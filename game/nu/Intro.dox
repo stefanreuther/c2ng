@@ -1,0 +1,10 @@
+/*!
+     \namespace game::nu
+     \brief planets.nu interface
+
+     This namespace contains all classes required to access the "planets.nu" game variant.
+
+     <b>Entry point:</b>
+
+     - game::nu::BrowserHandler
+ */

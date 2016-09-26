@@ -1,0 +1,12 @@
+/*!
+     \namespace game::map
+     \brief Map objects
+
+     This namespace contains game objects that are to be drawn on a map.
+     This includes ships, planets, other objects, and all other infrastructure required for that,
+     such as containers and iterators.
+
+     <b>Entry point:</b>
+
+     - game::map::Universe
+ */

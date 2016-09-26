@@ -1,0 +1,18 @@
+/*!
+     \namespace game
+     \brief %Game classes
+
+     This namespace contains classes for dealing with game specifics.
+
+     Most of these classes do not assume any particular threading model, i.e. they operate in a single thread.
+     For command-line utilities, this will be the only ("main") thread;
+     for GUI applications, this will be the background thread.
+
+     <b>Entry points:</b>
+
+     - game::Root
+     - game::Session
+     - game::spec::ShipList
+     - game::map::Universe
+     - game::browser::Session
+ */

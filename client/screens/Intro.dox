@@ -1,0 +1,6 @@
+/*!
+     \namespace client::screens
+     \brief Client screens
+
+     This namespace contains screens (=major contexts) of the graphical (client) applications.
+ */

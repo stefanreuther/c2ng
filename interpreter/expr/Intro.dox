@@ -1,0 +1,8 @@
+/*!
+     \namespace interpreter::expr
+     \brief Expression Interpreter
+
+     This namespace contains the expression parser.
+     Expressions are parsed into parse trees, and then compiled.
+     Thus, classes in this namespace are mostly used during script compilation.
+ */

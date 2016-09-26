@@ -1,0 +1,9 @@
+/*!
+     \namespace game::v3
+     \brief v3 interface
+
+     This namespace contains all classes required to access the regular ("v3") game variant,
+     including HOST/SRACE and PHost.
+
+     This includes binary formats that are used for our local files (chartX.cc).
+ */

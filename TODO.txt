@@ -1,0 +1,58 @@
+Major Concept Verification
+==========================
+
+MULTITHREADED SIMULATOR.
+- Make a stripped-down copy of ShipList to copy around.
+- Make a simulator-runner with multiple threads.
+
+PLANETSCENTRAL API. The existing API commands mostly map to microservice commands.
+We need coarser granularity.
+- file/lsgame or file/stat should provide enough information to build a Folder.
+- file/ls should produce file hashes to allow client-side caching.
+
+
+Minor Concept Verification
+==========================
+
+UNDO. The dat/dis style is cumbersome and does not map cleanly to Nu or Host data.
+- Make a Reverter interface with implementations for v3/Nu/Host.
+
+MAKETURN/SAVE.
+
+ABILITIES/ADVANTAGES.
+- Map Nu advantages to racial abilities or configuration.
+
+LOCAL/NETWORK WORKSPLIT.
+- Set up complete game directories for network v3 games.
+- Cache Nu history results locally.
+
+SERVERS.
+- Implement more PlanetsCentral servers within the new infrastructure.
+
+MESSAGES. Can we integrate all messages (in-game messages, PMs, activities, forum, VCR, files) into one interface?
+- Make an interface that provides heading/text/parsed data/VCR.
+- Cannot load everything locally, only in-game messages.
+
+SCRIPT-BASED TILES. We need tiles 
+
+FILER NG.
+- Use SHA-1 addressing (like git) for implicit deduplication.
+- Add transaction support: upload many files at once and commit at the end; fork dataspace for backup.
+- Add support for symlinks so that user:u/user/path/player9.rst can actually be a link to host:games/0001/out/9/player9.rst.
+- Requires export/import for host runs!
+
+SDL2/ANDROID.
+
+
+Features
+========
+
+HOST PREDICTION. We can do history, doing prediction should be possible.
+
+SPECIFICATION BROWSER. A better version of CCShips.
+- Browse hulls, engines, beams, torpedoes, abilities.
+- Determine abilities such as "2x mining" from config.
+- Allow searching for "who can build heaters" or "what are my cloak ships"
+
+MORE HOSTS. Can we do CircusMaximus?
+

@@ -1,0 +1,6 @@
+/*!
+     \namespace util
+     \brief Assorted Utilities
+
+     This namespace contains assorted utilities that are associated neither with user interface, nor with the script interpreter, nor with the game.
+ */

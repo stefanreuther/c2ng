@@ -1,0 +1,11 @@
+/*!
+     \namespace client
+     \brief Client modules
+
+     This namespace contains everything needed to build graphical (client) applications.
+     This includes widgets and management classes.
+     Code in this namespace can assume the presence of two threads (UI and worker).
+
+     \change c2ng has fewer custom widgets than PCC2 because of looser coupling to the actual data.
+     That is, we have more widgets in namespace ui::widgets.
+ */

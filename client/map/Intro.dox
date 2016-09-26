@@ -1,0 +1,7 @@
+/*!
+     \namespace client::map
+     \brief Map-related Code for the Client
+
+     This namespace contains widgets and other code to deal with the starmap
+     for the graphical (client) applications.
+ */

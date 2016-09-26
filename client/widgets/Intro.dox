@@ -1,0 +1,6 @@
+/*!
+     \namespace client::widgets
+     \brief Client widgets
+
+     This namespace contains widgets of the graphical (client) applications.
+ */

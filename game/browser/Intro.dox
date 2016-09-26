@@ -1,0 +1,16 @@
+/*!
+     \namespace game::browser
+     \brief %Browser classes
+
+     This namespace contains classes for browsing games.
+     Browsing will connect the different game version implementations to eventually produce a game::Root to play with.
+     This means, browsers are the central instance that knows the implementations supported by an application.
+
+     Most of these classes do not assume any particular threading model, i.e. they operate in a single thread.
+     For command-line utilities, this will be the only ("main") thread;
+     for GUI applications, this will be the background thread.
+
+     <b>Entry point:</b>
+
+     - game::browser::Session
+ */

@@ -1,0 +1,6 @@
+/*!
+     \namespace game::msg
+     \brief In-game Messaging
+
+     This namespace contains classes to deal with in-game messages.
+ */

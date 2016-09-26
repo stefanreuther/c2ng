@@ -1,0 +1,15 @@
+/*!
+     \namespace interpreter::exporter
+     \brief %Exporter
+
+     This namespace contains classes used for data export.
+     The exported is implemented on top of interpreter infrastructure.
+
+     Most of these classes do not assume any particular threading model, i.e. they operate in a single thread.
+     For command-line utilities, this will be the only ("main") thread;
+     for GUI applications, this will be the background thread.
+
+     <b>Entry point:</b>
+
+     - interpreter::exporter::Exporter
+ */

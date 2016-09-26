@@ -1,0 +1,16 @@
+/*!
+     \namespace ui
+     \brief User Interface
+
+     This namespace contains user interface kernel.
+     This includes the widget class hierarchy including many widget implementations,
+     as well as resource management.
+
+     Most of these classes do not assume any particular threading model, i.e. they operate in a single thread (the UI thread).
+     Resource management will use a background thread.
+
+     <b>Entry points:</b>
+
+     - ui::Root
+     - ui::Widget
+ */

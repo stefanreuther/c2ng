@@ -1,0 +1,7 @@
+/*!
+     \namespace util::rich
+     \brief Rich %Text
+
+     This namespace contains classes to deal with rich text (text with attributes).
+     The basic representation is independant from the user interface.
+ */

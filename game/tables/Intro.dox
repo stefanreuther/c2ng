@@ -1,0 +1,6 @@
+/*!
+     \namespace game::tables
+     \brief Tables
+
+     This namespace contains various string tables.
+  */

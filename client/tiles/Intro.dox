@@ -1,0 +1,6 @@
+/*!
+     \namespace client::tiles
+     \brief Control Screen Tiles
+
+     This namespace contains tiles used to build control screens (essentially, everything that observes an object).
+ */

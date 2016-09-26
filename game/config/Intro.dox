@@ -1,0 +1,11 @@
+/*!
+     \namespace game::config
+     \brief %Configuration classes
+
+     This namespace contains classes for accessing game and user configuration.
+     Essentially, these are data classes.
+
+     <b>Entry point:</b>
+
+     - game::config::Configuration
+ */

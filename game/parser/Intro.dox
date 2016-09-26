@@ -1,0 +1,8 @@
+/*!
+     \namespace game::parser
+     \brief Message parsing
+
+     This namespace contains everything needed to parse in-game messages.
+     This includes the matching engine as well as data storage classes.
+     Message parsers produce a set of data items that will be assimilated into the history database.
+ */

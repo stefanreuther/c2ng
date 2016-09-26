@@ -1,0 +1,10 @@
+/*!
+     \namespace ui::layout
+     \brief User Interface Layout
+
+     This namespace contains components to perform widget layout.
+
+     <b>Entry points:</b>
+
+     - ui::layout::Manager
+ */

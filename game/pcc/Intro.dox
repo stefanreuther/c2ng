@@ -1,0 +1,10 @@
+/*!
+     \namespace game::pcc
+     \brief planetscentral.com interface
+
+     This namespace contains all classes required to access the "planetscentral.com" server.
+
+     <b>Entry point:</b>
+
+     - game::pcc::BrowserHandler
+ */

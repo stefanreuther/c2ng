@@ -1,0 +1,20 @@
+/*!
+     \namespace interpreter
+     \brief Script Interpreter
+
+     This namespace contains the script interpreter.
+     This includes both compilation and execution of scripts.
+
+     Although the interpreter knows that it will run in a VGAP context, it has no references to actual game objects (footnotes apply).
+     Those will be provided by game::Session through a context instance.
+
+     Most of these classes do not assume any particular threading model, i.e. they operate in a single thread.
+     For command-line utilities, this will be the only ("main") thread;
+     for GUI applications, this will be the background thread.
+
+     <b>Entry points:</b>
+
+     - interpreter::StatementCompiler
+     - interpreter::ProcessList
+     - interpreter::World
+ */

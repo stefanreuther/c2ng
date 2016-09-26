@@ -1,0 +1,28 @@
+/*!
+     \namespace client::si
+     \brief Client/Script Interface
+
+     This namespace contains classes to connect the script interpreter and the user interface.
+
+     <b>Requirements:</b>
+
+     - user interface and script run in different threads
+     - user interface must be able to show a notification while scripts are running
+     - user interface must be blocked while a script is running
+     - scripts must be able to call back into UI to show dialogs
+     - scripts must be able to modify the UI to change contexts
+     - scripts must be able to access UI properties
+
+     <b>Overview:</b>
+
+     The user interface has a (single) UserSide object.
+     UserSide creates a slave object ScriptSide that has access to the game::Session.
+     The UserSide object can be used to post requests to the ScriptSide.
+
+     Users synchronize on the run-state of process groups, which is modelled as Wait object in ScriptSide.
+     User interface remains blocked while the process group runs.
+     A process group can be running a single process such as a user-interface command,
+     or a number of processes such as a Task Manager command or the initial auto-task run.
+
+     Callbacks from script to UI are synchronized on process Ids.
+ */

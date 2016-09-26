@@ -1,0 +1,6 @@
+/*!
+     \namespace game::score
+     \brief Scores
+
+     This namespace contains everything needed to manage various player scores.
+ */

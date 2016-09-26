@@ -1,0 +1,12 @@
+/*!
+     \namespace game::vcr
+     \brief Combat Recordings
+
+     This namespace contains all classes required to play combat recordings.
+     The general interface allows fights of an unlimited number of ships,
+     which would be used for combat systems such as FLAK.
+
+     <b>Entry point:</b>
+
+     - game::vcr::Database
+ */

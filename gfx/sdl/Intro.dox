@@ -1,0 +1,11 @@
+/*!
+     \namespace gfx::sdl
+     \brief SDL 1.2 Graphics
+
+     This namespace implements an interface to the SDL 1.2 library.
+     Programs built against this library may run on X11, Win32, vgalib, and elsewhere.
+
+     <b>Entry point:</b>
+
+     - gfx::sdl::Engine
+  */

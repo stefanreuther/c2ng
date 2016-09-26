@@ -1,0 +1,6 @@
+/*!
+     \namespace ui::widgets
+     \brief User Interface Widgets
+
+     This namespace contains all sorts of generic widgets.
+ */

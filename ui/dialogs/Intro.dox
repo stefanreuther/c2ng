@@ -1,0 +1,6 @@
+/*!
+     \namespace ui::dialogs
+     \brief User Interface Dialogs
+
+     This namespace contains standard dialogs.
+ */

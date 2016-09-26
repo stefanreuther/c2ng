@@ -1,0 +1,11 @@
+/*!
+     \namespace game::vcr::classic
+     \brief Classic Combat Recordings
+
+     This namespace contains all classes required to play classic combat recordings, i.e. 1:1 fights.
+     This is used for HOST/SRACE, PHost, and planets.nu.
+
+     <b>Entry point:</b>
+
+     - game::vcr::classic::Database
+ */

@@ -1,0 +1,6 @@
+/*!
+     \namespace ui::rich
+     \brief Rich-Text User Interface
+
+     This namespace contains user interface components that deal with rich text (see util::rich).
+ */

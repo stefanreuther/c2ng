@@ -1,0 +1,6 @@
+/*!
+     \namespace game::interface
+     \brief Game/Script interface
+
+     This namespace contains the interface to the script interpreter.
+ */

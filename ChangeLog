@@ -1,0 +1,755 @@
+2016-09-24  Stefan Reuther  <streu@gmx.de>
+
+	* game/pcc/accountfolder.cpp, game/pcc/accountfolder.hpp: new
+	* game/pcc/gamefolder.cpp, game/pcc/gamefolder.hpp: new
+	* game/pcc/serverdirectory.cpp, game/pcc/serverdirectory.hpp: new
+
+2016-09-22  Stefan Reuther  <streu@gmx.de>
+
+	* game/pcc/browserhandler.cpp, game/pcc/browserhandler.hpp: new
+
+2016-09-18  Stefan Reuther  <streu@gmx.de>
+
+	* client/tiles/shipoverviewtile.cpp, client/tiles/shipoverviewtile.hpp: new [client/tiles/shipoverview.h]
+	* game/interface/globalcommands.cpp, game/interface/globalcommands.hpp: new [int/if/globalif.h]
+	* game/interface/simpleprocedure.cpp, game/interface/simpleprocedure.hpp: new [int/compound.h]
+
+2016-09-16  Stefan Reuther  <streu@gmx.de>
+
+	* client/dialogs/turnlistdialog.cpp, client/dialogs/turnlistdialog.hpp: new
+
+2016-09-13  Stefan Reuther  <streu@gmx.de>
+
+	* client/widgets/turnlistbox.cpp, client/widgets/turnlistbox.hpp: new
+
+2016-09-11  Stefan Reuther  <streu@gmx.de>
+
+	* game/historyturn.cpp, game/historyturn.hpp: new
+	* game/historyturnlist.cpp, game/historyturnlist.hpp: new
+
+2016-09-10  Stefan Reuther  <streu@gmx.de>
+
+	* util/backupfile.cpp, util/backupfile.hpp: new [game/backup.h]
+	* interpreter/world.hpp: now has a file system (for script file access) and a load path (for Load command)
+
+2016-09-07  Stefan Reuther  <streu@gmx.de>
+
+	* game/map/objectlist.cpp, game/map/objectlist.hpp: new [game/objlist.h]
+	* game/map/objectreference.cpp, game/map/objectreference.hpp: new [game/objlist.h]
+
+2016-09-04  Stefan Reuther  <streu@gmx.de>
+
+	* client/tiles/errortile.cpp, client/tiles/errortile.hpp: new [client/tiles/errortile.h]
+	* client/tiles/tilefactory.cpp, client/tiles/tilefactory.hpp: new [client/tiles.h]
+
+2016-09-02  Stefan Reuther  <streu@gmx.de>
+
+	* ui/widgets/focusiterator.cpp, ui/widgets/focusiterator.hpp: new [ui/widgets/focusiterator.h]
+
+2016-08-27  Stefan Reuther  <streu@gmx.de>
+
+	* game/limits.hpp (MAX_PLAYERS): bump to 31 (target value, needed for Nu)
+	* game/nu/gamestate.cpp, game/nu/gamestate.hpp: new
+	* game/nu/registrationkey.cpp, game/nu/registrationkey.hpp: new
+	* game/nu/specificationloader.cpp, game/nu/specificationloader.hpp: new [initial, incomplete]
+	* game/nu/stringverifier.cpp, game/nu/stringverifier.hpp: new
+	* game/nu/turnloader.cpp, game/nu/turnloader.hpp: new [initial, incomplete]
+
+2016-08-26  Stefan Reuther  <streu@gmx.de>
+
+	* game/nu/gamefolder.cpp, game/nu/gamefolder.hpp: new
+	* game/nu/accountfolder.cpp, game/nu/accountfolder.hpp: new
+
+2016-08-25  Stefan Reuther  <streu@gmx.de>
+
+	* client/screens/playerscreen.cpp, client/screens/playerscreen.hpp: new [client/playerscr.h]
+
+2016-08-24  Stefan Reuther  <streu@gmx.de>
+
+	* game/map/minefield.cpp, game/map/minefield.hpp: new [game/mine.h]
+	* game/map/minefieldtype.cpp, game/map/minefieldtype.hpp: new [game/mine.h]
+	* game/interface/minefieldcontext.cpp, game/interface/minefieldcontext.hpp: new [int/if/mineif.h]
+	* game/interface/minefieldfunction.cpp, game/interface/minefieldfunction.hpp: new [int/if/mineif.h]
+	* game/interface/minefieldproperty.cpp, game/interface/minefieldproperty.hpp: new [int/if/mineif.h]
+	* game/interface/playercontext.cpp, game/interface/playercontext.hpp: new [int/if/playerif.h]
+	* game/interface/playerfunction.cpp, game/interface/playerfunction.hpp: new [int/if/playerif.h]
+
+2016-08-22  Stefan Reuther  <streu@gmx.de>
+
+	* client/screens/controlscreen.cpp, client/screens/controlscreen.hpp: new, incomplete
+
+2016-08-21  Stefan Reuther  <streu@gmx.de>
+
+	* game/interface/beamcontext.cpp, game/interface/beamcontext.hpp: new [int/if/specif.h]
+	* game/interface/beamfunction.cpp, game/interface/beamfunction.hpp: new [int/if/specif.h]
+	* game/interface/componentproperty.cpp, game/interface/componentproperty.hpp: new [int/if/specif.h]
+	* game/interface/enginecontext.cpp, game/interface/enginecontext.hpp: new [int/if/specif.h]
+	* game/interface/enginefunction.cpp, game/interface/enginefunction.hpp: new [int/if/specif.h]
+	* game/interface/engineproperty.cpp, game/interface/engineproperty.hpp: new [int/if/specif.h]
+	* game/interface/hullcontext.cpp, game/interface/hullcontext.hpp: new [int/if/hullif.h]
+	* game/interface/hullfunction.cpp, game/interface/hullfunction.hpp: new [int/if/hullif.h]
+	* game/interface/hullproperty.cpp, game/interface/hullproperty.hpp: new [int/if/hullif.h]
+	* game/interface/torpedocontext.cpp, game/interface/torpedocontext.hpp: new [int/if/specif.h]
+	* game/interface/torpedofunction.cpp, game/interface/torpedofunction.hpp: new [int/if/specif.h]
+	* game/interface/weaponproperty.cpp, game/interface/weaponproperty.hpp: new [int/if/specif.h]
+	* interpreter/exporter/htmlexporter.cpp, interpreter/exporter/htmlexporter.hpp: new
+
+2016-08-20  Stefan Reuther  <streu@gmx.de>
+
+	* share/resource/core.q: new [resource/core.q]
+
+2016-08-17  Stefan Reuther  <streu@gmx.de>
+
+	* game/interface/userinterfacepropertystack.cpp, game/interface/userinterfacepropertystack.hpp: new [int/if/userif.h, sort-of]
+
+2016-08-07  Stefan Reuther  <streu@gmx.de>
+
+	* game/extraidentifier.hpp: new
+	* game/extracontainer.cpp, game/extracontainer.hpp: new
+
+2016-08-06  Stefan Reuther  <streu@gmx.de>
+
+	* client/map/widget.cpp, client/map/widget.hpp: new [moved from client/map/widget.hpp]
+	* client/map/renderer.cpp, client/map/renderer.hpp: new [client/chart.h]
+	* client/map/proxy.cpp, client/map/proxy.hpp: new
+
+2016-08-05  Stefan Reuther  <streu@gmx.de>
+
+	* game/map/rendererlistener.hpp: new
+	* client/widgets/mapwidget.cpp, client/widgets/mapwidget.hpp: new [client/chart.h]
+
+2016-08-03  Stefan Reuther  <streu@gmx.de>
+
+	* game/map/renderer.cpp, game/map/renderer.hpp: new [client/chart.h, incomplete]
+	* game/map/rendererinstruction.hpp, game/map/renderinstruction.cpp: new
+	* game/map/renderinstruction.hpp: new
+	* game/map/renderlist.cpp, game/map/renderlist.hpp: new
+	* game/map/renderoptions.cpp, game/map/renderoptions.hpp: new [client/chart.h, incomplete]
+	* game/map/viewport.cpp, game/map/viewport.hpp: new [client/chart.h, incomplete]
+
+2016-07-27  Stefan Reuther  <streu@gmx.de>
+
+	* game/teamsettings.cpp, game/teamsettings.hpp: new [game/team.h]
+
+2016-07-23  Stefan Reuther  <streu@gmx.de>
+
+	* game/interface/ionstormcontext.cpp, game/interface/ionstormcontext.hpp: new
+	* game/interface/ionstormfunction.cpp, game/interface/ionstormfunction.hpp: new
+	* game/interface/ionstormproperty.cpp, game/interface/ionstormproperty.hpp: new
+	* game/tables/ionstormclassname.cpp, game/tables/ionstormclassname.hpp: new
+	* game/tables/mineraldensityclassname.cpp, game/tables/mineraldensityclassname.hpp: new
+	* game/tables/wormholestabilityname.cpp, game/tables/wormholestabilityname.hpp: new
+	* game/tables/headingname.cpp, game/tables/headingname.hpp: new
+	* game/map/ionstorm.cpp, game/map/ionstorm.hpp: new [game/ion.h]
+	* game/map/ionstormtype.cpp, game/map/ionstormtype.hpp: new [game/ion.h]
+	* game/interface/globalfunctions.cpp, game/interface/globalfunctions.hpp: new [int/if/globalif.h]
+
+2016-07-21  Stefan Reuther  <streu@gmx.de>
+
+	* client/dialogs/consoledialog.cpp, client/dialogs/consoledialog.hpp: new [client/dialogs/consoledlg.h]
+
+2016-07-20  Stefan Reuther  <streu@gmx.de>
+
+	* client/si/inputstate.cpp, client/si/inputstate.hpp: new
+	* client/si/outputstate.cpp, client/si/outputstate.hpp: new
+
+2016-07-18  Stefan Reuther  <streu@gmx.de>
+
+	* client/dialogs/objectselectiondialog.cpp: new [client/dialogs/objselect.h, sort-of]
+	* game/interface/iteratorprovider.hpp: new
+
+2016-07-17  Stefan Reuther  <streu@gmx.de>
+
+	* client/objectcursorfactory.hpp: new
+	* gfx/nullengine.cpp, gfx/nullengine.hpp: new
+	* client/tiles/selectionheadertile.cpp, client/tiles/selectionheadertile.hpp: new [client/tiles/objheader.h]
+
+2016-07-16  Stefan Reuther  <streu@gmx.de>
+
+	* game/interface/objectcommand.cpp, game/interface/objectcommand.hpp: new [int/if/objif.h]
+	* client/si/contextprovider.hpp: new
+	* client/session.cpp, client/session.hpp: new
+	* client/objectlistener.hpp: new
+	* client/objectobserver.cpp, client/objectobserver.hpp: new
+	* client/objectobserverproxy.cpp, client/objectobserverproxy.hpp: new
+	* client/marker.cpp, client/marker.hpp: new [client/marks.h]
+	* game/interface/iteratorcontext.cpp, game/interface/iteratorcontext.hpp: new [int/if/iterif.h]
+
+2016-07-12  Stefan Reuther  <streu@gmx.de>
+
+	* game/map/objectobserver.cpp, game/map/objectobserver.hpp: new [game/objobserve.h]
+
+2016-07-11  Stefan Reuther  <streu@gmx.de>
+
+	* game/interface/richtextfunctions.cpp, game/interface/richtextfunctions.hpp: new [int/if/richif.h]
+	* game/interface/richtextvalue.cpp, game/interface/richtextvalue.hpp: new [int/if/richif.h]
+	* game/interface/simplefunction.cpp, game/interface/simplefunction.hpp: new [int/compound.h]
+	* client/si/commands.cpp, client/si/commands.hpp: new [int/if/guiif.h, sort-of]
+	* client/widgets/keymapwidget.cpp, client/widgets/keymapwidget.hpp: new [client/dialogbinding.h, sort-of]
+
+2016-07-10  Stefan Reuther  <streu@gmx.de>
+
+	* client/si/control.cpp, client/si/control.hpp: new, replaces client/interpretercontrol.hpp
+	* client/si/requestlink1.hpp: new
+	* client/si/requestlink2.hpp: new
+	* client/si/scriptprocedure.cpp, client/si/scriptprocedure.hpp: new
+	* client/si/scriptside.cpp, client/si/scriptside.hpp: new
+	* client/si/userside.cpp, client/si/userside.hpp: new, replaces client/userinterface.hpp
+	* client/si/usertask.hpp: new
+	* game/stringverifier.cpp, game/stringverifier.hpp: new
+	* game/v3/stringverifier.cpp, game/v3/stringverifier.hpp: new
+
+2016-07-03  Stefan Reuther  <streu@gmx.de>
+
+	* game/interface/userinterfaceproperty.hpp: new [int/if/userif.h]
+	* game/interface/userinterfacepropertyaccessor.hpp: new [int/if/userif.h]
+	* game/map/cursors.cpp, game/map/cursors.hpp: new
+	* game/map/objectcursor.cpp, game/map/objectcursor.hpp: new [game/objsel.h]
+	* game/map/simpleobjectcursor.cpp, game/map/simpleobjectcursor.hpp: new [game/objsel.h]
+	* client/userinterface.cpp, client/userinterface.hpp: new [int/if/guiif.h], incomplete/prototype
+
+2016-07-02  Stefan Reuther  <streu@gmx.de>
+
+	* ui/dialogs/messagebox.cpp, ui/dialogs/messagebox.hpp: new [ui/msgbox.h]
+	* ui/rich/statictext.cpp, ui/rich/statictext.hpp: new [ui/widgets/richstatic.h]
+	* util/keystring.cpp, util/keystring.hpp: new [ui/keystring.h]
+	* game/spec/basecomponentvector.cpp, game/spec/basecomponentvector.hpp: new
+	* game/interface/shipcontext.cpp, game/interface/shipcontext.hpp: new [int/if/shipif.h]
+	* game/interface/shipfunction.cpp, game/interface/shipfunction.hpp: new [int/if/shipif.h]
+	* game/interface/shipproperty.cpp, game/interface/shipproperty.hpp: new [int/if/shipif.h]
+
+2016-06-26  Stefan Reuther  <streu@gmx.de>
+
+	* util/baseslaverequest.hpp: new
+	* util/baseslaverequestsender.hpp: new
+	* util/slaveobject.hpp: new
+	* util/slaverequest.hpp: new
+	* util/slaverequestsender.hpp: new
+
+2016-06-25  Stefan Reuther  <streu@gmx.de>
+
+	* ui/widgets/tiledpanel.cpp, ui/widgets/tiledpanel.hpp: new
+	* game/browser/handlerlist.cpp, game/browser/handlerlist.hpp: new
+
+2016-06-18  Stefan Reuther  <streu@gmx.de>
+
+	* game/msg/mailbox.hpp: new [game/msg.h]
+	* game/msg/inbox.cpp, game/msg/inbox.hpp: new [game/inbox.h]
+
+2016-06-05  Stefan Reuther  <streu@gmx.de>
+
+	* ui/invisiblewidget.cpp, ui/invisiblewidget.hpp: new [ui/ui.h]
+	* ui/widgets/keydispatcher.cpp, ui/widgets/keydispatcher.hpp: new [ui/widgets/keytranslator.h]
+	* game/exception.cpp, game/exception.hpp: new [game/error.h]
+	* game/browser/usercallbackproxy.cpp, game/browser/usercallbackproxy.hpp: moved from client/usercallbackproxy.hpp
+	* game/browser/session.cpp, game/browser/session.hpp: moved from client/sessionthread.hpp
+
+2016-06-04  Stefan Reuther  <streu@gmx.de>
+
+	* client/usercallback.cpp, client/usercallback.hpp: new
+	* client/screens/browserscreen.cpp, client/screens/browserscreen.hpp: new
+	* ui/widgets/richlistbox.cpp, ui/widgets/richlistbox.hpp: new
+
+2016-06-02  Stefan Reuther  <streu@gmx.de>
+
+	* ui/rich/imageobject.hpp: new [ui/richobj.h]
+
+2016-05-31  Stefan Reuther  <streu@gmx.de>
+
+	* util/rich/parser.cpp, util/rich/parser.hpp: new [ui/richparser.h]
+
+2016-05-30  Stefan Reuther  <streu@gmx.de>
+
+	* ui/rich/blockobject.hpp: new [ui/richobj.h]
+	* ui/rich/document.cpp, ui/rich/document.hpp: new [ui/richdocument.h]
+	* ui/rich/documentview.cpp, ui/rich/documentview.hpp: new [ui/richdocument.h]
+
+2016-05-29  Stefan Reuther  <streu@gmx.de>
+
+	* game/nu/browserhandler.cpp, game/nu/browserhandler.hpp: new
+	* client/usercallbackproxy.cpp, client/usercallbackproxy.hpp: new
+	* game/browser/usercallback.hpp: new
+
+2016-05-28  Stefan Reuther  <streu@gmx.de>
+
+	* remove Widget::m_id
+	* game/browser/unsupportedaccountfolder.cpp, game/browser/unsupportedaccountfolder.hpp: new [replaces accountfolder.hpp]
+	* ui/widgets/statictext.cpp, ui/widgets/statictext.hpp: new [ui/widgets/statictext.h]
+	* ui/widgets/inputline.cpp, ui/widgets/inputline.hpp: new [ui/widgets/inputline.h]
+
+2016-05-27  Stefan Reuther  <streu@gmx.de>
+
+	* util/unicodechars.hpp: new [util/unicodechars.h]
+	* util/skincolor.cpp, util/skincolor.hpp: new, moved from ui/draw.hpp
+	* util/rich/attribute.hpp: new [ui/richtext.h]
+	* util/rich/colorattribute.cpp, util/rich/colorattribute.hpp: new [ui/richtext.h]
+	* util/rich/linkattribute.cpp, util/rich/linkattribute.hpp: new [ui/richtext.h]
+	* util/rich/styleattribute.cpp, util/rich/styleattribute.hpp: new [ui/richtext.h]
+	* util/rich/text.cpp, util/rich/text.hpp: new [ui/richtext.h]
+	* util/rich/visitor.cpp, util/rich/visitor.hpp: new [ui/richtext.h]
+
+2016-05-24  Stefan Reuther  <streu@gmx.de>
+
+	* game/browser/account.cpp, game/browser/account.hpp: new
+	* game/browser/accountfolder.cpp, game/browser/accountfolder.hpp: new, incomplete
+	* game/browser/accountmanager.cpp, game/browser/accountmanager.hpp: new, incomplete
+	* util/profiledirectory.cpp, util/profiledirectory.hpp: new
+	* ui/widgets/simpleiconbox.cpp, ui/widgets/simpleiconbox.hpp: new [ui/widgets/dircrumbs.h]
+	* ui/widgets/iconbox.cpp, ui/widgets/iconbox.hpp: new [ui/iconbox.h]
+	* main/c2ng.cpp: prototype browser
+	* ui/group.cpp, ui/group.hpp: new [ui/ui.h]
+
+2016-05-23  Stefan Reuther  <streu@gmx.de>
+
+	* client/widgets/folderlistbox.cpp, client/widgets/folderlistbox.hpp: new
+
+2016-05-22  Stefan Reuther  <streu@gmx.de>
+
+	* client/sessionthread.cpp, client/sessionthread.hpp: new
+	* util/requestthread.cpp, util/requestthread.hpp: new
+	* main/c2ng.cpp: new [client/main.cc]
+	* ui/eventloop.cpp, ui/eventloop.hpp: new
+	* gfx/clipfilter.cpp, gfx/clipfilter.hpp: new [gfx/clip.h]
+	* ui/scrollablewidget.cpp, ui/scrollablewidget.hpp: new [ui/listbox.h]
+	* ui/widgets/abstractlistbox.cpp, ui/widgets/abstractlistbox.hpp: new [ui/listbox.h]
+
+2016-05-20  Stefan Reuther  <streu@gmx.de>
+
+	* game/browser/directoryhandler.cpp, game/browser/directoryhandler.hpp: new
+	* game/browser/handler.hpp: new
+
+2016-05-16  Stefan Reuther  <streu@gmx.de>
+
+	* game/browser/browser.cpp, game/browser/browser.hpp: new
+	* game/browser/filesystemfolder.cpp, game/browser/filesystemfolder.hpp: new
+	* game/browser/filesystemrootfolder.cpp, game/browser/filesystemrootfolder.hpp: new
+	* game/browser/folder.hpp: new
+	* game/browser/rootfolder.cpp, game/browser/rootfolder.hpp: new
+	* ui/res/directoryprovider.cpp, ui/res/directoryprovider.hpp: new [resmgr/resdir.h]
+	* ui/res/manager.cpp, ui/res/manager.hpp: new [resmgr/resmgr.h]
+	* ui/res/provider.cpp, ui/res/provider.hpp: new [resmgr/resmgr.h]
+
+2016-05-13  Stefan Reuther  <streu@gmx.de>
+
+	* gfx/blit.cpp, gfx/blit.hpp: new [gfx/blit.h]
+
+2016-05-04  Stefan Reuther  <streu@gmx.de>
+
+	* ui/res/ccimageloader.cpp, ui/res/ccimageloader.hpp: new [gfx/pixmap.h], temporary
+	* ui/res/engineimageloader.cpp, ui/res/engineimageloader.hpp: new [gfx/pixmap.h], temporary
+	* ui/res/imageloader.hpp: new, temporary
+	* gfx/timerqueue.cpp, gfx/timerqueue.hpp: new
+	* gfx/timer.hpp: new
+
+2016-05-03  Stefan Reuther  <streu@gmx.de>
+
+	* util/request.hpp: new
+	* util/requestdispatcher.hpp: new
+	* util/requestreceiver.hpp: new
+	* util/requestsender.hpp: new
+
+2016-05-01  Stefan Reuther  <streu@gmx.de>
+
+	* gfx/palettizedpixmap.cpp, gfx/palettizedpixmap.hpp: new
+	* gfx/pixmap.hpp: new
+	* gfx/pixmapcanvasimpl.hpp: new
+	* gfx/rgbapixmap.cpp, gfx/rgbapixmap.hpp: new
+	* gfx/primitives.hpp: moved here from gfx/sdl/surface.cpp
+
+2016-04-29  Stefan Reuther  <streu@gmx.de>
+
+	* ui/widgets/abstractbutton.cpp, ui/widgets/abstractbutton.hpp: new [ui/widgets/abstractbutton.h]
+	* ui/widgets/button.cpp, ui/widgets/button.hpp: new [ui/widgets/button.h]
+
+2016-04-27  Stefan Reuther  <streu@gmx.de>
+
+	* ui/window.cpp, ui/window.hpp: new [ui/window.h]
+
+2016-04-26  Stefan Reuther  <streu@gmx.de>
+
+	* ui/draw.cpp, ui/draw.hpp: new [ui/util.h, ui/window.h]
+
+2016-04-25  Stefan Reuther  <streu@gmx.de>
+
+	* gfx/fontlist.cpp, gfx/fontlist.hpp: new
+        * gfx/resourceprovider.hpp: new [replaces gfx/resourceloader.hpp]
+	* ui/defaultresourceprovider.cpp, ui/defaultresourceprovider.hpp: new
+
+2016-04-24  Stefan Reuther  <streu@gmx.de>
+
+	* gfx/fontrequest.cpp, gfx/fontrequest.hpp: new
+	* gfx/resourceloader.hpp: new
+	* ui/layoutablegroup.cpp, ui/layoutablegroup.hpp: new [ui/ui.h]
+	* ui/spacer.cpp, ui/spacer.hpp: new [ui/ui.h]
+	* ui/widget.cpp, ui/widget.hpp: new [ui/ui.h]
+	* ui/layout/axislayout.cpp, ui/layout/axislayout.hpp: new [ui/layout.h]
+	* ui/layout/hbox.cpp, ui/layout/hbox.hpp: new [ui/layout.h]
+	* ui/layout/info.cpp, ui/layout/info.hpp: new [ui/ui.h]
+	* ui/layout/manager.hpp: new [ui/layout.h]
+	* ui/layout/vbox.cpp, ui/layout/vbox.hpp: new [ui/layout.h]
+	* ui/colorscheme.cpp, ui/colorscheme.hpp: new [gfx/palette.h]
+	* gfx/complex.cpp, gfx/complex.hpp: new [gfx/gfxcompl.h]
+	* gfx/sdl/streaminterface.cpp, gfx/sdl/streaminterface.hpp: new [io/sdlstr.h]
+	* ui/cardgroup.cpp, ui/cardgroup.hpp: new
+	* ui/root.cpp, ui/root.hpp: new
+	* ui/simplewidget.cpp, ui/simplewidget.hpp: new
+	* ui/tiledwidget.hpp: new
+	* ui/widget.cpp, ui/widget.hpp: new [ui/ui.h]
+	* ui/layout/info.cpp, ui/layout/info.hpp: new [ui/ui.h]
+	* gfx/multiclipfilter.cpp, gfx/multiclipfilter.hpp: new [gfx/multiclip.h]
+	* gfx/filter.cpp, gfx/filter.hpp: new [gfx/gfx.h]
+
+2016-04-23  Stefan Reuther  <streu@gmx.de>
+
+	* gfx/bitmapfont.cpp, gfx/bitmapfont.hpp: new [gfx/bmfont.h]
+	* gfx/bitmapglyph.cpp, gfx/bitmapglyph.hpp: new [gfx/bmfont.h]
+	* gfx/font.cpp, gfx/font.hpp: new [gfx/font.h]
+	* gfx/colorscheme.cpp, gfx/colorscheme.hpp: new [gfx/gfxcontext.h]
+	* gfx/context.cpp, gfx/context.hpp: new [gfx/gfxcontext.h]
+	* gfx/nullcolorscheme.cpp, gfx/nullcolorscheme.hpp: new [gfx/gfxcontext.h]
+	* gfx/sdl/engine.cpp, gfx/sdl/engine.hpp: new [gfx/init.h etc]
+	* gfx/engine.hpp: new
+	* gfx/eventconsumer.hpp: new
+	* gfx/graphicsexception.cpp, gfx/graphicsexception.hpp: new [util/except.h]
+	* game/score/turnscorelist.cpp, game/score/turnscorelist.hpp: new [game/stat.h]
+	* game/score/turnscore.cpp, game/score/turnscore.hpp: new [game/stat.h]
+	* game/score/scoreid.hpp: new [game/stat.h]
+	* game/score/compoundscore.cpp, game/score/compoundscore.hpp: new [client/wscore.h]
+
+2016-04-21  Stefan Reuther  <streu@gmx.de>
+
+	* game/extra.cpp, game/extra.hpp: new
+	* game/interface/playerproperty.cpp, game/interface/playerproperty.hpp: new [int/if/playerif.h], incomplete
+
+2016-04-20  Stefan Reuther  <streu@gmx.de>
+
+	* interpreter/exporter/jsonexporter.cpp, interpreter/exporter/jsonexporter.hpp: new [int/export/expjson.h]
+	* interpreter/exporter/textexporter.cpp, interpreter/exporter/textexporter.cpp: new [int/export/exptext.h]
+	* interpreter/exporter/dbfexporter.cpp, interpreter/exporter/dbfexporter.hpp: new [int/export/expdbf.h]
+
+2016-04-18  Stefan Reuther  <streu@gmx.de>
+
+	* tools/c2export.cpp: new [tools/c2export.cc]
+
+2016-04-17  Stefan Reuther  <streu@gmx.de>
+
+	* interpreter/exporter/exporter.cpp, interpreter/exporter/exporter.hpp: new [int/export.h]
+	* interpreter/exporter/fieldlist.cpp, interpreter/exporter/fieldlist.hpp: new [int/export.h]
+	* interpreter/exporter/separatedtextexporter.cpp, interpreter/exporter/separatedtextexporter.hpp: new [int/export/expsep.h]
+	* util/answerprovider.hpp: new [util/answer.h]
+	* interpreter/processlist.cpp, interpreter/processlist.hpp: new [int/process.h]
+	* game/interface/globalcontext.cpp, game/interface/globalcontext.hpp: new [int/if/globalif.h]
+	* game/interface/globalproperty.cpp, game/interface/globalproperty.hpp: new [int/if/globalif.h]
+	* game/interface/planetcontext.cpp, game/interface/planetcontext.hpp: new [int/if/planetif.h]
+	* interpreter/objectpropertyvector.cpp, interpreter/objectpropertyvector.hpp: new [int/intglobal.h]
+
+2016-04-16  Stefan Reuther  <streu@gmx.de>
+
+	* game/tables/basemissionname.cpp, game/tables/basemissionname.hpp: new [game/tables.h]
+	* game/interface/baseproperty.cpp, game/interface/baseproperty.hpp: new [int/if/baseif.h]
+
+2016-04-14  Stefan Reuther  <streu@gmx.de>
+
+	* game/map/anyshiptype.cpp, game/map/anyshiptype.hpp: new [game/shiptype.h]
+	* game/map/historyshiptype.cpp, game/map/historyshiptype.hpp: new [game/shiptype.h]
+	* game/map/playedshiptype.cpp, game/map/playedshiptype.hpp: new [game/shiptype.h]
+
+2016-04-12  Stefan Reuther  <streu@gmx.de>
+
+	* game/tables/happinesschangename.cpp, game/tables/happinesschangename.hpp: new [game/tables.h]
+
+2016-04-11  Stefan Reuther  <streu@gmx.de>
+
+	* game/map/planetformula.cpp, game/map/planetformula.hpp: new [game/planetform.h]
+
+2016-04-10  Stefan Reuther  <streu@gmx.de>
+
+	* game/map/ship.cpp, game/map/ship.hpp: new [game/ship.h], incomplete
+	* game/map/shipdata.cpp, game/map/shipdata.hpp: new [game/ship.h]
+	* game/map/shiphistorydata.cpp, game/map/shiphistorydata.hpp: new [game/ship.h]
+	* game/spec/mission.cpp, game/spec/mission.hpp: new [game/mission.h]
+	* game/spec/missionlist.cpp, game/spec/missionlist.hpp: new [game/mission.h]
+	* game/shipbuildorder.cpp, game/shipbuildorder.cpp: new
+	* game/tables/happinessname.cpp, game/tables/happinessname.hpp: new [game/tables.h]
+	* game/tables/mineralmassclassname.cpp, game/tables/mineralmassclassname.hpp: new [game/tables.h]
+	* game/tables/temperaturename.cpp, game/tables/temperaturename.hpp: new [game/tables.h]
+	* game/tables/industrylevel.cpp, game/tables/industrylevel.hpp: new [game/tables.h]
+	* game/tables/nativegovernmentname.cpp, game/tables/nativegovernmentname.hpp: new [game/tables.h]
+	* game/tables/nativeracename.cpp, game/tables/nativeracename.hpp: new [game/tables.h]
+
+2016-04-09  Stefan Reuther  <streu@gmx.de>
+
+	* interpreter/closure.cpp, interpreter/closure.hpp: new [int/compound.h]
+	* interpreter/hashdata.cpp, interpreter/hashdata.hpp: new [int/hash.h]
+	* interpreter/hashvalue.cpp, interpreter/hashvalue.hpp: new [int/hash.h]
+	* game/interface/planetproperty.hpp: new [int/if/planetif.h], incomplete
+	* interpreter/savevisitor.cpp, interpreter/savevisitor.hpp: new [int/value.h]
+	* interpreter/tagnode.hpp: new [int/value.h]
+
+2016-04-08  Stefan Reuther  <streu@gmx.de>
+
+	* game/session.cpp, game/session.hpp: new
+	* game/game.cpp, game/game.hpp: new
+	* game/unitscoredefinitionlist.cpp, game/unitscoredefinitionlist.hpp: new [game/unitscore.h]
+	* game/unitscorelist.cpp, game/unitscorelist.hpp: new [game/unitscore.h]
+
+2016-04-07  Stefan Reuther  <streu@gmx.de>
+
+	* interpreter/selectionexpression.cpp, interpreter/selectionexpression.hpp: new [int/selexpr.h]
+	* interpreter/filecommandsource.cpp, interpreter/filecommandsource.hpp: new [int/csource.h]
+
+2016-04-06  Stefan Reuther  <streu@gmx.de>
+
+	* interpreter/filevalue.cpp, interpreter/filevalue.hpp: new [int/value.h]
+	* interpreter/memorycommandsource.cpp, interpreter/memorycommandsource.hpp: new [int/csource.h]
+	* interpreter/process.cpp, interpreter/process.hpp: mostly complete
+	* interpreter/subroutinevalue.cpp, interpreter/subroutinevalue.hpp: new [int/subr.h]
+
+2016-04-05  Stefan Reuther  <streu@gmx.de>
+
+	* interpreter/binaryexecution.cpp, interpreter/binaryexecution.hpp: new [int/binary.h]
+
+2016-04-04  Stefan Reuther  <streu@gmx.de>
+
+	* interpreter/process.cpp, interpreter/process.hpp: new [int/exec.h], incomplete
+	* interpreter/arrayvalue.cpp, interpreter/arrayvalue.hpp: new [int/array.h]
+	* interpreter/indexablevalue.cpp, interpreter/indexablevalue.hpp: new [int/compound.h]
+	* interpreter/arguments.cpp, interpreter/arguments.hpp: new [int/args.h]
+
+2016-04-03  Stefan Reuther  <streu@gmx.de>
+
+	* interpreter/basevalue.cpp, interpreter/basevalue.hpp: new
+	* interpreter/callablevalue.cpp, interpreter/callablevalue.hpp: new [int/compound.h]
+	* interpreter/keymapvalue.cpp, interpreter/keymapvalue.hpp: new [int/keymap.h]
+	* interpreter/nametable.cpp, interpreter/nametable.hpp: new [int/if/ifutil.h]
+	* interpreter/propertyacceptor.cpp, interpreter/propertyacceptor.hpp: new [int/propenum.h]
+	* interpreter/simplespecialcommand.cpp, interpreter/simplespecialcommand.hpp: new [int/special.h]
+	* interpreter/singlecontext.cpp, interpreter/singlecontext.hpp: new [int/context.h]
+	* interpreter/specialcommand.hpp: new [int/special.h]
+	* interpreter/structuretype.cpp, interpreter/structuretype.hpp: new [int/structure.h]
+	* interpreter/structurevalue.cpp, interpreter/structurevalue.hpp: new [int/structure.h]
+	* interpreter/ternaryexecution.cpp, interpreter/ternaryexecution.hpp: new [int/ternary.h]
+	* interpreter/typehint.hpp: new [int/if/ifutil.h]
+	* interpreter/unaryexecution.cpp, interpreter/unaryexecution.hpp: new [int/unary.h]
+	* util/atomtable.cpp, util/atomtable.hpp: new [util/atom.h]
+	* util/key.cpp, util/key.hpp: new [int/keymap.h]
+	* util/keymap.cpp, util/keymap.hpp: new [int/keymap.h]
+	* util/keymaptable.cpp, util/keymaptable.hpp: new [int/keymap.h]
+
+2016-04-02  Stefan Reuther  <streu@gmx.de>
+
+	* game/map/rangeset.cpp, game/map/rangeset.hpp: new [game/rangeset.h]
+	* game/parser/datainterface.hpp: new
+	* game/parser/messageparser.cpp, game/parser/messageparser.hpp: new [game/msgparse.h]
+	* game/parser/messagetemplate.cpp, game/parser/messagetemplate.hpp: new [game/msgtemplate.h]
+	* game/v3/inboxfile.cpp, game/v3/inboxfile.hpp: new [game/msg.h, game/inbox.h]
+	* interpreter/commandsource.cpp, interpreter/commandsource.hpp: new [int/csource.h]
+	* interpreter/context.cpp, interpreter/context.hpp: new [int/context.h]
+	* interpreter/contextprovider.hpp: new
+	* interpreter/defaultstatementcompilationcontext.cpp, interpreter/defaultstatementcompilationcontext.hpp: new
+	* interpreter/keywords.cpp, interpreter/keywords.hpp: new [int/keywords.h]
+	* interpreter/propertyacceptor.hpp: new [int/propenum.h]
+	* interpreter/statementcompilationcontext.cpp, interpreter/statementcompilationcontext.hpp: new [int/statement.h]
+	* interpreter/statementcompiler.cpp, interpreter/statementcompiler.hpp: new [int/statement.h], incomplete
+
+2016-03-31  Stefan Reuther  <streu@gmx.de>
+
+	* game/parser/messagevalue.cpp, game/parser/messagevalue.hpp: new [game/parser.h]
+	* game/parser/messageinformation.cpp, game/parser/messageinformation.hpp: new [game/parser.h]
+
+2016-03-29  Stefan Reuther  <streu@gmx.de>
+
+	* game/v3/loader.cpp, game/v3/loader.hpp: new [game/load.h]
+
+2016-03-28  Stefan Reuther  <streu@gmx.de>
+
+	* game/config/userconfiguration.cpp, game/config/userconfiguration.hpp: new [game/pref.h]
+	* game/interpreterinterface.hpp: new
+	* game/playerarray.hpp: new [game/playerset.h]
+	* game/playerbitmatrix.cpp, game/playerbitmatrix.hpp: new [game/playerset.h]
+	* game/turn.cpp, game/turn.hpp: new [game/global.h], draft
+	* game/turnloader.hpp: new, draft
+	* game/v3/resultloader.cpp, game/v3/resultloader.hpp: new [game/storage.h], draft, ugly, incomplete
+	* interpreter/binaryoperation.cpp, interpreter/binaryoperation.hpp: new [int/binary.h]
+	* interpreter/bytecodeobject.cpp, interpreter/bytecodeobject.hpp: new [int/bytecode.h]
+	* interpreter/compilationcontext.hpp: new [int/expr.h]
+	* interpreter/error.cpp, interpreter/error.hpp: new [int/interror.h]
+	* interpreter/expr/assignmentnode.cpp, interpreter/expr/assignmentnode.hpp: new [int/expr.h]
+	* interpreter/expr/builtinfunction.cpp, interpreter/expr/builtinfunction.hpp: new [int/builtin.h]
+	* interpreter/expr/casenode.cpp, interpreter/expr/casenode.hpp: new [int/expr.h]
+	* interpreter/expr/conditionalnode.cpp, interpreter/expr/conditionalnode.hpp: new [int/expr.h]
+	* interpreter/expr/functioncallnode.cpp, interpreter/expr/functioncallnode.hpp: new [int/expr.h]
+	* interpreter/expr/identifiernode.cpp, interpreter/expr/identifiernode.hpp: new [int/expr.h]
+	* interpreter/expr/indirectcallnode.cpp, interpreter/expr/indirectcallnode.hpp: new [int/expr.h]
+	* interpreter/expr/literalnode.cpp, interpreter/expr/literalnode.hpp: new [int/expr.h]
+	* interpreter/expr/logicalnode.cpp, interpreter/expr/logicalnode.hpp: new [int/expr.h]
+	* interpreter/expr/membernode.cpp, interpreter/expr/membernode.hpp: new [int/expr.h]
+	* interpreter/expr/node.cpp, interpreter/expr/node.hpp: new [int/expr.h]
+	* interpreter/expr/parser.cpp, interpreter/expr/parser.hpp: new [int/parseexpr.h]
+	* interpreter/expr/rvaluenode.cpp, interpreter/expr/rvaluenode.hpp: new [int/expr.h]
+	* interpreter/expr/sequencenode.cpp, interpreter/expr/sequencenode.hpp: new [int/expr.h]
+	* interpreter/expr/simplenode.cpp, interpreter/expr/simplenode.hpp: new [int/expr.h]
+	* interpreter/expr/simplervaluenode.cpp, interpreter/expr/simplervaluenode.hpp: new [int/expr.h]
+	* interpreter/fusion.cpp, interpreter/fusion.hpp: new [int/fusion.h]
+	* interpreter/opcode.cpp, interpreter/opcode.hpp: new [int/opcode.h]
+	* interpreter/optimizer.cpp, interpreter/optimizer.hpp: new [int/optimize.h]
+	* interpreter/ternaryoperation.cpp, interpreter/ternaryoperation.hpp: new [int/ternary.h]
+	* interpreter/tokenizer.cpp, interpreter/tokenizer.hpp: new [int/lex.h]
+	* interpreter/unaryoperation.cpp, interpreter/unaryoperation.hpp: new [int/unary.h]
+	* interpreter/values.cpp, interpreter/values.hpp: new [int/value.h]
+	* interpreter/world.hpp, interpreter/world.hpp: new [int/intglobal.h]
+
+2016-03-27  Stefan Reuther  <streu@gmx.de>
+
+	* game/map/anyplanettype.cpp, game/map/anyplanettype.hpp: new [game/planettype.h]
+	* game/map/basedata.hpp: new
+	* game/map/basestorage.cpp, game/map/basestorage.hpp: new
+	* game/map/circularobject.cpp, game/map/circularobject.hpp: new [game/obj.h]
+	* game/map/configuration.hpp, game/map/configuration.hpp: new [game/coord.h]
+	* game/map/mapobject.cpp, game/map/mapobject.hpp: new [game/obj.h]
+	* game/map/object.cpp, game/map/object.hpp: new [game/obj.h]
+	* game/map/objecttype.cpp, game/map/objecttype.hpp: new [game/objtypes.h]
+	* game/map/objectvector.hpp: new
+	* game/map/objectvectortype.hpp: new [game/objtypes.h]
+	* game/map/planet.cpp, game/map/planet.hpp: new [game/planet.h]
+	* game/map/planetdata.hpp: new
+	* game/map/playedbasetype.cpp, game/map/playedbasetype.hpp: new [game/planettype.h]
+	* game/map/playedplanettype.cpp, game/map/playedplanettype.hpp: new [game/planettype.h]
+	* game/map/point.cpp, game/map/point.hpp: moved from game/
+	* game/map/universe.cpp, game/map/universe.hpp: new [game/univ.h, placeholder for now]
+	* game/types.hpp: new
+
+2016-03-26  Stefan Reuther  <streu@gmx.de>
+
+	* game/spec/friendlycode.cpp, game/spec/friendlycode.hpp: new [game/fcode.h]
+	* game/spec/friendlycodelist.cpp, game/spec/friendlycodelist.hpp: new [game/fcode.h]
+
+2016-03-25  Stefan Reuther  <streu@gmx.de>
+
+	* game/vcr/classic/database.cpp, game/vcr/classic/database.hpp: new [game/classicvcr.h]
+	* util/math.hpp: new [game/formula.h]
+	* game/vcr/statistic.cpp, game/vcr/statistic.hpp: new [game/vcr.h]
+	* game/vcr/score.cpp, game/vcr/score.hpp: new [game/classicvcr.h]
+	* game/vcr/classic/pvcralgorithm.cpp, game/vcr/classic/pvcralgorithm.hpp: new [game/pvcr.h]
+
+2016-03-23  Stefan Reuther  <streu@gmx.de>
+
+	* game/vcr/classic/hostalgorithm.cpp, game/vcr/classic/hostalgorithm.hpp: new [game/tvcr.h]
+	* game/vcr/classic/statustoken.cpp, game/vcr/classic/statustoken.hpp: new [game/vcr.h]
+
+2016-03-22  Stefan Reuther  <streu@gmx.de>
+
+	* game/vcr/classic/algorithm.cpp, game/vcr/classic/algorithm.hpp: new [game/vcr.h]
+	* game/vcr/classic/battle.cpp, game/vcr/classic/battle.hpp: new [game/vcr.h, game/classicvcr.h]
+	* game/vcr/classic/nullvisualizer.cpp, game/vcr/classic/nullvisualizer.hpp: new [game/vcr.h]
+	* game/vcr/classic/types.hpp: new [game/vcr.h]
+	* game/vcr/classic/visualizer.hpp: new [game/vcr.h]
+
+2016-03-20  Stefan Reuther  <streu@gmx.de>
+
+	* game/spec/standardcomponentnameprovider.cpp, game/spec/standardcomponentnameprovider.hpp: new [game/specsn.h]
+	* game/vcr/battle.hpp: new [game/vcrdb.h]
+	* game/vcr/database.hpp: new [game/vcrdb.h]
+	* game/vcr/object.cpp, game/vcr/object.hpp: new [game/vcrobj.h]
+	* game/specificationloader.hpp: new
+
+2016-03-19  Stefan Reuther  <streu@gmx.de>
+
+	* gfx/sdl/surface.cpp, gfx/sdl/surface.hpp: new [pcc-v2/gfx/gfx.h]
+	* gfx/sdl/modetraits.hpp: new [pcc-v2/gfx/gfx-modetr.h]
+
+2016-03-18  Stefan Reuther  <streu@gmx.de>
+
+	* gfx/canvas.hpp: new [pcc-v2/gfx/gfx.h]
+	* gfx/nullcanvas.cpp, gfx/nullcanvas.hpp: new [pcc-v2/gfx/gfx.h]
+	* gfx/types.hpp: new [pcc-v2/gfx/gfxtypes.h]
+	* gfx/fillpattern.cpp, gfx/fillpattern.hpp: new [pcc-v2/gfx/gfxutil.h]
+	* gfx/point.hpp: new [pcc-v2/gfx/gfxutil.h]
+	* gfx/rectangle.cpp, gfx/rectangle.hpp: new [pcc-v2/gfx/gfxutil.h]
+	* gfx/rectangleset.cpp, gfx/rectangleset.hpp: new [pcc-v2/gfx/gfxutil.h]
+	* game/v3/rootloader.cpp, game/v3/rootloader.hpp: new
+	* game/v3/directoryscanner.cpp, game/v3/directoryscanner.hpp: new [pcc-v2/game/storage/overview.h]
+
+2016-03-17  Stefan Reuther  <streu@gmx.de>
+
+	* game/v3/turnfile.cpp, game/v3/turnfile.hpp: new [pcc-v2/game/trn.h]
+	* util/randomnumbergenerator.cpp, util/randomnumbergenerator.hpp: new [pcc-v2/util/random.h]
+	* game/timestamp.cpp, game/timestamp.hpp: new [pcc-v2/game/timestamp.h]
+	* game/spec/nullcomponentnameprovider.cpp, game/spec/nullcomponentnameprovider.hpp: new
+
+2016-03-16  Stefan Reuther  <streu@gmx.de>
+
+	* game/config/configurationparser.cpp, game/config/configurationparser.hpp: new [pcc-v2/util/confpars.h]
+	* util/configurationfileparser.cpp, util/configurationfileparser.hpp: new [pcc-v2/util/confpars.h]
+
+2016-03-15  Stefan Reuther  <streu@gmx.de>
+
+	* game/player.cpp, game/player.hpp: new [pcc-v2/game/racename.h]
+	* game/playerlist.cpp, game/playerlist.hpp: new [pcc-v2/game/racename.h]
+	* game/root.cpp, game/root.hpp: new
+	* game/spec/hullassignmentlist.cpp, game/spec/hullassignmentlist.hpp: new [pcc-v2/game/spec.h]
+
+2016-03-14  Stefan Reuther  <streu@gmx.de>
+
+	* game/v3/registrationkey.cpp, game/v3/registrationkey.hpp: new [pcc-v2/game/reg.h]
+	* game/hostversion.cpp, game/hostversion.hpp: new [pcc-v2/game/host.h]
+	* game/spec/hullfunctionassignmentlist.cpp, game/spec/hullfunctionassignmentlist.hpp: new [pcc-v2/game/spec.h]
+	* game/spec/hull.cpp, game/spec/hull.hpp: new [pcc-v2/game/spec.h]
+
+2016-03-13  Stefan Reuther  <streu@gmx.de>
+
+	* game/config/aliasoption.cpp, game/config/aliasoption.hpp: new [pcc-v2/game/config.h]
+	* game/limits.hpp: new
+	* game/config/hostconfiguration.cpp, game/config/hostconfiguration.hpp: new [pcc-v2/game/config.h]
+	* game/config/costarrayoption.cpp, game/config/costarrayoption.hpp: new [pcc-v2/game/config.h]
+	* game/config/collapsibleintegerarrayoption.hpp: new [pcc-v2/game/config.h]
+	* game/config/bitsetvalueparser.cpp, game/config/bitsetvalueparser.hpp: new [pcc-v2/util/conf.h]
+	* game/config/enumvalueparser.cpp, game/config/enumvalueparser.hpp: new [pcc-v2/util/conf.h]
+	* game/config/genericintegerarrayoption.cpp, game/config/genericintegerarrayoption.hpp: new [pcc-v2/util/conf.h]
+	* game/config/integerarrayoption.hpp: new [pcc-v2/util/conf.h]
+
+2016-03-11  Stefan Reuther  <streu@gmx.de>
+
+	* game/config/configuration.cpp, game/config/configuration.hpp: new [pcc-v2/util/conf.h]
+	* game/config/integeroption.cpp, game/config/integeroption.hpp: new [pcc-v2/util/conf.h]
+	* game/config/stringoption.cpp, game/config/stringoption.hpp: new [pcc-v2/util/conf.h]
+
+2016-03-10  Stefan Reuther  <streu@gmx.de>
+
+	* game/config/booleanvalueparser.cpp, game/config/booleanvalueparser.hpp: new [pcc-v2/util/conf.h]
+	* game/config/configurationoption.cpp, game/config/configurationoption.hpp: new [pcc-v2/util/conf.h]
+	* game/config/integervalueparser.cpp, game/config/integervalueparser.hpp: new [pcc-v2/util/conf.h]
+	* game/config/valueparser.cpp, game/config/valueparser.hpp: new [pcc-v2/util/conf.h]
+
+2016-03-08  Stefan Reuther  <streu@gmx.de>
+
+	* game/spec/modifiedhullfunctionlist.cpp, game/spec/modifiedhullfunctionlist.hpp: new [pcc-v2/game/hullfunc.h]
+	* game/spec/hullfunctionlist.cpp, game/spec/hullfunctionlist.hpp: new [pcc-v2/game/hullfunc.h]
+
+2016-03-07  Stefan Reuther  <streu@gmx.de>
+
+	* util/string.cpp, util/string.hpp: new [pcc-v2/util/misc.h]
+
+2016-03-06  Stefan Reuther  <streu@gmx.de>
+
+	* game/playerset.cpp, game/playerset.hpp: new [pcc-v2/game/playerset.h]
+	* game/spec/hullfunction.cpp, game/spec/hullfunction.hpp: new [pcc-v2/game/hullfunc.h]
+	* game/experiencelevelset.cpp, game/experiencelevelset.hpp: new [pcc-v2/game/exp.h]
+	* game/spec/basichullfunctionlist.cpp, game/spec/basichullfunctionlist.hpp: new [pcc-v2/game/hullfunc.h]
+	* game/spec/basichullfunction.cpp, game/spec/basichullfunction.hpp: new [pcc-v2/game/hullfunc.h]
+	* util/fileparser.cpp, util/fileparser.hpp: new [pcc-v2/util/filepars.h]
+	* game/cargospec.cpp, game/cargospec.hpp: new [pcc-v2/game/cspec.h]
+	* game/element.cpp, game/element.hpp: new [pcc-v2/game/cargotype.h]
+	* game/point.cpp, game/point.hpp: new [pcc-v2/game/coord.h]
+	* game/spec/beam.cpp, game/spec/beam.hpp: new [pcc-v2/game/spec.h]
+	* game/spec/component.cpp, game/spec/component.hpp: new [pcc-v2/game/spec.h]
+	* game/spec/componentnameprovider.hpp: new
+	* game/spec/componentvector.hpp: new
+	* game/spec/cost.cpp, game/spec/cost.hpp: new [pcc-v2/game/cost.h]
+	* game/spec/engine.cpp, game/spec/engine.hpp: new [pcc-v2/game/spec.h]
+	* game/spec/shiplist.cpp, game/spec/shiplist.hpp: new
+	* game/spec/torpedolauncher.cpp, game/spec/torpedolauncher.hpp: new [pcc-v2/game/spec.h]
+	* game/spec/weapon.cpp, game/spec/weapon.hpp: new [pcc-v2/game/spec.h]
+	* game/v3/resultfile.cpp, game/v3/resultfile.hpp: new [pcc-v2/game/rst.h]
+	* game/v3/specificationloader.cpp, game/v3/specificationloader.hpp: new
+	* game/v3/structures.hpp: new [pcc-v2/game/struct.in]

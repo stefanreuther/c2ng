@@ -1,0 +1,12 @@
+/*!
+     \namespace gfx
+     \brief Graphics
+
+     This namespace contains the graphics kernel, including basic canvas implementations and graphics primitives.
+     Actual environment-specific implementations that access actual graphics hardware are in sub-namespaces.
+
+     <b>Entry points:</b>
+
+     - gfx::Canvas
+     - gfx::Engine
+  */
