@@ -15,11 +15,20 @@ class TestUiResImageLoader : public CxxTest::TestSuite {
 class TestUiResManager : public CxxTest::TestSuite {
  public:
     void testIt();
+    void testLoad();
+    void testRemove();
 };
 
 class TestUiResProvider : public CxxTest::TestSuite {
  public:
     void testIt();
+};
+
+class TestUiResResId : public CxxTest::TestSuite {
+ public:
+    void testMake();
+    void testGeneralize();
+    void testMatch();
 };
 
 #endif

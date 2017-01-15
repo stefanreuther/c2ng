@@ -127,6 +127,11 @@ namespace game { namespace vcr { namespace classic {
                            const game::config::HostConfiguration& config,
                            const game::spec::ShipList& shipList) const;
 
+        const Object& left() const
+            { return m_before[0]; }
+        const Object& right() const
+            { return m_before[1]; }
+
      private:
         // Attributes from GClassicVcr:
         uint16_t m_seed;

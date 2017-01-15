@@ -68,7 +68,7 @@ namespace {
     };
 }
 
-game::nu::SpecificationLoader::SpecificationLoader(afl::base::Ptr<GameState> gameState,
+game::nu::SpecificationLoader::SpecificationLoader(afl::base::Ref<GameState> gameState,
                                                    afl::string::Translator& tx,
                                                    afl::sys::LogListener& log)
     : m_gameState(gameState),

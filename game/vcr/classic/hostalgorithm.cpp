@@ -165,10 +165,12 @@ game::vcr::classic::HostAlgorithm::Status::init(const Object& obj, Side side)
 game::vcr::classic::HostAlgorithm::HostAlgorithm(bool nuFlag,
                                                  Visualizer& vis,
                                                  const game::config::HostConfiguration& config,
-                                                 const game::spec::ShipList& list)
+                                                 const game::spec::BeamVector_t& beams,
+                                                 const game::spec::TorpedoVector_t& launchers)
     : Algorithm(vis),
       m_config(config),
-      m_shipList(list),
+      m_beams(beams),
+      m_launchers(launchers),
       m_nuFlag(nuFlag),
       m_seed(0),
       m_time(0),
@@ -839,7 +841,7 @@ game::vcr::classic::HostAlgorithm::fireBeam(Status& st, Status& opp, int which)
 {
     // ex VcrPlayerTHost::fireBeam
     int charge = st.m_beamStatus[which];
-    if (const game::spec::Beam* beam = m_shipList.beams().get(st.m_obj.getBeamType())) {
+    if (const game::spec::Beam* beam = m_beams.get(st.m_obj.getBeamType())) {
         int da = rdivadd(charge * beam->getDamagePower(), 100, 0);
         int ki = rdivadd(charge * beam->getKillPower(),   100, 0) * st.m_obj.getBeamKillRate();
 
@@ -918,7 +920,7 @@ game::vcr::classic::HostAlgorithm::fireTorp(Status& st, Status& opp, int launche
     // ex VcrPlayerTHost::fireTorp
     register int n = getRandom_1_100();
     if (n >= st.m_obj.getTorpMissRate()) {
-        if (const game::spec::TorpedoLauncher* t = m_shipList.launchers().get(st.m_obj.getTorpedoType())) {
+        if (const game::spec::TorpedoLauncher* t = m_launchers.get(st.m_obj.getTorpedoType())) {
             hit(opp, 2*t->getDamagePower(), 2*t->getKillPower());
         }
         m_statistic[st.m_side].handleTorpedoHit();
@@ -975,12 +977,12 @@ game::vcr::classic::HostAlgorithm::checkSide(Object& obj)
         obj.setOwner(12);
     }
 
-    if (obj.getBeamType() != 0 && m_shipList.beams().get(obj.getBeamType()) == 0) {
+    if (obj.getBeamType() != 0 && m_beams.get(obj.getBeamType()) == 0) {
         obj.setBeamType(0);
         obj.setNumBeams(0);
         err = true;
     }
-    if (obj.getTorpedoType() != 0 && m_shipList.launchers().get(obj.getTorpedoType()) == 0) {
+    if (obj.getTorpedoType() != 0 && m_launchers.get(obj.getTorpedoType()) == 0) {
         obj.setTorpedoType(0);
         obj.setNumLaunchers(0);
         err = true;

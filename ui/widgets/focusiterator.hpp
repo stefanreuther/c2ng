@@ -44,7 +44,6 @@ namespace ui { namespace widgets {
 
         // InvisibleWidget/Widget:
         virtual bool handleKey(util::Key_t key, int prefix);
-        virtual bool handleMouse(gfx::Point pt, MouseButtons_t pressedButtons);
 
      private:
         int m_flags;

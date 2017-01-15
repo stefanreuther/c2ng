@@ -1,20 +1,25 @@
-;=== PCC2 Resource Index ===
+;=== PCC2ng Resource Index ===
 ;
 ;  Syntax is
 ;    item = file name
 ;  items are
-;    s.foo = sounds
 ;    g.foo = graphics
-;    f.foo = fonts
-;  Names are relative to the resource directory resp. the "dir:" entries
-;  from cc-res.cfg.
+;  (fonts, sounds not implemented yet)
 ;
-;  When PCC II needs an item which is not there, it attempts a blind
-;  guess from the item name: the prefixes turn into a set of extensions,
-;  dots turn into slashes, hence PCC opens `vcr/torpedo.gfx' when asked
-;  for `g.vcr.torpedo'. When an item ending in a number can't be opened,
-;  PCC tries without the number (i.e. `g.vcr.ftr10' is tried as `g.vcr.ftr'
-;  if it can't be opened).
+;  Names are relative to the resource directory tihs file is in.
+;
+;  When PCC2 needs an item which has no definition here,
+;  it attempts to convert the resource identifier into a file name
+;  by turning the colons into directory separators. For example,
+;  the image resource
+;      vcr.torpedo.5
+;  is looked at the assignment
+;      g.vcr.torpedo.5
+;  and if not found, in the file
+;      vcr/torpedo/5.{jpg,png,etc.}
+;
+;  If this still cannot be found, PCC2 tries generalizing the item
+;  by removing trailing components.
 ;
 ;  File names:
 ;  - if a file name ends with a ".", PCC2 tries all supported extensions
@@ -28,57 +33,21 @@
 ;    + "add:N": only for palettized images: add N to each pixel
 ;
 
-;; ;----- VCR Sounds ------
-;; ; "s.vcr.beamN" is used when a type-N beam fires ("s.vcr.beam0" for fighters).
-;; ; "s.vcr.beam" is used when no value defined for this beam.
-;; ; The default sounds assume you have Winplan; right now we only include
-;; ; "zap.wav" and "expl-*.wav".
-;; s.vcr.beam    = wav/zap.wav
-;; s.vcr.beam0   = wav/ffire3.wav
-;; s.vcr.beam1   = wav/ffire4.wav
-;; s.vcr.beam2   = wav/ffire4.wav
-;; s.vcr.beam8   = wav/weapon2.wav
-;; s.vcr.beam9   = wav/laser.wav
-;; s.vcr.beam10  = wav/laser.wav
-;; s.vcr.tlaun   = wav/photon1.wav
-;; s.vcr.bang    = wav/expl-big.wav
-;; s.vcr.bangf   = wav/expl-small.wav
-;; s.vcr.damaged = wav/expl-small.wav
-;; s.vcr.thit    = wav/hit.wav
-;; 
-;; ; s.vcr.flaun = fighter launch
 
-;; ;--- Main Menu Graphics
-;; g.bg.choose   = bg/blank.|bg/title.|size:screen
-;; g.bg.unpack   = bg/blank.|bg/unpack.|size:screen
-;; g.bg.maketurn = bg/blank.|bg/maketurn.|size:screen
-;; g.bg.sweep    = bg/blank.|bg/sweep.|size:screen
-;; g.bg.vcr      = bg/blank.|vcr/banner.|size:screen
-;; 
-;; ;--- VCR Graphics
-;; g.vcr.bg      = vcrbg.jpg
-;; 
-;; ; This is the "custom ship" picture
-;; g.ship200     = menu/ship.cd
-;; 
-;; ; g.vcr.planet
-;; ; g.vcr.ship
-;; ; g.vcr.ftr[1..11]
-;; ; g.vcr.torpedo
-;; 
-;; ;--- Control Screens
-;; ; "g.planetX" is used for a planet of temperature X. We currently have only
-;; ; one for all. PCC 1.x synthesizes an image for each level from 12 images.
-;; g.planet = vcr/planet.png
-;; 
-;; ; "g.baseX" is used for a base whose highest tech is X. PCC 1.x distinguishes
-;; ; between high-tech and low-tech, so do we.
-;; g.base7  = base/newbase.png
-;; g.base8  = base/newbase.png
-;; g.base9  = base/newbase.png
-;; g.base10 = base/newbase.png
-;; g.base   = base/oldbase.png
-;; 
+;--- Control screens
+; "planet.X" is a planet of temperature X.
+g.planet = planet.png
+
+; "ship.X" is a ship with a given type
+g.ship = ship.png
+
+; "base.X" is a base with tech level X
+g.base.7 = newbase.png
+g.base.8 = newbase.png
+g.base.9 = newbase.png
+g.base.10 = newbase.png
+g.base = oldbase.png
+
 ;--- Windows
 ; "winblue" is some sort of blue marble. We can derive other window
 ; frame colors from it. For reference, here are some good ones:
@@ -97,33 +66,3 @@ g.winred = winblue.|add:-32
 g.wingray = winblue.|add:-48
 g.wingreen = winblue.|add:61
 g.winyellow = winblue.|add:78
-
-;; ; "bgtile" is a gray sand texture. We can derive other background
-;; ; colors from it. For reference, here are some good ones:
-;; ;   add:8 = light gray (works as window background)
-;; ;   add:16 = dark red
-;; ;   add:20 = reddish orange
-;; ;   add:28 = orangeish yellow
-;; ;   add:32 = yellow
-;; ;   add:48 = blue
-;; ;   add:52 = light blue (same shade as winblue)
-;; ;   add:56 = really light blue
-;; ;   add:64 = fall
-;; ;   add:72 = acid green
-;; ;   add:100 = pale green
-;; ;   add:112 = dark green
-;; ;   add:116 = bright green
-;; ;   add:128 = dark yellow
-;; ;   add:130 = not so dark greenish yellow
-;; ;   add:-12 = whiteish blue
-;; g.bgtile = bgtile.
-;; g.bluetile = bgtile.|add:48
-;; g.greentile = bgtile.|add:112
-;; g.redtile = bgtile.|add:16
-;; 
-;; ; Help files. "help.xxx" contains help pages "xxx:foo".
-;; ; "help" contains all pages without colon.
-;; help         = pcc2help.xml
-;; help.pcc2    = pcc2help.xml
-;; help.playvcr = pcc2help.xml
-;; help.int     = pcc2interpreter.xml

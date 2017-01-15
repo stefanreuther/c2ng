@@ -13,6 +13,7 @@ namespace game { namespace interface {
     bool checkRichArg(RichTextValue::Ptr_t& out, afl::data::Value* value);
 
     afl::data::Value* IFRAdd(game::Session& session, interpreter::Arguments& args);
+    afl::data::Value* IFRAlign(game::Session& session, interpreter::Arguments& args);
     afl::data::Value* IFRMid(game::Session& session, interpreter::Arguments& args);
     afl::data::Value* IFRString(game::Session& session, interpreter::Arguments& args);
     afl::data::Value* IFRLen(game::Session& session, interpreter::Arguments& args);

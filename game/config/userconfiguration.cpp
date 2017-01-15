@@ -81,7 +81,7 @@ void
 game::config::UserConfiguration::loadUserConfiguration(util::ProfileDirectory& dir, afl::sys::LogListener& log, afl::string::Translator& tx)
 {
     // ex game/pref.h:loadUserPreferences
-    afl::base::Ptr<afl::io::Stream> stream = dir.openFile(PCC2_INI);
+    afl::base::Ptr<afl::io::Stream> stream = dir.openFileNT(PCC2_INI);
     if (stream.get() != 0) {
         // Parse the file
         log.write(log.Debug, LOG_NAME, afl::string::Format(tx.translateString("Reading configuration from %s...").c_str(), stream->getName()));

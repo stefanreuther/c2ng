@@ -5,7 +5,7 @@
 #define C2NG_GAME_BROWSER_FILESYSTEMFOLDER_HPP
 
 #include "game/browser/folder.hpp"
-#include "afl/base/ptr.hpp"
+#include "afl/base/ref.hpp"
 #include "afl/io/directory.hpp"
 
 namespace game { namespace browser {
@@ -14,7 +14,7 @@ namespace game { namespace browser {
 
     class FileSystemFolder : public Folder {
      public:
-        FileSystemFolder(Browser& parent, afl::base::Ptr<afl::io::Directory> dir, String_t title);
+        FileSystemFolder(Browser& parent, afl::base::Ref<afl::io::Directory> dir, String_t title);
 
         virtual void loadContent(afl::container::PtrVector<Folder>& result);
 
@@ -32,7 +32,7 @@ namespace game { namespace browser {
 
      private:
         Browser& m_parent;
-        afl::base::Ptr<afl::io::Directory> m_directory;
+        afl::base::Ref<afl::io::Directory> m_directory;
         String_t m_title;
     };
 

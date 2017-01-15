@@ -11,6 +11,8 @@
 #include "gfx/multiclipfilter.hpp"
 #include "ui/colorscheme.hpp"
 #include "gfx/resourceprovider.hpp"
+#include "afl/container/ptrqueue.hpp"
+#include "afl/base/signal.hpp"
 
 namespace ui {
 
@@ -18,6 +20,10 @@ namespace ui {
         This is the root container for widgets.
         It provides drawing for child widgets.
         It does not have a parent.
+
+        Root also provides basic engine-independant event handling:
+        - mouse state tracking (postMouseEvent(), setMousePrefixArgument())
+        - synthetic keyboard events (postKeyEvent(), ungetKeyEvent())
 
         <b>Contained elements:</b>
         - Root provides a ui::ColorScheme to descendants
@@ -29,7 +35,10 @@ namespace ui {
         - Constructing a Root will create a gfx::Engine window.
         - Call handleEvent() in a loop.
           This will schedule redraw and dispatch events.
-          The thread calling handleEvent() should not block. */
+          The thread calling handleEvent() should not block.
+
+        <b>Multithreading:</b> All Root methods can only be called from the UI thread.
+        There is no internal interlocking. */
     class Root : public Widget {
      public:
         /** Constructor.
@@ -64,8 +73,49 @@ namespace ui {
             Those will be performed on the next handleEvent() call. */
         void handleEvent();
 
-        /** Post a mouse event. */
+        /** Post a mouse event.
+            Makes sure that a future handleEvent() call will eventually process a mouse event even if the mouse state didn't change. */
         void postMouseEvent();
+
+        /** Post a key event.
+            Makes sure that a future handleEvent() call will eventually process the given keyboard event.
+            All synthetic key events will be processed before new user input is received.
+            This is a queue, not a stack, thus key events will be processed in the same order as posted.
+
+            FIXME: maybe we can do without this method
+
+            \param key Key
+            \param prefix Prefix argument */
+        void postKeyEvent(util::Key_t key, int prefix);
+
+        /** Unget a key event.
+            Makes sure that a future handleEvent() call will eventually process the given keyboard event.
+            This event will be processed before all other keyboard events (postKeyEvent, ungetKeyEvent and real ones).
+            This is a stack, the latest ungetKeyEvent() event will be processed first.
+
+            \param key Key
+            \param prefix Prefix argument */
+        void ungetKeyEvent(util::Key_t key, int prefix);
+
+        /** Set prefix argument for next mouse command.
+            Because it's up to a widget to determine when a mouse-click is treated as such, we cannot associate a prefix argument with mouse events.
+            Instead, ui::PrefixArgument will post a prefix argument using this method,
+            and the consuming widget will consume is using consumeMousePrefixArgument().
+            Root contains logic to clear an unused prefix argument when a mouse click is definitely over.
+
+            For keyboard events, the prefix argument is provided directly in the event callback.
+
+            \param prefix New prefix argument
+            \see ui::PrefixArgument */
+        void setMousePrefixArgument(int prefix);
+
+        /** Consume prefix argument.
+            A consuming widget should call this method when it determined a successful mouse click.
+            For keyboard events, the prefix argument is provided directly in the event callback and this callback is pointless.
+
+            \return prefix argument, 0 if none
+            \see ui::PrefixArgument  */
+        int consumeMousePrefixArgument();
 
         /** Get color scheme.
             The same color scheme can also be obtained as getColorScheme(), but this method has a more specific prototype.
@@ -77,11 +127,17 @@ namespace ui {
         gfx::ResourceProvider& provider();
 
         /** Get engine.
-            \todo do we want to export the engine or just the methods we need? */
+            \todo do we want to export the engine or just the methods we need?
+            \return engine */
         gfx::Engine& engine();
 
+        /** Add widget.
+            The widget (a window, usually) is placed on top of the widget stack (i.e. frontmost).
+            \param child Widget */
         void add(Widget& child);
 
+        /** Remove widget.
+            \param child Widget */
         void remove(Widget& child);
 
         /** Center widget on screen.
@@ -96,23 +152,29 @@ namespace ui {
                           leave that many pixels from that edge. */
         void moveWidgetToEdge(Widget& widget, int xPos, int yPos, int offset);
 
+        afl::base::Signal<void(gfx::Canvas&)> sig_screenshot;
+
      private:
-        gfx::Engine& m_engine;
-        gfx::Engine::WindowFlags_t m_engineWindowFlags;
-        gfx::Point m_engineWindowSize;
-        int m_engineWindowBPP;
+        gfx::Engine& m_engine;                                             ///< Reference to underlying engine.
+        gfx::Engine::WindowFlags_t m_engineWindowFlags;                    ///< Configured engine flags.
+        gfx::Point m_engineWindowSize;                                     ///< Configured window size.
+        int m_engineWindowBPP;                                             ///< Configured bits per pixel.
 
-        afl::base::Ptr<gfx::Canvas> m_window;
-        std::auto_ptr<gfx::MultiClipFilter> m_filter;
+        afl::base::Ptr<gfx::Canvas> m_window;                              ///< Current engine window.
+        std::auto_ptr<gfx::MultiClipFilter> m_filter;                      ///< List of dirty areas. Never null.
 
-        ColorScheme m_colorScheme;
-        gfx::ResourceProvider& m_provider;
+        afl::container::PtrQueue<afl::base::Runnable> m_localTaskQueue;    ///< Local task queue. Contains local events.
+
+        ColorScheme m_colorScheme;                                         ///< Color scheme (palette -> pixel mapping).
+        gfx::ResourceProvider& m_provider;                                 ///< Resource provider.
 
         // Mouse state
-        bool m_mouseEventKnown;
-        bool m_mouseEventRequested;
-        gfx::Point m_mousePosition;
-        MouseButtons_t m_mouseButtons;
+        bool m_mouseEventKnown;                                            ///< Mouse state: true if m_mousePosition, m_mouseButtons valid.
+        bool m_mouseEventRequested;                                        ///< Mouse state: true if postMouseEvent() was called but not yet confirmed.
+        gfx::Point m_mousePosition;                                        ///< Mouse state: last position.
+        MouseButtons_t m_mouseButtons;                                     ///< Mouse state: last button state.
+        int m_mousePrefix;                                                 ///< Mouse state: prefix for next mouse click.
+        bool m_mousePrefixPosted;                                          ///< Mouse state: recognition of unused prefix. See handleMouse()
 
         void initWindow();
         void performDeferredRedraws();

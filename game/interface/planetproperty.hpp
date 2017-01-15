@@ -90,8 +90,8 @@ namespace game { namespace interface {
                                         const game::HostVersion& host,
                                         const game::config::HostConfiguration& config,
                                         InterpreterInterface& iface,
-                                        afl::base::Ptr<Game> game);
-    void setPlanetProperty(game::map::Planet& pl, PlanetProperty ipp, afl::data::Value* value);
+                                        afl::base::Ref<Game> game);
+    void setPlanetProperty(game::map::Planet& pl, PlanetProperty ipp, afl::data::Value* value, Root& root);
 
 } }
 

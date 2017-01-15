@@ -32,7 +32,7 @@ namespace {
     };
 }
 
-game::interface::TorpedoContext::TorpedoContext(bool useLauncher, int nr, afl::base::Ptr<game::spec::ShipList> shipList, afl::base::Ptr<game::Root> root)
+game::interface::TorpedoContext::TorpedoContext(bool useLauncher, int nr, afl::base::Ref<game::spec::ShipList> shipList, afl::base::Ref<game::Root> root)
     : m_useLauncher(useLauncher),
       m_number(nr),
       m_shipList(shipList),
@@ -45,11 +45,11 @@ game::interface::TorpedoContext::~TorpedoContext()
 { }
 
 // Context:
-bool
+game::interface::TorpedoContext*
 game::interface::TorpedoContext::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
 {
     // ex IntTorpedoContext::lookup, IntLauncherContext::lookup
-    return lookupName(name, torpedo_map, result);
+    return lookupName(name, torpedo_map, result) ? this : 0;
 }
 void
 game::interface::TorpedoContext::set(PropertyIndex_t index, afl::data::Value* value)
@@ -87,7 +87,7 @@ bool
 game::interface::TorpedoContext::next()
 {
     // ex IntTorpedoContext::next, IntLauncherContext::next
-    if (game::spec::TorpedoLauncher* launcher = m_shipList->launchers().findNext(m_number)) {
+    if (const game::spec::TorpedoLauncher* launcher = m_shipList->launchers().findNext(m_number)) {
         m_number = launcher->getId();
         return true;
     } else {
@@ -124,11 +124,23 @@ game::interface::TorpedoContext::toString(bool /*readable*/) const
 }
 
 void
-game::interface::TorpedoContext::store(interpreter::TagNode& out, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext* /*ctx*/) const
+game::interface::TorpedoContext::store(interpreter::TagNode& out, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
 {
     // ex IntTorpedoContext::store, IntLauncherContext::store
     out.tag = m_useLauncher ? out.Tag_Launcher : out.Tag_Torpedo;
     out.value = m_number;
+}
+
+game::interface::TorpedoContext*
+game::interface::TorpedoContext::create(bool useLauncher, int nr, Session& session)
+{
+    game::spec::ShipList* list = session.getShipList().get();
+    Root* root = session.getRoot().get();
+    if (list != 0 && root != 0 && list->launchers().get(nr) != 0) {
+        return new TorpedoContext(useLauncher, nr, *list, *root);
+    } else {
+        return 0;
+    }
 }
 
 afl::data::Value*

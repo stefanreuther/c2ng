@@ -18,9 +18,10 @@ WHAT IS PCC2?
   PCC2. It is intended to be 100% compatible to PCC2. However, it does
   away with many self-imposed limitations of PCC2.
 
-  Milestone Zero is a tech demo that proves feasability of some of the
+  Milestone One is a tech demo that proves feasability of some of the
   major features that turned out to be impossible on the original PCC2
-  codebase.
+  codebase and, unlike Milestone Zero, already looks somehow like a
+  Planets client.
 
 
 Project Goals
@@ -43,8 +44,8 @@ Project Goals
   - more scriptability.
 
 
-Milestone Zero
-===============
+Milestone One
+==============
 
   This version implements some key parts to prove feasibility. It does
   not have a fancy GUI and can not be used for playing.
@@ -64,7 +65,7 @@ Milestone Zero
     More fluent GUI. No more "Application not responding".
 
   Scripting engine ............................................. done
-    Controls most of the GUI.
+    Controls most of the GUI and data displays.
 
   Meaningful test coverage ..................................... done
     PCC2 has a meager test coverage of around 10%. c2ng currently
@@ -80,13 +81,13 @@ What can you do with it?
   c2ng(.exe) is the future pcc-v2.
 
   When you start the program, you will be shown a browser starting
-  with "My Computer". Note that the GUI is still very rough.
+  with "My Computer". Note that the GUI is still incomplete.
 
   (a) Use the browser to browse to a game directory on your hard disk.
 
   (b) Press [Ins] to add a network account. c2ng will ask for
   - user name
-  - server type (type "pcc" for PlanetsCentral or "nu" for planets.nu)
+  - server type (PlanetsCentral or planets.nu)
   - server address (you can leave this blank)
   A new entry will appear representing that account. You can enter it
   like a normal folder to browse your games; you will be asked for
@@ -94,8 +95,7 @@ What can you do with it?
 
   Use arrow keys and [Enter] to browse. After entering a game, you
   will see a screen with F1/F2/F3 buttons. Use these to select a ship,
-  planet, or base, and view its starchart. This proves that the
-  program shows actual, real game data.
+  planet, or base, and view its control screen.
 
   If you have configured PCC2 to make backups of your result files,
   [Alt]+[Up] will show the previous turn. (If you have not configured
@@ -106,7 +106,7 @@ Near Milestones
 ----------------
 
   - model the complete data and make it available for scripting
-    . remaining v3 objects
+    . most v3 objects done now
     . Nu advantages (map to racial abilities and configuration)
   - more server integration
   - data saving

@@ -20,14 +20,14 @@ TestGameBrowserHandlerList::testIt()
             { return false; }
         virtual game::browser::Folder* createAccountFolder(game::browser::Account& /*acc*/)
             { return 0; }
-        virtual afl::base::Ptr<game::Root> loadGameRoot(afl::base::Ptr<afl::io::Directory> /*dir*/)
+        virtual afl::base::Ptr<game::Root> loadGameRoot(afl::base::Ref<afl::io::Directory> /*dir*/)
             { return 0; }
     };
 
     game::browser::HandlerList testee;
     game::browser::Account acc;
     afl::container::PtrVector<game::browser::Folder> result;
-    afl::base::Ptr<afl::io::Directory> dir(afl::io::InternalDirectory::create("test"));
+    afl::base::Ref<afl::io::Directory> dir(afl::io::InternalDirectory::create("test"));
     TS_ASSERT(!testee.handleFolderName("foo", result));
     TS_ASSERT(testee.createAccountFolder(acc) == 0);
     TS_ASSERT(testee.loadGameRoot(dir).get() == 0);

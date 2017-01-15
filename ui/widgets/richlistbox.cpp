@@ -3,6 +3,7 @@
   */
 
 #include <algorithm>
+#include <climits>
 #include "ui/widgets/richlistbox.hpp"
 #include "ui/draw.hpp"
 #include "ui/rich/imageobject.hpp"
@@ -18,7 +19,8 @@ ui::widgets::RichListbox::Item::Item(const util::rich::Text text, afl::base::Ptr
 ui::widgets::RichListbox::RichListbox(gfx::ResourceProvider& provider, ui::ColorScheme& scheme)
     : m_provider(provider),
       m_colorScheme(scheme),
-      m_items()
+      m_items(),
+      m_renderFlags()
 { }
 
 ui::widgets::RichListbox::~RichListbox()
@@ -37,6 +39,28 @@ ui::widgets::RichListbox::addItem(const util::rich::Text text, afl::base::Ptr<gf
     size_t n = m_items.size();
     m_items.pushBackNew(new Item(text, image, accessible, m_provider));
     render(n, 1);
+}
+
+void
+ui::widgets::RichListbox::setRenderFlag(RenderFlag flag, bool value)
+{
+    if (value != hasRenderFlag(flag)) {
+        if (value) {
+            m_renderFlags += flag;
+        } else {
+            m_renderFlags -= flag;
+        }
+        if (flag == DisableWrap) {
+            render(0, m_items.size());
+        }
+        requestRedraw();
+    }
+}
+
+bool
+ui::widgets::RichListbox::hasRenderFlag(RenderFlag flag) const
+{
+    return m_renderFlags.contains(flag);
 }
 
 // AbstractListbox:
@@ -74,10 +98,14 @@ ui::widgets::RichListbox::drawHeader(gfx::Canvas& /*can*/, gfx::Rectangle /*area
 void
 ui::widgets::RichListbox::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state)
 {
-    gfx::Context ctx(can);
     SkinColorScheme main(BLACK_COLOR_SET, m_colorScheme);
     SkinColorScheme inv(GRAY_COLOR_SET, m_colorScheme);
-    ctx.useColorScheme(main);
+    gfx::Context<util::SkinColor::Color> ctx(can, main);
+    if (hasRenderFlag(UseBackgroundColorScheme)) {
+        ctx.useColorScheme(getColorScheme());
+    } else {
+        ctx.useColorScheme(main);
+    }
     prepareHighContrastListItem(ctx, area, state);
     if (item < m_items.size()) {
         if (state == FocusedItem) {
@@ -104,13 +132,19 @@ ui::widgets::RichListbox::getLayoutInfo() const
     return gfx::Point(400, 400);
 }
 
+bool
+ui::widgets::RichListbox::handleKey(util::Key_t key, int prefix)
+{
+    return defaultHandleKey(key, prefix);
+}
+
 void
 ui::widgets::RichListbox::render(size_t pos, size_t n)
 {
     for (size_t i = 0; i < n; ++i) {
         Item& it = *m_items[pos++];
         it.doc.clear();
-        it.doc.setPageWidth(std::max(10, getExtent().getWidth() - 4));
+        it.doc.setPageWidth(hasRenderFlag(DisableWrap) ? INT_MAX : std::max(10, getExtent().getWidth() - 4));
         if (it.image.get() != 0) {
             it.doc.addFloatObject(std::auto_ptr<ui::rich::BlockObject>(new ui::rich::ImageObject(it.image)), true);
         }

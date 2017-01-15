@@ -23,7 +23,7 @@ namespace interpreter {
         util::KeymapRef_t getKeymap() const;
 
         String_t toString(bool readable) const;
-        virtual void store(TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, SaveContext* ctx) const;
+        virtual void store(TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, SaveContext& ctx) const;
         virtual KeymapValue* clone() const;
 
      private:

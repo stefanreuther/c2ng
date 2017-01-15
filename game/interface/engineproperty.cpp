@@ -38,7 +38,7 @@ namespace {
             { throw interpreter::Error::notAssignable(); }
 
         // CallableValue:
-        virtual int32_t getDimension(int32_t which)
+        virtual int32_t getDimension(int32_t which) const
             { return which==0 ? 1 : m_engine.MAX_WARP+1; }
         virtual interpreter::Context* makeFirstContext()
             { throw interpreter::Error::typeError(interpreter::Error::ExpectIterable); }
@@ -48,7 +48,7 @@ namespace {
         // BaseValue:
         virtual String_t toString(bool /*readable*/) const
             { return "#<array>"; }
-        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext* /*ctx*/) const
+        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
             { throw interpreter::Error::notSerializable(); }
 
      private:

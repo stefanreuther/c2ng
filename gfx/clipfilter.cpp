@@ -1,12 +1,11 @@
 /**
   *  \file gfx/clipfilter.cpp
+  *  \brief Class gfx::ClipFilter
   */
 
 #include "gfx/clipfilter.hpp"
 
-// /** Constructor.
-//     \param rect      clipping rectangle
-//     \param parent    canvas to draw on */
+// Constructor.
 gfx::ClipFilter::ClipFilter(Canvas& parent, const Rectangle& r)
     : Filter(parent),
       m_rectangle(r)

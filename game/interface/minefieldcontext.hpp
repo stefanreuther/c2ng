@@ -8,16 +8,17 @@
 #include "interpreter/context.hpp"
 #include "game/map/minefield.hpp"
 #include "game/root.hpp"
+#include "game/session.hpp"
 
 namespace game { namespace interface {
 
     class MinefieldContext : public interpreter::Context {
      public:
-        MinefieldContext(int id, afl::base::Ptr<Root> root, afl::base::Ptr<Game> game);
+        MinefieldContext(int id, afl::base::Ref<Root> root, afl::base::Ref<Game> game);
         ~MinefieldContext();
 
         // Context:
-        virtual bool lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
+        virtual MinefieldContext* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
         virtual void set(PropertyIndex_t index, afl::data::Value* value);
         virtual afl::data::Value* get(PropertyIndex_t index);
         virtual bool next();
@@ -27,12 +28,14 @@ namespace game { namespace interface {
 
         // BaseValue:
         virtual String_t toString(bool readable) const;
-        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, interpreter::SaveContext* ctx) const;
+        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, interpreter::SaveContext& ctx) const;
+
+        static MinefieldContext* create(int id, Session& session, bool force);
 
      private:
         int m_id;
-        afl::base::Ptr<Root> m_root;
-        afl::base::Ptr<Game> m_game;
+        afl::base::Ref<Root> m_root;
+        afl::base::Ref<Game> m_game;
     };
 
 } }

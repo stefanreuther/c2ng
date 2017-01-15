@@ -5,6 +5,7 @@
 #include <algorithm>
 #include "ui/window.hpp"
 #include "gfx/complex.hpp"
+#include "ui/colorscheme.hpp"
 
 
 ui::Window::WindowColorScheme::WindowColorScheme(Window& parent)
@@ -12,31 +13,30 @@ ui::Window::WindowColorScheme::WindowColorScheme(Window& parent)
 { }
 
 gfx::Color_t
-ui::Window::WindowColorScheme::getColor(uint32_t index)
+ui::Window::WindowColorScheme::getColor(SkinColor::Color index)
 {
     if (index < SkinColor::NUM_COLORS) {
-        if (Widget* p = m_parent.getParent()) {
-            return p->getColorScheme().getColor(m_parent.m_style.colors[SkinColor::Color(index)]);
-        }
+        return m_parent.m_uiColorScheme.getColor(m_parent.m_style.colors[index]);
     }
     return 0;
 }
 
 void
-ui::Window::WindowColorScheme::drawBackground(gfx::Context& ctx, const gfx::Rectangle& area)
+ui::Window::WindowColorScheme::drawBackground(gfx::Canvas& can, const gfx::Rectangle& area)
 {
-    gfx::drawSolidBar(ctx, area, SkinColor::Background);
+    can.drawBar(area, getColor(SkinColor::Background), gfx::TRANSPARENT_COLOR, gfx::FillPattern::SOLID, gfx::OPAQUE_ALPHA);
 }
 
 
 
 
-ui::Window::Window(String_t title, gfx::ResourceProvider& provider, const WindowStyle& style, ui::layout::Manager& manager)
+ui::Window::Window(String_t title, gfx::ResourceProvider& provider, ColorScheme& uiColorScheme, const WindowStyle& style, ui::layout::Manager& manager)
     : LayoutableGroup(manager),
       m_title(title),
       m_resourceProvider(provider),
       m_style(style),
       m_border(5),
+      m_uiColorScheme(uiColorScheme),
       m_colorScheme(*this),
       conn_providerImageChange(provider.sig_imageChange.add(this, (void (Window::*)())&Window::requestRedraw))
 {
@@ -48,8 +48,7 @@ void
 ui::Window::draw(gfx::Canvas& can)
 {
     // ex UIWindow::drawContent
-    gfx::Context ctx(can);
-    ctx.useColorScheme(getParent()->getColorScheme());
+    gfx::Context<uint8_t> ctx(can, m_uiColorScheme);
     drawWindow(ctx, getExtent(), m_resourceProvider, m_style, m_title);
     defaultDrawChildren(can);
 }
@@ -58,11 +57,7 @@ gfx::Rectangle
 ui::Window::transformSize(gfx::Rectangle size, Transformation kind) const
 {
     // ex UIWindow::adjustSize
-    afl::base::Ptr<gfx::Font> font = m_resourceProvider.getFont(gfx::FontRequest().addSize(1));
-    if (font.get() == 0) {
-        // Error, bail out.
-        return size;
-    }
+    afl::base::Ref<gfx::Font> font = m_resourceProvider.getFont(gfx::FontRequest().addSize(1));
     int height = font->getTextHeight("Tp") + 2;
 
     switch (kind) {

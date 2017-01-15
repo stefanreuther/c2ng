@@ -107,20 +107,26 @@ namespace game { namespace v3 {
             \param count Number of targets to read
             \param fmt Format of targets (encrypted or plaintext)
             \param source Source of this information */
-        void loadTargets(game::map::Universe& univ, afl::io::Stream& file, int count, TargetFormat fmt, PlayerSet_t source);
+        void loadTargets(game::map::Universe& univ, afl::io::Stream& file, int count, TargetFormat fmt, PlayerSet_t source, int turnNumber);
 
         /** Load Minefields from KORE-style file.
             \param univ Target universe
             \param file File to read from
             \param count Number of minefields to load
             \param player Player who owns the KORE file */
-        void loadKoreMinefields(game::map::Universe& univ, afl::io::Stream& file, int count, int player);
+        void loadKoreMinefields(game::map::Universe& univ, afl::io::Stream& file, int count, int player, int turnNumber);
 
         /** Load ion storms from KOREx.DAT.
             \param univ Target universe
             \param file File to read from
             \param count Number of ion storms to read */
         void loadKoreIonStorms(game::map::Universe& univ, afl::io::Stream& file, int count);
+
+        /** Load explosions from KOREx.DAT.
+            \param univ Target universe
+            \param file File to read from
+            \param count Number of explosions to read */
+        void loadKoreExplosions(game::map::Universe& univ, afl::io::Stream& file, int count);
 
         /** Load inbox.
             Load MDATAx.DAT, or appropriate section from RST or VPA.DB. */
@@ -130,6 +136,8 @@ namespace game { namespace v3 {
             \param turn Target turn
             \param file File to read from */
         void loadBattles(game::Turn& turn, afl::io::Stream& file, const game::config::HostConfiguration& config);
+
+        void loadUfos(game::map::Universe& univ, afl::io::Stream& file, int firstId, int count);
 
      private:
         afl::charset::Charset& m_charset;

@@ -26,3 +26,11 @@ util::getHeadingDeg(double dx, double dy)
 {
     return getHeadingRad(dx, dy) * (180 / PI);
 }
+
+
+double
+util::getDistanceFromDX(int dx, int dy)
+{
+    // ex game/formula.h:distFromDX
+    return std::sqrt(double(dx*dx + dy*dy));
+}

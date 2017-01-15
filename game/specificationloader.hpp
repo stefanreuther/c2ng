@@ -6,12 +6,13 @@
 
 #include "afl/base/deletable.hpp"
 #include "game/spec/shiplist.hpp"
+#include "afl/base/refcounted.hpp"
 
 namespace game {
 
     class Root;
 
-    class SpecificationLoader : public afl::base::Deletable {
+    class SpecificationLoader : public afl::base::Deletable, public afl::base::RefCounted {
      public:
         virtual void loadShipList(game::spec::ShipList& list, Root& root) = 0;
     };

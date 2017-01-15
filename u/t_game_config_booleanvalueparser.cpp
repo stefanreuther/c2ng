@@ -36,6 +36,14 @@ TestGameConfigBooleanValueParser::testIt()
     TS_ASSERT_EQUALS(bvp.parse("TRU"), 1);
     TS_ASSERT_EQUALS(bvp.parse("FAL"), 0);
 
+    // Numeric
+    TS_ASSERT_EQUALS(bvp.parse("0"), 0);
+    TS_ASSERT_EQUALS(bvp.parse("1"), 1);
+    TS_ASSERT_EQUALS(bvp.parse("10"), 10);
+
+    // Error, treated as 1
+    TS_ASSERT_EQUALS(bvp.parse("Whateverest"), 1);
+
     // Reverse conversion
     TS_ASSERT_EQUALS(bvp.toString(0), "No");
     TS_ASSERT_EQUALS(bvp.toString(1), "Yes");

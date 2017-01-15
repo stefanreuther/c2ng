@@ -63,16 +63,16 @@ game::HistoryTurn::isLoadable() const
 
 // Handle successful load.
 void
-game::HistoryTurn::handleLoadSucceeded(afl::base::Ptr<Turn> turn)
+game::HistoryTurn::handleLoadSucceeded(afl::base::Ref<Turn> turn)
 {
     // Do not change the status if we are not actually loadable.
     // This also avoids that we overwrite a previous Turn pointer,
     // which other components might have references to.
     if (isLoadable()) {
-        m_turn = turn;
+        m_turn = turn.asPtr();
         m_status = Loaded;
 
-        m_timestamp = turn->universe().getTimestamp();
+        m_timestamp = turn->getTimestamp();
         // FIXME: validate turn? Must be non-null and have correct number
     }
 }

@@ -48,23 +48,23 @@ namespace ui {
     };
     extern const WindowStyle BLUE_WINDOW, BLUE_BLACK_WINDOW, BLUE_DARK_WINDOW, RED_WINDOW, GREEN_WINDOW;
 
-    void drawFrameUp(gfx::Context& ctx, gfx::Rectangle r);
-    void drawFrameDown(gfx::Context& ctx, gfx::Rectangle r);
+    void drawFrameUp(gfx::Context<uint8_t>& ctx, gfx::Rectangle r);
+    void drawFrameDown(gfx::Context<uint8_t>& ctx, gfx::Rectangle r);
 
-    void drawWindow(gfx::Context& ctx,
+    void drawWindow(gfx::Context<uint8_t>& ctx,
                     const gfx::Rectangle& extent,
                     gfx::ResourceProvider& provider,
                     const WindowStyle& style,
                     String_t name);
 
-    void drawButton(gfx::Context& ctx,
+    void drawButton(gfx::Context<uint8_t>& ctx,
                     const gfx::Rectangle& extent,
                     ButtonFlags_t flags,
                     Widget::States_t state,
                     String_t text);
 
-    void prepareHighContrastListItem(gfx::Context& ctx, gfx::Rectangle area, ui::widgets::AbstractListbox::ItemState state);
-    void prepareColorListItem(gfx::Context& ctx, gfx::Rectangle area, ui::widgets::AbstractListbox::ItemState state, ColorScheme& uiColors, afl::base::Deleter& h);
+    void prepareHighContrastListItem(gfx::Context<util::SkinColor::Color>& ctx, gfx::Rectangle area, ui::widgets::AbstractListbox::ItemState state);
+    void prepareColorListItem(gfx::Context<util::SkinColor::Color>& ctx, gfx::Rectangle area, ui::widgets::AbstractListbox::ItemState state, ColorScheme& uiColors, afl::base::Deleter& h);
 }
 
 #endif

@@ -11,7 +11,7 @@
 
 namespace gfx {
 
-    class Context;
+    class BaseContext;
     class Canvas;
 
     /** Glyph for a bitmap font.
@@ -26,7 +26,7 @@ namespace gfx {
         void addAAHint(uint16_t x, uint16_t y);
         int getHeight() const;
         int getWidth() const;
-        void draw(Context& ctx, Point pt) const;
+        void draw(BaseContext& ctx, Point pt) const;
         void drawColored(Canvas& can, Point pt, Color_t pixel_color, Color_t aa_color) const;
 
         void set(int x, int y, bool value);

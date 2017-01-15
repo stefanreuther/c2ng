@@ -9,25 +9,24 @@
 
 client::widgets::BusyIndicator::BusyIndicator(ui::Root& root, String_t text)
     : m_root(root),
-      m_text(text)
+      m_text(text),
+      m_keys()
 { }
 void
 client::widgets::BusyIndicator::draw(gfx::Canvas& can)
 {
-    gfx::Context ctx(can);
+    gfx::Context<uint8_t> ctx(can, m_root.colorScheme());
     gfx::Rectangle r(getExtent());
-    ctx.useColorScheme(m_root.colorScheme());
     drawSolidBar(ctx, r, ui::Color_Shield + 2);
     ui::drawFrameUp(ctx, r);
 
     ctx.setColor(ui::Color_White);
     r.grow(-2, -2);
-    afl::base::Ptr<gfx::Font> font = m_root.provider().getFont(gfx::FontRequest().addSize(1));
-    if (font.get() != 0) {
-        ctx.useFont(*font);
-        font->outText(ctx, r.getTopLeft(), m_text);
-    }
+    afl::base::Ref<gfx::Font> font = m_root.provider().getFont(gfx::FontRequest().addSize(1));
+    ctx.useFont(*font);
+    font->outText(ctx, r.getTopLeft(), m_text);
 }
+
 void
 client::widgets::BusyIndicator::handleStateChange(State /*st*/, bool /*enable*/)
 { }
@@ -41,17 +40,15 @@ client::widgets::BusyIndicator::handlePositionChange(gfx::Rectangle& /*oldPositi
 ui::layout::Info
 client::widgets::BusyIndicator::getLayoutInfo() const
 {
-    afl::base::Ptr<gfx::Font> font = m_root.provider().getFont(gfx::FontRequest().addSize(1));
-    if (font.get() == 0) {
-        return gfx::Point();
-    } else {
-        return gfx::Point(font->getTextWidth(m_text) + 4, font->getTextHeight(m_text) + 4);
-    }
+    afl::base::Ref<gfx::Font> font = m_root.provider().getFont(gfx::FontRequest().addSize(1));
+    return gfx::Point(font->getTextWidth(m_text) + 4, font->getTextHeight(m_text) + 4);
 }
 
 bool
-client::widgets::BusyIndicator::handleKey(util::Key_t /*key*/, int /*prefix*/)
+client::widgets::BusyIndicator::handleKey(util::Key_t key, int /*prefix*/)
 {
+    // This loses the prefixes, but there shouldn't be any.
+    m_keys.push_back(key);
     return true;
 }
 
@@ -59,4 +56,13 @@ bool
 client::widgets::BusyIndicator::handleMouse(gfx::Point /*pt*/, MouseButtons_t /*pressedButtons*/)
 {
     return true;
+}
+
+void
+client::widgets::BusyIndicator::replayEvents()
+{
+    while (!m_keys.empty()) {
+        m_root.ungetKeyEvent(m_keys.back(), 0);
+        m_keys.pop_back();
+    }
 }

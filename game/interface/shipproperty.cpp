@@ -16,6 +16,11 @@
 #include "afl/string/parse.hpp"
 #include "game/root.hpp"
 #include "game/spec/mission.hpp"
+#include "game/map/fleet.hpp"
+#include "game/map/fleetmember.hpp"
+#include "game/spec/engine.hpp"
+#include "game/exception.hpp"
+#include "game/stringverifier.hpp"
 
 using interpreter::makeStringValue;
 using interpreter::makeIntegerValue;
@@ -35,26 +40,26 @@ namespace {
         };
         ShipArrayProperty(Type type,
                           const game::map::Ship& ship,
-                          afl::base::Ptr<game::Game> game,
-                          afl::base::Ptr<game::Root> root,
-                          afl::base::Ptr<game::spec::ShipList> shipList);
+                          afl::base::Ptr<const game::Game> game,
+                          afl::base::Ptr<const game::Root> root,
+                          afl::base::Ptr<const game::spec::ShipList> shipList);
 
         virtual afl::data::Value* get(interpreter::Arguments& args);
         virtual void set(interpreter::Arguments& args, afl::data::Value* value);
 
-        virtual int32_t getDimension(int32_t which);
+        virtual int32_t getDimension(int32_t which) const;
         virtual interpreter::Context* makeFirstContext();
         virtual ShipArrayProperty* clone() const;
 
         virtual String_t toString(bool readable) const;
-        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, interpreter::SaveContext* ctx) const;
+        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, interpreter::SaveContext& ctx) const;
 
      private:
-        Type m_type;
+        const Type m_type;
         const game::map::Ship& m_ship;
-        afl::base::Ptr<game::Game> m_game;
-        afl::base::Ptr<game::Root> m_root;
-        afl::base::Ptr<game::spec::ShipList> m_shipList;
+        afl::base::Ptr<const game::Game> m_game;
+        afl::base::Ptr<const game::Root> m_root;
+        afl::base::Ptr<const game::spec::ShipList> m_shipList;
     };
 
     /** Classify ship. This yields the ship's category as a string, 0 if unknown. */
@@ -124,14 +129,14 @@ namespace {
     }
     
     const game::spec::Mission* getShipMission(const game::map::Ship& ship,
-                                              afl::base::Ptr<game::Root> root,
-                                              afl::base::Ptr<game::spec::ShipList> shipList)
+                                              afl::base::Ptr<const game::Root> root,
+                                              afl::base::Ptr<const game::spec::ShipList> shipList)
     {
         int nr, owner;
         if (root.get() != 0
             && shipList.get() != 0
             && ship.getMission().get(nr)
-            && ship.getOwner(owner))
+            && ship.getRealOwner().get(owner))
         {
             return shipList->missions().getMissionByNumber(nr, game::PlayerSet_t(root->hostConfiguration().getPlayerMissionNumber(owner)));
         } else {
@@ -144,9 +149,9 @@ namespace {
 
 ShipArrayProperty::ShipArrayProperty(Type type,
                                      const game::map::Ship& ship,
-                                     afl::base::Ptr<game::Game> game,
-                                     afl::base::Ptr<game::Root> root,
-                                     afl::base::Ptr<game::spec::ShipList> shipList)
+                                     afl::base::Ptr<const game::Game> game,                // needed for shipScores (Score)
+                                     afl::base::Ptr<const game::Root> root,                // needed for hostConfiguration (HasFunction)
+                                     afl::base::Ptr<const game::spec::ShipList> shipList)  // needed for hull functions
     : m_type(type),
       m_ship(ship),
       m_game(game),
@@ -232,7 +237,7 @@ ShipArrayProperty::set(interpreter::Arguments& /*args*/, afl::data::Value* /*val
 }
 
 int32_t
-ShipArrayProperty::getDimension(int32_t /*which*/)
+ShipArrayProperty::getDimension(int32_t /*which*/) const
 {
     // ex IntShipArrayProperty::getDimension
     // These properties behave like hashes, not arrays, so don't claim to be an array
@@ -261,7 +266,7 @@ ShipArrayProperty::toString(bool /*readable*/) const
 }
 
 void
-ShipArrayProperty::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext* /*ctx*/) const
+ShipArrayProperty::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
 {
     // ex IntShipArrayProperty::store
     throw interpreter::Error::notSerializable();
@@ -277,11 +282,12 @@ ShipArrayProperty::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux
 //     \param isp Property to query */
 afl::data::Value*
 game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
-                                 afl::string::Translator& tx,
-                                 InterpreterInterface& iface,
-                                 afl::base::Ptr<Root> root,
-                                 afl::base::Ptr<game::spec::ShipList> shipList,
-                                 afl::base::Ptr<Game> game)
+                                 afl::string::Translator& tx,                          // needed for names
+                                 InterpreterInterface& iface,                          // needed for names, HasTask
+                                 afl::base::Ptr<const Root> root,                      // needed for configuration
+                                 afl::base::Ptr<const game::spec::ShipList> shipList,  // needed for spec access
+                                 afl::base::Ptr<const Game> game,                      // needed for ship scores
+                                 afl::base::Ptr<Turn> turn)                            // needed for location names
 {
     // ex int/if/shipif.h:getShipProperty
     /* Combat participant properties often share names and meaning with ship properties,
@@ -374,11 +380,11 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
      case ispCargoColonists:
         /* @q Cargo.Colonists:Int (Ship Property)
            Number of colonists aboard this ship. */
-        return makeOptionalIntegerValue(sh.getCargo(game::Element::Colonists));
+        return makeOptionalIntegerValue(sh.getCargo(Element::Colonists));
      case ispCargoD:
         /* @q Cargo.D:Int (Ship Property)
            Duranium aboard this ship, kilotons. */
-        return makeOptionalIntegerValue(sh.getCargo(game::Element::Duranium));
+        return makeOptionalIntegerValue(sh.getCargo(Element::Duranium));
      case ispCargoFree:
         /* @q Cargo.Free:Int (Ship Property)
            Free cargo room. */
@@ -390,15 +396,15 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
      case ispCargoM:
         /* @q Cargo.M:Int (Ship Property)
            Molybdenum aboard this ship, kilotons. */
-        return makeOptionalIntegerValue(sh.getCargo(game::Element::Molybdenum));
+        return makeOptionalIntegerValue(sh.getCargo(Element::Molybdenum));
      case ispCargoMoney:
         /* @q Cargo.Money:Int (Ship Property)
            Money aboard this ship. */
-        return makeOptionalIntegerValue(sh.getCargo(game::Element::Money));
+        return makeOptionalIntegerValue(sh.getCargo(Element::Money));
      case ispCargoN:
         /* @q Cargo.N:Int (Ship Property)
            Neutronium aboard this ship, kilotons. */
-        return makeOptionalIntegerValue(sh.getCargo(game::Element::Neutronium));
+        return makeOptionalIntegerValue(sh.getCargo(Element::Neutronium));
      case ispCargoStr:
         /* @q Cargo.Str:Cargo (Ship Property)
            Cargo aboard this ship.
@@ -454,11 +460,11 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
      case ispCargoSupplies:
         /* @q Cargo.Supplies:Int (Ship Property)
            Supplies aboard this ship, kilotons. */
-        return makeOptionalIntegerValue(sh.getCargo(game::Element::Supplies));
+        return makeOptionalIntegerValue(sh.getCargo(Element::Supplies));
      case ispCargoT:
         /* @q Cargo.T:Int (Ship Property)
            Tritanium aboard this ship, kilotons. */
-        return makeOptionalIntegerValue(sh.getCargo(game::Element::Tritanium));
+        return makeOptionalIntegerValue(sh.getCargo(Element::Tritanium));
      case ispCrew:
         /* @q Crew:Int (Ship Property)
            Current crew size. */
@@ -538,8 +544,8 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
            Otherwise, returns the name ({Name (Ship Property)|Name}) of the leader.
            If the ship is not member of a fleet, this property is EMPTY. */
         if (int fid = sh.getFleetNumber()) {
-            if (game.get() != 0) {
-                if (game::map::Ship* leader = game->currentTurn().universe().ships().get(fid)) {
+            if (turn.get() != 0) {
+                if (game::map::Ship* leader = turn->universe().ships().get(fid)) {
                     String_t result = leader->getFleetName();
                     if (result.empty()) {
                         result = leader->getName(game::map::Object::LongName, tx, iface);
@@ -571,7 +577,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
            - "A" (Alchemy, including Neutronic/Aries Refinery) */
         if (shipList.get() == 0 || root.get() == 0) {
             return 0;
-        } else if (Game* g = game.get()) {
+        } else if (const Game* g = game.get()) {
             return makeStringValue(getSpecialFunctionsString(sh, g->shipScores(), *shipList, root->hostConfiguration()));
         } else {
             return 0;
@@ -619,8 +625,8 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
         if (sh.isVisible() && sh.getPosition(pt)) {
             if (root.get() == 0) {
                 return 0;
-            } else if (Game* g = game.get()) {
-                return makeStringValue(g->currentTurn().universe().getLocationName(pt, 0, root->hostConfiguration(), root->hostVersion(), tx, iface));
+            } else if (Turn* t = turn.get()) {
+                return makeStringValue(t->universe().getLocationName(pt, 0, root->hostConfiguration(), root->hostVersion(), tx, iface));
             } else {
                 return 0;
             }
@@ -650,7 +656,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
            Mission "Intercept" parameter.
            @assignable
            @see SetMission (Ship Command) */
-        return makeOptionalIntegerValue(sh.getMissionParameter(game::InterceptParameter));
+        return makeOptionalIntegerValue(sh.getMissionParameter(InterceptParameter));
      case ispMissionShort:
         /* @q Mission.Short:Str (Ship Property)
            Mission, short name. */
@@ -669,7 +675,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
            Mission "Tow" parameter.
            @assignable
            @see SetMission (Ship Command) */
-        return makeOptionalIntegerValue(sh.getMissionParameter(game::TowParameter));
+        return makeOptionalIntegerValue(sh.getMissionParameter(TowParameter));
      case ispMissionName:
         /* @q Mission:Str (Ship Property)
            Mission, full name. */
@@ -678,8 +684,8 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
         } else {
             int m, i, t;
             if (sh.getMission().get(m)
-                && sh.getMissionParameter(game::InterceptParameter).get(i)
-                && sh.getMissionParameter(game::TowParameter).get(t))
+                && sh.getMissionParameter(InterceptParameter).get(i)
+                && sh.getMissionParameter(TowParameter).get(t))
             {
                 return makeStringValue(afl::string::Format("M.I.T. %d (%d,%d)", m, i, t));
             } else {
@@ -720,8 +726,8 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
         /* @q Orbit$:Int (Ship Property)
            Id of planet this ship is orbiting. 0 if none. */
         if (sh.getPosition(pt)) {
-            if (Game* g = game.get()) {
-                return makeIntegerValue(g->currentTurn().universe().getPlanetAt(pt));
+            if (Turn* t = turn.get()) {
+                return makeIntegerValue(t->universe().getPlanetAt(pt));
             } else {
                 return 0;
             }
@@ -732,9 +738,9 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
         /* @q Orbit:Str (Ship Property)
            Name of planet this ship is orbiting. EMPTY if none. */
         if (sh.getPosition(pt)) {
-            if (Game* g = game.get()) {
-                if (int pid = g->currentTurn().universe().getPlanetAt(pt)) {
-                    if (game::map::Planet* p = g->currentTurn().universe().planets().get(pid)) {
+            if (Turn* t = turn.get()) {
+                if (const int pid = t->universe().getPlanetAt(pt)) {
+                    if (const game::map::Planet* p = t->universe().planets().get(pid)) {
                         return makeStringValue(p->getName(p->PlainName, tx, iface));
                     }
                 }
@@ -837,8 +843,8 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
         /* @q Transfer.Ship.Name:Str (Ship Property)
            Name of cargo transfer target ship. */
         if (sh.getTransporterTargetId(sh.TransferTransporter).get(n)) {
-            if (Game* g = game.get()) {
-                if (game::map::Ship* otherShip = g->currentTurn().universe().ships().get(n)) {
+            if (Turn* t = turn.get()) {
+                if (const game::map::Ship* otherShip = t->universe().ships().get(n)) {
                     return makeStringValue(otherShip->getName(game::map::Object::PlainName, tx, iface));
                 }
             }
@@ -885,8 +891,8 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
             if (n == 0) {
                 return makeStringValue("Jettison");
             }
-            if (Game* g = game.get()) {
-                if (game::map::Planet* pl = g->currentTurn().universe().planets().get(n)) {
+            if (Turn* t = turn.get()) {
+                if (const game::map::Planet* pl = t->universe().planets().get(n)) {
                     return makeStringValue(pl->getName(game::map::Object::PlainName, tx, iface));
                 }
             }
@@ -955,8 +961,8 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
         /* @q Waypoint.Planet:Int (Ship Property)
            Id of planet at waypoint.
            @see PlanetAt() */
-        if (game.get() != 0 && sh.getWaypoint().get(pt)) {
-            return makeIntegerValue(game->currentTurn().universe().getPlanetAt(pt));
+        if (turn.get() != 0 && sh.getWaypoint().get(pt)) {
+            return makeIntegerValue(turn->universe().getPlanetAt(pt));
         } else {
             return 0;
         }
@@ -979,12 +985,12 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
      case ispWaypointName:
         /* @q Waypoint:Str (Ship Property)
            Waypoint, as a human-readable string. */
-        if (game.get() != 0 && root.get() != 0 && sh.getWaypoint().get(pt)) {
+        if (turn.get() != 0 && root.get() != 0 && sh.getWaypoint().get(pt)) {
             // FIXME: PCC 1.x also handles Intercept here
             if (sh.getWaypointDX().isSame(0) && sh.getWaypointDY().isSame(0)) {
                 return makeStringValue("(Location)");
             } else {
-                return makeStringValue(game->currentTurn().universe().getLocationName(pt, 0, root->hostConfiguration(), root->hostVersion(), tx, iface));
+                return makeStringValue(turn->universe().getLocationName(pt, 0, root->hostConfiguration(), root->hostVersion(), tx, iface));
             }
         } else {
             return 0;
@@ -1004,7 +1010,10 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
 //     \param isp Property to modify
 //     \param value New value */
 void
-game::interface::setShipProperty(game::map::Ship& sh, ShipProperty isp, afl::data::Value* value, afl::base::Ptr<Root> root)
+game::interface::setShipProperty(game::map::Ship& sh, ShipProperty isp, afl::data::Value* value,
+                                 afl::base::Ref<Root> root,
+                                 afl::base::Ref<game::spec::ShipList> shipList,
+                                 afl::base::Ref<Turn> turn)
 {
     // ex int/if/shipif.h:setShipProperty
 
@@ -1023,53 +1032,58 @@ game::interface::setShipProperty(game::map::Ship& sh, ShipProperty isp, afl::dat
     switch (isp) {
      case ispFCode:
         if (checkStringArg(sv, value)) {
+            if (!root->stringVerifier().isValidString(StringVerifier::FriendlyCode, sv)) {
+                throw interpreter::Error::rangeError();
+            }
             sh.setFriendlyCode(sv);
         }
         break;
-        // FIXME: port ispMissionXXX
-//      case ispMissionId:
-//      case ispMissionIntercept:
-//      case ispMissionTow:
-//         if (checkIntArg(iv, value, 0, 10000)) {
-//             // FIXME: what if one value is unknown?
-//             int m = (isp == ispMissionId        ? iv : sh.getMission());
-//             int i = (isp == ispMissionIntercept ? iv : sh.getInterceptId());
-//             int t = (isp == ispMissionTow       ? iv : sh.getTowId());
-//             if (!setFleetMission(univ, sh.getId(), m, i, t)) {
-//                 throw GError(GError::eFleet, GError::eFleet);
-//             }
-//         }
-//         break;
+     case ispMissionId:
+     case ispMissionIntercept:
+     case ispMissionTow:
+        if (checkIntegerArg(iv, value, 0, 10000)) {
+            // FIXME: this changes other values to 0 if they were unknown (PCC2 probably crashes)
+            int m = (isp == ispMissionId        ? iv : sh.getMission().orElse(0));
+            int i = (isp == ispMissionIntercept ? iv : sh.getMissionParameter(InterceptParameter).orElse(0));
+            int t = (isp == ispMissionTow       ? iv : sh.getMissionParameter(TowParameter).orElse(0));
+            if (!game::map::FleetMember(turn->universe(), sh).setMission(m, i, t, root->hostConfiguration(), *shipList)) {
+                throw Exception(Exception::eFleet, Exception::eFleet);
+            }
+        }
+        break;
      case ispName:
         if (checkStringArg(sv, value)) {
+            if (!root->stringVerifier().isValidString(StringVerifier::ShipName, sv)) {
+                throw interpreter::Error::rangeError();
+            }
             sh.setName(sv);
         }
         break;
-     // case ispSpeedId:
-     //    if (checkIntegerArg(iv, value, 0, 9)) {
-//             if (!setFleetSpeed(univ, sh.getId(), iv)) {
-//                 throw GError(GError::eFleet, GError::eFleet);
-//             }
-//         }
-//         break;
+     case ispSpeedId:
+        if (checkIntegerArg(iv, value, 0, game::spec::Engine::MAX_WARP)) {
+            if (!game::map::FleetMember(turn->universe(), sh).setWarpFactor(iv, root->hostConfiguration(), *shipList)) {
+                throw Exception(Exception::eFleet, Exception::eFleet);
+            }
+        }
+        break;
      case ispEnemyId:
         if (checkIntegerArg(iv, value, 0, MAX_PLAYERS)) {
             // \change allow setting PE to all players from playerList, including aliens.
             // PHost allows [0,12], Tim-Host has no restriction.
-            if (root.get() == 0 || root->playerList().get(iv) == 0) {
+            if (root->playerList().get(iv) == 0) {
                 throw interpreter::Error::rangeError();
             }
             sh.setPrimaryEnemy(iv);
         }
         break;
-//      case ispFleetName:
-//         if (checkStringArg(sv, value)) {
-//             if (!setFleetName(univ, sh.getId(), sv)) {
-//                 throw IntError::notAssignable();
-//             }
-//         }
-//         break;
-//      case ispFleetId:
+     case ispFleetName:
+        if (checkStringArg(sv, value)) {
+            if (!game::map::FleetMember(turn->universe(), sh).setFleetName(sv)) {
+                throw interpreter::Error::notAssignable();
+            }
+        }
+        break;
+     // case ispFleetId:
 //         if (checkIntArg(iv, value, 0, NUM_SHIPS)) {
 //             if (!setFleetNumber(univ, sh.getId(), iv)) {
 //                 throw IntError::rangeError();

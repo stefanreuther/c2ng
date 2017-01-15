@@ -6,6 +6,7 @@
 
 #include "interpreter/indexablevalue.hpp"
 #include "game/session.hpp"
+#include "game/interface/shipcontext.hpp"
 
 namespace game { namespace interface {
 
@@ -14,17 +15,17 @@ namespace game { namespace interface {
         ShipFunction(Session& session);
 
         // IndexableValue:
-        virtual afl::data::Value* get(interpreter::Arguments& args);
+        virtual ShipContext* get(interpreter::Arguments& args);
         virtual void set(interpreter::Arguments& args, afl::data::Value* value);
 
         // CallableValue:
-        virtual int32_t getDimension(int32_t which);
-        virtual interpreter::Context* makeFirstContext();
+        virtual int32_t getDimension(int32_t which) const;
+        virtual ShipContext* makeFirstContext();
         virtual ShipFunction* clone() const;
 
         // BaseValue:
         virtual String_t toString(bool readable) const;
-        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, interpreter::SaveContext* ctx) const;
+        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, interpreter::SaveContext& ctx) const;
 
      private:
         Session& m_session;

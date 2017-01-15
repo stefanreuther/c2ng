@@ -46,7 +46,7 @@ namespace game { namespace spec {
         void clear();
 
         const Mission* getMissionByNumber(int id, PlayerSet_t raceMask) const;
-//     const GMission* getMissionByShip(const GShip& ship);
+        bool getIndexByNumber(int id, PlayerSet_t raceMask, size_t& index) const;
 
         void loadFromFile(afl::io::Stream& in, afl::sys::LogListener& log);
         void loadFromIniFile(afl::io::Stream& in, afl::charset::Charset& cs);

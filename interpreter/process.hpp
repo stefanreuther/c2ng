@@ -9,6 +9,7 @@
 #include "afl/data/segment.hpp"
 #include "afl/data/namemap.hpp"
 #include "interpreter/error.hpp"
+#include "afl/base/signal.hpp"
 
 namespace interpreter {
 
@@ -34,7 +35,6 @@ namespace interpreter {
             size_t frameSP;         /**< Own index. */
             bool wantResult;        /**< Set if caller wants a result on the stack. That is, when this frame is removed, an additional value must be pushed to the value stack. */
 
-            Frame();
             Frame(BCORef_t bco);
             ~Frame();
         };
@@ -70,23 +70,32 @@ namespace interpreter {
         void popFrame();
         size_t getNumActiveFrames() const;
         Frame* getOutermostFrame();
+        const Frame* getFrame(size_t nr) const;
 
         // Exceptions:
         void pushExceptionHandler(PC_t pc);
+        void pushExceptionHandler(PC_t pc, size_t frameSP, size_t contextSP, size_t valueSP);
         void popExceptionHandler();
 
         // Contexts:
         void pushNewContext(Context* ctx);
         void pushContextsFrom(afl::container::PtrVector<Context>& ctxs);
         void markContextTOS();
+        bool setContextTOS(size_t n);
         void popContext();
-        const afl::container::PtrVector<Context>& getContexts();
+        const afl::container::PtrVector<Context>& getContexts() const;
+        size_t getContextTOS() const
+            { return m_contextTOS; }
 
         // Value stack:
         void pushNewValue(afl::data::Value* v);
         void dropValue();
         afl::data::Value* getResult();
         size_t getStackSize() const;
+        const Segment_t& getValueStack() const
+            { return m_valueStack; }
+        Segment_t& getValueStack()
+            { return m_valueStack; }
 
         // Attributes:
         void            setState(State ps);
@@ -94,6 +103,7 @@ namespace interpreter {
         void            setProcessGroupId(uint32_t pgid);
         uint32_t        getProcessGroupId() const;
         uint32_t        getProcessId() const;
+        void            setName(String_t name);
         String_t        getName() const;
         void            setPriority(int pri);
         int             getPriority() const;
@@ -127,7 +137,12 @@ namespace interpreter {
         // static void setNewGlobalContext(IntContext* p);
         // static void setBreakHandler(bool check_break());
         void handleException(String_t e, String_t trace);
+        const afl::container::PtrVector<ExceptionHandler>& getExceptions() const
+            { return m_exceptions; }
 
+        Context* makeFrameContext(size_t level);
+
+        afl::base::Signal<void()> sig_invalidate;
 
      private:
         class FrameContext;

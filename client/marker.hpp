@@ -12,11 +12,12 @@ namespace client {
 
     const int NUM_USER_MARKERS = 8;
 
-    void drawMarker(gfx::Context& ctx, const Marker& marker, gfx::Point pt);
-    void drawDottedCircle(gfx::Context& ctx, gfx::Point pt, int r);
-    void drawSelection(gfx::Context& ctx, gfx::Point pt, int mult, int divi);
-    // void drawShipIcon(gfx::Context& ctx, GPlayerRelation relation, bool big, const GfxPoint pt);
+    void drawMarker(gfx::BaseContext& ctx, const Marker& marker, gfx::Point pt);
+    void drawDottedCircle(gfx::BaseContext& ctx, gfx::Point pt, int r);
+    void drawSelection(gfx::BaseContext& ctx, gfx::Point pt, int mult, int divi);
+    // void drawShipIcon(gfx::BaseContext& ctx, GPlayerRelation relation, bool big, const GfxPoint pt);
     const Marker* getUserMarker(int id, bool big);
+    int getMarkerHeight(const Marker& marker);
 
 }
 

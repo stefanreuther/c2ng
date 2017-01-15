@@ -52,7 +52,7 @@ namespace {
 
 game::pcc::BrowserHandler::BrowserHandler(game::browser::Browser& b,
                                           afl::net::http::Manager& mgr,
-                                          afl::base::Ptr<afl::io::Directory> defaultSpecificationDirectory,
+                                          afl::base::Ref<afl::io::Directory> defaultSpecificationDirectory,
                                           util::ProfileDirectory& profile)
     : m_browser(b),
       m_manager(mgr),
@@ -81,7 +81,7 @@ game::pcc::BrowserHandler::createAccountFolder(game::browser::Account& acc)
 }
 
 afl::base::Ptr<game::Root>
-game::pcc::BrowserHandler::loadGameRoot(afl::base::Ptr<afl::io::Directory> /*dir*/)
+game::pcc::BrowserHandler::loadGameRoot(afl::base::Ref<afl::io::Directory> /*dir*/)
 {
     // FIXME: do we need this? If folder is linked with server, process that.
     return 0;
@@ -238,8 +238,7 @@ game::pcc::BrowserHandler::getFile(game::browser::Account& acc, String_t name, a
     afl::net::Url mainUrl;
     afl::net::Url fileUrl;
     if (!mainUrl.parse(buildUrl(acc)) || !fileUrl.parse(name)) {
-        listener.handleFailure(afl::net::http::ClientRequest::UnsupportedProtocol,
-                               "!Invalid URL");
+        listener.handleFailure(afl::net::http::ClientRequest::UnsupportedProtocol, translator().translateString("Invalid URL"));
         return;
     }
     fileUrl.mergeFrom(mainUrl);
@@ -258,7 +257,7 @@ game::pcc::BrowserHandler::getFile(game::browser::Account& acc, String_t name, a
         // Download the file
         m_manager.getFile(fileUrl, listener);
     } else {
-        listener.handleFailure(afl::net::http::ClientRequest::ServerError, "!Not logged in");
+        listener.handleFailure(afl::net::http::ClientRequest::ServerError, translator().translateString("Not logged in"));
     }
 }
 
@@ -274,7 +273,7 @@ game::pcc::BrowserHandler::log()
     return m_browser.log();
 }
 
-afl::base::Ptr<afl::io::Directory>
+afl::base::Ref<afl::io::Directory>
 game::pcc::BrowserHandler::getDefaultSpecificationDirectory()
 {
     return m_defaultSpecificationDirectory;

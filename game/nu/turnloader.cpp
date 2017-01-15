@@ -144,7 +144,7 @@ namespace {
 }
 
 
-game::nu::TurnLoader::TurnLoader(afl::base::Ptr<GameState> gameState,
+game::nu::TurnLoader::TurnLoader(afl::base::Ref<GameState> gameState,
                                  afl::string::Translator& tx,
                                  afl::sys::LogListener& log)
     : m_gameState(gameState),
@@ -182,7 +182,7 @@ game::nu::TurnLoader::getPlayerStatus(int player, String_t& extra, afl::string::
 }
 
 void
-game::nu::TurnLoader::loadCurrentTurn(Turn& turn, Game& /*game*/, int player, Root& /*root*/)
+game::nu::TurnLoader::loadCurrentTurn(Turn& turn, Game& /*game*/, int player, Root& /*root*/, Session& /*session*/)
 {
     // FIXME: validate player
 
@@ -192,8 +192,11 @@ game::nu::TurnLoader::loadCurrentTurn(Turn& turn, Game& /*game*/, int player, Ro
         throw std::runtime_error(m_translator.translateString("Unable to download result file"));
     }
 
-    turn.universe().setTurnNumber(rst("rst")("game")("turn").toInteger());
-    turn.universe().setTimestamp(convertTime(rst("rst")("settings")("hostcompleted").toString()));
+    turn.setTurnNumber(rst("rst")("game")("turn").toInteger());
+    turn.setTimestamp(convertTime(rst("rst")("settings")("hostcompleted").toString()));
+
+    // FIXME: loadCurrentDatabases()
+    // must create all planets/ships before.
 
     loadPlanets(turn.universe(), rst("rst")("planets"), PlayerSet_t(player));
     loadStarbases(turn.universe(), rst("rst")("starbases"), PlayerSet_t(player));
@@ -237,7 +240,7 @@ game::nu::TurnLoader::loadHistoryTurn(Turn& turn, Game& game, int player, int tu
     (void) player;
     (void) turnNumber;
     (void) root;
-    throw std::runtime_error("!not implemented");
+    throw std::runtime_error("!FIXME: not implemented");
 }
 
 void

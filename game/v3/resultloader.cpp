@@ -18,6 +18,8 @@
 #include "game/game.hpp"
 #include "util/backupfile.hpp"
 #include "game/config/stringoption.hpp"
+#include "game/session.hpp"
+#include "game/v3/commandextra.hpp"
 
 namespace {
     const char LOG_NAME[] = "game.v3.resultloader";
@@ -113,32 +115,38 @@ game::v3::ResultLoader::getPlayerStatus(int player, String_t& extra, afl::string
 }
 
 void
-game::v3::ResultLoader::loadCurrentTurn(Turn& turn, Game& game, int player, game::Root& root)
+game::v3::ResultLoader::loadCurrentTurn(Turn& turn, Game& game, int player, game::Root& root, Session& session)
 {
     // ex game/load.h:loadCommon
     // Initialize planets and bases
     Loader ldr(m_charset, m_translator, m_log);
     ldr.prepareUniverse(turn.universe());
 
+    // Create CommandExtra. This allows further code to deal with PHost commands.
+    CommandExtra::create(turn);
+
     // xyplan.dat
     afl::base::Ptr<afl::io::Stream> file = root.gameDirectory().openFileNT(afl::string::Format("xyplan%d.dat", player), afl::io::FileSystem::OpenRead);
     if (file.get() == 0) {
-        file = root.specificationDirectory().openFile("xyplan.dat", afl::io::FileSystem::OpenRead);
+        file = root.specificationDirectory().openFile("xyplan.dat", afl::io::FileSystem::OpenRead).asPtr();
     }
     ldr.loadPlanetCoordinates(turn.universe(), *file);
     file = 0;
 
     // planet.nm
-    file = root.specificationDirectory().openFile("planet.nm", afl::io::FileSystem::OpenRead);
+    file = root.specificationDirectory().openFile("planet.nm", afl::io::FileSystem::OpenRead).asPtr();
     ldr.loadPlanetNames(turn.universe(), *file);
     file = 0;
 
     // storm.nm
-    file = root.specificationDirectory().openFile("storm.nm", afl::io::FileSystem::OpenRead);
+    file = root.specificationDirectory().openFile("storm.nm", afl::io::FileSystem::OpenRead).asPtr();
     ldr.loadIonStormNames(turn.universe(), *file);
 
+    // load database
+    loadCurrentDatabases(turn, game, player, root, session, m_charset);
+
     // ex GGameResultStorage::load(GGameTurn& trn)
-    file = root.gameDirectory().openFile(afl::string::Format("player%d.rst", player), afl::io::FileSystem::OpenRead);
+    file = root.gameDirectory().openFile(afl::string::Format("player%d.rst", player), afl::io::FileSystem::OpenRead).asPtr();
     if (const game::Player* p = root.playerList().get(player)) {
         m_log.write(m_log.Info, LOG_NAME, afl::string::Format(m_translator.translateString("Loading %s RST file...").c_str(), p->getName(Player::AdjectiveName)));
     }
@@ -194,18 +202,18 @@ game::v3::ResultLoader::loadHistoryTurn(Turn& turn, Game& game, int player, int 
     // FIXME: backup this?
     afl::base::Ptr<afl::io::Stream> file = root.gameDirectory().openFileNT(afl::string::Format("xyplan%d.dat", player), afl::io::FileSystem::OpenRead);
     if (file.get() == 0) {
-        file = root.specificationDirectory().openFile("xyplan.dat", afl::io::FileSystem::OpenRead);
+        file = root.specificationDirectory().openFile("xyplan.dat", afl::io::FileSystem::OpenRead).asPtr();
     }
     ldr.loadPlanetCoordinates(turn.universe(), *file);
     file = 0;
 
     // planet.nm
-    file = root.specificationDirectory().openFile("planet.nm", afl::io::FileSystem::OpenRead);
+    file = root.specificationDirectory().openFile("planet.nm", afl::io::FileSystem::OpenRead).asPtr();
     ldr.loadPlanetNames(turn.universe(), *file);
     file = 0;
 
     // storm.nm
-    file = root.specificationDirectory().openFile("storm.nm", afl::io::FileSystem::OpenRead);
+    file = root.specificationDirectory().openFile("storm.nm", afl::io::FileSystem::OpenRead).asPtr();
     ldr.loadIonStormNames(turn.universe(), *file);
 
     // load turn file backup
@@ -214,7 +222,7 @@ game::v3::ResultLoader::loadHistoryTurn(Turn& turn, Game& game, int player, int 
     tpl.setPlayerNumber(player);
     tpl.setTurnNumber(turnNumber);
 
-    file = tpl.openFile(m_fileSystem, root.userConfiguration()[opt_BackupResult]());
+    file = tpl.openFile(m_fileSystem, root.userConfiguration()[opt_BackupResult]()).asPtr();
     if (const game::Player* p = root.playerList().get(player)) {
         m_log.write(m_log.Info, LOG_NAME, afl::string::Format(m_translator.translateString("Loading %s backup file...").c_str(), p->getName(Player::AdjectiveName)));
     }
@@ -258,10 +266,10 @@ game::v3::ResultLoader::loadResult(Turn& turn, Root& root, Game& game, afl::io::
 //     trn.setHaveData(player);
 //     trn.setGen(player, GGen(gen));
     mergeScores(game.scores(), gen);
-    turn.universe().setTurnNumber(gen.turnNumber);
-    turn.universe().setTimestamp(gen.timestamp);
+    turn.setTurnNumber(gen.turnNumber);
+    turn.setTimestamp(gen.timestamp);
 
-//     /* Backup */
+    // Backup
     if (withBackup) {
         // FIXME: this can be moved into the caller
         try {
@@ -285,7 +293,7 @@ game::v3::ResultLoader::loadResult(Turn& turn, Root& root, Game& game, afl::io::
     // Targets
     seekToSection(file, result, ResultFile::TargetSection, m_translator);
     file.fullRead(afl::base::fromObject(n));
-    loader.loadTargets(turn.universe(), file, n, loader.TargetPlaintext, source);
+    loader.loadTargets(turn.universe(), file, n, loader.TargetPlaintext, source, turn.getTurnNumber());
 
     // Planets
     seekToSection(file, result, ResultFile::PlanetSection, m_translator);
@@ -301,11 +309,11 @@ game::v3::ResultLoader::loadResult(Turn& turn, Root& root, Game& game, afl::io::
     seekToSection(file, result, ResultFile::MessageSection, m_translator);
     loader.loadInbox(turn.inbox(), file, gen.turnNumber);
 
-    /* SHIPXY (must be after SHIP) */
+    // SHIPXY (must be after SHIP) <-- FIXME: why this comment (from PCC2)?
     seekToSection(file, result, ResultFile::ShipXYSection, m_translator);
     loader.loadShipXY(turn.universe(), file, getShipXYSize(result), Loader::LoadBoth, source, PlayerSet_t());
 
-//     /* VCRs */
+    // VCRs
     seekToSection(file, result, ResultFile::VcrSection, m_translator);
     loader.loadBattles(turn, file, root.hostConfiguration());
 
@@ -314,13 +322,13 @@ game::v3::ResultLoader::loadResult(Turn& turn, Root& root, Game& game, afl::io::
     if (result.getSectionOffset(ResultFile::KoreSection, pos)) {
         // KORE
         file.setPos(pos);
-        loader.loadKoreMinefields(turn.universe(), file, 500, player);
+        loader.loadKoreMinefields(turn.universe(), file, 500, player, turn.getTurnNumber());
         loader.loadKoreIonStorms(turn.universe(), file, 50);
-
-//         loadKoreExplosions(trn, s, 50);
+        loader.loadKoreExplosions(turn.universe(), file, 50);
 //         player_racenames.load(s); /* FIXME: configurable? */
 //         host_racenames = player_racenames;
-//         loadUfos(trn, s, 1, 100);
+        file.setPos(pos + 500*8+600+50*4+682);
+        loader.loadUfos(turn.universe(), file, 1, 100);
 
         file.setPos(pos + 500*8+600+50*4+682+7800);
         KoreTargetHeader kth;
@@ -329,17 +337,15 @@ game::v3::ResultLoader::loadResult(Turn& turn, Root& root, Game& game, afl::io::
             if (n > game::v3::structures::NUM_SHIPS) {
                 throw afl::except::FileFormatException(file, m_translator.translate("Unbelievable number of visual contacts"));
             }
-            loader.loadTargets(turn.universe(), file, n, loader.TargetEncrypted, source);
+            loader.loadTargets(turn.universe(), file, n, loader.TargetEncrypted, source, turn.getTurnNumber());
         }
     }
 
     if (result.getSectionOffset(ResultFile::SkoreSection, pos)) {
         // SKORE
         file.setPos(pos);
-//         TInt16 count;
-//         s.seek(rst.getSectionOffset(GResultFile::sec_Skore));
-//         if (getStructure(s, count) && count.value > 100) {
-//             loadUfos(trn, s, 101, count.value - 100);
-//         }
+        if (file.read(afl::base::fromObject(n)) == sizeof(n) && n > 100) {
+            loader.loadUfos(turn.universe(), file, 101, n - 100);
+        }
     }
 }

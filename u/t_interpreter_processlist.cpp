@@ -81,7 +81,7 @@ TestInterpreterProcessList::testSuspend()
     interpreter::World world(log, fs);
     interpreter::Process& p = testee.create(world, "testSuspend");
 
-    interpreter::BCORef_t bco = new interpreter::BytecodeObject();
+    interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
     bco->addInstruction(interpreter::Opcode::maSpecial, interpreter::Opcode::miSpecialSuspend, 0);
     p.pushFrame(bco, false);
     TS_ASSERT_EQUALS(p.getState(), interpreter::Process::Suspended);

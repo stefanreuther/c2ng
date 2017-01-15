@@ -38,9 +38,9 @@ namespace {
                 }
                 m_state += want_result ? "y" : "n";
             }
-        virtual bool isProcedureCall()
+        virtual bool isProcedureCall() const
             { return false; }
-        virtual int32_t getDimension(int32_t which)
+        virtual int32_t getDimension(int32_t which) const
             {
                 if (which == 0) {
                     return 7;
@@ -54,7 +54,7 @@ namespace {
         // IntValue:
         virtual String_t toString(bool /*readable*/) const
             { return "#<MyCallable>"; }
-        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext* /*ctx*/) const
+        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
             { throw interpreter::Error::notSerializable(); }
         virtual MyCallable* clone() const
             { return new MyCallable(); }

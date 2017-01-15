@@ -18,6 +18,8 @@ namespace ui {
 
         void stop(int n);
 
+        bool isStopped() const;
+
         afl::base::Closure<void(int)>* makeStop(int n);
 
      private:

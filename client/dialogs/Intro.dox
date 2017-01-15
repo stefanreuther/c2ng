@@ -1,0 +1,6 @@
+/*!
+     \namespace client::dialogs
+     \brief Client dialogs
+
+     This namespace contains dialogs for the client application.
+ */

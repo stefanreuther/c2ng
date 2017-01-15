@@ -18,6 +18,7 @@ namespace ui { namespace widgets {
 
         StaticText& setText(const String_t& text);
         StaticText& setIsFlexible(bool flex);
+        StaticText& setColor(util::SkinColor::Color color);
 
         // SimpleWidget:
         virtual void draw(gfx::Canvas& can);

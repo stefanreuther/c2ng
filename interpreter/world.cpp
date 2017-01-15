@@ -7,6 +7,13 @@
 #include "interpreter/propertyacceptor.hpp"
 #include "interpreter/context.hpp"
 #include "interpreter/error.hpp"
+#include "interpreter/mutexfunctions.hpp"
+#include "interpreter/filefunctions.hpp"
+#include "afl/io/textfile.hpp"
+#include "interpreter/filecommandsource.hpp"
+#include "interpreter/statementcompiler.hpp"
+#include "interpreter/defaultstatementcompilationcontext.hpp"
+#include "interpreter/memorycommandsource.hpp"
 
 const afl::data::NameMap::Index_t interpreter::World::sp_Comment;
 const afl::data::NameMap::Index_t interpreter::World::pp_Comment;
@@ -22,9 +29,11 @@ interpreter::World::World(afl::sys::LogListener& log, afl::io::FileSystem& fs)
       m_atomTable(),
       m_globalContexts(),
       m_processList(),
+      m_mutexList(),
       m_log(log),
       m_fileSystem(fs),
-      m_loadDirectory()
+      m_systemLoadDirectory(),
+      m_localLoadDirectory()
 {
     init();
 }
@@ -187,6 +196,30 @@ interpreter::World::processList() const
     return m_processList;
 }
 
+interpreter::MutexList&
+interpreter::World::mutexList()
+{
+    return m_mutexList;
+}
+
+const interpreter::MutexList&
+interpreter::World::mutexList() const
+{
+    return m_mutexList;
+}
+
+interpreter::FileTable&
+interpreter::World::fileTable()
+{
+    return m_fileTable;
+}
+
+const interpreter::FileTable&
+interpreter::World::fileTable() const
+{
+    return m_fileTable;
+}
+
 void
 interpreter::World::addNewGlobalContext(Context* ctx)
 {
@@ -201,15 +234,45 @@ interpreter::World::globalContexts() const
 }
 
 void
-interpreter::World::setLoadDirectory(afl::base::Ptr<afl::io::Directory> dir)
+interpreter::World::setSystemLoadDirectory(afl::base::Ptr<afl::io::Directory> dir)
 {
-    m_loadDirectory = dir;
+    m_systemLoadDirectory = dir;
 }
 
 afl::base::Ptr<afl::io::Directory>
-interpreter::World::getLoadDirectory() const
+interpreter::World::getSystemLoadDirectory() const
 {
-    return m_loadDirectory;
+    return m_systemLoadDirectory;
+}
+
+void
+interpreter::World::setLocalLoadDirectory(afl::base::Ptr<afl::io::Directory> dir)
+{
+    m_localLoadDirectory = dir;
+}
+
+afl::base::Ptr<afl::io::Directory>
+interpreter::World::getLocalLoadDirectory() const
+{
+    return m_localLoadDirectory;
+}
+
+afl::base::Ptr<afl::io::Stream>
+interpreter::World::openLoadFile(const String_t name) const
+{
+    // FIXME: this calls openFileNT on a Directory, giving it a possibly relative or absolute path name instead of just a file name.
+    // This is the same as in PCC2, and it happens to work due to the way how our Directory descendants are implemented, but it is so far not contractual.
+    afl::base::Ptr<afl::io::Stream> result;
+    if (result.get() == 0 && m_localLoadDirectory.get() != 0) {
+        result = m_localLoadDirectory->openFileNT(name, afl::io::FileSystem::OpenRead);
+    }
+    if (result.get() == 0 && m_systemLoadDirectory.get() != 0) {
+        result = m_systemLoadDirectory->openFileNT(name, afl::io::FileSystem::OpenRead);
+    }
+    if (result.get() == 0) {
+        result = m_fileSystem.openFileNT(name, afl::io::FileSystem::OpenRead);
+    }
+    return result;
 }
 
 afl::sys::LogListener&
@@ -233,6 +296,61 @@ afl::io::FileSystem&
 interpreter::World::fileSystem()
 {
     return m_fileSystem;
+}
+
+interpreter::BCORef_t
+interpreter::World::compileFile(afl::io::Stream& file)
+{
+    // Generate compilation objects
+    afl::io::TextFile tf(file);
+    FileCommandSource fcs(tf);
+    BCORef_t nbco = *new BytecodeObject();
+    nbco->setFileName(file.getName());
+
+    // Compile
+    try {
+        StatementCompiler sc(fcs);
+        DefaultStatementCompilationContext scc(*this);
+        scc.withFlag(CompilationContext::LocalContext)
+            .withFlag(CompilationContext::ExpressionsAreStatements)
+            .withFlag(CompilationContext::LinearExecution);
+        sc.compileList(*nbco, scc);
+        sc.finishBCO(*nbco, scc);
+        return nbco;
+    }
+    catch (Error& e) {
+        fcs.addTraceTo(e, afl::string::Translator::getSystemInstance());
+        throw e;
+    }
+}
+
+interpreter::BCORef_t
+interpreter::World::compileCommand(String_t command)
+{
+    bool hasResult;
+    return compileCommand(command, false, hasResult);
+}
+
+interpreter::BCORef_t
+interpreter::World::compileCommand(String_t command, bool wantResult, bool& hasResult)
+{
+    // Create compilation context
+    MemoryCommandSource mcs(command);
+    BCORef_t bco = *new BytecodeObject();
+
+    // Compile
+    StatementCompiler sc(mcs);
+    DefaultStatementCompilationContext scc(*this);
+    // scc.withContextProvider(&proc); // FIXME: can we do this? ScriptSide does it, but it requires creating the process beforehand.
+    scc.withFlag(CompilationContext::RefuseBlocks);
+    scc.withFlag(CompilationContext::LinearExecution);
+    if (!wantResult) {
+        scc.withFlag(scc.ExpressionsAreStatements);
+    }
+    StatementCompiler::StatementResult result = sc.compile(*bco, scc);
+    sc.finishBCO(*bco, scc);
+    hasResult = (result == StatementCompiler::CompiledExpression);
+    return bco;
 }
 
 void
@@ -271,4 +389,7 @@ interpreter::World::init()
        stored in the global property, and a local %System.Err is ignored.
        @assignable */
     m_globalPropertyNames.add("SYSTEM.ERR");
+
+    registerMutexFunctions(*this);
+    registerFileFunctions(*this);
 }

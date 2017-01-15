@@ -20,8 +20,7 @@ client::tiles::ErrorTile::draw(gfx::Canvas& can)
     // ex WErrorTile::drawData
     gfx::Rectangle in = getExtent();
 
-    gfx::Context ctx(can);
-    ctx.useColorScheme(m_root.colorScheme());
+    gfx::Context<uint8_t> ctx(can, m_root.colorScheme());
     ctx.useFont(*m_root.provider().getFont(gfx::FontRequest()));
     ctx.setColor(ui::Color_Red);
     drawRectangle(ctx, in);

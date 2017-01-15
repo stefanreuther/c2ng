@@ -8,7 +8,7 @@
 #include "game/map/planet.hpp"
 #include "game/spec/shiplist.hpp"
 #include "afl/base/ptr.hpp"
-#include "game/game.hpp"
+#include "game/turn.hpp"
 
 namespace game { namespace interface {
 
@@ -46,12 +46,21 @@ namespace game { namespace interface {
         ibpAmmoStorage
     };
 
+    /** Get starbase property.
+        \param pl        Planet to inquire
+        \param ibp       Starbase property
+        \param tx        Translator.
+        \param config    Host configuration (needed for limits, build orders)
+        \param shipList  Ship list (needed for build orders)
+        \param iface     Interface to other properties.
+        \param turn      Turn (needed for related units, namely: ships being repaired)
+        \return property value */
     afl::data::Value* getBaseProperty(const game::map::Planet& pl, BaseProperty ibp,
                                       afl::string::Translator& tx,
                                       const game::config::HostConfiguration& config,
-                                      const game::spec::ShipList& shipList,
+                                      afl::base::Ptr<const game::spec::ShipList> shipList,
                                       InterpreterInterface& iface,
-                                      afl::base::Ptr<Game> game);
+                                      afl::base::Ptr<Turn> turn);
     void              setBaseProperty(game::map::Planet& pl, BaseProperty ibp, afl::data::Value* value);
 
 } }

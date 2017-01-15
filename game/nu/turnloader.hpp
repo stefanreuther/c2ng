@@ -16,18 +16,18 @@ namespace game { namespace nu {
 
     class TurnLoader : public game::TurnLoader {
      public:
-        TurnLoader(afl::base::Ptr<GameState> gameState,
+        TurnLoader(afl::base::Ref<GameState> gameState,
                    afl::string::Translator& tx,
                    afl::sys::LogListener& log);
         ~TurnLoader();
 
         virtual PlayerStatusSet_t getPlayerStatus(int player, String_t& extra, afl::string::Translator& tx) const;
-        virtual void loadCurrentTurn(Turn& turn, Game& game, int player, Root& root);
+        virtual void loadCurrentTurn(Turn& turn, Game& game, int player, Root& root, Session& session);
         virtual void getHistoryStatus(int player, int turn, afl::base::Memory<HistoryStatus> status, const Root& root);
         virtual void loadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root);
 
      private:
-        afl::base::Ptr<GameState> m_gameState;
+        afl::base::Ref<GameState> m_gameState;
         afl::string::Translator& m_translator;
         afl::sys::LogListener& m_log;
 

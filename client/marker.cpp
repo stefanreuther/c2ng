@@ -194,7 +194,7 @@ namespace {
 //     \param marker  marker definition
 //     \param x,y     center  */
 void
-client::drawMarker(gfx::Context& ctx, const Marker& marker, gfx::Point pt)
+client::drawMarker(gfx::BaseContext& ctx, const Marker& marker, gfx::Point pt)
 {
     // ex client/marks.h:drawMarker
     const int8_t* ptr = marker.data;
@@ -209,7 +209,7 @@ client::drawMarker(gfx::Context& ctx, const Marker& marker, gfx::Point pt)
 //     \param x,y center
 //     \param r   radius, in range [0, 7]. */
 void
-client::drawDottedCircle(gfx::Context& ctx, gfx::Point pt, int r)
+client::drawDottedCircle(gfx::BaseContext& ctx, gfx::Point pt, int r)
 {
     // ex client/marks.h:drawDottedCircle
     static const Marker*const markers[] = {
@@ -229,7 +229,7 @@ client::drawDottedCircle(gfx::Context& ctx, gfx::Point pt, int r)
 //     \param mult,divi  Zoom settings. 1:1 = standard size for big font,
 //                       1:2 = size for normal font, others = starchart zoom. */
 void
-client::drawSelection(gfx::Context& ctx, gfx::Point pt, int mult, int divi)
+client::drawSelection(gfx::BaseContext& ctx, gfx::Point pt, int mult, int divi)
 {
     // ex client/marks.h:drawSelection
     if (mult <= 0 || divi <= 0) {
@@ -298,3 +298,8 @@ client::getUserMarker(int id, bool big)
     }
 }
 
+int
+client::getMarkerHeight(const Marker& marker)
+{
+    return marker.height;
+}

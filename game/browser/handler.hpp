@@ -55,7 +55,7 @@ namespace game { namespace browser {
 
             \param dir directory
             \return Non-null root if the directory was understood. */
-        virtual afl::base::Ptr<Root> loadGameRoot(afl::base::Ptr<afl::io::Directory> dir) = 0;
+        virtual afl::base::Ptr<Root> loadGameRoot(afl::base::Ref<afl::io::Directory> dir) = 0;
 
     };
 

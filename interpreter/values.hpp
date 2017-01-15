@@ -23,11 +23,12 @@ namespace interpreter {
 
     afl::data::Value* makeOptionalStringValue(const afl::base::Optional<String_t>& value);
 
-    int getBooleanValue(afl::data::Value* value);
+    int getBooleanValue(const afl::data::Value* value);
 
-    String_t toString(afl::data::Value* value, bool readable);
+    String_t toString(const afl::data::Value* value, bool readable);
 
     String_t quoteString(const String_t& value);
+    String_t formatFloat(double value);
 
 }
 

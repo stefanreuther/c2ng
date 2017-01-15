@@ -30,12 +30,11 @@ game::interface::EngineFunction::get(interpreter::Arguments& args)
     // ex int/if/specif.h:IFEngineGet
     int32_t id;
     args.checkArgumentCount(1);
-    if (m_session.getShipList().get() != 0
-        && interpreter::checkIntegerArg(id, args.getNext(), 1, getDimension(1)-1))
-    {
-        return new EngineContext(id, m_session.getShipList());
+    if (!interpreter::checkIntegerArg(id, args.getNext(), 1, getDimension(1)-1)) {
+        return 0;
     }
-    return 0;
+
+    return EngineContext::create(id, m_session);
 }
 
 void
@@ -46,7 +45,7 @@ game::interface::EngineFunction::set(interpreter::Arguments& /*args*/, afl::data
 
 // CallableValue:
 int32_t
-game::interface::EngineFunction::getDimension(int32_t which)
+game::interface::EngineFunction::getDimension(int32_t which) const
 {
     // ex int/if/specif.h:IFEngineDim
     return (which == 0
@@ -62,7 +61,7 @@ game::interface::EngineFunction::makeFirstContext()
     // ex int/if/specif.h:IFEngineMake
     if (game::spec::ShipList* list = m_session.getShipList().get()) {
         if (list->engines().size() > 0) {
-            return new EngineContext(1, list);
+            return new EngineContext(1, *list);
         }
     }
     return 0;
@@ -82,7 +81,7 @@ game::interface::EngineFunction::toString(bool /*readable*/) const
 }
 
 void
-game::interface::EngineFunction::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext* /*ctx*/) const
+game::interface::EngineFunction::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
 {
     throw interpreter::Error::notSerializable();
 }

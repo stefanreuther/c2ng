@@ -1,0 +1,10 @@
+/*!
+     \namespace game
+     \brief Battle Simulator classes
+
+     This namespace contains the battle simulator.
+
+     <b>Entry points:</b>
+
+     - game::sim::State
+ */

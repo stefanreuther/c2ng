@@ -75,7 +75,7 @@ gfx::BitmapGlyph::getWidth() const
     \param ctx Context to draw on
     \param x,y Position */
 void
-gfx::BitmapGlyph::draw(Context& ctx, Point pt) const
+gfx::BitmapGlyph::draw(BaseContext& ctx, Point pt) const
 {
     // ex GfxBitmapGlyph::draw
     // Do nothing if this glyph is blank

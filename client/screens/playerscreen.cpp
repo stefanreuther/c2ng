@@ -17,8 +17,36 @@
 #include "game/root.hpp"
 #include "game/game.hpp"
 #include "game/turn.hpp"
+#include "ui/layout/hbox.hpp"
+#include "ui/group.hpp"
+#include "ui/widgets/imagebutton.hpp"
+#include "ui/widgets/framegroup.hpp"
+#include "ui/layout/flow.hpp"
 
 namespace {
+
+    ui::widgets::AbstractButton& createImageButton(afl::base::Deleter& del, ui::Root& root, ui::LayoutableGroup& group, String_t text, util::Key_t key, String_t image)
+    {
+        // Create container group
+        ui::widgets::FrameGroup& frame = del.addNew(new ui::widgets::FrameGroup(ui::layout::HBox::instance0, root.colorScheme(), ui::widgets::FrameGroup::LoweredFrame));
+
+        // Create button
+        ui::widgets::ImageButton& result = del.addNew(new ui::widgets::ImageButton(image, key, root, gfx::Point(110, 110)));
+        result.setText(text);
+
+        // Connect and return
+        frame.add(result);
+        group.add(frame);
+        return result;
+    }
+
+    ui::widgets::AbstractButton& createActionButton(afl::base::Deleter& del, ui::Root& root, ui::LayoutableGroup& group, String_t text, util::Key_t key)
+    {
+        ui::widgets::Button& btn = del.addNew(new ui::widgets::Button(text, key, root));
+        group.add(btn);
+        return btn;
+    }
+
     class PlayerScreen : private client::si::Control {
      public:
         PlayerScreen(client::Session& session)
@@ -34,82 +62,84 @@ namespace {
         ~PlayerScreen()
             { }
 
-        void run(client::si::InputState& in, client::si::OutputState& out)
+        void run(client::si::InputState& in, client::si::OutputState& out, bool first)
             {
-                // Build a panel
+                // Player screen
+                //   HBox
+                //     VBox
+                //       FrameGroup + ImageButton
+                //       Spacer
+                //     VBox
+                //       DocView
+                //       Spacer
+                //       Buttons...
+                afl::string::Translator& tx = m_session.translator();
+                afl::base::Deleter del;
                 ui::Root& root = m_session.root();
-                ui::Window panel("!Player screen", root.provider(), ui::BLUE_BLACK_WINDOW, ui::layout::VBox::instance5);
-                ui::Spacer spacer;
-                ui::widgets::Button btnTest("!Test", 't', root.provider(), root.colorScheme());
-                ui::widgets::Button btnList("!List processes on console", 'l', root.provider(), root.colorScheme());
-                ui::widgets::Button btnClose("!ESC - Close", util::Key_Escape, root.provider(), root.colorScheme());
-                ui::widgets::Button btnF1("!F1 - Ships", util::Key_F1, root.provider(), root.colorScheme());
-                ui::widgets::Button btnF2("!F2 - Planets", util::Key_F2, root.provider(), root.colorScheme());
-                ui::widgets::Button btnF3("!F3 - Starbases", util::Key_F3, root.provider(), root.colorScheme());
-                client::widgets::KeymapWidget keys(m_session.gameSender(), root.engine().dispatcher(), *this);
-                keys.setKeymapName("RACESCREEN");
-                panel.add(m_docView);
-                panel.add(spacer);
-                panel.add(btnTest);
-                panel.add(btnList);
-                panel.add(btnF1);
-                panel.add(btnF2);
-                panel.add(btnF3);
-                panel.add(btnClose);
-                panel.add(keys);
 
-                keys.addButton(btnClose);
-                btnList.sig_fire.add(this, &PlayerScreen::onList);
-                btnTest.sig_fire.add(this, &PlayerScreen::onTest);
-                keys.addButton(btnF1);
-                keys.addButton(btnF2);
-                keys.addButton(btnF3);
+                // FIXME: this should be a container different widget...
+                ui::LayoutableGroup& panel = del.addNew(new ui::Window("!Player screen", root.provider(), root.colorScheme(), ui::BLUE_BLACK_WINDOW, ui::layout::HBox::instance5));
+
+                // Keymap handler
+                client::widgets::KeymapWidget& keys = del.addNew(new client::widgets::KeymapWidget(m_session.gameSender(), root.engine().dispatcher(), *this));
+
+                // Left group containing list of image buttons
+                ui::LayoutableGroup& leftGroup = del.addNew(new ui::Group(ui::layout::VBox::instance5));
+                keys.addButton(createImageButton(del, root, leftGroup, tx.translateString("F1 - Starships"), util::Key_F1, "menu.ship"));
+                keys.addButton(createImageButton(del, root, leftGroup, tx.translateString("F2 - Planets"),   util::Key_F2, "menu.planet"));
+                keys.addButton(createImageButton(del, root, leftGroup, tx.translateString("F3 - Starbases"), util::Key_F3, "menu.base"));
+                keys.addButton(createImageButton(del, root, leftGroup, tx.translateString("F4 - Starchart"), util::Key_F4, "menu.chart"));
+                leftGroup.add(del.addNew(new ui::Spacer()));
+                panel.add(leftGroup);
+
+                // Right group
+                ui::LayoutableGroup& rightGroup = del.addNew(new ui::Group(ui::layout::VBox::instance5));
+                rightGroup.add(m_docView);
+                rightGroup.add(del.addNew(new ui::Spacer()));
+
+                // Buttons
+                ui::LayoutableGroup& btnGroup = del.addNew(new ui::Group(del.addNew(new ui::layout::Flow(5, true))));
+
+                // PCC2 buttons:
+                //   A - Alliances
+                //   Ctrl-O - Options
+                //   F7 - Search
+                //   G - Global
+                //   T - Teams
+                //   S - Scores
+                //   B - Battle Simulator
+                //   I - Imperial Stats
+                //   W - Write Message
+                //   M - Messages
+                //   V - Combat Recorder
+                //   ESC - Exit
+                //   H - Help
+                keys.addButton(createActionButton(del, root, btnGroup, tx.translateString("ESC - Exit"), util::Key_Escape));
+                rightGroup.add(btnGroup);
+                panel.add(rightGroup);
+
+                // Finish and display it
+                keys.setKeymapName("RACESCREEN");
+                panel.add(keys);
                 panel.setExtent(root.getExtent());
                 panel.setState(ui::Widget::ModalState, true);
                 root.add(panel);
 
+                // Execute a possible inbound process. This will return when the inbound process finished.
+                // If the inbound process requests a context change, this will already stop the m_loop.
                 continueProcessWait(in.getProcess());
+
+                // Execute initialisation hooks the first time we're on the player screen.
+                // If the inbound process already requested a context change, bad things would happen if we start another process here.
+                // Therefore, we rather lose the init hooks in this case.
+                // (This will not normally happen because if first=true, there will be no inbound process.)
+                if (first && !m_loop.isStopped()) {
+                    executeCommandWait("C2$RunLoadHook", false, "Turn Initialisation");
+                }
+
+                // Run (this will immediately exit if one of the above scripts requested a context change.)
                 m_loop.run();
                 out = m_outputState;
-            }
-
-        void onTest()
-            { }
-
-        void onList()
-            {
-                class Job : public util::Request<game::Session> {
-                 public:
-                    void handle(game::Session& s)
-                        {
-                            const interpreter::ProcessList::Vector_t& list = s.world().processList().getProcessList();
-                            afl::sys::LogListener& log = s.log();
-                            log.write(log.Info, "main.ps", "  PID  PGID      STATE  NAME");
-                            for (size_t i = 0, n = list.size(); i < n; ++i) {
-                                const char* state = "?";
-                                interpreter::Process& p = *list[i];
-                                switch (p.getState()) {
-                                 case interpreter::Process::Suspended:  state = "Suspended"; break;
-                                 case interpreter::Process::Frozen:     state = "Frozen"; break;
-                                 case interpreter::Process::Runnable:   state = "Runnable"; break;
-                                 case interpreter::Process::Running:    state = "Running"; break;
-                                 case interpreter::Process::Waiting:    state = "Waiting"; break;
-                                 case interpreter::Process::Ended:      state = "Ended"; break;
-                                 case interpreter::Process::Terminated: state = "Terminated"; break;
-                                 case interpreter::Process::Failed:     state = "Failed"; break;
-                                }
-
-                                // Write a brief message:
-                                //   run 17@33 Running 'UI.Foo'
-                                log.write(log.Info, "main.ps", afl::string::Format("%5d %5d %10s '%s'")
-                                          << p.getProcessId()
-                                          << p.getProcessGroupId()
-                                          << state
-                                          << p.getName());
-                            }
-                        }
-                };
-                m_session.gameSender().postNewRequest(new Job());
             }
 
         void setInfo(String_t s)
@@ -193,7 +223,7 @@ namespace {
                                 info = afl::string::Format("!Player %d", game->getViewpointPlayer());
                             }
                             info += "\n";
-                            info += afl::string::Format("%d message%!1{s%}", game->currentTurn().inbox().getNumMessages());
+                            info += afl::string::Format("!%d message%!1{s%}", game->currentTurn().inbox().getNumMessages());
                             info += "\n";
                         }
                     }
@@ -220,7 +250,7 @@ namespace {
 }
 
 void
-client::screens::doPlayerScreen(Session& session, client::si::InputState& in, client::si::OutputState& out)
+client::screens::doPlayerScreen(Session& session, client::si::InputState& in, client::si::OutputState& out, bool first)
 {
-    PlayerScreen(session).run(in, out);
+    PlayerScreen(session).run(in, out, first);
 }

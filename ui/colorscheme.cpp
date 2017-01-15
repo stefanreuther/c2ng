@@ -179,17 +179,17 @@ ui::ColorScheme::~ColorScheme()
 { }
 
 gfx::Color_t
-ui::ColorScheme::getColor(uint32_t index)
+ui::ColorScheme::getColor(uint8_t index)
 {
     // ex GfxStandardColorScheme::getColor
     return index < Color_Avail ? m_colors[index] : m_colors[0];
 }
 
 void
-ui::ColorScheme::drawBackground(gfx::Context& ctx, const gfx::Rectangle& area)
+ui::ColorScheme::drawBackground(gfx::Canvas& can, const gfx::Rectangle& area)
 {
     // ex GfxStandardColorScheme::drawBackground
-    ctx.canvas().drawBar(area, m_colors[0], gfx::TRANSPARENT_COLOR, gfx::FillPattern::SOLID, gfx::OPAQUE_ALPHA);
+    can.drawBar(area, m_colors[0], gfx::TRANSPARENT_COLOR, gfx::FillPattern::SOLID, gfx::OPAQUE_ALPHA);
 }
 
 void

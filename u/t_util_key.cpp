@@ -195,3 +195,28 @@ TestUtilKey::testUnique()
         break;
     }
 }
+
+/** Test classifyKey. */
+void
+TestUtilKey::testClassify()
+{
+    // Some regular keys
+    TS_ASSERT_EQUALS(util::classifyKey('a'), util::NormalKey);
+    TS_ASSERT_EQUALS(util::classifyKey(' '), util::NormalKey);
+    TS_ASSERT_EQUALS(util::classifyKey(0x4000), util::NormalKey);
+    TS_ASSERT_EQUALS(util::classifyKey(util::Key_PgDn), util::NormalKey);
+
+    // Shifts
+    TS_ASSERT_EQUALS(util::classifyKey(util::Key_LShift), util::ModifierKey);
+    TS_ASSERT_EQUALS(util::classifyKey(util::Key_LAlt), util::ModifierKey);
+    TS_ASSERT_EQUALS(util::classifyKey(util::Key_LCtrl), util::ModifierKey);
+    TS_ASSERT_EQUALS(util::classifyKey(util::Key_RShift), util::ModifierKey);
+    TS_ASSERT_EQUALS(util::classifyKey(util::Key_RAlt), util::ModifierKey);
+    TS_ASSERT_EQUALS(util::classifyKey(util::Key_RCtrl), util::ModifierKey);
+
+    // Virtual
+    TS_ASSERT_EQUALS(util::classifyKey(util::Key_Quit), util::VirtualKey);
+    TS_ASSERT_EQUALS(util::classifyKey(util::Key_WheelDown), util::VirtualKey);
+    TS_ASSERT_EQUALS(util::classifyKey(util::Key_WheelUp), util::VirtualKey);
+}
+

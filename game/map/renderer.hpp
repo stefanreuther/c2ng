@@ -11,6 +11,7 @@ namespace game { namespace map {
     class Viewport;
     class RendererListener;
     class Planet;
+    class Drawing;
 
     class Renderer {
      public:
@@ -24,6 +25,8 @@ namespace game { namespace map {
 
         void renderGrid(RendererListener& out);
         void renderMinefields(RendererListener& out);
+        void renderDrawings(RendererListener& out);
+        void renderDrawing(RendererListener& out, const Drawing& d);
         void renderPlanets(RendererListener& out);
         void renderPlanet(RendererListener& out, const Planet& planet, Point pos);
         void renderShips(RendererListener& out);

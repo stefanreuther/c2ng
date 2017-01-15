@@ -14,9 +14,9 @@ namespace game {
     class TeamSettings {
      public:
         enum Relation {
-            ThisPlayer,
-            AlliedPlayer,
-            EnemyPlayer
+            ThisPlayer,         // ex is_Me
+            AlliedPlayer,       // ex is_Ally
+            EnemyPlayer         // ex is_Enemy
         };
 
         TeamSettings();

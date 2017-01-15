@@ -15,7 +15,7 @@ TestUiRichBlockObject::testIt()
      public:
         virtual gfx::Point getSize()
             { return gfx::Point(); }
-        virtual void draw(gfx::Context& /*ctx*/, gfx::Rectangle /*area*/)
+        virtual void draw(gfx::Context<util::SkinColor::Color>& /*ctx*/, gfx::Rectangle /*area*/)
             { }
     };
     Tester t;

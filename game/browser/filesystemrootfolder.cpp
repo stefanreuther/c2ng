@@ -18,22 +18,17 @@ void
 game::browser::FileSystemRootFolder::loadContent(afl::container::PtrVector<Folder>& result)
 {
     using afl::base::Ptr;
+    using afl::base::Ref;
     using afl::base::Enumerator;
     using afl::io::FileSystem;
     using afl::io::Directory;
     using afl::io::DirectoryEntry;
 
     // Open root list
-    Ptr<Directory> dir = m_parent.fileSystem().openRootDirectory();
-    if (dir.get() == 0) {
-        return;
-    }
+    Ref<Directory> dir = m_parent.fileSystem().openRootDirectory();
 
     // Enumerate root
-    Ptr<Enumerator<Ptr<DirectoryEntry> > > content = dir->getDirectoryEntries();
-    if (content.get() == 0) {
-        return;
-    }
+    Ref<Enumerator<Ptr<DirectoryEntry> > > content = dir->getDirectoryEntries();
 
     // Build list
     Ptr<DirectoryEntry> elem;

@@ -12,9 +12,9 @@
 
 #include "interpreter/structurevalue.hpp"
 #include "interpreter/propertyacceptor.hpp"
-#include "interpreter/error.hpp"
+#include "interpreter/savecontext.hpp"
 
-interpreter::StructureValueData::StructureValueData(afl::base::Ptr<StructureTypeData> type)
+interpreter::StructureValueData::StructureValueData(afl::base::Ref<StructureTypeData> type)
     : type(type),
       data()
 {
@@ -26,7 +26,7 @@ interpreter::StructureValueData::~StructureValueData()
 
 
 
-interpreter::StructureValue::StructureValue(afl::base::Ptr<StructureValueData> value)
+interpreter::StructureValue::StructureValue(afl::base::Ref<StructureValueData> value)
     : m_value(value)
 {
     // ex IntStructureValue::IntStructureValue
@@ -44,17 +44,11 @@ interpreter::StructureValue::toString(bool /*readable*/) const
 }
 
 void
-interpreter::StructureValue::store(TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, SaveContext* /*ctx*/) const
+interpreter::StructureValue::store(TagNode& out, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, SaveContext& ctx) const
 {
-    // FIXME: port: store(IntTagNode& sv, Stream& aux);
     // ex IntStructureValue::store
-//     IntVMSaveContext* vsc = IntVMSaveContext::getCurrentInstance();
-//     if (vsc != 0) {
-//         sv.tag   = IntTagNode::Tag_Struct;
-//         sv.value = vsc->addStructureValue(*value);
-//     } else {
-    throw Error::notSerializable();
-//     }
+    out.tag   = TagNode::Tag_Struct;
+    out.value = ctx.addStructureValue(*m_value);
 }
 
 // Value:
@@ -66,16 +60,16 @@ interpreter::StructureValue::clone() const
 }
 
 // Context:
-bool
+interpreter::StructureValue*
 interpreter::StructureValue::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
 {
     // ex IntStructureValue::lookup
     afl::data::NameMap::Index_t index = m_value->type->names.getIndexByName(name);
     if (index != afl::data::NameMap::nil) {
         result = index;
-        return true;
+        return this;
     } else {
-        return false;
+        return 0;
     }
 }
 

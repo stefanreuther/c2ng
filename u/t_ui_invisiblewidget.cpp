@@ -15,8 +15,6 @@ TestUiInvisibleWidget::testIt()
      public:
         virtual bool handleKey(util::Key_t /*key*/, int /*prefix*/)
             { return false; }
-        virtual bool handleMouse(gfx::Point /*pt*/, MouseButtons_t /*pressedButtons*/)
-            { return false; }
     };
     MyWidget t;
 }

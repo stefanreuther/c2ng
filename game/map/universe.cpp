@@ -7,6 +7,7 @@
 #include "game/map/objecttype.hpp"
 #include "game/map/anyplanettype.hpp"
 #include "game/map/ship.hpp"
+#include "game/map/reverter.hpp"
 #include "afl/string/format.hpp"
 #include "game/map/anyshiptype.hpp"
 #include "util/math.hpp"
@@ -36,60 +37,40 @@ game::map::Universe::Universe()
       m_planets(),
       m_ionStorms(),
       m_minefields(),
+      m_ufos(),
+      m_explosions(),
+      m_drawings(),
       m_universeChanged(false),
-      m_turnNumber(0),
-      m_timestamp(),
       m_playedShips(),
       m_playedPlanets(),
       m_playedBases(),
-      m_ionStormType()
+      m_fleets(),
+      m_ionStormType(),
+      m_reverter(0)
 {
+    // ex GUniverse::GUniverse
     m_minefields.reset(new MinefieldType(*this));
+    m_ufos.reset(new UfoType(*this));
+    m_explosions.reset(new ExplosionType(*this));
     m_playedShips.reset(new PlayedShipType(*this));
     m_playedPlanets.reset(new PlayedPlanetType(*this));
     m_playedBases.reset(new PlayedBaseType(*this));
+    m_fleets.reset(new FleetType(*this));
     m_ionStormType.reset(new IonStormType(*this));
-// /** Create blank universe. */
-// GUniverse::GUniverse()
-//       ty_any_ships(*this),
-//       ty_history_ships(*this),
-//       ty_any_planets(*this),
-//       ty_fleets(*this),
-//       ty_ufos(*this),
-//       ty_minefields(*this),
-// {
-//     init();
-// }
 
+    m_drawings.sig_change.add(this, &Universe::markChanged);
+
+    // Observe all set changes
+    playedShips().sig_setChange.add(this, &Universe::markChanged);
+    playedPlanets().sig_setChange.add(this, &Universe::markChanged);
+    ionStormType().sig_setChange.add(this, &Universe::markChanged);
+    minefields().sig_setChange.add(this, &Universe::markChanged);
+    ufos().sig_setChange.add(this, &Universe::markChanged);
+    explosions().sig_setChange.add(this, &Universe::markChanged);
 }
 
 game::map::Universe::~Universe()
 { }
-
-
-int
-game::map::Universe::getTurnNumber() const
-{
-    return m_turnNumber;
-}
-
-void
-game::map::Universe::setTurnNumber(int nr)
-{
-    m_turnNumber = nr;
-}
-
-game::Timestamp
-game::map::Universe::getTimestamp() const
-{
-    return m_timestamp;
-}
-
-void
-game::map::Universe::setTimestamp(const Timestamp& ts)
-{
-    m_timestamp = ts;
-}
 
 game::map::ObjectVector<game::map::Ship>&
 game::map::Universe::ships()
@@ -135,6 +116,12 @@ game::map::Universe::playedBases()
     return *m_playedBases;
 }
 
+game::map::FleetType&
+game::map::Universe::fleets()
+{
+    return *m_fleets;
+}
+
 game::map::ObjectVector<game::map::IonStorm>&
 game::map::Universe::ionStorms()
 {
@@ -166,6 +153,41 @@ game::map::Universe::minefields() const
     return *m_minefields;
 }
 
+game::map::UfoType&
+game::map::Universe::ufos()
+{
+    return *m_ufos;
+}
+
+const game::map::UfoType&
+game::map::Universe::ufos() const
+{
+    return *m_ufos;
+}
+
+game::map::ExplosionType&
+game::map::Universe::explosions()
+{
+    return *m_explosions;
+}
+
+const game::map::ExplosionType&
+game::map::Universe::explosions() const
+{
+    return *m_explosions;
+}
+
+game::map::DrawingContainer&
+game::map::Universe::drawings()
+{
+    return m_drawings;
+}
+
+const game::map::DrawingContainer&
+game::map::Universe::drawings() const
+{
+    return m_drawings;
+}
 
 game::map::Configuration&
 game::map::Universe::config()
@@ -179,6 +201,17 @@ game::map::Universe::config() const
     return m_config;
 }
 
+void
+game::map::Universe::setNewReverter(Reverter* p)
+{
+    m_reverter.reset(p);
+}
+
+game::map::Reverter*
+game::map::Universe::getReverter() const
+{
+    return m_reverter.get();
+}
 
 void
 game::map::Universe::notifyListeners()
@@ -195,7 +228,8 @@ game::map::Universe::notifyListeners()
     changed |= AnyPlanetType(*this).notifyObjectListeners();
     changed |= m_ionStormType->notifyObjectListeners();
     changed |= m_minefields->notifyObjectListeners();
-    // changed |= updateType(ty_ufos);
+    changed |= m_ufos->notifyObjectListeners();
+    changed |= m_explosions->notifyObjectListeners();
 
     /* Tell everyone we did updates */
     if (changed || m_universeChanged) {
@@ -217,6 +251,7 @@ game::map::Universe::markChanged()
 void
 game::map::Universe::postprocess(PlayerSet_t playingSet, PlayerSet_t availablePlayers, Object::Playability playability,
                                  const game::HostVersion& host, const game::config::HostConfiguration& config,
+                                 const int turnNumber,
                                  afl::string::Translator& tx, afl::sys::LogListener& log)
 {
 //     this->playing_set = playing_set;
@@ -258,10 +293,10 @@ game::map::Universe::postprocess(PlayerSet_t playingSet, PlayerSet_t availablePl
     }
 
     // Internal checks for others
-    m_minefields->internalCheck(m_turnNumber, host, config);
+    m_minefields->internalCheck(turnNumber, host, config);
+    m_drawings.eraseExpiredDrawings(turnNumber);
+    m_ufos->postprocess(turnNumber);
 // FIXME: port
-//     drawings.eraseExpiredDrawings(getTurnNumber());
-//     ty_ufos.postprocess();
 //     setTypePlayability(ty_minefields, playability);
 //     setTypePlayability(ty_ufos, playability);
 
@@ -269,17 +304,21 @@ game::map::Universe::postprocess(PlayerSet_t playingSet, PlayerSet_t availablePl
     m_playedShips->sig_setChange.raise(0);
     m_playedPlanets->sig_setChange.raise(0);
     m_playedBases->sig_setChange.raise(0);
+    m_fleets->sig_setChange.raise(0);
     m_ionStormType->sig_setChange.raise(0);
+    m_minefields->sig_setChange.raise(0);
+    m_ufos->sig_setChange.raise(0);
+    m_explosions->sig_setChange.raise(0);
 
     // Combined checks
     for (Id_t i = 1, n = m_ships.size(); i <= n; ++i) {
         if (Ship* s = m_ships.get(i)) {
-            s->combinedCheck1(*this);
+            s->combinedCheck1(*this, turnNumber);
         }
     }
     for (Id_t i = 1, n = m_planets.size(); i <= n; ++i) {
         if (Planet* p = m_planets.get(i)) {
-            p->combinedCheck2(*this, availablePlayers);
+            p->combinedCheck2(*this, availablePlayers, turnNumber);
         }
     }
 

@@ -1,0 +1,8 @@
+/*!
+     \namespace util::plugin
+     \brief Plugins
+
+     This namespace contains classes to manage plugins.
+     Although plugins refer to scripts or GUI resources, this module only maintains textual references.
+     Actual interpretation of script commands and file names happens in the application proper.
+ */

@@ -1,0 +1,405 @@
+#!/bin/bash
+#
+#  A trivial low-fat "configure" replacement
+#
+#  Like autoconf, tries to figure out things by executing programs and looking at the result.
+#  Unlike autoconf, tries to handle way fewer system anomalies.
+#  We assume the system is sufficiently POSIXey and do not check for old and obscure bugs.
+#  The main objective is to test for presense or absence of packages,
+#  and to allow automated, reliable configuration of path names.
+#
+
+
+
+################################ Arguments ################################
+
+# Variables:
+#   conf_pkg_set_X     true if user gave a --with/--without-X option
+#   conf_pkg_avail_X   true if user gave a --with option
+#   conf_pkg_dir_X     directory given with --with
+
+# conf_args_parse "$@" - parse command line and set parameters
+conf_args_parse() {
+    for i
+    do
+        case "$i" in
+            --help)
+                echo "Configuration script
+
+Usage: $0 [options]
+
+Options:
+  --with-PACKAGE               Assume package is present
+  --with-PACKAGE=DIR           Assume package is present in directory
+  --without-PACKAGE            Assume package is not present
+  NAME=VALUE                   Set environment variable
+"
+                ( conf_user_help ) >/dev/null 2>&1 && conf_user_help
+                exit 0
+                ;;
+            --with-*=*)
+                pair=${i#--with-}
+                dir=${pair#*=}
+                pkg=${pair%%=*}
+                eval conf_pkg_set_$pkg=true conf_pkg_avail_$pkg=true conf_pkg_dir_$pkg=\$dir
+                ;;
+            --with-*)
+                pkg=${i#--with-}
+                eval conf_pkg_set_$pkg=true conf_pkg_avail_$pkg=true
+                ;;
+            --without-*)
+                pkg=${i#--without-}
+                eval conf_pkg_set_$pkg=true conf_pkg_avail_$pkg=false
+                ;;
+            [!-]*=*)
+                val=${i#*=}
+                var=${i%%=*}
+                eval $var=\$val
+                ;;
+            *)
+                echo "$0: unrecognized argument: \"$i\"" >&2
+                exit 1
+        esac
+    done
+}
+
+# conf_arg_pkg_status PKGNAME - check status of a package
+#   PKGNAME must be in lower-case.
+#   Writes the status to stdout:
+#      probe      ... must check presence
+#      required   ... package must be there
+#      disabled   ... assume package not present
+conf_arg_pkg_status() {
+    # $1 = package
+    if eval test -z "\$conf_pkg_set_$1"; then
+        echo probe
+    elif eval "\$conf_pkg_avail_$1"; then
+        echo required
+    else
+        echo disabled
+    fi
+}
+
+
+
+################################ Variables ################################
+
+# These are the variables that appear in the Makefile configuration file.
+#
+# Variables:
+#   conf_var_list      list of variables
+#   conf_var_set_X     variable was set
+
+# conf_var_set NAME VALUE - Set variable
+conf_var_set() {
+    # $1 = name
+    # $2 = value
+    if eval test -z "\$conf_var_set_$1"; then
+        conf_var_list="$conf_var_list $1"
+    fi
+    eval conf_var_set_$1=true $1=\$2
+}
+
+# conf_var_add NAME VALUE - Add text to variable
+conf_var_add() {
+    # $1 = name
+    # $2 = value
+    if eval test -z "\$conf_var_set_$1"; then
+        conf_var_list="$conf_var_list $1"
+        eval conf_var_set_$1=true $1=\$2
+    else
+        eval "$1=\$$1\\ \$2"
+    fi
+}
+
+# conf_var_mset NAME=VALUE [NAME=VALUE...] - Set multiple variables
+conf_var_mset() {
+    for _i
+    do
+        conf_var_set "${_i%%=*}" "${_i#*=}"
+    done
+}
+
+# conf_var_write_makefile [PREFIX] - Write a *.mak file with all variables to stdout
+conf_var_write_makefile() {
+    # $1 = prefix
+    if test -n "$conf_var_list"; then
+        for _i in $conf_var_list; do
+            eval echo "\$1\$_i = \$$_i"
+        done
+    fi
+}
+
+# conf_var_publish NAME [NAME...] - Publish environment variables
+conf_var_publish() {
+    for _i
+    do
+        if eval test -z "\$conf_var_set_$_i"; then
+            conf_var_list="$conf_var_list $_i"
+            eval conf_var_set_$_i=true
+        fi
+    done
+}
+
+
+################################## Macros #################################
+
+# These are the macros that appear in a header file.
+#
+# Variables:
+#   conf_macro_list    list of macros
+#   conf_macro_set_X   macro was set
+
+
+# conf_macro_set NAME - Define a macro
+conf_macro_set() {
+    # $1 = name
+    if eval test -z "\$conf_macro_set_$1"; then
+        conf_macro_list="$conf_macro_list $1"
+    fi
+    eval conf_macro_set_$1=true
+}
+
+# conf_macro_write_header - write a *.h file with all macros to stdout
+conf_macro_write_header() {
+    # $1 = prefix
+    if test -n "$conf_macro_list"; then
+        for _i in $conf_macro_list; do
+            echo "#define $1$_i 1"
+        done
+    fi
+}
+
+################################# Logging #################################
+
+# Variables:
+#   conf_log_file    Name of log file
+#   conf_log_open    Nonempty if a test is running (conf_log_start but not conf_log_result)
+
+# conf_log_init - set up logging
+conf_log_init() {
+    conf_log_file="config.log"
+    (
+        echo "Configuration Log File"
+        date
+        echo
+    ) > $conf_log_file
+}
+
+# conf_log_start "Checking xyz" - log start of a test
+conf_log_start() {
+    printf "	%s" "$@"
+    echo "Test: $@
+" >> $conf_log_file
+    conf_log_open=true
+}
+
+# conf_log_result "found" - log result of a test
+conf_log_result() {
+    echo " $@"
+    conf_log_open=""
+}
+
+# conf_log_die "Fatal error" - log a test failure and exit
+conf_log_die() {
+    test -z "$conf_log_open" || conf_log_result "FAILED"
+    echo "$@" >&2
+    echo "Consult the log file, $conf_log_file, for details." >&2
+    conf_cleanup
+    exit 1
+}
+
+################################### Run ###################################
+
+# conf_run COMMAND ARGS... - Execute a command
+#   Adds logging and output redirection.
+#   Return value is return value of command.
+conf_run() {
+    echo "Executing command: $@
+----" >> $conf_log_file
+    "$@" >> $conf_log_file 2>&1
+    _result=$?
+    echo "----
+Result: $_result
+" >> $conf_log_file
+    return $_result
+}
+
+################################# Cleanup #################################
+
+# conf_cleanup - Clean up
+#   Call this last in your script.
+conf_cleanup() {
+    test -z "$conf_tmpfiles" || rm -f $conf_tmpfiles
+}
+
+# conf_cleanup_init - Initialize
+conf_cleanup_init() {
+    trap 'conf_cleanup' INT
+}
+
+# conf_cleanup_addtmp FILE - Add temporary file to be deleted upon exit
+conf_cleanup_addtmp() {
+    case "$conf_tmpfiles" in
+        *$1*) ;;
+        *) conf_tmpfiles="$conf_tmpfiles $1" ;;
+    esac
+}
+
+################################## Files ##################################
+
+# File presence test.
+# - call 'conf_file_set FILE FILE...' to define a set of required files
+# - call 'conf_file_check_dir DIR' to check that a directory contains all these files
+
+# conf_file_set FILE FILE... - set required files
+conf_file_set() {
+    conf_file_list="$@"
+}
+
+# conf_file_check_dir DIR - check for required files
+#   Returns success if all files are present.
+conf_file_check_dir() {
+    for _i in $conf_file_list; do
+        test -e "$1/$_i" || return 1
+    done
+}
+
+
+################################ Compiling ################################
+
+# Compile/link tests.
+# These are the classic "try whether it compiles" tests.
+# - call 'conf_compile_set_program "..."' to define a program.
+# - call 'conf_compile_try VAR=... VAR=...' to compile it with the given vars.
+#   On success, the variables are taken over.
+
+# conf_compile_set_program PROGRAMTEXT [.ext] - set program
+conf_compile_set_program() {
+    # $1 = program
+    # $2 = extension
+    conf_compile_program=__tmp_$$_${2:-.cpp}
+    echo "$1" > $conf_compile_program
+    echo "Test program $conf_compile_program:
+----
+$1
+----
+" >> $conf_log_file
+    conf_cleanup_addtmp "$conf_compile_program"
+    conf_cleanup_addtmp "${conf_compile_program%.*}.o"
+}
+
+# conf_compile_try VAR=VALUE VAR=VALUE... - try compiling.
+#   If the compilation succeeds using the given parameters, uses these parameters and returns success.
+#   Otherwise, returns failure.
+conf_compile_try() {
+    # args = var=value
+    if (
+        conf_var_mset "$@"
+        conf_run $CXX $CXXFLAGS -c $conf_compile_program
+    ); then
+        conf_var_mset "$@"
+        true
+    else
+        false
+    fi
+}
+
+# conf_link_try VAR=VALUE VAR=VALUE... - try linking.
+#   Like conf_compile_try, but does not only compile, also link.
+conf_link_try() {
+    _exe=__tmp_$$
+    if (
+        conf_var_mset "$@"
+        conf_run $CXX $CXXFLAGS -o $_exe $conf_compile_program $LDFLAGS $LIBS
+    ); then
+        conf_var_mset "$@"
+        rm $_exe
+        true
+    else
+        false
+    fi
+}
+
+# conf_link_try PACKAGE(s) - try linking against pkg-config package
+#   Like conf_link_try, fetches additional options from pkg-config.
+conf_link_try_pkgconfig() {
+    if ( pkg-config --exists "$@" ) >/dev/null 2>&1; then
+        conf_link_try CXXFLAGS="$CXXFLAGS $(pkg-config --cflags-only-I "$@")" LIBS="$LIBS $(pkg-config --libs "$@")"
+    else
+        false
+    fi
+}
+
+# conf_link_try_syslib NAME VAR=VALUE... - try linking a system library
+#   This implements the common pattern of an optional preinstalled (system) library.
+#   The name must be given in lower-case.
+#   If "--with-NAME=DIR" was given, tries to locate the system library in the given directory.
+#   If "--with-NAME" was given, fails if the library cannot be found.
+#   If "--without-NAME" was given, just reports it as not present.
+#   Otherwise, checks whether the library is available.
+conf_link_try_syslib() {
+    # $1 = name in lower-case
+    # $2... = additional variables
+    _lib=$1
+    shift
+    case $(conf_arg_pkg_status $_lib) in
+        required)
+            eval _libdir="\$conf_pkg_dir_$_lib"
+            if test -n "$_libdir"; then
+                conf_link_try CXXFLAGS="$CXXFLAGS -I$_libdir" LDFLAGS="$LDFLAGS -L$_libdir" "$@" ||
+                    conf_link_try CXXFLAGS="$CXXFLAGS -I$_libdir/include" LDFLAGS="$LDFLAGS -L$_libdir/lib" "$@" ||
+                    conf_log_die "The configured directory, \"$_libdir\", does not work."
+            else
+                conf_link_try "$@" ||
+                    conf_log_die "This required package could not be found."
+            fi
+            conf_log_result "OK"
+            true
+            ;;
+        disabled)
+            conf_log_result "disabled"
+            false
+            ;;
+        *)  # "probe"
+            if conf_link_try "$@"; then
+                conf_log_result "OK"
+                true
+            else
+                conf_log_result "not found"
+                false
+            fi
+            ;;
+    esac
+}
+
+
+################################## Update #################################
+
+# conf_update_file FILE - update file from stdin
+#   Call this as "echo .... | conf_update_file FILE".
+#   The file will be modified only if the new content differs from the old one,
+#   saving needless rebuilds if the configuration didn't actually change.
+conf_update_file() {
+    conf_log_start "Updating $1..."
+    if test -e "$1"; then
+        _tmp=__tmp$$
+        cat > $_tmp
+        if cmp -s "$1" $_tmp; then
+            rm $_tmp
+            conf_log_result "unchanged"
+        else
+            mv $_tmp "$1" || conf_log_die "Unable to update $1."
+            conf_log_result "done"
+        fi
+    else
+        cat > "$1" || conf_log_die "Unable to create $1."
+        conf_log_result "created"
+    fi
+}
+
+########################## Common Initialisation ##########################
+
+conf_args_parse "$@"
+conf_cleanup_init
+conf_log_init

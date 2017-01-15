@@ -3,7 +3,7 @@
   */
 
 #include "interpreter/structuretype.hpp"
-#include "interpreter/error.hpp"
+#include "interpreter/savecontext.hpp"
 
 interpreter::StructureTypeData::StructureTypeData()
 {
@@ -18,7 +18,7 @@ interpreter::StructureTypeData::~StructureTypeData()
 
 
 
-interpreter::StructureType::StructureType(afl::base::Ptr<StructureTypeData> type)
+interpreter::StructureType::StructureType(afl::base::Ref<StructureTypeData> type)
     : m_type(type)
 {
     // ex IntStructureType::IntStructureType
@@ -38,17 +38,11 @@ interpreter::StructureType::toString(bool /*readable*/) const
 }
 
 void
-interpreter::StructureType::store(TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, SaveContext* /*ctx*/) const
+interpreter::StructureType::store(TagNode& out, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, SaveContext& ctx) const
 {
-    // FIXME: port this (IntStructureType::store)
     // ex IntStructureType::store
-//     IntVMSaveContext* vsc = IntVMSaveContext::getCurrentInstance();
-//     if (vsc != 0) {
-//         sv.tag   = IntTagNode::Tag_StructType;
-//         sv.value = vsc->addStructureType(*type);
-//     } else {
-    throw Error::notSerializable();
-//     }
+    out.tag   = TagNode::Tag_StructType;
+    out.value = ctx.addStructureType(*m_type);
 }
 
 interpreter::StructureType*

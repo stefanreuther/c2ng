@@ -19,13 +19,7 @@ class gfx::PalettizedPixmap::TraitsImpl {
     static inline void poke(Data_t* ptr, Pixel_t val)
         { *ptr = val; }
     Pixel_t mix(Pixel_t a, Pixel_t b, Alpha_t balpha) const
-        {
-            uint8_t red   = mixColorComponent(RED_FROM_COLORQUAD  (m_pix.m_palette[a & 255]), RED_FROM_COLORQUAD  (m_pix.m_palette[b & 255]), balpha);
-            uint8_t green = mixColorComponent(GREEN_FROM_COLORQUAD(m_pix.m_palette[a & 255]), GREEN_FROM_COLORQUAD(m_pix.m_palette[b & 255]), balpha);
-            uint8_t blue  = mixColorComponent(BLUE_FROM_COLORQUAD (m_pix.m_palette[a & 255]), BLUE_FROM_COLORQUAD (m_pix.m_palette[b & 255]), balpha);
-            uint8_t alpha = mixColorComponent(ALPHA_FROM_COLORQUAD(m_pix.m_palette[a & 255]), ALPHA_FROM_COLORQUAD(m_pix.m_palette[b & 255]), balpha);
-            return m_pix.findNearestColor(COLORQUAD_FROM_RGBA(red,green,blue,alpha));
-        }
+        { return m_pix.findNearestColor(mixColor(m_pix.m_palette[a & 255], m_pix.m_palette[b & 255], balpha)); }
     inline Data_t* add(Data_t* ptr, int dx, int dy) const
         { return ptr + m_pix.getWidth()*dy + dx; }
 
@@ -39,7 +33,7 @@ class gfx::PalettizedPixmap::TraitsImpl {
 
 class gfx::PalettizedPixmap::CanvasImpl : public gfx::PixmapCanvasImpl<PalettizedPixmap, TraitsImpl> {
  public:
-    CanvasImpl(afl::base::Ptr<PalettizedPixmap> pix)
+    CanvasImpl(afl::base::Ref<PalettizedPixmap> pix)
         : PixmapCanvasImpl<PalettizedPixmap, TraitsImpl>(pix)
         { }
     virtual int getBitsPerPixel()
@@ -71,7 +65,7 @@ class gfx::PalettizedPixmap::CanvasImpl : public gfx::PixmapCanvasImpl<Palettize
             }
             colorHandles.fill(0);
         }
-    virtual afl::base::Ptr<Canvas> convertCanvas(afl::base::Ptr<Canvas> orig)
+    virtual afl::base::Ref<Canvas> convertCanvas(afl::base::Ref<Canvas> orig)
         {
             // FIXME: can we do better?
             return orig;
@@ -85,10 +79,10 @@ gfx::PalettizedPixmap::PalettizedPixmap(int w, int h)
     afl::base::Memory<ColorQuad_t>(m_palette).fill(COLORQUAD_FROM_RGBA(0,0,0,0));
 }
 
-afl::base::Ptr<gfx::PalettizedPixmap>
+afl::base::Ref<gfx::PalettizedPixmap>
 gfx::PalettizedPixmap::create(int w, int h)
 {
-    return new PalettizedPixmap(w, h);
+    return *new PalettizedPixmap(w, h);
 }
 
 void
@@ -124,8 +118,8 @@ gfx::PalettizedPixmap::findNearestColor(ColorQuad_t def) const
     return result;
 }
 
-afl::base::Ptr<gfx::Canvas>
+afl::base::Ref<gfx::Canvas>
 gfx::PalettizedPixmap::makeCanvas()
 {
-    return new CanvasImpl(this);
+    return *new CanvasImpl(*this);
 }

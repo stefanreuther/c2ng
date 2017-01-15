@@ -14,10 +14,10 @@ namespace game { namespace browser {
 
     class DirectoryHandler : public Handler {
      public:
-        DirectoryHandler(Browser& b, afl::base::Ptr<afl::io::Directory> defaultSpecificationDirectory, util::ProfileDirectory& profile, afl::io::FileSystem& fs);
+        DirectoryHandler(Browser& b, afl::base::Ref<afl::io::Directory> defaultSpecificationDirectory, util::ProfileDirectory& profile, afl::io::FileSystem& fs);
         virtual bool handleFolderName(String_t name, afl::container::PtrVector<Folder>& result);
         virtual Folder* createAccountFolder(Account& acc);
-        virtual afl::base::Ptr<Root> loadGameRoot(afl::base::Ptr<afl::io::Directory> dir);
+        virtual afl::base::Ptr<Root> loadGameRoot(afl::base::Ref<afl::io::Directory> dir);
 
      private:
         // Associated browser. FIXME: can we get rid of this?

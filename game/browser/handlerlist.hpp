@@ -28,7 +28,7 @@ namespace game { namespace browser {
         // Handler methods:
         virtual bool handleFolderName(String_t name, afl::container::PtrVector<Folder>& result);
         virtual Folder* createAccountFolder(Account& acc);
-        virtual afl::base::Ptr<Root> loadGameRoot(afl::base::Ptr<afl::io::Directory> dir);
+        virtual afl::base::Ptr<Root> loadGameRoot(afl::base::Ref<afl::io::Directory> dir);
 
      private:
         afl::container::PtrVector<Handler> m_handlers;

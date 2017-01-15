@@ -18,6 +18,7 @@
 #include "interpreter/keymapvalue.hpp"
 #include "util/key.hpp"
 #include "interpreter/callablevalue.hpp"
+#include "afl/data/visitor.hpp"
 
 using interpreter::getBooleanValue;
 using interpreter::makeBooleanValue;
@@ -53,8 +54,112 @@ namespace {
         \param pair [out] Receives the operands to operate on
         \param a,b  [in] User-supplied operands
         \return argument status */
-    Arithmetic checkArithmetic(ArithmeticPair& pair, afl::data::Value* a, afl::data::Value* b)
+    Arithmetic checkArithmetic(ArithmeticPair& pair, const afl::data::Value* a, const afl::data::Value* b)
     {
+#if 1
+        // Visitor version of type switch: 6% faster on "for i:=1 to 3000000 do j:=i+1" benchmark, 1.7k larger than dynamic_cast version
+        class VBase : public afl::data::Visitor {
+         public:
+            VBase()
+                : m_result(ariBad)
+                { }
+            virtual void visitString(const String_t& /*str*/)
+                { m_result = ariBad; }
+            virtual void visitBoolean(bool bv)
+                { visitInteger(bv); }
+            virtual void visitHash(const afl::data::Hash& /*hv*/)
+                { m_result = ariBad; }
+            virtual void visitVector(const afl::data::Vector& /*vv*/)
+                { m_result = ariBad; }
+            virtual void visitOther(const afl::data::Value& /*other*/)
+                { m_result = ariBad; }
+            virtual void visitNull()
+                { m_result = ariNull; }
+            virtual void visitError(const String_t& /*source*/, const String_t& /*str*/)
+                { m_result = ariBad; }
+            Arithmetic get() const
+                { return m_result; }
+         protected:
+            Arithmetic m_result;
+        };
+
+        class VInt : public VBase {
+         public:
+            VInt(ArithmeticPair& pair, int32_t a)
+                : m_pair(pair),
+                  m_a(a)
+                { }
+            virtual void visitInteger(int32_t iv)
+                {
+                    m_pair.ia = m_a;
+                    m_pair.ib = iv;
+                    m_result = ariInt;
+                }
+            virtual void visitFloat(double fv)
+                {
+                    m_pair.fa = m_a;
+                    m_pair.fb = fv;
+                    m_result = ariFloat;
+                }
+         private:
+            ArithmeticPair& m_pair;
+            const int32_t m_a;
+        };
+
+        class VFloat : public VBase {
+         public:
+            VFloat(ArithmeticPair& pair, double a)
+                : m_pair(pair),
+                  m_a(a)
+                { }
+            virtual void visitInteger(int32_t iv)
+                {
+                    m_pair.fa = m_a;
+                    m_pair.fb = iv;
+                    m_result = ariFloat;
+                }
+            virtual void visitFloat(double fv)
+                {
+                    m_pair.fa = m_a;
+                    m_pair.fb = fv;
+                    m_result = ariFloat;
+                }
+         private:
+            ArithmeticPair& m_pair;
+            const double m_a;
+        };
+
+        class VPair : public VBase {
+         public:
+            VPair(ArithmeticPair& pair, const afl::data::Value* b)
+                : m_pair(pair),
+                  m_b(b)
+                { }
+            virtual void visitInteger(int32_t iv)
+                {
+                    VInt v(m_pair, iv);
+                    v.visit(m_b);
+                    m_result = v.get();
+                }
+            virtual void visitFloat(double fv)
+                {
+                    VFloat v(m_pair, fv);
+                    v.visit(m_b);
+                    m_result = v.get();
+                }
+         private:
+            ArithmeticPair& m_pair;
+            const afl::data::Value* m_b;
+        };
+
+        if (a == 0 || b == 0) {
+            return ariNull;
+        } else {
+            VPair v(pair, b);
+            v.visit(a);
+            return v.get();
+        }
+#else
         bool afloat = false, bfloat = false;
 
         // Check for null
@@ -62,17 +167,17 @@ namespace {
             return ariNull;
 
         // Check a for numericness
-        if (afl::data::ScalarValue* iv = dynamic_cast<afl::data::ScalarValue*>(a))
+        if (const afl::data::ScalarValue* iv = dynamic_cast<const afl::data::ScalarValue*>(a))
             pair.ia = iv->getValue();
-        else if (afl::data::FloatValue* fv = dynamic_cast<afl::data::FloatValue*>(a))
+        else if (const afl::data::FloatValue* fv = dynamic_cast<const afl::data::FloatValue*>(a))
             pair.fa = fv->getValue(), afloat = true;
         else
             return ariBad;
 
         // Check b for numericness
-        if (afl::data::ScalarValue* iv = dynamic_cast<afl::data::ScalarValue*>(b))
+        if (const afl::data::ScalarValue* iv = dynamic_cast<const afl::data::ScalarValue*>(b))
             pair.ib = iv->getValue();
-        else if (afl::data::FloatValue* fv = dynamic_cast<afl::data::FloatValue*>(b))
+        else if (const afl::data::FloatValue* fv = dynamic_cast<const afl::data::FloatValue*>(b))
             pair.fb = fv->getValue(), bfloat = true;
         else
             return ariBad;
@@ -87,9 +192,10 @@ namespace {
         } else {
             return ariInt;
         }
+#endif
     }
 
-    String_t convertCase(afl::data::StringValue* sv, bool doit)
+    String_t convertCase(const afl::data::StringValue* sv, bool doit)
     {
         if (doit)
             return afl::string::strUCase(sv->getValue());
@@ -101,8 +207,150 @@ namespace {
         comparison result. Caller converts this again to a user-visible value.
         \param a,b User-supplied parameters
         \return Result */
-    Comparison compare(afl::data::Value* a, afl::data::Value* b, bool caseblind)
+    Comparison compare(const afl::data::Value* a, const afl::data::Value* b, bool caseblind)
     {
+#if 1
+        // Visitor version of type switch: again 6% faster on "for i:=1 to 3000000 do j:=i+1" benchmark, 1.8k larger than dynamic_cast version
+        class VBase : public afl::data::Visitor {
+         public:
+            VBase()
+                : m_result(cmpNull)
+                { }
+            virtual void visitBoolean(bool bv)
+                { visitInteger(bv); }
+            virtual void visitHash(const afl::data::Hash& /*hv*/)
+                { fail(); }
+            virtual void visitVector(const afl::data::Vector& /*vv*/)
+                { fail(); }
+            virtual void visitOther(const afl::data::Value& /*other*/)
+                { fail(); }
+            virtual void visitNull()
+                { m_result = cmpNull; }
+            virtual void visitError(const String_t& /*source*/, const String_t& /*str*/)
+                { fail(); }
+            Comparison get() const
+                { return m_result; }
+            void fail()
+                { throw Error::typeError(); }
+         protected:
+            Comparison m_result;
+        };
+
+        class VInt : public VBase {
+         public:
+            VInt(int32_t a)
+                : m_a(a)
+                { }
+            virtual void visitInteger(int32_t iv)
+                {
+                    m_result = (m_a == iv
+                                ? cmpEqual
+                                : m_a < iv
+                                ? cmpLess
+                                : cmpGreater);
+                }
+            virtual void visitFloat(double fv)
+                {
+                    m_result = (m_a == fv
+                                ? cmpEqual
+                                : m_a < fv
+                                ? cmpLess
+                                : cmpGreater);
+                }
+            virtual void visitString(const String_t& /*sv*/)
+                { fail(); }
+         private:
+            const int32_t m_a;
+        };
+
+        class VFloat : public VBase {
+         public:
+            VFloat(double a)
+                : m_a(a)
+                { }
+            virtual void visitInteger(int32_t iv)
+                {
+                    m_result = (m_a == iv
+                                ? cmpEqual
+                                : m_a < iv
+                                ? cmpLess
+                                : cmpGreater);
+                }
+            virtual void visitFloat(double fv)
+                {
+                    m_result = (m_a == fv
+                                ? cmpEqual
+                                : m_a < fv
+                                ? cmpLess
+                                : cmpGreater);
+                }
+            virtual void visitString(const String_t& /*sv*/)
+                { fail(); }
+         private:
+            const double m_a;
+        };
+
+        class VString : public VBase {
+         public:
+            VString(const String_t& a, bool caseblind)
+                : m_a(a),
+                  m_caseblind(caseblind)
+                { }
+            virtual void visitInteger(int32_t /*iv*/)
+                { fail(); }
+            virtual void visitFloat(double /*fv*/)
+                { fail(); }
+            virtual void visitString(const String_t& sv)
+                {
+                    int tmp;
+                    if (m_caseblind) {
+                        tmp = afl::string::strCaseCompare(m_a, sv);
+                    } else {
+                        tmp = m_a.compare(sv);
+                    }
+                    m_result = (tmp == 0
+                                ? cmpEqual
+                                : tmp < 0
+                                ? cmpLess
+                                : cmpGreater);
+                }
+         private:
+            const String_t& m_a;
+            const bool m_caseblind;
+        };
+
+        class VPair : public VBase {
+         public:
+            VPair(bool caseblind, const afl::data::Value* b)
+                : m_caseblind(caseblind),
+                  m_b(b)
+                { }
+            virtual void visitInteger(int32_t iv)
+                {
+                    VInt v(iv);
+                    v.visit(m_b);
+                    m_result = v.get();
+                }
+            virtual void visitFloat(double fv)
+                {
+                    VFloat v(fv);
+                    v.visit(m_b);
+                    m_result = v.get();
+                }
+            virtual void visitString(const String_t& sv)
+                {
+                    VString v(sv, m_caseblind);
+                    v.visit(m_b);
+                    m_result = v.get();
+                }
+         private:
+            const bool m_caseblind;
+            const afl::data::Value*const m_b;
+        };
+        VPair v(caseblind, b);
+        v.visit(a);
+        return v.get();
+#else
         ArithmeticPair p;
         switch (checkArithmetic(p, a, b)) {
          case ariNull:
@@ -120,8 +368,8 @@ namespace {
                           ? cmpEqual
                           : cmpGreater;
          default:
-            afl::data::StringValue* sa = dynamic_cast<afl::data::StringValue*>(a);
-            afl::data::StringValue* sb = dynamic_cast<afl::data::StringValue*>(b);
+            const afl::data::StringValue* sa = dynamic_cast<const afl::data::StringValue*>(a);
+            const afl::data::StringValue* sb = dynamic_cast<const afl::data::StringValue*>(b);
             if (sa != 0 && sb != 0) {
                 String_t ssa = convertCase(sa, caseblind);
                 String_t ssb = convertCase(sb, caseblind);
@@ -129,6 +377,7 @@ namespace {
             }
             throw Error::typeError();
         }
+#endif
     }
 
     /*
@@ -136,7 +385,7 @@ namespace {
      */
 
 
-    afl::data::Value* FAnd(interpreter::World& /*world*/, afl::data::Value* a, afl::data::Value* b)
+    afl::data::Value* FAnd(interpreter::World& /*world*/, const afl::data::Value* a, const afl::data::Value* b)
     {
         // Logical And, ternary logic
         //   e_f_t
@@ -153,7 +402,7 @@ namespace {
             return makeBooleanValue(-1);
     }
 
-    afl::data::Value* FOr(interpreter::World& /*world*/, afl::data::Value* a, afl::data::Value* b)
+    afl::data::Value* FOr(interpreter::World& /*world*/, const afl::data::Value* a, const afl::data::Value* b)
     {
         // Logical Or, ternary logic
         //   e_f_t
@@ -170,7 +419,7 @@ namespace {
             return makeBooleanValue(-1);
     }
 
-    afl::data::Value* FXor(interpreter::World& /*world*/, afl::data::Value* a, afl::data::Value* b)
+    afl::data::Value* FXor(interpreter::World& /*world*/, const afl::data::Value* a, const afl::data::Value* b)
     {
         // Logical Xor, ternary logic
         //   e_f_t
@@ -185,7 +434,7 @@ namespace {
             return makeBooleanValue(ba ^ bb);
     }
 
-    afl::data::Value* FAdd(interpreter::World& /*world*/, afl::data::Value* a, afl::data::Value* b)
+    afl::data::Value* FAdd(interpreter::World& /*world*/, const afl::data::Value* a, const afl::data::Value* b)
     {
         // Arithmetical addition or string concatenation
         ArithmeticPair p;
@@ -197,8 +446,8 @@ namespace {
          case ariFloat:
             return makeFloatValue(p.fa + p.fb);
          default:
-            afl::data::StringValue* sa = dynamic_cast<afl::data::StringValue*>(a);
-            afl::data::StringValue* sb = dynamic_cast<afl::data::StringValue*>(b);
+            const afl::data::StringValue* sa = dynamic_cast<const afl::data::StringValue*>(a);
+            const afl::data::StringValue* sb = dynamic_cast<const afl::data::StringValue*>(b);
             if (sa != 0 && sb != 0) {
                 return makeStringValue(sa->getValue() + sb->getValue());
             }
@@ -206,7 +455,7 @@ namespace {
         }
     }
 
-    afl::data::Value* FSub(interpreter::World& /*world*/, afl::data::Value* a, afl::data::Value* b)
+    afl::data::Value* FSub(interpreter::World& /*world*/, const afl::data::Value* a, const afl::data::Value* b)
     {
         // Subtraction
         ArithmeticPair p;
@@ -222,7 +471,7 @@ namespace {
         }
     }
 
-    afl::data::Value* FMult(interpreter::World& /*world*/, afl::data::Value* a, afl::data::Value* b)
+    afl::data::Value* FMult(interpreter::World& /*world*/, const afl::data::Value* a, const afl::data::Value* b)
     {
         // Multiplication
         ArithmeticPair p;
@@ -238,7 +487,7 @@ namespace {
         }
     }
 
-    afl::data::Value* FDivide(interpreter::World& /*world*/, afl::data::Value* a, afl::data::Value* b)
+    afl::data::Value* FDivide(interpreter::World& /*world*/, const afl::data::Value* a, const afl::data::Value* b)
     {
         // Division
         ArithmeticPair p;
@@ -259,7 +508,7 @@ namespace {
         }
     }
 
-    afl::data::Value* FIntegerDivide(interpreter::World& /*world*/, afl::data::Value* a, afl::data::Value* b)
+    afl::data::Value* FIntegerDivide(interpreter::World& /*world*/, const afl::data::Value* a, const afl::data::Value* b)
     {
         // Integer division
         ArithmeticPair p;
@@ -275,7 +524,7 @@ namespace {
         }
     }
 
-    afl::data::Value* FRemainder(interpreter::World& /*world*/, afl::data::Value* a, afl::data::Value* b)
+    afl::data::Value* FRemainder(interpreter::World& /*world*/, const afl::data::Value* a, const afl::data::Value* b)
     {
         // Integer remainder
         ArithmeticPair p;
@@ -291,19 +540,19 @@ namespace {
         }
     }
 
-    afl::data::Value* FPow(interpreter::World& /*world*/, afl::data::Value* a, afl::data::Value* b)
+    afl::data::Value* FPow(interpreter::World& /*world*/, const afl::data::Value* a, const afl::data::Value* b)
     {
         // Exponentiation
         if (a == 0 || b == 0)
             return 0;
 
         /* Second argument must be integer */
-        afl::data::ScalarValue* bi = dynamic_cast<afl::data::ScalarValue*>(b);
+        const afl::data::ScalarValue* bi = dynamic_cast<const afl::data::ScalarValue*>(b);
         if (!bi)
             throw Error::typeError(Error::ExpectInteger);
 
         /* First argument must be integer or real */
-        if (afl::data::ScalarValue* ai = dynamic_cast<afl::data::ScalarValue*>(a)) {
+        if (const afl::data::ScalarValue* ai = dynamic_cast<const afl::data::ScalarValue*>(a)) {
             /* Maximum value a, for which a^b yields an integer, starting with b=2 */
             static const uint16_t amax[] = {
                 46340,              // 46340**2 = 2147395600, 46341**2 =      2147488281
@@ -367,14 +616,14 @@ namespace {
                 // fractional result
                 return makeFloatValue(std::pow(double(a), double(b)));
             }
-        } else if (afl::data::FloatValue* af = dynamic_cast<afl::data::FloatValue*>(a)) {
+        } else if (const afl::data::FloatValue* af = dynamic_cast<const afl::data::FloatValue*>(a)) {
             return makeFloatValue(std::pow(af->getValue(), bi->getValue()));
         } else {
             throw Error::typeError(Error::ExpectNumeric);
         }
     }
 
-    afl::data::Value* FConcat(interpreter::World& /*world*/, afl::data::Value* a, afl::data::Value* b)
+    afl::data::Value* FConcat(interpreter::World& /*world*/, const afl::data::Value* a, const afl::data::Value* b)
     {
         // Concatenation, null annihilates
         if (a == 0 || b == 0)
@@ -383,7 +632,7 @@ namespace {
             return makeStringValue(interpreter::toString(a, false) + interpreter::toString(b, false));
     }
 
-    afl::data::Value* FConcatEmpty(interpreter::World& /*world*/, afl::data::Value* a, afl::data::Value* b)
+    afl::data::Value* FConcatEmpty(interpreter::World& /*world*/, const afl::data::Value* a, const afl::data::Value* b)
     {
         // Concatenation, null interpolates
         if (a == 0 && b == 0) {
@@ -402,92 +651,92 @@ namespace {
 
     /****************** Optionally case-sensitive functions ******************/
 
-    afl::data::Value* FCompareEQ(afl::data::Value* a, afl::data::Value* b, bool caseblind)
+    afl::data::Value* FCompareEQ(const afl::data::Value* a, const afl::data::Value* b, bool caseblind)
     {
         // Compare for equality
         Comparison cmp = compare(a, b, caseblind);
-        return (cmp & cmpNull)
+        return (cmp == cmpNull)
             ? 0
-            : makeBooleanValue((cmp & cmpEqual) != 0);
+            : makeBooleanValue(cmp == cmpEqual);
     }
 
-    afl::data::Value* FCompareNE(afl::data::Value* a, afl::data::Value* b, bool caseblind)
+    afl::data::Value* FCompareNE(const afl::data::Value* a, const afl::data::Value* b, bool caseblind)
     {
         // Compare for inequality
         Comparison cmp = compare(a, b, caseblind);
-        return (cmp & cmpNull)
+        return (cmp == cmpNull)
             ? 0
-            : makeBooleanValue((cmp & (cmpGreater | cmpLess)) != 0);
+            : makeBooleanValue(cmp != cmpEqual);
     }
 
-    afl::data::Value* FCompareLE(afl::data::Value* a, afl::data::Value* b, bool caseblind)
+    afl::data::Value* FCompareLE(const afl::data::Value* a, const afl::data::Value* b, bool caseblind)
     {
         // Compare for less/equal
         Comparison cmp = compare(a, b, caseblind);
-        return (cmp & cmpNull)
+        return (cmp == cmpNull)
             ? 0
-            : makeBooleanValue((cmp & (cmpLess | cmpEqual)) != 0);
+            : makeBooleanValue(cmp != cmpGreater);
     }
 
-    afl::data::Value* FCompareLT(afl::data::Value* a, afl::data::Value* b, bool caseblind)
+    afl::data::Value* FCompareLT(const afl::data::Value* a, const afl::data::Value* b, bool caseblind)
     {
         // Compare for less than
         Comparison cmp = compare(a, b, caseblind);
-        return (cmp & cmpNull)
+        return (cmp == cmpNull)
             ? 0
-            : makeBooleanValue((cmp & cmpLess) != 0);
+            : makeBooleanValue(cmp == cmpLess);
     }
 
-    afl::data::Value* FCompareGE(afl::data::Value* a, afl::data::Value* b, bool caseblind)
+    afl::data::Value* FCompareGE(const afl::data::Value* a, const afl::data::Value* b, bool caseblind)
     {
         // Compare for greater/equal
         Comparison cmp = compare(a, b, caseblind);
-        return (cmp & cmpNull)
+        return (cmp == cmpNull)
             ? 0
-            : makeBooleanValue((cmp & (cmpGreater | cmpEqual)) != 0);
+            : makeBooleanValue(cmp != cmpLess);
     }
 
-    afl::data::Value* FCompareGT(afl::data::Value* a, afl::data::Value* b, bool caseblind)
+    afl::data::Value* FCompareGT(const afl::data::Value* a, const afl::data::Value* b, bool caseblind)
     {
         // Compare for greater than
         Comparison cmp = compare(a, b, caseblind);
-        return (cmp & cmpNull)
+        return (cmp == cmpNull)
             ? 0
-            : makeBooleanValue((cmp & cmpGreater) != 0);
+            : makeBooleanValue(cmp == cmpGreater);
     }
 
-    afl::data::Value* FMin(afl::data::Value* a, afl::data::Value* b, bool caseblind)
+    afl::data::Value* FMin(const afl::data::Value* a, const afl::data::Value* b, bool caseblind)
     {
         // Compute minimum
         Comparison cmp = compare(a, b, caseblind);
-        if (cmp & cmpNull)
+        if (cmp == cmpNull)
             return 0;
-        else if (cmp & cmpLess)
+        else if (cmp == cmpLess)
             return a->clone();
         else
             return b->clone();
     }
 
-    afl::data::Value* FMax(afl::data::Value* a, afl::data::Value* b, bool caseblind)
+    afl::data::Value* FMax(const afl::data::Value* a, const afl::data::Value* b, bool caseblind)
     {
         // Compute maximum
         Comparison cmp = compare(a, b, caseblind);
-        if (cmp & cmpNull)
+        if (cmp == cmpNull)
             return 0;
-        else if (cmp & cmpGreater)
+        else if (cmp == cmpGreater)
             return a->clone();
         else
             return b->clone();
     }
 
-    afl::data::Value* FFirstStr(afl::data::Value* a, afl::data::Value* b, bool caseblind)
+    afl::data::Value* FFirstStr(const afl::data::Value* a, const afl::data::Value* b, bool caseblind)
     {
         // Split string at delimiter, return first part
         if (a == 0 || b == 0)
             return 0;
 
-        afl::data::StringValue* sa = dynamic_cast<afl::data::StringValue*>(a);
-        afl::data::StringValue* sb = dynamic_cast<afl::data::StringValue*>(b);
+        const afl::data::StringValue* sa = dynamic_cast<const afl::data::StringValue*>(a);
+        const afl::data::StringValue* sb = dynamic_cast<const afl::data::StringValue*>(b);
         if (sa == 0 || sb == 0)
             throw Error::typeError(Error::ExpectString);
 
@@ -499,14 +748,14 @@ namespace {
         return makeStringValue(ssa);
     }
 
-    afl::data::Value* FRestStr(afl::data::Value* a, afl::data::Value* b, bool caseblind)
+    afl::data::Value* FRestStr(const afl::data::Value* a, const afl::data::Value* b, bool caseblind)
     {
         // Split string at delimiter, return remainder
         if (a == 0 || b == 0)
             return 0;
 
-        afl::data::StringValue* sa = dynamic_cast<afl::data::StringValue*>(a);
-        afl::data::StringValue* sb = dynamic_cast<afl::data::StringValue*>(b);
+        const afl::data::StringValue* sa = dynamic_cast<const afl::data::StringValue*>(a);
+        const afl::data::StringValue* sb = dynamic_cast<const afl::data::StringValue*>(b);
         if (sa == 0 || sb == 0)
             throw Error::typeError(Error::ExpectString);
 
@@ -518,14 +767,14 @@ namespace {
         }
     }
 
-    afl::data::Value* FFindStr(afl::data::Value* a, afl::data::Value* b, bool caseblind)
+    afl::data::Value* FFindStr(const afl::data::Value* a, const afl::data::Value* b, bool caseblind)
     {
         // Find substring
         if (a == 0 || b == 0)
             return 0;
 
-        afl::data::StringValue* sa = dynamic_cast<afl::data::StringValue*>(a);
-        afl::data::StringValue* sb = dynamic_cast<afl::data::StringValue*>(b);
+        const afl::data::StringValue* sa = dynamic_cast<const afl::data::StringValue*>(a);
+        const afl::data::StringValue* sb = dynamic_cast<const afl::data::StringValue*>(b);
         if (sa == 0 || sb == 0)
             throw Error::typeError(Error::ExpectString);
 
@@ -536,7 +785,7 @@ namespace {
             return makeIntegerValue(0);
     }
 
-    afl::data::Value* FBitAnd(interpreter::World& /*world*/, afl::data::Value* a, afl::data::Value* b)
+    afl::data::Value* FBitAnd(interpreter::World& /*world*/, const afl::data::Value* a, const afl::data::Value* b)
     {
         // Bitwise and
         ArithmeticPair p;
@@ -550,7 +799,7 @@ namespace {
         }
     }
 
-    afl::data::Value* FBitOr(interpreter::World& /*world*/, afl::data::Value* a, afl::data::Value* b)
+    afl::data::Value* FBitOr(interpreter::World& /*world*/, const afl::data::Value* a, const afl::data::Value* b)
     {
         // Bitwise or
         ArithmeticPair p;
@@ -564,7 +813,7 @@ namespace {
         }
     }
 
-    afl::data::Value* FBitXor(interpreter::World& /*world*/, afl::data::Value* a, afl::data::Value* b)
+    afl::data::Value* FBitXor(interpreter::World& /*world*/, const afl::data::Value* a, const afl::data::Value* b)
     {
         // Bitwise Xor
         ArithmeticPair p;
@@ -578,27 +827,27 @@ namespace {
         }
     }
 
-    afl::data::Value* FStr(interpreter::World& /*world*/, afl::data::Value* a, afl::data::Value* b)
+    afl::data::Value* FStr(interpreter::World& /*world*/, const afl::data::Value* a, const afl::data::Value* b)
     {
         // Stringification with precision
         if (a == 0 || b == 0)
             return 0;
 
         /* Check second arg */
-        afl::data::ScalarValue* bi = dynamic_cast<afl::data::ScalarValue*>(b);
+        const afl::data::ScalarValue* bi = dynamic_cast<const afl::data::ScalarValue*>(b);
         if (bi == 0)
             throw Error::typeError(Error::ExpectInteger);
         if (bi->getValue() < 0)
             throw Error::rangeError();
 
         /* Check first arg */
-        if (afl::data::ScalarValue* ai = dynamic_cast<afl::data::ScalarValue*>(a)) {
+        if (const afl::data::ScalarValue* ai = dynamic_cast<const afl::data::ScalarValue*>(a)) {
             /* Bool converts as-is, as does integer with precision 0 */
-            if (dynamic_cast<afl::data::BooleanValue*>(ai) != 0 || bi->getValue() == 0)
+            if (dynamic_cast<const afl::data::BooleanValue*>(ai) != 0 || bi->getValue() == 0)
                 return makeStringValue(interpreter::toString(ai, false));
             /* Convert integer as floating point */
             return makeStringValue(afl::string::Format(String_t(afl::string::Format("%%.%df", bi->getValue())).c_str(), double(ai->getValue())));
-        } else if (afl::data::FloatValue* af = dynamic_cast<afl::data::FloatValue*>(a)) {
+        } else if (const afl::data::FloatValue* af = dynamic_cast<const afl::data::FloatValue*>(a)) {
             /* Convert float */
             return makeStringValue(afl::string::Format(String_t(afl::string::Format("%%.%df", bi->getValue())).c_str(), double(af->getValue())));
         } else {
@@ -606,7 +855,7 @@ namespace {
         }
     }
 
-    afl::data::Value* FAtan(interpreter::World& /*world*/, afl::data::Value* a, afl::data::Value* b)
+    afl::data::Value* FAtan(interpreter::World& /*world*/, const afl::data::Value* a, const afl::data::Value* b)
     {
         // Arc-tangent
         double value;
@@ -630,14 +879,14 @@ namespace {
         }
     }
 
-    afl::data::Value* FLCut(interpreter::World& /*world*/, afl::data::Value* a, afl::data::Value* b)
+    afl::data::Value* FLCut(interpreter::World& /*world*/, const afl::data::Value* a, const afl::data::Value* b)
     {
         // Remove leftmost N characters
         if (a == 0 || b == 0)
             return 0;
 
-        afl::data::StringValue* sa = dynamic_cast<afl::data::StringValue*>(a);
-        afl::data::ScalarValue*    ib = dynamic_cast<afl::data::ScalarValue*>(b);
+        const afl::data::StringValue* sa = dynamic_cast<const afl::data::StringValue*>(a);
+        const afl::data::ScalarValue* ib = dynamic_cast<const afl::data::ScalarValue*>(b);
         if (sa == 0 || ib == 0)
             throw Error::typeError();
 
@@ -649,14 +898,14 @@ namespace {
         return makeStringValue(ssa);
     }
 
-    afl::data::Value* FRCut(interpreter::World& /*world*/, afl::data::Value* a, afl::data::Value* b)
+    afl::data::Value* FRCut(interpreter::World& /*world*/, const afl::data::Value* a, const afl::data::Value* b)
     {
         // Remove after Nth character
         if (a == 0 || b == 0)
             return 0;
 
-        afl::data::StringValue* sa = dynamic_cast<afl::data::StringValue*>(a);
-        afl::data::ScalarValue*    ib = dynamic_cast<afl::data::ScalarValue*>(b);
+        const afl::data::StringValue* sa = dynamic_cast<const afl::data::StringValue*>(a);
+        const afl::data::ScalarValue* ib = dynamic_cast<const afl::data::ScalarValue*>(b);
         if (sa == 0 || ib == 0)
             throw Error::typeError();
 
@@ -670,14 +919,14 @@ namespace {
         return makeStringValue(ssa);
     }
 
-    afl::data::Value* FEndCut(interpreter::World& /*world*/, afl::data::Value* a, afl::data::Value* b)
+    afl::data::Value* FEndCut(interpreter::World& /*world*/, const afl::data::Value* a, const afl::data::Value* b)
     {
         // Remove all but last N characters
         if (a == 0 || b == 0)
             return 0;
 
-        afl::data::StringValue* sa = dynamic_cast<afl::data::StringValue*>(a);
-        afl::data::ScalarValue* ib = dynamic_cast<afl::data::ScalarValue*>(b);
+        const afl::data::StringValue* sa = dynamic_cast<const afl::data::StringValue*>(a);
+        const afl::data::ScalarValue* ib = dynamic_cast<const afl::data::ScalarValue*>(b);
         if (sa == 0 || ib == 0)
             throw Error::typeError();
 
@@ -693,14 +942,14 @@ namespace {
         return makeStringValue(ssa);
     }
 
-    afl::data::Value* FStrMult(interpreter::World& /*world*/, afl::data::Value* a, afl::data::Value* b)
+    afl::data::Value* FStrMult(interpreter::World& /*world*/, const afl::data::Value* a, const afl::data::Value* b)
     {
         // Replicate string
         if (a == 0 || b == 0)
             return 0;
 
-        afl::data::ScalarValue* ia = dynamic_cast<afl::data::ScalarValue*>(a);
-        afl::data::StringValue* sb = dynamic_cast<afl::data::StringValue*>(b);
+        const afl::data::ScalarValue* ia = dynamic_cast<const afl::data::ScalarValue*>(a);
+        const afl::data::StringValue* sb = dynamic_cast<const afl::data::StringValue*>(b);
         if (ia == 0 || sb == 0)
             throw Error::typeError();
 
@@ -717,13 +966,13 @@ namespace {
         return makeStringValue(result);
     }
 
-    afl::data::Value* FKeyAddParent(interpreter::World& /*world*/, afl::data::Value* a, afl::data::Value* b)
+    afl::data::Value* FKeyAddParent(interpreter::World& /*world*/, const afl::data::Value* a, const afl::data::Value* b)
     {
         if (a == 0 || b == 0)
             return 0;
 
-        interpreter::KeymapValue* keymap = dynamic_cast<interpreter::KeymapValue*>(a);
-        interpreter::KeymapValue* parent = dynamic_cast<interpreter::KeymapValue*>(b);
+        const interpreter::KeymapValue* keymap = dynamic_cast<const interpreter::KeymapValue*>(a);
+        const interpreter::KeymapValue* parent = dynamic_cast<const interpreter::KeymapValue*>(b);
         if (keymap == 0 || parent == 0)
             throw Error::typeError(Error::ExpectKeymap);
 
@@ -731,18 +980,18 @@ namespace {
         return keymap->clone();
     }
 
-    afl::data::Value* FKeyFind(interpreter::World& /*world*/, afl::data::Value* a, afl::data::Value* b)
+    afl::data::Value* FKeyFind(interpreter::World& /*world*/, const afl::data::Value* a, const afl::data::Value* b)
     {
         if (a == 0 || b == 0)
             return 0;
 
         // Keymap
-        interpreter::KeymapValue* keymap = dynamic_cast<interpreter::KeymapValue*>(a);
+        const interpreter::KeymapValue* keymap = dynamic_cast<const interpreter::KeymapValue*>(a);
         if (keymap == 0)
             throw Error::typeError(Error::ExpectKeymap);
 
         // Key
-        afl::data::StringValue* keysym = dynamic_cast<afl::data::StringValue*>(b);
+        const afl::data::StringValue* keysym = dynamic_cast<const afl::data::StringValue*>(b);
         if (!keysym)
             throw Error::typeError(Error::ExpectString);
 
@@ -759,19 +1008,19 @@ namespace {
             return makeIntegerValue(cmd);
     }
 
-    afl::data::Value* FArrayDim(interpreter::World& /*world*/, afl::data::Value* a, afl::data::Value* b)
+    afl::data::Value* FArrayDim(interpreter::World& /*world*/, const afl::data::Value* a, const afl::data::Value* b)
     {
         if (a == 0 || b == 0)
             return 0;
 
         // Array
-        interpreter::CallableValue* av = dynamic_cast<interpreter::CallableValue*>(a);
+        const interpreter::CallableValue* av = dynamic_cast<const interpreter::CallableValue*>(a);
         if (av == 0) {
             throw Error::typeError(Error::ExpectArray);
         }
 
         // Index
-        afl::data::ScalarValue* iv = dynamic_cast<afl::data::ScalarValue*>(b);
+        const afl::data::ScalarValue* iv = dynamic_cast<const afl::data::ScalarValue*>(b);
         if (iv == 0) {
             throw Error::typeError(Error::ExpectInteger);
         }
@@ -783,14 +1032,14 @@ namespace {
         return makeIntegerValue(av->getDimension(n));
     }
 
-    template<afl::data::Value* (*Func)(afl::data::Value*, afl::data::Value*, bool), bool Value>
+    template<afl::data::Value* (*Func)(const afl::data::Value*, const afl::data::Value*, bool), bool Value>
     afl::data::Value*
-    Bind(interpreter::World& /*world*/, afl::data::Value* a, afl::data::Value* b)
+    Bind(interpreter::World& /*world*/, const afl::data::Value* a, const afl::data::Value* b)
     {
         return Func(a, b, Value);
     }
 
-    afl::data::Value* (*const binary_ops[])(interpreter::World&,afl::data::Value*,afl::data::Value*) = {
+    afl::data::Value* (*const binary_ops[])(interpreter::World&,const afl::data::Value*,const afl::data::Value*) = {
         FAnd,
         FOr,
         FXor,
@@ -845,7 +1094,7 @@ namespace {
 //     \param a,b User-supplied arguments taken from value stack
 //     \return New value to push on value stack */
 afl::data::Value*
-interpreter::executeBinaryOperation(World& world, uint8_t op, afl::data::Value* a, afl::data::Value* b)
+interpreter::executeBinaryOperation(World& world, uint8_t op, const afl::data::Value* a, const afl::data::Value* b)
 {
     // ex executeBinaryOperation
     if (op < countof(binary_ops)) {
@@ -860,7 +1109,7 @@ interpreter::executeBinaryOperation(World& world, uint8_t op, afl::data::Value* 
 //     \param a,b User-supplied arguments taken from value stack
 //     \return Comparison result, possible input to makeBooleanValue. */
 int
-interpreter::executeComparison(uint8_t op, afl::data::Value* a, afl::data::Value* b)
+interpreter::executeComparison(uint8_t op, const afl::data::Value* a, const afl::data::Value* b)
 {
     // ex int/binary.h:executeComparison
     /* Figure out what to do */
@@ -885,7 +1134,7 @@ interpreter::executeComparison(uint8_t op, afl::data::Value* a, afl::data::Value
 
     /* Do it */
     Comparison result = compare(a, b, caseblind);
-    if (result & cmpNull) {
+    if (result == cmpNull) {
         return -1;
     } else {
         return (result & mask) != 0;

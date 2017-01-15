@@ -5,7 +5,7 @@
 #define C2NG_GFX_PIXMAPCANVASIMPL_HPP
 
 #include "gfx/canvas.hpp"
-#include "afl/base/ptr.hpp"
+#include "afl/base/ref.hpp"
 #include "gfx/primitives.hpp"
 
 namespace gfx {
@@ -15,7 +15,7 @@ namespace gfx {
      public:
         typedef Primitives<TraitsType> Primitives_t;
 
-        PixmapCanvasImpl(afl::base::Ptr<PixmapType> pix)
+        PixmapCanvasImpl(afl::base::Ref<PixmapType> pix)
             : m_pixmap(pix)
             { }
 
@@ -83,12 +83,6 @@ namespace gfx {
                 r.intersect(getSizeRectangle());
                 return r;
             }
-        virtual Color_t getPixel(Point pt)
-            {
-                Color_t result[1];
-                getPixels(pt, result);
-                return result[0];
-            }
         virtual void getPixels(Point pt, afl::base::Memory<Color_t> colors)
             {
                 int x = pt.getX();
@@ -141,7 +135,7 @@ namespace gfx {
                 return Rectangle(Point(0, 0), m_pixmap->getSize());
             }
 
-        afl::base::Ptr<PixmapType> m_pixmap;
+        afl::base::Ref<PixmapType> m_pixmap;
     };
 }
 

@@ -156,8 +156,7 @@ ui::rich::DocumentView::draw(gfx::Canvas& can)
 {
     // ex UIRichDocument::drawContent
     gfx::ClipFilter filter(can, getExtent());
-    gfx::Context ctx(filter);
-    ctx.useColorScheme(getColorScheme());
+    gfx::Context<util::SkinColor::Color> ctx(filter, getColorScheme());
     drawBackground(ctx, getExtent());
     doc.draw(ctx, getExtent(), getPageTop());
 }
@@ -254,7 +253,7 @@ bool
 ui::rich::DocumentView::handleMouse(gfx::Point pt, MouseButtons_t pressedButtons)
 {
     // ex UIRichDocument::handleEvent (part)
-    if (getExtent().contains(pt)) {
+    if (!hasState(DisabledState) && getExtent().contains(pt)) {
         requestActive();
         Document::LinkId_t link =
             doc.getLinkFromPos(gfx::Point(pt.getX() - getExtent().getLeftX(),

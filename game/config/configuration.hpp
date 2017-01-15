@@ -10,6 +10,7 @@
 #include "afl/string/string.hpp"
 #include "game/config/configurationoption.hpp"
 #include "afl/base/signal.hpp"
+#include "afl/base/enumerator.hpp"
 
 namespace game { namespace config {
 
@@ -31,6 +32,9 @@ namespace game { namespace config {
         This class is completely different from the PCC2 version, to add more flexibility. */
     class Configuration {
      public:
+        typedef std::pair<String_t,ConfigurationOption*> OptionInfo_t;
+        typedef afl::base::Enumerator<OptionInfo_t> Enumerator_t;
+
         /** Constructor.
             Makes an empty configuration. */
         Configuration();
@@ -69,6 +73,10 @@ namespace game { namespace config {
         const typename Descriptor::OptionType_t&
         operator[](const Descriptor& desc) const;
 
+        /** Enumeration.
+            \return Enumerator that produces all options. */
+        afl::base::Ptr<Enumerator_t> getOptions();
+
         /** Mark all options unset (default). */
         void markAllOptionsUnset();
 
@@ -82,7 +90,7 @@ namespace game { namespace config {
      private:
         class CasePreservingString {
          public:
-            CasePreservingString(String_t value)
+            CasePreservingString(const String_t& value)
                 : m_value(value)
                 { }
             CasePreservingString(const char* value)
@@ -90,6 +98,8 @@ namespace game { namespace config {
                 { }
             bool operator<(const CasePreservingString& other) const
                 { return afl::string::strCaseCompare(m_value, other.m_value) < 0; }
+            const String_t& toString() const
+                { return m_value; }
          private:
             String_t m_value;
         };

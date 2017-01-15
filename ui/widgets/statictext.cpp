@@ -48,21 +48,26 @@ ui::widgets::StaticText::setIsFlexible(bool flex)
     return *this;
 }
 
+ui::widgets::StaticText&
+ui::widgets::StaticText::setColor(util::SkinColor::Color color)
+{
+    m_color = color;
+    requestRedraw();
+    return *this;
+}
+
 // SimpleWidget:
 void
 ui::widgets::StaticText::draw(gfx::Canvas& can)
 {
     // ex UIStaticText::drawContent
-    afl::base::Ptr<gfx::Font> font = m_provider.getFont(m_font);
-    if (font.get() != 0) {
-        gfx::Context ctx(can);
-        ctx.useColorScheme(getColorScheme());
-        ctx.setColor(m_color);
-        ctx.useFont(*font);
-        ctx.setTextAlign(m_align, 1);
-        drawBackground(ctx, getExtent());
-        outTextF(ctx, getExtent(), m_text);
-    }
+    afl::base::Ref<gfx::Font> font = m_provider.getFont(m_font);
+    gfx::Context<util::SkinColor::Color> ctx(can, getColorScheme());
+    ctx.setColor(m_color);
+    ctx.useFont(*font);
+    ctx.setTextAlign(m_align, 1);
+    drawBackground(ctx, getExtent());
+    outTextF(ctx, getExtent(), m_text);
 }
 
 void
@@ -79,9 +84,8 @@ ui::layout::Info
 ui::widgets::StaticText::getLayoutInfo() const
 {
     // ex UIStaticText::getLayoutInfo
-    afl::base::Ptr<gfx::Font> font = m_provider.getFont(m_font);
-    gfx::Point pt(font.get() != 0 ? font->getTextWidth(m_text) : 0,
-                  font.get() != 0 ? font->getTextHeight(m_text) : 0);
+    afl::base::Ref<gfx::Font> font = m_provider.getFont(m_font);
+    gfx::Point pt(font->getTextWidth(m_text), font->getTextHeight(m_text));
     return ui::layout::Info(pt, pt, m_isFlexible ? ui::layout::Info::GrowHorizontal : ui::layout::Info::Fixed);
 }
 

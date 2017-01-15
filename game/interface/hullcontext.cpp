@@ -47,7 +47,7 @@ namespace {
     };
 }
 
-game::interface::HullContext::HullContext(int nr, afl::base::Ptr<game::spec::ShipList> shipList, afl::base::Ptr<game::Root> root)
+game::interface::HullContext::HullContext(int nr, afl::base::Ref<game::spec::ShipList> shipList, afl::base::Ref<game::Root> root)
     : m_number(nr),
       m_shipList(shipList), m_root(root)
 {
@@ -58,11 +58,11 @@ game::interface::HullContext::~HullContext()
 { }
 
 // Context:
-bool
+game::interface::HullContext*
 game::interface::HullContext::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
 {
     // ex IntHullContext::lookup
-    return lookupName(name, HULL_MAPPING, result);
+    return lookupName(name, HULL_MAPPING, result) ? this : 0;
 }
 
 void
@@ -99,7 +99,7 @@ bool
 game::interface::HullContext::next()
 {
     // ex IntHullContext::next
-    if (game::spec::Hull* h = m_shipList->hulls().findNext(m_number)) {
+    if (const game::spec::Hull* h = m_shipList->hulls().findNext(m_number)) {
         m_number = h->getId();
         return true;
     } else {
@@ -136,9 +136,22 @@ game::interface::HullContext::toString(bool /*readable*/) const
 }
 
 void
-game::interface::HullContext::store(interpreter::TagNode& out, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext* /*ctx*/) const
+game::interface::HullContext::store(interpreter::TagNode& out, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
 {
     // ex IntHullContext::store
     out.tag = out.Tag_Hull;
     out.value = m_number;
+}
+
+game::interface::HullContext*
+game::interface::HullContext::create(int nr, Session& session)
+{
+    // FIXME: this refuses creating a HullContext for nonexistant hulls.
+    // Nu has discontinuous hull Ids. Should we allow creating them?
+    game::spec::ShipList* list = session.getShipList().get();
+    Root* root = session.getRoot().get();
+    if (list != 0 && root != 0 && list->hulls().get(nr) != 0) {
+        return new HullContext(nr, *list, *root);
+    }
+    return 0;
 }

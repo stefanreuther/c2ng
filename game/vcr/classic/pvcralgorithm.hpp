@@ -34,7 +34,8 @@ namespace game { namespace vcr { namespace classic {
         PVCRAlgorithm(bool phost3Flag,
                       Visualizer& vis,
                       const game::config::HostConfiguration& config,
-                      const game::spec::ShipList& list);
+                      const game::spec::BeamVector_t& beams,
+                      const game::spec::TorpedoVector_t& launchers);
 
         /** Destructor. */
         ~PVCRAlgorithm();
@@ -68,7 +69,8 @@ namespace game { namespace vcr { namespace classic {
 
      private:
         const game::config::HostConfiguration& m_config;
-        const game::spec::ShipList& m_shipList;
+        const game::spec::BeamVector_t& m_beams;
+        const game::spec::TorpedoVector_t& m_launchers;
         bool m_phost3Flag;
         uint32_t m_seed;
         Time_t m_time;

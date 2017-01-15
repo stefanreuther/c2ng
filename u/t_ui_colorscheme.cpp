@@ -17,14 +17,13 @@ TestUiColorScheme::testBackground()
 
     // Initialize
     ui::ColorScheme testee;
-    afl::base::Ptr<gfx::RGBAPixmap> pix = gfx::RGBAPixmap::create(N, N);
-    afl::base::Ptr<gfx::Canvas> can = pix->makeCanvas();
+    afl::base::Ref<gfx::RGBAPixmap> pix = gfx::RGBAPixmap::create(N, N);
+    afl::base::Ref<gfx::Canvas> can = pix->makeCanvas();
     testee.init(*can);
     pix->pixels().fill(1234578);
 
     // Draw background
-    gfx::Context ctx(*can);
-    testee.drawBackground(ctx, gfx::Rectangle(0,0,N,N));
+    testee.drawBackground(*can, gfx::Rectangle(0,0,N,N));
 
     // Verify
     afl::base::Memory<const uint32_t> pixels = pix->pixels();
@@ -40,16 +39,16 @@ TestUiColorScheme::testColor()
 {
     // Use a RGBAPixmap to initialize the palette to a 1:1 mapping
     ui::ColorScheme testee;
-    afl::base::Ptr<gfx::Canvas> can = gfx::RGBAPixmap::create(1, 1)->makeCanvas();
+    afl::base::Ref<gfx::Canvas> can = gfx::RGBAPixmap::create(1, 1)->makeCanvas();
     testee.init(*can);
 
     // Test we can get everything
-    for (uint32_t i = 0; i < 1000; ++i) {
+    for (uint32_t i = 0; i < ui::Color_Avail; ++i) {
         testee.getColor(i);
     }
 
     // Out-of-range colors must report black
-    for (uint32_t i = 1000; i < 10000; ++i) {
+    for (uint32_t i = ui::Color_Avail; i < 255; ++i) {
         TS_ASSERT_EQUALS(testee.getColor(i), COLORQUAD_FROM_RGB(0,0,0));
     }
 }

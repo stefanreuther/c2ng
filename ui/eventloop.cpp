@@ -30,6 +30,12 @@ ui::EventLoop::stop(int n)
     m_stopped = true;
 }
 
+bool
+ui::EventLoop::isStopped() const
+{
+    return m_stopped;
+}
+
 afl::base::Closure<void(int)>*
 ui::EventLoop::makeStop(int n)
 {

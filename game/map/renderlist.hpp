@@ -23,9 +23,13 @@ namespace game { namespace map {
             riPlanet,                   // x,y,id,flags
             riShip,                     // x,y,id,rel
             riFleetLeader,              // x,y,id,rel
-            riMinefield                 // x,y,id,r,isWeb,rel
+            riMinefield,                // x,y,id,r,isWeb,rel
+            riUserCircle,               // x,y,r,color
+            riUserLine,                 // x,y,x,y,color
+            riUserRectangle,            // x,y,x,y,color
+            riUserMarker                // x,y,shape,color,text
         };
-        static const int MAX_INSTRUCTION = riMinefield;
+        static const int MAX_INSTRUCTION = riUserMarker;
 
         class Iterator {
          public:
@@ -53,6 +57,10 @@ namespace game { namespace map {
         virtual void drawShip(Point p, int id, Relation_t rel);
         virtual void drawFleetLeader(Point p, int id, Relation_t rel);
         virtual void drawMinefield(Point p, int id, int r, bool isWeb, Relation_t rel);
+        virtual void drawUserCircle(Point pt, int r, int color);
+        virtual void drawUserLine(Point a, Point b, int color);
+        virtual void drawUserRectangle(Point a, Point b, int color);
+        virtual void drawUserMarker(Point pt, int shape, int color, String_t label);
 
         void addInstruction(Instruction ins);
         void addParameter(int16_t par);

@@ -214,7 +214,7 @@ game::browser::Browser::createAccountFolder(Account& account)
 }
 
 afl::base::Ptr<game::Root>
-game::browser::Browser::loadGameRoot(afl::base::Ptr<afl::io::Directory> dir)
+game::browser::Browser::loadGameRoot(afl::base::Ref<afl::io::Directory> dir)
 {
     return m_handlers.loadGameRoot(dir);
 }

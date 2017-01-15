@@ -41,6 +41,8 @@ namespace game { namespace spec {
 
         const FriendlyCode* at(size_t n) const;
 
+        bool getIndexByName(const String_t& fc, size_t& index) const;
+
         Iterator_t getCodeByName(const String_t& fc) const;
 
 

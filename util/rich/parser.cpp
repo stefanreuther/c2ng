@@ -12,6 +12,8 @@
 #include "afl/io/xml/reader.hpp"
 #include "afl/io/xml/defaultentityhandler.hpp"
 #include "afl/base/countof.hpp"
+#include "util/rich/alignmentattribute.hpp"
+#include "afl/string/parse.hpp"
 
 namespace {
     struct ColorMap {
@@ -169,6 +171,30 @@ util::rich::Parser::parseTextItem(bool keepFormat)
             readNext();
         }
         return parseText(keepFormat).withColor(c);
+    } else if (isOpeningTag("align")) {
+        int width = 0;
+        int align = 0;
+        while (m_currentToken == m_reader.TagAttribute) {
+            if (m_reader.getName() == "width") {
+                int n;
+                if (afl::string::strToInteger(m_reader.getValue(), n) && n > 0) {
+                    width = n;
+                }
+            } else if (m_reader.getName() == "align") {
+                if (m_reader.getValue() == "left") {
+                    align = 0;
+                } else if (m_reader.getValue() == "center") {
+                    align = 1;
+                } else if (m_reader.getValue() == "right") {
+                    align = 2;
+                } else {
+                    // invalid
+                }
+            } else {
+            }
+            readNext();
+        }
+        return parseText(keepFormat).withNewAttribute(new AlignmentAttribute(width, align));
     } else if (m_currentToken == m_reader.TagStart) {
         /* An opening tag we don't understand; parse its content */
         readNext();

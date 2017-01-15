@@ -4,7 +4,7 @@
 #ifndef C2NG_GAME_INTERFACE_ITERATORCONTEXT_HPP
 #define C2NG_GAME_INTERFACE_ITERATORCONTEXT_HPP
 
-#include "afl/base/ptr.hpp"
+#include "afl/base/ref.hpp"
 #include "game/game.hpp"
 #include "interpreter/arguments.hpp"
 #include "interpreter/context.hpp"
@@ -19,11 +19,11 @@ namespace game { namespace interface {
 
     class IteratorContext : public interpreter::SingleContext {
      public:
-        IteratorContext(afl::base::Ptr<IteratorProvider> provider);
+        IteratorContext(afl::base::Ref<IteratorProvider> provider);
         ~IteratorContext();
 
         // Context:
-        virtual bool lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
+        virtual IteratorContext* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
         virtual void set(PropertyIndex_t index, afl::data::Value* value);
         virtual afl::data::Value* get(PropertyIndex_t index);
         virtual IteratorContext* clone() const;
@@ -32,15 +32,15 @@ namespace game { namespace interface {
 
         // BaseValue:
         virtual String_t toString(bool readable) const;
-        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, interpreter::SaveContext* ctx) const;
+        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, interpreter::SaveContext& ctx) const;
 
      private:
-        afl::base::Ptr<IteratorProvider> m_provider;
+        afl::base::Ref<IteratorProvider> m_provider;
     };
 
     afl::data::Value* IFIterator(game::Session& session, interpreter::Arguments& args);
 
-    afl::data::Value* makeIteratorValue(afl::base::Ptr<Game> game, int nr);
+    interpreter::Context* makeIteratorValue(afl::base::Ptr<Game> game, int nr, bool reportRangeError);
 
 } }
 

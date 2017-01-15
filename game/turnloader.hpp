@@ -8,12 +8,14 @@
 #include "afl/bits/smallset.hpp"
 #include "afl/string/translator.hpp"
 #include "game/playerset.hpp"
+#include "afl/charset/charset.hpp"
 
 namespace game {
 
     class Turn;
     class Game;
     class Root;
+    class Session;
 
     class TurnLoader : public afl::base::Deletable {
      public:
@@ -69,7 +71,7 @@ namespace game {
             \param player [in] Player number.
             \param root [in/out] Root. May be updated with configuration.
             FIXME: we may need to pass in a ShipList object to update ModifiedHullFunctionList? */
-        virtual void loadCurrentTurn(Turn& turn, Game& game, int player, Root& root) = 0;
+        virtual void loadCurrentTurn(Turn& turn, Game& game, int player, Root& root, Session& session) = 0;
 
         // Other methods:
         // - saveCurrentTurn
@@ -109,6 +111,22 @@ namespace game {
             \param baseSet set of players to check; pass in PlayerList::getAllPlayers().
             \return default player number if there is one; 0 if there is none or it's ambiguous */
         int getDefaultPlayer(PlayerSet_t baseSet) const;
+
+     protected:
+        /** Load current turn databases.
+            This method should be called by the loadCurrentTurn() method, with the same parameters,
+            to load the databases that are common to all versions:
+            - starchart (chartX.cc)
+            - scores (scoreX.cc)
+            FIXME: script VM? probably not here. */
+        void loadCurrentDatabases(Turn& turn, Game& game, int player, Root& root, Session& session, afl::charset::Charset& charset);
+
+        /** Load history turn databases.
+            This method should be called by the loadHistoryTurn() method, with the same parameters,
+            to load the databases that are common to all versions:
+            - starchart (chartX.cc)
+            - scores (scoreX.cc) */
+        void loadHistoryDatabases(Turn& turn, Game& game, int player, int turnNumber, Root& root, afl::charset::Charset& charset);
     };
 
 }

@@ -20,7 +20,7 @@ game::nu::GameFolder::GameFolder(BrowserHandler& handler,
     : m_handler(handler),
       m_account(acc),
       m_gameNr(gameNr),
-      m_state(new GameState(handler, acc, gameNr, hint))
+      m_state(*new GameState(handler, acc, gameNr, hint))
 { }
 
 void
@@ -38,7 +38,7 @@ game::nu::GameFolder::loadGameRoot()
     // Root
     afl::base::Ptr<Root> root = new Root(m_handler.getDefaultSpecificationDirectory(),
                                          afl::io::InternalDirectory::create("FIXME - nu game directory"),
-                                         new SpecificationLoader(m_state, m_handler.translator(), m_handler.log()),
+                                         *new SpecificationLoader(m_state, m_handler.translator(), m_handler.log()),
                                          HostVersion(HostVersion::NuHost, MKVERSION(3,2,0)),
                                          std::auto_ptr<game::RegistrationKey>(new RegistrationKey(a("player"))),
                                          std::auto_ptr<game::StringVerifier>(new StringVerifier()));

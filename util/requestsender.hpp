@@ -61,7 +61,7 @@ namespace util {
             Execute from origin thread. */
         void disconnect();
 
-        struct Impl {
+        struct Impl : public afl::base::RefCounted {
             RequestReceiver<ObjectType>* m_pBacklink;
             RequestDispatcher& m_dispatcher;
             Impl(RequestReceiver<ObjectType>* pBacklink, RequestDispatcher& dispatcher)

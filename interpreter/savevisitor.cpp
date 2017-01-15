@@ -2,6 +2,7 @@
   *  \file interpreter/savevisitor.cpp
   */
 
+#include <algorithm>
 #include <math.h>               // import into global namespace
 #include "interpreter/savevisitor.hpp"
 #include "interpreter/tagnode.hpp"
@@ -11,6 +12,8 @@
 #include "afl/bits/value.hpp"
 #include "afl/bits/int16le.hpp"
 #include "afl/bits/int32le.hpp"
+#include "interpreter/context.hpp"
+#include "util/io.hpp"
 
 /* Fallback implementation of isnan.
    If we have a macro, assume it works.
@@ -33,17 +36,6 @@ static inline bool isnan(Wrap d, ...)
 
 namespace {
     const char NAME[] = "VM Save";
-
-    /** Store Pascal string into stream.
-        \param s   Stream to write to from
-        \param str String, should be <= 255 characters (or will be truncated) */
-    void storePascalStringT(afl::io::DataSink& sink, const String_t& str)
-    {
-        const String_t name(NAME);
-        uint8_t length = str.size();
-        sink.handleFullData(name, afl::base::fromObject(length));
-        sink.handleFullData(name, afl::string::toBytes(str).trim(length));
-    }
 
     /** Store value in REAL (real48) format.
         REAL cannot store infinities, and has a smaller range than usual doubles.
@@ -119,11 +111,11 @@ namespace {
 
 }
 
-interpreter::SaveVisitor::SaveVisitor(TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, SaveContext* ctx)
+interpreter::SaveVisitor::SaveVisitor(TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, SaveContext& ctx)
     : m_out(out),
       m_aux(aux),
       m_charset(cs),
-      m_pContext(ctx)
+      m_context(ctx)
 { }
 
 void
@@ -131,23 +123,14 @@ interpreter::SaveVisitor::visitString(const String_t& str)
 {
     // ex IntStringValue::store
     String_t converted = m_charset.encode(afl::string::toMemory(str));
-    if (converted.size() == 0) {
-        // Empty string. Use Short String format, which is supported by PCC 1.0.8+.
-        m_out.tag   = TagNode::Tag_String;
-        m_out.value = 0;
-    } else if (converted.size() <= 255 && m_pContext == 0) {
-        // Use Short String format, which is supported by PCC 1.0.8+.
-        // When we're saving a VM file (that is, when we have a SaveContext instance), we don't have to care for backward compatibility,
-        // so let's save a few bytes by not using short string format there.
-        m_out.tag   = TagNode::Tag_String;
-        m_out.value = 0x11111111;
-        storePascalStringT(m_aux, converted);
-    } else {
-        // Use Long String format, PCC 1.0.18+.
-        m_out.tag   = TagNode::Tag_LongString;
-        m_out.value = converted.size();
-        m_aux.handleFullData(NAME, afl::string::toBytes(converted));
-    }
+
+    // \change We now always use Long String format.
+    // PCC2 would have tried to use Short String format (Tag_String, PCC 1.0.8, January 2001) when saving a chart.cc file.
+    // We don't know here whether we're saving a chart.cc file.
+    // However, since all versions of PCC2 since 1.0.18 (April 2002) can read Long String format, let's keep the code simple.
+    m_out.tag   = TagNode::Tag_LongString;
+    m_out.value = converted.size();
+    m_aux.handleFullData(NAME, afl::string::toBytes(converted));
 }
 
 void
@@ -197,7 +180,7 @@ interpreter::SaveVisitor::visitOther(const afl::data::Value& other)
     if (bv == 0) {
         throw Error(Error::notSerializable());
     }
-    bv->store(m_out, m_aux, m_charset, m_pContext);
+    bv->store(m_out, m_aux, m_charset, m_context);
 }
 
 void
@@ -216,7 +199,7 @@ interpreter::SaveVisitor::visitError(const String_t& /*source*/, const String_t&
 void
 interpreter::SaveVisitor::save(afl::io::DataSink& out,
                                const afl::data::Segment& data, size_t slots,
-                               afl::charset::Charset& cs, SaveContext* ctx)
+                               afl::charset::Charset& cs, SaveContext& ctx)
 {
     // ex IntDataSegment::save
     // Collect headers in one sink, aux data in another
@@ -241,4 +224,58 @@ interpreter::SaveVisitor::save(afl::io::DataSink& out,
     // Generate output
     out.handleFullData(name, headers.getContent());
     out.handleFullData(name, aux.getContent());
+}
+
+// /** Save context list into stream.
+//     \param out      [out] Stream
+//     \param contexts [in] Contexts to save
+//     \throws FileProblemException upon I/O error
+//     \throws IntError if a context cannot be serialized
+
+//     This is a very stripped-down version of IntDataSegment::save,
+//     which assumes contexts are never null. */
+void
+interpreter::SaveVisitor::saveContexts(afl::io::DataSink& out,
+                                       const afl::container::PtrVector<interpreter::Context>& contexts,
+                                       afl::charset::Charset& cs, SaveContext& ctx)
+{
+    // ex int/contextio.h:saveContexts
+    // Collect headers in one sink, aux data in another
+    afl::io::InternalSink headers;
+    afl::io::InternalSink aux;
+    const String_t name(NAME);
+
+    for (size_t i = 0, n = contexts.size(); i < n; ++i) {
+        // Generate single entry
+        TagNode node;
+        contexts[i]->store(node, aux, cs, ctx);
+
+        // Serialize tag node
+        afl::bits::Value<afl::bits::Int16LE> packedTag;
+        afl::bits::Value<afl::bits::Int32LE> packedValue;
+        packedTag = node.tag;
+        packedValue = node.value;
+        headers.handleFullData(name, packedTag.m_bytes);
+        headers.handleFullData(name, packedValue.m_bytes);
+    }
+
+    // Generate output
+    out.handleFullData(name, headers.getContent());
+    out.handleFullData(name, aux.getContent());
+}
+
+// /** Store name list to stream.
+//     \param s Stream to save to
+//     \param count Number of names to save. Must be <= getNumNames(). */
+void
+interpreter::SaveVisitor::saveNames(afl::io::DataSink& out, const afl::data::NameMap& names, size_t slots, afl::charset::Charset& cs)
+{
+    // ex IntVariableNames::save
+    size_t todo = std::min(uint32_t(slots), names.getNumNames());
+    for (size_t i = 0; i < todo; ++i) {
+        util::storePascalStringTruncate(out, names.getNameByIndex(i), cs);
+    }
+    for (size_t i = todo; i < slots; ++i) {
+        util::storePascalStringTruncate(out, String_t(), cs);
+    }
 }

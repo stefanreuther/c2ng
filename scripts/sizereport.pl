@@ -44,7 +44,7 @@ foreach (@ARGV) {
     while (<PIPE>) {
         #                                     Num        Value       Size    Type    Bind    Vis   Ndx  Name
         if (my ($size,$type,$bind,$name) = /^[\s\d]+:\s*[0-9a-f]+\s+(\d+)\s+(\S+)\s+(\S+)\s+\S+\s+\S+\s+(.+)/i) {
-            if ($type eq 'FUNC') {
+            if ($type eq 'FUNC' && $size > 0) {
                 my @parsedName = parseName($name);
                 my $root = $tree;
                 if (@parsedName) {

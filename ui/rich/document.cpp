@@ -12,9 +12,10 @@
 #include "util/rich/styleattribute.hpp"
 #include "util/rich/linkattribute.hpp"
 #include "util/rich/colorattribute.hpp"
+#include "util/rich/alignmentattribute.hpp"
 
 namespace {
-    void drawKeycap(gfx::Context& ctx, int x, int y, int he, int wi)
+    void drawKeycap(gfx::BaseContext& ctx, int x, int y, int he, int wi)
     {
         /* Adjust to leave some inter-line space */
         he -= he/8;
@@ -76,6 +77,8 @@ class ui::rich::Document::Splitter : public util::rich::Visitor {
     int nlink;
     int nkey;
     std::vector<util::SkinColor::Color> colors;
+    std::vector<size_t> m_alignmentSlots;
+    std::vector<int> m_alignmentWidths;
 
     void process(const util::rich::Attribute& att, int delta);
 };
@@ -99,12 +102,35 @@ ui::rich::Document::Splitter::handleText(String_t text)
     req.setStyle(nfixed > 0 ? 1 : 0);
 
     util::SkinColor::Color color = !colors.empty() ? colors.back() : util::SkinColor::Static;
-    items.pushBackNew(new Item(nlink ? Link : Normal, 0, 0,
-                               m_provider.getFont(req)->getTextWidth(text) + add,
-                               req, color,
-                               nunder > 0,
-                               nkey > 0,
-                               text));
+    int width = m_provider.getFont(req)->getTextWidth(text) + add;
+    bool addIt;
+    bool breakable;
+    if (!m_alignmentWidths.empty()) {
+        int& remain = m_alignmentWidths.back();
+        if (remain == 0) {
+            // No room for this one
+            addIt = false;
+            breakable = false;
+        } else {
+            // There is some room; reduce room.
+            remain -= std::min(remain, width);
+            addIt = true;
+            breakable = false;
+        }
+    } else {
+        addIt = true;
+        breakable = true;
+    }
+
+    if (addIt) {
+        items.pushBackNew(new Item(nlink ? Link : Normal, 0, 0,
+                                   width,
+                                   req, color,
+                                   nunder > 0,
+                                   nkey > 0,
+                                   text,
+                                   breakable));
+    }
     return true;
 }
 
@@ -154,7 +180,7 @@ ui::rich::Document::Splitter::process(const util::rich::Attribute& att, int delt
     } else if (const util::rich::LinkAttribute* la = dynamic_cast<const util::rich::LinkAttribute*>(&att)) {
         if (delta > 0) {
             items.pushBackNew(new Item(LinkTarget, 0, 0, 0, gfx::FontRequest(),
-                                       util::SkinColor::Static, false, false, la->getTarget()));
+                                       util::SkinColor::Static, false, false, la->getTarget(), false));
         }
         nlink += delta;
     } else if (const util::rich::ColorAttribute* ca = dynamic_cast<const util::rich::ColorAttribute*>(&att)) {
@@ -162,6 +188,32 @@ ui::rich::Document::Splitter::process(const util::rich::Attribute& att, int delt
             colors.push_back(ca->getColor());
         else
             colors.pop_back();
+    } else if (const util::rich::AlignmentAttribute* aa = dynamic_cast<const util::rich::AlignmentAttribute*>(&att)) {
+        if (delta > 0) {
+            m_alignmentWidths.push_back(aa->getWidth());
+            m_alignmentSlots.push_back(items.size());
+        } else {
+            if (!m_alignmentSlots.empty() && !m_alignmentWidths.empty()) {
+                int remainingWidth = m_alignmentWidths.back();
+                size_t startSlot = m_alignmentSlots.back();
+                if (startSlot < items.size()) {
+                    int leftWidth = remainingWidth * aa->getAlignment() / 2;
+                    int rightWidth = remainingWidth - leftWidth;
+                    items.insertNew(items.begin() + startSlot, new Item(Normal, 0, 0, leftWidth, gfx::FontRequest(), util::SkinColor::Static, false, false, String_t(), false));
+                    items.pushBackNew(new Item(Normal, 0, 0, rightWidth, gfx::FontRequest(), util::SkinColor::Static, false, false, String_t(), false));
+                } else {
+                    items.pushBackNew(new Item(Normal, 0, 0, remainingWidth, gfx::FontRequest(), util::SkinColor::Static, false, false, String_t(), false));
+                }
+            }
+            if (!m_alignmentSlots.empty()) {
+                m_alignmentSlots.pop_back();
+            }
+            if (!m_alignmentWidths.empty()) {
+                m_alignmentWidths.pop_back();
+            }
+        }
+    } else {
+        // ignore unknown attribute
     }
 }
 
@@ -322,7 +374,7 @@ ui::rich::Document::addNewline()
     flushWord();
     if (first_this_line == content.size()) {
         /* This line is empty, so just add some space */
-        afl::base::Ptr<gfx::Font> font = m_provider.getFont(gfx::FontRequest());
+        afl::base::Ref<gfx::Font> font = m_provider.getFont(gfx::FontRequest());
         int lineHeight = font->getLineHeight();
         if ((render_options & FullLinesBetweenParagraphs) != 0) {
             addY(lineHeight);
@@ -549,13 +601,13 @@ ui::rich::Document::getDocumentWidth() const
 //     \param area Area to draw in
 //     \param skipY Skip this many pixels from the top of the document */
 void
-ui::rich::Document::draw(gfx::Context& ctx, gfx::Rectangle area, int skipY)
+ui::rich::Document::draw(gfx::Context<util::SkinColor::Color>& ctx, gfx::Rectangle area, int skipY)
 {
     // ex RichDocument::draw
     for (size_t i = 0; i < content.size(); ++i) {
         Item& it = *content[i];
         if (it.kind != LinkTarget) {
-            afl::base::Ptr<gfx::Font> font = m_provider.getFont(it.font);
+            afl::base::Ref<gfx::Font> font = m_provider.getFont(it.font);
             gfx::Rectangle pos(it.x + area.getLeftX(),
                                it.y + area.getTopY() - skipY,
                                it.w,
@@ -615,7 +667,7 @@ ui::rich::Document::getLinkFromPos(gfx::Point pt) const
 {
     // ex RichDocument::getLinkFromPos
     for (size_t i = 0; i < content.size(); ++i) {
-        afl::base::Ptr<gfx::Font> font = m_provider.getFont(content[i]->font);
+        afl::base::Ref<gfx::Font> font = m_provider.getFont(content[i]->font);
         if ((content[i]->kind & Link) != 0
             && gfx::Rectangle(content[i]->x, content[i]->y, content[i]->w, font->getLineHeight()).contains(pt))
         {
@@ -719,7 +771,7 @@ ui::rich::Document::isLinkVisible(LinkId_t id, gfx::Rectangle limit) const
 {
     // ex RichDocument::isLinkVisible
     while (++id < content.size() && (content[id]->kind & Link) != 0) {
-        afl::base::Ptr<gfx::Font> font = m_provider.getFont(content[id]->font);
+        afl::base::Ref<gfx::Font> font = m_provider.getFont(content[id]->font);
         if (gfx::Rectangle(content[id]->x, content[id]->y,
                            content[id]->w, font->getLineHeight()).isIntersecting(limit))
         {
@@ -764,8 +816,8 @@ ui::rich::Document::process()
             for (breakItem = i; breakItem > 0; --breakItem) {
                 Item& it = *last_chunk[breakItem-1];
                 remX -= it.w;
-                afl::base::Ptr<gfx::Font> font = m_provider.getFont(it.font);
-                if (it.w != 0) {
+                afl::base::Ref<gfx::Font> font = m_provider.getFont(it.font);
+                if (it.breakable && it.w != 0) {
                     for (breakChar = it.text.size(); breakChar > 0; --breakChar) {
                         if (it.text[breakChar-1] == ' ' && remX + font->getTextWidth(it.text.substr(0, breakChar-1)) <= maxX) {
                             /* Found a break point */
@@ -784,8 +836,8 @@ ui::rich::Document::process()
 
                 /* last_chunk[0] now is what originally was breakItem-1 */
                 Item& it = *last_chunk[0];
-                afl::base::Ptr<gfx::Font> font = m_provider.getFont(it.font);
-                content.pushBackNew(new Item(it.kind, x, 0, 42, it.font, it.color, it.underline, it.key, it.text.substr(0, breakChar-1)));
+                afl::base::Ref<gfx::Font> font = m_provider.getFont(it.font);
+                content.pushBackNew(new Item(it.kind, x, 0, 42, it.font, it.color, it.underline, it.key, it.text.substr(0, breakChar-1), true));
                 content.back()->w = font->getTextWidth(content.back()->text);
                 flushLine();
 
@@ -803,8 +855,8 @@ ui::rich::Document::process()
                     String_t::size_type pos = it.text.find(' ');
                     if (pos != String_t::npos) {
                         /* ok, we can split that chunk. Do so. */
-                        afl::base::Ptr<gfx::Font> font = m_provider.getFont(it.font);
-                        content.pushBackNew(new Item(it.kind, x, 0, 42, it.font, it.color, it.underline, it.key, it.text.substr(0, pos)));
+                        afl::base::Ref<gfx::Font> font = m_provider.getFont(it.font);
+                        content.pushBackNew(new Item(it.kind, x, 0, 42, it.font, it.color, it.underline, it.key, it.text.substr(0, pos), true));
                         content.back()->w = font->getTextWidth(content.back()->text);
                         flushLine();
                         it.text.erase(0, pos+1);

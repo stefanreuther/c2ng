@@ -94,8 +94,7 @@ ui::widgets::AbstractListbox::draw(gfx::Canvas& can)
 
     // Draw remaining background
     if (r.exists()) {
-        gfx::Context ctx(can);
-        ctx.useColorScheme(getColorScheme());
+        gfx::Context<util::SkinColor::Color> ctx(can, getColorScheme());
         drawBackground(ctx, r);
     }
 }
@@ -116,7 +115,7 @@ ui::widgets::AbstractListbox::handleStateChange(State st, bool enable)
 }
 
 bool
-ui::widgets::AbstractListbox::handleKey(util::Key_t key, int /*prefix*/)
+ui::widgets::AbstractListbox::defaultHandleKey(util::Key_t key, int /*prefix*/)
 {
     // ex UIListbox::handleEvent, sort-of
     if (hasState(FocusedState) && !hasState(DisabledState)) {

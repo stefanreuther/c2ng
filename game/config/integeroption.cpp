@@ -50,3 +50,9 @@ game::config::IntegerOption::copyFrom(const IntegerOption& other)
 {
     set(other.m_value);
 }
+
+const game::config::ValueParser&
+game::config::IntegerOption::parser() const
+{
+    return m_parser;
+}

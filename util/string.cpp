@@ -3,9 +3,11 @@
   */
 
 #include <cstring>
+#include <algorithm>
 #include "util/string.hpp"
 #include "afl/string/char.hpp"
 #include "afl/string/parse.hpp"
+#include "util/stringparser.hpp"
 
 bool
 util::stringMatch(const char* pattern, const char* tester)
@@ -118,4 +120,75 @@ util::parsePlayerCharacter(const char ch, int& number)
     } else {
         return false;
     }
+}
+
+String_t
+util::formatOptions(String_t s)
+{
+    // Pass 1: figure out length of "options" part
+    size_t maxOption = 0;
+    {
+        StringParser sp(s);
+        while (1) {
+            String_t component;
+            sp.parseDelim("\t\n", component);
+            if (sp.parseChar('\t')) {
+                // Tab: this is an option
+                maxOption = std::max(maxOption, component.size());
+            } else if (sp.parseChar('\n')) {
+                // Newline: nothing to do
+            } else {
+                // End reached
+                break;
+            }
+        }
+    }
+
+    // Add room
+    maxOption += 3;
+
+    // Pass 2: build result
+    String_t result;
+    {
+        StringParser sp(s);
+        while (1) {
+            String_t component;
+            sp.parseDelim("\t\n", component);
+            if (sp.parseChar('\t')) {
+                // Tab: this is an option
+                result.append(2, ' ');
+                result += component;
+                result.append(maxOption - component.size(), ' ');
+            } else if (sp.parseChar('\n')) {
+                // Newline: nothing to do
+                result += component;
+                result += '\n';
+            } else {
+                // End reached
+                result += component;
+                break;
+            }
+        }
+    }
+    return result;
+}
+
+// Beautify variable name.
+String_t
+util::formatName(String_t name)
+{
+    // ex int/propenum.h:beautifyName
+    bool hadUC = false;
+    for (String_t::size_type i = 0, n = name.size(); i < name.size(); ++i) {
+        if (afl::string::charIsUpper(name[i])) {
+            if (hadUC) {
+                name[i] = afl::string::charToLower(name[i]);
+            } else {
+                hadUC = true;
+            }
+        } else {
+            hadUC = false;
+        }
+    }
+    return name;
 }

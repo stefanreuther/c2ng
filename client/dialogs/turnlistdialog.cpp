@@ -112,7 +112,7 @@ namespace {
                 int activeTurn = 0;
                 if (game::Game* g = s.getGame().get()) {
                     // Fetch current turn
-                    int currentTurn = g->currentTurn().universe().getTurnNumber();
+                    int currentTurn = g->currentTurn().getTurnNumber();
                     activeTurn = g->getViewpointTurnNumber();
 
                     // Fetch status of all turns below that.
@@ -123,7 +123,7 @@ namespace {
                     }
 
                     // Current turn
-                    content.push_back(TurnListbox::Item(currentTurn, convertTimestamp(g->currentTurn().universe().getTimestamp()), TurnListbox::Current));
+                    content.push_back(TurnListbox::Item(currentTurn, convertTimestamp(g->currentTurn().getTimestamp()), TurnListbox::Current));
                 }
                 m_response.postNewRequest(new InitialResponse(content, activeTurn));
             }
@@ -164,7 +164,7 @@ namespace {
                 game::Game* g = s.getGame().get();
                 game::Root* r = s.getRoot().get();
                 if (g != 0 && r != 0 && r->getTurnLoader().get() != 0) {
-                    int lastTurn = g->previousTurns().findNewestUnknownTurnNumber(g->currentTurn().universe().getTurnNumber());
+                    int lastTurn = g->previousTurns().findNewestUnknownTurnNumber(g->currentTurn().getTurnNumber());
                     if (lastTurn >= m_firstTurn) {
                         // Update
                         int firstTurn = std::max(m_firstTurn, lastTurn - (MAX_TURNS_TO_UPDATE-1));
@@ -200,11 +200,12 @@ namespace {
                     if (ht != 0 && ht->isLoadable()) {
                         // FIXME: code duplication to globalcommands.cpp
                         try {
-                            afl::base::Ptr<game::Turn> t = new game::Turn();
+                            afl::base::Ref<game::Turn> t = *new game::Turn();
                             int player = g->getViewpointPlayer();
                             r->getTurnLoader()->loadHistoryTurn(*t, *g, player, m_turnNumber, *r);
                             t->universe().postprocess(game::PlayerSet_t(player), game::PlayerSet_t(player), game::map::Object::ReadOnly,
                                                       r->hostVersion(), r->hostConfiguration(),
+                                                      m_turnNumber,
                                                       s.translator(), s.log());
                             ht->handleLoadSucceeded(t);
                         }
@@ -258,9 +259,9 @@ int
 client::dialogs::TurnListDialog::run()
 {
     afl::base::Deleter del;
-    ui::Window&          win       = del.addNew(new ui::Window(m_translator.translateString("Turn History"), m_root.provider(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
-    ui::widgets::Button& btnOK     = del.addNew(new ui::widgets::Button(m_translator.translateString("OK"),     util::Key_Return, m_root.provider(), m_root.colorScheme()));
-    ui::widgets::Button& btnCancel = del.addNew(new ui::widgets::Button(m_translator.translateString("Cancel"), util::Key_Escape, m_root.provider(), m_root.colorScheme()));
+    ui::Window&          win       = del.addNew(new ui::Window(m_translator.translateString("Turn History"), m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
+    ui::widgets::Button& btnOK     = del.addNew(new ui::widgets::Button(m_translator.translateString("OK"),     util::Key_Return, m_root));
+    ui::widgets::Button& btnCancel = del.addNew(new ui::widgets::Button(m_translator.translateString("Cancel"), util::Key_Escape, m_root));
 
     win.add(m_list);
 

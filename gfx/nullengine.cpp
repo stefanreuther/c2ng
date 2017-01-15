@@ -19,14 +19,14 @@ gfx::NullEngine::NullEngine()
 gfx::NullEngine::~NullEngine()
 { }
 
-afl::base::Ptr<gfx::Canvas>
+afl::base::Ref<gfx::Canvas>
 gfx::NullEngine::createWindow(int width, int height, int /*bpp*/, WindowFlags_t /*flags*/)
 {
     return RGBAPixmap::create(width, height)->makeCanvas();
 }
 
 
-afl::base::Ptr<gfx::Canvas>
+afl::base::Ref<gfx::Canvas>
 gfx::NullEngine::loadImage(afl::io::Stream& /*file*/)
 {
     return RGBAPixmap::create(1, 1)->makeCanvas();
@@ -73,7 +73,7 @@ gfx::NullEngine::dispatcher()
 }
 
 // Create a user-interface timer.
-afl::base::Ptr<gfx::Timer>
+afl::base::Ref<gfx::Timer>
 gfx::NullEngine::createTimer()
 {
     return m_timers.createTimer();

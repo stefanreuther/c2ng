@@ -9,17 +9,19 @@
 #include "interpreter/error.hpp"
 #include "game/turn.hpp"
 #include "afl/string/format.hpp"
+#include "game/interface/minefieldmethod.hpp"
+#include "interpreter/procedurevalue.hpp"
 
 namespace {
     enum MinefieldDomain { MinefieldPropertyDomain, MinefieldMethodDomain, OwnerPropertyDomain };
    
     static const interpreter::NameTable minefield_mapping[] = {
-        // { "DELETE",     2,                             MinefieldMethodDomain,   interpreter::thProcedure },
+        { "DELETE",     game::interface::immDelete,    MinefieldMethodDomain,   interpreter::thProcedure },
         { "ID",         game::interface::impId,        MinefieldPropertyDomain, interpreter::thInt },
         { "LASTSCAN",   game::interface::impLastScan,  MinefieldPropertyDomain, interpreter::thInt },
         { "LOC.X",      game::interface::impLocX,      MinefieldPropertyDomain, interpreter::thInt },
         { "LOC.Y",      game::interface::impLocY,      MinefieldPropertyDomain, interpreter::thInt },
-        // { "MARK",       0,                             MinefieldMethodDomain,   interpreter::thProcedure },
+        { "MARK",       game::interface::immMark,      MinefieldMethodDomain,   interpreter::thProcedure },
         { "MARKED",     game::interface::impMarked,    MinefieldPropertyDomain, interpreter::thBool },
         { "OWNER",      game::interface::iplShortName, OwnerPropertyDomain,     interpreter::thString },
         { "OWNER$",     game::interface::iplId,        OwnerPropertyDomain,     interpreter::thInt },
@@ -29,11 +31,37 @@ namespace {
         { "TYPE",       game::interface::impTypeStr,   MinefieldPropertyDomain, interpreter::thString },
         { "TYPE$",      game::interface::impTypeCode,  MinefieldPropertyDomain, interpreter::thInt },
         { "UNITS",      game::interface::impUnits,     MinefieldPropertyDomain, interpreter::thInt },
-        // { "UNMARK",     1,                             MinefieldMethodDomain,   interpreter::thProcedure },
+        { "UNMARK",     game::interface::immUnmark,    MinefieldMethodDomain,   interpreter::thProcedure },
+    };
+    class MinefieldMethodValue : public interpreter::ProcedureValue {
+     public:
+        MinefieldMethodValue(int id,
+                             game::interface::MinefieldMethod ism,
+                             afl::base::Ref<game::Turn> turn)
+            : m_id(id),
+              m_method(ism),
+              m_turn(turn)
+            { }
+
+        // ProcedureValue:
+        virtual void call(interpreter::Process& /*proc*/, interpreter::Arguments& a)
+            {
+                if (game::map::Minefield* mf = m_turn->universe().minefields().get(m_id)) {
+                    game::interface::callMinefieldMethod(*mf, m_method, a, m_turn->universe());
+                }
+            }
+
+        virtual MinefieldMethodValue* clone() const
+            { return new MinefieldMethodValue(m_id, m_method, m_turn); }
+
+     private:
+        const game::Id_t m_id;
+        const game::interface::MinefieldMethod m_method;
+        const afl::base::Ref<game::Turn> m_turn;
     };
 }
 
-game::interface::MinefieldContext::MinefieldContext(int id, afl::base::Ptr<Root> root, afl::base::Ptr<Game> game)
+game::interface::MinefieldContext::MinefieldContext(int id, afl::base::Ref<Root> root, afl::base::Ref<Game> game)
     : m_id(id),
       m_root(root),
       m_game(game)
@@ -45,11 +73,11 @@ game::interface::MinefieldContext::~MinefieldContext()
 { }
 
 // Context:
-bool
+game::interface::MinefieldContext*
 game::interface::MinefieldContext::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
 {
     // ex IntMinefieldContext::lookup
-    return lookupName(name, minefield_mapping, result);
+    return lookupName(name, minefield_mapping, result) ? this : 0;
 }
 
 void
@@ -88,9 +116,7 @@ game::interface::MinefieldContext::get(PropertyIndex_t index)
             }
 
          case MinefieldMethodDomain:
-         // FIXME: port this (MinefieldMethod)
-         //    return new IntObjectProcedureValue(*mf, *getCurrentUniverse(), minefield_methods[minefield_mapping[index].index]);
-            ;
+            return new MinefieldMethodValue(mf->getId(), MinefieldMethod(minefield_mapping[index].index), m_game->currentTurn());
         }
     }
     return 0;
@@ -135,9 +161,22 @@ game::interface::MinefieldContext::toString(bool /*readable*/) const
 }
 
 void
-game::interface::MinefieldContext::store(interpreter::TagNode& out, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext* /*ctx*/) const
+game::interface::MinefieldContext::store(interpreter::TagNode& out, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
 {
     // ex IntMinefieldContext::store
     out.tag   = out.Tag_Minefield;
     out.value = m_id;
+}
+
+game::interface::MinefieldContext*
+game::interface::MinefieldContext::create(int id, Session& session, bool force)
+{
+    Game* g = session.getGame().get();
+    Root* r = session.getRoot().get();
+    // FIXME: the minefields().get() test is not in PCC2 for MinefieldFunction::get()
+    if (g != 0 && r != 0 && (force || g->currentTurn().universe().minefields().get(id) != 0)) {
+        return new MinefieldContext(id, *r, *g);
+    } else {
+        return 0;
+    }
 }

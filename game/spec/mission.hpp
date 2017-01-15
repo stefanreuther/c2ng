@@ -81,15 +81,16 @@ namespace game { namespace spec {
 
 
         // /** Standard Mission Numbers. */
-        // enum {
+        // FIXME!
+        enum {
         //     // Standard missions
-        //     msn_Explore     = 1,
+            msn_Explore     = 1,
         //     msn_MineSweep   = 2,
         //     msn_LayMines    = 3,
         //     msn_Kill        = 4,
         //     msn_SensorSweep = 5,
         //     msn_LnD         = 6,    // Colonize, Land&Disassemble, Decommission
-        //     msn_Tow         = 7,
+            msn_Tow         = 7
         //     msn_Intercept   = 8,
         //     msn_Special     = 9,
         //     msn_Cloak       = 10,
@@ -119,7 +120,7 @@ namespace game { namespace spec {
         //     pmsn_LayMinesIn          = 16,
         //     pmsn_LayWebIn            = 17,
         //     pmsn_Training            = 18
-        // };
+        };
 
      private:
         int         m_number;         ///< Mission.

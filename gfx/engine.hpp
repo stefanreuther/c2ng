@@ -53,7 +53,7 @@ namespace gfx {
             \param flags Flags
             \return Canvas for that window; never null
             \throw GraphicsException on error */
-        virtual afl::base::Ptr<Canvas> createWindow(int width, int height, int bpp, WindowFlags_t flags) = 0;
+        virtual afl::base::Ref<Canvas> createWindow(int width, int height, int bpp, WindowFlags_t flags) = 0;
 
         /** Load an image file.
 
@@ -65,7 +65,7 @@ namespace gfx {
             \param file Opened file
             \return Canvas containing the loaded image; never null
             \throw GraphicsException on error */
-        virtual afl::base::Ptr<Canvas> loadImage(afl::io::Stream& file) = 0;
+        virtual afl::base::Ref<Canvas> loadImage(afl::io::Stream& file) = 0;
 
         /** Wait for and handle an event.
             Returns when a user event, dispatcher request, or timer has been processed.
@@ -92,7 +92,7 @@ namespace gfx {
             <b>Multithreading:</b> Call this method from the GUI thread only.
 
             \return newly-allocated timer; never null */
-        virtual afl::base::Ptr<Timer> createTimer() = 0;
+        virtual afl::base::Ref<Timer> createTimer() = 0;
     };
 
 }

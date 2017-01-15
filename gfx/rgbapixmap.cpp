@@ -17,13 +17,7 @@ class gfx::RGBAPixmap::TraitsImpl {
     static inline void poke(Data_t* ptr, Pixel_t val)
         { *ptr = val; }
     Pixel_t mix(Pixel_t a, Pixel_t b, Alpha_t balpha) const
-        {
-            uint8_t red   = mixColorComponent(RED_FROM_COLORQUAD  (a), RED_FROM_COLORQUAD  (b), balpha);
-            uint8_t green = mixColorComponent(GREEN_FROM_COLORQUAD(a), GREEN_FROM_COLORQUAD(b), balpha);
-            uint8_t blue  = mixColorComponent(BLUE_FROM_COLORQUAD (a), BLUE_FROM_COLORQUAD (b), balpha);
-            uint8_t alpha = mixColorComponent(ALPHA_FROM_COLORQUAD(a), ALPHA_FROM_COLORQUAD(b), balpha);
-            return COLORQUAD_FROM_RGBA(red,green,blue,alpha);
-        }
+        { return mixColor(a, b, balpha); }
     inline Data_t* add(Data_t* ptr, int dx, int dy) const
         { return ptr + m_pix.getWidth()*dy + dx; }
 
@@ -37,7 +31,7 @@ class gfx::RGBAPixmap::TraitsImpl {
 
 class gfx::RGBAPixmap::CanvasImpl : public gfx::PixmapCanvasImpl<RGBAPixmap, TraitsImpl> {
  public:
-    CanvasImpl(afl::base::Ptr<RGBAPixmap> pix)
+    CanvasImpl(afl::base::Ref<RGBAPixmap> pix)
         : PixmapCanvasImpl<RGBAPixmap, TraitsImpl>(pix)
         { }
     virtual int getBitsPerPixel()
@@ -73,7 +67,7 @@ class gfx::RGBAPixmap::CanvasImpl : public gfx::PixmapCanvasImpl<RGBAPixmap, Tra
             }
             colorHandles.fill(COLORQUAD_FROM_RGBA(0,0,0,0));
         }
-    virtual afl::base::Ptr<Canvas> convertCanvas(afl::base::Ptr<Canvas> orig)
+    virtual afl::base::Ref<Canvas> convertCanvas(afl::base::Ref<Canvas> orig)
         {
             // FIXME: can we do better?
             return orig;
@@ -85,14 +79,23 @@ gfx::RGBAPixmap::RGBAPixmap(int w, int h)
     : Pixmap<ColorQuad_t>(w, h)
 { }
 
-afl::base::Ptr<gfx::RGBAPixmap>
+afl::base::Ref<gfx::RGBAPixmap>
 gfx::RGBAPixmap::create(int w, int h)
 {
-    return new RGBAPixmap(w, h);
+    return *new RGBAPixmap(w, h);
 }
 
-afl::base::Ptr<gfx::Canvas>
+afl::base::Ref<gfx::Canvas>
 gfx::RGBAPixmap::makeCanvas()
 {
-    return new CanvasImpl(this);
+    return *new CanvasImpl(*this);
+}
+
+void
+gfx::RGBAPixmap::setAlpha(uint8_t alpha)
+{
+    afl::base::Memory<ColorQuad_t> q = pixels();
+    while (ColorQuad_t* qq = q.eat()) {
+        *qq = COLORQUAD_FROM_RGBA(RED_FROM_COLORQUAD(*qq), GREEN_FROM_COLORQUAD(*qq), BLUE_FROM_COLORQUAD(*qq), alpha);
+    }
 }

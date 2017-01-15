@@ -6,16 +6,17 @@
 
 #include "interpreter/context.hpp"
 #include "game/spec/shiplist.hpp"
+#include "game/session.hpp"
 
 namespace game { namespace interface {
 
     class EngineContext : public interpreter::Context {
      public:
-        EngineContext(int nr, afl::base::Ptr<game::spec::ShipList> shipList);
+        EngineContext(int nr, afl::base::Ref<game::spec::ShipList> shipList);
         ~EngineContext();
 
         // Context:
-        virtual bool lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
+        virtual EngineContext* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
         virtual void set(PropertyIndex_t index, afl::data::Value* value);
         virtual afl::data::Value* get(PropertyIndex_t index);
         virtual bool next();
@@ -25,11 +26,13 @@ namespace game { namespace interface {
 
         // BaseValue:
         virtual String_t toString(bool readable) const;
-        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, interpreter::SaveContext* ctx) const;
+        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, interpreter::SaveContext& ctx) const;
+
+        static EngineContext* create(int nr, Session& session);
 
      private:
         int m_number;
-        afl::base::Ptr<game::spec::ShipList> m_shipList;
+        afl::base::Ref<game::spec::ShipList> m_shipList;
     };
 
 } }

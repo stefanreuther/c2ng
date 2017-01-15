@@ -1,5 +1,6 @@
 /**
   *  \file gfx/clipfilter.hpp
+  *  \brief Class gfx::ClipFilter
   */
 #ifndef C2NG_GFX_CLIPFILTER_HPP
 #define C2NG_GFX_CLIPFILTER_HPP
@@ -8,16 +9,14 @@
 
 namespace gfx {
 
-// /** \class GfxClipRect
-//     \brief Clip at a Rectangle
-
-//     This class provides the back-end for drawing with clipping
-//     at a rectangle.
-
-//     It does not contain a public constructor or methods to modify the
-//     clip rectangle; derived classes must implement these when needed. */
+    /** Clipping filter.
+        This class provides drawing with clipping at a rectangle.
+        It will make sure that no drawing operation leaves the given rectangle. */
     class ClipFilter : public Filter {
      public:
+        /** Constructor.
+            \param parent Underlying canvas
+            \param r rectangle */
         ClipFilter(Canvas& parent, const Rectangle& r);
 
         // Canvas:

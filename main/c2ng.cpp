@@ -3,9 +3,12 @@
   */
 
 #include <memory>
+#include <ctime>
+#include <stdlib.h>
 #include "config.h"
 
 #include "afl/base/closure.hpp"
+#include "afl/base/ref.hpp"
 #include "afl/io/filesystem.hpp"
 #include "afl/net/http/client.hpp"
 #include "afl/net/http/defaultconnectionprovider.hpp"
@@ -16,40 +19,51 @@
 #include "afl/sys/environment.hpp"
 #include "afl/sys/longcommandlineparser.hpp"
 #include "afl/sys/thread.hpp"
+#include "client/plugins.hpp"
 #include "client/screens/browserscreen.hpp"
 #include "client/screens/controlscreen.hpp"
 #include "client/screens/playerscreen.hpp"
 #include "client/session.hpp"
+#include "client/si/control.hpp"
 #include "client/si/inputstate.hpp"
 #include "client/si/outputstate.hpp"
-#include "client/widgets/busyindicator.hpp"
+#include "client/si/scriptside.hpp"
 #include "game/browser/accountmanager.hpp"
 #include "game/browser/browser.hpp"
 #include "game/browser/directoryhandler.hpp"
+#include "game/db/loader.hpp"
 #include "game/game.hpp"
+#include "game/historyturn.hpp"
 #include "game/nu/browserhandler.hpp"
+#include "game/pcc/browserhandler.hpp"
 #include "game/session.hpp"
 #include "game/specificationloader.hpp"
 #include "game/turn.hpp"
+#include "game/turnloader.hpp"
+#include "gfx/complex.hpp"
+#include "gfx/gen/spaceviewconfig.hpp"
+#include "interpreter/values.hpp"
 #include "ui/defaultresourceprovider.hpp"
 #include "ui/draw.hpp"
-#include "ui/eventloop.hpp"
 #include "ui/res/ccimageloader.hpp"
 #include "ui/res/directoryprovider.hpp"
 #include "ui/res/engineimageloader.hpp"
 #include "ui/res/manager.hpp"
 #include "ui/rich/documentview.hpp"
 #include "ui/root.hpp"
-#include "ui/skincolorscheme.hpp"
 #include "util/consolelogger.hpp"
 #include "util/profiledirectory.hpp"
 #include "util/requestreceiver.hpp"
 #include "util/requestthread.hpp"
 #include "util/rich/parser.hpp"
 #include "version.hpp"
-#include "game/historyturn.hpp"
-#include "game/turnloader.hpp"
-#include "game/pcc/browserhandler.hpp"
+#include "util/messagecollector.hpp"
+#include "ui/screenshotlistener.hpp"
+#include "afl/except/commandlineexception.hpp"
+#include "util/stringparser.hpp"
+#include "util/translation.hpp"
+#include "afl/sys/dialog.hpp"
+#include "util/string.hpp"
 #ifdef HAVE_SDL
 # include "gfx/sdl/engine.hpp"
 typedef gfx::sdl::Engine Engine_t;
@@ -60,59 +74,123 @@ typedef gfx::sdl::Engine Engine_t;
 namespace {
     const char LOG_NAME[] = "main";
 
+    const char PROGRAM_TITLE[] = "PCC2 v" PCC2_VERSION;
 
-    void waitForInitialisation(ui::Root& root, util::RequestDispatcher& disp)
+
+    void waitForInitialisation(client::Session& clientSession, uint32_t waitId)
     {
-        // FIXME: preload images?
-        client::widgets::BusyIndicator ind(root, "!Loading...");
-        ind.setExtent(gfx::Rectangle(gfx::Point(), ind.getLayoutInfo().getPreferredSize()));
-        root.moveWidgetToEdge(ind, 1, 2, 10);
-        root.addChild(ind, 0);
-
-        // Event loop
-        ui::EventLoop loop(root);
-        class Stopper : public util::Request<ui::EventLoop> {
+        // Create a Control.
+        // This is required to allow background scripts (=plugin initialisation) to call into UI.
+        // We don't allow major interactions yet, though.
+        class NullControl : public client::si::Control {
          public:
-            virtual void handle(ui::EventLoop& loop)
-                { loop.stop(0); }
-        };
-        util::RequestReceiver<ui::EventLoop> loopReceiver(root.engine().dispatcher(), loop);
-
-        class StopPoster : public afl::base::Runnable {
-         public:
-            StopPoster(util::RequestSender<ui::EventLoop> reply)
-                : m_reply(reply)
+            NullControl(client::Session& session)
+                : Control(session.interface(), session.root(), session.translator())
                 { }
-            virtual void run()
-                { m_reply.postNewRequest(new Stopper()); }
-         private:
-            util::RequestSender<ui::EventLoop> m_reply;
+            virtual void handleStateChange(client::si::UserSide& ui, client::si::RequestLink2 link, client::si::OutputState::Target /*target*/)
+                { ui.continueProcessWithFailure(link, "Context error"); }
+            virtual void handleEndDialog(client::si::UserSide& ui, client::si::RequestLink2 link, int /*code*/)
+                { ui.continueProcessWithFailure(link, "Context error"); }
+            virtual void handlePopupConsole(client::si::UserSide& ui, client::si::RequestLink2 link)
+                { ui.continueProcessWithFailure(link, "Context error"); }
+            virtual client::si::ContextProvider* createContextProvider()
+                { return 0; }
         };
-        disp.postNewRunnable(new StopPoster(loopReceiver.getSender()));
-
-        // Background thread
-        loop.run();
+        NullControl ctl(clientSession);
+        ctl.attachPreparedWait(waitId);
     }
 
-    class ScriptInitializer : public util::Request<game::Session> {
+    class ScriptInitializer : public util::SlaveRequest<game::Session, client::si::ScriptSide> {
      public:
-        ScriptInitializer(afl::base::Ptr<afl::io::Directory> resourceDirectory)
-            : m_resourceDirectory(resourceDirectory)
+        ScriptInitializer(afl::base::Ref<afl::io::Directory> resourceDirectory, uint32_t waitId)
+            : m_resourceDirectory(resourceDirectory),
+              m_waitId(waitId)
             { }
-        virtual void handle(game::Session& t)
+        virtual void handle(game::Session& t, client::si::ScriptSide& ss)
             {
-                // Load core.q
-                afl::base::Ptr<afl::io::Stream> file = m_resourceDirectory->openFile("core.q", afl::io::FileSystem::OpenRead);
-                t.executeFile(*file);
+                // Configure load directory
+                t.world().setSystemLoadDirectory(m_resourceDirectory.asPtr());
+
+                // Get process list
+                interpreter::ProcessList& processList = t.world().processList();
+
+                // Create process to load core.q
+                interpreter::Process& coreProcess = processList.create(t.world(), "<Core>");
+                coreProcess.pushFrame(client::createFileLoader("core.q"), false);
+
+                // Create process to load plugins
+                interpreter::Process& pluginProcess = processList.create(t.world(), "<PluginLoader>");
+                pluginProcess.pushFrame(client::createLoaderForUnloadedPlugins(t.plugins()), false);
+
+                // Execute both processes in one group
+                uint32_t pgid = processList.allocateProcessGroup();
+                processList.resumeProcess(coreProcess, pgid);
+                processList.resumeProcess(pluginProcess, pgid);
+                ss.executeProcessGroupWait(m_waitId, pgid, t);
             }
      private:
-        afl::base::Ptr<afl::io::Directory> m_resourceDirectory;
+        afl::base::Ref<afl::io::Directory> m_resourceDirectory;
+        const uint32_t m_waitId;
+    };
+
+    class PluginInitializer : public util::Request<game::Session> {
+     public:
+        PluginInitializer(afl::base::Ref<afl::io::Directory> resDir, util::ProfileDirectory& dir, const std::vector<String_t>& commandLineResources)
+            : m_resourceDirectory(resDir),
+              m_profile(dir),
+              m_commandLineResources(commandLineResources)
+            { }
+        virtual void handle(game::Session& session)
+            {
+                // Note that plugin names must be specified in upper-case here.
+                // The plugins are loaded through the script interface, which upper-cases the names before looking them up.
+                try {
+                    // Global cc-res.cfg
+                    afl::base::Ptr<afl::io::Stream> configFile = m_resourceDirectory->openFileNT("cc-res.cfg", afl::io::FileSystem::OpenRead);
+                    if (configFile.get() != 0) {
+                        std::auto_ptr<util::plugin::Plugin> plug(new util::plugin::Plugin("(GLOBAL CC-RES.CFG)"));
+                        plug->initFromConfigFile(m_profile.open()->getDirectoryName(), session.translator().translateString("Global cc-res.cfg"), *configFile);
+                        session.plugins().addNewPlugin(plug.release());
+                    }
+                }
+                catch (...) { }
+
+                try {
+                    // User cc-res.cfg
+                    afl::base::Ptr<afl::io::Stream> configFile = m_profile.openFileNT("cc-res.cfg");
+                    if (configFile.get() != 0) {
+                        std::auto_ptr<util::plugin::Plugin> plug(new util::plugin::Plugin("(USER CC-RES.CFG)"));
+                        plug->initFromConfigFile(m_profile.open()->getDirectoryName(), session.translator().translateString("User cc-res.cfg"), *configFile);
+                        session.plugins().addNewPlugin(plug.release());
+                    }
+                }
+                catch (...) { }
+
+                try {
+                    // Plugins
+                    session.plugins().findPlugins(*m_profile.open()->openDirectory("plugins"));
+                }
+                catch (...) { }
+
+                if (!m_commandLineResources.empty()) {
+                    // Command line
+                    std::auto_ptr<util::plugin::Plugin> plug(new util::plugin::Plugin("(COMMAND LINE)"));
+                    for (size_t i = 0, n = m_commandLineResources.size(); i < n; ++i) {
+                        plug->addItem(util::plugin::Plugin::ResourceFile, m_commandLineResources[i]);
+                    }
+                    session.plugins().addNewPlugin(plug.release());
+                }
+            }
+     private:
+        afl::base::Ref<afl::io::Directory> m_resourceDirectory;
+        util::ProfileDirectory& m_profile;
+        const std::vector<String_t>& m_commandLineResources;
     };
 
     class BrowserInitializer : public util::Request<game::browser::Session> {
      public:
         BrowserInitializer(afl::io::FileSystem& fileSystem,
-                           afl::base::Ptr<afl::io::Directory> defaultSpecDirectory,
+                           afl::base::Ref<afl::io::Directory> defaultSpecDirectory,
                            util::ProfileDirectory& profile,
                            afl::net::http::Manager& httpManager)
             : m_fileSystem(fileSystem),
@@ -134,7 +212,7 @@ namespace {
 
      private:
         afl::io::FileSystem& m_fileSystem;
-        afl::base::Ptr<afl::io::Directory> m_defaultSpecDirectory;
+        afl::base::Ref<afl::io::Directory> m_defaultSpecDirectory;
         util::ProfileDirectory& m_profile;
         afl::net::http::Manager& m_httpManager;
     };
@@ -222,10 +300,11 @@ namespace {
                                 session.setShipList(new game::spec::ShipList());
                                 m_root->specificationLoader().loadShipList(*session.getShipList(), *m_root);
 
-                                m_root->getTurnLoader()->loadCurrentTurn(session.getGame()->currentTurn(), *session.getGame(), m_player, *m_root);
+                                m_root->getTurnLoader()->loadCurrentTurn(session.getGame()->currentTurn(), *session.getGame(), m_player, *m_root, session);
                                 session.getGame()->setViewpointPlayer(m_player);
                                 session.getGame()->currentTurn().universe().postprocess(game::PlayerSet_t(m_player), game::PlayerSet_t(m_player), game::map::Object::Playable,
                                                                                         m_root->hostVersion(), m_root->hostConfiguration(),
+                                                                                        session.getGame()->currentTurn().getTurnNumber(),
                                                                                         session.translator(), session.log());
                                 ok = true;
                             }
@@ -272,6 +351,94 @@ namespace {
         util::RequestSender<game::browser::Session> m_browserSender;
         util::RequestSender<game::Session> m_gameSender;
     };
+    
+
+    class RootOptions {
+     public:
+        static const int MIN_WIDTH = 640;   // ex GFX_MIN_WIDTH
+        static const int MIN_HEIGHT = 480;  // ex GFX_MIN_HEIGHT
+        static const int MAX_DIM = 10000;
+        RootOptions()
+            : m_width(800),
+              m_height(600),
+              m_bitsPerPixel(32),
+              m_flags()
+            { }
+        String_t getHelp()
+            {
+                return _("-fullscreen"     "\tRun fullscreen\n"
+                         "-windowed"       "\tRun in a window\n"
+                         "-bpp=N"          "\tUse color depth of N bits per pixel\n"
+                         "-size=W[xH]"     "\tUse resolution of WxH pixels\n");
+            }
+        bool handleOption(const String_t& option, afl::sys::CommandLineParser& parser)
+            {
+                // ex gfx/init.cc:options
+                if (option == "fullscreen") {
+                    m_flags += gfx::Engine::FullscreenWindow;
+                    return true;
+                } else if (option == "windowed") {
+                    m_flags -= gfx::Engine::FullscreenWindow;
+                    return true;
+                } else if (option == "bpp") {
+                    // ex gfx/init.cc:optSetBpp
+                    util::StringParser sp(parser.getRequiredParameter(option));
+                    int bpp = 0;
+                    if (!sp.parseInt(bpp) || !sp.parseEnd()) {
+                        throw afl::except::CommandLineException("!Invalid parameter to \"-bpp\"");
+                    }
+                    if (bpp != 8 && bpp != 16 && bpp != 32) {
+                        throw afl::except::CommandLineException("!Parameter to \"-bpp\" must be 8, 16 or 32");
+                    }
+                    m_bitsPerPixel = bpp;
+                    return true;
+                } else if (option == "hw") {
+                    // FIXME: do we still need this option "-hw"? Should it be in engine options?
+                    return false;
+                } else if (option == "size") {
+                    // ex gfx/init.cc:optSetSize
+                    util::StringParser sp(parser.getRequiredParameter(option));
+                    int w = 0, h = 0;
+                    if (!sp.parseInt(w)) {
+                        throw afl::except::CommandLineException("!Invalid parameter to \"-size\"");
+                    }
+                    if (sp.parseChar('X') || sp.parseChar('x') || sp.parseChar('*')) {
+                        if (!sp.parseInt(h)) {
+                            throw afl::except::CommandLineException("!Invalid parameter to \"-size\"");
+                        }
+                    } else {
+                        // FIXME: PCC2 had a special case to recognize 1200 as 1200x1024, which is the only non-4:3 resolution.
+                        h = 3*w/4;
+                    }
+                    if (!sp.parseEnd()) {
+                        throw afl::except::CommandLineException("!Invalid parameter to \"-size\"");
+                    }
+                    if (w < MIN_WIDTH || h < MIN_HEIGHT || w > MAX_DIM || h > MAX_DIM) {
+                        throw afl::except::CommandLineException("!Parameter to \"-size\" is out of range");
+                    }
+                    m_width = w;
+                    m_height = h;
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+
+        int getWidth() const
+            { return m_width; }
+        int getHeight() const
+            { return m_height; }
+        int getBitsPerPixel() const
+            { return m_bitsPerPixel; }
+        gfx::Engine::WindowFlags_t getFlags() const
+            { return m_flags; }
+
+     private:
+        int m_width;
+        int m_height;
+        int m_bitsPerPixel;
+        gfx::Engine::WindowFlags_t m_flags;
+    };
 
 
     class CommandLineParameters {
@@ -281,14 +448,22 @@ namespace {
               m_gameDirectory()
             { }
 
-        void parse(afl::base::Ptr<afl::sys::Environment::CommandLine_t> cmdl)
+        void parse(afl::base::Ref<afl::sys::Environment::CommandLine_t> cmdl, afl::sys::Dialog& dialog)
             {
                 afl::sys::LongCommandLineParser parser(cmdl);
                 bool option;
                 String_t text;
                 while (parser.getNext(option, text)) {
                     if (option) {
-                        // FIXME
+                        if (m_rootOptions.handleOption(text, parser)) {
+                            // ok
+                        } else if (text == "resource") {
+                            m_commandLineResources.push_back(parser.getRequiredParameter(text));
+                        } else if (text == "help") {
+                            doHelp(dialog);
+                        } else {
+                            throw afl::except::CommandLineException(afl::string::Format("!Unknown command line parameter \"-%s\"", text));
+                        }
                     } else {
                         if (!m_haveGameDirectory) {
                             m_haveGameDirectory = true;
@@ -310,11 +485,55 @@ namespace {
                 }
             }
 
+        void doHelp(afl::sys::Dialog& dialog)
+            {
+                String_t help = PROGRAM_TITLE;
+                help += "\n\n";
+                help += _("Usage: c2ng [-options] gamedir");
+                help += "\n\n";
+                help += _("Options:");
+                help += "\n";
+                help += util::formatOptions(_("-resource=NAME\tAdd resource provider\n") + m_rootOptions.getHelp());
+                help += "\n";
+                help += _("(c) copyright 2016 Stefan Reuther <streu@gmx.de>");
+                help += "\n";
+                dialog.showInfo(help, PROGRAM_TITLE);
+                std::exit(0);
+            }
+
+        const std::vector<String_t>& getCommandLineResources() const
+            { return m_commandLineResources; }
+
+        RootOptions& rootOptions()
+            { return m_rootOptions; }
+
      private:
+        RootOptions m_rootOptions;
         bool m_haveGameDirectory;
         String_t m_gameDirectory;
+        std::vector<String_t> m_commandLineResources;
     };
 
+    class StarColorScheme : public gfx::ColorScheme<util::SkinColor::Color> {
+     public:
+        StarColorScheme(ui::Root& root)
+            : m_root(root),
+              m_pixmap()
+            {
+                util::RandomNumberGenerator rng(std::time(0));
+                gfx::gen::SpaceViewConfig cfg;
+                cfg.setSize(root.getExtent().getSize());
+                cfg.setNumSuns(0);
+                m_pixmap = cfg.render(rng)->makeCanvas().asPtr();
+            }
+        virtual gfx::Color_t getColor(util::SkinColor::Color index)
+            { return m_root.colorScheme().getColor(ui::BLACK_COLOR_SET[index]); }
+        virtual void drawBackground(gfx::Canvas& can, const gfx::Rectangle& area)
+            { gfx::blitTiledAnchored(gfx::BaseContext(can), area, *m_pixmap, gfx::Point(0, 0), 0); }
+     private:
+        ui::Root& m_root;
+        afl::base::Ptr<gfx::Canvas> m_pixmap;
+    };
 
     void play(client::Session& session)
     {
@@ -323,6 +542,7 @@ namespace {
         OutputState::Target state = OutputState::PlayerScreen;
         InputState in;
         bool running = true;
+        bool first = true;
         while (running) {
             OutputState out;
             switch (state) {
@@ -335,28 +555,29 @@ namespace {
                 break;
 
              case OutputState::PlayerScreen:
-                client::screens::doPlayerScreen(session, in, out);
+                client::screens::doPlayerScreen(session, in, out, first);
+                first = false;
                 in = InputState();
                 in.setProcess(out.getProcess());
                 state = out.getTarget();
                 break;
 
              case OutputState::ShipScreen:
-                client::screens::ControlScreen(session, game::map::Cursors::ShipScreen, OutputState::ShipScreen).run(in, out);
+                client::screens::ControlScreen(session, game::map::Cursors::ShipScreen, client::screens::ControlScreen::ShipScreen).run(in, out);
                 in = InputState();
                 in.setProcess(out.getProcess());
                 state = out.getTarget();
                 break;
 
              case OutputState::PlanetScreen:
-                client::screens::ControlScreen(session, game::map::Cursors::PlanetScreen, OutputState::PlanetScreen).run(in, out);
+                client::screens::ControlScreen(session, game::map::Cursors::PlanetScreen, client::screens::ControlScreen::PlanetScreen).run(in, out);
                 in = InputState();
                 in.setProcess(out.getProcess());
                 state = out.getTarget();
                 break;
 
              case OutputState::BaseScreen:
-                client::screens::ControlScreen(session, game::map::Cursors::BaseScreen, OutputState::BaseScreen).run(in, out);
+                client::screens::ControlScreen(session, game::map::Cursors::BaseScreen, client::screens::ControlScreen::BaseScreen).run(in, out);
                 in = InputState();
                 in.setProcess(out.getProcess());
                 state = out.getTarget();
@@ -371,25 +592,35 @@ int main(int, char** argv)
     // Capture environment
     afl::sys::Environment& env = afl::sys::Environment::getInstance(argv);
     afl::io::FileSystem& fs = afl::io::FileSystem::getInstance();
+    afl::sys::Dialog& dialog = afl::sys::Dialog::getSystemInstance();
 
     // Infrastructure (FIXME).
     afl::string::NullTranslator tx;
-    util::ConsoleLogger log;
-    log.attachWriter(true, env.attachTextWriterNT(env.Error));
-    log.attachWriter(false, env.attachTextWriterNT(env.Output));
+    afl::sys::Log log;
+    util::ConsoleLogger console;
+    console.attachWriter(true, env.attachTextWriterNT(env.Error));
+    console.attachWriter(false, env.attachTextWriterNT(env.Output));
+    log.addListener(console);
     util::ProfileDirectory profile(env, fs, tx, log);
     afl::string::Translator::setSystemInstance(std::auto_ptr<afl::string::Translator>(new afl::string::ProxyTranslator(tx)));
 
     // At this point we are safely operable.
     try {
+        // Start collecting messages.
+        // Starting from here, log messages will be retrievable
+        util::MessageCollector collector;
+        log.addListener(collector);
+        console.setConfiguration("interpreter.process@Trace=hide");
+        collector.setConfiguration("interpreter.process@Trace=hide");
+
         // Parse command line.
         CommandLineParameters params;
-        params.parse(env.getCommandLine());
-        log.write(log.Info, LOG_NAME, "[PCC2 v" PCC2_VERSION "]");
+        params.parse(env.getCommandLine(), dialog);
+        log.write(log.Info, LOG_NAME, afl::string::Format("[%s]", PROGRAM_TITLE));
 
         // Derived environment
-        afl::base::Ptr<afl::io::Directory> resourceDirectory    = fs.openDirectory(fs.makePathName(fs.makePathName(env.getInstallationDirectoryName(), "share"), "resource"));
-        afl::base::Ptr<afl::io::Directory> defaultSpecDirectory = fs.openDirectory(fs.makePathName(fs.makePathName(env.getInstallationDirectoryName(), "share"), "specs"));
+        afl::base::Ref<afl::io::Directory> resourceDirectory    = fs.openDirectory(fs.makePathName(fs.makePathName(env.getInstallationDirectoryName(), "share"), "resource"));
+        afl::base::Ref<afl::io::Directory> defaultSpecDirectory = fs.openDirectory(fs.makePathName(fs.makePathName(env.getInstallationDirectoryName(), "share"), "specs"));
 
         // Set up GUI
         log.write(log.Debug, LOG_NAME, tx.translateString("Starting GUI..."));
@@ -397,11 +628,18 @@ int main(int, char** argv)
         ui::res::Manager mgr;
         mgr.addNewImageLoader(new ui::res::EngineImageLoader(engine));
         mgr.addNewImageLoader(new ui::res::CCImageLoader());
-        mgr.addNewProvider(new ui::res::DirectoryProvider(resourceDirectory));
+        mgr.addNewProvider(new ui::res::DirectoryProvider(resourceDirectory), "(MAIN)");
 
         ui::DefaultResourceProvider provider(mgr, resourceDirectory, engine.dispatcher(), tx, log);
-        ui::Root root(engine, provider, 800, 600, 32, Engine_t::WindowFlags_t());
+        ui::Root root(engine, provider,
+                      params.rootOptions().getWidth(),
+                      params.rootOptions().getHeight(),
+                      params.rootOptions().getBitsPerPixel(),
+                      params.rootOptions().getFlags());
         mgr.setScreenSize(root.getExtent().getSize());
+        root.sig_screenshot.addNewClosure(new ui::ScreenshotListener(fs, log));
+
+        // FIXME: rumours are that if an exception is thrown around here, the program hangs instead of terminating safely.
 
         // Set up HTTP
         // FIXME: do this here? We would have to do this elsewhere if it takes time; like, for loading config files.
@@ -421,6 +659,9 @@ int main(int, char** argv)
         game::Session gameSession(tx, fs);
         gameSession.log().addListener(log);
 
+        // Set some variables
+        gameSession.world().setNewGlobalValue("C2$RESOURCEDIRECTORY", interpreter::makeStringValue(resourceDirectory->getDirectoryName()));
+
         // Set up background thread and request receivers.
         // These must be after the session objects so that they die before them, allowing final requests to finish.
         util::RequestThread backgroundThread("game.background", log);
@@ -428,11 +669,13 @@ int main(int, char** argv)
         util::RequestReceiver<game::Session> gameReceiver(backgroundThread, gameSession);
 
         // Set up foreground thread.
-        client::Session clientSession(root, gameReceiver.getSender(), tx);
+        client::Session clientSession(root, gameReceiver.getSender(), tx, collector, log);
 
         // Initialize by posting requests to the background thread.
         // (This will not take time.)
-        gameReceiver.getSender().postNewRequest(new ScriptInitializer(resourceDirectory));
+        uint32_t scriptWaitId = clientSession.interface().allocateWaitId();
+        gameReceiver.getSender().postNewRequest(new PluginInitializer(resourceDirectory, profile, params.getCommandLineResources()));
+        clientSession.interface().postNewRequest(new ScriptInitializer(resourceDirectory, scriptWaitId));
         browserReceiver.getSender().postNewRequest(new BrowserInitializer(fs, defaultSpecDirectory, profile, httpManager));
         {
             String_t initialGameDirectory;
@@ -442,17 +685,18 @@ int main(int, char** argv)
         }
 
         // Wait for completion of initialisation
-        waitForInitialisation(root, backgroundThread);
+        waitForInitialisation(clientSession, scriptWaitId);
         log.write(log.Debug, LOG_NAME, tx.translateString("Initialisation complete"));
 
         // Start game browser
-        // FIXME: wrap this in a try/catch
+        // FIXME: wrap this loop in a try/catch
+        // FIXME: create the background image in the background thread
+        StarColorScheme docColors(root);
         while (1) {
             // Helpful information
             ui::rich::DocumentView docView(root.getExtent().getSize(), 0, root.provider());
-            ui::SkinColorScheme docColors(ui::BLACK_COLOR_SET, root.colorScheme());
             docView.setExtent(gfx::Rectangle(gfx::Point(0, 0), docView.getLayoutInfo().getPreferredSize()));
-            docView.getDocument().add(util::rich::Parser::parseXml("<big>PCC2ng Milestone Zero</big>"));
+            docView.getDocument().add(util::rich::Parser::parseXml("<big>PCC2ng Milestone One</big>"));
             docView.getDocument().addNewline();
             docView.getDocument().addNewline();
             docView.getDocument().add(util::rich::Parser::parseXml("<font color=\"dim\">&#xA9; 2016 Stefan Reuther &lt;streu@gmx.de&gt;</font>"));
@@ -460,14 +704,14 @@ int main(int, char** argv)
             docView.getDocument().finish();
             docView.handleDocumentUpdate();
             docView.adjustToDocumentSize();
-            docView.setExtent(gfx::Rectangle(gfx::Point(0, 0), docView.getLayoutInfo().getPreferredSize()));
+            docView.setExtent(root.getExtent());
             docView.setColorScheme(docColors);
             root.add(docView);
 
             // Browser
             client::screens::BrowserScreen browserScreen(root, browserReceiver.getSender());
             browserScreen.sig_gameSelection.addNewClosure(new BrowserListener(browserScreen, browserReceiver.getSender(), gameReceiver.getSender()));
-            int result = browserScreen.run();
+            int result = browserScreen.run(docColors);
             if (result != 0) {
                 // OK, play
                 play(clientSession);
@@ -481,14 +725,16 @@ int main(int, char** argv)
         client.stop();
         clientThread.join();
     }
+    catch (afl::except::CommandLineException& cx) {
+        dialog.showError(cx.what(), PROGRAM_TITLE);
+        return 1;
+    }
     catch (std::exception& e) {
-        log.write(log.Error, LOG_NAME, tx.translateString("Uncaught exception"), e);
-        log.write(log.Error, LOG_NAME, tx.translateString("Program exits abnormally (crash)"));
+        dialog.showError(log.formatException(tx.translateString("Uncaught exception"), e) + "\n\n" + tx.translateString("Program exits abnormally (crash)"), PROGRAM_TITLE);
         return 1;
     }
     catch (...) {
-        log.write(log.Error, LOG_NAME, tx.translateString("Uncaught exception"));
-        log.write(log.Error, LOG_NAME, tx.translateString("Program exits abnormally (crash)"));
+        dialog.showError(tx.translateString("Uncaught exception") + "\n\n" + tx.translateString("Program exits abnormally (crash)"), PROGRAM_TITLE);
         return 1;
     }
 }

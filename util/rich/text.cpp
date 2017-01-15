@@ -43,14 +43,16 @@ util::rich::Text::Text(SkinColor::Color color, const char* text)
 //     \param color Color to assign to whole string
 //     \param text  Text */
 util::rich::Text::Text(SkinColor::Color color, String_t text)
-    : m_text(text),
+    : RefCounted(),
+      m_text(text),
       m_attributes()
 {
     withNewAttribute(new ColorAttribute(color));
 }
 
 util::rich::Text::Text(const Text& other)
-    : m_text(other.m_text),
+    : RefCounted(),
+      m_text(other.m_text),
       m_attributes()
 {
     // ex RichText::RichText

@@ -24,6 +24,7 @@ namespace client { namespace si {
         Control(UserSide& iface, ui::Root& root, afl::string::Translator& tx);
         virtual ~Control();
 
+        void attachPreparedWait(uint32_t waitId);
         void executeCommandWait(String_t command, bool verbose, String_t name);
         void executeKeyCommandWait(String_t keymapName, util::Key_t key, int prefix);
         void continueProcessWait(RequestLink2 link);

@@ -231,10 +231,12 @@ struct game::vcr::classic::PVCRAlgorithm::AlternativeFormula {
 game::vcr::classic::PVCRAlgorithm::PVCRAlgorithm(bool phost3Flag,
                                                  Visualizer& vis,
                                                  const game::config::HostConfiguration& config,
-                                                 const game::spec::ShipList& list)
+                                                 const game::spec::BeamVector_t& beams,
+                                                 const game::spec::TorpedoVector_t& launchers)
     : Algorithm(vis),
       m_config(config),
-      m_shipList(list),
+      m_beams(beams),
+      m_launchers(launchers),
       m_phost3Flag(phost3Flag),
       m_seed(0),
       m_time(0),
@@ -1216,7 +1218,7 @@ int
 game::vcr::classic::PVCRAlgorithm::computeBeamHitOdds(int beam, const Object& obj)
 {
     // ex VcrPlayerPHost::computeBeamHitOdds
-    if (const game::spec::Beam* b = m_shipList.beams().get(beam)) {
+    if (const game::spec::Beam* b = m_beams.get(beam)) {
         int i = getExperienceModifiedValue(m_config[m_config.BeamHitBonus], m_config[m_config.EModBeamHitBonus], obj, -4095, 4095)
             * (b->getKillPower() + b->getDamagePower()) / 100
             + getExperienceModifiedValue(m_config[m_config.BeamHitOdds], m_config[m_config.EModBeamHitOdds], obj, 0, 100);
@@ -1232,7 +1234,7 @@ int
 game::vcr::classic::PVCRAlgorithm::computeBeamRechargeRate(int beam, const Object& obj)
 {
     // ex VcrPlayerPHost::computeBeamRechargeRate
-    if (const game::spec::Beam* b = m_shipList.beams().get(beam)) {
+    if (const game::spec::Beam* b = m_beams.get(beam)) {
         int i = (((b->getKillPower() + b->getDamagePower()) * getExperienceModifiedValue(m_config[m_config.BeamRechargeBonus], m_config[m_config.EModBeamRechargeBonus], obj, -4095, 4095)) / 100
                  + getExperienceModifiedValue(m_config[m_config.BeamRechargeRate], m_config[m_config.EModBeamRechargeRate], obj, 0, 16384))
             * obj.getBeamChargeRate();
@@ -1313,7 +1315,7 @@ game::vcr::classic::PVCRAlgorithm::beamFire(Status& st, Status& opp)
         return false;
     }
 
-    const game::spec::Beam* gb = m_shipList.beams().get(st.r.obj.getBeamType());
+    const game::spec::Beam* gb = m_beams.get(st.r.obj.getBeamType());
     if (gb == 0) {
         // error!
         return true;
@@ -1370,7 +1372,7 @@ int
 game::vcr::classic::PVCRAlgorithm::computeTorpHitOdds(int torp, const Object& obj)
 {
     // ex VcrPlayerPHost::computeTorpHitOdds
-    if (const game::spec::TorpedoLauncher* tl = m_shipList.launchers().get(torp)) {
+    if (const game::spec::TorpedoLauncher* tl = m_launchers.get(torp)) {
         int i = ((getExperienceModifiedValue(m_config[m_config.TorpHitBonus], m_config[m_config.EModTorpHitBonus], obj, -4095, 4095) * (tl->getKillPower() + tl->getDamagePower())) / 100
                  + getExperienceModifiedValue(m_config[m_config.TorpHitOdds], m_config[m_config.EModTorpHitOdds], obj, 0, 100));
         return i < 0 ? 0 : i;
@@ -1385,7 +1387,7 @@ int
 game::vcr::classic::PVCRAlgorithm::computeTubeRechargeRate(int torp, const Object& obj)
 {
     // ex VcrPlayerPHost::computeTubeRechargeRate
-    if (const game::spec::TorpedoLauncher* tl = m_shipList.launchers().get(torp)) {
+    if (const game::spec::TorpedoLauncher* tl = m_launchers.get(torp)) {
         int i = (((getExperienceModifiedValue(m_config[m_config.TubeRechargeBonus], m_config[m_config.EModTubeRechargeBonus], obj, -4095, 4095) * (tl->getKillPower() + tl->getDamagePower())) / 100
                   + getExperienceModifiedValue(m_config[m_config.TubeRechargeRate], m_config[m_config.EModTubeRechargeRate], obj, 0, 16384)))
             * obj.getTorpChargeRate();
@@ -1427,7 +1429,7 @@ game::vcr::classic::PVCRAlgorithm::torpsFire(Status& st, Status& opp)
             visualizer().updateLauncher(st.f.side, launcher);
             if (rr <= st.f.torp_hit_odds) {
                 /* Scaling factor for torpedo effect. Tim scales with 2 for some reason. */
-                if (const game::spec::TorpedoLauncher* tl = m_shipList.launchers().get(st.r.obj.getTorpedoType())) {
+                if (const game::spec::TorpedoLauncher* tl = m_launchers.get(st.r.obj.getTorpedoType())) {
                     int kill = tl->getKillPower();
                     int damage = tl->getDamagePower();
                     if (!m_config[m_config.AllowAlternativeCombat]()) {
@@ -1484,10 +1486,10 @@ game::vcr::classic::PVCRAlgorithm::canStillFight(const Status& st, const Status&
     // ex VcrPlayerPHost::canStillFight
     // FIXME: null-pointer checks!
     const bool drcheck = !(m_capabilities & game::v3::structures::DeathRayCapability) || !opp.r.obj.isPlanet();
-    return (st.r.obj.getNumBeams() > 0 && (drcheck || m_shipList.beams().get(st.r.obj.getBeamType())->getDamagePower()))
+    return (st.r.obj.getNumBeams() > 0 && (drcheck || m_beams.get(st.r.obj.getBeamType())->getDamagePower()))
         || (st.r.obj.getNumFighters() > 0 && st.r.obj.getNumBays() > 0)
         || (st.r.m_activeFighters > 0)
-        || (st.r.obj.getNumTorpedoes() > 0 && (drcheck || m_shipList.launchers().get(st.r.obj.getTorpedoType())->getDamagePower()));
+        || (st.r.obj.getNumTorpedoes() > 0 && (drcheck || m_launchers.get(st.r.obj.getTorpedoType())->getDamagePower()));
 }
 
 
@@ -1617,12 +1619,12 @@ game::vcr::classic::PVCRAlgorithm::checkSide(Object& obj)
         obj.setOwner(12);
     }
 
-    if (obj.getBeamType() != 0 && m_shipList.beams().get(obj.getBeamType()) == 0) {
+    if (obj.getBeamType() != 0 && m_beams.get(obj.getBeamType()) == 0) {
         obj.setBeamType(0);
         obj.setNumBeams(0);
         err = true;
     }
-    if (obj.getTorpedoType() != 0 && m_shipList.launchers().get(obj.getTorpedoType()) == 0) {
+    if (obj.getTorpedoType() != 0 && m_launchers.get(obj.getTorpedoType()) == 0) {
         obj.setTorpedoType(0);
         obj.setNumLaunchers(0);
         err = true;

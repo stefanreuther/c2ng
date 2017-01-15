@@ -22,13 +22,13 @@ namespace game { namespace interface {
         virtual void set(interpreter::Arguments& args, afl::data::Value* value);
 
         // CallableValue:
-        virtual int32_t getDimension(int32_t which);
+        virtual int32_t getDimension(int32_t which) const;
         virtual interpreter::Context* makeFirstContext();
         virtual SimpleFunction* clone() const;
 
         // BaseValue:
         virtual String_t toString(bool readable) const;
-        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, interpreter::SaveContext* ctx) const;
+        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, interpreter::SaveContext& ctx) const;
 
      private:
         Session& m_session;

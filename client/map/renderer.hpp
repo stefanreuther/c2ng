@@ -9,6 +9,7 @@
 #include "game/map/renderlist.hpp"
 #include "afl/base/ptr.hpp"
 #include "ui/colorscheme.hpp"
+#include "gfx/resourceprovider.hpp"
 
 namespace client { namespace map {
 
@@ -21,7 +22,7 @@ namespace client { namespace map {
         void setCenter(game::map::Point center);
         void setRenderList(afl::base::Ptr<game::map::RenderList> renderList);
 
-        void draw(gfx::Canvas& can, ui::ColorScheme& colorScheme) const;
+        void draw(gfx::Canvas& can, ui::ColorScheme& colorScheme, gfx::ResourceProvider& provider) const;
 
         void getPreferredWorldRange(game::map::Point& min, game::map::Point& max) const;
         void getMinimumWorldRange(game::map::Point& min, game::map::Point& max) const;

@@ -6,6 +6,7 @@
 
 #include "afl/data/namemap.hpp"
 #include "afl/data/segment.hpp"
+#include "afl/base/refcounted.hpp"
 
 namespace interpreter {
 
@@ -17,7 +18,7 @@ namespace interpreter {
         Iteration can therefore simply iterate over DataSegment indexes.
 
         FIXME: can we somehow use afl::data::Hash instead? */
-    class HashData {
+    class HashData : public afl::base::RefCounted {
      public:
         HashData();
         ~HashData();
@@ -31,6 +32,16 @@ namespace interpreter {
         afl::data::Value* get(afl::data::NameMap::Index_t index) const;
         String_t getName(afl::data::NameMap::Index_t index);
         afl::data::NameMap::Index_t getNumNames() const;
+
+        // Direct access (needed for saving/loading). FIXME: can we get rid of this?
+        const afl::data::NameMap& getNames() const
+            { return m_names; }
+        afl::data::NameMap& getNames()
+            { return m_names; }
+        const afl::data::Segment& getContent() const
+            { return m_content; }
+        afl::data::Segment& getContent()
+            { return m_content; }
 
      private:
         afl::data::NameMap m_names;

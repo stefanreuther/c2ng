@@ -140,10 +140,3 @@ ui::widgets::FocusIterator::handleKey(util::Key_t key, int /*prefix*/)
         return false;
     }
 }
-
-// Handle mouse movement.
-bool
-ui::widgets::FocusIterator::handleMouse(gfx::Point /*pt*/, MouseButtons_t /*pressedButtons*/)
-{
-    return false;
-}

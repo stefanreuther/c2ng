@@ -28,8 +28,20 @@ client::si::Control::~Control()
 }
 
 void
+client::si::Control::attachPreparedWait(uint32_t waitId)
+{
+    m_waiting = true;
+    m_interacting = false;
+    m_id = waitId;
+    updateBlocker();
+    m_loop.run();
+}
+
+void
 client::si::Control::executeCommandWait(String_t command, bool verbose, String_t name)
 {
+    // replaces int/simple.h:runHook (using command "RunHook ...")
+    // replaces int/simple.h:executeStatement (using command "C2$Eval atom, prefix" or similar)
     std::auto_ptr<ContextProvider> ctxp(createContextProvider());
     m_waiting = true;
     m_interacting = false;
@@ -107,6 +119,7 @@ client::si::Control::updateBlocker()
             m_root.add(m_blocker);
         } else {
             m_root.remove(m_blocker);
+            m_blocker.replayEvents();
         }
     }
 }

@@ -59,7 +59,7 @@ namespace game { namespace browser {
         afl::base::Ptr<Root> getSelectedRoot() const;
 
         Folder* createAccountFolder(Account& account);
-        afl::base::Ptr<Root> loadGameRoot(afl::base::Ptr<afl::io::Directory> dir);
+        afl::base::Ptr<Root> loadGameRoot(afl::base::Ref<afl::io::Directory> dir);
 
      private:
         afl::io::FileSystem& m_fileSystem;

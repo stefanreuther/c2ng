@@ -104,7 +104,7 @@ namespace game { namespace map {
         void        internalCheck(const Configuration& config,
                                   afl::string::Translator& tx,
                                   afl::sys::LogListener& log);
-        void        combinedCheck2(const Universe& univ, PlayerSet_t availablePlayers);
+        void        combinedCheck2(const Universe& univ, PlayerSet_t availablePlayers, int turnNumber);
 
         // MapObject interface:
         virtual String_t getName(Name which, afl::string::Translator& tx, InterpreterInterface& iface) const;

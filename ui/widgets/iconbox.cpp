@@ -53,8 +53,8 @@ ui::widgets::IconBox::draw(gfx::Canvas& can)
 
     int curx = getExtent().getLeftX() - m_leftX + x;
     if (curx < getExtent().getRightX()) {
-        drawBackground(gfx::Context(can).useColorScheme(getColorScheme()),
-                       gfx::Rectangle(curx, getExtent().getTopY(), getExtent().getRightX() - curx, getExtent().getHeight()));
+        gfx::Context<util::SkinColor::Color> ctx(can, getColorScheme());
+        drawBackground(ctx, gfx::Rectangle(curx, getExtent().getTopY(), getExtent().getRightX() - curx, getExtent().getHeight()));
     }
 }
 

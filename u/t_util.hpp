@@ -12,6 +12,12 @@ class TestUtilAnswerProvider : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestUtilApplication : public CxxTest::TestSuite {
+ public:
+    void testInit();
+    void testExit();
+};
+
 class TestUtilAtomTable : public CxxTest::TestSuite {
  public:
     void testAtom();
@@ -33,6 +39,11 @@ class TestUtilBaseSlaveRequestSender : public CxxTest::TestSuite {
     void testCall();
 };
 
+class TestUtilConfigurationFileParser : public CxxTest::TestSuite {
+ public:
+    void testInterface();
+};
+
 class TestUtilConstantAnswerProvider : public CxxTest::TestSuite {
  public:
     void testIt();
@@ -40,11 +51,26 @@ class TestUtilConstantAnswerProvider : public CxxTest::TestSuite {
     void testNo();
 };
 
+class TestUtilFileNamePattern : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testFail();
+    void testLiterals();
+    void testCopy();
+    void testPrepared();
+};
+
+class TestUtilFileParser : public CxxTest::TestSuite {
+ public:
+    void testInterface();
+};
+
 class TestUtilKey : public CxxTest::TestSuite {
  public:
     void testParse();
     void testFormat();
     void testUnique();
+    void testClassify();
 };
 
 class TestUtilKeyString : public CxxTest::TestSuite {
@@ -71,9 +97,36 @@ class TestUtilMath : public CxxTest::TestSuite {
     void testSquareInteger();
 };
 
+class TestUtilMessageCollector : public CxxTest::TestSuite {
+ public:
+    void testForward();
+    void testBackward();
+};
+
+class TestUtilMessageMatcher : public CxxTest::TestSuite {
+ public:
+    void testErrors();
+    void testMatch();
+};
+
+class TestUtilMessageNotifier : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
+class TestUtilPrefixArgument : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testSequences();
+    void testCancel();
+};
+
 class TestUtilRandomNumberGenerator : public CxxTest::TestSuite {
  public:
     void testIt();
+    void testRange();
+    void testFullRange();
+    void testReset();
 };
 
 class TestUtilRequest : public CxxTest::TestSuite {
@@ -95,6 +148,12 @@ class TestUtilRequestReceiver : public CxxTest::TestSuite {
 class TestUtilRequestThread : public CxxTest::TestSuite {
  public:
     void testIt();
+};
+
+class TestUtilRunLengthExpandTransform : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testBad();
 };
 
 class TestUtilSkinColor : public CxxTest::TestSuite {
@@ -123,11 +182,29 @@ class TestUtilString : public CxxTest::TestSuite {
     void testStringMatch();
     void testParseRange();
     void testParsePlayer();
+    void testFormatOptions();
+};
+
+class TestUtilStringList : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testSort();
+    void testCopy();
+};
+
+class TestUtilStringParser : public CxxTest::TestSuite {
+ public:
+    void testIt();
 };
 
 class TestUtilUnicodeChars : public CxxTest::TestSuite {
  public:
     void testIt();
+};
+
+class TestUtilstring : public CxxTest::TestSuite {
+ public:
+    void testFormatName();
 };
 
 #endif

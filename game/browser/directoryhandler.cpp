@@ -14,7 +14,7 @@ namespace {
     const char LOG_NAME[] = "game.browser";
 }
 
-game::browser::DirectoryHandler::DirectoryHandler(Browser& b, afl::base::Ptr<afl::io::Directory> defaultSpecificationDirectory, util::ProfileDirectory& profile, afl::io::FileSystem& fs)
+game::browser::DirectoryHandler::DirectoryHandler(Browser& b, afl::base::Ref<afl::io::Directory> defaultSpecificationDirectory, util::ProfileDirectory& profile, afl::io::FileSystem& fs)
     : m_browser(b),
       m_v3loader(defaultSpecificationDirectory, profile, b.translator(), b.log(), fs)
 { }
@@ -24,7 +24,7 @@ game::browser::DirectoryHandler::handleFolderName(String_t name, afl::container:
 {
     // Is this actually a local folder?
     try {
-        afl::base::Ptr<afl::io::Directory> dir = m_browser.fileSystem().openDirectory(name);
+        afl::base::Ref<afl::io::Directory> dir = m_browser.fileSystem().openDirectory(name);
         dir->getDirectoryEntries();
     }
     catch (...) {
@@ -38,10 +38,10 @@ game::browser::DirectoryHandler::handleFolderName(String_t name, afl::container:
         FileSystemRootFolder(m_browser).loadContent(roots);
 
         // Process the provided folder
-        afl::base::Ptr<afl::io::Directory> dir = m_browser.fileSystem().openDirectory(m_browser.fileSystem().getAbsolutePathName(name));
+        afl::base::Ptr<afl::io::Directory> dir = m_browser.fileSystem().openDirectory(m_browser.fileSystem().getAbsolutePathName(name)).asPtr();
         while (dir.get() != 0) {
             // Create this folder.
-            std::auto_ptr<FileSystemFolder> f(new FileSystemFolder(m_browser, dir, dir->getTitle()));
+            std::auto_ptr<FileSystemFolder> f(new FileSystemFolder(m_browser, *dir, dir->getTitle()));
 
             // Match against roots.
             // We prefer using a root because that has the nicer title than the implicitly created parent.
@@ -84,7 +84,7 @@ game::browser::DirectoryHandler::createAccountFolder(Account& /*acc*/)
 }
 
 afl::base::Ptr<game::Root>
-game::browser::DirectoryHandler::loadGameRoot(afl::base::Ptr<afl::io::Directory> dir)
+game::browser::DirectoryHandler::loadGameRoot(afl::base::Ref<afl::io::Directory> dir)
 {
     return m_v3loader.load(dir, false);
 }

@@ -7,7 +7,7 @@
 #include "interpreter/arguments.hpp"
 
 bool
-interpreter::IndexableValue::isProcedureCall()
+interpreter::IndexableValue::isProcedureCall() const
 {
     // ex IntIndexableValue::isProcedureCall
     return false;

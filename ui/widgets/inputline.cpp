@@ -1,26 +1,29 @@
 /**
   *  \file ui/widgets/inputline.cpp
+  *  \brief Class ui::widgets::InputLine
   */
 
 #include "ui/widgets/inputline.hpp"
-#include "afl/charset/utf8.hpp"
-#include "gfx/context.hpp"
-#include "ui/draw.hpp"
-#include "ui/colorscheme.hpp"
-#include "gfx/complex.hpp"
-#include "ui/window.hpp"
-#include "ui/layout/vbox.hpp"
-#include "ui/widgets/statictext.hpp"
 #include "afl/base/deleter.hpp"
+#include "afl/charset/utf8.hpp"
+#include "gfx/clipfilter.hpp"
+#include "gfx/complex.hpp"
+#include "gfx/context.hpp"
+#include "ui/colorscheme.hpp"
+#include "ui/draw.hpp"
+#include "ui/eventloop.hpp"
 #include "ui/group.hpp"
 #include "ui/layout/hbox.hpp"
+#include "ui/layout/vbox.hpp"
 #include "ui/spacer.hpp"
 #include "ui/widgets/button.hpp"
-#include "ui/eventloop.hpp"
+#include "ui/widgets/quit.hpp"
+#include "ui/widgets/statictext.hpp"
+#include "ui/window.hpp"
+#include "util/translation.hpp"
+#include "util/unicodechars.hpp"
 
 namespace {
-    const int CursorWidth = 2;
-
     size_t getPreviousWordBoundary(afl::charset::Utf8& u8, const String_t& str, size_t pos)
     {
         while (pos > 0 && u8.charAt(str, pos-1) == ' ')
@@ -39,6 +42,11 @@ namespace {
             ++pos;
         return pos;
     }
+
+    int getCursorWidth(gfx::Font& font)
+    {
+        return font.getEmWidth() / 2;
+    }
 }
 
 // /** Input line.
@@ -51,7 +59,7 @@ ui::widgets::InputLine::InputLine(size_t maxLength, Root& root)
       m_hotkey(0),
       m_maxLength(maxLength),
       m_cursorIndex(0),
-      m_firstIndex(0),
+      m_pixelOffset(0),
       m_text(),
       m_font(),
       m_preferredLength(maxLength < 40 ? maxLength : 40),
@@ -73,7 +81,7 @@ ui::widgets::InputLine::InputLine(size_t maxLength, int preferredLength, Root& r
       m_hotkey(0),
       m_maxLength(maxLength),
       m_cursorIndex(0),
-      m_firstIndex(0),
+      m_pixelOffset(0),
       m_text(),
       m_font(),
       m_preferredLength(preferredLength),
@@ -89,7 +97,7 @@ ui::widgets::InputLine::setText(String_t s)
 {
     m_text = s;
     m_cursorIndex = m_utf8.length(s);
-    m_firstIndex = 0;
+    m_pixelOffset = 0;
     scroll();
     requestRedraw();
     sig_change.raise();
@@ -133,7 +141,7 @@ ui::widgets::InputLine::setHotkey(util::Key_t hotkey)
 }
 
 ui::widgets::InputLine&
-ui::widgets::InputLine::setFont(gfx::FontRequest& font)
+ui::widgets::InputLine::setFont(const gfx::FontRequest& font)
 {
     m_font = font;
     return *this;
@@ -143,15 +151,16 @@ ui::widgets::InputLine::setFont(gfx::FontRequest& font)
 //     ilf_NonEditable (=request is ignored) and ilf_TypeErase (=replace
 //     current text). */
 void
-ui::widgets::InputLine::insert(String_t s)
+ui::widgets::InputLine::insertText(String_t s)
 {
     // ex UIInputLine::insert
     if (m_flags.contains(NonEditable)) {
         return;
     }
     if (m_flags.contains(TypeErase)) {
-        m_text = s;
-        m_cursorIndex = m_utf8.length(s);
+        // Replace
+        m_text = m_utf8.substr(s, 0, m_maxLength);
+        m_cursorIndex = m_utf8.length(m_text);
         setFlag(TypeErase, false);
     } else {
         // Can we insert?
@@ -174,7 +183,7 @@ ui::widgets::InputLine::insert(String_t s)
 // /** Move cursor to position pos.
 //     \param pos cursor position, [0, lengthUtf8()] */
 void
-ui::widgets::InputLine::setCursor(size_t pos)
+ui::widgets::InputLine::setCursorIndex(size_t pos)
 {
     // ex UIInputLine::setCursor
     const size_t textLength = m_utf8.length(m_text);
@@ -191,7 +200,7 @@ ui::widgets::InputLine::setCursor(size_t pos)
 
 // /** Get cursor position. Note that this position is in runes, not bytes! */
 size_t
-ui::widgets::InputLine::getCursor() const
+ui::widgets::InputLine::getCursorIndex() const
 {
     return m_cursorIndex;
 }
@@ -211,23 +220,24 @@ ui::widgets::InputLine::doStandardDialog(String_t title, String_t prompt)
     afl::base::Deleter del;
     EventLoop loop(m_root);
 
-    Window& window = del.addNew(new Window(title, m_root.provider(), BLUE_WINDOW, ui::layout::VBox::instance5));
+    Window& window = del.addNew(new Window(title, m_root.provider(), m_root.colorScheme(), BLUE_WINDOW, ui::layout::VBox::instance5));
     // FIXME: border 10
 
     window.add(del.addNew(new StaticText(prompt, SkinColor::Static, gfx::FontRequest().addSize(1), m_root.provider())));
     window.add(*this);
 
-    // FIXME: UIQuit quit(0);
+    ui::widgets::Quit quit(m_root, loop);
     Group& buttons = del.addNew(new Group(ui::layout::HBox::instance5));
     buttons.add(del.addNew(new Spacer()));
 
-    Button& okButton = del.addNew(new Button("!OK", util::Key_Return, m_root.provider(), m_root.colorScheme()));
-    Button& cancelButton = del.addNew(new Button("!Cancel", util::Key_Escape, m_root.provider(), m_root.colorScheme()));
+    Button& okButton = del.addNew(new Button(_("OK"), util::Key_Return, m_root));
+    Button& cancelButton = del.addNew(new Button(_("Cancel"), util::Key_Escape, m_root));
     okButton.sig_fire.addNewClosure(loop.makeStop(1));
     cancelButton.sig_fire.addNewClosure(loop.makeStop(0));
     buttons.add(okButton);
     buttons.add(cancelButton);
     window.add(buttons);
+    window.add(quit);
 
     // Do it
     window.pack();
@@ -257,7 +267,7 @@ ui::widgets::InputLine::handleKey(util::Key_t key, int /*prefix*/)
             requestActive();
             setFlag(TypeErase, false);
             if (m_cursorIndex > 0) {
-                setCursor(m_cursorIndex - 1);
+                setCursorIndex(m_cursorIndex - 1);
             }
             return true;
          case util::Key_Right:
@@ -265,20 +275,20 @@ ui::widgets::InputLine::handleKey(util::Key_t key, int /*prefix*/)
             requestActive();
             setFlag(TypeErase, false);
             if (m_cursorIndex < m_utf8.length(m_text)) {
-                setCursor(m_cursorIndex + 1);
+                setCursorIndex(m_cursorIndex + 1);
             }
             return true;
          case util::KeyMod_Ctrl + util::Key_Left:
             /* Move cursor left one word */
             requestActive();
             setFlag(TypeErase, false);
-            setCursor(getPreviousWordBoundary(m_utf8, m_text, m_cursorIndex));
+            setCursorIndex(getPreviousWordBoundary(m_utf8, m_text, m_cursorIndex));
             return true;
          case util::KeyMod_Ctrl + util::Key_Right:
             /* Move cursor right one word */
             requestActive();
             setFlag(TypeErase, false);
-            setCursor(getNextWordBoundary(m_utf8, m_text, m_cursorIndex));
+            setCursorIndex(getNextWordBoundary(m_utf8, m_text, m_cursorIndex));
             return true;
          case util::Key_Backspace:
             /* Delete character backward */
@@ -307,6 +317,7 @@ ui::widgets::InputLine::handleKey(util::Key_t key, int /*prefix*/)
                         m_text = m_utf8.substr(m_text, 0, m_cursorIndex) + m_utf8.substr(m_text, m_cursorIndex+1, String_t::npos);
                     }
                 }
+                scroll();
                 requestRedraw();
                 sig_change.raise();
             }
@@ -315,13 +326,13 @@ ui::widgets::InputLine::handleKey(util::Key_t key, int /*prefix*/)
             /* Go to beginning */
             requestActive();
             setFlag(TypeErase, false);
-            setCursor(0);
+            setCursorIndex(0);
             return true;
          case util::Key_End:
             /* Go to end */
             requestActive();
             setFlag(TypeErase, false);
-            setCursor(m_utf8.length(m_text));
+            setCursorIndex(m_utf8.length(m_text));
             return true;
          case util::KeyMod_Ctrl + 'y':
             /* Delete whole line */
@@ -332,7 +343,7 @@ ui::widgets::InputLine::handleKey(util::Key_t key, int /*prefix*/)
                 requestRedraw();
                 sig_change.raise();
             }
-            setCursor(0);
+            setCursorIndex(0);
             return true;
          case util::KeyMod_Ctrl + 'k':
             /* Delete till end of line */
@@ -351,7 +362,7 @@ ui::widgets::InputLine::handleKey(util::Key_t key, int /*prefix*/)
             if (!m_flags.contains(NonEditable)) {
                 pos = getPreviousWordBoundary(m_utf8, m_text, m_cursorIndex);
                 m_text = m_utf8.substr(m_text, 0, pos) + m_utf8.substr(m_text, m_cursorIndex, String_t::npos);
-                setCursor(pos);
+                setCursorIndex(pos);
                 requestRedraw();
                 sig_change.raise();
             }
@@ -372,7 +383,7 @@ ui::widgets::InputLine::handleKey(util::Key_t key, int /*prefix*/)
                     pos = n - 1;
                 }
                 m_text = m_utf8.substr(m_text, 0, pos-1) + m_utf8.substr(m_text, pos, 1) + m_utf8.substr(m_text, pos-1, 1) + m_utf8.substr(m_text, pos+1, String_t::npos);
-                setCursor(pos+1);
+                setCursorIndex(pos+1);
                 requestRedraw();
                 sig_change.raise();
             }
@@ -385,7 +396,7 @@ ui::widgets::InputLine::handleKey(util::Key_t key, int /*prefix*/)
                 String_t n;
                 m_utf8.append(n, key);
                 requestActive();
-                insert(n);
+                insertText(n);
                 return true;
             }
             break;
@@ -401,23 +412,21 @@ ui::widgets::InputLine::handleMouse(gfx::Point pt, MouseButtons_t pressedButtons
         requestActive();
         requestFocus();
 
-        size_t new_pos = m_firstIndex;
-        int delta = pt.getX() - getExtent().getLeftX();
-        afl::base::Ptr<gfx::Font> font = m_root.provider().getFont(m_font);
-        if (font.get() != 0) {
-            if (m_flags.contains(Hidden)) {
-                while (new_pos < m_utf8.length(m_text) && font->getTextWidth(String_t(new_pos - m_firstIndex, '*')) < delta) {
-                    ++new_pos;
-                }
-            } else {
-                while (new_pos < m_utf8.length(m_text) && font->getTextWidth(m_utf8.substr(m_text, m_firstIndex, new_pos - m_firstIndex)) < delta) {
-                    ++new_pos;
-                }
-            }
-        }
+        m_root.consumeMousePrefixArgument();
 
-        // FIXME: consumeprefix()
-        m_cursorIndex = new_pos;
+        // Find new position
+        afl::base::Ref<gfx::Font> font = m_root.provider().getFont(m_font);
+        const String_t text = getPerceivedText();
+        int pixelPos = m_pixelOffset + pt.getX() - getExtent().getLeftX();
+        size_t charPos = 0;
+        size_t length = m_utf8.length(text);
+        while (charPos <= length && font->getTextWidth(m_utf8.substr(m_text, 0, charPos)) < pixelPos) {
+            ++charPos;
+        }
+        if (charPos > 0) {
+            --charPos;
+        }
+        m_cursorIndex = charPos;
         setFlag(TypeErase, false);
         requestRedraw();
         return true;
@@ -431,13 +440,12 @@ void
 ui::widgets::InputLine::draw(gfx::Canvas& can)
 {
     // ex UIInputLine::drawContent
-    gfx::Context ctx(can);
-    ctx.useColorScheme(m_root.colorScheme());
+    gfx::ClipFilter filter(can, getExtent());
+    gfx::Context<uint8_t> ctx(filter, m_root.colorScheme());
 
     gfx::Rectangle r(getExtent());
     int bgcolor;
     if (getFocusState() != NoFocus) {
-        scroll();
         if (m_flags.contains(TypeErase)) {
             ctx.setColor(Color_Gray);
             bgcolor = Color_Blue;
@@ -452,28 +460,27 @@ ui::widgets::InputLine::draw(gfx::Canvas& can)
             ctx.setColor(Color_Black);
         }
         bgcolor = Color_Gray;
-        m_firstIndex = 0;
     }
 
-    String_t t = (m_flags.contains(Hidden)
-                  ? String_t(m_utf8.length(m_text) - m_firstIndex, '*')
-                  : String_t(m_utf8.substr(m_text, m_firstIndex, String_t::npos)));
+    String_t t = getPerceivedText();
 
-    afl::base::Ptr<gfx::Font> font = m_root.provider().getFont(m_font);
-    if (font.get() != 0) {
-        ctx.useFont(*font);
-    }
+    afl::base::Ref<gfx::Font> font = m_root.provider().getFont(m_font);
+    ctx.useFont(*font);
+
     drawSolidBar(ctx, r, bgcolor);
-    outTextF(ctx, r, t);
+    outText(ctx, gfx::Point(r.getLeftX() - m_pixelOffset, r.getTopY()), t);
 
-    /* outTextF sets cursor to the end of the output */
-    drawSolidBar(ctx, gfx::Rectangle(ctx.getCursor().getX(), r.getTopY(), r.getRightX() - ctx.getCursor().getX(), r.getHeight()), Color_Gray);
-    if (getFocusState() != NoFocus && m_cursorIndex >= m_firstIndex) {
-        int cx = font->getTextWidth(m_utf8.substr(t, 0, m_cursorIndex-m_firstIndex));
-        if (cx + 10 < r.getWidth()) {
-            /* FIXME: magic numbers */
-            drawSolidBar(ctx, gfx::Rectangle(r.getLeftX() + cx, r.getTopY() + font->getLineHeight()*9/10, font->getEmWidth()/2, std::max(font->getLineHeight()/10, 1)), Color_Black);
-        }
+    const int endX = r.getLeftX() - m_pixelOffset + font->getTextWidth(t);
+    if (endX < r.getRightX()) {
+        drawSolidBar(ctx, gfx::Rectangle(endX, r.getTopY(), r.getRightX() - endX, r.getHeight()), Color_Gray);
+    }
+    if (getFocusState() != NoFocus) {
+        const int cx = font->getTextWidth(m_utf8.substr(t, 0, m_cursorIndex));
+        drawSolidBar(ctx, gfx::Rectangle(r.getLeftX() - m_pixelOffset + cx,
+                                         r.getTopY() + font->getLineHeight()*9/10,
+                                         getCursorWidth(*font),
+                                         std::max(font->getLineHeight()/10, 1)),
+                     Color_Black);
     }
 }
 
@@ -491,7 +498,7 @@ ui::widgets::InputLine::handleStateChange(State st, bool enable)
 void
 ui::widgets::InputLine::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
 {
-    // FIXME: do we need to do more?
+    scroll();
     requestRedraw();
 }
 
@@ -499,14 +506,10 @@ ui::layout::Info
 ui::widgets::InputLine::getLayoutInfo() const
 {
     // ex UIInputLine::getLayoutInfo
-    afl::base::Ptr<gfx::Font> font = m_root.provider().getFont(m_font);
-    if (font.get() != 0) {
-        return ui::layout::Info(font->getCellSize().scaledBy(4, 1),
-                                font->getCellSize().scaledBy(m_preferredLength, 1),
-                                ui::layout::Info::GrowHorizontal);
-    } else {
-        return ui::layout::Info();
-    }
+    afl::base::Ref<gfx::Font> font = m_root.provider().getFont(m_font);
+    return ui::layout::Info(font->getCellSize().scaledBy(4, 1),
+                            font->getCellSize().scaledBy(m_preferredLength, 1),
+                            ui::layout::Info::GrowHorizontal);
 }
 
 // /** Adjust display so that cursor is visible. */
@@ -514,28 +517,20 @@ void
 ui::widgets::InputLine::scroll()
 {
     // ex UIInputLine::scroll()
-    afl::base::Ptr<gfx::Font> font = m_root.provider().getFont(m_font);
-    if (font.get() != 0) {
-        const size_t textLength = m_utf8.length(m_text);
+    afl::base::Ref<gfx::Font> font = m_root.provider().getFont(m_font);
+    String_t perceivedText = getPerceivedText();
 
-        if (m_cursorIndex > textLength) {
-            m_cursorIndex = textLength;
-        }
-        if (m_cursorIndex < 3) {
-            m_firstIndex = 0;
-        } else if (m_firstIndex > m_cursorIndex - 3) {
-            m_firstIndex = m_cursorIndex - 3;
-        }
+    int cursorWidth  = getCursorWidth(*font);
+    int textSize     = font->getTextWidth(perceivedText) + cursorWidth;
+    int beforeCursor = font->getTextWidth(m_utf8.substr(perceivedText, 0, m_cursorIndex));
+    int width = getExtent().getWidth();
 
-        String_t t = m_flags.contains(Hidden) ? String_t(textLength, '*') : m_text;
-        int ln = font->getTextWidth(m_utf8.substr(t, m_firstIndex, m_cursorIndex - m_firstIndex));
-        int av = getExtent().getWidth() - CursorWidth;
-        if (m_cursorIndex) {
-            while (m_firstIndex < m_cursorIndex-1 && ln > av) {
-                ++m_firstIndex;
-                ln = font->getTextWidth(m_utf8.substr(t, m_firstIndex, m_cursorIndex - m_firstIndex));
-            }
-        }
+    if (width + m_pixelOffset > textSize) {
+        m_pixelOffset = std::max(0, textSize - width);
+    } else if (m_pixelOffset >= beforeCursor) {
+        m_pixelOffset = beforeCursor;
+    } else if (beforeCursor - m_pixelOffset > width - cursorWidth) {
+        m_pixelOffset = beforeCursor - width + cursorWidth;
     }
 }
 
@@ -562,4 +557,18 @@ ui::widgets::InputLine::acceptUnicode(uint32_t uni) const
     //     return false;
     // }
     return true;
+}
+
+String_t
+ui::widgets::InputLine::getPerceivedText() const
+{
+    if (m_flags.contains(Hidden)) {
+        String_t result;
+        for (size_t i = 0, n = m_utf8.length(m_text); i < n; ++i) {
+            result += UTF_BULLET;
+        }
+        return result;
+    } else {
+        return m_text;
+    }
 }

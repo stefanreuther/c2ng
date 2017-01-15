@@ -7,6 +7,7 @@
 #include "afl/charset/utf8.hpp"
 #include "gfx/colorscheme.hpp"
 #include "gfx/rectangle.hpp"
+#include "gfx/basecolorscheme.hpp"
 
 int
 gfx::Font::getEmWidth()
@@ -32,7 +33,7 @@ gfx::Font::getCellSize()
 //     \param x,y    Anchor point
 //     \param text   Text to output */
 void
-gfx::outText(Context& ctx, Point pt, String_t text)
+gfx::outText(BaseContext& ctx, Point pt, String_t text)
 {
     if (Font* fnt = ctx.getFont()) {
         Point align = ctx.getTextAlign();
@@ -49,7 +50,7 @@ gfx::outText(Context& ctx, Point pt, String_t text)
 // /** Output Text, using Alignment Parameters.
 //     \overload */
 void
-gfx::outText(Context& ctx, Point pt, const char* text)
+gfx::outText(BaseContext& ctx, Point pt, const char* text)
 {
     outText(ctx, pt, String_t(text));
 }
@@ -71,7 +72,7 @@ gfx::outText(Context& ctx, Point pt, const char* text)
 //     several outText()s in a row and always know the correct place without
 //     explicitly having to compute the width. */
 void
-gfx::outTextF(Context& ctx, Point pt, int maxWidth, String_t text)
+gfx::outTextF(BaseContext& ctx, BaseColorScheme& cs, Point pt, int maxWidth, String_t text)
 {
     if (Font* fnt = ctx.getFont()) {
         // Limit text width
@@ -102,7 +103,7 @@ gfx::outTextF(Context& ctx, Point pt, int maxWidth, String_t text)
          case 0:
             /* Left */
             if (!ctx.isTransparentBackground()) {
-                ctx.colorScheme().drawBackground(ctx, Rectangle(x, y, maxWidth, height));
+                cs.drawBackground(ctx.canvas(), Rectangle(x, y, maxWidth, height));
             }
             fnt->outText(ctx, Point(x, y), text);
             ctx.setCursor(Point(x + width, newCursorY));
@@ -112,7 +113,7 @@ gfx::outTextF(Context& ctx, Point pt, int maxWidth, String_t text)
             int xl = x - maxWidth/2;
             int xtl = x - width/2;
             if (!ctx.isTransparentBackground()) {
-                ctx.colorScheme().drawBackground(ctx, Rectangle(xl, y, maxWidth, height));
+                cs.drawBackground(ctx.canvas(), Rectangle(xl, y, maxWidth, height));
             }
             fnt->outText(ctx, Point(xtl, y), text);
             ctx.setCursor(Point(x, newCursorY));
@@ -121,7 +122,7 @@ gfx::outTextF(Context& ctx, Point pt, int maxWidth, String_t text)
          case 2:
             /* Right */
             if (!ctx.isTransparentBackground()) {
-                ctx.colorScheme().drawBackground(ctx, Rectangle(x - maxWidth, y, maxWidth, height));
+                cs.drawBackground(ctx.canvas(), Rectangle(x - maxWidth, y, maxWidth, height));
             }
             fnt->outText(ctx, Point(x - width, y), text);
             ctx.setCursor(Point(x - width, newCursorY));
@@ -132,12 +133,12 @@ gfx::outTextF(Context& ctx, Point pt, int maxWidth, String_t text)
     }
 }
 
-// /** Output Text with fixed maximum width. \overload */
-void
-gfx::outTextF(Context& ctx, Point pt, int maxWidth, const char* text)
-{
-    outTextF(ctx, pt, maxWidth, String_t(text));
-}
+// // /** Output Text with fixed maximum width. \overload */
+// void
+// gfx::outTextF(BaseContext& ctx, Point pt, int maxWidth, const char* text)
+// {
+//     outTextF(ctx, pt, maxWidth, String_t(text));
+// }
 
 // /** Output Text with fixed area.
 //     See outTextF(GfxContext&,int,int,int,string_t) for more information.
@@ -150,7 +151,7 @@ gfx::outTextF(Context& ctx, Point pt, int maxWidth, const char* text)
 //     \param area Area to fill
 //     \param text Text to write */
 void
-gfx::outTextF(Context& ctx, const Rectangle& area, String_t text)
+gfx::outTextF(BaseContext& ctx, BaseColorScheme& cs, const Rectangle& area, String_t text)
 {
     Font* fnt = ctx.getFont();
     if (fnt != 0 && area.getWidth() != 0) {
@@ -162,23 +163,23 @@ gfx::outTextF(Context& ctx, const Rectangle& area, String_t text)
         if (height < area.getHeight() && !ctx.isTransparentBackground()) {
             const int topY = originY - height * align/2;
             if (topY > area.getTopY()) {
-                ctx.colorScheme().drawBackground(ctx, Rectangle(area.getLeftX(), area.getTopY(), area.getWidth(), topY - area.getTopY()));
+                cs.drawBackground(ctx.canvas(), Rectangle(area.getLeftX(), area.getTopY(), area.getWidth(), topY - area.getTopY()));
             }
 
             const int botY = topY + height;
             if (botY < area.getBottomY()) {
-                ctx.colorScheme().drawBackground(ctx, Rectangle(area.getLeftX(), botY, area.getWidth(), area.getBottomY() - botY));
+                cs.drawBackground(ctx.canvas(), Rectangle(area.getLeftX(), botY, area.getWidth(), area.getBottomY() - botY));
             }
         }
 
         // Draw the text
-        outTextF(ctx, Point(area.getLeftX() + ctx.getTextAlign().getX() * area.getWidth() / 2, originY), area.getWidth(), text);
+        outTextF(ctx, cs, Point(area.getLeftX() + ctx.getTextAlign().getX() * area.getWidth() / 2, originY), area.getWidth(), text);
     }
 }
 
-// /** Output Text with fixed area. \overload */
-void
-gfx::outTextF(Context& ctx, const Rectangle& area, const char* text)
-{
-    outTextF(ctx, area, String_t(text));
-}
+// // /** Output Text with fixed area. \overload */
+// void
+// gfx::outTextF(BaseContext& ctx, const Rectangle& area, const char* text)
+// {
+//     outTextF(ctx, area, String_t(text));
+// }

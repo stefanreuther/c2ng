@@ -242,8 +242,11 @@ game::map::Planet::internalCheck(const Configuration& config,
 //     This will do all post-processing which needs a partner to interact with.
 //     It requires the playability to be filled in. */
 void
-game::map::Planet::combinedCheck2(const Universe& univ, PlayerSet_t availablePlayers)
+game::map::Planet::combinedCheck2(const Universe& univ, PlayerSet_t availablePlayers, int turnNumber)
 {
+    // FIXME: remove parameter?
+    (void) univ;
+
     if (isUsed(m_currentPlanetData)) {
         if (m_planetKind == CurrentPlanet) {
             // We have seen this planet this turn
@@ -251,7 +254,7 @@ game::map::Planet::combinedCheck2(const Universe& univ, PlayerSet_t availablePla
                 = m_historyTimestamps[ColonistTime]
                 = m_historyTimestamps[NativeTime]
                 = m_historyTimestamps[CashTime]
-                = univ.getTurnNumber();
+                = turnNumber;
         } else {
             // We have taken this planet from the history
             int owner;

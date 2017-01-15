@@ -15,40 +15,8 @@
 #include "afl/string/format.hpp"
 #include "interpreter/propertyacceptor.hpp"
 #include "game/interface/playerproperty.hpp"
-#include "game/interface/objectcommand.hpp"
-
-namespace game { namespace interface {
-    // FIXME: move to separate file
-    enum PlanetMethod {
-        ipmMark,                    // 0
-        ipmUnmark,                  // 1
-        ipmSetComment,              // 2
-        ipmFixShip,                 // 3
-        ipmRecycleShip,             // 4
-        ipmBuildBase,               // 5
-        ipmAutoBuild,               // 6
-        ipmBuildDefense,            // 7
-        ipmBuildFactories,          // 8
-        ipmBuildMines,              // 9
-        ipmSetColonistTax,          // 10
-        ipmSetNativeTax,            // 11
-        ipmSetFCode,                // 12
-        ipmSetMission,              // 13
-        ipmBuildBaseDefense,        // 14
-        ipmSetTech,                 // 15
-        ipmBuildFighters,           // 16
-        ipmBuildEngines,            // 17
-        ipmBuildHulls,              // 18
-        ipmBuildLaunchers,          // 19
-        ipmBuildBeams,              // 20
-        ipmBuildTorps,              // 21
-        ipmSellSupplies,            // 22
-        ipmBuildShip,               // 23
-        ipmCargoTransfer,           // 24
-        ipmAutoTaxColonists,        // 25
-        ipmAutoTaxNatives           // 26
-    };
-} }
+#include "game/interface/planetmethod.hpp"
+#include "interpreter/procedurevalue.hpp"
 
 namespace {
     enum PlanetDomain {
@@ -59,9 +27,9 @@ namespace {
     };
 
     static const interpreter::NameTable planet_mapping[] = {
-        // { "AUTOBUILD",                 ipmAutoBuild,         PlanetMethod,   interpreter::thProcedure },
-        // { "AUTOTAXCOLONISTS",          ipmAutoTaxColonists,  PlanetMethod,   interpreter::thProcedure },
-        // { "AUTOTAXNATIVES",            ipmAutoTaxNatives,    PlanetMethod,   interpreter::thProcedure },
+        { "AUTOBUILD",                 game::interface::ipmAutoBuild,         PlanetMethodDomain,   interpreter::thProcedure },
+        { "AUTOTAXCOLONISTS",          game::interface::ipmAutoTaxColonists,  PlanetMethodDomain,   interpreter::thProcedure },
+        { "AUTOTAXNATIVES",            game::interface::ipmAutoTaxNatives,    PlanetMethodDomain,   interpreter::thProcedure },
         { "BASE",                      game::interface::ippBaseStr,           PlanetPropertyDomain, interpreter::thString },
         { "BASE.BUILDING",             game::interface::ippBaseBuildFlag,     PlanetPropertyDomain, interpreter::thBool },
         { "BASE.YESNO",                game::interface::ippBaseFlag,          PlanetPropertyDomain, interpreter::thBool },
@@ -75,19 +43,19 @@ namespace {
         { "BUILD.TORP$",               game::interface::ibpBuildTorp,         BasePropertyDomain,   interpreter::thInt },
         { "BUILD.TORP.COUNT",          game::interface::ibpBuildTorpCount,    BasePropertyDomain,   interpreter::thInt },
         { "BUILD.YESNO",               game::interface::ibpBuildFlag,         BasePropertyDomain,   interpreter::thBool },
-        // { "BUILDBASE",                 ipmBuildBase,         PlanetMethod,   interpreter::thProcedure },
-        // { "BUILDBASEDEFENSE",          ipmBuildBaseDefense,  PlanetMethod,   interpreter::thProcedure },
-        // { "BUILDBEAMS",                ipmBuildBeams,        PlanetMethod,   interpreter::thProcedure },
-        // { "BUILDDEFENSE",              ipmBuildDefense,      PlanetMethod,   interpreter::thProcedure },
-        // { "BUILDENGINES",              ipmBuildEngines,      PlanetMethod,   interpreter::thProcedure },
-        // { "BUILDFACTORIES",            ipmBuildFactories,    PlanetMethod,   interpreter::thProcedure },
-        // { "BUILDFIGHTERS",             ipmBuildFighters,     PlanetMethod,   interpreter::thProcedure },
-        // { "BUILDHULLS",                ipmBuildHulls,        PlanetMethod,   interpreter::thProcedure },
-        // { "BUILDLAUNCHERS",            ipmBuildLaunchers,    PlanetMethod,   interpreter::thProcedure },
-        // { "BUILDMINES",                ipmBuildMines,        PlanetMethod,   interpreter::thProcedure },
-        // { "BUILDSHIP",                 ipmBuildShip,         PlanetMethod,   interpreter::thProcedure },
-        // { "BUILDTORPS",                ipmBuildTorps,        PlanetMethod,   interpreter::thProcedure },
-        // { "CARGOTRANSFER",             ipmCargoTransfer,     PlanetMethod,   interpreter::thProcedure },
+        { "BUILDBASE",                 game::interface::ipmBuildBase,         PlanetMethodDomain,   interpreter::thProcedure },
+        { "BUILDBASEDEFENSE",          game::interface::ipmBuildBaseDefense,  PlanetMethodDomain,   interpreter::thProcedure },
+        { "BUILDBEAMS",                game::interface::ipmBuildBeams,        PlanetMethodDomain,   interpreter::thProcedure },
+        { "BUILDDEFENSE",              game::interface::ipmBuildDefense,      PlanetMethodDomain,   interpreter::thProcedure },
+        { "BUILDENGINES",              game::interface::ipmBuildEngines,      PlanetMethodDomain,   interpreter::thProcedure },
+        { "BUILDFACTORIES",            game::interface::ipmBuildFactories,    PlanetMethodDomain,   interpreter::thProcedure },
+        { "BUILDFIGHTERS",             game::interface::ipmBuildFighters,     PlanetMethodDomain,   interpreter::thProcedure },
+        { "BUILDHULLS",                game::interface::ipmBuildHulls,        PlanetMethodDomain,   interpreter::thProcedure },
+        { "BUILDLAUNCHERS",            game::interface::ipmBuildLaunchers,    PlanetMethodDomain,   interpreter::thProcedure },
+        { "BUILDMINES",                game::interface::ipmBuildMines,        PlanetMethodDomain,   interpreter::thProcedure },
+        { "BUILDSHIP",                 game::interface::ipmBuildShip,         PlanetMethodDomain,   interpreter::thProcedure },
+        { "BUILDTORPS",                game::interface::ipmBuildTorps,        PlanetMethodDomain,   interpreter::thProcedure },
+        { "CARGOTRANSFER",             game::interface::ipmCargoTransfer,     PlanetMethodDomain,   interpreter::thProcedure },
         { "COLONISTS",                 game::interface::ippColonists,         PlanetPropertyDomain, interpreter::thInt },
         { "COLONISTS.CHANGE",          game::interface::ippColonistChangeStr, PlanetPropertyDomain, interpreter::thString },
         { "COLONISTS.CHANGE$",         game::interface::ippColonistChange,    PlanetPropertyDomain, interpreter::thInt },
@@ -113,7 +81,7 @@ namespace {
         { "FCODE",                     game::interface::ippFCode,             PlanetPropertyDomain, interpreter::thString },
         { "FIGHTERS",                  game::interface::ibpBaseFighters,      BasePropertyDomain,   interpreter::thInt },
         { "FIGHTERS.MAX",              game::interface::ibpBaseFightersMax,   BasePropertyDomain,   interpreter::thInt },
-        // { "FIXSHIP",                   ipmFixShip,           PlanetMethod,   interpreter::thProcedure },
+        { "FIXSHIP",                   game::interface::ipmFixShip,           PlanetMethodDomain,   interpreter::thProcedure },
         { "GROUND.D",                  game::interface::ippGroundD,           PlanetPropertyDomain, interpreter::thInt },
         { "GROUND.M",                  game::interface::ippGroundM,           PlanetPropertyDomain, interpreter::thInt },
         { "GROUND.N",                  game::interface::ippGroundN,           PlanetPropertyDomain, interpreter::thInt },
@@ -158,15 +126,15 @@ namespace {
         { "OWNER$",                    game::interface::iplId,                OwnerPropertyDomain,  interpreter::thInt },
         { "OWNER.ADJ",                 game::interface::iplAdjName,           OwnerPropertyDomain,  interpreter::thString },
         { "PLAYED",                    game::interface::ippPlayed,            PlanetPropertyDomain, interpreter::thBool },
-        // { "RECYCLESHIP",               ipmRecycleShip,       PlanetMethod,   interpreter::thProcedure },
+        { "RECYCLESHIP",               game::interface::ipmRecycleShip,       PlanetMethodDomain,   interpreter::thProcedure },
         { "SCORE",                     game::interface::ippScore,             PlanetPropertyDomain, interpreter::thArray },
-        // { "SELLSUPPLIES",              ipmSellSupplies,      PlanetMethod,   interpreter::thProcedure },
-        // { "SETCOLONISTTAX",            ipmSetColonistTax,    PlanetMethod,   interpreter::thProcedure },
-        // { "SETCOMMENT",                ipmSetComment,        PlanetMethod,   interpreter::thProcedure },
-        // { "SETFCODE",                  ipmSetFCode,          PlanetMethod,   interpreter::thProcedure },
-        // { "SETMISSION",                ipmSetMission,        PlanetMethod,   interpreter::thProcedure },
-        // { "SETNATIVETAX",              ipmSetNativeTax,      PlanetMethod,   interpreter::thProcedure },
-        // { "SETTECH",                   ipmSetTech,           PlanetMethod,   interpreter::thProcedure },
+        { "SELLSUPPLIES",              game::interface::ipmSellSupplies,      PlanetMethodDomain,   interpreter::thProcedure },
+        { "SETCOLONISTTAX",            game::interface::ipmSetColonistTax,    PlanetMethodDomain,   interpreter::thProcedure },
+        { "SETCOMMENT",                game::interface::ipmSetComment,        PlanetMethodDomain,   interpreter::thProcedure },
+        { "SETFCODE",                  game::interface::ipmSetFCode,          PlanetMethodDomain,   interpreter::thProcedure },
+        { "SETMISSION",                game::interface::ipmSetMission,        PlanetMethodDomain,   interpreter::thProcedure },
+        { "SETNATIVETAX",              game::interface::ipmSetNativeTax,      PlanetMethodDomain,   interpreter::thProcedure },
+        { "SETTECH",                   game::interface::ipmSetTech,           PlanetMethodDomain,   interpreter::thProcedure },
         { "SHIPYARD",                  game::interface::ibpShipyardStr,       BasePropertyDomain,   interpreter::thString },
         { "SHIPYARD.ACTION",           game::interface::ibpShipyardAction,    BasePropertyDomain,   interpreter::thString },
         { "SHIPYARD.ID",               game::interface::ibpShipyardId,        BasePropertyDomain,   interpreter::thInt },
@@ -205,61 +173,64 @@ namespace {
         return interpreter::lookupName(q, planet_mapping, result);
     }
 
-    const game::interface::ObjectCommand::Function_t PLANET_METHODS[] = {
-        game::interface::IFObjMark,                  // 0
-        game::interface::IFObjUnmark,                // 1
-        // IFPlanetSetComment,         // 2
-        // IFBaseFixShip,              // 3
-        // IFBaseRecycleShip,          // 4
-        // IFPlanetBuildBase,          // 5
-        // IFPlanetAutoBuild,          // 6
-        // IFPlanetBuildDefense,       // 7
-        // IFPlanetBuildFactories,     // 8
-        // IFPlanetBuildMines,         // 9
-        // IFPlanetSetColonistTax,     // 10
-        // IFPlanetSetNativeTax,       // 11
-        // IFPlanetSetFCode,           // 12
-        // IFBaseSetMission,           // 13
-        // IFPlanetBuildBaseDefense,   // 14
-        // IFBaseSetTech,              // 15
-        // IFBaseBuildFighters,        // 16
-        // IFBaseBuildEngines,         // 17
-        // IFBaseBuildHulls,           // 18
-        // IFBaseBuildLaunchers,       // 19
-        // IFBaseBuildBeams,           // 20
-        // IFBaseBuildTorps,           // 21
-        // IFPlanetSellSupplies,       // 22
-        // IFBaseBuildShip,            // 23
-        // IFPlanetCargoTransfer,      // 24
-        // IFPlanetAutoTaxColonists,   // 25
-        // IFPlanetAutoTaxNatives,     // 26
-    };
+    class PlanetMethodValue : public interpreter::ProcedureValue {
+     public:
+        PlanetMethodValue(int id,
+                          game::Session& session,
+                          game::interface::PlanetMethod ipm,
+                          afl::base::Ref<game::Root> root,
+                          afl::base::Ref<game::Turn> turn)
+            : m_id(id),
+              m_session(session),
+              m_method(ipm),
+              m_root(root),
+              m_turn(turn)
+            { }
 
+        // ProcedureValue:
+        virtual void call(interpreter::Process& /*proc*/, interpreter::Arguments& a)
+            {
+                if (game::map::Planet* pl = m_turn->universe().planets().get(m_id)) {
+                    game::interface::callPlanetMethod(*pl, m_method, a, m_session, *m_turn, *m_root);
+                }
+            }
+
+        virtual PlanetMethodValue* clone() const
+            { return new PlanetMethodValue(m_id, m_session, m_method, m_root, m_turn); }
+
+     private:
+        game::Id_t m_id;
+        game::Session& m_session;
+        game::interface::PlanetMethod m_method;
+        afl::base::Ref<game::Root> m_root;
+        afl::base::Ref<game::Turn> m_turn;
+    };
 }
 
 game::interface::PlanetContext::PlanetContext(int id,
                                               Session& session,
-                                              afl::base::Ptr<Root> root,
-                                              afl::base::Ptr<Game> game)
+                                              afl::base::Ref<Root> root,
+                                              afl::base::Ref<Game> game)
     : m_id(id),
       m_session(session),
       m_root(root),
       m_game(game)
 {
     // ex IntPlanetContext::IntPlanetContext (sort-of)
+    // FIXME: ShipContext takes and keeps a ship list. Should we do the same?
 }
 
 game::interface::PlanetContext::~PlanetContext()
 { }
 
 // Context:
-bool
+game::interface::PlanetContext*
 game::interface::PlanetContext::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
 {
     if (name.startsWith("PLANET.")) {
-        return lookupPlanetProperty(afl::data::NameQuery(name, 7), m_session.world(), result);
+        return lookupPlanetProperty(afl::data::NameQuery(name, 7), m_session.world(), result) ? this : 0;
     } else {
-        return lookupPlanetProperty(name, m_session.world(), result);
+        return lookupPlanetProperty(name, m_session.world(), result) ? this : 0;
     }
 }
 
@@ -272,11 +243,11 @@ game::interface::PlanetContext::set(PropertyIndex_t index, afl::data::Value* val
             // Builtin property
             switch (PlanetDomain(planet_mapping[index].domain)) {
              case PlanetPropertyDomain:
-        //     setPlanetProperty(*pl, IntPlanetProperty(planet_mapping[index].index), value);
-        //     break;
+                setPlanetProperty(*pl, PlanetProperty(planet_mapping[index].index), value, *m_root);
+                break;
              case BasePropertyDomain:
-        //     setBaseProperty(*pl, IntBaseProperty(planet_mapping[index].index), value);
-        //     break;
+                setBaseProperty(*pl, BaseProperty(planet_mapping[index].index), value);
+                break;
              case OwnerPropertyDomain:
              case PlanetMethodDomain:
                 throw interpreter::Error::notAssignable();
@@ -301,40 +272,30 @@ game::interface::PlanetContext::get(PropertyIndex_t index)
     if (game::map::Planet* pl = getObject()) {
         if (index < NUM_PLANET_PROPERTIES) {
             // Builtin property
-            if (Root* root = m_root.get()) {
-                switch (PlanetDomain(planet_mapping[index].domain)) {
-                 case PlanetPropertyDomain:
-                    return getPlanetProperty(*pl, PlanetProperty(planet_mapping[index].index),
-                                             m_session.translator(),
-                                             root->hostVersion(),
-                                             root->hostConfiguration(),
-                                             m_session.interface(),
-                                             m_game);
-                 case BasePropertyDomain:
-                    if (const game::spec::ShipList* list = m_session.getShipList().get()) {
-                        return getBaseProperty(*pl, BaseProperty(planet_mapping[index].index),
-                                               m_session.translator(),
-                                               root->hostConfiguration(),
-                                               *list,
-                                               m_session.interface(),
-                                               m_game);
-                    } else {
-                        return 0;
-                    }
-                 case OwnerPropertyDomain:
-                    if (const Game* game = m_game.get()) {
-                        int owner;
-                        if (pl->getOwner(owner)) {
-                            return getPlayerProperty(owner, PlayerProperty(planet_mapping[index].index), root->playerList(), *game, root->hostConfiguration());
-                        } else {
-                            return 0;
-                        }
-                    } else {
-                        return 0;
-                    }
-                 case PlanetMethodDomain:
-                    return new ObjectCommand(m_session, *pl, PLANET_METHODS[planet_mapping[index].index]);
+            int owner;
+            switch (PlanetDomain(planet_mapping[index].domain)) {
+             case PlanetPropertyDomain:
+                return getPlanetProperty(*pl, PlanetProperty(planet_mapping[index].index),
+                                         m_session.translator(),
+                                         m_root->hostVersion(),
+                                         m_root->hostConfiguration(),
+                                         m_session.interface(),
+                                         m_game);
+             case BasePropertyDomain:
+                return getBaseProperty(*pl, BaseProperty(planet_mapping[index].index),
+                                       m_session.translator(),
+                                       m_root->hostConfiguration(),
+                                       m_session.getShipList(),
+                                       m_session.interface(),
+                                       &m_game->currentTurn());
+             case OwnerPropertyDomain:
+                if (pl->getOwner(owner)) {
+                    return getPlayerProperty(owner, PlayerProperty(planet_mapping[index].index), m_root->playerList(), *m_game, m_root->hostConfiguration());
+                } else {
+                    return 0;
                 }
+             case PlanetMethodDomain:
+                return new PlanetMethodValue(pl->getId(), m_session, PlanetMethod(planet_mapping[index].index), m_root, m_game->currentTurn());
             }
             return 0;
         } else {
@@ -350,11 +311,9 @@ game::interface::PlanetContext::get(PropertyIndex_t index)
 bool
 game::interface::PlanetContext::next()
 {
-    if (Game* game = m_game.get()) {
-        if (int id = game::map::AnyPlanetType(game->currentTurn().universe()).findNextIndex(m_id)) {
-            m_id = id;
-            return true;
-        }
+    if (int id = game::map::AnyPlanetType(m_game->currentTurn().universe()).findNextIndex(m_id)) {
+        m_id = id;
+        return true;
     }
     return false;
 }
@@ -368,11 +327,7 @@ game::interface::PlanetContext::clone() const
 game::map::Planet*
 game::interface::PlanetContext::getObject()
 {
-    if (Game* game = m_game.get()) {
-        return game->currentTurn().universe().planets().get(m_id);
-    } else {
-        return 0;
-    }
+    return m_game->currentTurn().universe().planets().get(m_id);
 }
 
 void
@@ -392,10 +347,21 @@ game::interface::PlanetContext::toString(bool /*readable*/) const
 }
 
 void
-game::interface::PlanetContext::store(interpreter::TagNode& out, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext* /*ctx*/) const
+game::interface::PlanetContext::store(interpreter::TagNode& out, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
 {
     // ex IntPlanetContext::store
     out.tag = out.Tag_Planet;
     out.value = m_id;
 }
 
+game::interface::PlanetContext*
+game::interface::PlanetContext::create(int id, Session& session)
+{
+    Game* game = session.getGame().get();
+    Root* root = session.getRoot().get();
+    if (game != 0 && root != 0 && game->currentTurn().universe().planets().get(id) != 0) {
+        return new PlanetContext(id, session, *root, *game);
+    } else {
+        return 0;
+    }
+}

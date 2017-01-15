@@ -30,20 +30,20 @@ class ExpressionTestHelper::TestContext : public interpreter::SingleContext {
     TestContext(ExpressionTestHelper& parent)
         : m_parent(parent)
         { }
-    virtual bool lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
+    virtual TestContext* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
         {
             // ex GlobalTestVars::lookup(const IntNameQuery& name)
             if (name.match("A")) {
                 result = 0;
-                return true;
+                return this;
             } else if (name.match("B")) {
                 result = 1;
-                return true;
+                return this;
             } else if (name.match("C")) {
                 result = 2;
-                return true;
+                return this;
             } else {
-                return false;
+                return 0;
             }
         }
 
@@ -67,7 +67,7 @@ class ExpressionTestHelper::TestContext : public interpreter::SingleContext {
         { }
     virtual TestContext* clone() const
         { return new TestContext(m_parent); }
-    virtual void store(interpreter::TagNode&, afl::io::DataSink&, afl::charset::Charset&, interpreter::SaveContext*) const
+    virtual void store(interpreter::TagNode&, afl::io::DataSink&, afl::charset::Charset&, interpreter::SaveContext&) const
         { throw interpreter::Error::notSerializable(); }
 
  private:
@@ -80,7 +80,7 @@ class ExpressionTestHelper::TestContext : public interpreter::SingleContext {
              case 1: return m_parent.b;
              case 2: return m_parent.c;
              default:
-                TS_ASSERT("!bad variable");
+                TS_ASSERT(!"bad variable");
                 return m_parent.a;
             }
         }
@@ -125,7 +125,7 @@ ExpressionTestHelper::checkFileExpression(const char* expr, int result)
         std::auto_ptr<interpreter::expr::Node> node(interpreter::expr::Parser(tok).parse());
         TSM_ASSERT_EQUALS(expr, tok.getCurrentToken(), tok.tEnd);
 
-        interpreter::BCORef_t bco = new interpreter::BytecodeObject();
+        interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
         node->compileValue(*bco, interpreter::CompilationContext(world));
 
         interpreter::Process exec(world, "checkScalarExpression", 9);
@@ -161,7 +161,7 @@ ExpressionTestHelper::checkNullExpression(const char* expr)
         std::auto_ptr<interpreter::expr::Node> node(interpreter::expr::Parser(tok).parse());
         TSM_ASSERT_EQUALS(expr, tok.getCurrentToken(), tok.tEnd);
 
-        interpreter::BCORef_t bco = new interpreter::BytecodeObject();
+        interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
         node->compileValue(*bco, interpreter::CompilationContext(world));
 
         interpreter::Process exec(world, "checkNullExpression", 9);
@@ -193,7 +193,7 @@ ExpressionTestHelper::checkStringExpression(const char* expr, const char* result
         std::auto_ptr<interpreter::expr::Node> node(interpreter::expr::Parser(tok).parse());
         TSM_ASSERT_EQUALS(expr, tok.getCurrentToken(), tok.tEnd);
 
-        interpreter::BCORef_t bco = new interpreter::BytecodeObject();
+        interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
         node->compileValue(*bco, interpreter::CompilationContext(world));
 
         interpreter::Process exec(world, "checkStringExpression", 9);
@@ -230,7 +230,7 @@ ExpressionTestHelper::checkFloatExpression(const char* expr, double result)
         std::auto_ptr<interpreter::expr::Node> node(interpreter::expr::Parser(tok).parse());
         TSM_ASSERT_EQUALS(expr, tok.getCurrentToken(), tok.tEnd);
 
-        interpreter::BCORef_t bco = new interpreter::BytecodeObject();
+        interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
         node->compileValue(*bco, interpreter::CompilationContext(world));
 
         interpreter::Process exec(world, "checkStringExpression", 9);
@@ -269,7 +269,7 @@ ExpressionTestHelper::checkFailureExpression(const char* expr)
         std::auto_ptr<interpreter::expr::Node> node(interpreter::expr::Parser(tok).parse());
         TSM_ASSERT_EQUALS(expr, tok.getCurrentToken(), tok.tEnd);
 
-        interpreter::BCORef_t bco = new interpreter::BytecodeObject();
+        interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
         node->compileValue(*bco, interpreter::CompilationContext(world));
         compiled = true;
 
@@ -297,7 +297,7 @@ ExpressionTestHelper::checkScalarExpression(const char* expr, int result, bool i
         std::auto_ptr<interpreter::expr::Node> node(interpreter::expr::Parser(tok).parse());
         TSM_ASSERT_EQUALS(expr, tok.getCurrentToken(), tok.tEnd);
 
-        interpreter::BCORef_t bco = new interpreter::BytecodeObject();
+        interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
         node->compileValue(*bco, interpreter::CompilationContext(world));
 
         interpreter::Process exec(world, "checkScalarExpression", 9);
@@ -356,7 +356,7 @@ ExpressionTestHelper::checkStatement(const char* stmt)
         scc.withFlag(scc.LinearExecution);
         scc.withFlag(scc.ExpressionsAreStatements);
 
-        interpreter::BCORef_t bco = new interpreter::BytecodeObject();
+        interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
         interpreter::StatementCompiler::StatementResult result = interpreter::StatementCompiler(mcs).compileList(*bco, scc);
 
         TSM_ASSERT_DIFFERS(stmt, result, interpreter::StatementCompiler::CompiledExpression);
@@ -399,7 +399,7 @@ ExpressionTestHelper::checkIntegerExpressionStatement(const char* expr, int valu
         scc.withFlag(scc.RefuseBlocks);
         scc.withFlag(scc.LinearExecution);
 
-        interpreter::BCORef_t bco = new interpreter::BytecodeObject();
+        interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
         interpreter::StatementCompiler::StatementResult result = interpreter::StatementCompiler(mcs).compile(*bco, scc);
 
         TSM_ASSERT_EQUALS(expr, result, interpreter::StatementCompiler::CompiledExpression);

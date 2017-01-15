@@ -16,7 +16,7 @@ game::interface::ShipFunction::ShipFunction(Session& session)
 
 
 // IndexableValue:
-afl::data::Value*
+game::interface::ShipContext*
 game::interface::ShipFunction::get(interpreter::Arguments& args)
 {
     /* @q Ship(sid:Int):Obj (Function, Context)
@@ -39,14 +39,7 @@ game::interface::ShipFunction::get(interpreter::Arguments& args)
         return 0;
     }
 
-    Game* game = m_session.getGame().get();
-    Root* root = m_session.getRoot().get();
-    game::spec::ShipList* shipList = m_session.getShipList().get();
-    if (game != 0 && root != 0 && shipList != 0 && game->currentTurn().universe().ships().get(id) != 0) {
-        return new ShipContext(id, m_session, root, game, shipList);
-    } else {
-        return 0;
-    }
+    return ShipContext::create(id, m_session);
 }
 
 void
@@ -59,7 +52,7 @@ game::interface::ShipFunction::set(interpreter::Arguments& /*args*/, afl::data::
 
 // CallableValue:
 int32_t
-game::interface::ShipFunction::getDimension(int32_t which)
+game::interface::ShipFunction::getDimension(int32_t which) const
 {
     // ex int/if/shipif.h:IFShipDim
     if (which == 0) {
@@ -73,7 +66,7 @@ game::interface::ShipFunction::getDimension(int32_t which)
     }
 }
 
-interpreter::Context*
+game::interface::ShipContext*
 game::interface::ShipFunction::makeFirstContext()
 {
     Game* game = m_session.getGame().get();
@@ -82,7 +75,7 @@ game::interface::ShipFunction::makeFirstContext()
     if (game != 0 && root != 0 && shipList != 0) {
         int id = game::map::AnyShipType(game->currentTurn().universe()).findNextIndex(0);
         if (id != 0) {
-            return new ShipContext(id, m_session, root, game, shipList);
+            return new ShipContext(id, m_session, *root, *game, *shipList);
         } else {
             return 0;
         }
@@ -106,7 +99,7 @@ game::interface::ShipFunction::toString(bool /*readable*/) const
 }
 
 void
-game::interface::ShipFunction::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext* /*ctx*/) const
+game::interface::ShipFunction::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
 {
     throw interpreter::Error::notSerializable();
 }

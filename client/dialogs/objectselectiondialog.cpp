@@ -27,6 +27,7 @@
 #include "ui/widgets/button.hpp"
 #include "ui/window.hpp"
 #include "util/translation.hpp"
+#include "afl/base/refcounted.hpp"
 
 namespace {
     /*
@@ -34,7 +35,7 @@ namespace {
      *  The CommonState object is created in the UI thread and may therefore not do anything during construction.
      *  All references to it are held by objects in the worker thread.
      */
-    class CommonState {
+    class CommonState : public afl::base::RefCounted {
      public:
         // Constructor.
         CommonState(int screenNumber)
@@ -90,7 +91,7 @@ namespace {
      */
     class DialogIteratorProvider : public game::interface::IteratorProvider {
      public:
-        DialogIteratorProvider(afl::base::Ptr<CommonState> state)
+        DialogIteratorProvider(afl::base::Ref<CommonState> state)
             : m_state(state)
             { }
         virtual game::map::ObjectCursor* getCursor()
@@ -102,7 +103,7 @@ namespace {
         virtual String_t toString()
             { return "#<iterator>"; }
      private:
-        afl::base::Ptr<CommonState> m_state;
+        afl::base::Ref<CommonState> m_state;
     };
 
     /*
@@ -111,35 +112,27 @@ namespace {
      */
     class DialogContextProvider : public client::si::ContextProvider {
      public:
-        DialogContextProvider(afl::base::Ptr<CommonState> state)
+        DialogContextProvider(afl::base::Ref<CommonState> state)
             : m_state(state)
             { }
         virtual void createContext(game::Session& session, interpreter::Process& proc)
             {
-                game::Game* g = session.getGame().get();
-                game::Root* r = session.getRoot().get();
-                game::spec::ShipList* sl = session.getShipList().get();
-                if (g != 0 && r != 0 && sl != 0 && m_state.get() != 0) {
-                    // FIXME: this code should be in a common library probably
-                    game::map::Object* obj = m_state->cursor().getCurrentObject();
-                    if (dynamic_cast<game::map::Ship*>(obj) != 0) {
-                        proc.pushNewContext(new game::interface::ShipContext(obj->getId(),
-                                                                             session,
-                                                                             session.getRoot(),
-                                                                             session.getGame(),
-                                                                             session.getShipList()));
-                    } else if (dynamic_cast<game::map::Planet*>(obj) != 0) {
-                        proc.pushNewContext(new game::interface::PlanetContext(obj->getId(),
-                                                                               session,
-                                                                               session.getRoot(),
-                                                                               session.getGame()));
-                    } else {
-                        // FIXME?
+                // FIXME: this code should be in a common library probably
+                game::map::Object* obj = m_state->cursor().getCurrentObject();
+                if (dynamic_cast<game::map::Ship*>(obj) != 0) {
+                    if (interpreter::Context* ctx = game::interface::ShipContext::create(obj->getId(), session)) {
+                        proc.pushNewContext(ctx);
                     }
+                } else if (dynamic_cast<game::map::Planet*>(obj) != 0) {
+                    if (interpreter::Context* ctx = game::interface::PlanetContext::create(obj->getId(), session)) {
+                        proc.pushNewContext(ctx);
+                    }
+                } else {
+                    // FIXME?
                 }
             }
      private:
-        afl::base::Ptr<CommonState> m_state;
+        afl::base::Ref<CommonState> m_state;
     };
 
     /*
@@ -148,7 +141,7 @@ namespace {
      */
     class DialogControl : public client::si::Control {
      public:
-        DialogControl(client::si::UserSide& side, ui::Root& root, afl::string::Translator& tx, ui::EventLoop& loop, afl::base::Ptr<CommonState> state, client::si::OutputState& outputState)
+        DialogControl(client::si::UserSide& side, ui::Root& root, afl::string::Translator& tx, ui::EventLoop& loop, afl::base::Ref<CommonState> state, client::si::OutputState& outputState)
             : Control(side, root, tx),
               m_currentId(0),
               m_loop(loop),
@@ -218,7 +211,7 @@ namespace {
         int m_currentId;
      private:
         ui::EventLoop& m_loop;
-        afl::base::Ptr<CommonState> m_state;
+        afl::base::Ref<CommonState> m_state;
         util::RequestReceiver<DialogControl> m_receiver;
         client::si::OutputState& m_outputState;
     };
@@ -229,7 +222,7 @@ namespace {
      */
     class DialogCursorFactory : public client::ObjectCursorFactory {
      public:
-        DialogCursorFactory(afl::base::Ptr<CommonState> state)
+        DialogCursorFactory(afl::base::Ref<CommonState> state)
             : m_state(state)
             { }
         game::map::ObjectCursor* getCursor(game::Session& s)
@@ -238,7 +231,7 @@ namespace {
                 return &m_state->cursor();
             }
      private:
-        afl::base::Ptr<CommonState> m_state;
+        afl::base::Ref<CommonState> m_state;
     };
 
     /*
@@ -249,7 +242,7 @@ namespace {
                                           public game::interface::UserInterfacePropertyAccessor
     {
      public:
-        DialogUserInterfaceProperties(afl::base::Ptr<CommonState> state)
+        DialogUserInterfaceProperties(afl::base::Ref<CommonState> state)
             : m_state(state)
             { }
         virtual void init(game::Session& master)
@@ -264,7 +257,7 @@ namespace {
                     result.reset();
                     return true;
                  case game::interface::iuiIterator:
-                    result.reset(new game::interface::IteratorContext(new DialogIteratorProvider(m_state)));
+                    result.reset(new game::interface::IteratorContext(*new DialogIteratorProvider(m_state)));
                     return true;
                  case game::interface::iuiSimFlag:
                     result.reset(interpreter::makeBooleanValue(0));
@@ -281,7 +274,7 @@ namespace {
         virtual bool set(game::interface::UserInterfaceProperty /*prop*/, afl::data::Value* /*p*/)
             { return false; }
      private:
-        afl::base::Ptr<CommonState> m_state;
+        afl::base::Ref<CommonState> m_state;
     };
 }
 
@@ -319,7 +312,7 @@ client::dialogs::doObjectSelectionDialog(const ObjectSelectionDialog& def,
     afl::string::Translator& tx = parentControl.translator();
 
     // Create common state
-    afl::base::Ptr<CommonState> state(new CommonState(def.screenNumber));
+    afl::base::Ref<CommonState> state(*new CommonState(def.screenNumber));
 
     // Create ObjectObserver. This cause the CommonState to be initialized with the cursor we want.
     client::ObjectObserverProxy oop(iface.gameSender(), std::auto_ptr<client::ObjectCursorFactory>(new DialogCursorFactory(state)));
@@ -334,12 +327,12 @@ client::dialogs::doObjectSelectionDialog(const ObjectSelectionDialog& def,
     client::widgets::KeymapWidget& keys = del.addNew(new client::widgets::KeymapWidget(iface.gameSender(), root.engine().dispatcher(), ctl));
     keys.setKeymapName(def.keymapName);
 
-    ui::Window& win = del.addNew(new ui::Window(tx.translateString(def.titleUT), root.provider(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
-    client::tiles::TileFactory(root, keys, oop).createLayout(win, def.layoutName, del);
+    ui::Window& win = del.addNew(new ui::Window(tx.translateString(def.titleUT), root.provider(), root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
+    client::tiles::TileFactory(root, iface, keys, oop).createLayout(win, def.layoutName, del);
     ctl.attach(oop);
 
-    ui::widgets::Button& btnOK     = del.addNew(new ui::widgets::Button(tx.translateString("OK"),     util::Key_Return, root.provider(), root.colorScheme()));
-    ui::widgets::Button& btnCancel = del.addNew(new ui::widgets::Button(tx.translateString("Cancel"), util::Key_Escape, root.provider(), root.colorScheme()));
+    ui::widgets::Button& btnOK     = del.addNew(new ui::widgets::Button(tx.translateString("OK"),     util::Key_Return, root));
+    ui::widgets::Button& btnCancel = del.addNew(new ui::widgets::Button(tx.translateString("Cancel"), util::Key_Escape, root));
     keys.addButton(btnOK);
     keys.addButton(btnCancel);
 

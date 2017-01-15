@@ -164,13 +164,27 @@ const game::spec::Mission*
 game::spec::MissionList::getMissionByNumber(int id, PlayerSet_t raceMask) const
 {
     // ex GMissionList::getMissionByNumber
-    for (Iterator_t i = begin(); i != end(); ++i) {
-        if (i->getNumber() == id && i->getRaceMask().containsAnyOf(raceMask)) {
-            return &*i;
+    size_t slot;
+    if (getIndexByNumber(id, raceMask, slot)) {
+        return at(slot);
+    } else {
+        return 0;
+    }
+}
+
+bool
+game::spec::MissionList::getIndexByNumber(int id, PlayerSet_t raceMask, size_t& index) const
+{
+    for (size_t i = 0, n = m_data.size(); i < n; ++i) {
+        const Mission& msn = m_data[i];
+        if (msn.getNumber() == id && msn.getRaceMask().containsAnyOf(raceMask)) {
+            index = i;
+            return true;
         }
     }
-    return 0;
+    return false;
 }
+
 
 /** Load mission.cc file.
     \param in      stream */

@@ -444,7 +444,7 @@ game::v3::DirectoryScanner::initMessageParser(afl::io::Directory& dir)
     // ex loadMessageParser, sort of
     static const char fileName[] = "hostver.ini";
     try {
-        afl::base::Ptr<afl::io::Stream> file = dir.openFile(fileName, afl::io::FileSystem::OpenRead);
+        afl::base::Ref<afl::io::Stream> file = dir.openFile(fileName, afl::io::FileSystem::OpenRead);
         m_messageParser.load(*file, m_translator, m_log);
     }
     catch (afl::except::FileProblemException& e) {

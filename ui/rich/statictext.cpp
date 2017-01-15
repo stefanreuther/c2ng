@@ -30,8 +30,7 @@ void
 ui::rich::StaticText::draw(gfx::Canvas& can)
 {
     // ex UIRichStatic::drawContent
-    gfx::Context ctx(can);
-    ctx.useColorScheme(getColorScheme());
+    gfx::Context<util::SkinColor::Color> ctx(can, getColorScheme());
     m_document.draw(ctx, getExtent(), 0);
 }
 

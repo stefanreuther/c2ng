@@ -6,6 +6,11 @@
 
 #include <cxxtest/TestSuite.h> 
 
+class TestGameConfigAliasOption : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
 class TestGameConfigBitsetValueParser : public CxxTest::TestSuite {
  public:
     void testIt();
@@ -20,6 +25,7 @@ class TestGameConfigConfiguration : public CxxTest::TestSuite {
  public:
     void testIndexing();
     void testAccess();
+    void testEnum();
 };
 
 class TestGameConfigConfigurationOption : public CxxTest::TestSuite {
@@ -35,9 +41,21 @@ class TestGameConfigCostArrayOption : public CxxTest::TestSuite {
     void testSet3();
 };
 
+class TestGameConfigGenericIntegerArrayOption : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testZero();
+};
+
 class TestGameConfigHostConfiguration : public CxxTest::TestSuite {
  public:
     void testRace();
+    void testAlias();
+};
+
+class TestGameConfigIntegerOption : public CxxTest::TestSuite {
+ public:
+    void testIt();
 };
 
 class TestGameConfigIntegerValueParser : public CxxTest::TestSuite {

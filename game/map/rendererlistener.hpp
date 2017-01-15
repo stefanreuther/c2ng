@@ -32,6 +32,10 @@ namespace game { namespace map {
         virtual void drawShip(Point p, int id, Relation_t rel) = 0;
         virtual void drawFleetLeader(Point pt, int id, Relation_t rel) = 0;
         virtual void drawMinefield(Point p, int id, int r, bool isWeb, Relation_t rel) = 0;
+        virtual void drawUserCircle(Point pt, int r, int color) = 0;
+        virtual void drawUserLine(Point a, Point b, int color) = 0;
+        virtual void drawUserRectangle(Point a, Point b, int color) = 0;
+        virtual void drawUserMarker(Point pt, int shape, int color, String_t label) = 0;
     };
 
 } }

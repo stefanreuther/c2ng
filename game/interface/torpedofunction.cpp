@@ -44,13 +44,11 @@ game::interface::TorpedoFunction::get(interpreter::Arguments& args)
     // ex int/if/specif.h:IFTorpedoGet, IFLauncherGet
     int32_t id;
     args.checkArgumentCount(1);
-    if (m_session.getShipList().get() != 0
-        && m_session.getRoot().get() != 0
-        && interpreter::checkIntegerArg(id, args.getNext(), 1, getDimension(1)-1))
-    {
-        return new TorpedoContext(m_useLauncher, id, m_session.getShipList(), m_session.getRoot());
+
+    if (!interpreter::checkIntegerArg(id, args.getNext(), 1, getDimension(1)-1)) {
+        return 0;
     }
-    return 0;
+    return TorpedoContext::create(m_useLauncher, id, m_session);
 }
 
 void
@@ -61,7 +59,7 @@ game::interface::TorpedoFunction::set(interpreter::Arguments& /*args*/, afl::dat
 
 // CallableValue:
 int32_t
-game::interface::TorpedoFunction::getDimension(int32_t which)
+game::interface::TorpedoFunction::getDimension(int32_t which) const
 {
     // ex int/if/specif.h:IFTorpedoDim
     return (which == 0
@@ -75,12 +73,10 @@ interpreter::Context*
 game::interface::TorpedoFunction::makeFirstContext()
 {
     // ex int/if/specif.h:IFTorpedoMake,IFLauncherMake
-    if (game::spec::ShipList* list = m_session.getShipList().get()) {
-        if (m_session.getRoot().get() != 0) {
-            if (list->launchers().size() > 0) {
-                return new TorpedoContext(m_useLauncher, 1, list, m_session.getRoot());
-            }
-        }
+    game::spec::ShipList* list = m_session.getShipList().get();
+    Root* root = m_session.getRoot().get();
+    if (list != 0 && root != 0 && list->launchers().size() > 0) {
+        return new TorpedoContext(m_useLauncher, 1, *list, *root);
     }
     return 0;
 }
@@ -99,7 +95,7 @@ game::interface::TorpedoFunction::toString(bool /*readable*/) const
 }
 
 void
-game::interface::TorpedoFunction::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext* /*ctx*/) const
+game::interface::TorpedoFunction::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
 {
     throw interpreter::Error::notSerializable();
 }

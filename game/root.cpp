@@ -10,9 +10,9 @@
 #include "game/turnloader.hpp"
 
 // Constructor.
-game::Root::Root(afl::base::Ptr<afl::io::Directory> specificationDirectory,
-                 afl::base::Ptr<afl::io::Directory> gameDirectory,
-                 afl::base::Ptr<SpecificationLoader> specLoader,
+game::Root::Root(afl::base::Ref<afl::io::Directory> specificationDirectory,
+                 afl::base::Ref<afl::io::Directory> gameDirectory,
+                 afl::base::Ref<SpecificationLoader> specLoader,
                  game::HostVersion hostVersion,
                  std::auto_ptr<game::RegistrationKey> registrationKey,
                  std::auto_ptr<StringVerifier> stringVerifier)
@@ -56,6 +56,13 @@ game::Root::specificationLoader()
 // Access host version.
 game::HostVersion&
 game::Root::hostVersion()
+{
+    return m_hostVersion;
+}
+
+// Access host version.
+const game::HostVersion&
+game::Root::hostVersion() const
 {
     return m_hostVersion;
 }

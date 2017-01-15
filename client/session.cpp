@@ -7,9 +7,11 @@
 
 client::Session::Session(ui::Root& root,
                          util::RequestSender<game::Session> gameSender,
-                         afl::string::Translator& tx)
+                         afl::string::Translator& tx,
+                         util::MessageCollector& console,
+                         afl::sys::Log& mainLog)
     : m_root(root),
-      m_interface(gameSender, root.engine().dispatcher()),
+      m_interface(gameSender, root.engine().dispatcher(), console, mainLog),
       m_translator(tx)
 {
     registerCommands(m_interface);

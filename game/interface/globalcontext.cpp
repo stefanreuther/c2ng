@@ -129,14 +129,14 @@ game::interface::GlobalContext::~GlobalContext()
 { }
 
 // Context:
-bool
+game::interface::GlobalContext*
 game::interface::GlobalContext::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
 {
     // ex IntGlobalContext::lookup
     if (name.startsWith("GLOBAL.")) {
-        return lookupGlobalProperty(afl::data::NameQuery(name, 7), result, m_session);
+        return lookupGlobalProperty(afl::data::NameQuery(name, 7), result, m_session) ? this : 0;
     } else {
-        return lookupGlobalProperty(name, result, m_session);
+        return lookupGlobalProperty(name, result, m_session) ? this : 0;
     }
 }
 
@@ -225,7 +225,7 @@ game::interface::GlobalContext::toString(bool /*readable*/) const
 }
 
 void
-game::interface::GlobalContext::store(interpreter::TagNode& out, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext* /*ctx*/) const
+game::interface::GlobalContext::store(interpreter::TagNode& out, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
 {
     // ex IntGlobalContext::store
     out.tag = out.Tag_Global;

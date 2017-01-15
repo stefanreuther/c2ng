@@ -1,0 +1,7 @@
+/*!
+     \namespace game::actions
+     \brief Actions
+
+     This namespace contains actions.
+     Actions manipulate the public interfaces of other classes, and make sure rules are being followed.
+ */

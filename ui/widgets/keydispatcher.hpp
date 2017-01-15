@@ -28,7 +28,6 @@ namespace ui { namespace widgets {
 
         // Widget:
         virtual bool handleKey(util::Key_t key, int prefix);
-        virtual bool handleMouse(gfx::Point pt, MouseButtons_t pressedButtons);
 
      private:
         afl::container::PtrMap<Key_t, Closure_t> m_keys;

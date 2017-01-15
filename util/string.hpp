@@ -48,6 +48,35 @@ namespace util {
         \return true if character was parsed correctly, false on error */
     bool parsePlayerCharacter(const char ch, int& number);
 
+    /** Format a textual list of options.
+        The string can contain
+        - regular lines (subheadings, blank lines)
+        - options, separated from their descriptions by a tab
+
+        This function will format all options such that the descriptions line up nicely.
+        For example,
+        <pre>
+        Options:
+        -width[tab]Set the width
+        -height[tab]Set the height
+        </pre>
+        will be formatted to
+        <pre>
+        Options:
+          -width    Set the width
+          -height   Set the height
+        </pre>
+
+        \param s String to format
+        \return result */
+    String_t formatOptions(String_t s);
+
+    /** Beautify variable name.
+        Converts UGLY.CAPS to Nicely.Formatted.Text.
+        \param name Name
+        \return formatted name */
+    String_t formatName(String_t name);
+
 }
 
 #endif

@@ -23,11 +23,11 @@ namespace game { namespace spec {
     class Hull;
     class Beam;
     class Engine;
-    class Torpedo;
+    class TorpedoLauncher;
     typedef ComponentVector<Hull> HullVector_t;
     typedef ComponentVector<Beam> BeamVector_t;
     typedef ComponentVector<Engine> EngineVector_t;
-    typedef ComponentVector<Torpedo> TorpedoVector_t;
+    typedef ComponentVector<TorpedoLauncher> TorpedoVector_t;
 
 } }
 

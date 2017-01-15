@@ -1,0 +1,6 @@
+/*!
+     \namespace gfx::gen
+     \brief Generated Images
+
+     This namespace contains code to generate images.
+  */

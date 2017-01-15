@@ -29,7 +29,7 @@ namespace {
             // Try enumerating the parent's content. If that fails, try to create it.
             // (openDir alone does not check whether the directory actually exists.)
             try {
-                afl::base::Ptr<afl::io::Directory> parent = fs.openDirectory(parentName);
+                afl::base::Ref<afl::io::Directory> parent = fs.openDirectory(parentName);
                 parent->getDirectoryEntries();
             }
             catch (afl::except::FileProblemException&) {
@@ -38,8 +38,8 @@ namespace {
 
             // Parent should now exist. Try creating child in it unless it already exists.
             try {
-                afl::base::Ptr<afl::io::Directory> parent = fs.openDirectory(parentName);
-                afl::base::Ptr<afl::io::DirectoryEntry> entry = parent->getDirectoryEntryByName(childName);
+                afl::base::Ref<afl::io::Directory> parent = fs.openDirectory(parentName);
+                afl::base::Ref<afl::io::DirectoryEntry> entry = parent->getDirectoryEntryByName(childName);
                 if (entry->getFileType() != afl::io::DirectoryEntry::tDirectory) {
                     entry->createAsDirectory();
                 }
@@ -158,7 +158,7 @@ util::BackupFile::copyFile(afl::io::FileSystem& fs, String_t tpl, afl::io::Strea
         tryCreatePath(fs, fs.getDirectoryName(name));
 
         // Do it
-        afl::base::Ptr<afl::io::Stream> file = fs.openFile(name, fs.Create);
+        afl::base::Ref<afl::io::Stream> file = fs.openFile(name, fs.Create);
         file->copyFrom(src);
     }
 }
@@ -175,7 +175,7 @@ util::BackupFile::eraseFile(afl::io::FileSystem& fs, String_t tpl)
         const String_t parent = fs.getDirectoryName(name);
         const String_t child  = fs.getFileName(name);
         try {
-            afl::base::Ptr<afl::io::Directory> dir = fs.openDirectory(parent);
+            afl::base::Ref<afl::io::Directory> dir = fs.openDirectory(parent);
             dir->eraseNT(child);
         }
         catch (afl::except::FileProblemException&) { }
@@ -199,7 +199,7 @@ util::BackupFile::hasFile(afl::io::FileSystem& fs, String_t tpl)
     }
 }
 
-afl::base::Ptr<afl::io::Stream>
+afl::base::Ref<afl::io::Stream>
 util::BackupFile::openFile(afl::io::FileSystem& fs, String_t tpl)
 {
     if (tpl.empty()) {

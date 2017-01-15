@@ -9,15 +9,26 @@
 #include "game/msg/inbox.hpp"
 #include "game/vcr/database.hpp"
 #include "game/extracontainer.hpp"
+#include "afl/base/refcounted.hpp"
+#include "game/timestamp.hpp"
 
 namespace game {
 
     // This is the successor to GGameTurn.
 
-    class Turn {
+    class Turn : public afl::base::RefCounted {
      public:
         Turn();
         ~Turn();
+
+        void setTurnNumber(int turnNumber);
+        int getTurnNumber() const;
+
+        void setDatabaseTurnNumber(int turnNumber);
+        int getDatabaseTurnNumber() const;
+
+        void setTimestamp(const Timestamp& ts);
+        Timestamp getTimestamp() const;
 
         game::map::Universe& universe();
         const game::map::Universe& universe() const;
@@ -42,11 +53,13 @@ namespace game {
 
         afl::base::Ptr<game::vcr::Database> m_battles;
 
+        int m_turnNumber;
+        int m_databaseTurnNumber;
+        Timestamp m_timestamp;
+
         // (Inbox)
         // (Outbox)
         // (Alliances)
-        // (Battles)
-        // (Commands)
         // (Gen)
         // (data set)                          whose players' data we have
     };

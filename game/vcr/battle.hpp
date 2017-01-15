@@ -29,7 +29,7 @@ namespace game { namespace vcr {
         virtual size_t getNumObjects() const = 0;
 
         /** Get an object participating in the fight.
-            If the result is requested but not yet known, compute it.
+            If the result is requested but not yet known, needs not compute it; use prepareResult() to reliably obtain results.
             If the fight cannot be played, but after=true is requested, treat that as after=false.
             \param slot Slot, [0,getNumObjects())
             \param after false to return beginning of fight, true to return after. */

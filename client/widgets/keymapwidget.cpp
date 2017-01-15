@@ -51,12 +51,6 @@ client::widgets::KeymapWidget::handleKey(util::Key_t key, int prefix)
     }
 }
 
-bool
-client::widgets::KeymapWidget::handleMouse(gfx::Point /*pt*/, MouseButtons_t /*pressedButtons*/)
-{
-    return false;
-}
-
 afl::base::Closure<void(int, util::Key_t)>*
 client::widgets::KeymapWidget::makeKey()
 {

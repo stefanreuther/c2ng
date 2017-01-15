@@ -5,6 +5,7 @@
 #include "interpreter/subroutinevalue.hpp"
 #include "interpreter/process.hpp"
 #include "interpreter/error.hpp"
+#include "interpreter/savecontext.hpp"
 
 
 interpreter::SubroutineValue::SubroutineValue(BCORef_t bco)
@@ -31,14 +32,14 @@ interpreter::SubroutineValue::call(Process& proc, afl::data::Segment& args, bool
 }
 
 bool
-interpreter::SubroutineValue::isProcedureCall()
+interpreter::SubroutineValue::isProcedureCall() const
 {
     // ex IntSubroutineValue::isProcedureCall
     return m_bco->isProcedure();
 }
 
 int32_t
-interpreter::SubroutineValue::getDimension(int32_t /*which*/)
+interpreter::SubroutineValue::getDimension(int32_t /*which*/) const
 {
     // ex IntSubroutineValue::getDimension
     return 0;
@@ -65,17 +66,11 @@ interpreter::SubroutineValue::toString(bool /*readable*/) const
 }
 
 void
-interpreter::SubroutineValue::store(TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, SaveContext* /*ctx*/) const
+interpreter::SubroutineValue::store(TagNode& out, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, SaveContext& ctx) const
 {
     // ex IntSubroutineValue::store
-    // FIXME: port (store)
-//     IntVMSaveContext* vsc = IntVMSaveContext::getCurrentInstance();
-//     if (vsc != 0) {
-//         tag.tag   = IntTagNode::Tag_BCO;
-//         tag.value = vsc->addBCO(*bco);
-//     } else {
-    throw Error::notSerializable();
-//     }
+    out.tag   = TagNode::Tag_BCO;
+    out.value = ctx.addBCO(*m_bco);
 }
 
 interpreter::SubroutineValue*

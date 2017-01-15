@@ -188,3 +188,20 @@ interpreter::checkFlagArg(int32_t& flagOut, int32_t* valueOut, afl::data::Value*
         throw Error::typeError();
     }
 }
+
+// Check command atom argument.
+bool
+interpreter::checkCommandAtomArg(util::Atom_t& atomOut, afl::data::Value* value, util::AtomTable& table)
+{
+    if (value == 0) {
+        return false;
+    } else if (afl::data::StringValue* sv = dynamic_cast<afl::data::StringValue*>(value)) {
+        atomOut = table.getAtomFromString(sv->getValue());
+        return true;
+    } else if (afl::data::ScalarValue* iv = dynamic_cast<afl::data::ScalarValue*>(value)) {
+        atomOut = iv->getValue();
+        return true;
+    } else {
+        throw Error::typeError(Error::ExpectString);
+    }
+}

@@ -84,7 +84,7 @@ game::Game::setViewpointPlayer(int pid)
 afl::base::Ptr<game::Turn>
 game::Game::getViewpointTurn() const
 {
-    if (m_viewpointTurnNumber == 0 || m_viewpointTurnNumber == currentTurn().universe().getTurnNumber()) {
+    if (m_viewpointTurnNumber == 0 || m_viewpointTurnNumber == currentTurn().getTurnNumber()) {
         return m_currentTurn;
     } else if (HistoryTurn* ht = m_previousTurns.get(m_viewpointTurnNumber)) {
         return ht->getTurn();
@@ -97,7 +97,7 @@ int
 game::Game::getViewpointTurnNumber() const
 {
     if (m_viewpointTurnNumber == 0) {
-        return currentTurn().universe().getTurnNumber();
+        return currentTurn().getTurnNumber();
     } else {
         return m_viewpointTurnNumber;
     }

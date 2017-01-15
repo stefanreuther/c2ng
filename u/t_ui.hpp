@@ -23,6 +23,16 @@ class TestUiInvisibleWidget : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestUiPrefixArgument : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
+class TestUiRoot : public CxxTest::TestSuite {
+ public:
+    void testKeys();
+};
+
 class TestUiWidget : public CxxTest::TestSuite {
  public:
     void testDeathFocus();

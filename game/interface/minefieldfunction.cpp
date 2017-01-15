@@ -37,14 +37,7 @@ game::interface::MinefieldFunction::get(interpreter::Arguments& args)
         return 0;
     }
 
-    Game* g = m_session.getGame().get();
-    Root* r = m_session.getRoot().get();
-    // FIXME: the minefields().get() test is not in PCC2
-    if (g != 0 || r != 0 || g->currentTurn().universe().minefields().get(mid) != 0) {
-        return new MinefieldContext(mid, r, g);
-    } else {
-        return 0;
-    }
+    return MinefieldContext::create(mid, m_session, false);
 }
 
 void
@@ -55,7 +48,7 @@ game::interface::MinefieldFunction::set(interpreter::Arguments& /*args*/, afl::d
 
 // CallableValue:
 int32_t
-game::interface::MinefieldFunction::getDimension(int32_t which)
+game::interface::MinefieldFunction::getDimension(int32_t which) const
 {
     if (which == 0) {
         return 1;
@@ -75,7 +68,7 @@ game::interface::MinefieldFunction::makeFirstContext()
     Root* r = m_session.getRoot().get();
     if (g != 0 || r != 0) {
         if (int mid = g->currentTurn().universe().minefields().findNextIndex(0)) {
-            return new MinefieldContext(mid, r, g);
+            return new MinefieldContext(mid, *r, *g);
         } else {
             return 0;
         }
@@ -98,7 +91,7 @@ game::interface::MinefieldFunction::toString(bool /*readable*/) const
 }
 
 void
-game::interface::MinefieldFunction::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext* /*ctx*/) const
+game::interface::MinefieldFunction::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
 {
     throw interpreter::Error::notSerializable();
 }

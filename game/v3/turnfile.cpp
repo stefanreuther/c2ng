@@ -1,20 +1,21 @@
 /**
   *  \file game/v3/turnfile.cpp
+  *  \brief Class game::v3::TurnFile
   */
 
 #include <cstring>
 #include <algorithm>
 #include "game/v3/turnfile.hpp"
-#include "afl/except/filetooshortexception.hpp"
-#include "afl/except/fileformatexception.hpp"
-#include "util/translation.hpp"
-#include "afl/bits/int32le.hpp"
 #include "afl/base/countof.hpp"
 #include "afl/bits/int16le.hpp"
-#include "afl/checksums/bytesum.hpp"
-#include "util/randomnumbergenerator.hpp"
-#include "game/v3/registrationkey.hpp"
+#include "afl/bits/int32le.hpp"
 #include "afl/bits/pack.hpp"
+#include "afl/checksums/bytesum.hpp"
+#include "afl/except/fileformatexception.hpp"
+#include "afl/except/filetooshortexception.hpp"
+#include "game/v3/registrationkey.hpp"
+#include "util/randomnumbergenerator.hpp"
+#include "util/translation.hpp"
 
 namespace {
     const int CURRENT_VERSION = 1;
@@ -301,46 +302,42 @@ game::v3::TurnFile::TurnFile(afl::charset::Charset& charset, afl::io::Stream& st
 game::v3::TurnFile::~TurnFile()
 { }
 
-// /** Get player number. */
+// Get player number.
 int
 game::v3::TurnFile::getPlayer() const
 {
     return m_turnHeader.playerId;
 }
 
-// /** Get turn timestamp. */
+// Get turn timestamp.
 game::Timestamp
 game::v3::TurnFile::getTimestamp() const
 {
     return game::Timestamp(m_turnHeader.timestamp);
 }
 
-// /** Get number of commands stored in this turn.
-//     This is not necessary the number of commands the turn will have when written to disk,
-//     since there might be some deleted or invalid ones. */
+// Get number of commands stored in this turn.
 size_t
 game::v3::TurnFile::getNumCommands() const
 {
     return m_offsets.size();
 }
 
-// /** Get bitfield of features active in this turn file. */
+// Get feature flags.
 game::v3::TurnFile::FeatureSet_t
 game::v3::TurnFile::getFeatures() const
 {
     return m_features;
 }
 
-// /** Get sub-version of turn file. Only valid for Winplan turns.
-//     Returns the "xy" in "file format 3.5xy" (currently either 0 or 1). */
+// Get sub-version of turn file.
 int
 game::v3::TurnFile::getVersion() const
 {
     return m_version;
 }
 
-
-// /** Set turn timestamp. */
+// Set turn timestamp.
 void
 game::v3::TurnFile::setTimestamp(const Timestamp& time)
 {
@@ -348,9 +345,7 @@ game::v3::TurnFile::setTimestamp(const Timestamp& time)
     m_isDirty = true;
 }
 
-// /** Set turn version number. The version is transmitted through the
-//     Winplan trailer; it is the 'xy' in 'VER3.5xy'.
-//     \param n version number. Currently valid values: 0 and 1. */
+// Set sub-version of turn file.
 void
 game::v3::TurnFile::setVersion(int n)
 {
@@ -358,7 +353,7 @@ game::v3::TurnFile::setVersion(int n)
     m_isDirty   = true;
 }
 
-// /** Change turn format. */
+// Set turn format.
 void
 game::v3::TurnFile::setFeatures(FeatureSet_t f)
 {
@@ -379,6 +374,7 @@ game::v3::TurnFile::setFeatures(FeatureSet_t f)
  *  Trailer access
  */
 
+// Try to get the turn number used to generate this turn.
 int
 game::v3::TurnFile::tryGetTurnNr() const
 {
@@ -408,12 +404,7 @@ game::v3::TurnFile::tryGetTurnNr() const
 //     std::copy(data, data + 11, dos_trailer.players);
 // }
 
-// /** Set registration info.
-//     The turn number must be passed in as well,
-//     because Host uses it to validate the registration info for Winplan clients.
-//     When copying the turns, this may be the turn number from tryGetTurnNr().
-//     \param reg Registration info
-//     \param turn_nr Turn number */
+// Set registration info.
 void
 game::v3::TurnFile::setRegistrationKey(const RegistrationKey& key, int turnNr)
 {
@@ -422,7 +413,7 @@ game::v3::TurnFile::setRegistrationKey(const RegistrationKey& key, int turnNr)
     util::RandomNumberGenerator rng(m_turnHeader.playerId + (turnNr << 16));
 
     // Dosplan half (authoritative)
-    afl::bits::packArray<afl::bits::UInt32LE>(m_dosTrailer.registrationKey, key.getKey());
+    afl::bits::packArray<afl::bits::UInt32LE>(afl::base::fromObject(m_dosTrailer.registrationKey), key.getKey());
 
     // Winplan half (mostly informative)
     if (m_features.contains(WinplanFeature)) {
@@ -449,35 +440,33 @@ game::v3::TurnFile::setRegistrationKey(const RegistrationKey& key, int turnNr)
     m_isDirty = true;
 }
 
-// /** Get Winplan (v3.5) trailer.
-//     This header is only set if the turn file actually is in Winplan format. */
-// inline const TTurnWindowsTrailer&
-// GTurnFile::getWindowsTrailer() const
-// {
-//     return m_windowsTrailer;
-// }
+// Get Windows (v3.5) trailer.
+const game::v3::structures::TurnWindowsTrailer&
+game::v3::TurnFile::getWindowsTrailer() const
+{
+    return m_windowsTrailer;
+}
 
-// /** Get DOS (v3.0) Trailer. */
-// inline const TTurnDosTrailer&
-// GTurnFile::getDosTrailer() const
-// {
-//     return dos_trailer;
-// }
+// Get DOS (v3.0) trailer.
+const game::v3::structures::TurnDosTrailer&
+game::v3::TurnFile::getDosTrailer() const
+{
+    return m_dosTrailer;
+}
 
-// /** Get turn header. */
+// Get turn header.
 const game::v3::structures::TurnHeader&
 game::v3::TurnFile::getTurnHeader() const
 {
     return m_turnHeader;
 }
 
-// /** Get raw TacCom header. Since that currently is only used by
-//     un-trn, I didn't bother to write accessors for everything. */
-// inline const TTaccomTurnHeader&
-// GTurnFile::getTaccomHeader() const
-// {
-//     return taccom_header;
-// }
+// Get Taccom header.
+const game::v3::structures::TaccomTurnHeader&
+game::v3::TurnFile::getTaccomHeader() const
+{
+    return m_taccomHeader;
+}
 
 
 
@@ -485,7 +474,7 @@ game::v3::TurnFile::getTurnHeader() const
  *  Command accessors
  */
 
-// /** Get command at specified index. Index is in range [0, getNumCommands()) */
+// Get command code.
 bool
 game::v3::TurnFile::getCommandCode(size_t index, CommandCode_t& out) const
 {
@@ -502,9 +491,7 @@ game::v3::TurnFile::getCommandCode(size_t index, CommandCode_t& out) const
     }
 }
 
-// /** Get length of command at specified index.
-//     Index is in range [0, getNumCommands()).
-//     If the command is invalid or unknown, returns -1. */
+// Get length of command data field.
 bool
 game::v3::TurnFile::getCommandLength(size_t index, int& out) const
 {
@@ -546,9 +533,7 @@ game::v3::TurnFile::getCommandLength(size_t index, int& out) const
     }
 }
 
-// /** Get id for command at specified index.
-//     For most commands, this is the Id of the object the command refers to.
-//     \param index command index, [0, getNumCommands()). */
+// Get command Id field.
 bool
 game::v3::TurnFile::getCommandId(size_t index, int& out) const
 {
@@ -565,7 +550,7 @@ game::v3::TurnFile::getCommandId(size_t index, int& out) const
     }
 }
 
-// /** Get type of specified command. */
+// Get command type.
 bool
 game::v3::TurnFile::getCommandType(size_t index, CommandType& type) const
 {
@@ -578,10 +563,7 @@ game::v3::TurnFile::getCommandType(size_t index, CommandType& type) const
     }
 }
 
-// /** Get position of a command in the file.
-//     This position is informative and only valid for complete, clean files.
-//     \param index command index, [0,getNumCommands()).
-//     \return position, 0-based, into complete file */
+// Get position of a command in the file.
 bool
 game::v3::TurnFile::getCommandPosition(size_t index, int32_t& out) const
 {
@@ -593,8 +575,7 @@ game::v3::TurnFile::getCommandPosition(size_t index, int32_t& out) const
     }
 }
 
-// // /** Get name of command.
-// //     \returns pointer to string, or null if command is invalid. */
+// Get name of a command.
 const char*
 game::v3::TurnFile::getCommandName(size_t index) const
 {
@@ -606,9 +587,7 @@ game::v3::TurnFile::getCommandName(size_t index) const
     }
 }
 
-// // /** Get data at specified index.
-// //     For most commands, this is the payload data following the object Id.
-// //     \param index command index, [0, getNumCommands()). */
+// Get command data.
 afl::base::ConstBytes_t 
 game::v3::TurnFile::getCommandData(size_t index) const
 {
@@ -619,14 +598,12 @@ game::v3::TurnFile::getCommandData(size_t index) const
     }
 }
 
-// 
-// /*
-//  *  Command definition accessors
-//  */
+
+/*
+ *  Command definition accessors
+ */
 
-// /** Get type of specified command code.
-//     \param cmd Command code (see getCommandCode, tcm_XXX)
-//     \return type of command */
+// Get command type, given a command code.
 game::v3::TurnFile::CommandType
 game::v3::TurnFile::getCommandCodeType(CommandCode_t cmd)
 {
@@ -637,9 +614,7 @@ game::v3::TurnFile::getCommandCodeType(CommandCode_t cmd)
     }
 }
 
-// /** Get name of specified command code.
-//     \param cmd Command code (see getCommandCode, tcm_XXX)
-//     \return name; null if command is invalid */
+// Get command name, given a command code.
 const char*
 game::v3::TurnFile::getCommandCodeName(CommandCode_t cmd)
 {
@@ -650,12 +625,8 @@ game::v3::TurnFile::getCommandCodeName(CommandCode_t cmd)
     }
 }
 
-// /** Get record index of specified command code.
-//     Planet/Base/Ship commands contain portions of proper game object records;
-//     this routine returns the index into the (DOS format) game object record for the command.
-//     For other commands, it returns 0.
-//     \param code command, tcm_XXX */
-int
+// Get command record index, given a command code.
+size_t
 game::v3::TurnFile::getCommandCodeRecordIndex(CommandCode_t code)
 {
     if (code < countof(COMMAND_DEFINITIONS)) {
@@ -670,9 +641,7 @@ game::v3::TurnFile::getCommandCodeRecordIndex(CommandCode_t code)
  *  Modificators
  */
 
-// /** Add command to turn file. Data is to be appended using addData().
-//     \param cmd   Command code (tcm_XXX)
-//     \param id    Object id. For messages, the size. For passwords, zero. */
+// Add a command.
 void
 game::v3::TurnFile::addCommand(CommandCode_t cmd, int id)
 {
@@ -683,12 +652,7 @@ game::v3::TurnFile::addCommand(CommandCode_t cmd, int id)
     addData(afl::base::fromObject(buf));         // marks turn dirty
 }
 
-// /** Add command to file.
-//     Shortcut for a addCommand(int,int) + addData() combination.
-//     \param cmd   Command code (tcm_XXX)
-//     \param id    Object id. For messages, the size. For passwords, zero.
-//     \param data  Data associated with command
-//     \param len   Length of data in bytes */
+// Add a command with data.
 void
 game::v3::TurnFile::addCommand(CommandCode_t cmd, int id, afl::base::ConstBytes_t data)
 {
@@ -696,7 +660,7 @@ game::v3::TurnFile::addCommand(CommandCode_t cmd, int id, afl::base::ConstBytes_
     addData(data);       // marks turn dirty
 }
 
-/** Add data to turn file. Should be used only after addCommand(). */
+// Add command data.
 void
 game::v3::TurnFile::addData(afl::base::ConstBytes_t data)
 {
@@ -704,14 +668,13 @@ game::v3::TurnFile::addData(afl::base::ConstBytes_t data)
     m_data.append(data);
 }
 
-/** Delete a command. The command is only marked as deleted (invalid),
-    it does not "disappear" from the getNumCommands() count. */
+// Delete command.
 void
 game::v3::TurnFile::deleteCommand(size_t index)
 {
-    // FIXME? this fails when commands are aliased. We do not generate
-    // that, but others might, and we don't block it. PHost wouldn't
-    // be able to read it, so it is probably not worth bothering with.
+    // FIXME? this fails when commands are aliased.
+    // We do not generate that, but others might, and we don't block it.
+    // PHost wouldn't be able to read it, so it is probably not worth bothering with.
     // However, a more solid version just adds a null and points the command there.
     int32_t pos;
     if (getCommandPosition(index, pos)) {
@@ -757,22 +720,21 @@ game::v3::TurnFile::deleteCommand(size_t index)
 //     makeCommands(id, tcm_BaseFIRST, tcm_BaseLAST, old, neu);
 // }
 
-// 
-// /*
-//  *  Structure access
-//  */
+
+/*
+ *  Structure access
+ */
 
-// /** Sort commands. Establishes canonical ordering of commands. */
+// Sort commands.
 void
 game::v3::TurnFile::sortCommands()
 {
     // We don't need to mark the turn dirty here, as swapping offsets does not change checksums.
-    // Currently (20070910, 20130209), un-trn relies on that.
+    // Currently (20070910, 20130209, 20170114), un-trn relies on that.
     std::stable_sort(m_offsets.begin(), m_offsets.end(), CommandComparator(m_data));
 }
 
-// /** Update.
-//     Regenerates the whole file, so that /data/ contains an exact image of the TRN file. */
+// Update image.
 void
 game::v3::TurnFile::update()
 {
@@ -801,7 +763,7 @@ game::v3::TurnFile::update()
         // Write Taccom files
         bool didTurn = false;
         for (size_t i = 0; i < structures::MAX_TRN_ATTACHMENTS; ++i) {
-            if (m_turnPlacement == int(i)) { // FIXME: cast
+            if (m_turnPlacement == i) {
                 newHeader.turnAddress = newData.size() + 1;
                 updateTurnFile(newData, newOffsets);
                 newHeader.turnSize = newData.size() + 1 - newHeader.turnAddress;
@@ -832,10 +794,7 @@ game::v3::TurnFile::update()
     m_isDirty = false;
 }
 
-// /** Update Trailer. This can be called after update() when there still
-//     have been changes done to the DOS trailer (i.e. templock processing).
-//     No other changes must have been made.
-//     \pre update() has been called, turn is not dirty */
+// Update trailer.
 void
 game::v3::TurnFile::updateTrailer()
 {
@@ -849,8 +808,7 @@ game::v3::TurnFile::updateTrailer()
     }
 }
 
-// /** Compute turn checksum.
-//     \pre turn is valid (not dirty) */
+// Compute turn checksum.
 uint32_t
 game::v3::TurnFile::computeTurnChecksum() const
 {
@@ -871,18 +829,14 @@ game::v3::TurnFile::computeTurnChecksum() const
     return turnChecksum + 3*m_turnHeader.timeChecksum + 13;
 }
 
-// 
-// /*
-//  *  Taccom access
-//  */
+
+/*
+ *  Taccom access
+ */
 
-// /** Attach a file.
-//     \param file_data  File data
-//     \param len        Length
-//     \param name       File name. 12 chars or less.
-//     \returns position of file, or -1 if attaching not possible (directory is full) */
-int
-game::v3::TurnFile::addFile(afl::base::ConstBytes_t fileData, const String_t& name)
+// Attach a file.
+bool
+game::v3::TurnFile::addFile(afl::base::ConstBytes_t fileData, const String_t& name, size_t& pos)
 {
     for (size_t i = 0; i < structures::MAX_TRN_ATTACHMENTS; ++i) {
         if (String_t(m_taccomHeader.attachments[i].name).empty()) {
@@ -893,15 +847,16 @@ game::v3::TurnFile::addFile(afl::base::ConstBytes_t fileData, const String_t& na
             m_data.append(fileData);
             m_features += TaccomFeature;
             m_isDirty = true;
-            return i;
+            pos = i;
+            return true;
         }
     }
-    return -1;
+    return false;
 }
 
-// /** Delete an attached file. */
+// Delete an attached file.
 void
-game::v3::TurnFile::deleteFile(size_t index)
+game::v3::TurnFile::deleteFile(const size_t index)
 {
     if (index < structures::MAX_TRN_ATTACHMENTS) {
         m_isDirty = true;
@@ -909,7 +864,7 @@ game::v3::TurnFile::deleteFile(size_t index)
     }
 }
 
-// /** Get number of attachments. */
+// Get number of attachments.
 size_t
 game::v3::TurnFile::getNumFiles() const
 {
@@ -923,7 +878,7 @@ game::v3::TurnFile::getNumFiles() const
 }
 
 // /** Get position of turn data in TacCom container. */
-int
+size_t
 game::v3::TurnFile::getTaccomTurnPlace() const
 {
     return m_turnPlacement;
@@ -935,24 +890,31 @@ game::v3::TurnFile::getTaccomTurnPlace() const
  *  Output
  */
 
-// /** Write out turn file.
-//     \pre update() has been called, or turn file is unmodified. */
+// Write turn file.
 void
-game::v3::TurnFile::write(afl::io::Stream& stream)
+game::v3::TurnFile::write(afl::io::Stream& stream) const
 {
 //     ASSERT(!dirty);
     stream.fullWrite(m_data);
 }
+
+// Get associated character set.
+afl::charset::Charset&
+game::v3::TurnFile::charset() const
+{
+    return m_charset;
+}
+
 
 
 /*
  *  Internal
  */
 
-// /** Initialize by loading a stream.
-//     The stream contains a full turn file (including possible Taccom data).
-//     \param str Stream to read
-//     \param full_parse true to read full turn, false to read only headers */
+/** Initialize by loading a stream.
+    The stream contains a full turn file (including possible Taccom data).
+    \param str Stream to read
+    \param fullParse true to read full turn, false to read only headers */
 void
 game::v3::TurnFile::init(afl::io::Stream& str, bool fullParse)
 {
@@ -964,7 +926,7 @@ game::v3::TurnFile::init(afl::io::Stream& str, bool fullParse)
             // Taccom-enhanced TRN
             afl::base::fromObject(m_taccomHeader).copyFrom(m_data);
             m_features += TaccomFeature;
-            parseTurnFile(str, m_taccomHeader.turnAddress+1, m_taccomHeader.turnSize);
+            parseTurnFile(str, m_taccomHeader.turnAddress - 1, m_taccomHeader.turnSize);
             for (size_t i = 0; i < structures::MAX_TRN_ATTACHMENTS; ++i) {
                 if (!String_t(m_taccomHeader.attachments[i].name).empty()) {
                     // Attachment present
@@ -994,11 +956,11 @@ game::v3::TurnFile::init(afl::io::Stream& str, bool fullParse)
     }
 }
 
-// Check file position. Called from parser.
-// Assumes file loaded into m_data.
-// \param stream stream we're processing (for generating error messages only)
-// \param offset,size file specification, zero-based
-// \throw FileFormatException on error.
+/** Check a file position.
+    Assumes file already loaded into m_data.
+    \param stream stream we're processing (for generating error messages only)
+    \param offset,length position/range to verify, zero-based
+    \throw afl::except::FileFormatException on error. */
 void
 game::v3::TurnFile::checkRange(afl::io::Stream& stream, afl::io::Stream::FileSize_t offset, afl::io::Stream::FileSize_t length)
 {
@@ -1008,11 +970,11 @@ game::v3::TurnFile::checkRange(afl::io::Stream& stream, afl::io::Stream::FileSiz
     }
 }
 
-// Parse Turn File.
-// To be called from the constructor only (assumes most things zeroed).
-// \param offset Starting position into file (nonzero for Taccom).
-// \param length Length of turn data.
-// \throw FileFormatException on error. */
+/** Parse Turn File.
+    To be called from the constructor only (assumes most things zeroed).
+    \param offset Starting position into file (nonzero for Taccom).
+    \param length Length of turn data.
+    \throw afl::except::FileFormatException on error. */
 void
 game::v3::TurnFile::parseTurnFile(afl::io::Stream& stream, afl::io::Stream::FileSize_t offset, afl::io::Stream::FileSize_t length)
 {
@@ -1066,7 +1028,7 @@ game::v3::TurnFile::parseTurnFile(afl::io::Stream& stream, afl::io::Stream::File
     // now read the trailers
     // FIXME? In case the actual turn data contains "VER3.5nn", this will mis-interpret the turn file in the same way as host does.
     if (length >= sizeof(m_dosTrailer) + sizeof(m_windowsTrailer) + sizeof(m_turnHeader)) {
-        afl::base::fromObject(m_windowsTrailer).copyFrom(data.subrange(length - sizeof(m_dosTrailer) - sizeof(m_windowsTrailer)));
+        afl::base::fromObject(m_windowsTrailer).copyFrom(data.subrange(offset + length - sizeof(m_dosTrailer) - sizeof(m_windowsTrailer)));
         if (std::memcmp(m_windowsTrailer.magic, V35_MAGIC, 6) == 0) {
             m_features += WinplanFeature;
             if (m_windowsTrailer.magic[6] >= '0' && m_windowsTrailer.magic[6] <= '9' && m_windowsTrailer.magic[7] >= '0' && m_windowsTrailer.magic[7] <= '9') {
@@ -1081,8 +1043,9 @@ game::v3::TurnFile::parseTurnFile(afl::io::Stream& stream, afl::io::Stream::File
     afl::base::fromObject(m_dosTrailer).copyFrom(data.subrange(offset + length - sizeof(m_dosTrailer)));
 }
 
-// Parse headers and trailers directly from a stream.
-// For call from constructor only (assumes most things zeroed).
+/** Parse headers and trailers directly from a stream.
+    \param offset Starting position into file (nonzero for Taccom).
+    \param length Length of turn data. */
 void
 game::v3::TurnFile::parseTurnFileHeader(afl::io::Stream& stream, afl::io::Stream::FileSize_t offset, afl::io::Stream::FileSize_t length)
 {
@@ -1116,10 +1079,10 @@ game::v3::TurnFile::parseTurnFileHeader(afl::io::Stream& stream, afl::io::Stream
     }
 }
 
-// /** Generate turn file structure. Called by update().
-//     The turn must not contain any invalid commands.
-//     \param buf buffer that will receive the turn data (initially empty)
-//     \param offsets buffer that will receive the command offsets (initially empty) */
+/** Generate turn file structure. Called by update().
+    The turn must not contain any invalid commands.
+    \param data buffer that will receive the turn data (initially empty)
+    \param offsets buffer that will receive the command offsets (initially empty) */
 void
 game::v3::TurnFile::updateTurnFile(afl::base::GrowableMemory<uint8_t>& data, afl::base::GrowableMemory<uint32_t>& offsets)
 {
@@ -1189,6 +1152,8 @@ game::v3::TurnFile::updateTurnFile(afl::base::GrowableMemory<uint8_t>& data, afl
 //     }
 // }
 
+/** Encode a string according to our character set.
+    \param in String */
 String_t
 game::v3::TurnFile::encodeString(const String_t& in) const
 {

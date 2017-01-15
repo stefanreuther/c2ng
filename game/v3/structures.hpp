@@ -60,6 +60,12 @@ namespace game { namespace v3 { namespace structures {
 //     MAX_BAY_LIMIT     = 20          ///< Maximum number of fighter bays in a VCR.
 // };
 
+    enum Section {
+        ShipSection,
+        PlanetSection,
+        BaseSection
+    };
+
     enum Ore {
         Neutronium,
         Tritanium,
@@ -435,17 +441,17 @@ namespace game { namespace v3 { namespace structures {
 
     /** Turn file trailer, DOS version. */
     struct TurnDosTrailer {
-        Int32_t     checksum;                                   ///< Checksum over turn file, up to just before DOS trailer.
-        Int32_t     signature;                                  ///< Signature inserted by maketurn program, undefined normally.
-        uint8_t     registrationKey[4*51];                      ///< Registration string from FIZZ.BIN.
-        Int32_t     playerSecret[NUM_PLAYERS];                  ///< "Player secret" (templock).
+        UInt32_t    checksum;                                   ///< Checksum over turn file, up to just before DOS trailer.
+        UInt32_t    signature;                                  ///< Signature inserted by maketurn program, undefined normally.
+        UInt32_t    registrationKey[51];                        ///< Registration string from FIZZ.BIN.
+        UInt32_t    playerSecret[NUM_PLAYERS];                  ///< "Player secret" (templock).
     };
     static_assert(sizeof(TurnDosTrailer) == 256, "sizeof TurnDosTrailer");
 
     /** Turn file trailer, Windows version. Always followed by DOS trailer. */
     struct TurnWindowsTrailer {
         char        magic[8];                                   ///< "VER3.5xx".
-        Int32_t     vphKey[2];                                  ///< VPH.DLL values.
+        UInt32_t    vphKey[2];                                  ///< VPH.DLL values.
         String25_t  regstr1[2];                                 ///< Serial number. Same as standard reg string 1.
         String25_t  regstr2[2];                                 ///< Reg date. Same as standard reg string 2.
         String50_t  regstr3;                                    ///< Player name. Player-settable.
@@ -471,50 +477,6 @@ namespace game { namespace v3 { namespace structures {
         String12_t  adjectiveNames[NUM_PLAYERS];
     };
     static_assert(sizeof(RaceNames) == 682, "sizeof RaceNames");
-
-    /** CCBSim Ship Structure. */
-    struct SimShipData {
-        VcrObject   object;
-        Int16_t     engineType;
-        Int16_t     hullType;
-        Int16_t     shield;
-        String3_t   friendlyCode;
-        Int16_t     aggressiveness;
-        Int16_t     mass;
-        Int16_t     flags;
-        Int32_t     flakRating;
-        Int16_t     flakCompensation;
-        Int16_t     interceptId;
-        Int16_t     flags2;
-    };
-    static_assert(sizeof(SimShipData) == 67, "sizeof SimShipData");
-
-    struct SimPlanetData {
-        Int16_t     numTorpedoes[NUM_TORPEDO_TYPES];            // vcro.name
-        Int32_t     _pad0;                                      // vcro.damage, .crew
-        Int16_t     id;                                         // vcro.id
-        Int16_t     owner;                                      // vcro.owner
-        Int16_t     _pad1;                                      // vcro.picture, .hull_or_zero
-        Int16_t     beamTechLevel;                              // vcro.beam_type
-        uint8_t     _pad2;                                      // vcro.beam_count
-        uint8_t     experienceLevel;                            // vcro.experience_level
-        Int16_t     numFighters;                                // vcro.bay_count
-        Int16_t     _pad3;                                      // vcro.torp_type
-        Int16_t     numTorpedoesOld;                            // vcro._ammo
-        Int16_t     torpedoTechLevel;                           // vcro.torp_launcher_count
-        Int16_t     numBaseDefensePosts;                        // .engine_type
-        Int16_t     numDefensePosts;                            // .hull_type
-        Int16_t     shield;                                     // .shield
-        String3_t   fcode;                                      // .fcode
-        Int16_t     aggressiveness;                             // .aggressiveness
-        Int16_t     _pad5;                                      // .mass
-        Int16_t     flags;
-        Int32_t     flakRating;
-        Int16_t     flakCompensation;
-        Int16_t     _pad6;
-        Int16_t     flags2;
-    };
-    static_assert(sizeof(SimPlanetData) == sizeof(SimShipData), "sizeof SimPlanetData");
 
     /* Host-specific */
 
@@ -598,24 +560,6 @@ namespace game { namespace v3 { namespace structures {
     };
     static_assert(sizeof(DatabaseMinefield) == 16, "sizeof DatabaseMinefield");
 
-    /// User drawing (rPainting, 5).
-    struct DatabaseDrawing {
-        uint8_t     type;                                       ///< Painting type, and comment flag.
-        uint8_t     color;                                      ///< Painting color.
-        Int16_t     x1, y1;                                     ///< Left-top or center position.
-        Int16_t     x2, y2;                                     ///< Bottom-right position, radius or shape.
-        Int16_t     tag;                                        ///< User-defined tag.
-        Int16_t     expirationTurn;                             ///< Turn of expiry.
-    };
-    static_assert(sizeof(DatabaseDrawing) == 14, "sizeof DatabaseDrawing");
-
-    /// Autobuiild settings (rAutoBuild, 6).
-    struct AutobuildSettings {
-        Int16_t     goal[4];                                    ///< Target number, 0..999; 1000 meaning "max".
-        int8_t      speed[4];                                   ///< Speed, 0..100.
-    };
-    static_assert(sizeof(AutobuildSettings) == 12, "sizeof AutobuildSettings");
-
     /// Ufo history (rUfoHistory, 12).
     struct DatabaseUfo {
         Int16_t     id;                                         ///< Ufo Id.
@@ -626,52 +570,6 @@ namespace game { namespace v3 { namespace structures {
         Int16_t     speedX, speedY;                             ///< Movement vector, if known.
     };
     static_assert(sizeof(DatabaseUfo) == 94, "sizeof DatabaseUfo");
-
-    /* Score DB */
-
-    /// score.cc (PCC2 score db) header.
-    struct ScoreHeader {
-        char        signature[8];                               ///< "CCstat0",26.
-        UInt32_t    headerSize;                                 ///< Total size of header, pointer to entries.
-        UInt16_t    numHeaderFields;                            ///< Fields in this header.
-        UInt16_t    numEntries;                                 ///< Number of entries.
-        UInt16_t    recordHeaderSize;                           ///< Size of record header.
-        UInt16_t    numRecordFields;                            ///< Fields in a record.
-        UInt16_t    headerFieldAddress[2];                      ///< Pointers to sub-fields.
-    };
-    static_assert(sizeof(ScoreHeader) == 24, "sizeof ScoreHeader");
-
-    /// score.cc (PCC2 score db) record header.
-    struct ScoreRecordHeader {
-        Int16_t     turn;                                       ///< Turn number.
-        char        timestamp[18];                              ///< Time stamp.
-    };
-    static_assert(sizeof(ScoreRecordHeader) == 20, "sizeof ScoreRecordHeader");
-
-    /// score.cc (PCC2 score db) score description.
-    struct ScoreDescription {
-        String50_t  name;                                       ///< Name of score. Identifies the score to humans.
-        Int16_t     scoreType;                                  ///< Type of score. Identifies the score to programs.
-        Int16_t     turnLimit;                                  ///< Turns to keep win limit.
-        Int32_t     winLimit;                                   ///< Win limit. If somebody exceeds this limit for turn_limit turns, he wins. -1=no such limit.
-    };
-    static_assert(sizeof(ScoreDescription) == 58, "sizeof ScoreDescription");
-
-    /// stat.cc (PCC1 score db) header.
-    struct StatHeader {
-        char        signature[8];                               ///< "CC-Stat",26.
-        Int16_t     numEntries;
-        Int16_t     recordSize;
-    };
-    static_assert(sizeof(StatHeader) == 12, "sizeof StatHeader");
-
-    /// stat.cc (PCC1 score db) entry.
-    struct StatRecord {
-        ScoreRecordHeader header;                               ///< Record header.
-        GenScore    scores[NUM_PLAYERS];                        ///< Player scores.
-        Int16_t     pbps[NUM_PLAYERS];                          ///< Build points.
-    };
-    static_assert(sizeof(StatRecord) == 130, "sizeof StatRecord");
 
     /// hconfig.hst.
     struct HConfig {

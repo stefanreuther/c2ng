@@ -9,6 +9,7 @@
 #include "interpreter/arguments.hpp"
 #include "client/si/requestlink1.hpp"
 #include "game/session.hpp"
+#include "afl/base/weaklink.hpp"
 
 namespace client { namespace si {
 
@@ -38,7 +39,7 @@ namespace client { namespace si {
         <b>Lifetime</b>
 
         Like all script objects, this one lives in a interpreter::World.
-        Because the ScriptSide may die before the World, it registers with the ScriptSide.
+        Because the ScriptSide may die before the World, the ScriptSide has a WeakLink pointing at the ScriptSide.
         After the ScriptSide died, the ScriptProcedure will become inactive
         and fail all requests with a interpreter::Error::contextError(). */
     class ScriptProcedure : public interpreter::CallableValue {
@@ -53,31 +54,20 @@ namespace client { namespace si {
 
         // BaseValue:
         virtual String_t toString(bool readable) const;
-        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, interpreter::SaveContext* ctx) const;
+        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, interpreter::SaveContext& ctx) const;
 
         // CallableValue:
         virtual void call(interpreter::Process& proc, afl::data::Segment& args, bool want_result);
-        virtual bool isProcedureCall();
-        virtual int32_t getDimension(int32_t which);
+        virtual bool isProcedureCall() const;
+        virtual int32_t getDimension(int32_t which) const;
         virtual interpreter::Context* makeFirstContext();
         virtual ScriptProcedure* clone() const;
-
-        /** Set ScriptSide pointer.
-            Used by the ScriptSide to detach from this object and make it inactive.
-            \param p new pointer */
-        void setScriptSide(ScriptSide* p);
      private:
         game::Session& m_session;
-        ScriptSide* m_pScriptSide;
+        afl::base::WeakLink<ScriptSide> m_pScriptSide;
         void (*m_pFunction)(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     };
 
 } }
-
-inline void
-client::si::ScriptProcedure::setScriptSide(ScriptSide* p)
-{
-    m_pScriptSide = p;
-}
 
 #endif

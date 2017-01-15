@@ -10,6 +10,7 @@
 #include "afl/base/signal.hpp"
 #include "ui/layout/info.hpp"
 #include "gfx/colorscheme.hpp"
+#include "util/skincolor.hpp"
 
 namespace ui {
 
@@ -79,8 +80,8 @@ namespace ui {
         virtual ui::layout::Info getLayoutInfo() const = 0;
 
         // Color scheme
-        void setColorScheme(gfx::ColorScheme& scheme);
-        gfx::ColorScheme& getColorScheme() const;
+        void setColorScheme(gfx::ColorScheme<util::SkinColor::Color>& scheme);
+        gfx::ColorScheme<util::SkinColor::Color>& getColorScheme() const;
 
         // Links
         Widget* getParent() const { return m_parent; }
@@ -103,7 +104,7 @@ namespace ui {
         Widget* m_lastChild;           /**< Last child. */
         Widget* m_focusedChild;        /**< Focused child. */
         Widget* m_activeChild;         /**< Selected child. */
-        gfx::ColorScheme* m_colorScheme;
+        gfx::ColorScheme<util::SkinColor::Color>* m_colorScheme;
         States_t m_states;
         int m_id;
         gfx::Rectangle m_extent;

@@ -6,6 +6,9 @@
 #include "client/marker.hpp"
 #include "gfx/complex.hpp"
 #include "gfx/context.hpp"
+#include "afl/base/staticassert.hpp"
+#include "afl/base/countof.hpp"
+#include "game/map/drawing.hpp"
 
 namespace {
     const int SCRingRadius           = 3;      ///< Radius of planet ring, in ly.
@@ -20,7 +23,7 @@ namespace {
     const int SCMaxIconHeight = 50;
     const int SCMaxIconWidth  = 300;
 
-    void drawCross(gfx::Context& ctx, gfx::Point pt, int size)
+    void drawCross(gfx::BaseContext& ctx, gfx::Point pt, int size)
     {
         // ex GChartViewport::drawCross (part)
         drawHLine(ctx, pt.getX() - size, pt.getY(), pt.getX() + size);
@@ -46,11 +49,50 @@ namespace {
         }
         return ui::Color_DarkPink;
     }
+
+
+    // /* In addition to the internal<->external conversion, we expose a
+    //    simple color number (0..NUM_USER_COLORS, where 0 isn't selectable
+    //    through dialogs) to the user. The following two functions provide a
+    //    mapping. */
+    static const uint8_t user_colors[] = {
+        0,
+        1,   2,   3,   4,   5,   6,   7,   8,   9,  15,
+        97,  99,  101, 103, 105, 107, 109, 111, 113, 115,
+        98,  100, 102, 104, 106, 108, 110, 112, 114, 116
+    };
+    static_assert(countof(user_colors) == game::map::Drawing::NUM_USER_COLORS + 1, "countof user_colors");
+
+    // /** Convert color into user color index.
+    //     \param color Color number
+    //     \return User color number (0..NUM_USER_COLORS); -1 if color does not match
+    //     any user color */
+    // int
+    // GDrawing::getUserColorFromColor(uint8 color)
+    // {
+    //     for (int i = 0; i < int(countof(user_colors)); ++i)
+    //         if (user_colors[i] == color)
+    //             return i;
+    //     return -1;
+    // }
+
+    // /** Convert user color index into color number.
+    //     \param user_color User color number (0..NUM_USER_COLORS)
+    //     \return color number */
+    uint8_t getUserColor(int color)
+    {
+        // ex GDrawing::getColorFromUserColor
+        if (color >= 0 && color < int(countof(user_colors))) {
+            return user_colors[color];
+        } else {
+            return ui::Color_White;
+        }
+    }
 }
 
 class client::map::Renderer::Listener : public game::map::RendererListener {
  public:
-    Listener(gfx::Context& ctx, const Renderer& parent)
+    Listener(gfx::Context<uint8_t>& ctx, const Renderer& parent)
         : m_context(ctx),
           m_parent(parent)
         { }
@@ -234,10 +276,59 @@ class client::map::Renderer::Listener : public game::map::RendererListener {
             drawCircle(m_context, pt, m_parent.scale(r));
             drawCross(m_context, pt, m_parent.getCrossSize());
         }
+    virtual void drawUserCircle(game::map::Point pt, int r, int color)
+        {
+            // ex GChartViewport::drawDrawing
+            m_context.setLinePattern(0xFF);
+            m_context.setColor(getUserColor(color));
+            drawCircle(m_context, m_parent.scale(pt), m_parent.scale(r));
+        }
+    virtual void drawUserLine(game::map::Point a, game::map::Point b, int color)
+        {
+            // ex GChartViewport::drawDrawing
+            m_context.setLinePattern(0xFF);
+            m_context.setColor(getUserColor(color));
+            drawLine(m_context, m_parent.scale(a), m_parent.scale(b));
+        }
+    virtual void drawUserRectangle(game::map::Point a, game::map::Point b, int color)
+        {
+            // ex GChartViewport::drawDrawing
+            m_context.setLinePattern(0xFF);
+            m_context.setColor(getUserColor(color));
 
+            gfx::Point aa = m_parent.scale(a);
+            gfx::Point bb = m_parent.scale(b);
+            drawRectangle(m_context, gfx::Rectangle(std::min(aa.getX(), bb.getX()),
+                                                    std::min(aa.getY(), bb.getY()),
+                                                    std::abs(aa.getX() - bb.getX()) + 1,
+                                                    std::abs(aa.getY() - bb.getY()) + 1));
+        }
+    virtual void drawUserMarker(game::map::Point pt, int shape, int color, String_t label)
+        {
+            // ex GChartViewport::drawDrawing
+            m_context.setLinePattern(0xFF);
+            m_context.setColor(getUserColor(color));
+            m_context.setTextAlign(1, 0);
+            gfx::Point origin = m_parent.scale(pt);
+            if (m_parent.m_zoomDivider < 2*m_parent.m_zoomMultiplier) {
+                /* draw marker */
+                if (const Marker* marker = getUserMarker(shape, true)) {
+                    drawMarker(m_context, *marker, origin);
+
+                    /* draw text */
+                    if (!label.empty()) {
+                        outTextF(m_context, origin + gfx::Point(0, getMarkerHeight(*marker)), 600, label);
+                    }
+                }
+            } else {
+                if (const Marker* marker = getUserMarker(shape, false)) {
+                    drawMarker(m_context, *marker, origin);
+                }
+            }
+        }
 
  private:
-    gfx::Context& m_context;
+    gfx::Context<uint8_t>& m_context;
     const Renderer& m_parent;
 };
 
@@ -273,10 +364,33 @@ client::map::Renderer::setRenderList(afl::base::Ptr<game::map::RenderList> rende
 }
 
 void
-client::map::Renderer::draw(gfx::Canvas& can, ui::ColorScheme& colorScheme) const
+client::map::Renderer::draw(gfx::Canvas& can, ui::ColorScheme& colorScheme, gfx::ResourceProvider& provider) const
 {
-    gfx::Context ctx(can);
-    ctx.useColorScheme(colorScheme);
+    gfx::Context<uint8_t> ctx(can, colorScheme);
+
+    // Font
+    // ex GChartViewport::getFont
+    int fontSize;
+    if (m_zoomMultiplier > m_zoomDivider) {
+        if (m_zoomMultiplier > 2*m_zoomDivider) {
+            /* more then 2:1: 22 pt */
+            fontSize = +1;
+        } else {
+            /* 1:1 up to 2:1: 16 pt */
+            fontSize = 0;
+        }
+    } else {
+        if (2*m_zoomMultiplier < m_zoomDivider) {
+            /* smaller than 1:2 */
+            // FIXME: should be 6 or 8 pt font, as in PCC 1.x */
+            fontSize = -2;
+        } else {
+            /* 1:2 up to 1:1: 12 pt */
+            fontSize = -1;
+        }
+    }
+    ctx.useFont(*provider.getFont(gfx::FontRequest().setSize(fontSize)));
+
     if (m_renderList.get() != 0) {
         Listener painter(ctx, *this);
         m_renderList->replay(painter);

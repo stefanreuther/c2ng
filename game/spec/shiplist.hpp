@@ -18,6 +18,7 @@
 #include "game/spec/standardcomponentnameprovider.hpp"
 #include "game/spec/torpedolauncher.hpp"
 #include "game/spec/missionlist.hpp"
+#include "afl/base/refcounted.hpp"
 
 namespace game { namespace spec {
 
@@ -33,7 +34,7 @@ namespace game { namespace spec {
           - with hull function assigned as racial abilities and assigned to hulls
         - component namer
         - friendly codes */
-    class ShipList {
+    class ShipList : public afl::base::RefCounted {
      public:
         /** Constructor. */
         ShipList();

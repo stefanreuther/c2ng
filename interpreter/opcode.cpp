@@ -193,7 +193,7 @@ interpreter::Opcode::getDisassemblyTemplate(String_t& tpl) const
         break;
 
      default:
-        tpl += "unknown\t%u";
+        tpl += "unknown?\t%u";
         break;
     }
 }

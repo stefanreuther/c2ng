@@ -37,9 +37,3 @@ ui::widgets::KeyDispatcher::handleKey(util::Key_t key, int prefix)
         return false;
     }
 }
-
-bool
-ui::widgets::KeyDispatcher::handleMouse(gfx::Point /*pt*/, MouseButtons_t /*pressedButtons*/)
-{
-    return false;
-}

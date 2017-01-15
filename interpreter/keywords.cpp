@@ -11,6 +11,7 @@ namespace {
         "ABORT",
         "BIND",
         "BREAK",
+        "CALL",
         "CASE",
         "CONTINUE",
         "CREATEKEYMAP",

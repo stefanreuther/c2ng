@@ -37,13 +37,9 @@ client::widgets::TurnListbox::isItemAccessible(size_t /*n*/)
 int
 client::widgets::TurnListbox::getItemHeight(size_t /*n*/)
 {
-    if (m_bigFont.get() != 0 && m_smallFont.get() != 0) {
-        return m_bigFont->getLineHeight()
-            + m_smallFont->getLineHeight()
-            + 2*OUTLINE_SIZE;
-    } else {
-        return 1;
-    }
+    return m_bigFont->getLineHeight()
+        + m_smallFont->getLineHeight()
+        + 2*OUTLINE_SIZE;
 }
 
 int
@@ -62,11 +58,11 @@ client::widgets::TurnListbox::drawItem(gfx::Canvas& can, gfx::Rectangle area, si
     using ui::SkinColor;
     afl::base::Deleter deleter;
 
-    gfx::Context ctx(can);
+    gfx::Context<util::SkinColor::Color> ctx(can, getColorScheme());
     prepareColorListItem(ctx, area, state, m_root.colorScheme(), deleter);
 
     const Item* pItem = getItem(item);
-    if (pItem != 0 && m_bigFont.get() != 0 && m_smallFont.get() != 0) {
+    if (pItem != 0) {
         SkinColor::Color textColor  = SkinColor::Static;
         SkinColor::Color subColor   = SkinColor::Faded;
 
@@ -129,10 +125,11 @@ client::widgets::TurnListbox::drawItem(gfx::Canvas& can, gfx::Rectangle area, si
         outTextF(ctx, textArea, pItem->time);
 
         if (boxColor >= 0) {
-            ctx.useColorScheme(m_root.colorScheme());
+            gfx::Context<uint8_t> ctx(can, m_root.colorScheme());
             drawSolidBar(ctx, area, boxColor);
             ctx.setTextAlign(1, 1);
             if (stateColor >= 0) {
+                ctx.useFont(*m_smallFont);
                 ctx.setColor(stateColor);
                 outTextF(ctx, area, stateText);
             }
@@ -144,9 +141,13 @@ client::widgets::TurnListbox::drawItem(gfx::Canvas& can, gfx::Rectangle area, si
 ui::layout::Info
 client::widgets::TurnListbox::getLayoutInfo() const
 {
-    return m_bigFont.get() != 0
-        ? m_cells.scaledBy(m_bigFont->getCellSize())
-        : gfx::Point(1, 1);
+    return m_cells.scaledBy(m_bigFont->getCellSize());
+}
+
+bool
+client::widgets::TurnListbox::handleKey(util::Key_t key, int prefix)
+{
+    return defaultHandleKey(key, prefix);
 }
 
 void

@@ -1,5 +1,6 @@
 /**
   *  \file ui/invisiblewidget.cpp
+  *  \brief Class ui::InvisibleWidget
   */
 
 #include "ui/invisiblewidget.hpp"
@@ -20,4 +21,10 @@ ui::layout::Info
 ui::InvisibleWidget::getLayoutInfo() const
 {
     return ui::layout::Info();
+}
+
+bool
+ui::InvisibleWidget::handleMouse(gfx::Point /*pt*/, MouseButtons_t /*pressedButtons*/)
+{
+    return false;
 }

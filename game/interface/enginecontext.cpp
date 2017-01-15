@@ -31,7 +31,7 @@ namespace {
     };
 }
 
-game::interface::EngineContext::EngineContext(int nr, afl::base::Ptr<game::spec::ShipList> shipList)
+game::interface::EngineContext::EngineContext(int nr, afl::base::Ref<game::spec::ShipList> shipList)
     : m_number(nr),
       m_shipList(shipList)
 {
@@ -42,28 +42,24 @@ game::interface::EngineContext::~EngineContext()
 { }
 
 // Context:
-bool
+game::interface::EngineContext*
 game::interface::EngineContext::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
 {
     // ex IntEngineContext::lookup
-    return lookupName(name, ENGINE_MAP, result);
+    return lookupName(name, ENGINE_MAP, result) ? this : 0;
 }
 
 void
 game::interface::EngineContext::set(PropertyIndex_t index, afl::data::Value* value)
 {
-    if (m_shipList.get() != 0) {
-        if (game::spec::Engine* e = m_shipList->engines().get(m_number)) {
-            switch (EngineDomain(ENGINE_MAP[index].domain)) {
-             case ComponentPropertyDomain:
-                setComponentProperty(*e, ComponentProperty(ENGINE_MAP[index].index), value, *m_shipList);
-                break;
-             case EnginePropertyDomain:
-                setEngineProperty(*e, EngineProperty(ENGINE_MAP[index].index), value, *m_shipList);
-                break;
-            }
-        } else {
-            throw interpreter::Error::notAssignable();
+    if (game::spec::Engine* e = m_shipList->engines().get(m_number)) {
+        switch (EngineDomain(ENGINE_MAP[index].domain)) {
+         case ComponentPropertyDomain:
+            setComponentProperty(*e, ComponentProperty(ENGINE_MAP[index].index), value, *m_shipList);
+            break;
+         case EnginePropertyDomain:
+            setEngineProperty(*e, EngineProperty(ENGINE_MAP[index].index), value, *m_shipList);
+            break;
         }
     } else {
         throw interpreter::Error::notAssignable();
@@ -74,14 +70,12 @@ afl::data::Value*
 game::interface::EngineContext::get(PropertyIndex_t index)
 {
     // ex IntEngineContext::get
-    if (m_shipList.get() != 0) {
-        if (const game::spec::Engine* e = m_shipList->engines().get(m_number)) {
-            switch (EngineDomain(ENGINE_MAP[index].domain)) {
-             case ComponentPropertyDomain:
-                return getComponentProperty(*e, ComponentProperty(ENGINE_MAP[index].index), *m_shipList);
-             case EnginePropertyDomain:
-                return getEngineProperty(*e, EngineProperty(ENGINE_MAP[index].index));
-            }
+    if (const game::spec::Engine* e = m_shipList->engines().get(m_number)) {
+        switch (EngineDomain(ENGINE_MAP[index].domain)) {
+         case ComponentPropertyDomain:
+            return getComponentProperty(*e, ComponentProperty(ENGINE_MAP[index].index), *m_shipList);
+         case EnginePropertyDomain:
+            return getEngineProperty(*e, EngineProperty(ENGINE_MAP[index].index));
         }
     }
     return 0;
@@ -91,13 +85,9 @@ bool
 game::interface::EngineContext::next()
 {
     // ex IntEngineContext::next
-    if (m_shipList.get() != 0) {
-        if (game::spec::Engine* e = m_shipList->engines().findNext(m_number)) {
-            m_number = e->getId();
-            return true;
-        } else {
-            return false;
-        }
+    if (game::spec::Engine* e = m_shipList->engines().findNext(m_number)) {
+        m_number = e->getId();
+        return true;
     } else {
         return false;
     }
@@ -133,9 +123,20 @@ game::interface::EngineContext::toString(bool /*readable*/) const
 }
 
 void
-game::interface::EngineContext::store(interpreter::TagNode& out, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext* /*ctx*/) const
+game::interface::EngineContext::store(interpreter::TagNode& out, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
 {
     // ex IntEngineContext::store
     out.tag = out.Tag_Engine;
     out.value = m_number;
+}
+
+game::interface::EngineContext*
+game::interface::EngineContext::create(int nr, Session& session)
+{
+    game::spec::ShipList* list = session.getShipList().get();
+    if (list != 0 && list->engines().get(nr) != 0) {
+        return new EngineContext(nr, *list);
+    } else {
+        return 0;
+    }
 }

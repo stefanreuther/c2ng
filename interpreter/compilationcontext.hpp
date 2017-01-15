@@ -34,7 +34,10 @@ namespace interpreter {
             WantTerminators,
             /** Statements: linear execution until here. If set, it is guaranteed that the statements within this
                 block are guaranteed to be executed in their entirety, linearly once from top to bottom. */
-            LinearExecution
+            LinearExecution,
+            /** Statements: execute "Load" at compile time.
+                If set, statements of the form "Load <literal>" are executed at compilation time. */
+            PreexecuteLoad
         };
 
         CompilationContext(World& world)

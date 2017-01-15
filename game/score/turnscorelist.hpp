@@ -54,6 +54,10 @@ namespace game { namespace score {
 
         const TurnScore* getTurn(int turnNr) const;
 
+        void setFutureFeatures(bool flag);
+
+        bool hasFutureFeatures() const;
+
      private:
     // /** Definitions of the records.
     //     Each entry describes one row of scores.
@@ -69,7 +73,7 @@ namespace game { namespace score {
 
         // /** Write-protection marker.
         //     Set when the file contains a future feature. */
-        // bool file_used_future_features;
+        bool m_fileUsedFutureFeatures;
 
         /** All score records. */
         afl::container::PtrVector<TurnScore> m_turnScores;

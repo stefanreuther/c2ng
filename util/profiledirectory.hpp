@@ -14,26 +14,43 @@
 
 namespace util {
 
+    /** Profile directory handling.
+        This class provides functions to operate with the profile directory. */
     class ProfileDirectory {
      public:
-        ProfileDirectory(afl::sys::Environment& env,
-                         afl::io::FileSystem& fileSystem,
-                         afl::string::Translator& tx, afl::sys::LogListener& log);
+        /** Constructor.
+            \param env Environment
+            \param fileSystem File system to use
+            \param tx Translator (FIXME: needed?)
+            \param log Logger (FIXME: needed?) */
+        ProfileDirectory(afl::sys::Environment& env, afl::io::FileSystem& fileSystem, afl::string::Translator& tx, afl::sys::LogListener& log);
 
-        afl::base::Ptr<afl::io::Stream> openFile(String_t name);
+        /** Open file in profile directory for reading.
+            If the file or the profile directory does not exist, returns 0.
+            \return file, 0 on error.
+            \param name File name */
+        afl::base::Ptr<afl::io::Stream> openFileNT(String_t name);
 
-        afl::base::Ptr<afl::io::Stream> createFile(String_t name);
+        /** Create file.
+            If the profile directory does not exist, creates it.
+            \param name File name
+            \return file
+            \throw afl::except::FileProblemException on error */
+        afl::base::Ref<afl::io::Stream> createFile(String_t name);
 
-        afl::base::Ptr<afl::io::Directory> open();
+        /** Open profile directory for writing.
+            If the profile directory does not exist, creates it.
+            \return profile directory
+            \throw afl::except::FileProblemException on error */
+        afl::base::Ref<afl::io::Directory> open();
 
      private:
+        /// Name of profile directory.
         String_t m_name;
 
         afl::io::FileSystem& m_fileSystem;
         afl::string::Translator& m_translator;
         afl::sys::LogListener& m_log;
-
-        
     };
 
 }

@@ -104,14 +104,27 @@ namespace game { namespace interface {
         ispWaypointName
     };
 
+    /** Get ship property.
+        \param sh        Ship to inquire.
+        \param isp       Ship property to inquire.
+        \param tx        Translator.
+        \param iface     Interface to other properties.
+        \param root      Root (needed for configuration)
+        \param shipList  Ship list (needed for specifications)
+        \param game      Game (needed for unit score definitions)
+        \param turn      Turn (needed for related units to name locations; cannot be const because name accessors are not const)
+        \return property value */
     afl::data::Value* getShipProperty(const game::map::Ship& sh, ShipProperty isp,
                                       afl::string::Translator& tx,
                                       InterpreterInterface& iface,
-                                      afl::base::Ptr<Root> root,
-                                      afl::base::Ptr<game::spec::ShipList> shipList,
-                                      afl::base::Ptr<Game> game);
+                                      afl::base::Ptr<const Root> root,
+                                      afl::base::Ptr<const game::spec::ShipList> shipList,
+                                      afl::base::Ptr<const Game> game,
+                                      afl::base::Ptr<Turn> turn);
     void setShipProperty(game::map::Ship& sh, ShipProperty isp, afl::data::Value* value,
-                         afl::base::Ptr<Root> root);
+                         afl::base::Ref<Root> root,
+                         afl::base::Ref<game::spec::ShipList> shipList,
+                         afl::base::Ref<Turn> turn);
 
 } }
 

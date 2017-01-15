@@ -84,6 +84,18 @@ game::spec::FriendlyCodeList::at(size_t n) const
     }
 }
 
+bool
+game::spec::FriendlyCodeList::getIndexByName(const String_t& fc, size_t& index) const
+{
+    Iterator_t it = getCodeByName(fc);
+    if (it != end()) {
+        index = it - begin();
+        return true;
+    } else {
+        return false;
+    }
+}
+
 // /** Look up friendly code by name.
 //     \returns iterator pointing to friendly code, or end() if none */
 game::spec::FriendlyCodeList::Iterator_t

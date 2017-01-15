@@ -22,13 +22,13 @@ namespace interpreter {
 
         // CallableValue:
         virtual void call(Process& proc, afl::data::Segment& args, bool want_result);
-        virtual bool isProcedureCall();
-        virtual int32_t getDimension(int32_t which);
+        virtual bool isProcedureCall() const;
+        virtual int32_t getDimension(int32_t which) const;
         virtual Context* makeFirstContext();
 
         // BaseValue:
         virtual String_t toString(bool readable) const;
-        virtual void store(TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, SaveContext* ctx) const;
+        virtual void store(TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, SaveContext& ctx) const;
 
         // Value:
         virtual Closure* clone() const;

@@ -77,7 +77,7 @@ game::interface::getPlayerProperty(int pid, PlayerProperty ipl,
            This reports the build queue priority points for a player,
            no matter what flavour of build points is active (PBPs, PAL).
            @since PCC2 1.99.25, PCC 0.98.5 */
-        return makeOptionalIntegerValue(CompoundScore(game.scores(), game::score::ScoreId_BuildPoints, 1).get(game.scores(), game.currentTurn().universe().getTurnNumber(), pid));
+        return makeOptionalIntegerValue(CompoundScore(game.scores(), game::score::ScoreId_BuildPoints, 1).get(game.scores(), game.currentTurn().getTurnNumber(), pid));
 
      case iplRaceId:
         /* @q My.Race.Id:Int (Global Property)
@@ -107,52 +107,52 @@ game::interface::getPlayerProperty(int pid, PlayerProperty ipl,
         /* @q My.Bases:Int (Global Property)
            @q Bases:Int (Player Property)
            Number of bases this player has, according to score. */
-        return makeOptionalIntegerValue(CompoundScore(game.scores(), game::score::ScoreId_Bases, 1).get(game.scores(), game.currentTurn().universe().getTurnNumber(), pid));
+        return makeOptionalIntegerValue(CompoundScore(game.scores(), game::score::ScoreId_Bases, 1).get(game.scores(), game.currentTurn().getTurnNumber(), pid));
 
      case iplScorePlanets:
         /* @q My.Planets:Int (Global Property)
            @q Planets:Int (Player Property)
            Number of planets this player has, according to score. */
-        return makeOptionalIntegerValue(CompoundScore(game.scores(), game::score::ScoreId_Planets, 1).get(game.scores(), game.currentTurn().universe().getTurnNumber(), pid));
+        return makeOptionalIntegerValue(CompoundScore(game.scores(), game::score::ScoreId_Planets, 1).get(game.scores(), game.currentTurn().getTurnNumber(), pid));
 
      case iplScoreShips:
         /* @q My.Ships:Int (Global Property)
            @q Ships:Int (Player Property)
            Number of ships this player has, according to score. */
-        return makeOptionalIntegerValue(CompoundScore(game.scores(), CompoundScore::TotalShips).get(game.scores(), game.currentTurn().universe().getTurnNumber(), pid));
+        return makeOptionalIntegerValue(CompoundScore(game.scores(), CompoundScore::TotalShips).get(game.scores(), game.currentTurn().getTurnNumber(), pid));
 
      case iplScore:
         /* @q My.Score:Int (Global Property)
            @q Score:Int (Player Property)
            This player's Tim-score. */
-        return makeOptionalIntegerValue(CompoundScore(game.scores(), CompoundScore::TimScore).get(game.scores(), game.currentTurn().universe().getTurnNumber(), pid));
+        return makeOptionalIntegerValue(CompoundScore(game.scores(), CompoundScore::TimScore).get(game.scores(), game.currentTurn().getTurnNumber(), pid));
 
      case iplScoreCapital:
         /* @q My.Ships.Capital:Int (Global Property)
            @q Ships.Capital:Int (Player Property)
            Number of capital ships this player has, according to score. */
-        return makeOptionalIntegerValue(CompoundScore(game.scores(), game::score::ScoreId_Capital, 1).get(game.scores(), game.currentTurn().universe().getTurnNumber(), pid));
+        return makeOptionalIntegerValue(CompoundScore(game.scores(), game::score::ScoreId_Capital, 1).get(game.scores(), game.currentTurn().getTurnNumber(), pid));
 
      case iplScoreFreighters:
         /* @q My.Score.Freighters:Int (Global Property)
            @q Score.Freighters:Int (Player Property)
            Number of freighters this player has, according to score. */
-        return makeOptionalIntegerValue(CompoundScore(game.scores(), game::score::ScoreId_Freighters, 1).get(game.scores(), game.currentTurn().universe().getTurnNumber(), pid));
+        return makeOptionalIntegerValue(CompoundScore(game.scores(), game::score::ScoreId_Freighters, 1).get(game.scores(), game.currentTurn().getTurnNumber(), pid));
 
      case iplTotalShips:
         /* @q Ships.Total:Int (Global Property)
            Total number of ships (from this player's score information). */
-        return makeOptionalIntegerValue(CompoundScore(game.scores(), CompoundScore::TotalShips).get(game.scores(), game.currentTurn().universe().getTurnNumber(), PlayerSet_t::allUpTo(MAX_PLAYERS)));
+        return makeOptionalIntegerValue(CompoundScore(game.scores(), CompoundScore::TotalShips).get(game.scores(), game.currentTurn().getTurnNumber(), PlayerSet_t::allUpTo(MAX_PLAYERS)));
 
      case iplTotalFreighters:
         /* @q Ships.Freighters:Int (Global Property)
            Total number of freighters (from this player's score information). */
-        return makeOptionalIntegerValue(CompoundScore(game.scores(), game::score::ScoreId_Freighters, 1).get(game.scores(), game.currentTurn().universe().getTurnNumber(), PlayerSet_t::allUpTo(MAX_PLAYERS)));
+        return makeOptionalIntegerValue(CompoundScore(game.scores(), game::score::ScoreId_Freighters, 1).get(game.scores(), game.currentTurn().getTurnNumber(), PlayerSet_t::allUpTo(MAX_PLAYERS)));
 
      case iplTotalCapital:
         /* @q Total.Capital:Int (Global Property)
            Total number of capital ships (from this player's score information). */
-        return makeOptionalIntegerValue(CompoundScore(game.scores(), game::score::ScoreId_Capital, 1).get(game.scores(), game.currentTurn().universe().getTurnNumber(), PlayerSet_t::allUpTo(MAX_PLAYERS)));
+        return makeOptionalIntegerValue(CompoundScore(game.scores(), game::score::ScoreId_Capital, 1).get(game.scores(), game.currentTurn().getTurnNumber(), PlayerSet_t::allUpTo(MAX_PLAYERS)));
 
     }
     return 0;

@@ -47,6 +47,7 @@
 #include "util/profiledirectory.hpp"
 #include "game/turnloader.hpp"
 #include "game/specificationloader.hpp"
+#include "util/application.hpp"
 
 namespace {
     const char LOG_NAME[] = "export";
@@ -62,15 +63,6 @@ namespace {
         tDBF
     };
 
-    const char* progname;
-
-    void die(afl::io::TextWriter& out, String_t str)
-    {
-        out.writeLine(afl::string::Format("%s: %s", progname, str));
-        out.flush();
-        std::exit(1);
-    }
-
     /* Meta-context for generating field names. Used to implement '-F'. */
     // FIXME: move into library
     class MetaContext : public interpreter::Context,
@@ -80,7 +72,7 @@ namespace {
         MetaContext();
 
         // Context:
-        virtual bool lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
+        virtual MetaContext* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
         virtual void set(PropertyIndex_t index, afl::data::Value* value);
         virtual afl::data::Value* get(PropertyIndex_t index);
         virtual bool next();
@@ -90,7 +82,7 @@ namespace {
 
         // BaseValue:
         virtual String_t toString(bool readable) const;
-        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, interpreter::SaveContext* ctx) const;
+        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, interpreter::SaveContext& ctx) const;
 
         // PropertyAcceptor:
         virtual void addProperty(const String_t& name, interpreter::TypeHint th);
@@ -114,9 +106,9 @@ namespace {
           m_position(0)
     { }
 
-    bool MetaContext::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
+    MetaContext* MetaContext::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
     {
-        return lookupName(name, meta_mapping, result);
+        return lookupName(name, meta_mapping, result) ? this : 0;
     }
 
     void MetaContext::set(PropertyIndex_t /*index*/, afl::data::Value* /*value*/)
@@ -189,7 +181,7 @@ namespace {
         return "#<meta>";
     }
 
-    void MetaContext::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext* /*ctx*/) const
+    void MetaContext::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
     {
         throw interpreter::Error::notSerializable();
     }
@@ -201,81 +193,6 @@ namespace {
     }
 
 
-    /** Exit with help message. */
-    void help(afl::sys::Environment& env)
-    {
-        afl::base::Ptr<afl::io::TextWriter> out = env.attachTextWriter(env.Output);
-        out->writeLine(afl::string::Format(_("PCC2 Export v%s - (c) 2016 Stefan Reuther").c_str(), PCC2_VERSION));
-        out->writeLine();
-        out->writeLine(afl::string::Format(_("Usage:\n"
-                                             "  %s [-h]\n"
-                                             "  %$0s [-opts] [-f F@W...] [-S|-P|-A OBJECT] [-t TYPE] DIR [ROOT] PLAYER\n\n"
-                                             "Options:\n"
-                                             "  -C CHARSET      Set game character set\n"
-                                             "  -f FIELD@WIDTH  Add field to report\n"
-                                             "  -S              Export ships (same as '-A SHIP')\n"
-                                             "  -P              Export planets (same as '-A PLANET')\n"
-                                             "  -A OBJECT       Export specified object type (CCScript array name)\n"
-                                             "  -t TYPE         Set output file format/type\n"
-                                             "  -o FILE         Set output file name (default: stdout)\n"
-                                             "  -O CHARSET      Set output file character set (default: UTF-8)\n"
-                                             "  -F              Export list of fields instead of game data\n"
-                                             "\n"
-                                             "Types:\n"
-                                             "  dbf             dBASE file (needs '-o')\n"
-                                             "  text            simple text table, default\n"
-                                             "  table           boxy text table\n"
-                                             "  csv, tsv, ssv   comma/tab/semicolon-separated values\n"
-                                             "  json            JSON (JavaScript)\n"
-                                             "  html            HTML\n"
-                                             "\n"
-                                             "Report bugs to <Streu@gmx.de>\n").c_str(),
-                                           progname));
-        out->flush();
-        std::exit(0);
-    }
-
-    String_t fetchArg(afl::io::TextWriter& out, const char* opt, afl::sys::CommandLineParser& parser)
-    {
-        String_t result;
-        if (!parser.getParameter(result)) {
-            die(out, afl::string::Format(_("option '%s' needs an argument").c_str(), opt));
-        }
-        return result;
-    }
-
-
-    interpreter::Context* findArray(afl::io::TextWriter& out, const String_t& name, interpreter::World& world)
-    {
-        // Look up name
-        afl::data::NameMap::Index_t i = world.globalPropertyNames().getIndexByName(afl::string::strUCase(name));
-        if (i == afl::data::NameMap::nil) {
-            die(out, afl::string::Format(_("unknown object type '%s'").c_str(), name));
-        }
-
-        // Check for array
-        interpreter::CallableValue* cv = dynamic_cast<interpreter::CallableValue*>(world.globalValues()[i]);
-        if (!cv) {
-            die(out, afl::string::Format(_("unknown object type '%s'").c_str(), name));
-        }
-
-        // Check for content
-        try {
-            interpreter::Context* ctx = cv->makeFirstContext();
-            if (!ctx) {
-                die(out, afl::string::Format(_("this game does not contain any objects of type '%s'").c_str(), name));
-            }
-            return ctx;
-        }
-        catch (interpreter::Error& e) {
-            // This happens when they do something like '-ACADD',
-            // because CAdd refuses makeFirstContext() with an
-            // IntError::typeError. No need to display the very
-            // error message; it's not a known object type, period.
-            die(out, afl::string::Format(_("unknown object type '%s'").c_str(), name));
-            return 0;
-        }
-    }
 
     void doTextExport(OutputType typ, interpreter::exporter::FieldList& job, interpreter::Context* ctx, afl::io::TextWriter& tf)
     {
@@ -306,28 +223,26 @@ namespace {
             break;
         }
     }
+
+    class ConsoleExportApplication : public util::Application {
+     public:
+        ConsoleExportApplication(afl::sys::Environment& env, afl::io::FileSystem& fs)
+            : Application(env, fs)
+            { }
+
+        void appMain();
+
+     private:
+        void help();
+        String_t fetchArg(const char* opt, afl::sys::CommandLineParser& parser);
+        interpreter::Context* findArray(const String_t& name, interpreter::World& world);
+    };
 }
 
-
-int main(int, char** argv)
+void
+ConsoleExportApplication::appMain()
 {
-    // Keep environment
-    afl::sys::Environment& env = afl::sys::Environment::getInstance(argv);
-    afl::io::FileSystem& fs = afl::io::FileSystem::getInstance();
-
-    // Set up infrastructure. We only attach the error channel to not mess up output.
-    afl::string::NullTranslator tx;
-    util::ConsoleLogger logger;
-    afl::base::Ptr<afl::io::TextWriter> errorOutput = env.attachTextWriterNT(env.Error);
-    if (errorOutput.get() == 0) {
-        // Error channel does not exist
-        errorOutput = new afl::io::NullTextWriter();
-    } else {
-        logger.attachWriter(true, errorOutput);
-    }
-    util::ProfileDirectory profile(env, fs, tx, logger);
-
-    progname = argv[0];
+    util::ProfileDirectory profile(environment(), fileSystem(), translator(), log());
 
     // Parse args
     interpreter::exporter::FieldList job;
@@ -345,24 +260,24 @@ int main(int, char** argv)
     afl::charset::Charset* outputCharset = 0;
 
     int i;
-    afl::sys::StandardCommandLineParser commandLine(env.getCommandLine());
+    afl::sys::StandardCommandLineParser commandLine(environment().getCommandLine());
     String_t p;
     bool opt;
     while (commandLine.getNext(opt, p)) {
         if (opt) {
             if (p == "C") {
-                if (afl::charset::Charset* cs = afl::charset::DefaultCharsetFactory().createCharset(holder, fetchArg(*errorOutput, "-C", commandLine))) {
+                if (afl::charset::Charset* cs = afl::charset::DefaultCharsetFactory().createCharset(holder, fetchArg("-C", commandLine))) {
                     gameCharset = cs;
                 } else {
-                    die(*errorOutput, _("the specified character set is not known"));
+                    errorExit(_("the specified character set is not known"));
                 }
             } else if (p == "f") {
-                String_t pp = fetchArg(*errorOutput, "-f", commandLine);
+                String_t pp = fetchArg("-f", commandLine);
                 try {
                     job.addList(pp);
                 }
                 catch (interpreter::Error& e) {
-                    die(*errorOutput, afl::string::Format("'-f %s': %s", pp, e.what()));
+                    errorExit(afl::string::Format("'-f %s': %s", pp, e.what()));
                 }
             } else if (p == "F") {
                 opt_fields = true;
@@ -371,9 +286,9 @@ int main(int, char** argv)
             } else if (p == "P") {
                 arg_array = "PLANET";
             } else if (p == "A") {
-                arg_array = fetchArg(*errorOutput, "-A", commandLine);
+                arg_array = fetchArg("-A", commandLine);
             } else if (p == "t") {
-                String_t t = fetchArg(*errorOutput, "-t", commandLine);
+                String_t t = fetchArg("-t", commandLine);
                 if (t == "text") {
                     arg_typ = tText;
                 } else if (t == "table") {
@@ -391,20 +306,20 @@ int main(int, char** argv)
                 } else if (t == "html") {
                     arg_typ = tHTML;
                 } else {
-                    die(*errorOutput, _("invalid output format specified"));
+                    errorExit(_("invalid output format specified"));
                 }
             } else if (p == "o") {
-                arg_outfile = fetchArg(*errorOutput, "-o", commandLine);
+                arg_outfile = fetchArg("-o", commandLine);
             } else if (p == "O") {
-                if (afl::charset::Charset* cs = afl::charset::DefaultCharsetFactory().createCharset(holder, fetchArg(*errorOutput, "-O", commandLine))) {
+                if (afl::charset::Charset* cs = afl::charset::DefaultCharsetFactory().createCharset(holder, fetchArg("-O", commandLine))) {
                     outputCharset = cs;
                 } else {
-                    die(*errorOutput, _("the specified character set is not known"));
+                    errorExit(_("the specified character set is not known"));
                 }
             } else if (p == "h" || p == "help") {
-                help(env);
+                help();
             } else {
-                die(*errorOutput, afl::string::Format(_("invalid option specified. Use '%s -h' for help.").c_str(), progname));
+                errorExit(afl::string::Format(_("invalid option specified. Use '%s -h' for help.").c_str(), environment().getInvocationName()));
             }
         } else {
             if (arg_race == 0 && afl::string::strToInteger(p, i) && i > 0 && i <= game::MAX_PLAYERS) {
@@ -414,7 +329,7 @@ int main(int, char** argv)
             } else if (!arg_rootdir.isValid()) {
                 arg_rootdir = p;
             } else {
-                die(*errorOutput, _("too many arguments"));
+                errorExit(_("too many arguments"));
             }
         }
     }
@@ -422,7 +337,7 @@ int main(int, char** argv)
     // Validate args
     String_t arg_array2;
     if (!arg_array.get(arg_array2)) {
-        die(*errorOutput, _("please specify the object type to export ('-P', '-S', '-A'). Use '-h' for help."));
+        errorExit(_("please specify the object type to export ('-P', '-S', '-A'). Use '-h' for help."));
     }
 
     // Default field set
@@ -436,43 +351,45 @@ int main(int, char** argv)
 
     try {
         // Set up game directories
-        String_t defaultRoot = fs.makePathName(fs.makePathName(env.getInstallationDirectoryName(), "share"), "specs");
-        game::v3::RootLoader loader(fs.openDirectory(arg_rootdir.orElse(defaultRoot)), profile, tx, logger, fs);
+        afl::io::FileSystem& fs = fileSystem();
+        String_t defaultRoot = fs.makePathName(fs.makePathName(environment().getInstallationDirectoryName(), "share"), "specs");
+        game::v3::RootLoader loader(fs.openDirectory(arg_rootdir.orElse(defaultRoot)), profile, translator(), log(), fs);
         loader.setCharsetNew(gameCharset->clone());
 
         // Check game data
         afl::base::Ptr<game::Root> root = loader.load(fs.openDirectory(arg_gamedir.orElse(".")), false);
         if (root.get() == 0 || root->getTurnLoader().get() == 0) {
-            die(*errorOutput, _("no game data found"));
+            errorExit(_("no game data found"));
         }
 
         // Check player number
         if (arg_race != 0) {
             String_t extra;
-            if (!root->getTurnLoader()->getPlayerStatus(arg_race, extra, tx).contains(game::TurnLoader::Available)) {
-                die(*errorOutput, afl::string::Format(_("no game data available for player %d").c_str(), arg_race));
+            if (!root->getTurnLoader()->getPlayerStatus(arg_race, extra, translator()).contains(game::TurnLoader::Available)) {
+                errorExit(afl::string::Format(_("no game data available for player %d").c_str(), arg_race));
             }
         } else {
             arg_race = root->getTurnLoader()->getDefaultPlayer(root->playerList().getAllPlayers());
             if (arg_race == 0) {
-                die(*errorOutput, _("please specify the player number"));
+                errorExit(_("please specify the player number"));
             }
         }
 
         // Make a session and load it
-        game::Session session(tx, fs);
+        game::Session session(translator(), fs);
         session.setGame(new game::Game());
         session.setRoot(root);
         session.setShipList(new game::spec::ShipList());
         root->specificationLoader().loadShipList(*session.getShipList(), *root);
 
-        root->getTurnLoader()->loadCurrentTurn(session.getGame()->currentTurn(), *session.getGame(), arg_race, *root);
+        root->getTurnLoader()->loadCurrentTurn(session.getGame()->currentTurn(), *session.getGame(), arg_race, *root, session);
         session.getGame()->currentTurn().universe().postprocess(game::PlayerSet_t(arg_race), game::PlayerSet_t(arg_race), game::map::Object::ReadOnly,
                                                                 root->hostVersion(), root->hostConfiguration(),
-                                                                tx, logger);
+                                                                session.getGame()->currentTurn().getTurnNumber(),
+                                                                translator(), log());
 
         // What do we want to export?
-        std::auto_ptr<interpreter::Context> array(findArray(*errorOutput, arg_array2, session.world()));
+        std::auto_ptr<interpreter::Context> array(findArray(arg_array2, session.world()));
         if (opt_fields) {
             std::auto_ptr<MetaContext> meta(new MetaContext());
             array->enumProperties(*meta);
@@ -484,22 +401,21 @@ int main(int, char** argv)
             // Output to DBF file. Requires file name.
             String_t outfile;
             if (!arg_outfile.get(outfile)) {
-                die(*errorOutput, _("output to DBF file needs an output file name ('-o')"));
+                errorExit(_("output to DBF file needs an output file name ('-o')"));
             }
-            afl::base::Ptr<afl::io::Stream> s = fs.openFile(outfile, afl::io::FileSystem::Create);
+            afl::base::Ref<afl::io::Stream> s = fs.openFile(outfile, afl::io::FileSystem::Create);
             interpreter::exporter::DbfExporter(*s).doExport(array.get(), util::ConstantAnswerProvider::sayYes, job);
         } else {
             String_t outfile;
             if (!arg_outfile.get(outfile)) {
                 // Output to console. The console performs character set conversion.
-                afl::base::Ptr<afl::io::TextWriter> writer = env.attachTextWriter(env.Output);
                 if (outputCharset != 0) {
-                    logger.write(logger.Warn, "export", _("WARNING: Option '-O' has been ignored because standard output is being used."));
+                    log().write(afl::sys::LogListener::Warn, "export", _("WARNING: Option '-O' has been ignored because standard output is being used."));
                 }
-                doTextExport(arg_typ, job, array.get(), *writer);
+                doTextExport(arg_typ, job, array.get(), standardOutput());
             } else {
                 // Output to file
-                afl::base::Ptr<afl::io::Stream> s = fs.openFile(outfile, afl::io::FileSystem::Create);
+                afl::base::Ref<afl::io::Stream> s = fs.openFile(outfile, afl::io::FileSystem::Create);
                 afl::io::TextFile tf(*s);
                 if (outputCharset != 0) {
                     tf.setCharsetNew(outputCharset->clone());
@@ -509,19 +425,93 @@ int main(int, char** argv)
             }
         }
     }
-    catch (afl::except::FileProblemException& fpe) {
-        die(*errorOutput, afl::string::Format("%s: %s", fpe.getFileName(), fpe.what()));
-    }
-    catch (interpreter::Error& ie) {
-        die(*errorOutput, ie.what());
-    }
     catch (game::Exception& ge) {
-        die(*errorOutput, ge.getUserError());
+        errorExit(ge.getUserError());
     }
-    catch (std::exception& e) {
-        die(*errorOutput, e.what());
+    // Other exceptions handled by caller.
+}
+
+void
+ConsoleExportApplication::help()
+{
+    afl::io::TextWriter& out = standardOutput();
+    out.writeLine(afl::string::Format(_("PCC2 Export v%s - (c) 2016 Stefan Reuther").c_str(), PCC2_VERSION));
+    out.writeLine();
+    out.writeLine(afl::string::Format(_("Usage:\n"
+                                        "  %s [-h]\n"
+                                        "  %$0s [-opts] [-f F@W...] [-S|-P|-A OBJECT] [-t TYPE] DIR [ROOT] PLAYER\n\n"
+                                        "Options:\n"
+                                        "  -C CHARSET      Set game character set\n"
+                                        "  -f FIELD@WIDTH  Add field to report\n"
+                                        "  -S              Export ships (same as '-A SHIP')\n"
+                                        "  -P              Export planets (same as '-A PLANET')\n"
+                                        "  -A OBJECT       Export specified object type (CCScript array name)\n"
+                                        "  -t TYPE         Set output file format/type\n"
+                                        "  -o FILE         Set output file name (default: stdout)\n"
+                                        "  -O CHARSET      Set output file character set (default: UTF-8)\n"
+                                        "  -F              Export list of fields instead of game data\n"
+                                        "\n"
+                                        "Types:\n"
+                                        "  dbf             dBASE file (needs '-o')\n"
+                                        "  text            simple text table, default\n"
+                                        "  table           boxy text table\n"
+                                        "  csv, tsv, ssv   comma/tab/semicolon-separated values\n"
+                                        "  json            JSON (JavaScript)\n"
+                                        "  html            HTML\n"
+                                        "\n"
+                                        "Report bugs to <Streu@gmx.de>\n").c_str(),
+                                      environment().getInvocationName()));
+    out.flush();
+    exit(0);
+}
+
+String_t
+ConsoleExportApplication::fetchArg(const char* opt, afl::sys::CommandLineParser& parser)
+{
+    String_t result;
+    if (!parser.getParameter(result)) {
+        errorExit(afl::string::Format(_("option '%s' needs an argument").c_str(), opt));
     }
-    return 0;
+    return result;
 }
 
 
+interpreter::Context*
+ConsoleExportApplication::findArray(const String_t& name, interpreter::World& world)
+{
+    // Look up name
+    afl::data::NameMap::Index_t i = world.globalPropertyNames().getIndexByName(afl::string::strUCase(name));
+    if (i == afl::data::NameMap::nil) {
+        errorExit(afl::string::Format(_("unknown object type '%s'").c_str(), name));
+    }
+
+    // Check for array
+    interpreter::CallableValue* cv = dynamic_cast<interpreter::CallableValue*>(world.globalValues()[i]);
+    if (!cv) {
+        errorExit(afl::string::Format(_("unknown object type '%s'").c_str(), name));
+    }
+
+    // Check for content
+    try {
+        interpreter::Context* ctx = cv->makeFirstContext();
+        if (!ctx) {
+            errorExit(afl::string::Format(_("this game does not contain any objects of type '%s'").c_str(), name));
+        }
+        return ctx;
+    }
+    catch (interpreter::Error& e) {
+        // This happens when they do something like '-ACADD',
+        // because CAdd refuses makeFirstContext() with an
+        // IntError::typeError. No need to display the very
+        // error message; it's not a known object type, period.
+        errorExit(afl::string::Format(_("unknown object type '%s'").c_str(), name));
+        return 0;
+    }
+}
+
+int main(int, char** argv)
+{
+    afl::sys::Environment& env = afl::sys::Environment::getInstance(argv);
+    afl::io::FileSystem& fs = afl::io::FileSystem::getInstance();
+    return ConsoleExportApplication(env, fs).run();
+}

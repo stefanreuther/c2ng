@@ -30,6 +30,8 @@ namespace game { namespace config {
 
         void copyFrom(const IntegerOption& other);
 
+        const ValueParser& parser() const;
+
      private:
         const ValueParser& m_parser;
         int32_t m_value;

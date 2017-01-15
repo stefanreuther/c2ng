@@ -6,7 +6,7 @@
 #define C2NG_GFX_TIMERQUEUE_HPP
 
 #include <vector>
-#include "afl/base/ptr.hpp"
+#include "afl/base/ref.hpp"
 #include "gfx/timer.hpp"
 
 namespace gfx {
@@ -34,7 +34,7 @@ namespace gfx {
             Can be called from users; must be called from UI thread.
 
             \return new timer */
-        afl::base::Ptr<Timer> createTimer();
+        afl::base::Ref<Timer> createTimer();
 
         /** Get next timeout.
 

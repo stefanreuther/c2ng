@@ -36,6 +36,7 @@
 #include "interpreter/values.hpp"
 #include "interpreter/world.hpp"
 #include "util/translation.hpp"
+#include "afl/except/fileproblemexception.hpp"
 
 namespace {
 
@@ -64,18 +65,6 @@ namespace {
 }
 
 /***************************** Process::Frame ****************************/
-
-/** Construct empty stack frame. */
-// FIXME: this is needed for loading. Can we do without it?
-interpreter::Process::Frame::Frame()
-    : bco(0),
-      pc(0),
-      localNames(),
-      contextSP(0),
-      exceptionSP(0),
-      frameSP(0),
-      wantResult(false)
-{ }
 
 /** Construct stack frame.
     \param bco Byte code object associated with this frame (=code to execute) */
@@ -107,14 +96,14 @@ class interpreter::Process::FrameContext : public interpreter::SingleContext {
         { }
 
     // Context:
-    virtual bool lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
+    virtual FrameContext* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
         {
             NameMap_t::Index_t i = m_frame.localNames.getIndexByName(name);
             if (i != NameMap_t::nil) {
                 result = i;
-                return true;
+                return this;
             } else {
-                return false;
+                return 0;
             }
         }
     virtual void set(PropertyIndex_t index, afl::data::Value* value)
@@ -135,7 +124,7 @@ class interpreter::Process::FrameContext : public interpreter::SingleContext {
     // BaseValue:
     virtual String_t toString(bool /*readable*/) const
         { return "#<stack-frame>"; }
-    virtual void store(TagNode& out, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, SaveContext* /*ctx*/) const
+    virtual void store(TagNode& out, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, SaveContext& /*ctx*/) const
         {
             out.tag   = TagNode::Tag_Frame;
             out.value = m_frame.frameSP;
@@ -188,8 +177,10 @@ interpreter::Process::~Process()
     // // Use setNotificationMessage which implements the whole protocol.
     // setNotificationMessage(0);
 
-    // // Disown all my mutexes
-    // IntMutex::disownLocksByProcess(this);
+    // Disown all my mutexes
+    m_world.mutexList().disownLocksByProcess(this);
+
+    sig_invalidate.raise();
 }
 
 // /** Push new frame. This frame will execute util termination, then execution
@@ -252,6 +243,15 @@ interpreter::Process::getOutermostFrame()
     return m_frames[0];
 }
 
+const interpreter::Process::Frame*
+interpreter::Process::getFrame(size_t nr) const
+{
+    return (nr < m_frames.size()
+            ? m_frames[nr]
+            : 0);
+}
+
+
 // /** Push exception handler. If program triggers an error, execution resumes
 //     in the current frame at the specified program counter.
 //     \param pc Program counter */
@@ -263,6 +263,17 @@ interpreter::Process::pushExceptionHandler(PC_t pc)
     e->valueSP   = m_valueStack.size();
     e->contextSP = m_contexts.size();
     e->frameSP   = m_frames.size();
+    e->pc        = pc;
+    m_exceptions.pushBackNew(e);
+}
+
+void
+interpreter::Process::pushExceptionHandler(PC_t pc, size_t frameSP, size_t contextSP, size_t valueSP)
+{
+    ExceptionHandler* e = new ExceptionHandler;
+    e->valueSP   = valueSP;
+    e->contextSP = contextSP;
+    e->frameSP   = frameSP;
     e->pc        = pc;
     m_exceptions.pushBackNew(e);
 }
@@ -300,6 +311,17 @@ interpreter::Process::markContextTOS()
     m_contextTOS = m_contexts.size();
 }
 
+bool
+interpreter::Process::setContextTOS(size_t n)
+{
+    if (n <= m_contexts.size()) {
+        m_contextTOS = n;
+        return true;
+    } else {
+        return false;
+    }
+}
+
 // /** Pop context. Cancels a previous pushNewContext. */
 void
 interpreter::Process::popContext()
@@ -309,11 +331,10 @@ interpreter::Process::popContext()
 }
 
 const afl::container::PtrVector<interpreter::Context>&
-interpreter::Process::getContexts()
+interpreter::Process::getContexts() const
 {
     return m_contexts;
 }
-
 
 void
 interpreter::Process::pushNewValue(afl::data::Value* v)
@@ -372,6 +393,12 @@ interpreter::Process::getProcessId() const
     return m_processId;
 }
 
+void
+interpreter::Process::setName(String_t name)
+{
+    m_processName = name;
+}
+
 String_t
 interpreter::Process::getName() const
 {
@@ -418,7 +445,6 @@ interpreter::Process::getProcessKind() const
 void
 interpreter::Process::addTraceTo(Error& err)
 {
-    (void) err;
     // ex IntExecutionContext::addTraceTo
     static const char*const firstformats[] = {
         N_("in file '%s', line %d"),
@@ -467,7 +493,7 @@ interpreter::Process::addTraceTo(Error& err)
         } else {
             /* Procedure name known. Generate name to use for actual formatting. */
             SubroutineValue* sv = dynamic_cast<SubroutineValue*>(m_world.globalValues()[m_world.globalPropertyNames().getIndexByName(bcoName)]);
-            if (sv == 0 || bco != sv->getBytecodeObject()) {
+            if (sv == 0 || &bco.get() != &sv->getBytecodeObject().get()) {
                 bcoName = afl::string::Format("(%s)", bcoName);
             }
 
@@ -500,6 +526,12 @@ interpreter::Process::run()
     // ex IntExecutionContext::run()
     // unsigned counter = 0;
     logProcessState("run");
+
+    // Notify observers.
+    // This general mechanism is used to invalidate ProcessObserverContexts when their parent process runs.
+    // FIXME: Can we make this more elegant?
+    sig_invalidate.raise();
+
     m_state = Running;
     while (m_state == Running) {
         try {
@@ -665,7 +697,7 @@ interpreter::Process::executeInstruction()
          case Opcode::sNamedShared:
          {
              NameMap_t::Index_t index = m_world.globalPropertyNames().getIndexByName(f.bco->getName(op.arg));
-             if (index == NameMap_t::nil) {
+             if (index != NameMap_t::nil) {
                  valueStack.pushBack(m_world.globalValues()[index]);
              } else {
                  throw Error::unknownIdentifier(f.bco->getName(op.arg));
@@ -947,9 +979,9 @@ interpreter::Process::executeInstruction()
             } else if (Context* cv = dynamic_cast<Context*>(valueStack.top())) {
                 /* It's a context */
                 Context::PropertyIndex_t index;
-                if (cv->lookup(f.bco->getName(op.arg), index)) {
+                if (Context* foundContext = cv->lookup(f.bco->getName(op.arg), index)) {
                     /* Load permitted */
-                    afl::data::Value* v = cv->get(index);
+                    afl::data::Value* v = foundContext->get(index);
                     valueStack.popBack();
                     if (op.minor == Opcode::miIMCall) {
                         delete v;
@@ -973,9 +1005,9 @@ interpreter::Process::executeInstruction()
             if (Context* cv = dynamic_cast<Context*>(valueStack.top())) {
                 /* It's a context */
                 Context::PropertyIndex_t index;
-                if (cv->lookup(f.bco->getName(op.arg), index)) {
+                if (Context* foundContext = cv->lookup(f.bco->getName(op.arg), index)) {
                     /* Assignment permitted */
-                    cv->set(index, valueStack.top(1));
+                    foundContext->set(index, valueStack.top(1));
                 } else {
                     /* Name not found */
                     throw Error::unknownIdentifier(f.bco->getName(op.arg));
@@ -1101,7 +1133,7 @@ interpreter::Process::executeInstruction()
                 if (!handleLoad(name)) {
                     valueStack.pushBackNew(makeStringValue("File not found"));
                 } else {
-                    valueStack.pushBack(0);
+                    valueStack.pushBackNew(0);
                 }
             }
             break;
@@ -1134,10 +1166,11 @@ interpreter::Process::executeInstruction()
          }
          case Opcode::miSpecialThrow:
             checkStack(1);
-            if (afl::data::Value* v = valueStack.top())
+            if (afl::data::Value* v = valueStack.top()) {
                 handleException(toString(v, false), String_t());
-            else
+            } else {
                 handleException("Throw empty", String_t());
+            }
             break;
          case Opcode::miSpecialTerminate:
             m_state = Terminated;
@@ -1159,9 +1192,9 @@ interpreter::Process::executeInstruction()
          case Opcode::miSpecialInstance:
             checkStack(1);
             if (StructureType* isv = dynamic_cast<StructureType*>(valueStack.top())) {
-                afl::base::Ptr<StructureTypeData> isvd = isv->getType();
+                afl::base::Ref<StructureTypeData> isvd = isv->getType();
                 valueStack.popBack();
-                valueStack.pushBackNew(new StructureValue(new StructureValueData(isvd)));
+                valueStack.pushBackNew(new StructureValue(*new StructureValueData(isvd)));
             } else {
                 handleException("Invalid structure constructor", String_t());
             }
@@ -1304,8 +1337,8 @@ interpreter::Process::lookup(const afl::data::NameQuery& q, Context::PropertyInd
     // ex IntExecutionContext::lookup
     for (size_t i = m_contexts.size(); i > 0; --i) {
         Context* c = m_contexts[i-1];
-        if (c->lookup(q, index)) {
-            return c;
+        if (Context* fc = c->lookup(q, index)) {
+            return fc;
         }
     }
     return 0;
@@ -1403,7 +1436,7 @@ interpreter::Process::handleFunctionCall(BCORef_t bco, Segment_t& args, bool wan
 
     /* Store the varargs */
     if (bco->isVarargs()) {
-        frame.localValues.setNew(bco->getMaxArgs(), new ArrayValue(va));
+        frame.localValues.setNew(bco->getMaxArgs(), new ArrayValue(*va));
     }
 }
 
@@ -1426,44 +1459,15 @@ bool
 interpreter::Process::handleLoad(String_t name)
 {
     // ex IntExecutionContext::handleLoad
-
-    // Open stream
-    // FIXME: this calls openFileNT on a Directory, giving it a possibly relative or absolute path name instead of just a file name.
-    // This is the same as in PCC2, and it happens to work due to the way how our Directory descendants are implemented, but it is so far not contractual.
-    afl::base::Ptr<afl::io::Directory> dir = m_world.getLoadDirectory();
-    if (dir.get() == 0) {
-        return false;
-    }
-    afl::base::Ptr<afl::io::Stream> file = dir->openFileNT(name, afl::io::FileSystem::OpenRead);
+    afl::base::Ptr<afl::io::Stream> file = m_world.openLoadFile(name);
     if (file.get() == 0) {
+        // Failure
         return false;
-    }        
-
-    // Generate compilation objects
-    afl::io::TextFile tf(*file);
-    FileCommandSource fcs(tf);
-    BCORef_t nbco = new BytecodeObject();
-    nbco->setFileName(file->getName());
-
-    // Compile
-    try {
-        StatementCompiler sc(fcs);
-        DefaultStatementCompilationContext scc(m_world);
-        scc.withFlag(CompilationContext::LocalContext)
-            .withFlag(CompilationContext::ExpressionsAreStatements)
-            .withFlag(CompilationContext::LinearExecution);
-        sc.compileList(*nbco, scc);
-        sc.finishBCO(*nbco, scc);
+    } else {
+        // Make new frame
+        pushFrame(m_world.compileFile(*file), false);
+        return true;
     }
-    catch (Error& e) {
-        // FIXME: PCC2 uses 'getDirectoryName(name)' instead of 'name'; this would need a FileSystem instance. Can we do without?
-        e.addTrace(afl::string::Format(_("in file '%s', line %d").c_str(), name, fcs.getLineNumber()));
-        throw e;
-    }
-
-    // Make new frame
-    pushFrame(nbco, false);
-    return true;
 }
 
 
@@ -1572,6 +1576,20 @@ interpreter::Process::handleException(String_t e, String_t trace)
     }
 }
 
+// /** Make stack frame context by Id. This is used to deserialize stack
+//     frame contexts. It only works while actually deserializing a process.
+//     \param id Id read from file
+//     \return IntExecutionFrameContext object; 0 if those are not allowed here */
+interpreter::Context*
+interpreter::Process::makeFrameContext(size_t level)
+{
+    if (level < m_frames.size()) {
+        return new FrameContext(*m_frames[level]);
+    } else {
+        return 0;
+    }
+}
+
 // /** Handle Dim instruction.
 //     \param values data segment affected by this instruction
 //     \param names name list affected by this instruction
@@ -1635,7 +1653,7 @@ interpreter::Process::handleEvalStatement(uint16_t nargs)
     }
 
     /* Compile */
-    BCORef_t bco = new BytecodeObject();
+    BCORef_t bco = *new BytecodeObject();
     StatementCompiler sc(mcs);
     sc.compileList(*bco, scc);
     sc.finishBCO(*bco, scc);
@@ -1666,7 +1684,7 @@ interpreter::Process::handleEvalExpression()
     }
     m_valueStack.popBack();
 
-    BCORef_t bco = new BytecodeObject();
+    BCORef_t bco = *new BytecodeObject();
     expr->compileValue(*bco, CompilationContext(m_world));
     bco->setIsProcedure(false);
     bco->addInstruction(Opcode::maSpecial, Opcode::miSpecialReturn, 1);
@@ -1699,20 +1717,20 @@ interpreter::Process::handleAddHook()
     /* Verify name */
     String_t hookName = "ON " + toString(m_valueStack.top(1), false);
     NameMap_t::Index_t pos = m_world.globalPropertyNames().addMaybe(hookName);
-    BCORef_t hook;
+    BCOPtr_t hook; // FIXME: can we make this use BCORef?
     if (m_world.globalValues()[pos] == 0) {
         /* Create it */
         hook = new BytecodeObject();
         hook->setIsProcedure(true);
         hook->setName(hookName);
-        m_world.globalValues().setNew(pos, new SubroutineValue(hook));
+        m_world.globalValues().setNew(pos, new SubroutineValue(*hook));
     } else {
         /* Use existing */
         SubroutineValue* sv = dynamic_cast<SubroutineValue*>(m_world.globalValues()[pos]);
         if (!sv) {
             throw Error::typeError(Error::ExpectProcedure);
         }
-        hook = sv->getBytecodeObject();
+        hook = sv->getBytecodeObject().asPtr();
     }
 
     /* Add it */
@@ -1734,7 +1752,7 @@ interpreter::Process::handleNewArray(uint16_t ndim)
     checkStack(ndim);
 
     /* Create array object */
-    afl::base::Ptr<ArrayData> ad = new ArrayData();
+    afl::base::Ref<ArrayData> ad = *new ArrayData();
     for (size_t i = 0; i < ndim; ++i) {
         afl::data::ScalarValue* iv = dynamic_cast<afl::data::ScalarValue*>(m_valueStack.top(ndim - i - 1));
         if (!iv)
@@ -1772,7 +1790,7 @@ interpreter::Process::handleResizeArray(uint16_t ndim)
     if (!a) {
         throw Error::typeError(Error::ExpectArray);
     }
-    afl::base::Ptr<ArrayData> origAD = a->getData();
+    afl::base::Ref<ArrayData> origAD = a->getData();
 
     /* Modify it */
     origAD->resize(ad);
@@ -1788,7 +1806,7 @@ interpreter::Process::handleMakeList(uint16_t nelems)
     checkStack(nelems);
 
     /* Create array object */
-    afl::base::Ptr<ArrayData> ad = new ArrayData();
+    afl::base::Ref<ArrayData> ad = *new ArrayData();
     if (!ad->addDimension(nelems))
         throw Error::rangeError();
 
@@ -1802,7 +1820,7 @@ void
 interpreter::Process::handleNewHash()
 {
     // IntExecutionContext::handleNewHash
-    m_valueStack.pushBackNew(new HashValue(new HashData()));
+    m_valueStack.pushBackNew(new HashValue(*new HashData()));
 }
 
 // /** Handle "sbind" instruction. */

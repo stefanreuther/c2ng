@@ -12,12 +12,6 @@ gfx::Filter::Filter(Canvas& parent)
 gfx::Filter::~Filter()
 { }
 
-gfx::Color_t
-gfx::Filter::getPixel(Point pt)
-{
-    return m_parent.getPixel(pt);
-}
-
 void
 gfx::Filter::getPixels(Point pt, afl::base::Memory<Color_t> colors)
 {
@@ -54,8 +48,8 @@ gfx::Filter::encodeColors(afl::base::Memory<const ColorQuad_t> colorDefinitions,
     m_parent.encodeColors(colorDefinitions, colorHandles);
 }
 
-afl::base::Ptr<gfx::Canvas>
-gfx::Filter::convertCanvas(afl::base::Ptr<Canvas> orig)
+afl::base::Ref<gfx::Canvas>
+gfx::Filter::convertCanvas(afl::base::Ref<Canvas> orig)
 {
     return orig;
 }

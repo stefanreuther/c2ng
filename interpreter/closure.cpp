@@ -59,14 +59,14 @@ interpreter::Closure::call(Process& proc, afl::data::Segment& args, bool want_re
 }
 
 bool
-interpreter::Closure::isProcedureCall()
+interpreter::Closure::isProcedureCall() const
 {
     // ex IntClosure::isProcedureCall
     return m_function->isProcedureCall();
 }
 
 int32_t
-interpreter::Closure::getDimension(int32_t which)
+interpreter::Closure::getDimension(int32_t which) const
 {
     // ex IntClosure::getDimension
     int32_t totalDimensions = m_function->getDimension(0);
@@ -95,7 +95,7 @@ interpreter::Closure::makeFirstContext()
     // ex IntClosure::makeFirstContext
     // Since we are providing a "slice" of the array, we cannot make a first context.
     // It would have to represent that slice. Therefore, pretend to be not iterable.
-    return 0;
+    throw Error::typeError(Error::ExpectIterable);
 }
 
 // BaseValue:
@@ -107,7 +107,7 @@ interpreter::Closure::toString(bool /*readable*/) const
 }
 
 void
-interpreter::Closure::store(TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, SaveContext* /*ctx*/) const
+interpreter::Closure::store(TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, SaveContext& /*ctx*/) const
 {
     // ex IntClosure::store
     throw Error::notSerializable();

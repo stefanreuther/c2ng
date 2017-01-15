@@ -9,6 +9,7 @@
 #include "afl/io/textwriter.hpp"
 #include "afl/sys/mutex.hpp"
 #include "afl/base/ptr.hpp"
+#include "util/messagematcher.hpp"
 
 namespace util {
 
@@ -44,9 +45,17 @@ namespace util {
             we expect console output to be reasonably fast.) */
         void attachWriter(bool error, afl::base::Ptr<afl::io::TextWriter> w);
 
+        /** Set configuration.
+            \param config MessageMatcher configuration. Produces one of
+            - "hide", "drop" (=hide)
+            - "keep", "show" (=show normally, default)
+            - "raw" (=show just text) */
+        void setConfiguration(String_t config);
+
      private:
         afl::sys::Mutex m_mutex;
         afl::base::Ptr<afl::io::TextWriter> m_writers[2];
+        MessageMatcher m_matcher;
     };
 
 }

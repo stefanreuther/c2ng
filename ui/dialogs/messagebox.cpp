@@ -14,7 +14,7 @@
 
 // Constructor.
 ui::dialogs::MessageBox::MessageBox(const char* text, String_t title, Root& root)
-    : Window(title, root.provider(), BLUE_WINDOW, ui::layout::VBox::instance5),
+    : Window(title, root.provider(), root.colorScheme(), BLUE_WINDOW, ui::layout::VBox::instance5),
       m_deleter(),
       m_buttonGroup(m_deleter.addNew(new Group(ui::layout::HBox::instance5))),
       m_keyDispatcher(m_deleter.addNew(new ui::widgets::KeyDispatcher())),
@@ -30,7 +30,7 @@ ui::dialogs::MessageBox::MessageBox(const char* text, String_t title, Root& root
 
 // Constructor.
 ui::dialogs::MessageBox::MessageBox(String_t text, String_t title, Root& root)
-    : Window(title, root.provider(), BLUE_WINDOW, ui::layout::VBox::instance5),
+    : Window(title, root.provider(), root.colorScheme(), BLUE_WINDOW, ui::layout::VBox::instance5),
       m_deleter(),
       m_buttonGroup(m_deleter.addNew(new Group(ui::layout::HBox::instance5))),
       m_keyDispatcher(m_deleter.addNew(new ui::widgets::KeyDispatcher())),
@@ -46,7 +46,7 @@ ui::dialogs::MessageBox::MessageBox(String_t text, String_t title, Root& root)
 
 // Constructor.
 ui::dialogs::MessageBox::MessageBox(util::rich::Text text, String_t title, Root& root)
-    : Window(title, root.provider(), BLUE_WINDOW, ui::layout::VBox::instance5),
+    : Window(title, root.provider(), root.colorScheme(), BLUE_WINDOW, ui::layout::VBox::instance5),
       m_deleter(),
       m_buttonGroup(m_deleter.addNew(new Group(ui::layout::HBox::instance5))),
       m_keyDispatcher(m_deleter.addNew(new ui::widgets::KeyDispatcher())),
@@ -65,7 +65,7 @@ ui::dialogs::MessageBox&
 ui::dialogs::MessageBox::addButton(int id, String_t text, util::Key_t key)
 {
     // ex UIMessageBox::addButton
-    ui::widgets::Button& btn = m_deleter.addNew(new ui::widgets::Button(text, key, m_root.provider(), m_root.colorScheme()));
+    ui::widgets::Button& btn = m_deleter.addNew(new ui::widgets::Button(text, key, m_root));
     m_buttonGroup.add(btn);
     btn.sig_fire.addNewClosure(m_loop.makeStop(id));
     checkKey(id, key, true);

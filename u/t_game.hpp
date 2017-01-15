@@ -96,6 +96,14 @@ class TestGamePlayerBitMatrix : public CxxTest::TestSuite {
     void testMatrix();
 };
 
+class TestGamePlayerList : public CxxTest::TestSuite {
+ public:
+    void testExpand();
+    void testIteration();
+    void testSetup();
+    void testChar();
+};
+
 class TestGameRegistrationKey : public CxxTest::TestSuite {
  public:
     void testIt();

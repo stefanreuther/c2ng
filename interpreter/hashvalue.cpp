@@ -9,12 +9,13 @@
 #include "interpreter/context.hpp"
 #include "interpreter/propertyacceptor.hpp"
 #include "interpreter/typehint.hpp"
+#include "interpreter/savecontext.hpp"
 
 namespace {
     /** Context for iterating a hash. */
     class HashContext : public interpreter::Context {
      public:
-        HashContext(afl::base::Ptr<interpreter::HashData> data)
+        HashContext(afl::base::Ref<interpreter::HashData> data)
             : m_data(data),
               m_slot(0)
             { }
@@ -22,22 +23,22 @@ namespace {
             { }
 
         // Context:
-        virtual bool lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
+        virtual HashContext* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
             {
                 // ex IntHashContext::lookup
                 if (name.match("KEY")) {
                     /* @q Key:Str (Hash Element Property)
                        The key of this hash element. */
                     result = 0;
-                    return true;
+                    return this;
                 } else if (name.match("VALUE")) {
                     /* @q Value:Any (Hash Element Property)
                        The value of this hash element.
                        @assignable */
                     result = 1;
-                    return true;
+                    return this;
                 } else {
-                    return false;
+                    return 0;
                 }
             }
 
@@ -83,7 +84,7 @@ namespace {
         // BaseValue:
         virtual String_t toString(bool /*readable*/) const
             { return "#<hashIterator>"; }
-        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext* /*ctx*/) const
+        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
             { throw interpreter::Error::notSerializable(); }
 
         // Value:
@@ -91,19 +92,19 @@ namespace {
             { return new HashContext(*this); }
 
      private:
-        afl::base::Ptr<interpreter::HashData> m_data;
+        afl::base::Ref<interpreter::HashData> m_data;
         afl::data::NameMap::Index_t m_slot;
     };
 }
 
-interpreter::HashValue::HashValue(afl::base::Ptr<HashData> data)
+interpreter::HashValue::HashValue(afl::base::Ref<HashData> data)
     : m_data(data)
 { }
 
 interpreter::HashValue::~HashValue()
 { }
 
-afl::base::Ptr<interpreter::HashData>
+afl::base::Ref<interpreter::HashData>
 interpreter::HashValue::getData()
 {
     // ex IntHash::getData
@@ -137,7 +138,7 @@ interpreter::HashValue::set(Arguments& args, afl::data::Value* value)
 
 // CallableValue:
 int32_t
-interpreter::HashValue::getDimension(int32_t /*which*/)
+interpreter::HashValue::getDimension(int32_t /*which*/) const
 {
     // ex IntHash::getDimension
     return 0;
@@ -163,21 +164,11 @@ interpreter::HashValue::toString(bool /*readable*/) const
 }
 
 void
-interpreter::HashValue::store(TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, SaveContext* ctx) const
+interpreter::HashValue::store(TagNode& out, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, SaveContext& ctx) const
 {
     // ex IntHash::store
-    // FIXME: port this (store)
-    // IntVMSaveContext* vsc = IntVMSaveContext::getCurrentInstance();
-    // if (vsc != 0) {
-    //     tag.tag   = IntTagNode::Tag_Hash;
-    //     tag.value = vsc->addHash(*data);
-    // } else {
-    (void) out;
-    (void) aux;
-    (void) cs;
-    (void) ctx;
-    throw Error::notSerializable();
-    // }
+    out.tag = TagNode::Tag_Hash;
+    out.value = ctx.addHash(*m_data);
 }
 
 // Value:

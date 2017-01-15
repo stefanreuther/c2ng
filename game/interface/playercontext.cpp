@@ -31,7 +31,7 @@ namespace {
     };
 }
 
-game::interface::PlayerContext::PlayerContext(int nr, afl::base::Ptr<Game> game, afl::base::Ptr<Root> root)
+game::interface::PlayerContext::PlayerContext(int nr, afl::base::Ref<Game> game, afl::base::Ref<Root> root)
     : m_number(nr),
       m_game(game),
       m_root(root)
@@ -41,11 +41,11 @@ game::interface::PlayerContext::~PlayerContext()
 { }
 
 // Context:
-bool
+game::interface::PlayerContext*
 game::interface::PlayerContext::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
 {
     // ex IntPlayerContext::lookup
-    return lookupName(name, player_mapping, result);
+    return lookupName(name, player_mapping, result) ? this : 0;
 }
 
 void
@@ -111,10 +111,31 @@ game::interface::PlayerContext::toString(bool /*readable*/) const
 }
 
 void
-game::interface::PlayerContext::store(interpreter::TagNode& out, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext* /*ctx*/) const
+game::interface::PlayerContext::store(interpreter::TagNode& out, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
 {
     // ex IntPlayerContext::store
     out.tag = out.Tag_Player;
     out.value = m_number;
+}
+
+game::interface::PlayerContext*
+game::interface::PlayerContext::create(int nr, Session& session)
+{
+    // Valid state?
+    Game* g = session.getGame().get();
+    Root* r = session.getRoot().get();
+    if (g == 0 || r == 0) {
+        return 0;
+    }
+
+    // Valid player number?
+    // \change: This ought to have a "pl->isReal" check which I deliberately omitted.
+    // This allows scripts to do "Player(0)" or "Player(12)" to access special slots.
+    Player* pl = r->playerList().get(nr);
+    if (pl == 0) {
+        return 0;
+    }
+
+    return new PlayerContext(nr, *g, *r);
 }
 

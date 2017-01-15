@@ -25,7 +25,7 @@ namespace {
             // Try enumerating the parent's content. If that fails, try to create it.
             // (openDir alone does not check whether the directory actually exists.)
             try {
-                afl::base::Ptr<afl::io::Directory> parent = fs.openDirectory(parentName);
+                afl::base::Ref<afl::io::Directory> parent = fs.openDirectory(parentName);
                 parent->getDirectoryEntries();
             }
             catch (afl::except::FileProblemException&) {
@@ -34,8 +34,8 @@ namespace {
 
             // Parent should now exist. Try creating child in it unless it already exists.
             try {
-                afl::base::Ptr<afl::io::Directory> parent = fs.openDirectory(parentName);
-                afl::base::Ptr<afl::io::DirectoryEntry> entry = parent->getDirectoryEntryByName(childName);
+                afl::base::Ref<afl::io::Directory> parent = fs.openDirectory(parentName);
+                afl::base::Ref<afl::io::DirectoryEntry> entry = parent->getDirectoryEntryByName(childName);
                 if (entry->getFileType() != afl::io::DirectoryEntry::tDirectory) {
                     entry->createAsDirectory();
                 }
@@ -55,24 +55,24 @@ util::ProfileDirectory::ProfileDirectory(afl::sys::Environment& env,
 { }
 
 afl::base::Ptr<afl::io::Stream>
-util::ProfileDirectory::openFile(String_t name)
+util::ProfileDirectory::openFileNT(String_t name)
 {
     try {
-        afl::base::Ptr<afl::io::Directory> parent = m_fileSystem.openDirectory(m_name);
-        return parent->openFile(name, afl::io::FileSystem::OpenRead);
+        afl::base::Ref<afl::io::Directory> parent = m_fileSystem.openDirectory(m_name);
+        return parent->openFile(name, afl::io::FileSystem::OpenRead).asPtr();
     }
     catch (afl::except::FileProblemException&) {
         return 0;
     }
 }
 
-afl::base::Ptr<afl::io::Stream>
+afl::base::Ref<afl::io::Stream>
 util::ProfileDirectory::createFile(String_t name)
 {
     return open()->openFile(name, afl::io::FileSystem::Create);
 }
 
-afl::base::Ptr<afl::io::Directory>
+afl::base::Ref<afl::io::Directory>
 util::ProfileDirectory::open()
 {
     tryCreatePath(m_fileSystem, m_name);

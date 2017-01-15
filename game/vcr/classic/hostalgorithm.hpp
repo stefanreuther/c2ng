@@ -25,7 +25,8 @@ namespace game { namespace vcr { namespace classic {
         HostAlgorithm(bool nuFlag,
                       Visualizer& vis,
                       const game::config::HostConfiguration& config,
-                      const game::spec::ShipList& list);
+                      const game::spec::BeamVector_t& beams,
+                      const game::spec::TorpedoVector_t& launchers);
 
         /** Destructor. */
         ~HostAlgorithm();
@@ -59,7 +60,8 @@ namespace game { namespace vcr { namespace classic {
 
      private:
         const game::config::HostConfiguration& m_config;
-        const game::spec::ShipList& m_shipList;
+        const game::spec::BeamVector_t& m_beams;
+        const game::spec::TorpedoVector_t& m_launchers;
         int m_nuFlag;
         int m_seed;
         Time_t m_time;

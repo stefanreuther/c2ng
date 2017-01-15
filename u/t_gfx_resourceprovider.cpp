@@ -15,8 +15,8 @@ TestGfxResourceProvider::testIt()
      public:
         virtual afl::base::Ptr<gfx::Canvas> getImage(String_t /*name*/, bool* /*status*/)
             { return 0; }
-        virtual afl::base::Ptr<gfx::Font> getFont(gfx::FontRequest /*req*/)
-            { return 0; }
+        virtual afl::base::Ref<gfx::Font> getFont(gfx::FontRequest /*req*/)
+            { throw "egal"; }
     };
     Tester t;
 }

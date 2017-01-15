@@ -35,8 +35,8 @@ TestGameHistoryTurn::testSuccess()
 {
     // A turn
     const int NR = 42;
-    afl::base::Ptr<game::Turn> t = new game::Turn();
-    t->universe().setTurnNumber(NR);
+    afl::base::Ref<game::Turn> t = *new game::Turn();
+    t->setTurnNumber(NR);
 
     // Direct load
     {

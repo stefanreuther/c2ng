@@ -7,7 +7,27 @@
 
 #include <cxxtest/TestSuite.h>
 
+class TestGameInterfaceEngineContext : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
+class TestGameInterfaceExplosionContext : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
+class TestGameInterfaceFriendlyCodeContext : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
 class TestGameInterfaceIteratorProvider : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
+class TestGameInterfaceMissionContext : public CxxTest::TestSuite {
  public:
     void testIt();
 };
@@ -21,6 +41,11 @@ class TestGameInterfaceRichTextFunctions : public CxxTest::TestSuite {
     void testRStyle();
     void testRLink();
     void testRXml();
+};
+
+class TestGameInterfaceUfoContext : public CxxTest::TestSuite {
+ public:
+    void testTypes();
 };
 
 class TestGameInterfaceUserInterfaceProperty : public CxxTest::TestSuite {

@@ -20,6 +20,7 @@
 #include "afl/sys/loglistener.hpp"
 #include "interpreter/callablevalue.hpp"
 #include "interpreter/filevalue.hpp"
+#include "afl/data/visitor.hpp"
 
 using interpreter::Error;
 using interpreter::getBooleanValue;
@@ -47,19 +48,42 @@ namespace {
         \param arg [out] Argument for arithmetic
         \param a [in] User-supplied argument
         \return status */
-    Arithmetic checkArithmetic(ArithmeticArg& arg, afl::data::Value* a)
+    Arithmetic checkArithmetic(ArithmeticArg& arg, const afl::data::Value* a)
     {
-        if (a == 0) {
-            return ariNull;
-        } else if (afl::data::ScalarValue* iv = dynamic_cast<afl::data::ScalarValue*>(a)) {
-            arg.ia = iv->getValue();
-            return ariInt;
-        } else if (afl::data::FloatValue* fv = dynamic_cast<afl::data::FloatValue*>(a)) {
-            arg.fa = fv->getValue();
-            return ariFloat;
-        } else {
-            return ariBad;
-        }
+        // Visitor is faster than traditional type switch
+        class V : public afl::data::Visitor {
+         public:
+            V(ArithmeticArg& arg)
+                : m_result(ariBad),
+                  m_arg(arg)
+                { }
+            virtual void visitString(const String_t& /*str*/)
+                { m_result = ariBad; }
+            virtual void visitInteger(int32_t iv)
+                { m_result = ariInt; m_arg.ia = iv; }
+            virtual void visitFloat(double fv)
+                { m_result = ariFloat; m_arg.fa = fv; }
+            virtual void visitBoolean(bool bv)
+                { m_result = ariInt; m_arg.ia = bv; }
+            virtual void visitHash(const afl::data::Hash& /*hv*/)
+                { m_result = ariBad; }
+            virtual void visitVector(const afl::data::Vector& /*vv*/)
+                { m_result = ariBad; }
+            virtual void visitOther(const afl::data::Value& /*other*/)
+                { m_result = ariBad; }
+            virtual void visitNull()
+                { m_result = ariNull; }
+            virtual void visitError(const String_t& /*source*/, const String_t& /*str*/)
+                { m_result = ariBad; }
+            Arithmetic get() const
+                { return m_result; }
+         private:
+            Arithmetic m_result;
+            ArithmeticArg& m_arg;
+        };
+        V v(arg);
+        v.visit(a);
+        return v.get();
     }
 
     /** Prepare for trigonometry. Checks whether the argument is of the correct
@@ -67,13 +91,13 @@ namespace {
         \param arg user-supplied argument
         \return argument to pass to C++ math library
         \throws Error if bad user-supplied argument */
-    double prepareTrig(afl::data::Value* arg)
+    double prepareTrig(const afl::data::Value* arg)
     {
         // Fetch value
         double value;
-        if (afl::data::ScalarValue* iv = dynamic_cast<afl::data::ScalarValue*>(arg))
+        if (const afl::data::ScalarValue* iv = dynamic_cast<const afl::data::ScalarValue*>(arg))
             value = iv->getValue();
-        else if (afl::data::FloatValue* fv = dynamic_cast<afl::data::FloatValue*>(arg))
+        else if (const afl::data::FloatValue* fv = dynamic_cast<const afl::data::FloatValue*>(arg))
             value = fv->getValue();
         else
             throw Error::typeError(Error::ExpectNumeric);
@@ -85,7 +109,7 @@ namespace {
         return value * (util::PI / 180.0);
     }
 
-    afl::data::Value* FNot(interpreter::World& /*world*/, afl::data::Value* arg)
+    afl::data::Value* FNot(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
         // logical not
         int value = getBooleanValue(arg);
@@ -95,13 +119,13 @@ namespace {
         return makeBooleanValue(value);
     }
 
-    afl::data::Value* FBool(interpreter::World& /*world*/, afl::data::Value* arg)
+    afl::data::Value* FBool(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
         // conversion to bool, i.e. double not
         return makeBooleanValue(getBooleanValue(arg));
     }
 
-    afl::data::Value* FNeg(interpreter::World& /*world*/, afl::data::Value* arg)
+    afl::data::Value* FNeg(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
         // arithmetic negation
         ArithmeticArg a;
@@ -117,7 +141,7 @@ namespace {
         }
     }
 
-    afl::data::Value* FPos(interpreter::World& /*world*/, afl::data::Value* arg)
+    afl::data::Value* FPos(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
         // arithmetic "identity", i.e. just check type
         ArithmeticArg a;
@@ -133,7 +157,7 @@ namespace {
         }
     }
 
-    afl::data::Value* FSin(interpreter::World& /*world*/, afl::data::Value* arg)
+    afl::data::Value* FSin(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
         // Sine
         if (!arg)
@@ -142,7 +166,7 @@ namespace {
             return makeFloatValue(std::sin(prepareTrig(arg)));
     }
 
-    afl::data::Value* FCos(interpreter::World& /*world*/, afl::data::Value* arg)
+    afl::data::Value* FCos(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
         // Cosine
         if (!arg)
@@ -151,7 +175,7 @@ namespace {
             return makeFloatValue(std::cos(prepareTrig(arg)));
     }
 
-    afl::data::Value* FTan(interpreter::World& /*world*/, afl::data::Value* arg)
+    afl::data::Value* FTan(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
         // Tangent
         if (!arg) {
@@ -167,7 +191,7 @@ namespace {
         }
     }
 
-    afl::data::Value* FZap(interpreter::World& /*world*/, afl::data::Value* arg)
+    afl::data::Value* FZap(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
         // Turn false into null
         if (!arg)
@@ -178,7 +202,7 @@ namespace {
             return arg->clone();
     }
 
-    afl::data::Value* FAbs(interpreter::World& /*world*/, afl::data::Value* arg)
+    afl::data::Value* FAbs(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
         // Absolute value
         ArithmeticArg a;
@@ -194,7 +218,7 @@ namespace {
         }
     }
 
-    afl::data::Value* FExp(interpreter::World& /*world*/, afl::data::Value* arg)
+    afl::data::Value* FExp(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
         // Exponential
         ArithmeticArg a;
@@ -210,7 +234,7 @@ namespace {
         }
     }
 
-    afl::data::Value* FLog(interpreter::World& /*world*/, afl::data::Value* arg)
+    afl::data::Value* FLog(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
         // Logarithm
         ArithmeticArg a;
@@ -232,7 +256,7 @@ namespace {
         }
     }
 
-    afl::data::Value* FBitNot(interpreter::World& /*world*/, afl::data::Value* arg)
+    afl::data::Value* FBitNot(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
         // Bitwise negation
         ArithmeticArg a;
@@ -247,29 +271,29 @@ namespace {
         }
     }
 
-    afl::data::Value* FIsEmtpy(interpreter::World& /*world*/, afl::data::Value* arg)
+    afl::data::Value* FIsEmpty(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
         // Check emptiness (null)
         return makeBooleanValue(arg == 0);
     }
 
-    afl::data::Value* FIsNum(interpreter::World& /*world*/, afl::data::Value* arg)
+    afl::data::Value* FIsNum(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
         // Check numericness
         // FIXME: PCC 1.x returns False for bools
         return makeBooleanValue(arg != 0
-                                && (dynamic_cast<afl::data::ScalarValue*>(arg) != 0
-                                    || dynamic_cast<afl::data::FloatValue*>(arg) != 0));
+                                && (dynamic_cast<const afl::data::ScalarValue*>(arg) != 0
+                                    || dynamic_cast<const afl::data::FloatValue*>(arg) != 0));
     }
 
-    afl::data::Value* FIsString(interpreter::World& /*world*/, afl::data::Value* arg)
+    afl::data::Value* FIsString(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
         // Check string
         return makeBooleanValue(arg != 0
-                                && dynamic_cast<afl::data::StringValue*>(arg) != 0);
+                                && dynamic_cast<const afl::data::StringValue*>(arg) != 0);
     }
 
-    afl::data::Value* FAsc(interpreter::World& /*world*/, afl::data::Value* arg)
+    afl::data::Value* FAsc(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
         // Get ASCII/Unicode code of (stringified) arg
         if (arg == 0)
@@ -284,12 +308,12 @@ namespace {
         }
     }
 
-    afl::data::Value* FChr(interpreter::World& /*world*/, afl::data::Value* arg)
+    afl::data::Value* FChr(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
         // Get character from ASCII/Unicode code
         if (arg == 0) {
             return 0;
-        } else if (afl::data::ScalarValue* iv = dynamic_cast<afl::data::ScalarValue*>(arg)) {
+        } else if (const afl::data::ScalarValue* iv = dynamic_cast<const afl::data::ScalarValue*>(arg)) {
             String_t tmp;
             afl::charset::Utf8().append(tmp, iv->getValue());
             return makeStringValue(tmp);
@@ -298,8 +322,7 @@ namespace {
         }
     }
 
-    afl::data::Value*
-    FStr(interpreter::World& /*world*/, afl::data::Value* arg)
+    afl::data::Value* FStr(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
         // Simple stringification
         if (arg == 0)
@@ -307,7 +330,7 @@ namespace {
         return makeStringValue(interpreter::toString(arg, false));
     }
 
-    afl::data::Value* FSqrt(interpreter::World& /*world*/, afl::data::Value* arg)
+    afl::data::Value* FSqrt(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
         // Square root
         ArithmeticArg a;
@@ -327,7 +350,7 @@ namespace {
         }
     }
 
-    afl::data::Value* FTrunc(interpreter::World& /*world*/, afl::data::Value* arg)
+    afl::data::Value* FTrunc(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
         // Truncate fractional digits
         ArithmeticArg a;
@@ -345,7 +368,7 @@ namespace {
         }
     }
 
-    afl::data::Value* FRound(interpreter::World& /*world*/, afl::data::Value* arg)
+    afl::data::Value* FRound(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
         // Round arithmetically
         ArithmeticArg a;
@@ -367,59 +390,57 @@ namespace {
         }
     }
 
-    afl::data::Value* FLTrim(interpreter::World& /*world*/, afl::data::Value* arg)
+    afl::data::Value* FLTrim(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
         // Trim left whitespace
         if (arg == 0)
             return 0;
-        else if (afl::data::StringValue* sv = dynamic_cast<afl::data::StringValue*>(arg))
+        else if (const afl::data::StringValue* sv = dynamic_cast<const afl::data::StringValue*>(arg))
             return makeStringValue(afl::string::strLTrim(sv->getValue()));
         else
             throw Error::typeError(Error::ExpectString);
     }
 
-    afl::data::Value*
-    FRTrim(interpreter::World& /*world*/, afl::data::Value* arg)
+    afl::data::Value* FRTrim(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
         // Trim right whitespace
         if (arg == 0)
             return 0;
-        else if (afl::data::StringValue* sv = dynamic_cast<afl::data::StringValue*>(arg))
+        else if (const afl::data::StringValue* sv = dynamic_cast<const afl::data::StringValue*>(arg))
             return makeStringValue(afl::string::strRTrim(sv->getValue()));
         else
             throw Error::typeError(Error::ExpectString);
     }
 
-    afl::data::Value*
-    FLRTrim(interpreter::World& /*world*/, afl::data::Value* arg)
+    afl::data::Value* FLRTrim(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
         // Trim both whitespace
         if (arg == 0)
             return 0;
-        else if (afl::data::StringValue* sv = dynamic_cast<afl::data::StringValue*>(arg))
+        else if (const afl::data::StringValue* sv = dynamic_cast<const afl::data::StringValue*>(arg))
             return makeStringValue(afl::string::strTrim(sv->getValue()));
         else
             throw Error::typeError(Error::ExpectString);
     }
 
-    afl::data::Value* FLength(interpreter::World& /*world*/, afl::data::Value* arg)
+    afl::data::Value* FLength(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
         // Get length of string
         // FIXME: PCC 1.x stringifies. Should we, too?
         if (arg == 0)
             return 0;
-        else if (afl::data::StringValue* sv = dynamic_cast<afl::data::StringValue*>(arg))
+        else if (const afl::data::StringValue* sv = dynamic_cast<const afl::data::StringValue*>(arg))
             return makeIntegerValue(afl::charset::Utf8().length(sv->getValue()));
         else
             throw Error::typeError(Error::ExpectString);
     }
 
-    afl::data::Value* FVal(interpreter::World& /*world*/, afl::data::Value* arg)
+    afl::data::Value* FVal(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
         // Evaluate
         if (arg == 0) {
             return 0;
-        } else if (afl::data::StringValue* sv = dynamic_cast<afl::data::StringValue*>(arg)) {
+        } else if (const afl::data::StringValue* sv = dynamic_cast<const afl::data::StringValue*>(arg)) {
             String_t ssv = sv->getValue();
             if (ssv.find_first_not_of(" \t0123456789-+.") != ssv.npos) {
                 // syntax error, i.e. hex
@@ -444,20 +465,20 @@ namespace {
         }
     }
 
-    afl::data::Value* FTrace(interpreter::World& world, afl::data::Value* arg)
+    afl::data::Value* FTrace(interpreter::World& world, const afl::data::Value* arg)
     {
         // Debug log; print value and continue
         world.logListener().write(afl::sys::LogListener::Trace, "script", interpreter::toString(arg, true));
         return afl::data::Value::cloneOf(arg);
     }
 
-    afl::data::Value* FNot2(interpreter::World& /*world*/, afl::data::Value* arg)
+    afl::data::Value* FNot2(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
         // Negation using binary logic: t->f, f->t, e->t
         return makeBooleanValue(getBooleanValue(arg) <= 0);
     }
 
-    afl::data::Value* FAtom(interpreter::World& world, afl::data::Value* arg)
+    afl::data::Value* FAtom(interpreter::World& world, const afl::data::Value* arg)
     {
         // String to atom
         if (arg == 0)
@@ -465,25 +486,25 @@ namespace {
         return makeIntegerValue(world.atomTable().getAtomFromString(interpreter::toString(arg, false)));
     }
 
-    afl::data::Value* FAtomStr(interpreter::World& world, afl::data::Value* arg)
+    afl::data::Value* FAtomStr(interpreter::World& world, const afl::data::Value* arg)
     {
         // Atom to string
         if (arg == 0)
             return 0;
 
-        afl::data::ScalarValue* iv = dynamic_cast<afl::data::ScalarValue*>(arg);
+        const afl::data::ScalarValue* iv = dynamic_cast<const afl::data::ScalarValue*>(arg);
         if (!iv)
             throw Error::typeError(Error::ExpectInteger);
 
         return makeStringValue(world.atomTable().getStringFromAtom(iv->getValue()));
     }
 
-    afl::data::Value* FKeyCreate(interpreter::World& world, afl::data::Value* arg)
+    afl::data::Value* FKeyCreate(interpreter::World& world, const afl::data::Value* arg)
     {
         if (arg == 0)
             return 0;
 
-        afl::data::StringValue* sv = dynamic_cast<afl::data::StringValue*>(arg);
+        const afl::data::StringValue* sv = dynamic_cast<const afl::data::StringValue*>(arg);
         if (!sv)
             throw Error::typeError(Error::ExpectString);
 
@@ -491,12 +512,12 @@ namespace {
         return interpreter::makeKeymapValue(km);
     }
 
-    afl::data::Value* FKeyLookup(interpreter::World& world, afl::data::Value* arg)
+    afl::data::Value* FKeyLookup(interpreter::World& world, const afl::data::Value* arg)
     {
         if (arg == 0)
             return 0;
 
-        afl::data::StringValue* sv = dynamic_cast<afl::data::StringValue*>(arg);
+        const afl::data::StringValue* sv = dynamic_cast<const afl::data::StringValue*>(arg);
         if (!sv)
             throw Error::typeError(Error::ExpectString);
 
@@ -506,7 +527,7 @@ namespace {
         return interpreter::makeKeymapValue(km);
     }
 
-    afl::data::Value* FInc(interpreter::World& /*world*/, afl::data::Value* arg)
+    afl::data::Value* FInc(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
         // arithmetic increment
         ArithmeticArg a;
@@ -522,7 +543,7 @@ namespace {
         }
     }
 
-    afl::data::Value* FDec(interpreter::World& /*world*/, afl::data::Value* arg)
+    afl::data::Value* FDec(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
         // arithmetic decrement
         ArithmeticArg a;
@@ -538,13 +559,13 @@ namespace {
         }
     }
 
-    afl::data::Value* FIsProcedure(interpreter::World& /*world*/, afl::data::Value* arg)
+    afl::data::Value* FIsProcedure(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
         // check for procedure
         if (!arg)
             return 0;
 
-        if (interpreter::CallableValue* cv = dynamic_cast<interpreter::CallableValue*>(arg)) {
+        if (const interpreter::CallableValue* cv = dynamic_cast<const interpreter::CallableValue*>(arg)) {
             // Callable builtin
             return makeBooleanValue(cv->isProcedureCall());
         } else {
@@ -553,32 +574,32 @@ namespace {
         }
     }
 
-    afl::data::Value* FFileNr(interpreter::World& /*world*/, afl::data::Value* arg)
+    afl::data::Value* FFileNr(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
         // null
         if (!arg)
             return 0;
 
         // integer?
-        if (afl::data::ScalarValue* iv = dynamic_cast<afl::data::ScalarValue*>(arg))
+        if (const afl::data::ScalarValue* iv = dynamic_cast<const afl::data::ScalarValue*>(arg))
             return new interpreter::FileValue(iv->getValue());
-        else if (interpreter::FileValue* fv = dynamic_cast<interpreter::FileValue*>(arg))
+        else if (const interpreter::FileValue* fv = dynamic_cast<const interpreter::FileValue*>(arg))
             return new interpreter::FileValue(fv->getFileNumber());
         else
             throw Error::typeError(Error::ExpectInteger);
     }
 
-    afl::data::Value* FIsArray(interpreter::World& /*world*/, afl::data::Value* arg)
+    afl::data::Value* FIsArray(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
         if (!arg)
             return 0;
-        else if (interpreter::CallableValue* a = dynamic_cast<interpreter::CallableValue*>(arg))
+        else if (const interpreter::CallableValue* a = dynamic_cast<const interpreter::CallableValue*>(arg))
             return makeIntegerValue(a->getDimension(0));
         else
             return makeIntegerValue(0);
     }
 
-    afl::data::Value* (*const unary_ops[])(interpreter::World&, afl::data::Value*) = {
+    afl::data::Value* (*const unary_ops[])(interpreter::World&, const afl::data::Value*) = {
         FNot,
         FBool,
         FNeg,
@@ -591,7 +612,7 @@ namespace {
         FExp,
         FLog,
         FBitNot,
-        FIsEmtpy,
+        FIsEmpty,
         FIsNum,
         FIsString,
         FAsc,

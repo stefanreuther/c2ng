@@ -10,6 +10,11 @@ INCLUDE_Makefile.min = Rules-mingw.mak
 
 ## Configuration
 include config.mk
+CXX = $(CONFIG_C2NG_CXX)
+AR = $(CONFIG_C2NG_AR)
+LIBS = $(CONFIG_C2NG_LIBS)
+PERL = $(CONFIG_C2NG_PERL)
+RM = rm -f
 STRIP = strip
 RANLIB = :
 
@@ -37,19 +42,124 @@ end
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/pcc/accountfolder.cpp game/pcc/accountfolder.hpp \
-    game/pcc/gamefolder.cpp game/pcc/gamefolder.hpp \
-    game/pcc/serverdirectory.cpp game/pcc/serverdirectory.hpp \
-    game/pcc/browserhandler.cpp game/pcc/browserhandler.hpp \
-    game/interface/globalcommands.cpp game/interface/globalcommands.hpp \
-    game/interface/simpleprocedure.cpp game/interface/simpleprocedure.hpp \
-    game/historyturnlist.cpp game/historyturnlist.hpp game/historyturn.cpp \
-    game/historyturn.hpp util/backupfile.cpp util/backupfile.hpp \
-    game/map/objectlist.cpp game/map/objectlist.hpp \
-    game/map/objectreference.cpp game/map/objectreference.hpp \
-    game/nu/turnloader.cpp game/nu/turnloader.hpp \
-    game/nu/specificationloader.cpp game/nu/specificationloader.hpp \
-    game/nu/gamestate.cpp game/nu/gamestate.hpp game/nu/registrationkey.cpp \
+FILES_gamelib = game/v3/trn/dumper.cpp game/v3/trn/dumper.hpp \
+    util/application.cpp util/application.hpp game/v3/trn/filter.cpp \
+    game/v3/trn/parseexception.hpp game/v3/trn/indexfilter.cpp \
+    game/v3/trn/indexfilter.hpp game/v3/trn/negatefilter.cpp \
+    game/v3/trn/negatefilter.hpp game/v3/trn/orfilter.cpp \
+    game/v3/trn/orfilter.hpp game/v3/trn/andfilter.cpp \
+    game/v3/trn/andfilter.hpp game/v3/trn/idfilter.cpp \
+    game/v3/trn/idfilter.hpp game/v3/trn/stringfilter.cpp \
+    game/v3/trn/stringfilter.hpp game/v3/trn/namefilter.cpp \
+    game/v3/trn/namefilter.hpp game/v3/trn/constantfilter.cpp \
+    game/v3/trn/constantfilter.hpp game/v3/trn/filter.hpp \
+    interpreter/vmio/assemblersavecontext.cpp \
+    interpreter/vmio/assemblersavecontext.hpp \
+    game/interface/commandinterface.cpp game/interface/commandinterface.hpp \
+    game/v3/commandextra.cpp game/v3/commandextra.hpp \
+    game/v3/commandcontainer.cpp game/v3/commandcontainer.hpp \
+    game/v3/command.cpp game/v3/command.hpp util/prefixargument.cpp \
+    util/prefixargument.hpp game/v3/controlfile.cpp game/v3/controlfile.hpp \
+    util/stringlist.cpp util/stringlist.hpp util/messagenotifier.cpp \
+    util/messagenotifier.hpp util/messagecollector.cpp \
+    util/messagecollector.hpp util/messagematcher.cpp \
+    util/messagematcher.hpp util/filenamepattern.cpp \
+    util/filenamepattern.hpp game/maint/directorywrapper.cpp \
+    game/maint/directorywrapper.hpp game/maint/sweeper.cpp \
+    game/maint/sweeper.hpp game/map/reverter.hpp game/v3/reverter.hpp \
+    game/interface/minefieldmethod.cpp game/interface/minefieldmethod.hpp \
+    util/rich/alignmentattribute.cpp util/rich/alignmentattribute.hpp \
+    interpreter/processobservercontext.cpp \
+    interpreter/processobservercontext.hpp game/sim/loader.cpp \
+    game/sim/loader.hpp game/sim/structures.hpp game/sim/setup.cpp \
+    game/sim/setup.hpp game/sim/planet.cpp game/sim/planet.hpp \
+    game/sim/ship.cpp game/sim/ship.hpp game/sim/configuration.cpp \
+    game/sim/configuration.hpp game/sim/ability.hpp game/sim/object.cpp \
+    game/sim/object.hpp game/interface/planetmethod.cpp \
+    game/interface/planetmethod.hpp game/actions/preconditions.cpp \
+    game/actions/preconditions.hpp game/actions/basefixrecycle.cpp \
+    game/actions/basefixrecycle.hpp util/runlengthexpandtransform.cpp \
+    util/runlengthexpandtransform.hpp game/score/structures.hpp \
+    game/score/loader.cpp game/score/loader.hpp util/stringparser.cpp \
+    util/stringparser.hpp game/interface/explosionfunction.cpp \
+    game/interface/explosionfunction.hpp game/interface/explosioncontext.cpp \
+    game/interface/explosioncontext.hpp game/interface/explosionproperty.cpp \
+    game/interface/explosionproperty.hpp game/map/explosiontype.cpp \
+    game/map/explosiontype.hpp game/map/explosion.cpp game/map/explosion.hpp \
+    interpreter/simpleprocedurevalue.cpp \
+    interpreter/simpleprocedurevalue.hpp \
+    interpreter/simpleindexablevalue.cpp \
+    interpreter/simpleindexablevalue.hpp interpreter/filefunctions.cpp \
+    interpreter/filefunctions.hpp interpreter/filetable.cpp \
+    interpreter/filetable.hpp game/map/fleettype.cpp game/map/fleettype.hpp \
+    interpreter/procedurevalue.cpp interpreter/procedurevalue.hpp \
+    game/interface/shipmethod.cpp game/interface/shipmethod.hpp \
+    game/map/shiputils.cpp game/map/shiputils.hpp game/map/fleet.cpp \
+    game/map/fleet.hpp game/map/fleetmember.cpp game/map/fleetmember.hpp \
+    game/interface/vcrfunction.cpp game/interface/vcrfunction.hpp \
+    game/interface/vcrcontext.cpp game/interface/vcrcontext.hpp \
+    game/interface/vcrsidefunction.cpp game/interface/vcrsidefunction.hpp \
+    game/interface/vcrsidecontext.cpp game/interface/vcrsidecontext.hpp \
+    game/interface/vcrproperty.cpp game/interface/vcrproperty.hpp \
+    game/interface/vcrsideproperty.cpp game/interface/vcrsideproperty.hpp \
+    game/interface/pluginfunction.cpp game/interface/pluginfunction.hpp \
+    game/interface/plugincontext.cpp game/interface/plugincontext.hpp \
+    game/interface/pluginproperty.cpp game/interface/pluginproperty.hpp \
+    util/plugin/installer.cpp util/plugin/installer.hpp \
+    util/plugin/manager.cpp util/plugin/manager.hpp util/plugin/plugin.cpp \
+    util/plugin/plugin.hpp game/interface/drawingmethod.cpp \
+    game/interface/drawingmethod.hpp game/interface/drawingfunction.cpp \
+    game/interface/drawingfunction.hpp game/interface/drawingcontext.cpp \
+    game/interface/drawingcontext.hpp game/interface/drawingproperty.cpp \
+    game/interface/drawingproperty.hpp util/io.cpp util/io.hpp \
+    game/db/drawingatommap.cpp game/db/drawingatommap.hpp game/db/loader.cpp \
+    game/db/loader.hpp game/db/structures.hpp game/map/drawingcontainer.cpp \
+    game/map/drawingcontainer.hpp game/map/drawing.cpp game/map/drawing.hpp \
+    interpreter/vmio/nullloadcontext.cpp \
+    interpreter/vmio/nullloadcontext.hpp \
+    interpreter/vmio/nullsavecontext.cpp \
+    interpreter/vmio/nullsavecontext.hpp \
+    interpreter/vmio/worldloadcontext.cpp \
+    interpreter/vmio/worldloadcontext.hpp interpreter/vmio/structures.cpp \
+    interpreter/vmio/processloadcontext.cpp \
+    interpreter/vmio/processloadcontext.hpp game/interface/loadcontext.cpp \
+    game/interface/loadcontext.hpp interpreter/vmio/structures.hpp \
+    interpreter/vmio/objectloader.cpp interpreter/vmio/loadcontext.hpp \
+    interpreter/blobvalue.cpp interpreter/blobvalue.hpp \
+    interpreter/vmio/valueloader.cpp interpreter/vmio/valueloader.hpp \
+    interpreter/vmio/objectloader.hpp interpreter/mutexfunctions.cpp \
+    interpreter/mutexfunctions.hpp interpreter/vmio/processsavecontext.cpp \
+    interpreter/vmio/processsavecontext.hpp interpreter/mutexcontext.cpp \
+    interpreter/mutexcontext.hpp interpreter/mutexlist.cpp \
+    interpreter/mutexlist.hpp interpreter/vmio/filesavecontext.cpp \
+    interpreter/vmio/filesavecontext.hpp game/interface/ufofunction.cpp \
+    game/interface/ufofunction.hpp game/interface/ufocontext.cpp \
+    game/interface/ufocontext.hpp game/interface/ufoproperty.cpp \
+    game/interface/ufoproperty.hpp game/map/ufotype.cpp game/map/ufotype.hpp \
+    game/map/ufo.cpp game/map/ufo.hpp game/interface/missionfunction.cpp \
+    game/interface/missionfunction.hpp game/interface/missioncontext.cpp \
+    game/interface/missioncontext.hpp game/interface/missionproperty.cpp \
+    game/interface/missionproperty.hpp game/interface/cargofunctions.cpp \
+    game/interface/cargofunctions.hpp \
+    game/interface/friendlycodefunction.cpp \
+    game/interface/friendlycodefunction.hpp \
+    game/interface/friendlycodecontext.cpp \
+    game/interface/friendlycodecontext.hpp \
+    game/interface/friendlycodeproperty.cpp \
+    game/interface/friendlycodeproperty.hpp game/pcc/accountfolder.cpp \
+    game/pcc/accountfolder.hpp game/pcc/gamefolder.cpp \
+    game/pcc/gamefolder.hpp game/pcc/serverdirectory.cpp \
+    game/pcc/serverdirectory.hpp game/pcc/browserhandler.cpp \
+    game/pcc/browserhandler.hpp game/interface/globalcommands.cpp \
+    game/interface/globalcommands.hpp game/interface/simpleprocedure.cpp \
+    game/interface/simpleprocedure.hpp game/historyturnlist.cpp \
+    game/historyturnlist.hpp game/historyturn.cpp game/historyturn.hpp \
+    util/backupfile.cpp util/backupfile.hpp game/map/objectlist.cpp \
+    game/map/objectlist.hpp game/map/objectreference.cpp \
+    game/map/objectreference.hpp game/nu/turnloader.cpp \
+    game/nu/turnloader.hpp game/nu/specificationloader.cpp \
+    game/nu/specificationloader.hpp game/nu/gamestate.cpp \
+    game/nu/gamestate.hpp game/nu/registrationkey.cpp \
     game/nu/registrationkey.hpp game/nu/stringverifier.cpp \
     game/nu/stringverifier.hpp game/nu/gamefolder.cpp game/nu/gamefolder.hpp \
     game/nu/accountfolder.cpp game/nu/accountfolder.hpp \
@@ -342,8 +452,59 @@ PROJ_AUTO += \
     gamelib:game/*.cpp,game/*.hpp,util/*.cpp,util/*.hpp,interpreter/*.cpp,interpreter/*.hpp
 
 TARGETS += guilib
-FILES_guilib = client/tiles/shipoverviewtile.cpp \
-    client/tiles/shipoverviewtile.hpp client/dialogs/turnlistdialog.cpp \
+FILES_guilib = gfx/basecontext.cpp gfx/basecontext.hpp \
+    gfx/basecolorscheme.hpp client/widgets/commanddataview.cpp \
+    client/widgets/commanddataview.hpp ui/rich/draw.cpp ui/rich/draw.hpp \
+    ui/rich/splitter.cpp ui/rich/splitter.hpp \
+    client/widgets/standarddataview.cpp client/widgets/standarddataview.hpp \
+    client/widgets/collapsibledataview.cpp \
+    client/widgets/collapsibledataview.hpp ui/layout/grid.cpp \
+    ui/layout/grid.hpp client/widgets/comment.cpp client/widgets/comment.hpp \
+    ui/layout/flow.cpp ui/layout/flow.hpp ui/widgets/quit.cpp \
+    ui/widgets/quit.hpp ui/widgets/radiobutton.cpp \
+    ui/widgets/radiobutton.hpp ui/widgets/checkbox.cpp \
+    ui/widgets/checkbox.hpp ui/screenshotlistener.cpp \
+    ui/screenshotlistener.hpp gfx/save.cpp gfx/save.hpp \
+    ui/widgets/abstractcheckbox.cpp ui/widgets/abstractcheckbox.hpp \
+    gfx/nullresourceprovider.cpp gfx/nullresourceprovider.hpp \
+    ui/prefixargument.cpp ui/prefixargument.hpp \
+    client/si/stringlistdialogwidget.cpp \
+    client/si/stringlistdialogwidget.hpp client/si/listboxfunction.cpp \
+    client/si/listboxfunction.hpp ui/widgets/stringlistbox.cpp \
+    ui/widgets/stringlistbox.hpp gfx/defaultfont.cpp gfx/defaultfont.hpp \
+    client/widgets/consoleview.cpp client/widgets/consoleview.hpp \
+    client/si/widgetindexedproperty.cpp client/si/widgetindexedproperty.hpp \
+    client/si/widgetextraproperty.cpp client/si/widgetextraproperty.hpp \
+    client/si/widgetreference.cpp client/si/widgetreference.hpp \
+    client/si/widgetwrapper.cpp client/si/widgetwrapper.hpp \
+    client/tiles/basescreenheadertile.cpp \
+    client/tiles/basescreenheadertile.hpp \
+    client/tiles/planetscreenheadertile.cpp \
+    client/tiles/planetscreenheadertile.hpp ui/widgets/transparentwindow.cpp \
+    ui/widgets/transparentwindow.hpp gfx/gen/perlinnoise.cpp \
+    gfx/gen/perlinnoise.hpp gfx/gen/spaceviewconfig.cpp \
+    gfx/gen/spaceviewconfig.hpp gfx/gen/spaceview.cpp gfx/gen/spaceview.hpp \
+    client/si/values.cpp client/si/values.hpp client/si/widgetproperty.cpp \
+    client/si/widgetproperty.hpp client/si/genericwidgetvalue.cpp \
+    client/si/genericwidgetvalue.hpp client/si/dialogfunction.cpp \
+    client/si/dialogfunction.hpp client/si/widgetcommandvalue.cpp \
+    client/si/widgetcommandvalue.hpp client/si/widgetfunctionvalue.cpp \
+    client/si/widgetfunctionvalue.hpp client/si/widgetvalue.cpp \
+    client/si/widgetvalue.hpp client/si/widgetfunction.cpp \
+    client/si/widgetfunction.hpp client/si/widgetcommand.cpp \
+    client/si/widgetcommand.hpp client/si/widgetholder.cpp \
+    client/si/widgetholder.hpp client/si/usercall.hpp \
+    ui/res/winplanbitmapprovider.cpp ui/res/winplanbitmapprovider.hpp \
+    ui/res/factory.cpp ui/res/factory.hpp ui/res/resourcefileprovider.cpp \
+    ui/res/resourcefileprovider.hpp ui/res/resourcefile.cpp \
+    ui/res/resourcefile.hpp ui/res/resid.cpp ui/res/resid.hpp \
+    client/plugins.cpp client/plugins.hpp \
+    client/widgets/controlscreenheader.cpp \
+    client/widgets/controlscreenheader.hpp \
+    client/tiles/shipscreenheadertile.cpp \
+    client/tiles/shipscreenheadertile.hpp ui/widgets/imagebutton.cpp \
+    ui/widgets/imagebutton.hpp ui/widgets/framegroup.cpp \
+    ui/widgets/framegroup.hpp client/dialogs/turnlistdialog.cpp \
     client/dialogs/turnlistdialog.hpp client/widgets/turnlistbox.cpp \
     client/widgets/turnlistbox.hpp client/tiles/errortile.cpp \
     client/tiles/errortile.hpp client/tiles/tilefactory.cpp \
@@ -415,14 +576,13 @@ FILES_guilib = client/tiles/shipoverviewtile.cpp \
     ui/layout/info.hpp ui/cardgroup.cpp ui/cardgroup.hpp ui/widget.cpp \
     ui/widget.hpp gfx/bitmapfont.cpp gfx/bitmapfont.hpp gfx/bitmapglyph.cpp \
     gfx/bitmapglyph.hpp gfx/font.cpp gfx/font.hpp gfx/nullcolorscheme.cpp \
-    gfx/nullcolorscheme.hpp gfx/context.cpp gfx/context.hpp \
-    gfx/colorscheme.cpp gfx/colorscheme.hpp gfx/graphicsexception.cpp \
-    gfx/graphicsexception.hpp gfx/sdl/engine.cpp gfx/sdl/engine.hpp \
-    gfx/eventconsumer.hpp gfx/engine.hpp gfx/sdl/surface.cpp \
-    gfx/sdl/surface.hpp gfx/sdl/modetraits.hpp gfx/nullcanvas.cpp \
-    gfx/nullcanvas.hpp gfx/types.hpp gfx/canvas.hpp gfx/rectangleset.cpp \
-    gfx/rectangleset.hpp gfx/rectangle.cpp gfx/rectangle.hpp gfx/point.hpp \
-    gfx/fillpattern.cpp gfx/fillpattern.hpp
+    gfx/nullcolorscheme.hpp gfx/context.hpp gfx/colorscheme.hpp \
+    gfx/graphicsexception.cpp gfx/graphicsexception.hpp gfx/sdl/engine.cpp \
+    gfx/sdl/engine.hpp gfx/eventconsumer.hpp gfx/engine.hpp \
+    gfx/sdl/surface.cpp gfx/sdl/surface.hpp gfx/sdl/modetraits.hpp \
+    gfx/nullcanvas.cpp gfx/nullcanvas.hpp gfx/types.hpp gfx/canvas.hpp \
+    gfx/rectangleset.cpp gfx/rectangleset.hpp gfx/rectangle.cpp \
+    gfx/rectangle.hpp gfx/point.hpp gfx/fillpattern.cpp gfx/fillpattern.hpp
 TYPE_guilib = lib
 DEPEND_guilib = afl
 PROJ_AUTO += guilib:gfx/*.cpp,gfx/*.hpp,ui/*.cpp,ui/*.hpp,client/*.cpp,client/*.hpp
@@ -434,6 +594,26 @@ FILES_c2export = tools/c2export.cpp
 TYPE_c2export = app
 DEPEND_c2export = gamelib afl
 
+TARGETS += c2plugin
+FILES_c2plugin = tools/c2plugin.cpp
+TYPE_c2plugin = app
+DEPEND_c2plugin = gamelib afl
+
+TARGETS += c2script
+FILES_c2script = tools/c2script.cpp
+TYPE_c2script = app
+DEPEND_c2script = gamelib afl
+
+TARGETS += c2sweep
+FILES_c2sweep = tools/c2sweep.cpp
+TYPE_c2sweep = app
+DEPEND_c2sweep = gamelib afl
+
+TARGETS += c2untrn
+FILES_c2untrn = tools/c2untrn.cpp
+TYPE_c2untrn = app
+DEPEND_c2untrn = gamelib afl
+
 # Main entry points (GUIs)
 TARGETS += c2ng
 FILES_c2ng = main/c2ng.cpp
@@ -442,7 +622,49 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_game_hostversion.cpp u/t_game_experiencelevelset.cpp \
+FILES_testsuite = u/t_game_v3_trn_parseexception.cpp \
+    u/t_game_v3_trn_filter.cpp u/t_game_v3_trn_namefilter.cpp \
+    u/t_game_v3_trn_stringfilter.cpp u/t_game_v3_trn_idfilter.cpp \
+    u/t_game_v3_trn_negatefilter.cpp u/t_game_v3_trn_orfilter.cpp \
+    u/t_game_v3_trn_indexfilter.cpp u/t_game_v3_trn_andfilter.cpp \
+    u/t_game_v3_trn_constantfilter.cpp u/t_game_v3_trn.hpp \
+    u/t_util_application.cpp u/t_interpreter_vmio_nullloadcontext.cpp \
+    u/t_interpreter_selectionexpression.cpp \
+    u/t_interpreter_ternaryoperation.cpp u/t_interpreter_unaryoperation.cpp \
+    u/t_interpreter_binaryoperation.cpp u/t_interpreter_optimizer.cpp \
+    u/t_gfx_basecolorscheme.cpp u/t_ui_widgets_inputline.cpp \
+    u/t_game_v3_commandextra.cpp u/t_game_v3_command.cpp \
+    u/t_game_v3_commandcontainer.cpp u/t_client_si_widgetfunction.cpp \
+    u/t_ui_layout_grid.cpp u/t_ui_layout.hpp u/t_ui_root.cpp \
+    u/t_ui_widgets_radiobutton.cpp u/t_ui_widgets_checkbox.cpp \
+    u/t_interpreter_error.cpp u/t_gfx_save.cpp \
+    u/t_gfx_nullresourceprovider.cpp u/t_ui_widgets_abstractbutton.cpp \
+    u/t_ui_prefixargument.cpp u/t_util_prefixargument.cpp \
+    u/t_game_v3_controlfile.cpp u/t_util_stringlist.cpp \
+    u/t_util_fileparser.cpp u/t_util_configurationfileparser.cpp \
+    u/t_gfx_defaultfont.cpp u/t_util_messagenotifier.cpp \
+    u/t_util_messagecollector.cpp u/t_util_messagematcher.cpp \
+    u/t_util_filenamepattern.cpp u/t_gfx_types.cpp \
+    u/t_gfx_gen_perlinnoise.cpp u/t_gfx_gen.hpp \
+    u/t_client_si_scriptprocedure.cpp u/t_client_si_usercall.cpp \
+    u/t_game_sim_loader.cpp u/t_game_sim_planet.cpp u/t_game_sim_ship.cpp \
+    u/t_game_sim_object.cpp u/t_game_sim.hpp \
+    u/t_game_actions_preconditions.cpp u/t_game_actions.hpp \
+    u/t_util_runlengthexpandtransform.cpp u/t_util_stringparser.cpp \
+    u/t_ui_res_resid.cpp u/t_game_interface_explosioncontext.cpp \
+    u/t_game_map_explosion.cpp u/t_interpreter_procedurevalue.cpp \
+    u/t_util_plugin_plugin.cpp u/t_util_plugin.hpp u/t_game_playerlist.cpp \
+    u/t_interpreter_vmio_valueloader.cpp u/t_interpreter_mutexlist.cpp \
+    u/t_interpreter_vmio_nullsavecontext.cpp \
+    u/t_interpreter_vmio_loadcontext.cpp u/t_interpreter_vmio.hpp \
+    u/t_interpreter_blobvalue.cpp u/t_game_interface_ufocontext.cpp \
+    u/t_game_interface_enginecontext.cpp \
+    u/t_game_interface_friendlycodecontext.cpp \
+    u/t_game_interface_missioncontext.cpp u/helper/contextverifier.cpp \
+    u/helper/contextverifier.hpp u/t_interpreter_context.cpp \
+    u/t_game_config_genericintegerarrayoption.cpp \
+    u/t_game_config_integeroption.cpp u/t_game_config_aliasoption.cpp \
+    u/t_game_hostversion.cpp u/t_game_experiencelevelset.cpp \
     u/t_game_spec_engine.cpp u/t_game_historyturnlist.cpp \
     u/t_game_element.cpp u/t_game_historyturn.cpp u/t_game_turnloader.cpp \
     u/t_game_registrationkey.cpp u/t_game_specificationloader.cpp \
@@ -540,7 +762,8 @@ PROJ_AUTO += testsuite:u/*.cpp,u/*.hpp
 HEADERS_testsuite = u/t_*.hpp
 
 test: $(OUTPUT_testsuite)
-	./testsuite
+	@echo "        Running testsuite..."
+	@$(RUN) ./$(OUTPUT_testsuite)
 
 testsuite.cpp: $(HEADERS_testsuite)
 	@echo "        Generating test driver..."

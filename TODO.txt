@@ -33,13 +33,35 @@ MESSAGES. Can we integrate all messages (in-game messages, PMs, activities, foru
 - Make an interface that provides heading/text/parsed data/VCR.
 - Cannot load everything locally, only in-game messages.
 
-SCRIPT-BASED TILES. We need tiles 
-
 FILER NG.
 - Use SHA-1 addressing (like git) for implicit deduplication.
 - Add transaction support: upload many files at once and commit at the end; fork dataspace for backup.
 - Add support for symlinks so that user:u/user/path/player9.rst can actually be a link to host:games/0001/out/9/player9.rst.
 - Requires export/import for host runs!
+- Feasibility proof: backup of around 1360 host runs
+    1.1G with compressed backups, 7671 files
+       tarball (20161007-hostdata.tar.gz) --> 1028284795 bytes
+    5.7G with unpacked backups, 236k files
+    2.9G deduplicated, 87k files
+       tarball --> 490421264 bytes = 52% savings
+    1.1G deduplicated and individually compressed, 87k files
+       tarball --> 487724408 bytes
+  deduplication: unpack all embedded backups, deduplicate according to SHA1. Many files appear a few thousand times:
+  . 5465 x da39a3ee5e6b4b0d3255bfef95601890afd80709 empty file
+  . 3237 x 1489f923c4dca729178b3e3233458550d8dddf29 "\0\0"
+  . 2824 x abf24fe466a4aebb67df9c09c2e709f08ded11e6 planet.nm (10k)
+  . 2780 x 248007892b37290e57481fe14a6cc3bd14716253 storm.nm (1k)
+  . 2756 x 58035942b6e2767eff1067e8c4dfe841ac9b779e extmines.hst (114k)
+  . 2729 x c2bb2031892bd458f66765026b406b0ac71220b3 xtrafcod.txt (280b)
+  . 2691 x 4621a111daaee735ecf2efa1cacd88117fbd456c mission.ini (796b)
+  . 2065 x 774dcd1416072b15f5ea714a24a8a5befdd3b271 ptscore.log (188b)
+  . 1951 x ee1bd67ad9ada8e9f758d73e07e437f4ba206cfb amaster.src (42k)
+  . 1762 x c1e97145ed7f2f42fcffa6a040e623344e8086fb map.ini (37b)
+  . 1401 x e17e582f41605053e9ca23bbb8431dcad01397ac PList beamspec.dat (360b)
+  . 1401 x 2b157adab7b80f9f88d3294316e334e9ec6caa6e PList torpspec.dat (470b)
+  . 1376 x 9f1d18a684944457c37c4730318a82f36fef330d PList hullfunc.txt (25k)
+  . 1356 x 625207c88f4903b5b68c547e2bf10ac33e0336ec truehull.dat (440b)
+- TL;DR: deduplication PCc host data needs the same amount of on-disk storage, but reduces backup size in half.
 
 SDL2/ANDROID.
 
@@ -56,3 +78,16 @@ SPECIFICATION BROWSER. A better version of CCShips.
 
 MORE HOSTS. Can we do CircusMaximus?
 
+OBJECT FILE (*.qc) SUPPORT.
+
+
+MISC
+=====
+
+INTERPRETER REWORKS.
+- Constant folding. Translate '"foo" & chr(33)' into a string.
+- Rework expressions to reference+deleter style instead of current auto_ptr style.
+
+SUPPORT 8-BPP.
+- Need to disable or tweak graphical effects. It's easy to saturate the GUI thread by just scrolling around
+  on the main screen.

@@ -7,6 +7,17 @@
 
 #include <cxxtest/TestSuite.h>
 
+class TestUiWidgetsAbstractButton : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
+class TestUiWidgetsCheckbox : public CxxTest::TestSuite {
+ public:
+    void testCycle();
+    void testLifetime();
+};
+
 class TestUiWidgetsFocusIterator : public CxxTest::TestSuite {
  public:
     void testTab();
@@ -18,6 +29,17 @@ class TestUiWidgetsFocusIterator : public CxxTest::TestSuite {
     void testVerticalWrap();
     void testVerticalTab();
     void testOther();
+};
+
+class TestUiWidgetsInputLine : public CxxTest::TestSuite {
+ public:
+    void testInsert();
+};
+
+class TestUiWidgetsRadioButton : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testLifetime();
 };
 
 #endif

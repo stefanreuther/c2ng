@@ -25,4 +25,10 @@
      or a number of processes such as a Task Manager command or the initial auto-task run.
 
      Callbacks from script to UI are synchronized on process Ids.
+
+     <b>Entry Points:</b>
+
+     - client::si::UserSide (bootstraps most of it)
+     - client::si::Control (entry point to script integration from user interface)
+     - client::si::DialogFunction (entry point to user-interface integration from scripts)
  */

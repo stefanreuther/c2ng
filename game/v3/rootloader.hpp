@@ -24,7 +24,7 @@ namespace game { namespace v3 {
     // - multi-use (=can be used multiple times to re-scan)
     class RootLoader {
      public:
-        RootLoader(afl::base::Ptr<afl::io::Directory> defaultSpecificationDirectory,
+        RootLoader(afl::base::Ref<afl::io::Directory> defaultSpecificationDirectory,
                    util::ProfileDirectory& profile,
                    afl::string::Translator& tx,
                    afl::sys::LogListener& log,
@@ -32,10 +32,10 @@ namespace game { namespace v3 {
 
         void setCharsetNew(afl::charset::Charset* p);
 
-        afl::base::Ptr<Root> load(afl::base::Ptr<afl::io::Directory> gameDirectory, bool forceEmpty);
+        afl::base::Ptr<Root> load(afl::base::Ref<afl::io::Directory> gameDirectory, bool forceEmpty);
 
      private:
-        afl::base::Ptr<afl::io::Directory> m_defaultSpecificationDirectory;
+        afl::base::Ref<afl::io::Directory> m_defaultSpecificationDirectory;
         util::ProfileDirectory& m_profile;
         afl::string::Translator& m_translator;
         afl::sys::LogListener& m_log;

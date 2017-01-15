@@ -1,0 +1,7 @@
+/*!
+     \namespace game::db
+     \brief Starchart Database
+
+     This namespace contains code to save and load the starchart database (chart.cc).
+     The starchart database contains history information and other data that is kept between turns without host assistance.
+ */

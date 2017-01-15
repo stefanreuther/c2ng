@@ -14,7 +14,7 @@ namespace game { namespace nu {
 
     class SpecificationLoader : public game::SpecificationLoader {
      public:
-        SpecificationLoader(afl::base::Ptr<GameState> gameState,
+        SpecificationLoader(afl::base::Ref<GameState> gameState,
                             afl::string::Translator& tx,
                             afl::sys::LogListener& log);
 
@@ -23,7 +23,7 @@ namespace game { namespace nu {
         virtual void loadShipList(game::spec::ShipList& list, Root& root);
 
      private:
-        afl::base::Ptr<GameState> m_gameState;
+        afl::base::Ref<GameState> m_gameState;
         afl::string::Translator& m_translator;
         afl::sys::LogListener& m_log;
 

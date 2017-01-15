@@ -5,6 +5,7 @@
 #include "interpreter/arrayvalue.hpp"
 #include "interpreter/arguments.hpp"
 #include "interpreter/error.hpp"
+#include "interpreter/savecontext.hpp"
 
 namespace {
     /** Maximum total size of an array.
@@ -175,7 +176,7 @@ interpreter::ArrayData::resize(const ArrayData& tpl)
 
 // /** Constructor.
 //     \param data Our array */
-interpreter::ArrayValue::ArrayValue(afl::base::Ptr<ArrayData> data)
+interpreter::ArrayValue::ArrayValue(afl::base::Ref<ArrayData> data)
     : m_data(data)
 { }
 
@@ -206,7 +207,7 @@ interpreter::ArrayValue::set(Arguments& args, afl::data::Value* value)
 
 // CallableValue:
 int32_t
-interpreter::ArrayValue::getDimension(int32_t which)
+interpreter::ArrayValue::getDimension(int32_t which) const
 {
     // ex IntArray::getDimension
     // FIXME: range checks?
@@ -240,21 +241,15 @@ interpreter::ArrayValue::toString(bool /*readable*/) const
 }
 
 void
-interpreter::ArrayValue::store(TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, SaveContext* /*ctx*/) const
+interpreter::ArrayValue::store(TagNode& out, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, SaveContext& ctx) const
 {
     // ex IntArray::store
-    // FIXME: port this (VM save)
-//     IntVMSaveContext* vsc = IntVMSaveContext::getCurrentInstance();
-//     if (vsc != 0) {
-//         tag.tag   = IntTagNode::Tag_Array;
-//         tag.value = vsc->addArray(*data);
-//     } else {
-    throw Error::notSerializable();
-//     }
+    out.tag   = TagNode::Tag_Array;
+    out.value = ctx.addArray(*m_data);
 }
 
 // Inquiry
-afl::base::Ptr<interpreter::ArrayData>
+afl::base::Ref<interpreter::ArrayData>
 interpreter::ArrayValue::getData()
 {
     return m_data;

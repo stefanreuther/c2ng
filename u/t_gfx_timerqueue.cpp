@@ -34,8 +34,8 @@ TestGfxTimerQueue::test1()
 
     // Set up
     gfx::TimerQueue testee;
-    afl::base::Ptr<gfx::Timer> t1 = testee.createTimer();
-    afl::base::Ptr<gfx::Timer> t2 = testee.createTimer();
+    afl::base::Ptr<gfx::Timer> t1 = testee.createTimer().asPtr();
+    afl::base::Ptr<gfx::Timer> t2 = testee.createTimer().asPtr();
     t1->sig_fire.add(&h1, &Handler::tick);
     t2->sig_fire.add(&h2, &Handler::tick);
 
@@ -72,6 +72,6 @@ TestGfxTimerQueue::test2()
     afl::base::Ptr<gfx::Timer> t1;
     {
         gfx::TimerQueue testee;
-        t1 = testee.createTimer();
+        t1 = testee.createTimer().asPtr();
     }
 }

@@ -16,12 +16,14 @@
 #include "afl/string/parse.hpp"
 #include "afl/io/xml/defaultentityhandler.hpp"
 #include "afl/charset/utf8.hpp"
+#include "util/rich/alignmentattribute.hpp"
 
 using interpreter::checkIntegerArg;
 using interpreter::checkStringArg;
 using interpreter::makeIntegerValue;
 using interpreter::makeStringValue;
 typedef game::interface::RichTextValue::Ptr_t Ptr_t;
+typedef game::interface::RichTextValue::Ref_t Ref_t;
 
 namespace {
     enum StyleKind {
@@ -114,7 +116,7 @@ game::interface::checkRichArg(RichTextValue::Ptr_t& out, afl::data::Value* value
         return false;
     } else {
         if (RichTextValue* rv = dynamic_cast<RichTextValue*>(value)) {
-            out = rv->get();
+            out = rv->get().asPtr();
         } else {
             out = new util::rich::Text(interpreter::toString(value, false));
         }
@@ -141,13 +143,13 @@ game::interface::IFRAdd(game::Session& /*session*/, interpreter::Arguments& args
         // Special case: act as cast-to-rich-text, avoiding a copy
         Ptr_t result;
         if (checkRichArg(result, args.getNext())) {
-            return new RichTextValue(result);
+            return new RichTextValue(*result);
         } else {
             return 0;
         }
     } else {
         // General case
-        Ptr_t result = new util::rich::Text();
+        Ref_t result = *new util::rich::Text();
         while (args.getNumArgs() > 0) {
             Ptr_t tmp;
             if (!checkRichArg(tmp, args.getNext())) {
@@ -157,6 +159,41 @@ game::interface::IFRAdd(game::Session& /*session*/, interpreter::Arguments& args
         }
         return new RichTextValue(result);
     }
+}
+
+afl::data::Value*
+game::interface::IFRAlign(game::Session& /*session*/, interpreter::Arguments& args)
+{
+    /* @q RAlign(str:RichText, width:Int, Optional align:Int):RichText (Function)
+       Place rich text in an alignment block.
+
+       Creates a block of the given width, and aligns the text in it.
+       For word-wrapping purposes, the block is treated as a single unit.
+
+       This can be used to make simple tables. For example,
+       <pre class="ccscript">
+         RAdd(RAlign("one", 100, 2), "\n", RAlign("another", 100, 2))
+       </pre>
+       produces the words "one" and "another", each aligned to the right at 100 pixels, in successive lines.
+
+       <b>Note:</b> This function's interface is still preliminary.
+
+       @since PCC2 2.40.1 */
+    args.checkArgumentCount(2, 3);
+
+    // Parse args
+    Ptr_t text;
+    int32_t width;
+    int32_t align = 0;
+    if (!checkRichArg(text, args.getNext()) || !checkIntegerArg(width, args.getNext(), 0, 10000)) {
+        return 0;
+    }
+    checkIntegerArg(align, args.getNext(), 0, 2);   // FIXME: preliminary!!!
+
+    // Create result
+    Ref_t clone = *new util::rich::Text(*text);
+    clone->withNewAttribute(new util::rich::AlignmentAttribute(width, align));
+    return new RichTextValue(clone);
 }
 
 // /* @q RMid(str:RichText, first:Int, Optional length:Int):RichText (Function)
@@ -195,9 +232,9 @@ game::interface::IFRMid(game::Session& /*session*/, interpreter::Arguments& args
     size_t nStart  = u8.charToBytePos(text, iStart == 0 ? 0 : static_cast<size_t>(iStart) - 1);
     size_t nLength = u8.charToBytePos(text.substr(nStart), iLength);
     if (nStart > str->size()) {
-        return new RichTextValue(new util::rich::Text());
+        return new RichTextValue(*new util::rich::Text());
     } else {
-        return new RichTextValue(new util::rich::Text(str->substr(nStart, nLength)));
+        return new RichTextValue(*new util::rich::Text(str->substr(nStart, nLength)));
     }
 }
 
@@ -240,12 +277,10 @@ game::interface::IFRLen(game::Session& /*session*/, interpreter::Arguments& args
     args.checkArgumentCount(1);
     Ptr_t str;
     if (checkRichArg(str, args.getNext())) {
-        // FIXME: use character numbers, not bytes!
-        return makeIntegerValue(str->size());
+        return makeIntegerValue(afl::charset::Utf8(0).length(str->getText()));
     } else {
         return 0;
     }
-
 }
 
 // /* @q RStyle(style:Str, content:RichText...):RichText (Function)
@@ -289,7 +324,7 @@ game::interface::IFRStyle(game::Session& session, interpreter::Arguments& args)
         result = processStyle(style.substr(pos, i-pos), result);
         pos = i+1;
     }
-    return new RichTextValue(processStyle(style.substr(pos), result));
+    return new RichTextValue(*processStyle(style.substr(pos), result));
 }
 
 // /* @q RLink(target:Str, content:RichText...):RichText (Function)
@@ -322,7 +357,7 @@ game::interface::IFRLink(game::Session& session, interpreter::Arguments& args)
     }
 
     // Build a link
-    Ptr_t clone = new util::rich::Text(*result);
+    Ref_t clone = *new util::rich::Text(*result);
     clone->withNewAttribute(new util::rich::LinkAttribute(link));
     return new RichTextValue(clone);
 }
@@ -393,6 +428,6 @@ game::interface::IFRXml(game::Session& /*session*/, interpreter::Arguments& args
     p.readNext();
 
     // Read
-    Ptr_t result = new util::rich::Text(p.parse());
+    Ref_t result = *new util::rich::Text(p.parse());
     return new RichTextValue(result);
 }

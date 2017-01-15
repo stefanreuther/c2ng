@@ -17,13 +17,13 @@ namespace game { namespace pcc {
      public:
         BrowserHandler(game::browser::Browser& b,
                        afl::net::http::Manager& mgr,
-                       afl::base::Ptr<afl::io::Directory> defaultSpecificationDirectory,
+                       afl::base::Ref<afl::io::Directory> defaultSpecificationDirectory,
                        util::ProfileDirectory& profile);
 
         // Handler:
         virtual bool handleFolderName(String_t name, afl::container::PtrVector<game::browser::Folder>& result);
         virtual game::browser::Folder* createAccountFolder(game::browser::Account& acc);
-        virtual afl::base::Ptr<Root> loadGameRoot(afl::base::Ptr<afl::io::Directory> dir);
+        virtual afl::base::Ptr<Root> loadGameRoot(afl::base::Ref<afl::io::Directory> dir);
 
         // pcc::BrowserHandler
         bool login(game::browser::Account& acc);
@@ -40,13 +40,13 @@ namespace game { namespace pcc {
 
         afl::sys::LogListener& log();
 
-        afl::base::Ptr<afl::io::Directory> getDefaultSpecificationDirectory();
+        afl::base::Ref<afl::io::Directory> getDefaultSpecificationDirectory();
         util::ProfileDirectory& profile();
 
      private:
         game::browser::Browser& m_browser;
         afl::net::http::Manager& m_manager;
-        afl::base::Ptr<afl::io::Directory> m_defaultSpecificationDirectory;
+        afl::base::Ref<afl::io::Directory> m_defaultSpecificationDirectory;
         util::ProfileDirectory& m_profile;
 
         // Cache:

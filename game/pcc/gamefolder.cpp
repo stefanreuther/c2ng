@@ -32,7 +32,7 @@ game::pcc::GameFolder::loadGameRoot()
 #if 1
     // Quick and dirty solution: pretend this to be a local folder and work with that.
     // FIXME: this needs a lot of optimisation (and quite a number of protocol improvements on server side).
-    return m_v3loader.load(new ServerDirectory(m_handler, m_account, m_path), false);
+    return m_v3loader.load(*new ServerDirectory(m_handler, m_account, m_path), false);
 #else
     afl::base::Ptr<afl::io::Directory> gameDirectory(new ServerDirectory(m_handler, m_account, m_path));
 

@@ -8,7 +8,7 @@
 #include "afl/base/types.hpp"
 #include "afl/data/segment.hpp"
 #include "interpreter/indexablevalue.hpp"
-#include "afl/base/ptr.hpp"
+#include "afl/base/ref.hpp"
 
 namespace interpreter {
 
@@ -16,7 +16,7 @@ namespace interpreter {
 
     /** Storage for array data.
         Consists of a set of dimensions, plus an IntDataSegment containing the array data. */
-    class ArrayData {
+    class ArrayData : public afl::base::RefCounted {
      public:
         ArrayData();
         ~ArrayData();
@@ -31,6 +31,10 @@ namespace interpreter {
 
         afl::data::Segment content;
 
+        // FIXME: can we avoid this?
+        const std::vector<size_t>& getDimensions() const
+            { return m_dimensions; }
+
      private:
         /** Total size. Used to keep track of the maximum total number of elements. */
         size_t m_totalSize;
@@ -44,26 +48,26 @@ namespace interpreter {
         The actual data is stored in an ArrayData object. */
     class ArrayValue : public IndexableValue {
      public:
-        ArrayValue(afl::base::Ptr<ArrayData> data);
+        ArrayValue(afl::base::Ref<ArrayData> data);
 
         // IndexableValue:
         virtual afl::data::Value* get(Arguments& args);
         virtual void set(Arguments& args, afl::data::Value* value);
 
         // CallableValue:
-        virtual int32_t getDimension(int32_t which);
+        virtual int32_t getDimension(int32_t which) const;
         virtual Context* makeFirstContext();
 
         // BaseValue:
         virtual ArrayValue* clone() const;
         virtual String_t toString(bool readable) const;
-        virtual void store(TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, SaveContext* ctx) const;
+        virtual void store(TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, SaveContext& ctx) const;
 
         // Inquiry
-        afl::base::Ptr<ArrayData> getData();
+        afl::base::Ref<ArrayData> getData();
 
      private:
-        afl::base::Ptr<ArrayData> m_data;
+        afl::base::Ref<ArrayData> m_data;
     };
 }
 

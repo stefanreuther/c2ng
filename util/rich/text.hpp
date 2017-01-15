@@ -8,6 +8,7 @@
 #include "afl/container/ptrvector.hpp"
 #include "util/skincolor.hpp"
 #include "util/rich/styleattribute.hpp"
+#include "afl/base/refcounted.hpp"
 
 namespace util { namespace rich {
 
@@ -27,7 +28,7 @@ namespace util { namespace rich {
 
         In addition to method calls, you can use RichTextVisitor to
         inspect a RichText object. */
-    class Text {
+    class Text : public afl::base::RefCounted {
      public:
         typedef String_t::size_type size_type;
 

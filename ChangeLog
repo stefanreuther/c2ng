@@ -1,3 +1,346 @@
+2017-01-14  Stefan Reuther  <streu@gmx.de>
+
+	* tools/c2untrn.cpp: new [game/un-trn.cc]
+	* game/v3/trn/dumper.cpp, game/v3/trn/dumper.hpp: new [game/un-trn.cc]
+
+2017-01-10  Stefan Reuther  <streu@gmx.de>
+
+	* util/application.cpp, util/application.hpp: new
+
+2017-01-08  Stefan Reuther  <streu@gmx.de>
+
+	* game/v3/trn/andfilter.cpp, game/v3/trn/andfilter.hpp: new [game/un-trnflt.h]
+	* game/v3/trn/constantfilter.cpp, game/v3/trn/constantfilter.hpp: new [game/un-trnflt.h]
+	* game/v3/trn/filter.cpp, game/v3/trn/filter.hpp: new [game/un-trnflt.h]
+	* game/v3/trn/idfilter.cpp, game/v3/trn/idfilter.hpp: new [game/un-trnflt.h]
+	* game/v3/trn/indexfilter.cpp, game/v3/trn/indexfilter.hpp: new [game/un-trnflt.h]
+	* game/v3/trn/namefilter.cpp, game/v3/trn/namefilter.hpp: new [game/un-trnflt.h]
+	* game/v3/trn/negatefilter.cpp, game/v3/trn/negatefilter.hpp: new [game/un-trnflt.h]
+	* game/v3/trn/orfilter.cpp, game/v3/trn/orfilter.hpp: new [game/un-trnflt.h]
+	* game/v3/trn/parseexception.hpp: new [game/un-trnflt.h]
+	* game/v3/trn/stringfilter.cpp, game/v3/trn/stringfilter.hpp: new [game/un-trnflt.h]
+	* interpreter/optimizer.cpp (doInvertJumps): do not optimize jXXp + jXX [#328]
+
+2017-01-03  Stefan Reuther  <streu@gmx.de>
+
+	* gfx/basecontext.cpp, gfx/basecontext.hpp: new; rework gfx::Context
+	* gfx/basecolorscheme.hpp: new; rework gfx::ColorScheme
+
+2017-01-02  Stefan Reuther  <streu@gmx.de>
+
+	* client/widgets/commanddataview.cpp, client/widgets/commanddataview.hpp: new
+	* ui/rich/draw.cpp, ui/rich/draw.hpp: new
+
+2016-12-28  Stefan Reuther  <streu@gmx.de>
+
+	* interpreter/vmio/assemblersavecontext.cpp, interpreter/vmio/assemblersavecontext.hpp: new
+	* ui/rich/splitter.cpp, ui/rich/splitter.hpp: new
+
+2016-12-25  Stefan Reuther  <streu@gmx.de>
+
+	* interpreter/values.cpp (getBooleanValue): non-scalars treated as true, not empty [#327]
+
+2016-12-24  Stefan Reuther  <streu@gmx.de>
+
+	* game/interface/commandinterface.cpp, game/interface/commandinterface.hpp: new
+
+2016-12-23  Stefan Reuther  <streu@gmx.de>
+
+	* client/widgets/collapsibledataview.cpp, client/widgets/collapsibledataview.hpp: new
+	* client/widgets/standarddataview.cpp, client/widgets/standarddataview.hpp: new
+	* game/interface/globalfunctions.cpp (Pref): new
+	* game/interface/globalcommands.cpp (AddPref, CreatePrefOption, CreateConfigOption): new
+	* client/tiles/shipoverviewtile.cpp, client/tiles/shipoverviewtile.hpp: moved into core_tiles.q
+	* game/v3/commandextra.cpp, game/v3/commandextra.hpp: new
+	* game/v3/command.cpp, game/v3/command.hpp: new [game/cmds.h]
+	* game/v3/commandcontainer.cpp, game/v3/commandcontainer.hpp: new [game/cmds.h]
+
+2016-12-20  Stefan Reuther  <streu@gmx.de>
+
+	* gfx/sdl/engine.cpp: add performance/throughput hack for UI/worker thread transitions
+	* ui/layout/grid.cpp, ui/layout/grid.hpp: new [ui/layout.h]
+	* client/widgets/comment.cpp, client/widgets/comment.hpp: new [client/tiles/commenttile.h]
+
+2016-12-19  Stefan Reuther  <streu@gmx.de>
+
+	* ui/layout/flow.cpp, ui/layout/flow.hpp: new [ui/layout.h]
+	* ui/widgets/quit.cpp, ui/widgets/quit.hpp: new [ui/widgets/quit.h]
+	* ui/widgets/radiobutton.cpp, ui/widgets/radiobutton.hpp: new [ui/widgets/radiobutton.h]
+	* ui/widgets/checkbox.cpp, ui/widgets/checkbox.hpp: new [ui/widgets/checkbox.h]
+	* ui/screenshotlistener.cpp, ui/screenshotlistener.hpp: new [ui/uiglobal.h]
+	* gfx/save.cpp, gfx/save.hpp: new
+
+2016-12-18  Stefan Reuther  <streu@gmx.de>
+
+	* ui/widgets/abstractcheckbox.cpp, ui/widgets/abstractcheckbox.hpp: new [ui/widgets/abstractcheckbox.h]
+	* gfx/nullresourceprovider.cpp, gfx/nullresourceprovider.hpp: new
+
+2016-12-17  Stefan Reuther  <streu@gmx.de>
+
+	* ui/prefixargument.cpp, ui/prefixargument.hpp: new [ui/prefix.h]
+	* util/prefixargument.cpp, util/prefixargument.hpp: new [ui/prefix.h]
+	* game/v3/controlfile.cpp, game/v3/controlfile.hpp: new [game/checksum.h]
+
+2016-12-16  Stefan Reuther  <streu@gmx.de>
+
+	* client/si/commands.cpp, client/si/widgetcommand.cpp, gfx/sdl/engine.cpp: proper screen updates for script-initiated dialogs
+	* client/si/listboxfunction.cpp, client/si/listboxfunction.hpp: new [int/if/listif.h]
+	* client/si/stringlistdialogwidget.cpp, client/si/stringlistdialogwidget.hpp: new [int/if/listif.h]
+
+2016-12-14  Stefan Reuther  <streu@gmx.de>
+
+	* ui/widgets/stringlistbox.cpp, ui/widgets/stringlistbox.hpp: new [ui/listbox.h]
+	* util/stringlist.cpp, util/stringlist.hpp: new [util/strlist.h]
+
+2016-12-11  Stefan Reuther  <streu@gmx.de>
+
+	* gfx/defaultfont.cpp, gfx/defaultfont.hpp: new
+	* client/widgets/consoleview.cpp, client/widgets/consoleview.hpp: new [client/widgets/consoleview.h]
+	* util/messagenotifier.cpp, util/messagenotifier.hpp: new [util/console.h]
+	* util/messagecollector.cpp, util/messagecollector.hpp: new [util/console.h]
+
+2016-12-09  Stefan Reuther  <streu@gmx.de>
+
+	* util/messagematcher.cpp, util/messagematcher.hpp: new
+	* util/filenamepattern.cpp, util/filenamepattern.hpp: new [io/glob.h]
+
+2016-12-08  Stefan Reuther  <streu@gmx.de>
+
+	* tools/c2sweep.cpp: new [tools/c2sweep.cc]
+	* game/maint/directorywrapper.cpp, game/maint/directorywrapper.hpp: new [game/sweep.h]
+
+2016-12-07  Stefan Reuther  <streu@gmx.de>
+
+	* game/maint/sweeper.cpp, game/maint/sweeper.hpp: new [game/sweep.h]
+
+2016-12-05  Stefan Reuther  <streu@gmx.de>
+
+	* game/map/reverter.hpp: new
+	* game/v3/reverter.hpp: new
+
+2016-12-04  Stefan Reuther  <streu@gmx.de>
+
+	* game/interface/minefieldmethod.cpp, game/interface/minefieldmethod.hpp: new [int/if/mineif.h]
+
+2016-12-03  Stefan Reuther  <streu@gmx.de>
+
+	* share/resource/core_tiles.q (Tile.PlanetOverview, Tile.BaseOverview): new
+	* util/rich/alignmentattribute.cpp, util/rich/alignmentattribute.hpp: new
+	* client/plugins.cpp, game/session.cpp, interpreter/process.cpp, interpreter/world.cpp, main/c2ng.cpp: rework and simplify Load/core.q handling
+
+2016-12-02  Stefan Reuther  <streu@gmx.de>
+
+	* client/si/widgetextraproperty.cpp, client/si/widgetextraproperty.hpp: new
+	* client/si/widgetindexedproperty.cpp, client/si/widgetindexedproperty.hpp: new
+
+2016-12-01  Stefan Reuther  <streu@gmx.de>
+
+	* client/si/widgetreference.cpp, client/si/widgetreference.hpp: new
+
+2016-11-29  Stefan Reuther  <streu@gmx.de>
+
+	* client/si/widgetwrapper.cpp, client/si/widgetwrapper.hpp: new
+
+2016-11-28  Stefan Reuther  <streu@gmx.de>
+
+	* client/si/userside.hpp, game/session.hpp: ScriptSide now is an optional attribute of Session; simplifies downstream code
+
+2016-11-26  Stefan Reuther  <streu@gmx.de>
+
+	* client/tiles/basescreenheadertile.cpp, client/tiles/basescreenheadertile.hpp: new [client/tiles/baseheader.h]
+	* client/tiles/planetscreenheadertile.cpp, client/tiles/planetscreenheadertile.hpp: new [client/tiles/planetheader.h]
+	* ui/widgets/transparentwindow.cpp, ui/widgets/transparentwindow.hpp: new
+	* gfx/gen/perlinnoise.cpp, gfx/gen/perlinnoise.hpp: new
+	* gfx/gen/spaceview.cpp, gfx/gen/spaceview.hpp: new
+	* gfx/gen/spaceviewconfig.cpp, gfx/gen/spaceviewconfig.hpp: new
+
+2016-11-21  Stefan Reuther  <streu@gmx.de>
+
+	* client/si/values.cpp, client/si/values.hpp: new
+	* client/si/widgetproperty.cpp, client/si/widgetproperty.hpp: new
+
+2016-11-20  Stefan Reuther  <streu@gmx.de>
+
+	* client/si/dialogfunction.cpp, client/si/dialogfunction.hpp: new
+	* client/si/genericwidgetvalue.cpp, client/si/genericwidgetvalue.hpp: new
+	* client/si/widgetcommand.cpp, client/si/widgetcommand.hpp: new
+	* client/si/widgetcommandvalue.cpp, client/si/widgetcommandvalue.hpp: new
+	* client/si/widgetfunction.cpp, client/si/widgetfunction.hpp: new
+	* client/si/widgetfunctionvalue.cpp, client/si/widgetfunctionvalue.hpp: new
+	* client/si/widgetholder.cpp, client/si/widgetholder.hpp: new
+	* client/si/widgetvalue.cpp, client/si/widgetvalue.hpp: new
+	* client/si/usercall.hpp: new
+
+2016-11-16  Stefan Reuther  <streu@gmx.de>
+
+	* interpreter/processobservercontext.hpp: new
+	* game/sim/loader.cpp, game/sim/loader.hpp: new [game/sim.h]
+
+2016-11-14  Stefan Reuther  <streu@gmx.de>
+
+	* game/sim/setup.cpp, game/sim/setup.hpp: new [game/sim.h]
+	* game/sim/planet.cpp, game/sim/planet.hpp: new [game/sim.h]
+
+2016-11-13  Stefan Reuther  <streu@gmx.de>
+
+	* game/sim/ability.hpp: new [game/sim.h]
+	* game/sim/configuration.cpp, game/sim/configuration.hpp: new [game/sim.h]
+	* game/sim/object.cpp, game/sim/object.hpp: new [game/sim.h]
+	* game/sim/ship.cpp, game/sim/ship.hpp: new [game/sim.h]
+
+2016-11-12  Stefan Reuther  <streu@gmx.de>
+
+	* game/interface/planetmethod.cpp, game/interface/planetmethod.hpp: new [int/if/planetif.h, int/if/baseif.h]
+	* game/actions/basefixrecycle.cpp, game/actions/basefixrecycle.hpp: new [game/actions/basefix.h]
+	* game/actions/preconditions.cpp, game/actions/preconditions.hpp: new [game/actions/preconditions.h]
+	* ui/res/winplanbitmapprovider.cpp, ui/res/winplanbitmapprovider.hpp: new [resmgr/res-wp.h]
+
+2016-11-11  Stefan Reuther  <streu@gmx.de>
+
+	* ui/res/factory.cpp, ui/res/factory.hpp: new [resmgr/resmgrcf.cc]
+
+2016-11-10  Stefan Reuther  <streu@gmx.de>
+
+	* ui/res/resourcefileprovider.cpp, ui/res/resourcefileprovider.hpp: new [resmgr/res-cc1.h, resmgr/cc1resid.h]
+	* ui/res/resourcefile.cpp, ui/res/resourcefile.hpp: new [resmgr/res-cc1.h]
+	* util/runlengthexpandtransform.cpp, util/runlengthexpandtransform.hpp: new [io/rle.h]
+
+2016-11-08  Stefan Reuther  <streu@gmx.de>
+
+	* game/score/loader.cpp, game/score/loader.hpp: new [game/stat.h]
+	* game/score/structures.hpp: new
+
+2016-11-06  Stefan Reuther  <streu@gmx.de>
+
+	* util/stringparser.cpp, util/stringparser.hpp: new [moved]
+	* ui/res/resid.cpp, ui/res/resid.hpp: new [resmgr/resmgr.h]
+	* game/interface/explosioncontext.cpp, game/interface/explosioncontext.hpp: new
+	* game/interface/explosionfunction.cpp, game/interface/explosionfunction.hpp: new
+	* game/interface/explosionproperty.cpp, game/interface/explosionproperty.hpp: new
+	* game/map/explosion.cpp, game/map/explosion.hpp: new [game/expl.h]
+	* game/map/explosiontype.cpp, game/map/explosiontype.hpp: new [game/expl.h]
+
+2016-11-05  Stefan Reuther  <streu@gmx.de>
+
+	* interpreter/simpleprocedurevalue.cpp, interpreter/simpleprocedurevalue.hpp: new [int/compound.h]
+	* interpreter/filefunctions.cpp, interpreter/filefunctions.hpp: new [int/file.h]
+	* interpreter/filetable.cpp, interpreter/filetable.hpp: new [int/file.h]
+	* interpreter/simpleindexablevalue.cpp, interpreter/simpleindexablevalue.hpp: new [int/compound.h]
+	* client/plugins.cpp, client/plugins.hpp: new [client/main.cc]
+	* game/map/fleettype.cpp, game/map/fleettype.hpp: new [game/fleet.h]
+	* interpreter/procedurevalue.cpp, interpreter/procedurevalue.hpp: new
+	* game/interface/shipmethod.cpp, game/interface/shipmethod.hpp: new [int/if/shipif.h]
+	* game/map/shiputils.cpp, game/map/shiputils.hpp: new [game/fleet.h]
+	* game/map/fleet.cpp, game/map/fleet.hpp: new [game/fleet.h]
+	* game/map/fleetmember.cpp, game/map/fleetmember.hpp: new [game/fleet.h]
+
+2016-11-03  Stefan Reuther  <streu@gmx.de>
+
+	* client/tiles/shipscreenheadertile.cpp, client/tiles/shipscreenheadertile.hpp: new [client/tiles/shipheader.h]
+
+2016-11-01  Stefan Reuther  <streu@gmx.de>
+
+	* client/tiles/controlscreenheadertile.cpp, client/tiles/controlscreenheadertile.hpp: new [client/tiles/csheader.h]
+	* ui/widgets/imagebutton.cpp, ui/widgets/imagebutton.hpp: new [ui/widgets/imagewidget.h]
+
+2016-10-31  Stefan Reuther  <streu@gmx.de>
+
+	* ui/widgets/framegroup.cpp, ui/widgets/framegroup.hpp: new [ui/widgets/framegroup.h, client/wcolorframe.h]
+	* game/interface/vcrcontext.cpp, game/interface/vcrcontext.hpp: new [int/if/vcrif.h]
+	* game/interface/vcrfunction.cpp, game/interface/vcrfunction.hpp: new [int/if/vcrif.h]
+	* game/interface/vcrproperty.cpp, game/interface/vcrproperty.hpp: new [int/if/vcrif.h]
+	* game/interface/vcrsidecontext.cpp, game/interface/vcrsidecontext.hpp: new [int/if/vcrif.h]
+	* game/interface/vcrsidefunction.cpp, game/interface/vcrsidefunction.hpp: new [int/if/vcrif.h]
+	* game/interface/vcrsideproperty.cpp, game/interface/vcrsideproperty.hpp: new [int/if/vcrif.h]
+
+2016-10-30  Stefan Reuther  <streu@gmx.de>
+
+	* game/interface/plugincontext.cpp, game/interface/plugincontext.hpp: new [int/if/plugif.h]
+	* game/interface/pluginfunction.cpp, game/interface/pluginfunction.hpp: new [int/if/plugif.h]
+	* game/interface/pluginproperty.cpp, game/interface/pluginproperty.hpp: new [int/if/plugif.h]
+	* tools/c2plugin.cpp: new [tools/c2plugin.cc]
+	* util/plugin/installer.cpp, util/plugin/installer.hpp: new [util/pluginstall.h]
+	* util/plugin/manager.cpp, util/plugin/manager.hpp: new [util/pluginmgr.h]
+	* util/plugin/plugin.cpp, util/plugin/plugin.hpp: new [util/plugin.h]
+	* game/interface/drawingmethod.cpp, game/interface/drawingmethod.hpp: new [int/if/drawingif.h]
+
+2016-10-29  Stefan Reuther  <streu@gmx.de>
+
+	* game/interface/drawingcontext.cpp, game/interface/drawingcontext.hpp: new [int/if/drawingif.h]
+	* game/interface/drawingfunction.cpp, game/interface/drawingfunction.hpp: new [int/if/drawingif.h]
+	* game/interface/drawingproperty.cpp, game/interface/drawingproperty.hpp: new [int/if/drawingif.h]
+	* util/io.cpp, util/io.hpp: new [io/io.h]
+	* game/db/drawingatommap.cpp, game/db/drawingatommap.hpp: new [game/drawing.h]
+	* game/db/loader.cpp, game/db/loader.hpp: new [game/db.h]
+	* game/db/structures.hpp: new
+	* game/map/drawing.cpp, game/map/drawing.hpp: new [game/drawing.h]
+	* game/map/drawingcontainer.cpp, game/map/drawingcontainer.hpp: new [game/drawing.h]
+
+2016-10-27  Stefan Reuther  <streu@gmx.de>
+
+	* interpreter/vmio/nullloadcontext.cpp, interpreter/vmio/nullloadcontext.hpp: new
+
+2016-10-22  Stefan Reuther  <streu@gmx.de>
+
+	* interpreter/vmio/nullsavecontext.cpp, interpreter/vmio/nullsavecontext.hpp: new
+	* interpreter/vmio/worldloadcontext.cpp, interpreter/vmio/worldloadcontext.hpp: new
+	* interpreter/vmio/processloadcontext.cpp, interpreter/vmio/processloadcontext.hpp: new
+	* game/interface/loadcontext.cpp, game/interface/loadcontext.hpp: new [int/contextio.h]
+	* interpreter/vmio/objectloader.cpp, interpreter/vmio/objectloader.hpp: new [int/vmio.h]
+	* interpreter/vmio/structures.hpp: new
+
+2016-10-20  Stefan Reuther  <streu@gmx.de>
+
+	* interpreter/blobvalue.cpp, interpreter/blobvalue.hpp: new [int/value.h]
+	* interpreter/vmio/loadcontext.hpp: new [int/vmio.h]
+	* interpreter/vmio/valueloader.cpp, interpreter/vmio/valueloader.hpp: new [int/vmio.h]
+
+2016-10-16  Stefan Reuther  <streu@gmx.de>
+
+	* interpreter/mutexcontext.cpp, interpreter/mutexcontext.hpp: new [int/mutex.h]
+	* interpreter/mutexfunctions.cpp, interpreter/mutexfunctions.hpp: new [int/mutex.h]
+	* interpreter/mutexlist.cpp, interpreter/mutexlist.hpp: new [int/mutex.h]
+	* interpreter/vmio/processsavecontext.cpp, interpreter/vmio/processsavecontext.hpp: new [int/vmio.h]
+	* interpreter/vmio/filesavecontext.cpp, interpreter/vmio/filesavecontext.hpp: new [int/vmio.h]
+	* tools/c2script.cpp: new
+	* game/interface/ufocontext.cpp, game/interface/ufocontext.hpp: new [int/if/ufoif.h]
+	* game/interface/ufoproperty.cpp, game/interface/ufoproperty.hpp: new [int/if/ufoif.h]
+	* game/interface/ufofunction.cpp, game/interface/ufofunction.hpp: new [int/if/ufoif.h]
+
+2016-10-09  Stefan Reuther  <streu@gmx.de>
+
+	* game/map/ufo.cpp, game/map/ufo.hpp: new [game/ufo.h]
+	* game/map/ufotype.cpp, game/map/ufotype.hpp: new [game/ufo.h]
+
+2016-10-08  Stefan Reuther  <streu@gmx.de>
+
+	* game/interface/missioncontext.cpp, game/interface/missioncontext.hpp: new
+	* game/interface/missionfunction.cpp, game/interface/missionfunction.hpp: new
+	* game/interface/missionproperty.cpp, game/interface/missionproperty.hpp: new
+	* game/interface/planetcontext.hpp, game/interface/shipcontext.hpp: use Ref<> to document non-null-ness
+
+2016-10-07  Stefan Reuther  <streu@gmx.de>
+
+	* game/v3/loader.cpp, game/v3/specificationloader.cpp: bugfix: correctly load truehull, base tech levels
+
+2016-10-05  Stefan Reuther  <streu@gmx.de>
+
+	* game/interface/cargofunctions.cpp, game/interface/cargofunctions.hpp: new [int/if/globalif.h]
+
+2016-10-04  Stefan Reuther  <streu@gmx.de>
+
+	* game/interface/friendlycodecontext.cpp, game/interface/friendlycodecontext.hpp: new
+	* game/interface/friendlycodefunction.cpp, game/interface/friendlycodefunction.hpp: new
+	* game/interface/friendlycodeproperty.cpp, game/interface/friendlycodeproperty.hpp: new
+
+2016-10-03  Stefan Reuther  <streu@gmx.de>
+
+	* game/config/configuration.cpp, game/interface/globalfunctions.cpp: implement Cfg()
+
+2016-09-25  Stefan Reuther  <streu@gmx.de>
+
+	-------------------- c2ng_ms0 (Milestone 0, version 2.40)
+
 2016-09-24  Stefan Reuther  <streu@gmx.de>
 
 	* game/pcc/accountfolder.cpp, game/pcc/accountfolder.hpp: new

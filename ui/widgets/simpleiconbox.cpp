@@ -42,10 +42,8 @@ ui::widgets::SimpleIconBox::getItemWidth(size_t nr)
 {
     // ex UIDirectoryCrumbTrail::getItemWidth (sort-of)
     if (nr < m_items.size()) {
-        afl::base::Ptr<gfx::Font> font = m_root.provider().getFont(m_items[nr].font);
-        if (font.get() != 0) {
-            return font->getTextWidth(m_items[nr].text) + GAP_X*2;
-        }
+        afl::base::Ref<gfx::Font> font = m_root.provider().getFont(m_items[nr].font);
+        return font->getTextWidth(m_items[nr].text) + GAP_X*2;
     }
     return 0;
 }
@@ -61,12 +59,9 @@ ui::widgets::SimpleIconBox::drawItem(gfx::Canvas& can, gfx::Rectangle area, size
 {
     // ex UIDirectoryCrumbTrail::drawItem
     if (item < m_items.size()) {
-        gfx::Context ctx(can);
-        ctx.useColorScheme(getColorScheme());
-        afl::base::Ptr<gfx::Font> font = m_root.provider().getFont(m_items[item].font);
-        if (font.get() != 0) {
-            ctx.useFont(*font);
-        }
+        gfx::Context<util::SkinColor::Color> ctx(can, getColorScheme());
+        afl::base::Ref<gfx::Font> font = m_root.provider().getFont(m_items[item].font);
+        ctx.useFont(*font);
 
         /* Draw the box */
         if (state == Selected) {

@@ -15,7 +15,7 @@ namespace {
     }
 }
 
-game::browser::FileSystemFolder::FileSystemFolder(Browser& parent, afl::base::Ptr<afl::io::Directory> dir, String_t title)
+game::browser::FileSystemFolder::FileSystemFolder(Browser& parent, afl::base::Ref<afl::io::Directory> dir, String_t title)
     : m_parent(parent),
       m_directory(dir),
       m_title(title)
@@ -25,15 +25,13 @@ void
 game::browser::FileSystemFolder::loadContent(afl::container::PtrVector<Folder>& result)
 {
     using afl::base::Ptr;
+    using afl::base::Ref;
     using afl::base::Enumerator;
     using afl::io::Directory;
     using afl::io::DirectoryEntry;
 
     // Enumerate directory
-    Ptr<Enumerator<Ptr<DirectoryEntry> > > content = m_directory->getDirectoryEntries();
-    if (content.get() == 0) {
-        return;
-    }
+    Ref<Enumerator<Ptr<DirectoryEntry> > > content = m_directory->getDirectoryEntries();
 
     // Build list
     Ptr<DirectoryEntry> elem;

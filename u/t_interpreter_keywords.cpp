@@ -21,14 +21,23 @@ TestInterpreterKeywords::testEnum()
             { }
         virtual void addProperty(const String_t& name, interpreter::TypeHint th)
             {
+                // Validate type hint
                 TS_ASSERT_EQUALS(th, interpreter::thNone);
+
+                // Validate that resolving the keyword back works
+                TS_ASSERT_DIFFERS(interpreter::lookupKeyword(name), interpreter::kwNone);
+
+                // Make sure we see some specific keywords (but only once)
                 if (name == "ABORT") {
+                    TS_ASSERT(!m_seenAbort);
                     m_seenAbort = true;
                 }
                 if (name == "WITH") {
+                    TS_ASSERT(!m_seenWith);
                     m_seenWith = true;
                 }
                 if (name == "REDIM") {
+                    TS_ASSERT(!m_seenRedim);
                     m_seenRedim = true;
                 }
             }

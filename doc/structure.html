@@ -1,0 +1,362 @@
+<html>
+  <head>
+    <title>PCC2ng: Big List Of Objects</title>
+    <!--
+        This document lists the (planned and existing) object structure of PCC2ng in an abstract, high-level format.
+        This document requires JavaScript to render all annotations.
+      -->
+    <style>
+      body {
+        font-family: sans-serif;
+        background-color: #fff;
+      }
+      .tree div {               /* General styles (also resets inherited styles) */
+        padding-left: 1em;
+        border-left: solid #ccc 1px;
+        border-bottom: solid #ccc 1px;
+        margin: 3px;
+        max-width: 40em;
+        color: #000;
+        text-decoration: none;  /* does not have an effect in Iceweasel 38 although it lists it as interpreted in the DOM inspector. Works in Konqueror. */
+        font-style: normal;
+      }
+      .root {                   /* Root element */
+      }
+      .root div                 { background-color: #f2f2f2; }
+      .root div div             { background-color: #e5e5e5; }
+      .root div div div         { background-color: #d8d8d8; }
+      .root div div div div     { background-color: #cbcbcb; }
+      .root div div div div div { background-color: #bebebe; }
+      .tree .hasnotify, .legend .hasnotify {          /* Has a notifyListeners method */
+      }
+      .tree .mark-hasnotify, .legend .mark-hasnotify {
+        display: inline-block;
+        width: 0;
+        height: 0;
+        border-left: #808 solid 0.25em;
+        border-bottom: #808 solid 0.25em;
+        border-right: rgba(255,255,255,0) solid 0.25em;
+        border-top: rgba(255,255,255,0) solid 0.25em;
+        margin-right: 0.2em;
+      }
+      .tree .haschange, .legend .haschange {          /* Has a change signal */
+      }
+      .tree .mark-haschange, .legend .mark-haschange {
+        display: inline-block;
+        width: 0.25em;
+        height: 0.25em;
+        border-left: #808 solid 0.1em;
+        border-bottom: #808 solid 0.1em;
+        border-right: #fff solid 0em;
+        border-top: #fff solid 0em;
+        margin-right: 0.2em;
+      }
+      .tree .optional, .legend .optional {            /* Optional element */
+      }
+      .tree .mark-optional, .legend .mark-optional {
+        color: blue;
+        text-decoration: none !important;
+        font-style: normal;
+        font-size: 80%;
+      }
+      .tree .ptr, .legend .ptr {                      /* Pointed-to by smart pointer */
+      }
+      .tree .mark-ptr, .legend .mark-ptr {
+        color: red;
+        text-decoration: none !important;
+        font-style: normal;
+        font-size: 80%;
+      }
+      .tree .ref, .legend .ref {                      /* Reference to an external object */
+      }
+      .tree .mark-ref, .legend .mark-ref {
+        color: green;
+        text-decoration: none !important;
+        font-style: normal;
+        font-size: 80%;
+      }
+      .tree .owned, .legend .owned {                  /* Owned (=opposite of .ptr) */
+      }
+      .tree .virtual, .legend .virtual {              /* Instance of derived class with virtual methods */
+        text-decoration: underline #cc0;
+        font-style: italic;
+      }
+      .tree .missing, .legend .missing {
+        color: #888;
+        text-decoration: underline dotted #888;
+      }
+      .legend {
+        border: solid black 1px;
+        float: right;
+        background-color: #fff;
+        padding: 0.2em;
+      }
+      .legend h2 {
+        margin: 0;
+        font-size: 120%;
+      }
+      .tree em {
+        text-decoration: none;
+        font-style: normal;
+        font-size: 80%;
+        color: #666;
+      }
+    </style>
+    <script>
+      window.addEventListener('load', function() {
+        function annotate(className, text) {
+          [].forEach.call(document.getElementsByClassName(className), function(e) {
+            var z = document.createElement('span');
+            z.className = 'mark-' + className;
+            z.appendChild(document.createTextNode(text));
+            e.insertBefore(z, e.firstChild);
+          });
+        }
+        annotate('optional', '? ');
+        annotate('ref', '& ');
+        annotate('ptr', '\u2192 ');
+        annotate('haschange', '');
+        annotate('hasnotify', '');
+      });
+    </script>
+  </head>
+  <body>
+    <h1>PCC2ng: Big List Of Objects</h1>
+
+    <div class="legend">
+      <h2>Legend</h2>
+      <table>
+        <tr><td class="hasnotify">Obj</td><td>Has notifyListeners() method and/or sig_change signal</td></tr>
+        <tr><td class="haschange">Obj</td><td>Has markChanged() method</td></tr>
+        <tr><td class="ptr">Obj</td><td>Pointed-to by shared smart pointer (and thus shareable)</td></tr>
+        <tr><td class="ref">Obj</td><td>Reference to another object</td></tr>
+        <tr><td class="optional">Obj</td><td>Optional (may not exist, pointer can be null)</td></tr>
+        <tr><td class="virtual">Obj</td><td>Derived instance of class with virtual methods</td></tr>
+        <tr><td class="missing">Obj</td><td>Planned but not implemented</td></tr>
+        <tr><td>[]</td><td>Container has multiple objects of this type</td></tr>
+      </table>
+      
+    </div>
+
+    <p>This document lists the (planned and existing) object structure of PCC2ng in an abstract, high-level format.</p>
+    <noscript>
+      This document requires JavaScript to render all annotations.
+    </noscript>
+    <ul>
+      <li><a href="#game">Game</a></li>
+      <li><a href="#browser">Browser</a></li>
+      <li><a href="#ui">User Interface</a></li>
+    </ul>
+
+    <h2 id="game">Game</h2>
+    <p>The game::Session is the root of anything that is done with game data.
+      All accesses to game::Session happen in a single thread.
+      This is either the only thread (console programs), or a background thread (GUI programs).
+      The game::Session also includes the interpreter::World.</p>
+    <div class="tree">
+      <div class="root hasnotify"><b>game::Session</b>
+        <div class="optional ptr hasnotify">Root <em>: game::Root</em>
+          <div class="ptr virtual">SpecDir <em>: afl::io::Directory</em></div>
+          <div class="ptr virtual">GameDir <em>: afl::io::Directory</em></div>
+          <div class="ptr virtual">SpecLoader <em>: game::SpecificationLoader</em></div>
+          <div class="owned">HostVersion <em>: game::HostVersion</em></div>
+          <div class="owned virtual">RegKey <em>: game::RegistrationKey</em></div>
+          <div class="owned haschange">HostConfig <em>: game::config::HostConfiguration</em></div>
+          <div class="owned haschange">UserConfig <em>: game::config::UserConfiguration</em></div>
+          <div class="owned haschange">PlayerList <em>: game::PlayerList</em>
+            <div class="owned">Player <em>: game::Player[]</em></div>
+          </div>
+          <div class="optional ptr virtual">TurnLoader <em>: game::TurnLoader</em></div>
+          <div class="owned virtual">StringVerifier <em>: game::StringVerifier</em></div>
+        </div>
+        <div class="optional ptr haschange">ShipList <em>: game::spec::ShipList</em>
+          <div class="owned">Beams <em>: game::spec::ComponentVector</em>
+            <div class="owned">Beam <em>: game::spec::Beam[]</em></div>
+          </div>
+          <div class="owned">Engines <em>: game::spec::ComponentVector</em>
+            <div class="owned">Engine <em>: game::spec::Engine[]</em></div>
+          </div>
+          <div class="owned">Launchers <em>: game::spec::ComponentVector</em>
+            <div class="owned">Launcher <em>: game::spec::TorpedoLauncher[]</em></div>
+          </div>
+          <div class="owned">Hulls <em>: game::spec::ComponentVector</em>
+            <div class="owned">Hull <em>: game::spec::Hull[]</em></div></div>
+          <div class="owned">BasicHullFunctions <em>: game::spec::BasicHullFunctionList</em>
+            <div class="owned">Engine <em>: game::spec::BasicHullFunction[]</em></div>
+            <div class="owned">DefaultAssignment <em>: (int,int)[]</em></div>
+          </div>
+          <div class="owned">ModifiedHullFunctions <em>: game::spec::ModifiedHullFunctionList</em>
+            <div class="owned">ModifiedFunction <em>: game::spec::HullFunction[]</em></div>
+          </div>
+          <div class="owned">RacialAbilities <em>: game::spec::HullFunctionAssignmentList</em></div>
+          <div class="owned">HullAssignments <em>: game::spec::HullAssignmentList</em></div>
+          <div class="owned">ComponentNamer <em>: game::spec::ComponentNameProvider</em></div>
+          <div class="owned">FriendlyCodes <em>: game::spec::FriendlyCodeList</em>
+            <div class="owned">FriendlyCode <em>: game::spec::FriendlyCode[]</em></div>
+          </div>
+          <div class="owned">Missions <em>: game::spec::MissionList</em>
+            <div class="owned">Mission <em>: game::spec::Mission[]</em></div></div>
+          <div class="owned missing">Torpedoes</div>
+          <div class="owned missing">Fighters</div>
+        </div>
+        <div class="optional ptr hasnotify">Game <em>: game::Game</em>
+          <div class="owned">PlanetScoreDef, ShipScoreDef <em>: game::UnitScoreDefinitionList</em></div>
+          <div class="owned">Viewpoint <em>: int</em></div>
+          <div class="owned">TurnScores <em>: game::TurnScoreList</em></div>
+          <div class="owned missing">Selections</div>
+          <div class="owned haschange">Teams <em>: game::TeamSettings</em></div>
+          <div class="owned">Cursors <em>: game::map::Cursors</em>
+            <div class="owned haschange">CurrentShip/Planet/Base, etc... <em>: game::map::SimpleObjectCursor</em></div>
+          </div>
+          <div class="owned haschange">HistoryTurnList <em>: game::HistoryTurnList</em></div>
+          <div class="ptr hasnotify">Turn <em>: game::Turn</em>
+            <div class="owned">Inbox <em>: game::msg::Inbox</em></div>
+            <div class="owned missing">Outbox</div>
+            <div class="optional ptr virtual">Battles <em>: game::vcr::Database</em>
+              <div class="owned virtual">Battle <em>: game::vcr::Battle[]</em>
+                <div class="owned">Unit <em>: game::vcr::Object[]</em></div>
+              </div>
+            </div>
+            <div class="owned missing">Allies</div>
+            <div class="owned">Extra <em>: game::ExtraContainer</em>
+              <div class="optional">Commands <em>: game::v3::CommandContainer</em>
+                <div class="owned">Command <em>: game::v3::Command[]</em></div>
+              </div>
+            </div>
+            <div class="owned missing">Gen</div>
+            <div class="owned missing">DataSet</div>
+            <div class="owned">TurnNumber <em>: int</em></div>
+            <div class="owned">TimeStamp <em>: game::Timestamp</em></div>
+            <div class="owned">DatabaseTurn <em>: int</em></div>
+            <div class="owned hasnotify">Universe <em>: game::map::Universe</em>
+              <div class="owned">Ships <em>: game::map::ObjectVector</em>
+                <div class="owned haschange">Ship <em>: game::map::Ship[]</em></div>
+              </div>
+              <div class="owned">Planets <em>: game::map::ObjectVector</em>
+                <div class="owned haschange">Planet <em>: game::map::Planet[]</em></div>
+              </div>
+              <div class="owned">Config <em>: game::map::Configuration</em></div>
+              <div class="owned">Storms <em>: game::map::ObjectVector</em>
+                <div class="owned haschange">Storm <em>: game::map::IonStorm[]</em></div></div>
+              <div class="owned">Minefields <em>: game::map::ObjectVector</em>
+                <div class="owned haschange">Minefield <em>: game::map::Minefield[]</em></div>
+              </div>
+              <div class="owned">Ufos <em>: game::map::ObjectVector</em>
+                <div class="owned haschange">Ufo <em>: game::map::Ufo[]</em></div>
+              </div>
+              <div class="owned">Explosions <em>: game::map::ObjectVector</em>
+                <div class="owned haschange">Explosion <em>: game::map::Explosion[]</em></div>
+              </div>
+              <div class="owned haschange">Drawings <em>: game::map::DrawingContainer</em>
+                <div class="owned">Drawing <em>: game::map::Drawing[]</em></div>
+              </div>
+              <div class="owned virtual">Reverter <em>: game::map::Reverter</em></div>
+            </div>
+          </div>
+        </div>
+        <div class="owned">Extra
+          <div class="owned optional">ScriptSide <em>: client::si::ScriptSide</em></div>
+          <div class="owned optional missing">SimState
+            <div class="owned hasnotify">Setup <em>: game::sim::Setup</em>
+              <div class="owned haschange">Ship <em>: game::sim::Ship[]</em></div>
+              <div class="owned haschange">Planet <em>: game::sim::Planet</em></div>
+            </div>
+            <div class="owned">Config <em>: game::sim::Configuration</em></div>
+          </div>
+        </div>
+        <div class="owned">Log <em>: afl::sys::Log</em></div>
+        <div class="owned">RandomNumberGenerator <em>: util::RandomNumberGenerator</em></div>
+        <div class="owned">InterpreterInterface <em>: game::InterpreterInterface</em></div>
+        <div class="owned virtual">UserInterfacePropertyAccessor <em>: game::interface::UserInterfacePropertyAccessor[]</em></div>
+        <div class="ref">Translator <em>: afl::string::Translator</em></div>
+        <div class="owned hasnotify">World <em>: interpreterinterface::World</em>
+          <div class="owned">GlobalPropertyNames, ShipPropertyNames, PlanetPropertyNames <em>: afl::data::NameMap</em></div>
+          <div class="owned">GlobalPropertyValues <em>: afl::data::Segment</em></div>
+          <div class="owned">ShipPropertyValues, PlanetPropertyValues <em>: interpreter::ObjectPropertyVector</em></div>
+          <div class="owned">Specials <em>: interpreter::SpecialCommand[]</em></div>
+          <div class="owned haschange">Keymaps <em>: util::KeymapTable</em>
+            <div class="owned">Keymap <em>: util::Keymap[]</em></div>
+          </div>
+          <div class="owned">Atoms <em>: util::AtomTable</em></div>
+          <div class="owned">Plugins <em>: util::plugin::Manager</em>
+            <div class="owned">Plugin <em>: util::plugin::Plugin[]</em></div>
+          </div>
+          <div class="owned">ProcessList <em>: interpreter::ProcessList</em>
+            <div class="owned">Process <em>: interpreter::Process[]</em></div>
+          </div>
+          <div class="owned virtual">GlobalContexts <em>: interpreter::Context[]</em></div>
+          <div class="ref">LogListener <em>: afl::sys::LogListener</em></div>
+          <div class="owned">MutexList <em>: interpreter::MutexList</em></div>
+          <div class="owned">FileTable <em>: interpreter::FileTable</em></div>
+          <div class="ptr owned virtual">SystemLoadDir, LocalLoadDir <em>: afl::io::Directory</em></div>
+          <div class="ref">FileSystem <em>: afl::io::FileSystem</em></div>
+        </div>
+      </div>
+    </div>
+
+    <h2 id="browser">Browser</h2>
+    <p>The role of a browser is to obtain a game::Root that can be used to bootstrap a game::Session.
+      It is separate from game::Session to allow programs that use only one of them.
+      All accesses to game::browser::Session happen in a single thread,
+      which is the same one as the thread that accesses the game::Session.</p>
+    <div class="tree">
+      <div class="root hasnotify"><b>game::browser::Session</b>
+        <div class="owned">AccountManager <em>: game::browser::AccountManager</em>
+          <div class="owned">Account <em>: game::browser::Account[]</em></div>
+        </div>
+        <div class="ref virtual">UserCallback <em>: game::browser::UserCallback</em></div>
+        <div class="owned missing">Favorites</div>
+        <div class="owned">Browser <em>: game::browser::Browser</em>
+          <div class="owned">HandlerList <em>: game::browser::HandlerList</em>
+            <div class="owned virtual">Handler <em>: game::browser::Handler[]</em></div>
+          </div>
+          <div class="owned virtual">Path <em>: game::browser::Folder[]</em></div>
+          <div class="owned virtual">Content <em>: game::browser::Folder[]</em></div>
+          <div class="owned virtual">Origin <em>: game::browser::Folder</em></div>
+          <div class="optional ptr">ChildRoot <em>: game::Root</em></div>
+        </div>
+      </div>
+    </div>
+
+    <h2 id="ui">User Interface</h2>
+    <p>A GUI program can be built starting with a ui::Root.
+      A GUI program that operates on VGAP data uses a client::Session which implements the proper thread separation (UserSide / ScriptSide).</p>
+    <div class="tree">
+      <div class="root"><b>client::Session</b>
+        <div class="ref"><b>Root</b> <em>: ui::Root</em>
+          <div class="ref virtual">Engine <em>: gfx::Engine</em>
+            <div class="owned virtual">Dispatcher <em>: util::RequestDispatcher</em></div>
+            <div class="owned virtual">Timer</div>
+          </div>
+          <div class="ref virtual">Canvas <em>: gfx::Canvas</em></div>
+          <div class="ref virtual">ResourceProvider <em>: gfx::ResourceProvider (ui::DefaultResourceProvider)</em>
+            <div class="ref">Manager <em>: ui::res::Manager</em>
+              <div class="owned virtual">ImageLoader <em>: ui::res::ImageLoader[]</em></div>
+              <div class="owned virtual">ResourceProvider <em>: ui::res::Provider[]</em></div>
+              <div class="owned">ScreenSize <em>: gfx::Point</em></div>
+            </div>
+            <div class="owned">ImageCache <em>: gfx::Canvas[]</em></div>
+            <div class="owned">FontList <em>: gfx::Font[]</em></div>
+          </div>
+          <div class="owned">ColorScheme <em>: ui::ColorScheme</em></div>
+          <div class="owned">EventQueue <em>: afl::base::Runnable[]</em></div>
+          <div class="virtual ref">Window <em>: ui::Widget...</em>
+            <div class="virtual ref">ChildWidget <em>: ui::Widget[]...</em></div>
+          </div>
+        </div>
+        <div class="owned">UserSide <em>: client::si::UserSide</em>
+          <div class="owned">GameSender <em>: util::RequestSender</em></div>
+          <div class="owned">ScriptSideSender <em>: util::SlaveRequestSender</em></div>
+          <div class="owned">Console <em>: util::MessageCollector</em></div>
+          <div class="ref">Log <em>: afl::sys::Log</em></div>
+          <div class="ref">Control <em>: client::si::Control</em>
+            <div class="ref">Root <em>: ui::Root</em></div>
+            <div class="ref">UserSide <em>: client::si::UserSide</em></div>
+            <div class="ref">Translator <em>: afl::string::Translator</em></div>
+          </div>
+        </div>
+        <div class="ref">Translator <em>: afl::string::Translator</em></div>
+      </div>
+    </div>
+  </body>
+</html>

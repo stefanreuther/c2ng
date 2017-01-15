@@ -18,23 +18,26 @@ ui::res::Manager::~Manager()
 void
 ui::res::Manager::addNewImageLoader(ImageLoader* p)
 {
-    assert(p);
-    m_imageLoaders.pushBackNew(p);
+    if (p != 0) {
+        m_imageLoaders.pushBackNew(p);
+    }
 }
 
 void
-ui::res::Manager::addNewProvider(Provider* p)
+ui::res::Manager::addNewProvider(Provider* p, String_t key)
 {
-    assert(p);
-    m_providers.pushBackNew(p);
+    if (p != 0) {
+        std::auto_ptr<Provider> pp(p);
+        m_providers.pushBackNew(new ProviderKey(pp, key));
+    }
 }
 
 afl::base::Ptr<gfx::Canvas>
 ui::res::Manager::loadImage(String_t name)
 {
     afl::base::Ptr<gfx::Canvas> result;
-    for (size_t i = 0, n = m_providers.size(); i < n; ++i) {
-        result = m_providers[i]->loadImage(name, *this);
+    for (size_t i = m_providers.size(); i > 0; --i) {
+        result = m_providers[i-1]->provider->loadImage(name, *this);
         if (result.get() != 0) {
             break;
         }
@@ -53,6 +56,18 @@ ui::res::Manager::loadImage(afl::io::Stream& s)
         }
     }
     return result;
+}
+
+void
+ui::res::Manager::removeProvidersByKey(String_t key)
+{
+    size_t out = 0;
+    for (size_t i = 0, n = m_providers.size(); i < n; ++i) {
+        if (m_providers[i]->key != key) {
+            m_providers.swapElements(i, out++);
+        }
+    }
+    m_providers.resize(out);
 }
 
 gfx::Point

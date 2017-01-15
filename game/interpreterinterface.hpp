@@ -6,6 +6,7 @@
 #define C2NG_GAME_INTERPRETERINTERFACE_HPP
 
 #include "afl/string/string.hpp"
+#include "afl/data/value.hpp"
 
 namespace game {
 
@@ -32,7 +33,7 @@ namespace game {
             \return Result
 
             FIXME: this method is deprecated because it requires Process::runTemporary. */
-        virtual bool evaluate(Scope scope, int id, String_t expr) = 0;
+        virtual afl::data::Value* evaluate(Scope scope, int id, String_t expr) = 0;
 
         /** Get comment for an object.
             \param scope Object type

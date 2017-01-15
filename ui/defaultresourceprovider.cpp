@@ -10,6 +10,8 @@
 #include "gfx/bitmapfont.hpp"
 #include "ui/draw.hpp"
 #include "ui/res/ccimageloader.hpp"
+#include "ui/res/resid.hpp"
+#include "gfx/defaultfont.hpp"
 
 namespace {
     const char LOG_NAME[] = "ui.resload";
@@ -19,12 +21,13 @@ namespace {
 // Constructor.
 // FIXME: get rid of the "dir" parameter
 ui::DefaultResourceProvider::DefaultResourceProvider(ui::res::Manager& mgr,
-                                                     afl::base::Ptr<afl::io::Directory> dir,
+                                                     afl::base::Ref<afl::io::Directory> dir,
                                                      util::RequestDispatcher& mainThreadDispatcher,
                                                      afl::string::Translator& tx,
                                                      afl::sys::LogListener& log)
     : m_manager(mgr),
       m_fontList(),
+      m_defaultFont(gfx::createDefaultFont()),
       m_mainThreadDispatcher(mainThreadDispatcher),
       m_log(log),
       m_translator(tx),
@@ -32,6 +35,8 @@ ui::DefaultResourceProvider::DefaultResourceProvider(ui::res::Manager& mgr,
       m_imageMutex(),
       m_imageCache(),
       m_imageQueue(),
+      m_managerRequests(),
+      m_managerInvalidate(false),
       m_loaderWake(0),
       m_loaderStopRequest(false)
 {
@@ -47,6 +52,19 @@ ui::DefaultResourceProvider::~DefaultResourceProvider()
     }
     m_loaderWake.post();
     m_loaderThread.join();
+}
+
+void
+ui::DefaultResourceProvider::postNewManagerRequest(util::Request<ui::res::Manager>* req, bool invalidateCache)
+{
+    {
+        afl::sys::MutexGuard g(m_imageMutex);
+        if (req != 0) {
+            m_managerRequests.pushBackNew(req);
+        }
+        m_managerInvalidate |= invalidateCache;
+    }
+    m_loaderWake.post();
 }
 
 // Get image.
@@ -74,10 +92,15 @@ ui::DefaultResourceProvider::getImage(String_t name, bool* status)
     return 0;
 }
 
-afl::base::Ptr<gfx::Font>
+afl::base::Ref<gfx::Font>
 ui::DefaultResourceProvider::getFont(gfx::FontRequest req)
 {
-    return m_fontList.findFont(req);
+    afl::base::Ptr<gfx::Font> result = m_fontList.findFont(req);
+    if (result.get() == 0) {
+        return m_defaultFont;
+    } else {
+        return *result;
+    }
 }
 
 void
@@ -101,7 +124,7 @@ ui::DefaultResourceProvider::init(afl::io::Directory& dir)
 void
 ui::DefaultResourceProvider::addFont(afl::io::Directory& dir, const char* name, const gfx::FontRequest& defn)
 {
-    afl::base::Ptr<afl::io::Stream> file = dir.openFile(name, afl::io::FileSystem::OpenRead);
+    afl::base::Ref<afl::io::Stream> file = dir.openFile(name, afl::io::FileSystem::OpenRead);
     afl::base::Ptr<gfx::BitmapFont> font = new gfx::BitmapFont();
     font->load(*file, 0);
     m_fontList.addFont(defn, font);
@@ -113,12 +136,17 @@ ui::DefaultResourceProvider::run()
     while (1) {
         m_loaderWake.wait();
 
+        while (util::Request<ui::res::Manager>* req = pullManagerRequest()) {
+            req->handle(m_manager);
+        }
+
         String_t todo;
         {
             afl::sys::MutexGuard g(m_imageMutex);
             if (m_loaderStopRequest) {
                 break;
             }
+
             while (!m_imageQueue.empty()) {
                 String_t n = m_imageQueue.front();
                 m_imageQueue.pop_front();
@@ -131,10 +159,18 @@ ui::DefaultResourceProvider::run()
 
         if (!todo.empty()) {
             // Load it
-            // FIXME: if we don't find it, we'd have to generalize here.
             afl::base::Ptr<gfx::Canvas> can;
             try {
-                can = m_manager.loadImage(todo);
+                String_t id = todo;
+                while (1) {
+                    can = m_manager.loadImage(id);
+                    if (can.get() != 0) {
+                        break;
+                    }
+                    if (!ui::res::generalizeResourceId(id)) {
+                        break;
+                    }
+                }
                 if (can.get() == 0) {
                     m_log.write(m_log.Warn, LOG_NAME, afl::string::Format(m_translator.translateString("Image \"%s\" not found").c_str(), todo));
                 } else {
@@ -166,4 +202,18 @@ ui::DefaultResourceProvider::run()
             m_mainThreadDispatcher.postNewRunnable(new Signaler(sig_imageChange));
         }
     }
+}
+
+util::Request<ui::res::Manager>*
+ui::DefaultResourceProvider::pullManagerRequest()
+{
+    afl::sys::MutexGuard g(m_imageMutex);
+    if (!m_managerRequests.empty()) {
+        return m_managerRequests.extractFront();
+    }
+    if (m_managerInvalidate) {
+        m_managerInvalidate = false;
+        m_imageCache.clear();
+    }
+    return 0;
 }

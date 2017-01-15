@@ -12,8 +12,8 @@ client::tiles::SelectionHeaderTile::SelectionHeaderTile(ui::Root& root, client::
       m_name(),
       m_marked(),
       m_receiver(root.engine().dispatcher(), *this),
-      m_prev(UTF_UP_ARROW, '-', root.provider(), root.colorScheme()),
-      m_next(UTF_DOWN_ARROW, '+', root.provider(), root.colorScheme())
+      m_prev(UTF_UP_ARROW, '-', root),
+      m_next(UTF_DOWN_ARROW, '+', root)
 {
     // ex WObjectSelectionHeaderTile::WObjectSelectionHeaderTile
     // ex WObjectSelectionHeaderTile::init
@@ -34,9 +34,8 @@ client::tiles::SelectionHeaderTile::draw(gfx::Canvas& can)
     // ex WObjectSelectionHeaderTile::drawData
     defaultDrawChildren(can);
 
-    gfx::Context ctx(can);
+    gfx::Context<util::SkinColor::Color> ctx(can, getColorScheme());
     ctx.useFont(*m_root.provider().getFont(gfx::FontRequest().addWeight(1)));
-    ctx.useColorScheme(getColorScheme());
 
     gfx::Rectangle r = getExtent();
     r.setWidth(r.getWidth() - 2*r.getHeight() - 1); // room for buttons

@@ -65,7 +65,7 @@ game::browser::AccountManager::getAccount(size_t index) const
 void
 game::browser::AccountManager::load()
 {
-    afl::base::Ptr<afl::io::Stream> file = m_profile.openFile(INI_FILE);
+    afl::base::Ptr<afl::io::Stream> file = m_profile.openFileNT(INI_FILE);
     if (file.get() != 0) {
         class AccountFileParser : public util::FileParser {
          public:
@@ -137,11 +137,11 @@ void
 game::browser::AccountManager::save()
 {
     try {
-        afl::base::Ptr<afl::io::Directory> dir = m_profile.open();
+        afl::base::Ref<afl::io::Directory> dir = m_profile.open();
 
         // Create new file
         {
-            afl::base::Ptr<afl::io::Stream> file = dir->openFile(NEW_FILE, afl::io::FileSystem::Create);
+            afl::base::Ref<afl::io::Stream> file = dir->openFile(NEW_FILE, afl::io::FileSystem::Create);
             afl::io::TextFile tf(*file);
             tf.writeLine("; PCC2ng Network Configuration");
             tf.writeLine();

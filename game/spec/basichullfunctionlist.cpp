@@ -233,7 +233,7 @@ game::spec::BasicHullFunctionList::matchFunction(int requestedFunctionId, int fo
     // ex GHullFunctionData::matchBasicFunction
     while (foundFunctionId != requestedFunctionId) {
         const BasicHullFunction* foundFunction = getFunctionById(foundFunctionId);
-        if (foundFunctionId == 0) {
+        if (foundFunction == 0) {
             // this function does not exist
             return false;
         }

@@ -25,7 +25,6 @@ namespace gfx {
         virtual void blit(const Point& pt, Canvas& src, Rectangle rect);
         virtual void blitPattern(Rectangle rect, const Point& pt, int bytesPerLine, const uint8_t* data, Color_t color, Color_t bg, Alpha_t alpha);
         virtual Rectangle computeClipRect(Rectangle r);
-        virtual Color_t getPixel(Point pt);
         virtual void getPixels(Point pt, afl::base::Memory<Color_t> colors);
         virtual Point getSize();
         virtual int getBitsPerPixel();
@@ -34,7 +33,7 @@ namespace gfx {
         virtual void setPalette(Color_t start, afl::base::Memory<const ColorQuad_t> colorDefinitions, afl::base::Memory<Color_t> colorHandles);
         virtual void decodeColors(afl::base::Memory<const Color_t> colorHandles, afl::base::Memory<ColorQuad_t> colorDefinitions);
         virtual void encodeColors(afl::base::Memory<const ColorQuad_t> colorDefinitions, afl::base::Memory<Color_t> colorHandles);
-        virtual afl::base::Ptr<Canvas> convertCanvas(afl::base::Ptr<Canvas> orig);
+        virtual afl::base::Ref<Canvas> convertCanvas(afl::base::Ref<Canvas> orig);
     };
 
 }

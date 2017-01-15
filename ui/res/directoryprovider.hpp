@@ -18,12 +18,12 @@ namespace ui { namespace res {
 //     to file names, and build synthetic resources. */
     class DirectoryProvider : public Provider {
      public:
-        DirectoryProvider(afl::base::Ptr<afl::io::Directory> dir);
+        DirectoryProvider(afl::base::Ref<afl::io::Directory> dir);
 
         virtual afl::base::Ptr<gfx::Canvas> loadImage(String_t name, Manager& mgr);
 
      private:
-        afl::base::Ptr<afl::io::Directory> m_directory;
+        afl::base::Ref<afl::io::Directory> m_directory;
 
         typedef std::map<String_t, String_t> AliasMap_t;
         AliasMap_t m_aliasMap;

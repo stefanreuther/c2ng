@@ -16,8 +16,8 @@ namespace game { namespace pcc {
         ServerDirectory(BrowserHandler& handler, game::browser::Account& acc, String_t name);
         virtual ~ServerDirectory();
 
-        virtual afl::base::Ptr<afl::io::DirectoryEntry> getDirectoryEntryByName(String_t name);
-        virtual afl::base::Ptr<afl::base::Enumerator<afl::base::Ptr<afl::io::DirectoryEntry> > > getDirectoryEntries();
+        virtual afl::base::Ref<afl::io::DirectoryEntry> getDirectoryEntryByName(String_t name);
+        virtual afl::base::Ref<afl::base::Enumerator<afl::base::Ptr<afl::io::DirectoryEntry> > > getDirectoryEntries();
         virtual afl::base::Ptr<afl::io::Directory> getParentDirectory();
         virtual String_t getDirectoryName();
         virtual String_t getTitle();

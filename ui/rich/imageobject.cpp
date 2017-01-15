@@ -27,7 +27,7 @@ ui::rich::ImageObject::getSize()
 }
 
 void
-ui::rich::ImageObject::draw(gfx::Context& ctx, gfx::Rectangle area)
+ui::rich::ImageObject::draw(gfx::Context<util::SkinColor::Color>& ctx, gfx::Rectangle area)
 {
     // ex RichDocumentImageObject::draw
     if (m_image.get() != 0) {

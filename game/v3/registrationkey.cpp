@@ -138,7 +138,7 @@ game::v3::RegistrationKey::initFromDirectory(afl::io::Directory& dir, afl::sys::
     try {
         m_isValid = false;
 
-        afl::base::Ptr<afl::io::Stream> s = dir.openFile("fizz.bin", afl::io::FileSystem::OpenRead);
+        afl::base::Ref<afl::io::Stream> s = dir.openFile("fizz.bin", afl::io::FileSystem::OpenRead);
         parseFizz(*s);
 // FIXME: reg.key parsing
 //         if (winplan_dir) {

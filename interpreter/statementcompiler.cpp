@@ -25,6 +25,7 @@
 #include "interpreter/structuretype.hpp"
 #include "interpreter/subroutinevalue.hpp"
 #include "interpreter/world.hpp"
+#include "interpreter/values.hpp"
 
 namespace {
     enum TypeKeyword {
@@ -110,6 +111,9 @@ namespace {
 }
 
 
+const int interpreter::StatementCompiler::MIN_OPTIMISATION_LEVEL;
+const int interpreter::StatementCompiler::MAX_OPTIMISATION_LEVEL;
+const int interpreter::StatementCompiler::DEFAULT_OPTIMISATION_LEVEL;
 
 
 
@@ -117,7 +121,7 @@ interpreter::StatementCompiler::StatementCompiler(CommandSource& cs)
     : m_commandSource(cs),
       m_allowLocalTypes(false),
       m_allowLocalSubs(false),
-      m_optimisationLevel(1)
+      m_optimisationLevel(DEFAULT_OPTIMISATION_LEVEL)
 {
     // ex IntStatementCompiler::IntStatementCompiler
     cs.readNextLine();
@@ -166,6 +170,9 @@ interpreter::StatementCompiler::compile(BytecodeObject& bco, const StatementComp
             parseEndOfLine();
             scc.compileBreak(bco);
             return CompiledStatement;
+
+         case kwCall:
+            return compileCall(bco, scc);
 
          case kwContinue:
             /* @q Continue (Elementary Command)
@@ -390,6 +397,12 @@ interpreter::StatementCompiler::compileList(BytecodeObject& bco, const Statement
 }
 
 void
+interpreter::StatementCompiler::setOptimisationLevel(int level)
+{
+    m_optimisationLevel = level;
+}
+
+void
 interpreter::StatementCompiler::finishBCO(BytecodeObject& bco, const StatementCompilationContext& scc)
 {
     // ex IntStatementCompiler::finishBCO
@@ -536,6 +549,17 @@ interpreter::StatementCompiler::StatementResult
 interpreter::StatementCompiler::compileAmbiguousSingleWord(const String_t& name, BytecodeObject& bco, const StatementCompilationContext& scc)
 {
     // ex IntStatementCompiler::compileAmbiguousSingleWord
+    // FIXME: this evaluates the variable reference twice (runtime cost).
+    // A version that evaluates it only once would be
+    //      push
+    //      dup 0
+    //      uisproc
+    //      jfep 1F
+    //      procind 0
+    //      j 2F
+    //   1: drop
+    //   2:
+    // and would be preferrable for by-name lookups.
     BytecodeObject::Label_t lskip = bco.makeLabel();
     bco.addVariableReferenceInstruction(Opcode::maPush, name, scc);
     bco.addInstruction(Opcode::maUnary, unIsProcedure, 0);
@@ -612,6 +636,8 @@ interpreter::StatementCompiler::compileAmbiguousRuntimeSwitch(const String_t& na
                 "pushloc" due to an enclosing 'With', we'll know that it will
                 at runtime find something.
             */
+            // FIXME: this evaluates the variable reference twice (runtime cost).
+            // To evaluate only once, we'd need to do rewrite the halves (replace push by dup).
             bool protect = paren
                 && interpreter::expr::lookupBuiltinFunction(name) != 0
                 && !bco.hasLocalVariable(name);
@@ -788,6 +814,77 @@ interpreter::StatementCompiler::compileBind(BytecodeObject& bco, const Statement
     bco.addInstruction(Opcode::maStack, Opcode::miStackDrop, 1);
     return CompiledStatement;
 }
+
+/** Compile "Call" statement.
+    \param bco Bytecode output
+    \param scc Statement compilation context */
+interpreter::StatementCompiler::StatementResult
+interpreter::StatementCompiler::compileCall(BytecodeObject& bco, const StatementCompilationContext& scc)
+{
+    /* @q Call command args, ... (Elementary Command)
+       Invoke a command.
+
+       Normally, commands are invoked by listing their name and arguments, as in
+       <pre class="ccscript">
+         SetWaypoint 1000, 1020
+       </pre>
+       However, this only works if the command is a single word.
+       Invoking a command on another object requires {With}.
+
+       Using <tt>Call</tt>, you can invoke commands using an expression.
+       This allows commands that are hard to express using {With}, for example
+       <pre class="ccscript">
+         % set towee's fcode to the same as ours
+         Call Ship(Mission.Tow).SetFCode FCode
+       </pre>
+       In addition, it can be a tiny bit more efficient in some cases.
+
+       <b>Caveat Emptor:</b> when interpreting the "command" expression,
+       {Call} will consume the longest possible expression (greedy parsing).
+       This means, <tt>Call Foo -1</tt> will be interpreted as the call of a subtraction expression,
+       which is meaningless, instead of as a call of <tt>Foo</tt> with parameter <tt>-1</tt>.
+       In this case, add an additional comma to indicate where the "command" expression ends:
+       <pre class="ccscript">
+         Call Foo, -1
+       </pre>
+
+       @since PCC2 2.0.2, PCC2ng 2.40.1 */
+
+    Tokenizer& tok = m_commandSource.tokenizer();
+    tok.readNextToken();
+
+    /* Procedure */
+    std::auto_ptr<interpreter::expr::Node> procedure(interpreter::expr::Parser(tok).parse());
+
+    /* Skip comma */
+    tok.checkAdvance(tok.tComma);
+
+    /* Arguments */
+    afl::container::PtrVector<interpreter::expr::Node> args;
+    parseArgumentList(args);
+    for (size_t i = 0; i != args.size(); ++i) {
+        args[i]->compileValue(bco, scc);
+    }
+
+    /* Warning for code such as
+         Call Foo +1
+       which would be an ambiguous-but-eventually-correctly-executed runtime switch without 'Call',
+       but is always a binary operator that fails execution with 'Call'. */
+    if (interpreter::expr::SimpleNode* n = dynamic_cast<interpreter::expr::SimpleNode*>(procedure.get())) {
+        if (n->is(Opcode::maBinary, biConcat) || n->is(Opcode::maBinary, biAdd) || n->is(Opcode::maBinary, biSub)) {
+            Error e("Binary operator in first operand to 'Call' is most likely not what you want");
+            m_commandSource.addTraceTo(e, afl::string::Translator::getSystemInstance());
+            scc.world().logError(afl::sys::LogListener::Warn, e);
+        }
+    }
+
+    /* Call */
+    procedure->compileValue(bco, scc);
+    bco.addInstruction(Opcode::maIndirect, Opcode::miIMCall + Opcode::miIMRefuseFunctions, args.size());
+
+    return CompiledStatement;
+}
+
 
 /** Compile "CreateKeymap" statement.
     \param bco Bytecode output
@@ -1564,18 +1661,42 @@ interpreter::StatementCompiler::compileLoad(BytecodeObject& bco, const Statement
 
     /* Parse it */
     m_commandSource.tokenizer().readNextToken();
-    compileArgumentExpression(bco, scc);
+    std::auto_ptr<interpreter::expr::Node> node(interpreter::expr::Parser(m_commandSource.tokenizer()).parse());
     parseEndOfLine();
 
-    /* Generate code */
-    bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialLoad, 0);
-    if (mustSucceed) {
-        BytecodeObject::Label_t lab = bco.makeLabel();
-        bco.addJump(Opcode::jIfEmpty, lab);
-        bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialThrow, 0);
-        bco.addLabel(lab);
+    /* Precompilation */
+    bool precompiled = false;
+    if (scc.hasFlag(scc.PreexecuteLoad)) {
+        if (interpreter::expr::LiteralNode* lit = dynamic_cast<interpreter::expr::LiteralNode*>(node.get())) {
+            if (afl::data::Value* value = lit->getValue()) {
+                String_t fileName(toString(value, false));
+                afl::base::Ptr<afl::io::Stream> file = scc.world().openLoadFile(fileName);
+                if (file.get() != 0) {
+                    // File opened successfully. Compile it.
+                    // FIXME: deal with recursion. Right now, recursion is implicitly broken because compileFile does not set PreexecuteLoad.
+                    // However, it is desirable to compile a nested file with PreexecuteLoad, too, as long as recursion is prevented.
+                    scc.world().logListener().write(afl::sys::LogListener::Trace, "script.trace", afl::string::Format("Preloading \"%s\"...", fileName));
+                    SubroutineValue subv(scc.world().compileFile(*file));
+                    bco.addPushLiteral(&subv);
+                    bco.addInstruction(Opcode::maIndirect, Opcode::miIMCall, 0);
+                    precompiled = true;
+                }
+            }
+        }
     }
-    bco.addInstruction(Opcode::maStack, Opcode::miStackDrop, 1);
+
+    /* Generate code */
+    if (!precompiled) {
+        node->compileValue(bco, scc);
+        bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialLoad, 0);
+        if (mustSucceed) {
+            BytecodeObject::Label_t lab = bco.makeLabel();
+            bco.addJump(Opcode::jIfEmpty, lab);
+            bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialThrow, 0);
+            bco.addLabel(lab);
+        }
+        bco.addInstruction(Opcode::maStack, Opcode::miStackDrop, 1);
+    }
 
     return CompiledStatement;
 }
@@ -1636,7 +1757,7 @@ interpreter::StatementCompiler::compileOn(BytecodeObject& bco, const StatementCo
     };
 
     /* Compile embedded command */
-    BCORef_t nbco = new BytecodeObject();
+    BCORef_t nbco = *new BytecodeObject();
     nbco->setIsProcedure(true);
     nbco->setFileName(bco.getFileName());
     compile(*nbco, HookCompilationContext(scc.world()));
@@ -1778,7 +1899,7 @@ interpreter::StatementCompiler::compileOption(BytecodeObject& /*bco*/, const Sta
             m_allowLocalSubs = (parseOptionArgument(tok, 0, 1) != 0);
         } else if (opname == "OPTIMIZE") {
             /* "Optimize(0-3) */
-            m_optimisationLevel = parseOptionArgument(tok, -1, 3);
+            m_optimisationLevel = parseOptionArgument(tok, MIN_OPTIMISATION_LEVEL, MAX_OPTIMISATION_LEVEL);
         } else {
             /* Unrecognized option. Skip brace pair. */
             if (tok.checkAdvance(tok.tLParen)) {
@@ -2328,7 +2449,7 @@ interpreter::StatementCompiler::compileSub(BytecodeObject& bco, const StatementC
     tok.readNextToken();
 
     /* Create new BCO */
-    BCORef_t nbco = new BytecodeObject();
+    BCORef_t nbco = *new BytecodeObject();
     nbco->setIsProcedure(proc);
     nbco->setName(name);
     nbco->setFileName(bco.getFileName());
@@ -2450,8 +2571,8 @@ interpreter::StatementCompiler::compileStruct(BytecodeObject& bco, const Stateme
     parseEndOfLine();
 
     /* We create a structure and a constructor function */
-    StructureType typeValue(new StructureTypeData());
-    BCORef_t ctorBCO = new BytecodeObject();
+    StructureType typeValue(*new StructureTypeData());
+    BCORef_t ctorBCO = *new BytecodeObject();
     ctorBCO->setIsProcedure(false);
     ctorBCO->setFileName(bco.getFileName());
     ctorBCO->addLineNumber(m_commandSource.getLineNumber());

@@ -34,7 +34,7 @@ namespace {
 
 }
 
-game::interface::BeamContext::BeamContext(int nr, afl::base::Ptr<game::spec::ShipList> shipList, afl::base::Ptr<game::Root> root)
+game::interface::BeamContext::BeamContext(int nr, afl::base::Ref<game::spec::ShipList> shipList, afl::base::Ref<game::Root> root)
     : m_number(nr),
       m_shipList(shipList),
       m_root(root)
@@ -46,11 +46,11 @@ game::interface::BeamContext::~BeamContext()
 { }
 
 // Context:
-bool
+game::interface::BeamContext*
 game::interface::BeamContext::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
 {
     // ex IntBeamContext::lookup
-    return lookupName(name, BEAM_MAP, result);
+    return lookupName(name, BEAM_MAP, result) ? this : 0;
 }
 
 void
@@ -123,8 +123,19 @@ game::interface::BeamContext::toString(bool /*readable*/) const
 }
 
 void
-game::interface::BeamContext::store(interpreter::TagNode& out, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext* /*ctx*/) const
+game::interface::BeamContext::store(interpreter::TagNode& out, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
 {
     out.tag = out.Tag_Beam;
     out.value = m_number;
+}
+
+game::interface::BeamContext*
+game::interface::BeamContext::create(int nr, Session& session)
+{
+    game::spec::ShipList* list = session.getShipList().get();
+    Root* root = session.getRoot().get();
+    if (list != 0 && root != 0 && list->beams().get(nr) != 0) {
+        return new BeamContext(nr, *list, *root);
+    }
+    return 0;
 }

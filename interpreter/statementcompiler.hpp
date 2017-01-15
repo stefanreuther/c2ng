@@ -35,6 +35,10 @@ namespace interpreter {
             CompiledExpression       ///< Successfully compiled an expression. Its result remains on stack. Only if not ExpressionsAreStatements.
         };
 
+        static const int MIN_OPTIMISATION_LEVEL = -1;
+        static const int MAX_OPTIMISATION_LEVEL = 3;
+        static const int DEFAULT_OPTIMISATION_LEVEL = 1;
+
         /** Constructor.
             \param cs Command source that contains statements to compile. */
         explicit StatementCompiler(CommandSource& cs);
@@ -54,6 +58,8 @@ namespace interpreter {
             \retval Terminator We ended the compilation because we found a terminator (only if scc.hasFlag(WantTerminators)) */
         StatementResult compileList(BytecodeObject& bco, const StatementCompilationContext& scc);
 
+        void setOptimisationLevel(int level);
+
         /** Finish a BCO. Performs configured optimisations. */
         void finishBCO(BytecodeObject& bco, const StatementCompilationContext& scc);
 
@@ -63,6 +69,7 @@ namespace interpreter {
         StatementResult compileAmbiguousRuntimeSwitch(const String_t& name, bool paren, BytecodeObject& bco, const StatementCompilationContext& scc);
         StatementResult compileAbort(BytecodeObject& bco, const StatementCompilationContext& scc);
         StatementResult compileBind(BytecodeObject& bco, const StatementCompilationContext& scc);
+        StatementResult compileCall(BytecodeObject& bco, const StatementCompilationContext& scc);
         StatementResult compileCreateKeymap(BytecodeObject& bco, const StatementCompilationContext& scc);
         StatementResult compileCreateProperty(BytecodeObject& bco, const StatementCompilationContext& scc, Opcode::Special minor, const char* prefix);
         StatementResult compileDim(BytecodeObject& bco, const StatementCompilationContext& scc);

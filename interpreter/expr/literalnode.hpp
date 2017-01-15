@@ -20,6 +20,9 @@ namespace interpreter { namespace expr {
         void compileEffect(BytecodeObject& bco, const interpreter::CompilationContext& cc);
         void compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff);
 
+        afl::data::Value* getValue() const
+            { return m_value.get(); }
+
      private:
         std::auto_ptr<afl::data::Value> m_value;
     };

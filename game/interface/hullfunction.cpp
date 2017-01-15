@@ -30,13 +30,10 @@ game::interface::HullFunction::get(interpreter::Arguments& args)
     // ex int/if/hullif.h:IFHullGet
     int32_t id;
     args.checkArgumentCount(1);
-    if (m_session.getShipList().get() != 0
-        && m_session.getRoot().get() != 0
-        && interpreter::checkIntegerArg(id, args.getNext(), 1, getDimension(1)-1))
-    {
-        return new HullContext(id, m_session.getShipList(), m_session.getRoot());
+    if (!interpreter::checkIntegerArg(id, args.getNext(), 1, getDimension(1)-1)) {
+        return 0;
     }
-    return 0;
+    return HullContext::create(id, m_session);
 }
 
 void
@@ -47,7 +44,7 @@ game::interface::HullFunction::set(interpreter::Arguments& /*args*/, afl::data::
 
 // CallableValue:
 int32_t
-game::interface::HullFunction::getDimension(int32_t which)
+game::interface::HullFunction::getDimension(int32_t which) const
 {
     // ex int/if/hullif.h:IFHullDim
     return (which == 0
@@ -61,12 +58,10 @@ interpreter::Context*
 game::interface::HullFunction::makeFirstContext()
 {
     // ex int/if/hullif.h:IFHullMake
-    if (game::spec::ShipList* list = m_session.getShipList().get()) {
-        if (m_session.getRoot().get() != 0) {
-            if (list->hulls().size() > 0) {
-                return new HullContext(1, list, m_session.getRoot());
-            }
-        }
+    game::spec::ShipList* list = m_session.getShipList().get();
+    Root* root = m_session.getRoot().get();
+    if (list != 0 && root != 0 && list->hulls().size() > 0) {
+        return new HullContext(1, *list, *m_session.getRoot());
     }
     return 0;
 }
@@ -85,7 +80,7 @@ game::interface::HullFunction::toString(bool /*readable*/) const
 }
 
 void
-game::interface::HullFunction::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext* /*ctx*/) const
+game::interface::HullFunction::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
 {
     throw interpreter::Error::notSerializable();
 }

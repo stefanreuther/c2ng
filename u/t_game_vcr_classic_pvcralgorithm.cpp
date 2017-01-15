@@ -375,7 +375,7 @@ TestGameVcrClassicPVCRAlgorithm::testTF()
     initConfig(config);
 
     // First fight
-    game::vcr::classic::PVCRAlgorithm testee(false, vis, config, list);
+    game::vcr::classic::PVCRAlgorithm testee(false, vis, config, list.beams(), list.launchers());
     game::vcr::Object left(convertObject(battles[0].object[0]));
     game::vcr::Object right(convertObject(battles[0].object[1]));
     uint16_t seed = battles[0].seed;
@@ -420,7 +420,7 @@ TestGameVcrClassicPVCRAlgorithm::testCarriers()
     initConfig(config);
 
     // First fight
-    game::vcr::classic::PVCRAlgorithm testee(false, vis, config, list);
+    game::vcr::classic::PVCRAlgorithm testee(false, vis, config, list.beams(), list.launchers());
     game::vcr::Object left(convertObject(battles[1].object[0]));
     game::vcr::Object right(convertObject(battles[1].object[1]));
     uint16_t seed = battles[1].seed;
@@ -483,7 +483,7 @@ TestGameVcrClassicPVCRAlgorithm::testRandomBonus()
     const struct Object rightShip = { 10, 10, 1000, 0, 8, 100, 1, 1, 1,  0, 400, "Right", 7, 100, 0, 0, 0, false, 1, 1, 35, 1, 0 };
 
     // First fight
-    game::vcr::classic::PVCRAlgorithm testee(false, vis, config, list);
+    game::vcr::classic::PVCRAlgorithm testee(false, vis, config, list.beams(), list.launchers());
     game::vcr::Object left(convertObject(leftShip));
     game::vcr::Object right(convertObject(rightShip));
     uint16_t seed = 0;

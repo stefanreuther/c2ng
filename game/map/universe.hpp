@@ -17,13 +17,17 @@
 #include "game/map/playedbasetype.hpp"
 #include "game/map/ionstormtype.hpp"
 #include "game/map/minefieldtype.hpp"
-#include "game/timestamp.hpp"
+#include "game/map/ufotype.hpp"
+#include "game/map/drawingcontainer.hpp"
+#include "game/map/fleettype.hpp"
+#include "game/map/explosiontype.hpp"
 
 namespace game { namespace map {
 
     class Planet;
     class Ship;
     class IonStorm;
+    class Reverter;
 
     class Universe {
      public:
@@ -36,13 +40,6 @@ namespace game { namespace map {
         Universe();
         ~Universe();
 
-        int getTurnNumber() const;
-        void setTurnNumber(int nr);
-
-        // FIXME: these don't really belong here, but neither does the turn number
-        Timestamp getTimestamp() const;
-        void setTimestamp(const Timestamp& ts);
-
         ObjectVector<Ship>& ships();
         const ObjectVector<Ship>& ships() const;
 
@@ -53,6 +50,7 @@ namespace game { namespace map {
 
         PlayedPlanetType& playedPlanets();
         PlayedBaseType& playedBases();
+        FleetType& fleets();
 
         ObjectVector<IonStorm>& ionStorms();
         const ObjectVector<IonStorm>& ionStorms() const;
@@ -61,8 +59,20 @@ namespace game { namespace map {
         MinefieldType& minefields();
         const MinefieldType& minefields() const;
 
+        UfoType& ufos();
+        const UfoType& ufos() const;
+
+        ExplosionType& explosions();
+        const ExplosionType& explosions() const;
+
+        DrawingContainer& drawings();
+        const DrawingContainer& drawings() const;
+
         Configuration& config();
         const Configuration& config() const;
+
+        void setNewReverter(Reverter* p);
+        Reverter* getReverter() const;
 
         /** Perform all updates.
             This will poll all updatable objects, and raise the appropriate signals. */
@@ -73,6 +83,7 @@ namespace game { namespace map {
 
         void postprocess(PlayerSet_t playingSet, PlayerSet_t availablePlayers, Object::Playability playability,
                          const game::HostVersion& host, const game::config::HostConfiguration& config,
+                         int turnNumber,
                          afl::string::Translator& tx, afl::sys::LogListener& log);
 
 
@@ -105,31 +116,24 @@ namespace game { namespace map {
         ObjectVector<Planet> m_planets;
         ObjectVector<IonStorm> m_ionStorms;
         std::auto_ptr<MinefieldType> m_minefields;
+        std::auto_ptr<UfoType> m_ufos;
+        std::auto_ptr<ExplosionType> m_explosions;
+        DrawingContainer m_drawings;
 
         bool m_universeChanged;
-
-        int m_turnNumber;
-        Timestamp m_timestamp;
 
         std::auto_ptr<PlayedShipType> m_playedShips;
         std::auto_ptr<PlayedPlanetType> m_playedPlanets;
         std::auto_ptr<PlayedBaseType> m_playedBases;
+        std::auto_ptr<FleetType> m_fleets;
         std::auto_ptr<IonStormType> m_ionStormType;
+
+        std::auto_ptr<Reverter> m_reverter;
 
 // class GUniverse {
 //  public:
 //     // Initialisation
 //     void recomputeOrbitFlags();
-
-//     GDrawingContainer& getDrawings()
-//         { return drawings; }
-//     GDrawingContainer const& getDrawings() const
-//         { return drawings; }
-
-//     GExplosionContainer& getExplosions()
-//         { return explosions; }
-//     GExplosionContainer const& getExplosions() const
-//         { return explosions; }
 
 //     // Location accessors
 //     bool      isShipTowed(int sid) const;
@@ -145,17 +149,8 @@ namespace game { namespace map {
 //     GPlayedPlanetType  ty_played_planets;
 //     GAnyPlanetType     ty_any_planets;
 //     GPlayedBaseType    ty_played_bases;
-//     GFleetType         ty_fleets;
-//     GUfoType           ty_ufos;
-//     GMinefieldType     ty_minefields;
-
-//  private:
-//     void init();
 
 //     GPlayerSet   playing_set, data_set;
-//     ptr_vector<GIonStorm> storms;
-//     GDrawingContainer     drawings;
-//     GExplosionContainer   explosions;
 
 
 

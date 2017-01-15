@@ -1,5 +1,12 @@
 /**
   *  \file ui/layout/manager.hpp
+  *
+  *  PCC2 Comment:
+  *
+  *  Layout managers arrange widgets in a group, without needing to
+  *  manually compute coordinates. Layouts automatically adapt to
+  *  changing font sizes and so forth, provided the widgets report
+  *  correct values via getLayoutInfo().
   */
 #ifndef C2NG_UI_LAYOUT_MANAGER_HPP
 #define C2NG_UI_LAYOUT_MANAGER_HPP

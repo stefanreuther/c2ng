@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/tagnode.hpp
+  *  \brief Struct interpreter::TagNode
   */
 #ifndef C2NG_INTERPRETER_TAGNODE_HPP
 #define C2NG_INTERPRETER_TAGNODE_HPP
@@ -16,6 +17,7 @@ namespace interpreter {
         - string tag (actual string data in auxiliary data field)
         - 48-bit floating point values (Turbo Pascal REAL)
         - 32-bit floating point values (IEEE single precision)
+        - other tag or Id for nonscalars or contexts (may have auxiliary data depending on type)
 
         Turbo Pascal has an entirely-software emulated floating point type REAL.
         Those have the convenient property of having an effective value of 0.0 if their first byte, the exponent, is zero.
@@ -53,22 +55,25 @@ namespace interpreter {
         /* Tag values for serialized contexts.
            Those must have their lower 8 bits zero.
            By convention, to avoid collision with standard (non-context) values, they also have their highest bit set. */
-        static const uint16_t Tag_Ship      = 0x8000;
-        static const uint16_t Tag_Planet    = 0x8100;
-        static const uint16_t Tag_Minefield = 0x8200;
-        static const uint16_t Tag_Ion       = 0x8300;
-        static const uint16_t Tag_Hull      = 0x8400;
-        static const uint16_t Tag_Engine    = 0x8500;
-        static const uint16_t Tag_Beam      = 0x8600;
-        static const uint16_t Tag_Torpedo   = 0x8700;
-        static const uint16_t Tag_Launcher  = 0x8800;
-        static const uint16_t Tag_Frame     = 0x8900;
-        static const uint16_t Tag_Global    = 0x8A00;
-        static const uint16_t Tag_Mutex     = 0x8B00;
-        static const uint16_t Tag_Iterator  = 0x8C00;
-        static const uint16_t Tag_Player    = 0x8D00;
+        static const uint16_t Tag_Ship      = 0x8000;        ///< Ship(value).
+        static const uint16_t Tag_Planet    = 0x8100;        ///< Planet(value).
+        static const uint16_t Tag_Minefield = 0x8200;        ///< Minefield(value).
+        static const uint16_t Tag_Ion       = 0x8300;        ///< IonStorm(value).
+        static const uint16_t Tag_Hull      = 0x8400;        ///< Hull(value).
+        static const uint16_t Tag_Engine    = 0x8500;        ///< Engine(value).
+        static const uint16_t Tag_Beam      = 0x8600;        ///< Beam(value).
+        static const uint16_t Tag_Torpedo   = 0x8700;        ///< Torpedo(value).
+        static const uint16_t Tag_Launcher  = 0x8800;        ///< Launcher(value).
+        static const uint16_t Tag_Frame     = 0x8900;        ///< Stack frame context. Value is the age of the frame (0=oldest/bottom-most).
+        static const uint16_t Tag_Global    = 0x8A00;        ///< Global context.
+        static const uint16_t Tag_Mutex     = 0x8B00;        ///< Mutex. Value is the "ownership" flag, aux contains 2 uint32_t's (string lengths) followed by two strings (name and note).
+        static const uint16_t Tag_Iterator  = 0x8C00;        ///< Iterator(value).
+        static const uint16_t Tag_Player    = 0x8D00;        ///< Player(value).
 
+        /** Type tag. */
         uint16_t tag;
+
+        /** Type-dependant values. */
         uint32_t value;
     };
 

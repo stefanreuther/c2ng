@@ -39,7 +39,7 @@ namespace client { namespace screens {
         /** Display this screen.
             Returns when the user cancels the dialog.
             \return Exit code. 0 if user cancelled normally, otherwise, parameter of stop(). */
-        int run();
+        int run(gfx::ColorScheme<util::SkinColor::Color>& parentColors);
 
         /** Callback: stop this screen.
             \param n Exit code. */
@@ -133,7 +133,7 @@ namespace client { namespace screens {
         bool m_hasUp;
         State m_state;
         bool m_blockState;
-        afl::base::Ptr<gfx::Timer> m_timer;
+        afl::base::Ref<gfx::Timer> m_timer;
     };
 
 } }

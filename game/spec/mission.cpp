@@ -320,6 +320,7 @@ game::spec::Mission::parseDescription(const String_t& descriptionLine)
          case 'i': m_flags    += WaypointMission; break;
          case 'o': paramFlags += OwnParameter; break;
          case '!': paramFlags += NotThisParameter; break;
+         case 'n': paramType  = IntegerParameter; break; // new
          case 'p': paramType  = PlanetParameter; break;
          case 's': paramType  = ShipParameter; break;
          case 'h': paramType  = HereParameter; break;

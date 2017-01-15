@@ -53,7 +53,6 @@ namespace client { namespace widgets {
 
         // InvisibleWidget/Widget/EventConsumer:
         virtual bool handleKey(util::Key_t key, int prefix);
-        virtual bool handleMouse(gfx::Point pt, MouseButtons_t pressedButtons);
 
         /** Make a key handler.
             This can be attached to a button's sig_fireKey to make this button fire a keymap action.

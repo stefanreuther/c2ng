@@ -18,12 +18,12 @@ namespace game { namespace nu {
      public:
         BrowserHandler(game::browser::Browser& b,
                        afl::net::http::Manager& mgr,
-                       afl::base::Ptr<afl::io::Directory> defaultSpecificationDirectory);
+                       afl::base::Ref<afl::io::Directory> defaultSpecificationDirectory);
 
         // Handler:
         virtual bool handleFolderName(String_t name, afl::container::PtrVector<game::browser::Folder>& result);
         virtual game::browser::Folder* createAccountFolder(game::browser::Account& acc);
-        virtual afl::base::Ptr<Root> loadGameRoot(afl::base::Ptr<afl::io::Directory> dir);
+        virtual afl::base::Ptr<Root> loadGameRoot(afl::base::Ref<afl::io::Directory> dir);
 
         // nu::BrowserHandler
         bool login(game::browser::Account& acc);
@@ -38,12 +38,12 @@ namespace game { namespace nu {
 
         afl::sys::LogListener& log();
 
-        afl::base::Ptr<afl::io::Directory> getDefaultSpecificationDirectory();
+        afl::base::Ref<afl::io::Directory> getDefaultSpecificationDirectory();
 
      private:
         game::browser::Browser& m_browser;
         afl::net::http::Manager& m_manager;
-        afl::base::Ptr<afl::io::Directory> m_defaultSpecificationDirectory;
+        afl::base::Ref<afl::io::Directory> m_defaultSpecificationDirectory;
 
         // Cache:
         std::auto_ptr<afl::data::Value> m_gameList;

@@ -47,11 +47,13 @@ namespace gfx {
 
             This method shall not block.
             Currently, there is no provision for background font loading, meaning all fonts must be preloaded.
-            This method shall not return a null pointer if at all possible; a null font is an error case.
+            This method must not return a null pointer.
+            It should try hard to obtain a font, even if it does not precisely match the request.
+            If absolutely no matching font is found, it can return a default font (createDefaultFont()).
 
             \param req Font request
             \return font */
-        virtual afl::base::Ptr<Font> getFont(FontRequest req) = 0;
+        virtual afl::base::Ref<Font> getFont(FontRequest req) = 0;
 
         /** Image change.
             This signal is raised when background-loaded images become available.

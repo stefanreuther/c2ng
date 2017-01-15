@@ -349,6 +349,7 @@ game::v3::SpecificationLoader::loadShipList(game::spec::ShipList& list, game::Ro
     loadLaunchers(list, root.specificationDirectory());
     loadEngines(list, root.specificationDirectory());
     loadHulls(list, root.specificationDirectory());
+    loadHullAssignments(list, root.specificationDirectory());
     loadHullFunctions(list, root.specificationDirectory(), root.hostVersion(), root.hostConfiguration());
     list.componentNamer().load(root.specificationDirectory(), m_translator, m_log);
     loadFriendlyCodes(list, root.specificationDirectory());
@@ -366,7 +367,7 @@ game::v3::SpecificationLoader::loadBeams(game::spec::ShipList& list, afl::io::Di
     beams.clear();
 
     // Load it
-    afl::base::Ptr<afl::io::Stream> file = dir.openFile("beamspec.dat", FileSystem::OpenRead);
+    afl::base::Ref<afl::io::Stream> file = dir.openFile("beamspec.dat", FileSystem::OpenRead);
     for (size_t i = 1; i <= gt::NUM_BEAM_TYPES; ++i) {
         gt::Beam in;
         file->fullRead(afl::base::fromObject(in));
@@ -390,7 +391,7 @@ game::v3::SpecificationLoader::loadLaunchers(game::spec::ShipList& list, afl::io
     torps.clear();
 
     // Load it
-    afl::base::Ptr<afl::io::Stream> file = dir.openFile("torpspec.dat", FileSystem::OpenRead);
+    afl::base::Ref<afl::io::Stream> file = dir.openFile("torpspec.dat", FileSystem::OpenRead);
     for (size_t i = 1; i <= gt::NUM_TORPEDO_TYPES; ++i) {
         gt::Torpedo in;
         file->fullRead(afl::base::fromObject(in));
@@ -418,7 +419,7 @@ game::v3::SpecificationLoader::loadEngines(game::spec::ShipList& list, afl::io::
     engines.clear();
 
     // Load it
-    afl::base::Ptr<afl::io::Stream> file = dir.openFile("engspec.dat", FileSystem::OpenRead);
+    afl::base::Ref<afl::io::Stream> file = dir.openFile("engspec.dat", FileSystem::OpenRead);
     for (size_t i = 1; i <= gt::NUM_ENGINE_TYPES; ++i) {
         gt::Engine in;
         file->fullRead(afl::base::fromObject(in));
@@ -443,7 +444,7 @@ game::v3::SpecificationLoader::loadHulls(game::spec::ShipList& list, afl::io::Di
     hulls.clear();
 
     // Load it
-    afl::base::Ptr<afl::io::Stream> file = dir.openFile("hullspec.dat", FileSystem::OpenRead);
+    afl::base::Ref<afl::io::Stream> file = dir.openFile("hullspec.dat", FileSystem::OpenRead);
     gt::Hull in;
     size_t i = 0;
     while (file->read(afl::base::fromObject(in)) == sizeof(in)) {
@@ -483,7 +484,7 @@ game::v3::SpecificationLoader::loadHullAssignments(game::spec::ShipList& list, a
     hullAssignments.clear();
 
     // Load it
-    afl::base::Ptr<afl::io::Stream> file = dir.openFile("truehull.dat", FileSystem::OpenRead);
+    afl::base::Ref<afl::io::Stream> file = dir.openFile("truehull.dat", FileSystem::OpenRead);
     gt::Truehull in;
     file->fullRead(afl::base::fromObject(in));
     for (size_t player = 0; player < gt::NUM_PLAYERS; ++player) {

@@ -20,6 +20,8 @@
 #include "afl/data/integervalue.hpp"
 #include "afl/data/booleanvalue.hpp"
 
+using interpreter::Opcode;
+
 namespace {
     /** Information about a label. */
     struct IntLabelInfo {
@@ -81,8 +83,8 @@ IntOptimizerState::initLabelInfo()
 {
     label_info.resize(bco.getNumLabels());
     for (interpreter::BytecodeObject::PC_t i = 0; i < bco.getNumInstructions(); ++i) {
-        if (bco(i).major == interpreter::Opcode::maJump) {
-            if ((bco(i).minor & interpreter::Opcode::jSymbolic) != 0) {
+        if (bco(i).major == Opcode::maJump) {
+            if ((bco(i).minor & Opcode::jSymbolic) != 0) {
                 assert(bco(i).arg < label_info.size());
                 if (bco(i).isLabel()) {
                     label_info[bco(i).arg].address = i;
@@ -108,28 +110,28 @@ IntOptimizerState::iterate()
 
     struct Table {
         bool (IntOptimizerState::*func)(PC_t);           /**< Function to call. */
-        interpreter::Opcode::Major major;                 /**< Required major opcode. */
+        Opcode::Major major;                 /**< Required major opcode. */
         PC_t                      observed_insns;        /**< Number of observed instructions after pc. */
         const char*               name;
     };
     static const Table table[] = {
-        { &IntOptimizerState::doStoreDrop,         interpreter::Opcode::maStore,    1, "StoreDrop" },
-        { &IntOptimizerState::doStoreDropMember,   interpreter::Opcode::maMemref,   1, "StoreDropIM" },
-        { &IntOptimizerState::doStoreDropMember,   interpreter::Opcode::maIndirect, 1, "StoreDropIM" },
-        { &IntOptimizerState::doMergeDrop,         interpreter::Opcode::maStack,    1, "MergeDrop" },
-        { &IntOptimizerState::doNullOp,            interpreter::Opcode::maStack,    0, "NullOp" },
-        { &IntOptimizerState::doEraseUnusedLabels, interpreter::Opcode::maJump,     0, "EraseUnusedLabels" },
-        { &IntOptimizerState::doInvertJumps,       interpreter::Opcode::maJump,     2, "InvertJumps" },
-        { &IntOptimizerState::doThreadJumps,       interpreter::Opcode::maJump,     0, "ThreadJumps" },
-        { &IntOptimizerState::doRemoveUnused,      interpreter::Opcode::maJump,     1, "RemoveUnused" },
-        { &IntOptimizerState::doRemoveUnused,      interpreter::Opcode::maSpecial,  1, "RemoveUnused" },
-        { &IntOptimizerState::doMergeNegation,     interpreter::Opcode::maUnary,    1, "MergeNegation" },
-        { &IntOptimizerState::doUnaryCondition,    interpreter::Opcode::maUnary,    1, "UnaryCondition" },
-        { &IntOptimizerState::doFoldUnaryInt,      interpreter::Opcode::maPush,     1, "FoldUnaryInt" },
-        { &IntOptimizerState::doFoldBinaryInt,     interpreter::Opcode::maPush,     1, "FoldBinaryInt" },
-        { &IntOptimizerState::doFoldJump,          interpreter::Opcode::maPush,     1, "FoldJump" },
-        { &IntOptimizerState::doPopPush,           interpreter::Opcode::maPop,      1, "PopPush" },
-        { &IntOptimizerState::doCompareNC,         interpreter::Opcode::maPush,     1, "CompareNC" },
+        { &IntOptimizerState::doStoreDrop,         Opcode::maStore,    1, "StoreDrop" },
+        { &IntOptimizerState::doStoreDropMember,   Opcode::maMemref,   1, "StoreDropIM" },
+        { &IntOptimizerState::doStoreDropMember,   Opcode::maIndirect, 1, "StoreDropIM" },
+        { &IntOptimizerState::doMergeDrop,         Opcode::maStack,    1, "MergeDrop" },
+        { &IntOptimizerState::doNullOp,            Opcode::maStack,    0, "NullOp" },
+        { &IntOptimizerState::doEraseUnusedLabels, Opcode::maJump,     0, "EraseUnusedLabels" },
+        { &IntOptimizerState::doInvertJumps,       Opcode::maJump,     2, "InvertJumps" },
+        { &IntOptimizerState::doThreadJumps,       Opcode::maJump,     0, "ThreadJumps" },
+        { &IntOptimizerState::doRemoveUnused,      Opcode::maJump,     1, "RemoveUnused" },
+        { &IntOptimizerState::doRemoveUnused,      Opcode::maSpecial,  1, "RemoveUnused" },
+        { &IntOptimizerState::doMergeNegation,     Opcode::maUnary,    1, "MergeNegation" },
+        { &IntOptimizerState::doUnaryCondition,    Opcode::maUnary,    1, "UnaryCondition" },
+        { &IntOptimizerState::doFoldUnaryInt,      Opcode::maPush,     1, "FoldUnaryInt" },
+        { &IntOptimizerState::doFoldBinaryInt,     Opcode::maPush,     1, "FoldBinaryInt" },
+        { &IntOptimizerState::doFoldJump,          Opcode::maPush,     1, "FoldJump" },
+        { &IntOptimizerState::doPopPush,           Opcode::maPop,      1, "PopPush" },
+        { &IntOptimizerState::doCompareNC,         Opcode::maPush,     1, "CompareNC" },
     };
 
     bool did = false;
@@ -157,14 +159,14 @@ IntOptimizerState::clearInstruction(PC_t pc)
         /* Jump or catch, so decrement label's reference count */
         --label_info[bco(pc).arg].use_count;
     }
-    bco(pc).major = interpreter::Opcode::maJump;
-    bco(pc).minor = interpreter::Opcode::jLabel;
+    bco(pc).major = Opcode::maJump;
+    bco(pc).minor = Opcode::jLabel;
     bco(pc).arg   = 0;
 }
 
 /************************ Individual Optimisations ***********************/
 
-/** StoreDrop optimisation. Combine STOREx + DROP into POPx. 
+/** StoreDrop optimisation. Combine STOREx + DROP into POPx.
     Implemented by decreasing the DROP's counter; if it reaches zero,
     it is removed by doNullOp.
 
@@ -172,8 +174,8 @@ IntOptimizerState::clearInstruction(PC_t pc)
 bool
 IntOptimizerState::doStoreDrop(PC_t pc)
 {
-    if (bco(pc+1).is(interpreter::Opcode::miStackDrop) && bco(pc+1).arg > 0) {
-        bco(pc).major = interpreter::Opcode::maPop;
+    if (bco(pc+1).is(Opcode::miStackDrop) && bco(pc+1).arg > 0) {
+        bco(pc).major = Opcode::maPop;
         --bco(pc+1).arg;
         return true;
     } else {
@@ -181,7 +183,8 @@ IntOptimizerState::doStoreDrop(PC_t pc)
     }
 }
 
-/** StoreDrop optimisation for member references. Combine STOREx + DROP into POPx. 
+/** StoreDrop optimisation for member references. Combine STOREx + DROP into POPx.
+    The same optimisation can be done for LOADx + DROP -> CALLx.
     Implemented by decreasing the DROP's counter; if it reaches zero,
     it is removed by doNullOp.
 
@@ -189,12 +192,18 @@ IntOptimizerState::doStoreDrop(PC_t pc)
 bool
 IntOptimizerState::doStoreDropMember(PC_t pc)
 {
-    if ((bco(pc).minor & interpreter::Opcode::miIMOpMask) == interpreter::Opcode::miIMStore
-        && bco(pc+1).is(interpreter::Opcode::miStackDrop)
+    int minor = (bco(pc).minor & Opcode::miIMOpMask);
+    if ((minor == Opcode::miIMStore || minor == Opcode::miIMLoad)
+        && bco(pc+1).is(Opcode::miStackDrop)
         && bco(pc+1).arg > 0)
     {
-        bco(pc).minor -= interpreter::Opcode::miIMStore;
-        bco(pc).minor += interpreter::Opcode::miIMPop;
+        if (minor == Opcode::miIMStore) {
+            bco(pc).minor -= Opcode::miIMStore;
+            bco(pc).minor += Opcode::miIMPop;
+        } else {
+            bco(pc).minor -= Opcode::miIMLoad;
+            bco(pc).minor += Opcode::miIMCall;
+        }
         --bco(pc+1).arg;
         return true;
     } else {
@@ -211,7 +220,7 @@ IntOptimizerState::doStoreDropMember(PC_t pc)
 bool
 IntOptimizerState::doMergeDrop(PC_t pc)
 {
-    if (bco(pc).is(interpreter::Opcode::miStackDrop) && bco(pc+1).is(interpreter::Opcode::miStackDrop)) {
+    if (bco(pc).is(Opcode::miStackDrop) && bco(pc+1).is(Opcode::miStackDrop)) {
         bco(pc+1).arg += bco(pc).arg;
         clearInstruction(pc);
         return true;
@@ -225,7 +234,7 @@ IntOptimizerState::doMergeDrop(PC_t pc)
 bool
 IntOptimizerState::doNullOp(PC_t pc)
 {
-    if ((bco(pc).is(interpreter::Opcode::miStackDrop) || bco(pc).is(interpreter::Opcode::miStackSwap)) && bco(pc).arg == 0) {
+    if ((bco(pc).is(Opcode::miStackDrop) || bco(pc).is(Opcode::miStackSwap)) && bco(pc).arg == 0) {
         clearInstruction(pc);
         return true;
     } else {
@@ -238,7 +247,7 @@ bool
 IntOptimizerState::doEraseUnusedLabels(PC_t pc)
 {
     /* Remove unreferenced labels */
-    if (bco(pc).isLabel() && (bco(pc).minor & interpreter::Opcode::jSymbolic) != 0 && label_info[bco(pc).arg].use_count == 0) {
+    if (bco(pc).isLabel() && (bco(pc).minor & Opcode::jSymbolic) != 0 && label_info[bco(pc).arg].use_count == 0) {
         clearInstruction(pc);
         return true;
     } else {
@@ -256,16 +265,18 @@ IntOptimizerState::doInvertJumps(PC_t pc)
     if (bco(pc).isRegularJump()
         && label_info[bco(pc).arg].address == pc+2
         && bco(pc+1).isRegularJump()
-        && (bco(pc+1).minor & interpreter::Opcode::jPopAlways) == 0)
+        && (bco(pc+1).minor & Opcode::jPopAlways) == 0
+        && ((bco(pc).minor & Opcode::jPopAlways) == 0
+            || (bco(pc+1).minor & Opcode::jAlways) == Opcode::jAlways))
     {
-        int nextMinor = (bco(pc+1).minor & ~(bco(pc).minor & interpreter::Opcode::jAlways)) | (bco(pc).minor & interpreter::Opcode::jPopAlways);
-        if ((nextMinor & interpreter::Opcode::jAlways) == 0) {
+        int nextMinor = (bco(pc+1).minor & ~(bco(pc).minor & Opcode::jAlways)) | (bco(pc).minor & Opcode::jPopAlways);
+        if ((nextMinor & Opcode::jAlways) == 0) {
             // Second jump is never taken. Eliminate both.
             clearInstruction(pc);
             clearInstruction(pc+1);
-            if (nextMinor & interpreter::Opcode::jPopAlways) {                
-                bco(pc+1).major = interpreter::Opcode::maStack;
-                bco(pc+1).minor = interpreter::Opcode::miStackDrop;
+            if (nextMinor & Opcode::jPopAlways) {
+                bco(pc+1).major = Opcode::maStack;
+                bco(pc+1).minor = Opcode::miStackDrop;
                 bco(pc+1).arg = 1;
             }
         } else {
@@ -302,15 +313,15 @@ IntOptimizerState::doThreadJumps(PC_t pc)
         if (target_address+1 >= bco.getNumInstructions()) {
             /* Jump to label at end of routine */
             break;
-        } else if (bco(target_address+1).isLabel() && (bco(target_address+1).minor & interpreter::Opcode::jSymbolic) != 0) {
+        } else if (bco(target_address+1).isLabel() && (bco(target_address+1).minor & Opcode::jSymbolic) != 0) {
             /* Jump to a label, which is followed by a label. Jump to the later label,
                to make the former unreferenced and removable. */
             target_label = bco(target_address+1).arg;
             assert(label_info[target_label].address == target_address+1);
         } else if (bco(target_address+1).isRegularJump()
-                   && (bco(target_address+1).minor == (interpreter::Opcode::jAlways | interpreter::Opcode::jSymbolic)
-                       || ((bco(pc).minor & interpreter::Opcode::jPopAlways) == 0
-                           && (bco(target_address+1).minor & interpreter::Opcode::jPopAlways) == 0
+                   && (bco(target_address+1).minor == (Opcode::jAlways | Opcode::jSymbolic)
+                       || ((bco(pc).minor & Opcode::jPopAlways) == 0
+                           && (bco(target_address+1).minor & Opcode::jPopAlways) == 0
                            && (bco(pc).minor & ~bco(target_address+1).minor) == 0)))
         {
             /* Jump to an unconditional jump (frequent in if-within-loops),
@@ -332,10 +343,10 @@ IntOptimizerState::doThreadJumps(PC_t pc)
     /* Did we change anything? */
     if (label_info[target_label].address == pc+1) {
         /* It is a jump to the next instruction. Delete it. */
-        if (bco(pc).minor & interpreter::Opcode::jPopAlways) {
+        if (bco(pc).minor & Opcode::jPopAlways) {
             clearInstruction(pc);
-            bco(pc).major = interpreter::Opcode::maStack;
-            bco(pc).minor = interpreter::Opcode::miStackDrop;
+            bco(pc).major = Opcode::maStack;
+            bco(pc).minor = Opcode::miStackDrop;
             bco(pc).arg = 1;
         } else {
             clearInstruction(pc);
@@ -359,10 +370,10 @@ IntOptimizerState::doThreadJumps(PC_t pc)
 bool
 IntOptimizerState::doRemoveUnused(PC_t pc)
 {
-    if ((bco(pc).isRegularJump() && (bco(pc).minor & interpreter::Opcode::jAlways) == interpreter::Opcode::jAlways)
-        || (bco(pc).is(interpreter::Opcode::miSpecialThrow))
-        || (bco(pc).is(interpreter::Opcode::miSpecialTerminate))
-        || (bco(pc).is(interpreter::Opcode::miSpecialReturn)))
+    if ((bco(pc).isRegularJump() && (bco(pc).minor & Opcode::jAlways) == Opcode::jAlways)
+        || (bco(pc).is(Opcode::miSpecialThrow))
+        || (bco(pc).is(Opcode::miSpecialTerminate))
+        || (bco(pc).is(Opcode::miSpecialReturn)))
     {
         // Jump, throw or return
         PC_t i = pc+1;
@@ -389,7 +400,7 @@ IntOptimizerState::doMergeNegation(PC_t pc)
     enum { None = -1, RepFalse = -2, ZapBool = -3 };
     int result = None;
 
-    if (!bco(pc+1).is(interpreter::Opcode::maUnary))
+    if (!bco(pc+1).is(Opcode::maUnary))
         return false;
 
     switch (bco(pc).minor) {
@@ -461,11 +472,11 @@ IntOptimizerState::doMergeNegation(PC_t pc)
         return false;
     } else if (result == RepFalse) {
         /* Replace by 'drop 1; pushbool 0' */
-        bco(pc).major   = interpreter::Opcode::maStack;
-        bco(pc).minor   = interpreter::Opcode::miStackDrop;
+        bco(pc).major   = Opcode::maStack;
+        bco(pc).minor   = Opcode::miStackDrop;
         bco(pc).arg     = 1;
-        bco(pc+1).major = interpreter::Opcode::maPush;
-        bco(pc+1).minor = interpreter::Opcode::sBoolean;
+        bco(pc+1).major = Opcode::maPush;
+        bco(pc+1).minor = Opcode::sBoolean;
         bco(pc+1).arg   = 0;
         return true;
     } else if (result == ZapBool) {
@@ -490,35 +501,35 @@ bool
 IntOptimizerState::doUnaryCondition(PC_t pc)
 {
     /* u<logic> / j<cc>p -> j<cc'>p */
-    if (bco(pc+1).isRegularJump() && (bco(pc+1).minor & interpreter::Opcode::jPopAlways) != 0) {
+    if (bco(pc+1).isRegularJump() && (bco(pc+1).minor & Opcode::jPopAlways) != 0) {
         int oldCond = bco(pc+1).minor;
         int newCond = 0;
         if (bco(pc).is(interpreter::unIsEmpty)) {
             /* uisempty: t->e, f->tf, e->never */
-            if (oldCond & interpreter::Opcode::jIfTrue)
-                newCond |= interpreter::Opcode::jIfEmpty;
-            if (oldCond & interpreter::Opcode::jIfFalse)
-                newCond |= interpreter::Opcode::jIfTrue | interpreter::Opcode::jIfFalse;
+            if (oldCond & Opcode::jIfTrue)
+                newCond |= Opcode::jIfEmpty;
+            if (oldCond & Opcode::jIfFalse)
+                newCond |= Opcode::jIfTrue | Opcode::jIfFalse;
         } else if (bco(pc).is(interpreter::unNot)) {
             /* unot: t->f, f->t, e->e */
-            if (oldCond & interpreter::Opcode::jIfTrue)
-                newCond |= interpreter::Opcode::jIfFalse;
-            if (oldCond & interpreter::Opcode::jIfFalse)
-                newCond |= interpreter::Opcode::jIfTrue;
-            if (oldCond & interpreter::Opcode::jIfEmpty)
-                newCond |= interpreter::Opcode::jIfEmpty;
+            if (oldCond & Opcode::jIfTrue)
+                newCond |= Opcode::jIfFalse;
+            if (oldCond & Opcode::jIfFalse)
+                newCond |= Opcode::jIfTrue;
+            if (oldCond & Opcode::jIfEmpty)
+                newCond |= Opcode::jIfEmpty;
         } else if (bco(pc).is(interpreter::unZap)) {
             /* uzap: t->t, f->never, e->fe */
-            if (oldCond & interpreter::Opcode::jIfTrue)
-                newCond |= interpreter::Opcode::jIfTrue;
-            if (oldCond & interpreter::Opcode::jIfEmpty)
-                newCond |= interpreter::Opcode::jIfEmpty | interpreter::Opcode::jIfFalse;
+            if (oldCond & Opcode::jIfTrue)
+                newCond |= Opcode::jIfTrue;
+            if (oldCond & Opcode::jIfEmpty)
+                newCond |= Opcode::jIfEmpty | Opcode::jIfFalse;
         } else if (bco(pc).is(interpreter::unNot2)) {
             /* unot2: t->fe, f->t, e->never */
-            if (oldCond & interpreter::Opcode::jIfTrue)
-                newCond |= interpreter::Opcode::jIfFalse | interpreter::Opcode::jIfEmpty;
-            if (oldCond & interpreter::Opcode::jIfFalse)
-                newCond |= interpreter::Opcode::jIfTrue;
+            if (oldCond & Opcode::jIfTrue)
+                newCond |= Opcode::jIfFalse | Opcode::jIfEmpty;
+            if (oldCond & Opcode::jIfFalse)
+                newCond |= Opcode::jIfTrue;
         } else if (bco(pc).is(interpreter::unBool)) {
             /* ubool / jccp --> jccp */
             newCond = oldCond;
@@ -531,12 +542,12 @@ IntOptimizerState::doUnaryCondition(PC_t pc)
         if (newCond == 0) {
             /* This will become a "jump never" */
             clearInstruction(pc+1);
-            bco(pc+1).major = interpreter::Opcode::maStack;
-            bco(pc+1).minor = interpreter::Opcode::miStackDrop;
+            bco(pc+1).major = Opcode::maStack;
+            bco(pc+1).minor = Opcode::miStackDrop;
             bco(pc+1).arg   = 1;
         } else {
             /* Update jump */
-            bco(pc+1).minor = newCond | interpreter::Opcode::jPopAlways | interpreter::Opcode::jSymbolic;
+            bco(pc+1).minor = newCond | Opcode::jPopAlways | Opcode::jSymbolic;
         }
         return true;
     } else {
@@ -552,7 +563,7 @@ IntOptimizerState::doUnaryCondition(PC_t pc)
 bool
 IntOptimizerState::doFoldUnaryInt(PC_t pc)
 {
-    if ((bco(pc).minor != interpreter::Opcode::sInteger && bco(pc).minor != interpreter::Opcode::sBoolean) || !bco(pc+1).is(interpreter::Opcode::maUnary))
+    if ((bco(pc).minor != Opcode::sInteger && bco(pc).minor != Opcode::sBoolean) || !bco(pc+1).is(Opcode::maUnary))
         return false;
 
     switch (bco(pc+1).minor) {
@@ -573,7 +584,7 @@ IntOptimizerState::doFoldUnaryInt(PC_t pc)
      case interpreter::unBitNot:
         try {
             afl::data::Value* result;
-            if (bco(pc).minor == interpreter::Opcode::sInteger) {
+            if (bco(pc).minor == Opcode::sInteger) {
                 afl::data::IntegerValue iv(+int16_t(bco(pc).arg));
                 result = interpreter::executeUnaryOperation(world, bco(pc+1).minor, &iv);
             } else if (int16_t(bco(pc).arg) < 0) {
@@ -586,16 +597,16 @@ IntOptimizerState::doFoldUnaryInt(PC_t pc)
             /* Can we encode the result? */
             bool did;
             if (result == 0) {
-                bco(pc).minor = interpreter::Opcode::sBoolean;
+                bco(pc).minor = Opcode::sBoolean;
                 bco(pc).arg   = uint16_t(-1U);
                 did = true;
             } else if (afl::data::ScalarValue* iv = dynamic_cast<afl::data::ScalarValue*>(result)) {
                 if (dynamic_cast<afl::data::BooleanValue*>(iv) != 0) {
-                    bco(pc).minor = interpreter::Opcode::sBoolean;
+                    bco(pc).minor = Opcode::sBoolean;
                     bco(pc).arg   = (iv->getValue() != 0);
                     did = true;
                 } else if (iv->getValue() >= -32767 && iv->getValue() <= +32767) {
-                    bco(pc).minor = interpreter::Opcode::sInteger;
+                    bco(pc).minor = Opcode::sInteger;
                     bco(pc).arg   = iv->getValue();
                     did = true;
                 } else {
@@ -627,7 +638,7 @@ IntOptimizerState::doFoldUnaryInt(PC_t pc)
 bool
 IntOptimizerState::doFoldBinaryInt(PC_t pc)
 {
-    if (bco(pc).minor != interpreter::Opcode::sInteger || !bco(pc+1).is(interpreter::Opcode::maBinary))
+    if (bco(pc).minor != Opcode::sInteger || !bco(pc+1).is(Opcode::maBinary))
         return false;
 
     int16_t value = bco(pc).arg;
@@ -635,7 +646,7 @@ IntOptimizerState::doFoldBinaryInt(PC_t pc)
      case interpreter::biAdd:
         /* "+ 1" => uinc, "+ -1" => udec, "+0" => upos */
         if (value == 0 || value == 1 || value == -1) {
-            bco(pc+1).major = interpreter::Opcode::maUnary;
+            bco(pc+1).major = Opcode::maUnary;
             bco(pc+1).minor = (value == 0 ? interpreter::unPos : value == 1 ? interpreter::unInc : interpreter::unDec);
             clearInstruction(pc);
             return true;
@@ -645,7 +656,7 @@ IntOptimizerState::doFoldBinaryInt(PC_t pc)
      case interpreter::biSub:
         /* "- +1" => uinc, "- -1" => uinc, "+0" => upos */
         if (value == 0 || value == 1 || value == -1) {
-            bco(pc+1).major = interpreter::Opcode::maUnary;
+            bco(pc+1).major = Opcode::maUnary;
             bco(pc+1).minor = (value == 0 ? interpreter::unPos : value == 1 ? interpreter::unDec : interpreter::unInc);
             clearInstruction(pc);
             return true;
@@ -657,7 +668,7 @@ IntOptimizerState::doFoldBinaryInt(PC_t pc)
      case interpreter::biIntegerDivide:
         /* "* +1" => upos, "* -1" => uneg */
         if (value == 1 || value == -1) {
-            bco(pc+1).major = interpreter::Opcode::maUnary;
+            bco(pc+1).major = Opcode::maUnary;
             bco(pc+1).minor = (value == 1 ? interpreter::unPos : interpreter::unNeg);
             clearInstruction(pc);
             return true;
@@ -667,7 +678,7 @@ IntOptimizerState::doFoldBinaryInt(PC_t pc)
      case interpreter::biPow:
         /* "^ +1" => upos */
         if (value == 1) {
-            bco(pc+1).major = interpreter::Opcode::maUnary;
+            bco(pc+1).major = Opcode::maUnary;
             bco(pc+1).minor = interpreter::unPos;
             clearInstruction(pc);
             return true;
@@ -688,26 +699,26 @@ IntOptimizerState::doFoldBinaryInt(PC_t pc)
 bool
 IntOptimizerState::doFoldJump(PC_t pc)
 {
-    if (bco(pc).minor != interpreter::Opcode::sInteger && bco(pc).minor != interpreter::Opcode::sBoolean)
+    if (bco(pc).minor != Opcode::sInteger && bco(pc).minor != Opcode::sBoolean)
         return false;
     if (!bco(pc+1).isRegularJump())
         return false;
 
     /* Figure out condition */
     int cond;
-    if (bco(pc).minor == interpreter::Opcode::sBoolean && int16_t(bco(pc).arg) < 0)
-        cond = interpreter::Opcode::jIfEmpty;
+    if (bco(pc).minor == Opcode::sBoolean && int16_t(bco(pc).arg) < 0)
+        cond = Opcode::jIfEmpty;
     else if (bco(pc).arg == 0)
-        cond = interpreter::Opcode::jIfFalse;
+        cond = Opcode::jIfFalse;
     else
-        cond = interpreter::Opcode::jIfTrue;
+        cond = Opcode::jIfTrue;
 
     /* Check jump */
-    if ((bco(pc+1).minor & interpreter::Opcode::jAlways) == interpreter::Opcode::jAlways) {
+    if ((bco(pc+1).minor & Opcode::jAlways) == Opcode::jAlways) {
         /* Unconditional jump. Check whether it jumps at a conditional jump. */
-        if (bco(pc+1).minor & interpreter::Opcode::jPopAlways) {
+        if (bco(pc+1).minor & Opcode::jPopAlways) {
             /* Pathological case: push + jp, turn into j */
-            bco(pc+1).minor &= ~interpreter::Opcode::jPopAlways;
+            bco(pc+1).minor &= ~Opcode::jPopAlways;
             clearInstruction(pc);
             return true;
         }
@@ -722,7 +733,7 @@ IntOptimizerState::doFoldJump(PC_t pc)
 
         if (bco(target_address+1).minor & cond) {
             /* Jump to conditional jump that will be taken; follow it */
-            if (bco(target_address+1).minor & interpreter::Opcode::jPopAlways) {
+            if (bco(target_address+1).minor & Opcode::jPopAlways) {
                 clearInstruction(pc);
             }
             --label_info[bco(pc+1).arg].use_count;
@@ -735,15 +746,15 @@ IntOptimizerState::doFoldJump(PC_t pc)
         }
     } else {
         /* Conditional jump */
-        if (bco(pc+1).minor & interpreter::Opcode::jPopAlways) {
+        if (bco(pc+1).minor & Opcode::jPopAlways) {
             /* This jump will pop, drop the push */
             clearInstruction(pc);
         }
 
         if (bco(pc+1).minor & cond) {
             /* This jump will be taken. Make it unconditional. */
-            bco(pc+1).minor |= interpreter::Opcode::jAlways;
-            bco(pc+1).minor &= ~interpreter::Opcode::jPopAlways;
+            bco(pc+1).minor |= Opcode::jAlways;
+            bco(pc+1).minor &= ~Opcode::jPopAlways;
         } else {
             /* This jump will not be taken. Drop it. */
             clearInstruction(pc+1);
@@ -760,13 +771,13 @@ IntOptimizerState::doPopPush(PC_t pc)
 {
     /* Next instruction must be push with same address, but may not be
        a named variable: assigning those implies a type-cast. */
-    if (bco(pc+1).major == interpreter::Opcode::maPush
+    if (bco(pc+1).major == Opcode::maPush
         && bco(pc).minor == bco(pc+1).minor
         && bco(pc).arg == bco(pc+1).arg
-        && bco(pc).minor != interpreter::Opcode::sNamedVariable)
+        && bco(pc).minor != Opcode::sNamedVariable)
     {
         /* do it */
-        bco(pc+1).major = interpreter::Opcode::maStore;
+        bco(pc+1).major = Opcode::maStore;
         clearInstruction(pc);
         return true;
     } else {
@@ -776,7 +787,7 @@ IntOptimizerState::doPopPush(PC_t pc)
 }
 
 /** Convert push followed by case-blind comparison into regular
-    comparisons if it can be proven that case-blindness is not needed. 
+    comparisons if it can be proven that case-blindness is not needed.
     This removes the need for upcasing in the comparison. The same
     applies for First/Rest/FindStr. Note that only equality
     comparisons can use this optimisation; ordering comparisons depend
@@ -789,17 +800,17 @@ IntOptimizerState::doCompareNC(PC_t pc)
     const uint8_t cm = bco(pc+1).minor;
 
     /* First must be push literal */
-    if (pm != interpreter::Opcode::sInteger && pm != interpreter::Opcode::sBoolean && pm != interpreter::Opcode::sLiteral)
+    if (pm != Opcode::sInteger && pm != Opcode::sBoolean && pm != Opcode::sLiteral)
         return false;
 
     /* Second must be case-blind compare */
-    if (bco(pc+1).major != interpreter::Opcode::maBinary)
+    if (bco(pc+1).major != Opcode::maBinary)
         return false;
     if (cm != interpreter::biCompareEQ_NC && cm != interpreter::biCompareNE_NC && cm != interpreter::biFirstStr_NC && cm != interpreter::biRestStr_NC && cm != interpreter::biFindStr_NC)
         return false;
 
     /* If first is pushlit, it must be an acceptable literal */
-    if (pm == interpreter::Opcode::sLiteral) {
+    if (pm == Opcode::sLiteral) {
         afl::data::Value* iv = bco.getLiteral(bco(pc).arg);
         if (dynamic_cast<afl::data::ScalarValue*>(iv) != 0 || dynamic_cast<afl::data::FloatValue*>(iv) != 0) {
             /* accept */ ;

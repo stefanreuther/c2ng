@@ -285,27 +285,26 @@ game::interface::getGlobalProperty(GlobalProperty igp, Session& session)
         /* @q Turn:Int (Global Property)
            Turn number. */
         if (Game* game = session.getGame().get()) {
-            return makeIntegerValue(game->currentTurn().universe().getTurnNumber());
+            return makeIntegerValue(game->currentTurn().getTurnNumber());
         } else {
             return 0;
         }
-// FIXME: port (property)
-//      case igpTurnIsNew:
-//         /* @q Turn.IsNew:Bool (Global Property)
-//            New-turn flag.
-//            True if this is a new turn, false if you have opened PCC for the second time this turn. */
-//         if (haveDisplayedTurn())
-//             return makeBoolValue(getDisplayedTurn().getDatabaseTurn() < getDisplayedTurn().getTurnNumber());
-//         else
-//             return 0;
-// FIXME: port (property)
+     case igpTurnIsNew:
+        /* @q Turn.IsNew:Bool (Global Property)
+           New-turn flag.
+           True if this is a new turn, false if you have opened PCC for the second time this turn. */
+        if (Game* game = session.getGame().get()) {
+            return makeBooleanValue(game->currentTurn().getDatabaseTurnNumber() < game->currentTurn().getTurnNumber());
+        } else {
+            return 0;
+        }
      case igpTurnTime:
         /* @q Turn.Time:Str (Global Property)
            Turn time.
            Time of last host run, in <tt>hh:mm:ss</tt> format,
            using the host's timezone and 24-hour format. */
         if (Game* game = session.getGame().get()) {
-            const Timestamp& ts = game->currentTurn().universe().getTimestamp();
+            const Timestamp& ts = game->currentTurn().getTimestamp();
             if (ts.isValid()) {
                 return makeStringValue(ts.getTimeAsString());
             } else {
@@ -320,7 +319,7 @@ game::interface::getGlobalProperty(GlobalProperty igp, Session& session)
            Date of last host run, in <tt>mm-dd-yyyy</tt> format,
            using the host's timezone. */
         if (Game* game = session.getGame().get()) {
-            const Timestamp& ts = game->currentTurn().universe().getTimestamp();
+            const Timestamp& ts = game->currentTurn().getTimestamp();
             if (ts.isValid()) {
                 return makeStringValue(ts.getDateAsString());
             } else {

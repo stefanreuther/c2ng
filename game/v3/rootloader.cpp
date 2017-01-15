@@ -42,7 +42,7 @@ namespace {
 
 }
 
-game::v3::RootLoader::RootLoader(afl::base::Ptr<afl::io::Directory> defaultSpecificationDirectory,
+game::v3::RootLoader::RootLoader(afl::base::Ref<afl::io::Directory> defaultSpecificationDirectory,
                                  util::ProfileDirectory& profile,
                                  afl::string::Translator& tx,
                                  afl::sys::LogListener& log,
@@ -65,7 +65,7 @@ game::v3::RootLoader::setCharsetNew(afl::charset::Charset* p)
 }
 
 afl::base::Ptr<game::Root>
-game::v3::RootLoader::load(afl::base::Ptr<afl::io::Directory> gameDirectory, bool forceEmpty)
+game::v3::RootLoader::load(afl::base::Ref<afl::io::Directory> gameDirectory, bool forceEmpty)
 {
     m_scanner.clear();
     m_scanner.scan(*gameDirectory, *m_charset);
@@ -73,7 +73,7 @@ game::v3::RootLoader::load(afl::base::Ptr<afl::io::Directory> gameDirectory, boo
     afl::base::Ptr<Root> result;
     if (!m_scanner.getDirectoryFlags().empty() || forceEmpty) {
         // Specification directory
-        afl::base::Ptr<afl::io::MultiDirectory> spec = afl::io::MultiDirectory::create();
+        afl::base::Ref<afl::io::MultiDirectory> spec = afl::io::MultiDirectory::create();
         spec->addDirectory(gameDirectory);
         spec->addDirectory(m_defaultSpecificationDirectory);
 
@@ -82,7 +82,7 @@ game::v3::RootLoader::load(afl::base::Ptr<afl::io::Directory> gameDirectory, boo
         key->initFromDirectory(*gameDirectory, m_log);
 
         // Specification loader
-        afl::base::Ptr<SpecificationLoader> specLoader(new SpecificationLoader(*m_charset, m_translator, m_log));
+        afl::base::Ref<SpecificationLoader> specLoader(*new SpecificationLoader(*m_charset, m_translator, m_log));
 
         // Produce result
         result = new Root(spec, gameDirectory, specLoader,
@@ -347,7 +347,7 @@ game::v3::RootLoader::loadRaceNames(PlayerList& list, afl::io::Directory& dir)
     list.clear();
 
     // Load the file
-    afl::base::Ptr<afl::io::Stream> file = dir.openFile("race.nm", FileSystem::OpenRead);
+    afl::base::Ref<afl::io::Stream> file = dir.openFile("race.nm", FileSystem::OpenRead);
     gt::RaceNames in;
     file->fullRead(afl::base::fromObject(in));
     for (size_t player = 0; player < gt::NUM_PLAYERS; ++player) {

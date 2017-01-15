@@ -24,6 +24,10 @@ TestUtilBackupFile::testExpand()
     // Test
     // - trivial case
     TS_ASSERT_EQUALS(t.expandFileName(fs, ""), "");
+    TS_ASSERT_EQUALS(t.expandFileName(fs, "%%"), "%");
+    TS_ASSERT_EQUALS(t.expandFileName(fs, "a%%p"), "a%p");
+    TS_ASSERT_EQUALS(t.expandFileName(fs, "%'"), "'");
+    TS_ASSERT_EQUALS(t.expandFileName(fs, "%"), "%");
 
     // - no directory
     TS_ASSERT_EQUALS(t.expandFileName(fs, "player%p.%t"), "player3.042");

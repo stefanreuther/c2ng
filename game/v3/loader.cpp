@@ -9,15 +9,17 @@
 #include "afl/string/format.hpp"
 #include "game/map/basedata.hpp"
 #include "game/map/ionstorm.hpp"
+#include "game/map/minefield.hpp"
+#include "game/map/minefieldtype.hpp"
 #include "game/map/planet.hpp"
 #include "game/map/planetdata.hpp"
 #include "game/map/ship.hpp"
+#include "game/map/ufotype.hpp"
 #include "game/parser/messageinformation.hpp"
 #include "game/v3/inboxfile.hpp"
+#include "game/v3/reverter.hpp"
 #include "game/v3/structures.hpp"
 #include "game/vcr/classic/database.hpp"
-#include "game/map/minefieldtype.hpp"
-#include "game/map/minefield.hpp"
 
 namespace {
     const char LOG_NAME[] = "game.v3.loader";
@@ -58,6 +60,7 @@ game::v3::Loader::Loader(afl::charset::Charset& charset, afl::string::Translator
 void
 game::v3::Loader::prepareUniverse(game::map::Universe& univ)
 {
+    univ.setNewReverter(new Reverter());
     for (size_t i = 1; i <= structures::NUM_SHIPS; ++i) {
         univ.ships().create(i);
     }
@@ -206,7 +209,7 @@ game::v3::Loader::loadBases(game::map::Universe& univ, afl::io::Stream& file, in
         baseData.damage              = rawBase.damage;
 
         for (int i = 0; i < 4; ++i) {
-            baseData.techLevels[0] = rawBase.techLevels[0];
+            baseData.techLevels[i] = rawBase.techLevels[i];
         }
 
         // Arrays
@@ -349,15 +352,16 @@ game::v3::Loader::loadShips(game::map::Universe& univ, afl::io::Stream& file, in
         if (mode != LoadPrevious) {
             s->addCurrentShipData(shipData, source);
         }
-        if (mode != LoadCurrent) {
-            s->addPreviousShipData(shipData);
-        }
+        // FIXME: add to reverter
+        // if (mode != LoadCurrent) {
+        //     s->addPreviousShipData(shipData);
+        // }
         --count;
     }
 }
 
 void
-game::v3::Loader::loadTargets(game::map::Universe& univ, afl::io::Stream& file, int count, TargetFormat fmt, PlayerSet_t source)
+game::v3::Loader::loadTargets(game::map::Universe& univ, afl::io::Stream& file, int count, TargetFormat fmt, PlayerSet_t source, int turnNumber)
 {
     // ex game/load.cc:loadTargets
     m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loading %d visual contact%!1{s%}...").c_str(), count));
@@ -380,7 +384,7 @@ game::v3::Loader::loadTargets(game::map::Universe& univ, afl::io::Stream& file, 
         } else {
             // Convert to message information
             namespace gp = game::parser;
-            gp::MessageInformation info(gp::MessageInformation::Ship, shipId, univ.getTurnNumber());
+            gp::MessageInformation info(gp::MessageInformation::Ship, shipId, turnNumber);
 
             // Simple values
             info.addValue(gp::mi_Owner, target.owner);
@@ -409,7 +413,7 @@ game::v3::Loader::loadTargets(game::map::Universe& univ, afl::io::Stream& file, 
 
 // Load Minefields from KORE-style file.
 void
-game::v3::Loader::loadKoreMinefields(game::map::Universe& univ, afl::io::Stream& file, int count, int player)
+game::v3::Loader::loadKoreMinefields(game::map::Universe& univ, afl::io::Stream& file, int count, int player, int turnNumber)
 {
     // ex game/load.cc:loadKoreMinefields
     m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loading up to %d minefield%!1{s%}...").c_str(), count));
@@ -439,7 +443,7 @@ game::v3::Loader::loadKoreMinefields(game::map::Universe& univ, afl::io::Stream&
                 p->addReport(game::map::Point(mf.x, mf.y),
                              owner, type,
                              game::map::Minefield::RadiusKnown, mf.radius,
-                             univ.getTurnNumber(),
+                             turnNumber,
                              game::map::Minefield::MinefieldScanned);
             }
         }
@@ -471,6 +475,23 @@ game::v3::Loader::loadKoreIonStorms(game::map::Universe& univ, afl::io::Stream& 
 }
 
 void
+game::v3::Loader::loadKoreExplosions(game::map::Universe& univ, afl::io::Stream& file, int count)
+{
+    // ex game/load.cc:loadKoreExplosions
+    m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loading up to %d explosion%!1{s%}...").c_str(), count));
+
+    for (int i = 1; i <= count; ++i) {
+        structures::KoreExplosion kx;
+        file.fullRead(afl::base::fromObject(kx));
+        int x = kx.x;
+        int y = kx.y;
+        if (x != 0 || y != 0) {
+            univ.explosions().add(game::map::Explosion(i, game::map::Point(x, y)));
+        }
+    }
+}
+
+void
 game::v3::Loader::loadInbox(game::msg::Inbox& inbox, afl::io::Stream& file, int turn)
 {
     InboxFile parser(file, m_charset);
@@ -494,5 +515,35 @@ game::v3::Loader::loadBattles(game::Turn& turn, afl::io::Stream& file, const gam
     if (db->getNumBattles() != 0) {
         m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loaded %d combat recording%!1{s%}...").c_str(), db->getNumBattles()));
         turn.setBattles(db);
+    }
+}
+
+void
+game::v3::Loader::loadUfos(game::map::Universe& univ, afl::io::Stream& file, int firstId, int count)
+{
+    // ex game/load.h:loadUfos, GUfoType::addUfoData, GUfo::addUfoData
+    game::map::UfoType& ufos = univ.ufos();
+    for (int i = 0; i < count; ++i) {
+        structures::Ufo in;
+        file.fullRead(afl::base::fromObject(in));
+        if (in.color != 0) {
+            // uc.addUfoData(first_id + i, ufo);
+            if (game::map::Ufo* out = ufos.addUfo(firstId+i, in.typeCode, in.color)) {
+                out->setName(m_charset.decode(afl::string::toMemory(in.name)));
+                out->setInfo1(m_charset.decode(afl::string::toMemory(in.info1)));
+                out->setInfo2(m_charset.decode(afl::string::toMemory(in.info2)));
+                out->setPosition(game::map::Point(in.x, in.y));
+                out->setSpeed(int(in.warpFactor));
+                if (in.heading >= 0) {
+                    out->setHeading(int(in.heading));
+                } else {
+                    out->setHeading(afl::base::Nothing);
+                }
+                out->setPlanetRange(int(in.planetRange));
+                out->setShipRange(int(in.shipRange));
+                out->setRadius(int(in.radius));
+                out->setIsSeenThisTurn(true);
+            }
+        }
     }
 }

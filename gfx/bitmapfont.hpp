@@ -27,7 +27,7 @@ namespace gfx {
         void load(afl::io::Stream& s, int index);
 
         // Font virtuals:
-        virtual void outText(Context& ctx, Point pt, String_t text);
+        virtual void outText(BaseContext& ctx, Point pt, String_t text);
         virtual int getTextWidth(String_t text);
         virtual int getTextHeight(String_t text);
 

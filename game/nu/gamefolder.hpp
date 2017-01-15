@@ -43,7 +43,7 @@ namespace game { namespace nu {
 
         int32_t m_gameNr;
 
-        afl::base::Ptr<GameState> m_state;
+        afl::base::Ref<GameState> m_state;
     };
 
 } }

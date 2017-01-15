@@ -16,7 +16,7 @@ game::interface::PlanetFunction::PlanetFunction(Session& session)
 
 
 // IndexableValue:
-afl::data::Value*
+game::interface::PlanetContext*
 game::interface::PlanetFunction::get(interpreter::Arguments& args)
 {
     /* @q Planet(sid:Int):Obj (Function, Context)
@@ -39,13 +39,7 @@ game::interface::PlanetFunction::get(interpreter::Arguments& args)
         return 0;
     }
 
-    Game* game = m_session.getGame().get();
-    Root* root = m_session.getRoot().get();
-    if (game != 0 && root != 0 && game->currentTurn().universe().planets().get(id) != 0) {
-        return new PlanetContext(id, m_session, root, game);
-    } else {
-        return 0;
-    }
+    return PlanetContext::create(id, m_session);
 }
 
 void
@@ -58,7 +52,7 @@ game::interface::PlanetFunction::set(interpreter::Arguments& /*args*/, afl::data
 
 // CallableValue:
 int32_t
-game::interface::PlanetFunction::getDimension(int32_t which)
+game::interface::PlanetFunction::getDimension(int32_t which) const
 {
     // ex int/if/planetif.h:IFPlanetDim
     if (which == 0) {
@@ -80,7 +74,7 @@ game::interface::PlanetFunction::makeFirstContext()
     if (game != 0 && root != 0) {
         int id = game::map::AnyPlanetType(game->currentTurn().universe()).findNextIndex(0);
         if (id != 0) {
-            return new PlanetContext(id, m_session, root, game);
+            return new PlanetContext(id, m_session, *root, *game);
         } else {
             return 0;
         }
@@ -104,7 +98,7 @@ game::interface::PlanetFunction::toString(bool /*readable*/) const
 }
 
 void
-game::interface::PlanetFunction::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext* /*ctx*/) const
+game::interface::PlanetFunction::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
 {
     throw interpreter::Error::notSerializable();
 }

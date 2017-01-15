@@ -7,10 +7,10 @@
 #include "gfx/pixmap.hpp"
 #include "afl/base/types.hpp"
 #include "gfx/types.hpp"
-#include "afl/base/ptr.hpp"
-#include "canvas.hpp"
+#include "afl/base/ref.hpp"
 #include "afl/base/refcounted.hpp"
 #include "afl/base/uncopyable.hpp"
+#include "gfx/canvas.hpp"
 
 namespace gfx {
 
@@ -19,7 +19,7 @@ namespace gfx {
                              private afl::base::Uncopyable
     {
      public:
-        static afl::base::Ptr<PalettizedPixmap> create(int w, int h);
+        static afl::base::Ref<PalettizedPixmap> create(int w, int h);
 
         void setPalette(uint8_t start, afl::base::Memory<const ColorQuad_t> colorDefinitions);
 
@@ -29,7 +29,7 @@ namespace gfx {
 
         uint8_t findNearestColor(ColorQuad_t def) const;
 
-        afl::base::Ptr<Canvas> makeCanvas();
+        afl::base::Ref<Canvas> makeCanvas();
 
      private:
         inline PalettizedPixmap(int w, int h);

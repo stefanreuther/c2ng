@@ -74,7 +74,7 @@ namespace ui { namespace widgets {
 
         ui::Root& m_root;
 
-        afl::base::Ptr<gfx::Timer> m_timer;
+        afl::base::Ref<gfx::Timer> m_timer;
         void handleTimer();
     };
 

@@ -12,9 +12,11 @@
 
 namespace ui {
 
+    class ColorScheme;
+
     class Window : public LayoutableGroup {
      public:
-        Window(String_t title, gfx::ResourceProvider& provider, const WindowStyle& style, ui::layout::Manager& manager);
+        Window(String_t title, gfx::ResourceProvider& provider, ColorScheme& uiColorScheme, const WindowStyle& style, ui::layout::Manager& manager);
 
         virtual void draw(gfx::Canvas& can);
         virtual gfx::Rectangle transformSize(gfx::Rectangle size, Transformation kind) const;
@@ -22,11 +24,11 @@ namespace ui {
         virtual bool handleMouse(gfx::Point pt, MouseButtons_t pressedButtons);
 
      private:
-        class WindowColorScheme : public gfx::ColorScheme {
+        class WindowColorScheme : public gfx::ColorScheme<SkinColor::Color> {
          public:
             WindowColorScheme(Window& parent);
-            virtual gfx::Color_t getColor(uint32_t index);
-            virtual void drawBackground(gfx::Context& ctx, const gfx::Rectangle& area);
+            virtual gfx::Color_t getColor(SkinColor::Color index);
+            virtual void drawBackground(gfx::Canvas& can, const gfx::Rectangle& area);
          private:
             Window& m_parent;
         };
@@ -36,6 +38,7 @@ namespace ui {
         gfx::ResourceProvider& m_resourceProvider;
         const WindowStyle& m_style;
         int m_border;
+        ColorScheme& m_uiColorScheme;
         WindowColorScheme m_colorScheme;
         afl::base::SignalConnection conn_providerImageChange;
     };

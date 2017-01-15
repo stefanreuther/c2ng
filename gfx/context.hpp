@@ -4,63 +4,58 @@
 #ifndef C2NG_GFX_CONTEXT_HPP
 #define C2NG_GFX_CONTEXT_HPP
 
-#include "gfx/types.hpp"
-#include "gfx/fillpattern.hpp"
-#include "gfx/point.hpp"
+#include "gfx/basecontext.hpp"
+#include "gfx/colorscheme.hpp"
 
 namespace gfx {
 
-    class FillPattern;
-    class Font;
-    class Canvas;
-    class ColorScheme;
-
-    class Context {
+    template<typename Index>
+    class Context : public BaseContext {
      public:
-        explicit Context(Canvas& canvas);
+        typedef Index Index_t;
 
-        Context& setColor(uint32_t color);
-        Context& setRawColor(Color_t color);
-        Context& setSolidBackground();
-        Context& setTransparentBackground();
-        Context& setLineThickness(int n);
-        Context& setLinePattern(LinePattern_t pat);
-        Context& setFillPattern(const FillPattern& pat);
-        Context& setAlpha(Alpha_t alpha);
-        Context& setCursor(Point pt);
-        Context& setTextAlign(int x, int y);
+        Context(Canvas& canvas, ColorScheme<Index>& colorScheme);
 
-        Context& useFont(Font& font);
-        Context& useCanvas(Canvas& canvas);
-        Context& useColorScheme(ColorScheme& colorScheme);
-
-        Color_t getRawColor() const;
-        bool isTransparentBackground() const;
-        int getLineThickness() const;
-        LinePattern_t getLinePattern() const;
-        FillPattern& fillPattern();
-        const FillPattern& fillPattern() const;
-        Alpha_t getAlpha() const;
-        Point getCursor() const;
-        Point getTextAlign() const;
-        Font* getFont() const;
-        Canvas& canvas() const;
-        ColorScheme& colorScheme() const;
+        Context& setColor(Index color);
+        Context& useColorScheme(ColorScheme<Index>& colorScheme);
+        ColorScheme<Index>& colorScheme() const;
 
      private:
-        Color_t m_rawColor;
-        int m_lineThickness;
-        LinePattern_t m_linePattern;
-        bool m_transparentBackground;
-        FillPattern m_fillPattern;
-        Alpha_t m_alpha;
-        Point m_cursor;
-        Point m_textAlign;
-        Font* m_font;
-        Canvas* m_canvas;
-        ColorScheme* m_colorScheme;
+        ColorScheme<Index>* m_colorScheme;
     };
 
 }
 
+template<typename Index>
+inline
+gfx::Context<Index>::Context(Canvas& canvas, ColorScheme<Index>& colorScheme)
+    : BaseContext(canvas),
+      m_colorScheme(&colorScheme)
+{ }
+
+template<typename Index>
+gfx::Context<Index>&
+gfx::Context<Index>::setColor(Index color)
+{
+    // ex GfxContext::setColor
+    setRawColor(colorScheme().getColor(color));
+    return *this;
+}
+
+template<typename Index>
+inline gfx::Context<Index>&
+gfx::Context<Index>::useColorScheme(ColorScheme<Index>& colorScheme)
+{
+    // ex GfxContext::useColorScheme
+    m_colorScheme = &colorScheme;
+    return *this;
+}
+
+template<typename Index>
+inline gfx::ColorScheme<Index>&
+gfx::Context<Index>::colorScheme() const
+{
+    // ex GfxContext::getColorScheme
+    return *m_colorScheme;
+}
 #endif

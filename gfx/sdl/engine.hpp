@@ -11,8 +11,9 @@
 #include "afl/base/types.hpp"
 #include "afl/sys/loglistener.hpp"
 #include "afl/sys/mutex.hpp"
-#include "afl/container/ptrvector.hpp"
 #include "gfx/timerqueue.hpp"
+#include "afl/container/ptrqueue.hpp"
+#include "afl/sys/semaphore.hpp"
 
 namespace gfx { namespace sdl {
 
@@ -23,11 +24,11 @@ namespace gfx { namespace sdl {
         explicit Engine(afl::sys::LogListener& log);
         ~Engine();
 
-        virtual afl::base::Ptr<Canvas> createWindow(int width, int height, int bpp, WindowFlags_t flags);
-        virtual afl::base::Ptr<Canvas> loadImage(afl::io::Stream& file);
+        virtual afl::base::Ref<Canvas> createWindow(int width, int height, int bpp, WindowFlags_t flags);
+        virtual afl::base::Ref<Canvas> loadImage(afl::io::Stream& file);
         virtual void handleEvent(EventConsumer& consumer, bool relativeMouseMovement);
         virtual util::RequestDispatcher& dispatcher();
-        virtual afl::base::Ptr<Timer> createTimer();
+        virtual afl::base::Ref<Timer> createTimer();
 
      private:
         // Integration
@@ -48,6 +49,10 @@ namespace gfx { namespace sdl {
         bool m_buttonPressed;              ///< true if a button was pressed last time.
         uint32_t m_doubleClickDelay;       ///< Double click delay, ms.
 
+        // Command performance hack, see handleEvent()
+        afl::sys::Semaphore m_runnableSemaphore;
+        bool m_lastWasRunnable;
+
         // Timer
         TimerQueue m_timerQueue;
 
@@ -55,7 +60,7 @@ namespace gfx { namespace sdl {
         virtual void postNewRunnable(afl::base::Runnable* p);
         void processTaskQueue();
         afl::sys::Mutex m_taskMutex;
-        afl::container::PtrVector<afl::base::Runnable> m_taskQueue;
+        afl::container::PtrQueue<afl::base::Runnable> m_taskQueue;
 
         // Event utilities
         void setMouseGrab(bool enable);

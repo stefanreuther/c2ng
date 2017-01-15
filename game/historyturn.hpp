@@ -74,7 +74,7 @@ namespace game {
         /** Handle successful load.
             If this turn was loadable, remembers the given Turn object, and switches to state Loaded.
             \param turn Turn, must not be null */
-        void handleLoadSucceeded(afl::base::Ptr<Turn> turn);
+        void handleLoadSucceeded(afl::base::Ref<Turn> turn);
 
         /** Handle unsuccessful load.
             Depending on the turn's status, enters Failed or Unavailable status. */

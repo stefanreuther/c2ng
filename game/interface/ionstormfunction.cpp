@@ -39,12 +39,7 @@ game::interface::IonStormFunction::get(interpreter::Arguments& args)
         return 0;
     }
 
-    Game* game = m_session.getGame().get();
-    if (game != 0 && game->currentTurn().universe().ionStorms().get(id) != 0) {
-        return new IonStormContext(id, m_session, game);
-    } else {
-        return 0;
-    }
+    return IonStormContext::create(id, m_session);
 }
 
 void
@@ -56,7 +51,7 @@ game::interface::IonStormFunction::set(interpreter::Arguments& /*args*/, afl::da
 
 // CallableValue:
 int32_t
-game::interface::IonStormFunction::getDimension(int32_t which)
+game::interface::IonStormFunction::getDimension(int32_t which) const
 {
     // ex int/if/ionif.h:IFIonDim
     if (which == 0) {
@@ -75,7 +70,7 @@ game::interface::IonStormFunction::makeFirstContext()
     if (game != 0) {
         int id = game->currentTurn().universe().ionStormType().findNextIndex(0);
         if (id != 0) {
-            return new IonStormContext(id, m_session, game);
+            return new IonStormContext(id, m_session, *game);
         } else {
             return 0;
         }
@@ -99,7 +94,7 @@ game::interface::IonStormFunction::toString(bool /*readable*/) const
 }
 
 void
-game::interface::IonStormFunction::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext* /*ctx*/) const
+game::interface::IonStormFunction::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
 {
     throw interpreter::Error::notSerializable();
 }

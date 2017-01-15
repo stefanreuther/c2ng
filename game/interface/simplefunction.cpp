@@ -37,7 +37,7 @@ game::interface::SimpleFunction::set(interpreter::Arguments& /*args*/, afl::data
 
 // CallableValue:
 int32_t
-game::interface::SimpleFunction::getDimension(int32_t /*which*/)
+game::interface::SimpleFunction::getDimension(int32_t /*which*/) const
 {
     // ex IntSimpleIndexableValue::getDimension, sort-of
     return 0;
@@ -65,7 +65,7 @@ game::interface::SimpleFunction::toString(bool /*readable*/) const
 }
 
 void
-game::interface::SimpleFunction::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext* /*ctx*/) const
+game::interface::SimpleFunction::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
 {
     // ex IntSimpleIndexableValue::store
     throw interpreter::Error::notSerializable();

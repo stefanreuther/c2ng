@@ -17,6 +17,8 @@
 #include "game/map/anyshiptype.hpp"
 #include "game/turn.hpp"
 #include "interpreter/indexablevalue.hpp"
+#include "game/root.hpp"
+#include "game/stringverifier.hpp"
 
 using interpreter::makeIntegerValue;
 using interpreter::makeBooleanValue;
@@ -31,31 +33,31 @@ using interpreter::Arguments;
 namespace {
     class PlanetArrayProperty : public interpreter::IndexableValue {
      public:
-        PlanetArrayProperty(const game::map::Planet& planet, afl::base::Ptr<const game::Game> game, game::interface::PlanetProperty property);
+        PlanetArrayProperty(const game::map::Planet& planet, afl::base::Ref<game::Game> game, game::interface::PlanetProperty property);
 
         // IndexableValue:
         virtual afl::data::Value* get(Arguments& args);
         virtual void set(Arguments& args, afl::data::Value* value);
 
         // CallableValue:
-        virtual int32_t getDimension(int32_t which);
+        virtual int32_t getDimension(int32_t which) const;
         virtual interpreter::Context* makeFirstContext();
 
         // BaseValue:
         virtual String_t toString(bool readable) const;
-        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, interpreter::SaveContext* ctx) const;
+        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, interpreter::SaveContext& ctx) const;
 
         // Value:
         virtual PlanetArrayProperty* clone() const;
 
      private:
         const game::map::Planet& m_planet;
-        afl::base::Ptr<const game::Game> m_game;
+        afl::base::Ref<game::Game> m_game;
         const game::interface::PlanetProperty m_property;
     };
 }
 
-PlanetArrayProperty::PlanetArrayProperty(const game::map::Planet& planet, afl::base::Ptr<const game::Game> game, game::interface::PlanetProperty property)
+PlanetArrayProperty::PlanetArrayProperty(const game::map::Planet& planet, afl::base::Ref<game::Game> game, game::interface::PlanetProperty property)
     : interpreter::IndexableValue(),
       m_planet(planet),
       m_game(game),
@@ -68,24 +70,21 @@ PlanetArrayProperty::get(Arguments& args)
 {
     // ex PlanetArrayProperty::get
     switch (m_property) {
-     case game::interface::ippScore:
+     case game::interface::ippScore: {
         // FIXME: /* Documented in shipproperty.cc */
-        if (const game::Game* g = m_game.get()) {
-            int32_t id;
-            game::UnitScoreList::Index_t index;
-            int16_t value, turn;
-            args.checkArgumentCount(1);
-            if (checkIntegerArg(id, args.getNext(), 0, 0x7FFF)
-                && g->planetScores().lookup(id, index)
-                && m_planet.unitScores().get(index, value, turn))
-            {
-                return makeIntegerValue(value);
-            } else {
-                return 0;
-            }
+        int32_t id;
+        game::UnitScoreList::Index_t index;
+        int16_t value, turn;
+        args.checkArgumentCount(1);
+        if (checkIntegerArg(id, args.getNext(), 0, 0x7FFF)
+            && m_game->planetScores().lookup(id, index)
+            && m_planet.unitScores().get(index, value, turn))
+        {
+            return makeIntegerValue(value);
         } else {
             return 0;
         }
+     }
 
      default:
         return 0;
@@ -101,7 +100,7 @@ PlanetArrayProperty::set(Arguments& /*args*/, afl::data::Value* /*value*/)
 
 // CallableValue:
 int32_t
-PlanetArrayProperty::getDimension(int32_t /*which*/)
+PlanetArrayProperty::getDimension(int32_t /*which*/) const
 {
     // ex PlanetArrayProperty::getDimension
     return 0;
@@ -123,7 +122,7 @@ PlanetArrayProperty::toString(bool /*readable*/) const
 }
 
 void
-PlanetArrayProperty::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext* /*ctx*/) const
+PlanetArrayProperty::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
 {
     // ex PlanetArrayProperty::store
     throw Error::notSerializable();
@@ -145,7 +144,7 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
                                    const game::HostVersion& host,
                                    const game::config::HostConfiguration& config,
                                    InterpreterInterface& iface,
-                                   afl::base::Ptr<Game> game)
+                                   afl::base::Ref<Game> game)
 {
     // ex int/if/planetif.h:getPlanetProperty
     // FIXME: check lifetime issues. If this gives out an array property, that one must keep config/shipList alive.
@@ -309,21 +308,18 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
             <tr><td>4</td><td>Heavy</td></tr>
            </table> */
         return makeOptionalIntegerValue(pl.getIndustryLevel(host));
-     case ippLevel:
+     case ippLevel: {
         /* @q Level:Int (Planet Property)
            Planet's experience level.
            If the experience system is not enabled, or the level is not known, yields EMPTY. */
-        if (const Game* g = game.get()) {
-            UnitScoreList::Index_t index;
-            int16_t value, turn;
-            if (g->planetScores().lookup(ScoreId_ExpLevel, index) && pl.unitScores().get(index, value, turn)) {
-                return makeIntegerValue(value);
-            } else {
-                return 0;
-            }
+        UnitScoreList::Index_t index;
+        int16_t value, turn;
+        if (game->planetScores().lookup(ScoreId_ExpLevel, index) && pl.unitScores().get(index, value, turn)) {
+            return makeIntegerValue(value);
         } else {
             return 0;
         }
+     }
      case ippLocX: {
         /* @q Loc.X:Int (Planet Property)
            Planet X location. */
@@ -506,45 +502,36 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
         /* @q Natives:Int (Planet Property)
            Native population size, clans. */
         return makeOptionalIntegerValue(pl.getNatives());
-     case ippOrbitingEnemies:
+     case ippOrbitingEnemies: {
         /* @q Orbit.Enemy:Int (Planet Property)
            Number of enemy (=not own) ships in orbit of this planet. */
-        if (Game* g = game.get()) {
-            game::map::Point pt;
-            if (pl.getPosition(pt)) {
-                return makeIntegerValue(game::map::AnyShipType(g->currentTurn().universe()).countObjectsAt(pt, PlayerSet_t::allUpTo(MAX_PLAYERS) - g->getViewpointPlayer()));
-            } else {
-                return 0;
-            }
+        game::map::Point pt;
+        if (pl.getPosition(pt)) {
+            return makeIntegerValue(game::map::AnyShipType(game->currentTurn().universe()).countObjectsAt(pt, PlayerSet_t::allUpTo(MAX_PLAYERS) - game->getViewpointPlayer()));
         } else {
             return 0;
         }
-     case ippOrbitingOwn:
+     }
+     case ippOrbitingOwn: {
         /* @q Orbit.Own:Int (Planet Property)
            Number of own ships in orbit of this planet. */
-        if (Game* g = game.get()) {
-            game::map::Point pt;
-            if (pl.getPosition(pt)) {
-                return makeIntegerValue(game::map::AnyShipType(g->currentTurn().universe()).countObjectsAt(pt, PlayerSet_t(g->getViewpointPlayer())));
-            } else {
-                return 0;
-            }
+        game::map::Point pt;
+        if (pl.getPosition(pt)) {
+            return makeIntegerValue(game::map::AnyShipType(game->currentTurn().universe()).countObjectsAt(pt, PlayerSet_t(game->getViewpointPlayer())));
         } else {
             return 0;
         }
-     case ippOrbitingShips:
+     }
+     case ippOrbitingShips: {
         /* @q Orbit:Int (Planet Property)
            Total number of ships in orbit of this planet. */
-        if (Game* g = game.get()) {
-            game::map::Point pt;
-            if (pl.getPosition(pt)) {
-                return makeIntegerValue(game::map::AnyShipType(g->currentTurn().universe()).countObjectsAt(pt, PlayerSet_t::allUpTo(MAX_PLAYERS)));
-            } else {
-                return 0;
-            }
+        game::map::Point pt;
+        if (pl.getPosition(pt)) {
+            return makeIntegerValue(game::map::AnyShipType(game->currentTurn().universe()).countObjectsAt(pt, PlayerSet_t::allUpTo(MAX_PLAYERS)));
         } else {
             return 0;
         }
+     }
      case ippPlayed:
         /* @q Played:Bool (Planet Property)
            True if this planet is played.
@@ -590,7 +577,7 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
 }
 
 void
-game::interface::setPlanetProperty(game::map::Planet& pl, PlanetProperty ipp, afl::data::Value* value)
+game::interface::setPlanetProperty(game::map::Planet& pl, PlanetProperty ipp, afl::data::Value* value, Root& root)
 {
     // ex int/if/planetif.h:setPlanetProperty
     // We cannot assign to anything other than auto-build goals on non-played planets
@@ -629,6 +616,9 @@ game::interface::setPlanetProperty(game::map::Planet& pl, PlanetProperty ipp, af
      {
          String_t sv;
          if (checkStringArg(sv, value)) {
+             if (!root.stringVerifier().isValidString(StringVerifier::FriendlyCode, sv)) {
+                 throw Error::rangeError();
+             }
              pl.setFriendlyCode(sv);
          }
          break;

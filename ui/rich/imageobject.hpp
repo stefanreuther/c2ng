@@ -16,7 +16,7 @@ namespace ui { namespace rich {
         ~ImageObject();
 
         virtual gfx::Point getSize();
-        virtual void draw(gfx::Context& ctx, gfx::Rectangle area);
+        virtual void draw(gfx::Context<util::SkinColor::Color>& ctx, gfx::Rectangle area);
 
      private:
         afl::base::Ptr<gfx::Canvas> m_image;

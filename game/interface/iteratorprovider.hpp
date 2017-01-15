@@ -7,6 +7,7 @@
 #include "interpreter/tagnode.hpp"
 #include "afl/string/string.hpp"
 #include "afl/base/deletable.hpp"
+#include "afl/base/refcounted.hpp"
 
 namespace game { namespace map {
     class ObjectCursor;
@@ -15,7 +16,7 @@ namespace game { namespace map {
 
 namespace game { namespace interface {
 
-    class IteratorProvider : public afl::base::Deletable {
+    class IteratorProvider : public afl::base::Deletable, public afl::base::RefCounted {
      public:
         virtual game::map::ObjectCursor* getCursor() = 0;
         virtual game::map::ObjectType* getType() = 0;

@@ -35,13 +35,13 @@ namespace gfx {
             \param bpp Bits per pixel (8/16/24/32 to pick a specific width; 0 to pick the default)
             \param flags Flags
             \return newly-allocated RGBAPixmap */
-        virtual afl::base::Ptr<Canvas> createWindow(int width, int height, int bpp, WindowFlags_t flags);
+        virtual afl::base::Ref<Canvas> createWindow(int width, int height, int bpp, WindowFlags_t flags);
 
         /** Load an image file.
             NullEngine will return an empty 1x1 RGBAPixmap for all requests.
             \param file File (ignored by NullEngine)
             \return image */
-        virtual afl::base::Ptr<Canvas> loadImage(afl::io::Stream& file);
+        virtual afl::base::Ref<Canvas> loadImage(afl::io::Stream& file);
 
         /** Wait for and handle an event.
             Returns when an event has been processed.
@@ -58,7 +58,7 @@ namespace gfx {
         /** Create a user-interface timer.
             The timer callback will execute from within handleEvent() and cause it to return.
             \return newly-allocated timer; never null */
-        virtual afl::base::Ptr<Timer> createTimer();
+        virtual afl::base::Ref<Timer> createTimer();
 
         // NullEngine:
         /** Post a key event.

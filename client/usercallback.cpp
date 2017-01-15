@@ -15,6 +15,7 @@
 #include "ui/layout/hbox.hpp"
 #include "ui/spacer.hpp"
 #include "ui/eventloop.hpp"
+#include "util/translation.hpp"
 
 namespace {
     class RegisterTask : public util::Request<game::browser::Session> {
@@ -69,7 +70,7 @@ client::UserCallback::askInput(String_t title,
     // Build a dialog
     afl::base::Deleter del;
     afl::container::PtrVector<Handler> handlers;
-    ui::Window window(title, m_root.provider(), ui::BLUE_WINDOW, ui::layout::VBox::instance5);
+    ui::Window window(title, m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5);
     size_t valueIndex = 0;
     for (size_t i = 0; i < question.size(); ++i) {
         switch (question[i].type) {
@@ -111,8 +112,8 @@ client::UserCallback::askInput(String_t title,
     ui::Group& g(del.addNew(new ui::Group(ui::layout::HBox::instance5)));
     g.add(del.addNew(new ui::Spacer()));
 
-    ui::widgets::Button& okButton(del.addNew(new ui::widgets::Button("!OK", util::Key_Return, m_root.provider(), m_root.colorScheme())));
-    ui::widgets::Button& cancelButton(del.addNew(new ui::widgets::Button("!Cancel", util::Key_Escape, m_root.provider(), m_root.colorScheme())));
+    ui::widgets::Button& okButton(del.addNew(new ui::widgets::Button(_("OK"), util::Key_Return, m_root)));
+    ui::widgets::Button& cancelButton(del.addNew(new ui::widgets::Button(_("Cancel"), util::Key_Escape, m_root)));
     g.add(okButton);
     g.add(cancelButton);
     window.add(g);

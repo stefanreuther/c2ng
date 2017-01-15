@@ -9,6 +9,7 @@
 #include "afl/string/parse.hpp"
 #include "gfx/rgbapixmap.hpp"
 #include "gfx/blit.hpp"
+#include "util/stringparser.hpp"
 
 namespace {
 // /** Convert resource identifier string value into file name template.
@@ -48,53 +49,9 @@ namespace {
             }
         }
     }
-
-    class Scanner {
-     public:
-        Scanner(String_t str)
-            : str(str),
-              pos(0)
-            { }
-        bool scanString(const char* s);
-        bool scanInt(int& out);
-        bool scanEnd()
-            { return pos == str.size(); }
-
-     private:
-        String_t str;
-        String_t::size_type pos;
-    };
-
-    bool Scanner::scanString(const char* s)
-    {
-        String_t::size_type len = std::strlen(s);
-        if (str.size() - pos >= len && str.compare(pos, len, s, len) == 0) {
-            pos += len;
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    bool Scanner::scanInt(int& out)
-    {
-        String_t::size_type err, err2;
-        if (afl::string::strToInteger(str.substr(pos), out, err)) {
-            // completely valid
-            pos = str.size();
-            return true;
-        } else if (err != 0 && afl::string::strToInteger(str.substr(pos, err), out, err2)) {
-            // part is valid
-            pos += err;
-            return true;
-        } else {
-            // invalid
-            return false;
-        }
-    }
 }
 
-ui::res::DirectoryProvider::DirectoryProvider(afl::base::Ptr<afl::io::Directory> dir)
+ui::res::DirectoryProvider::DirectoryProvider(afl::base::Ref<afl::io::Directory> dir)
     : m_directory(dir),
       m_aliasMap()
 {
@@ -133,43 +90,43 @@ ui::res::DirectoryProvider::loadImage(String_t name, Manager& mgr)
     while (afl::string::strRemove(spec, "|")) {
         String_t op = afl::string::strTrim(afl::string::strFirst(spec, "|"));
 
-        Scanner ops(op);
+        util::StringParser ops(op);
         if (op.size() == 0) {
             // Blank
-        } else if (ops.scanString("size:")) {
+        } else if (ops.parseString("size:")) {
             // Resize
             int width = -1, height = -1;
-            if (ops.scanString("screen")) {
+            if (ops.parseString("screen")) {
                 width = mgr.getScreenSize().getX();
                 height = mgr.getScreenSize().getY();
             } else {
-                if (ops.scanInt(width)) {
-                    if (ops.scanString("%")) {
+                if (ops.parseInt(width)) {
+                    if (ops.parseString("%")) {
                         width = mgr.getScreenSize().getX() * width / 100;
                     }
                 }
-                if (ops.scanString(",") && ops.scanInt(height)) {
-                    if (ops.scanString("%")) {
+                if (ops.parseString(",") && ops.parseInt(height)) {
+                    if (ops.parseString("%")) {
                         height = mgr.getScreenSize().getY() * height / 100;
                     }
                 }
             }
 
-            if (ops.scanEnd() && width > 0 && height > 0) {
+            if (ops.parseEnd() && width > 0 && height > 0) {
                 // FIXME: can we optimize by not creating a RGBA pixmap if not needed?
-                afl::base::Ptr<gfx::Canvas> npix = gfx::RGBAPixmap::create(width, height)->makeCanvas();
+                afl::base::Ref<gfx::Canvas> npix = gfx::RGBAPixmap::create(width, height)->makeCanvas();
                 blitStretchRotate(*pix, *npix,
                                   gfx::Rectangle(gfx::Point(), pix->getSize()),
                                   gfx::Rectangle(gfx::Point(), npix->getSize()),
                                   0, 0,
                                   width, 0,
                                   0, height);
-                pix = npix;
+                pix = npix.asPtr();
             }
-        } else if (ops.scanString("add:")) {
+        } else if (ops.parseString("add:")) {
             // Add value to each pixel
             int toAdd;
-            if (ops.scanInt(toAdd) && ops.scanEnd() && pix->getBitsPerPixel() == 8) {
+            if (ops.parseInt(toAdd) && ops.parseEnd() && pix->getBitsPerPixel() == 8) {
                 addToPixelValue(*pix, toAdd);
             }
         } else {
@@ -197,7 +154,7 @@ ui::res::DirectoryProvider::loadAliases()
             // Strip comment
             String_t::size_type p = line.find_first_of(";#");
             if (p != line.npos) {
-            line.erase(p);
+                line.erase(p);
             }
             line = afl::string::strTrim(line);
 

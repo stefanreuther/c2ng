@@ -1,106 +1,114 @@
 /**
   *  \file ui/widgets/abstractbutton.hpp
+  *  \brief Class ui::widgets::AbstractButton
   */
 #ifndef C2NG_UI_WIDGETS_ABSTRACTBUTTON_HPP
 #define C2NG_UI_WIDGETS_ABSTRACTBUTTON_HPP
 
-#include "ui/simplewidget.hpp"
-#include "ui/draw.hpp"
 #include "afl/base/signal.hpp"
+#include "ui/draw.hpp"
+#include "ui/root.hpp"
+#include "ui/simplewidget.hpp"
 
 namespace ui { namespace widgets {
-
-// /** \class UIAbstractButton
-//     \brief Standard Button
-
-//     This class provides the event handling mechanisms of a standard
-//     clickable button (checkbox, radiobutton, ...). The button can be
-//     have an associated hot-key if so desired.
-
-//     Buttons are triggered by a keystroke or mouse click.
-
-//     Derived classes must override draw().
-
-//     Buttons fire a command, a stop, or a keystroke. You can attach
-//     own handlers to sig_fire. */
 
     /*
      *  Transition from old methods:
      *     addCommand -> retire, replace by event listener
      *     addStop -> replace by sig_fire.addNewClosure(loop.makeStop(n))
-     *     addKey -> 
+     *     addKey -> replace by sig_fireKey listener
+     *
+     *  Transition for flags:
+     *     bf_Pressed -> PressedButton
+     *     bf_Highlight -> HighlightedButton
+     *     bf_Key -> replace by sig_fireKey listener
+     *     bf_SmallSize -> Button::setFont
+     *     bf_PressOverride -> ?
+     *     bf_LeftJust -> ?
      */
+
+
+    /** Base class for a regular push-button.
+        This implements the event handling of a standard push button:
+        - a matching keypress produces an event
+        - a mouse click within the button produces an event
+        Event handling honors prefix arguments.
+
+        Derived classes must implement the missing abstract methods:
+        - appearance-related: draw, getLayoutInfo, handlePositionChange
+        - handleStateChange: call defaultHandleStateChange
+        - handleKey: call defaultHandleKey
+        - handleMouse: call defaultHandleMouse
+
+        Event receivers can attach events to sig_fire and sig_fireKey that differ in their parameters. */
     class AbstractButton : public SimpleWidget {
      public:
-        AbstractButton(util::Key_t key);
+        /** Constructor.
+            \param root Associated UI root (required for prefix argument handling)
+            \param key  Invoking key */
+        AbstractButton(ui::Root& root, util::Key_t key);
 
+        /** Set or clear a button flag.
+            \param flag Flag to set or clear
+            \param value true to set, false to clear */
         void setFlag(ButtonFlag flag, bool value);
+
+        /** Get current flags.
+            \return flags */
         ButtonFlags_t getFlags() const;
 
-        virtual bool handleKey(util::Key_t key, int prefix);
-        virtual bool handleMouse(gfx::Point pt, MouseButtons_t pressedButtons);
+        /** Default implementation for handleStateChange.
+            Call this from your handleStateChange implementation.
+            \param st State
+            \param enable Whether state was added or removed */
+        void defaultHandleStateChange(State st, bool enable);
 
+        /** Default implementation for handleKey.
+            Call this from your handleKey implementation.
+            \param key Key
+            \param prefix Prefix argument
+            \return true if event was handled */
+        bool defaultHandleKey(util::Key_t key, int prefix);
+
+        /** Default implementation for handleMouse.
+            Call this from your handleMouse implementation.
+            \param pt Mouse pointer location
+            \param pressedButtons Button and modifier state
+            \return true if event was handled */
+        bool defaultHandleMouse(gfx::Point pt, MouseButtons_t pressedButtons);
+
+        /** Get associated key.
+            \return key */
+        util::Key_t getKey() const;
+
+        /** Get associated root.
+            \return root */
+        ui::Root& root() const;
+
+        /** Signal: regular activation.
+            \param prefix Prefix argument */
         afl::base::Signal<void(int)> sig_fire;
+
+        /** Signal: key activation.
+            \param prefix Prefix argument.
+            \param key Invoking key. If the button is clicked with a modifier being held, this key will include the modifier. */
         afl::base::Signal<void(int, util::Key_t)> sig_fireKey;
 
      private:
-        util::Key_t m_key;
+        // Root
+        ui::Root& m_root;
+
+        // Associated key
+        const util::Key_t m_key;
+
+        // Keyboard modifiers that were active when the mouse was pressed in this button
         util::Key_t m_activeModifiers;
 
+        // Additional flags
         ButtonFlags_t m_flags;
 
         void fire(int arg, util::Key_t key);
-//  public:
-//     enum {
-//         bf_Pressed       = st_Last*2,     //!< Button is currently pressed.
-//         bf_Highlight     = st_Last*4,     //!< Button is highlighted ("on").
-//         bf_Key           = st_Last*8,     //!< This is a "key" button. That is, it generates a keystroke and does not react upon keystrokes.
-//         bf_SmallSize     = st_Last*16,    //!< Use "small" font. FIXME: this belongs into UIButton.
-//         bf_PressOverride = st_Last*32,    //!< Button should appear depressed. FIXME: this belongs into UIButton.
-//         bf_LeftJust      = st_Last*64     //!< Left-justify text. FIXME: this belongs into UIButton.
-//     };
-
-//     /* Constructors */
-//     UIAbstractButton();
-//     UIAbstractButton(UIKey key);
-//     UIAbstractButton(int id, UIKey key);
-//     ~UIAbstractButton();
-
-//     /* Button handlers */
-//     UIAbstractButton& addCommand();
-//     UIAbstractButton& addStop();
-//     UIAbstractButton& addKey();
-
-//     template<typename T> UIAbstractButton& addCall(T* object, void (T::*function)(int))
-//         { sig_fire.add(object, function); return *this; }
-//     template<typename T> UIAbstractButton& addCall(T* object, void (T::*function)())
-//         { sig_fire.add(object, function); return *this; }
-
-//     /* Event handlers */
-//     bool handleEvent(const UIEvent& e, bool second_pass);
-//     bool handleCommand(const UICommand& cmd, UIBaseWidget& sender);
-//     void onStateChange(int astate, bool enable);
-
-//     UIKey getKey() const;
-//     void setKey(UIKey);
-
-// };
-
-// inline UIKey
-// UIAbstractButton::getKey() const
-// {
-//     return key;
-// }
-
-// inline void
-// UIAbstractButton::setKey(UIKey key)
-// {
-//     this->key = key;
-// }
-
-// #endif
     };
-    
 
 } }
 

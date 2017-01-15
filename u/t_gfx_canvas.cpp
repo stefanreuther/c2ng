@@ -36,8 +36,6 @@ TestGfxCanvas::testIt()
             { }
         virtual Rectangle computeClipRect(Rectangle /*r*/)
             { return Rectangle(); }
-        virtual Color_t getPixel(Point /*pt*/)
-            { return Color_t(); }
         virtual void getPixels(Point /*pt*/, afl::base::Memory<Color_t> /*colors*/)
             { }
         virtual Point getSize()
@@ -54,8 +52,8 @@ TestGfxCanvas::testIt()
             { }
         virtual void encodeColors(afl::base::Memory<const ColorQuad_t> /*colorDefinitions*/, afl::base::Memory<Color_t> /*colorHandles*/)
             { }
-        virtual afl::base::Ptr<Canvas> convertCanvas(afl::base::Ptr<Canvas> /*orig*/)
-            { return 0; }
+        virtual afl::base::Ref<Canvas> convertCanvas(afl::base::Ref<Canvas> orig)
+            { return orig; }
     };
     Tester t;
 }

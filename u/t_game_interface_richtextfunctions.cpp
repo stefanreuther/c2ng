@@ -36,7 +36,7 @@ TestGameInterfaceRichTextFunctions::testRAdd()
     seg.pushBackNew(interpreter::makeIntegerValue(2));
     seg.pushBackNew(interpreter::makeStringValue("three"));
     seg.pushBackNew(interpreter::makeStringValue("four"));
-    seg.pushBackNew(new game::interface::RichTextValue(new util::rich::Text(util::SkinColor::Red, "red")));
+    seg.pushBackNew(new game::interface::RichTextValue(*new util::rich::Text(util::SkinColor::Red, "red")));
 
     // Test a number of invocations
     {
@@ -167,7 +167,7 @@ TestGameInterfaceRichTextFunctions::testRString()
     seg.pushBackNew(0);
     seg.pushBackNew(interpreter::makeIntegerValue(2));
     seg.pushBackNew(interpreter::makeStringValue("three"));
-    seg.pushBackNew(new game::interface::RichTextValue(new util::rich::Text(util::SkinColor::Red, "four")));
+    seg.pushBackNew(new game::interface::RichTextValue(*new util::rich::Text(util::SkinColor::Red, "four")));
 
     // Test a number of invocations
     {
@@ -225,7 +225,7 @@ TestGameInterfaceRichTextFunctions::testRLen()
     seg.pushBackNew(0);
     seg.pushBackNew(interpreter::makeIntegerValue(2));
     seg.pushBackNew(interpreter::makeStringValue("three"));
-    seg.pushBackNew(new game::interface::RichTextValue(new util::rich::Text(util::SkinColor::Red, "four")));
+    seg.pushBackNew(new game::interface::RichTextValue(*new util::rich::Text(util::SkinColor::Red, "four")));
 
     // Test a number of invocations
     {
@@ -267,6 +267,16 @@ TestGameInterfaceRichTextFunctions::testRLen()
         int32_t iv;
         TS_ASSERT(interpreter::checkIntegerArg(iv, result.get()));
         TS_ASSERT_EQUALS(iv, 4);
+    }
+    {
+        // Unicode
+        afl::data::Segment seg2;
+        seg2.pushBackNew(new game::interface::RichTextValue(*new util::rich::Text("\xE2\x86\x90")));
+        interpreter::Arguments args(seg2, 0, 1);
+        Value_t result(game::interface::IFRLen(s, args));
+        int32_t iv;
+        TS_ASSERT(interpreter::checkIntegerArg(iv, result.get()));
+        TS_ASSERT_EQUALS(iv, 1);
     }
 }
 

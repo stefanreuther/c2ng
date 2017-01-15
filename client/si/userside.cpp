@@ -10,24 +10,79 @@
 #include "client/si/scriptside.hpp"
 #include "client/si/usertask.hpp"
 #include "afl/string/format.hpp"
+#include "client/si/usercall.hpp"
+#include "game/extraidentifier.hpp"
+
+const game::ExtraIdentifier<game::Session, client::si::ScriptSide> client::si::SCRIPTSIDE_ID = {{}};
 
 // Constructor.
-client::si::UserSide::UserSide(util::RequestSender<game::Session> gameSender, util::RequestDispatcher& self)
+client::si::UserSide::UserSide(util::RequestSender<game::Session> gameSender, util::RequestDispatcher& self,
+                               util::MessageCollector& console, afl::sys::Log& mainLog)
     : m_gameSender(gameSender),
       m_receiver(self, *this),
-      m_slave(gameSender, new ScriptSide(m_receiver.getSender())),
+      m_console(console),
+      m_mainLog(mainLog),
       m_waitIdCounter(0)
-{ }
+{
+    // Create the ScriptSide
+    class Task : public util::Request<game::Session> {
+     public:
+        Task(util::RequestSender<UserSide> reply)
+            : m_reply(reply)
+            { }
+        virtual void handle(game::Session& session)
+            {
+                ScriptSide* ss = session.extra().get(SCRIPTSIDE_ID);
+                if (!ss) {
+                    ss = session.extra().setNew(SCRIPTSIDE_ID, new ScriptSide(m_reply));
+                    ss->init(session);
+                }
+            }
+     private:
+        util::RequestSender<UserSide> m_reply;
+    };
+    m_gameSender.postNewRequest(new Task(m_receiver.getSender()));
+}
 
 // Destructor.
 client::si::UserSide::~UserSide()
-{ }
+{
+    // Remove the ScriptSide
+    class Task : public util::Request<game::Session> {
+     public:
+        virtual void handle(game::Session& session)
+            {
+                if (ScriptSide* ss = session.extra().get(SCRIPTSIDE_ID)) {
+                    ss->done(session);
+                    session.extra().setNew(SCRIPTSIDE_ID, (ScriptSide*)0);
+                }
+            }
+    };
+    m_gameSender.postNewRequest(new Task());
+}
 
 // Post a request to execute on the ScriptSide.
 void
 client::si::UserSide::postNewRequest(util::SlaveRequest<game::Session, ScriptSide>* request)
 {
-    m_slave.postNewRequest(request);
+    class Task : public util::Request<game::Session> {
+     public:
+        Task(std::auto_ptr<util::SlaveRequest<game::Session, ScriptSide> > p)
+            : m_p(p)
+            { }
+        virtual void handle(game::Session& session)
+            {
+                if (ScriptSide* ss = session.extra().get(SCRIPTSIDE_ID)) {
+                    if (m_p.get() != 0) {
+                        m_p->handle(session, *ss);
+                    }
+                }
+            }
+     private:
+        std::auto_ptr<util::SlaveRequest<game::Session, ScriptSide> > m_p;
+    };
+    std::auto_ptr<util::SlaveRequest<game::Session, ScriptSide> > p(request);
+    m_gameSender.postNewRequest(new Task(p));
 }
 
 // Continue a process after UI callout.
@@ -44,7 +99,7 @@ client::si::UserSide::continueProcess(RequestLink2 link)
      private:
         RequestLink2 m_link;
     };
-    m_slave.postNewRequest(new Task(link));
+    postNewRequest(new Task(link));
 }
 
 void
@@ -63,7 +118,7 @@ client::si::UserSide::joinProcess(RequestLink2 link, RequestLink2 other)
         RequestLink2 m_other;
     };
     if (other.isValid()) {
-        m_slave.postNewRequest(new Task(link, other));
+        postNewRequest(new Task(link, other));
     }
 }
 
@@ -84,7 +139,7 @@ client::si::UserSide::continueProcessWithFailure(RequestLink2 link, String_t err
         RequestLink2 m_link;
         String_t m_error;
     };
-    m_slave.postNewRequest(new Task(link, error));
+    postNewRequest(new Task(link, error));
 }
 
 // Detach from process after UI callout.
@@ -101,7 +156,7 @@ client::si::UserSide::detachProcess(RequestLink2 link)
      private:
         RequestLink2 m_link;
     };
-    m_slave.postNewRequest(new Task(link));
+    postNewRequest(new Task(link));
 }
 
 // Process a UserTask.
@@ -123,6 +178,14 @@ client::si::UserSide::processTask(UserTask& t, RequestLink2 link)
     }
 }
 
+void
+client::si::UserSide::processCall(UserCall& t)
+{
+    if (!m_controls.empty()) {
+        t.handle(*this, *m_controls.back());
+    }
+}
+
 // Set variable in process.
 void
 client::si::UserSide::setVariable(RequestLink2 link, String_t name, std::auto_ptr<afl::data::Value> value)
@@ -141,7 +204,7 @@ client::si::UserSide::setVariable(RequestLink2 link, String_t name, std::auto_pt
         String_t m_name;
         std::auto_ptr<afl::data::Value> m_value;
     };
-    m_slave.postNewRequest(new Task(link, name, value));
+    postNewRequest(new Task(link, name, value));
 }
 
 // Allocate a wait Id.
@@ -167,7 +230,7 @@ client::si::UserSide::continueProcessWait(uint32_t id, RequestLink2 link)
         uint32_t m_id;
         RequestLink2 m_link;
     };
-    m_slave.postNewRequest(new ContinueTask(id, link));
+    postNewRequest(new ContinueTask(id, link));
 }
 
 // Execute a command and setup wait.
@@ -192,7 +255,7 @@ client::si::UserSide::executeCommandWait(uint32_t id, String_t command, bool ver
         String_t m_name;
         std::auto_ptr<ContextProvider> m_contextProvider;
     };
-    m_slave.postNewRequest(new StartTask(id, command, verbose, name, ctxp));
+    postNewRequest(new StartTask(id, command, verbose, name, ctxp));
 }
 
 // Execute a key command and setup wait.
@@ -227,7 +290,7 @@ client::si::UserSide::executeKeyCommandWait(uint32_t id, String_t keymapName, ut
         int m_prefix;
         std::auto_ptr<ContextProvider> m_contextProvider;
     };
-    m_slave.postNewRequest(new StartTask(id, keymapName, key, prefix, ctxp));
+    postNewRequest(new StartTask(id, keymapName, key, prefix, ctxp));
 }
 
 // Handle successful wait.

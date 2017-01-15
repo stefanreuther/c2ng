@@ -6,6 +6,7 @@
 
 #include "afl/data/segment.hpp"
 #include "afl/base/types.hpp"
+#include "util/atomtable.hpp"
 
 namespace interpreter {
 
@@ -102,6 +103,15 @@ namespace interpreter {
         \return true if value was specified, false if value was null (flagOut, valueOut not changed)
         \throw Error if value is invalid */
     bool checkFlagArg(int32_t& flagOut, int32_t* valueOut, afl::data::Value* value, const char* tpl);
+
+    /** Check command atom argument.
+        Users either specify the command as a string, or an atom.
+        \param atomOut [out] The command
+        \param value [in] Value given by user
+        \param table [in/out] Atom table
+        \return true if value was specified, false if value was null (atomOut not changed)
+        \throw Error if value is invalid */
+    bool checkCommandAtomArg(util::Atom_t& atomOut, afl::data::Value* value, util::AtomTable& table);
 
 }
 

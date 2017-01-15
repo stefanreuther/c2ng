@@ -1,0 +1,11 @@
+/*!
+     \namespace game::maint
+     \brief Maintenance utilities
+
+     This namespace contains classes for maintenance (technical matters).
+     This includes access do internals of game files and directories:
+     - unpack
+     - maketurn
+     - sweep
+     - dump
+ */

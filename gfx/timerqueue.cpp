@@ -78,11 +78,11 @@ gfx::TimerQueue::~TimerQueue()
     }
 }
 
-afl::base::Ptr<gfx::Timer>
+afl::base::Ref<gfx::Timer>
 gfx::TimerQueue::createTimer()
 {
-    afl::base::Ptr<TimerImpl> t = new TimerImpl(*this);
-    m_timers.push_back(t.get());
+    afl::base::Ref<TimerImpl> t = *new TimerImpl(*this);
+    m_timers.push_back(&t.get());
     return t;
 }
 

@@ -1,18 +1,22 @@
 /**
   *  \file ui/widgets/abstractbutton.cpp
+  *  \brief Class ui::widgets::AbstractButton
   */
 
 #include "ui/widgets/abstractbutton.hpp"
 
-ui::widgets::AbstractButton::AbstractButton(util::Key_t key)
+// Constructor.
+ui::widgets::AbstractButton::AbstractButton(ui::Root& root, util::Key_t key)
     : SimpleWidget(),
       sig_fire(),
       sig_fireKey(),
+      m_root(root),
       m_key(key),
       m_activeModifiers(0),
       m_flags()
 { }
 
+// Set or clear a button flag.
 void
 ui::widgets::AbstractButton::setFlag(ButtonFlag flag, bool value)
 {
@@ -33,22 +37,37 @@ ui::widgets::AbstractButton::setFlag(ButtonFlag flag, bool value)
     }
 }
 
+// Get current flags.
 ui::ButtonFlags_t
 ui::widgets::AbstractButton::getFlags() const
 {
     return m_flags;
 }
 
+// Default implementation for handleStateChange.
+void
+ui::widgets::AbstractButton::defaultHandleStateChange(State st, bool enable)
+{
+    if (st == ActiveState) {
+        setFlag(ActiveButton, enable);
+        if (!enable) {
+            // We lost logical focus: un-press the button
+            setFlag(PressedButton, enable);
+        }
+    }
+    requestRedraw();
+}
 
+// Default implementation for handleKey.
 bool
-ui::widgets::AbstractButton::handleKey(util::Key_t key, int prefix)
+ui::widgets::AbstractButton::defaultHandleKey(util::Key_t key, int prefix)
 {
     if (!hasState(DisabledState)) {
         // FIXME: && !hasState(bf_Key)
         // FIXME: PCC2 checks Alt and #/\ only on second pass
         if (key == m_key
             || key == util::KeyMod_Alt + m_key
-            || (key == '\\' && key == '#'))
+            || (key == '\\' && m_key == '#'))
         {
             requestActive();
             fire(prefix, key);
@@ -61,8 +80,9 @@ ui::widgets::AbstractButton::handleKey(util::Key_t key, int prefix)
     }
 }
 
+// Default implementation for handleMouse.
 bool
-ui::widgets::AbstractButton::handleMouse(gfx::Point pt, MouseButtons_t pressedButtons)
+ui::widgets::AbstractButton::defaultHandleMouse(gfx::Point pt, MouseButtons_t pressedButtons)
 {
     if (getExtent().contains(pt) && !hasState(DisabledState)) {
         // Mouse is in widget
@@ -86,11 +106,7 @@ ui::widgets::AbstractButton::handleMouse(gfx::Point pt, MouseButtons_t pressedBu
         } else if (m_flags.contains(PressedButton)) {
             // Mouse released in button
             setFlag(PressedButton, false);
-
-            // FIXME: prefix argument
-            // int arg = consumePrefixArg();
-            int arg = 0;
-            fire(arg, m_key | m_activeModifiers);
+            fire(m_root.consumeMousePrefixArgument(), m_key | m_activeModifiers);
             m_activeModifiers = 0;
         } else {
             // Mouse still down
@@ -104,7 +120,20 @@ ui::widgets::AbstractButton::handleMouse(gfx::Point pt, MouseButtons_t pressedBu
     }
 }
 
-// /** Reaction on button click. */
+// Get associated key.
+util::Key_t
+ui::widgets::AbstractButton::getKey() const
+{
+    return m_key;
+}
+
+// Get associated root.
+ui::Root&
+ui::widgets::AbstractButton::root() const
+{
+    return m_root;
+}
+
 void
 ui::widgets::AbstractButton::fire(int arg, util::Key_t key)
 {
@@ -112,50 +141,3 @@ ui::widgets::AbstractButton::fire(int arg, util::Key_t key)
     sig_fire.raise(arg);
     sig_fireKey.raise(arg, key);
 }
-
-// /** Make this a "key" button. */
-// UIAbstractButton&
-// UIAbstractButton::addKey()
-// {
-//     setState(bf_Key, true);
-//     return *this;
-// }
-
-// /** Change button state. When the button loses logical focus, it must
-//     be un-pressed. Certain events also need redraw. */
-// void
-// UIAbstractButton::onStateChange(int astate, bool enable)
-// {
-//     UIWidget::onStateChange(astate, enable);
-
-//     // FIXME: can we get rid of this status manipulation?
-//     if (astate & st_Disabled)
-//         status &= ~bf_Pressed;
-
-//     if ((status & (bf_Pressed | st_Selected)) == bf_Pressed)
-//         status &= ~bf_Pressed;
-
-//     if (astate & (bf_Pressed | st_Selected | bf_Highlight | st_Disabled | bf_PressOverride))
-//         drawWidget(false);
-// }
-
-// bool
-// UIAbstractButton::handleCommand(const UICommand& cmd, UIBaseWidget& sender)
-// {
-//     if (cmd.code == cm_INT_QueryReferencePoint) {
-//         // FIXME: do we need this? This is the default setting.
-//         ASSERT(cmd.infop);
-//         TReferencePointArg& ra = *static_cast<TReferencePointArg*>(cmd.infop);
-//         ra.x = getExtent().x;
-//         ra.y = getExtent().getBottomY();
-//         return true;
-//     } else if (cmd.code == cm_INT_Push) {
-//         setState(bf_PressOverride, true);
-//         return true;
-//     } else if (cmd.code == cm_INT_Unpush) {
-//         setState(bf_PressOverride, false);
-//         return true;
-//     } else {
-//         return UIWidget::handleCommand(cmd, sender);
-//     }
-// }

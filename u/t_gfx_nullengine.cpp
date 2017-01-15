@@ -71,10 +71,10 @@ TestGfxNullEngine::testTimers()
 
     // Create stuff
     gfx::NullEngine t;
-    afl::base::Ptr<gfx::Timer> time1 = t.createTimer();
-    afl::base::Ptr<gfx::Timer> time2 = t.createTimer();
-    TS_ASSERT(time1.get() != 0);
-    TS_ASSERT(time2.get() != 0);
+    afl::base::Ref<gfx::Timer> time1 = t.createTimer();
+    afl::base::Ref<gfx::Timer> time2 = t.createTimer();
+    TS_ASSERT(&time1.get() != 0);
+    TS_ASSERT(&time2.get() != 0);
 
     // Set up everything
     Counter ctrTimer1(numTimer1);

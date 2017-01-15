@@ -29,9 +29,26 @@ class TestClientSiRequestLink2 : public CxxTest::TestSuite {
     void testConvert();
 };
 
+class TestClientSiScriptProcedure : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testNull();
+};
+
+class TestClientSiUserCall : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
 class TestClientSiUserTask : public CxxTest::TestSuite {
  public:
     void testIt();
+};
+
+class TestClientSiWidgetFunction : public CxxTest::TestSuite {
+ public:
+    void testNewButton();
+    void testNewInput();
 };
 
 #endif

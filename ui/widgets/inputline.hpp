@@ -1,25 +1,24 @@
 /**
   *  \file ui/widgets/inputline.hpp
+  *  \brief Class ui::widgets::InputLine
   */
 #ifndef C2NG_UI_WIDGETS_INPUTLINE_HPP
 #define C2NG_UI_WIDGETS_INPUTLINE_HPP
 
-#include "afl/base/types.hpp"
-#include "util/key.hpp"
-#include "gfx/fontrequest.hpp"
-#include "afl/bits/smallset.hpp"
 #include "afl/base/signal.hpp"
-#include "ui/simplewidget.hpp"
+#include "afl/base/types.hpp"
+#include "afl/bits/smallset.hpp"
+#include "afl/charset/utf8.hpp"
+#include "gfx/fontrequest.hpp"
 #include "gfx/resourceprovider.hpp"
 #include "ui/root.hpp"
-#include "afl/charset/utf8.hpp"
+#include "ui/simplewidget.hpp"
+#include "util/key.hpp"
 
 namespace ui { namespace widgets {
 
-    // /** \class UIInputLine
-    //     \brief Input Line
-
-    //     Standard text entry field */
+    /** Input line.
+        A standard focusable, scrollable text entry field. */
     class InputLine : public SimpleWidget {
      public:
         // Removed flags:
@@ -45,11 +44,11 @@ namespace ui { namespace widgets {
         Flags_t getFlags() const;
 
         InputLine& setHotkey(util::Key_t hotkey);
-        InputLine& setFont(gfx::FontRequest& font);
+        InputLine& setFont(const gfx::FontRequest& font);
 
-        void insert(String_t s); // FIXME name
-        void setCursor(size_t pos); // FIXME name
-        size_t getCursor() const; // FIXME name
+        void insertText(String_t s);
+        void setCursorIndex(size_t pos);
+        size_t getCursorIndex() const;
 
         bool doStandardDialog(String_t title, String_t prompt);
         
@@ -76,7 +75,8 @@ namespace ui { namespace widgets {
         size_t m_cursorIndex;
 
         /** First displayed character position. */
-        size_t m_firstIndex;
+        //size_t m_firstIndex;
+        int m_pixelOffset;
 
         /** Text. */
         String_t m_text;
@@ -100,10 +100,7 @@ namespace ui { namespace widgets {
         int getTextWidth() const;
         bool acceptUnicode(uint32_t uni) const;
 
-
- //    static bool run(string_t& str, string_t::size_type m_maxLength,
- //                    const string_t& title, const string_t& req,
- //                    int width, int flags);
+        String_t getPerceivedText() const;
     };
 
 } }

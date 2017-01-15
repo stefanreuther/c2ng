@@ -14,6 +14,10 @@
 #include "afl/base/ptr.hpp"
 #include "afl/io/directory.hpp"
 #include "afl/io/filesystem.hpp"
+#include "interpreter/mutexlist.hpp"
+#include "interpreter/filetable.hpp"
+#include "afl/io/stream.hpp"
+#include "interpreter/bytecodeobject.hpp"
 
 namespace interpreter {
 
@@ -62,16 +66,31 @@ namespace interpreter {
         ProcessList& processList();
         const ProcessList& processList() const;
 
+        MutexList& mutexList();
+        const MutexList& mutexList() const;
+
+        FileTable& fileTable();
+        const FileTable& fileTable() const;
+
         void addNewGlobalContext(Context* ctx);
         const afl::container::PtrVector<Context>& globalContexts() const;
 
-        void setLoadDirectory(afl::base::Ptr<afl::io::Directory> dir);
-        afl::base::Ptr<afl::io::Directory> getLoadDirectory() const;
+        void setSystemLoadDirectory(afl::base::Ptr<afl::io::Directory> dir);
+        afl::base::Ptr<afl::io::Directory> getSystemLoadDirectory() const;
+
+        void setLocalLoadDirectory(afl::base::Ptr<afl::io::Directory> dir);
+        afl::base::Ptr<afl::io::Directory> getLocalLoadDirectory() const;
+
+        afl::base::Ptr<afl::io::Stream> openLoadFile(const String_t name) const;
 
         afl::sys::LogListener& logListener();
         void logError(afl::sys::LogListener::Level level, const Error& e);
 
         afl::io::FileSystem& fileSystem();
+
+        BCORef_t compileFile(afl::io::Stream& file);
+        BCORef_t compileCommand(String_t command);
+        BCORef_t compileCommand(String_t command, bool wantResult, bool& hasResult);
 
         void notifyListeners();
 
@@ -109,6 +128,12 @@ namespace interpreter {
         // ex int/process.cc:process_list
         ProcessList m_processList;
 
+        // ex int/mutex.h globals
+        MutexList m_mutexList;
+
+        // ex int/file.h globals
+        FileTable m_fileTable;
+
         // replacement for console
         afl::sys::LogListener& m_log;
 
@@ -116,7 +141,8 @@ namespace interpreter {
         afl::io::FileSystem& m_fileSystem;
 
         // ex game_file_dir, sort-of
-        afl::base::Ptr<afl::io::Directory> m_loadDirectory;
+        afl::base::Ptr<afl::io::Directory> m_systemLoadDirectory;
+        afl::base::Ptr<afl::io::Directory> m_localLoadDirectory;
 
         void init();
     };

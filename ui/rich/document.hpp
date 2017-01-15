@@ -51,11 +51,13 @@ namespace ui { namespace rich {
             bool underline;
             bool key;
             String_t text;
+            bool breakable;
 
-            Item(ItemKind kind, int x, int y, int w, gfx::FontRequest font, util::SkinColor::Color color, bool underline, bool key, const String_t& text)
+            Item(ItemKind kind, int x, int y, int w, gfx::FontRequest font, util::SkinColor::Color color, bool underline, bool key, const String_t& text, bool breakable)
                 : kind(kind), x(x), y(y), w(w),
                   font(font), color(color),
-                  underline(underline), key(key), text(text)
+                  underline(underline), key(key), text(text),
+                  breakable(breakable)
                 { }
         };
 
@@ -105,7 +107,7 @@ namespace ui { namespace rich {
         int getDocumentHeight() const;
         int getDocumentWidth() const;
 
-        void draw(gfx::Context& ctx, gfx::Rectangle area, int skipY);
+        void draw(gfx::Context<util::SkinColor::Color>& ctx, gfx::Rectangle area, int skipY);
 
         LinkId_t getLinkFromPos(gfx::Point pt) const;
         String_t getLinkTarget(LinkId_t link) const;

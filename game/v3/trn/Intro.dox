@@ -1,0 +1,6 @@
+/*!
+     \namespace game::v3::trn
+     \brief v3 turn file handling
+
+     This namespace contains classes to deal with turn files.
+ */

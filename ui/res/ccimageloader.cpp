@@ -8,6 +8,8 @@
 #include "gfx/palettizedpixmap.hpp"
 #include "ui/colorscheme.hpp"
 #include "afl/base/growablememory.hpp"
+#include "afl/io/transformreaderstream.hpp"
+#include "util/runlengthexpandtransform.hpp"
 
 namespace {
     /** Convert PCC v1 color to equivalent PCC v2 color. */
@@ -63,7 +65,7 @@ namespace {
         line.resize((width + 1)/2);
 
         // Load image
-        afl::base::Ptr<gfx::PalettizedPixmap> pix = gfx::PalettizedPixmap::create(width, height);
+        afl::base::Ref<gfx::PalettizedPixmap> pix = gfx::PalettizedPixmap::create(width, height);
         for (int i = 0; i < height; ++i) {
             // Read line
             s.read(line);
@@ -91,7 +93,7 @@ namespace {
                                                        gfx::OPAQUE_ALPHA));
         }
 
-        return pix->makeCanvas();
+        return pix->makeCanvas().asPtr();
     }
 
     /** Load .cc image. Those are used by PCC v1 in 256 color mode.
@@ -128,7 +130,7 @@ namespace {
         }
         
         // Load image
-        afl::base::Ptr<gfx::PalettizedPixmap> pix = gfx::PalettizedPixmap::create(width, height);
+        afl::base::Ref<gfx::PalettizedPixmap> pix = gfx::PalettizedPixmap::create(width, height);
         s.fullRead(pix->pixels());
 
         // Convert pixel data
@@ -146,7 +148,7 @@ namespace {
                                                        gfx::OPAQUE_ALPHA));
         }
 
-        return pix->makeCanvas();
+        return pix->makeCanvas().asPtr();
     }
 
 
@@ -181,14 +183,33 @@ namespace {
         }
 
         // Load image
-        afl::base::Ptr<gfx::PalettizedPixmap> pix = gfx::PalettizedPixmap::create(width, height);
+        afl::base::Ref<gfx::PalettizedPixmap> pix = gfx::PalettizedPixmap::create(width, height);
         s.fullRead(pix->pixels());
 
         // Set up palette
         pix->setPalette(0, ui::STANDARD_COLORS);
         pix->setPalette(255, COLORQUAD_FROM_RGBA(0,0,0,gfx::TRANSPARENT_ALPHA));
 
-        return pix->makeCanvas();
+        return pix->makeCanvas().asPtr();
+    }
+
+    afl::base::Ptr<gfx::Canvas> loadImageInternal(afl::io::Stream& in)
+    {
+        // ex ui/pixmap.cc:loadImageInternal, sort-of
+        uint8_t magic[2];
+        if (in.read(magic) == sizeof(magic)) {
+            if (magic[0] == 'C' && magic[1] == 'C') {
+                return loadCCImage(in);
+            } else if (magic[0] == 'C' && magic[1] == 'D') {
+                return loadCDImage(in);
+            } else if (magic[0] == 0 && magic[1] == 8) {
+                return loadGFXImage(in);
+            } else {
+                return 0;
+            }
+        } else {
+            return 0;
+        }
     }
 }
 
@@ -199,20 +220,15 @@ ui::res::CCImageLoader::CCImageLoader()
 afl::base::Ptr<gfx::Canvas>
 ui::res::CCImageLoader::loadImage(afl::io::Stream& in)
 {
-    // ex ui/pixmap.cc:loadImageInternal, sort-of
-    uint8_t magic[2];
+    // Load as uncompressed image
     in.setPos(0);
-    if (in.read(magic) == sizeof(magic)) {
-        if (magic[0] == 'C' && magic[1] == 'C') {
-            return loadCCImage(in);
-        } else if (magic[0] == 'C' && magic[1] == 'D') {
-            return loadCDImage(in);
-        } else if (magic[0] == 0 && magic[1] == 8) {
-            return loadGFXImage(in);
-        } else {
-            return 0;
-        }
-    } else {
-        return 0;
+    afl::base::Ptr<gfx::Canvas> result = loadImageInternal(in);
+    if (result.get() == 0) {
+        // Try again compressed
+        in.setPos(0);
+        util::RunLengthExpandTransform tx;
+        afl::io::TransformReaderStream decompReader(in, tx);
+        result = loadImageInternal(decompReader);
     }
+    return result;
 }

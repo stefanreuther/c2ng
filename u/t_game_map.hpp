@@ -21,6 +21,11 @@ class TestGameMapConfiguration : public CxxTest::TestSuite {
     void testWrappedSmall();
 };
 
+class TestGameMapExplosion : public CxxTest::TestSuite {
+ public:
+    void testName();
+};
+
 class TestGameMapMapObject : public CxxTest::TestSuite {
  public:
     void testIt();

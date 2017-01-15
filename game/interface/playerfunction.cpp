@@ -36,22 +36,7 @@ game::interface::PlayerFunction::get(interpreter::Arguments& args)
         return 0;
     }
 
-    // Valid state?
-    Game* g = m_session.getGame().get();
-    Root* r = m_session.getRoot().get();
-    if (g == 0 || r == 0) {
-        return 0;
-    }
-
-    // Valid player number?
-    // \change: This ought to have a "pl->isReal" check which I deliberately omitted.
-    // This allows scripts to do "Player(0)" or "Player(12)" to access special slots.
-    Player* pl = r->playerList().get(pid);
-    if (pl == 0) {
-        return 0;
-    }
-
-    return new PlayerContext(pid, g, r);
+    return PlayerContext::create(pid, m_session);
 }
 
 void
@@ -62,7 +47,7 @@ game::interface::PlayerFunction::set(interpreter::Arguments& /*args*/, afl::data
 
 // CallableValue:
 int32_t
-game::interface::PlayerFunction::getDimension(int32_t which)
+game::interface::PlayerFunction::getDimension(int32_t which) const
 {
     // \change: This reports DIM(PLAYER)=13 in a v3 game, not 12 as PCC2.
     return which == 0
@@ -89,7 +74,7 @@ game::interface::PlayerFunction::makeFirstContext()
     }
 
     if (pl != 0) {
-        return new PlayerContext(pl->getId(), g, r);
+        return new PlayerContext(pl->getId(), *g, *r);
     } else {
         return 0;
     }
@@ -109,7 +94,7 @@ game::interface::PlayerFunction::toString(bool /*readable*/) const
 }
 
 void
-game::interface::PlayerFunction::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext* /*ctx*/) const
+game::interface::PlayerFunction::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
 {
     throw interpreter::Error::notSerializable();
 }

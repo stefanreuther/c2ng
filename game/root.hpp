@@ -37,9 +37,9 @@ namespace game {
             \param hostVersion host version, see m_hostVersion
             \param registrationKey registration status, see m_registrationKey. Must not be null.
             \param stringVerifier string verifier, see m_stringVerifier. Must not be null. */
-        Root(afl::base::Ptr<afl::io::Directory> specificationDirectory,
-             afl::base::Ptr<afl::io::Directory> gameDirectory,
-             afl::base::Ptr<SpecificationLoader> specLoader,
+        Root(afl::base::Ref<afl::io::Directory> specificationDirectory,
+             afl::base::Ref<afl::io::Directory> gameDirectory,
+             afl::base::Ref<SpecificationLoader> specLoader,
              game::HostVersion hostVersion,
              std::auto_ptr<RegistrationKey> registrationKey,
              std::auto_ptr<StringVerifier> stringVerifier);
@@ -62,6 +62,7 @@ namespace game {
         /** Access host version.
             See m_hostVersion. */
         HostVersion& hostVersion();
+        const HostVersion& hostVersion() const;
 
         /** Access host configuration.
             See m_hostConfiguration. */
@@ -101,7 +102,7 @@ namespace game {
 
             Specific users will load standard specification files here (e.g. "engspec.dat").
             Generic users will load PCC2-specific specification files here (e.g. "hullfunc.cc", "names.cc"). */
-        afl::base::Ptr<afl::io::Directory> m_specificationDirectory;
+        afl::base::Ref<afl::io::Directory> m_specificationDirectory;
 
         /** Game directory.
             If this is a game with local data, points there.
@@ -109,11 +110,11 @@ namespace game {
 
             Specific users will load and save standard data files here (e.g. "player1.rst", "ship1.dat").
             Generic users will load and save PCC2-specific files here (e.g. "chart1.cc"). */
-        const afl::base::Ptr<afl::io::Directory> m_gameDirectory;
+        const afl::base::Ref<afl::io::Directory> m_gameDirectory;
 
         /** Specification loader.
             This is an implementation-specific class allowing to load game specification files. */
-        const afl::base::Ptr<SpecificationLoader> m_specificationLoader;
+        const afl::base::Ref<SpecificationLoader> m_specificationLoader;
 
         /** Host version.
             Stores the host version.

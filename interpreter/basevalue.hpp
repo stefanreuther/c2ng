@@ -36,7 +36,9 @@ namespace interpreter {
             \param ctx [in,optional] Context to save structured data.
                    Serialization may fail if this object represents structured data and no context is given.
             \throw Error if object cannot be serialized */
-        virtual void store(TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, SaveContext* ctx) const = 0;
+        // FIXME: consider changing this function's signature:
+        //   - drop the cs parameter and let the SaveContext handle it(?)
+        virtual void store(TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, SaveContext& ctx) const = 0;
 
         // afl::data::Value:
         virtual void visit(afl::data::Visitor& visitor) const;

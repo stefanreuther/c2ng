@@ -13,7 +13,9 @@ namespace interpreter {
     class PropertyAcceptor;
 
     /** Context for name lookup.
-        A context provides a means for looking up and dealing with local names, and possibly iteration through objects. */
+        A context provides a means for looking up and dealing with local names, and possibly iteration through objects.
+
+        FIXME: it makes sense to split lookup() and set()/get() into different classes now */
     class Context : public BaseValue {
      public:
         /** Index for a property. */
@@ -22,8 +24,8 @@ namespace interpreter {
         /** Look up a symbol by its name.
             \param name [in] Name query
             \param result [out] On success, property index
-            \return true if found, false on failure. */
-        virtual bool lookup(const afl::data::NameQuery& name, PropertyIndex_t& result) = 0;
+            \return non-null context if found (can be a different one than this one), null on failure. */
+        virtual Context* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result) = 0;
 
         /** Set value by its index.
             \param index Property index

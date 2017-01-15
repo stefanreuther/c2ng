@@ -1,15 +1,26 @@
 /**
   *  \file ui/spacer.cpp
+  *  \brief Class ui::Spacer
   */
 
 #include "ui/spacer.hpp"
 
-// /** \class UISpacer
-
-//     An invisible spacer. When put into a group with other widgets,
-//     spacers will expand to fill available space. Spacers themselves
-//     are invisible. */
+// Construct growable spacer.
 ui::Spacer::Spacer()
+    : SimpleWidget(),
+      m_info(gfx::Point(), gfx::Point(), ui::layout::Info::GrowBoth)
+{ }
+
+// Construct fixed-size spacer.
+ui::Spacer::Spacer(gfx::Point size)
+    : SimpleWidget(),
+      m_info(size)
+{ }
+
+// Construct custom spacer.
+ui::Spacer::Spacer(ui::layout::Info info)
+    : SimpleWidget(),
+      m_info(info)
 { }
 
 ui::Spacer::~Spacer()
@@ -30,7 +41,8 @@ ui::Spacer::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
 ui::layout::Info
 ui::Spacer::getLayoutInfo() const
 {
-    return ui::layout::Info(gfx::Point(), gfx::Point(), ui::layout::Info::GrowBoth);
+    // ex UISpacer::getLayoutInfo, UIFixedSpacer::getLayoutInfo
+    return m_info;
 }
 
 bool

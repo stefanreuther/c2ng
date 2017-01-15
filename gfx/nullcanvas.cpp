@@ -42,12 +42,6 @@ gfx::NullCanvas::computeClipRect(Rectangle r)
     return Rectangle(r.getTopLeft(), Point());
 }
 
-gfx::Color_t
-gfx::NullCanvas::getPixel(Point /*pt*/)
-{
-    return 0;
-}
-
 void
 gfx::NullCanvas::getPixels(Point /*pt*/, afl::base::Memory<Color_t> colors)
 {
@@ -98,8 +92,8 @@ gfx::NullCanvas::encodeColors(afl::base::Memory<const ColorQuad_t> /*colorDefini
     colorHandles.fill(0);
 }
 
-afl::base::Ptr<gfx::Canvas>
-gfx::NullCanvas::convertCanvas(afl::base::Ptr<Canvas> orig)
+afl::base::Ref<gfx::Canvas>
+gfx::NullCanvas::convertCanvas(afl::base::Ref<Canvas> orig)
 {
     return orig;
 }

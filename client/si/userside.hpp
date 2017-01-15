@@ -13,6 +13,8 @@
 #include "util/requestsender.hpp"
 #include "util/slaverequestsender.hpp"
 #include "client/si/requestlink2.hpp"
+#include "game/extraidentifier.hpp"
+#include "util/messagecollector.hpp"
 
 namespace client { namespace si {
 
@@ -20,7 +22,10 @@ namespace client { namespace si {
     class RequestLink2;
     class ScriptSide;
     class UserTask;
+    class UserCall;
     class ContextProvider;
+
+    extern const game::ExtraIdentifier<game::Session, ScriptSide> SCRIPTSIDE_ID;
 
     /** User-side of script interface.
         This implements multiple views on scripts.
@@ -35,7 +40,10 @@ namespace client { namespace si {
         /** Constructor.
             \param gameSender RequestSender to execute stuff on a game::Session
             \param self RequestDispatcher used to execute stuff on this object (UI thread) */
-        UserSide(util::RequestSender<game::Session> gameSender, util::RequestDispatcher& self);
+        UserSide(util::RequestSender<game::Session> gameSender,
+                 util::RequestDispatcher& self,
+                 util::MessageCollector& console,
+                 afl::sys::Log& mainLog);
 
         /** Destructor. */
         ~UserSide();
@@ -46,6 +54,17 @@ namespace client { namespace si {
 
         util::RequestSender<game::Session> gameSender()
             { return m_gameSender; }
+
+        // FIXME: can we get along without exporting this?
+        util::RequestSender<UserSide> userSender()
+            { return m_receiver.getSender(); }
+
+        util::MessageCollector& console()
+            { return m_console; }
+
+        afl::sys::Log& mainLog()
+            { return m_mainLog; }
+
 
         /*!
          *  \name Process Functions
@@ -81,6 +100,7 @@ namespace client { namespace si {
             \param t Task to execute
             \param link Identification of the invoking process */
         void processTask(UserTask& t, RequestLink2 link);
+        void processCall(UserCall& t);
 
         /** Set variable in process.
             \param link Identification of the process
@@ -165,7 +185,8 @@ namespace client { namespace si {
      private:
         util::RequestSender<game::Session> m_gameSender;
         util::RequestReceiver<UserSide> m_receiver;
-        util::SlaveRequestSender<game::Session,ScriptSide> m_slave;
+        util::MessageCollector& m_console;
+        afl::sys::Log& m_mainLog;
 
         uint32_t m_waitIdCounter;
 

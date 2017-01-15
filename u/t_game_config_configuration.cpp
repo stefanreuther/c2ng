@@ -7,6 +7,7 @@
 #include "game/config/integeroption.hpp"
 #include "game/config/configuration.hpp"
 
+/** Test index-to-create. */
 void
 TestGameConfigConfiguration::testIndexing()
 {
@@ -27,6 +28,7 @@ TestGameConfigConfiguration::testIndexing()
     TS_ASSERT_EQUALS(fig[two](), 33);
 }
 
+/** Test accessing an option. */
 void
 TestGameConfigConfiguration::testAccess()
 {
@@ -40,3 +42,30 @@ TestGameConfigConfiguration::testAccess()
     TS_ASSERT(opt->toString() == "somevalue");
 }
 
+/** Test enumeration. */
+void
+TestGameConfigConfiguration::testEnum()
+{
+    game::config::IntegerValueParser vp;
+    const game::config::IntegerOptionDescriptor one = { "one", &vp };
+    const game::config::IntegerOptionDescriptor two = { "two", &vp };
+    game::config::Configuration testee;
+
+    // Set first option
+    testee[one].set(1);
+
+    // Start enumeration
+    afl::base::Ptr<game::config::Configuration::Enumerator_t> e(testee.getOptions());
+    TS_ASSERT(e.get() != 0);
+
+    // Verify first element
+    game::config::Configuration::OptionInfo_t info;
+    bool ok = e->getNextElement(info);
+    TS_ASSERT(ok);
+    TS_ASSERT_EQUALS(info.first, "one");
+    TS_ASSERT_EQUALS(info.second, &testee[one]);
+
+    // Access second element. We cannot say what this does to the enumeration, but it should not crash it.
+    testee[two].set(3);
+    e->getNextElement(info);
+}

@@ -35,6 +35,39 @@ game::config::Configuration::setOption(String_t name, String_t value, Configurat
     opt->setAndMarkUpdated(value, source);
 }
 
+// Enumeration.
+afl::base::Ptr<afl::base::Enumerator<std::pair<String_t,game::config::ConfigurationOption*> > >
+game::config::Configuration::getOptions()
+{
+    /*
+     *  We never delete configuration entries; all we possibly do is change existing ones.
+     *  Therefore, all this iterator needs to do is to iterate through the map; map iterators remain stable.
+     */
+    class Iterator : public afl::base::Enumerator<std::pair<String_t,ConfigurationOption*> > {
+     public:
+        Iterator(Configuration& parent)
+            : m_iterator(parent.m_options.begin()),
+              m_end(parent.m_options.end())
+            { }
+
+        virtual bool getNextElement(std::pair<String_t,ConfigurationOption*>& result)
+            {
+                if (m_iterator != m_end) {
+                    result.first = m_iterator->first.toString();
+                    result.second = m_iterator->second;
+                    ++m_iterator;
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+     private:
+        Map_t::iterator m_iterator;
+        Map_t::iterator m_end;
+    };
+    return new Iterator(*this);
+}
+
 // Mark all options unset.
 void
 game::config::Configuration::markAllOptionsUnset()

@@ -169,6 +169,10 @@ gfx::sdl::Surface::blit(const Point& pt, Canvas& src, Rectangle rect)
     } else {
         defaultBlit(pt, src, rect);
     }
+    m_updateRegion.include(Rectangle(pt.getX() + rect.getLeftX(),
+                                     pt.getY() + rect.getTopY(),
+                                     rect.getWidth(),
+                                     rect.getHeight()));
 }
 
 void
@@ -188,20 +192,6 @@ gfx::sdl::Surface::computeClipRect(Rectangle r)
 {
     r.intersect(Rectangle(0, 0, m_surface->w, m_surface->h));
     return r;
-}
-
-// FIXME: retire
-gfx::Color_t
-gfx::sdl::Surface::getPixel(Point pt)
-{
-    int x = pt.getX();
-    int y = pt.getY();
-    Color_t result[1] = {0};
-    if (x >= 0 && y >= 0 && x < m_surface->w && y < m_surface->h) {
-        ensureLocked();
-        GFX_MODE_SWITCH(m_surface, readPixels(x, y, result));
-    }
-    return result[0];
 }
 
 void
@@ -387,15 +377,15 @@ gfx::sdl::Surface::encodeColors(afl::base::Memory<const ColorQuad_t> colorDefini
     }
 }
 
-afl::base::Ptr<gfx::Canvas>
-gfx::sdl::Surface::convertCanvas(afl::base::Ptr<Canvas> orig)
+afl::base::Ref<gfx::Canvas>
+gfx::sdl::Surface::convertCanvas(afl::base::Ref<Canvas> orig)
 {
     // ex GfxPixmap::convertToScreenFormat, GfxPixmap::convertTo
 
     // FIXME: think about preserving alpha.
     // If input is RGBA8888 and screen is RGB565, this looses the alpha channel (I think).
     // SDL_DisplayFormatAlpha has some extra logic to avoid that.
-    if (Surface* sfc = dynamic_cast<Surface*>(orig.get())) {
+    if (Surface* sfc = dynamic_cast<Surface*>(&orig.get())) {
         // I took a peep at SDL_DisplayFormat for these flag combinations:
         // - output is hardware if this is hardware
         // - preserve colorkey/alpha
@@ -403,7 +393,7 @@ gfx::sdl::Surface::convertCanvas(afl::base::Ptr<Canvas> orig)
         SDL_Surface* copy = SDL_ConvertSurface(sfc->m_surface, m_surface->format, flags);
         if (copy) {
             try {
-                return new Surface(copy, true);
+                return *new Surface(copy, true);
             }
             catch (...) {
                 SDL_FreeSurface(copy);

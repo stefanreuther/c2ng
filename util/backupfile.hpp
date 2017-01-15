@@ -66,7 +66,7 @@ namespace util {
             \param tpl Template file name (can be empty; in this case, the function does nothing)
             \return file, never null
             \throw FileProblemException if file does not exist */
-        afl::base::Ptr<afl::io::Stream> openFile(afl::io::FileSystem& fs, String_t tpl);
+        afl::base::Ref<afl::io::Stream> openFile(afl::io::FileSystem& fs, String_t tpl);
 
      private:
         String_t m_gameDirectory;

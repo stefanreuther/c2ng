@@ -7,50 +7,24 @@
 #include "client/dialogs/objectselectiondialog.hpp"
 
 #include "t_client_dialogs.hpp"
-#include "game/session.hpp"
-#include "afl/string/nulltranslator.hpp"
-#include "game/game.hpp"
-#include "game/turn.hpp"
-#include "game/map/planet.hpp"
-#include "util/requestthread.hpp"
-#include "gfx/nullengine.hpp"
-#include "client/si/control.hpp"
-#include "gfx/font.hpp"
-#include "afl/string/format.hpp"
-#include "interpreter/memorycommandsource.hpp"
-#include "interpreter/defaultstatementcompilationcontext.hpp"
-#include "interpreter/statementcompiler.hpp"
-#include "client/session.hpp"
 #include "afl/io/nullfilesystem.hpp"
+#include "afl/string/format.hpp"
+#include "afl/string/nulltranslator.hpp"
+#include "client/session.hpp"
+#include "client/si/control.hpp"
+#include "game/game.hpp"
+#include "game/map/planet.hpp"
+#include "game/session.hpp"
+#include "game/turn.hpp"
+#include "gfx/font.hpp"
+#include "gfx/nullengine.hpp"
+#include "gfx/nullresourceprovider.hpp"
+#include "interpreter/defaultstatementcompilationcontext.hpp"
+#include "interpreter/memorycommandsource.hpp"
+#include "interpreter/statementcompiler.hpp"
+#include "util/requestthread.hpp"
 
 namespace {
-    // FIXME: make these official classes?
-    class NullFont : public gfx::Font {
-     public:
-        virtual void outText(gfx::Context& /*ctx*/, gfx::Point /*pt*/, String_t /*text*/)
-            { }
-        virtual int getTextWidth(String_t text)
-            {
-                // Of course, Unicode runes are larger than ASCII characters, what did you think?
-                return text.size();
-            }
-        virtual int getTextHeight(String_t /*text*/)
-            { return 1; }
-    };
-    
-    class NullResourceProvider : public gfx::ResourceProvider {
-     public:
-        NullResourceProvider()
-            : m_font(new NullFont())
-            { }
-        virtual afl::base::Ptr<gfx::Canvas> getImage(String_t /*name*/, bool* /*status*/)
-            { return 0; }
-        virtual afl::base::Ptr<gfx::Font> getFont(gfx::FontRequest /*req*/)
-            { return m_font; }
-     private:
-        afl::base::Ptr<NullFont> m_font;
-    };
-
     /*
      *  Test harness
      *
@@ -73,6 +47,7 @@ namespace {
                 afl::string::NullTranslator tx;
                 afl::sys::Log log;
                 afl::io::NullFileSystem fs;
+                util::MessageCollector collector;
 
                 // Create a game session containing some data
                 game::Session session(tx, fs);
@@ -88,11 +63,13 @@ namespace {
                                                                         /*plability:*/game::map::Object::Playable,
                                                                         game::HostVersion(),
                                                                         config,
+                                                                        1,
                                                                         tx, log);
 
-                util::RequestThread sessionThread("TestClientDialogsObjectSelectionDialog::testIt", log);
-                util::RequestReceiver<game::Session> sessionReceiver(sessionThread, session);
-                session.log().addListener(log);
+                // Create pseudo graphics infrastructure (must live longest!)
+                gfx::NullEngine engine;
+                gfx::NullResourceProvider provider;
+                ui::Root root(engine, provider, 400, 300, 32, gfx::Engine::WindowFlags_t());
 
                 // Session does not work without scripts, so preload it.
                 {
@@ -101,7 +78,7 @@ namespace {
                     interpreter::Process& proc = processList.create(session.world(), "Initializer");
 
                     // Create BCO
-                    interpreter::BCORef_t bco = new interpreter::BytecodeObject();
+                    interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
 
                     // Create script
                     interpreter::MemoryCommandSource mcs;
@@ -134,13 +111,13 @@ namespace {
                     processList.removeTerminatedProcesses();
                 }
 
-                // Create pseudo graphics infrastructure
-                gfx::NullEngine engine;
-                NullResourceProvider provider;
-                ui::Root root(engine, provider, 400, 300, 32, gfx::Engine::WindowFlags_t());
+                // Create session thread
+                util::RequestThread sessionThread("TestClientDialogsObjectSelectionDialog::testIt", log);
+                util::RequestReceiver<game::Session> sessionReceiver(sessionThread, session);
+                session.log().addListener(log);
 
                 // Create a client session. This is required to make UI commands work.
-                client::Session clientSession(root, sessionReceiver.getSender(), tx);
+                client::Session clientSession(root, sessionReceiver.getSender(), tx, collector, log);
 
                 // Create a parent Control
                 class TheControl : public client::si::Control {
@@ -207,7 +184,7 @@ TestClientDialogsObjectSelectionDialog::testOK()
                 // During this time, the UI will not be responsive (FIXME for later: keys should be queued).
                 // We therefore fire a key from a timer.
                 client::si::OutputState output;
-                afl::base::Ptr<gfx::Timer> t = engine.createTimer();
+                afl::base::Ref<gfx::Timer> t = engine.createTimer();
                 t->sig_fire.addNewClosure(new KeyCallback(engine, util::Key_Return));
                 t->setInterval(100);
                 int result = client::dialogs::doObjectSelectionDialog(client::dialogs::PLANET_SELECTION_DIALOG, session.interface(), parentControl, output);
@@ -229,7 +206,7 @@ TestClientDialogsObjectSelectionDialog::testCancel()
             {
                 // Open the dialog
                 client::si::OutputState output;
-                afl::base::Ptr<gfx::Timer> t = engine.createTimer();
+                afl::base::Ref<gfx::Timer> t = engine.createTimer();
                 t->sig_fire.addNewClosure(new KeyCallback(engine, util::Key_Escape));
                 t->setInterval(100);
                 int result = client::dialogs::doObjectSelectionDialog(client::dialogs::PLANET_SELECTION_DIALOG, session.interface(), parentControl, output);

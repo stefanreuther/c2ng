@@ -8,7 +8,7 @@
 #include "afl/base/uncopyable.hpp"
 #include "gfx/types.hpp"
 #include "gfx/pixmap.hpp"
-#include "afl/base/ptr.hpp"
+#include "afl/base/ref.hpp"
 #include "gfx/canvas.hpp"
 
 namespace gfx {
@@ -18,9 +18,11 @@ namespace gfx {
                        private afl::base::Uncopyable
     {
      public:
-        static afl::base::Ptr<RGBAPixmap> create(int w, int h);
+        static afl::base::Ref<RGBAPixmap> create(int w, int h);
 
-        afl::base::Ptr<Canvas> makeCanvas();
+        afl::base::Ref<Canvas> makeCanvas();
+
+        void setAlpha(uint8_t alpha);
 
      private:
         inline RGBAPixmap(int w, int h);

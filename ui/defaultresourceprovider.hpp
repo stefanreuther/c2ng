@@ -17,6 +17,8 @@
 #include "gfx/resourceprovider.hpp"
 #include "ui/res/manager.hpp"
 #include "util/requestdispatcher.hpp"
+#include "util/request.hpp"
+#include "afl/container/ptrqueue.hpp"
 
 namespace ui {
 
@@ -33,7 +35,7 @@ namespace ui {
             \param mainThreadDispatcher Dispatcher for the main (UI) thread to place callbacks properly.
                        Must out-live the DefaultResourceProvider. */
         DefaultResourceProvider(ui::res::Manager& mgr,
-                                afl::base::Ptr<afl::io::Directory> dir,
+                                afl::base::Ref<afl::io::Directory> dir,
                                 util::RequestDispatcher& mainThreadDispatcher,
                                 afl::string::Translator& tx,
                                 afl::sys::LogListener& log);
@@ -41,9 +43,15 @@ namespace ui {
         /** Destructor. */
         ~DefaultResourceProvider();
 
+        /** Post a request to operate on the Resource Manager.
+            The request will be executed in the worker thread.
+            \param req Request
+            \param invalidateCache true to invalidate the image cache after this request */
+        void postNewManagerRequest(util::Request<ui::res::Manager>* req, bool invalidateCache);
+
         // ResourceProvider:
         virtual afl::base::Ptr<gfx::Canvas> getImage(String_t name, bool* status = 0);
-        virtual afl::base::Ptr<gfx::Font> getFont(gfx::FontRequest req);
+        virtual afl::base::Ref<gfx::Font> getFont(gfx::FontRequest req);
 
      private:
         /** Resource manager. */
@@ -51,6 +59,7 @@ namespace ui {
 
         /** Font list. All fonts are pre-loaded. */
         gfx::FontList m_fontList;
+        afl::base::Ref<gfx::Font> m_defaultFont;
 
         /** Main thread dispatcher to place callbacks in UI thread. */
         util::RequestDispatcher& m_mainThreadDispatcher;
@@ -77,6 +86,9 @@ namespace ui {
         /** Queue of images to load. */
         std::list<String_t> m_imageQueue;
 
+        afl::container::PtrQueue<util::Request<ui::res::Manager> > m_managerRequests;
+        bool m_managerInvalidate;
+
         /** Semaphore to wake the background thread. Essentially tracks the m_imageQueue length. */
         afl::sys::Semaphore m_loaderWake;
 
@@ -87,6 +99,8 @@ namespace ui {
         void addFont(afl::io::Directory& dir, const char* name, const gfx::FontRequest& defn);
 
         virtual void run();
+
+        util::Request<ui::res::Manager>* pullManagerRequest();
     };
 
 }

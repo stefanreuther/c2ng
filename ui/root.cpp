@@ -8,6 +8,24 @@
 #include "ui/spacer.hpp"
 #include "gfx/context.hpp"
 #include "gfx/complex.hpp"
+#include "gfx/nullcolorscheme.hpp"
+
+namespace {
+    class KeyPoster : public afl::base::Runnable {
+     public:
+        KeyPoster(ui::Root& p, util::Key_t key, int prefix)
+            : m_parent(p),
+              m_key(key),
+              m_prefix(prefix)
+            { }
+        virtual void run()
+            { m_parent.handleKey(m_key, m_prefix); }
+     private:
+        ui::Root& m_parent;
+        util::Key_t m_key;
+        int m_prefix;
+    };
+}
 
 ui::Root::Root(gfx::Engine& engine, gfx::ResourceProvider& provider, int wi, int he, int bpp, gfx::Engine::WindowFlags_t flags)
     : Widget(),
@@ -17,12 +35,15 @@ ui::Root::Root(gfx::Engine& engine, gfx::ResourceProvider& provider, int wi, int
       m_engineWindowBPP(bpp),
       m_window(),
       m_filter(),
+      m_localTaskQueue(),
       m_colorScheme(),
       m_provider(provider),
       m_mouseEventKnown(false),
       m_mouseEventRequested(false),
       m_mousePosition(),
-      m_mouseButtons()
+      m_mouseButtons(),
+      m_mousePrefix(0),
+      m_mousePrefixPosted(false)
 {
     initWindow();
     setState(FocusedState, true);
@@ -96,9 +117,15 @@ ui::Root::getLayoutInfo() const
 bool
 ui::Root::handleKey(util::Key_t key, int prefix)
 {
+    // If key is a perceived keypress, clear the prefix argument
+    // (which is for the mouse only).
+    if (util::classifyKey(key) != util::ModifierKey) {
+        consumeMousePrefixArgument();
+    }
+
     switch (key ^ (util::KeyMod_Ctrl + util::KeyMod_Shift)) {
      case 's':
-        // FIXME: doScreenshot();
+        sig_screenshot.raise(*m_window);
         return true;
 
      case 'q':
@@ -130,7 +157,20 @@ ui::Root::handleMouse(gfx::Point pt, MouseButtons_t pressedButtons)
     m_mouseEventKnown = true;
     m_mousePosition = pt;
     m_mouseButtons = pressedButtons - DoubleClick;
-    return defaultHandleMouse(pt, pressedButtons);
+
+    // If this is a button release, it must either consume the prefix or post a new one.
+    // Otherwise, we assume the user clicked at a non prefix-capable widget and discard it below.
+    m_mousePrefixPosted = false;
+
+    // Process the event
+    bool did = defaultHandleMouse(pt, pressedButtons);
+
+    // Discard prefix if unused.
+    if (!m_mousePrefixPosted && m_mouseButtons.empty()) {
+        consumeMousePrefixArgument();
+    }
+
+    return did;
 }
 
 void
@@ -140,7 +180,10 @@ ui::Root::handleEvent()
     performDeferredRedraws();
 
     // Process an event
-    if (m_mouseEventRequested) {
+    std::auto_ptr<afl::base::Runnable> t(m_localTaskQueue.extractFront());
+    if (t.get() != 0) {
+        t->run();
+    } else if (m_mouseEventRequested) {
         m_mouseEventRequested = false;
         handleMouse(m_mousePosition, m_mouseButtons);
     } else {
@@ -154,6 +197,36 @@ ui::Root::postMouseEvent()
     if (m_mouseEventKnown) {
         m_mouseEventRequested = true;
     }
+}
+
+void
+ui::Root::postKeyEvent(util::Key_t key, int prefix)
+{
+    m_localTaskQueue.pushBackNew(new KeyPoster(*this, key, prefix));
+}
+
+void
+ui::Root::ungetKeyEvent(util::Key_t key, int prefix)
+{
+    m_localTaskQueue.pushFrontNew(new KeyPoster(*this, key, prefix));
+}
+
+void
+ui::Root::setMousePrefixArgument(int prefix)
+{
+    // ex UIBaseWidget::setPrefixArg
+    m_mousePrefix = prefix;
+    m_mousePrefixPosted = true;
+}
+
+int
+ui::Root::consumeMousePrefixArgument()
+{
+    // ex UIBaseWidget::consumePrefixArg
+    int result = m_mousePrefix;
+    m_mousePrefix = 0;
+    m_mousePrefixPosted = false;
+    return result;
 }
 
 ui::ColorScheme&
@@ -214,7 +287,7 @@ void
 ui::Root::initWindow()
 {
     // Set up window
-    m_window = m_engine.createWindow(m_engineWindowSize.getX(), m_engineWindowSize.getY(), m_engineWindowBPP, m_engineWindowFlags);
+    m_window = m_engine.createWindow(m_engineWindowSize.getX(), m_engineWindowSize.getY(), m_engineWindowBPP, m_engineWindowFlags).asPtr();
     setExtent(gfx::Rectangle(gfx::Point(0, 0), m_engineWindowSize));
 
     // Set up drawing filter
@@ -222,7 +295,7 @@ ui::Root::initWindow()
 
     // Palette
     m_colorScheme.init(*m_window);
-    setColorScheme(m_colorScheme);
+    setColorScheme(gfx::NullColorScheme<util::SkinColor::Color>::instance);
 }
 
 void
@@ -249,8 +322,7 @@ ui::Root::performDeferredRedraws()
 void
 ui::Root::drawFrames(gfx::Canvas& can, Widget& widget)
 {
-    gfx::Context ctx(can);
-    ctx.useColorScheme(m_colorScheme);
+    gfx::Context<uint8_t> ctx(can, m_colorScheme);
 
     if (CardGroup* c = dynamic_cast<CardGroup*>(&widget)) {
         if (Widget* ch = c->getFocusedChild()) {

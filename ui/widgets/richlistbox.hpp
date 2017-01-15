@@ -11,16 +11,26 @@
 #include "ui/rich/document.hpp"
 #include "afl/container/ptrvector.hpp"
 #include "ui/colorscheme.hpp"
+#include "afl/bits/smallset.hpp"
 
 namespace ui { namespace widgets {
 
     class RichListbox : public AbstractListbox {
      public:
+        enum RenderFlag {
+            UseBackgroundColorScheme,
+            DisableWrap
+        };
+        typedef afl::bits::SmallSet<RenderFlag> RenderFlagSet_t;
+
         RichListbox(gfx::ResourceProvider& provider, ui::ColorScheme& scheme);
         ~RichListbox();
 
         void clear();
         void addItem(const util::rich::Text text, afl::base::Ptr<gfx::Canvas> image, bool accessible);
+
+        void setRenderFlag(RenderFlag flag, bool value);
+        bool hasRenderFlag(RenderFlag flag) const;
 
         // AbstractListbox:
         virtual size_t getNumItems();
@@ -34,6 +44,7 @@ namespace ui { namespace widgets {
 
         // Widget:
         virtual ui::layout::Info getLayoutInfo() const;
+        virtual bool handleKey(util::Key_t key, int prefix);
 
      private:
         struct Item {
@@ -48,6 +59,7 @@ namespace ui { namespace widgets {
         gfx::ResourceProvider& m_provider;
         ui::ColorScheme& m_colorScheme;
         afl::container::PtrVector<Item> m_items;
+        RenderFlagSet_t m_renderFlags;
 
         void render(size_t pos, size_t n);
     };

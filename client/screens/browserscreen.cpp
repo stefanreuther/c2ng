@@ -23,6 +23,13 @@
 #include "game/browser/account.hpp"
 #include "ui/widgets/focusiterator.hpp"
 #include "game/turnloader.hpp"
+#include "util/translation.hpp"
+#include "gfx/rgbapixmap.hpp"
+#include "gfx/complex.hpp"
+#include "ui/widgets/transparentwindow.hpp"
+#include "ui/widgets/quit.hpp"
+#include "afl/base/observable.hpp"
+#include "ui/widgets/radiobutton.hpp"
 
 using afl::base::Ptr;
 using afl::container::PtrVector;
@@ -34,35 +41,38 @@ namespace {
     class NewAccountDialog {
      public:
         NewAccountDialog(ui::Root& root)
-            : m_userInput(1000, 30, root),
-              m_typeInput(1000, 30, root),
+            : m_typeValue(0),
+              m_userInput(1000, 30, root),
+              m_typePlanetsCentral(root, 'p', "PlanetsCentral", m_typeValue, 0),
+              m_typeNu            (root, 'n', "planets.nu",     m_typeValue, 1),
               m_hostInput(1000, 30, root),
               m_root(root),
               m_loop(root)
             {
-                m_typeInput.setText("pcc");
                 m_hostInput.setText("");
             }
 
         bool run()
             {
                 afl::base::Deleter h;
-                ui::Window win("!New Account", m_root.provider(), ui::BLUE_WINDOW, ui::layout::VBox::instance5);
-                win.add(h.addNew(new ui::widgets::StaticText("!User name:", util::SkinColor::Static, gfx::FontRequest(), m_root.provider())));
+                ui::Window win(_("Add Account"), m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5);
+                win.add(h.addNew(new ui::widgets::StaticText(_("User name:"), util::SkinColor::Static, gfx::FontRequest(), m_root.provider())));
                 win.add(m_userInput);
-                win.add(h.addNew(new ui::widgets::StaticText("!Type (\"pcc\" or \"nu\"):", util::SkinColor::Static, gfx::FontRequest(), m_root.provider())));
-                win.add(m_typeInput);
-                win.add(h.addNew(new ui::widgets::StaticText("!Address (empty for default):", util::SkinColor::Static, gfx::FontRequest(), m_root.provider())));
+                win.add(h.addNew(new ui::widgets::StaticText(_("Type:"), util::SkinColor::Static, gfx::FontRequest(), m_root.provider())));
+                win.add(m_typePlanetsCentral);
+                win.add(m_typeNu);
+                win.add(h.addNew(new ui::widgets::StaticText(_("Address (empty for default):"), util::SkinColor::Static, gfx::FontRequest(), m_root.provider())));
                 win.add(m_hostInput);
 
                 ui::widgets::FocusIterator& it = h.addNew(new ui::widgets::FocusIterator(ui::widgets::FocusIterator::Vertical | ui::widgets::FocusIterator::Tab));
                 it.add(m_userInput);
-                it.add(m_typeInput);
+                it.add(m_typePlanetsCentral);
+                it.add(m_typeNu);
                 it.add(m_hostInput);
                 win.add(it);
 
-                ui::widgets::Button& btnOK     = h.addNew(new ui::widgets::Button("!OK", util::Key_Return, m_root.provider(), m_root.colorScheme()));
-                ui::widgets::Button& btnCancel = h.addNew(new ui::widgets::Button("!Cancel", util::Key_Escape, m_root.provider(), m_root.colorScheme()));
+                ui::widgets::Button& btnOK     = h.addNew(new ui::widgets::Button(_("OK"), util::Key_Return, m_root));
+                ui::widgets::Button& btnCancel = h.addNew(new ui::widgets::Button(_("Cancel"), util::Key_Escape, m_root));
                 btnOK.sig_fire.add(this, &NewAccountDialog::onOK);
                 btnCancel.sig_fire.addNewClosure(m_loop.makeStop(0));
 
@@ -70,6 +80,9 @@ namespace {
                 g.add(h.addNew(new ui::Spacer()));
                 g.add(btnOK);
                 g.add(btnCancel);
+
+                ui::widgets::Quit q(m_root, m_loop);
+                win.add(q);
 
                 win.add(g);
                 win.pack();
@@ -80,7 +93,7 @@ namespace {
 
         void onOK()
             {
-                if (m_userInput.getText().empty() || (m_typeInput.getText() != "nu" && m_typeInput.getText() != "pcc")) {
+                if (m_userInput.getText().empty()) {
                     // Failure
                 } else {
                     m_loop.stop(1);
@@ -125,13 +138,15 @@ namespace {
                     String_t m_host;
                 };
                 sender.postNewRequest(new Task(m_userInput.getText(),
-                                               m_typeInput.getText(),
+                                               m_typeValue.get() == 0 ? "pcc" : "nu",
                                                m_hostInput.getText()));
             }
 
      private:
+        afl::base::Observable<int> m_typeValue;
         ui::widgets::InputLine m_userInput;
-        ui::widgets::InputLine m_typeInput;
+        ui::widgets::RadioButton m_typePlanetsCentral;
+        ui::widgets::RadioButton m_typeNu;
         ui::widgets::InputLine m_hostInput;
         ui::Root& m_root;
         ui::EventLoop m_loop;
@@ -386,7 +401,7 @@ client::screens::BrowserScreen::BrowserScreen(ui::Root& root, util::RequestSende
       m_list(gfx::Point(20, 20), m_root),
       m_crumbs(root.provider().getFont(gfx::FontRequest())->getCellSize().scaledBy(40, 1), m_root),
       m_info(root.provider(), root.colorScheme()),
-      m_optionButton("!Ins - Add Account", util::Key_Insert, root.provider(), root.colorScheme()),
+      m_optionButton(_("Ins - Add Account"), util::Key_Insert, root),
       m_infoItems(),
       m_infoIndex(0),
       m_loop(root),
@@ -401,21 +416,16 @@ client::screens::BrowserScreen::BrowserScreen(ui::Root& root, util::RequestSende
     m_list.sig_itemDoubleClick.add(this, &BrowserScreen::onItemDoubleClicked);
     m_crumbs.sig_change.add(this, &BrowserScreen::onCrumbClicked);
     m_optionButton.sig_fire.add(this, &BrowserScreen::onAddAccount);
+    m_info.setRenderFlag(m_info.UseBackgroundColorScheme, true);
 }
 
 int
-client::screens::BrowserScreen::run()
+client::screens::BrowserScreen::run(gfx::ColorScheme<util::SkinColor::Color>& parentColors)
 {
-#if 1
-    ui::Window window("!Select", m_root.provider(), ui::BLUE_BLACK_WINDOW, ui::layout::VBox::instance5);
-#else
-    ui::Group window(ui::layout::VBox::instance5);
-    ui::SkinColorScheme colorScheme(ui::BLACK_COLOR_SET, m_root.colorScheme());
-    window.setColorScheme(colorScheme);
-#endif
+    ui::widgets::TransparentWindow window(parentColors, ui::layout::VBox::instance5);
 
     ui::Group buttons(ui::layout::HBox::instance5);
-    ui::widgets::Button btnExit("!Exit", util::Key_Escape, m_root.provider(), m_root.colorScheme());
+    ui::widgets::Button btnExit(_("Exit"), util::Key_Escape, m_root);
     ui::Spacer btnSpacer;
     buttons.add(btnExit);
     buttons.add(btnSpacer);

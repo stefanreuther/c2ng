@@ -10,7 +10,7 @@
 
 namespace client { namespace screens {
 
-    void doPlayerScreen(Session& session, client::si::InputState& in, client::si::OutputState& out);
+    void doPlayerScreen(Session& session, client::si::InputState& in, client::si::OutputState& out, bool first);
 
 } }
 

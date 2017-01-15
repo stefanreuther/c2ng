@@ -155,6 +155,15 @@ interpreter::BytecodeObject::addLineNumber(uint32_t line)
     }
 }
 
+// add line number, for loading
+void
+interpreter::BytecodeObject::addLineNumber(uint32_t line, uint32_t pc)
+{
+    line_numbers.push_back(pc);
+    line_numbers.push_back(line);
+}
+
+
 // /** Get line number for a particular PC. */
 uint32_t
 interpreter::BytecodeObject::getLineNumber(PC_t pc) const
@@ -394,7 +403,7 @@ interpreter::BytecodeObject::copyLocalVariablesFrom(const BytecodeObject& other)
 // /** Append another byte-code object.
 //     Note that this trusts the BCO to contain no invalid opcodes. */
 void
-interpreter::BytecodeObject::append(BytecodeObject& other)
+interpreter::BytecodeObject::append(const BytecodeObject& other)
 {
     // ex IntBytecodeObject::append
     // Remember base address of insertion
@@ -424,10 +433,9 @@ interpreter::BytecodeObject::append(BytecodeObject& other)
                 break;
              case Opcode::sLocal:
                 // Adjust local by name
-                // FIXME: this works as long as all locals are unique. It will fail
-                // when we have non-unique locals as there is no requirement that the
-                // local addresses used in the code correspond to local_names. We
-                // should make up some rules about how the two BCOs have to be related.
+                // FIXME: this works as long as all locals are unique or compatible.
+                // It will fail when we have overlapping locals that were intended to be unique, which could happen when inlining.
+                // We should make up some rules about how the two BCOs have to be related.
                 addInstruction(maj, o.minor, m_localNames.addMaybe(other.m_localNames.getNameByIndex(o.arg)));
                 break;
              case Opcode::sLiteral:

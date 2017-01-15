@@ -17,99 +17,151 @@
 
 % @q CC$LibraryVersion:Str (Internal)
 % Version of the standard library (<tt>core.q</tt>).
-Dim Shared CC$LibraryVersion = '2.40'
+Dim Shared CC$LibraryVersion = '2.40.1'
 
 %%% Console-Mode Replacements for GUI routines %%%%%%%%%%%%%%%%%%%%%%
 
 If Not System.GUI Then
   % c2ng does not need replacements for rich-text operations here.
+
+  %%% Utilities
+
+  % Return the index of the first word in list which starts with the given word.
+  Function CC$MatchWord(list, word)
+    Local i:=1, e
+    Do While list<>''
+      e := First(' ', list)
+      If Mid(e,1,Len(word)) = word Then Return i
+      i := i + 1
+      list := Trim(Rest(' ', list))
+    Loop
+  EndFunction
+
+  % Count number of words in list
+  Function CC$CountWords(list)
+    Local i:=0
+    Do While list<>''
+      i:=i+1
+      list:=Trim(Rest(' ', list))
+    Loop
+    Return i
+  EndFunction
+
+  %%% Replacements for client/si/commands.cc
+
+  % LoadResource has no effect
+  Sub LoadResource(name)
+  EndSub
+
+  % MessageBox generates a console message.
+  Sub MessageBox(text, Optional heading)
+    % FIXME: PCC 1.x replaces \r by \n in text.
+    If IsEmpty(heading) Then heading := Translate("Message")
+    Print heading, ": ", text
+  EndSub
+
+  %  void IFSystemExitClient(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
+  %  void IFSystemExitRace(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
+
+  Sub UI.ChooseObject(screen)
+    Abort "Not in graphics mode"
+  EndSub
+
+  Sub UI.ChooseTurn(Optional delta)
+    Abort "Not in graphics mode"
+  EndSub
+
+  Sub UI.EndDialog(Optional code)
+    Abort "Not in graphics mode"
+  EndSub
+
+  Sub UI.GotoScreen (sid, Optional oid)
+    Abort "Not in graphics mode"
+  EndSub
+
+  % FIXME: IFUIInput(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
+
+  % UI.Message generates a console message and a prompt
+  Sub UI.Message (text, Optional heading, buttons)
+    MessageBox text, Heading
+    If IsEmpty(buttons) Then buttons := Translate("OK")
+    Do
+      UI.Input buttons
+      If IsEmpty(UI.Result) Then
+        % This means the last choice
+        UI.Result := Z(CC$CountWords(buttons))
+        Break
+      Else If UI.Result = "" Then
+        % This means the first choice
+        UI.Result := 1
+        Break
+      Else
+        % Does this match any button?
+        UI.Result := CC$MatchWord(buttons, UI.Result)
+        If Not IsEmpty(UI.Result) Then Break
+      EndIf
+    Loop
+  EndSub
+
+  % No effect in console mode
+  Sub UI.PopupConsole
+  EndSub
 EndIf
+
+% Create an array on-the-fly
+% @since PCC2 2.40.1
+Function Array(a())
+  Return a
+EndFunction
+
+% Utility: append value to an array.
+% @since PCC2 2.40.1
+% (also in namer.q since 1.99.22)
+Sub Array.Push(a, val)
+  ReDim a(Dim(a)+1)
+  a(Dim(a)-1) := val
+EndSub
+
+% Utility: pop value from an array.
+% @since PCC2 2.40.1
+Function Array.Pop(a)
+  Local result
+  If Dim(a) > 0
+    result := a(Dim(a)-1)
+    ReDim a(Dim(a)-1)
+  EndIf
+  Return result
+EndFunction
+
 
 %%% User-callable Subroutines %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% @q WaitOneTurn (Global Command)
-% Suspend script for one turn.
-% Execution proceeds next turn (or later, when a turn is missed).
-% See {Stop} for details and restrictions on suspension.
-% @see Stop
-% @since PCC2 1.99.10, PCC 1.0.6
-Sub WaitOneTurn ()
-  Local t = Turn
-  Do While t = Turn
-    Stop
-  Loop
-EndSub
+Load "core_game.q"
+
 
 %%% GUI Subroutines %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 If System.GUI Then
-%% When the GUI is not active, don't define all these to save memory
+  %% When the GUI is not active, don't define all these to save memory
+  Load "core_tiles.q"
+  Load "core_ui.q"
+EndIf % System.GUI
 
-% '.' everywhere
-Sub CC$ToggleSelection
-  Mark Not Marked
-EndSub
 
-% F1/F2/F3
-Sub CC$GotoScreen (Screen)
-  Local UI.Result
-  UI.ChooseObject Screen
-  If Not IsEmpty(UI.Result) Then UI.GotoScreen Screen, UI.Result
-EndSub
-
-% ExitRace with confirmation
-Sub CC$ExitRace
-  Local UI.Result
-  UI.Message Translate("Do you want to exit this game?"), Translate("Exit Game"), Translate("Yes No")
-  If UI.Result=1 Then System.ExitRace
-EndSub
-
-% ExitClient with confirmation
-Sub CC$ExitClient
-  Local UI.Result
-  UI.Message Translate("Do you want to exit PCC2?"), Translate("PCC2"), Translate("Yes No")
-  If UI.Result=1 Then System.ExitClient
-EndSub
-
-Sub C2$SelectPrevious
-  With UI.Iterator Do CurrentIndex := PreviousIndex(CurrentIndex, "w")
-EndSub
-
-Sub C2$SelectNext
-  With UI.Iterator Do CurrentIndex := NextIndex(CurrentIndex, "w")
-EndSub
-
-Sub C2$SelectPreviousMarked
-  With UI.Iterator Do CurrentIndex := PreviousIndex(CurrentIndex, "wm")
-EndSub
-
-Sub C2$SelectNextMarked
-  With UI.Iterator Do CurrentIndex := NextIndex(CurrentIndex, "wm")
-EndSub
-
-Sub C2$History(delta)
-  % Pick next turn
-  Local UI.Result
-  UI.ChooseTurn delta
-  If UI.Result
-    History.ShowTurn UI.Result
-  EndIf
-EndSub
-
-Sub C2$HistoryPrevious
-  C2$History -1
-EndSub
-
-Sub C2$HistoryNext
-  C2$History 1
-EndSub
+%%% Internals
 
 % c2ng internal: This function is used to execute commands bound to keys.
+% @since PCC2 2.40
 Sub C2$Eval(code, UI.Prefix)
   Eval AtomStr(code)
 EndSub
 
-EndIf % System.GUI
+% c2ng internal: Game setup
+% @since PCC2 2.40.1
+Sub C2$RunLoadHook
+  RunHook Load
+  If Turn.IsNew Then RunHook NewTurn
+EndSub
 
 %%% Initialisation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -118,6 +170,7 @@ CreateShipProperty   Comment
 CreatePlanetProperty Comment
 
 % Global Variables (System.Err is referenced by the interpreter core and therefore defined there).
+
 % @q UI.Result:Str (Global Variable)
 % Result of last user-interface operation.
 % Operations like {UI.Message} store their result in a variable %UI.Result.
@@ -194,38 +247,72 @@ CreateKeymap BaseSelectionDialog(SelectionDialog)
 
 % Global Bindings
 Bind Global          "a-c"    := "UI.PopupConsole"
-Bind Global          "quit"   := "CC$ExitClient"
-Bind Global          "a-up"   := "C2$HistoryPrevious"
-Bind Global          "a-down" := "C2$HistoryNext"
+Bind Global          "quit"   := "CCUI.ExitClient"
+Bind Global          "a-up"   := "CCUI.History.PreviousTurn"
+Bind Global          "a-down" := "CCUI.History.NextTurn"
 
 % Control Screen Bindings
-Bind ControlScreen   "."      := "CC$ToggleSelection"
-Bind ControlScreen   "esc"    := "UI.GotoScreen 0"
-Bind ControlScreen   "pgup"   := "C2$SelectPrevious",       "wheelup"   := "C2$SelectPrevious",       "-"   := "C2$SelectPrevious"
-Bind ControlScreen   "pgdn"   := "C2$SelectNext",           "wheeldn"   := "C2$SelectNext",           "+"   := "C2$SelectNext"
-Bind ControlScreen   "c-pgup" := "C2$SelectPreviousMarked", "c-wheelup" := "C2$SelectPreviousMarked", "c--" := "C2$SelectPreviousMarked"
-Bind ControlScreen   "c-pgdn" := "C2$SelectNextMarked",     "c-wheeldn" := "C2$SelectNextMarked",     "c-+" := "C2$SelectNextMarked"
-Bind ControlScreen   "f1"     := "CC$GotoScreen 1"
-Bind ControlScreen   "f2"     := "CC$GotoScreen 2"
-Bind ControlScreen   "f3"     := "CC$GotoScreen 3"
+Bind ControlScreen    "."      := "CCUI.ToggleSelection"
+Bind ControlScreen    "esc"    := "UI.GotoScreen 0"
+Bind ControlScreen    "pgup"   := "CCUI.SelectPrevious",       "wheelup"   := "CCUI.SelectPrevious",       "-"   := "CCUI.SelectPrevious"
+Bind ControlScreen    "pgdn"   := "CCUI.SelectNext",           "wheeldn"   := "CCUI.SelectNext",           "+"   := "CCUI.SelectNext"
+Bind ControlScreen    "c-pgup" := "CCUI.SelectPreviousMarked", "c-wheelup" := "CCUI.SelectPreviousMarked", "c--" := "CCUI.SelectPreviousMarked"
+Bind ControlScreen    "c-pgdn" := "CCUI.SelectNextMarked",     "c-wheeldn" := "CCUI.SelectNextMarked",     "c-+" := "CCUI.SelectNextMarked"
+Bind ControlScreen    "f1"     := "CCUI.GotoScreen 1"
+Bind ControlScreen    "f2"     := "CCUI.GotoScreen 2"
+Bind ControlScreen    "f3"     := "CCUI.GotoScreen 3"
+Bind ControlScreen    "c-f2"   := "CCUI.GotoPlanetHere"
+Bind ControlScreen    "c-f3"   := "CCUI.GotoBaseHere"
+Bind ControlScreen    "c-f8"   := "CCUI.GotoBaseHere"
+
+Bind Ship             "e"      := "CCUI.Ship.SetEnemy"
+Bind Ship             "g"      := "CCUI.Give"
+Bind Ship             "m"      := "CCUI.Ship.SetMission"
+Bind Ship             "n"      := "CCUI.Ship.Rename"
+Bind Ship             "f9"     := "CCUI.Ship.SetComment"
+Bind ShipScreen       "f8"     := "CCUI.GotoBaseHere"
+Bind ShipTaskScreen   "f9"     := "CCUI.Ship.SetComment"
+Bind ShipTaskScreen   "f8"     := "CCUI.GotoBaseHere"
+
+Bind Planet           "g"      := "CCUI.Give"
+Bind Planet           "f9"     := "CCUI.Planet.SetComment"
+Bind PlanetTaskScreen "f8"     := "CCUI.GotoBaseHere"
+Bind PlanetTaskScreen "f9"     := "CCUI.Planet.SetComment"
+
+Bind Base             "m"      := "CCUI.Base.SetMission"
+Bind Base             "f9"     := "CCUI.Planet.SetComment"
+Bind BaseScreen       "f8"     := "CCUI.GotoPlanetHere"
+Bind BaseTaskScreen   "f9"     := "CCUI.Planet.SetComment"
+Bind BaseTaskScreen   "f8"     := "CCUI.GotoPlanetHere"
+
+Bind FleetScreen      "g"      := "CCUI.Give"
+Bind FleetScreen      "f9"     := "CCUI.Planet.SetComment"
+
 
 % Starchart Bindings
 
 % Race Screen Bindings
-Bind RaceScreen      "esc"    := "CC$ExitRace"
-Bind RaceScreen      "f1"     := "CC$GotoScreen 1"
-Bind RaceScreen      "f2"     := "CC$GotoScreen 2"
-Bind RaceScreen      "f3"     := "CC$GotoScreen 3"
+Bind RaceScreen       "esc"    := "CCUI.ExitRace"
+Bind RaceScreen       "f1"     := "CCUI.GotoScreen 1"
+Bind RaceScreen       "f2"     := "CCUI.GotoScreen 2"
+Bind RaceScreen       "f3"     := "CCUI.GotoScreen 3"
 
 % Selection Dialog Bindings
-Bind SelectionDialog "esc"    := "UI.EndDialog 0"
-Bind SelectionDialog "enter"  := "UI.EndDialog 1"
-Bind SelectionDialog "up"     := "C2$SelectPrevious",       "pgup"   := "C2$SelectPrevious",       "wheelup"   := "C2$SelectPrevious",       "-"   := "C2$SelectPrevious"
-Bind SelectionDialog "down"   := "C2$SelectNext",           "pgdn"   := "C2$SelectNext",           "wheeldn"   := "C2$SelectNext",           "+"   := "C2$SelectNext"
-Bind SelectionDialog "c-up"   := "C2$SelectPreviousMarked", "c-pgup" := "C2$SelectPreviousMarked", "c-wheelup" := "C2$SelectPreviousMarked", "c--" := "C2$SelectPreviousMarked"
-Bind SelectionDialog "c-down" := "C2$SelectNextMarked",     "c-pgdn" := "C2$SelectNextMarked",     "c-wheeldn" := "C2$SelectNextMarked",     "c-+" := "C2$SelectNextMarked"
-Bind SelectionDialog "."      := "CC$ToggleSelection"
+Bind SelectionDialog  "esc"    := "UI.EndDialog 0"
+Bind SelectionDialog  "enter"  := "UI.EndDialog 1"
+Bind SelectionDialog  "up"     := "CCUI.SelectPrevious",       "pgup"   := "CCUI.SelectPrevious",       "wheelup"   := "CCUI.SelectPrevious",       "-"   := "CCUI.SelectPrevious"
+Bind SelectionDialog  "down"   := "CCUI.SelectNext",           "pgdn"   := "CCUI.SelectNext",           "wheeldn"   := "CCUI.SelectNext",           "+"   := "CCUI.SelectNext"
+Bind SelectionDialog  "c-up"   := "CCUI.SelectPreviousMarked", "c-pgup" := "CCUI.SelectPreviousMarked", "c-wheelup" := "CCUI.SelectPreviousMarked", "c--" := "CCUI.SelectPreviousMarked"
+Bind SelectionDialog  "c-down" := "CCUI.SelectNextMarked",     "c-pgdn" := "CCUI.SelectNextMarked",     "c-wheeldn" := "CCUI.SelectNextMarked",     "c-+" := "CCUI.SelectNextMarked"
+Bind SelectionDialog  "."      := "CCUI.ToggleSelection"
 
 On EnterDirectory Do TryLoad "autoexec.q"
 
 If System.GUI Then Print "[", System.Program, " ", System.Version, ", core.q ", CC$LibraryVersion, "]"
+
+%% Experimental
+Function Compile(expr)
+  Local CC$Result
+  Eval "Option LocalSubs(1)", "Local Function CC$Fun", "Return " & expr, "EndFunction", "CC$Result = CC$Fun"
+  Return CC$Result
+EndFunction

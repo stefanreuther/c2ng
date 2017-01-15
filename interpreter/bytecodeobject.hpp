@@ -10,6 +10,8 @@
 #include "afl/data/value.hpp"
 #include "afl/data/namemap.hpp"
 #include "afl/data/segment.hpp"
+#include "afl/base/ref.hpp"
+#include "afl/base/refcounted.hpp"
 
 namespace interpreter {
 
@@ -25,7 +27,8 @@ namespace interpreter {
 // class IntVMLoadContext;
 
     /** Reference to a BytecodeObject. */
-    typedef afl::base::Ptr<BytecodeObject> BCORef_t;
+    typedef afl::base::Ref<BytecodeObject> BCORef_t;
+    typedef afl::base::Ptr<BytecodeObject> BCOPtr_t;
 
 // /** Bytecode object (BCO). Bytecode objects contain code for execution.
 //     It contains the following elements:
@@ -69,7 +72,7 @@ namespace interpreter {
 //     a known address at compile time, allowing faster code to be generated.
 //     The compiler will use this instead of a <code>dimloc</code> instruction
 //     when it can prove that it's safe to do so. */
-    class BytecodeObject {
+    class BytecodeObject : public afl::base::RefCounted {
 //     friend class IntVMSaveContext;
 //     friend class IntVMLoadContext;
      public:
@@ -80,12 +83,14 @@ namespace interpreter {
         ~BytecodeObject();
 
         void     addArgument(String_t name, bool optional);
-        void     addLocalVariable(const String_t& name);
+        uint16_t addLocalVariable(const String_t& name);
         bool     hasLocalVariable(const String_t& name);
         void     setIsProcedure(bool flag);
         void     setIsVarargs(bool flag);
         size_t   getMinArgs() const;
         size_t   getMaxArgs() const;
+        void     setMinArgs(size_t n);
+        void     setMaxArgs(size_t n);
         bool     isProcedure() const;
         bool     isVarargs() const;
         String_t getName() const;
@@ -93,6 +98,7 @@ namespace interpreter {
         String_t getFileName() const;
         void     setFileName(String_t fileName);
         void     addLineNumber(uint32_t line);
+        void     addLineNumber(uint32_t line, uint32_t pc);
         uint32_t getLineNumber(PC_t pc) const;
 
         Label_t  makeLabel();
@@ -107,10 +113,11 @@ namespace interpreter {
         void     relocate();
         void     compact();
         void     copyLocalVariablesFrom(const BytecodeObject& other);
-        void     append(BytecodeObject& other);
+        void     append(const BytecodeObject& other);
 
         PC_t     getNumInstructions() const;
         uint32_t getNumLabels() const;
+        void     setNumLabels(uint32_t n);
         PC_t     getJumpTarget(uint8_t minor, uint16_t arg) const;
         Opcode&  operator()(PC_t index);
         const Opcode& operator()(PC_t index) const;
@@ -118,7 +125,29 @@ namespace interpreter {
 
         afl::data::Value* getLiteral(uint16_t index) const;
         const String_t& getName(uint16_t index) const;
-        const afl::data::NameMap& getLocalNames() const;
+        const afl::data::NameMap& getLocalNames() const;  // FIXME: rename to getLocalVariableNames
+        afl::data::NameMap& getLocalNames()
+            { return m_localNames; }
+
+        const afl::data::NameMap& getNames() const
+            { return m_names; }
+        afl::data::NameMap& getNames()
+            { return m_names; }
+
+        const afl::data::Segment& getLiterals() const
+            { return m_data; }
+        afl::data::Segment& getLiterals()
+            { return m_data; }
+
+        const std::vector<Opcode>& getCode() const
+            { return m_code; }
+        // std::vector<Opcode>& getCode()
+        //     { return m_code; }
+
+        const std::vector<uint32_t>& getLineNumbers() const
+            { return line_numbers; }
+        // std::vector<uint32_t>& getLineNumbers()
+        //     { return line_numbers; }
 
      private:
         afl::data::Segment    m_data;  ///< Literals referenced in bytecode.
@@ -148,16 +177,16 @@ namespace std {
     template<>
     struct less<interpreter::BCORef_t> {
         bool operator()(interpreter::BCORef_t a, interpreter::BCORef_t b) const
-            { return less<void*>()(a.get(), b.get()); }
+            { return less<void*>()(&a.get(), &b.get()); }
     };
 }
 
 // /** Add local variable. addLocalVariable() should not be followed by addArgument(). */
-inline void
+inline uint16_t
 interpreter::BytecodeObject::addLocalVariable(const String_t& name)
 {
     // ex IntBytecodeObject::addLocalVariable
-    m_localNames.add(name);
+    return m_localNames.add(name);
 }
 
 // /** Check for local variable.
@@ -202,6 +231,18 @@ interpreter::BytecodeObject::getMaxArgs() const
 {
     // ex IntBytecodeObject::getMaxArgs
     return m_maxArgs;
+}
+
+inline void
+interpreter::BytecodeObject::setMinArgs(size_t n)
+{
+    m_minArgs = n;
+}
+
+inline void
+interpreter::BytecodeObject::setMaxArgs(size_t n)
+{
+    m_maxArgs = n;
 }
 
 // /** Get the "is procedure" flag. \see setIsProcedure */
@@ -260,6 +301,12 @@ interpreter::BytecodeObject::getNumLabels() const
 {
     // ex IntBytecodeObject::getNumLabels
     return num_labels;
+}
+
+inline void
+interpreter::BytecodeObject::setNumLabels(uint32_t n)
+{
+    num_labels = n;
 }
 
 // /** Read/write access to instruction by address. */

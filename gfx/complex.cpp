@@ -15,19 +15,19 @@ namespace {
 #define LINE_PATTERN1(parm, t) ((parm).getLinePattern() & (0x80 >> (t & 7)))
 
     /// Helper function for 1-wide lines.
-    void linePixel(const gfx::Context& c, int x1, int y1)
+    void linePixel(const gfx::BaseContext& c, int x1, int y1)
     {
         c.canvas().drawPixel(gfx::Point(x1, y1), c.getRawColor(), c.getAlpha());
     }
 
     /// Helper function for general lines in north-south direction.
-    void lineHLine(const gfx::Context& c, int x1, int y1)
+    void lineHLine(const gfx::BaseContext& c, int x1, int y1)
     {
         c.canvas().drawHLine(gfx::Point(x1, y1), c.getLineThickness(), c.getRawColor(), gfx::SOLID_LINE, c.getAlpha());
     }
 
     /// Helper function for general lines in east-west direction.
-    void lineVLine(const gfx::Context& c, int x1, int y1)
+    void lineVLine(const gfx::BaseContext& c, int x1, int y1)
     {
         c.canvas().drawVLine(gfx::Point(x1, y1), c.getLineThickness(), c.getRawColor(), gfx::SOLID_LINE, c.getAlpha());
     }
@@ -41,7 +41,7 @@ namespace {
 //     \param x1,y1 starting coordinates
 //     \param x2 ending X. */
 void
-gfx::drawHLine(const Context& ctx, int x1, int y1, int x2)
+gfx::drawHLine(const BaseContext& ctx, int x1, int y1, int x2)
 {
     // ex gfx/gfxcompl.h:drawHLine
     if (x1 > x2) {
@@ -67,7 +67,7 @@ gfx::drawHLine(const Context& ctx, int x1, int y1, int x2)
 //     \param x1,y1 starting coordinates
 //     \param y2 ending Y */
 void
-gfx::drawVLine(const Context& ctx, int x1, int y1, int y2)
+gfx::drawVLine(const BaseContext& ctx, int x1, int y1, int y2)
 {
     // ex gfx/gfxcompl.h:drawVLine
     if (y2 < y1) {
@@ -100,7 +100,7 @@ gfx::drawVLine(const Context& ctx, int x1, int y1, int y2)
 //     \param p1 starting coordinates
 //     \param p2 ending coordinates */
 void
-gfx::drawLine(const Context& ctx, const Point p1, const Point p2)
+gfx::drawLine(const BaseContext& ctx, const Point p1, const Point p2)
 {
     int x1 = p1.getX(), y1 = p1.getY();
     int x2 = p2.getX(), y2 = p2.getY();
@@ -131,7 +131,7 @@ gfx::drawLine(const Context& ctx, const Point p1, const Point p2)
             std::swap(x1, x2);
         }
 
-        void (*plot) (const Context&,int,int);
+        void (*plot) (const BaseContext&,int,int);
         int error = dy >> 1;
         int addx  = (x2 < x1) ? -1 : 1;
 
@@ -160,7 +160,7 @@ gfx::drawLine(const Context& ctx, const Point p1, const Point p2)
             std::swap(x1, x2);
         }
 
-        void (*plot) (const Context&,int,int);
+        void (*plot) (const BaseContext&,int,int);
         int error = dx >> 1;
         int addy  = (y2<y1) ? -1 : 1;
 
@@ -193,7 +193,7 @@ gfx::drawLine(const Context& ctx, const Point p1, const Point p2)
 //                the cursor is updated.
 //     \param x,y endpoint*/
 void
-gfx::drawLineTo(Context& ctx, const Point pt)
+gfx::drawLineTo(BaseContext& ctx, const Point pt)
 {
     // ex gfx/gfxcompl.h:drawLineTo
     drawLine(ctx, ctx.getCursor(), pt);
@@ -207,7 +207,7 @@ gfx::drawLineTo(Context& ctx, const Point pt)
 //                the cursor is updated.
 //     \param dx,dy offset of endpoint relative to cursor. */
 void
-gfx::drawLineRel(Context& ctx, int dx, int dy)
+gfx::drawLineRel(BaseContext& ctx, int dx, int dy)
 {
     // ex gfx/gfxcompl.h:drawLineRel
     drawLineTo(ctx, ctx.getCursor() + Point(dx, dy));
@@ -225,7 +225,7 @@ gfx::drawLineRel(Context& ctx, int dx, int dy)
 //     \param pt center point
 //     \param r radius */
 void
-gfx::drawCircle(const Context& ctx, const Point pt, int r)
+gfx::drawCircle(const BaseContext& ctx, const Point pt, int r)
 {
     /*
      *  A home-brew circle algorithm (but probably not at all new):
@@ -310,7 +310,7 @@ gfx::drawCircle(const Context& ctx, const Point pt, int r)
 //     \param pt center point
 //     \param r radius */
 void
-gfx::drawFilledCircle(const Context& ctx, const Point pt, int r)
+gfx::drawFilledCircle(const BaseContext& ctx, const Point pt, int r)
 {
     /* Roughly the same algorithm as drawCircle */
     const int x0 = pt.getX();
@@ -346,7 +346,7 @@ gfx::drawFilledCircle(const Context& ctx, const Point pt, int r)
 //     \param x1,y1 one corner
 //     \param x2,y2 other corner */
 void
-gfx::drawBar(const Context& ctx, int x1, int y1, int x2, int y2)
+gfx::drawBar(const BaseContext& ctx, int x1, int y1, int x2, int y2)
 {
     if (x1 > x2) {
         std::swap(x1, x2);
@@ -368,7 +368,7 @@ gfx::drawBar(const Context& ctx, int x1, int y1, int x2, int y2)
 //     \param ctx parameters. All fill styles are used.
 //     \param r rectangle to fill */
 void
-gfx::drawBar(const Context& ctx, const Rectangle& r)
+gfx::drawBar(const BaseContext& ctx, const Rectangle& r)
 {
     ctx.canvas().drawBar(r,
                          ctx.getRawColor(),
@@ -377,27 +377,27 @@ gfx::drawBar(const Context& ctx, const Rectangle& r)
                          ctx.getAlpha());
 }
 
-// /** Draw Solid Bar. Draws a solid rectangle with the given color. This
-//     one does not use a graphics parameter set.
-//     \param can canvas
-//     \param r rectangle to fill
-//     \param color color to fill the rectangle with */
-void
-gfx::drawSolidBar(const Context& ctx, const Rectangle& r, Color_t color)
-{
-    ctx.canvas().drawBar(r,
-                         ctx.colorScheme().getColor(color),
-                         TRANSPARENT_COLOR,
-                         FillPattern::SOLID,
-                         ctx.getAlpha());
-}
+// // /** Draw Solid Bar. Draws a solid rectangle with the given color. This
+// //     one does not use a graphics parameter set.
+// //     \param can canvas
+// //     \param r rectangle to fill
+// //     \param color color to fill the rectangle with */
+// void
+// gfx::drawSolidBar(const Context& ctx, const Rectangle& r, Color_t color)
+// {
+//     ctx.canvas().drawBar(r,
+//                          ctx.colorScheme().getColor(color),
+//                          TRANSPARENT_COLOR,
+//                          FillPattern::SOLID,
+//                          ctx.getAlpha());
+// }
 
 // /** Draw rectangle. Draw the borders of a rectangle, but does not fill
 //     the object. Degenerate rectangles (size 0 or 1) are supported.
 //     \param ctx parameters. All line styles are used.
 //     \param r rectangle to draw */
 void
-gfx::drawRectangle(const Context& ctx, const Rectangle& r)
+gfx::drawRectangle(const BaseContext& ctx, const Rectangle& r)
 {
     if (r.getWidth() == 0 || r.getHeight() == 0) {
         return;
@@ -421,7 +421,7 @@ gfx::drawRectangle(const Context& ctx, const Rectangle& r)
 //     \param p2        ending coordinates (the pointer is added here)
 //     \param ptsize    length of pointer in pixels, approximately */
 void
-gfx::drawArrow(const Context& ctx, const Point p1, const Point p2, int ptsize)
+gfx::drawArrow(const BaseContext& ctx, const Point p1, const Point p2, int ptsize)
 {
     drawLine(ctx, p1, p2);
 
@@ -438,24 +438,24 @@ gfx::drawArrow(const Context& ctx, const Point p1, const Point p2, int ptsize)
 //     \param ctx graphics context
 //     \param pt point */
 void
-gfx::drawPixel(const Context& ctx, const Point pt)
+gfx::drawPixel(const BaseContext& ctx, const Point pt)
 {
     ctx.canvas().drawPixel(pt, ctx.getRawColor(), ctx.getAlpha());
 }
 
-// /** Draw background.
-//     \param ctx graphics context
-//     \param pt area */
-void
-gfx::drawBackground(Context& ctx, const Rectangle& r)
-{
-    ctx.colorScheme().drawBackground(ctx, r);
-}
+// // /** Draw background.
+// //     \param ctx graphics context
+// //     \param pt area */
+// void
+// gfx::drawBackground(Context& ctx, const Rectangle& r)
+// {
+//     ctx.colorScheme().drawBackground(ctx, r);
+// }
 
 // /** Blit Pixmap on Canvas. Displays this pixmap on the specified
 //     canvas, at the specified position. */
 void
-gfx::blitPixmap(Context& ctx, Point pt, Canvas& pixmap)
+gfx::blitPixmap(const BaseContext& ctx, Point pt, Canvas& pixmap)
 {
     // ex GfxPixmap::blit
     ctx.canvas().blit(pt, pixmap, Rectangle(Point(), pixmap.getSize()));
@@ -472,7 +472,7 @@ gfx::blitPixmap(Context& ctx, Point pt, Canvas& pixmap)
 //     GfxCanvas::blitSurface(), they specify the coordinates before
 //     clipping. */
 void
-gfx::blitPixmap(Context& ctx, Point pt, Canvas& pixmap, Rectangle area)
+gfx::blitPixmap(const BaseContext& ctx, Point pt, Canvas& pixmap, Rectangle area)
 {
     // ex GfxPixmap::blit
     pt -= area.getTopLeft();
@@ -483,7 +483,7 @@ gfx::blitPixmap(Context& ctx, Point pt, Canvas& pixmap, Rectangle area)
 // /** Blit Pixmap on canvas. Ensures that the area x+wi/y+he is covered,
 //     filling with color 0. */
 void
-gfx::blitSized(Context& ctx, Rectangle area, Canvas& pixmap)
+gfx::blitSized(const BaseContext& ctx, Rectangle area, Canvas& pixmap)
 {
     // ex GfxPixmap::blitSized
 
@@ -533,7 +533,7 @@ gfx::blitSized(Context& ctx, Rectangle area, Canvas& pixmap)
 //     \param alt    Alteration of X coordinate
 //     \see tileAnchored() */
 void
-gfx::blitTiled(Context& ctx, const Rectangle& area, Canvas& pixmap, int alt)
+gfx::blitTiled(const BaseContext& ctx, const Rectangle& area, Canvas& pixmap, int alt)
 {
     // ex GfxPixmap::tile
     blitTiledAnchored(ctx, area, pixmap, area.getTopLeft(), alt);
@@ -554,7 +554,7 @@ gfx::blitTiled(Context& ctx, const Rectangle& area, Canvas& pixmap, int alt)
 //     first line at ax, the second at ax-16, the third at ax again, etc. This
 //     makes large tiled regions look much nicer. */
 void
-gfx::blitTiledAnchored(Context& ctx, const Rectangle& area, Canvas& pixmap, Point anchor, int alt)
+gfx::blitTiledAnchored(const BaseContext& ctx, const Rectangle& area, Canvas& pixmap, Point anchor, int alt)
 {
     // ex GfxPixmap::tileAnchored
     int y2 = area.getBottomY(), x2 = area.getRightX();

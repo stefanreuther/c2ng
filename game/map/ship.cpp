@@ -33,7 +33,6 @@ game::map::Ship::Ship(int id)
       m_fleetNumber(0),
       m_fleetName(),
       m_currentData(),
-      m_previousData(),
       m_historyData(),
       m_shipSource(),
       m_targetSource(),
@@ -65,11 +64,12 @@ game::map::Ship::addCurrentShipData(const ShipData& data, PlayerSet_t source)
 // }
 }
 
-void
-game::map::Ship::addPreviousShipData(const ShipData& data)
-{
-    m_previousData = data;
-}
+// FIXME: retire
+// void
+// game::map::Ship::addPreviousShipData(const ShipData& data) REVERTER
+// {
+//     m_previousData = data;
+// }
 
 // /** Add TARGET.DAT entry. This assumes that if we see a ship through
 //     several .dat files, we get the same one each time. This does, however,
@@ -114,12 +114,12 @@ game::map::Ship::addShipXYData(Point pt, int owner, int mass, PlayerSet_t source
 
     // Update ship.
     if (m_shipSource.empty()) {
-        m_previousData.x          = m_currentData.x          = pt.getX();
-        m_previousData.y          = m_currentData.y          = pt.getY();
-        m_previousData.waypointDX = m_currentData.waypointDX = NegativeProperty_t();
-        m_previousData.waypointDY = m_currentData.waypointDY = NegativeProperty_t();
-        m_currentData.owner       = owner;
-        m_scannedMass             = mass;
+        m_currentData.x          = pt.getX();
+        m_currentData.y          = pt.getY();
+        m_currentData.waypointDX = NegativeProperty_t();
+        m_currentData.waypointDY = NegativeProperty_t();
+        m_currentData.owner      = owner;
+        m_scannedMass            = mass;
     }
 }
 
@@ -246,12 +246,14 @@ game::map::Ship::internalCheck()
 //     This will do all post-processing which needs a partner to interact with.
 //     It requires the playability to be filled in. */
 void
-game::map::Ship::combinedCheck1(Universe& univ)
+game::map::Ship::combinedCheck1(Universe& univ, int turnNumber)
 {
+    // FIXME: remove parameter?
+    (void) univ;
     // ex GShip::combinedCheck1
     // Update ages
     if (hasFullShipData()) {
-        m_historyTimestamps[MilitaryTime] = m_historyTimestamps[RestTime] = univ.getTurnNumber();
+        m_historyTimestamps[MilitaryTime] = m_historyTimestamps[RestTime] = turnNumber;
     }
 
     // Update ship track.
@@ -603,6 +605,17 @@ game::map::Ship::setWaypoint(afl::base::Optional<Point> pt)
     }
 }
 
+void
+game::map::Ship::clearWaypoint()
+{
+    if (!m_currentData.waypointDX.isSame(0) || !m_currentData.waypointDY.isSame(0)) {
+        m_currentData.waypointDX = 0;
+        m_currentData.waypointDY = 0;
+        markDirty();
+    }
+}
+
+
 // /** Get waypoint X displacement. */
 game::NegativeProperty_t
 game::map::Ship::getWaypointDX() const
@@ -727,7 +740,7 @@ game::map::Ship::getNumBeams() const
     if (m_currentData.beamType.isSame(0)) {
         return 0;
     } else {
-        return m_currentData.beamType;
+        return m_currentData.numBeams;
     }
 }
 
@@ -927,6 +940,7 @@ game::map::Ship::setFriendlyCode(StringProperty_t fc)
 {
     // ex GShip::setFCode
     m_currentData.friendlyCode = fc;
+    markDirty();
 }
 
 // 

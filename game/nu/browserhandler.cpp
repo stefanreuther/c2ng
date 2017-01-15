@@ -33,7 +33,7 @@ namespace {
 }
 
 
-game::nu::BrowserHandler::BrowserHandler(game::browser::Browser& b, afl::net::http::Manager& mgr, afl::base::Ptr<afl::io::Directory> defaultSpecificationDirectory)
+game::nu::BrowserHandler::BrowserHandler(game::browser::Browser& b, afl::net::http::Manager& mgr, afl::base::Ref<afl::io::Directory> defaultSpecificationDirectory)
     : m_browser(b),
       m_manager(mgr),
       m_defaultSpecificationDirectory(defaultSpecificationDirectory),
@@ -59,7 +59,7 @@ game::nu::BrowserHandler::createAccountFolder(game::browser::Account& acc)
 }
 
 afl::base::Ptr<game::Root>
-game::nu::BrowserHandler::loadGameRoot(afl::base::Ptr<afl::io::Directory> /*dir*/)
+game::nu::BrowserHandler::loadGameRoot(afl::base::Ref<afl::io::Directory> /*dir*/)
 {
     // FIXME: do we need this? Look at folder content, if it's nu, open it.
     return 0;
@@ -201,7 +201,7 @@ game::nu::BrowserHandler::log()
     return m_browser.log();
 }
 
-afl::base::Ptr<afl::io::Directory>
+afl::base::Ref<afl::io::Directory>
 game::nu::BrowserHandler::getDefaultSpecificationDirectory()
 {
     return m_defaultSpecificationDirectory;

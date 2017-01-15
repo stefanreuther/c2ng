@@ -52,7 +52,7 @@ namespace {
 
 }
 
-game::interface::IonStormContext::IonStormContext(int id, Session& session, afl::base::Ptr<Game> game)
+game::interface::IonStormContext::IonStormContext(int id, Session& session, afl::base::Ref<Game> game)
     : m_id(id),
       m_session(session),
       m_game(game)
@@ -62,11 +62,11 @@ game::interface::IonStormContext::~IonStormContext()
 { }
 
 // Context:
-bool
+game::interface::IonStormContext*
 game::interface::IonStormContext::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
 {
     // ex IntIonContext::lookup
-    return lookupName(name, ion_storm_mapping, result);
+    return lookupName(name, ion_storm_mapping, result) ? this : 0;
 }
 
 void
@@ -89,9 +89,8 @@ game::interface::IonStormContext::set(PropertyIndex_t index, afl::data::Value* v
 afl::data::Value*
 game::interface::IonStormContext::get(PropertyIndex_t index)
 {
-    Game* g = m_game.get();
     game::map::IonStorm* ii = getObject();
-    if (g != 0 && ii != 0) {
+    if (ii != 0) {
         switch (IonStormDomain(ion_storm_mapping[index].domain)) {
          case IonStormPropertyDomain:
             return getIonStormProperty(*ii, IonStormProperty(ion_storm_mapping[index].index), m_session.translator(), m_session.interface());
@@ -105,17 +104,14 @@ game::interface::IonStormContext::get(PropertyIndex_t index)
     } else {
         return 0;
     }
-
 }
 
 bool
 game::interface::IonStormContext::next()
 {
-    if (Game* game = m_game.get()) {
-        if (int id = game->currentTurn().universe().ionStormType().findNextIndex(m_id)) {
-            m_id = id;
-            return true;
-        }
+    if (int id = m_game->currentTurn().universe().ionStormType().findNextIndex(m_id)) {
+        m_id = id;
+        return true;
     }
     return false;
 }
@@ -130,11 +126,7 @@ game::interface::IonStormContext::clone() const
 game::map::IonStorm*
 game::interface::IonStormContext::getObject()
 {
-    if (Game* game = m_game.get()) {
-        return game->currentTurn().universe().ionStorms().get(m_id);
-    } else {
-        return 0;
-    }
+    return m_game->currentTurn().universe().ionStorms().get(m_id);
 }
 
 void
@@ -153,9 +145,20 @@ game::interface::IonStormContext::toString(bool /*readable*/) const
 }
 
 void
-game::interface::IonStormContext::store(interpreter::TagNode& out, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext* /*ctx*/) const
+game::interface::IonStormContext::store(interpreter::TagNode& out, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
 {
     // ex IntIonContext::store
     out.tag = out.Tag_Ion;
     out.value = m_id;
+}
+
+game::interface::IonStormContext*
+game::interface::IonStormContext::create(int id, Session& session)
+{
+    Game* game = session.getGame().get();
+    if (game != 0 && game->currentTurn().universe().ionStorms().get(id) != 0) {
+        return new IonStormContext(id, session, *game);
+    } else {
+        return 0;
+    }
 }

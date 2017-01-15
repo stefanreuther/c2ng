@@ -10,7 +10,7 @@
 #include "gfx/rectangle.hpp"
 #include "gfx/types.hpp"
 #include "afl/base/memory.hpp"
-#include "afl/base/ptr.hpp"
+#include "afl/base/ref.hpp"
 
 namespace gfx {
 
@@ -45,7 +45,7 @@ namespace gfx {
         - On all but 32-bit canvases, all colors need to be opaque, but one color can be defined transparent and is used for color-keying.
           Whereas on an 8-bit canvas, the color number uniquely identifies the color-key slot,
           care must be taken that the color does not result from a blending operation in 16- and 24-bit canvases. */
-    class Canvas : public afl::base::Deletable {
+    class Canvas : public afl::base::Deletable, public afl::base::RefCounted {
      public:
         /** Draw horizontal line.
             \param pt    origin
@@ -130,7 +130,6 @@ namespace gfx {
         // virtual bool computeOffset(GfxCanvas& other, GfxPoint& pt) = 0;
 
         /** Read one pixel. \return pixel value in target format. */
-        virtual Color_t getPixel(Point pt) = 0;
         virtual void getPixels(Point pt, afl::base::Memory<Color_t> colors) = 0;
 
         /** Get size of this surface */
@@ -176,7 +175,7 @@ namespace gfx {
             If colorDefinitions and colorHandles do not have the same number of elements, the behaviour is undefined. */
         virtual void encodeColors(afl::base::Memory<const ColorQuad_t> colorDefinitions, afl::base::Memory<Color_t> colorHandles) = 0;
 
-        virtual afl::base::Ptr<Canvas> convertCanvas(afl::base::Ptr<Canvas> orig) = 0;
+        virtual afl::base::Ref<Canvas> convertCanvas(afl::base::Ref<Canvas> orig) = 0;
 
         void defaultBlit(Point pt, Canvas& src, Rectangle rect);
     };

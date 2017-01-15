@@ -1,21 +1,25 @@
 /**
   *  \file game/playerlist.cpp
+  *  \brief Class game::PlayerList
   */
 
 #include "game/playerlist.hpp"
 #include "util/string.hpp"
 
+// FIXME: simplification: refuse player numbers > MAX_PLAYERS. Keep m_players at MAX_PLAYERS+1 slots all the time.
+
+// Default constructor.
 game::PlayerList::PlayerList()
     : m_players()
 {
-    if (Player* p = create(0)) {
-        p->initUnowned();
-    }
+    clear();
 }
 
+// Destructor.
 game::PlayerList::~PlayerList()
 { }
 
+// Create a player slot.
 game::Player*
 game::PlayerList::create(int id)
 {
@@ -34,6 +38,7 @@ game::PlayerList::create(int id)
     }
 }
 
+// Get player slot.
 game::Player*
 game::PlayerList::get(int id) const
 {
@@ -44,19 +49,24 @@ game::PlayerList::get(int id) const
     }
 }
 
+// Reset this object.
 void
 game::PlayerList::clear()
 {
-    // FIXME: slot 0?
     m_players.clear();
+    if (Player* p = create(0)) {
+        p->initUnowned();
+    }
 }
 
+// Get size.
 int
 game::PlayerList::size() const
 {
     return m_players.size();
 }
 
+// Get player object, given a player character.
 game::Player*
 game::PlayerList::getPlayerFromCharacter(char ch) const
 {
@@ -68,9 +78,11 @@ game::PlayerList::getPlayerFromCharacter(char ch) const
     }
 }
 
+// Expand names in string template.
 char
 game::PlayerList::getCharacterFromPlayer(int id) const
 {
+    // ex game/player.h:getPlayerChar
     // FIXME: might be better in class Player? util?
     if (id >= 0 && id < 10) {
         return '0' + id;
@@ -81,10 +93,7 @@ game::PlayerList::getCharacterFromPlayer(int id) const
     }
 }
 
-// /** Expand race names.
-//     "%N" expands to race N's short name.
-//     "%-N" expands to race N's adjective.
-//     "%%" is a percent sign. */
+// Get set of all players.
 String_t
 game::PlayerList::expandNames(const String_t tpl) const
 {
@@ -119,6 +128,7 @@ game::PlayerList::expandNames(const String_t tpl) const
     return result;
 }
 
+// Get set of all players.
 game::PlayerSet_t
 game::PlayerList::getAllPlayers() const
 {
@@ -133,12 +143,14 @@ game::PlayerList::getAllPlayers() const
     return result;
 }
 
+// Get first player.
 game::Player*
 game::PlayerList::getFirstPlayer() const
 {
     return findNextPlayer(0);
 }
 
+// Get next player.
 game::Player*
 game::PlayerList::getNextPlayer(Player* p) const
 {
@@ -147,12 +159,14 @@ game::PlayerList::getNextPlayer(Player* p) const
         : 0;
 }
 
+// Get next player.
 game::Player*
-game::PlayerList::getNextPlayer(int n) const
+game::PlayerList::getNextPlayer(int id) const
 {
-    return findNextPlayer(n);
+    return findNextPlayer(id);
 }
 
+// Notify listeners.
 void
 game::PlayerList::notifyListeners()
 {
@@ -172,6 +186,11 @@ game::Player*
 game::PlayerList::findNextPlayer(int nr) const
 {
     int limit = size();
+
+    // If input is negative, fast-forward to 0. This avoids that a loop starting at -bignum takes forever.
+    if (nr < 0) {
+        nr = 0;
+    }
     while (nr < limit) {
         ++nr;
         if (Player* p = get(nr)) {

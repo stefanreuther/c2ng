@@ -55,6 +55,7 @@ namespace util {
         return x*x;
     }
 
+    double getDistanceFromDX(int dx, int dy);
 }
 
 #endif

@@ -30,8 +30,7 @@ ui::widgets::TiledPanel::~TiledPanel()
 void
 ui::widgets::TiledPanel::draw(gfx::Canvas& can)
 {
-    gfx::Context ctx(can);
-    ctx.useColorScheme(m_colorScheme);
+    gfx::Context<uint8_t> ctx(can, m_colorScheme);
 
     gfx::Rectangle r = getExtent();
     drawFrameUp(ctx, r);

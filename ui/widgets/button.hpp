@@ -11,21 +11,20 @@ namespace ui { namespace widgets {
 
     class Button : public AbstractButton {
      public:
-        Button(String_t text, util::Key_t key, gfx::ResourceProvider& provider, ui::ColorScheme& scheme);
+        Button(String_t text, util::Key_t key, ui::Root& root);
         ~Button();
 
         virtual void draw(gfx::Canvas& can);
         virtual void handleStateChange(State st, bool enable);
         virtual void handlePositionChange(gfx::Rectangle& oldPosition);
         virtual ui::layout::Info getLayoutInfo() const;
+        virtual bool handleKey(util::Key_t key, int prefix);
+        virtual bool handleMouse(gfx::Point pt, MouseButtons_t pressedButtons);
 
         void setFont(gfx::FontRequest font);
 
      private:
         String_t m_text;
-
-        gfx::ResourceProvider& m_provider;
-        ui::ColorScheme& m_scheme;
         gfx::FontRequest m_font;
     };
 

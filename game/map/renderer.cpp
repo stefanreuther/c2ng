@@ -30,7 +30,7 @@ game::map::Renderer::render(RendererListener& out)
     // if (opt.show & GChartOptions::co_Ion)
     //     drawIons(can, univ, opt.fill);
     // if (opt.show & GChartOptions::co_Drawings)
-    //     drawDrawings(can, univ, opt.show);
+    renderDrawings(out);
     // drawShipSelAndVectors(can, univ, opt.show);
     renderPlanets(out);
     renderShips(out);
@@ -187,6 +187,95 @@ game::map::Renderer::renderMinefields(RendererListener& out)
     }
 }
 
+// /** Draw user drawings. Call only if these are actually enabled.
+//     \param can  Canvas to draw on
+//     \param trn  Turn to get drawings from
+//     \param show options.show, to test whether labels should be drawn */
+void
+game::map::Renderer::renderDrawings(RendererListener& out)
+{
+    // ex GChartViewport::drawDrawings
+    const DrawingContainer& d = m_viewport.universe().drawings();
+//     const bool with_text = (show & GChartOptions::co_Labels) != 0;
+    for (DrawingContainer::Iterator_t i = d.begin(); i != d.end(); ++i) {
+        if (const Drawing* p = *i) {
+            if (p->isVisible()
+                /* && (drawing_filter == NO_FILTER
+//                 || (*i)->getTag() == drawing_filter) */)
+            {
+                renderDrawing(out, *p);
+            }
+        }
+    }
+
+//     GfxContext ctx;
+//     ctx.useCanvas(can);
+//     ctx.useColorScheme(GfxStandardColorScheme::instance);
+
+//     GExplosionContainer& e = trn.getExplosions();
+//     for (GExplosionContainer::iterator i = e.begin(); i != e.end(); ++i) {
+//         bool big = divi < 2*mult;
+//         for (int img = getFirstImage(); img >= 0; img = getNextImage(img)) {
+//             GfxPoint pos = scaleXY(chart_conf.getSimplePointAlias(i->getPos(), img));
+//             /* red '+' */
+//             ctx.setColor(COLOR_RED);
+//             drawMarker(ctx, getUserMarker(0, big), pos);
+//             /* yellow 'x' */
+//             ctx.setColor(COLOR_YELLOW);
+//             drawMarker(ctx, getUserMarker(2, big), pos);
+//         }
+//     }
+// }
+}
+
+void
+game::map::Renderer::renderDrawing(RendererListener& out, const Drawing& d)
+{
+    switch (d.getType()) {
+     case Drawing::LineDrawing:
+        // for (int img = getFirstImage(); img >= 0; img = getNextImage(img)) {
+        //     GfxPoint origin = scaleXY(chart_conf.getSimplePointAlias(d.getPos(),  img));
+        //     GfxPoint end    = scaleXY(chart_conf.getSimplePointAlias(d.getPos2(), img));
+        out.drawUserLine(d.getPos(), d.getPos2(), d.getColor());
+        // }
+        break;
+     case Drawing::RectangleDrawing:
+        // for (int img = getFirstImage(); img >= 0; img = getNextImage(img)) {
+        //     GfxPoint origin = scaleXY(chart_conf.getSimplePointAlias(d.getPos(),  img));
+        //     GfxPoint end    = scaleXY(chart_conf.getSimplePointAlias(d.getPos2(), img));
+        out.drawUserRectangle(d.getPos(), d.getPos2(), d.getColor());
+        // }
+        break;
+     case Drawing::CircleDrawing:
+        // for (int img = getFirstImage(); img >= 0; img = getNextImage(img)) {
+        //     GfxPoint origin = scaleXY(chart_conf.getSimplePointAlias(d.getPos(), img));
+        out.drawUserCircle(d.getPos(), d.getCircleRadius(), d.getColor());
+        // }
+        break;
+     case Drawing::MarkerDrawing:
+        // for (int img = getFirstImage(); img >= 0; img = getNextImage(img)) {
+        //     GfxPoint origin = scaleXY(chart_conf.getSimplePointAlias(d.getPos(), img));
+        // FIXME: trim "|"
+        out.drawUserMarker(d.getPos(), d.getMarkerKind(), d.getColor(), afl::string::strFirst(d.getComment(), "|"));
+        //     if (divi < 2*mult) {
+        //         /* draw marker */
+        //         const TMarkerImage& img = getUserMarker(d.getMarkerKind(), true);
+        //         drawMarker(ctx, img, origin);
+
+        //         /* draw text */
+        //         if (with_text) {
+        //             string_t text = strFirst(d.getComment(), "|");
+        //             if (text.size())
+        //                 outTextF(ctx, origin.x, origin.y + img.height, 600, text);
+        //         }
+        //     } else {
+        //         drawMarker(ctx, getUserMarker(d.getMarkerKind(), false), origin);
+        //     }
+        // }
+        break;
+    }
+
+}
 
 void
 game::map::Renderer::renderPlanets(RendererListener& out)

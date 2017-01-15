@@ -1,0 +1,7 @@
+/*!
+     \namespace interpreter::vmio
+     \brief Script Interpreter Virtual Machine I/O
+
+     This namespace contains code to save and load interpreter VM state.
+     This is used to produce VM state files (script.cc) and compiled script object files (*.qc).
+ */

@@ -49,7 +49,6 @@ namespace game { namespace map {
 
         // Load and Save
         void       addCurrentShipData(const ShipData& data, PlayerSet_t source);
-        void       addPreviousShipData(const ShipData& data);
     //     void       addTargetData(const TShipTarget& target, GPlayerSet source);
         void       addShipXYData(Point pt, int owner, int mass, PlayerSet_t source);
     //     void       addRCEntry(int flag);
@@ -63,7 +62,7 @@ namespace game { namespace map {
     //     void       getShipHistoryData(TDbShip& the_data) const;
 
         void       internalCheck();
-        void       combinedCheck1(Universe& univ);
+        void       combinedCheck1(Universe& univ, int turnNumber);
 
         // MapObject interface
         virtual String_t getName(Name which, afl::string::Translator& tx, InterpreterInterface& iface) const;
@@ -102,6 +101,7 @@ namespace game { namespace map {
         // Course accessors
         afl::base::Optional<Point> getWaypoint() const;
         void              setWaypoint(afl::base::Optional<Point> pt);
+        void              clearWaypoint();
         NegativeProperty_t getWaypointDX() const;
         NegativeProperty_t getWaypointDY() const;
         IntegerProperty_t  getHeading() const;
@@ -203,7 +203,6 @@ namespace game { namespace map {
 
         // Data:
         ShipData m_currentData;                // ex ship_info.data
-        ShipData m_previousData;
         ShipHistoryData m_historyData;         // ex ship_info.track_turn, track
 
         int m_historyTimestamps[2];

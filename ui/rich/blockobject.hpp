@@ -8,6 +8,7 @@
 #include "gfx/point.hpp"
 #include "gfx/context.hpp"
 #include "gfx/rectangle.hpp"
+#include "util/skincolor.hpp"
 
 namespace ui { namespace rich {
 
@@ -16,7 +17,7 @@ namespace ui { namespace rich {
     class BlockObject : public afl::base::Deletable {
      public:
         virtual gfx::Point getSize() = 0;
-        virtual void draw(gfx::Context& ctx, gfx::Rectangle area) = 0;
+        virtual void draw(gfx::Context<util::SkinColor::Color>& ctx, gfx::Rectangle area) = 0;
     };
 
 } }

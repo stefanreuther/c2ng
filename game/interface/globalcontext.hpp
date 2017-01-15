@@ -16,7 +16,7 @@ namespace game { namespace interface {
         ~GlobalContext();
 
         // Context:
-        virtual bool lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
+        virtual GlobalContext* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
         virtual void set(PropertyIndex_t index, afl::data::Value* value);
         virtual afl::data::Value* get(PropertyIndex_t index);
         virtual GlobalContext* clone() const;
@@ -25,7 +25,7 @@ namespace game { namespace interface {
 
         // BaseValue:
         virtual String_t toString(bool readable) const;
-        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, interpreter::SaveContext* ctx) const;
+        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, interpreter::SaveContext& ctx) const;
 
      private:
         Session& m_session;

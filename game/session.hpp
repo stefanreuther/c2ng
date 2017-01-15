@@ -5,18 +5,20 @@
 #define C2NG_GAME_SESSION_HPP
 
 #include <memory>
-#include "interpreter/world.hpp"
-#include "afl/sys/log.hpp"
 #include "afl/base/ptr.hpp"
-#include "game/spec/shiplist.hpp"
-#include "game/interpreterinterface.hpp"
-#include "afl/string/translator.hpp"
 #include "afl/base/signalconnection.hpp"
-#include "afl/io/stream.hpp"
-#include "game/interface/userinterfacepropertyaccessor.hpp"
-#include "interpreter/error.hpp"
-#include "game/interface/userinterfacepropertystack.hpp"
 #include "afl/io/filesystem.hpp"
+#include "afl/io/stream.hpp"
+#include "afl/string/translator.hpp"
+#include "afl/sys/log.hpp"
+#include "game/extracontainer.hpp"
+#include "game/interface/userinterfacepropertyaccessor.hpp"
+#include "game/interface/userinterfacepropertystack.hpp"
+#include "game/interpreterinterface.hpp"
+#include "game/spec/shiplist.hpp"
+#include "interpreter/error.hpp"
+#include "interpreter/world.hpp"
+#include "util/plugin/manager.hpp"
 
 namespace game {
 
@@ -71,7 +73,11 @@ namespace game {
 
         util::RandomNumberGenerator& rng();
 
-        bool executeFile(afl::io::Stream& file);
+        util::plugin::Manager& plugins();
+
+        ExtraContainer<Session>& extra();
+
+        // bool executeFile(afl::io::Stream& file);
 
         void notifyListeners();
 
@@ -84,12 +90,14 @@ namespace game {
         game::interface::UserInterfacePropertyStack m_uiPropertyStack;
         interpreter::World m_world;
         util::RandomNumberGenerator m_rng;
+        util::plugin::Manager m_plugins;
+        ExtraContainer<Session> m_extra;
 
         afl::base::SignalConnection conn_hostConfigToMap;
         afl::base::SignalConnection conn_userConfigToMap;
 
         // InterpreterInterface:
-        virtual bool evaluate(Scope scope, int id, String_t expr);
+        virtual afl::data::Value* evaluate(Scope scope, int id, String_t expr);
         virtual String_t getComment(Scope scope, int id);
         virtual bool hasTask(Scope scope, int id);
         virtual bool getHullShortName(int nr, String_t& out);

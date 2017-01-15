@@ -5,21 +5,22 @@
 #define C2NG_UI_SKINCOLORSCHEME_HPP
 
 #include "gfx/colorscheme.hpp"
+#include "util/skincolor.hpp"
 
 namespace ui {
 
     class ColorSet;
     class ColorScheme;
 
-    class SkinColorScheme : public gfx::ColorScheme {
+    class SkinColorScheme : public gfx::ColorScheme<util::SkinColor::Color> {
      public:
-        SkinColorScheme(const ColorSet& colors, ColorScheme& uiColorScheme);
-        virtual gfx::Color_t getColor(uint32_t index);
-        virtual void drawBackground(gfx::Context& ctx, const gfx::Rectangle& area);
+        SkinColorScheme(const ColorSet& colors, ui::ColorScheme& uiColorScheme);
+        virtual gfx::Color_t getColor(util::SkinColor::Color index);
+        virtual void drawBackground(gfx::Canvas& can, const gfx::Rectangle& area);
 
      private:
         const ColorSet& m_colors;
-        ColorScheme& m_uiColorScheme;
+        ui::ColorScheme& m_uiColorScheme;
     };
 }
 

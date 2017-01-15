@@ -19,36 +19,12 @@ game::interface::ObjectCommand::~ObjectCommand()
 
 // CallableValue:
 void
-game::interface::ObjectCommand::call(interpreter::Process& proc, afl::data::Segment& args, bool wantResult)
+game::interface::ObjectCommand::call(interpreter::Process& proc, interpreter::Arguments& args)
 {
     // ex IntObjectProcedureValue::call
-    interpreter::Arguments a(args, 0, args.size());
-    m_function(m_session, m_object, proc, a);
-    if (wantResult) {
-        proc.pushNewValue(0);
-    }
+    m_function(m_session, m_object, proc, args);
 }
 
-bool
-game::interface::ObjectCommand::isProcedureCall()
-{
-    // ex IntObjectProcedureValue::isProcedureCall
-    return true;
-}
-
-int32_t
-game::interface::ObjectCommand::getDimension(int32_t /*which*/)
-{
-    // ex IntObjectProcedureValue::getDimension
-    return 0;
-}
-
-interpreter::Context*
-game::interface::ObjectCommand::makeFirstContext()
-{
-    // ex IntObjectProcedureValue::makeFirstContext
-    return 0;
-}
 game::interface::ObjectCommand*
 game::interface::ObjectCommand::clone() const
 {
@@ -56,25 +32,16 @@ game::interface::ObjectCommand::clone() const
     return new ObjectCommand(m_session, m_object, m_function);
 }
 
-// BaseValue:
-String_t
-game::interface::ObjectCommand::toString(bool /*readable*/) const
-{
-    // ex IntObjectProcedureValue::toString
-    return "#<obj-procedure>";
-}
-
-void
-game::interface::ObjectCommand::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext* /*ctx*/) const
-{
-    // ex IntObjectProcedureValue::store
-    throw interpreter::Error::notSerializable();
-}
-
 // /** Implementation of the "Mark" command.
 //     Syntax: 'Mark [flag]' */
 void
 game::interface::IFObjMark(game::Session& /*session*/, game::map::Object& obj, interpreter::Process& /*proc*/, interpreter::Arguments& args)
+{
+    IFObjMark(obj, args);
+}
+
+void
+game::interface::IFObjMark(game::map::Object& obj, interpreter::Arguments& args)
 {
     // ex int/if/objif.h:IFObjMark
     /* @q Mark Optional flag:Bool (Planet Command, Ship Command, Ufo Command, Storm Command, Minefield Command)
@@ -96,6 +63,12 @@ game::interface::IFObjMark(game::Session& /*session*/, game::map::Object& obj, i
 //     Syntax: 'Unmark' */
 void
 game::interface::IFObjUnmark(game::Session& /*session*/, game::map::Object& obj, interpreter::Process& /*proc*/, interpreter::Arguments& args)
+{
+    IFObjUnmark(obj, args);
+}
+
+void
+game::interface::IFObjUnmark(game::map::Object& obj, interpreter::Arguments& args)
 {
     // ex int/if/objif.h:IFObjUnmark
     /* @q Unmark (Planet Command, Ship Command, Ufo Command, Storm Command, Minefield Command)

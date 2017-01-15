@@ -443,13 +443,13 @@ ui::Widget::getExtent() const
 }
 
 void
-ui::Widget::setColorScheme(gfx::ColorScheme& scheme)
+ui::Widget::setColorScheme(gfx::ColorScheme<util::SkinColor::Color>& scheme)
 {
     // ex UIBaseWidget::setSkin, sort-of
     m_colorScheme = &scheme;
 }
 
-gfx::ColorScheme&
+gfx::ColorScheme<util::SkinColor::Color>&
 ui::Widget::getColorScheme() const
 {
     if (m_colorScheme != 0) {

@@ -9,6 +9,7 @@
 #include "afl/data/scalarvalue.hpp"
 #include "interpreter/world.hpp"
 #include "afl/base/countof.hpp"
+#include "interpreter/arguments.hpp"
 
 using interpreter::Error;
 
@@ -35,13 +36,11 @@ namespace {
         }
 
         /* c must be a string or integer (the command) */
-        uint32_t command;
-        if (afl::data::StringValue* sv = dynamic_cast<afl::data::StringValue*>(c))
-            command = world.atomTable().getAtomFromString(sv->getValue());
-        else if (afl::data::ScalarValue* iv = dynamic_cast<afl::data::ScalarValue*>(c))
-            command = iv->getValue();
-        else
-            throw Error::typeError(Error::ExpectString);
+        util::Atom_t command;
+        if (!interpreter::checkCommandAtomArg(command, c, world.atomTable())) {
+            // cannot happen (already handled above)
+            return 0;
+        }
 
         /* Do it */
         keymap->getKeymap()->addKey(keyval, command, 0);

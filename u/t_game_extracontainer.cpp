@@ -16,8 +16,8 @@ namespace {
 void
 TestGameExtraContainer::testIt()
 {
-    static const game::ExtraIdentifier<int,MyExtra1> def1 = {};
-    static const game::ExtraIdentifier<int,MyExtra2> def2 = {};
+    static const game::ExtraIdentifier<int,MyExtra1> def1 = {{}};
+    static const game::ExtraIdentifier<int,MyExtra2> def2 = {{}};
 
     game::ExtraContainer<int> testee;
     TS_ASSERT(testee.get(def1) == 0);

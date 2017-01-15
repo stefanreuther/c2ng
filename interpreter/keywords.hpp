@@ -15,6 +15,7 @@ namespace interpreter {
         kwAbort,
         kwBind,
         kwBreak,
+        kwCall,
         kwCase,
         kwContinue,
         kwCreateKeymap,

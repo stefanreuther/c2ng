@@ -44,7 +44,7 @@ namespace {
 
     class IteratorFunction : public interpreter::IndexableValue {
      public:
-        IteratorFunction(afl::base::Ptr<game::interface::IteratorProvider> provider, IteratorProperty p)
+        IteratorFunction(afl::base::Ref<game::interface::IteratorProvider> provider, IteratorProperty p)
             : m_provider(provider),
               m_property(p)
             { }
@@ -130,7 +130,7 @@ namespace {
             }
 
         // CallableValue:
-        virtual int32_t getDimension(int32_t /*which*/)
+        virtual int32_t getDimension(int32_t /*which*/) const
             {
                 // ex IntIteratorFunction::getDimension
                 return 0;
@@ -155,21 +155,21 @@ namespace {
                 return "#<array>";
             }
 
-        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext* /*ctx*/) const
+        virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
             {
                 // ex IntIteratorFunction::store
                 throw interpreter::Error::notSerializable();
             }
 
      private:
-        afl::base::Ptr<game::interface::IteratorProvider> m_provider;
-        IteratorProperty m_property;
+        afl::base::Ref<game::interface::IteratorProvider> m_provider;
+        const IteratorProperty m_property;
     };
 }
 
 
 
-game::interface::IteratorContext::IteratorContext(afl::base::Ptr<IteratorProvider> provider)
+game::interface::IteratorContext::IteratorContext(afl::base::Ref<IteratorProvider> provider)
     : SingleContext(),
       m_provider(provider)
 {
@@ -180,11 +180,11 @@ game::interface::IteratorContext::~IteratorContext()
 { }
 
 // Context:
-bool
+game::interface::IteratorContext*
 game::interface::IteratorContext::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
 {
     // ex IntIteratorContext::lookup
-    return lookupName(name, ITERATOR_MAP, result);
+    return lookupName(name, ITERATOR_MAP, result) ? this : 0;
 }
 
 void
@@ -274,7 +274,7 @@ game::interface::IteratorContext::toString(bool readable) const
 }
 
 void
-game::interface::IteratorContext::store(interpreter::TagNode& out, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext* /*ctx*/) const
+game::interface::IteratorContext::store(interpreter::TagNode& out, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
 {
     // ex IntIteratorContext::store
     m_provider->store(out);
@@ -310,33 +310,25 @@ game::interface::IFIterator(game::Session& session, interpreter::Arguments& args
         return 0;
     }
 
-    return makeIteratorValue(session.getGame(), v);
+    return makeIteratorValue(session.getGame(), v, true);
 }
 
-afl::data::Value*
-game::interface::makeIteratorValue(afl::base::Ptr<Game> game, int nr)
+interpreter::Context*
+game::interface::makeIteratorValue(afl::base::Ptr<Game> game, int nr, bool reportRangeError)
 {
     class NumberedIteratorProvider : public IteratorProvider {
      public:
-        NumberedIteratorProvider(afl::base::Ptr<Game> game, int nr)
+        NumberedIteratorProvider(afl::base::Ref<Game> game, int nr)
             : m_game(game),
               m_number(nr)
             { }
         virtual game::map::ObjectCursor* getCursor()
             {
-                if (m_game.get() != 0) {
-                    return m_game->cursors().getCursorByNumber(m_number);
-                } else {
-                    return 0;
-                }
+                return m_game->cursors().getCursorByNumber(m_number);
             }
         virtual game::map::ObjectType* getType()
             {
-                if (m_game.get() != 0) {
-                    return m_game->cursors().getTypeByNumber(m_number);
-                } else {
-                    return 0;
-                }
+                return m_game->cursors().getTypeByNumber(m_number);
             }
         virtual void store(interpreter::TagNode& out)
             {
@@ -348,15 +340,19 @@ game::interface::makeIteratorValue(afl::base::Ptr<Game> game, int nr)
                 return afl::string::Format("Iterator(%d)", m_number);
             }
      private:
-        afl::base::Ptr<game::Game> m_game;
+        afl::base::Ref<game::Game> m_game;
         int m_number;
     };
 
     if (game.get() == 0) {
         return 0;
     } else if (game->cursors().getTypeByNumber(nr) == 0) {
-        throw interpreter::Error::rangeError();
+        if (reportRangeError) {
+            throw interpreter::Error::rangeError();
+        } else {
+            return 0;
+        }
     } else {
-        return new IteratorContext(new NumberedIteratorProvider(game, nr));
+        return new IteratorContext(*new NumberedIteratorProvider(*game, nr));
     }
 }

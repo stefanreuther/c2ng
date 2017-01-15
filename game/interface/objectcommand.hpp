@@ -4,7 +4,7 @@
 #ifndef C2NG_GAME_INTERFACE_OBJECTCOMMAND_HPP
 #define C2NG_GAME_INTERFACE_OBJECTCOMMAND_HPP
 
-#include "interpreter/callablevalue.hpp"
+#include "interpreter/procedurevalue.hpp"
 #include "game/session.hpp"
 #include "game/map/object.hpp"
 #include "interpreter/process.hpp"
@@ -23,23 +23,16 @@ namespace game { namespace interface {
 
         FIXME: we must also keep the object alive, see bug #308.
         Alternatively, refer to the object by name somehow. */
-    class ObjectCommand : public interpreter::CallableValue {
+    class ObjectCommand : public interpreter::ProcedureValue {
      public:
         typedef void (*Function_t)(game::Session&, game::map::Object&, interpreter::Process&, interpreter::Arguments&);
 
         ObjectCommand(game::Session& session, game::map::Object& obj, Function_t func);
         ~ObjectCommand();
 
-        // CallableValue:
-        virtual void call(interpreter::Process& proc, afl::data::Segment& args, bool wantResult);
-        virtual bool isProcedureCall();
-        virtual int32_t getDimension(int32_t which);
-        virtual interpreter::Context* makeFirstContext();
+        // ProcedureValue:
+        virtual void call(interpreter::Process& proc, interpreter::Arguments& args);
         virtual ObjectCommand* clone() const;
-
-        // BaseValue:
-        virtual String_t toString(bool readable) const;
-        virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, interpreter::SaveContext* ctx) const;
 
      private:
         game::Session& m_session;
@@ -49,7 +42,9 @@ namespace game { namespace interface {
     };
 
     void IFObjMark(game::Session& session, game::map::Object& obj, interpreter::Process& proc, interpreter::Arguments& args);
+    void IFObjMark(game::map::Object& obj, interpreter::Arguments& args);
     void IFObjUnmark(game::Session& session, game::map::Object& obj, interpreter::Process& proc, interpreter::Arguments& args);
+    void IFObjUnmark(game::map::Object& obj, interpreter::Arguments& args);
 
 } }
 

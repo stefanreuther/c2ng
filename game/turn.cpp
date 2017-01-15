@@ -9,11 +9,51 @@ game::Turn::Turn()
     : m_universe(),
       m_extras(),
       m_inbox(),
-      m_battles()
+      m_battles(),
+      m_turnNumber(0),
+      m_databaseTurnNumber(0),
+      m_timestamp()
 { }
 
 game::Turn::~Turn()
 { }
+
+void
+game::Turn::setTurnNumber(int turnNumber)
+{
+    m_turnNumber = turnNumber;
+}
+
+int
+game::Turn::getTurnNumber() const
+{
+    return m_turnNumber;
+}
+
+void
+game::Turn::setDatabaseTurnNumber(int turnNumber)
+{
+    m_databaseTurnNumber = turnNumber;
+}
+
+int
+game::Turn::getDatabaseTurnNumber() const
+{
+    // ex GGameTurn::getDatabaseTurn
+    return m_databaseTurnNumber;
+}
+
+void
+game::Turn::setTimestamp(const Timestamp& ts)
+{
+    m_timestamp = ts;
+}
+
+game::Timestamp
+game::Turn::getTimestamp() const
+{
+    return m_timestamp;
+}
 
 game::map::Universe&
 game::Turn::universe()

@@ -57,8 +57,10 @@ namespace ui { namespace widgets {
         // Widget virtuals:
         virtual void draw(gfx::Canvas& can);
         virtual void handleStateChange(State st, bool enable);
+        // virtual void handlePositionChange(gfx::Rectangle& oldPosition); --> child
         // virtual ui::layout::Info getLayoutInfo() const; --> child
-        virtual bool handleKey(util::Key_t key, int prefix);
+        // virtual bool handleKey(util::Key_t key, int prefix);
+        bool defaultHandleKey(util::Key_t key, int prefix);
         virtual bool handleMouse(gfx::Point pt, MouseButtons_t pressedButtons);
 
         void setFlag(Flag flag, bool enable);

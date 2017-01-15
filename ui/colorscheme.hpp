@@ -82,12 +82,12 @@ namespace ui {
 
     extern const gfx::ColorQuad_t STANDARD_COLORS[Color_Avail];
 
-    class ColorScheme : public gfx::ColorScheme {
+    class ColorScheme : public gfx::ColorScheme<uint8_t> {
      public:
         ColorScheme();
         virtual ~ColorScheme();
-        virtual gfx::Color_t getColor(uint32_t index);
-        virtual void drawBackground(gfx::Context& ctx, const gfx::Rectangle& area);
+        virtual gfx::Color_t getColor(uint8_t index);
+        virtual void drawBackground(gfx::Canvas& can, const gfx::Rectangle& area);
 
         void init(gfx::Canvas& can);
 

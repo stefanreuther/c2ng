@@ -27,7 +27,7 @@ namespace game { namespace v3 {
 
         virtual PlayerStatusSet_t getPlayerStatus(int player, String_t& extra, afl::string::Translator& tx) const;
 
-        virtual void loadCurrentTurn(Turn& turn, Game& game, int player, Root& root);
+        virtual void loadCurrentTurn(Turn& turn, Game& game, int player, Root& root, Session& session);
 
         virtual void getHistoryStatus(int player, int turn, afl::base::Memory<HistoryStatus> status, const Root& root);
 

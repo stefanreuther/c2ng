@@ -350,17 +350,19 @@ game::vcr::classic::Battle::createAlgorithmForType(Type type,
 {
     // ex GClassicVcrEntry::createPlayerForType
     // NOTE: caller must call setCapabilities!
+    const game::spec::BeamVector_t& beams = shipList.beams();
+    const game::spec::TorpedoVector_t& launchers = shipList.launchers();
     switch (type) {
      case Host:
-        return new HostAlgorithm(false, vis, config, shipList);
+        return new HostAlgorithm(false, vis, config, beams, launchers);
      case NuHost:
-        return new HostAlgorithm(true, vis, config, shipList);
+        return new HostAlgorithm(true, vis, config, beams, launchers);
      case PHost4:
-        return new PVCRAlgorithm(true, vis, config, shipList);
+        return new PVCRAlgorithm(true, vis, config, beams, launchers);
      case PHost3:
-        return new PVCRAlgorithm(true, vis, config, shipList);
+        return new PVCRAlgorithm(true, vis, config, beams, launchers);
      case PHost2:
-        return new PVCRAlgorithm(false, vis, config, shipList);
+        return new PVCRAlgorithm(false, vis, config, beams, launchers);
      case Unknown:
      case UnknownPHost:
         break;

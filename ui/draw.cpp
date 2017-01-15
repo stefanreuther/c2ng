@@ -113,7 +113,7 @@ const ui::WindowStyle ui::GREEN_WINDOW      = { "wingreen", GRAY_COLOR_SET };
 //     to give the effect of a 3D raised panel. */
 // Precondition: ctx prepared with a ui::ColorScheme
 void
-ui::drawFrameUp(gfx::Context& ctx, gfx::Rectangle r)
+ui::drawFrameUp(gfx::Context<uint8_t>& ctx, gfx::Rectangle r)
 {
     // ex ui/util.h:drawFrameUp
     int x2 = r.getRightX() - 1;
@@ -131,7 +131,7 @@ ui::drawFrameUp(gfx::Context& ctx, gfx::Rectangle r)
 //     to give the effect of a 3D lowered panel. */
 // Precondition: ctx prepared with a ui::ColorScheme
 void
-ui::drawFrameDown(gfx::Context& ctx, gfx::Rectangle r)
+ui::drawFrameDown(gfx::Context<uint8_t>& ctx, gfx::Rectangle r)
 {
     // ex ui/util.h:drawFrameDown
     int x2 = r.getRightX() - 1;
@@ -151,7 +151,7 @@ ui::drawFrameDown(gfx::Context& ctx, gfx::Rectangle r)
 //     screen) */
 // Precondition: ctx prepared with a ui::ColorScheme.
 void
-ui::drawWindow(gfx::Context& ctx,
+ui::drawWindow(gfx::Context<uint8_t>& ctx,
                const gfx::Rectangle& extent,
                gfx::ResourceProvider& provider,
                const WindowStyle& style,
@@ -180,13 +180,11 @@ ui::drawWindow(gfx::Context& ctx,
                                 extent.getWidth() - 8, extent.getHeight() - 28),
                  style.colors[SkinColor::Background]);
 
-    afl::base::Ptr<gfx::Font> font(provider.getFont(gfx::FontRequest().addSize(1)));
-    if (font.get() != 0) {
-        ctx.setColor(Color_White);
-        ctx.setTextAlign(1, 0);
-        ctx.useFont(*font);
-        gfx::outTextF(ctx, Point(extent.getLeftX() + extent.getWidth()/2, extent.getTopY() + 2), extent.getWidth(), name);
-    }
+    afl::base::Ref<gfx::Font> font(provider.getFont(gfx::FontRequest().addSize(1)));
+    ctx.setColor(Color_White);
+    ctx.setTextAlign(1, 0);
+    ctx.useFont(*font);
+    gfx::outTextF(ctx, Point(extent.getLeftX() + extent.getWidth()/2, extent.getTopY() + 2), extent.getWidth(), name);
 }
 
 namespace {
@@ -255,7 +253,7 @@ namespace {
 //     \param flags      Style flags (bf_XXX, st_XXX) */
 // Precondition: ctx has appropriate font, and a ui::ColorScheme, and text alignment
 void
-ui::drawButton(gfx::Context& ctx,
+ui::drawButton(gfx::Context<uint8_t>& ctx,
                const gfx::Rectangle& extent,
                ButtonFlags_t flags,
                Widget::States_t state,
@@ -325,7 +323,7 @@ ui::drawButton(gfx::Context& ctx,
 }
 
 void
-ui::prepareHighContrastListItem(gfx::Context& ctx, gfx::Rectangle area, ui::widgets::AbstractListbox::ItemState state)
+ui::prepareHighContrastListItem(gfx::Context<util::SkinColor::Color>& ctx, gfx::Rectangle area, ui::widgets::AbstractListbox::ItemState state)
 {
     // ex UIListbox::prepareEntry (part 1)
     switch (state) {
@@ -353,7 +351,7 @@ ui::prepareHighContrastListItem(gfx::Context& ctx, gfx::Rectangle area, ui::widg
 }
 
 void
-ui::prepareColorListItem(gfx::Context& ctx, gfx::Rectangle area, ui::widgets::AbstractListbox::ItemState state, ColorScheme& uiColors, afl::base::Deleter& h)
+ui::prepareColorListItem(gfx::Context<util::SkinColor::Color>& ctx, gfx::Rectangle area, ui::widgets::AbstractListbox::ItemState state, ColorScheme& uiColors, afl::base::Deleter& h)
 {
     // ex UIListbox::prepareEntry (part 2)
     // CursorlessColorStyle means: use PassiveItem instead of ActiveItem/FocusedItem

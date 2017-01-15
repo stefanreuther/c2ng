@@ -203,6 +203,8 @@ gfx::sdl::Engine::Engine(afl::sys::LogListener& log)
       m_lastClickPosition(),
       m_buttonPressed(false),
       m_doubleClickDelay(1000 / 3),
+      m_runnableSemaphore(0),
+      m_lastWasRunnable(false),
       m_timerQueue(),
       m_taskMutex(),
       m_taskQueue()
@@ -245,7 +247,7 @@ gfx::sdl::Engine::~Engine()
     SDL_QuitSubSystem(SDL_INIT_VIDEO | SDL_INIT_TIMER);
 }
 
-afl::base::Ptr<gfx::Canvas>
+afl::base::Ref<gfx::Canvas>
 gfx::sdl::Engine::createWindow(int width, int height, int bpp, WindowFlags_t flags)
 {
     int sdlFlags = 0;
@@ -288,10 +290,10 @@ gfx::sdl::Engine::createWindow(int width, int height, int bpp, WindowFlags_t fla
         }
     }
 
-    return m_window;
+    return *m_window;
 }
 
-afl::base::Ptr<gfx::Canvas>
+afl::base::Ref<gfx::Canvas>
 gfx::sdl::Engine::loadImage(afl::io::Stream& file)
 {
     StreamInterface iface(file);
@@ -305,7 +307,7 @@ gfx::sdl::Engine::loadImage(afl::io::Stream& file)
     if (!sfc) {
         throw afl::except::FileFormatException(file, SDL_GetError());
     }
-    return new Surface(sfc, true);
+    return *new Surface(sfc, true);
 }
 
 // /** Get Event from Queue. Fetches one event and returns it in
@@ -327,6 +329,21 @@ gfx::sdl::Engine::handleEvent(EventConsumer& consumer, bool relativeMouseMovemen
     // Update mouse grab
     setMouseGrab(relativeMouseMovement);
 
+    // Performance hack.
+    // SDL runs at 100 Hz. This means that a task that posts Runnables in lock-step mode
+    // (i.e. a new Runnable is posted after the previous one confirmed)
+    // will get a throughput of at best 100 operations per second.
+    // Building a scripted dialog will need several dozen actions, leading to noticeable delays.
+    // If we know the last event was a Runnable, we therefore anticipate that the next one will be one, too.
+    // Sleeping a little will give the other side time to prepare their event.
+    // Posting a Runnable will post the semaphore, interrupting the wait.
+    // This improves throughput good enough such that constructing a dialog such as
+    // "CCUI.Ship.SetExtendedMission" no longer leads to a noticeable delay.
+    if (m_lastWasRunnable) {
+        m_runnableSemaphore.wait(5);
+        m_lastWasRunnable = false;
+    }
+
     // Wait for event to arrive
     SDL_Event ev;
     while (1) {
@@ -340,7 +357,7 @@ gfx::sdl::Engine::handleEvent(EventConsumer& consumer, bool relativeMouseMovemen
         } else {
             // Not-so-easy case: wait until we have an event.
             // SDL-1.2 has no SDL_WaitEventTimeout, so we do a delay loop.
-            // This is less crappy than it sounds because SDL ultimately does the same in its SDL_WaitEvent.
+            // This is the same thing that SDL does internally, i.e. SDL doesn't have internal super powers.
             uint32_t start = afl::sys::Time::getTickCounter();
             uint32_t elapsed = 0;
             bool eventStatus = false;
@@ -368,7 +385,7 @@ gfx::sdl::Engine::dispatcher()
     return *this;
 }
 
-afl::base::Ptr<gfx::Timer>
+afl::base::Ref<gfx::Timer>
 gfx::sdl::Engine::createTimer()
 {
     return m_timerQueue.createTimer();
@@ -407,6 +424,7 @@ bool
 gfx::sdl::Engine::convertEvent(const SDL_Event& se, gfx::EventConsumer& consumer, bool infinite)
 {
     // ex ui/event.cc:convertEvent
+    m_lastWasRunnable = false;
     switch(se.type) {
      case SDL_KEYDOWN: {
         uint32_t u = se.key.keysym.unicode;
@@ -521,6 +539,7 @@ gfx::sdl::Engine::convertEvent(const SDL_Event& se, gfx::EventConsumer& consumer
         //     return true;
 
      case SDL_WAKE_EVENT:
+        m_lastWasRunnable = true;
         processTaskQueue();
         return true;
 
@@ -567,34 +586,38 @@ gfx::sdl::Engine::handleMouse(EventConsumer& consumer, const SDL_MouseButtonEven
 void
 gfx::sdl::Engine::postNewRunnable(afl::base::Runnable* p)
 {
+    // Make sure to post only non-null runnables.
+    // Each Runnable will be accompanied by a single SDL_WAKE_EVENT.
     if (p != 0) {
         afl::sys::MutexGuard g(m_taskMutex);
         m_taskQueue.pushBackNew(p);
-        if (m_taskQueue.size() == 1) {
-            SDL_Event event;
-            event.type = SDL_WAKE_EVENT;
-            event.user.code = 0;
-            event.user.data1 = 0;
-            event.user.data2 = 0;
-            SDL_PushEvent(&event);
-        }
+
+        SDL_Event event;
+        event.type = SDL_WAKE_EVENT;
+        event.user.code = 0;
+        event.user.data1 = 0;
+        event.user.data2 = 0;
+        SDL_PushEvent(&event);
+        m_runnableSemaphore.post();
     }
 }
 
 void
 gfx::sdl::Engine::processTaskQueue()
 {
-    // FIXME: this probably needs to be changed because we must allow recursion!
-    // Swap out old task queue
-    afl::container::PtrVector<afl::base::Runnable> q;
+    // Process precisely one Runnable.
+    // Processing the Runnable may spawn a new event loop.
+    // If we were using the "swap whole list and process everything" optimisation here,
+    // events posted before the spawn would be held up.
+    m_runnableSemaphore.wait(0);
+    std::auto_ptr<afl::base::Runnable> t;
     {
         afl::sys::MutexGuard g(m_taskMutex);
-        m_taskQueue.swap(q);
+        t.reset(m_taskQueue.extractFront());
     }
 
-    // Process task queue
-    for (size_t i = 0, n = q.size(); i < n; ++i) {
-        q[i]->run();
+    if (t.get() != 0) {
+        t->run();
     }
 }
 

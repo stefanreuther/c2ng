@@ -65,7 +65,7 @@ namespace client { namespace dialogs {
         client::widgets::TurnListbox m_list;
         ui::EventLoop m_loop;
 
-        afl::base::Ptr<gfx::Timer> m_activationTimer;
+        afl::base::Ref<gfx::Timer> m_activationTimer;
         bool m_pendingActivation;
 
         void onOK();

@@ -32,15 +32,12 @@ void
 client::map::Widget::draw(gfx::Canvas& can)
 {
     // Background
-    {
-        gfx::Context ctx(can);
-        m_root.getColorScheme().drawBackground(ctx, getExtent());
-    }
+    m_root.colorScheme().drawBackground(can, getExtent());
 
     // Map
     {
         gfx::ClipFilter clip(can, getExtent());
-        m_renderer.draw(clip, m_root.colorScheme());
+        m_renderer.draw(clip, m_root.colorScheme(), m_root.provider());
     }
 }
 

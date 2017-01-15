@@ -215,7 +215,7 @@ TestGameVcrClassicHostAlgorithm::testFirst()
     initShipList(list);
 
     // First fight
-    game::vcr::classic::HostAlgorithm testee(false, vis, config, list);
+    game::vcr::classic::HostAlgorithm testee(false, vis, config, list.beams(), list.launchers());
     game::vcr::Object left(convertObject(battles[0].object[0]));
     game::vcr::Object right(convertObject(battles[0].object[1]));
     uint16_t seed = battles[0].seed;
@@ -255,7 +255,7 @@ TestGameVcrClassicHostAlgorithm::testSecond()
     initShipList(list);
 
     // Second fight
-    game::vcr::classic::HostAlgorithm testee(false, vis, config, list);
+    game::vcr::classic::HostAlgorithm testee(false, vis, config, list.beams(), list.launchers());
     game::vcr::Object left(convertObject(battles[1].object[0]));
     game::vcr::Object right(convertObject(battles[1].object[1]));
     uint16_t seed = battles[1].seed;
@@ -295,7 +295,7 @@ TestGameVcrClassicHostAlgorithm::testLast()
     initShipList(list);
 
     // Final recording (ship/planet)
-    game::vcr::classic::HostAlgorithm testee(false, vis, config, list);
+    game::vcr::classic::HostAlgorithm testee(false, vis, config, list.beams(), list.launchers());
     game::vcr::Object left(convertObject(battles[16].object[0]));
     game::vcr::Object right(convertObject(battles[16].object[1]));
     uint16_t seed = battles[16].seed;
@@ -335,7 +335,7 @@ TestGameVcrClassicHostAlgorithm::testDeadFire()
     initShipList(list);
 
     // "Deadfire" fight (carrier/carrier fight)
-    game::vcr::classic::HostAlgorithm testee(false, vis, config, list);
+    game::vcr::classic::HostAlgorithm testee(false, vis, config, list.beams(), list.launchers());
     game::vcr::Object left(convertObject(battles[17].object[0]));
     game::vcr::Object right(convertObject(battles[17].object[1]));
     uint16_t seed = battles[17].seed;

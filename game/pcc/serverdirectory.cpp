@@ -19,7 +19,7 @@
 class game::pcc::ServerDirectory::Entry : public afl::io::DirectoryEntry {
  public:
     // Construct from container and JSON data (existing files)
-    Entry(afl::base::Ptr<ServerDirectory> container, afl::data::Access data)
+    Entry(afl::base::Ref<ServerDirectory> container, afl::data::Access data)
         : m_container(container),
           m_title(data("name").toString()),
           m_url()
@@ -37,7 +37,7 @@ class game::pcc::ServerDirectory::Entry : public afl::io::DirectoryEntry {
         }
 
     // Construct from container and name (nonexistant files)
-    Entry(afl::base::Ptr<ServerDirectory> container, String_t title)
+    Entry(afl::base::Ref<ServerDirectory> container, String_t title)
         : m_container(container),
           m_title(title),
           m_url()
@@ -54,7 +54,7 @@ class game::pcc::ServerDirectory::Entry : public afl::io::DirectoryEntry {
         { return String_t(); }
 
     // Open as file. For now, we can only open for reading, and download the file completely.
-    afl::base::Ptr<afl::io::Stream> openFile(afl::io::FileSystem::OpenMode mode)
+    afl::base::Ref<afl::io::Stream> openFile(afl::io::FileSystem::OpenMode mode)
         {
             if (getFileType() != tFile) {
                 throw afl::except::FileProblemException(m_title, afl::string::Messages::fileNotFound());
@@ -77,7 +77,7 @@ class game::pcc::ServerDirectory::Entry : public afl::io::DirectoryEntry {
             }
 
             // Create InternalStream object for user to work with
-            afl::base::Ptr<afl::io::InternalStream> s(new afl::io::InternalStream());
+            afl::base::Ref<afl::io::InternalStream> s(*new afl::io::InternalStream());
             s->setName(m_title);
             s->write(listener.getResponseData());
             s->setPos(0);
@@ -85,19 +85,19 @@ class game::pcc::ServerDirectory::Entry : public afl::io::DirectoryEntry {
         }
 
     // Open as directory.
-    afl::base::Ptr<afl::io::Directory> openDirectory()
+    afl::base::Ref<afl::io::Directory> openDirectory()
         {
             if (getFileType() == tDirectory) {
-                return new ServerDirectory(m_container->m_handler,
-                                           m_container->m_account,
-                                           afl::string::PosixFileNames().makePathName(m_container->m_name, m_title));
+                return *new ServerDirectory(m_container->m_handler,
+                                            m_container->m_account,
+                                            afl::string::PosixFileNames().makePathName(m_container->m_name, m_title));
             } else {
                 throw afl::except::FileProblemException(m_title, afl::string::Messages::fileNotFound());
             }
         }
 
     // Open container.
-    afl::base::Ptr<afl::io::Directory> openContainingDirectory()
+    afl::base::Ref<afl::io::Directory> openContainingDirectory()
         { return m_container; }
 
     // Update info. All available info has been provided in the constructor, so nothing to do here.
@@ -117,7 +117,7 @@ class game::pcc::ServerDirectory::Entry : public afl::io::DirectoryEntry {
         { throw afl::except::FileProblemException(m_title, afl::string::Messages::cannotWrite()); }
 
  private:
-    afl::base::Ptr<ServerDirectory> m_container;
+    afl::base::Ref<ServerDirectory> m_container;
     String_t m_title;
     String_t m_url;
 };
@@ -137,7 +137,7 @@ game::pcc::ServerDirectory::ServerDirectory(BrowserHandler& handler,
 game::pcc::ServerDirectory::~ServerDirectory()
 { }
 
-afl::base::Ptr<afl::io::DirectoryEntry>
+afl::base::Ref<afl::io::DirectoryEntry>
 game::pcc::ServerDirectory::getDirectoryEntryByName(String_t name)
 {
     // Load content
@@ -146,15 +146,15 @@ game::pcc::ServerDirectory::getDirectoryEntryByName(String_t name)
     // If there is a matching directory entry, use that
     for (size_t i = 0, n = m_entries->size(); i < n; ++i) {
         if ((*m_entries)[i]->getTitle() == name) {
-            return (*m_entries)[i];
+            return *(*m_entries)[i];
         }
     }
 
     // Mone found; make empty one
-    return new Entry(this, name);
+    return *new Entry(*this, name);
 }
 
-afl::base::Ptr<afl::base::Enumerator<afl::base::Ptr<afl::io::DirectoryEntry> > >
+afl::base::Ref<afl::base::Enumerator<afl::base::Ptr<afl::io::DirectoryEntry> > >
 game::pcc::ServerDirectory::getDirectoryEntries()
 {
     // Load the directory listing and provide it to user from memory.
@@ -179,7 +179,7 @@ game::pcc::ServerDirectory::getDirectoryEntries()
     };
 
     load();
-    return new Enum(m_entries);
+    return *new Enum(m_entries);
 }
 
 afl::base::Ptr<afl::io::Directory>
@@ -220,7 +220,7 @@ game::pcc::ServerDirectory::load()
     afl::data::Access a(content);
     if (a("result").toInteger()) {
         for (size_t i = 0, n = a("reply").getArraySize(); i < n; ++i) {
-            m_entries->push_back(new Entry(this, a("reply")[i]));
+            m_entries->push_back(new Entry(*this, a("reply")[i]));
         }
     } else {
         String_t error = a("error").toString();

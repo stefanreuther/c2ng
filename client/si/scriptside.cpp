@@ -14,36 +14,18 @@
 #include "interpreter/memorycommandsource.hpp"
 #include "interpreter/statementcompiler.hpp"
 #include "interpreter/values.hpp"
+#include "afl/sys/semaphore.hpp"
 
 using interpreter::makeBooleanValue;
 
 client::si::ScriptSide::ScriptSide(util::RequestSender<UserSide> reply)
     : conn_processGroupFinish(),
       m_reply(reply),
-      m_procedures(),
       m_waits()
 { }
 
 client::si::ScriptSide::~ScriptSide()
-{
-    for (std::set<ScriptProcedure*>::iterator it = m_procedures.begin(), e = m_procedures.end(); it != e; ++it) {
-        (**it).setScriptSide(0);
-    }
-}
-
-void
-client::si::ScriptSide::addProcedure(ScriptProcedure* p)
-{
-    if (p != 0) {
-        m_procedures.insert(p);
-    }
-}
-
-void
-client::si::ScriptSide::removeProcedure(ScriptProcedure* p)
-{
-    m_procedures.erase(p);
-}
+{ }
 
 void
 client::si::ScriptSide::executeCommandWait(uint32_t id, game::Session& session, String_t command, bool verbose, String_t name, std::auto_ptr<ContextProvider> ctxp)
@@ -58,7 +40,7 @@ client::si::ScriptSide::executeCommandWait(uint32_t id, game::Session& session, 
     interpreter::Process& proc = processList.create(session.world(), name);
 
     // Create BCO
-    interpreter::BCORef_t bco = new interpreter::BytecodeObject();
+    interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
     if (ctxp.get() != 0) {
         ctxp->createContext(session, proc);
     }
@@ -103,6 +85,14 @@ client::si::ScriptSide::executeCommandWait(uint32_t id, game::Session& session, 
     processList.startProcessGroup(pgid);
 
     // Execute
+    runProcesses(session);
+}
+
+void
+client::si::ScriptSide::executeProcessGroupWait(uint32_t id, uint32_t pgid, game::Session& session)
+{
+    m_waits.push_back(Wait(id, pgid, 0, false, false));
+    session.world().processList().startProcessGroup(pgid);
     runProcesses(session);
 }
 
@@ -162,6 +152,79 @@ client::si::ScriptSide::postNewTask(RequestLink1 link, UserTask* t)
     std::auto_ptr<UserTask> tt(t);
     m_reply.postNewRequest(new Proxy(tt, link));
     link.getProcess().suspendForUI();
+}
+
+util::RequestSender<client::si::UserSide>
+client::si::ScriptSide::sender()
+{
+    return m_reply;
+}
+
+void
+client::si::ScriptSide::call(UserCall& t)
+{
+    class Proxy : public util::Request<UserSide> {
+     public:
+        Proxy(UserCall& t, afl::sys::Semaphore& result, std::auto_ptr<interpreter::Error>& error)
+            : m_task(t),
+              m_result(result),
+              m_error(error)
+            { }
+        ~Proxy()
+            { m_result.post(); }
+        void handle(UserSide& ui)
+            {
+                try {
+                    ui.processCall(m_task);
+                }
+                catch (interpreter::Error& e) {
+                    m_error.reset(new interpreter::Error(e));
+                }
+                catch (std::exception& e) {
+                    m_error.reset(new interpreter::Error(e.what()));
+                }
+            }
+     private:
+        UserCall& m_task;
+        afl::sys::Semaphore& m_result;
+        std::auto_ptr<interpreter::Error>& m_error;
+    };
+
+    afl::sys::Semaphore result(0);
+    std::auto_ptr<interpreter::Error> error;
+    m_reply.postNewRequest(new Proxy(t, result, error));
+    result.wait();
+    if (error.get() != 0) {
+        throw *error;
+    }
+}
+
+void
+client::si::ScriptSide::callAsyncNew(UserCall* t)
+{
+    class Proxy : public util::Request<UserSide> {
+     public:
+        Proxy(std::auto_ptr<UserCall>& t)
+            : m_task(t)
+            { }
+        ~Proxy()
+            { }
+        void handle(UserSide& ui)
+            {
+                try {
+                    ui.processCall(*m_task);
+                }
+                catch (std::exception& e) {
+                    // boom.
+                    // FIXME: log it?
+                }
+            }
+     private:
+        std::auto_ptr<UserCall> m_task;
+    };
+
+    std::auto_ptr<UserCall> tt(t);
+    m_reply.postNewRequest(new Proxy(tt));
 }
 
 void
@@ -259,8 +322,6 @@ client::si::ScriptSide::runProcesses(game::Session& session)
 void
 client::si::ScriptSide::init(game::Session& session)
 {
-    // ex int/if/guiif.cc:initInterpreterGuiInterface
-
     class Relay : public afl::base::Closure<void(uint32_t)> {
      public:
         Relay(game::Session& session, ScriptSide& self)
@@ -275,13 +336,6 @@ client::si::ScriptSide::init(game::Session& session)
         ScriptSide& m_self;
     };
     conn_processGroupFinish = session.world().processList().sig_processGroupFinish.addNewClosure(new Relay(session, *this));
-
-    // Values
-    /* @q System.GUI:Bool (Global Property)
-       Graphical interface flag.
-       True if PCC is running with graphical interface, False if it is running in console mode. */
-    session.world().setNewGlobalValue("SYSTEM.GUI", makeBooleanValue(true));
-    // defineGlobalValue("LISTBOX",        new IntSimpleIndexableValue(0, IFListbox,           0));
 
     // IntExecutionContext::setBreakHandler(checkBreak);
 }
@@ -334,7 +388,8 @@ client::si::ScriptSide::onProcessGroupFinish(game::Session& session, uint32_t pg
                 break;
 
              case interpreter::Process::Failed:
-                session.logError(e);
+                // See below.
+                // session.logError(e);
                 break;
             }
             handleWait(w.waitId, w.process->getState(), e);
@@ -342,6 +397,18 @@ client::si::ScriptSide::onProcessGroupFinish(game::Session& session, uint32_t pg
             handleWait(w.waitId, interpreter::Process::Terminated, interpreter::Error(""));
         }
     }
+
+    // FIXME: is this right here? This is a stopgap measure to see failing scripts.
+    // There should be a more specific reporting of failing scripts (e.g. to tell a tile updater that its command failed.)
+    const interpreter::ProcessList::Vector_t& processes = session.world().processList().getProcessList();
+    for (size_t i = 0, n = processes.size(); i < n; ++i) {
+        if (interpreter::Process* p = processes[i]) {
+            if (p->getProcessGroupId() == pgid && p->getState() == interpreter::Process::Failed) {
+                session.logError(p->getError());
+            }
+        }
+    }
+
     session.notifyListeners();
 }
 

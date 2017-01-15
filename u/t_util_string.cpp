@@ -168,3 +168,49 @@ TestUtilString::testParsePlayer()
     TS_ASSERT(util::parsePlayerCharacter('X', id));
     TS_ASSERT_EQUALS(id, 33);
 }
+
+void
+TestUtilString::testFormatOptions()
+{
+    // Trivial cases
+    TS_ASSERT_EQUALS(util::formatOptions(""),          "");
+    TS_ASSERT_EQUALS(util::formatOptions("-a\tfoo\n"), "  -a   foo\n");
+
+    // Not-so-trivial cases
+    TS_ASSERT_EQUALS(util::formatOptions("-a\tfoo\n"
+                                         "-foo\tbar\n"
+                                         "-bar\tbaz\n"
+                                         "-help\thelp!\n"),
+                     "  -a      foo\n"
+                     "  -foo    bar\n"
+                     "  -bar    baz\n"
+                     "  -help   help!\n");
+    TS_ASSERT_EQUALS(util::formatOptions("Heading:\n"
+                                         "-option\tinfo\n"
+                                         "\n"
+                                         "Another heading:\n"
+                                         "-more\toption\n"),
+                     "Heading:\n"
+                     "  -option   info\n"
+                     "\n"
+                     "Another heading:\n"
+                     "  -more     option\n");
+
+    TS_ASSERT_EQUALS(util::formatOptions("-foo\twhoops, forgot the newline"),
+                     "  -foo   whoops, forgot the newline");
+
+    TS_ASSERT_EQUALS(util::formatOptions("-foo\tfirst line\n\tsecond line\n"),
+                     "  -foo   first line\n"
+                     "         second line\n");
+}
+
+/** Test util::formatName. */
+void
+TestUtilstring::testFormatName()
+{
+    TS_ASSERT_EQUALS(util::formatName("FOO"), "Foo");
+    TS_ASSERT_EQUALS(util::formatName("FOO.BAR"), "Foo.Bar");
+    TS_ASSERT_EQUALS(util::formatName("LOC.X"), "Loc.X");
+    TS_ASSERT_EQUALS(util::formatName("CC$FOO"), "Cc$Foo");
+    TS_ASSERT_EQUALS(util::formatName("AA3BB"), "Aa3Bb");
+}

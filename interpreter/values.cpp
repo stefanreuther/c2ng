@@ -76,31 +76,57 @@ interpreter::makeOptionalStringValue(const afl::base::Optional<String_t>& value)
     in a boolean context in a program.
     \retval -1 Input is EMPTY
     \retval 0  Input is False
-    \retval +1 Input is True */
+    \retval +1 Input is True
+    \change PCC2 <= 2.0.1 treats non-scalars as empty. We treat non-scalars as true. */
 int
-interpreter::getBooleanValue(afl::data::Value* value)
+interpreter::getBooleanValue(const afl::data::Value* value)
 {
-    // FIXME: what should this return for values that are neither int, nor float, nor string?
-    // Right now, it makes them EMPTY, but should probably generate an error. However, generating
-    // EMPTY has the convenient property of making ubool/unot/uzap/unot2/uisempty operations
-    // never fail, which permits a number of useful optimisations.
-    // FIXME: use visitor?
-    // FIXME: const?
-    if (value == 0) {
-        return -1;
-    } else if (afl::data::ScalarValue* iv = dynamic_cast<afl::data::ScalarValue*>(value)) {
-        return iv->getValue() != 0;
-    } else if (afl::data::FloatValue* fv = dynamic_cast<afl::data::FloatValue*>(value)) {
-        return std::fabs(fv->getValue()) > 1.0E-06;
-    } else if (afl::data::StringValue* sv = dynamic_cast<afl::data::StringValue*>(value)) {
-        return sv->getValue().size() != 0;
-    } else {
-        return -1;
-    }
+    // What should this return for values that are neither int, nor float, nor string?
+    // In PCC2 up to 2.0.1, we produced EMPTY which means out-of-range context accesses and correct accesses are indistinguishable
+    // unless you resort to hacks such as "Ships(ID_TO_TEST) # ''" (produces a string for valid Ids, EMPTY otherwise).
+    // Assuming that all non-empty values are somehow meaningful, it makes sense to treat them as true instead.
+    // This is also consistent with other scripting languages that treat object references as true (JavaScript, Perl, Python...).
+
+    // It is important to not generate an error.
+    // This the convenient property of making ubool/unot/uzap/unot2/uisempty operations never fail,
+    // which permits a number of useful optimisations.
+
+    // Using a visitor is cleaner and about 10% faster than using a dynamic_cast type switch.
+    class V : public afl::data::Visitor {
+     public:
+        V()
+            : m_result(0)
+            { }
+        virtual void visitString(const String_t& str)
+            { m_result = !str.empty(); }
+        virtual void visitInteger(int32_t iv)
+            { m_result = (iv != 0); }
+        virtual void visitFloat(double fv)
+            { m_result = (std::fabs(fv) > 1.0E-06); }
+        virtual void visitBoolean(bool bv)
+            { m_result = bv; }
+        virtual void visitHash(const afl::data::Hash& /*hv*/)
+            { m_result = 1; }
+        virtual void visitVector(const afl::data::Vector& /*vv*/)
+            { m_result = 1; }
+        virtual void visitOther(const afl::data::Value& /*other*/)
+            { m_result = 1; }
+        virtual void visitNull()
+            { m_result = -1; }
+        virtual void visitError(const String_t& /*source*/, const String_t& /*str*/)
+            { m_result = -1; }
+        int get() const
+            { return m_result; }
+     private:
+        int m_result;
+    };
+    V visi;
+    visi.visit(value);
+    return visi.get();
 }
 
 String_t
-interpreter::toString(afl::data::Value* value, bool readable)
+interpreter::toString(const afl::data::Value* value, bool readable)
 {
     class ToStringVisitor : public afl::data::Visitor {
      public:
@@ -124,17 +150,7 @@ interpreter::toString(afl::data::Value* value, bool readable)
             }
         virtual void visitFloat(double fv)
             {
-                // ex IntFloatValue::toString
-                String_t result = afl::string::Format("%f", fv);
-                if (result.find('.') != result.npos && result.find_first_of("Ee") == result.npos) {
-                    String_t::size_type cut = result.size();
-                    while (cut > 0 && result[cut-1] == '0')
-                        --cut;
-                    if (cut > 0 && result[cut-1] == '.')
-                        --cut;
-                    result.erase(cut);
-                }
-                m_result = result;
+                m_result = formatFloat(fv);
             }
         virtual void visitBoolean(bool bv)
             {
@@ -189,24 +205,44 @@ String_t
 interpreter::quoteString(const String_t& value)
 {
     // ex int/value.h:quoteString
-    if (value.find_first_of("\"\\") == value.npos) {
+    if (value.find_first_of("\"\\\n") == value.npos) {
         // No meta-characters, use unquoted double-quote string
         return "\"" + value + "\"";
-    } else if (value.find('\'') == value.npos) {
-        // Double-quotes or backslashes, but no apostrophes
+    } else if (value.find_first_of("\'\n") == value.npos) {
+        // Double-quotes or backslashes, but no apostrophes or newlines
         return "'" + value + "'";
     } else {
         // Sufficiently complicated, so add quotes.
         String_t output = "\"";
         String_t::size_type i = 0, j;
-        while (((j = value.find_first_of("\"\\", i)) != value.npos)) {
+        while (((j = value.find_first_of("\"\\\n", i)) != value.npos)) {
             output.append(value, i, j-i);
             output.append(1, '\\');
-            output.append(value, j, 1);
+            if (value[j] == '\n') {
+                output.append(1, 'n');
+            } else {
+                output.append(value, j, 1);
+            }
             i = j+1;
         }
         output.append(value, i, value.npos);
         output += "\"";
         return output;
     }
+}
+
+String_t
+interpreter::formatFloat(double value)
+{
+    // ex IntFloatValue::toString
+    String_t result = afl::string::Format("%f", value);
+    if (result.find('.') != result.npos && result.find_first_of("Ee") == result.npos) {
+        String_t::size_type cut = result.size();
+        while (cut > 0 && result[cut-1] == '0')
+            --cut;
+        if (cut > 0 && result[cut-1] == '.')
+            --cut;
+        result.erase(cut);
+    }
+    return result;
 }

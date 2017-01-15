@@ -9,20 +9,23 @@
 #include "afl/io/datasink.hpp"
 #include "afl/charset/charset.hpp"
 #include "afl/data/segment.hpp"
+#include "afl/data/namemap.hpp"
 
 namespace interpreter {
 
     class SaveContext;
+    class Context;
     class TagNode;
 
     /** Visitor to save a value.
         Values are serialized to an 48-bit tag node (see TagNode) plus an optional block of auxiliary information.
-        This class implements a visitor to save values.
+        A data segment consists of a sequence of tag nodes, followed by the concatenated auxiliary information.
+
+        This class implements a visitor to save values and segments in this format.
 
         SaveVisitor().visit() saves one object.
         Structured data (e.g. hashes) may contain multiple objects to resolve possibly-shared links between this data.
-        To resolve that, we need a SaveContext.
-        Plain data (e.g. object properties) can be saved directly using a null SaveContext. */
+        To resolve that, we need a SaveContext. */
     class SaveVisitor : public afl::data::Visitor {
      public:
         /** Constructor.
@@ -31,7 +34,7 @@ namespace interpreter {
             \param aux [out] Auxiliary data appended here
             \param cs [in] Character set
             \param ctx [in,optional] Save context to save structured data */
-        SaveVisitor(TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, SaveContext* ctx);
+        SaveVisitor(TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, SaveContext& ctx);
 
         // Visitor methods:
         virtual void visitString(const String_t& str);
@@ -52,13 +55,26 @@ namespace interpreter {
             \param ctx [in,optional] Save context to save structured data */
         static void save(afl::io::DataSink& out,
                          const afl::data::Segment& data, size_t slots,
-                         afl::charset::Charset& cs, SaveContext* ctx);
+                         afl::charset::Charset& cs, SaveContext& ctx);
+
+        /** Save contexts.
+            \param out [out] Data goes here
+            \param data [in] Data segment to save
+            \param cs [in] Character set
+            \param ctx [in,optional] Save context to save structured data */
+        // FIXME: here?
+        static void saveContexts(afl::io::DataSink& out,
+                                 const afl::container::PtrVector<interpreter::Context>& contexts,
+                                 afl::charset::Charset& cs, SaveContext& ctx);
+
+        // FIXME: here?
+        static void saveNames(afl::io::DataSink& out, const afl::data::NameMap& names, size_t slots, afl::charset::Charset& cs);
 
      private:
         TagNode& m_out;
         afl::io::DataSink& m_aux;
         afl::charset::Charset& m_charset;
-        SaveContext* m_pContext;
+        SaveContext& m_context;
     };
 
 }

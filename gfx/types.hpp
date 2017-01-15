@@ -47,12 +47,23 @@ namespace gfx {
      *  Operations
      */
 
-    /** Alpha mixing.
+    /** Alpha mixing for a single color component.
         \tparam T     value type
         \param a      background color
         \param b      color to write
         \param alpha  alpha value of color to write. */
     template<class T> T mixColorComponent(T a, T b, Alpha_t alpha);
+
+    /** Alpha mixing for a ColorQuad_t.
+        \param a      background color
+        \param b      color to write
+        \param alpha  alpha value of color to write. */
+    ColorQuad_t mixColor(ColorQuad_t a, ColorQuad_t b, Alpha_t alpha);
+
+    /** Adding two ColorQuad_t.
+        \param a      color 1
+        \param b      color 2. */
+    ColorQuad_t addColor(ColorQuad_t a, ColorQuad_t b);
 
     /** Get distance metric between two colors.
         \param x,y Colors
@@ -66,7 +77,7 @@ template<class T>
 inline T
 gfx::mixColorComponent(T a, T b, Alpha_t alpha)
 {
-    return a + ((b-a) * alpha >> 8);
+    return a + ((b-a) * alpha / 255);
 }
 
 #endif

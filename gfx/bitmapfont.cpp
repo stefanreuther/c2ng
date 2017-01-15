@@ -252,7 +252,7 @@ gfx::BitmapFont::load(afl::io::Stream& s, int index)
 
 // Font virtuals:
 void
-gfx::BitmapFont::outText(Context& ctx, Point pt, String_t text)
+gfx::BitmapFont::outText(BaseContext& ctx, Point pt, String_t text)
 {
     // ex GfxBitmapFont::outText
     afl::charset::Utf8Reader rdr(afl::string::toBytes(text), 0);

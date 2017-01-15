@@ -37,11 +37,11 @@ namespace interpreter {
         virtual void call(Process& proc, afl::data::Segment& args, bool want_result) = 0;
 
         /** Check syntactic form. */
-        virtual bool isProcedureCall() = 0;
+        virtual bool isProcedureCall() const = 0;
 
         /** Array reflection. Implementation of the IsArray() and Dim() builtins.
             \param which 0=get number of dimensions, 1..n=get that dimension */
-        virtual int32_t getDimension(int32_t which) = 0;
+        virtual int32_t getDimension(int32_t which) const = 0;
 
         /** Get context for first item in iteration. This should be equivalent to
             <tt>dynamic_cast<IntContext*>(call(exc, args))</tt>, where

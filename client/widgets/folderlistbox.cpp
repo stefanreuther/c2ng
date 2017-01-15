@@ -33,9 +33,7 @@ client::widgets::FolderListbox::isItemAccessible(size_t /*n*/)
 int
 client::widgets::FolderListbox::getItemHeight(size_t /*n*/)
 {
-    return m_font.get() != 0
-        ? m_font->getLineHeight()
-        : 1;
+    return m_font->getLineHeight();
 }
 
 int
@@ -56,8 +54,7 @@ client::widgets::FolderListbox::drawItem(gfx::Canvas& can, gfx::Rectangle area, 
 
     const Item* pItem = getItem(item);
 
-    gfx::Context ctx(can);
-    ctx.useColorScheme(getColorScheme());
+    gfx::Context<util::SkinColor::Color> ctx(can, getColorScheme());
     ctx.useFont(*m_font);
     if (pItem != 0 && pItem->indent != 0) {
         drawBackground(ctx, area.splitX(m_font->getEmWidth() * pItem->indent));
@@ -77,9 +74,13 @@ client::widgets::FolderListbox::drawItem(gfx::Canvas& can, gfx::Rectangle area, 
 ui::layout::Info
 client::widgets::FolderListbox::getLayoutInfo() const
 {
-    return m_font.get() != 0
-        ? m_cells.scaledBy(m_font->getCellSize())
-        : gfx::Point(1, 1);
+    return m_cells.scaledBy(m_font->getCellSize());
+}
+
+bool
+client::widgets::FolderListbox::handleKey(util::Key_t key, int prefix)
+{
+    return defaultHandleKey(key, prefix);
 }
 
 void

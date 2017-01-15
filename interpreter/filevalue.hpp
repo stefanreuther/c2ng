@@ -19,7 +19,7 @@ namespace interpreter {
 
         virtual String_t toString(bool readable) const;
         virtual FileValue* clone() const;
-        virtual void store(TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, SaveContext* ctx) const;
+        virtual void store(TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, SaveContext& ctx) const;
 
         /** Get integer value. */
         int32_t getFileNumber() const

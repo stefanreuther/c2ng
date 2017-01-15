@@ -13,7 +13,7 @@ ui::res::EngineImageLoader::loadImage(afl::io::Stream& in)
 {
     try {
         in.setPos(0);
-        return m_engine.loadImage(in);
+        return m_engine.loadImage(in).asPtr();
     }
     catch (...) {
         return 0;

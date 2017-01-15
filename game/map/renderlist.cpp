@@ -170,6 +170,43 @@ game::map::RenderList::drawMinefield(Point p, int id, int r, bool isWeb, Relatio
 }
 
 void
+game::map::RenderList::drawUserCircle(Point pt, int r, int color)
+{
+    addInstruction(riUserCircle);
+    addPointParameter(pt);
+    addParameter(r);
+    addParameter(color);
+}
+
+void
+game::map::RenderList::drawUserLine(Point a, Point b, int color)
+{
+    addInstruction(riUserLine);
+    addPointParameter(a);
+    addPointParameter(b);
+    addParameter(color);
+}
+
+void
+game::map::RenderList::drawUserRectangle(Point a, Point b, int color)
+{
+    addInstruction(riUserRectangle);
+    addPointParameter(a);
+    addPointParameter(b);
+    addParameter(color);
+}
+
+void
+game::map::RenderList::drawUserMarker(Point pt, int shape, int color, String_t label)
+{
+    addInstruction(riUserMarker);
+    addPointParameter(pt);
+    addParameter(shape);
+    addParameter(color);
+    addStringParameter(label);
+}
+
+void
 game::map::RenderList::addInstruction(Instruction ins)
 {
     m_lastInstruction = m_instructions.size();
@@ -268,6 +305,39 @@ game::map::RenderList::replay(RendererListener& listener) const
             int id, r, isWeb, rel;
             if (it.readPointParameter(p) && it.readParameter(id) && it.readParameter(r) && it.readParameter(isWeb) && it.readParameter(rel)) {
                 listener.drawMinefield(p, id, r, bool(isWeb), Relation_t(rel));
+            }
+            break;
+         }
+         case riUserCircle: {
+            Point p;
+            int r, color;
+            if (it.readPointParameter(p) && it.readParameter(r) && it.readParameter(color)) {
+                listener.drawUserCircle(p, r, color);
+            }
+            break;
+         }
+         case riUserLine: {
+            Point a, b;
+            int color;
+            if (it.readPointParameter(a) && it.readPointParameter(b) && it.readParameter(color)) {
+                listener.drawUserLine(a, b, color);
+            }
+            break;
+         }
+         case riUserRectangle: {
+            Point a, b;
+            int color;
+            if (it.readPointParameter(a) && it.readPointParameter(b) && it.readParameter(color)) {
+                listener.drawUserRectangle(a, b, color);
+            }
+            break;
+         }
+         case riUserMarker: {
+            Point p;
+            int shape, color;
+            String_t text;
+            if (it.readPointParameter(p) && it.readParameter(shape) && it.readParameter(color) && it.readStringParameter(text)) {
+                listener.drawUserMarker(p, shape, color, text);
             }
             break;
          }

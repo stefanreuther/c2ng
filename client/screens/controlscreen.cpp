@@ -19,17 +19,28 @@
 #include "client/objectobserverproxy.hpp"
 #include "client/tiles/selectionheadertile.hpp"
 #include "client/objectlistener.hpp"
+#include "afl/base/refcounted.hpp"
+#include "client/tiles/shipscreenheadertile.hpp"
+#include "client/tiles/tilefactory.hpp"
+#include "client/si/genericwidgetvalue.hpp"
+#include "client/si/widgetcommand.hpp"
+#include "interpreter/typehint.hpp"
+#include "client/si/widgetwrapper.hpp"
+#include "ui/prefixargument.hpp"
+#include "ui/layout/hbox.hpp"
+#include "ui/group.hpp"
+#include "ui/spacer.hpp"
 
 namespace {
 
-    struct ScreenState {
+    struct ScreenState : public afl::base::RefCounted {
         int screenNumber;
         client::si::OutputState::Target ownTarget;
     };
 
     class ScreenCursorFactory : public client::ObjectCursorFactory {
      public:
-        ScreenCursorFactory(afl::base::Ptr<ScreenState> state)
+        ScreenCursorFactory(afl::base::Ref<ScreenState> state)
             : m_state(state)
             { }
         virtual game::map::ObjectCursor* getCursor(game::Session& session)
@@ -46,34 +57,27 @@ namespace {
             }
      private:
         afl::base::Ptr<game::Game> m_game;
-        afl::base::Ptr<ScreenState> m_state;
+        afl::base::Ref<ScreenState> m_state;
     };
 
     class ScreenContextProvider : public client::si::ContextProvider {
      public:
-        ScreenContextProvider(afl::base::Ptr<ScreenState> state)
+        ScreenContextProvider(afl::base::Ref<ScreenState> state)
             : m_state(state)
             { }
         virtual void createContext(game::Session& session, interpreter::Process& proc)
             {
-                game::Game* g = session.getGame().get();
-                game::Root* r = session.getRoot().get();
-                game::spec::ShipList* sl = session.getShipList().get();
-                if (g != 0 && r != 0 && sl != 0 && m_state.get() != 0) {
-                    game::map::ObjectCursor* c = g->cursors().getCursorByNumber(m_state->screenNumber);
-                    if (c != 0) {
+                if (game::Game* g = session.getGame().get()) {
+                    if (game::map::ObjectCursor* c = g->cursors().getCursorByNumber(m_state->screenNumber)) {
                         game::map::Object* obj = c->getCurrentObject();
                         if (dynamic_cast<game::map::Ship*>(obj) != 0) {
-                            proc.pushNewContext(new game::interface::ShipContext(obj->getId(),
-                                                                                 session,
-                                                                                 session.getRoot(),
-                                                                                 session.getGame(),
-                                                                                 session.getShipList()));
+                            if (interpreter::Context* ctx = game::interface::ShipContext::create(obj->getId(), session)) {
+                                proc.pushNewContext(ctx);
+                            }
                         } else if (dynamic_cast<game::map::Planet*>(obj) != 0) {
-                            proc.pushNewContext(new game::interface::PlanetContext(obj->getId(),
-                                                                                   session,
-                                                                                   session.getRoot(),
-                                                                                   session.getGame()));
+                            if (interpreter::Context* ctx = game::interface::PlanetContext::create(obj->getId(), session)) {
+                                proc.pushNewContext(ctx);
+                            }
                         } else {
                             // FIXME?
                         }
@@ -81,14 +85,14 @@ namespace {
                 }
             }
      private:
-        afl::base::Ptr<ScreenState> m_state;
+        afl::base::Ref<ScreenState> m_state;
     };
 
     class ScreenUserInterfaceProperties : public util::SlaveObject<game::Session>,
                                           public game::interface::UserInterfacePropertyAccessor
     {
      public:
-        ScreenUserInterfaceProperties(afl::base::Ptr<ScreenState> state)
+        ScreenUserInterfaceProperties(afl::base::Ref<ScreenState> state)
             : m_pSession(0),
               m_state(state)
             { }
@@ -106,11 +110,11 @@ namespace {
             {
                 switch (prop) {
                  case game::interface::iuiScreenNumber:
-                    result.reset(interpreter::makeIntegerValue(1));
+                    result.reset(interpreter::makeIntegerValue(m_state->screenNumber));
                     return true;
                  case game::interface::iuiIterator:
                     if (m_pSession != 0 && m_pSession->getGame().get() != 0) {
-                        result.reset(game::interface::makeIteratorValue(m_pSession->getGame(), m_state->screenNumber));
+                        result.reset(game::interface::makeIteratorValue(m_pSession->getGame(), m_state->screenNumber, false));
                     } else {
                         result.reset();
                     }
@@ -131,13 +135,13 @@ namespace {
             { return false; }
      private:
         game::Session* m_pSession;
-        afl::base::Ptr<ScreenState> m_state;
+        afl::base::Ref<ScreenState> m_state;
     };
 
 
     class ScreenControl : public client::si::Control {
      public:
-        ScreenControl(client::Session& session, ui::EventLoop& loop, afl::base::Ptr<ScreenState> state, client::si::OutputState& out)
+        ScreenControl(client::Session& session, ui::EventLoop& loop, afl::base::Ref<ScreenState> state, client::si::OutputState& out)
             : Control(session.interface(), session.root(), session.translator()),
               m_session(session),
               m_loop(loop),
@@ -192,7 +196,7 @@ namespace {
         client::Session& m_session;
         ui::EventLoop& m_loop;
         client::si::OutputState& m_outputState;
-        afl::base::Ptr<ScreenState> m_state;
+        afl::base::Ref<ScreenState> m_state;
     };
 
     class ScreenMapUpdater : public client::ObjectListener {
@@ -224,20 +228,36 @@ namespace {
     };
 }
 
+const client::screens::ControlScreen::Definition client::screens::ControlScreen::ShipScreen = {
+    client::si::OutputState::ShipScreen,
+    "SHIPSCREEN",
+    "SHIPSCREEN",
+};
+const client::screens::ControlScreen::Definition client::screens::ControlScreen::PlanetScreen = {
+    client::si::OutputState::PlanetScreen,
+    "PLANETSCREEN",
+    "PLANETSCREEN",
+};
+const client::screens::ControlScreen::Definition client::screens::ControlScreen::BaseScreen = {
+    client::si::OutputState::BaseScreen,
+    "BASESCREEN",
+    "BASESCREEN",
+};
 
-client::screens::ControlScreen::ControlScreen(Session& session, int nr, client::si::OutputState::Target me)
+client::screens::ControlScreen::ControlScreen(Session& session, int nr, const Definition& def)
     : m_session(session),
       m_number(nr),
-      m_me(me)
+      m_definition(def)
 { }
 
 void
 client::screens::ControlScreen::run(client::si::InputState& in, client::si::OutputState& out)
 {
     // Set up common state
-    afl::base::Ptr<ScreenState> state(new ScreenState());
+    afl::base::Deleter deleter;
+    afl::base::Ref<ScreenState> state(*new ScreenState());
     state->screenNumber = m_number;
-    state->ownTarget = m_me;
+    state->ownTarget = m_definition.target;
 
     // An event loop
     ui::Root& root = m_session.root();
@@ -247,17 +267,22 @@ client::screens::ControlScreen::run(client::si::InputState& in, client::si::Outp
     ScreenControl ctl(m_session, loop, state, out);
 
     // Build it
-    ui::Window panel("!Control SCreen", root.provider(), ui::BLUE_BLACK_WINDOW, ui::layout::VBox::instance5);
+    ui::Window panel("!Control Screen", root.provider(), root.colorScheme(), ui::BLUE_DARK_WINDOW, ui::layout::HBox::instance5);
     client::widgets::KeymapWidget keys(m_session.gameSender(), root.engine().dispatcher(), ctl);
-    client::map::Widget map(ctl.interface().gameSender(), root, gfx::Point(300, 300));
-    keys.setKeymapName("SHIPSCREEN"/*FIXME*/);
-
     client::ObjectObserverProxy oop(m_session.gameSender(), std::auto_ptr<client::ObjectCursorFactory>(new ScreenCursorFactory(state)));
-    client::tiles::SelectionHeaderTile sht(root, keys);
-    sht.attach(oop);
+
+    ui::Group tileGroup(ui::layout::VBox::instance5);
+    client::tiles::TileFactory(root, m_session.interface(), keys, oop).createLayout(tileGroup, m_definition.layoutName, deleter);
+    tileGroup.add(deleter.addNew(new ui::Spacer()));
+    panel.add(tileGroup);
+
+    client::map::Widget map(ctl.interface().gameSender(), root, gfx::Point(300, 300));
+    keys.setKeymapName(m_definition.keymapName);
+
+    ui::PrefixArgument prefix(root);
 
     panel.add(keys);
-    panel.add(sht);
+    panel.add(prefix);
     panel.add(map);
     panel.setExtent(root.getExtent());
     panel.setState(ui::Widget::ModalState, true);
