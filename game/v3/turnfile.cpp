@@ -276,7 +276,7 @@ game::v3::TurnFile::TurnFile(afl::charset::Charset& charset, int player, Timesta
       m_isDirty(false)
 {
     // ex GTurnfile::GTurnfile
-    m_turnHeader.playerId = player;
+    m_turnHeader.playerId = int16_t(player);
     time.storeRawData(m_turnHeader.timestamp);
 }
 
@@ -383,9 +383,9 @@ game::v3::TurnFile::tryGetTurnNr() const
         for (size_t i = 0; i < countof(MAGIC_NUMBERS); ++i) {
             if (MAGIC_NUMBERS[i] == checker) {
                 if (i == 0) {
-                    return countof(MAGIC_NUMBERS);
+                    return int(countof(MAGIC_NUMBERS));
                 } else {
-                    return i;
+                    return int(i);
                 }
             }
         }
@@ -417,17 +417,17 @@ game::v3::TurnFile::setRegistrationKey(const RegistrationKey& key, int turnNr)
 
     // Winplan half (mostly informative)
     if (m_features.contains(WinplanFeature)) {
-        m_windowsTrailer.regstr3 = encodeString(key.getLine(RegistrationKey::Line3));
-        m_windowsTrailer.regstr4 = encodeString(key.getLine(RegistrationKey::Line4));
+        m_windowsTrailer.regstr3 = afl::string::toBytes(encodeString(key.getLine(RegistrationKey::Line3)));
+        m_windowsTrailer.regstr4 = afl::string::toBytes(encodeString(key.getLine(RegistrationKey::Line4)));
         afl::base::Bytes_t(m_windowsTrailer.unused).fill(0);
-        m_windowsTrailer.regstr1[0] = encodeString(key.getLine(RegistrationKey::Line1));
-        m_windowsTrailer.regstr2[0] = encodeString(key.getLine(RegistrationKey::Line2));
+        m_windowsTrailer.regstr1[0] = afl::string::toBytes(encodeString(key.getLine(RegistrationKey::Line1)));
+        m_windowsTrailer.regstr2[0] = afl::string::toBytes(encodeString(key.getLine(RegistrationKey::Line2)));
 
         for (size_t i = 0; i < sizeof(m_windowsTrailer.regstr1[0]); ++i) {
-            m_windowsTrailer.regstr1[0].m_bytes[i] ^= (m_windowsTrailer.regstr1[1].m_bytes[i] = rng(256));
+            m_windowsTrailer.regstr1[0].m_bytes[i] ^= (m_windowsTrailer.regstr1[1].m_bytes[i] = uint8_t(rng(256)));
         }
         for (size_t i = 0; i < sizeof(m_windowsTrailer.regstr2[0]); ++i) {
-            m_windowsTrailer.regstr2[0].m_bytes[i] ^= (m_windowsTrailer.regstr2[1].m_bytes[i] = rng(256));
+            m_windowsTrailer.regstr2[0].m_bytes[i] ^= (m_windowsTrailer.regstr2[1].m_bytes[i] = uint8_t(rng(256)));
         }
 
         uint32_t randomNr = rng() << 16;
@@ -646,9 +646,9 @@ void
 game::v3::TurnFile::addCommand(CommandCode_t cmd, int id)
 {
     afl::bits::Value<afl::bits::Int16LE> buf[2];
-    m_offsets.append(m_data.size());
-    buf[0] = cmd;
-    buf[1] = id;
+    m_offsets.append(uint32_t(m_data.size()));
+    buf[0] = int16_t(cmd);
+    buf[1] = int16_t(id);
     addData(afl::base::fromObject(buf));         // marks turn dirty
 }
 
@@ -764,21 +764,21 @@ game::v3::TurnFile::update()
         bool didTurn = false;
         for (size_t i = 0; i < structures::MAX_TRN_ATTACHMENTS; ++i) {
             if (m_turnPlacement == i) {
-                newHeader.turnAddress = newData.size() + 1;
+                newHeader.turnAddress = int32_t(newData.size() + 1);
                 updateTurnFile(newData, newOffsets);
-                newHeader.turnSize = newData.size() + 1 - newHeader.turnAddress;
+                newHeader.turnSize = int32_t(newData.size() + 1 - newHeader.turnAddress);
                 didTurn = true;
             }
 
-            if (!String_t(m_taccomHeader.attachments[i].name).empty()) {
-                newHeader.attachments[i].address = newData.size() + 1;
+            if (!afl::base::ConstBytes_t(m_taccomHeader.attachments[i].name).empty()) {
+                newHeader.attachments[i].address = int32_t(newData.size() + 1);
                 newData.append(m_data.subrange(m_taccomHeader.attachments[i].address-1, m_taccomHeader.attachments[i].length));
             }
         }
         if (!didTurn) {
-            newHeader.turnAddress = newData.size() + 1;
+            newHeader.turnAddress = int32_t(newData.size() + 1);
             updateTurnFile(newData, newOffsets);
-            newHeader.turnSize = newData.size() + 1 - newHeader.turnAddress;
+            newHeader.turnSize = int32_t(newData.size() + 1 - newHeader.turnAddress);
         }
 
         // Update header
@@ -839,11 +839,11 @@ bool
 game::v3::TurnFile::addFile(afl::base::ConstBytes_t fileData, const String_t& name, size_t& pos)
 {
     for (size_t i = 0; i < structures::MAX_TRN_ATTACHMENTS; ++i) {
-        if (String_t(m_taccomHeader.attachments[i].name).empty()) {
+        if (afl::base::ConstBytes_t(m_taccomHeader.attachments[i].name).empty()) {
             // Found empty slot.
-            m_taccomHeader.attachments[i].address = m_data.size() + 1;
-            m_taccomHeader.attachments[i].length = fileData.size();
-            m_taccomHeader.attachments[i].name = encodeString(name);
+            m_taccomHeader.attachments[i].address = int32_t(m_data.size() + 1);
+            m_taccomHeader.attachments[i].length = int32_t(fileData.size());
+            m_taccomHeader.attachments[i].name = afl::string::toBytes(encodeString(name));
             m_data.append(fileData);
             m_features += TaccomFeature;
             m_isDirty = true;
@@ -870,7 +870,7 @@ game::v3::TurnFile::getNumFiles() const
 {
     size_t n = 0;
     for (size_t i = 0; i < structures::MAX_TRN_ATTACHMENTS; ++i) {
-        if (!String_t(m_taccomHeader.attachments[i].name).empty()) {
+        if (!afl::base::ConstBytes_t(m_taccomHeader.attachments[i].name).empty()) {
             ++n;
         }
     }
@@ -928,7 +928,7 @@ game::v3::TurnFile::init(afl::io::Stream& str, bool fullParse)
             m_features += TaccomFeature;
             parseTurnFile(str, m_taccomHeader.turnAddress - 1, m_taccomHeader.turnSize);
             for (size_t i = 0; i < structures::MAX_TRN_ATTACHMENTS; ++i) {
-                if (!String_t(m_taccomHeader.attachments[i].name).empty()) {
+                if (!afl::base::ConstBytes_t(m_taccomHeader.attachments[i].name).empty()) {
                     // Attachment present
                     if (m_taccomHeader.turnAddress > m_taccomHeader.attachments[i].address) {
                         m_turnPlacement = i+1;
@@ -1090,8 +1090,8 @@ game::v3::TurnFile::updateTurnFile(afl::base::GrowableMemory<uint8_t>& data, afl
 
     // Update turn header
     // .player, .timestamp already set
-    m_turnHeader.timeChecksum = afl::checksums::ByteSum().add(afl::base::fromObject(m_turnHeader.timestamp), 0);
-    m_turnHeader.numCommands = m_offsets.size();
+    m_turnHeader.timeChecksum = int16_t(afl::checksums::ByteSum().add(m_turnHeader.timestamp, 0));
+    m_turnHeader.numCommands = int32_t(m_offsets.size());
     m_turnHeader.unused = 0;  // why not?
 
     // now, add commands
@@ -1113,15 +1113,15 @@ game::v3::TurnFile::updateTurnFile(afl::base::GrowableMemory<uint8_t>& data, afl
             size_t thisCommandOffset = data.size();
             offsets.append(thisCommandOffset);
             data.append(m_data.subrange(*m_offsets.at(i), length + 4));
-            put<afl::bits::Int32LE>(data, turnDirOffset + 4*i, thisCommandOffset - newTurnStart + 1);
+            put<afl::bits::Int32LE>(data, turnDirOffset + 4*i, int32_t(thisCommandOffset - newTurnStart + 1));
         }
     }
 
     // Append trailers
     if (m_features.contains(WinplanFeature)) {
         std::memcpy(m_windowsTrailer.magic, V35_MAGIC, 6);
-        m_windowsTrailer.magic[6] = '0' + m_version/10;
-        m_windowsTrailer.magic[7] = '0' + m_version%10;
+        m_windowsTrailer.magic[6] = char('0' + m_version/10);
+        m_windowsTrailer.magic[7] = char('0' + m_version%10);
         // .vphKey, .regstr[1..4], unused already set
         data.append(afl::base::fromObject(m_windowsTrailer));
     }
@@ -1157,5 +1157,5 @@ game::v3::TurnFile::updateTurnFile(afl::base::GrowableMemory<uint8_t>& data, afl
 String_t
 game::v3::TurnFile::encodeString(const String_t& in) const
 {
-    return m_charset.encode(afl::string::toMemory(in));
+    return afl::string::fromBytes(m_charset.encode(afl::string::toMemory(in)));
 }

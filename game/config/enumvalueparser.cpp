@@ -1,5 +1,6 @@
 /**
   *  \file game/config/enumvalueparser.cpp
+  *  \brief Class game::config::EnumValueParser
   */
 
 #include <stdexcept>

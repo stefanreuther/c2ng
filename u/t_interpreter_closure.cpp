@@ -13,6 +13,9 @@
 #include "util/consolelogger.hpp"
 #include "interpreter/world.hpp"
 #include "afl/io/nullfilesystem.hpp"
+#include "interpreter/vmio/nullsavecontext.hpp"
+#include "afl/charset/utf8charset.hpp"
+#include "afl/io/internalsink.hpp"
 
 namespace {
     class MyCallable : public interpreter::CallableValue {
@@ -67,6 +70,7 @@ namespace {
     int MyCallable::num_instances;
 }
 
+/** Test all closure methods. */
 void
 TestInterpreterClosure::testClosure()
 {
@@ -80,10 +84,10 @@ TestInterpreterClosure::testClosure()
 
     // Try cloning
     {
-        afl::data::Value* copy = base->clone();
-        TS_ASSERT_DIFFERS(base, copy);
+        std::auto_ptr<afl::data::Value> copy(base->clone());
+        TS_ASSERT_DIFFERS(base, copy.get());
         TS_ASSERT_EQUALS(MyCallable::num_instances, 2);
-        delete copy;
+        copy.reset();
         TS_ASSERT_EQUALS(MyCallable::num_instances, 1);
     }
 
@@ -94,6 +98,19 @@ TestInterpreterClosure::testClosure()
     TS_ASSERT_EQUALS(c->getDimension(0), 7);
     TS_ASSERT_EQUALS(c->getDimension(1), 5);
     TS_ASSERT_EQUALS(c->getDimension(7), 35);
+
+    // Closure properties
+    TS_ASSERT(!c->isProcedureCall());
+    TS_ASSERT_THROWS(c->makeFirstContext(), interpreter::Error);
+    TS_ASSERT_EQUALS(c->toString(false).substr(0, 2), "#<");
+    TS_ASSERT_EQUALS(c->toString(false), c->toString(true));
+    {
+        interpreter::TagNode out;
+        afl::io::InternalSink aux;
+        afl::charset::Utf8Charset cs;
+        interpreter::vmio::NullSaveContext ctx;
+        TS_ASSERT_THROWS(c->store(out, aux, cs, ctx), interpreter::Error);
+    }
 
     // Clone the closure
     {

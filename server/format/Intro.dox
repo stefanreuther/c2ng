@@ -1,0 +1,12 @@
+/*!
+     \namespace server::format
+     \brief c2format server
+
+     This namespace implements the c2format service.
+     c2format is the backend to the format API endpoint that allows web applications to deal with binary VGAP files.
+
+     <b>Entry points:</b>
+
+     - server::format::Format
+     - server::format::Packer
+ */

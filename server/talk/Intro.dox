@@ -1,0 +1,26 @@
+/*!
+     \namespace server::talk
+     \brief c2talk server
+
+     This namespace implements the c2talk service.
+     c2talk implements the forum and PMs.
+
+     <b>Terminology:</b>
+
+     - message Id (mid): number that identifies a message (posting in a forum).
+       Not to be confused with the RfC message Id (rfcMsgId) used on the NNTP view.
+     - forum Id (fid): number that identifies a forum
+     - topic Id (tid): number that identifies a topic
+     - group Id (grid): string that identifies a forum group
+     - user folder Id (ufid): number that identifies a user's PM folder
+     - PM Id (pmid): number that identifies a PM in users' folders
+     - user Id: a string containing the internal user Id.
+       Typically this string contains just digits, but we don't rely on that.
+       An empty user Id means admin access.
+
+     <b>Entry points:</b>
+
+     - server::talk::CommandHandler
+     - server::talk::Root
+     - server::talk::Session
+ */

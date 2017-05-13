@@ -29,6 +29,11 @@ TestInterpreterBlobValue::testIt()
     TS_ASSERT_EQUALS(clone->data().size(), 3U);
     TS_ASSERT(clone->data().equalContent(testee.data()));
 
+    // Stringify
+    TS_ASSERT_EQUALS(testee.toString(false).substr(0, 2), "#<");
+    TS_ASSERT_EQUALS(testee.toString(false), testee.toString(true));
+    TS_ASSERT_EQUALS(clone->toString(false), testee.toString(false));
+
     // Test store
     afl::io::InternalSink sink;
     interpreter::TagNode node;

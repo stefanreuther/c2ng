@@ -1,0 +1,6 @@
+/*!
+     \namespace server::talk::render
+     \brief Renderers
+
+     This namespace implements renderers for messages and PMs.
+ */

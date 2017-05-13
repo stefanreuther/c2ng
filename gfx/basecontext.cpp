@@ -1,9 +1,11 @@
 /**
   *  \file gfx/basecontext.cpp
+  *  \brief Class gfx::BaseContext
   */
 
 #include "gfx/basecontext.hpp"
 
+// Constructor.
 gfx::BaseContext::BaseContext(Canvas& canvas)
     : m_rawColor(0),
       m_lineThickness(1),
@@ -19,14 +21,7 @@ gfx::BaseContext::BaseContext(Canvas& canvas)
     // ex GfxContext::GfxContext
 }
 
-// gfx::Context&
-// gfx::Context::setColor(uint32_t color)
-// {
-//     // ex GfxContext::setColor
-//     m_rawColor = colorScheme().getColor(color);
-//     return *this;
-// }
-
+// Set color, raw.
 gfx::BaseContext&
 gfx::BaseContext::setRawColor(Color_t color)
 {
@@ -35,6 +30,7 @@ gfx::BaseContext::setRawColor(Color_t color)
     return *this;
 }
 
+// Make background solid.
 gfx::BaseContext&
 gfx::BaseContext::setSolidBackground()
 {
@@ -43,6 +39,7 @@ gfx::BaseContext::setSolidBackground()
     return *this;
 }
 
+// Make background transparent.
 gfx::BaseContext&
 gfx::BaseContext::setTransparentBackground()
 {
@@ -51,6 +48,7 @@ gfx::BaseContext::setTransparentBackground()
     return *this;
 }
 
+// Set line thickness.
 gfx::BaseContext&
 gfx::BaseContext::setLineThickness(int n)
 {
@@ -59,6 +57,7 @@ gfx::BaseContext::setLineThickness(int n)
     return *this;
 }
 
+// Set line pattern.
 gfx::BaseContext&
 gfx::BaseContext::setLinePattern(LinePattern_t pat)
 {
@@ -67,6 +66,7 @@ gfx::BaseContext::setLinePattern(LinePattern_t pat)
     return *this;
 }
 
+// Set fill pattern.
 gfx::BaseContext&
 gfx::BaseContext::setFillPattern(const FillPattern& pat)
 {
@@ -76,6 +76,7 @@ gfx::BaseContext::setFillPattern(const FillPattern& pat)
     return *this;
 }
 
+// Set alpha.
 gfx::BaseContext&
 gfx::BaseContext::setAlpha(Alpha_t alpha)
 {
@@ -84,6 +85,7 @@ gfx::BaseContext::setAlpha(Alpha_t alpha)
     return *this;
 }
 
+// Set cursor.
 gfx::BaseContext&
 gfx::BaseContext::setCursor(Point pt)
 {
@@ -92,6 +94,7 @@ gfx::BaseContext::setCursor(Point pt)
     return *this;
 }
 
+// Set text alignment.
 gfx::BaseContext&
 gfx::BaseContext::setTextAlign(int x, int y)
 {
@@ -100,6 +103,7 @@ gfx::BaseContext::setTextAlign(int x, int y)
     return *this;
 }
 
+// Use a font.
 gfx::BaseContext&
 gfx::BaseContext::useFont(Font& font)
 {
@@ -108,6 +112,7 @@ gfx::BaseContext::useFont(Font& font)
     return *this;
 }
 
+// Use a canvas.
 gfx::BaseContext&
 gfx::BaseContext::useCanvas(Canvas& canvas)
 {
@@ -116,14 +121,7 @@ gfx::BaseContext::useCanvas(Canvas& canvas)
     return *this;
 }
 
-// gfx::Context&
-// gfx::Context::useColorScheme(ColorScheme<uint32_t>& colorScheme)
-// {
-//     // ex GfxContext::useColorScheme
-//     m_colorScheme = &colorScheme;
-//     return *this;
-// }
-
+// Get color, raw.
 gfx::Color_t
 gfx::BaseContext::getRawColor() const
 {
@@ -131,6 +129,7 @@ gfx::BaseContext::getRawColor() const
     return m_rawColor;
 }
 
+// Check for transparent background.
 bool
 gfx::BaseContext::isTransparentBackground() const
 {
@@ -138,6 +137,7 @@ gfx::BaseContext::isTransparentBackground() const
     return m_transparentBackground;
 }
 
+// Get line thickness.
 int
 gfx::BaseContext::getLineThickness() const
 {
@@ -145,6 +145,7 @@ gfx::BaseContext::getLineThickness() const
     return m_lineThickness;
 }
 
+// Get line pattern.
 gfx::LinePattern_t
 gfx::BaseContext::getLinePattern() const
 {
@@ -152,6 +153,7 @@ gfx::BaseContext::getLinePattern() const
     return m_linePattern;
 }
 
+// Access fill pattern.
 gfx::FillPattern&
 gfx::BaseContext::fillPattern()
 {
@@ -159,6 +161,7 @@ gfx::BaseContext::fillPattern()
     return m_fillPattern;
 }
 
+// Access fill pattern.
 const gfx::FillPattern&
 gfx::BaseContext::fillPattern() const
 {
@@ -166,6 +169,7 @@ gfx::BaseContext::fillPattern() const
     return m_fillPattern;
 }
 
+// Get alpha.
 gfx::Alpha_t
 gfx::BaseContext::getAlpha() const
 {
@@ -173,6 +177,7 @@ gfx::BaseContext::getAlpha() const
     return m_alpha;
 }
 
+// Get cursor.
 gfx::Point
 gfx::BaseContext::getCursor() const
 {
@@ -180,6 +185,7 @@ gfx::BaseContext::getCursor() const
     return m_cursor;
 }
 
+// Get text alignment.
 gfx::Point
 gfx::BaseContext::getTextAlign() const
 {
@@ -187,6 +193,7 @@ gfx::BaseContext::getTextAlign() const
     return m_textAlign;
 }
 
+// Get font.
 gfx::Font*
 gfx::BaseContext::getFont() const
 {
@@ -194,16 +201,10 @@ gfx::BaseContext::getFont() const
     return m_font;
 }
 
+// Access canvas.
 gfx::Canvas&
 gfx::BaseContext::canvas() const
 {
     // ex GfxContext::getCanvas
     return *m_canvas;
 }
-
-// gfx::ColorScheme<uint32_t>&
-// gfx::Context::colorScheme() const
-// {
-//     // ex GfxContext::getColorScheme
-//     return *m_colorScheme;
-// }

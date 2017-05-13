@@ -34,6 +34,9 @@ TestInterpreterExporterFieldList::testAdd()
     TS_ASSERT_EQUALS(name, "QUX");
     TS_ASSERT_EQUALS(width, 30);
 
+    TS_ASSERT_EQUALS(t.getFieldName(2), "QUX"); // FIXME: function is pending-delete
+    TS_ASSERT_EQUALS(t.getFieldWidth(2), 30);   // FIXME: function is pending-delete
+
     TS_ASSERT(!t.getField(3, name, width));
     TS_ASSERT(!t.getField(-1, name, width));
 
@@ -101,5 +104,9 @@ TestInterpreterExporterFieldList::testModify()
 
     t.addList("x@5,y");
     TS_ASSERT_EQUALS(t.toString(), "B,C,E,X@5,Y");
+
+    t.setFieldName(1, "D");
+    t.setFieldWidth(2, 9);
+    TS_ASSERT_EQUALS(t.toString(), "B,D,E@9,X@5,Y");
 }
 

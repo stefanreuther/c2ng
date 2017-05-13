@@ -1,14 +1,11 @@
 /**
   *  \file interpreter/nametable.cpp
+  *  \brief Structure interpreter::NameTable
   */
 
 #include "interpreter/nametable.hpp"
 
-// /** Look up a name in a mapping list.
-//     \param name    Name of property to find
-//     \param mapping Mapping list, must be sorted
-//     \param size    Size of mapping list
-//     \return index such that mapping[return].name == name, or -1 */
+// Look up name in table.
 bool
 interpreter::lookupName(const afl::data::NameQuery& name, afl::base::Memory<const NameTable> tab, interpreter::Context::PropertyIndex_t& index)
 {

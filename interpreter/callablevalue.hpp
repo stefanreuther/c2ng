@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/callablevalue.hpp
+  *  \brief Class interpreter::CallableValue
   *
   *  Original comment:
   *
@@ -25,7 +26,13 @@ namespace interpreter {
 
     /** Callable value.
         This is the base for items callable in a process context.
-        They can have the syntactic form of a procedure or of a function. */
+        They can have the syntactic form of a procedure or of a function.
+        A CallableValue can also appear in a ForEach loop to provide an iterable context.
+
+        The specialisation IndexableValue provides elements that have the syntactic form of a function,
+        and can optionally be assigned.
+
+        Further specialisations exist to bind C++ functions. */
     class CallableValue : public BaseValue {
      public:
         /** Call.
@@ -36,18 +43,22 @@ namespace interpreter {
             \param want_result True if a result is required (use exc.pushNewValue()) */
         virtual void call(Process& proc, afl::data::Segment& args, bool want_result) = 0;
 
-        /** Check syntactic form. */
+        /** Check syntactic form.
+            \retval false Function ("name(a1,a2)", can have result)
+            \retval true Procedure ("name a1,a2", no result) */
         virtual bool isProcedureCall() const = 0;
 
         /** Array reflection. Implementation of the IsArray() and Dim() builtins.
-            \param which 0=get number of dimensions, 1..n=get that dimension */
+            \param which 0=get number of dimensions, 1..n=get that dimension
+            \return result */
         virtual int32_t getDimension(int32_t which) const = 0;
 
-        /** Get context for first item in iteration. This should be equivalent to
-            <tt>dynamic_cast<IntContext*>(call(exc, args))</tt>, where
-            args are the parameters needed to address the first object.
+        /** Get context for first item in iteration.
+            This should be equivalent to <tt>dynamic_cast<Context*>(call(proc, args, true))</tt>,
+            where args are the parameters needed to address the first object.
             Caller assumes lifetime management for the context.
-            \return context. Return 0 if set is empty. Throws IntError if request is invalid. */
+            \return context. Return 0 if set is empty.
+            \throw Error if request is invalid and item is not iterable. */
         virtual Context* makeFirstContext() = 0;
 
         // Value:

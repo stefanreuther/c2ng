@@ -116,6 +116,9 @@ class game::pcc::ServerDirectory::Entry : public afl::io::DirectoryEntry {
     void doCreateAsDirectory()
         { throw afl::except::FileProblemException(m_title, afl::string::Messages::cannotWrite()); }
 
+    void doSetFlag(FileFlag /*flag*/, bool /*value*/)
+        { throw afl::except::FileProblemException(m_title, afl::string::Messages::cannotWrite()); }
+
  private:
     afl::base::Ref<ServerDirectory> m_container;
     String_t m_title;

@@ -189,7 +189,7 @@ gfx::FillPattern&
 gfx::FillPattern::invert() throw()
 {
     for (size_t i = 0; i < SIZE; ++i) {
-        m_pattern[i] = ~m_pattern[i];
+        m_pattern[i] = uint8_t(~m_pattern[i]);
     }
     return *this;
 }

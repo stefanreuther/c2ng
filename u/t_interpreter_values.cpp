@@ -3,6 +3,7 @@
   *  \brief Test for interpreter::Values
   */
 
+#include <memory>
 #include "interpreter/values.hpp"
 
 #include "t_interpreter.hpp"
@@ -18,6 +19,7 @@
 #include "afl/data/visitor.hpp"
 #include "interpreter/basevalue.hpp"
 #include "interpreter/error.hpp"
+#include "game/types.hpp"
 
 /** Test toString for strings. */
 void
@@ -188,4 +190,86 @@ TestInterpreterValues::testMiscToString()
         TS_ASSERT_THROWS(interpreter::toString(&ev, false), interpreter::Error);
         TS_ASSERT_THROWS(interpreter::toString(&ev, true), interpreter::Error);
     }
+}
+
+/** Test make functions. */
+void
+TestInterpreterValues::testMake()
+{
+    std::auto_ptr<afl::data::Value> p;
+
+    // makeBooleanValue true
+    p.reset(interpreter::makeBooleanValue(1));
+    TS_ASSERT(dynamic_cast<afl::data::BooleanValue*>(p.get()) != 0);
+    TS_ASSERT_EQUALS(dynamic_cast<afl::data::BooleanValue*>(p.get())->getValue(), 1);
+    TS_ASSERT_EQUALS(interpreter::getBooleanValue(p.get()), 1);
+
+    // makeBooleanValue false
+    p.reset(interpreter::makeBooleanValue(0));
+    TS_ASSERT(dynamic_cast<afl::data::BooleanValue*>(p.get()) != 0);
+    TS_ASSERT_EQUALS(dynamic_cast<afl::data::BooleanValue*>(p.get())->getValue(), 0);
+    TS_ASSERT_EQUALS(interpreter::getBooleanValue(p.get()), 0);
+
+    // makeBooleanValue null
+    p.reset(interpreter::makeBooleanValue(-1));
+    TS_ASSERT(p.get() == 0);
+    TS_ASSERT_EQUALS(interpreter::getBooleanValue(p.get()), -1);
+
+    // makeIntegerValue
+    p.reset(interpreter::makeIntegerValue(42));
+    TS_ASSERT(dynamic_cast<afl::data::IntegerValue*>(p.get()) != 0);
+    TS_ASSERT_EQUALS(dynamic_cast<afl::data::IntegerValue*>(p.get())->getValue(), 42);
+    TS_ASSERT_EQUALS(interpreter::getBooleanValue(p.get()), 1);
+
+    // makeFloatValue
+    p.reset(interpreter::makeFloatValue(3.25));
+    TS_ASSERT(dynamic_cast<afl::data::FloatValue*>(p.get()) != 0);
+    TS_ASSERT_EQUALS(dynamic_cast<afl::data::FloatValue*>(p.get())->getValue(), 3.25);
+    TS_ASSERT_EQUALS(interpreter::getBooleanValue(p.get()), 1);
+
+    // makeStringValue (NTBS)
+    p.reset(interpreter::makeStringValue("abc"));
+    TS_ASSERT(dynamic_cast<afl::data::StringValue*>(p.get()) != 0);
+    TS_ASSERT_EQUALS(dynamic_cast<afl::data::StringValue*>(p.get())->getValue(), "abc");
+    TS_ASSERT_EQUALS(interpreter::getBooleanValue(p.get()), 1);
+
+    // makeStringValue (String)
+    p.reset(interpreter::makeStringValue(String_t("xyz")));
+    TS_ASSERT(dynamic_cast<afl::data::StringValue*>(p.get()) != 0);
+    TS_ASSERT_EQUALS(dynamic_cast<afl::data::StringValue*>(p.get())->getValue(), "xyz");
+    TS_ASSERT_EQUALS(interpreter::getBooleanValue(p.get()), 1);
+
+    // makeStringValue (String)
+    p.reset(interpreter::makeStringValue(String_t()));
+    TS_ASSERT(dynamic_cast<afl::data::StringValue*>(p.get()) != 0);
+    TS_ASSERT_EQUALS(dynamic_cast<afl::data::StringValue*>(p.get())->getValue(), "");
+    TS_ASSERT_EQUALS(interpreter::getBooleanValue(p.get()), 0);
+
+    // makeOptionalIntegerValue
+    p.reset(interpreter::makeOptionalIntegerValue(game::IntegerProperty_t(9)));
+    TS_ASSERT(dynamic_cast<afl::data::IntegerValue*>(p.get()) != 0);
+    TS_ASSERT_EQUALS(dynamic_cast<afl::data::IntegerValue*>(p.get())->getValue(), 9);
+    TS_ASSERT_EQUALS(interpreter::getBooleanValue(p.get()), 1);
+
+    // makeOptionalIntegerValue empty
+    p.reset(interpreter::makeOptionalIntegerValue(game::IntegerProperty_t()));
+    TS_ASSERT(p.get() == 0);
+
+    // makeOptionalStringValue
+    p.reset(interpreter::makeOptionalStringValue(String_t("hi")));
+    TS_ASSERT(dynamic_cast<afl::data::StringValue*>(p.get()) != 0);
+    TS_ASSERT_EQUALS(dynamic_cast<afl::data::StringValue*>(p.get())->getValue(), "hi");
+    TS_ASSERT_EQUALS(interpreter::getBooleanValue(p.get()), 1);
+
+    // makeOptionalIntegerValue empty
+    p.reset(interpreter::makeOptionalStringValue(afl::base::Nothing));
+    TS_ASSERT(p.get() == 0);
+
+    // getBooleanValue with afl native types
+    p.reset(new afl::data::HashValue(afl::data::Hash::create()));
+    TS_ASSERT_EQUALS(interpreter::getBooleanValue(p.get()), 1);
+
+    p.reset(new afl::data::VectorValue(afl::data::Vector::create()));
+    TS_ASSERT_EQUALS(interpreter::getBooleanValue(p.get()), 1);
+    
 }

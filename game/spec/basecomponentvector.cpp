@@ -1,23 +1,12 @@
 /**
   *  \file game/spec/basecomponentvector.cpp
+  *  \brief Class game::spec::BaseComponentVector
   */
 
 #include <memory>
 #include "game/spec/basecomponentvector.hpp"
 
-// Set new element.
-void
-game::spec::BaseComponentVector::setNew(int id, Component* p)
-{
-    std::auto_ptr<Component> save(p);
-
-    // FIXME: give PtrVector a resize()?
-    while (id > static_cast<int>(m_components.size())) {
-        m_components.pushBackNew(0);
-    }
-    m_components.replaceElementNew(id-1, save.release());
-}
-
+// Get a component by number.
 game::spec::Component*
 game::spec::BaseComponentVector::get(int id) const
 {
@@ -28,6 +17,7 @@ game::spec::BaseComponentVector::get(int id) const
     }
 }
 
+// Find next component, given an Id.
 game::spec::Component*
 game::spec::BaseComponentVector::findNext(int id) const
 {
@@ -39,6 +29,20 @@ game::spec::BaseComponentVector::findNext(int id) const
         }
     }
     return 0;
+}
+
+// Set new element.
+void
+game::spec::BaseComponentVector::setNew(int id, Component* p)
+{
+    std::auto_ptr<Component> save(p);
+    if (id > 0) {
+        size_t index = static_cast<size_t>(id - 1);
+        if (index >= m_components.size()) {
+            m_components.resize(index + 1);
+        }
+        m_components.replaceElementNew(index, save.release());
+    }
 }
 
 bool

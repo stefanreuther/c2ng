@@ -1,14 +1,17 @@
 /**
   *  \file interpreter/filevalue.cpp
+  *  \brief Class interpreter::FileValue
   */
 
 #include "interpreter/filevalue.hpp"
 #include "afl/string/format.hpp"
 
+// Constructor.
 interpreter::FileValue::FileValue(int32_t fileNr)
     : m_fileNr(fileNr)
 { }
 
+// Destructor.
 interpreter::FileValue::~FileValue()
 { }
 
@@ -33,9 +36,3 @@ interpreter::FileValue::store(TagNode& out, afl::io::DataSink& /*aux*/, afl::cha
     out.tag   = TagNode::Tag_FileHandle;
     out.value = m_fileNr;
 }
-
-// FIXME: port this (load)
-// IntFileValue::IntFileValue(const IntTagNode& sv, Stream& /*aux*/)
-//     : file_nr(sv.value)
-// { }
-

@@ -1,5 +1,6 @@
 /**
   *  \file game/spec/torpedo.hpp
+  *  \brief Class game::spec::Torpedo
   */
 #ifndef C2NG_GAME_SPEC_TORPEDO_HPP
 #define C2NG_GAME_SPEC_TORPEDO_HPP
@@ -10,9 +11,15 @@ namespace game { namespace spec {
 
     class TorpedoLauncher;
 
+    /** A torpedo launcher.
+        This class only holds data which it does not interpret or limit.
+
+        This class is constructed from a TorpedoLauncher which is the primary data class for torpedo systems. */
     class Torpedo : public Weapon {
      public:
-        Torpedo(const TorpedoLauncher& launcher);
+        /** Constructor.
+            \param torpedo Id */
+        explicit Torpedo(const TorpedoLauncher& launcher);
     };
 
 } }

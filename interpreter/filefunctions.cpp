@@ -589,7 +589,7 @@ namespace {
 
         // execute
         if (size != 0) {
-            afl::bits::packFixedString(blob->data().subrange(index, size), afl::string::toMemory(value));
+            afl::bits::packFixedString(blob->data().subrange(index, size), afl::string::toBytes(value));
         }
 
         return blob.release();
@@ -712,7 +712,7 @@ namespace {
 
         // Do it
         // FIXME: convertGameToUtf8()!!!
-        String_t result = afl::bits::unpackFixedString(bv->data().subrange(index, size));
+        String_t result = afl::string::fromBytes(afl::bits::unpackFixedString(bv->data().subrange(index, size)));
         return makeStringValue(result);
     }
 

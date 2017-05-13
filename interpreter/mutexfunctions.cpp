@@ -194,7 +194,7 @@ namespace interpreter { namespace {
             return makeBooleanValue(mtx != 0);
          case 1:
             if (mtx != 0) {
-                if (Process* p = mtx->getOwner()) {
+                if (const Process* p = mtx->getOwner()) {
                     return makeStringValue(p->getName());
                 }
             }

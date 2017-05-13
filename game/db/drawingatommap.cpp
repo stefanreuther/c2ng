@@ -67,7 +67,7 @@ game::db::DrawingAtomMap::get(uint16_t value) const
 // /** Save object to stream. This is used to create the rPaintingTags
 //     (11) record in chartX.cc. */
 void
-game::db::DrawingAtomMap::save(afl::io::Stream& out, afl::charset::Charset& cs, util::AtomTable& table) const
+game::db::DrawingAtomMap::save(afl::io::Stream& out, afl::charset::Charset& cs, const util::AtomTable& table) const
 {
     // ex GDrawingAtomMap::save
     // build value array
@@ -86,7 +86,7 @@ game::db::DrawingAtomMap::save(afl::io::Stream& out, afl::charset::Charset& cs, 
     }
 
     // write it out
-    tmp = valueBuffer.size();
+    tmp = uint16_t(valueBuffer.size());
     out.fullWrite(tmp.m_bytes);
     out.fullWrite(valueBuffer.toBytes());
 

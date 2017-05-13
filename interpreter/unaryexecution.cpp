@@ -430,7 +430,7 @@ namespace {
         if (arg == 0)
             return 0;
         else if (const afl::data::StringValue* sv = dynamic_cast<const afl::data::StringValue*>(arg))
-            return makeIntegerValue(afl::charset::Utf8().length(sv->getValue()));
+            return makeIntegerValue(int32_t(afl::charset::Utf8().length(sv->getValue())));
         else
             throw Error::typeError(Error::ExpectString);
     }

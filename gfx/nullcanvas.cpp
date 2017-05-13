@@ -1,5 +1,6 @@
 /**
   *  \file gfx/nullcanvas.cpp
+  *  \brief Class gfx::NullCanvas
   */
 
 #include "gfx/nullcanvas.hpp"
@@ -51,12 +52,14 @@ gfx::NullCanvas::getPixels(Point /*pt*/, afl::base::Memory<Color_t> colors)
 gfx::Point
 gfx::NullCanvas::getSize()
 {
+    // Report nonzero size to avoid someone dividing by zero
     return Point(1, 1);
 }
 
 int
 gfx::NullCanvas::getBitsPerPixel()
 {
+    // Report nonzero bits to avoid someone dividing by zero
     return 1;
 }
 

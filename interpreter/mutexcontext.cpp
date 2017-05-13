@@ -112,7 +112,7 @@ interpreter::MutexContext::store(TagNode& out, afl::io::DataSink& aux, afl::char
     afl::bits::Value<afl::bits::UInt32LE> header[2];
     header[0] = m_mutex->getName().size();
     header[1] = m_mutex->getNote().size();
-    aux.handleFullData("Lock", afl::base::fromObject(header));
-    aux.handleFullData("Lock", afl::string::toBytes(m_mutex->getName()));
-    aux.handleFullData("Lock", afl::string::toBytes(m_mutex->getNote()));
+    aux.handleFullData(afl::base::fromObject(header));
+    aux.handleFullData(afl::string::toBytes(m_mutex->getName()));
+    aux.handleFullData(afl::string::toBytes(m_mutex->getNote()));
 }

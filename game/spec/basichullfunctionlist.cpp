@@ -1,14 +1,15 @@
 /**
   *  \file game/spec/basichullfunctionlist.cpp
+  *  \brief Class game::spec::BasicHullFunctionList
   */
 
 #include "game/spec/basichullfunctionlist.hpp"
 #include "afl/string/format.hpp"
 #include "afl/string/parse.hpp"
 #include "afl/string/string.hpp"
+#include "game/spec/hull.hpp"
 #include "util/fileparser.hpp"
 #include "util/string.hpp"
-#include "game/spec/hull.hpp"
 
 namespace {
     /** Parser for 'hullfunc.cc'. */
@@ -89,7 +90,6 @@ BasicHullFunctionReader::handleLine(const String_t& fileName, int lineNr, String
             handleError(fileName, lineNr, afl::string::Format(m_translator.translateString("Duplicate definition for hull function #%d").c_str(), parsedNumber));
             return;
         }
-
         m_lastFunction = m_list.addFunction(parsedNumber, name);
         m_lastFunctionWasBogus = false;
     } else {
@@ -102,7 +102,7 @@ BasicHullFunctionReader::handleLine(const String_t& fileName, int lineNr, String
             return;
         }
 
-        String_t name  = afl::string::strTrim(line.substr(0, pos-1));
+        String_t name  = afl::string::strTrim(line.substr(0, pos));
         String_t value = afl::string::strTrim(line.substr(pos+1));
         if (util::stringMatch("Implies", name)) {
             // 'i' takes device number or name
@@ -155,6 +155,8 @@ BasicHullFunctionReader::handleError(const String_t& fileName, int lineNr, Strin
     // ex GHullFunctionReader::error
     m_log.write(m_log.Error, "game.spec.hullfunc", fileName, lineNr, message);
 }
+
+/************************* BasicHullFunctionList *************************/
 
 // Constructor.
 game::spec::BasicHullFunctionList::BasicHullFunctionList()
@@ -231,6 +233,7 @@ bool
 game::spec::BasicHullFunctionList::matchFunction(int requestedFunctionId, int foundFunctionId) const
 {
     // ex GHullFunctionData::matchBasicFunction
+    size_t loopLimit = m_functions.size();
     while (foundFunctionId != requestedFunctionId) {
         const BasicHullFunction* foundFunction = getFunctionById(foundFunctionId);
         if (foundFunction == 0) {
@@ -243,6 +246,12 @@ game::spec::BasicHullFunctionList::matchFunction(int requestedFunctionId, int fo
             // this function doesn't imply anything
             return false;
         }
+
+        if (loopLimit == 0) {
+            // loop detected
+            return false;
+        }
+        --loopLimit;
     }
 
     // found match
@@ -261,6 +270,7 @@ void
 game::spec::BasicHullFunctionList::performDefaultAssignments(ComponentVector<Hull>& hulls) const
 {
     // ex GHullFunctionData::performDefaultAssignments
+    // FIXME: having this function here makes it hard to test due to cyclic dependency Hull<>BasicHullFunctionList
     for (size_t i = 0, n = m_defaultAssignments.size(); i < n; ++i) {
         if (Hull* h = hulls.get(m_defaultAssignments[i].first)) {
             h->changeHullFunction(ModifiedHullFunctionList::Function_t(m_defaultAssignments[i].second),

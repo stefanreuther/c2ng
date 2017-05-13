@@ -1,5 +1,6 @@
 /**
   *  \file game/maint/sweeper.cpp
+  *  \brief Class game::maint::Sweeper
   *
   *  PCC2 Comment:
   *
@@ -18,13 +19,14 @@
   *  - SWEEP 1.0 (19971220)
   */
 
+#include <cassert>
 #include "game/maint/sweeper.hpp"
 #include "game/v3/structures.hpp"
 #include "afl/string/format.hpp"
 #include "afl/io/stream.hpp"
 #include "afl/base/countof.hpp"
 
-// /** Constructor. */
+// Constructor.
 game::maint::Sweeper::Sweeper()
     : m_eraseDatabaseFlag(false),
       m_didScan(false),
@@ -34,16 +36,13 @@ game::maint::Sweeper::Sweeper()
     // ex GSweepControl::GSweepControl
 }
 
-// /** Scan game directory. This looks for genX.dat files to figure out
-//     what players are there. This is the same criterion GDirectoryOverview
-//     uses). However, unlike GDirectoryOverview, this does not look into
-//     the files. */
+// Scan game directory.
 void
 game::maint::Sweeper::scan(afl::io::Directory& dir)
 {
     // ex GSweepControl::scan
     m_remainingPlayers.clear();
-    for (size_t i = 1; i <= game::v3::structures::NUM_PLAYERS; ++i) {
+    for (int i = 1; i <= game::v3::structures::NUM_PLAYERS; ++i) {
         if (dir.openFileNT(afl::string::Format("gen%d.dat", i), afl::io::FileSystem::OpenRead).get() != 0) {
             m_remainingPlayers += i;
         }
@@ -51,19 +50,22 @@ game::maint::Sweeper::scan(afl::io::Directory& dir)
     m_didScan = true;
 }
 
-// /** Perform "sweep" operation: erase files. Enumerates all files to erase on the
-//     given GSweepProcessor. */
+// Execute operation.
 void
 game::maint::Sweeper::execute(afl::io::Directory& dir)
 {
     // ex GSweepControl::processFiles
+
+    // \change in c2ng, execute() implies updateIndex().
+    // In PCC2, processFiles() and processIndex() were separate.
+
     // Scan for players
     if (!m_didScan) {
         scan(dir);
     }
 
     // Delete configured player files
-    for (size_t i = 1; i <= game::v3::structures::NUM_PLAYERS; ++i) {
+    for (int i = 1; i <= game::v3::structures::NUM_PLAYERS; ++i) {
         if (m_selectedPlayers.contains(i)) {
             processPlayerFiles(dir, i);
             m_remainingPlayers -= i;
@@ -100,12 +102,11 @@ game::maint::Sweeper::execute(afl::io::Directory& dir)
             dir.eraseNT("races.ini");    // created by VPA
         }
     }
+
+    updateIndex(dir);
 }
 
-// /** Set erase-database flag. If set, also deletes files usually kept
-//     over various turns (such as history databases), and thus cannot be
-//     recovered by Unpack. Default is disabled.
-//     \param flag new value */
+// Configuration: erase database flag.
 void
 game::maint::Sweeper::setEraseDatabase(bool flag)
 {
@@ -113,8 +114,7 @@ game::maint::Sweeper::setEraseDatabase(bool flag)
     m_eraseDatabaseFlag = flag;
 }
 
-// /** Set players to erase.
-//     \param set Player set */
+// Configuration: set selected players.
 void
 game::maint::Sweeper::setPlayers(PlayerSet_t set)
 {
@@ -122,7 +122,7 @@ game::maint::Sweeper::setPlayers(PlayerSet_t set)
     m_selectedPlayers = set;
 }
 
-// /** Get player set. */
+// Get selected players.
 game::PlayerSet_t
 game::maint::Sweeper::getPlayers() const
 {
@@ -130,18 +130,18 @@ game::maint::Sweeper::getPlayers() const
     return m_selectedPlayers;
 }
 
-// /** Get set of remaining players. Reflects the current state of the
-//     game directory. That is, before the "Sweep" operation is
-//     performed, it possibly includes the players to be erased. */
-// c2ng change: does no longer imply scan()
+// Get remaining players.
 game::PlayerSet_t
-game::maint::Sweeper::getRemainingPlayers()
+game::maint::Sweeper::getRemainingPlayers() const
 {
+    // c2ng change: does no longer imply scan()
     // ex GSweepControl::getRemainingPlayers
     return m_remainingPlayers;
 }
 
-// /** Process one player's files. */
+/** Process one player's files.
+    \param dir Directory
+    \param player Player */
 void
 game::maint::Sweeper::processPlayerFiles(afl::io::Directory& dir, int player)
 {
@@ -206,18 +206,16 @@ game::maint::Sweeper::processPlayerFiles(afl::io::Directory& dir, int player)
     }
 }
 
-// /** Perform "Sweep" operation: update index file. This rewrites the
-//     init.tmp index file required by planets.exe and Winplan. Unlike
-//     CCSweep 1.x, we rebuild the file from scratch. */
+/** Update index file.
+    This rewrites the init.tmp index file required by planets.exe and Winplan.
+    Unlike CCSweep 1.x, we rebuild the file from scratch.
+
+    \pre m_didScan */
 void
 game::maint::Sweeper::updateIndex(afl::io::Directory& dir)
 {
     // ex GSweepControl::processIndex
     using game::v3::structures::NUM_PLAYERS;
-
-    if (!m_didScan) {
-        scan(dir);
-    }
 
     // Only write the file if it wouldn't be empty. If it would be empty,
     // processFiles will have deleted it.
@@ -225,7 +223,7 @@ game::maint::Sweeper::updateIndex(afl::io::Directory& dir)
         // Build new index. Since it's simple, we build it directly instead of
         // using the normal marshalling functions.
         uint8_t newIndex[2*NUM_PLAYERS];
-        for (size_t i = 1; i <= NUM_PLAYERS; ++i) {
+        for (int i = 1; i <= NUM_PLAYERS; ++i) {
             newIndex[2*(i-1)]   = (m_remainingPlayers.contains(i));
             newIndex[2*(i-1)+1] = 0;
         }

@@ -1,5 +1,6 @@
 /**
   *  \file gfx/rgbapixmap.cpp
+  *  \brief Class gfx::RGBAPixmap
   */
 
 #include "gfx/rgbapixmap.hpp"
@@ -41,13 +42,6 @@ class gfx::RGBAPixmap::CanvasImpl : public gfx::PixmapCanvasImpl<RGBAPixmap, Tra
     virtual void setPalette(Color_t /*start*/, afl::base::Memory<const ColorQuad_t> colorDefinitions, afl::base::Memory<Color_t> colorHandles)
         {
             encodeColors(colorDefinitions, colorHandles);
-            while (Color_t* p = colorHandles.eat()) {
-                if (const ColorQuad_t* q = colorDefinitions.eat()) {
-                    *p = *q;
-                } else {
-                    *p = 0;
-                }
-            }
         }
     virtual void decodeColors(afl::base::Memory<const Color_t> colorHandles, afl::base::Memory<ColorQuad_t> colorDefinitions)
         {
@@ -77,7 +71,9 @@ class gfx::RGBAPixmap::CanvasImpl : public gfx::PixmapCanvasImpl<RGBAPixmap, Tra
 
 gfx::RGBAPixmap::RGBAPixmap(int w, int h)
     : Pixmap<ColorQuad_t>(w, h)
-{ }
+{
+    pixels().fill(COLORQUAD_FROM_RGBA(0, 0, 0, 0));
+}
 
 afl::base::Ref<gfx::RGBAPixmap>
 gfx::RGBAPixmap::create(int w, int h)

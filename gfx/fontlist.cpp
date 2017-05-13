@@ -1,22 +1,27 @@
 /**
   *  \file gfx/fontlist.cpp
+  *  \brief Class gfx::FontList
   */
 
 #include "gfx/fontlist.hpp"
 
+// Default constructor.
 gfx::FontList::FontList()
     : m_fonts()
 { }
 
+// Destructor.
 gfx::FontList::~FontList()
 { }
 
+// Add font.
 void
 gfx::FontList::addFont(FontRequest defn, afl::base::Ptr<Font> font)
 {
     m_fonts.push_back(Element(defn, font));
 }
 
+// Find a font.
 afl::base::Ptr<gfx::Font>
 gfx::FontList::findFont(FontRequest req) const
 {
@@ -43,7 +48,7 @@ gfx::FontList::findFont(FontRequest req) const
     if (result.get() == 0) {
         // Not found. Try again with different style (replace roman by sans, mono, etc.).
         // At this point, the request is all-wildcard.
-        // If find still fails, this means 
+        // If find still fails, this means we don't have any font at all.
         req.setStyle(afl::base::Nothing);
         result = find(req);
     }

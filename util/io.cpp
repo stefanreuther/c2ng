@@ -9,14 +9,13 @@ bool
 util::storePascalString(afl::io::DataSink& out, const String_t& str, afl::charset::Charset& charset)
 {
     // Encode
-    String_t encoded = charset.encode(afl::string::toMemory(str));
-    afl::base::ConstBytes_t encodedBytes = afl::string::toBytes(encoded);
+    afl::base::GrowableBytes_t encoded = charset.encode(afl::string::toMemory(str));
 
     // Can we represent the size?
-    uint8_t size = uint8_t(encodedBytes.size());
-    if (size == encodedBytes.size()) {
-        out.handleFullData("<string>", afl::base::fromObject(size));
-        out.handleFullData("<string>", encodedBytes);
+    uint8_t size = uint8_t(encoded.size());
+    if (size == encoded.size()) {
+        out.handleFullData(afl::base::fromObject(size));
+        out.handleFullData(encoded);
         return true;
     } else {
         return false;
@@ -27,21 +26,20 @@ bool
 util::storePascalStringTruncate(afl::io::DataSink& out, const String_t& str, afl::charset::Charset& charset)
 {
     // Encode
-    String_t encoded = charset.encode(afl::string::toMemory(str));
-    afl::base::ConstBytes_t encodedBytes = afl::string::toBytes(encoded);
+    afl::base::GrowableBytes_t encoded = charset.encode(afl::string::toMemory(str));
 
     // Can we represent the size?
     bool ok;
-    if (encodedBytes.size() <= 255) {
+    if (encoded.size() <= 255) {
         ok = true;
     } else {
-        encodedBytes.trim(255);
+        encoded.trim(255);
         ok = false;
     }
-    uint8_t size = uint8_t(encodedBytes.size());
+    uint8_t size = uint8_t(encoded.size());
 
-    out.handleFullData("<string>", afl::base::fromObject(size));
-    out.handleFullData("<string>", encodedBytes);
+    out.handleFullData(afl::base::fromObject(size));
+    out.handleFullData(encoded);
     return ok;
 }
 
@@ -53,9 +51,9 @@ util::loadPascalString(afl::io::Stream& in, afl::charset::Charset& charset)
     in.fullRead(afl::base::fromObject(size));
 
     // Read body
-    afl::base::GrowableMemory<char> encodedChars;
+    afl::base::GrowableBytes_t encodedChars;
     encodedChars.resize(size);
-    in.fullRead(encodedChars.toBytes());
+    in.fullRead(encodedChars);
 
     return charset.decode(encodedChars);
 }

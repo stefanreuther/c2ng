@@ -1,12 +1,12 @@
 /**
   *  \file game/score/turnscorelist.cpp
+  *  \brief Class game::score::TurnScoreList
   */
 
 #include <cassert>
 #include "game/score/turnscorelist.hpp"
 
-// /** Constructor.
-//     Makes a blank statistics file with a default schema. */
+// Constructor.
 game::score::TurnScoreList::TurnScoreList()
     : m_slotMapping(),
       m_scoreDescriptions(),
@@ -16,9 +16,11 @@ game::score::TurnScoreList::TurnScoreList()
     clear();
 }
 
+// Destructor.
 game::score::TurnScoreList::~TurnScoreList()
 { }
 
+// Reset content.
 void
 game::score::TurnScoreList::clear()
 {
@@ -28,7 +30,7 @@ game::score::TurnScoreList::clear()
     std::vector<Description>().swap(m_scoreDescriptions);
     afl::container::PtrVector<TurnScore>().swap(m_turnScores);
 
-    // Set up standard shcema
+    // Set up standard schema
     m_slotMapping.reserve(5);
     m_slotMapping.push_back(ScoreId_Planets);
     m_slotMapping.push_back(ScoreId_Capital);
@@ -39,10 +41,7 @@ game::score::TurnScoreList::clear()
     m_fileUsedFutureFeatures = false;
 }
 
-// /** Get index for particular score, or add it. If the score does not exist yet,
-//     changes the schema to add it.
-//     \param score_id Score identifier, ScoreId_xxx.
-//     \return Index (>= 0) */
+// Add a score type.
 game::score::TurnScoreList::Slot_t
 game::score::TurnScoreList::addSlot(ScoreId_t id)
 {
@@ -55,9 +54,7 @@ game::score::TurnScoreList::addSlot(ScoreId_t id)
     return result;
 }
 
-// /** Get index for a particular score.
-//     \param score_id Score identifier, ScoreId_xxx.
-//     \return Index (>= 0) or nil */
+// Get a score slot by type.
 bool
 game::score::TurnScoreList::getSlot(ScoreId_t id, Slot_t& out) const
 {
@@ -71,10 +68,7 @@ game::score::TurnScoreList::getSlot(ScoreId_t id, Slot_t& out) const
     return false;
 }
 
-// /** Add score description. If the description already exists, it is overwritten.
-//     \param desc Description to add
-//     \return true if this adds or changes a description, false if the new
-//     description is identical to an existing one */
+// Add a score description.
 bool
 game::score::TurnScoreList::addDescription(const Description& d)
 {
@@ -100,9 +94,7 @@ game::score::TurnScoreList::addDescription(const Description& d)
     return true;
 }
 
-// /** Get description for a particular score Id.
-//     \param score_id Score identifier, ScoreId_xxx
-//     \return pointer to description, or null if none stored in file */
+// Get a score description.
 const game::score::TurnScoreList::Description*
 game::score::TurnScoreList::getDescription(ScoreId_t id) const
 {
@@ -115,10 +107,7 @@ game::score::TurnScoreList::getDescription(ScoreId_t id) const
     return 0;
 }
 
-// /** Get score record for a turn. If none exists, adds one.
-//     \param turn Turn number (used as key)
-//     \param ts   Timestamp
-//     \return reference to record */
+// Add a turn.
 game::score::TurnScore&
 game::score::TurnScoreList::addTurn(int turnNr, const Timestamp& time)
 {
@@ -158,6 +147,7 @@ game::score::TurnScoreList::addTurn(int turnNr, const Timestamp& time)
     return *m_turnScores[index];
 }
 
+// Get a turn.
 const game::score::TurnScore*
 game::score::TurnScoreList::getTurn(int turnNr) const
 {
@@ -170,12 +160,69 @@ game::score::TurnScoreList::getTurn(int turnNr) const
     return 0;
 }
 
+// Get number of turns stored.
+size_t
+game::score::TurnScoreList::getNumTurns() const
+{
+    return m_turnScores.size();
+}
+
+// Get turn by index.
+const game::score::TurnScore*
+game::score::TurnScoreList::getTurnByIndex(size_t index) const
+{
+    if (index < m_turnScores.size()) {
+        return m_turnScores[index];
+    } else {
+        return 0;
+    }
+}
+
+// Get number of descriptions stored.
+size_t
+game::score::TurnScoreList::getNumDescriptions() const
+{
+    return m_scoreDescriptions.size();
+}
+
+// Get description by index.
+const game::score::TurnScoreList::Description*
+game::score::TurnScoreList::getDescriptionByIndex(size_t index) const
+{
+    if (index < m_scoreDescriptions.size()) {
+        return &m_scoreDescriptions[index];
+    } else {
+        return 0;
+    }
+}
+
+// Get number of score types stored.
+size_t
+game::score::TurnScoreList::getNumScores() const
+{
+    return m_slotMapping.size();
+}
+
+// Get score Id by index.
+bool
+game::score::TurnScoreList::getScoreByIndex(size_t index, ScoreId_t& result) const
+{
+    if (index < m_slotMapping.size()) {
+        result = m_slotMapping[index];
+        return true;
+    } else {
+        return false;
+    }
+}
+
+// Set "future features" flag.
 void
 game::score::TurnScoreList::setFutureFeatures(bool flag)
 {
     m_fileUsedFutureFeatures = flag;
 }
 
+// Get "future features" flag.
 bool
 game::score::TurnScoreList::hasFutureFeatures() const
 {

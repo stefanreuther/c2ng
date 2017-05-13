@@ -1,5 +1,6 @@
 /**
   *  \file game/shipbuildorder.cpp
+  *  \brief Class game::ShipBuildOrder
   */
 
 #include "game/shipbuildorder.hpp"

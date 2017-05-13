@@ -324,7 +324,7 @@ game::v3::RootLoader::loadRaceMapping(Root& root, afl::io::Stream& file, game::c
     if (file.read(afl::base::fromObject(mapping)) == sizeof(mapping)) {
         // Load configuration option
         game::config::HostConfiguration& config = root.hostConfiguration();
-        for (size_t i = 1; i <= gt::NUM_PLAYERS; ++i) {
+        for (int i = 1; i <= gt::NUM_PLAYERS; ++i) {
             config[config.PlayerRace].set(i, mapping[i-1]);
         }
         config[config.PlayerSpecialMission].copyFrom(config[config.PlayerRace]);
@@ -350,11 +350,11 @@ game::v3::RootLoader::loadRaceNames(PlayerList& list, afl::io::Directory& dir)
     afl::base::Ref<afl::io::Stream> file = dir.openFile("race.nm", FileSystem::OpenRead);
     gt::RaceNames in;
     file->fullRead(afl::base::fromObject(in));
-    for (size_t player = 0; player < gt::NUM_PLAYERS; ++player) {
+    for (int player = 0; player < gt::NUM_PLAYERS; ++player) {
         if (Player* out = list.create(player+1)) {
-            out->setName(Player::ShortName,     m_charset->decode(afl::string::toMemory(in.shortNames[player])));
-            out->setName(Player::LongName,      m_charset->decode(afl::string::toMemory(in.longNames[player])));
-            out->setName(Player::AdjectiveName, m_charset->decode(afl::string::toMemory(in.adjectiveNames[player])));
+            out->setName(Player::ShortName,     m_charset->decode(in.shortNames[player]));
+            out->setName(Player::LongName,      m_charset->decode(in.longNames[player]));
+            out->setName(Player::AdjectiveName, m_charset->decode(in.adjectiveNames[player]));
             out->setOriginalNames();
         }
     }

@@ -1,5 +1,6 @@
 /**
   *  \file game/shipbuildorder.hpp
+  *  \brief Class game::ShipBuildOrder
   */
 #ifndef C2NG_GAME_SHIPBUILDORDER_HPP
 #define C2NG_GAME_SHIPBUILDORDER_HPP

@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/mutexlist.cpp
+  *  \brief Class interpreter::MutexList
   *
   *  PCC2 Comment:
   *
@@ -36,8 +37,6 @@
   *  This does not implement PCC 1.x's "CC$Lock" and "CC$Unlock" commands.
   *  When needed, they can be implemented as scripts using something like
   *  a hash-of-mutexes.
-  *
-  *  FIXME c2ng: replace the adventurous reference counting with Ref<>
   */
 
 #include <cassert>
@@ -45,87 +44,82 @@
 #include "interpreter/error.hpp"
 
 
-
+// Destructor.
 interpreter::MutexList::Mutex::~Mutex()
 {
     // ex IntMutex::~IntMutex
 }
 
-// /** Constructor.
-//     \param slot Slot in mutex_objects.
-//     \param note User's note
-//     \param owner Owning process */
-interpreter::MutexList::Mutex::Mutex(MutexList& container, Index_t slot, const String_t& note, Process* owner)
+// Constructor.
+interpreter::MutexList::Mutex::Mutex(MutexList& container, Index_t slot, const String_t& note, const Process* owner)
     : m_container(&container),
-      reference_counter(1),
-      slot(slot),
-      note(note),
-      owner(owner)
+      m_referenceCounter(1),
+      m_slot(slot),
+      m_note(note),
+      m_owner(owner)
 {
     // ex IntMutex::IntMutex
 }
 
-// /** Get user's note. */
+// Get user's note.
 const String_t&
 interpreter::MutexList::Mutex::getNote() const
 {
     // ex IntMutex::getNote
-    return note;
+    return m_note;
 }
 
-// /** Get mutex name. */
+// Get mutex name.
 String_t
 interpreter::MutexList::Mutex::getName() const
 {
     // ex IntMutex::getName
     if (m_container != 0) {
-        return m_container->m_mutexNames.getNameByIndex(slot);
+        return m_container->m_mutexNames.getNameByIndex(m_slot);
     } else {
         return "<dead>";
     }
 }
 
-// /** Get owning process.
-//     \return the process, or 0 if orphaned */
-interpreter::Process*
+// Get owning process.
+const interpreter::Process*
 interpreter::MutexList::Mutex::getOwner() const
 {
     // ex IntMutex::getOwner
-    return owner;
+    return m_owner;
 }
 
-// /** Set owning process. Use with care. */
+// Set owning process.
 void
-interpreter::MutexList::Mutex::setOwner(Process* newOwner)
+interpreter::MutexList::Mutex::setOwner(const Process* newOwner)
 {
     // ex IntMutex::setOwner
-    owner = newOwner;
+    m_owner = newOwner;
 }
 
-// /** Increase reference counter.
-//     \return this */
+// Increase reference count.
 interpreter::MutexList::Mutex&
 interpreter::MutexList::Mutex::addReference()
 {
     // ex IntMutex::addReference
-    ++reference_counter;
+    ++m_referenceCounter;
     return *this;
 }
 
-// /** Remove reference. Unregisters the mutex and deletes it when this
-//     was the last reference. */
+// Remove a reference.
 void
 interpreter::MutexList::Mutex::removeReference()
 {
     // ex IntMutex::removeReference
-    if (--reference_counter == 0) {
-        if (m_container != 0) {
-            m_container->m_mutexObjects[slot] = 0;
+    if (--m_referenceCounter == 0) {
+        if (m_container != 0 && m_slot < m_container->m_mutexObjects.size()) {
+            m_container->m_mutexObjects[m_slot] = 0;
         }
         delete this;
     }
 }
 
+// Abandon mutex.
 void
 interpreter::MutexList::Mutex::abandon()
 {
@@ -134,17 +128,19 @@ interpreter::MutexList::Mutex::abandon()
 
     // The MutexList died, so the process probably also died or will die soon.
     // Even if it behaves nicely, it will have no way to free the mutex, so do that here.
-    owner = 0;
+    m_owner = 0;
 }
 
 
 /******************************* MutexList *******************************/
 
+// Constructor.
 interpreter::MutexList::MutexList()
     : m_mutexNames(),
       m_mutexObjects()
 { }
 
+// Destructor.
 interpreter::MutexList::~MutexList()
 {
     for (size_t i = 0, n = m_mutexObjects.size(); i < n; ++i) {
@@ -154,69 +150,82 @@ interpreter::MutexList::~MutexList()
     }
 }
 
-// /** Create new lock.
-//     \param name Name of lock, in upper-case
-//     \param note User's comment
-//     \param owner Owning process
-//     \return newly-created IntMutex object
-//     \throw IntError if there is a locking conflict */
+// Create a new lock, creation semantics.
 interpreter::MutexList::Mutex*
-interpreter::MutexList::create(const String_t& name, const String_t& note, Process* owner)
+interpreter::MutexList::create(const String_t& name, const String_t& note, const Process* owner)
 {
     // ex IntMutex::create
     // Get slot for this mutex. An existing slot will be recycled.
     afl::data::NameMap::Index_t slot = m_mutexNames.addMaybe(name);
 
     // Check existing mutex
-    if (slot < m_mutexObjects.size() && m_mutexObjects[slot] != 0) {
+    if (getMutexBySlot(slot) != 0) {
         throw interpreter::Error("Already locked");
     }
 
-    // Create new mutex. This will place it in mutex_objects.
+    // Create new mutex. This will place it in m_mutexObjects.
     return createMutex(slot, note, owner);
 }
 
+// Create a new lock, load semantics.
 interpreter::MutexList::Mutex*
-interpreter::MutexList::load(const String_t& name, const String_t& note, Process* owner)
+interpreter::MutexList::load(const String_t& name, const String_t& note, const Process* owner)
 {
     // ex IntMutexContext::load (part)
     afl::data::NameMap::Index_t slot = m_mutexNames.addMaybe(name);
-    if (slot < m_mutexObjects.size() && m_mutexObjects[slot] != 0) {
+    if (Mutex* mtx = getMutexBySlot(slot)) {
         // This mutex already exists. Is it compatible?
         if (owner != 0) {
-            if (m_mutexObjects[slot]->getOwner() != 0 && m_mutexObjects[slot]->getOwner() != owner) {
+            if (mtx->getOwner() != 0 && mtx->getOwner() != owner) {
                 throw interpreter::Error("Incompatible locks");
             }
-            m_mutexObjects[slot]->setOwner(owner);
+            mtx->setOwner(owner);
         }
-        return &m_mutexObjects[slot]->addReference();
+        return &mtx->addReference();
     } else {
         // Make new mutex
         return createMutex(slot, note, owner);
     }
 }
 
-// /** Query lock.
-//     \param name Name of lock, in upper-case
-//     \return Pointer to existing lock of that name, 0 if none */
+// Query lock.
 interpreter::MutexList::Mutex*
 interpreter::MutexList::query(const String_t& name) const
 {
     // ex IntMutex::query
     afl::data::NameMap::Index_t slot = m_mutexNames.getIndexByName(name);
-    if (slot == m_mutexNames.nil || slot >= m_mutexNames.getNumNames()) {
-        return 0;
-    } else {
-        return m_mutexObjects[slot];
+    return getMutexBySlot(slot);
+}
+
+// Disown/orphan all locks owned by a process.
+void
+interpreter::MutexList::disownLocksByProcess(const Process* process)
+{
+    // ex IntMutex::disownLocksByProcess
+    for (size_t i = 0, e = m_mutexObjects.size(); i < e; ++i) {
+        if (m_mutexObjects[i] != 0 && m_mutexObjects[i]->getOwner() == process) {
+            m_mutexObjects[i]->setOwner(0);
+        }
     }
 }
 
-// /** Create a mutex. This assumes that the mutex is actually free.
-//     \param slot Slot in mutex_objects.
-//     \param note User's note
-//     \param owner Owning process */
+// Enumerate mutexes.
+void
+interpreter::MutexList::enumMutexes(std::vector<Mutex*>& data, const Process* process)
+{
+    // ex IntMutex::enumMutexes
+    for (size_t i = 0, e = m_mutexObjects.size(); i < e; ++i) {
+        if (m_mutexObjects[i] != 0
+            && (process == 0 || m_mutexObjects[i]->getOwner() == process))
+        {
+            data.push_back(m_mutexObjects[i]);
+        }
+    }
+}
+
+// Create a mutex.
 interpreter::MutexList::Mutex*
-interpreter::MutexList::createMutex(Index_t slot, const String_t& note, Process* owner)
+interpreter::MutexList::createMutex(Index_t slot, const String_t& note, const Process* owner)
 {
     // ex IntMutex::createMutex
     // Make room
@@ -231,35 +240,13 @@ interpreter::MutexList::createMutex(Index_t slot, const String_t& note, Process*
     return mtx;
 }
 
-// /** Disown/orphan all locks owned by a process.
-//     \param process Process to check for */
-void
-interpreter::MutexList::disownLocksByProcess(Process* process)
+// Get mutex, given a slot.
+interpreter::MutexList::Mutex*
+interpreter::MutexList::getMutexBySlot(Index_t slot) const
 {
-    // ex IntMutex::disownLocksByProcess
-    for (size_t i = 0, e = m_mutexObjects.size(); i < e; ++i) {
-        if (m_mutexObjects[i] != 0 && m_mutexObjects[i]->getOwner() == process) {
-            m_mutexObjects[i]->setOwner(0);
-        }
-    }
-}
-
-// /** Enumerate mutexes. This will enumerate all mutexes as defined by
-//     the owner filter, and add them to data. Note that this will not
-//     add references to the mutexes.
-
-//     \param data [out] List will be produced here
-//     \param owner [in] Filter. If non-null, only list mutexes owned by
-//     this process. If null, list all mutexes. */
-void
-interpreter::MutexList::enumMutexes(std::vector<Mutex*>& data, Process* process)
-{
-    // ex IntMutex::enumMutexes
-    for (size_t i = 0, e = m_mutexObjects.size(); i < e; ++i) {
-        if (m_mutexObjects[i] != 0
-            && (process == 0 || m_mutexObjects[i]->getOwner() == process))
-        {
-            data.push_back(m_mutexObjects[i]);
-        }
+    if (slot < m_mutexObjects.size()) {
+        return m_mutexObjects[slot];
+    } else {
+        return 0;
     }
 }

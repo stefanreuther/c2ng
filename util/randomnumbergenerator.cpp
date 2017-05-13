@@ -13,7 +13,7 @@ uint16_t
 util::RandomNumberGenerator::operator()()
 {
     advance();
-    return m_seed >> 16;
+    return uint16_t(m_seed >> 16);
 }
 
 // Get random number in range [0, max).
@@ -26,7 +26,7 @@ util::RandomNumberGenerator::operator()(uint16_t max)
         = (loword(seed) * max + hiword(seed) * max << 16) >> 32
           hence loword(result) = loword(seed)*max which is discarded anyways
         = (loword(seed) * max >> 16 + hiword(seed) * max) >> 16 */
-    return (((m_seed & 0xFFFFU) * max >> 16) + (m_seed >> 16) * max) >> 16;
+    return uint16_t((((m_seed & 0xFFFFU) * max >> 16) + (m_seed >> 16) * max) >> 16);
 }
 
 void
@@ -46,5 +46,5 @@ util::RandomNumberGenerator::getSeed() const
 void
 util::RandomNumberGenerator::advance()
 {
-    m_seed = 134775813UL * m_seed + 1;
+    m_seed = uint32_t(134775813UL * m_seed + 1);
 }

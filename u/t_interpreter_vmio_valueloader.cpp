@@ -196,8 +196,8 @@ TestInterpreterVmioValueLoader::testReal()
 
         // Build TagNode
         interpreter::TagNode tagIn;
-        tagIn.tag   = reals[i].bytes[0] + 256*reals[i].bytes[1];
-        tagIn.value = reals[i].bytes[2] + 256*reals[i].bytes[3] + 65536*reals[i].bytes[4] + 16777216*reals[i].bytes[5];
+        tagIn.tag   = static_cast<uint16_t>(reals[i].bytes[0] + 256*reals[i].bytes[1]);
+        tagIn.value = static_cast<uint32_t>(reals[i].bytes[2] + 256*reals[i].bytes[3] + 65536*reals[i].bytes[4] + 16777216*reals[i].bytes[5]);
 
         // Load value
         afl::io::ConstMemoryStream auxIn((afl::base::Bytes_t()));

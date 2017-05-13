@@ -7,6 +7,7 @@
 #include "util/translation.hpp"
 #include "afl/string/format.hpp"
 #include "gfx/complex.hpp"
+#include "afl/base/optional.hpp"
 
 namespace {
     const int OUTLINE_SIZE = 3;
@@ -66,8 +67,8 @@ client::widgets::TurnListbox::drawItem(gfx::Canvas& can, gfx::Rectangle area, si
         SkinColor::Color textColor  = SkinColor::Static;
         SkinColor::Color subColor   = SkinColor::Faded;
 
-        int boxColor = -1;
-        int stateColor = -1;
+        afl::base::Optional<uint8_t> boxColor;
+        afl::base::Optional<uint8_t> stateColor;
         String_t stateText;
         String_t turnText = afl::string::Format(_("Turn %d").c_str(), pItem->turnNumber);
         switch (pItem->status) {
@@ -124,13 +125,15 @@ client::widgets::TurnListbox::drawItem(gfx::Canvas& can, gfx::Rectangle area, si
         ctx.setColor(subColor);
         outTextF(ctx, textArea, pItem->time);
 
-        if (boxColor >= 0) {
+        uint8_t c;
+        if (boxColor.get(c)) {
             gfx::Context<uint8_t> ctx(can, m_root.colorScheme());
-            drawSolidBar(ctx, area, boxColor);
+            drawSolidBar(ctx, area, c);
             ctx.setTextAlign(1, 1);
-            if (stateColor >= 0) {
+
+            if (stateColor.get(c)) {
                 ctx.useFont(*m_smallFont);
-                ctx.setColor(stateColor);
+                ctx.setColor(c);
                 outTextF(ctx, area, stateText);
             }
         }

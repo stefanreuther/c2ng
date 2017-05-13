@@ -12,7 +12,35 @@ class TestGfxBaseColorScheme : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestGfxBaseContext : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
+class TestGfxBitmapFont : public CxxTest::TestSuite {
+ public:
+    void testFile();
+    void testAdd();
+    void testFileErrors();
+};
+
+class TestGfxBitmapGlyph : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testConstruct();
+};
+
 class TestGfxCanvas : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
+class TestGfxColorScheme : public CxxTest::TestSuite {
+ public:
+    void testInterface();
+};
+
+class TestGfxContext : public CxxTest::TestSuite {
  public:
     void testIt();
 };
@@ -39,7 +67,42 @@ class TestGfxFillPattern : public CxxTest::TestSuite {
     void testPredefined();
 };
 
+class TestGfxFilter : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
+class TestGfxFont : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testFitWidth();
+    void testFitArea();
+};
+
+class TestGfxFontList : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testUnit();
+    void testList();
+};
+
+class TestGfxFontRequest : public CxxTest::TestSuite {
+ public:
+    void testSet();
+    void testMatch();
+};
+
+class TestGfxGraphicsException : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
 class TestGfxNullCanvas : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
+class TestGfxNullColorScheme : public CxxTest::TestSuite {
  public:
     void testIt();
 };
@@ -55,7 +118,30 @@ class TestGfxNullResourceProvider : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestGfxPalettizedPixmap : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
+class TestGfxPixmapCanvasImpl : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
 class TestGfxPoint : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
+class TestGfxPrimitives : public CxxTest::TestSuite {
+ public:
+    void testHLine();
+    void testVLine();
+    void testBar();
+    void testBlit();
+};
+
+class TestGfxRGBAPixmap : public CxxTest::TestSuite {
  public:
     void testIt();
 };
@@ -63,6 +149,10 @@ class TestGfxPoint : public CxxTest::TestSuite {
 class TestGfxRectangle : public CxxTest::TestSuite {
  public:
     void testIt();
+    void testModify();
+    void testAlign();
+    void testSplit();
+    void testFormat();
 };
 
 class TestGfxResourceProvider : public CxxTest::TestSuite {

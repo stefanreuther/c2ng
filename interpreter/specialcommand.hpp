@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/specialcommand.hpp
+  *  \brief Interface interpreter::SpecialCommand
   */
 #ifndef C2NG_INTERPRETER_SPECIALCOMMAND_HPP
 #define C2NG_INTERPRETER_SPECIALCOMMAND_HPP

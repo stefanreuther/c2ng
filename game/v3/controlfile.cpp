@@ -45,7 +45,7 @@ game::v3::ControlFile::load(afl::io::Directory& dir, int player)
         // Successfully opened Dosplan file
         m_fileOwner = 0;
     } else {
-        // No Winplan file, try Winplan file
+        // No Dosplan file, try Winplan file
         f = dir.openFileNT(afl::string::Format("contrl%d.dat", player), FileSystem::OpenRead);
         if (f.get() != 0) {
             // Successfully opened Winplan file

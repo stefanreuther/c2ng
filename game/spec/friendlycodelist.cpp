@@ -1,5 +1,6 @@
 /**
   *  \file game/spec/friendlycodelist.cpp
+  *  \brief Class game::spec::FriendlyCodeList
   */
 
 #include "game/spec/friendlycodelist.hpp"
@@ -9,8 +10,8 @@
 #include "util/translation.hpp"
 
 namespace {
-// /** Compare friendly codes. Alpha-numerical codes sort before those
-//     with other characters, and codes are sorted case-blind. */
+    /** Compare friendly codes.
+        Alpha-numerical codes sort before those with other characters, and codes are sorted case-blind. */
     bool compareFriendlyCodes(const game::spec::FriendlyCode& a,
                               const game::spec::FriendlyCode& b)
     {
@@ -33,13 +34,14 @@ namespace {
     }
 }
 
-
+// Default constructor.
 game::spec::FriendlyCodeList::FriendlyCodeList()
     : m_data(),
       m_extraData()
 { }
 
-game::spec::FriendlyCodeList::FriendlyCodeList(const FriendlyCodeList& originalList, const game::map::Object& obj, game::config::HostConfiguration& config)
+// Make sublist of some other list.
+game::spec::FriendlyCodeList::FriendlyCodeList(const FriendlyCodeList& originalList, const game::map::Object& obj, const game::config::HostConfiguration& config)
     : m_data(),
       m_extraData()
 {
@@ -52,27 +54,32 @@ game::spec::FriendlyCodeList::FriendlyCodeList(const FriendlyCodeList& originalL
     sort();
 }
 
+// Destructor.
 game::spec::FriendlyCodeList::~FriendlyCodeList()
 { }
 
+// Get number of friendly codes.
 size_t
 game::spec::FriendlyCodeList::size() const
 {
     return m_data.size();
 }
 
+// Get iterator to first friendly code.
 game::spec::FriendlyCodeList::Iterator_t
 game::spec::FriendlyCodeList::begin() const
 {
     return m_data.begin();
 }
 
+// Get iterator to one-past-last friendly code.
 game::spec::FriendlyCodeList::Iterator_t
 game::spec::FriendlyCodeList::end() const
 {
     return m_data.end();
 }
 
+// Access a friendly code by index.
 const game::spec::FriendlyCode*
 game::spec::FriendlyCodeList::at(size_t n) const
 {
@@ -84,6 +91,7 @@ game::spec::FriendlyCodeList::at(size_t n) const
     }
 }
 
+// Get index, given a friendly code.
 bool
 game::spec::FriendlyCodeList::getIndexByName(const String_t& fc, size_t& index) const
 {
@@ -96,8 +104,7 @@ game::spec::FriendlyCodeList::getIndexByName(const String_t& fc, size_t& index) 
     }
 }
 
-// /** Look up friendly code by name.
-//     \returns iterator pointing to friendly code, or end() if none */
+// Look up friendly code by name.
 game::spec::FriendlyCodeList::Iterator_t
 game::spec::FriendlyCodeList::getCodeByName(const String_t& fc) const
 {
@@ -111,8 +118,7 @@ game::spec::FriendlyCodeList::getCodeByName(const String_t& fc) const
 }
 
 
-// /** Add a friendly code. You should use sort as soon as possible to
-//     re-sort the list. */
+// Add a friendly code.
 void
 game::spec::FriendlyCodeList::addCode(const FriendlyCode& code)
 {
@@ -120,8 +126,7 @@ game::spec::FriendlyCodeList::addCode(const FriendlyCode& code)
     m_data.pushBackNew(new FriendlyCode(code));
 }
 
-// /** Sort friendly-code list in a sensible way to present it to
-//     users. */
+// Sort list in-place.
 void
 game::spec::FriendlyCodeList::sort()
 {
@@ -130,6 +135,7 @@ game::spec::FriendlyCodeList::sort()
     m_data.sort(compareFriendlyCodes);
 }
 
+// Clear.
 void
 game::spec::FriendlyCodeList::clear()
 {
@@ -137,10 +143,7 @@ game::spec::FriendlyCodeList::clear()
     m_data.clear();
 }
 
-
-/** Load friendly code list from a file. Syntax errors are logged on
-    the console.
-    \param inp   the file */
+// Load friendly code list from a file.
 void
 game::spec::FriendlyCodeList::load(afl::io::Stream& in, afl::sys::LogListener& log)
 {
@@ -162,6 +165,7 @@ game::spec::FriendlyCodeList::load(afl::io::Stream& in, afl::sys::LogListener& l
             line.erase(0, p+1);
             if (fc.length() > 3) {
                 log.write(log.Warn, LOG_NAME, in.getName(), tf.getLineNumber(), _("friendly code too long; truncated"));
+                fc.erase(3);
             }
             try {
                 addCode(FriendlyCode(fc, line));
@@ -177,8 +181,7 @@ game::spec::FriendlyCodeList::load(afl::io::Stream& in, afl::sys::LogListener& l
 }
 
 
-// /** Clear extra fcodes list.
-//     \post isExtraFC(x) == false for all codes */
+// Clear extra friendly codes list.
 void
 game::spec::FriendlyCodeList::clearExtraCodes()
 {
@@ -186,9 +189,7 @@ game::spec::FriendlyCodeList::clearExtraCodes()
     m_extraData.reset();
 }
 
-// /** Load extra fcodes list. This will append the specified file to the
-//     current list. To replace the list, clear it first
-//     (clearExtraFC()). */
+// Load extra friendly codes list.
 void
 game::spec::FriendlyCodeList::loadExtraCodes(afl::io::Stream& in)
 {
@@ -201,8 +202,7 @@ game::spec::FriendlyCodeList::loadExtraCodes(afl::io::Stream& in)
     m_extraData.append(' ');
 }
 
-// /** Check whether the specified friendly code is numeric. Handles all
-//     host-specific special rules. */
+// Check whether the specified friendly code is numeric.
 bool
 game::spec::FriendlyCodeList::isNumeric(const String_t& fc, const HostVersion& host) const
 {
@@ -244,7 +244,7 @@ game::spec::FriendlyCodeList::isNumeric(const String_t& fc, const HostVersion& h
     return true;
 }
 
-// /** Check whether fc is a special friendly code according to xtrafcode.txt. */
+// Check whether a friendly code is an extra code.
 bool
 game::spec::FriendlyCodeList::isExtra(const String_t& fc) const
 {
@@ -268,13 +268,7 @@ game::spec::FriendlyCodeList::isExtra(const String_t& fc) const
     return false;
 }
 
-// /** True iff friendly code is special. A friendly code is special if
-//     it is on the global FC list and not marked unspecial.
-//     \param fc          the FCode to test
-//     \param ignore_case true to ignore case. HOST has some codes
-//                        case-insensitive, so we need case-insensitive
-//                        comparison to avoid triggering a special action
-//                        when generating random FCs */
+// Check whether a friendly code is a special code.
 bool
 game::spec::FriendlyCodeList::isSpecial(const String_t& fc, bool ignoreCase) const
 {
@@ -289,10 +283,7 @@ game::spec::FriendlyCodeList::isSpecial(const String_t& fc, bool ignoreCase) con
     return false;
 }
 
-
-// /** Check for universal minefield friendly code.
-//     \param fc Friendly code to check
-//     \param tolerant true to accept either case, false to use host's rules */
+// Check whether a friendly code is a universal minefield friendly code.
 bool
 game::spec::FriendlyCodeList::isUniversalMinefieldFCode(const String_t& fc, bool tolerant, const HostVersion& host) const
 {
@@ -306,7 +297,7 @@ game::spec::FriendlyCodeList::isUniversalMinefieldFCode(const String_t& fc, bool
         && (fc[1] == 'f' || (tolerant && fc[1] == 'F'));
 }
 
-// /** Get a friendly code's numeric value. */
+// Get friendly code's numeric value.
 int
 game::spec::FriendlyCodeList::getNumericValue(const String_t& fc, const HostVersion& host) const
 {
@@ -319,22 +310,7 @@ game::spec::FriendlyCodeList::getNumericValue(const String_t& fc, const HostVers
     }
 }
 
-// /** Check whether fc is permitted as a "random" code. Random codes must be
-//     - not special (ignoring case. HOST considers things like "eE7" special)
-//     - not numeric
-//     - random enough
-
-//     "Not special" means:
-//     - not listed in special-fcode list (GFCode::isSpecial)
-//     - not listed in extra-fcode list
-//     - is not a universal minefield friendly code
-//     - does not start with "X"
-//     - does not contain "#" or "?" (those are special to our simulator)
-
-//     "Random enough" means it does not contain any duplicate character.
-
-//     \todo this special-cases the "mf" and "X" prefixes. Probably
-//     a better method for defining these prefixes should be designed. */
+// Check whether a friendly code is permitted as random friendly code.
 bool
 game::spec::FriendlyCodeList::isAllowedRandomCode(const String_t& fc, const HostVersion& host)
 {
@@ -351,24 +327,22 @@ game::spec::FriendlyCodeList::isAllowedRandomCode(const String_t& fc, const Host
         && !isNumeric(fc, host);
 }
 
-// /** Generate a random friendly code. See isAllowedRandom() for
-//     conditions for random fcodes.
+// Generate a random friendly code.
 
-//     To guarantee termination, this function bails out if it did not
-//     find a good enough code after a while. This never happened in real
-//     life. However, lusers can configure their system to trigger the
-//     termination guard (by defining every numeric character special
-//     in xtrafcode.txt), so we prefer degradation over crash. */
 String_t
 game::spec::FriendlyCodeList::generateRandomCode(util::RandomNumberGenerator& rng, const HostVersion& host)
 {
     // ex GFCode::generateRandomFCode()
+    // To guarantee termination, this function bails out if it did not find a good enough code after a while.
+    // I have never seen this happen in real life.
+    // However, lusers can configure their system to trigger the termination guard
+    // (by defining every numeric character special in xtrafcode.txt), so we prefer degradation over crash.
     int paranoiaCounter = 200;
     String_t rv(3, ' ');
     do {
-        rv[0] = 33 + rng(90);
-        rv[1] = 33 + rng(90);
-        rv[2] = 33 + rng(90);
+        rv[0] = static_cast<char>(33 + rng(90));
+        rv[1] = static_cast<char>(33 + rng(90));
+        rv[2] = static_cast<char>(33 + rng(90));
     } while (!isAllowedRandomCode(rv, host) && --paranoiaCounter);
     return rv;
 }

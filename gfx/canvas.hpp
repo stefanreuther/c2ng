@@ -138,7 +138,12 @@ namespace gfx {
         /** Get number of bits used per pixel. */
         virtual int getBitsPerPixel() = 0;
 
+        // /** Check if rectangle is visible. A rectangle is visible if at least
+        //     one pixel of it can be seen. */
         virtual bool isVisible(Rectangle r) = 0;
+
+        // /** Check if rectangle is clipped. If it is not clipped, it is completely
+        //     visible. */
         virtual bool isClipped(Rectangle r) = 0;
 
         /** Define palette colors.
@@ -178,25 +183,10 @@ namespace gfx {
         virtual afl::base::Ref<Canvas> convertCanvas(afl::base::Ref<Canvas> orig) = 0;
 
         void defaultBlit(Point pt, Canvas& src, Rectangle rect);
+        bool defaultIsClipped(const Rectangle& r);
+        bool defaultIsVisible(const Rectangle& r);
     };
 
 }
-
-// FIXME: move elsewhere?
-// /** Check if rectangle is clipped. If it is not clipped, it is completely
-//     visible. */
-// bool
-// GfxCanvas::isClipped(Rectangle r)
-// {
-//     return r != computeClipRect(r);
-// }
-
-// /** Check if rectangle is visible. A rectangle is visible if at least
-//     one pixel of it can be seen. */
-// bool
-// GfxCanvas::isVisible(Rectangle r)
-// {
-//     return computeClipRect(r).exists();
-// }
 
 #endif

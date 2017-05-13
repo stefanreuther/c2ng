@@ -7,6 +7,7 @@
 
 #include "t_game.hpp"
 
+/** Simple tests. */
 void
 TestGamePlayerBitMatrix::testMatrix()
 {
@@ -26,6 +27,10 @@ TestGamePlayerBitMatrix::testMatrix()
     for (int i = 1; i <= MAX_PLAYERS; ++i) {
         TS_ASSERT(mtx.getRow(i).empty());
     }
+
+    // check out-of-range access
+    TS_ASSERT(mtx.getRow(-1).empty());
+    TS_ASSERT(mtx.getRow(10000).empty());
 
     // set some value and check that surroundings are not modified. Do so twice.
     for (int i = 0; i < 2; ++i) {
@@ -78,6 +83,13 @@ TestGamePlayerBitMatrix::testMatrix()
         TS_ASSERT_EQUALS(mtx.getRow(3), game::PlayerSet_t(7) | game::PlayerSet_t(8));
     }
 
+    // clear bit
+    for (int i = 0; i < 2; ++i) {
+        mtx.set(2, 6, false);
+        TS_ASSERT(!mtx.get(2, 6));
+        TS_ASSERT(mtx.getRow(2).empty());
+    }
+
     // check some out-of-range positions
     TS_ASSERT(!mtx.get(99, 2));
     TS_ASSERT(!mtx.get(99, 99));
@@ -85,6 +97,17 @@ TestGamePlayerBitMatrix::testMatrix()
     TS_ASSERT(!mtx.get(-99, 99));
     TS_ASSERT(!mtx.get(1, 130));
     TS_ASSERT(!mtx.get(130, 1));
+
+    // out-of-range
+    mtx.set(0, 1, true);
+    TS_ASSERT(!mtx.get(0, 1));
+    mtx.set(1, 0, true);
+    TS_ASSERT(!mtx.get(0, 1));
+
+    mtx.set(1000, 1, true);
+    TS_ASSERT(!mtx.get(1000, 1));
+    mtx.set(1, 1000, true);
+    TS_ASSERT(!mtx.get(1000, 1));
 
     // clear it again and check zeroness again
     mtx.clear();

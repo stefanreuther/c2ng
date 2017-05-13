@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/compilationcontext.hpp
+  *  \brief Class interpreter::CompilationContext
   */
 #ifndef C2NG_INTERPRETER_COMPILATIONCONTEXT_HPP
 #define C2NG_INTERPRETER_COMPILATIONCONTEXT_HPP
@@ -10,9 +11,17 @@ namespace interpreter {
 
     class World;
 
-    /** Compilation context. Contains options in effect for current compilation. */
+    /** Compilation context.
+        Contains flags in effect for current compilation.
+
+        CompilationContext is used for expressions but can hold all option flags, including those for statements.
+        These flags generally provide information about the compilation environment (e.g. "we are compiling a multi-line statement"),
+        not user options ("optimisation level").
+
+        StatementCompilationContext extends CompilationContext to contain additional parameters and behaviour for compiling statements. */
     class CompilationContext {
      public:
+        /** Compilation flag. */
         enum Flag {
             /** Expressions: If set, string operations are case-blind ("NC" opcodes). */
             CaseBlind,
@@ -40,23 +49,28 @@ namespace interpreter {
             PreexecuteLoad
         };
 
-        CompilationContext(World& world)
-            : m_compilationFlags(CaseBlind),
-              m_world(world)
-            { }
+        /** Constructor.
+            \param world World in which this compilation takes place */
+        explicit CompilationContext(World& world);
 
-        CompilationContext& withFlag(Flag flag)
-            { m_compilationFlags += flag; return *this; }
+        /** Add a flag.
+            \param flag Flag to add
+            \return *this (for chainability) */
+        CompilationContext& withFlag(Flag flag);
 
-        CompilationContext& withoutFlag(Flag flag)
-            { m_compilationFlags -= flag; return *this; }
+        /** Remove a flag.
+            \param flag Flag to remove
+            \return *this (for chainability) */
+        CompilationContext& withoutFlag(Flag flag);
 
-        bool hasFlag(Flag flag) const
-            { return m_compilationFlags.contains(flag); }
+        /** Check presence of a flag.
+            \param flag Flag to check
+            \return true if flag is set */
+        bool hasFlag(Flag flag) const;
 
-        // World is always modifyable, constness of the context means we don't modify the context
-        World& world() const
-            { return m_world; }
+        /** Access associated world.
+            \return world */
+        World& world() const;
 
      private:
         // ex compilation_flags
@@ -65,6 +79,44 @@ namespace interpreter {
         World& m_world;
     };
 
+}
+
+// Constructor.
+inline
+interpreter::CompilationContext::CompilationContext(World& world)
+    : m_compilationFlags(CaseBlind),
+      m_world(world)
+{ }
+
+// Add a flag.
+inline interpreter::CompilationContext&
+interpreter::CompilationContext::withFlag(Flag flag)
+{
+    m_compilationFlags += flag;
+    return *this;
+}
+
+// Remove a flag.
+inline interpreter::CompilationContext&
+interpreter::CompilationContext::withoutFlag(Flag flag)
+{
+    m_compilationFlags -= flag;
+    return *this;
+}
+
+// Check presence of a flag.
+inline bool
+interpreter::CompilationContext::hasFlag(Flag flag) const
+{
+    return m_compilationFlags.contains(flag);
+}
+
+// Access associated world.
+inline interpreter::World&
+interpreter::CompilationContext::world() const
+{
+    // World is always modifyable, constness of the context means we don't modify the context
+    return m_world;
 }
 
 #endif

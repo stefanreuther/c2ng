@@ -1,5 +1,6 @@
 /**
   *  \file gfx/filter.cpp
+  *  \brief Class gfx::Filter
   */
 
 #include "gfx/filter.hpp"

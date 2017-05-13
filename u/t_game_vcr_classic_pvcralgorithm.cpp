@@ -119,7 +119,7 @@ namespace {
     };
     struct Battle {
         int magic;
-        int seed;
+        uint16_t seed;
         int capabilities;
         const char* algorithm;
         Object object[2];

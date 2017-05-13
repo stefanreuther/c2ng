@@ -1,5 +1,6 @@
 /**
   *  \file game/spec/hullfunction.hpp
+  *  \brief Class game::spec::HullFunction
   */
 #ifndef C2NG_GAME_SPEC_HULLFUNCTION_HPP
 #define C2NG_GAME_SPEC_HULLFUNCTION_HPP
@@ -12,21 +13,28 @@ namespace game { namespace spec {
 
     class Hull;
 
-    // /** Hull function. This class has two purposes:
-    //     - it can store a restricted/modified function definition for use
-    //       in mapping our internal numbers / host's numbers to functions
-    //     - it can report a broken-down function assignment for users
+    /** Hull function.
+        This class has two purposes:
+        - it can store a restricted/modified function definition for use in mapping our internal numbers / host's numbers to functions
+        - it can report a broken-down function assignment for users
 
-    //     In the first case, the fields Levels, HostId, BasicFunctionId are
-    //     relevant, in the second case the fields Levels, Players, Kind, and
-    //     BasicFunctionId.
-
-    //     \see HullFunctionData. */
+        In the first case, the fields Levels, HostId, BasicFunctionId are relevant,
+        in the second case the fields Levels, Players, Kind, and BasicFunctionId. */
     class HullFunction {
      public:
+        /** Assignment kind. */
         enum Kind {
+            /** Assigned to ship.
+                Not all ships of this type/owner may have this function.
+                If the ship changes ownership, the function follows. */
             AssignedToShip,
+            /** Assigned to hull.
+                All ships of this type/owner have this function.
+                If the ship changes ownership, the function may get lost/appear if it is player specific. */
             AssignedToHull,
+            /** Assigned to race.
+                All ships of this owner have this function.
+                If the ship changes ownership, the function may get lost/appear. */
             AssignedToRace
         };
 
@@ -78,9 +86,9 @@ namespace game { namespace spec {
 
         /** Constructor.
             Construct a hull function object referring to a basic, unrestricted function.
-            The function is assigned to all players, all levels.
+            The function is assigned to all players, all levels, assigned to the ship.
             \param basicFunctionId Basic function Id, see BasicHullFunction::getId() */
-        HullFunction(int basicFunctionId = -1);
+        explicit HullFunction(int basicFunctionId = -1);
 
         /** Constructor.
             Construct a hull function object referring to a function restricted to a certain set of levels.
@@ -93,6 +101,8 @@ namespace game { namespace spec {
         void setPlayers(PlayerSet_t players);
 
         /** Set level restriction.
+            This value should not be limited by host configuration NumExperienceLevels,
+            so it need not be updated when the host configuration changes.
             \param levels Level set */
         void setLevels(ExperienceLevelSet_t levels);
 
@@ -110,28 +120,48 @@ namespace game { namespace spec {
             \param basicFunctionId function Id, see BasicHullFunction::getId() */
         void setBasicFunctionId(int basicFunctionId);
 
-        /** Get player restriction. */
+        /** Get player restriction.
+            \return player set */
         PlayerSet_t getPlayers() const;
 
-        /** Get level restriction. */
+        /** Get level restriction.
+            \return level set */
         ExperienceLevelSet_t getLevels() const;
 
-        /** Get kind of assignment. */
+        /** Get kind of assignment.
+            \return kind of assignment */
         Kind getKind() const;
 
         /** Get host Id.
             \return host id, or -1 if none */
         int getHostId() const;
 
-        /** Get basic function Id. */
+        /** Get basic function Id.
+            \return basic function Id */
         int getBasicFunctionId() const;
 
         /** Check whether two functions name the same hull function.
-            This compares just the function data, not assignment information.
+            This compares just the function data (basic function and experience levels), not assignment information (player, kind, host Id).
             \param other other function
             \return true if both are the same function */
         bool isSame(const HullFunction& other);
 
+        /** Get default assignments for a basic function.
+            Some hull functions have a variable default assignment, depending on the configuration or hull properties.
+            In host, the Init=Default statement will consult the current configuration, and set the functions accordingly.
+
+            We want to be able to support configuration that changes on the fly without reloading hull functions.
+            That is, when the player configures AllowOneEngineTowing=Yes, all ships magically receive the Tow ability.
+
+            This function determines the variable default for a hull/device.
+
+            Note that all variable defaults are AssignedToHull and apply to all levels.
+            This function does not handle fixed defaults ("44-46 = Gravitonic"); those are in BasicHullFunction/BasicHullFunctionList.
+
+            \param basicFunctionId Function
+            \param config Host configuration
+            \param hull Hull
+            \return default assignment for this basic function (AssignedToHull, all levels) */
         static PlayerSet_t getDefaultAssignment(int basicFunctionId, const game::config::HostConfiguration& config, const Hull& hull);
 
      private:

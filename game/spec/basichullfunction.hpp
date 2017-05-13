@@ -1,5 +1,6 @@
 /**
   *  \file game/spec/basichullfunction.hpp
+  *  \brief Class game::spec::BasicHullFunction
   */
 #ifndef C2NG_GAME_SPEC_BASICHULLFUNCTION_HPP
 #define C2NG_GAME_SPEC_BASICHULLFUNCTION_HPP

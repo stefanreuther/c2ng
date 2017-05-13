@@ -22,7 +22,7 @@ namespace {
         for (size_t slotIndex = 0, numSlots = slots.size(); slotIndex < numSlots; ++slotIndex) {
             structures::Int32_t row[structures::NUM_PLAYERS];
             in.fullRead(afl::base::fromObject(row));
-            for (size_t i = 0; i < structures::NUM_PLAYERS; ++i) {
+            for (int i = 0; i < structures::NUM_PLAYERS; ++i) {
                 int32_t value = row[i];
                 if (value != -1) {
                     record.set(slots[slotIndex], i+1, value);
@@ -84,12 +84,10 @@ game::score::Loader::load(TurnScoreList& list, afl::io::Stream& in)
         in.fullRead(afl::base::fromObject(rawDesc));
 
         // Build description
-        TurnScoreList::Description cookedDesc = {
-            m_charset.decode(afl::string::toMemory(rawDesc.name)),
-            rawDesc.scoreId,
-            rawDesc.turnLimit,
-            rawDesc.winLimit
-        };
+        TurnScoreList::Description cookedDesc(m_charset.decode(rawDesc.name),
+                                              rawDesc.scoreId,
+                                              rawDesc.turnLimit,
+                                              rawDesc.winLimit);
         list.addDescription(cookedDesc);
     }
 

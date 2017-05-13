@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/world.cpp
+  *  \brief Class interpreter::World
   */
 
 #include "interpreter/world.hpp"
@@ -18,7 +19,7 @@
 const afl::data::NameMap::Index_t interpreter::World::sp_Comment;
 const afl::data::NameMap::Index_t interpreter::World::pp_Comment;
 
-
+// Constructor.
 interpreter::World::World(afl::sys::LogListener& log, afl::io::FileSystem& fs)
     : m_globalPropertyNames(),
       m_shipPropertyNames(),
@@ -38,12 +39,11 @@ interpreter::World::World(afl::sys::LogListener& log, afl::io::FileSystem& fs)
     init();
 }
 
+// Destructor.
 interpreter::World::~World()
 { }
 
-/** Define a global value.
-    \param name Name of the value
-    \param proc value */
+// Set a global value.
 void
 interpreter::World::setNewGlobalValue(const char* name, afl::data::Value* value)
 {
@@ -59,72 +59,84 @@ interpreter::World::setNewGlobalValue(const char* name, afl::data::Value* value)
     m_globalValues.setNew(index, value);
 }
 
+// Access global property names.
 afl::data::NameMap&
 interpreter::World::globalPropertyNames()
 {
     return m_globalPropertyNames;
 }
 
+// Access global property names (const).
 const afl::data::NameMap&
 interpreter::World::globalPropertyNames() const
 {
     return m_globalPropertyNames;
 }
 
+// Access ship property names.
 afl::data::NameMap&
 interpreter::World::shipPropertyNames()
 {
     return m_shipPropertyNames;
 }
 
+// Access ship property names (const).
 const afl::data::NameMap&
 interpreter::World::shipPropertyNames() const
 {
     return m_shipPropertyNames;
 }
 
+// Access planet property names.
 afl::data::NameMap&
 interpreter::World::planetPropertyNames()
 {
     return m_planetPropertyNames;
 }
 
+// Access planet property names (const).
 const afl::data::NameMap&
 interpreter::World::planetPropertyNames() const
 {
     return m_planetPropertyNames;
 }
 
+// Access global values.
 afl::data::Segment&
 interpreter::World::globalValues()
 {
     return m_globalValues;
 }
 
+// Access global values (const).
 const afl::data::Segment&
 interpreter::World::globalValues() const
 {
     return m_globalValues;
 }
 
+// Access ship properties.
 interpreter::ObjectPropertyVector&
 interpreter::World::shipProperties()
 {
     return m_shipProperties;
 }
 
+// Access ship properties (const).
 const interpreter::ObjectPropertyVector&
 interpreter::World::shipProperties() const
 {
     return m_shipProperties;
 }
 
+// Access planet properties.
 interpreter::ObjectPropertyVector&
 interpreter::World::planetProperties()
 {
     return m_planetProperties;
 }
 
+// Access planet properties (const).
 const interpreter::ObjectPropertyVector&
 interpreter::World::planetProperties() const
 {
@@ -132,9 +144,7 @@ interpreter::World::planetProperties() const
 }
 
 
-/** Define a special command.
-    \param name   [in] Name of the command, upper-case
-    \param newCmd [in] Newly-created SpecialCommand descendant object */
+// Define a special command.
 void
 interpreter::World::addNewSpecialCommand(const char* name, SpecialCommand* newCmd)
 {
@@ -142,15 +152,14 @@ interpreter::World::addNewSpecialCommand(const char* name, SpecialCommand* newCm
     m_specialCommands.insertNew(name, newCmd);
 }
 
-/** Look up special command.
-    \param name Name of command
-    \return IntSpecialCommand descendant that compiles this command. 0 if this is not a special command. */
+// Look up special command.
 interpreter::SpecialCommand*
 interpreter::World::lookupSpecialCommand(String_t name) const
 {
     return m_specialCommands[name];
 }
 
+// Enumerate special commands.
 void
 interpreter::World::enumSpecialCommands(PropertyAcceptor& acceptor) const
 {
@@ -160,66 +169,77 @@ interpreter::World::enumSpecialCommands(PropertyAcceptor& acceptor) const
     }
 }
 
+// Access keymaps.
 util::KeymapTable&
 interpreter::World::keymaps()
 {
     return m_keymaps;
 }
 
+// Access keymaps (const).
 const util::KeymapTable&
 interpreter::World::keymaps() const
 {
     return m_keymaps;
 }
 
+// Access atoms.
 util::AtomTable&
 interpreter::World::atomTable()
 {
     return m_atomTable;
 }
 
+// Access atoms (const).
 const util::AtomTable&
 interpreter::World::atomTable() const
 {
     return m_atomTable;
 }
 
+// Access process list.
 interpreter::ProcessList&
 interpreter::World::processList()
 {
     return m_processList;
 }
 
+// Access process list (const).
 const interpreter::ProcessList&
 interpreter::World::processList() const
 {
     return m_processList;
 }
 
+// Access mutexes.
 interpreter::MutexList&
 interpreter::World::mutexList()
 {
     return m_mutexList;
 }
 
+// Access mutexes (const).
 const interpreter::MutexList&
 interpreter::World::mutexList() const
 {
     return m_mutexList;
 }
 
+// Access files.
 interpreter::FileTable&
 interpreter::World::fileTable()
 {
     return m_fileTable;
 }
 
+// Access files (const).
 const interpreter::FileTable&
 interpreter::World::fileTable() const
 {
     return m_fileTable;
 }
 
+// Add new global context.
 void
 interpreter::World::addNewGlobalContext(Context* ctx)
 {
@@ -227,36 +247,42 @@ interpreter::World::addNewGlobalContext(Context* ctx)
     m_globalContexts.pushBackNew(ctx);
 }
 
+// Access global contexts.
 const afl::container::PtrVector<interpreter::Context>&
 interpreter::World::globalContexts() const
 {
     return m_globalContexts;
 }
 
+//Set system load directory.
 void
 interpreter::World::setSystemLoadDirectory(afl::base::Ptr<afl::io::Directory> dir)
 {
     m_systemLoadDirectory = dir;
 }
 
+// Get system load directory.
 afl::base::Ptr<afl::io::Directory>
 interpreter::World::getSystemLoadDirectory() const
 {
     return m_systemLoadDirectory;
 }
 
+// Set local load directory.
 void
 interpreter::World::setLocalLoadDirectory(afl::base::Ptr<afl::io::Directory> dir)
 {
     m_localLoadDirectory = dir;
 }
 
+// Get local load directory.
 afl::base::Ptr<afl::io::Directory>
 interpreter::World::getLocalLoadDirectory() const
 {
     return m_localLoadDirectory;
 }
 
+// Open file for loading.
 afl::base::Ptr<afl::io::Stream>
 interpreter::World::openLoadFile(const String_t name) const
 {
@@ -275,12 +301,14 @@ interpreter::World::openLoadFile(const String_t name) const
     return result;
 }
 
+// Access logger.
 afl::sys::LogListener&
 interpreter::World::logListener()
 {
     return m_log;
 }
 
+// Log an error.
 void
 interpreter::World::logError(afl::sys::LogListener::Level level, const Error& e)
 {
@@ -292,12 +320,14 @@ interpreter::World::logError(afl::sys::LogListener::Level level, const Error& e)
     }
 }
 
+// Access file system.
 afl::io::FileSystem&
 interpreter::World::fileSystem()
 {
     return m_fileSystem;
 }
 
+// Compile a file.
 interpreter::BCORef_t
 interpreter::World::compileFile(afl::io::Stream& file)
 {
@@ -324,6 +354,7 @@ interpreter::World::compileFile(afl::io::Stream& file)
     }
 }
 
+// Compile a command.
 interpreter::BCORef_t
 interpreter::World::compileCommand(String_t command)
 {
@@ -331,6 +362,7 @@ interpreter::World::compileCommand(String_t command)
     return compileCommand(command, false, hasResult);
 }
 
+// Compile a command.
 interpreter::BCORef_t
 interpreter::World::compileCommand(String_t command, bool wantResult, bool& hasResult)
 {
@@ -353,13 +385,14 @@ interpreter::World::compileCommand(String_t command, bool wantResult, bool& hasR
     return bco;
 }
 
+// Notify listeners.
 void
 interpreter::World::notifyListeners()
 {
     m_keymaps.notifyListeners();
 }
 
-/** Initialize interpreter globals. Call this once per program invocation. */
+/** Initialize sub-objects. */
 void
 interpreter::World::init()
 {

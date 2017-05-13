@@ -28,7 +28,7 @@ interpreter::BlobValue::store(TagNode& out, afl::io::DataSink& aux, afl::charset
     // ex IntBlobValue::store
     out.tag = out.Tag_Blob;
     out.value = m_data.size();
-    aux.handleFullData(toString(false), m_data);
+    aux.handleFullData(m_data);
 }
 
 

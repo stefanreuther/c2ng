@@ -1,6 +1,6 @@
 /**
   *  \file game/v3/trn/dumper.cpp
-  *  \class game::v3::trn::Dumper
+  *  \brief Class game::v3::trn::Dumper
   */
 
 #include "game/v3/trn/dumper.hpp"
@@ -40,9 +40,9 @@ namespace {
              default:
                 if (value[i] >= 0 && value[i] < 32) {
                     result += '\\';
-                    result += '0' + value[i] / 64;
-                    result += '0' + value[i] / 8 % 8;
-                    result += '0' + value[i] % 8;
+                    result += char('0' + value[i] / 64);
+                    result += char('0' + value[i] / 8 % 8);
+                    result += char('0' + value[i] % 8);
                 } else {
                     result += value[i];
                 }
@@ -66,7 +66,7 @@ namespace {
         for (size_t i = 0; i < sizeof(tmp); ++i) {
             tmp.m_bytes[i] = pair[0].m_bytes[i] ^ pair[1].m_bytes[i];
         }
-        return cs.decode(afl::string::toMemory(tmp));
+        return cs.decode(tmp);
     }
 
     /** Decode reg string, standard trailer. */
@@ -79,10 +79,10 @@ namespace {
                 errorFlag = true;
                 tmp[i] = '?';
             } else {
-                tmp[i] = t[i] / (13+13*i);
+                tmp[i] = char(t[i] / (13+13*i));
             }
         }
-        return cs.decode(afl::string::toMemory(afl::bits::unpackFixedString(tmp)));
+        return cs.decode(afl::bits::unpackFixedString(tmp));
     }
 }
 
@@ -164,7 +164,7 @@ String_t
 game::v3::trn::Dumper::CommandReader::getString(size_t size, afl::charset::Charset& cs)
 {
     // ex CommandReader::getString
-    return cs.decode(afl::string::toMemory(afl::bits::unpackFixedString(getBlob(size))));
+    return cs.decode(afl::bits::unpackFixedString(getBlob(size)));
 }
 
 
@@ -327,9 +327,9 @@ game::v3::trn::Dumper::showMessage(const TurnFile& trn, CommandReader& rdr, size
 {
     String_t msg(afl::string::fromBytes(rdr.getBlob(size)));
     for (String_t::size_type i = 0; i < msg.size(); ++i) {
-        msg[i] -= 13;
+        msg[i] = char(msg[i] - 13);
     }
-    msg = trn.charset().decode(afl::string::toMemory(msg));
+    msg = trn.charset().decode(afl::string::toBytes(msg));
 
     String_t::size_type pos = 0;
     String_t::size_type n;
@@ -410,7 +410,7 @@ game::v3::trn::Dumper::showTaccom(const TurnFile& trn) const
         }
 
         const game::v3::structures::TaccomTurnFile& f = hdr.attachments[i];
-        String_t name = trn.charset().decode(afl::string::toMemory(f.name));
+        String_t name = trn.charset().decode(f.name);
         if (!name.empty()) {
             m_output.writeLine(afl::string::Format(";   file \"%s\", %d bytes, position %d", name, int32_t(f.length), int32_t(f.address)));
         }
@@ -435,11 +435,11 @@ game::v3::trn::Dumper::showHeader(const TurnFile& trn) const
     }
     m_output.writeLine();
     showValue("Player",    trn.getPlayer());
-    showValue("Commands",  trn.getNumCommands());
+    showValue("Commands",  int32_t(trn.getNumCommands()));
     showValue("Timestamp", trn.getTimestamp().getTimestampAsString());
 
     uint32_t storedChecksum = trn.getTurnHeader().timeChecksum;
-    uint32_t actualChecksum = afl::checksums::ByteSum().add(afl::base::fromObject(trn.getTurnHeader().timestamp), 0);
+    uint32_t actualChecksum = afl::checksums::ByteSum().add(trn.getTurnHeader().timestamp, 0);
 
     String_t comment;
     if (storedChecksum == actualChecksum) {
@@ -474,8 +474,8 @@ game::v3::trn::Dumper::showTrailer(const TurnFile& trn) const
         showLine("VPH B", formatHex(vphB), turnComment);
         showValue("RegStr1", decodeStringPair(wt.regstr1, trn.charset()));
         showValue("RegStr2", decodeStringPair(wt.regstr2, trn.charset()));
-        showValue("RegStr3", trn.charset().decode(afl::string::toMemory(wt.regstr3)), "Player Name");
-        showValue("RegStr4", trn.charset().decode(afl::string::toMemory(wt.regstr4)), "Player Address");
+        showValue("RegStr3", trn.charset().decode(wt.regstr3), "Player Name");
+        showValue("RegStr4", trn.charset().decode(wt.regstr4), "Player Address");
         m_output.writeLine();
         m_output.writeLine("; DOS Trailer follows:");
     } else {
@@ -526,7 +526,7 @@ game::v3::trn::Dumper::showTrailer(const TurnFile& trn) const
 
     m_output.writeLine();
     m_output.writeLine("PlayerLog");
-    for (size_t i = 0; i < game::v3::structures::NUM_PLAYERS; ++i) {
+    for (int i = 0; i < game::v3::structures::NUM_PLAYERS; ++i) {
         showLine(afl::string::Format("  Player%d", i+1), formatHex(dt.playerSecret[i]), String_t());
     }
 }

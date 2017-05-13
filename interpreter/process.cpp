@@ -20,7 +20,6 @@
 #include "interpreter/defaultstatementcompilationcontext.hpp"
 #include "interpreter/expr/parser.hpp"
 #include "interpreter/filecommandsource.hpp"
-#include "interpreter/hashdata.hpp"
 #include "interpreter/hashvalue.hpp"
 #include "interpreter/memorycommandsource.hpp"
 #include "interpreter/optimizer.hpp"
@@ -664,6 +663,10 @@ interpreter::Process::executeInstruction()
 
 #if 0
     m_world.logListener().write(afl::sys::LogListener::Trace, m_processName, afl::string::Format("%d>%d:\t%s", m_frames.size(), f.pc, f.bco->getDisassembly(f.pc, m_world)));
+#endif
+
+#if 0
+    std::cout << String_t(afl::string::Format("%d>%d:\t%s", m_frames.size(), f.pc, f.bco->getDisassembly(f.pc, m_world))) << "\n";
 #endif
 
     // Execute it
@@ -1820,7 +1823,7 @@ void
 interpreter::Process::handleNewHash()
 {
     // IntExecutionContext::handleNewHash
-    m_valueStack.pushBackNew(new HashValue(*new HashData()));
+    m_valueStack.pushBackNew(new HashValue(afl::data::Hash::create()));
 }
 
 // /** Handle "sbind" instruction. */

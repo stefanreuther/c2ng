@@ -411,8 +411,7 @@ interpreter::ProcessList::getProcessById(uint32_t processId) const
 }
 
 // Get process list.
-const
-interpreter::ProcessList::Vector_t&
+const interpreter::ProcessList::Vector_t&
 interpreter::ProcessList::getProcessList() const
 {
     // ex int/process.h:getProcessList

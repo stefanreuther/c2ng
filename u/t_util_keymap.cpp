@@ -41,6 +41,23 @@ TestUtilKeymap::testKeymap()
     TS_ASSERT_EQUALS(b.lookupCommand(4), 5U);
     TS_ASSERT_EQUALS(b.lookupCommand(7), 8U);
     TS_ASSERT_EQUALS(b.lookupCommand(99), 0U);
+
+    // Look up, asking for place of definition
+    util::KeymapRef_t where;
+    b.lookupCommand(1, where);
+    TS_ASSERT_EQUALS(where, &b);
+    b.lookupCommand(4, where);
+    TS_ASSERT_EQUALS(where, &a);
+
+    // Look up conditions
+    TS_ASSERT_EQUALS(a.lookupCondition(1), 3U);
+    TS_ASSERT_EQUALS(a.lookupCondition(4), 6U);
+    TS_ASSERT_EQUALS(a.lookupCondition(7), 0U);
+    TS_ASSERT_EQUALS(a.lookupCondition(99), 0U);
+    TS_ASSERT_EQUALS(b.lookupCondition(1), 5U);
+    TS_ASSERT_EQUALS(b.lookupCondition(4), 6U);
+    TS_ASSERT_EQUALS(b.lookupCondition(7), 9U);
+    TS_ASSERT_EQUALS(b.lookupCondition(99), 0U);
 }
 
 /** Test change tracking. */
@@ -56,4 +73,8 @@ TestUtilKeymap::testChange()
 
     a.addKey(1, 2, 3);
     TS_ASSERT(!a.isChanged());
+
+    a.addKey(1, 2, 4);
+    TS_ASSERT(a.isChanged());
+    a.markChanged(false);
 }

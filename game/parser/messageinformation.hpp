@@ -43,27 +43,60 @@ namespace game { namespace parser {
         typedef afl::container::PtrVector<MessageValueBase> Values_t;
         typedef Values_t::const_iterator Iterator_t, ConstIterator_t;
 
+        /** Constructor.
+            \param type Target object type
+            \param id Target object Id, dependant on type
+            \param turn Turn number */
         MessageInformation(Type type, int32_t id, int turn);
+
+        /** Destructor. */
         ~MessageInformation();
 
+        /** Add string value.
+            \param si String value index
+            \param s String value */
         void addValue(MessageStringIndex si, const String_t& s);
+
+        /** Add integer value.
+            \param ii Integer value index
+            \param s String value */
         void addValue(MessageIntegerIndex ii, int32_t i);
+
+        /** Add configuration value.
+            \pre getObjectType() == Configuration
+            \param key Configuration key
+            \param value Value */
         void addConfigurationValue(String_t key, String_t value);
+
+        /** Add score value.
+            \pre getObjectType() == PlayerScore
+            \param player Player number
+            \param value Score value */
         void addScoreValue(int player, int32_t value);
+
         // FIXME: missing
         // void addAllianceValue(string_t id, const GAllianceOffer& offer);
 
-        Iterator_t begin() const
-            { return m_values.begin(); }
-        Iterator_t end() const
-            { return m_values.end(); }
 
-        Type getObjectType() const
-            { return m_type; }
-        int32_t getObjectId() const
-            { return m_id; }
-        int getTurnNumber() const
-            { return m_turnNumber; }
+        /** Get iterator to first contained value.
+            \return iterator */
+        Iterator_t begin() const;
+
+        /** Get iterator to last contained value.
+            \return iterator */
+        Iterator_t end() const;
+
+        /** Get target object type.
+            \return target object type */
+        Type getObjectType() const;
+
+        /** Get target object Id.
+            \return target object Id */
+        int32_t getObjectId() const;
+
+        /** Get turn number.
+            \return turn number */
+        int getTurnNumber() const;
 
      private:
         const Type m_type;
@@ -73,5 +106,41 @@ namespace game { namespace parser {
     };
 
 } }
+
+
+// Get iterator to first contained value.
+inline game::parser::MessageInformation::Iterator_t
+game::parser::MessageInformation::begin() const
+{
+    return m_values.begin();
+}
+
+// Get iterator to last contained value.
+inline game::parser::MessageInformation::Iterator_t
+game::parser::MessageInformation::end() const
+{
+    return m_values.end();
+}
+
+// Get target object type.
+inline game::parser::MessageInformation::Type
+game::parser::MessageInformation::getObjectType() const
+{
+    return m_type;
+}
+
+// Get target object Id.
+inline int32_t
+game::parser::MessageInformation::getObjectId() const
+{
+    return m_id;
+}
+
+// Get turn number.
+inline int
+game::parser::MessageInformation::getTurnNumber() const
+{
+    return m_turnNumber;
+}
 
 #endif

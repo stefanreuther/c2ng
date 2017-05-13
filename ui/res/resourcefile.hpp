@@ -1,6 +1,6 @@
 /**
   *  \file ui/res/resourcefile.hpp
-  *  \class ui::res::ResourceFile
+  *  \brief Class ui::res::ResourceFile
   */
 #ifndef C2NG_UI_RES_RESOURCEFILE_HPP
 #define C2NG_UI_RES_RESOURCEFILE_HPP

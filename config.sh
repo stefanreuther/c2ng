@@ -90,6 +90,7 @@ if test -z "$CXXTESTDIR"; then
     for i in $CXXTESTDIR ../cxxtest* ../../cxxtest* ../../../cxxtest*  ../software/cxxtest* ../../software/cxxtest* ../../../software/cxxtest*; do
         if conf_file_check_dir "$i"; then
             conf_var_set CXXTESTDIR "$i"
+            conf_var_set HAVE_CXXTEST yes
             conf_log_result "$CXXTESTDIR"
             break
         fi
@@ -97,11 +98,13 @@ if test -z "$CXXTESTDIR"; then
     if test -z "$CXXTESTDIR"; then
         conf_log_result "not found"
         conf_var_set CXXTESTDIR ""
+        conf_var_set HAVE_CXXTEST no
     fi
 else
     conf_file_check_dir "$CXXTESTDIR" || conf_log_die "The specified directory \"$CXXTESTDIR\" does not work."
     conf_log_result "OK"
     conf_var_publish CXXTESTDIR
+    conf_var_set HAVE_CXXTEST yes
 fi
 
 # afl

@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/vmio/structures.cpp
+  *  \brief interpreter::vmio Structures
   */
 
 #include "interpreter/vmio/structures.hpp"

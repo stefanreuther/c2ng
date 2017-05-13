@@ -12,10 +12,10 @@ namespace {
     /** Load undelimited, unencoded string. */
     String_t loadString(afl::io::Stream& s, size_t length)
     {
-        afl::base::GrowableMemory<char> buffer;
+        afl::base::GrowableBytes_t buffer;
         buffer.resize(length);
-        s.fullRead(buffer.toBytes());
-        return afl::string::fromMemory(buffer);
+        s.fullRead(buffer);
+        return afl::string::fromBytes(buffer);
     }
 
     /** Load mutex. */
@@ -26,7 +26,7 @@ namespace {
         aux.fullRead(afl::base::fromObject(header));
 
         String_t name = loadString(aux, header[0]);
-        String_t note = loadString(aux, header[4]);
+        String_t note = loadString(aux, header[1]);
         return ctx.loadMutex(name, note, owner);
     }
 }
@@ -97,3 +97,7 @@ interpreter::vmio::ProcessLoadContext::createProcess()
     // Otherwise, we should just be able to call our parent's version.
     return 0;
 }
+
+void
+interpreter::vmio::ProcessLoadContext::finishProcess(Process& /*proc*/)
+{ }

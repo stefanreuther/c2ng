@@ -50,18 +50,17 @@
   *  FIXME: to make this useful, we need a way to control the logger formatting
   */
 
-#include <iostream>
 #include <stdexcept>
 #include <vector>
-#include "afl/base/deleter.hpp"
 #include "afl/base/optional.hpp"
 #include "afl/charset/charset.hpp"
 #include "afl/charset/codepage.hpp"
 #include "afl/charset/codepagecharset.hpp"
 #include "afl/charset/defaultcharsetfactory.hpp"
+#include "afl/except/fileformatexception.hpp"
 #include "afl/except/fileproblemexception.hpp"
 #include "afl/io/filesystem.hpp"
-#include "afl/io/nulltextwriter.hpp"
+#include "afl/io/multidirectory.hpp"
 #include "afl/io/textfile.hpp"
 #include "afl/io/textwriter.hpp"
 #include "afl/string/format.hpp"
@@ -69,8 +68,8 @@
 #include "afl/sys/commandlineparser.hpp"
 #include "afl/sys/environment.hpp"
 #include "afl/sys/standardcommandlineparser.hpp"
-#include "game/exception.hpp"
 #include "game/game.hpp"
+#include "game/interface/loadcontext.hpp"
 #include "game/session.hpp"
 #include "game/specificationloader.hpp"
 #include "game/turn.hpp"
@@ -83,17 +82,14 @@
 #include "interpreter/memorycommandsource.hpp"
 #include "interpreter/statementcompiler.hpp"
 #include "interpreter/subroutinevalue.hpp"
+#include "interpreter/vmio/assemblersavecontext.hpp"
 #include "interpreter/vmio/filesavecontext.hpp"
+#include "interpreter/vmio/objectloader.hpp"
+#include "util/application.hpp"
 #include "util/consolelogger.hpp"
 #include "util/profiledirectory.hpp"
 #include "util/translation.hpp"
 #include "version.hpp"
-#include "interpreter/vmio/objectloader.hpp"
-#include "afl/except/fileformatexception.hpp"
-#include "game/interface/loadcontext.hpp"
-#include "afl/io/multidirectory.hpp"
-#include "interpreter/vmio/assemblersavecontext.hpp"
-#include "util/application.hpp"
 
 namespace {
     const char LOG_NAME[] = "script";
@@ -106,7 +102,6 @@ namespace {
     };
 
     struct Parameters {
-        afl::base::Deleter holder;
         afl::base::Optional<String_t> arg_gamedir;  // -G
         afl::base::Optional<String_t> arg_rootdir;  // -R
         afl::base::Optional<String_t> arg_output;   // -o
@@ -114,22 +109,21 @@ namespace {
         bool opt_commands;                          // -k
         bool opt_preexecLoad;                       // -fpreexec-load
         Mode mode;
-        afl::charset::Charset* gameCharset;
+        std::auto_ptr<afl::charset::Charset> gameCharset;
         std::vector<String_t> loadPath;             // -I
         std::vector<String_t> job;
         int optimisationLevel;
         int playerNumber;
 
         Parameters()
-            : holder(),
-              arg_gamedir(),
+            : arg_gamedir(),
               arg_rootdir(),
               arg_output(),
               opt_debug(true),
               opt_commands(false),
               opt_preexecLoad(false),
               mode(ExecMode),
-              gameCharset(&holder.addNew(new afl::charset::CodepageCharset(afl::charset::g_codepageLatin1))),
+              gameCharset(new afl::charset::CodepageCharset(afl::charset::g_codepageLatin1)),
               loadPath(),
               job(),
               optimisationLevel(1),
@@ -150,9 +144,8 @@ namespace {
         }
     }
 
-    String_t getFileNameExtension(String_t input)
+    String_t getFileNameExtension(afl::io::FileSystem& fs, String_t input)
     {
-        afl::io::FileSystem& fs = afl::io::FileSystem::getInstance();
         String_t fileName = fs.getFileName(input);
         String_t::size_type dot = fileName.rfind('.');
         if (dot != String_t::npos && dot != 0) {
@@ -191,8 +184,9 @@ namespace {
             // Files: compile files into individual BCOs
             for (size_t i = 0, n = params.job.size(); i < n; ++i) {
                 // FIXME: when given .qs files, assemble. When given .qc files, load.
-                String_t ext = getFileNameExtension(params.job[i]);
-                afl::base::Ref<afl::io::Stream> stream(afl::io::FileSystem::getInstance().openFile(params.job[i], afl::io::FileSystem::OpenRead));
+                afl::io::FileSystem& fs = session.world().fileSystem();
+                String_t ext = getFileNameExtension(fs, params.job[i]);
+                afl::base::Ref<afl::io::Stream> stream(fs.openFile(params.job[i], afl::io::FileSystem::OpenRead));
                 if (ext == "qc") {
                     // Load header FIXME q&d
                     uint8_t header[14];
@@ -204,7 +198,7 @@ namespace {
                     
                     game::interface::LoadContext lc(session);
                     interpreter::vmio::ObjectLoader loader(*params.gameCharset, lc);
-                    loader.load(*stream);
+                    loader.load(stream);
                     result.push_back(loader.getBCO(bcoId).asPtr());
                 } else {
                     interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
@@ -262,9 +256,8 @@ namespace {
         }
     }
 
-    String_t getOutputFileName(String_t input, const char* ext)
+    String_t getOutputFileName(afl::io::FileSystem& fs, String_t input, const char* ext)
     {
-        afl::io::FileSystem& fs = afl::io::FileSystem::getInstance();
         String_t dirName = fs.getDirectoryName(input);
         String_t fileName = fs.getFileName(input);
         String_t::size_type dot = fileName.rfind('.');
@@ -280,7 +273,7 @@ namespace {
         return fs.makePathName(dirName, fileName);
     }
 
-    void saveObjectFile(afl::sys::LogListener& log, String_t fileName, interpreter::BCORef_t bco, const Parameters& params)
+    void saveObjectFile(afl::sys::LogListener& log, afl::io::FileSystem& fs, String_t fileName, interpreter::BCORef_t bco, const Parameters& params)
     {
         // Prepare save
         interpreter::vmio::FileSaveContext fsc(*params.gameCharset);
@@ -289,7 +282,7 @@ namespace {
         log.write(log.Trace, LOG_NAME, afl::string::Format(_("Writing '%s', %d object%!1{s%}...").c_str(), fileName, fsc.getNumPreparedObjects()));
 
         // Create output file
-        afl::base::Ref<afl::io::Stream> file = afl::io::FileSystem::getInstance().openFile(fileName, afl::io::FileSystem::Create);
+        afl::base::Ref<afl::io::Stream> file = fs.openFile(fileName, afl::io::FileSystem::Create);
         uint8_t header[] = { 'C', 'C', 'o', 'b', 'j', 26, 100, 0, 4, 0,
                              uint8_t(bcoID),
                              uint8_t(bcoID>>8),
@@ -390,7 +383,11 @@ namespace {
      */
     int doCompileMode(game::Session& session, const Parameters& params)
     {
-        warnIgnoredOptions(session.log(), params);
+        // Environment
+        afl::sys::LogListener& log = session.log();
+        afl::io::FileSystem& fs = session.world().fileSystem();
+
+        warnIgnoredOptions(log, params);
 
         // Compile
         std::vector<interpreter::BCOPtr_t> result;
@@ -401,16 +398,16 @@ namespace {
         if (params.arg_output.get(output)) {
             // Single output file given. If we have multiple BCO's, merge.
             interpreter::BCORef_t bco = mergeResult(result);
-            saveObjectFile(session.log(), output, bco, params);
+            saveObjectFile(log, fs, output, bco, params);
             return 0;
         } else if (params.opt_commands) {
             // No output file given, input is commands
-            session.log().write(afl::sys::Log::Error, LOG_NAME, session.translator().translateString("must specify an output file ('-o FILE') if input is commands"));
+            log.write(afl::sys::Log::Error, LOG_NAME, session.translator().translateString("must specify an output file ('-o FILE') if input is commands"));
             return 1;
         } else {
             // No output file given, input is files. Generate output file names.
             for (size_t i = 0; i < result.size() && i < params.job.size(); ++i) {
-                saveObjectFile(session.log(), getOutputFileName(params.job[i], ".qc"), *result[i], params);
+                saveObjectFile(log, fs, getOutputFileName(fs, params.job[i], ".qc"), *result[i], params);
             }
             return 0;
         }
@@ -434,7 +431,7 @@ namespace {
         String_t output;
         if (params.arg_output.get(output)) {
             // Save to file
-            afl::base::Ref<afl::io::Stream> file = afl::io::FileSystem::getInstance().openFile(output, afl::io::FileSystem::Create);
+            afl::base::Ref<afl::io::Stream> file = session.world().fileSystem().openFile(output, afl::io::FileSystem::Create);
             afl::io::TextFile text(*file);
             saveAssemblerSource(text, bco, params);
         } else {
@@ -513,8 +510,8 @@ ConsoleScriptApplication::appMain()
                 }
                 params.playerNumber = value;
             } else if (p == "C") {
-                if (afl::charset::Charset* cs = afl::charset::DefaultCharsetFactory().createCharset(params.holder, fetchArg("-C", commandLine))) {
-                    params.gameCharset = cs;
+                if (afl::charset::Charset* cs = afl::charset::DefaultCharsetFactory().createCharset(fetchArg("-C", commandLine))) {
+                    params.gameCharset.reset(cs);
                 } else {
                     errorExit(_("the specified character set is not known"));
                 }

@@ -1,5 +1,6 @@
 /**
   *  \file game/spec/friendlycode.cpp
+  *  \brief Class game::spec::FriendlyCode
   */
 
 #include <cstring>
@@ -11,7 +12,7 @@
 #include "util/string.hpp"
 
 
-// /** Construct empty GFCode object. */
+// Default constructor.
 game::spec::FriendlyCode::FriendlyCode()
     : m_code(),
       m_description(),
@@ -19,10 +20,7 @@ game::spec::FriendlyCode::FriendlyCode()
       m_flags()
 { }
 
-// /** Construct from fcodes.cc file line. This one handles a line
-//     that originally contained `c + "," + desc_line'.
-//     \param c          friendly code
-//     \param desc_line  description line */
+// Construct from definition.
 game::spec::FriendlyCode::FriendlyCode(String_t code, String_t descriptionLine)
     : m_code(code),
       m_description(),
@@ -33,9 +31,11 @@ game::spec::FriendlyCode::FriendlyCode(String_t code, String_t descriptionLine)
     initFromString(descriptionLine);
 }
 
+// Destructor.
 game::spec::FriendlyCode::~FriendlyCode()
 { }
 
+// Get friendly code.
 const String_t&
 game::spec::FriendlyCode::getCode() const
 {
@@ -43,6 +43,7 @@ game::spec::FriendlyCode::getCode() const
     return m_code;
 }
 
+// Get description.
 String_t
 game::spec::FriendlyCode::getDescription(const PlayerList& playerList) const
 {
@@ -50,25 +51,23 @@ game::spec::FriendlyCode::getDescription(const PlayerList& playerList) const
     return playerList.expandNames(m_description);
 }
 
+// Get flags.
 game::spec::FriendlyCode::FlagSet_t
 game::spec::FriendlyCode::getFlags() const
 {
     return m_flags;
 }
 
+// Get set of races who can use this friendly code.
 game::PlayerSet_t
 game::spec::FriendlyCode::getRaces() const
 {
     return m_races;
 }
 
-
-
-
-/** Check whether code works on specified object.
-    \param o a ship or planet */
+// Check whether this friendly code works on an object.
 bool
-game::spec::FriendlyCode::worksOn(const game::map::Object& o, game::config::HostConfiguration& config) const
+game::spec::FriendlyCode::worksOn(const game::map::Object& o, const game::config::HostConfiguration& config) const
 {
     // ex GFCode::worksOn
     // FIXME: incomplete
@@ -82,10 +81,9 @@ game::spec::FriendlyCode::worksOn(const game::map::Object& o, game::config::Host
     }
 }
 
-/** Check whether code works on planet.
-    \param p a planet */
+// Check whether this friendly code works on a planet.
 bool
-game::spec::FriendlyCode::worksOn(const game::map::Planet& p, game::config::HostConfiguration& config) const
+game::spec::FriendlyCode::worksOn(const game::map::Planet& p, const game::config::HostConfiguration& config) const
 {
     // ex GFCode::worksOn
     // FIXME: consider moving this out of FriendlyCode. Instead, make separate filter classes. It's only used to build filtered lists.
@@ -105,18 +103,12 @@ game::spec::FriendlyCode::worksOn(const game::map::Planet& p, game::config::Host
     return false;
 }
 
-
-// /** Parse a flag list.
-//     \param s       string we got from user
-//     \param data    allowed options, in caps (e.g., for fcodes, "SPBRAU")
-//     \param value   pointer to integer variable with result (first option
-//                    has value 1, second has value 2, third has 4, etc.)
-//     \param races   pointer to player set. Can be NULL, then
-//                    we'll not accept races. *races can be preinitialized
-//                    to a default value (*value can not). Note that the result
-//                    may contain bits outside 1..11.
-//     \param accept_bad_flags if set, accept unknown flags.
-//     \returns true on success, false on error */
+/** Parse a flag list.
+    \param s       [in] string we got from user
+    \param data    [in] allowed options, in caps (e.g., for fcodes, "SPBRAU")
+    \param value   [out] flag result
+    \param races   [out] player set result
+    \returns true on success, false on error */
 bool
 game::spec::FriendlyCode::parseFlags(const String_t& s, const char* data, FlagSet_t& flags, PlayerSet_t& races)
 {
@@ -151,6 +143,8 @@ game::spec::FriendlyCode::parseFlags(const String_t& s, const char* data, FlagSe
     return true;
 }
 
+/** Initialize from description string.
+    \param descriptionLine Description */
 void
 game::spec::FriendlyCode::initFromString(const String_t& descriptionLine)
 {

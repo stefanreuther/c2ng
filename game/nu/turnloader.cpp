@@ -246,9 +246,9 @@ game::nu::TurnLoader::loadHistoryTurn(Turn& turn, Game& game, int player, int tu
 void
 game::nu::TurnLoader::loadPlanets(game::map::Universe& univ, afl::data::Access planets, PlayerSet_t players)
 {
-    const int n = planets.getArraySize();
+    const size_t n = planets.getArraySize();
     m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loading %d planet%!1{s%}...").c_str(), n));
-    for (int i = 0; i < n; ++i) {
+    for (size_t i = 0; i < n; ++i) {
         afl::data::Access in = planets[i];
         int id = in("id").toInteger();
         game::map::Planet* out = univ.planets().create(id);
@@ -343,9 +343,9 @@ game::nu::TurnLoader::loadStarbases(game::map::Universe& univ, afl::data::Access
 {
     using game::map::Planet;
 
-    const int n = bases.getArraySize();
+    const size_t n = bases.getArraySize();
     m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loading %d starbase%!1{s%}...").c_str(), n));
-    for (int i = 0; i < n; ++i) {
+    for (size_t i = 0; i < n; ++i) {
         afl::data::Access in = bases[i];
 
         // Get planet. This does not create planet objects!
@@ -397,9 +397,9 @@ game::nu::TurnLoader::loadStarbases(game::map::Universe& univ, afl::data::Access
 void
 game::nu::TurnLoader::loadShips(game::map::Universe& univ, afl::data::Access ships, PlayerSet_t players)
 {
-    const int n = ships.getArraySize();
+    const size_t n = ships.getArraySize();
     m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loading %d ship%!1{s%}...").c_str(), n));
-    for (int i = 0; i < n; ++i) {
+    for (size_t i = 0; i < n; ++i) {
         afl::data::Access in = ships[i];
         int id = in("id").toInteger();
         game::map::Ship* out = univ.ships().create(id);
@@ -497,9 +497,9 @@ game::nu::TurnLoader::loadMinefields(game::map::Universe& univ, afl::data::Acces
 {
     using game::map::Minefield;
 
-    const int n = p.getArraySize();
+    const size_t n = p.getArraySize();
     m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loading %d minefield%!1{s%}...").c_str(), n));
-    for (int i = 0; i < n; ++i) {
+    for (size_t i = 0; i < n; ++i) {
         afl::data::Access in = p[i];
 
         int id = in("id").toInteger();

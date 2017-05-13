@@ -1,5 +1,10 @@
 /**
   *  \file game/parser/messagevalue.cpp
+  *  \brief Template class game::parser::MessageValue and related functions
+  *
+  *  This contains the integer-to-name and name-to-integer mapping functions for MessageStringIndex and MessageIntegerIndex.
+  *
+  *  Note that getNameFromIndex and getStringIndexFromKeyword/getIntegerIndexFromKeyword are not inverse to each other!
   */
 
 #include "game/parser/messagevalue.hpp"
@@ -75,18 +80,7 @@ namespace {
 
 }
 
-/*
- *  Original comment:
- *
- *  This contains the integer-to-name mapping functions declared in
- *  game/parser.h, to avoid pulling them in for code that doesn't
- *  need any integer-to-name mappings.
- *
- *  Note that getNameForItem and getXxxIndexFromKeyword are not
- *  inverse to each other!
- */
-
-/** Get user-visible name for a GMessageStringIndex. */
+// Get human-readable name, given a string index.
 String_t
 game::parser::getNameFromIndex(MessageStringIndex si, afl::string::Translator& tx)
 {
@@ -99,7 +93,7 @@ game::parser::getNameFromIndex(MessageStringIndex si, afl::string::Translator& t
     return "?";
 }
 
-/** Get user-visible name for a GMessageIntIndex. */
+// Get human-readable name, given an integer index.
 String_t
 game::parser::getNameFromIndex(MessageIntegerIndex ii, afl::string::Translator& tx)
 {
@@ -169,8 +163,7 @@ game::parser::getNameFromIndex(MessageIntegerIndex ii, afl::string::Translator& 
     return "?";
 }
 
-
-/** Look up keyword into a GMessageStringIndex. */
+// Get string index, given a keyword.
 game::parser::MessageStringIndex
 game::parser::getStringIndexFromKeyword(String_t kw)
 {
@@ -178,7 +171,7 @@ game::parser::getStringIndexFromKeyword(String_t kw)
     return MessageStringIndex(lookupKeyword(kw, stringNames, ms_Max));
 }
 
-/** Look up keyword into a GMessageIntIndex. */
+// Get integer index, given a keyword.
 game::parser::MessageIntegerIndex
 game::parser::getIntegerIndexFromKeyword(String_t kw)
 {

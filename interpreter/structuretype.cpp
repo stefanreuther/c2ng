@@ -1,35 +1,24 @@
 /**
   *  \file interpreter/structuretype.cpp
+  *  \brief Class interpreter::StructureType
   */
 
 #include "interpreter/structuretype.hpp"
 #include "interpreter/savecontext.hpp"
 
-interpreter::StructureTypeData::StructureTypeData()
-{
-    // ex IntStructureTypeData::IntStructureTypeData
-}
-
-interpreter::StructureTypeData::~StructureTypeData()
-{
-    // ex IntStructureTypeData::~IntStructureTypeData
-}
-
-
-
-
-interpreter::StructureType::StructureType(afl::base::Ref<StructureTypeData> type)
+// Constructor.
+interpreter::StructureType::StructureType(StructureTypeData::Ref_t type)
     : m_type(type)
 {
     // ex IntStructureType::IntStructureType
 }
 
+// Destructor.
 interpreter::StructureType::~StructureType()
 {
     // ex IntStructureType::~IntStructureType
 }
 
-// IntValue:
 String_t
 interpreter::StructureType::toString(bool /*readable*/) const
 {

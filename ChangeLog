@@ -1,4 +1,282 @@
+2017-05-08  Stefan Reuther  <streu@gmx.de>
+
+	* scripts/install.pl: add install script
+
+2017-04-23  Stefan Reuther  <streu@gmx.de>
+
+	* interpreter/hashvalue.hpp: convert to use afl::data::Hash; remove interpreter/hashdata.hpp.
+
+2017-04-18  Stefan Reuther  <streu@gmx.de>
+
+	* interpreter/exporter/htmlexporter.cpp: escape HTML [#343]
+
+2017-04-08  Stefan Reuther  <streu@gmx.de>
+
+	* game/maint/sweeper.cpp (execute): call updateIndex()
+
+2017-04-03  Stefan Reuther  <streu@gmx.de>
+
+	* server/interface/composablecommandhandler.cpp, server/interface/composablecommandhandler.hpp: new
+
+2017-03-27  Stefan Reuther  <streu@gmx.de>
+
+	* interpreter/arraydata.cpp, interpreter/arraydata.hpp: new [split up from interpreter/arrayvalue.hpp]
+
+2017-03-26  Stefan Reuther  <streu@gmx.de>
+
+	* server/configurationhandler.cpp, server/configurationhandler.hpp: new
+
+2017-03-24  Stefan Reuther  <streu@gmx.de>
+
+	* server/common/session.cpp, server/common/session.hpp: new (from file and talk session)
+
+2017-03-23  Stefan Reuther  <streu@gmx.de>
+
+	* server/interface/hostcron.hpp: new [ex planetscentral/host/cmdcron.h]
+	* server/interface/hostcronclient.cpp, server/interface/hostcronclient.hpp: new [ex planetscentral/host/cmdcron.h]
+
+2017-03-17  Stefan Reuther  <streu@gmx.de>
+
+	* tools/c2rater.cpp: new [ex planetscentral/rater/rater.cc]
+	* game/maint/difficultyrater.cpp, game/maint/difficultyrater.hpp: new [ex planetscentral/rater/difficulty.h]
+	* server/file/directorywrapper.cpp, server/file/directorywrapper.hpp: new
+
+2017-03-15  Stefan Reuther  <streu@gmx.de>
+
+	* server/file/clientdirectoryhandler.cpp, server/file/clientdirectoryhandler.hpp: new
+
+2017-03-14  Stefan Reuther  <streu@gmx.de>
+
+	* server/file/ca/objectcache.hpp: new
+	* server/file/ca/internalobjectcache.cpp, server/file/ca/internalobjectcache.hpp: new
+
+2017-03-13  Stefan Reuther  <streu@gmx.de>
+
+	* server/file/ca/internalreferencecounter.hpp, server/file/ca/internalreferencecounter.hpp: new
+	* server/file/ca/referencecounter.hpp: new
+
+2017-03-12  Stefan Reuther  <streu@gmx.de>
+
+	* server/file/directoryhandlerfactory.cpp, server/file/directoryhandlerfactory.hpp: new
+	* server/file/utils.cpp, server/file/utils.hpp: new
+	* server/tools/c2fileclient.cpp: new
+
+2017-03-11  Stefan Reuther  <streu@gmx.de>
+
+	* server/file/ca/commit.cpp, server/file/ca/commit.hpp: new
+
+2017-03-07  Stefan Reuther  <streu@gmx.de>
+
+	* server/file/ca/directoryentry.cpp, server/file/ca/directoryentry.hpp: new
+	* server/file/ca/directoryhandler.cpp, server/file/ca/directoryhandler.hpp: new
+	* server/file/ca/root.cpp, server/file/ca/root.hpp: new
+
+2017-03-05  Stefan Reuther  <streu@gmx.de>
+
+	* server/file/ca/objectid.cpp, server/file/ca/objectid.hpp: new
+	* server/file/ca/objectstore.cpp, server/file/ca/objectstore.hpp: new
+
+2017-02-28  Stefan Reuther  <streu@gmx.de>
+
+	* server/file/directoryhandler.hpp: rework interface in anticipation of new storage backend
+
+2017-02-26  Stefan Reuther  <streu@gmx.de>
+
+	* server/file/filegame.cpp, server/file/filegame.hpp: new [planetscentral/file.cc]
+	* server/file/gamestatus.cpp, server/file/gamestatus.hpp: new [planetscentral/dirinfo.h]
+	* server/file/internaldirectoryhandler.cpp, server/file/internaldirectoryhandler.hpp: new
+	* server/file/racenames.cpp, server/file/racenames.hpp: new
+	* server/interface/filegame.hpp: new [planetscentral/file.cc]
+	* server/interface/filegameclient.cpp, server/interface/filegameclient.hpp: new [planetscentral/file.cc]
+	* server/interface/filegameserver.cpp, server/interface/filegameserver.hpp: new [planetscentral/file.cc]
+
+2017-02-17  Stefan Reuther  <streu@gmx.de>
+
+	* server/file/directoryhandler.hpp: new
+	* server/file/directoryitem.cpp, server/file/directoryitem.hpp: new [planetscentral/userdir.h]
+	* server/file/filebase.cpp, server/file/filebase.hpp: new [planetscentral/file.cc]
+	* server/file/fileitem.cpp, server/file/fileitem.hpp: new [planetscentral/userdir.h]
+	* server/file/filesystemhandler.cpp, server/file/filesystemhandler.hpp: new
+	* server/file/item.cpp, server/file/item.hpp: new [planetscentral/userdir.h]
+	* server/file/pathresolver.cpp, server/file/pathresolver.hpp: new [planetscentral/pathresolver.h]
+
+2017-02-16  Stefan Reuther  <streu@gmx.de>
+
+	* server/c2file.cpp: new [planetscentral/file.cc]
+	* server/file/commandhandler.cpp, server/file/commandhandler.hpp: new [planetscentral/file.cc]
+	* server/file/root.cpp, server/file/root.hpp: new [planetscentral/file.cc]
+	* server/file/session.cpp, server/file/session.hpp: new [planetscentral/file.cc]
+
+2017-02-13  Stefan Reuther  <streu@gmx.de>
+
+	* server/interface/filebase.cpp, server/interface/filebase.hpp: new [planetscentral/file.cc]
+	* server/interface/filebaseclient.cpp, server/interface/filebaseclient.hpp: new [planetscentral/dbclient/fileclient.h]
+	* server/interface/filebaseserver.cpp, server/interface/filebaseserver.hpp: new [planetscentral/file.cc]
+
+2017-02-12  Stefan Reuther  <streu@gmx.de>
+
+	* server/talk/configuration.cpp, server/talk/configuration.hpp: new
+	* server/interface/base.hpp: new
+	* server/interface/baseclient.cpp, server/interface/baseclient.hpp: new
+
+2017-02-11  Stefan Reuther  <streu@gmx.de>
+
+	* server/interface/talknntp.hpp: new [planetscentral/talk/cmdnntp.h]
+	* server/interface/talknntpclient.cpp, server/interface/talknntpclient.hpp: new [planetscentral/talk/cmdnntp.h]
+	* server/interface/talknntpserver.cpp, server/interface/talknntpserver.hpp: new [planetscentral/talk/cmdnntp.h]
+	* server/interface/talkpm.hpp: new [planetscentral/talk/cmdpm.h]
+	* server/interface/talkpmclient.cpp, server/interface/talkpmclient.hpp: new [planetscentral/talk/cmdpm.h]
+	* server/interface/talkpmserver.cpp, server/interface/talkpmserver.hpp: new [planetscentral/talk/cmdpm.h]
+	* server/talk/talknntp.cpp, server/talk/talknntp.hpp: new [planetscentral/talk/cmdnntp.h]
+	* server/talk/talkpm.cpp, server/talk/talkpm.hpp: new [planetscentral/talk/cmdpm.h]
+	* server/talk/userpm.cpp, server/talk/userpm.hpp: new [planetscentral/talk/userpm.h]
+
+2017-02-10  Stefan Reuther  <streu@gmx.de>
+
+	* server/errors.hpp: new
+	* server/interface/talkfolder.hpp: new [planetscentral/talk/cmdfolder.h]
+	* server/interface/talkfolderclient.cpp, server/interface/talkfolderclient.hpp: new [planetscentral/talk/cmdfolder.h]
+	* server/interface/talkfolderserver.cpp, server/interface/talkfolderserver.hpp: new [planetscentral/talk/cmdfolder.h]
+	* server/talk/spam.hpp, server/talk/spam.cpp: new [planetscentral/talk/spam.h]
+	* server/talk/talkfolder.cpp, server/talk/talkfolder.hpp: new [planetscentral/talk/cmdfolder.h]
+	* server/talk/userfolder.cpp, server/talk/userfolder.hpp: new [planetscentral/talk/userfolder.h]
+
+2017-02-09  Stefan Reuther  <streu@gmx.de>
+
+	* server/interface/talkuser.hpp: new [planetscentral/talk/cmduser.h]
+	* server/interface/talkuserclient.cpp, server/interface/talkuserclient.hpp: new [planetscentral/talk/cmduser.h]
+	* server/interface/talkuserserver.cpp, server/interface/talkuserserver.hpp: new [planetscentral/talk/cmduser.h]
+	* server/talk/talkuser.cpp, server/talk/talkuser.hpp: new [planetscentral/talk/cmduser.h]
+
+2017-02-05  Stefan Reuther  <streu@gmx.de>
+
+	* server/talk/newsrc.cpp, server/talk/newsrc.hpp: new [planetscentral/talk/newsrc.h]
+
+2017-02-04  Stefan Reuther  <streu@gmx.de>
+
+	* server/interface/talkforum.cpp, server/interface/talkforum.hpp: new [planetscentral/talk/cmdforum.h]
+	* server/interface/talkforumclient.cpp, server/interface/talkforumclient.hpp: new [planetscentral/talk/cmdforum.h]
+	* server/interface/talkforumserver.cpp, server/interface/talkforumserver.hpp: new [planetscentral/talk/cmdforum.h]
+	* server/interface/talkthread.hpp  new [planetscentral/talk/cmdthread.h]
+	* server/interface/talkthreadclient.cpp, server/interface/talkthreadclient.hpp: new [planetscentral/talk/cmdthread.h]
+	* server/interface/talkthreadserver.cpp, server/interface/talkthreadserver.hpp: new [planetscentral/talk/cmdthread.h]
+	* server/talk/notify.cpp, server/talk/notify.hpp: new [planetscentral/talk/notify.h]
+	* server/talk/sorter.hpp: new [planetscentral/talk/cmdforum.h]
+	* server/talk/talkforum.cpp, server/talk/talkforum.hpp: new [planetscentral/talk/cmdforum.h]
+	* server/talk/talkthread.cpp, server/talk/talkthread.hpp: new [planetscentral/talk/cmdthread.h]
+
+2017-02-01  Stefan Reuther  <streu@gmx.de>
+
+	* server/interface/mailqueue.hpp: new [planetscentral/mailout/mailout.cc]
+	* server/interface/mailqueueclient.cpp, server/interface/mailqueueclient.hpp: new [planetscentral/mailout/mailout.cc]
+	* server/interface/mailqueueserver.cpp, server/interface/mailqueueserver.hpp: new [planetscentral/mailout/mailout.cc]
+
+2017-01-31  Stefan Reuther  <streu@gmx.de>
+
+	* server/interface/talkpost.hpp: new [planetscentral/talk/cmdpost.h]
+	* server/interface/talkpostclient.cpp, server/interface/talkpostclient.hpp: new [planetscentral/talk/cmdpost.h]
+	* server/interface/talkpostserver.cpp, server/interface/talkpostserver.hpp: new [planetscentral/talk/cmdpost.h]
+	* server/talk/talkpost.cpp, server/talk/talkpost.hpp: new [planetscentral/talk/cmdpost.h]
+
+2017-01-29  Stefan Reuther  <streu@gmx.de>
+
+	* server/talk/accesschecker.cpp, server/talk/accesschecker.hpp: new [planetscentral/talk/cmdpost.h]
+	* server/talk/parse/bblexer.cpp, server/talk/parse/bblexer.hpp: new [planetscentral/talk/bblex.h]
+	* server/talk/parse/bbparser.cpp, server/talk/parse/bbparser.hpp: new [planetscentral/talk/bbparse.h]
+	* server/talk/render/bbrenderer.cpp, server/talk/render/bbrenderer.hpp: new [planetscentral/talk/bbout.h]
+	* server/talk/render/htmlrenderer.cpp, server/talk/render/htmlrenderer.hpp: new [planetscentral/talk/htmlout.h]
+	* server/talk/render/mailrenderer.cpp, server/talk/render/mailrenderer.hpp: new [planetscentral/talk/mailout.h]
+
+2017-01-28  Stefan Reuther  <streu@gmx.de>
+
+	* server/interface/talkgroup.hpp: new [planetscentral/talk/cmdgroup.h]
+	* server/interface/talkgroupclient.cpp, server/interface/talkgroupclient.hpp: new [planetscentral/talk/cmdgroup.h]
+	* server/interface/talkgroupserver.cpp, server/interface/talkgroupserver.hpp: new [planetscentral/talk/cmdgroup.h]
+	* server/interface/talkrender.hpp: new [planetscentral/talk/cmdrender.h]
+	* server/interface/talkrenderclient.cpp, server/interface/talkrenderclient.hpp: new [planetscentral/talk/cmdrender.h]
+	* server/interface/talkrenderserver.cpp, server/interface/talkrenderserver.hpp: new [planetscentral/talk/cmdrender.h]
+	* server/talk/forum.cpp, server/talk/forum.hpp: new [planetscentral/talk/forum.h]
+	* server/talk/message.cpp, server/talk/message.hpp: new [planetscentral/talk/message.h]
+	* server/talk/render/context.cpp, server/talk/render/context.hpp: new [planetscentral/talk/render.h]
+	* server/talk/render/options.cpp, server/talk/render/options.hpp: new [planetscentral/talk/render.h]
+	* server/talk/render/render.cpp, server/talk/render/render.hpp: new [planetscentral/talk/render.h]
+	* server/talk/render/textrenderer.cpp, server/talk/render/textrenderer.hpp: new [planetscentral/talk/textout.h]
+	* server/talk/talkgroup.cpp, server/talk/talkgroup.hpp: new [planetscentral/talk/cmdgroup.h]
+	* server/talk/talkrender.cpp, server/talk/talkrender.hpp: new [planetscentral/talk/cmdrender.h]
+	* server/talk/topic.cpp, server/talk/topic.hpp: new [planetscentral/talk/topic.h]
+	* server/talk/user.cpp, server/talk/user.hpp: new [planetscentral/talk/user.h]
+	* server/talk/util.cpp, server/talk/util.hpp: new [planetscentral/talk/user.h]
+
+2017-01-27  Stefan Reuther  <streu@gmx.de>
+
+	* server/talk/linkformatter.cpp, server/talk/linkformatter.hpp: new [planetscentral/talk/url.h]
+	* server/talk/textnode.cpp, server/talk/textnode.hpp: new [planetscentral/talk/text.h]
+
+2017-01-26  Stefan Reuther  <streu@gmx.de>
+
+	* server/talk/group.cpp, server/talk/group.hpp: new [planetscentral/talk/group.h]
+
+2017-01-25  Stefan Reuther  <streu@gmx.de>
+
+	* server/types.cpp, server/types.hpp: new
+
+2017-01-24  Stefan Reuther  <streu@gmx.de>
+
+	* server/c2talk.cpp: new [planetscentral/talk/talk.cc]; basic structure for a complex microservice
+	* server/interface/talksyntax.hpp: new [planetscentral/talk/cmdsyntax.h]
+	* server/interface/talksyntaxclient.cpp, server/interface/talksyntaxclient.hpp: new [planetscentral/talk/cmdsyntax.h]
+	* server/interface/talksyntaxserver.cpp, server/interface/talksyntaxserver.hpp: new [planetscentral/talk/cmdsyntax.h]
+	* server/talk/commandhandler.cpp, server/talk/commandhandler.hpp: new [planetscentral/talk/talkconnection.h]
+	* server/talk/root.cpp, server/talk/root.hpp: new [planetscentral/talk/talkconnection.h]
+	* server/talk/session.cpp, server/talk/session.hpp: new [planetscentral/talk/talkconnection.h]
+	* server/talk/talksyntax.cpp, server/talk/talksyntax.hpp: new [planetscentral/talk/cmdsyntax.h]
+
+2017-01-22  Stefan Reuther  <streu@gmx.de>
+
+	* server/talk/inlinerecognizer.cpp, server/talk/inlinerecognizer.hpp: new [planetscentral/talk/smiley.h]
+	* server/format/simpacker.cpp, server/format/simpacker.hpp: new [planetscentral/format/simpacker.h]
+
+2017-01-21  Stefan Reuther  <streu@gmx.de>
+
+	* server/application.cpp, server/application.hpp: new [server/config.cc, etc.]
+	* server/c2format.cpp: new [planetscentral/format/format.cc]
+	* server/format/beampacker.cpp, server/format/beampacker.hpp: new [planetscentral/format/specpacker.h]
+	* server/format/enginepacker.cpp, server/format/enginepacker.hpp: new [planetscentral/format/specpacker.h]
+	* server/format/format.cpp, server/format/format.hpp: new [planetscentral/format/format.cc]
+	* server/format/hullpacker.cpp, server/format/hullpacker.hpp: new [planetscentral/format/specpacker.h]
+	* server/format/packer.hpp: new [planetscentral/format/packer.h]
+	* server/format/stringpacker.cpp, server/format/stringpacker.hpp: new [planetscentral/format/stringpacker.h]
+	* server/format/torpedopacker.cpp, server/format/torpedopacker.hpp: new [planetscentral/format/specpacker.h]
+	* server/format/truehullpacker.cpp, server/format/truehullpacker.hpp: new [planetscentral/format/specpacker.h]
+	* server/format/utils.cpp, server/format/utils.hpp: new [planetscentral/format/specpacker.h]
+	* server/interface/format.hpp: new
+	* server/interface/formatclient.cpp, server/interface/formatclient.hpp: new
+	* server/interface/formatserver.cpp, server/interface/formatserver.hpp: new [planetscentral/format/format.cc]
+
+2017-01-20  Stefan Reuther  <streu@gmx.de>
+
+	* util/syntax/factory.cpp, util/syntax/factory.hpp: new [planetscentral/talk/syntaxnames.h]
+
+2017-01-19  Stefan Reuther  <streu@gmx.de>
+
+	* util/syntax/inihighlighter.cpp, util/syntax/inihighlighter.hpp: new [planetscentral/talk/syntaxini.h]
+
+2017-01-18  Stefan Reuther  <streu@gmx.de>
+
+	* util/syntax/chighlighter.cpp, util/syntax/chighlighter.hpp: new [planetscentral/talk/syntaxc.h]
+
+2017-01-17  Stefan Reuther  <streu@gmx.de>
+
+	* util/syntax/format.hpp: new [planetscentral/talk/syntax.h]
+	* util/syntax/highlighter.hpp: new [planetscentral/talk/syntax.h]
+	* util/syntax/keywordtable.cpp, util/syntax/keywordtable.hpp: new [planetscentral/talk/syntaxdb.h]
+	* util/syntax/nullhighlighter.hpp, util/syntax/nullhighlighter.cpp: new [planetscentral/talk/syntax.h]
+	* util/syntax/scripthighlighter.cpp, util/syntax/scripthighlighter.hpp: new [planetscentral/talk/syntaxscript.h]
+	* util/syntax/segment.cpp, util/syntax/segment.hpp: new [planetscentral/talk/syntax.h]
+
 2017-01-14  Stefan Reuther  <streu@gmx.de>
+
+	-------------------- c2ng_ms1 (Milestone 1, version 2.40.1)
 
 	* tools/c2untrn.cpp: new [game/un-trn.cc]
 	* game/v3/trn/dumper.cpp, game/v3/trn/dumper.hpp: new [game/un-trn.cc]

@@ -39,7 +39,10 @@ util::Application::Application(afl::sys::Environment& env, afl::io::FileSystem& 
       m_logger(),
       m_errorOutput(getWriter(env, env.Error)),
       m_standardOutput(getWriter(env, env.Output))
-{ }
+{
+    m_logger.attachWriter(false, m_standardOutput.asPtr());
+    m_logger.attachWriter(true, m_errorOutput.asPtr());
+}
 
 int
 util::Application::run()

@@ -13,14 +13,15 @@
 #include "interpreter/compilationcontext.hpp"
 #include "interpreter/world.hpp"
 #include "interpreter/values.hpp"
+#include "afl/base/optional.hpp"
+#include "interpreter/error.hpp"
 
 namespace {
     /** Find literal within data segment.
         \param dseg Data segment
         \param value Literal to find, must not be null
-        \return index such that data[index] equals value. -1 if none found. */
-    static int32_t
-    findLiteral(const afl::data::Segment& dseg, const afl::data::Value* value)
+        \return index such that data[index] equals value; Nothing if none found. */
+    afl::base::Optional<uint16_t> findLiteral(const afl::data::Segment& dseg, const afl::data::Value* value)
     {
         // Check at most 20 previous literals. This is to limit the amount of
         // time taken when compiling. As of 20100711, time taken and object file
@@ -29,34 +30,35 @@ namespace {
         // - max 20 literals       0.05s (25990 bytes)  0.11s (75894 bytes)
         // - full check            0.08s (24805 bytes)  0.90s (73186 bytes)
         // That is, we get roughly 2/3 of the savings at 1/30 of the cost.
-        uint32_t first = 0;
-        if (dseg.size() > 20) {
-            first = dseg.size() - 20;
+        size_t first = 0;
+        size_t last = dseg.size();
+        if (last > 20) {
+            first = last - 20;
         }
 
         if (const afl::data::IntegerValue* iv = dynamic_cast<const afl::data::IntegerValue*>(value)) {
-            for (uint32_t i = first; i < dseg.size(); ++i) {
+            for (size_t i = first; i < last; ++i) {
                 if (const afl::data::IntegerValue* iv2 = dynamic_cast<const afl::data::IntegerValue*>(dseg[i]))
                     if (iv2->getValue() == iv->getValue())
-                        return i;
+                        return uint16_t(i);
             }
-            return -1;
+            return afl::base::Nothing;
         } else if (const afl::data::FloatValue* fv = dynamic_cast<const afl::data::FloatValue*>(value)) {
-            for (uint32_t i = first; i < dseg.size(); ++i) {
+            for (size_t i = first; i < last; ++i) {
                 if (const afl::data::FloatValue* fv2 = dynamic_cast<const afl::data::FloatValue*>(dseg[i]))
                     if (fv2->getValue() == fv->getValue())
-                        return i;
+                        return uint16_t(i);
             }
-            return -1;
+            return afl::base::Nothing;
         } else if (const afl::data::StringValue* sv = dynamic_cast<const afl::data::StringValue*>(value)) {
-            for (uint32_t i = first; i < dseg.size(); ++i) {
+            for (size_t i = first; i < last; ++i) {
                 if (const afl::data::StringValue* sv2 = dynamic_cast<const afl::data::StringValue*>(dseg[i]))
                     if (sv2->getValue() == sv->getValue())
-                        return i;
+                        return uint16_t(i);
             }
-            return -1;
+            return afl::base::Nothing;
         } else {
-            return -1;
+            return afl::base::Nothing;
         }
     }
 }
@@ -139,7 +141,7 @@ void
 interpreter::BytecodeObject::addLineNumber(uint32_t line)
 {
     // ex IntBytecodeObject::addLineNumber
-    uint32_t address = m_code.size();
+    uint32_t address = uint32_t(m_code.size());
 
     if (line_numbers.size() == 0
         || (line != line_numbers[line_numbers.size()-1] && address != line_numbers[line_numbers.size()-2]))
@@ -181,6 +183,21 @@ interpreter::BytecodeObject::getLineNumber(PC_t pc) const
     return line_numbers[i+1];
 }
 
+// /** Make a new label for future reference. This label can be used in as many jumps
+//     as needed (addJump), and must be placed exactly once using addLabel. */
+interpreter::BytecodeObject::Label_t
+interpreter::BytecodeObject::makeLabel()
+{
+    // ex IntBytecodeObject::makeLabel
+    Label_t oldCount = num_labels;
+    Label_t newCount = Label_t(num_labels + 1);
+    if (newCount == 0) {
+        throw Error::tooComplex();
+    }
+    num_labels = newCount;
+    return oldCount;
+}
+
 // /** Add an instruction. */
 void
 interpreter::BytecodeObject::addInstruction(Opcode::Major major, uint8_t minor, uint16_t arg)
@@ -204,7 +221,7 @@ interpreter::BytecodeObject::addVariableReferenceInstruction(Opcode::Major major
         // Is it a local variable?
         afl::data::NameMap::Index_t ix = m_localNames.getIndexByName(name);
         if (ix != m_localNames.nil) {
-            addInstruction(major, Opcode::sLocal, ix);
+            addInstruction(major, Opcode::sLocal, uint16_t(ix));
             return;
         }
 
@@ -212,7 +229,7 @@ interpreter::BytecodeObject::addVariableReferenceInstruction(Opcode::Major major
         if (cc.hasFlag(CompilationContext::AlsoGlobalContext)) {
             ix = cc.world().globalPropertyNames().getIndexByName(name);
             if (ix != m_localNames.nil) {
-                addInstruction(major, Opcode::sShared, ix);
+                addInstruction(major, Opcode::sShared, uint16_t(ix));
                 return;
             }
         }
@@ -256,27 +273,42 @@ interpreter::BytecodeObject::addPushLiteral(afl::data::Value* literal)
     if (afl::data::ScalarValue* sv = dynamic_cast<afl::data::ScalarValue*>(literal)) {
         if (sv->getValue() >= -int32_t(0x7FFF) && sv->getValue() <= int32_t(0x7FFF)) {
             if (dynamic_cast<afl::data::BooleanValue*>(sv) != 0) {
-                addInstruction(Opcode::maPush, Opcode::sBoolean, sv->getValue());
+                addInstruction(Opcode::maPush, Opcode::sBoolean, uint16_t(sv->getValue()));
                 return;
             }
             if (dynamic_cast<afl::data::IntegerValue*>(sv) != 0) {
-                addInstruction(Opcode::maPush, Opcode::sInteger, sv->getValue());
+                addInstruction(Opcode::maPush, Opcode::sInteger, uint16_t(sv->getValue()));
                 return;
             }
         }
     }
 
     // None of the above, so use general way
-    int32_t existing = findLiteral(m_data, literal);
-    if (existing >= 0) {
+    uint16_t existing;
+    if (findLiteral(m_data, literal).get(existing)) {
         // Recycle existing literal
         addInstruction(Opcode::maPush, Opcode::sLiteral, existing);
     } else {
         // FIXME: check 16-bit range
         m_data.pushBack(literal);
-        addInstruction(Opcode::maPush, Opcode::sLiteral, m_data.size()-1);
+        addInstruction(Opcode::maPush, Opcode::sLiteral, uint16_t(m_data.size()-1));
     }
 }
+
+// /** Add a name for reference by later instructions. Existing names are recycled if
+//     possible. */
+uint16_t
+interpreter::BytecodeObject::addName(String_t name)
+{
+    // ex IntBytecodeObject::addName
+    afl::data::NameMap::Index_t nativeIndex = m_names.addMaybe(name);
+    uint16_t packedIndex = uint16_t(nativeIndex);
+    if (nativeIndex != packedIndex) {
+        throw Error::tooComplex();
+    }
+    return packedIndex;
+}
+
 
 // /** Check whether this BCO contains any instruction that potentially calls user code.
 //     This can be
@@ -349,7 +381,7 @@ interpreter::BytecodeObject::relocate()
                 assert(oldCode[i].arg < addresses.size());
                 Opcode c;
                 c.major = oldCode[i].major;
-                c.minor = oldCode[i].minor & ~Opcode::jSymbolic;
+                c.minor = uint8_t(oldCode[i].minor & ~Opcode::jSymbolic);
                 c.arg   = addresses[oldCode[i].arg];
                 m_code.push_back(c);
             } else {
@@ -436,6 +468,7 @@ interpreter::BytecodeObject::append(const BytecodeObject& other)
                 // FIXME: this works as long as all locals are unique or compatible.
                 // It will fail when we have overlapping locals that were intended to be unique, which could happen when inlining.
                 // We should make up some rules about how the two BCOs have to be related.
+                // FIXME: handle 64k overflow
                 addInstruction(maj, o.minor, m_localNames.addMaybe(other.m_localNames.getNameByIndex(o.arg)));
                 break;
              case Opcode::sLiteral:
@@ -463,9 +496,9 @@ interpreter::BytecodeObject::append(const BytecodeObject& other)
          case Opcode::maJump:
             // Adjust argument
             if (o.minor & Opcode::jSymbolic) {
-                addInstruction(maj, o.minor, o.arg + symBase);
+                addInstruction(maj, o.minor, uint16_t(o.arg + symBase));
             } else {
-                addInstruction(maj, o.minor, o.arg + absBase);
+                addInstruction(maj, o.minor, uint16_t(o.arg + absBase));
             }
             break;
          case Opcode::maMemref:
@@ -540,8 +573,7 @@ interpreter::BytecodeObject::getJumpTarget(uint8_t minor, uint16_t arg) const
 String_t
 interpreter::BytecodeObject::getDisassembly(PC_t index, const World& w) const
 {
-    String_t tpl;
-    m_code[index].getDisassemblyTemplate(tpl);
+    String_t tpl = m_code[index].getDisassemblyTemplate();
 
     String_t result;
     for (String_t::size_type i = 0; i < tpl.size(); ++i) {

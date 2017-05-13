@@ -73,3 +73,17 @@ gfx::Canvas::defaultBlit(Point pt, Canvas& src, Rectangle rect)
         }
     }
 }
+
+bool
+gfx::Canvas::defaultIsClipped(const Rectangle& r)
+{
+    // ex GfxCanvas::isClipped
+    return r != computeClipRect(r);
+}
+
+bool
+gfx::Canvas::defaultIsVisible(const Rectangle& r)
+{
+    // ex GfxCanvas::isVisible
+    return computeClipRect(r).exists();
+}

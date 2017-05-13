@@ -7,7 +7,10 @@
 
 #include "t_game_spec.hpp"
 #include "afl/io/constmemorystream.hpp"
+#include "afl/base/growablememory.hpp"
+#include "afl/sys/log.hpp"
 
+/** Test isNumeric(). */
 void
 TestGameSpecFriendlyCodeList::testNumeric()
 {
@@ -23,6 +26,7 @@ TestGameSpecFriendlyCodeList::testNumeric()
 
     host.set(host.Host, MKVERSION(3,22,40));
     TS_ASSERT(!testee.isNumeric("-11", host));
+    TS_ASSERT_EQUALS(testee.getNumericValue("-11", host), 1000);
     TS_ASSERT(!testee.isNumeric("--1", host));
     TS_ASSERT(!testee.isNumeric("1", host));
     TS_ASSERT(!testee.isNumeric(" 1", host));
@@ -58,6 +62,7 @@ TestGameSpecFriendlyCodeList::testNumeric()
     TS_ASSERT(testee.isNumeric(" 1 ", host));
 }
 
+/** Test isAllowedRandomCode(). */
 void
 TestGameSpecFriendlyCodeList::testRandom()
 {
@@ -126,3 +131,314 @@ TestGameSpecFriendlyCodeList::testRandom()
     TS_ASSERT(!testee.isAllowedRandomCode("ab", host));   // fails: length mismatch
     TS_ASSERT(!testee.isAllowedRandomCode("abcd", host)); // fails: length mismatch
 }
+
+/** Test container behaviour. */
+void
+TestGameSpecFriendlyCodeList::testContainer()
+{
+    game::spec::FriendlyCodeList testee;
+
+    // Verify initial state
+    TS_ASSERT_EQUALS(testee.size(), 0U);
+    TS_ASSERT_EQUALS(testee.begin(), testee.end());
+    TS_ASSERT(testee.at(0) == 0);
+
+    // Add some elements
+    testee.addCode(game::spec::FriendlyCode("pfc", "p,xxx"));
+    testee.addCode(game::spec::FriendlyCode("bfc", "b,xxx"));
+    testee.addCode(game::spec::FriendlyCode("sfc", "s,xxx"));
+    testee.addCode(game::spec::FriendlyCode("ffc", "p+1,xxx"));
+
+    // Verify properties
+    TS_ASSERT_EQUALS(testee.size(), 4U);
+    TS_ASSERT_EQUALS((*testee.begin())->getCode(), "pfc");
+
+    TS_ASSERT(testee.at(0) != 0);
+    TS_ASSERT(testee.at(3) != 0);
+    TS_ASSERT(testee.at(4) == 0);
+    TS_ASSERT_EQUALS(testee.at(0)->getCode(), "pfc");
+    TS_ASSERT_EQUALS(testee.at(1)->getCode(), "bfc");
+    TS_ASSERT_EQUALS(testee.at(2)->getCode(), "sfc");
+    TS_ASSERT_EQUALS(testee.at(3)->getCode(), "ffc");
+
+    size_t index;
+    TS_ASSERT(testee.getIndexByName("sfc", index));
+    TS_ASSERT_EQUALS(index, 2U);
+    TS_ASSERT(!testee.getIndexByName("SFC", index));
+    TS_ASSERT(!testee.getIndexByName("mkt", index));
+
+    TS_ASSERT_EQUALS(testee.getCodeByName("sfc"), testee.begin() + 2);
+    TS_ASSERT_EQUALS(testee.getCodeByName("mkt"), testee.end());
+
+    // Sort
+    testee.sort();
+    TS_ASSERT_EQUALS(testee.size(), 4U);
+    TS_ASSERT_EQUALS(testee.at(0)->getCode(), "bfc");
+    TS_ASSERT_EQUALS(testee.at(1)->getCode(), "ffc");
+    TS_ASSERT_EQUALS(testee.at(2)->getCode(), "pfc");
+    TS_ASSERT_EQUALS(testee.at(3)->getCode(), "sfc");
+    TS_ASSERT_EQUALS((*testee.begin())->getCode(), "bfc");
+
+    TS_ASSERT(testee.getIndexByName("sfc", index));
+    TS_ASSERT_EQUALS(index, 3U);
+
+    // Create a sub-list
+    game::map::Planet p(9);
+    p.setOwner(1);
+    p.setPlayability(p.ReadOnly);
+
+    game::spec::FriendlyCodeList sublist(testee, p, game::config::HostConfiguration());
+    TS_ASSERT_EQUALS(sublist.size(), 2U);
+    TS_ASSERT_EQUALS(sublist.at(0)->getCode(), "ffc");
+    TS_ASSERT_EQUALS(sublist.at(1)->getCode(), "pfc");
+
+    // Clear original list. Sublist remains.
+    testee.clear();
+    TS_ASSERT_EQUALS(testee.size(), 0U);
+    TS_ASSERT_EQUALS(sublist.size(), 2U);
+    TS_ASSERT_EQUALS(sublist.at(0)->getCode(), "ffc");
+}
+
+/** Test special friendly code detection. */
+void
+TestGameSpecFriendlyCodeList::testSpecial()
+{
+    game::spec::FriendlyCodeList testee;
+
+    // Provide normal
+    testee.addCode(game::spec::FriendlyCode("pfc", "p,xxx"));
+    testee.addCode(game::spec::FriendlyCode("bfc", "b,xxx"));
+    testee.addCode(game::spec::FriendlyCode("ufc", "u,xxx"));
+
+    // Load extras
+    afl::io::ConstMemoryStream ms(afl::string::toBytes("ab\n"
+                                                       "z\n"
+                                                       "pppp\n"
+                                                       "e f\n"));
+    testee.loadExtraCodes(ms);
+
+    // Verify
+    TS_ASSERT(testee.isExtra("ab"));
+    TS_ASSERT(testee.isExtra("abc"));
+    TS_ASSERT(testee.isExtra("z"));
+    TS_ASSERT(!testee.isExtra("ZZ"));
+    TS_ASSERT(!testee.isExtra("ppp"));   // no truncation to 3 characters!
+    TS_ASSERT(testee.isExtra("pppp"));
+    TS_ASSERT(testee.isExtra("e"));
+    TS_ASSERT(testee.isExtra("e11"));
+    TS_ASSERT(testee.isExtra("fff"));
+
+    // Check special
+    TS_ASSERT(testee.isSpecial("pfc", false));
+    TS_ASSERT(testee.isSpecial("bfc", false));
+    TS_ASSERT(!testee.isSpecial("ufc", false));
+    TS_ASSERT(!testee.isSpecial("PFC", false));
+    TS_ASSERT(!testee.isSpecial("BFC", false));
+    TS_ASSERT(!testee.isSpecial("UFC", false));
+    TS_ASSERT(testee.isSpecial("PFC", true));
+    TS_ASSERT(testee.isSpecial("BFC", true));
+    TS_ASSERT(!testee.isSpecial("UFC", true));
+
+    // Clear extra
+    testee.clearExtraCodes();
+    TS_ASSERT(!testee.isExtra("ab"));
+    TS_ASSERT(!testee.isExtra("abc"));
+    TS_ASSERT(!testee.isExtra("z"));
+}
+
+/** Test generateRandomCode(). */
+void
+TestGameSpecFriendlyCodeList::testGenerateRandom()
+{
+    // Environment
+    game::HostVersion host;
+    util::RandomNumberGenerator rng(0);
+
+    // Testee
+    game::spec::FriendlyCodeList testee;
+
+    // Test.
+    // Checking whether the result satisfies the rules means reimplementing them,
+    // but let's test that the result is sufficiently random.
+    // (This test will also fail if the generator fails to advance the random seed.)
+    String_t a = testee.generateRandomCode(rng, host);
+    String_t b = testee.generateRandomCode(rng, host);
+    String_t c = testee.generateRandomCode(rng, host);
+
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT_DIFFERS(a, c);
+    TS_ASSERT_DIFFERS(b, c);
+}
+
+/** Test isUniversalMinefieldFCode(). */
+void
+TestGameSpecFriendlyCodeList::testUniversalMF()
+{
+    // Environment
+    game::HostVersion phost;
+    phost.set(phost.PHost, MKVERSION(4, 0, 0));
+
+    game::HostVersion thost;
+    thost.set(thost.Host, MKVERSION(3, 2, 0));
+
+    // Testee
+    game::spec::FriendlyCodeList testee;
+
+    // Test
+    TS_ASSERT(testee.isUniversalMinefieldFCode("mfx", false, phost));
+    TS_ASSERT(testee.isUniversalMinefieldFCode("mfx", false, thost));
+    TS_ASSERT(!testee.isUniversalMinefieldFCode("abc", false, thost));
+
+    TS_ASSERT(!testee.isUniversalMinefieldFCode("MFX", false, phost));
+    TS_ASSERT(testee.isUniversalMinefieldFCode("MFX", false, thost));
+    TS_ASSERT(!testee.isUniversalMinefieldFCode("ABC", false, thost));
+
+    TS_ASSERT(testee.isUniversalMinefieldFCode("MFX", true, phost));
+    TS_ASSERT(testee.isUniversalMinefieldFCode("MFX", true, thost));
+    TS_ASSERT(!testee.isUniversalMinefieldFCode("ABC", true, thost));
+}
+
+/** Test generateRandomCode() infinite loop avoidance. */
+void
+TestGameSpecFriendlyCodeList::testGenerateRandomLoop()
+{
+    // Environment
+    game::HostVersion host;
+    util::RandomNumberGenerator rng(0);
+
+    // Create a friendly code list that blocks all ASCII characters
+    afl::base::GrowableMemory<uint8_t> mem;
+    for (uint8_t ch = ' '; ch < 127; ++ch) {
+        mem.append(ch);
+        mem.append('\n');
+    }
+    afl::io::ConstMemoryStream ms(mem);
+    game::spec::FriendlyCodeList testee;
+    testee.loadExtraCodes(ms);
+
+    // generateRandomCode() must still finish
+    TS_ASSERT_EQUALS(testee.generateRandomCode(rng, host).size(), 3U);
+}
+
+/** Test generateRandomCode() infinite loop avoidance. */
+void
+TestGameSpecFriendlyCodeList::testGenerateRandomBlock()
+{
+    // Environment
+    game::HostVersion host;
+    util::RandomNumberGenerator rng(0);
+
+    // Create a friendly code list that blocks all ASCII characters except for Z
+    afl::base::GrowableMemory<uint8_t> mem;
+    for (uint8_t ch = ' '; ch < 127; ++ch) {
+        if (ch != 'Z') {
+            mem.append(ch);
+            mem.append('\n');
+        }
+    }
+    afl::io::ConstMemoryStream ms(mem);
+    game::spec::FriendlyCodeList testee;
+    testee.loadExtraCodes(ms);
+
+    // generateRandomCode() must create a code starting with 'Z'
+    String_t s = testee.generateRandomCode(rng, host);
+    TS_ASSERT_EQUALS(s.size(), 3U);
+    TS_ASSERT_EQUALS(s[0], 'Z');
+}
+
+/** Test load(). */
+void
+TestGameSpecFriendlyCodeList::testLoad()
+{
+    using game::spec::FriendlyCode;
+
+    // Environment
+    static const char* FILE =
+        "; comment\n"           // comment
+        "mkt,s,Make\n"          // ship code
+        "\n"                    // blank line
+        "  NUK  ,p,Nuke\n"      // planet code
+        "a=b,c,d\n"             // assignment associated with planet code
+        "???,u,Unspecial\n";    // unspecial
+    afl::io::ConstMemoryStream ms(afl::string::toBytes(FILE));
+    afl::sys::Log log;
+
+    // Load
+    game::spec::FriendlyCodeList testee;
+    testee.load(ms, log);
+
+    // Verify
+    TS_ASSERT_EQUALS(testee.size(), 3U);
+    TS_ASSERT_EQUALS(testee.at(0)->getCode(), "mkt");
+    TS_ASSERT_EQUALS(testee.at(0)->getFlags(), FriendlyCode::FlagSet_t(FriendlyCode::ShipCode));
+    TS_ASSERT_EQUALS(testee.at(1)->getCode(), "NUK");
+    TS_ASSERT_EQUALS(testee.at(1)->getFlags(), FriendlyCode::FlagSet_t(FriendlyCode::PlanetCode));
+    TS_ASSERT_EQUALS(testee.at(2)->getCode(), "???");
+    TS_ASSERT_EQUALS(testee.at(2)->getFlags(), FriendlyCode::FlagSet_t(FriendlyCode::UnspecialCode));
+}
+
+/** Test sort order. */
+void
+TestGameSpecFriendlyCodeList::testSort()
+{
+    using game::spec::FriendlyCode;
+
+    // Alphanumeric goes before non-alphanumeric, capital before lower-case.
+    game::spec::FriendlyCodeList testee;
+    testee.addCode(FriendlyCode("!bc", ",x"));
+    testee.addCode(FriendlyCode("abc", ",x"));
+    testee.addCode(FriendlyCode("0bc", ",x"));
+    testee.addCode(FriendlyCode("Abc", ",x"));
+    testee.addCode(FriendlyCode("ABC", ",x"));
+    testee.addCode(FriendlyCode("?bc", ",x"));
+
+    // Sort
+    testee.sort();
+
+    // Verify
+    TS_ASSERT_EQUALS(testee.size(), 6U);
+    TS_ASSERT_EQUALS(testee.at(0)->getCode(), "0bc");
+    TS_ASSERT_EQUALS(testee.at(1)->getCode(), "ABC");
+    TS_ASSERT_EQUALS(testee.at(2)->getCode(), "Abc");
+    TS_ASSERT_EQUALS(testee.at(3)->getCode(), "abc");
+    TS_ASSERT_EQUALS(testee.at(4)->getCode(), "!bc");
+    TS_ASSERT_EQUALS(testee.at(5)->getCode(), "?bc");
+}
+
+/** Test syntax errors in load(). */
+void
+TestGameSpecFriendlyCodeList::testSyntaxErrors()
+{
+    class CountingLogger : public afl::sys::LogListener {
+     public:
+        CountingLogger()
+            : m_numMessages(0)
+            { }
+        virtual void handleMessage(const Message& /*msg*/)
+            { ++m_numMessages; }
+        size_t getNumMessages() const
+            { return m_numMessages; }
+     private:
+        size_t m_numMessages;
+    };
+
+    // Badly formatted line
+    {
+        afl::io::ConstMemoryStream ms(afl::string::toBytes("foo\n"));
+        CountingLogger log;
+        game::spec::FriendlyCodeList list;
+        list.load(ms, log);
+        TS_ASSERT_EQUALS(log.getNumMessages(), 1U);
+        TS_ASSERT_EQUALS(list.size(), 0U);
+    }
+    {
+        afl::io::ConstMemoryStream ms(afl::string::toBytes("longcode,,foo\n"));
+        CountingLogger log;
+        game::spec::FriendlyCodeList list;
+        list.load(ms, log);
+        TS_ASSERT_EQUALS(log.getNumMessages(), 1U);
+        TS_ASSERT_EQUALS(list.size(), 1U);
+        TS_ASSERT_EQUALS(list.at(0)->getCode(), "lon");
+    }
+}
+

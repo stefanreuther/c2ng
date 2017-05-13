@@ -1,15 +1,16 @@
 /**
   *  \file game/db/structures.hpp
+  *  \brief Database File Structures
   */
 #ifndef C2NG_GAME_DB_STRUCTURES_HPP
 #define C2NG_GAME_DB_STRUCTURES_HPP
 
-#include "afl/bits/value.hpp"
-#include "afl/bits/uint16le.hpp"
 #include "afl/base/staticassert.hpp"
-#include "afl/bits/uint32le.hpp"
 #include "afl/bits/fixedstring.hpp"
 #include "afl/bits/int16le.hpp"
+#include "afl/bits/uint16le.hpp"
+#include "afl/bits/uint32le.hpp"
+#include "afl/bits/value.hpp"
 
 namespace game { namespace db { namespace structures {
 
@@ -66,7 +67,7 @@ namespace game { namespace db { namespace structures {
     };
     static_assert(sizeof(DatabaseDrawing) == 14, "sizeof DatabaseDrawing");
 
-    /// Autobuiild settings (rAutoBuild, 6).
+    /// Autobuild settings (rAutoBuild, 6).
     struct AutobuildSettings {
         Int16_t     goal[4];                                    ///< Target number, 0..999; 1000 meaning "max".
         int8_t      speed[4];                                   ///< Speed, 0..100.
@@ -77,18 +78,21 @@ namespace game { namespace db { namespace structures {
         UInt16_t id;
         UInt16_t numProperties;
     };
+    static_assert(sizeof(PropertyHeader) == 4, "sizeof PropertyHeader");
 
     struct UnitScoreHeader {
         String50_t name;
         UInt16_t scoreType;
         UInt16_t scoreLimit;
     };
+    static_assert(sizeof(UnitScoreHeader) == 54, "sizeof UnitScoreHeader");
 
     struct UnitScoreEntry {
         UInt16_t id;
         UInt16_t score;
         UInt16_t turn;
     };
+    static_assert(sizeof(UnitScoreEntry) == 6, "sizeof UnitScoreEntry");
 
 } } }
 

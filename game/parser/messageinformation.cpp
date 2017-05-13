@@ -1,15 +1,13 @@
 /**
   *  \file game/parser/messageinformation.cpp
+  *  \brief Class game::parser::MessageInformation
   */
 
 #include <cassert>
 #include "game/parser/messageinformation.hpp"
 
 
-// /** Constructor.
-//     \param obj target object type
-//     \param id target object Id, if appropriate for its type
-//     \param turn turn this information is from */
+// Constructor.
 game::parser::MessageInformation::MessageInformation(Type type, int32_t id, int turn)
     : m_type(type),
       m_id(id),
@@ -19,10 +17,11 @@ game::parser::MessageInformation::MessageInformation(Type type, int32_t id, int 
     // ex GMessageInformation::GMessageInformation
 }
 
+// Destructor.
 game::parser::MessageInformation::~MessageInformation()
 { }
 
-// /** Add string value. */
+// Add string value.
 void
 game::parser::MessageInformation::addValue(MessageStringIndex si, const String_t& s)
 {
@@ -30,7 +29,7 @@ game::parser::MessageInformation::addValue(MessageStringIndex si, const String_t
     m_values.pushBackNew(new MessageStringValue_t(si, s));
 }
 
-/** Add integer value. */
+// Add integer value.
 void
 game::parser::MessageInformation::addValue(MessageIntegerIndex ii, int32_t i)
 {
@@ -38,7 +37,7 @@ game::parser::MessageInformation::addValue(MessageIntegerIndex ii, int32_t i)
     m_values.pushBackNew(new MessageIntegerValue_t(ii, i));
 }
 
-// /** Add configuration key. For MessageConfig only. */
+// Add configuration value.
 void
 game::parser::MessageInformation::addConfigurationValue(String_t key, String_t value)
 {
@@ -47,7 +46,7 @@ game::parser::MessageInformation::addConfigurationValue(String_t key, String_t v
     m_values.pushBackNew(new MessageConfigurationValue_t(key, value));
 }
 
-// /** Add player score. For MessagePlayerScore only. */
+// Add score value.
 void
 game::parser::MessageInformation::addScoreValue(int player, int32_t value)
 {

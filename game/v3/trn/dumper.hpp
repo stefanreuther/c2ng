@@ -1,6 +1,6 @@
 /**
   *  \file game/v3/trn/dumper.hpp
-  *  \class game::v3::trn::Dumper
+  *  \brief Class game::v3::trn::Dumper
   */
 #ifndef C2NG_GAME_V3_TRN_DUMPER_HPP
 #define C2NG_GAME_V3_TRN_DUMPER_HPP

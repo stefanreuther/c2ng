@@ -3,7 +3,6 @@
   *  \brief Test for client::dialogs::ObjectSelectionDialog
   */
 
-#include <iostream>
 #include "client/dialogs/objectselectiondialog.hpp"
 
 #include "t_client_dialogs.hpp"

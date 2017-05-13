@@ -37,7 +37,7 @@ interpreter::expr::IndirectCallNode::compileValue(BytecodeObject& bco, const Com
         args[i]->compileValue(bco, cc);
     }
     func->compileValue(bco, cc);
-    bco.addInstruction(Opcode::maIndirect, Opcode::miIMLoad + Opcode::miIMRefuseProcedures, args.size());
+    bco.addInstruction(Opcode::maIndirect, Opcode::miIMLoad + Opcode::miIMRefuseProcedures, uint16_t(args.size()));
 }
 
 void
@@ -49,7 +49,7 @@ interpreter::expr::IndirectCallNode::compileStore(BytecodeObject& bco, const Com
     }
     rhs.compileValue(bco, cc);
     func->compileValue(bco, cc);
-    bco.addInstruction(Opcode::maIndirect, Opcode::miIMStore + Opcode::miIMRefuseProcedures, args.size());
+    bco.addInstruction(Opcode::maIndirect, Opcode::miIMStore + Opcode::miIMRefuseProcedures, uint16_t(args.size()));
 }
 
 void
@@ -68,13 +68,13 @@ interpreter::expr::IndirectCallNode::compileRead(BytecodeObject& bco, const Comp
     func->compileValue(bco, cc);
 
     // Duplicate everything      => ...:args:func:args:func
-    uint32_t nwords = args.size()+1;
-    for (uint32_t i = 0; i < nwords; ++i) {
-        bco.addInstruction(Opcode::maStack, Opcode::miStackDup, nwords-1);
+    size_t nwords = args.size()+1;
+    for (size_t i = 0; i < nwords; ++i) {
+        bco.addInstruction(Opcode::maStack, Opcode::miStackDup, uint16_t(nwords-1));
     }
 
     // Read                      => ...:args:func:value
-    bco.addInstruction(Opcode::maIndirect, Opcode::miIMLoad + Opcode::miIMRefuseProcedures, args.size());
+    bco.addInstruction(Opcode::maIndirect, Opcode::miIMLoad + Opcode::miIMRefuseProcedures, uint16_t(args.size()));
 }
 
 void
@@ -83,5 +83,5 @@ interpreter::expr::IndirectCallNode::compileWrite(BytecodeObject& bco, const Com
     // We have ...:args:func:value,
     // we need ...:args:value:func
     bco.addInstruction(Opcode::maStack, Opcode::miStackSwap, 1);
-    bco.addInstruction(Opcode::maIndirect, Opcode::miIMStore + Opcode::miIMRefuseProcedures, args.size());
+    bco.addInstruction(Opcode::maIndirect, Opcode::miIMStore + Opcode::miIMRefuseProcedures, uint16_t(args.size()));
 }

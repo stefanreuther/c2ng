@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/filecommandsource.cpp
+  *  \brief Class interpreter::FileCommandSource
   */
 
 #include "interpreter/filecommandsource.hpp"

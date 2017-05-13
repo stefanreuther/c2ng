@@ -79,7 +79,11 @@ TestGameSimObject::verifyObject(game::sim::Object& t)
     t.markClean();
     t.setFlags(game::sim::Object::fl_Commander);
     TS_ASSERT_EQUALS(t.getFlags(), game::sim::Object::fl_Commander);
+    TS_ASSERT(!t.hasAnyNonstandardAbility());     // Commander bit alone is not effective
     TS_ASSERT(t.isDirty());
+    t.setFlags(game::sim::Object::fl_Commander | game::sim::Object::fl_CommanderSet);
+    TS_ASSERT(t.hasAnyNonstandardAbility());
+    TS_ASSERT(t.hasAbility(game::sim::CommanderAbility, game::spec::ShipList(), game::config::HostConfiguration()));
 
     t.markClean();
     t.setFlakRatingOverride(1342);
@@ -159,6 +163,19 @@ TestGameSimObject::testRandom()
         TS_ASSERT_LESS_THAN_EQUALS('0', s[1]);
         TS_ASSERT_LESS_THAN_EQUALS(s[1], '9');
         TS_ASSERT_EQUALS(s[2], 'c');
+    }
+
+    // Same thing, but start with shorter code
+    t.setFlags(game::sim::Object::fl_RandomFC + game::sim::Object::fl_RandomFC2);
+    t.setFriendlyCode("a");
+    for (int i = 0; i < 1000; ++i) {
+        t.setRandomFriendlyCode();
+        String_t s = t.getFriendlyCode();
+        TS_ASSERT_EQUALS(s.size(), 3U);
+        TS_ASSERT_EQUALS(s[0], 'a');
+        TS_ASSERT_LESS_THAN_EQUALS('0', s[1]);
+        TS_ASSERT_LESS_THAN_EQUALS(s[1], '9');
+        TS_ASSERT_EQUALS(s[2], ' ');
     }
 }
 

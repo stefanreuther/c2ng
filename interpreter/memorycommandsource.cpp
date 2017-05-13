@@ -1,9 +1,11 @@
 /**
   *  \file interpreter/memorycommandsource.cpp
+  *  \brief Class interpreter::MemoryCommandSource
   */
 
 #include "interpreter/memorycommandsource.hpp"
 
+// Constructor.
 interpreter::MemoryCommandSource::MemoryCommandSource()
     : m_lines(),
       m_index(0)
@@ -11,6 +13,7 @@ interpreter::MemoryCommandSource::MemoryCommandSource()
     // ex IntMemoryCommandSource::IntMemoryCommandSource
 }
 
+// Constructor.
 interpreter::MemoryCommandSource::MemoryCommandSource(String_t line)
     : m_lines(1, line),
       m_index(0)

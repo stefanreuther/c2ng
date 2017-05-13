@@ -14,6 +14,7 @@
 #include "interpreter/structurevalue.hpp"
 #include "interpreter/structuretype.hpp"
 #include "interpreter/vmio/loadcontext.hpp"
+#include "afl/base/ref.hpp"
 
 namespace interpreter { namespace vmio {
 
@@ -29,10 +30,10 @@ namespace interpreter { namespace vmio {
         ObjectLoader(afl::charset::Charset& cs, LoadContext& ctx);
         ~ObjectLoader();
 
-        void load(afl::io::Stream& s);
+        void load(afl::base::Ref<afl::io::Stream> s);
 
         BCORef_t getBCO(uint32_t id);
-        afl::base::Ref<HashData> getHash(uint32_t id);
+        afl::data::Hash::Ref_t getHash(uint32_t id);
         afl::base::Ref<ArrayData> getArray(uint32_t id);
         afl::base::Ref<StructureValueData> getStructureValue(uint32_t id);
         afl::base::Ref<StructureTypeData> getStructureType(uint32_t id);
@@ -50,6 +51,7 @@ namespace interpreter { namespace vmio {
         virtual Context* loadContext(const TagNode& tag, afl::io::Stream& aux);
         virtual Context* loadMutex(const String_t& name, const String_t& note, Process* owner);
         virtual Process* createProcess();
+        virtual void finishProcess(Process& proc);
 
         // Loaded objects. Indexed by object Id.
         afl::container::PtrMap<uint32_t, SubroutineValue> bco_map;

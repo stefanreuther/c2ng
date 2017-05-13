@@ -1,5 +1,6 @@
 /**
   *  \file gfx/point.hpp
+  *  \brief Class gfx::Point
   */
 #ifndef C2NG_GFX_POINT_HPP
 #define C2NG_GFX_POINT_HPP
@@ -9,47 +10,85 @@
 namespace gfx {
 
     /** Point.
-        This object contains a point in the X/Y plane.
-        This is a plain old structure, don't hesitate to modify it directly. */
+        This object contains a point in the X/Y plane on a graphics canvas. */
     class Point {
      public:
-        /** Create point. */
+        /** Create point at origin. */
         Point()
             : m_x(0), m_y(0)
             { }
-        /** Create point at specified X/Y. */
+
+        /** Create point at specified X/Y.
+            \param x,y Coordinates */
         Point(int x, int y)
             : m_x(x), m_y(y)
             { }
 
+        /** Get X coordinate.
+            \return value */
         int getX() const
             { return m_x; }
                 
+        /** Get Y coordinate.
+            \return value */
         int getY() const
             { return m_y; }
 
+        /** Set X coordinate.
+            \param x new value */
         void setX(int x)
             { m_x = x; }
+
+        /** Set Y coordinate.
+            \param y new value */
         void setY(int y)
             { m_y = y; }
+
+        /** Add to X coordinate.
+            \param dx value to add */
         void addX(int dx)
             { m_x += dx; }
+
+        /** Add to Y coordinate.
+            \param dy value to add */
         void addY(int dy)
             { m_y += dy; }
 
-        /** Compare two points for equality. */
+        /** Compare two points for equality.
+            \param rhs Point to compare
+            \return true if equal */
         bool operator==(Point rhs) const
             { return m_x == rhs.m_x && m_y == rhs.m_y; }
-        /** Compare two points for inequality. */
+
+        /** Compare two points for inequality.
+            \param rhs Point to compare
+            \return true if different */
         bool operator!=(Point rhs) const
             { return m_x != rhs.m_x || m_y != rhs.m_y; }
 
+        /** Vector addition.
+            \param other Point to add
+            \return point with component-wise coordinate sum */
         Point operator+(Point other) const
             { return Point(m_x + other.m_x, m_y + other.m_y); }
+
+        /** Vector subtraction.
+            \param other Point to subtract
+            \return point with component-wise coordinate difference */
         Point operator-(Point other) const
             { return Point(m_x - other.m_x, m_y - other.m_y); }
+
+        /** In-place vector addition.
+            Adds the other point's coordinates to this one.
+            \param other Point to add
+            \return *this */
         Point& operator+=(Point other)
             { m_x += other.m_x; m_y += other.m_y; return *this; }
+
+        /** In-place vector subtraction.
+            Subtracts the other point's coordinates from this one.
+            \param other Point to subtract
+            \return *this */
         Point& operator-=(Point other)
             { m_x -= other.m_x; m_y -= other.m_y; return *this; }
 
@@ -60,6 +99,9 @@ namespace gfx {
         Point scaledBy(int sx, int sy) const
             { return Point(m_x * sx, m_y * sy); }
 
+        /** Scale point coordinates.
+            \param other Point to to multiply with
+            \return point with component-wise coordinate product */
         Point scaledBy(Point other) const
             { return Point(m_x * other.m_x, m_y * other.m_y); }
 
@@ -70,6 +112,10 @@ namespace gfx {
 
 }
 
+/** Output point to a stream.
+    \param os Stream
+    \param pt Point
+    \return os */
 std::ostream& operator<<(std::ostream& os, const gfx::Point& pt);
 
 #endif

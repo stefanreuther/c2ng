@@ -158,15 +158,15 @@ ui::res::ResourceFileProvider::loadImage(String_t name, Manager& mgr)
     // ex ResProviderResFile::loadPixmap
     int a;
     if (matchResourceId(name, SHIP, a)) {
-        return loadImageById(cc1id_Ships + a, mgr);
+        return loadImageById(uint16_t(cc1id_Ships + a), mgr);
     } else if (matchResourceId(name, BASE, a)) {
         return loadImageById(a > 6 ? cc1id_Base_Hi : cc1id_Base_Lo, mgr);
     } else if (matchResourceId(name, VCR_FIGHTER, a)) {
-        return loadImageById(cc1id_VCR_Fighter + a, mgr);
+        return loadImageById(uint16_t(cc1id_VCR_Fighter + a), mgr);
     } else if (matchResourceId(name, PLANET, a)) {
-        return loadImageById(cc1id_Climate_F + a, mgr);
+        return loadImageById(uint16_t(cc1id_Climate_F + a), mgr);
     } else if (matchResourceId(name, "res", a)) {
-        return loadImageById(a, mgr);
+        return loadImageById(uint16_t(a), mgr);
     } else {
         return 0;
     }
@@ -177,7 +177,7 @@ ui::res::ResourceFileProvider::loadImageById(uint16_t id, Manager& mgr)
 {
     // ex ResProviderResFile::loadPixmap
     // Try 256-color version
-    afl::base::Ptr<afl::io::Stream> in = m_file.openMember(id + 20000);
+    afl::base::Ptr<afl::io::Stream> in = m_file.openMember(uint16_t(id + 20000));
     if (in.get() != 0) {
         return mgr.loadImage(*in);
     }

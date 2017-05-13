@@ -1034,7 +1034,7 @@ game::vcr::classic::PVCRAlgorithm::fighterLaunch(Status& st)
                     /* okay, we have a bay which is ready, and an empty track. */
                     st.r.m_fighterStatus[track]     = FighterAttacks;
                     st.r.m_fighterX[track]          = st.r.m_objectX;
-                    st.r.m_fighterStrikesLeft[track] = st.f.StrikesPerFighter;
+                    st.r.m_fighterStrikesLeft[track] = uint16_t(st.f.StrikesPerFighter);
                     st.r.m_bayStatus[bay]           = 0;
                     st.r.m_activeFighters++;
                     st.r.obj.addFighters(-1);
@@ -1113,8 +1113,8 @@ game::vcr::classic::PVCRAlgorithm::fighterIntercept()
     for (int i = 0, limit = m_status[LeftSide].f.MaxFightersLaunched; i < limit; ++i) {
         if (m_status[LeftSide].r.m_fighterStatus[i] != FighterIdle) {
             int hash = m_status[LeftSide].r.m_fighterX[i] >> 7;
-            lslot[lcount] = i;
-            lmatch[lcount] = hash;
+            lslot[lcount] = int8_t(i);
+            lmatch[lcount] = int16_t(hash);
             lcount++;
             bins[(hash >> 5) & 15] |= 1 << (hash & 31);
         }
@@ -1125,8 +1125,8 @@ game::vcr::classic::PVCRAlgorithm::fighterIntercept()
         if (m_status[RightSide].r.m_fighterStatus[i] != FighterIdle) {
             int hash = m_status[RightSide].r.m_fighterX[i] >> 7;
             if (bins[(hash >> 5) & 15] & (1 << (hash & 31))) {
-                rslot[rcount] = i;
-                rmatch[rcount] = hash;
+                rslot[rcount] = int8_t(i);
+                rmatch[rcount] = int16_t(hash);
                 rcount++;
             }
         }

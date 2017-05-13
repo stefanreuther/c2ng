@@ -147,8 +147,8 @@ ui::layout::Grid::getLayoutInfo(const Widget& container)
     if (h.min_sizes.empty()) {
         return gfx::Point(2*m_outer, 2*m_outer);
     } else {
-        int minX = 2 * m_outer + (h.min_sizes.size()-1) * m_space;
-        int minY = 2 * m_outer + (v.min_sizes.size()-1) * m_space;
+        int minX = 2 * m_outer + int(h.min_sizes.size()-1) * m_space;
+        int minY = 2 * m_outer + int(v.min_sizes.size()-1) * m_space;
         int prefX = minX;
         int prefY = minY;
         bool flexH = false;

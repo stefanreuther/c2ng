@@ -1,0 +1,12 @@
+/*!
+     \namespace server::file
+     \brief c2file server
+
+     This namespace implements the c2file service.
+     c2file manages file storage.
+     This is used to store user and game files.
+
+     - server::file::CommandHandler
+     - server::file::Root
+     - server::file::Session
+ */

@@ -1,9 +1,11 @@
 /**
   *  \file interpreter/propertyacceptor.cpp
+  *  \brief Class interpreter::PropertyAcceptor
   */
 
 #include "interpreter/propertyacceptor.hpp"
 
+// Utility function: enumerate a NameMap object.
 void
 interpreter::PropertyAcceptor::enumNames(const afl::data::NameMap& names)
 {
@@ -13,6 +15,7 @@ interpreter::PropertyAcceptor::enumNames(const afl::data::NameMap& names)
     }
 }
 
+// Utility function: enumerate a NameTable array.
 void
 interpreter::PropertyAcceptor::enumTable(afl::base::Memory<const NameTable> tab)
 {

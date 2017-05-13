@@ -29,6 +29,8 @@ TestInterpreterVmioLoadContext::testIt()
             { return 0; }
         virtual interpreter::Process* createProcess()
             { return 0; }
+        virtual void finishProcess(interpreter::Process& /*proc*/)
+            { }
     };
     Tester t;
 }

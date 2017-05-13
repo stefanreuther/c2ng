@@ -1,5 +1,6 @@
 /**
   *  \file game/parser/messagetemplate.cpp
+  *  \brief Class game::parser::MessageTemplate
   */
 
 #include "game/parser/messagetemplate.hpp"
@@ -132,9 +133,7 @@ namespace {
     }
 }
 
-// /** Constructor. Create a blank message template.
-//     \param message_object object kind described by this template
-//     \param name name of the template, for reference by user */
+// Constructor.
 game::parser::MessageTemplate::MessageTemplate(MessageInformation::Type type, String_t name)
     : m_messageType(type),
       m_name(name),
@@ -145,12 +144,11 @@ game::parser::MessageTemplate::MessageTemplate(MessageInformation::Type type, St
       m_types()
 { }
 
+// Destructor.
 game::parser::MessageTemplate::~MessageTemplate()
 { }
 
-// /** Add a iMatchKind, iMatchSubId, iMatchBigId instruction.
-//     \param opcode Opcode
-//     \param value  Value to match */
+// Add "match" instruction.
 void
 game::parser::MessageTemplate::addMatchInstruction(uint8_t opcode, uint16_t value)
 {
@@ -158,31 +156,26 @@ game::parser::MessageTemplate::addMatchInstruction(uint8_t opcode, uint16_t valu
     m_instructions.push_back(Instruction(opcode, 0, value, 0));
 }
 
-// /** Add iValue instructions.
-//     \param opcode should be iValue
-//     \param value  List of values to produce, separated by commas. Each entry will generate one instruction.  */
+// Add "value" instruction.
 void
 game::parser::MessageTemplate::addValueInstruction(uint8_t opcode, String_t value)
 {
     // ex GMessageTemplate::addValueInstruction
     String_t::size_type p = 0, n;
     for (n = value.find(','); n != String_t::npos; p = n+1, n = value.find(',', p)) {
-        m_instructions.push_back(Instruction(opcode, 0, m_strings.size(), 0));
+        m_instructions.push_back(Instruction(opcode, 0, uint16_t(m_strings.size()), 0));
         m_strings.push_back(strTrim(String_t(value, p, n-p)));
     }
-    m_instructions.push_back(Instruction(opcode, 0, m_strings.size(), 0));
+    m_instructions.push_back(Instruction(opcode, 0, uint16_t(m_strings.size()), 0));
     m_strings.push_back(strTrim(String_t(value, p)));
 }
 
-// /** Add a check/parse instruction.
-//     \param opcode Opcode, iCheck to iArray, with optional scope modifier added.
-//     \param offset Distance, according to scope modifier.
-//     \param value  Value to match. For iParse/iArray, wildcard symbols ('$') are processed. */
+// Add "check" instruction.
 void
 game::parser::MessageTemplate::addCheckInstruction(uint8_t opcode, int8_t offset, String_t value)
 {
     // ex GMessageTemplate::addCheckInstruction
-    m_instructions.push_back(Instruction(opcode, offset, m_strings.size(), 0));
+    m_instructions.push_back(Instruction(opcode, offset, uint16_t(m_strings.size()), 0));
     if ((opcode & iMask) == iParse || (opcode & iMask) == iArray) {
         String_t::size_type p = 0, n;
         for (n = value.find('$'); n != String_t::npos; p = n+1, n = value.find('$', p)) {
@@ -195,8 +188,7 @@ game::parser::MessageTemplate::addCheckInstruction(uint8_t opcode, int8_t offset
     }
 }
 
-/** Add single variable.
-    \param name name or name:type pair */
+// Add a single variable.
 void
 game::parser::MessageTemplate::addVariable(String_t name)
 {
@@ -207,8 +199,7 @@ game::parser::MessageTemplate::addVariable(String_t name)
     m_types.push_back(strTrim(strUCase(type)));
 }
 
-/** Add variables.
-    \param names comma-separated list of variable names */
+// Add list of variables.
 void
 game::parser::MessageTemplate::addVariables(String_t names)
 {
@@ -220,8 +211,7 @@ game::parser::MessageTemplate::addVariables(String_t names)
     addVariable(String_t(names, p));
 }
 
-/** Set continue flag. If set, matching this template does not stop matching further templates.
-    \param flag Value to set */
+// Set continuation flag.
 void
 game::parser::MessageTemplate::setContinueFlag(bool flag)
 {
@@ -229,8 +219,7 @@ game::parser::MessageTemplate::setContinueFlag(bool flag)
     m_continueFlag = flag;
 }
 
-// /** Get number of variables. This is the number of variables in "assign" statements that this
-//     template will generate. */
+// Get number of variables.
 size_t
 game::parser::MessageTemplate::getNumVariables() const
 {
@@ -238,8 +227,7 @@ game::parser::MessageTemplate::getNumVariables() const
     return m_variables.size();
 }
 
-// /** Get number of wildcards. This is the number of values this template will produce when
-//     matching. */
+// Get number of wildcards.
 size_t
 game::parser::MessageTemplate::getNumWildcards() const
 {
@@ -255,8 +243,7 @@ game::parser::MessageTemplate::getNumWildcards() const
     return total;
 }
 
-// /** Get number of restrictions. This is the number of non-empty matches. A template with no
-//     restrictions will match every message. */
+// Get number of restrictions.
 size_t
 game::parser::MessageTemplate::getNumRestrictions() const
 {
@@ -270,8 +257,7 @@ game::parser::MessageTemplate::getNumRestrictions() const
     return total;
 }
 
-// /** Find variable slot by name.
-//     \return index such that getVariableName(return) == name, -1 if none. */
+// Find variable slot by name.
 bool
 game::parser::MessageTemplate::getVariableSlotByName(const String_t name, size_t& out) const
 {
@@ -285,8 +271,7 @@ game::parser::MessageTemplate::getVariableSlotByName(const String_t name, size_t
     return false;
 }
 
-// /** Get variable name.
-//     \param index Variable index [0,getNumVariables()) */
+// Get variable name by index.
 String_t
 game::parser::MessageTemplate::getVariableName(size_t index) const
 {
@@ -298,7 +283,7 @@ game::parser::MessageTemplate::getVariableName(size_t index) const
     }
 }
 
-// /** Get template name. */
+// Get name of template (as set in constructor).
 String_t
 game::parser::MessageTemplate::getTemplateName() const
 {
@@ -306,18 +291,12 @@ game::parser::MessageTemplate::getTemplateName() const
     return m_name;
 }
 
-
-// /** Match message against this template.
-//     \param message [in] Message
-//     \param player  [in] Player who got the message
-//     \param values  [out] Placeholder values; empty on call.
-//     \retval true if message matches, values have been filled out
-//     \retval false if message does not match, values has undefined content */
+// Match message against this template.
 bool
 game::parser::MessageTemplate::match(const MessageLines_t& message, const DataInterface& iface, std::vector<String_t>& values) const
 {
     // ex GMessageTemplate::match
-    uint16_t line = 0;
+    size_t line = 0;
     for (std::vector<Instruction>::const_iterator it = m_instructions.begin(); it != m_instructions.end(); ++it) {
         uint8_t opcode = it->opcode;
         uint8_t group  = opcode & iMask;
@@ -353,7 +332,7 @@ game::parser::MessageTemplate::match(const MessageLines_t& message, const DataIn
                    This is intended for the case where the character is a race number (0-9, a, b), and we want an integer. */
                 // Change from PCC2: this will produce c->12 for colonists.
                 int nr;
-                if (!util::parsePlayerCharacter(getMessageHeaderInformation(message, MsgHdrSubId), nr)) {
+                if (!util::parsePlayerCharacter(static_cast<char>(getMessageHeaderInformation(message, MsgHdrSubId)), nr)) {
                     nr = 0;
                 }
                 values.push_back(formatNumber(nr));
@@ -406,7 +385,7 @@ game::parser::MessageTemplate::match(const MessageLines_t& message, const DataIn
             /* If it's an array, read the additional lines */
             if (group == iArray) {
                 size_t nelems = 1;
-                while (nelems < NUM_PLAYERS && line+1U < message.size() && matchLine(message[line+1], it->index, it->count, typeIndex, values, iface)) {
+                while (int(nelems) < NUM_PLAYERS && line+1U < message.size() && matchLine(message[line+1], it->index, it->count, typeIndex, values, iface)) {
                     ++nelems, ++line;
                 }
                 consolidateArray(values, it->count, nelems);
@@ -469,12 +448,9 @@ game::parser::MessageTemplate::match(const MessageLines_t& message, const DataIn
 // }
 // #endif
 
-// /** Check for a string.
-//     \param message [in] Message text
-//     \param line    [in/out] Current line pointer
-//     \param insn    [in] Instruction to process; this checks the index and scope fields */
+// Check for a string.
 bool
-game::parser::MessageTemplate::check(const MessageLines_t& message, uint16_t& line, const Instruction& insn, const DataInterface& iface) const
+game::parser::MessageTemplate::check(const MessageLines_t& message, size_t& line, const Instruction& insn, const DataInterface& iface) const
 {
     // ex GMessageTemplate::check
     String_t needle = strUCase(iface.expandRaceNames(m_strings[insn.index]));
@@ -490,7 +466,7 @@ game::parser::MessageTemplate::check(const MessageLines_t& message, uint16_t& li
         return false;
     } else {
         /* Check just one line */
-        uint16_t lineToCheck;
+        size_t lineToCheck;
         if ((insn.opcode & ~iMask) == sRelative) {
             lineToCheck = line + insn.offset;
         } else {
@@ -505,14 +481,7 @@ game::parser::MessageTemplate::check(const MessageLines_t& message, uint16_t& li
     }
 }
 
-// /** Match a single line.
-//     \param line   [in] Text line from message
-//     \param index  [in] Index into string table of first string
-//     \param nvar   [in] Number of variables to produce
-//     \param typeIndex [in] Index into type array
-//     \param values [out] Produce output here
-//     \retval true match succeeded; values have been produced and postprocessed according to their types
-//     \retval false match failed; values have not been changed */
+// Match a single line.
 bool
 game::parser::MessageTemplate::matchLine(const String_t& line, size_t index, size_t nvar, size_t typeIndex, std::vector<String_t>& values, const DataInterface& iface) const
 {
@@ -535,14 +504,7 @@ game::parser::MessageTemplate::matchLine(const String_t& line, size_t index, siz
     }
 }
 
-// /** Match a partial line.
-//     \param line    [in] Text line from message
-//     \param startAt [in] Value of variable starts at this position
-//     \param index   [in] Index into string table of first string
-//     \param nvar    [in] Number of variables to produce
-//     \param values  [out] Produce output here
-//     \retval true match succeeded; values have been produced (but not postprocessed)
-//     \retval false match failed; values have not been changed */
+// Match a partial line.
 bool
 game::parser::MessageTemplate::matchPart(const String_t& line, size_t startAt, size_t index, size_t nvar, std::vector<String_t>& values, const DataInterface& iface) const
 {
@@ -583,11 +545,7 @@ game::parser::MessageTemplate::matchPart(const String_t& line, size_t startAt, s
     return true;
 }
 
-// /** Consolidate an array. Matching has produced nvar*nelems items.
-//     Combine that down to nvar elements, each containing a list of values.
-//     \param values [in/out] Values
-//     \param nvar   [in] Number of variables (columns)
-//     \param nelems [in] Number of array items (rows) */
+// Consolidate an array.
 void
 game::parser::MessageTemplate::consolidateArray(std::vector<String_t>& values, size_t nvar, size_t nelems) const
 {
@@ -616,7 +574,7 @@ game::parser::MessageTemplate::consolidateArray(std::vector<String_t>& values, s
         for (size_t i = 0; i < nelems; ++i) {
             int slot;
             if (playerIndex == nil) {
-                slot = i;
+                slot = static_cast<int>(i);
             } else {
                 slot = parseIntegerValue(values[playerIndex + i*nvar + firstIndex]) - 1;
             }
@@ -627,7 +585,7 @@ game::parser::MessageTemplate::consolidateArray(std::vector<String_t>& values, s
         }
 
         /* Build new value */
-        for (size_t i = 1; i < NUM_PLAYERS; ++i) {
+        for (int i = 1; i < NUM_PLAYERS; ++i) {
             data[0] += ',';
             data[0] += data[i];
         }
@@ -643,7 +601,7 @@ game::parser::MessageTemplate::consolidateArray(std::vector<String_t>& values, s
     values.resize(firstIndex + nvar);
 }
 
-// /** Split message into lines. */
+// Split message into lines.
 void
 game::parser::splitMessage(MessageLines_t& out, const String_t& in)
 {
@@ -655,10 +613,7 @@ game::parser::splitMessage(MessageLines_t& out, const String_t& in)
     out.push_back(String_t(in, i));
 }
 
-// /** Extract information from message header.
-//     \param msg  Message text
-//     \param what Requested information
-//     \return Information. 0 if not found. */
+// Extract information from message header.
 int32_t
 game::parser::getMessageHeaderInformation(const MessageLines_t& msg, MessageHeaderInformation what)
 {
@@ -698,6 +653,7 @@ game::parser::getMessageHeaderInformation(const MessageLines_t& msg, MessageHead
     return result;
 }
 
+// Parse integer value.
 int32_t
 game::parser::parseIntegerValue(const String_t& value)
 {

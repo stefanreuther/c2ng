@@ -1,9 +1,18 @@
 /**
   *  \file interpreter/opcode.cpp
+  *  \brief Class interpreter::Opcode
   */
 
 #include "interpreter/opcode.hpp"
 #include "afl/base/memory.hpp"
+#include "afl/base/staticassert.hpp"
+
+/* An Opcode object should be 4 bytes.
+   Nothing in the code relies on that (I hope).
+   Anyway, this is a canary to tell us if a compiler starts to think otherwise.
+   If this breaks, (a) remove this check to get it working again quickly,
+   and (b) start investigating why it broke. */
+static_assert(sizeof(interpreter::Opcode), 4);
 
 namespace {
     // Names for enum Scope
@@ -69,9 +78,11 @@ namespace {
     }
 }
 
-void
-interpreter::Opcode::getDisassemblyTemplate(String_t& tpl) const
+// Get template for disassembling this opcode.
+String_t
+interpreter::Opcode::getDisassemblyTemplate() const
 {
+    String_t tpl;
     switch (major) {
      case maPush:
         tpl += "push";
@@ -93,7 +104,7 @@ interpreter::Opcode::getDisassemblyTemplate(String_t& tpl) const
         break;
      case maJump:
         {
-            uint8_t flags = minor & ~jSymbolic;
+            uint8_t flags = uint8_t(minor & ~jSymbolic);
             if (flags == 0) {
                 tpl += "label";
             } else if (flags < jCatch) {
@@ -196,4 +207,38 @@ interpreter::Opcode::getDisassemblyTemplate(String_t& tpl) const
         tpl += "unknown?\t%u";
         break;
     }
+    return tpl;
+}
+
+// Get external "major" value.
+uint8_t
+interpreter::Opcode::getExternalMajor() const
+{
+    switch (major) {
+     case maPush:
+     case maBinary:
+     case maUnary:
+     case maTernary:
+     case maJump:
+     case maIndirect:
+     case maStack:
+     case maPop:
+     case maStore:
+     case maMemref:
+     case maDim:
+     case maSpecial:
+        return major;
+
+     case maFusedUnary:
+     case maFusedBinary:
+     case maFusedComparison2:
+        return maPush;
+
+     case maFusedComparison:
+        return maBinary;
+
+     case maInplaceUnary:
+        return maPush;
+    }
+    return major;
 }

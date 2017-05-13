@@ -368,11 +368,11 @@ game::v3::SpecificationLoader::loadBeams(game::spec::ShipList& list, afl::io::Di
 
     // Load it
     afl::base::Ref<afl::io::Stream> file = dir.openFile("beamspec.dat", FileSystem::OpenRead);
-    for (size_t i = 1; i <= gt::NUM_BEAM_TYPES; ++i) {
+    for (int i = 1; i <= gt::NUM_BEAM_TYPES; ++i) {
         gt::Beam in;
         file->fullRead(afl::base::fromObject(in));
         if (gs::Beam* out = beams.create(i)) {
-            out->setName(m_charset.decode(afl::string::toMemory(in.name)));
+            out->setName(m_charset.decode(in.name));
             unpackCost(out->cost(), in.cost);
             out->setMass(in.mass);
             out->setTechLevel(in.techLevel);
@@ -392,11 +392,11 @@ game::v3::SpecificationLoader::loadLaunchers(game::spec::ShipList& list, afl::io
 
     // Load it
     afl::base::Ref<afl::io::Stream> file = dir.openFile("torpspec.dat", FileSystem::OpenRead);
-    for (size_t i = 1; i <= gt::NUM_TORPEDO_TYPES; ++i) {
+    for (int i = 1; i <= gt::NUM_TORPEDO_TYPES; ++i) {
         gt::Torpedo in;
         file->fullRead(afl::base::fromObject(in));
         if (gs::TorpedoLauncher* out = torps.create(i)) {
-            out->setName(m_charset.decode(afl::string::toMemory(in.name)));
+            out->setName(m_charset.decode(in.name));
             out->torpedoCost().set(gs::Cost::Tritanium, 1);
             out->torpedoCost().set(gs::Cost::Duranium, 1);
             out->torpedoCost().set(gs::Cost::Molybdenum, 1);
@@ -420,11 +420,11 @@ game::v3::SpecificationLoader::loadEngines(game::spec::ShipList& list, afl::io::
 
     // Load it
     afl::base::Ref<afl::io::Stream> file = dir.openFile("engspec.dat", FileSystem::OpenRead);
-    for (size_t i = 1; i <= gt::NUM_ENGINE_TYPES; ++i) {
+    for (int i = 1; i <= gt::NUM_ENGINE_TYPES; ++i) {
         gt::Engine in;
         file->fullRead(afl::base::fromObject(in));
         if (gs::Engine* out = engines.create(i)) {
-            out->setName(m_charset.decode(afl::string::toMemory(in.name)));
+            out->setName(m_charset.decode(in.name));
             unpackCost(out->cost(), in.cost);
             out->setTechLevel(in.techLevel);
 
@@ -446,12 +446,12 @@ game::v3::SpecificationLoader::loadHulls(game::spec::ShipList& list, afl::io::Di
     // Load it
     afl::base::Ref<afl::io::Stream> file = dir.openFile("hullspec.dat", FileSystem::OpenRead);
     gt::Hull in;
-    size_t i = 0;
+    int i = 0;
     while (file->read(afl::base::fromObject(in)) == sizeof(in)) {
         ++i;
         if (gs::Hull* out = hulls.create(i)) {
             out->clearHullFunctions();
-            out->setName(m_charset.decode(afl::string::toMemory(in.name)));
+            out->setName(m_charset.decode(in.name));
             out->setExternalPictureNumber(in.pictureNumber);
             out->setInternalPictureNumber(i == 104 ? 152 : i == 105 ? 153 : in.pictureNumber);
             out->cost().set(gs::Cost::Tritanium, in.tritanium);
@@ -487,8 +487,8 @@ game::v3::SpecificationLoader::loadHullAssignments(game::spec::ShipList& list, a
     afl::base::Ref<afl::io::Stream> file = dir.openFile("truehull.dat", FileSystem::OpenRead);
     gt::Truehull in;
     file->fullRead(afl::base::fromObject(in));
-    for (size_t player = 0; player < gt::NUM_PLAYERS; ++player) {
-        for (size_t slot = 0; slot < gt::NUM_HULLS_PER_PLAYER; ++slot) {
+    for (int player = 0; player < gt::NUM_PLAYERS; ++player) {
+        for (int slot = 0; slot < gt::NUM_HULLS_PER_PLAYER; ++slot) {
             int hull = in.hulls[player][slot];
             if (hull != 0) {
                 if (list.hulls().get(hull) == 0) {

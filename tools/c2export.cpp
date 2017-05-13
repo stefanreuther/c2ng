@@ -5,21 +5,15 @@
   *  This is the main function for the c2export (command line data exporter) utility.
   */
 
-#include <iostream>
 #include <cstdlib>
-#include "afl/base/countof.hpp"
 #include "afl/base/optional.hpp"
 #include "afl/charset/charset.hpp"
 #include "afl/charset/codepage.hpp"
 #include "afl/charset/codepagecharset.hpp"
 #include "afl/charset/defaultcharsetfactory.hpp"
-#include "afl/except/fileproblemexception.hpp"
-#include "afl/io/filemapping.hpp"
-#include "afl/io/nulltextwriter.hpp"
 #include "afl/io/textfile.hpp"
 #include "afl/io/textwriter.hpp"
 #include "afl/string/format.hpp"
-#include "afl/string/nulltranslator.hpp"
 #include "afl/string/parse.hpp"
 #include "afl/sys/environment.hpp"
 #include "afl/sys/standardcommandlineparser.hpp"
@@ -28,7 +22,9 @@
 #include "game/limits.hpp"
 #include "game/map/universe.hpp"
 #include "game/session.hpp"
+#include "game/specificationloader.hpp"
 #include "game/turn.hpp"
+#include "game/turnloader.hpp"
 #include "game/v3/rootloader.hpp"
 #include "interpreter/callablevalue.hpp"
 #include "interpreter/error.hpp"
@@ -40,14 +36,11 @@
 #include "interpreter/exporter/textexporter.hpp"
 #include "interpreter/propertyacceptor.hpp"
 #include "interpreter/values.hpp"
-#include "util/consolelogger.hpp"
+#include "util/application.hpp"
 #include "util/constantanswerprovider.hpp"
+#include "util/profiledirectory.hpp"
 #include "util/translation.hpp"
 #include "version.hpp"
-#include "util/profiledirectory.hpp"
-#include "game/turnloader.hpp"
-#include "game/specificationloader.hpp"
-#include "util/application.hpp"
 
 namespace {
     const char LOG_NAME[] = "export";
@@ -121,7 +114,7 @@ namespace {
         if (m_position < m_names.size()) {
             switch (meta_mapping[index].index) {
              case 0:
-                return interpreter::makeIntegerValue(m_position);
+                return interpreter::makeIntegerValue(int32_t(m_position));
              case 1:
                 return interpreter::makeStringValue(m_names[m_position]);
              case 2:
@@ -247,8 +240,6 @@ ConsoleExportApplication::appMain()
     // Parse args
     interpreter::exporter::FieldList job;
 
-    afl::base::Deleter holder;
-
     afl::base::Optional<String_t> arg_array;
     afl::base::Optional<String_t> arg_gamedir;
     afl::base::Optional<String_t> arg_rootdir;
@@ -256,8 +247,8 @@ ConsoleExportApplication::appMain()
     OutputType arg_typ = tText;
     int arg_race = 0;
     bool opt_fields = false;
-    afl::charset::Charset* gameCharset = &holder.addNew(new afl::charset::CodepageCharset(afl::charset::g_codepageLatin1));
-    afl::charset::Charset* outputCharset = 0;
+    std::auto_ptr<afl::charset::Charset> gameCharset(new afl::charset::CodepageCharset(afl::charset::g_codepageLatin1));
+    std::auto_ptr<afl::charset::Charset> outputCharset;
 
     int i;
     afl::sys::StandardCommandLineParser commandLine(environment().getCommandLine());
@@ -266,8 +257,8 @@ ConsoleExportApplication::appMain()
     while (commandLine.getNext(opt, p)) {
         if (opt) {
             if (p == "C") {
-                if (afl::charset::Charset* cs = afl::charset::DefaultCharsetFactory().createCharset(holder, fetchArg("-C", commandLine))) {
-                    gameCharset = cs;
+                if (afl::charset::Charset* cs = afl::charset::DefaultCharsetFactory().createCharset(fetchArg("-C", commandLine))) {
+                    gameCharset.reset(cs);
                 } else {
                     errorExit(_("the specified character set is not known"));
                 }
@@ -311,8 +302,8 @@ ConsoleExportApplication::appMain()
             } else if (p == "o") {
                 arg_outfile = fetchArg("-o", commandLine);
             } else if (p == "O") {
-                if (afl::charset::Charset* cs = afl::charset::DefaultCharsetFactory().createCharset(holder, fetchArg("-O", commandLine))) {
-                    outputCharset = cs;
+                if (afl::charset::Charset* cs = afl::charset::DefaultCharsetFactory().createCharset(fetchArg("-O", commandLine))) {
+                    outputCharset.reset(cs);
                 } else {
                     errorExit(_("the specified character set is not known"));
                 }
@@ -409,7 +400,7 @@ ConsoleExportApplication::appMain()
             String_t outfile;
             if (!arg_outfile.get(outfile)) {
                 // Output to console. The console performs character set conversion.
-                if (outputCharset != 0) {
+                if (outputCharset.get() != 0) {
                     log().write(afl::sys::LogListener::Warn, "export", _("WARNING: Option '-O' has been ignored because standard output is being used."));
                 }
                 doTextExport(arg_typ, job, array.get(), standardOutput());
@@ -417,7 +408,7 @@ ConsoleExportApplication::appMain()
                 // Output to file
                 afl::base::Ref<afl::io::Stream> s = fs.openFile(outfile, afl::io::FileSystem::Create);
                 afl::io::TextFile tf(*s);
-                if (outputCharset != 0) {
+                if (outputCharset.get() != 0) {
                     tf.setCharsetNew(outputCharset->clone());
                 }
                 doTextExport(arg_typ, job, array.get(), tf);

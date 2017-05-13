@@ -1,35 +1,39 @@
 /**
   *  \file interpreter/objectpropertyvector.cpp
+  *  \brief Class interpreter::ObjectPropertyVector
   */
 
 #include "interpreter/objectpropertyvector.hpp"
 
-
+// Constructor.
 interpreter::ObjectPropertyVector::ObjectPropertyVector()
     : m_data()
 { }
 
+// Destructor.
 interpreter::ObjectPropertyVector::~ObjectPropertyVector()
 { }
 
+// Get or create a segment.
 afl::data::Segment*
 interpreter::ObjectPropertyVector::create(int id)
 {
     if (id > 0) {
-        // FIXME: give PtrVector a resize()?
-        while (id > static_cast<int>(m_data.size())) {
-            m_data.pushBackNew(0);
+        size_t slot = static_cast<size_t>(id);
+        if (slot > m_data.size()) {
+            m_data.resize(slot);
         }
-        if (m_data[id-1] == 0) {
-            m_data.replaceElementNew(id-1, new afl::data::Segment());
+        --slot;
+        if (m_data[slot] == 0) {
+            m_data.replaceElementNew(slot, new afl::data::Segment());
         }
-        return m_data[id-1];
+        return m_data[slot];
     } else {
         return 0;
     }
 }
 
-
+// Get segment.
 afl::data::Segment*
 interpreter::ObjectPropertyVector::get(int id) const
 {
@@ -40,6 +44,7 @@ interpreter::ObjectPropertyVector::get(int id) const
     }
 }
 
+// Get value.
 afl::data::Value*
 interpreter::ObjectPropertyVector::get(int id, afl::data::Segment::Index_t index) const
 {
@@ -50,6 +55,7 @@ interpreter::ObjectPropertyVector::get(int id, afl::data::Segment::Index_t index
     }
 }
 
+// Clear.
 void
 interpreter::ObjectPropertyVector::clear()
 {

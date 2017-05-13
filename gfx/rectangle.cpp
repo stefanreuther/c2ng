@@ -1,5 +1,9 @@
 /**
   *  \file gfx/rectangle.cpp
+  *  \brief Class gfx::Rectangle
+  *
+  *  \change c2ng does not derive this from SDL_Rect.
+  *  This is now a class, not a structure.
   */
 
 #include <ostream>
@@ -13,13 +17,6 @@ gfx::Rectangle::Rectangle() throw()
       m_height(0)
 { }
 
-// FIXME: delete
-// /** Construct Rectangle from SDL_Rect. */
-// inline
-// Rectangle::Rectangle(const SDL_Rect& r) throw()
-//     : SDL_Rect(r)
-// { }
-
 // Construct Rectangle from explicit parameters.
 gfx::Rectangle::Rectangle(int x, int y, int w, int h) throw()
     : m_left(x),
@@ -28,41 +25,6 @@ gfx::Rectangle::Rectangle(int x, int y, int w, int h) throw()
       m_height(h)
 { }
 
-// FIXME: delete. This makes all sorts of problems with overloaded functions
-// where 'foo(pt)' is different from 'foo(Rectangle(pt))'.
-// // Construct rectangle with given size.
-// gfx::Rectangle::Rectangle(Point extent) throw()
-//     : m_left(0),
-//       m_top(0),
-//       m_width(extent.getX()),
-//       m_height(extent.getY())
-// { }
-
-// FIXME: delete
-// /** Construct rectangle with given size at position.
-//     \param x,y Origin
-//     \param pt  Specifies size of rectangle */
-// gfx::Rectangle::Rectangle(int x, int y, Point pt) throw()
-// {
-//     this->x = x;
-//     this->y = y;
-//     this->w = pt.x;
-//     this->h = pt.y;
-// }
-
-// FIXME: delete
-// /** Construct rectangle at given position.
-//     \param pt Origin
-//     \param w,h Size */
-// inline
-// Rectangle::Rectangle(Point pt, int w, int h) throw()
-// {
-//     this->x = pt.x;
-//     this->y = pt.y;
-//     this->w = w;
-//     this->h = h;
-// }
-
 // Construct rectangle with position and size.
 gfx::Rectangle::Rectangle(Point origin, Point extent) throw()
     : m_left(origin.getX()),
@@ -70,17 +32,6 @@ gfx::Rectangle::Rectangle(Point origin, Point extent) throw()
       m_width(extent.getX()),
       m_height(extent.getY())
 { }
-
-// FIXME: delete
-// /** Construct bounding rectangle for GfxCanvas.
-//     Constructs a rectangle that covers the whole area of \c can. */
-// Rectangle::Rectangle(GfxCanvas& can)
-// {
-//     Point pt = can.getSize();
-//     x = y = 0;
-//     w = pt.x;
-//     h = pt.y;
-// }
 
 // FIXME: delete
 // /** Clip at size. Modify this rectangle so that it lies entirely
@@ -102,7 +53,6 @@ gfx::Rectangle::Rectangle(Point origin, Point extent) throw()
 //     h = (sh < 0) ? 0 : sh;
 // }
 
-
 // Intersect (clip) at rectangle.
 void
 gfx::Rectangle::intersect(const Rectangle& r) throw()
@@ -123,8 +73,8 @@ gfx::Rectangle::intersect(const Rectangle& r) throw()
     if (m_top + sh > r.m_height + r.m_top) {
         sh = r.m_height - m_top + r.m_top;
     }
-    m_width = (sw < 0) ? 0 : sw;
-    m_height = (sh < 0) ? 0 : sh;
+    m_width = int((sw < 0) ? 0 : sw);
+    m_height = int((sh < 0) ? 0 : sh);
 }
 
 // Include rectangle.
@@ -212,8 +162,8 @@ gfx::Rectangle::moveTo(Point where) throw()
     return movedBy;
 }
 
-
-// /** Move this rectangle such that it is contained within \c other. 
+// FIXME: remove
+// /** Move this rectangle such that it is contained within \c other.
 //     Does not change our size. */
 // void
 // Rectangle::moveInto(const Rectangle& other) throw()
@@ -232,14 +182,14 @@ gfx::Rectangle::moveTo(Point where) throw()
 //         m_top = other.m_top + other.m_height - m_height;
 // }
 
-// Center this rectangle within \c other.
+// Center this rectangle within another.
 void
 gfx::Rectangle::centerWithin(const Rectangle& other) throw()
 {
     moveToEdge(other, 1, 1, 0);
 }
 
-// Move this rectangle to edge of \c other.
+// Move this rectangle to edge of another.
 void
 gfx::Rectangle::moveToEdge(const Rectangle& other, int xPos, int yPos, int offset) throw()
 {
@@ -310,7 +260,8 @@ gfx::Rectangle::splitY(int pix)
     return Rectangle(m_left, resultY, m_width, pix);
 }
 
+// Output rectangle.
 std::ostream& operator<<(std::ostream& os, const gfx::Rectangle& r)
 {
-    return os << r.getLeftX() << "x" << r.getTopY() << "+" << r.getWidth() << "+" << r.getHeight();
+    return os << r.getWidth() << "x" << r.getHeight() << "+" << r.getLeftX() << "+" << r.getTopY();
 }

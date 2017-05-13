@@ -12,4 +12,18 @@ class TestGfxGenPerlinNoise : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestGfxGenSpaceView : public CxxTest::TestSuite {
+ public:
+    void testStarfieldRegression();
+    void testStarRegression();
+    void testNebulaRegression();
+    void testSunRegression();
+};
+
+class TestGfxGenSpaceViewConfig : public CxxTest::TestSuite {
+ public:
+    void testRegression();
+    void testRegressionDefault();
+};
+
 #endif

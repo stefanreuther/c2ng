@@ -12,6 +12,7 @@ class TestGameActionsPreconditions : public CxxTest::TestSuite {
     void testShip();
     void testPlanet();
     void testBase();
+    void testSession();
 };
 
 #endif

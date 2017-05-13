@@ -21,6 +21,11 @@ class TestGameConfigBooleanValueParser : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestGameConfigCollapsibleIntegerArrayOption : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
 class TestGameConfigConfiguration : public CxxTest::TestSuite {
  public:
     void testIndexing();
@@ -39,6 +44,13 @@ class TestGameConfigCostArrayOption : public CxxTest::TestSuite {
     void testSet1();
     void testSet2();
     void testSet3();
+    void testFormat();
+};
+
+class TestGameConfigEnumValueParser : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testIt2();
 };
 
 class TestGameConfigGenericIntegerArrayOption : public CxxTest::TestSuite {
@@ -53,12 +65,22 @@ class TestGameConfigHostConfiguration : public CxxTest::TestSuite {
     void testAlias();
 };
 
+class TestGameConfigIntegerArrayOption : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
 class TestGameConfigIntegerOption : public CxxTest::TestSuite {
  public:
     void testIt();
 };
 
 class TestGameConfigIntegerValueParser : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
+class TestGameConfigStringOption : public CxxTest::TestSuite {
  public:
     void testIt();
 };

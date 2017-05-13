@@ -31,6 +31,7 @@ class TestInterpreterExprBuiltinFunction : public CxxTest::TestSuite {
     void testStrCase();
     void testAtom();
     void testEval();
+    void testMisc();
 };
 
 class TestInterpreterExprParser : public CxxTest::TestSuite {

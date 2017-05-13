@@ -54,6 +54,22 @@ TestGameSpecComponentVector::testCreate()
     TS_ASSERT(testee.get(8) == 0);
     TS_ASSERT(testee.get(9) != 0);
     TS_ASSERT(testee.get(10) == 0);
+
+    // Test iteration
+    MyComponent* p = testee.findNext(0);
+    TS_ASSERT(p != 0);
+    TS_ASSERT_EQUALS(p->getId(), 1);
+
+    p = testee.findNext(1);
+    TS_ASSERT(p != 0);
+    TS_ASSERT_EQUALS(p->getId(), 2);
+
+    p = testee.findNext(2);
+    TS_ASSERT(p != 0);
+    TS_ASSERT_EQUALS(p->getId(), 9);
+
+    p = testee.findNext(9);
+    TS_ASSERT(p == 0);
 }
 
 /** Test name access. */

@@ -8,6 +8,7 @@
 #include "t_game.hpp"
 #include "game/player.hpp"
 #include "afl/charset/utf8reader.hpp"
+#include "helper/counter.hpp"
 
 /** Test setup and expandNames(). */
 void
@@ -240,3 +241,50 @@ TestGamePlayerList::testChar()
     TS_ASSERT_EQUALS(testee.getCharacterFromPlayer(260), '\0');
     TS_ASSERT_EQUALS(testee.getCharacterFromPlayer(100000000), '\0');
 }
+
+/** Test notifyListeners(). */
+void
+TestGamePlayerList::testNotify()
+{
+    // Create a PlayerList with a listener
+    Counter c;
+    game::PlayerList testee;
+    testee.sig_change.add(&c, &Counter::increment);
+    TS_ASSERT_EQUALS(c.get(), 0);
+
+    // Adding players registers as a change
+    testee.create(2);
+    testee.create(5);
+    testee.notifyListeners();
+    TS_ASSERT_EQUALS(c.get(), 1);
+
+    // Modify a player
+    testee.get(2)->setName(game::Player::LongName, "Long");
+    testee.notifyListeners();
+    TS_ASSERT_EQUALS(c.get(), 2);
+
+    // Notify again does not longer call the listener because it has reset the status
+    testee.notifyListeners();
+    TS_ASSERT_EQUALS(c.get(), 2);
+
+    // Same thing again, now modify both
+    testee.get(2)->setName(game::Player::LongName, "2");
+    testee.get(5)->setName(game::Player::LongName, "2");
+    testee.notifyListeners();
+    TS_ASSERT_EQUALS(c.get(), 3);
+
+    // Notify again does not longer call the listener because it has reset the status
+    testee.notifyListeners();
+    TS_ASSERT_EQUALS(c.get(), 3);
+
+    // Re-adding a player no longer counts as a change...
+    testee.create(2);
+    testee.notifyListeners();
+    TS_ASSERT_EQUALS(c.get(), 3);
+
+    // ...but adding a new one does
+    testee.create(9);
+    testee.notifyListeners();
+    TS_ASSERT_EQUALS(c.get(), 4);
+}
+

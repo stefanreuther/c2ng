@@ -1,11 +1,11 @@
 /**
   *  \file game/extra.hpp
+  *  \brief Base class game::Extra
   */
 #ifndef C2NG_GAME_EXTRA_HPP
 #define C2NG_GAME_EXTRA_HPP
 
 #include "afl/base/deletable.hpp"
-#include "afl/container/ptrmap.hpp"
 
 namespace game {
 

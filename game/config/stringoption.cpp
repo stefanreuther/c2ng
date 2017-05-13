@@ -1,5 +1,6 @@
 /**
   *  \file game/config/stringoption.cpp
+  *  \brief Class game::config::StringOption
   */
 
 #include "game/config/stringoption.hpp"

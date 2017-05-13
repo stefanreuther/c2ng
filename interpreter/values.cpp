@@ -1,20 +1,20 @@
 /**
   *  \file interpreter/values.cpp
+  *  \brief Interpreter Value Handling
   */
 
 #include <cmath>
 #include "interpreter/values.hpp"
 #include "afl/data/booleanvalue.hpp"
-#include "afl/data/integervalue.hpp"
 #include "afl/data/floatvalue.hpp"
+#include "afl/data/integervalue.hpp"
 #include "afl/data/stringvalue.hpp"
-#include "afl/string/format.hpp"
 #include "afl/data/visitor.hpp"
-#include "interpreter/error.hpp"
+#include "afl/string/format.hpp"
 #include "interpreter/basevalue.hpp"
+#include "interpreter/error.hpp"
 
-/** Make a tristate-boolean value from integer.
-    \param value Negative for empty, zero for false, positive for true */
+// Make a tristate-boolean value from integer.
 afl::data::Value*
 interpreter::makeBooleanValue(int value)
 {
@@ -26,8 +26,7 @@ interpreter::makeBooleanValue(int value)
     }
 }
 
-/** Make integer value. Convenience function to save code.
-    \param value Value to create */
+// Make integer value.
 afl::data::Value*
 interpreter::makeIntegerValue(int32_t value)
 {
@@ -35,8 +34,7 @@ interpreter::makeIntegerValue(int32_t value)
     return new afl::data::IntegerValue(value);
 }
 
-/** Make float value. Convenience function to save code.
-    \param value Value to create */
+// Make float value.
 afl::data::Value*
 interpreter::makeFloatValue(double value)
 {
@@ -44,8 +42,7 @@ interpreter::makeFloatValue(double value)
     return new afl::data::FloatValue(value);
 }
 
-/** Make string value. Convenience function to save code.
-    \param str Value to create */
+// Make string value.
 afl::data::Value*
 interpreter::makeStringValue(String_t str)
 {
@@ -53,8 +50,7 @@ interpreter::makeStringValue(String_t str)
     return new afl::data::StringValue(str);
 }
 
-/** Make string value. Convenience function to save code.
-    \param str Value to create */
+// Make string value.
 afl::data::Value*
 interpreter::makeStringValue(const char* str)
 {
@@ -62,6 +58,7 @@ interpreter::makeStringValue(const char* str)
     return new afl::data::StringValue(str);
 }
 
+// Make optional string value.
 afl::data::Value*
 interpreter::makeOptionalStringValue(const afl::base::Optional<String_t>& value)
 {
@@ -72,12 +69,7 @@ interpreter::makeOptionalStringValue(const afl::base::Optional<String_t>& value)
     }
 }
 
-/** Get tristate-integer value from value. This is used whenever a value is used
-    in a boolean context in a program.
-    \retval -1 Input is EMPTY
-    \retval 0  Input is False
-    \retval +1 Input is True
-    \change PCC2 <= 2.0.1 treats non-scalars as empty. We treat non-scalars as true. */
+// Get tristate-integer value from value.
 int
 interpreter::getBooleanValue(const afl::data::Value* value)
 {
@@ -88,7 +80,7 @@ interpreter::getBooleanValue(const afl::data::Value* value)
     // This is also consistent with other scripting languages that treat object references as true (JavaScript, Perl, Python...).
 
     // It is important to not generate an error.
-    // This the convenient property of making ubool/unot/uzap/unot2/uisempty operations never fail,
+    // This has the convenient property of making ubool/unot/uzap/unot2/uisempty operations never fail,
     // which permits a number of useful optimisations.
 
     // Using a visitor is cleaner and about 10% faster than using a dynamic_cast type switch.
@@ -125,6 +117,7 @@ interpreter::getBooleanValue(const afl::data::Value* value)
     return visi.get();
 }
 
+// Convert to string representation.
 String_t
 interpreter::toString(const afl::data::Value* value, bool readable)
 {
@@ -200,7 +193,7 @@ interpreter::toString(const afl::data::Value* value, bool readable)
     return worker.m_result;
 }
 
-/** Quote a string. Returns some piece of code that, when read, returns a string \c value. */
+// Quote a string.
 String_t
 interpreter::quoteString(const String_t& value)
 {
@@ -231,6 +224,7 @@ interpreter::quoteString(const String_t& value)
     }
 }
 
+// Format a floating-point value.
 String_t
 interpreter::formatFloat(double value)
 {

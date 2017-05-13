@@ -11,7 +11,6 @@
 #include "interpreter/arrayvalue.hpp"
 #include "interpreter/bytecodeobject.hpp"
 #include "interpreter/error.hpp"
-#include "interpreter/hashdata.hpp"
 #include "interpreter/process.hpp"
 #include "interpreter/structuretype.hpp"
 #include "interpreter/structurevalue.hpp"
@@ -29,8 +28,8 @@ TestInterpreterVmioNullSaveContext::testIt()
         TS_ASSERT_THROWS(testee.addBCO(bco), interpreter::Error);
     }
     {
-        interpreter::HashData hash;
-        TS_ASSERT_THROWS(testee.addHash(hash), interpreter::Error);
+        afl::data::Hash::Ref_t hash = afl::data::Hash::create();
+        TS_ASSERT_THROWS(testee.addHash(*hash), interpreter::Error);
     }
     {
         interpreter::ArrayData array;

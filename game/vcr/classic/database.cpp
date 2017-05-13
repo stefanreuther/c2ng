@@ -44,7 +44,7 @@ namespace {
         out.setNumBays(obj.numBays);
         out.setExperienceLevel(obj.experienceLevel);
         out.setIsPlanet(side == game::vcr::classic::RightSide && in.battleType != 0);
-        out.setName(charset.decode(afl::string::toMemory(obj.name)));
+        out.setName(charset.decode(obj.name));
 
         // Handle torps/fighters
         if (obj.numLaunchersPacked != 0) {
@@ -217,7 +217,7 @@ game::vcr::classic::Database::load(afl::io::Stream& file,
     if (mayBePHost && type == Host) {
         type = PHost3;
         if ((firstFlags & game::v3::structures::ValidCapabilities) != 0) {
-            capabilities = firstFlags & ~game::v3::structures::ValidCapabilities;
+            capabilities = uint16_t(firstFlags & ~game::v3::structures::ValidCapabilities);
         }
         if (capabilities != 0) {
             type = PHost4;

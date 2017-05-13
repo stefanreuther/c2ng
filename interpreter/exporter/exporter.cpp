@@ -100,5 +100,4 @@ interpreter::exporter::Exporter::doExport(Context* ctx, util::AnswerProvider& fi
         }
     } while (ctx->next());
     endTable();
-
 }

@@ -8,10 +8,14 @@
 
 namespace ui { namespace res {
 
+    /** ImageLoader implementation for PCC's custom image formats.
+        Historical reasons. */
     class CCImageLoader : public ImageLoader {
      public:
+        /** Constructor. */
         CCImageLoader();
 
+        // ImageLoader
         virtual afl::base::Ptr<gfx::Canvas> loadImage(afl::io::Stream& in);
     };
 

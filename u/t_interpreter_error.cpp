@@ -51,6 +51,7 @@ TestInterpreterError::testInstances()
     verifyInstance(interpreter::Error::unknownIdentifier("FOO"));
     verifyInstance(interpreter::Error::typeError());
     verifyInstance(interpreter::Error::typeError(interpreter::Error::ExpectString));
+    verifyInstance(interpreter::Error::typeError(interpreter::Error::ExpectArray));
     verifyInstance(interpreter::Error::internalError("boom"));
     verifyInstance(interpreter::Error::notSerializable());
     verifyInstance(interpreter::Error::notAssignable());
@@ -65,4 +66,5 @@ TestInterpreterError::testInstances()
     verifyInstance(interpreter::Error::garbageAtEnd(true));
     verifyInstance(interpreter::Error::expectIdentifier("name"));
     verifyInstance(interpreter::Error::contextError());
+    verifyInstance(interpreter::Error::tooComplex());
 }

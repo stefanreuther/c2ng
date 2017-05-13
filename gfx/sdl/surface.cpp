@@ -120,7 +120,7 @@ gfx::sdl::Surface::drawPixels(const Point& pt, afl::base::Memory<const Color_t> 
             if (!colors.empty()) {
                 ensureLocked();
                 GFX_MODE_SWITCH(m_surface, writePixels(x, y, colors, alpha));
-                m_updateRegion.include(Rectangle(x, y, colors.size(), 1));
+                m_updateRegion.include(Rectangle(x, y, int(colors.size()), 1));
             }
         }
     }
@@ -137,10 +137,10 @@ gfx::sdl::Surface::drawBar(Rectangle rect, Color_t color, Color_t bg, const Fill
     ensureLocked();
     if (alpha == OPAQUE_ALPHA && pat.isBlack()) {
         SDL_Rect r;
-        r.x = rect.getLeftX();
-        r.y = rect.getTopY();
-        r.w = rect.getWidth();
-        r.h = rect.getHeight();
+        r.x = Sint16(rect.getLeftX());
+        r.y = Sint16(rect.getTopY());
+        r.w = Uint16(rect.getWidth());
+        r.h = Uint16(rect.getHeight());
         SDL_FillRect(m_surface, &r, color);
     } else {
         GFX_MODE_SWITCH(m_surface, doBar(rect, color, bg, pat, alpha));
@@ -153,16 +153,16 @@ gfx::sdl::Surface::blit(const Point& pt, Canvas& src, Rectangle rect)
 {
     if (Surface* s = dynamic_cast<Surface*>(&src)) {
         SDL_Rect dstrect;
-        dstrect.x = pt.getX() + rect.getLeftX();
-        dstrect.y = pt.getY() + rect.getTopY();
+        dstrect.x = Sint16(pt.getX() + rect.getLeftX());
+        dstrect.y = Sint16(pt.getY() + rect.getTopY());
         dstrect.w = 0;
         dstrect.h = 0;
 
         SDL_Rect srcrect;
-        srcrect.x = rect.getLeftX();
-        srcrect.y = rect.getTopY();
-        srcrect.w = rect.getWidth();
-        srcrect.h = rect.getHeight();
+        srcrect.x = Sint16(rect.getLeftX());
+        srcrect.y = Sint16(rect.getTopY());
+        srcrect.w = Uint16(rect.getWidth());
+        srcrect.h = Uint16(rect.getHeight());
 
         ensureUnlocked();
         SDL_BlitSurface(s->m_surface, &srcrect, m_surface, &dstrect);
@@ -270,7 +270,7 @@ gfx::sdl::Surface::setPalette(Color_t start, afl::base::Memory<const ColorQuad_t
         // Convert.
         Color_t nr = start;
         afl::base::GrowableMemory<SDL_Color> palette;
-        palette.ensureCapacity(colorDefinitions.size());
+        palette.reserve(colorDefinitions.size());
         while (const Color_t* in = colorDefinitions.eat()) {
             // Convert RGB
             SDL_Color c;

@@ -258,10 +258,12 @@ interpreter::vmio::ObjectLoader::~ObjectLoader()
 //     \param acceptProcesses true to accept saved processes (=VM file),
 //     false to accept only bytecode (=object file) */
 void
-interpreter::vmio::ObjectLoader::load(afl::io::Stream& s)
+interpreter::vmio::ObjectLoader::load(afl::base::Ref<afl::io::Stream> s)
 {
     // ex IntVMLoadContext::load
-    LoadObject ldr(s);
+    // FIXME: the parameter must be a Ref<> because the stream will eventually end up in a LimitedStream
+    // which requires a Ref<>. However, actually the LimitedStream should be fixed to not need a Ref<>.
+    LoadObject ldr(*s);
     uint32_t objType, objId;
     while (ldr.readObject(objType, objId)) {
         switch (objType) {
@@ -290,7 +292,7 @@ interpreter::vmio::ObjectLoader::load(afl::io::Stream& s)
             break;
 
          default:
-            throw afl::except::FileFormatException(s, _("Unexpected object"));
+            throw afl::except::FileFormatException(*s, _("Unexpected object"));
         }
     }
 }
@@ -312,13 +314,13 @@ interpreter::vmio::ObjectLoader::getBCO(uint32_t id)
 // /** Get hash object by Id
 //     \param id Id to check
 //     \return hash data */
-afl::base::Ref<interpreter::HashData>
+afl::data::Hash::Ref_t
 interpreter::vmio::ObjectLoader::getHash(uint32_t id)
 {
     // ex IntVMLoadContext::getHash
     HashValue* hv = hash_map[id];
     if (hv == 0) {
-        hv = hash_map.insertNew(id, new HashValue(*new HashData()));
+        hv = hash_map.insertNew(id, new HashValue(afl::data::Hash::create()));
     }
     return hv->getData();
 }
@@ -485,6 +487,9 @@ interpreter::vmio::ObjectLoader::loadProcess(LoadObject& ldr)
     if (!proc->setContextTOS(loaded_context_tos)) {
         // Loaded context TOS was out of range. PCC2 ignores this, and so do we.
     }
+
+    // Finish the process (put it in its place according to priority)
+    finishProcess(*proc);
 }
 
 // /** Load stack frames.
@@ -578,6 +583,11 @@ interpreter::vmio::ObjectLoader::createProcess()
     return m_context.createProcess();
 }
 
+void
+interpreter::vmio::ObjectLoader::finishProcess(Process& proc)
+{
+    m_context.finishProcess(proc);
+}
 
 // /** Load bytecode object.
 //     \param ldr Object loader that has just read the object header
@@ -662,23 +672,31 @@ void
 interpreter::vmio::ObjectLoader::loadHash(LoadObject& ldr, uint32_t id)
 {
     // ex IntVMLoadContext::loadHash
-    afl::base::Ref<HashData> hash = getHash(id);
+    // Load
+    afl::data::NameMap names;
+    afl::data::Segment values;
     uint32_t propId, propCount;
     while (afl::io::Stream* ps = ldr.readProperty(propId, propCount)) {
         switch (propId) {
          case 1:
             // names
-            ValueLoader(m_charset, *this).loadNames(hash->getNames(), *ps, propCount);
+            ValueLoader(m_charset, *this).loadNames(names, *ps, propCount);
             break;
 
          case 2:
             // values
-            ValueLoader(m_charset, *this).load(hash->getContent(), *ps, 0, propCount);
+            ValueLoader(m_charset, *this).load(values, *ps, 0, propCount);
             break;
 
          default:
             break;
         }
+    }
+
+    // Store in hash
+    afl::data::Hash::Ref_t hash = getHash(id);
+    for (size_t i = 0, n = names.getNumNames(); i < n; ++i) {
+        hash->setNew(names.getNameByIndex(i), values.extractElement(i));
     }
 }
 
@@ -755,7 +773,7 @@ interpreter::vmio::ObjectLoader::loadStructureType(LoadObject& ldr, uint32_t id)
         switch (propId) {
          case 1:
             // names
-            ValueLoader(m_charset, *this).loadNames(type->names, *ps, propCount);
+            ValueLoader(m_charset, *this).loadNames(type->names(), *ps, propCount);
             break;
 
          default:

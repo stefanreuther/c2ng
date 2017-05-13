@@ -1,16 +1,17 @@
 /**
   *  \file game/v3/structures.hpp
+  *  \brief v3 Structures
   */
 #ifndef C2NG_GAME_V3_STRUCTURES_HPP
 #define C2NG_GAME_V3_STRUCTURES_HPP
 
-#include "afl/bits/int16le.hpp"
-#include "afl/bits/value.hpp"
-#include "afl/bits/int32le.hpp"
 #include "afl/base/staticassert.hpp"
 #include "afl/bits/fixedstring.hpp"
+#include "afl/bits/int16le.hpp"
+#include "afl/bits/int32le.hpp"
 #include "afl/bits/uint16le.hpp"
 #include "afl/bits/uint32le.hpp"
+#include "afl/bits/value.hpp"
 
 /** \namespace game::v3::structures
     \brief v3 Structure Definitions
@@ -33,18 +34,18 @@ namespace game { namespace v3 { namespace structures {
 
 
     /** Manifest Constants. */
-    const size_t NUM_BEAM_TYPES = 10;                          ///< Number of beams in BEAMSPEC.
-    const size_t NUM_TORPEDO_TYPES = 10;                       ///< Number of torpedoes in TORPSPEC.
-    const size_t NUM_ENGINE_TYPES = 9;                         ///< Number of engines in ENGSPEC.
-    const size_t NUM_WARP_FACTORS = 9;                         ///< Number of warp factors.
+    const int NUM_BEAM_TYPES = 10;                          ///< Number of beams in BEAMSPEC.
+    const int NUM_TORPEDO_TYPES = 10;                       ///< Number of torpedoes in TORPSPEC.
+    const int NUM_ENGINE_TYPES = 9;                         ///< Number of engines in ENGSPEC.
+    const int NUM_WARP_FACTORS = 9;                         ///< Number of warp factors.
 
-    const size_t NUM_SHIPS   = 999;              ///< Maximum number of ships.
-    const size_t NUM_PLANETS = 500;              ///< Maximum number of planets.
-    const size_t NUM_ION_STORMS = 50;            ///< Maximum number of ion storms.
+    const int NUM_SHIPS   = 999;              ///< Maximum number of ships.
+    const int NUM_PLANETS = 500;              ///< Maximum number of planets.
+    const int NUM_ION_STORMS = 50;            ///< Maximum number of ion storms.
 
-    const size_t NUM_PLAYERS = 11;                             ///< Number of players in standard game.
-    const size_t NUM_OWNERS  =  12;              ///< Permitted range for owners: include Aliens.
-    const size_t NUM_HULLS_PER_PLAYER = 20;                   ///< Number of hulls per player.
+    const int NUM_PLAYERS = 11;                             ///< Number of players in standard game.
+    const int NUM_OWNERS  =  12;              ///< Permitted range for owners: include Aliens.
+    const int NUM_HULLS_PER_PLAYER = 20;                   ///< Number of hulls per player.
 
     const size_t MAX_TRN_ATTACHMENTS = 10;
 
@@ -185,7 +186,7 @@ namespace game { namespace v3 { namespace structures {
 
     /** Game info. The GEN file contains one such record. \see GGen. */
     struct Gen {
-        char        timestamp[18];                              ///< Host time stamp.
+        uint8_t     timestamp[18];                              ///< Host time stamp.
         GenScore    scores[NUM_PLAYERS];                        ///< Scores.
         Int16_t     playerId;                                   ///< Player number.
         char        password[20];                               ///< Encoded password. @sa GGen
@@ -202,7 +203,7 @@ namespace game { namespace v3 { namespace structures {
 
     /** Game info in RST file. Same as TGen, but lacks a few fields. \see GGen */
     struct ResultGen {
-        char        timestamp[18];                              ///< Host time stamp.
+        uint8_t     timestamp[18];                              ///< Host time stamp.
         GenScore    scores[NUM_PLAYERS];                        ///< Scores.
         Int16_t     playerId;                                   ///< Player number.
         char        password[20];                               ///< Encoded password. @sa GGen
@@ -416,7 +417,7 @@ namespace game { namespace v3 { namespace structures {
     struct TurnHeader {
         Int16_t     playerId;                                   ///< Player number.
         Int32_t     numCommands;                                ///< Number of commands.
-        char        timestamp[18];                              ///< Timestamp.
+        uint8_t     timestamp[18];                              ///< Timestamp.
         Int16_t     unused;                                     ///< Unused. Contains random value.
         Int16_t     timeChecksum;                               ///< Checksum over timestamp.
     };

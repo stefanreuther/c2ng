@@ -6,6 +6,8 @@
 #include "game/vcr/object.hpp"
 
 #include "t_game_vcr.hpp"
+#include "game/spec/componentvector.hpp"
+#include "game/spec/hull.hpp"
 
 /** Test "get/set" methods. */
 void
@@ -123,3 +125,130 @@ TestGameVcrObject::testAdd()
     t.addMass(340);
     TS_ASSERT_EQUALS(t.getMass(), 440);
 }
+
+/** Test guessing the ship type. */
+void
+TestGameVcrObject::testGuess()
+{
+    // Create an object
+    game::vcr::Object testee;
+    testee.setPicture(3);
+    testee.setMass(200);
+    testee.setNumBeams(12);
+    testee.setNumBays(3);
+    testee.setIsPlanet(false);
+
+    // Create a ship list and test against that
+    game::spec::HullVector_t vec;
+    game::spec::Hull* p = vec.create(1);
+    TS_ASSERT(p);
+    p->setMass(300);
+    p->setMaxBeams(11);
+    p->setMaxLaunchers(3);
+    p->setExternalPictureNumber(3);
+    p->setInternalPictureNumber(44);
+
+    p = vec.create(10);
+    TS_ASSERT(p);
+    p->setMass(300);
+    p->setMaxBeams(12);
+    p->setNumBays(1);
+    p->setExternalPictureNumber(3);
+    p->setInternalPictureNumber(77);
+
+    TS_ASSERT(!testee.canBeHull(vec, 1));
+    TS_ASSERT(!testee.canBeHull(vec, 2));
+    TS_ASSERT(testee.canBeHull(vec, 10));
+    TS_ASSERT_EQUALS(testee.getGuessedHull(vec), 10);
+    TS_ASSERT_EQUALS(testee.getGuessedShipPicture(vec), 77);
+
+    testee.setGuessedHull(vec);
+    TS_ASSERT_EQUALS(testee.getHull(), 10);
+}
+
+/** Test guessing the ship type, ambiguous case. */
+void
+TestGameVcrObject::testGuessAmbig()
+{
+    // Create an object
+    game::vcr::Object testee;
+    testee.setPicture(3);
+    testee.setMass(200);
+    testee.setNumBeams(12);
+    testee.setNumBays(3);
+    testee.setIsPlanet(false);
+
+    // Create a ship list and test against that
+    game::spec::HullVector_t vec;
+    game::spec::Hull* p = vec.create(1);
+    TS_ASSERT(p);
+    p->setMass(300);
+    p->setMaxBeams(14);
+    p->setNumBays(3);
+    p->setExternalPictureNumber(3);
+    p->setInternalPictureNumber(44);
+
+    p = vec.create(10);
+    TS_ASSERT(p);
+    p->setMass(300);
+    p->setMaxBeams(12);
+    p->setNumBays(1);
+    p->setExternalPictureNumber(3);
+    p->setInternalPictureNumber(77);
+
+    TS_ASSERT(testee.canBeHull(vec, 1));
+    TS_ASSERT(testee.canBeHull(vec, 10));
+    TS_ASSERT_EQUALS(testee.getGuessedHull(vec), 0);
+    TS_ASSERT_EQUALS(testee.getGuessedShipPicture(vec), 3);
+
+    // Manually resolve the ambiguity
+    testee.setHull(1);
+    TS_ASSERT(testee.canBeHull(vec, 1));
+    TS_ASSERT(!testee.canBeHull(vec, 10));
+    TS_ASSERT_EQUALS(testee.getGuessedHull(vec), 1);
+    TS_ASSERT_EQUALS(testee.getGuessedShipPicture(vec), 44);
+}
+
+/** Test guessing the ship type, total mismatch. */
+void
+TestGameVcrObject::testGuessMismatch()
+{
+    // Create an object
+    game::vcr::Object testee;
+    testee.setPicture(3);
+    testee.setMass(200);
+    testee.setNumBeams(12);
+    testee.setNumBays(3);
+    testee.setIsPlanet(false);
+
+    // Create a ship list and test against that
+    game::spec::HullVector_t vec;
+    game::spec::Hull* p = vec.create(1);
+    TS_ASSERT(p);
+    p->setMass(300);
+    p->setMaxBeams(10);
+    p->setNumBays(3);
+    p->setExternalPictureNumber(3);
+    p->setInternalPictureNumber(44);
+
+    p = vec.create(10);
+    TS_ASSERT(p);
+    p->setMass(300);
+    p->setMaxBeams(12);
+    p->setMaxLaunchers(2);
+    p->setExternalPictureNumber(3);
+    p->setInternalPictureNumber(77);
+
+    TS_ASSERT(!testee.canBeHull(vec, 1));
+    TS_ASSERT(!testee.canBeHull(vec, 10));
+    TS_ASSERT_EQUALS(testee.getGuessedHull(vec), 0);
+    TS_ASSERT_EQUALS(testee.getGuessedShipPicture(vec), 3);
+
+    // Manually resolve; this will skip the consistency checks
+    testee.setHull(1);
+    TS_ASSERT(testee.canBeHull(vec, 1));
+    TS_ASSERT(!testee.canBeHull(vec, 10));
+    TS_ASSERT_EQUALS(testee.getGuessedHull(vec), 1);
+    TS_ASSERT_EQUALS(testee.getGuessedShipPicture(vec), 44);
+}
+

@@ -77,7 +77,7 @@ game::interface::getGlobalProperty(GlobalProperty igp, Session& session)
         /* @q My.InMsgs:Int (Global Property)
            Number of incoming (received) messages this turn. */
         if (Game* game = session.getGame().get()) {
-            return makeIntegerValue(game->currentTurn().inbox().getNumMessages());
+            return makeIntegerValue(int32_t(game->currentTurn().inbox().getNumMessages()));
         } else {
             return 0;
         }
@@ -94,7 +94,7 @@ game::interface::getGlobalProperty(GlobalProperty igp, Session& session)
            Number of incoming combat recordings this turn. */
         if (Game* game = session.getGame().get()) {
             if (game::vcr::Database* db = game->currentTurn().getBattles().get()) {
-                return makeIntegerValue(db->getNumBattles());
+                return makeIntegerValue(int32_t(db->getNumBattles()));
             } else {
                 return makeIntegerValue(0);
             }

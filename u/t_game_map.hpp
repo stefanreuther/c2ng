@@ -26,6 +26,11 @@ class TestGameMapExplosion : public CxxTest::TestSuite {
     void testName();
 };
 
+class TestGameMapIonStorm : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
 class TestGameMapMapObject : public CxxTest::TestSuite {
  public:
     void testIt();

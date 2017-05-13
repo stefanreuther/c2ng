@@ -1,10 +1,11 @@
 /**
   *  \file interpreter/commandsource.cpp
+  *  \brief Class interpreter::CommandSource
   */
 
 #include "interpreter/commandsource.hpp"
 
-/** Default constructor. */
+// Default constructor.
 interpreter::CommandSource::CommandSource()
     : m_tokenizer(String_t()),
       m_lineNr(0),
@@ -13,11 +14,11 @@ interpreter::CommandSource::CommandSource()
     // ex IntCommandSource::IntCommandSource
 }
 
-/** Destructor. */
+// Destructor.
 interpreter::CommandSource::~CommandSource()
 { }
 
-/** Set next line. Call this from readNextLine. */
+// Set next input line.
 void
 interpreter::CommandSource::setNextLine(String_t s)
 {

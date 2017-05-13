@@ -22,7 +22,7 @@ TestGameTimestamp::testInit()
     // Assigning a correct timestamp
     {
         // 12-24-1988 Nakatomi Plaza - Never Forget
-        const char data[18] = {'1','2','-','2','4','-','1','9','8','8','2','0',':','1','5',':','3','1'};
+        static const uint8_t data[18] = {'1','2','-','2','4','-','1','9','8','8','2','0',':','1','5',':','3','1'};
         Timestamp ts(data);
         TS_ASSERT(ts.isValid());
         TS_ASSERT_EQUALS(ts.getTimestampAsString(), "12-24-198820:15:31");
@@ -30,7 +30,7 @@ TestGameTimestamp::testInit()
         TS_ASSERT_EQUALS(ts.getDateAsString(), "12-24-1988");
 
         // Compare with copy-out
-        char data2[18];
+        uint8_t data2[18];
         ts.storeRawData(data2);
         TS_ASSERT_SAME_DATA(data, data2, 18);
 
@@ -53,13 +53,13 @@ TestGameTimestamp::testRelation()
 {
     using game::Timestamp;
 
-    const char data[18]       = {'1','2','-','2','4','-','1','9','8','8','2','0',':','1','5',':','3','1'};
-    const char prevYear[18]   = {'1','2','-','2','4','-','1','9','8','7','2','0',':','1','5',':','3','1'};
-    const char prevMonth[18]  = {'1','1','-','2','4','-','1','9','8','8','2','0',':','1','5',':','3','1'};
-    const char prevDay[18]    = {'1','2','-','2','3','-','1','9','8','8','2','0',':','1','5',':','3','1'};
-    const char prevHour[18]   = {'1','2','-','2','4','-','1','9','8','8','1','9',':','1','5',':','3','1'};
-    const char prevMinute[18] = {'1','2','-','2','4','-','1','9','8','8','2','0',':','1','4',':','3','1'};
-    const char prevSecond[18] = {'1','2','-','2','4','-','1','9','8','8','2','0',':','1','5',':','3','0'};
+    static const uint8_t data[18]       = {'1','2','-','2','4','-','1','9','8','8','2','0',':','1','5',':','3','1'};
+    static const uint8_t prevYear[18]   = {'1','2','-','2','4','-','1','9','8','7','2','0',':','1','5',':','3','1'};
+    static const uint8_t prevMonth[18]  = {'1','1','-','2','4','-','1','9','8','8','2','0',':','1','5',':','3','1'};
+    static const uint8_t prevDay[18]    = {'1','2','-','2','3','-','1','9','8','8','2','0',':','1','5',':','3','1'};
+    static const uint8_t prevHour[18]   = {'1','2','-','2','4','-','1','9','8','8','1','9',':','1','5',':','3','1'};
+    static const uint8_t prevMinute[18] = {'1','2','-','2','4','-','1','9','8','8','2','0',':','1','4',':','3','1'};
+    static const uint8_t prevSecond[18] = {'1','2','-','2','4','-','1','9','8','8','2','0',':','1','5',':','3','0'};
 
     // Timestamp is not earlier than itself
     TS_ASSERT(!Timestamp(data).isEarlierThan(Timestamp(data)));

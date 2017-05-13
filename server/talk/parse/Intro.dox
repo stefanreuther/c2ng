@@ -1,0 +1,6 @@
+/*!
+     \namespace server::talk::parse
+     \brief Parsers
+
+     This namespace implements parsers for messages and PMs.
+ */

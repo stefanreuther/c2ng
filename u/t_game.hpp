@@ -38,6 +38,11 @@ class TestGameExperienceLevelSet : public CxxTest::TestSuite {
     void testFormat();
 };
 
+class TestGameExtra : public CxxTest::TestSuite {
+ public:
+    void testInterface();
+};
+
 class TestGameExtraContainer : public CxxTest::TestSuite {
  public:
     void testIt();
@@ -71,6 +76,7 @@ class TestGameHostVersion : public CxxTest::TestSuite {
     void testFormat();
     void testAccessor();
     void testVersion();
+    void testProperties();
 };
 
 class TestGameInterpreterInterface : public CxxTest::TestSuite {
@@ -102,9 +108,25 @@ class TestGamePlayerList : public CxxTest::TestSuite {
     void testIteration();
     void testSetup();
     void testChar();
+    void testNotify();
+};
+
+class TestGamePlayerSet : public CxxTest::TestSuite {
+ public:
+    void testFormat();
 };
 
 class TestGameRegistrationKey : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
+class TestGameRoot : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
+class TestGameShipBuildOrder : public CxxTest::TestSuite {
  public:
     void testIt();
 };
@@ -131,6 +153,12 @@ class TestGameTimestamp : public CxxTest::TestSuite {
  public:
     void testInit();
     void testRelation();
+};
+
+class TestGameTurn : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testNotify();
 };
 
 class TestGameTurnLoader : public CxxTest::TestSuite {

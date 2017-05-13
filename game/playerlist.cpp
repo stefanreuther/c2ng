@@ -63,7 +63,7 @@ game::PlayerList::clear()
 int
 game::PlayerList::size() const
 {
-    return m_players.size();
+    return int(m_players.size());
 }
 
 // Get player object, given a player character.
@@ -85,9 +85,9 @@ game::PlayerList::getCharacterFromPlayer(int id) const
     // ex game/player.h:getPlayerChar
     // FIXME: might be better in class Player? util?
     if (id >= 0 && id < 10) {
-        return '0' + id;
+        return char('0' + id);
     } else if (id >= 10 && id < 36) {
-        return 'A' + (id-10);
+        return char('A' + (id-10));
     } else {
         return '\0';
     }

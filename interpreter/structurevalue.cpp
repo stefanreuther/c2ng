@@ -1,5 +1,8 @@
 /**
   *  \file interpreter/structurevalue.cpp
+  *  \brief Class interpreter::StructureValue
+  *
+  *  PCC2 Comment:
   *
   *  A structure type has a fixed name/value-slot mapping for all objects
   *  of its type (unlike a hash, which has a possibly-different mapping
@@ -14,24 +17,14 @@
 #include "interpreter/propertyacceptor.hpp"
 #include "interpreter/savecontext.hpp"
 
-interpreter::StructureValueData::StructureValueData(afl::base::Ref<StructureTypeData> type)
-    : type(type),
-      data()
-{
-    // ex IntStructureValueData::IntStructureValueData
-}
-
-interpreter::StructureValueData::~StructureValueData()
-{ }
-
-
-
-interpreter::StructureValue::StructureValue(afl::base::Ref<StructureValueData> value)
+// Constructor.
+interpreter::StructureValue::StructureValue(StructureValueData::Ref_t value)
     : m_value(value)
 {
     // ex IntStructureValue::IntStructureValue
 }
 
+// Destructor.
 interpreter::StructureValue::~StructureValue()
 { }
 
@@ -64,7 +57,7 @@ interpreter::StructureValue*
 interpreter::StructureValue::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
 {
     // ex IntStructureValue::lookup
-    afl::data::NameMap::Index_t index = m_value->type->names.getIndexByName(name);
+    afl::data::NameMap::Index_t index = m_value->type->names().getIndexByName(name);
     if (index != afl::data::NameMap::nil) {
         result = index;
         return this;
@@ -98,5 +91,5 @@ void
 interpreter::StructureValue::enumProperties(PropertyAcceptor& acceptor)
 {
     // ex IntStructureValue::enumProperties
-    acceptor.enumNames(m_value->type->names);
+    acceptor.enumNames(m_value->type->names());
 }

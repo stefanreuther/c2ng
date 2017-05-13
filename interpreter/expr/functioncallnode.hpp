@@ -13,7 +13,7 @@ namespace interpreter { namespace expr {
     class FunctionCallNode : public RValueNode {
      public:
         void addNewArgument(Node* arg);
-        int getNumArgs() const
+        size_t getNumArgs() const
             { return args.size(); }
      protected:
         // FIXME: un-export this!

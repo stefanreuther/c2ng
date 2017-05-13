@@ -31,7 +31,7 @@ namespace {
     {
         for (size_t i = 0; i < countof(colors); ++i) {
             if (colors[i] == externalColor) {
-                return i;
+                return uint8_t(i);
             }
         }
         return 10;
@@ -203,7 +203,7 @@ game::db::Loader::load(afl::io::Stream& in, Turn& turn, Game& game, bool acceptP
                 /* read it */
                 structures::AutobuildSettings abs;
                 in.fullRead(afl::base::fromObject(abs));
-                size -= sizeof(abs);
+                size -= uint32_t(sizeof(abs));
 
                 /* enter into database */
                 ++id;
@@ -398,7 +398,7 @@ game::db::Loader::loadUnitScoreRecord(afl::io::Stream& in, Scope scope, game::ma
     if (readUnitScoreHeader(in, ush)) {
         /* Read content */
         UnitScoreDefinitionList::Definition def;
-        def.name = m_charset.decode(afl::string::toMemory(ush.name));
+        def.name = m_charset.decode(ush.name);
         def.id = ush.scoreType;
         def.limit = ush.scoreLimit;
         UnitScoreDefinitionList::Index_t index = defs.add(def);

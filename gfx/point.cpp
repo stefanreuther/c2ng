@@ -1,5 +1,6 @@
 /**
   *  \file gfx/point.cpp
+  *  \brief Class gfx::Point
   */
 
 #include <ostream>

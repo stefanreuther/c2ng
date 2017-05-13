@@ -520,7 +520,7 @@ namespace {
             : m_root(root),
               m_pixmap()
             {
-                util::RandomNumberGenerator rng(std::time(0));
+                util::RandomNumberGenerator rng(uint32_t(std::time(0)));
                 gfx::gen::SpaceViewConfig cfg;
                 cfg.setSize(root.getExtent().getSize());
                 cfg.setNumSuns(0);

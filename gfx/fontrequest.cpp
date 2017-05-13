@@ -1,5 +1,6 @@
 /**
   *  \file gfx/fontrequest.cpp
+  *  \brief Class gfx::FontRequest
   */
 
 #include "gfx/fontrequest.hpp"
@@ -18,6 +19,7 @@ namespace {
     }
 }
 
+// Default constructor.
 gfx::FontRequest::FontRequest()
     : m_size(0),
       m_weight(0),
@@ -32,29 +34,23 @@ gfx::FontRequest::FontRequest()
 //       m_style()
 // { }
 
+// Add size.
 gfx::FontRequest&
 gfx::FontRequest::addSize(int n)
 {
-    int16_t value = 0;
-    if (m_size.get(value)) {
-        n += value;
-    }
-    m_size = n;
+    m_size = static_cast<RawValue_t>(m_size.orElse(0) + n);
     return *this;
 }
 
+// Add weight.
 gfx::FontRequest&
 gfx::FontRequest::addWeight(int n)
 {
-    int16_t value = 0;
-    if (m_weight.get(value)) {
-        n += value;
-    }
-    m_weight = n;
+    m_weight = static_cast<RawValue_t>(m_weight.orElse(0) + n);
     return *this;
 }
 
-
+// Set size.
 gfx::FontRequest&
 gfx::FontRequest::setSize(Value_t n)
 {
@@ -62,6 +58,7 @@ gfx::FontRequest::setSize(Value_t n)
     return *this;
 }
 
+// Set weight.
 gfx::FontRequest&
 gfx::FontRequest::setWeight(Value_t n)
 {
@@ -69,6 +66,7 @@ gfx::FontRequest::setWeight(Value_t n)
     return *this;
 }
 
+// Set slant.
 gfx::FontRequest&
 gfx::FontRequest::setSlant(Value_t n)
 {
@@ -76,6 +74,7 @@ gfx::FontRequest::setSlant(Value_t n)
     return *this;
 }
 
+// Set style.
 gfx::FontRequest&
 gfx::FontRequest::setStyle(Value_t n)
 {
@@ -83,30 +82,35 @@ gfx::FontRequest::setStyle(Value_t n)
     return *this;
 }
 
+// Get size.
 gfx::FontRequest::Value_t
 gfx::FontRequest::getSize() const
 {
     return m_size;
 }
 
+// Get weight.
 gfx::FontRequest::Value_t
 gfx::FontRequest::getWeight() const
 {
     return m_weight;
 }
 
+// Get slant.
 gfx::FontRequest::Value_t
 gfx::FontRequest::getSlant() const
 {
     return m_slant;
 }
 
+// Get style.
 gfx::FontRequest::Value_t
 gfx::FontRequest::getStyle() const
 {
     return m_style;
 }
 
+// Match another FontRequest.
 bool
 gfx::FontRequest::match(const FontRequest& provided)
 {

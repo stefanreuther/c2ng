@@ -1,5 +1,6 @@
 /**
   *  \file game/spec/friendlycode.hpp
+  *  \brief Class game::spec::FriendlyCode
   */
 #ifndef C2NG_GAME_SPEC_FRIENDLYCODE_HPP
 #define C2NG_GAME_SPEC_FRIENDLYCODE_HPP
@@ -14,16 +15,12 @@
 
 namespace game { namespace spec {
 
-// /*! \class GFCode
-
-//     This class defines a special friendly code. In particular, it
-//     associates the code with a condition and description.
-
-//     There also are methods for generating random codes and for
-//     inquiring/managing the special fcode definitions. */
-// //! A friendly code definition.
+    /** Special friendly code.
+        This class defines a special friendly code.
+        In particular, it associates the code with a condition and description. */
     class FriendlyCode {
      public:
+        /** Friendly code flag. */
         enum Flag {
             ShipCode,             ///< Works on ships.
             PlanetCode,           ///< Works on planets.
@@ -33,33 +30,54 @@ namespace game { namespace spec {
             RegisteredCode,       ///< Works for registered players only.
             UnspecialCode         ///< Not a special friendly code per se.
         };
+
+        /** Set of friendly code flags. */
         typedef afl::bits::SmallSet<Flag> FlagSet_t;
 
-
-
+        /** Default constructor.
+            Not normally used. */
         FriendlyCode();
 
+        /** Construct from definition.
+            This handles a fcodes.cc line that originally contained code+","+descriptionLine.
+            \param code Friendly code
+            \param descriptionLine Description line, consisting of flags, a comma, and description text.
+            \throw std::runtime_error descriptionLine is invalid */
         FriendlyCode(String_t code, String_t descriptionLine);
 
+        /** Destructor. */
         ~FriendlyCode();
 
+        /** Get friendly code.
+            \return code */
         const String_t& getCode() const;
 
+        /** Get description.
+            \param playerList Player list used to render player name placeholders.
+            \return formatted description */
         String_t getDescription(const PlayerList& playerList) const;
 
-//     /** Get flags.
-//         \return bitfield of fc_XXX */
+        /** Get flags.
+            \return Flags */
         FlagSet_t getFlags() const;
 
-//     /** Get set of players who can use this FCode. */
+        /** Get set of races who can use this friendly code.
+            \return set of races */
         PlayerSet_t getRaces() const;
 
+        /** Check whether this friendly code works on an object.
+            \param o Object
+            \param config Host configuration
+            \return true if friendly code is a valid/sensible choice for this object */
+        bool worksOn(const game::map::Object& o, const game::config::HostConfiguration& config) const;
 
-        bool worksOn(const game::map::Object& o, game::config::HostConfiguration& config) const;
-//     bool worksOn(const GShip& s) const;
-        bool worksOn(const game::map::Planet& p, game::config::HostConfiguration& config) const;
+        // FIXME: bool worksOn(const GShip& s) const;
 
-
+        /** Check whether this friendly code works on a planet.
+            \param p Planet
+            \param config Host configuration
+            \return true if friendly code is a valid/sensible choice for this planet */
+        bool worksOn(const game::map::Planet& p, const game::config::HostConfiguration& config) const;
 
      private:
         static bool parseFlags(const String_t& s, const char* data, FlagSet_t& flags, PlayerSet_t& races);

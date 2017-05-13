@@ -5,6 +5,7 @@
 #include "game/spec/cost.hpp"
 
 #include "u/t_game_spec.hpp"
+
 /** Tests various cases of GCost::fromString.
 
     This does not test invalid cases, as those are not yet defined. As of 20081216,
@@ -192,6 +193,7 @@ TestGameSpecCost::testParse()
     }
 }
 
+/** Test addition and add(). */
 void
 TestGameSpecCost::testAdd()
 {
@@ -249,6 +251,7 @@ TestGameSpecCost::testAdd()
     }
 }
 
+/** Test subtraction. */
 void
 TestGameSpecCost::testSubtract()
 {
@@ -304,8 +307,31 @@ TestGameSpecCost::testSubtract()
         TS_ASSERT(a.isNonNegative());
         TS_ASSERT(b.isNonNegative());
     }
+
+    {
+        game::spec::Cost a = game::spec::Cost::fromString("$200");
+        a.add(a.Molybdenum, 20);
+        TS_ASSERT_EQUALS(a.get(a.Tritanium), 0);
+        TS_ASSERT_EQUALS(a.get(a.Duranium), 0);
+        TS_ASSERT_EQUALS(a.get(a.Molybdenum), 20);
+        TS_ASSERT_EQUALS(a.get(a.Supplies), 0);
+        TS_ASSERT_EQUALS(a.get(a.Money), 200);
+        TS_ASSERT(a.isNonNegative());
+    }
+
+    {
+        game::spec::Cost a = game::spec::Cost::fromString("$200");
+        a.add(a.Supplies, 3);
+        TS_ASSERT_EQUALS(a.get(a.Tritanium), 0);
+        TS_ASSERT_EQUALS(a.get(a.Duranium), 0);
+        TS_ASSERT_EQUALS(a.get(a.Molybdenum), 0);
+        TS_ASSERT_EQUALS(a.get(a.Supplies), 3);
+        TS_ASSERT_EQUALS(a.get(a.Money), 200);
+        TS_ASSERT(a.isNonNegative());
+    }
 }
 
+/** Test multiplication. */
 void
 TestGameSpecCost::testMult()
 {
@@ -355,6 +381,7 @@ TestGameSpecCost::testMult()
     }
 }
 
+/** Test comparisons. */
 void
 TestGameSpecCost::testCompare()
 {
@@ -377,10 +404,10 @@ TestGameSpecCost::testCompare()
     TS_ASSERT(game::spec::Cost::fromString("$100") != game::spec::Cost::fromString("s100"));
 }
 
+/** Test isEnoughFor(). */
 void
 TestGameSpecCost::testEnough()
 {
-    // isEnoughFor()
     // Equality:
     TS_ASSERT( game::spec::Cost().isEnoughFor(game::spec::Cost()));
     TS_ASSERT( game::spec::Cost::fromString("1t").isEnoughFor(game::spec::Cost::fromString("1t")));
@@ -434,3 +461,41 @@ TestGameSpecCost::testEnough()
     TS_ASSERT( game::spec::Cost::fromString("5t 3d 7m 22s 22$").isEnoughFor(game::spec::Cost::fromString("3tdm 42$")));
     TS_ASSERT(!game::spec::Cost::fromString("5t 3d 7m 22s 22$").isEnoughFor(game::spec::Cost::fromString("3tdm 52$")));
 }
+
+/** Test getMaxAmount(). */
+void
+TestGameSpecCost::testGetMaxAmount()
+{
+    using game::spec::Cost;
+
+    // Divide zero by X
+    TS_ASSERT_EQUALS(Cost().getMaxAmount(9999, Cost()), 9999);
+    TS_ASSERT_EQUALS(Cost().getMaxAmount(9999, Cost::fromString("1t")), 0);
+    TS_ASSERT_EQUALS(Cost().getMaxAmount(9999, Cost::fromString("1d")), 0);
+    TS_ASSERT_EQUALS(Cost().getMaxAmount(9999, Cost::fromString("1m")), 0);
+    TS_ASSERT_EQUALS(Cost().getMaxAmount(9999, Cost::fromString("1s")), 0);
+    TS_ASSERT_EQUALS(Cost().getMaxAmount(9999, Cost::fromString("1$")), 0);
+
+    // Divide X by zero
+    TS_ASSERT_EQUALS(Cost::fromString("1t").getMaxAmount(9999, Cost()), 9999);
+    TS_ASSERT_EQUALS(Cost::fromString("1d").getMaxAmount(9999, Cost()), 9999);
+    TS_ASSERT_EQUALS(Cost::fromString("1m").getMaxAmount(9999, Cost()), 9999);
+    TS_ASSERT_EQUALS(Cost::fromString("1s").getMaxAmount(9999, Cost()), 9999);
+    TS_ASSERT_EQUALS(Cost::fromString("1$").getMaxAmount(9999, Cost()), 9999);
+
+    // Actual division
+    TS_ASSERT_EQUALS(Cost::fromString("100t 80d 20m").getMaxAmount(9999, Cost::fromString("1tdm")), 20);
+    TS_ASSERT_EQUALS(Cost::fromString("100t 80d 20m").getMaxAmount(3, Cost::fromString("1tdm")), 3);
+
+    // Division with supply sale
+    TS_ASSERT_EQUALS(Cost::fromString("200s 100$").getMaxAmount(9999, Cost::fromString("1s 2$")), 100);
+    TS_ASSERT_EQUALS(Cost::fromString("200s 100$").getMaxAmount(9999, Cost::fromString("2s 1$")), 100);
+
+    // Negative
+    Cost neg;
+    neg.set(Cost::Tritanium, -1);
+    TS_ASSERT_EQUALS(neg.getMaxAmount(9999, Cost()), 0);
+    TS_ASSERT_EQUALS(Cost().getMaxAmount(9999, neg), 0);
+    TS_ASSERT_EQUALS(Cost().getMaxAmount(-1, Cost()), 0);
+}
+

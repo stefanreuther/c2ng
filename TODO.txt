@@ -62,6 +62,22 @@ FILER NG.
   . 1376 x 9f1d18a684944457c37c4730318a82f36fef330d PList hullfunc.txt (25k)
   . 1356 x 625207c88f4903b5b68c547e2bf10ac33e0336ec truehull.dat (440b)
 - TL;DR: deduplication PCc host data needs the same amount of on-disk storage, but reduces backup size in half.
+- Initial implementation (without reference counting / cleanup):
+  . 291568 user files / 20170224-hostdata
+  . 47 minutes conversion time on 'rocket'
+  . 7367168k user data (du -sk)
+  . 1865827 objects (=write amplification of 6.4)
+  . 8340792k object data (du -sk)
+  . 1947441k effective object data (file size)
+- Implementation with reference counting:
+  . 27 minutes conversion time on 'rocket' (~6:30 CPU)
+  . 113772 objects (55% savings)
+  . 925968k object data (du -sk)
+  . 615114k effective object data (file size)
+  . 9725501440 bytes written, 7566229504 cancelled (=short-lived objects)
+- For reference, with git:
+  . 113767 objects
+  . 982452k object data with git (du -sk)
 
 SDL2/ANDROID.
 

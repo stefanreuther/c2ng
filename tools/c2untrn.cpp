@@ -55,7 +55,7 @@ ConsoleUntrnApplication::appMain()
     bool opt_comments = true;
     afl::base::Deleter deleter;
     std::vector<String_t> edits;
-    afl::charset::Charset* charset = 0;
+    std::auto_ptr<afl::charset::Charset> charset(new afl::charset::CodepageCharset(afl::charset::g_codepageLatin1));
 
     afl::sys::StandardCommandLineParser cmdl(environment().getCommandLine());
     bool option;
@@ -86,8 +86,9 @@ ConsoleUntrnApplication::appMain()
                     errorExit(_("option \"-C\" needs an argument (the character set)"));
                 }
 
-                charset = afl::charset::DefaultCharsetFactory().createCharset(deleter, charsetName);
-                if (!charset) {
+                if (afl::charset::Charset* cs = afl::charset::DefaultCharsetFactory().createCharset(charsetName)) {
+                    charset.reset(cs);
+                } else {
                     errorExit(_("the specified character set is not known"));
                 }
             } else if (text == "f") {
@@ -141,9 +142,6 @@ ConsoleUntrnApplication::appMain()
     }
     if (!edits.empty() && opt_action == List) {
         opt_action = Rewrite;
-    }
-    if (!charset) {
-        charset = &deleter.addNew(new afl::charset::CodepageCharset(afl::charset::g_codepageLatin1));
     }
 
     const bool showHeader = opt_header.orElse(!opt_filter);
@@ -281,12 +279,12 @@ ConsoleUntrnApplication::processEdit(game::v3::TurnFile& trn, String_t edit)
         trn.setVersion(n);
     } else if (afl::string::strCaseCompare(cmd, "time") == 0 || afl::string::strCaseCompare(cmd, "timestamp") == 0) {
         // Convert to timestamp
-        String_t time = trn.charset().encode(afl::string::toMemory(p.getRemainder()));
-        char timeBuffer[game::Timestamp::SIZE];
+        afl::base::GrowableBytes_t time = trn.charset().encode(afl::string::toMemory(p.getRemainder()));
+        uint8_t timeBuffer[game::Timestamp::SIZE];
         if (time.size() != sizeof timeBuffer) {
             errorExit(_("timestamp must be 18 characters in length"));
         }
-        afl::string::StringMemory_t(timeBuffer).copyFrom(afl::string::toMemory(time));
+        afl::base::Bytes_t(timeBuffer).copyFrom(time);
 
         // Set it
         trn.setTimestamp(timeBuffer);

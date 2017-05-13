@@ -32,6 +32,9 @@ TestInterpreterExprBuiltinFunction::testTrig()
     h.checkNullExpression("sin(z(0))");
     h.checkFailureExpression("sin('a')");
     h.checkFailureExpression("sin('')");
+    h.checkIntegerExpression("if(sin(90),3,2)",3);      // used as condition
+    h.checkIntegerExpression("if(sin(0);1,3,2)",3);     // used as effect
+    h.checkBadExpression("sin(0):='x'");                // used as assigment target
 
     // Cos
     h.checkFloatExpression("cos(0)", 1);
@@ -45,6 +48,9 @@ TestInterpreterExprBuiltinFunction::testTrig()
     h.checkNullExpression("cos(z(0))");
     h.checkFailureExpression("cos('a')");
     h.checkFailureExpression("cos('')");
+    h.checkIntegerExpression("if(cos(0),3,2)",3);       // used as condition
+    h.checkIntegerExpression("if(cos(90);1,3,2)",3);    // used as effect
+    h.checkBadExpression("cos(0):='x'");                // used as assigment target
 
     // Tan
     h.checkFloatExpression("tan(0)", 0);
@@ -62,6 +68,9 @@ TestInterpreterExprBuiltinFunction::testTrig()
     h.checkNullExpression("tan(z(0))");
     h.checkFailureExpression("tan('a')");
     h.checkFailureExpression("tan('')");
+    h.checkIntegerExpression("if(tan(45),3,2)",3);      // used as condition
+    h.checkIntegerExpression("if(tan(0);1,3,2)",3);     // used as effect
+    h.checkBadExpression("tan(0):='x'");                // used as assigment target
 
     // Atan
     h.checkFloatExpression("atan(1)", 45);
@@ -94,6 +103,10 @@ TestInterpreterExprBuiltinFunction::testTrig()
     h.checkFailureExpression("atan('a')");
     h.checkFailureExpression("atan(1,'a')");
     h.checkFailureExpression("atan('a',1)");
+
+    h.checkIntegerExpression("if(atan(1,0),3,2)",3);    // used as condition
+    h.checkIntegerExpression("if(atan(0,1);1,3,2)",3);  // used as effect
+    h.checkBadExpression("atan(0,1):='x'");             // used as assigment target
 }
 
 /** Test Abs function.
@@ -121,6 +134,10 @@ TestInterpreterExprBuiltinFunction::testAbs()
 
     h.checkFailureExpression("abs('a')");
     h.checkFailureExpression("abs('')");
+
+    h.checkIntegerExpression("if(abs(1),9,0)", 9);    // used as condition
+    h.checkIntegerExpression("if(abs(0);1,9,0)", 9);  // used as effect
+    h.checkBadExpression("abs(0):=2");                // used as assigment target
 }
 
 /** Test Asc function.
@@ -136,6 +153,10 @@ TestInterpreterExprBuiltinFunction::testAsc()
     h.checkIntegerExpression("asc(2.5)", 50);
     h.checkNullExpression("asc('')");
     h.checkNullExpression("asc(z(0))");
+
+    h.checkIntegerExpression("if(asc('a'),9,0)", 9);    // used as condition
+    h.checkIntegerExpression("if(asc('x');0,0,9)", 9);  // used as effect
+    h.checkBadExpression("asc('0'):=2");                // used as assigment target
 }
 
 /** Test bit operations.
@@ -159,6 +180,9 @@ TestInterpreterExprBuiltinFunction::testBitOps()
     h.checkFailureExpression("bitand('a')");
     h.checkFailureExpression("bitand(1,'a')");
     h.checkFailureExpression("bitand('a',1)");
+    h.checkIntegerExpression("if(bitand(2,3,7),7,9)", 7);
+    h.checkIntegerExpression("if(bitand(1,2,4);1,7,9)", 7);
+    h.checkBadExpression("bitand(1,2):=3");
 
     // BitOr
     h.checkIntegerExpression("bitor(1)", 1);
@@ -174,6 +198,9 @@ TestInterpreterExprBuiltinFunction::testBitOps()
     h.checkFailureExpression("bitor('a')");
     h.checkFailureExpression("bitor(1,'a')");
     h.checkFailureExpression("bitor('a',1)");
+    h.checkIntegerExpression("if(bitor(2,3,5),7,9)", 7);
+    h.checkIntegerExpression("if(bitor(1,2,4);0,7,9)", 9);
+    h.checkBadExpression("bitor(1,2):=3");
 
     // BitXor
     h.checkIntegerExpression("bitxor(1)", 1);
@@ -189,6 +216,9 @@ TestInterpreterExprBuiltinFunction::testBitOps()
     h.checkFailureExpression("bitxor('a')");
     h.checkFailureExpression("bitxor(1,'a')");
     h.checkFailureExpression("bitxor('a',1)");
+    h.checkIntegerExpression("if(bitxor(2,3,5),7,9)", 7);
+    h.checkIntegerExpression("if(bitxor(1,2,4);0,7,9)", 9);
+    h.checkBadExpression("bitxor(1,2):=3");
 
     // BitNot
     h.checkIntegerExpression("bitnot(1)", -2);
@@ -196,6 +226,9 @@ TestInterpreterExprBuiltinFunction::testBitOps()
     h.checkIntegerExpression("bitnot(true)", -2);
     h.checkNullExpression("bitnot(z(0))");
     h.checkFailureExpression("bitnot('a')");
+    h.checkIntegerExpression("if(bitnot(0),2,3)", 2);
+    h.checkIntegerExpression("if(bitnot(-1);1,3,5)", 3);
+    h.checkBadExpression("bitnot(9):=4");
 }
 
 /** Test Min/Max operators.
@@ -218,6 +251,9 @@ TestInterpreterExprBuiltinFunction::testMinMax()
     h.checkNullExpression("max(1,z(0))");
     h.checkNullExpression("max(z(0),1)");
     h.checkNullExpression("max(z(0))");
+    h.checkIntegerExpression("if(max(-1,0),99,22)", 22);
+    h.checkIntegerExpression("if(max(-1,0);1,99,22)", 99);
+    h.checkBadExpression("max(1,2):=3");
 
     // Floats and Mixes
     // Note that min/max do not lift their argument to a common type before returning it!
@@ -233,6 +269,9 @@ TestInterpreterExprBuiltinFunction::testMinMax()
     h.checkNullExpression("max(1.0,z(0))");
     h.checkNullExpression("max(z(0),1.0)");
     h.checkNullExpression("max(z(0))");
+    h.checkIntegerExpression("if(min(-1,0),99,22)", 99);
+    h.checkIntegerExpression("if(min(-1,0);0,99,22)", 22);
+    h.checkBadExpression("min(1,2):=3");
 
     // Same things with StrCase, to exercise NC versions
     h.checkIntegerExpression("strcase(min(1))", 1);
@@ -255,6 +294,9 @@ TestInterpreterExprBuiltinFunction::testMinMax()
     h.checkNullExpression("strcase(max(1.0,z(0)))");
     h.checkNullExpression("strcase(max(z(0),1.0))");
     h.checkNullExpression("strcase(max(z(0)))");
+    h.checkIntegerExpression("strcase(if(max(-1,0),99,22))", 22);
+    h.checkIntegerExpression("if(strcase(max(-1,0));1,99,22)", 99);
+    h.checkBadExpression("strcase(max(1,2)):=3");
     
     // Strings
     h.checkStringExpression("min('h','a','l','l','o')", "a");
@@ -271,6 +313,9 @@ TestInterpreterExprBuiltinFunction::testMinMax()
     h.checkNullExpression("min(z(0),'a')");
     h.checkNullExpression("strcase(min('a',z(0)))");
     h.checkNullExpression("strcase(min(z(0),'a'))");
+    h.checkIntegerExpression("strcase(if(min(-1,0),99,22))", 99);
+    h.checkIntegerExpression("if(strcase(min(-1,0));0,99,22)", 22);
+    h.checkBadExpression("strcase(min(1,2):=3)");
 }
 
 /** Test Chr/Chr$ function (two names for the same function).
@@ -295,6 +340,10 @@ TestInterpreterExprBuiltinFunction::testChr()
     h.checkFailureExpression("chr$('a')");
     h.checkStringExpression("chr$(128)", "\xC2\x80");
     h.checkStringExpression("chr$(57665)", "\xEE\x85\x81");
+
+    h.checkIntegerExpression("if(chr(99),3,4)", 3);
+    h.checkIntegerExpression("if(chr(77);0,3,4)", 4);
+    h.checkBadExpression("chr(88):='x'");
 }
 
 /** Test type tests: IsEmpty, IsNum, IsString.
@@ -314,6 +363,9 @@ TestInterpreterExprBuiltinFunction::testTypeChecks()
     h.checkBooleanExpression("isempty('foo')", false);
     h.checkBooleanExpression("isempty(z(0))", true);
     h.checkBooleanExpression("isempty(zap(0))", true);
+    h.checkIntegerExpression("if(isempty(''),0,9)", 9);
+    h.checkIntegerExpression("if(isempty('');0,9,0)", 0);
+    h.checkBadExpression("isempty(''):=1");
 
     h.checkBooleanExpression("isnum(0)", true);
     h.checkBooleanExpression("isnum(1)", true);
@@ -325,6 +377,9 @@ TestInterpreterExprBuiltinFunction::testTypeChecks()
     h.checkBooleanExpression("isnum('foo')", false);
     h.checkBooleanExpression("isnum(z(0))", false);
     h.checkBooleanExpression("isnum(zap(0))", false);
+    h.checkIntegerExpression("if(isnum(7),9,0)", 9);
+    h.checkIntegerExpression("if(isnum(7);0,9,0)", 0);
+    h.checkBadExpression("isnum(7):=1");
 
     h.checkBooleanExpression("isstring(0)", false);
     h.checkBooleanExpression("isstring(1)", false);
@@ -336,6 +391,9 @@ TestInterpreterExprBuiltinFunction::testTypeChecks()
     h.checkBooleanExpression("isstring('foo')", true);
     h.checkBooleanExpression("isstring(z(0))", false);
     h.checkBooleanExpression("isstring(zap(0))", false);
+    h.checkIntegerExpression("if(isstring(''),9,0)", 9);
+    h.checkIntegerExpression("if(isstring('');0,9,0)", 0);
+    h.checkBadExpression("isstring(''):=1");
 }
 
 /** Test Exp/Log.
@@ -370,6 +428,14 @@ TestInterpreterExprBuiltinFunction::testExp()
     h.checkFailureExpression("exp('a')");
     h.checkNullExpression("log(z(0))");
     h.checkNullExpression("exp(z(0))");
+
+    h.checkIntegerExpression("if(log(99),9,0)", 9);
+    h.checkIntegerExpression("if(log(1);1,9,0)", 9);
+    h.checkBadExpression("log(1):=2");
+
+    h.checkIntegerExpression("if(exp(0),9,0)", 9);
+    h.checkIntegerExpression("if(exp(1);0,0,9)", 9);
+    h.checkBadExpression("exp(1):=2");
 }
 
 /** Test substring-finding routines: InStr, First, Rest.
@@ -388,6 +454,9 @@ TestInterpreterExprBuiltinFunction::testStrFind()
     h.checkIntegerExpression("instr('foobar', 'foo')", 1);
     h.checkIntegerExpression("instr('foo', 'foobar')", 0);
     h.checkIntegerExpression("instr('foobar', 'b')", 4);
+    h.checkIntegerExpression("if(instr('foobar','b'),8,2)", 8);
+    h.checkIntegerExpression("if(instr('foobar','x');1,8,2)", 8);
+    h.checkBadExpression("instr('foobar','b'):=0");
 
     h.checkIntegerExpression("strcase(instr('foobar', 'o'))", 2);
     h.checkIntegerExpression("strcase(instr('foobar', 'O'))", 0);
@@ -397,6 +466,9 @@ TestInterpreterExprBuiltinFunction::testStrFind()
     h.checkIntegerExpression("strcase(instr('foobar', 'foo'))", 1);
     h.checkIntegerExpression("strcase(instr('foo', 'foobar'))", 0);
     h.checkIntegerExpression("strcase(instr('foobar', 'b'))", 4);
+    h.checkIntegerExpression("if(strcase(instr('foobar','b')),8,2)", 8);
+    h.checkIntegerExpression("if(strcase(instr('foobar','x'));1,8,2)", 8);
+    h.checkBadExpression("strcase(instr('foobar','b'):=0)");
 
     // First - different order of parameters!
     h.checkStringExpression("first('o', 'foobar')", "f");
@@ -407,6 +479,9 @@ TestInterpreterExprBuiltinFunction::testStrFind()
     h.checkStringExpression("first('foo', 'foobar')", "");
     h.checkStringExpression("first('foobar', 'foo')", "foo");
     h.checkStringExpression("first('b', 'foobar')", "foo");
+    h.checkIntegerExpression("if(first('b','foobar'),8,2)", 8);
+    h.checkIntegerExpression("if(first('x','foobar');0,8,2)", 2);
+    h.checkBadExpression("first('b','foobar'):=0");
 
     h.checkStringExpression("strcase(first('o', 'foobar'))", "f");
     h.checkStringExpression("strcase(first('O', 'foobar'))", "foobar");
@@ -416,6 +491,9 @@ TestInterpreterExprBuiltinFunction::testStrFind()
     h.checkStringExpression("strcase(first('foo', 'foobar'))", "");
     h.checkStringExpression("strcase(first('foobar', 'foo'))", "foo");
     h.checkStringExpression("strcase(first('b', 'foobar'))", "foo");
+    h.checkIntegerExpression("if(strcase(first('b','foobar')),8,2)", 8);
+    h.checkIntegerExpression("if(strcase(first('x','foobar'));0,8,2)", 2);
+    h.checkBadExpression("strcase(first('b','foobar')):=0");
 
     // Rest
     h.checkStringExpression("rest('o', 'foobar')", "obar");
@@ -435,6 +513,9 @@ TestInterpreterExprBuiltinFunction::testStrFind()
     h.checkStringExpression("strcase(rest('foo', 'foobar'))", "bar");
     h.checkNullExpression("strcase(rest('foobar', 'foo'))");
     h.checkStringExpression("strcase(rest('b', 'foobar'))", "ar");
+    h.checkIntegerExpression("if(rest('b','foobar'),8,2)", 8);
+    h.checkIntegerExpression("if(rest('x','foobar');1,8,2)", 8);
+    h.checkBadExpression("rest('b','foobar'):=0");
 
     // Null
     h.checkNullExpression("instr(z(0),'a')");
@@ -446,6 +527,9 @@ TestInterpreterExprBuiltinFunction::testStrFind()
     h.checkNullExpression("rest(z(0),'a')");
     h.checkNullExpression("rest('a',z(0))");
     h.checkNullExpression("rest(z(0),z(0))");
+    h.checkIntegerExpression("if(strcase(rest('b','foobar')),8,2)", 8);
+    h.checkIntegerExpression("if(strcase(rest('x','foobar'));1,8,2)", 8);
+    h.checkBadExpression("strcase(rest('b','foobar')):=0");
 
     // Type errors
     // FIXME: should these really be type errors, or should we implicitly stringify?
@@ -484,6 +568,10 @@ TestInterpreterExprBuiltinFunction::testSubstr()
     h.checkNullExpression("mid(z(0),z(0))");
     h.checkNullExpression("mid('foo',z(0))");
 
+    h.checkIntegerExpression("if(mid('foobar',3),8,2)",8);
+    h.checkIntegerExpression("if(mid('foobar',30);1,8,2)",8);
+    h.checkBadExpression("mid('foobar',2):='a'");                 // FIXME: This may get legalized someday
+
     // Mid, 3-arg
     h.checkStringExpression("mid('foobar',-2,3)", "foo");
     h.checkStringExpression("mid('foobar',-1,3)", "foo");
@@ -506,6 +594,10 @@ TestInterpreterExprBuiltinFunction::testSubstr()
     h.checkNullExpression("mid(z(0),z(0),z(0))");
     h.checkNullExpression("mid('foo',z(0),z(0))");
     h.checkNullExpression("mid('foo',1,z(0))");
+
+    h.checkIntegerExpression("if(mid('foobar',3,1),8,2)",8);
+    h.checkIntegerExpression("if(mid('foobar',30,1);1,8,2)",8);
+    h.checkBadExpression("mid('foobar',2,1):='a'");                 // FIXME: This may get legalized someday
     
     // Left
     h.checkStringExpression("left('foobar',-3)", "");
@@ -525,6 +617,10 @@ TestInterpreterExprBuiltinFunction::testSubstr()
     h.checkNullExpression("left(z(0),z(0))");
     h.checkNullExpression("left('foo',z(0))");
 
+    h.checkIntegerExpression("if(left('foobar',3),8,2)",8);
+    h.checkIntegerExpression("if(left('foobar',30);0,8,2)",2);
+    h.checkBadExpression("left('foobar',2):='a'");                 // FIXME: This may get legalized someday
+
     // Right
     h.checkStringExpression("right('foobar',-3)", "");
     h.checkStringExpression("right('foobar',-2)", "");
@@ -542,6 +638,10 @@ TestInterpreterExprBuiltinFunction::testSubstr()
     h.checkNullExpression("right(z(0),1)");
     h.checkNullExpression("right(z(0),z(0))");
     h.checkNullExpression("right('foo',z(0))");
+
+    h.checkIntegerExpression("if(right('foobar',3),8,2)",8);
+    h.checkIntegerExpression("if(right('foobar',30);0,8,2)",2);
+    h.checkBadExpression("right('foobar',2):='a'");                 // FIXME: This may get legalized someday
 
     // Type errors
     h.checkFailureExpression("mid(10,1,1)");
@@ -572,6 +672,10 @@ TestInterpreterExprBuiltinFunction::testTrim()
     h.checkFailureExpression("trim(1)");
     h.checkFailureExpression("trim(1.0)");
 
+    h.checkIntegerExpression("if(trim(' x'),7,6)",7);
+    h.checkIntegerExpression("if(trim(' ');1,7,6)",7);
+    h.checkBadExpression("trim(''):=9");
+
     // LTrim
     h.checkStringExpression("ltrim('foo')", "foo");
     h.checkStringExpression("ltrim('  foo')", "foo");
@@ -582,6 +686,10 @@ TestInterpreterExprBuiltinFunction::testTrim()
     h.checkFailureExpression("ltrim(1)");
     h.checkFailureExpression("ltrim(1.0)");
 
+    h.checkIntegerExpression("if(ltrim(' x'),7,6)",7);
+    h.checkIntegerExpression("if(ltrim(' ');1,7,6)",7);
+    h.checkBadExpression("ltrim(''):=9");
+
     // RTrim
     h.checkStringExpression("rtrim('foo')", "foo");
     h.checkStringExpression("rtrim('  foo')", "  foo");
@@ -591,6 +699,10 @@ TestInterpreterExprBuiltinFunction::testTrim()
     h.checkNullExpression("rtrim(z(0))");
     h.checkFailureExpression("rtrim(1)");
     h.checkFailureExpression("rtrim(1.0)");
+
+    h.checkIntegerExpression("if(rtrim(' x'),7,6)",7);
+    h.checkIntegerExpression("if(rtrim(' ');1,7,6)",7);
+    h.checkBadExpression("rtrim(''):=9");
 }
 
 /** Test square root (Sqr/Sqrt).
@@ -621,6 +733,10 @@ TestInterpreterExprBuiltinFunction::testSqrt()
 
     h.checkFailureExpression("sqrt(-1)");
     h.checkFailureExpression("sqrt('a')");
+
+    h.checkIntegerExpression("if(sqrt(9),4,3)", 4);
+    h.checkIntegerExpression("if(sqrt(9);0,2,1)", 1);
+    h.checkBadExpression("sqrt(7):=9");
 
     // Same things again with Sqr
     h.checkFloatExpression("sqr(0)", 0);
@@ -662,6 +778,10 @@ TestInterpreterExprBuiltinFunction::testRound()
     h.checkIntegerExpression("round(+1)", 1);
     h.checkIntegerExpression("round(true)", 1);
 
+    h.checkIntegerExpression("if(round(9),4,3)", 4);
+    h.checkIntegerExpression("if(round(9);0,2,1)", 1);
+    h.checkBadExpression("round(7):=9");
+
     // Floats, Int
     h.checkIntegerExpression("int(1.9)", 1);
     h.checkIntegerExpression("int(1.5)", 1);
@@ -676,6 +796,10 @@ TestInterpreterExprBuiltinFunction::testRound()
     h.checkNullExpression("int(z(0))");
     h.checkFailureExpression("int('a')");
     h.checkFailureExpression("int(2147483648)");
+
+    h.checkIntegerExpression("if(int(9),4,3)", 4);
+    h.checkIntegerExpression("if(int(9);0,2,1)", 1);
+    h.checkBadExpression("int(7):=9");
 
     // Floats, Round
     h.checkIntegerExpression("round(1.9)", 2);
@@ -707,6 +831,10 @@ TestInterpreterExprBuiltinFunction::testIf()
 
     h.checkIntegerExpression("if(1,2,'a')",2);
     h.checkStringExpression("if(0,2,'a')", "a");
+
+    h.checkIntegerExpression("if(if(1,2,0),3,4)", 3);
+    h.checkIntegerExpression("if(if(1,2,0);0,3,4)", 4);
+    h.checkBadExpression("if(1,2,3):=9");
 }
 
 /** Test Str function.
@@ -728,6 +856,10 @@ TestInterpreterExprBuiltinFunction::testStr()
     h.checkStringExpression("str(false)", "NO");
     h.checkNullExpression("str(z(0))");
 
+    h.checkIntegerExpression("if(str(9),4,3)", 4);
+    h.checkIntegerExpression("if(str(9);0,2,1)", 1);
+    h.checkBadExpression("str(7):=9");
+
     // Binary
     h.checkStringExpression("str(1,3)", "1.000");
     h.checkStringExpression("str(123456789,3)", "123456789.000");
@@ -740,6 +872,10 @@ TestInterpreterExprBuiltinFunction::testStr()
     h.checkNullExpression("str(z(0),3)");
     h.checkNullExpression("str(1,z(0))");
     h.checkFailureExpression("str(1, 'a')");
+
+    h.checkIntegerExpression("if(str(9,2),4,3)", 4);
+    h.checkIntegerExpression("if(str(9,2);0,2,1)", 1);
+    h.checkBadExpression("str(7,2):=9");
 }
 
 /** Test Val function.
@@ -765,6 +901,10 @@ TestInterpreterExprBuiltinFunction::testVal()
 
     h.checkFailureExpression("val(1)");
     h.checkFailureExpression("val(true)");
+
+    h.checkIntegerExpression("if(val('9'),4,3)", 4);
+    h.checkIntegerExpression("if(val('9');0,2,1)", 1);
+    h.checkBadExpression("val('7'):=9");
 }
 
 /** Test Z/Zap function.
@@ -801,6 +941,11 @@ TestInterpreterExprBuiltinFunction::testZap()
     h.checkStringExpression("zap('a')", "a");
     h.checkFloatExpression("zap(0.1)", 0.1);
     h.checkBooleanExpression("zap(true)", true);
+
+    // Variants
+    h.checkIntegerExpression("if(z(9),4,3)", 4);
+    h.checkIntegerExpression("if(z(9);0,2,1)", 1);
+    h.checkBadExpression("z(7):=9");
 }
 
 /** Test Len function.
@@ -818,6 +963,11 @@ TestInterpreterExprBuiltinFunction::testLen()
     // FIXME: those yield 1 and 2, respectively, in PCC1:
     h.checkFailureExpression("len(2)");
     h.checkFailureExpression("len(12)");
+
+    // Variants
+    h.checkIntegerExpression("if(len('x'),4,3)", 4);
+    h.checkIntegerExpression("if(len('');1,2,1)", 2);
+    h.checkBadExpression("len(''):=9");
 }
 
 /** Test String/String$ function.
@@ -845,6 +995,14 @@ TestInterpreterExprBuiltinFunction::testStrMult()
     h.checkFailureExpression("string('a', 10)");
     h.checkFailureExpression("string('a', 'b')");
     h.checkFailureExpression("string(1,2)");
+
+    h.checkIntegerExpression("if(string(10,'a'),9,8)", 9);
+    h.checkIntegerExpression("if(string(10,'a');0,9,8)", 8);
+    h.checkBadExpression("string(10,'a'):='y'");
+
+    h.checkIntegerExpression("if(string(10),9,8)", 9);
+    h.checkIntegerExpression("if(string(10);0,9,8)", 8);
+    h.checkBadExpression("string(10):='y'");
 
     // Same thing using String$
     h.checkStringExpression("string$(10)", "          ");
@@ -889,9 +1047,13 @@ TestInterpreterExprBuiltinFunction::testStrCase()
     h.checkIntegerExpression("if(strcase(instr('foo','O') or instr('foo','O')),3,4)", 4);
     h.checkIntegerExpression("if(strcase(instr('foo','O') or instr('foo','o')),3,4)", 3);
     h.checkIntegerExpression("if(strcase(instr('foo','o') or instr('foo','O')),3,4)", 3);
+    h.checkIntegerExpression("strcase(if(instr('foo','O') or instr('foo','O'),3,4))", 4);
 
     h.checkIntegerExpression("if('a' = 'A', 3, 4)", 3);
     h.checkIntegerExpression("if('a' <> 'A', 3, 4)", 4);
+
+    h.checkIntegerExpression("if(strcase(instr('foo','O'));1,9,2)", 9);
+    h.checkBadExpression("strcase('x'):=9");
 }
 
 /** Test atom functions: Atom, AtomStr.
@@ -909,6 +1071,14 @@ TestInterpreterExprBuiltinFunction::testAtom()
 
     h.checkStringExpression("atomstr(atom(1))", "1");
     h.checkStringExpression("atomstr(atom('haha'))", "haha");
+
+    h.checkIntegerExpression("if(atom('x'),3,5)", 3);
+    h.checkIntegerExpression("if(atom('');1,3,5)", 3);
+    h.checkBadExpression("atom('y'):=3");
+
+    h.checkIntegerExpression("if(atomstr(atom('x')),3,5)", 3);
+    h.checkIntegerExpression("if(atomstr(0);1,3,5)", 3);
+    h.checkBadExpression("atomstr(77):=3");
 }
 
 /** Test Eval function.
@@ -925,4 +1095,19 @@ TestInterpreterExprBuiltinFunction::testEval()
     h.checkNullExpression("eval(z(0))");
     h.checkNullExpression("eval('z(0)')");
     h.checkStringExpression("eval('\"foo\"')", "foo");
+
+    h.checkIntegerExpression("if(eval(1),2,3)", 2);
+    h.checkIntegerExpression("if(eval(0);1,2,3)", 2);
+    h.checkBadExpression("eval(1):=2");
 }
+
+/** Test miscellaneous. */
+void
+TestInterpreterExprBuiltinFunction::testMisc()
+{
+    ExpressionTestHelper h;
+
+    // This does not execute because we don't have a user-defined function (but it compiles)
+    h.checkFailureExpression("udf(9)");
+}
+

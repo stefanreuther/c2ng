@@ -1,0 +1,18 @@
+/*!
+     \namespace server::interface
+     \brief PlanetsCentral server interfaces
+
+     This namespace contains interfaces for the PlanetsCentral servers.
+     For each interface or part thereof, we have
+     - a class \c Thing containing the interface
+     - a class \c ThingClient providing an implementation of the interface using a CommandHandler,
+       which clients can use to talk to the server
+     - a class \c ThingServer providing an implementation of CommandHandler, talking to the interface,
+       which is used by the server implementing the interface
+
+     Each server will implement the interface in its own namespace,
+     and hook it to a \c ThingServer listening on the network.
+     Some servers implement huge interfaces (e.g. c2talk with 60+ commands).
+     In this case, the server interface has been split into multiple small interfaces;
+     the server implements a multiplexer.
+ */

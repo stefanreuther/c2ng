@@ -35,8 +35,6 @@ static inline bool isnan(Wrap d, ...)
 
 
 namespace {
-    const char NAME[] = "VM Save";
-
     /** Store value in REAL (real48) format.
         REAL cannot store infinities, and has a smaller range than usual doubles.
         Those are stored as REAL-max.
@@ -122,7 +120,7 @@ void
 interpreter::SaveVisitor::visitString(const String_t& str)
 {
     // ex IntStringValue::store
-    String_t converted = m_charset.encode(afl::string::toMemory(str));
+    afl::base::GrowableBytes_t converted = m_charset.encode(afl::string::toMemory(str));
 
     // \change We now always use Long String format.
     // PCC2 would have tried to use Short String format (Tag_String, PCC 1.0.8, January 2001) when saving a chart.cc file.
@@ -130,7 +128,7 @@ interpreter::SaveVisitor::visitString(const String_t& str)
     // However, since all versions of PCC2 since 1.0.18 (April 2002) can read Long String format, let's keep the code simple.
     m_out.tag   = TagNode::Tag_LongString;
     m_out.value = converted.size();
-    m_aux.handleFullData(NAME, afl::string::toBytes(converted));
+    m_aux.handleFullData(converted);
 }
 
 void
@@ -205,7 +203,6 @@ interpreter::SaveVisitor::save(afl::io::DataSink& out,
     // Collect headers in one sink, aux data in another
     afl::io::InternalSink headers;
     afl::io::InternalSink aux;
-    const String_t name(NAME);
 
     for (size_t i = 0; i < slots; ++i) {
         // Generate single entry
@@ -217,13 +214,13 @@ interpreter::SaveVisitor::save(afl::io::DataSink& out,
         afl::bits::Value<afl::bits::Int32LE> packedValue;
         packedTag = node.tag;
         packedValue = node.value;
-        headers.handleFullData(name, packedTag.m_bytes);
-        headers.handleFullData(name, packedValue.m_bytes);
+        headers.handleFullData(packedTag.m_bytes);
+        headers.handleFullData(packedValue.m_bytes);
     }
 
     // Generate output
-    out.handleFullData(name, headers.getContent());
-    out.handleFullData(name, aux.getContent());
+    out.handleFullData(headers.getContent());
+    out.handleFullData(aux.getContent());
 }
 
 // /** Save context list into stream.
@@ -243,7 +240,6 @@ interpreter::SaveVisitor::saveContexts(afl::io::DataSink& out,
     // Collect headers in one sink, aux data in another
     afl::io::InternalSink headers;
     afl::io::InternalSink aux;
-    const String_t name(NAME);
 
     for (size_t i = 0, n = contexts.size(); i < n; ++i) {
         // Generate single entry
@@ -255,13 +251,13 @@ interpreter::SaveVisitor::saveContexts(afl::io::DataSink& out,
         afl::bits::Value<afl::bits::Int32LE> packedValue;
         packedTag = node.tag;
         packedValue = node.value;
-        headers.handleFullData(name, packedTag.m_bytes);
-        headers.handleFullData(name, packedValue.m_bytes);
+        headers.handleFullData(packedTag.m_bytes);
+        headers.handleFullData(packedValue.m_bytes);
     }
 
     // Generate output
-    out.handleFullData(name, headers.getContent());
-    out.handleFullData(name, aux.getContent());
+    out.handleFullData(headers.getContent());
+    out.handleFullData(aux.getContent());
 }
 
 // /** Store name list to stream.
@@ -271,7 +267,7 @@ void
 interpreter::SaveVisitor::saveNames(afl::io::DataSink& out, const afl::data::NameMap& names, size_t slots, afl::charset::Charset& cs)
 {
     // ex IntVariableNames::save
-    size_t todo = std::min(uint32_t(slots), names.getNumNames());
+    size_t todo = std::min(slots, names.getNumNames());
     for (size_t i = 0; i < todo; ++i) {
         util::storePascalStringTruncate(out, names.getNameByIndex(i), cs);
     }

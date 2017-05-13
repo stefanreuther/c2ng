@@ -1,11 +1,12 @@
 /**
   *  \file interpreter/filetable.cpp
+  *  \brief Class interpreter::FileTable
   */
 
 #include "interpreter/filetable.hpp"
+#include "afl/data/scalarvalue.hpp"
 #include "afl/except/fileproblemexception.hpp"
 #include "interpreter/error.hpp"
-#include "afl/data/scalarvalue.hpp"
 #include "interpreter/filevalue.hpp"
 
 struct interpreter::FileTable::State {
@@ -38,25 +39,25 @@ interpreter::FileTable::State::~State()
 }
 
 
+/******************************* FileTable *******************************/
 
-
-
+// Constructor.
 interpreter::FileTable::FileTable()
     : m_files()
 { }
 
+// Destructor.
 interpreter::FileTable::~FileTable()
 { }
 
+// Set maximum number of files.
 void
 interpreter::FileTable::setMaxFiles(size_t n)
 {
     m_files.resize(n);
 }
 
-// /** Open a new file.
-//     \param fd  File number
-//     \param sfd Newly-allocated IntFileDescriptor object */
+// Open new file.
 void
 interpreter::FileTable::openFile(size_t fd, afl::base::Ref<afl::io::Stream> ps)
 {
@@ -68,6 +69,7 @@ interpreter::FileTable::openFile(size_t fd, afl::base::Ref<afl::io::Stream> ps)
     m_files.replaceElementNew(fd, new State(ps));
 }
 
+// Close a file.
 void
 interpreter::FileTable::closeFile(size_t fd)
 {
@@ -77,6 +79,7 @@ interpreter::FileTable::closeFile(size_t fd)
     }
 }
 
+// Prepare a file for appending.
 void
 interpreter::FileTable::prepareForAppend(size_t fd)
 {
@@ -90,15 +93,9 @@ interpreter::FileTable::prepareForAppend(size_t fd)
 }
 
 
-
-// /** Check file number argument.
-//     \param fd [out] File number, guaranteed to be in range
-//     \param arg [in] Argument received from user
-//     \param mustBeOpen [in] If true, accept only open files
-//     \return true iff argument was given, false if it was null
-//     \throw IntError on type error */
+// Check file argument, produce file number.
 bool
-interpreter::FileTable::checkFileArg(size_t& fd, afl::data::Value* arg, bool mustBeOpen)
+interpreter::FileTable::checkFileArg(size_t& fd, const afl::data::Value* arg, bool mustBeOpen)
 {
     // ex int/file.cc:checkFileArg
     // Check for null
@@ -108,9 +105,9 @@ interpreter::FileTable::checkFileArg(size_t& fd, afl::data::Value* arg, bool mus
 
     // Check for file number
     int32_t value;
-    if (afl::data::ScalarValue* sv = dynamic_cast<afl::data::ScalarValue*>(arg)) {
+    if (const afl::data::ScalarValue* sv = dynamic_cast<const afl::data::ScalarValue*>(arg)) {
         value = sv->getValue();
-    } else if (FileValue* fv = dynamic_cast<FileValue*>(arg)) {
+    } else if (const FileValue* fv = dynamic_cast<const FileValue*>(arg)) {
         value = fv->getFileNumber();
     } else {
         throw Error::typeError(Error::ExpectFile);
@@ -127,14 +124,10 @@ interpreter::FileTable::checkFileArg(size_t& fd, afl::data::Value* arg, bool mus
     fd = value;
     return true;
 }
-        
-// /** Check file number argument, public interface.
-//     \param tf [out] File handle, guaranteed to be valid if return value is true
-//     \param arg [in] Argument received from user
-//     \return true iff argument was given, false if it was null
-//     \throw IntError on type error */
+
+// Check file argument, produce text file pointer.
 bool
-interpreter::FileTable::checkFileArg(afl::io::TextFile*& tf, afl::data::Value* arg)
+interpreter::FileTable::checkFileArg(afl::io::TextFile*& tf, const afl::data::Value* arg)
 {
     // ex int/file.cc:checkFileArg
     size_t fd;
@@ -147,11 +140,12 @@ interpreter::FileTable::checkFileArg(afl::io::TextFile*& tf, afl::data::Value* a
     }
 }
 
+// Get a currently-unused slot.
 size_t
 interpreter::FileTable::getFreeFile() const
 {
     // ex IFFreeFile (part)
-    // We never return 0!
+    // 0 means no slot; slot 0 is never reported as usable slot!
     for (size_t i = 1, n = m_files.size(); i < n; ++i) {
         if (m_files[i] == 0) {
             return i;

@@ -44,11 +44,11 @@ TestUiColorScheme::testColor()
 
     // Test we can get everything
     for (uint32_t i = 0; i < ui::Color_Avail; ++i) {
-        testee.getColor(i);
+        testee.getColor(uint8_t(i));
     }
 
     // Out-of-range colors must report black
     for (uint32_t i = ui::Color_Avail; i < 255; ++i) {
-        TS_ASSERT_EQUALS(testee.getColor(i), COLORQUAD_FROM_RGB(0,0,0));
+        TS_ASSERT_EQUALS(testee.getColor(uint8_t(i)), COLORQUAD_FROM_RGB(0,0,0));
     }
 }

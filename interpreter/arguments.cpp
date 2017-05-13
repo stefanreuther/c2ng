@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/arguments.cpp
+  *  \brief Class interpreter::Arguments and argument access functions
   */
 
 #include <cmath>
@@ -159,6 +160,7 @@ interpreter::checkFlagArg(int32_t& flagOut, int32_t* valueOut, afl::data::Value*
         return true;
     } else if (afl::data::StringValue* sv = dynamic_cast<afl::data::StringValue*>(value)) {
         // Parse string
+        // FIXME: reset flagOut to 0 here?
         const String_t& s = sv->getValue();
         uint32_t parsedValue = 0;
         enum { No, Yes, Followed } valueState = No;

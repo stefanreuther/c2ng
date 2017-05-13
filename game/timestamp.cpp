@@ -31,15 +31,15 @@ namespace {
 
 
     /** Decode string. */
-    String_t decode(afl::string::ConstStringMemory_t data)
+    String_t decode(afl::base::ConstBytes_t data)
     {
         return afl::charset::CodepageCharset(afl::charset::g_codepageLatin1).decode(data);
     }
 
     /** Convert digit to ASCII representation. */
-    char digit(int n)
+    uint8_t digit(int n)
     {
-        return '0' + (n % 10);
+        return uint8_t('0' + (n % 10));
     }
 
     const char NULL_TIMESTAMP[] = "00-00-000000:00:00";
@@ -95,14 +95,14 @@ game::Timestamp::getTimestampAsString() const
 String_t
 game::Timestamp::getTimeAsString() const
 {
-    return decode(afl::string::ConstStringMemory_t(m_data).subrange(10));
+    return decode(afl::base::ConstBytes_t(m_data).subrange(10));
 }
 
 // Get date (10 characters, mm-dd-yyyy) as string.
 String_t
 game::Timestamp::getDateAsString() const
 {
-    return decode(afl::string::ConstStringMemory_t(m_data).subrange(0, 10));
+    return decode(afl::base::ConstBytes_t(m_data).subrange(0, 10));
 }
 
 // Get raw data.

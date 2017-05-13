@@ -70,10 +70,10 @@ interpreter::vmio::AssemblerSaveContext::~AssemblerSaveContext()
 { }
 
 uint32_t
-interpreter::vmio::AssemblerSaveContext::addBCO(interpreter::BytecodeObject& bco)
+interpreter::vmio::AssemblerSaveContext::addBCO(const interpreter::BytecodeObject& bco)
 {
     struct BytecodeMetaObject : public MetaObject {
-        BytecodeMetaObject(interpreter::BytecodeObject& bco)
+        BytecodeMetaObject(const interpreter::BytecodeObject& bco)
             : m_bco(bco)
             { }
         virtual void writeDeclaration(AssemblerSaveContext& /*asc*/, afl::io::TextWriter& out)
@@ -200,7 +200,7 @@ interpreter::vmio::AssemblerSaveContext::addBCO(interpreter::BytecodeObject& bco
                 out.writeLine(afl::string::Format("End%s", keyword));
                 out.writeLine();
             }
-        interpreter::BytecodeObject& m_bco;
+        const interpreter::BytecodeObject& m_bco;
     };
 
 
@@ -238,24 +238,24 @@ interpreter::vmio::AssemblerSaveContext::addBCO(interpreter::BytecodeObject& bco
 }
 
 uint32_t
-interpreter::vmio::AssemblerSaveContext::addHash(interpreter::HashData& hash)
+interpreter::vmio::AssemblerSaveContext::addHash(const afl::data::Hash& hash)
 {
     (void) hash;
     return 0;
 }
 
 uint32_t
-interpreter::vmio::AssemblerSaveContext::addArray(interpreter::ArrayData& array)
+interpreter::vmio::AssemblerSaveContext::addArray(const interpreter::ArrayData& array)
 {
     (void) array;
     return 0;
 }
 
 uint32_t
-interpreter::vmio::AssemblerSaveContext::addStructureType(interpreter::StructureTypeData& type)
+interpreter::vmio::AssemblerSaveContext::addStructureType(const interpreter::StructureTypeData& type)
 {
     struct StructureTypeMetaObject : public MetaObject {
-        StructureTypeMetaObject(interpreter::StructureTypeData& type)
+        StructureTypeMetaObject(const interpreter::StructureTypeData& type)
             : m_type(type)
             { }
         virtual void writeDeclaration(AssemblerSaveContext& /*asc*/, afl::io::TextWriter& out)
@@ -268,7 +268,7 @@ interpreter::vmio::AssemblerSaveContext::addStructureType(interpreter::Structure
                 out.writeLine(afl::string::Format("Struct %s", name));
 
                 // Content
-                const afl::data::NameMap& names = m_type.names;
+                const afl::data::NameMap& names = m_type.names();
                 for (afl::data::NameMap::Index_t i = 0, n = names.getNumNames(); i < n; ++i) {
                     out.writeLine(afl::string::Format("    .field %s", names.getNameByIndex(i)));
                 }
@@ -277,7 +277,7 @@ interpreter::vmio::AssemblerSaveContext::addStructureType(interpreter::Structure
                 out.writeLine("EndStruct");
                 out.writeLine();
             }
-        interpreter::StructureTypeData& m_type;
+        const interpreter::StructureTypeData& m_type;
     };
 
 
@@ -304,14 +304,14 @@ interpreter::vmio::AssemblerSaveContext::addStructureType(interpreter::Structure
 }
 
 uint32_t
-interpreter::vmio::AssemblerSaveContext::addStructureValue(interpreter::StructureValueData& value)
+interpreter::vmio::AssemblerSaveContext::addStructureValue(const interpreter::StructureValueData& value)
 {
     (void) value;
     return 0;
 }
 
 bool
-interpreter::vmio::AssemblerSaveContext::isCurrentProcess(interpreter::Process* /*p*/)
+interpreter::vmio::AssemblerSaveContext::isCurrentProcess(const interpreter::Process* /*p*/)
 {
     return false;
 }
@@ -421,8 +421,7 @@ interpreter::vmio::AssemblerSaveContext::formatLiteral(const afl::data::Value* v
 String_t
 interpreter::vmio::AssemblerSaveContext::formatInstruction(const Opcode& opc, const BytecodeObject& bco)
 {
-    String_t tpl;
-    opc.getDisassemblyTemplate(tpl);
+    String_t tpl = opc.getDisassemblyTemplate();
     if (tpl.find('?') != String_t::npos) {
         if (opc.arg != 0) {
             return afl::string::Format("    genint%d.%d %d", opc.major, opc.minor, opc.arg);

@@ -284,6 +284,23 @@ ExpressionTestHelper::checkFailureExpression(const char* expr)
     }
 }
 
+// check expression that parses, but does not compile
+void
+ExpressionTestHelper::checkBadExpression(const char* expr)
+{
+    afl::sys::Log logger;
+    afl::io::NullFileSystem fs;
+    interpreter::World world(logger, fs);
+
+    interpreter::Tokenizer tok(expr);
+    std::auto_ptr<interpreter::expr::Node> node;
+    TSM_ASSERT_THROWS_NOTHING(expr, node.reset(interpreter::expr::Parser(tok).parse()));
+    TSM_ASSERT_EQUALS(expr, tok.getCurrentToken(), tok.tEnd);
+
+    interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
+    TSM_ASSERT_THROWS(expr, node->compileValue(*bco, interpreter::CompilationContext(world)), interpreter::Error);
+}
+
 void
 ExpressionTestHelper::checkScalarExpression(const char* expr, int result, bool isBool)
 {

@@ -1,24 +1,6 @@
 /**
   *  \file interpreter/fusion.cpp
   *  \brief Interpreter: Instruction Fusion
-  *
-  *  To avoid unnecessary creation of temporary values, we can fuse
-  *  instructions together. The idea is to detect patterns, and mark
-  *  fusable instructions with a special major opcode. The interpreter
-  *  then executes these major opcodes in one cycle, saving
-  *  temporaries where possible.
-  *
-  *  Instruction fusion is an internal optimisation. Fused
-  *  instructions are not saved to the VM file; see
-  *  interpreter::Opcode::getExternalMajor().
-  *
-  *  No changes are done to the instruction stream other than the
-  *  major opcode. Thus, all information can still be found at the
-  *  usual places. In particular, if a jump exists into the middle of
-  *  a fused instruction, it will simply proceed by executing the
-  *  original unfused instruction.
-  *
-  *  FIXME: file taken almost verbatim; needs to be beefed up a little
   */
 
 #include "interpreter/fusion.hpp"
@@ -31,24 +13,57 @@ namespace {
     /** Local Variable Tracer.
         Used to find local variables that are guarenteed to be overwritten.
         This is an object to allow re-using some state between different invocations. */
-    class IntLocalTracer {
+    class LocalTracer {
      public:
-        IntLocalTracer(const interpreter::BytecodeObject& bco);
+        LocalTracer(const interpreter::BytecodeObject& bco);
 
         bool isOverwrittenLocal(interpreter::BytecodeObject::PC_t pc, uint16_t address, uint32_t depth);
         bool hasExceptionHandling();
 
      private:
-        const interpreter::BytecodeObject& bco;
-        enum { DontKnow, No, Yes } ehState;
+        const interpreter::BytecodeObject& m_bco;
+        enum { DontKnow, No, Yes } m_ehState;
     };
+
+    /** Check for comparison instruction. */
+    bool isComparison(const interpreter::Opcode& op)
+    {
+        return op.is(interpreter::Opcode::maBinary)
+            && (op.minor >= interpreter::biCompareEQ && op.minor <= interpreter::biCompareGT_NC);
+    }
+
+    /** Check for regular conditional jump. */
+    bool isConditionalJump(const interpreter::Opcode& op)
+    {
+        return op.isRegularJump()
+            && (op.minor & interpreter::Opcode::jPopAlways) != 0;
+    }
+
+    /** Check for direct storage class, i.e. storage classes that directly
+        refer to a data segment that can provide/take values with defined ownership semantics. */
+    bool isDirectStorageClass(const interpreter::Opcode& op)
+    {
+        switch (op.minor) {
+         case interpreter::Opcode::sLocal:
+         case interpreter::Opcode::sStatic:
+         case interpreter::Opcode::sShared:
+         case interpreter::Opcode::sNamedShared:
+         case interpreter::Opcode::sLiteral:
+            return true;
+
+         default:
+            return false;
+        }
+    }
 }
+
+/****************************** LocalTracer ******************************/
 
 /** Constructor.
     \param bco BCO to analyze */
-IntLocalTracer::IntLocalTracer(const interpreter::BytecodeObject& bco)
-    : bco(bco),
-      ehState(DontKnow)
+LocalTracer::LocalTracer(const interpreter::BytecodeObject& bco)
+    : m_bco(bco),
+      m_ehState(DontKnow)
 { }
 
 /** Check for overwritten local variable.
@@ -66,13 +81,11 @@ IntLocalTracer::IntLocalTracer(const interpreter::BytecodeObject& bco)
     \retval true The variable is guaranteed to be overwritten and losing its value is ok
     \retval false The variable's value might still be required, or we are unsure */
 bool
-IntLocalTracer::isOverwrittenLocal(interpreter::BytecodeObject::PC_t pc,
-                                   uint16_t address,
-                                   uint32_t depth)
+LocalTracer::isOverwrittenLocal(interpreter::BytecodeObject::PC_t pc, uint16_t address, uint32_t depth)
 {
     /* Check depth */
-    while (depth > 0 && pc < bco.getNumInstructions()) {
-        const interpreter::Opcode& op = bco(pc++);
+    while (depth > 0 && pc < m_bco.getNumInstructions()) {
+        const interpreter::Opcode& op = m_bco(pc++);
         --depth;       
         switch (op.major) {
          case interpreter::Opcode::maPush:
@@ -116,7 +129,7 @@ IntLocalTracer::isOverwrittenLocal(interpreter::BytecodeObject::PC_t pc,
                         return false;
                     }
                 }
-                pc = bco.getJumpTarget(op.minor, op.arg);
+                pc = m_bco.getJumpTarget(op.minor, op.arg);
             } else {
                 /* jdz, catch: too complex/rare to reason about */
                 return false;
@@ -160,61 +173,24 @@ IntLocalTracer::isOverwrittenLocal(interpreter::BytecodeObject::PC_t pc,
     \retval true This BCO uses exception handling
     \retval false This BCO does not use exception handling */
 bool
-IntLocalTracer::hasExceptionHandling()
+LocalTracer::hasExceptionHandling()
 {
-    if (ehState == DontKnow) {
-        ehState = No;
-        for (interpreter::BytecodeObject::PC_t i = 0, n = bco.getNumInstructions(); i < n; ++i) {
-            const interpreter::Opcode& op = bco(i);
+    if (m_ehState == DontKnow) {
+        m_ehState = No;
+        for (interpreter::BytecodeObject::PC_t i = 0, n = m_bco.getNumInstructions(); i < n; ++i) {
+            const interpreter::Opcode& op = m_bco(i);
             if (op.major == interpreter::Opcode::maJump && (op.minor & ~interpreter::Opcode::jSymbolic) == interpreter::Opcode::jCatch) {
-                ehState = Yes;
+                m_ehState = Yes;
                 break;
             }
         }
     }
-    return (ehState == Yes);
+    return (m_ehState == Yes);
 }
 
-/**************************** Other Functions ****************************/
+/********************************* Fusion ********************************/
 
-/** Check for comparison instruction. */
-static bool
-isComparison(const interpreter::Opcode& op)
-{
-    return op.is(interpreter::Opcode::maBinary)
-        && (op.minor >= interpreter::biCompareEQ && op.minor <= interpreter::biCompareGT_NC);
-}
-
-/** Check for regular conditional jump. */
-static bool
-isConditionalJump(const interpreter::Opcode& op)
-{
-    return op.isRegularJump()
-        && (op.minor & interpreter::Opcode::jPopAlways) != 0;
-}
-
-/** Check for direct storage class, i.e. storage classes that directly
-    refer to a data segment that can provide/take values with defined
-    ownership semantics. */
-static bool
-isDirectStorageClass(const interpreter::Opcode& op)
-{
-    switch (op.minor) {
-     case interpreter::Opcode::sLocal:
-     case interpreter::Opcode::sStatic:
-     case interpreter::Opcode::sShared:
-     case interpreter::Opcode::sNamedShared:
-     case interpreter::Opcode::sLiteral:
-        return true;
-
-     default:
-        return false;
-    }
-}
-
-/** Perform instruction fusion.
-    Processes the whole BCO and fuses instructions where possible.
-    \param bco Byte code object, updated in-place */
+// Fuse instructions.
 void
 interpreter::fuseInstructions(BytecodeObject& bco)
 {
@@ -224,7 +200,7 @@ interpreter::fuseInstructions(BytecodeObject& bco)
         return;
     }
 
-    IntLocalTracer tracer(bco);
+    LocalTracer tracer(bco);
 
     /* Iterate backwards. We'll be combining instruction pairs. */
     for (interpreter::BytecodeObject::PC_t i = n-1; i > 0; --i) {
@@ -269,9 +245,7 @@ interpreter::fuseInstructions(BytecodeObject& bco)
     }
 }
 
-/** Undo instruction fusion.
-    Restores the original instructions in the whole BCO.
-    \param bco Byte code object, updated in-place */
+// Unfuse instructions.
 void
 interpreter::unfuseInstructions(BytecodeObject& bco)
 {

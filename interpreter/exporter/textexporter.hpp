@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/exporter/textexporter.hpp
+  *  \brief Class interpreter::exporter::TextExporter
   */
 #ifndef C2NG_INTERPRETER_EXPORTER_TEXTEXPORTER_HPP
 #define C2NG_INTERPRETER_EXPORTER_TEXTEXPORTER_HPP
@@ -10,10 +11,16 @@
 namespace interpreter { namespace exporter {
 
     /** Export text table.
-        This builds a table using ASCII characters. */
+        This builds a table using ASCII characters.
+        It implements the "text" and "table" output formats. */
     class TextExporter : public Exporter {
      public:
+        /** Constructor.
+            \param file output file
+            \param boxes true to generate a table with borders ("table"), false to generate just a simple table ("text") */
         TextExporter(afl::io::TextWriter& file, bool boxes);
+
+        // Exporter:
         virtual void startTable(const FieldList& fields, afl::base::Memory<const TypeHint> types);
         virtual void startRecord();
         virtual void addField(afl::data::Value* value, const String_t& name, TypeHint type);

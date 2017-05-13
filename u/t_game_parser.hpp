@@ -12,11 +12,46 @@ class TestGameParserDataInterface : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestGameParserMessageInformation : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testPlayerScore();
+    void testConfiguration();
+};
+
+class TestGameParserMessageParser : public CxxTest::TestSuite {
+ public:
+    void testHostVersion();
+    void testConfig();
+    void testObjects();
+    void testMulti();
+    void testScore();
+    void testDelta();
+};
+
 class TestGameParserMessageTemplate : public CxxTest::TestSuite {
  public:
     void testValues();
     void testValuesX100();
     void testValuesEnum();
+    void testValuesFormat();
+    void testGetMessageHeaderInformation();
+    void testSplitMessage();
+    void testParseInteger();
+    void testMatchMeta();
+    void testMatchMetaSubId();
+    void testMatchMetaBigId();
+    void testMatchCheck();
+    void testMatchParseValues();
+    void testMatchArray();
+    void testMatchArrayFixed();
+};
+
+class TestGameParserMessageValue : public CxxTest::TestSuite {
+ public:
+    void testValues();
+    void testNames();
+    void testKeywords();
 };
 
 #endif

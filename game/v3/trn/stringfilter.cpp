@@ -33,7 +33,7 @@ game::v3::trn::StringFilter::accept(const TurnFile& trn, size_t index) const
             text = afl::string::fromBytes(trn.getCommandData(index).subrange(0, id));
             for (size_t i = 0, n = text.size(); i < n; ++i) {
                 // quick&dirty decoder. We don't need the full decoder here.
-                text[i] -= 13;
+                text[i] = char(text[i] - 13);
             }
         }
         break;
@@ -44,6 +44,6 @@ game::v3::trn::StringFilter::accept(const TurnFile& trn, size_t index) const
     if (m_string.empty()) {
         return true;
     } else {
-        return afl::string::strUCase(trn.charset().decode(afl::string::toMemory(text))).find(m_string) != String_t::npos;
+        return afl::string::strUCase(trn.charset().decode(afl::string::toBytes(text))).find(m_string) != String_t::npos;
     }
 }

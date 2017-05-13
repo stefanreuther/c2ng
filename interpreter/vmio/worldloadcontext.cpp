@@ -60,6 +60,11 @@ interpreter::vmio::WorldLoadContext::loadMutex(const String_t& name, const Strin
 interpreter::Process*
 interpreter::vmio::WorldLoadContext::createProcess()
 {
-    // FIXME: if the processes have priorities, we must somehow arrange to call handlePriorityChange() on them
     return &m_world.processList().create(m_world, "<Loaded Process>");
+}
+
+void
+interpreter::vmio::WorldLoadContext::finishProcess(Process& proc)
+{
+    m_world.processList().handlePriorityChange(proc);
 }

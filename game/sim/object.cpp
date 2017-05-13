@@ -1,10 +1,12 @@
 /**
   *  \file game/sim/object.cpp
+  *  \brief Class game::sim::Object
   */
 
 #include <cstdlib>
 #include "game/sim/object.hpp"
 
+// Default constructor.
 game::sim::Object::Object()
     : m_id(1),
       m_name("?"),
@@ -19,10 +21,12 @@ game::sim::Object::Object()
       m_changed(false)
 { }
 
+// Destructor.
 game::sim::Object::~Object()
 { }
 
-// Attributes:
+
+// Get object Id.
 game::Id_t
 game::sim::Object::getId() const
 {
@@ -30,6 +34,7 @@ game::sim::Object::getId() const
     return m_id;
 }
 
+// Set object Id.
 void
 game::sim::Object::setId(Id_t id)
 {
@@ -38,6 +43,7 @@ game::sim::Object::setId(Id_t id)
     markDirty();
 }
 
+// Get name.
 String_t
 game::sim::Object::getName() const
 {
@@ -45,14 +51,17 @@ game::sim::Object::getName() const
     return m_name;
 }
 
+// Set name.
 void
 game::sim::Object::setName(String_t name)
 {
     // ex GSimObject::setName
+    // FIXME: can we move this into Ship? Planet does not need it.
     m_name = name;
     markDirty();
 }
 
+// Get friendly code.
 String_t
 game::sim::Object::getFriendlyCode() const
 {
@@ -60,6 +69,7 @@ game::sim::Object::getFriendlyCode() const
     return m_friendlyCode;
 }
 
+// Set friendly code.
 void
 game::sim::Object::setFriendlyCode(String_t fcode)
 {
@@ -68,6 +78,7 @@ game::sim::Object::setFriendlyCode(String_t fcode)
     markDirty();
 }
 
+// Get damage.
 int
 game::sim::Object::getDamage() const
 {
@@ -75,6 +86,7 @@ game::sim::Object::getDamage() const
     return m_damage;
 }
 
+// Set damage.
 void
 game::sim::Object::setDamage(int damage)
 {
@@ -83,6 +95,7 @@ game::sim::Object::setDamage(int damage)
     markDirty();
 }
 
+// Get shield level.
 int
 game::sim::Object::getShield() const
 {
@@ -90,6 +103,7 @@ game::sim::Object::getShield() const
     return m_shield;
 }
 
+// Set shield level.
 void
 game::sim::Object::setShield(int shield)
 {
@@ -98,6 +112,7 @@ game::sim::Object::setShield(int shield)
     markDirty();
 }
 
+// Get owner.
 int
 game::sim::Object::getOwner() const
 {
@@ -105,6 +120,7 @@ game::sim::Object::getOwner() const
     return m_owner;
 }
 
+// Set owner.
 void
 game::sim::Object::setOwner(int owner)
 {
@@ -113,6 +129,7 @@ game::sim::Object::setOwner(int owner)
     markDirty();
 }
 
+// Get experience level.
 int
 game::sim::Object::getExperienceLevel() const
 {
@@ -120,6 +137,7 @@ game::sim::Object::getExperienceLevel() const
     return m_experienceLevel;
 }
 
+// Set experience level.
 void
 game::sim::Object::setExperienceLevel(int experienceLevel)
 {
@@ -128,6 +146,7 @@ game::sim::Object::setExperienceLevel(int experienceLevel)
     markDirty();
 }
 
+// Get flags.
 int32_t
 game::sim::Object::getFlags() const
 {
@@ -135,6 +154,7 @@ game::sim::Object::getFlags() const
     return m_flags;
 }
 
+// Set flags.
 void
 game::sim::Object::setFlags(int32_t flags)
 {
@@ -143,6 +163,7 @@ game::sim::Object::setFlags(int32_t flags)
     markDirty();
 }
 
+// Get FLAK rating override.
 int32_t
 game::sim::Object::getFlakRatingOverride() const
 {
@@ -150,6 +171,7 @@ game::sim::Object::getFlakRatingOverride() const
     return m_flakRatingOverride;
 }
 
+// Set FLAK rating override.
 void
 game::sim::Object::setFlakRatingOverride(int32_t r)
 {
@@ -158,6 +180,7 @@ game::sim::Object::setFlakRatingOverride(int32_t r)
     markDirty();
 }
 
+// Get FLAK compensation override.
 int
 game::sim::Object::getFlakCompensationOverride() const
 {
@@ -165,6 +188,7 @@ game::sim::Object::getFlakCompensationOverride() const
     return m_flakCompensationOverride;
 }
 
+// Set FLAK compensation override.
 void
 game::sim::Object::setFlakCompensationOverride(int r)
 {
@@ -173,9 +197,7 @@ game::sim::Object::setFlakCompensationOverride(int r)
     markDirty();
 }
 
-// /** Assign random friendly code if requested. Considers fl_RandomFC
-//     and the fl_RandomDigits flags to assign a new, (partially) numeric
-//     friendly code. */
+// Assign random friendly code if requested.
 void
 game::sim::Object::setRandomFriendlyCode()
 {
@@ -186,20 +208,18 @@ game::sim::Object::setRandomFriendlyCode()
             which = fl_RandomDigits;
         }
         for (size_t i = 0; i < 3; ++i) {
-            if (m_friendlyCode.size() < i) {
+            if (m_friendlyCode.size() <= i) {
                 m_friendlyCode += ' ';
             }
             if ((which & (fl_RandomFC1 << i)) != 0) {
-                m_friendlyCode[i] = '0' + (std::rand() % 10);
+                m_friendlyCode[i] = static_cast<char>('0' + (std::rand() % 10));
             }
         }
         markDirty();
     }
 }
 
-// /** Assign random friendly code flags. Derives fl_RandomFC and fl_RandomDigits
-//     from the actual friendly code selected.
-//     \return true iff fl_RandomFC has been enabled */
+// Assign random friendly code flags.
 bool
 game::sim::Object::setRandomFriendlyCodeFlags()
 {
@@ -219,31 +239,33 @@ game::sim::Object::setRandomFriendlyCodeFlags()
     return (newFlags & fl_RandomFC) != 0;
 }
 
+// Check effective availability of an ability.
 bool
 game::sim::Object::hasAbility(Ability which, const game::spec::ShipList& shipList, const game::config::HostConfiguration& config) const
 {
     // ex GSimObject::hasFunction
     // Get bits (ex simf_to_value_bit, simf_to_set_bit)
-    int32_t validBit = 0, setBit = 0;
+    int32_t setBit = 0, activeBit = 0;
     switch (which) {
-     case PlanetImmunityAbility:       validBit = fl_PlanetImmunitySet;   setBit = fl_PlanetImmunity;   break;
-     case FullWeaponryAbility:         validBit = fl_FullWeaponrySet;     setBit = fl_FullWeaponry;     break;
-     case CommanderAbility:            validBit = fl_CommanderSet;        setBit = fl_Commander;        break;
-     case TripleBeamKillAbility:       validBit = fl_TripleBeamKillSet;   setBit = fl_TripleBeamKill;   break;
-     case DoubleBeamChargeAbility:     validBit = fl_DoubleBeamChargeSet; setBit = fl_DoubleBeamCharge; break;
-     case DoubleTorpedoChargeAbility:  validBit = fl_DoubleTorpChargeSet; setBit = fl_DoubleTorpCharge; break;
-     case ElusiveAbility:              validBit = fl_ElusiveSet;          setBit = fl_Elusive;          break;
-     case SquadronAbility:             validBit = fl_SquadronSet;         setBit = fl_Squadron;         break;
+     case PlanetImmunityAbility:       setBit = fl_PlanetImmunitySet;   activeBit = fl_PlanetImmunity;   break;
+     case FullWeaponryAbility:         setBit = fl_FullWeaponrySet;     activeBit = fl_FullWeaponry;     break;
+     case CommanderAbility:            setBit = fl_CommanderSet;        activeBit = fl_Commander;        break;
+     case TripleBeamKillAbility:       setBit = fl_TripleBeamKillSet;   activeBit = fl_TripleBeamKill;   break;
+     case DoubleBeamChargeAbility:     setBit = fl_DoubleBeamChargeSet; activeBit = fl_DoubleBeamCharge; break;
+     case DoubleTorpedoChargeAbility:  setBit = fl_DoubleTorpChargeSet; activeBit = fl_DoubleTorpCharge; break;
+     case ElusiveAbility:              setBit = fl_ElusiveSet;          activeBit = fl_Elusive;          break;
+     case SquadronAbility:             setBit = fl_SquadronSet;         activeBit = fl_Squadron;         break;
     }
 
     int32_t flags = getFlags();
-    if ((flags & validBit) != 0) {
-        return (flags & setBit) != 0;
+    if ((flags & setBit) != 0) {
+        return (flags & activeBit) != 0;
     } else {
         return hasImpliedAbility(which, shipList, config);
     }
 }
 
+// Check presence of any nonstandard ability.
 bool
 game::sim::Object::hasAnyNonstandardAbility() const
 {
@@ -251,7 +273,8 @@ game::sim::Object::hasAnyNonstandardAbility() const
     return (getFlags() & fl_FunctionSetBits) != 0;
 }
 
-// Dirtiness:
+
+// Mark dirty.
 void
 game::sim::Object::markDirty()
 {
@@ -259,6 +282,7 @@ game::sim::Object::markDirty()
     m_changed = true;
 }
 
+// Mark clean.
 void
 game::sim::Object::markClean()
 {
@@ -266,6 +290,7 @@ game::sim::Object::markClean()
     m_changed = false;
 }
 
+// Check dirtiness.
 bool
 game::sim::Object::isDirty() const
 {

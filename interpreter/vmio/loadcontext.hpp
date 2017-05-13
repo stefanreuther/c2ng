@@ -73,6 +73,11 @@ namespace interpreter { namespace vmio {
         /** Create a process.
             \return newly-created process or null */
         virtual Process* createProcess() = 0;
+
+        /** Finish a process.
+            Must be called after a process created using createProcess() has been completed.
+            \param proc Process */
+        virtual void finishProcess(Process& proc) = 0;
     };
 
 } }

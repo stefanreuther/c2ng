@@ -32,8 +32,8 @@ game::v3::StringVerifier::isValidCharacter(Context ctx, afl::charset::Unichar_t 
      {
          String_t utf;
          afl::charset::Utf8().append(utf, ch);
-         String_t encoded = m_charset->encode(afl::string::toMemory(utf));
-         String_t decoded = m_charset->decode(afl::string::toMemory(encoded));
+         afl::base::GrowableBytes_t encoded = m_charset->encode(afl::string::toMemory(utf));
+         String_t decoded = m_charset->decode(encoded);
          return encoded.size() == 1
              && utf == decoded;
      }
@@ -46,11 +46,11 @@ game::v3::StringVerifier::isValidCharacter(Context ctx, afl::charset::Unichar_t 
      {
          String_t utf;
          afl::charset::Utf8().append(utf, ch);
-         String_t encoded = m_charset->encode(afl::string::toMemory(utf));
-         String_t decoded = m_charset->decode(afl::string::toMemory(encoded));
+         afl::base::GrowableBytes_t encoded = m_charset->encode(afl::string::toMemory(utf));
+         String_t decoded = m_charset->decode(encoded);
          return encoded.size() == 1
              && utf == decoded
-             && static_cast<uint8_t>(encoded[0]) < 0x100 - 13;
+             && *encoded.at(0) < 0x100 - 13;
      }
     }
     return false;

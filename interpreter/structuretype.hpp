@@ -1,34 +1,31 @@
 /**
   *  \file interpreter/structuretype.hpp
+  *  \brief Class interpreter::StructureType
   */
 #ifndef C2NG_INTERPRETER_STRUCTURETYPE_HPP
 #define C2NG_INTERPRETER_STRUCTURETYPE_HPP
 
-#include "afl/data/namemap.hpp"
 #include "interpreter/basevalue.hpp"
-#include "afl/base/ref.hpp"
-#include "afl/base/refcounted.hpp"
+#include "interpreter/structuretypedata.hpp"
 
 namespace interpreter {
 
-    /** Structure type.
-        Contains everything that makes up a structure type.
-        Actually, a structure type is just the member name/slot mapping, so
-        this could have been a typedef to IntVariableNames, but making this
-        a type keeps the door open for future expansion. */
-    class StructureTypeData : public afl::base::RefCounted {
-     public:
-        StructureTypeData();
-        ~StructureTypeData();
-
-        afl::data::NameMap names;
-    };
-
-    /** Handle to a structure type. */
+    /** Value of a structure type.
+        The actual data is in a StructureTypeData object; this object stores a reference there-to.
+        This type appears in data segments and is frequently copied.
+        Multiple StructureType objects can and will often reference the same StructureTypeData. */
     class StructureType : public BaseValue {
      public:
-        StructureType(afl::base::Ref<StructureTypeData> type);
+        /** Constructor.
+            \param type Structure type */
+        explicit StructureType(StructureTypeData::Ref_t type);
+
+        /** Destructor. */
         ~StructureType();
+
+        /** Get contained type.
+            \return contained type */
+        StructureTypeData::Ref_t getType() const;
 
         // BaseValue:
         virtual String_t toString(bool readable) const;
@@ -37,12 +34,15 @@ namespace interpreter {
         // Value:
         virtual StructureType* clone() const;
 
-        afl::base::Ref<StructureTypeData> getType() const
-            { return m_type; }
-
      private:
-        afl::base::Ref<StructureTypeData> m_type;
+        const StructureTypeData::Ref_t m_type;
     };
+}
+
+inline interpreter::StructureTypeData::Ref_t
+interpreter::StructureType::getType() const
+{
+    return m_type;
 }
 
 #endif

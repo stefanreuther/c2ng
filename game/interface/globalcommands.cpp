@@ -61,7 +61,7 @@ namespace {
         // Draw it
         std::auto_ptr<Drawing> drawing(new Drawing(a, drawingType));
         drawing->setPos2(b);
-        drawing->setColor(color);
+        drawing->setColor(uint8_t(color));
         drawing->setTag(tag);
         drawing->setExpire(expire);
 
@@ -294,7 +294,7 @@ game::interface::IFNewCircle(interpreter::Process& /*proc*/, game::Session& sess
     // Do it
     std::auto_ptr<Drawing> drawing(new Drawing(game::map::Point(x, y), Drawing::CircleDrawing));
     drawing->setCircleRadius(radius);
-    drawing->setColor(color);
+    drawing->setColor(uint8_t(color));
     drawing->setTag(tag);
     drawing->setExpire(expire);
 
@@ -431,7 +431,7 @@ game::interface::IFNewMarker(interpreter::Process& /*proc*/, game::Session& sess
     // Draw it
     std::auto_ptr<Drawing> drawing(new Drawing(game::map::Point(x, y), Drawing::MarkerDrawing));
     drawing->setMarkerKind(type);
-    drawing->setColor(color);
+    drawing->setColor(uint8_t(color));
     drawing->setTag(tag);
     drawing->setExpire(expire);
     drawing->setComment(text);

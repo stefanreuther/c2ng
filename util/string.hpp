@@ -77,6 +77,11 @@ namespace util {
         \return formatted name */
     String_t formatName(String_t name);
 
+    /** Encode MIME header.
+        \param input text to encode
+        \param charset character set */
+    String_t encodeMimeHeader(String_t input, String_t charsetName);
+
 }
 
 #endif

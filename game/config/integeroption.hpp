@@ -1,5 +1,6 @@
 /**
   *  \file game/config/integeroption.hpp
+  *  \brief Class game::config::IntegerOption
   */
 #ifndef C2NG_GAME_CONFIG_INTEGEROPTION_HPP
 #define C2NG_GAME_CONFIG_INTEGEROPTION_HPP
@@ -16,20 +17,32 @@ namespace game { namespace config {
         This contains a single value, parsed from text according to a ValueParser. */
     class IntegerOption : public ConfigurationOption {
      public:
-        IntegerOption(const ValueParser& parser, int32_t initialValue = 0);
+        /** Constructor.
+            \param parser ValueParser instance. Must have sufficient lifetime.
+            \param initialValue Initial value */
+        explicit IntegerOption(const ValueParser& parser, int32_t initialValue = 0);
 
+        /** Destructor. */
         ~IntegerOption();
 
+        // ConfigurationOption:
         virtual void set(String_t value);
-
         virtual String_t toString() const;
 
+        /** Set value.
+            \param newValue New value */
         void set(int32_t newValue);
 
+        /** Get value.
+            \return value */
         int32_t operator()() const;
 
+        /** Copy from another option.
+            \param other other option */
         void copyFrom(const IntegerOption& other);
 
+        /** Access ValueParser.
+            \return parser instance */
         const ValueParser& parser() const;
 
      private:

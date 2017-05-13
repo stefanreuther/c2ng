@@ -7,13 +7,23 @@ CXX = $(CONFIG_C2NG_CXX)
 LDFLAGS = $(CONFIG_AFL_LDFLAGS) $(CONFIG_C2NG_LDFLAGS)
 LIBS = $(CONFIG_C2NG_LIBS)
 STRIP = strip
+OBJECTS_c2file-server = server/c2file.o
+OBJECTS_c2fileclient = server/tools/c2fileclient.o
+OBJECTS_c2format-server = server/c2format.o
 OBJECTS_c2ng = main/c2ng.o
 OBJECTS_c2plugin = tools/c2plugin.o
+OBJECTS_c2rater = tools/c2rater.o
 OBJECTS_c2script = tools/c2script.o
 OBJECTS_c2sweep = tools/c2sweep.o
+OBJECTS_c2talk-server = server/c2talk.o
 OBJECTS_c2untrn = tools/c2untrn.o
-OBJECTS_gamelib = game/v3/trn/dumper.o util/application.o \
-    game/v3/trn/filter.o game/v3/trn/indexfilter.o \
+OBJECTS_gamelib = interpreter/structurevaluedata.o \
+    interpreter/structuretypedata.o interpreter/arraydata.o \
+    game/maint/difficultyrater.o util/syntax/factory1.o \
+    util/syntax/inihighlighter.o util/syntax/chighlighter.o \
+    util/syntax/scripthighlighter.o util/syntax/keywordtable.o \
+    util/syntax/segment.o util/syntax/nullhighlighter.o game/v3/trn/dumper.o \
+    util/application1.o game/v3/trn/filter.o game/v3/trn/indexfilter.o \
     game/v3/trn/negatefilter.o game/v3/trn/orfilter.o \
     game/v3/trn/andfilter.o game/v3/trn/idfilter.o \
     game/v3/trn/stringfilter.o game/v3/trn/namefilter.o \
@@ -122,14 +132,14 @@ OBJECTS_gamelib = game/v3/trn/dumper.o util/application.o \
     game/tables/happinessname.o game/tables/temperaturename.o \
     game/tables/industrylevel.o game/tables/nativegovernmentname.o \
     game/tables/nativeracename.o interpreter/closure.o \
-    interpreter/hashvalue.o interpreter/hashdata.o \
-    game/interface/planetproperty.o interpreter/savevisitor.o \
-    game/session2.o game/game.o game/unitscoredefinitionlist.o \
-    game/unitscorelist.o interpreter/selectionexpression.o \
-    interpreter/filecommandsource.o interpreter/filevalue.o \
-    interpreter/subroutinevalue.o interpreter/memorycommandsource.o \
-    interpreter/binaryexecution.o interpreter/indexablevalue.o \
-    interpreter/arguments.o interpreter/arrayvalue.o interpreter/process.o \
+    interpreter/hashvalue.o game/interface/planetproperty.o \
+    interpreter/savevisitor.o game/session2.o game/game.o \
+    game/unitscoredefinitionlist.o game/unitscorelist.o \
+    interpreter/selectionexpression.o interpreter/filecommandsource.o \
+    interpreter/filevalue.o interpreter/subroutinevalue.o \
+    interpreter/memorycommandsource.o interpreter/binaryexecution.o \
+    interpreter/indexablevalue.o interpreter/arguments.o \
+    interpreter/arrayvalue.o interpreter/process.o \
     interpreter/structurevalue.o interpreter/structuretype.o \
     interpreter/basevalue.o interpreter/ternaryexecution.o \
     interpreter/keymapvalue.o interpreter/unaryexecution.o \
@@ -149,19 +159,18 @@ OBJECTS_gamelib = game/v3/trn/dumper.o util/application.o \
     interpreter/unaryoperation.o interpreter/binaryoperation.o \
     interpreter/expr/indirectcallnode.o interpreter/expr/functioncallnode.o \
     interpreter/expr/identifiernode.o interpreter/expr/membernode.o \
-    interpreter/expr/logicalnode.o interpreter/expr/conditionalnode.o \
-    interpreter/expr/sequencenode.o interpreter/expr/assignmentnode.o \
-    interpreter/expr/casenode.o interpreter/expr/simplenode.o \
-    interpreter/expr/simplervaluenode.o interpreter/expr/literalnode.o \
-    interpreter/expr/rvaluenode.o interpreter/expr/node.o \
-    interpreter/bytecodeobject.o interpreter/opcode.o util/math.o \
-    interpreter/error.o interpreter/tokenizer.o \
-    game/config/userconfiguration.o game/map/anyplanettype.o \
-    game/map/playedbasetype.o game/map/playedplanettype.o \
-    game/map/objecttype.o game/map/universe.o game/map/configuration1.o \
-    game/map/basestorage.o game/map/planet.o game/map/circularobject.o \
-    game/map/mapobject.o game/map/point.o game/map/object.o \
-    game/spec/friendlycodelist.o game/spec/friendlycode.o \
+    interpreter/expr/logicalnode.o interpreter/expr/sequencenode.o \
+    interpreter/expr/assignmentnode.o interpreter/expr/casenode.o \
+    interpreter/expr/simplenode.o interpreter/expr/simplervaluenode.o \
+    interpreter/expr/literalnode.o interpreter/expr/rvaluenode.o \
+    interpreter/expr/node.o interpreter/bytecodeobject.o \
+    interpreter/opcode.o util/math.o interpreter/error.o \
+    interpreter/tokenizer.o game/config/userconfiguration.o \
+    game/map/anyplanettype.o game/map/playedbasetype.o \
+    game/map/playedplanettype.o game/map/objecttype.o game/map/universe.o \
+    game/map/configuration1.o game/map/basestorage.o game/map/planet.o \
+    game/map/circularobject.o game/map/mapobject.o game/map/point.o \
+    game/map/object.o game/spec/friendlycodelist.o game/spec/friendlycode.o \
     game/vcr/classic/database.o game/vcr/statistic.o game/vcr/score.o \
     game/vcr/classic/pvcralgorithm.o game/vcr/classic/statustoken.o \
     game/vcr/classic/hostalgorithm.o game/vcr/classic/nullvisualizer.o \
@@ -228,7 +237,7 @@ OBJECTS_guilib = gfx/basecontext.o client/widgets/commanddataview.o \
     client/screens/browserscreen.o ui/widgets/richlistbox.o \
     ui/rich/imageobject.o ui/rich/documentview.o ui/rich/document.o \
     ui/widgets/statictext1.o ui/widgets/inputline.o \
-    ui/widgets/simpleiconbox.o ui/widgets/iconbox.o ui/group.o \
+    ui/widgets/simpleiconbox.o ui/widgets/iconbox.o ui/group1.o \
     client/widgets/folderlistbox.o ui/eventloop.o ui/skincolorscheme.o \
     gfx/clipfilter.o ui/scrollablewidget.o ui/widgets/abstractlistbox.o \
     ui/res/provider.o ui/res/directoryprovider.o ui/res/manager.o gfx/blit.o \
@@ -238,18 +247,196 @@ OBJECTS_guilib = gfx/basecontext.o client/widgets/commanddataview.o \
     ui/draw.o ui/defaultresourceprovider.o gfx/fontlist.o gfx/fontrequest.o \
     ui/spacer.o ui/layoutablegroup.o ui/layout/vbox.o ui/layout/axislayout.o \
     ui/layout/hbox.o ui/colorscheme.o gfx/complex.o \
-    gfx/sdl/streaminterface.o gfx/multiclipfilter.o gfx/filter1.o ui/root1.o \
+    gfx/sdl/streaminterface.o gfx/multiclipfilter.o gfx/filter1.o ui/root4.o \
     ui/simplewidget.o ui/layout/info.o ui/cardgroup.o ui/widget1.o \
     gfx/bitmapfont.o gfx/bitmapglyph.o gfx/font.o gfx/nullcolorscheme.o \
     gfx/graphicsexception.o gfx/sdl/engine1.o gfx/sdl/surface.o \
     gfx/nullcanvas.o gfx/rectangleset.o gfx/rectangle.o gfx/fillpattern.o
-OBJECTS_testsuite = u/t_game_v3_trn_parseexception.o \
-    u/t_game_v3_trn_filter.o u/t_game_v3_trn_namefilter.o \
-    u/t_game_v3_trn_stringfilter.o u/t_game_v3_trn_idfilter.o \
-    u/t_game_v3_trn_negatefilter.o u/t_game_v3_trn_orfilter.o \
-    u/t_game_v3_trn_indexfilter.o u/t_game_v3_trn_andfilter.o \
-    u/t_game_v3_trn_constantfilter.o u/t_util_application.o \
-    u/t_interpreter_vmio_nullloadcontext.o \
+OBJECTS_serverlib = server/interface/composablecommandhandler.o \
+    server/configurationhandler.o server/common/session3.o \
+    server/interface/hostcronclient.o server/file/directorywrapper1.o \
+    server/file/clientdirectoryhandler.o \
+    server/file/ca/internalobjectcache.o \
+    server/file/ca/internalreferencecounter.o \
+    server/file/directoryhandlerfactory.o server/file/directoryhandler2.o \
+    server/tools/c2fileclient.o server/file/utils.o server/file/ca/commit.o \
+    server/file/ca/root1.o server/file/ca/directoryhandler1.o \
+    server/file/ca/directoryentry.o server/file/ca/objectid.o \
+    server/file/ca/objectstore.o server/file/internaldirectoryhandler.o \
+    server/file/racenames.o server/file/filegame.o server/file/gamestatus.o \
+    server/interface/filegameserver.o server/interface/filegameclient.o \
+    server/file/pathresolver.o server/file/filebase.o \
+    server/file/directoryitem.o server/file/fileitem.o \
+    server/file/filesystemhandler.o server/file/item.o server/file/root2.o \
+    server/file/commandhandler.o server/interface/filebaseserver.o \
+    server/interface/filebaseclient.o server/interface/filebase1.o \
+    server/talk/configuration3.o server/interface/baseclient.o \
+    server/talk/talknntp.o server/interface/talknntpserver.o \
+    server/interface/talknntpclient.o server/talk/talkpm.o \
+    server/talk/userpm.o server/interface/talkpmserver.o \
+    server/interface/talkpmclient.o server/talk/talkfolder.o \
+    server/talk/userfolder.o server/interface/talkfolderserver.o \
+    server/interface/talkfolderclient.o server/talk/spam.o \
+    server/talk/talkuser.o server/interface/talkuserserver.o \
+    server/interface/talkuserclient.o server/talk/newsrc.o \
+    server/talk/talkthread.o server/interface/talkthreadserver.o \
+    server/interface/talkthreadclient.o server/talk/notify.o \
+    server/talk/talkforum1.o server/interface/talkforum.o \
+    server/interface/talkforumserver.o server/interface/talkforumclient.o \
+    server/interface/mailqueueserver.o server/interface/mailqueueclient.o \
+    server/talk/talkpost.o server/interface/talkpostserver.o \
+    server/interface/talkpostclient.o server/talk/accesschecker.o \
+    server/talk/render/bbrenderer.o server/talk/render/mailrenderer.o \
+    server/talk/render/htmlrenderer.o server/talk/parse/bbparser.o \
+    server/talk/parse/bblexer.o server/talk/util.o server/talk/user.o \
+    server/interface/talkgroupclient.o server/talk/talkgroup.o \
+    server/interface/talkgroupserver.o server/talk/talkrender.o \
+    server/interface/talkrenderserver.o server/interface/talkrenderclient.o \
+    server/talk/render/render.o server/talk/forum.o server/talk/topic.o \
+    server/talk/render/options.o server/talk/render/context1.o \
+    server/talk/render/textrenderer.o server/talk/message.o \
+    server/talk/linkformatter.o server/talk/textnode.o server/talk/group.o \
+    server/types1.o server/talk/talksyntax.o \
+    server/interface/talksyntaxserver.o server/interface/talksyntaxclient.o \
+    server/talk/commandhandler1.o server/talk/root3.o server/talk/session4.o \
+    server/talk/inlinerecognizer.o server/format/simpacker.o \
+    server/format/truehullpacker.o server/format/enginepacker.o \
+    server/format/hullpacker.o server/format/torpedopacker.o \
+    server/format/utils1.o server/format/beampacker.o server/application.o \
+    server/format/format.o server/interface/formatserver.o \
+    server/format/stringpacker.o server/interface/formatclient.o
+OBJECTS_testsuite = u/t_interpreter_vmio_filesavecontext.o \
+    u/t_interpreter_vmio_processsavecontext.o \
+    u/t_interpreter_vmio_structures.o \
+    u/t_interpreter_vmio_processloadcontext.o u/t_gfx_filter.o \
+    u/t_game_config_stringoption.o u/t_game_config_integerarrayoption.o \
+    u/t_gfx_font.o u/t_game_config_enumvalueparser.o u/t_gfx_bitmapfont.o \
+    u/t_gfx_bitmapglyph.o u/t_gfx_primitives.o u/t_gfx_pixmapcanvasimpl.o \
+    u/t_gfx_fontlist.o u/t_gfx_context.o u/t_gfx_nullcolorscheme.o \
+    u/t_gfx_colorscheme.o u/t_gfx_basecontext.o u/t_gfx_rgbapixmap.o \
+    u/t_gfx_fontrequest.o u/t_gfx_palettizedpixmap.o \
+    u/t_gfx_gen_spaceviewconfig.o u/t_gfx_gen_spaceview.o \
+    u/t_game_sim_setup.o u/t_game_sim_configuration.o u/t_game_sim_ability.o \
+    u/t_server_configurationhandler.o u/t_interpreter_opcode.o \
+    u/t_interpreter_keymapvalue.o u/t_interpreter_simplespecialcommand.o \
+    u/t_interpreter_memorycommandsource.o u/t_interpreter_fusion.o \
+    u/t_interpreter_filetable.o u/t_interpreter_filevalue.o \
+    u/t_gfx_graphicsexception.o u/t_interpreter_filecommandsource.o \
+    u/t_interpreter_defaultstatementcompilationcontext.o \
+    u/t_interpreter_compilationcontext.o u/t_interpreter_propertyacceptor.o \
+    u/t_interpreter_contextprovider.o u/t_interpreter_callablevalue.o \
+    u/t_interpreter_basevalue.o u/t_interpreter_commandsource.o \
+    u/t_interpreter_arrayvalue.o u/t_interpreter_arguments.o \
+    u/t_interpreter_structurevalue.o u/t_interpreter_structurevaluedata.o \
+    u/t_interpreter_structuretype.o u/t_interpreter_structuretypedata.o \
+    u/t_interpreter_objectpropertyvector.o u/t_interpreter_world.o \
+    u/t_interpreter_arraydata.o u/t_interpreter_hashvalue.o \
+    u/t_util_rich_alignmentattribute.o u/t_util_syntax_format.o \
+    u/t_game_sim_structures.o u/t_game_v3_structures.o \
+    u/t_game_db_structures.o u/t_game_extra.o u/t_interpreter_savecontext.o \
+    u/t_interpreter_specialcommand.o u/t_interpreter_typehint.o \
+    u/t_interpreter_tagnode.o u/t_interpreter_exporter_exporter.o \
+    u/t_interpreter_exporter_dbfexporter.o \
+    u/t_interpreter_exporter_jsonexporter.o \
+    u/t_interpreter_exporter_textexporter.o \
+    u/t_interpreter_exporter_separatedtextexporter.o \
+    u/t_interpreter_exporter_htmlexporter.o u/t_interpreter_filefunctions.o \
+    u/t_game_parser_messageparser.o u/t_game_parser_messageinformation.o \
+    u/t_game_parser_messagevalue.o u/t_game_root.o u/t_game_turn.o \
+    u/t_game_playerset.o u/t_game_shipbuildorder.o u/t_game_spec_shiplist.o \
+    u/t_game_spec_standardcomponentnameprovider.o u/t_game_spec_hull.o \
+    u/t_game_spec_hullfunctionassignmentlist.o \
+    u/t_game_spec_modifiedhullfunctionlist.o u/t_game_spec_hullfunction.o \
+    u/t_game_spec_hullassignmentlist.o u/t_game_spec_mission.o \
+    u/t_game_spec_basichullfunctionlist.o \
+    u/t_game_spec_nullcomponentnameprovider.o u/t_game_spec_torpedo.o \
+    u/t_game_spec_torpedolauncher.o u/t_game_spec_beam.o \
+    u/t_game_spec_weapon.o u/t_game_spec_basichullfunction.o \
+    u/t_game_spec_basecomponentvector.o u/t_game_score_loader.o \
+    u/t_game_score_compoundscore.o u/t_game_score_turnscorelist.o \
+    u/t_game_score_turnscore.o u/t_server_talk_render_bbrenderer.o \
+    u/t_game_map_ionstorm.o u/t_game_maint_sweeper.o \
+    u/t_server_format_format.o u/t_server_format_truehullpacker.o \
+    u/t_server_format_stringpacker.o u/t_server_format_hullpacker.o \
+    u/t_server_format_enginepacker.o u/t_server_format_torpedopacker.o \
+    u/t_server_format_beampacker.o \
+    u/t_server_interface_composablecommandhandler.o \
+    u/t_server_talk_commandhandler.o u/t_server_talk_talknntp.o \
+    u/t_server_talk_talkthread.o u/t_server_talk_talkfolder.o \
+    u/t_server_talk_talkgroup.o u/t_server_talk_userfolder.o \
+    u/t_server_talk_topic.o u/t_server_talk_user.o \
+    u/t_server_talk_talkforum.o u/t_server_talk_talkrender.o \
+    u/t_interpreter_vmio_objectloader.o u/t_server_common_session.o \
+    u/t_server_interface_hostcronclient.o u/t_server_interface_hostcron.o \
+    u/t_util_io.o u/t_game_maint_difficultyrater.o \
+    u/t_game_config_collapsibleintegerarrayoption.o \
+    u/t_server_file_directorywrapper.o \
+    u/t_server_file_clientdirectoryhandler.o \
+    u/t_server_file_ca_internalobjectcache.o \
+    u/t_server_file_ca_objectcache.o u/t_server_file_ca_referencecounter.o \
+    u/t_server_file_ca_internalreferencecounter.o \
+    u/t_server_file_directoryhandlerfactory.o u/t_server_file_utils.o \
+    u/t_server_file_ca_root.o u/t_server_file_ca_directoryhandler.o \
+    u/t_server_file_ca_referenceupdater.o u/t_server_file_ca_commit.o \
+    u/t_server_file_ca_directoryentry.o u/t_server_file_ca_objectid.o \
+    u/t_server_file_ca_objectstore.o u/t_server_file_filegame.o \
+    u/t_server_file_racenames.o u/t_server_file_gamestatus.o u/files.o \
+    u/t_server_interface_filegameserver.o \
+    u/t_server_interface_filegameclient.o u/t_server_interface_filegame.o \
+    u/t_server_file_commandhandler.o u/t_server_file_item.o \
+    u/t_server_file_directoryhandler.o u/t_server_file_root.o \
+    u/t_server_file_session.o u/t_server_file_filebase.o \
+    u/t_ui_res_ccimageloader.o u/t_ui_res_engineimageloader.o \
+    u/t_server_interface_filebaseserver.o \
+    u/t_server_interface_filebaseclient.o u/t_server_interface_filebase.o \
+    u/t_server_talk_message.o u/t_server_talk_accesschecker.o \
+    u/t_server_talk_forum.o u/t_server_talk_configuration.o \
+    u/t_server_talk_userpm.o u/t_server_interface_baseclient.o \
+    u/t_server_interface_base.o u/t_server_interface_talknntpserver.o \
+    u/t_server_interface_talknntpclient.o u/t_server_interface_talknntp.o \
+    u/t_server_talk_talkpm.o u/t_server_interface_talkpmserver.o \
+    u/t_server_interface_talkpmclient.o u/t_server_interface_talkpm.o \
+    u/t_server_interface_talkfolderserver.o \
+    u/t_server_interface_talkfolderclient.o \
+    u/t_server_interface_talkfolder.o u/t_server_talk_render_htmlrenderer.o \
+    u/t_server_talk_talkpost.o u/t_server_format_simpacker.o \
+    u/t_server_talk_spam.o u/t_server_talk_talkuser.o \
+    u/t_server_interface_talkuserserver.o \
+    u/t_server_interface_talkuserclient.o u/t_server_interface_talkuser.o \
+    u/t_server_talk_newsrc.o u/t_server_talk_talksyntax.o \
+    u/t_server_talk_textnode.o u/t_server_interface_formatserver.o \
+    u/t_server_interface_talkthreadserver.o \
+    u/t_server_interface_talkthreadclient.o \
+    u/t_server_interface_talkthread.o u/t_server_interface_talkgroupserver.o \
+    u/t_server_interface_talkgroupclient.o u/t_server_talk_sorter.o \
+    u/t_server_interface_talkforumserver.o \
+    u/t_server_interface_talkforumclient.o u/t_server_interface_talkforum.o \
+    u/t_server_interface_mailqueueserver.o \
+    u/t_server_interface_mailqueueclient.o u/t_server_interface_mailqueue.o \
+    u/t_server_interface_talkpostserver.o \
+    u/t_server_interface_talkpostclient.o u/t_server_interface_talkpost.o \
+    u/t_game_db_drawingatommap.o u/t_server_talk_parse_bbparser.o \
+    u/t_server_talk_parse_bblexer.o u/t_server_interface_talkrenderserver.o \
+    u/t_server_interface_talkrenderclient.o u/t_server_format_utils.o \
+    u/t_server_talk_root.o u/t_server_talk_util.o \
+    u/t_server_talk_render_context.o u/t_server_talk_render_options.o \
+    u/t_server_interface_talksyntaxserver.o u/helper/commandhandlermock.o \
+    u/t_server_interface_talksyntaxclient.o u/helper/callreceiver.o \
+    u/t_server_interface_talkrender.o u/t_server_interface_talkgroup.o \
+    u/t_server_talk_linkformatter.o u/t_server_talk_group.o \
+    u/t_server_types.o u/t_server_interface_talksyntax.o \
+    u/t_server_talk_inlinerecognizer.o u/t_server_format_packer.o \
+    u/t_server_interface_formatclient.o u/t_server_interface_format.o \
+    u/t_util_syntax_factory.o u/t_util_syntax_inihighlighter.o \
+    u/t_util_syntax_chighlighter.o u/t_util_syntax_keywordtable.o \
+    u/t_util_syntax_segment.o u/t_util_syntax_nullhighlighter.o \
+    u/t_util_syntax_scripthighlighter.o u/t_util_syntax_highlighter.o \
+    u/t_game_v3_trn_parseexception.o u/t_game_v3_trn_filter.o \
+    u/t_game_v3_trn_namefilter.o u/t_game_v3_trn_stringfilter.o \
+    u/t_game_v3_trn_idfilter.o u/t_game_v3_trn_negatefilter.o \
+    u/t_game_v3_trn_orfilter.o u/t_game_v3_trn_indexfilter.o \
+    u/t_game_v3_trn_andfilter.o u/t_game_v3_trn_constantfilter.o \
+    u/t_util_application.o u/t_interpreter_vmio_nullloadcontext.o \
     u/t_interpreter_selectionexpression.o u/t_interpreter_ternaryoperation.o \
     u/t_interpreter_unaryoperation.o u/t_interpreter_binaryoperation.o \
     u/t_interpreter_optimizer.o u/t_gfx_basecolorscheme.o \
@@ -360,20 +547,42 @@ CXXTESTDIR = $(CONFIG_AFL_CXXTESTDIR)
 include config.mk
 include $(CONFIG_C2NG_AFL_DIR)/config.mk
 
-.PHONY: tags all clean distclean gamelib guilib c2export c2plugin c2script \
-    c2sweep c2untrn c2ng testsuite
+.PHONY: tags all clean distclean gamelib guilib serverlib c2export c2plugin \
+    c2rater c2script c2sweep c2untrn c2file-server c2format-server \
+    c2talk-server c2fileclient c2ng testsuite
 
 .SUFFIXES: .cpp .o .s
 
-all: all-sdl-$(CONFIG_C2NG_HAVE_SDL)
+all: all-sdl-$(CONFIG_C2NG_HAVE_SDL) all-cxxtest-$(CONFIG_C2NG_HAVE_CXXTEST)
 
-all-sdl-yes: all-sdl-no c2ng.exe testsuite.exe
+all-sdl-yes: all-sdl-no c2ng.exe
 
-all-sdl-no: c2export.exe c2plugin.exe c2script.exe c2sweep.exe c2untrn.exe
+all-sdl-no: c2export.exe c2plugin.exe c2rater.exe c2script.exe c2sweep.exe \
+    c2untrn.exe c2file-server.exe c2format-server.exe c2talk-server.exe \
+    c2fileclient.exe
+
+all-cxxtest-yes: testsuite.exe
+
+all-cxxtest-no:
 
 c2export.exe: $(OBJECTS_c2export) libgamelib.a $(LIBDEPEND)
 	$(CXX) $(LDFLAGS) $(LINKFLAGS_gamelib) -L$(CONFIG_C2NG_AFL_DIR) -o c2export.exe $(OBJECTS_c2export) libgamelib.a -lafl $(CONFIG_AFL_LIBS) $(LIBS)
 	$(STRIP) c2export.exe
+
+c2file-server.exe: $(OBJECTS_c2file-server) libserverlib.a libgamelib.a \
+    $(LIBDEPEND)
+	$(CXX) $(LDFLAGS) $(LINKFLAGS_serverlib) $(LINKFLAGS_gamelib) -L$(CONFIG_C2NG_AFL_DIR) -o c2file-server.exe $(OBJECTS_c2file-server) libserverlib.a libgamelib.a -lafl $(CONFIG_AFL_LIBS) $(LIBS)
+	$(STRIP) c2file-server.exe
+
+c2fileclient.exe: $(OBJECTS_c2fileclient) libserverlib.a libgamelib.a \
+    $(LIBDEPEND)
+	$(CXX) $(LDFLAGS) $(LINKFLAGS_serverlib) $(LINKFLAGS_gamelib) -L$(CONFIG_C2NG_AFL_DIR) -o c2fileclient.exe $(OBJECTS_c2fileclient) libserverlib.a libgamelib.a -lafl $(CONFIG_AFL_LIBS) $(LIBS)
+	$(STRIP) c2fileclient.exe
+
+c2format-server.exe: $(OBJECTS_c2format-server) libserverlib.a libgamelib.a \
+    $(LIBDEPEND)
+	$(CXX) $(LDFLAGS) $(LINKFLAGS_serverlib) $(LINKFLAGS_gamelib) -L$(CONFIG_C2NG_AFL_DIR) -o c2format-server.exe $(OBJECTS_c2format-server) libserverlib.a libgamelib.a -lafl $(CONFIG_AFL_LIBS) $(LIBS)
+	$(STRIP) c2format-server.exe
 
 c2ng.exe: $(OBJECTS_c2ng) libguilib.a libgamelib.a $(LIBDEPEND)
 	$(CXX) $(LDFLAGS) $(LINKFLAGS_guilib) $(LINKFLAGS_gamelib) -L$(CONFIG_C2NG_AFL_DIR) -o c2ng.exe $(OBJECTS_c2ng) libguilib.a libgamelib.a -lafl $(CONFIG_AFL_LIBS) $(LIBS) $(CONFIG_C2NG_GUILIBS)
@@ -383,6 +592,10 @@ c2plugin.exe: $(OBJECTS_c2plugin) libgamelib.a $(LIBDEPEND)
 	$(CXX) $(LDFLAGS) $(LINKFLAGS_gamelib) -L$(CONFIG_C2NG_AFL_DIR) -o c2plugin.exe $(OBJECTS_c2plugin) libgamelib.a -lafl $(CONFIG_AFL_LIBS) $(LIBS)
 	$(STRIP) c2plugin.exe
 
+c2rater.exe: $(OBJECTS_c2rater) libgamelib.a $(LIBDEPEND)
+	$(CXX) $(LDFLAGS) $(LINKFLAGS_gamelib) -L$(CONFIG_C2NG_AFL_DIR) -o c2rater.exe $(OBJECTS_c2rater) libgamelib.a -lafl $(CONFIG_AFL_LIBS) $(LIBS)
+	$(STRIP) c2rater.exe
+
 c2script.exe: $(OBJECTS_c2script) libgamelib.a $(LIBDEPEND)
 	$(CXX) $(LDFLAGS) $(LINKFLAGS_gamelib) -L$(CONFIG_C2NG_AFL_DIR) -o c2script.exe $(OBJECTS_c2script) libgamelib.a -lafl $(CONFIG_AFL_LIBS) $(LIBS)
 	$(STRIP) c2script.exe
@@ -390,6 +603,11 @@ c2script.exe: $(OBJECTS_c2script) libgamelib.a $(LIBDEPEND)
 c2sweep.exe: $(OBJECTS_c2sweep) libgamelib.a $(LIBDEPEND)
 	$(CXX) $(LDFLAGS) $(LINKFLAGS_gamelib) -L$(CONFIG_C2NG_AFL_DIR) -o c2sweep.exe $(OBJECTS_c2sweep) libgamelib.a -lafl $(CONFIG_AFL_LIBS) $(LIBS)
 	$(STRIP) c2sweep.exe
+
+c2talk-server.exe: $(OBJECTS_c2talk-server) libserverlib.a libgamelib.a \
+    $(LIBDEPEND)
+	$(CXX) $(LDFLAGS) $(LINKFLAGS_serverlib) $(LINKFLAGS_gamelib) -L$(CONFIG_C2NG_AFL_DIR) -o c2talk-server.exe $(OBJECTS_c2talk-server) libserverlib.a libgamelib.a -lafl $(CONFIG_AFL_LIBS) $(LIBS)
+	$(STRIP) c2talk-server.exe
 
 c2untrn.exe: $(OBJECTS_c2untrn) libgamelib.a $(LIBDEPEND)
 	$(CXX) $(LDFLAGS) $(LINKFLAGS_gamelib) -L$(CONFIG_C2NG_AFL_DIR) -o c2untrn.exe $(OBJECTS_c2untrn) libgamelib.a -lafl $(CONFIG_AFL_LIBS) $(LIBS)
@@ -403,30 +621,51 @@ libguilib.a: $(OBJECTS_guilib)
 	$(AR) cr libguilib.a $(OBJECTS_guilib) 
 	$(RANLIB) libguilib.a
 
-testsuite.exe: $(OBJECTS_testsuite) libguilib.a libgamelib.a $(LIBDEPEND)
-	$(CXX) $(LDFLAGS) $(LINKFLAGS_guilib) $(LINKFLAGS_gamelib) -L$(CONFIG_C2NG_AFL_DIR) -o testsuite.exe $(OBJECTS_testsuite) libguilib.a libgamelib.a -lafl $(CONFIG_AFL_LIBS) $(LIBS) $(CONFIG_C2NG_GUILIBS)
+libserverlib.a: $(OBJECTS_serverlib) libgamelib.a
+	$(AR) cr libserverlib.a $(OBJECTS_serverlib)  libgamelib.a
+	$(RANLIB) libserverlib.a
+
+testsuite.exe: $(OBJECTS_testsuite) libserverlib.a libguilib.a libgamelib.a \
+    $(LIBDEPEND)
+	$(CXX) $(LDFLAGS) $(LINKFLAGS_serverlib) $(LINKFLAGS_guilib) $(LINKFLAGS_gamelib) -L$(CONFIG_C2NG_AFL_DIR) -o testsuite.exe $(OBJECTS_testsuite) libserverlib.a libguilib.a libgamelib.a -lafl $(CONFIG_AFL_LIBS) $(LIBS) $(CONFIG_C2NG_GUILIBS)
 	$(STRIP) testsuite.exe
 
 c2export: c2export.exe
+
+c2file-server: c2file-server.exe
+
+c2fileclient: c2fileclient.exe
+
+c2format-server: c2format-server.exe
 
 c2ng: c2ng.exe
 
 c2plugin: c2plugin.exe
 
+c2rater: c2rater.exe
+
 c2script: c2script.exe
 
 c2sweep: c2sweep.exe
+
+c2talk-server: c2talk-server.exe
 
 c2untrn: c2untrn.exe
 
 clean:
 	$(RM) $(OBJECTS_gamelib)
 	$(RM) $(OBJECTS_guilib)
+	$(RM) $(OBJECTS_serverlib)
 	$(RM) $(OBJECTS_c2export)
 	$(RM) $(OBJECTS_c2plugin)
+	$(RM) $(OBJECTS_c2rater)
 	$(RM) $(OBJECTS_c2script)
 	$(RM) $(OBJECTS_c2sweep)
 	$(RM) $(OBJECTS_c2untrn)
+	$(RM) $(OBJECTS_c2file-server)
+	$(RM) $(OBJECTS_c2format-server)
+	$(RM) $(OBJECTS_c2talk-server)
+	$(RM) $(OBJECTS_c2fileclient)
 	$(RM) $(OBJECTS_c2ng)
 	$(RM) $(OBJECTS_testsuite)
 
@@ -434,11 +673,17 @@ distclean: clean
 	$(RM) testsuite.cpp
 	$(RM) libgamelib.a
 	$(RM) libguilib.a
+	$(RM) libserverlib.a
 	$(RM) c2export.exe
 	$(RM) c2plugin.exe
+	$(RM) c2rater.exe
 	$(RM) c2script.exe
 	$(RM) c2sweep.exe
 	$(RM) c2untrn.exe
+	$(RM) c2file-server.exe
+	$(RM) c2format-server.exe
+	$(RM) c2talk-server.exe
+	$(RM) c2fileclient.exe
 	$(RM) c2ng.exe
 	$(RM) testsuite.exe
 
@@ -582,6 +827,12 @@ gfx/filter1.o: gfx/filter.cpp
 gfx/filter1.s: gfx/filter.cpp
 	$(CXX) $(CXXFLAGS) -o gfx/filter1.s -S gfx/filter.cpp
 
+gfx/gen/spaceview.o: gfx/gen/spaceview.cpp
+	$(CXX) $(CXXFLAGS) -ffloat-store -o gfx/gen/spaceview.o -c gfx/gen/spaceview.cpp
+
+gfx/gen/spaceview.s: gfx/gen/spaceview.cpp
+	$(CXX) $(CXXFLAGS) -ffloat-store -o gfx/gen/spaceview.s -S gfx/gen/spaceview.cpp
+
 gfx/point1.o: gfx/point.cpp
 	$(CXX) $(CXXFLAGS) -o gfx/point1.o -c gfx/point.cpp
 
@@ -602,6 +853,98 @@ interpreter/values1.o: interpreter/values.cpp
 interpreter/values1.s: interpreter/values.cpp
 	$(CXX) $(CXXFLAGS) -o interpreter/values1.s -S interpreter/values.cpp
 
+server/common/session3.o: server/common/session.cpp
+	$(CXX) $(CXXFLAGS) -o server/common/session3.o -c server/common/session.cpp
+
+server/common/session3.s: server/common/session.cpp
+	$(CXX) $(CXXFLAGS) -o server/common/session3.s -S server/common/session.cpp
+
+server/file/ca/directoryhandler1.o: server/file/ca/directoryhandler.cpp
+	$(CXX) $(CXXFLAGS) -o server/file/ca/directoryhandler1.o -c server/file/ca/directoryhandler.cpp
+
+server/file/ca/directoryhandler1.s: server/file/ca/directoryhandler.cpp
+	$(CXX) $(CXXFLAGS) -o server/file/ca/directoryhandler1.s -S server/file/ca/directoryhandler.cpp
+
+server/file/ca/root1.o: server/file/ca/root.cpp
+	$(CXX) $(CXXFLAGS) -o server/file/ca/root1.o -c server/file/ca/root.cpp
+
+server/file/ca/root1.s: server/file/ca/root.cpp
+	$(CXX) $(CXXFLAGS) -o server/file/ca/root1.s -S server/file/ca/root.cpp
+
+server/file/directoryhandler2.o: server/file/directoryhandler.cpp
+	$(CXX) $(CXXFLAGS) -o server/file/directoryhandler2.o -c server/file/directoryhandler.cpp
+
+server/file/directoryhandler2.s: server/file/directoryhandler.cpp
+	$(CXX) $(CXXFLAGS) -o server/file/directoryhandler2.s -S server/file/directoryhandler.cpp
+
+server/file/directorywrapper1.o: server/file/directorywrapper.cpp
+	$(CXX) $(CXXFLAGS) -o server/file/directorywrapper1.o -c server/file/directorywrapper.cpp
+
+server/file/directorywrapper1.s: server/file/directorywrapper.cpp
+	$(CXX) $(CXXFLAGS) -o server/file/directorywrapper1.s -S server/file/directorywrapper.cpp
+
+server/file/root2.o: server/file/root.cpp
+	$(CXX) $(CXXFLAGS) -o server/file/root2.o -c server/file/root.cpp
+
+server/file/root2.s: server/file/root.cpp
+	$(CXX) $(CXXFLAGS) -o server/file/root2.s -S server/file/root.cpp
+
+server/format/utils1.o: server/format/utils.cpp
+	$(CXX) $(CXXFLAGS) -o server/format/utils1.o -c server/format/utils.cpp
+
+server/format/utils1.s: server/format/utils.cpp
+	$(CXX) $(CXXFLAGS) -o server/format/utils1.s -S server/format/utils.cpp
+
+server/interface/filebase1.o: server/interface/filebase.cpp
+	$(CXX) $(CXXFLAGS) -o server/interface/filebase1.o -c server/interface/filebase.cpp
+
+server/interface/filebase1.s: server/interface/filebase.cpp
+	$(CXX) $(CXXFLAGS) -o server/interface/filebase1.s -S server/interface/filebase.cpp
+
+server/talk/commandhandler1.o: server/talk/commandhandler.cpp
+	$(CXX) $(CXXFLAGS) -o server/talk/commandhandler1.o -c server/talk/commandhandler.cpp
+
+server/talk/commandhandler1.s: server/talk/commandhandler.cpp
+	$(CXX) $(CXXFLAGS) -o server/talk/commandhandler1.s -S server/talk/commandhandler.cpp
+
+server/talk/configuration3.o: server/talk/configuration.cpp
+	$(CXX) $(CXXFLAGS) -o server/talk/configuration3.o -c server/talk/configuration.cpp
+
+server/talk/configuration3.s: server/talk/configuration.cpp
+	$(CXX) $(CXXFLAGS) -o server/talk/configuration3.s -S server/talk/configuration.cpp
+
+server/talk/render/context1.o: server/talk/render/context.cpp
+	$(CXX) $(CXXFLAGS) -o server/talk/render/context1.o -c server/talk/render/context.cpp
+
+server/talk/render/context1.s: server/talk/render/context.cpp
+	$(CXX) $(CXXFLAGS) -o server/talk/render/context1.s -S server/talk/render/context.cpp
+
+server/talk/root3.o: server/talk/root.cpp
+	$(CXX) $(CXXFLAGS) -o server/talk/root3.o -c server/talk/root.cpp
+
+server/talk/root3.s: server/talk/root.cpp
+	$(CXX) $(CXXFLAGS) -o server/talk/root3.s -S server/talk/root.cpp
+
+server/talk/session4.o: server/talk/session.cpp
+	$(CXX) $(CXXFLAGS) -o server/talk/session4.o -c server/talk/session.cpp
+
+server/talk/session4.s: server/talk/session.cpp
+	$(CXX) $(CXXFLAGS) -o server/talk/session4.s -S server/talk/session.cpp
+
+server/talk/talkforum1.o: server/talk/talkforum.cpp
+	$(CXX) $(CXXFLAGS) -o server/talk/talkforum1.o -c server/talk/talkforum.cpp
+
+server/talk/talkforum1.s: server/talk/talkforum.cpp
+	$(CXX) $(CXXFLAGS) -o server/talk/talkforum1.s -S server/talk/talkforum.cpp
+
+server/types1.o: server/types.cpp
+	$(CXX) $(CXXFLAGS) -o server/types1.o -c server/types.cpp
+
+server/types1.s: server/types.cpp
+	$(CXX) $(CXXFLAGS) -o server/types1.s -S server/types.cpp
+
+serverlib: libserverlib.a
+
 tags:
 	@etags --recurse client game gfx interpreter main tools ui util
 
@@ -620,6 +963,24 @@ testsuite.o: testsuite.cpp
 
 testsuite.s: testsuite.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -U_CXXTEST_HAVE_EH -U_CXXTEST_HAVE_STD -O0 -o testsuite.s -S testsuite.cpp
+
+u/files.o: u/files.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/files.o -c u/files.cpp
+
+u/files.s: u/files.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/files.s -S u/files.cpp
+
+u/helper/callreceiver.o: u/helper/callreceiver.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/helper/callreceiver.o -c u/helper/callreceiver.cpp
+
+u/helper/callreceiver.s: u/helper/callreceiver.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/helper/callreceiver.s -S u/helper/callreceiver.cpp
+
+u/helper/commandhandlermock.o: u/helper/commandhandlermock.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/helper/commandhandlermock.o -c u/helper/commandhandlermock.cpp
+
+u/helper/commandhandlermock.s: u/helper/commandhandlermock.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/helper/commandhandlermock.s -S u/helper/commandhandlermock.cpp
 
 u/helper/contextverifier.o: u/helper/contextverifier.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/helper/contextverifier.o -c u/helper/contextverifier.cpp
@@ -757,6 +1118,14 @@ u/t_game_config_booleanvalueparser.o: u/t_game_config_booleanvalueparser.cpp
 u/t_game_config_booleanvalueparser.s: u/t_game_config_booleanvalueparser.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_config_booleanvalueparser.s -S u/t_game_config_booleanvalueparser.cpp
 
+u/t_game_config_collapsibleintegerarrayoption.o: \
+    u/t_game_config_collapsibleintegerarrayoption.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_config_collapsibleintegerarrayoption.o -c u/t_game_config_collapsibleintegerarrayoption.cpp
+
+u/t_game_config_collapsibleintegerarrayoption.s: \
+    u/t_game_config_collapsibleintegerarrayoption.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_config_collapsibleintegerarrayoption.s -S u/t_game_config_collapsibleintegerarrayoption.cpp
+
 u/t_game_config_configuration.o: u/t_game_config_configuration.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_config_configuration.o -c u/t_game_config_configuration.cpp
 
@@ -777,6 +1146,12 @@ u/t_game_config_costarrayoption.o: u/t_game_config_costarrayoption.cpp
 u/t_game_config_costarrayoption.s: u/t_game_config_costarrayoption.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_config_costarrayoption.s -S u/t_game_config_costarrayoption.cpp
 
+u/t_game_config_enumvalueparser.o: u/t_game_config_enumvalueparser.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_config_enumvalueparser.o -c u/t_game_config_enumvalueparser.cpp
+
+u/t_game_config_enumvalueparser.s: u/t_game_config_enumvalueparser.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_config_enumvalueparser.s -S u/t_game_config_enumvalueparser.cpp
+
 u/t_game_config_genericintegerarrayoption.o: \
     u/t_game_config_genericintegerarrayoption.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_config_genericintegerarrayoption.o -c u/t_game_config_genericintegerarrayoption.cpp
@@ -791,6 +1166,12 @@ u/t_game_config_hostconfiguration.o: u/t_game_config_hostconfiguration.cpp
 u/t_game_config_hostconfiguration.s: u/t_game_config_hostconfiguration.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_config_hostconfiguration.s -S u/t_game_config_hostconfiguration.cpp
 
+u/t_game_config_integerarrayoption.o: u/t_game_config_integerarrayoption.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_config_integerarrayoption.o -c u/t_game_config_integerarrayoption.cpp
+
+u/t_game_config_integerarrayoption.s: u/t_game_config_integerarrayoption.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_config_integerarrayoption.s -S u/t_game_config_integerarrayoption.cpp
+
 u/t_game_config_integeroption.o: u/t_game_config_integeroption.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_config_integeroption.o -c u/t_game_config_integeroption.cpp
 
@@ -803,11 +1184,29 @@ u/t_game_config_integervalueparser.o: u/t_game_config_integervalueparser.cpp
 u/t_game_config_integervalueparser.s: u/t_game_config_integervalueparser.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_config_integervalueparser.s -S u/t_game_config_integervalueparser.cpp
 
+u/t_game_config_stringoption.o: u/t_game_config_stringoption.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_config_stringoption.o -c u/t_game_config_stringoption.cpp
+
+u/t_game_config_stringoption.s: u/t_game_config_stringoption.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_config_stringoption.s -S u/t_game_config_stringoption.cpp
+
 u/t_game_config_valueparser.o: u/t_game_config_valueparser.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_config_valueparser.o -c u/t_game_config_valueparser.cpp
 
 u/t_game_config_valueparser.s: u/t_game_config_valueparser.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_config_valueparser.s -S u/t_game_config_valueparser.cpp
+
+u/t_game_db_drawingatommap.o: u/t_game_db_drawingatommap.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_db_drawingatommap.o -c u/t_game_db_drawingatommap.cpp
+
+u/t_game_db_drawingatommap.s: u/t_game_db_drawingatommap.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_db_drawingatommap.s -S u/t_game_db_drawingatommap.cpp
+
+u/t_game_db_structures.o: u/t_game_db_structures.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_db_structures.o -c u/t_game_db_structures.cpp
+
+u/t_game_db_structures.s: u/t_game_db_structures.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_db_structures.s -S u/t_game_db_structures.cpp
 
 u/t_game_element.o: u/t_game_element.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_element.o -c u/t_game_element.cpp
@@ -826,6 +1225,12 @@ u/t_game_experiencelevelset.o: u/t_game_experiencelevelset.cpp
 
 u/t_game_experiencelevelset.s: u/t_game_experiencelevelset.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_experiencelevelset.s -S u/t_game_experiencelevelset.cpp
+
+u/t_game_extra.o: u/t_game_extra.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_extra.o -c u/t_game_extra.cpp
+
+u/t_game_extra.s: u/t_game_extra.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_extra.s -S u/t_game_extra.cpp
 
 u/t_game_extracontainer.o: u/t_game_extracontainer.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_extracontainer.o -c u/t_game_extracontainer.cpp
@@ -943,6 +1348,18 @@ u/t_game_interpreterinterface.o: u/t_game_interpreterinterface.cpp
 u/t_game_interpreterinterface.s: u/t_game_interpreterinterface.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_interpreterinterface.s -S u/t_game_interpreterinterface.cpp
 
+u/t_game_maint_difficultyrater.o: u/t_game_maint_difficultyrater.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_maint_difficultyrater.o -c u/t_game_maint_difficultyrater.cpp
+
+u/t_game_maint_difficultyrater.s: u/t_game_maint_difficultyrater.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_maint_difficultyrater.s -S u/t_game_maint_difficultyrater.cpp
+
+u/t_game_maint_sweeper.o: u/t_game_maint_sweeper.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_maint_sweeper.o -c u/t_game_maint_sweeper.cpp
+
+u/t_game_maint_sweeper.s: u/t_game_maint_sweeper.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_maint_sweeper.s -S u/t_game_maint_sweeper.cpp
+
 u/t_game_map_circularobject.o: u/t_game_map_circularobject.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_map_circularobject.o -c u/t_game_map_circularobject.cpp
 
@@ -960,6 +1377,12 @@ u/t_game_map_explosion.o: u/t_game_map_explosion.cpp
 
 u/t_game_map_explosion.s: u/t_game_map_explosion.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_map_explosion.s -S u/t_game_map_explosion.cpp
+
+u/t_game_map_ionstorm.o: u/t_game_map_ionstorm.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_map_ionstorm.o -c u/t_game_map_ionstorm.cpp
+
+u/t_game_map_ionstorm.s: u/t_game_map_ionstorm.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_map_ionstorm.s -S u/t_game_map_ionstorm.cpp
 
 u/t_game_map_mapobject.o: u/t_game_map_mapobject.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_map_mapobject.o -c u/t_game_map_mapobject.cpp
@@ -1015,11 +1438,29 @@ u/t_game_parser_datainterface.o: u/t_game_parser_datainterface.cpp
 u/t_game_parser_datainterface.s: u/t_game_parser_datainterface.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_parser_datainterface.s -S u/t_game_parser_datainterface.cpp
 
+u/t_game_parser_messageinformation.o: u/t_game_parser_messageinformation.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_parser_messageinformation.o -c u/t_game_parser_messageinformation.cpp
+
+u/t_game_parser_messageinformation.s: u/t_game_parser_messageinformation.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_parser_messageinformation.s -S u/t_game_parser_messageinformation.cpp
+
+u/t_game_parser_messageparser.o: u/t_game_parser_messageparser.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_parser_messageparser.o -c u/t_game_parser_messageparser.cpp
+
+u/t_game_parser_messageparser.s: u/t_game_parser_messageparser.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_parser_messageparser.s -S u/t_game_parser_messageparser.cpp
+
 u/t_game_parser_messagetemplate.o: u/t_game_parser_messagetemplate.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_parser_messagetemplate.o -c u/t_game_parser_messagetemplate.cpp
 
 u/t_game_parser_messagetemplate.s: u/t_game_parser_messagetemplate.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_parser_messagetemplate.s -S u/t_game_parser_messagetemplate.cpp
+
+u/t_game_parser_messagevalue.o: u/t_game_parser_messagevalue.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_parser_messagevalue.o -c u/t_game_parser_messagevalue.cpp
+
+u/t_game_parser_messagevalue.s: u/t_game_parser_messagevalue.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_parser_messagevalue.s -S u/t_game_parser_messagevalue.cpp
 
 u/t_game_player.o: u/t_game_player.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_player.o -c u/t_game_player.cpp
@@ -1045,11 +1486,65 @@ u/t_game_playerlist.o: u/t_game_playerlist.cpp
 u/t_game_playerlist.s: u/t_game_playerlist.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_playerlist.s -S u/t_game_playerlist.cpp
 
+u/t_game_playerset.o: u/t_game_playerset.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_playerset.o -c u/t_game_playerset.cpp
+
+u/t_game_playerset.s: u/t_game_playerset.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_playerset.s -S u/t_game_playerset.cpp
+
 u/t_game_registrationkey.o: u/t_game_registrationkey.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_registrationkey.o -c u/t_game_registrationkey.cpp
 
 u/t_game_registrationkey.s: u/t_game_registrationkey.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_registrationkey.s -S u/t_game_registrationkey.cpp
+
+u/t_game_root.o: u/t_game_root.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_root.o -c u/t_game_root.cpp
+
+u/t_game_root.s: u/t_game_root.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_root.s -S u/t_game_root.cpp
+
+u/t_game_score_compoundscore.o: u/t_game_score_compoundscore.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_score_compoundscore.o -c u/t_game_score_compoundscore.cpp
+
+u/t_game_score_compoundscore.s: u/t_game_score_compoundscore.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_score_compoundscore.s -S u/t_game_score_compoundscore.cpp
+
+u/t_game_score_loader.o: u/t_game_score_loader.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_score_loader.o -c u/t_game_score_loader.cpp
+
+u/t_game_score_loader.s: u/t_game_score_loader.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_score_loader.s -S u/t_game_score_loader.cpp
+
+u/t_game_score_turnscore.o: u/t_game_score_turnscore.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_score_turnscore.o -c u/t_game_score_turnscore.cpp
+
+u/t_game_score_turnscore.s: u/t_game_score_turnscore.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_score_turnscore.s -S u/t_game_score_turnscore.cpp
+
+u/t_game_score_turnscorelist.o: u/t_game_score_turnscorelist.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_score_turnscorelist.o -c u/t_game_score_turnscorelist.cpp
+
+u/t_game_score_turnscorelist.s: u/t_game_score_turnscorelist.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_score_turnscorelist.s -S u/t_game_score_turnscorelist.cpp
+
+u/t_game_shipbuildorder.o: u/t_game_shipbuildorder.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_shipbuildorder.o -c u/t_game_shipbuildorder.cpp
+
+u/t_game_shipbuildorder.s: u/t_game_shipbuildorder.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_shipbuildorder.s -S u/t_game_shipbuildorder.cpp
+
+u/t_game_sim_ability.o: u/t_game_sim_ability.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_sim_ability.o -c u/t_game_sim_ability.cpp
+
+u/t_game_sim_ability.s: u/t_game_sim_ability.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_sim_ability.s -S u/t_game_sim_ability.cpp
+
+u/t_game_sim_configuration.o: u/t_game_sim_configuration.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_sim_configuration.o -c u/t_game_sim_configuration.cpp
+
+u/t_game_sim_configuration.s: u/t_game_sim_configuration.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_sim_configuration.s -S u/t_game_sim_configuration.cpp
 
 u/t_game_sim_loader.o: u/t_game_sim_loader.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_sim_loader.o -c u/t_game_sim_loader.cpp
@@ -1069,11 +1564,49 @@ u/t_game_sim_planet.o: u/t_game_sim_planet.cpp
 u/t_game_sim_planet.s: u/t_game_sim_planet.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_sim_planet.s -S u/t_game_sim_planet.cpp
 
+u/t_game_sim_setup.o: u/t_game_sim_setup.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_sim_setup.o -c u/t_game_sim_setup.cpp
+
+u/t_game_sim_setup.s: u/t_game_sim_setup.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_sim_setup.s -S u/t_game_sim_setup.cpp
+
 u/t_game_sim_ship.o: u/t_game_sim_ship.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_sim_ship.o -c u/t_game_sim_ship.cpp
 
 u/t_game_sim_ship.s: u/t_game_sim_ship.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_sim_ship.s -S u/t_game_sim_ship.cpp
+
+u/t_game_sim_structures.o: u/t_game_sim_structures.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_sim_structures.o -c u/t_game_sim_structures.cpp
+
+u/t_game_sim_structures.s: u/t_game_sim_structures.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_sim_structures.s -S u/t_game_sim_structures.cpp
+
+u/t_game_spec_basecomponentvector.o: u/t_game_spec_basecomponentvector.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_spec_basecomponentvector.o -c u/t_game_spec_basecomponentvector.cpp
+
+u/t_game_spec_basecomponentvector.s: u/t_game_spec_basecomponentvector.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_spec_basecomponentvector.s -S u/t_game_spec_basecomponentvector.cpp
+
+u/t_game_spec_basichullfunction.o: u/t_game_spec_basichullfunction.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_spec_basichullfunction.o -c u/t_game_spec_basichullfunction.cpp
+
+u/t_game_spec_basichullfunction.s: u/t_game_spec_basichullfunction.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_spec_basichullfunction.s -S u/t_game_spec_basichullfunction.cpp
+
+u/t_game_spec_basichullfunctionlist.o: \
+    u/t_game_spec_basichullfunctionlist.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_spec_basichullfunctionlist.o -c u/t_game_spec_basichullfunctionlist.cpp
+
+u/t_game_spec_basichullfunctionlist.s: \
+    u/t_game_spec_basichullfunctionlist.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_spec_basichullfunctionlist.s -S u/t_game_spec_basichullfunctionlist.cpp
+
+u/t_game_spec_beam.o: u/t_game_spec_beam.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_spec_beam.o -c u/t_game_spec_beam.cpp
+
+u/t_game_spec_beam.s: u/t_game_spec_beam.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_spec_beam.s -S u/t_game_spec_beam.cpp
 
 u/t_game_spec_component.o: u/t_game_spec_component.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_spec_component.o -c u/t_game_spec_component.cpp
@@ -1119,17 +1652,97 @@ u/t_game_spec_friendlycodelist.o: u/t_game_spec_friendlycodelist.cpp
 u/t_game_spec_friendlycodelist.s: u/t_game_spec_friendlycodelist.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_spec_friendlycodelist.s -S u/t_game_spec_friendlycodelist.cpp
 
+u/t_game_spec_hull.o: u/t_game_spec_hull.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_spec_hull.o -c u/t_game_spec_hull.cpp
+
+u/t_game_spec_hull.s: u/t_game_spec_hull.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_spec_hull.s -S u/t_game_spec_hull.cpp
+
+u/t_game_spec_hullassignmentlist.o: u/t_game_spec_hullassignmentlist.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_spec_hullassignmentlist.o -c u/t_game_spec_hullassignmentlist.cpp
+
+u/t_game_spec_hullassignmentlist.s: u/t_game_spec_hullassignmentlist.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_spec_hullassignmentlist.s -S u/t_game_spec_hullassignmentlist.cpp
+
+u/t_game_spec_hullfunction.o: u/t_game_spec_hullfunction.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_spec_hullfunction.o -c u/t_game_spec_hullfunction.cpp
+
+u/t_game_spec_hullfunction.s: u/t_game_spec_hullfunction.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_spec_hullfunction.s -S u/t_game_spec_hullfunction.cpp
+
+u/t_game_spec_hullfunctionassignmentlist.o: \
+    u/t_game_spec_hullfunctionassignmentlist.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_spec_hullfunctionassignmentlist.o -c u/t_game_spec_hullfunctionassignmentlist.cpp
+
+u/t_game_spec_hullfunctionassignmentlist.s: \
+    u/t_game_spec_hullfunctionassignmentlist.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_spec_hullfunctionassignmentlist.s -S u/t_game_spec_hullfunctionassignmentlist.cpp
+
 u/t_game_spec_hullfunctionlist.o: u/t_game_spec_hullfunctionlist.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_spec_hullfunctionlist.o -c u/t_game_spec_hullfunctionlist.cpp
 
 u/t_game_spec_hullfunctionlist.s: u/t_game_spec_hullfunctionlist.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_spec_hullfunctionlist.s -S u/t_game_spec_hullfunctionlist.cpp
 
+u/t_game_spec_mission.o: u/t_game_spec_mission.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_spec_mission.o -c u/t_game_spec_mission.cpp
+
+u/t_game_spec_mission.s: u/t_game_spec_mission.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_spec_mission.s -S u/t_game_spec_mission.cpp
+
 u/t_game_spec_missionlist.o: u/t_game_spec_missionlist.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_spec_missionlist.o -c u/t_game_spec_missionlist.cpp
 
 u/t_game_spec_missionlist.s: u/t_game_spec_missionlist.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_spec_missionlist.s -S u/t_game_spec_missionlist.cpp
+
+u/t_game_spec_modifiedhullfunctionlist.o: \
+    u/t_game_spec_modifiedhullfunctionlist.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_spec_modifiedhullfunctionlist.o -c u/t_game_spec_modifiedhullfunctionlist.cpp
+
+u/t_game_spec_modifiedhullfunctionlist.s: \
+    u/t_game_spec_modifiedhullfunctionlist.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_spec_modifiedhullfunctionlist.s -S u/t_game_spec_modifiedhullfunctionlist.cpp
+
+u/t_game_spec_nullcomponentnameprovider.o: \
+    u/t_game_spec_nullcomponentnameprovider.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_spec_nullcomponentnameprovider.o -c u/t_game_spec_nullcomponentnameprovider.cpp
+
+u/t_game_spec_nullcomponentnameprovider.s: \
+    u/t_game_spec_nullcomponentnameprovider.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_spec_nullcomponentnameprovider.s -S u/t_game_spec_nullcomponentnameprovider.cpp
+
+u/t_game_spec_shiplist.o: u/t_game_spec_shiplist.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_spec_shiplist.o -c u/t_game_spec_shiplist.cpp
+
+u/t_game_spec_shiplist.s: u/t_game_spec_shiplist.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_spec_shiplist.s -S u/t_game_spec_shiplist.cpp
+
+u/t_game_spec_standardcomponentnameprovider.o: \
+    u/t_game_spec_standardcomponentnameprovider.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_spec_standardcomponentnameprovider.o -c u/t_game_spec_standardcomponentnameprovider.cpp
+
+u/t_game_spec_standardcomponentnameprovider.s: \
+    u/t_game_spec_standardcomponentnameprovider.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_spec_standardcomponentnameprovider.s -S u/t_game_spec_standardcomponentnameprovider.cpp
+
+u/t_game_spec_torpedo.o: u/t_game_spec_torpedo.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_spec_torpedo.o -c u/t_game_spec_torpedo.cpp
+
+u/t_game_spec_torpedo.s: u/t_game_spec_torpedo.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_spec_torpedo.s -S u/t_game_spec_torpedo.cpp
+
+u/t_game_spec_torpedolauncher.o: u/t_game_spec_torpedolauncher.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_spec_torpedolauncher.o -c u/t_game_spec_torpedolauncher.cpp
+
+u/t_game_spec_torpedolauncher.s: u/t_game_spec_torpedolauncher.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_spec_torpedolauncher.s -S u/t_game_spec_torpedolauncher.cpp
+
+u/t_game_spec_weapon.o: u/t_game_spec_weapon.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_spec_weapon.o -c u/t_game_spec_weapon.cpp
+
+u/t_game_spec_weapon.s: u/t_game_spec_weapon.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_spec_weapon.s -S u/t_game_spec_weapon.cpp
 
 u/t_game_specificationloader.o: u/t_game_specificationloader.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_specificationloader.o -c u/t_game_specificationloader.cpp
@@ -1237,6 +1850,12 @@ u/t_game_timestamp.o: u/t_game_timestamp.cpp
 u/t_game_timestamp.s: u/t_game_timestamp.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_timestamp.s -S u/t_game_timestamp.cpp
 
+u/t_game_turn.o: u/t_game_turn.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_turn.o -c u/t_game_turn.cpp
+
+u/t_game_turn.s: u/t_game_turn.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_turn.s -S u/t_game_turn.cpp
+
 u/t_game_turnloader.o: u/t_game_turnloader.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_turnloader.o -c u/t_game_turnloader.cpp
 
@@ -1296,6 +1915,12 @@ u/t_game_v3_stringverifier.o: u/t_game_v3_stringverifier.cpp
 
 u/t_game_v3_stringverifier.s: u/t_game_v3_stringverifier.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_v3_stringverifier.s -S u/t_game_v3_stringverifier.cpp
+
+u/t_game_v3_structures.o: u/t_game_v3_structures.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_v3_structures.o -c u/t_game_v3_structures.cpp
+
+u/t_game_v3_structures.s: u/t_game_v3_structures.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_v3_structures.s -S u/t_game_v3_structures.cpp
 
 u/t_game_v3_trn_andfilter.o: u/t_game_v3_trn_andfilter.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_v3_trn_andfilter.o -c u/t_game_v3_trn_andfilter.cpp
@@ -1425,11 +2050,41 @@ u/t_gfx_basecolorscheme.o: u/t_gfx_basecolorscheme.cpp
 u/t_gfx_basecolorscheme.s: u/t_gfx_basecolorscheme.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_basecolorscheme.s -S u/t_gfx_basecolorscheme.cpp
 
+u/t_gfx_basecontext.o: u/t_gfx_basecontext.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_basecontext.o -c u/t_gfx_basecontext.cpp
+
+u/t_gfx_basecontext.s: u/t_gfx_basecontext.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_basecontext.s -S u/t_gfx_basecontext.cpp
+
+u/t_gfx_bitmapfont.o: u/t_gfx_bitmapfont.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_bitmapfont.o -c u/t_gfx_bitmapfont.cpp
+
+u/t_gfx_bitmapfont.s: u/t_gfx_bitmapfont.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_bitmapfont.s -S u/t_gfx_bitmapfont.cpp
+
+u/t_gfx_bitmapglyph.o: u/t_gfx_bitmapglyph.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_bitmapglyph.o -c u/t_gfx_bitmapglyph.cpp
+
+u/t_gfx_bitmapglyph.s: u/t_gfx_bitmapglyph.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_bitmapglyph.s -S u/t_gfx_bitmapglyph.cpp
+
 u/t_gfx_canvas.o: u/t_gfx_canvas.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_canvas.o -c u/t_gfx_canvas.cpp
 
 u/t_gfx_canvas.s: u/t_gfx_canvas.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_canvas.s -S u/t_gfx_canvas.cpp
+
+u/t_gfx_colorscheme.o: u/t_gfx_colorscheme.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_colorscheme.o -c u/t_gfx_colorscheme.cpp
+
+u/t_gfx_colorscheme.s: u/t_gfx_colorscheme.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_colorscheme.s -S u/t_gfx_colorscheme.cpp
+
+u/t_gfx_context.o: u/t_gfx_context.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_context.o -c u/t_gfx_context.cpp
+
+u/t_gfx_context.s: u/t_gfx_context.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_context.s -S u/t_gfx_context.cpp
 
 u/t_gfx_defaultfont.o: u/t_gfx_defaultfont.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_defaultfont.o -c u/t_gfx_defaultfont.cpp
@@ -1455,17 +2110,65 @@ u/t_gfx_fillpattern.o: u/t_gfx_fillpattern.cpp
 u/t_gfx_fillpattern.s: u/t_gfx_fillpattern.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_fillpattern.s -S u/t_gfx_fillpattern.cpp
 
+u/t_gfx_filter.o: u/t_gfx_filter.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_filter.o -c u/t_gfx_filter.cpp
+
+u/t_gfx_filter.s: u/t_gfx_filter.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_filter.s -S u/t_gfx_filter.cpp
+
+u/t_gfx_font.o: u/t_gfx_font.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_font.o -c u/t_gfx_font.cpp
+
+u/t_gfx_font.s: u/t_gfx_font.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_font.s -S u/t_gfx_font.cpp
+
+u/t_gfx_fontlist.o: u/t_gfx_fontlist.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_fontlist.o -c u/t_gfx_fontlist.cpp
+
+u/t_gfx_fontlist.s: u/t_gfx_fontlist.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_fontlist.s -S u/t_gfx_fontlist.cpp
+
+u/t_gfx_fontrequest.o: u/t_gfx_fontrequest.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_fontrequest.o -c u/t_gfx_fontrequest.cpp
+
+u/t_gfx_fontrequest.s: u/t_gfx_fontrequest.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_fontrequest.s -S u/t_gfx_fontrequest.cpp
+
 u/t_gfx_gen_perlinnoise.o: u/t_gfx_gen_perlinnoise.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_gen_perlinnoise.o -c u/t_gfx_gen_perlinnoise.cpp
 
 u/t_gfx_gen_perlinnoise.s: u/t_gfx_gen_perlinnoise.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_gen_perlinnoise.s -S u/t_gfx_gen_perlinnoise.cpp
 
+u/t_gfx_gen_spaceview.o: u/t_gfx_gen_spaceview.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_gen_spaceview.o -c u/t_gfx_gen_spaceview.cpp
+
+u/t_gfx_gen_spaceview.s: u/t_gfx_gen_spaceview.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_gen_spaceview.s -S u/t_gfx_gen_spaceview.cpp
+
+u/t_gfx_gen_spaceviewconfig.o: u/t_gfx_gen_spaceviewconfig.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_gen_spaceviewconfig.o -c u/t_gfx_gen_spaceviewconfig.cpp
+
+u/t_gfx_gen_spaceviewconfig.s: u/t_gfx_gen_spaceviewconfig.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_gen_spaceviewconfig.s -S u/t_gfx_gen_spaceviewconfig.cpp
+
+u/t_gfx_graphicsexception.o: u/t_gfx_graphicsexception.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_graphicsexception.o -c u/t_gfx_graphicsexception.cpp
+
+u/t_gfx_graphicsexception.s: u/t_gfx_graphicsexception.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_graphicsexception.s -S u/t_gfx_graphicsexception.cpp
+
 u/t_gfx_nullcanvas.o: u/t_gfx_nullcanvas.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_nullcanvas.o -c u/t_gfx_nullcanvas.cpp
 
 u/t_gfx_nullcanvas.s: u/t_gfx_nullcanvas.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_nullcanvas.s -S u/t_gfx_nullcanvas.cpp
+
+u/t_gfx_nullcolorscheme.o: u/t_gfx_nullcolorscheme.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_nullcolorscheme.o -c u/t_gfx_nullcolorscheme.cpp
+
+u/t_gfx_nullcolorscheme.s: u/t_gfx_nullcolorscheme.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_nullcolorscheme.s -S u/t_gfx_nullcolorscheme.cpp
 
 u/t_gfx_nullengine.o: u/t_gfx_nullengine.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_nullengine.o -c u/t_gfx_nullengine.cpp
@@ -1479,11 +2182,29 @@ u/t_gfx_nullresourceprovider.o: u/t_gfx_nullresourceprovider.cpp
 u/t_gfx_nullresourceprovider.s: u/t_gfx_nullresourceprovider.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_nullresourceprovider.s -S u/t_gfx_nullresourceprovider.cpp
 
+u/t_gfx_palettizedpixmap.o: u/t_gfx_palettizedpixmap.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_palettizedpixmap.o -c u/t_gfx_palettizedpixmap.cpp
+
+u/t_gfx_palettizedpixmap.s: u/t_gfx_palettizedpixmap.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_palettizedpixmap.s -S u/t_gfx_palettizedpixmap.cpp
+
+u/t_gfx_pixmapcanvasimpl.o: u/t_gfx_pixmapcanvasimpl.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_pixmapcanvasimpl.o -c u/t_gfx_pixmapcanvasimpl.cpp
+
+u/t_gfx_pixmapcanvasimpl.s: u/t_gfx_pixmapcanvasimpl.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_pixmapcanvasimpl.s -S u/t_gfx_pixmapcanvasimpl.cpp
+
 u/t_gfx_point.o: u/t_gfx_point.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_point.o -c u/t_gfx_point.cpp
 
 u/t_gfx_point.s: u/t_gfx_point.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_point.s -S u/t_gfx_point.cpp
+
+u/t_gfx_primitives.o: u/t_gfx_primitives.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_primitives.o -c u/t_gfx_primitives.cpp
+
+u/t_gfx_primitives.s: u/t_gfx_primitives.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_primitives.s -S u/t_gfx_primitives.cpp
 
 u/t_gfx_rectangle.o: u/t_gfx_rectangle.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_rectangle.o -c u/t_gfx_rectangle.cpp
@@ -1496,6 +2217,12 @@ u/t_gfx_resourceprovider.o: u/t_gfx_resourceprovider.cpp
 
 u/t_gfx_resourceprovider.s: u/t_gfx_resourceprovider.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_resourceprovider.s -S u/t_gfx_resourceprovider.cpp
+
+u/t_gfx_rgbapixmap.o: u/t_gfx_rgbapixmap.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_rgbapixmap.o -c u/t_gfx_rgbapixmap.cpp
+
+u/t_gfx_rgbapixmap.s: u/t_gfx_rgbapixmap.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_rgbapixmap.s -S u/t_gfx_rgbapixmap.cpp
 
 u/t_gfx_save.o: u/t_gfx_save.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_save.o -c u/t_gfx_save.cpp
@@ -1533,6 +2260,30 @@ u/t_interpreter.o: u/t_interpreter.cpp
 u/t_interpreter.s: u/t_interpreter.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter.s -S u/t_interpreter.cpp
 
+u/t_interpreter_arguments.o: u/t_interpreter_arguments.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_arguments.o -c u/t_interpreter_arguments.cpp
+
+u/t_interpreter_arguments.s: u/t_interpreter_arguments.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_arguments.s -S u/t_interpreter_arguments.cpp
+
+u/t_interpreter_arraydata.o: u/t_interpreter_arraydata.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_arraydata.o -c u/t_interpreter_arraydata.cpp
+
+u/t_interpreter_arraydata.s: u/t_interpreter_arraydata.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_arraydata.s -S u/t_interpreter_arraydata.cpp
+
+u/t_interpreter_arrayvalue.o: u/t_interpreter_arrayvalue.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_arrayvalue.o -c u/t_interpreter_arrayvalue.cpp
+
+u/t_interpreter_arrayvalue.s: u/t_interpreter_arrayvalue.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_arrayvalue.s -S u/t_interpreter_arrayvalue.cpp
+
+u/t_interpreter_basevalue.o: u/t_interpreter_basevalue.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_basevalue.o -c u/t_interpreter_basevalue.cpp
+
+u/t_interpreter_basevalue.s: u/t_interpreter_basevalue.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_basevalue.s -S u/t_interpreter_basevalue.cpp
+
 u/t_interpreter_binaryoperation.o: u/t_interpreter_binaryoperation.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_binaryoperation.o -c u/t_interpreter_binaryoperation.cpp
 
@@ -1551,11 +2302,29 @@ u/t_interpreter_bytecodeobject.o: u/t_interpreter_bytecodeobject.cpp
 u/t_interpreter_bytecodeobject.s: u/t_interpreter_bytecodeobject.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_bytecodeobject.s -S u/t_interpreter_bytecodeobject.cpp
 
+u/t_interpreter_callablevalue.o: u/t_interpreter_callablevalue.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_callablevalue.o -c u/t_interpreter_callablevalue.cpp
+
+u/t_interpreter_callablevalue.s: u/t_interpreter_callablevalue.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_callablevalue.s -S u/t_interpreter_callablevalue.cpp
+
 u/t_interpreter_closure.o: u/t_interpreter_closure.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_closure.o -c u/t_interpreter_closure.cpp
 
 u/t_interpreter_closure.s: u/t_interpreter_closure.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_closure.s -S u/t_interpreter_closure.cpp
+
+u/t_interpreter_commandsource.o: u/t_interpreter_commandsource.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_commandsource.o -c u/t_interpreter_commandsource.cpp
+
+u/t_interpreter_commandsource.s: u/t_interpreter_commandsource.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_commandsource.s -S u/t_interpreter_commandsource.cpp
+
+u/t_interpreter_compilationcontext.o: u/t_interpreter_compilationcontext.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_compilationcontext.o -c u/t_interpreter_compilationcontext.cpp
+
+u/t_interpreter_compilationcontext.s: u/t_interpreter_compilationcontext.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_compilationcontext.s -S u/t_interpreter_compilationcontext.cpp
 
 u/t_interpreter_context.o: u/t_interpreter_context.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_context.o -c u/t_interpreter_context.cpp
@@ -1563,17 +2332,77 @@ u/t_interpreter_context.o: u/t_interpreter_context.cpp
 u/t_interpreter_context.s: u/t_interpreter_context.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_context.s -S u/t_interpreter_context.cpp
 
+u/t_interpreter_contextprovider.o: u/t_interpreter_contextprovider.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_contextprovider.o -c u/t_interpreter_contextprovider.cpp
+
+u/t_interpreter_contextprovider.s: u/t_interpreter_contextprovider.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_contextprovider.s -S u/t_interpreter_contextprovider.cpp
+
+u/t_interpreter_defaultstatementcompilationcontext.o: \
+    u/t_interpreter_defaultstatementcompilationcontext.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_defaultstatementcompilationcontext.o -c u/t_interpreter_defaultstatementcompilationcontext.cpp
+
+u/t_interpreter_defaultstatementcompilationcontext.s: \
+    u/t_interpreter_defaultstatementcompilationcontext.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_defaultstatementcompilationcontext.s -S u/t_interpreter_defaultstatementcompilationcontext.cpp
+
 u/t_interpreter_error.o: u/t_interpreter_error.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_error.o -c u/t_interpreter_error.cpp
 
 u/t_interpreter_error.s: u/t_interpreter_error.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_error.s -S u/t_interpreter_error.cpp
 
+u/t_interpreter_exporter_dbfexporter.o: \
+    u/t_interpreter_exporter_dbfexporter.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_exporter_dbfexporter.o -c u/t_interpreter_exporter_dbfexporter.cpp
+
+u/t_interpreter_exporter_dbfexporter.s: \
+    u/t_interpreter_exporter_dbfexporter.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_exporter_dbfexporter.s -S u/t_interpreter_exporter_dbfexporter.cpp
+
+u/t_interpreter_exporter_exporter.o: u/t_interpreter_exporter_exporter.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_exporter_exporter.o -c u/t_interpreter_exporter_exporter.cpp
+
+u/t_interpreter_exporter_exporter.s: u/t_interpreter_exporter_exporter.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_exporter_exporter.s -S u/t_interpreter_exporter_exporter.cpp
+
 u/t_interpreter_exporter_fieldlist.o: u/t_interpreter_exporter_fieldlist.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_exporter_fieldlist.o -c u/t_interpreter_exporter_fieldlist.cpp
 
 u/t_interpreter_exporter_fieldlist.s: u/t_interpreter_exporter_fieldlist.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_exporter_fieldlist.s -S u/t_interpreter_exporter_fieldlist.cpp
+
+u/t_interpreter_exporter_htmlexporter.o: \
+    u/t_interpreter_exporter_htmlexporter.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_exporter_htmlexporter.o -c u/t_interpreter_exporter_htmlexporter.cpp
+
+u/t_interpreter_exporter_htmlexporter.s: \
+    u/t_interpreter_exporter_htmlexporter.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_exporter_htmlexporter.s -S u/t_interpreter_exporter_htmlexporter.cpp
+
+u/t_interpreter_exporter_jsonexporter.o: \
+    u/t_interpreter_exporter_jsonexporter.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_exporter_jsonexporter.o -c u/t_interpreter_exporter_jsonexporter.cpp
+
+u/t_interpreter_exporter_jsonexporter.s: \
+    u/t_interpreter_exporter_jsonexporter.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_exporter_jsonexporter.s -S u/t_interpreter_exporter_jsonexporter.cpp
+
+u/t_interpreter_exporter_separatedtextexporter.o: \
+    u/t_interpreter_exporter_separatedtextexporter.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_exporter_separatedtextexporter.o -c u/t_interpreter_exporter_separatedtextexporter.cpp
+
+u/t_interpreter_exporter_separatedtextexporter.s: \
+    u/t_interpreter_exporter_separatedtextexporter.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_exporter_separatedtextexporter.s -S u/t_interpreter_exporter_separatedtextexporter.cpp
+
+u/t_interpreter_exporter_textexporter.o: \
+    u/t_interpreter_exporter_textexporter.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_exporter_textexporter.o -c u/t_interpreter_exporter_textexporter.cpp
+
+u/t_interpreter_exporter_textexporter.s: \
+    u/t_interpreter_exporter_textexporter.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_exporter_textexporter.s -S u/t_interpreter_exporter_textexporter.cpp
 
 u/t_interpreter_expr_builtinfunction.o: \
     u/t_interpreter_expr_builtinfunction.cpp
@@ -1589,11 +2418,61 @@ u/t_interpreter_expr_parser.o: u/t_interpreter_expr_parser.cpp
 u/t_interpreter_expr_parser.s: u/t_interpreter_expr_parser.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_expr_parser.s -S u/t_interpreter_expr_parser.cpp
 
+u/t_interpreter_filecommandsource.o: u/t_interpreter_filecommandsource.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_filecommandsource.o -c u/t_interpreter_filecommandsource.cpp
+
+u/t_interpreter_filecommandsource.s: u/t_interpreter_filecommandsource.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_filecommandsource.s -S u/t_interpreter_filecommandsource.cpp
+
+u/t_interpreter_filefunctions.o: u/t_interpreter_filefunctions.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_filefunctions.o -c u/t_interpreter_filefunctions.cpp
+
+u/t_interpreter_filefunctions.s: u/t_interpreter_filefunctions.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_filefunctions.s -S u/t_interpreter_filefunctions.cpp
+
+u/t_interpreter_filetable.o: u/t_interpreter_filetable.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_filetable.o -c u/t_interpreter_filetable.cpp
+
+u/t_interpreter_filetable.s: u/t_interpreter_filetable.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_filetable.s -S u/t_interpreter_filetable.cpp
+
+u/t_interpreter_filevalue.o: u/t_interpreter_filevalue.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_filevalue.o -c u/t_interpreter_filevalue.cpp
+
+u/t_interpreter_filevalue.s: u/t_interpreter_filevalue.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_filevalue.s -S u/t_interpreter_filevalue.cpp
+
+u/t_interpreter_fusion.o: u/t_interpreter_fusion.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_fusion.o -c u/t_interpreter_fusion.cpp
+
+u/t_interpreter_fusion.s: u/t_interpreter_fusion.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_fusion.s -S u/t_interpreter_fusion.cpp
+
+u/t_interpreter_hashvalue.o: u/t_interpreter_hashvalue.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_hashvalue.o -c u/t_interpreter_hashvalue.cpp
+
+u/t_interpreter_hashvalue.s: u/t_interpreter_hashvalue.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_hashvalue.s -S u/t_interpreter_hashvalue.cpp
+
+u/t_interpreter_keymapvalue.o: u/t_interpreter_keymapvalue.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_keymapvalue.o -c u/t_interpreter_keymapvalue.cpp
+
+u/t_interpreter_keymapvalue.s: u/t_interpreter_keymapvalue.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_keymapvalue.s -S u/t_interpreter_keymapvalue.cpp
+
 u/t_interpreter_keywords.o: u/t_interpreter_keywords.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_keywords.o -c u/t_interpreter_keywords.cpp
 
 u/t_interpreter_keywords.s: u/t_interpreter_keywords.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_keywords.s -S u/t_interpreter_keywords.cpp
+
+u/t_interpreter_memorycommandsource.o: \
+    u/t_interpreter_memorycommandsource.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_memorycommandsource.o -c u/t_interpreter_memorycommandsource.cpp
+
+u/t_interpreter_memorycommandsource.s: \
+    u/t_interpreter_memorycommandsource.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_memorycommandsource.s -S u/t_interpreter_memorycommandsource.cpp
 
 u/t_interpreter_mutexlist.o: u/t_interpreter_mutexlist.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_mutexlist.o -c u/t_interpreter_mutexlist.cpp
@@ -1606,6 +2485,20 @@ u/t_interpreter_nametable.o: u/t_interpreter_nametable.cpp
 
 u/t_interpreter_nametable.s: u/t_interpreter_nametable.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_nametable.s -S u/t_interpreter_nametable.cpp
+
+u/t_interpreter_objectpropertyvector.o: \
+    u/t_interpreter_objectpropertyvector.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_objectpropertyvector.o -c u/t_interpreter_objectpropertyvector.cpp
+
+u/t_interpreter_objectpropertyvector.s: \
+    u/t_interpreter_objectpropertyvector.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_objectpropertyvector.s -S u/t_interpreter_objectpropertyvector.cpp
+
+u/t_interpreter_opcode.o: u/t_interpreter_opcode.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_opcode.o -c u/t_interpreter_opcode.cpp
+
+u/t_interpreter_opcode.s: u/t_interpreter_opcode.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_opcode.s -S u/t_interpreter_opcode.cpp
 
 u/t_interpreter_optimizer.o: u/t_interpreter_optimizer.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_optimizer.o -c u/t_interpreter_optimizer.cpp
@@ -1631,6 +2524,18 @@ u/t_interpreter_processlist.o: u/t_interpreter_processlist.cpp
 u/t_interpreter_processlist.s: u/t_interpreter_processlist.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_processlist.s -S u/t_interpreter_processlist.cpp
 
+u/t_interpreter_propertyacceptor.o: u/t_interpreter_propertyacceptor.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_propertyacceptor.o -c u/t_interpreter_propertyacceptor.cpp
+
+u/t_interpreter_propertyacceptor.s: u/t_interpreter_propertyacceptor.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_propertyacceptor.s -S u/t_interpreter_propertyacceptor.cpp
+
+u/t_interpreter_savecontext.o: u/t_interpreter_savecontext.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_savecontext.o -c u/t_interpreter_savecontext.cpp
+
+u/t_interpreter_savecontext.s: u/t_interpreter_savecontext.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_savecontext.s -S u/t_interpreter_savecontext.cpp
+
 u/t_interpreter_selectionexpression.o: \
     u/t_interpreter_selectionexpression.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_selectionexpression.o -c u/t_interpreter_selectionexpression.cpp
@@ -1639,11 +2544,55 @@ u/t_interpreter_selectionexpression.s: \
     u/t_interpreter_selectionexpression.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_selectionexpression.s -S u/t_interpreter_selectionexpression.cpp
 
+u/t_interpreter_simplespecialcommand.o: \
+    u/t_interpreter_simplespecialcommand.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_simplespecialcommand.o -c u/t_interpreter_simplespecialcommand.cpp
+
+u/t_interpreter_simplespecialcommand.s: \
+    u/t_interpreter_simplespecialcommand.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_simplespecialcommand.s -S u/t_interpreter_simplespecialcommand.cpp
+
+u/t_interpreter_specialcommand.o: u/t_interpreter_specialcommand.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_specialcommand.o -c u/t_interpreter_specialcommand.cpp
+
+u/t_interpreter_specialcommand.s: u/t_interpreter_specialcommand.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_specialcommand.s -S u/t_interpreter_specialcommand.cpp
+
 u/t_interpreter_statementcompiler.o: u/t_interpreter_statementcompiler.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_statementcompiler.o -c u/t_interpreter_statementcompiler.cpp
 
 u/t_interpreter_statementcompiler.s: u/t_interpreter_statementcompiler.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_statementcompiler.s -S u/t_interpreter_statementcompiler.cpp
+
+u/t_interpreter_structuretype.o: u/t_interpreter_structuretype.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_structuretype.o -c u/t_interpreter_structuretype.cpp
+
+u/t_interpreter_structuretype.s: u/t_interpreter_structuretype.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_structuretype.s -S u/t_interpreter_structuretype.cpp
+
+u/t_interpreter_structuretypedata.o: u/t_interpreter_structuretypedata.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_structuretypedata.o -c u/t_interpreter_structuretypedata.cpp
+
+u/t_interpreter_structuretypedata.s: u/t_interpreter_structuretypedata.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_structuretypedata.s -S u/t_interpreter_structuretypedata.cpp
+
+u/t_interpreter_structurevalue.o: u/t_interpreter_structurevalue.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_structurevalue.o -c u/t_interpreter_structurevalue.cpp
+
+u/t_interpreter_structurevalue.s: u/t_interpreter_structurevalue.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_structurevalue.s -S u/t_interpreter_structurevalue.cpp
+
+u/t_interpreter_structurevaluedata.o: u/t_interpreter_structurevaluedata.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_structurevaluedata.o -c u/t_interpreter_structurevaluedata.cpp
+
+u/t_interpreter_structurevaluedata.s: u/t_interpreter_structurevaluedata.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_structurevaluedata.s -S u/t_interpreter_structurevaluedata.cpp
+
+u/t_interpreter_tagnode.o: u/t_interpreter_tagnode.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_tagnode.o -c u/t_interpreter_tagnode.cpp
+
+u/t_interpreter_tagnode.s: u/t_interpreter_tagnode.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_tagnode.s -S u/t_interpreter_tagnode.cpp
 
 u/t_interpreter_ternaryoperation.o: u/t_interpreter_ternaryoperation.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_ternaryoperation.o -c u/t_interpreter_ternaryoperation.cpp
@@ -1657,6 +2606,12 @@ u/t_interpreter_tokenizer.o: u/t_interpreter_tokenizer.cpp
 u/t_interpreter_tokenizer.s: u/t_interpreter_tokenizer.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_tokenizer.s -S u/t_interpreter_tokenizer.cpp
 
+u/t_interpreter_typehint.o: u/t_interpreter_typehint.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_typehint.o -c u/t_interpreter_typehint.cpp
+
+u/t_interpreter_typehint.s: u/t_interpreter_typehint.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_typehint.s -S u/t_interpreter_typehint.cpp
+
 u/t_interpreter_unaryoperation.o: u/t_interpreter_unaryoperation.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_unaryoperation.o -c u/t_interpreter_unaryoperation.cpp
 
@@ -1668,6 +2623,14 @@ u/t_interpreter_values.o: u/t_interpreter_values.cpp
 
 u/t_interpreter_values.s: u/t_interpreter_values.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_values.s -S u/t_interpreter_values.cpp
+
+u/t_interpreter_vmio_filesavecontext.o: \
+    u/t_interpreter_vmio_filesavecontext.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_vmio_filesavecontext.o -c u/t_interpreter_vmio_filesavecontext.cpp
+
+u/t_interpreter_vmio_filesavecontext.s: \
+    u/t_interpreter_vmio_filesavecontext.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_vmio_filesavecontext.s -S u/t_interpreter_vmio_filesavecontext.cpp
 
 u/t_interpreter_vmio_loadcontext.o: u/t_interpreter_vmio_loadcontext.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_vmio_loadcontext.o -c u/t_interpreter_vmio_loadcontext.cpp
@@ -1691,11 +2654,821 @@ u/t_interpreter_vmio_nullsavecontext.s: \
     u/t_interpreter_vmio_nullsavecontext.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_vmio_nullsavecontext.s -S u/t_interpreter_vmio_nullsavecontext.cpp
 
+u/t_interpreter_vmio_objectloader.o: u/t_interpreter_vmio_objectloader.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_vmio_objectloader.o -c u/t_interpreter_vmio_objectloader.cpp
+
+u/t_interpreter_vmio_objectloader.s: u/t_interpreter_vmio_objectloader.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_vmio_objectloader.s -S u/t_interpreter_vmio_objectloader.cpp
+
+u/t_interpreter_vmio_processloadcontext.o: \
+    u/t_interpreter_vmio_processloadcontext.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_vmio_processloadcontext.o -c u/t_interpreter_vmio_processloadcontext.cpp
+
+u/t_interpreter_vmio_processloadcontext.s: \
+    u/t_interpreter_vmio_processloadcontext.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_vmio_processloadcontext.s -S u/t_interpreter_vmio_processloadcontext.cpp
+
+u/t_interpreter_vmio_processsavecontext.o: \
+    u/t_interpreter_vmio_processsavecontext.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_vmio_processsavecontext.o -c u/t_interpreter_vmio_processsavecontext.cpp
+
+u/t_interpreter_vmio_processsavecontext.s: \
+    u/t_interpreter_vmio_processsavecontext.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_vmio_processsavecontext.s -S u/t_interpreter_vmio_processsavecontext.cpp
+
+u/t_interpreter_vmio_structures.o: u/t_interpreter_vmio_structures.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_vmio_structures.o -c u/t_interpreter_vmio_structures.cpp
+
+u/t_interpreter_vmio_structures.s: u/t_interpreter_vmio_structures.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_vmio_structures.s -S u/t_interpreter_vmio_structures.cpp
+
 u/t_interpreter_vmio_valueloader.o: u/t_interpreter_vmio_valueloader.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_vmio_valueloader.o -c u/t_interpreter_vmio_valueloader.cpp
 
 u/t_interpreter_vmio_valueloader.s: u/t_interpreter_vmio_valueloader.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_vmio_valueloader.s -S u/t_interpreter_vmio_valueloader.cpp
+
+u/t_interpreter_world.o: u/t_interpreter_world.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_world.o -c u/t_interpreter_world.cpp
+
+u/t_interpreter_world.s: u/t_interpreter_world.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_world.s -S u/t_interpreter_world.cpp
+
+u/t_server_common_session.o: u/t_server_common_session.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_common_session.o -c u/t_server_common_session.cpp
+
+u/t_server_common_session.s: u/t_server_common_session.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_common_session.s -S u/t_server_common_session.cpp
+
+u/t_server_configurationhandler.o: u/t_server_configurationhandler.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_configurationhandler.o -c u/t_server_configurationhandler.cpp
+
+u/t_server_configurationhandler.s: u/t_server_configurationhandler.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_configurationhandler.s -S u/t_server_configurationhandler.cpp
+
+u/t_server_file_ca_commit.o: u/t_server_file_ca_commit.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_ca_commit.o -c u/t_server_file_ca_commit.cpp
+
+u/t_server_file_ca_commit.s: u/t_server_file_ca_commit.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_ca_commit.s -S u/t_server_file_ca_commit.cpp
+
+u/t_server_file_ca_directoryentry.o: u/t_server_file_ca_directoryentry.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_ca_directoryentry.o -c u/t_server_file_ca_directoryentry.cpp
+
+u/t_server_file_ca_directoryentry.s: u/t_server_file_ca_directoryentry.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_ca_directoryentry.s -S u/t_server_file_ca_directoryentry.cpp
+
+u/t_server_file_ca_directoryhandler.o: \
+    u/t_server_file_ca_directoryhandler.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_ca_directoryhandler.o -c u/t_server_file_ca_directoryhandler.cpp
+
+u/t_server_file_ca_directoryhandler.s: \
+    u/t_server_file_ca_directoryhandler.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_ca_directoryhandler.s -S u/t_server_file_ca_directoryhandler.cpp
+
+u/t_server_file_ca_internalobjectcache.o: \
+    u/t_server_file_ca_internalobjectcache.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_ca_internalobjectcache.o -c u/t_server_file_ca_internalobjectcache.cpp
+
+u/t_server_file_ca_internalobjectcache.s: \
+    u/t_server_file_ca_internalobjectcache.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_ca_internalobjectcache.s -S u/t_server_file_ca_internalobjectcache.cpp
+
+u/t_server_file_ca_internalreferencecounter.o: \
+    u/t_server_file_ca_internalreferencecounter.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_ca_internalreferencecounter.o -c u/t_server_file_ca_internalreferencecounter.cpp
+
+u/t_server_file_ca_internalreferencecounter.s: \
+    u/t_server_file_ca_internalreferencecounter.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_ca_internalreferencecounter.s -S u/t_server_file_ca_internalreferencecounter.cpp
+
+u/t_server_file_ca_objectcache.o: u/t_server_file_ca_objectcache.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_ca_objectcache.o -c u/t_server_file_ca_objectcache.cpp
+
+u/t_server_file_ca_objectcache.s: u/t_server_file_ca_objectcache.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_ca_objectcache.s -S u/t_server_file_ca_objectcache.cpp
+
+u/t_server_file_ca_objectid.o: u/t_server_file_ca_objectid.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_ca_objectid.o -c u/t_server_file_ca_objectid.cpp
+
+u/t_server_file_ca_objectid.s: u/t_server_file_ca_objectid.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_ca_objectid.s -S u/t_server_file_ca_objectid.cpp
+
+u/t_server_file_ca_objectstore.o: u/t_server_file_ca_objectstore.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_ca_objectstore.o -c u/t_server_file_ca_objectstore.cpp
+
+u/t_server_file_ca_objectstore.s: u/t_server_file_ca_objectstore.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_ca_objectstore.s -S u/t_server_file_ca_objectstore.cpp
+
+u/t_server_file_ca_referencecounter.o: \
+    u/t_server_file_ca_referencecounter.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_ca_referencecounter.o -c u/t_server_file_ca_referencecounter.cpp
+
+u/t_server_file_ca_referencecounter.s: \
+    u/t_server_file_ca_referencecounter.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_ca_referencecounter.s -S u/t_server_file_ca_referencecounter.cpp
+
+u/t_server_file_ca_referenceupdater.o: \
+    u/t_server_file_ca_referenceupdater.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_ca_referenceupdater.o -c u/t_server_file_ca_referenceupdater.cpp
+
+u/t_server_file_ca_referenceupdater.s: \
+    u/t_server_file_ca_referenceupdater.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_ca_referenceupdater.s -S u/t_server_file_ca_referenceupdater.cpp
+
+u/t_server_file_ca_root.o: u/t_server_file_ca_root.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_ca_root.o -c u/t_server_file_ca_root.cpp
+
+u/t_server_file_ca_root.s: u/t_server_file_ca_root.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_ca_root.s -S u/t_server_file_ca_root.cpp
+
+u/t_server_file_clientdirectoryhandler.o: \
+    u/t_server_file_clientdirectoryhandler.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_clientdirectoryhandler.o -c u/t_server_file_clientdirectoryhandler.cpp
+
+u/t_server_file_clientdirectoryhandler.s: \
+    u/t_server_file_clientdirectoryhandler.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_clientdirectoryhandler.s -S u/t_server_file_clientdirectoryhandler.cpp
+
+u/t_server_file_commandhandler.o: u/t_server_file_commandhandler.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_commandhandler.o -c u/t_server_file_commandhandler.cpp
+
+u/t_server_file_commandhandler.s: u/t_server_file_commandhandler.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_commandhandler.s -S u/t_server_file_commandhandler.cpp
+
+u/t_server_file_directoryhandler.o: u/t_server_file_directoryhandler.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_directoryhandler.o -c u/t_server_file_directoryhandler.cpp
+
+u/t_server_file_directoryhandler.s: u/t_server_file_directoryhandler.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_directoryhandler.s -S u/t_server_file_directoryhandler.cpp
+
+u/t_server_file_directoryhandlerfactory.o: \
+    u/t_server_file_directoryhandlerfactory.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_directoryhandlerfactory.o -c u/t_server_file_directoryhandlerfactory.cpp
+
+u/t_server_file_directoryhandlerfactory.s: \
+    u/t_server_file_directoryhandlerfactory.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_directoryhandlerfactory.s -S u/t_server_file_directoryhandlerfactory.cpp
+
+u/t_server_file_directorywrapper.o: u/t_server_file_directorywrapper.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_directorywrapper.o -c u/t_server_file_directorywrapper.cpp
+
+u/t_server_file_directorywrapper.s: u/t_server_file_directorywrapper.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_directorywrapper.s -S u/t_server_file_directorywrapper.cpp
+
+u/t_server_file_filebase.o: u/t_server_file_filebase.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_filebase.o -c u/t_server_file_filebase.cpp
+
+u/t_server_file_filebase.s: u/t_server_file_filebase.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_filebase.s -S u/t_server_file_filebase.cpp
+
+u/t_server_file_filegame.o: u/t_server_file_filegame.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_filegame.o -c u/t_server_file_filegame.cpp
+
+u/t_server_file_filegame.s: u/t_server_file_filegame.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_filegame.s -S u/t_server_file_filegame.cpp
+
+u/t_server_file_gamestatus.o: u/t_server_file_gamestatus.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_gamestatus.o -c u/t_server_file_gamestatus.cpp
+
+u/t_server_file_gamestatus.s: u/t_server_file_gamestatus.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_gamestatus.s -S u/t_server_file_gamestatus.cpp
+
+u/t_server_file_item.o: u/t_server_file_item.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_item.o -c u/t_server_file_item.cpp
+
+u/t_server_file_item.s: u/t_server_file_item.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_item.s -S u/t_server_file_item.cpp
+
+u/t_server_file_racenames.o: u/t_server_file_racenames.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_racenames.o -c u/t_server_file_racenames.cpp
+
+u/t_server_file_racenames.s: u/t_server_file_racenames.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_racenames.s -S u/t_server_file_racenames.cpp
+
+u/t_server_file_root.o: u/t_server_file_root.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_root.o -c u/t_server_file_root.cpp
+
+u/t_server_file_root.s: u/t_server_file_root.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_root.s -S u/t_server_file_root.cpp
+
+u/t_server_file_session.o: u/t_server_file_session.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_session.o -c u/t_server_file_session.cpp
+
+u/t_server_file_session.s: u/t_server_file_session.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_session.s -S u/t_server_file_session.cpp
+
+u/t_server_file_utils.o: u/t_server_file_utils.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_utils.o -c u/t_server_file_utils.cpp
+
+u/t_server_file_utils.s: u/t_server_file_utils.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_utils.s -S u/t_server_file_utils.cpp
+
+u/t_server_format_beampacker.o: u/t_server_format_beampacker.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_format_beampacker.o -c u/t_server_format_beampacker.cpp
+
+u/t_server_format_beampacker.s: u/t_server_format_beampacker.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_format_beampacker.s -S u/t_server_format_beampacker.cpp
+
+u/t_server_format_enginepacker.o: u/t_server_format_enginepacker.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_format_enginepacker.o -c u/t_server_format_enginepacker.cpp
+
+u/t_server_format_enginepacker.s: u/t_server_format_enginepacker.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_format_enginepacker.s -S u/t_server_format_enginepacker.cpp
+
+u/t_server_format_format.o: u/t_server_format_format.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_format_format.o -c u/t_server_format_format.cpp
+
+u/t_server_format_format.s: u/t_server_format_format.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_format_format.s -S u/t_server_format_format.cpp
+
+u/t_server_format_hullpacker.o: u/t_server_format_hullpacker.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_format_hullpacker.o -c u/t_server_format_hullpacker.cpp
+
+u/t_server_format_hullpacker.s: u/t_server_format_hullpacker.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_format_hullpacker.s -S u/t_server_format_hullpacker.cpp
+
+u/t_server_format_packer.o: u/t_server_format_packer.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_format_packer.o -c u/t_server_format_packer.cpp
+
+u/t_server_format_packer.s: u/t_server_format_packer.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_format_packer.s -S u/t_server_format_packer.cpp
+
+u/t_server_format_simpacker.o: u/t_server_format_simpacker.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_format_simpacker.o -c u/t_server_format_simpacker.cpp
+
+u/t_server_format_simpacker.s: u/t_server_format_simpacker.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_format_simpacker.s -S u/t_server_format_simpacker.cpp
+
+u/t_server_format_stringpacker.o: u/t_server_format_stringpacker.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_format_stringpacker.o -c u/t_server_format_stringpacker.cpp
+
+u/t_server_format_stringpacker.s: u/t_server_format_stringpacker.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_format_stringpacker.s -S u/t_server_format_stringpacker.cpp
+
+u/t_server_format_torpedopacker.o: u/t_server_format_torpedopacker.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_format_torpedopacker.o -c u/t_server_format_torpedopacker.cpp
+
+u/t_server_format_torpedopacker.s: u/t_server_format_torpedopacker.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_format_torpedopacker.s -S u/t_server_format_torpedopacker.cpp
+
+u/t_server_format_truehullpacker.o: u/t_server_format_truehullpacker.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_format_truehullpacker.o -c u/t_server_format_truehullpacker.cpp
+
+u/t_server_format_truehullpacker.s: u/t_server_format_truehullpacker.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_format_truehullpacker.s -S u/t_server_format_truehullpacker.cpp
+
+u/t_server_format_utils.o: u/t_server_format_utils.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_format_utils.o -c u/t_server_format_utils.cpp
+
+u/t_server_format_utils.s: u/t_server_format_utils.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_format_utils.s -S u/t_server_format_utils.cpp
+
+u/t_server_interface_base.o: u/t_server_interface_base.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_base.o -c u/t_server_interface_base.cpp
+
+u/t_server_interface_base.s: u/t_server_interface_base.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_base.s -S u/t_server_interface_base.cpp
+
+u/t_server_interface_baseclient.o: u/t_server_interface_baseclient.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_baseclient.o -c u/t_server_interface_baseclient.cpp
+
+u/t_server_interface_baseclient.s: u/t_server_interface_baseclient.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_baseclient.s -S u/t_server_interface_baseclient.cpp
+
+u/t_server_interface_composablecommandhandler.o: \
+    u/t_server_interface_composablecommandhandler.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_composablecommandhandler.o -c u/t_server_interface_composablecommandhandler.cpp
+
+u/t_server_interface_composablecommandhandler.s: \
+    u/t_server_interface_composablecommandhandler.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_composablecommandhandler.s -S u/t_server_interface_composablecommandhandler.cpp
+
+u/t_server_interface_filebase.o: u/t_server_interface_filebase.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_filebase.o -c u/t_server_interface_filebase.cpp
+
+u/t_server_interface_filebase.s: u/t_server_interface_filebase.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_filebase.s -S u/t_server_interface_filebase.cpp
+
+u/t_server_interface_filebaseclient.o: \
+    u/t_server_interface_filebaseclient.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_filebaseclient.o -c u/t_server_interface_filebaseclient.cpp
+
+u/t_server_interface_filebaseclient.s: \
+    u/t_server_interface_filebaseclient.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_filebaseclient.s -S u/t_server_interface_filebaseclient.cpp
+
+u/t_server_interface_filebaseserver.o: \
+    u/t_server_interface_filebaseserver.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_filebaseserver.o -c u/t_server_interface_filebaseserver.cpp
+
+u/t_server_interface_filebaseserver.s: \
+    u/t_server_interface_filebaseserver.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_filebaseserver.s -S u/t_server_interface_filebaseserver.cpp
+
+u/t_server_interface_filegame.o: u/t_server_interface_filegame.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_filegame.o -c u/t_server_interface_filegame.cpp
+
+u/t_server_interface_filegame.s: u/t_server_interface_filegame.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_filegame.s -S u/t_server_interface_filegame.cpp
+
+u/t_server_interface_filegameclient.o: \
+    u/t_server_interface_filegameclient.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_filegameclient.o -c u/t_server_interface_filegameclient.cpp
+
+u/t_server_interface_filegameclient.s: \
+    u/t_server_interface_filegameclient.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_filegameclient.s -S u/t_server_interface_filegameclient.cpp
+
+u/t_server_interface_filegameserver.o: \
+    u/t_server_interface_filegameserver.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_filegameserver.o -c u/t_server_interface_filegameserver.cpp
+
+u/t_server_interface_filegameserver.s: \
+    u/t_server_interface_filegameserver.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_filegameserver.s -S u/t_server_interface_filegameserver.cpp
+
+u/t_server_interface_format.o: u/t_server_interface_format.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_format.o -c u/t_server_interface_format.cpp
+
+u/t_server_interface_format.s: u/t_server_interface_format.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_format.s -S u/t_server_interface_format.cpp
+
+u/t_server_interface_formatclient.o: u/t_server_interface_formatclient.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_formatclient.o -c u/t_server_interface_formatclient.cpp
+
+u/t_server_interface_formatclient.s: u/t_server_interface_formatclient.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_formatclient.s -S u/t_server_interface_formatclient.cpp
+
+u/t_server_interface_formatserver.o: u/t_server_interface_formatserver.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_formatserver.o -c u/t_server_interface_formatserver.cpp
+
+u/t_server_interface_formatserver.s: u/t_server_interface_formatserver.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_formatserver.s -S u/t_server_interface_formatserver.cpp
+
+u/t_server_interface_hostcron.o: u/t_server_interface_hostcron.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hostcron.o -c u/t_server_interface_hostcron.cpp
+
+u/t_server_interface_hostcron.s: u/t_server_interface_hostcron.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hostcron.s -S u/t_server_interface_hostcron.cpp
+
+u/t_server_interface_hostcronclient.o: \
+    u/t_server_interface_hostcronclient.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hostcronclient.o -c u/t_server_interface_hostcronclient.cpp
+
+u/t_server_interface_hostcronclient.s: \
+    u/t_server_interface_hostcronclient.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hostcronclient.s -S u/t_server_interface_hostcronclient.cpp
+
+u/t_server_interface_mailqueue.o: u/t_server_interface_mailqueue.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_mailqueue.o -c u/t_server_interface_mailqueue.cpp
+
+u/t_server_interface_mailqueue.s: u/t_server_interface_mailqueue.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_mailqueue.s -S u/t_server_interface_mailqueue.cpp
+
+u/t_server_interface_mailqueueclient.o: \
+    u/t_server_interface_mailqueueclient.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_mailqueueclient.o -c u/t_server_interface_mailqueueclient.cpp
+
+u/t_server_interface_mailqueueclient.s: \
+    u/t_server_interface_mailqueueclient.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_mailqueueclient.s -S u/t_server_interface_mailqueueclient.cpp
+
+u/t_server_interface_mailqueueserver.o: \
+    u/t_server_interface_mailqueueserver.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_mailqueueserver.o -c u/t_server_interface_mailqueueserver.cpp
+
+u/t_server_interface_mailqueueserver.s: \
+    u/t_server_interface_mailqueueserver.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_mailqueueserver.s -S u/t_server_interface_mailqueueserver.cpp
+
+u/t_server_interface_talkfolder.o: u/t_server_interface_talkfolder.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkfolder.o -c u/t_server_interface_talkfolder.cpp
+
+u/t_server_interface_talkfolder.s: u/t_server_interface_talkfolder.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkfolder.s -S u/t_server_interface_talkfolder.cpp
+
+u/t_server_interface_talkfolderclient.o: \
+    u/t_server_interface_talkfolderclient.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkfolderclient.o -c u/t_server_interface_talkfolderclient.cpp
+
+u/t_server_interface_talkfolderclient.s: \
+    u/t_server_interface_talkfolderclient.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkfolderclient.s -S u/t_server_interface_talkfolderclient.cpp
+
+u/t_server_interface_talkfolderserver.o: \
+    u/t_server_interface_talkfolderserver.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkfolderserver.o -c u/t_server_interface_talkfolderserver.cpp
+
+u/t_server_interface_talkfolderserver.s: \
+    u/t_server_interface_talkfolderserver.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkfolderserver.s -S u/t_server_interface_talkfolderserver.cpp
+
+u/t_server_interface_talkforum.o: u/t_server_interface_talkforum.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkforum.o -c u/t_server_interface_talkforum.cpp
+
+u/t_server_interface_talkforum.s: u/t_server_interface_talkforum.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkforum.s -S u/t_server_interface_talkforum.cpp
+
+u/t_server_interface_talkforumclient.o: \
+    u/t_server_interface_talkforumclient.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkforumclient.o -c u/t_server_interface_talkforumclient.cpp
+
+u/t_server_interface_talkforumclient.s: \
+    u/t_server_interface_talkforumclient.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkforumclient.s -S u/t_server_interface_talkforumclient.cpp
+
+u/t_server_interface_talkforumserver.o: \
+    u/t_server_interface_talkforumserver.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkforumserver.o -c u/t_server_interface_talkforumserver.cpp
+
+u/t_server_interface_talkforumserver.s: \
+    u/t_server_interface_talkforumserver.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkforumserver.s -S u/t_server_interface_talkforumserver.cpp
+
+u/t_server_interface_talkgroup.o: u/t_server_interface_talkgroup.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkgroup.o -c u/t_server_interface_talkgroup.cpp
+
+u/t_server_interface_talkgroup.s: u/t_server_interface_talkgroup.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkgroup.s -S u/t_server_interface_talkgroup.cpp
+
+u/t_server_interface_talkgroupclient.o: \
+    u/t_server_interface_talkgroupclient.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkgroupclient.o -c u/t_server_interface_talkgroupclient.cpp
+
+u/t_server_interface_talkgroupclient.s: \
+    u/t_server_interface_talkgroupclient.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkgroupclient.s -S u/t_server_interface_talkgroupclient.cpp
+
+u/t_server_interface_talkgroupserver.o: \
+    u/t_server_interface_talkgroupserver.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkgroupserver.o -c u/t_server_interface_talkgroupserver.cpp
+
+u/t_server_interface_talkgroupserver.s: \
+    u/t_server_interface_talkgroupserver.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkgroupserver.s -S u/t_server_interface_talkgroupserver.cpp
+
+u/t_server_interface_talknntp.o: u/t_server_interface_talknntp.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talknntp.o -c u/t_server_interface_talknntp.cpp
+
+u/t_server_interface_talknntp.s: u/t_server_interface_talknntp.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talknntp.s -S u/t_server_interface_talknntp.cpp
+
+u/t_server_interface_talknntpclient.o: \
+    u/t_server_interface_talknntpclient.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talknntpclient.o -c u/t_server_interface_talknntpclient.cpp
+
+u/t_server_interface_talknntpclient.s: \
+    u/t_server_interface_talknntpclient.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talknntpclient.s -S u/t_server_interface_talknntpclient.cpp
+
+u/t_server_interface_talknntpserver.o: \
+    u/t_server_interface_talknntpserver.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talknntpserver.o -c u/t_server_interface_talknntpserver.cpp
+
+u/t_server_interface_talknntpserver.s: \
+    u/t_server_interface_talknntpserver.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talknntpserver.s -S u/t_server_interface_talknntpserver.cpp
+
+u/t_server_interface_talkpm.o: u/t_server_interface_talkpm.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkpm.o -c u/t_server_interface_talkpm.cpp
+
+u/t_server_interface_talkpm.s: u/t_server_interface_talkpm.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkpm.s -S u/t_server_interface_talkpm.cpp
+
+u/t_server_interface_talkpmclient.o: u/t_server_interface_talkpmclient.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkpmclient.o -c u/t_server_interface_talkpmclient.cpp
+
+u/t_server_interface_talkpmclient.s: u/t_server_interface_talkpmclient.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkpmclient.s -S u/t_server_interface_talkpmclient.cpp
+
+u/t_server_interface_talkpmserver.o: u/t_server_interface_talkpmserver.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkpmserver.o -c u/t_server_interface_talkpmserver.cpp
+
+u/t_server_interface_talkpmserver.s: u/t_server_interface_talkpmserver.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkpmserver.s -S u/t_server_interface_talkpmserver.cpp
+
+u/t_server_interface_talkpost.o: u/t_server_interface_talkpost.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkpost.o -c u/t_server_interface_talkpost.cpp
+
+u/t_server_interface_talkpost.s: u/t_server_interface_talkpost.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkpost.s -S u/t_server_interface_talkpost.cpp
+
+u/t_server_interface_talkpostclient.o: \
+    u/t_server_interface_talkpostclient.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkpostclient.o -c u/t_server_interface_talkpostclient.cpp
+
+u/t_server_interface_talkpostclient.s: \
+    u/t_server_interface_talkpostclient.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkpostclient.s -S u/t_server_interface_talkpostclient.cpp
+
+u/t_server_interface_talkpostserver.o: \
+    u/t_server_interface_talkpostserver.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkpostserver.o -c u/t_server_interface_talkpostserver.cpp
+
+u/t_server_interface_talkpostserver.s: \
+    u/t_server_interface_talkpostserver.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkpostserver.s -S u/t_server_interface_talkpostserver.cpp
+
+u/t_server_interface_talkrender.o: u/t_server_interface_talkrender.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkrender.o -c u/t_server_interface_talkrender.cpp
+
+u/t_server_interface_talkrender.s: u/t_server_interface_talkrender.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkrender.s -S u/t_server_interface_talkrender.cpp
+
+u/t_server_interface_talkrenderclient.o: \
+    u/t_server_interface_talkrenderclient.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkrenderclient.o -c u/t_server_interface_talkrenderclient.cpp
+
+u/t_server_interface_talkrenderclient.s: \
+    u/t_server_interface_talkrenderclient.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkrenderclient.s -S u/t_server_interface_talkrenderclient.cpp
+
+u/t_server_interface_talkrenderserver.o: \
+    u/t_server_interface_talkrenderserver.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkrenderserver.o -c u/t_server_interface_talkrenderserver.cpp
+
+u/t_server_interface_talkrenderserver.s: \
+    u/t_server_interface_talkrenderserver.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkrenderserver.s -S u/t_server_interface_talkrenderserver.cpp
+
+u/t_server_interface_talksyntax.o: u/t_server_interface_talksyntax.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talksyntax.o -c u/t_server_interface_talksyntax.cpp
+
+u/t_server_interface_talksyntax.s: u/t_server_interface_talksyntax.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talksyntax.s -S u/t_server_interface_talksyntax.cpp
+
+u/t_server_interface_talksyntaxclient.o: \
+    u/t_server_interface_talksyntaxclient.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talksyntaxclient.o -c u/t_server_interface_talksyntaxclient.cpp
+
+u/t_server_interface_talksyntaxclient.s: \
+    u/t_server_interface_talksyntaxclient.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talksyntaxclient.s -S u/t_server_interface_talksyntaxclient.cpp
+
+u/t_server_interface_talksyntaxserver.o: \
+    u/t_server_interface_talksyntaxserver.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talksyntaxserver.o -c u/t_server_interface_talksyntaxserver.cpp
+
+u/t_server_interface_talksyntaxserver.s: \
+    u/t_server_interface_talksyntaxserver.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talksyntaxserver.s -S u/t_server_interface_talksyntaxserver.cpp
+
+u/t_server_interface_talkthread.o: u/t_server_interface_talkthread.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkthread.o -c u/t_server_interface_talkthread.cpp
+
+u/t_server_interface_talkthread.s: u/t_server_interface_talkthread.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkthread.s -S u/t_server_interface_talkthread.cpp
+
+u/t_server_interface_talkthreadclient.o: \
+    u/t_server_interface_talkthreadclient.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkthreadclient.o -c u/t_server_interface_talkthreadclient.cpp
+
+u/t_server_interface_talkthreadclient.s: \
+    u/t_server_interface_talkthreadclient.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkthreadclient.s -S u/t_server_interface_talkthreadclient.cpp
+
+u/t_server_interface_talkthreadserver.o: \
+    u/t_server_interface_talkthreadserver.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkthreadserver.o -c u/t_server_interface_talkthreadserver.cpp
+
+u/t_server_interface_talkthreadserver.s: \
+    u/t_server_interface_talkthreadserver.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkthreadserver.s -S u/t_server_interface_talkthreadserver.cpp
+
+u/t_server_interface_talkuser.o: u/t_server_interface_talkuser.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkuser.o -c u/t_server_interface_talkuser.cpp
+
+u/t_server_interface_talkuser.s: u/t_server_interface_talkuser.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkuser.s -S u/t_server_interface_talkuser.cpp
+
+u/t_server_interface_talkuserclient.o: \
+    u/t_server_interface_talkuserclient.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkuserclient.o -c u/t_server_interface_talkuserclient.cpp
+
+u/t_server_interface_talkuserclient.s: \
+    u/t_server_interface_talkuserclient.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkuserclient.s -S u/t_server_interface_talkuserclient.cpp
+
+u/t_server_interface_talkuserserver.o: \
+    u/t_server_interface_talkuserserver.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkuserserver.o -c u/t_server_interface_talkuserserver.cpp
+
+u/t_server_interface_talkuserserver.s: \
+    u/t_server_interface_talkuserserver.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkuserserver.s -S u/t_server_interface_talkuserserver.cpp
+
+u/t_server_talk_accesschecker.o: u/t_server_talk_accesschecker.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_accesschecker.o -c u/t_server_talk_accesschecker.cpp
+
+u/t_server_talk_accesschecker.s: u/t_server_talk_accesschecker.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_accesschecker.s -S u/t_server_talk_accesschecker.cpp
+
+u/t_server_talk_commandhandler.o: u/t_server_talk_commandhandler.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_commandhandler.o -c u/t_server_talk_commandhandler.cpp
+
+u/t_server_talk_commandhandler.s: u/t_server_talk_commandhandler.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_commandhandler.s -S u/t_server_talk_commandhandler.cpp
+
+u/t_server_talk_configuration.o: u/t_server_talk_configuration.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_configuration.o -c u/t_server_talk_configuration.cpp
+
+u/t_server_talk_configuration.s: u/t_server_talk_configuration.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_configuration.s -S u/t_server_talk_configuration.cpp
+
+u/t_server_talk_forum.o: u/t_server_talk_forum.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_forum.o -c u/t_server_talk_forum.cpp
+
+u/t_server_talk_forum.s: u/t_server_talk_forum.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_forum.s -S u/t_server_talk_forum.cpp
+
+u/t_server_talk_group.o: u/t_server_talk_group.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_group.o -c u/t_server_talk_group.cpp
+
+u/t_server_talk_group.s: u/t_server_talk_group.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_group.s -S u/t_server_talk_group.cpp
+
+u/t_server_talk_inlinerecognizer.o: u/t_server_talk_inlinerecognizer.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_inlinerecognizer.o -c u/t_server_talk_inlinerecognizer.cpp
+
+u/t_server_talk_inlinerecognizer.s: u/t_server_talk_inlinerecognizer.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_inlinerecognizer.s -S u/t_server_talk_inlinerecognizer.cpp
+
+u/t_server_talk_linkformatter.o: u/t_server_talk_linkformatter.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_linkformatter.o -c u/t_server_talk_linkformatter.cpp
+
+u/t_server_talk_linkformatter.s: u/t_server_talk_linkformatter.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_linkformatter.s -S u/t_server_talk_linkformatter.cpp
+
+u/t_server_talk_message.o: u/t_server_talk_message.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_message.o -c u/t_server_talk_message.cpp
+
+u/t_server_talk_message.s: u/t_server_talk_message.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_message.s -S u/t_server_talk_message.cpp
+
+u/t_server_talk_newsrc.o: u/t_server_talk_newsrc.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_newsrc.o -c u/t_server_talk_newsrc.cpp
+
+u/t_server_talk_newsrc.s: u/t_server_talk_newsrc.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_newsrc.s -S u/t_server_talk_newsrc.cpp
+
+u/t_server_talk_parse_bblexer.o: u/t_server_talk_parse_bblexer.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_parse_bblexer.o -c u/t_server_talk_parse_bblexer.cpp
+
+u/t_server_talk_parse_bblexer.s: u/t_server_talk_parse_bblexer.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_parse_bblexer.s -S u/t_server_talk_parse_bblexer.cpp
+
+u/t_server_talk_parse_bbparser.o: u/t_server_talk_parse_bbparser.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_parse_bbparser.o -c u/t_server_talk_parse_bbparser.cpp
+
+u/t_server_talk_parse_bbparser.s: u/t_server_talk_parse_bbparser.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_parse_bbparser.s -S u/t_server_talk_parse_bbparser.cpp
+
+u/t_server_talk_render_bbrenderer.o: u/t_server_talk_render_bbrenderer.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_render_bbrenderer.o -c u/t_server_talk_render_bbrenderer.cpp
+
+u/t_server_talk_render_bbrenderer.s: u/t_server_talk_render_bbrenderer.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_render_bbrenderer.s -S u/t_server_talk_render_bbrenderer.cpp
+
+u/t_server_talk_render_context.o: u/t_server_talk_render_context.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_render_context.o -c u/t_server_talk_render_context.cpp
+
+u/t_server_talk_render_context.s: u/t_server_talk_render_context.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_render_context.s -S u/t_server_talk_render_context.cpp
+
+u/t_server_talk_render_htmlrenderer.o: \
+    u/t_server_talk_render_htmlrenderer.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_render_htmlrenderer.o -c u/t_server_talk_render_htmlrenderer.cpp
+
+u/t_server_talk_render_htmlrenderer.s: \
+    u/t_server_talk_render_htmlrenderer.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_render_htmlrenderer.s -S u/t_server_talk_render_htmlrenderer.cpp
+
+u/t_server_talk_render_options.o: u/t_server_talk_render_options.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_render_options.o -c u/t_server_talk_render_options.cpp
+
+u/t_server_talk_render_options.s: u/t_server_talk_render_options.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_render_options.s -S u/t_server_talk_render_options.cpp
+
+u/t_server_talk_root.o: u/t_server_talk_root.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_root.o -c u/t_server_talk_root.cpp
+
+u/t_server_talk_root.s: u/t_server_talk_root.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_root.s -S u/t_server_talk_root.cpp
+
+u/t_server_talk_sorter.o: u/t_server_talk_sorter.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_sorter.o -c u/t_server_talk_sorter.cpp
+
+u/t_server_talk_sorter.s: u/t_server_talk_sorter.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_sorter.s -S u/t_server_talk_sorter.cpp
+
+u/t_server_talk_spam.o: u/t_server_talk_spam.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_spam.o -c u/t_server_talk_spam.cpp
+
+u/t_server_talk_spam.s: u/t_server_talk_spam.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_spam.s -S u/t_server_talk_spam.cpp
+
+u/t_server_talk_talkfolder.o: u/t_server_talk_talkfolder.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_talkfolder.o -c u/t_server_talk_talkfolder.cpp
+
+u/t_server_talk_talkfolder.s: u/t_server_talk_talkfolder.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_talkfolder.s -S u/t_server_talk_talkfolder.cpp
+
+u/t_server_talk_talkforum.o: u/t_server_talk_talkforum.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_talkforum.o -c u/t_server_talk_talkforum.cpp
+
+u/t_server_talk_talkforum.s: u/t_server_talk_talkforum.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_talkforum.s -S u/t_server_talk_talkforum.cpp
+
+u/t_server_talk_talkgroup.o: u/t_server_talk_talkgroup.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_talkgroup.o -c u/t_server_talk_talkgroup.cpp
+
+u/t_server_talk_talkgroup.s: u/t_server_talk_talkgroup.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_talkgroup.s -S u/t_server_talk_talkgroup.cpp
+
+u/t_server_talk_talknntp.o: u/t_server_talk_talknntp.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_talknntp.o -c u/t_server_talk_talknntp.cpp
+
+u/t_server_talk_talknntp.s: u/t_server_talk_talknntp.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_talknntp.s -S u/t_server_talk_talknntp.cpp
+
+u/t_server_talk_talkpm.o: u/t_server_talk_talkpm.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_talkpm.o -c u/t_server_talk_talkpm.cpp
+
+u/t_server_talk_talkpm.s: u/t_server_talk_talkpm.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_talkpm.s -S u/t_server_talk_talkpm.cpp
+
+u/t_server_talk_talkpost.o: u/t_server_talk_talkpost.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_talkpost.o -c u/t_server_talk_talkpost.cpp
+
+u/t_server_talk_talkpost.s: u/t_server_talk_talkpost.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_talkpost.s -S u/t_server_talk_talkpost.cpp
+
+u/t_server_talk_talkrender.o: u/t_server_talk_talkrender.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_talkrender.o -c u/t_server_talk_talkrender.cpp
+
+u/t_server_talk_talkrender.s: u/t_server_talk_talkrender.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_talkrender.s -S u/t_server_talk_talkrender.cpp
+
+u/t_server_talk_talksyntax.o: u/t_server_talk_talksyntax.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_talksyntax.o -c u/t_server_talk_talksyntax.cpp
+
+u/t_server_talk_talksyntax.s: u/t_server_talk_talksyntax.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_talksyntax.s -S u/t_server_talk_talksyntax.cpp
+
+u/t_server_talk_talkthread.o: u/t_server_talk_talkthread.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_talkthread.o -c u/t_server_talk_talkthread.cpp
+
+u/t_server_talk_talkthread.s: u/t_server_talk_talkthread.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_talkthread.s -S u/t_server_talk_talkthread.cpp
+
+u/t_server_talk_talkuser.o: u/t_server_talk_talkuser.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_talkuser.o -c u/t_server_talk_talkuser.cpp
+
+u/t_server_talk_talkuser.s: u/t_server_talk_talkuser.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_talkuser.s -S u/t_server_talk_talkuser.cpp
+
+u/t_server_talk_textnode.o: u/t_server_talk_textnode.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_textnode.o -c u/t_server_talk_textnode.cpp
+
+u/t_server_talk_textnode.s: u/t_server_talk_textnode.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_textnode.s -S u/t_server_talk_textnode.cpp
+
+u/t_server_talk_topic.o: u/t_server_talk_topic.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_topic.o -c u/t_server_talk_topic.cpp
+
+u/t_server_talk_topic.s: u/t_server_talk_topic.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_topic.s -S u/t_server_talk_topic.cpp
+
+u/t_server_talk_user.o: u/t_server_talk_user.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_user.o -c u/t_server_talk_user.cpp
+
+u/t_server_talk_user.s: u/t_server_talk_user.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_user.s -S u/t_server_talk_user.cpp
+
+u/t_server_talk_userfolder.o: u/t_server_talk_userfolder.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_userfolder.o -c u/t_server_talk_userfolder.cpp
+
+u/t_server_talk_userfolder.s: u/t_server_talk_userfolder.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_userfolder.s -S u/t_server_talk_userfolder.cpp
+
+u/t_server_talk_userpm.o: u/t_server_talk_userpm.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_userpm.o -c u/t_server_talk_userpm.cpp
+
+u/t_server_talk_userpm.s: u/t_server_talk_userpm.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_userpm.s -S u/t_server_talk_userpm.cpp
+
+u/t_server_talk_util.o: u/t_server_talk_util.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_util.o -c u/t_server_talk_util.cpp
+
+u/t_server_talk_util.s: u/t_server_talk_util.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_util.s -S u/t_server_talk_util.cpp
+
+u/t_server_types.o: u/t_server_types.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_types.o -c u/t_server_types.cpp
+
+u/t_server_types.s: u/t_server_types.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_types.s -S u/t_server_types.cpp
 
 u/t_ui_colorscheme.o: u/t_ui_colorscheme.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_ui_colorscheme.o -c u/t_ui_colorscheme.cpp
@@ -1726,6 +3499,18 @@ u/t_ui_prefixargument.o: u/t_ui_prefixargument.cpp
 
 u/t_ui_prefixargument.s: u/t_ui_prefixargument.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_ui_prefixargument.s -S u/t_ui_prefixargument.cpp
+
+u/t_ui_res_ccimageloader.o: u/t_ui_res_ccimageloader.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_ui_res_ccimageloader.o -c u/t_ui_res_ccimageloader.cpp
+
+u/t_ui_res_ccimageloader.s: u/t_ui_res_ccimageloader.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_ui_res_ccimageloader.s -S u/t_ui_res_ccimageloader.cpp
+
+u/t_ui_res_engineimageloader.o: u/t_ui_res_engineimageloader.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_ui_res_engineimageloader.o -c u/t_ui_res_engineimageloader.cpp
+
+u/t_ui_res_engineimageloader.s: u/t_ui_res_engineimageloader.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_ui_res_engineimageloader.s -S u/t_ui_res_engineimageloader.cpp
 
 u/t_ui_res_imageloader.o: u/t_ui_res_imageloader.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_ui_res_imageloader.o -c u/t_ui_res_imageloader.cpp
@@ -1865,6 +3650,12 @@ u/t_util_fileparser.o: u/t_util_fileparser.cpp
 u/t_util_fileparser.s: u/t_util_fileparser.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_util_fileparser.s -S u/t_util_fileparser.cpp
 
+u/t_util_io.o: u/t_util_io.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_util_io.o -c u/t_util_io.cpp
+
+u/t_util_io.s: u/t_util_io.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_util_io.s -S u/t_util_io.cpp
+
 u/t_util_key.o: u/t_util_key.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_util_key.o -c u/t_util_key.cpp
 
@@ -1954,6 +3745,12 @@ u/t_util_requestthread.o: u/t_util_requestthread.cpp
 
 u/t_util_requestthread.s: u/t_util_requestthread.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_util_requestthread.s -S u/t_util_requestthread.cpp
+
+u/t_util_rich_alignmentattribute.o: u/t_util_rich_alignmentattribute.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_util_rich_alignmentattribute.o -c u/t_util_rich_alignmentattribute.cpp
+
+u/t_util_rich_alignmentattribute.s: u/t_util_rich_alignmentattribute.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_util_rich_alignmentattribute.s -S u/t_util_rich_alignmentattribute.cpp
 
 u/t_util_rich_attribute.o: u/t_util_rich_attribute.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_util_rich_attribute.o -c u/t_util_rich_attribute.cpp
@@ -2045,11 +3842,71 @@ u/t_util_stringparser.o: u/t_util_stringparser.cpp
 u/t_util_stringparser.s: u/t_util_stringparser.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_util_stringparser.s -S u/t_util_stringparser.cpp
 
+u/t_util_syntax_chighlighter.o: u/t_util_syntax_chighlighter.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_util_syntax_chighlighter.o -c u/t_util_syntax_chighlighter.cpp
+
+u/t_util_syntax_chighlighter.s: u/t_util_syntax_chighlighter.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_util_syntax_chighlighter.s -S u/t_util_syntax_chighlighter.cpp
+
+u/t_util_syntax_factory.o: u/t_util_syntax_factory.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_util_syntax_factory.o -c u/t_util_syntax_factory.cpp
+
+u/t_util_syntax_factory.s: u/t_util_syntax_factory.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_util_syntax_factory.s -S u/t_util_syntax_factory.cpp
+
+u/t_util_syntax_format.o: u/t_util_syntax_format.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_util_syntax_format.o -c u/t_util_syntax_format.cpp
+
+u/t_util_syntax_format.s: u/t_util_syntax_format.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_util_syntax_format.s -S u/t_util_syntax_format.cpp
+
+u/t_util_syntax_highlighter.o: u/t_util_syntax_highlighter.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_util_syntax_highlighter.o -c u/t_util_syntax_highlighter.cpp
+
+u/t_util_syntax_highlighter.s: u/t_util_syntax_highlighter.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_util_syntax_highlighter.s -S u/t_util_syntax_highlighter.cpp
+
+u/t_util_syntax_inihighlighter.o: u/t_util_syntax_inihighlighter.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_util_syntax_inihighlighter.o -c u/t_util_syntax_inihighlighter.cpp
+
+u/t_util_syntax_inihighlighter.s: u/t_util_syntax_inihighlighter.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_util_syntax_inihighlighter.s -S u/t_util_syntax_inihighlighter.cpp
+
+u/t_util_syntax_keywordtable.o: u/t_util_syntax_keywordtable.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_util_syntax_keywordtable.o -c u/t_util_syntax_keywordtable.cpp
+
+u/t_util_syntax_keywordtable.s: u/t_util_syntax_keywordtable.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_util_syntax_keywordtable.s -S u/t_util_syntax_keywordtable.cpp
+
+u/t_util_syntax_nullhighlighter.o: u/t_util_syntax_nullhighlighter.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_util_syntax_nullhighlighter.o -c u/t_util_syntax_nullhighlighter.cpp
+
+u/t_util_syntax_nullhighlighter.s: u/t_util_syntax_nullhighlighter.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_util_syntax_nullhighlighter.s -S u/t_util_syntax_nullhighlighter.cpp
+
+u/t_util_syntax_scripthighlighter.o: u/t_util_syntax_scripthighlighter.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_util_syntax_scripthighlighter.o -c u/t_util_syntax_scripthighlighter.cpp
+
+u/t_util_syntax_scripthighlighter.s: u/t_util_syntax_scripthighlighter.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_util_syntax_scripthighlighter.s -S u/t_util_syntax_scripthighlighter.cpp
+
+u/t_util_syntax_segment.o: u/t_util_syntax_segment.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_util_syntax_segment.o -c u/t_util_syntax_segment.cpp
+
+u/t_util_syntax_segment.s: u/t_util_syntax_segment.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_util_syntax_segment.s -S u/t_util_syntax_segment.cpp
+
 u/t_util_unicodechars.o: u/t_util_unicodechars.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_util_unicodechars.o -c u/t_util_unicodechars.cpp
 
 u/t_util_unicodechars.s: u/t_util_unicodechars.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_util_unicodechars.s -S u/t_util_unicodechars.cpp
+
+ui/group1.o: ui/group.cpp
+	$(CXX) $(CXXFLAGS) -o ui/group1.o -c ui/group.cpp
+
+ui/group1.s: ui/group.cpp
+	$(CXX) $(CXXFLAGS) -o ui/group1.s -S ui/group.cpp
 
 ui/rich/draw1.o: ui/rich/draw.cpp
 	$(CXX) $(CXXFLAGS) -o ui/rich/draw1.o -c ui/rich/draw.cpp
@@ -2057,11 +3914,11 @@ ui/rich/draw1.o: ui/rich/draw.cpp
 ui/rich/draw1.s: ui/rich/draw.cpp
 	$(CXX) $(CXXFLAGS) -o ui/rich/draw1.s -S ui/rich/draw.cpp
 
-ui/root1.o: ui/root.cpp
-	$(CXX) $(CXXFLAGS) -o ui/root1.o -c ui/root.cpp
+ui/root4.o: ui/root.cpp
+	$(CXX) $(CXXFLAGS) -o ui/root4.o -c ui/root.cpp
 
-ui/root1.s: ui/root.cpp
-	$(CXX) $(CXXFLAGS) -o ui/root1.s -S ui/root.cpp
+ui/root4.s: ui/root.cpp
+	$(CXX) $(CXXFLAGS) -o ui/root4.s -S ui/root.cpp
 
 ui/widget1.o: ui/widget.cpp
 	$(CXX) $(CXXFLAGS) -o ui/widget1.o -c ui/widget.cpp
@@ -2074,6 +3931,12 @@ ui/widgets/statictext1.o: ui/widgets/statictext.cpp
 
 ui/widgets/statictext1.s: ui/widgets/statictext.cpp
 	$(CXX) $(CXXFLAGS) -o ui/widgets/statictext1.s -S ui/widgets/statictext.cpp
+
+util/application1.o: util/application.cpp
+	$(CXX) $(CXXFLAGS) -o util/application1.o -c util/application.cpp
+
+util/application1.s: util/application.cpp
+	$(CXX) $(CXXFLAGS) -o util/application1.s -S util/application.cpp
 
 util/plugin/manager1.o: util/plugin/manager.cpp
 	$(CXX) $(CXXFLAGS) -o util/plugin/manager1.o -c util/plugin/manager.cpp
@@ -2092,6 +3955,12 @@ util/rich/parser1.o: util/rich/parser.cpp
 
 util/rich/parser1.s: util/rich/parser.cpp
 	$(CXX) $(CXXFLAGS) -o util/rich/parser1.s -S util/rich/parser.cpp
+
+util/syntax/factory1.o: util/syntax/factory.cpp
+	$(CXX) $(CXXFLAGS) -o util/syntax/factory1.o -c util/syntax/factory.cpp
+
+util/syntax/factory1.s: util/syntax/factory.cpp
+	$(CXX) $(CXXFLAGS) -o util/syntax/factory1.s -S util/syntax/factory.cpp
 
 
 

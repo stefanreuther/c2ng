@@ -1,5 +1,6 @@
 /**
   *  \file game/spec/hullfunction.cpp
+  *  \brief Class game::spec::HullFunction
   */
 
 #include "game/spec/hullfunction.hpp"
@@ -23,66 +24,77 @@ game::spec::HullFunction::HullFunction(int basicFunctionId, ExperienceLevelSet_t
       m_hostId(-1)
 { }
 
+// Set player restriction.
 void
 game::spec::HullFunction::setPlayers(PlayerSet_t players)
 {
     m_players = players;
 }
 
+// Set level restriction.
 void
 game::spec::HullFunction::setLevels(ExperienceLevelSet_t levels)
 {
     m_levels = levels;
 }
 
+// Set kind.
 void
 game::spec::HullFunction::setKind(Kind kind)
 {
     m_kind = kind;
 }
 
+// Set host Id.
 void
 game::spec::HullFunction::setHostId(int hostId)
 {
     m_hostId = hostId;
 }
 
+// Set basic function Id.
 void
 game::spec::HullFunction::setBasicFunctionId(int basicFunctionId)
 {
     m_basicFunctionId = basicFunctionId;
 }
 
+// Get player restriction.
 game::PlayerSet_t
 game::spec::HullFunction::getPlayers() const
 {
     return m_players;
 }
 
+// Get level restriction.
 game::ExperienceLevelSet_t
 game::spec::HullFunction::getLevels() const
 {
     return m_levels;
 }
 
+// Get kind of assignment.
 game::spec::HullFunction::Kind
 game::spec::HullFunction::getKind() const
 {
     return m_kind;
 }
 
+// Get host Id.
 int
 game::spec::HullFunction::getHostId() const
 {
     return m_hostId;
 }
 
+// Get basic function Id.
 int
 game::spec::HullFunction::getBasicFunctionId() const
 {
     return m_basicFunctionId;
 }
 
+// Check whether two functions name the same hull function.
 bool
 game::spec::HullFunction::isSame(const HullFunction& other)
 {
@@ -91,28 +103,11 @@ game::spec::HullFunction::isSame(const HullFunction& other)
         && m_levels == other.m_levels;
 }
 
-// /** Get default assignment for a function. Some hull functions can have a
-//     variable default assignment, depending upon configuration or other
-//     properties of a hull. In the host, the "Init=Default" statement will
-//     consult the current configuration, and set the functions accordingly.
-//     We want to be able to support configuration that changes on the fly
-//     without reloading hull functions (i.e. when the player configures
-//     AllowOneEngineTowing=Yes, all ships magically receive the 'Tow' ability).
-//     This function figures out the current variable default for a hull/device.
-
-//     \param device Device identifier
-//     \param hull   Hull object
-
-//     \return players who will have the function by default
-
-//     Note that the classic hull functions assigned to fixed hull numbers
-//     (i.e. "44-46 = Gravitonic") are not handled here.
-
-//     Note: all hull functions that can have a nonempty result here must be
-//     listed in GHull::clearSpecialFunctions(). */
+// Get default assignments for a basic function.
 game::PlayerSet_t
 game::spec::HullFunction::getDefaultAssignment(int basicFunctionId, const game::config::HostConfiguration& config, const Hull& hull)
 {
+    // Note: all hull functions that can have a nonempty result here must be listed in HullFunctionAssignmentList::clear().
     // ex GHullFunctionData::getDefaultAssignment
     if (basicFunctionId == Tow) {
         // if AllowOneEngineTowing enabled or ship has more than one engine, everyone can tow with it

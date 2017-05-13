@@ -8,6 +8,7 @@
 
 #include "t_interpreter.hpp"
 
+/** Test lookupName(). */
 void
 TestInterpreterNameTable::testLookup()
 {

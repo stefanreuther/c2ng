@@ -1,5 +1,6 @@
 /**
   *  \file gfx/rectangle.hpp
+  *  \brief Class gfx::Rectangle
   */
 #ifndef C2NG_GFX_RECTANGLE_HPP
 #define C2NG_GFX_RECTANGLE_HPP
@@ -9,10 +10,12 @@
 
 namespace gfx {
 
-// /** Rectangle. An SDL_Rect or a faster implementation. Represents
-//     rectangles as position plus extent. This offers some useful
-//     primitives to work with rectangles. Otherwise, this is a plain old
-//     structure and you are invited to modify it directly. */
+    /** Rectangle.
+        Rectangles are represented as position and extent.
+        This corresponds to a half-open interval representation, where the top/left coordinate is part of the covered area,
+        but the bottom/right one is not.
+
+        Degenerate (zero-size, i.e. zero-width or zero-height) rectangles can be represented and are not normalized. */
     class Rectangle {
      public:
         /** Construct empty rectangle.
@@ -26,80 +29,93 @@ namespace gfx {
             \param h height */
         Rectangle(int x, int y, int w, int h) throw();
 
-        // /** Construct rectangle with given size.
-        //     The rectangle is located at (0,0).
-        //     \param extent Specifies size of rectangle */
-        // explicit Rectangle(Point extent) throw();
-
         /** Construct rectangle with position and size.
-            \param origin Origin
+            \param origin origin
             \param extent extent */
         Rectangle(Point origin, Point extent) throw();
 
-        /** Get top coordinate. */
+        /** Get top coordinate.
+            \return top Y */
         int getTopY() const
             { return m_top; }
 
-        /** Get right coordinate. */
+        /** Get left coordinate.
+            \return left X */
         int getLeftX() const
             { return m_left; }
 
-        /** Get bottom coordinate. */
+        /** Get bottom coordinate.
+            \return bottom Y */
         int getBottomY() const
             { return m_top + m_height; }
 
-        /** Get right coordinate. */
+        /** Get right coordinate.
+            \return right X */
         int getRightX() const
             { return m_left + m_width; }
 
-        /** Get width. */
+        /** Get width.
+            \return width */
         int getWidth() const
             { return m_width; }
 
-        /** Get height. */
+        /** Get height.
+            \return height */
         int getHeight() const
             { return m_height; }
 
-        /** Get top-left point. */
+        /** Get top-left point.
+            \return point */
         Point getTopLeft() const
             { return Point(m_left, m_top); }
 
-        /** Get bottom-right point. */
+        /** Get bottom-right point.
+            \return point */
         Point getBottomRight() const
             { return Point(getRightX(), getBottomY()); }
 
-        /** Get size of rectangle. */
+        /** Get size of rectangle.
+            \return size */
         Point getSize() const
             { return Point(m_width, m_height); }
 
-
+        /** Set left X coordinate.
+            \param left new value */
         void setLeftX(int left)
             { m_left = left; }
+
+        /** Set top Y coordinate.
+            \param top new value */
         void setTopY(int top)
             { m_top = top; }
+
+        /** Set width.
+            \param width new value */
         void setWidth(int width)
             { m_width = width; }
+
+        /** Set height.
+            \param height new value */
         void setHeight(int height)
             { m_height = height; }
 
-
-
         /** Intersect (clip) at rectangle.
             Modify this rectangle so that it lies entirely within the other rectangle, \c r.
+            \param r Rectangle
             \post result.contains(p) iff orig.contains(p) && r.contains(p) for all points p */
         void intersect(const Rectangle& r) throw();
 
         /** Include rectangle.
             Computes the smallest possible rectangle which includes this one as well r,
             and modifies this rectangle to contain these bounds.
-
+            \param r Rectangle
             \post r.contains(p) || orig.contains(p) => result.contains(p) for all points p (the converse obviously does not hold). */
         void include(const Rectangle& r) throw();
 
         /** Include point.
             Computes the smallest possible rectangle which includes this one as well as pt,
             and modifies this rectangle to contain these bounds.
-
+            \param pt Point
             \post r.contains(p) => result.contains(p) for all points p
             \post result.contains(pt) */
         void include(Point pt) throw();
@@ -109,7 +125,9 @@ namespace gfx {
             \return true iff r.contains(x,y) => contains(x,y) for all x,y. */
         bool contains(const Rectangle& r) const throw();
 
-        /** Check whether rectangle contains a given point. */
+        /** Check whether rectangle contains a given point.
+            \param px,py Coordinates
+            \return true if point is within rectangle */
         bool contains(int px, int py) const
             {
                 // FIXME: improvement possible
@@ -118,7 +136,9 @@ namespace gfx {
                 return px >= 0 && py >= 0 && px < m_width && py < m_height;
             }
 
-        /** Check whether rectangle contains a given point. */
+        /** Check whether rectangle contains a given point.
+            \param pt Point
+            \return true if point is within rectangle */
         bool contains(Point pt) const throw()
             { return contains(pt.getX(), pt.getY()); }
 
@@ -132,7 +152,8 @@ namespace gfx {
             \note empty rectangles do not compare equal unless their x,y is also identical */
         bool operator!=(const Rectangle& rhs) const throw();
 
-        /** Check whether this rectangle has a non-zero extent. */
+        /** Check whether this rectangle has a non-zero extent.
+            \return true if rectangle has a non-zero extent */
         bool exists() const throw()
             { return m_width > 0 && m_height > 0; }
 
@@ -143,62 +164,40 @@ namespace gfx {
             \post x == where.x && y == where.y */
         Point moveTo(Point where) throw();
 
-        // FIXME: delete, retire and replace by generic moveTo
-        //     /** Move to point. \overload */
-        //     Point moveTo(int px, int py) throw()
-        //         { return moveTo(Point(px, py)); }
-
         /** Move by relative distance.
-            The distance is given in the components of a point. */
+            The distance is given in the components of a point.
+            \param dist Relative movement */
         void moveBy(Point dist)
             { m_left += dist.getX(); m_top += dist.getY(); }
-
-        // FIXME: delete, retire and replace by generic moveBy
-        //     /** Move by relative distance. The distance is given by two
-        //         integers. */
-        //     void moveBy(int dx, int dy)
-        //         { x += dx; y += dy; }
-        //     /** Move by relative distance, reverse direction. */
-        //     void moveByRev(Point dist)
-        //         { x -= dist.x; y -= dist.y; }
-        //     /** Move by relative distance, reverse direction. */
-        //     void moveByRev(int dx, int dy)
-        //         { x -= dx; y -= dy; }
 
         /** Grow rectangle.
             This enlarges the rectangle by \c dx columns to the left and right,
             and by \c dy lines at top and bottom (for a total growth of twice the given amount, of course).
-            Use negative values to shrink. */
+            Use negative values to shrink.
+            \param dx Width increase
+            \param dy Height increase */
         void grow(int dx, int dy)
             { m_left -= dx; m_top -= dy; m_width += 2*dx; m_height += 2*dy; }
 
-        // FIXME: delete, unused
-        //     /** Grow rectangle in one direction. This enlarges the rectangle
-        //         by \c dx columns to the right and \c dy lines to the bottom,
-        //         without affecting its origin. */
-        //     void growSize(int dx, int dy)
-        //         { w += dx; h += dy; }
-        //     /** Grow rectangle in one direction. \overload */
-        //     void growSize(Point pt)
-        //         { w += pt.x; h += pt.y; }
-
-        /** Get center point of rectangle. */
+        /** Get center point of rectangle.
+            \return center */
         Point getCenter() const
             { return Point(m_left + m_width/2, m_top + m_height/2); }
 
-        /** Check whether this rectangle intersects another one. */
+        /** Check whether this rectangle intersects another one.
+            \param r other rectangle
+            \return true if this rectangle intersects \c r */
         bool isIntersecting(Rectangle r) const
             {
                 r.intersect(*this);
                 return r.exists();
             }
 
-//     void moveInto(const Rectangle& other) throw();
-
-        /** Center this rectangle within \c other. */
+        /** Center this rectangle within another.
+            \param other other rectangle */
         void centerWithin(const Rectangle& other) throw();
 
-        /** Move this rectangle to edge of \c other.
+        /** Move this rectangle to edge of another.
             \param other  Bounding rectangle
             \param xPos   Relative X position (0: left, 1: center, 2: right)
             \param yPos   Relative Y position (0: top, 1: center, 2: bottom)
@@ -214,8 +213,8 @@ namespace gfx {
 
         /** Split rectangle vertically.
             Removes \c pix pixels from the left (less if the rectangle is narrower), like consumeX(int).
-            Returns the removed rectangle.
-            \param pix number of pixels to remove */
+            \param pix number of pixels to remove
+            \return removed rectangle */
         Rectangle splitX(int pix);
 
         /** Reduce this rectangle's height from the top.
@@ -226,8 +225,8 @@ namespace gfx {
 
         /** Split rectangle horizontally.
             Removes \c pix pixels from the top (less if the rectangle is shorter), like consumeY(int).
-            Returns the removed rectangle.
-            \param pix number of pixels to remove */
+            \param pix number of pixels to remove
+            \return removed rectangle */
         Rectangle splitY(int pix);
 
      private:
@@ -238,6 +237,11 @@ namespace gfx {
     };
 }
 
+/** Output rectangle.
+    Generates the X11 geometry format (WxH+X+Y).
+    \param os Output stream
+    \param r Rectangle to output
+    \return os */
 std::ostream& operator<<(std::ostream& os, const gfx::Rectangle& r);
 
 #endif

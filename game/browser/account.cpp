@@ -72,7 +72,7 @@ game::browser::Account::get(String_t key, String_t defaultValue) const
 void
 game::browser::Account::setEncoded(String_t key, String_t value, bool persistent)
 {
-    set(key, afl::charset::Base64().encode(afl::string::toMemory(value)), persistent);
+    set(key, afl::string::fromBytes(afl::charset::Base64().encode(afl::string::toMemory(value))), persistent);
 }
 
 // Get encoded attribute.
@@ -80,7 +80,7 @@ bool
 game::browser::Account::getEncoded(String_t key, String_t& result) const
 {
     if (const String_t* p = get(key)) {
-        result = afl::charset::Base64().decode(afl::string::toMemory(*p));
+        result = afl::charset::Base64().decode(afl::string::toBytes(*p));
         return true;
     } else {
         return false;
@@ -143,21 +143,21 @@ game::browser::Account::setHost(String_t host)
 void
 game::browser::Account::setGameFolderName(String_t gameId, String_t folderName)
 {
-    set(GAME_KEY_PREFIX + afl::charset::UrlEncoding().encode(afl::string::toMemory(gameId)), folderName, true);
+    set(GAME_KEY_PREFIX + afl::string::fromBytes(afl::charset::UrlEncoding().encode(afl::string::toMemory(gameId))), folderName, true);
 }
 
 // Get game folder name.
 const String_t*
 game::browser::Account::getGameFolderName(String_t gameId) const
 {
-    return get(GAME_KEY_PREFIX + afl::charset::UrlEncoding().encode(afl::string::toMemory(gameId)));
+    return get(GAME_KEY_PREFIX + afl::string::fromBytes(afl::charset::UrlEncoding().encode(afl::string::toMemory(gameId))));
 }
 
 // Remove game folder name.
 void
 game::browser::Account::removeGameFolderName(String_t gameId)
 {
-    m_data.erase(GAME_KEY_PREFIX + afl::charset::UrlEncoding().encode(afl::string::toMemory(gameId)));
+    m_data.erase(GAME_KEY_PREFIX + afl::string::fromBytes(afl::charset::UrlEncoding().encode(afl::string::toMemory(gameId))));
 }
 
 // Save this account's data to a text file.

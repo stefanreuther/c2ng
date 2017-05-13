@@ -31,6 +31,9 @@ namespace game { namespace spec {
             \return Number of components */
         int size() const;
 
+        /** Find next component, given an Id.
+            \param id Starting point. 0=get first component.
+            \return Component with getId() > id, or null if none */
         Component* findNext(int id) const;
 
         /** Get short names.
@@ -45,7 +48,8 @@ namespace game { namespace spec {
 
      protected:
         /** Set new element.
-            Callers are trusted; calling this method with unexpected parameters (e.g. id=0) may crash.
+            Callers are trusted to not provide unreasonable Ids.
+            Invalid Ids (<= 0) cause the call to be ignored and destroy \c p.
             \param id Component number, >= 1
             \param p Newly-allocated component */
         void setNew(int id, Component* p);
@@ -100,7 +104,7 @@ game::spec::BaseComponentVector::clear()
 inline int
 game::spec::BaseComponentVector::size() const
 {
-    return m_components.size();
+    return int(m_components.size());
 }
 
 #endif

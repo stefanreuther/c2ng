@@ -29,31 +29,50 @@ LDFLAGS = $(CONFIG_AFL_LDFLAGS) $(CONFIG_C2NG_LDFLAGS)
 CXXTESTDIR = $(CONFIG_AFL_CXXTESTDIR)
 
 # Define "all" targets
-all: all-sdl-$(CONFIG_C2NG_HAVE_SDL)
+all: all-sdl-$(CONFIG_C2NG_HAVE_SDL) all-cxxtest-$(CONFIG_C2NG_HAVE_CXXTEST)
 all-sdl-yes: all-sdl-no $(OUTPUT_$(PROJECTS_guiapp))
 all-sdl-no: $(OUTPUT_$(PROJECTS_app))
-MAIN_TARGETS += all all-sdl-yes all-sdl-no
+all-cxxtest-yes: $(OUTPUT_$(PROJECTS_testapp))
+all-cxxtest-no: 
+MAIN_TARGETS += all all-sdl-yes all-sdl-no all-cxxtest-yes all-cxxtest-no
 
 # Define "guiapp" type
 begin guiapp
 PARENT = app
 LIBS_$(NAME) +:= $(CONFIG_C2NG_GUILIBS)
 end
+begin testapp
+PARENT = app
+LIBS_$(NAME) +:= $(CONFIG_C2NG_GUILIBS)
+end
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/v3/trn/dumper.cpp game/v3/trn/dumper.hpp \
-    util/application.cpp util/application.hpp game/v3/trn/filter.cpp \
-    game/v3/trn/parseexception.hpp game/v3/trn/indexfilter.cpp \
-    game/v3/trn/indexfilter.hpp game/v3/trn/negatefilter.cpp \
-    game/v3/trn/negatefilter.hpp game/v3/trn/orfilter.cpp \
-    game/v3/trn/orfilter.hpp game/v3/trn/andfilter.cpp \
-    game/v3/trn/andfilter.hpp game/v3/trn/idfilter.cpp \
-    game/v3/trn/idfilter.hpp game/v3/trn/stringfilter.cpp \
-    game/v3/trn/stringfilter.hpp game/v3/trn/namefilter.cpp \
-    game/v3/trn/namefilter.hpp game/v3/trn/constantfilter.cpp \
-    game/v3/trn/constantfilter.hpp game/v3/trn/filter.hpp \
-    interpreter/vmio/assemblersavecontext.cpp \
+FILES_gamelib = interpreter/structurevaluedata.cpp \
+    interpreter/structurevaluedata.hpp interpreter/structuretypedata.cpp \
+    interpreter/structuretypedata.hpp \
+    game/interface/userinterfaceproperty.hpp util/unicodechars.hpp \
+    interpreter/arraydata.cpp interpreter/arraydata.hpp \
+    game/maint/difficultyrater.cpp game/maint/difficultyrater.hpp \
+    util/syntax/factory.cpp util/syntax/factory.hpp \
+    util/syntax/inihighlighter.cpp util/syntax/inihighlighter.hpp \
+    util/syntax/chighlighter.cpp util/syntax/chighlighter.hpp \
+    util/syntax/scripthighlighter.cpp util/syntax/scripthighlighter.hpp \
+    util/syntax/keywordtable.cpp util/syntax/keywordtable.hpp \
+    util/syntax/segment.cpp util/syntax/segment.hpp util/syntax/format.hpp \
+    util/syntax/nullhighlighter.cpp util/syntax/nullhighlighter.hpp \
+    util/syntax/highlighter.hpp game/v3/trn/dumper.cpp \
+    game/v3/trn/dumper.hpp util/application.cpp util/application.hpp \
+    game/v3/trn/filter.cpp game/v3/trn/parseexception.hpp \
+    game/v3/trn/indexfilter.cpp game/v3/trn/indexfilter.hpp \
+    game/v3/trn/negatefilter.cpp game/v3/trn/negatefilter.hpp \
+    game/v3/trn/orfilter.cpp game/v3/trn/orfilter.hpp \
+    game/v3/trn/andfilter.cpp game/v3/trn/andfilter.hpp \
+    game/v3/trn/idfilter.cpp game/v3/trn/idfilter.hpp \
+    game/v3/trn/stringfilter.cpp game/v3/trn/stringfilter.hpp \
+    game/v3/trn/namefilter.cpp game/v3/trn/namefilter.hpp \
+    game/v3/trn/constantfilter.cpp game/v3/trn/constantfilter.hpp \
+    game/v3/trn/filter.hpp interpreter/vmio/assemblersavecontext.cpp \
     interpreter/vmio/assemblersavecontext.hpp \
     game/interface/commandinterface.cpp game/interface/commandinterface.hpp \
     game/v3/commandextra.cpp game/v3/commandextra.hpp \
@@ -289,7 +308,6 @@ FILES_gamelib = game/v3/trn/dumper.cpp game/v3/trn/dumper.hpp \
     game/tables/nativegovernmentname.hpp game/tables/nativeracename.cpp \
     game/tables/nativeracename.hpp interpreter/closure.cpp \
     interpreter/closure.hpp interpreter/hashvalue.cpp \
-    interpreter/hashdata.cpp interpreter/hashdata.hpp \
     interpreter/hashvalue.hpp game/interface/planetproperty.cpp \
     game/interface/planetproperty.hpp interpreter/savevisitor.cpp \
     interpreter/savevisitor.hpp interpreter/tagnode.hpp \
@@ -354,12 +372,11 @@ FILES_gamelib = game/v3/trn/dumper.cpp game/v3/trn/dumper.hpp \
     interpreter/expr/identifiernode.cpp interpreter/expr/identifiernode.hpp \
     interpreter/expr/membernode.hpp interpreter/expr/membernode.cpp \
     interpreter/expr/logicalnode.cpp interpreter/expr/logicalnode.hpp \
-    interpreter/expr/conditionalnode.cpp \
-    interpreter/expr/conditionalnode.hpp interpreter/expr/sequencenode.cpp \
-    interpreter/expr/sequencenode.hpp interpreter/expr/assignmentnode.cpp \
-    interpreter/expr/assignmentnode.hpp interpreter/expr/casenode.cpp \
-    interpreter/expr/casenode.hpp interpreter/expr/simplenode.cpp \
-    interpreter/expr/simplenode.hpp interpreter/expr/simplervaluenode.cpp \
+    interpreter/expr/sequencenode.cpp interpreter/expr/sequencenode.hpp \
+    interpreter/expr/assignmentnode.cpp interpreter/expr/assignmentnode.hpp \
+    interpreter/expr/casenode.cpp interpreter/expr/casenode.hpp \
+    interpreter/expr/simplenode.cpp interpreter/expr/simplenode.hpp \
+    interpreter/expr/simplervaluenode.cpp \
     interpreter/expr/simplervaluenode.hpp interpreter/expr/literalnode.cpp \
     interpreter/expr/literalnode.hpp interpreter/expr/rvaluenode.hpp \
     interpreter/expr/rvaluenode.cpp interpreter/expr/node.cpp \
@@ -587,6 +604,137 @@ TYPE_guilib = lib
 DEPEND_guilib = afl
 PROJ_AUTO += guilib:gfx/*.cpp,gfx/*.hpp,ui/*.cpp,ui/*.hpp,client/*.cpp,client/*.hpp
 
+TARGETS += serverlib
+FILES_serverlib = server/interface/composablecommandhandler.cpp \
+    server/interface/composablecommandhandler.hpp \
+    server/configurationhandler.cpp server/configurationhandler.hpp \
+    server/common/session.cpp server/common/session.hpp \
+    server/interface/hostcronclient.cpp server/interface/hostcronclient.hpp \
+    server/interface/hostcron.hpp server/file/directorywrapper.cpp \
+    server/file/directorywrapper.hpp server/file/clientdirectoryhandler.cpp \
+    server/file/clientdirectoryhandler.hpp \
+    server/file/ca/internalobjectcache.cpp \
+    server/file/ca/internalobjectcache.hpp server/file/ca/objectcache.hpp \
+    server/file/ca/internalreferencecounter.cpp \
+    server/file/ca/internalreferencecounter.hpp \
+    server/file/ca/referencecounter.hpp \
+    server/file/directoryhandlerfactory.cpp \
+    server/file/directoryhandlerfactory.hpp server/file/directoryhandler.cpp \
+    server/tools/c2fileclient.cpp server/file/utils.cpp \
+    server/file/utils.hpp server/file/ca/commit.cpp \
+    server/file/ca/commit.hpp server/file/ca/referenceupdater.hpp \
+    server/file/ca/root.cpp server/file/ca/root.hpp \
+    server/file/ca/directoryhandler.cpp server/file/ca/directoryhandler.hpp \
+    server/file/ca/directoryentry.cpp server/file/ca/directoryentry.hpp \
+    server/file/ca/objectid.cpp server/file/ca/objectid.hpp \
+    server/file/ca/objectstore.cpp server/file/ca/objectstore.hpp \
+    server/file/internaldirectoryhandler.cpp \
+    server/file/internaldirectoryhandler.hpp server/file/racenames.cpp \
+    server/file/racenames.hpp server/file/filegame.cpp \
+    server/file/filegame.hpp server/file/gamestatus.cpp \
+    server/interface/filegameserver.cpp server/interface/filegameserver.hpp \
+    server/interface/filegameclient.cpp server/interface/filegameclient.hpp \
+    server/interface/filegame.hpp server/file/gamestatus.hpp \
+    server/file/pathresolver.cpp server/file/pathresolver.hpp \
+    server/file/filebase.cpp server/file/filebase.hpp \
+    server/file/directoryitem.cpp server/file/fileitem.cpp \
+    server/file/filesystemhandler.cpp server/file/filesystemhandler.hpp \
+    server/file/directoryitem.hpp server/file/fileitem.hpp \
+    server/file/item.cpp server/file/directoryhandler.hpp \
+    server/file/item.hpp server/file/root.cpp server/file/commandhandler.cpp \
+    server/file/commandhandler.hpp server/file/session.hpp \
+    server/file/root.hpp server/interface/filebaseserver.cpp \
+    server/interface/filebaseserver.hpp server/interface/filebaseclient.cpp \
+    server/interface/filebaseclient.hpp server/interface/filebase.cpp \
+    server/interface/filebase.hpp server/talk/configuration.cpp \
+    server/talk/configuration.hpp server/interface/baseclient.cpp \
+    server/interface/baseclient.hpp server/interface/base.hpp \
+    server/talk/talknntp.cpp server/talk/talknntp.hpp \
+    server/interface/talknntpserver.cpp server/interface/talknntpserver.hpp \
+    server/interface/talknntpclient.cpp server/interface/talknntpclient.hpp \
+    server/interface/talknntp.hpp server/talk/talkpm.cpp \
+    server/talk/talkpm.hpp server/talk/userpm.cpp server/talk/userpm.hpp \
+    server/interface/talkpmserver.cpp server/interface/talkpmserver.hpp \
+    server/interface/talkpmclient.cpp server/interface/talkpmclient.hpp \
+    server/interface/talkpm.hpp server/talk/talkfolder.cpp \
+    server/talk/talkfolder.hpp server/talk/userfolder.cpp \
+    server/talk/userfolder.hpp server/interface/talkfolderserver.cpp \
+    server/interface/talkfolderserver.hpp \
+    server/interface/talkfolderclient.cpp \
+    server/interface/talkfolderclient.hpp server/interface/talkfolder.hpp \
+    server/errors.hpp server/talk/spam.cpp server/talk/spam.hpp \
+    server/talk/talkuser.cpp server/talk/talkuser.hpp \
+    server/interface/talkuserserver.cpp server/interface/talkuserserver.hpp \
+    server/interface/talkuserclient.cpp server/interface/talkuserclient.hpp \
+    server/interface/talkuser.hpp server/talk/newsrc.cpp \
+    server/talk/newsrc.hpp server/talk/talkthread.cpp \
+    server/talk/talkthread.hpp server/interface/talkthreadserver.cpp \
+    server/interface/talkthreadserver.hpp \
+    server/interface/talkthreadclient.cpp \
+    server/interface/talkthreadclient.hpp server/interface/talkthread.hpp \
+    server/talk/notify.cpp server/talk/notify.hpp server/talk/sorter.hpp \
+    server/talk/talkforum.cpp server/talk/talkforum.hpp \
+    server/interface/talkforum.cpp server/interface/talkforumserver.cpp \
+    server/interface/talkforumserver.hpp \
+    server/interface/talkforumclient.cpp \
+    server/interface/talkforumclient.hpp server/interface/talkforum.hpp \
+    server/interface/mailqueueserver.cpp \
+    server/interface/mailqueueserver.hpp \
+    server/interface/mailqueueclient.cpp \
+    server/interface/mailqueueclient.hpp server/interface/mailqueue.hpp \
+    server/talk/talkpost.cpp server/talk/talkpost.hpp \
+    server/interface/talkpostserver.cpp server/interface/talkpostserver.hpp \
+    server/interface/talkpostclient.cpp server/interface/talkpostclient.hpp \
+    server/interface/talkpost.hpp server/talk/accesschecker.cpp \
+    server/talk/accesschecker.hpp server/talk/render/bbrenderer.cpp \
+    server/talk/render/bbrenderer.hpp server/talk/render/mailrenderer.cpp \
+    server/talk/render/mailrenderer.hpp server/talk/render/htmlrenderer.cpp \
+    server/talk/render/htmlrenderer.hpp server/talk/parse/bbparser.cpp \
+    server/talk/parse/bbparser.hpp server/talk/parse/bblexer.cpp \
+    server/talk/parse/bblexer.hpp server/talk/util.cpp server/talk/util.hpp \
+    server/talk/user.cpp server/talk/user.hpp \
+    server/interface/talkgroupclient.cpp \
+    server/interface/talkgroupclient.hpp server/talk/talkgroup.cpp \
+    server/talk/talkgroup.hpp server/interface/talkgroupserver.cpp \
+    server/interface/talkgroupserver.hpp server/interface/talkgroup.hpp \
+    server/talk/talkrender.cpp server/talk/talkrender.hpp \
+    server/interface/talkrenderserver.cpp \
+    server/interface/talkrenderserver.hpp \
+    server/interface/talkrenderclient.cpp \
+    server/interface/talkrenderclient.hpp server/interface/talkrender.hpp \
+    server/talk/render/render.cpp server/talk/render/render.hpp \
+    server/talk/forum.cpp server/talk/forum.hpp server/talk/topic.cpp \
+    server/talk/topic.hpp server/talk/render/options.cpp \
+    server/talk/render/options.hpp server/talk/render/context.cpp \
+    server/talk/render/context.hpp server/talk/render/textrenderer.cpp \
+    server/talk/render/textrenderer.hpp server/talk/message.cpp \
+    server/talk/message.hpp server/talk/linkformatter.cpp \
+    server/talk/linkformatter.hpp server/talk/textnode.cpp \
+    server/talk/textnode.hpp server/talk/group.cpp server/talk/group.hpp \
+    server/types.cpp server/types.hpp server/talk/talksyntax.cpp \
+    server/talk/talksyntax.hpp server/interface/talksyntaxserver.cpp \
+    server/interface/talksyntaxserver.hpp \
+    server/interface/talksyntaxclient.cpp \
+    server/interface/talksyntaxclient.hpp server/interface/talksyntax.hpp \
+    server/talk/commandhandler.cpp server/talk/commandhandler.hpp \
+    server/talk/root.cpp server/talk/session.cpp server/talk/session.hpp \
+    server/talk/root.hpp server/talk/inlinerecognizer.cpp \
+    server/talk/inlinerecognizer.hpp server/format/simpacker.cpp \
+    server/format/simpacker.hpp server/format/truehullpacker.cpp \
+    server/format/truehullpacker.hpp server/format/enginepacker.cpp \
+    server/format/enginepacker.hpp server/format/hullpacker.cpp \
+    server/format/hullpacker.hpp server/format/torpedopacker.cpp \
+    server/format/torpedopacker.hpp server/format/utils.cpp \
+    server/format/utils.hpp server/format/beampacker.cpp \
+    server/format/beampacker.hpp server/application.cpp \
+    server/application.hpp server/format/format.cpp server/format/format.hpp \
+    server/interface/formatserver.cpp server/interface/formatserver.hpp \
+    server/format/stringpacker.cpp server/format/stringpacker.hpp \
+    server/format/packer.hpp server/interface/formatclient.cpp \
+    server/interface/formatclient.hpp server/interface/format.hpp
+TYPE_serverlib = lib
+DEPEND_serverlib = afl gamelib
+PROJ_AUTO += serverlib:server/[^c]*.cpp,server/c[^2]*.cpp,server/*.hpp
 
 # Tools
 TARGETS += c2export
@@ -598,6 +746,11 @@ TARGETS += c2plugin
 FILES_c2plugin = tools/c2plugin.cpp
 TYPE_c2plugin = app
 DEPEND_c2plugin = gamelib afl
+
+TARGETS += c2rater
+FILES_c2rater = tools/c2rater.cpp
+TYPE_c2rater = app
+DEPEND_c2rater = gamelib afl
 
 TARGETS += c2script
 FILES_c2script = tools/c2script.cpp
@@ -614,6 +767,27 @@ FILES_c2untrn = tools/c2untrn.cpp
 TYPE_c2untrn = app
 DEPEND_c2untrn = gamelib afl
 
+# Servers
+TARGETS += c2file-server
+FILES_c2file-server = server/c2file.cpp
+TYPE_c2file-server = app
+DEPEND_c2file-server = serverlib gamelib afl
+
+TARGETS += c2format-server
+FILES_c2format-server = server/c2format.cpp
+TYPE_c2format-server = app
+DEPEND_c2format-server = serverlib gamelib afl
+
+TARGETS += c2talk-server
+FILES_c2talk-server = server/c2talk.cpp
+TYPE_c2talk-server = app
+DEPEND_c2talk-server = serverlib gamelib afl
+
+TARGETS += c2fileclient
+FILES_c2fileclient = server/tools/c2fileclient.cpp
+TYPE_c2fileclient = app
+DEPEND_c2fileclient = serverlib gamelib afl
+
 # Main entry points (GUIs)
 TARGETS += c2ng
 FILES_c2ng = main/c2ng.cpp
@@ -622,7 +796,153 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_game_v3_trn_parseexception.cpp \
+FILES_testsuite = u/t_interpreter_vmio_filesavecontext.cpp \
+    u/t_interpreter_vmio_processsavecontext.cpp \
+    u/t_interpreter_vmio_structures.cpp \
+    u/t_interpreter_vmio_processloadcontext.cpp u/t_gfx_filter.cpp \
+    u/t_game_config_stringoption.cpp u/t_game_config_integerarrayoption.cpp \
+    u/t_gfx_font.cpp u/t_game_config_enumvalueparser.cpp \
+    u/t_gfx_bitmapfont.cpp u/t_gfx_bitmapglyph.cpp u/t_gfx_primitives.cpp \
+    u/t_gfx_pixmapcanvasimpl.cpp u/t_gfx_fontlist.cpp u/t_gfx_context.cpp \
+    u/t_gfx_nullcolorscheme.cpp u/t_gfx_colorscheme.cpp \
+    u/t_gfx_basecontext.cpp u/t_gfx_rgbapixmap.cpp u/t_gfx_fontrequest.cpp \
+    u/t_gfx_palettizedpixmap.cpp u/t_gfx_gen_spaceviewconfig.cpp \
+    u/t_gfx_gen_spaceview.cpp u/t_game_sim_setup.cpp \
+    u/t_game_sim_configuration.cpp u/t_game_sim_ability.cpp \
+    u/t_server_configurationhandler.cpp u/t_interpreter_opcode.cpp \
+    u/t_interpreter_keymapvalue.cpp u/t_interpreter_simplespecialcommand.cpp \
+    u/t_interpreter_memorycommandsource.cpp u/t_interpreter_fusion.cpp \
+    u/t_interpreter_filetable.cpp u/t_interpreter_filevalue.cpp \
+    u/t_gfx_graphicsexception.cpp u/t_interpreter_filecommandsource.cpp \
+    u/t_interpreter_defaultstatementcompilationcontext.cpp \
+    u/t_interpreter_compilationcontext.cpp \
+    u/t_interpreter_propertyacceptor.cpp u/t_interpreter_contextprovider.cpp \
+    u/t_interpreter_callablevalue.cpp u/t_interpreter_basevalue.cpp \
+    u/t_interpreter_commandsource.cpp u/t_interpreter_arrayvalue.cpp \
+    u/t_interpreter_arguments.cpp u/t_interpreter_structurevalue.cpp \
+    u/t_interpreter_structurevaluedata.cpp u/t_interpreter_structuretype.cpp \
+    u/t_interpreter_structuretypedata.cpp \
+    u/t_interpreter_objectpropertyvector.cpp u/t_interpreter_world.cpp \
+    u/t_interpreter_arraydata.cpp u/t_interpreter_hashvalue.cpp \
+    u/t_util_rich_alignmentattribute.cpp u/t_util_syntax_format.cpp \
+    u/t_game_sim_structures.cpp u/t_game_v3_structures.cpp \
+    u/t_game_db_structures.cpp u/t_game_extra.cpp \
+    u/t_interpreter_savecontext.cpp u/t_interpreter_specialcommand.cpp \
+    u/t_interpreter_typehint.cpp u/t_interpreter_tagnode.cpp \
+    u/t_interpreter_exporter_exporter.cpp \
+    u/t_interpreter_exporter_dbfexporter.cpp \
+    u/t_interpreter_exporter_jsonexporter.cpp \
+    u/t_interpreter_exporter_textexporter.cpp \
+    u/t_interpreter_exporter_separatedtextexporter.cpp \
+    u/t_interpreter_exporter_htmlexporter.cpp \
+    u/t_interpreter_filefunctions.cpp u/t_game_parser_messageparser.cpp \
+    u/t_game_parser_messageinformation.cpp u/t_game_parser_messagevalue.cpp \
+    u/t_game_root.cpp u/helper/counter.hpp u/t_game_turn.cpp \
+    u/t_game_playerset.cpp u/t_game_shipbuildorder.cpp \
+    u/t_game_spec_shiplist.cpp \
+    u/t_game_spec_standardcomponentnameprovider.cpp u/t_game_spec_hull.cpp \
+    u/t_game_spec_hullfunctionassignmentlist.cpp \
+    u/t_game_spec_modifiedhullfunctionlist.cpp \
+    u/t_game_spec_hullfunction.cpp u/t_game_spec_hullassignmentlist.cpp \
+    u/t_game_spec_mission.cpp u/t_game_spec_basichullfunctionlist.cpp \
+    u/t_game_spec_nullcomponentnameprovider.cpp u/t_game_spec_torpedo.cpp \
+    u/t_game_spec_torpedolauncher.cpp u/t_game_spec_beam.cpp \
+    u/t_game_spec_weapon.cpp u/t_game_spec_basichullfunction.cpp \
+    u/t_game_spec_basecomponentvector.cpp u/t_game_score_loader.cpp \
+    u/t_game_score_compoundscore.cpp u/t_game_score_turnscorelist.cpp \
+    u/t_game_score_turnscore.cpp u/t_game_score.hpp \
+    u/t_server_talk_render_bbrenderer.cpp u/t_game_map_ionstorm.cpp \
+    u/t_game_maint_sweeper.cpp u/t_server_format_format.cpp \
+    u/t_server_format_truehullpacker.cpp u/t_server_format_stringpacker.cpp \
+    u/t_server_format_hullpacker.cpp u/t_server_format_enginepacker.cpp \
+    u/t_server_format_torpedopacker.cpp u/t_server_format_beampacker.cpp \
+    u/t_server_interface_composablecommandhandler.cpp \
+    u/t_server_talk_commandhandler.cpp u/t_server_talk_talknntp.cpp \
+    u/t_server_talk_talkthread.cpp u/t_server_talk_talkfolder.cpp \
+    u/t_server_talk_talkgroup.cpp u/t_server_talk_userfolder.cpp \
+    u/t_server_talk_topic.cpp u/t_server_talk_user.cpp \
+    u/t_server_talk_talkforum.cpp u/t_server_talk_talkrender.cpp \
+    u/t_interpreter_vmio_objectloader.cpp u/t_server_common_session.cpp \
+    u/t_server_common.hpp u/t_server_interface_hostcronclient.cpp \
+    u/t_server_interface_hostcron.cpp u/t_util_io.cpp \
+    u/t_game_maint_difficultyrater.cpp u/t_game_maint.hpp \
+    u/t_game_config_collapsibleintegerarrayoption.cpp \
+    u/t_server_file_directorywrapper.cpp \
+    u/t_server_file_clientdirectoryhandler.cpp \
+    u/t_server_file_ca_internalobjectcache.cpp \
+    u/t_server_file_ca_objectcache.cpp \
+    u/t_server_file_ca_referencecounter.cpp \
+    u/t_server_file_ca_internalreferencecounter.cpp \
+    u/t_server_file_directoryhandlerfactory.cpp u/t_server_file_utils.cpp \
+    u/t_server_file_ca_root.cpp u/t_server_file_ca_directoryhandler.cpp \
+    u/t_server_file_ca_referenceupdater.cpp u/t_server_file_ca_commit.cpp \
+    u/t_server_file_ca_directoryentry.cpp u/t_server_file_ca_objectid.cpp \
+    u/t_server_file_ca_objectstore.cpp u/t_server_file_ca.hpp \
+    u/t_server_file_filegame.cpp u/t_server_file_racenames.cpp \
+    u/t_server_file_gamestatus.cpp u/files.cpp u/files.hpp \
+    u/t_server_interface_filegameserver.cpp \
+    u/t_server_interface_filegameclient.cpp \
+    u/t_server_interface_filegame.cpp u/t_server_file_commandhandler.cpp \
+    u/t_server_file_item.cpp u/t_server_file_directoryhandler.cpp \
+    u/t_server_file_root.cpp u/t_server_file_session.cpp \
+    u/t_server_file_filebase.cpp u/t_server_file.hpp \
+    u/t_ui_res_ccimageloader.cpp u/t_ui_res_engineimageloader.cpp \
+    u/t_server_interface_filebaseserver.cpp \
+    u/t_server_interface_filebaseclient.cpp \
+    u/t_server_interface_filebase.cpp u/t_server_talk_message.cpp \
+    u/t_server_talk_accesschecker.cpp u/t_server_talk_forum.cpp \
+    u/t_server_talk_configuration.cpp u/t_server_talk_userpm.cpp \
+    u/t_server_interface_baseclient.cpp u/t_server_interface_base.cpp \
+    u/t_server_interface_talknntpserver.cpp \
+    u/t_server_interface_talknntpclient.cpp \
+    u/t_server_interface_talknntp.cpp u/t_server_talk_talkpm.cpp \
+    u/t_server_interface_talkpmserver.cpp \
+    u/t_server_interface_talkpmclient.cpp u/t_server_interface_talkpm.cpp \
+    u/t_server_interface_talkfolderserver.cpp \
+    u/t_server_interface_talkfolderclient.cpp \
+    u/t_server_interface_talkfolder.cpp \
+    u/t_server_talk_render_htmlrenderer.cpp u/t_server_talk_talkpost.cpp \
+    u/t_server_format_simpacker.cpp u/t_server_talk_spam.cpp \
+    u/t_server_talk_talkuser.cpp u/t_server_interface_talkuserserver.cpp \
+    u/t_server_interface_talkuserclient.cpp \
+    u/t_server_interface_talkuser.cpp u/t_server_talk_newsrc.cpp \
+    u/t_server_talk_talksyntax.cpp u/t_server_talk_textnode.cpp \
+    u/t_server_interface_formatserver.cpp \
+    u/t_server_interface_talkthreadserver.cpp \
+    u/t_server_interface_talkthreadclient.cpp \
+    u/t_server_interface_talkthread.cpp \
+    u/t_server_interface_talkgroupserver.cpp \
+    u/t_server_interface_talkgroupclient.cpp u/t_server_talk_sorter.cpp \
+    u/t_server_interface_talkforumserver.cpp \
+    u/t_server_interface_talkforumclient.cpp \
+    u/t_server_interface_talkforum.cpp \
+    u/t_server_interface_mailqueueserver.cpp \
+    u/t_server_interface_mailqueueclient.cpp \
+    u/t_server_interface_mailqueue.cpp \
+    u/t_server_interface_talkpostserver.cpp \
+    u/t_server_interface_talkpostclient.cpp \
+    u/t_server_interface_talkpost.cpp u/t_game_db_drawingatommap.cpp \
+    u/t_game_db.hpp u/t_server_talk_parse_bbparser.cpp \
+    u/t_server_talk_parse_bblexer.cpp u/t_server_talk_parse.hpp \
+    u/t_server_interface_talkrenderserver.cpp \
+    u/t_server_interface_talkrenderclient.cpp u/t_server_format_utils.cpp \
+    u/t_server_talk_root.cpp u/t_server_talk_util.cpp \
+    u/t_server_talk_render_context.cpp u/t_server_talk_render_options.cpp \
+    u/t_server_talk_render.hpp u/t_server_interface_talksyntaxserver.cpp \
+    u/helper/commandhandlermock.cpp u/helper/commandhandlermock.hpp \
+    u/t_server_interface_talksyntaxclient.cpp u/helper/callreceiver.cpp \
+    u/helper/callreceiver.hpp u/t_server_interface_talkrender.cpp \
+    u/t_server_interface_talkgroup.cpp u/t_server_talk_linkformatter.cpp \
+    u/t_server_talk_group.cpp u/t_server_types.cpp u/t_server.hpp \
+    u/t_server_interface_talksyntax.cpp u/t_server_talk_inlinerecognizer.cpp \
+    u/t_server_talk.hpp u/t_server_format_packer.cpp u/t_server_format.hpp \
+    u/t_server_interface_formatclient.cpp u/t_server_interface_format.cpp \
+    u/t_server_interface.hpp u/t_util_syntax_factory.cpp \
+    u/t_util_syntax_inihighlighter.cpp u/t_util_syntax_chighlighter.cpp \
+    u/t_util_syntax_keywordtable.cpp u/t_util_syntax_segment.cpp \
+    u/t_util_syntax_nullhighlighter.cpp \
+    u/t_util_syntax_scripthighlighter.cpp u/t_util_syntax_highlighter.cpp \
+    u/t_util_syntax.hpp u/t_game_v3_trn_parseexception.cpp \
     u/t_game_v3_trn_filter.cpp u/t_game_v3_trn_namefilter.cpp \
     u/t_game_v3_trn_stringfilter.cpp u/t_game_v3_trn_idfilter.cpp \
     u/t_game_v3_trn_negatefilter.cpp u/t_game_v3_trn_orfilter.cpp \
@@ -755,8 +1075,8 @@ FILES_testsuite = u/t_game_v3_trn_parseexception.cpp \
     u/t_game_config_configuration.cpp u/t_game_spec_hullfunctionlist.cpp \
     u/t_game_v3_resultfile.cpp u/t_game_v3.hpp testsuite.cpp \
     u/t_game_spec.hpp u/t_game_spec_cost.cpp
-TYPE_testsuite = guiapp
-DEPEND_testsuite = guilib gamelib afl
+TYPE_testsuite = testapp
+DEPEND_testsuite = serverlib guilib gamelib afl
 PROJ_AUTO += testsuite:u/*.cpp,u/*.hpp
 
 HEADERS_testsuite = u/t_*.hpp
@@ -780,6 +1100,10 @@ tags:
 # but not for testsuite.cpp, where cxxtest automatically defines it.
 CXXFLAGS_$(FILES_testsuite) +:= -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g
 CXXFLAGS_testsuite.cpp +:= -U_CXXTEST_HAVE_EH -U_CXXTEST_HAVE_STD -O0
+
+# This module uses floating-point, and will get a x86/x64 difference
+# without this option.
+CXXFLAGS_gfx/gen/spaceview.cpp +:= -ffloat-store
 
 # Must rename some object files because ar only looks at basenames.
 PROJ_UNIQUE_STEMS = 1

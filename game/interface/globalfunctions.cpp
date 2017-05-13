@@ -288,7 +288,7 @@ game::interface::IFFormat(game::Session& /*session*/, interpreter::Arguments& ar
     String_t strings[LIMIT];
     afl::string::Format formatter(fmt.c_str());
 
-    for (uint32_t i = 0, limit = args.getNumArgs(); i < limit; ++i) {
+    for (size_t i = 0, limit = args.getNumArgs(); i < limit; ++i) {
         // Check and convert value
         afl::data::Value* v = args.getNext();
         if (v == 0) {
@@ -423,9 +423,9 @@ game::interface::IFRandom(game::Session& session, interpreter::Arguments& args)
     }
 
     if (lo < hi) {
-        return makeIntegerValue(lo + session.rng()(hi - lo));
+        return makeIntegerValue(lo + session.rng()(uint16_t(hi - lo)));
     } else if (lo > hi) {
-        return makeIntegerValue(lo - session.rng()(lo - hi));
+        return makeIntegerValue(lo - session.rng()(uint16_t(lo - hi)));
     } else {
         return makeIntegerValue(lo);
     }

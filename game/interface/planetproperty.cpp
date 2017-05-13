@@ -77,7 +77,7 @@ PlanetArrayProperty::get(Arguments& args)
         int16_t value, turn;
         args.checkArgumentCount(1);
         if (checkIntegerArg(id, args.getNext(), 0, 0x7FFF)
-            && m_game->planetScores().lookup(id, index)
+            && m_game->planetScores().lookup(int16_t(id), index)
             && m_planet.unitScores().get(index, value, turn))
         {
             return makeIntegerValue(value);

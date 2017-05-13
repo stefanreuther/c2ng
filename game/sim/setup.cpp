@@ -1,17 +1,20 @@
 /**
   *  \file game/sim/setup.cpp
+  *  \brief Class game::sim::Setup
   */
 
 #include "game/sim/setup.hpp"
 #include "game/sim/ship.hpp"
 #include "game/sim/planet.hpp"
 
+// Construct empty list.
 game::sim::Setup::Setup()
     : m_ships(),
       m_planet(),
       m_structureChanged(false)
 { }
 
+// Copy a setup.
 game::sim::Setup::Setup(const Setup& other)
     : m_ships(),
       m_planet(),
@@ -21,29 +24,33 @@ game::sim::Setup::Setup(const Setup& other)
     *this = other;
 }
 
+// Destructor.
 game::sim::Setup::~Setup()
 { }
 
+// Assign another setup.
 game::sim::Setup&
 game::sim::Setup::operator=(const Setup& other)
 {
-    // Clear
-    m_ships.clear();
-    m_planet.reset();
+    if (&other != this) {
+        // Clear
+        m_ships.clear();
+        m_planet.reset();
 
-    // Copy other
-    m_ships.reserve(other.m_ships.size());
-    for (Slot_t i = 0, n = other.m_ships.size(); i < n; ++i) {
-        m_ships.pushBackNew(new Ship(*other.m_ships[i]));
+        // Copy other
+        m_ships.reserve(other.m_ships.size());
+        for (Slot_t i = 0, n = other.m_ships.size(); i < n; ++i) {
+            m_ships.pushBackNew(new Ship(*other.m_ships[i]));
+        }
+        if (other.m_planet.get() != 0) {
+            m_planet.reset(new Planet(*other.m_planet));
+        }
+        m_structureChanged = true;
     }
-    if (other.m_planet.get() != 0) {
-        m_planet.reset(new Planet(*other.m_planet));
-    }
-    m_structureChanged = true;
-
     return *this;
 }
 
+// Add planet.
 game::sim::Planet*
 game::sim::Setup::addPlanet()
 {
@@ -55,12 +62,14 @@ game::sim::Setup::addPlanet()
     return m_planet.get();
 }
 
+// Check presence of planet.
 bool
 game::sim::Setup::hasPlanet() const
 {
     return m_planet.get() != 0;
 }
 
+// Get planet.
 const game::sim::Planet*
 game::sim::Setup::getPlanet() const
 {
@@ -68,6 +77,7 @@ game::sim::Setup::getPlanet() const
     return m_planet.get();
 }
 
+// Get planet.
 game::sim::Planet*
 game::sim::Setup::getPlanet()
 {
@@ -75,6 +85,7 @@ game::sim::Setup::getPlanet()
     return m_planet.get();
 }
 
+// Remove planet.
 void
 game::sim::Setup::removePlanet()
 {
@@ -85,6 +96,7 @@ game::sim::Setup::removePlanet()
     }
 }
 
+// Add a ship.
 game::sim::Ship*
 game::sim::Setup::addShip()
 {
@@ -94,6 +106,7 @@ game::sim::Setup::addShip()
     return result;
 }
 
+// Get number of ships.
 game::sim::Setup::Slot_t
 game::sim::Setup::getNumShips() const
 {
@@ -101,12 +114,14 @@ game::sim::Setup::getNumShips() const
     return m_ships.size();
 }
 
+// Get ship, given a slot number.
 const game::sim::Ship*
 game::sim::Setup::getShip(Slot_t slot) const
 {
     return const_cast<Setup*>(this)->getShip(slot);
 }
 
+// Get ship, given a slot number.
 game::sim::Ship*
 game::sim::Setup::getShip(Slot_t slot)
 {
@@ -118,8 +133,7 @@ game::sim::Setup::getShip(Slot_t slot)
     }
 }
 
-// /** Remove a ship.
-//     \param ix Index of ship to remove, [0,getNumShips()). */
+// Remove ship, given a slot number.
 void
 game::sim::Setup::removeShip(Slot_t slot)
 {
@@ -130,6 +144,7 @@ game::sim::Setup::removeShip(Slot_t slot)
     }
 }
 
+// Get number of objects.
 game::sim::Setup::Slot_t
 game::sim::Setup::getNumObjects() const
 {
@@ -140,6 +155,7 @@ game::sim::Setup::getNumObjects() const
     return result;
 }
 
+// Get object, given a slot number.
 game::sim::Object*
 game::sim::Setup::getObject(Slot_t slot)
 {
@@ -153,9 +169,7 @@ game::sim::Setup::getObject(Slot_t slot)
     }
 }
 
-// /** Add ship at specific position.
-//     \param i ship to duplicate
-//     \param id Id number for the duplicate */
+// Duplicate a ship.
 void
 game::sim::Setup::duplicateShip(Slot_t slot, Id_t newId, afl::string::Translator& tx)
 {
@@ -168,8 +182,7 @@ game::sim::Setup::duplicateShip(Slot_t slot, Id_t newId, afl::string::Translator
     }
 }
 
-// /** Swap two ships.
-//     \param a,b Indexes of ships to swap */
+// Swap two ships.
 void
 game::sim::Setup::swapShips(Slot_t a, Slot_t b)
 {
@@ -180,9 +193,7 @@ game::sim::Setup::swapShips(Slot_t a, Slot_t b)
     }
 }
 
-// /** Get index of a GSimShip object.
-//     \param sh Some ship from this GSimState
-//     \inv getIndexOf(getShip(x)) == x */
+// Find ship slot, given an object.
 bool
 game::sim::Setup::findIndex(const Ship* ship, Slot_t& result) const
 {
@@ -196,7 +207,7 @@ game::sim::Setup::findIndex(const Ship* ship, Slot_t& result) const
     return false;
 }
 
-// /** Get index of a ship by Id. */
+// Find ship slot, given an Id.
 bool
 game::sim::Setup::findShipSlotById(Id_t id, Slot_t& result) const
 {
@@ -210,6 +221,7 @@ game::sim::Setup::findShipSlotById(Id_t id, Slot_t& result) const
     return false;
 }
 
+// Find ship, given an Id.
 game::sim::Ship*
 game::sim::Setup::findShipById(Id_t id)
 {
@@ -222,8 +234,7 @@ game::sim::Setup::findShipById(Id_t id)
     }
 }
 
-// /** Get a free Id number.
-//     \return Id number, 0 if none found */
+// Find unused ship Id.
 game::Id_t
 game::sim::Setup::findUnusedShipId(Id_t firstToCheck) const
 {
@@ -238,7 +249,7 @@ game::sim::Setup::findUnusedShipId(Id_t firstToCheck) const
     return i;
 }
 
-// /** Perform all queued updates. */
+// Notify listeners.
 void
 game::sim::Setup::notifyListeners()
 {
@@ -263,8 +274,7 @@ game::sim::Setup::notifyListeners()
     }
 }
 
-// /** Assign random friendly codes for all objects that want them.
-//     Calls GSimObject::assignRandomFCode() on all objects. */
+// Set random friendly codes.
 void
 game::sim::Setup::setRandomFriendlyCodes()
 {
@@ -276,8 +286,7 @@ game::sim::Setup::setRandomFriendlyCodes()
     }
 }
 
-// /** Check whether simulation matches ship list. Checks all ships.
-//     \see GSimShip::isMatchingShipList(). */
+// Check whether this setup matches a ship list.
 bool
 game::sim::Setup::isMatchingShipList(const game::spec::ShipList& shipList) const
 {

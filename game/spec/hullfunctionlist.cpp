@@ -1,5 +1,6 @@
 /**
   *  \file game/spec/hullfunctionlist.cpp
+  *  \brief Class game::spec::HullFunctionList
   */
 
 #include <algorithm>
@@ -64,6 +65,9 @@ namespace {
                 int rfirst = firstLevel(rhs.getLevels());
                 if (lfirst != rfirst) {
                     return lfirst < rfirst;
+                }
+                if (lhs.getLevels() != rhs.getLevels()) {
+                    return lhs.getLevels().toInteger() < rhs.getLevels().toInteger();
                 }
 
                 // Then, functions

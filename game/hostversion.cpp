@@ -85,10 +85,16 @@ game::HostVersion::toString(afl::string::Translator& tx) const
 int32_t
 game::HostVersion::getCommandArgumentLimit() const
 {
-    if (m_kind == PHost && m_version >= MKVERSION(3,3,2)) {
-        return 10000;
+    // \change This differs from PCC2, but is consistent with PCC1.
+    if (m_kind == PHost) {
+        if (m_version >= MKVERSION(3,3,2)) {
+            return 10000;
+        } else {
+            return 500;
+        }
     } else {
-        return 500;
+        // No way to know whether it's Host999.
+        return 999;
     }
 }
 
@@ -213,7 +219,7 @@ int
 game::HostVersion::getColonistTaxRateLimit(int player, const game::config::HostConfiguration& config) const
 {
     // ex GHost::getColonistTaxRateLimit
-    if (m_kind != PHost && config.getPlayerRaceNumber(player)) {
+    if (m_kind != PHost && config.getPlayerRaceNumber(player) == 2) {
         return 75;
     } else {
         return 100;
@@ -252,6 +258,7 @@ game::HostVersion::isMissionAllowed(int mission) const
 {
     // ex GHost::isMissionAllowed
     // SRace cannot have mission 1
+    // FIXME: NuHost also has some limits here
     if (mission == 1 && m_kind == SRace) {
         return false;
     } else {

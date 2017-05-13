@@ -1,0 +1,6 @@
+/*!
+     \namespace server
+     \brief PlanetsCentral servers
+
+     This namespace contains the PlanetsCentral servers.
+ */

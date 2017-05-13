@@ -34,7 +34,7 @@ namespace game { namespace db {
 
         util::Atom_t get(uint16_t value) const;
 
-        void save(afl::io::Stream& out, afl::charset::Charset& cs, util::AtomTable& table) const;
+        void save(afl::io::Stream& out, afl::charset::Charset& cs, const util::AtomTable& table) const;
         void load(afl::io::Stream& in, afl::charset::Charset& cs, util::AtomTable& table);
 
      private:

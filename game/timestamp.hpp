@@ -18,8 +18,8 @@ namespace game {
      public:
         static const size_t SIZE = 18;
 
-        typedef char (&Data_t)[SIZE];
-        typedef const char (&ConstData_t)[SIZE];
+        typedef uint8_t (&Data_t)[SIZE];
+        typedef const uint8_t (&ConstData_t)[SIZE];
 
         /** Construct from binary representation.
             Makes a timestamp from an 18-byte ASCII timestamp field. */
@@ -71,7 +71,7 @@ namespace game {
         bool isValid() const;
         
      private:
-        char m_data[SIZE];
+        uint8_t m_data[SIZE];
     };
 
 }

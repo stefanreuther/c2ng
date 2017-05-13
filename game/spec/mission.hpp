@@ -38,6 +38,8 @@ namespace game { namespace spec {
             PlayerParameter     // Player number (ex mat_Player)
         };
 
+        /** Default constructor.
+            This constructor is only intended to make Mission usable with containers. */
         Mission();
         Mission(int number, String_t descriptionLine);
         ~Mission();

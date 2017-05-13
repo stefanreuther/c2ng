@@ -76,6 +76,8 @@ namespace {
                 { }
             virtual void doCreateAsDirectory()
                 { }
+            virtual void doSetFlag(FileFlag /*flag*/, bool /*value*/)
+                { }
          private:
             String_t m_name;
             afl::base::Ref<afl::io::Directory> m_parent;

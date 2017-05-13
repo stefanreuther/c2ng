@@ -1,6 +1,6 @@
 /**
   *  \file game/interface/ionstormcontext.hpp
-  *  \class game::interface::IonStormContext
+  *  \brief Class game::interface::IonStormContext
   */
 #ifndef C2NG_GAME_INTERFACE_IONSTORMCONTEXT_HPP
 #define C2NG_GAME_INTERFACE_IONSTORMCONTEXT_HPP

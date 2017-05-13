@@ -74,6 +74,10 @@ TestInterpreterExprParser::testAssignment()
     h.checkIntegerExpression("(((a))):=17", 17);
     TS_ASSERT_EQUALS(h.a, 17);
     h.a = h.b = h.c = 0;
+
+    h.checkIntegerExpression("if(a:=b,2,3)", 3);
+    TS_ASSERT_EQUALS(h.a, 0);
+    h.a = h.b = h.c = 0;
 }
 
 /** Test logical "Or" operator.

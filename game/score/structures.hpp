@@ -37,7 +37,7 @@ namespace game { namespace score { namespace structures {
     /// score.cc (PCC2 score db) record header.
     struct ScoreRecordHeader {
         Int16_t     turn;                                       ///< Turn number.
-        char        timestamp[18];                              ///< Time stamp.
+        uint8_t     timestamp[18];                              ///< Time stamp.
     };
     static_assert(sizeof(ScoreRecordHeader) == 20, "sizeof ScoreRecordHeader");
 

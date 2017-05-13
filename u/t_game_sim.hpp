@@ -8,6 +8,17 @@
 #include <cxxtest/TestSuite.h>
 #include "game/sim/object.hpp"
 
+class TestGameSimAbility : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
+class TestGameSimConfiguration : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testConfig();
+};
+
 class TestGameSimLoader : public CxxTest::TestSuite {
  public:
     void testV0();
@@ -31,11 +42,32 @@ class TestGameSimObject : public CxxTest::TestSuite {
 class TestGameSimPlanet : public CxxTest::TestSuite {
  public:
     void testIt();
+    void testAbility();
+    void testCost();
+    void testCostZero();
+    void testCostPartial();
+};
+
+class TestGameSimSetup : public CxxTest::TestSuite {
+ public:
+    void testObj();
+    void testShip();
+    void testShipList();
+    void testRandom();
+    void testListener();
 };
 
 class TestGameSimShip : public CxxTest::TestSuite {
  public:
     void testIt();
+    void testName();
+    void testShipList();
+    void testAbilities();
+};
+
+class TestGameSimStructures : public CxxTest::TestSuite {
+ public:
+    void testHeader();
 };
 
 #endif

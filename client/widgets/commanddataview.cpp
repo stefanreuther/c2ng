@@ -141,7 +141,7 @@ gfx::Point
 client::widgets::CommandDataView::getPreferredChildSize() const
 {
     gfx::Point buttonSize = findButtonSize();
-    return gfx::Point(buttonSize.getX() + root().provider().getFont(gfx::FontRequest())->getEmWidth() * 20, buttonSize.getY() * m_lines.size());
+    return gfx::Point(buttonSize.getX() + root().provider().getFont(gfx::FontRequest())->getEmWidth() * 20, int(buttonSize.getY() * m_lines.size()));
 }
 
 void

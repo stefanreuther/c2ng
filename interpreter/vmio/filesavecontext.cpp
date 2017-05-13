@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/vmio/filesavecontext.cpp
+  *  \brief Class interpreter::vmio::FileSaveContext
   *
   *  PCC2 Comment:
   *
@@ -37,16 +38,17 @@
   */
 
 #include "interpreter/vmio/filesavecontext.hpp"
+#include "afl/base/growablememory.hpp"
 #include "afl/bits/pack.hpp"
 #include "afl/io/nullstream.hpp"
+#include "afl/tmp/ifthenelse.hpp"
+#include "afl/tmp/issametype.hpp"
 #include "interpreter/arrayvalue.hpp"
-#include "interpreter/hashdata.hpp"
 #include "interpreter/savevisitor.hpp"
 #include "interpreter/structuretype.hpp"
 #include "interpreter/structurevalue.hpp"
 #include "interpreter/vmio/processsavecontext.hpp"
 #include "interpreter/vmio/structures.hpp"
-#include "afl/base/growablememory.hpp"
 
 namespace {
     using interpreter::vmio::structures::UInt32_t;
@@ -72,9 +74,34 @@ namespace {
         void writeHeader();
     };
 
+    // Format a uint32_t.
+    inline uint32_t toWord(uint32_t value)
+    {
+        // ex int/vmio.h:storeItem
+        return value;
+    }
+
+    // Format a size_t.
+    // The adventurous prototype is required because size_t may be the same as uint32_t and a size_t prototype cannot exist with the one above.
+    // Therefore, if it is identical, we define the function taking a uint64_t instead (which is then never used).
+    inline uint32_t toWord(afl::tmp::IfThenElse<afl::tmp::IsSameType<uint32_t, size_t>::result, uint64_t, size_t>::Type value)
+    {
+        // ex int/vmio.h:storeItem
+        return static_cast<uint32_t>(value);
+    }
+
+    // Format a Opcode.
+    inline uint32_t toWord(interpreter::Opcode insn)
+    {
+        // ex int/vmio.h:storeItem
+        return uint32_t(insn.arg)
+            + (uint32_t(insn.minor) << 16)
+            + (uint32_t(insn.getExternalMajor()) << 24);
+    }
+
     template<typename T>
     void
-    writeArray32(afl::io::Stream& out, interpreter::vmio::FileSaveContext& ctx, afl::base::Memory<const T> obj)
+    writeArray32(afl::io::Stream& out, afl::base::Memory<const T> obj)
     {
         const size_t CHUNK = 128;
         while (!obj.empty()) {
@@ -82,7 +109,7 @@ namespace {
             afl::base::Memory<const T> now(obj.split(CHUNK));
             size_t i = 0;
             while (const T* p = now.eat()) {
-                buffer[i++] = ctx.toWord(*p);
+                buffer[i++] = toWord(*p);
             }
             out.fullWrite(afl::base::Memory<UInt32_t>(buffer).trim(i).toBytes());
         }
@@ -126,7 +153,7 @@ SaveObject::end()
 {
     //ASSERT(m_propertyIndex == obj_header[3]);
     afl::io::Stream::FileSize_t end_pos = m_stream.getPos();
-    m_header.size = end_pos - m_headerPosition - 4*4;
+    m_header.size = uint32_t(end_pos - m_headerPosition - 4*4);
     m_stream.setPos(m_headerPosition);
     writeHeader();
     m_stream.setPos(end_pos);
@@ -145,41 +172,44 @@ void
 SaveObject::endProperty()
 {
     if (UInt32_t* p = m_properties.at(2*m_propertyIndex + 1)) {
-        *p = m_stream.getPos() - m_thisPropertyPosition;
+        *p = uint32_t(m_stream.getPos() - m_thisPropertyPosition);
     }
     ++m_propertyIndex;
 }
 
+/**************************** FileSaveContext ****************************/
 
+// Constructor.
 interpreter::vmio::FileSaveContext::FileSaveContext(afl::charset::Charset& cs)
     : m_charset(cs),
       m_debugInformationEnabled(true),
-      obj_to_id(),
-      obj_id_counter(0),
-      plan_objs(),
-      plan_types()
+      m_objectToId(),
+      m_objectIdCounter(0),
+      m_planObjects(),
+      m_planTypes()
 {
     // ex IntVMSaveContext::IntVMSaveContext
 }
 
+// Destructor.
 interpreter::vmio::FileSaveContext::~FileSaveContext()
 { }
 
+// Enable/disable debug information.
 void
 interpreter::vmio::FileSaveContext::setDebugInformation(bool enable)
 {
     m_debugInformationEnabled = enable;
 }
 
+// Get number of prepared objects.
 size_t
 interpreter::vmio::FileSaveContext::getNumPreparedObjects() const
 {
-    return plan_objs.size();
+    return m_planObjects.size();
 }
 
-// /** Add process object to serialization. Note that, unlike bytecode, a process
-//     can be saved many times. Loading will then create multiple copies of it.
-//     \param proc The process object */
+// Add process object.
 void
 interpreter::vmio::FileSaveContext::addProcess(Process& proc)
 {
@@ -190,80 +220,50 @@ interpreter::vmio::FileSaveContext::addProcess(Process& proc)
     saveProcess(ns, proc);
 
     /* Remember the plan */
-    plan_objs.push_back(&proc);
-    plan_types.push_back(poProcess);
+    m_planObjects.push_back(&proc);
+    m_planTypes.push_back(poProcess);
 }
 
-// /** Save all pending objects.
-//     \param out Stream to save to */
+// Save all pending objects.
 void
 interpreter::vmio::FileSaveContext::save(afl::io::Stream& out)
 {
     // ex IntVMSaveContext::save
-    // ASSERT(plan_objs.size() == plan_types.size());
-    for (size_t i = 0; i < plan_objs.size(); ++i) {
-        switch (plan_types[i]) {
+    // ASSERT(m_planObjects.size() == m_planTypes.size());
+    for (size_t i = 0; i < m_planObjects.size(); ++i) {
+        switch (m_planTypes[i]) {
          case poBytecode:
-            saveBCO(out, *static_cast<BytecodeObject*>(plan_objs[i]), obj_to_id[plan_objs[i]]);
+            saveBCO(out, *static_cast<const BytecodeObject*>(m_planObjects[i]), m_objectToId[m_planObjects[i]]);
             break;
          case poProcess:
-            saveProcess(out, *static_cast<Process*>(plan_objs[i]));
+            saveProcess(out, *static_cast<const Process*>(m_planObjects[i]));
             break;
          case poArray:
-            saveArray(out, *static_cast<ArrayData*>(plan_objs[i]), obj_to_id[plan_objs[i]]);
+            saveArray(out, *static_cast<const ArrayData*>(m_planObjects[i]), m_objectToId[m_planObjects[i]]);
             break;
          case poHash:
-            saveHash(out, *static_cast<HashData*>(plan_objs[i]), obj_to_id[plan_objs[i]]);
+            saveHash(out, *static_cast<const afl::data::Hash*>(m_planObjects[i]), m_objectToId[m_planObjects[i]]);
             break;
          case poStructType:
-            saveStructureType(out, *static_cast<StructureTypeData*>(plan_objs[i]), obj_to_id[plan_objs[i]]);
+            saveStructureType(out, *static_cast<const StructureTypeData*>(m_planObjects[i]), m_objectToId[m_planObjects[i]]);
             break;
          case poStructValue:
-            saveStructureValue(out, *static_cast<StructureValueData*>(plan_objs[i]), obj_to_id[plan_objs[i]]);
+            saveStructureValue(out, *static_cast<const StructureValueData*>(m_planObjects[i]), m_objectToId[m_planObjects[i]]);
             break;
         }
     }
 }
 
-uint32_t
-interpreter::vmio::FileSaveContext::toWord(uint32_t value)
-{
-    // ex int/vmio.h:storeItem
-    return value;
-}
-
-uint32_t
-interpreter::vmio::FileSaveContext::toWord(Opcode insn)
-{
-    // ex int/vmio.h:storeItem
-    return uint32_t(insn.arg)
-        + (uint32_t(insn.minor) << 16)
-        + (uint32_t(insn.getExternalMajor()) << 24);
-}
-
-uint32_t
-interpreter::vmio::FileSaveContext::toWord(BCORef_t bco)
-{
-    // ex int/vmio.h:storeItem
-    return addBCO(*bco);
-}
-
-
 // SaveContext:
-// /** Add bytecode object to serialization. This assigns the BCO an Id
-//     number which can be used to refer to that BCO. The Id number is
-//     returned. Adding an object multiple times only saves it once.
-//     \param bco the bytecode object
-//     \return Id number */
 uint32_t
-interpreter::vmio::FileSaveContext::addBCO(BytecodeObject& bco)
+interpreter::vmio::FileSaveContext::addBCO(const BytecodeObject& bco)
 {
     // ex IntVMSaveContext::addBCO
     /* Is this item already known? */
-    uint32_t& id = obj_to_id[&bco];
+    uint32_t& id = m_objectToId[&bco];
     if (id == 0) {
         /* This object is not yet known. Give it an Id. */
-        id = ++obj_id_counter;
+        id = ++m_objectIdCounter;
 
         /* Save its preconditions. Note that if the BCO indirectly refers
            to itself, the nested addBCO will see that it already has an
@@ -272,131 +272,103 @@ interpreter::vmio::FileSaveContext::addBCO(BytecodeObject& bco)
         saveBCO(ns, bco, id);
 
         /* Remember the plan */
-        plan_objs.push_back(&bco);
-        plan_types.push_back(poBytecode);
+        m_planObjects.push_back(&bco);
+        m_planTypes.push_back(poBytecode);
     }
     return id;
 }
 
-// /** Add hash object to serialisation. This assigns the hash an
-//     Id number which can be used to refer to that hash. The Id
-//     number is returned. Adding an object multiple times only saves
-//     it once.
-//     \param hash the hash data
-//     \return Id number */
 uint32_t
-interpreter::vmio::FileSaveContext::addHash(HashData& hash)
+interpreter::vmio::FileSaveContext::addHash(const afl::data::Hash& hash)
 {
     // ex IntVMSaveContext::addHash
     /* Is this item already known? */
-    uint32_t& id = obj_to_id[&hash];
+    uint32_t& id = m_objectToId[&hash];
     if (id == 0) {
         /* This object is not yet known. Give it an Id. */
-        id = ++obj_id_counter;
+        id = ++m_objectIdCounter;
 
         /* Save its preconditions */
         afl::io::NullStream ns;
         saveHash(ns, hash, id);
 
         /* Remember the plan */
-        plan_objs.push_back(&hash);
-        plan_types.push_back(poHash);
+        m_planObjects.push_back(&hash);
+        m_planTypes.push_back(poHash);
     }
     return id;
 }
 
-// /** Add array object to serialisation. This assigns the array an
-//     Id number which can be used to refer to that array. The Id
-//     number is returned. Adding an object multiple times only saves
-//     it once.
-//     \param array the array data
-//     \return Id number */
 uint32_t
-interpreter::vmio::FileSaveContext::addArray(ArrayData& array)
+interpreter::vmio::FileSaveContext::addArray(const ArrayData& array)
 {
     // ex IntVMSaveContext::addArray
     /* Is this item already known? */
-    uint32_t& id = obj_to_id[&array];
+    uint32_t& id = m_objectToId[&array];
     if (id == 0) {
         /* This object is not yet known. Give it an Id. */
-        id = ++obj_id_counter;
+        id = ++m_objectIdCounter;
 
         /* Save its preconditions */
         afl::io::NullStream ns;
         saveArray(ns, array, id);
 
         /* Remember the plan */
-        plan_objs.push_back(&array);
-        plan_types.push_back(poArray);
+        m_planObjects.push_back(&array);
+        m_planTypes.push_back(poArray);
     }
     return id;
 }
 
-// /** Add structure type object to serialisation. This assigns the
-//     type an Id number which can be used to refer to that type.
-//     The Id number is returned. Adding an object multiple times
-//     only saves it once.
-//     \param array the structure type
-//     \return Id number */
 uint32_t
-interpreter::vmio::FileSaveContext::addStructureType(StructureTypeData& type)
+interpreter::vmio::FileSaveContext::addStructureType(const StructureTypeData& type)
 {
     // ex IntVMSaveContext::addStructureType
     /* Is this item already known? */
-    uint32_t& id = obj_to_id[&type];
+    uint32_t& id = m_objectToId[&type];
     if (id == 0) {
         /* This object is not yet known. Give it an Id. */
-        id = ++obj_id_counter;
+        id = ++m_objectIdCounter;
 
         /* Save its preconditions */
         afl::io::NullStream ns;
         saveStructureType(ns, type, id);
 
         /* Remember the plan */
-        plan_objs.push_back(&type);
-        plan_types.push_back(poStructType);
+        m_planObjects.push_back(&type);
+        m_planTypes.push_back(poStructType);
     }
     return id;
 }
 
-// /** Add structure value object to serialisation. This assigns the
-//     value an Id number which can be used to refer to it. The Id
-//     number is returned. Adding an object multiple times only saves
-//     it once.
-//     \param array the structure value
-//     \return Id number */
 uint32_t
-interpreter::vmio::FileSaveContext::addStructureValue(StructureValueData& value)
+interpreter::vmio::FileSaveContext::addStructureValue(const StructureValueData& value)
 {
     // ex IntVMSaveContext::addStructureValue
     /* Is this item already known? */
-    uint32_t& id = obj_to_id[&value];
+    uint32_t& id = m_objectToId[&value];
     if (id == 0) {
         /* This object is not yet known. Give it an Id. */
-        id = ++obj_id_counter;
+        id = ++m_objectIdCounter;
 
         /* Save its preconditions */
         afl::io::NullStream ns;
         saveStructureValue(ns, value, id);
 
         /* Remember the plan */
-        plan_objs.push_back(&value);
-        plan_types.push_back(poStructValue);
+        m_planObjects.push_back(&value);
+        m_planTypes.push_back(poStructValue);
     }
     return id;
 }
 
 bool
-interpreter::vmio::FileSaveContext::isCurrentProcess(Process* /*p*/)
+interpreter::vmio::FileSaveContext::isCurrentProcess(const Process* /*p*/)
 {
     return false;
 }
 
-
-// /** Save a bytecode object.
-//     \param out  Stream to write to
-//     \param p    Bytecode object to save
-//     \param id   Id to assign this BCO */
+// Save a bytecode object.
 void
 interpreter::vmio::FileSaveContext::saveBCO(afl::io::Stream& out, const BytecodeObject& bco, uint32_t id)
 {
@@ -407,34 +379,34 @@ interpreter::vmio::FileSaveContext::saveBCO(afl::io::Stream& out, const Bytecode
     // Property 1: header (num_labels, flags, min_args, max_args)
     structures::BCOHeader header;
     so.startProperty(0);
-    header.flags = (bco.isProcedure() * header.ProcedureFlag) + (bco.isVarargs() * header.VarargsFlag);
-    header.minArgs = bco.getMinArgs();
-    header.maxArgs = bco.getMaxArgs();
+    header.flags = uint16_t((bco.isProcedure() * header.ProcedureFlag) + (bco.isVarargs() * header.VarargsFlag));
+    header.minArgs = uint16_t(bco.getMinArgs());
+    header.maxArgs = uint16_t(bco.getMaxArgs());
     header.numLabels = bco.getNumLabels();
     out.fullWrite(afl::base::fromObject(header));
     so.endProperty();
 
     // Property 2: "data" (literals for pushlit, data segment)
     const afl::data::Segment& literals = bco.getLiterals();
-    so.startProperty(literals.size());
+    so.startProperty(uint32_t(literals.size()));
     SaveVisitor::save(out, literals, literals.size(), m_charset, *this);
     so.endProperty();
 
     // Property 3: "names" (names for e.g. pushvar, name list)
     const afl::data::NameMap& names = bco.getNames();
-    so.startProperty(names.getNumNames());
+    so.startProperty(uint32_t(names.getNumNames()));
     SaveVisitor::saveNames(out, names, names.getNumNames(), m_charset);
     so.endProperty();
 
     // Property 4: "code" (count = number of instructions, size = 4x count). 32 bit per instruction.
     const std::vector<Opcode>& code = bco.getCode();
-    so.startProperty(code.size());
-    writeArray32(out, *this, afl::base::Memory<const Opcode>(code));
+    so.startProperty(uint32_t(code.size()));
+    writeArray32(out, afl::base::Memory<const Opcode>(code));
     so.endProperty();
 
     // Property 5: "local_names" (predeclared locals, name list)
     const afl::data::NameMap& localNames = bco.getLocalNames();
-    so.startProperty(localNames.getNumNames());
+    so.startProperty(uint32_t(localNames.getNumNames()));
     SaveVisitor::saveNames(out, localNames, localNames.getNumNames(), m_charset);
     so.endProperty();
 
@@ -453,8 +425,8 @@ interpreter::vmio::FileSaveContext::saveBCO(afl::io::Stream& out, const Bytecode
     // Property 8: "line numbers" (count = number of lines, size = 8x count)
     const std::vector<uint32_t>& lineNumbers = bco.getLineNumbers();
     if (m_debugInformationEnabled) {
-        so.startProperty(lineNumbers.size()/2);
-        writeArray32(out, *this, afl::base::Memory<const uint32_t>(lineNumbers));
+        so.startProperty(uint32_t(lineNumbers.size()/2));
+        writeArray32(out, afl::base::Memory<const uint32_t>(lineNumbers));
         so.endProperty();
     } else {
         so.startProperty(0);
@@ -464,36 +436,30 @@ interpreter::vmio::FileSaveContext::saveBCO(afl::io::Stream& out, const Bytecode
     so.end();
 }
 
-// /** Save a hash object.
-//     \param out Stream to save to
-//     \param hash Hash to save
-//     \param id Id to use */
+// Save a hash object.
 void
-interpreter::vmio::FileSaveContext::saveHash(afl::io::Stream& out, const HashData& hash, uint32_t id)
+interpreter::vmio::FileSaveContext::saveHash(afl::io::Stream& out, const afl::data::Hash& hash, uint32_t id)
 {
     // ex IntVMSaveContext::saveHash
     SaveObject so(out);
     so.start(structures::otyp_DataHash, id, 2);
 
     // Property 1: names
-    const afl::data::NameMap& names = hash.getNames();
-    so.startProperty(names.getNumNames());
+    const afl::data::NameMap& names = hash.getKeys();
+    so.startProperty(uint32_t(names.getNumNames()));
     SaveVisitor::saveNames(out, names, names.getNumNames(), m_charset);
     so.endProperty();
 
     // Property 2: values
-    const afl::data::Segment& content = hash.getContent();
-    so.startProperty(content.size());
+    const afl::data::Segment& content = hash.getValues();
+    so.startProperty(uint32_t(content.size()));
     SaveVisitor::save(out, content, content.size(), m_charset, *this);
     so.endProperty();
 
     so.end();
 }
 
-// /** Save an array object.
-//     \param out Stream to save to
-//     \param array Array to save
-//     \param id Id to use */
+// Save an array object.
 void
 interpreter::vmio::FileSaveContext::saveArray(afl::io::Stream& out, const ArrayData& array, uint32_t id)
 {
@@ -503,23 +469,20 @@ interpreter::vmio::FileSaveContext::saveArray(afl::io::Stream& out, const ArrayD
 
     // Property 1: dimensions
     const std::vector<size_t>& dim = array.getDimensions();
-    so.startProperty(dim.size());
-    writeArray32(out, *this, afl::base::Memory<const size_t>(dim));
+    so.startProperty(uint32_t(dim.size()));
+    writeArray32(out, afl::base::Memory<const size_t>(dim));
     so.endProperty();
 
     // Property 2: content
     const afl::data::Segment& content = array.content;
-    so.startProperty(content.size());
+    so.startProperty(uint32_t(content.size()));
     SaveVisitor::save(out, content, content.size(), m_charset, *this);
     so.endProperty();
 
     so.end();
 }
 
-// /** Save a structure type.
-//     \param out Stream to save to
-//     \param type Type to save
-//     \param id Id to use */
+// Save a structure type.
 void
 interpreter::vmio::FileSaveContext::saveStructureType(afl::io::Stream& out, const StructureTypeData& type, uint32_t id)
 {
@@ -528,18 +491,15 @@ interpreter::vmio::FileSaveContext::saveStructureType(afl::io::Stream& out, cons
     so.start(structures::otyp_DataStructType, id, 1);
 
     // Property 1: name list
-    const afl::data::NameMap& names = type.names;
-    so.startProperty(names.getNumNames());
+    const afl::data::NameMap& names = type.names();
+    so.startProperty(uint32_t(names.getNumNames()));
     SaveVisitor::saveNames(out, names, names.getNumNames(), m_charset);
     so.endProperty();
 
     so.end();
 }
 
-// /** Save a structure value.
-//     \param out Stream to save to
-//     \param value Value to save
-//     \param id Id to use */
+// Save a structure value.
 void
 interpreter::vmio::FileSaveContext::saveStructureValue(afl::io::Stream& out, const StructureValueData& value, uint32_t id)
 {
@@ -556,16 +516,14 @@ interpreter::vmio::FileSaveContext::saveStructureValue(afl::io::Stream& out, con
 
     // Property 2: content
     const afl::data::Segment& data = value.data;
-    so.startProperty(data.size());
+    so.startProperty(uint32_t(data.size()));
     SaveVisitor::save(out, data, data.size(), m_charset, *this);
     so.endProperty();
 
     so.end();
 }
 
-// /** Save a stack frame object.
-//     \param out Stream to save to
-//     \param fr  Stack frame to save */
+// Save a stack frame object.
 void
 interpreter::vmio::FileSaveContext::saveFrame(afl::io::Stream& out, const Process::Frame& fr)
 {
@@ -574,37 +532,35 @@ interpreter::vmio::FileSaveContext::saveFrame(afl::io::Stream& out, const Proces
 
     // We don't actually need the frame_sp here (it will be ignored and
     // reconstructed upon load), but it doesn't hurt.
-    so.start(structures::otyp_Frame, fr.frameSP, 3);
+    so.start(structures::otyp_Frame, uint32_t(fr.frameSP), 3);
 
     // Property 1: header
     so.startProperty(0);
     structures::FrameHeader header;
     header.bcoRef = addBCO(*fr.bco);
-    header.pc = fr.pc;
-    header.contextSP = fr.contextSP;
-    header.exceptionSP = fr.exceptionSP;
+    header.pc = uint32_t(fr.pc);
+    header.contextSP = uint32_t(fr.contextSP);
+    header.exceptionSP = uint32_t(fr.exceptionSP);
     header.flags = (fr.wantResult * header.WantResult);
     out.fullWrite(afl::base::fromObject(header));
     so.endProperty();
 
     // Property 2: local values (data segment)
-    so.startProperty(fr.localValues.size());
+    so.startProperty(uint32_t(fr.localValues.size()));
     SaveVisitor::save(out, fr.localValues, fr.localValues.size(), m_charset, *this);
     so.endProperty();
 
     // Property 3: local names (name list)
-    so.startProperty(fr.localNames.getNumNames());
+    so.startProperty(uint32_t(fr.localNames.getNumNames()));
     SaveVisitor::saveNames(out, fr.localNames, fr.localNames.getNumNames(), m_charset);
     so.endProperty();
 
     so.end();
 }
 
-// /** Save process.
-//     \param out Stream to save to
-//     \param exc Process to save */
+// Save process.
 void
-interpreter::vmio::FileSaveContext::saveProcess(afl::io::Stream& out, Process& proc)
+interpreter::vmio::FileSaveContext::saveProcess(afl::io::Stream& out, const Process& proc)
 {
     // Nested context to provide process context to mutexes
     ProcessSaveContext childContext(*this, proc);
@@ -616,9 +572,9 @@ interpreter::vmio::FileSaveContext::saveProcess(afl::io::Stream& out, Process& p
     // Property 1: header
     so.startProperty(0);
     structures::ProcessHeader header;
-    header.priority = proc.getPriority();
+    header.priority = uint8_t(proc.getPriority());
     header.kind = proc.getProcessKind();
-    header.contextTOS = proc.getContextTOS();
+    header.contextTOS = uint16_t(proc.getContextTOS());
     out.fullWrite(afl::base::fromObject(header));
     so.endProperty();
 
@@ -629,7 +585,7 @@ interpreter::vmio::FileSaveContext::saveProcess(afl::io::Stream& out, Process& p
 
     // Property 3: frames (object array)
     size_t numFrames = proc.getNumActiveFrames();
-    so.startProperty(numFrames);
+    so.startProperty(uint32_t(numFrames));
     for (size_t i = 0; i < numFrames; ++i) {
         if (const Process::Frame* f = proc.getFrame(i)) {
             // FIXME: do we need to use childContext here?
@@ -640,26 +596,26 @@ interpreter::vmio::FileSaveContext::saveProcess(afl::io::Stream& out, Process& p
 
     // Property 4: contexts (data segment)
     const afl::container::PtrVector<Context>& contexts = proc.getContexts();
-    so.startProperty(contexts.size());
+    so.startProperty(uint32_t(contexts.size()));
     SaveVisitor::saveContexts(out, contexts, m_charset, childContext);
     so.endProperty();
 
     // Property 5: exceptions (counts = number, size = 16xcount)
     const afl::container::PtrVector<Process::ExceptionHandler>& exceptions = proc.getExceptions();
-    so.startProperty(exceptions.size());
+    so.startProperty(uint32_t(exceptions.size()));
     for (size_t i = 0, n = exceptions.size(); i < n; ++i) {
         UInt32_t tmp[4];
-        tmp[0] = exceptions[i]->frameSP;
-        tmp[1] = exceptions[i]->contextSP;
-        tmp[2] = exceptions[i]->valueSP;
-        tmp[3] = exceptions[i]->pc;
+        tmp[0] = uint32_t(exceptions[i]->frameSP);
+        tmp[1] = uint32_t(exceptions[i]->contextSP);
+        tmp[2] = uint32_t(exceptions[i]->valueSP);
+        tmp[3] = uint32_t(exceptions[i]->pc);
         out.fullWrite(afl::base::fromObject(tmp));
     }
     so.endProperty();
 
     // Property 6: value stack (data segment)
     const Process::Segment_t& valueStack = proc.getValueStack();
-    so.startProperty(valueStack.size());
+    so.startProperty(uint32_t(valueStack.size()));
     SaveVisitor::save(out, valueStack, valueStack.size(), m_charset, childContext);
     so.endProperty();
 

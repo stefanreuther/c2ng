@@ -1,5 +1,6 @@
 /**
   *  \file gfx/nullcanvas.hpp
+  *  \brief Class gfx::NullCanvas
   */
 #ifndef C2NG_GFX_NULLCANVAS_HPP
 #define C2NG_GFX_NULLCANVAS_HPP

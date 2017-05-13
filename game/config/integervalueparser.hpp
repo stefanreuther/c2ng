@@ -1,5 +1,6 @@
 /**
   *  \file game/config/integervalueparser.hpp
+  *  \brief Class game::config::IntegerValueParser
   */
 #ifndef C2NG_GAME_CONFIG_INTEGERVALUEPARSER_HPP
 #define C2NG_GAME_CONFIG_INTEGERVALUEPARSER_HPP

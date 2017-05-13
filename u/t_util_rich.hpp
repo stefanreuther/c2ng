@@ -7,6 +7,11 @@
 
 #include <cxxtest/TestSuite.h>
 
+class TestUtilRichAlignmentAttribute : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
 class TestUtilRichAttribute : public CxxTest::TestSuite {
  public:
     void testIt();
@@ -25,6 +30,7 @@ class TestUtilRichLinkAttribute : public CxxTest::TestSuite {
 class TestUtilRichParser : public CxxTest::TestSuite {
  public:
     void testParseXml();
+    void testAll();
 };
 
 class TestUtilRichStyleAttribute : public CxxTest::TestSuite {
@@ -35,6 +41,9 @@ class TestUtilRichStyleAttribute : public CxxTest::TestSuite {
 class TestUtilRichText : public CxxTest::TestSuite {
  public:
     void testIt();
+    void testConstruction();
+    void testWith();
+    void testStringOps();
 };
 
 class TestUtilRichVisitor : public CxxTest::TestSuite {

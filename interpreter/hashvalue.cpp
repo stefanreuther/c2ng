@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/hashvalue.cpp
+  *  \brief Class interpreter::HashValue
   */
 
 #include "interpreter/hashvalue.hpp"
@@ -15,7 +16,7 @@ namespace {
     /** Context for iterating a hash. */
     class HashContext : public interpreter::Context {
      public:
-        HashContext(afl::base::Ref<interpreter::HashData> data)
+        HashContext(afl::data::Hash::Ref_t data)
             : m_data(data),
               m_slot(0)
             { }
@@ -46,7 +47,7 @@ namespace {
             {
                 // ex IntHashContext::set
                 if (index == 1) {
-                    m_data->setNew(m_slot, afl::data::Value::cloneOf(value));
+                    m_data->setValueByIndex(m_slot, value);
                 } else {
                     throw interpreter::Error::notAssignable();
                 }
@@ -56,16 +57,16 @@ namespace {
             {
                 // ex IntHashContext::get
                 if (index == 0) {
-                    return interpreter::makeStringValue(m_data->getName(m_slot));
+                    return interpreter::makeStringValue(m_data->getKeys().getNameByIndex(m_slot));
                 } else {
-                    return afl::data::Value::cloneOf(m_data->get(m_slot));
+                    return afl::data::Value::cloneOf(m_data->getValueByIndex(m_slot));
                 }
             }
 
         virtual bool next()
             {
                 // ex IntHashContext::next
-                if (m_slot+1 < m_data->getNumNames()) {
+                if (m_slot+1 < m_data->getKeys().getNumNames()) {
                     ++m_slot;
                     return true;
                 } else {
@@ -92,19 +93,22 @@ namespace {
             { return new HashContext(*this); }
 
      private:
-        afl::base::Ref<interpreter::HashData> m_data;
+        afl::data::Hash::Ref_t m_data;
         afl::data::NameMap::Index_t m_slot;
     };
 }
 
-interpreter::HashValue::HashValue(afl::base::Ref<HashData> data)
+// Constructor.
+interpreter::HashValue::HashValue(afl::data::Hash::Ref_t data)
     : m_data(data)
 { }
 
+// Destructor.
 interpreter::HashValue::~HashValue()
 { }
 
-afl::base::Ref<interpreter::HashData>
+// Access underlying actual hash.
+afl::data::Hash::Ref_t
 interpreter::HashValue::getData()
 {
     // ex IntHash::getData
@@ -148,7 +152,7 @@ interpreter::Context*
 interpreter::HashValue::makeFirstContext()
 {
     // ex IntHash::makeFirstContext
-    if (m_data->getNumNames() == 0) {
+    if (m_data->getKeys().getNumNames() == 0) {
         return 0;
     } else {
         return new HashContext(m_data);

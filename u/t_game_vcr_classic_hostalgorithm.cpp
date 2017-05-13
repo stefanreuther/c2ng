@@ -124,7 +124,7 @@ namespace {
         int crewDefenseRate;
     };
     struct Battle {
-        int seed;
+        uint16_t seed;
         int magic;
         int capabilities;
         Object object[2];

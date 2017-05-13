@@ -1,5 +1,6 @@
 /**
   *  \file ui/res/ccimageloader.cpp
+  *  \brief Class ui::res::EngineImageLoader
   */
 
 #include "ui/res/ccimageloader.hpp"
@@ -16,15 +17,15 @@ namespace {
     inline uint8_t convertColor(uint8_t c)
     {
         if (c >= 0x30)
-            return c - 0x20;
+            return uint8_t(c - 0x20);
         else
-            return c & 0x0F;
+            return uint8_t(c & 0x0F);
     }
 
     inline uint8_t convertColor16(uint8_t c)
     {
         if (c >= 10 && c < 15)
-            return c-10 + 160;
+            return uint8_t(c-10 + 160);
         else
             return c;
     }
@@ -56,7 +57,7 @@ namespace {
         int width = header.width;
         int height = header.height;
         if (width <= 0 || height <= 0 || width > 4000 || height > 4000) {
-            // c2ng change: PCC1.x only accepts up to 1 Mpx
+            // c2ng change: PCC2 only accepts up to 1 Mpx
             return 0;
         }
 
@@ -87,10 +88,10 @@ namespace {
         // Set up palette
         pix->setPalette(0, ui::STANDARD_COLORS);
         for (int i = 0; i < 5; ++i) {
-            pix->setPalette(160+i, COLORQUAD_FROM_RGBA(header.palette[i][0] * 255/63,
-                                                       header.palette[i][1] * 255/63,
-                                                       header.palette[i][2] * 255/63,
-                                                       gfx::OPAQUE_ALPHA));
+            pix->setPalette(uint8_t(160+i), COLORQUAD_FROM_RGBA(header.palette[i][0] * 255/63,
+                                                                header.palette[i][1] * 255/63,
+                                                                header.palette[i][2] * 255/63,
+                                                                gfx::OPAQUE_ALPHA));
         }
 
         return pix->makeCanvas().asPtr();
@@ -125,7 +126,7 @@ namespace {
         int width = header.width;
         int height = header.height;
         if (width <= 0 || height <= 0 || width > 4000 || height > 4000) {
-            // c2ng change: PCC1.x only accepts up to 1 Mpx
+            // c2ng change: PCC2 only accepts up to 1 Mpx
             return 0;
         }
         
@@ -142,10 +143,10 @@ namespace {
         // Set up palette
         pix->setPalette(0, ui::STANDARD_COLORS);
         for (int i = 0; i < 64; ++i) {
-            pix->setPalette(160+i, COLORQUAD_FROM_RGBA(header.palette[i][0] * 255/63,
-                                                       header.palette[i][1] * 255/63,
-                                                       header.palette[i][2] * 255/63,
-                                                       gfx::OPAQUE_ALPHA));
+            pix->setPalette(uint8_t(160+i), COLORQUAD_FROM_RGBA(header.palette[i][0] * 255/63,
+                                                                header.palette[i][1] * 255/63,
+                                                                header.palette[i][2] * 255/63,
+                                                                gfx::OPAQUE_ALPHA));
         }
 
         return pix->makeCanvas().asPtr();
@@ -214,9 +215,11 @@ namespace {
 }
 
 
+// Constructor
 ui::res::CCImageLoader::CCImageLoader()
 { }
 
+// Load image.
 afl::base::Ptr<gfx::Canvas>
 ui::res::CCImageLoader::loadImage(afl::io::Stream& in)
 {

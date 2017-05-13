@@ -20,7 +20,7 @@ TestGameHistoryTurn::testSet()
     TS_ASSERT(testee.getTurn().get() == 0);
 
     // Timestamp
-    const char data[18] = {'1','2','-','2','4','-','1','9','8','8','2','0',':','1','5',':','3','1'};
+    const uint8_t data[18] = {'1','2','-','2','4','-','1','9','8','8','2','0',':','1','5',':','3','1'};
     testee.setTimestamp(game::Timestamp(data));
     TS_ASSERT_EQUALS(testee.getTimestamp(), game::Timestamp(data));
 

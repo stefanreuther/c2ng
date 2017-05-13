@@ -1,5 +1,6 @@
 /**
   *  \file game/sim/structures.hpp
+  *  \brief Simulator Structures
   */
 #ifndef C2NG_GAME_SIM_STRUCTURES_HPP
 #define C2NG_GAME_SIM_STRUCTURES_HPP

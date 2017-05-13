@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/typehint.hpp
+  *  \brief Enum interpreter::TypeHint
   */
 #ifndef C2NG_INTERPRETER_TYPEHINT_HPP
 #define C2NG_INTERPRETER_TYPEHINT_HPP

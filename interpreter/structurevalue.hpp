@@ -1,33 +1,35 @@
 /**
   *  \file interpreter/structurevalue.hpp
+  *  \brief Class interpreter::StructureValue
   */
 #ifndef C2NG_INTERPRETER_STRUCTUREVALUE_HPP
 #define C2NG_INTERPRETER_STRUCTUREVALUE_HPP
 
-#include "afl/base/ref.hpp"
-#include "afl/data/segment.hpp"
 #include "interpreter/singlecontext.hpp"
-#include "interpreter/structuretype.hpp"
-#include "afl/base/refcounted.hpp"
+#include "interpreter/structurevaluedata.hpp"
 
 namespace interpreter {
 
+    /** Structure value.
+        The actual value (and type reference) is in a StructureValueData.
 
-    /** Structure value. */
-    class StructureValueData : public afl::base::RefCounted {
-     public:
-        StructureValueData(afl::base::Ref<StructureTypeData> type);
-        ~StructureValueData();
+        This type appears in data segments and is frequently copied.
+        Multiple StructureValue objects can and will often reference the same StructureValueData.
 
-        afl::base::Ref<StructureTypeData> type;
-        afl::data::Segment data;
-    };
-
-    /** Handle to a structure value. */
+        This type provides integration with the remainder of the interpreter.
+        In this case, this is the implementation of Context methods, making "With sv" or "sv->member" operations work. */
     class StructureValue : public SingleContext {
      public:
-        StructureValue(afl::base::Ref<StructureValueData> value);
+        /** Constructor.
+            \param value Structure value */
+        explicit StructureValue(StructureValueData::Ref_t value);
+
+        /** Destructor. */
         ~StructureValue();
+
+        /** Get referenced structure value.
+            \return value */
+        StructureValueData::Ref_t getValue() const;
 
         // BaseValue:
         virtual String_t toString(bool readable) const;
@@ -43,13 +45,16 @@ namespace interpreter {
         virtual game::map::Object* getObject();
         virtual void enumProperties(PropertyAcceptor& acceptor);
 
-        afl::base::Ref<StructureValueData> getValue() const
-            { return m_value; }
-
      private:
-        afl::base::Ref<StructureValueData> m_value;
+        StructureValueData::Ref_t m_value;
     };
 
+}
+
+inline interpreter::StructureValueData::Ref_t
+interpreter::StructureValue::getValue() const
+{
+    return m_value;
 }
 
 #endif

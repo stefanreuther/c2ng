@@ -1,5 +1,6 @@
 /**
   *  \file game/vcr/object.cpp
+  *  \brief Class game::vcr::Object
   */
 
 #include "game/vcr/object.hpp"
@@ -24,9 +25,7 @@ game::vcr::Object::~Object()
     // ex GVcrObject::~GVcrObject
 }
 
-// /** Remember guessed hull. This will modify the object in place, so it's a bad
-//     idea to call this on VCRs you intend to export, but it'll save a few cycles
-//     in guessHull() later on. */
+// Remember guessed hull.
 void
 game::vcr::Object::setGuessedHull(const game::spec::HullVector_t& hulls)
 {
@@ -34,10 +33,7 @@ game::vcr::Object::setGuessedHull(const game::spec::HullVector_t& hulls)
     setHull(getGuessedHull(hulls));
 }
 
-// /** Check if this could be the specified hull.
-//     \param hull_id Hull to check for
-//     \return true iff this ship could be of the specified hull
-//     \pre isPlanet() */
+// Check if this could be the specified hull.
 bool
 game::vcr::Object::canBeHull(const game::spec::HullVector_t& hulls, int hullId) const
 {
@@ -53,36 +49,38 @@ game::vcr::Object::canBeHull(const game::spec::HullVector_t& hulls, int hullId) 
         // Hull is known
         return getHull() == hullId;
     } else {
-// FIXME: incomplete port
-//         /* This checks the same properties as PCC 1.x does. It does not check:
-//            - Mass. Normally, the ship shouldn't be lighter than its hull's mass,
-//              but since balancing approaches toy around with the mass, we don't
-//              trust it too much.
-//            - Crew. The crew can be larger (tow-capture bug) or smaller than
-//              the hull's standard crew. */
+        /* This checks the same properties as PCC 1.x does. It does not check:
+           - Mass. Normally, the ship shouldn't be lighter than its hull's mass,
+             but since balancing approaches toy around with the mass, we don't
+             trust it too much.
+           - Crew. The crew can be larger (tow-capture bug) or smaller than
+             the hull's standard crew. */
 
-//         /* picture must match.
-//            THost has an easter egg where it reports Nebulas (picture 16) with picture 30
-//            instead when they have Transwarp Drives. */
-//         if (getPicture() != hull.getExternalPictureNumber()
-//             && (getPicture() != 30
-//                 || hull.getExternalPictureNumber() != 16))
-//             return false;
-//         /* must not have more beams/torps than hull allows */
-//         if (getBeamCount() > hull.getMaxBeams() || getTorpLauncherCount() > hull.getMaxLaunchers())
-//             return false;
-//         /* for fighter bays, the only criterion is that ship has
-//            fighters but hull has not. The number of bays can be
-//            smaller (NTP, damage) or larger (scotty bonus). */
-//         if (getBayCount() && !hull.getNumBays())
-//             return false;
+        /* Picture must match.
+           THost has an easter egg where it reports Nebulas (picture 16) with picture 30
+           instead when they have Transwarp Drives. */
+        if (getPicture() != theHull->getExternalPictureNumber()
+            && (getPicture() != 30
+                || theHull->getExternalPictureNumber() != 16))
+        {
+            return false;
+        }
+
+        /* Must not have more beams/torps than hull allows */
+        if (getNumBeams() > theHull->getMaxBeams() || getNumLaunchers() > theHull->getMaxLaunchers()) {
+            return false;
+        }
+
+        /* For fighter bays, the only criterion is that ship has fighters but hull has not.
+           The number of bays can be smaller (damage), zero (NTP) or larger (scotty bonus). */
+        if (getNumBays() != 0 && theHull->getNumBays() == 0) {
+            return false;
+        }
         return true;
     }
 }
 
-// /** Guess this ship's hull. Whereas getHull() returns the value from the combat
-//     record, which can be missing, this will attempt to guess the correct value.
-//     \return hull number, zero if ambiguous, impossible, or this is actually a planet */
+// Guess this ship's hull.
 int
 game::vcr::Object::getGuessedHull(const game::spec::HullVector_t& hulls) const
 {
@@ -99,10 +97,11 @@ game::vcr::Object::getGuessedHull(const game::spec::HullVector_t& hulls) const
 
     // otherwise, try all hulls.
     int type = 0;
-    for (int i = 1, n = hulls.size(); i <= n; ++i) {
-        if (canBeHull(hulls, i)) {
+    for (game::spec::Hull* p = hulls.findNext(0); p != 0; p = hulls.findNext(p->getId())) {
+        int id = p->getId();
+        if (canBeHull(hulls, id)) {
             if (type == 0) {
-                type = i;
+                type = id;
             } else {
                 return 0;       // ambiguous, can't guess
             }
@@ -111,9 +110,6 @@ game::vcr::Object::getGuessedHull(const game::spec::HullVector_t& hulls) const
     return type;
 }
 
-// /** Get ship picture. Whereas getPicture() just returns the value from the combat record,
-//     this will attempt to resolve the record back into a ship type, and give that ship's
-//     picture. Thus, it will reflect users' changes. */
 int
 game::vcr::Object::getGuessedShipPicture(const game::spec::HullVector_t& hulls) const
 {

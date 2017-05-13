@@ -3,24 +3,20 @@
   *  \brief "Sweep" utility - Main Function
   */
 
-#include "afl/sys/environment.hpp"
-#include "afl/io/filesystem.hpp"
-#include "afl/string/nulltranslator.hpp"
-#include "util/consolelogger.hpp"
-#include "afl/io/textwriter.hpp"
-#include "afl/io/nulltextwriter.hpp"
-#include "game/playerset.hpp"
-#include "afl/sys/standardcommandlineparser.hpp"
-#include "afl/string/format.hpp"
-#include "version.hpp"
-#include "util/translation.hpp"
-#include "game/limits.hpp"
-#include "afl/string/parse.hpp"
 #include "afl/base/optional.hpp"
-#include "game/maint/sweeper.hpp"
+#include "afl/io/filesystem.hpp"
+#include "afl/io/textwriter.hpp"
+#include "afl/string/format.hpp"
+#include "afl/string/parse.hpp"
+#include "afl/sys/environment.hpp"
+#include "afl/sys/standardcommandlineparser.hpp"
+#include "game/limits.hpp"
 #include "game/maint/directorywrapper.hpp"
-#include "afl/except/fileproblemexception.hpp"
+#include "game/maint/sweeper.hpp"
+#include "game/playerset.hpp"
 #include "util/application.hpp"
+#include "util/translation.hpp"
+#include "version.hpp"
 
 using game::maint::DirectoryWrapper;
 

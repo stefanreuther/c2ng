@@ -1,6 +1,6 @@
 /**
   *  \file ui/res/resourcefile.cpp
-  *  \class ui::res::ResourceFile
+  *  \brief Class ui::res::ResourceFile
   */
 
 #include "ui/res/resourcefile.hpp"

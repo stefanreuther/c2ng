@@ -1,5 +1,6 @@
 /**
   *  \file gfx/palettizedpixmap.cpp
+  *  \brief Class gfx::PalettizedPixmap
   */
 
 #include <cstdlib>
@@ -42,7 +43,7 @@ class gfx::PalettizedPixmap::CanvasImpl : public gfx::PixmapCanvasImpl<Palettize
         }
     virtual void setPalette(Color_t start, afl::base::Memory<const ColorQuad_t> colorDefinitions, afl::base::Memory<Color_t> colorHandles)
         {
-            pixmap().setPalette(start, colorDefinitions);
+            pixmap().setPalette(uint8_t(start), colorDefinitions);
             while (Color_t* p = colorHandles.eat()) {
                 *p = start++;
             }
@@ -73,36 +74,51 @@ class gfx::PalettizedPixmap::CanvasImpl : public gfx::PixmapCanvasImpl<Palettize
 };
 
 
+// Constructor.
 gfx::PalettizedPixmap::PalettizedPixmap(int w, int h)
     : Pixmap<uint8_t>(w, h)
 {
     afl::base::Memory<ColorQuad_t>(m_palette).fill(COLORQUAD_FROM_RGBA(0,0,0,0));
+    pixels().fill(0);
 }
 
+// Create a PalettizedPixmap.
 afl::base::Ref<gfx::PalettizedPixmap>
 gfx::PalettizedPixmap::create(int w, int h)
 {
     return *new PalettizedPixmap(w, h);
 }
 
+// Set palette.
 void
 gfx::PalettizedPixmap::setPalette(uint8_t start, afl::base::Memory<const ColorQuad_t> colorDefinitions)
 {
-    afl::base::Memory<ColorQuad_t>(m_palette).subrange(start).copyFrom(colorDefinitions);
+    while (!colorDefinitions.empty()) {
+        size_t amountCopied = afl::base::Memory<ColorQuad_t>(m_palette).subrange(start).copyFrom(colorDefinitions).size();
+        colorDefinitions.split(amountCopied);
+        start = 0;
+    }
 }
 
+// Set single palette entry.
 void
 gfx::PalettizedPixmap::setPalette(uint8_t slot, ColorQuad_t colorDefinition)
 {
     m_palette[slot] = colorDefinition;
 }
 
+// Get palette.
 void
 gfx::PalettizedPixmap::getPalette(uint8_t start, afl::base::Memory<ColorQuad_t> colorDefinitions) const
 {
-    colorDefinitions.copyFrom(afl::base::Memory<const ColorQuad_t>(m_palette).subrange(start));
+    while (!colorDefinitions.empty()) {
+        size_t amountCopied = colorDefinitions.copyFrom(afl::base::Memory<const ColorQuad_t>(m_palette).subrange(start)).size();
+        colorDefinitions.split(amountCopied);
+        start = 0;
+    }
 }
 
+// Find nearest color, given a ColorQuad_t.
 uint8_t
 gfx::PalettizedPixmap::findNearestColor(ColorQuad_t def) const
 {
@@ -110,14 +126,15 @@ gfx::PalettizedPixmap::findNearestColor(ColorQuad_t def) const
     int32_t resultDist = getColorDistance(def, m_palette[0]);
     for (int i = 1; i < 256 && resultDist != 0; ++i) {
         int32_t dist = getColorDistance(def, m_palette[i]);
-        if (dist < i) {
-            result = i;
+        if (dist < resultDist) {
+            result = uint8_t(i);
             resultDist = dist;
         }
     }
     return result;
 }
 
+// Create canvas to draw on.
 afl::base::Ref<gfx::Canvas>
 gfx::PalettizedPixmap::makeCanvas()
 {

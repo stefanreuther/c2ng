@@ -70,8 +70,8 @@ gfx::gen::SpaceView::renderStarfield(util::RandomNumberGenerator& rng)
     const int h = m_pixmap.getHeight();
     const int numStars = w * h / 512;
     for (int i = 0; i < numStars; ++i) {
-        int x = rng(w);
-        int y = rng(h);
+        int x = rng(uint16_t(w));
+        int y = rng(uint16_t(h));
         int c = rng(256);
         put(m_pixmap, x, y, COLORQUAD_FROM_RGBA(255, 255, 255, (c*c*c) >> 16));
     }

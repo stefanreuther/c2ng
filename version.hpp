@@ -1,11 +1,12 @@
 /**
   *  \file version.hpp
+  *  \brief Version number definitions
   */
 #ifndef C2NG_VERSION_HPP
 #define C2NG_VERSION_HPP
 
-#define PCC2_VERSION "2.40.1 (c2ng)"
-#define PCC2_VERSION_CODE 240001
+#define PCC2_VERSION "2.40.2 (c2ng)"
+#define PCC2_VERSION_CODE 240002
 
 #define PCC2_URL     "http://phost.de/~stefan/pcc2.html"
 

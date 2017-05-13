@@ -65,6 +65,12 @@ class TestUtilFileParser : public CxxTest::TestSuite {
     void testInterface();
 };
 
+class TestUtilIo : public CxxTest::TestSuite {
+ public:
+    void testStorePascalString();
+    void testStorePascalStringTruncate();
+};
+
 class TestUtilKey : public CxxTest::TestSuite {
  public:
     void testParse();
@@ -95,12 +101,15 @@ class TestUtilMath : public CxxTest::TestSuite {
     void testDivideAndRoundToEven();
     void testGetHeading();
     void testSquareInteger();
+    void testRound();
+    void testDistance();
 };
 
 class TestUtilMessageCollector : public CxxTest::TestSuite {
  public:
     void testForward();
     void testBackward();
+    void testWrap();
 };
 
 class TestUtilMessageMatcher : public CxxTest::TestSuite {
@@ -183,6 +192,7 @@ class TestUtilString : public CxxTest::TestSuite {
     void testParseRange();
     void testParsePlayer();
     void testFormatOptions();
+    void testEncodeMimeHeader();
 };
 
 class TestUtilStringList : public CxxTest::TestSuite {

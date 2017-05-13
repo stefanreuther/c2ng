@@ -1,5 +1,6 @@
 /**
   *  \file game/config/integervalueparser.cpp
+  *  \brief Class game::config::IntegerValueParser
   */
 
 #include <stdexcept>

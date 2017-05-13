@@ -30,6 +30,10 @@ class TestGameV3ControlFile : public CxxTest::TestSuite {
     void testSaveDOS();
     void testSaveWin();
     void testSaveBig();
+    void testLoadDOS();
+    void testLoadWindows();
+    void testLoadEmpty();
+    void testRange();
 };
 
 class TestGameV3ResultFile : public CxxTest::TestSuite {
@@ -43,6 +47,11 @@ class TestGameV3StringVerifier : public CxxTest::TestSuite {
     void testMain();
     void testFCode();
     void testMessage();
+};
+
+class TestGameV3Structures : public CxxTest::TestSuite {
+ public:
+    void testHeader();
 };
 
 #endif

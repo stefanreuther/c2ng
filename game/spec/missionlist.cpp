@@ -115,11 +115,11 @@ game::spec::MissionList::addMission(const Mission& msn)
     char c = msn.getHotkey();
     if (c == 0) {
         if (msn.getNumber() >= 0 && msn.getNumber() < 10) {
-            c = '0' + msn.getNumber();
+            c = char('0' + msn.getNumber());
         } else {
             for (int i = 0; i < 26; ++i) {
                 if (!(m_usedLetters & (1 << i))) {
-                    c = 'a' + i;  // FIXME: assumes ASCII
+                    c = char('a' + i);  // FIXME: assumes ASCII
                     break;
                 }
             }

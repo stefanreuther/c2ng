@@ -7,6 +7,7 @@
 #include "gfx/gen/spaceviewconfig.hpp"
 #include "gfx/gen/spaceview.hpp"
 
+// Constructor.
 gfx::gen::SpaceViewConfig::SpaceViewConfig()
     : m_width(640),
       m_height(480),
@@ -14,6 +15,7 @@ gfx::gen::SpaceViewConfig::SpaceViewConfig()
       m_starProbability(95)
 { }
 
+// Set image size.
 void
 gfx::gen::SpaceViewConfig::setSize(Point pt)
 {
@@ -21,18 +23,21 @@ gfx::gen::SpaceViewConfig::setSize(Point pt)
     m_height = pt.getY();
 }
 
+// Set number of suns (close stars).
 void
 gfx::gen::SpaceViewConfig::setNumSuns(int n)
 {
     m_numSuns = n;
 }
 
+// Set probability of stars.
 void
 gfx::gen::SpaceViewConfig::setStarProbability(int n)
 {
     m_starProbability = n;
 }
 
+// Render.
 afl::base::Ref<gfx::RGBAPixmap>
 gfx::gen::SpaceViewConfig::render(util::RandomNumberGenerator& rng) const
 {
@@ -56,18 +61,18 @@ gfx::gen::SpaceViewConfig::render(util::RandomNumberGenerator& rng) const
     // Render stars (not so far stars).
     if (m_starProbability > 0) {
         do {
-            int x = rng(m_width);
-            int y = rng(m_height);
-            Value_t size = rng(scale) * 0.001;
+            int x = rng(uint16_t(m_width));
+            int y = rng(uint16_t(m_height));
+            Value_t size = rng(uint16_t(scale)) * 0.001;
             renderer.renderStar(COLORQUAD_FROM_RGBA(255, 255, 255, 0), Point(x, y), size);
         } while (rng(100) < m_starProbability);
     }
 
     // Render nebulas.
     do {
-        uint8_t r = rng(256);
-        uint8_t g = rng(256);
-        uint8_t b = rng(256);
+        uint8_t r = uint8_t(rng(256));
+        uint8_t g = uint8_t(rng(256));
+        uint8_t b = uint8_t(rng(256));
         Value_t intensity = (rng(256) + 1280) * (1.0 / 1280);      // [1, 1.2)
         Value_t falloff = (rng(768) + 768) * (1.0 / 256);          // [3, 6)
         renderer.renderNebula(rng, COLORQUAD_FROM_RGBA(r, g, b, 0), scale / 4, intensity, falloff);
@@ -79,20 +84,20 @@ gfx::gen::SpaceViewConfig::render(util::RandomNumberGenerator& rng) const
         if (rng(2) == 0) {
             // Colder sun
             uint8_t r = 255;
-            uint8_t g = rng(256);
-            uint8_t b = rng(64);
+            uint8_t g = uint8_t(rng(256));
+            uint8_t b = uint8_t(rng(64));
             color = COLORQUAD_FROM_RGBA(r, g, b, 0);
         } else {
             // Hotter sun
-            uint8_t r = rng(64);
-            uint8_t g = rng(256);
+            uint8_t r = uint8_t(rng(64));
+            uint8_t g = uint8_t(rng(256));
             uint8_t b = 255;
             color = COLORQUAD_FROM_RGBA(r, g, b, 0);
         }
 
-        int x = rng(m_width);
-        int y = rng(m_height);
-        int size = rng(scale / 10) + scale / 100;
+        int x = rng(uint16_t(m_width));
+        int y = rng(uint16_t(m_height));
+        int size = rng(uint16_t(scale / 10)) + scale / 100;
         renderer.renderSun(color, Point(x, y), size);
     }
 

@@ -131,7 +131,7 @@ game::interface::setDrawingProperty(game::map::Drawing& d, DrawingProperty idp, 
     switch (idp) {
      case idpColor:
         if (checkIntegerArg(i, value, 0, Drawing::NUM_USER_COLORS)) {
-            d.setColor(i);
+            d.setColor(uint8_t(i));
         }
         break;
      case idpComment:

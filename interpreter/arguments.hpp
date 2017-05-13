@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/arguments.hpp
+  *  \brief Class interpreter::Arguments and argument access functions
   */
 #ifndef C2NG_INTERPRETER_ARGUMENTS_HPP
 #define C2NG_INTERPRETER_ARGUMENTS_HPP

@@ -131,7 +131,7 @@ class client::map::Renderer::Listener : public game::map::RendererListener {
 
             // Determine ship ring color
             bool shipGuessed;
-            int shipRingColor;
+            uint8_t shipRingColor;
             switch (flags & (ripOwnShips | ripEnemyShips | ripAlliedShips)) {
              case 0:
                 shipGuessed = true;
@@ -173,7 +173,7 @@ class client::map::Renderer::Listener : public game::map::RendererListener {
             }
 
             // Determine planet ring color
-            int planetRingColor;
+            uint8_t planetRingColor;
             bool planetDotted;
             if ((flags & ripOwnPlanet) != 0) {
                 planetRingColor = ui::Color_Blue;
@@ -370,7 +370,7 @@ client::map::Renderer::draw(gfx::Canvas& can, ui::ColorScheme& colorScheme, gfx:
 
     // Font
     // ex GChartViewport::getFont
-    int fontSize;
+    int16_t fontSize;
     if (m_zoomMultiplier > m_zoomDivider) {
         if (m_zoomMultiplier > 2*m_zoomDivider) {
             /* more then 2:1: 22 pt */

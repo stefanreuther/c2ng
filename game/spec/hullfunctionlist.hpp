@@ -1,5 +1,6 @@
 /**
   *  \file game/spec/hullfunctionlist.hpp
+  *  \brief Class game::spec::HullFunctionList
   */
 #ifndef C2NG_GAME_SPEC_HULLFUNCTIONLIST_HPP
 #define C2NG_GAME_SPEC_HULLFUNCTIONLIST_HPP

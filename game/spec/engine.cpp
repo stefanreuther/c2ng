@@ -1,11 +1,13 @@
 /**
   *  \file game/spec/engine.cpp
+  *  \brief Class game::spec::Engine
   */
 
 #include <cassert>
 #include "game/spec/engine.hpp"
 #include "afl/base/countof.hpp"
 
+// Constructor.
 game::spec::Engine::Engine(int id)
     : Component(ComponentNameProvider::Engine, id),
       m_maxEfficientWarp(0)
@@ -15,9 +17,11 @@ game::spec::Engine::Engine(int id)
     }
 }
 
+// Destructor.
 game::spec::Engine::~Engine()
 { }
 
+// Get fuel factor.
 bool
 game::spec::Engine::getFuelFactor(int warp, int32_t& fuelFactor) const
 {
@@ -32,6 +36,7 @@ game::spec::Engine::getFuelFactor(int warp, int32_t& fuelFactor) const
     }
 }
 
+// Set fuel factor.
 void
 game::spec::Engine::setFuelFactor(int warp, int32_t fuelFactor)
 {
@@ -40,6 +45,7 @@ game::spec::Engine::setFuelFactor(int warp, int32_t fuelFactor)
     }
 }
 
+// Get maximum efficient warp.
 int
 game::spec::Engine::getMaxEfficientWarp() const
 {
@@ -54,6 +60,7 @@ game::spec::Engine::getMaxEfficientWarp() const
     }
 }
 
+// Set maximum efficient warp.
 void
 game::spec::Engine::setMaxEfficientWarp(int warp)
 {

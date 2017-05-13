@@ -61,13 +61,13 @@ void
 game::v3::Loader::prepareUniverse(game::map::Universe& univ)
 {
     univ.setNewReverter(new Reverter());
-    for (size_t i = 1; i <= structures::NUM_SHIPS; ++i) {
+    for (int i = 1; i <= structures::NUM_SHIPS; ++i) {
         univ.ships().create(i);
     }
-    for (size_t i = 1; i <= structures::NUM_PLANETS; ++i) {
+    for (int i = 1; i <= structures::NUM_PLANETS; ++i) {
         univ.planets().create(i);
     }
-    for (size_t i = 1; i <= structures::NUM_ION_STORMS; ++i) {
+    for (int i = 1; i <= structures::NUM_ION_STORMS; ++i) {
         univ.ionStorms().create(i);
     }
 }
@@ -92,7 +92,7 @@ game::v3::Loader::loadPlanets(game::map::Universe& univ, afl::io::Stream& file, 
         // FIXME: must validate data so we don't accidentally see an unknown value
         game::map::PlanetData planetData;
         planetData.owner             = rawPlanet.owner;
-        planetData.friendlyCode      = m_charset.decode(afl::string::toMemory(rawPlanet.friendlyCode));
+        planetData.friendlyCode      = m_charset.decode(rawPlanet.friendlyCode);
         planetData.numMines          = rawPlanet.numMines;
         planetData.numFactories      = rawPlanet.numFactories;
         planetData.numDefensePosts   = rawPlanet.numDefensePosts;
@@ -138,7 +138,7 @@ game::v3::Loader::loadPlanetCoordinates(game::map::Universe& univ, afl::io::Stre
     m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loading up to %d planet position%!1{s%}...").c_str(), structures::NUM_PLANETS));
     structures::Int16_t data[structures::NUM_PLANETS * 3];
     file.fullRead(afl::base::fromObject(data));
-    for (size_t planetId = 1; planetId <= structures::NUM_PLANETS; ++planetId) {
+    for (int planetId = 1; planetId <= structures::NUM_PLANETS; ++planetId) {
         // FIXME: PCC2 checked chart config here.
         // pro: coordinate filtering is a v3 thing, and should be done in v3 code
         // con: doing the filtering in game::map::Planet::internalCheck only allows live map-reconfiguration to recover from errors
@@ -159,12 +159,12 @@ game::v3::Loader::loadPlanetNames(game::map::Universe& univ, afl::io::Stream& fi
     m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loading %d planet name%!1{s%}...").c_str(), structures::NUM_PLANETS));
     structures::String20_t data[structures::NUM_PLANETS];
     file.fullRead(afl::base::fromObject(data));
-    for (size_t planetId = 1; planetId <= structures::NUM_PLANETS; ++planetId) {
+    for (int planetId = 1; planetId <= structures::NUM_PLANETS; ++planetId) {
         game::map::Planet* p = univ.planets().get(planetId);
         if (!p) {
             throw afl::except::FileFormatException(file, afl::string::Format(m_translator.translateString("Invalid planet Id #%d").c_str(), planetId));
         }
-        p->setName(m_charset.decode(afl::string::toMemory(data[planetId-1])));
+        p->setName(m_charset.decode(data[planetId-1]));
     }
 }
 
@@ -176,12 +176,12 @@ game::v3::Loader::loadIonStormNames(game::map::Universe& univ, afl::io::Stream& 
     m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loading %d ion storm name%!1{s%}...").c_str(), structures::NUM_ION_STORMS));
     structures::String20_t data[structures::NUM_ION_STORMS];
     file.fullRead(afl::base::fromObject(data));
-    for (size_t stormId = 1; stormId <= structures::NUM_ION_STORMS; ++stormId) {
+    for (int stormId = 1; stormId <= structures::NUM_ION_STORMS; ++stormId) {
         game::map::IonStorm* p = univ.ionStorms().get(stormId);
         if (!p) {
             throw afl::except::FileFormatException(file, afl::string::Format(m_translator.translateString("Invalid ion storm Id #%d").c_str(), stormId));
         }
-        p->setName(m_charset.decode(afl::string::toMemory(data[stormId-1])));
+        p->setName(m_charset.decode(data[stormId-1]));
     }
 }
 
@@ -213,20 +213,19 @@ game::v3::Loader::loadBases(game::map::Universe& univ, afl::io::Stream& file, in
         }
 
         // Arrays
-        for (int i = 1; i <= int(structures::NUM_ENGINE_TYPES); ++i) {
+        for (int i = 1; i <= structures::NUM_ENGINE_TYPES; ++i) {
             baseData.engineStorage.set(i, int(rawBase.engineStorage[i-1]));
         }
-        for (int i = 1; i <= int(structures::NUM_HULLS_PER_PLAYER); ++i) {
+        for (int i = 1; i <= structures::NUM_HULLS_PER_PLAYER; ++i) {
             baseData.hullStorage.set(i, int(rawBase.hullStorage[i-1]));
         }
-        for (int i = 1; i <= int(structures::NUM_BEAM_TYPES); ++i) {
+        for (int i = 1; i <= structures::NUM_BEAM_TYPES; ++i) {
             baseData.beamStorage.set(i, int(rawBase.beamStorage[i-1]));
         }
-        for (int i = 1; i <= int(structures::NUM_TORPEDO_TYPES); ++i) {
+        for (int i = 1; i <= structures::NUM_TORPEDO_TYPES; ++i) {
             baseData.launcherStorage.set(i, int(rawBase.launcherStorage[i-1]));
         }
-        for (int i = 1; i <= int(structures::NUM_TORPEDO_TYPES); ++i) {
-
+        for (int i = 1; i <= structures::NUM_TORPEDO_TYPES; ++i) {
             baseData.torpedoStorage.set(i, int(rawBase.torpedoStorage[i-1]));
         }
 
@@ -285,7 +284,7 @@ game::v3::Loader::loadShipXY(game::map::Universe& univ, afl::io::Stream& file, a
                 return;
             }
 
-            if (owner > 0 && owner <= int(structures::NUM_OWNERS) && !reject.contains(owner)) {
+            if (owner > 0 && owner <= structures::NUM_OWNERS && !reject.contains(owner)) {
                 if (game::map::Ship* ship = univ.ships().get(id)) {
                     ship->addShipXYData(game::map::Point(x, y), owner, mass, source);
                 }
@@ -313,7 +312,7 @@ game::v3::Loader::loadShips(game::map::Universe& univ, afl::io::Stream& file, in
         // FIXME: must validate data so we don't accidentally see an unknown value
         map::ShipData shipData;
         shipData.owner               = rawShip.owner;
-        shipData.friendlyCode        = m_charset.decode(afl::string::toMemory(rawShip.friendlyCode));
+        shipData.friendlyCode        = m_charset.decode(rawShip.friendlyCode);
         shipData.warpFactor          = rawShip.warpFactor;
         shipData.waypointDX          = rawShip.waypointDX;
         shipData.waypointDY          = rawShip.waypointDY;
@@ -333,7 +332,7 @@ game::v3::Loader::loadShips(game::map::Universe& univ, afl::io::Stream& file, in
         shipData.damage              = rawShip.damage;
         shipData.crew                = rawShip.crew;
         shipData.colonists           = rawShip.colonists;
-        shipData.name                = m_charset.decode(afl::string::toMemory(rawShip.name));
+        shipData.name                = m_charset.decode(rawShip.name);
         shipData.neutronium          = rawShip.ore[structures::Neutronium];
         shipData.tritanium           = rawShip.ore[structures::Tritanium];
         shipData.duranium            = rawShip.ore[structures::Duranium];
@@ -400,7 +399,7 @@ game::v3::Loader::loadTargets(game::map::Universe& univ, afl::io::Stream& file, 
             }
 
             // Name (optional)
-            String_t name = m_charset.decode(afl::string::toMemory(target.name));
+            String_t name = m_charset.decode(target.name);
             if (!isDummyName(name, shipId)) {
                 info.addValue(gp::ms_Name, name);
             }
@@ -529,9 +528,9 @@ game::v3::Loader::loadUfos(game::map::Universe& univ, afl::io::Stream& file, int
         if (in.color != 0) {
             // uc.addUfoData(first_id + i, ufo);
             if (game::map::Ufo* out = ufos.addUfo(firstId+i, in.typeCode, in.color)) {
-                out->setName(m_charset.decode(afl::string::toMemory(in.name)));
-                out->setInfo1(m_charset.decode(afl::string::toMemory(in.info1)));
-                out->setInfo2(m_charset.decode(afl::string::toMemory(in.info2)));
+                out->setName(m_charset.decode(in.name));
+                out->setInfo1(m_charset.decode(in.info1));
+                out->setInfo2(m_charset.decode(in.info2));
                 out->setPosition(game::map::Point(in.x, in.y));
                 out->setSpeed(int(in.warpFactor));
                 if (in.heading >= 0) {

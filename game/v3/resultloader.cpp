@@ -65,7 +65,7 @@ namespace {
         const game::score::TurnScore::Slot_t fi = scores.addSlot(game::score::ScoreId_Freighters);
         const game::score::TurnScore::Slot_t bi = scores.addSlot(game::score::ScoreId_Bases);
 
-        for (int i = 1; i <= int(game::v3::structures::NUM_PLAYERS); ++i) {
+        for (int i = 1; i <= game::v3::structures::NUM_PLAYERS; ++i) {
             // FIXME: implement some sensible merging here.
             // - when we know a score blanker is in use, treat 0 as unknown
             // - do not overwrite a nonzero value with 0 [but what about rehosts?]
@@ -334,7 +334,7 @@ game::v3::ResultLoader::loadResult(Turn& turn, Root& root, Game& game, afl::io::
         KoreTargetHeader kth;
         if (file.read(afl::base::fromObject(kth)) == sizeof(kth) && std::memcmp(kth.sig, "1120", 4) == 0) {
             uint32_t n = kth.num;
-            if (n > game::v3::structures::NUM_SHIPS) {
+            if (n > uint32_t(game::v3::structures::NUM_SHIPS)) {
                 throw afl::except::FileFormatException(file, m_translator.translate("Unbelievable number of visual contacts"));
             }
             loader.loadTargets(turn.universe(), file, n, loader.TargetEncrypted, source, turn.getTurnNumber());

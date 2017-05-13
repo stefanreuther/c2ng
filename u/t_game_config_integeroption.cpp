@@ -18,6 +18,7 @@ TestGameConfigIntegerOption::testIt()
     // Verify initial state
     TS_ASSERT_EQUALS(testee.toString(), "9");
     TS_ASSERT_EQUALS(testee(), 9);
+    TS_ASSERT_EQUALS(&testee.parser(), &vp);
 
     // Modify
     testee.set(42);

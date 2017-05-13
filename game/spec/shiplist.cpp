@@ -185,14 +185,14 @@ game::spec::ShipList::findRacialAbilities(const game::config::HostConfiguration&
 {
     // ex GHull::findRacialAbilities
     // Sanity check
-    Hull* referenceHull = hulls().get(1);
+    Hull* referenceHull = hulls().findNext(0);
     if (!referenceHull) {
         return;
     }
     HullFunctionAssignmentList& referenceAssignments = referenceHull->getHullFunctions(true /* assigned to hull */);
     for (size_t i = 0, n = referenceAssignments.getNumEntries(); i < n; ++i) {
         // Hull #1 has some hull function for a particular set of players.
-        if (HullFunctionAssignmentList::Entry* entry = referenceAssignments.get(i)) {
+        if (const HullFunctionAssignmentList::Entry* entry = referenceAssignments.getEntryByIndex(i)) {
             const ModifiedHullFunctionList::Function_t function = entry->m_function;
             PlayerSet_t players =
                 HullFunction::getDefaultAssignment(int32_t(entry->m_function), config, *referenceHull)
@@ -200,15 +200,16 @@ game::spec::ShipList::findRacialAbilities(const game::config::HostConfiguration&
                 - entry->m_removedPlayers;
 
             // Check all other hulls and check who of them has that function, too.
-            for (int hullNr = 2, numHulls = hulls().size(); hullNr < numHulls && !players.empty(); ++hullNr) {
-                if (Hull* otherHull = hulls().get(hullNr)) {
-                    if (HullFunctionAssignmentList::Entry* otherEntry = otherHull->getHullFunctions(true).find(function)) {
-                        players &= (HullFunction::getDefaultAssignment(int32_t(function), config, *otherHull)
-                                    + otherEntry->m_addedPlayers
-                                    - otherEntry->m_removedPlayers);
-                    } else {
-                        break;
-                    }
+            for (Hull* otherHull = hulls().findNext(referenceHull->getId());
+                 otherHull != 0 && !players.empty();
+                 otherHull = hulls().findNext(otherHull->getId()))
+            {
+                if (const HullFunctionAssignmentList::Entry* otherEntry = otherHull->getHullFunctions(true).findEntry(function)) {
+                    players &= (HullFunction::getDefaultAssignment(int32_t(function), config, *otherHull)
+                                + otherEntry->m_addedPlayers
+                                - otherEntry->m_removedPlayers);
+                } else {
+                    break;
                 }
             }
 
@@ -224,13 +225,13 @@ game::spec::ShipList::findRacialAbilities(const game::config::HostConfiguration&
                 m_racialAbilities.change(function, players, PlayerSet_t());
                 for (int hullNr = 1, numHulls = hulls().size(); hullNr < numHulls; ++hullNr) {
                     if (Hull* hull = hulls().get(hullNr)) {
-                        if (HullFunctionAssignmentList::Entry* entry = hull->getHullFunctions(true).find(function)) {
+                        if (const HullFunctionAssignmentList::Entry* entry = hull->getHullFunctions(true).findEntry(function)) {
                             if (players == (HullFunction::getDefaultAssignment(int32_t(function), config, *hull)
                                             - entry->m_addedPlayers
                                             + entry->m_removedPlayers))
                             {
                                 // exact match
-                                hull->getHullFunctions(true).remove(function);
+                                hull->getHullFunctions(true).removeEntry(function);
                             }
                         }
                     }

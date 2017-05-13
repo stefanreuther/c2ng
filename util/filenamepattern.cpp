@@ -1,5 +1,6 @@
 /**
   *  \file util/filenamepattern.cpp
+  *  \brief Class util::FileNamePattern
   */
 
 #include <stdexcept>
@@ -8,25 +9,11 @@
 #include "afl/string/string.hpp"
 #include "util/translation.hpp"
 
-// /*! \class FileNameMatcher
-//     \brief File Name Pattern Matcher
+/** Implementation of pattern matching.
+    This class is the internal back-end to FileNamePattern.
 
-//     This class provides a means of compiling and applying a file name
-//     pattern. This default implementation provides the following rules:
-//     - "*" matches any sequence of characters, including nothing at all
-//     - "?" matches any single character
-//     - "\" quotes the next character, i.e. "\*" matches a single star
-
-//     This class is the internal back-end to FileNamePattern.
-
-//     \todo We should optionally use system rules, i.e. fnmatch(3) on
-//     Unix, respective Windows function on Windows. This requires a new
-//     function under arch/, and a configure switch (maybe users prefer
-//     uniform behaviour on all platforms?). This default implementation
-//     does not implement any operating system's rules completely.
-
-//     \todo Right now, this isn't particularily efficient. We use a
-//     simple back-tracking matcher. */
+    \todo Right now, this isn't particularily efficient.
+    We use a simple back-tracking matcher. */
 class util::FileNamePattern::Impl {
  public:
     Impl();
@@ -58,22 +45,21 @@ class util::FileNamePattern::Impl {
     bool matchRecursive(afl::charset::Utf8Reader arg, size_t matchPos) const;
 };
 
-// /** Construct blank object. */
+/** Construct blank object. */
 util::FileNamePattern::Impl::Impl()
 {
     // ex FileNameMatcher::FileNameMatcher
 }
 
-// /** Destroy. */
+/** Destroy. */
 util::FileNamePattern::Impl::~Impl()
 {
     // ex FileNameMatcher::~FileNameMatcher
 }
 
-// /** Compile pattern for later use. This builds an internal private
-//     representation which simplifies and speeds up later matching.
-//     \throw FileNamePatternException if the pattern is syntactically
-//     invalid */
+/** Compile pattern for later use.
+    This builds an internal private representation which simplifies and speeds up later matching.
+    \throw std::runtime_error if the pattern is syntactically invalid */
 void
 util::FileNamePattern::Impl::compile(String_t arg)
 {
@@ -106,9 +92,9 @@ util::FileNamePattern::Impl::compile(String_t arg)
     }
 }
 
-// /** Match pattern.
-//     \param arg file name
-//     \return true iff arg matches the compiled pattern */
+/** Match pattern.
+    \param arg file name
+    \return true iff arg matches the compiled pattern */
 bool
 util::FileNamePattern::Impl::match(String_t arg) const
 {
@@ -122,8 +108,8 @@ util::FileNamePattern::Impl::empty() const
     return m_operations.empty();
 }
 
-// /** Check whether we have a wildcard.
-//     \return true if this is a wildcard, false if it is a proper file name. */
+/** Check whether we have a wildcard.
+    \return true if this is a wildcard, false if it is a proper file name. */
 bool
 util::FileNamePattern::Impl::hasWildcard() const
 {
@@ -134,8 +120,8 @@ util::FileNamePattern::Impl::hasWildcard() const
             || m_operations.front().type != MatchLiteral);
 }
 
-// /** Get file name.
-//     \pre !hasWildcard() */
+/** Get file name.
+    \pre !hasWildcard() */
 bool
 util::FileNamePattern::Impl::getFileName(String_t& out) const
 {
@@ -151,10 +137,10 @@ util::FileNamePattern::Impl::getFileName(String_t& out) const
     }
 }
 
-// /** Add operation. This does a few trivial optimisations. The goal is
-//     to speed up matching ("***x" takes cubic time without
-//     optimisation, linear time with), and to otherwise simplify
-//     handling. */
+/** Add operation.
+    This does a few trivial optimisations.
+    The goal is to speed up matching ("***x" takes cubic time without optimisation, linear time with),
+    and to otherwise simplify handling. */
 void
 util::FileNamePattern::Impl::addOp(OpType op, const String_t arg)
 {
@@ -191,15 +177,14 @@ util::FileNamePattern::Impl::addOp(OpType op, const String_t arg)
     m_operations.push_back(Operation(op, arg));
 }
 
-// /** Recursive matching. Check whether tail of input string matches
-//     tail of pattern.
-//     \param arg       [in] String to match
-//     \param matchPos [in] Position in pattern to start matching at
-//     \return true iff match ok
+/** Recursive matching.
+    Check whether tail of input string matches tail of pattern.
+    \param arg       [in] String to match
+    \param matchPos [in] Position in pattern to start matching at
+    \return true iff match ok
 
-//     \todo We could recognize some common patterns to speed up
-//     matching, e.g. "*x" = directly compare string end, "*x*" = use
-//     a single s.find() call. */
+    \todo We could recognize some common patterns to speed up matching, e.g. "*x" = directly compare string end,
+    "*x*" = use a single s.find() call. */
 bool
 util::FileNamePattern::Impl::matchRecursive(afl::charset::Utf8Reader arg, size_t matchPos) const
 {
@@ -257,16 +242,14 @@ util::FileNamePattern::Impl::matchRecursive(afl::charset::Utf8Reader arg, size_t
 
 
 
-// /** Construct blank pattern. Call setPattern() before use. */
+// Construct blank pattern.
 util::FileNamePattern::FileNamePattern()
     : m_pImpl(new Impl())
 {
     // ex FileNamePattern::FileNamePattern
 }
 
-// /** Construct pattern.
-//     \param name [in] Pattern
-//     \see FileNameMatcher */
+// Construct pattern.
 util::FileNamePattern::FileNamePattern(const String_t name)
     : m_pImpl(new Impl())
 {
@@ -274,14 +257,14 @@ util::FileNamePattern::FileNamePattern(const String_t name)
     m_pImpl->compile(name);
 }
 
-// /** Copy constructor. */
+// Copy constructor.
 util::FileNamePattern::FileNamePattern(const FileNamePattern& other)
     : m_pImpl(new Impl(*other.m_pImpl))
 {
     // ex FileNamePattern::FileNamePattern
 }
 
-// /** Assignment operator. */
+// Assignment operator.
 util::FileNamePattern&
 util::FileNamePattern::operator=(const FileNamePattern& other)
 {
@@ -289,14 +272,13 @@ util::FileNamePattern::operator=(const FileNamePattern& other)
     return *this;
 }
 
-// /** Destructor. */
+// Destructor.
 util::FileNamePattern::~FileNamePattern()
 {
     // ex FileNamePattern::~FileNamePattern
 }
 
-// /** Set pattern. Discards the old one and sets a new one.
-//     \param pattern [in] The new pattern */
+// Set pattern.
 void
 util::FileNamePattern::setPattern(const String_t pattern)
 {
@@ -304,9 +286,7 @@ util::FileNamePattern::setPattern(const String_t pattern)
     m_pImpl->compile(pattern);
 }
 
-// /** Check whether we have a wildcard. If it is not a wildcard, it is a
-//     proper file name which can be used directly (see getFileName()).
-//     \return true if this is a wildcard, false if it is a proper file name. */
+// Check whether pattern has a wildcard.
 bool
 util::FileNamePattern::hasWildcard() const
 {
@@ -314,11 +294,7 @@ util::FileNamePattern::hasWildcard() const
     return m_pImpl->hasWildcard();
 }
 
-// /** Get file name. Note that this file name can differ from the name
-//     used with the constructor in case quoting is used. For example,
-//     with "foo\\*bar", hasWildcard() is true and getFileName() returns
-//     "foo*bar"; the backslash quotes.
-//     \pre hasWildcard() */
+// Get file name.
 bool
 util::FileNamePattern::getFileName(String_t& out) const
 {
@@ -326,9 +302,7 @@ util::FileNamePattern::getFileName(String_t& out) const
     return m_pImpl->getFileName(out);
 }
 
-// /** Check for match.
-//     \param filename [in] file name to test
-//     \return true if filename matches pattern. */
+// Match.
 bool
 util::FileNamePattern::match(const String_t filename) const
 {
@@ -336,14 +310,14 @@ util::FileNamePattern::match(const String_t filename) const
     return m_pImpl->match(filename);
 }
 
+// Check emptiness.
 bool
 util::FileNamePattern::empty() const
 {
     return m_pImpl->empty();
 }
 
-// /** Get pattern that matches all files.
-//     \post match(x) <=> x names a user-visible file */
+// Create pattern that matches all files.
 String_t
 util::FileNamePattern::getAllFilesPattern()
 {
@@ -351,8 +325,7 @@ util::FileNamePattern::getAllFilesPattern()
     return "*";
 }
 
-// /** Get pattern that matches all files with a particular extension.
-//     \param ext [in] Extension, not including the dot */
+// Create pattern that matches all files with a given extension.
 String_t
 util::FileNamePattern::getAllFilesWithExtensionPattern(String_t ext)
 {
@@ -360,9 +333,7 @@ util::FileNamePattern::getAllFilesWithExtensionPattern(String_t ext)
     return String_t("*.") + getSingleFilePattern(ext);
 }
 
-// /** Get pattern that matches a single file.
-//     \param name [in] The name to match
-//     \post match(x) <=> x and \c name name the same file */
+// Create pattern that matches a single file.
 String_t
 util::FileNamePattern::getSingleFilePattern(String_t name)
 {

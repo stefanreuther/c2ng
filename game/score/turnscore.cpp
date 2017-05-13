@@ -1,27 +1,24 @@
 /**
   *  \file game/score/turnscore.cpp
+  *  \brief Class game::score::TurnScore
   */
 
 #include "game/score/turnscore.hpp"
 #include "game/limits.hpp"
 
-
-// /** Constructor.
-//     \param turn        Turn number
-//     \param time        Timestamp
-//     \param num_fields  Number of fields to allocate */
-game::score::TurnScore::TurnScore(int turn, Timestamp time)
-    : m_turnNumber(turn),
+// Constructor.
+game::score::TurnScore::TurnScore(int turnNumber, Timestamp time)
+    : m_turnNumber(turnNumber),
       m_timestamp(time)
 {
     // ex GStatRecord::GStatRecord
 }
 
-// /** Destructor. */
+// Destructor.
 game::score::TurnScore::~TurnScore()
 { }
 
-// /** Get turn number. */
+// Get turn number.
 int
 game::score::TurnScore::getTurnNumber() const
 {
@@ -29,7 +26,7 @@ game::score::TurnScore::getTurnNumber() const
     return m_turnNumber;
 }
 
-// /** Get timestamp of this turn. */
+// Get timestamp.
 const game::Timestamp&
 game::score::TurnScore::getTimestamp() const
 {
@@ -37,7 +34,7 @@ game::score::TurnScore::getTimestamp() const
     return m_timestamp;
 }
 
-
+// Set value.
 void
 game::score::TurnScore::set(Slot_t slot, int player, Value_t value)
 {
@@ -53,7 +50,7 @@ game::score::TurnScore::set(Slot_t slot, int player, Value_t value)
     }
 }
 
-
+// Get value.
 game::score::TurnScore::Value_t
 game::score::TurnScore::get(Slot_t slot, int player) const
 {

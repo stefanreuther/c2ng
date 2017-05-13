@@ -136,8 +136,10 @@ gfx::createDefaultFont()
     }
 
     // Specials
+    charCode = 0xE100;
     for (size_t i = 0; i < 16; ++i) {
-        font->addNewGlyph(0xE100 + i, new BitmapGlyph(8, BYTES_PER_CHAR, &FONT_DATA[31 * BYTES_PER_CHAR]));
+        font->addNewGlyph(charCode, new BitmapGlyph(8, BYTES_PER_CHAR, &FONT_DATA[31 * BYTES_PER_CHAR]));
+        ++charCode;
     }
 
     return font;

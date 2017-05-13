@@ -21,6 +21,9 @@ class TestGameVcrObject : public CxxTest::TestSuite {
  public:
     void testGetSet();
     void testAdd();
+    void testGuess();
+    void testGuessAmbig();
+    void testGuessMismatch();
 };
 
 class TestGameVcrScore : public CxxTest::TestSuite {

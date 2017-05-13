@@ -1,5 +1,6 @@
 /**
   *  \file util/rich/parser.cpp
+  *  \brief Class util::rich::Parser
   */
 
 #include "util/rich/parser.hpp"
@@ -14,6 +15,7 @@
 #include "afl/base/countof.hpp"
 #include "util/rich/alignmentattribute.hpp"
 #include "afl/string/parse.hpp"
+#include "afl/base/optional.hpp"
 
 namespace {
     struct ColorMap {
@@ -43,7 +45,7 @@ namespace {
 }
 
 
-// /** Constructor. */
+// Constructor.
 util::rich::Parser::Parser(afl::io::xml::BaseReader& rdr)
     : m_reader(rdr),
       m_currentToken(rdr.Eof)
@@ -51,8 +53,7 @@ util::rich::Parser::Parser(afl::io::xml::BaseReader& rdr)
     // ex RichParser::RichParser
 }
 
-// Utilities
-// /** Advance to next tag. */
+// Advance to next tag.
 void
 util::rich::Parser::readNext()
 {
@@ -60,8 +61,7 @@ util::rich::Parser::readNext()
     m_currentToken = m_reader.readNext();
 }
 
-// /** Check for opening tag. If that tag is found, skips it from the token stream.
-//     \param what Tag to check for (case sensitive!) */
+// Check for opening tag.
 bool
 util::rich::Parser::isOpeningTag(const char* what)
 {
@@ -74,9 +74,7 @@ util::rich::Parser::isOpeningTag(const char* what)
     }
 }
 
-// /** Skip a tag.
-//     Called with current being the unknown opening tag.
-//     Eats up balanced tags until that tag is closed. */
+// Skip a tag.
 void
 util::rich::Parser::skipTag()
 {
@@ -93,10 +91,7 @@ util::rich::Parser::skipTag()
     } while (m_currentToken != m_reader.Eof && nesting != 0);
 }
 
-// Parser
-// /** Parse text sequence. Parses a list of text elements until it encounters a closing tag.
-//     \param keepFormat true to keep format (inside <pre>), false to rewrap (outside <pre>)
-//     \return parsed text */
+// Parse text sequence.
 util::rich::Text
 util::rich::Parser::parseText(bool keepFormat)
 {
@@ -128,23 +123,24 @@ util::rich::Parser::parseText(bool keepFormat)
     return result;
 }
 
-// /** Parse a text element.
-//     Parses a single tag in flow-text markup.
-//     \param keepFormat true to keep format (inside <pre>), false to rewrap (outside <pre>)
-//     \return parsed text */
+// Parse text element.
 util::rich::Text
 util::rich::Parser::parseTextItem(bool keepFormat)
 {
     // ex RichParser::parseTextItem
     if (isOpeningTag("a")) {
-        String_t target;
+        afl::base::Optional<String_t> target;
         while (m_currentToken == m_reader.TagAttribute) {
             if (m_reader.getName() == "href") {
                 target = m_reader.getValue();
             }
             readNext();
         }
-        return parseText(keepFormat).withNewAttribute(new LinkAttribute(target));
+        if (const String_t* s = target.get()) {
+            return parseText(keepFormat).withNewAttribute(new LinkAttribute(*s));
+        } else {
+            return parseText(keepFormat);
+        }
     } else if (isOpeningTag("b")) {
         return parseText(keepFormat).withStyle(StyleAttribute::Bold);
     } else if (isOpeningTag("em")) {
@@ -163,14 +159,18 @@ util::rich::Parser::parseTextItem(bool keepFormat)
     } else if (isOpeningTag("small")) {
         return parseText(keepFormat).withStyle(StyleAttribute::Small);
     } else if (isOpeningTag("font")) {
-        SkinColor::Color c = SkinColor::Static;
+        afl::base::Optional<SkinColor::Color> c;
         while (m_currentToken == m_reader.TagAttribute) {
             if (m_reader.getName() == "color") {
                 c = parseColorName(m_reader.getValue());
             }
             readNext();
         }
-        return parseText(keepFormat).withColor(c);
+        if (const SkinColor::Color* pc = c.get()) {
+            return parseText(keepFormat).withColor(*pc);
+        } else {
+            return parseText(keepFormat);
+        }
     } else if (isOpeningTag("align")) {
         int width = 0;
         int align = 0;
@@ -191,6 +191,7 @@ util::rich::Parser::parseTextItem(bool keepFormat)
                     // invalid
                 }
             } else {
+                // unknown attribute
             }
             readNext();
         }
@@ -206,8 +207,7 @@ util::rich::Parser::parseTextItem(bool keepFormat)
     }
 }
 
-// /** Parse a piece of text.
-//     Simple all-in-one entry point. */
+// Parse text.
 util::rich::Text
 util::rich::Parser::parse()
 {
@@ -243,10 +243,7 @@ util::rich::Parser::parse()
     return result;
 }
 
-// /** Append string to RichText. This collapses multiple spaces into one, and strips newlines.
-//     \param out       [in/out] RichText to append to
-//     \param haveSpace [in/out] Space status tracking
-//     \param in        [in] Text to append */
+// Append string to Text.
 void
 util::rich::Parser::appendText(Text& out, bool& haveSpace, const String_t& in)
 {
@@ -273,8 +270,7 @@ util::rich::Parser::appendText(Text& out, bool& haveSpace, const String_t& in)
     }
 }
 
-// /** Render a key specification. Documents contain \<kbd> tags for whole key strings, such
-//     as "Alt+A". This splits the key string into individual keys. */
+// Render keys.
 util::rich::Text
 util::rich::Parser::renderKeys(const String_t& name)
 {
@@ -320,6 +316,7 @@ util::rich::Parser::renderKeys(const String_t& name)
     return result;
 }
 
+// Parse string.
 util::rich::Text
 util::rich::Parser::parseXml(String_t source)
 {

@@ -11,6 +11,7 @@
 #include "gfx/point.hpp"
 #include "afl/base/types.hpp"
 #include "afl/base/memory.hpp"
+#include "gfx/fillpattern.hpp"
 
 namespace gfx {
 
@@ -26,7 +27,7 @@ namespace gfx {
         - <tt>Data_t* get(int x, int y)</tt>: create pointer into framebuffer at x,y
         - <tt>Pixel_t peek(Data_t*)</tt>: read a pixel
         - <tt>void poke(Data_t*, Pixel_t)</tt>: write a pixel
-        - <tt>Pixel(Pixel_t a, Pixel_b b, Alpha_t balpha)</tt>: alpha blending
+        - <tt>Pixel_t mix(Pixel_t a, Pixel_b b, Alpha_t balpha)</tt>: alpha blending
         - <tt>Data_t* add(Data_t*, int dx, int dy)</tt>: update data pointer */
     template<class T>
     class Primitives {
@@ -41,7 +42,7 @@ namespace gfx {
 
         /** Constructor.
             \param traits Traits object */
-        Primitives(const T& traits)
+        explicit Primitives(const T& traits)
             : m_traits(traits)
             { }
 
@@ -114,12 +115,12 @@ gfx::Primitives<T>::writePixels(int x, int y, afl::base::Memory<const Color_t> p
     Data_t* p = m_traits.get(x, y);
     if (alpha == OPAQUE_ALPHA) {
         while (const Color_t* pix = pixels.eat()) {
-            m_traits.poke(p, *pix);
+            m_traits.poke(p, Pixel_t(*pix));
             p = m_traits.add(p, 1, 0);
         }
     } else {
         while (const Color_t* pix = pixels.eat()) {
-            m_traits.poke(p, m_traits.mix(m_traits.peek(p), *pix, alpha));
+            m_traits.poke(p, m_traits.mix(m_traits.peek(p), Pixel_t(*pix), alpha));
             p = m_traits.add(p, 1, 0);
         }
     }
@@ -247,13 +248,13 @@ gfx::Primitives<T>::doBar(Rectangle rect, Color_t color, Color_t bg, const FillP
     int x1 = rect.getLeftX(), y1 = rect.getTopY(), x2 = rect.getRightX(), h = rect.getHeight();
     if (bg == TRANSPARENT_COLOR) {
         while (h > 0) {
-            doHLine(x1, y1, x2, color, pat[y1], alpha);
+            doHLine(x1, y1, x2, Pixel_t(color), pat[y1], alpha);
             ++y1; --h;
         }
     } else {
         while (h > 0) {
-            doHLine(x1, y1, x2, color, pat[y1], alpha);
-            doHLine(x1, y1, x2, bg, ~pat[y1], alpha);
+            doHLine(x1, y1, x2, Pixel_t(color), pat[y1], alpha);
+            doHLine(x1, y1, x2, Pixel_t(bg), uint8_t(~pat[y1]), alpha);
             ++y1; --h;
         }
     }
@@ -266,12 +267,12 @@ gfx::Primitives<T>::doBlitPattern(Rectangle rect, const Point& pt, int bytesPerL
 {
     if (alpha == OPAQUE_ALPHA) {
         if (bg == TRANSPARENT_COLOR) {
-            doBlitPatternTransp(rect, pt, bytesPerLine, data, color);
+            doBlitPatternTransp(rect, pt, bytesPerLine, data, Pixel_t(color));
         } else {
-            doBlitPatternOpaque(rect, pt, bytesPerLine, data, color, bg);
+            doBlitPatternOpaque(rect, pt, bytesPerLine, data, Pixel_t(color), Pixel_t(bg));
         }
     } else {
-        doBlitPatternAlpha(rect, pt, bytesPerLine, data, color, bg, alpha);
+        doBlitPatternAlpha(rect, pt, bytesPerLine, data, Pixel_t(color), bg, alpha);
     }
 }
 
@@ -280,11 +281,11 @@ template<typename T>
 void
 gfx::Primitives<T>::doBlitPatternTransp(Rectangle rect, Point pt, int bytesPerLine, const uint8_t* data, Pixel_t color)
 {
-    int x = rect.getLeftX() - pt.getX();                // columns to skip in data image
-    int y = rect.getTopY() - pt.getY();                 // lines to skip in data image
+    const int x = rect.getLeftX() - pt.getX();                // columns to skip in data image
+    const int y = rect.getTopY() - pt.getY();                 // lines to skip in data image
     data += bytesPerLine * y + x/8;
 
-    uint8_t zmask = 0x80 >> (x & 7);
+    const uint8_t zmask = uint8_t(0x80 >> (x & 7));
     Data_t* zmem = m_traits.get(rect.getLeftX(), rect.getTopY());
     int h = rect.getHeight();
     while (h > 0) {
@@ -296,7 +297,7 @@ gfx::Primitives<T>::doBlitPatternTransp(Rectangle rect, Point pt, int bytesPerLi
                 m_traits.poke(mem, color);
             }
             mem = m_traits.add(mem, 1, 0);
-            mask >>= 1;
+            mask = uint8_t(mask >> 1);
             if (!mask) {
                 mask = 0x80;
                 ++pat;
@@ -313,11 +314,11 @@ template<typename T>
 void
 gfx::Primitives<T>::doBlitPatternOpaque(Rectangle rect, Point pt, int bytesPerLine, const uint8_t* data, Pixel_t color, Pixel_t bg)
 {
-    int x = rect.getLeftX() - pt.getX();                // columns to skip in data image
-    int y = rect.getTopY() - pt.getY();                 // lines to skip in data image
+    const int x = rect.getLeftX() - pt.getX();                // columns to skip in data image
+    const int y = rect.getTopY() - pt.getY();                 // lines to skip in data image
     data += bytesPerLine * y + x/8;
 
-    uint8_t zmask = 0x80 >> (x & 7);
+    const uint8_t zmask = uint8_t(0x80 >> (x & 7));
     Data_t* zmem = m_traits.get(rect.getLeftX(), rect.getTopY());
     int h = rect.getHeight();
     while (h > 0) {
@@ -331,7 +332,7 @@ gfx::Primitives<T>::doBlitPatternOpaque(Rectangle rect, Point pt, int bytesPerLi
                 m_traits.poke(mem, bg);
             }
             mem = m_traits.add(mem, 1, 0);
-            mask >>= 1;
+            mask = uint8_t(mask >> 1);
             if (!mask) {
                 mask = 0x80;
                 ++pat;
@@ -349,11 +350,11 @@ template<typename T>
 void
 gfx::Primitives<T>::doBlitPatternAlpha(Rectangle rect, Point pt, int bytesPerLine, const uint8_t* data, Pixel_t color, Color_t bg, Alpha_t alpha)
 {
-    int x = rect.getLeftX() - pt.getX();                // columns to skip in data image
-    int y = rect.getTopY() - pt.getY();                 // lines to skip in data image
+    const int x = rect.getLeftX() - pt.getX();                // columns to skip in data image
+    const int y = rect.getTopY() - pt.getY();                 // lines to skip in data image
     data += bytesPerLine * y + x/8;
 
-    uint8_t zmask = 0x80 >> (x & 7);
+    const uint8_t zmask = uint8_t(0x80 >> (x & 7));
     Data_t* zmem = m_traits.get(rect.getLeftX(), rect.getTopY());
     int h = rect.getHeight();
     while (h > 0) {
@@ -364,10 +365,10 @@ gfx::Primitives<T>::doBlitPatternAlpha(Rectangle rect, Point pt, int bytesPerLin
             if (*pat & mask) {
                 m_traits.poke(mem, m_traits.mix(m_traits.peek(mem), color, alpha));
             } else if (bg != TRANSPARENT_COLOR) {
-                m_traits.poke(mem, m_traits.mix(m_traits.peek(mem), bg, alpha));
+                m_traits.poke(mem, m_traits.mix(m_traits.peek(mem), Pixel_t(bg), alpha));
             }
             mem = m_traits.add(mem, 1, 0);
-            mask >>= 1;
+            mask = uint8_t(mask >> 1);
             if (!mask) {
                 mask = 0x80;
                 ++pat;

@@ -403,3 +403,5 @@ conf_update_file() {
 conf_args_parse "$@"
 conf_cleanup_init
 conf_log_init
+echo "Invocation: $0 $@" >> $conf_log_file
+echo                     >> $conf_log_file

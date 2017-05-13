@@ -49,7 +49,7 @@ gfx::saveCanvas(Canvas& can, afl::io::Stream& stream)
     Header h;
     h.signature[0]         = 'B';
     h.signature[1]         = 'M';
-    h.fileSize             = pixmapSize + sizeof(h);
+    h.fileSize             = uint32_t(pixmapSize + sizeof(h));
     h.reserved             = 0;
     h.pixelOffset          = sizeof(h);
     h.headerSize           = 40;

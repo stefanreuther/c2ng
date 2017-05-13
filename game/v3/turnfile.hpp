@@ -453,7 +453,7 @@ namespace game { namespace v3 {
         structures::TurnDosTrailer m_dosTrailer;         ///< DOS trailer.
         structures::TurnWindowsTrailer m_windowsTrailer; ///< Windows trailer.
         afl::base::GrowableMemory<uint8_t> m_data;       ///< Miscellaneous data. The TRN, usually ;)
-        afl::base::GrowableMemory<uint32_t> m_offsets;   ///< Offsets of commands, pointing into data. zero-based. NOT the pointer array from the turn file!
+        afl::base::GrowableMemory<uint32_t> m_offsets;   ///< Offsets of commands, pointing into data. zero-based. NOT the pointer array from the turn file! FIXME: should be size_t?
         int m_version;                                   ///< TRN file sub-version (Winplan only).
         FeatureSet_t m_features;                         ///< TRN file features (bitfield trnf_Xxx).
         size_t m_turnPlacement;                          ///< Taccom: place TRN before Nth attachment.

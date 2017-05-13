@@ -8,6 +8,20 @@
 #include "afl/string/char.hpp"
 #include "afl/string/parse.hpp"
 #include "util/stringparser.hpp"
+#include "afl/charset/base64.hpp"
+
+namespace {
+    bool mustEncode(const String_t& word)
+    {
+        for (String_t::size_type i = 0; i < word.size(); ++i) {
+            uint8_t u = word[i];
+            if (u >= 0x80 || u < 0x20 || u == '?') {
+                return true;
+            }
+        }
+        return false;
+    }
+}
 
 bool
 util::stringMatch(const char* pattern, const char* tester)
@@ -34,8 +48,6 @@ util::stringMatch(const char* pattern, const String_t& tester)
 {
     return stringMatch(pattern, tester.c_str());
 }
-
-
 
 bool
 util::eatWord(const char*& tpl, String_t& word)
@@ -191,4 +203,52 @@ util::formatName(String_t name)
         }
     }
     return name;
+}
+
+String_t
+util::encodeMimeHeader(String_t input, String_t charsetName)
+{
+    // FIXME: move elsewhere?
+    // FIXME: RFC 2047 places some pretty tight limits on the format of lines containing
+    // encoded words:
+    // - max 75 chars per encoded word
+    // - max 76 chars per line containing an encoded word
+    // Since we don't see complete lines, we only try to enforce the per-word limit.
+    // "65" is 75 minus "=" and "?", minus roundoff errors.
+    String_t::size_type maxCharsPerWord = (65 - charsetName.size()) * 3/4;
+    String_t::size_type n = 0;
+    String_t::size_type p;
+    String_t result;
+    while ((p = input.find_first_not_of(" \t\r\n", n)) != String_t::npos) {
+        // Copy run of space characters
+        result.append(input, n, p-n);
+
+        // Find next word
+        n = input.find_first_of(" \t\r\n", p);
+        if (n == String_t::npos) {
+            n = input.size();
+        }
+        String_t word(input, p, n-p);
+        if (mustEncode(word)) {
+            String_t::size_type i = 0;
+            while (i < word.size()) {
+                String_t::size_type n = word.size() - i;
+                if (n > maxCharsPerWord) {
+                    n = maxCharsPerWord;
+                }
+                result += "=?";
+                result += charsetName;
+                result += "?B?";
+                result += afl::string::fromBytes(afl::charset::Base64().encode(afl::string::toMemory(String_t(word, i, n))));
+                result += "?=";
+                i += n;
+                if (i < word.size()) {
+                    result += "\r\n ";
+                }
+            }
+        } else {
+            result += word;
+        }
+    }
+    return result;
 }

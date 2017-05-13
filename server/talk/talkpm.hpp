@@ -1,0 +1,42 @@
+/**
+  *  \file server/talk/talkpm.hpp
+  *  \brief Class server::talk::TalkPM
+  */
+#ifndef C2NG_SERVER_TALK_TALKPM_HPP
+#define C2NG_SERVER_TALK_TALKPM_HPP
+
+#include "server/interface/talkpm.hpp"
+
+namespace server { namespace talk {
+
+    class Session;
+    class Root;
+
+    /** Implementation of PM commands. */
+    class TalkPM : public server::interface::TalkPM {
+     public:
+        /** Constructor.
+            \param session Session
+            \param root Service root */
+        TalkPM(Session& session, Root& root);
+        ~TalkPM();
+
+        // TalkPM interface:
+        virtual int32_t create(String_t receivers, String_t subject, String_t text, afl::base::Optional<int32_t> parent);
+        virtual Info getInfo(int32_t folder, int32_t pmid);
+        virtual void getInfo(int32_t folder, afl::base::Memory<const int32_t> pmids, afl::container::PtrVector<Info>& results);
+        virtual int32_t copy(int32_t sourceFolder, int32_t destFolder, afl::base::Memory<const int32_t> pmids);
+        virtual int32_t move(int32_t sourceFolder, int32_t destFolder, afl::base::Memory<const int32_t> pmids);
+        virtual int32_t remove(int32_t folder, afl::base::Memory<const int32_t> pmids);
+        virtual String_t render(int32_t folder, int32_t pmid, const Options& options);
+        virtual void render(int32_t folder, afl::base::Memory<const int32_t> pmids, afl::container::PtrVector<String_t>& result);
+        virtual int32_t changeFlags(int32_t folder, int32_t flagsToClear, int32_t flagsToSet, afl::base::Memory<const int32_t> pmids);
+
+     private:
+        Session& m_session;
+        Root& m_root;
+    };
+
+} }
+
+#endif

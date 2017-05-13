@@ -3,7 +3,6 @@
   *  \brief Test for util::MessageCollector
   */
 
-#include <stdio.h>
 #include "util/messagecollector.hpp"
 
 #include "t_util.hpp"
@@ -110,3 +109,56 @@ TestUtilMessageCollector::testBackward()
         TS_ASSERT_EQUALS(result, "h9k9h8k8h7k7h6k6h5k5h4k4h3k3h2k2h1k1h0k0");
     }
 }
+
+/** Test message collection with embedded wrap. */
+void
+TestUtilMessageCollector::testWrap()
+{
+    util::MessageCollector testee;
+
+    const int N = 10;
+
+    // Populate it
+    testee.setConfiguration("keep=keep:drop=drop:hide=hide");
+    testee.write(afl::sys::LogListener::Info, "keep", "kpre\nkmid\nkfinal");
+    testee.write(afl::sys::LogListener::Info, "drop", "dpre\ndmid\ndfinal");
+    testee.write(afl::sys::LogListener::Info, "hide", "hpre\nhmid\nhfinal");
+
+    // Iterate
+    {
+        String_t result;
+        afl::sys::LogListener::Message msg;
+        util::MessageCollector::MessageNumber_t nr = testee.getOldestPosition();
+        int limit = 0;
+        while (testee.readNewerMessage(nr, &msg, nr)) {
+            // Make sure we don't run into an infinite loop
+            TS_ASSERT(limit < N);
+            ++limit;
+
+            // Collect results
+            result += msg.m_message;
+            result += ".";
+        }
+        TS_ASSERT_EQUALS(result, "kpre.kmid.kfinal.");
+    }
+
+    // Reconfigure and iterate again
+    testee.setConfiguration("*=keep");
+    {
+        String_t result;
+        afl::sys::LogListener::Message msg;
+        util::MessageCollector::MessageNumber_t nr = testee.getOldestPosition();
+        int limit = 0;
+        while (testee.readNewerMessage(nr, &msg, nr)) {
+            // Make sure we don't run into an infinite loop
+            TS_ASSERT(limit < 2*N);
+            ++limit;
+
+            // Collect results
+            result += msg.m_message;
+            result += ".";
+        }
+        TS_ASSERT_EQUALS(result, "kpre.kmid.kfinal.hpre.hmid.hfinal.");
+    }
+}
+

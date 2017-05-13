@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/exporter/dbfexporter.cpp
+  *  \brief Class interpreter::exporter::DbfExporter
   *
   *  PCC2 Comment:
   *
@@ -119,8 +120,8 @@ interpreter::exporter::DbfExporter::startTable(const FieldList& fields, afl::bas
         afl::base::fromObject(fieldDesc).fill(0);
         afl::base::fromObject(fieldDesc).trim(11).copyFrom(afl::string::toBytes(fields.getFieldName(i)));
         fieldDesc.type = typ;
-        fieldDesc.length = width;
-        fieldDesc.decimals = decim;
+        fieldDesc.length = static_cast<uint8_t>(width);
+        fieldDesc.decimals = static_cast<uint8_t>(decim);
         m_file.fullWrite(afl::base::fromObject(fieldDesc));
 
         m_widths.push_back(width);
@@ -193,7 +194,7 @@ interpreter::exporter::DbfExporter::addField(afl::data::Value* value, const Stri
         if (rightAlign && s.size() < m_widths[m_fieldNumber]) {
             s.insert(s.begin(), m_widths[m_fieldNumber] - s.size(), ' ');
         }
-        afl::bits::packFixedString(m_recordPosition.split(m_widths[m_fieldNumber]), afl::string::toMemory(s));
+        afl::bits::packFixedString(m_recordPosition.split(m_widths[m_fieldNumber]), afl::string::toBytes(s));
     }
     ++m_fieldNumber;
 }
@@ -229,8 +230,8 @@ interpreter::exporter::DbfExporter::writeFileHeader()
     header.signature = 3;        // dBASE III file
     // ignore year/month/day fields
     header.numRecords = m_numRecords;
-    header.headerSize = m_startPosition;
-    header.recordSize = m_recordSize;
+    header.headerSize = static_cast<uint16_t>(m_startPosition);
+    header.recordSize = static_cast<uint16_t>(m_recordSize);
 
     m_file.setPos(0);
     m_file.fullWrite(afl::base::fromObject(header));

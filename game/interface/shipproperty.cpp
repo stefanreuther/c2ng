@@ -187,7 +187,7 @@ ShipArrayProperty::get(interpreter::Arguments& args)
             game::UnitScoreDefinitionList::Index_t index;
             int16_t value, turn;
             if (m_game.get() != 0
-                && m_game->shipScores().lookup(id, index)
+                && m_game->shipScores().lookup(int16_t(id), index)
                 && m_ship.unitScores().get(index, value, turn))
             {
                 return makeIntegerValue(value);

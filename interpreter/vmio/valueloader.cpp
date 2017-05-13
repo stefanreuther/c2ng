@@ -156,9 +156,9 @@ String_t
 interpreter::vmio::ValueLoader::loadLongString(uint32_t length, afl::io::Stream& aux)
 {
     // ex IntStringValue::IntStringValue (part)
-    afl::base::GrowableMemory<char> buffer;
+    afl::base::GrowableBytes_t buffer;
     buffer.resize(length);
-    aux.fullRead(buffer.toBytes());
+    aux.fullRead(buffer);
 
     return m_charset.decode(buffer);
 }

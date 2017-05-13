@@ -1,5 +1,5 @@
 /*!
-     \namespace game
+     \namespace game::sim
      \brief Battle Simulator classes
 
      This namespace contains the battle simulator.

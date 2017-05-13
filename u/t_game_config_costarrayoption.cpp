@@ -24,6 +24,10 @@ TestGameConfigCostArrayOption::testSet1()
     TS_ASSERT_EQUALS(testee(10).get(game::spec::Cost::Duranium), 20);
     TS_ASSERT_EQUALS(testee(10).get(game::spec::Cost::Molybdenum), 30);
 
+    // out-of-range
+    TS_ASSERT_EQUALS(testee(100).get(game::spec::Cost::Tritanium), 10);
+    TS_ASSERT_EQUALS(testee(-1).get(game::spec::Cost::Tritanium), 10);
+
     TS_ASSERT_EQUALS(testee.toString(), "T10 D20 M30");
 }
 
@@ -52,6 +56,8 @@ TestGameConfigCostArrayOption::testSet2()
     TS_ASSERT_EQUALS(testee(10).get(game::spec::Cost::Tritanium), 50);
     TS_ASSERT_EQUALS(testee(10).get(game::spec::Cost::Duranium), 0);
     TS_ASSERT_EQUALS(testee(10).get(game::spec::Cost::Molybdenum), 0);
+
+    TS_ASSERT_EQUALS(testee.toString(), "T10,T20,T30,T40,T50,T50,T50,T50,T50,T50,T50");
 }
 
 /** Test set(), case 2. */
@@ -73,5 +79,38 @@ TestGameConfigCostArrayOption::testSet3()
     TS_ASSERT_EQUALS(testee(3).get(game::spec::Cost::Tritanium), 10);
     TS_ASSERT_EQUALS(testee(3).get(game::spec::Cost::Duranium), 0);
     TS_ASSERT_EQUALS(testee(3).get(game::spec::Cost::Molybdenum), 0);
+
+    TS_ASSERT_EQUALS(testee.toString(), "T10,M5,T10,T10,T10,T10,T10,T10,T10,T10,T10");
+}
+
+/** Test formatting, various cases. */
+void
+TestGameConfigCostArrayOption::testFormat()
+{
+    {
+        game::config::CostArrayOption testee;
+        testee.set("T10,T20");
+        TS_ASSERT_EQUALS(testee.toString(), "T10,T20,T20,T20,T20,T20,T20,T20,T20,T20,T20");
+    }
+    {
+        game::config::CostArrayOption testee;
+        testee.set("T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13");
+        TS_ASSERT_EQUALS(testee.toString(), "T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13");
+    }
+    {
+        game::config::CostArrayOption testee;
+        testee.set("T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T13,T13,T13,T13,T13");
+        TS_ASSERT_EQUALS(testee.toString(), "T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13");
+    }
+    {
+        game::config::CostArrayOption testee;
+        testee.set("T1,T2,T3,T4,T5,T6,T7,T8,T9,T9,T9,T9,T9,T9");
+        TS_ASSERT_EQUALS(testee.toString(), "T1,T2,T3,T4,T5,T6,T7,T8,T9,T9,T9");
+    }
+    {
+        game::config::CostArrayOption testee;
+        testee.set("T20,T20,T20,T20,T20,T20,T20,T20,T20,T20,T20");
+        TS_ASSERT_EQUALS(testee.toString(), "T20");
+    }
 }
 

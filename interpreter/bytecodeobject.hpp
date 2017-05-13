@@ -116,8 +116,8 @@ namespace interpreter {
         void     append(const BytecodeObject& other);
 
         PC_t     getNumInstructions() const;
-        uint32_t getNumLabels() const;
-        void     setNumLabels(uint32_t n);
+        Label_t  getNumLabels() const;
+        void     setNumLabels(uint16_t n);
         PC_t     getJumpTarget(uint8_t minor, uint16_t arg) const;
         Opcode&  operator()(PC_t index);
         const Opcode& operator()(PC_t index) const;
@@ -186,7 +186,7 @@ inline uint16_t
 interpreter::BytecodeObject::addLocalVariable(const String_t& name)
 {
     // ex IntBytecodeObject::addLocalVariable
-    return m_localNames.add(name);
+    return uint16_t(m_localNames.add(name));
 }
 
 // /** Check for local variable.
@@ -261,24 +261,6 @@ interpreter::BytecodeObject::isVarargs() const
     return m_isVarargs;
 }
 
-// /** Make a new label for future reference. This label can be used in as many jumps
-//     as needed (addJump), and must be placed exactly once using addLabel. */
-inline interpreter::BytecodeObject::Label_t
-interpreter::BytecodeObject::makeLabel()
-{
-    // ex IntBytecodeObject::makeLabel
-    return num_labels++;
-}
-
-// /** Add a name for reference by later instructions. Existing names are recycled if
-//     possible. */
-inline uint16_t
-interpreter::BytecodeObject::addName(String_t name)
-{
-    // ex IntBytecodeObject::addName
-    return m_names.addMaybe(name);
-}
-
 // /** Check whether we already know the specified name. */
 inline bool
 interpreter::BytecodeObject::hasName(String_t name) const
@@ -296,7 +278,7 @@ interpreter::BytecodeObject::getNumInstructions() const
 }
 
 // /** Get number of symbolic labels in this bytecode object. */
-inline uint32_t
+inline interpreter::BytecodeObject::Label_t
 interpreter::BytecodeObject::getNumLabels() const
 {
     // ex IntBytecodeObject::getNumLabels
@@ -304,7 +286,7 @@ interpreter::BytecodeObject::getNumLabels() const
 }
 
 inline void
-interpreter::BytecodeObject::setNumLabels(uint32_t n)
+interpreter::BytecodeObject::setNumLabels(uint16_t n)
 {
     num_labels = n;
 }

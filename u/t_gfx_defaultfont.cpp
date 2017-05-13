@@ -16,5 +16,7 @@ TestGfxDefaultFont::testIt()
     afl::base::Ref<gfx::Font> font(gfx::createDefaultFont());
     TS_ASSERT(font->getTextWidth("abc") > 0);
     TS_ASSERT(font->getTextHeight("abc") > 0);
+
+    TS_ASSERT(font->getTextWidth("\xD0\x81") > 0);
 }
 

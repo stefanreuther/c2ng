@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/exporter/jsonexporter.cpp
+  *  \brief Class interpreter::exporter::JsonExporter
   *
   *  FIXME: this uses PCC2's ad-hoc JSON formatter. Use the JSON infrastructure from afl.
   */

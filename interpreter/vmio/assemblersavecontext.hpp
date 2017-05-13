@@ -19,12 +19,12 @@ namespace interpreter { namespace vmio {
         AssemblerSaveContext();
         ~AssemblerSaveContext();
 
-        virtual uint32_t addBCO(interpreter::BytecodeObject& bco);
-        virtual uint32_t addHash(interpreter::HashData& hash);
-        virtual uint32_t addArray(interpreter::ArrayData& array);
-        virtual uint32_t addStructureType(interpreter::StructureTypeData& type);
-        virtual uint32_t addStructureValue(interpreter::StructureValueData& value);
-        virtual bool isCurrentProcess(interpreter::Process* p);
+        virtual uint32_t addBCO(const interpreter::BytecodeObject& bco);
+        virtual uint32_t addHash(const afl::data::Hash& hash);
+        virtual uint32_t addArray(const interpreter::ArrayData& array);
+        virtual uint32_t addStructureType(const interpreter::StructureTypeData& type);
+        virtual uint32_t addStructureValue(const interpreter::StructureValueData& value);
+        virtual bool isCurrentProcess(const interpreter::Process* p);
 
         void save(afl::io::TextWriter& out);
 
@@ -44,7 +44,7 @@ namespace interpreter { namespace vmio {
             virtual void writeDeclaration(AssemblerSaveContext& asc, afl::io::TextWriter&) = 0;
             virtual void writeBody(AssemblerSaveContext& asc, afl::io::TextWriter&) = 0;
         };
-        typedef afl::container::PtrMap<void*,MetaObject> Map_t;
+        typedef afl::container::PtrMap<const void*,MetaObject> Map_t;
         Map_t m_metadata;
         std::vector<MetaObject*> m_sequence;
         std::set<String_t> m_usedNames;

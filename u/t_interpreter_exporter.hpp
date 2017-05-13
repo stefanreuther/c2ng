@@ -7,11 +7,54 @@
 
 #include <cxxtest/TestSuite.h>
 
+class TestInterpreterExporterDbfExporter : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testIt2();
+};
+
+class TestInterpreterExporterExporter : public CxxTest::TestSuite {
+ public:
+    void testInterface();
+    void testIt();
+    void testError();
+    void testNoObject();
+    void testFilter();
+    void testCancel();
+};
+
 class TestInterpreterExporterFieldList : public CxxTest::TestSuite {
  public:
     void testAdd();
     void testAddList();
     void testModify();
+};
+
+class TestInterpreterExporterHtmlExporter : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
+class TestInterpreterExporterJsonExporter : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testEmpty();
+    void testArray();
+};
+
+class TestInterpreterExporterSeparatedTextExporter : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
+class TestInterpreterExporterTextExporter : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testSimple();
+    void testSimpleLong();
+    void testEmptyBox();
+    void testBox();
+    void testLongBox();
 };
 
 #endif

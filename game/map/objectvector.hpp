@@ -68,7 +68,7 @@ template<typename T>
 game::Id_t
 game::map::ObjectVector<T>::size() const
 {
-    return m_components.size();
+    return Id_t(m_components.size());
 }
 
 #endif

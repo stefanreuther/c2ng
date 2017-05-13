@@ -7,6 +7,7 @@
 
 #include "t_util.hpp"
 
+/** Test util::stringMatch. */
 void
 TestUtilString::testStringMatch()
 {
@@ -21,6 +22,7 @@ TestUtilString::testStringMatch()
     TS_ASSERT(!util::stringMatch("ENGLISH", "en"));
 }
 
+/** Test util::parseRange. */
 void
 TestUtilString::testParseRange()
 {
@@ -107,7 +109,9 @@ TestUtilString::testParseRange()
         TSM_ASSERT(failure_cases[i].value, !util::parseRange(failure_cases[i].value, min, max, pos));
         TSM_ASSERT_EQUALS(failure_cases[i].value, failure_cases[i].pos, pos);
     }
-}    
+}
+
+/** Test util::parsePlayerCharacter. */
 void
 TestUtilString::testParsePlayer()
 {
@@ -169,6 +173,7 @@ TestUtilString::testParsePlayer()
     TS_ASSERT_EQUALS(id, 33);
 }
 
+/** Test util::formatOptions. */
 void
 TestUtilString::testFormatOptions()
 {
@@ -213,4 +218,25 @@ TestUtilstring::testFormatName()
     TS_ASSERT_EQUALS(util::formatName("LOC.X"), "Loc.X");
     TS_ASSERT_EQUALS(util::formatName("CC$FOO"), "Cc$Foo");
     TS_ASSERT_EQUALS(util::formatName("AA3BB"), "Aa3Bb");
+}
+
+/** Test util::encodeMimeHeader. */
+void
+TestUtilString::testEncodeMimeHeader()
+{
+    TS_ASSERT_EQUALS(util::encodeMimeHeader("hi mom", "UTF-8"), "hi mom");
+
+    // No word wrapping for unencoded stuff!
+    const char LOREM[] = "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Duis sem velit, ultrices et, fermentum auctor, rhoncus ut, ligula. Phasellus at purus sed purus cursus iaculis. Suspendisse fermentum. Pellentesque et arcu.";
+    TS_ASSERT_EQUALS(util::encodeMimeHeader(LOREM, "us-ascii"), LOREM);
+                                            
+    // Single unicode characters
+    TS_ASSERT_EQUALS(util::encodeMimeHeader("die bl\xc3\xb6""den \xc3\xb6sen", "UTF-8"), "die =?UTF-8?B?YmzDtmRlbg==?= =?UTF-8?B?w7ZzZW4=?=");
+
+    // Many unicode characters
+    TS_ASSERT_EQUALS(util::encodeMimeHeader("\xc3\xb6\xc3\xb6\xc3\xb6\xc3\xb6\xc3\xb6\xc3\xb6\xc3\xb6\xc3\xb6\xc3\xb6\xc3\xb6\xc3\xb6\xc3\xb6\xc3\xb6\xc3\xb6\xc3\xb6\xc3\xb6"
+                                            "\xc3\xb6\xc3\xb6\xc3\xb6\xc3\xb6\xc3\xb6\xc3\xb6\xc3\xb6\xc3\xb6\xc3\xb6\xc3\xb6\xc3\xb6\xc3\xb6\xc3\xb6\xc3\xb6\xc3\xb6\xc3\xb6",
+                                            "UTF-8"),
+                     "=?UTF-8?B?w7bDtsO2w7bDtsO2w7bDtsO2w7bDtsO2w7bDtsO2w7bDtsO2w7bDtsO2w7bD?=\r\n"
+                     " =?UTF-8?B?tsO2w7bDtsO2w7bDtsO2w7bDtg==?=");
 }

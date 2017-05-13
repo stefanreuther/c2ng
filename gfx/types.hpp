@@ -16,10 +16,10 @@ namespace gfx {
 
 #define COLORQUAD_FROM_RGBA(r,g,b,a)  ::gfx::ColorQuad_t(((r)<<24) + ((g)<<16) + ((b)<<8) + (a))
 #define COLORQUAD_FROM_RGB(r,g,b)     COLORQUAD_FROM_RGBA(r, g, b, ::gfx::OPAQUE_ALPHA)
-#define RED_FROM_COLORQUAD(c)         (((c)>>24) & 0xFF)
-#define GREEN_FROM_COLORQUAD(c)       (((c)>>16) & 0xFF)
-#define BLUE_FROM_COLORQUAD(c)        (((c)>>8) & 0xFF)
-#define ALPHA_FROM_COLORQUAD(c)       ((c) & 0xFF)
+#define RED_FROM_COLORQUAD(c)         uint8_t(((c)>>24) & 0xFF)
+#define GREEN_FROM_COLORQUAD(c)       uint8_t(((c)>>16) & 0xFF)
+#define BLUE_FROM_COLORQUAD(c)        uint8_t(((c)>>8) & 0xFF)
+#define ALPHA_FROM_COLORQUAD(c)       uint8_t((c) & 0xFF)
 
     /** Transparent color.
         When a background color is requested, specify this value to draw transparent.
@@ -77,7 +77,7 @@ template<class T>
 inline T
 gfx::mixColorComponent(T a, T b, Alpha_t alpha)
 {
-    return a + ((b-a) * alpha / 255);
+    return T(a + ((b-a) * alpha / 255));
 }
 
 #endif

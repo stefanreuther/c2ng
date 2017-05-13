@@ -1,5 +1,6 @@
 /**
   *  \file game/config/collapsibleintegerarrayoption.hpp
+  *  \brief Template Class game::config::CollapsibleIntegerArrayOption
   */
 #ifndef C2NG_GAME_CONFIG_COLLAPSIBLEINTEGERARRAYOPTION_HPP
 #define C2NG_GAME_CONFIG_COLLAPSIBLEINTEGERARRAYOPTION_HPP
@@ -9,14 +10,22 @@
 
 namespace game { namespace config {
 
+    class Configuration;
+
     /** Integer option array.
         This contains an array of int32_t values,
-        parsed from a comma-separated list according to a ValueParser. */
+        parsed from a comma-separated list according to a ValueParser.
+        \tparam N Array size */
     template<int N>
     class CollapsibleIntegerArrayOption : public GenericIntegerArrayOption {
      public:
+        /** Constructor.
+            Makes an option that uses the given ValueParser to parse values.
+            The option is initialized to all-zero.
+            \param parser Parser */
         explicit CollapsibleIntegerArrayOption(const ValueParser& parser);
 
+        /** Destructor. */
         ~CollapsibleIntegerArrayOption();
 
         // GenericIntegerArrayOption:
@@ -25,6 +34,8 @@ namespace game { namespace config {
         // ConfigurationOption:
         virtual String_t toString() const;
 
+        /** Copy from another option of the same type.
+            \param other Source option */
         void copyFrom(const CollapsibleIntegerArrayOption<N>& other);
 
      private:
@@ -50,7 +61,9 @@ template<int N>
 inline
 game::config::CollapsibleIntegerArrayOption<N>::CollapsibleIntegerArrayOption(const ValueParser& parser)
     : GenericIntegerArrayOption(parser)
-{ }
+{
+    getArray().fill(0);
+}
 
 template<int N>
 inline

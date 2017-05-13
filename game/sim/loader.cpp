@@ -56,7 +56,7 @@ game::sim::Loader::load(afl::io::Stream& in, Setup& setup)
 
         if (Ship* sh = setup.addShip()) {
             sh->setId(data.object.id);
-            sh->setName(m_charset.decode(afl::string::toMemory(data.object.name)));
+            sh->setName(m_charset.decode(data.object.name));
             sh->setDamage(data.object.damage);
             sh->setCrew(data.object.crew);
             sh->setOwner(data.object.owner);
@@ -70,7 +70,7 @@ game::sim::Loader::load(afl::io::Stream& in, Setup& setup)
             sh->setEngineType(data.engineType);
             sh->setHullTypeOnly(data.hullType);
             sh->setShield(data.shield);
-            sh->setFriendlyCode(m_charset.decode(afl::string::toMemory(data.friendlyCode)));
+            sh->setFriendlyCode(m_charset.decode(data.friendlyCode));
 
             if (version > 0) {
                 sh->setAggressiveness(data.aggressiveness);
@@ -123,9 +123,9 @@ game::sim::Loader::load(afl::io::Stream& in, Setup& setup)
             pl->setShield(100);
             pl->setDamage(0);
 
-            pl->setFriendlyCode(m_charset.decode(afl::string::toMemory(data.friendlyCode)));
+            pl->setFriendlyCode(m_charset.decode(data.friendlyCode));
 
-            for (int i = 1; i <= int(structures::NUM_TORPEDO_TYPES); ++i) {
+            for (int i = 1; i <= structures::NUM_TORPEDO_TYPES; ++i) {
                 pl->setNumBaseTorpedoes(i, (version > 1
                                             ? data.numTorpedoes[i-1]
                                             : pl->getBaseTorpedoTech() == i

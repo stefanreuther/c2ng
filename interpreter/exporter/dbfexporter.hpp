@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/exporter/dbfexporter.hpp
+  *  \brief Class interpreter::exporter::DbfExporter
   */
 #ifndef C2NG_INTERPRETER_EXPORTER_DBFEXPORTER_HPP
 #define C2NG_INTERPRETER_EXPORTER_DBFEXPORTER_HPP
@@ -10,10 +11,16 @@
 
 namespace interpreter { namespace exporter {
 
+    /** DBF exporter.
+        Creates a dBASE III *.dbf file.
+        DBF is a binary file format (although its content ends up as mostly text). */
     class DbfExporter : public Exporter {
      public:
-        DbfExporter(afl::io::Stream& file);
+        /** Constructor.
+            \param file Output file */
+        explicit DbfExporter(afl::io::Stream& file);
 
+        // Exporter:
         virtual void startTable(const FieldList& fields, afl::base::Memory<const TypeHint> types);
         virtual void startRecord();
         virtual void addField(afl::data::Value* value, const String_t& name, TypeHint type);

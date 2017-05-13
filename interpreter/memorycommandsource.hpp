@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/memorycommandsource.hpp
+  *  \brief Class interpreter::MemoryCommandSource
   */
 #ifndef C2NG_INTERPRETER_MEMORYCOMMANDSOURCE_HPP
 #define C2NG_INTERPRETER_MEMORYCOMMANDSOURCE_HPP

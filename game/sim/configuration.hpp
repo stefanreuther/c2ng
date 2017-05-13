@@ -1,5 +1,6 @@
 /**
   *  \file game/sim/configuration.hpp
+  *  \brief Class game::sim::Configuration
   */
 #ifndef C2NG_GAME_SIM_CONFIGURATION_HPP
 #define C2NG_GAME_SIM_CONFIGURATION_HPP
@@ -10,16 +11,18 @@
 
 namespace game { namespace sim {
 
+    /** Simulator configuration. */
     class Configuration {
      public:
-        /** Balancing mode. Various algorithms to correct the TVCR
-            left/right imbalance. */
+        /** Balancing mode.
+            Various algorithms to correct the TVCR left/right imbalance. */
         enum BalancingMode {
             BalanceNone,            ///< No balancing.
             Balance360k,            ///< 360kt bonus (HOST).
             BalanceMasterAtArms     ///< Master at Arms proposal.
         };
-        /** VCR mode. Which VCR is used to run the simulation. */
+        /** VCR mode.
+            Which VCR is used to run the simulation. */
         enum VcrMode {
             VcrHost,                ///< HOST.
             VcrPHost2,              ///< PHost 2.x.
@@ -35,28 +38,91 @@ namespace game { namespace sim {
         //     VcrMAX = VcrNuHost
         // };
 
+        /** Default constructor. */
         Configuration();
 
+        /** Load defaults.
+            \param teams Teams (to initialize alliances from) */
         void loadDefaults(const TeamSettings& teams);
+
+        /** Set mode (host version).
+            Sets other parameters (ES-Bonus, Scotty bonus, left/right, balancing) to mode/configuration dependant defaults.
+            \param mode Mode
+            \param teams Team settings (for viewpoint player)
+            \param config Host configuration */
         void setMode(VcrMode mode, const TeamSettings& teams, const game::config::HostConfiguration& config);
+
+        /** Check enabled experience.
+            \param config Host configuration
+            \return true if experience enabled */
         bool isExperienceEnabled(const game::config::HostConfiguration& config) const;
 
+        /** Set engine/shield bonus.
+            \param n Bonus (percentage) */
         void setEngineShieldBonus(int n);
-        int  getEngineShieldBonus() const;
+
+        /** Get engine/shield bonus.
+            \return bonus (percentage) */
+        int getEngineShieldBonus() const;
+
+        /** Set scotty bonus.
+            \param enable flag */
         void setScottyBonus(bool enable);
+
+        /** Check for scotty bonus.
+            \return true if enabled */
         bool hasScottyBonus() const;
+
+        /** Set random left/right assignment.
+            \param enable flag */
         void setRandomLeftRight(bool enable);
+
+        /** Check for random left/right assignment.
+            \return true if enabled */
         bool hasRandomLeftRight() const;
+
+        /** Set whether alliances are honored.
+            \param enable flag */
         void setHonorAlliances(bool enable);
+
+        /** Check whether alliances are honored.
+            \return true if enabled */
         bool hasHonorAlliances() const;
+
+        /** Set limitation to one fight.
+            \param enable flag */
         void setOnlyOneSimulation(bool enable);
+
+        /** Check limitation to one fight.
+            \return true if enabled */
         bool hasOnlyOneSimulation() const;
+
+        /** Set seed control.
+            \param enable flag */
         void setSeedControl(bool enable);
+
+        /** Check for seed control.
+            \return true if enabled */
         bool hasSeedControl() const;
+
+        /** Set whether friendly codes are randomized on every fight.
+            \param enable flag */
         void setRandomizeFCodesOnEveryFight(bool enable);
+
+        /** Check whether friendly codes are randomized on every fight.
+            \return true if enabled */
         bool hasRandomizeFCodesOnEveryFight() const;
+
+        /** Set balancing mode.
+            \param mode Mode */
         void setBalancingMode(BalancingMode mode);
+
+        /** Get balancing mode.
+            \return mode */
         BalancingMode getBalancingMode() const;
+
+        /** Get simulation mode (host version).
+            \return mode */
         VcrMode getMode() const;
 
      private:

@@ -1,5 +1,6 @@
 /**
   *  \file game/spec/modifiedhullfunctionlist.cpp
+  *  \brief Class game::spec::ModifiedHullFunctionList
   */
 
 #include "game/spec/modifiedhullfunctionlist.hpp"
@@ -8,11 +9,12 @@ namespace {
     const int32_t MODIFIED_FUNCTION_BASE_ID = 99999;
 }
 
-
+// Constructor.
 game::spec::ModifiedHullFunctionList::ModifiedHullFunctionList()
     : m_modifiedFunctions()
 { }
 
+// Destructor.
 game::spec::ModifiedHullFunctionList::~ModifiedHullFunctionList()
 { }
 
@@ -62,6 +64,7 @@ game::spec::ModifiedHullFunctionList::getFunctionIdFromDefinition(const HullFunc
     }
 }
 
+// Return definition of a hull function.
 bool
 game::spec::ModifiedHullFunctionList::getFunctionDefinition(Function_t id, HullFunction& def) const
 {

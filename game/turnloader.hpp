@@ -9,6 +9,7 @@
 #include "afl/string/translator.hpp"
 #include "game/playerset.hpp"
 #include "afl/charset/charset.hpp"
+#include "afl/base/refcounted.hpp"
 
 namespace game {
 
@@ -17,7 +18,7 @@ namespace game {
     class Root;
     class Session;
 
-    class TurnLoader : public afl::base::Deletable {
+    class TurnLoader : public afl::base::Deletable, public afl::base::RefCounted {
      public:
         enum PlayerStatus {
             /** This player's data is available.

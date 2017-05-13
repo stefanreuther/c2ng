@@ -10,7 +10,10 @@
 #include "afl/string/string.hpp"
 #include "afl/charset/codepagecharset.hpp"
 #include "afl/charset/codepage.hpp"
+#include "afl/sys/log.hpp"
+#include "game/limits.hpp"
 
+/** Test mission.ini parsing. */
 void
 TestGameSpecMissionList::testMissionIni()
 {
@@ -18,7 +21,7 @@ TestGameSpecMissionList::testMissionIni()
     using game::spec::Mission;
 
     // Generate a pseudo file
-    const char data[] = ";22 comment\n"
+    static const char data[] = ";22 comment\n"
         "10 one\n"
         "11 two (I:IA)*\n"
         "12 three (T:TA)#\n"
@@ -94,6 +97,7 @@ TestGameSpecMissionList::testMissionIni()
     TS_ASSERT_EQUALS(list.at(6)->getHotkey(), 'g');
 }
 
+/** Test mission.ini parsing, race handling. */
 void
 TestGameSpecMissionList::testMissionIniRaces()
 {
@@ -101,7 +105,7 @@ TestGameSpecMissionList::testMissionIniRaces()
     using game::spec::Mission;
 
     // Generate a pseudo file
-    const char data[] =
+    static const char data[] =
         "10 one/1\n"
         "11 two/2 (I:IA)*\n"
         "12 three (T:TA)#/3\n"
@@ -172,3 +176,205 @@ TestGameSpecMissionList::testMissionIniRaces()
     TS_ASSERT_EQUALS((list.at(5)->getRaceMask().toInteger() & 0xFFE), 0x402U);
     TS_ASSERT_EQUALS((list.at(6)->getRaceMask().toInteger() & 0xFFE), 0x804U);
 }
+
+/** Test loading from mission.ini. */
+void
+TestGameSpecMissionList::testLoad()
+{
+    // File
+    static const char* file =
+        "; mission.cc\n"
+        "s=what?\n"           // ignored assignment
+        "1,,Minimal\n"
+        "\n"
+        "2,,Short\n"
+        "i=Intercept2\n"
+        "j=Tow2\n"
+        "s=Short2\n"
+        "C=Cond2\n"
+        "t=Text2\n"
+        "w=Work2\n"
+        "o=Set2\n"
+        "y=Ignore2\n"
+        "3,+5,Full\n"
+        "I=Intercept3\n"
+        " J = Tow3\n"
+        "shortName = Short3\n"
+        "Condition = Cond3\n"
+        "Text=Text3\n"
+        "WILLWORK=Work3\n"
+        "OnSet=Set3\n"
+        "; Some ignored assignments:\n"
+        "Textignore=Bad3\n"
+        "Tet=Bad3\n"
+        " = Bad3\n";
+    afl::io::ConstMemoryStream ms(afl::string::toBytes(file));
+    afl::sys::Log log;
+
+    // Load
+    game::spec::MissionList testee;
+    testee.loadFromFile(ms, log);
+
+    // Verify
+    TS_ASSERT_EQUALS(testee.size(), 3U);
+    TS_ASSERT(testee.at(0) != 0);
+    TS_ASSERT(testee.at(1) != 0);
+    TS_ASSERT(testee.at(2) != 0);
+
+    // Mission 1: Minimal, defaults
+    TS_ASSERT_EQUALS(testee.at(0)->getNumber(), 1);
+    TS_ASSERT_EQUALS(testee.at(0)->getName(), "Minimal");
+    TS_ASSERT_EQUALS(testee.at(0)->getRaceMask(), game::PlayerSet_t::allUpTo(game::MAX_PLAYERS));
+    TS_ASSERT_EQUALS(testee.at(0)->getParameterName(game::InterceptParameter), "Intercept");
+    TS_ASSERT_EQUALS(testee.at(0)->getParameterName(game::TowParameter), "Tow");
+    TS_ASSERT_EQUALS(testee.at(0)->getConditionExpression(), "");
+    TS_ASSERT_EQUALS(testee.at(0)->getWarningExpression(), "");
+    TS_ASSERT_EQUALS(testee.at(0)->getLabelExpression(), "");
+    TS_ASSERT_EQUALS(testee.at(0)->getSetCommand(), "");
+
+    // Mission 2: Short, everything assigned using one-letter names
+    TS_ASSERT_EQUALS(testee.at(1)->getNumber(), 2);
+    TS_ASSERT_EQUALS(testee.at(1)->getName(), "Short");
+    TS_ASSERT_EQUALS(testee.at(1)->getRaceMask(), game::PlayerSet_t::allUpTo(game::MAX_PLAYERS));
+    TS_ASSERT_EQUALS(testee.at(1)->getParameterName(game::InterceptParameter), "Intercept2");
+    TS_ASSERT_EQUALS(testee.at(1)->getParameterName(game::TowParameter), "Tow2");
+    TS_ASSERT_EQUALS(testee.at(1)->getConditionExpression(), "Cond2");
+    TS_ASSERT_EQUALS(testee.at(1)->getWarningExpression(), "Work2");
+    TS_ASSERT_EQUALS(testee.at(1)->getLabelExpression(), "Text2");
+    TS_ASSERT_EQUALS(testee.at(1)->getSetCommand(), "Set2");
+
+    // Mission 3: Full, everything assigned using full names
+    TS_ASSERT_EQUALS(testee.at(2)->getNumber(), 3);
+    TS_ASSERT_EQUALS(testee.at(2)->getName(), "Full");
+    TS_ASSERT_EQUALS(testee.at(2)->getRaceMask(), game::PlayerSet_t(5));
+    TS_ASSERT_EQUALS(testee.at(2)->getParameterName(game::InterceptParameter), "Intercept3");
+    TS_ASSERT_EQUALS(testee.at(2)->getParameterName(game::TowParameter), "Tow3");
+    TS_ASSERT_EQUALS(testee.at(2)->getConditionExpression(), "Cond3");
+    TS_ASSERT_EQUALS(testee.at(2)->getWarningExpression(), "Work3");
+    TS_ASSERT_EQUALS(testee.at(2)->getLabelExpression(), "Text3");
+    TS_ASSERT_EQUALS(testee.at(2)->getSetCommand(), "Set3");
+}
+
+/** Test addMission(), merge missions, and, implicitly, sort(). */
+void
+TestGameSpecMissionList::testAddMerge()
+{
+    using game::spec::Mission;
+
+    game::spec::MissionList testee;
+
+    // Add some "mission.cc" missions
+    testee.addMission(Mission(1, ",Explore"));
+    testee.addMission(Mission(9, "+1,Special 1"));
+    testee.addMission(Mission(9, "+2,Special 2"));
+    testee.addMission(Mission(9, "+3,Special 3"));
+
+    // Add some "mission.ini" missions
+    testee.addMission(Mission(1, ",Other Explore"));
+    testee.addMission(Mission(4, ",Kill"));
+    testee.addMission(Mission(9, ",Special"));
+
+    // Sort
+    testee.sort();
+
+    TS_ASSERT_EQUALS(testee.size(), 5U);
+    TS_ASSERT_EQUALS(testee.at(0)->getNumber(), 1);
+    TS_ASSERT_EQUALS(testee.at(0)->getName(), "Explore");
+    TS_ASSERT_EQUALS(testee.at(1)->getNumber(), 4);
+    TS_ASSERT_EQUALS(testee.at(1)->getName(), "Kill");
+    TS_ASSERT_EQUALS(testee.at(2)->getNumber(), 9);
+    TS_ASSERT_EQUALS(testee.at(2)->getName(), "Special 1");
+    TS_ASSERT_EQUALS(testee.at(2)->getRaceMask(), game::PlayerSet_t(1));
+    TS_ASSERT_EQUALS(testee.at(3)->getNumber(), 9);
+    TS_ASSERT_EQUALS(testee.at(3)->getName(), "Special 2");
+    TS_ASSERT_EQUALS(testee.at(3)->getRaceMask(), game::PlayerSet_t(2));
+    TS_ASSERT_EQUALS(testee.at(4)->getNumber(), 9);
+    TS_ASSERT_EQUALS(testee.at(4)->getName(), "Special 3");
+    TS_ASSERT_EQUALS(testee.at(4)->getRaceMask(), game::PlayerSet_t(3));
+
+    // Test lookup
+    const Mission* p;
+    p = testee.getMissionByNumber(1, game::PlayerSet_t(1));
+    TS_ASSERT(p != 0);
+    TS_ASSERT_EQUALS(p->getName(), "Explore");
+
+    p = testee.getMissionByNumber(9, game::PlayerSet_t(1));
+    TS_ASSERT(p != 0);
+    TS_ASSERT_EQUALS(p->getName(), "Special 1");
+
+    p = testee.getMissionByNumber(9, game::PlayerSet_t(4));
+    TS_ASSERT(p == 0);
+
+    // Test position lookup
+    size_t index = 9999;
+    TS_ASSERT(testee.getIndexByNumber(1, game::PlayerSet_t(3), index));
+    TS_ASSERT_EQUALS(index, 0U);
+
+    TS_ASSERT(testee.getIndexByNumber(9, game::PlayerSet_t(2), index));
+    TS_ASSERT_EQUALS(index, 3U);
+
+    TS_ASSERT(!testee.getIndexByNumber(9, game::PlayerSet_t(4), index));
+}
+
+/** Test addMission(), letter assignment. */
+void
+TestGameSpecMissionList::testAddMergeLetters()
+{
+    using game::spec::Mission;
+
+    // Assign many missions
+    game::spec::MissionList testee;
+    for (int i = 0; i < 30; ++i) {
+        testee.addMission(Mission(20+i, ",egal"));
+    }
+    TS_ASSERT_EQUALS(testee.size(), 30U);
+    TS_ASSERT_EQUALS(testee.at(0)->getHotkey(), 'a');
+    TS_ASSERT_EQUALS(testee.at(1)->getHotkey(), 'b');
+    TS_ASSERT_EQUALS(testee.at(25)->getHotkey(), 'z');
+    TS_ASSERT_EQUALS(testee.at(26)->getHotkey(), 'a');
+
+    // Clear and add anew
+    testee.clear();
+    for (int i = 0; i < 5; ++i) {
+        testee.addMission(Mission(20+i, ",egal"));
+    }
+    TS_ASSERT_EQUALS(testee.size(), 5U);
+    TS_ASSERT_EQUALS(testee.at(0)->getHotkey(), 'a');
+    TS_ASSERT_EQUALS(testee.at(1)->getHotkey(), 'b');
+    TS_ASSERT_EQUALS(testee.at(4)->getHotkey(), 'e');
+}
+
+/** Test addMission(), letter assignment. */
+void
+TestGameSpecMissionList::testAddMergeLetters2()
+{
+    using game::spec::Mission;
+
+    // Preload, then assign many missions
+    game::spec::MissionList testee;
+    testee.addMission(Mission(98, ",~kill"));
+    testee.addMission(Mission(99, ",~jump"));
+    for (int i = 0; i < 40; ++i) {
+        testee.addMission(Mission(i, ",egal"));
+    }
+    TS_ASSERT_EQUALS(testee.size(), 42U);
+
+    // Manually assigned:
+    TS_ASSERT_EQUALS(testee.at(0)->getHotkey(), 'k');
+    TS_ASSERT_EQUALS(testee.at(1)->getHotkey(), 'j');
+
+    // Auto-assigned:
+    TS_ASSERT_EQUALS(testee.at(2)->getHotkey(), '0');
+    TS_ASSERT_EQUALS(testee.at(3)->getHotkey(), '1');
+    TS_ASSERT_EQUALS(testee.at(11)->getHotkey(), '9');
+
+    TS_ASSERT_EQUALS(testee.at(12)->getHotkey(), 'a');
+    TS_ASSERT_EQUALS(testee.at(13)->getHotkey(), 'b');
+
+    TS_ASSERT_EQUALS(testee.at(20)->getHotkey(), 'i');
+    TS_ASSERT_EQUALS(testee.at(21)->getHotkey(), 'l');
+
+    TS_ASSERT_EQUALS(testee.at(35)->getHotkey(), 'z');
+    TS_ASSERT_EQUALS(testee.at(36)->getHotkey(), 'a');
+}
+

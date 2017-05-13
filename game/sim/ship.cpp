@@ -1,5 +1,6 @@
 /**
   *  \file game/sim/ship.cpp
+  *  \brief Class game::sim::Ship
   */
 
 #include "game/sim/ship.hpp"
@@ -27,6 +28,7 @@ const int game::sim::Ship::agg_Passive;
 const int game::sim::Ship::agg_NoFuel;
 
 
+// Default constructor.
 game::sim::Ship::Ship()
     : Object(),
       m_crew(10),
@@ -45,10 +47,11 @@ game::sim::Ship::Ship()
     // ex GSimShip::GSimShip
 }
 
+// Destructor.
 game::sim::Ship::~Ship()
 { }
 
-// /** Get crew. */
+// Get crew.
 int
 game::sim::Ship::getCrew() const
 {
@@ -56,7 +59,7 @@ game::sim::Ship::getCrew() const
     return m_crew;
 }
 
-// /** Change crew. */
+// Set crew.
 void
 game::sim::Ship::setCrew(int crew)
 {
@@ -65,7 +68,7 @@ game::sim::Ship::setCrew(int crew)
     markDirty();
 }
 
-// /** Get hull type. Can be 0 for custom ships. */
+// Get hull type.
 int
 game::sim::Ship::getHullType() const
 {
@@ -73,9 +76,7 @@ game::sim::Ship::getHullType() const
     return m_hullType;
 }
 
-// /** Set hull type. Can be 0 for custom ships. If this changes the hull
-//     type, it will also update the arms and crew to reflect that new
-//     type. */
+// Set hull type.
 void
 game::sim::Ship::setHullType(int hullType, const game::spec::ShipList& shipList)
 {
@@ -119,6 +120,7 @@ game::sim::Ship::setHullType(int hullType, const game::spec::ShipList& shipList)
     }
 }
 
+// Set hull type only.
 void
 game::sim::Ship::setHullTypeOnly(int hullType)
 {
@@ -126,7 +128,7 @@ game::sim::Ship::setHullTypeOnly(int hullType)
     markDirty();
 }
 
-// /** Get mass. Always kept up-to-date. */
+// Get mass.
 int
 game::sim::Ship::getMass() const
 {
@@ -134,7 +136,7 @@ game::sim::Ship::getMass() const
     return m_mass;
 }
 
-// /** Change mass. Only used for custom ships. */
+// Set mass.
 void
 game::sim::Ship::setMass(int mass)
 {
@@ -143,7 +145,7 @@ game::sim::Ship::setMass(int mass)
     markDirty();
 }
 
-// /** Get beam type. */
+// Get beam type.
 int
 game::sim::Ship::getBeamType() const
 {
@@ -151,7 +153,7 @@ game::sim::Ship::getBeamType() const
     return m_beamType;
 }
 
-// /** Change beam type. */
+// Set beam type.
 void
 game::sim::Ship::setBeamType(int beamType)
 {
@@ -160,7 +162,7 @@ game::sim::Ship::setBeamType(int beamType)
     markDirty();
 }
 
-// /** Get beam count. */
+// Get number of beams.
 int
 game::sim::Ship::getNumBeams() const
 {
@@ -168,7 +170,7 @@ game::sim::Ship::getNumBeams() const
     return m_numBeams;
 }
 
-// /** Change beam count. */
+// Set number of beams.
 void
 game::sim::Ship::setNumBeams(int numBeams)
 {
@@ -177,7 +179,7 @@ game::sim::Ship::setNumBeams(int numBeams)
     markDirty();
 }
 
-// /** Get torpedo type. */
+// Get torpedo type.
 int
 game::sim::Ship::getTorpedoType() const
 {
@@ -185,7 +187,7 @@ game::sim::Ship::getTorpedoType() const
     return m_torpedoType;
 }
 
-// /** Change torpedo type. */
+// Set torpedo type.
 void
 game::sim::Ship::setTorpedoType(int torpedoType)
 {
@@ -194,7 +196,7 @@ game::sim::Ship::setTorpedoType(int torpedoType)
     markDirty();
 }
 
-// /** Get torpedo launcher count. */
+// Get number of torpedo launchers.
 int
 game::sim::Ship::getNumLaunchers() const
 {
@@ -202,7 +204,7 @@ game::sim::Ship::getNumLaunchers() const
     return m_numLaunchers;
 }
 
-// /** Change torpedo launcher count. */
+// Set number of torpedo launchers.
 void
 game::sim::Ship::setNumLaunchers(int numLaunchers)
 {
@@ -211,7 +213,7 @@ game::sim::Ship::setNumLaunchers(int numLaunchers)
     markDirty();
 }
 
-// /** Get number of fighter bays. */
+// Get number of fighter bays.
 int
 game::sim::Ship::getNumBays() const
 {
@@ -219,7 +221,7 @@ game::sim::Ship::getNumBays() const
     return m_numBays;
 }
 
-// /** Change number of fighter bays. */
+// Set number of fighter bays.
 void
 game::sim::Ship::setNumBays(int numBays)
 {
@@ -228,7 +230,7 @@ game::sim::Ship::setNumBays(int numBays)
     markDirty();
 }
 
-// /** Get ammunition (torps, fighters). */
+// Get number of torpedoes/fighters.
 int
 game::sim::Ship::getAmmo() const
 {
@@ -236,7 +238,7 @@ game::sim::Ship::getAmmo() const
     return m_ammo;
 }
 
-// /** Change ammunition (torps, fighters). */
+// Set number of torpedoes/fighters.
 void
 game::sim::Ship::setAmmo(int ammo)
 {
@@ -245,7 +247,7 @@ game::sim::Ship::setAmmo(int ammo)
     markDirty();
 }
 
-// /** Get engine type. */
+// Get engine type.
 int
 game::sim::Ship::getEngineType() const
 {
@@ -253,7 +255,7 @@ game::sim::Ship::getEngineType() const
     return m_engineType;
 }
 
-// /** Change engine type. */
+// Set engine type.
 void
 game::sim::Ship::setEngineType(int engineType)
 {
@@ -262,7 +264,7 @@ game::sim::Ship::setEngineType(int engineType)
     markDirty();
 }
 
-/** Get aggressiveness. */
+// Get aggressiveness.
 int
 game::sim::Ship::getAggressiveness() const
 {
@@ -270,7 +272,7 @@ game::sim::Ship::getAggressiveness() const
     return m_aggressiveness;
 }
 
-// /** Change aggressiveness (agg_XXX). */
+// Set aggressiveness.
 void
 game::sim::Ship::setAggressiveness(int aggressiveness)
 {
@@ -279,7 +281,7 @@ game::sim::Ship::setAggressiveness(int aggressiveness)
     markDirty();
 }
 
-// /** Get Id for intercept-attack. */
+// Get Id for intercept-attack.
 int
 game::sim::Ship::getInterceptId() const
 {
@@ -287,7 +289,7 @@ game::sim::Ship::getInterceptId() const
     return m_interceptId;
 }
 
-// /** Set Id for intercept-attack. */
+// Set Id for intercept-attack.
 void
 game::sim::Ship::setInterceptId(int id)
 {
@@ -296,20 +298,21 @@ game::sim::Ship::setInterceptId(int id)
     markDirty();
 }
 
+// Check for default name.
 bool
 game::sim::Ship::hasDefaultName(afl::string::Translator& tx) const
 {
     return getName() == String_t(afl::string::Format(tx.translateString("Ship %d").c_str(), getId()));
 }
 
+// Set default name.
 void
 game::sim::Ship::setDefaultName(afl::string::Translator& tx)
 {
     setName(afl::string::Format(tx.translateString("Ship %d").c_str(), getId()));
 }
 
-// /** Check whether this is a custom ship. Custom ships have some more
-//     freedom in configuring. */
+// Check for custom ship.
 bool
 game::sim::Ship::isCustomShip() const
 {
@@ -317,11 +320,12 @@ game::sim::Ship::isCustomShip() const
     return getHullType() == 0;
 }
 
-// /** Check whether this ship matches the current ship list. */
+// Check whether this ship matches a ship list.
 bool
 game::sim::Ship::isMatchingShipList(const game::spec::ShipList& shipList) const
 {
     // ex GSimShip::isMatchingShipList
+    // FIXME: verify beam/torpedo types?
     /* custom ships have full freedom */
     if (isCustomShip()) {
         return true;
@@ -354,7 +358,7 @@ game::sim::Ship::isMatchingShipList(const game::spec::ShipList& shipList) const
     return true;
 }
 
-// /** Check whether this ship has a specific hull function from the configuration. */
+// Check whether this ship has a specific hull function from the configuration.
 bool
 game::sim::Ship::hasImpliedAbility(Ability which, const game::spec::ShipList& shipList, const game::config::HostConfiguration& config) const
 {

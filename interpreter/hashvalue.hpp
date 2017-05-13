@@ -1,24 +1,31 @@
 /**
   *  \file interpreter/hashvalue.hpp
+  *  \brief Class interpreter::HashValue
   */
 #ifndef C2NG_INTERPRETER_HASHVALUE_HPP
 #define C2NG_INTERPRETER_HASHVALUE_HPP
 
 #include "afl/base/ref.hpp"
 #include "interpreter/indexablevalue.hpp"
-#include "interpreter/hashdata.hpp"
+#include "afl/data/hash.hpp"
 
 namespace interpreter {
 
     /** Hash reference.
         Hashes are always by-reference, because HashValue objects are cloned when put on the stack.
-        The actual data is stored in a HashData object. */
+        The actual data is stored in a afl::data::Hash object. */
     class HashValue : public IndexableValue {
      public:
-        HashValue(afl::base::Ref<HashData> data);
+        /** Constructor.
+            \param data Hash */
+        explicit HashValue(afl::data::Hash::Ref_t data);
+
+        /** Destructor. */
         ~HashValue();
 
-        afl::base::Ref<HashData> getData();
+        /** Access underlying actual hash.
+            \return hash */
+        afl::data::Hash::Ref_t getData();
 
         // IndexableValue:
         virtual afl::data::Value* get(Arguments& args);
@@ -36,7 +43,7 @@ namespace interpreter {
         virtual HashValue* clone() const;
 
      private:
-        afl::base::Ref<HashData> m_data;
+        afl::data::Hash::Ref_t m_data;
     };
 
 }

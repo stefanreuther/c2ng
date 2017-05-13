@@ -82,6 +82,8 @@ if (@pureVirtuals) {
             $testCode .= "            { return false; }\n";
         } elsif ($x =~ /^virtual (afl::base::)?Ptr</) {
             $testCode .= "            { return 0; }\n";
+        } elsif ($x =~ /^virtual (afl::base::)?Ref</) {
+            $testCode .= "            { throw std::runtime_error(\"no ref\"); }\n";
         } elsif ($x =~ /^virtual [\w\s:<>]+\*/) {
             $testCode .= "            { return 0; }\n";
         } elsif ($x =~ /^virtual ([\w:<>]+)/) {

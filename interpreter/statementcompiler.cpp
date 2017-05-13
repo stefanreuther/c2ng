@@ -26,6 +26,7 @@
 #include "interpreter/subroutinevalue.hpp"
 #include "interpreter/world.hpp"
 #include "interpreter/values.hpp"
+#include "afl/charset/defaultcharsetfactory.hpp"
 
 namespace {
     enum TypeKeyword {
@@ -880,7 +881,7 @@ interpreter::StatementCompiler::compileCall(BytecodeObject& bco, const Statement
 
     /* Call */
     procedure->compileValue(bco, scc);
-    bco.addInstruction(Opcode::maIndirect, Opcode::miIMCall + Opcode::miIMRefuseFunctions, args.size());
+    bco.addInstruction(Opcode::maIndirect, Opcode::miIMCall + Opcode::miIMRefuseFunctions, uint16_t(args.size()));
 
     return CompiledStatement;
 }
@@ -1221,7 +1222,7 @@ interpreter::StatementCompiler::compileEval(BytecodeObject& bco, const Statement
     for (size_t i = 0; i < args.size(); ++i) {
         args[i]->compileValue(bco, scc);
     }
-    bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialEvalStatement, args.size());
+    bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialEvalStatement, uint16_t(args.size()));
 
     return CompiledStatement;
 }
@@ -1878,19 +1879,13 @@ interpreter::StatementCompiler::compileOption(BytecodeObject& /*bco*/, const Sta
                 throw Error::expectSymbol(")");
 
             /* Interpret it */
-            // FIXME: port this (charset factory impedance mismatch: deleter vs. auto_ptr)
-            // bool utf8;
-            // CharacterSet cset;
-            // if (CharacterSet::isCharsetNameUtf8(encname)) {
-            //     utf8 = true;
-            // } else {
-            //     utf8 = false;
-            //     cset = CharacterSet::getCharsetByName(encname);
-            //     if (!cset.isValid())
-            //         throw Error("Unknown encoding, " + encname);
-            // }
-            // if (!m_commandSource.setEncoding(utf8, cset))
-            //     throw Error::misplacedKeyword("Option Encoding");
+            afl::charset::Charset* cs = afl::charset::DefaultCharsetFactory().createCharset(encname);
+            if (cs == 0) {
+                throw Error("Unknown encoding, " + encname);
+            }
+            if (!m_commandSource.setCharsetNew(cs)) {
+                throw Error::misplacedKeyword("Option Encoding");
+            }
         } else if (opname == "LOCALTYPES") {
             /* "LocalTypes(0/1)" */
             m_allowLocalTypes = (parseOptionArgument(tok, 0, 1) != 0);
@@ -2046,7 +2041,7 @@ interpreter::StatementCompiler::compileReDim(BytecodeObject& bco, const Statemen
         }
 
         /* Do it */
-        bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialResizeArray, numDims);
+        bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialResizeArray, uint16_t(numDims));
         if (!tok.checkAdvance(tok.tComma)) {
             break;
         }
@@ -2357,7 +2352,7 @@ interpreter::StatementCompiler::compileSelectionExec(BytecodeObject& bco, const 
 
     /* Generate code for a call to "CC$SELECTIONEXEC target, expr" */
     afl::data::StringValue sv(expr);
-    bco.addInstruction(Opcode::maPush, Opcode::sInteger, target);
+    bco.addInstruction(Opcode::maPush, Opcode::sInteger, uint16_t(target));
     bco.addPushLiteral(&sv);
     bco.addInstruction(Opcode::maPush, Opcode::sNamedShared, bco.addName("CC$SELECTIONEXEC"));
     bco.addInstruction(Opcode::maIndirect, Opcode::miIMCall + Opcode::miIMRefuseFunctions, 2);
@@ -2604,9 +2599,9 @@ interpreter::StatementCompiler::compileStruct(BytecodeObject& bco, const Stateme
                         throw Error::expectIdentifier("variable name");
                     String_t field = tok.getCurrentString();
                     validateName(scc, field);
-                    if (typeValue.getType()->names.getIndexByName(field) != afl::data::NameMap::nil)
+                    if (typeValue.getType()->names().getIndexByName(field) != afl::data::NameMap::nil)
                         throw Error("Duplicate field name");
-                    typeValue.getType()->names.add(field);
+                    typeValue.getType()->names().add(field);
                     tok.readNextToken();
 
                     /* Read value */
@@ -2924,7 +2919,7 @@ interpreter::StatementCompiler::compileProcedureCall(BytecodeObject& bco, const 
 
     /* Call */
     bco.addVariableReferenceInstruction(Opcode::maPush, name, scc);
-    bco.addInstruction(Opcode::maIndirect, Opcode::miIMCall + Opcode::miIMRefuseFunctions, args.size());
+    bco.addInstruction(Opcode::maIndirect, Opcode::miIMCall + Opcode::miIMRefuseFunctions, uint16_t(args.size()));
 
     return CompiledStatement;
 }
@@ -3028,7 +3023,7 @@ interpreter::StatementCompiler::compileInitializer(BytecodeObject& bco, const St
             if (!tok.checkAdvance(tok.tComma))
                 throw Error::expectSymbol(",", ")");
         }
-        bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialNewArray, n);
+        bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialNewArray, uint16_t(n));
         if (tok.checkAdvance("AS")) {
             // Type initializer
             if (tok.getCurrentToken() != tok.tIdentifier)
@@ -3053,8 +3048,8 @@ interpreter::StatementCompiler::compileInitializer(BytecodeObject& bco, const St
                 //  loopn:
                 //     udec
                 for (int i = 0; i < n; ++i) {
-                    bco.addInstruction(Opcode::maStack, Opcode::miStackDup, i);
-                    bco.addInstruction(Opcode::maPush,  Opcode::sInteger, n - i);
+                    bco.addInstruction(Opcode::maStack, Opcode::miStackDup, uint16_t(i));
+                    bco.addInstruction(Opcode::maPush,  Opcode::sInteger, uint16_t(n - i));
                     bco.addInstruction(Opcode::maBinary, biArrayDim, 0);
                     bco.addJump(Opcode::jIfFalse | Opcode::jIfEmpty, label_skip[n-1-i]);
                     bco.addLabel(label_loop[n-1-i]);
@@ -3067,13 +3062,13 @@ interpreter::StatementCompiler::compileInitializer(BytecodeObject& bco, const St
                 //     dup 2N+1      (duplicate array)
                 //     popind N
                 for (int i = 0; i < n; ++i) {
-                    bco.addInstruction(Opcode::maStack, Opcode::miStackDup, 2*i);
+                    bco.addInstruction(Opcode::maStack, Opcode::miStackDup, uint16_t(2*i));
                 }
                 if (!compileTypeInitializer(bco, scc, typeName)) {
                     bco.addPushLiteral(0);
                 }
-                bco.addInstruction(Opcode::maStack, Opcode::miStackDup, 2*n+1);
-                bco.addInstruction(Opcode::maIndirect, Opcode::miIMPop, n);
+                bco.addInstruction(Opcode::maStack, Opcode::miStackDup, uint16_t(2*n+1));
+                bco.addInstruction(Opcode::maIndirect, Opcode::miIMPop, uint16_t(n));
 
                 // Loop tails:
                 //     jt loopn

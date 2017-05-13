@@ -130,3 +130,7 @@ game::interface::LoadContext::createProcess()
 {
     return 0;
 }
+
+void
+game::interface::LoadContext::finishProcess(interpreter::Process& /*proc*/)
+{ }

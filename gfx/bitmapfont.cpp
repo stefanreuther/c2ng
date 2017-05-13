@@ -1,5 +1,6 @@
 /**
   *  \file gfx/bitmapfont.cpp
+  *  \brief Class gfx::BitmapFont
   */
 
 #include <memory>
@@ -24,8 +25,7 @@ namespace {
     }
 }
 
-
-/** Constructor. Makes an empty font. */
+// Construct an empty font.
 gfx::BitmapFont::BitmapFont()
     : glyphs(),
       height(0)
@@ -33,14 +33,11 @@ gfx::BitmapFont::BitmapFont()
     // ex GfxBitmapFont::GfxBitmapFont
 }
 
+// Destructor.
 gfx::BitmapFont::~BitmapFont()
 { }
 
-
-// BitmapFont methods:
-
-/** Add new glyph. GfxBitmapFont assumes ownership of the glyph.
-    If there already is a glyph with that Id, it is replaced. */
+// Add new glyph.
 void
 gfx::BitmapFont::addNewGlyph(afl::charset::Unichar_t id, BitmapGlyph* g)
 {
@@ -90,9 +87,7 @@ gfx::BitmapFont::addNewGlyph(afl::charset::Unichar_t id, BitmapGlyph* g)
     }
 }
 
-/** Get glyph for a character.
-    \param id Character id
-    \return Glyph; 0 if none present. */
+// Get glyph for a character.
 const gfx::BitmapGlyph*
 gfx::BitmapFont::getGlyph(afl::charset::Unichar_t id) const
 {
@@ -109,23 +104,20 @@ gfx::BitmapFont::getGlyph(afl::charset::Unichar_t id) const
     }
 }
 
-/** Get current upper bound of character Ids.
-    This value can be used to control iteration across all characters
-    ('for (uint32_t i = 0, e = getCurrentCharacterLimit(); i < e; ++i)').
-    \return some n, such that getGlyph(m) returns null for all m >= n. */
+// Get current upper bound of character Ids.
 uint32_t
 gfx::BitmapFont::getCurrentCharacterLimit() const
 {
     // ex GfxBitmapFont::getCurrentCharacterLimit
-    uint32_t limit = 256 * glyphs.size();
+    size_t limit = 256 * glyphs.size();
     if (glyphs.size() != 0 && glyphs.back() != 0) {
         limit -= 256;
         limit += glyphs.back()->size();
     }
-    return limit;
+    return static_cast<uint32_t>(limit);
 }
 
-/** Get font height. */
+// Get font height.
 int
 gfx::BitmapFont::getHeight() const
 {
@@ -169,8 +161,7 @@ namespace {
     static_assert(sizeof(Hint) == 4, "sizeof Hint");
 }
 
-/** Load bitmap font from "FN" file. This is a custom font file
-    format, used by PCC 1.x as well as PCC2. */
+// Load bitmap font from "FN" file.
 void
 gfx::BitmapFont::load(afl::io::Stream& s, int index)
 {

@@ -98,11 +98,11 @@ namespace game {
 
         /** Check whether this host allows large cargo transfers.
             A large cargo transfer is one where the cargo amount in transit plus the ship content exceed the cargo room size.
-            This is allowed by most Host versions, but was blocked/made configurable in recent THosts. */
+            This is allowed by most Host versions, but was blocked/made configurable in THost 3.22.31. */
         bool hasLargeCargoTransfer() const;
 
         /** Check whether the "Lay mines in" mission automatically fills in the minefield owner.
-            When enlarging a foreing minefield, some PHost versions require you to set an 'miX' friendly code, some do not. */
+            When enlarging a foreing minefield, PHost versions before 3.4c require you to set an 'miX' friendly code, newer do not. */
         bool hasAutomaticMineIdentity() const;
 
         /** Get post-taxation happiness limit.

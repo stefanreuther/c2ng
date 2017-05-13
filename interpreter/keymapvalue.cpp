@@ -1,17 +1,21 @@
 /**
   *  \file interpreter/keymapvalue.cpp
+  *  \brief Class interpreter::KeymapValue
   */
 
 #include "interpreter/keymapvalue.hpp"
 #include "interpreter/error.hpp"
 
+// Constructor.
 interpreter::KeymapValue::KeymapValue(util::KeymapRef_t keymap)
     : m_keymap(keymap)
 { }
 
+// Destructor.
 interpreter::KeymapValue::~KeymapValue()
 { }
 
+// Get keymap.
 util::KeymapRef_t
 interpreter::KeymapValue::getKeymap() const
 {

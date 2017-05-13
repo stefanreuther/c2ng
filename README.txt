@@ -18,10 +18,10 @@ WHAT IS PCC2?
   PCC2. It is intended to be 100% compatible to PCC2. However, it does
   away with many self-imposed limitations of PCC2.
 
-  Milestone One is a tech demo that proves feasability of some of the
-  major features that turned out to be impossible on the original PCC2
-  codebase and, unlike Milestone Zero, already looks somehow like a
-  Planets client.
+  Milestone Two is a tech demo. Adding to Milestone One, it adds
+  network server code (but does not change the client code very much).
+  Milestone One uncovered gaps in PlanetsCentral network protocols,
+  thus I have given some more priority to upgrading those for now.
 
 
 Project Goals
@@ -44,7 +44,7 @@ Project Goals
   - more scriptability.
 
 
-Milestone One
+Milestone Two
 ==============
 
   This version implements some key parts to prove feasibility. It does
@@ -69,10 +69,16 @@ Milestone One
 
   Meaningful test coverage ..................................... done
     PCC2 has a meager test coverage of around 10%. c2ng currently
-    achieves >30% in the application, >80% in the foundation
+    achieves >50% in the application, ~90% in the foundation
     libraries. This, together with some newer coding styles, gives it
     a greater stability than PCC2, and some confidence that changing a
     feature does not break another.
+
+  PlanetsCentral / PCC2Web ..................................... done
+    Milestone Two adds Talk and File servers. Compared to the older
+    implementations, they are faster, more robust, and better tested.
+    The File server provides a new backend with automatic compression
+    and deduplication.
 
 
 What can you do with it?
@@ -122,5 +128,4 @@ Future Milestones
   - implement help
   - can we integrate forums/activities?
   - more operating systems (Android!)
-  - port PlanetsCentral / PCC2Web to use c2ng as basis
   - C++11, maybe

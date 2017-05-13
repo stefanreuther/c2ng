@@ -114,7 +114,7 @@ String_t
 game::v3::decodeMessage(afl::base::ConstBytes_t data, afl::charset::Charset& charset, bool rewrap)
 {
     // ex game/msg.h:getMessageFromArray
-    afl::base::GrowableMemory<char> result;
+    afl::base::GrowableBytes_t result;
     enum { None, Before, Inside } rewrapStatus;
 
     // Winplan fixup needed?
@@ -133,13 +133,13 @@ game::v3::decodeMessage(afl::base::ConstBytes_t data, afl::charset::Charset& cha
     // Convert message
     bool skipping = false;
     while (const uint8_t* p = data.eat()) {
-        char c = *p - 13;
+        uint8_t c = uint8_t(*p - 13);
         switch (c) {
          case 13:
             // CR. Regular line ending except if we're rewrapping Winplan mess.
             if (rewrapStatus != Inside) {
                 if (rewrapStatus == Before) {
-                    if (const char* p = result.atEnd(0)) {
+                    if (const uint8_t* p = result.atEnd(0)) {
                         if (*p == '\n') {
                             // a blank line, i.e. end of the headers
                             rewrapStatus = Inside;

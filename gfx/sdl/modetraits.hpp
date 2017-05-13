@@ -89,9 +89,9 @@ namespace gfx { namespace sdl {
             }
         static inline void poke(Data_t* ptr, Pixel_t val)
             {
-                ptr[0] = val;
-                ptr[1] = val >> 8;
-                ptr[2] = val >> 16;
+                ptr[0] = uint8_t(val);
+                ptr[1] = uint8_t(val >> 8);
+                ptr[2] = uint8_t(val >> 16);
             }
         inline Pixel_t mix(Pixel_t a, Pixel_t b, Alpha_t balpha) const
             {
@@ -116,20 +116,20 @@ gfx::sdl::ModeTraits8::mix(Pixel_t a, Pixel_t b, Alpha_t balpha) const
 {
     /* FIXME: caching? */
     register SDL_Color* pal = sfc->format->palette->colors;
-    return SDL_MapRGB(sfc->format,
-                      mixColorComponent(pal[a].r, pal[b].r, balpha),
-                      mixColorComponent(pal[a].g, pal[b].g, balpha),
-                      mixColorComponent(pal[a].b, pal[b].b, balpha));
+    return Pixel_t(SDL_MapRGB(sfc->format,
+                              mixColorComponent(pal[a].r, pal[b].r, balpha),
+                              mixColorComponent(pal[a].g, pal[b].g, balpha),
+                              mixColorComponent(pal[a].b, pal[b].b, balpha)));
 }
 
 gfx::sdl::ModeTraits16::Pixel_t
 gfx::sdl::ModeTraits16::mix(Pixel_t a, Pixel_t b, Alpha_t balpha) const
 {
     SDL_PixelFormat* fmt = sfc->format;
-    Pixel_t re = mixColorComponent(a & fmt->Rmask, b & fmt->Rmask, balpha) & fmt->Rmask;
-    Pixel_t gr = mixColorComponent(a & fmt->Gmask, b & fmt->Gmask, balpha) & fmt->Gmask;
-    Pixel_t bl = mixColorComponent(a & fmt->Bmask, b & fmt->Bmask, balpha) & fmt->Bmask;
-    return re | gr | bl;
+    Pixel_t re = Pixel_t(mixColorComponent(a & fmt->Rmask, b & fmt->Rmask, balpha) & fmt->Rmask);
+    Pixel_t gr = Pixel_t(mixColorComponent(a & fmt->Gmask, b & fmt->Gmask, balpha) & fmt->Gmask);
+    Pixel_t bl = Pixel_t(mixColorComponent(a & fmt->Bmask, b & fmt->Bmask, balpha) & fmt->Bmask);
+    return Pixel_t(re | gr | bl);
 }
 
 gfx::sdl::ModeTraits32::Pixel_t

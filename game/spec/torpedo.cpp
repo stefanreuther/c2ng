@@ -1,5 +1,6 @@
 /**
   *  \file game/spec/torpedo.cpp
+  *  \brief Class game::spec::Torpedo
   */
 
 #include "game/spec/torpedo.hpp"

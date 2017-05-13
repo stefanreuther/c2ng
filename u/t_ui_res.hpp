@@ -7,6 +7,19 @@
 
 #include <cxxtest/TestSuite.h>
 
+class TestUiResCCImageLoader : public CxxTest::TestSuite {
+ public:
+    void testCompressedCD();
+    void testUncompressedGFX();
+    void testCompressedCC();
+};
+
+class TestUiResEngineImageLoader : public CxxTest::TestSuite {
+ public:
+    void testOK();
+    void testFail();
+};
+
 class TestUiResImageLoader : public CxxTest::TestSuite {
  public:
     void testIt();
@@ -22,6 +35,7 @@ class TestUiResManager : public CxxTest::TestSuite {
 class TestUiResProvider : public CxxTest::TestSuite {
  public:
     void testIt();
+    void testOpen();
 };
 
 class TestUiResResId : public CxxTest::TestSuite {

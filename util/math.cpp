@@ -1,14 +1,26 @@
 /**
   *  \file util/math.cpp
+  *  \brief Mathematical Functions
   */
 
 #include <cmath>
 #include "util/math.hpp"
 
-/** Pi. This is what "echo 'a(1)*4' | bc -l" says. */
+// Pi. This is what "echo 'a(1)*4' | bc -l" says.
 const double util::PI = 3.14159265358979323844;
 
+// Arithmetic rounding.
+int32_t
+util::roundToInt(double d)
+{
+    if (d < 0) {
+        return -int32_t(-d + 0.5);
+    } else {
+        return int32_t(d + 0.5);
+    }
+}
 
+// Given coordinate offsets, compute heading.
 double
 util::getHeadingRad(double dx, double dy)
 {
@@ -21,6 +33,7 @@ util::getHeadingRad(double dx, double dy)
     return value;
 }
 
+// Given coordinate offsets, compute heading in degrees.
 double
 util::getHeadingDeg(double dx, double dy)
 {

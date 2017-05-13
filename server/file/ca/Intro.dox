@@ -1,0 +1,26 @@
+/*!
+     \namespace server::file::ca
+     \brief c2file content-addressable storage
+
+     This namespace implements content-addressable storage for c2file.
+     Instead of storing a plain copy of the users' files, this stores data addressed by its content hash.
+
+     This provides implicit deduplication and cache content negotiation for network clients.
+     Deduplication brings major backup size savings on PlanetsCentral.com.
+     Providing content hashes allows network clients (i.e. PCC2 talking to PCc) to detect whether they have to download a file or not.
+
+     Content-addressable storage is precisely what git does, so we use the very same format, although with slight variations:
+     - no packfiles
+     - hardcoded use of HEAD/master (i.e. you cannot track other branches)
+     - we allow empty directories to be committed
+
+     In addition, note that this is a file storage, not a SCM.
+     Therefore, this does not track history (as if all commits were made using "--amend"), and aggressively removes garbage.
+     Our commits are small (individual files); updating a single file in a 3-deep folder would normally produce 5 new objects
+     (commit, trees, file), and keeping the old versions would negate our size savings.
+
+     <b>Entry points:</b>
+
+     - server::file::ca::ObjectStore
+     - server::file::ca::Root
+ */

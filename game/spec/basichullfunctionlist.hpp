@@ -1,5 +1,6 @@
 /**
   *  \file game/spec/basichullfunctionlist.hpp
+  *  \brief Class game::spec::BasicHullFunctionList
   */
 #ifndef C2NG_GAME_SPEC_BASICHULLFUNCTIONLIST_HPP
 #define C2NG_GAME_SPEC_BASICHULLFUNCTIONLIST_HPP
@@ -16,6 +17,10 @@ namespace game { namespace spec {
 
     class Hull;
 
+    /** List of basic hull functions.
+        This defines a list of basic hull function (BasicHullFunction).
+        We read their definition from a definition file,
+        to allow easier upgrade (and storage of friendly help texts) for future functions. */
     class BasicHullFunctionList {
      public:
         /** Constructor. */
@@ -27,7 +32,10 @@ namespace game { namespace spec {
         /** Clear hull functions definitions. */
         void clear();
 
-        /** Load from file. */
+        /** Load from file.
+            \param in Input file
+            \param tx Translator (for generating error messages)
+            \param log Logger (for generating error messages) */
         void load(afl::io::Stream& in, afl::string::Translator& tx, afl::sys::LogListener& log);
 
         /** Get definition of a basic function.

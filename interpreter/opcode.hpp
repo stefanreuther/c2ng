@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/opcode.hpp
+  *  \brief Class interpreter::Opcode
   */
 #ifndef C2NG_INTERPRETER_OPCODE_HPP
 #define C2NG_INTERPRETER_OPCODE_HPP
@@ -133,8 +134,8 @@ namespace interpreter {
             miSpecialBind               ///< Bind arguments to make a closure. arg is number of arguments.
         };
 
-        /** Get template for disassembling this opcode. The caller must fill
-            in the placeholders from the opcode's \c arg field.
+        /** Get template for disassembling this opcode.
+            The caller must fill in the placeholders from the opcode's \c arg field.
             - %n name table index
             - %l literal table index
             - %s subroutine table index
@@ -142,113 +143,123 @@ namespace interpreter {
             - %d signed int
             - %L local variable name, given by address
             - %T static variable name, given by address
-            - %G shared variable name, given by address */
-        void getDisassemblyTemplate(String_t& tpl) const;
+            - %G shared variable name, given by address
+            \return template string */
+        String_t getDisassemblyTemplate() const;
 
+        /** Check for special (miSpecialXXX) instruction.
+            \param sp Instruction to check for
+            \return true on match */
         bool is(Special sp) const;
+
+        /** Check for stack (miStackXXX) instruction.
+            \param st Instruction to check for
+            \return true on match */
         bool is(Stack st) const;
+
+        /** Check major opcode.
+            \param m Major opcode to check for
+            \return true on match */
         bool is(Major m) const;
+
+        /** Check for unary (unXXX) instruction.
+            \param un Operation to check for
+            \return true on match */
         bool is(UnaryOperation un) const;
+
+        /** Check for binary (biXXX) instruction.
+            \param bi Operation to check for
+            \return true on match */
         bool is(BinaryOperation bi) const;
+
+        /** Check for ternary (teXXX) instruction.
+            \param te Operation to check for
+            \return true on match */
         bool is(TernaryOperation te) const;
+
+        /** Check for jump or catch.
+            This accepts all instructions that have a label as a target, that is, all jumps and catch (but not labels).
+            \return true on match */
         bool isJumpOrCatch() const;
+
+        /** Check for regular jumps.
+            This accepts all regular jumps, but not special jumps (jdz), labels or catch.
+            \return true on match */
         bool isRegularJump() const;
+
+        /** Check for label.
+            \return true on match */
         bool isLabel() const;
 
+        /** Get external "major" value.
+            For fused instructions, returns the original opcode.
+            \return external opcode */
         uint8_t getExternalMajor() const;
     };
 
 }
 
+// Check for special (miSpecialXXX) instruction.
 inline bool
 interpreter::Opcode::is(Special sp) const
 {
     return major == maSpecial && minor == sp;
 }
 
+// Check for stack (miStackXXX) instruction.
 inline bool
 interpreter::Opcode::is(Stack st) const
 {
     return major == maStack && minor == st;
 }
 
+// Check major opcode.
 inline bool
 interpreter::Opcode::is(Major m) const
 {
     return major == m;
 }
 
+// Check for unary (unXXX) instruction.
 inline bool
 interpreter::Opcode::is(UnaryOperation un) const
 {
     return major == maUnary && minor == un;
 }
 
+// Check for binary (biXXX) instruction.
 inline bool
 interpreter::Opcode::is(BinaryOperation bi) const
 {
     return major == maBinary && minor == bi;
 }
 
+// Check for ternary (teXXX) instruction.
 inline bool
 interpreter::Opcode::is(TernaryOperation te) const
 {
     return major == maTernary && minor == te;
 }
 
-/** Check whether this is a jump or catch, that is, anything that has a label as a target. */
+// Check for jump or catch.
 inline bool
 interpreter::Opcode::isJumpOrCatch() const
 {
     return major == maJump && (minor & ~jSymbolic) != 0;
 }
 
-/** Check whether this is a regular jump, that is, not a label, catch or other jump. */
+// Check for regular jumps.
 inline bool
 interpreter::Opcode::isRegularJump() const
 {
     return major == maJump && (minor & jOtherMask) == 0 && (minor & jAlways) != 0;
 }
 
-/** Check whether this is a label. */
+// Check for label.
 inline bool
 interpreter::Opcode::isLabel() const
 {
     return major == maJump && (minor & ~jSymbolic) == 0;
-}
-
-/** Get external "major" value.
-    This folds away internal opcodes. */
-inline uint8_t
-interpreter::Opcode::getExternalMajor() const
-{
-    switch (major) {
-     case maPush:
-     case maBinary:
-     case maUnary:
-     case maTernary:
-     case maJump:
-     case maIndirect:
-     case maStack:
-     case maPop:
-     case maStore:
-     case maMemref:
-     case maDim:
-     case maSpecial:
-        return major;
-
-     case maFusedUnary:
-     case maFusedBinary:
-     case maFusedComparison2:
-        return maPush;
-
-     case maFusedComparison:
-        return maBinary;
-
-     case maInplaceUnary:
-        return maPush;
-    }
-    return major;
 }
 
 #endif

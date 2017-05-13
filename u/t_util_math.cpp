@@ -115,3 +115,36 @@ TestUtilMath::testSquareInteger()
     TS_ASSERT_EQUALS(util::squareInteger(-42), 1764);
     TS_ASSERT_EQUALS(util::squareInteger(-20000), 400000000);
 }
+
+/** Test roundToInt. */
+void
+TestUtilMath::testRound()
+{
+    TS_ASSERT_EQUALS(util::roundToInt(0), 0);
+    TS_ASSERT_EQUALS(util::roundToInt(0.3), 0);
+    TS_ASSERT_EQUALS(util::roundToInt(0.5), 1);
+    TS_ASSERT_EQUALS(util::roundToInt(1.49), 1);
+    TS_ASSERT_EQUALS(util::roundToInt(1.5), 2);
+    TS_ASSERT_EQUALS(util::roundToInt(1.51), 2);
+
+    TS_ASSERT_EQUALS(util::roundToInt(-0.3), 0);
+    TS_ASSERT_EQUALS(util::roundToInt(-0.5), -1);
+    TS_ASSERT_EQUALS(util::roundToInt(-1.49), -1);
+    TS_ASSERT_EQUALS(util::roundToInt(-1.5), -2);
+    TS_ASSERT_EQUALS(util::roundToInt(-1.51), -2);
+}
+
+/** Test getDistanceFromDX. */
+void
+TestUtilMath::testDistance()
+{
+    TS_ASSERT_EQUALS(util::getDistanceFromDX(0, 0), 0.0);
+    TS_ASSERT_EQUALS(util::getDistanceFromDX(0, 1), 1.0);
+    TS_ASSERT_EQUALS(util::getDistanceFromDX(0, 10), 10.0);
+    TS_ASSERT_EQUALS(util::getDistanceFromDX(0, 162), 162.0);
+    TS_ASSERT_EQUALS(util::getDistanceFromDX(1, 0), 1.0);
+    TS_ASSERT_EQUALS(util::getDistanceFromDX(10, 0), 10.0);
+    TS_ASSERT_EQUALS(util::getDistanceFromDX(162, 0), 162.0);
+    TS_ASSERT_EQUALS(util::getDistanceFromDX(3, 4), 5.0);
+}
+

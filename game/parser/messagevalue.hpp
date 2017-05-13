@@ -1,5 +1,6 @@
 /**
   *  \file game/parser/messagevalue.hpp
+  *  \brief Template class game::parser::MessageValue and related functions
   */
 #ifndef C2NG_GAME_PARSER_MESSAGEVALUE_HPP
 #define C2NG_GAME_PARSER_MESSAGEVALUE_HPP
@@ -23,15 +24,29 @@ namespace game { namespace parser {
     template<typename Index, typename Value>
     class MessageValue : public MessageValueBase {
      public:
+        typedef Index Index_t;
+        typedef Value Value_t;
+
+        /** Constructor.
+            \param index Index
+            \param value Initial value */
         MessageValue(Index index, Value value);
+
+        /** Destructor. */
         virtual ~MessageValue();
 
+        /** Get index.
+            \return index */
         Index getIndex() const
             { return m_index; }
 
+        /** Get current value.
+            \return value */
         Value getValue() const
             { return m_value; }
 
+        /** Set new value.
+            \param v Value */
         void setValue(Value v)
             { this->m_value = v; }
      public:
@@ -148,11 +163,26 @@ namespace game { namespace parser {
     // FIXME: missing
     // typedef GMessageValue<string_t,GAllianceOffer> GMessageAllianceValue;
 
-
+    /** Get human-readable name, given a string index.
+        \param si String index
+        \param tx Translator
+        \return Human-readable, translated name */
     String_t getNameFromIndex(MessageStringIndex si, afl::string::Translator& tx);
+
+    /** Get human-readable name, given an integer index.
+        \param ii Integer index
+        \param tx Translator
+        \return Human-readable, translated name */
     String_t getNameFromIndex(MessageIntegerIndex ii, afl::string::Translator& tx);
 
+    /** Get string index, given a keyword.
+        \param kw Keyword in upper case
+        \return String index; ms_Max if keyword not recognized */
     MessageStringIndex getStringIndexFromKeyword(String_t kw);
+
+    /** Get integer index, given a keyword.
+        \param kw Keyword in upper case
+        \return Integer index; mi_Max if keyword not recognized */
     MessageIntegerIndex getIntegerIndexFromKeyword(String_t kw);
 
 } }

@@ -1,5 +1,6 @@
 /**
   *  \file util/rich/text.cpp
+  *  \brief Class util::rich::Text
   */
 
 #include "util/rich/text.hpp"
@@ -7,7 +8,7 @@
 #include "util/rich/visitor.hpp"
 #include "util/rich/colorattribute.hpp"
 
-
+// Construct blank object.
 util::rich::Text::Text()
     : m_text(),
       m_attributes()
@@ -15,6 +16,7 @@ util::rich::Text::Text()
     // ex RichText::RichText
 }
 
+// Construct from C string.
 util::rich::Text::Text(const char* text)
     : m_text(text),
       m_attributes()
@@ -22,6 +24,7 @@ util::rich::Text::Text(const char* text)
     // ex RichText::RichText
 }
 
+// Construct from C++ string.
 util::rich::Text::Text(String_t text)
     : m_text(text),
       m_attributes()
@@ -29,9 +32,7 @@ util::rich::Text::Text(String_t text)
     // ex RichText::RichText
 }
 
-// /** Construct colored text from C string.
-//     \param color Color to assign to whole string
-//     \param text  Text */
+// Construct colored text from C string.
 util::rich::Text::Text(SkinColor::Color color, const char* text)
     : m_text(text),
       m_attributes()
@@ -39,9 +40,7 @@ util::rich::Text::Text(SkinColor::Color color, const char* text)
     withNewAttribute(new ColorAttribute(color));
 }
 
-// /** Construct colored text from C++ string.
-//     \param color Color to assign to whole string
-//     \param text  Text */
+// Construct colored text from C++ string.
 util::rich::Text::Text(SkinColor::Color color, String_t text)
     : RefCounted(),
       m_text(text),
@@ -50,6 +49,7 @@ util::rich::Text::Text(SkinColor::Color color, String_t text)
     withNewAttribute(new ColorAttribute(color));
 }
 
+// Copy constructor.
 util::rich::Text::Text(const Text& other)
     : RefCounted(),
       m_text(other.m_text),
@@ -65,6 +65,7 @@ util::rich::Text::Text(const Text& other)
     }
 }
 
+// Construct sub-string.
 util::rich::Text::Text(const Text& other, size_type start, size_type length)
     : m_text(other.m_text, start, length),
       m_attributes()
@@ -88,10 +89,12 @@ util::rich::Text::Text(const Text& other, size_type start, size_type length)
         }
     }
 }
-        
+
+// Destructor.
 util::rich::Text::~Text()
 { }
 
+// Apply attribute to whole text.
 util::rich::Text&
 util::rich::Text::withNewAttribute(Attribute* attr)
 {
@@ -106,12 +109,14 @@ util::rich::Text::withNewAttribute(Attribute* attr)
     return *this;
 }
 
+// Apply color to whole text.
 util::rich::Text&
 util::rich::Text::withColor(SkinColor::Color color)
 {
     return withNewAttribute(new ColorAttribute(color));
 }
 
+// Apply style to whole text.
 util::rich::Text&
 util::rich::Text::withStyle(StyleAttribute::Style style)
 {
@@ -119,6 +124,7 @@ util::rich::Text::withStyle(StyleAttribute::Style style)
     return withNewAttribute(new StyleAttribute(style));
 }
 
+// Get raw text without attributes.
 String_t
 util::rich::Text::getText() const
 {
@@ -126,9 +132,7 @@ util::rich::Text::getText() const
     return m_text;
 }
 
-// /** Get substring of a rich-text object.
-//     \param start  first position
-//     \param length number of characters to extract */
+// Get substring of a rich-text object.
 util::rich::Text
 util::rich::Text::substr(size_type start, size_type length) const
 {
@@ -136,7 +140,7 @@ util::rich::Text::substr(size_type start, size_type length) const
     return Text(*this, start, length);
 }
 
-// /** Erase part of a rich-text object. */
+// Erase part of a rich-text object.
 void
 util::rich::Text::erase(size_type start, size_type length)
 {
@@ -150,21 +154,22 @@ util::rich::Text::erase(size_type start, size_type length)
             /* delete piece from middle */
             Text tmp(*this, 0, start);
             tmp.append(Text(*this, start + length, String_t::npos));
-            *this = tmp;
+            swap(tmp);
         }
     }
 }
 
-// /** Append other rich text object.
-//     \param other [in] text to append
-//     \return *this */
+// Append rich text.
 util::rich::Text&
 util::rich::Text::append(const Text& other)
 {
     // ex RichText::append
     size_t offset = m_text.size();
     m_text.append(other.m_text);
-    for (size_t i = 0; i < other.m_attributes.size(); ++i) {
+
+    // Note: the "n = ...size()" is required to make self-append work.
+    // If this == &other, other.m_attributes will grow in this process.
+    for (size_t i = 0, n = other.m_attributes.size(); i < n; ++i) {
         Attribute* att = other.m_attributes[i]->clone();
         att->m_start = other.m_attributes[i]->m_start + offset;
         att->m_end   = other.m_attributes[i]->m_end   + offset;
@@ -173,9 +178,7 @@ util::rich::Text::append(const Text& other)
     return *this;
 }
 
-// /** Append attribute-less text.
-//     \param text [in] text to append
-//     \return *this */
+// Append C string.
 util::rich::Text&
 util::rich::Text::append(const char* text)
 {
@@ -184,9 +187,7 @@ util::rich::Text::append(const char* text)
     return *this;
 }
 
-// /** Append attribute-less text.
-//     \param text [in] text to append
-//     \return *this */
+// Append C++ string.
 util::rich::Text&
 util::rich::Text::append(String_t text)
 {
@@ -195,10 +196,7 @@ util::rich::Text::append(String_t text)
     return *this;
 }
 
-// /** Append colored text.
-//     \param color [in] color to use
-//     \param text [in] text to append
-//     \return *this */
+// Append colored C string.
 util::rich::Text&
 util::rich::Text::append(SkinColor::Color color, const char* text)
 {
@@ -213,10 +211,7 @@ util::rich::Text::append(SkinColor::Color color, const char* text)
     return *this;
 }
 
-// /** Append colored text.
-//     \param color [in] color to use
-//     \param text [in] text to append
-//     \return *this */
+// Append colored C++ string.
 util::rich::Text&
 util::rich::Text::append(SkinColor::Color color, String_t text)
 {
@@ -230,7 +225,7 @@ util::rich::Text::append(SkinColor::Color color, String_t text)
     return *this;
 }
 
-// /** Assignment operator. */
+// Assignment operator.
 util::rich::Text&
 util::rich::Text::operator=(const Text& other)
 {
@@ -242,7 +237,7 @@ util::rich::Text::operator=(const Text& other)
     return *this;
 }
 
-// /** Swap two rich-text objects. */
+// Swap two rich-text objects.
 void
 util::rich::Text::swap(Text& other)
 {
@@ -251,7 +246,7 @@ util::rich::Text::swap(Text& other)
     m_attributes.swap(other.m_attributes);
 }
 
-// /** Clear this rich-text object. */
+// Clear this rich-text object.
 void
 util::rich::Text::clear()
 {
@@ -260,7 +255,7 @@ util::rich::Text::clear()
     m_attributes.clear();
 }
 
-// /** Visit this text item. */
+// Visit this text.
 util::rich::Visitor&
 util::rich::Text::visit(Visitor& visitor) const
 {

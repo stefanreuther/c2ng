@@ -1,5 +1,6 @@
 /**
   *  \file game/config/integerarrayoption.hpp
+  *  \brief Template class game::config::IntegerArrayOption
   */
 #ifndef C2NG_GAME_CONFIG_INTEGERARRAYOPTION_HPP
 #define C2NG_GAME_CONFIG_INTEGERARRAYOPTION_HPP
@@ -8,15 +9,27 @@
 
 namespace game { namespace config {
 
+    class Configuration;
+
     /** Integer option array.
         This contains an array of int32_t values,
-        parsed from a comma-separated list according to a ValueParser. */
+        parsed from a comma-separated list according to a ValueParser.
+        \tparam N Array size */
     template<int N>
     class IntegerArrayOption : public GenericIntegerArrayOption {
      public:
+        /** Constructor.
+            Initializes the option to all-zero.
+            \param parser Parser */
         explicit IntegerArrayOption(const ValueParser& parser);
+
+        /** Constructor.
+            Initializes the option to the given defaults.
+            \param parser Parser
+            \param defaultValue Default values */
         explicit IntegerArrayOption(const ValueParser& parser, const int32_t (&defaultValue)[N]);
 
+        /** Destructor. */
         ~IntegerArrayOption();
 
         // GenericIntegerArrayOption:
@@ -25,6 +38,8 @@ namespace game { namespace config {
         // ConfigurationOption:
         virtual String_t toString() const;
 
+        /** Copy from another option of the same type.
+            \param other Source option */
         void copyFrom(const IntegerArrayOption<N>& other);
 
      private:
@@ -62,7 +77,9 @@ template<int N>
 inline
 game::config::IntegerArrayOption<N>::IntegerArrayOption(const ValueParser& parser)
     : GenericIntegerArrayOption(parser)
-{ }
+{
+    getArray().fill(0);
+}
 
 template<int N>
 inline

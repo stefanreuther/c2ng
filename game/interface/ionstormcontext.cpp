@@ -1,6 +1,6 @@
 /**
   *  \file game/interface/ionstormcontext.cpp
-  *  \class game::interface::IonStormContext
+  *  \brief Class game::interface::IonStormContext
   */
 
 #include "game/interface/ionstormcontext.hpp"

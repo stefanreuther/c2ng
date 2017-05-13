@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/filevalue.hpp
+  *  \brief Class interpreter::FileValue
   */
 #ifndef C2NG_INTERPRETER_FILEVALUE_HPP
 #define C2NG_INTERPRETER_FILEVALUE_HPP
@@ -14,22 +15,31 @@ namespace interpreter {
         It's otherwise just an integer. */
     class FileValue : public BaseValue {
      public:
-        FileValue(int32_t fileNr);
+        /** Constructor.
+            \param fileNr File number */
+        explicit FileValue(int32_t fileNr);
+
+        /** Destructor. */
         ~FileValue();
 
+        /** Get integer value. */
+        int32_t getFileNumber() const;
+
+        // BaseValue:
         virtual String_t toString(bool readable) const;
         virtual FileValue* clone() const;
         virtual void store(TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, SaveContext& ctx) const;
 
-        /** Get integer value. */
-        int32_t getFileNumber() const
-            { return m_fileNr; }
-
      private:
         int32_t m_fileNr;
     };
-
     
+}
+
+inline int32_t
+interpreter::FileValue::getFileNumber() const
+{
+    return m_fileNr;
 }
 
 #endif

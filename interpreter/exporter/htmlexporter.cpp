@@ -64,7 +64,13 @@ interpreter::exporter::HtmlExporter::writeTag(const char* tagName, const String_
     afl::charset::Utf8Reader rdr(afl::string::toBytes(content), 0);
     while (rdr.hasMore()) {
         afl::charset::Unichar_t ch = rdr.eat();
-        if (ch <= 127) {
+        if (ch == '&') {
+            escaped.append("&amp;");
+        } else if (ch == '<') {
+            escaped.append("&lt;");
+        } else if (ch == '>') {
+            escaped.append("&gt;");
+        } else if (ch <= 127) {
             escaped.append(1, char(ch));
         } else {
             escaped.append(afl::string::Format("&#%d;", ch));

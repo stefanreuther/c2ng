@@ -333,7 +333,7 @@ game::v3::DirectoryScanner::checkResult(afl::io::Directory& dir, afl::charset::C
             if (file->read(afl::base::fromObject(rgen)) == sizeof(rgen)
                 && rgen.playerId == playerId
                 && rgen.turnNumber > 0
-                && rgen.timestampChecksum == int16_t(afl::checksums::ByteSum().add(afl::base::fromObject(rgen.timestamp), 0)))
+                && rgen.timestampChecksum == int16_t(afl::checksums::ByteSum().add(rgen.timestamp, 0)))
             {
                 // ok
                 if (pVersion) {

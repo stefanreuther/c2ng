@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/filecommandsource.hpp
+  *  \brief Class interpreter::FileCommandSource
   */
 #ifndef C2NG_INTERPRETER_FILECOMMANDSOURCE_HPP
 #define C2NG_INTERPRETER_FILECOMMANDSOURCE_HPP
@@ -15,8 +16,9 @@ namespace interpreter {
      public:
         /** File command source.
             \param tf Text file to read from */
-        FileCommandSource(afl::io::TextFile& tf);
+        explicit FileCommandSource(afl::io::TextFile& tf);
 
+        // CommandSource:
         virtual void readNextLine();
         virtual bool setCharsetNew(afl::charset::Charset* cs);
         virtual void addTraceTo(Error& e, afl::string::Translator& tx);

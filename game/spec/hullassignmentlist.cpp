@@ -1,33 +1,40 @@
 /**
   *  \file game/spec/hullassignmentlist.cpp
+  *  \brief Class game::spec::HullAssignmentList
   */
 
 #include "game/spec/hullassignmentlist.hpp"
 
+// Default constructor.
 game::spec::HullAssignmentList::HullAssignmentList()
     : m_mode(PlayerIndexed),
       m_mapping()
 { }
 
+// Destructor.
 game::spec::HullAssignmentList::~HullAssignmentList()
 { }
 
+// Clear.
 void
 game::spec::HullAssignmentList::clear()
 {
     m_mapping.clear();
 }
 
+// Set access mode.
 void
 game::spec::HullAssignmentList::setMode(Mode mode)
 {
     m_mode = mode;
 }
 
+// Add a mapping.
 void
 game::spec::HullAssignmentList::add(int player, int position, int hullNr)
 {
-    if (player != 0 && position != 0 && hullNr != 0) {
+    // FIXME: do we need the ability to set a hullNr to 0?
+    if (player > 0 && position > 0 && hullNr > 0) {
         if (int(m_mapping.size()) <= player) {
             m_mapping.resize(player+1);
         }
@@ -39,6 +46,7 @@ game::spec::HullAssignmentList::add(int player, int position, int hullNr)
     }
 }
 
+// Clear a player slot.
 void
 game::spec::HullAssignmentList::clearPlayer(int player)
 {
@@ -47,6 +55,7 @@ game::spec::HullAssignmentList::clearPlayer(int player)
     }
 }
 
+// Get index, given a hull.
 int
 game::spec::HullAssignmentList::getIndexFromHull(const game::config::HostConfiguration& config, int player, int hullNr) const
 {
@@ -58,13 +67,14 @@ game::spec::HullAssignmentList::getIndexFromHull(const game::config::HostConfigu
     } else {
         for (size_t i = 0, n = m_mapping[mappedPlayer].size(); i < n; ++i) {
             if (m_mapping[mappedPlayer][i] == hullNr) {
-                return i;
+                return int(i);
             }
         }
         return 0;
     }
 }
 
+// Get hull, given an index.
 int
 game::spec::HullAssignmentList::getHullFromIndex(const game::config::HostConfiguration& config, int player, int index) const
 {
@@ -81,6 +91,7 @@ game::spec::HullAssignmentList::getHullFromIndex(const game::config::HostConfigu
     }
 }
 
+// Get maximum index.
 int
 game::spec::HullAssignmentList::getMaxIndex(const game::config::HostConfiguration& config, int player) const
 {
@@ -90,7 +101,7 @@ game::spec::HullAssignmentList::getMaxIndex(const game::config::HostConfiguratio
     } else if (m_mapping[mappedPlayer].size() <= 1) {
         return 0;
     } else {
-        return m_mapping[mappedPlayer].size() - 1;
+        return int(m_mapping[mappedPlayer].size() - 1);
     }
 }
 

@@ -38,13 +38,13 @@ interpreter::vmio::NullLoadContext::loadStructureType(uint32_t /*id*/)
 }
 
 interpreter::Context*
-interpreter::vmio::NullLoadContext::loadContext(const interpreter::TagNode& /*tag*/, afl::io::Stream& /*aux*/)
+interpreter::vmio::NullLoadContext::loadContext(const TagNode& /*tag*/, afl::io::Stream& /*aux*/)
 {
     return 0;
 }
 
 interpreter::Context*
-interpreter::vmio::NullLoadContext::loadMutex(const String_t& /*name*/, const String_t& /*note*/, interpreter::Process* /*owner*/)
+interpreter::vmio::NullLoadContext::loadMutex(const String_t& /*name*/, const String_t& /*note*/, Process* /*owner*/)
 {
     return 0;
 }
@@ -54,3 +54,7 @@ interpreter::vmio::NullLoadContext::createProcess()
 {
     return 0;
 }
+
+void
+interpreter::vmio::NullLoadContext::finishProcess(Process& /*proc*/)
+{ }

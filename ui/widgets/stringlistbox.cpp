@@ -100,7 +100,7 @@ ui::widgets::StringListbox::getLayoutInfo() const
     // Find height
     int height = m_preferredHeight;
     if (height == 0) {
-        height = std::max(size_t(3), std::min(size_t(20), m_content.size()));
+        height = std::max(3, std::min(20, int(m_content.size())));
     }
     height *= cellSize.getY();
 

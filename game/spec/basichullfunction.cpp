@@ -1,5 +1,6 @@
 /**
   *  \file game/spec/basichullfunction.cpp
+  *  \brief Class game::spec::BasicHullFunction
   */
 
 #include "game/spec/basichullfunction.hpp"
@@ -13,6 +14,7 @@ game::spec::BasicHullFunction::BasicHullFunction(int id, String_t name)
       m_impliedFunctionId(-1)
 { }
 
+// Destructor.
 game::spec::BasicHullFunction::~BasicHullFunction()
 { }
 
