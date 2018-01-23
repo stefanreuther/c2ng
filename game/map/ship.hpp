@@ -56,6 +56,7 @@ namespace game { namespace map {
     //     void       addShipTrackEntry(const TDbShipTrackEntry& data, int turn);
         void       addMessageInformation(const game::parser::MessageInformation& info, PlayerSet_t source);
 
+        void       getCurrentShipData(ShipData& out) const;
     //     void       getShipData(TShip& data) const;
     //     int        getShipTrackHeader(TDbShipTrack& header) const;
     //     void       getShipTrackEntry(TDbShipTrackEntry& entry, int slot) const;
@@ -148,17 +149,13 @@ namespace game { namespace map {
         LongProperty_t     getFreeCargo(const game::spec::ShipList& list) const;
 
         // Transporter accesssors
-    //     TShipTransfer& getTransporter(Transporter which_one) throw();
-    //     const TShipTransfer& getTransporter(Transporter which_one) const throw();
         bool               isTransporterActive(Transporter which) const;
         IntegerProperty_t  getTransporterTargetId(Transporter which) const;
         void               setTransporterTargetId(Transporter which, IntegerProperty_t id);
         IntegerProperty_t  getTransporterCargo(Transporter which, Element::Type type) const;
         void               setTransporterCargo(Transporter which, Element::Type type, IntegerProperty_t amount);
     //     bool       isTransporterCancellable(Transporter which_one) const throw();
-    //     void       cancelTranporter(Transporter which_one) throw();
-    //     bool       isTransporterInUse(Transporter which_one) const throw();
-    //     void       setTransporterInUse(Transporter which_one, bool in_use) throw();
+        void               cancelTransporter(Transporter which);
 
         // Fleet accessors
         void               setFleetNumber(int fno);
@@ -213,6 +210,9 @@ namespace game { namespace map {
         PlayerSet_t m_xySource;
 
         UnitScoreList m_unitScores;
+
+        ShipData::Transfer& getTransporter(Transporter which);
+        const ShipData::Transfer& getTransporter(Transporter which) const;
     };
 
 } }

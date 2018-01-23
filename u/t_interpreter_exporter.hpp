@@ -7,6 +7,11 @@
 
 #include <cxxtest/TestSuite.h>
 
+class TestInterpreterExporterConfiguration : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
 class TestInterpreterExporterDbfExporter : public CxxTest::TestSuite {
  public:
     void testIt();
@@ -28,6 +33,11 @@ class TestInterpreterExporterFieldList : public CxxTest::TestSuite {
     void testAdd();
     void testAddList();
     void testModify();
+};
+
+class TestInterpreterExporterFormat : public CxxTest::TestSuite {
+ public:
+    void testIt();
 };
 
 class TestInterpreterExporterHtmlExporter : public CxxTest::TestSuite {

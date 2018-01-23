@@ -69,6 +69,12 @@ class TestServerTalkRoot : public CxxTest::TestSuite {
     void testGetUserIdFromLogin();
 };
 
+class TestServerTalkSession : public CxxTest::TestSuite {
+ public:
+    void testPermission();
+    void testRenderOptions();
+};
+
 class TestServerTalkSorter : public CxxTest::TestSuite {
  public:
     void testInterface();
@@ -174,7 +180,6 @@ class TestServerTalkTopic : public CxxTest::TestSuite {
 class TestServerTalkUser : public CxxTest::TestSuite {
  public:
     void testBasicProperties();
-    void testRealName();
     void testMailPMType();
     void testAutowatch();
     void testWatchIndividual();

@@ -6,19 +6,22 @@
 #include "server/interface/talkfolderserver.hpp"
 
 #include "t_server_interface.hpp"
-#include "u/helper/callreceiver.hpp"
-#include "afl/string/format.hpp"
 #include "afl/data/access.hpp"
-#include "server/types.hpp"
+#include "afl/string/format.hpp"
+#include "afl/test/callreceiver.hpp"
 #include "server/interface/talkfolderclient.hpp"
+#include "server/types.hpp"
 
 using afl::string::Format;
 using afl::data::Segment;
 using afl::data::Access;
 
 namespace {
-    class TalkFolderMock : public server::interface::TalkFolder, public CallReceiver {
+    class TalkFolderMock : public server::interface::TalkFolder, public afl::test::CallReceiver {
      public:
+        TalkFolderMock(afl::test::Assert a)
+            : CallReceiver(a)
+            { }
         virtual void getFolders(afl::data::IntegerList_t& result)
             {
                 checkCall("getFolders()");
@@ -108,7 +111,7 @@ TestServerInterfaceTalkFolderServer::testIt()
 {
     using server::interface::TalkFolder;
 
-    TalkFolderMock mock;
+    TalkFolderMock mock("testIt");
     server::interface::TalkFolderServer testee(mock);
 
     // getFolders
@@ -225,7 +228,7 @@ TestServerInterfaceTalkFolderServer::testIt()
 void
 TestServerInterfaceTalkFolderServer::testErrors()
 {
-    TalkFolderMock mock;
+    TalkFolderMock mock("testErrors");
     server::interface::TalkFolderServer testee(mock);
 
     Segment empty;    // g++-3.4 sees an invocation of a copy constructor if I construct this object in-place.
@@ -247,7 +250,7 @@ TestServerInterfaceTalkFolderServer::testRoundtrip()
 {
     using server::interface::TalkFolder;
 
-    TalkFolderMock mock;
+    TalkFolderMock mock("testRoundtrip");
     server::interface::TalkFolderServer level1(mock);
     server::interface::TalkFolderClient level2(level1);
     server::interface::TalkFolderServer level3(level2);

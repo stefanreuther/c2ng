@@ -74,11 +74,10 @@ util::eatWord(const char*& tpl, String_t& word)
 bool
 util::parseRange(const String_t& s, int& min, int& max, String_t::size_type& pos)
 {
-    int minResult, maxResult;
-
     String_t::size_type p = s.find('-');
     if (p != s.npos) {
         // two parts
+        int minResult, maxResult;
         if (!afl::string::strToInteger(s.substr(0, p), minResult, pos)) {
             return false;
         }
@@ -106,6 +105,7 @@ util::parseRange(const String_t& s, int& min, int& max, String_t::size_type& pos
         }
     } else {
         // one part, case one
+        int minResult;
         if (!afl::string::strToInteger(s, minResult, pos)) {
             return false;
         } else {
@@ -144,10 +144,10 @@ util::formatOptions(String_t s)
         while (1) {
             String_t component;
             sp.parseDelim("\t\n", component);
-            if (sp.parseChar('\t')) {
+            if (sp.parseCharacter('\t')) {
                 // Tab: this is an option
                 maxOption = std::max(maxOption, component.size());
-            } else if (sp.parseChar('\n')) {
+            } else if (sp.parseCharacter('\n')) {
                 // Newline: nothing to do
             } else {
                 // End reached
@@ -166,12 +166,12 @@ util::formatOptions(String_t s)
         while (1) {
             String_t component;
             sp.parseDelim("\t\n", component);
-            if (sp.parseChar('\t')) {
+            if (sp.parseCharacter('\t')) {
                 // Tab: this is an option
                 result.append(2, ' ');
                 result += component;
                 result.append(maxOption - component.size(), ' ');
-            } else if (sp.parseChar('\n')) {
+            } else if (sp.parseCharacter('\n')) {
                 // Newline: nothing to do
                 result += component;
                 result += '\n';

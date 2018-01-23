@@ -3,16 +3,16 @@
   *  \brief Test for server::file::ca::DirectoryHandler
   */
 
-#include <memory>
 #include "server/file/ca/directoryhandler.hpp"
 
+#include <memory>
 #include "t_server_file_ca.hpp"
-#include "server/file/internaldirectoryhandler.hpp"
-#include "server/file/ca/objectstore.hpp"
-#include "u/helper/callreceiver.hpp"
-#include "afl/string/format.hpp"
 #include "afl/except/fileproblemexception.hpp"
+#include "afl/string/format.hpp"
+#include "afl/test/callreceiver.hpp"
 #include "server/file/ca/directoryentry.hpp"
+#include "server/file/ca/objectstore.hpp"
+#include "server/file/internaldirectoryhandler.hpp"
 
 using server::file::ca::ObjectId;
 using server::file::ca::ObjectStore;
@@ -167,8 +167,11 @@ TestServerFileCaDirectoryHandler::testTree()
     server::file::ca::DirectoryHandler testee(store, ObjectId::fromHex("9aa7c49a27dd00dd2bdb9ce354f9a68cf04396b9"), "root", *new NullReferenceUpdater());
 
     // Read the root directory
-    class Callback : public DirectoryHandler::Callback, public CallReceiver {
+    class Callback : public DirectoryHandler::Callback, public afl::test::CallReceiver {
      public:
+        Callback(afl::test::Assert a)
+            : CallReceiver(a)
+            { }
         virtual void addItem(const DirectoryHandler::Info& info)
             {
                 checkCall(afl::string::Format("addItem(%s,%d,%d,%s)",
@@ -179,7 +182,7 @@ TestServerFileCaDirectoryHandler::testTree()
                                               info.contentId.orElse("-")));
             }
     };
-    Callback cb;
+    Callback cb("testTree");
     cb.expectCall("addItem(dir,dir,-1,-)");
     cb.expectCall("addItem(file,file,4,a7f8d9e5dcf3a68fdd2bfb727cde12029875260b)");
     testee.readContent(cb);

@@ -185,7 +185,7 @@ TestServerTalkTalkThread::testIt()
         TS_ASSERT_EQUALS(TalkThread(otherSession, root).remove(99), false);
         TS_ASSERT_EQUALS(TalkThread(rootSession, root).remove(99), false);
 
-        // - Success case: root can remove thread #1 it from forum #2
+        // - Success case: root can remove thread #1 from forum #2
         TS_ASSERT_EQUALS(TalkThread(rootSession, root).remove(1), true);
         TS_ASSERT_EQUALS(TalkThread(rootSession, root).remove(1), false);
 

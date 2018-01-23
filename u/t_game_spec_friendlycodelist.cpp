@@ -187,7 +187,8 @@ TestGameSpecFriendlyCodeList::testContainer()
     p.setOwner(1);
     p.setPlayability(p.ReadOnly);
 
-    game::spec::FriendlyCodeList sublist(testee, p, game::config::HostConfiguration());
+    const game::config::HostConfiguration hostConfig;
+    game::spec::FriendlyCodeList sublist(testee, p, hostConfig);
     TS_ASSERT_EQUALS(sublist.size(), 2U);
     TS_ASSERT_EQUALS(sublist.at(0)->getCode(), "ffc");
     TS_ASSERT_EQUALS(sublist.at(1)->getCode(), "pfc");

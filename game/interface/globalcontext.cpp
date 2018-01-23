@@ -39,7 +39,7 @@ namespace {
         { "CHART.Y",               game::interface::iuiChartY,            UIPropertyDomain,       interpreter::thInt },
         { "MY.BASES",              game::interface::iplScoreBases,        MyPlayerPropertyDomain, interpreter::thInt },
         { "MY.INMSGS",             game::interface::igpMyInMsgs,          GlobalPropertyDomain,   interpreter::thInt },
-        // { "MY.OUTMSGS",            game::interface::igpMyOutMsgs,         GlobalPropertyDomain,   interpreter::thInt },
+        { "MY.OUTMSGS",            game::interface::igpMyOutMsgs,         GlobalPropertyDomain,   interpreter::thInt },
         { "MY.PBPS",               game::interface::iplPBPs,              MyPlayerPropertyDomain, interpreter::thInt },
         { "MY.PLANETS",            game::interface::iplScorePlanets,      MyPlayerPropertyDomain, interpreter::thInt },
         { "MY.RACE",               game::interface::iplShortName,         MyPlayerPropertyDomain, interpreter::thString },

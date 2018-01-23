@@ -102,6 +102,10 @@ server::interface::TalkGroupClient::packDescription(afl::data::Segment& command,
         command.pushBackString("parent");
         command.pushBackString(*p);
     }
+    if (const String_t* p = info.key.get()) {
+        command.pushBackString("key");
+        command.pushBackString(*p);
+    }
     if (const bool* p = info.unlisted.get()) {
         command.pushBackString("unlisted");
         command.pushBackInteger(*p);
@@ -121,6 +125,9 @@ server::interface::TalkGroupClient::unpackDescription(const Value_t* value)
     }
     if (const Value_t* p = a("parent").getValue()) {
         result.parentGroup = toString(p);
+    }
+    if (const Value_t* p = a("key").getValue()) {
+        result.key = toString(p);
     }
     if (const Value_t* p = a("unlisted").getValue()) {
         result.unlisted = toInteger(p);

@@ -3,13 +3,13 @@
   *  \brief Test for server::interface::TalkPostServer
   */
 
-#include <memory>
 #include "server/interface/talkpostserver.hpp"
 
+#include <memory>
 #include "t_server_interface.hpp"
-#include "afl/string/format.hpp"
-#include "u/helper/callreceiver.hpp"
 #include "afl/data/access.hpp"
+#include "afl/string/format.hpp"
+#include "afl/test/callreceiver.hpp"
 #include "server/interface/talkpostclient.hpp"
 #include "server/types.hpp"
 
@@ -17,8 +17,11 @@ using afl::string::Format;
 using afl::data::Segment;
 
 namespace {
-    class TalkPostMock : public server::interface::TalkPost, public CallReceiver {
+    class TalkPostMock : public server::interface::TalkPost, public afl::test::CallReceiver {
      public:
+        TalkPostMock(afl::test::Assert a)
+            : CallReceiver(a)
+            { }
         virtual int32_t create(int32_t forumId, String_t subject, String_t text, const CreateOptions& options)
             {
                 checkCall(Format("create(%d,%s,%s,%s,%s,%s)") << forumId << subject << text << options.userId.orElse("no-user") << options.readPermissions.orElse("no-read") << options.answerPermissions.orElse("no-answer"));
@@ -93,7 +96,7 @@ namespace {
 void
 TestServerInterfaceTalkPostServer::testIt()
 {
-    TalkPostMock mock;
+    TalkPostMock mock("testIt");
     server::interface::TalkPostServer testee(mock);
 
     // POSTNEW
@@ -187,7 +190,7 @@ TestServerInterfaceTalkPostServer::testIt()
 void
 TestServerInterfaceTalkPostServer::testErrors()
 {
-    TalkPostMock mock;
+    TalkPostMock mock("testErrors");
     server::interface::TalkPostServer testee(mock);
 
     TS_ASSERT_THROWS(testee.callVoid(Segment().pushBackString("huhu")), std::exception);
@@ -207,7 +210,7 @@ TestServerInterfaceTalkPostServer::testErrors()
 void
 TestServerInterfaceTalkPostServer::testRoundtrip()
 {
-    TalkPostMock mock;
+    TalkPostMock mock("testRoundtrip");
     server::interface::TalkPostServer level1(mock);
     server::interface::TalkPostClient level2(level1);
     server::interface::TalkPostServer level3(level2);

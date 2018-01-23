@@ -5,10 +5,12 @@
 #define C2NG_GAME_SPEC_MISSIONLIST_HPP
 
 #include <vector>
-#include "game/spec/mission.hpp"
-#include "afl/io/stream.hpp"
 #include "afl/charset/charset.hpp"
+#include "afl/io/stream.hpp"
 #include "afl/sys/loglistener.hpp"
+#include "game/hostversion.hpp"
+#include "game/spec/mission.hpp"
+#include "game/config/hostconfiguration.hpp"
 
 namespace game { namespace spec {
 
@@ -50,6 +52,11 @@ namespace game { namespace spec {
 
         void loadFromFile(afl::io::Stream& in, afl::sys::LogListener& log);
         void loadFromIniFile(afl::io::Stream& in, afl::charset::Charset& cs);
+
+        /*
+         *  Utilities
+         */
+        bool isMissionCloaking(int mission_id, int owner, const game::config::HostConfiguration& config, const HostVersion& host) const;
 
      private:
         Container_t m_data;

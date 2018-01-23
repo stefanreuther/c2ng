@@ -8,7 +8,6 @@
 #include "afl/base/deleter.hpp"
 #include "afl/charset/codepage.hpp"
 #include "afl/charset/codepagecharset.hpp"
-#include "afl/charset/defaultcharsetfactory.hpp"
 #include "afl/data/defaultvaluefactory.hpp"
 #include "afl/io/bufferedstream.hpp"
 #include "afl/io/constmemorystream.hpp"
@@ -25,6 +24,7 @@
 #include "server/format/truehullpacker.hpp"
 #include "server/types.hpp"
 #include "server/errors.hpp"
+#include "util/charsetfactory.hpp"
 
 namespace {
     server::format::Packer& makePacker(const String_t& formatName, afl::base::Deleter& del)
@@ -77,7 +77,7 @@ namespace {
     afl::charset::Charset& makeCharset(const afl::base::Optional<String_t>& cs, afl::base::Deleter& del)
     {
         if (const String_t* p = cs.get()) {
-            afl::charset::Charset* result = afl::charset::DefaultCharsetFactory().createCharset(*p);
+            afl::charset::Charset* result = util::CharsetFactory().createCharset(*p);
             if (!result) {
                 throw std::runtime_error(server::INVALID_CHARSET);
             }

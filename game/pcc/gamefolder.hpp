@@ -33,7 +33,7 @@ namespace game { namespace pcc {
         String_t m_path;
         mutable size_t m_hint;
         afl::io::NullFileSystem m_nullFS;
-        game::v3::RootLoader m_v3loader;
+        game::v3::RootLoader m_v3Loader;
 
         afl::data::Access getGameListEntry() const;
     };

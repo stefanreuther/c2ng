@@ -56,7 +56,7 @@ server::talk::TalkPost::create(int32_t forumId, String_t subject, String_t text,
     if (!f.exists(m_root)) {
         throw std::runtime_error(FORUM_NOT_FOUND);
     }
-    m_session.checkPrivilege(f.writePermissions().get(), m_root);
+    m_session.checkPermission(f.writePermissions().get(), m_root);
 
     const Time_t time = m_root.getTime();
     bool isSpam = false;
@@ -164,7 +164,7 @@ server::talk::TalkPost::reply(int32_t parentPostId, String_t subject, String_t t
     if (answerperm.empty()) {
         answerperm = f.writePermissions().get();
     }
-    m_session.checkPrivilege(answerperm, m_root);
+    m_session.checkPermission(answerperm, m_root);
 
     // All preconditions fulfilled, operate!
     const int32_t mid = ++m_root.lastMessageId();
@@ -340,7 +340,7 @@ server::talk::TalkPost::remove(int32_t postId)
         // Permission check
         if (!m_session.isAdmin()
             && m_session.getUser() != msg.author().get()
-            && !m_session.hasPrivilege(msg.topic(m_root).forum(m_root).deletePermissions().get(), m_root))
+            && !m_session.hasPermission(msg.topic(m_root).forum(m_root).deletePermissions().get(), m_root))
         {
             throw std::runtime_error(NOT_AUTHOR);
         }

@@ -1,11 +1,12 @@
 /**
   *  \file server/file/internaldirectoryhandler.cpp
+  *  \brief Class server::file::InternalDirectoryHandler
   */
 
 #include "server/file/internaldirectoryhandler.hpp"
+#include "afl/except/fileproblemexception.hpp"
 #include "afl/io/constmemorystream.hpp"
 #include "afl/io/internalfilemapping.hpp"
-#include "afl/except/fileproblemexception.hpp"
 #include "afl/string/posixfilenames.hpp"
 
 server::file::InternalDirectoryHandler::InternalDirectoryHandler(String_t name, Directory& dir)
@@ -50,7 +51,7 @@ server::file::InternalDirectoryHandler::createFile(String_t name, afl::base::Con
     p->content.append(content);
 
     Info result(name, IsFile);
-    result.size = p->content.size();
+    result.size = static_cast<int32_t>(p->content.size());
     return result;
 }
 
@@ -80,7 +81,7 @@ server::file::InternalDirectoryHandler::readContent(Callback& callback)
     for (size_t i = 0, n = m_dir.files.size(); i < n; ++i) {
         if (File* p = m_dir.files[i]) {
             Info info(p->name, IsFile);
-            info.size = p->content.size();
+            info.size = static_cast<int32_t>(p->content.size());
             callback.addItem(info);
         }
     }

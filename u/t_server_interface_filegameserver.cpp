@@ -3,13 +3,13 @@
   *  \brief Test for server::interface::FileGameServer
   */
 
-#include <stdexcept>
 #include "server/interface/filegameserver.hpp"
 
+#include <stdexcept>
 #include "t_server_interface.hpp"
-#include "u/helper/callreceiver.hpp"
-#include "afl/string/format.hpp"
 #include "afl/data/access.hpp"
+#include "afl/string/format.hpp"
+#include "afl/test/callreceiver.hpp"
 #include "server/interface/filegameclient.hpp"
 
 using afl::string::Format;
@@ -19,8 +19,11 @@ using afl::data::Value;
 using server::interface::FileGame;
 
 namespace {
-    class FileGameMock : public server::interface::FileGame, public CallReceiver {
+    class FileGameMock : public server::interface::FileGame, public afl::test::CallReceiver {
      public:
+        FileGameMock(afl::test::Assert a)
+            : CallReceiver(a)
+            { }
         void getGameInfo(String_t path, GameInfo& result)
             {
                 checkCall(Format("getGameInfo(%s)", path));
@@ -54,7 +57,7 @@ namespace {
 void
 TestServerInterfaceFileGameServer::testIt()
 {
-    FileGameMock mock;
+    FileGameMock mock("testIt");
     server::interface::FileGameServer testee(mock);
 
     // getGameInfo
@@ -206,7 +209,7 @@ TestServerInterfaceFileGameServer::testIt()
 void
 TestServerInterfaceFileGameServer::testErrors()
 {
-    FileGameMock mock;
+    FileGameMock mock("testErrors");
     server::interface::FileGameServer testee(mock);
 
     Segment empty;    // g++-3.4 sees an invocation of a copy constructor if I construct this object in-place.
@@ -225,7 +228,7 @@ TestServerInterfaceFileGameServer::testErrors()
 void
 TestServerInterfaceFileGameServer::testRoundtrip()
 {
-    FileGameMock mock;
+    FileGameMock mock("testRoundtrip");
     server::interface::FileGameServer level1(mock);
     server::interface::FileGameClient level2(level1);
     server::interface::FileGameServer level3(level2);

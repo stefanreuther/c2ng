@@ -1,0 +1,6 @@
+/*!
+     \namespace server::host::rank
+     \brief Ranking Algorithms
+
+     This namespace contains everything related to ranking and scoring.
+ */

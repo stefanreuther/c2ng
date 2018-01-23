@@ -7,6 +7,16 @@
 
 #include <cxxtest/TestSuite.h>
 
+class TestServerFileClientDirectory : public CxxTest::TestSuite {
+ public:
+    void testRead();
+    void testStat();
+    void testList();
+    void testRemoteError();
+    void testLocalError();
+    void testSubdir();
+};
+
 class TestServerFileClientDirectoryHandler : public CxxTest::TestSuite {
  public:
     void testIt();
@@ -88,6 +98,11 @@ class TestServerFileGameStatus : public CxxTest::TestSuite {
     void testBoth();
     void testInvalidResult();
     void testInvalidKey();
+};
+
+class TestServerFileInternalFileServer : public CxxTest::TestSuite {
+ public:
+    void testIt();
 };
 
 class TestServerFileItem : public CxxTest::TestSuite {

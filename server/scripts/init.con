@@ -1,0 +1,20 @@
+#
+#  Initialize database and applications
+#
+#  Usage:
+#    c2console < init.con
+#
+#  This can be run at any time and will bring the system to the latest
+#  basic state, without touching existing user data.
+#
+#  This no longer includes a "init from scratch" option.
+#  To start with a clean installation, clear the database and the filespaces.
+#
+
+load init_user.con
+load init_userfile.con
+load init_host.con
+load init_upgrade.con
+load init_talk.con
+
+echo "Done."

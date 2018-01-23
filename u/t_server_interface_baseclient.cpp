@@ -6,26 +6,26 @@
 #include "server/interface/baseclient.hpp"
 
 #include "t_server_interface.hpp"
-#include "u/helper/commandhandlermock.hpp"
+#include "afl/test/commandhandler.hpp"
 #include "server/types.hpp"
 
 /** Test it. */
 void
 TestServerInterfaceBaseClient::testIt()
 {
-    CommandHandlerMock mock;
+    afl::test::CommandHandler mock("testIt");
     server::interface::BaseClient testee(mock);
 
     mock.expectCall("PING");
-    mock.provideReturnValue(server::makeStringValue("PONG"));
+    mock.provideNewResult(server::makeStringValue("PONG"));
     TS_ASSERT_EQUALS(testee.ping(), "PONG");
 
-    mock.expectCall("USER|1023");
-    mock.provideReturnValue(0);
+    mock.expectCall("USER, 1023");
+    mock.provideNewResult(0);
     testee.setUserContext("1023");
 
-    mock.expectCall("USER|");
-    mock.provideReturnValue(0);
+    mock.expectCall("USER, ");
+    mock.provideNewResult(0);
     testee.setUserContext(String_t());
 
     mock.checkFinish();

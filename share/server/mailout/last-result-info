@@ -1,0 +1,33 @@
+!- Ranks:
+!set rank_1 1st
+!set rank_2 2nd
+!set rank_3 3rd
+!set rank_4 4th
+!set rank_5 5th
+!set rank_6 6th
+!set rank_7 7th
+!set rank_8 8th
+!set rank_9 9th
+!set rank_10 10th
+!set rank_11 11th
+!-
+From: PlanetsCentral Host <host@planetscentral.com>
+Subject: [PlanetsCentral] $(gamename): Result File for Player $(slot), Final Turn $(gameturn)
+X-PCC-Game-Number: $(gameid)
+
+Hi,
+
+Host has run for game #$(gameid), $(gamename).
+This was the last turn for this game.
+You have finished $(rank_$(rank)) place.
+
+Game details can be found on
+<http://planetscentral.com/host/game.cgi/$(gameurl)>.
+
+The game has now ended, do not submit a turn file.
+
+Have fun.
+
+-- 
+To change your email settings, go to
+<http://planetscentral.com/settings.cgi>.

@@ -4,14 +4,15 @@
 #ifndef C2NG_GAME_GAME_HPP
 #define C2NG_GAME_GAME_HPP
 
-#include "game/unitscoredefinitionlist.hpp"
-#include "afl/base/refcounted.hpp"
-#include "game/score/turnscorelist.hpp"
-#include "game/map/cursors.hpp"
-#include "game/teamsettings.hpp"
-#include "game/historyturnlist.hpp"
 #include "afl/base/ptr.hpp"
+#include "afl/base/refcounted.hpp"
 #include "afl/base/signal.hpp"
+#include "game/historyturnlist.hpp"
+#include "game/map/cursors.hpp"
+#include "game/map/markings.hpp"
+#include "game/score/turnscorelist.hpp"
+#include "game/teamsettings.hpp"
+#include "game/unitscoredefinitionlist.hpp"
 
 namespace game {
 
@@ -48,6 +49,8 @@ namespace game {
 
         game::map::Cursors& cursors();
 
+        game::map::Markings& markings();
+
         void notifyListeners();
 
         afl::base::Signal<void()> sig_viewpointTurnChange;
@@ -65,6 +68,7 @@ namespace game {
         game::score::TurnScoreList m_scores;
 
         game::map::Cursors m_cursors;
+        game::map::Markings m_markings;
     };
 
 }

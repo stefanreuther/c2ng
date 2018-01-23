@@ -46,6 +46,14 @@ server::ConfigurationHandler::handleCommandLineOption(const String_t& option, af
     }
 }
 
+String_t
+server::ConfigurationHandler::getHelp()
+{
+    return
+        "-DKEY=VALUE\tOverride config file entry\n"
+        "--config=FILE\tSet path to config file\n";
+}
+
 // Load configuration file.
 void
 server::ConfigurationHandler::loadConfigurationFile(afl::sys::Environment& env, afl::io::FileSystem& fs)

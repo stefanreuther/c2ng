@@ -16,10 +16,10 @@ namespace server { namespace interface {
     class TalkGroup : public afl::base::Deletable {
      public:
         struct Description {
-            // FIXME: field "key"
             afl::base::Optional<String_t> name;
             afl::base::Optional<String_t> description;
             afl::base::Optional<String_t> parentGroup;
+            afl::base::Optional<String_t> key;
             afl::base::Optional<bool> unlisted;
         };
 

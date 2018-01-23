@@ -6,6 +6,8 @@
 #define C2NG_SERVER_COMMON_SESSION_HPP
 
 #include "afl/string/string.hpp"
+#include "interpreter/arguments.hpp"
+#include "afl/sys/log.hpp"
 
 namespace server { namespace common {
 
@@ -46,6 +48,24 @@ namespace server { namespace common {
         /** Check for user context.
             \throw std::runtime_error if session does not have a user context */
         void checkUser() const;
+
+        /** Log a command.
+            This function is part of Session because it includes session information (user name) in the message.
+            \param log Logger to write to
+            \param logChannel Log channel base name
+            \param verb Command verb
+            \param args Remaining arguments
+            \param censor Argument position to censor (0-based) */
+        void logCommand(afl::sys::LogListener& log, String_t logChannel, const String_t& verb, interpreter::Arguments args, size_t censor);
+
+
+        /** Format a word for logging.
+            This replaces complicated words by a placeholder so that users cannot spoof log entries.
+            This function is used internally by logCommand(), and exported for convenience.
+            \param word Word to format
+            \param censor true if this word shall be censored (password)
+            \return formatted log */
+        static String_t formatWord(const String_t& word, bool censor);
 
      private:
         String_t m_user;

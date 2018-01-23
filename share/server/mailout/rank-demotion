@@ -1,0 +1,36 @@
+!set rank_0     Spaceman Recruit
+!set rank_1     Spaceman Apprentice
+!set rank_2     Spaceman
+!set rank_3     Petty Officer
+!set rank_4     Chief Petty Officer
+!set rank_5     Senior Chief Petty Officer
+!set rank_6     Ensign
+!set rank_7     Lieutenant Junior Grade
+!set rank_8     Lieutenant
+!set rank_9     Lieutenant Commander
+!set rank_10    Commander
+!set rank_11    Captain
+!set rank_12    Rear Admiral
+!set rank_13    Vice Admiral
+!set rank_14    Admiral
+From: PlanetsCentral <$(SMTP_FROM)>
+Subject: [PlanetsCentral] Demotion to $(rank_$(rank))
+
+Hi,
+
+you do no longer fulfil the requirements for your current rank.
+Therefore, you have been demoted to
+
+  $(rank_$(rank))
+
+We know you can do better, therefore we wish you good luck in
+restoring your hard-earned previous rank.
+
+Your current scores:
+- skill points: $(rankpoints)
+- reliability points: $(turnreliability)
+- turns played: $(turnsplayed)
+
+
+Best regards,
+PlanetsCentral administration

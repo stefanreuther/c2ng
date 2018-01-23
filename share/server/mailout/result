@@ -1,0 +1,49 @@
+!-
+!set next_day_msg       Next host is scheduled for $(next_day_time).
+!set next_day_early_msg Next host is scheduled for $(next_day_time), but will run earlier when all turns are in.
+!-
+!set next_stop_msg       Host currently does not run.
+!set next_stop_early_msg Host will run when all turns are in.
+!-
+!set next_quick_msg       Host will run when all turns are in.
+!set next_quick_early_msg Host will run when all turns are in.
+!-
+!set next_manual_msg       Host will be run manually.
+!set next_manual_early_msg Host will be run manually, or when all turns are in.
+!-
+From: PlanetsCentral Host <host@planetscentral.com>
+Subject: [PlanetsCentral] $(gamename): Result File for Player $(slot), Turn $(gameturn)
+X-PCC-Game-Number: $(gameid)
+
+Hi,
+
+please find attached the result file for turn $(gameturn) of
+game #$(gameid), $(gamename).
+
+$(next_$(next_schedule)_msg)
+
+To submit your turn file, go to
+<http://planetscentral.com/login.cgi?returnto=host/>,
+log in, and upload your turn file using the upload form,
+or reply to this mail with your turn file attached.
+
+!if $(configChanged)
+NOTE: The game configuration has changed.
+
+!endif
+!if $(scheduleChanged)
+NOTE: The game schedule has changed.
+
+!endif
+!if $(endChanged)
+NOTE: The game's ending condition has changed.
+
+!endif
+Game details can be found on
+<http://planetscentral.com/host/game.cgi/$(gameurl)>.
+
+Have fun.
+
+-- 
+To change your email settings, go to
+<http://planetscentral.com/settings.cgi>.

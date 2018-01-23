@@ -7,6 +7,7 @@
 #include "game/cargospec.hpp"
 #include "afl/string/format.hpp"
 #include "afl/bits/smallset.hpp"
+#include "game/limits.hpp"
 
 namespace {
     const char cargo_type_letters[]    = "NTDMFCS$W";
@@ -255,7 +256,7 @@ game::CargoSpec::parse(const String_t& str, bool acceptMax)
                 return false;
             }
             if (acceptMax && eatMax(str, i)) {
-                add(type, 10000);
+                add(type, MAX_NUMBER);
             } else {
                 int32_t amount;
                 if (!eatNumber(amount, str, i)) {

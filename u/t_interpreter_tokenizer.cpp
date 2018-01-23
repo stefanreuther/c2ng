@@ -62,7 +62,7 @@ TestInterpreterTokenizer::testTokenizer()
 
     // Pairs
     {
-        interpreter::Tokenizer tok("<> <= >= := < > < = > = : = ..");
+        interpreter::Tokenizer tok("<> <= >= := < > < = > = : = -> ..");
         TS_ASSERT(tok.checkAdvance(tok.tNE));
         TS_ASSERT(tok.checkAdvance(tok.tLE));
         TS_ASSERT(tok.checkAdvance(tok.tGE));
@@ -75,6 +75,7 @@ TestInterpreterTokenizer::testTokenizer()
         TS_ASSERT(tok.checkAdvance(tok.tEQ));
         TS_ASSERT(tok.checkAdvance(tok.tColon));
         TS_ASSERT(tok.checkAdvance(tok.tEQ));
+        TS_ASSERT(tok.checkAdvance(tok.tArrow));
         TS_ASSERT(tok.checkAdvance(tok.tDot));
         TS_ASSERT(tok.checkAdvance(tok.tDot));
         TS_ASSERT(tok.checkAdvance(tok.tEnd));
@@ -301,6 +302,8 @@ TestInterpreterTokenizer::testStrings()
         { "\"foo\"", "foo" },
         { "\"fo\\\"o\"", "fo\"o" },
         { "\"fo\\\\o\"", "fo\\o" },
+        { "\"hi\\n\"", "hi\n" },
+        { "'hi\\n'", "hi\\n" },
     };
 
     for (size_t i = 0; i < sizeof(strings)/sizeof(strings[0]); ++i) {
@@ -332,3 +335,43 @@ TestInterpreterTokenizer::testStrings()
         TS_ASSERT_EQUALS(tok.readNextToken(), tok.tEnd);
     }
 }
+
+/** Test isIdentifierCharacter. */
+void
+TestInterpreterTokenizer::testIsIdentifierCharacter()
+{
+    TS_ASSERT(interpreter::Tokenizer::isIdentifierCharacter('.'));
+    TS_ASSERT(interpreter::Tokenizer::isIdentifierCharacter('_'));
+    TS_ASSERT(interpreter::Tokenizer::isIdentifierCharacter('$'));
+    TS_ASSERT(interpreter::Tokenizer::isIdentifierCharacter('I'));
+    TS_ASSERT(interpreter::Tokenizer::isIdentifierCharacter('A'));
+    TS_ASSERT(interpreter::Tokenizer::isIdentifierCharacter('Z'));
+    TS_ASSERT(interpreter::Tokenizer::isIdentifierCharacter('a'));
+    TS_ASSERT(interpreter::Tokenizer::isIdentifierCharacter('z'));
+    TS_ASSERT(interpreter::Tokenizer::isIdentifierCharacter('0'));
+    TS_ASSERT(interpreter::Tokenizer::isIdentifierCharacter('9'));
+
+    TS_ASSERT(!interpreter::Tokenizer::isIdentifierCharacter(':'));
+    TS_ASSERT(!interpreter::Tokenizer::isIdentifierCharacter(' '));
+    TS_ASSERT(!interpreter::Tokenizer::isIdentifierCharacter('\0'));
+    TS_ASSERT(!interpreter::Tokenizer::isIdentifierCharacter('\xf6'));
+}
+
+/** Test isValidUppercaseIdentifier(). */
+void
+TestInterpreterTokenizer::testIsValidUppercaseIdentifier()
+{
+    TS_ASSERT(!interpreter::Tokenizer::isValidUppercaseIdentifier(""));
+    TS_ASSERT( interpreter::Tokenizer::isValidUppercaseIdentifier("X"));
+    TS_ASSERT( interpreter::Tokenizer::isValidUppercaseIdentifier("X9"));
+    TS_ASSERT( interpreter::Tokenizer::isValidUppercaseIdentifier("X.Y"));
+    TS_ASSERT( interpreter::Tokenizer::isValidUppercaseIdentifier("X$"));
+    TS_ASSERT( interpreter::Tokenizer::isValidUppercaseIdentifier("X_"));
+    TS_ASSERT( interpreter::Tokenizer::isValidUppercaseIdentifier("_X"));
+    TS_ASSERT( interpreter::Tokenizer::isValidUppercaseIdentifier("X1"));
+    TS_ASSERT(!interpreter::Tokenizer::isValidUppercaseIdentifier("1X"));
+    TS_ASSERT(!interpreter::Tokenizer::isValidUppercaseIdentifier("$X"));
+    TS_ASSERT(!interpreter::Tokenizer::isValidUppercaseIdentifier("x"));
+    TS_ASSERT(!interpreter::Tokenizer::isValidUppercaseIdentifier("Xx"));
+}
+

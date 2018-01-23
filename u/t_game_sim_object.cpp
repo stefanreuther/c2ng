@@ -83,7 +83,9 @@ TestGameSimObject::verifyObject(game::sim::Object& t)
     TS_ASSERT(t.isDirty());
     t.setFlags(game::sim::Object::fl_Commander | game::sim::Object::fl_CommanderSet);
     TS_ASSERT(t.hasAnyNonstandardAbility());
-    TS_ASSERT(t.hasAbility(game::sim::CommanderAbility, game::spec::ShipList(), game::config::HostConfiguration()));
+    const game::config::HostConfiguration hostConfig;
+    const game::spec::ShipList shipList;
+    TS_ASSERT(t.hasAbility(game::sim::CommanderAbility, shipList, hostConfig));
 
     t.markClean();
     t.setFlakRatingOverride(1342);

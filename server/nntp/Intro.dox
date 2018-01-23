@@ -1,0 +1,13 @@
+/*!
+     \namespace server::nntp
+     \brief c2nntp server
+
+     This namespace implements the c2nntp service.
+     c2nntp serves forums via NNTP.
+
+     <b>Entry points:</b>
+
+     - server::nntp::LineHandler
+     - server::nntp::Root
+     - server::nntp::Session
+ */

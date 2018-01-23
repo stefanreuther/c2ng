@@ -85,3 +85,32 @@ game::ShipBuildOrder::setNumLaunchers(int n)
 {
     m_numLaunchers = n;
 }
+
+void
+game::ShipBuildOrder::canonicalize()
+{
+    // ex game/actions/baseship.cc:canonicalizeBuildOrder
+    if (m_numLaunchers == 0) {
+        m_launcherType = 0;
+    }
+    if (m_numBeams == 0) {
+        m_beamType = 0;
+    }
+}
+
+bool
+game::ShipBuildOrder::operator==(const ShipBuildOrder& other) const
+{
+    return m_hullIndex == other.m_hullIndex
+        && m_engineType == other.m_engineType
+        && m_beamType == other.m_beamType
+        && m_numBeams == other.m_numBeams
+        && m_launcherType == other.m_launcherType
+        && m_numLaunchers == other.m_numLaunchers;
+}
+
+bool
+game::ShipBuildOrder::operator!=(const ShipBuildOrder& other) const
+{
+    return !operator==(other);
+}

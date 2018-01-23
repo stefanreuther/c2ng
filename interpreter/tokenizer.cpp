@@ -230,7 +230,7 @@ interpreter::Tokenizer::read()
             // Identifier
             while (m_pos < limit) {
                 c = afl::string::charToUpper(m_line[m_pos]);
-                if ((c >= 'A' && c <= 'Z') || c == '$' || c == '_' || (c >= '0' && c <= '9') || c == '.') {
+                if (isIdentifierCharacter(c)) {
                     m_currentString += c;
                     ++m_pos;
                     if (c != '.' && m_currentString.size() > 255) {
@@ -331,4 +331,32 @@ interpreter::Tokenizer::readNumber()
     } else {
         m_currentToken = tInteger;
     }
+}
+
+bool
+interpreter::Tokenizer::isIdentifierCharacter(char c)
+{
+    return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '$' || c == '_' || (c >= '0' && c <= '9') || c == '.';
+}
+
+bool
+interpreter::Tokenizer::isValidUppercaseIdentifier(const String_t& candidate)
+{
+    if (candidate.empty()) {
+        return false;
+    }
+    for (size_t i = 0, n = candidate.size(); i < n; ++i) {
+        if ((candidate[i] >= 'A' && candidate[i] <= 'Z')
+            || candidate[i] == '_'
+            || (i > 0
+                && ((candidate[i] >= '0' && candidate[i] <= '9')
+                    || candidate[i] == '.' || candidate[i] == '$')))
+        {
+            // ok
+        } else {
+            return false;
+        }
+    }
+    return true;
+
 }

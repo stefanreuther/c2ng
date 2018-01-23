@@ -1,0 +1,72 @@
+#
+#  Talk
+#
+echo "*** Talk ***"
+
+# Create allowpost property for everyone
+silent redis hset default:profile allowpost 1
+silent redis hset default:profile talkautowatch 1
+
+# Create groups; don't fail if they exist
+silent noerror talk groupadd root              key root
+silent noerror talk groupadd active            key 0100-active
+silent noerror talk groupadd finished          key 0200-finished
+silent noerror talk groupadd active-unlisted   key 0101-active
+silent noerror talk groupadd finished-unlisted key 0201-finished
+
+# Configure groups
+silent talk groupset root              name "All forums"     description "text:All forums"                key root          parent ""
+silent talk groupset active            name "Active Games"   description "text:Forums for active games"   key 0100-active   parent root
+silent talk groupset finished          name "Finished Games" description "text:Forums for finished games" key 0200-finished parent root
+silent talk groupset active-unlisted   name "Active Games"   description "text:Forums for active games"   key 0101-active   parent "" unlisted 1
+silent talk groupset finished-unlisted name "Finished Games" description "text:Forums for finished games" key 0201-finished parent "" unlisted 1
+
+# Create forums
+# - News
+redis hget forum:byname news | setenv f
+if {int $f} {} else {talk forumadd parent root | setenv f}
+silent redis hset forum:byname news $f
+silent talk forumset $f name "News" description "text:News and Announcements about PlanetsCentral"
+silent talk forumset $f newsgroup planetscentral.news key 0001-news
+silent talk forumset $f readperm all writeperm p:allowadmin answerperm -u:anon,p:allowpost
+
+# - Planets
+redis hget forum:byname planets | setenv f
+if {int $f} {} else {talk forumadd parent root | setenv f}
+silent redis hset forum:byname planets $f
+silent talk forumset $f name "Planets" description "text:Rules and Strategy for our beloved game"
+silent talk forumset $f newsgroup planetscentral.planets key 0002-planets
+silent talk forumset $f readperm all writeperm -u:anon,p:allowpost answerperm -u:anon,p:allowpost
+
+# - Bugs
+redis hget forum:byname bugs | setenv f
+if {int $f} {} else {talk forumadd parent root | setenv f}
+silent redis hset forum:byname bugs $f
+silent talk forumset $f name "Bugs" description "text:Bugs and Feature Requests for PlanetsCentral and other VGAP software"
+silent talk forumset $f newsgroup planetscentral.bugs key 0003-bugs
+silent talk forumset $f readperm all writeperm -u:anon,p:allowpost answerperm -u:anon,p:allowpost
+
+# - Talk
+redis hget forum:byname talk | setenv f
+if {int $f} {} else {talk forumadd parent root | setenv f}
+silent redis hset forum:byname talk $f
+silent talk forumset $f name "Talk" description "text:Everything: VGAP, RL, or otherwise"
+silent talk forumset $f newsgroup planetscentral.talk key 0004-talk
+silent talk forumset $f readperm all writeperm -u:anon,p:allowpost answerperm -u:anon,p:allowpost
+
+# - Test
+redis hget forum:byname test | setenv f
+if {int $f} {} else {talk forumadd parent root | setenv f}
+silent redis hset forum:byname test $f
+silent talk forumset $f name "Test" description "text:Test postings"
+silent talk forumset $f newsgroup planetscentral.test key 9999-test
+silent talk forumset $f readperm all writeperm -u:anon,p:allowpost answerperm -u:anon,p:allowpost
+
+# Create PM Infrastructure
+silent redis hmset default:folder:1:header name "Inbox" description "Incoming messages"
+silent redis sadd default:folder:all 1
+
+silent redis hmset default:folder:2:header name "Outbox" description "Sent messages"
+silent redis sadd default:folder:all 2
+
+silent redis hset default:profile mailpmtype msg

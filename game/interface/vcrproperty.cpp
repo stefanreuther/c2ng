@@ -12,6 +12,7 @@
 
 using interpreter::makeIntegerValue;
 using interpreter::makeStringValue;
+using interpreter::makeSizeValue;
 
 // /** Get property of a VCR record.
 //     \param vcr The record
@@ -88,7 +89,7 @@ game::interface::getVcrProperty(size_t battleNumber,
            This is the number of elements in the {Unit (Combat Property)|Unit} array.
            @since PCC2 1.99.19 */
         if (battle != 0) {
-            return makeIntegerValue(battle->getNumObjects());
+            return makeSizeValue(battle->getNumObjects());
         } else {
             return 0;
         }

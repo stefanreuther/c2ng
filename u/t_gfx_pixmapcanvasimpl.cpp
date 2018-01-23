@@ -70,7 +70,7 @@ namespace {
     class CanvasImpl : public gfx::PixmapCanvasImpl<PixmapImpl, TraitsImpl> {
      public:
         CanvasImpl(afl::base::Ref<PixmapImpl> p)
-            : PixmapCanvasImpl(p)
+            : gfx::PixmapCanvasImpl<PixmapImpl, TraitsImpl>(p)
             { }
         virtual int getBitsPerPixel()
             { return 8; }

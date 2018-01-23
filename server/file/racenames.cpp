@@ -1,5 +1,7 @@
 /**
   *  \file server/file/racenames.cpp
+  *
+  *  FIXME: replace by server/common/racenames.
   */
 
 #include "server/file/racenames.hpp"

@@ -4,12 +4,16 @@
 #ifndef C2NG_SERVER_APPLICATION_HPP
 #define C2NG_SERVER_APPLICATION_HPP
 
+#include "afl/base/deleter.hpp"
 #include "afl/io/filesystem.hpp"
 #include "afl/net/networkstack.hpp"
 #include "afl/sys/commandlineparser.hpp"
 #include "afl/sys/environment.hpp"
 #include "afl/sys/loglistener.hpp"
 #include "util/consolelogger.hpp"
+#include "afl/net/commandhandler.hpp"
+#include "afl/net/name.hpp"
+#include "afl/net/tunnel/tunnelablenetworkstack.hpp"
 
 namespace server {
 
@@ -37,20 +41,37 @@ namespace server {
     class Application : public afl::base::Deletable {
      public:
         /** Constructor.
+            \param logName Logger name
             \param env Environment instance
             \param fs File system instance
             \param net Network stack instance */
-        Application(afl::sys::Environment& env, afl::io::FileSystem& fs, afl::net::NetworkStack& net);
+        Application(const String_t& logName, afl::sys::Environment& env, afl::io::FileSystem& fs, afl::net::NetworkStack& net);
 
         /** Run the server.
             Invokes serverMain() with exception protection.
             \return return code (exit code) */
         int run();
 
+        String_t getHelp() const;
+
         afl::sys::Environment& environment();
         afl::io::FileSystem& fileSystem();
         afl::net::NetworkStack& networkStack();
+        afl::net::NetworkStack& clientNetworkStack();
         afl::sys::LogListener& log();
+
+        afl::io::TextWriter& standardOutput();
+
+        void exit(int n);
+
+        /** Create a client to another microservice.
+            \param name Network name
+            \param del Deleter for created objects
+            \param stateless true if this is a stateless connection (database, format).
+                             In this case, it will be set to auto-reconnect.
+                             In other cases, you have to deal with it.
+            \return CommandHandler to access the microservice, allocated in the deleter. */
+        afl::net::CommandHandler& createClient(const afl::net::Name& name, afl::base::Deleter& del, bool stateless);
 
      protected:
         /** Application.
@@ -65,9 +86,12 @@ namespace server {
         class ConfigurationHandler;
         friend class ConfigurationHandler;
 
+        String_t m_logName;
         afl::sys::Environment& m_environment;
         afl::io::FileSystem& m_fileSystem;
         afl::net::NetworkStack& m_networkStack;
+        afl::base::Deleter m_deleter;
+        afl::net::tunnel::TunnelableNetworkStack m_clientNetworkStack;
         util::ConsoleLogger m_logger;
         afl::base::Ref<afl::io::TextWriter> m_errorOutput;
         afl::base::Ref<afl::io::TextWriter> m_standardOutput;
@@ -76,6 +100,8 @@ namespace server {
         void reportError(String_t str);
 
         void parseCommandLine(ConfigurationHandler& handler);
+
+        void waitReady(afl::net::CommandHandler& handler);
     };
 
 }

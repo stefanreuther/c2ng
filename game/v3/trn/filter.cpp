@@ -62,7 +62,7 @@ namespace game { namespace v3 { namespace trn { namespace {
     {
         // ex game/un-trnflt.cc:isSingle
         char ch;
-        return p.getCurrentChar(ch)
+        return p.getCurrentCharacter(ch)
             && (ch == '('
                 || ch == '\''
                 || ch == '"'
@@ -85,7 +85,7 @@ namespace game { namespace v3 { namespace trn { namespace {
         const char ntbs[] = { ch, '\0' };
         String_t value;
         p.parseDelim(ntbs, value);
-        if (!p.parseChar(ch)) {
+        if (!p.parseCharacter(ch)) {
             throw ParseException(_("unterminated string constant"));
         }
         return h.addNew(new StringFilter(value));
@@ -95,8 +95,8 @@ namespace game { namespace v3 { namespace trn { namespace {
         If there's a "-", parse the upper bound and update \c high. */
     void parseUpperBound(util::StringParser& p, int& low, int& high)
     {
-        int i;
-        if (p.parseChar('-')) {
+        if (p.parseCharacter('-')) {
+            int i;
             parseWhitespace(p);
             if (!p.parseInt(i) || i < low) {
                 throw ParseException(_("Invalid upper bound after \"#\""));
@@ -112,21 +112,21 @@ namespace game { namespace v3 { namespace trn { namespace {
         // ex game/un-trnflt.cc:parseSingle
         int i;
         parseWhitespace(p);
-        if (p.parseChar('(')) {
+        if (p.parseCharacter('(')) {
             // parenized expression
             const Filter& result = parseFilter1(p, h);
             parseWhitespace(p);
-            if (!p.parseChar(')')) {
+            if (!p.parseCharacter(')')) {
                 throw ParseException(_("\")\" expected"));
             }
             return result;
-        } else if (p.parseChar('\'')) {
+        } else if (p.parseCharacter('\'')) {
             // single-quoted string
             return parseString(p, h, '\'');
-        } else if (p.parseChar('"')) {
+        } else if (p.parseCharacter('"')) {
             // double-quoted string
             return parseString(p, h, '"');
-        } else if (p.parseChar('#')) {
+        } else if (p.parseCharacter('#')) {
             // index / index range
             parseWhitespace(p);
             if (!p.parseInt(i) || i <= 0) {
@@ -151,7 +151,7 @@ namespace game { namespace v3 { namespace trn { namespace {
                     return h.addNew(new ConstantFilter(false));
                 } else {
                     parseWhitespace(p);
-                    bool wild = p.parseChar('*');
+                    bool wild = p.parseCharacter('*');
                     return h.addNew(new NameFilter(text, wild));
                 }
             } else {
@@ -182,7 +182,7 @@ namespace game { namespace v3 { namespace trn { namespace {
     {
         // ex game/un-trnflt.cc:parseAnd
         parseWhitespace(p);
-        if (p.parseChar('!')) {
+        if (p.parseCharacter('!')) {
             return h.addNew(new NegateFilter(parseAnd(p, h)));
         } else {
             return parseEx(p, h);
@@ -197,7 +197,7 @@ namespace game { namespace v3 { namespace trn { namespace {
         const Filter* result = &parseAnd(p, h);
         while (1) {
             parseWhitespace(p);
-            if (!p.parseChar('&')) {
+            if (!p.parseCharacter('&')) {
                 break;
             }
             result = &h.addNew(new AndFilter(*result, parseAnd(p, h)));
@@ -213,7 +213,7 @@ namespace game { namespace v3 { namespace trn { namespace {
         const Filter* result = &parseOr(p, h);
         while (1) {
             parseWhitespace(p);
-            if (!p.parseChar('|')) {
+            if (!p.parseCharacter('|')) {
                 break;
             }
             result = &h.addNew(new OrFilter(*result, parseOr(p, h)));

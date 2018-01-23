@@ -1,0 +1,27 @@
+# -*-Makefile-*- rules for manual
+
+FILES_MANUAL = \
+        client/si/*.cpp \
+        game/interface/*.cpp \
+        interpreter/*.cpp \
+        interpreter/*/*.cpp \
+        server/*/*.cpp \
+	share/resource/core*.q
+
+# As of 20180121, do not include this in 'all' because it is incomplete and will only clutter up regular builds
+# all: manual
+
+.PHONY: manual html
+
+manual: share/resource/pcc2tech.xml
+
+html: doc/pcc2tech.html
+
+clean:
+	$(RM) share/resource/pcc2tech.xml
+
+share/resource/pcc2tech.xml: scripts/doc.pl $(FILES_MANUAL)
+	$(PERL) scripts/doc.pl $(FILES_MANUAL) > $@
+
+doc/pcc2tech.html: share/resource/pcc2tech.xml scripts/pcc2help.xsl
+	xsltproc --path scripts --param whoami "'int'" scripts/pcc2help.xsl share/resource/pcc2tech.xml > $@

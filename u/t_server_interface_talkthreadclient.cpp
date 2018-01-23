@@ -11,7 +11,7 @@
 #include "afl/data/hashvalue.hpp"
 #include "afl/data/vector.hpp"
 #include "afl/data/vectorvalue.hpp"
-#include "u/helper/commandhandlermock.hpp"
+#include "afl/test/commandhandler.hpp"
 #include "server/types.hpp"
 
 using afl::data::Hash;
@@ -25,7 +25,7 @@ using afl::data::VectorValue;
 void
 TestServerInterfaceTalkThreadClient::testIt()
 {
-    CommandHandlerMock mock;
+    afl::test::CommandHandler mock("testIt");
     server::interface::TalkThreadClient testee(mock);
 
     // getInfo
@@ -33,8 +33,8 @@ TestServerInterfaceTalkThreadClient::testIt()
         Hash::Ref_t in = Hash::create();
         in->setNew("subject", server::makeStringValue("Subj"));
         in->setNew("forum", server::makeIntegerValue(3));
-        mock.expectCall("THREADSTAT|92");
-        mock.provideReturnValue(new HashValue(in));
+        mock.expectCall("THREADSTAT, 92");
+        mock.provideNewResult(new HashValue(in));
 
         server::interface::TalkThread::Info out = testee.getInfo(92);
         TS_ASSERT_EQUALS(out.subject, "Subj");
@@ -59,8 +59,8 @@ TestServerInterfaceTalkThreadClient::testIt()
         vec->pushBackNew(new HashValue(in));
         vec->pushBackNew(0);
         
-        mock.expectCall("THREADMSTAT|420|421");
-        mock.provideReturnValue(new VectorValue(vec));
+        mock.expectCall("THREADMSTAT, 420, 421");
+        mock.provideNewResult(new VectorValue(vec));
 
         static const int32_t threadIds[] = {420,421};
         afl::container::PtrVector<server::interface::TalkThread::Info> out;
@@ -81,8 +81,8 @@ TestServerInterfaceTalkThreadClient::testIt()
     // getPosts
     {
         server::interface::TalkThread::ListParameters params;
-        mock.expectCall("THREADLSPOST|77");
-        mock.provideReturnValue(server::makeIntegerValue(9));
+        mock.expectCall("THREADLSPOST, 77");
+        mock.provideNewResult(server::makeIntegerValue(9));
 
         std::auto_ptr<afl::data::Value> result(testee.getPosts(77, params));
         TS_ASSERT_EQUALS(server::toInteger(result.get()), 9);
@@ -93,43 +93,43 @@ TestServerInterfaceTalkThreadClient::testIt()
         params.mode = params.WantRange;
         params.start = 30;
         params.count = 10;
-        mock.expectCall("THREADLSPOST|77|LIMIT|30|10|SORT|LASTTIME");
-        mock.provideReturnValue(server::makeIntegerValue(9));
+        mock.expectCall("THREADLSPOST, 77, LIMIT, 30, 10, SORT, LASTTIME");
+        mock.provideNewResult(server::makeIntegerValue(9));
 
         std::auto_ptr<afl::data::Value> result(testee.getPosts(77, params));
         TS_ASSERT_EQUALS(server::toInteger(result.get()), 9);
     }
 
     // setSticky
-    mock.expectCall("THREADSTICKY|78|1");
-    mock.provideReturnValue(0);
+    mock.expectCall("THREADSTICKY, 78, 1");
+    mock.provideNewResult(0);
     testee.setSticky(78, true);
-    mock.expectCall("THREADSTICKY|79|0");
-    mock.provideReturnValue(0);
+    mock.expectCall("THREADSTICKY, 79, 0");
+    mock.provideNewResult(0);
     testee.setSticky(79, false);
 
     // getPermissions
-    mock.expectCall("THREADPERMS|12");
-    mock.provideReturnValue(server::makeIntegerValue(0));
+    mock.expectCall("THREADPERMS, 12");
+    mock.provideNewResult(server::makeIntegerValue(0));
     TS_ASSERT_EQUALS(testee.getPermissions(12, afl::base::Nothing), 0);
     {
         const String_t perms[] = {"read","write","delete"};
-        mock.expectCall("THREADPERMS|12|read|write|delete");
-        mock.provideReturnValue(server::makeIntegerValue(7));
+        mock.expectCall("THREADPERMS, 12, read, write, delete");
+        mock.provideNewResult(server::makeIntegerValue(7));
         TS_ASSERT_EQUALS(testee.getPermissions(12, perms), 7);
     }
 
     // moveToForum
-    mock.expectCall("THREADMV|35|2");
-    mock.provideReturnValue(0);
+    mock.expectCall("THREADMV, 35, 2");
+    mock.provideNewResult(0);
     testee.moveToForum(35, 2);
 
     // remove
-    mock.expectCall("THREADRM|8");
-    mock.provideReturnValue(server::makeIntegerValue(1));
+    mock.expectCall("THREADRM, 8");
+    mock.provideNewResult(server::makeIntegerValue(1));
     TS_ASSERT(testee.remove(8));
-    mock.expectCall("THREADRM|81");
-    mock.provideReturnValue(server::makeIntegerValue(0));
+    mock.expectCall("THREADRM, 81");
+    mock.provideNewResult(server::makeIntegerValue(0));
     TS_ASSERT(!testee.remove(81));
 
     mock.checkFinish();

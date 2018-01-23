@@ -38,16 +38,29 @@ use strict;
 # e.g. a::b::c of size 10 is represented as
 #   $tree->{a}{child}{b}{child}{c}{size} = 10
 my $tree = {};
+my $calls = 0;
+my $objs = 0;
 
-foreach (@ARGV) {
-    open PIPE, "readelf -Ws $_ | c++filt |" or die "popen($_)";
+foreach my $f (@ARGV) {
+    if ($f eq '--calls') {
+        $calls = 1;
+        next;
+    }
+    if ($f eq '--objects') {
+        $objs = 1;
+        next;
+    }
+    open PIPE, "readelf -Ws $f | c++filt |" or die "popen($f)";
     while (<PIPE>) {
         #                                     Num        Value       Size    Type    Bind    Vis   Ndx  Name
         if (my ($size,$type,$bind,$name) = /^[\s\d]+:\s*[0-9a-f]+\s+(\d+)\s+(\S+)\s+(\S+)\s+\S+\s+\S+\s+(.+)/i) {
-            if ($type eq 'FUNC' && $size > 0) {
+            if (($type eq 'FUNC' || ($objs && $type eq 'OBJECT')) && $size > 0) {
                 my @parsedName = parseName($name);
                 my $root = $tree;
                 if (@parsedName) {
+                    if ($bind eq 'WEAK') {
+                        push @parsedName, ' [weak]';
+                    }
                     while (@parsedName > 1) {
                         my $x = shift @parsedName;
                         if (!exists $root->{$x}{child}) {
@@ -62,14 +75,40 @@ foreach (@ARGV) {
         }
     }
     close PIPE;
+
+    if ($calls) {
+        open PIPE, "objdump -drC $f |" or die "popen($f)";
+        while (<PIPE>) {
+            if (/\scallq?\s+[0-9a-fx]+\s+<(.*)>/) {
+                my @parsedName = parseName($1);
+                my $root = $tree;
+                if (@parsedName) {
+                    while (@parsedName > 1) {
+                        my $x = shift @parsedName;
+                        if (!exists $root->{$x}{child}) {
+                            $root->{$x}{child} = {};
+                        }
+                        $root = $root->{$x}{child};
+                    }
+                    $root->{$parsedName[0]}{calls} += 1;
+                }
+            }
+        }
+        close PIPE;
+    }
 }
 
 # Simplify
 simplify($tree);
 
 # Build report
-print "Total   Item Size | Name\n";
-print "-------- -------- | ----------------------------------------\n";
+if ($calls) {
+    print "Total   Item Size | Calls  | Name\n";
+    print "-------- -------- | ------ | ----------------------------------------\n";
+} else {
+    print "Total   Item Size | Name\n";
+    print "-------- -------- | ----------------------------------------\n";
+}
 printReport($tree, '');
 
 
@@ -202,7 +241,11 @@ sub printReport {
             $totalSize += sumSize($tree->{$_}{child});
         }
         my $mult = exists $tree->{$_}{mult} && $tree->{$_}{mult} > 1 ? sprintf(" [x%d]", $tree->{$_}{mult}) : '';
-        printf "%8s %8s | %s%s%s\n", $totalSize, $selfSize, $indent, $_, $mult;
+        if ($calls) {
+            printf "%8s %8s | %6s | %s%s%s\n", $totalSize, $selfSize, $tree->{$_}{calls} || '', $indent, $_, $mult;
+        } else {
+            printf "%8s %8s | %s%s%s\n", $totalSize, $selfSize, $indent, $_, $mult;
+        }
         if (exists $tree->{$_}{child}) {
             printReport($tree->{$_}{child}, $indent.'   ');
         }

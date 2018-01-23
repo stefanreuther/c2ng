@@ -115,7 +115,7 @@ ConsoleRaterApplication::appMain()
 void
 ConsoleRaterApplication::help(afl::io::TextWriter& out)
 {
-    out.writeLine(afl::string::Format(_("PCC2 Game Difficulty Rater v%s - (c) 2012-2017 Stefan Reuther").c_str(), PCC2_VERSION));
+    out.writeLine(afl::string::Format(_("PCC2 Game Difficulty Rater v%s - (c) 2012-2018 Stefan Reuther").c_str(), PCC2_VERSION));
     out.writeLine();
     out.writeLine(afl::string::Format(_("Usage:\n"
                                         "  %s [-options...] [gamedir]\n\n"

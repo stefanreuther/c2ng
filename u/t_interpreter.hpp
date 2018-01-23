@@ -140,6 +140,7 @@ class TestInterpreterFileCommandSource : public CxxTest::TestSuite {
 class TestInterpreterFileFunctions : public CxxTest::TestSuite {
  public:
     void testSet();
+    void testPositionFunctions();
 };
 
 class TestInterpreterFileTable : public CxxTest::TestSuite {
@@ -398,6 +399,8 @@ class TestInterpreterTokenizer : public CxxTest::TestSuite {
     void testIntegers();
     void testFloats();
     void testStrings();
+    void testIsIdentifierCharacter();
+    void testIsValidUppercaseIdentifier();
 };
 
 class TestInterpreterTypeHint : public CxxTest::TestSuite {

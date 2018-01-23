@@ -21,6 +21,9 @@ namespace {
         if (const String_t* p = info.parentGroup.get()) {
             g.setParent(*p, root);
         }
+        if (const String_t* p = info.key.get()) {
+            g.key().set(*p);
+        }
         if (const bool* p = info.unlisted.get()) {
             g.unlisted().set(*p);
         }

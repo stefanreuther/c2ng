@@ -245,7 +245,7 @@ server::talk::Forum::describeAsNewsgroup(const server::talk::render::Context& ct
     result.newsgroupName = getNewsgroup();
     result.firstSequenceNumber = 1;
     result.lastSequenceNumber = lastMessageSequenceNumber().get();
-    result.writeAllowed = session.hasPrivilege(writePermissions().get(), root);
+    result.writeAllowed = session.hasPermission(writePermissions().get(), root);
     result.description = server::talk::render::render(description().get(), ctx, opts, root);
     return result;
 }

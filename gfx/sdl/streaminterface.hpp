@@ -1,5 +1,6 @@
 /**
   *  \file gfx/sdl/streaminterface.hpp
+  *  \brief Class gfx::sdl::StreamInterface
   */
 #ifndef C2NG_GFX_SDL_STREAMINTERFACE_HPP
 #define C2NG_GFX_SDL_STREAMINTERFACE_HPP
@@ -9,19 +10,18 @@
 
 namespace gfx { namespace sdl {
 
-    /*! \class StreamSDLInterface
-        \brief Stream Interface to SDL_RWops
+    /** Adapter between afl::io::Stream and SDL_RWops.
 
-        This class translates a Stream object into the SDL_RWops interface
-        for SDL routines, such as SDL_LoadBMP(). Lifetime management is still
-        up to the caller, the close() function exported to SDL is a no-op.
-
-        (This used to be part of the Stream class itself, requiring all
-        programs including textual ones to be linked to SDL.) */
+        This class translates a Stream object into the SDL_RWops interface for SDL routines, such as SDL_LoadBMP().
+        Lifetime management is still up to the caller, the close() function exported to SDL is a no-op. */
     class StreamInterface : public SDL_RWops {
      public:
-        StreamInterface(afl::io::Stream& parent);
+        /** Constructor.
+            \param parent Parent stream. Lifetime must exceed that of the StreamInterface. */
+        explicit StreamInterface(afl::io::Stream& parent);
 
+        /** Access parent stream.
+            \return parent stream */
         afl::io::Stream& parent();
 
      private:

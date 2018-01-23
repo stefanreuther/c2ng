@@ -3,14 +3,14 @@
   *  \brief Test for server::interface::TalkPMServer
   */
 
-#include <memory>
-#include <stdexcept>
 #include "server/interface/talkpmserver.hpp"
 
+#include <memory>
+#include <stdexcept>
 #include "t_server_interface.hpp"
-#include "u/helper/callreceiver.hpp"
-#include "afl/string/format.hpp"
 #include "afl/data/access.hpp"
+#include "afl/string/format.hpp"
+#include "afl/test/callreceiver.hpp"
 #include "server/interface/talkpmclient.hpp"
 
 using afl::string::Format;
@@ -19,8 +19,11 @@ using afl::data::Value;
 using afl::data::Access;
 
 namespace {
-    class TalkPMMock : public server::interface::TalkPM, public CallReceiver {
+    class TalkPMMock : public server::interface::TalkPM, public afl::test::CallReceiver {
      public:
+        TalkPMMock(afl::test::Assert a)
+            : CallReceiver(a)
+            { }
         virtual int32_t create(String_t receivers, String_t subject, String_t text, afl::base::Optional<int32_t> parent)
             {
                 checkCall(Format("create(%s,%s,%s,%d)", receivers, subject, text, parent.orElse(-1)));
@@ -105,7 +108,7 @@ TestServerInterfaceTalkPMServer::testIt()
 {
     using server::interface::TalkPM;
 
-    TalkPMMock mock;
+    TalkPMMock mock("testIt");
     server::interface::TalkPMServer testee(mock);
 
     // create
@@ -248,7 +251,7 @@ TestServerInterfaceTalkPMServer::testErrors()
 {
     using server::interface::TalkPM;
 
-    TalkPMMock mock;
+    TalkPMMock mock("testErrors");
     server::interface::TalkPMServer testee(mock);
 
     Segment empty;    // g++-3.4 sees an invocation of a copy constructor if I construct this object in-place.
@@ -273,7 +276,7 @@ TestServerInterfaceTalkPMServer::testRoundtrip()
 {
     using server::interface::TalkPM;
 
-    TalkPMMock mock;
+    TalkPMMock mock("testRoundtrip");
     server::interface::TalkPMServer level1(mock);
     server::interface::TalkPMClient level2(level1);
     server::interface::TalkPMServer level3(level2);

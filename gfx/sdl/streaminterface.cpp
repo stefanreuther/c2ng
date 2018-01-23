@@ -1,5 +1,6 @@
 /**
   *  \file gfx/sdl/streaminterface.cpp
+  *  \brief Class gfx::sdl::StreamInterface
   */
 
 #include <stdexcept>
@@ -8,13 +9,8 @@
 # include "gfx/sdl/streaminterface.hpp"
 
 namespace {
-
     using gfx::sdl::StreamInterface;
-    
-// /** \ingroup SDLInterface
-//     SDL Interface. These functions implement the SDL<->Stream interface for
-//     the StreamSDLInterface class. */
-// //@{
+
     extern "C" int SDLIF_seek(SDL_RWops* context, int offset, int whence)
     {
         afl::io::Stream& s = static_cast<StreamInterface*>(context)->parent();
@@ -36,7 +32,7 @@ namespace {
                 SDL_SetError("%s", e.what());
                 return -1;
             }
-            return s.getPos();
+            return static_cast<int>(s.getPos());
         } else {
             SDL_SetError("Seek error");
             return -1;
@@ -56,7 +52,7 @@ namespace {
                     SDL_SetError("Read error (end of file)");
                     return 0;
                 }
-                return r/size;
+                return static_cast<int>(r/size);
             }
         }
         catch (std::exception& e) {
@@ -78,7 +74,7 @@ namespace {
                 SDL_SetError("Write error (disk full)");
                 return 0;
             }
-            return w/size;
+            return static_cast<int>(w/size);
         }
         catch (std::exception& e) {
             SDL_SetError(e.what());
@@ -91,11 +87,9 @@ namespace {
         // No delete code. Object is deleted automatically.
         return 0;
     }
-// //@}
 }
 
-// /** Constructor.
-//     \param s Stream to export */
+// Constructor.
 gfx::sdl::StreamInterface::StreamInterface(afl::io::Stream& parent)
     : m_parent(parent)
 {

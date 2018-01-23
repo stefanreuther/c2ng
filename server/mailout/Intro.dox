@@ -1,0 +1,13 @@
+/*!
+     \namespace server::mailout
+     \brief c2mailout server
+
+     This namespace implements the c2mailout service.
+     c2mailout implements the mail queue and manages email address confirmations.
+
+     <b>Entry points:</b>
+
+     - server::mailout::CommandHandler
+     - server::mailout::Root
+     - server::mailout::Session
+ */

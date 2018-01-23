@@ -49,7 +49,7 @@ void
 gfx::MultiClipFilter::drawPixels(const Point& pt, afl::base::Memory<const Color_t> colors, Alpha_t alpha)
 {
     for (RectangleSet::Iterator_t i = m_set.begin(); i != m_set.end(); ++i) {
-        Rectangle r(pt, Point(colors.size(), 1));
+        Rectangle r(pt, Point(static_cast<int>(colors.size()), 1));
         r.intersect(*i);
         if (r.exists()) {
             parent().drawPixels(r.getTopLeft(), colors.subrange(r.getLeftX() - pt.getX(), r.getWidth()), alpha);

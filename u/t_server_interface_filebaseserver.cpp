@@ -3,15 +3,15 @@
   *  \brief Test for server::interface::FileBaseServer
   */
 
-#include <stdexcept>
 #include "server/interface/filebaseserver.hpp"
 
+#include <stdexcept>
 #include "t_server_interface.hpp"
-#include "afl/string/format.hpp"
-#include "u/helper/callreceiver.hpp"
 #include "afl/data/access.hpp"
-#include "server/types.hpp"
+#include "afl/string/format.hpp"
+#include "afl/test/callreceiver.hpp"
 #include "server/interface/filebaseclient.hpp"
+#include "server/types.hpp"
 
 using afl::string::Format;
 using afl::data::Segment;
@@ -19,8 +19,11 @@ using afl::data::Access;
 using server::interface::FileBase;
 
 namespace {
-    class FileBaseMock : public FileBase, public CallReceiver {
+    class FileBaseMock : public FileBase, public afl::test::CallReceiver {
      public:
+        FileBaseMock(afl::test::Assert a)
+            : CallReceiver(a)
+            { }
         virtual void copyFile(String_t sourceFile, String_t destFile)
             { checkCall(Format("copyFile(%s,%s)", sourceFile, destFile)); }
         virtual void forgetDirectory(String_t dirName)
@@ -100,7 +103,7 @@ namespace {
 void
 TestServerInterfaceFileBaseServer::testIt()
 {
-    FileBaseMock mock;
+    FileBaseMock mock("testIt");
     server::interface::FileBaseServer testee(mock);
 
     // copyFile
@@ -258,7 +261,7 @@ TestServerInterfaceFileBaseServer::testIt()
 void
 TestServerInterfaceFileBaseServer::testErrors()
 {
-    FileBaseMock mock;
+    FileBaseMock mock("testErrors");
     server::interface::FileBaseServer testee(mock);
 
     Segment empty;    // g++-3.4 sees an invocation of a copy constructor if I construct this object in-place.
@@ -280,7 +283,7 @@ TestServerInterfaceFileBaseServer::testErrors()
 void
 TestServerInterfaceFileBaseServer::testRoundtrip()
 {
-    FileBaseMock mock;
+    FileBaseMock mock("testRoundtrip");
     server::interface::FileBaseServer level1(mock);
     server::interface::FileBaseClient level2(level1);
     server::interface::FileBaseClient level3(level2);

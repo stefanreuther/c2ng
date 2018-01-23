@@ -95,6 +95,16 @@ namespace interpreter {
         bool checkAdvance(TokenType t);
         bool checkAdvance(const char* keyword);
 
+        /** Test for identifier character.
+            \param c Character to test
+            \return true on success */
+        static bool isIdentifierCharacter(char c);
+
+        /** Test for valid uppercase identifier.
+            \param c Candidate to test
+            \return true on success */
+        static bool isValidUppercaseIdentifier(const String_t& candidate);
+
      private:
         String_t             m_line;
         String_t::size_type  m_pos;

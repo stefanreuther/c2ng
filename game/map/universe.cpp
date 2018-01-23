@@ -91,6 +91,12 @@ game::map::Universe::playedShips()
     return *m_playedShips;
 }
 
+const game::map::PlayedShipType&
+game::map::Universe::playedShips() const
+{
+    return *m_playedShips;
+}
+
 game::map::ObjectVector<game::map::Planet>&
 game::map::Universe::planets()
 {
@@ -330,10 +336,10 @@ game::map::Universe::postprocess(PlayerSet_t playingSet, PlayerSet_t availablePl
 //     \param pt Location, need not be normalized
 //     \return Id of planet, or zero if none */
 game::Id_t
-game::map::Universe::getPlanetAt(Point pt)
+game::map::Universe::getPlanetAt(Point pt) const
 {
     // ex GUniverse::getPlanetAt
-    return AnyPlanetType(*this).findFirstObjectAt(m_config.getCanonicalLocation(pt));
+    return AnyPlanetType(const_cast<Universe&>(*this)).findFirstObjectAt(m_config.getCanonicalLocation(pt));
 }
 
 // /** Get planet at location, with warp wells. If there is no planet at
@@ -346,7 +352,7 @@ game::Id_t
 game::map::Universe::getPlanetAt(Point pt,
                                  bool gravityFlag,
                                  const game::config::HostConfiguration& config,
-                                 const HostVersion& host)
+                                 const HostVersion& host) const
 {
     // ex GUniverse::getPlanetAt
     Id_t rv = getPlanetAt(pt);
@@ -364,7 +370,7 @@ game::map::Universe::getPlanetAt(Point pt,
 game::Id_t
 game::map::Universe::getGravityPlanetAt(Point pt,
                                         const game::config::HostConfiguration& config,
-                                        const HostVersion& host)
+                                        const HostVersion& host) const
 {
     // ex GUniverse::getGravityPlanetAt
     /* easy case */
@@ -372,7 +378,7 @@ game::map::Universe::getGravityPlanetAt(Point pt,
         return 0;
     }
 
-    AnyPlanetType ty(*this);
+    AnyPlanetType ty(const_cast<Universe&>(*this));
     switch (host.getKind()) {
      case HostVersion::Unknown:
      case HostVersion::PHost: {

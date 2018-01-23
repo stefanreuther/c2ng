@@ -34,6 +34,17 @@ interpreter::makeIntegerValue(int32_t value)
     return new afl::data::IntegerValue(value);
 }
 
+// Make size value.
+afl::data::Value*
+interpreter::makeSizeValue(size_t value)
+{
+    if (value > 0x7FFFFFFF) {
+        return makeIntegerValue(0x7FFFFFFF);
+    } else {
+        return makeIntegerValue(static_cast<int32_t>(value));
+    }
+}
+
 // Make float value.
 afl::data::Value*
 interpreter::makeFloatValue(double value)

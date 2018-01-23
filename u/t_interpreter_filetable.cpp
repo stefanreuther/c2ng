@@ -108,13 +108,13 @@ TestInterpreterFileTable::testAppend()
     {
         afl::data::IntegerValue one(1);
         TS_ASSERT(testee.checkFileArg(tf, &one));
-        tf->setSystemNewline(true);
+        tf->setSystemNewline(false);
         tf->writeLine("t\xc3\xa4xt");
     }
     {
         afl::data::IntegerValue two(2);
         TS_ASSERT(testee.checkFileArg(tf, &two));
-        tf->setSystemNewline(true);
+        tf->setSystemNewline(false);
         tf->writeLine("t\xc3\xa4xt");
     }
 

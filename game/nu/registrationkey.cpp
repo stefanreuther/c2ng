@@ -49,6 +49,12 @@ game::nu::RegistrationKey::setLine(Line /*which*/, String_t /*value*/)
     return false;
 }
 
+int
+game::nu::RegistrationKey::getMaxTechLevel(TechLevel /*area*/) const
+{
+    return (getStatus() == Registered ? 10 : 7);
+}
+
 void
 game::nu::RegistrationKey::setStatus(Status st)
 {

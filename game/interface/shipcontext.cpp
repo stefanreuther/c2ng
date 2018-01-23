@@ -201,10 +201,10 @@ namespace {
             { }
 
         // ProcedureValue:
-        virtual void call(interpreter::Process& /*proc*/, interpreter::Arguments& a)
+        virtual void call(interpreter::Process& proc, interpreter::Arguments& a)
             {
                 if (game::map::Ship* sh = m_turn->universe().ships().get(m_id)) {
-                    game::interface::callShipMethod(*sh, m_method, a, m_session, m_root, m_shipList, m_turn);
+                    game::interface::callShipMethod(*sh, m_method, a, proc, m_session, m_root, m_shipList, m_turn);
                 }
             }
 

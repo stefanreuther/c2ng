@@ -1,0 +1,19 @@
+From: PlanetsCentral Messenger <$(SMTP_FROM)>
+Subject: [PlanetsCentral] New Private Message
+
+Hi,
+
+you have received a new private message. Use
+  <http://planetscentral.com/mail/view.cgi/1>
+to read it.
+
+No more mails about private messages will be sent until
+you read them.
+
+
+Best regards,
+PlanetsCentral administration
+
+-- 
+To change your email settings, go to
+<http://planetscentral.com/settings.cgi>.

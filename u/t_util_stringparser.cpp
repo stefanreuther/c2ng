@@ -20,6 +20,7 @@ TestUtilStringParser::testIt()
         TS_ASSERT(!p.parseString("x"));
         TS_ASSERT(!p.parseInt(n));
         TS_ASSERT_EQUALS(p.getRemainder(), "");
+        TS_ASSERT_EQUALS(p.getPosition(), 0U);
     }
 
     // Regular case
@@ -27,21 +28,23 @@ TestUtilStringParser::testIt()
         util::StringParser p("13a");
         TS_ASSERT_EQUALS(p.getRemainder(), "13a");
         TS_ASSERT(p.parseInt(n));
+        TS_ASSERT_EQUALS(p.getPosition(), 2U);
         TS_ASSERT(p.parseString("a"));
         TS_ASSERT(p.parseEnd());
         TS_ASSERT_EQUALS(n, 13);
         TS_ASSERT_EQUALS(p.getRemainder(), "");
+        TS_ASSERT_EQUALS(p.getPosition(), 3U);
     }
 
-    // parseChar
+    // parseCharacter
     {
         util::StringParser p("xyz");
-        TS_ASSERT( p.parseChar('x'));
-        TS_ASSERT(!p.parseChar('a'));
-        TS_ASSERT( p.parseChar('y'));
+        TS_ASSERT( p.parseCharacter('x'));
+        TS_ASSERT(!p.parseCharacter('a'));
+        TS_ASSERT( p.parseCharacter('y'));
         TS_ASSERT_EQUALS(p.getRemainder(), "z");
-        TS_ASSERT( p.parseChar('z'));
-        TS_ASSERT(!p.parseChar('z'));
+        TS_ASSERT( p.parseCharacter('z'));
+        TS_ASSERT(!p.parseCharacter('z'));
         TS_ASSERT(p.parseEnd());
         TS_ASSERT_EQUALS(p.getRemainder(), "");
     }
@@ -57,10 +60,29 @@ TestUtilStringParser::testIt()
         TS_ASSERT_EQUALS(tmp, "");
         TS_ASSERT_EQUALS(p.getRemainder(), ":xyz");
 
-        TS_ASSERT(p.parseChar(':'));
+        TS_ASSERT(p.parseCharacter(':'));
 
         TS_ASSERT(p.parseDelim(":", tmp));
         TS_ASSERT_EQUALS(tmp, "xyz");
         TS_ASSERT(p.parseEnd());
+    }
+
+    // Numbers
+    {
+        util::StringParser p("1 -1 +1 99 -99 +99");
+        int a = 0, b = 0, c = 0;
+        int64_t d = 0, e = 0, f = 0;
+        TS_ASSERT(p.parseInt(a));
+        TS_ASSERT(p.parseInt(b));
+        TS_ASSERT(p.parseInt(c));
+        TS_ASSERT(p.parseInt64(d));
+        TS_ASSERT(p.parseInt64(e));
+        TS_ASSERT(p.parseInt64(f));
+        TS_ASSERT_EQUALS(a, 1);
+        TS_ASSERT_EQUALS(b, -1);
+        TS_ASSERT_EQUALS(c, 1);
+        TS_ASSERT_EQUALS(d, 99);
+        TS_ASSERT_EQUALS(e, -99);
+        TS_ASSERT_EQUALS(f, 99);
     }
 }

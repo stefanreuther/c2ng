@@ -6,14 +6,14 @@
 #include "gfx/filter.hpp"
 
 #include "t_gfx.hpp"
-#include "u/helper/callreceiver.hpp"
+#include "afl/test/callreceiver.hpp"
 
 namespace {
     /* Test implementation of Filter (also serves as interface test) */
-    class TestFilter : public gfx::Filter, public CallReceiver {
+    class TestFilter : public gfx::Filter, public afl::test::CallReceiver {
      public:
-        TestFilter(gfx::Canvas& parent)
-            : Filter(parent)
+        TestFilter(gfx::Canvas& parent, afl::test::Assert a)
+            : Filter(parent), CallReceiver(a)
             { }
         virtual void drawHLine(const gfx::Point& /*pt*/, int /*npix*/, gfx::Color_t /*color*/, gfx::LinePattern_t /*pat*/, gfx::Alpha_t /*alpha*/)
             { checkCall("drawHLine"); }
@@ -46,8 +46,11 @@ namespace {
             }
     };
 
-    class TestCanvas : public gfx::Canvas, public CallReceiver {
+    class TestCanvas : public gfx::Canvas, public afl::test::CallReceiver {
      public:
+        TestCanvas(afl::test::Assert a)
+            : CallReceiver(a)
+            { }
         virtual void drawHLine(const gfx::Point& /*pt*/, int /*npix*/, gfx::Color_t /*color*/, gfx::LinePattern_t /*pat*/, gfx::Alpha_t /*alpha*/)
             { checkCall("drawHLine"); }
         virtual void drawVLine(const gfx::Point& /*pt*/, int /*npix*/, gfx::Color_t /*color*/, gfx::LinePattern_t /*pat*/, gfx::Alpha_t /*alpha*/)
@@ -104,8 +107,8 @@ namespace {
 void
 TestGfxFilter::testIt()
 {
-    TestCanvas c;
-    TestFilter t(c);
+    TestCanvas c("testIt");
+    TestFilter t(c, "testIt");
 
     // getPixels
     {

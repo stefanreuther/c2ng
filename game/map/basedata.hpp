@@ -29,7 +29,13 @@ namespace game { namespace map {
         IntegerProperty_t    mission;
 
         ShipBuildOrder       shipBuildOrder;
+
+        BaseData(int = 0)
+            { }
     };
+
+    BaseStorage* getBaseStorage(BaseData& bd, TechLevel area);
+    const BaseStorage* getBaseStorage(const BaseData& bd, TechLevel area);
 
 } }
 

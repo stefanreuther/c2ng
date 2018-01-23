@@ -3,18 +3,18 @@
   *  \brief Test for server::interface::TalkNNTPServer
   */
 
-#include <memory>
-#include <stdexcept>
 #include "server/interface/talknntpserver.hpp"
 
+#include <memory>
+#include <stdexcept>
 #include "t_server_interface.hpp"
-#include "u/helper/callreceiver.hpp"
-#include "afl/string/format.hpp"
 #include "afl/data/access.hpp"
 #include "afl/data/hash.hpp"
 #include "afl/data/hashvalue.hpp"
-#include "server/types.hpp"
+#include "afl/string/format.hpp"
+#include "afl/test/callreceiver.hpp"
 #include "server/interface/talknntpclient.hpp"
+#include "server/types.hpp"
 
 using afl::string::Format;
 using afl::data::Segment;
@@ -23,8 +23,11 @@ using afl::data::Hash;
 using afl::data::HashValue;
 
 namespace {
-    class TalkNNTPMock : public TalkNNTP, public CallReceiver {
+    class TalkNNTPMock : public TalkNNTP, public afl::test::CallReceiver {
      public:
+        TalkNNTPMock(afl::test::Assert a)
+            : CallReceiver(a)
+            { }
         virtual String_t checkUser(String_t loginName, String_t password)
             {
                 checkCall(Format("checkUser(%s,%s)", loginName, password));
@@ -94,7 +97,7 @@ namespace {
 void
 TestServerInterfaceTalkNNTPServer::testIt()
 {
-    TalkNNTPMock mock;
+    TalkNNTPMock mock("testIt");
     server::interface::TalkNNTPServer testee(mock);
 
     // checkUser
@@ -224,7 +227,7 @@ TestServerInterfaceTalkNNTPServer::testIt()
 void
 TestServerInterfaceTalkNNTPServer::testErrors()
 {
-    TalkNNTPMock mock;
+    TalkNNTPMock mock("testErrors");
     server::interface::TalkNNTPServer testee(mock);
 
     Segment empty;    // g++-3.4 sees an invocation of a copy constructor if I construct this object in-place.
@@ -245,7 +248,7 @@ TestServerInterfaceTalkNNTPServer::testErrors()
 void
 TestServerInterfaceTalkNNTPServer::testRoundtrip()
 {
-    TalkNNTPMock mock;
+    TalkNNTPMock mock("testRoundtrip");
     server::interface::TalkNNTPServer level1(mock);
     server::interface::TalkNNTPClient level2(level1);
     server::interface::TalkNNTPServer level3(level2);

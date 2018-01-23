@@ -48,7 +48,7 @@ game::interface::IFObjMark(game::map::Object& obj, interpreter::Arguments& args)
        Mark object.
        Marks the current object.
        If the flag is specified as False, unmarks it instead.
-       @since PCC2 1.99.9, PCC 1.0.5
+       @since PCC2 1.99.9, PCC 1.0.5, PCC2 2.40.1
        @diff This command is also available for ufos, ion storms, and minefields since PCC2 1.99.13.
        Older versions and PCC 1.x only allow it for ships and planets.
        @see Unmark */
@@ -74,7 +74,7 @@ game::interface::IFObjUnmark(game::map::Object& obj, interpreter::Arguments& arg
     /* @q Unmark (Planet Command, Ship Command, Ufo Command, Storm Command, Minefield Command)
        Unmark object.
        Unmarks the current object.
-       @since PCC2 1.99.9, PCC 1.0.5
+       @since PCC2 1.99.9, PCC 1.0.5, PCC2 2.40.1
        @diff This command is also available for ufos, ion storms, and minefields since PCC2 1.99.13.
        Older versions and PCC 1.x only allow it for ships and planets.
        @see Mark */

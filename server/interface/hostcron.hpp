@@ -40,7 +40,7 @@ namespace server { namespace interface {
         virtual void listGameEvents(afl::base::Optional<int32_t> limit, std::vector<Event>& result) = 0;
 
         // CRONKICK game:GID (Host Command)
-        virtual void kickstartGame(int32_t gameId) = 0;
+        virtual bool kickstartGame(int32_t gameId) = 0;
     };
 
 } }

@@ -42,8 +42,9 @@ TestGameSpecShipList::testIt()
     TS_ASSERT_EQUALS(&sl.racialAbilities(), &csl.racialAbilities());
     // TS_ASSERT_EQUALS(csl.racialAbilities().getNumEntries(), 0U); <- cannot check this; HullAssignmentList is preloaded with default no-op entries
 
+    game::config::HostConfiguration hostConfig;
     TS_ASSERT_EQUALS(&sl.hullAssignments(), &csl.hullAssignments());
-    TS_ASSERT_EQUALS(csl.hullAssignments().getMaxIndex(game::config::HostConfiguration(), 1), 0);
+    TS_ASSERT_EQUALS(csl.hullAssignments().getMaxIndex(hostConfig, 1), 0);
 
     TS_ASSERT_EQUALS(&sl.componentNamer(), &csl.componentNamer());
     TS_ASSERT_EQUALS(csl.componentNamer().getShortName(game::spec::ComponentNameProvider::Hull, 15, "SMALL DEEP SPACE FREIGHTER", ""), "SMALL DEEP SPACE FREIGHTER");
@@ -217,7 +218,8 @@ TestGameSpecShipList::testRacialAbilitiesFail()
     testee.hulls().create(1)->changeHullFunction(ModifiedHullFunctionList::Function_t(HullFunction::Cloak), game::PlayerSet_t(9), game::PlayerSet_t(), false);
 
     // Do it
-    testee.findRacialAbilities(game::config::HostConfiguration());
+    game::config::HostConfiguration hostConfig;
+    testee.findRacialAbilities(hostConfig);
 
     // Must not find Cloak.
     const game::spec::HullFunctionAssignmentList::Entry* p =

@@ -2,27 +2,53 @@
 # Makefile
 #
 
-OBJECTS_c2export = tools/c2export.o
+OBJECTS_c2configtool = tools/c2configtool.o
 CXX = $(CONFIG_C2NG_CXX)
 LDFLAGS = $(CONFIG_AFL_LDFLAGS) $(CONFIG_C2NG_LDFLAGS)
 LIBS = $(CONFIG_C2NG_LIBS)
+OBJECTS_c2console = server/tools/c2console.o
+OBJECTS_c2dbexport = server/tools/c2dbexport.o
+OBJECTS_c2export = tools/c2export.o
 OBJECTS_c2file-server = server/c2file.o
 OBJECTS_c2fileclient = server/tools/c2fileclient.o
 OBJECTS_c2format-server = server/c2format.o
+OBJECTS_c2gfxgen = tools/c2gfxgen.o
+OBJECTS_c2host-server = server/c2host.o
+OBJECTS_c2mailin = server/tools/c2mailin.o
+OBJECTS_c2mailout-server = server/c2mailout.o
+OBJECTS_c2mgrep = tools/c2mgrep.o
+OBJECTS_c2monitor-server = server/c2monitor.o
 OBJECTS_c2ng = main/c2ng.o
+OBJECTS_c2nntp-server = server/c2nntp.o
 OBJECTS_c2plugin = tools/c2plugin.o
 OBJECTS_c2rater = tools/c2rater.o
 OBJECTS_c2script = tools/c2script.o
 OBJECTS_c2sweep = tools/c2sweep.o
 OBJECTS_c2talk-server = server/c2talk.o
 OBJECTS_c2untrn = tools/c2untrn.o
-OBJECTS_gamelib = interpreter/structurevaluedata.o \
+OBJECTS_gamelib = game/map/shippredictor.o util/configurationfile.o \
+    game/v3/hconfig.o game/map/markings.o game/map/markingvector.o \
+    game/db/fleetloader.o game/interface/cargomethod.o \
+    game/actions/cargotransfersetup.o game/map/shiptransporter.o \
+    game/actions/buildammo.o game/test/interpreterinterface.o \
+    game/actions/buildship.o game/map/basedata.o game/test/cargocontainer1.o \
+    game/test/specificationloader1.o game/test/stringverifier2.o \
+    game/test/registrationkey1.o game/actions/buildparts.o \
+    game/actions/techupgrade.o game/actions/basebuildaction.o \
+    game/map/shipstorage.o interpreter/exporter/format.o \
+    interpreter/exporter/configuration3.o util/charsetfactory.o \
+    game/v3/packer.o game/v3/undoinformation.o \
+    game/actions/buildstructures.o game/v3/reverter.o \
+    game/actions/buildstarbase.o game/actions/cargocostaction.o \
+    game/map/planetstorage.o game/actions/cargotransfer.o \
+    game/cargocontainer.o game/v3/outboxreader.o game/msg/outbox.o \
+    util/processrunner.o interpreter/structurevaluedata.o \
     interpreter/structuretypedata.o interpreter/arraydata.o \
     game/maint/difficultyrater.o util/syntax/factory1.o \
     util/syntax/inihighlighter.o util/syntax/chighlighter.o \
     util/syntax/scripthighlighter.o util/syntax/keywordtable.o \
     util/syntax/segment.o util/syntax/nullhighlighter.o game/v3/trn/dumper.o \
-    util/application1.o game/v3/trn/filter.o game/v3/trn/indexfilter.o \
+    util/application2.o game/v3/trn/filter.o game/v3/trn/indexfilter.o \
     game/v3/trn/negatefilter.o game/v3/trn/orfilter.o \
     game/v3/trn/andfilter.o game/v3/trn/idfilter.o \
     game/v3/trn/stringfilter.o game/v3/trn/namefilter.o \
@@ -49,7 +75,7 @@ OBJECTS_gamelib = interpreter/structurevaluedata.o \
     game/interface/vcrsidefunction.o game/interface/vcrsidecontext.o \
     game/interface/vcrproperty.o game/interface/vcrsideproperty.o \
     game/interface/pluginfunction.o game/interface/plugincontext.o \
-    game/interface/pluginproperty.o util/plugin/installer.o \
+    game/interface/pluginproperty.o util/plugin/installer1.o \
     util/plugin/manager1.o util/plugin/plugin.o \
     game/interface/drawingmethod.o game/interface/drawingfunction.o \
     game/interface/drawingcontext.o game/interface/drawingproperty.o \
@@ -99,13 +125,13 @@ OBJECTS_gamelib = interpreter/structurevaluedata.o \
     game/interface/iteratorcontext.o game/map/objectobserver1.o \
     game/interface/richtextfunctions.o game/interface/richtextvalue.o \
     game/interface/simplefunction.o game/stringverifier1.o \
-    game/v3/stringverifier2.o game/map/cursors.o \
+    game/v3/stringverifier3.o game/map/cursors.o \
     game/map/simpleobjectcursor.o game/map/objectcursor.o util/keystring.o \
     game/spec/basecomponentvector.o game/interface/shipfunction.o \
     game/interface/shipcontext.o game/interface/shipproperty.o \
     game/browser/handlerlist.o game/msg/inbox.o game/exception.o \
     game/browser/session1.o game/browser/usercallbackproxy.o \
-    util/rich/parser1.o game/nu/browserhandler.o \
+    util/rich/parser2.o game/nu/browserhandler.o \
     game/browser/unsupportedaccountfolder.o util/rich/linkattribute.o \
     util/rich/styleattribute.o util/skincolor.o util/rich/colorattribute.o \
     util/rich/visitor.o util/rich/text.o util/profiledirectory.o \
@@ -179,7 +205,7 @@ OBJECTS_gamelib = interpreter/structurevaluedata.o \
     util/randomnumbergenerator.o game/v3/turnfile.o game/timestamp.o \
     game/spec/nullcomponentnameprovider.o game/config/configurationparser.o \
     util/configurationfileparser.o game/playerlist.o game/player.o \
-    game/root.o game/spec/hullassignmentlist.o game/v3/registrationkey1.o \
+    game/root.o game/spec/hullassignmentlist.o game/v3/registrationkey2.o \
     game/hostversion.o game/spec/hullfunctionassignmentlist.o \
     game/spec/hull.o game/config/aliasoption.o game/config/costarrayoption.o \
     game/config/hostconfiguration.o game/config/enumvalueparser.o \
@@ -192,18 +218,20 @@ OBJECTS_gamelib = interpreter/structurevaluedata.o \
     game/playerset.o game/experiencelevelset.o \
     game/spec/basichullfunctionlist.o game/spec/basichullfunction.o \
     util/fileparser.o game/v3/resultfile.o game/cargospec.o \
-    game/v3/specificationloader1.o game/spec/shiplist.o game/spec/engine.o \
+    game/v3/specificationloader2.o game/spec/shiplist.o game/spec/engine.o \
     game/spec/torpedolauncher.o game/spec/beam.o game/spec/weapon.o \
     game/spec/component.o game/spec/cost.o game/element.o
 AR = $(CONFIG_C2NG_AR)
-OBJECTS_guilib = gfx/basecontext.o client/widgets/commanddataview.o \
-    ui/rich/draw1.o ui/rich/splitter.o client/widgets/standarddataview.o \
-    client/widgets/collapsibledataview.o ui/layout/grid.o \
-    client/widgets/comment.o ui/layout/flow.o ui/widgets/quit.o \
-    ui/widgets/radiobutton.o ui/widgets/checkbox.o ui/screenshotlistener.o \
-    gfx/save.o ui/widgets/abstractcheckbox.o gfx/nullresourceprovider.o \
-    ui/prefixargument.o client/si/stringlistdialogwidget.o \
-    client/si/listboxfunction.o ui/widgets/stringlistbox.o gfx/defaultfont.o \
+OBJECTS_guilib = ui/res/generatedplanetprovider.o gfx/gen/planet2.o \
+    gfx/gen/planetconfig.o gfx/gen/application.o gfx/basecontext.o \
+    client/widgets/commanddataview.o ui/rich/draw1.o ui/rich/splitter.o \
+    client/widgets/standarddataview.o client/widgets/collapsibledataview.o \
+    ui/layout/grid.o client/widgets/comment.o ui/layout/flow.o \
+    ui/widgets/quit.o ui/widgets/radiobutton.o ui/widgets/checkbox.o \
+    ui/screenshotlistener.o gfx/save.o ui/widgets/abstractcheckbox.o \
+    gfx/nullresourceprovider.o ui/prefixargument.o \
+    client/si/stringlistdialogwidget.o client/si/listboxfunction.o \
+    ui/widgets/stringlistbox.o gfx/defaultfont.o \
     client/widgets/consoleview.o client/si/widgetindexedproperty.o \
     client/si/widgetextraproperty.o client/si/widgetreference.o \
     client/si/widgetwrapper.o client/tiles/basescreenheadertile.o \
@@ -245,30 +273,80 @@ OBJECTS_guilib = gfx/basecontext.o client/widgets/commanddataview.o \
     ui/draw.o ui/defaultresourceprovider.o gfx/fontlist.o gfx/fontrequest.o \
     ui/spacer.o ui/layoutablegroup.o ui/layout/vbox.o ui/layout/axislayout.o \
     ui/layout/hbox.o ui/colorscheme.o gfx/complex.o \
-    gfx/sdl/streaminterface.o gfx/multiclipfilter.o gfx/filter1.o ui/root4.o \
+    gfx/sdl/streaminterface.o gfx/multiclipfilter.o gfx/filter1.o ui/root8.o \
     ui/simplewidget.o ui/layout/info.o ui/cardgroup.o ui/widget1.o \
     gfx/bitmapfont.o gfx/bitmapglyph.o gfx/font.o gfx/nullcolorscheme.o \
     gfx/graphicsexception.o gfx/sdl/engine1.o gfx/sdl/surface.o \
     gfx/nullcanvas.o gfx/rectangleset.o gfx/rectangle.o gfx/fillpattern.o
-OBJECTS_serverlib = server/interface/composablecommandhandler.o \
+OBJECTS_serverlib = server/monitor/timeserieswriter.o \
+    server/monitor/timeseriesloader.o server/monitor/timeseries.o \
+    server/monitor/loadaverageobserver.o server/monitor/statusobserver.o \
+    server/monitor/badnessfileobserver.o server/monitor/statuspage.o \
+    server/monitor/status.o server/monitor/networkobserver.o \
+    server/monitor/serverapplication4.o server/mailout/transmitterimpl.o \
+    server/mailout/root5.o server/mailout/template.o \
+    server/mailout/message.o server/mailout/mailqueue.o \
+    server/mailout/commandhandler2.o server/mailout/configuration5.o \
+    server/mailout/serverapplication3.o server/dbexport/dbexporter.o \
+    server/dbexport/exportapplication.o server/nntp/root6.o \
+    server/nntp/linehandler.o server/nntp/serverapplication5.o \
+    server/console/routercontextfactory.o server/interface/sessionrouter.o \
+    server/interface/sessionrouterclient.o server/console/nullterminal.o \
+    server/console/connectioncontextfactory.o server/console/pipeterminal.o \
+    server/console/dumbterminal.o server/console/colorterminal.o \
+    server/console/terminal.o server/console/filecommandhandler.o \
+    server/console/stringcommandhandler.o \
+    server/console/integercommandhandler.o \
+    server/console/arcanecommandhandler.o \
+    server/console/fundamentalcommandhandler.o \
+    server/console/macrocommandhandler.o server/console/parser1.o \
+    server/console/environment.o server/console/consoleapplication.o \
+    server/mailin/mailinapplication.o server/file/clientdirectory.o \
+    server/format/serverapplication1.o server/file/clientapplication.o \
+    server/file/serverapplication.o server/talk/serverapplication6.o \
+    server/host/user1.o server/common/user.o \
+    server/host/serverapplication2.o server/common/root1.o \
+    server/mailin/mailprocessor.o server/file/internalfileserver.o \
+    server/host/resultsender.o server/host/gamerating.o \
+    server/host/rank/victory.o server/host/rank/levelhandler.o \
+    server/host/rank/scorefilereader.o server/host/exec.o \
+    server/host/rank/refereefilereader.o server/host/rank/rank.o \
+    server/host/cronimpl.o server/host/hostcron.o server/host/hostschedule.o \
+    server/host/hostturn.o server/host/configurationbuilder.o \
+    server/host/exporter1.o server/host/installer.o \
+    server/common/racenames.o server/host/hostplayer.o \
+    server/host/session4.o server/host/hostgame.o server/host/gamearbiter.o \
+    server/interface/hostplayerserver.o server/interface/hostplayerclient.o \
+    server/interface/hostturnserver.o server/interface/hostturnclient.o \
+    server/interface/hostturn1.o server/interface/hostgameserver.o \
+    server/interface/hostscheduleserver.o \
+    server/interface/hostscheduleclient.o server/interface/hostgameclient.o \
+    server/host/talkadapter.o server/host/gamecreator.o \
+    server/interface/hostplayer1.o server/interface/hostschedule1.o \
+    server/interface/hostgame1.o server/host/schedule.o \
+    server/host/configuration4.o server/host/game1.o server/host/hosttool.o \
+    server/host/root4.o server/host/commandhandler1.o \
+    server/interface/hostcronserver.o server/interface/hosttool1.o \
+    server/interface/hosttoolserver.o server/interface/hosttoolclient.o \
+    server/interface/composablecommandhandler.o \
     server/configurationhandler.o server/common/session3.o \
     server/interface/hostcronclient.o server/file/directorywrapper1.o \
     server/file/clientdirectoryhandler.o \
     server/file/ca/internalobjectcache.o \
     server/file/ca/internalreferencecounter.o \
     server/file/directoryhandlerfactory.o server/file/directoryhandler2.o \
-    server/tools/c2fileclient.o server/file/utils.o server/file/ca/commit.o \
-    server/file/ca/root1.o server/file/ca/directoryhandler1.o \
-    server/file/ca/directoryentry.o server/file/ca/objectid.o \
-    server/file/ca/objectstore.o server/file/internaldirectoryhandler.o \
-    server/file/racenames.o server/file/filegame.o server/file/gamestatus.o \
+    server/file/utils.o server/file/ca/commit.o server/file/ca/root2.o \
+    server/file/ca/directoryhandler1.o server/file/ca/directoryentry.o \
+    server/file/ca/objectid.o server/file/ca/objectstore.o \
+    server/file/internaldirectoryhandler.o server/file/racenames1.o \
+    server/file/filegame.o server/file/gamestatus.o \
     server/interface/filegameserver.o server/interface/filegameclient.o \
     server/file/pathresolver.o server/file/filebase.o \
     server/file/directoryitem.o server/file/fileitem.o \
-    server/file/filesystemhandler.o server/file/item.o server/file/root2.o \
+    server/file/filesystemhandler.o server/file/item.o server/file/root3.o \
     server/file/commandhandler.o server/interface/filebaseserver.o \
     server/interface/filebaseclient.o server/interface/filebase1.o \
-    server/talk/configuration3.o server/interface/baseclient.o \
+    server/talk/configuration6.o server/interface/baseclient.o \
     server/talk/talknntp.o server/interface/talknntpserver.o \
     server/interface/talknntpclient.o server/talk/talkpm.o \
     server/talk/userpm.o server/interface/talkpmserver.o \
@@ -286,24 +364,93 @@ OBJECTS_serverlib = server/interface/composablecommandhandler.o \
     server/interface/talkpostclient.o server/talk/accesschecker.o \
     server/talk/render/bbrenderer.o server/talk/render/mailrenderer.o \
     server/talk/render/htmlrenderer.o server/talk/parse/bbparser.o \
-    server/talk/parse/bblexer.o server/talk/util.o server/talk/user.o \
+    server/talk/parse/bblexer.o server/talk/util.o server/talk/user2.o \
     server/interface/talkgroupclient.o server/talk/talkgroup.o \
     server/interface/talkgroupserver.o server/talk/talkrender.o \
     server/interface/talkrenderserver.o server/interface/talkrenderclient.o \
     server/talk/render/render.o server/talk/forum.o server/talk/topic.o \
     server/talk/render/options.o server/talk/render/context1.o \
-    server/talk/render/textrenderer.o server/talk/message.o \
+    server/talk/render/textrenderer.o server/talk/message1.o \
     server/talk/linkformatter.o server/talk/textnode.o server/talk/group.o \
     server/types1.o server/talk/talksyntax.o \
     server/interface/talksyntaxserver.o server/interface/talksyntaxclient.o \
-    server/talk/commandhandler1.o server/talk/root3.o server/talk/session4.o \
+    server/talk/commandhandler3.o server/talk/root7.o server/talk/session5.o \
     server/talk/inlinerecognizer.o server/format/simpacker.o \
     server/format/truehullpacker.o server/format/enginepacker.o \
     server/format/hullpacker.o server/format/torpedopacker.o \
-    server/format/utils1.o server/format/beampacker.o server/application.o \
-    server/format/format.o server/interface/formatserver.o \
+    server/format/utils1.o server/format/beampacker.o server/application1.o \
+    server/format/format1.o server/interface/formatserver.o \
     server/format/stringpacker.o server/interface/formatclient.o
-OBJECTS_testsuite = u/t_interpreter_vmio_filesavecontext.o \
+OBJECTS_testsuite = u/t_util_configurationfile.o \
+    u/t_server_monitor_timeseriesloader.o \
+    u/t_server_monitor_timeserieswriter.o u/t_game_v3_hconfig.o \
+    u/t_server_monitor_statusobserver.o u/t_server_monitor_timeseries.o \
+    u/t_game_map_markings.o u/t_game_map_markingvector.o \
+    u/t_gfx_sdl_streaminterface.o u/t_game_map_fleetmember.o \
+    u/t_game_db_fleetloader.o u/t_gfx_gen_planetconfig.o \
+    u/t_gfx_gen_planet.o u/t_gfx_gen_vector3d.o \
+    u/t_game_actions_cargotransfersetup.o u/t_game_actions_cargotransfer.o \
+    u/t_game_actions_buildammo.o u/t_game_actions_buildship.o \
+    u/t_game_actions_buildstarbase.o u/t_game_actions_buildstructures.o \
+    u/t_game_actions_techupgrade.o u/t_game_v3_undoinformation.o \
+    u/t_game_actions_buildparts.o u/t_game_actions_basebuildaction.o \
+    u/t_game_actions_basebuildexecutor.o u/t_server_monitor_status.o \
+    u/t_interpreter_exporter_configuration.o \
+    u/t_interpreter_exporter_format.o u/t_util_charsetfactory.o \
+    u/t_game_interface_engineproperty.o u/t_game_v3_packer.o \
+    u/t_game_v3_loader.o u/t_game_actions_cargocostaction.o \
+    u/t_game_cargocontainer.o u/t_game_v3_outboxreader.o \
+    u/t_game_msg_outbox.o u/t_server_monitor_badnessfileobserver.o \
+    u/t_server_monitor_observer.o u/t_server_mailout_transmitterimpl.o \
+    u/t_server_mailout_root.o u/t_server_mailout_commandhandler.o \
+    u/t_server_mailout_mailqueue.o u/t_server_mailout_message.o \
+    u/t_server_mailout_template.o u/t_server_mailout_session.o \
+    u/t_server_mailout_configuration.o u/t_server_mailout_transmitter.o \
+    u/t_server_dbexport_dbexporter.o u/t_server_nntp_root.o \
+    u/t_server_console_routercontextfactory.o \
+    u/t_server_console_fundamentalcommandhandler.o \
+    u/helper/consolecommandhandlermock.o u/t_server_console_pipeterminal.o \
+    u/t_server_console_dumbterminal.o u/t_server_console_colorterminal.o \
+    u/t_server_console_integercommandhandler.o \
+    u/t_server_console_stringcommandhandler.o \
+    u/t_server_console_nullterminal.o u/t_server_console_parser.o \
+    u/t_server_console_environment.o u/t_server_console_commandhandler.o \
+    u/t_server_console_contextfactory.o u/t_server_console_context.o \
+    u/t_server_console_terminal.o u/t_server_mailin_mailinapplication.o \
+    u/t_server_file_clientdirectory.o u/t_server_errors.o \
+    u/t_server_talk_session.o u/t_game_vcr_classic_types.o \
+    u/t_server_host_resultsender.o u/t_server_common_user.o \
+    u/t_server_common_sessionprotocolhandlerfactory.o \
+    u/t_server_common_sessionprotocolhandler.o u/t_server_common_root.o \
+    u/t_server_mailin_mailprocessor.o u/t_server_host_commandhandler.o \
+    u/t_server_host_hostturn.o u/t_server_host_hostschedule.o \
+    u/t_server_host_hostplayer.o u/t_server_host_hostgame.o \
+    u/t_server_common_racenames.o u/t_server_host_installer.o \
+    u/t_server_file_internalfileserver.o u/t_server_host_game.o \
+    u/t_server_host_cronimpl.o u/t_server_host_exporter.o \
+    u/t_server_host_configuration.o u/t_server_host_hostcron.o \
+    u/t_server_host_hosttool.o u/t_server_host_talkadapter.o \
+    u/t_server_host_rank_victory.o u/t_server_host_rank_levelhandler.o \
+    u/t_server_host_cron.o u/t_server_interface_sessionrouter.o \
+    u/t_server_host_rank_scorefilereader.o \
+    u/t_server_host_rank_refereefilereader.o u/t_server_host_rank_rank.o \
+    u/t_server_host_configurationbuilder.o u/t_server_host_gamearbiter.o \
+    u/t_server_interface_hostplayerserver.o \
+    u/t_server_interface_hostplayerclient.o \
+    u/t_server_interface_hostturnserver.o \
+    u/t_server_interface_hostturnclient.o \
+    u/t_server_interface_hostgameserver.o \
+    u/t_server_interface_hostscheduleserver.o \
+    u/t_server_interface_hostscheduleclient.o \
+    u/t_server_interface_hostgameclient.o u/t_server_host_gamecreator.o \
+    u/t_server_host_talklistener.o u/t_server_interface_hostplayer.o \
+    u/t_server_interface_hostturn.o u/t_server_interface_hostschedule.o \
+    u/t_server_interface_hostgame.o u/t_server_host_schedule.o \
+    u/t_util_processrunner.o u/t_server_host_session.o \
+    u/t_server_interface_hosttoolserver.o \
+    u/t_server_interface_hosttoolclient.o \
+    u/t_server_interface_hostcronserver.o u/t_server_interface_hosttool.o \
+    u/t_interpreter_vmio_filesavecontext.o \
     u/t_interpreter_vmio_processsavecontext.o \
     u/t_interpreter_vmio_structures.o \
     u/t_interpreter_vmio_processloadcontext.o u/t_gfx_filter.o \
@@ -418,8 +565,8 @@ OBJECTS_testsuite = u/t_interpreter_vmio_filesavecontext.o \
     u/t_server_interface_talkrenderclient.o u/t_server_format_utils.o \
     u/t_server_talk_root.o u/t_server_talk_util.o \
     u/t_server_talk_render_context.o u/t_server_talk_render_options.o \
-    u/t_server_interface_talksyntaxserver.o u/helper/commandhandlermock.o \
-    u/t_server_interface_talksyntaxclient.o u/helper/callreceiver.o \
+    u/t_server_interface_talksyntaxserver.o \
+    u/t_server_interface_talksyntaxclient.o \
     u/t_server_interface_talkrender.o u/t_server_interface_talkgroup.o \
     u/t_server_talk_linkformatter.o u/t_server_talk_group.o \
     u/t_server_types.o u/t_server_interface_talksyntax.o \
@@ -538,19 +685,21 @@ OBJECTS_testsuite = u/t_interpreter_vmio_filesavecontext.o \
     u/t_game_spec_cost.o
 RM = rm -f
 OBJECTS_afl = 
-CXXFLAGS = -I$(CONFIG_C2NG_AFL_DIR) -I. $(CONFIG_C2NG_CXXFLAGS) -MMD -g
+CXXFLAGS = -I$(CONFIG_C2NG_AFL_DIR) -I. $(CONFIG_C2NG_CXXFLAGS) -MMD -g -DTARGET_OS_POSIX
 PERL = $(CONFIG_C2NG_PERL)
 INSTALL_CMD = $(PERL) scripts/install.pl -d -s $(INSTALL_FLAGS)
 INSTDIR = /opt/c2ng
 INSTALL_DATA = $(PERL) scripts/install.pl -d -m 644 $(INSTALL_FLAGS)
+FILES_MANUAL = client/si/*.cpp game/interface/*.cpp interpreter/*.cpp \
+    interpreter/*/*.cpp server/*/*.cpp share/resource/core*.q
 HEADERS_testsuite = u/t_*.hpp
 CXXTESTDIR = $(CONFIG_AFL_CXXTESTDIR)
 
 include config.mk
 include $(CONFIG_C2NG_AFL_DIR)/config.mk
 
-.PHONY: tags clean distclean install install-sdl-yes install-sdl-no afl \
-    gamelib guilib serverlib
+.PHONY: tags manual html clean distclean install install-sdl-yes \
+    install-sdl-no afl gamelib guilib serverlib
 
 .SUFFIXES: .cpp .lo .o .s
 
@@ -558,12 +707,26 @@ all: all-sdl-$(CONFIG_C2NG_HAVE_SDL) all-cxxtest-$(CONFIG_C2NG_HAVE_CXXTEST)
 
 all-sdl-yes: all-sdl-no c2ng
 
-all-sdl-no: c2export c2plugin c2rater c2script c2sweep c2untrn c2file-server \
-    c2format-server c2talk-server c2fileclient
+all-sdl-no: c2configtool c2export c2mgrep c2plugin c2rater c2script c2sweep \
+    c2untrn c2gfxgen c2file-server c2format-server c2host-server \
+    c2talk-server c2fileclient c2mailin c2console c2dbexport c2nntp-server \
+    c2mailout-server c2monitor-server
 
 all-cxxtest-yes: testsuite
 
 all-cxxtest-no:
+
+c2configtool: $(OBJECTS_c2configtool) libgamelib.a $(LIBDEPEND)
+	@echo "        Linking c2configtool..."
+	@$(CXX) $(LDFLAGS) -o c2configtool $(OBJECTS_c2configtool) -L. -lgamelib -L$(CONFIG_C2NG_AFL_DIR) -lafl $(CONFIG_AFL_LIBS) $(LIBS)
+
+c2console: $(OBJECTS_c2console) libserverlib.a libgamelib.a $(LIBDEPEND)
+	@echo "        Linking c2console..."
+	@$(CXX) $(LDFLAGS) -o c2console $(OBJECTS_c2console) -L. -lserverlib -L. -lgamelib -L$(CONFIG_C2NG_AFL_DIR) -lafl $(CONFIG_AFL_LIBS) $(LIBS)
+
+c2dbexport: $(OBJECTS_c2dbexport) libserverlib.a libgamelib.a $(LIBDEPEND)
+	@echo "        Linking c2dbexport..."
+	@$(CXX) $(LDFLAGS) -o c2dbexport $(OBJECTS_c2dbexport) -L. -lserverlib -L. -lgamelib -L$(CONFIG_C2NG_AFL_DIR) -lafl $(CONFIG_AFL_LIBS) $(LIBS)
 
 c2export: $(OBJECTS_c2export) libgamelib.a $(LIBDEPEND)
 	@echo "        Linking c2export..."
@@ -584,9 +747,41 @@ c2format-server: $(OBJECTS_c2format-server) libserverlib.a libgamelib.a \
 	@echo "        Linking c2format-server..."
 	@$(CXX) $(LDFLAGS) -o c2format-server $(OBJECTS_c2format-server) -L. -lserverlib -L. -lgamelib -L$(CONFIG_C2NG_AFL_DIR) -lafl $(CONFIG_AFL_LIBS) $(LIBS)
 
+c2gfxgen: $(OBJECTS_c2gfxgen) libguilib.a libgamelib.a $(LIBDEPEND)
+	@echo "        Linking c2gfxgen..."
+	@$(CXX) $(LDFLAGS) -o c2gfxgen $(OBJECTS_c2gfxgen) -L. -lguilib -L. -lgamelib -L$(CONFIG_C2NG_AFL_DIR) -lafl $(CONFIG_AFL_LIBS) $(LIBS)
+
+c2host-server: $(OBJECTS_c2host-server) libserverlib.a libgamelib.a \
+    $(LIBDEPEND)
+	@echo "        Linking c2host-server..."
+	@$(CXX) $(LDFLAGS) -o c2host-server $(OBJECTS_c2host-server) -L. -lserverlib -L. -lgamelib -L$(CONFIG_C2NG_AFL_DIR) -lafl $(CONFIG_AFL_LIBS) $(LIBS)
+
+c2mailin: $(OBJECTS_c2mailin) libserverlib.a libgamelib.a $(LIBDEPEND)
+	@echo "        Linking c2mailin..."
+	@$(CXX) $(LDFLAGS) -o c2mailin $(OBJECTS_c2mailin) -L. -lserverlib -L. -lgamelib -L$(CONFIG_C2NG_AFL_DIR) -lafl $(CONFIG_AFL_LIBS) $(LIBS)
+
+c2mailout-server: $(OBJECTS_c2mailout-server) libserverlib.a libgamelib.a \
+    $(LIBDEPEND)
+	@echo "        Linking c2mailout-server..."
+	@$(CXX) $(LDFLAGS) -o c2mailout-server $(OBJECTS_c2mailout-server) -L. -lserverlib -L. -lgamelib -L$(CONFIG_C2NG_AFL_DIR) -lafl $(CONFIG_AFL_LIBS) $(LIBS)
+
+c2mgrep: $(OBJECTS_c2mgrep) libgamelib.a $(LIBDEPEND)
+	@echo "        Linking c2mgrep..."
+	@$(CXX) $(LDFLAGS) -o c2mgrep $(OBJECTS_c2mgrep) -L. -lgamelib -L$(CONFIG_C2NG_AFL_DIR) -lafl $(CONFIG_AFL_LIBS) $(LIBS)
+
+c2monitor-server: $(OBJECTS_c2monitor-server) libserverlib.a libgamelib.a \
+    $(LIBDEPEND)
+	@echo "        Linking c2monitor-server..."
+	@$(CXX) $(LDFLAGS) -o c2monitor-server $(OBJECTS_c2monitor-server) -L. -lserverlib -L. -lgamelib -L$(CONFIG_C2NG_AFL_DIR) -lafl $(CONFIG_AFL_LIBS) $(LIBS)
+
 c2ng: $(OBJECTS_c2ng) libguilib.a libgamelib.a $(LIBDEPEND)
 	@echo "        Linking c2ng..."
 	@$(CXX) $(LDFLAGS) -o c2ng $(OBJECTS_c2ng) -L. -lguilib -L. -lgamelib -L$(CONFIG_C2NG_AFL_DIR) -lafl $(CONFIG_AFL_LIBS) $(LIBS) $(CONFIG_C2NG_GUILIBS)
+
+c2nntp-server: $(OBJECTS_c2nntp-server) libserverlib.a libgamelib.a \
+    $(LIBDEPEND)
+	@echo "        Linking c2nntp-server..."
+	@$(CXX) $(LDFLAGS) -o c2nntp-server $(OBJECTS_c2nntp-server) -L. -lserverlib -L. -lgamelib -L$(CONFIG_C2NG_AFL_DIR) -lafl $(CONFIG_AFL_LIBS) $(LIBS)
 
 c2plugin: $(OBJECTS_c2plugin) libgamelib.a $(LIBDEPEND)
 	@echo "        Linking c2plugin..."
@@ -621,57 +816,81 @@ libguilib.a: $(OBJECTS_guilib)
 	@echo "        Archiving libguilib.a..."
 	@$(AR) cru libguilib.a $(OBJECTS_guilib) 
 
-libserverlib.a: $(OBJECTS_serverlib) libgamelib.a
+libserverlib.a: $(OBJECTS_serverlib)
 	@echo "        Archiving libserverlib.a..."
-	@$(AR) cru libserverlib.a $(OBJECTS_serverlib)  libgamelib.a
+	@$(AR) cru libserverlib.a $(OBJECTS_serverlib) 
 
 testsuite: $(OBJECTS_testsuite) libserverlib.a libguilib.a libgamelib.a \
     $(LIBDEPEND)
 	@echo "        Linking testsuite..."
 	@$(CXX) $(LDFLAGS) -o testsuite $(OBJECTS_testsuite) -L. -lserverlib -L. -lguilib -L. -lgamelib -L$(CONFIG_C2NG_AFL_DIR) -lafl $(CONFIG_AFL_LIBS) $(LIBS) $(CONFIG_C2NG_GUILIBS)
 
-Makefile: P9/Settings P9/Rules-unix.mak P9/Settings-unix.mak
+Makefile: P9/Settings P9/02_manual.pr P9/Rules-unix.mak P9/Settings-unix.mak
 	@echo "        Regenerating Makefile..."
 	@proj9 update
 
 clean:
+	$(RM) share/resource/pcc2tech.xml
 	$(RM) $(OBJECTS_gamelib)
 	$(RM) $(OBJECTS_guilib)
 	$(RM) $(OBJECTS_serverlib)
+	$(RM) $(OBJECTS_c2configtool)
 	$(RM) $(OBJECTS_c2export)
+	$(RM) $(OBJECTS_c2mgrep)
 	$(RM) $(OBJECTS_c2plugin)
 	$(RM) $(OBJECTS_c2rater)
 	$(RM) $(OBJECTS_c2script)
 	$(RM) $(OBJECTS_c2sweep)
 	$(RM) $(OBJECTS_c2untrn)
+	$(RM) $(OBJECTS_c2gfxgen)
 	$(RM) $(OBJECTS_c2file-server)
 	$(RM) $(OBJECTS_c2format-server)
+	$(RM) $(OBJECTS_c2host-server)
 	$(RM) $(OBJECTS_c2talk-server)
 	$(RM) $(OBJECTS_c2fileclient)
+	$(RM) $(OBJECTS_c2mailin)
+	$(RM) $(OBJECTS_c2console)
+	$(RM) $(OBJECTS_c2dbexport)
+	$(RM) $(OBJECTS_c2nntp-server)
+	$(RM) $(OBJECTS_c2mailout-server)
+	$(RM) $(OBJECTS_c2monitor-server)
 	$(RM) $(OBJECTS_c2ng)
 	$(RM) $(OBJECTS_testsuite)
 
 depend.mk: Makefile
 	@echo "        Regenerating depend.mk..."
-	@for i in $(OBJECTS_afl) $(OBJECTS_gamelib) $(OBJECTS_guilib) $(OBJECTS_serverlib) $(OBJECTS_c2export) $(OBJECTS_c2plugin) $(OBJECTS_c2rater) $(OBJECTS_c2script) $(OBJECTS_c2sweep) $(OBJECTS_c2untrn) $(OBJECTS_c2file-server) $(OBJECTS_c2format-server) $(OBJECTS_c2talk-server) $(OBJECTS_c2fileclient) $(OBJECTS_c2ng) $(OBJECTS_testsuite); do echo "-include $${i%o}d"; done > depend.mk
+	@for i in $(OBJECTS_afl) $(OBJECTS_gamelib) $(OBJECTS_guilib) $(OBJECTS_serverlib) $(OBJECTS_c2configtool) $(OBJECTS_c2export) $(OBJECTS_c2mgrep) $(OBJECTS_c2plugin) $(OBJECTS_c2rater) $(OBJECTS_c2script) $(OBJECTS_c2sweep) $(OBJECTS_c2untrn) $(OBJECTS_c2gfxgen) $(OBJECTS_c2file-server) $(OBJECTS_c2format-server) $(OBJECTS_c2host-server) $(OBJECTS_c2talk-server) $(OBJECTS_c2fileclient) $(OBJECTS_c2mailin) $(OBJECTS_c2console) $(OBJECTS_c2dbexport) $(OBJECTS_c2nntp-server) $(OBJECTS_c2mailout-server) $(OBJECTS_c2monitor-server) $(OBJECTS_c2ng) $(OBJECTS_testsuite); do echo "-include $${i%o}d"; done > depend.mk
 
 distclean: clean
 	$(RM) testsuite.cpp
 	$(RM) libgamelib.a
 	$(RM) libguilib.a
 	$(RM) libserverlib.a
+	$(RM) c2configtool
 	$(RM) c2export
+	$(RM) c2mgrep
 	$(RM) c2plugin
 	$(RM) c2rater
 	$(RM) c2script
 	$(RM) c2sweep
 	$(RM) c2untrn
+	$(RM) c2gfxgen
 	$(RM) c2file-server
 	$(RM) c2format-server
+	$(RM) c2host-server
 	$(RM) c2talk-server
 	$(RM) c2fileclient
+	$(RM) c2mailin
+	$(RM) c2console
+	$(RM) c2dbexport
+	$(RM) c2nntp-server
+	$(RM) c2mailout-server
+	$(RM) c2monitor-server
 	$(RM) c2ng
 	$(RM) testsuite
+
+doc/pcc2tech.html: share/resource/pcc2tech.xml scripts/pcc2help.xsl
+	xsltproc --path scripts --param whoami "'int'" scripts/pcc2help.xsl share/resource/pcc2tech.xml > $@
 
 game/browser/session1.lo: game/browser/session.cpp
 	$(CXX) -fPIC $(CXXFLAGS) -o game/browser/session1.lo -c game/browser/session.cpp
@@ -833,6 +1052,46 @@ game/stringverifier1.o: game/stringverifier.cpp
 game/stringverifier1.s: game/stringverifier.cpp
 	$(CXX) $(CXXFLAGS) -o game/stringverifier1.s -S game/stringverifier.cpp
 
+game/test/cargocontainer1.lo: game/test/cargocontainer.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o game/test/cargocontainer1.lo -c game/test/cargocontainer.cpp
+
+game/test/cargocontainer1.o: game/test/cargocontainer.cpp
+	@echo "        Compiling game/test/cargocontainer.cpp..."
+	@$(CXX) $(CXXFLAGS) -o game/test/cargocontainer1.o -c game/test/cargocontainer.cpp
+
+game/test/cargocontainer1.s: game/test/cargocontainer.cpp
+	$(CXX) $(CXXFLAGS) -o game/test/cargocontainer1.s -S game/test/cargocontainer.cpp
+
+game/test/registrationkey1.lo: game/test/registrationkey.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o game/test/registrationkey1.lo -c game/test/registrationkey.cpp
+
+game/test/registrationkey1.o: game/test/registrationkey.cpp
+	@echo "        Compiling game/test/registrationkey.cpp..."
+	@$(CXX) $(CXXFLAGS) -o game/test/registrationkey1.o -c game/test/registrationkey.cpp
+
+game/test/registrationkey1.s: game/test/registrationkey.cpp
+	$(CXX) $(CXXFLAGS) -o game/test/registrationkey1.s -S game/test/registrationkey.cpp
+
+game/test/specificationloader1.lo: game/test/specificationloader.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o game/test/specificationloader1.lo -c game/test/specificationloader.cpp
+
+game/test/specificationloader1.o: game/test/specificationloader.cpp
+	@echo "        Compiling game/test/specificationloader.cpp..."
+	@$(CXX) $(CXXFLAGS) -o game/test/specificationloader1.o -c game/test/specificationloader.cpp
+
+game/test/specificationloader1.s: game/test/specificationloader.cpp
+	$(CXX) $(CXXFLAGS) -o game/test/specificationloader1.s -S game/test/specificationloader.cpp
+
+game/test/stringverifier2.lo: game/test/stringverifier.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o game/test/stringverifier2.lo -c game/test/stringverifier.cpp
+
+game/test/stringverifier2.o: game/test/stringverifier.cpp
+	@echo "        Compiling game/test/stringverifier.cpp..."
+	@$(CXX) $(CXXFLAGS) -o game/test/stringverifier2.o -c game/test/stringverifier.cpp
+
+game/test/stringverifier2.s: game/test/stringverifier.cpp
+	$(CXX) $(CXXFLAGS) -o game/test/stringverifier2.s -S game/test/stringverifier.cpp
+
 game/turnloader1.lo: game/turnloader.cpp
 	$(CXX) -fPIC $(CXXFLAGS) -o game/turnloader1.lo -c game/turnloader.cpp
 
@@ -853,35 +1112,35 @@ game/v3/loader3.o: game/v3/loader.cpp
 game/v3/loader3.s: game/v3/loader.cpp
 	$(CXX) $(CXXFLAGS) -o game/v3/loader3.s -S game/v3/loader.cpp
 
-game/v3/registrationkey1.lo: game/v3/registrationkey.cpp
-	$(CXX) -fPIC $(CXXFLAGS) -o game/v3/registrationkey1.lo -c game/v3/registrationkey.cpp
+game/v3/registrationkey2.lo: game/v3/registrationkey.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o game/v3/registrationkey2.lo -c game/v3/registrationkey.cpp
 
-game/v3/registrationkey1.o: game/v3/registrationkey.cpp
+game/v3/registrationkey2.o: game/v3/registrationkey.cpp
 	@echo "        Compiling game/v3/registrationkey.cpp..."
-	@$(CXX) $(CXXFLAGS) -o game/v3/registrationkey1.o -c game/v3/registrationkey.cpp
+	@$(CXX) $(CXXFLAGS) -o game/v3/registrationkey2.o -c game/v3/registrationkey.cpp
 
-game/v3/registrationkey1.s: game/v3/registrationkey.cpp
-	$(CXX) $(CXXFLAGS) -o game/v3/registrationkey1.s -S game/v3/registrationkey.cpp
+game/v3/registrationkey2.s: game/v3/registrationkey.cpp
+	$(CXX) $(CXXFLAGS) -o game/v3/registrationkey2.s -S game/v3/registrationkey.cpp
 
-game/v3/specificationloader1.lo: game/v3/specificationloader.cpp
-	$(CXX) -fPIC $(CXXFLAGS) -o game/v3/specificationloader1.lo -c game/v3/specificationloader.cpp
+game/v3/specificationloader2.lo: game/v3/specificationloader.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o game/v3/specificationloader2.lo -c game/v3/specificationloader.cpp
 
-game/v3/specificationloader1.o: game/v3/specificationloader.cpp
+game/v3/specificationloader2.o: game/v3/specificationloader.cpp
 	@echo "        Compiling game/v3/specificationloader.cpp..."
-	@$(CXX) $(CXXFLAGS) -o game/v3/specificationloader1.o -c game/v3/specificationloader.cpp
+	@$(CXX) $(CXXFLAGS) -o game/v3/specificationloader2.o -c game/v3/specificationloader.cpp
 
-game/v3/specificationloader1.s: game/v3/specificationloader.cpp
-	$(CXX) $(CXXFLAGS) -o game/v3/specificationloader1.s -S game/v3/specificationloader.cpp
+game/v3/specificationloader2.s: game/v3/specificationloader.cpp
+	$(CXX) $(CXXFLAGS) -o game/v3/specificationloader2.s -S game/v3/specificationloader.cpp
 
-game/v3/stringverifier2.lo: game/v3/stringverifier.cpp
-	$(CXX) -fPIC $(CXXFLAGS) -o game/v3/stringverifier2.lo -c game/v3/stringverifier.cpp
+game/v3/stringverifier3.lo: game/v3/stringverifier.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o game/v3/stringverifier3.lo -c game/v3/stringverifier.cpp
 
-game/v3/stringverifier2.o: game/v3/stringverifier.cpp
+game/v3/stringverifier3.o: game/v3/stringverifier.cpp
 	@echo "        Compiling game/v3/stringverifier.cpp..."
-	@$(CXX) $(CXXFLAGS) -o game/v3/stringverifier2.o -c game/v3/stringverifier.cpp
+	@$(CXX) $(CXXFLAGS) -o game/v3/stringverifier3.o -c game/v3/stringverifier.cpp
 
-game/v3/stringverifier2.s: game/v3/stringverifier.cpp
-	$(CXX) $(CXXFLAGS) -o game/v3/stringverifier2.s -S game/v3/stringverifier.cpp
+game/v3/stringverifier3.s: game/v3/stringverifier.cpp
+	$(CXX) $(CXXFLAGS) -o game/v3/stringverifier3.s -S game/v3/stringverifier.cpp
 
 game/vcr/object2.lo: game/vcr/object.cpp
 	$(CXX) -fPIC $(CXXFLAGS) -o game/vcr/object2.lo -c game/vcr/object.cpp
@@ -904,6 +1163,16 @@ gfx/filter1.o: gfx/filter.cpp
 
 gfx/filter1.s: gfx/filter.cpp
 	$(CXX) $(CXXFLAGS) -o gfx/filter1.s -S gfx/filter.cpp
+
+gfx/gen/planet2.lo: gfx/gen/planet.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o gfx/gen/planet2.lo -c gfx/gen/planet.cpp
+
+gfx/gen/planet2.o: gfx/gen/planet.cpp
+	@echo "        Compiling gfx/gen/planet.cpp..."
+	@$(CXX) $(CXXFLAGS) -o gfx/gen/planet2.o -c gfx/gen/planet.cpp
+
+gfx/gen/planet2.s: gfx/gen/planet.cpp
+	$(CXX) $(CXXFLAGS) -o gfx/gen/planet2.s -S gfx/gen/planet.cpp
 
 gfx/gen/spaceview.lo: gfx/gen/spaceview.cpp
 	$(CXX) -fPIC $(CXXFLAGS) -ffloat-store -o gfx/gen/spaceview.lo -c gfx/gen/spaceview.cpp
@@ -937,9 +1206,13 @@ gfx/sdl/engine1.s: gfx/sdl/engine.cpp
 
 guilib: libguilib.a
 
-install: c2export c2plugin c2rater c2script c2sweep c2untrn c2file-server \
-    c2format-server c2talk-server c2fileclient
-	$(INSTALL_CMD) c2export c2plugin c2rater c2script c2sweep c2untrn c2file-server c2format-server c2talk-server c2fileclient $(INSTDIR)/bin
+html: doc/pcc2tech.html
+
+install: c2configtool c2export c2mgrep c2plugin c2rater c2script c2sweep \
+    c2untrn c2gfxgen c2file-server c2format-server c2host-server \
+    c2talk-server c2fileclient c2mailin c2console c2dbexport c2nntp-server \
+    c2mailout-server c2monitor-server
+	$(INSTALL_CMD) c2configtool c2export c2mgrep c2plugin c2rater c2script c2sweep c2untrn c2gfxgen c2file-server c2format-server c2host-server c2talk-server c2fileclient c2mailin c2console c2dbexport c2nntp-server c2mailout-server c2monitor-server $(INSTDIR)/bin
 	$(MAKE) install-sdl-$(CONFIG_C2NG_HAVE_SDL)
 	$(INSTALL_DATA) -R share $(INSTDIR)/share
 
@@ -947,6 +1220,19 @@ install-sdl-no:
 
 install-sdl-yes: c2ng
 	$(INSTALL_CMD) c2ng $(INSTDIR)/bin
+
+interpreter/exporter/configuration3.lo: \
+    interpreter/exporter/configuration.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o interpreter/exporter/configuration3.lo -c interpreter/exporter/configuration.cpp
+
+interpreter/exporter/configuration3.o: \
+    interpreter/exporter/configuration.cpp
+	@echo "        Compiling interpreter/exporter/configuration.cpp..."
+	@$(CXX) $(CXXFLAGS) -o interpreter/exporter/configuration3.o -c interpreter/exporter/configuration.cpp
+
+interpreter/exporter/configuration3.s: \
+    interpreter/exporter/configuration.cpp
+	$(CXX) $(CXXFLAGS) -o interpreter/exporter/configuration3.s -S interpreter/exporter/configuration.cpp
 
 interpreter/values1.lo: interpreter/values.cpp
 	$(CXX) -fPIC $(CXXFLAGS) -o interpreter/values1.lo -c interpreter/values.cpp
@@ -958,6 +1244,28 @@ interpreter/values1.o: interpreter/values.cpp
 interpreter/values1.s: interpreter/values.cpp
 	$(CXX) $(CXXFLAGS) -o interpreter/values1.s -S interpreter/values.cpp
 
+manual: share/resource/pcc2tech.xml
+
+server/application1.lo: server/application.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o server/application1.lo -c server/application.cpp
+
+server/application1.o: server/application.cpp
+	@echo "        Compiling server/application.cpp..."
+	@$(CXX) $(CXXFLAGS) -o server/application1.o -c server/application.cpp
+
+server/application1.s: server/application.cpp
+	$(CXX) $(CXXFLAGS) -o server/application1.s -S server/application.cpp
+
+server/common/root1.lo: server/common/root.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o server/common/root1.lo -c server/common/root.cpp
+
+server/common/root1.o: server/common/root.cpp
+	@echo "        Compiling server/common/root.cpp..."
+	@$(CXX) $(CXXFLAGS) -o server/common/root1.o -c server/common/root.cpp
+
+server/common/root1.s: server/common/root.cpp
+	$(CXX) $(CXXFLAGS) -o server/common/root1.s -S server/common/root.cpp
+
 server/common/session3.lo: server/common/session.cpp
 	$(CXX) -fPIC $(CXXFLAGS) -o server/common/session3.lo -c server/common/session.cpp
 
@@ -967,6 +1275,16 @@ server/common/session3.o: server/common/session.cpp
 
 server/common/session3.s: server/common/session.cpp
 	$(CXX) $(CXXFLAGS) -o server/common/session3.s -S server/common/session.cpp
+
+server/console/parser1.lo: server/console/parser.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o server/console/parser1.lo -c server/console/parser.cpp
+
+server/console/parser1.o: server/console/parser.cpp
+	@echo "        Compiling server/console/parser.cpp..."
+	@$(CXX) $(CXXFLAGS) -o server/console/parser1.o -c server/console/parser.cpp
+
+server/console/parser1.s: server/console/parser.cpp
+	$(CXX) $(CXXFLAGS) -o server/console/parser1.s -S server/console/parser.cpp
 
 server/file/ca/directoryhandler1.lo: server/file/ca/directoryhandler.cpp
 	$(CXX) -fPIC $(CXXFLAGS) -o server/file/ca/directoryhandler1.lo -c server/file/ca/directoryhandler.cpp
@@ -978,15 +1296,15 @@ server/file/ca/directoryhandler1.o: server/file/ca/directoryhandler.cpp
 server/file/ca/directoryhandler1.s: server/file/ca/directoryhandler.cpp
 	$(CXX) $(CXXFLAGS) -o server/file/ca/directoryhandler1.s -S server/file/ca/directoryhandler.cpp
 
-server/file/ca/root1.lo: server/file/ca/root.cpp
-	$(CXX) -fPIC $(CXXFLAGS) -o server/file/ca/root1.lo -c server/file/ca/root.cpp
+server/file/ca/root2.lo: server/file/ca/root.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o server/file/ca/root2.lo -c server/file/ca/root.cpp
 
-server/file/ca/root1.o: server/file/ca/root.cpp
+server/file/ca/root2.o: server/file/ca/root.cpp
 	@echo "        Compiling server/file/ca/root.cpp..."
-	@$(CXX) $(CXXFLAGS) -o server/file/ca/root1.o -c server/file/ca/root.cpp
+	@$(CXX) $(CXXFLAGS) -o server/file/ca/root2.o -c server/file/ca/root.cpp
 
-server/file/ca/root1.s: server/file/ca/root.cpp
-	$(CXX) $(CXXFLAGS) -o server/file/ca/root1.s -S server/file/ca/root.cpp
+server/file/ca/root2.s: server/file/ca/root.cpp
+	$(CXX) $(CXXFLAGS) -o server/file/ca/root2.s -S server/file/ca/root.cpp
 
 server/file/directoryhandler2.lo: server/file/directoryhandler.cpp
 	$(CXX) -fPIC $(CXXFLAGS) -o server/file/directoryhandler2.lo -c server/file/directoryhandler.cpp
@@ -1008,15 +1326,45 @@ server/file/directorywrapper1.o: server/file/directorywrapper.cpp
 server/file/directorywrapper1.s: server/file/directorywrapper.cpp
 	$(CXX) $(CXXFLAGS) -o server/file/directorywrapper1.s -S server/file/directorywrapper.cpp
 
-server/file/root2.lo: server/file/root.cpp
-	$(CXX) -fPIC $(CXXFLAGS) -o server/file/root2.lo -c server/file/root.cpp
+server/file/racenames1.lo: server/file/racenames.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o server/file/racenames1.lo -c server/file/racenames.cpp
 
-server/file/root2.o: server/file/root.cpp
+server/file/racenames1.o: server/file/racenames.cpp
+	@echo "        Compiling server/file/racenames.cpp..."
+	@$(CXX) $(CXXFLAGS) -o server/file/racenames1.o -c server/file/racenames.cpp
+
+server/file/racenames1.s: server/file/racenames.cpp
+	$(CXX) $(CXXFLAGS) -o server/file/racenames1.s -S server/file/racenames.cpp
+
+server/file/root3.lo: server/file/root.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o server/file/root3.lo -c server/file/root.cpp
+
+server/file/root3.o: server/file/root.cpp
 	@echo "        Compiling server/file/root.cpp..."
-	@$(CXX) $(CXXFLAGS) -o server/file/root2.o -c server/file/root.cpp
+	@$(CXX) $(CXXFLAGS) -o server/file/root3.o -c server/file/root.cpp
 
-server/file/root2.s: server/file/root.cpp
-	$(CXX) $(CXXFLAGS) -o server/file/root2.s -S server/file/root.cpp
+server/file/root3.s: server/file/root.cpp
+	$(CXX) $(CXXFLAGS) -o server/file/root3.s -S server/file/root.cpp
+
+server/format/format1.lo: server/format/format.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o server/format/format1.lo -c server/format/format.cpp
+
+server/format/format1.o: server/format/format.cpp
+	@echo "        Compiling server/format/format.cpp..."
+	@$(CXX) $(CXXFLAGS) -o server/format/format1.o -c server/format/format.cpp
+
+server/format/format1.s: server/format/format.cpp
+	$(CXX) $(CXXFLAGS) -o server/format/format1.s -S server/format/format.cpp
+
+server/format/serverapplication1.lo: server/format/serverapplication.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o server/format/serverapplication1.lo -c server/format/serverapplication.cpp
+
+server/format/serverapplication1.o: server/format/serverapplication.cpp
+	@echo "        Compiling server/format/serverapplication.cpp..."
+	@$(CXX) $(CXXFLAGS) -o server/format/serverapplication1.o -c server/format/serverapplication.cpp
+
+server/format/serverapplication1.s: server/format/serverapplication.cpp
+	$(CXX) $(CXXFLAGS) -o server/format/serverapplication1.s -S server/format/serverapplication.cpp
 
 server/format/utils1.lo: server/format/utils.cpp
 	$(CXX) -fPIC $(CXXFLAGS) -o server/format/utils1.lo -c server/format/utils.cpp
@@ -1028,6 +1376,86 @@ server/format/utils1.o: server/format/utils.cpp
 server/format/utils1.s: server/format/utils.cpp
 	$(CXX) $(CXXFLAGS) -o server/format/utils1.s -S server/format/utils.cpp
 
+server/host/commandhandler1.lo: server/host/commandhandler.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o server/host/commandhandler1.lo -c server/host/commandhandler.cpp
+
+server/host/commandhandler1.o: server/host/commandhandler.cpp
+	@echo "        Compiling server/host/commandhandler.cpp..."
+	@$(CXX) $(CXXFLAGS) -o server/host/commandhandler1.o -c server/host/commandhandler.cpp
+
+server/host/commandhandler1.s: server/host/commandhandler.cpp
+	$(CXX) $(CXXFLAGS) -o server/host/commandhandler1.s -S server/host/commandhandler.cpp
+
+server/host/configuration4.lo: server/host/configuration.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o server/host/configuration4.lo -c server/host/configuration.cpp
+
+server/host/configuration4.o: server/host/configuration.cpp
+	@echo "        Compiling server/host/configuration.cpp..."
+	@$(CXX) $(CXXFLAGS) -o server/host/configuration4.o -c server/host/configuration.cpp
+
+server/host/configuration4.s: server/host/configuration.cpp
+	$(CXX) $(CXXFLAGS) -o server/host/configuration4.s -S server/host/configuration.cpp
+
+server/host/exporter1.lo: server/host/exporter.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o server/host/exporter1.lo -c server/host/exporter.cpp
+
+server/host/exporter1.o: server/host/exporter.cpp
+	@echo "        Compiling server/host/exporter.cpp..."
+	@$(CXX) $(CXXFLAGS) -o server/host/exporter1.o -c server/host/exporter.cpp
+
+server/host/exporter1.s: server/host/exporter.cpp
+	$(CXX) $(CXXFLAGS) -o server/host/exporter1.s -S server/host/exporter.cpp
+
+server/host/game1.lo: server/host/game.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o server/host/game1.lo -c server/host/game.cpp
+
+server/host/game1.o: server/host/game.cpp
+	@echo "        Compiling server/host/game.cpp..."
+	@$(CXX) $(CXXFLAGS) -o server/host/game1.o -c server/host/game.cpp
+
+server/host/game1.s: server/host/game.cpp
+	$(CXX) $(CXXFLAGS) -o server/host/game1.s -S server/host/game.cpp
+
+server/host/root4.lo: server/host/root.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o server/host/root4.lo -c server/host/root.cpp
+
+server/host/root4.o: server/host/root.cpp
+	@echo "        Compiling server/host/root.cpp..."
+	@$(CXX) $(CXXFLAGS) -o server/host/root4.o -c server/host/root.cpp
+
+server/host/root4.s: server/host/root.cpp
+	$(CXX) $(CXXFLAGS) -o server/host/root4.s -S server/host/root.cpp
+
+server/host/serverapplication2.lo: server/host/serverapplication.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o server/host/serverapplication2.lo -c server/host/serverapplication.cpp
+
+server/host/serverapplication2.o: server/host/serverapplication.cpp
+	@echo "        Compiling server/host/serverapplication.cpp..."
+	@$(CXX) $(CXXFLAGS) -o server/host/serverapplication2.o -c server/host/serverapplication.cpp
+
+server/host/serverapplication2.s: server/host/serverapplication.cpp
+	$(CXX) $(CXXFLAGS) -o server/host/serverapplication2.s -S server/host/serverapplication.cpp
+
+server/host/session4.lo: server/host/session.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o server/host/session4.lo -c server/host/session.cpp
+
+server/host/session4.o: server/host/session.cpp
+	@echo "        Compiling server/host/session.cpp..."
+	@$(CXX) $(CXXFLAGS) -o server/host/session4.o -c server/host/session.cpp
+
+server/host/session4.s: server/host/session.cpp
+	$(CXX) $(CXXFLAGS) -o server/host/session4.s -S server/host/session.cpp
+
+server/host/user1.lo: server/host/user.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o server/host/user1.lo -c server/host/user.cpp
+
+server/host/user1.o: server/host/user.cpp
+	@echo "        Compiling server/host/user.cpp..."
+	@$(CXX) $(CXXFLAGS) -o server/host/user1.o -c server/host/user.cpp
+
+server/host/user1.s: server/host/user.cpp
+	$(CXX) $(CXXFLAGS) -o server/host/user1.s -S server/host/user.cpp
+
 server/interface/filebase1.lo: server/interface/filebase.cpp
 	$(CXX) -fPIC $(CXXFLAGS) -o server/interface/filebase1.lo -c server/interface/filebase.cpp
 
@@ -1038,25 +1466,155 @@ server/interface/filebase1.o: server/interface/filebase.cpp
 server/interface/filebase1.s: server/interface/filebase.cpp
 	$(CXX) $(CXXFLAGS) -o server/interface/filebase1.s -S server/interface/filebase.cpp
 
-server/talk/commandhandler1.lo: server/talk/commandhandler.cpp
-	$(CXX) -fPIC $(CXXFLAGS) -o server/talk/commandhandler1.lo -c server/talk/commandhandler.cpp
+server/interface/hostgame1.lo: server/interface/hostgame.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o server/interface/hostgame1.lo -c server/interface/hostgame.cpp
 
-server/talk/commandhandler1.o: server/talk/commandhandler.cpp
+server/interface/hostgame1.o: server/interface/hostgame.cpp
+	@echo "        Compiling server/interface/hostgame.cpp..."
+	@$(CXX) $(CXXFLAGS) -o server/interface/hostgame1.o -c server/interface/hostgame.cpp
+
+server/interface/hostgame1.s: server/interface/hostgame.cpp
+	$(CXX) $(CXXFLAGS) -o server/interface/hostgame1.s -S server/interface/hostgame.cpp
+
+server/interface/hostplayer1.lo: server/interface/hostplayer.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o server/interface/hostplayer1.lo -c server/interface/hostplayer.cpp
+
+server/interface/hostplayer1.o: server/interface/hostplayer.cpp
+	@echo "        Compiling server/interface/hostplayer.cpp..."
+	@$(CXX) $(CXXFLAGS) -o server/interface/hostplayer1.o -c server/interface/hostplayer.cpp
+
+server/interface/hostplayer1.s: server/interface/hostplayer.cpp
+	$(CXX) $(CXXFLAGS) -o server/interface/hostplayer1.s -S server/interface/hostplayer.cpp
+
+server/interface/hostschedule1.lo: server/interface/hostschedule.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o server/interface/hostschedule1.lo -c server/interface/hostschedule.cpp
+
+server/interface/hostschedule1.o: server/interface/hostschedule.cpp
+	@echo "        Compiling server/interface/hostschedule.cpp..."
+	@$(CXX) $(CXXFLAGS) -o server/interface/hostschedule1.o -c server/interface/hostschedule.cpp
+
+server/interface/hostschedule1.s: server/interface/hostschedule.cpp
+	$(CXX) $(CXXFLAGS) -o server/interface/hostschedule1.s -S server/interface/hostschedule.cpp
+
+server/interface/hosttool1.lo: server/interface/hosttool.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o server/interface/hosttool1.lo -c server/interface/hosttool.cpp
+
+server/interface/hosttool1.o: server/interface/hosttool.cpp
+	@echo "        Compiling server/interface/hosttool.cpp..."
+	@$(CXX) $(CXXFLAGS) -o server/interface/hosttool1.o -c server/interface/hosttool.cpp
+
+server/interface/hosttool1.s: server/interface/hosttool.cpp
+	$(CXX) $(CXXFLAGS) -o server/interface/hosttool1.s -S server/interface/hosttool.cpp
+
+server/interface/hostturn1.lo: server/interface/hostturn.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o server/interface/hostturn1.lo -c server/interface/hostturn.cpp
+
+server/interface/hostturn1.o: server/interface/hostturn.cpp
+	@echo "        Compiling server/interface/hostturn.cpp..."
+	@$(CXX) $(CXXFLAGS) -o server/interface/hostturn1.o -c server/interface/hostturn.cpp
+
+server/interface/hostturn1.s: server/interface/hostturn.cpp
+	$(CXX) $(CXXFLAGS) -o server/interface/hostturn1.s -S server/interface/hostturn.cpp
+
+server/mailout/commandhandler2.lo: server/mailout/commandhandler.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o server/mailout/commandhandler2.lo -c server/mailout/commandhandler.cpp
+
+server/mailout/commandhandler2.o: server/mailout/commandhandler.cpp
+	@echo "        Compiling server/mailout/commandhandler.cpp..."
+	@$(CXX) $(CXXFLAGS) -o server/mailout/commandhandler2.o -c server/mailout/commandhandler.cpp
+
+server/mailout/commandhandler2.s: server/mailout/commandhandler.cpp
+	$(CXX) $(CXXFLAGS) -o server/mailout/commandhandler2.s -S server/mailout/commandhandler.cpp
+
+server/mailout/configuration5.lo: server/mailout/configuration.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o server/mailout/configuration5.lo -c server/mailout/configuration.cpp
+
+server/mailout/configuration5.o: server/mailout/configuration.cpp
+	@echo "        Compiling server/mailout/configuration.cpp..."
+	@$(CXX) $(CXXFLAGS) -o server/mailout/configuration5.o -c server/mailout/configuration.cpp
+
+server/mailout/configuration5.s: server/mailout/configuration.cpp
+	$(CXX) $(CXXFLAGS) -o server/mailout/configuration5.s -S server/mailout/configuration.cpp
+
+server/mailout/root5.lo: server/mailout/root.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o server/mailout/root5.lo -c server/mailout/root.cpp
+
+server/mailout/root5.o: server/mailout/root.cpp
+	@echo "        Compiling server/mailout/root.cpp..."
+	@$(CXX) $(CXXFLAGS) -o server/mailout/root5.o -c server/mailout/root.cpp
+
+server/mailout/root5.s: server/mailout/root.cpp
+	$(CXX) $(CXXFLAGS) -o server/mailout/root5.s -S server/mailout/root.cpp
+
+server/mailout/serverapplication3.lo: server/mailout/serverapplication.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o server/mailout/serverapplication3.lo -c server/mailout/serverapplication.cpp
+
+server/mailout/serverapplication3.o: server/mailout/serverapplication.cpp
+	@echo "        Compiling server/mailout/serverapplication.cpp..."
+	@$(CXX) $(CXXFLAGS) -o server/mailout/serverapplication3.o -c server/mailout/serverapplication.cpp
+
+server/mailout/serverapplication3.s: server/mailout/serverapplication.cpp
+	$(CXX) $(CXXFLAGS) -o server/mailout/serverapplication3.s -S server/mailout/serverapplication.cpp
+
+server/monitor/serverapplication4.lo: server/monitor/serverapplication.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o server/monitor/serverapplication4.lo -c server/monitor/serverapplication.cpp
+
+server/monitor/serverapplication4.o: server/monitor/serverapplication.cpp
+	@echo "        Compiling server/monitor/serverapplication.cpp..."
+	@$(CXX) $(CXXFLAGS) -o server/monitor/serverapplication4.o -c server/monitor/serverapplication.cpp
+
+server/monitor/serverapplication4.s: server/monitor/serverapplication.cpp
+	$(CXX) $(CXXFLAGS) -o server/monitor/serverapplication4.s -S server/monitor/serverapplication.cpp
+
+server/nntp/root6.lo: server/nntp/root.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o server/nntp/root6.lo -c server/nntp/root.cpp
+
+server/nntp/root6.o: server/nntp/root.cpp
+	@echo "        Compiling server/nntp/root.cpp..."
+	@$(CXX) $(CXXFLAGS) -o server/nntp/root6.o -c server/nntp/root.cpp
+
+server/nntp/root6.s: server/nntp/root.cpp
+	$(CXX) $(CXXFLAGS) -o server/nntp/root6.s -S server/nntp/root.cpp
+
+server/nntp/serverapplication5.lo: server/nntp/serverapplication.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o server/nntp/serverapplication5.lo -c server/nntp/serverapplication.cpp
+
+server/nntp/serverapplication5.o: server/nntp/serverapplication.cpp
+	@echo "        Compiling server/nntp/serverapplication.cpp..."
+	@$(CXX) $(CXXFLAGS) -o server/nntp/serverapplication5.o -c server/nntp/serverapplication.cpp
+
+server/nntp/serverapplication5.s: server/nntp/serverapplication.cpp
+	$(CXX) $(CXXFLAGS) -o server/nntp/serverapplication5.s -S server/nntp/serverapplication.cpp
+
+server/talk/commandhandler3.lo: server/talk/commandhandler.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o server/talk/commandhandler3.lo -c server/talk/commandhandler.cpp
+
+server/talk/commandhandler3.o: server/talk/commandhandler.cpp
 	@echo "        Compiling server/talk/commandhandler.cpp..."
-	@$(CXX) $(CXXFLAGS) -o server/talk/commandhandler1.o -c server/talk/commandhandler.cpp
+	@$(CXX) $(CXXFLAGS) -o server/talk/commandhandler3.o -c server/talk/commandhandler.cpp
 
-server/talk/commandhandler1.s: server/talk/commandhandler.cpp
-	$(CXX) $(CXXFLAGS) -o server/talk/commandhandler1.s -S server/talk/commandhandler.cpp
+server/talk/commandhandler3.s: server/talk/commandhandler.cpp
+	$(CXX) $(CXXFLAGS) -o server/talk/commandhandler3.s -S server/talk/commandhandler.cpp
 
-server/talk/configuration3.lo: server/talk/configuration.cpp
-	$(CXX) -fPIC $(CXXFLAGS) -o server/talk/configuration3.lo -c server/talk/configuration.cpp
+server/talk/configuration6.lo: server/talk/configuration.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o server/talk/configuration6.lo -c server/talk/configuration.cpp
 
-server/talk/configuration3.o: server/talk/configuration.cpp
+server/talk/configuration6.o: server/talk/configuration.cpp
 	@echo "        Compiling server/talk/configuration.cpp..."
-	@$(CXX) $(CXXFLAGS) -o server/talk/configuration3.o -c server/talk/configuration.cpp
+	@$(CXX) $(CXXFLAGS) -o server/talk/configuration6.o -c server/talk/configuration.cpp
 
-server/talk/configuration3.s: server/talk/configuration.cpp
-	$(CXX) $(CXXFLAGS) -o server/talk/configuration3.s -S server/talk/configuration.cpp
+server/talk/configuration6.s: server/talk/configuration.cpp
+	$(CXX) $(CXXFLAGS) -o server/talk/configuration6.s -S server/talk/configuration.cpp
+
+server/talk/message1.lo: server/talk/message.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o server/talk/message1.lo -c server/talk/message.cpp
+
+server/talk/message1.o: server/talk/message.cpp
+	@echo "        Compiling server/talk/message.cpp..."
+	@$(CXX) $(CXXFLAGS) -o server/talk/message1.o -c server/talk/message.cpp
+
+server/talk/message1.s: server/talk/message.cpp
+	$(CXX) $(CXXFLAGS) -o server/talk/message1.s -S server/talk/message.cpp
 
 server/talk/render/context1.lo: server/talk/render/context.cpp
 	$(CXX) -fPIC $(CXXFLAGS) -o server/talk/render/context1.lo -c server/talk/render/context.cpp
@@ -1068,25 +1626,35 @@ server/talk/render/context1.o: server/talk/render/context.cpp
 server/talk/render/context1.s: server/talk/render/context.cpp
 	$(CXX) $(CXXFLAGS) -o server/talk/render/context1.s -S server/talk/render/context.cpp
 
-server/talk/root3.lo: server/talk/root.cpp
-	$(CXX) -fPIC $(CXXFLAGS) -o server/talk/root3.lo -c server/talk/root.cpp
+server/talk/root7.lo: server/talk/root.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o server/talk/root7.lo -c server/talk/root.cpp
 
-server/talk/root3.o: server/talk/root.cpp
+server/talk/root7.o: server/talk/root.cpp
 	@echo "        Compiling server/talk/root.cpp..."
-	@$(CXX) $(CXXFLAGS) -o server/talk/root3.o -c server/talk/root.cpp
+	@$(CXX) $(CXXFLAGS) -o server/talk/root7.o -c server/talk/root.cpp
 
-server/talk/root3.s: server/talk/root.cpp
-	$(CXX) $(CXXFLAGS) -o server/talk/root3.s -S server/talk/root.cpp
+server/talk/root7.s: server/talk/root.cpp
+	$(CXX) $(CXXFLAGS) -o server/talk/root7.s -S server/talk/root.cpp
 
-server/talk/session4.lo: server/talk/session.cpp
-	$(CXX) -fPIC $(CXXFLAGS) -o server/talk/session4.lo -c server/talk/session.cpp
+server/talk/serverapplication6.lo: server/talk/serverapplication.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o server/talk/serverapplication6.lo -c server/talk/serverapplication.cpp
 
-server/talk/session4.o: server/talk/session.cpp
+server/talk/serverapplication6.o: server/talk/serverapplication.cpp
+	@echo "        Compiling server/talk/serverapplication.cpp..."
+	@$(CXX) $(CXXFLAGS) -o server/talk/serverapplication6.o -c server/talk/serverapplication.cpp
+
+server/talk/serverapplication6.s: server/talk/serverapplication.cpp
+	$(CXX) $(CXXFLAGS) -o server/talk/serverapplication6.s -S server/talk/serverapplication.cpp
+
+server/talk/session5.lo: server/talk/session.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o server/talk/session5.lo -c server/talk/session.cpp
+
+server/talk/session5.o: server/talk/session.cpp
 	@echo "        Compiling server/talk/session.cpp..."
-	@$(CXX) $(CXXFLAGS) -o server/talk/session4.o -c server/talk/session.cpp
+	@$(CXX) $(CXXFLAGS) -o server/talk/session5.o -c server/talk/session.cpp
 
-server/talk/session4.s: server/talk/session.cpp
-	$(CXX) $(CXXFLAGS) -o server/talk/session4.s -S server/talk/session.cpp
+server/talk/session5.s: server/talk/session.cpp
+	$(CXX) $(CXXFLAGS) -o server/talk/session5.s -S server/talk/session.cpp
 
 server/talk/talkforum1.lo: server/talk/talkforum.cpp
 	$(CXX) -fPIC $(CXXFLAGS) -o server/talk/talkforum1.lo -c server/talk/talkforum.cpp
@@ -1097,6 +1665,16 @@ server/talk/talkforum1.o: server/talk/talkforum.cpp
 
 server/talk/talkforum1.s: server/talk/talkforum.cpp
 	$(CXX) $(CXXFLAGS) -o server/talk/talkforum1.s -S server/talk/talkforum.cpp
+
+server/talk/user2.lo: server/talk/user.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o server/talk/user2.lo -c server/talk/user.cpp
+
+server/talk/user2.o: server/talk/user.cpp
+	@echo "        Compiling server/talk/user.cpp..."
+	@$(CXX) $(CXXFLAGS) -o server/talk/user2.o -c server/talk/user.cpp
+
+server/talk/user2.s: server/talk/user.cpp
+	$(CXX) $(CXXFLAGS) -o server/talk/user2.s -S server/talk/user.cpp
 
 server/types1.lo: server/types.cpp
 	$(CXX) -fPIC $(CXXFLAGS) -o server/types1.lo -c server/types.cpp
@@ -1110,8 +1688,11 @@ server/types1.s: server/types.cpp
 
 serverlib: libserverlib.a
 
+share/resource/pcc2tech.xml: scripts/doc.pl $(FILES_MANUAL)
+	$(PERL) scripts/doc.pl $(FILES_MANUAL) > $@
+
 tags:
-	@etags --recurse client game gfx interpreter main tools ui util
+	@etags --recurse client game gfx interpreter main server tools ui util
 
 test: testsuite
 	@echo "        Running testsuite..."
@@ -1141,25 +1722,16 @@ u/files.o: u/files.cpp
 u/files.s: u/files.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/files.s -S u/files.cpp
 
-u/helper/callreceiver.lo: u/helper/callreceiver.cpp
-	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/helper/callreceiver.lo -c u/helper/callreceiver.cpp
+u/helper/consolecommandhandlermock.lo: \
+    u/helper/consolecommandhandlermock.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/helper/consolecommandhandlermock.lo -c u/helper/consolecommandhandlermock.cpp
 
-u/helper/callreceiver.o: u/helper/callreceiver.cpp
-	@echo "        Compiling u/helper/callreceiver.cpp..."
-	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/helper/callreceiver.o -c u/helper/callreceiver.cpp
+u/helper/consolecommandhandlermock.o: u/helper/consolecommandhandlermock.cpp
+	@echo "        Compiling u/helper/consolecommandhandlermock.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/helper/consolecommandhandlermock.o -c u/helper/consolecommandhandlermock.cpp
 
-u/helper/callreceiver.s: u/helper/callreceiver.cpp
-	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/helper/callreceiver.s -S u/helper/callreceiver.cpp
-
-u/helper/commandhandlermock.lo: u/helper/commandhandlermock.cpp
-	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/helper/commandhandlermock.lo -c u/helper/commandhandlermock.cpp
-
-u/helper/commandhandlermock.o: u/helper/commandhandlermock.cpp
-	@echo "        Compiling u/helper/commandhandlermock.cpp..."
-	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/helper/commandhandlermock.o -c u/helper/commandhandlermock.cpp
-
-u/helper/commandhandlermock.s: u/helper/commandhandlermock.cpp
-	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/helper/commandhandlermock.s -S u/helper/commandhandlermock.cpp
+u/helper/consolecommandhandlermock.s: u/helper/consolecommandhandlermock.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/helper/consolecommandhandlermock.s -S u/helper/consolecommandhandlermock.cpp
 
 u/helper/contextverifier.lo: u/helper/contextverifier.cpp
 	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/helper/contextverifier.lo -c u/helper/contextverifier.cpp
@@ -1284,6 +1856,110 @@ u/t_client_si_widgetfunction.o: u/t_client_si_widgetfunction.cpp
 u/t_client_si_widgetfunction.s: u/t_client_si_widgetfunction.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_client_si_widgetfunction.s -S u/t_client_si_widgetfunction.cpp
 
+u/t_game_actions_basebuildaction.lo: u/t_game_actions_basebuildaction.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_actions_basebuildaction.lo -c u/t_game_actions_basebuildaction.cpp
+
+u/t_game_actions_basebuildaction.o: u/t_game_actions_basebuildaction.cpp
+	@echo "        Compiling u/t_game_actions_basebuildaction.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_actions_basebuildaction.o -c u/t_game_actions_basebuildaction.cpp
+
+u/t_game_actions_basebuildaction.s: u/t_game_actions_basebuildaction.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_actions_basebuildaction.s -S u/t_game_actions_basebuildaction.cpp
+
+u/t_game_actions_basebuildexecutor.lo: \
+    u/t_game_actions_basebuildexecutor.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_actions_basebuildexecutor.lo -c u/t_game_actions_basebuildexecutor.cpp
+
+u/t_game_actions_basebuildexecutor.o: u/t_game_actions_basebuildexecutor.cpp
+	@echo "        Compiling u/t_game_actions_basebuildexecutor.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_actions_basebuildexecutor.o -c u/t_game_actions_basebuildexecutor.cpp
+
+u/t_game_actions_basebuildexecutor.s: u/t_game_actions_basebuildexecutor.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_actions_basebuildexecutor.s -S u/t_game_actions_basebuildexecutor.cpp
+
+u/t_game_actions_buildammo.lo: u/t_game_actions_buildammo.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_actions_buildammo.lo -c u/t_game_actions_buildammo.cpp
+
+u/t_game_actions_buildammo.o: u/t_game_actions_buildammo.cpp
+	@echo "        Compiling u/t_game_actions_buildammo.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_actions_buildammo.o -c u/t_game_actions_buildammo.cpp
+
+u/t_game_actions_buildammo.s: u/t_game_actions_buildammo.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_actions_buildammo.s -S u/t_game_actions_buildammo.cpp
+
+u/t_game_actions_buildparts.lo: u/t_game_actions_buildparts.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_actions_buildparts.lo -c u/t_game_actions_buildparts.cpp
+
+u/t_game_actions_buildparts.o: u/t_game_actions_buildparts.cpp
+	@echo "        Compiling u/t_game_actions_buildparts.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_actions_buildparts.o -c u/t_game_actions_buildparts.cpp
+
+u/t_game_actions_buildparts.s: u/t_game_actions_buildparts.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_actions_buildparts.s -S u/t_game_actions_buildparts.cpp
+
+u/t_game_actions_buildship.lo: u/t_game_actions_buildship.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_actions_buildship.lo -c u/t_game_actions_buildship.cpp
+
+u/t_game_actions_buildship.o: u/t_game_actions_buildship.cpp
+	@echo "        Compiling u/t_game_actions_buildship.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_actions_buildship.o -c u/t_game_actions_buildship.cpp
+
+u/t_game_actions_buildship.s: u/t_game_actions_buildship.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_actions_buildship.s -S u/t_game_actions_buildship.cpp
+
+u/t_game_actions_buildstarbase.lo: u/t_game_actions_buildstarbase.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_actions_buildstarbase.lo -c u/t_game_actions_buildstarbase.cpp
+
+u/t_game_actions_buildstarbase.o: u/t_game_actions_buildstarbase.cpp
+	@echo "        Compiling u/t_game_actions_buildstarbase.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_actions_buildstarbase.o -c u/t_game_actions_buildstarbase.cpp
+
+u/t_game_actions_buildstarbase.s: u/t_game_actions_buildstarbase.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_actions_buildstarbase.s -S u/t_game_actions_buildstarbase.cpp
+
+u/t_game_actions_buildstructures.lo: u/t_game_actions_buildstructures.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_actions_buildstructures.lo -c u/t_game_actions_buildstructures.cpp
+
+u/t_game_actions_buildstructures.o: u/t_game_actions_buildstructures.cpp
+	@echo "        Compiling u/t_game_actions_buildstructures.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_actions_buildstructures.o -c u/t_game_actions_buildstructures.cpp
+
+u/t_game_actions_buildstructures.s: u/t_game_actions_buildstructures.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_actions_buildstructures.s -S u/t_game_actions_buildstructures.cpp
+
+u/t_game_actions_cargocostaction.lo: u/t_game_actions_cargocostaction.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_actions_cargocostaction.lo -c u/t_game_actions_cargocostaction.cpp
+
+u/t_game_actions_cargocostaction.o: u/t_game_actions_cargocostaction.cpp
+	@echo "        Compiling u/t_game_actions_cargocostaction.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_actions_cargocostaction.o -c u/t_game_actions_cargocostaction.cpp
+
+u/t_game_actions_cargocostaction.s: u/t_game_actions_cargocostaction.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_actions_cargocostaction.s -S u/t_game_actions_cargocostaction.cpp
+
+u/t_game_actions_cargotransfer.lo: u/t_game_actions_cargotransfer.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_actions_cargotransfer.lo -c u/t_game_actions_cargotransfer.cpp
+
+u/t_game_actions_cargotransfer.o: u/t_game_actions_cargotransfer.cpp
+	@echo "        Compiling u/t_game_actions_cargotransfer.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_actions_cargotransfer.o -c u/t_game_actions_cargotransfer.cpp
+
+u/t_game_actions_cargotransfer.s: u/t_game_actions_cargotransfer.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_actions_cargotransfer.s -S u/t_game_actions_cargotransfer.cpp
+
+u/t_game_actions_cargotransfersetup.lo: \
+    u/t_game_actions_cargotransfersetup.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_actions_cargotransfersetup.lo -c u/t_game_actions_cargotransfersetup.cpp
+
+u/t_game_actions_cargotransfersetup.o: \
+    u/t_game_actions_cargotransfersetup.cpp
+	@echo "        Compiling u/t_game_actions_cargotransfersetup.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_actions_cargotransfersetup.o -c u/t_game_actions_cargotransfersetup.cpp
+
+u/t_game_actions_cargotransfersetup.s: \
+    u/t_game_actions_cargotransfersetup.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_actions_cargotransfersetup.s -S u/t_game_actions_cargotransfersetup.cpp
+
 u/t_game_actions_preconditions.lo: u/t_game_actions_preconditions.cpp
 	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_actions_preconditions.lo -c u/t_game_actions_preconditions.cpp
 
@@ -1293,6 +1969,16 @@ u/t_game_actions_preconditions.o: u/t_game_actions_preconditions.cpp
 
 u/t_game_actions_preconditions.s: u/t_game_actions_preconditions.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_actions_preconditions.s -S u/t_game_actions_preconditions.cpp
+
+u/t_game_actions_techupgrade.lo: u/t_game_actions_techupgrade.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_actions_techupgrade.lo -c u/t_game_actions_techupgrade.cpp
+
+u/t_game_actions_techupgrade.o: u/t_game_actions_techupgrade.cpp
+	@echo "        Compiling u/t_game_actions_techupgrade.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_actions_techupgrade.o -c u/t_game_actions_techupgrade.cpp
+
+u/t_game_actions_techupgrade.s: u/t_game_actions_techupgrade.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_actions_techupgrade.s -S u/t_game_actions_techupgrade.cpp
 
 u/t_game_browser_account.lo: u/t_game_browser_account.cpp
 	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_browser_account.lo -c u/t_game_browser_account.cpp
@@ -1346,6 +2032,16 @@ u/t_game_browser_unsupportedaccountfolder.o: \
 u/t_game_browser_unsupportedaccountfolder.s: \
     u/t_game_browser_unsupportedaccountfolder.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_browser_unsupportedaccountfolder.s -S u/t_game_browser_unsupportedaccountfolder.cpp
+
+u/t_game_cargocontainer.lo: u/t_game_cargocontainer.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_cargocontainer.lo -c u/t_game_cargocontainer.cpp
+
+u/t_game_cargocontainer.o: u/t_game_cargocontainer.cpp
+	@echo "        Compiling u/t_game_cargocontainer.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_cargocontainer.o -c u/t_game_cargocontainer.cpp
+
+u/t_game_cargocontainer.s: u/t_game_cargocontainer.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_cargocontainer.s -S u/t_game_cargocontainer.cpp
 
 u/t_game_cargospec.lo: u/t_game_cargospec.cpp
 	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_cargospec.lo -c u/t_game_cargospec.cpp
@@ -1529,6 +2225,16 @@ u/t_game_db_drawingatommap.o: u/t_game_db_drawingatommap.cpp
 u/t_game_db_drawingatommap.s: u/t_game_db_drawingatommap.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_db_drawingatommap.s -S u/t_game_db_drawingatommap.cpp
 
+u/t_game_db_fleetloader.lo: u/t_game_db_fleetloader.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_db_fleetloader.lo -c u/t_game_db_fleetloader.cpp
+
+u/t_game_db_fleetloader.o: u/t_game_db_fleetloader.cpp
+	@echo "        Compiling u/t_game_db_fleetloader.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_db_fleetloader.o -c u/t_game_db_fleetloader.cpp
+
+u/t_game_db_fleetloader.s: u/t_game_db_fleetloader.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_db_fleetloader.s -S u/t_game_db_fleetloader.cpp
+
 u/t_game_db_structures.lo: u/t_game_db_structures.cpp
 	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_db_structures.lo -c u/t_game_db_structures.cpp
 
@@ -1648,6 +2354,16 @@ u/t_game_interface_enginecontext.o: u/t_game_interface_enginecontext.cpp
 
 u/t_game_interface_enginecontext.s: u/t_game_interface_enginecontext.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_interface_enginecontext.s -S u/t_game_interface_enginecontext.cpp
+
+u/t_game_interface_engineproperty.lo: u/t_game_interface_engineproperty.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_interface_engineproperty.lo -c u/t_game_interface_engineproperty.cpp
+
+u/t_game_interface_engineproperty.o: u/t_game_interface_engineproperty.cpp
+	@echo "        Compiling u/t_game_interface_engineproperty.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_interface_engineproperty.o -c u/t_game_interface_engineproperty.cpp
+
+u/t_game_interface_engineproperty.s: u/t_game_interface_engineproperty.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_interface_engineproperty.s -S u/t_game_interface_engineproperty.cpp
 
 u/t_game_interface_explosioncontext.lo: \
     u/t_game_interface_explosioncontext.cpp
@@ -1820,6 +2536,16 @@ u/t_game_map_explosion.o: u/t_game_map_explosion.cpp
 u/t_game_map_explosion.s: u/t_game_map_explosion.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_map_explosion.s -S u/t_game_map_explosion.cpp
 
+u/t_game_map_fleetmember.lo: u/t_game_map_fleetmember.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_map_fleetmember.lo -c u/t_game_map_fleetmember.cpp
+
+u/t_game_map_fleetmember.o: u/t_game_map_fleetmember.cpp
+	@echo "        Compiling u/t_game_map_fleetmember.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_map_fleetmember.o -c u/t_game_map_fleetmember.cpp
+
+u/t_game_map_fleetmember.s: u/t_game_map_fleetmember.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_map_fleetmember.s -S u/t_game_map_fleetmember.cpp
+
 u/t_game_map_ionstorm.lo: u/t_game_map_ionstorm.cpp
 	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_map_ionstorm.lo -c u/t_game_map_ionstorm.cpp
 
@@ -1839,6 +2565,26 @@ u/t_game_map_mapobject.o: u/t_game_map_mapobject.cpp
 
 u/t_game_map_mapobject.s: u/t_game_map_mapobject.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_map_mapobject.s -S u/t_game_map_mapobject.cpp
+
+u/t_game_map_markings.lo: u/t_game_map_markings.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_map_markings.lo -c u/t_game_map_markings.cpp
+
+u/t_game_map_markings.o: u/t_game_map_markings.cpp
+	@echo "        Compiling u/t_game_map_markings.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_map_markings.o -c u/t_game_map_markings.cpp
+
+u/t_game_map_markings.s: u/t_game_map_markings.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_map_markings.s -S u/t_game_map_markings.cpp
+
+u/t_game_map_markingvector.lo: u/t_game_map_markingvector.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_map_markingvector.lo -c u/t_game_map_markingvector.cpp
+
+u/t_game_map_markingvector.o: u/t_game_map_markingvector.cpp
+	@echo "        Compiling u/t_game_map_markingvector.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_map_markingvector.o -c u/t_game_map_markingvector.cpp
+
+u/t_game_map_markingvector.s: u/t_game_map_markingvector.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_map_markingvector.s -S u/t_game_map_markingvector.cpp
 
 u/t_game_map_object.lo: u/t_game_map_object.cpp
 	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_map_object.lo -c u/t_game_map_object.cpp
@@ -1909,6 +2655,16 @@ u/t_game_msg_mailbox.o: u/t_game_msg_mailbox.cpp
 
 u/t_game_msg_mailbox.s: u/t_game_msg_mailbox.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_msg_mailbox.s -S u/t_game_msg_mailbox.cpp
+
+u/t_game_msg_outbox.lo: u/t_game_msg_outbox.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_msg_outbox.lo -c u/t_game_msg_outbox.cpp
+
+u/t_game_msg_outbox.o: u/t_game_msg_outbox.cpp
+	@echo "        Compiling u/t_game_msg_outbox.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_msg_outbox.o -c u/t_game_msg_outbox.cpp
+
+u/t_game_msg_outbox.s: u/t_game_msg_outbox.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_msg_outbox.s -S u/t_game_msg_outbox.cpp
 
 u/t_game_parser_datainterface.lo: u/t_game_parser_datainterface.cpp
 	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_parser_datainterface.lo -c u/t_game_parser_datainterface.cpp
@@ -2694,6 +3450,46 @@ u/t_game_v3_controlfile.o: u/t_game_v3_controlfile.cpp
 u/t_game_v3_controlfile.s: u/t_game_v3_controlfile.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_v3_controlfile.s -S u/t_game_v3_controlfile.cpp
 
+u/t_game_v3_hconfig.lo: u/t_game_v3_hconfig.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_v3_hconfig.lo -c u/t_game_v3_hconfig.cpp
+
+u/t_game_v3_hconfig.o: u/t_game_v3_hconfig.cpp
+	@echo "        Compiling u/t_game_v3_hconfig.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_v3_hconfig.o -c u/t_game_v3_hconfig.cpp
+
+u/t_game_v3_hconfig.s: u/t_game_v3_hconfig.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_v3_hconfig.s -S u/t_game_v3_hconfig.cpp
+
+u/t_game_v3_loader.lo: u/t_game_v3_loader.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_v3_loader.lo -c u/t_game_v3_loader.cpp
+
+u/t_game_v3_loader.o: u/t_game_v3_loader.cpp
+	@echo "        Compiling u/t_game_v3_loader.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_v3_loader.o -c u/t_game_v3_loader.cpp
+
+u/t_game_v3_loader.s: u/t_game_v3_loader.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_v3_loader.s -S u/t_game_v3_loader.cpp
+
+u/t_game_v3_outboxreader.lo: u/t_game_v3_outboxreader.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_v3_outboxreader.lo -c u/t_game_v3_outboxreader.cpp
+
+u/t_game_v3_outboxreader.o: u/t_game_v3_outboxreader.cpp
+	@echo "        Compiling u/t_game_v3_outboxreader.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_v3_outboxreader.o -c u/t_game_v3_outboxreader.cpp
+
+u/t_game_v3_outboxreader.s: u/t_game_v3_outboxreader.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_v3_outboxreader.s -S u/t_game_v3_outboxreader.cpp
+
+u/t_game_v3_packer.lo: u/t_game_v3_packer.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_v3_packer.lo -c u/t_game_v3_packer.cpp
+
+u/t_game_v3_packer.o: u/t_game_v3_packer.cpp
+	@echo "        Compiling u/t_game_v3_packer.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_v3_packer.o -c u/t_game_v3_packer.cpp
+
+u/t_game_v3_packer.s: u/t_game_v3_packer.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_v3_packer.s -S u/t_game_v3_packer.cpp
+
 u/t_game_v3_resultfile.lo: u/t_game_v3_resultfile.cpp
 	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_v3_resultfile.lo -c u/t_game_v3_resultfile.cpp
 
@@ -2824,6 +3620,16 @@ u/t_game_v3_trn_stringfilter.o: u/t_game_v3_trn_stringfilter.cpp
 u/t_game_v3_trn_stringfilter.s: u/t_game_v3_trn_stringfilter.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_v3_trn_stringfilter.s -S u/t_game_v3_trn_stringfilter.cpp
 
+u/t_game_v3_undoinformation.lo: u/t_game_v3_undoinformation.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_v3_undoinformation.lo -c u/t_game_v3_undoinformation.cpp
+
+u/t_game_v3_undoinformation.o: u/t_game_v3_undoinformation.cpp
+	@echo "        Compiling u/t_game_v3_undoinformation.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_v3_undoinformation.o -c u/t_game_v3_undoinformation.cpp
+
+u/t_game_v3_undoinformation.s: u/t_game_v3_undoinformation.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_v3_undoinformation.s -S u/t_game_v3_undoinformation.cpp
+
 u/t_game_vcr_battle.lo: u/t_game_vcr_battle.cpp
 	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_vcr_battle.lo -c u/t_game_vcr_battle.cpp
 
@@ -2888,6 +3694,16 @@ u/t_game_vcr_classic_statustoken.o: u/t_game_vcr_classic_statustoken.cpp
 
 u/t_game_vcr_classic_statustoken.s: u/t_game_vcr_classic_statustoken.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_vcr_classic_statustoken.s -S u/t_game_vcr_classic_statustoken.cpp
+
+u/t_game_vcr_classic_types.lo: u/t_game_vcr_classic_types.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_vcr_classic_types.lo -c u/t_game_vcr_classic_types.cpp
+
+u/t_game_vcr_classic_types.o: u/t_game_vcr_classic_types.cpp
+	@echo "        Compiling u/t_game_vcr_classic_types.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_vcr_classic_types.o -c u/t_game_vcr_classic_types.cpp
+
+u/t_game_vcr_classic_types.s: u/t_game_vcr_classic_types.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_vcr_classic_types.s -S u/t_game_vcr_classic_types.cpp
 
 u/t_game_vcr_classic_visualizer.lo: u/t_game_vcr_classic_visualizer.cpp
 	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_game_vcr_classic_visualizer.lo -c u/t_game_vcr_classic_visualizer.cpp
@@ -3089,6 +3905,26 @@ u/t_gfx_gen_perlinnoise.o: u/t_gfx_gen_perlinnoise.cpp
 u/t_gfx_gen_perlinnoise.s: u/t_gfx_gen_perlinnoise.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_gen_perlinnoise.s -S u/t_gfx_gen_perlinnoise.cpp
 
+u/t_gfx_gen_planet.lo: u/t_gfx_gen_planet.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_gen_planet.lo -c u/t_gfx_gen_planet.cpp
+
+u/t_gfx_gen_planet.o: u/t_gfx_gen_planet.cpp
+	@echo "        Compiling u/t_gfx_gen_planet.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_gen_planet.o -c u/t_gfx_gen_planet.cpp
+
+u/t_gfx_gen_planet.s: u/t_gfx_gen_planet.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_gen_planet.s -S u/t_gfx_gen_planet.cpp
+
+u/t_gfx_gen_planetconfig.lo: u/t_gfx_gen_planetconfig.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_gen_planetconfig.lo -c u/t_gfx_gen_planetconfig.cpp
+
+u/t_gfx_gen_planetconfig.o: u/t_gfx_gen_planetconfig.cpp
+	@echo "        Compiling u/t_gfx_gen_planetconfig.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_gen_planetconfig.o -c u/t_gfx_gen_planetconfig.cpp
+
+u/t_gfx_gen_planetconfig.s: u/t_gfx_gen_planetconfig.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_gen_planetconfig.s -S u/t_gfx_gen_planetconfig.cpp
+
 u/t_gfx_gen_spaceview.lo: u/t_gfx_gen_spaceview.cpp
 	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_gen_spaceview.lo -c u/t_gfx_gen_spaceview.cpp
 
@@ -3108,6 +3944,16 @@ u/t_gfx_gen_spaceviewconfig.o: u/t_gfx_gen_spaceviewconfig.cpp
 
 u/t_gfx_gen_spaceviewconfig.s: u/t_gfx_gen_spaceviewconfig.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_gen_spaceviewconfig.s -S u/t_gfx_gen_spaceviewconfig.cpp
+
+u/t_gfx_gen_vector3d.lo: u/t_gfx_gen_vector3d.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_gen_vector3d.lo -c u/t_gfx_gen_vector3d.cpp
+
+u/t_gfx_gen_vector3d.o: u/t_gfx_gen_vector3d.cpp
+	@echo "        Compiling u/t_gfx_gen_vector3d.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_gen_vector3d.o -c u/t_gfx_gen_vector3d.cpp
+
+u/t_gfx_gen_vector3d.s: u/t_gfx_gen_vector3d.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_gen_vector3d.s -S u/t_gfx_gen_vector3d.cpp
 
 u/t_gfx_graphicsexception.lo: u/t_gfx_graphicsexception.cpp
 	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_graphicsexception.lo -c u/t_gfx_graphicsexception.cpp
@@ -3248,6 +4094,16 @@ u/t_gfx_sdl_engine.o: u/t_gfx_sdl_engine.cpp
 
 u/t_gfx_sdl_engine.s: u/t_gfx_sdl_engine.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_sdl_engine.s -S u/t_gfx_sdl_engine.cpp
+
+u/t_gfx_sdl_streaminterface.lo: u/t_gfx_sdl_streaminterface.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_sdl_streaminterface.lo -c u/t_gfx_sdl_streaminterface.cpp
+
+u/t_gfx_sdl_streaminterface.o: u/t_gfx_sdl_streaminterface.cpp
+	@echo "        Compiling u/t_gfx_sdl_streaminterface.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_sdl_streaminterface.o -c u/t_gfx_sdl_streaminterface.cpp
+
+u/t_gfx_sdl_streaminterface.s: u/t_gfx_sdl_streaminterface.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_sdl_streaminterface.s -S u/t_gfx_sdl_streaminterface.cpp
 
 u/t_gfx_timer.lo: u/t_gfx_timer.cpp
 	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_gfx_timer.lo -c u/t_gfx_timer.cpp
@@ -3443,6 +4299,19 @@ u/t_interpreter_error.o: u/t_interpreter_error.cpp
 u/t_interpreter_error.s: u/t_interpreter_error.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_error.s -S u/t_interpreter_error.cpp
 
+u/t_interpreter_exporter_configuration.lo: \
+    u/t_interpreter_exporter_configuration.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_exporter_configuration.lo -c u/t_interpreter_exporter_configuration.cpp
+
+u/t_interpreter_exporter_configuration.o: \
+    u/t_interpreter_exporter_configuration.cpp
+	@echo "        Compiling u/t_interpreter_exporter_configuration.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_exporter_configuration.o -c u/t_interpreter_exporter_configuration.cpp
+
+u/t_interpreter_exporter_configuration.s: \
+    u/t_interpreter_exporter_configuration.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_exporter_configuration.s -S u/t_interpreter_exporter_configuration.cpp
+
 u/t_interpreter_exporter_dbfexporter.lo: \
     u/t_interpreter_exporter_dbfexporter.cpp
 	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_exporter_dbfexporter.lo -c u/t_interpreter_exporter_dbfexporter.cpp
@@ -3476,6 +4345,16 @@ u/t_interpreter_exporter_fieldlist.o: u/t_interpreter_exporter_fieldlist.cpp
 
 u/t_interpreter_exporter_fieldlist.s: u/t_interpreter_exporter_fieldlist.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_exporter_fieldlist.s -S u/t_interpreter_exporter_fieldlist.cpp
+
+u/t_interpreter_exporter_format.lo: u/t_interpreter_exporter_format.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_exporter_format.lo -c u/t_interpreter_exporter_format.cpp
+
+u/t_interpreter_exporter_format.o: u/t_interpreter_exporter_format.cpp
+	@echo "        Compiling u/t_interpreter_exporter_format.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_exporter_format.o -c u/t_interpreter_exporter_format.cpp
+
+u/t_interpreter_exporter_format.s: u/t_interpreter_exporter_format.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_exporter_format.s -S u/t_interpreter_exporter_format.cpp
 
 u/t_interpreter_exporter_htmlexporter.lo: \
     u/t_interpreter_exporter_htmlexporter.cpp
@@ -4010,6 +4889,26 @@ u/t_interpreter_world.o: u/t_interpreter_world.cpp
 u/t_interpreter_world.s: u/t_interpreter_world.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_interpreter_world.s -S u/t_interpreter_world.cpp
 
+u/t_server_common_racenames.lo: u/t_server_common_racenames.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_common_racenames.lo -c u/t_server_common_racenames.cpp
+
+u/t_server_common_racenames.o: u/t_server_common_racenames.cpp
+	@echo "        Compiling u/t_server_common_racenames.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_common_racenames.o -c u/t_server_common_racenames.cpp
+
+u/t_server_common_racenames.s: u/t_server_common_racenames.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_common_racenames.s -S u/t_server_common_racenames.cpp
+
+u/t_server_common_root.lo: u/t_server_common_root.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_common_root.lo -c u/t_server_common_root.cpp
+
+u/t_server_common_root.o: u/t_server_common_root.cpp
+	@echo "        Compiling u/t_server_common_root.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_common_root.o -c u/t_server_common_root.cpp
+
+u/t_server_common_root.s: u/t_server_common_root.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_common_root.s -S u/t_server_common_root.cpp
+
 u/t_server_common_session.lo: u/t_server_common_session.cpp
 	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_common_session.lo -c u/t_server_common_session.cpp
 
@@ -4020,6 +4919,42 @@ u/t_server_common_session.o: u/t_server_common_session.cpp
 u/t_server_common_session.s: u/t_server_common_session.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_common_session.s -S u/t_server_common_session.cpp
 
+u/t_server_common_sessionprotocolhandler.lo: \
+    u/t_server_common_sessionprotocolhandler.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_common_sessionprotocolhandler.lo -c u/t_server_common_sessionprotocolhandler.cpp
+
+u/t_server_common_sessionprotocolhandler.o: \
+    u/t_server_common_sessionprotocolhandler.cpp
+	@echo "        Compiling u/t_server_common_sessionprotocolhandler.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_common_sessionprotocolhandler.o -c u/t_server_common_sessionprotocolhandler.cpp
+
+u/t_server_common_sessionprotocolhandler.s: \
+    u/t_server_common_sessionprotocolhandler.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_common_sessionprotocolhandler.s -S u/t_server_common_sessionprotocolhandler.cpp
+
+u/t_server_common_sessionprotocolhandlerfactory.lo: \
+    u/t_server_common_sessionprotocolhandlerfactory.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_common_sessionprotocolhandlerfactory.lo -c u/t_server_common_sessionprotocolhandlerfactory.cpp
+
+u/t_server_common_sessionprotocolhandlerfactory.o: \
+    u/t_server_common_sessionprotocolhandlerfactory.cpp
+	@echo "        Compiling u/t_server_common_sessionprotocolhandlerfactory.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_common_sessionprotocolhandlerfactory.o -c u/t_server_common_sessionprotocolhandlerfactory.cpp
+
+u/t_server_common_sessionprotocolhandlerfactory.s: \
+    u/t_server_common_sessionprotocolhandlerfactory.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_common_sessionprotocolhandlerfactory.s -S u/t_server_common_sessionprotocolhandlerfactory.cpp
+
+u/t_server_common_user.lo: u/t_server_common_user.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_common_user.lo -c u/t_server_common_user.cpp
+
+u/t_server_common_user.o: u/t_server_common_user.cpp
+	@echo "        Compiling u/t_server_common_user.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_common_user.o -c u/t_server_common_user.cpp
+
+u/t_server_common_user.s: u/t_server_common_user.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_common_user.s -S u/t_server_common_user.cpp
+
 u/t_server_configurationhandler.lo: u/t_server_configurationhandler.cpp
 	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_configurationhandler.lo -c u/t_server_configurationhandler.cpp
 
@@ -4029,6 +4964,178 @@ u/t_server_configurationhandler.o: u/t_server_configurationhandler.cpp
 
 u/t_server_configurationhandler.s: u/t_server_configurationhandler.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_configurationhandler.s -S u/t_server_configurationhandler.cpp
+
+u/t_server_console_colorterminal.lo: u/t_server_console_colorterminal.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_console_colorterminal.lo -c u/t_server_console_colorterminal.cpp
+
+u/t_server_console_colorterminal.o: u/t_server_console_colorterminal.cpp
+	@echo "        Compiling u/t_server_console_colorterminal.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_console_colorterminal.o -c u/t_server_console_colorterminal.cpp
+
+u/t_server_console_colorterminal.s: u/t_server_console_colorterminal.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_console_colorterminal.s -S u/t_server_console_colorterminal.cpp
+
+u/t_server_console_commandhandler.lo: u/t_server_console_commandhandler.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_console_commandhandler.lo -c u/t_server_console_commandhandler.cpp
+
+u/t_server_console_commandhandler.o: u/t_server_console_commandhandler.cpp
+	@echo "        Compiling u/t_server_console_commandhandler.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_console_commandhandler.o -c u/t_server_console_commandhandler.cpp
+
+u/t_server_console_commandhandler.s: u/t_server_console_commandhandler.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_console_commandhandler.s -S u/t_server_console_commandhandler.cpp
+
+u/t_server_console_context.lo: u/t_server_console_context.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_console_context.lo -c u/t_server_console_context.cpp
+
+u/t_server_console_context.o: u/t_server_console_context.cpp
+	@echo "        Compiling u/t_server_console_context.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_console_context.o -c u/t_server_console_context.cpp
+
+u/t_server_console_context.s: u/t_server_console_context.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_console_context.s -S u/t_server_console_context.cpp
+
+u/t_server_console_contextfactory.lo: u/t_server_console_contextfactory.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_console_contextfactory.lo -c u/t_server_console_contextfactory.cpp
+
+u/t_server_console_contextfactory.o: u/t_server_console_contextfactory.cpp
+	@echo "        Compiling u/t_server_console_contextfactory.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_console_contextfactory.o -c u/t_server_console_contextfactory.cpp
+
+u/t_server_console_contextfactory.s: u/t_server_console_contextfactory.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_console_contextfactory.s -S u/t_server_console_contextfactory.cpp
+
+u/t_server_console_dumbterminal.lo: u/t_server_console_dumbterminal.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_console_dumbterminal.lo -c u/t_server_console_dumbterminal.cpp
+
+u/t_server_console_dumbterminal.o: u/t_server_console_dumbterminal.cpp
+	@echo "        Compiling u/t_server_console_dumbterminal.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_console_dumbterminal.o -c u/t_server_console_dumbterminal.cpp
+
+u/t_server_console_dumbterminal.s: u/t_server_console_dumbterminal.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_console_dumbterminal.s -S u/t_server_console_dumbterminal.cpp
+
+u/t_server_console_environment.lo: u/t_server_console_environment.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_console_environment.lo -c u/t_server_console_environment.cpp
+
+u/t_server_console_environment.o: u/t_server_console_environment.cpp
+	@echo "        Compiling u/t_server_console_environment.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_console_environment.o -c u/t_server_console_environment.cpp
+
+u/t_server_console_environment.s: u/t_server_console_environment.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_console_environment.s -S u/t_server_console_environment.cpp
+
+u/t_server_console_fundamentalcommandhandler.lo: \
+    u/t_server_console_fundamentalcommandhandler.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_console_fundamentalcommandhandler.lo -c u/t_server_console_fundamentalcommandhandler.cpp
+
+u/t_server_console_fundamentalcommandhandler.o: \
+    u/t_server_console_fundamentalcommandhandler.cpp
+	@echo "        Compiling u/t_server_console_fundamentalcommandhandler.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_console_fundamentalcommandhandler.o -c u/t_server_console_fundamentalcommandhandler.cpp
+
+u/t_server_console_fundamentalcommandhandler.s: \
+    u/t_server_console_fundamentalcommandhandler.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_console_fundamentalcommandhandler.s -S u/t_server_console_fundamentalcommandhandler.cpp
+
+u/t_server_console_integercommandhandler.lo: \
+    u/t_server_console_integercommandhandler.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_console_integercommandhandler.lo -c u/t_server_console_integercommandhandler.cpp
+
+u/t_server_console_integercommandhandler.o: \
+    u/t_server_console_integercommandhandler.cpp
+	@echo "        Compiling u/t_server_console_integercommandhandler.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_console_integercommandhandler.o -c u/t_server_console_integercommandhandler.cpp
+
+u/t_server_console_integercommandhandler.s: \
+    u/t_server_console_integercommandhandler.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_console_integercommandhandler.s -S u/t_server_console_integercommandhandler.cpp
+
+u/t_server_console_nullterminal.lo: u/t_server_console_nullterminal.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_console_nullterminal.lo -c u/t_server_console_nullterminal.cpp
+
+u/t_server_console_nullterminal.o: u/t_server_console_nullterminal.cpp
+	@echo "        Compiling u/t_server_console_nullterminal.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_console_nullterminal.o -c u/t_server_console_nullterminal.cpp
+
+u/t_server_console_nullterminal.s: u/t_server_console_nullterminal.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_console_nullterminal.s -S u/t_server_console_nullterminal.cpp
+
+u/t_server_console_parser.lo: u/t_server_console_parser.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_console_parser.lo -c u/t_server_console_parser.cpp
+
+u/t_server_console_parser.o: u/t_server_console_parser.cpp
+	@echo "        Compiling u/t_server_console_parser.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_console_parser.o -c u/t_server_console_parser.cpp
+
+u/t_server_console_parser.s: u/t_server_console_parser.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_console_parser.s -S u/t_server_console_parser.cpp
+
+u/t_server_console_pipeterminal.lo: u/t_server_console_pipeterminal.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_console_pipeterminal.lo -c u/t_server_console_pipeterminal.cpp
+
+u/t_server_console_pipeterminal.o: u/t_server_console_pipeterminal.cpp
+	@echo "        Compiling u/t_server_console_pipeterminal.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_console_pipeterminal.o -c u/t_server_console_pipeterminal.cpp
+
+u/t_server_console_pipeterminal.s: u/t_server_console_pipeterminal.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_console_pipeterminal.s -S u/t_server_console_pipeterminal.cpp
+
+u/t_server_console_routercontextfactory.lo: \
+    u/t_server_console_routercontextfactory.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_console_routercontextfactory.lo -c u/t_server_console_routercontextfactory.cpp
+
+u/t_server_console_routercontextfactory.o: \
+    u/t_server_console_routercontextfactory.cpp
+	@echo "        Compiling u/t_server_console_routercontextfactory.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_console_routercontextfactory.o -c u/t_server_console_routercontextfactory.cpp
+
+u/t_server_console_routercontextfactory.s: \
+    u/t_server_console_routercontextfactory.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_console_routercontextfactory.s -S u/t_server_console_routercontextfactory.cpp
+
+u/t_server_console_stringcommandhandler.lo: \
+    u/t_server_console_stringcommandhandler.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_console_stringcommandhandler.lo -c u/t_server_console_stringcommandhandler.cpp
+
+u/t_server_console_stringcommandhandler.o: \
+    u/t_server_console_stringcommandhandler.cpp
+	@echo "        Compiling u/t_server_console_stringcommandhandler.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_console_stringcommandhandler.o -c u/t_server_console_stringcommandhandler.cpp
+
+u/t_server_console_stringcommandhandler.s: \
+    u/t_server_console_stringcommandhandler.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_console_stringcommandhandler.s -S u/t_server_console_stringcommandhandler.cpp
+
+u/t_server_console_terminal.lo: u/t_server_console_terminal.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_console_terminal.lo -c u/t_server_console_terminal.cpp
+
+u/t_server_console_terminal.o: u/t_server_console_terminal.cpp
+	@echo "        Compiling u/t_server_console_terminal.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_console_terminal.o -c u/t_server_console_terminal.cpp
+
+u/t_server_console_terminal.s: u/t_server_console_terminal.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_console_terminal.s -S u/t_server_console_terminal.cpp
+
+u/t_server_dbexport_dbexporter.lo: u/t_server_dbexport_dbexporter.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_dbexport_dbexporter.lo -c u/t_server_dbexport_dbexporter.cpp
+
+u/t_server_dbexport_dbexporter.o: u/t_server_dbexport_dbexporter.cpp
+	@echo "        Compiling u/t_server_dbexport_dbexporter.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_dbexport_dbexporter.o -c u/t_server_dbexport_dbexporter.cpp
+
+u/t_server_dbexport_dbexporter.s: u/t_server_dbexport_dbexporter.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_dbexport_dbexporter.s -S u/t_server_dbexport_dbexporter.cpp
+
+u/t_server_errors.lo: u/t_server_errors.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_errors.lo -c u/t_server_errors.cpp
+
+u/t_server_errors.o: u/t_server_errors.cpp
+	@echo "        Compiling u/t_server_errors.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_errors.o -c u/t_server_errors.cpp
+
+u/t_server_errors.s: u/t_server_errors.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_errors.s -S u/t_server_errors.cpp
 
 u/t_server_file_ca_commit.lo: u/t_server_file_ca_commit.cpp
 	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_ca_commit.lo -c u/t_server_file_ca_commit.cpp
@@ -4155,6 +5262,16 @@ u/t_server_file_ca_root.o: u/t_server_file_ca_root.cpp
 u/t_server_file_ca_root.s: u/t_server_file_ca_root.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_ca_root.s -S u/t_server_file_ca_root.cpp
 
+u/t_server_file_clientdirectory.lo: u/t_server_file_clientdirectory.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_clientdirectory.lo -c u/t_server_file_clientdirectory.cpp
+
+u/t_server_file_clientdirectory.o: u/t_server_file_clientdirectory.cpp
+	@echo "        Compiling u/t_server_file_clientdirectory.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_clientdirectory.o -c u/t_server_file_clientdirectory.cpp
+
+u/t_server_file_clientdirectory.s: u/t_server_file_clientdirectory.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_clientdirectory.s -S u/t_server_file_clientdirectory.cpp
+
 u/t_server_file_clientdirectoryhandler.lo: \
     u/t_server_file_clientdirectoryhandler.cpp
 	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_clientdirectoryhandler.lo -c u/t_server_file_clientdirectoryhandler.cpp
@@ -4240,6 +5357,17 @@ u/t_server_file_gamestatus.o: u/t_server_file_gamestatus.cpp
 
 u/t_server_file_gamestatus.s: u/t_server_file_gamestatus.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_gamestatus.s -S u/t_server_file_gamestatus.cpp
+
+u/t_server_file_internalfileserver.lo: \
+    u/t_server_file_internalfileserver.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_internalfileserver.lo -c u/t_server_file_internalfileserver.cpp
+
+u/t_server_file_internalfileserver.o: u/t_server_file_internalfileserver.cpp
+	@echo "        Compiling u/t_server_file_internalfileserver.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_internalfileserver.o -c u/t_server_file_internalfileserver.cpp
+
+u/t_server_file_internalfileserver.s: u/t_server_file_internalfileserver.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_internalfileserver.s -S u/t_server_file_internalfileserver.cpp
 
 u/t_server_file_item.lo: u/t_server_file_item.cpp
 	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_file_item.lo -c u/t_server_file_item.cpp
@@ -4390,6 +5518,275 @@ u/t_server_format_utils.o: u/t_server_format_utils.cpp
 
 u/t_server_format_utils.s: u/t_server_format_utils.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_format_utils.s -S u/t_server_format_utils.cpp
+
+u/t_server_host_commandhandler.lo: u/t_server_host_commandhandler.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_commandhandler.lo -c u/t_server_host_commandhandler.cpp
+
+u/t_server_host_commandhandler.o: u/t_server_host_commandhandler.cpp
+	@echo "        Compiling u/t_server_host_commandhandler.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_commandhandler.o -c u/t_server_host_commandhandler.cpp
+
+u/t_server_host_commandhandler.s: u/t_server_host_commandhandler.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_commandhandler.s -S u/t_server_host_commandhandler.cpp
+
+u/t_server_host_configuration.lo: u/t_server_host_configuration.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_configuration.lo -c u/t_server_host_configuration.cpp
+
+u/t_server_host_configuration.o: u/t_server_host_configuration.cpp
+	@echo "        Compiling u/t_server_host_configuration.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_configuration.o -c u/t_server_host_configuration.cpp
+
+u/t_server_host_configuration.s: u/t_server_host_configuration.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_configuration.s -S u/t_server_host_configuration.cpp
+
+u/t_server_host_configurationbuilder.lo: \
+    u/t_server_host_configurationbuilder.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_configurationbuilder.lo -c u/t_server_host_configurationbuilder.cpp
+
+u/t_server_host_configurationbuilder.o: \
+    u/t_server_host_configurationbuilder.cpp
+	@echo "        Compiling u/t_server_host_configurationbuilder.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_configurationbuilder.o -c u/t_server_host_configurationbuilder.cpp
+
+u/t_server_host_configurationbuilder.s: \
+    u/t_server_host_configurationbuilder.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_configurationbuilder.s -S u/t_server_host_configurationbuilder.cpp
+
+u/t_server_host_cron.lo: u/t_server_host_cron.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_cron.lo -c u/t_server_host_cron.cpp
+
+u/t_server_host_cron.o: u/t_server_host_cron.cpp
+	@echo "        Compiling u/t_server_host_cron.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_cron.o -c u/t_server_host_cron.cpp
+
+u/t_server_host_cron.s: u/t_server_host_cron.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_cron.s -S u/t_server_host_cron.cpp
+
+u/t_server_host_cronimpl.lo: u/t_server_host_cronimpl.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_cronimpl.lo -c u/t_server_host_cronimpl.cpp
+
+u/t_server_host_cronimpl.o: u/t_server_host_cronimpl.cpp
+	@echo "        Compiling u/t_server_host_cronimpl.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_cronimpl.o -c u/t_server_host_cronimpl.cpp
+
+u/t_server_host_cronimpl.s: u/t_server_host_cronimpl.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_cronimpl.s -S u/t_server_host_cronimpl.cpp
+
+u/t_server_host_exporter.lo: u/t_server_host_exporter.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_exporter.lo -c u/t_server_host_exporter.cpp
+
+u/t_server_host_exporter.o: u/t_server_host_exporter.cpp
+	@echo "        Compiling u/t_server_host_exporter.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_exporter.o -c u/t_server_host_exporter.cpp
+
+u/t_server_host_exporter.s: u/t_server_host_exporter.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_exporter.s -S u/t_server_host_exporter.cpp
+
+u/t_server_host_game.lo: u/t_server_host_game.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_game.lo -c u/t_server_host_game.cpp
+
+u/t_server_host_game.o: u/t_server_host_game.cpp
+	@echo "        Compiling u/t_server_host_game.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_game.o -c u/t_server_host_game.cpp
+
+u/t_server_host_game.s: u/t_server_host_game.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_game.s -S u/t_server_host_game.cpp
+
+u/t_server_host_gamearbiter.lo: u/t_server_host_gamearbiter.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_gamearbiter.lo -c u/t_server_host_gamearbiter.cpp
+
+u/t_server_host_gamearbiter.o: u/t_server_host_gamearbiter.cpp
+	@echo "        Compiling u/t_server_host_gamearbiter.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_gamearbiter.o -c u/t_server_host_gamearbiter.cpp
+
+u/t_server_host_gamearbiter.s: u/t_server_host_gamearbiter.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_gamearbiter.s -S u/t_server_host_gamearbiter.cpp
+
+u/t_server_host_gamecreator.lo: u/t_server_host_gamecreator.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_gamecreator.lo -c u/t_server_host_gamecreator.cpp
+
+u/t_server_host_gamecreator.o: u/t_server_host_gamecreator.cpp
+	@echo "        Compiling u/t_server_host_gamecreator.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_gamecreator.o -c u/t_server_host_gamecreator.cpp
+
+u/t_server_host_gamecreator.s: u/t_server_host_gamecreator.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_gamecreator.s -S u/t_server_host_gamecreator.cpp
+
+u/t_server_host_hostcron.lo: u/t_server_host_hostcron.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_hostcron.lo -c u/t_server_host_hostcron.cpp
+
+u/t_server_host_hostcron.o: u/t_server_host_hostcron.cpp
+	@echo "        Compiling u/t_server_host_hostcron.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_hostcron.o -c u/t_server_host_hostcron.cpp
+
+u/t_server_host_hostcron.s: u/t_server_host_hostcron.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_hostcron.s -S u/t_server_host_hostcron.cpp
+
+u/t_server_host_hostgame.lo: u/t_server_host_hostgame.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_hostgame.lo -c u/t_server_host_hostgame.cpp
+
+u/t_server_host_hostgame.o: u/t_server_host_hostgame.cpp
+	@echo "        Compiling u/t_server_host_hostgame.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_hostgame.o -c u/t_server_host_hostgame.cpp
+
+u/t_server_host_hostgame.s: u/t_server_host_hostgame.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_hostgame.s -S u/t_server_host_hostgame.cpp
+
+u/t_server_host_hostplayer.lo: u/t_server_host_hostplayer.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_hostplayer.lo -c u/t_server_host_hostplayer.cpp
+
+u/t_server_host_hostplayer.o: u/t_server_host_hostplayer.cpp
+	@echo "        Compiling u/t_server_host_hostplayer.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_hostplayer.o -c u/t_server_host_hostplayer.cpp
+
+u/t_server_host_hostplayer.s: u/t_server_host_hostplayer.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_hostplayer.s -S u/t_server_host_hostplayer.cpp
+
+u/t_server_host_hostschedule.lo: u/t_server_host_hostschedule.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_hostschedule.lo -c u/t_server_host_hostschedule.cpp
+
+u/t_server_host_hostschedule.o: u/t_server_host_hostschedule.cpp
+	@echo "        Compiling u/t_server_host_hostschedule.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_hostschedule.o -c u/t_server_host_hostschedule.cpp
+
+u/t_server_host_hostschedule.s: u/t_server_host_hostschedule.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_hostschedule.s -S u/t_server_host_hostschedule.cpp
+
+u/t_server_host_hosttool.lo: u/t_server_host_hosttool.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_hosttool.lo -c u/t_server_host_hosttool.cpp
+
+u/t_server_host_hosttool.o: u/t_server_host_hosttool.cpp
+	@echo "        Compiling u/t_server_host_hosttool.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_hosttool.o -c u/t_server_host_hosttool.cpp
+
+u/t_server_host_hosttool.s: u/t_server_host_hosttool.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_hosttool.s -S u/t_server_host_hosttool.cpp
+
+u/t_server_host_hostturn.lo: u/t_server_host_hostturn.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_hostturn.lo -c u/t_server_host_hostturn.cpp
+
+u/t_server_host_hostturn.o: u/t_server_host_hostturn.cpp
+	@echo "        Compiling u/t_server_host_hostturn.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_hostturn.o -c u/t_server_host_hostturn.cpp
+
+u/t_server_host_hostturn.s: u/t_server_host_hostturn.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_hostturn.s -S u/t_server_host_hostturn.cpp
+
+u/t_server_host_installer.lo: u/t_server_host_installer.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_installer.lo -c u/t_server_host_installer.cpp
+
+u/t_server_host_installer.o: u/t_server_host_installer.cpp
+	@echo "        Compiling u/t_server_host_installer.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_installer.o -c u/t_server_host_installer.cpp
+
+u/t_server_host_installer.s: u/t_server_host_installer.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_installer.s -S u/t_server_host_installer.cpp
+
+u/t_server_host_rank_levelhandler.lo: u/t_server_host_rank_levelhandler.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_rank_levelhandler.lo -c u/t_server_host_rank_levelhandler.cpp
+
+u/t_server_host_rank_levelhandler.o: u/t_server_host_rank_levelhandler.cpp
+	@echo "        Compiling u/t_server_host_rank_levelhandler.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_rank_levelhandler.o -c u/t_server_host_rank_levelhandler.cpp
+
+u/t_server_host_rank_levelhandler.s: u/t_server_host_rank_levelhandler.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_rank_levelhandler.s -S u/t_server_host_rank_levelhandler.cpp
+
+u/t_server_host_rank_rank.lo: u/t_server_host_rank_rank.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_rank_rank.lo -c u/t_server_host_rank_rank.cpp
+
+u/t_server_host_rank_rank.o: u/t_server_host_rank_rank.cpp
+	@echo "        Compiling u/t_server_host_rank_rank.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_rank_rank.o -c u/t_server_host_rank_rank.cpp
+
+u/t_server_host_rank_rank.s: u/t_server_host_rank_rank.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_rank_rank.s -S u/t_server_host_rank_rank.cpp
+
+u/t_server_host_rank_refereefilereader.lo: \
+    u/t_server_host_rank_refereefilereader.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_rank_refereefilereader.lo -c u/t_server_host_rank_refereefilereader.cpp
+
+u/t_server_host_rank_refereefilereader.o: \
+    u/t_server_host_rank_refereefilereader.cpp
+	@echo "        Compiling u/t_server_host_rank_refereefilereader.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_rank_refereefilereader.o -c u/t_server_host_rank_refereefilereader.cpp
+
+u/t_server_host_rank_refereefilereader.s: \
+    u/t_server_host_rank_refereefilereader.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_rank_refereefilereader.s -S u/t_server_host_rank_refereefilereader.cpp
+
+u/t_server_host_rank_scorefilereader.lo: \
+    u/t_server_host_rank_scorefilereader.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_rank_scorefilereader.lo -c u/t_server_host_rank_scorefilereader.cpp
+
+u/t_server_host_rank_scorefilereader.o: \
+    u/t_server_host_rank_scorefilereader.cpp
+	@echo "        Compiling u/t_server_host_rank_scorefilereader.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_rank_scorefilereader.o -c u/t_server_host_rank_scorefilereader.cpp
+
+u/t_server_host_rank_scorefilereader.s: \
+    u/t_server_host_rank_scorefilereader.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_rank_scorefilereader.s -S u/t_server_host_rank_scorefilereader.cpp
+
+u/t_server_host_rank_victory.lo: u/t_server_host_rank_victory.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_rank_victory.lo -c u/t_server_host_rank_victory.cpp
+
+u/t_server_host_rank_victory.o: u/t_server_host_rank_victory.cpp
+	@echo "        Compiling u/t_server_host_rank_victory.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_rank_victory.o -c u/t_server_host_rank_victory.cpp
+
+u/t_server_host_rank_victory.s: u/t_server_host_rank_victory.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_rank_victory.s -S u/t_server_host_rank_victory.cpp
+
+u/t_server_host_resultsender.lo: u/t_server_host_resultsender.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_resultsender.lo -c u/t_server_host_resultsender.cpp
+
+u/t_server_host_resultsender.o: u/t_server_host_resultsender.cpp
+	@echo "        Compiling u/t_server_host_resultsender.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_resultsender.o -c u/t_server_host_resultsender.cpp
+
+u/t_server_host_resultsender.s: u/t_server_host_resultsender.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_resultsender.s -S u/t_server_host_resultsender.cpp
+
+u/t_server_host_schedule.lo: u/t_server_host_schedule.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_schedule.lo -c u/t_server_host_schedule.cpp
+
+u/t_server_host_schedule.o: u/t_server_host_schedule.cpp
+	@echo "        Compiling u/t_server_host_schedule.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_schedule.o -c u/t_server_host_schedule.cpp
+
+u/t_server_host_schedule.s: u/t_server_host_schedule.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_schedule.s -S u/t_server_host_schedule.cpp
+
+u/t_server_host_session.lo: u/t_server_host_session.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_session.lo -c u/t_server_host_session.cpp
+
+u/t_server_host_session.o: u/t_server_host_session.cpp
+	@echo "        Compiling u/t_server_host_session.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_session.o -c u/t_server_host_session.cpp
+
+u/t_server_host_session.s: u/t_server_host_session.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_session.s -S u/t_server_host_session.cpp
+
+u/t_server_host_talkadapter.lo: u/t_server_host_talkadapter.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_talkadapter.lo -c u/t_server_host_talkadapter.cpp
+
+u/t_server_host_talkadapter.o: u/t_server_host_talkadapter.cpp
+	@echo "        Compiling u/t_server_host_talkadapter.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_talkadapter.o -c u/t_server_host_talkadapter.cpp
+
+u/t_server_host_talkadapter.s: u/t_server_host_talkadapter.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_talkadapter.s -S u/t_server_host_talkadapter.cpp
+
+u/t_server_host_talklistener.lo: u/t_server_host_talklistener.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_talklistener.lo -c u/t_server_host_talklistener.cpp
+
+u/t_server_host_talklistener.o: u/t_server_host_talklistener.cpp
+	@echo "        Compiling u/t_server_host_talklistener.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_talklistener.o -c u/t_server_host_talklistener.cpp
+
+u/t_server_host_talklistener.s: u/t_server_host_talklistener.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_host_talklistener.s -S u/t_server_host_talklistener.cpp
 
 u/t_server_interface_base.lo: u/t_server_interface_base.cpp
 	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_base.lo -c u/t_server_interface_base.cpp
@@ -4549,6 +5946,199 @@ u/t_server_interface_hostcronclient.s: \
     u/t_server_interface_hostcronclient.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hostcronclient.s -S u/t_server_interface_hostcronclient.cpp
 
+u/t_server_interface_hostcronserver.lo: \
+    u/t_server_interface_hostcronserver.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hostcronserver.lo -c u/t_server_interface_hostcronserver.cpp
+
+u/t_server_interface_hostcronserver.o: \
+    u/t_server_interface_hostcronserver.cpp
+	@echo "        Compiling u/t_server_interface_hostcronserver.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hostcronserver.o -c u/t_server_interface_hostcronserver.cpp
+
+u/t_server_interface_hostcronserver.s: \
+    u/t_server_interface_hostcronserver.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hostcronserver.s -S u/t_server_interface_hostcronserver.cpp
+
+u/t_server_interface_hostgame.lo: u/t_server_interface_hostgame.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hostgame.lo -c u/t_server_interface_hostgame.cpp
+
+u/t_server_interface_hostgame.o: u/t_server_interface_hostgame.cpp
+	@echo "        Compiling u/t_server_interface_hostgame.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hostgame.o -c u/t_server_interface_hostgame.cpp
+
+u/t_server_interface_hostgame.s: u/t_server_interface_hostgame.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hostgame.s -S u/t_server_interface_hostgame.cpp
+
+u/t_server_interface_hostgameclient.lo: \
+    u/t_server_interface_hostgameclient.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hostgameclient.lo -c u/t_server_interface_hostgameclient.cpp
+
+u/t_server_interface_hostgameclient.o: \
+    u/t_server_interface_hostgameclient.cpp
+	@echo "        Compiling u/t_server_interface_hostgameclient.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hostgameclient.o -c u/t_server_interface_hostgameclient.cpp
+
+u/t_server_interface_hostgameclient.s: \
+    u/t_server_interface_hostgameclient.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hostgameclient.s -S u/t_server_interface_hostgameclient.cpp
+
+u/t_server_interface_hostgameserver.lo: \
+    u/t_server_interface_hostgameserver.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hostgameserver.lo -c u/t_server_interface_hostgameserver.cpp
+
+u/t_server_interface_hostgameserver.o: \
+    u/t_server_interface_hostgameserver.cpp
+	@echo "        Compiling u/t_server_interface_hostgameserver.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hostgameserver.o -c u/t_server_interface_hostgameserver.cpp
+
+u/t_server_interface_hostgameserver.s: \
+    u/t_server_interface_hostgameserver.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hostgameserver.s -S u/t_server_interface_hostgameserver.cpp
+
+u/t_server_interface_hostplayer.lo: u/t_server_interface_hostplayer.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hostplayer.lo -c u/t_server_interface_hostplayer.cpp
+
+u/t_server_interface_hostplayer.o: u/t_server_interface_hostplayer.cpp
+	@echo "        Compiling u/t_server_interface_hostplayer.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hostplayer.o -c u/t_server_interface_hostplayer.cpp
+
+u/t_server_interface_hostplayer.s: u/t_server_interface_hostplayer.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hostplayer.s -S u/t_server_interface_hostplayer.cpp
+
+u/t_server_interface_hostplayerclient.lo: \
+    u/t_server_interface_hostplayerclient.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hostplayerclient.lo -c u/t_server_interface_hostplayerclient.cpp
+
+u/t_server_interface_hostplayerclient.o: \
+    u/t_server_interface_hostplayerclient.cpp
+	@echo "        Compiling u/t_server_interface_hostplayerclient.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hostplayerclient.o -c u/t_server_interface_hostplayerclient.cpp
+
+u/t_server_interface_hostplayerclient.s: \
+    u/t_server_interface_hostplayerclient.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hostplayerclient.s -S u/t_server_interface_hostplayerclient.cpp
+
+u/t_server_interface_hostplayerserver.lo: \
+    u/t_server_interface_hostplayerserver.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hostplayerserver.lo -c u/t_server_interface_hostplayerserver.cpp
+
+u/t_server_interface_hostplayerserver.o: \
+    u/t_server_interface_hostplayerserver.cpp
+	@echo "        Compiling u/t_server_interface_hostplayerserver.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hostplayerserver.o -c u/t_server_interface_hostplayerserver.cpp
+
+u/t_server_interface_hostplayerserver.s: \
+    u/t_server_interface_hostplayerserver.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hostplayerserver.s -S u/t_server_interface_hostplayerserver.cpp
+
+u/t_server_interface_hostschedule.lo: u/t_server_interface_hostschedule.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hostschedule.lo -c u/t_server_interface_hostschedule.cpp
+
+u/t_server_interface_hostschedule.o: u/t_server_interface_hostschedule.cpp
+	@echo "        Compiling u/t_server_interface_hostschedule.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hostschedule.o -c u/t_server_interface_hostschedule.cpp
+
+u/t_server_interface_hostschedule.s: u/t_server_interface_hostschedule.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hostschedule.s -S u/t_server_interface_hostschedule.cpp
+
+u/t_server_interface_hostscheduleclient.lo: \
+    u/t_server_interface_hostscheduleclient.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hostscheduleclient.lo -c u/t_server_interface_hostscheduleclient.cpp
+
+u/t_server_interface_hostscheduleclient.o: \
+    u/t_server_interface_hostscheduleclient.cpp
+	@echo "        Compiling u/t_server_interface_hostscheduleclient.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hostscheduleclient.o -c u/t_server_interface_hostscheduleclient.cpp
+
+u/t_server_interface_hostscheduleclient.s: \
+    u/t_server_interface_hostscheduleclient.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hostscheduleclient.s -S u/t_server_interface_hostscheduleclient.cpp
+
+u/t_server_interface_hostscheduleserver.lo: \
+    u/t_server_interface_hostscheduleserver.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hostscheduleserver.lo -c u/t_server_interface_hostscheduleserver.cpp
+
+u/t_server_interface_hostscheduleserver.o: \
+    u/t_server_interface_hostscheduleserver.cpp
+	@echo "        Compiling u/t_server_interface_hostscheduleserver.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hostscheduleserver.o -c u/t_server_interface_hostscheduleserver.cpp
+
+u/t_server_interface_hostscheduleserver.s: \
+    u/t_server_interface_hostscheduleserver.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hostscheduleserver.s -S u/t_server_interface_hostscheduleserver.cpp
+
+u/t_server_interface_hosttool.lo: u/t_server_interface_hosttool.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hosttool.lo -c u/t_server_interface_hosttool.cpp
+
+u/t_server_interface_hosttool.o: u/t_server_interface_hosttool.cpp
+	@echo "        Compiling u/t_server_interface_hosttool.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hosttool.o -c u/t_server_interface_hosttool.cpp
+
+u/t_server_interface_hosttool.s: u/t_server_interface_hosttool.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hosttool.s -S u/t_server_interface_hosttool.cpp
+
+u/t_server_interface_hosttoolclient.lo: \
+    u/t_server_interface_hosttoolclient.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hosttoolclient.lo -c u/t_server_interface_hosttoolclient.cpp
+
+u/t_server_interface_hosttoolclient.o: \
+    u/t_server_interface_hosttoolclient.cpp
+	@echo "        Compiling u/t_server_interface_hosttoolclient.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hosttoolclient.o -c u/t_server_interface_hosttoolclient.cpp
+
+u/t_server_interface_hosttoolclient.s: \
+    u/t_server_interface_hosttoolclient.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hosttoolclient.s -S u/t_server_interface_hosttoolclient.cpp
+
+u/t_server_interface_hosttoolserver.lo: \
+    u/t_server_interface_hosttoolserver.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hosttoolserver.lo -c u/t_server_interface_hosttoolserver.cpp
+
+u/t_server_interface_hosttoolserver.o: \
+    u/t_server_interface_hosttoolserver.cpp
+	@echo "        Compiling u/t_server_interface_hosttoolserver.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hosttoolserver.o -c u/t_server_interface_hosttoolserver.cpp
+
+u/t_server_interface_hosttoolserver.s: \
+    u/t_server_interface_hosttoolserver.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hosttoolserver.s -S u/t_server_interface_hosttoolserver.cpp
+
+u/t_server_interface_hostturn.lo: u/t_server_interface_hostturn.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hostturn.lo -c u/t_server_interface_hostturn.cpp
+
+u/t_server_interface_hostturn.o: u/t_server_interface_hostturn.cpp
+	@echo "        Compiling u/t_server_interface_hostturn.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hostturn.o -c u/t_server_interface_hostturn.cpp
+
+u/t_server_interface_hostturn.s: u/t_server_interface_hostturn.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hostturn.s -S u/t_server_interface_hostturn.cpp
+
+u/t_server_interface_hostturnclient.lo: \
+    u/t_server_interface_hostturnclient.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hostturnclient.lo -c u/t_server_interface_hostturnclient.cpp
+
+u/t_server_interface_hostturnclient.o: \
+    u/t_server_interface_hostturnclient.cpp
+	@echo "        Compiling u/t_server_interface_hostturnclient.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hostturnclient.o -c u/t_server_interface_hostturnclient.cpp
+
+u/t_server_interface_hostturnclient.s: \
+    u/t_server_interface_hostturnclient.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hostturnclient.s -S u/t_server_interface_hostturnclient.cpp
+
+u/t_server_interface_hostturnserver.lo: \
+    u/t_server_interface_hostturnserver.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hostturnserver.lo -c u/t_server_interface_hostturnserver.cpp
+
+u/t_server_interface_hostturnserver.o: \
+    u/t_server_interface_hostturnserver.cpp
+	@echo "        Compiling u/t_server_interface_hostturnserver.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hostturnserver.o -c u/t_server_interface_hostturnserver.cpp
+
+u/t_server_interface_hostturnserver.s: \
+    u/t_server_interface_hostturnserver.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_hostturnserver.s -S u/t_server_interface_hostturnserver.cpp
+
 u/t_server_interface_mailqueue.lo: u/t_server_interface_mailqueue.cpp
 	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_mailqueue.lo -c u/t_server_interface_mailqueue.cpp
 
@@ -4584,6 +6174,17 @@ u/t_server_interface_mailqueueserver.o: \
 u/t_server_interface_mailqueueserver.s: \
     u/t_server_interface_mailqueueserver.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_mailqueueserver.s -S u/t_server_interface_mailqueueserver.cpp
+
+u/t_server_interface_sessionrouter.lo: \
+    u/t_server_interface_sessionrouter.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_sessionrouter.lo -c u/t_server_interface_sessionrouter.cpp
+
+u/t_server_interface_sessionrouter.o: u/t_server_interface_sessionrouter.cpp
+	@echo "        Compiling u/t_server_interface_sessionrouter.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_sessionrouter.o -c u/t_server_interface_sessionrouter.cpp
+
+u/t_server_interface_sessionrouter.s: u/t_server_interface_sessionrouter.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_sessionrouter.s -S u/t_server_interface_sessionrouter.cpp
 
 u/t_server_interface_talkfolder.lo: u/t_server_interface_talkfolder.cpp
 	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkfolder.lo -c u/t_server_interface_talkfolder.cpp
@@ -4939,6 +6540,209 @@ u/t_server_interface_talkuserserver.s: \
     u/t_server_interface_talkuserserver.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_interface_talkuserserver.s -S u/t_server_interface_talkuserserver.cpp
 
+u/t_server_mailin_mailinapplication.lo: \
+    u/t_server_mailin_mailinapplication.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_mailin_mailinapplication.lo -c u/t_server_mailin_mailinapplication.cpp
+
+u/t_server_mailin_mailinapplication.o: \
+    u/t_server_mailin_mailinapplication.cpp
+	@echo "        Compiling u/t_server_mailin_mailinapplication.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_mailin_mailinapplication.o -c u/t_server_mailin_mailinapplication.cpp
+
+u/t_server_mailin_mailinapplication.s: \
+    u/t_server_mailin_mailinapplication.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_mailin_mailinapplication.s -S u/t_server_mailin_mailinapplication.cpp
+
+u/t_server_mailin_mailprocessor.lo: u/t_server_mailin_mailprocessor.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_mailin_mailprocessor.lo -c u/t_server_mailin_mailprocessor.cpp
+
+u/t_server_mailin_mailprocessor.o: u/t_server_mailin_mailprocessor.cpp
+	@echo "        Compiling u/t_server_mailin_mailprocessor.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_mailin_mailprocessor.o -c u/t_server_mailin_mailprocessor.cpp
+
+u/t_server_mailin_mailprocessor.s: u/t_server_mailin_mailprocessor.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_mailin_mailprocessor.s -S u/t_server_mailin_mailprocessor.cpp
+
+u/t_server_mailout_commandhandler.lo: u/t_server_mailout_commandhandler.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_mailout_commandhandler.lo -c u/t_server_mailout_commandhandler.cpp
+
+u/t_server_mailout_commandhandler.o: u/t_server_mailout_commandhandler.cpp
+	@echo "        Compiling u/t_server_mailout_commandhandler.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_mailout_commandhandler.o -c u/t_server_mailout_commandhandler.cpp
+
+u/t_server_mailout_commandhandler.s: u/t_server_mailout_commandhandler.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_mailout_commandhandler.s -S u/t_server_mailout_commandhandler.cpp
+
+u/t_server_mailout_configuration.lo: u/t_server_mailout_configuration.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_mailout_configuration.lo -c u/t_server_mailout_configuration.cpp
+
+u/t_server_mailout_configuration.o: u/t_server_mailout_configuration.cpp
+	@echo "        Compiling u/t_server_mailout_configuration.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_mailout_configuration.o -c u/t_server_mailout_configuration.cpp
+
+u/t_server_mailout_configuration.s: u/t_server_mailout_configuration.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_mailout_configuration.s -S u/t_server_mailout_configuration.cpp
+
+u/t_server_mailout_mailqueue.lo: u/t_server_mailout_mailqueue.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_mailout_mailqueue.lo -c u/t_server_mailout_mailqueue.cpp
+
+u/t_server_mailout_mailqueue.o: u/t_server_mailout_mailqueue.cpp
+	@echo "        Compiling u/t_server_mailout_mailqueue.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_mailout_mailqueue.o -c u/t_server_mailout_mailqueue.cpp
+
+u/t_server_mailout_mailqueue.s: u/t_server_mailout_mailqueue.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_mailout_mailqueue.s -S u/t_server_mailout_mailqueue.cpp
+
+u/t_server_mailout_message.lo: u/t_server_mailout_message.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_mailout_message.lo -c u/t_server_mailout_message.cpp
+
+u/t_server_mailout_message.o: u/t_server_mailout_message.cpp
+	@echo "        Compiling u/t_server_mailout_message.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_mailout_message.o -c u/t_server_mailout_message.cpp
+
+u/t_server_mailout_message.s: u/t_server_mailout_message.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_mailout_message.s -S u/t_server_mailout_message.cpp
+
+u/t_server_mailout_root.lo: u/t_server_mailout_root.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_mailout_root.lo -c u/t_server_mailout_root.cpp
+
+u/t_server_mailout_root.o: u/t_server_mailout_root.cpp
+	@echo "        Compiling u/t_server_mailout_root.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_mailout_root.o -c u/t_server_mailout_root.cpp
+
+u/t_server_mailout_root.s: u/t_server_mailout_root.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_mailout_root.s -S u/t_server_mailout_root.cpp
+
+u/t_server_mailout_session.lo: u/t_server_mailout_session.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_mailout_session.lo -c u/t_server_mailout_session.cpp
+
+u/t_server_mailout_session.o: u/t_server_mailout_session.cpp
+	@echo "        Compiling u/t_server_mailout_session.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_mailout_session.o -c u/t_server_mailout_session.cpp
+
+u/t_server_mailout_session.s: u/t_server_mailout_session.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_mailout_session.s -S u/t_server_mailout_session.cpp
+
+u/t_server_mailout_template.lo: u/t_server_mailout_template.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_mailout_template.lo -c u/t_server_mailout_template.cpp
+
+u/t_server_mailout_template.o: u/t_server_mailout_template.cpp
+	@echo "        Compiling u/t_server_mailout_template.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_mailout_template.o -c u/t_server_mailout_template.cpp
+
+u/t_server_mailout_template.s: u/t_server_mailout_template.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_mailout_template.s -S u/t_server_mailout_template.cpp
+
+u/t_server_mailout_transmitter.lo: u/t_server_mailout_transmitter.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_mailout_transmitter.lo -c u/t_server_mailout_transmitter.cpp
+
+u/t_server_mailout_transmitter.o: u/t_server_mailout_transmitter.cpp
+	@echo "        Compiling u/t_server_mailout_transmitter.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_mailout_transmitter.o -c u/t_server_mailout_transmitter.cpp
+
+u/t_server_mailout_transmitter.s: u/t_server_mailout_transmitter.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_mailout_transmitter.s -S u/t_server_mailout_transmitter.cpp
+
+u/t_server_mailout_transmitterimpl.lo: \
+    u/t_server_mailout_transmitterimpl.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_mailout_transmitterimpl.lo -c u/t_server_mailout_transmitterimpl.cpp
+
+u/t_server_mailout_transmitterimpl.o: u/t_server_mailout_transmitterimpl.cpp
+	@echo "        Compiling u/t_server_mailout_transmitterimpl.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_mailout_transmitterimpl.o -c u/t_server_mailout_transmitterimpl.cpp
+
+u/t_server_mailout_transmitterimpl.s: u/t_server_mailout_transmitterimpl.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_mailout_transmitterimpl.s -S u/t_server_mailout_transmitterimpl.cpp
+
+u/t_server_monitor_badnessfileobserver.lo: \
+    u/t_server_monitor_badnessfileobserver.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_monitor_badnessfileobserver.lo -c u/t_server_monitor_badnessfileobserver.cpp
+
+u/t_server_monitor_badnessfileobserver.o: \
+    u/t_server_monitor_badnessfileobserver.cpp
+	@echo "        Compiling u/t_server_monitor_badnessfileobserver.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_monitor_badnessfileobserver.o -c u/t_server_monitor_badnessfileobserver.cpp
+
+u/t_server_monitor_badnessfileobserver.s: \
+    u/t_server_monitor_badnessfileobserver.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_monitor_badnessfileobserver.s -S u/t_server_monitor_badnessfileobserver.cpp
+
+u/t_server_monitor_observer.lo: u/t_server_monitor_observer.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_monitor_observer.lo -c u/t_server_monitor_observer.cpp
+
+u/t_server_monitor_observer.o: u/t_server_monitor_observer.cpp
+	@echo "        Compiling u/t_server_monitor_observer.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_monitor_observer.o -c u/t_server_monitor_observer.cpp
+
+u/t_server_monitor_observer.s: u/t_server_monitor_observer.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_monitor_observer.s -S u/t_server_monitor_observer.cpp
+
+u/t_server_monitor_status.lo: u/t_server_monitor_status.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_monitor_status.lo -c u/t_server_monitor_status.cpp
+
+u/t_server_monitor_status.o: u/t_server_monitor_status.cpp
+	@echo "        Compiling u/t_server_monitor_status.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_monitor_status.o -c u/t_server_monitor_status.cpp
+
+u/t_server_monitor_status.s: u/t_server_monitor_status.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_monitor_status.s -S u/t_server_monitor_status.cpp
+
+u/t_server_monitor_statusobserver.lo: u/t_server_monitor_statusobserver.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_monitor_statusobserver.lo -c u/t_server_monitor_statusobserver.cpp
+
+u/t_server_monitor_statusobserver.o: u/t_server_monitor_statusobserver.cpp
+	@echo "        Compiling u/t_server_monitor_statusobserver.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_monitor_statusobserver.o -c u/t_server_monitor_statusobserver.cpp
+
+u/t_server_monitor_statusobserver.s: u/t_server_monitor_statusobserver.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_monitor_statusobserver.s -S u/t_server_monitor_statusobserver.cpp
+
+u/t_server_monitor_timeseries.lo: u/t_server_monitor_timeseries.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_monitor_timeseries.lo -c u/t_server_monitor_timeseries.cpp
+
+u/t_server_monitor_timeseries.o: u/t_server_monitor_timeseries.cpp
+	@echo "        Compiling u/t_server_monitor_timeseries.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_monitor_timeseries.o -c u/t_server_monitor_timeseries.cpp
+
+u/t_server_monitor_timeseries.s: u/t_server_monitor_timeseries.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_monitor_timeseries.s -S u/t_server_monitor_timeseries.cpp
+
+u/t_server_monitor_timeseriesloader.lo: \
+    u/t_server_monitor_timeseriesloader.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_monitor_timeseriesloader.lo -c u/t_server_monitor_timeseriesloader.cpp
+
+u/t_server_monitor_timeseriesloader.o: \
+    u/t_server_monitor_timeseriesloader.cpp
+	@echo "        Compiling u/t_server_monitor_timeseriesloader.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_monitor_timeseriesloader.o -c u/t_server_monitor_timeseriesloader.cpp
+
+u/t_server_monitor_timeseriesloader.s: \
+    u/t_server_monitor_timeseriesloader.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_monitor_timeseriesloader.s -S u/t_server_monitor_timeseriesloader.cpp
+
+u/t_server_monitor_timeserieswriter.lo: \
+    u/t_server_monitor_timeserieswriter.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_monitor_timeserieswriter.lo -c u/t_server_monitor_timeserieswriter.cpp
+
+u/t_server_monitor_timeserieswriter.o: \
+    u/t_server_monitor_timeserieswriter.cpp
+	@echo "        Compiling u/t_server_monitor_timeserieswriter.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_monitor_timeserieswriter.o -c u/t_server_monitor_timeserieswriter.cpp
+
+u/t_server_monitor_timeserieswriter.s: \
+    u/t_server_monitor_timeserieswriter.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_monitor_timeserieswriter.s -S u/t_server_monitor_timeserieswriter.cpp
+
+u/t_server_nntp_root.lo: u/t_server_nntp_root.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_nntp_root.lo -c u/t_server_nntp_root.cpp
+
+u/t_server_nntp_root.o: u/t_server_nntp_root.cpp
+	@echo "        Compiling u/t_server_nntp_root.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_nntp_root.o -c u/t_server_nntp_root.cpp
+
+u/t_server_nntp_root.s: u/t_server_nntp_root.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_nntp_root.s -S u/t_server_nntp_root.cpp
+
 u/t_server_talk_accesschecker.lo: u/t_server_talk_accesschecker.cpp
 	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_accesschecker.lo -c u/t_server_talk_accesschecker.cpp
 
@@ -5101,6 +6905,16 @@ u/t_server_talk_root.o: u/t_server_talk_root.cpp
 
 u/t_server_talk_root.s: u/t_server_talk_root.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_root.s -S u/t_server_talk_root.cpp
+
+u/t_server_talk_session.lo: u/t_server_talk_session.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_session.lo -c u/t_server_talk_session.cpp
+
+u/t_server_talk_session.o: u/t_server_talk_session.cpp
+	@echo "        Compiling u/t_server_talk_session.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_session.o -c u/t_server_talk_session.cpp
+
+u/t_server_talk_session.s: u/t_server_talk_session.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_session.s -S u/t_server_talk_session.cpp
 
 u/t_server_talk_sorter.lo: u/t_server_talk_sorter.cpp
 	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_server_talk_sorter.lo -c u/t_server_talk_sorter.cpp
@@ -5552,6 +7366,26 @@ u/t_util_baseslaverequestsender.o: u/t_util_baseslaverequestsender.cpp
 u/t_util_baseslaverequestsender.s: u/t_util_baseslaverequestsender.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_util_baseslaverequestsender.s -S u/t_util_baseslaverequestsender.cpp
 
+u/t_util_charsetfactory.lo: u/t_util_charsetfactory.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_util_charsetfactory.lo -c u/t_util_charsetfactory.cpp
+
+u/t_util_charsetfactory.o: u/t_util_charsetfactory.cpp
+	@echo "        Compiling u/t_util_charsetfactory.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_util_charsetfactory.o -c u/t_util_charsetfactory.cpp
+
+u/t_util_charsetfactory.s: u/t_util_charsetfactory.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_util_charsetfactory.s -S u/t_util_charsetfactory.cpp
+
+u/t_util_configurationfile.lo: u/t_util_configurationfile.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_util_configurationfile.lo -c u/t_util_configurationfile.cpp
+
+u/t_util_configurationfile.o: u/t_util_configurationfile.cpp
+	@echo "        Compiling u/t_util_configurationfile.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_util_configurationfile.o -c u/t_util_configurationfile.cpp
+
+u/t_util_configurationfile.s: u/t_util_configurationfile.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_util_configurationfile.s -S u/t_util_configurationfile.cpp
+
 u/t_util_configurationfileparser.lo: u/t_util_configurationfileparser.cpp
 	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_util_configurationfileparser.lo -c u/t_util_configurationfileparser.cpp
 
@@ -5701,6 +7535,16 @@ u/t_util_prefixargument.o: u/t_util_prefixargument.cpp
 
 u/t_util_prefixargument.s: u/t_util_prefixargument.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_util_prefixargument.s -S u/t_util_prefixargument.cpp
+
+u/t_util_processrunner.lo: u/t_util_processrunner.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_util_processrunner.lo -c u/t_util_processrunner.cpp
+
+u/t_util_processrunner.o: u/t_util_processrunner.cpp
+	@echo "        Compiling u/t_util_processrunner.cpp..."
+	@$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_util_processrunner.o -c u/t_util_processrunner.cpp
+
+u/t_util_processrunner.s: u/t_util_processrunner.cpp
+	$(CXX) $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_util_processrunner.s -S u/t_util_processrunner.cpp
 
 u/t_util_randomnumbergenerator.lo: u/t_util_randomnumbergenerator.cpp
 	$(CXX) -fPIC $(CXXFLAGS) -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -o u/t_util_randomnumbergenerator.lo -c u/t_util_randomnumbergenerator.cpp
@@ -6032,15 +7876,15 @@ ui/rich/draw1.o: ui/rich/draw.cpp
 ui/rich/draw1.s: ui/rich/draw.cpp
 	$(CXX) $(CXXFLAGS) -o ui/rich/draw1.s -S ui/rich/draw.cpp
 
-ui/root4.lo: ui/root.cpp
-	$(CXX) -fPIC $(CXXFLAGS) -o ui/root4.lo -c ui/root.cpp
+ui/root8.lo: ui/root.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o ui/root8.lo -c ui/root.cpp
 
-ui/root4.o: ui/root.cpp
+ui/root8.o: ui/root.cpp
 	@echo "        Compiling ui/root.cpp..."
-	@$(CXX) $(CXXFLAGS) -o ui/root4.o -c ui/root.cpp
+	@$(CXX) $(CXXFLAGS) -o ui/root8.o -c ui/root.cpp
 
-ui/root4.s: ui/root.cpp
-	$(CXX) $(CXXFLAGS) -o ui/root4.s -S ui/root.cpp
+ui/root8.s: ui/root.cpp
+	$(CXX) $(CXXFLAGS) -o ui/root8.s -S ui/root.cpp
 
 ui/widget1.lo: ui/widget.cpp
 	$(CXX) -fPIC $(CXXFLAGS) -o ui/widget1.lo -c ui/widget.cpp
@@ -6062,15 +7906,25 @@ ui/widgets/statictext1.o: ui/widgets/statictext.cpp
 ui/widgets/statictext1.s: ui/widgets/statictext.cpp
 	$(CXX) $(CXXFLAGS) -o ui/widgets/statictext1.s -S ui/widgets/statictext.cpp
 
-util/application1.lo: util/application.cpp
-	$(CXX) -fPIC $(CXXFLAGS) -o util/application1.lo -c util/application.cpp
+util/application2.lo: util/application.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o util/application2.lo -c util/application.cpp
 
-util/application1.o: util/application.cpp
+util/application2.o: util/application.cpp
 	@echo "        Compiling util/application.cpp..."
-	@$(CXX) $(CXXFLAGS) -o util/application1.o -c util/application.cpp
+	@$(CXX) $(CXXFLAGS) -o util/application2.o -c util/application.cpp
 
-util/application1.s: util/application.cpp
-	$(CXX) $(CXXFLAGS) -o util/application1.s -S util/application.cpp
+util/application2.s: util/application.cpp
+	$(CXX) $(CXXFLAGS) -o util/application2.s -S util/application.cpp
+
+util/plugin/installer1.lo: util/plugin/installer.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o util/plugin/installer1.lo -c util/plugin/installer.cpp
+
+util/plugin/installer1.o: util/plugin/installer.cpp
+	@echo "        Compiling util/plugin/installer.cpp..."
+	@$(CXX) $(CXXFLAGS) -o util/plugin/installer1.o -c util/plugin/installer.cpp
+
+util/plugin/installer1.s: util/plugin/installer.cpp
+	$(CXX) $(CXXFLAGS) -o util/plugin/installer1.s -S util/plugin/installer.cpp
 
 util/plugin/manager1.lo: util/plugin/manager.cpp
 	$(CXX) -fPIC $(CXXFLAGS) -o util/plugin/manager1.lo -c util/plugin/manager.cpp
@@ -6092,15 +7946,15 @@ util/prefixargument1.o: util/prefixargument.cpp
 util/prefixargument1.s: util/prefixargument.cpp
 	$(CXX) $(CXXFLAGS) -o util/prefixargument1.s -S util/prefixargument.cpp
 
-util/rich/parser1.lo: util/rich/parser.cpp
-	$(CXX) -fPIC $(CXXFLAGS) -o util/rich/parser1.lo -c util/rich/parser.cpp
+util/rich/parser2.lo: util/rich/parser.cpp
+	$(CXX) -fPIC $(CXXFLAGS) -o util/rich/parser2.lo -c util/rich/parser.cpp
 
-util/rich/parser1.o: util/rich/parser.cpp
+util/rich/parser2.o: util/rich/parser.cpp
 	@echo "        Compiling util/rich/parser.cpp..."
-	@$(CXX) $(CXXFLAGS) -o util/rich/parser1.o -c util/rich/parser.cpp
+	@$(CXX) $(CXXFLAGS) -o util/rich/parser2.o -c util/rich/parser.cpp
 
-util/rich/parser1.s: util/rich/parser.cpp
-	$(CXX) $(CXXFLAGS) -o util/rich/parser1.s -S util/rich/parser.cpp
+util/rich/parser2.s: util/rich/parser.cpp
+	$(CXX) $(CXXFLAGS) -o util/rich/parser2.s -S util/rich/parser.cpp
 
 util/syntax/factory1.lo: util/syntax/factory.cpp
 	$(CXX) -fPIC $(CXXFLAGS) -o util/syntax/factory1.lo -c util/syntax/factory.cpp

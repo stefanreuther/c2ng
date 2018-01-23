@@ -41,6 +41,7 @@ ui::widgets::ImageButton::draw(gfx::Canvas& can)
         // Draw the image.
         afl::base::Ptr<gfx::Canvas> image = root().provider().getImage(m_image);
         if (image.get() != 0) {
+            // FIXME: 20180101: blitSized() assumes that the image is fully opaque.
             blitSized(ctx, getExtent(), *image);
         }
     }

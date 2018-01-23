@@ -25,11 +25,7 @@ util::RequestThread::RequestThread(String_t name, afl::sys::LogListener& log)
 util::RequestThread::~RequestThread()
 {
     if (m_thread.get() != 0) {
-        {
-            afl::sys::MutexGuard g(m_taskMutex);
-            m_stop = true;
-        }
-        m_taskSemaphore.post();
+        stop();
         m_thread->join();
     }
 }
@@ -76,4 +72,14 @@ util::RequestThread::run()
         }
     }
     m_log.write(m_log.Trace, m_name, _("Thread terminates"));
+}
+
+void
+util::RequestThread::stop()
+{
+    {
+        afl::sys::MutexGuard g(m_taskMutex);
+        m_stop = true;
+    }
+    m_taskSemaphore.post();
 }

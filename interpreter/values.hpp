@@ -25,6 +25,12 @@ namespace interpreter {
         \return newly-created value */
     afl::data::Value* makeIntegerValue(int32_t value);
 
+    /** Make size value.
+        This is the same as makeIntegerValue, but will provide a reasonable fallback (INT_MAX) if the value is out of range.
+        \param value Size value
+        \return newly-created value */
+    afl::data::Value* makeSizeValue(size_t value);
+
     /** Make float value.
         \param value Float value
         \return newly-created value */

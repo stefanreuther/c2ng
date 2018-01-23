@@ -172,6 +172,10 @@ namespace game {
             Games with non-alternative combat internally double the torpedo powers. */
         bool hasDoubleTorpedoPower(const game::config::HostConfiguration& config) const;
 
+        /** Check for ability to do two cargo transfers from a ship.
+            Classic VGAP can do that, Nu has only one slot to store the transfer. */
+        bool hasParallelShipTransfers() const;
+
      private:
         /** Host type. */
         Kind m_kind;

@@ -17,8 +17,8 @@ TestServerInterfaceHostCron::testInterface()
             { return Event(); }
         virtual void listGameEvents(afl::base::Optional<int32_t> /*limit*/, std::vector<Event>& /*result*/)
             { }
-        virtual void kickstartGame(int32_t /*gameId*/)
-            { }
+        virtual bool kickstartGame(int32_t /*gameId*/)
+            { return false; }
     };
     Tester t;
 }

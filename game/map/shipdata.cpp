@@ -4,6 +4,9 @@
 
 #include "game/map/shipdata.hpp"
 
+game::map::ShipData::ShipData(int)
+{ }
+
 game::IntegerProperty_t
 game::map::getShipMass(const ShipData& data, const game::spec::ShipList& shipList)
 {
@@ -38,4 +41,16 @@ game::map::getShipMass(const ShipData& data, const game::spec::ShipList& shipLis
     } else {
         return IntegerProperty_t();
     }
+}
+
+bool
+game::map::isTransferActive(const ShipData::Transfer& tr)
+{
+    return tr.neutronium.orElse(0) != 0
+        || tr.tritanium.orElse(0) != 0
+        || tr.duranium.orElse(0) != 0
+        || tr.molybdenum.orElse(0) != 0
+        || tr.colonists.orElse(0) != 0
+        || tr.supplies.orElse(0) != 0
+        || tr.targetId.orElse(0) != 0;
 }

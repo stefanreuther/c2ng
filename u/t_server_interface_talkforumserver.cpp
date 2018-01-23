@@ -3,23 +3,26 @@
   *  \brief Test for server::interface::TalkForumServer
   */
 
-#include <stdexcept>
 #include "server/interface/talkforumserver.hpp"
 
+#include <stdexcept>
 #include "t_server_interface.hpp"
-#include "server/interface/talkforum.hpp"
-#include "u/helper/callreceiver.hpp"
-#include "afl/string/format.hpp"
 #include "afl/data/access.hpp"
-#include "server/types.hpp"
+#include "afl/string/format.hpp"
+#include "afl/test/callreceiver.hpp"
+#include "server/interface/talkforum.hpp"
 #include "server/interface/talkforumclient.hpp"
+#include "server/types.hpp"
 
 using afl::string::Format;
 using afl::data::Segment;
 
 namespace {
-    class TalkForumMock : public server::interface::TalkForum, public CallReceiver {
+    class TalkForumMock : public server::interface::TalkForum, public afl::test::CallReceiver {
      public:
+        TalkForumMock(afl::test::Assert a)
+            : CallReceiver(a)
+            { }
         virtual int32_t add(afl::base::Memory<const String_t> config)
             {
                 String_t cmd = "add(";
@@ -135,7 +138,7 @@ namespace {
 void
 TestServerInterfaceTalkForumServer::testIt()
 {
-    TalkForumMock mock;
+    TalkForumMock mock("testIt");
     server::interface::TalkForumServer testee(mock);
 
     // add/FORUMADD
@@ -286,7 +289,7 @@ TestServerInterfaceTalkForumServer::testIt()
 void
 TestServerInterfaceTalkForumServer::testErrors()
 {
-    TalkForumMock mock;
+    TalkForumMock mock("testErrors");
     server::interface::TalkForumServer testee(mock);
 
     Segment empty;    // g++-3.4 sees an invocation of a copy constructor if I construct this object in-place.
@@ -306,7 +309,7 @@ TestServerInterfaceTalkForumServer::testErrors()
 void
 TestServerInterfaceTalkForumServer::testRoundtrip()
 {
-    TalkForumMock mock;
+    TalkForumMock mock("testRoundtrip");
     server::interface::TalkForumServer level1(mock);
     server::interface::TalkForumClient level2(level1);
     server::interface::TalkForumServer level3(level2);

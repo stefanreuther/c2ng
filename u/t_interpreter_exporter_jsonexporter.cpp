@@ -66,7 +66,7 @@ TestInterpreterExporterJsonExporter::testIt()
     // Output receiver
     afl::io::InternalStream outputStream;
     afl::io::TextFile outputText(outputStream);
-    outputText.setSystemNewline(true);
+    outputText.setSystemNewline(false);
 
     // Testee
     interpreter::exporter::JsonExporter testee(outputText);
@@ -122,7 +122,7 @@ TestInterpreterExporterJsonExporter::testEmpty()
     // Output receiver
     afl::io::InternalStream outputStream;
     afl::io::TextFile outputText(outputStream);
-    outputText.setSystemNewline(true);
+    outputText.setSystemNewline(false);
 
     // Testee
     interpreter::exporter::JsonExporter testee(outputText);
@@ -148,7 +148,7 @@ TestInterpreterExporterJsonExporter::testArray()
     // Output receiver
     afl::io::InternalStream outputStream;
     afl::io::TextFile outputText(outputStream);
-    outputText.setSystemNewline(true);
+    outputText.setSystemNewline(false);
 
     // Testee
     interpreter::exporter::JsonExporter testee(outputText);

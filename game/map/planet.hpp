@@ -66,13 +66,6 @@ namespace game { namespace map {
             CashTime               // Cash/supplies
         };
 
-        enum TechLevel {
-            EngineTech,                                             ///< Engine tech level.
-            HullTech,                                               ///< Hull tech level.
-            BeamTech,                                               ///< Beam weapon tech level.
-            TorpedoTech                                             ///< Torpedo tech level.
-        };
-
 //     enum {
 //         FlagOwnShipsInOrbit     = 1,    ///< Own ship(s) in orbit.
 //         FlagAlliedShipsInOrbit  = 2,    ///< Allied ship(s) in orbit.
@@ -87,9 +80,7 @@ namespace game { namespace map {
 
 //     // Load and Save:
         void addCurrentPlanetData(const PlanetData& data, PlayerSet_t source);
-        void addPreviousPlanetData(const PlanetData& data);
         void addCurrentBaseData(const BaseData& data, PlayerSet_t source);
-        void addPreviousBaseData(const BaseData& data);
 //     void        addHistoryData(const TDbPlanet& data);
 //     void        addMessageInformation(const GMessageInformation& info);  // planet-hist.cc
 
@@ -97,7 +88,8 @@ namespace game { namespace map {
         void setName(const String_t& name);
         void setKnownToNotExist(bool value);
 
-//     void        getPlanetData(TPlanet& dat) const;
+        void getCurrentPlanetData(PlanetData& data) const;
+        void getCurrentBaseData(BaseData& data) const;
 //     void        getBaseData(TStarbase& bdat) const;
 //     void        getHistoryData(TDbPlanet& data) const;
 
@@ -192,15 +184,9 @@ namespace game { namespace map {
         void               setBaseShipyardOrder(IntegerProperty_t action, IntegerProperty_t id);
 
         // Component storage accessors:
-        IntegerProperty_t  getBaseEngineStore(int slot) const;
-        IntegerProperty_t  getBaseBeamStore(int slot) const;
-        IntegerProperty_t  getBaseHullStoreSlot(int slot) const;
-        IntegerProperty_t  getBaseLauncherStore(int slot) const;
-
-        void               setBaseEngineStore(int slot, IntegerProperty_t amount);
-        void               setBaseBeamStore(int slot, IntegerProperty_t amount);
-        void               setBaseHullStoreSlot(int slot, IntegerProperty_t amount);
-        void               setBaseLauncherStore(int slot, IntegerProperty_t amount);
+        // for hulls, this is a TRUEHULL SLOT, not a HULL NUMBER.
+        IntegerProperty_t  getBaseStorage(TechLevel area, int slot) const;
+        void               setBaseStorage(TechLevel area, int slot, IntegerProperty_t amount);
 
         // Build order accessors:
         IntegerProperty_t  getBaseBuildHull(const game::config::HostConfiguration& config, const game::spec::HullAssignmentList& map) const;
@@ -233,10 +219,8 @@ namespace game { namespace map {
         bool m_knownToNotExist; // Override saying this planet does not exist
 
         PlanetData m_currentPlanetData;
-        PlanetData m_previousPlanetData;
 
         BaseData m_currentBaseData;
-        BaseData m_previousBaseData;
 
         BaseKind m_baseKind;
         PlanetKind m_planetKind;
@@ -254,8 +238,8 @@ namespace game { namespace map {
         bool m_isPlanetKnownToHaveNatives;
         IntegerProperty_t m_industryLevel;
 
-        int m_autobuildGoals[NUM_PLANETARY_BUILDINGS];
-        int m_autobuildSpeeds[NUM_PLANETARY_BUILDINGS];
+        int m_autobuildGoals[NUM_PLANETARY_BUILDING_TYPES];
+        int m_autobuildSpeeds[NUM_PLANETARY_BUILDING_TYPES];
 
         // Base extra info
         IntegerProperty_t m_queuePosition;

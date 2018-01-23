@@ -10,7 +10,6 @@
 #include "afl/charset/charset.hpp"
 #include "afl/charset/codepage.hpp"
 #include "afl/charset/codepagecharset.hpp"
-#include "afl/charset/defaultcharsetfactory.hpp"
 #include "afl/io/textfile.hpp"
 #include "afl/io/textwriter.hpp"
 #include "afl/string/format.hpp"
@@ -41,20 +40,12 @@
 #include "util/profiledirectory.hpp"
 #include "util/translation.hpp"
 #include "version.hpp"
+#include "util/charsetfactory.hpp"
+#include "interpreter/exporter/format.hpp"
+#include "interpreter/exporter/configuration.hpp"
 
 namespace {
     const char LOG_NAME[] = "export";
-
-    enum OutputType {
-        tText,
-        tTable,
-        tCommaSV,
-        tTabSV,
-        tSemicolonSV,
-        tJSON,
-        tHTML,
-        tDBF
-    };
 
     /* Meta-context for generating field names. Used to implement '-F'. */
     // FIXME: move into library
@@ -114,7 +105,7 @@ namespace {
         if (m_position < m_names.size()) {
             switch (meta_mapping[index].index) {
              case 0:
-                return interpreter::makeIntegerValue(int32_t(m_position));
+                return interpreter::makeSizeValue(m_position);
              case 1:
                 return interpreter::makeStringValue(m_names[m_position]);
              case 2:
@@ -187,31 +178,31 @@ namespace {
 
 
 
-    void doTextExport(OutputType typ, interpreter::exporter::FieldList& job, interpreter::Context* ctx, afl::io::TextWriter& tf)
+    void doTextExport(interpreter::exporter::Format typ, interpreter::exporter::FieldList& job, interpreter::Context* ctx, afl::io::TextWriter& tf)
     {
         switch (typ) {
-         case tText:
+         case interpreter::exporter::TextFormat:
             interpreter::exporter::TextExporter(tf, false).doExport(ctx, util::ConstantAnswerProvider::sayYes, job);
             break;
-         case tTable:
+         case interpreter::exporter::TableFormat:
             interpreter::exporter::TextExporter(tf, true).doExport(ctx, util::ConstantAnswerProvider::sayYes, job);
             break;
-         case tCommaSV:
+         case interpreter::exporter::CommaSVFormat:
             interpreter::exporter::SeparatedTextExporter(tf, ',').doExport(ctx, util::ConstantAnswerProvider::sayYes, job);
             break;
-         case tTabSV:
+         case interpreter::exporter::TabSVFormat:
             interpreter::exporter::SeparatedTextExporter(tf, '\t').doExport(ctx, util::ConstantAnswerProvider::sayYes, job);
             break;
-         case tSemicolonSV:
+         case interpreter::exporter::SemicolonSVFormat:
             interpreter::exporter::SeparatedTextExporter(tf, ';').doExport(ctx, util::ConstantAnswerProvider::sayYes, job);
             break;
-         case tJSON:
+         case interpreter::exporter::JSONFormat:
             interpreter::exporter::JsonExporter(tf).doExport(ctx, util::ConstantAnswerProvider::sayYes, job);
             break;
-         case tHTML:
+         case interpreter::exporter::HTMLFormat:
             interpreter::exporter::HtmlExporter(tf).doExport(ctx, util::ConstantAnswerProvider::sayYes, job);
             break;
-         case tDBF:
+         case interpreter::exporter::DBaseFormat:
             /* handled outside */
             break;
         }
@@ -238,17 +229,16 @@ ConsoleExportApplication::appMain()
     util::ProfileDirectory profile(environment(), fileSystem(), translator(), log());
 
     // Parse args
-    interpreter::exporter::FieldList job;
+    interpreter::exporter::Configuration config;
 
     afl::base::Optional<String_t> arg_array;
     afl::base::Optional<String_t> arg_gamedir;
     afl::base::Optional<String_t> arg_rootdir;
     afl::base::Optional<String_t> arg_outfile;
-    OutputType arg_typ = tText;
     int arg_race = 0;
     bool opt_fields = false;
     std::auto_ptr<afl::charset::Charset> gameCharset(new afl::charset::CodepageCharset(afl::charset::g_codepageLatin1));
-    std::auto_ptr<afl::charset::Charset> outputCharset;
+    bool hadCharsetOption = false;
 
     int i;
     afl::sys::StandardCommandLineParser commandLine(environment().getCommandLine());
@@ -257,7 +247,7 @@ ConsoleExportApplication::appMain()
     while (commandLine.getNext(opt, p)) {
         if (opt) {
             if (p == "C") {
-                if (afl::charset::Charset* cs = afl::charset::DefaultCharsetFactory().createCharset(fetchArg("-C", commandLine))) {
+                if (afl::charset::Charset* cs = util::CharsetFactory().createCharset(fetchArg("-C", commandLine))) {
                     gameCharset.reset(cs);
                 } else {
                     errorExit(_("the specified character set is not known"));
@@ -265,7 +255,7 @@ ConsoleExportApplication::appMain()
             } else if (p == "f") {
                 String_t pp = fetchArg("-f", commandLine);
                 try {
-                    job.addList(pp);
+                    config.fieldList().addList(pp);
                 }
                 catch (interpreter::Error& e) {
                     errorExit(afl::string::Format("'-f %s': %s", pp, e.what()));
@@ -279,34 +269,17 @@ ConsoleExportApplication::appMain()
             } else if (p == "A") {
                 arg_array = fetchArg("-A", commandLine);
             } else if (p == "t") {
-                String_t t = fetchArg("-t", commandLine);
-                if (t == "text") {
-                    arg_typ = tText;
-                } else if (t == "table") {
-                    arg_typ = tTable;
-                } else if (t == "dbf") {
-                    arg_typ = tDBF;
-                } else if (t == "csv") {
-                    arg_typ = tCommaSV;
-                } else if (t == "tsv") {
-                    arg_typ = tTabSV;
-                } else if (t == "ssv") {
-                    arg_typ = tSemicolonSV;
-                } else if (t == "json") {
-                    arg_typ = tJSON;
-                } else if (t == "html") {
-                    arg_typ = tHTML;
-                } else {
-                    errorExit(_("invalid output format specified"));
-                }
+                config.setFormatByName(fetchArg("-t", commandLine));
             } else if (p == "o") {
                 arg_outfile = fetchArg("-o", commandLine);
             } else if (p == "O") {
-                if (afl::charset::Charset* cs = afl::charset::DefaultCharsetFactory().createCharset(fetchArg("-O", commandLine))) {
-                    outputCharset.reset(cs);
-                } else {
-                    errorExit(_("the specified character set is not known"));
-                }
+                config.setCharsetByName(fetchArg("-O", commandLine));
+                hadCharsetOption = true;
+            } else if (p == "c") {
+                afl::base::Ref<afl::io::Stream> file = fileSystem().openFile(fetchArg("-c", commandLine), afl::io::FileSystem::OpenRead);
+                interpreter::exporter::Configuration tmpConfig(config);
+                tmpConfig.load(*file);
+                config = tmpConfig;
             } else if (p == "h" || p == "help") {
                 help();
             } else {
@@ -332,11 +305,11 @@ ConsoleExportApplication::appMain()
     }
 
     // Default field set
-    if (job.size() == 0) {
+    if (config.fieldList().size() == 0) {
         if (opt_fields) {
-            job.addList("NAME@30,TYPE@10");
+            config.fieldList().addList("NAME@30,TYPE@10");
         } else {
-            job.addList("ID@5,NAME@30");
+            config.fieldList().addList("ID@5,NAME@30");
         }
     }
 
@@ -348,9 +321,10 @@ ConsoleExportApplication::appMain()
         loader.setCharsetNew(gameCharset->clone());
 
         // Check game data
-        afl::base::Ptr<game::Root> root = loader.load(fs.openDirectory(arg_gamedir.orElse(".")), false);
+        const String_t usedGameDir = arg_gamedir.orElse(".");
+        afl::base::Ptr<game::Root> root = loader.load(fs.openDirectory(usedGameDir), false);
         if (root.get() == 0 || root->getTurnLoader().get() == 0) {
-            errorExit(_("no game data found"));
+            errorExit(afl::string::Format(_("no game data found in directory \"%s\"").c_str(), usedGameDir));
         }
 
         // Check player number
@@ -388,30 +362,28 @@ ConsoleExportApplication::appMain()
         }
 
         // Do it.
-        if (arg_typ == tDBF) {
+        if (config.getFormat() == interpreter::exporter::DBaseFormat) {
             // Output to DBF file. Requires file name.
             String_t outfile;
             if (!arg_outfile.get(outfile)) {
                 errorExit(_("output to DBF file needs an output file name ('-o')"));
             }
             afl::base::Ref<afl::io::Stream> s = fs.openFile(outfile, afl::io::FileSystem::Create);
-            interpreter::exporter::DbfExporter(*s).doExport(array.get(), util::ConstantAnswerProvider::sayYes, job);
+            interpreter::exporter::DbfExporter(*s).doExport(array.get(), util::ConstantAnswerProvider::sayYes, config.fieldList());
         } else {
             String_t outfile;
             if (!arg_outfile.get(outfile)) {
                 // Output to console. The console performs character set conversion.
-                if (outputCharset.get() != 0) {
+                if (hadCharsetOption) {
                     log().write(afl::sys::LogListener::Warn, "export", _("WARNING: Option '-O' has been ignored because standard output is being used."));
                 }
-                doTextExport(arg_typ, job, array.get(), standardOutput());
+                doTextExport(config.getFormat(), config.fieldList(), array.get(), standardOutput());
             } else {
                 // Output to file
                 afl::base::Ref<afl::io::Stream> s = fs.openFile(outfile, afl::io::FileSystem::Create);
                 afl::io::TextFile tf(*s);
-                if (outputCharset.get() != 0) {
-                    tf.setCharsetNew(outputCharset->clone());
-                }
-                doTextExport(arg_typ, job, array.get(), tf);
+                tf.setCharsetNew(config.createCharset());
+                doTextExport(config.getFormat(), config.fieldList(), array.get(), tf);
                 tf.flush();
             }
         }
@@ -426,7 +398,7 @@ void
 ConsoleExportApplication::help()
 {
     afl::io::TextWriter& out = standardOutput();
-    out.writeLine(afl::string::Format(_("PCC2 Export v%s - (c) 2016 Stefan Reuther").c_str(), PCC2_VERSION));
+    out.writeLine(afl::string::Format(_("PCC2 Export v%s - (c) 2017-2018 Stefan Reuther").c_str(), PCC2_VERSION));
     out.writeLine();
     out.writeLine(afl::string::Format(_("Usage:\n"
                                         "  %s [-h]\n"
@@ -441,6 +413,7 @@ ConsoleExportApplication::help()
                                         "  -o FILE         Set output file name (default: stdout)\n"
                                         "  -O CHARSET      Set output file character set (default: UTF-8)\n"
                                         "  -F              Export list of fields instead of game data\n"
+                                        "  -c FILE         Read configuration from file\n"
                                         "\n"
                                         "Types:\n"
                                         "  dbf             dBASE file (needs '-o')\n"
@@ -450,7 +423,7 @@ ConsoleExportApplication::help()
                                         "  json            JSON (JavaScript)\n"
                                         "  html            HTML\n"
                                         "\n"
-                                        "Report bugs to <Streu@gmx.de>\n").c_str(),
+                                        "Report bugs to <Streu@gmx.de>").c_str(),
                                       environment().getInvocationName()));
     out.flush();
     exit(0);

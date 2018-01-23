@@ -1,0 +1,33 @@
+!set status_1 accepted (green).
+!set status_2 accepted with minor errors (yellow).
+!set status_3 REJECTED due to major errors (red).
+!set status_4 REJECTED due to major damage.
+!set status_5 REJECTED because it was stale.
+!-
+From: PlanetsCentral Host <host@planetscentral.com>
+Subject: [PlanetsCentral] $(gamename): Turn File Confirmation for Player $(slot), Turn $(gameturn)
+X-PCC-Game-Number: $(gameid)
+
+Hi,
+
+your turn file for turn $(gameturn) of
+game #$(gameid), $(gamename)
+was received and was
+$(status_$(trn_status))
+
+
+>> Turn Checker Output
+
+$(trn_output)
+
+
+>> Mail Information
+
+Subject:    $(mail_subject)
+Date:       $(mail_date)
+Message-Id: $(mail_messageid)
+File Path:  $(mail_path)
+
+-- 
+To change your email settings, go to
+<http://planetscentral.com/settings.cgi>.

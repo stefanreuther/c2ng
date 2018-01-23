@@ -1,0 +1,27 @@
+/*!
+     \namespace server::host
+     \brief c2host server
+
+     This namespace implements the c2host service.
+     c2host implements game management including the scheduler.
+
+     <b>Basics:</b>
+
+     Games are identified by game Ids (numbers).
+     Users are identified by user Ids which are treated as strings.
+
+     c2host interfaces to
+     - c2router (to close sessions for games that are about to host)
+     - c2talk (to manage forums associated with games)
+     - c2file (to manage host files [hostfile] and user files [userfile])
+
+     Unlike c2host classic, c2host-ng does not assume to share a filespace with hostfile.
+     Instead, files are copied in and out.
+     This provides additional isolation and allows c2file to implement a more efficient mapping than the classic 1:1.
+
+     <b>Entry points:</b>
+
+     - server::host::CommandHandler
+     - server::host::Root
+     - server::host::Game
+ */

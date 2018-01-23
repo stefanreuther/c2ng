@@ -12,6 +12,12 @@ class TestGameInterfaceEngineContext : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestGameInterfaceEngineProperty : public CxxTest::TestSuite {
+ public:
+    void testGet();
+    void testSet();
+};
+
 class TestGameInterfaceExplosionContext : public CxxTest::TestSuite {
  public:
     void testIt();

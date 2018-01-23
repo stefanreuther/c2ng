@@ -24,7 +24,7 @@ namespace game { namespace browser {
         Browser& m_browser;
 
         // RootLoader
-        game::v3::RootLoader m_v3loader;
+        game::v3::RootLoader m_v3Loader;
     };
 
 } }

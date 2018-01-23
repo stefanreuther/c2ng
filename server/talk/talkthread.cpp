@@ -70,7 +70,7 @@ server::talk::TalkThread::setSticky(int32_t threadId, bool flag)
     }
 
     // Permission check
-    m_session.checkPrivilege(t.forum(m_root).deletePermissions().get(), m_root);
+    m_session.checkPermission(t.forum(m_root).deletePermissions().get(), m_root);
 
     // Execute
     t.setSticky(m_root, flag);
@@ -96,7 +96,7 @@ server::talk::TalkThread::getPermissions(int32_t threadId, afl::base::Memory<con
         if (str.empty()) {
             str = f.header().stringField(key).get();
         }
-        if (m_session.hasPrivilege(str, m_root)) {
+        if (m_session.hasPermission(str, m_root)) {
             result |= mask;
         }
         mask <<= 1;
@@ -126,8 +126,8 @@ server::talk::TalkThread::moveToForum(int32_t threadId, int32_t forumId)
 
     // Check permissions: must have delete permission on source forum, and write permission on target
     if (!m_session.isAdmin()) {
-        m_session.checkPrivilege(src.deletePermissions().get(), m_root);
-        m_session.checkPrivilege(dst.writePermissions().get(), m_root);
+        m_session.checkPermission(src.deletePermissions().get(), m_root);
+        m_session.checkPermission(dst.writePermissions().get(), m_root);
     }
 
     // Do it. Actual forum move is trivial, but we must update all sequence numbers and change
@@ -189,7 +189,7 @@ server::talk::TalkThread::remove(int32_t threadId)
         // Check delete permissions
         Forum f(t.forum(m_root));
         if (!m_session.isAdmin()) {
-            m_session.checkPrivilege(f.deletePermissions().get(), m_root);
+            m_session.checkPermission(f.deletePermissions().get(), m_root);
         }
 
         // Do it

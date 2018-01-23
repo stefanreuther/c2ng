@@ -1,0 +1,24 @@
+!-
+!-  NOTE: this is sent to unverified addresses!
+!-
+From: PlanetsCentral Host <host@planetscentral.com>
+Subject: [PlanetsCentral] Turn file rejected
+
+Hi,
+
+your turn file was REJECTED.
+I could not match it to any active game you play.
+
+Probably you have subscribed to the game using a different email
+address then for submitting this turn. Please resubmit the file
+with the correct sender address, or use the web interface at
+<http://planetscentral.com/login.cgi?returnto=host/>.
+
+
+>> Mail Information
+
+Subject:    $(mail_subject)
+From:       $(mail_from)
+Date:       $(mail_date)
+Message-Id: $(mail_messageid)
+File Path:  $(mail_path)

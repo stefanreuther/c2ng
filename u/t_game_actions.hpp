@@ -7,12 +7,151 @@
 
 #include <cxxtest/TestSuite.h>
 
+class TestGameActionsBaseBuildAction : public CxxTest::TestSuite {
+ public:
+    void testError();
+    void testSuccess();
+};
+
+class TestGameActionsBaseBuildExecutor : public CxxTest::TestSuite {
+ public:
+    void testInterface();
+};
+
+class TestGameActionsBuildAmmo : public CxxTest::TestSuite {
+ public:
+    void testFail();
+    void testSuccess();
+    void testLimitCapacity();
+    void testLimitResource();
+    void testLimitKey();
+    void testLimitKeyDowngrade();
+    void testLimitKeyDowngradeNoListener();
+    void testLimitTechCost();
+    void testSellNoReverter();
+    void testSellReverter();
+    void testInvalidTypes();
+    void testDifferentContainers();
+};
+
+class TestGameActionsBuildParts : public CxxTest::TestSuite {
+ public:
+    void testBuild();
+    void testAdd();
+    void testModify();
+    void testModifyTech();
+    void testRevert();
+    void testShipBuild();
+    void testShipBuildMin();
+    void testShipBuildOther();
+};
+
+class TestGameActionsBuildShip : public CxxTest::TestSuite {
+ public:
+    void testError();
+    void testSuccess();
+    void testNoBeams();
+    void testInitialTech();
+    void testTechUpgrade();
+    void testTechUpgradeFail();
+    void testUseParts();
+    void testUsePartsPartial();
+    void testPreexistingOrder();
+};
+
+class TestGameActionsBuildStarbase : public CxxTest::TestSuite {
+ public:
+    void testError();
+    void testErrorNullOp();
+    void testNormal();
+    void testModify();
+    void testConfigChange();
+    void testConfigChangeSignal();
+    void testTooExpensive();
+};
+
+class TestGameActionsBuildStructures : public CxxTest::TestSuite {
+ public:
+    void testError();
+    void testSuccess();
+    void testModify();
+    void testMulti();
+    void testResourceLimit();
+    void testAutoBuild();
+    void testAutoBuildGroup();
+    void testBuildFailure();
+};
+
+class TestGameActionsCargoCostAction : public CxxTest::TestSuite {
+ public:
+    void testNormal();
+    void testMissingMineral();
+    void testMissingMoney();
+    void testMissingSupplies();
+    void testMissingLotsOfMoney();
+    void testMultiModification();
+    void testUnderlayingChange();
+};
+
+class TestGameActionsCargoTransfer : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testNormal();
+    void testUnloadNoSource();
+    void testUnloadNoTarget();
+    void testUnloadMultipleTarget();
+    void testUnloadNormal();
+    void testUnloadSell();
+    void testLimitRoom();
+    void testLimitTypes();
+    void testSupplySale();
+    void testOverloadEmpty();
+    void testOverloadBefore();
+    void testOverloadAfter();
+    void testTemporary();
+    void testCargoSpec();
+    void testCargoSpecSupplySale();
+};
+
+class TestGameActionsCargoTransferSetup : public CxxTest::TestSuite {
+ public:
+    void testInit();
+    void testCreateNonexistant();
+    void testOwnShipOwnShip();
+    void testOwnShipAlliedShip();
+    void testOwnShipForeignShip();
+    void testForeignShipOwnShip();
+    void testForeignShipForeignShip();
+    void testOwnShipForeignShipConflict();
+    void testOwnShipForeignShipAutoCancel();
+    void testShipMismatch();
+    void testJettisonNormal();
+    void testJettisonFail();
+    void testJettisonFailPlanet();
+    void testOwnPlanetOwnShip();
+    void testOwnPlanetAlliedShip();
+    void testOwnPlanetForeignShip();
+    void testForeignPlanetOwnShip();
+    void testForeignShipOwnPlanet();
+    void testOwnPlanetForeignShipConflict();
+};
+
 class TestGameActionsPreconditions : public CxxTest::TestSuite {
  public:
     void testShip();
     void testPlanet();
     void testBase();
     void testSession();
+};
+
+class TestGameActionsTechUpgrade : public CxxTest::TestSuite {
+ public:
+    void testFail();
+    void testSimple();
+    void testRevertable();
+    void testRevertableChange();
+    void testRevertableShip();
+    void testRevertableNoSignal();
 };
 
 #endif

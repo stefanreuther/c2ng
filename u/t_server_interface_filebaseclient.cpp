@@ -3,15 +3,15 @@
   *  \brief Test for server::interface::FileBaseClient
   */
 
-#include <memory>
 #include "server/interface/filebaseclient.hpp"
 
+#include <memory>
 #include "t_server_interface.hpp"
-#include "u/helper/commandhandlermock.hpp"
 #include "afl/data/hash.hpp"
 #include "afl/data/hashvalue.hpp"
 #include "afl/data/vector.hpp"
 #include "afl/data/vectorvalue.hpp"
+#include "afl/test/commandhandler.hpp"
 #include "server/types.hpp"
 
 using afl::data::Hash;
@@ -26,23 +26,23 @@ TestServerInterfaceFileBaseClient::testIt()
 {
     using server::interface::FileBase;
 
-    CommandHandlerMock mock;
+    afl::test::CommandHandler mock("testIt");
     server::interface::FileBaseClient testee(mock);
 
     // copyFile
-    mock.expectCall("CP|a/from|b/to");
-    mock.provideReturnValue(0);
+    mock.expectCall("CP, a/from, b/to");
+    mock.provideNewResult(0);
     testee.copyFile("a/from", "b/to");
 
     // forgetDirectory
-    mock.expectCall("FORGET|a/b");
-    mock.provideReturnValue(0);
+    mock.expectCall("FORGET, a/b");
+    mock.provideNewResult(0);
     testee.forgetDirectory("a/b");
 
     // testFiles
     {
-        mock.expectCall("FTEST|f1|f2|ff");
-        mock.provideReturnValue(new VectorValue(Vector::create(Segment().pushBackInteger(1).pushBackInteger(0).pushBackInteger(1))));
+        mock.expectCall("FTEST, f1, f2, ff");
+        mock.provideNewResult(new VectorValue(Vector::create(Segment().pushBackInteger(1).pushBackInteger(0).pushBackInteger(1))));
 
         String_t fileNames[] = { "f1", "f2", "ff" };
         afl::data::IntegerList_t result;
@@ -55,8 +55,8 @@ TestServerInterfaceFileBaseClient::testIt()
     }
 
     // getFile
-    mock.expectCall("GET|a/b/c");
-    mock.provideReturnValue(server::makeStringValue("...content..."));
+    mock.expectCall("GET, a/b/c");
+    mock.provideNewResult(server::makeStringValue("...content..."));
     TS_ASSERT_EQUALS(testee.getFile("a/b/c"), "...content...");
 
     // getDirectoryContent
@@ -82,8 +82,8 @@ TestServerInterfaceFileBaseClient::testIt()
         in->pushBackNew(new HashValue(ufo));
 
         // Test
-        mock.expectCall("LS|a");
-        mock.provideReturnValue(new VectorValue(in));
+        mock.expectCall("LS, a");
+        mock.provideNewResult(new VectorValue(in));
         afl::container::PtrMap<String_t, FileBase::Info> result;
         testee.getDirectoryContent("a", result);
 
@@ -123,8 +123,8 @@ TestServerInterfaceFileBaseClient::testIt()
         in->setNew("perms", new VectorValue(Vector::create(Segment().pushBackNew(new HashValue(perm1)).pushBackNew(new HashValue(perm2)))));
 
         // Do it
-        mock.expectCall("LSPERM|u/foo");
-        mock.provideReturnValue(new HashValue(in));
+        mock.expectCall("LSPERM, u/foo");
+        mock.provideNewResult(new HashValue(in));
 
         std::vector<FileBase::Permission> result;
         String_t owner;
@@ -139,49 +139,49 @@ TestServerInterfaceFileBaseClient::testIt()
     }
 
     // createDirectory etc.
-    mock.expectCall("MKDIR|a/dir");
-    mock.provideReturnValue(0);
+    mock.expectCall("MKDIR, a/dir");
+    mock.provideNewResult(0);
     testee.createDirectory("a/dir");
 
-    mock.expectCall("MKDIRHIER|a/b/c/d/e/f");
-    mock.provideReturnValue(0);
+    mock.expectCall("MKDIRHIER, a/b/c/d/e/f");
+    mock.provideNewResult(0);
     testee.createDirectoryTree("a/b/c/d/e/f");
 
-    mock.expectCall("MKDIRAS|u/user|1030");
-    mock.provideReturnValue(0);
+    mock.expectCall("MKDIRAS, u/user, 1030");
+    mock.provideNewResult(0);
     testee.createDirectoryAsUser("u/user", "1030");
 
     // getDirectoryProperty
     {
-        mock.expectCall("PROPGET|dir|name");
-        mock.provideReturnValue(server::makeStringValue("Dir Name"));
+        mock.expectCall("PROPGET, dir, name");
+        mock.provideNewResult(server::makeStringValue("Dir Name"));
 
         std::auto_ptr<afl::data::Value> p(testee.getDirectoryProperty("dir", "name"));
         TS_ASSERT_EQUALS(server::toString(p.get()), "Dir Name");
     }
 
     // setDirectoryProperty
-    mock.expectCall("PROPSET|dir|name|New Name");
-    mock.provideReturnValue(0);
+    mock.expectCall("PROPSET, dir, name, New Name");
+    mock.provideNewResult(0);
     testee.setDirectoryProperty("dir", "name", "New Name");
 
     // putFile
-    mock.expectCall("PUT|file|content...");
-    mock.provideReturnValue(0);
+    mock.expectCall("PUT, file, content...");
+    mock.provideNewResult(0);
     testee.putFile("file", "content...");
 
     // remove
-    mock.expectCall("RM|a/file");
-    mock.provideReturnValue(0);
+    mock.expectCall("RM, a/file");
+    mock.provideNewResult(0);
     testee.removeFile("a/file");
 
-    mock.expectCall("RMDIR|a/d");
-    mock.provideReturnValue(0);
+    mock.expectCall("RMDIR, a/d");
+    mock.provideNewResult(0);
     testee.removeDirectory("a/d");
 
     // setDirectoryPermissions
-    mock.expectCall("SETPERM|dir|1050|rw");
-    mock.provideReturnValue(0);
+    mock.expectCall("SETPERM, dir, 1050, rw");
+    mock.provideNewResult(0);
     testee.setDirectoryPermissions("dir", "1050", "rw");
 
     // getFileInformation
@@ -191,8 +191,8 @@ TestServerInterfaceFileBaseClient::testIt()
         file->setNew("size", server::makeIntegerValue(999));
         file->setNew("id", server::makeStringValue("55ca6286e3e4f4fba5d0448333fa99fc5a404a73"));
 
-        mock.expectCall("STAT|a/x/file.bin");
-        mock.provideReturnValue(new HashValue(file));
+        mock.expectCall("STAT, a/x/file.bin");
+        mock.provideNewResult(new HashValue(file));
 
         FileBase::Info out = testee.getFileInformation("a/x/file.bin");
         TS_ASSERT_EQUALS(out.type, FileBase::IsFile);
@@ -207,8 +207,8 @@ TestServerInterfaceFileBaseClient::testIt()
         in->setNew("files", server::makeIntegerValue(1075));
         in->setNew("kbytes", server::makeIntegerValue(13427));
 
-        mock.expectCall("USAGE|u");
-        mock.provideReturnValue(new HashValue(in));
+        mock.expectCall("USAGE, u");
+        mock.provideNewResult(new HashValue(in));
 
         FileBase::Usage out = testee.getDiskUsage("u");
         TS_ASSERT_EQUALS(out.numItems, 1075);

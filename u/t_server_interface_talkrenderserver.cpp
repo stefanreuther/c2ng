@@ -3,20 +3,23 @@
   *  \brief Test for server::interface::TalkRenderServer
   */
 
-#include <memory>
-#include <stdexcept>
 #include "server/interface/talkrenderserver.hpp"
 
+#include <memory>
+#include <stdexcept>
 #include "t_server_interface.hpp"
 #include "afl/string/format.hpp"
+#include "afl/test/callreceiver.hpp"
 #include "server/interface/talkrender.hpp"
-#include "server/types.hpp"
-#include "u/helper/callreceiver.hpp"
 #include "server/interface/talkrenderclient.hpp"
+#include "server/types.hpp"
 
 namespace {
-    class TalkRenderMock : public server::interface::TalkRender, public CallReceiver {
+    class TalkRenderMock : public server::interface::TalkRender, public afl::test::CallReceiver {
      public:
+        TalkRenderMock(afl::test::Assert a)
+            : CallReceiver(a)
+            { }
         virtual void setOptions(const Options& opts)
             {
                 checkCall(afl::string::Format("setOptions(%s,%s)", opts.baseUrl.orElse("none"), opts.format.orElse("none")));
@@ -33,7 +36,7 @@ void
 TestServerInterfaceTalkRenderServer::testServer()
 {
     using afl::data::Segment;
-    TalkRenderMock mock;
+    TalkRenderMock mock("testServer");
     server::interface::TalkRenderServer testee(mock);
 
     // RENDEROPTION in a bajillion forms
@@ -89,7 +92,7 @@ TestServerInterfaceTalkRenderServer::testServer()
 void
 TestServerInterfaceTalkRenderServer::testRoundtrip()
 {
-    TalkRenderMock mock;
+    TalkRenderMock mock("testRoundtrip");
     server::interface::TalkRenderServer level1(mock);
     server::interface::TalkRenderClient level2(level1);
     server::interface::TalkRenderServer level3(level2);

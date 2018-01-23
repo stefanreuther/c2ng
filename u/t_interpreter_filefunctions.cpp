@@ -18,6 +18,8 @@
 #include "interpreter/singlecontext.hpp"
 #include "interpreter/values.hpp"
 #include "interpreter/arguments.hpp"
+#include "afl/io/filemapping.hpp"
+#include "afl/data/floatvalue.hpp"
 
 namespace {
     class GlobalContextMock : public interpreter::SingleContext {
@@ -60,6 +62,40 @@ namespace {
         interpreter::World& m_world;
     };
 
+    class StreamMock : public afl::io::Stream {
+     public:
+        StreamMock()
+            : m_pos(0),
+              m_size(0)
+            { }
+        virtual size_t read(Bytes_t m)
+            { m.fill(0); return m.size(); }
+        virtual size_t write(ConstBytes_t m)
+            { return m.size(); }
+        virtual void flush()
+            { }
+        virtual void setPos(FileSize_t pos)
+            { m_pos = pos; }
+        virtual FileSize_t getPos()
+            { return m_pos; }
+        virtual FileSize_t getSize()
+            { return m_size; }
+        virtual uint32_t getCapabilities()
+            { return CanRead|CanWrite|CanSeek; }
+        virtual String_t getName()
+            { return String_t(); }
+        virtual afl::base::Ref<Stream> createChild()
+            { throw "geht ned"; }
+        virtual afl::base::Ptr<afl::io::FileMapping> createFileMapping(FileSize_t /*limit*/)
+            { return 0; }
+        void setSize(FileSize_t sz)
+            { m_size = sz; }
+     private:
+        FileSize_t m_pos;
+        FileSize_t m_size;
+    };
+
+
     void checkStatement(interpreter::World& world, const char* stmt)
     {
         // Build a command source
@@ -86,6 +122,8 @@ namespace {
         exec.pushFrame(bco, false);
         bool ok = exec.runTemporary();
         TSM_ASSERT(stmt, ok);
+        TSM_ASSERT_EQUALS(stmt, exec.getState(), interpreter::Process::Ended);
+        TSM_ASSERT_EQUALS(stmt, exec.getError().what(), String_t());
     }
 
     void checkInteger(interpreter::World& world, const char* name, int32_t expectedValue)
@@ -96,6 +134,18 @@ namespace {
         int32_t foundValue;
         TSM_ASSERT(name, interpreter::checkIntegerArg(foundValue, world.globalValues().get(index)));
         TSM_ASSERT_EQUALS(name, foundValue, expectedValue);
+    }
+
+    void checkFloat(interpreter::World& world, const char* name, double expectedValue)
+    {
+        afl::data::NameMap::Index_t index = world.globalPropertyNames().getIndexByName(name);
+        TSM_ASSERT(name, index != afl::data::NameMap::nil);
+
+        afl::data::FloatValue* fv = dynamic_cast<afl::data::FloatValue*>(world.globalValues().get(index));
+        TSM_ASSERT(name, fv != 0);
+        if (fv != 0) {
+            TSM_ASSERT_EQUALS(name, fv->getValue(), expectedValue);
+        }
     }
 }
 
@@ -126,5 +176,53 @@ TestInterpreterFileFunctions::testSet()
                    "setbyte block, 100, 57, 48\n"
                    "a:=getword(block, 100)\n");
     checkInteger(world, "A", 12345);
+}
+
+/** Test FPos(), FSize() functions. */
+void
+TestInterpreterFileFunctions::testPositionFunctions()
+{
+    // Environment
+    afl::sys::Log logger;
+    afl::io::NullFileSystem fs;
+    interpreter::World world(logger, fs);
+
+    world.addNewGlobalContext(new GlobalContextMock(world));
+    registerFileFunctions(world);
+
+    // Configure files
+    afl::base::Ref<StreamMock> stream(*new StreamMock());
+    world.fileTable().setMaxFiles(5);
+    world.fileTable().openFile(1, stream);
+
+    // Test
+    // - program: set A to position, B to size; catch error in B (to simplify testing overflow case)
+    const char*const STATEMENT = "a:=fpos(#1)\nb:=7\ntry b:=fsize(#1)\n";
+
+    // - initial state
+    checkStatement(world, STATEMENT);
+    checkInteger(world, "A", 0);
+    checkInteger(world, "B", 0);
+
+    // - average case
+    stream->setPos(10000);
+    stream->setSize(20000);
+    checkStatement(world, STATEMENT);
+    checkInteger(world, "A", 10000);
+    checkInteger(world, "B", 20000);
+
+    // - 32-bit boundary
+    stream->setPos(0x7FFFFFFFU);
+    stream->setSize(0x80000000U);
+    checkStatement(world, STATEMENT);
+    checkInteger(world, "A", 0x7FFFFFFFU);
+    checkFloat(world, "B", 2147483648.0);
+
+    // - 53-bit boundary
+    stream->setPos(9007199254740992ULL);
+    stream->setSize(9007199254740993ULL);
+    checkStatement(world, STATEMENT);
+    checkFloat(world, "A", 9007199254740992.0);
+    checkInteger(world, "B", 7);
 }
 

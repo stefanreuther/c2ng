@@ -23,14 +23,12 @@ namespace {
     const char EMAIL_ROOT[] =          "email:";
     const char PM_ROOT[] =             "pm:";
     const char DEFAULT_FOLDER_ROOT[] = "default:folder:";
-    const char GAME_ROOT[] =           "game:";
-    const char USER_ROOT[] =           "user:";
-    const char DEFAULT_PROFILE[] =     "default:profile";
 }
 
 // Constructor.
 server::talk::Root::Root(afl::net::CommandHandler& db, afl::net::CommandHandler& mail, const Configuration& config)
-    : m_log(),
+    : server::common::Root(db),
+      m_log(),
       m_keywordTable(),
       m_recognizer(),
       m_linkFormatter(),
@@ -120,12 +118,6 @@ server::talk::Root::lastMessageId()
 }
 
 afl::net::redis::Subtree
-server::talk::Root::gameRoot()
-{
-    return afl::net::redis::Subtree(m_db, GAME_ROOT);
-}
-
-afl::net::redis::Subtree
 server::talk::Root::topicRoot()
 {
     return afl::net::redis::Subtree(m_db, THREAD_ROOT);
@@ -165,23 +157,10 @@ server::talk::Root::newsgroupMap()
 }
 
 afl::net::redis::Subtree
-server::talk::Root::userRoot()
-{
-    return afl::net::redis::Subtree(m_db, USER_ROOT);
-}
-
-afl::net::redis::HashKey
-server::talk::Root::defaultProfile()
-{
-    return afl::net::redis::HashKey(m_db, DEFAULT_PROFILE);
-}
-
-afl::net::redis::Subtree
 server::talk::Root::emailRoot()
 {
     return afl::net::redis::Subtree(m_db, EMAIL_ROOT);
 }
-
 
 afl::net::redis::Subtree
 server::talk::Root::defaultFolderRoot()

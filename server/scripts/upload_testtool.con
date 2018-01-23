@@ -1,0 +1,51 @@
+#
+#  Upload test tools
+#
+#  For debugging runhost/runmaster.
+#
+
+# Recreate game directory
+setenv N x-test
+silent noerror hostfile rmdir tools/${N}
+silent hostfile mkdir tools/${N}
+
+# Create auxhost scripts
+silent hostfile put tools/${N}/c2aux1.sh {
+  echo "+++ auxhost1 +++"
+  touch "$1"/x-test-aux1
+}
+silent hostfile put tools/${N}/c2aux2.sh {
+  echo "+++ auxhost2 +++"
+  touch "$1"/x-test-aux2
+}
+silent hostfile put tools/${N}/c2auxbc.sh {
+  echo "+++ auxbc +++"
+  touch "$1"/x-test-auxbc
+}
+
+# Create runhost/runmaster scripts
+silent hostfile put tools/${N}/c2master.sh {
+  echo "+++ master +++"
+  touch "$1"/x-test-master
+}
+silent hostfile put tools/${N}/c2pre.sh {
+  echo "+++ pre +++"
+  touch "$1"/x-test-pre
+}
+silent hostfile put tools/${N}/c2post.sh {
+  echo "+++ post +++"
+  touch "$1"/x-test-post
+}
+
+# Create in database
+silent host tooladd ${N} tools/${N} "" "x_test"
+silent host toolset ${N} description "Hook debugging tool"
+silent host toolset ${N} extradescription "A debugging tool, trying to hook into every possible script."
+
+
+
+# Now, same thing again for scoring
+setenv N x-score
+silent host tooladd ${N} tools/${N} "" "referee"
+silent host toolset ${N} description "Referee debugging tool"
+silent host toolset ${N} extradescription "A debugging tool, claiming to be a referee."

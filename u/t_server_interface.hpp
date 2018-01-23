@@ -26,6 +26,7 @@ class TestServerInterfaceFileBase : public CxxTest::TestSuite {
  public:
     void testInterface();
     void testProperty();
+    void testGetFileNT();
 };
 
 class TestServerInterfaceFileBaseClient : public CxxTest::TestSuite {
@@ -83,6 +84,117 @@ class TestServerInterfaceHostCronClient : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestServerInterfaceHostCronServer : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testErrors();
+    void testRoundtrip();
+};
+
+class TestServerInterfaceHostGame : public CxxTest::TestSuite {
+ public:
+    void testInterface();
+    void testFormat();
+    void testParse();
+    void testInit();
+};
+
+class TestServerInterfaceHostGameClient : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testStat();
+    void testTools();
+    void testVC();
+    void testErrors();
+};
+
+class TestServerInterfaceHostGameServer : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testErrors();
+    void testRoundtrip();
+};
+
+class TestServerInterfaceHostPlayer : public CxxTest::TestSuite {
+ public:
+    void testInterface();
+    void testFormat();
+    void testParse();
+    void testInit();
+};
+
+class TestServerInterfaceHostPlayerClient : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testFail();
+};
+
+class TestServerInterfaceHostPlayerServer : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testErrors();
+    void testRoundtrip();
+};
+
+class TestServerInterfaceHostSchedule : public CxxTest::TestSuite {
+ public:
+    void testInterface();
+    void testFormat();
+    void testParse();
+};
+
+class TestServerInterfaceHostScheduleClient : public CxxTest::TestSuite {
+ public:
+    void testModify();
+    void testOther();
+    void testErrors();
+};
+
+class TestServerInterfaceHostScheduleServer : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testErrors();
+    void testRoundtrip();
+};
+
+class TestServerInterfaceHostTool : public CxxTest::TestSuite {
+ public:
+    void testInterface();
+};
+
+class TestServerInterfaceHostToolClient : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testModes();
+};
+
+class TestServerInterfaceHostToolServer : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testErrors();
+    void testRoundtrip();
+    void testArea();
+    void testAreaMismatch();
+};
+
+class TestServerInterfaceHostTurn : public CxxTest::TestSuite {
+ public:
+    void testInterface();
+    void testInit();
+};
+
+class TestServerInterfaceHostTurnClient : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
+class TestServerInterfaceHostTurnServer : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testErrors();
+    void testRoundtrip();
+};
+
 class TestServerInterfaceMailQueue : public CxxTest::TestSuite {
  public:
     void testInterface();
@@ -97,6 +209,13 @@ class TestServerInterfaceMailQueueServer : public CxxTest::TestSuite {
  public:
     void testIt();
     void testRoundtrip();
+};
+
+class TestServerInterfaceSessionRouter : public CxxTest::TestSuite {
+ public:
+    void testInterface();
+    void testParse();
+    void testFormat();
 };
 
 class TestServerInterfaceTalkFolder : public CxxTest::TestSuite {

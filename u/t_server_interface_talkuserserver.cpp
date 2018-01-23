@@ -3,23 +3,26 @@
   *  \brief Test for server::interface::TalkUserServer
   */
 
-#include <stdexcept>
-#include <memory>
 #include "server/interface/talkuserserver.hpp"
 
+#include <stdexcept>
+#include <memory>
 #include "t_server_interface.hpp"
-#include "u/helper/callreceiver.hpp"
 #include "afl/string/format.hpp"
-#include "server/types.hpp"
+#include "afl/test/callreceiver.hpp"
 #include "server/interface/talkuser.hpp"
 #include "server/interface/talkuserclient.hpp"
+#include "server/types.hpp"
 
 using afl::data::Segment;
 using afl::string::Format;
 
 namespace {
-    class TalkUserMock : public server::interface::TalkUser, public CallReceiver {
+    class TalkUserMock : public server::interface::TalkUser, public afl::test::CallReceiver {
      public:
+        TalkUserMock(afl::test::Assert a)
+            : CallReceiver(a)
+            { }
         virtual afl::data::Value* accessNewsrc(Modification modif, Result res, afl::base::Memory<const Selection> selections, afl::base::Memory<const int32_t> posts)
             {
                 String_t modifStr = "?";
@@ -128,7 +131,7 @@ namespace {
 void
 TestServerInterfaceTalkUserServer::testIt()
 {
-    TalkUserMock mock;
+    TalkUserMock mock("testIt");
     server::interface::TalkUserServer testee(mock);
 
     // accessNewsrc
@@ -292,7 +295,7 @@ TestServerInterfaceTalkUserServer::testIt()
 void
 TestServerInterfaceTalkUserServer::testErrors()
 {
-    TalkUserMock mock;
+    TalkUserMock mock("testErrors");
     server::interface::TalkUserServer testee(mock);
 
     // Invalid command
@@ -318,7 +321,7 @@ void
 TestServerInterfaceTalkUserServer::testRoundtrip()
 {
     using server::interface::TalkUser;
-    TalkUserMock mock;
+    TalkUserMock mock("testRoundtrip");
     server::interface::TalkUserServer level1(mock);
     server::interface::TalkUserClient level2(level1);
     server::interface::TalkUserServer level3(level2);

@@ -4,9 +4,9 @@
 
 #include "game/map/ship.hpp"
 #include "afl/string/format.hpp"
-#include "util/math.hpp"
 #include "game/map/universe.hpp"
 #include "game/parser/messagevalue.hpp"
+#include "util/math.hpp"
 
 namespace {
     template<typename PropertyType, typename ValueType>
@@ -113,6 +113,7 @@ game::map::Ship::addShipXYData(Point pt, int owner, int mass, PlayerSet_t source
     m_xySource += source;
 
     // Update ship.
+    // FIXME: if m_shipSource.empty() but existing values are invalid, initialize them anyway for order independence
     if (m_shipSource.empty()) {
         m_currentData.x          = pt.getX();
         m_currentData.y          = pt.getY();
@@ -206,6 +207,12 @@ game::map::Ship::addMessageInformation(const game::parser::MessageInformation& i
     // Count as target
     // Rule-wise, this value is more or less irrelevant once m_shipSource is set, but it helps in reconstructing target files.
     m_targetSource += source;
+}
+
+void
+game::map::Ship::getCurrentShipData(ShipData& out) const
+{
+    out = m_currentData;
 }
 
 
@@ -961,6 +968,7 @@ void
 game::map::Ship::setAmmo(IntegerProperty_t amount)
 {
     m_currentData.ammo = amount;
+    markDirty();
 }
 
 // /** Get cargo amount on ship, raw version. This does not honor reservations. */
@@ -1062,6 +1070,7 @@ game::map::Ship::setCargo(Element::Type type, IntegerProperty_t amount)
         }
         break;
     }
+    markDirty();
 }
 
 game::LongProperty_t
@@ -1090,15 +1099,7 @@ game::map::Ship::isTransporterActive(Transporter which) const
 {
     // ex GShip::isTransporterActive
     const ShipData::Transfer& tr = which==UnloadTransporter ? m_currentData.unload : m_currentData.transfer;
-    int i;
-    return m_kind == CurrentShip
-        && tr.neutronium.get(i) && i != 0
-        && tr.tritanium.get(i) && i != 0
-        && tr.duranium.get(i) && i != 0
-        && tr.molybdenum.get(i) && i != 0
-        && tr.colonists.get(i) && i != 0
-        && tr.supplies.get(i) && i != 0
-        && tr.targetId.get(i) && i != 0;
+    return m_kind == CurrentShip && isTransferActive(tr);
 }
 
 game::IntegerProperty_t
@@ -1156,31 +1157,6 @@ game::map::Ship::setTransporterCargo(Transporter which, Element::Type type, Inte
 }
 
 
-// 
-// /*
-//  *  Transporter access
-//  *
-//  *  FIXME: this area still exports raw VGAP data structures to the user.
-//  *  This should be changed.
-//  */
-
-// /** Access a transporter.
-//     \param which which_one transporter to access. */
-// TShipTransfer&
-// GShip::getTransporter(Transporter which_one) throw()
-// {
-//     return which_one == t_Transfer ? ship_info->data.transfer : ship_info->data.unload;
-// }
-
-// /** Access a transporter.
-//     \param which which_one transporter to access. */
-// const TShipTransfer&
-// GShip::getTransporter(Transporter which_one) const throw()
-// {
-//     return which_one == t_Transfer ? ship_info->data.transfer : ship_info->data.unload;
-// }
-
-
 // /** Check whether a transporter is cancellable. A transporter is
 //     cancellable if its content can be moved back into main cargo room
 //     without overloading the ship. */
@@ -1204,41 +1180,29 @@ game::map::Ship::setTransporterCargo(Transporter which, Element::Type type, Inte
 
 // /** Cancel a transporter. Moves its contents back to main cargo room.
 //     \pre isTransporterCancellable(which_one) */
-// void
-// GShip::cancelTranporter(Transporter which_one) throw()
-// {
-//     /* Because the transporter is guaranteed to be cancellable,
-//        we know that this ship has full data. */
-//     ASSERT(isTransporterCancellable(which_one));
-//     TShipTransfer& t = getTransporter(which_one);
-//     ship_info->data.ore_cargo[0] += t.ore[0];
-//     ship_info->data.ore_cargo[1] += t.ore[1];
-//     ship_info->data.ore_cargo[2] += t.ore[2];
-//     ship_info->data.ore_cargo[3] += t.ore[3];
-//     ship_info->data.colonists += t.colonists;
-//     ship_info->data.supplies += t.supplies;
-//     t.ore[0] = t.ore[1] = t.ore[2] = t.ore[3] = t.supplies = t.colonists = t.id = 0;
+void
+game::map::Ship::cancelTransporter(Transporter which)
+{
+    // ex GShip::cancelTranporter
+    ShipData::Transfer& tr = getTransporter(which);
 
-//     markDirty();
-// }
+    m_currentData.neutronium = m_currentData.neutronium.orElse(0) + tr.neutronium.orElse(0);
+    m_currentData.tritanium  = m_currentData.tritanium.orElse(0)  + tr.tritanium.orElse(0);
+    m_currentData.duranium   = m_currentData.duranium.orElse(0)   + tr.duranium.orElse(0);
+    m_currentData.molybdenum = m_currentData.molybdenum.orElse(0) + tr.molybdenum.orElse(0);
+    m_currentData.colonists  = m_currentData.colonists.orElse(0)  + tr.colonists.orElse(0);
+    m_currentData.supplies   = m_currentData.supplies.orElse(0)   + tr.supplies.orElse(0);
 
-// /** Check whether transporter is in use. A transporter is in use if
-//     the user is currently preparing a transport order. This means we
-//     must deny all other attempts of starting to prepare such an
-//     order. */
-// bool
-// GShip::isTransporterInUse(Transporter which_one) const throw()
-// {
-//     return transporter_in_use[which_one];
-// }
+    tr.neutronium = 0;
+    tr.tritanium  = 0;
+    tr.duranium   = 0;
+    tr.molybdenum = 0;
+    tr.supplies   = 0;
+    tr.colonists  = 0;
+    tr.targetId   = 0;
 
-// /** Set transporter in-use mark.
-//     \see isTransporterInUse */
-// void
-// GShip::setTransporterInUse(Transporter which_one, bool in_use) throw()
-// {
-//     transporter_in_use[which_one] = in_use;
-// }
+    markDirty();
+}
 
 // 
 // /*
@@ -1254,6 +1218,7 @@ game::map::Ship::setFleetNumber(int fno)
 {
     // ex GShip::setFleetNumber
     m_fleetNumber = fno;
+    markDirty();
 }
 
 // /** Get number of the fleet this ship is in.
@@ -1271,6 +1236,7 @@ game::map::Ship::setFleetName(String_t name)
 {
     // ex GShip::setFleetName
     m_fleetName = name;
+    markDirty();
 }
 
 // /** Get name of the fleet led by this ship (if any). */
@@ -1323,6 +1289,7 @@ game::map::Ship::addShipSpecialFunction(game::spec::ModifiedHullFunctionList::Fu
 {
     // ex GShip::addShipFunction
     m_specialFunctions.push_back(function);
+    markDirty();
 }
 
 // /** Check whether this ship can do special function.
@@ -1458,4 +1425,18 @@ const game::UnitScoreList&
 game::map::Ship::unitScores() const
 {
     return m_unitScores;
+}
+
+game::map::ShipData::Transfer&
+game::map::Ship::getTransporter(Transporter which)
+{
+    // ex GShip::getTransporter
+    return which==UnloadTransporter ? m_currentData.unload : m_currentData.transfer;
+}
+
+const game::map::ShipData::Transfer&
+game::map::Ship::getTransporter(Transporter which) const
+{
+    // ex GShip::getTransporter
+    return which==UnloadTransporter ? m_currentData.unload : m_currentData.transfer;
 }

@@ -17,7 +17,7 @@
    Do not use the name %Beams in new code, it is not supported by PCC2; use %Beam instead.
 
    @see int:index:group:beamproperty|Beam Properties
-   @since PCC 1.0.18, PCC2 1.99.8, PCC2NG 2.40 */
+   @since PCC 1.0.18, PCC2 1.99.8, PCC2 2.40 */
 
 game::interface::BeamFunction::BeamFunction(Session& session)
     : m_session(session)

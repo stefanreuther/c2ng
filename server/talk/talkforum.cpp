@@ -122,7 +122,7 @@ server::talk::TalkForum::getPermissions(int32_t fid, afl::base::Memory<const Str
     while (const String_t* p = permissionList.eat()) {
         String_t key = *p + "perm";
         String_t str = f.header().stringField(key).get();
-        if (m_session.hasPrivilege(str, m_root)) {
+        if (m_session.hasPermission(str, m_root)) {
             result |= mask;
         }
         mask <<= 1;
@@ -138,7 +138,7 @@ server::talk::TalkForum::getSize(int32_t fid)
     if (!f.exists(m_root)) {
         throw std::runtime_error(FORUM_NOT_FOUND);
     }
-    m_session.checkPrivilege(f.readPermissions().get(), m_root);
+    m_session.checkPermission(f.readPermissions().get(), m_root);
 
     Size sz;
     sz.numThreads       = f.topics().size();

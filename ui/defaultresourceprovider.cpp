@@ -46,11 +46,7 @@ ui::DefaultResourceProvider::DefaultResourceProvider(ui::res::Manager& mgr,
 // Destructor.
 ui::DefaultResourceProvider::~DefaultResourceProvider()
 {
-    {
-        afl::sys::MutexGuard g(m_imageMutex);
-        m_loaderStopRequest = true;
-    }
-    m_loaderWake.post();
+    stop();
     m_loaderThread.join();
 }
 
@@ -202,6 +198,16 @@ ui::DefaultResourceProvider::run()
             m_mainThreadDispatcher.postNewRunnable(new Signaler(sig_imageChange));
         }
     }
+}
+
+void
+ui::DefaultResourceProvider::stop()
+{
+    {
+        afl::sys::MutexGuard g(m_imageMutex);
+        m_loaderStopRequest = true;
+    }
+    m_loaderWake.post();
 }
 
 util::Request<ui::res::Manager>*

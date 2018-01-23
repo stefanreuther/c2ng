@@ -5,15 +5,17 @@
 #include "server/application.hpp"
 #include "afl/except/fileproblemexception.hpp"
 #include "afl/io/nulltextwriter.hpp"
+#include "afl/net/resp/client.hpp"
 #include "afl/string/format.hpp"
 #include "afl/sys/longcommandlineparser.hpp"
+#include "afl/sys/thread.hpp"
 #include "server/configurationhandler.hpp"
+#include "server/interface/baseclient.hpp"
+#include "server/ports.hpp"
 
 using afl::string::Format;
 
 namespace {
-    const char LOG_NAME[] = "server";
-
     afl::base::Ref<afl::io::TextWriter> getWriter(afl::sys::Environment& env, afl::sys::Environment::Channel ch)
     {
         try {
@@ -23,12 +25,23 @@ namespace {
             return *new afl::io::NullTextWriter();
         }
     }
+
+    class Exit {
+     public:
+        Exit(int n)
+            : m_exitCode(n)
+            { }
+        int get()
+            { return m_exitCode; }
+     private:
+        int m_exitCode;
+    };
 }
 
 class server::Application::ConfigurationHandler : public server::ConfigurationHandler {
  public:
     ConfigurationHandler(server::Application& app)
-        : server::ConfigurationHandler(app.log(), LOG_NAME),
+        : server::ConfigurationHandler(app.log(), app.m_logName),
           m_app(app)
         { }
     bool handleConfiguration(const String_t& key, const String_t& value)
@@ -37,10 +50,13 @@ class server::Application::ConfigurationHandler : public server::ConfigurationHa
     Application& m_app;
 };
 
-server::Application::Application(afl::sys::Environment& env, afl::io::FileSystem& fs, afl::net::NetworkStack& net)
-    : m_environment(env),
+server::Application::Application(const String_t& logName, afl::sys::Environment& env, afl::io::FileSystem& fs, afl::net::NetworkStack& net)
+    : m_logName(logName),
+      m_environment(env),
       m_fileSystem(fs),
       m_networkStack(net),
+      m_deleter(),
+      m_clientNetworkStack(net),
       m_logger(),
       m_errorOutput(getWriter(env, env.Error)),
       m_standardOutput(getWriter(env, env.Output)),
@@ -64,6 +80,9 @@ server::Application::run()
         m_errorOutput->flush();
         return 0;
     }
+    catch (Exit& n) {
+        return n.get();
+    }
     catch (afl::except::FileProblemException& e) {
         reportError(e.getFileName() + ": " + e.what());
         return 1;
@@ -76,6 +95,14 @@ server::Application::run()
         reportError("Uncaught exception");
         return 1;
     }
+}
+
+String_t
+server::Application::getHelp() const
+{
+    return ConfigurationHandler::getHelp() +
+        "--log=CONFIG\tSet logger configuration\n"
+        "--proxy=URL\tAdd network proxy\n";
 }
 
 afl::sys::Environment&
@@ -96,10 +123,57 @@ server::Application::networkStack()
     return m_networkStack;
 }
 
+afl::net::NetworkStack&
+server::Application::clientNetworkStack()
+{
+    return m_clientNetworkStack;
+}
+
 afl::sys::LogListener&
 server::Application::log()
 {
     return m_logger;
+}
+
+afl::io::TextWriter&
+server::Application::standardOutput()
+{
+    return *m_standardOutput;
+}
+
+void
+server::Application::exit(int n)
+{
+    m_standardOutput->flush();
+    m_errorOutput->flush();
+    throw Exit(n);
+}
+
+afl::net::CommandHandler&
+server::Application::createClient(const afl::net::Name& name, afl::base::Deleter& del, bool stateless)
+{
+    // ex Connection::connectRetry
+    // This used to do 5 loops x 1 second.
+    // Doing the first loops in just 100 ms gives us faster automatic system tests.
+    int i = 15;
+    while (1) {
+        --i;
+        try {
+            afl::net::resp::Client& result = del.addNew(new afl::net::resp::Client(clientNetworkStack(), name));
+            log().write(afl::sys::LogListener::Info, m_logName, afl::string::Format("Connected to %s", name.toString()));
+            waitReady(result);
+            if (stateless) {
+                result.setReconnectMode(afl::net::Reconnectable::Always);
+            }
+            return result;
+        }
+        catch (std::exception& e) {
+            if (i == 0) {
+                throw;
+            }
+            afl::sys::Thread::sleep(i < 5 ? 1000 : 100);
+        }
+    }
 }
 
 void
@@ -124,10 +198,46 @@ server::Application::parseCommandLine(ConfigurationHandler& handler)
             // ok, "-D" or "--config"
         } else if (text == "log") {
             m_logger.setConfiguration(parser.getRequiredParameter(text));
+        } else if (text == "proxy") {
+            String_t url = parser.getRequiredParameter(text);
+            if (!m_clientNetworkStack.add(url)) {
+                throw std::runtime_error(Format("Unrecognized proxy URL: \"%s\"", url));
+            }
         } else {
             if (!handleCommandLineOption(text, parser)) {
                 throw std::runtime_error(Format("Unrecognized command line option: \"-%s\"", text));
             }
         }
+    }
+}
+
+void
+server::Application::waitReady(afl::net::CommandHandler& handler)
+{
+    // ex DbReadyClient::onConnect
+    // This used to be done on the database only, but it doesn't hurt also doing it on other connections
+    int count = 0;
+    while (1) {
+        try {
+            server::interface::BaseClient(handler).ping();
+            break;
+        }
+        catch (std::exception& e) {
+            if (std::strncmp(e.what(), "LOADING", 7) == 0) {
+                // 10 x 1 second
+                // 10 x 5 seconds
+                // 10 x 20 seconds
+                if (count > 30) {
+                    // 260 seconds should be enough
+                    log().write(afl::sys::LogListener::Error, m_logName, "Server fails to become ready; giving up.");
+                    throw;
+                }
+            } else {
+                throw;
+            }
+        }
+        int sleepTime = count > 20 ? 20 : count > 10 ? 5 : 1;
+        log().write(afl::sys::LogListener::Trace, m_logName, afl::string::Format("Server not ready yet, sleeping %d seconds...", sleepTime));
+        afl::sys::Thread::sleep(sleepTime * 1000);
     }
 }

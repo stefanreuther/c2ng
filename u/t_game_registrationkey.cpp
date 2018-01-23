@@ -19,6 +19,8 @@ TestGameRegistrationKey::testIt()
             { return String_t(); }
         virtual bool setLine(Line /*which*/, String_t /*value*/)
             { return false; }
+        virtual int getMaxTechLevel(game::TechLevel /*which*/) const
+            { return 100; }
     };
     Tester t;
 }

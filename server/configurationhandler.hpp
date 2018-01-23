@@ -44,6 +44,10 @@ namespace server {
             \throw std::runtime_error the option was recognized, but its parameters were invalid */
         bool handleCommandLineOption(const String_t& option, afl::sys::CommandLineParser& parser);
 
+        /** Get help for command-line options.
+            \return help string; pass to util::formatOptions(). */
+        static String_t getHelp();
+
         /** Load configuration file.
             \param env Environment instance
             \param fs File system instance

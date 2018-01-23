@@ -209,7 +209,7 @@ namespace game { namespace v3 {
             \param f new feature flags */
         void setFeatures(FeatureSet_t f);
 
-        
+
         /*
          *  Trailer access
          */
@@ -311,6 +311,17 @@ namespace game { namespace v3 {
             \param index [in] Command index, [0,getNumCommands())
             \return Command name; null if command is invalid or unknown, or index is out of range */
         const char* getCommandName(size_t index) const;
+
+        /** Find run of a series of commands addressed to the same unit.
+            This function's behaviour is defined for PlanetCommand, ShipCommand, BaseCommand.
+            For example, if this points at the first command for planet #38 in a sorted turnfile,
+            this will return the number of commands for planet #38.
+
+            Other commands cannot be sensibly grouped so using this function makes no sense.
+
+            \param index [in] Command index, [0,getNumCommands())
+            \return Number of commands for that unit. Zero if \c index is invalid, otherwise guaranteed to be at least 1. */
+        size_t findCommandRunLength(size_t index) const;
 
         /** Get command data.
             This returns a memory descriptor to the command itself <b>and everything that follows</b>.

@@ -35,6 +35,8 @@ namespace game { namespace v3 {
 
         void loadResult(Turn& trn, Root& root, Game& game, afl::io::Stream& file, int player, bool withBackup);
 
+        void loadTurnfile(Turn& trn, Root& root, afl::io::Stream& file, int player);
+
      private:
         afl::charset::Charset& m_charset;
         afl::string::Translator& m_translator;
@@ -42,6 +44,8 @@ namespace game { namespace v3 {
         afl::io::FileSystem& m_fileSystem;
 
         PlayerArray<DirectoryScanner::PlayerFlags_t> m_playerFlags;
+
+        void addMessage(Turn& trn, String_t text, int sender, PlayerSet_t receiver);
     };
 
 } }

@@ -48,9 +48,42 @@ end
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = interpreter/structurevaluedata.cpp \
-    interpreter/structurevaluedata.hpp interpreter/structuretypedata.cpp \
-    interpreter/structuretypedata.hpp \
+FILES_gamelib = game/map/shippredictor.cpp game/map/shippredictor.hpp \
+    util/configurationfile.cpp util/configurationfile.hpp \
+    game/v3/hconfig.cpp game/v3/hconfig.hpp game/map/markings.cpp \
+    game/map/markings.hpp game/map/markingvector.cpp \
+    game/map/markingvector.hpp game/db/fleetloader.cpp \
+    game/db/fleetloader.hpp game/interface/cargomethod.cpp \
+    game/interface/cargomethod.hpp game/actions/cargotransfersetup.cpp \
+    game/actions/cargotransfersetup.hpp game/map/shiptransporter.cpp \
+    game/map/shiptransporter.hpp game/actions/buildammo.cpp \
+    game/actions/buildammo.hpp game/test/interpreterinterface.cpp \
+    game/test/interpreterinterface.hpp game/actions/buildship.cpp \
+    game/actions/buildship.hpp game/map/basedata.cpp \
+    game/test/cargocontainer.cpp game/test/cargocontainer.hpp \
+    game/test/specificationloader.cpp game/test/specificationloader.hpp \
+    game/test/stringverifier.cpp game/test/stringverifier.hpp \
+    game/test/registrationkey.cpp game/test/registrationkey.hpp \
+    game/actions/buildparts.cpp game/actions/buildparts.hpp \
+    game/actions/techupgrade.cpp game/actions/techupgrade.hpp \
+    game/actions/basebuildaction.cpp game/actions/basebuildaction.hpp \
+    game/actions/basebuildexecutor.hpp game/map/shipstorage.cpp \
+    game/map/shipstorage.hpp interpreter/exporter/format.cpp \
+    interpreter/exporter/format.hpp interpreter/exporter/configuration.cpp \
+    interpreter/exporter/configuration.hpp util/charsetfactory.cpp \
+    util/charsetfactory.hpp game/v3/packer.cpp game/v3/packer.hpp \
+    game/v3/undoinformation.cpp game/v3/undoinformation.hpp \
+    game/actions/buildstructures.cpp game/actions/buildstructures.hpp \
+    game/v3/reverter.cpp game/actions/buildstarbase.cpp \
+    game/actions/buildstarbase.hpp game/actions/cargocostaction.cpp \
+    game/actions/cargocostaction.hpp game/map/planetstorage.cpp \
+    game/map/planetstorage.hpp game/actions/cargotransfer.cpp \
+    game/actions/cargotransfer.hpp game/cargocontainer.cpp \
+    game/cargocontainer.hpp game/v3/outboxreader.cpp \
+    game/v3/outboxreader.hpp game/msg/outbox.cpp game/msg/outbox.hpp \
+    util/processrunner.cpp util/processrunner.hpp \
+    interpreter/structurevaluedata.cpp interpreter/structurevaluedata.hpp \
+    interpreter/structuretypedata.cpp interpreter/structuretypedata.hpp \
     game/interface/userinterfaceproperty.hpp util/unicodechars.hpp \
     interpreter/arraydata.cpp interpreter/arraydata.hpp \
     game/maint/difficultyrater.cpp game/maint/difficultyrater.hpp \
@@ -469,11 +502,15 @@ PROJ_AUTO += \
     gamelib:game/*.cpp,game/*.hpp,util/*.cpp,util/*.hpp,interpreter/*.cpp,interpreter/*.hpp
 
 TARGETS += guilib
-FILES_guilib = gfx/basecontext.cpp gfx/basecontext.hpp \
-    gfx/basecolorscheme.hpp client/widgets/commanddataview.cpp \
-    client/widgets/commanddataview.hpp ui/rich/draw.cpp ui/rich/draw.hpp \
-    ui/rich/splitter.cpp ui/rich/splitter.hpp \
-    client/widgets/standarddataview.cpp client/widgets/standarddataview.hpp \
+FILES_guilib = ui/res/generatedplanetprovider.cpp \
+    ui/res/generatedplanetprovider.hpp gfx/gen/vector3d.hpp \
+    gfx/gen/planet.cpp gfx/gen/planet.hpp gfx/gen/planetconfig.cpp \
+    gfx/gen/planetconfig.hpp gfx/gen/application.cpp gfx/gen/application.hpp \
+    gfx/basecontext.cpp gfx/basecontext.hpp gfx/basecolorscheme.hpp \
+    client/widgets/commanddataview.cpp client/widgets/commanddataview.hpp \
+    ui/rich/draw.cpp ui/rich/draw.hpp ui/rich/splitter.cpp \
+    ui/rich/splitter.hpp client/widgets/standarddataview.cpp \
+    client/widgets/standarddataview.hpp \
     client/widgets/collapsibledataview.cpp \
     client/widgets/collapsibledataview.hpp ui/layout/grid.cpp \
     ui/layout/grid.hpp client/widgets/comment.cpp client/widgets/comment.hpp \
@@ -605,7 +642,125 @@ DEPEND_guilib = afl
 PROJ_AUTO += guilib:gfx/*.cpp,gfx/*.hpp,ui/*.cpp,ui/*.hpp,client/*.cpp,client/*.hpp
 
 TARGETS += serverlib
-FILES_serverlib = server/interface/composablecommandhandler.cpp \
+FILES_serverlib = server/monitor/timeserieswriter.cpp \
+    server/monitor/timeserieswriter.hpp server/monitor/timeseriesloader.cpp \
+    server/monitor/timeseriesloader.hpp server/monitor/timeseries.cpp \
+    server/monitor/timeseries.hpp server/monitor/loadaverageobserver.cpp \
+    server/monitor/loadaverageobserver.hpp server/monitor/statusobserver.cpp \
+    server/monitor/badnessfileobserver.cpp \
+    server/monitor/badnessfileobserver.hpp server/monitor/statuspage.cpp \
+    server/monitor/statuspage.hpp server/monitor/status.cpp \
+    server/monitor/status.hpp server/monitor/networkobserver.cpp \
+    server/monitor/networkobserver.hpp server/monitor/observer.hpp \
+    server/monitor/serverapplication.cpp \
+    server/monitor/serverapplication.hpp server/mailout/transmitterimpl.cpp \
+    server/mailout/transmitterimpl.hpp server/mailout/transmitter.hpp \
+    server/mailout/root.cpp server/mailout/template.cpp \
+    server/mailout/template.hpp server/mailout/message.cpp \
+    server/mailout/message.hpp server/mailout/mailqueue.cpp \
+    server/mailout/mailqueue.hpp server/mailout/commandhandler.cpp \
+    server/mailout/commandhandler.hpp server/mailout/session.hpp \
+    server/mailout/configuration.cpp server/mailout/configuration.hpp \
+    server/mailout/serverapplication.cpp \
+    server/mailout/serverapplication.hpp server/mailout/root.hpp \
+    server/dbexport/dbexporter.cpp server/dbexport/dbexporter.hpp \
+    server/dbexport/exportapplication.cpp \
+    server/dbexport/exportapplication.hpp server/nntp/root.cpp \
+    server/nntp/linehandler.cpp server/nntp/linehandler.hpp \
+    server/nntp/session.hpp server/nntp/root.hpp \
+    server/nntp/serverapplication.cpp server/nntp/serverapplication.hpp \
+    server/ports.hpp server/console/routercontextfactory.cpp \
+    server/console/routercontextfactory.hpp \
+    server/interface/sessionrouter.cpp \
+    server/interface/sessionrouterclient.cpp \
+    server/interface/sessionrouterclient.hpp server/console/nullterminal.cpp \
+    server/console/nullterminal.hpp \
+    server/console/connectioncontextfactory.cpp \
+    server/console/connectioncontextfactory.hpp \
+    server/console/contextfactory.hpp server/console/pipeterminal.cpp \
+    server/console/dumbterminal.cpp server/console/colorterminal.cpp \
+    server/console/terminal.cpp server/console/colorterminal.hpp \
+    server/console/dumbterminal.hpp server/console/pipeterminal.hpp \
+    server/console/filecommandhandler.cpp \
+    server/console/filecommandhandler.hpp \
+    server/console/stringcommandhandler.cpp \
+    server/console/stringcommandhandler.hpp \
+    server/console/integercommandhandler.cpp \
+    server/console/integercommandhandler.hpp \
+    server/console/arcanecommandhandler.cpp \
+    server/console/arcanecommandhandler.hpp \
+    server/console/fundamentalcommandhandler.cpp \
+    server/console/fundamentalcommandhandler.hpp \
+    server/console/macrocommandhandler.cpp \
+    server/console/macrocommandhandler.hpp server/console/context.hpp \
+    server/console/terminal.hpp server/console/commandhandler.hpp \
+    server/console/parser.cpp server/console/parser.hpp \
+    server/console/environment.cpp server/console/environment.hpp \
+    server/console/consoleapplication.cpp \
+    server/console/consoleapplication.hpp \
+    server/mailin/mailinapplication.cpp server/mailin/mailinapplication.hpp \
+    server/file/clientdirectory.cpp server/file/clientdirectory.hpp \
+    server/format/serverapplication.cpp server/format/serverapplication.hpp \
+    server/file/clientapplication.cpp server/file/clientapplication.hpp \
+    server/file/serverapplication.cpp server/file/serverapplication.hpp \
+    server/talk/serverapplication.cpp server/talk/serverapplication.hpp \
+    server/host/user.cpp server/host/user.hpp server/common/user.cpp \
+    server/common/user.hpp server/common/sessionprotocolhandlerfactory.hpp \
+    server/common/sessionprotocolhandler.hpp \
+    server/host/serverapplication.cpp server/host/serverapplication.hpp \
+    server/common/root.cpp server/common/root.hpp \
+    server/mailin/mailprocessor.cpp server/mailin/mailprocessor.hpp \
+    server/file/internalfileserver.cpp server/file/internalfileserver.hpp \
+    server/interface/sessionrouter.hpp server/host/resultsender.cpp \
+    server/host/resultsender.hpp server/host/gamerating.cpp \
+    server/host/gamerating.hpp server/host/rank/victory.cpp \
+    server/host/rank/victory.hpp server/host/rank/levelhandler.cpp \
+    server/host/rank/levelhandler.hpp server/host/rank/scorefilereader.cpp \
+    server/host/rank/scorefilereader.hpp server/host/exec.cpp \
+    server/host/exec.hpp server/host/rank/refereefilereader.cpp \
+    server/host/rank/refereefilereader.hpp server/host/rank/rank.cpp \
+    server/host/rank/rank.hpp server/host/cron.hpp server/host/cronimpl.cpp \
+    server/host/cronimpl.hpp server/host/hostcron.cpp \
+    server/host/hostcron.hpp server/host/hostschedule.cpp \
+    server/host/hostschedule.hpp server/host/hostturn.cpp \
+    server/host/hostturn.hpp server/host/configurationbuilder.cpp \
+    server/host/configurationbuilder.hpp server/host/exporter.cpp \
+    server/host/exporter.hpp server/host/installer.cpp \
+    server/host/installer.hpp server/common/racenames.cpp \
+    server/common/racenames.hpp server/host/hostplayer.cpp \
+    server/host/hostplayer.hpp server/host/session.cpp \
+    server/host/hostgame.cpp server/host/hostgame.hpp \
+    server/host/gamearbiter.cpp server/host/gamearbiter.hpp \
+    server/interface/hostplayerserver.cpp \
+    server/interface/hostplayerserver.hpp \
+    server/interface/hostplayerclient.cpp \
+    server/interface/hostplayerclient.hpp \
+    server/interface/hostturnserver.cpp server/interface/hostturnserver.hpp \
+    server/interface/hostturnclient.cpp server/interface/hostturnclient.hpp \
+    server/interface/hostturn.cpp server/interface/hostgameserver.cpp \
+    server/interface/hostgameserver.hpp \
+    server/interface/hostscheduleserver.cpp \
+    server/interface/hostscheduleserver.hpp \
+    server/interface/hostscheduleclient.cpp \
+    server/interface/hostscheduleclient.hpp \
+    server/interface/hostgameclient.cpp server/interface/hostgameclient.hpp \
+    server/host/talkadapter.cpp server/host/talkadapter.hpp \
+    server/host/gamecreator.cpp server/host/gamecreator.hpp \
+    server/host/talklistener.hpp server/interface/hostplayer.cpp \
+    server/interface/hostturn.hpp server/interface/hostplayer.hpp \
+    server/interface/hostschedule.cpp server/interface/hostschedule.hpp \
+    server/interface/hostgame.cpp server/interface/hostgame.hpp \
+    server/host/schedule.cpp server/host/schedule.hpp \
+    server/host/configuration.cpp server/host/configuration.hpp \
+    server/host/game.cpp server/host/game.hpp server/host/hosttool.cpp \
+    server/host/hosttool.hpp server/host/root.cpp \
+    server/host/commandhandler.cpp server/host/commandhandler.hpp \
+    server/host/root.hpp server/host/session.hpp \
+    server/interface/hostcronserver.cpp server/interface/hostcronserver.hpp \
+    server/interface/hosttool.cpp server/interface/hosttoolserver.cpp \
+    server/interface/hosttoolserver.hpp server/interface/hosttoolclient.cpp \
+    server/interface/hosttoolclient.hpp server/interface/hosttool.hpp \
+    server/interface/composablecommandhandler.cpp \
     server/interface/composablecommandhandler.hpp \
     server/configurationhandler.cpp server/configurationhandler.hpp \
     server/common/session.cpp server/common/session.hpp \
@@ -620,8 +775,7 @@ FILES_serverlib = server/interface/composablecommandhandler.cpp \
     server/file/ca/referencecounter.hpp \
     server/file/directoryhandlerfactory.cpp \
     server/file/directoryhandlerfactory.hpp server/file/directoryhandler.cpp \
-    server/tools/c2fileclient.cpp server/file/utils.cpp \
-    server/file/utils.hpp server/file/ca/commit.cpp \
+    server/file/utils.cpp server/file/utils.hpp server/file/ca/commit.cpp \
     server/file/ca/commit.hpp server/file/ca/referenceupdater.hpp \
     server/file/ca/root.cpp server/file/ca/root.hpp \
     server/file/ca/directoryhandler.cpp server/file/ca/directoryhandler.hpp \
@@ -733,14 +887,24 @@ FILES_serverlib = server/interface/composablecommandhandler.cpp \
     server/format/packer.hpp server/interface/formatclient.cpp \
     server/interface/formatclient.hpp server/interface/format.hpp
 TYPE_serverlib = lib
-DEPEND_serverlib = afl gamelib
+DEPEND_serverlib = afl
 PROJ_AUTO += serverlib:server/[^c]*.cpp,server/c[^2]*.cpp,server/*.hpp
 
 # Tools
+TARGETS += c2configtool
+FILES_c2configtool = tools/c2configtool.cpp
+TYPE_c2configtool = app
+DEPEND_c2configtool = gamelib afl
+
 TARGETS += c2export
 FILES_c2export = tools/c2export.cpp
 TYPE_c2export = app
 DEPEND_c2export = gamelib afl
+
+TARGETS += c2mgrep
+FILES_c2mgrep = tools/c2mgrep.cpp
+TYPE_c2mgrep = app
+DEPEND_c2mgrep = gamelib afl
 
 TARGETS += c2plugin
 FILES_c2plugin = tools/c2plugin.cpp
@@ -767,6 +931,11 @@ FILES_c2untrn = tools/c2untrn.cpp
 TYPE_c2untrn = app
 DEPEND_c2untrn = gamelib afl
 
+TARGETS += c2gfxgen
+FILES_c2gfxgen = tools/c2gfxgen.cpp
+TYPE_c2gfxgen = app
+DEPEND_c2gfxgen = guilib gamelib afl
+
 # Servers
 TARGETS += c2file-server
 FILES_c2file-server = server/c2file.cpp
@@ -778,6 +947,11 @@ FILES_c2format-server = server/c2format.cpp
 TYPE_c2format-server = app
 DEPEND_c2format-server = serverlib gamelib afl
 
+TARGETS += c2host-server
+FILES_c2host-server = server/c2host.cpp
+TYPE_c2host-server = app
+DEPEND_c2host-server = serverlib gamelib afl
+
 TARGETS += c2talk-server
 FILES_c2talk-server = server/c2talk.cpp
 TYPE_c2talk-server = app
@@ -788,6 +962,36 @@ FILES_c2fileclient = server/tools/c2fileclient.cpp
 TYPE_c2fileclient = app
 DEPEND_c2fileclient = serverlib gamelib afl
 
+TARGETS += c2mailin
+FILES_c2mailin = server/tools/c2mailin.cpp
+TYPE_c2mailin = app
+DEPEND_c2mailin = serverlib gamelib afl
+
+TARGETS += c2console
+FILES_c2console = server/tools/c2console.cpp
+TYPE_c2console = app
+DEPEND_c2console = serverlib gamelib afl
+
+TARGETS += c2dbexport
+FILES_c2dbexport = server/tools/c2dbexport.cpp
+TYPE_c2dbexport = app
+DEPEND_c2dbexport = serverlib gamelib afl
+
+TARGETS += c2nntp-server
+FILES_c2nntp-server = server/c2nntp.cpp
+TYPE_c2nntp-server = app
+DEPEND_c2nntp-server = serverlib gamelib afl
+
+TARGETS += c2mailout-server
+FILES_c2mailout-server = server/c2mailout.cpp
+TYPE_c2mailout-server = app
+DEPEND_c2mailout-server = serverlib gamelib afl
+
+TARGETS += c2monitor-server
+FILES_c2monitor-server = server/c2monitor.cpp
+TYPE_c2monitor-server = app
+DEPEND_c2monitor-server = serverlib gamelib afl
+
 # Main entry points (GUIs)
 TARGETS += c2ng
 FILES_c2ng = main/c2ng.cpp
@@ -796,7 +1000,85 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_interpreter_vmio_filesavecontext.cpp \
+FILES_testsuite = u/t_util_configurationfile.cpp \
+    u/t_server_monitor_timeseriesloader.cpp \
+    u/t_server_monitor_timeserieswriter.cpp u/t_game_v3_hconfig.cpp \
+    u/t_server_monitor_statusobserver.cpp u/t_server_monitor_timeseries.cpp \
+    u/t_game_map_markings.cpp u/t_game_map_markingvector.cpp \
+    u/t_gfx_sdl_streaminterface.cpp u/t_game_map_fleetmember.cpp \
+    u/t_game_db_fleetloader.cpp u/t_gfx_gen_planetconfig.cpp \
+    u/t_gfx_gen_planet.cpp u/t_gfx_gen_vector3d.cpp \
+    u/t_game_actions_cargotransfersetup.cpp \
+    u/t_game_actions_cargotransfer.cpp u/t_game_actions_buildammo.cpp \
+    u/t_game_actions_buildship.cpp u/t_game_actions_buildstarbase.cpp \
+    u/t_game_actions_buildstructures.cpp u/t_game_actions_techupgrade.cpp \
+    u/t_game_v3_undoinformation.cpp u/t_game_actions_buildparts.cpp \
+    u/t_game_actions_basebuildaction.cpp \
+    u/t_game_actions_basebuildexecutor.cpp u/t_server_monitor_status.cpp \
+    u/t_interpreter_exporter_configuration.cpp \
+    u/t_interpreter_exporter_format.cpp u/t_util_charsetfactory.cpp \
+    u/t_game_interface_engineproperty.cpp u/t_game_v3_packer.cpp \
+    u/t_game_v3_loader.cpp u/t_game_actions_cargocostaction.cpp \
+    u/t_game_cargocontainer.cpp u/t_game_v3_outboxreader.cpp \
+    u/t_game_msg_outbox.cpp u/t_server_monitor_badnessfileobserver.cpp \
+    u/t_server_monitor_observer.cpp u/t_server_monitor.hpp \
+    u/t_server_mailout_transmitterimpl.cpp u/t_server_mailout_root.cpp \
+    u/t_server_mailout_commandhandler.cpp u/t_server_mailout_mailqueue.cpp \
+    u/t_server_mailout_message.cpp u/t_server_mailout_template.cpp \
+    u/t_server_mailout_session.cpp u/t_server_mailout_configuration.cpp \
+    u/t_server_mailout_transmitter.cpp u/t_server_mailout.hpp \
+    u/t_server_dbexport_dbexporter.cpp u/t_server_dbexport.hpp \
+    u/t_server_nntp_root.cpp u/t_server_nntp.hpp \
+    u/t_server_console_routercontextfactory.cpp \
+    u/t_server_console_fundamentalcommandhandler.cpp \
+    u/helper/consolecommandhandlermock.cpp \
+    u/helper/consolecommandhandlermock.hpp \
+    u/t_server_console_pipeterminal.cpp u/t_server_console_dumbterminal.cpp \
+    u/t_server_console_terminal.hpp u/t_server_console_colorterminal.cpp \
+    u/t_server_console_integercommandhandler.cpp \
+    u/t_server_console_stringcommandhandler.cpp \
+    u/t_server_console_nullterminal.cpp u/t_server_console_parser.cpp \
+    u/t_server_console_environment.cpp u/t_server_console_commandhandler.cpp \
+    u/t_server_console_contextfactory.cpp u/t_server_console_context.cpp \
+    u/t_server_console_terminal.cpp u/t_server_console.hpp \
+    u/t_server_mailin_mailinapplication.cpp \
+    u/t_server_file_clientdirectory.cpp u/t_server_errors.cpp \
+    u/t_server_talk_session.cpp u/t_game_vcr_classic_types.cpp \
+    u/t_server_host_resultsender.cpp u/t_server_common_user.cpp \
+    u/t_server_common_sessionprotocolhandlerfactory.cpp \
+    u/t_server_common_sessionprotocolhandler.cpp u/t_server_common_root.cpp \
+    u/t_server_mailin_mailprocessor.cpp u/t_server_mailin.hpp \
+    u/t_server_host_commandhandler.cpp u/t_server_host_hostturn.cpp \
+    u/t_server_host_hostschedule.cpp u/t_server_host_hostplayer.cpp \
+    u/t_server_host_hostgame.cpp u/t_server_common_racenames.cpp \
+    u/t_server_host_installer.cpp u/t_server_file_internalfileserver.cpp \
+    u/t_server_host_game.cpp u/t_server_host_cronimpl.cpp \
+    u/t_server_host_exporter.cpp u/t_server_host_configuration.cpp \
+    u/t_server_host_hostcron.cpp u/t_server_host_hosttool.cpp \
+    u/t_server_host_talkadapter.cpp u/t_server_host_rank_victory.cpp \
+    u/t_server_host_rank_levelhandler.cpp u/t_server_host_cron.cpp \
+    u/t_server_interface_sessionrouter.cpp \
+    u/t_server_host_rank_scorefilereader.cpp \
+    u/t_server_host_rank_refereefilereader.cpp u/t_server_host_rank_rank.cpp \
+    u/t_server_host_rank.hpp u/t_server_host_configurationbuilder.cpp \
+    u/t_server_host_gamearbiter.cpp \
+    u/t_server_interface_hostplayerserver.cpp \
+    u/t_server_interface_hostplayerclient.cpp \
+    u/t_server_interface_hostturnserver.cpp \
+    u/t_server_interface_hostturnclient.cpp \
+    u/t_server_interface_hostgameserver.cpp \
+    u/t_server_interface_hostscheduleserver.cpp \
+    u/t_server_interface_hostscheduleclient.cpp \
+    u/t_server_interface_hostgameclient.cpp u/t_server_host_gamecreator.cpp \
+    u/t_server_host_talklistener.cpp u/t_server_interface_hostplayer.cpp \
+    u/t_server_interface_hostturn.cpp u/t_server_interface_hostschedule.cpp \
+    u/t_server_interface_hostgame.cpp u/t_server_host_schedule.cpp \
+    u/t_util_processrunner.cpp u/t_server_host_session.cpp \
+    u/t_server_host.hpp u/t_server_interface_hosttoolserver.cpp \
+    u/t_server_interface_hosttoolclient.cpp \
+    u/t_server_interface_hostcronserver.cpp \
+    u/t_server_interface_hosttool.cpp \
+    u/t_interpreter_vmio_filesavecontext.cpp \
     u/t_interpreter_vmio_processsavecontext.cpp \
     u/t_interpreter_vmio_structures.cpp \
     u/t_interpreter_vmio_processloadcontext.cpp u/t_gfx_filter.cpp \
@@ -929,13 +1211,12 @@ FILES_testsuite = u/t_interpreter_vmio_filesavecontext.cpp \
     u/t_server_talk_root.cpp u/t_server_talk_util.cpp \
     u/t_server_talk_render_context.cpp u/t_server_talk_render_options.cpp \
     u/t_server_talk_render.hpp u/t_server_interface_talksyntaxserver.cpp \
-    u/helper/commandhandlermock.cpp u/helper/commandhandlermock.hpp \
-    u/t_server_interface_talksyntaxclient.cpp u/helper/callreceiver.cpp \
-    u/helper/callreceiver.hpp u/t_server_interface_talkrender.cpp \
-    u/t_server_interface_talkgroup.cpp u/t_server_talk_linkformatter.cpp \
-    u/t_server_talk_group.cpp u/t_server_types.cpp u/t_server.hpp \
-    u/t_server_interface_talksyntax.cpp u/t_server_talk_inlinerecognizer.cpp \
-    u/t_server_talk.hpp u/t_server_format_packer.cpp u/t_server_format.hpp \
+    u/t_server_interface_talksyntaxclient.cpp \
+    u/t_server_interface_talkrender.cpp u/t_server_interface_talkgroup.cpp \
+    u/t_server_talk_linkformatter.cpp u/t_server_talk_group.cpp \
+    u/t_server_types.cpp u/t_server.hpp u/t_server_interface_talksyntax.cpp \
+    u/t_server_talk_inlinerecognizer.cpp u/t_server_talk.hpp \
+    u/t_server_format_packer.cpp u/t_server_format.hpp \
     u/t_server_interface_formatclient.cpp u/t_server_interface_format.cpp \
     u/t_server_interface.hpp u/t_util_syntax_factory.cpp \
     u/t_util_syntax_inihighlighter.cpp u/t_util_syntax_chighlighter.cpp \
@@ -1094,7 +1375,7 @@ distclean:
 
 .PHONY: tags
 tags: 
-	@etags --recurse client game gfx interpreter main tools ui util
+	@etags --recurse client game gfx interpreter main server tools ui util
 
 # We must define _CXXTEST_HAVE_EH and _CXXTEST_HAVE_STD for test cases,
 # but not for testsuite.cpp, where cxxtest automatically defines it.

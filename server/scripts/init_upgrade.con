@@ -1,0 +1,36 @@
+#
+#  Upgrade stuff
+#
+
+echo "*** Upgrading player profiles ***"
+
+silent redis hmset default:profilecopy turnreliability 90000
+redis smembers user:all | foreach uid {
+  # 20120901: All users must have a screen name
+  if {redis hget user:${uid}:profile screenname | str_empty} {
+    redis get user:${uid}:name | redis hset user:${uid}:profile screenname
+  }
+
+  # 20120901: Set a default turnreliability
+  if {redis hexists user:${uid}:profile turnreliability | int_not} {redis hset user:${uid}:profile turnreliability 90000}
+
+  # 20130329: Set default rankpoints so we can sort
+  if {redis hexists user:${uid}:profile rankpoints | int_not} {redis hset user:${uid}:profile rankpoints 0}
+  if {redis hexists user:${uid}:profile rank       | int_not} {redis hset user:${uid}:profile rank       0}
+}
+
+echo "*** Upgrading games ***"
+
+# 20130320: Rewrite each game's name. This reconnects the games with their forums and updates
+# forum naming policies.
+host gamelist id | foreach i {host gamegetname $i | host gamesetname $i}
+
+# 20130329: Users in non-test games should be in user:active
+redis sunion game:state:running game:state:finished | foreach gid {
+  if {redis get game:${gid}:type | str_eq test | int_not} {
+    redis hkeys game:${gid}:users | foreach uid {
+      redis sadd user:active ${uid}
+    }
+  }
+}
+silent redis sinterstore user:active user:all user:active

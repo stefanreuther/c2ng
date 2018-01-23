@@ -6,20 +6,20 @@
 #define C2NG_UTIL_REQUESTTHREAD_HPP
 
 #include <memory>
+#include "afl/base/stoppable.hpp"
+#include "afl/container/ptrvector.hpp"
+#include "afl/string/string.hpp"
+#include "afl/sys/loglistener.hpp"
 #include "afl/sys/mutex.hpp"
 #include "afl/sys/semaphore.hpp"
 #include "afl/sys/thread.hpp"
 #include "util/requestdispatcher.hpp"
-#include "afl/container/ptrvector.hpp"
-#include "afl/string/string.hpp"
-#include "afl/sys/loglistener.hpp"
 
 namespace util {
 
     /** Worker thread.
         This implements RequestDispatcher and executes all posted Runnable's in a separate thread. */
-    class RequestThread : public RequestDispatcher, private afl::base::Runnable
-    {
+    class RequestThread : public RequestDispatcher, private afl::base::Stoppable {
      public:
         /** Constructor.
             This starts the thread.
@@ -36,6 +36,7 @@ namespace util {
      private:
         // Runnable:
         virtual void run();
+        virtual void stop();
 
         /** Underlying thread. Created in constructor, shut down in destructor. */
         std::auto_ptr<afl::sys::Thread> m_thread;

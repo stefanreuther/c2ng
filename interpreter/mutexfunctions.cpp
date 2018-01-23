@@ -99,7 +99,7 @@ interpreter::LockFunction::call(Process& proc, afl::data::Segment& args, bool wa
        The return value cannot meaningfully be used.
 
        @see GetLockInfo
-       @since PCC2 1.99.17, PCC 1.1.2, PCC2ng 2.40.1 */
+       @since PCC2 1.99.17, PCC 1.1.2, PCC2 2.40.1 */
     Arguments a(args, 0, args.size());
     a.checkArgumentCount(1, 2);
 
@@ -176,7 +176,7 @@ namespace interpreter { namespace {
            - type=2: return the information text (%hint parameter for {Lock()}), EMPTY if there is no lock
 
            @see Lock()
-           @since PCC2 1.99.17, PCC2ng 2.40.1 */
+           @since PCC2 1.99.17, PCC2 2.40.1 */
         args.checkArgumentCount(1, 2);
 
         // Parse args

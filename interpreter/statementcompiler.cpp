@@ -26,7 +26,7 @@
 #include "interpreter/subroutinevalue.hpp"
 #include "interpreter/world.hpp"
 #include "interpreter/values.hpp"
-#include "afl/charset/defaultcharsetfactory.hpp"
+#include "util/charsetfactory.hpp"
 
 namespace {
     enum TypeKeyword {
@@ -849,7 +849,7 @@ interpreter::StatementCompiler::compileCall(BytecodeObject& bco, const Statement
          Call Foo, -1
        </pre>
 
-       @since PCC2 2.0.2, PCC2ng 2.40.1 */
+       @since PCC2 2.0.2, PCC2 2.40.1 */
 
     Tokenizer& tok = m_commandSource.tokenizer();
     tok.readNextToken();
@@ -1879,7 +1879,7 @@ interpreter::StatementCompiler::compileOption(BytecodeObject& /*bco*/, const Sta
                 throw Error::expectSymbol(")");
 
             /* Interpret it */
-            afl::charset::Charset* cs = afl::charset::DefaultCharsetFactory().createCharset(encname);
+            afl::charset::Charset* cs = util::CharsetFactory().createCharset(encname);
             if (cs == 0) {
                 throw Error("Unknown encoding, " + encname);
             }

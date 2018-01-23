@@ -45,13 +45,13 @@ game::interface::getFriendlyCodeProperty(const game::spec::FriendlyCode& fc, Fri
      case ifpName:
         /* @q Name:Str (Friendly Code Property)
            Friendly code.
-           @since PCC2NG 2.40.1 */
+           @since PCC2 2.40.1 */
         return makeStringValue(fc.getCode());
      case ifpDescription:
         /* @q Description:Str (Friendly Code Property)
            Description.
            A one-liner describing the friendly code.
-           @since PCC2NG 2.40.1 */
+           @since PCC2 2.40.1 */
         return makeStringValue(fc.getDescription(players));
      case ifpFlags:
         /* @q Flags:Str (Friendly Code Property)
@@ -63,13 +63,13 @@ game::interface::getFriendlyCodeProperty(const game::spec::FriendlyCode& fc, Fri
            - "a": code is valid for alchemy ships
            - "r": this is a registered-only code
            - "u": this is not a special friendly code
-           @since PCC2NG 2.40.1 */
+           @since PCC2 2.40.1 */
         return makeStringValue(convertFlags(fc.getFlags()));
      case ifpRaces:
         /* @q Races$:Int (Friendly Code Property)
            Races.
            A bitfield with the "2^N" bit set if race N can use this code.
-           @since PCC2NG 2.40.1 */
+           @since PCC2 2.40.1 */
         return makeIntegerValue(fc.getRaces().toInteger());
     }
     return 0;

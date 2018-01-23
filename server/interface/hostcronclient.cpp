@@ -37,10 +37,10 @@ server::interface::HostCronClient::listGameEvents(afl::base::Optional<int32_t> l
     }
 }
 
-void
+bool
 server::interface::HostCronClient::kickstartGame(int32_t gameId)
 {
-    m_commandHandler.callVoid(Segment().pushBackString("CRONKICK").pushBackInteger(gameId));
+    return m_commandHandler.callInt(Segment().pushBackString("CRONKICK").pushBackInteger(gameId));
 }
 
 server::interface::HostCron::Event

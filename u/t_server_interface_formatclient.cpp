@@ -3,23 +3,26 @@
   *  \brief Test for server::interface::FormatClient
   */
 
-#include <memory>
 #include "server/interface/formatclient.hpp"
 
+#include <memory>
 #include "t_server_interface.hpp"
-#include "server/interface/formatserver.hpp"
-#include "interpreter/values.hpp"
-#include "interpreter/arguments.hpp"
-#include "u/helper/callreceiver.hpp"
 #include "afl/string/format.hpp"
+#include "afl/test/callreceiver.hpp"
+#include "interpreter/arguments.hpp"
+#include "interpreter/values.hpp"
+#include "server/interface/formatserver.hpp"
 #include "server/types.hpp"
 
 /** Test chaining of clients and servers. */
 void
 TestServerInterfaceFormatClient::testChain()
 {
-    class FormatImpl : public server::interface::Format, public CallReceiver {
+    class FormatImpl : public server::interface::Format, public afl::test::CallReceiver {
      public:
+        FormatImpl()
+            : CallReceiver("testChain")
+            { }
         virtual afl::data::Value* pack(String_t formatName, afl::data::Value* data, afl::base::Optional<String_t> format, afl::base::Optional<String_t> charset)
             {
                 checkCall(afl::string::Format("pack('%s', '%s', %s, %s)", formatName, server::toString(data), format.orElse("none"), charset.orElse("none")));

@@ -20,21 +20,10 @@
 #include "game/v3/reverter.hpp"
 #include "game/v3/structures.hpp"
 #include "game/vcr/classic/database.hpp"
+#include "game/v3/packer.hpp"
 
 namespace {
     const char LOG_NAME[] = "game.v3.loader";
-
-    void unpackTransfer(game::map::ShipData::Transfer& out, const game::v3::structures::ShipTransfer& in)
-    {
-        out.neutronium = in.ore[game::v3::structures::Neutronium];
-        out.tritanium  = in.ore[game::v3::structures::Tritanium];
-        out.duranium   = in.ore[game::v3::structures::Duranium];
-        out.molybdenum = in.ore[game::v3::structures::Molybdenum];
-        out.colonists  = in.colonists;
-        out.supplies   = in.supplies;
-        out.targetId   = in.targetId;
-    }
-
 
     /** Check for dummy name.
         PHost can filter out ship names; we detect such names to avoid overwriting a known name by a dummy.
@@ -60,7 +49,6 @@ game::v3::Loader::Loader(afl::charset::Charset& charset, afl::string::Translator
 void
 game::v3::Loader::prepareUniverse(game::map::Universe& univ)
 {
-    univ.setNewReverter(new Reverter());
     for (int i = 1; i <= structures::NUM_SHIPS; ++i) {
         univ.ships().create(i);
     }
@@ -78,53 +66,27 @@ game::v3::Loader::loadPlanets(game::map::Universe& univ, afl::io::Stream& file, 
 {
     // ex game/load.cc:loadPlanets
     m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loading %d planet%!1{s%}...").c_str(), count));
+    Reverter* pReverter = dynamic_cast<Reverter*>(univ.getReverter());
     while (count > 0) {
         structures::Planet rawPlanet;
         file.fullRead(afl::base::fromObject(rawPlanet));
 
-        int planetId = rawPlanet.planetId;
+        const int planetId = rawPlanet.planetId;
         map::Planet* p = univ.planets().get(planetId);
         if (!p) {
             throw afl::except::FileFormatException(file, afl::string::Format(m_translator.translateString("Invalid planet Id #%d").c_str(), planetId));
         }
 
         // Unpack the planet
-        // FIXME: must validate data so we don't accidentally see an unknown value
         game::map::PlanetData planetData;
-        planetData.owner             = rawPlanet.owner;
-        planetData.friendlyCode      = m_charset.decode(rawPlanet.friendlyCode);
-        planetData.numMines          = rawPlanet.numMines;
-        planetData.numFactories      = rawPlanet.numFactories;
-        planetData.numDefensePosts   = rawPlanet.numDefensePosts;
-        planetData.minedNeutronium   = rawPlanet.minedOre[structures::Neutronium];
-        planetData.minedTritanium    = rawPlanet.minedOre[structures::Tritanium];
-        planetData.minedDuranium     = rawPlanet.minedOre[structures::Duranium];
-        planetData.minedMolybdenum   = rawPlanet.minedOre[structures::Molybdenum];
-        planetData.colonistClans     = rawPlanet.colonists;
-        planetData.supplies          = rawPlanet.supplies;
-        planetData.money             = rawPlanet.money;
-        planetData.groundNeutronium  = rawPlanet.groundOre[structures::Neutronium];
-        planetData.groundTritanium   = rawPlanet.groundOre[structures::Tritanium];
-        planetData.groundDuranium    = rawPlanet.groundOre[structures::Duranium];
-        planetData.groundMolybdenum  = rawPlanet.groundOre[structures::Molybdenum];
-        planetData.densityNeutronium = rawPlanet.oreDensity[structures::Neutronium];
-        planetData.densityTritanium  = rawPlanet.oreDensity[structures::Tritanium];
-        planetData.densityDuranium   = rawPlanet.oreDensity[structures::Duranium];
-        planetData.densityMolybdenum = rawPlanet.oreDensity[structures::Molybdenum];
-        planetData.colonistTax       = rawPlanet.colonistTax;
-        planetData.nativeTax         = rawPlanet.nativeTax;
-        planetData.colonistHappiness = rawPlanet.colonistHappiness;
-        planetData.nativeHappiness   = rawPlanet.nativeHappiness;
-        planetData.nativeGovernment  = rawPlanet.nativeGovernment;
-        planetData.nativeClans       = rawPlanet.natives;
-        planetData.nativeRace        = rawPlanet.nativeRace;
-        planetData.temperature       = 100 - rawPlanet.temperatureCode;
-        planetData.baseFlag          = rawPlanet.buildBaseFlag;
+        Packer(m_charset).unpackPlanet(planetData, rawPlanet);
         if (mode != LoadPrevious) {
             p->addCurrentPlanetData(planetData, source);
         }
         if (mode != LoadCurrent) {
-            p->addPreviousPlanetData(planetData);
+            if (pReverter != 0) {
+                pReverter->addPlanetData(planetId, planetData);
+            }
         }
         --count;
     }
@@ -191,61 +153,28 @@ game::v3::Loader::loadBases(game::map::Universe& univ, afl::io::Stream& file, in
 {
     // ex game/load.h:loadBases
     m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loading %d starbase%!1{s%}...").c_str(), count));
+    Reverter* pReverter = dynamic_cast<Reverter*>(univ.getReverter());
     while (count > 0) {
         structures::Base rawBase;
         file.fullRead(afl::base::fromObject(rawBase));
 
-        int baseId = rawBase.baseId;
+        const int baseId = rawBase.baseId;
         map::Planet* p = univ.planets().get(baseId);
         if (!p) {
             throw afl::except::FileFormatException(file, afl::string::Format(m_translator.translateString("Invalid starbase Id #%d").c_str(), baseId));
         }
 
         // Unpack the base
-        // FIXME: must validate data so we don't accidentally see an unknown value
         game::map::BaseData baseData;
-        baseData.owner               = rawBase.owner;
-        baseData.numBaseDefensePosts = rawBase.numBaseDefensePosts;
-        baseData.damage              = rawBase.damage;
-
-        for (int i = 0; i < 4; ++i) {
-            baseData.techLevels[i] = rawBase.techLevels[i];
-        }
-
-        // Arrays
-        for (int i = 1; i <= structures::NUM_ENGINE_TYPES; ++i) {
-            baseData.engineStorage.set(i, int(rawBase.engineStorage[i-1]));
-        }
-        for (int i = 1; i <= structures::NUM_HULLS_PER_PLAYER; ++i) {
-            baseData.hullStorage.set(i, int(rawBase.hullStorage[i-1]));
-        }
-        for (int i = 1; i <= structures::NUM_BEAM_TYPES; ++i) {
-            baseData.beamStorage.set(i, int(rawBase.beamStorage[i-1]));
-        }
-        for (int i = 1; i <= structures::NUM_TORPEDO_TYPES; ++i) {
-            baseData.launcherStorage.set(i, int(rawBase.launcherStorage[i-1]));
-        }
-        for (int i = 1; i <= structures::NUM_TORPEDO_TYPES; ++i) {
-            baseData.torpedoStorage.set(i, int(rawBase.torpedoStorage[i-1]));
-        }
-
-        baseData.numFighters    = rawBase.numFighters;
-        baseData.shipyardId     = rawBase.shipyardId;
-        baseData.shipyardAction = rawBase.shipyardAction;
-        baseData.mission        = rawBase.mission;
-
-        baseData.shipBuildOrder.setHullIndex(rawBase.shipBuildOrder.hullIndex);
-        baseData.shipBuildOrder.setEngineType(rawBase.shipBuildOrder.engineType);
-        baseData.shipBuildOrder.setBeamType(rawBase.shipBuildOrder.beamType);
-        baseData.shipBuildOrder.setNumBeams(rawBase.shipBuildOrder.numBeams);
-        baseData.shipBuildOrder.setLauncherType(rawBase.shipBuildOrder.launcherType);
-        baseData.shipBuildOrder.setNumLaunchers(rawBase.shipBuildOrder.numLaunchers);
+        Packer(m_charset).unpackBase(baseData, rawBase);
 
         if (mode != LoadPrevious) {
             p->addCurrentBaseData(baseData, source);
         }
         if (mode != LoadCurrent) {
-            p->addPreviousBaseData(baseData);
+            if (pReverter != 0) {
+                pReverter->addBaseData(baseId, baseData);
+            }
         }
         --count;
     }
@@ -298,63 +227,29 @@ void
 game::v3::Loader::loadShips(game::map::Universe& univ, afl::io::Stream& file, int count, LoadMode mode, bool remapExplore, PlayerSet_t source)
 {
     m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loading %d ship%!1{s%}...").c_str(), count));
+    Reverter* pReverter = dynamic_cast<Reverter*>(univ.getReverter());
     while (count > 0) {
         structures::Ship rawShip;
         file.fullRead(afl::base::fromObject(rawShip));
 
-        int shipId = rawShip.shipId;
+        const int shipId = rawShip.shipId;
         map::Ship* s = univ.ships().get(shipId);
         if (!s) {
             throw afl::except::FileFormatException(file, afl::string::Format(m_translator.translateString("Invalid ship Id #%d").c_str(), shipId));
         }
 
         // Unpack the ship
-        // FIXME: must validate data so we don't accidentally see an unknown value
         map::ShipData shipData;
-        shipData.owner               = rawShip.owner;
-        shipData.friendlyCode        = m_charset.decode(rawShip.friendlyCode);
-        shipData.warpFactor          = rawShip.warpFactor;
-        shipData.waypointDX          = rawShip.waypointDX;
-        shipData.waypointDY          = rawShip.waypointDY;
-        shipData.x                   = rawShip.x;
-        shipData.y                   = rawShip.y;
-        shipData.engineType          = rawShip.engineType;
-        shipData.hullType            = rawShip.hullType;
-        shipData.beamType            = rawShip.beamType;
-        shipData.numBeams            = rawShip.numBeams;
-        shipData.numBays             = rawShip.numBays;
-        shipData.launcherType        = rawShip.launcherType;
-        shipData.ammo                = rawShip.ammo;
-        shipData.numLaunchers        = rawShip.numLaunchers;
-        shipData.mission             = rawShip.mission;
-        shipData.primaryEnemy        = rawShip.primaryEnemy;
-        shipData.missionTowParameter = rawShip.missionTowParameter;
-        shipData.damage              = rawShip.damage;
-        shipData.crew                = rawShip.crew;
-        shipData.colonists           = rawShip.colonists;
-        shipData.name                = m_charset.decode(rawShip.name);
-        shipData.neutronium          = rawShip.ore[structures::Neutronium];
-        shipData.tritanium           = rawShip.ore[structures::Tritanium];
-        shipData.duranium            = rawShip.ore[structures::Duranium];
-        shipData.molybdenum          = rawShip.ore[structures::Molybdenum];
-        shipData.supplies            = rawShip.supplies;
-        unpackTransfer(shipData.unload, rawShip.unload);
-        unpackTransfer(shipData.transfer, rawShip.transfer);
-        shipData.missionInterceptParameter = rawShip.missionInterceptParameter;
-        shipData.money               = rawShip.money;
-
-        // In SRace, mission 1 means "special".
-        if (remapExplore && shipData.mission.isSame(1)) {
-            shipData.mission = 9;
-        }
+        Packer(m_charset).unpackShip(shipData, rawShip, remapExplore);
 
         if (mode != LoadPrevious) {
             s->addCurrentShipData(shipData, source);
         }
-        // FIXME: add to reverter
-        // if (mode != LoadCurrent) {
-        //     s->addPreviousShipData(shipData);
-        // }
+        if (mode != LoadCurrent) {
+            if (pReverter != 0) {
+                pReverter->addShipData(shipId, shipData);
+            }
+        }
         --count;
     }
 }
@@ -375,8 +270,7 @@ game::v3::Loader::loadTargets(game::map::Universe& univ, afl::io::Stream& file, 
             }
         }
 
-
-        int shipId = target.shipId;
+        const int shipId = target.shipId;
         map::Ship* s = univ.ships().get(shipId);
         if (!s) {
             m_log.write(m_log.Error, LOG_NAME, afl::string::Format(m_translator.translateString("Invalid ship Id #%d for visual contact. Target will be ignored").c_str(), shipId));

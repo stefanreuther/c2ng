@@ -6,12 +6,12 @@
 #include "server/interface/filegameclient.hpp"
 
 #include "t_server_interface.hpp"
-#include "u/helper/commandhandlermock.hpp"
-#include "afl/data/vector.hpp"
-#include "afl/data/vectorvalue.hpp"
 #include "afl/data/hash.hpp"
 #include "afl/data/hashvalue.hpp"
 #include "afl/data/stringvalue.hpp"
+#include "afl/data/vector.hpp"
+#include "afl/data/vectorvalue.hpp"
+#include "afl/test/commandhandler.hpp"
 
 using afl::data::Hash;
 using afl::data::HashValue;
@@ -52,13 +52,13 @@ TestServerInterfaceFileGameClient::testIt()
 {
     using server::interface::FileGame;
 
-    CommandHandlerMock mock;
+    afl::test::CommandHandler mock("testIt");
     server::interface::FileGameClient testee(mock);
 
     // getGameInfo - null answer
     {
-        mock.expectCall("STATGAME|a/b");
-        mock.provideReturnValue(0);
+        mock.expectCall("STATGAME, a/b");
+        mock.provideNewResult(0);
 
         FileGame::GameInfo gi;
         TS_ASSERT_THROWS_NOTHING(testee.getGameInfo("a/b", gi));
@@ -73,8 +73,8 @@ TestServerInterfaceFileGameClient::testIt()
 
     // getGameInfo - real answer
     {
-        mock.expectCall("STATGAME|x/y/z");
-        mock.provideReturnValue(new HashValue(makeGameResponse("x/y/z/a", "Game A")));
+        mock.expectCall("STATGAME, x/y/z");
+        mock.provideNewResult(new HashValue(makeGameResponse("x/y/z/a", "Game A")));
 
         FileGame::GameInfo gi;
         TS_ASSERT_THROWS_NOTHING(testee.getGameInfo("x/y/z", gi));
@@ -97,8 +97,8 @@ TestServerInterfaceFileGameClient::testIt()
     {
         Hash::Ref_t h = makeGameResponse("x/y/z/a", "Game A");
         h->setNew("game", new StringValue("blub"));
-        mock.expectCall("STATGAME|x/y/z");
-        mock.provideReturnValue(new HashValue(h));
+        mock.expectCall("STATGAME, x/y/z");
+        mock.provideNewResult(new HashValue(h));
 
         FileGame::GameInfo gi;
         TS_ASSERT_THROWS_NOTHING(testee.getGameInfo("x/y/z", gi));
@@ -113,8 +113,8 @@ TestServerInterfaceFileGameClient::testIt()
 
     // listGameInfo - null answer
     {
-        mock.expectCall("LSGAME|a/b");
-        mock.provideReturnValue(0);
+        mock.expectCall("LSGAME, a/b");
+        mock.provideNewResult(0);
 
         afl::container::PtrVector<FileGame::GameInfo> result;
         TS_ASSERT_THROWS_NOTHING(testee.listGameInfo("a/b", result));
@@ -123,8 +123,8 @@ TestServerInterfaceFileGameClient::testIt()
 
     // listGameInfo - real answer
     {
-        mock.expectCall("LSGAME|z");
-        mock.provideReturnValue(new VectorValue(Vector::create(Segment().
+        mock.expectCall("LSGAME, z");
+        mock.provideNewResult(new VectorValue(Vector::create(Segment().
                                                                pushBackNew(new HashValue(makeGameResponse("z/1", "Game One"))).
                                                                pushBackNew(new HashValue(makeGameResponse("z/2", "Game Two"))).
                                                                pushBackNew(new HashValue(makeGameResponse("z/3/a", "Game Three A"))))));
@@ -145,8 +145,8 @@ TestServerInterfaceFileGameClient::testIt()
 
     // listGameInfo - mixed answer (produces empty game)
     {
-        mock.expectCall("LSGAME|zq");
-        mock.provideReturnValue(new VectorValue(Vector::create(Segment().
+        mock.expectCall("LSGAME, zq");
+        mock.provideNewResult(new VectorValue(Vector::create(Segment().
                                                                pushBackNew(0).
                                                                pushBackNew(new HashValue(makeGameResponse("zq/qq", "Q"))))));
 
@@ -163,8 +163,8 @@ TestServerInterfaceFileGameClient::testIt()
 
     // getKeyInfo - null answer
     {
-        mock.expectCall("STATREG|r");
-        mock.provideReturnValue(0);
+        mock.expectCall("STATREG, r");
+        mock.provideNewResult(0);
 
         FileGame::KeyInfo result;
         TS_ASSERT_THROWS_NOTHING(testee.getKeyInfo("r", result));
@@ -177,8 +177,8 @@ TestServerInterfaceFileGameClient::testIt()
 
     // getKeyInfo - real answer
     {
-        mock.expectCall("STATREG|r2");
-        mock.provideReturnValue(new HashValue(makeKeyResponse("r2", "Name", "Address")));
+        mock.expectCall("STATREG, r2");
+        mock.provideNewResult(new HashValue(makeKeyResponse("r2", "Name", "Address")));
 
         FileGame::KeyInfo result;
         TS_ASSERT_THROWS_NOTHING(testee.getKeyInfo("r2", result));
@@ -193,8 +193,8 @@ TestServerInterfaceFileGameClient::testIt()
     {
         Hash::Ref_t h = makeKeyResponse("r2", "Name", "Address");
         h->setNew("reg", new StringValue("wut?"));
-        mock.expectCall("STATREG|r2");
-        mock.provideReturnValue(new HashValue(h));
+        mock.expectCall("STATREG, r2");
+        mock.provideNewResult(new HashValue(h));
 
         FileGame::KeyInfo result;
         TS_ASSERT_THROWS_NOTHING(testee.getKeyInfo("r2", result));
@@ -207,8 +207,8 @@ TestServerInterfaceFileGameClient::testIt()
 
     // listKeyInfo - null answer
     {
-        mock.expectCall("LSREG|r3");
-        mock.provideReturnValue(0);
+        mock.expectCall("LSREG, r3");
+        mock.provideNewResult(0);
 
         afl::container::PtrVector<FileGame::KeyInfo> result;
         TS_ASSERT_THROWS_NOTHING(testee.listKeyInfo("r3", result));
@@ -217,8 +217,8 @@ TestServerInterfaceFileGameClient::testIt()
 
     // listKeyInfo - real answer
     {
-        mock.expectCall("LSREG|z");
-        mock.provideReturnValue(new VectorValue(Vector::create(Segment().
+        mock.expectCall("LSREG, z");
+        mock.provideNewResult(new VectorValue(Vector::create(Segment().
                                                                pushBackNew(new HashValue(makeKeyResponse("z/1", "Key One", "Adr 1"))).
                                                                pushBackNew(new HashValue(makeKeyResponse("z/2", "Key Two", "Adr 2"))).
                                                                pushBackNew(new HashValue(makeKeyResponse("z/3/a", "Key Three A", "Adr 3a"))))));

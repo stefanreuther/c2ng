@@ -1,5 +1,6 @@
 /**
   *  \file game/unitscorelist.cpp
+  *  \brief Class game::UnitScoreList
   */
 
 #include "game/unitscorelist.hpp"
@@ -40,7 +41,7 @@ game::UnitScoreList::merge(Index_t index, int16_t value, int16_t turn)
     }
 }
 
-
+// Get score value.
 bool
 game::UnitScoreList::get(Index_t index, int16_t& value, int16_t& turn) const
 {

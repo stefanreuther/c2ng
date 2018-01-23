@@ -3,24 +3,27 @@
   *  \brief Test for server::interface::TalkThreadServer
   */
 
-#include <memory>
-#include <stdexcept>
 #include "server/interface/talkthreadserver.hpp"
 
+#include <memory>
+#include <stdexcept>
 #include "t_server_interface.hpp"
-#include "server/interface/talkthread.hpp"
-#include "u/helper/callreceiver.hpp"
-#include "afl/string/format.hpp"
-#include "server/interface/talkthreadclient.hpp"
-#include "afl/data/segment.hpp"
 #include "afl/data/access.hpp"
+#include "afl/data/segment.hpp"
+#include "afl/string/format.hpp"
+#include "afl/test/callreceiver.hpp"
+#include "server/interface/talkthread.hpp"
+#include "server/interface/talkthreadclient.hpp"
 
 using afl::data::Segment;
 using afl::string::Format;
 
 namespace {
-    class TalkThreadMock : public server::interface::TalkThread, public CallReceiver {
+    class TalkThreadMock : public server::interface::TalkThread, public afl::test::CallReceiver {
      public:
+        TalkThreadMock(afl::test::Assert a)
+            : CallReceiver(a)
+            { }
         virtual Info getInfo(int32_t threadId)
             {
                 checkCall(Format("getInfo(%d)", threadId));
@@ -99,7 +102,7 @@ namespace {
 void
 TestServerInterfaceTalkThreadServer::testIt()
 {
-    TalkThreadMock mock;
+    TalkThreadMock mock("testIt");
     server::interface::TalkThreadServer testee(mock);
 
     // getInfo
@@ -208,7 +211,7 @@ TestServerInterfaceTalkThreadServer::testIt()
 void
 TestServerInterfaceTalkThreadServer::testErrors()
 {
-    TalkThreadMock mock;
+    TalkThreadMock mock("testErrors");
     server::interface::TalkThreadServer testee(mock);
 
     // Bad command
@@ -230,7 +233,7 @@ TestServerInterfaceTalkThreadServer::testErrors()
 void
 TestServerInterfaceTalkThreadServer::testRoundtrip()
 {
-    TalkThreadMock mock;
+    TalkThreadMock mock("testRoundtrip");
     server::interface::TalkThreadServer level1(mock);
     server::interface::TalkThreadClient level2(level1);
     server::interface::TalkThreadServer level3(level2);

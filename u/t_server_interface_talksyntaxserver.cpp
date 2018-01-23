@@ -3,21 +3,24 @@
   *  \brief Test for server::interface::TalkSyntaxServer
   */
 
-#include <memory>
-#include <stdexcept>
 #include "server/interface/talksyntaxserver.hpp"
 
+#include <memory>
+#include <stdexcept>
 #include "t_server_interface.hpp"
-#include "server/interface/talksyntax.hpp"
-#include "u/helper/callreceiver.hpp"
-#include "server/types.hpp"
 #include "afl/data/access.hpp"
 #include "afl/data/vectorvalue.hpp"
+#include "afl/test/callreceiver.hpp"
+#include "server/interface/talksyntax.hpp"
 #include "server/interface/talksyntaxclient.hpp"
+#include "server/types.hpp"
 
 namespace {
-    class TalkSyntaxMock : public server::interface::TalkSyntax, public CallReceiver {
+    class TalkSyntaxMock : public server::interface::TalkSyntax, public afl::test::CallReceiver {
      public:
+        TalkSyntaxMock(afl::test::Assert a)
+            : CallReceiver(a)
+            { }
         virtual String_t get(String_t key)
             {
                 checkCall("get " + key);
@@ -40,7 +43,7 @@ namespace {
 void
 TestServerInterfaceTalkSyntaxServer::testIt()
 {
-    TalkSyntaxMock mock;
+    TalkSyntaxMock mock("testIt");
     server::interface::TalkSyntaxServer testee(mock);
 
     // SYNTAXGET
@@ -90,7 +93,7 @@ TestServerInterfaceTalkSyntaxServer::testIt()
 void
 TestServerInterfaceTalkSyntaxServer::testRoundtrip()
 {
-    TalkSyntaxMock mock;
+    TalkSyntaxMock mock("testRoundtrip");
     server::interface::TalkSyntaxServer level1(mock);
     server::interface::TalkSyntaxClient level2(level1);
     server::interface::TalkSyntaxServer level3(level2);

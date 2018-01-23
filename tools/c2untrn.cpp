@@ -6,7 +6,6 @@
 #include "afl/base/optional.hpp"
 #include "afl/charset/codepage.hpp"
 #include "afl/charset/codepagecharset.hpp"
-#include "afl/charset/defaultcharsetfactory.hpp"
 #include "afl/checksums/bytesum.hpp"
 #include "afl/io/filesystem.hpp"
 #include "afl/string/format.hpp"
@@ -22,6 +21,8 @@
 #include "util/stringparser.hpp"
 #include "util/translation.hpp"
 #include "version.hpp"
+#include "util/charsetfactory.hpp"
+#include "util/string.hpp"
 
 namespace {
     class ConsoleUntrnApplication : public util::Application {
@@ -86,7 +87,7 @@ ConsoleUntrnApplication::appMain()
                     errorExit(_("option \"-C\" needs an argument (the character set)"));
                 }
 
-                if (afl::charset::Charset* cs = afl::charset::DefaultCharsetFactory().createCharset(charsetName)) {
+                if (afl::charset::Charset* cs = util::CharsetFactory().createCharset(charsetName)) {
                     charset.reset(cs);
                 } else {
                     errorExit(_("the specified character set is not known"));
@@ -220,35 +221,36 @@ ConsoleUntrnApplication::showHelp()
 {
     // ex game/un-trn.cc:help
     afl::io::TextWriter& w = standardOutput();
-    w.writeLine(afl::string::Format(_("Turn File Decompiler v%s - (c) 2001-2017 Stefan Reuther").c_str(), PCC2_VERSION));
+    w.writeLine(afl::string::Format(_("Turn File Decompiler v%s - (c) 2001-2018 Stefan Reuther").c_str(), PCC2_VERSION));
     w.writeText(afl::string::Format(_("\n"
                                       "Usage:\n"
                                       "  %s [-h|-v]\n"
                                       "  %0$s [-pPtTsckr] [-d] [-f expr] playerX.trn\n\n"
                                       "Filter expressions:\n"
                                       "  a&b, a|b, !a, (a), command, com*, id, id-id, true, false, #num, #num-num\n\n"
-                                      "About:\n"
-                                      " -h        this help summary\n"
-                                      " -v        show version number\n"
-                                      "\n"
-                                      "Options:\n"
-                                      " -p/-P     show/don't show turn header\n"
-                                      " -t/-T     show/don't show turn trailer\n"
-                                      " -f expr   show only matching commands\n"
-                                      " -e cmd    edit turn file\n"
-                                      " -C cset   use specified character set\n"
-                                      " -s        sort turn before doing anything\n"
-                                      " -c        do not show most comments\n"
-                                      " -a        ignore Taccom attachments (delete them if -r used)\n"
-                                      " -z        zap commands before doing anything (just parse headers)\n"
-                                      "\n"
-                                      "Actions:\n"
-                                      " -r        re-write turn\n"
-                                      " -d        delete matching commands (ignores -pPtT, implies -r)\n"
-                                      " -n        no output (ignores -pPtT)\n"
+                                      "%s"
                                       "\n"
                                       "Report bugs to <Streu@gmx.de>\n").c_str(),
-                                    environment().getInvocationName()));
+                                    environment().getInvocationName(),
+                                    util::formatOptions(_("About:\n"
+                                                          "-h\tthis help summary\n"
+                                                          "-v\tshow version number\n"
+                                                          "\n"
+                                                          "Options:\n"
+                                                          "-p/-P\tshow/don't show turn header\n"
+                                                          "-t/-T\tshow/don't show turn trailer\n"
+                                                          "-f expr\tshow only matching commands\n"
+                                                          "-e cmd\tedit turn file\n"
+                                                          "-C cset\tuse specified character set\n"
+                                                          "-s\tsort turn before doing anything\n"
+                                                          "-c\tdo not show most comments\n"
+                                                          "-a\tignore Taccom attachments (delete them if -r used)\n"
+                                                          "-z\tzap commands before doing anything (just parse headers)\n"
+                                                          "\n"
+                                                          "Actions:\n"
+                                                          "-r\tre-write turn\n"
+                                                          "-d\tdelete matching commands (ignores -pPtT, implies -r)\n"
+                                                          "-n\tno output (ignores -pPtT)\n"))));
     exit(0);
 }
 
@@ -256,7 +258,7 @@ void
 ConsoleUntrnApplication::showVersion()
 {
     // ex game/un-trn.cc:version
-    standardOutput().writeLine(afl::string::Format(_("Turn File Decompiler v%s - (c) 2001-2017 Stefan Reuther").c_str(), PCC2_VERSION));
+    standardOutput().writeLine(afl::string::Format(_("Turn File Decompiler v%s - (c) 2001-2018 Stefan Reuther").c_str(), PCC2_VERSION));
     exit(0);
 }
 
@@ -266,7 +268,7 @@ ConsoleUntrnApplication::processEdit(game::v3::TurnFile& trn, String_t edit)
     // Find command
     util::StringParser p(edit);
     String_t cmd;
-    if (!p.parseDelim("=", cmd) || !p.parseChar('=')) {
+    if (!p.parseDelim("=", cmd) || !p.parseCharacter('=')) {
         errorExit(afl::string::Format(_("invalid edit command \"%s\"").c_str(), edit));
     }
 

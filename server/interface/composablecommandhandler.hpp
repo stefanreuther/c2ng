@@ -26,7 +26,7 @@ namespace server { namespace interface {
           }
         </code>
 
-        Each CommandHandler can also be used as a CommandHandler on its own. */
+        Each ComposableCommandHandler can also be used as a CommandHandler on its own. */
     class ComposableCommandHandler : public afl::net::CommandHandler {
      public:
         /** Handle a command.

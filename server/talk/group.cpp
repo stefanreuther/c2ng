@@ -124,6 +124,7 @@ server::talk::Group::describe(const server::talk::render::Context& ctx, const se
        @key unlisted:Int     (If nonzero, group is unlistable) */
 
     // FIXME: can we use HMGET?
+    // FIXME: this traditionally does not report "key" although it could now.
     server::interface::TalkGroup::Description result;
     result.name = name().get();
     result.description = server::talk::render::render(description().get(), ctx, opts, root);

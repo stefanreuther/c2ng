@@ -18,36 +18,11 @@
 #include "game/registrationkey.hpp"
 #include "game/root.hpp"
 #include "game/game.hpp"
+#include "game/test/registrationkey.hpp"
+#include "game/test/stringverifier.hpp"
+#include "game/test/specificationloader.hpp"
 
 namespace {
-    class NullSpecificationLoader : public game::SpecificationLoader {
-     public:
-        virtual void loadShipList(game::spec::ShipList&, game::Root&)
-            { }
-    };
-
-    class NullRegistrationKey : public game::RegistrationKey {
-     public:
-        virtual Status getStatus() const
-            { return Unknown; }
-        virtual String_t getLine(Line) const
-            { return String_t(); }
-        virtual bool setLine(Line, String_t)
-            { return false; }
-    };
-
-    class NullStringVerifier : public game::StringVerifier {
-     public:
-        virtual bool isValidString(Context, const String_t&)
-            { return true; }
-        virtual bool isValidCharacter(Context, afl::charset::Unichar_t)
-            { return true; }
-        virtual size_t getMaxStringLength(Context)
-            { return 1000; };
-        virtual NullStringVerifier* clone() const
-            { return new NullStringVerifier(); }
-    };
-
     void addBase(game::map::Planet& planet)
     {
         game::map::BaseData data;
@@ -158,10 +133,10 @@ TestGameActionsPreconditions::testSession()
         game::Session session(tx, fs);
         session.setRoot(new game::Root(afl::io::InternalDirectory::create("spec"),
                                        afl::io::InternalDirectory::create("game"),
-                                       *new NullSpecificationLoader(),
+                                       *new game::test::SpecificationLoader(),
                                        game::HostVersion(),
-                                       std::auto_ptr<game::RegistrationKey>(new NullRegistrationKey()),
-                                       std::auto_ptr<game::StringVerifier>(new NullStringVerifier())));
+                                       std::auto_ptr<game::RegistrationKey>(new game::test::RegistrationKey(game::RegistrationKey::Unknown, 100)),
+                                       std::auto_ptr<game::StringVerifier>(new game::test::StringVerifier())));
         TS_ASSERT_THROWS(game::actions::mustHaveShipList(session), game::Exception);
         TS_ASSERT_THROWS_NOTHING(game::actions::mustHaveRoot(session));
         TS_ASSERT_THROWS(game::actions::mustHaveGame(session), game::Exception);
@@ -180,10 +155,10 @@ TestGameActionsPreconditions::testSession()
         session.setShipList(new game::spec::ShipList());
         session.setRoot(new game::Root(afl::io::InternalDirectory::create("spec"),
                                        afl::io::InternalDirectory::create("game"),
-                                       *new NullSpecificationLoader(),
+                                       *new game::test::SpecificationLoader(),
                                        game::HostVersion(),
-                                       std::auto_ptr<game::RegistrationKey>(new NullRegistrationKey()),
-                                       std::auto_ptr<game::StringVerifier>(new NullStringVerifier())));
+                                       std::auto_ptr<game::RegistrationKey>(new game::test::RegistrationKey(game::RegistrationKey::Unknown, 100)),
+                                       std::auto_ptr<game::StringVerifier>(new game::test::StringVerifier())));
         session.setGame(new game::Game());
         TS_ASSERT_THROWS_NOTHING(game::actions::mustHaveShipList(session));
         TS_ASSERT_THROWS_NOTHING(game::actions::mustHaveRoot(session));

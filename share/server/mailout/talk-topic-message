@@ -1,0 +1,20 @@
+From: PlanetsCentral Forum <$(SMTP_FROM)>
+Subject: [PlanetsCentral] Topic Notification: $(subject)
+
+Hi,
+
+the topic
+  $(subject)
+has received a reply since your last visit. The message is cited below.
+
+If you no longer wish to receive notifications from this topic,
+log in, visit the topic, and use the "Stop watching this topic" button.
+
+
+>> Message
+
+Subject: $(subject)
+Author:  $(author)
+URL:     <http://planetscentral.com/$(posturl)>
+
+$(message)

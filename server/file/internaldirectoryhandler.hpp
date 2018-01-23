@@ -1,18 +1,29 @@
 /**
   *  \file server/file/internaldirectoryhandler.hpp
+  *  \brief Class server::file::InternalDirectoryHandler
   */
 #ifndef C2NG_SERVER_FILE_INTERNALDIRECTORYHANDLER_HPP
 #define C2NG_SERVER_FILE_INTERNALDIRECTORYHANDLER_HPP
 
+#include "afl/base/growablememory.hpp"
+#include "afl/container/ptrvector.hpp"
 #include "afl/string/string.hpp"
 #include "server/file/directoryhandler.hpp"
-#include "afl/container/ptrvector.hpp"
-#include "afl/base/growablememory.hpp"
 
 namespace server { namespace file {
 
+    /** In-Memory implementation of DirectoryHandler.
+        This class is used for testing.
+        The typical use-case:
+        - creates a InternalDirectoryHandler::Directory
+        - creates an InternalDirectoryHandler using that Directory
+        - creates a Root that uses that InternalDirectoryHandler
+
+        Since this class is used for testing, it allows manipulation of its inner data structures. */
     class InternalDirectoryHandler : public DirectoryHandler {
      public:
+        /** Representation of a file.
+            It can contain data. */
         struct File {
             String_t name;
             afl::base::GrowableMemory<uint8_t> content;
@@ -20,6 +31,9 @@ namespace server { namespace file {
                 : name(name), content()
                 { }
         };
+
+        /** Representation of a directory.
+            It can contain more directories and files. */
         struct Directory {
             String_t name;
             afl::container::PtrVector<Directory> subdirectories;
@@ -29,8 +43,12 @@ namespace server { namespace file {
                 { }
         };
 
+        /** Constructor.
+            \param name Name
+            \param dir Directory */
         InternalDirectoryHandler(String_t name, Directory& dir);
 
+        // DirectoryHandler methods:
         virtual String_t getName();
         virtual afl::base::Ref<afl::io::FileMapping> getFile(const Info& info);
         virtual afl::base::Ref<afl::io::FileMapping> getFileByName(String_t name);
@@ -42,7 +60,14 @@ namespace server { namespace file {
         virtual void removeDirectory(String_t name);
         virtual afl::base::Optional<Info> copyFile(DirectoryHandler& source, const Info& sourceInfo, String_t name);
 
+        /** Find file, given a name.
+            \param name Name to find
+            \return File if found, null otherwise */
         File* findFile(const String_t& name);
+
+        /** Find directory, given a name.
+            \param name Name to find
+            \return Directory if found, null otherwise */
         Directory* findDirectory(const String_t& name);
 
      private:

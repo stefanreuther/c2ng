@@ -13,6 +13,7 @@
 #include "game/v3/specificationloader.hpp"
 #include "game/v3/resultloader.hpp"
 #include "game/v3/stringverifier.hpp"
+#include "game/v3/hconfig.hpp"
 
 namespace gt = game::v3::structures;
 using afl::io::FileSystem;
@@ -23,23 +24,6 @@ namespace {
     const int DEFAULT_HOST_VERSION = MKVERSION(3,22,26);
 
     const char LOG_NAME[] = "game.v3.rootloader";
-
-    /** Import 11 WORDs from HCONFIG image (per-player settings). */
-    void importArray16(game::config::HostConfiguration::StandardOption_t& option, gt::Int16_t (&image)[12])
-    {
-        for (int i = 1; i <= 11; ++i) {
-            option.set(i, image[i]);
-        }
-    }
-
-    /** Import 8 DWORDs from HCONFIG image (meteor settings). */
-    void importArray32(game::config::IntegerArrayOption<8>& option, gt::Int32_t (&image)[8])
-    {
-        for (int i = 1; i <= 8; ++i) {
-            option.set(i, image[i-1]);
-        }
-    }
-
 }
 
 game::v3::RootLoader::RootLoader(afl::base::Ref<afl::io::Directory> defaultSpecificationDirectory,
@@ -201,110 +185,7 @@ game::v3::RootLoader::loadHConfig(Root& root,
 
     gt::HConfig image;
     size_t size = hconfig.read(afl::base::fromObject(image));
-
-    // Assign values.
-    // Instead of checking each option's position, we only check known version boundaries.
-    game::config::HostConfiguration& config = root.hostConfiguration();
-    if (size >= 10) {
-        config[config.RecycleRate].set(image.RecycleRate); config[config.RecycleRate].setSource(source);
-        config[config.RandomMeteorRate].set(image.RandomMeteorRate); config[config.RandomMeteorRate].setSource(source);
-        config[config.AllowMinefields].set(image.AllowMinefields); config[config.AllowMinefields].setSource(source);
-        config[config.AllowAlchemy].set(image.AllowAlchemy); config[config.AllowAlchemy].setSource(source);
-        config[config.DeleteOldMessages].set(image.DeleteOldMessages); config[config.DeleteOldMessages].setSource(source);
-    }
-    if (size >= 186) {
-        config[config.DisablePasswords].set(image.DisablePasswords); config[config.DisablePasswords].setSource(source);
-        importArray16(config[config.GroundKillFactor], image.GroundKillFactor); config[config.GroundKillFactor].setSource(source);
-        importArray16(config[config.GroundDefenseFactor], image.GroundDefenseFactor); config[config.GroundDefenseFactor].setSource(source);
-        importArray16(config[config.FreeFighters], image.FreeFighters); config[config.FreeFighters].setSource(source);
-        importArray16(config[config.RaceMiningRate], image.RaceMiningRate); config[config.RaceMiningRate].setSource(source);
-        importArray16(config[config.ColonistTaxRate], image.ColonistTaxRate); config[config.ColonistTaxRate].setSource(source);
-        config[config.RebelsBuildFighters].set(image.RebelsBuildFighters); config[config.RebelsBuildFighters].setSource(source);
-        config[config.ColoniesBuildFighters].set(image.ColoniesBuildFighters); config[config.ColoniesBuildFighters].setSource(source);
-        config[config.RobotsBuildFighters].set(image.RobotsBuildFighters); config[config.RobotsBuildFighters].setSource(source);
-        config[config.CloakFailureRate].set(image.CloakFailureRate); config[config.CloakFailureRate].setSource(source);
-        config[config.RobCloakedShips].set(image.RobCloakedShips); config[config.RobCloakedShips].setSource(source);
-        config[config.ScanRange].set(image.ScanRange); config[config.ScanRange].setSource(source);
-        config[config.DarkSenseRange].set(image.DarkSenseRange); config[config.DarkSenseRange].setSource(source);
-        config[config.AllowHiss].set(image.AllowHiss); config[config.AllowHiss].setSource(source);
-        config[config.AllowRebelGroundAttack].set(image.AllowRebelGroundAttack); config[config.AllowRebelGroundAttack].setSource(source);
-        config[config.AllowSuperRefit].set(image.AllowSuperRefit); config[config.AllowSuperRefit].setSource(source);
-        config[config.AllowWebMines].set(image.AllowWebMines); config[config.AllowWebMines].setSource(source);
-        config[config.CloakFuelBurn].set(image.CloakFuelBurn); config[config.CloakFuelBurn].setSource(source);
-        config[config.SensorRange].set(image.SensorRange); config[config.SensorRange].setSource(source);
-        config[config.AllowNewNatives].set(image.AllowNewNatives); config[config.AllowNewNatives].setSource(source);
-        config[config.AllowPlanetAttacks].set(image.AllowPlanetAttacks); config[config.AllowPlanetAttacks].setSource(source);
-        config[config.BorgAssimilationRate].set(image.BorgAssimilationRate); config[config.BorgAssimilationRate].setSource(source);
-        config[config.WebMineDecayRate].set(image.WebMineDecayRate); config[config.WebMineDecayRate].setSource(source);
-        config[config.MineDecayRate].set(image.MineDecayRate); config[config.MineDecayRate].setSource(source);
-        config[config.MaximumMinefieldRadius].set(image.MaximumMinefieldRadius); config[config.MaximumMinefieldRadius].setSource(source);
-        config[config.TransuraniumDecayRate].set(image.TransuraniumDecayRate); config[config.TransuraniumDecayRate].setSource(source);
-        config[config.StructureDecayPerTurn].set(image.StructureDecayPerTurn); config[config.StructureDecayPerTurn].setSource(source);
-        config[config.AllowEatingSupplies].set(image.AllowEatingSupplies); config[config.AllowEatingSupplies].setSource(source);
-        config[config.AllowNoFuelMovement].set(image.AllowNoFuelMovement); config[config.AllowNoFuelMovement].setSource(source);
-        config[config.MineHitOdds].set(image.MineHitOdds); config[config.MineHitOdds].setSource(source);
-        config[config.WebMineHitOdds].set(image.WebMineHitOdds); config[config.WebMineHitOdds].setSource(source);
-        config[config.MineScanRange].set(image.MineScanRange); config[config.MineScanRange].setSource(source);
-        config[config.AllowMinesDestroyMines].set(image.AllowMinesDestroyMines); config[config.AllowMinesDestroyMines].setSource(source);
-    }
-    if (size >= 288) {
-        config[config.AllowEngineShieldBonus].set(image.AllowEngineShieldBonus); config[config.AllowEngineShieldBonus].setSource(source);
-        config[config.EngineShieldBonusRate].set(image.EngineShieldBonusRate); config[config.EngineShieldBonusRate].setSource(source);
-        // FIXME: _ColonialFighterSweepRate
-        config[config.AllowColoniesSweepWebs].set(image.AllowColoniesSweepWebs); config[config.AllowColoniesSweepWebs].setSource(source);
-        config[config.MineSweepRate].set(image.MineSweepRate); config[config.MineSweepRate].setSource(source);
-        config[config.WebMineSweepRate].set(image.WebMineSweepRate); config[config.WebMineSweepRate].setSource(source);
-        config[config.HissEffectRate].set(image.HissEffectRate); config[config.HissEffectRate].setSource(source);
-        config[config.RobFailureOdds].set(image.RobFailureOdds); config[config.RobFailureOdds].setSource(source);
-        config[config.PlanetsAttackRebels].set(image.PlanetsAttackRebels); config[config.PlanetsAttackRebels].setSource(source);
-        config[config.PlanetsAttackKlingons].set(image.PlanetsAttackKlingons); config[config.PlanetsAttackKlingons].setSource(source);
-        config[config.MineSweepRange].set(image.MineSweepRange); config[config.MineSweepRange].setSource(source);
-        config[config.WebMineSweepRange].set(image.WebMineSweepRange); config[config.WebMineSweepRange].setSource(source);
-        config[config.AllowScienceMissions].set(image.AllowScienceMissions); config[config.AllowScienceMissions].setSource(source);
-        config[config.MineHitOddsWhenCloakedX10].set(image.MineHitOddsWhenCloakedX10); config[config.MineHitOddsWhenCloakedX10].setSource(source);
-        config[config.DamageLevelForCloakFail].set(image.DamageLevelForCloakFail); config[config.DamageLevelForCloakFail].setSource(source);
-        config[config.AllowFedCombatBonus].set(image.AllowFedCombatBonus); config[config.AllowFedCombatBonus].setSource(source);
-        config[config.MeteorShowerOdds].set(image.MeteorShowerOdds); config[config.MeteorShowerOdds].setSource(source);
-        importArray32(config[config.MeteorShowerOreRanges], image.MeteorShowerOreRanges); config[config.MeteorShowerOreRanges].setSource(source);
-        config[config.LargeMeteorsImpacting].set(image.LargeMeteorsImpacting); config[config.LargeMeteorsImpacting].setSource(source);
-        importArray32(config[config.LargeMeteorOreRanges], image.LargeMeteorOreRanges); config[config.LargeMeteorOreRanges].setSource(source);
-        config[config.AllowMeteorMessages].set(image.AllowMeteorMessages); config[config.AllowMeteorMessages].setSource(source);
-    }
-    if (size >= 298) {
-        config[config.AllowOneEngineTowing].set(image.AllowOneEngineTowing); config[config.AllowOneEngineTowing].setSource(source);
-        config[config.AllowHyperWarps].set(image.AllowHyperWarps); config[config.AllowHyperWarps].setSource(source);
-        config[config.ClimateDeathRate].set(image.ClimateDeathRate); config[config.ClimateDeathRate].setSource(source);
-        config[config.AllowGravityWells].set(image.AllowGravityWells); config[config.AllowGravityWells].setSource(source);
-        config[config.CrystalsPreferDeserts].set(image.CrystalsPreferDeserts); config[config.CrystalsPreferDeserts].setSource(source);
-    }
-    if (size >= 302) {
-        config[config.AllowMinesDestroyWebs].set(image.AllowMinesDestroyWebs); config[config.AllowMinesDestroyWebs].setSource(source);
-        config[config.ClimateLimitsPopulation].set(image.ClimateLimitsPopulation); config[config.ClimateLimitsPopulation].setSource(source);
-    }
-    if (size >= 328) {
-        config[config.MaxPlanetaryIncome].set(image.MaxPlanetaryIncome); config[config.MaxPlanetaryIncome].setSource(source);
-        config[config.IonStormActivity].set(image.IonStormActivity); config[config.IonStormActivity].setSource(source);
-        config[config.AllowChunneling].set(image.AllowChunneling); config[config.AllowChunneling].setSource(source);
-        config[config.AllowDeluxeSuperSpy].set(image.AllowDeluxeSuperSpy); config[config.AllowDeluxeSuperSpy].setSource(source);
-        config[config.IonStormsHideMines].set(image.IonStormsHideMines); config[config.IonStormsHideMines].setSource(source);
-        config[config.AllowGloryDevice].set(image.AllowGloryDevice); config[config.AllowGloryDevice].setSource(source);
-        config[config.AllowAntiCloakShips].set(image.AllowAntiCloakShips); config[config.AllowAntiCloakShips].setSource(source);
-        config[config.AllowGamblingShips].set(image.AllowGamblingShips); config[config.AllowGamblingShips].setSource(source);
-        config[config.AllowCloakedShipsAttack].set(image.AllowCloakedShipsAttack); config[config.AllowCloakedShipsAttack].setSource(source);
-        config[config.AllowShipCloning].set(image.AllowShipCloning); config[config.AllowShipCloning].setSource(source);
-        config[config.AllowBoardingParties].set(image.AllowBoardingParties); config[config.AllowBoardingParties].setSource(source);
-        config[config.AllowImperialAssault].set(image.AllowImperialAssault); config[config.AllowImperialAssault].setSource(source);
-    }
-    if (size >= 336) {
-        config[config.RamScoopFuelPerLY].set(image.RamScoopFuelPerLY); config[config.RamScoopFuelPerLY].setSource(source);
-        config[config.AllowAdvancedRefinery].set(image.AllowAdvancedRefinery); config[config.AllowAdvancedRefinery].setSource(source);
-        config[config.AllowBioscanners].set(image.AllowBioscanners); config[config.AllowBioscanners].setSource(source);
-        config[config.HullTechNotSlowedByMines].set(image.HullTechNotSlowedByMines); config[config.HullTechNotSlowedByMines].setSource(source);
-    }
-    // FIXME: _LokiDecloaksBirds
-    if (size >= 340) {
-        config[config.AllowVPAFeatures].set(image.AllowVPAFeatures); config[config.AllowVPAFeatures].setSource(source);
-    }
+    unpackHConfig(image, size, root.hostConfiguration(), source);
 
     // Postprocess
     root.hostConfiguration().setDependantOptions();

@@ -13,7 +13,8 @@ game::Game::Game()
       m_teamSettings(),
       m_viewpointTurnNumber(0),
       m_scores(),
-      m_cursors()
+      m_cursors(),
+      m_markings()
 {
     m_cursors.setUniverse(&m_currentTurn->universe());
 }
@@ -113,6 +114,21 @@ game::Game::setViewpointTurnNumber(int nr)
 
     // Update
     if (oldTurn != newTurn) {
+        // Transfer selection to new turn
+        // FIXME: the limitToExistingObjects() will unmark objects that don't exist in the new turn.
+        // It would be nice if we could avoid that.
+        // However, the copyFrom() will already unmark nonexistant objects,
+        // effectively doing the equivalent of limitToExistingObjects().
+        // Until we can somehow avoid that, keep the limitToExistingObjects().
+        if (oldTurn != 0) {
+            m_markings.copyFrom(oldTurn->universe(), m_markings.getCurrentLayer());
+        }
+        if (newTurn != 0) {
+            m_markings.copyTo(newTurn->universe(), m_markings.getCurrentLayer());
+            m_markings.limitToExistingObjects(newTurn->universe(), m_markings.getCurrentLayer());
+        }
+
+        // Change cursor
         m_cursors.setUniverse(newTurn != 0 ? &newTurn->universe() : 0);
         sig_viewpointTurnChange.raise();
     }
@@ -148,10 +164,27 @@ game::Game::cursors()
     return m_cursors;
 }
 
+game::map::Markings&
+game::Game::markings()
+{
+    return m_markings;
+}
+
 void
 game::Game::notifyListeners()
 {
-    if (Turn* t = m_currentTurn.get()) {
-        t->notifyListeners();
+    // FIXME: as of 20180101, the script side only operates on "current", but the C++ GUI side partially displays "viewpoint".
+    // Thus, notify both.
+
+    // Current turn
+    Turn* t1 = m_currentTurn.get();
+    if (t1 != 0) {
+        t1->notifyListeners();
+    }
+
+    // Viewpoint turn
+    Turn* t2 = getViewpointTurn().get();
+    if (t2 != 0 && t2 != t1) {
+        t2->notifyListeners();
     }
 }

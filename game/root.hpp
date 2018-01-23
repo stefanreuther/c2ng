@@ -82,6 +82,7 @@ namespace game {
         /** Access registration status.
             See m_registrationKey. */
         RegistrationKey& registrationKey();
+        const RegistrationKey& registrationKey() const;
 
         /** Access string verifier. */
         StringVerifier& stringVerifier();

@@ -9,7 +9,7 @@
 namespace {
     int16_t pack(game::map::RenderList::Instruction insn, size_t numArgs)
     {
-        return 256*insn + numArgs;
+        return int16_t(256*insn + numArgs);
     }
 
     bool unpackInstruction(int value, game::map::RenderList::Instruction& ri)

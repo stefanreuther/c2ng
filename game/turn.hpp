@@ -4,13 +4,14 @@
 #ifndef C2NG_GAME_TURN_HPP
 #define C2NG_GAME_TURN_HPP
 
-#include "game/map/universe.hpp"
-#include "afl/container/ptrmap.hpp"
-#include "game/msg/inbox.hpp"
-#include "game/vcr/database.hpp"
-#include "game/extracontainer.hpp"
 #include "afl/base/refcounted.hpp"
+#include "afl/container/ptrmap.hpp"
+#include "game/extracontainer.hpp"
+#include "game/map/universe.hpp"
+#include "game/msg/inbox.hpp"
+#include "game/msg/outbox.hpp"
 #include "game/timestamp.hpp"
+#include "game/vcr/database.hpp"
 
 namespace game {
 
@@ -39,6 +40,9 @@ namespace game {
         game::msg::Inbox& inbox();
         const game::msg::Inbox& inbox() const;
 
+        game::msg::Outbox& outbox();
+        const game::msg::Outbox& outbox() const;
+
         ExtraContainer<Turn>& extras();
         const ExtraContainer<Turn>& extras() const;
 
@@ -50,6 +54,7 @@ namespace game {
         ExtraContainer<Turn> m_extras;
 
         game::msg::Inbox m_inbox;
+        game::msg::Outbox m_outbox;
 
         afl::base::Ptr<game::vcr::Database> m_battles;
 
@@ -57,8 +62,6 @@ namespace game {
         int m_databaseTurnNumber;
         Timestamp m_timestamp;
 
-        // (Inbox)
-        // (Outbox)
         // (Alliances)
         // (Gen)
         // (data set)                          whose players' data we have

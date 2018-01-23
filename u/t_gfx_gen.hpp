@@ -12,6 +12,17 @@ class TestGfxGenPerlinNoise : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestGfxGenPlanet : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testLarge();
+};
+
+class TestGfxGenPlanetConfig : public CxxTest::TestSuite {
+ public:
+    void testDefault();
+};
+
 class TestGfxGenSpaceView : public CxxTest::TestSuite {
  public:
     void testStarfieldRegression();
@@ -24,6 +35,11 @@ class TestGfxGenSpaceViewConfig : public CxxTest::TestSuite {
  public:
     void testRegression();
     void testRegressionDefault();
+};
+
+class TestGfxGenVector3D : public CxxTest::TestSuite {
+ public:
+    void testIt();
 };
 
 #endif

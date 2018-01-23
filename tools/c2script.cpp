@@ -46,8 +46,6 @@
   *       --charset/-C CS    Game charset                    [PCC2 option]
   *       -O LVL             Optimisation level              [C compiler option]
   *       -k                 Execute commands, not files     [PCC1 option]
-  *
-  *  FIXME: to make this useful, we need a way to control the logger formatting
   */
 
 #include <stdexcept>
@@ -56,7 +54,6 @@
 #include "afl/charset/charset.hpp"
 #include "afl/charset/codepage.hpp"
 #include "afl/charset/codepagecharset.hpp"
-#include "afl/charset/defaultcharsetfactory.hpp"
 #include "afl/except/fileformatexception.hpp"
 #include "afl/except/fileproblemexception.hpp"
 #include "afl/io/filesystem.hpp"
@@ -86,8 +83,10 @@
 #include "interpreter/vmio/filesavecontext.hpp"
 #include "interpreter/vmio/objectloader.hpp"
 #include "util/application.hpp"
+#include "util/charsetfactory.hpp"
 #include "util/consolelogger.hpp"
 #include "util/profiledirectory.hpp"
+#include "util/string.hpp"
 #include "util/translation.hpp"
 #include "version.hpp"
 
@@ -108,6 +107,7 @@ namespace {
         bool opt_debug;                             // -g/-s
         bool opt_commands;                          // -k
         bool opt_preexecLoad;                       // -fpreexec-load
+        bool opt_readonly;                          // --readonly
         Mode mode;
         std::auto_ptr<afl::charset::Charset> gameCharset;
         std::vector<String_t> loadPath;             // -I
@@ -122,6 +122,7 @@ namespace {
               opt_debug(true),
               opt_commands(false),
               opt_preexecLoad(false),
+              opt_readonly(false),
               mode(ExecMode),
               gameCharset(new afl::charset::CodepageCharset(afl::charset::g_codepageLatin1)),
               loadPath(),
@@ -375,6 +376,9 @@ namespace {
             returnCode = 1;
         }
         processList.removeTerminatedProcesses();
+
+        // FIXME: save stuff etc.
+        // Check "readonly" option.
         return returnCode;
     }
 
@@ -510,7 +514,7 @@ ConsoleScriptApplication::appMain()
                 }
                 params.playerNumber = value;
             } else if (p == "C") {
-                if (afl::charset::Charset* cs = afl::charset::DefaultCharsetFactory().createCharset(fetchArg("-C", commandLine))) {
+                if (afl::charset::Charset* cs = util::CharsetFactory().createCharset(fetchArg("-C", commandLine))) {
                     params.gameCharset.reset(cs);
                 } else {
                     errorExit(_("the specified character set is not known"));
@@ -537,6 +541,10 @@ ConsoleScriptApplication::appMain()
                 catch (std::exception& e) {
                     errorExit(_("parameter to '--log' is not valid"));
                 }
+            } else if (p == "readonly" || p == "read-only") {
+                params.opt_readonly = true;
+            } else if (p == "q") {
+                consoleLogger().setConfiguration("script*@Info+=raw:*=hide");
             } else if (p == "h" || p == "help") {
                 help();
             } else {
@@ -605,36 +613,43 @@ ConsoleScriptApplication::fetchArg(const char* opt, afl::sys::CommandLineParser&
 void
 ConsoleScriptApplication::help()
 {
+    const String_t options =
+        util::formatOptions(_("Actions:\n"
+                              "--exec, --run\tExecute (default)\n"
+                              "--compile, -c\tCompile to \"*.qc\" files\n"
+                              "--disassemble, -S\tDisassemble to \"*.qs\" files\n"
+                              // "--dump\tDump data\n"
+                              "\n"
+                              "Options:\n"
+                              "-g\tEnable debug info (default)\n"
+                              "-s\tDisable debug info\n"
+                              "-o FILE\tOutput file\n"
+                              "--game/-G DIR\tGame directory\n"
+                              "--root/-R DIR\tRoot direcory\n"
+                              "--player/-P NUM\tPlayer number\n"
+                              "--readonly\tOpen game data read-only\n"
+                              "-I DIR\tInclude (load) directory\n"
+                              "--charset/-C CS\tSet game character set\n"
+                              "-O LVL\tOptimisation level\n"
+                              "-k\tExecute commands, not files\n"
+                              "--log CONFIG\tConfigure log output\n"
+                              "-q\tQuiet; show only script output (predefined log config)\n"
+                              "\n"
+                              "Expert Options:\n"
+                              "-f preexec-load\tPre-execute \"Load\" statements\n"));
+    
     afl::io::TextWriter& out = standardOutput();
-    out.writeLine(afl::string::Format(_("PCC2 Script Engine v%s - (c) 2016 Stefan Reuther").c_str(), PCC2_VERSION));
+    out.writeLine(afl::string::Format(_("PCC2 Script Engine v%s - (c) 2017-2018 Stefan Reuther").c_str(), PCC2_VERSION));
     out.writeLine();
     out.writeLine(afl::string::Format(_("Usage:\n"
                                         "  %s [-h]\n"
                                         "  %$0s [-ACTION] [-OPTIONS] FILE...\n"
                                         "  %$0s [-ACTION] [-OPTIONS] -k COMMAND...\n\n"
-                                        "Actions:\n"
-                                        "  --exec, --run    Execute (default)\n"
-                                        "  --compile, -c    Compile to \"*.qc\" files\n"
-                                        "  --disassemble, -S  Disassemble to \"*.qs\" files\n"
-                                        // "  --dump           Dump data\n"
+                                        "%s"
                                         "\n"
-                                        "Options:\n"
-                                        "  -g               Enable debug info (default)\n"
-                                        "  -s               Disable debug info\n"
-                                        "  -o FILE          Output file\n"
-                                        "  --game/-G DIR    Game directory\n"
-                                        "  --root/-R DIR    Root direcory\n"
-                                        "  -I DIR           Include (load) directory\n"
-                                        "  --charset/-C CS  Set game character set\n"
-                                        "  -O LVL           Optimisation level\n"
-                                        "  -k               Execute commands, not files\n"
-                                        "  --log CONFIG     Configure log output\n"
-                                        "\n"
-                                        "Expert Options:\n"
-                                        "  -f preexec-load  Pre-execute \"Load\" statements\n" 
-                                        "\n"
-                                        "Report bugs to <Streu@gmx.de>\n").c_str(),
-                                      environment().getInvocationName()));
+                                        "Report bugs to <Streu@gmx.de>").c_str(),
+                                      environment().getInvocationName(),
+                                      options));
     exit(0);
 }
 

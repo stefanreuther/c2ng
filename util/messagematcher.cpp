@@ -39,9 +39,9 @@ util::MessageMatcher::setConfiguration(const String_t& value)
 
         // Level
         LevelSet_t levels = LevelSet_t::allUpTo(LogListener::Error);
-        if (p.parseChar('@')) {
+        if (p.parseCharacter('@')) {
             // "-level" syntax
-            bool below = p.parseChar('-');
+            bool below = p.parseCharacter('-');
 
             // Level
             LogListener::Level level;
@@ -60,7 +60,7 @@ util::MessageMatcher::setConfiguration(const String_t& value)
             }
 
             // "level+" syntax
-            bool above = p.parseChar('+');
+            bool above = p.parseCharacter('+');
 
             // Adjust
             if (above) {
@@ -83,7 +83,7 @@ util::MessageMatcher::setConfiguration(const String_t& value)
         }
 
         // Action
-        if (!p.parseChar('=')) {
+        if (!p.parseCharacter('=')) {
             throw std::runtime_error(_("Missing '=' in message match expression"));
         }
         String_t action;
@@ -96,7 +96,7 @@ util::MessageMatcher::setConfiguration(const String_t& value)
         if (p.parseEnd()) {
             break;
         }
-        if (!p.parseChar(':')) {
+        if (!p.parseCharacter(':')) {
             throw std::runtime_error(_("Missing ':' in message match expression"));
         }
     }

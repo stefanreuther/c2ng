@@ -22,7 +22,7 @@ game::interface::MissionFunction::get(interpreter::Arguments& args)
        | With Mission(shipMission, shipOwner) Do ...
 
        @see int:index:group:missionproperty|Mission Properties
-       @since PCC2NG 2.40.1 */
+       @since PCC2 2.40.1 */
 
     args.checkArgumentCount(1, 2);
 

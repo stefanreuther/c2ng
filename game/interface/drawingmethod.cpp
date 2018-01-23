@@ -8,7 +8,7 @@
 namespace {
     /* @q Delete (Drawing Command)
        Delete this drawing.
-       @since PCC 1.0.14, PCC2 1.99.20, PCC2ng 2.40.1 */
+       @since PCC 1.0.14, PCC2 1.99.20, PCC2 2.40.1 */
     void IFDrawingDelete(game::map::DrawingContainer& container,
                          game::map::DrawingContainer::Iterator_t it,
                          interpreter::Arguments& args)
@@ -22,7 +22,7 @@ namespace {
     /* @q SetComment s:Str (Drawing Command)
        Set drawing comment.
        @see Comment (Drawing Property)
-       @since PCC 1.0.14, PCC2 1.99.20, PCC2ng 2.40.1 */
+       @since PCC 1.0.14, PCC2 1.99.20, PCC2 2.40.1 */
     void IFDrawingSetComment(game::map::DrawingContainer& container,
                              game::map::DrawingContainer::Iterator_t it,
                              interpreter::Arguments& args)

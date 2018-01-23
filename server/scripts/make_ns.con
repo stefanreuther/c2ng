@@ -1,0 +1,37 @@
+#
+#  "Northern Star" game (no alliances)
+#
+
+# Crate
+host newgame | setenv gid
+
+# Basic properites
+host gamesetname ${gid} "North Star"
+host gameset ${gid} description "No-alliances/no-cooperation game. Everyone plays for themselves. Otherwise, similar to the Pleiades series."
+
+host gameset ${gid} endCondition open
+
+host gameset ${gid} host      phost-current
+host gameset ${gid} master    amaster-3.10g
+host gameset ${gid} shiplist  plist-3.2
+
+host gameaddtool ${gid} config-exp4
+host gameaddtool ${gid} config-ionstorms0
+host gameaddtool ${gid} config-wormholes5
+host gameaddtool ${gid} config-wrap
+host gameaddtool ${gid} config-noallies
+host gameaddtool ${gid} config-nogive
+host gameaddtool ${gid} config-noshow
+host gameaddtool ${gid} ptscore-1.4
+
+# Basic Sun/Thu schedule; Mon/Wed/Fri until turn 20
+host scheduleset ${gid} weekly 17 early
+host scheduleadd ${gid} weekly 42 early untilturn 20
+host scheduleadd ${gid} daily 7 early untilturn 1
+
+# Make it public and respawnable
+host gamesettype ${gid} public
+host gameset ${gid} copyEnable 1
+
+# Success
+echo "*** Created game with Id ${gid} ***"

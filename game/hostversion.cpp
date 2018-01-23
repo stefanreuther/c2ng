@@ -5,6 +5,7 @@
 
 #include "game/hostversion.hpp"
 #include "afl/string/format.hpp"
+#include "game/limits.hpp"
 
 namespace {
     String_t formatVersion(String_t hostName, int32_t version, bool host)
@@ -88,7 +89,7 @@ game::HostVersion::getCommandArgumentLimit() const
     // \change This differs from PCC2, but is consistent with PCC1.
     if (m_kind == PHost) {
         if (m_version >= MKVERSION(3,3,2)) {
-            return 10000;
+            return MAX_NUMBER;
         } else {
             return 500;
         }
@@ -310,6 +311,13 @@ bool
 game::HostVersion::hasDoubleTorpedoPower(const game::config::HostConfiguration& config) const
 {
     return !(m_kind == PHost && config[config.AllowAlternativeCombat]());
+}
+
+// Check for ability to do two cargo transfers from a ship.
+bool
+game::HostVersion::hasParallelShipTransfers() const
+{
+    return m_kind != NuHost;
 }
 
 

@@ -15,6 +15,11 @@ class TestServerConfigurationHandler : public CxxTest::TestSuite {
     void testNoFile();
 };
 
+class TestServerErrors : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
 class TestServerTypes : public CxxTest::TestSuite {
  public:
     void testToInteger();

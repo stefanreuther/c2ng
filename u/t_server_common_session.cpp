@@ -33,3 +33,40 @@ TestServerCommonSession::testIt()
     TS_ASSERT_THROWS(testee.checkUser(), std::exception);
     TS_ASSERT_THROWS_NOTHING(testee.checkAdmin());
 }
+
+/** Test formatWord(). */
+void
+TestServerCommonSession::testFormatWord()
+{
+    using server::common::Session;
+
+    // Empty
+    TS_ASSERT_EQUALS(Session::formatWord("", false), "''");
+    TS_ASSERT_EQUALS(Session::formatWord("", true), "''");
+
+    // Placeholder trigger
+    // - spaces
+    TS_ASSERT_EQUALS(Session::formatWord(" ", false), "...");
+    // - special characters
+    TS_ASSERT_EQUALS(Session::formatWord("[foo]", false), "...");
+    TS_ASSERT_EQUALS(Session::formatWord("a\nb", false), "...");
+    TS_ASSERT_EQUALS(Session::formatWord("''", false), "...");
+    // - too long
+    TS_ASSERT_EQUALS(Session::formatWord(String_t(200, 'x'), false), "...");
+
+    // Censor
+    TS_ASSERT_EQUALS(Session::formatWord("x", true), "...");
+
+    // Normal: we want to pass...
+    // - normal words
+    TS_ASSERT_EQUALS(Session::formatWord("x", false), "x");
+    TS_ASSERT_EQUALS(Session::formatWord("x_y", false), "x_y");
+    // - file names
+    TS_ASSERT_EQUALS(Session::formatWord("a/b/c.dat", false), "a/b/c.dat");
+    // - permission strings
+    TS_ASSERT_EQUALS(Session::formatWord("g:1,g:2", false), "g:1,g:2");
+    TS_ASSERT_EQUALS(Session::formatWord("-all", false), "-all");
+    // - wildcards
+    TS_ASSERT_EQUALS(Session::formatWord("xy*", false), "xy*");
+}
+

@@ -13,9 +13,11 @@
 #include "game/config/integeroption.hpp"
 #include "game/config/integervalueparser.hpp"
 #include "game/config/booleanvalueparser.hpp"
+#include "game/limits.hpp"
 
 using interpreter::checkIntegerArg;
 using interpreter::checkStringArg;
+using game::MAX_NUMBER;
 
 namespace {
     void drawLineOrRectangle(game::Session& session,
@@ -34,10 +36,10 @@ namespace {
         int32_t tag = 0;
         int32_t expire = -1;
 
-        if (!checkIntegerArg(x1, args.getNext(), 0, 10000)
-            || !checkIntegerArg(y1, args.getNext(), 0, 10000)
-            || !checkIntegerArg(x2, args.getNext(), 0, 10000)
-            || !checkIntegerArg(y2, args.getNext(), 0, 10000))
+        if (!checkIntegerArg(x1, args.getNext(), 0, MAX_NUMBER)
+            || !checkIntegerArg(y1, args.getNext(), 0, MAX_NUMBER)
+            || !checkIntegerArg(x2, args.getNext(), 0, MAX_NUMBER)
+            || !checkIntegerArg(y2, args.getNext(), 0, MAX_NUMBER))
             return;
         checkIntegerArg(color, args.getNext(), 0, Drawing::NUM_USER_COLORS);
         checkIntegerArg(tag, args.getNext(), 0, 0xFFFF);
@@ -129,8 +131,7 @@ namespace {
    @change Whereas PCC and PCC2 only accept options they know in this command, PCC2ng will accept all names.
    A previously-undefined name will produce a new option of type "string".
 
-   FIXME: add and document a command to define new configuration options.
-
+   @see CreateConfigOption
    @since PCC 1.1.4, PCC2 1.99.25, PCC2 2.40.1 */
 void
 game::interface::IFAddConfig(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
@@ -199,9 +200,18 @@ game::interface::IFAddFCode(interpreter::Process& /*proc*/, game::Session& sessi
 }
 
 /* @q AddPref line:Str (Global Command)
+   Modify the user configuration (preferences/options).
+   %line is a configuration assignment as it could appear in <tt>pcc2.ini</tt>.
+   This command will process the line, and update the in-memory configuration accordingly.
+   The configuration file will be rewritten the next time PCC2 exits the game.
 
-   FIXME
+   You can only modify complete options, there's no way to modify just one slot of an array option.
 
+   FIXME: Need to have a way to have configuration without a loaded game
+
+   If the option you're setting has not be defined before, this command will produce a new option of type "string".
+
+   @see CreatePrefOption
    @since PCC2 2.40.1 */
 void
 game::interface::IFAddPref(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
@@ -229,10 +239,48 @@ game::interface::IFAddPref(interpreter::Process& /*proc*/, game::Session& sessio
                                     game::config::ConfigurationOption::User);
 }
 
+/* @q CC$SelectionExec layer:Int, code:Str (Internal)
+   Back-end to {SelectionExec}.
+
+   @since PCC2 2.40.3, PCC2 1.99.10 */
+void
+game::interface::IFCCSelectionExec(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
+{
+    // ex int/if/globalif.cc:IFCCSelectionExec
+    args.checkArgumentCount(2);
+
+    Game& g = game::actions::mustHaveGame(session);
+
+    int32_t layer;
+    String_t code;
+    if (!interpreter::checkIntegerArg(layer, args.getNext(), 0, int(g.markings().getNumLayers()))) {
+        return;
+    }
+    if (!interpreter::checkStringArg(code, args.getNext())) {
+        return;
+    }
+
+    size_t effLayer = (layer == 0
+                       ? g.markings().getCurrentLayer()
+                       : size_t(layer-1));
+
+    g.markings().executeCompiledExpression(code, effLayer, g.currentTurn().universe());
+}
+
 /* @q CreateConfigOption key:Str, type:Str (Global Command)
+   Create a new game configuration option (PConfig/HConfig).
+   Use this to track configuration options that PCC2 does not support internally.
 
-   FIXME
+   %key is the name of the option.
 
+   %type is the type of the value.
+   Supported types are:
+   - "int"/"integer": a number
+   - "str"/"string": a string
+   - "bool"/"boolean": a boolean value (yes/no)
+   The type affects acceptable values for the option, and the return type produced by {Cfg()}.
+
+   @see AddConfig, Cfg(), CreatePrefOption
    @since PCC2 2.40.1 */
 void
 game::interface::IFCreateConfigOption(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
@@ -242,9 +290,19 @@ game::interface::IFCreateConfigOption(interpreter::Process& /*proc*/, game::Sess
 }
 
 /* @q CreatePrefOption key:Str, type:Str (Global Command)
+   Create a new user configuration option (pcc2.ini).
+   Use this to track configuration options that PCC2 does not support internally.
 
-   FIXME
+   %key is the name of the option.
 
+   %type is the type of the value.
+   Supported types are:
+   - "int"/"integer": a number
+   - "str"/"string": a string
+   - "bool"/"boolean": a boolean value (yes/no)
+   The type affects acceptable values for the option, and the return type produced by {Pref()}.
+
+   @see AddPref, Pref(), CreateConfigOption
    @since PCC2 2.40.1 */
 void
 game::interface::IFCreatePrefOption(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
@@ -280,8 +338,8 @@ game::interface::IFNewCircle(interpreter::Process& /*proc*/, game::Session& sess
     int32_t color = 9;
     int32_t tag = 0;
     int32_t expire = -1;
-    if (!checkIntegerArg(x, args.getNext(), 0, 10000)
-        || !checkIntegerArg(y, args.getNext(), 0, 10000)
+    if (!checkIntegerArg(x, args.getNext(), 0, MAX_NUMBER)
+        || !checkIntegerArg(y, args.getNext(), 0, MAX_NUMBER)
         || !checkIntegerArg(radius, args.getNext(), 1, 5000))
         return;
     checkIntegerArg(color, args.getNext(), 0, Drawing::NUM_USER_COLORS);
@@ -415,8 +473,8 @@ game::interface::IFNewMarker(interpreter::Process& /*proc*/, game::Session& sess
     int32_t tag = 0;
     int32_t expire = -1;
     String_t text;
-    if (!checkIntegerArg(x, args.getNext(), 0, 10000)
-        || !checkIntegerArg(y, args.getNext(), 0, 10000)
+    if (!checkIntegerArg(x, args.getNext(), 0, MAX_NUMBER)
+        || !checkIntegerArg(y, args.getNext(), 0, MAX_NUMBER)
         || !checkIntegerArg(type, args.getNext(), 0, 7 /*FIXME: NUM_USER_MARKERS-1*/)) {
         return;
     }
@@ -453,7 +511,7 @@ game::interface::IFHistoryShowTurn(interpreter::Process& /*proc*/, game::Session
     // Check parameters
     args.checkArgumentCount(1);
     int32_t turn;
-    if (!interpreter::checkIntegerArg(turn, args.getNext(), 0, 10000)) {
+    if (!interpreter::checkIntegerArg(turn, args.getNext(), 0, MAX_NUMBER)) {
         return;
     }
 

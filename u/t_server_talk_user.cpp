@@ -73,61 +73,6 @@ TestServerTalkUser::testBasicProperties()
     TS_ASSERT_EQUALS(Access(p).toInteger(), 2);
 }
 
-/** Test getRealName(). */
-void
-TestServerTalkUser::testRealName()
-{
-    afl::net::NullCommandHandler mail;
-
-    // No real name set
-    {
-        afl::net::redis::InternalDatabase db;
-        server::talk::Root root(db, mail, server::talk::Configuration());
-        server::talk::User testee(root, "1001");
-        TS_ASSERT_EQUALS(testee.getRealName(), "");
-    }
-
-    // Real name set, but not enabled
-    {
-        afl::net::redis::InternalDatabase db;
-        server::talk::Root root(db, mail, server::talk::Configuration());
-        root.userRoot().subtree("1001").hashKey("profile").stringField("realname").set("RN");
-        server::talk::User testee(root, "1001");
-        TS_ASSERT_EQUALS(testee.getRealName(), "");
-    }
-
-    // Real name set and enabled
-    {
-        afl::net::redis::InternalDatabase db;
-        server::talk::Root root(db, mail, server::talk::Configuration());
-        root.userRoot().subtree("1001").hashKey("profile").stringField("realname").set("RN");
-        root.userRoot().subtree("1001").hashKey("profile").intField("inforealnameflag").set(1);
-        server::talk::User testee(root, "1001");
-        TS_ASSERT_EQUALS(testee.getRealName(), "RN");
-    }
-
-    // Real name set and enabled in default profile
-    {
-        afl::net::redis::InternalDatabase db;
-        server::talk::Root root(db, mail, server::talk::Configuration());
-        root.userRoot().subtree("1001").hashKey("profile").stringField("realname").set("RN");
-        root.defaultProfile().intField("inforealnameflag").set(1);
-        server::talk::User testee(root, "1001");
-        TS_ASSERT_EQUALS(testee.getRealName(), "RN");
-    }
-
-    // Real name set and enabled in default profile, but disabled by user
-    {
-        afl::net::redis::InternalDatabase db;
-        server::talk::Root root(db, mail, server::talk::Configuration());
-        root.userRoot().subtree("1001").hashKey("profile").stringField("realname").set("RN");
-        root.userRoot().subtree("1001").hashKey("profile").intField("inforealnameflag").set(0);
-        root.defaultProfile().intField("inforealnameflag").set(1);
-        server::talk::User testee(root, "1001");
-        TS_ASSERT_EQUALS(testee.getRealName(), "");
-    }
-}
-
 /** Test getPMMailType(). */
 void
 TestServerTalkUser::testMailPMType()

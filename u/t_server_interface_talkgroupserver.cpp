@@ -3,14 +3,14 @@
   *  \brief Test for server::interface::TalkGroupServer
   */
 
-#include <memory>
-#include <stdexcept>
 #include "server/interface/talkgroupserver.hpp"
 
+#include <memory>
+#include <stdexcept>
 #include "t_server_interface.hpp"
-#include "u/helper/callreceiver.hpp"
-#include "afl/string/format.hpp"
 #include "afl/data/access.hpp"
+#include "afl/string/format.hpp"
+#include "afl/test/callreceiver.hpp"
 #include "server/interface/talkgroupclient.hpp"
 
 using afl::string::Format;
@@ -18,11 +18,15 @@ using afl::data::Segment;
 using server::interface::TalkGroup;
 
 namespace {
-    class TalkGroupMock : public TalkGroup, public CallReceiver {
+    class TalkGroupMock : public TalkGroup, public afl::test::CallReceiver {
+     public:
+        TalkGroupMock(afl::test::Assert a)
+            : CallReceiver(a)
+            { }
         virtual void add(String_t groupId, const Description& info)
-            { checkCall(Format("add(%s,%s,%s,%s,%d/%d)") << groupId << info.name.orElse("no-name") << info.description.orElse("no-description") << info.parentGroup.orElse("no-parent") << int(info.unlisted.isValid()) << int(info.unlisted.orElse(false))); }
+            { checkCall(Format("add(%s,%s,%s,%s,%s,%d/%d)") << groupId << info.name.orElse("no-name") << info.description.orElse("no-description") << info.parentGroup.orElse("no-parent") << info.key.orElse("no-key") << int(info.unlisted.isValid()) << int(info.unlisted.orElse(false))); }
         virtual void set(String_t groupId, const Description& info)
-            { checkCall(Format("set(%s,%s,%s,%s,%d/%d)") << groupId << info.name.orElse("no-name") << info.description.orElse("no-description") << info.parentGroup.orElse("no-parent") << int(info.unlisted.isValid()) << int(info.unlisted.orElse(false))); }
+            { checkCall(Format("set(%s,%s,%s,%s,%s,%d/%d)") << groupId << info.name.orElse("no-name") << info.description.orElse("no-description") << info.parentGroup.orElse("no-parent") << info.key.orElse("no-key") << int(info.unlisted.isValid()) << int(info.unlisted.orElse(false))); }
         virtual String_t getField(String_t groupId, String_t fieldName)
             {
                 checkCall(Format("getField(%s,%s)", groupId, fieldName));
@@ -60,27 +64,36 @@ namespace {
 void
 TestServerInterfaceTalkGroupServer::testIt()
 {
-    TalkGroupMock mock;
+    TalkGroupMock mock("testIt");
     server::interface::TalkGroupServer testee(mock);
 
     // add
-    mock.expectCall("add(g,no-name,no-description,no-parent,0/0)");
+    mock.expectCall("add(g,no-name,no-description,no-parent,no-key,0/0)");
     testee.callVoid(Segment().pushBackString("GROUPADD").pushBackString("g"));
 
-    mock.expectCall("add(g,Name,no-description,Parent,1/0)");
+    mock.expectCall("add(g,Name,no-description,Parent,no-key,1/0)");
     testee.callVoid(Segment().pushBackString("GROUPADD").pushBackString("g")
                     .pushBackString("parent").pushBackString("Parent")
                     .pushBackString("name").pushBackString("Name")
                     .pushBackString("unlisted").pushBackInteger(0));
+
+    mock.expectCall("add(g,no-name,no-description,no-parent,Key,0/0)");
+    testee.callVoid(Segment().pushBackString("GROUPADD").pushBackString("g")
+                    .pushBackString("key").pushBackString("Key"));
+
     // set
-    mock.expectCall("set(g,no-name,no-description,no-parent,0/0)");
+    mock.expectCall("set(g,no-name,no-description,no-parent,no-key,0/0)");
     testee.callVoid(Segment().pushBackString("GROUPSET").pushBackString("g"));
 
-    mock.expectCall("set(g,Name,no-description,Parent,1/0)");
+    mock.expectCall("set(g,Name,no-description,Parent,no-key,1/0)");
     testee.callVoid(Segment().pushBackString("GROUPSET").pushBackString("g")
                     .pushBackString("parent").pushBackString("Parent")
                     .pushBackString("name").pushBackString("Name")
                     .pushBackString("unlisted").pushBackInteger(0));
+
+    mock.expectCall("set(g,no-name,no-description,no-parent,Key,0/0)");
+    testee.callVoid(Segment().pushBackString("GROUPSET").pushBackString("g")
+                    .pushBackString("key").pushBackString("Key"));
 
     // getField
     mock.expectCall("getField(gg,ff)");
@@ -159,7 +172,7 @@ TestServerInterfaceTalkGroupServer::testIt()
 void
 TestServerInterfaceTalkGroupServer::testErrors()
 {
-    TalkGroupMock mock;
+    TalkGroupMock mock("testErrors");
     server::interface::TalkGroupServer testee(mock);
 
     // bad arg count
@@ -190,14 +203,14 @@ TestServerInterfaceTalkGroupServer::testErrors()
 void
 TestServerInterfaceTalkGroupServer::testRoundtrip()
 {
-    TalkGroupMock mock;
+    TalkGroupMock mock("testRoundtrip");
     server::interface::TalkGroupServer level1(mock);
     server::interface::TalkGroupClient level2(level1);
     server::interface::TalkGroupServer level3(level2);
     server::interface::TalkGroupClient level4(level3);
 
     // add
-    mock.expectCall("add(g,no-name,no-description,no-parent,0/0)");
+    mock.expectCall("add(g,no-name,no-description,no-parent,no-key,0/0)");
     level4.add("g", TalkGroup::Description());
 
     {
@@ -205,13 +218,14 @@ TestServerInterfaceTalkGroupServer::testRoundtrip()
         d.parentGroup = "Parent";
         d.name = "Name";
         d.unlisted = false;
+        d.key = "KK";
 
-        mock.expectCall("add(g,Name,no-description,Parent,1/0)");
+        mock.expectCall("add(g,Name,no-description,Parent,KK,1/0)");
         level4.add("g", d);
     }
 
     // set
-    mock.expectCall("set(g,no-name,no-description,no-parent,0/0)");
+    mock.expectCall("set(g,no-name,no-description,no-parent,no-key,0/0)");
     level4.set("g", TalkGroup::Description());
 
     {
@@ -220,7 +234,7 @@ TestServerInterfaceTalkGroupServer::testRoundtrip()
         d.name = "Name";
         d.unlisted = false;
 
-        mock.expectCall("set(g,Name,no-description,Parent,1/0)");
+        mock.expectCall("set(g,Name,no-description,Parent,no-key,1/0)");
         level4.set("g", d);
     }
 

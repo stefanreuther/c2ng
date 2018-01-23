@@ -13,7 +13,7 @@
 #include "interpreter/propertyacceptor.hpp"
 #include "game/game.hpp"
 
-using interpreter::makeIntegerValue;
+using interpreter::makeSizeValue;
 
 namespace {
     enum VcrSideDomain {
@@ -121,7 +121,7 @@ game::interface::VcrSideContext::get(PropertyIndex_t index)
         /* @q Index:Int (Combat Participant Property)
            Position of this unit in the fight.
            This is the index into the fight's {Unit (Combat Property)|Unit} array. */
-        return makeIntegerValue(m_side + 1);
+        return makeSizeValue(m_side + 1);
     }
     return 0;
 }

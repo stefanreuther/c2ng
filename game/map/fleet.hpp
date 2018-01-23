@@ -6,6 +6,7 @@
 
 #include "game/spec/shiplist.hpp"
 #include "game/config/hostconfiguration.hpp"
+#include "game/unitscoredefinitionlist.hpp"
 
 namespace game { namespace map {
 
@@ -20,6 +21,11 @@ namespace game { namespace map {
 
         void synchronize(const game::config::HostConfiguration& config,
                          const game::spec::ShipList& shipList);
+
+        bool hasSpecialFunction(int basicFunction,
+                                const UnitScoreDefinitionList& scoreDefinitions,
+                                const game::spec::ShipList& shipList,
+                                const game::config::HostConfiguration& config) const;
 
         static void synchronizeFleetMember(Universe& univ, Id_t sid,
                                            const game::config::HostConfiguration& config,

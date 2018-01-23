@@ -6,13 +6,13 @@
 #include "server/interface/talkgroupclient.hpp"
 
 #include "t_server_interface.hpp"
-#include "u/helper/commandhandlermock.hpp"
-#include "server/types.hpp"
 #include "afl/data/hash.hpp"
 #include "afl/data/hashvalue.hpp"
+#include "afl/data/segment.hpp"
 #include "afl/data/vector.hpp"
 #include "afl/data/vectorvalue.hpp"
-#include "afl/data/segment.hpp"
+#include "afl/test/commandhandler.hpp"
+#include "server/types.hpp"
 
 using afl::data::Hash;
 using afl::data::HashValue;
@@ -23,18 +23,18 @@ using afl::data::Segment;
 void
 TestServerInterfaceTalkGroupClient::testIt()
 {
-    CommandHandlerMock mock;
+    afl::test::CommandHandler mock("testIt");
     server::interface::TalkGroupClient testee(mock);
 
     // add
     {
-        mock.expectCall("GROUPADD|g");
-        mock.provideReturnValue(0);
+        mock.expectCall("GROUPADD, g");
+        mock.provideNewResult(0);
         testee.add("g", server::interface::TalkGroupClient::Description());
     }
     {
-        mock.expectCall("GROUPADD|g2|name|theName|description|theDescription|parent|theParent|unlisted|0");
-        mock.provideReturnValue(0);
+        mock.expectCall("GROUPADD, g2, name, theName, description, theDescription, parent, theParent, unlisted, 0");
+        mock.provideNewResult(0);
 
         server::interface::TalkGroupClient::Description desc;
         desc.name = "theName";
@@ -46,13 +46,13 @@ TestServerInterfaceTalkGroupClient::testIt()
 
     // set
     {
-        mock.expectCall("GROUPSET|g");
-        mock.provideReturnValue(0);
+        mock.expectCall("GROUPSET, g");
+        mock.provideNewResult(0);
         testee.set("g", server::interface::TalkGroupClient::Description());
     }
     {
-        mock.expectCall("GROUPSET|g2|name|theName|description|theDescription|parent|theParent|unlisted|0");
-        mock.provideReturnValue(0);
+        mock.expectCall("GROUPSET, g2, name, theName, description, theDescription, parent, theParent, unlisted, 0");
+        mock.provideNewResult(0);
 
         server::interface::TalkGroupClient::Description desc;
         desc.name = "theName";
@@ -63,15 +63,15 @@ TestServerInterfaceTalkGroupClient::testIt()
     }
 
     // getField
-    mock.expectCall("GROUPGET|g|name");
-    mock.provideReturnValue(server::makeStringValue("theName"));
+    mock.expectCall("GROUPGET, g, name");
+    mock.provideNewResult(server::makeStringValue("theName"));
     TS_ASSERT_EQUALS(testee.getField("g", "name"), "theName");
 
     // list
     {
         // Return null - should produce no groups/forums
-        mock.expectCall("GROUPLS|g");
-        mock.provideReturnValue(0);
+        mock.expectCall("GROUPLS, g");
+        mock.provideNewResult(0);
 
         afl::data::StringList_t groups;
         afl::data::IntegerList_t forums;
@@ -85,8 +85,8 @@ TestServerInterfaceTalkGroupClient::testIt()
         Hash::Ref_t h = Hash::create();
         h->setNew("groups", new VectorValue(Vector::create(Segment().pushBackString("sub1").pushBackString("sub2"))));
         h->setNew("forums", new VectorValue(Vector::create(Segment().pushBackInteger(32).pushBackInteger(16).pushBackInteger(8))));
-        mock.expectCall("GROUPLS|top");
-        mock.provideReturnValue(new HashValue(h));
+        mock.expectCall("GROUPLS, top");
+        mock.provideNewResult(new HashValue(h));
 
         afl::data::StringList_t groups;
         afl::data::IntegerList_t forums;
@@ -104,8 +104,8 @@ TestServerInterfaceTalkGroupClient::testIt()
     // getDescription
     {
         // Return null
-        mock.expectCall("GROUPSTAT|gg");
-        mock.provideReturnValue(0);
+        mock.expectCall("GROUPSTAT, gg");
+        mock.provideNewResult(0);
 
         server::interface::TalkGroup::Description desc = testee.getDescription("gg");
 
@@ -121,8 +121,8 @@ TestServerInterfaceTalkGroupClient::testIt()
         h->setNew("description", server::makeStringValue("This is the description"));
         h->setNew("parent", server::makeStringValue("parent"));
         h->setNew("unlisted", server::makeIntegerValue(1));
-        mock.expectCall("GROUPSTAT|gg2");
-        mock.provideReturnValue(new HashValue(h));
+        mock.expectCall("GROUPSTAT, gg2");
+        mock.provideNewResult(new HashValue(h));
 
         server::interface::TalkGroup::Description desc = testee.getDescription("gg2");
 
@@ -146,8 +146,8 @@ TestServerInterfaceTalkGroupClient::testIt()
         Vector::Ref_t vec = Vector::create();
         vec->pushBackNew(0);
         vec->pushBackNew(new HashValue(h));
-        mock.expectCall("GROUPMSTAT|foo|bar");
-        mock.provideReturnValue(new VectorValue(vec));
+        mock.expectCall("GROUPMSTAT, foo, bar");
+        mock.provideNewResult(new VectorValue(vec));
 
         afl::data::StringList_t names;
         names.push_back("foo");

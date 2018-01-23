@@ -12,6 +12,7 @@
 #include "afl/bits/uint16le.hpp"
 #include "afl/bits/uint32le.hpp"
 #include "afl/bits/value.hpp"
+#include "game/types.hpp"
 
 /** \namespace game::v3::structures
     \brief v3 Structure Definitions
@@ -48,6 +49,14 @@ namespace game { namespace v3 { namespace structures {
     const int NUM_HULLS_PER_PLAYER = 20;                   ///< Number of hulls per player.
 
     const size_t MAX_TRN_ATTACHMENTS = 10;
+
+    /** Maximum size of a message (file format limit).
+        This is actually a totally arbitrary limit.
+        It defines our cutoff point when our file parsers reject a file as invalid.
+        Host's limits are much lower. */
+    const int MAX_MESSAGE_SIZE = 16000;
+
+    // make a constant for 600 = default message size
 
 //     MAX_HULLS   = NUM_PLAYERS*NUM_HULLS_PER_PLAYER, ///< Maximum number of hulls.
 
@@ -147,13 +156,12 @@ namespace game { namespace v3 { namespace structures {
     };
     static_assert(sizeof(BuildOrder) == 14, "sizeof BuildOrder");
 
-    /** Tech level index. */
-    enum TechLevel {
-        EngineTech,                                             ///< Engine tech level.
-        HullTech,                                               ///< Hull tech level.
-        BeamTech,                                               ///< Beam weapon tech level.
-        TorpedoTech                                             ///< Torpedo tech level.
-    };
+    // Tech levels must match binary format.
+    // If they didn't, we'd have to translate.
+    static_assert(EngineTech  == 0, "EngineTech");
+    static_assert(HullTech    == 1, "HullTech");
+    static_assert(BeamTech    == 2, "BeamTech");
+    static_assert(TorpedoTech == 3, "TorpedoTech");
 
     /** Starbase. BDATA contains these. */
     struct Base {
@@ -230,6 +238,25 @@ namespace game { namespace v3 { namespace structures {
         Int16_t     to;                                         ///< Receiver race.
     };
     static_assert(sizeof(OutgoingMessageHeader) == 10, "sizeof OutgoingMessageHeader");
+
+    /** Outgoing message file header (v3.5).
+        MESS35 starts with one of these, followed by a sequence of Outbox35MessageHeader + messages;
+        the empty message file may have a truncated or missing header. */
+    struct Outbox35FileHeader {
+        Int16_t numMessages;                                    ///< Number of messages.
+        uint8_t pad[17];                                        ///< Padding; indeterminate.
+    };
+    static_assert(sizeof(Outbox35FileHeader) == 19, "sizeof Outbox35FileHeader");
+
+    /** Outgoing message header (v3.5).
+        Followed by the encrypted messsage data. */
+    struct Outbox35MessageHeader {
+        uint8_t pad;                                            ///< Padding; indeterminate.
+        uint8_t validFlag;                                      ///< Validity flag, '1' for valid.
+        uint8_t receivers[NUM_OWNERS];                          ///< Receivers (player 1..11, host). '1' to send to that receiver.
+        Int16_t messageLength;                                  ///< Length of the message. Defaults to 600.
+    };
+    static_assert(sizeof(Outbox35MessageHeader) == 16, "sizeof Outbox35MessageHeader");
 
     /** Planet. PDATA contains these. */
     struct Planet {
@@ -669,6 +696,52 @@ namespace game { namespace v3 { namespace structures {
         // -- 340 bytes
     };
     static_assert(sizeof(HConfig) == 340, "sizeof HConfig");
+
+    /*
+     *  VPA
+     */
+
+    struct VpaTurn {
+        UInt32_t signature;             ///< Block identifier (TURN_MAGIC).
+        UInt32_t size;                  ///< Size of payload (everything after this header).
+        UInt16_t turnNumber;            ///< Turn number.
+        uint8_t  timestamp[18];         ///< Time stamp.
+        GenScore scores[NUM_PLAYERS];   ///< Scores.
+    };
+    static_assert(sizeof(VpaTurn) == 116, "sizeof VpaTurn");
+
+    const uint32_t VPA_TURN_MAGIC = 0x4E525554;    // TURN
+
+    struct VpaChunk {
+        UInt32_t type;                  ///< Chunk type.
+        UInt32_t size;                  ///< Size of payload (everything after this header).
+        UInt16_t count;                 ///< Number of elements, if applicable.
+    };
+    static_assert(sizeof(VpaChunk) == 10, "sizeof VpaChunk");
+
+    const uint32_t VPA_BASE_CHUNK_MAGIC = 0x45534142;    ///< Starbase data (BASE).
+    const uint32_t VPA_EPLN_CHUNK_MAGIC = 0x4E4C5045;    ///< Planet scans (EPLN).
+    const uint32_t VPA_IMSG_CHUNK_MAGIC = 0x47534D49;    ///< Incoming messages (IMSG).
+    const uint32_t VPA_IONS_CHUNK_MAGIC = 0x534E4F49;    ///< Ion storms (IONS).
+    const uint32_t VPA_MARK_CHUNK_MAGIC = 0x4B52414D;    ///< Drawings (MARK).
+    const uint32_t VPA_MINE_CHUNK_MAGIC = 0x454E494D;    ///< Minefields (MINE).
+    const uint32_t VPA_MSGO_CHUNK_MAGIC = 0x4F47534D;    ///< Message associations (MSGO).
+    const uint32_t VPA_NPLN_CHUNK_MAGIC = 0x4E4C504E;    ///< Planet flags (NPLN).
+    const uint32_t VPA_OMSG_CHUNK_MAGIC = 0x47534D4F;    ///< Outgoing messages (OMSG).
+    const uint32_t VPA_PASS_CHUNK_MAGIC = 0x53534150;    ///< Password (PASS).
+    const uint32_t VPA_PBPS_CHUNK_MAGIC = 0x53504250;    ///< PBPs (PBPS).
+    const uint32_t VPA_PEXP_CHUNK_MAGIC = 0x50584550;    ///< Planet experience (PEXP).
+    const uint32_t VPA_PHST_CHUNK_MAGIC = 0x54534850;    ///< PHost version (PHST).
+    const uint32_t VPA_PLAN_CHUNK_MAGIC = 0x4E414C50;    ///< Planet data (PLAN).
+    const uint32_t VPA_REFS_CHUNK_MAGIC = 0x53464552;    ///< Reserved (REFS).
+    const uint32_t VPA_SCOR_CHUNK_MAGIC = 0x524F4353;    ///< Reserved (SCOR).
+    const uint32_t VPA_SEXP_CHUNK_MAGIC = 0x50584553;    ///< Ship experience (SEXP).
+    const uint32_t VPA_SHIP_CHUNK_MAGIC = 0x50494853;    ///< Ship data (SHIP).
+    const uint32_t VPA_UFOS_CHUNK_MAGIC = 0x534F4655;    ///< Ufo data (UFOS).
+    const uint32_t VPA_VCRS_CHUNK_MAGIC = 0x53524356;    ///< VCR data (VCRS).
+    const uint32_t VPA_VERS_CHUNK_MAGIC = 0x53524556;    ///< Version number (VERS).
+    const uint32_t VPA_WORM_CHUNK_MAGIC = 0x4D524F57;    ///< Wormholes (WORM).
+    const uint32_t VPA_XYPL_CHUNK_MAGIC = 0x4C505958;    ///< Planet positions (XYPL).
 
 } } }
 

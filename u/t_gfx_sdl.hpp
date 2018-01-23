@@ -12,4 +12,9 @@ class TestGfxSdlEngine : public CxxTest::TestSuite {
     void testInstantiation();
 };
 
+class TestGfxSdlStreamInterface : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
 #endif

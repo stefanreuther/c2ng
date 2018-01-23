@@ -1,43 +1,20 @@
 /**
   *  \file server/file/commandhandler.cpp
+  *  \brief Class server::file::CommandHandler
   */
 
 #include <stdexcept>
 #include "server/file/commandhandler.hpp"
-#include "server/types.hpp"
-#include "server/errors.hpp"
 #include "afl/string/char.hpp"
 #include "interpreter/arguments.hpp"
+#include "server/errors.hpp"
+#include "server/file/filebase.hpp"
+#include "server/file/filegame.hpp"
 #include "server/file/root.hpp"
 #include "server/file/session.hpp"
-#include "server/file/filebase.hpp"
 #include "server/interface/filebaseserver.hpp"
 #include "server/interface/filegameserver.hpp"
-#include "server/file/filegame.hpp"
-
-namespace {
-    // FIXME: code duplication
-    bool isPrintable(const String_t& s)
-    {
-        for (String_t::size_type i = 0; i < s.size(); ++i) {
-            if (!afl::string::charIsAlphanumeric(s[i]) && s[i] != '/' && s[i] != '.' && s[i] != '_' && s[i] != '-' && s[i] != '*' && s[i] != ':' && s[i] != ',') {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    String_t formatWord(const String_t& word)
-    {
-        if (word.empty()) {
-            return "''";
-        } else if (word.size() < 100 && isPrintable(word)) {
-            return word;
-        } else {
-            return "...";
-        }
-    }
-}
+#include "server/types.hpp"
 
 server::file::CommandHandler::CommandHandler(Root& root, Session& session)
     : m_root(root),
@@ -119,24 +96,8 @@ server::file::CommandHandler::getHelp()
         "This is c2file-ng\n";
 }
 
-// FIXME: code duplication...
-void
+inline void
 server::file::CommandHandler::logCommand(const String_t& verb, interpreter::Arguments args)
 {
-    // Log channel name
-    String_t channel = "file.command";
-    if (!m_session.isAdmin()) {
-        channel += ".";
-        channel += m_session.getUser();
-    }
-
-    // Command
-    String_t text = formatWord(verb);
-    while (args.getNumArgs() != 0) {
-        text += " ";
-        text += formatWord(toString(args.getNext()));
-    }
-
-    // Log it
-    m_root.log().write(afl::sys::Log::Info, channel, text);
+    m_session.logCommand(m_root.log(), "file.command", verb, args, 0);
 }

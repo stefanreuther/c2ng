@@ -37,3 +37,40 @@ TestGameShipBuildOrder::testIt()
     TS_ASSERT_EQUALS(testee.getNumLaunchers(), 4);
 }
 
+/** Test comparison. */
+void
+TestGameShipBuildOrder::testComparison()
+{
+    // Default
+    TS_ASSERT_EQUALS(game::ShipBuildOrder() == game::ShipBuildOrder(), true);
+    TS_ASSERT_EQUALS(game::ShipBuildOrder() != game::ShipBuildOrder(), false);
+
+    // Nondefault
+    game::ShipBuildOrder testee;
+    testee.setHullIndex(15);
+    testee.setEngineType(9);
+    testee.setBeamType(3);
+    testee.setNumBeams(18);
+    testee.setLauncherType(8);
+    testee.setNumLaunchers(4);
+    TS_ASSERT_EQUALS(testee == testee, true);
+    TS_ASSERT_EQUALS(testee == game::ShipBuildOrder(), false);
+}
+
+/** Test canonicalize(). */
+void
+TestGameShipBuildOrder::testCanonicalize()
+{
+    game::ShipBuildOrder testee;
+    testee.setHullIndex(15);
+    testee.setEngineType(9);
+    testee.setBeamType(3);
+    testee.setNumBeams(0);
+    testee.setLauncherType(8);
+    testee.setNumLaunchers(0);
+    testee.canonicalize();
+
+    TS_ASSERT_EQUALS(testee.getLauncherType(), 0);
+    TS_ASSERT_EQUALS(testee.getBeamType(), 0);
+}
+

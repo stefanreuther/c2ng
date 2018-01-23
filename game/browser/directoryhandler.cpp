@@ -16,7 +16,7 @@ namespace {
 
 game::browser::DirectoryHandler::DirectoryHandler(Browser& b, afl::base::Ref<afl::io::Directory> defaultSpecificationDirectory, util::ProfileDirectory& profile, afl::io::FileSystem& fs)
     : m_browser(b),
-      m_v3loader(defaultSpecificationDirectory, profile, b.translator(), b.log(), fs)
+      m_v3Loader(defaultSpecificationDirectory, profile, b.translator(), b.log(), fs)
 { }
 
 bool
@@ -86,5 +86,5 @@ game::browser::DirectoryHandler::createAccountFolder(Account& /*acc*/)
 afl::base::Ptr<game::Root>
 game::browser::DirectoryHandler::loadGameRoot(afl::base::Ref<afl::io::Directory> dir)
 {
-    return m_v3loader.load(dir, false);
+    return m_v3Loader.load(dir, false);
 }

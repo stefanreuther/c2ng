@@ -39,6 +39,24 @@ class TestUtilBaseSlaveRequestSender : public CxxTest::TestSuite {
     void testCall();
 };
 
+class TestUtilCharsetFactory : public CxxTest::TestSuite {
+ public:
+    void testIteration();
+    void testNames();
+    void testCodes();
+    void testErrors();
+};
+
+class TestUtilConfigurationFile : public CxxTest::TestSuite {
+ public:
+    void testLoad();
+    void testSave();
+    void testFind();
+    void testMergePreserve();
+    void testMergeNamespaced();
+    void testRemove();
+};
+
 class TestUtilConfigurationFileParser : public CxxTest::TestSuite {
  public:
     void testInterface();
@@ -128,6 +146,11 @@ class TestUtilPrefixArgument : public CxxTest::TestSuite {
     void testIt();
     void testSequences();
     void testCancel();
+};
+
+class TestUtilProcessRunner : public CxxTest::TestSuite {
+ public:
+    void testIt();
 };
 
 class TestUtilRandomNumberGenerator : public CxxTest::TestSuite {

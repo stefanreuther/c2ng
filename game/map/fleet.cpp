@@ -5,11 +5,11 @@
 #include "game/map/fleet.hpp"
 #include "game/map/anyshiptype.hpp"
 #include "game/map/ship.hpp"
-#include "game/spec/missionlist.hpp"
-#include "game/spec/mission.hpp"
-#include "game/playerset.hpp"
-#include "game/map/universe.hpp"
 #include "game/map/shiputils.hpp"
+#include "game/map/universe.hpp"
+#include "game/playerset.hpp"
+#include "game/spec/mission.hpp"
+#include "game/spec/missionlist.hpp"
 
 using game::spec::Mission;
 
@@ -77,6 +77,39 @@ game::map::Fleet::synchronize(const game::config::HostConfiguration& config,
                 synchronizeFleetMember(m_universe, i, config, shipList);
             }
         }
+    }
+}
+
+// /** Check whether the fleet can do a particular special function.
+//     \param univ Universe to work on
+//     \param fid Fleet Id
+//     \param basic_function Function to check for
+//     \retval true all fleet members can do this function
+//     \retval false not all fleet members can do this function */
+bool
+game::map::Fleet::hasSpecialFunction(int basicFunction,
+                                     const UnitScoreDefinitionList& scoreDefinitions,
+                                     const game::spec::ShipList& shipList,
+                                     const game::config::HostConfiguration& config) const
+{
+    // ex game/fleet.h:canFleetDoSpecial
+    if (m_ship.getFleetNumber() == 0) {
+        // Lone ship: just check it
+        return m_ship.hasSpecialFunction(basicFunction, scoreDefinitions, shipList, config);
+    } else {
+        // Fleet: check all members
+        AnyShipType ships(m_universe);
+        const int fleetNumber = m_ship.getId();
+        for (Id_t i = ships.getNextIndex(0); i != 0; i = ships.getNextIndex(i)) {
+            if (Ship* sh = ships.getObjectByIndex(i)) {
+                if (sh->getFleetNumber() == fleetNumber) {
+                    if (!sh->hasSpecialFunction(basicFunction, scoreDefinitions, shipList, config)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
 }
 
@@ -155,5 +188,5 @@ game::map::Fleet::synchronizeFleetMember(Universe& univ, Id_t sid,
         } else {
             // Leader does not exist? Error, ignore.
         }
-    }        
+    }
 }

@@ -25,7 +25,7 @@ namespace ui {
     /** Default resource provider implementation.
         Implements the gfx::ResourceProvider interface using a ui::res::Manager and a background thread. */
     class DefaultResourceProvider : public gfx::ResourceProvider,
-                                    private afl::base::Runnable
+                                    private afl::base::Stoppable
     {
      public:
         /** Constructor.
@@ -99,6 +99,7 @@ namespace ui {
         void addFont(afl::io::Directory& dir, const char* name, const gfx::FontRequest& defn);
 
         virtual void run();
+        virtual void stop();
 
         util::Request<ui::res::Manager>* pullManagerRequest();
     };

@@ -38,6 +38,9 @@ namespace game { namespace map {
         IntegerProperty_t  nativeRace;
         IntegerProperty_t  temperature;
         IntegerProperty_t  baseFlag;
+
+        PlanetData(int = 0)
+            { }
     };
 
 } }

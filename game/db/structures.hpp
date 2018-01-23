@@ -11,6 +11,7 @@
 #include "afl/bits/uint16le.hpp"
 #include "afl/bits/uint32le.hpp"
 #include "afl/bits/value.hpp"
+#include "game/types.hpp"
 
 namespace game { namespace db { namespace structures {
 
@@ -73,6 +74,7 @@ namespace game { namespace db { namespace structures {
         int8_t      speed[4];                                   ///< Speed, 0..100.
     };
     static_assert(sizeof(AutobuildSettings) == 12, "sizeof AutobuildSettings");
+    static_assert(NUM_PLANETARY_BUILDING_TYPES == 4, "NUM_PLANETARY_BUILDING_TYPES");
 
     struct PropertyHeader {
         UInt16_t id;

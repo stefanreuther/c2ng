@@ -7,6 +7,8 @@
 #include "afl/string/parse.hpp"
 #include "interpreter/error.hpp"
 #include "afl/string/format.hpp"
+#include "interpreter/tokenizer.hpp"
+#include "afl/string/char.hpp"
 
 interpreter::exporter::FieldList::FieldList()
     : m_items()
@@ -47,8 +49,8 @@ interpreter::exporter::FieldList::add(String_t spec)
         }
         spec.erase(m);
     }
-    String_t s = afl::string::strTrim(spec);
-    if (s.empty()) {
+    const String_t s = afl::string::strUCase(afl::string::strTrim(spec));
+    if (!Tokenizer::isValidUppercaseIdentifier(s)) {
         throw Error("Syntax error");
     }
     add(m_items.size(), s, width);

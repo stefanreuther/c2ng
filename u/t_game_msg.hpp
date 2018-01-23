@@ -12,4 +12,10 @@ class TestGameMsgMailbox : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestGameMsgOutbox : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testMerge();
+};
+
 #endif

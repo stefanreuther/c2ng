@@ -33,6 +33,7 @@ namespace game { namespace interface {
     };
 
     void callShipMethod(game::map::Ship& sh, ShipMethod ism, interpreter::Arguments& args,
+                        interpreter::Process& process,                        // needed for cargo transfer which needs it for CARGO.REMAINDER
                         Session& session,                                     // needed for world()
                         afl::base::Ref<Root> root,                            // needed for setShipProperty() which needs it for config
                         afl::base::Ref<game::spec::ShipList> shipList,        // needed for setShipProperty() which needs it for Engines

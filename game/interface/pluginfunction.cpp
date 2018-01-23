@@ -18,7 +18,7 @@ game::interface::PluginFunction::get(interpreter::Arguments& args)
        Accesses the properties of the plugin given by the name <tt>Id</tt>.
        If no such plugin was loaded, returns EMPTY.
        @see int:index:group:pluginproperty|Plugin Properties
-       @since PCC2 1.99.25, PCC2ng 2.40.1 */
+       @since PCC2 1.99.25, PCC2 2.40.1 */
     args.checkArgumentCount(1);
 
     String_t arg;

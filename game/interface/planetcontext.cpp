@@ -188,10 +188,10 @@ namespace {
             { }
 
         // ProcedureValue:
-        virtual void call(interpreter::Process& /*proc*/, interpreter::Arguments& a)
+        virtual void call(interpreter::Process& proc, interpreter::Arguments& a)
             {
                 if (game::map::Planet* pl = m_turn->universe().planets().get(m_id)) {
-                    game::interface::callPlanetMethod(*pl, m_method, a, m_session, *m_turn, *m_root);
+                    game::interface::callPlanetMethod(*pl, m_method, a, proc, m_session, *m_turn, *m_root);
                 }
             }
 

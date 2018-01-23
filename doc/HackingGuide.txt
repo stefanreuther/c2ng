@@ -1,0 +1,690 @@
+PCC2ng HACKING GUIDE
+********************
+
+  Table of Contents:
+  - Introduction
+  - Key differences to PCC2
+  - Initialisation
+  - Threads
+  - Data Structures
+  - Format Strings
+  - Internationalisation
+  - Memory Management
+  - Graphics Primitives
+  - Source Code Structure
+  - Naming Conventions
+  - Scripting
+  - Character Sets
+  - Modules
+  - Terms
+
+
+
+Introduction
+============
+
+  This document gives an overview over the internals of c2ng. It is
+  modeled after the HackingGuide document from PCC2.
+
+  A high-level overview over PCC2 data structures exists in
+  structure.html. Open with a JavaScript-capable browser for best
+  results.
+
+
+Status
+------
+
+  This is work in progress. In some places, the source code is a mess.
+  This is a refactoring of PCC2, done by copying and whacking the old
+  code into new structure.
+
+  In general, you can assume that components (classes) that have
+  commented-out code or commented-out comments are incomplete. A
+  complete class has full doxygen documentation and a test suite.
+
+  Wherever practical, functions contain a "// ex Class::fun" comment
+  referring to the PCC2 implementation of the same functionality.
+
+
+
+Key differences to PCC2
+=======================
+
+  No global variables with state. A global stateless instance is ok
+  (such as ui::layout::HBox::instance5), a global config file is not.
+
+  Use C++2003. Namespaces, templates, STL, and multiple inheritance
+  are no longer rocket science as they were when PCC2 started. Staying
+  with C++2003 allows us to use the same toolchains used to build it
+  like we used for PCC2, and thus produce very portable binaries.
+  Changing to C++11 or newer is low priority, but will happen when a
+  similarily-portable build environment can be produced.
+
+  Assume a modern OS. File names need no longer (try to) be 8.3
+  conformant. Threads are available. Object file naming conflicts are
+  solved by the build systems. Objects larger than 64k are possible
+  (but don't overdo it).
+
+  Use the "afl" OS abstractions. This replaces the whacky "cpluslib"
+  and "arch" modules from PCC2.
+
+  Do not access global instances of afl objects (FileSystem,
+  Environment, NetworkStack). Instead, have your main function hand
+  them to you.
+
+  Design for testability. Most of the testability is actually already
+  obtained by following the "no globals" policy.
+
+
+
+Initialisation
+==============
+
+  Initialisation sequences are now MOSTLY implicit by construction and
+  need therefore not be maintained explicitly. The "modinit" mechanism
+  is no longer needed.
+
+  One important pitfall is the the RequestThread object must be
+  constructed after (and thus die before) the objects its
+  RequestReceiver's work on.
+
+
+
+Threads
+=======
+
+  All game-related stuff (loading, scripts, etc.) runs in one thread.
+  For command-line applications, that's the only thread there is. This
+  thread may do everything it wants, including accessing network/disk,
+  heavy computations, etc.
+
+  UI operations run in a separate thread. This thread must not block.
+  Therefore, it must not access network or disk, and should not do
+  heavy computation (scaling/converting/blitting an image cannot be
+  avoided in this thread and thus is acceptable).
+
+  Some components may have special-purpose threads. This includes
+  infrastructure threads (UI image loader ui::DefaultResourceProvider,
+  HTTP client).
+
+  Command line application:
+  - main thread (game)
+  - optional infrastructure threads (e.g., HTTP)
+
+  GUI applications:
+  - main thread (UI)
+  - session thread (game)
+  - optional infrastructure threads (e.g., HTTP, resource loading)
+
+
+Communication and Locking
+-------------------------
+
+  Most data is associated with one thread only:
+  - UI operations are only done in the UI thread
+  - game operations are only done in the session thread
+  Therefore, no locking is needed.
+
+  Shared components that are locked internally:
+  - logger/console
+  - translator
+
+  To signal an operation to be done in another thread, threads
+  implement the util::RequestDispatcher interface. Everyone can post a
+  Runnable into this interface that will be run in the target thread.
+
+  To help with managing states, use the util::RequestReceiver class.
+  A RequestReceiver has an associated object. It provides a
+  util::RequestSender which allows other threads to post util::Request
+  descendants. The requests will be executed in the thread owning the
+  object, or discarded if the object has died.
+
+  We have two main such objects:
+  - the browser session
+  - the game session
+
+  (a) To execute something on one such session, post a Request on its
+      RequestSender. To get results back, give them your RequestSender
+      so they can post a callback.
+
+  (b) To execute something stateful, such as "register for an event
+      signal and give me information", create the event listener as a
+      slave object. Create a SlaveRequestSender and use that to
+      communicate with the slave object.
+
+
+
+Data Structures
+===============
+
+  For details on v3 file formats, read the File Format List available on
+      http://phost.de/~stefan/filefmt.html
+  It documents both regular VGAP file formats as well as PCC file formats,
+  valid for PCC 1.x and PCC2.
+
+  c2ng is no longer based on v3 file formats internally. Instead, a
+  small abstraction is built inbetween. Access to v3 binary file
+  formats happens in game::v3 only; the core uses abstracted data types.
+  PCC2 started to go on that route; c2ng goes much further.
+
+  Most arrays are flexible. Iteration should not rely on a fixed upper
+  bound.
+
+
+
+Maybe types and Data Validity
+-----------------------------
+
+  All properties of units are exported as Optional types. Those differ
+  from PCC2's Maybe by having a cleaner interface; you cannot forget
+  to check availability before using a value (which would have caused
+  an assertion failure in PCC2, and often did when you went to the
+  limits).
+
+  Objects have a playability. A playability other than NotPlayable
+  indicates that all "classic" parameters of the unit are known.
+
+
+
+Cargo Transactions
+------------------
+
+  PCC2 no longer has cargo transactions. Instead, all possible
+  in-flight actions must just watch for changes on underlying objects
+  and if those changes affect the action, they must recover.
+
+  Parallel actions are very rare, so a recovery behaviour could even
+  be a reset of the action.
+
+
+
+Format Strings
+==============
+
+  c2ng uses the same formatting library as PCC2, now under the name
+  afl::string::Format.
+
+  The format routine can distinguish between integers being one or
+  zero in order to generate plural forms. For example,
+     This ship has %d engine%!1{s%}.
+  turns into "This ship has 1 engine." or "This ship has 8 engines.". If
+  your language needs to differentiate more cases (I recall slavic
+  languages differentiate between "1", "2..4" and "5 or more"?), it's no
+  problem to add new modifiers. This way, only the format routine has to
+  be taught of new languages, the actual program code can be left alone.
+
+  Another important property is that the format routine is "forgiving"
+  against type errors:
+     Format("%d", numToString(12999))
+  will work and set status flags as if it were formatting a number.
+
+
+
+Internationalisation
+====================
+
+  As of 20180101, all code that generates user-visible texts uses an
+  afl::string::Translator instance for translation, but no actual
+  translation is implemented. The on-disk format for translations is
+  not yet decided.
+
+  Most components should actually accept and use a Translator
+  instance. For code where this is impractical, the "_" shortcut macro
+  is also available, but should be used sparingly.
+
+
+
+Memory Management
+=================
+
+  Memory management is roughly the same in PCC2 and c2ng. Essentially,
+  we have two schemes of memory management:
+
+  + Smart Pointers.
+    "afl::base::Ptr<T>" (successor to Ptr<T>) is a reference-counted
+    smart pointer. It supports almost everything a dumb pointer can.
+    In particular, it can be passed through a dumb pointer, in which
+    case it finds its reference count using a global std::map. Classes
+    derived from afl::base::RefCounted have their reference count
+    embedded in the object. "afl::base::Ref<T>" is a variant of Ptr
+    that does not support non-null values (like a C++ reference) and
+    thus is a little more efficient and allows omitting NULL checks.
+    It requires its pointee to be derived from RefCounted, to make it
+    less likely to accidentally point it at a stack object.
+
+  + Explicit Management.
+    Essentially, whenever you create an object you have to decide how
+    you get rid of it. Tools to help with explicit MM are the same as
+    in PCC2:
+
+    . afl::container::PtrVector<T> (sort-of a vector-of-auto_ptr) and
+      friends
+
+    . afl::base::Deleter (successor to ObjectHolder) can be used to
+      gather a list of objects. If you're writing a factory, you'll give
+      it a Deleter as parameter and register your objects in it. If
+      you're calling a factory, the Deleter you supply controls lifetime
+      of the factory products.
+
+  A Planets client application uses a game::Session as its central
+  point. The game::Session can contain (smart) pointers to a
+  game::Root, game::spec::ShipList, and game::Game. Code that creates
+  own objects must obtain these pointers from the game::Session on
+  each use, or use their own Ptr/Ref to keep the Root/ShipList/Game
+  object alive. This will suffice to keep the sub-object of the Root/
+  ShipList/Game alive.
+
+
+
+Graphics Primitives
+===================
+
+  c2ng no longer has graphics library headers ("SDL.h") leak into user
+  code. All user code works on abstractions. Otherwise, the
+  class/function structure is more or less the same.
+
+  The interface has been refined to allow working without SDL
+  internals. It has been simplified so you do no longer need lock()
+  and update().
+
+  Many routines draw on a gfx::Canvas. Often, drawing uses a
+  gfx::Context, which is a gfx::Canvas plus some high-level parameters
+  ("line width", "color").
+
+
+Pitfalls
+--------
+
+  Some routines use half-open intervals, some use closed intervals. Be
+  careful.
+
+  Fonts use simple, brute-force anti-aliasing, that is, they draw a few
+  pixels in half intensity. Therefore, make sure that text is never drawn
+  twice without drawing background inbetween.
+
+
+User Interface
+--------------
+
+  Like PCC2, c2ng splits between graphics primitives (gfx) and UI; it
+  adjusts the divider a little (i.e. palette goes into UI, events go
+  into gfx).
+
+  The interface has been simplified. UI components can no longer call
+  into the graphics kernel; instead, they can only request to be
+  called. This simplifies redraw management a lot, but defeats a few
+  display tricks such as XOR draw.
+
+
+Resources
+---------
+
+  The mechanisms c2ng can take resources from are very similar to PCC2
+  (resource directory, *.res file, etc.). However, from the
+  perspective of a UI application, image loading is asynchronous: when
+  you call ResourceProvider::getImage(), the background thread will
+  start loading the image, and a later call will give you the right
+  result.
+
+  In contrast, fonts are loaded synchronously respectively are always
+  available. Since many widget metrics depend on that, asynchronous
+  font loading just is too cumbersome.
+
+
+Source Code Structure
+=====================
+
+  Directory      | Type    | Content
+  =================================================================
+  P9             | source  | input files for makefile generator
+  ---------------+---------+---------------------------------------
+  client         | guilib  | client source code
+    dialogs      |         | dialogs
+    map          |         | map renderer
+    screens      |         | control screens
+    si           |         | script integration
+    tiles        |         | tiles (=control screen widgets)
+    widgets      |         | widgets
+  ---------------+---------+---------------------------------------
+  doc            | doc     | developer and user documentation
+  ---------------+---------+---------------------------------------
+  game           | gamelib | game library; subdivided into
+                 |         | more namespaces, in particular:
+    actions      |         | complex actions
+    browser      |         | browser
+    config       |         | configuration (pcc2.ini, pconfig.src)
+    interface    |         | script interface
+    maint        |         | maintenance utilities
+    map          |         | map objects (ship, planet, etc.)
+    msg          |         | message handling
+    nu           |         | planets.nu integration
+    parser       |         | message parsing
+    pcc          |         | PlanetsCentral.com integration
+    score        |         | score handling
+    sim          |         | combat simulator
+    spec         |         | specification
+    tables       |         | string tables
+    v3           |         | VGAP3-specific code (as opposed to Nu)
+    vcr          |         | VCR algorithms
+  ---------------+---------+---------------------------------------
+  gfx            | guilib  | graphics primitives
+    gen          |         | procedural generation
+    sdl          |         | SDL back-end
+  ---------------+---------+---------------------------------------
+  interpreter    | gamelib | script interpreter
+  ---------------+---------+---------------------------------------
+  main           | source  | entry points for GUI applications  
+  ---------------+---------+---------------------------------------
+  server         | serverl.| PlanetsCentral microservices
+    interface    |         | interface classes
+    xxx          |         | "c2xxx" microservice/utility
+  ---------------+---------+---------------------------------------
+  share          | data    | data files
+    resource     |         | ex "resource"
+    server       |         | resources for servers
+    specs        |         | ex "specs"
+  ---------------+---------+---------------------------------------
+  tools          | source  | command-line tool source code
+  ---------------+---------+---------------------------------------
+  u              | source  | unit tests
+  ---------------+---------+---------------------------------------
+  ui             | guilib  | user interface kernel
+  ---------------+---------+---------------------------------------
+  util           | gamelib | miscellaneous
+
+
+  guilib        GUI library (formerly pcc1)
+  gamelib       Non-GUI library (formerly pcc2)
+  serverlib     Server library and programs (formerly planetscentral);
+                see ServerHackingGuide.txt
+  source        Source code
+
+  The source code has been structured such that a console program only
+  needs to reference gamelib, but not guilib; gamelib components must
+  not depend on guilib components.
+
+
+
+Makefiles
+---------
+
+  The Makefile is generated from the stuff in P9/ by a Perl script. I
+  wrote that script when Makefile generators were not as abundand as
+  they are now. Its main objective is creating hierarchical projects
+  (libraries + executables) and makefiles for multiple toolchains with
+  little reliance on makefile magic.
+
+  This script is available from the same place as c2ng; changes to the
+  makefiles should be done in the input files instead.
+
+
+
+Naming Conventions
+==================
+
+  FooBar           class/struct
+
+  FooBar_t         typedef
+
+  FOO_BAR          constant, macro
+
+  fooBar           local variable
+
+  m_fooBar         member
+
+  fooBar()         function; sometimes also used for locals
+
+  As per common convention, the directory name matches the namespace
+  of a component, and the file name matches the class name, if any.
+
+
+
+Scripting
+=========
+
+  Whereas scripting was "bolted-on" in PCC 1.x and PCC2, PCC2ng does
+  "script first" (well, almost). The intent is to implement much more
+  in scripts than in previous versions.
+
+
+Compilation
+-----------
+
+  Like PCC2, PCC2ng compiles scripts into an internal bytecode. This
+  bytecode is the same as in PCC2 and PCC2 Web.
+
+
+Lifetimes
+---------
+
+  All scripting information lives in an interpreter::World, which in
+  turn lives in a game::Session. Conversely, no script object can
+  legally outlive its World or Session, and can thus happily carry
+  dumb references around.
+
+  The game::Session keeps smart pointers to a game::Root,
+  game::ShipList, and game::Game. Script objects must therefore keep
+  these alive using a smart pointer.
+
+
+Processes and UI integration
+----------------------------
+
+  Every running script is a process (identical to PCC2). PCC2ng adds a
+  new state for processes: "Waiting". This means the process is
+  waiting for an external trigger to continue. Currently, the only
+  wait reason is a UI operation, but it could also be I/O or similar.
+
+  When processes should execute (e.g. when it is initially started, or
+  when suspended processes are revived from a previous run), they are
+  put into a process group identified by a numeric value. The most
+  urgent process (according to priority) is selected to execute; other
+  processes from the process group will not run until it terminated.
+  This is needed to ensure proper sequencing between processes that
+  wait.
+
+  While processes are executing, user input shall be blocked to make
+  sure a previous input has been processed completely. This is done
+  using a client::si::Control object that acts as a front-end to the
+  UI/script communication infrastructure. Waiting for processes is
+  coordinated using Wait Ids that are distinct from process or process
+  group Ids.
+
+  PCC2ng introduces scriptable dialogs. That is, a script can open a
+  dialog and wait for its result (e.g. UI.ChooseObject), but that
+  dialog itself spawns new scripts. In this case, we could end up with
+  two processes (process groups) after a dialog (e.g. the process
+  calling UI.ChooseObject, and the one finishing the dialog). In this
+  case, the processes will be merged into one process group, because
+  that process group is still needed to satisfy the former process'
+  wait.
+
+
+Debugging the Scripting Engine
+------------------------------
+
+  The scripting engine is also included in a standalone program,
+  "c2script". In addition to executing code, this program can be used
+  to compile script files (*.q) into object (*.qc) or assembler (*.qs)
+  files. To debug the compiler, just let it create assembler code:
+
+     c2script -S file.q
+
+  (writes the assembler code to stdout)
+
+  Neither PCC2 nor PCC2ng can currently load object files (*.qc).
+
+  To dump object files or scriptX.cc files in a low-level format, use
+  PCC2's 'scripts/c2vmdump.pl'.
+
+
+Character Sets
+==============
+
+  c2ng exclusively uses UTF-8. afl converts external operating system
+  interfaces (command line parameters, file names):
+    - Windows NT: file names are translated between Unicode and UTF-8.
+    - Windows 9x: file names are translated between "ANSI" and UTF-8,
+      usually with a Unicode step inbetween. For both kinds, the "ANSI"
+      command line is ignored and re-parsed from the Unicode version.
+    - Unix: file names and command line are translated between the
+      locale character set and UTF-8. Although many instances of bad
+      encoding (e.g. Latin-1 file name in an UTF-8 locale) will work,
+      it's possible that PCC2 will be unable to access files with
+      invalid (e.g. non-minimally encoded) names.
+
+  For games that use a different external character set (=all v3
+  games), the data is converted upon load.
+
+
+Unicode Usage
+-------------
+
+  E000..E07F      - error characters. Used by Unix filesystem operation
+                    to encode bytes 80..FF which the libc cannot decode,
+                    to allow them to survive UTF-8 coding.
+
+  E100..E10F      - replacement glyphs, upper-left
+  E110..E11F      - replacement glyphs, upper-right
+  E120..E12F      - replacement glyphs, lower-left
+  E130..E13F      - replacement glyphs, lower-right
+
+  E140...         - specials
+
+  Replacement glyphs are used to display characters for which a font
+  doesn't have a glyph. For Unicode characters, four of them are
+  displayed atop each other; one from each range for the four hex
+  digits from the character code. For error characters, an upper-left
+  and a lower-right glyph are used. Fonts either have all 64 of these
+  characters, with the appropriate hex digits, or just the first
+  group, all producing an identical replacement character.
+
+  The fonts bundled with PCC2 support all characters from the
+  supported codepages, yielding for Western European/American, Eastern
+  European, and Cyrillic alphabets. The font renderer assumes
+  precomposed characters (NFC, used on Windows), and cannot handle
+  decomposed ones (NFD, used on MacOS). It also doesn't support right-
+  to-left writing.
+
+  The following table lists the correspondence between PCC 1.x's
+  codepage 437 variant and the Unicode codes used in PCC2.
+
+    Character            PCC1/dec  Unicode  UTF8/hex
+    -------------------  --------  -------  --------
+    up arrow               30, 24   U+2191  E2 86 91
+    down arrow             31, 25   U+2193  E2 86 93
+    right arrow                26   U+2191  E2 86 92
+    left arrow                 27   U+2190  E2 86 90
+    left/right arrow           29   U+2194  E2 86 94
+    up/down arrow              18   U+2195  E2 86 95
+    page up arrow              24   U+219F  E2 86 9F
+    page down arrow            25   U+21A1  E2 86 A1
+    top arc CW arrow           29   U+E140  EE 85 80
+    left triangle         17, 221   U+25C0  E2 97 80
+    right triangle        16, 222   U+25B6  E2 96 B6
+    thin bar                   18   U+E144  EE 85 84
+    round bullet                7   U+2022  E2 80 A2
+    square bullet             254   U+25A0  E2 96 A0
+    en dash                    22   U+2013  E2 80 93
+    corresponds to            158   U+2259  E2 89 99
+    times                     159   U+00D7  C3 97
+    greater or equal          242   U+2265  E2 89 A5
+    less or equal             243   U+2264  E2 89 A4
+    registered                169   U+00AE  C2 AE
+    trademark                 170   U+2122  E2 84 A2
+    ornament left             156   U+E142  EE 85 82
+    ornament right            157   U+E143  EE 85 83
+    middle dot                250   U+00B7  C2 B7
+    check mark (square root)  251   U+2713  E2 9C 93
+
+
+
+Terms
+=====
+
+  "afl"           - "a foundation library", collection of boring foundation
+                    components such as threads, mutexes, network, used to
+                    provide portability for PCC2ng.
+
+  "atom"          - a number that represents a string, used to implement
+                    keymaps and marker tags in PCC(2).
+
+  "AVCs"          - additional visual contacts (targets above 50 limit)
+
+  "BASIC string"  - character string occupying a fixed number of bytes,
+                    padded with spaces. In BASIC, declared as "STRING*n",
+                    with n being the number of bytes. PCC2 also accepts
+                    null termination, see file format list.
+
+  "battle"        - multiple fights (VCRs) to resolve a conflict.
+
+  "BCO"           - bytecode object, basic data structure storing a
+                    compiled script.
+
+  "combat"        - single fight (VCR), part of a battle.
+
+  "config"        - game configuration (hconfig, pconfig).
+
+  "cursor"        - reference to a current ->object, e.g. "current ship".
+                    Called object selections in PCC2.
+
+  "directory"     - a directory as seen by your operating system.
+
+  "folder"        - a folder as seen by PCC2's browser; this can include
+                    totally virtual folders such as online games.
+
+  "fusion"        - a bytecode optimisation that executes multiple
+                    instructions in one step, avoiding intermediate values.
+
+  "Nu"            - a VGAP 3.0 workalike game, with mostly identical rules,
+                    but entirely different underlying technology
+
+  "NVC"           - non-visual contact, i.e. ship listed in SHIPXY file, but
+                    not in SHIP or TARGET file.
+
+  "object"        - game object, usually something that can appear on the map.
+
+  "object type"   - container of similar ->objects, i.e. "all ships".
+
+  "Pascal string" - character string of up to 255 bytes, stored with
+                    preceding length byte.
+
+  "pref"          - user preferences, i.e. client configuration.
+
+  "process"       - script code ready to execute (mainly, a stack of BCOs and
+                    runtime data).
+
+  "process group" - a set of processes that execute in sequence. UI always works
+                    in process groups, because UI interactions can cause the
+                    UI to be blocked on multiple processes.
+
+  "rune"          - an UTF-8 encoded character consisting of multiple bytes.
+
+  "session"       - the root of a game session (game::Session), consisting of
+                    a script World (interpreter::World) and a Game (game::Game).
+                    Interactive programs also have an additional browser session
+                    (game::browser::Session) and a UI session (client::Session)
+                    to combine the respective objects. In server modules, a
+                    Session corresponds to a connection's state.
+
+  "spec"          - specification data (hullspec, beamspec, etc.) including
+                    additional specification data used by PHost such as
+                    hullfunc.txt.
+
+  "tag [node]"    - a 6-byte structure of a serialized script data item.
+                    See interpreter::TagNode.
+
+  "target"        - visual contact, i.e. ship listed in TARGET file.
+
+  "tile"          - widget that can be displayed on a control screen. In
+                    architectural terms, a plain widget is just a view, whereas
+                    the tile includes the model-view connector, typically
+                    scripted.
+
+  "v3"            - shortcut for VGAP 3.0/3.5, to distinguish from Nu
+
+  "widget"        - user interface control.
+
+
+
+-eof-

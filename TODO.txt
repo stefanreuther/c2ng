@@ -15,7 +15,7 @@ Minor Concept Verification
 ==========================
 
 UNDO. The dat/dis style is cumbersome and does not map cleanly to Nu or Host data.
-- Make a Reverter interface with implementations for v3/Nu/Host.
+- [DONE] Make a Reverter interface with implementations for v3/Nu/Host.
 
 MAKETURN/SAVE.
 
@@ -27,17 +27,18 @@ LOCAL/NETWORK WORKSPLIT.
 - Cache Nu history results locally.
 
 SERVERS.
-- Implement more PlanetsCentral servers within the new infrastructure.
+- [DONE] Implement more PlanetsCentral servers within the new infrastructure.
+- Implement integrated router/server.
 
 MESSAGES. Can we integrate all messages (in-game messages, PMs, activities, forum, VCR, files) into one interface?
 - Make an interface that provides heading/text/parsed data/VCR.
 - Cannot load everything locally, only in-game messages.
 
 FILER NG.
-- Use SHA-1 addressing (like git) for implicit deduplication.
+- [DONE] Use SHA-1 addressing (like git) for implicit deduplication.
 - Add transaction support: upload many files at once and commit at the end; fork dataspace for backup.
 - Add support for symlinks so that user:u/user/path/player9.rst can actually be a link to host:games/0001/out/9/player9.rst.
-- Requires export/import for host runs!
+- [DONE] Requires export/import for host runs!
 - Feasibility proof: backup of around 1360 host runs
     1.1G with compressed backups, 7671 files
        tarball (20161007-hostdata.tar.gz) --> 1028284795 bytes

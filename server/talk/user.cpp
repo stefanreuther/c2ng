@@ -1,21 +1,6 @@
 /**
   *  \file server/talk/user.cpp
   *  \brief Class server::talk::User
-  *
-  *  PCC2 comment:
-  *
-  *  Users have, for our purposes, three identifying names:
-  *  - a user Id. This is used everywhere in the database.
-  *    Although it is a number, all programs treat it as string.
-  *    User Ids taken from the database are trusted. User Ids
-  *    are unique and not recycled.
-  *  - a login name. This is the name used in URLs. There is an
-  *    index mapping login names to user Ids. This is also the
-  *    name users use to refer to other users (in at-links, for
-  *    example). Login names are unique, but can be recycled.
-  *  - a screen name. This one is only displayed and never used
-  *    in any machine interface; there is no index and there is
-  *    no mechanism to make them unique.
   */
 
 #include <memory>
@@ -26,53 +11,9 @@
 
 // Constructor.
 server::talk::User::User(Root& root, String_t userId)
-    : m_user(root.userRoot().subtree(userId)),
-      m_defaultProfile(root.defaultProfile())
+    : server::common::User(root, userId)
 {
     // ex User::User
-}
-
-// Get user's screen name.
-String_t
-server::talk::User::getScreenName()
-{
-    // ex User::getScreenName
-    // Since 20110901, there is no longer an automatic fallback to the login name, all users' screen names are filled in.
-    // This is also the reason there is no need to implement a fallback to the default profile.
-    return profile().stringField("screenname").get();
-}
-
-// Get user's login name.
-String_t
-server::talk::User::getLoginName()
-{
-    // ex User::getLoginName
-    return m_user.stringKey("name").get();
-}
-
-// Get user's real name.
-String_t
-server::talk::User::getRealName()
-{
-    // ex User::getRealName
-    std::auto_ptr<afl::data::Value> allow(getProfileRaw("inforealnameflag"));
-    if (allow.get() != 0 && toInteger(allow.get()) > 0) {
-        return profile().stringField("realname").get();
-    } else {
-        return String_t();
-    }
-}
-
-// Get raw value from user profile.
-afl::data::Value*
-server::talk::User::getProfileRaw(String_t key)
-{
-    // ex User::getProfileRaw
-    afl::data::Value* result = profile().field(key).getRawValue();
-    if (result == 0) {
-        result = m_defaultProfile.field(key).getRawValue();
-    }
-    return result;
 }
 
 // Get PM mail type (profile access).
@@ -104,20 +45,12 @@ server::talk::User::isWatchIndividual()
     return toInteger(value.get()) > 0;
 }
 
-// Get user's profile.
-afl::net::redis::HashKey
-server::talk::User::profile()
-{
-    // ex User::profile
-    return m_user.hashKey("profile");
-}
-
 // Get forum data for user.
 afl::net::redis::Subtree
 server::talk::User::forumData()
 {
     // ex User::forumData
-    return m_user.subtree("forum");
+    return tree().subtree("forum");
 }
 
 // Get set of user's posted messages.
@@ -140,7 +73,7 @@ server::talk::User::newsrc()
 afl::net::redis::StringKey
 server::talk::User::passwordHash()
 {
-    return m_user.stringKey("password");
+    return tree().stringKey("password");
 }
 
 // Get PM data for user.
@@ -148,7 +81,7 @@ afl::net::redis::Subtree
 server::talk::User::pmFolderData()
 {
     // ex User::pmFolderData
-    return m_user.subtree("pm:folder");
+    return tree().subtree("pm:folder");
 }
 
 // Get user's PM folder counter.

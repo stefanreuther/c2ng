@@ -6,6 +6,7 @@
 
 #include "afl/base/deletable.hpp"
 #include "afl/string/string.hpp"
+#include "game/types.hpp"
 
 namespace game {
 
@@ -29,7 +30,7 @@ namespace game {
 
         virtual bool setLine(Line which, String_t value) = 0;
 
-        // FIXME: virtual int getMaximumTechLevel(??? area) const = 0;
+        virtual int getMaxTechLevel(TechLevel area) const = 0;
     };
 
 }

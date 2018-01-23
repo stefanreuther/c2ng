@@ -1,300 +1,1490 @@
-# Grammar for member functions
+#
+#  This is an attempt to capture (and improve) the vocabulary of PCC2ng.
+#  PCC2 used inconsistent naming, e.g. "getNumXYZ" here vs. "getXYZCount" there.
+#  This file defines a grammar that matches the function/variable names used in PCC2.
+#  The idea is to anticipate new names, e.g. if we have a getFoo(), we will also
+#  have a setFoo(), m_foo, getLatestFoo(), getFooByName(), etc.
+#
+#  The names are extracted from the source code using Doxygen and xsltproc, and
+#  matched against this grammar using namecheck.pl.
+#
+
+
+# Roots:
+#   member-function
+#   member-variable
 
 member-variable = 'm_' <lc> property-name
                 | 'm_p' property-name
                 | 'm_' object-accessor
+                | 'm_' <lc> plural-property-name
+                | 'm_' <lc> testable-property           # FIXME: m_foo should be transformed to m_isFoo
+                | 'm_' <lc> testable-property plural-property-name
+                | 'sig_' <lc> signal-name
+                | 'conn_' <lc> signal-name
+                | memvar-error
+                | 'm_' memvar-special
 
-member-function = 'get' property-name | 'get' | 'get' property-name 'From' property-name | 'get' property-name 'By' property-name
-                | 'tryGet' property-name
-                | 'set' property-name | 'set'
-                | 'store' property-name
-                | 'parse' property-name
-                | 'fire' property-name
-                | 'start' property-name
-                | 'kill' property-name
-                | 'land' property-name
-                | 'add' property-name | 'add'
+member-function = 'add'
+                | 'add' plural-property-name
+                | 'add' property-name
+                | 'addNew' property-name
                 | 'addTo' property-name
+                | 'allocate' property-name
+                | 'canHave' property-name
                 | 'change' property-name | 'change'
-                | 'enumerate' property-name
-                | 'delete' property-name
-                | 'update' property-name | 'update'
+                | 'check' property-name
+                | 'clear' property-name | 'clear' plural-property-name | 'clear'
+                | 'close' | 'closeFile' | 'closeInline' | 'closeLinks' | 'closeUntil'
                 | 'compute' property-name
-                | 'sort' property-name | 'sort' | 'sortForNewShip'
-                | 'load' property-name | 'load'
-                | 'to' conversion-target
+                | 'configure' | 'configureReconnect' | 'configureTextFile'
+                | 'connectSignals' | 'connectWith'
+                | 'consume' property-name
+                | 'create' property-name               # FIXME: unify create/make
+                | 'createNew' property-name            # FIXME: unify create/make. Check whether createNew makes sense
+                | 'createCharsetByIndex'               # FIXME: special case...
+                | 'create'
+                | 'delete' property-name
+                | 'enum' plural-property-name
+                | 'enumTable'                           # FIXME: check
+                | 'enumerate' plural-property-name
+                | 'empty'
+                | 'erase' | 'eraseFile' | 'eraseExpiredDrawings'
+                | 'exists'
+                | 'exit'
+                | 'find'
+                | 'find' property-name
+                | 'find' plural-property-name
+                | 'find' property-name find-criteria
+                | 'forget' property-name
+                | 'format' property-name
                 | 'from' conversion-target
-                | 'is' testable-property
-                | 'has' property-name
-                | 'clear' property-name | 'clear'
+                | 'get'
+                | 'get' property-name
+                | 'get' property-name 'Status'              # implementing this as a left-recursive rule in property-name makes this very slow
+                | 'get' property-name find-criteria
+                | 'handle' property-name | 'handle' signal-name
+                | 'handle' | 'handleDecrement' | 'handleDocumentUpdate' | 'handleEndDialog' | 'handleException' | 'handleIgnoredLine' | 'handleInvalidOpcode'
+                | 'handleMakeList' | 'handleMouse' | 'handlePopupConsole' | 'handleRequest' | 'handleSetup' | 'handleWait'      # FIXME: check
+                | 'has' property-name | 'hasAny' property-name | 'hasFull' property-name
+                | 'is' testable-property | 'is'
+                | 'load' property-name | 'load' plural-property-name | 'load' | 'load' file-name
+                | 'loadChildRoot' | 'loadFromFile' | 'loadFromIniFile' | 'loadFrom'                             # FIXME: check
+                | 'lock'
+                | 'log' property-name | 'log'
+                | 'make' property-name
+                | 'on' signal-name
+                | 'open' | 'openAt' | 'openChild' | 'openContainingDirectory' | 'openDirectory' | 'openFileForReading' | 'openFile' | 'openFileNT' | 'openFolder' | 'openLoadFile' | 'openMember' | 'openParent' | 'openResourceFile'
+                | 'pack' property-name | 'pack'
+                | 'parse' property-name | 'parse' compiler-target | 'parse'
+                | 'query'
+                | 'read' property-name
                 | 'remove' property-name | 'remove'
-                | random-member
+                | 'removeEmpty' | 'removeFromWork' | 'removeSystemContent' | 'removeTerminatedProcesses' | 'removeUserContent' | 'removeProvidersByKey'  # FIXME: check
+                | 'replay' | 'replayEvents'
+                | 'reply'
+                | 'reportError'
+                | 'requestActive' | 'requestAddress' | 'requestChildRedraw' | 'requestConfirmation' | 'requestFocus' | 'requestLoad' | 'requestRedraw' | 'requestStop'
+                | 'resign'
+                | 'resolve' property-name | 'resolveTo' property-name
+                | 'restore' | 'restore' property-name
+                | 'resumeProcess'
+                | 'run' | 'runProcesses' | 'runQueue' | 'runTemporary' | 'runDueItem'
+                | 'save' property-name | 'save' plural-property-name | 'save' | 'save' file-name
+                | 'saveTo' | 'saveToConfiguration'
+                | 'scale' | 'scaledBy'
+                | 'scan'
+                | 'scroll'
+                | 'selectChild'
+                | 'set'
+                | 'set' property-name
+                | 'set' property-name
+                | 'set' property-name find-criteria
+                | 'setNew' property-name | 'setNew'
+                | 'sort' plural-property-name | 'sort'
+                | 'start' | 'startMessage' | 'startNextObject' | 'startProcessGroup'
+                | 'store' property-name | 'store'
+                | 'to' conversion-target
+                | 'tryGet' property-name
+                | 'unload'
+                | 'unlock'
+                | 'unpack' property-name | 'unpack'
+                | 'update'
+                | 'update' property-name
+                | 'update' plural-property-name
+                | 'with' property-name
+                | 'withNew' property-name
+                | 'without' property-name
+                | 'write' property-name
                 | object-accessor
+                | random-member
+                | memfun-error
 
 # Member functions that don't fit anywhere
-random-member   = 'begin'
-                | 'canBeHull'
+random-member   = 'abandon'
+                | 'accept'
+                | 'advance' | 'advanceTime'
+                | 'all'
+                | 'appMain'
+                | 'append'
+                | 'at'
+                | 'attach' | 'attach' property-name
+                | 'begin'
+                | 'build' | 'buildFolderInfo' | 'buildGameListCommand' | 'buildInfo' | 'buildPlayerList'
+                | 'byName'
                 | 'charToType'
-                | 'checkResult' | 'checkRange' | 'checkBattle'
-                | 'copyFrom'
-                | 'create'
-                | 'decode'
+                | 'call' | 'callAsyncNew'
+                | 'canonicalize'                                                        # FIXME: normalize?
+                | 'cleanup'
+                | 'clone'
+                | 'commit'
+                | 'compact'
+                | 'consolidateArray'
+                | 'containsRectangle' | 'containsCircle' | 'containsLine' | 'contains'
+                | 'contextError'
+                | 'continueProcess' | 'continueProcessWait' | 'continueProcessWithFailure'
+                | 'convertCanvas' | 'convertEvent' | 'convertToAssignment'
+                | 'copyFile' | 'copyFrom' | 'copyGame' | 'copyLocalVariablesFrom' | 'copy' | 'copyTo' | 'copyValues'
+                | 'countObjectsAt' | 'countObjects'
+                | 'decode' | 'decodeColors'
+                | 'default' property-name
+                | 'defaultBlit' | 'defaultDrawChildren' | 'defaultHandleKey' | 'defaultHandleMouse' | 'defaultHandlePopupConsole' | 'defaultHandleStateChange'
+                | 'describe' | 'describeItem' | 'describeAsNewsgroup' | 'describeSlot' | 'describeVictoryCondition'
+                | 'detach' | 'detach' property-name
+                | 'disconnect'
+                | 'disownLocksByProcess'
                 | 'divide'
-                | 'doneBattle'
-                | 'encodeString'
+                | 'do' doable
+                | 'done'
+                | 'drop' | 'dropActive' | 'dropValue'
+                | 'dump'
+                | 'duplicateShip'
+                | 'edit' | 'edit' property-name
+                | 'enableButton' | 'disableButton'
+                | 'encodeColors' | 'encodeString'
                 | 'end'
-                | 'expandNames'
-                | 'find' | 'findRacialAbilities'
-                | 'handleLine' | 'handleIgnoredLine' | 'handleError' | 'handleAssignment'
-                | 'initAlien' | 'initUnowned' | 'initUnregistered' | 'initFromDirectory' | 'init' | 'initFromFizz' | 'initBattle'
+                | 'ensureLocked' | 'ensureUnlocked'
+                | 'enterGroup'
+                | 'errorExit'
+                | 'evaluate' | 'evaluateString' | 'evaluateStringToBool' | 'evaluateInteractive'
+                | 'expand' | 'expandFileName' | 'expandNames' | 'expandRaceNames'
+                | 'expect' | 'expectKeyword' | 'expectIdentifier' | 'expectSymbol'
+                | 'export' | 'exportGame' | 'exportTool' | 'exportSubdirectory'
+                | 'extractPlugin' | 'extractWait'
+                | 'fade'
+                | 'fillGroupListCache'
+                | 'findCommandRunLength' | 'findCreate' | 'findNearestVisibleDrawing' | 'findNewestUnknownTurnNumber' | 'findSectionEnd'
+                | 'findIndexForId'                                                      # FIXME: ..By..?
+                | 'finish' | 'finishBCO' | 'finishNewGame' | 'finishProcess'
+                | 'flush' | 'flushItems' | 'flushLine' | 'flushWord'
+                | 'generate' | 'generateInitialSchedule' | 'generateRandomCode'         # FIXME: check
+                | 'grow'
+                | 'import' | 'importGame' | 'importBackups' | 'importSubdirectory' | 'importTarball'
+                | 'include'                                                               # FIXME: check
+                | 'init' property-name | 'initFrom' property-name | 'initFrom' file-name
+                | 'init' | 'initActivityDetector' | 'initAlien' | 'initFromTurnScores' | 'initMessageParser' | 'initUnowned' | 'initUnregistered' | 'initWorld'
+                | 'insertNewCommand' | 'insertText'
+                | 'installChangedGameFiles' | 'installFileMulti' | 'installGameData' | 'uninstallGameData'
+                | 'invalidateResult'
+                | 'invert'
+                | 'kickstartGame'
+                | 'length'                                                                      # FIXME: size?
+                | 'limitToExistingObjects'
+                | 'list' | 'listContent' | 'listGameEvents' | 'listGameInfo' | 'listGames' | 'listKeyInfo' | 'listMessages' | 'listNewsgroupsByGroup' | 'listNewsgroups' | 'listPermissions' | 'listPlayers'
+                | 'login'
+                | 'lookup' | 'lookup' property-name
+                | 'makeCanvas' | 'makeBinary' | 'makeForumUrl' | 'makeFrameContext' | 'makeGameUrl' | 'makePath' | 'makePeer' | 'makePostUrl' | 'makeStop' | 'makeTernary' | 'makeUnary' | 'makeUserUrl' | 'makeVisible' | 'makeTopicUrl'
                 | 'mapPlayer'
-                | 'markAllOptionsUnset'
-                | 'markUpdated'
-                | 'matchFunction'
-                | 'parse' | 'parseFizz'
-                | 'performDefaultAssignments'
-                | 'playCycle' | 'playFastForward'
-                | 'prepareResult'
-                | 'scan'
+                | 'markAllOptionsUnset' | 'mark' testable-property | 'markContextTOS'
+                | 'matchLine' | 'matchPart' | 'matchRecursive' | 'match' | 'matchFunction'
+                | 'maybeRequestNewRange'
+                | 'merge'
+                | 'modify'
+                | 'move' | 'moveBy' | 'moveTo' | 'moveDueItems' | 'moveObjects' | 'movePendingToWork' | 'moveToEdge' | 'moveToForum' | 'moveToPending' | 'moveWidgetToEdge'
+                | 'notifyAddress' | 'notifyListeners' | 'notifyObjectListeners'         # FIXME: check
+                | 'peek'
+                | 'perform' | 'performDeferredRedraws' | 'performDefaultAssignments'
+                | 'pickDayTime'
+                | 'ping'
+                | 'poke'
+                | 'pop' property-name | 'pop' plural-property-name
+                | 'popNew'                                                              # FIXME: check
+                | 'prepare' property-name
+                | 'prepareForAppend' | 'prepareInstall' | 'prepareQueues'               # FIXME: check
+                | 'post' property-name | 'postNew' property-name | 'postNew'
+                | 'postMouseEvent' | 'postMouse'                                        # FIXME: check
+                | 'postNewManagerRequest'
+                | 'postprocess'
+                | 'preview'
+                | 'process' property-name | 'process'
+                | 'processPart' | 'processPlayerFiles' | 'processRequests' | 'processSessionCommand' | 'processTaskQueue' | 'processCall'
+                | 'processWatch'                                                        # FIXME: check
+                | 'pullManagerRequest'
+                | 'push' property-name | 'pushNew' property-name | 'pushNew' | 'push' plural-property-name
+                | 'pushContextsFrom'                                                    # FIXME: check
+                | 'putFile'
+                | 'read' | 'readNewerMessage' | 'readOlderMessage' | 'readMail'
+                | 'relocate'
+                | 'replace' | 'replaceDirectory'
+                | 'resize'
                 | 'sellSuppliesIfNeeded'
-                | 'setAndMarkUpdated'
+                | 'send' | 'sendMessage' | 'sendRejection'
                 | 'simplify'
                 | 'size'
-                | 'wasSet'
+                | 'skipBlanks' | 'skipTag'
+                | 'sortAlphabetically' | 'sortForNewShip' | 'sortItemsAlphabetically'     # FIXME: simplify?
+                | 'stop'
+                | 'submit'
+                | 'substitute'                          # FIXME: replace?
+                | 'substr'
+                | 'suspendForUI'
+                | 'swap' | 'swapItems' | 'swapContent' | 'swapShips' | 'swapSides'
+                | 'synchronize' | 'synchronizeFleetMember'
+                | 'testFiles'
+                | 'toggleOptions'
+                | 'transform' | 'transform' property-name
+                | 'triggerUpdate'
+                | 'trimCache' | 'trimComments'
+                | 'unwatch'
+                | 'updateFrom' | 'updateBlocker' | 'updateScrollable' | 'updateUpperLimits'
+                | 'useCanvas' | 'useFont'
+                | 'validate' property-name
+                | 'visit'
+                | 'wait' | 'waitReady'
+                | 'wasSet' | 'wasRead'                  # FIXME: check, isXXX?
+                | 'watch'
+                | 'what'
+                | 'worksOn'
                 | 'write'
+                | random-graphics-member
+                | random-compiler-member
+                | random-game-member
+                | random-server-member
 
 # Object accessors. For functions that provide two-way access to an object.
 # These don't have a get/set in front and are syntactically the same as variables.
 # For example, 'Beams& beams() { return m_beams; }'
-object-accessor = 'beams'
+object-accessor = 'accounts'
+                | 'accountManager'
+                | 'activeUsers'
+                | 'adjectiveNames'
+                | 'allForums'
+                | 'amounts'
+                | 'arbiter'
+                | 'arguments'
+                | 'atomTable'
+                | 'author'
                 | 'basicHullFunctions'
+                | 'beams'
+                | 'browser'
+                | 'callback'                    # FIXME: check
+                | 'canvas'
+                | 'charset'
+                | 'checkturnRunner'
+                | 'clientCache'
+                | 'clientNetworkStack'
+                | 'colorScheme'
+                | 'colors'
+                | 'commandContainers'
                 | 'componentNamer'
+                | 'components'
+                | 'config'
+                | 'consoleLogger' | 'console'
+                | 'container'
+                | 'content'
+                | 'controls'
                 | 'cost'
-                | 'engines'
+                | 'costAction'
+                | 'current' property-name
+                | 'cursor' | 'cursors'
+                | 'data'
+                | 'defaultFolderRoot' | 'defaultProfile' | 'defaultRaceNames' | 'defaults'
+                | 'deleter'
+                | 'description'
+                | 'directoryScanner'
+                | 'dispatcher'
+                | 'drawings'
+                | 'emailRoot'
+                | 'engine' | 'engines'
+                | 'environment'
+                | 'errorOutput'
+                | 'explosions'
+                | 'extra' | 'extras'
+                | 'field'
+                | 'fieldList'
+                | 'fileSystem'
+                | 'fileTable'
+                | 'fillPattern'
+                | 'fleets'
+                | 'fonts'
+                | 'forum' | 'forumRoot' | 'forums' | 'forumId' | 'forumDisabled' | 'forumData'
+                | 'friendlyCodes'
                 | 'gameDirectory'
+                | 'gameSender'
+                | 'globalContexts'
+                | 'globalHistory'
+                | 'globalPropertyNames'
+                | 'globalValues'
+                | 'graphicsSuffixes'
+                | 'groupAction'                 # FIXME: check
+                | 'groupRoot'
+                | 'handlers'
+                | 'header'
+                | 'history'
                 | 'hostConfiguration'
                 | 'hostVersion'
                 | 'hullAssignments'
                 | 'hulls'
+                | 'inbox'
+                | 'index'                       # FIXME: check
+                | 'info'                        # FIXME: check
+                | 'interface'
+                | 'interrupt'
+                | 'ionStormType'
+                | 'ionStorms'
+                | 'iterator'
+                | 'key'                         # FIXME: check
+                | 'keyDispatcher'
+                | 'keymaps'
+                | 'keywordTable'
+                | 'lastTopicId'
                 | 'launchers'
+                | 'left'
+                | 'linkFormatter'
+                | 'listeners'
+                | 'longNames'
+                | 'macros'
+                | 'mailQueue'
+                | 'mainLog'
+                | 'markings'                    # FIXME: check
+                | 'messages'
+                | 'minefields'
+                | 'missions'
                 | 'modifiedHullFunctions'
+                | 'mutex'
+                | 'mutexList'
+                | 'name' | 'names'
+                | 'networkStack'
+                | 'newsgroupMap'
+                | 'newsrc'                      # FIXME: check
+                | 'next'                        # FIXME: check
+                | 'outbox'
+                | 'ownedGames'
+                | 'parent'
+                | 'parentMessageId'
                 | 'parser'
+                | 'passwordHash'
+                | 'path'                        # FIXME: check
+                | 'pixels'
+                | 'pixmap'
+                | 'planet'
+                | 'planetProperties'
+                | 'planetPropertyNames'
+                | 'planetScores'
+                | 'planets'
+                | 'played' plural-property-name
+                | 'playerId'
                 | 'playerList'
+                | 'players'
+                | 'plugins'
                 | 'racialAbilities'
+                | 'recognizer'
                 | 'registrationKey'
+                | 'rfcHeaders' | 'rfcMessageId' | 'rfcMessageIdRoot'
+                | 'right'
+                | 'rng'
+                | 'root'
+                | 'rootDirectory'
+                | 'row'
+                | 'scoreDescriptions'
+                | 'scores'
+                | 'sender'
+                | 'sequenceNumber'
+                | 'sessionAction'
+                | 'settings'
+                | 'shipList'
+                | 'shipListRoot'
+                | 'shipProperties'
+                | 'shipPropertyNames'
+                | 'shipScores'
+                | 'ships'
+                | 'shortNames'
+                | 'slotStatus'
                 | 'specificationDirectory'
                 | 'specificationLoader'
+                | 'standardOutput'
+                | 'stickyTopics'
+                | 'stringVerifier'
+                | 'subgroups'
+                | 'subject'
+                | 'talk'
+                | 'teamSettings'
+                | 'templateName'
+                | 'terminal'
+                | 'text'
+                | 'time'
+                | 'tokenizer'
+                | 'toolRoot'
+                | 'tools' | 'toolsByKind' | 'toolData'
+                | 'topic' | 'topics' | 'topicRoot' | 'topicId'         # FIXME: mergeable?
+                | 'torpedoCost'
+                | 'translator'
+                | 'tree'
+                | 'tristate'                     # here because defaults() is here...
+                | 'turn' | 'turnNumber' | 'turnStatus'
+                | 'ufos'
+                | 'uiPropertyStack'
+                | 'uniqueId'
+                | 'unitScores'
+                | 'universe'
+                | 'unlisted'                    # FIXME: check
+                | 'unreadMessages'
+                | 'userCallbackProxy'
+                | 'userConfiguration'
+                | 'userFile'
+                | 'userReferenceCounters'
+                | 'userRoot'
+                | 'userSender'
+                | 'userSide'
+                | 'value'
                 | 'visualizer'
+                | 'watchedForums'
+                | 'watchedTopics'
+                | 'widgets'
+                | 'workQueue'
+                | 'world'
+                | 'writers'
 
-property-name = 'Num' property-name
-              | 'After'
-              | 'AlgorithmName'
-              | 'All'
-              | 'AllPlayers'
+
+# Plural property names. These can be counted.
+plural-property-name = 'Accounts'
+                     | 'ActiveFrames'
+                     | 'Aliases'
+                     | 'AlignmentSlots' | 'AlignmentWidths'             # FIXME: check
+                     | 'AllianceSettings'
+                     | 'Args'                           # FIXME: Arguments?
+                     | 'Assignments'
+                     | 'Attributes'
+                     | 'AvailableContexts'
+                     | 'BaseStorage'
+                     | 'BaseTorpedoesAsType'
+                     | 'Bases'
+                     | 'Battles'
+                     | 'Bays'
+                     | 'Beams'
+                     | 'Boxes'
+                     | 'Buildings'
+                     | 'Buttons'
+                     | 'Bytes'
+                     | 'Cells'
+                     | 'Charsets'
+                     | 'Columns'
+                     | 'Commands'
+                     | 'CommentCharacters'
+                     | 'CompilationFlags'
+                     | 'ConflictingPlugins'
+                     | 'Containers'
+                     | 'Crumbs'
+                     | 'Definitions'
+                     | 'DependingPlugins'
+                     | 'Descriptions'
+                     | 'Dimensions'
+                     | 'DirectParents'
+                     | 'Directories'
+                     | 'DueEvents'
+                     | 'Elements'
+                     | 'EnemySettings'
+                     | 'EngineWindowFlags'
+                     | 'Engines'
+                     | 'Entries'
+                     | 'ExistingParts'
+                     | 'ExtraCodes'
+                     | 'Features'
+                     | 'Fighters'
+                     | 'FightersAboard'
+                     | 'FightersAllowedToSell'
+                     | 'Files'
+                     | 'Firsts'                         # FIXME: check
+                     | 'Fleets'
+                     | 'Frames'
+                     | 'FriendlyCodes'
+                     | 'FuelFactors'
+                     | 'Functions'
+                     | 'FutureEvents'
+                     | 'Games'
+                     | 'Handlers'
+                     | 'HistoryTimestamps'
+                     | 'HostVersions'
+                     | 'HullAssignments'
+                     | 'HullFunctions'
+                     | 'Hulls'
+                     | 'Icons'
+                     | 'Ids'
+                     | 'ImageLoaders'
+                     | 'Instructions'
+                     | 'IonStorms'
+                     | 'Items'
+                     | 'Keys'
+                     | 'Labels'
+                     | 'Launchers'
+                     | 'Layers'
+                     | 'Lines'
+                     | 'LockedGames'
+                     | 'ManagerRequests'
+                     | 'Messages'
+                     | 'Minefields'
+                     | 'MissingFeatures'
+                     | 'Missions'
+                     | 'ModifiedFunctions'
+                     | 'MouseButtons'
+                     | 'MutexNames' | 'MutexObjects'    # FIXME: merge?
+                     | 'Mutexes'
+                     | 'Names'
+                     | 'NewTechLevels'                  # FIXME: generalize?
+                     | 'Objects'
+                     | 'Observers'
+                     | 'Offsets'
+                     | 'Operations'
+                     | 'ParameterTypes'
+                     | 'Parameters'
+                     | 'ParentColors'
+                     | 'Parents'
+                     | 'Parts'
+                     | 'PlanTypes' | 'PlanObjects'      # FIXME: check
+                     | 'PlanetNames'
+                     | 'Planets'
+                     | 'Players'
+                     | 'Plugins'
+                     | 'PointImages'
+                     | 'Points'
+                     | 'PositionalParameters'
+                     | 'PostponedMessages'
+                     | 'PreparedObjects'
+                     | 'PreviousTurns'
+                     | 'Processes'
+                     | 'Properties'
+                     | 'Providers'
+                     | 'RacialAbilities'
+                     | 'Records'
+                     | 'RectangularImages'
+                     | 'RemovedFiles'
+                     | 'Restrictions'
+                     | 'Rules'
+                     | 'ScoreDefinitions'
+                     | 'Scores'
+                     | 'SelectedPlayers'
+                     | 'Series'                         # FIXME: check
+                     | 'Ships'
+                     | 'ShipFunctions'
+                     | 'SignalConnections'
+                     | 'SpecialCommands'
+                     | 'Starbases'                      # FIXME: Bases?
+                     | 'Strings'
+                     | 'Subdirectories'
+                     | 'Suns'
+                     | 'TeamMembers'
+                     | 'TeamNames'
+                     | 'TechLevels'
+                     | 'Templates'
+                     | 'Texts'                          # FIXME: check
+                     | 'Timers'
+                     | 'TimePoints'
+                     | 'TorpedoHits'                    # FIXME: check
+                     | 'Torpedoes'
+                     | 'TorpedoesAllowedToSell'
+                     | 'Translations'
+                     | 'TurnScores'
+                     | 'Turns'
+                     | 'Types'
+                     | 'Ufos'
+                     | 'Values'
+                     | 'Variables'
+                     | 'Waits'                          # FIXME: Waiting...
+                     | 'Weekdays'
+                     | 'Widths'
+                     | 'Wildcards'
+                     | 'Writer'
+                     | 'Marked' plural-property-name
+                     | 'Default' plural-property-name
+                     | 'Base' plural-property-name
+                     | 'Played' plural-property-name
+
+# Properties. Anything that can be part of something else.
+property-name = 'Num' plural-property-name
+              | 'First' property-name
+              | 'Last' property-name
+              | 'Next' property-name
+              | 'Nearest' property-name
+              | 'Previous' property-name
+              | 'AAData' | 'AaData'             # Both spellings; it's getAAData() but m_aaData
+              | 'AAHint'
+              | 'Ability'
+              | 'Account' | 'AccountFolder'
+              | 'Action' | 'Actions'
+              | 'ActivationTimer'
+              | 'Active' property-name
+              | 'Address'
+              | 'Adjective'
+              | 'Affected' property-name
+              | 'Aggressiveness'
+              | 'AlgorithmName' | 'Algorithm' | 'AlgorithmForType'
+              | 'AliasMap'
+              | 'Align'                         # FIXME: check
+              | 'Alignment'
+              | 'All' | 'All' plural-property-name
+              | 'AllFilesPattern' | 'AllFilesWithExtensionPattern'
+              | 'AllMinefieldsKnown'            # FIXME: testable-property
+              | 'AllowLocalSubs' | 'AllowLocalTypes' | 'AllowParallelTransfer'      # FIXME: check
+              | 'Alpha'
+              | 'AlternativeCombat'             # FIXME: check
+              | 'Ammo'
               | 'Amount'
-              | 'Amounts'
+              | 'AnchorPoint'
+              | 'Answer'
+              | 'AnyShip'
+              | 'App'                           # FIXME: check
+              | 'Area'
+              | 'Arg'                           # FIXME: Arg/Argument
+              | 'Argument'
+              | 'ArgumentLimit'
+              | 'ArgumentsFrom'
               | 'Array'
               | 'Assignment'
-              | 'Assignments'
+              | 'Atom' | 'Atoms'
+              | 'AtomFromString'                # FIXME: generic rule?
+              | 'AtomFromStringNC'              # FIXME: generic rule?
+              | 'Attachment' | 'Attachments'
+              | 'Attribute'
+              | 'Author'
+              | 'AutobuildGoal' | 'AutobuildGoals'
+              | 'AutobuildSpeed' | 'AutobuildSpeeds'
               | 'AutomaticMineIdentity'
+              | 'Aux'                           # FIXME: check
+              | 'AverageMinerals'
+              | 'AverageNatives'
+              | 'AverageVPI'
+              | 'BCO' | 'Bco'                   # Both spellings; it's getBCO() but m_bco.
+              | 'Background'
+              | 'BalancingMode'
+              | 'Base' | 'Base' property-name
+              | 'BaseBuildHull'
+              | 'BaseBuildOrder'
+              | 'BaseBuildOrderHullIndex'
+              | 'BaseDirectory'
+              | 'BasePath'
+              | 'BaseQueuePosition'
+              | 'BaseQueuePriority'
+              | 'BaseShipyardAction'
+              | 'BaseShipyardId'
+              | 'BaseShipyardOrder'
+              | 'BaseUrl'
               | 'BasicFunctionId'
-              | 'Battle'
-              | 'Battles'
-              | 'Bays'
+              | 'Battle' | 'Battles'
+              | 'BattleNumber'
+              | 'BayRechargeRate'
               | 'Beam'
               | 'BeamChargeRate'
+              | 'BeamHitOdds'
               | 'BeamKillRate'
+              | 'BeamRechargeRate'
+              | 'BeamTech'
               | 'BeamType'
-              | 'Beams'
-              | 'Before'
+              | 'BigFont'
+              | 'BitsPerPixel'
+              | 'Blob'
+              | 'BlockState' | 'BlockSyntax'    # FIXME: check
+              | 'Blocker'
+              | 'Bold'                          # FIXME: check
+              | 'Border'                        # FIXME: check
+              | 'BottomRight'
+              | 'BottomY'
+              | 'BoundingRectangle'
+              | 'Buffer'
+              | 'BuildAmount'
+              | 'BuildBaseFlag'
+              | 'BuildMillipoints'
+              | 'BuildMillipointsMax'           # FIXME: MaxBuildMillipoints
+              | 'BuildMillipointsMin'           # FIXME: MinBuildMillipoints
+              | 'BuildOrder'
+              | 'Button'
+              | 'ButtonGroup'                   # FIXME: check
+              | 'ButtonPressed'                 # FIXME: check
+              | 'ButtonSize'                    # FIXME: check
+              | 'BytecodeObject'
+              | 'BytesForSize' | 'BytesPerLine'  # FIXME: check these
+              | 'Cache' | 'Cached' property-name
+              | 'Callback'
+              | 'CanonicalLocation'
               | 'Capabilities'
               | 'Cargo'
+              | 'CaseInsensitiveUniversalMinefieldFCodes'               # FIXME: ...FriendlyCodes
+              | 'CellSize'
+              | 'Center'
+              | 'Change'
+              | 'ChangeOnClick'                 # FIXME: testable-property
               | 'Character'
-              | 'Charset'
-              | 'ColonistTaxRateLimit'
-              | 'Command'
-              | 'CommandArgumentLimit'
-              | 'CommandCode'
-              | 'CommandCodeName'
-              | 'CommandCodeRecordIndex'
-              | 'CommandCodeType'
-              | 'CommandData'
-              | 'CommandId'
-              | 'CommandLength'
-              | 'CommandName'
-              | 'CommandPosition'
-              | 'CommandType'
-              | 'Commands'
+              | 'CharacterLimit'                # FIXME: ...Num...?
+              | 'CharacterSet'                  # FIXME: Charset
+              | 'Charset' | 'Charset' property-name
+              | 'CharsetNew'                    # FIXME: setCharsetNew -> setNewCharset
+              | 'Child'
+              | 'ChildName' | 'ChildInfo' | 'ChildPosition' | 'ChildPositions' | 'ChildWidgetPositions' | 'ChildWidgets'   # FIXME: clean up?
+              | 'ChunkPrefix' | 'ChunkSize'
+              | 'CircleRadius'
+              | 'CircularExcess'
+              | 'CircularPrecision'
+              | 'Class'
+              | 'Client'
+              | 'CloakFuelUsed'
+              | 'Closure'
+              | 'Code'
+              | 'Colonist' property-name
+              | 'Color'
+              | 'ColorCode'
+              | 'ColorScheme'
+              | 'Command' | 'Command' property-name | 'CommandCode' property-name
               | 'Comment'
-              | 'Components'
-              | 'Config'
+              | 'CommitId'
+              | 'ComputedValue'
+              | 'Condition' | 'Condition' property-name
+              | 'Config' | 'ConfigInt'           # FIXME: Configuration
+              | 'ConfigFileName'                 # FIXME: Configuration
               | 'Configuration'
-              | 'Container'
+              | 'ConfigurationDirectory' | 'ConfigurationFile' | 'ConfigurationValue'
+              | 'ConflictingTransferShipId'
+              | 'Content'
+              | 'Context' | 'Contexts'
+              | 'ContextFactory'
+              | 'ContextProvider'
+              | 'ContextStack'
+              | 'ContextTOS'
+              | 'ContinueFlag'
+              | 'Control'
+              | 'ControlFile' | 'ControlInfo'           # FIXME: merge?
+              | 'Coordinate'                     # FIXME: replace by Position
               | 'Cost'
               | 'Crew'
               | 'CrewDefenseRate'
+              | 'Cron'
+              | 'CrossSize'
               | 'CumulativeHullfunc'
+              | 'Current' property-name
+              | 'Cursor' | 'Cursor' property-name
               | 'Damage'
               | 'DamagePower'
               | 'Data'
+              | 'DatabaseTurnNumber'
               | 'DateAsString'
+              | 'Daytime'
+              | 'DbAddress'                     # FIXME: DatabaseAddress?
               | 'DeathRays'
-              | 'Default' property-name
+              | 'DebugInformation'
+              | 'Default' | 'Default' property-name
+              | 'DefaultImages'
+              | 'DefaultValues'                 # FIXME: check
+              | 'Defense'
               | 'Definition'
+              | 'DefinitionFileName'
               | 'DependantOptions'
               | 'Description'
-              | 'DirectoryFlags'
-              | 'DirectoryHostVersion'
-              | 'Distance'
+              | 'DescriptionKey'                # FIXME: check
+              | 'Descriptions'
+              | 'DetectorStatus'
+              | 'DialogTitle'
+              | 'Difficulty'
+              | 'Dim'                           # FIXME: check
+              | 'Dimension' | 'Dimensions'       # FIXME: check
+              | 'Dir'                           # FIXME: check
+              | 'DirectParent'
+              | 'Directory' | 'Directory' property-name
+              | 'Disassembly'
+              | 'DiskUsage'
+              | 'Distance' | 'DistanceTo' | 'DistanceToWrap'
+              | 'Divider'
+              | 'DocView'                       # FIXME: check
+              | 'Document' | 'Document' property-name
               | 'DosTrailer'
+              | 'DoubleClickDelay'
+              | 'DoubleTorpedoPower'
+              | 'Drawing' | 'Drawings'
+              | 'Dump'                          # FIXME: check
+              | 'EOF'                                   # FIXME: check
+              | 'EffectiveAmount'
               | 'EfficientWarp'
-              | 'Engine'
-              | 'Engines'
+              | 'Elapsed'                       # FIXME: check
+              | 'Element'                               # FIXME: Element <> Entry
+              | 'EmWidth'
+              | 'EmailAddress'
+              | 'Encoded'                               # FIXME: WTF?
+              | 'EngineShieldBonus'
+              | 'EngineType'
+              | 'EngineWindowBPP'
+              | 'EngineWindowSize'
               | 'Entries'
+              | 'Entry'
+              | 'EraseDatabase'                 # FIXME: testable-property
+              | 'EraseDatabaseFlag'             # FIXME: check
+              | 'EraseMode'
+              | 'Error'
+              | 'ErrorStream'
+              | 'Event'
+              | 'Exception' | 'Exceptions'              # FIXME: check
+              | 'ExceptionHandler'
+              | 'Experience'
               | 'ExperienceBonus'
-              | 'ExperienceLevel'
+              | 'ExperienceLevel' | 'ExperienceLevels'
               | 'ExperienceLevelName'
-              | 'ExperienceLevels'
+              | 'Expire'                                # FIXME: Expiration...
               | 'Explanation'
+              | 'Expr'                          # FIXME: Expression
+              | 'Expression'
+              | 'Extent'
               | 'ExternalPictureNumber'
+              | 'ExtraData'
+              | 'Factor'
+              | 'Factory'
               | 'Features'
-              | 'Fighter'
-              | 'Fighters'
-              | 'FighterX'
-              | 'File'
-              | 'Files'
-              | 'Fizz'
+              | 'Field' | 'Field' property-name
+              | 'Fighter' property-name
+              | 'FightersAllowedToSell'               # FIXME: Num?
+              | 'File' | 'File' property-name
+              | 'FileNr'                                # FIXME: FileId/Number?
+              | 'Fill'                                  # FIXME: FillPattern?
+              | 'FillPattern'
+              | 'Filter'
+              | 'Fizz'                                  # FIXME: check
+              | 'Flag'
+              | 'Flags'
+              | 'FlakCompensationOverride' | 'FlakRatingOverride'
+              | 'Flavor'
+              | 'Fleet' property-name
+              | 'Float'
+              | 'FloatObject'
+              | 'FocusState'
+              | 'FocusedChild'
+              | 'Folder' | 'Folders'
+              | 'FolderName'
+              | 'Font'
+              | 'FontList'
+              | 'ForcedCellHeight' | 'ForcedCellWidth'
+              | 'ForcedCellSize'
+              | 'Format'
+              | 'Forum' | 'ForumId'
               | 'ForwardedOption'
               | 'ForwardedOptionName'
+              | 'Frame' | 'FrameWidth'
+              | 'FrameType'
+              | 'FreeCargo' | 'FreeFile'
+              | 'FriendlyCode'
+              | 'FromHostConfiguration'                 # FIXME: check
               | 'Fuel'
               | 'FuelFactor'
-              | 'FuelFactors'
-              | 'Function'
-              | 'FunctionDefinition'
-              | 'FunctionId'
-              | 'Functions'
+              | 'FullName'
+              | 'Function' | 'Function' property-name
+              | 'FutureFeatures'
+              | 'Game' | 'Game' property-name
+              | 'GameListAccount'                       # FIXME: check
+              | 'GameNr'                                # FIXME: GameId?
+              | 'Get'                                   # FIXME: check
+              | 'GlobalContext'
+              | 'GlobalValue'
+              | 'Glyph'
+              | 'Government'
+              | 'GrabDelay' | 'GrabEnabled' | 'GrabEnableTime'   # FIXME: check
+              | 'GravityPlanet'
+              | 'Group'
+              | 'GroupListCache'
+              | 'Growth'
+              | 'GrowthBehaviour'
               | 'GuessedHull'
               | 'GuessedShipPicture'
-              | 'HConfig'
-              | 'Header'
+              | 'Handler'
+              | 'Happiness'
+              | 'Has' testable-property
+              | 'Hash'
+              | 'Header' | 'Header' property-name
+              | 'Heading'
+              | 'Height'
+              | 'Help'
               | 'HighTechTorpedoBug'
-              | 'HostId'
-              | 'HostVersions'
-              | 'Hull'
-              | 'HullAssignments'
-              | 'HullFunction'
+              | 'Hint'
+              | 'History' property-name
+              | 'Holder'                                    # FIXME: check; should probably be deleter
+              | 'HonorAlliances'                                # FIXME: testable-property
+              | 'HorizontalGap'
+              | 'Host' | 'Host' property-name
+              | 'HostDelay' | 'HostEarly'                   # FIXME: check those
+              | 'Hotkey'
+              | 'HoverItem'
+              | 'HoverLink'
+              | 'Hull' | 'Hull' property-name | 'HullTypeOnly'
               | 'HullFunctions'
-              | 'Hulls'
               | 'Id'
+              | 'IdCounter'                             # FIXME: check. 'LastId'?
+              | 'Identifier'
+              | 'Image'
+              | 'ImageCache'
+              | 'ImageLoader'
+              | 'ImageMap'
+              | 'ImageMutex'
+              | 'ImageName'
+              | 'ImageQueue'
+              | 'ImageSize'
               | 'ImmuneAssaultShip'
-              | 'ImpliedFunctionId'
+              | 'ImpliedAbility' | 'ImpliedFunctionId'      # FIXME: merge?
+              | 'Inbox'
               | 'Index'
+              | 'IndustryLevel'
+              | 'Info' | 'Info1' | 'Info2' | 'Information' | 'Infos'      # FIXME: check those
+              | 'InfoIndex'
+              | 'InitialDelta'
+              | 'Instance'
+              | 'InstanceName'
+              | 'Instruction'
+              | 'Int16' | 'Int32'
+              | 'Integer' | 'IntegerProperty' | 'IntegerValue'
+              | 'Intent'
+              | 'Interacting'                                   # FIXME: testable-property
+              | 'InterceptId'
               | 'InternalPictureNumber'
+              | 'Interval'
+              | 'InvokingObject'
+              | 'IonStorm'                              # FIXME: Storm vs IonStorm
               | 'Is' testable-property
-              | 'Key'
+              | 'Item' | 'Item' property-name | 'Items'
+              | 'Jump'
+              | 'JumpTarget'
+              | 'Key' | 'Key' property-name | 'Keys'
+              | 'Keymap' | 'KeymapName'
+              | 'KeywordTableName'
               | 'KillPower'
               | 'Kind'
+              | 'KnownToHaveNatives'                    # FIXME: testable-property
+              | 'KnownToNotExist'                       # FIXME: testable-property
+              | 'Label'
+              | 'LabelExpression'
               | 'LargeCargoTransfer'
+              | 'LastClickPosition'
+              | 'LastClickTime'
               | 'Launcher'
-              | 'Launchers'
-              | 'Levels'
-              | 'Line'
-              | 'Log'
+              | 'LauncherType'
+              | 'Layer'
+              | 'Layout' | 'LayoutInfo'
+              | 'Leaf'
+              | 'LeftStatus'
+              | 'LeftX' | 'LeftMargin'
+              | 'Length'
+              | 'Levels'                                # FIXME: Experience...?
+              | 'Lhs' | 'Rhs'                           # FIXME: check
+              | 'Limit' | 'Limits'
+              | 'Line' | 'Line' property-name
+              | 'Line1' | 'Line2'                       # FIXME: Info1/2?
+              | 'LineNr'                                # FIXME: LineNumber?
+              | 'LineNumber'
+              | 'LineNumbers'                           # FIXME: lineNumbers()?
+              | 'Link' | 'LinkTarget' | 'LinkKind'
+              | 'LinkFromPos'                           # FIXME: LinkFromPosition?
+              | 'List'
+              | 'ListEntry'
+              | 'ListParameters'
+              | 'ListenAddress'
+              | 'Listener'
+              | 'Literal' | 'Literals'
+              | 'Loaded'                                # FIXME: testable-property
+              | 'LoaderStopRequest'
+              | 'LoaderThread'
+              | 'LoaderWake'
+              | 'LocalLoadDirectory'
+              | 'LocalNames'
+              | 'LocalTaskQueue'
+              | 'LocalVariable'
+              | 'LocationName'
+              | 'LogName'
+              | 'LoginName'
+              | 'Loop'                                          # FIXME: check
+              | 'Lower'                                         # FIXME: check
+              | 'MailAddress'
+              | 'MainThreadDispatcher'
+              | 'Make'                                          # FIXME: check
+              | 'Manager'
+              | 'ManagerInvalidate'                             # FIXME: check
+              | 'Map'
               | 'Mapping'
+              | 'MarkerKind'                            # FIXME: check
               | 'Mass'
-              | 'Max' property-name
+              | 'Matcher'
+              | 'Max' | 'Max' property-name | 'Max' plural-property-name
+              | 'MaximumCoordinates'                    # FIXME: Max....
+              | 'Message' | 'Message' property-name     # FIXME: check MessageHeading / MessageHeader
+              | 'MessageFromFile'
+              | 'MessageParser'
+              | 'Metadata'
+              | 'Min' | 'Min' property-name | 'Min' plural-property-name
+              | 'Minefield'
               | 'MinefieldCenterBug'
+              | 'MinimumCoordinates'                    # FIXME: Min...
+              | 'MinimumWorldRange'                     # FIXME: Min...
+              | 'MissingAmount'
+              | 'Mission'
+              | 'MissionNumber'
+              | 'MissionParameter'
               | 'Mode'
-              | 'ModifiedFunctions'
+              | 'Modifiers'
+              | 'MouseGrab'                             # FIXME: testable-property
+              | 'MousePosition'
+              | 'MousePrefix'
+              | 'MousePrefixArgument'
+              | 'Movement' | 'MovementFuelUsed' | 'MovementVector'
+              | 'Mutex'
+              | 'MyValue'                                       # FIXME: check
               | 'Name'
-              | 'Names'
-              | 'NativeTaxRateLimit'
+              | 'Names'                                 # FIXME: names()?
+              | 'Native' property-name
+              | 'Natives'
               | 'NegativeFCodes'
-              | 'Object'
-              | 'ObjectX'
-              | 'Objects'
+              | 'NewOrder'
+              | 'Newest'                                        # FIXME: check
+              | 'NewestPosition'
+              | 'Newline'
+              | 'Newsgroup'
+              | 'Next'                           # FIXME: more specific about what is next
+              | 'NonstandardAbility'
+              | 'Note'
+              | 'NullFS'
+              | 'Number'                         # FIXME: verify that we need this
+              | 'NumericValue'
+              | 'Object' | 'Object' property-name
+              | 'ObjectReference'
+              | 'ObjectToId'
+              | 'Observer'
               | 'Offset'
-              | 'Offsets'
-              | 'Option'
-              | 'Options'
-              | 'OriginalName'
+              | 'Old' property-name
+              | 'Oldest' property-name
+              | 'OneLineSyntax'                         # FIXME: testable-property
+              | 'OnlyOneSimulation'                     # FIXME: testable-property
+              | 'OpenSlot'
+              | 'Operation'
+              | 'Operator'
+              | 'OptimisationLevel'
+              | 'Option' | 'Options'
+              | 'OptionButton'
+              | 'Order'
+              | 'OreDensity'
+              | 'OreGround'                             # FIXME: better name?
               | 'OriginalNames'
+              | 'Other'                                         # FIXME: check
+              | 'OtherEnd'
               | 'Outcome'
+              | 'Outer'                                         # FIXME: check
+              | 'OutermostFrame'
+              | 'Output'
+              | 'OutputStream'
+              | 'Overload'                              # FIXME: testable-property
               | 'Owner'
-              | 'PConfig'
+              | 'PM'
+              | 'PMMailType'
+              | 'Padding'
+              | 'PageSize' | 'PageTop' | 'PageWidth'
+              | 'Palette'
+              | 'Paragraph'
+              | 'ParallelShipTransfers'
+              | 'Parameter' | 'ParameterFlags' | 'ParameterName' | 'ParameterType'
+              | 'ParenLevel'
               | 'Parent'
-              | 'Parser'
+              | 'ParentDirectory'
+              | 'ParentEntry'
+              | 'ParentEnum'
+              | 'Parts'
+              | 'PassRate'
+              | 'PathName' | 'Path'                     # FIXME: merge?
+              | 'PathOrigin'
+              | 'Pattern'
+              | 'PendingScroll'
+              | 'PerceivedText'
+              | 'Permission' | 'Permissions'
               | 'Picture'
-              | 'PlanetTemperatureCode'
+              | 'Pid'
+              | 'Pix'                                           # FIXME: Pixmap?
+              | 'PixelOffset'
+              | 'Pixels'
+              | 'Planet' | 'Planet' property-name
               | 'Playability'
-              | 'Player'
-              | 'PlayerFlags'
-              | 'PlayerMissionNumber'
-              | 'PlayerRaceNumber'
+              | 'Player' | 'Player' property-name
+              | 'PlayerRankPoints'
               | 'Players'
-              | 'PlayersOfRace'
-              | 'PlayersThatCan'
-              | 'PlayersWhere'
-              | 'PlayersWhereEnabled'
+              | 'PlayersOfRace' | 'PlayersThatCan' | 'PlayersWhereEnabled' | 'PlayersWhere'      # FIXME: do we have a standard pattern for these?
+              | 'Plugin'
+              | 'PmId'                                          # FIXME: check
+              | 'PmTree'                                        # FIXME: check
+              | 'Point' | 'PointAlias' | 'PointParameter'   # FIXME: Position...
+              | 'Pos' | 'Pos2'                              # FIXME: Position...
+              | 'PosLastSeen'
+              | 'Position'
               | 'PostTaxationHappinessLimit'
-              | 'Race'
-              | 'RaceMapping'
-              | 'RaceNames'
-              | 'RacialAbilities'
+              | 'PostedMessages'
+              | 'Posts'
+              | 'PreferredChildSize'
+              | 'PreferredLength'
+              | 'PreferredSize' | 'PreferredHeight' | 'PreferredWidth'
+              | 'PreferredWidthInPixels'
+              | 'PreferredWorldRange'
+              | 'Prev'
+              | 'PreviousRfcMessageId'
+              | 'PreviousVirtualHost'
+              | 'PrimaryEnemy'
+              | 'Priority'
+              | 'Process'
+              | 'ProcessError' | 'ProcessId' | 'ProcessKind' | 'ProcessList' | 'ProcessName' | 'ProcessState' | 'ProcessPriority'
+              | 'ProcessGroupId' | 'ProcessGroup'                       # FIXME: pick one
+              | 'Profile'
+              | 'ProfileRaw'
+              | 'ProfileString'
+              | 'Property' | 'PropertyId' | 'PropertyStream'
+              | 'ProtocolHandler'
+              | 'Provider'
+              | 'Proxy'
+              | 'Queue' | 'QueueMutex' | 'QueuePriority' | 'QueuePosition'
+              | 'Race' | 'RaceName'
+              | 'RaceMask'
+              | 'RaceNumber'
+              | 'Races'
+              | 'Radius' | 'RadiusSquared'
+              | 'RandomFriendlyCodeFlags' | 'RandomFriendlyCode' | 'RandomFriendlyCodes'
+              | 'RandomLeftRight'                                         # FIXME: testable-property
+              | 'RandomizeFCodesOnEveryFight'                             # FIXME: testable-property
+              | 'Range'
+              | 'Ranks'
+              | 'Rating'
+              | 'RawColor'
               | 'RawData'
+              | 'RawText'
+              | 'Reader'
+              | 'RealId'
+              | 'RealName'
+              | 'RealOwner'
+              | 'Reason'
+              | 'ReceiveConfig'
+              | 'Receiver'
+              | 'ReceiverMask'
+              | 'Record' | 'RecordIndex' | 'RecordPosition' | 'RecordSize'
+              | 'Rectangle'
+              | 'RefereeScoreName'
+              | 'Reference'
+              | 'ReferenceCounter'
+              | 'RefCounter'                                    # FIXME: ReferenceCounter
+              | 'ReferencedValue'
+              | 'Refs' | 'RefsHeads'                            # these are git names, not plural
               | 'RegistrationKey'
+              | 'RejectDirectory'
+              | 'RelRadius' | 'RelX' | 'RelY'                   # FIXME: check
+              | 'Relation'
+              | 'RelativeItemPosition'
+              | 'RelativePosition'
+              | 'RelativeToAbsoluteOffset'
+              | 'Remainder'                             # FIXME: Remaining...
+              | 'RemainingAmount'
+              | 'RemainingLine'
+              | 'RemainingPlayers'
+              | 'RemoteControlFlag'
+              | 'RenderFlag'
+              | 'RenderList'
+              | 'RenderOptions'
+              | 'Renderer'
+              | 'RenderFlags'                                   # FIXME: RendererFlags?
+              | 'Reply'
+              | 'Report'
+              | 'Req'                                           # FIXME: Request
+              | 'Request'
+              | 'ResourceProvider'
               | 'Result'
+              | 'Reverter'
+              | 'RfcHeader'
+              | 'RfcMessageId'
+              | 'RightMargin'
+              | 'RightStatus'
+              | 'RightX'
+              | 'Root'
+              | 'RootDir'
+              | 'RootDirItem'
+              | 'RootFolder'
+              | 'RootHandler'                           # FIXME: check
+              | 'Router'
+              | 'RouterAddress'
+              | 'Row'
+              | 'Runnable'                              # FIXME: check. Request?
+              | 'RunnableSemaphore'
+              | 'Runner'
+              | 'RunningProcess'
+              | 'ScannedHeading' | 'ScannedMass'
               | 'Scanner'
+              | 'Schedule'
+              | 'ScollSpeed'
+              | 'Score' | 'ScoreValue' | 'Scores'
+              | 'ScoreKey'
+              | 'ScottyBonus'                                             # FIXME: testable-property
+              | 'ScreenName' | 'ScreenSize'
+              | 'ScriptError'
+              | 'ScriptSide'
+              | 'ScrollStep' | 'ScrollSpeed'
+              | 'Scrollback'
+              | 'ScrollbackIndicator'                                     # FIXME: testable-property
+              | 'SecondValue'
               | 'Section'
-              | 'SectionAddress'
-              | 'SectionOffset'
+              | 'SectionAddress' | 'SectionName' | 'SectionOffset'        # FIXME: merge some of these
+              | 'SectorNumber'
               | 'Seed'
+              | 'SeedControl'                                           # FIXME: testable-property
+              | 'SelectedChild' | 'SelectedLink' | 'SelectedRoot'
+              | 'Selection' | 'Selections'
+              | 'SendConfig'
+              | 'SendPrefix'
+              | 'Sender'
+              | 'Separator'
+              | 'Sequence'
+              | 'SequenceNumber'
+              | 'Session'
+              | 'SessionName'
+              | 'Set'                                           # FIXME: check
+              | 'SetCommand'
               | 'Shield'
-              | 'ShipFunctions'
-              | 'ShipList'
+              | 'Ship' | 'Ship' property-name
               | 'ShipSpecificFunctions'
+              | 'ShipXYData'
               | 'ShortName'
+              | 'Show'                                          # FIXME: check
+              | 'ShowComments' | 'ShowHeader' | 'ShowTrailer'           # FIXME: testable-property
+              | 'Sibling'
+              | 'Side'
+              | 'SignalState'
               | 'Signature'
               | 'SiliconoidDesertAdvantage'
+              | 'SimpleCanonicalLocation'
+              | 'SimpleNearestAlias'
+              | 'SimplePointAlias'
+              | 'SingleFilePattern'
+              | 'Size'
+              | 'SizeCells'                                     # FIXME: check
+              | 'SizeInCells'
+              | 'SizeRectangle'
+              | 'Slant'
+              | 'Slave'
+              | 'Slot' | 'Slots' | 'Slot' property-name
+              | 'SmallFont'
+              | 'SmileyDefinition'
+              | 'SmtpAddress' | 'SmtpClient' | 'SmtpConfig'
+              | 'SolidBackground'                                       # FIXME: testable-property?
               | 'Source'
-              | 'SpacePaddedFCodes'
+              | 'Space'
+              | 'SpacePaddedFCodes'                                     # FIXME: ...FriendlyCodes
+              | 'SpecialCommand'                                        # FIXME: Command?
+              | 'SpecialFunction' | 'SpecialFunctions'
               | 'SpecificationDirectory'
-              | 'SquaredRawDistance'
+              | 'Speed'                         # FIXME: Warp factor?
+              | 'SquaredDistance'               # FIXME: DistanceSquared?
+              | 'SquaredRawDistance'            # FIXME: DistanceSquared?
+              | 'Stack'
+              | 'StackSize'
+              | 'StandoffDistance'
+              | 'StarProbability'
+              | 'Start'                                         # FIXME: check
+              | 'StartPosition'
+              | 'State' | 'States'
+              | 'Statistic'
               | 'Status'
+              | 'StatusFileName'
+              | 'StatusTime'
+              | 'StatusToken'
+              | 'Sticky'                                                # FIXME: testable-property
+              | 'StickyThreads'
+              | 'Stop'                                          # FIXME: check
+              | 'StopRequest'
+              | 'Storage'
+              | 'Store'                                         # FIXME: check
+              | 'Stream'
+              | 'String' | 'StringProperty' | 'StringLength' | 'StringValue' | 'StringParameter'
+              | 'StructureType' | 'StructureValue' | 'StructureTypeReference'
+              | 'Style'
+              | 'SubroutineReference'
+              | 'SunPosition'
+              | 'SunRelX' | 'SunRelY' | 'SunRelZ'
+              | 'SuppliesAllowedToBuy'
+              | 'Surface'
+              | 'SystemLoadDirectory'
+              | 'SystemTime'
+              | 'Table'
+              | 'Taccom'                     # FIXME
               | 'TaccomHeader'
               | 'TaccomTurnPlace'
+              | 'Tag'
+              | 'TalkAddress'
+              | 'TalkListener'
+              | 'Target'
+              | 'Target' | 'Target' property-name
+              | 'Task'
+              | 'TaskMutex' | 'TaskQueue' | 'TaskSemaphore'
+              | 'Tax'
+              | 'TaxRateLimit'               # FIXME: TaxLimit?
+              | 'Team' | 'Teams'
+              | 'TeamName'
+              | 'Tech'                       # FIXME: used in getBaseTorpedoTech - should be ...Level?
               | 'TechLevel'
-              | 'Template'
-              | 'Time'
-              | 'TimeAsString'
+              | 'Temperature'
+              | 'TemperatureCode'
+              | 'Template' | 'TemplateName'
+              | 'TemplateDirectory' | 'TemplateDirectoryName' | 'TemplateFileName'     # FIXME: check
+              | 'Temporary'                     # FIXME: testable-property
+              | 'Text'
+              | 'TextFile'
+              | 'TextAlign' | 'TextHeight' | 'TextWidth'
+              | 'Thickness'
+              | 'Thread'
+              | 'Threads'
+              | 'Tile'
+              | 'Time' | 'TimeSeries'
+              | 'TimeAsString'                  # FIXME: TimeAsString <> TimestampAsString
+              | 'Timeout'
+              | 'Timer'
+              | 'TimerQueue'
               | 'Timestamp'
               | 'TimestampAsString'
-              | 'TorpChargeRate'
-              | 'TorpMissRate'
+              | 'Title'
+              | 'TitleFont'
+              | 'Token' | 'TokenString' | 'TokenType'
+              | 'TonsDestroyed'
+              | 'Tool' | 'Tools'
+              | 'Top' | 'TopY' | 'TopLeft'
+              | 'TorpChargeRate' | 'TorpMissRate' | 'TorpHitOdds'
               | 'Torpedo'
-              | 'TorpedoMoneyCost'
-              | 'TorpedoType'
-              | 'Torpedoes'
+              | 'Torpedo' property-name
+              | 'TotalRating'
+              | 'TotalSize'
+              | 'TotalTechLevel'
+              | 'TotalWidth'
+              | 'Totals'
+              | 'Trace'
               | 'Trailer'
-              | 'Translations'
-              | 'Translator'
+              | 'Traits'
+              | 'Trampoline'
+              | 'Transmitter'
+              | 'TransparentBackground'                                 # FIXME: testable-property?
+              | 'TransporterCargo' | 'Transporter' | 'TransporterTargetId'
+              | 'TreeId' | 'TreeObject'
+              | 'TubeRechargeRate'
+              | 'Turn'
               | 'TurnChecksum'
               | 'TurnFile'
-              | 'TurnFileHeader'
               | 'TurnHeader'
-              | 'TurnNr'
+              | 'TurnLastSeen'
+              | 'TurnLimit'
+              | 'TurnLoader'
+              | 'TurnNr'                    # FIXME: replace by TurnNumber
+              | 'TurnNumber'
               | 'TurnPlacement'
-              | 'Type'
+              | 'TurnTimestamp'
+              | 'Type' | 'TypeCode' | 'TypeLimit'
+              | 'UInt16' | 'UInt8'
+              | 'Ufo'
+              | 'UiColorScheme'
+              | 'Underline'                                             # FIXME: check
+              | 'UndoInformation'
+              | 'Unit'
+              | 'Units'
+              | 'UnitsAfterDecay' | 'UnitsForLaying' | 'UnitsLastSeen'
+              | 'Universe'
+              | 'UnusedShipId'
+              | 'UpdateInterval' | 'UpdateRegion'
+              | 'Updater'
+              | 'Upper'                                                 # FIXME: check
+              | 'Url'
+              | 'UseLauncher'                                   # FIXME: testable-property
+              | 'UsePartsFromStorage'                           # FIXME: testable-property
+              | 'UsedLetters'
+              | 'UsedNames'
+              | 'User'
+              | 'UserCall'
+              | 'UserCircle'
+              | 'UserContext'
+              | 'UserError'
+              | 'UserFileAddress'
+              | 'UserFolder'
+              | 'UserFolderId'
+              | 'UserFolderSet'
+              | 'UserHistoryItem'
+              | 'UserIdFromLogin'
+              | 'UserLine'
+              | 'UserMarker'
+              | 'UserRectangle'
+              | 'V3Loader'
+              | 'ValidActions'
               | 'Value'
-              | 'Values'
+              | 'ValueStack'
+              | 'Variable' | 'VariableName' | 'VariableSlotByName'
+              | 'VcrMode'
+              | 'VerifyTrailerChecksum'                         # FIXME: testable-property
               | 'Version'
+              | 'VerticalGap'
+              | 'VictoryCondition'
+              | 'ViewState'
+              | 'ViewpointPlayer' | 'ViewpointTurn' | 'ViewpointTurnNumber'
+              | 'Viewport'
+              | 'VisibilityLevel'
               | 'Visualizer'
+              | 'Voltage'
+              | 'WaitId'
+              | 'WaitIdCounter'
+              | 'Waiting'                                               # FIXME: check
+              | 'Wake'                                                  # FIXME: check
+              | 'WarningExpression'
+              | 'WarpFactor'
+              | 'WatchedForums'
+              | 'WatchedThreads'
+              | 'Waypoint'
+              | 'WaypointDX' | 'WaypointDY'
+              | 'WeekDays'
+              | 'Weight'
+              | 'Widget'
+              | 'Width'
+              | 'Wildcard'
+              | 'Window'
               | 'WindowsTrailer'
-              | 'WinplanString1'
-              | 'WinplanString2'
-              | 'X'
-              | 'Y'
-              | property-name 'Status'
+              | 'WinplanString1' | 'WinplanString2'             # FIXME: check
+              | 'Word' | 'WordSeparator'
+              | 'Work'
+              | 'WriteMode'
+              | 'Writer'
+              | 'X' | 'X2'
+              | 'XySource'
+              | 'Y' | 'Y2'
+              | 'ZoomDivider' | 'ZoomMultiplier'
+
+file-name = 'ControlFile'
+          | 'ConfigFile'
+          | 'CurrentDatabases'
+          | 'Defaults'
+          | 'Fizz'
+          | 'Float48'
+          | 'Frames'
+          | 'HConfig'
+          | 'HistoryDatabases'
+          | 'ImageById'
+          | 'IonStormNames'
+          | 'KoreExplosions' | 'KoreIonStorms' | 'KoreMinefields'
+          | 'LongString'
+          | 'Outbox' | 'Outbox35'
+          | 'PConfig'
+          | 'PascalString'
+          | 'PlanetCoordinates'
+          | 'PluginFile'
+          | 'PropertyRecord'
+          | 'RaceHullAssignments' | 'RaceMapping' | 'RaceNames'
+          | 'RejectedMail'
+          | 'ResourceFile'
+          | 'ScriptFile'
+          | 'ShipXY'
+          | 'Targets'
+          | 'Turnfile'
+          | 'UnitScoreRecord'
+          | 'UserConfiguration'
 
 conversion-target = 'CargoSpecString'
                   | 'Cost'
@@ -302,21 +1492,419 @@ conversion-target = 'CargoSpecString'
                   | 'String'
                   | 'StringArray'
 
-testable-property = 'AllTheSame'
+testable-property = 'AccessibleTechLevel'
+                  | 'Active'
+                  | 'Admin'
+                  | 'AllTheSame'
+                  | 'Allowed'
+                  | 'AllowedRandomCode'
+                  | 'At' property-name
+                  | 'Atom'
+                  | 'AutoWatch'
+                  | 'Before'
+                  | 'Black'
+                  | 'Blank'
+                  | 'Broken'
+                  | 'BuildingBase'
+                  | 'Change' | 'Changed'                        # FIXME: check
+                  | 'Checked'
+                  | 'ChildLoaded'
+                  | 'Clean'
+                  | 'Clipped'
+                  | 'CloserThan'
+                  | 'Command'
+                  | 'Conflict'
+                  | 'CurrentProcess'
+                  | 'CustomShip'
+                  | 'DebugInformationEnabled'
+                  | 'DependingOn'
+                  | 'DidScan'                                   # FIXME: check
+                  | 'Dirty'
+                  | 'DisableGrab'                               # FIXME: check
+                  | 'Done'
+                  | 'EOF' | 'Eof'                                               # FIXME: check
                   | 'ESBActive'
                   | 'EarlierThan'
-                  | 'Dirty'
+                  | 'Empty'
+                  | 'End'
                   | 'EnoughFor'
                   | 'EugeneGame'
                   | 'ExactHyperjumpDistance2'
+                  | 'ExperienceEnabled'
+                  | 'Expired'
+                  | 'Extra'
+                  | 'FileUsedFutureFeatures'                                    # FIXME: check
+                  | 'FireOnAttackFighters'                                      # FIXME: check
+                  | 'Fixed'                                                     # FIXME: check
+                  | 'FleetLeader'
+                  | 'FleetMember'
+                  | 'Flexible'
                   | 'Freighter'
+                  | 'GrowHorizontal' | 'GrowVertical'
+                  | 'Growing'
+                  | 'Hyperdriving'
+                  | 'IdentifierCharacter'
+                  | 'Ignored'
+                  | 'InSection'
+                  | 'Info'
+                  | 'Intersecting'
+                  | 'ItemAccessible'
+                  | 'KnownTag'
+                  | 'KnownToHaveNatives' | 'PlanetKnownToHaveNatives'           # FIXME: check
+                  | 'LastTopicPermitted'                                        # FIXME: check
+                  | 'LastWasRunnable'                                           # FIXME: check
+                  | 'LinkVisible'
+                  | 'Loadable'
+                  | 'Loaded'
+                  | 'Marked'
+                  | 'MatchingShipList'
+                  | 'MessageIntroducer'
+                  | 'MineLayingAfterMineDecay'
                   | 'MissionAllowed'
+                  | 'MissionCloaking' | 'MissionLocked'
+                  | 'MouseBlocked'
+                  | 'MouseDown' | 'MousePressed'        # FIXME: merge?
+                  | 'MouseEventKnown'
+                  | 'MouseEventRequested'
+                  | 'MousePrefixPosted'
+                  | 'MultiJoinAllowed'
+                  | 'MustCommitReceiver'
+                  | 'NamedTeam'
+                  | 'NeedInaccessibleTech'                                      # FIXME: check
                   | 'NonNegative'
+                  | 'NuFlag'                                                    # FIXME: check
+                  | 'Numeric'
+                  | 'OnMap'
+                  | 'OpeningTag'
+                  | 'Overload'
+                  | 'Owned'                                                     # FIXME: check
                   | 'PBPGame'
                   | 'PHostRoundingMiningResults'
+                  | 'PendingActivation'                                         # FIXME: check
+                  | 'Phost3Flag'                                                # FIXME: check
                   | 'Planet'
+                  | 'Playable'
+                  | 'PreciousFile'
+                  | 'Procedure'
+                  | 'ProcedureCall'
+                  | 'Provided'
+                  | 'RankingDisabled'
+                  | 'RatingKnown'
                   | 'Real'
+                  | 'Recurse'                                                   # FIXME: check
+                  | 'ReliablyVisible'
+                  | 'ResultValid'
+                  | 'RightJustified'                                            # FIXME: check
+                  | 'RoundingMineDecay'
                   | 'Same'
-                  | 'Valid'
+                  | 'Satisfied'
+                  | 'Seen'
+                  | 'SeenThisTurn'
+                  | 'SetFromHostConfiguration'
+                  | 'SlotInGame' | 'SlotPlayed'
+                  | 'Special'
+                  | 'Sticky'
+                  | 'StopFlag'                                                  # FIXME: check
+                  | 'StopRequested'
+                  | 'Stopped'
+                  | 'StoredInHistory'
+                  | 'StructureChanged'
+                  | 'SupplySaleAllowed'
+                  | 'TransparentBackground'
+                  | 'TransporterActive'
+                  | 'Unit'
+                  | 'UniversalMinefieldFCode'
+                  | 'UnknownContent'
+                  | 'UnloadAllowed'
+                  | 'Up'                                # FIXME: check
+                  | 'UpLink'
+                  | 'UpdateFor'
+                  | 'Updated'
+                  | 'UsePartsFromStorage'
+                  | 'UserOnGame'
+                  | 'UserOnGameAsPrimary'
+                  | 'Valid' | 'Valid' property-name | 'ValidPath' | 'ValidUppercaseIdentifier' | 'ValidMethod'
+                  | 'Varargs'
+                  | 'Visible'
+                  | 'WantResult'
+                  | 'WatchIndividual'
+                  | 'Web'
                   | 'Zero'
 
+signal-name = property-name 'Change'
+            # These need to be here separately because we don't backtrack good enough. property-name will eat 'PlanetChange' and fail the above rule:
+            | 'PlanetChange' | 'ShipChange' | 'CursorChange' | 'ObjectChange' | 'CommandChange' | 'StructureChange' | 'ModelChange' | 'CostActionChange' | 'ReceiverChange'
+            | 'ActivationTimer'
+            | 'AddAccount'                # FIXME: check
+            | 'Cancel'
+            | 'Change'
+            | 'ChildAdded'
+            | 'ChildRemove'               # FIXME: ...removed?
+            | 'Click' | 'ItemClick' | 'ItemDoubleClick' | 'LinkClick' | 'CrumbClicked' | 'ItemDoubleClicked'      # FIXME: check
+            | 'ConnectionClose'
+            | 'CurrentChange'
+            | 'Fire' | 'FireKey'
+            | 'GameSelection'
+            | 'GameEnd' | 'GameStart'
+            | 'HandleFocusChange' | 'HandleRedraw' | 'HandleStateChange'   # FIXME: check
+            | 'HostConfigToMap'           # FIXME: check
+            | 'Invalidate'
+            | 'KeyEnter' | 'KeyHelp' | 'KeyLeft' | 'KeyQuit' | 'KeyTab'
+            | 'ListMoved'
+            | 'LoadFailed'                # FIXME: ...Failure?
+            | 'LoadSucceeded'             # FIXME: ...Success?
+            | 'MenuRequest'
+            | 'OK'
+            | 'PreUpdate'
+            | 'ProcessGroupFinish'
+            | 'ProcessInvalidate'         # FIXME: check
+            | 'ProviderImageChange'
+            | 'Screenshot'
+            | 'Scroll'                    # FIXME: check
+            | 'SetChange'
+            | 'SendTimeout'
+            | 'Start'
+            | 'Timer'
+            | 'UndoChange'
+            | 'Update'           # FIXME: replace by Change?
+            | 'UserConfigToMap'           # FIXME: check
+            | 'ViewportUpdate'            # FIXME: check
+
+find-criteria = 'Wrap'
+              | 'NoWrap'
+              | 'By' property-name
+              | 'From' property-name     # FIXME: replace by By
+              | 'At'
+              | 'For'
+
+doable = 'AddReplace'
+       | 'BlitPattern' | 'BlitPatternAlpha' | 'BlitPatternOpaque' | 'BlitPatternTransp'
+       | 'Clear' | 'Copy' | 'CreateAsDirectory'
+       | 'Erase' | 'Export'
+       | 'Install'
+       | 'Load'
+       | 'OkDialog'
+       | 'Remove' | 'Rename'
+       | 'SetFlag' | 'Space' | 'StandardAutoBuild' | 'StandardDialog' | 'Subtract' | 'Sync'
+       | 'TechUpgrade'
+
+
+############################## Random one-of-a-kind functions by part ##############################
+
+# Graphics
+random-graphics-member = 'shiftLeft' | 'shiftRight' | 'shiftUp' | 'shiftDown'
+                       | 'draw' draw-target | 'draw'
+                       | 'do' draw-target
+                       | 'dot'
+                       | 'render' draw-target | 'render'
+                       | 'show' draw-target
+                       | 'print' draw-target                # FIXME: show/render
+                       | 'splitX' | 'splitY'
+                       | 'addAt' | 'addCentered' | 'addCenterObject' | 'addPreformatted' | 'addRight' | 'appendText' | 'tabTo'
+                       | 'blit' | 'blitPattern'
+                       | 'computeClipRect' | 'adjustPosition' | 'adjustToDocumentSize' | 'clipRegionAtRectangle'
+                       | 'askInput' | 'ask'
+                       | 'calcLight'
+                       | 'centerWidget' | 'centerWithin'
+                       | 'flipHorizontal' | 'flipVertical'
+                       | 'intersect' | 'join'
+                       | 'mag2' | 'mix'
+                       | 'provider'
+                       | 'noise' | 'recursiveField'
+                       | 'outText'
+                       | 'ungetKeyEvent'
+
+draw-target = property-name
+            | plural-property-name
+            | 'Background'
+            | 'Banner'
+            | 'Bar'
+            | 'BorderLine'
+            | 'Colored'
+            | 'FleetLeader'
+            | 'Frames'
+            | 'Grid' | 'GridLine'
+            | 'HLine'
+            | 'Hex'
+            | 'Nebula'
+            | 'Pixel' | 'Pixels'
+            | 'Popup'
+            | 'PrimaryPrompt'
+            | 'ResultPrefix'
+            | 'ResultSuffix'
+            | 'SecondaryPrompt'
+            | 'ShipMarker'
+            | 'Star' | 'Starfield'
+            | 'Sun'
+            | 'UtilData'
+            | 'VLine'
+            | 'ValueArray'
+            | 'YesNoDialog'
+
+# Compiler
+random-compiler-member = 'compile' compiler-target | 'compile' | 'defaultCompile' compiler-target
+                       | 'handle' compiler-target
+                       | 'atomLookup' | 'atomStrLookup'
+                       | 'visit' compiler-type
+                       | 'make' compiler-type 'Value'
+                       | 'check' compiler-type 'Arg'
+                       | 'setBinary' | 'setUnary' | 'setTernary'
+                       | 'addCheckInstruction' | 'addOp' | 'addPushLiteral' | 'addTraceTo' | 'addValueInstruction' | 'addVariableReferenceInstruction' | 'addMatchInstruction'
+                       | 'checkArgumentCountAtLeast' | 'checkArgumentCount' | 'checkAdvance'
+                       | 'execute' | 'executeCommandWait' | 'executeCompiledExpression' | 'executeInstruction' | 'executeKeyCommandWait' | 'executeListOperation' | 'executeProcessGroupWait'
+                       | 'garbageAtEnd' | 'internalError' | 'invalidMultiline' | 'misplacedKeyword' | 'typeError' | 'tooComplex' | 'notSerializable' | 'unknownIdentifier' | 'rangeError' | 'notAssignable'
+                       | 'joinProcess' | 'terminateProcess' | 'terminateAllProcesses'
+
+compiler-target = 'Abort' | 'AddHook' | 'AmbiguousRuntimeSwitch' | 'AmbiguousSingleWord' | 'AmbiguousStatement' | 'ArgumentCondition' | 'ArgumentExpression' | 'And' | 'Add'
+                | 'Arglist' | 'ArgumentList'                          # FIXME
+                | 'Bind' | 'Break'
+                | 'Call' | 'Cleanup' | 'Command' | 'Condition' | 'Continue' | 'CreateKeymap' | 'CreateProperty' | 'Comparison' | 'Concat' | 'Coordinates'
+                | 'Dim' | 'Do' | 'Delim'
+                | 'Effect' | 'Eval' | 'ExpressionStatement' | 'End' | 'EvalExpression' | 'EvalStatement' | 'EndOfLine'
+                | 'Factor' | 'File' | 'ForEach' | 'For' | 'FunctionCall' | 'Fizz'
+                | 'If' | 'Initializer' | 'Include' | 'Int64' | 'Int'
+                | 'KeymapName'
+                | 'List' | 'Load'
+                | 'Mult'
+                | 'NewArray' | 'NewHash' | 'NA' | 'Neg' | 'Not'
+                | 'On' | 'OptionalTypeMask' | 'Option' | 'Or'
+                | 'Print' | 'ProcedureCall' | 'Pow' | 'Primary'
+                | 'Read' | 'ReDim' | 'Return' | 'RunHook' | 'ResizeArray'
+                | 'Scope' | 'SelectCondition' | 'SelectionExec' | 'Select' | 'Store' | 'Struct' | 'Sub' | 'SubroutineDefinition' | 'Summand' | 'SectionDelimiter' | 'Sequence'
+                | 'Try' | 'TypeInitializer' | 'TextItem' | 'TurnFileHeader'
+                | 'UseKeymap'
+                | 'Value' | 'VariableDefinition'
+                | 'With' | 'Write' | 'While'
+                | 'Xml'
+
+compiler-type = 'Boolean' | 'Error' | 'Float' | 'Hash' | 'Integer' | 'Null' | 'Other' | 'String' | 'Blob' | 'Vector'
+
+
+
+# Game
+random-game-member = 'accountHull'
+                   | 'acceptUnicode'
+                   | 'fire' | 'fireAtFighter' | 'fireBeamsAtFighter' | 'fireBeams' | 'fireBeam' | 'fireTorpedoes' | 'fireTorpedo' | 'fireTorp' | 'rechargeBeams'
+                   | 'torpsFire' | 'torpsRecharge'
+                   | 'killFighter' | 'landFighter' | 'launchFighter' | 'launchFighters' | 'startFighter'
+                   | 'fighterAttack' | 'fighterIntercept' | 'fighterLaunch' | 'fighterMove' | 'fighterRecharge' | 'fighterShoot' | 'fighterStuff'
+                   | 'beamFindNearestFighter' | 'beamFire' | 'beamRecharge' | 'killObject'
+                   | 'hit' | 'hitT' | 'handleTorpedoHit' | 'handleFightersAboard' | 'handleElapsedTime' | 'playBattle' | 'playCycle' | 'playFastForward'
+                   | 'preloadWeapons'
+                   | 'doneBattle'
+                   | 'getHeadersForDisplay'
+                   | 'getRandom_1_100' | 'getRandom_1_17' | 'getRandom_1_20' | 'random' | 'random64k' | 'randomRange100LT' | 'randomRange100' | 'randomRange'
+                   | 'setAndMarkUpdated'
+                   | 'addLimitCash' | 'addProvidedFeaturesTo'
+                   | 'combinedCheck1' | 'combinedCheck2' | 'internalCheck' | 'computeDerivedInformation'
+                   | 'endAttribute' | 'endLine' | 'endRecord' | 'endTable'
+                   | 'startAttribute' | 'startLine' | 'startRecord' | 'startTable'
+                   | 'attachPreparedWait'
+                   | 'canBeHull'
+                   | 'cancelConflictingTransfer' | 'cancelMessage' | 'cancelTransporter'
+                   | 'canEnter' | 'canStillFight'
+                   | 'checkAuth' | 'checkCombatActivity' | 'checkExistance' | 'checkInstallAmbiguity' | 'check' | 'checkProxyPlanet' | 'checkSide' | 'checkStack' | 'checkTopic'
+                   | 'compareDetectorStatus'
+                   | 'fromShipShip' | 'fromPlanetShip' | 'fromShipJettison'
+                   | 'rdivadd'
+
+# Server
+random-server-member = 'accessNewsrc'
+                     | 'callRouter' | 'callServer' | 'callVoid'
+                     | 'addRemoveTool'
+                     | 'getFileNT' | 'getGames' | 'getNewest' | 'getPMs'
+                     | 'setupWorkDirectory'
+                     | 'serverMain' | 'schedulerMain'
+                     | 'applySortBySequenceMap' | 'applySortBySequence' | 'applySortKey'
+                     | 'checkUserPermission' | 'checkAdmin'
+                     | 'cloneGame'
+                     | 'confirmAddress' | 'confirmMail' | 'confirmUpdate'
+                     | 'createDirectoryAsUser' | 'createDirectoryCommon' | 'createDirectoryTree'
+                     | 'handleArticle' | 'handleAtLink' | 'handleAuthinfo' | 'handleGroup' | 'handleListActive' | 'handleListGroup' | 'handleListItem' | 'handleListNewsgroups'
+                     | 'handleListOverviewFormat' | 'handleListSubscriptions' | 'handleNoparse' | 'handleOpening' | 'handleOtherAttribute' | 'handleOver' | 'handlePart'
+                     | 'handlePlayerDrop' | 'handlePlayerRankChanges' | 'handlePostData' | 'handleSmiley'
+                     | 'leaveDefault'
+                     | 'linkObject' | 'unlinkObject' | 'unlinkContent'
+                     | 'mget'                                           # FIXME: rename?
+                     | 'sendAllResults'
+                     | 'tryCloseRouterSessions'                         # FIXME: tryTo?
+                     | server-property
+
+server-property = 'answerPermissions'
+                | 'attachments'
+                | 'configChanged'
+                | 'creationTime'
+                | 'endChanged'
+                | 'watchers'
+                | 'gameReferenceCount' | 'gameReferenceCounts'
+                | 'gameRoot'
+                | 'expireTime'
+                | 'firstPostingId'
+                | 'flags'
+                | 'hostFile' | 'hostRoot' | 'masterRoot'
+                | 'lastForumId' | 'lastHostTime' | 'lastMessageId' | 'lastMessageSequenceNumber' | 'lastPostId' | 'lastScheduleChangeTime' | 'lastTime' | 'lastTurnSubmissionTime'
+                | 'mailRoot' | 'messageRoot'
+                | 'notifiedForums' | 'notifiedTopics'
+                | 'pmFolderCount' | 'pmFolderData' | 'pmFolders' | 'pmRoot' | 'postedMessages' | 'postTime'
+                | 'previousRfcMessageId' | 'previousSequenceNumber' | 'previousTurns'
+                | 'profile'
+                | 'rank' | 'rankPoints'
+                | 'receivers'
+                | 'referenceCounter'
+                | 'scheduleChanged'
+
+############################## Errors ##############################
+
+memvar-error = 'a' | 'accept_preproc' | 'accept_regexp' | 'apPlug' | 'arg' | 'arg_names' | 'args' | 'array_map' | 'attr_length' | 'attr_start' | 'auth_status' | 'auth_uid' | 'auth_user'
+             | 'b' | 'binary_op' | 'bco_map' | 'baseDir' | 'block_objs' | 'bo_height' | 'bo_index' | 'bo_width'
+             | 'c' | 'cmd' | 'cmd_onset' | 'cmds' | 'colors' | 'cacheDirty' | 'cacheIndex' | 'cache' | 'cloak_fuel_used' | 'config_known' | 'config_values' | 'content' | 'current_forum' | 'current_group' | 'current' | 'current_seq_map' | 'current_seq' | 'cursor'
+             | 'data' | 'defFileName' | 'description' | 'det_timer' | 'det_valid' | 'doc'
+             | 'entry_vec' | 'exp_condition' | 'exp_label' | 'exp_warning'
+             | 'file_name' | 'first_this_line' | 'func'
+             | 'glyphs'
+             | 'hash_first' | 'hash_map' | 'height' | 'hotkey' | 'hover_link'
+             | 'id' | 'items'
+             | 'key_flags'
+             | 'language' | 'last_chunk' | 'left_margin' | 'lex' | 'line_numbers' | 'loaded'
+             | 'major' | 'manager' | 'mdown' | 'minor'
+             | 'movement_fuel_used'
+             | 'name' | 'nbig' | 'nbold' | 'next' | 'nfixed' | 'nkey' | 'nlink' | 'num_labels' | 'nunder'
+             | 'one_f' | 'options' | 'outer'
+             | 'page_width' | 'perm12' | 'perm' | 'pref_size' | 'provides'
+             | 'readAllBelowLine' | 'render_options' | 'requires' | 'right_margin' | 'right_probab' | 'rootDir' | 'root'
+             | 'selected_link' | 'shiplist_average_cost' | 'shiplist_known' | 'ship' | 'shortcut_jump' | 'short_name' | 'space' | 'srcDir' | 'srcFile' | 'stack' | 'state' | 'struct_type_map' | 'struct_value_map'
+             | 'text' | 'towee_override' | 'tag' | 'token_length' | 'token' | 'token_start' | 'tok' | 'turns_computed' | 'type'
+             | 'univ'
+             | 'valid'
+             | 'x' | 'y' | 'z'
+
+             | 'm_' <lc> signal-name 'Connection'
+             | 'm_after'
+             | 'm_big' | 'm_byte'
+             | 'm_call'
+             | 'm_db'
+             | 'm_fs'
+             | 'm_locked'                               # FIXME: isLocked
+             | 'm_utf8'
+             | 'm_universeChanged'                      # FIXME: isUniverseChanged?
+
+memvar-special = 'impl' | 'implementation'              # FIXME: m_impl
+               | 'pImpl'
+               | 'childRoot'
+               | 'condTurnOrTime'
+               | 'counter'
+               | 'current'
+               | 'delta'
+               | 'from'                                 # FIXME: check. 'm_sender'?
+               | 'log' | 'logger'                       # FIXME: m_log
+               | 'p'
+               | 'out'                                  # FIXME: check
+               | 'ref'
+               | 'to'                                   # FIXME: check
+               | 'vec' | 'vector'                       # FIXME: check
+               | 'wantBase'                             # FIXME: check
+               | 'wasRead'
+
+memfun-error = 'help'
+             | 'initializeGame'
+             | 'inLink'

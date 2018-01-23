@@ -8,7 +8,7 @@
   *  in strings intended for translation, because xgettext will not
   *  handle that.
   *
-  *  (c) 2001-2016 Stefan Reuther <Streu@gmx.de>
+  *  (c) 2001-2018 Stefan Reuther <Streu@gmx.de>
   *
   *  This program is free software; you can redistribute it and/or
   *  modify it under the terms of file `COPYING' that comes with the

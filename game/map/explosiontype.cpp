@@ -59,7 +59,7 @@ game::Id_t
 game::map::ExplosionType::getPreviousIndex(Id_t index) const
 {
     if (index == 0) {
-        return m_explosions.size();
+        return Id_t(m_explosions.size());
     } else {
         return index-1;
     }

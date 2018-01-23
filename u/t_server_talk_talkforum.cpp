@@ -3,26 +3,26 @@
   *  \brief Test for server::talk::TalkForum
   */
 
-#include <memory>
 #include "server/talk/talkforum.hpp"
 
+#include <memory>
 #include "t_server_talk.hpp"
-#include "u/helper/commandhandlermock.hpp"
-#include "server/talk/sorter.hpp"
-#include "afl/net/redis/sortoperation.hpp"
-#include "afl/data/value.hpp"
 #include "afl/data/access.hpp"
+#include "afl/data/segment.hpp"
+#include "afl/data/value.hpp"
 #include "afl/data/vector.hpp"
 #include "afl/data/vectorvalue.hpp"
-#include "afl/data/segment.hpp"
-#include "server/types.hpp"
 #include "afl/net/nullcommandhandler.hpp"
 #include "afl/net/redis/internaldatabase.hpp"
+#include "afl/net/redis/sortoperation.hpp"
+#include "afl/test/commandhandler.hpp"
 #include "server/talk/configuration.hpp"
-#include "server/talk/session.hpp"
 #include "server/talk/root.hpp"
+#include "server/talk/session.hpp"
+#include "server/talk/sorter.hpp"
 #include "server/talk/talkgroup.hpp"
 #include "server/talk/talkpost.hpp"
+#include "server/types.hpp"
 
 using afl::data::Access;
 using afl::data::Segment;
@@ -46,14 +46,14 @@ TestServerTalkTalkForum::testListOperation()
             }
     };
 
-    CommandHandlerMock mock;
+    afl::test::CommandHandler mock("testListOperation");
     afl::net::redis::IntegerSetKey key(mock, "key");
     TestSorter sorter;
 
     // Default (=WantAll)
     {
-        mock.expectCall("SORT|key");
-        mock.provideReturnValue(new VectorValue(Vector::create(Segment().pushBackInteger(1).pushBackInteger(9))));
+        mock.expectCall("SORT, key");
+        mock.provideNewResult(new VectorValue(Vector::create(Segment().pushBackInteger(1).pushBackInteger(9))));
 
         server::interface::TalkForum::ListParameters p;
         std::auto_ptr<afl::data::Value> result(server::talk::TalkForum::executeListOperation(p, key, sorter));
@@ -64,8 +64,8 @@ TestServerTalkTalkForum::testListOperation()
 
     // Part (=WantRange)
     {
-        mock.expectCall("SORT|key|LIMIT|3|7");
-        mock.provideReturnValue(new VectorValue(Vector::create(Segment().pushBackInteger(1).pushBackInteger(9).pushBackInteger(12))));
+        mock.expectCall("SORT, key, LIMIT, 3, 7");
+        mock.provideNewResult(new VectorValue(Vector::create(Segment().pushBackInteger(1).pushBackInteger(9).pushBackInteger(12))));
 
         server::interface::TalkForum::ListParameters p;
         p.mode = p.WantRange;
@@ -80,8 +80,8 @@ TestServerTalkTalkForum::testListOperation()
 
     // Sorted
     {
-        mock.expectCall("SORT|key|BY|*->field");
-        mock.provideReturnValue(new VectorValue(Vector::create(Segment().pushBackInteger(9).pushBackInteger(1))));
+        mock.expectCall("SORT, key, BY, *->field");
+        mock.provideNewResult(new VectorValue(Vector::create(Segment().pushBackInteger(9).pushBackInteger(1))));
 
         server::interface::TalkForum::ListParameters p;
         p.sortKey = "field";
@@ -100,8 +100,8 @@ TestServerTalkTalkForum::testListOperation()
 
     // Member check
     {
-        mock.expectCall("SISMEMBER|key|42");
-        mock.provideReturnValue(server::makeIntegerValue(1));
+        mock.expectCall("SISMEMBER, key, 42");
+        mock.provideNewResult(server::makeIntegerValue(1));
 
         server::interface::TalkForum::ListParameters p;
         p.mode = p.WantMemberCheck;
@@ -112,8 +112,8 @@ TestServerTalkTalkForum::testListOperation()
 
     // Size
     {
-        mock.expectCall("SCARD|key");
-        mock.provideReturnValue(server::makeIntegerValue(6));
+        mock.expectCall("SCARD, key");
+        mock.provideNewResult(server::makeIntegerValue(6));
 
         server::interface::TalkForum::ListParameters p;
         p.mode = p.WantSize;

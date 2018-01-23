@@ -21,6 +21,7 @@
 #include "game/spec/engine.hpp"
 #include "game/exception.hpp"
 #include "game/stringverifier.hpp"
+#include "game/map/shippredictor.hpp"
 
 using interpreter::makeStringValue;
 using interpreter::makeIntegerValue;
@@ -692,26 +693,38 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
                 return 0;
             }
         }
-//      case ispMoveETA:
-//         /* @q Move.ETA:Int (Ship Property)
-//            Estimated time of arrival at waypoint (number of turns). */
-//         if (sh.getShipKind() == sh.CurrentShip) {
-//             GShipTurnPredictor pred(univ, sh.getId());
-//             pred.computeMovement();
-//             return makeIntValue(pred.getNumTurns());
-//         } else {
-//             return 0;
-//         }
-//      case ispMoveFuel:
-//         /* @q Move.Fuel:Int (Ship Property)
-//            Predicted fuel useage for movement, in kilotons. */
-//         if (sh.getShipKind() == sh.CurrentShip) {
-//             GShipTurnPredictor pred(univ, sh.getId());
-//             pred.computeMovement();
-//             return makeIntValue(pred.getMovementFuelUsed());
-//         } else {
-//             return 0;
-//         }
+     case ispMoveETA:
+        /* @q Move.ETA:Int (Ship Property)
+           Estimated time of arrival at waypoint (number of turns). */
+        if (sh.getShipKind() == sh.CurrentShip && turn.get() != 0 && game.get() != 0 && shipList.get() != 0 && root.get() != 0) {
+            game::map::ShipPredictor pred(turn->universe(),
+                                          sh.getId(),
+                                          game->shipScores(),
+                                          *shipList,
+                                          root->hostConfiguration(),
+                                          root->hostVersion(),
+                                          root->registrationKey());
+            pred.computeMovement();
+            return makeIntegerValue(pred.getNumTurns());
+        } else {
+            return 0;
+        }
+     case ispMoveFuel:
+        /* @q Move.Fuel:Int (Ship Property)
+           Predicted fuel useage for movement, in kilotons. */
+        if (sh.getShipKind() == sh.CurrentShip && turn.get() != 0 && game.get() != 0 && shipList.get() != 0 && root.get() != 0) {
+            game::map::ShipPredictor pred(turn->universe(),
+                                          sh.getId(),
+                                          game->shipScores(),
+                                          *shipList,
+                                          root->hostConfiguration(),
+                                          root->hostVersion(),
+                                          root->registrationKey());
+            pred.computeMovement();
+            return makeIntegerValue(pred.getMovementFuelUsed());
+        } else {
+            return 0;
+        }
      case ispName:
         /* @q Name:Str (Ship Property)
            Ship name.
@@ -739,7 +752,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
            Name of planet this ship is orbiting. EMPTY if none. */
         if (sh.getPosition(pt)) {
             if (Turn* t = turn.get()) {
-                if (const int pid = t->universe().getPlanetAt(pt)) {
+                if (const Id_t pid = t->universe().getPlanetAt(pt)) {
                     if (const game::map::Planet* p = t->universe().planets().get(pid)) {
                         return makeStringValue(p->getName(p->PlainName, tx, iface));
                     }
@@ -1041,7 +1054,7 @@ game::interface::setShipProperty(game::map::Ship& sh, ShipProperty isp, afl::dat
      case ispMissionId:
      case ispMissionIntercept:
      case ispMissionTow:
-        if (checkIntegerArg(iv, value, 0, 10000)) {
+        if (checkIntegerArg(iv, value, 0, MAX_NUMBER)) {
             // FIXME: this changes other values to 0 if they were unknown (PCC2 probably crashes)
             int m = (isp == ispMissionId        ? iv : sh.getMission().orElse(0));
             int i = (isp == ispMissionIntercept ? iv : sh.getMissionParameter(InterceptParameter).orElse(0));
@@ -1083,13 +1096,13 @@ game::interface::setShipProperty(game::map::Ship& sh, ShipProperty isp, afl::dat
             }
         }
         break;
-     // case ispFleetId:
-//         if (checkIntArg(iv, value, 0, NUM_SHIPS)) {
-//             if (!setFleetNumber(univ, sh.getId(), iv)) {
-//                 throw IntError::rangeError();
-//             }
-//         }
-//         break;
+     case ispFleetId:
+        if (checkIntegerArg(iv, value)) {
+            if (!game::map::FleetMember(turn->universe(), sh).setFleetNumber(iv, root->hostConfiguration(), *shipList)) {
+                throw interpreter::Error::rangeError();
+            }
+        }
+        break;
      default:
         throw interpreter::Error::notAssignable();
     }

@@ -5,14 +5,12 @@
 
 #include "server/file/clientdirectoryhandler.hpp"
 #include "server/interface/filebaseclient.hpp"
-#include "server/interface/baseclient.hpp"
 #include "afl/io/constmemorystream.hpp"
 #include "afl/io/internalfilemapping.hpp"
 #include "afl/net/reconnectable.hpp"
 
 using server::interface::FileBase;
 using server::interface::FileBaseClient;
-using server::interface::BaseClient;
 using server::file::DirectoryHandler;
 
 namespace {
@@ -33,23 +31,6 @@ server::file::ClientDirectoryHandler::ClientDirectoryHandler(afl::net::CommandHa
     : m_commandHandler(commandHandler),
       m_basePath(basePath)
 { }
-
-// Set user.
-void
-server::file::ClientDirectoryHandler::setUser(const String_t& user)
-{
-    // If we have a user context, disable reconnect.
-    // Reconnecting would reset the server-side user context.
-    if (!user.empty()) {
-        if (afl::net::Reconnectable* rc = dynamic_cast<afl::net::Reconnectable*>(&m_commandHandler)) {
-            rc->setReconnectMode(afl::net::Reconnectable::Once);
-        }
-    }
-
-    // Set user context.
-    // This performs the one and only reconnect, if any.
-    BaseClient(m_commandHandler).setUserContext(user);
-}
 
 String_t
 server::file::ClientDirectoryHandler::getName()
@@ -78,7 +59,7 @@ server::file::ClientDirectoryHandler::createFile(String_t name, afl::base::Const
 
     // FIXME: this Info structure is synthetic. Server should normally supply it
     Info result(name, IsFile);
-    result.size = content.size();
+    result.size = static_cast<int32_t>(content.size());
     return result;
 }
 

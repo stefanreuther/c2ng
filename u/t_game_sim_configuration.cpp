@@ -25,7 +25,9 @@ TestGameSimConfiguration::testIt()
     TS_ASSERT_EQUALS(t.getMode(), t.VcrPHost4);
 
     // Modify
-    t.setMode(t.VcrHost, game::TeamSettings(), game::config::HostConfiguration());
+    const game::config::HostConfiguration hostConfig;
+    const game::TeamSettings teams;
+    t.setMode(t.VcrHost, teams, hostConfig);
     TS_ASSERT_EQUALS(t.getMode(), t.VcrHost);
     TS_ASSERT(t.hasHonorAlliances());
     TS_ASSERT(!t.hasOnlyOneSimulation());
@@ -68,7 +70,7 @@ TestGameSimConfiguration::testIt()
     TS_ASSERT(t.hasSeedControl());
 
     // Load defaults
-    t.loadDefaults(game::TeamSettings());
+    t.loadDefaults(teams);
     TS_ASSERT(t.hasHonorAlliances());
     TS_ASSERT(!t.hasOnlyOneSimulation());
     TS_ASSERT(!t.hasSeedControl());
@@ -79,6 +81,7 @@ TestGameSimConfiguration::testIt()
 void
 TestGameSimConfiguration::testConfig()
 {
+    const game::TeamSettings emptyTeams;
     {
         game::sim::Configuration t;
         game::config::HostConfiguration config;
@@ -86,7 +89,7 @@ TestGameSimConfiguration::testConfig()
         config[config.EngineShieldBonusRate].set(30);
         config[config.AllowFedCombatBonus].set(true);
         config[config.NumExperienceLevels].set(3);
-        t.setMode(t.VcrPHost4, game::TeamSettings(), config);
+        t.setMode(t.VcrPHost4, emptyTeams, config);
 
         TS_ASSERT_EQUALS(t.getEngineShieldBonus(), 30);
         TS_ASSERT_EQUALS(t.hasScottyBonus(), true);
@@ -101,7 +104,7 @@ TestGameSimConfiguration::testConfig()
         config[config.EngineShieldBonusRate].set(30);
         config[config.AllowFedCombatBonus].set(true);
         config[config.NumExperienceLevels].set(0);
-        t.setMode(t.VcrPHost4, game::TeamSettings(), config);
+        t.setMode(t.VcrPHost4, emptyTeams, config);
 
         TS_ASSERT_EQUALS(t.getEngineShieldBonus(), 0);
         TS_ASSERT_EQUALS(t.hasScottyBonus(), true);
@@ -116,7 +119,7 @@ TestGameSimConfiguration::testConfig()
         config[config.EngineShieldBonusRate].set(30);
         config[config.AllowFedCombatBonus].set(true);
         config[config.NumExperienceLevels].set(3);
-        t.setMode(t.VcrHost, game::TeamSettings(), config);
+        t.setMode(t.VcrHost, emptyTeams, config);
 
         TS_ASSERT_EQUALS(t.getEngineShieldBonus(), 30);
         TS_ASSERT_EQUALS(t.hasScottyBonus(), true);
@@ -131,7 +134,7 @@ TestGameSimConfiguration::testConfig()
         config[config.EngineShieldBonusRate].set(30);
         config[config.AllowFedCombatBonus].set(false);
         config[config.NumExperienceLevels].set(3);
-        t.setMode(t.VcrHost, game::TeamSettings(), config);
+        t.setMode(t.VcrHost, emptyTeams, config);
 
         TS_ASSERT_EQUALS(t.getEngineShieldBonus(), 00);
         TS_ASSERT_EQUALS(t.hasScottyBonus(), false);

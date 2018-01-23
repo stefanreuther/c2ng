@@ -26,6 +26,7 @@ using interpreter::Error;
 using interpreter::getBooleanValue;
 using interpreter::makeBooleanValue;
 using interpreter::makeIntegerValue;
+using interpreter::makeSizeValue;
 using interpreter::makeFloatValue;
 using interpreter::makeStringValue;
 
@@ -430,7 +431,7 @@ namespace {
         if (arg == 0)
             return 0;
         else if (const afl::data::StringValue* sv = dynamic_cast<const afl::data::StringValue*>(arg))
-            return makeIntegerValue(int32_t(afl::charset::Utf8().length(sv->getValue())));
+            return makeSizeValue(afl::charset::Utf8().length(sv->getValue()));
         else
             throw Error::typeError(Error::ExpectString);
     }

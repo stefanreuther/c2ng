@@ -176,6 +176,8 @@ server::interface::TalkGroupServer::parseDescription(interpreter::Arguments& arg
             result.description = toString(args.getNext());
         } else if (key == "parent") {
             result.parentGroup = toString(args.getNext());
+        } else if (key == "key") {
+            result.key = toString(args.getNext());
         } else if (key == "unlisted") {
             result.unlisted = toInteger(args.getNext()) != 0;
         } else {

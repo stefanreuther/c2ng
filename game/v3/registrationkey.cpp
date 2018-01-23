@@ -47,6 +47,8 @@ namespace {
 // Constructor.
 game::v3::RegistrationKey::RegistrationKey(afl::charset::Charset& charset)
     : m_charset(charset),
+      m_winplanString1(),
+      m_winplanString2(),
       m_isValid(false)
 {
     initUnregistered();
@@ -111,6 +113,12 @@ game::v3::RegistrationKey::setLine(Line which, String_t value)
         return true;
     }
     return true;
+}
+
+int
+game::v3::RegistrationKey::getMaxTechLevel(TechLevel /*area*/) const
+{
+    return (getStatus() == Registered ? 10 : 6);
 }
 
 // Create unregistered key.

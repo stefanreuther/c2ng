@@ -17,6 +17,7 @@ namespace game { namespace nu {
         virtual Status getStatus() const;
         virtual String_t getLine(Line which) const;
         virtual bool setLine(Line which, String_t value);
+        virtual int getMaxTechLevel(TechLevel area) const;
 
         void setStatus(Status st);
 

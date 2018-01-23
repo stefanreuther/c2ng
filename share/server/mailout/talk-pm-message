@@ -1,0 +1,18 @@
+From: PlanetsCentral Messenger <$(SMTP_FROM)>
+Subject: [PlanetsCentral] Message: $(subject)
+
+Hi,
+
+you have received a new private message which is quoted below.
+Use the link to read it online and/or reply to it.
+
+DO NOT REPLY TO THIS EMAIL.
+
+
+>> Message
+
+Subject: $(subject)
+Author:  $(author)
+URL:     <http://planetscentral.com/mail/view.cgi/1/$(id)>
+
+$(message)

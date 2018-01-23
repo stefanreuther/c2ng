@@ -1,0 +1,54 @@
+#
+#  Upload a game
+#
+
+fatal checkenv name         # Name of game
+fatal checkenv dir          # Input directory
+fatal checkenv host         # Host version
+fatal checkenv master       # Master version
+
+# Load all files before starting to talk to database
+fatal setenv beamspec <${dir}/beamspec.dat
+fatal setenv hullspec <${dir}/hullspec.dat
+fatal setenv torpspec <${dir}/torpspec.dat
+fatal setenv engspec  <${dir}/engspec.dat
+fatal setenv planetnm <${dir}/planet.nm
+fatal setenv racenm   <${dir}/race.nm
+fatal setenv xyplan   <${dir}/xyplan.dat
+fatal setenv amaster  <${dir}/amaster.src
+fatal setenv pconfig  <${dir}/pconfig.src
+fatal setenv shiplist <${dir}/shiplist.txt
+fatal setenv truehull <${dir}/truehull.dat
+
+# Create it
+host newgame             | setenv gid
+host gamegetdir ${gid}   | setenv gamedir
+
+# Basic properties
+host gamesetname ${gid} ${name}
+host gameset ${gid} host ${host}
+host gameset ${gid} master ${master}
+
+# Basic Sun/Thu schedule; Sun/Wed/Fri until turn 15
+host scheduleset ${gid} weekly 17 early
+host scheduleadd ${gid} weekly 41 early untilturn 15
+
+# Upload files
+hostfile put ${gamedir}/data/beamspec.dat ${beamspec}
+hostfile put ${gamedir}/data/hullspec.dat ${hullspec}
+hostfile put ${gamedir}/data/torpspec.dat ${torpspec}
+hostfile put ${gamedir}/data/engspec.dat ${engspec}
+hostfile put ${gamedir}/data/planet.nm ${planetnm}
+hostfile put ${gamedir}/data/race.nm ${racenm}
+hostfile put ${gamedir}/data/xyplan.dat ${xyplan}
+hostfile put ${gamedir}/data/amaster.src ${amaster}
+hostfile put ${gamedir}/data/pconfig.src ${pconfig}
+hostfile put ${gamedir}/data/shiplist.txt ${shiplist}
+hostfile put ${gamedir}/data/truehull.dat ${truehull}
+
+# Put on proper lists
+host gamesettype ${gid} public
+host gamesetstate ${gid} joining
+
+# Success
+echo "*** Created game with Id ${gid} ***"

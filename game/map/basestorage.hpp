@@ -25,6 +25,8 @@ namespace game { namespace map {
 
         bool isValid() const;
 
+        void clear();
+
      private:
         std::vector<IntegerProperty_t> m_content;
     };

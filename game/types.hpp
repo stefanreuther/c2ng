@@ -41,7 +41,7 @@ namespace game {
         DefenseBuilding,
         BaseDefenseBuilding
     };
-    const size_t NUM_PLANETARY_BUILDINGS = 4;
+    const size_t NUM_PLANETARY_BUILDING_TYPES = 4;
 
     // /** Industrial Activity Ratings. Order matches that used in UTIL.DAT
     //     record 6 (TUtil6SensorSweep::activity), and is also used in
@@ -61,6 +61,14 @@ namespace game {
         InterceptParameter,      ///< Intercept parameter.
         TowParameter             ///< Tow parameter.
     };
+
+    enum TechLevel {
+        EngineTech,                                             ///< Engine tech level.
+        HullTech,                                               ///< Hull tech level.
+        BeamTech,                                               ///< Beam weapon tech level.
+        TorpedoTech                                             ///< Torpedo tech level.
+    };
+    const size_t NUM_TECH_AREAS = 4;
 
     // FIXME: these are internal representation only so we may not have to differentiate between IntegerProperty_t and NegativeProperty_t.
     typedef afl::base::InlineOptional<int16_t,-1,int> IntegerProperty_t;

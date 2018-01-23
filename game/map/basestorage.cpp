@@ -62,3 +62,9 @@ game::map::BaseStorage::isValid() const
     }
     return false;
 }
+
+void
+game::map::BaseStorage::clear()
+{
+    m_content.clear();
+}

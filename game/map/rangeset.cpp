@@ -8,8 +8,8 @@
 
 game::map::RangeSet::RangeSet()
     : m_points(),
-      m_minimum(),
-      m_maximum()
+      m_min(),
+      m_max()
 { }
 
 game::map::RangeSet::~RangeSet()
@@ -25,7 +25,7 @@ game::map::RangeSet::add(Point pt, int r)
     if (r > 0) {
         // Seed min, max
         if (m_points.empty()) {
-            m_minimum = m_maximum = pt;
+            m_min = m_max = pt;
         }
 
         // Include point in map
@@ -39,10 +39,10 @@ game::map::RangeSet::add(Point pt, int r)
         }
 
         // Update min, max
-        m_minimum.setX(std::min(m_minimum.getX(), pt.getX() - r));
-        m_minimum.setY(std::min(m_minimum.getY(), pt.getY() - r));
-        m_maximum.setX(std::max(m_maximum.getX(), pt.getX() + r));
-        m_maximum.setY(std::max(m_maximum.getY(), pt.getY() + r));
+        m_min.setX(std::min(m_min.getX(), pt.getX() - r));
+        m_min.setY(std::min(m_min.getY(), pt.getY() - r));
+        m_max.setX(std::max(m_max.getX(), pt.getX() + r));
+        m_max.setY(std::max(m_max.getY(), pt.getY() + r));
     }
 }
 
@@ -74,7 +74,7 @@ game::map::RangeSet::clear()
 {
     // ex GRangeSet::clear
     m_points.clear();
-    m_minimum = m_maximum = Point(0, 0);
+    m_min = m_max = Point(0, 0);
 }
 
 // /** Check for emptiness. */
@@ -87,18 +87,18 @@ game::map::RangeSet::isEmpty() const
 
 // /** Get minimum point of bounding box. */
 game::map::Point
-game::map::RangeSet::getMinimum() const
+game::map::RangeSet::getMin() const
 {
     // ex GRangeSet::getMinimum
-    return m_minimum;
+    return m_min;
 }
 
 // /** Get maximum point of bounding box. */
 game::map::Point
-game::map::RangeSet::getMaximum() const
+game::map::RangeSet::getMax() const
 {
     // ex GRangeSet::getMaximum
-    return m_maximum;
+    return m_max;
 }
 
 // /** Get begin iterator. */

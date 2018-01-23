@@ -13,6 +13,7 @@
 #include "afl/net/networkstack.hpp"
 #include "afl/net/resp/client.hpp"
 #include "server/file/clientdirectoryhandler.hpp"
+#include "server/interface/baseclient.hpp"
 
 namespace {
     struct InternalRoot : public afl::base::Deletable {
@@ -85,7 +86,15 @@ server::file::DirectoryHandlerFactory::createDirectoryHandler(const String_t& st
             // Build the result
             ClientDirectoryHandler& handler = m_deleter.addNew(new ClientDirectoryHandler(*client, path));
             if (!u.getUser().empty()) {
-                handler.setUser(u.getUser());
+                // If we have a user context, disable reconnect.
+                // Reconnecting would reset the server-side user context.
+                if (afl::net::Reconnectable* rc = dynamic_cast<afl::net::Reconnectable*>(client)) {
+                    rc->setReconnectMode(afl::net::Reconnectable::Once);
+                }
+
+                // Set user context.
+                // This performs the one and only reconnect, if any.
+                server::interface::BaseClient(*client).setUserContext(u.getUser());
             }
             result = &handler;
         } else if ((p = str.find('@')) != String_t::npos) {

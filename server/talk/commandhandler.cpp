@@ -32,29 +32,6 @@
 #include "server/talk/talkuser.hpp"
 #include "server/types.hpp"
 
-namespace {
-    bool isPrintable(const String_t& s)
-    {
-        for (String_t::size_type i = 0; i < s.size(); ++i) {
-            if (!afl::string::charIsAlphanumeric(s[i]) && s[i] != '/' && s[i] != '.' && s[i] != '_' && s[i] != '-' && s[i] != ':' && s[i] != ',') {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    String_t formatWord(const String_t& word, const String_t& verb, size_t index)
-    {
-        if (word.empty()) {
-            return "''";
-        } else if (word.size() < 100 && isPrintable(word) && !(verb == "NNTPUSER" && index == 2)) {
-            return word;
-        } else {
-            return "...";
-        }
-    }
-}
-
 
 server::talk::CommandHandler::CommandHandler(Root& root, Session& session)
     : m_root(root),
@@ -297,25 +274,8 @@ server::talk::CommandHandler::getHelp(String_t topic) const
     }
 }
 
-void
+inline void
 server::talk::CommandHandler::logCommand(const String_t& verb, interpreter::Arguments args)
 {
-    // Log channel name
-    String_t channel = "talk.command";
-    if (!m_session.isAdmin()) {
-        channel += ".";
-        channel += m_session.getUser();
-    }
-
-    // Command
-    String_t text = formatWord(verb, verb, 0);
-    size_t i = 1;
-    while (args.getNumArgs() != 0) {
-        text += " ";
-        text += formatWord(toString(args.getNext()), verb, i);
-        ++i;
-    }
-
-    // Log it
-    m_root.log().write(afl::sys::Log::Info, channel, text);
+    m_session.logCommand(m_root.log(), "talk.command", verb, args, (verb=="NNTPUSER" ? 2 : 0));
 }

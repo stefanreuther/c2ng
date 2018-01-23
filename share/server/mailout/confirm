@@ -1,0 +1,24 @@
+From: PlanetsCentral <$(SMTP_FROM)>
+Subject: [PlanetsCentral] Mail address confirmation
+
+Hi,
+
+someone, possibly you, registered this email address,
+  $(email)
+on <$(CGI_ROOT)>, a VGAP gaming website, for the user
+account "$(user)".
+
+
+If you wish to associate this email address and this account,
+please confirm by clicking the following link:
+
+$(confirmlink)
+
+If clicking does not work in your mail program, copy the link into
+your web browser's address bar.
+
+Only this will enable PlanetsCentral to send you any email at all.
+You can configure when and how emails are sent on your Settings page,
+<$(CGI_ROOT)settings.cgi>.
+
+If you do not confirm your email address, no more mail will be sent.

@@ -28,7 +28,7 @@ util::StringParser::parseString(const char* s)
 
 // Check character literal.
 bool
-util::StringParser::parseChar(char ch)
+util::StringParser::parseCharacter(char ch)
 {
     if (m_pos < m_string.size() && ch == m_string[m_pos]) {
         ++m_pos;
@@ -69,6 +69,25 @@ util::StringParser::parseInt(int& out)
     }
 }
 
+// Check variable 64-bit integer.
+bool
+util::StringParser::parseInt64(int64_t& out)
+{
+    String_t::size_type err, err2;
+    if (afl::string::strToInteger(m_string.substr(m_pos), out, err)) {
+        // completely valid
+        m_pos = m_string.size();
+        return true;
+    } else if (err != 0 && afl::string::strToInteger(m_string.substr(m_pos, err), out, err2)) {
+        // part is valid
+        m_pos += err;
+        return true;
+    } else {
+        // invalid
+        return false;
+    }
+}
+
 // Parse character class.
 bool
 util::StringParser::parseWhile(bool classify(char), String_t& out)
@@ -90,7 +109,7 @@ util::StringParser::parseEnd()
 
 // Get current character.
 bool
-util::StringParser::getCurrentChar(char& ch) const
+util::StringParser::getCurrentCharacter(char& ch) const
 {
     if (m_pos < m_string.size()) {
         ch = m_string[m_pos];
@@ -105,4 +124,11 @@ String_t
 util::StringParser::getRemainder() const
 {
     return m_string.substr(m_pos);
+}
+
+// Get current parser position.
+size_t
+util::StringParser::getPosition() const
+{
+    return m_pos;
 }

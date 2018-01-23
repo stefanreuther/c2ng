@@ -51,6 +51,8 @@ namespace game { namespace map {
         Transfer              transfer;                            ///< Transfer transporters. For enemy-ship transfer.
         IntegerProperty_t     missionInterceptParameter;                  ///< Mission: intercept Id.
         IntegerProperty_t     money;                                      ///< Money in cargo room.
+
+        ShipData(int = 0);
     };
 
     /** Compute ship mass from ship data record.
@@ -58,6 +60,11 @@ namespace game { namespace map {
         not a history record)
         \return mass */
     IntegerProperty_t getShipMass(const ShipData& data, const game::spec::ShipList& shipList);
+
+    /** Check validity of a ship transporter.
+        \param tr Transporter
+        \return true if this is an active (nonempty) transport */
+    bool isTransferActive(const ShipData::Transfer& tr);
 
 } }
 

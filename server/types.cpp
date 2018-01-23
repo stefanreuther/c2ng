@@ -1,5 +1,6 @@
 /**
   *  \file server/types.cpp
+  *  \brief Convenience functions and types for server applications
   */
 
 #include "server/types.hpp"

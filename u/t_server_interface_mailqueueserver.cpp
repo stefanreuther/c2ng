@@ -3,20 +3,23 @@
   *  \brief Test for server::interface::MailQueueServer
   */
 
-#include <stdexcept>
 #include "server/interface/mailqueueserver.hpp"
 
+#include <stdexcept>
 #include "t_server_interface.hpp"
-#include "u/helper/callreceiver.hpp"
 #include "afl/string/format.hpp"
+#include "afl/test/callreceiver.hpp"
 #include "server/interface/mailqueue.hpp"
 #include "server/interface/mailqueueclient.hpp"
 
 using afl::string::Format;
 
 namespace {
-    class MailQueueMock : public server::interface::MailQueue, public CallReceiver {
+    class MailQueueMock : public server::interface::MailQueue, public afl::test::CallReceiver {
      public:
+        MailQueueMock(afl::test::Assert a)
+            : CallReceiver(a)
+            { }
         virtual void startMessage(String_t templateName, afl::base::Optional<String_t> uniqueId)
             { checkCall(Format("startMessage(%s,%s)", templateName, uniqueId.orElse("no-id"))); }
 
@@ -59,7 +62,7 @@ TestServerInterfaceMailQueueServer::testIt()
 {
     using afl::data::Segment;
 
-    MailQueueMock mock;
+    MailQueueMock mock("testIt");
     server::interface::MailQueueServer testee(mock);
 
     // Commands
@@ -115,7 +118,7 @@ TestServerInterfaceMailQueueServer::testIt()
 void
 TestServerInterfaceMailQueueServer::testRoundtrip()
 {
-    MailQueueMock mock;
+    MailQueueMock mock("testRoundtrip");
     server::interface::MailQueueServer level1(mock);
     server::interface::MailQueueClient level2(level1);
     server::interface::MailQueueServer level3(level2);

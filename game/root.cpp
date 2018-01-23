@@ -113,6 +113,12 @@ game::Root::registrationKey()
     return *m_registrationKey;
 }
 
+const game::RegistrationKey&
+game::Root::registrationKey() const
+{
+    return *m_registrationKey;
+}
+
 // Access string verifier.
 game::StringVerifier&
 game::Root::stringVerifier()

@@ -1,4 +1,4 @@
-CXXFLAGS += -MMD -g
+CXXFLAGS += -MMD -g -DTARGET_OS_POSIX
 INSTDIR = /opt/c2ng
 INSTALL_CMD  = $(PERL) scripts/install.pl -d -s $(INSTALL_FLAGS)
 INSTALL_DATA = $(PERL) scripts/install.pl -d -m 644 $(INSTALL_FLAGS)

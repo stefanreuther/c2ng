@@ -125,7 +125,7 @@ namespace {
                     xn[2]->compileValue(bco, scc);
                 }
                 bco.addInstruction(Opcode::maPush, Opcode::sNamedShared, bco.addName("CC$INPUT"));
-                bco.addInstruction(Opcode::maIndirect, Opcode::miIMLoad, xn.size());
+                bco.addInstruction(Opcode::maIndirect, Opcode::miIMLoad, static_cast<uint16_t>(xn.size()));
                 xn[1]->compileWrite(bco, scc);
                 bco.addInstruction(Opcode::maStack, Opcode::miStackDrop, 1);
             }
@@ -193,7 +193,7 @@ namespace {
                 // Generate code
                 fd->compileValue(bco, scc);
                 fileName->compileValue(bco, scc);
-                bco.addInstruction(Opcode::maPush, Opcode::sInteger, mode);
+                bco.addInstruction(Opcode::maPush, Opcode::sInteger, static_cast<uint16_t>(mode));
                 bco.addInstruction(Opcode::maPush, Opcode::sNamedShared, bco.addName("CC$OPEN"));
                 bco.addInstruction(Opcode::maIndirect, Opcode::miIMCall, 3);
             }
@@ -221,7 +221,7 @@ namespace {
        @since PCC2 1.99.12, PCC 1.0.13, PCC2 2.40.1 */
     class SFSetInt : public interpreter::SpecialCommand {
      public:
-        SFSetInt(int size)
+        SFSetInt(uint16_t size)
             : m_size(size)
             { }
 
@@ -241,9 +241,7 @@ namespace {
                 afl::container::PtrVector<Node> xn;
                 tok.readNextToken();
                 parseCommandArgumentList(tok, xn);
-                if (xn.size() < 3) {
-                    throw interpreter::Error("Too few arguments");
-                }
+                checkArgumentCount(xn.size(), 3, 0xFFFE);
 
                 // Read cycle for first arg
                 xn[0]->compileRead(bco, scc);
@@ -258,14 +256,14 @@ namespace {
 
                 // Call routine to do the work
                 bco.addInstruction(Opcode::maPush, Opcode::sNamedShared, bco.addName("CC$SETINT"));
-                bco.addInstruction(Opcode::maIndirect, Opcode::miIMLoad, xn.size() + 1);
+                bco.addInstruction(Opcode::maIndirect, Opcode::miIMLoad, static_cast<uint16_t>(xn.size() + 1));
 
                 // Write cycle for first arg
                 xn[0]->compileWrite(bco, scc);
                 bco.addInstruction(Opcode::maStack, Opcode::miStackDrop, 1);
             }
      private:
-        const int m_size;
+        const uint16_t m_size;
     };
 
     /* @q SetStr v:Blob, pos:Int, length:Int, str:Int (Global Command)
@@ -303,7 +301,7 @@ namespace {
 
                 // Call routine to do the work
                 bco.addInstruction(Opcode::maPush, Opcode::sNamedShared, bco.addName("CC$SETSTR"));
-                bco.addInstruction(Opcode::maIndirect, Opcode::miIMLoad, xn.size());
+                bco.addInstruction(Opcode::maIndirect, Opcode::miIMLoad, static_cast<uint16_t>(xn.size())); // always 4, see checkArgumentCount
 
                 // Write cycle for first arg
                 xn[0]->compileWrite(bco, scc);
@@ -381,6 +379,19 @@ namespace {
         }
     }
 
+    /** Convert file size into script-side value.
+        The value is returned as integer or float if it fits, otherwise an error is generated. */
+    afl::data::Value* makeFileSizeValue(afl::io::Stream::FileSize_t n)
+    {
+        if (n <= 0x7FFFFFFF) {
+            return interpreter::makeIntegerValue(static_cast<int32_t>(n));
+        } else if (n <= 0x20000000000000ULL) {
+            return interpreter::makeFloatValue(static_cast<double>(n));
+        } else {
+            throw interpreter::Error::rangeError();
+        }
+    }
+
 
     /******************************* Functions *******************************/
 
@@ -403,7 +414,7 @@ namespace {
         std::auto_ptr<interpreter::BlobValue> bv(new interpreter::BlobValue());
         bv->data().resize(size);
         if (size != 0) {
-            int32_t got = tf->read(bv->data());
+            int32_t got = static_cast<int32_t>(tf->read(bv->data()));
             if (got != size) {
                 throw interpreter::Error("Premature end of file");
             }
@@ -547,7 +558,7 @@ namespace {
             // encode it
             for (int32_t i = 0; i < size; ++i) {
                 if (uint8_t* p = blob->data().at(index)) {
-                    *p = (theValue & 255);
+                    *p = static_cast<uint8_t>(theValue & 255);
                 }
                 ++index;
                 theValue >>= 8;
@@ -597,7 +608,13 @@ namespace {
 
     /* @q FPos(#fd:File):Int (Function)
        Get current position within a file.
-       @see Seek
+
+       @diff If the file is larger than 2 GByte, the file position can be too large to be expressed as an integer.
+       PCC2 2.40.3 or later will return a floating-point value for positions between 2 GiB and 8 PiB (9 PB),
+       and fail with a range error for even larger positions.
+       Older versions will truncate the value (remainder modulo 4 GiB).
+
+       @see Seek, FSize
        @since PCC2 1.99.12, PCC 1.0.13, PCC2 2.40.1 */
     afl::data::Value* IFFPos(World& world, Arguments& args)
     {
@@ -606,7 +623,7 @@ namespace {
         if (!world.fileTable().checkFileArg(tf, args.getNext())) {
             return 0;
         }
-        return makeIntegerValue(tf->getPos());
+        return makeFileSizeValue(tf->getPos());
     }
 
     /* @q FreeFile():Int (Function)
@@ -627,11 +644,17 @@ namespace {
         if (result == 0) {
             throw interpreter::Error("No free file number");
         }
-        return makeIntegerValue(result);
+        return makeIntegerValue(static_cast<int32_t>(result));
     }
 
     /* @q FSize(#fd:File):Int (Function)
        Get size of the file, in bytes.
+
+       @diff If the file is larger than 2 GByte, the file size cannot be expressed as an integer.
+       PCC2 2.40.3 or later will return a floating-point value for files between 2 GiB and 8 PiB (9 PB),
+       and fail with a range error for even larger files.
+       Older versions will truncate the value (remainder modulo 4 GiB).
+
        @see FPos
        @since PCC2 1.99.12, PCC 1.0.13, PCC2 2.40.1 */
     afl::data::Value* IFFSize(World& world, Arguments& args)
@@ -641,7 +664,7 @@ namespace {
         if (!world.fileTable().checkFileArg(tf, args.getNext())) {
             return 0;
         }
-        return makeIntegerValue(tf->getSize());
+        return makeFileSizeValue(tf->getSize());
     }
 
     /* @q GetByte(v:Blob, pos:Int):Int (Function)
@@ -785,7 +808,7 @@ namespace {
             return;
         }
         if (!checkIntegerArg(size, args.getNext(), 0, BLOB_LIMIT)) {
-            size = bv->data().size();
+            size = static_cast<int32_t>(bv->data().size());
         }
 
         // Write the blob

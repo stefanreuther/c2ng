@@ -361,10 +361,10 @@ game::nu::TurnLoader::loadStarbases(game::map::Universe& univ, afl::data::Access
             out->addBaseSource(players);
             out->setNumBuildings(BaseDefenseBuilding, in("defense").toInteger());
             out->setBaseDamage(in("damage").toInteger());
-            out->setBaseTechLevel(Planet::EngineTech,  in("enginetechlevel").toInteger());
-            out->setBaseTechLevel(Planet::HullTech,    in("hulltechlevel").toInteger());
-            out->setBaseTechLevel(Planet::BeamTech,    in("beamtechlevel").toInteger());
-            out->setBaseTechLevel(Planet::TorpedoTech, in("torptechlevel").toInteger());
+            out->setBaseTechLevel(EngineTech,  in("enginetechlevel").toInteger());
+            out->setBaseTechLevel(HullTech,    in("hulltechlevel").toInteger());
+            out->setBaseTechLevel(BeamTech,    in("beamtechlevel").toInteger());
+            out->setBaseTechLevel(TorpedoTech, in("torptechlevel").toInteger());
             out->setCargo(Element::Fighters, in("fighters").toInteger());
             out->setBaseShipyardOrder(in("shipmission").toInteger(), in("targetshipid").toInteger());
             out->setBaseMission(in("mission").toInteger()); // FIXME: mission1target!

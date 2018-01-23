@@ -1,5 +1,6 @@
 /**
   *  \file game/unitscorelist.hpp
+  *  \brief Class game::UnitScoreList
   */
 #ifndef C2NG_GAME_UNITSCORELIST_HPP
 #define C2NG_GAME_UNITSCORELIST_HPP
@@ -9,11 +10,16 @@
 
 namespace game {
 
-    // /** Unit Score Values. Contains values for one unit. It is indexed by
-    //     GUnitScoreDefinitions::index_t, obtained by the unit's class'
-    //     GUnitScoreDefinitions object.  */
+    /** Unit score list.
+        Contains score values for one unit.
+        Each score is annotated with a turn number.
+        Score values can be missing.
+
+        Scores are identified by an index.
+        The indexes are defined by the unit type's UnitScoreDefinitionList (see Index_t). */
     class UnitScoreList {
      public:
+        /** Index identifying a score. */
         typedef size_t Index_t;
 
         /** Constructor.

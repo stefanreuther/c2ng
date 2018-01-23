@@ -5,6 +5,7 @@
 #define C2NG_INTERPRETER_EXPR_BUILTINFUNCTION_HPP
 
 #include "afl/string/string.hpp"
+#include "afl/base/types.hpp"
 
 namespace interpreter { namespace expr {
 
@@ -16,13 +17,13 @@ namespace interpreter { namespace expr {
         const char* name;
 
         /// Argument count restrictions.
-        int min_args, max_args;
+        uint32_t min_args, max_args;
 
         /// Node generator function.
         FunctionCallNode* (*generator)(const BuiltinFunctionDescriptor& desc);
 
         /// Additional parameter for node generator.
-        int generator_arg;
+        uint8_t generator_arg;
     };
 
     const BuiltinFunctionDescriptor* lookupBuiltinFunction(String_t name);

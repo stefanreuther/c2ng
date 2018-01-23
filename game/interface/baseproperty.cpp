@@ -56,22 +56,22 @@ namespace {
 
     game::IntegerProperty_t getBaseEngineStore(const game::map::Planet& p, const game::spec::ShipList& /*shipList*/, int n)
     {
-        return p.getBaseEngineStore(n);
+        return p.getBaseStorage(game::EngineTech, n);
     }
 
     game::IntegerProperty_t getBaseHullStoreSlot(const game::map::Planet& p, const game::spec::ShipList& /*shipList*/, int n)
     {
-        return p.getBaseHullStoreSlot(n);
+        return p.getBaseStorage(game::HullTech, n);
     }
 
     game::IntegerProperty_t getBaseBeamStore(const game::map::Planet& p, const game::spec::ShipList& /*shipList*/, int n)
     {
-        return p.getBaseBeamStore(n);
+        return p.getBaseStorage(game::BeamTech, n);
     }
 
     game::IntegerProperty_t getBaseLauncherStore(const game::map::Planet& p, const game::spec::ShipList& /*shipList*/, int n)
     {
-        return p.getBaseLauncherStore(n);
+        return p.getBaseStorage(game::TorpedoTech, n);
     }
 
     game::IntegerProperty_t getBaseAmmoStore(const game::map::Planet& p, const game::spec::ShipList& shipList, int n)
@@ -279,7 +279,7 @@ game::interface::getBaseProperty(const game::map::Planet& pl, BaseProperty ibp,
      case ibpBeamTech:
         /* @q Tech.Beam:Int (Planet Property)
            Beam tech level on starbase. EMPTY if no base. */
-        return makeOptionalIntegerValue(pl.getBaseTechLevel(game::map::Planet::BeamTech));
+        return makeOptionalIntegerValue(pl.getBaseTechLevel(BeamTech));
      case ibpBuildBeam:
         /* @q Build.Beam$:Int (Planet Property)
            Beam type for ship to build on starbase. EMPTY if no base. */
@@ -345,11 +345,11 @@ game::interface::getBaseProperty(const game::map::Planet& pl, BaseProperty ibp,
      case ibpEngineTech:
         /* @q Tech.Engine:Int (Planet Property)
            Engine tech level on starbase. EMPTY if no base. */
-        return makeOptionalIntegerValue(pl.getBaseTechLevel(game::map::Planet::EngineTech));
+        return makeOptionalIntegerValue(pl.getBaseTechLevel(EngineTech));
      case ibpHullTech:
         /* @q Tech.Hull:Int (Planet Property)
            Hull tech level on starbase. EMPTY if no base. */
-        return makeOptionalIntegerValue(pl.getBaseTechLevel(game::map::Planet::HullTech));
+        return makeOptionalIntegerValue(pl.getBaseTechLevel(HullTech));
      case ibpMission:
         /* @q Mission$:Int (Planet Property)
            Starbase mission number. EMPTY if no base.
@@ -412,7 +412,7 @@ game::interface::getBaseProperty(const game::map::Planet& pl, BaseProperty ibp,
      case ibpTorpedoTech:
         /* @q Tech.Torpedo:Int (Planet Property)
            Torpedo tech level on starbase. EMPTY if no base. */
-        return makeOptionalIntegerValue(pl.getBaseTechLevel(game::map::Planet::TorpedoTech));
+        return makeOptionalIntegerValue(pl.getBaseTechLevel(TorpedoTech));
 
      case ibpEngineStorage:
         /* @q Storage.Engines:Int() (Planet Property)

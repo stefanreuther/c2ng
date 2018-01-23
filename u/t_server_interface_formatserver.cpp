@@ -7,15 +7,18 @@
 
 #include "t_server_interface.hpp"
 #include "afl/string/format.hpp"
+#include "afl/test/callreceiver.hpp"
 #include "server/interface/format.hpp"
 #include "server/types.hpp"
-#include "u/helper/callreceiver.hpp"
 
 using afl::data::Segment;
 
 namespace {
-    class FormatMock : public server::interface::Format, public CallReceiver {
+    class FormatMock : public server::interface::Format, public afl::test::CallReceiver {
      public:
+        FormatMock(afl::test::Assert a)
+            : CallReceiver(a)
+            { }
         virtual afl::data::Value* pack(String_t formatName, afl::data::Value* data, afl::base::Optional<String_t> format, afl::base::Optional<String_t> charset)
             {
                 checkCall(afl::string::Format("pack(%s,%s,%s,%s)", formatName, server::toString(data), format.orElse("no-format"), charset.orElse("no-charset")));
@@ -35,7 +38,7 @@ namespace {
 void
 TestServerInterfaceFormatServer::testIt()
 {
-    FormatMock mock;
+    FormatMock mock("testIt");
     server::interface::FormatServer testee(mock);
 
     // Extra commands
@@ -66,7 +69,7 @@ TestServerInterfaceFormatServer::testIt()
 void
 TestServerInterfaceFormatServer::testErrors()
 {
-    FormatMock mock;
+    FormatMock mock("testErrors");
     server::interface::FormatServer testee(mock);
 
     Segment empty;    // g++-3.4 sees an invocation of a copy constructor if I construct this object in-place.

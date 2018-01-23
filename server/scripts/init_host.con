@@ -1,0 +1,24 @@
+#
+#  Host file
+#
+
+# We're taking the specs from the "share" folder that drives the main app, not a separate copy like -classic did.
+setenv specs ../../share/specs
+
+echo "*** Host files ***"
+
+noerror hostfile mkdir bin
+noerror hostfile mkdir defaults
+noerror hostfile mkdir games
+noerror hostfile mkdir tools
+noerror hostfile mkdir shiplist
+silent hostfile setperm shiplist * rl
+silent hostfile put bin/runhost.sh <init/bin/runhost.sh
+silent hostfile put bin/runmaster.sh <init/bin/runmaster.sh
+silent hostfile put bin/checkturn.sh <init/bin/checkturn.sh
+silent hostfile put bin/updateconfig.pl <init/bin/updateconfig.pl
+silent hostfile put bin/checkinstall.sh <init/bin/checkinstall.sh
+silent hostfile put defaults/planet.nm <${specs}/planet.nm
+silent hostfile put defaults/storm.nm <${specs}/storm.nm
+silent hostfile put defaults/race.nm <${specs}/race.nm
+silent hostfile put defaults/xyplan.dat <${specs}/xyplan.dat

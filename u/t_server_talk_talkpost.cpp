@@ -6,23 +6,23 @@
 #include "server/talk/talkpost.hpp"
 
 #include "t_server_talk.hpp"
-#include "u/helper/commandhandlermock.hpp"
+#include "afl/net/nullcommandhandler.hpp"
+#include "afl/net/redis/integerfield.hpp"
 #include "afl/net/redis/internaldatabase.hpp"
+#include "afl/test/commandhandler.hpp"
+#include "server/talk/forum.hpp"
+#include "server/talk/message.hpp"
 #include "server/talk/root.hpp"
 #include "server/talk/session.hpp"
-#include "server/talk/forum.hpp"
-#include "server/talk/user.hpp"
-#include "afl/net/redis/integerfield.hpp"
-#include "server/talk/message.hpp"
-#include "afl/net/nullcommandhandler.hpp"
 #include "server/talk/topic.hpp"
+#include "server/talk/user.hpp"
 
 /** Test create(), regular case, including notification. */
 void
 TestServerTalkTalkPost::testCreate()
 {
     // Infrastructure
-    CommandHandlerMock mq;
+    afl::test::CommandHandler mq("testCreate");
     afl::net::redis::InternalDatabase db;
     server::talk::Root root(db, mq, server::talk::Configuration());
     server::talk::Session session;
@@ -55,16 +55,16 @@ TestServerTalkTalkPost::testCreate()
 
     // Write a posting as user "b".
     // This must create a message to "a" (because b is the author and c is already notified).
-    mq.expectCall("MAIL|talk-forum");
-    mq.provideReturnValue(0);
-    mq.expectCall("PARAM|forum|Foorum");
-    mq.provideReturnValue(0);
-    mq.expectCall("PARAM|subject|subj");
-    mq.provideReturnValue(0);
-    mq.expectCall("PARAM|posturl|talk/thread.cgi/1-subj#p1");
-    mq.provideReturnValue(0);
-    mq.expectCall("SEND|user:a");
-    mq.provideReturnValue(0);
+    mq.expectCall("MAIL, talk-forum");
+    mq.provideNewResult(0);
+    mq.expectCall("PARAM, forum, Foorum");
+    mq.provideNewResult(0);
+    mq.expectCall("PARAM, subject, subj");
+    mq.provideNewResult(0);
+    mq.expectCall("PARAM, posturl, talk/thread.cgi/1-subj#p1");
+    mq.provideNewResult(0);
+    mq.expectCall("SEND, user:a");
+    mq.provideNewResult(0);
 
     session.setUser("b");
     server::talk::TalkPost testee(session, root);
@@ -346,7 +346,7 @@ TestServerTalkTalkPost::testPermissions()
         TS_ASSERT_THROWS_NOTHING(testee.edit(1, "reply", "text:text2"));
     }
 
-    // - Edit #1 as a (should fail)
+    // - Edit #1 as a (should succeed)
     {
         server::talk::Session session;
         server::talk::TalkPost testee(session, root);
@@ -745,7 +745,7 @@ TestServerTalkTalkPost::testGetNewest2()
         TS_ASSERT_EQUALS(result.size(), 5U);
     }
 
-    // List as 'a' who can see everything because he can wrote it
+    // List as 'b' who can see everything because he wrote it
     {
         server::talk::Session session;
         server::talk::TalkPost testee(session, root);

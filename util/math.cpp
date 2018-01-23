@@ -13,6 +13,7 @@ const double util::PI = 3.14159265358979323844;
 int32_t
 util::roundToInt(double d)
 {
+    // ex game/formula.h:roundToInt
     if (d < 0) {
         return -int32_t(-d + 0.5);
     } else {

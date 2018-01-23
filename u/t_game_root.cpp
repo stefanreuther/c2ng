@@ -13,6 +13,9 @@
 #include "game/stringverifier.hpp"
 #include "game/turnloader.hpp"
 #include "helper/counter.hpp"
+#include "game/test/registrationkey.hpp"
+#include "game/test/stringverifier.hpp"
+#include "game/test/specificationloader.hpp"
 
 /** Simple test. */
 void
@@ -23,41 +26,16 @@ TestGameRoot::testIt()
     afl::base::Ref<afl::io::Directory> gameDirectory(afl::io::InternalDirectory::create("game"));
 
     // SpecificationLoader
-    class NullSpecificationLoader : public game::SpecificationLoader {
-     public:
-        virtual void loadShipList(game::spec::ShipList& /*list*/, game::Root& /*root*/)
-            { }
-    };
-    afl::base::Ref<game::SpecificationLoader> specLoader(*new NullSpecificationLoader());
+    afl::base::Ref<game::SpecificationLoader> specLoader(*new game::test::SpecificationLoader());
 
     // Host version
     game::HostVersion hostVersion(game::HostVersion::PHost, MKVERSION(4,0,0));
 
     // Registration key
-    class NullRegistrationKey : public game::RegistrationKey {
-     public:
-        virtual Status getStatus() const
-            { return Status(); }
-        virtual String_t getLine(Line /*which*/) const
-            { return String_t(); }
-        virtual bool setLine(Line /*which*/, String_t /*value*/)
-            { return false; }
-    };
-    std::auto_ptr<game::RegistrationKey> regKey(new NullRegistrationKey());
+    std::auto_ptr<game::RegistrationKey> regKey(new game::test::RegistrationKey(game::RegistrationKey::Unknown, 100));
 
     // StringVerifier
-    class NullStringVerifier : public game::StringVerifier {
-     public:
-        virtual bool isValidString(Context /*ctx*/, const String_t& /*text*/)
-            { return false; }
-        virtual bool isValidCharacter(Context /*ctx*/, afl::charset::Unichar_t /*ch*/)
-            { return false; }
-        virtual size_t getMaxStringLength(Context /*ctx*/)
-            { return 0; }
-        virtual NullStringVerifier* clone() const
-            { return new NullStringVerifier(); }
-    };
-    std::auto_ptr<game::StringVerifier> stringVerifier(new NullStringVerifier());
+    std::auto_ptr<game::StringVerifier> stringVerifier(new game::test::StringVerifier());
     
     // Build a root
     game::Root testee(specificationDirectory, gameDirectory, specLoader, hostVersion, regKey, stringVerifier);
@@ -69,8 +47,8 @@ TestGameRoot::testIt()
     TS_ASSERT_EQUALS(&testee.specificationLoader(), &*specLoader);
     TS_ASSERT_EQUALS(testee.hostVersion().getKind(), game::HostVersion::PHost);
     TS_ASSERT_EQUALS(testee.hostVersion().getVersion(), MKVERSION(4,0,0));
-    TS_ASSERT(dynamic_cast<NullRegistrationKey*>(&testee.registrationKey()) != 0);
-    TS_ASSERT(dynamic_cast<NullStringVerifier*>(&testee.stringVerifier()) != 0);
+    TS_ASSERT(dynamic_cast<game::test::RegistrationKey*>(&testee.registrationKey()) != 0);
+    TS_ASSERT(dynamic_cast<game::test::StringVerifier*>(&testee.stringVerifier()) != 0);
     TS_ASSERT(testee.getTurnLoader().get() == 0);
 
     // Verify accessors

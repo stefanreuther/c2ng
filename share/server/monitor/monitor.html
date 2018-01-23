@@ -1,0 +1,148 @@
+<html>
+  <head>
+    <title>Server Status</title>
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="viewport" content="width=device-width">
+    <style>
+      body {
+        background-color: #112;
+        font-family: sans-serif;
+        color: #ccc;
+      }
+      h1 {
+        font-color: #fff;
+      }
+      .clear {
+        clear: both;
+        width: 0; height: 0;
+      }
+      .service, .info {
+        float: left;
+        width: 20em;
+        height: 5em;
+        margin: 5px;
+        padding: 5px 10px;
+        color: #fff;
+        border-width: 0 0 0 10px;
+        border-style: solid;
+        box-shadow: 2px 2px 2px #000;
+      }
+      .service {
+        cursor: pointer;
+      }
+      h2 {
+        margin: 0 0 5px 0;
+        font-size: 125%;
+        font-weight: normal;
+        border-bottom: solid #ccc 1px;
+      }
+      .active-service {
+        background-color: #083304;
+        border-color: #116608;
+      }
+      .failed-service {
+        background-color: #661108;
+        border-color: #c21;
+      }
+      .broken-service {
+        background-color: #330;
+        border-color: #660;
+      }
+      .broken-service .status, .failed-service .status {
+        animation: blink-animation 0.75s steps(2, start) infinite;
+      }
+      @keyframes blink-animation {
+        to { visibility: hidden; }
+      }
+      .info {
+        background-color: #033;
+        border-color: #066;
+      }
+      .latency, .status, .value {
+        display: block;
+      }
+      .latency {
+        color: #666;
+        font-size: 80%;
+      }
+      .plot {
+        stroke: #666;
+        stroke-width: 3px;
+        fill: none;
+      }
+      .plot.plot0 {
+        stroke: #4f0;
+      }
+      .plot.plot1 {
+        stroke: #8d0;
+      }
+      .plot.plot2 {
+        stroke: #bb0;
+      }
+      .plot.plot3 {
+        stroke: #b80;
+      }
+      .plot.plot4 {
+        stroke: #f40;
+      }
+      .plot.plot5 {
+        stroke: #853;
+      }
+      .chart {
+        width: 600px;
+        margin: 5px;
+      }
+      .axes {
+        stroke: #ccc;
+        fill: none;
+      }
+      text.axes {
+        fill: #ccc;
+        font-size: 14px;
+        font-family: sans-serif;
+        font-weight: normal;
+      }
+    </style>
+    <script type="text/javascript">
+document.addEventListener('DOMContentLoaded', function() {
+  // Update times
+  function x(ele, time) {
+    ele.title = ele.innerHTML;
+    ele.innerHTML = (new Date(1000*time)).toLocaleString();
+    ele.style.borderBottom = "dotted 1px #668";
+  };
+  x(document.getElementById("checktime"), $(CHECKTIMENUM));
+  x(document.getElementById("servertime"), $(SERVERTIMENUM));
+
+  // Only one chart at a time...
+  function hideCharts(except) {
+    [].forEach.call(document.getElementsByClassName("chart"),
+                    function(e) { e.style.display = (except && except === e.id ? "" : "none"); });
+  }
+  hideCharts();
+
+  [].forEach.call(document.getElementsByClassName("service"),
+                  function(e) {
+                    e.addEventListener("click", function() { hideCharts("chart" + e.id.substr(7)); });
+                  });
+});
+    </script>
+  </head>
+
+  <body>
+    <h1>Server Status</h1>
+
+    <div id="#status">
+$(STATUS)
+      <div class="info">
+        <h2>Server Time</h2>
+        <span class="value">Server time: <span id="servertime">$(SERVERTIME)</span></span>
+        <span class="value">Last check: <span id="checktime">$(CHECKTIME)</span></span>
+      </div>
+    </div>
+    <div class="clear"></div>
+
+    $(HISTORY)
+
+  </body>
+</html>

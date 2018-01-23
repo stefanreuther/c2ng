@@ -15,7 +15,7 @@ namespace server { namespace interface {
     /** Interface to Mail Queue service (mailout). */
     class MailQueue : public afl::base::Deletable {
      public:
-        // RESP Syntax: MAIL tpl:Str, [uniq:Str]
+        // MAIL tpl:Str, [uniq:Str]
         virtual void startMessage(String_t templateName, afl::base::Optional<String_t> uniqueId) = 0;
 
         // PARAM name:Str, val:Str

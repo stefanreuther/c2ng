@@ -141,7 +141,7 @@ ConsoleSweepApplication::appMain()
 void
 ConsoleSweepApplication::help(afl::io::TextWriter& out)
 {
-    out.writeLine(afl::string::Format(_("PCC2 Game Directory Cleaner v%s - (c) 2010-2016 Stefan Reuther").c_str(), PCC2_VERSION));
+    out.writeLine(afl::string::Format(_("PCC2 Game Directory Cleaner v%s - (c) 2010-2018 Stefan Reuther").c_str(), PCC2_VERSION));
     out.writeLine();
     out.writeLine(afl::string::Format(_("Usage:\n"
                                         "  %s [-h]\n"

@@ -78,7 +78,7 @@ server::talk::TalkNNTP::listNewsgroups(afl::container::PtrVector<Info>& result)
         int32_t fid;
         if (afl::string::strToInteger(list[i+1], fid)) {
             Forum f(m_root, fid);
-            if (m_session.hasPrivilege(f.readPermissions().get(), m_root)) {
+            if (m_session.hasPermission(f.readPermissions().get(), m_root)) {
                 result.pushBackNew(new Info(f.describeAsNewsgroup(ctx, opts, m_root, m_session)));
             }
         }
@@ -98,7 +98,7 @@ server::talk::TalkNNTP::findNewsgroup(String_t newsgroupName)
         throw std::runtime_error(FORUM_NOT_FOUND);
     } else {
         Forum f(m_root, fid);
-        if (m_session.hasPrivilege(f.readPermissions().get(), m_root)) {
+        if (m_session.hasPermission(f.readPermissions().get(), m_root)) {
             render::Context ctx(m_session.getUser());
             render::Options opts;
             opts.setFormat("text");

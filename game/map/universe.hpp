@@ -44,6 +44,7 @@ namespace game { namespace map {
         const ObjectVector<Ship>& ships() const;
 
         PlayedShipType& playedShips();
+        const PlayedShipType& playedShips() const;
 
         ObjectVector<Planet>& planets();
         const ObjectVector<Planet>& planets() const;
@@ -90,14 +91,14 @@ namespace game { namespace map {
         /*
          *  Location accessors
          */
-        Id_t getPlanetAt(Point pt);
+        Id_t getPlanetAt(Point pt) const;
         Id_t getPlanetAt(Point pt,
                          bool gravityFlag,
                          const game::config::HostConfiguration& config,
-                         const HostVersion& host);
+                         const HostVersion& host) const;
         Id_t getGravityPlanetAt(Point pt,
                                 const game::config::HostConfiguration& config,
-                                const HostVersion& host);
+                                const HostVersion& host) const;
 
         Id_t getAnyShipAt(Point pt);
 

@@ -1,0 +1,23 @@
+From: PlanetsCentral Forum <$(SMTP_FROM)>
+Subject: [PlanetsCentral] Forum Notification: $(forum)
+
+Hi,
+
+the forum
+  $(forum)
+has received a message since your last visit. Use
+  <http://planetscentral.com/$(posturl)>
+to read it.
+
+No more mails about this forum will be sent until you visit it.
+
+If you no longer wish to receive notifications from this forum,
+log in, visit the forum, and use the "Stop watching this forum" button.
+
+
+Best regards,
+PlanetsCentral administration
+
+-- 
+To change your email settings, go to
+<http://planetscentral.com/settings.cgi>.

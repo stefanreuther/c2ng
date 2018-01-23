@@ -587,6 +587,24 @@ game::v3::TurnFile::getCommandName(size_t index) const
     }
 }
 
+size_t
+game::v3::TurnFile::findCommandRunLength(size_t index) const
+{
+    // ex game/load-trn.cc:findFirstCommandForNextUnit, sort-of
+    size_t runLength = 0;
+    CommandType startType;
+    int startId;
+    if (getCommandType(index, startType) && getCommandId(index, startId)) {
+        CommandType nextType;
+        int nextId;
+        do {
+            ++runLength;
+        } while (getCommandType(index+runLength, nextType) && getCommandId(index+runLength, nextId) && nextType == startType && nextId == startId);
+    }
+    return runLength;
+}
+
+
 // Get command data.
 afl::base::ConstBytes_t 
 game::v3::TurnFile::getCommandData(size_t index) const
@@ -1009,7 +1027,7 @@ game::v3::TurnFile::parseTurnFile(afl::io::Stream& stream, afl::io::Stream::File
     checkRange(stream, sizeof(m_turnHeader)+1, 4*m_turnHeader.numCommands);
     afl::base::ConstBytes_t offsetTable = data.subrange(offset + sizeof(m_turnHeader) + 1, 4*m_turnHeader.numCommands);
     while (const Int32LE::Bytes_t* p = offsetTable.eatN<4>()) {
-        m_offsets.append(offset + Int32LE::unpack(*p) - 1);
+        m_offsets.append(static_cast<uint32_t>(offset + Int32LE::unpack(*p) - 1));
     }
     for (size_t i = 0, n = m_offsets.size(); i < n; ++i) {
         checkRange(stream, *m_offsets.at(i), 4);      // each command is at least 4 bytes
@@ -1111,7 +1129,7 @@ game::v3::TurnFile::updateTurnFile(afl::base::GrowableMemory<uint8_t>& data, afl
             }
 
             size_t thisCommandOffset = data.size();
-            offsets.append(thisCommandOffset);
+            offsets.append(static_cast<uint32_t>(thisCommandOffset));
             data.append(m_data.subrange(*m_offsets.at(i), length + 4));
             put<afl::bits::Int32LE>(data, turnDirOffset + 4*i, int32_t(thisCommandOffset - newTurnStart + 1));
         }

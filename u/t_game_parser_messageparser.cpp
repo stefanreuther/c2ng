@@ -108,6 +108,7 @@ TestGameParserMessageParser::testHostVersion()
     game::parser::MessageParser testee;
     TS_ASSERT_THROWS_NOTHING(testee.load(ms, tx, log));
     TS_ASSERT_EQUALS(testee.getNumTemplates(), 2U);
+    MockDataInterface ifc;
 
     // Parse messages
     {
@@ -119,7 +120,7 @@ TestGameParserMessageParser::testHostVersion()
                                                      "TOR=945A6730\n"
                                                      "TRU=74071860\n"
                                                      "PXY=1CDA17D2\n",
-                                                     MockDataInterface(),
+                                                     ifc,
                                                      30, info, tx, log));
         TS_ASSERT_EQUALS(info.size(), 1U);
         TS_ASSERT(info[0] != 0);
@@ -136,7 +137,7 @@ TestGameParserMessageParser::testHostVersion()
                                                      "Northern   :    13\n"
                                                      "HOST Version 3.22.020\n"
                                                      "Compiled: Nov 26, 1997\n",
-                                                     MockDataInterface(),
+                                                     ifc,
                                                      30, info, tx, log));
         TS_ASSERT_EQUALS(info.size(), 1U);
         TS_ASSERT(info[0] != 0);
@@ -151,7 +152,7 @@ TestGameParserMessageParser::testHostVersion()
                                                      "TO: The Lizards\n"
                                                      "\n"
                                                      "This is war!\n",
-                                                     MockDataInterface(),
+                                                     ifc,
                                                      30, info, tx, log));
         TS_ASSERT_EQUALS(info.size(), 0U);
     }
@@ -188,6 +189,7 @@ TestGameParserMessageParser::testConfig()
     game::parser::MessageParser testee;
     TS_ASSERT_THROWS_NOTHING(testee.load(ms, tx, log));
     TS_ASSERT_EQUALS(testee.getNumTemplates(), 3U);
+    MockDataInterface ifc;
 
     // Parse message
     {
@@ -204,7 +206,7 @@ TestGameParserMessageParser::testConfig()
                                                      "a10 ground attack  YES\n"
                                                      "a1 super refit  YES\n"
                                                      "Web mines  YES",
-                                                     MockDataInterface(),
+                                                     ifc,
                                                      30, info, tx, log));
         TS_ASSERT_EQUALS(info.size(), 1U);
         TS_ASSERT(info[0] != 0);
@@ -217,7 +219,7 @@ TestGameParserMessageParser::testConfig()
         afl::container::PtrVector<game::parser::MessageInformation> info;
         TS_ASSERT_THROWS_NOTHING(testee.parseMessage("(-g0000)< Shortened >\n"
                                                      "a2 hiss mission  YES\n",
-                                                     MockDataInterface(),
+                                                     ifc,
                                                      30, info, tx, log));
         TS_ASSERT_EQUALS(info.size(), 1U);
         TS_ASSERT(info[0] != 0);
@@ -284,6 +286,7 @@ TestGameParserMessageParser::testObjects()
     game::parser::MessageParser testee;
     TS_ASSERT_THROWS_NOTHING(testee.load(ms, tx, log));
     TS_ASSERT_EQUALS(testee.getNumTemplates(), 3U);
+    MockDataInterface ifc;
 
     // Parse message
     {
@@ -298,7 +301,7 @@ TestGameParserMessageParser::testObjects()
                                                      " Minerals on/in planet\n"
                                                      "N: 880 M: 862 T: 829 D: 876\n"
                                                      "  Megacredits :  0\n",
-                                                     MockDataInterface(),
+                                                     ifc,
                                                      30, info, tx, log));
         TS_ASSERT_EQUALS(info.size(), 1U);
         TS_ASSERT(info[0] != 0);
@@ -328,7 +331,7 @@ TestGameParserMessageParser::testObjects()
                                                      "Class :  Level 3\n"
                                                      "  Strong\n"
                                                      "System is growing",
-                                                     MockDataInterface(),
+                                                     ifc,
                                                      30, info, tx, log));
         TS_ASSERT_EQUALS(info.size(), 1U);
         TS_ASSERT(info[0] != 0);
@@ -350,7 +353,7 @@ TestGameParserMessageParser::testObjects()
                                                      "( 1930 , 2728 )\n"
                                                      "The name of the ship was the: \n"
                                                      "C.S.S. War03\n",
-                                                     MockDataInterface(),
+                                                     ifc,
                                                      30, info, tx, log));
         TS_ASSERT_EQUALS(info.size(), 1U);
         TS_ASSERT(info[0] != 0);
@@ -398,6 +401,7 @@ TestGameParserMessageParser::testMulti()
     game::parser::MessageParser testee;
     TS_ASSERT_THROWS_NOTHING(testee.load(ms, tx, log));
     TS_ASSERT_EQUALS(testee.getNumTemplates(), 2U);
+    MockDataInterface ifc;
 
     // Parse message
     {
@@ -410,7 +414,7 @@ TestGameParserMessageParser::testMulti()
                                                      "Has struck a mine!\n"
                                                      "AT: (  2758 , 1709 )\n"
                                                      "Damage is at  400%\n",
-                                                     MockDataInterface(),
+                                                     ifc,
                                                      30, info, tx, log));
         TS_ASSERT_EQUALS(info.size(), 2U);
         TS_ASSERT(info[0] != 0);
@@ -437,7 +441,7 @@ TestGameParserMessageParser::testMulti()
                                                      "Has struck a mine!\n"
                                                      "AT: (1234,4567)\n"
                                                      "Damage is at  400%\n",
-                                                     MockDataInterface(),
+                                                     ifc,
                                                      30, info, tx, log));
         TS_ASSERT_EQUALS(info.size(), 1U);
         TS_ASSERT(info[0] != 0);
@@ -471,6 +475,7 @@ TestGameParserMessageParser::testScore()
     game::parser::MessageParser testee;
     TS_ASSERT_THROWS_NOTHING(testee.load(ms, tx, log));
     TS_ASSERT_EQUALS(testee.getNumTemplates(), 1U);
+    MockDataInterface ifc;
 
     // Parse message
     {
@@ -490,7 +495,7 @@ TestGameParserMessageParser::testScore()
                                                      "a11        :    13\n"
                                                      "HOST Version 3.22.020\n"
                                                      "Compiled: Nov 26, 1997",
-                                                     MockDataInterface(),
+                                                     ifc,
                                                      30, info, tx, log));
         TS_ASSERT_EQUALS(info.size(), 1U);
         TS_ASSERT(info[0] != 0);
@@ -528,13 +533,14 @@ TestGameParserMessageParser::testDelta()
     game::parser::MessageParser testee;
     TS_ASSERT_THROWS_NOTHING(testee.load(ms, tx, log));
     TS_ASSERT_EQUALS(testee.getNumTemplates(), 1U);
+    MockDataInterface ifc;
 
     // Parse message
     {
         afl::container::PtrVector<game::parser::MessageInformation> info;
         TS_ASSERT_THROWS_NOTHING(testee.parseMessage("(-q0200)<<< 3D Scanner >>>\n"
                                                      "Ship has 500 fuel on starbord, and 30 on portside.",
-                                                     MockDataInterface(),
+                                                     ifc,
                                                      30, info, tx, log));
         TS_ASSERT_EQUALS(info.size(), 1U);
         TS_ASSERT(info[0] != 0);

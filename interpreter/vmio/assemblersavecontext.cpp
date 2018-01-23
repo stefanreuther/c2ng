@@ -14,28 +14,9 @@
 #include "interpreter/values.hpp"
 #include "interpreter/vmio/nullsavecontext.hpp"
 #include "interpreter/structuretype.hpp"
+#include "interpreter/tokenizer.hpp"
 
 namespace {
-    bool isValidName(const String_t& s)
-    {
-        if (s.empty()) {
-            return false;
-        }
-        for (size_t i = 0, n = s.size(); i < n; ++i) {
-            if ((s[i] >= 'A' && s[i] <= 'Z')
-                || s[i] == '_'
-                || (i > 0
-                    && ((s[i] >= '0' && s[i] <= '9')
-                        || s[i] == '.' || s[i] == '$')))
-            {
-                // ok
-            } else {
-                return false;
-            }
-        }
-        return true;
-    }
-
     String_t quoteName(const String_t& s)
     {
         if (s.empty()) {
@@ -221,7 +202,7 @@ interpreter::vmio::AssemblerSaveContext::addBCO(const interpreter::BytecodeObjec
         p->isSequenced = true;
 
         // Assign a name
-        if (isValidName(bco.getName()) && m_usedNames.find(bco.getName()) == m_usedNames.end()) {
+        if (Tokenizer::isValidUppercaseIdentifier(bco.getName()) && m_usedNames.find(bco.getName()) == m_usedNames.end()) {
             p->name = bco.getName();
         } else {
             do {

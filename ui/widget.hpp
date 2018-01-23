@@ -106,7 +106,6 @@ namespace ui {
         Widget* m_activeChild;         /**< Selected child. */
         gfx::ColorScheme<util::SkinColor::Color>* m_colorScheme;
         States_t m_states;
-        int m_id;
         gfx::Rectangle m_extent;
     };
 

@@ -7,6 +7,14 @@
 
 #include <cxxtest/TestSuite.h>
 
+class TestGameCargoContainer : public CxxTest::TestSuite {
+ public:
+    void testInterface();
+    void testValidImpossible();
+    void testInitial();
+    void testOverload();
+};
+
 class TestGameCargoSpec : public CxxTest::TestSuite {
  public:
     void testParse();
@@ -25,6 +33,8 @@ class TestGameElement : public CxxTest::TestSuite {
  public:
     void testOperator();
     void testTorpedo();
+    void testIteration();
+    void testName();
 };
 
 class TestGameException : public CxxTest::TestSuite {
@@ -129,6 +139,8 @@ class TestGameRoot : public CxxTest::TestSuite {
 class TestGameShipBuildOrder : public CxxTest::TestSuite {
  public:
     void testIt();
+    void testComparison();
+    void testCanonicalize();
 };
 
 class TestGameSpecificationLoader : public CxxTest::TestSuite {
@@ -181,11 +193,14 @@ class TestGameTypes : public CxxTest::TestSuite {
 class TestGameUnitScoreDefinitionList : public CxxTest::TestSuite {
  public:
     void testIt();
+    void testCopy();
 };
 
 class TestGameUnitScoreList : public CxxTest::TestSuite {
  public:
     void testIt();
+    void testCopy();
+    void testMerge();
 };
 
 #endif

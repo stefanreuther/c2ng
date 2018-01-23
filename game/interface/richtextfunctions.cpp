@@ -20,7 +20,7 @@
 
 using interpreter::checkIntegerArg;
 using interpreter::checkStringArg;
-using interpreter::makeIntegerValue;
+using interpreter::makeSizeValue;
 using interpreter::makeStringValue;
 typedef game::interface::RichTextValue::Ptr_t Ptr_t;
 typedef game::interface::RichTextValue::Ref_t Ref_t;
@@ -277,7 +277,7 @@ game::interface::IFRLen(game::Session& /*session*/, interpreter::Arguments& args
     args.checkArgumentCount(1);
     Ptr_t str;
     if (checkRichArg(str, args.getNext())) {
-        return makeIntegerValue(afl::charset::Utf8(0).length(str->getText()));
+        return makeSizeValue(afl::charset::Utf8(0).length(str->getText()));
     } else {
         return 0;
     }

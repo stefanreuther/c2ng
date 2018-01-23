@@ -12,6 +12,8 @@ namespace game {
 
     const int MAX_RACES = 31;
 
+    const int MAX_NUMBER = 10000;
+
 }
 
 #endif

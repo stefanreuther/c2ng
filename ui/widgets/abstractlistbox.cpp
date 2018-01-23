@@ -481,7 +481,9 @@ ui::widgets::AbstractListbox::makeVisible(const gfx::Rectangle& relativeArea)
     int h    = relativeArea.getHeight();
 
     int availableHeight = getExtent().getHeight() - getHeaderHeight();
-    if (h > availableHeight) {
+    if (availableHeight <= 0) {
+        // don't change anything, it's not visible
+    } else if (h > availableHeight) {
         m_topY = topY;
         requestRedraw();
     } else if (topY < m_topY) {

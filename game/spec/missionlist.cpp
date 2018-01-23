@@ -5,11 +5,11 @@
 #include "game/spec/missionlist.hpp"
 #include "afl/io/textfile.hpp"
 #include "afl/string/parse.hpp"
-#include "util/string.hpp"
 #include "game/limits.hpp"
-#include "interpreter/values.hpp"
-#include "util/translation.hpp"
 #include "game/v3/structures.hpp"
+#include "interpreter/values.hpp"
+#include "util/string.hpp"
+#include "util/translation.hpp"
 
 namespace {
     const char LOG_NAME[] = "game.spec.missionlist";
@@ -206,7 +206,7 @@ game::spec::MissionList::loadFromFile(afl::io::Stream& in, afl::sys::LogListener
             log.write(log.Error, LOG_NAME, in.getName(), tf.getLineNumber(), _("missing delimiter"));
         } else if (line[p] == ',') {
             int mnum;
-            if (!afl::string::strToInteger(afl::string::strTrim(line.substr(0, p)), mnum) || mnum < 0 || mnum > 10000) {
+            if (!afl::string::strToInteger(afl::string::strTrim(line.substr(0, p)), mnum) || mnum < 0 || mnum > MAX_NUMBER) {
                 log.write(log.Error, LOG_NAME, in.getName(), tf.getLineNumber(), _("invalid mission number"));
                 have_mission = false;
                 continue;       // with next mission
@@ -357,4 +357,25 @@ game::spec::MissionList::loadFromIniFile(afl::io::Stream& in, afl::charset::Char
         new_mission.setName(line);
         addMission(new_mission);
     }
+}
+
+
+// /** Check whether a mission causes the ship to cloak. */
+bool
+game::spec::MissionList::isMissionCloaking(int mission_id,
+                                           int owner,
+                                           const game::config::HostConfiguration& config,
+                                           const HostVersion& host) const
+{
+    // ex game/mission.cc:isMissionCloaking
+    // This is an instance function to allow some configurable logic later
+    const bool isPHost = host.getKind() == HostVersion::PHost;
+    const int  emsa = config[config.ExtMissionsStartAt]();
+    return (mission_id == Mission::msn_Cloak
+            || (isPHost && mission_id == emsa + Mission::pmsn_Cloak)
+            || (config.getPlayerMissionNumber(owner) == 3
+                && (mission_id == Mission::msn_Special
+                    || (isPHost
+                        && (mission_id == emsa + Mission::pmsn_Special
+                            || mission_id == emsa + Mission::pmsn_StandardSuperSpy)))));
 }

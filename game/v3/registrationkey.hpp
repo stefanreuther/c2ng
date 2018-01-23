@@ -38,6 +38,7 @@ namespace game { namespace v3 {
         virtual Status getStatus() const;
         virtual String_t getLine(Line which) const;
         virtual bool setLine(Line which, String_t value);
+        virtual int getMaxTechLevel(TechLevel area) const;
 
         /** Create unregistered key. */
         void initUnregistered();

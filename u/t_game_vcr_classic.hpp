@@ -37,6 +37,11 @@ class TestGameVcrClassicStatusToken : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestGameVcrClassicTypes : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
 class TestGameVcrClassicVisualizer : public CxxTest::TestSuite {
  public:
     void testIt();

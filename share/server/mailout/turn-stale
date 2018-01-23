@@ -1,0 +1,24 @@
+!-
+!-  NOTE: this is sent to unverified addresses!
+!-
+From: PlanetsCentral Host <host@planetscentral.com>
+Subject: [PlanetsCentral] Turn file rejected
+
+Hi,
+
+your turn file was REJECTED.
+I could not match it to any active game you play.
+
+Probably the file is stale (made from an old result file).
+Please submit only turn files made from current results.
+You can download your current result file from the game's
+home page.
+
+
+>> Mail Information
+
+Subject:    $(mail_subject)
+From:       $(mail_from)
+Date:       $(mail_date)
+Message-Id: $(mail_messageid)
+File Path:  $(mail_path)

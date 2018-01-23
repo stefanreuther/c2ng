@@ -10,6 +10,7 @@
 #include "afl/net/redis/integersetkey.hpp"
 #include "afl/net/redis/subtree.hpp"
 #include "afl/string/string.hpp"
+#include "server/common/user.hpp"
 
 namespace server { namespace talk {
 
@@ -17,35 +18,13 @@ namespace server { namespace talk {
 
     /** A user profile.
         This encapsulates the user profile access for c2talk.
-
-        \todo Merge with User classes of other components */
-    class User {
+        It is based on the common User class. */
+    class User : public server::common::User {
      public:
         /** Constructor.
             \param root Service root
             \param userId User Id ("1001") */
         User(Root& root, String_t userId);
-
-        /** Get user's screen name.
-            This value is stored in the user's profile.
-            \return Screen Name */
-        String_t getScreenName();
-
-        /** Get user's login name.
-            This is the name he uses to login, and which others use to refer to him.
-            \return Login Name */
-        String_t getLoginName();
-
-        /** Get user's real name.
-            If this user's real name is not available to others (configuration option), returns a null string.
-            \return Real Name or empty string */
-        String_t getRealName();
-
-        /** Get raw value from user profile.
-            If the value is not set, falls back to the default from the default profile.
-            \param key Profile key
-            \return Option value. Null if not set anywhere */
-        afl::data::Value* getProfileRaw(String_t key);
 
         /** Get PM mail type (profile access).
             \return Value from profile */
@@ -60,11 +39,6 @@ namespace server { namespace talk {
             If set, the user wants notifications about each message for watched topics/forums.
             \return Value */
         bool isWatchIndividual();
-
-        /** Get user's profile.
-            Used for manual access to user's configuration (not recommended normally).
-            \return profile hash */
-        afl::net::redis::HashKey profile();
 
         /** Get forum data for user.
             Used for manual access to user's forum data (not recommended normally).
@@ -117,10 +91,6 @@ namespace server { namespace talk {
             a topic is marked notified when a notification has been sent until they visit the topic again.
             \return Forum Ids of notified forums */
         afl::net::redis::IntegerSetKey notifiedTopics();
-
-     private:
-        afl::net::redis::Subtree m_user;
-        afl::net::redis::HashKey m_defaultProfile;
     };
 
 } }

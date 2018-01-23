@@ -9,6 +9,7 @@ game::Turn::Turn()
     : m_universe(),
       m_extras(),
       m_inbox(),
+      m_outbox(),
       m_battles(),
       m_turnNumber(0),
       m_databaseTurnNumber(0),
@@ -91,6 +92,18 @@ const game::msg::Inbox&
 game::Turn::inbox() const
 {
     return m_inbox;
+}
+
+game::msg::Outbox&
+game::Turn::outbox()
+{
+    return m_outbox;
+}
+
+const game::msg::Outbox&
+game::Turn::outbox() const
+{
+    return m_outbox;
 }
 
 game::ExtraContainer<game::Turn>&

@@ -26,7 +26,7 @@ namespace util {
         /** Check character literal.
             \param ch Character
             \return true on match, false on mismatch */
-        bool parseChar(char ch);
+        bool parseCharacter(char ch);
 
         /** Check delimited variable string.
             Accumulates all characters in \c out, until a delimiter or the end of the string is found.
@@ -39,6 +39,11 @@ namespace util {
             \param out [out] Integer
             \return true on match, false on mismatch */
         bool parseInt(int& out);
+
+        /** Check variable 64-bit integer.
+            \param out [out] Integer
+            \return true on match, false on mismatch */
+        bool parseInt64(int64_t& out);
 
         /** Parse character class.
             Accumulates all characters in \c out as long as the classification function returns true.
@@ -55,11 +60,15 @@ namespace util {
             Does not modify the state.
             \param ch [out] Character
             \return true if character could be obtained, false if end has been reached */
-        bool getCurrentChar(char& ch) const;
+        bool getCurrentCharacter(char& ch) const;
 
         /** Get remaining unparsed text.
             \return text */
         String_t getRemainder() const;
+
+        /** Get current parser position.
+            \return position */
+        size_t getPosition() const;
 
      private:
         String_t m_string;

@@ -36,6 +36,39 @@ class TestGameV3ControlFile : public CxxTest::TestSuite {
     void testRange();
 };
 
+class TestGameV3HConfig : public CxxTest::TestSuite {
+ public:
+    void testPack();
+};
+
+class TestGameV3Loader : public CxxTest::TestSuite {
+ public:
+    void testLoadPlanets();
+    void testLoadShips();
+    void testLoadBases();
+};
+
+class TestGameV3OutboxReader : public CxxTest::TestSuite {
+ public:
+    void testLoad30Empty();
+    void testLoad30Zero();
+    void testLoad30ZeroLength();
+    void testLoad30One();
+    void testLoad35Empty();
+    void testLoad35Zero();
+    void testLoad35ZeroLength();
+    void testLoad35One();
+    void testLoad35Two();
+    void testLoad35Invalid();
+};
+
+class TestGameV3Packer : public CxxTest::TestSuite {
+ public:
+    void testUnpackShip();
+    void testUnpackPlanet();
+    void testUnpackBase();
+};
+
 class TestGameV3ResultFile : public CxxTest::TestSuite {
  public:
     void test30();
@@ -52,6 +85,17 @@ class TestGameV3StringVerifier : public CxxTest::TestSuite {
 class TestGameV3Structures : public CxxTest::TestSuite {
  public:
     void testHeader();
+};
+
+class TestGameV3UndoInformation : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testNoPlanet();
+    void testInit();
+    void testSupplySale();
+    void testTorpedoUpgrade();
+    void testTorpedoShip();
+    void testSupplyShip();
 };
 
 #endif

@@ -300,7 +300,7 @@ gfx::sdl::Surface::setPalette(Color_t start, afl::base::Memory<const ColorQuad_t
 
         // Update palette
         if (!palette.empty()) {
-            SDL_SetPalette(m_surface, SDL_PHYSPAL|SDL_LOGPAL, palette.at(0), start, palette.size());
+            SDL_SetPalette(m_surface, SDL_PHYSPAL|SDL_LOGPAL, palette.at(0), static_cast<int>(start), static_cast<int>(palette.size()));
         }
 
         // Update color key

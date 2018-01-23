@@ -7,6 +7,7 @@
 #include "afl/except/fileproblemexception.hpp"
 #include "afl/io/constmemorystream.hpp"
 #include "afl/io/directoryentry.hpp"
+#include "afl/io/unchangeabledirectoryentry.hpp"
 #include "afl/string/messages.hpp"
 #include "server/file/directoryitem.hpp"
 #include "server/file/fileitem.hpp"
@@ -26,22 +27,17 @@ class server::file::DirectoryWrapper::File : public afl::io::ConstMemoryStream {
 };
 
 /** Implementation of DirectoryEntry for DirectoryWrapper. */
-class server::file::DirectoryWrapper::Entry : public afl::io::DirectoryEntry {
+class server::file::DirectoryWrapper::Entry : public afl::io::UnchangeableDirectoryEntry {
  public:
     Entry(afl::base::Ref<DirectoryWrapper> parent, server::file::FileItem& item)
-        : m_parent(parent), m_item(item)
+        : UnchangeableDirectoryEntry(afl::string::Messages::cannotWrite()), m_parent(parent), m_item(item)
         { }
     virtual String_t getTitle()
         { return m_item.getName(); }
     virtual String_t getPathName()
         { return String_t(); }
-    virtual afl::base::Ref<afl::io::Stream> openFile(afl::io::FileSystem::OpenMode mode)
-        {
-            if (mode != afl::io::FileSystem::OpenRead) {
-                throw afl::except::FileProblemException(getTitle(), afl::string::Messages::cannotWrite());
-            }
-            return *new File(m_parent->m_item.getFileContent(m_item));
-        }
+    virtual afl::base::Ref<afl::io::Stream> openFileForReading()
+        { return *new File(m_parent->m_item.getFileContent(m_item)); }
     virtual afl::base::Ref<afl::io::Directory> openDirectory()
         { throw afl::except::FileProblemException(getTitle(), afl::string::Messages::cannotAccessDirectories()); }
     virtual afl::base::Ref<afl::io::Directory> openContainingDirectory()
@@ -53,14 +49,6 @@ class server::file::DirectoryWrapper::Entry : public afl::io::DirectoryEntry {
                 setFileSize(*p);
             }
         }
-    virtual void doRename(String_t /*newName*/)
-        { throw afl::except::FileProblemException(getTitle(), afl::string::Messages::cannotWrite()); }
-    virtual void doErase()
-        { throw afl::except::FileProblemException(getTitle(), afl::string::Messages::cannotWrite()); }
-    virtual void doCreateAsDirectory()
-        { throw afl::except::FileProblemException(getTitle(), afl::string::Messages::cannotWrite()); }
-    virtual void doSetFlag(FileFlag /*flag*/, bool /*value*/)
-        { throw afl::except::FileProblemException(getTitle(), afl::string::Messages::cannotWrite()); }
  private:
     afl::base::Ref<DirectoryWrapper> m_parent;
     server::file::FileItem& m_item;

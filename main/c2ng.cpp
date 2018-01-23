@@ -64,6 +64,9 @@
 #include "util/translation.hpp"
 #include "afl/sys/dialog.hpp"
 #include "util/string.hpp"
+#include "afl/base/optional.hpp"
+#include "afl/net/tunnel/tunnelablenetworkstack.hpp"
+#include "ui/res/generatedplanetprovider.hpp"
 #ifdef HAVE_SDL
 # include "gfx/sdl/engine.hpp"
 typedef gfx::sdl::Engine Engine_t;
@@ -402,7 +405,7 @@ namespace {
                     if (!sp.parseInt(w)) {
                         throw afl::except::CommandLineException("!Invalid parameter to \"-size\"");
                     }
-                    if (sp.parseChar('X') || sp.parseChar('x') || sp.parseChar('*')) {
+                    if (sp.parseCharacter('X') || sp.parseCharacter('x') || sp.parseCharacter('*')) {
                         if (!sp.parseInt(h)) {
                             throw afl::except::CommandLineException("!Invalid parameter to \"-size\"");
                         }
@@ -459,6 +462,8 @@ namespace {
                             // ok
                         } else if (text == "resource") {
                             m_commandLineResources.push_back(parser.getRequiredParameter(text));
+                        } else if (text == "proxy") {
+                            m_proxyAddress = parser.getRequiredParameter(text);
                         } else if (text == "help") {
                             doHelp(dialog);
                         } else {
@@ -495,7 +500,7 @@ namespace {
                 help += "\n";
                 help += util::formatOptions(_("-resource=NAME\tAdd resource provider\n") + m_rootOptions.getHelp());
                 help += "\n";
-                help += _("(c) copyright 2016 Stefan Reuther <streu@gmx.de>");
+                help += _("(c) copyright 2017-2018 Stefan Reuther <streu@gmx.de>");
                 help += "\n";
                 dialog.showInfo(help, PROGRAM_TITLE);
                 std::exit(0);
@@ -507,10 +512,14 @@ namespace {
         RootOptions& rootOptions()
             { return m_rootOptions; }
 
+        const afl::base::Optional<String_t>& getProxyAddress() const
+            { return m_proxyAddress; }
+
      private:
         RootOptions m_rootOptions;
         bool m_haveGameDirectory;
         String_t m_gameDirectory;
+        afl::base::Optional<String_t> m_proxyAddress;
         std::vector<String_t> m_commandLineResources;
     };
 
@@ -629,6 +638,7 @@ int main(int, char** argv)
         mgr.addNewImageLoader(new ui::res::EngineImageLoader(engine));
         mgr.addNewImageLoader(new ui::res::CCImageLoader());
         mgr.addNewProvider(new ui::res::DirectoryProvider(resourceDirectory), "(MAIN)");
+        mgr.addNewProvider(new ui::res::GeneratedPlanetProvider(), "(MAIN-PLANETS)");
 
         ui::DefaultResourceProvider provider(mgr, resourceDirectory, engine.dispatcher(), tx, log);
         ui::Root root(engine, provider,
@@ -639,14 +649,18 @@ int main(int, char** argv)
         mgr.setScreenSize(root.getExtent().getSize());
         root.sig_screenshot.addNewClosure(new ui::ScreenshotListener(fs, log));
 
-        // FIXME: rumours are that if an exception is thrown around here, the program hangs instead of terminating safely.
+        // Setup network
+        afl::net::tunnel::TunnelableNetworkStack net(afl::net::NetworkStack::getInstance());
+        if (const String_t* p = params.getProxyAddress().get()) {
+            net.add(*p);
+        }
 
         // Set up HTTP
         // FIXME: do this here? We would have to do this elsewhere if it takes time; like, for loading config files.
         log.write(log.Debug, LOG_NAME, tx.translateString("Starting network..."));
         afl::net::http::Client client;
         afl::sys::Thread clientThread("http", client);
-        client.setNewConnectionProvider(new afl::net::http::DefaultConnectionProvider(client, afl::net::NetworkStack::getInstance()));
+        client.setNewConnectionProvider(new afl::net::http::DefaultConnectionProvider(client, net));
         clientThread.start();
         afl::net::http::Manager httpManager(client);
 
@@ -696,10 +710,10 @@ int main(int, char** argv)
             // Helpful information
             ui::rich::DocumentView docView(root.getExtent().getSize(), 0, root.provider());
             docView.setExtent(gfx::Rectangle(gfx::Point(0, 0), docView.getLayoutInfo().getPreferredSize()));
-            docView.getDocument().add(util::rich::Parser::parseXml("<big>PCC2ng Milestone One</big>"));
+            docView.getDocument().add(util::rich::Parser::parseXml("<big>PCC2ng Milestone Three</big>"));
             docView.getDocument().addNewline();
             docView.getDocument().addNewline();
-            docView.getDocument().add(util::rich::Parser::parseXml("<font color=\"dim\">&#xA9; 2016 Stefan Reuther &lt;streu@gmx.de&gt;</font>"));
+            docView.getDocument().add(util::rich::Parser::parseXml("<font color=\"dim\">&#xA9; 2017-2018 Stefan Reuther &lt;streu@gmx.de&gt;</font>"));
             docView.getDocument().addNewline();
             docView.getDocument().finish();
             docView.handleDocumentUpdate();

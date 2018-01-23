@@ -3,21 +3,21 @@
   *  \brief Test for server::file::DirectoryHandlerFactory
   */
 
-#include <memory>
 #include "server/file/directoryhandlerfactory.hpp"
 
+#include <memory>
 #include "t_server_file.hpp"
-#include "afl/io/nullfilesystem.hpp"
 #include "afl/except/fileproblemexception.hpp"
-#include "server/file/directoryhandler.hpp"
-#include "afl/net/nullnetworkstack.hpp"
-#include "u/helper/commandhandlermock.hpp"
-#include "afl/net/protocolhandlerfactory.hpp"
-#include "afl/net/server.hpp"
-#include "afl/net/resp/protocolhandler.hpp"
-#include "afl/sys/thread.hpp"
-#include "afl/net/networkstack.hpp"
+#include "afl/io/nullfilesystem.hpp"
 #include "afl/net/name.hpp"
+#include "afl/net/networkstack.hpp"
+#include "afl/net/nullnetworkstack.hpp"
+#include "afl/net/protocolhandlerfactory.hpp"
+#include "afl/net/resp/protocolhandler.hpp"
+#include "afl/net/server.hpp"
+#include "afl/sys/thread.hpp"
+#include "afl/test/commandhandler.hpp"
+#include "server/file/directoryhandler.hpp"
 
 /** Test makePathName. */
 void
@@ -169,7 +169,7 @@ TestServerFileDirectoryHandlerFactory::testCreateRemote()
     // Set up a server
     const int16_t PORT_NR = 25289;
     afl::net::NetworkStack& stack = afl::net::NetworkStack::getInstance();
-    CommandHandlerMock mock;
+    afl::test::CommandHandler mock("testCreateRemote");
     ServerStuff stuff(mock, stack, afl::net::Name("127.0.0.1", PORT_NR));
 
     // Set up test infrastructure
@@ -179,27 +179,27 @@ TestServerFileDirectoryHandlerFactory::testCreateRemote()
     server::file::DirectoryHandlerFactory testee(fs, stack);
 
     // Create two instances. Should be unified due to caching (but we get two user-logons).
-    mock.expectCall("USER|1022");
-    mock.provideReturnValue(0);
+    mock.expectCall("USER, 1022");
+    mock.provideNewResult(0);
     DirectoryHandler& a = testee.createDirectoryHandler("c2file://1022@127.0.0.1:25289/");
 
-    mock.expectCall("USER|1022");
-    mock.provideReturnValue(0);
+    mock.expectCall("USER, 1022");
+    mock.provideNewResult(0);
     DirectoryHandler& b = testee.createDirectoryHandler("c2file://1022@127.0.0.1:25289/b");
 
     // Create a file in a
-    mock.expectCall("PUT|z|cc");
-    mock.provideReturnValue(0);
+    mock.expectCall("PUT, z, cc");
+    mock.provideNewResult(0);
     a.createFile("z", afl::string::toBytes("cc"));
 
     // Create a file in b
-    mock.expectCall("PUT|b/f|cc");
-    mock.provideReturnValue(0);
+    mock.expectCall("PUT, b/f, cc");
+    mock.provideNewResult(0);
     b.createFile("f", afl::string::toBytes("cc"));
 
     // Copy a to b
-    mock.expectCall("CP|src|b/dst");
-    mock.provideReturnValue(0);
+    mock.expectCall("CP, src, b/dst");
+    mock.provideNewResult(0);
     TS_ASSERT(b.copyFile(a, DirectoryHandler::Info("src", DirectoryHandler::IsFile), "dst").isValid());
 
     mock.checkFinish();

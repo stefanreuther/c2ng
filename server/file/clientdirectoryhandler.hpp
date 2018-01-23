@@ -28,12 +28,6 @@ namespace server { namespace file {
             \param basePath Base path. Should not be empty; the commandHandler must be able to answer a "LS basePath". */
         ClientDirectoryHandler(afl::net::CommandHandler& commandHandler, String_t basePath);
 
-        /** Set user.
-            Configures the user Id to use for access checking on the other side.
-            This requires that the CommandHandler passed to the constructor also implement server::interface::Base.
-            \param user User Id */
-        void setUser(const String_t& user);
-
         // DirectoryHandler implementation:
         virtual String_t getName();
         virtual afl::base::Ref<afl::io::FileMapping> getFile(const Info& info);

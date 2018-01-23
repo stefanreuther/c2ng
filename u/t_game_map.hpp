@@ -26,6 +26,27 @@ class TestGameMapExplosion : public CxxTest::TestSuite {
     void testName();
 };
 
+class TestGameMapFleetMember : public CxxTest::TestSuite {
+ public:
+    void testSetFleetName();
+    void testSetWaypoint();
+    void testSetWarpFactor();
+    void testSetMission();
+    void testSetMissionToIntercept();
+    void testSetMissionFromIntercept();
+    void testSetFleetNumberFail();
+    void testSetFleetNumberSuccess();
+    void testSetFleetNumberDropLeader();
+    void testSetFleetNumberDropMember();
+    void testSetFleetNumberMoveMember();
+    void testSetMissionTow();
+    void testSetMissionTowOther();
+    void testSetMissionTowInvalid();
+    void testIsMissionLocked();
+    void testIsMissionLockedMutex();
+    void testSetFleetNumberForeign();
+};
+
 class TestGameMapIonStorm : public CxxTest::TestSuite {
  public:
     void testIt();
@@ -34,6 +55,25 @@ class TestGameMapIonStorm : public CxxTest::TestSuite {
 class TestGameMapMapObject : public CxxTest::TestSuite {
  public:
     void testIt();
+};
+
+class TestGameMapMarkingVector : public CxxTest::TestSuite {
+ public:
+    void testInit();
+    void testSetGet();
+    void testCopy();
+    void testExecute();
+    void testExecuteSize();
+    void testExecuteOp();
+    void testExecuteError();
+};
+
+class TestGameMapMarkings : public CxxTest::TestSuite {
+ public:
+    void testInit();
+    void testCopy();
+    void testExecute();
+    void testSetLayer();
 };
 
 class TestGameMapObject : public CxxTest::TestSuite {

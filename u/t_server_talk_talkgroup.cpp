@@ -32,6 +32,7 @@ TestServerTalkTalkGroup::testIt()
         TalkGroup::Description d;
         d.name = "All";
         d.description = "text:All forums";
+        d.key = "000-root";
         TalkGroup(rootSession, root).add("root", d);
     }
     {
@@ -83,6 +84,7 @@ TestServerTalkTalkGroup::testIt()
 
     // Query info
     TS_ASSERT_EQUALS(TalkGroup(rootSession, root).getField("root", "name"), "Root");
+    TS_ASSERT_EQUALS(TalkGroup(rootSession, root).getField("root", "key"), "000-root");
     TS_ASSERT_EQUALS(TalkGroup(userSession, root).getField("root", "name"), "Root");
     TS_ASSERT_EQUALS(TalkGroup(rootSession, root).getField("unlisted", "description"), "text:Secret");
 

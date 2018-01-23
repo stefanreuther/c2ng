@@ -162,7 +162,7 @@ game::interface::IFCfg(game::Session& session, interpreter::Arguments& args)
 //    | Distance(Ship(10), Planet(30))
 
 //    If a wrapped map is being used, the map seam is also considered and the shortest possible distance is reported.
-//    @since PCC 1.0.11, PCC2 1.99.8, PCC2NG 2.40.1 */
+//    @since PCC 1.0.11, PCC2 1.99.8, PCC2 2.40.1 */
 afl::data::Value*
 game::interface::IFDistance(game::Session& session, interpreter::Arguments& args)
 {
@@ -265,7 +265,7 @@ game::interface::IFDistance(game::Session& session, interpreter::Arguments& args
 
 //    This function supports up to 10 arguments (plus the format string) in one call.
 
-//    @since PCC2 1.99.9, PCC2NG 2.40
+//    @since PCC2 1.99.9, PCC2 2.40
 //    @see RXml */
 afl::data::Value*
 game::interface::IFFormat(game::Session& /*session*/, interpreter::Arguments& args)
@@ -320,7 +320,7 @@ game::interface::IFFormat(game::Session& /*session*/, interpreter::Arguments& ar
 //    When %flag is True (nonzero, nonempty), returns the planet whose gravity wells are in effect at that place;
 //    when %flag is False or not specified at all, returns only exact matches.
 //    If there is no such planet, it returns zero.
-//    @since PCC 1.0.18, PCC2 1.99.9, PCC2NG 2.40.1 */
+//    @since PCC 1.0.18, PCC2 1.99.9, PCC2 2.40.1 */
 afl::data::Value*
 game::interface::IFPlanetAt(game::Session& session, interpreter::Arguments& args)
 {
@@ -402,7 +402,7 @@ game::interface::IFPref(game::Session& session, interpreter::Arguments& args)
 //    <tt>Random(500,1)</tt> generates random numbers between 2 and 500
 //    (the first parameter always included in the range, the second one is not).
 
-//    @since PCC 1.0.7, PCC2 1.99.9, PCC2NG 2.40 */
+//    @since PCC 1.0.7, PCC2 1.99.9, PCC2 2.40 */
 afl::data::Value*
 game::interface::IFRandom(game::Session& session, interpreter::Arguments& args)
 {
@@ -434,7 +434,7 @@ game::interface::IFRandom(game::Session& session, interpreter::Arguments& args)
 // /* @q RandomFCode():Str (Function)
 //    Generate a random friendly code.
 //    The friendly code will not have a special meaning.
-//    @since PCC 1.1.11, PCC2 1.99.8, PCC2NG 2.40.1 */
+//    @since PCC 1.1.11, PCC2 1.99.8, PCC2 2.40.1 */
 afl::data::Value*
 game::interface::IFRandomFCode(game::Session& session, interpreter::Arguments& args)
 {
@@ -455,7 +455,7 @@ game::interface::IFRandomFCode(game::Session& session, interpreter::Arguments& a
 //    Uses PCC's internal language database to reproduce the English string given as parameter
 //    in the user's preferred language.
 //    If the string is not contained in the language database, returns the original string.
-//    @since PCC2 1.99.9, PCC2NG 2.40 */
+//    @since PCC2 1.99.9, PCC2 2.40 */
 afl::data::Value*
 game::interface::IFTranslate(game::Session& session, interpreter::Arguments& args)
 {
@@ -474,7 +474,7 @@ game::interface::IFTranslate(game::Session& session, interpreter::Arguments& arg
 //    Returns the Id of the %slot'th hull number the specified %player can build.
 //    If the %player parameter is omitted, uses your player slot.
 //    If the specified slot does not contain a buildable hull, returns 0.
-//    @since PCC 1.0.12, PCC2 1.99.8, PCC2NG 2.40 */
+//    @since PCC 1.0.12, PCC2 1.99.8, PCC2 2.40 */
 afl::data::Value*
 game::interface::IFTruehull(game::Session& session, interpreter::Arguments& args)
 {

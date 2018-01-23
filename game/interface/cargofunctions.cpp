@@ -59,7 +59,7 @@ game::interface::checkCargoSpecArg(CargoSpec& out, afl::data::Value* value)
 //    Add cargo sets.
 //    Returns a new cargo set containing the sum of all cargo sets given as parameter.
 //    @diff PCC 1.x supports two to six arguments for this function, PCC2 supports any number from one up.
-//    @since PCC 1.0.10, PCC2 1.99.9, PCC2NG 2.40.1
+//    @since PCC 1.0.10, PCC2 1.99.9, PCC2 2.40.1
 //    @see CSub */
 afl::data::Value*
 game::interface::IFCAdd(game::Session& /*session*/, interpreter::Arguments& args)

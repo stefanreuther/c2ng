@@ -6,13 +6,13 @@
 #include "server/interface/talknntpclient.hpp"
 
 #include "t_server_interface.hpp"
-#include "u/helper/commandhandlermock.hpp"
-#include "server/types.hpp"
+#include "afl/data/access.hpp"
 #include "afl/data/hash.hpp"
 #include "afl/data/hashvalue.hpp"
 #include "afl/data/vector.hpp"
 #include "afl/data/vectorvalue.hpp"
-#include "afl/data/access.hpp"
+#include "afl/test/commandhandler.hpp"
+#include "server/types.hpp"
 
 using server::makeStringValue;
 using server::makeIntegerValue;
@@ -26,18 +26,18 @@ using afl::data::VectorValue;
 void
 TestServerInterfaceTalkNNTPClient::testIt()
 {
-    CommandHandlerMock mock;
+    afl::test::CommandHandler mock("testIt");
     server::interface::TalkNNTPClient testee(mock);
 
     // checkUser
-    mock.expectCall("NNTPUSER|theUser|thePassword");
-    mock.provideReturnValue(makeStringValue("1030"));
+    mock.expectCall("NNTPUSER, theUser, thePassword");
+    mock.provideNewResult(makeStringValue("1030"));
     TS_ASSERT_EQUALS(testee.checkUser("theUser", "thePassword"), "1030");
 
     // listNewsgroups
     {
         mock.expectCall("NNTPLIST");
-        mock.provideReturnValue(0);
+        mock.provideNewResult(0);
         afl::container::PtrVector<TalkNNTP::Info> result;
         testee.listNewsgroups(result);
         TS_ASSERT_EQUALS(result.size(), 0U);
@@ -55,7 +55,7 @@ TestServerInterfaceTalkNNTPClient::testIt()
         vec->pushBackNew(new HashValue(in));
 
         mock.expectCall("NNTPLIST");
-        mock.provideReturnValue(new VectorValue(vec));
+        mock.provideNewResult(new VectorValue(vec));
 
         afl::container::PtrVector<TalkNNTP::Info> result;
         testee.listNewsgroups(result);
@@ -79,8 +79,8 @@ TestServerInterfaceTalkNNTPClient::testIt()
         in->setNew("lastSeq",      makeIntegerValue(27));
         in->setNew("writeAllowed", makeIntegerValue(0));
 
-        mock.expectCall("NNTPFINDNG|pcc.another.group");
-        mock.provideReturnValue(new HashValue(in));
+        mock.expectCall("NNTPFINDNG, pcc.another.group");
+        mock.provideNewResult(new HashValue(in));
 
         TalkNNTP::Info out = testee.findNewsgroup("pcc.another.group");
         TS_ASSERT_EQUALS(out.newsgroupName, "pcc.another.group");
@@ -92,14 +92,14 @@ TestServerInterfaceTalkNNTPClient::testIt()
     }
 
     // findMessage
-    mock.expectCall("NNTPFINDMID|a.b.c@d");
-    mock.provideReturnValue(makeIntegerValue(580));
+    mock.expectCall("NNTPFINDMID, a.b.c@d");
+    mock.provideNewResult(makeIntegerValue(580));
     TS_ASSERT_EQUALS(testee.findMessage("a.b.c@d"), 580);
 
     // listMessages
     {
-        mock.expectCall("NNTPFORUMLS|9");
-        mock.provideReturnValue(new VectorValue(Vector::create(afl::data::Segment().pushBackInteger(1).pushBackInteger(37).pushBackInteger(2).pushBackInteger(45))));
+        mock.expectCall("NNTPFORUMLS, 9");
+        mock.provideNewResult(new VectorValue(Vector::create(afl::data::Segment().pushBackInteger(1).pushBackInteger(37).pushBackInteger(2).pushBackInteger(45))));
 
         afl::data::IntegerList_t result;
         testee.listMessages(9, result);
@@ -117,8 +117,8 @@ TestServerInterfaceTalkNNTPClient::testIt()
         in->setNew("Content-Type", makeStringValue("text/plain"));
         in->setNew("Message-Id",   makeStringValue("<foo@bar>"));
 
-        mock.expectCall("NNTPPOSTHEAD|45");
-        mock.provideReturnValue(new HashValue(in));
+        mock.expectCall("NNTPPOSTHEAD, 45");
+        mock.provideNewResult(new HashValue(in));
 
         Hash::Ref_t out = testee.getMessageHeader(45);
         TS_ASSERT_EQUALS(server::toString(out->get("Content-Type")), "text/plain");
@@ -135,8 +135,8 @@ TestServerInterfaceTalkNNTPClient::testIt()
         vec->pushBackNew(0);
         vec->pushBackNew(new HashValue(in));
 
-        mock.expectCall("NNTPPOSTMHEAD|42|45");
-        mock.provideReturnValue(new VectorValue(vec));
+        mock.expectCall("NNTPPOSTMHEAD, 42, 45");
+        mock.provideNewResult(new VectorValue(vec));
 
         afl::data::Segment result;
         static const int32_t msgids[] = { 42, 45 };
@@ -150,8 +150,8 @@ TestServerInterfaceTalkNNTPClient::testIt()
 
     // listNewsgroupsByGroup
     {
-        mock.expectCall("NNTPGROUPLS|root");
-        mock.provideReturnValue(new VectorValue(Vector::create(afl::data::Segment().pushBackString("pcc.news").pushBackString("pcc.info").pushBackString("pcc.talk"))));
+        mock.expectCall("NNTPGROUPLS, root");
+        mock.provideNewResult(new VectorValue(Vector::create(afl::data::Segment().pushBackString("pcc.news").pushBackString("pcc.info").pushBackString("pcc.talk"))));
 
         afl::data::StringList_t result;
         testee.listNewsgroupsByGroup("root", result);

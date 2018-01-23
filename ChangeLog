@@ -1,3 +1,392 @@
+2018-01-21  Stefan Reuther  <streu@gmx.de>
+
+	* scripts/doc.pl, P9/02_manual.pr: new
+	* interpreter/values.hpp (makeSizeValue): cleanup: new function to avoid cast at caller
+	* game/map/universe.hpp: cleanup: getPlanetAt() etc. now const to avoid const_cast at caller
+	* game/map/shippredictor.cpp, game/map/shippredictor.hpp: new [ex game/shippredict.h]
+
+2018-01-14  Stefan Reuther  <streu@gmx.de>
+
+	* tools/c2configtool.cpp: new [ex updateconfig.pl]
+	* util/configurationfile.cpp, util/configurationfile.hpp: new [ex updateconfig.pl]
+
+2018-01-13  Stefan Reuther  <streu@gmx.de>
+
+	* server/monitor/timeseriesloader.cpp, server/monitor/timeseriesloader.hpp: new
+	* server/monitor/timeserieswriter.cpp, server/monitor/timeserieswriter.hpp: new
+
+2018-01-10  Stefan Reuther  <streu@gmx.de>
+
+	* game/v3/hconfig.cpp, game/v3/hconfig.hpp: new
+
+2018-01-07  Stefan Reuther  <streu@gmx.de>
+
+	* share/server/monitor/monitor.html: new skin to allow rendering time series
+	* server/monitor/status.cpp, server/monitor/status.hpp: render time series
+	* server/monitor/timeseries.cpp, server/monitor/timeseries.hpp: new
+	* server/monitor/loadaverageobserver.cpp, server/monitor/loadaverageobserver.hpp: new
+	* server/monitor/statusobserver.cpp, server/monitor/statusobserver.hpp: new
+
+2018-01-06  Stefan Reuther  <streu@gmx.de>
+
+	* server/monitor/serverapplication.cpp: monitor FORMAT service
+	* server/monitor/networkobserver.cpp: send User-Agent
+	* share/server/monitor/monitor.html: update template
+
+2018-01-01  Stefan Reuther  <streu@gmx.de>
+
+	* ui/res/generatedplanetprovider.cpp, ui/res/generatedplanetprovider.hpp: new
+
+2017-12-31  Stefan Reuther  <streu@gmx.de>
+
+	* game/map/markings.cpp, game/map/markings.hpp: new [ex game/sel.h]
+	* game/map/markingvector.cpp, game/map/markingvector.hpp: new [ex game/sel.h]
+
+2017-12-30  Stefan Reuther  <streu@gmx.de>
+
+	* game/map/fleetmember.cpp (setMission): synchronize reset of Intercept to fleet members as well [#363]
+
+2017-12-29  Stefan Reuther  <streu@gmx.de>
+
+	* game/db/fleetloader.cpp: new [ex game/fleet.h]
+
+2017-12-28  Stefan Reuther  <streu@gmx.de>
+
+	* gfx/gen/application.cpp: new
+	* gfx/gen/planet.hpp: new
+	* gfx/gen/planetconfig.hpp: new
+	* gfx/gen/vector3d.hpp: new
+	* tools/c2gfxgen.cpp: new
+
+2017-12-27  Stefan Reuther  <streu@gmx.de>
+
+	* interpreter/filefunctions.cpp (FPos, FSize): add ability to handle files >2 GiB
+
+2017-12-25  Stefan Reuther  <streu@gmx.de>
+
+	* game/actions/cargotransfersetup.cpp, game/actions/cargotransfersetup.hpp: new
+	* game/interface/cargomethod.cpp, game/interface/cargomethod.hpp: new
+
+2017-12-24  Stefan Reuther  <streu@gmx.de>
+
+	* game/map/shiptransporter.cpp, game/map/shiptransporter.hpp: new [ex game/shiptransfer.h]
+
+2017-12-23  Stefan Reuther  <streu@gmx.de>
+
+	* game/actions/buildammo.hpp: new [ex game/actions/baseammo.h]
+
+2017-12-20  Stefan Reuther  <streu@gmx.de>
+
+	* game/actions/buildship.cpp, game/actions/buildship.hpp: new [ex game/actions/baseship.h]
+	* game/v3/undoinformation.cpp: deal with host-side cargo transfer [#362]
+
+2017-12-19  Stefan Reuther  <streu@gmx.de>
+
+	* game/test/registrationkey.cpp, game/test/registrationkey.hpp: new
+	* game/test/specificationloader.cpp, game/test/specificationloader.hpp: new
+	* game/test/stringverifier.cpp, game/test/stringverifier.hpp: new
+
+2017-12-16  Stefan Reuther  <streu@gmx.de>
+
+	* game/actions/buildparts.cpp, game/actions/buildparts.hpp: new [ex game/actions/baseparts.h]
+	* game/actions/techupgrade.cpp, game/actions/techupgrade.hpp: new [ex game/actions/basetech.h]
+
+2017-12-15  Stefan Reuther  <streu@gmx.de>
+
+	* game/actions/basebuildaction.cpp, game/actions/basebuildaction.hpp: new [ex game/actions/basebuild.h]
+	* game/actions/basebuildexecutor.hpp: new [ex game/actions/basebuild.h]
+	* server/host/cronimpl.hpp, server/mailout/transmitterimpl.hpp, ui/defaultresourceprovider.hpp, util/requestthread.hpp: adapt to change in afl (Runnable -> Stoppable)
+
+2017-12-14  Stefan Reuther  <streu@gmx.de>
+
+	* server/console/parser.cpp: fix piping over empty list
+
+2017-12-10  Stefan Reuther  <streu@gmx.de>
+
+	* game/map/shipstorage.cpp, game/map/shipstorage.hpp: new [ex game/shiptransfer.cc]
+	* tools/c2export.cpp: add '-c' option [#359]
+	* interpreter/exporter/configuration.hpp: new [ex int/export/expconfig.h]
+	* interpreter/exporter/format.hpp: new [ex int/export.h]
+	* util/charsetfactory.hpp: new [ex util/recode.h]
+
+2017-12-07  Stefan Reuther  <streu@gmx.de>
+
+	* game/interface/planetmethod.cpp: add SellSupplies command
+
+2017-12-05  Stefan Reuther  <streu@gmx.de>
+
+	* interpreter/exporter/fieldlist.cpp: improve error detection [#358]
+	* tools/c2export.cpp: improve error message [#358]
+
+2017-12-04  Stefan Reuther  <streu@gmx.de>
+
+	* game/v3/resultloader.cpp: add ability to load result file
+	* game/v3/packer.hpp, game/v3/packer.cpp: new
+	* game/v3/undoinformation.cpp, game/v3/undoinformation.hpp: new [ex game/undo.h]
+
+2017-12-03  Stefan Reuther  <streu@gmx.de>
+
+	* game/actions/buildstarbase.cpp, game/actions/buildstarbase.hpp: new [ex game/actions/planetbase.h]
+	* game/actions/buildstructures.cpp, game/actions/buildstructures.hpp: new [ex game/actions/planetstructs.h]
+	* game/actions/cargocostaction.cpp, game/actions/cargocostaction.hpp: new [ex game/actions/cargocost.h]
+	* game/actions/cargotransfer.cpp, game/actions/cargotransfer.hpp: new [ex game/cargotr.h]
+	* game/cargocontainer.hpp: new [ex game/cargo.h]
+	* game/map/planetstorage.cpp, game/map/planetstorage.hpp: new [ex game/planettransfer.h]
+
+2017-11-28  Stefan Reuther  <streu@gmx.de>
+
+	* tools/c2mgrep.cpp: new [ex tools/c2mgrep.cc]
+	* game/v3/outboxreader.cpp, game/v3/outboxreader.hpp: new [ex game/load-msg.h]
+
+2017-11-25  Stefan Reuther  <streu@gmx.de>
+
+	* game/msg/outbox.hpp: new [ex game/msg.h, game/msg-out.cc]
+
+2017-11-19  Stefan Reuther  <streu@gmx.de>
+
+	* main/c2ng.cpp, server/monitor/serverapplication.cpp: basic proxy support
+
+2017-11-13  Stefan Reuther  <streu@gmx.de>
+
+	* server/c2monitor.cpp: new [ex planetscentral/monitor.cc]
+	* server/monitor/badnessfileobserver.cpp, server/monitor/badnessfileobserver.hpp: new [ex planetscentral/monitor.cc]
+	* server/monitor/networkobserver.cpp, server/monitor/networkobserver.hpp: new [ex planetscentral/monitor.cc]
+	* server/monitor/observer.hpp: new [ex planetscentral/monitor.cc]
+	* server/monitor/serverapplication.cpp, server/monitor/serverapplication.hpp: new [ex planetscentral/monitor.cc]
+	* server/monitor/status.cpp, server/monitor/status.hpp: new [ex planetscentral/monitor.cc]
+	* server/monitor/statuspage.cpp, server/monitor/statuspage.hpp: new [ex planetscentral/monitor.cc]
+
+2017-11-04  Stefan Reuther  <streu@gmx.de>
+
+	* server/mailout/commandhandler.cpp, server/mailout/commandhandler.hpp: new [ex planetscentral/mailout/mailout.cc]
+	* server/mailout/configuration.cpp, server/mailout/configuration.hpp: new
+	* server/mailout/mailqueue.cpp, server/mailout/mailqueue.hpp: new [ex planetscentral/mailout/mailout.cc]
+	* server/mailout/message.cpp, server/mailout/message.hpp: new [ex planetscentral/mailout/message.h]
+	* server/mailout/root.cpp, server/mailout/root.hpp: new [ex planetscentral/mailout/mailout.cc]
+	* server/mailout/serverapplication.cpp, server/mailout/serverapplication.hpp: new [ex planetscentral/mailout/mailout.cc]
+	* server/mailout/session.hpp: new [ex planetscentral/mailout/mailout.cc]
+	* server/mailout/template.cpp, server/mailout/template.hpp: new [ex planetscentral/mailout/template.h]
+	* server/mailout/transmitter.hpp: new [ex planetscentral/mailout/transmitter.h]
+	* server/mailout/transmitterimpl.cpp, server/mailout/transmitterimpl.hpp: new [ex planetscentral/mailout/transmitter.h]
+
+2017-10-31  Stefan Reuther  <streu@gmx.de>
+
+	* server/dbexport/dbexporter.cpp, server/dbexport/dbexporter.hpp: new [ex planetscentral/dbexport/exdb.h]
+	* server/dbexport/exportapplication.cpp, server/dbexport/exportapplication.hpp: new [ex planetscentral/dbexport/dbexport.h]
+
+2017-10-30  Stefan Reuther  <streu@gmx.de>
+
+	* server/c2nntp.cpp: new [ex planetscentral/nntp/nntp.cc]
+	* server/nntp/linehandler.cpp, server/nntp/linehandler.hpp: new [ex planetscentral/nntp/nntpworker.h]
+	* server/nntp/root.cpp, server/nntp/root.hpp: new [ex planetscentral/nntp/nntp.cc]
+	* server/nntp/serverapplication.cpp, server/nntp/serverapplication.hpp: new [ex planetscentral/nntp/nntp.cc]
+	* server/nntp/session.hpp: new [ex planetscentral/nntp/nntpworker.h]
+
+2017-10-29  Stefan Reuther  <streu@gmx.de>
+
+	* server/scripts/init.con: new [ex planetscentral/scripts/init.con]
+	* server/ports.hpp: new
+	* server/console/routercontextfactory.cpp, server/console/routercontextfactory.hpp: new [ex planetscentral/console/router.h]
+	* server/interface/sessionrouterclient.cpp, server/interface/sessionrouterclient.hpp: new [ex planetscentral/dbclient/routerclient.h]
+
+2017-10-07  Stefan Reuther  <streu@gmx.de>
+
+	* server/console/colorterminal.cpp, server/console/colorterminal.hpp: new [ex planetscentral/console/console.cc]
+	* server/console/connectioncontextfactory.cpp, server/console/connectioncontextfactory.hpp: new [ex planetscentral/console/context.h]
+	* server/console/contextfactory.hpp: new
+	* server/console/dumbterminal.cpp, server/console/dumbterminal.hpp: new [ex planetscentral/console/console.cc]
+	* server/console/filecommandhandler.cpp, server/console/filecommandhandler.hpp: new [ex planetscentral/console/console.cc]
+	* server/console/integercommandhandler.cpp, server/console/integercommandhandler.hpp: new [ex planetscentral/console/console.cc]
+	* server/console/pipeterminal.cpp, server/console/pipeterminal.hpp: new [ex planetscentral/console/console.cc]
+	* server/console/stringcommandhandler.cpp, server/console/stringcommandhandler.hpp: new [ex planetscentral/console/console.cc]
+
+2017-10-04  Stefan Reuther  <streu@gmx.de>
+
+	* server/console/arcanecommandhandler.cpp, server/console/arcanecommandhandler.hpp: new [ex planetscentral/console/console.cc]
+	* server/console/fundamentalcommandhandler.cpp, server/console/fundamentalcommandhandler.hpp: new [ex planetscentral/console/console.cc]
+	* server/console/macrocommandhandler.cpp, server/console/macrocommandhandler.hpp: new [ex planetscentral/console/console.cc]
+
+2017-10-03  Stefan Reuther  <streu@gmx.de>
+
+	* server/console/commandhandler.hpp: new
+	* server/console/consoleapplication.cpp, server/console/consoleapplication.hpp: new [ex planetscentral/console/console.cc]
+	* server/console/context.hpp: new [ex planetscentral/console/context.h]
+	* server/console/environment.cpp, server/console/environment.hpp: new [ex planetscentral/console/console.cc]
+	* server/console/parser.cpp, server/console/parser.hpp: new [ex planetscentral/console/console.cc]
+	* server/console/terminal.hpp: new [ex planetscentral/console/console.cc]
+	* server/tools/c2console.cpp: new [ex planetscentral/console/console.cc]
+
+2017-10-02  Stefan Reuther  <streu@gmx.de>
+
+	* server/: add graceful shutdown on SIGINT/SIGTERM; update reconnect behaviour
+
+2017-10-01  Stefan Reuther  <streu@gmx.de>
+
+	* server/mailin/mailinapplication.cpp, server/mailin/mailinapplication.hpp: new
+	* server/host/exporter.cpp: implement backup import and add some logging
+	* server/file/clientdirectory.cpp, server/file/clientdirectory.hpp: new
+
+2017-09-29  Stefan Reuther  <streu@gmx.de>
+
+	* server/common/sessionprotocolhandler.hpp: new
+	* server/common/sessionprotocolhandlerfactory.hpp: new
+	* server/common/user.cpp, server/common/user.hpp: new
+	* server/file/clientapplication.cpp, server/file/clientapplication.hpp: new
+	* server/file/serverapplication.cpp, server/file/serverapplication.hpp: new
+	* server/format/serverapplication.cpp, server/format/serverapplication.hpp: new
+	* server/host/serverapplication.cpp, server/host/serverapplication.hpp: new
+	* server/host/user.cpp, server/host/user.hpp: new
+	* server/talk/serverapplication.cpp, server/talk/serverapplication.hpp: new
+
+2017-09-28  Stefan Reuther  <streu@gmx.de>
+
+	* server/common/root.cpp, server/common/root.hpp: new
+	* server/host/hostturn.cpp: convert errors so users don't interpret passed-on hostfile 404's as game 404's
+
+2017-09-27  Stefan Reuther  <streu@gmx.de>
+
+	* server/mailin/mailprocessor.cpp, server/mailin/mailprocessor.hpp: new [ex planetscentral/mailin/mailin.cc]
+	* server/tools/c2mailin.cpp: new [ex planetscentral/mailin/mailin.cc]
+
+2017-09-26  Stefan Reuther  <streu@gmx.de>
+
+	* server/host/cronimpl.cpp: fix scheduler synchronisation; improve logging
+
+2017-09-17  Stefan Reuther  <streu@gmx.de>
+
+	* server/host/hostplayer.cpp (resign): don't produce duplicate subscription
+
+2017-09-16  Stefan Reuther  <streu@gmx.de>
+
+	* server/host/hostgame.cpp (getPermissions): produce correct result [#350]
+
+2017-09-08  Stefan Reuther  <streu@gmx.de>
+
+	* server/host/hostplayer.cpp (setDirectory): use target user permissions, not session user [#349]
+	* server/host/game.cpp: ignore errors during file installation [#349]
+
+2017-09-04  Stefan Reuther  <streu@gmx.de>
+
+	* server/file/internalfileserver.cpp, server/file/internalfileserver.hpp: new
+
+2017-09-03  Stefan Reuther  <streu@gmx.de>
+
+	* server/file/clientdirectoryhandler.hpp: remove setUser function
+
+2017-08-26  Stefan Reuther  <streu@gmx.de>
+
+	* server/host/resultsender.cpp, server/host/resultsender.hpp: new [ex planetscentral/host/exec.h]
+	* server/host/gamerating.cpp, server/host/gamerating.hpp: new [ex planetscentral/host/rating.h]
+
+2017-08-22  Stefan Reuther  <streu@gmx.de>
+
+	* server/host/rank/levelhandler.cpp, server/host/rank/levelhandler.hpp: new [ex planetscentral/host/ranking.h]
+	* server/host/rank/victory.cpp, server/host/rank/victory.hpp: new [ex planetscentral/host/victory.h]
+
+2017-08-20  Stefan Reuther  <streu@gmx.de>
+
+	* server/host/exec.cpp, server/host/exec.hpp: new [ex planetscentral/host/exec.h]
+	* server/host/rank/scorefilereader.cpp, server/host/rank/scorefilereader.hpp: new [ex planetscentral/host/import.h]
+
+2017-08-19  Stefan Reuther  <streu@gmx.de>
+
+	* server/host/rank/rank.cpp, server/host/rank/rank.hpp: new [ex planetscentral/host/rank.h]
+	* server/host/rank/refereefilereader.cpp, server/host/rank/refereefilereader.hpp: new [ex planetscentral/host/rank.h]
+	* server/host/cronimpl.cpp, server/host/cronimpl.hpp: new [ex planetscentral/host/cron.h]
+	* server/host/hostturn.cpp (submit): produce recognizable error message if turn fails to parse [#348]
+
+2017-08-17  Stefan Reuther  <streu@gmx.de>
+
+	* server/host/cron.hpp: new
+	* server/host/hostcron.cpp, server/host/hostcron.hpp: new [ex planetscentral/host/cmdcron.h]
+
+2017-08-16  Stefan Reuther  <streu@gmx.de>
+
+	* server/host/hostschedule.cpp, server/host/hostschedule.hpp: new [ex planetscentral/host/cmdsched.h]
+
+2017-08-15  Stefan Reuther  <streu@gmx.de>
+
+	* server/host/hostturn.cpp, server/host/hostturn.hpp: new [ex planetscentral/host/cmdplayer.h]
+
+2017-08-13  Stefan Reuther  <streu@gmx.de>
+
+	* server/host/configurationbuilder.cpp, server/host/configurationbuilder.hpp: new [ex planetscentral/host/exec.h]
+	* server/host/exporter.cpp, server/host/exporter.hpp: new [ex planetscentral/host/exec.h]
+	* server/c2host.cpp: add working directory configuration
+
+2017-08-12  Stefan Reuther  <streu@gmx.de>
+
+	* server/common/racenames.cpp, server/common/racenames.hpp: new
+	* server/host/gamearbiter.cpp, server/host/gamearbiter.hpp: new [ex planetscentral/host/lock.h]
+	* server/host/hostgame.cpp, server/host/hostgame.hpp: new [ex planetscentral/host/cmdgame.h]
+	* server/host/hostplayer.cpp, server/host/hostplayer.hpp: new [ex planetscentral/host/cmdplayer.h]
+	* server/host/installer.cpp, server/host/installer.hpp: new [ex planetscentral/host/install.h]
+
+2017-08-08  Stefan Reuther  <streu@gmx.de>
+
+	* server/interface/hostplayerserver.cpp, server/interface/hostplayerserver.hpp: new [ex planetscentral/host/cmdplayer.h]
+
+2017-08-07  Stefan Reuther  <streu@gmx.de>
+
+	* server/interface/hostplayerclient.cpp, server/interface/hostplayerclient.hpp: new [ex planetscentral/host/cmdplayer.h]
+
+2017-08-06  Stefan Reuther  <streu@gmx.de>
+
+	* server/interface/hostgameserver.cpp, server/interface/hostgameserver.hpp: new [ex planetscentral/host/cmdgame.h]
+	* server/interface/hostscheduleserver.cpp, server/interface/hostscheduleserver.hpp: new [ex planetscentral/host/cmdsched.h]
+	* server/interface/hostturnclient.cpp, server/interface/hostturnclient.hpp: new [ex planetscentral/host/cmdplayer.h]
+	* server/interface/hostturnserver.cpp, server/interface/hostturnserver.hpp: new [ex planetscentral/host/cmdplayer.h]
+
+2017-08-03  Stefan Reuther  <streu@gmx.de>
+
+	* server/interface/hostgameclient.cpp, server/interface/hostgameclient.hpp: new [ex planetscentral/host/cmdgame.h]
+	* server/interface/hostscheduleclient.cpp, server/interface/hostscheduleclient.hpp: new [ex planetscentral/host/cmdsched.h]
+
+2017-07-30  Stefan Reuther  <streu@gmx.de>
+
+	* server/host/configuration.cpp, server/host/configuration.hpp: new [ex planetscentral/host/schedule.h]
+	* server/host/game.cpp, server/host/game.hpp: new [ex planetscentral/host/game.h]
+	* server/host/gamecreator.cpp, server/host/gamecreator.hpp: new [ex planetscentral/host/newgame.h]
+	* server/host/schedule.cpp, server/host/schedule.hpp: new [ex planetscentral/host/schedule.h]
+	* server/host/talkadapter.cpp, server/host/talkadapter.hpp: new [ex planetscentral/host/talk.h]
+	* server/host/talklistener.hpp: new [ex planetscentral/host/talk.h]
+	* server/interface/hostgame.cpp, server/interface/hostgame.hpp: new [ex planetscentral/host/cmdgame.h]
+	* server/interface/hostplayer.cpp, server/interface/hostplayer.hpp: new [ex planetscentral/host/cmdplayer.h]
+	* server/interface/hostschedule.hpp, server/interface/hostschedule.cpp: new [ex planetscentral/host/cmdsched.h]
+	* server/interface/hostturn.cpp, server/interface/hostturn.hpp: new [ex planetscentral/host/cmdplayer.h]
+
+2017-07-29  Stefan Reuther  <streu@gmx.de>
+
+	* util/processrunner.cpp, util/processrunner.hpp: new [ex planetscentral/host/runner.h]
+
+2017-07-28  Stefan Reuther  <streu@gmx.de>
+
+	* server/host/hosttool.cpp, server/host/hosttool.cpp: new [ex planetscentral/host/cmdhost.h]
+
+2017-07-25  Stefan Reuther  <streu@gmx.de>
+
+	* server/host/commandhandler.cpp, server/host/commandhandler.hpp: new [ex planetscentral/host/host.cc]
+	* server/host/root.cpp, server/host/root.hpp: new [ex planetscentral/host/host.cc]
+	* server/host/session.hpp: new [ex planetscentral/host/host.cc]
+
+2017-07-23  Stefan Reuther  <streu@gmx.de>
+
+	* server/c2host.cpp: new [ex planetscentral/host/host.cc]
+	* server/interface/hostcronserver.cpp, server/interface/hostcronserver.hpp: new [ex planetscentral/host/cmdcron.h]
+	* server/interface/hosttool.cpp, server/interface/hosttool.hpp: new [ex planetscentral/host/cmdhost.h]
+	* server/interface/hosttoolclient.cpp, server/interface/hosttoolclient.hpp: new [ex planetscentral/host/cmdhost.h]
+	* server/interface/hosttoolserver.cpp, server/interface/hosttoolserver.hpp: new [ex planetscentral/host/cmdhost.h]
+
+2017-07-22  Stefan Reuther  <streu@gmx.de>
+
+	* server/interface/talkgroup.hpp: add "key" property
+
+	* server/c2talk.cpp: start using tighter timeouts to speed up system tests
+
+2017-05-13  Stefan Reuther  <streu@gmx.de>
+
+	-------------------- c2ng_2_40_2 (Milestone 2, version 2.40.2)
+
 2017-05-08  Stefan Reuther  <streu@gmx.de>
 
 	* scripts/install.pl: add install script

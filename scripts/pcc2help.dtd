@@ -1,0 +1,83 @@
+<!ENTITY nbsp "&#160;">
+
+<!ENTITY % block "h1|h2|h3|p|ul|ol|kl|dl|img|table|pre">
+<!ENTITY % text  "#PCDATA|a|b|em|tt|kbd|font">
+<!ENTITY % nestedBlock "ul|ol|kl|dl|img|br|table|pre">
+
+<!ELEMENT help (page|group)*>
+
+<!ELEMENT group (page|group)*>
+<!ATTLIST group id    CDATA #IMPLIED
+                title CDATA #REQUIRED>
+
+<!ELEMENT page (%block;|page)*>
+<!ATTLIST page id CDATA #REQUIRED>
+
+<!-- Headings contain only #PCDATA to allow reusing them in attributes -->
+<!ELEMENT h1     (#PCDATA)>
+<!ELEMENT h2     (#PCDATA)>
+<!ELEMENT h3     (#PCDATA)>
+<!ATTLIST h1 id CDATA #IMPLIED>
+<!ATTLIST h2 id CDATA #IMPLIED>
+<!ATTLIST h3 id CDATA #IMPLIED>
+
+<!-- Generic paragraph -->
+<!ELEMENT p      (%text;|img|br)*>
+
+<!-- ul/ol contain any number of li -->
+<!ELEMENT ul     (li)*>
+<!ELEMENT ol     (li)*>
+<!ELEMENT li     (%text;|%nestedBlock;)*>
+
+<!-- kl contains any number of <ki key="...">...</ki> -->
+<!ELEMENT kl     (ki)*>
+<!ELEMENT ki     (%text;|%nestedBlock;)*>
+<!ATTLIST ki key CDATA #REQUIRED>
+
+<!-- dl contains any number of <di term="...">...</di> -->
+<!ELEMENT dl     (di)*>
+<!ELEMENT di     (%text;|%nestedBlock;)*>
+<!ATTLIST di term CDATA #REQUIRED>
+
+<!-- Text elements can nest as required -->
+<!-- Links -->
+<!ELEMENT a      (%text;)*>
+<!ATTLIST a href CDATA #REQUIRED>
+
+<!-- Font styles -->
+<!ELEMENT b      (%text;)*>
+<!ELEMENT em     (%text;)*>
+<!ELEMENT tt     (%text;)*>
+<!ELEMENT font   (%text;)*>
+<!ATTLIST font color CDATA #IMPLIED>
+
+<!-- Keycaps. These do not nest. -->
+<!ELEMENT kbd    (#PCDATA)>
+
+<!-- Images -->
+<!ELEMENT img    EMPTY>
+<!ATTLIST img src   CDATA #REQUIRED
+              align (left|right|center) #IMPLIED>
+
+<!-- Hard linefeed -->
+<!ELEMENT br     EMPTY>
+
+<!-- Tables -->
+<!ELEMENT table  (tr)*>
+<!ATTLIST table align (left|right|center) #IMPLIED>
+
+<!ELEMENT tr     (td|tn|th)*>
+
+<!-- Table cells. td is regular data, th is heading (highlighted, centered),
+     tn is numbers (right-aligned). Alignment can be overridden. Widths
+     can and must be specified on the first line. -->
+<!ELEMENT td     (%text;)*>
+<!ELEMENT th     (%text;)*>
+<!ELEMENT tn     (%text;)*>
+<!ATTLIST td align (left|right|center) #IMPLIED   width CDATA #IMPLIED>
+<!ATTLIST th align (left|right|center) #IMPLIED   width CDATA #IMPLIED>
+<!ATTLIST tn align (left|right|center) #IMPLIED   width CDATA #IMPLIED>
+
+<!-- Preformatted -->
+<!ELEMENT pre    (%text;)*>
+<!ATTLIST pre class (plaintext|ccscript) #IMPLIED>

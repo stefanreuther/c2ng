@@ -8,26 +8,26 @@
 #include "t_server_interface.hpp"
 #include "afl/data/vectorvalue.hpp"
 #include "afl/net/commandhandler.hpp"
+#include "afl/test/commandhandler.hpp"
 #include "server/types.hpp"
-#include "u/helper/commandhandlermock.hpp"
 
 /** Simple test. */
 void
 TestServerInterfaceTalkSyntaxClient::testIt()
 {
-    CommandHandlerMock mock;
+    afl::test::CommandHandler mock("testIt");
     server::interface::TalkSyntaxClient testee(mock);
 
     // SYNTAXGET
-    mock.expectCall("SYNTAXGET|foo");
-    mock.provideReturnValue(server::makeStringValue("bar"));
+    mock.expectCall("SYNTAXGET, foo");
+    mock.provideNewResult(server::makeStringValue("bar"));
     TS_ASSERT_EQUALS(testee.get("foo"), "bar");
 
     // SYNTAXMGET (with wrong return value)
     String_t abc[] = {"a","b","c"};
     {
-        mock.expectCall("SYNTAXMGET|a|b|c");
-        mock.provideReturnValue(0);
+        mock.expectCall("SYNTAXMGET, a, b, c");
+        mock.provideNewResult(0);
         afl::data::Vector::Ref_t result = testee.mget(abc);
         TS_ASSERT_EQUALS(result->size(), 0U);
     }
@@ -38,8 +38,8 @@ TestServerInterfaceTalkSyntaxClient::testIt()
         expectation->pushBackString("aa");
         expectation->pushBackNew(0);
         expectation->pushBackInteger(42);
-        mock.expectCall("SYNTAXMGET|a|b|c");
-        mock.provideReturnValue(new afl::data::VectorValue(expectation));
+        mock.expectCall("SYNTAXMGET, a, b, c");
+        mock.provideNewResult(new afl::data::VectorValue(expectation));
         
         afl::data::Vector::Ref_t result = testee.mget(abc);
         TS_ASSERT_EQUALS(result->size(), 3U);

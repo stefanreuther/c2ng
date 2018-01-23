@@ -8,6 +8,7 @@
 #include "afl/string/format.hpp"
 #include "ui/res/resid.hpp"
 #include "client/objectlistener.hpp"
+#include "game/types.hpp"
 
 using ui::widgets::FrameGroup;
 
@@ -51,10 +52,10 @@ client::tiles::BaseScreenHeaderTile::attach(ObjectObserverProxy& oop)
                                                      r->hostConfiguration().getExperienceLevelName(level, session.translator()));
 
                     // ex WBaseScreenHeaderTile::getPictureId
-                    int tech = std::max(std::max(p->getBaseTechLevel(p->EngineTech).orElse(0),
-                                                 p->getBaseTechLevel(p->HullTech).orElse(0)),
-                                        std::max(p->getBaseTechLevel(p->BeamTech).orElse(0),
-                                                 p->getBaseTechLevel(p->TorpedoTech).orElse(0)));
+                    int tech = std::max(std::max(p->getBaseTechLevel(game::EngineTech).orElse(0),
+                                                 p->getBaseTechLevel(game::HullTech).orElse(0)),
+                                        std::max(p->getBaseTechLevel(game::BeamTech).orElse(0),
+                                                 p->getBaseTechLevel(game::TorpedoTech).orElse(0)));
                     m_image = ui::res::makeResourceId(ui::res::BASE, tech, p->getId());
                 }
             }

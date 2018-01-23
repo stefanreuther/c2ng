@@ -1,25 +1,25 @@
 /**
   *  \file gfx/sdl/engine.cpp
+  *  \brief Class gfx::sdl::Engine
   */
 
 #include "config.h"
 #ifdef HAVE_SDL
 # include <cstdlib>
 # include <SDL.h>
+# ifdef HAVE_SDL_IMAGE
+#  include <SDL_image.h>
+# endif
+# include "afl/except/fileformatexception.hpp"
 # include "afl/string/format.hpp"
+# include "afl/sys/mutexguard.hpp"
 # include "afl/sys/time.hpp"
 # include "gfx/eventconsumer.hpp"
 # include "gfx/graphicsexception.hpp"
 # include "gfx/sdl/engine.hpp"
+# include "gfx/sdl/streaminterface.hpp"
 # include "gfx/sdl/surface.hpp"
 # include "util/translation.hpp"
-# include "gfx/sdl/streaminterface.hpp"
-# include "afl/except/fileformatexception.hpp"
-# include "util/translation.hpp"
-# include "afl/sys/mutexguard.hpp"
-# ifdef HAVE_SDL_IMAGE
-#  include <SDL_image.h>
-# endif
 
 namespace {
     const char LOG_NAME[] = "gfx.sdl";
@@ -192,6 +192,7 @@ namespace {
 
 }
 
+// Constructor.
 gfx::sdl::Engine::Engine(afl::sys::LogListener& log)
     : m_log(log),
       m_window(),
@@ -214,17 +215,10 @@ gfx::sdl::Engine::Engine(afl::sys::LogListener& log)
         throw GraphicsException(afl::string::Format(_("Error initializing SDL: %s").c_str(), SDL_GetError()));
     }
 
-    // FIXME: needed?
-    // global_timer_id = SDL_AddTimer(TIMER_MS, timerFunction, 0);
-    // if (!global_timer_id)
-    //     throw InitException(string_t(_("Unable to start timer: ")) + SDL_GetError());
-
     SDL_SetEventFilter(quitHandler);
     SDL_EnableUNICODE(1);
     SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
 
-    // FIXME: needed?
-    // SDL_EventState(SDL_ENABLE, ev_Tick);
     SDL_EventState(SDL_ENABLE, SDL_KEYDOWN);
     SDL_EventState(SDL_ENABLE, SDL_MOUSEBUTTONUP);
     SDL_EventState(SDL_ENABLE, SDL_MOUSEBUTTONDOWN);
@@ -235,18 +229,15 @@ gfx::sdl::Engine::Engine(afl::sys::LogListener& log)
     std::atexit(SDL_Quit);
 }
 
+// Destructor.
 gfx::sdl::Engine::~Engine()
 {
     // ex ui/event.cc:doneEvents
-    // FIXME: needed?
-    // if (global_timer_id) {
-    //     SDL_RemoveTimer(global_timer_id);
-    //     global_timer_id = 0;
-    // }
     SDL_SetEventFilter(0);
     SDL_QuitSubSystem(SDL_INIT_VIDEO | SDL_INIT_TIMER);
 }
 
+// Create a window.
 afl::base::Ref<gfx::Canvas>
 gfx::sdl::Engine::createWindow(int width, int height, int bpp, WindowFlags_t flags)
 {
@@ -293,6 +284,7 @@ gfx::sdl::Engine::createWindow(int width, int height, int bpp, WindowFlags_t fla
     return *m_window;
 }
 
+// Load an image file.
 afl::base::Ref<gfx::Canvas>
 gfx::sdl::Engine::loadImage(afl::io::Stream& file)
 {
@@ -310,12 +302,7 @@ gfx::sdl::Engine::loadImage(afl::io::Stream& file)
     return *new Surface(sfc, true);
 }
 
-// /** Get Event from Queue. Fetches one event and returns it in
-//     \c event. If \c idle is false (default), waits for an event.
-//     If \c idle is true, returns an event with type ev_Idle
-//     if there is no event in the queue. If \c infinite is false,
-//     returns normal mouse events; otherwise returns relative
-//     mouse movement. */
+// Wait for and handle an event.
 void
 gfx::sdl::Engine::handleEvent(EventConsumer& consumer, bool relativeMouseMovement)
 {
@@ -379,24 +366,26 @@ gfx::sdl::Engine::handleEvent(EventConsumer& consumer, bool relativeMouseMovemen
     }
 }
 
+// Get request dispatcher.
 util::RequestDispatcher&
 gfx::sdl::Engine::dispatcher()
 {
     return *this;
 }
 
+// Create a user-interface timer.
 afl::base::Ref<gfx::Timer>
 gfx::sdl::Engine::createTimer()
 {
     return m_timerQueue.createTimer();
 }
 
+/*
+ *  Privates
+ */
 
-// /** Set mouse mode.
-//     \param infinite \c false = normal mode. Mouse events report normal
-//     x/y coordinates. Pointer is visible. \c true = infinite movement
-//     mode. Mouse events report relative x/y coordinates. Pointer is
-//     invisible. */
+/** Set mouse mode.
+    \param enable true: grab mouse pointer and start reporting infinite movement; false: normal mouse behaviour */
 void
 gfx::sdl::Engine::setMouseGrab(bool enable)
 {
@@ -414,12 +403,12 @@ gfx::sdl::Engine::setMouseGrab(bool enable)
     }
 }
 
-/** Convert SDL event into our format.
-    \param se [input] the SDL event to convert
-    \param ue [output] the event we generate
-    \param infinite true iff we are in "infinite movement" mode and want
-    relative mouse movement to be reported.
-    \returns true iff successful, false if event doesn't map to our scheme. */
+/** Convert and dispatch SDL event.
+    \param se       SDL event
+    \param consumer Event consumer to receive the event
+    \param infinite true iff we are in "infinite movement" mode and want relative mouse movement to be reported.
+    \retval true Event was dispatched
+    \retval false Event not understood */
 bool
 gfx::sdl::Engine::convertEvent(const SDL_Event& se, gfx::EventConsumer& consumer, bool infinite)
 {
@@ -521,22 +510,6 @@ gfx::sdl::Engine::convertEvent(const SDL_Event& se, gfx::EventConsumer& consumer
 
      case SDL_MOUSEBUTTONUP:
         return handleMouse(consumer, se.button, infinite, 0);
-
-        // FIXME: needed?
-        //  case ev_Tick:
-        //  {
-        //      long now = global_timer;
-        //      ue.type = ev_Tick;
-        //      if (last_tick_event >= 0)
-        //          ue.tick.elapsed = (now - last_tick_event);
-        //      else
-        //          ue.tick.elapsed = 1;
-        //      last_tick_event = now;
-        //  }
-        //  return true;
-        //  case SDL_NOEVENT:
-        //     ue.type = ev_Idle;
-        //     return true;
 
      case SDL_WAKE_EVENT:
         m_lastWasRunnable = true;

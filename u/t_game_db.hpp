@@ -13,6 +13,21 @@ class TestGameDbDrawingAtomMap : public CxxTest::TestSuite {
     void testSave();
 };
 
+class TestGameDbFleetLoader : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testBroken();
+    void testBrokenBadSig();
+    void testBrokenBadVersion();
+    void testBrokenTruncated();
+    void testSimple();
+    void testMoved();
+    void testMovedRange();
+    void testMovedName();
+    void testDeleted();
+    void testComments();
+};
+
 class TestGameDbStructures : public CxxTest::TestSuite {
  public:
     void testHeader();

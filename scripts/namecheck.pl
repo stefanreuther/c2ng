@@ -47,6 +47,7 @@ foreach (@ARGV) {
     }
 }
 
+my $num_failures = 0;
 loadGrammar($grammar, $grammarFile);
 while (<STDIN>) {
     foreach (split /\s+/) {
@@ -57,18 +58,25 @@ while (<STDIN>) {
         }
     }
 }
+print "** Failures: $num_failures\n"
+    if $num_failures;
 
 sub checkWord {
     my ($grammar, $root, $word) = @_;
-    my $result = deriveGrammar($grammar, $root, $word, length($word));
+    # The depth is used to limit maximum recursion.
+    # 'length($word)' will allow one grammer production per character in the word.
+    # Since we sometimes need multiple productions to reach one that actually produces terminal symbols,
+    # take that by a factor. This still is a brute heuristic that can fail.
+    my $result = deriveGrammar($grammar, $root, $word, 10*length($word));
     if ($result->{state} && $result->{remain} == 0) {
         if ($debug) {
             print "$word: matches\n";
             dumpTree($result->{path}, '  ');
         }
     } else {
-        print "$word: fail, state $result->{state}, remain $result->{remain}\n";
+        print "$word:$root fail, state $result->{state}, remain $result->{remain}\n";
         dumpTree($result->{path}, '  ');
+        ++$num_failures;
     }
 }
 

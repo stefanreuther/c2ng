@@ -56,14 +56,24 @@ TestServerTalkRoot::testCheckUserPermission()
     TS_ASSERT(!testee.checkUserPermission("g:44", "1003"));
     TS_ASSERT(!testee.checkUserPermission("-g:44", "1003"));
 
+    TS_ASSERT( testee.checkUserPermission("u:1003", "1003"));
+    TS_ASSERT(!testee.checkUserPermission("u:1003", "1004"));
+    TS_ASSERT(!testee.checkUserPermission("-u:1003", "1003"));
+    TS_ASSERT(!testee.checkUserPermission("-u:1003", "1004"));
+
     // Combinations
     // - first hit decides
     TS_ASSERT(!testee.checkUserPermission("-all,all", "1003"));
     TS_ASSERT(!testee.checkUserPermission("-p:defProfile1,all", "1003"));
+    TS_ASSERT(!testee.checkUserPermission("-all,u:1003", "1003"));
+    TS_ASSERT(!testee.checkUserPermission("-all,u:1003", "1004"));
+    TS_ASSERT( testee.checkUserPermission("u:1003,-all", "1003"));
 
     // - first is mismatch, second decides
     TS_ASSERT( testee.checkUserPermission("-p:defProfile0,all", "1003"));
     TS_ASSERT( testee.checkUserPermission("-p:bothProfile0,all", "1003"));
+    TS_ASSERT(!testee.checkUserPermission("u:1003,-all", "1004"));
+    TS_ASSERT( testee.checkUserPermission("u:1003,all", "1004"));
 
     // - no match
     TS_ASSERT(!testee.checkUserPermission("p:userProfile0,p:bothProfile0", "1003"));

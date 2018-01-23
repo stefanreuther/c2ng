@@ -106,7 +106,7 @@ namespace {
                             if (p.parseEnd()) {
                                 break;
                             }
-                            p.parseChar(',');
+                            p.parseCharacter(',');
                         }
                     }
                     

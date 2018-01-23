@@ -39,7 +39,7 @@ server::talk::AccessChecker::isAllowed(Topic& t)
         if (readPermissions.empty()) {
             readPermissions = t.forum(m_root).readPermissions().get();
         }
-        m_lastTopicPermitted = m_session.hasPrivilege(readPermissions, m_root);
+        m_lastTopicPermitted = m_session.hasPermission(readPermissions, m_root);
     }
     return m_lastTopicPermitted;
 }

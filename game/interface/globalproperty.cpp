@@ -14,6 +14,7 @@
 
 using interpreter::makeStringValue;
 using interpreter::makeIntegerValue;
+using interpreter::makeSizeValue;
 using interpreter::makeBooleanValue;
 
 afl::data::Value*
@@ -77,26 +78,26 @@ game::interface::getGlobalProperty(GlobalProperty igp, Session& session)
         /* @q My.InMsgs:Int (Global Property)
            Number of incoming (received) messages this turn. */
         if (Game* game = session.getGame().get()) {
-            return makeIntegerValue(int32_t(game->currentTurn().inbox().getNumMessages()));
+            return makeSizeValue(game->currentTurn().inbox().getNumMessages());
         } else {
             return 0;
         }
-// FIXME: port (property)
-//      case igpMyOutMsgs:
-//         /* @q My.OutMsgs:Int (Global Property)
-//            Number of outgoing (sent) messages this turn. */
-//         if (haveDisplayedTurn())
-//             return makeIntValue(getDisplayedTurn().getOutbox(getPlayerId()).getCount());
-//         else
-//             return 0;
+     case igpMyOutMsgs:
+        /* @q My.OutMsgs:Int (Global Property)
+           Number of outgoing (sent) messages this turn. */
+        if (Game* game = session.getGame().get()) {
+            return makeSizeValue(game->currentTurn().outbox().getNumMessages());
+        } else {
+            return 0;
+        }
      case igpMyVCRs:
         /* @q My.VCRs:Int (Global Property)
            Number of incoming combat recordings this turn. */
         if (Game* game = session.getGame().get()) {
             if (game::vcr::Database* db = game->currentTurn().getBattles().get()) {
-                return makeIntegerValue(int32_t(db->getNumBattles()));
+                return makeSizeValue(db->getNumBattles());
             } else {
-                return makeIntegerValue(0);
+                return makeSizeValue(0);
             }
         } else {
             return 0;
@@ -125,13 +126,16 @@ game::interface::getGlobalProperty(GlobalProperty igp, Session& session)
 //             return makeStringValue(root_dir_name);
 //         else
 //             return 0;
-// FIXME: port (property)
-//      case igpSelectionLayer:
-//         /* @q Selection.Layer:Int (Global Property)
-//            Current selection layer.
-//            A number from 0 to 7.
-//            @assignable */
-//         return makeIntValue(GMultiSelection::getCurrentSelectionLayer());
+     case igpSelectionLayer:
+        /* @q Selection.Layer:Int (Global Property)
+           Current selection layer.
+           A number from 0 to 7.
+           @assignable */
+        if (Game* game = session.getGame().get()) {
+            return makeSizeValue(game->markings().getCurrentLayer());
+        } else {
+            return 0;
+        }
 // FIXME: port (property)
 //      case igpSystemLanguage:
 //         /* @q System.Language:Str (Global Property)
@@ -238,7 +242,7 @@ game::interface::getGlobalProperty(GlobalProperty igp, Session& session)
            Registration flag.
            %True if you use a shareware key (Tech 6 limit), %False if you use a full version. */
         if (Root* root = session.getRoot().get()) {
-            return makeBooleanValue(root->registrationKey().getStatus() == RegistrationKey::Unregistered);
+            return makeBooleanValue(root->registrationKey().getStatus() != RegistrationKey::Registered);
         } else {
             return 0;
         }
@@ -247,7 +251,7 @@ game::interface::getGlobalProperty(GlobalProperty igp, Session& session)
            Registration flag.
            One of <tt>"Shareware"</tt> or <tt>"Registered"</tt>. */
         if (Root* root = session.getRoot().get()) {
-            return makeStringValue(root->registrationKey().getStatus() == RegistrationKey::Unregistered ? "Shareware" : "Registered");
+            return makeStringValue(root->registrationKey().getStatus() == RegistrationKey::Registered ? "Registered" : "Shareware");
         } else {
             return 0;
         }
@@ -338,11 +342,15 @@ game::interface::setGlobalProperty(GlobalProperty igp, Session& session, afl::da
     // ex int/if/globalif.h:setGlobalProperty
     int32_t iv;
     switch (igp) {
-    // FIXME: port (assignable property)
-    //  case igpSelectionLayer:
-    //     if (checkIntArg(iv, value, 0, GMultiSelection::NUM_SELECTION_LAYERS-1))
-    //         GMultiSelection::setCurrentSelectionLayer(iv);
-    //     break;
+     case igpSelectionLayer:
+        if (Game* game = session.getGame().get()) {
+            if (interpreter::checkIntegerArg(iv, value, 0, int(game->markings().get(game::map::Markings::Ship).size()) - 1)) {
+                game->markings().setCurrentLayer(iv, game->currentTurn().universe());
+            }
+        } else {
+            throw interpreter::Error::notAssignable();
+        }
+        break;
      case igpRandomSeed:
         if (interpreter::checkIntegerArg(iv, value)) {
             session.rng().setSeed(iv);

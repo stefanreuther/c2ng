@@ -72,9 +72,7 @@ game::map::Planet::Planet(Id_t id)
       m_position(),
       m_knownToNotExist(false),
       m_currentPlanetData(),
-      m_previousPlanetData(),
       m_currentBaseData(),
-      m_previousBaseData(),
       m_baseKind(UnknownBase),
       m_planetKind(NoPlanet),
       m_planetSource(),
@@ -120,12 +118,6 @@ game::map::Planet::addCurrentPlanetData(const PlanetData& data, PlayerSet_t sour
     m_planetSource += source;
 }
 
-void
-game::map::Planet::addPreviousPlanetData(const PlanetData& data)
-{
-    m_previousPlanetData = data;
-}
-
 // /** Add starbase .dat file entry. See addPlanetData() for details. */
 void
 game::map::Planet::addCurrentBaseData(const BaseData& data, PlayerSet_t source)
@@ -133,12 +125,6 @@ game::map::Planet::addCurrentBaseData(const BaseData& data, PlayerSet_t source)
     // ex GPlanet::addBaseData
     m_currentBaseData = data;
     m_baseSource += source;
-}
-
-void
-game::map::Planet::addPreviousBaseData(const BaseData& data)
-{
-    m_previousBaseData = data;
 }
 
 // /** Set planet position. */
@@ -170,6 +156,18 @@ game::map::Planet::setKnownToNotExist(bool value)
 {
     m_knownToNotExist = value;
     markDirty();
+}
+
+void
+game::map::Planet::getCurrentPlanetData(PlanetData& data) const
+{
+    data = m_currentPlanetData;
+}
+
+void
+game::map::Planet::getCurrentBaseData(BaseData& data) const
+{
+    data = m_currentBaseData;
 }
 
 // /** Do internal checks for this planet.
@@ -218,7 +216,6 @@ game::map::Planet::internalCheck(const Configuration& config,
         // FIXME this will make PCC2 write invalid files, i.e. where BDATA.DAT and BDATA.DIS disagree.
         log.write(log.Warn, LOG_NAME, afl::string::Format(tx.translateString("Starbase #%d does not have a planet, deleting it").c_str(), m_id));
         m_currentBaseData = BaseData();
-        m_previousBaseData = BaseData();
         m_baseSource = PlayerSet_t();
     }
 
@@ -261,9 +258,7 @@ game::map::Planet::combinedCheck2(const Universe& univ, PlayerSet_t availablePla
             if (getOwner(owner) && availablePlayers.contains(owner)) {
                 // planet is played by us, but we do no longer own it
                 m_currentPlanetData.owner = 0;
-                m_previousPlanetData.owner = 0;
                 m_currentPlanetData.colonistClans = LongProperty_t();
-                m_previousPlanetData.colonistClans = LongProperty_t();
             }
         }
 
@@ -906,6 +901,7 @@ game::map::Planet::setCargo(Element::Type type, LongProperty_t amount)
         }
         break;
     }
+    markDirty();
 }
 
 
@@ -977,72 +973,26 @@ game::map::Planet::setBaseShipyardOrder(IntegerProperty_t action, IntegerPropert
     markDirty();
 }
 
-
 game::IntegerProperty_t
-game::map::Planet::getBaseEngineStore(int slot) const
+game::map::Planet::getBaseStorage(TechLevel area, int slot) const
 {
-    // ex GPlanet::getBaseEngineStore
-    return m_currentBaseData.engineStorage.get(slot);
-}
-
-game::IntegerProperty_t
-game::map::Planet::getBaseBeamStore(int slot) const
-{
-    // ex GPlanet::getBaseBeamStore
-    return m_currentBaseData.beamStorage.get(slot);
-}
-
-game::IntegerProperty_t
-game::map::Planet::getBaseHullStoreSlot(int slot) const
-{
-    // ex GPlanet::getBaseHullStoreSlot
-    return m_currentBaseData.hullStorage.get(slot);
-}
-
-game::IntegerProperty_t
-game::map::Planet::getBaseLauncherStore(int slot) const
-{
-    // ex GPlanet::getBaseLauncherStore
-    return m_currentBaseData.launcherStorage.get(slot);
-}
-
-void
-game::map::Planet::setBaseEngineStore(int slot, IntegerProperty_t amount)
-{
-    // ex GPlanet::setBaseEngineStore
-    if (IntegerProperty_t* p = m_currentBaseData.engineStorage.at(slot)) {
-        *p = amount;
-        markDirty();
+    // ex GPlanet::getBaseEngineStore, GPlanet::getBaseBeamStore, GPlanet::getBaseHullStoreSlot, GPlanet::getBaseLauncherStore
+    if (const BaseStorage* p = game::map::getBaseStorage(m_currentBaseData, area)) {
+        return p->get(slot);
+    } else {
+        return afl::base::Nothing;
     }
 }
 
 void
-game::map::Planet::setBaseBeamStore(int slot, IntegerProperty_t amount)
+game::map::Planet::setBaseStorage(TechLevel area, int slot, IntegerProperty_t amount)
 {
-    // ex GPlanet::setBaseBeamStore
-    if (IntegerProperty_t* p = m_currentBaseData.beamStorage.at(slot)) {
-        *p = amount;
-        markDirty();
-    }
-}
-
-void
-game::map::Planet::setBaseHullStoreSlot(int slot, IntegerProperty_t amount)
-{
-    // ex GPlanet::setBaseHullStoreSlot
-    if (IntegerProperty_t* p = m_currentBaseData.hullStorage.at(slot)) {
-        *p = amount;
-        markDirty();
-    }
-}
-
-void
-game::map::Planet::setBaseLauncherStore(int slot, IntegerProperty_t amount)
-{
-    // ex GPlanet::setBaseLauncherStore
-    if (IntegerProperty_t* p = m_currentBaseData.launcherStorage.at(slot)) {
-        *p = amount;
-        markDirty();
+    // ex GPlanet::setBaseHullStoreSlot, GPlanet::setBaseEngineStore, GPlanet::setBaseBeamStore, GPlanet::setBaseLauncherStore
+    if (BaseStorage* pBS = game::map::getBaseStorage(m_currentBaseData, area)) {
+        if (IntegerProperty_t* p = pBS->at(slot)) {
+            *p = amount;
+            markDirty();
+        }
     }
 }
 

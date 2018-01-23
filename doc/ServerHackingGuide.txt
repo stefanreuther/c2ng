@@ -1,0 +1,160 @@
+PLANETSCENTRAL HACKING GUIDE (c2ng)
+***********************************
+
+
+Introduction
+============
+
+  This document gives an overview over the internals of the
+  PlanetsCentral servers bundled with PCC2ng.
+
+
+
+Overview
+=========
+
+  PlanetsCentral consists of a small bunch of application servers each
+  providing a specific function.
+
+  - Network services
+    + c2file (file store)
+    + c2format (binary file parsers for eventual use by web applications)
+    + c2host (game hosting: configuration, scheduler)
+    + c2mailout (mail queue)
+    + c2monitor (status monitor)
+    + c2nntp (forum/NNTP adaptor)
+    + c2router (c2server multiplexer)
+    + c2talk (forum/PMs)
+
+  - Utilities
+    + c2console (console for all of the above)
+    + c2logger (log file redirector)
+    + c2mailin (utility to parse RfC mail and feed it into c2host)
+    + c2server (server mode VGAP client)
+
+  (The PCC2 utility distribution also includes c2rater and c2dbdump.)
+
+  These servers use redis as data store, and (optionally) some disk
+  directory. They talk to each other using the redis serialisation
+  protocol (RESP), which is a simple reliable method of transferring
+  array-of-things across a network without escaping/quoting worries.
+
+  The main objectives of splitting PlanetsCentral into servers are
+  sharing application logic (e.g. the "create a forum" or "can this
+  user access this file" logic is in a central place) and the
+  possibility to isolate services by running them in different user
+  Ids or containers. Scalability is currently not a goal, a single
+  machine can host a VGAP server just fine.
+
+  This architecture style is nowadays refered to as microservices.
+  Although the target aims for all services built from the same
+  source, running different versions or implementations in one setup
+  is an explicitly supported use-case.
+
+
+Structure of a RESP Server
+==========================
+
+Stateless server
+----------------
+
+  A stateless server has no per-connection state; all commands will
+  produce the same response on every connection (but may modify a
+  global state seen by other commands).
+
+  afl::net::NetworkStack (global instance)
+         - afl's network stack abstraction. Provides a uniform API
+           for Unix/Windows network programming.
+  afl::net::Server (one instance)
+         - Multi-connection network server. Accepts connections and
+           transfers data in and out.
+  afl::net::resp::ProtocolHandler (one per connection)
+         - RESP protocol parser. Parses incoming commands and formats
+           results.
+  ServerClass < afl::net::CommandHandler (one instance)
+         - The concrete logic is implemented in this class.
+  ApplicationClass < server::Application (one instance)
+         - The application class performs configuration and contains
+           global state.
+
+
+Stateful server
+---------------
+
+  A stateful server has per-connection state. Commands can depend on
+  previous commands sent on the same connection.
+
+  Most servers are stateful by their support of the USER command which
+  enables access checking.
+
+  afl::net::NetworkStack (global instance)
+         - afl's network stack abstraction. Provides a uniform API
+           for Unix/Windows network programming.
+  afl::net::Server (one instance)
+         - Multi-connection network server. Accepts connections and
+           transfers data in and out.
+  HandlerClass < afl::net::ProtocolHandler (one per connection)
+         - Manages lifetime of per-connection/session state.
+           Dispatches all calls into its per-connection RESP handler.
+         - Typically a SessionProtocolHandler<...>.
+  afl::net::resp::ProtocolHandler (one per connection)
+         - RESP protocol parser. Parses incoming commands and formats
+           results.
+  ServerClass < afl::net::CommandHandler (one per connection)
+         - The concrete logic is implemented in this class.
+  ApplicationClass < server::Application (one instance)
+         - The application class performs configuration and contains
+           global state.
+
+
+Implementation of the CommandHandler
+------------------------------------
+
+  For each service or service section, there is an interface in
+  server::interface.
+
+  MyService
+         - abstract base class
+  MyServiceClient
+         - implementation of MyService that implements methods
+           by calling a CommandHandler. This is used by users of the
+           service.
+  MyServiceServer
+         - implementation of afl::net::CommandHandler that calls a
+           MyServiceInstance.
+
+  The server-specific folder contains an implementation of MyService
+  that contains the actual logic. To implement the CommandHandler of
+  a service, it is combined with a MyServiceServer.
+
+  If a service implements multiple sections (e.g. c2talk implementing
+  RENDERxxx, FORUMxxx, POSTxxx, etc.), another CommandHandler instance
+  is put in front that multiplexes between the sections. All state is
+  in a Session class, so the individual CommandHandler can be
+  short-lived.
+
+
+Security Model
+--------------
+
+  Essentially, servers assume that everyone who contacts them is
+  trusted and has performed user authentication against a user
+  database.
+
+  Coming from the "a service is a set of common subroutines" mindset,
+  servers do NOT validate user credentials. Access checking is an
+  optional feature of servers that must be requested by the caller. A
+  server connection starts in unrestricted mode, and can be put in a
+  user context using the USER command.
+
+  It is NOT intended to have these servers listen on a
+  world-accessible port in the network.
+
+  One implication of this security model is that a stateful server
+  connection must NOT auto-reconnect. Connection loss and reconnect
+  between a USER command and a function command would execute the
+  function command with no access checking.
+
+
+
+-eof-

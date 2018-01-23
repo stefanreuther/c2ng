@@ -5,9 +5,11 @@
 #define C2NG_GAME_INTERFACE_PLANETMETHOD_HPP
 
 #include "game/map/planet.hpp"
-#include "interpreter/arguments.hpp"
 #include "game/session.hpp"
 #include "game/turn.hpp"
+#include "interpreter/arguments.hpp"
+#include "interpreter/process.hpp"
+#include "game/shipbuildorder.hpp"
 
 namespace game { namespace interface {
 
@@ -41,11 +43,15 @@ namespace game { namespace interface {
         ipmAutoTaxNatives           // 26
     };
 
-    void callPlanetMethod(game::map::Planet& pl, PlanetMethod ipm, interpreter::Arguments& args,
+    void callPlanetMethod(game::map::Planet& pl,
+                          PlanetMethod ipm,
+                          interpreter::Arguments& args,
+                          interpreter::Process& process,
                           Session& session,
                           Turn& turn,
                           Root& root);
 
+    bool parseBuildShipCommand(interpreter::Arguments& args, ShipBuildOrder& o, const game::spec::ShipList& shipList);
 } }
 
 #endif

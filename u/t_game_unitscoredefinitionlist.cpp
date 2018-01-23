@@ -7,6 +7,7 @@
 
 #include "t_game.hpp"
 
+/** Simple test. */
 void
 TestGameUnitScoreDefinitionList::testIt()
 {
@@ -35,3 +36,27 @@ TestGameUnitScoreDefinitionList::testIt()
     TS_ASSERT(testee.lookup(9, found));
     TS_ASSERT_EQUALS(ix, found);
 }
+
+/** UnitScoreDefinitionList must be copyable. */
+void
+TestGameUnitScoreDefinitionList::testCopy()
+{
+    // Set up
+    game::UnitScoreDefinitionList testee;
+    game::UnitScoreDefinitionList::Definition def = {
+        "foo",
+        9,
+        1000
+    };
+    game::UnitScoreDefinitionList::Index_t ix = testee.add(def);
+
+    // Copy
+    game::UnitScoreDefinitionList other(testee);
+    TS_ASSERT(other.get(ix) != 0);
+    TS_ASSERT_EQUALS(other.get(ix)->name, "foo");
+
+    // Assign
+    other = game::UnitScoreDefinitionList();
+    TS_ASSERT(other.get(ix) == 0);
+}
+

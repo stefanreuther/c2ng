@@ -18,10 +18,10 @@ WHAT IS PCC2?
   PCC2. It is intended to be 100% compatible to PCC2. However, it does
   away with many self-imposed limitations of PCC2.
 
-  Milestone Two is a tech demo. Adding to Milestone One, it adds
-  network server code (but does not change the client code very much).
-  Milestone One uncovered gaps in PlanetsCentral network protocols,
-  thus I have given some more priority to upgrading those for now.
+  Milestone Three expands upon previous versions by completing more
+  and more of the foundation code. It adds more properties to the
+  scripting language, more command-line utilities, and more
+  PlanetsCentral servers, but few if any fancy user features.
 
 
 Project Goals
@@ -44,8 +44,8 @@ Project Goals
   - more scriptability.
 
 
-Milestone Two
-==============
+Milestone Three
+================
 
   This version implements some key parts to prove feasibility. It does
   not have a fancy GUI and can not be used for playing.
@@ -75,16 +75,14 @@ Milestone Two
     feature does not break another.
 
   PlanetsCentral / PCC2Web ..................................... done
-    Milestone Two adds Talk and File servers. Compared to the older
-    implementations, they are faster, more robust, and better tested.
-    The File server provides a new backend with automatic compression
-    and deduplication.
+    Milestone Three adds all servers except for PCC2 Web, in better
+    quality than before.
 
 
 What can you do with it?
 ========================
 
-  c2ng(.exe) is the future pcc-v2.
+  c2ng(.exe) is the future player client (pcc-v2).
 
   When you start the program, you will be shown a browser starting
   with "My Computer". Note that the GUI is still incomplete.
@@ -106,6 +104,37 @@ What can you do with it?
   If you have configured PCC2 to make backups of your result files,
   [Alt]+[Up] will show the previous turn. (If you have not configured
   PCC2 to make backups, do so now.)
+
+
+Program List
+-------------
+
+  - Main Utilities
+    . c2ng: graphical player client
+
+  - Utilities
+    . c2configtool: configuration handler
+    . c2export: game data export
+    . c2gfxgen: procedural graphics generation
+    . c2mgrep: message search
+    . c2plugin: plugin manager
+    . c2rater: game rating computer
+    . c2script: scripting engine
+    . c2sweep: game directory cleaner
+    . c2untrn: turn file decompiler
+
+  - PlanetsCentral
+    . c2console: console
+    . c2dbexport: database exporter
+    . c2fileclient: file client
+    . c2file-server: file server
+    . c2format-server: format (binary I/O) server
+    . c2host-server: host server
+    . c2mailin: incoming mail processor
+    . c2mailout-server: mail queue server
+    . c2monitor-server: server status monitor
+    . c2nntp-server: NNTP server
+    . c2talk-server: PM/forum server
 
 
 Near Milestones

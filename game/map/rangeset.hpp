@@ -33,16 +33,16 @@ namespace game { namespace map {
 
         void clear();
         bool isEmpty() const;
-        Point getMinimum() const;
-        Point getMaximum() const;
+        Point getMin() const;
+        Point getMax() const;
 
         Iterator_t begin() const;
         Iterator_t end() const;
 
      private:
         PointMap_t m_points;
-        Point m_minimum;
-        Point m_maximum;
+        Point m_min;
+        Point m_max;
     };
 
 } }
