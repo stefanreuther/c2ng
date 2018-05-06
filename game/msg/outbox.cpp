@@ -38,10 +38,8 @@ namespace {
                 if (bits.contains(i)) {
                     if (i == 12 /*FIXME*/) {
                         return "Host";
-                    } else if (game::Player* p = players.get(i)) {
-                        return p->getName(game::Player::LongName);
                     } else {
-                        return afl::string::Format("Player %d", i);
+                        return players.getPlayerName(i, game::Player::LongName);
                     }
                 }
             }
@@ -265,12 +263,7 @@ game::msg::Outbox::getHeadersForDisplay(int sender,
     // ex GOutbox::getHeadersForDisplay
     // FIXME: receivers &= GPlayerSet::fromInteger(ALL_RECEIVERS_MASK);
 
-    String_t senderName;
-    if (const Player* p = players.get(sender)) {
-        senderName = p->getName(Player::LongName);
-    } else {
-        senderName = afl::string::Format("Player %d", sender);
-    }
+    String_t senderName = players.getPlayerName(sender, Player::LongName);
     String_t receiverText = getReceiverText(receivers, tx, players);
     String_t text = afl::string::Format(tx.translateString("<<< Sub Space Message >>>\nFROM: %s\nTO: %s\n").c_str(),
                                         senderName, receiverText);

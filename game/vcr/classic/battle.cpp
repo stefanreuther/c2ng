@@ -9,6 +9,7 @@
 #include "game/vcr/classic/hostalgorithm.hpp"
 #include "game/vcr/classic/pvcralgorithm.hpp"
 #include "afl/string/format.hpp"
+#include "game/vcr/classic/utils.hpp"
 
 namespace {
     int getBuildPointMass(const game::vcr::Object& obj,
@@ -257,68 +258,23 @@ game::vcr::classic::Battle::getSeed() const
 
 // Format current status as string.
 String_t
-game::vcr::classic::Battle::formatResult(int player, afl::string::Translator& tx) const
+game::vcr::classic::Battle::formatResult(int player, const String_t& annotation, afl::string::Translator& tx) const
 {
     // ex VcrPlayer::getResultString
-    // FIXME: do we need this method, and do we need this signature?
-    int me;
-    if (m_before[0].getOwner() == player) {
-        me = 0;
-    } else if (m_before[1].getOwner() == player) {
-        me = 1;
-    } else {
-        me = 2;
-    }
-
-    String_t s;
-    if (m_result.empty()) {
-        s = tx.translateString("unknown. Wait while computing...");
-    } else if (m_result == Invalid) {
-        s = tx.translateString("Battle cannot be played!");
-    } else if (m_result == Timeout) {
-        s = tx.translateString("Battle timed out (too long).");
-    } else if (m_result == Stalemate) {
-        s = tx.translateString("Stalemate.");
-    } else if (m_result == LeftDestroyed) {
-        if (me == 0) {
-            s = tx.translateString("We were destroyed.");
-        } else if (me == 1) {
-            s = tx.translateString("We won.");
-        } else {
-            s = afl::string::Format(tx.translateString("%s won.").c_str(), m_before[RightSide].getName());
-        }
-    } else if (m_result == RightDestroyed) {
-        if (me == 1) {
-            s = tx.translateString("We were destroyed.");
-        } else if (me == 0) {
-            s = tx.translateString("We won.");
-        } else {
-            s = afl::string::Format(tx.translateString("%s won.").c_str(), m_before[LeftSide].getName());
-        }
-    } else if (m_result == LeftCaptured) {
-        if (me == 0) {
-            s = tx.translateString("They have captured our ship.");
-        } else if (me == 1) {
-            s = tx.translateString("We captured their ship.");
-        } else {
-            s = afl::string::Format(tx.translateString("%s was captured.").c_str(), m_before[LeftSide].getName());
-        }
-    } else if (m_result == RightCaptured) {
-        if (me == 1) {
-            s = tx.translateString("They have captured our ship.");
-        } else if (me == 0) {
-            s = tx.translateString("We captured their ship.");
-        } else {
-            s = afl::string::Format(tx.translateString("%s was captured.").c_str(), m_before[RightSide].getName());
-        }
-    } else if (m_result == BattleResult_t(LeftDestroyed) + RightDestroyed) {
-        s = tx.translateString("Both were destroyed.");
-    } else {
-        s = tx.translateString("Both are disabled.");
-    }
-    return s;
+    return formatBattleResult(m_result,
+                              m_before[0].getName(),
+                              (m_before[0].getOwner() == player ? TeamSettings::ThisPlayer : TeamSettings::EnemyPlayer),
+                              m_before[1].getName(),
+                              (m_before[1].getOwner() == player ? TeamSettings::ThisPlayer : TeamSettings::EnemyPlayer),
+                              annotation,
+                              tx);
 }
 
+game::vcr::classic::BattleResult_t
+game::vcr::classic::Battle::getResult() const
+{
+    return m_result;
+}
 
 
 // /** Store result. Fetches the result from the specified

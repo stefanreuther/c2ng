@@ -3,57 +3,80 @@
   */
 
 #include "game/interface/globalproperty.hpp"
-#include "interpreter/values.hpp"
-#include "game/root.hpp"
-#include "interpreter/error.hpp"
-#include "version.hpp"
 #include "game/game.hpp"
-#include "game/turn.hpp"
-#include "interpreter/arguments.hpp"
 #include "game/registrationkey.hpp"
+#include "game/root.hpp"
+#include "game/turn.hpp"
+#include "game/turnloader.hpp"
+#include "interpreter/arguments.hpp"
+#include "interpreter/error.hpp"
+#include "interpreter/values.hpp"
+#include "version.hpp"
 
 using interpreter::makeStringValue;
 using interpreter::makeIntegerValue;
 using interpreter::makeSizeValue;
 using interpreter::makeBooleanValue;
+using game::TurnLoader;
+
+namespace {
+    afl::data::Value* getTurnLoaderPropery(TurnLoader::Property p, game::Session& session)
+    {
+        if (game::Root* pRoot = session.getRoot().get()) {
+            if (TurnLoader* pTL = pRoot->getTurnLoader().get()) {
+                String_t value = pTL->getProperty(p);
+                if (!value.empty()) {
+                    return makeStringValue(value);
+                }
+            }
+        }
+        return 0;
+    }
+
+    String_t getLanguageCode(afl::string::Translator& tx)
+    {
+        // Translators: translate this as {lang}de, {lang}es, etc.
+        // FIXME: We're stripping the tag manually here.
+        // The idea is to move this stripping into the actual translator implementation
+        // to also allow context-dependant translations such as for example {mission}none, {owner}none
+        // that require different word forms in some languages.
+        String_t text = tx.translateString("{lang}en");
+        String_t::size_type n = text.find('}');
+        if (n != String_t::npos) {
+            text.erase(0, n+1);
+        }
+        return text;
+    }
+}
+
 
 afl::data::Value*
 game::interface::getGlobalProperty(GlobalProperty igp, Session& session)
 {
     // ex int/if/globalif.h:getGlobalProperty
     switch (igp) {
-// FIXME: port (property)
-//      case igpFileFormatLocal:
-//         /* @q System.Local:Str (Global Property)
-//            Local file format.
-//            Reports the file format PCC uses to store your player files:
-//            - <tt>"DOS"</tt> (same as planets.exe)
-//            - <tt>"Windows"</tt> (same as Winplan) */
-
-//         /* In PCC 1.x, this value determines the format of control and message outbox files.
-//            In PCC2, those are orthogonal. We can, however, comparatively easily determine the mailbox format. */
-        // FIXME: should get this value from TurnLoader
-//         if (haveDisplayedTurn()) {
-//             if (getCurrentTurn().getOutbox(getPlayerId()).getFormat() == GOutbox::fDos)
-//                 return makeStringValue("DOS");
-//             else
-//                 return makeStringValue("Windows");
-//         } else {
-//             return 0;
-//         }
+     case igpFileFormatLocal:
+        /* @q System.Local:Str (Global Property)
+           Local file format.
+           Reports the file format PCC uses to store your player files:
+           - <tt>"DOS"</tt> (same as planets.exe)
+           - <tt>"Windows"</tt> (same as Winplan)
+           - <tt>"RST"</tt> (not-unpacked result file, c2nu only)
+           - <tt>"Nu"</tt> (planets.nu, c2ng only) */
+        return getTurnLoaderPropery(TurnLoader::LocalFileFormatProperty, session);
      case igpFileFormatRemote:
         /* @q System.Remote:Str (Global Property)
            Remote file format.
            Reports the file format PCC uses for your turn files, i.e. what the "remote" host system sees:
-           - <tt>"DOS"</tt> (same as planets.exe)
-           - <tt>"Windows"</tt> (same as Winplan) */
+           - <tt>"DOS"</tt> (same as planets.exe, PCC 1.x only)
+           - <tt>"Windows"</tt> (same as Winplan)
+           - <tt>"Nu"</tt> (planets.nu, c2nu only) */
 
         /* In PCC 1.x, this value is 0 for Dosplan, 1 for Winplan, and
            determines the TRN format. This is the config option. As of
            20110206, PCC2 has no such config option and always produces
            Winplan format. */
-        // FIXME: should get this value from TurnLoader
-        return makeStringValue("Windows");
+        return getTurnLoaderPropery(TurnLoader::RemoteFileFormatProperty, session);
      case igpGameDirectory:
         /* @q System.GameDirectory:Str (Global Property)
            Game directory. EMPTY when no game loaded.
@@ -67,10 +90,15 @@ game::interface::getGlobalProperty(GlobalProperty igp, Session& session)
            | Open MakeFileName(System.GameDirectory, "file.txt") For Input As #1
            to access files in the game directory.
 
-           @diff In c2ng, this value may be the empty string "" if a game is loaded,
+           @diff In c2ng, this value may be EMPTY if a game is loaded,
            but the game directory is a virtual directory (e.g. network game). */
         if (Root* root = session.getRoot().get()) {
-            return makeStringValue(root->gameDirectory().getDirectoryName());
+            String_t dirName = root->gameDirectory().getDirectoryName();
+            if (dirName.empty()) {
+                return 0;
+            } else {
+                return makeStringValue(dirName);
+            }
         } else {
             return 0;
         }
@@ -102,30 +130,28 @@ game::interface::getGlobalProperty(GlobalProperty igp, Session& session)
         } else {
             return 0;
         }
-// FIXME: port (property). Note that this is NOT specificationDirectory()!
-//      case igpRootDirectory:
-//         /* @q System.RootDirectory:Str (Global Property)
-//            Root directory.
+     case igpRootDirectory:
+        /* @q System.RootDirectory:Str (Global Property)
+           Root directory.
 
-//            The root directory is the directory within the program installation directory
-//            containing the default specification files.
-//            If a specification file cannot be found in the {System.GameDirectory|game directory},
-//            it is looked for in the root directory.
-//            This directory typically is one of
-//            - /usr/local/share/planets
-//            - C:\Programs\PCC2\specs
+           The root directory is the directory within the program installation directory
+           containing the default specification files.
+           If a specification file cannot be found in the {System.GameDirectory|game directory},
+           it is looked for in the root directory.
+           This directory typically is one of
+           - /usr/local/share/planets
+           - C:\Programs\PCC2\specs
 
-//            @diff In PCC 1.x, it is possible to concatenate this property with a file name
-//            to access a file in the root directory.
-//            This does no longer work in PCC2.
-//            Use the {MakeFileName} function, as in
-//            | Open MakeFileName(System.RootDirectory, "file.txt") For Input As #1
-//            to access files in the root directory. */
-        // FIXME: should get this value from TurnLoader
-//         if (root_dir_name.size())
-//             return makeStringValue(root_dir_name);
-//         else
-//             return 0;
+           @diff In PCC 1.x, it is possible to concatenate this property with a file name
+           to access a file in the root directory.
+           This does no longer work in PCC2.
+           Use the {MakeFileName} function, as in
+           | Open MakeFileName(System.RootDirectory, "file.txt") For Input As #1
+           to access files in the root directory.
+
+           @change In PCC2ng, it is possible for this property to be empty.
+           In network play, a root specification directory may not be used. */
+        return getTurnLoaderPropery(TurnLoader::RootDirectoryProperty, session);
      case igpSelectionLayer:
         /* @q Selection.Layer:Int (Global Property)
            Current selection layer.
@@ -136,14 +162,13 @@ game::interface::getGlobalProperty(GlobalProperty igp, Session& session)
         } else {
             return 0;
         }
-// FIXME: port (property)
-//      case igpSystemLanguage:
-//         /* @q System.Language:Str (Global Property)
-//            Language code.
-//            This is the language the user wants to use,
-//            usually in the form of a two-letter ISO 639 code ("en" = English).
-//            @since PCC2 1.99.25 */
-//         return makeStringValue(getLanguageCode());
+     case igpSystemLanguage:
+        /* @q System.Language:Str (Global Property)
+           Language code.
+           This is the language the user wants to use,
+           usually in the form of a two-letter ISO 639 code ("en" = English).
+           @since PCC2 1.99.25 */
+        return makeStringValue(getLanguageCode(session.translator()));
      case igpSystemProgram:
         /* @q System.Program:Str (Global Property)
            Name of the program executing the script.

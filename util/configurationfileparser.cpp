@@ -6,8 +6,7 @@
 #include "afl/string/string.hpp"
 #include "util/translation.hpp"
 
-// /** \class ConfigParser
-//     \brief Configuration File Parser (pconfig.src alike)
+// /** Configuration File Parser (pconfig.src alike)
 
 //     This class encapsulates the logic for parsing PCONFIG.SRC-alike
 //     configuration files. In a nutshell:

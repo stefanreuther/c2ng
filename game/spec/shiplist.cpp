@@ -179,6 +179,34 @@ game::spec::ShipList::missions() const
     return m_missions;
 }
 
+// Get component, given a reference.
+const game::spec::Component*
+game::spec::ShipList::getComponent(Reference ref) const
+{
+    switch (ref.getType()) {
+     case Reference::Null:
+     case Reference::Player:
+     case Reference::MapLocation:
+     case Reference::Ship:
+     case Reference::Planet:
+     case Reference::Starbase:
+     case Reference::Storm:
+     case Reference::Minefield:
+     case Reference::Ufo:
+        return 0;
+
+     case Reference::Hull:
+        return hulls().get(ref.getId());
+     case Reference::Engine:
+        return engines().get(ref.getId());
+     case Reference::Beam:
+        return beams().get(ref.getId());
+     case Reference::Torpedo:
+        return launchers().get(ref.getId());
+    }
+    return 0;
+}
+
 // Find racial abilities.
 void
 game::spec::ShipList::findRacialAbilities(const game::config::HostConfiguration& config)
@@ -249,10 +277,10 @@ game::spec::ShipList::enumerateHullFunctions(HullFunctionList& result,
                                              PlayerSet_t playerLimit,
                                              ExperienceLevelSet_t levelLimit,
                                              bool includeNewShip,
-                                             bool includeRacialAbilities)
+                                             bool includeRacialAbilities) const
 {
     // ex GHull::enumerateHullFunctions
-    if (Hull* hull = hulls().get(hullNr)) {
+    if (const Hull* hull = hulls().get(hullNr)) {
         if (includeRacialAbilities) {
             m_racialAbilities.getAll(result, modifiedHullFunctions(), config, *hull, playerLimit, levelLimit, HullFunction::AssignedToRace);
         }

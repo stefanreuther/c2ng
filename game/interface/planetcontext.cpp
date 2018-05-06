@@ -165,7 +165,7 @@ namespace {
         // Check user-defined properties
         afl::data::NameMap::Index_t ix = world.planetPropertyNames().getIndexByName(q);
         if (ix != afl::data::NameMap::nil) {
-            result = ix + NUM_PLANET_PROPERTIES;
+            result = static_cast<interpreter::Context::PropertyIndex_t>(ix + NUM_PLANET_PROPERTIES);
             return true;
         }
 

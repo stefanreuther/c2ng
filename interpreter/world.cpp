@@ -59,6 +59,13 @@ interpreter::World::setNewGlobalValue(const char* name, afl::data::Value* value)
     m_globalValues.setNew(index, value);
 }
 
+// Get a global value.
+afl::data::Value*
+interpreter::World::getGlobalValue(const char* name) const
+{
+    return m_globalValues[m_globalPropertyNames.getIndexByName(name)];
+}
+
 // Access global property names.
 afl::data::NameMap&
 interpreter::World::globalPropertyNames()

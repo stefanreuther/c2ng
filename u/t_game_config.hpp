@@ -31,6 +31,7 @@ class TestGameConfigConfiguration : public CxxTest::TestSuite {
     void testIndexing();
     void testAccess();
     void testEnum();
+    void testMerge();
 };
 
 class TestGameConfigConfigurationOption : public CxxTest::TestSuite {
@@ -83,6 +84,13 @@ class TestGameConfigIntegerValueParser : public CxxTest::TestSuite {
 class TestGameConfigStringOption : public CxxTest::TestSuite {
  public:
     void testIt();
+};
+
+class TestGameConfigUserConfiguration : public CxxTest::TestSuite {
+ public:
+    void testDefaults();
+    void testGameType();
+    void testFormat();
 };
 
 class TestGameConfigValueParser : public CxxTest::TestSuite {

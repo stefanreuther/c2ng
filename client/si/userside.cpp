@@ -302,6 +302,17 @@ client::si::UserSide::handleWait(uint32_t id, interpreter::Process::State state,
     }
 }
 
+// Create ContextProvider.
+client::si::ContextProvider*
+client::si::UserSide::createContextProvider()
+{
+    if (m_controls.empty()) {
+        return 0;
+    } else {
+        return m_controls.back()->createContextProvider();
+    }
+}
+
 // Add listener.
 void
 client::si::UserSide::addControl(Control& p)

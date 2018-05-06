@@ -21,10 +21,10 @@ namespace server { namespace mailin {
         virtual void serverMain();
         virtual bool handleConfiguration(const String_t& key, const String_t& value);
         virtual bool handleCommandLineOption(const String_t& option, afl::sys::CommandLineParser& parser);
+        virtual String_t getApplicationName() const;
+        virtual String_t getCommandLineOptionHelp() const;
 
      private:
-        void help();
-
         void readMail(afl::io::Stream& buffer);
         bool saveRejectedMail(afl::base::ConstBytes_t buffer);
 

@@ -68,7 +68,7 @@ namespace {
                 // Create pseudo graphics infrastructure (must live longest!)
                 gfx::NullEngine engine;
                 gfx::NullResourceProvider provider;
-                ui::Root root(engine, provider, 400, 300, 32, gfx::Engine::WindowFlags_t());
+                ui::Root root(engine, provider, gfx::WindowParameters());
 
                 // Session does not work without scripts, so preload it.
                 {

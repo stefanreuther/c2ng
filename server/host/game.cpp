@@ -801,9 +801,13 @@ server::host::Game::describe(bool verbose, String_t forUser, Root& root)
                     slotStates.push_back(HostGame::OccupiedSlot);
                     turnState = slot.turnStatus().get();
                     if (!forUser.empty()) {
+                        bool isTemporary = (turnState & TurnIsTemporary) != 0;
                         turnState &= TurnStateMask;
                         if (turnState == TurnYellow || turnState == TurnGreen) {
                             turnState = TurnGreen;
+                            if (isTemporary && root.config().usersSeeTemporaryTurns) {
+                                turnState |= TurnIsTemporary;
+                            }
                         } else if (turnState == TurnDead) {
                             turnState = TurnDead;
                         } else {

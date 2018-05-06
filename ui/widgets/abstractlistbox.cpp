@@ -342,6 +342,15 @@ ui::widgets::AbstractListbox::getRelativeItemPosition(size_t item)
     return result;
 }
 
+gfx::Rectangle
+ui::widgets::AbstractListbox::getAbsoluteItemPosition(size_t item)
+{
+    gfx::Rectangle r = getRelativeItemPosition(item);
+    r.moveBy(gfx::Point(0, -m_topY));
+    r.moveBy(getExtent().getTopLeft()); // FIXME: ok?
+    return r;
+}
+
 bool
 ui::widgets::AbstractListbox::getItemFromRelativePosition(gfx::Point pt, size_t& item, gfx::Rectangle& area)
 {

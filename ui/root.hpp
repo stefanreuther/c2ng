@@ -6,13 +6,14 @@
 #define C2NG_UI_ROOT_HPP
 
 #include <memory>
-#include "ui/widget.hpp"
+#include "afl/base/signal.hpp"
+#include "afl/container/ptrqueue.hpp"
 #include "gfx/engine.hpp"
 #include "gfx/multiclipfilter.hpp"
-#include "ui/colorscheme.hpp"
 #include "gfx/resourceprovider.hpp"
-#include "afl/container/ptrqueue.hpp"
-#include "afl/base/signal.hpp"
+#include "ui/colorscheme.hpp"
+#include "ui/widget.hpp"
+#include "gfx/windowparameters.hpp"
 
 namespace ui {
 
@@ -44,11 +45,9 @@ namespace ui {
         /** Constructor.
             \param engine Graphics engine
             \param provider Resource provider
-            \param wi Width (X) of graphics window
-            \param he Height (Y) of graphics window
-            \param bpp Bits per pixel of graphics window
-            \param flags Graphics window flags. \see gfx::Engine::createWindow. */
-        Root(gfx::Engine& engine, gfx::ResourceProvider& provider, int wi, int he, int bpp, gfx::Engine::WindowFlags_t flags);
+            \param param Window parameters
+            \see gfx::Engine::createWindow. */
+        Root(gfx::Engine& engine, gfx::ResourceProvider& provider, const gfx::WindowParameters& param);
 
         /** Destructor. */
         ~Root();
@@ -156,9 +155,7 @@ namespace ui {
 
      private:
         gfx::Engine& m_engine;                                             ///< Reference to underlying engine.
-        gfx::Engine::WindowFlags_t m_engineWindowFlags;                    ///< Configured engine flags.
-        gfx::Point m_engineWindowSize;                                     ///< Configured window size.
-        int m_engineWindowBPP;                                             ///< Configured bits per pixel.
+        gfx::WindowParameters m_engineWindowParameters;                    ///< Configured window parameters.
 
         afl::base::Ptr<gfx::Canvas> m_window;                              ///< Current engine window.
         std::auto_ptr<gfx::MultiClipFilter> m_filter;                      ///< List of dirty areas. Never null.

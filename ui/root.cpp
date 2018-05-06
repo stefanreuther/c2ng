@@ -4,11 +4,11 @@
   */
 
 #include "ui/root.hpp"
+#include "gfx/complex.hpp"
+#include "gfx/context.hpp"
+#include "gfx/nullcolorscheme.hpp"
 #include "ui/cardgroup.hpp"
 #include "ui/spacer.hpp"
-#include "gfx/context.hpp"
-#include "gfx/complex.hpp"
-#include "gfx/nullcolorscheme.hpp"
 
 namespace {
     class KeyPoster : public afl::base::Runnable {
@@ -27,12 +27,10 @@ namespace {
     };
 }
 
-ui::Root::Root(gfx::Engine& engine, gfx::ResourceProvider& provider, int wi, int he, int bpp, gfx::Engine::WindowFlags_t flags)
+ui::Root::Root(gfx::Engine& engine, gfx::ResourceProvider& provider, const gfx::WindowParameters& param)
     : Widget(),
       m_engine(engine),
-      m_engineWindowFlags(flags),
-      m_engineWindowSize(wi, he),
-      m_engineWindowBPP(bpp),
+      m_engineWindowParameters(param),
       m_window(),
       m_filter(),
       m_localTaskQueue(),
@@ -287,8 +285,8 @@ void
 ui::Root::initWindow()
 {
     // Set up window
-    m_window = m_engine.createWindow(m_engineWindowSize.getX(), m_engineWindowSize.getY(), m_engineWindowBPP, m_engineWindowFlags).asPtr();
-    setExtent(gfx::Rectangle(gfx::Point(0, 0), m_engineWindowSize));
+    m_window = m_engine.createWindow(m_engineWindowParameters).asPtr();
+    setExtent(gfx::Rectangle(gfx::Point(0, 0), m_engineWindowParameters.size));
 
     // Set up drawing filter
     m_filter.reset(new gfx::MultiClipFilter(*m_window));
@@ -303,9 +301,14 @@ ui::Root::performDeferredRedraws()
 {
     m_filter->clipRegionAtRectangle(getExtent());
     if (!m_filter->empty()) {
-        // FIXME: optimisation opportunity: draw on a custom filter
-        draw(*m_filter);
-        m_filter->clear();
+        // Exchange the filter.
+        // A widget might detect during partial redraw that it wants a full redraw, and add to the filter.
+        // This must lead to a full redraw cycle.
+        std::auto_ptr<gfx::MultiClipFilter> mc(m_filter);
+        m_filter.reset(new gfx::MultiClipFilter(*m_window));
+
+        // Draw
+        draw(*mc);
     }
 }
 
@@ -315,9 +318,9 @@ ui::Root::performDeferredRedraws()
     \param widget Widget to draw
 
     Widgets are color-coded as follows:
-    - red: UIGroup (all descendants shown)
-    - white: UICardGroup (only visible descendant shown)
-    - green, slashed: UISpacer
+    - red: Group (all descendants shown)
+    - white: CardGroup (only visible descendant shown)
+    - green, slashed: Spacer
     - yellow: regular widgets */
 void
 ui::Root::drawFrames(gfx::Canvas& can, Widget& widget)

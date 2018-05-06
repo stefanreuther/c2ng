@@ -170,6 +170,18 @@ game::Game::markings()
     return m_markings;
 }
 
+game::msg::Configuration&
+game::Game::messageConfiguration()
+{
+    return m_messageConfiguration;
+}
+
+const game::msg::Configuration&
+game::Game::messageConfiguration() const
+{
+    return m_messageConfiguration;
+}
+
 void
 game::Game::notifyListeners()
 {

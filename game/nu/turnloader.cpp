@@ -243,6 +243,22 @@ game::nu::TurnLoader::loadHistoryTurn(Turn& turn, Game& game, int player, int tu
     throw std::runtime_error("!FIXME: not implemented");
 }
 
+String_t
+game::nu::TurnLoader::getProperty(Property p)
+{
+    switch (p) {
+     case LocalFileFormatProperty:
+     case RemoteFileFormatProperty:
+        // igpFileFormatLocal:
+        return "Nu";
+
+     case RootDirectoryProperty:
+        // igpRootDirectory:
+        return String_t();
+    }
+    return String_t();
+}
+
 void
 game::nu::TurnLoader::loadPlanets(game::map::Universe& univ, afl::data::Access planets, PlayerSet_t players)
 {

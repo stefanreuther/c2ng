@@ -9,8 +9,7 @@
 ui::layout::HBox ui::layout::HBox::instance0(0);
 ui::layout::HBox ui::layout::HBox::instance5(5);
 
-// /** \class UIHBoxLayout
-//     \brief Horizontal Box Layout
+// /** Horizontal Box Layout
 
 //     Widgets will be arranged horizontally, all the same height, from
 //     left to right. This layout will completely cover the container

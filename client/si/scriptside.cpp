@@ -15,8 +15,21 @@
 #include "interpreter/statementcompiler.hpp"
 #include "interpreter/values.hpp"
 #include "afl/sys/semaphore.hpp"
+#include "client/si/contextreceiver.hpp"
 
-using interpreter::makeBooleanValue;
+namespace {
+    using interpreter::makeBooleanValue;
+    class ProcessContextReceiver : public client::si::ContextReceiver {
+     public:
+        ProcessContextReceiver(interpreter::Process& proc)
+            : m_process(proc)
+            { }
+        virtual void addNewContext(interpreter::Context* pContext)
+            { m_process.pushNewContext(pContext); }
+     private:
+        interpreter::Process& m_process;
+    };
+}
 
 client::si::ScriptSide::ScriptSide(util::RequestSender<UserSide> reply)
     : conn_processGroupFinish(),
@@ -42,7 +55,8 @@ client::si::ScriptSide::executeCommandWait(uint32_t id, game::Session& session, 
     // Create BCO
     interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
     if (ctxp.get() != 0) {
-        ctxp->createContext(session, proc);
+        ProcessContextReceiver recv(proc);
+        ctxp->createContext(session, recv);
     }
 
     // Create compilation context

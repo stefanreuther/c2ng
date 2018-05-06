@@ -4,6 +4,7 @@
 #ifndef C2NG_GAME_V3_RESULTLOADER_HPP
 #define C2NG_GAME_V3_RESULTLOADER_HPP
 
+#include <memory>
 #include "game/turnloader.hpp"
 #include "afl/charset/charset.hpp"
 #include "afl/io/stream.hpp"
@@ -19,7 +20,9 @@ namespace game { namespace v3 {
 
     class ResultLoader : public TurnLoader {
      public:
-        ResultLoader(afl::charset::Charset& charset,
+        ResultLoader(afl::base::Ref<afl::io::Directory> specificationDirectory,
+                     afl::base::Ref<afl::io::Directory> defaultSpecificationDirectory,
+                     std::auto_ptr<afl::charset::Charset> charset,
                      afl::string::Translator& tx,
                      afl::sys::LogListener& log,
                      const DirectoryScanner& scanner,
@@ -33,12 +36,16 @@ namespace game { namespace v3 {
 
         virtual void loadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root);
 
+        virtual String_t getProperty(Property p);
+
         void loadResult(Turn& trn, Root& root, Game& game, afl::io::Stream& file, int player, bool withBackup);
 
         void loadTurnfile(Turn& trn, Root& root, afl::io::Stream& file, int player);
 
      private:
-        afl::charset::Charset& m_charset;
+        afl::base::Ref<afl::io::Directory> m_specificationDirectory;
+        afl::base::Ref<afl::io::Directory> m_defaultSpecificationDirectory;
+        std::auto_ptr<afl::charset::Charset> m_charset;
         afl::string::Translator& m_translator;
         afl::sys::LogListener& m_log;
         afl::io::FileSystem& m_fileSystem;

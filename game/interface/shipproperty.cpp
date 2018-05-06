@@ -41,9 +41,9 @@ namespace {
         };
         ShipArrayProperty(Type type,
                           const game::map::Ship& ship,
-                          afl::base::Ptr<const game::Game> game,
-                          afl::base::Ptr<const game::Root> root,
-                          afl::base::Ptr<const game::spec::ShipList> shipList);
+                          afl::base::Ref<const game::Game> game,
+                          afl::base::Ref<const game::Root> root,
+                          afl::base::Ref<const game::spec::ShipList> shipList);
 
         virtual afl::data::Value* get(interpreter::Arguments& args);
         virtual void set(interpreter::Arguments& args, afl::data::Value* value);
@@ -58,9 +58,9 @@ namespace {
      private:
         const Type m_type;
         const game::map::Ship& m_ship;
-        afl::base::Ptr<const game::Game> m_game;
-        afl::base::Ptr<const game::Root> m_root;
-        afl::base::Ptr<const game::spec::ShipList> m_shipList;
+        afl::base::Ref<const game::Game> m_game;
+        afl::base::Ref<const game::Root> m_root;
+        afl::base::Ref<const game::spec::ShipList> m_shipList;
     };
 
     /** Classify ship. This yields the ship's category as a string, 0 if unknown. */
@@ -130,16 +130,12 @@ namespace {
     }
     
     const game::spec::Mission* getShipMission(const game::map::Ship& ship,
-                                              afl::base::Ptr<const game::Root> root,
-                                              afl::base::Ptr<const game::spec::ShipList> shipList)
+                                              const game::Root& root,
+                                              const game::spec::ShipList& shipList)
     {
         int nr, owner;
-        if (root.get() != 0
-            && shipList.get() != 0
-            && ship.getMission().get(nr)
-            && ship.getRealOwner().get(owner))
-        {
-            return shipList->missions().getMissionByNumber(nr, game::PlayerSet_t(root->hostConfiguration().getPlayerMissionNumber(owner)));
+        if (ship.getMission().get(nr) && ship.getRealOwner().get(owner)) {
+            return shipList.missions().getMissionByNumber(nr, game::PlayerSet_t(root.hostConfiguration().getPlayerMissionNumber(owner)));
         } else {
             return 0;
         }
@@ -150,9 +146,9 @@ namespace {
 
 ShipArrayProperty::ShipArrayProperty(Type type,
                                      const game::map::Ship& ship,
-                                     afl::base::Ptr<const game::Game> game,                // needed for shipScores (Score)
-                                     afl::base::Ptr<const game::Root> root,                // needed for hostConfiguration (HasFunction)
-                                     afl::base::Ptr<const game::spec::ShipList> shipList)  // needed for hull functions
+                                     afl::base::Ref<const game::Game> game,                // needed for shipScores (Score)
+                                     afl::base::Ref<const game::Root> root,                // needed for hostConfiguration (HasFunction)
+                                     afl::base::Ref<const game::spec::ShipList> shipList)  // needed for hull functions
     : m_type(type),
       m_ship(ship),
       m_game(game),
@@ -187,8 +183,7 @@ ShipArrayProperty::get(interpreter::Arguments& args)
 
             game::UnitScoreDefinitionList::Index_t index;
             int16_t value, turn;
-            if (m_game.get() != 0
-                && m_game->shipScores().lookup(int16_t(id), index)
+            if (m_game->shipScores().lookup(int16_t(id), index)
                 && m_ship.unitScores().get(index, value, turn))
             {
                 return makeIntegerValue(value);
@@ -213,18 +208,14 @@ ShipArrayProperty::get(interpreter::Arguments& args)
                 return 0;
             }
             int funcId;
-            if (m_game.get() != 0 && m_shipList.get() != 0 && m_root.get() != 0) {
-                if (afl::string::strToInteger(func, funcId)) {
-                    // accept
-                } else if (const game::spec::BasicHullFunction* hf = m_shipList->basicHullFunctions().getFunctionByName(func, false)) {
-                    funcId = hf->getId();
-                } else {
-                    throw interpreter::Error("Invalid hull function name");
-                }
-                return makeBooleanValue(m_ship.hasSpecialFunction(funcId, m_game->shipScores(), *m_shipList, m_root->hostConfiguration()));
+            if (afl::string::strToInteger(func, funcId)) {
+                // accept
+            } else if (const game::spec::BasicHullFunction* hf = m_shipList->basicHullFunctions().getFunctionByName(func, false)) {
+                funcId = hf->getId();
             } else {
-                return 0;
+                throw interpreter::Error("Invalid hull function name");
             }
+            return makeBooleanValue(m_ship.hasSpecialFunction(funcId, m_game->shipScores(), *m_shipList, m_root->hostConfiguration()));
         }
     }
     return 0;
@@ -285,10 +276,10 @@ afl::data::Value*
 game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
                                  afl::string::Translator& tx,                          // needed for names
                                  InterpreterInterface& iface,                          // needed for names, HasTask
-                                 afl::base::Ptr<const Root> root,                      // needed for configuration
-                                 afl::base::Ptr<const game::spec::ShipList> shipList,  // needed for spec access
-                                 afl::base::Ptr<const Game> game,                      // needed for ship scores
-                                 afl::base::Ptr<Turn> turn)                            // needed for location names
+                                 afl::base::Ref<const Root> root,                      // needed for configuration
+                                 afl::base::Ref<const game::spec::ShipList> shipList,  // needed for spec access
+                                 afl::base::Ref<const Game> game,                      // needed for ship scores
+                                 afl::base::Ref<Turn> turn)                            // needed for location names
 {
     // ex int/if/shipif.h:getShipProperty
     /* Combat participant properties often share names and meaning with ship properties,
@@ -305,9 +296,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
            - 1..10 for torpedoes
            - 11 for fighters
            - EMPTY if no secondary weapon, or not known. */
-        if (shipList.get() == 0) {
-            return 0;
-        } else if (sh.getNumBays().get(n) && n > 0) {
+        if (sh.getNumBays().get(n) && n > 0) {
             return makeIntegerValue(shipList->launchers().size() + 1);
         } else if (sh.getTorpedoType().get(n) && n > 0) {
             return makeIntegerValue(n);
@@ -332,9 +321,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
         /* @q Aux.Short:Str (Ship Property, Combat Participant Property)
            Secondary weapon type, short name.
            @see Aux (Ship Property) */
-        if (shipList.get() == 0) {
-            return 0;
-        } else if (sh.getNumBays().get(n) && n > 0) {
+        if (sh.getNumBays().get(n) && n > 0) {
             return makeStringValue("Ftr");
         } else if (sh.getTorpedoType().get(n) && n > 0) {
             return makeOptionalStringValue(shipList->launchers().shortNames(shipList->componentNamer())(n));
@@ -345,9 +332,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
         /* @q Aux:Str (Ship Property, Combat Participant Property)
            Secondary weapon type, full name.
            Either a torpedo system name, "Fighters", or EMPTY. */
-        if (shipList.get() == 0) {
-            return 0;
-        } else if (sh.getNumBays().get(n) && n > 0) {
+        if (sh.getNumBays().get(n) && n > 0) {
             return makeStringValue("Fighters");
         } else if (sh.getTorpedoType().get(n) && n > 0) {
             return makeOptionalStringValue(shipList->launchers().names(shipList->componentNamer())(n));
@@ -365,19 +350,11 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
      case ispBeamShort:
         /* @q Beam.Short:Str (Ship Property, Combat Participant Property)
            Beam type, short name. */
-        if (shipList.get() == 0) {
-            return 0;
-        } else {
-            return makeOptionalStringValue(shipList->beams().shortNames(shipList->componentNamer())(sh.getBeamType()));
-        }
+        return makeOptionalStringValue(shipList->beams().shortNames(shipList->componentNamer())(sh.getBeamType()));
      case ispBeamName:
         /* @q Beam:Str (Ship Property, Combat Participant Property)
            Beam type, full name. */
-        if (shipList.get() == 0) {
-            return 0;
-        } else {
-            return makeOptionalStringValue(shipList->beams().names(shipList->componentNamer())(sh.getBeamType()));
-        }
+        return makeOptionalStringValue(shipList->beams().names(shipList->componentNamer())(sh.getBeamType()));
      case ispCargoColonists:
         /* @q Cargo.Colonists:Int (Ship Property)
            Number of colonists aboard this ship. */
@@ -389,11 +366,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
      case ispCargoFree:
         /* @q Cargo.Free:Int (Ship Property)
            Free cargo room. */
-        if (shipList.get() == 0) {
-            return 0;
-        } else {
-            return makeOptionalIntegerValue(sh.getFreeCargo(*shipList));
-        }
+        return makeOptionalIntegerValue(sh.getFreeCargo(*shipList));
      case ispCargoM:
         /* @q Cargo.M:Int (Ship Property)
            Molybdenum aboard this ship, kilotons. */
@@ -487,11 +460,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
      case ispEngineName:
         /* @q Engine:Str (Ship Property)
            Type of engine, full name. */
-        if (shipList.get() == 0) {
-            return 0;
-        } else {
-            return makeOptionalStringValue(shipList->engines().names(shipList->componentNamer())(sh.getEngineType()));
-        }
+        return makeOptionalStringValue(shipList->engines().names(shipList->componentNamer())(sh.getEngineType()));
      case ispFCode:
         /* @q FCode:Str (Ship Property)
            Friendly code.
@@ -545,14 +514,12 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
            Otherwise, returns the name ({Name (Ship Property)|Name}) of the leader.
            If the ship is not member of a fleet, this property is EMPTY. */
         if (int fid = sh.getFleetNumber()) {
-            if (turn.get() != 0) {
-                if (game::map::Ship* leader = turn->universe().ships().get(fid)) {
-                    String_t result = leader->getFleetName();
-                    if (result.empty()) {
-                        result = leader->getName(game::map::Object::LongName, tx, iface);
-                    }
-                    return makeStringValue(result);
+            if (game::map::Ship* leader = turn->universe().ships().get(fid)) {
+                String_t result = leader->getFleetName();
+                if (result.empty()) {
+                    result = leader->getName(game::map::Object::LongName, tx, iface);
                 }
+                return makeStringValue(result);
             }
         }
         return 0;
@@ -576,13 +543,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
            - "G" (Gravitonic accelerator)
            - "B" (Bioscan, including Full Bioscan)
            - "A" (Alchemy, including Neutronic/Aries Refinery) */
-        if (shipList.get() == 0 || root.get() == 0) {
-            return 0;
-        } else if (const Game* g = game.get()) {
-            return makeStringValue(getSpecialFunctionsString(sh, g->shipScores(), *shipList, root->hostConfiguration()));
-        } else {
-            return 0;
-        }
+        return makeStringValue(getSpecialFunctionsString(sh, game->shipScores(), *shipList, root->hostConfiguration()));
      case ispId:
         /* @q Id:Int (Ship Property)
            Ship Id. */
@@ -591,16 +552,14 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
         /* @q Level:Int (Ship Property)
            Ship's experience level.
            If the experience system is not enabled, or the level is not known, yields EMPTY. */
-        if (const Game* g = game.get()) {
+        {
             UnitScoreList::Index_t index;
             int16_t value, turn;
-            if (g->shipScores().lookup(ScoreId_ExpLevel, index) && sh.unitScores().get(index, value, turn)) {
+            if (game->shipScores().lookup(ScoreId_ExpLevel, index) && sh.unitScores().get(index, value, turn)) {
                 return makeIntegerValue(value);
             } else {
                 return 0;
             }
-        } else {
-            return 0;
         }
      case ispLocX:
         /* @q Loc.X:Int (Ship Property)
@@ -624,13 +583,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
            If the ship is at a planet, returns that planet's name and Id.
            In deep space, returns an (X,Y) pair. */
         if (sh.isVisible() && sh.getPosition(pt)) {
-            if (root.get() == 0) {
-                return 0;
-            } else if (Turn* t = turn.get()) {
-                return makeStringValue(t->universe().getLocationName(pt, 0, root->hostConfiguration(), root->hostVersion(), tx, iface));
-            } else {
-                return 0;
-            }
+            return makeStringValue(turn->universe().getLocationName(pt, 0, root->hostConfiguration(), root->hostVersion(), tx, iface));
         } else {
             return 0;
         }
@@ -641,11 +594,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
      case ispMass:
         /* @q Mass:Int (Ship Property)
            Mass of ship (hull, components, and cargo). */
-        if (shipList.get() == 0) {
-            return 0;
-        } else {
-            return makeOptionalIntegerValue(sh.getMass(*shipList));
-        }
+        return makeOptionalIntegerValue(sh.getMass(*shipList));
      case ispMissionId:
         /* @q Mission$:Int (Ship Property)
            Mission number.
@@ -661,7 +610,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
      case ispMissionShort:
         /* @q Mission.Short:Str (Ship Property)
            Mission, short name. */
-        if (const game::spec::Mission* msn = getShipMission(sh, root, shipList)) {
+        if (const game::spec::Mission* msn = getShipMission(sh, *root, *shipList)) {
             return makeStringValue(msn->getShortName());
         } else {
             int m;
@@ -680,7 +629,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
      case ispMissionName:
         /* @q Mission:Str (Ship Property)
            Mission, full name. */
-        if (const game::spec::Mission* msn = getShipMission(sh, root, shipList)) {
+        if (const game::spec::Mission* msn = getShipMission(sh, *root, *shipList)) {
             return makeStringValue(msn->getName());
         } else {
             int m, i, t;
@@ -696,7 +645,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
      case ispMoveETA:
         /* @q Move.ETA:Int (Ship Property)
            Estimated time of arrival at waypoint (number of turns). */
-        if (sh.getShipKind() == sh.CurrentShip && turn.get() != 0 && game.get() != 0 && shipList.get() != 0 && root.get() != 0) {
+        if (sh.getShipKind() == sh.CurrentShip) {
             game::map::ShipPredictor pred(turn->universe(),
                                           sh.getId(),
                                           game->shipScores(),
@@ -712,7 +661,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
      case ispMoveFuel:
         /* @q Move.Fuel:Int (Ship Property)
            Predicted fuel useage for movement, in kilotons. */
-        if (sh.getShipKind() == sh.CurrentShip && turn.get() != 0 && game.get() != 0 && shipList.get() != 0 && root.get() != 0) {
+        if (sh.getShipKind() == sh.CurrentShip) {
             game::map::ShipPredictor pred(turn->universe(),
                                           sh.getId(),
                                           game->shipScores(),
@@ -739,11 +688,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
         /* @q Orbit$:Int (Ship Property)
            Id of planet this ship is orbiting. 0 if none. */
         if (sh.getPosition(pt)) {
-            if (Turn* t = turn.get()) {
-                return makeIntegerValue(t->universe().getPlanetAt(pt));
-            } else {
-                return 0;
-            }
+            return makeIntegerValue(turn->universe().getPlanetAt(pt));
         } else {
             return 0;
         }
@@ -751,11 +696,9 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
         /* @q Orbit:Str (Ship Property)
            Name of planet this ship is orbiting. EMPTY if none. */
         if (sh.getPosition(pt)) {
-            if (Turn* t = turn.get()) {
-                if (const Id_t pid = t->universe().getPlanetAt(pt)) {
-                    if (const game::map::Planet* p = t->universe().planets().get(pid)) {
-                        return makeStringValue(p->getName(p->PlainName, tx, iface));
-                    }
+            if (const Id_t pid = turn->universe().getPlanetAt(pt)) {
+                if (const game::map::Planet* p = turn->universe().planets().get(pid)) {
+                    return makeStringValue(p->getName(p->PlainName, tx, iface));
                 }
             }
         }
@@ -781,10 +724,8 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
         /* @q Speed:Str (Ship Property)
            Speed, as human-readable string.
            If the hyperdrive is active, reports "Hyperdrive", otherwise "Warp x". */
-        if (shipList.get() == 0 || root.get() == 0) {
-            return 0;
-        } else if (sh.getWarpFactor().get(n)) {
-            if (game.get() != 0 && sh.isHyperdriving(game->shipScores(), *shipList, root->hostConfiguration())) {
+        if (sh.getWarpFactor().get(n)) {
+            if (sh.isHyperdriving(game->shipScores(), *shipList, root->hostConfiguration())) {
                 return makeStringValue("Hyperdrive");
             } else {
                 return makeStringValue(afl::string::Format("Warp %d", n));
@@ -819,19 +760,11 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
      case ispTorpShort:
         /* @q Torp.Short:Str (Ship Property, Combat Participant Property)
            Torpedo type, short name. */
-        if (shipList.get() == 0) {
-            return 0;
-        } else {
-            return makeOptionalStringValue(shipList->launchers().shortNames(shipList->componentNamer())(sh.getTorpedoType()));
-        }
+        return makeOptionalStringValue(shipList->launchers().shortNames(shipList->componentNamer())(sh.getTorpedoType()));
      case ispTorpName:
         /* @q Torp:Str (Ship Property, Combat Participant Property)
            Torpedo type, full name. */
-        if (shipList.get() == 0) {
-            return 0;
-        } else {
-            return makeOptionalStringValue(shipList->launchers().names(shipList->componentNamer())(sh.getTorpedoType()));
-        }
+        return makeOptionalStringValue(shipList->launchers().names(shipList->componentNamer())(sh.getTorpedoType()));
      case ispTransferShipColonists:
         /* @q Transfer.Ship.Colonists:Int (Ship Property)
            Number of colonists being transferred to another ship. */
@@ -856,10 +789,8 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
         /* @q Transfer.Ship.Name:Str (Ship Property)
            Name of cargo transfer target ship. */
         if (sh.getTransporterTargetId(sh.TransferTransporter).get(n)) {
-            if (Turn* t = turn.get()) {
-                if (const game::map::Ship* otherShip = t->universe().ships().get(n)) {
-                    return makeStringValue(otherShip->getName(game::map::Object::PlainName, tx, iface));
-                }
+            if (const game::map::Ship* otherShip = turn->universe().ships().get(n)) {
+                return makeStringValue(otherShip->getName(game::map::Object::PlainName, tx, iface));
             }
         }
         return 0;
@@ -904,10 +835,8 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
             if (n == 0) {
                 return makeStringValue("Jettison");
             }
-            if (Turn* t = turn.get()) {
-                if (const game::map::Planet* pl = t->universe().planets().get(n)) {
-                    return makeStringValue(pl->getName(game::map::Object::PlainName, tx, iface));
-                }
+            if (const game::map::Planet* pl = turn->universe().planets().get(n)) {
+                return makeStringValue(pl->getName(game::map::Object::PlainName, tx, iface));
             }
         }
         return 0;
@@ -929,9 +858,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
         /* @q Type.Short:Str (Ship Property)
            Classification of ship, short.
            This is the first letter of the {Type (Ship Property)|Type}, see there. */
-        if (shipList.get() == 0) {
-            return 0;
-        } else if (const char* p = classifyShip(sh, *shipList)) {
+        if (const char* p = classifyShip(sh, *shipList)) {
             return makeStringValue(String_t(p, 1));
         } else {
             return 0;
@@ -943,9 +870,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
            - "Torpedo Ship"
            - "Beam Weapons"
            - "Freighter" */
-        if (shipList.get() == 0) {
-            return 0;
-        } else if (const char* p = classifyShip(sh, *shipList)) {
+        if (const char* p = classifyShip(sh, *shipList)) {
             return makeStringValue(p);
         } else {
             return 0;
@@ -974,7 +899,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
         /* @q Waypoint.Planet:Int (Ship Property)
            Id of planet at waypoint.
            @see PlanetAt() */
-        if (turn.get() != 0 && sh.getWaypoint().get(pt)) {
+        if (sh.getWaypoint().get(pt)) {
             return makeIntegerValue(turn->universe().getPlanetAt(pt));
         } else {
             return 0;
@@ -998,7 +923,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
      case ispWaypointName:
         /* @q Waypoint:Str (Ship Property)
            Waypoint, as a human-readable string. */
-        if (turn.get() != 0 && root.get() != 0 && sh.getWaypoint().get(pt)) {
+        if (sh.getWaypoint().get(pt)) {
             // FIXME: PCC 1.x also handles Intercept here
             if (sh.getWaypointDX().isSame(0) && sh.getWaypointDY().isSame(0)) {
                 return makeStringValue("(Location)");

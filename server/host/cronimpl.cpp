@@ -202,6 +202,7 @@ namespace {
             gg.removeConfig("nextHostTime");
         } else {
             // no event
+            gg.removeConfig("nextHostTime");
         }
     }
 

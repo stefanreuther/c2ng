@@ -7,7 +7,6 @@
 
 #include "afl/base/refcounted.hpp"
 #include "afl/base/ptr.hpp"
-#include "afl/bits/smallset.hpp"
 #include "afl/io/stream.hpp"
 #include "util/requestdispatcher.hpp"
 #include "gfx/timer.hpp"
@@ -16,6 +15,7 @@ namespace gfx {
 
     class Canvas;
     class EventConsumer;
+    struct WindowParameters;
 
     /** Base class for a graphics engine.
         This encapsulates all logic for talking to a GUI library.
@@ -29,14 +29,6 @@ namespace gfx {
         - timers */
     class Engine : public afl::base::RefCounted {
      public:
-        enum WindowFlag {
-            ResizableWindow,    ///< Make the window resizable. FIXME: interface to report these events is still missing
-            FullscreenWindow    ///< Make the window full-screen.
-        };
-
-        /** Options for the window. */
-        typedef afl::bits::SmallSet<WindowFlag> WindowFlags_t;
-
         virtual ~Engine()
             { }
 
@@ -47,13 +39,10 @@ namespace gfx {
 
             <b>Multithreading:</b> Call this method from the GUI thread only.
 
-            \param width Width of window, pixels
-            \param height Height of window, pixels
-            \param bpp Bits per pixel (8/16/24/32 to pick a specific width; 0 to pick the default)
-            \param flags Flags
+            \param param Window parameters (size, color depth, title, ...)
             \return Canvas for that window; never null
             \throw GraphicsException on error */
-        virtual afl::base::Ref<Canvas> createWindow(int width, int height, int bpp, WindowFlags_t flags) = 0;
+        virtual afl::base::Ref<Canvas> createWindow(const WindowParameters& param) = 0;
 
         /** Load an image file.
 

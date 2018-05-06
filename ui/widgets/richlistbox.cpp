@@ -9,6 +9,34 @@
 #include "ui/rich/imageobject.hpp"
 #include "ui/skincolorscheme.hpp"
 
+namespace {
+    using util::SkinColor;
+
+    /* Color scheme for color inversion.
+       This is used when UseBackgroundColorScheme is set.
+       It does not (can not!) provide complete color inversion. */
+    class InverseColorScheme : public gfx::ColorScheme<SkinColor::Color> {
+     public:
+        InverseColorScheme(gfx::ColorScheme<SkinColor::Color>& parent)
+            : m_parent(parent)
+            { }
+        virtual gfx::Color_t getColor(SkinColor::Color index)
+            {
+                switch (index) {
+                 case SkinColor::Static:     return m_parent.getColor(SkinColor::InvStatic);
+                 case SkinColor::Background: return m_parent.getColor(SkinColor::Static);
+                 case SkinColor::InvStatic:  return m_parent.getColor(SkinColor::Static);
+                 default:                    return m_parent.getColor(index);
+                }
+            }
+        virtual void drawBackground(gfx::Canvas& can, const gfx::Rectangle& area)
+            { can.drawBar(area, getColor(SkinColor::Background), 0, gfx::FillPattern::SOLID, gfx::OPAQUE_ALPHA); }
+     private:
+        gfx::ColorScheme<SkinColor::Color>& m_parent;
+    };
+}
+
+
 ui::widgets::RichListbox::Item::Item(const util::rich::Text text, afl::base::Ptr<gfx::Canvas> image, bool accessible, gfx::ResourceProvider& provider)
     : accessible(accessible),
       text(text),
@@ -20,7 +48,8 @@ ui::widgets::RichListbox::RichListbox(gfx::ResourceProvider& provider, ui::Color
     : m_provider(provider),
       m_colorScheme(scheme),
       m_items(),
-      m_renderFlags()
+      m_renderFlags(),
+      m_preferredWidth(400)
 { }
 
 ui::widgets::RichListbox::~RichListbox()
@@ -39,6 +68,12 @@ ui::widgets::RichListbox::addItem(const util::rich::Text text, afl::base::Ptr<gf
     size_t n = m_items.size();
     m_items.pushBackNew(new Item(text, image, accessible, m_provider));
     render(n, 1);
+}
+
+void
+ui::widgets::RichListbox::setPreferredWidth(int width)
+{
+    m_preferredWidth = width;
 }
 
 void
@@ -100,6 +135,7 @@ ui::widgets::RichListbox::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t
 {
     SkinColorScheme main(BLACK_COLOR_SET, m_colorScheme);
     SkinColorScheme inv(GRAY_COLOR_SET, m_colorScheme);
+    InverseColorScheme inv2(getColorScheme());
     gfx::Context<util::SkinColor::Color> ctx(can, main);
     if (hasRenderFlag(UseBackgroundColorScheme)) {
         ctx.useColorScheme(getColorScheme());
@@ -109,7 +145,11 @@ ui::widgets::RichListbox::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t
     prepareHighContrastListItem(ctx, area, state);
     if (item < m_items.size()) {
         if (state == FocusedItem) {
-            ctx.useColorScheme(inv);
+            if (hasRenderFlag(UseBackgroundColorScheme)) {
+                ctx.useColorScheme(inv2);
+            } else {
+                ctx.useColorScheme(inv);
+            }
         }
         area.grow(-2, -2);
         m_items[item]->doc.draw(ctx, area, 0);
@@ -128,8 +168,21 @@ ui::widgets::RichListbox::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
 ui::layout::Info
 ui::widgets::RichListbox::getLayoutInfo() const
 {
-    // FIXME 1.0e+38
-    return gfx::Point(400, 400);
+    int totalHeight = 0;
+    for (size_t i = 0, n = m_items.size(); i < n; ++i) {
+        const Item& it = *m_items[i];
+        ui::rich::Document doc(m_provider);
+        doc.setPageWidth(hasRenderFlag(DisableWrap) ? INT_MAX : m_preferredWidth);
+        if (it.image.get() != 0) {
+            doc.addFloatObject(std::auto_ptr<ui::rich::BlockObject>(new ui::rich::ImageObject(it.image)), true);
+        }
+        doc.add(it.text);
+        doc.finish();
+        totalHeight += doc.getDocumentHeight();
+        totalHeight += 4;
+    }
+
+    return gfx::Point(m_preferredWidth, totalHeight);
 }
 
 bool

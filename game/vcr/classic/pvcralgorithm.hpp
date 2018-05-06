@@ -87,11 +87,11 @@ namespace game { namespace vcr { namespace classic {
 
         /** Changing values. */
         struct RunningStatus {
-            uint16_t m_beamStatus[VCR_MAX_BEAMS];        ///< Beam status, [0, ~1000]
-            uint16_t m_launcherStatus[VCR_MAX_TORPS];        ///< Torpedo launcher status, [0, ~1000]
-            uint16_t m_bayStatus[VCR_MAX_BAYS];          ///< Fighter bay status, [0, ~1000]
-            uint8_t  m_fighterStatus[VCR_MAX_FTRS];      ///< Fighter status, [0, 2]
-            uint16_t m_fighterStrikesLeft[VCR_MAX_FTRS];  ///< Fighter strikes remaining
+            int  m_beamStatus[VCR_MAX_BEAMS];        ///< Beam status, [0, ~1000]
+            int  m_launcherStatus[VCR_MAX_TORPS];        ///< Torpedo launcher status, [0, ~1000]
+            int  m_bayStatus[VCR_MAX_BAYS];          ///< Fighter bay status, [0, ~1000]
+            uint8_t m_fighterStatus[VCR_MAX_FTRS];      ///< Fighter status, [0, 2]
+            int  m_fighterStrikesLeft[VCR_MAX_FTRS];  ///< Fighter strikes remaining
             int  m_fighterX[VCR_MAX_FTRS];           ///< Fighter X position, in meters
             int  m_objectX;                             ///< X position of baseship, in meters
             int  m_activeFighters;                 ///< Number of fighters currently out
@@ -106,6 +106,9 @@ namespace game { namespace vcr { namespace classic {
             int32_t damage_scaled2;   ///< Damage, scaled with scale*100
             int32_t crew_scaled2;     ///< Crew, scaled with scale*100
 #endif
+            RunningStatus()
+                : m_objectX(-9999)
+                { }
         };
 
 #ifdef PVCR_PREPARED_RNG
@@ -127,6 +130,10 @@ namespace game { namespace vcr { namespace classic {
             RandomConfig_t torp_recharge;  ///< Precomputed bay recharge rate
             int beam_hit_odds;      ///< Precomputed gross beam hit odds (%)
             int torp_hit_odds;      ///< Precomputed gross torp hit odds (%)
+            int beam_kill;
+            int beam_damage;
+            int torp_kill;
+            int torp_damage;
             Side side;
 #ifdef PVCR_INTEGER
             int32_t scale;            ///< Scale factor for status value
@@ -208,14 +215,14 @@ namespace game { namespace vcr { namespace classic {
         void fighterIntercept();
         bool fighterAttack(Status& st, Status& opp);
 
-        inline int computeBeamHitOdds(int beam, const Object& obj);
-        inline int computeBeamRechargeRate(int beam, const Object& obj);
+        inline int computeBeamHitOdds(const game::spec::Beam& beam, const Object& obj);
+        inline int computeBeamRechargeRate(const game::spec::Beam& beam, const Object& obj);
         void beamRecharge(Status& st);
         int beamFindNearestFighter(const Status& st, const Status& oppst);
         bool beamFire(Status& st, Status& opp);
 
-        inline int computeTorpHitOdds(int torp, const Object& obj);
-        inline int computeTubeRechargeRate(int torp, const Object& obj);
+        inline int computeTorpHitOdds(const game::spec::TorpedoLauncher& torp, const Object& obj);
+        inline int computeTubeRechargeRate(const game::spec::TorpedoLauncher& torp, const Object& obj);
         void torpsRecharge(Status& st);
         bool torpsFire(Status& st, Status& opp);
 

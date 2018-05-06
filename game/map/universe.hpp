@@ -21,6 +21,7 @@
 #include "game/map/drawingcontainer.hpp"
 #include "game/map/fleettype.hpp"
 #include "game/map/explosiontype.hpp"
+#include "game/reference.hpp"
 
 namespace game { namespace map {
 
@@ -75,6 +76,8 @@ namespace game { namespace map {
         void setNewReverter(Reverter* p);
         Reverter* getReverter() const;
 
+        const Object* getObject(Reference ref) const;
+
         /** Perform all updates.
             This will poll all updatable objects, and raise the appropriate signals. */
         void notifyListeners();
@@ -108,9 +111,11 @@ namespace game { namespace map {
                                  afl::string::Translator& tx,
                                  InterpreterInterface& iface);
 
+        Id_t findShipTowing(int sid, int after = 0) const;
+
         afl::base::Signal<void()> sig_preUpdate;
         afl::base::Signal<void()> sig_universeChange;
-        
+
      private:
         Configuration m_config;
         ObjectVector<Ship> m_ships;
@@ -137,7 +142,6 @@ namespace game { namespace map {
 //     void recomputeOrbitFlags();
 
 //     // Location accessors
-//     bool      isShipTowed(int sid) const;
 
 //     // Updates
 

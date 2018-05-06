@@ -20,8 +20,24 @@ game::nu::AccountFolder::loadContent(afl::container::PtrVector<Folder>& result)
     }
 }
 
+bool
+game::nu::AccountFolder::loadConfiguration(game::config::UserConfiguration& /*config*/)
+{
+    return false;
+}
+
+void
+game::nu::AccountFolder::saveConfiguration(const game::config::UserConfiguration& /*config*/)
+{ }
+
+bool
+game::nu::AccountFolder::setLocalDirectoryName(String_t /*directoryName*/)
+{
+    return false;
+}
+
 afl::base::Ptr<game::Root>
-game::nu::AccountFolder::loadGameRoot()
+game::nu::AccountFolder::loadGameRoot(const game::config::UserConfiguration& /*config*/)
 {
     return 0;
 }

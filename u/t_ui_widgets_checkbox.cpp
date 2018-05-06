@@ -16,7 +16,7 @@ TestUiWidgetsCheckbox::testCycle()
     // Environment
     gfx::NullEngine engine;
     gfx::NullResourceProvider provider;
-    ui::Root root(engine, provider, 100, 100, 8, gfx::Engine::WindowFlags_t());
+    ui::Root root(engine, provider, gfx::WindowParameters());
 
     // Testee
     afl::base::Observable<int> value;
@@ -72,7 +72,7 @@ TestUiWidgetsCheckbox::testLifetime()
     // Environment
     gfx::NullEngine engine;
     gfx::NullResourceProvider provider;
-    ui::Root root(engine, provider, 100, 100, 8, gfx::Engine::WindowFlags_t());
+    ui::Root root(engine, provider, gfx::WindowParameters());
 
     // Testee
     afl::base::Observable<int> value;

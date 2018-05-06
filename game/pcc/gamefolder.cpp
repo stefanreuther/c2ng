@@ -5,6 +5,8 @@
 #include "game/pcc/gamefolder.hpp"
 #include "game/pcc/browserhandler.hpp"
 #include "game/pcc/serverdirectory.hpp"
+#include "afl/charset/codepagecharset.hpp"
+#include "afl/charset/codepage.hpp"
 
 game::pcc::GameFolder::GameFolder(BrowserHandler& handler, game::browser::Account& acc, String_t path, size_t hint)
     : m_handler(handler),
@@ -26,13 +28,33 @@ game::pcc::GameFolder::loadContent(afl::container::PtrVector<Folder>& /*result*/
     // Nothing to load, there are no subfolders
 }
 
+bool
+game::pcc::GameFolder::loadConfiguration(game::config::UserConfiguration& /*config*/)
+{
+    return false; /* FIXME: get associated folder from account and load that */
+}
+
+void
+game::pcc::GameFolder::saveConfiguration(const game::config::UserConfiguration& /*config*/)
+{
+    /* FIXME: get associated folder from account and save there */
+}
+
+bool
+game::pcc::GameFolder::setLocalDirectoryName(String_t /*directoryName*/)
+{
+    // FIXME: implement
+    return false;
+}
+
 afl::base::Ptr<game::Root>
-game::pcc::GameFolder::loadGameRoot()
+game::pcc::GameFolder::loadGameRoot(const game::config::UserConfiguration& config)
 {
 #if 1
     // Quick and dirty solution: pretend this to be a local folder and work with that.
     // FIXME: this needs a lot of optimisation (and quite a number of protocol improvements on server side).
-    return m_v3Loader.load(*new ServerDirectory(m_handler, m_account, m_path), false);
+    afl::charset::CodepageCharset cs(afl::charset::g_codepageLatin1);
+    return m_v3Loader.load(*new ServerDirectory(m_handler, m_account, m_path), cs, config, false);
 #else
     afl::base::Ptr<afl::io::Directory> gameDirectory(new ServerDirectory(m_handler, m_account, m_path));
 
@@ -49,7 +71,7 @@ game::pcc::GameFolder::loadGameRoot()
     key->initFromDirectory(*gameDirectory, m_handler.log());
 
     // Specification loader
-    afl::base::Ptr<game::SpecificationLoader> specLoader(new game::v3::SpecificationLoader(charset, m_handler.translator(), m_handler.log()));
+    afl::base::Ptr<game::SpecificationLoader> specLoader(new game::v3::SpecificationLoader(spec, charset, m_handler.translator(), m_handler.log()));
 
     // FIXME: host version should be determined by server
     game::HostVersion version(game::HostVersion::PHost, MKVERSION(4,0,0));
@@ -101,6 +123,7 @@ game::pcc::GameFolder::canEnter() const
 {
     return false;
 }
+
 game::pcc::GameFolder::Kind
 game::pcc::GameFolder::getKind() const
 {

@@ -27,7 +27,6 @@ namespace ui { namespace widgets {
 
         // Widget:
         virtual ui::layout::Info getLayoutInfo() const;
-        virtual void handlePositionChange(gfx::Rectangle& oldPosition);
 
         // IconBox:
         virtual int getItemWidth(size_t nr);

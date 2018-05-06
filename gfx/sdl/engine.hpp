@@ -33,7 +33,7 @@ namespace gfx { namespace sdl {
         ~Engine();
 
         // Engine methods:
-        virtual afl::base::Ref<Canvas> createWindow(int width, int height, int bpp, WindowFlags_t flags);
+        virtual afl::base::Ref<Canvas> createWindow(const WindowParameters& param);
         virtual afl::base::Ref<Canvas> loadImage(afl::io::Stream& file);
         virtual void handleEvent(EventConsumer& consumer, bool relativeMouseMovement);
         virtual util::RequestDispatcher& dispatcher();
@@ -75,9 +75,6 @@ namespace gfx { namespace sdl {
         void setMouseGrab(bool enable);
         bool convertEvent(const SDL_Event& se, EventConsumer& consumer, bool infinite);
         bool handleMouse(EventConsumer& consumer, const SDL_MouseButtonEvent& be, bool infinite, uint32_t addButton);
-
-        // Logging
-        void logException(std::exception* e, const char* where);
     };
 
 } }

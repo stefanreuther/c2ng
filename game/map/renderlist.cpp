@@ -2,81 +2,19 @@
   *  \file game/map/renderlist.cpp
   */
 
-#include <stdexcept>
 #include "game/map/renderlist.hpp"
-#include "util/translation.hpp"
-
-namespace {
-    int16_t pack(game::map::RenderList::Instruction insn, size_t numArgs)
-    {
-        return int16_t(256*insn + numArgs);
-    }
-
-    bool unpackInstruction(int value, game::map::RenderList::Instruction& ri)
-    {
-        if (value >= 0 && value <= game::map::RenderList::MAX_INSTRUCTION) {
-            ri = static_cast<game::map::RenderList::Instruction>(value);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    bool unpack(int value, game::map::RenderList::Instruction& insn, size_t& numArgs)
-    {
-        if (unpackInstruction(value >> 8, insn)) {
-            numArgs = (value & 255);
-            return true;
-        } else {
-            return false;
-        }
-    }
-}
 
 game::map::RenderList::Iterator::Iterator(const RenderList& parent)
-    : m_parent(parent),
-      m_nextInstruction(0),
-      m_nextParameter(0),
-      m_numParameters(0)
+    : StringInstructionList::Iterator(parent)
 { }
 
 bool
 game::map::RenderList::Iterator::readInstruction(Instruction& insn)
 {
-    if (m_nextInstruction >= m_parent.m_instructions.size()) {
-        return false;
-    } else {
-        size_t numArgs;
-        if (unpack(m_parent.m_instructions[m_nextInstruction++], insn, numArgs)) {
-            m_nextParameter = m_nextInstruction;
-            m_numParameters = numArgs;
-            m_nextInstruction += numArgs;
-            return true;
-        } else {
-            return false;
-        }
-    }
-}
-
-bool
-game::map::RenderList::Iterator::readParameter(int& value)
-{
-    if (m_numParameters <= 0 || m_nextParameter >= m_parent.m_instructions.size()) {
-        return false;
-    } else {
-        value = m_parent.m_instructions[m_nextParameter++];
-        --m_numParameters;
-        return true;
-    }
-}
-
-bool
-game::map::RenderList::Iterator::readStringParameter(String_t& value)
-{
-    int index;
-    if (readParameter(index)) {
-        if (index >= 0 && size_t(index) < m_parent.m_strings.size()) {
-            value = m_parent.m_strings[index];
+    StringInstructionList::Instruction_t rawInsn;
+    if (StringInstructionList::Iterator::readInstruction(rawInsn)) {
+        if (/*rawInsn >= 0 &&*/ rawInsn <= MAX_INSTRUCTION) {
+            insn = static_cast<Instruction>(rawInsn);
             return true;
         } else {
             return false;
@@ -89,7 +27,7 @@ game::map::RenderList::Iterator::readStringParameter(String_t& value)
 bool
 game::map::RenderList::Iterator::readPointParameter(Point& value)
 {
-    int x, y;
+    int32_t x, y;
     if (readParameter(x) && readParameter(y)) {
         value = Point(x, y);
         return true;
@@ -100,9 +38,6 @@ game::map::RenderList::Iterator::readPointParameter(Point& value)
 
 
 game::map::RenderList::RenderList()
-    : m_instructions(),
-      m_strings(),
-      m_lastInstruction(-1)
 { }
 
 game::map::RenderList::~RenderList()
@@ -209,30 +144,7 @@ game::map::RenderList::drawUserMarker(Point pt, int shape, int color, String_t l
 void
 game::map::RenderList::addInstruction(Instruction ins)
 {
-    m_lastInstruction = m_instructions.size();
-    m_instructions.push_back(pack(ins, 0));
-}
-
-void
-game::map::RenderList::addParameter(int16_t par)
-{
-    if (m_instructions.size() > m_lastInstruction) {
-        m_instructions.push_back(par);
-        m_instructions[m_lastInstruction]++;
-    }
-}
-
-void
-game::map::RenderList::addStringParameter(String_t s)
-{
-    if (m_strings.size() >= 0x7FFF) {
-        // If this is ever hit, convert m_instructions to int32_t.
-        throw std::runtime_error(_("Map too complex"));
-    }
-
-    int16_t n = static_cast<int16_t>(m_strings.size());
-    m_strings.push_back(s);
-    addParameter(n);
+    StringInstructionList::addInstruction(static_cast<Instruction_t>(ins));
 }
 
 void
@@ -275,7 +187,7 @@ game::map::RenderList::replay(RendererListener& listener) const
 
          case riPlanet: {
             Point p;
-            int id, flags;
+            int32_t id, flags;
             if (it.readPointParameter(p) && it.readParameter(id) && it.readParameter(flags)) {
                 listener.drawPlanet(p, id, flags);
             }
@@ -284,7 +196,7 @@ game::map::RenderList::replay(RendererListener& listener) const
 
          case riShip: {
             Point p;
-            int id, rel;
+            int32_t id, rel;
             if (it.readPointParameter(p) && it.readParameter(id) && it.readParameter(rel)) {
                 listener.drawShip(p, id, Relation_t(rel));
             }
@@ -293,7 +205,7 @@ game::map::RenderList::replay(RendererListener& listener) const
 
          case riFleetLeader: {
             Point p;
-            int id, rel;
+            int32_t id, rel;
             if (it.readPointParameter(p) && it.readParameter(id) && it.readParameter(rel)) {
                 listener.drawFleetLeader(p, id, Relation_t(rel));
             }
@@ -302,7 +214,7 @@ game::map::RenderList::replay(RendererListener& listener) const
 
          case riMinefield: {
             Point p;
-            int id, r, isWeb, rel;
+            int32_t id, r, isWeb, rel;
             if (it.readPointParameter(p) && it.readParameter(id) && it.readParameter(r) && it.readParameter(isWeb) && it.readParameter(rel)) {
                 listener.drawMinefield(p, id, r, bool(isWeb), Relation_t(rel));
             }
@@ -310,7 +222,7 @@ game::map::RenderList::replay(RendererListener& listener) const
          }
          case riUserCircle: {
             Point p;
-            int r, color;
+            int32_t r, color;
             if (it.readPointParameter(p) && it.readParameter(r) && it.readParameter(color)) {
                 listener.drawUserCircle(p, r, color);
             }
@@ -318,7 +230,7 @@ game::map::RenderList::replay(RendererListener& listener) const
          }
          case riUserLine: {
             Point a, b;
-            int color;
+            int32_t color;
             if (it.readPointParameter(a) && it.readPointParameter(b) && it.readParameter(color)) {
                 listener.drawUserLine(a, b, color);
             }
@@ -326,7 +238,7 @@ game::map::RenderList::replay(RendererListener& listener) const
          }
          case riUserRectangle: {
             Point a, b;
-            int color;
+            int32_t color;
             if (it.readPointParameter(a) && it.readPointParameter(b) && it.readParameter(color)) {
                 listener.drawUserRectangle(a, b, color);
             }
@@ -334,7 +246,7 @@ game::map::RenderList::replay(RendererListener& listener) const
          }
          case riUserMarker: {
             Point p;
-            int shape, color;
+            int32_t shape, color;
             String_t text;
             if (it.readPointParameter(p) && it.readParameter(shape) && it.readParameter(color) && it.readStringParameter(text)) {
                 listener.drawUserMarker(p, shape, color, text);
@@ -343,20 +255,6 @@ game::map::RenderList::replay(RendererListener& listener) const
          }
         }
     }
-}
-
-void
-game::map::RenderList::clear()
-{
-    m_instructions.clear();
-    m_strings.clear();
-    m_lastInstruction = size_t(-1);
-}
-
-size_t
-game::map::RenderList::getNumInstructions() const
-{
-    return m_instructions.size();
 }
 
 game::map::RenderList::Iterator

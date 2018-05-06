@@ -28,6 +28,8 @@ TestGfxRectangle::testIt()
     TS_ASSERT_EQUALS(a.getHeight(), 40);
     TS_ASSERT(a.getBottomRight() == gfx::Point(40, 60));
     TS_ASSERT(a.getTopLeft() == gfx::Point(10, 20));
+    TS_ASSERT(a.getTopRight() == gfx::Point(40, 20));
+    TS_ASSERT(a.getBottomLeft() == gfx::Point(10, 60));
     TS_ASSERT(a.getCenter() == gfx::Point(25, 40));
     TS_ASSERT(a.getSize() == gfx::Point(30, 40));
 
@@ -163,6 +165,13 @@ TestGfxRectangle::testAlign()
 
     t.moveToEdge(gfx::Rectangle(0, 0, 640, 480), 2, 1, 20);
     TS_ASSERT_EQUALS(t, gfx::Rectangle(570, 230, 50, 20));
+
+    // moveIntoRectangle
+    t.moveIntoRectangle(gfx::Rectangle(0, 0, 100, 100));
+    TS_ASSERT_EQUALS(t, gfx::Rectangle(50, 80, 50, 20));
+
+    t.moveIntoRectangle(gfx::Rectangle(200, 200, 30, 100));
+    TS_ASSERT_EQUALS(t, gfx::Rectangle(200, 200, 50, 20));
 }
 
 /** Test split functions. */

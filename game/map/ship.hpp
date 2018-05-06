@@ -5,18 +5,20 @@
 #define C2NG_GAME_MAP_SHIP_HPP
 
 #include <vector>
-#include "game/map/shipdata.hpp"
-#include "game/map/mapobject.hpp"
-#include "game/playerset.hpp"
-#include "game/spec/shiplist.hpp"
-#include "game/map/shiphistorydata.hpp"
 #include "game/element.hpp"
-#include "game/unitscorelist.hpp"
+#include "game/map/mapobject.hpp"
+#include "game/map/shipdata.hpp"
+#include "game/map/shiphistorydata.hpp"
 #include "game/parser/messageinformation.hpp"
+#include "game/playerset.hpp"
 #include "game/spec/modifiedhullfunctionlist.hpp"
+#include "game/spec/shiplist.hpp"
 #include "game/unitscoredefinitionlist.hpp"
+#include "game/unitscorelist.hpp"
 
 namespace game { namespace map {
+
+    class Universe;
 
     // /** Ship. We essentially have three kinds of ship:
     //     - current ship, i.e. one seen this turn, and possibly played
@@ -175,7 +177,8 @@ namespace game { namespace map {
                                 const UnitScoreDefinitionList& scoreDefinitions,
                                 const game::spec::ShipList& shipList,
                                 const game::config::HostConfiguration& config) const;
-    //     void       enumShipSpecificSpecials(GHullFunctionList& list) const;
+        void enumerateShipFunctions(game::spec::HullFunctionList& list,
+                                    const game::spec::ShipList& shipList) const;
         bool hasAnyShipSpecialFunctions() const;
 
         // Public members:

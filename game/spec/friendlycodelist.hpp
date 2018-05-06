@@ -19,11 +19,47 @@ namespace game { namespace spec {
         This manages a list of friendly codes and offers operations on it.
         Lists can be loaded from a file, or created as a subset of another list.
         In addition to friendly code definitions (which can be visualized),
-        it can also manage a list of reserved prefixes (which are not visualized, "extra"). */
+        it can also manage a list of reserved prefixes (which are not visualized, "extra").
+
+        Functions to test friendly codes take a HostSelection object that determines how to deal with host specifics.
+        Pass a game::HostVersion to use that host's particular rules.
+        Pass <tt>Pessimistic</tt> to assume pessimistic rules,
+        i.e. assume this friendly code might be special and should be avoided when picking random friendly codes. */
     class FriendlyCodeList {
      public:
         typedef afl::container::PtrVector<FriendlyCode> Container_t;
         typedef Container_t::const_iterator Iterator_t;
+
+        enum Pessimistic_t { Pessimistic };
+
+        /** Host selection helper object.
+            See FriendlyCodeList description. */
+        class HostSelection {
+         public:
+            /** Construct from HostVersion.
+                Query will honor that host's rule.
+                \param host Host version */
+            HostSelection(const HostVersion& host);
+
+            /** Pessimistic assumption.
+                In case of doubt, query will assume that a code is special.
+                \param p Placeholder */
+            HostSelection(Pessimistic_t p);
+
+            /** @copydoc game::HostVersion::hasSpacePaddedFCodes */
+            bool hasSpacePaddedFCodes() const;
+
+            /** @copydoc game::HostVersion::hasNegativeFCodes */
+            bool hasNegativeFCodes() const;
+
+            /** @copydoc game::HostVersion::hasCaseInsensitiveUniversalMinefieldFCodes */
+            bool hasCaseInsensitiveUniversalMinefieldFCodes() const;
+
+         private:
+            bool m_hasSpacePaddedFCodes;
+            bool m_hasNegativeFCodes;
+            bool m_hasCaseInsensitiveUniversalMinefieldFCodes;
+        };
 
         /** Default constructor.
             Makes an empty list. */
@@ -36,7 +72,11 @@ namespace game { namespace spec {
             \param config Host configuration
 
             Note that this copies only friendly codes; it does not copy the extra friendly codes. */
-        FriendlyCodeList(const FriendlyCodeList& originalList, const game::map::Object& obj, const game::config::HostConfiguration& config);
+        FriendlyCodeList(const FriendlyCodeList& originalList,
+                         const game::map::Object& obj,
+                         const UnitScoreDefinitionList& scoreDefinitions,
+                         const game::spec::ShipList& shipList,
+                         const game::config::HostConfiguration& config);
 
         /** Destructor. */
         ~FriendlyCodeList();
@@ -122,7 +162,7 @@ namespace game { namespace spec {
             \param fc Friendly code
             \param host Host version
             \return true if friendly code is considered numeric */
-        bool isNumeric(const String_t& fc, const HostVersion& host) const;
+        bool isNumeric(const String_t& fc, const HostSelection host) const;
 
         /** Check whether a friendly code is an extra code.
             \param fc Friendly code
@@ -141,13 +181,13 @@ namespace game { namespace spec {
             \param tolerant true to accept upper and lower case; false to use host's rules
             \param host Host version
             \return true if this friendly code is a universal minefield friendly code */
-        bool isUniversalMinefieldFCode(const String_t& fc, bool tolerant, const HostVersion& host) const;
+        bool isUniversalMinefieldFCode(const String_t& fc, bool tolerant, const HostSelection host) const;
 
         /** Get friendly code's numeric value.
             \param fc Friendly code
             \param host Host version
             \return numeric value (1000 if code is not numeric) */
-        int getNumericValue(const String_t& fc, const HostVersion& host) const;
+        int getNumericValue(const String_t& fc, const HostSelection host) const;
 
         /** Check whether a friendly code is permitted as random friendly code.
             Random codes must be
@@ -167,14 +207,14 @@ namespace game { namespace spec {
             \param fc Friendly code
             \param host Host version
             \return friendly code is a valid result for generateRandomCode() */
-        bool isAllowedRandomCode(const String_t& fc, const HostVersion& host);
+        bool isAllowedRandomCode(const String_t& fc, const HostSelection host);
 
         /** Generate a random friendly code.
             See isAllowedRandomCode() for conditions for random friendly codes.
             \param rng Random number generator
             \param host Host version
             \return newly-generated code */
-        String_t generateRandomCode(util::RandomNumberGenerator& rng, const HostVersion& host);
+        String_t generateRandomCode(util::RandomNumberGenerator& rng, const HostSelection host);
 
      private:
         /** Special friendly codes. */
@@ -189,5 +229,39 @@ namespace game { namespace spec {
     };
 
 } }
+
+
+inline
+game::spec::FriendlyCodeList::HostSelection::HostSelection(const HostVersion& host)
+    : m_hasSpacePaddedFCodes(host.hasSpacePaddedFCodes()),
+      m_hasNegativeFCodes(host.hasNegativeFCodes()),
+      m_hasCaseInsensitiveUniversalMinefieldFCodes(host.hasCaseInsensitiveUniversalMinefieldFCodes())
+{ }
+
+inline
+game::spec::FriendlyCodeList::HostSelection::HostSelection(Pessimistic_t)
+    : m_hasSpacePaddedFCodes(true),
+      m_hasNegativeFCodes(true),
+      m_hasCaseInsensitiveUniversalMinefieldFCodes(true)
+{ }
+
+inline bool
+game::spec::FriendlyCodeList::HostSelection::hasSpacePaddedFCodes() const
+{
+    return m_hasSpacePaddedFCodes;
+}
+
+inline bool
+game::spec::FriendlyCodeList::HostSelection::hasNegativeFCodes() const
+{
+    return m_hasNegativeFCodes;
+}
+
+inline bool
+game::spec::FriendlyCodeList::HostSelection::hasCaseInsensitiveUniversalMinefieldFCodes() const
+{
+    return m_hasCaseInsensitiveUniversalMinefieldFCodes;
+}
+
 
 #endif

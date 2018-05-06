@@ -54,6 +54,7 @@ class TestGameV3OutboxReader : public CxxTest::TestSuite {
     void testLoad30Zero();
     void testLoad30ZeroLength();
     void testLoad30One();
+    void testLoad30Host();
     void testLoad35Empty();
     void testLoad35Zero();
     void testLoad35ZeroLength();
@@ -73,6 +74,28 @@ class TestGameV3ResultFile : public CxxTest::TestSuite {
  public:
     void test30();
     void test35();
+};
+
+class TestGameV3ResultLoader : public CxxTest::TestSuite {
+ public:
+    void testLoadTurnFile();
+    void testMissingShip();
+    void testMissingPlanet();
+    void testMissingBase();
+    void testUnplayedShip();
+    void testUnplayedPlanet();
+    void testUnplayedBase();
+    void testNoBase();
+    void testInvalidCommand();
+    void testInvalidFile();
+    void testInvalidPlayer();
+    void testAllianceCommand();
+    void testMessageCommand();
+};
+
+class TestGameV3Reverter : public CxxTest::TestSuite {
+ public:
+    void testGetPreviousFriendlyCode();
 };
 
 class TestGameV3StringVerifier : public CxxTest::TestSuite {

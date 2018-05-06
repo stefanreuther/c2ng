@@ -58,22 +58,6 @@ server::host::ServerApplication::handleCommandLineOption(const String_t& option,
     if (option == "nocron") {
         m_config.useCron = false;
         return true;
-    } else if (option == "help") {
-        using afl::string::Format;
-        afl::io::TextWriter& out = standardOutput();
-        out.writeLine(Format(_("PCC2 Host Server v%s - (c) 2017-2018 Stefan Reuther").c_str(), PCC2_VERSION));
-        out.writeLine();
-        out.writeLine(Format(_("Usage:\n"
-                               "  %s [-options]\n\n"
-                               "Options:\n"
-                               "%s"
-                               "\n"
-                               "Report bugs to <Streu@gmx.de>").c_str(),
-                             environment().getInvocationName(),
-                             util::formatOptions(Application::getHelp() +
-                                                 "--nocron\tDisable scheduler\n")));
-        exit(0);
-        return true;
     } else {
         return false;
     }
@@ -174,6 +158,16 @@ server::host::ServerApplication::handleConfiguration(const String_t& key, const 
             m_config.timeScale = n;
         } else {
             throw afl::except::CommandLineException(afl::string::Format("Invalid number for '%s'", key));
+        }
+        return true;
+    } else if (key == "HOST.USERSSEETEMPORARYTURNS") {
+        /* @q Host.UsersSeeTemporaryTurns:Bool (Config)
+           If enabled, users see each others temporary turns.
+           If disabled, users only see their own temporary status (original behaviour).
+           c2ng/c2host-server only.
+           @since PCC2 2.40.4 */
+        if (!util::parseBooleanValue(value, m_config.usersSeeTemporaryTurns)) {
+            throw afl::except::CommandLineException(afl::string::Format("Invalid value for '%s'", key));
         }
         return true;
     } else if (key == "HOST.WORKDIR") {
@@ -293,4 +287,16 @@ server::host::ServerApplication::setupWorkDirectory()
     fs.openDirectory(m_config.workDirectory)->getDirectoryEntries();
 
     log().write(afl::sys::LogListener::Info, LOG_NAME, afl::string::Format("Using work directory %s", m_config.workDirectory));
+}
+
+String_t
+server::host::ServerApplication::getApplicationName() const
+{
+    return afl::string::Format(_("PCC2 Host Server v%s - (c) 2017-2018 Stefan Reuther").c_str(), PCC2_VERSION);
+}
+
+String_t
+server::host::ServerApplication::getCommandLineOptionHelp() const
+{
+    return "--nocron\tDisable scheduler\n";
 }

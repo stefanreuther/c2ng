@@ -62,7 +62,7 @@ ui::widgets::AbstractButton::defaultHandleStateChange(State st, bool enable)
 bool
 ui::widgets::AbstractButton::defaultHandleKey(util::Key_t key, int prefix)
 {
-    if (!hasState(DisabledState)) {
+    if (!hasState(DisabledState) && m_key != 0) {
         // FIXME: && !hasState(bf_Key)
         // FIXME: PCC2 checks Alt and #/\ only on second pass
         if (key == m_key
@@ -127,6 +127,13 @@ ui::widgets::AbstractButton::getKey() const
     return m_key;
 }
 
+// Set associated key.
+void
+ui::widgets::AbstractButton::setKey(util::Key_t key)
+{
+    m_key = key;
+}
+
 // Get associated root.
 ui::Root&
 ui::widgets::AbstractButton::root() const
@@ -139,5 +146,7 @@ ui::widgets::AbstractButton::fire(int arg, util::Key_t key)
 {
     // ex UIAbstractButton::fire
     sig_fire.raise(arg);
-    sig_fireKey.raise(arg, key);
+    if ((key & util::Key_Mask) != 0) {
+        sig_fireKey.raise(arg, key);
+    }
 }

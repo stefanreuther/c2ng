@@ -10,6 +10,7 @@
 #include "afl/io/filesystem.hpp"
 #include "afl/net/networkstack.hpp"
 #include "afl/sys/commandlineparser.hpp"
+#include "afl/net/tunnel/tunnelablenetworkstack.hpp"
 
 namespace server { namespace file {
 
@@ -34,9 +35,11 @@ namespace server { namespace file {
         void doList(afl::sys::CommandLineParser& cmdl);
         void doList(DirectoryHandler& in, String_t name, bool recursive, bool longFormat, bool withHeader);
         void doClear(afl::sys::CommandLineParser& cmdl);
+        void doServe(afl::sys::CommandLineParser& cmdl);
         void help();
 
-        afl::net::NetworkStack& m_networkStack;
+        afl::net::NetworkStack& m_serverNetworkStack;
+        afl::net::tunnel::TunnelableNetworkStack m_networkStack;
     };
 
 } }
@@ -45,6 +48,7 @@ namespace server { namespace file {
 inline
 server::file::ClientApplication::ClientApplication(afl::sys::Environment& env, afl::io::FileSystem& fs, afl::net::NetworkStack& net)
     : Application(env, fs),
+      m_serverNetworkStack(net),
       m_networkStack(net)
 { }
 

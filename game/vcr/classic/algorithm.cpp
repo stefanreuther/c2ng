@@ -5,6 +5,13 @@
 
 #include "game/vcr/classic/algorithm.hpp"
 
+const int32_t game::vcr::classic::Algorithm::MAX_COORDINATE;
+
+// ex VCRMF_MAX_FTRS. We don't need VCRMF_MAX_BEAMS, VCRMF_MAX_TORPS, VCRMF_MAX_BAYS
+// because those values are known from the battle specs and we no longer use fixed-sized arrays.
+const int game::vcr::classic::Algorithm::MAX_FIGHTER_TRACKS;
+
+
 // Constructor.
 game::vcr::classic::Algorithm::Algorithm(Visualizer& vis)
     : m_pVisualizer(&vis)

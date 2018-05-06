@@ -7,6 +7,16 @@
 
 #include <cxxtest/TestSuite.h>
 
+class TestGfxGenColorRange : public CxxTest::TestSuite {
+ public:
+    void testGetMax();
+    void testGetLimit();
+    void testGetSimple();
+    void testGetOne();
+    void testParse();
+    void testParseError();
+};
+
 class TestGfxGenPerlinNoise : public CxxTest::TestSuite {
  public:
     void testIt();

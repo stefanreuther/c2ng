@@ -119,3 +119,20 @@ gfx::FontRequest::match(const FontRequest& provided)
         && matchValue(m_slant, provided.m_slant)
         && matchValue(m_style, provided.m_style);
 }
+
+// Compare for equality.
+bool
+gfx::FontRequest::operator==(const FontRequest& other) const
+{
+    return m_size.isSame(other.m_size)
+        && m_weight.isSame(other.m_weight)
+        && m_slant.isSame(other.m_slant)
+        && m_style.isSame(other.m_style);
+}
+
+// Compare for inequality.
+bool
+gfx::FontRequest::operator!=(const FontRequest& other) const
+{
+    return !operator==(other);
+}

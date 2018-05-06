@@ -19,6 +19,7 @@
 #include "interpreter/error.hpp"
 #include "interpreter/world.hpp"
 #include "util/plugin/manager.hpp"
+#include "game/reference.hpp"
 
 namespace game {
 
@@ -80,6 +81,8 @@ namespace game {
         // bool executeFile(afl::io::Stream& file);
 
         void notifyListeners();
+
+        bool getReferenceName(Reference ref, String_t& result);
 
      private:
         afl::sys::Log m_log;

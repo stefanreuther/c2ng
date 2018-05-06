@@ -17,7 +17,7 @@ namespace game { namespace browser {
         DirectoryHandler(Browser& b, afl::base::Ref<afl::io::Directory> defaultSpecificationDirectory, util::ProfileDirectory& profile, afl::io::FileSystem& fs);
         virtual bool handleFolderName(String_t name, afl::container::PtrVector<Folder>& result);
         virtual Folder* createAccountFolder(Account& acc);
-        virtual afl::base::Ptr<Root> loadGameRoot(afl::base::Ref<afl::io::Directory> dir);
+        virtual afl::base::Ptr<Root> loadGameRoot(afl::base::Ref<afl::io::Directory> dir, const game::config::UserConfiguration& config);
 
      private:
         // Associated browser. FIXME: can we get rid of this?

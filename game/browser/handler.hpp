@@ -5,9 +5,10 @@
 #define C2NG_GAME_BROWSER_HANDLER_HPP
 
 #include "afl/base/deletable.hpp"
-#include "afl/string/string.hpp"
-#include "afl/container/ptrvector.hpp"
 #include "afl/base/ptr.hpp"
+#include "afl/container/ptrvector.hpp"
+#include "afl/string/string.hpp"
+#include "game/config/userconfiguration.hpp"
 #include "game/root.hpp"
 
 namespace game { namespace browser {
@@ -50,12 +51,20 @@ namespace game { namespace browser {
 
             If the folder contains a network game, this must create a network Root.
 
+            The configuration passed will be the content of the "pcc2.ini" file from the directory.
+            It shall be consulted for the "Game_" options.
+            - Game_Type / Game_User / Game_Host / Game_Id for a network game association
+            - Game_Finished / Game_ReadOnly to determine the access level of loaded data
+            - Game_AccessHostFiles to configure access to host files
+            - Game_Charset to configure the character set
+
             This function is only allowed to throw if it has positively identified the directory as being its responsibility.
             Exceptions will stop the handler search and prevent other handlers from being given a chance to handle the directory.
 
             \param dir directory
+            \param config configuration
             \return Non-null root if the directory was understood. */
-        virtual afl::base::Ptr<Root> loadGameRoot(afl::base::Ref<afl::io::Directory> dir) = 0;
+        virtual afl::base::Ptr<Root> loadGameRoot(afl::base::Ref<afl::io::Directory> dir, const game::config::UserConfiguration& config) = 0;
 
     };
 

@@ -12,23 +12,24 @@ void
 TestGameVcrClassicVisualizer::testIt()
 {
     using game::vcr::classic::Side;
+    using game::vcr::classic::Algorithm;
     class Tester : public game::vcr::classic::Visualizer {
      public:
-        virtual void startFighter(Side /*side*/, int /*track*/)
+        virtual void startFighter(Algorithm& /*algo*/, Side /*side*/, int /*track*/)
             { }
-        virtual void landFighter(Side /*side*/, int /*track*/)
+        virtual void landFighter(Algorithm& /*algo*/, Side /*side*/, int /*track*/)
             { }
-        virtual void killFighter(Side /*side*/, int /*track*/)
+        virtual void killFighter(Algorithm& /*algo*/, Side /*side*/, int /*track*/)
             { }
-        virtual void fireBeam(Side /*side*/, int /*track*/, int /*target*/, int /*hit*/, int /*damage*/, int /*kill*/)
+        virtual void fireBeam(Algorithm& /*algo*/, Side /*side*/, int /*track*/, int /*target*/, int /*hit*/, int /*damage*/, int /*kill*/)
             { }
-        virtual void fireTorpedo(Side /*side*/, int /*hit*/, int /*launcher*/)
+        virtual void fireTorpedo(Algorithm& /*algo*/, Side /*side*/, int /*hit*/, int /*launcher*/)
             { }
-        virtual void updateBeam(Side /*side*/, int /*id*/)
+        virtual void updateBeam(Algorithm& /*algo*/, Side /*side*/, int /*id*/)
             { }
-        virtual void updateLauncher(Side /*side*/, int /*id*/)
+        virtual void updateLauncher(Algorithm& /*algo*/, Side /*side*/, int /*id*/)
             { }
-        virtual void killObject(Side /*side*/)
+        virtual void killObject(Algorithm& /*algo*/, Side /*side*/)
             { }
     };
     Tester t;

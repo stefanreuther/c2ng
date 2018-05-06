@@ -3,8 +3,6 @@
   */
 
 #include "game/v3/rootloader.hpp"
-#include "afl/charset/codepage.hpp"
-#include "afl/charset/codepagecharset.hpp"
 #include "afl/except/fileformatexception.hpp"
 #include "afl/io/multidirectory.hpp"
 #include "afl/string/format.hpp"
@@ -36,23 +34,17 @@ game::v3::RootLoader::RootLoader(afl::base::Ref<afl::io::Directory> defaultSpeci
       m_translator(tx),
       m_log(log),
       m_fileSystem(fs),
-      m_scanner(*m_defaultSpecificationDirectory, tx, log),
-      m_charset(new afl::charset::CodepageCharset(afl::charset::g_codepageLatin1))
+      m_scanner(*m_defaultSpecificationDirectory, tx, log)
 { }
 
-void
-game::v3::RootLoader::setCharsetNew(afl::charset::Charset* p)
-{
-    if (p) {
-        m_charset.reset(p);
-    }
-}
-
 afl::base::Ptr<game::Root>
-game::v3::RootLoader::load(afl::base::Ref<afl::io::Directory> gameDirectory, bool forceEmpty)
+game::v3::RootLoader::load(afl::base::Ref<afl::io::Directory> gameDirectory,
+                           afl::charset::Charset& charset,
+                           const game::config::UserConfiguration& config,
+                           bool forceEmpty)
 {
     m_scanner.clear();
-    m_scanner.scan(*gameDirectory, *m_charset);
+    m_scanner.scan(*gameDirectory, charset);
 
     afl::base::Ptr<Root> result;
     if (!m_scanner.getDirectoryFlags().empty() || forceEmpty) {
@@ -62,36 +54,51 @@ game::v3::RootLoader::load(afl::base::Ref<afl::io::Directory> gameDirectory, boo
         spec->addDirectory(m_defaultSpecificationDirectory);
 
         // Registration key
-        std::auto_ptr<RegistrationKey> key(new RegistrationKey(*m_charset));
+        std::auto_ptr<RegistrationKey> key(new RegistrationKey(charset));
         key->initFromDirectory(*gameDirectory, m_log);
 
         // Specification loader
-        afl::base::Ref<SpecificationLoader> specLoader(*new SpecificationLoader(*m_charset, m_translator, m_log));
+        afl::base::Ref<SpecificationLoader> specLoader(*new SpecificationLoader(spec, std::auto_ptr<afl::charset::Charset>(charset.clone()), m_translator, m_log));
+
+        // Actions
+        Root::Actions_t actions;
+        actions += Root::aLoadEditable;
+        actions += Root::aConfigureCharset;
+        actions += Root::aConfigureFinished;
+        actions += Root::aConfigureReadOnly;
+        actions += Root::aSweep;
+        if (m_scanner.getDirectoryFlags().containsAnyOf(DirectoryScanner::PlayerFlags_t() + DirectoryScanner::HaveResult + DirectoryScanner::HaveNewResult + DirectoryScanner::HaveOtherResult)) {
+            actions += Root::aUnpack;
+        }
+        if (m_scanner.getDirectoryFlags().contains(DirectoryScanner::HaveUnpacked)) {
+            actions += Root::aMaketurn;
+        }
 
         // Produce result
-        result = new Root(spec, gameDirectory, specLoader,
+        result = new Root(gameDirectory, specLoader,
                           m_scanner.getDirectoryHostVersion(),
                           std::auto_ptr<game::RegistrationKey>(key),
-                          std::auto_ptr<game::StringVerifier>(new StringVerifier(std::auto_ptr<afl::charset::Charset>(m_charset->clone()))));
+                          std::auto_ptr<game::StringVerifier>(new StringVerifier(std::auto_ptr<afl::charset::Charset>(charset.clone()))),
+                          Root::Actions_t(actions));
 
         // Configuration
-        loadConfiguration(*result);
-        loadRaceNames(result->playerList(), *spec);
+        loadConfiguration(*result, *spec, charset);
+        loadRaceNames(result->playerList(), *spec, charset);
 
         // Preferences
         result->userConfiguration().loadUserConfiguration(m_profile, m_log, m_translator);
-        result->userConfiguration().loadGameConfiguration(*gameDirectory, m_log, m_translator);
+        result->userConfiguration().merge(config);
 
         // Turn loader
         if (m_scanner.getDirectoryFlags().contains(DirectoryScanner::HaveResult)) {
-            result->setTurnLoader(new ResultLoader(*m_charset, m_translator, m_log, m_scanner, m_fileSystem));
+            result->setTurnLoader(new ResultLoader(spec, m_defaultSpecificationDirectory, std::auto_ptr<afl::charset::Charset>(charset.clone()), m_translator, m_log, m_scanner, m_fileSystem));
         }
     }
     return result;
 }
 
 void
-game::v3::RootLoader::loadConfiguration(Root& root)
+game::v3::RootLoader::loadConfiguration(Root& root, afl::io::Directory& dir, afl::charset::Charset& charset)
 {
     // ex game/config.cc:initConfig
     game::config::HostConfiguration& config = root.hostConfiguration();
@@ -99,13 +106,14 @@ game::v3::RootLoader::loadConfiguration(Root& root)
 
     // Check pconfig.src
     // FIXME: do we really want to load these from specificationDirectory()?
-    afl::base::Ptr<afl::io::Stream> file = root.specificationDirectory().openFileNT("pconfig.src", FileSystem::OpenRead);
+    afl::base::Ptr<afl::io::Stream> file = dir.openFileNT("pconfig.src", FileSystem::OpenRead);
     if (file.get() != 0) {
         // OK, PHost
         loadPConfig(root,
                     file,
-                    root.specificationDirectory().openFileNT("shiplist.txt", FileSystem::OpenRead),
-                    ConfigurationOption::Game);
+                    dir.openFileNT("shiplist.txt", FileSystem::OpenRead),
+                    ConfigurationOption::Game,
+                    charset);
     } else {
         // SRace
         file = root.gameDirectory().openFileNT("friday.dat", FileSystem::OpenRead);
@@ -114,7 +122,7 @@ game::v3::RootLoader::loadConfiguration(Root& root)
         }
 
         // Regular host config
-        file = root.specificationDirectory().openFileNT("hconfig.hst", FileSystem::OpenRead);
+        file = dir.openFileNT("hconfig.hst", FileSystem::OpenRead);
         if (file.get() != 0) {
             loadHConfig(root, *file, ConfigurationOption::Game);
         } else {
@@ -138,12 +146,13 @@ void
 game::v3::RootLoader::loadPConfig(Root& root,
                                   afl::base::Ptr<afl::io::Stream> pconfig,
                                   afl::base::Ptr<afl::io::Stream> shiplist,
-                                  game::config::ConfigurationOption::Source source)
+                                  game::config::ConfigurationOption::Source source,
+                                  afl::charset::Charset& charset)
 {
     // ex game/config.cc:loadPConfig
     // Configure parser
     game::config::ConfigurationParser parser(m_log, root.hostConfiguration(), source);
-    parser.setCharsetNew(m_charset->clone());
+    parser.setCharsetNew(charset.clone());
 
     // Load pconfig.src (mandatory)
     m_log.write(m_log.Info, LOG_NAME, afl::string::Format(m_translator.translateString("Reading configuration from %s...").c_str(), pconfig->getName()));
@@ -222,7 +231,7 @@ game::v3::RootLoader::loadRaceMapping(Root& root, afl::io::Stream& file, game::c
 }
 
 void
-game::v3::RootLoader::loadRaceNames(PlayerList& list, afl::io::Directory& dir)
+game::v3::RootLoader::loadRaceNames(PlayerList& list, afl::io::Directory& dir, afl::charset::Charset& charset)
 {
     // ex GRaceNameList::load
     list.clear();
@@ -233,9 +242,9 @@ game::v3::RootLoader::loadRaceNames(PlayerList& list, afl::io::Directory& dir)
     file->fullRead(afl::base::fromObject(in));
     for (int player = 0; player < gt::NUM_PLAYERS; ++player) {
         if (Player* out = list.create(player+1)) {
-            out->setName(Player::ShortName,     m_charset->decode(in.shortNames[player]));
-            out->setName(Player::LongName,      m_charset->decode(in.longNames[player]));
-            out->setName(Player::AdjectiveName, m_charset->decode(in.adjectiveNames[player]));
+            out->setName(Player::ShortName,     charset.decode(in.shortNames[player]));
+            out->setName(Player::LongName,      charset.decode(in.longNames[player]));
+            out->setName(Player::AdjectiveName, charset.decode(in.adjectiveNames[player]));
             out->setOriginalNames();
         }
     }

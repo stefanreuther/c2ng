@@ -1353,17 +1353,19 @@ game::map::Ship::hasSpecialFunction(int basicFunction,
 
 // /** Enumerate this ship's special functions (only functions assigned to this
 //     ship, not including class functions). */
-// void
-// GShip::enumShipSpecificSpecials(GHullFunctionList& list) const
-// {
-//     const GHullFunctionData& fd = GHullFunctionData::instance;
-//     for (std::size_t i = 0; i < map_info.special_functions.size(); ++i) {
-//         GHullFunction f;
-//         if (fd.getFunctionDefinition(fd.getIdFromHostId(map_info.special_functions[i]), f)) {
-//             list.add(f);
-//         }
-//     }
-// }
+void
+game::map::Ship::enumerateShipFunctions(game::spec::HullFunctionList& list,
+                                        const game::spec::ShipList& shipList) const
+{
+    // ex GShip::enumShipSpecificSpecials
+    const game::spec::ModifiedHullFunctionList& mhf = shipList.modifiedHullFunctions();
+    for (size_t i = 0, n = m_specialFunctions.size(); i < n; ++i) {
+        game::spec::HullFunction f;
+        if (mhf.getFunctionDefinition(mhf.getFunctionIdFromHostId(m_specialFunctions[i]), f)) {
+            list.add(f);
+        }
+    }
+}
 
 // /** Check whether this ship has any ship-specific functions. */
 bool

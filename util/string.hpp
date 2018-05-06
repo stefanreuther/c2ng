@@ -1,5 +1,6 @@
 /**
   *  \file util/string.hpp
+  *  \brief String Utilities
   */
 #ifndef C2NG_UTIL_STRING_HPP
 #define C2NG_UTIL_STRING_HPP
@@ -22,6 +23,13 @@ namespace util {
     bool stringMatch(const char* pattern, const char* tester);
     bool stringMatch(const char* pattern, const String_t& tester);
 
+    /** Consume word from comma-separated list.
+        This is intended for matching of user-given words against a fixed template list,
+        thus there are no provisions for specially processing the template (e.g. no removal of whitespace).
+        \param tpl [in/out] Comma-separated word list
+        \param word [out] Word
+        \retval true Word has been consumed from tpl and pointer advanced; \c word has been set
+        \retval false No more words, nothing changed */
     bool eatWord(const char*& tpl, String_t& word);
 
     /** Parse a range. Syntax is one of
@@ -47,6 +55,14 @@ namespace util {
         \param number [out] Player number
         \return true if character was parsed correctly, false on error */
     bool parsePlayerCharacter(const char ch, int& number);
+
+    /** Parse a boolean value.
+        This is intended for booleans parsed from command-line options and configuration files.
+        \param s [in] String
+        \param result [out] Result
+        \retval true String parsed correctly, result has been updated
+        \retval false String not valid, result unchanged */
+    bool parseBooleanValue(const String_t& s, bool& result);
 
     /** Format a textual list of options.
         The string can contain
@@ -81,6 +97,15 @@ namespace util {
         \param input text to encode
         \param charset character set */
     String_t encodeMimeHeader(String_t input, String_t charsetName);
+
+    /** Encode as HTML.
+        \param input text to encode
+        \param rawUnicode If true, Unicode characters are reproduced as-is.
+                          This saves memory but requires the output to be delivered to the client with a "UTF-8" character set declaration.
+                          If false, Unicode characters are encoded as numerical escapes,
+                          which requires more memory but is independant of the character set.
+        \return encoded text */
+    String_t encodeHtml(const String_t& input, bool rawUnicode);
 
 }
 

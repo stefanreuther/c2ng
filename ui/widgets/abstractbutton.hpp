@@ -81,6 +81,10 @@ namespace ui { namespace widgets {
             \return key */
         util::Key_t getKey() const;
 
+        /** Set associated key.
+            \param key Key */
+        void setKey(util::Key_t key);
+
         /** Get associated root.
             \return root */
         ui::Root& root() const;
@@ -99,7 +103,7 @@ namespace ui { namespace widgets {
         ui::Root& m_root;
 
         // Associated key
-        const util::Key_t m_key;
+        util::Key_t m_key;
 
         // Keyboard modifiers that were active when the mouse was pressed in this button
         util::Key_t m_activeModifiers;

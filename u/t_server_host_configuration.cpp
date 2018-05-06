@@ -17,6 +17,7 @@ TestServerHostConfiguration::testBase()
     TS_ASSERT_EQUALS(testee.workDirectory, "");
     TS_ASSERT_EQUALS(testee.useCron, true);
     TS_ASSERT_EQUALS(testee.hostFileAddress.toString(), "127.0.0.1:7776");
+    TS_ASSERT_EQUALS(testee.usersSeeTemporaryTurns, true);
 
     // Must be copyable
     server::host::Configuration t = testee;

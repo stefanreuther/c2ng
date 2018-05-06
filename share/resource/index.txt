@@ -66,3 +66,26 @@ g.winred = winblue.|add:-32
 g.wingray = winblue.|add:-48
 g.wingreen = winblue.|add:61
 g.winyellow = winblue.|add:78
+
+; "bgtile" is a gray sand texture. We can derive other background
+; colors from it. For reference, here are some good ones:
+;   add:8 = light gray (works as window background)
+;   add:16 = dark red
+;   add:20 = reddish orange
+;   add:28 = orangeish yellow
+;   add:32 = yellow
+;   add:48 = blue
+;   add:52 = light blue (same shade as winblue)
+;   add:56 = really light blue
+;   add:64 = fall
+;   add:72 = acid green
+;   add:100 = pale green
+;   add:112 = dark green
+;   add:116 = bright green
+;   add:128 = dark yellow
+;   add:130 = not so dark greenish yellow
+;   add:-12 = whiteish blue
+g.bgtile = bgtile.
+g.bluetile = bgtile.|add:48
+g.greentile = bgtile.|add:112
+g.redtile = bgtile.|add:16

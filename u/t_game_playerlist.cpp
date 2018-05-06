@@ -288,3 +288,21 @@ TestGamePlayerList::testNotify()
     TS_ASSERT_EQUALS(c.get(), 4);
 }
 
+/** Test getName(). */
+void
+TestGamePlayerList::testGetName()
+{
+    game::PlayerList testee;
+    game::Player* p = testee.create(3);
+    p->setName(game::Player::LongName, "Long");
+    p->setName(game::Player::EmailAddress, "e@mai.l");
+
+    TS_ASSERT_EQUALS(testee.getPlayerName(3, game::Player::LongName), "Long");
+    TS_ASSERT_EQUALS(testee.getPlayerName(3, game::Player::EmailAddress), "e@mai.l");
+    TS_ASSERT_EQUALS(testee.getPlayerName(3, game::Player::AdjectiveName), "");
+
+    TS_ASSERT_EQUALS(testee.getPlayerName(1, game::Player::LongName), "Player 1");
+    TS_ASSERT_EQUALS(testee.getPlayerName(1, game::Player::EmailAddress), "");
+    TS_ASSERT_EQUALS(testee.getPlayerName(1, game::Player::AdjectiveName), "Player 1");
+}
+

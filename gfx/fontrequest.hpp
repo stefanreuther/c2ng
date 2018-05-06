@@ -85,6 +85,16 @@ namespace gfx {
             \return true on match */
         bool match(const FontRequest& provided);
 
+        /** Compare for equality.
+            \param other Other FontRequest
+            \return true if equal (all constraints identical) */
+        bool operator==(const FontRequest& other) const;
+
+        /** Compare for inequality.
+            \param other Other FontRequest
+            \return true if different (some constraints not identical) */
+        bool operator!=(const FontRequest& other) const;
+
      private:
         Value_t m_size;
         Value_t m_weight;

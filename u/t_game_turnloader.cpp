@@ -21,6 +21,8 @@ TestGameTurnLoader::testInterface()
             { }
         virtual void loadHistoryTurn(game::Turn& /*turn*/, game::Game& /*game*/, int /*player*/, int /*turnNumber*/, game::Root& /*root*/)
             { }
+        virtual String_t getProperty(Property /*p*/)
+            { return String_t(); }
     };
     Tester t;
 }
@@ -49,6 +51,8 @@ TestGameTurnLoader::testDefault()
             { }
         virtual void loadHistoryTurn(game::Turn& /*turn*/, game::Game& /*game*/, int /*player*/, int /*turnNumber*/, game::Root& /*root*/)
             { }
+        virtual String_t getProperty(Property /*p*/)
+            { return String_t(); }
      private:
         afl::base::Memory<const PlayerStatusSet_t> m_data;
     };

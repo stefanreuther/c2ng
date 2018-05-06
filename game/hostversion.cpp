@@ -59,6 +59,14 @@ game::HostVersion::getVersion() const
     return m_version;
 }
 
+// Check for PHost.
+bool
+game::HostVersion::isPHost() const
+{
+    return m_kind == PHost;
+}
+
+
 // Format as string.
 String_t
 game::HostVersion::toString(afl::string::Translator& tx) const
@@ -318,6 +326,14 @@ bool
 game::HostVersion::hasParallelShipTransfers() const
 {
     return m_kind != NuHost;
+}
+
+// Check for extended missions.
+bool
+game::HostVersion::hasExtendedMissions(const game::config::HostConfiguration& config) const
+{
+    return m_kind == PHost
+        && config[config.AllowExtendedMissions]() != 0;
 }
 
 

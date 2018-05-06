@@ -42,12 +42,12 @@ namespace ui { namespace res {
     /** Resource Id Prefix: Ship moving to the right in VCR (fighting on the left).
         \param first   Hull::getExternalPictureNumber()
         \param second  Hull::getId() */
-    extern const char RSHIP[];
+    extern const char VCR_RSHIP[];
 
     /** Resource Id Prefix: Ship moving to the left in VCR (fighting on the right).
         \param first   Hull::getExternalPictureNumber()
         \param second  Hull::getId() */
-    extern const char LSHIP[];
+    extern const char VCR_LSHIP[];
 
     /** Resource Id Prefix: Fighter moving to the right in VCR.
         \param first   Race number. */

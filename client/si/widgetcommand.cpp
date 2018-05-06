@@ -24,6 +24,7 @@
 #include "ui/widgets/stringlistbox.hpp"
 #include "client/si/stringlistdialogwidget.hpp"
 #include "interpreter/values.hpp"
+#include "client/si/contextreceiver.hpp"
 
 namespace {
     void setBooleanProperty(client::si::WidgetProperty p,
@@ -77,12 +78,12 @@ client::si::IFWidgetRun(game::Session& session, ScriptSide& ss, const WidgetRefe
         RunContextProvider(RequestLink2 link)
             : m_link(link)
             { }
-        void createContext(game::Session& session, interpreter::Process& proc)
+        void createContext(game::Session& session, ContextReceiver& recv)
             {
                 uint32_t pid;
                 if (m_link.getProcessId(pid)) {
                     if (interpreter::Process* parent = session.world().processList().getProcessById(pid)) {
-                        proc.pushNewContext(interpreter::ProcessObserverContext::create(*parent));
+                        recv.addNewContext(interpreter::ProcessObserverContext::create(*parent));
                     }
                 }
             }

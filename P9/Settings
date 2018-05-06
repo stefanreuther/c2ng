@@ -29,9 +29,9 @@ LDFLAGS = $(CONFIG_AFL_LDFLAGS) $(CONFIG_C2NG_LDFLAGS)
 CXXTESTDIR = $(CONFIG_AFL_CXXTESTDIR)
 
 # Define "all" targets
-all: all-sdl-$(CONFIG_C2NG_HAVE_SDL) all-cxxtest-$(CONFIG_C2NG_HAVE_CXXTEST)
-all-sdl-yes: all-sdl-no $(OUTPUT_$(PROJECTS_guiapp))
-all-sdl-no: $(OUTPUT_$(PROJECTS_app))
+all: all-guilib-$(CONFIG_C2NG_HAVE_GUILIB) all-cxxtest-$(CONFIG_C2NG_HAVE_CXXTEST)
+all-guilib-yes: all-guilib-no $(OUTPUT_$(PROJECTS_guiapp))
+all-guilib-no: $(OUTPUT_$(PROJECTS_app))
 all-cxxtest-yes: $(OUTPUT_$(PROJECTS_testapp))
 all-cxxtest-no: 
 MAIN_TARGETS += all all-sdl-yes all-sdl-no all-cxxtest-yes all-cxxtest-no
@@ -48,10 +48,36 @@ end
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/map/shippredictor.cpp game/map/shippredictor.hpp \
-    util/configurationfile.cpp util/configurationfile.hpp \
-    game/v3/hconfig.cpp game/v3/hconfig.hpp game/map/markings.cpp \
-    game/map/markings.hpp game/map/markingvector.cpp \
+FILES_gamelib = game/map/movementpredictor.cpp \
+    game/map/movementpredictor.hpp game/actions/changeshipfriendlycode.cpp \
+    game/actions/changeshipfriendlycode.hpp game/map/planetpredictor.cpp \
+    game/map/planetpredictor.hpp game/map/planeteffectors.cpp \
+    game/map/planeteffectors.hpp game/v3/registry.cpp game/v3/registry.hpp \
+    game/map/chunnelmission.cpp game/map/chunnelmission.hpp util/updater.hpp \
+    game/parser/format.cpp game/parser/format.hpp game/reference.cpp \
+    game/reference.hpp game/msg/configuration.cpp game/msg/configuration.hpp \
+    game/shipquery.cpp game/shipquery.hpp util/syntax/lisphighlighter.cpp \
+    util/syntax/lisphighlighter.hpp \
+    game/vcr/classic/mirroringeventlistener.cpp \
+    game/vcr/classic/mirroringeventlistener.hpp \
+    util/syntax/pascalhighlighter.cpp util/syntax/pascalhighlighter.hpp \
+    game/vcr/classic/utils.cpp game/vcr/classic/utils.hpp \
+    game/vcr/classic/eventrecorder.cpp game/vcr/classic/eventrecorder.hpp \
+    game/vcr/classic/eventvisualizer.cpp \
+    game/vcr/classic/eventvisualizer.hpp game/vcr/classic/eventlistener.hpp \
+    util/stringinstructionlist.cpp util/stringinstructionlist.hpp \
+    util/instructionlist.cpp util/instructionlist.hpp game/vcr/overview.cpp \
+    game/vcr/overview.hpp game/vcr/battle.cpp \
+    game/interface/completionlist.cpp game/interface/completionlist.hpp \
+    util/directorybrowser.cpp util/directorybrowser.hpp \
+    game/v3/check/configuration.cpp game/v3/check/configuration.hpp \
+    game/v3/check/application.cpp game/v3/check/application.hpp \
+    game/v3/check/checker.cpp game/v3/check/checker.hpp \
+    game/v3/trn/turnprocessor.cpp game/v3/trn/turnprocessor.hpp \
+    util/digest.cpp util/digest.hpp game/map/shippredictor.cpp \
+    game/map/shippredictor.hpp util/configurationfile.cpp \
+    util/configurationfile.hpp game/v3/hconfig.cpp game/v3/hconfig.hpp \
+    game/map/markings.cpp game/map/markings.hpp game/map/markingvector.cpp \
     game/map/markingvector.hpp game/db/fleetloader.cpp \
     game/db/fleetloader.hpp game/interface/cargomethod.cpp \
     game/interface/cargomethod.hpp game/actions/cargotransfersetup.cpp \
@@ -502,11 +528,63 @@ PROJ_AUTO += \
     gamelib:game/*.cpp,game/*.hpp,util/*.cpp,util/*.hpp,interpreter/*.cpp,interpreter/*.hpp
 
 TARGETS += guilib
-FILES_guilib = ui/res/generatedplanetprovider.cpp \
-    ui/res/generatedplanetprovider.hpp gfx/gen/vector3d.hpp \
-    gfx/gen/planet.cpp gfx/gen/planet.hpp gfx/gen/planetconfig.cpp \
-    gfx/gen/planetconfig.hpp gfx/gen/application.cpp gfx/gen/application.hpp \
-    gfx/basecontext.cpp gfx/basecontext.hpp gfx/basecolorscheme.hpp \
+FILES_guilib = client/tiles/shipmovementtile.cpp \
+    client/tiles/shipmovementtile.hpp ui/widgets/textbutton.cpp \
+    ui/widgets/textbutton.hpp client/tiles/shipcargotile.cpp \
+    ui/widgets/simpletable.cpp ui/widgets/simpletable.hpp \
+    client/widgets/simplegauge.cpp client/widgets/simplegauge.hpp \
+    client/tiles/shipcargotile.hpp client/dialogs/inboxdialog.cpp \
+    client/dialogs/inboxdialog.hpp client/widgets/messageactionpanel.cpp \
+    client/widgets/messageactionpanel.hpp client/vcr/classic/event.cpp \
+    client/vcr/classic/interleavedscheduler.cpp \
+    client/vcr/classic/interleavedscheduler.hpp gfx/scan.cpp gfx/scan.hpp \
+    client/vcr/classic/playbackscreen.cpp \
+    client/vcr/classic/playbackscreen.hpp \
+    client/vcr/classic/standardscheduler.cpp \
+    client/vcr/classic/standardscheduler.hpp \
+    client/vcr/classic/traditionalscheduler.cpp \
+    client/vcr/classic/traditionalscheduler.hpp \
+    client/vcr/classic/scheduler.hpp client/vcr/classic/eventconsumer.hpp \
+    client/vcr/classic/event.hpp client/vcr/classic/renderer.cpp \
+    client/vcr/classic/renderer.hpp client/vcr/classic/player.cpp \
+    client/vcr/classic/player.hpp gfx/gen/texture.cpp gfx/gen/texture.hpp \
+    gfx/gen/colorrange.cpp gfx/gen/colorrange.hpp \
+    client/vcr/playbackcontrolwidget.cpp \
+    client/vcr/playbackcontrolwidget.hpp client/vcr/unitstatuswidget.cpp \
+    client/vcr/unitstatuswidget.hpp ui/res/winplanvcrprovider.cpp \
+    ui/res/winplanvcrprovider.hpp gfx/windowparameters.hpp \
+    gfx/gen/shieldrenderer.cpp gfx/gen/shieldrenderer.hpp \
+    gfx/gen/explosionrenderer.cpp gfx/gen/explosionrenderer.hpp \
+    gfx/gen/particlerenderer.cpp gfx/gen/particlerenderer.hpp \
+    client/vcr/torpedosprite.cpp client/vcr/torpedosprite.hpp \
+    client/vcr/beamsprite.cpp client/vcr/beamsprite.hpp \
+    gfx/anim/textsprite.cpp gfx/anim/textsprite.hpp \
+    gfx/anim/pixmapsprite.cpp gfx/anim/pixmapsprite.hpp \
+    ui/widgets/spritewidget.cpp ui/widgets/spritewidget.hpp \
+    gfx/anim/controller.cpp gfx/anim/controller.hpp gfx/anim/sprite.cpp \
+    gfx/anim/sprite.hpp client/dialogs/classicvcrdialog.cpp \
+    client/dialogs/classicvcrdialog.hpp client/widgets/classicvcrinfo.cpp \
+    client/widgets/classicvcrinfo.hpp client/si/contextreceiver.hpp \
+    ui/widgets/panel.cpp ui/widgets/panel.hpp ui/pixmapcolorscheme.cpp \
+    ui/pixmapcolorscheme.hpp gfx/application.cpp gfx/application.hpp \
+    gfx/sdl2/nullpresenter.cpp gfx/sdl2/nullpresenter.hpp \
+    gfx/sdl2/presenter.hpp gfx/sdl2/streaminterface.cpp \
+    gfx/sdl2/streaminterface.hpp gfx/sdl2/surface.cpp gfx/sdl2/surface.hpp \
+    gfx/sdl2/engine.cpp gfx/sdl2/engine.hpp gfx/gen/orbitconfig.cpp \
+    gfx/gen/orbitconfig.hpp client/imageloader.cpp client/imageloader.hpp \
+    client/dialogs/directoryselectiondialog.cpp \
+    client/dialogs/directoryselectiondialog.hpp \
+    ui/widgets/standarddialogbuttons.cpp \
+    ui/widgets/standarddialogbuttons.hpp \
+    client/dialogs/folderconfigdialog.cpp \
+    client/dialogs/folderconfigdialog.hpp client/downlink.cpp \
+    client/downlink.hpp ui/widgets/menuframe.cpp ui/widgets/menuframe.hpp \
+    ui/widgets/optiongrid.cpp ui/widgets/optiongrid.hpp \
+    ui/res/generatedplanetprovider.cpp ui/res/generatedplanetprovider.hpp \
+    gfx/gen/vector3d.hpp gfx/gen/planet.cpp gfx/gen/planet.hpp \
+    gfx/gen/planetconfig.cpp gfx/gen/planetconfig.hpp \
+    gfx/gen/application.cpp gfx/gen/application.hpp gfx/basecontext.cpp \
+    gfx/basecontext.hpp gfx/basecolorscheme.hpp \
     client/widgets/commanddataview.cpp client/widgets/commanddataview.hpp \
     ui/rich/draw.cpp ui/rich/draw.hpp ui/rich/splitter.cpp \
     ui/rich/splitter.hpp client/widgets/standarddataview.cpp \
@@ -642,7 +720,8 @@ DEPEND_guilib = afl
 PROJ_AUTO += guilib:gfx/*.cpp,gfx/*.hpp,ui/*.cpp,ui/*.hpp,client/*.cpp,client/*.hpp
 
 TARGETS += serverlib
-FILES_serverlib = server/monitor/timeserieswriter.cpp \
+FILES_serverlib = server/file/directorypage.cpp \
+    server/file/directorypage.hpp server/monitor/timeserieswriter.cpp \
     server/monitor/timeserieswriter.hpp server/monitor/timeseriesloader.cpp \
     server/monitor/timeseriesloader.hpp server/monitor/timeseries.cpp \
     server/monitor/timeseries.hpp server/monitor/loadaverageobserver.cpp \
@@ -891,6 +970,11 @@ DEPEND_serverlib = afl
 PROJ_AUTO += serverlib:server/[^c]*.cpp,server/c[^2]*.cpp,server/*.hpp
 
 # Tools
+TARGETS += c2check
+FILES_c2check = tools/c2check.cpp
+TYPE_c2check = app
+DEPEND_c2check = gamelib afl
+
 TARGETS += c2configtool
 FILES_c2configtool = tools/c2configtool.cpp
 TYPE_c2configtool = app
@@ -1000,7 +1084,21 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_util_configurationfile.cpp \
+FILES_testsuite = u/t_game_map_movementpredictor.cpp \
+    u/t_game_v3_reverter.cpp u/t_game_map_ship.cpp \
+    u/t_game_map_planetpredictor.cpp u/t_util_updater.cpp \
+    u/t_game_vcr_classic_utils.cpp \
+    u/t_game_vcr_classic_mirroringeventlistener.cpp u/t_gfx_scan.cpp \
+    u/t_gfx_anim_sprite.cpp u/t_gfx_anim_controller.cpp u/t_gfx_anim.hpp \
+    u/t_util_syntax_lisphighlighter.cpp u/t_gfx_gen_colorrange.cpp \
+    u/t_util_syntax_pascalhighlighter.cpp \
+    u/t_game_vcr_classic_eventrecorder.cpp \
+    u/t_game_vcr_classic_eventlistener.cpp \
+    u/t_util_stringinstructionlist.cpp u/t_util_instructionlist.cpp \
+    u/t_game_map_renderlist.cpp u/t_game_config_userconfiguration.cpp \
+    u/t_client_si_contextreceiver.cpp u/t_client_downlink.cpp \
+    u/t_server_application.cpp u/t_game_v3_resultloader.cpp \
+    u/t_util_digest.cpp u/t_util_configurationfile.cpp \
     u/t_server_monitor_timeseriesloader.cpp \
     u/t_server_monitor_timeserieswriter.cpp u/t_game_v3_hconfig.cpp \
     u/t_server_monitor_statusobserver.cpp u/t_server_monitor_timeseries.cpp \

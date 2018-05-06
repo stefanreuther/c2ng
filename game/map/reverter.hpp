@@ -35,9 +35,9 @@ namespace game { namespace map {
         virtual int getNumTorpedoesAllowedToSell(int planetId, int slot) const = 0;
         virtual int getNumFightersAllowedToSell(int planetId) const = 0;
 
-        // // - determine previous friendly code
-        // virtual String_t getPreviousShipFriendlyCode(int shipId) const = 0;
-        // virtual String_t getPreviousPlanetFriendlyCode(int planetId) const = 0;
+        // - determine previous friendly code
+        virtual afl::base::Optional<String_t> getPreviousShipFriendlyCode(Id_t shipId) const = 0;
+        virtual afl::base::Optional<String_t> getPreviousPlanetFriendlyCode(Id_t planetId) const = 0;
 
         // // - determine previous mission
         // virtual void getPreviousShipMission(int shipId, int& m, int& i, int& t) const = 0;

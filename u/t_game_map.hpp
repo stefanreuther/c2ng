@@ -76,6 +76,11 @@ class TestGameMapMarkings : public CxxTest::TestSuite {
     void testSetLayer();
 };
 
+class TestGameMapMovementPredictor : public CxxTest::TestSuite {
+ public:
+    void testCombinations();
+};
+
 class TestGameMapObject : public CxxTest::TestSuite {
  public:
     void testIt();
@@ -98,9 +103,30 @@ class TestGameMapObjectReference : public CxxTest::TestSuite {
     void testAccessor();
 };
 
+class TestGameMapPlanetPredictor : public CxxTest::TestSuite {
+ public:
+    void testPHost();
+    void testHost();
+    void testGrowthPHostTholian();
+    void testGrowthHostTholian();
+};
+
 class TestGameMapPoint : public CxxTest::TestSuite {
  public:
     void testBasics();
+};
+
+class TestGameMapRenderList : public CxxTest::TestSuite {
+ public:
+    void testRead();
+    void testReadInsnOnly();
+    void testReplay();
+    void testReplayAgain();
+};
+
+class TestGameMapShip : public CxxTest::TestSuite {
+ public:
+    void testInit();
 };
 
 class TestGameMapViewport : public CxxTest::TestSuite {

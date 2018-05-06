@@ -128,6 +128,7 @@ fi
 # We're testing GUI libraries in the following, so swap out libs...
 NONGUILIBS=$LIBS
 LIBS=$GUILIBS
+conf_var_set HAVE_GUILIB no
 
 # SDL
 conf_log_start "Looking for SDL..."
@@ -148,6 +149,7 @@ case $(conf_arg_pkg_status sdl) in
                 conf_log_die "This required package could not be found."
         fi
         conf_var_set HAVE_SDL yes
+        conf_var_set HAVE_GUILIB yes
         conf_macro_set HAVE_SDL
         conf_log_result "OK"
         ;;
@@ -157,6 +159,7 @@ case $(conf_arg_pkg_status sdl) in
     *)
         if conf_link_try || conf_link_try_pkgconfig sdl; then
             conf_var_set HAVE_SDL yes
+            conf_var_set HAVE_GUILIB yes
             conf_macro_set HAVE_SDL
             conf_log_result "OK"
         else
@@ -166,41 +169,118 @@ case $(conf_arg_pkg_status sdl) in
 esac
 
 # SDL_image
-conf_log_start "Looking for SDL_image..."
-conf_compile_set_program "
+if ${conf_macro_set_HAVE_SDL:-false}; then
+    conf_log_start "Looking for SDL_image..."
+    conf_compile_set_program "
   #include <SDL_image.h>
   #undef main
   int main() { IMG_Load_RW(0, 0); }"
-case $(conf_arg_pkg_status sdl_image) in
-    required)
-        libdir="$conf_pkg_dir_sdl_image"
-        if test -n "$libdir"; then
-            conf_link_try CXXFLAGS="$CXXFLAGS -I$libdir" LDFLAGS="$LDFLAGS -L$libdir" LIBS="$LIBS -lSDL_image"||
-                conf_link_try CXXFLAGS="$CXXFLAGS -I$libdir/include" LDFLAGS="$LDFLAGS -L$libdir/lib" LIBS="$LIBS -lSDL_image" ||
-                conf_log_die "The configured directory, \"$libdir\", does not work."
-        else
-            conf_link_try || conf_link_try LIBS="$LIBS -lSDL_image" || conf_link_try_pkgconfig SDL_image ||
-                conf_log_die "This required package could not be found."
-        fi
-        conf_var_set HAVE_SDL_IMAGE yes
-        conf_macro_set HAVE_SDL_IMAGE
-        conf_log_result "OK"
-        ;;
-    disabled)
-        conf_log_result "disabled"
-        ;;
-    *)
-        if conf_link_try LIBS="$LIBS -lSDL_image" || conf_link_try_pkgconfig SDL_image; then
+    case $(conf_arg_pkg_status sdl_image) in
+        required)
+            libdir="$conf_pkg_dir_sdl_image"
+            if test -n "$libdir"; then
+                conf_link_try CXXFLAGS="$CXXFLAGS -I$libdir" LDFLAGS="$LDFLAGS -L$libdir" LIBS="$LIBS -lSDL_image"||
+                    conf_link_try CXXFLAGS="$CXXFLAGS -I$libdir/include" LDFLAGS="$LDFLAGS -L$libdir/lib" LIBS="$LIBS -lSDL_image" ||
+                    conf_log_die "The configured directory, \"$libdir\", does not work."
+            else
+                conf_link_try || conf_link_try LIBS="$LIBS -lSDL_image" || conf_link_try_pkgconfig SDL_image ||
+                    conf_log_die "This required package could not be found."
+            fi
             conf_var_set HAVE_SDL_IMAGE yes
             conf_macro_set HAVE_SDL_IMAGE
             conf_log_result "OK"
-        else
-            conf_log_result "not found"
-        fi
-        ;;
-esac
-    
+            ;;
+        disabled)
+            conf_log_result "disabled"
+            ;;
+        *)
+            if conf_link_try LIBS="$LIBS -lSDL_image" || conf_link_try_pkgconfig SDL_image; then
+                conf_var_set HAVE_SDL_IMAGE yes
+                conf_macro_set HAVE_SDL_IMAGE
+                conf_log_result "OK"
+            else
+                conf_log_result "not found"
+            fi
+            ;;
+    esac
+fi
 
+# SDL2
+if ! ${conf_macro_set_HAVE_SDL:-false}; then
+    conf_log_start "Looking for SDL2..."
+    conf_var_set HAVE_SDL2 no
+    conf_compile_set_program "
+  #include <SDL.h>
+  #undef main
+  int main() { SDL_Init(0); }"
+    case $(conf_arg_pkg_status sdl2) in
+        required)
+            libdir="$conf_pkg_dir_sdl2"
+            if test -n "$libdir"; then
+                conf_link_try CXXFLAGS="$CXXFLAGS -I$libdir" LDFLAGS="$LDFLAGS -L$libdir" ||
+                    conf_link_try CXXFLAGS="$CXXFLAGS -I$libdir/include" LDFLAGS="$LDFLAGS -L$libdir/lib" ||
+                    conf_log_die "The configured directory, \"$libdir\", does not work."
+            else
+                conf_link_try || conf_link_try_pkgconfig sdl2 ||
+                    conf_log_die "This required package could not be found."
+            fi
+            conf_var_set HAVE_SDL2 yes
+            conf_var_set HAVE_GUILIB yes
+            conf_macro_set HAVE_SDL2
+            conf_log_result "OK"
+            ;;
+        disabled)
+            conf_log_result "disabled"
+            ;;
+        *)
+            if conf_link_try || conf_link_try_pkgconfig sdl2; then
+                conf_var_set HAVE_SDL2 yes
+                conf_var_set HAVE_GUILIB yes
+                conf_macro_set HAVE_SDL2
+                conf_log_result "OK"
+            else
+                conf_log_result "not found"
+            fi
+            ;;
+    esac
+fi
+
+# SDL2_image
+if ${conf_macro_set_HAVE_SDL2:-false}; then
+    conf_log_start "Looking for SDL2_image..."
+    conf_compile_set_program "
+  #include <SDL_image.h>
+  #undef main
+  int main() { IMG_Load_RW(0, 0); }"
+    case $(conf_arg_pkg_status sdl2_image) in
+        required)
+            libdir="$conf_pkg_dir_sdl2_image"
+            if test -n "$libdir"; then
+                conf_link_try CXXFLAGS="$CXXFLAGS -I$libdir" LDFLAGS="$LDFLAGS -L$libdir" LIBS="$LIBS -lSDL2_image"||
+                    conf_link_try CXXFLAGS="$CXXFLAGS -I$libdir/include" LDFLAGS="$LDFLAGS -L$libdir/lib" LIBS="$LIBS -lSDL2_image" ||
+                    conf_log_die "The configured directory, \"$libdir\", does not work."
+            else
+                conf_link_try || conf_link_try LIBS="$LIBS -lSDL2_image" || conf_link_try_pkgconfig SDL2_image ||
+                    conf_log_die "This required package could not be found."
+            fi
+            conf_var_set HAVE_SDL2_IMAGE yes
+            conf_macro_set HAVE_SDL2_IMAGE
+            conf_log_result "OK"
+            ;;
+        disabled)
+            conf_log_result "disabled"
+            ;;
+        *)
+            if conf_link_try LIBS="$LIBS -lSDL2_image" || conf_link_try_pkgconfig SDL2_image; then
+                conf_var_set HAVE_SDL2_IMAGE yes
+                conf_macro_set HAVE_SDL2_IMAGE
+                conf_log_result "OK"
+            else
+                conf_log_result "not found"
+            fi
+            ;;
+    esac
+fi
 
 # Swap settings back
 GUILIBS=$LIBS

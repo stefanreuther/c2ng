@@ -6,11 +6,15 @@
 #include <cstring>
 #include <stdexcept>
 #include "game/spec/friendlycode.hpp"
-#include "game/limits.hpp"
-#include "util/translation.hpp"
 #include "afl/string/format.hpp"
+#include "game/limits.hpp"
+#include "game/spec/hullfunction.hpp"
 #include "util/string.hpp"
+#include "util/translation.hpp"
+#include "game/map/planet.hpp"
+#include "game/map/ship.hpp"
 
+using game::spec::HullFunction;
 
 // Default constructor.
 game::spec::FriendlyCode::FriendlyCode()
@@ -67,18 +71,56 @@ game::spec::FriendlyCode::getRaces() const
 
 // Check whether this friendly code works on an object.
 bool
-game::spec::FriendlyCode::worksOn(const game::map::Object& o, const game::config::HostConfiguration& config) const
+game::spec::FriendlyCode::worksOn(const game::map::Object& o,
+                                  const UnitScoreDefinitionList& scoreDefinitions,
+                                  const game::spec::ShipList& shipList,
+                                  const game::config::HostConfiguration& config) const
 {
     // ex GFCode::worksOn
-    // FIXME: incomplete
-    /*if (const GShip* s = dynamic_cast<const GShip*>(&o))
-        return worksOn(*s);
-        else*/
-    if (const game::map::Planet* p = dynamic_cast<const game::map::Planet*>(&o)) {
+    if (const game::map::Ship* s = dynamic_cast<const game::map::Ship*>(&o)) {
+        return worksOn(*s, scoreDefinitions, shipList, config);
+    } else if (const game::map::Planet* p = dynamic_cast<const game::map::Planet*>(&o)) {
         return worksOn(*p, config);
     } else {
         return false;
     }
+}
+
+bool
+game::spec::FriendlyCode::worksOn(const game::map::Ship& s,
+                                  const UnitScoreDefinitionList& scoreDefinitions,
+                                  const game::spec::ShipList& shipList,
+                                  const game::config::HostConfiguration& config) const
+{
+    // ex GFCode::worksOn(const GShip& s)
+    if (!s.isPlayable(s.ReadOnly)) {
+        return false;
+    }
+    int owner = 0;
+    if (!s.getRealOwner().get(owner)) {
+        return false;
+    }
+    if (!m_races.contains(config.getPlayerRaceNumber(owner))) {
+        return false;
+    }
+    if (!m_flags.contains(ShipCode)) {
+        return false;
+    }
+    if (m_flags.contains(CapitalShipCode)
+        && s.getNumBeams().orElse(0) == 0
+        && s.getNumLaunchers().orElse(0) == 0
+        && s.getNumBeams().orElse(0) == 0)
+    {
+        return false;
+    }
+    if (m_flags.contains(AlchemyShipCode)
+        && !s.hasSpecialFunction(HullFunction::MerlinAlchemy,     scoreDefinitions, shipList, config)
+        && !s.hasSpecialFunction(HullFunction::NeutronicRefinery, scoreDefinitions, shipList, config)
+        && !s.hasSpecialFunction(HullFunction::AriesRefinery,     scoreDefinitions, shipList, config))
+    {
+        return false;
+    }
+    return true;
 }
 
 // Check whether this friendly code works on a planet.

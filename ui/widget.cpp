@@ -470,8 +470,11 @@ ui::Widget::defaultHandleKey(util::Key_t key, int prefix)
         }
     }
     for (Widget* w = getFirstChild(); w != 0; w = w->getNextSibling()) {
-        if (w->handleKey(key, prefix)) {
-            return true;
+        // Focused child has already been processed above; do not process it again.
+        if (w != getFocusedChild()) {
+            if (w->handleKey(key, prefix)) {
+                return true;
+            }
         }
         if (w->hasState(ModalState)) {
             break;
@@ -490,8 +493,11 @@ ui::Widget::defaultHandleMouse(gfx::Point pt, MouseButtons_t pressedButtons)
         }
     }
     for (Widget* w = getFirstChild(); w != 0; w = w->getNextSibling()) {
-        if (w->handleMouse(pt, pressedButtons)) {
-            return true;
+        // Active child has already been processed above; do not process it again.
+        if (w != getActiveChild()) {
+            if (w->handleMouse(pt, pressedButtons)) {
+                return true;
+            }
         }
         if (w->hasState(ModalState)) {
             break;

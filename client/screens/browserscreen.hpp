@@ -78,7 +78,8 @@ namespace client { namespace screens {
         enum InfoAction {
             NoAction,
             PlayAction,
-            FolderAction
+            FolderAction,
+            RootAction
         };
         
         struct InfoItem {
@@ -107,6 +108,8 @@ namespace client { namespace screens {
         // void onKeyPlugin(int); // F5
         void onKeyQuit(int);
         void onAddAccount(int);
+        void onRootAction(size_t index);
+        bool preparePlayAction(size_t index);
 
         void setState(State st);
         void setList(client::widgets::FolderListbox::Items_t& items,

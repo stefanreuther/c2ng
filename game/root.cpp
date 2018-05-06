@@ -10,14 +10,13 @@
 #include "game/turnloader.hpp"
 
 // Constructor.
-game::Root::Root(afl::base::Ref<afl::io::Directory> specificationDirectory,
-                 afl::base::Ref<afl::io::Directory> gameDirectory,
+game::Root::Root(afl::base::Ref<afl::io::Directory> gameDirectory,
                  afl::base::Ref<SpecificationLoader> specLoader,
                  game::HostVersion hostVersion,
                  std::auto_ptr<game::RegistrationKey> registrationKey,
-                 std::auto_ptr<StringVerifier> stringVerifier)
-    : m_specificationDirectory(specificationDirectory),
-      m_gameDirectory(gameDirectory),
+                 std::auto_ptr<StringVerifier> stringVerifier,
+                 Actions_t actions)
+    : m_gameDirectory(gameDirectory),
       m_specificationLoader(specLoader),
       m_hostVersion(hostVersion),
       m_hostConfiguration(),
@@ -25,19 +24,13 @@ game::Root::Root(afl::base::Ref<afl::io::Directory> specificationDirectory,
       m_playerList(),
       m_registrationKey(registrationKey),
       m_stringVerifier(stringVerifier),
-      m_turnLoader()
+      m_turnLoader(),
+      m_actions(actions)
 { }
 
 // Destructor.
 game::Root::~Root()
 { }
-
-// Access specification directory.
-afl::io::Directory&
-game::Root::specificationDirectory() const
-{
-    return *m_specificationDirectory;
-}
 
 // Access game directory.
 afl::io::Directory&
@@ -140,11 +133,16 @@ game::Root::getTurnLoader() const
     return m_turnLoader;
 }
 
+game::Root::Actions_t
+game::Root::getPossibleActions() const
+{
+    return m_actions;
+}
+
 // Notify listeners.
 void
 game::Root::notifyListeners()
 {
-    // m_specificationDirectory: does not change
     // m_gameDirectory: does not change
     // m_specificationLoader: does not change
 

@@ -134,6 +134,7 @@ ui::DefaultResourceProvider::run()
 
         while (util::Request<ui::res::Manager>* req = pullManagerRequest()) {
             req->handle(m_manager);
+            delete req;
         }
 
         String_t todo;
@@ -181,6 +182,7 @@ ui::DefaultResourceProvider::run()
             }
 
             // Save it
+            // for testing: afl::sys::Thread::sleep(1000);
             afl::sys::MutexGuard g(m_imageMutex);
             m_imageCache[todo] = can;
 

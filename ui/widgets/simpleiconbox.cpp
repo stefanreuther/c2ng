@@ -29,13 +29,6 @@ ui::widgets::SimpleIconBox::getLayoutInfo() const
     return ui::layout::Info(pt, pt, ui::layout::Info::GrowHorizontal);
 }
 
-void
-ui::widgets::SimpleIconBox::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
-{
-    // FIXME: do we need to do something?
-    requestRedraw();
-}
-
 // IconBox:
 int
 ui::widgets::SimpleIconBox::getItemWidth(size_t nr)

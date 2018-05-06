@@ -444,7 +444,7 @@ ui::widgets::InputLine::draw(gfx::Canvas& can)
     gfx::Context<uint8_t> ctx(filter, m_root.colorScheme());
 
     gfx::Rectangle r(getExtent());
-    int bgcolor;
+    uint8_t bgcolor;
     if (getFocusState() != NoFocus) {
         if (m_flags.contains(TypeErase)) {
             ctx.setColor(Color_Gray);

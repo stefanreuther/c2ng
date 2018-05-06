@@ -86,8 +86,14 @@ namespace game { namespace vcr { namespace classic {
 
         /** Format current status as string.
             \param player Assume this player's point of view (0=neutral)
+            \param annotation Optional annotation (points)
             \param tx Translator */
-        String_t formatResult(int player, afl::string::Translator& tx) const;
+        String_t formatResult(int player, const String_t& annotation, afl::string::Translator& tx) const;
+
+        /** Get result.
+            FIXME: do we need this? Right now, it simplifies some things,
+            but it violates our abstractions. */
+        BattleResult_t getResult() const;
 
         // FIXME: need this method?
         // void setResultFromPlayer(VcrPlayer& player);

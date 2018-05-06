@@ -8,6 +8,9 @@
 #include "game/browser/filesystemrootfolder.hpp"
 #include "game/browser/filesystemfolder.hpp"
 #include "afl/except/fileproblemexception.hpp"
+#include "afl/charset/codepage.hpp"
+#include "afl/charset/codepagecharset.hpp"
+#include "util/charsetfactory.hpp"
 
 namespace {
     // FIXME: duplicate to browser.cpp
@@ -84,7 +87,16 @@ game::browser::DirectoryHandler::createAccountFolder(Account& /*acc*/)
 }
 
 afl::base::Ptr<game::Root>
-game::browser::DirectoryHandler::loadGameRoot(afl::base::Ref<afl::io::Directory> dir)
+game::browser::DirectoryHandler::loadGameRoot(afl::base::Ref<afl::io::Directory> dir, const game::config::UserConfiguration& config)
 {
-    return m_v3Loader.load(dir, false);
+    String_t gameType = config.getGameType();
+    if (gameType.empty() || gameType == "local") {
+        std::auto_ptr<afl::charset::Charset> cs(util::CharsetFactory().createCharset(config[config.Game_Charset]()));
+        if (cs.get() == 0) {
+            cs.reset(new afl::charset::CodepageCharset(afl::charset::g_codepageLatin1));
+        }
+        return m_v3Loader.load(dir, *cs, config, false);
+    } else {
+        return 0;
+    }
 }

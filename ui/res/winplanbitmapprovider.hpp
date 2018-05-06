@@ -10,8 +10,7 @@
 
 namespace ui { namespace res {
 
-    // /*! \class ResProviderWinplanBitmaps
-    //   \brief Winplan Resource Provider
+    // /* Winplan Resource Provider
 
     //   This resource provider provides access to a Winplan "bmp" directory.
     //   It reads the ship pictures.

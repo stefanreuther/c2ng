@@ -3,6 +3,7 @@ PCC2ng HACKING GUIDE
 
   Table of Contents:
   - Introduction
+  - Building PCC2ng
   - Key differences to PCC2
   - Initialisation
   - Threads
@@ -44,6 +45,50 @@ Status
 
   Wherever practical, functions contain a "// ex Class::fun" comment
   referring to the PCC2 implementation of the same functionality.
+
+
+
+Building PCC2ng
+===============
+
+  Prerequisites:
+  - C++ compiler
+  - Perl
+  - SDL 1.2 or SDL 2.0, matching SDL_image library
+  - OpenSSL and zlib (OpenSSL not yet strictly required, but zlib is
+    needed for several functions including communication with the
+    planets.nu server).
+
+
+Building on Linux
+-----------------
+
+  Build afl:
+
+    cd /path/to/afl
+    sh config.sh
+    make all test
+
+  Build c2ng:
+
+    cd /path/to/c2ng
+    sh config.sh --with-afl=/path/to/afl
+    make all test
+
+  If SDL 1.2 is found, c2ng is built against that, because the SDL 1.x
+  port is currently more mature. If you have SDL 1.2 and SDL 2
+  installed, and wish to build against SDL 2, use `--without-sdl`.
+
+
+Building on Windows (mingw)
+---------------------------
+
+  It's essentially the same as on Linux. Use `make -f Makefile.min`;
+  that Makefile knows you're building *.exe files.
+
+  Windows will not normally be able to execute uninstalled binaries,
+  because it requires *.dll files in the same directory as the *.exe
+  files.
 
 
 
@@ -369,7 +414,8 @@ Source Code Structure
   ---------------+---------+---------------------------------------
   gfx            | guilib  | graphics primitives
     gen          |         | procedural generation
-    sdl          |         | SDL back-end
+    sdl          |         | SDL 1.2 back-end
+    sdl2         |         | SDL 2.0 back-end
   ---------------+---------+---------------------------------------
   interpreter    | gamelib | script interpreter
   ---------------+---------+---------------------------------------

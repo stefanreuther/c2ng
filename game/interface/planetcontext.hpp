@@ -9,6 +9,7 @@
 #include "game/root.hpp"
 #include "game/game.hpp"
 #include "game/session.hpp"
+#include "game/map/planet.hpp"
 
 namespace game { namespace interface {
 

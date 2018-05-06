@@ -13,6 +13,7 @@
 #include "game/score/turnscorelist.hpp"
 #include "game/teamsettings.hpp"
 #include "game/unitscoredefinitionlist.hpp"
+#include "game/msg/configuration.hpp"
 
 namespace game {
 
@@ -51,6 +52,9 @@ namespace game {
 
         game::map::Markings& markings();
 
+        game::msg::Configuration& messageConfiguration();
+        const game::msg::Configuration& messageConfiguration() const;
+
         void notifyListeners();
 
         afl::base::Signal<void()> sig_viewpointTurnChange;
@@ -69,6 +73,8 @@ namespace game {
 
         game::map::Cursors m_cursors;
         game::map::Markings m_markings;
+
+        game::msg::Configuration m_messageConfiguration;
     };
 
 }

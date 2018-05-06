@@ -12,22 +12,19 @@ namespace game { namespace browser {
 
     class RootFolder : public Folder {
      public:
-        RootFolder(Browser& parent);
+        explicit RootFolder(Browser& parent);
 
         ~RootFolder();
 
         virtual void loadContent(afl::container::PtrVector<Folder>& result);
-
-        virtual afl::base::Ptr<Root> loadGameRoot();
-
+        virtual bool loadConfiguration(game::config::UserConfiguration& config);
+        virtual void saveConfiguration(const game::config::UserConfiguration& config);
+        virtual bool setLocalDirectoryName(String_t directoryName);
+        virtual afl::base::Ptr<Root> loadGameRoot(const game::config::UserConfiguration& config);
         virtual String_t getName() const;
-
         virtual util::rich::Text getDescription() const;
-
         virtual bool isSame(const Folder& other) const;
-
         virtual bool canEnter() const;
-
         virtual Kind getKind() const;
 
      private:

@@ -167,35 +167,12 @@ server::mailin::MailInApplication::handleConfiguration(const String_t& key, cons
 bool
 server::mailin::MailInApplication::handleCommandLineOption(const String_t& option, afl::sys::CommandLineParser& /*parser*/)
 {
-    if (option == "h" || option == "help") {
-        help();
-        return true;
-    } else if (option == "dump") {
+    if (option == "dump") {
         m_dump = true;
         return true;
     } else {
         return false;
     }
-}
-
-void
-server::mailin::MailInApplication::help()
-{
-    afl::io::TextWriter& out = standardOutput();
-    out.writeLine(afl::string::Format(_("PCC2 Incoming Mail Processor v%s - (c) 2017-2018 Stefan Reuther").c_str(), PCC2_VERSION));
-    out.writeLine();
-    out.writeLine(afl::string::Format(_("Usage:\n"
-                                        "  %s [-h]\n"
-                                        "  %$0s [-dump] < MAILFILE\n"
-                                        "\n"
-                                        "Options:\n"
-                                        "%s"
-                                        "\n"
-                                        "Report bugs to <Streu@gmx.de>").c_str(),
-                                      environment().getInvocationName(),
-                                      util::formatOptions(getHelp() + "--dump\tShow mail content instead of submitting to server\n")));
-    out.flush();
-    exit(0);
 }
 
 void
@@ -232,11 +209,23 @@ server::mailin::MailInApplication::saveRejectedMail(afl::base::ConstBytes_t buff
     // Save
     try {
         fs.openFile(fileName, fs.Create)->fullWrite(buffer);
-        log().write(afl::sys::LogListener::Info, LOG_NAME, Format("[reject] saved as '%s'\n", fileName));
+        log().write(afl::sys::LogListener::Info, LOG_NAME, Format("[reject] saved as '%s'", fileName));
     }
     catch (std::exception& e) {
         log().write(afl::sys::LogListener::Warn, LOG_NAME, Format("[error] writing file '%s'", fileName), e);
         return false;
     }
     return true;
+}
+
+String_t
+server::mailin::MailInApplication::getApplicationName() const
+{
+    return afl::string::Format(_("PCC2 Incoming Mail Processor v%s - (c) 2017-2018 Stefan Reuther").c_str(), PCC2_VERSION);
+}
+
+String_t
+server::mailin::MailInApplication::getCommandLineOptionHelp() const
+{
+    return "--dump\tShow mail content instead of submitting to server\n";
 }

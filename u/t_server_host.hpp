@@ -192,6 +192,7 @@ class TestServerHostHostTurn : public CxxTest::TestSuite {
     void testSubmitEmailUser();
     void testSubmitEmailStale();
     void testStatus();
+    void testStatusTempEnable();
     void testStatusErrors();
 };
 

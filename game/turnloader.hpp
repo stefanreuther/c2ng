@@ -52,6 +52,12 @@ namespace game {
             StronglyPositive
         };
 
+        enum Property {
+            LocalFileFormatProperty,
+            RemoteFileFormatProperty,
+            RootDirectoryProperty
+        };
+
         /** Get player status.
             Valid player numbers can be taken from the PlayerList.
             If an invalid player number is passed in, this function must return an empty status and empty \c extra.
@@ -101,6 +107,8 @@ namespace game {
             If this function fails to load history data, it can throw an exception.
             Caller must deal with that. */
         virtual void loadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root) = 0;
+
+        virtual String_t getProperty(Property p) = 0;
 
 
         /*

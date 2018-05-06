@@ -369,13 +369,13 @@ game::spec::MissionList::isMissionCloaking(int mission_id,
 {
     // ex game/mission.cc:isMissionCloaking
     // This is an instance function to allow some configurable logic later
-    const bool isPHost = host.getKind() == HostVersion::PHost;
+    const bool hasXM = host.hasExtendedMissions(config);
     const int  emsa = config[config.ExtMissionsStartAt]();
     return (mission_id == Mission::msn_Cloak
-            || (isPHost && mission_id == emsa + Mission::pmsn_Cloak)
+            || (hasXM && mission_id == emsa + Mission::pmsn_Cloak)
             || (config.getPlayerMissionNumber(owner) == 3
                 && (mission_id == Mission::msn_Special
-                    || (isPHost
+                    || (hasXM
                         && (mission_id == emsa + Mission::pmsn_Special
                             || mission_id == emsa + Mission::pmsn_StandardSuperSpy)))));
 }

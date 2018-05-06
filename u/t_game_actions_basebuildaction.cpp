@@ -26,12 +26,12 @@ namespace {
               planet(*univ.planets().create(72)),
               container(),
               shipList(),
-              root(afl::io::InternalDirectory::create("spec dir"),
-                   afl::io::InternalDirectory::create("game dir"),
+              root(afl::io::InternalDirectory::create("game dir"),
                    *new game::test::SpecificationLoader(),
                    game::HostVersion(game::HostVersion::Host, MKVERSION(3, 22, 47)),
                    std::auto_ptr<game::RegistrationKey>(new game::test::RegistrationKey(game::RegistrationKey::Unregistered, 5)),
-                   std::auto_ptr<game::StringVerifier>(new game::test::StringVerifier()))
+                   std::auto_ptr<game::StringVerifier>(new game::test::StringVerifier()),
+                   game::Root::Actions_t())
             { root.hostConfiguration().setDefaultValues(); }
 
         game::map::Universe univ;

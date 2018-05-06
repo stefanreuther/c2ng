@@ -93,7 +93,7 @@ namespace game { namespace spec {
         //     msn_SensorSweep = 5,
         //     msn_LnD         = 6,    // Colonize, Land&Disassemble, Decommission
             msn_Tow         = 7,
-        //     msn_Intercept   = 8,
+            msn_Intercept   = 8,
             msn_Special     = 9,
             msn_Cloak       = 10,
         //     msn_BUFuel      = 11,
@@ -114,14 +114,14 @@ namespace game { namespace spec {
         //     pmsn_XferMc              = 8,
             pmsn_StandardSuperSpy    = 9,
             pmsn_Cloak               = 10,
-            pmsn_Special             = 11
+            pmsn_Special             = 11,
         //     pmsn_GatherBuildFtr      = 12,
         //     pmsn_BUmc                = 13,
         //     pmsn_BUclans             = 14,
         //     pmsn_BeamUpMultiple      = 15,
         //     pmsn_LayMinesIn          = 16,
         //     pmsn_LayWebIn            = 17,
-        //     pmsn_Training            = 18
+            pmsn_Training            = 18
         };
 
      private:

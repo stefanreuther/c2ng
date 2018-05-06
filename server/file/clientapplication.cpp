@@ -4,12 +4,18 @@
   */
 
 #include "server/file/clientapplication.hpp"
-#include "afl/sys/standardcommandlineparser.hpp"
+#include "afl/net/http/pagedispatcher.hpp"
+#include "afl/net/http/protocolhandler.hpp"
+#include "afl/net/name.hpp"
+#include "afl/net/protocolhandlerfactory.hpp"
+#include "afl/net/server.hpp"
 #include "afl/string/format.hpp"
-#include "util/translation.hpp"
-#include "server/file/directoryhandlerfactory.hpp"
+#include "afl/sys/standardcommandlineparser.hpp"
 #include "server/file/directoryhandler.hpp"
+#include "server/file/directoryhandlerfactory.hpp"
+#include "server/file/directorypage.hpp"
 #include "server/file/utils.hpp"
+#include "util/translation.hpp"
 #include "version.hpp"
 
 void
@@ -24,6 +30,8 @@ server::file::ClientApplication::appMain()
         if (opt) {
             if (p == "h" || p == "help") {
                 help();
+            } else if (p == "proxy") {
+                m_networkStack.add(commandLine.getRequiredParameter(p));
             } else {
                 errorExit(afl::string::Format(_("invalid option specified. Use '%s -h' for help.").c_str(), environment().getInvocationName()));
             }
@@ -48,6 +56,8 @@ server::file::ClientApplication::appMain()
         doClear(commandLine);
     } else if (*pCommand == "sync") {
         doSync(commandLine);
+    } else if (*pCommand == "serve") {
+        doServe(commandLine);
     } else {
         errorExit(afl::string::Format(_("invalid command '%s'. Use '%s -h' for help.").c_str(), *pCommand, environment().getInvocationName()));
     }
@@ -56,16 +66,18 @@ server::file::ClientApplication::appMain()
 void
 server::file::ClientApplication::doCopy(afl::sys::CommandLineParser& cmdl)
 {
-    bool opt_recursive = false;
     DirectoryHandlerFactory dhf(fileSystem(), networkStack());
     DirectoryHandler* in = 0;
     DirectoryHandler* out = 0;
+    CopyFlags_t flags;
     String_t p;
     bool opt;
     while (cmdl.getNext(opt, p)) {
         if (opt) {
             if (p == "r") {
-                opt_recursive = true;
+                flags += CopyRecursively;
+            } else if (p == "x") {
+                flags += CopyExpandTarballs;
             } else {
                 errorExit(afl::string::Format(_("invalid option specified. Use '%s -h' for help.").c_str(), environment().getInvocationName()));
             }
@@ -84,7 +96,7 @@ server::file::ClientApplication::doCopy(afl::sys::CommandLineParser& cmdl)
         errorExit(afl::string::Format(_("need two directory names (source, destination). Use '%s -h' for help.").c_str(), environment().getInvocationName()));
     }
 
-    copyDirectory(*out, *in, opt_recursive);
+    copyDirectory(*out, *in, flags);
 }
 
 void
@@ -228,6 +240,55 @@ server::file::ClientApplication::doClear(afl::sys::CommandLineParser& cmdl)
 }
 
 void
+server::file::ClientApplication::doServe(afl::sys::CommandLineParser& cmdl)
+{
+    // Parse parameters
+    afl::base::Optional<String_t> source;
+    afl::base::Optional<String_t> address;
+
+    String_t p;
+    bool opt;
+    while (cmdl.getNext(opt, p)) {
+        if (opt) {
+            errorExit(afl::string::Format(_("invalid option specified. Use '%s -h' for help.").c_str(), environment().getInvocationName()));
+        } else if (!source.isValid()) {
+            source = p;
+        } else if (!address.isValid()) {
+            address = p;
+        } else {
+            errorExit(afl::string::Format(_("too many parameters. Use '%s -h' for help.").c_str(), environment().getInvocationName()));
+        }
+    }
+
+    const String_t* pSource = source.get();
+    const String_t* pAddress = address.get();
+    if (pSource == 0 || pAddress == 0) {
+        errorExit(afl::string::Format(_("too few parameters. Use '%s -h' for help.").c_str(), environment().getInvocationName()));
+    }
+
+    // ProtocolHandlerFactory
+    class MyProtocolHandlerFactory : public afl::net::ProtocolHandlerFactory {
+     public:
+        MyProtocolHandlerFactory(afl::net::http::Dispatcher& disp)
+            : m_dispatcher(disp)
+            { }
+        virtual afl::net::ProtocolHandler* create()
+            { return new afl::net::http::ProtocolHandler(m_dispatcher); }
+     private:
+        afl::net::http::Dispatcher& m_dispatcher;
+    };
+
+    // Set up
+    DirectoryHandlerFactory dhf(fileSystem(), networkStack());
+    DirectoryHandler& dh(dhf.createDirectoryHandler(*pSource));
+    afl::net::http::PageDispatcher disp;
+    disp.addNewPage("", new DirectoryPage(dh));
+    MyProtocolHandlerFactory phf(disp);
+    afl::net::Server server(m_serverNetworkStack.listen(afl::net::Name::parse(*pAddress, "8080"), 10), phf);
+    server.run();
+}
+
+void
 server::file::ClientApplication::help()
 {
     afl::io::TextWriter& out = standardOutput();
@@ -235,14 +296,24 @@ server::file::ClientApplication::help()
     out.writeLine();
     out.writeLine(afl::string::Format(_("Usage:\n"
                                         "  %s [-h]\n"
-                                        "  %$0s cp [-r] SOURCE DEST\n"
-                                        "  %$0s ls [-r] [-l] DIR\n"
-                                        "  %$0s sync SOURCE DEST\n"
-                                        "  %$0s clear DIR\n"
+                                        "  %$0s [--proxy=URL] COMMAND...\n"
                                         "\n"
-                                        "Options:\n"
+                                        "Commands:\n"
+                                        "  %$0s cp [-r] [-x] SOURCE DEST\n"
+                                        "                      Copy everything from SOURCE to DEST\n"
+                                        "  %$0s ls [-r] [-l] DIR...\n"
+                                        "                      List content of the DIRs\n"
+                                        "  %$0s sync SOURCE DEST\n"
+                                        "                      Make DEST contain the same content as SOURCE\n"
+                                        "  %$0s clear DIR...\n"
+                                        "                      Remove content of DIRs\n"
+                                        "  %$0s serve SOURCE HOST:PORT\n"
+                                        "                      Serve SOURCE via HTTP for testing\n"
+                                        "\n"
+                                        "Command Options:\n"
                                         "  -r                  Recursive\n"
                                         "  -l                  Long format\n"
+                                        "  -x                  Expand *.tgz/*.tar.gz files\n"
                                         "\n"
                                         "File specifications:\n"
                                         "  PATH                Access files within unmanaged file system\n"

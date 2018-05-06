@@ -80,8 +80,8 @@ TestUtilString::testParseRange()
         { "x", 0 },
         { "-", 0 },
         { "-2", 0 },
-        { "   x", 3 },
-        { "   -x", 4 },
+        { "   x", 0 /* was 3, now 0 because string is entirely invalid */ },
+        { "   -x", 0 /* was 4, now 0 because string is entirely invalid */ },
         // { "   -2x", 5 },
         
         // standard cases
@@ -240,3 +240,52 @@ TestUtilString::testEncodeMimeHeader()
                      "=?UTF-8?B?w7bDtsO2w7bDtsO2w7bDtsO2w7bDtsO2w7bDtsO2w7bDtsO2w7bDtsO2w7bD?=\r\n"
                      " =?UTF-8?B?tsO2w7bDtsO2w7bDtsO2w7bDtg==?=");
 }
+
+/** Test parseBooleanValue(). */
+void
+TestUtilString::testParseBoolean()
+{
+    bool result;
+    TS_ASSERT(util::parseBooleanValue("yes",   result)); TS_ASSERT(result);
+    TS_ASSERT(util::parseBooleanValue("YES",   result)); TS_ASSERT(result);
+    TS_ASSERT(util::parseBooleanValue("y",     result)); TS_ASSERT(result);
+    TS_ASSERT(util::parseBooleanValue("true",  result)); TS_ASSERT(result);
+    TS_ASSERT(util::parseBooleanValue("1",     result)); TS_ASSERT(result);
+    TS_ASSERT(util::parseBooleanValue("0001",  result)); TS_ASSERT(result);
+    TS_ASSERT(util::parseBooleanValue(" 1 ",   result)); TS_ASSERT(result);
+
+    TS_ASSERT(util::parseBooleanValue("no",    result)); TS_ASSERT(!result);
+    TS_ASSERT(util::parseBooleanValue("NO",    result)); TS_ASSERT(!result);
+    TS_ASSERT(util::parseBooleanValue("n",     result)); TS_ASSERT(!result);
+    TS_ASSERT(util::parseBooleanValue("false", result)); TS_ASSERT(!result);
+    TS_ASSERT(util::parseBooleanValue("0",     result)); TS_ASSERT(!result);
+    TS_ASSERT(util::parseBooleanValue("00000", result)); TS_ASSERT(!result);
+    TS_ASSERT(util::parseBooleanValue("  0 ",  result)); TS_ASSERT(!result);
+
+    TS_ASSERT(!util::parseBooleanValue("-1",   result));
+    TS_ASSERT(!util::parseBooleanValue("none", result));
+    TS_ASSERT(!util::parseBooleanValue("1000", result));
+    TS_ASSERT(!util::parseBooleanValue("",     result));
+    TS_ASSERT(!util::parseBooleanValue(" ",    result));
+}
+
+/** Test encodeHtml(). */
+void
+TestUtilstring::testEncodeHtml()
+{
+    TS_ASSERT_EQUALS(util::encodeHtml("", false), "");
+    TS_ASSERT_EQUALS(util::encodeHtml("", true),  "");
+
+    TS_ASSERT_EQUALS(util::encodeHtml("hi mom", false), "hi mom");
+    TS_ASSERT_EQUALS(util::encodeHtml("hi mom", true),  "hi mom");
+
+    TS_ASSERT_EQUALS(util::encodeHtml("vector<int>& a", false), "vector&lt;int&gt;&amp; a");
+    TS_ASSERT_EQUALS(util::encodeHtml("vector<int>& a", true),  "vector&lt;int&gt;&amp; a");
+
+    TS_ASSERT_EQUALS(util::encodeHtml("say \"Qapla'\"", false), "say &quot;Qapla&#39;&quot;");
+    TS_ASSERT_EQUALS(util::encodeHtml("say \"Qapla'\"", true),  "say &quot;Qapla&#39;&quot;");
+
+    TS_ASSERT_EQUALS(util::encodeHtml("\xc3\xb6\xE2\x9C\x97X", false), "&#246;&#10007;X");
+    TS_ASSERT_EQUALS(util::encodeHtml("\xc3\xb6\xE2\x9C\x97X", true),  "\xc3\xb6\xE2\x9C\x97X");
+}
+

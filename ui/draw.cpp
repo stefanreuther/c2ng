@@ -145,6 +145,28 @@ ui::drawFrameDown(gfx::Context<uint8_t>& ctx, gfx::Rectangle r)
     ctx.canvas().drawVLine(Point(x2, r.getTopY()),             y2+1-r.getTopY(), ctx.getRawColor(), gfx::SOLID_LINE, gfx::OPAQUE_ALPHA);
 }
 
+// /** Tile area with pixmap.
+//     \param can    canvas to use
+//     \param r      area to tile with pixmap
+//     \param pix    pixmap to use, may be null
+//     \param color  when /pix/ is null, the image is filled with this color
+//     \param alter  X coordinate alteration. With alteration 0, the area is
+//                   tiled with a regular grid, like on a checkered paper.
+//                   With nonzero alteration, the second row is shifted
+//                   that many pixels to the left, the next one is shifted
+//                   to the right again, etc, to make the pattern look more
+//                   interesting. */
+void
+ui::drawTiledArea(gfx::Context<uint8_t>& ctx, gfx::Rectangle r, const afl::base::Ptr<gfx::Canvas>& pix, uint8_t color, int alter)
+{
+    // ex drawTiledArea
+    if (pix.get() != 0) {
+        blitTiled(ctx, r, *pix, alter);
+    } else {
+        drawSolidBar(ctx, r, color);
+    }
+}
+
 
 // /** Draw a window. Available as static function to be callable from
 //     outside (widgets that look like windows but aren't, like the VCR
@@ -161,18 +183,10 @@ ui::drawWindow(gfx::Context<uint8_t>& ctx,
     afl::base::Ptr<gfx::Canvas> pix(provider.getImage(style.backgroundTile));
 
     drawFrameUp(ctx, extent);
-    if (pix.get() != 0) {
-        gfx::blitTiled(ctx, Rectangle(extent.getLeftX() + 1,  extent.getTopY() + 1,    extent.getWidth() - 2, 22),                      *pix, 16);
-        gfx::blitTiled(ctx, Rectangle(extent.getLeftX() + 1,  extent.getTopY() + 23,   2,                     extent.getHeight() - 26), *pix, 16);
-        gfx::blitTiled(ctx, Rectangle(extent.getRightX() - 3, extent.getTopY() + 23,   2,                     extent.getHeight() - 26), *pix, 16);
-        gfx::blitTiled(ctx, Rectangle(extent.getLeftX() + 1,  extent.getBottomY() - 3, extent.getWidth() - 2, 2),                       *pix, 16);
-    } else {
-        gfx::drawSolidBar(ctx, Rectangle(extent.getLeftX() + 1,  extent.getTopY() + 1,    extent.getWidth() - 2, 22),                      Color_BlueBlack);
-        gfx::drawSolidBar(ctx, Rectangle(extent.getLeftX() + 1,  extent.getTopY() + 23,   2,                     extent.getHeight() - 26), Color_BlueBlack);
-        gfx::drawSolidBar(ctx, Rectangle(extent.getRightX() - 3, extent.getTopY() + 23,   2,                     extent.getHeight() - 26), Color_BlueBlack);
-        gfx::drawSolidBar(ctx, Rectangle(extent.getLeftX() + 1,  extent.getBottomY() - 3, extent.getWidth() - 2, 2),                       Color_BlueBlack);
-    }
-
+    drawTiledArea(ctx, Rectangle(extent.getLeftX() + 1,  extent.getTopY() + 1,    extent.getWidth() - 2, 22),                      pix, Color_BlueBlack, 16);
+    drawTiledArea(ctx, Rectangle(extent.getLeftX() + 1,  extent.getTopY() + 23,   2,                     extent.getHeight() - 26), pix, Color_BlueBlack, 16);
+    drawTiledArea(ctx, Rectangle(extent.getRightX() - 3, extent.getTopY() + 23,   2,                     extent.getHeight() - 26), pix, Color_BlueBlack, 16);
+    drawTiledArea(ctx, Rectangle(extent.getLeftX() + 1,  extent.getBottomY() - 3, extent.getWidth() - 2, 2),                       pix, Color_BlueBlack, 16);
     drawFrameDown(ctx, Rectangle(extent.getLeftX() + 3, extent.getTopY() + 23, extent.getWidth() - 6, extent.getHeight() - 26));
 
     // synchronize this with UIWindowSkin::drawBackground

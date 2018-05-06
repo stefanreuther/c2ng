@@ -5,6 +5,8 @@
 
 #include "game/playerlist.hpp"
 #include "util/string.hpp"
+#include "afl/string/format.hpp"
+#include "util/translation.hpp"
 
 // FIXME: simplification: refuse player numbers > MAX_PLAYERS. Keep m_players at MAX_PLAYERS+1 slots all the time.
 
@@ -164,6 +166,32 @@ game::Player*
 game::PlayerList::getNextPlayer(int id) const
 {
     return findNextPlayer(id);
+}
+
+// Get name of a player.
+String_t
+game::PlayerList::getPlayerName(int id, Player::Name which) const
+{
+    if (const Player* p = get(id)) {
+        return p->getName(which);
+    } else {
+        String_t result;
+        switch (which) {
+         case Player::ShortName:
+         case Player::AdjectiveName:
+         case Player::LongName:
+         case Player::OriginalShortName:
+         case Player::OriginalAdjectiveName:
+         case Player::OriginalLongName:
+            result = afl::string::Format(_("Player %d").c_str(), id);
+            break;
+         case Player::UserName:
+         case Player::NickName:
+         case Player::EmailAddress:
+            break;
+        }
+        return result;
+    }
 }
 
 // Notify listeners.

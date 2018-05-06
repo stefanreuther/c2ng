@@ -2,29 +2,36 @@
   *  \file client/screens/playerscreen.cpp
   */
 
+#include <ctime>
 #include "client/screens/playerscreen.hpp"
+#include "afl/string/format.hpp"
 #include "client/si/control.hpp"
-#include "ui/widgets/button.hpp"
+#include "client/widgets/keymapwidget.hpp"
+#include "game/game.hpp"
+#include "game/root.hpp"
+#include "game/turn.hpp"
+#include "gfx/complex.hpp"
+#include "ui/eventloop.hpp"
+#include "ui/group.hpp"
+#include "ui/layout/flow.hpp"
+#include "ui/layout/hbox.hpp"
+#include "ui/layout/vbox.hpp"
+#include "ui/rich/documentview.hpp"
 #include "ui/root.hpp"
 #include "ui/spacer.hpp"
-#include "ui/window.hpp"
-#include "ui/rich/documentview.hpp"
-#include "util/requestreceiver.hpp"
-#include "ui/eventloop.hpp"
-#include "ui/layout/vbox.hpp"
-#include "client/widgets/keymapwidget.hpp"
-#include "afl/string/format.hpp"
-#include "game/root.hpp"
-#include "game/game.hpp"
-#include "game/turn.hpp"
-#include "ui/layout/hbox.hpp"
-#include "ui/group.hpp"
-#include "ui/widgets/imagebutton.hpp"
+#include "ui/widgets/button.hpp"
 #include "ui/widgets/framegroup.hpp"
-#include "ui/layout/flow.hpp"
+#include "ui/widgets/imagebutton.hpp"
+#include "ui/widgets/panel.hpp"
+#include "ui/window.hpp"
+#include "util/requestreceiver.hpp"
+#include "client/dialogs/classicvcrdialog.hpp"
+#include "ui/widgets/keydispatcher.hpp"
+#include "client/vcr/classic/playbackscreen.hpp"
+#include "client/widgets/messageactionpanel.hpp"
+#include "client/dialogs/inboxdialog.hpp"
 
 namespace {
-
     ui::widgets::AbstractButton& createImageButton(afl::base::Deleter& del, ui::Root& root, ui::LayoutableGroup& group, String_t text, util::Key_t key, String_t image)
     {
         // Create container group
@@ -62,7 +69,7 @@ namespace {
         ~PlayerScreen()
             { }
 
-        void run(client::si::InputState& in, client::si::OutputState& out, bool first)
+        void run(client::si::InputState& in, client::si::OutputState& out, gfx::ColorScheme<util::SkinColor::Color>& colorScheme, bool first)
             {
                 // Player screen
                 //   HBox
@@ -77,8 +84,8 @@ namespace {
                 afl::base::Deleter del;
                 ui::Root& root = m_session.root();
 
-                // FIXME: this should be a container different widget...
-                ui::LayoutableGroup& panel = del.addNew(new ui::Window("!Player screen", root.provider(), root.colorScheme(), ui::BLUE_BLACK_WINDOW, ui::layout::HBox::instance5));
+                ui::LayoutableGroup& panel = del.addNew(new ui::widgets::Panel(ui::layout::HBox::instance5, 10));
+                panel.setColorScheme(colorScheme);                
 
                 // Keymap handler
                 client::widgets::KeymapWidget& keys = del.addNew(new client::widgets::KeymapWidget(m_session.gameSender(), root.engine().dispatcher(), *this));
@@ -118,6 +125,13 @@ namespace {
                 rightGroup.add(btnGroup);
                 panel.add(rightGroup);
 
+                // HACK
+                ui::widgets::KeyDispatcher disp;
+                disp.add('v', this, &PlayerScreen::doVcr);
+                disp.add('m', this, &PlayerScreen::doMessages);
+                panel.add(disp);
+                // /HACK
+
                 // Finish and display it
                 keys.setKeymapName("RACESCREEN");
                 panel.add(keys);
@@ -149,6 +163,28 @@ namespace {
                 doc.add(s);
                 doc.finish();
                 m_docView.handleDocumentUpdate();
+            }
+
+        void doVcr()
+            {
+                client::dialogs::ClassicVcrDialog dlg(m_session.root(), m_session.gameSender());
+                dlg.sig_play.add(this, &PlayerScreen::doPlayVcr);
+                dlg.run();
+            }
+
+        void doPlayVcr(size_t index)
+            {
+                client::vcr::classic::PlaybackScreen screen(m_session.root(), m_session.translator(), m_session.gameSender(), index, m_session.interface().mainLog());
+                screen.run();
+            }
+        
+        void doMessages()
+            {
+                client::dialogs::InboxDialog dlg(m_session);
+                client::si::InputState in;
+                client::si::OutputState out;
+                dlg.run(in, out);
+                handleStateChange(m_session.interface(), out.getProcess(), out.getTarget());
             }
 
         virtual void handleStateChange(client::si::UserSide& us, client::si::RequestLink2 link, client::si::OutputState::Target target)
@@ -250,7 +286,7 @@ namespace {
 }
 
 void
-client::screens::doPlayerScreen(Session& session, client::si::InputState& in, client::si::OutputState& out, bool first)
+client::screens::doPlayerScreen(Session& session, client::si::InputState& in, client::si::OutputState& out, gfx::ColorScheme<util::SkinColor::Color>& colorScheme, bool first)
 {
-    PlayerScreen(session).run(in, out, first);
+    PlayerScreen(session).run(in, out, colorScheme, first);
 }

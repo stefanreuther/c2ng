@@ -4,18 +4,16 @@
 #ifndef C2NG_GAME_MAP_RENDERLIST_HPP
 #define C2NG_GAME_MAP_RENDERLIST_HPP
 
-#include <vector>
 #include "afl/base/types.hpp"
 #include "afl/string/string.hpp"
 #include "game/map/point.hpp"
 #include "game/map/rendererlistener.hpp"
+#include "util/stringinstructionlist.hpp"
 
 namespace game { namespace map {
 
-    class RenderList : public RendererListener {
+    class RenderList : public RendererListener, public util::StringInstructionList {
      public:
-        // FIXME: this is two classes in one: a replayable RendererListener and a serialized instruction storage.
-        // It makes sense to separate the two for testability.
         enum Instruction {
             riGridBorderLine,           // x1,y1,x2,y2 [inclusive]
             riGridLine,                 // x1,y1,x2,y2 [inclusive]
@@ -29,22 +27,14 @@ namespace game { namespace map {
             riUserRectangle,            // x,y,x,y,color
             riUserMarker                // x,y,shape,color,text
         };
-        static const int MAX_INSTRUCTION = riUserMarker;
+        static const uint16_t MAX_INSTRUCTION = riUserMarker;
 
-        class Iterator {
+        class Iterator : public StringInstructionList::Iterator {
          public:
             Iterator(const RenderList& parent);
 
             bool readInstruction(Instruction& insn);
-            bool readParameter(int& value);
-            bool readStringParameter(String_t& value);
             bool readPointParameter(Point& value);
-
-         private:
-            const RenderList& m_parent;
-            size_t m_nextInstruction;
-            size_t m_nextParameter;
-            size_t m_numParameters;
         };
 
         RenderList();
@@ -63,22 +53,11 @@ namespace game { namespace map {
         virtual void drawUserMarker(Point pt, int shape, int color, String_t label);
 
         void addInstruction(Instruction ins);
-        void addParameter(int16_t par);
-        void addStringParameter(String_t s);
         void addPointParameter(Point pt);
 
         void replay(RendererListener& listener) const;
 
-        size_t getNumInstructions() const;
-
-        void clear();
-
         Iterator read() const;
-
-     private:
-        std::vector<int16_t> m_instructions;
-        std::vector<String_t> m_strings;
-        size_t m_lastInstruction;
     };
 
 } }

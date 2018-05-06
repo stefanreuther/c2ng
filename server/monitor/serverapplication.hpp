@@ -35,6 +35,8 @@ namespace server { namespace monitor {
         virtual bool handleCommandLineOption(const String_t& option, afl::sys::CommandLineParser& parser);
         virtual void serverMain();
         virtual bool handleConfiguration(const String_t& key, const String_t& value);
+        virtual String_t getApplicationName() const;
+        virtual String_t getCommandLineOptionHelp() const;
 
      private:
         afl::net::Name m_listenAddress;

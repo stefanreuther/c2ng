@@ -77,6 +77,23 @@ ui::widgets::IconBox::handleStateChange(State st, bool enable)
     }
 }
 
+void
+ui::widgets::IconBox::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+{
+    // The typical usecase for this function is that the size is set after initial layout (pack()).
+    // If the widget has been configured before layout, it will have an animation scheduled based on a zero-size widget.
+    // So we re-do the computation and cancel that animation.
+
+    // Compute new position
+    adjustPosition();
+
+    // Cancel animation
+    m_leftX = m_targetLeftX;
+    m_scrollSpeed = 0;
+
+    requestRedraw();
+}
+
 bool
 ui::widgets::IconBox::handleKey(util::Key_t /*key*/, int /*prefix*/)
 {
@@ -357,12 +374,3 @@ ui::widgets::IconBox::handleTimer()
 
     m_timer->setInterval(20);
 }
-
-
-// FIXME: remove; done in child classes
-// void
-// UIIconBox::getLayoutInfo(LayoutInfo& info)
-// {
-//     info.pref_size = info.min_size = size;
-//     info.flags = li_FlexibleH;
-// }

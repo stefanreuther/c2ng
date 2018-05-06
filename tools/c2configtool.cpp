@@ -3,20 +3,20 @@
   */
 
 #include <memory>
-#include "afl/sys/environment.hpp"
 #include "afl/io/filesystem.hpp"
-#include "util/application.hpp"
-#include "afl/sys/standardcommandlineparser.hpp"
-#include "util/configurationfile.hpp"
 #include "afl/io/textfile.hpp"
 #include "afl/string/format.hpp"
-#include "util/translation.hpp"
-#include "version.hpp"
-#include "util/string.hpp"
-#include "game/v3/structures.hpp"
+#include "afl/sys/environment.hpp"
+#include "afl/sys/log.hpp"
+#include "afl/sys/standardcommandlineparser.hpp"
 #include "game/config/hostconfiguration.hpp"
 #include "game/v3/hconfig.hpp"
-#include "afl/sys/log.hpp"
+#include "game/v3/structures.hpp"
+#include "util/application.hpp"
+#include "util/configurationfile.hpp"
+#include "util/string.hpp"
+#include "util/translation.hpp"
+#include "version.hpp"
 
 namespace {
     class ConsoleConfigApplication : public util::Application {
@@ -56,6 +56,9 @@ namespace {
                 }
             }
 
+        util::ConfigurationFile* get()
+            { return m_p.get(); }
+
      private:
         std::auto_ptr<util::ConfigurationFile> m_p;
     };
@@ -83,6 +86,7 @@ ConsoleConfigApplication::appMain()
     ConfigurationReference subject;
     afl::sys::StandardCommandLineParser cmdl(environment().getCommandLine());
     bool hadAction = false;
+    bool whitespaceIsSignificant = false;
     bool option;
     String_t text;
     while (cmdl.getNext(option, text)) {
@@ -105,6 +109,14 @@ ConsoleConfigApplication::appMain()
                     errorExit(_("expecting \"KEY=VALUE\" for option \"-D\""));
                 }
                 subject().set(kv.substr(0, eq), kv.substr(eq+1));
+            } else if (text == "A") {
+                // -A KEY=VALUE
+                String_t kv = cmdl.getRequiredParameter(text);
+                String_t::size_type eq = kv.find('=');
+                if (eq == String_t::npos) {
+                    errorExit(_("expecting \"KEY=VALUE\" for option \"-A\""));
+                }
+                subject().add(kv.substr(0, eq), kv.substr(eq+1));
             } else if (text == "U") {
                 // -U KEY
                 String_t key = cmdl.getRequiredParameter(text);
@@ -138,6 +150,12 @@ ConsoleConfigApplication::appMain()
                 afl::base::Ref<afl::io::Stream> thisStream(fileSystem().openFile(fileName, afl::io::FileSystem::Create));
                 saveHConfig(subject(), *thisStream);
                 hadAction = true;
+            } else if (text == "w") {
+                // -w
+                whitespaceIsSignificant = true;
+                if (util::ConfigurationFile* p = subject.get()) {
+                    p->setWhitespaceIsSignificant(whitespaceIsSignificant);
+                }
             } else {
                 errorExit(afl::string::Format(_("invalid option specified. Use \"%s -h\" for help").c_str(), environment().getInvocationName()));
             }
@@ -146,6 +164,7 @@ ConsoleConfigApplication::appMain()
             afl::base::Ref<afl::io::Stream> thisStream(fileSystem().openFile(text, afl::io::FileSystem::OpenRead));
             afl::io::TextFile thisText(*thisStream);
             std::auto_ptr<util::ConfigurationFile> thisConfig(new util::ConfigurationFile());
+            thisConfig->setWhitespaceIsSignificant(whitespaceIsSignificant);
             thisConfig->load(thisText);
             subject.replaceOrMerge(thisConfig);
         }
@@ -171,12 +190,14 @@ ConsoleConfigApplication::showHelp()
                                     environment().getInvocationName(),
                                     util::formatOptions(_("General:\n"
                                                           "--help\tshow help\n"
+                                                          "-w\twhitespace is significant in values\n"
                                                           "\n"
                                                           "Load/Modify:\n"
                                                           "FILE\tload text file\n"
                                                           "--empty\tload empty file\n"
                                                           "--load-hconfig=FILE\tload binary HConfig file\n"
                                                           "-DKEY=VALUE\tset value\n"
+                                                          "-AKEY=VALUE\tadd value\n"
                                                           "-UKEY\tunset value\n"
                                                           "\n"
                                                           "Actions:\n"
@@ -199,7 +220,7 @@ ConsoleConfigApplication::loadHConfig(util::ConfigurationFile& out, afl::io::Str
     game::v3::unpackHConfig(data, size, config, game::config::ConfigurationOption::User);
 
     // Convert that into result
-    afl::base::Ref<game::config::Configuration::Enumerator_t> e(*config.getOptions());
+    afl::base::Ref<game::config::Configuration::Enumerator_t> e(config.getOptions());
     game::config::Configuration::OptionInfo_t oi;
     while (e->getNextElement(oi)) {
         if (oi.second != 0 && oi.second->getSource() == game::config::ConfigurationOption::User) {

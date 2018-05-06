@@ -34,7 +34,7 @@ namespace server {
         ConfigurationHandler(afl::sys::LogListener& log, String_t logName);
 
         /** Destructor. */
-        ~ConfigurationHandler();
+        virtual ~ConfigurationHandler();
 
         /** Process a command-line option ("-D", "--config").
             \param option Option name as obtained from CommandLineParser::getNext

@@ -216,7 +216,7 @@ TestUtilConfigurationFile::testMergeNamespaced()
                      "%NS\n"
                      "a=7\n"
                      "b=2\n"
-                     "  Q = 9\n");
+                     "Q = 9\n");
 }
 
 /** Test remove(). */
@@ -249,5 +249,39 @@ TestUtilConfigurationFile::testRemove()
     
     p = testee.findElement(util::ConfigurationFile::Assignment, "pCONFIG.Allowshipnames");
     TS_ASSERT(p == 0);
+}
+
+/** Test add(). */
+void
+TestUtilConfigurationFile::testAdd()
+{
+    // Test data
+    afl::io::ConstMemoryStream in(afl::string::toBytes("    FILTER=f1\n"
+                                                       "    FILTER=f2\n"));
+    afl::io::TextFile tf(in);
+
+    // Parse it
+    util::ConfigurationFile testee;
+    testee.load(tf);
+
+    // Add to it
+    testee.add("other", "o");
+    testee.add("filter", "f3");
+    testee.add("sec", "filter", "f4");
+
+    // Verify
+    afl::io::InternalStream out;
+    afl::io::TextFile tfo(out);
+    tfo.setSystemNewline(false);
+    testee.save(tfo);
+    tfo.flush();
+    
+    TS_ASSERT_EQUALS(afl::string::fromBytes(out.getContent()),
+                     "    FILTER=f1\n"
+                     "    FILTER=f2\n"
+                     "    filter = f3\n"
+                     "    other = o\n"
+                     "% sec\n"
+                     "  filter = f4\n");
 }
 

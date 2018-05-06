@@ -5,14 +5,19 @@
   *  Test cases ported from JavaScript version (js/projects/c2web/game/tvcr.js 1.13).
   */
 
+#include <memory>
 #include "game/vcr/classic/hostalgorithm.hpp"
 
 #include "t_game_vcr_classic.hpp"
 #include "afl/base/countof.hpp"
 #include "game/vcr/classic/nullvisualizer.hpp"
+#include "game/vcr/classic/statustoken.hpp"
 
 
 namespace {
+    /*
+     *  Hard-wired ship list to avoid dependency to external files
+     */
     struct Cost {
         int d, m, mc, t;
     };
@@ -95,9 +100,10 @@ namespace {
         }
     }
 
-
-
-
+    /*
+     *  Hardwired combat to avoid dependency on external files.
+     *  These fights are from actual games.
+     */
     struct Object {
         int mass;
         int isPlanet;
@@ -168,7 +174,7 @@ namespace {
         {65,  0, 72, {{113, 0, "HKF Spirit of Eness",   0, 240, 115, 3, 61, 0, 5, 6, 0, 0,  7, 27, 0, 4, 100, 1,1,35,1,0},
                       {123, 1, "Cygnet",                0,   5,  41, 2,  1, 0, 3, 3, 0, 5,  0, 0,  5, 0, 100, 1,1,35,1,0}}},
 
-        // tests/vcr/deadfire.vcr, a carrier/carrier fight:
+        // This is pcc-v2/tests/vcr/deadfire.vcr, a carrier/carrier fight:
         {107, 0, 47, {{625, 0, "Carota", 0, 1858, 496, 11, 144, 0, 7, 10, 0, 8, 0, 0, 122, 0, 100, 1,1,35,1,0},
                       {370, 1, "Vendor", 0, 62,   32,  1,  1,   0, 6, 9, 0, 13, 0, 0, 62,  0, 100, 1,1,35,1,0}}}
     };
@@ -201,10 +207,10 @@ namespace {
         result.setCrewDefenseRate(in.crewDefenseRate);
         return result;
     }
-
 }
 
-
+/** Test first battle: Freighter vs Torper, normal playback.
+    Must produce correct result. */
 void
 TestGameVcrClassicHostAlgorithm::testFirst()
 {
@@ -245,6 +251,8 @@ TestGameVcrClassicHostAlgorithm::testFirst()
     TS_ASSERT_EQUALS(right.getCrew(), 240);
 }
 
+/** Test second battle: Torper vs Torper, normal playback.
+    Must produce correct result. */
 void
 TestGameVcrClassicHostAlgorithm::testSecond()
 {
@@ -285,6 +293,8 @@ TestGameVcrClassicHostAlgorithm::testSecond()
     TS_ASSERT_EQUALS(right.getCrew(), 121);
 }
 
+/** Test last battle: Torper vs Planet, normal playback.
+    Must produce correct result. */
 void
 TestGameVcrClassicHostAlgorithm::testLast()
 {
@@ -325,6 +335,8 @@ TestGameVcrClassicHostAlgorithm::testLast()
     TS_ASSERT_EQUALS(right.getCrew(), 5);
 }
 
+/** Test fighter/fighter, normal playback.
+    Must produce correct result. */
 void
 TestGameVcrClassicHostAlgorithm::testDeadFire()
 {
@@ -363,3 +375,133 @@ TestGameVcrClassicHostAlgorithm::testDeadFire()
     TS_ASSERT_EQUALS(right.getDamage(), 102);
     TS_ASSERT_EQUALS(left.getCrew(), 1858);
 }
+
+/** Test tenth battle: Torper vs Torper.
+    This also tests partial playback, intermediate status queries, and status tokens.
+    Must produce correct result at all stages. */
+void
+TestGameVcrClassicHostAlgorithm::testTenth()
+{
+    using game::vcr::classic::LeftSide;
+    using game::vcr::classic::RightSide;
+
+    // Surroundings
+    game::vcr::classic::NullVisualizer vis;
+    game::config::HostConfiguration config;
+    game::spec::ShipList list;
+    initShipList(list);
+
+    // Final recording (ship/planet)
+    game::vcr::classic::HostAlgorithm testee(false, vis, config, list.beams(), list.launchers());
+    game::vcr::Object left(convertObject(battles[9].object[0]));
+    game::vcr::Object right(convertObject(battles[9].object[1]));
+    uint16_t seed = battles[9].seed;
+    bool result = testee.checkBattle(left, right, seed);
+    TS_ASSERT(!result);
+
+    // Run until time 150 (2:30)
+    testee.initBattle(left, right, seed);
+    for (int i = 0; i < 150; ++i) {
+        TS_ASSERT_EQUALS(testee.playCycle(), true);
+    }
+
+    // Verify intermediate state
+    TS_ASSERT_EQUALS(testee.getTime(), 150);
+    TS_ASSERT_EQUALS(testee.getShield(LeftSide), 50);
+    TS_ASSERT_EQUALS(testee.getShield(RightSide), 94);
+    TS_ASSERT_EQUALS(testee.getDamage(LeftSide), 0);
+    TS_ASSERT_EQUALS(testee.getDamage(RightSide), 0);
+    TS_ASSERT_EQUALS(testee.getCrew(LeftSide), 430);
+    TS_ASSERT_EQUALS(testee.getCrew(RightSide), 240);
+    TS_ASSERT_EQUALS(testee.getNumTorpedoes(LeftSide), 28);
+    TS_ASSERT_EQUALS(testee.getNumTorpedoes(RightSide), 28);
+    for (int i = 0; i < 4; ++i) {
+        TS_ASSERT_EQUALS(testee.getBeamStatus(LeftSide, i), 100);
+    }
+    for (int i = 0; i < 6; ++i) {
+        TS_ASSERT_EQUALS(testee.getBeamStatus(RightSide, i), 100);
+    }
+    TS_ASSERT_EQUALS(testee.getLauncherStatus(LeftSide, 0), 17);
+    TS_ASSERT_EQUALS(testee.getLauncherStatus(LeftSide, 1), 100);
+    TS_ASSERT_EQUALS(testee.getLauncherStatus(LeftSide, 2), 20);
+    TS_ASSERT_EQUALS(testee.getLauncherStatus(RightSide, 0), 12);
+    TS_ASSERT_EQUALS(testee.getLauncherStatus(RightSide, 1), 22);
+    TS_ASSERT_EQUALS(testee.getLauncherStatus(RightSide, 2), 17);
+    TS_ASSERT_EQUALS(testee.getLauncherStatus(RightSide, 3), 17);
+
+    // Save a token
+    std::auto_ptr<game::vcr::classic::StatusToken> token(testee.createStatusToken());
+    TS_ASSERT(token.get() != 0);
+
+    // Run until time 210 (3:30)
+    for (int i = 0; i < 60; ++i) {
+        TS_ASSERT_EQUALS(testee.playCycle(), true);
+    }
+
+    // Verify intermediate state
+    TS_ASSERT_EQUALS(testee.getTime(), 210);
+    TS_ASSERT_EQUALS(testee.getShield(LeftSide), 0);
+    TS_ASSERT_EQUALS(testee.getShield(RightSide), 81);
+    TS_ASSERT_EQUALS(testee.getDamage(LeftSide), 60);
+    TS_ASSERT_EQUALS(testee.getDamage(RightSide), 0);
+    TS_ASSERT_EQUALS(testee.getCrew(LeftSide), 376);
+    TS_ASSERT_EQUALS(testee.getCrew(RightSide), 240);
+    TS_ASSERT_EQUALS(testee.getNumTorpedoes(LeftSide), 23);
+    TS_ASSERT_EQUALS(testee.getNumTorpedoes(RightSide), 21);
+    TS_ASSERT_EQUALS(testee.getBeamStatus(LeftSide, 0), 6);
+    TS_ASSERT_EQUALS(testee.getBeamStatus(LeftSide, 1), 13);
+    TS_ASSERT_EQUALS(testee.getBeamStatus(LeftSide, 2), 8);
+    TS_ASSERT_EQUALS(testee.getBeamStatus(LeftSide, 3), 12);
+    TS_ASSERT_EQUALS(testee.getBeamStatus(RightSide, 0), 9);
+    TS_ASSERT_EQUALS(testee.getBeamStatus(RightSide, 1), 4);
+    TS_ASSERT_EQUALS(testee.getBeamStatus(RightSide, 2), 9);
+    TS_ASSERT_EQUALS(testee.getBeamStatus(RightSide, 3), 10);
+    TS_ASSERT_EQUALS(testee.getBeamStatus(RightSide, 4), 7);
+    TS_ASSERT_EQUALS(testee.getBeamStatus(RightSide, 4), 7);
+    TS_ASSERT_EQUALS(testee.getLauncherStatus(LeftSide, 0), 2);
+    TS_ASSERT_EQUALS(testee.getLauncherStatus(LeftSide, 1), 45);
+    TS_ASSERT_EQUALS(testee.getLauncherStatus(LeftSide, 2), 92);
+    TS_ASSERT_EQUALS(testee.getLauncherStatus(RightSide, 0), 80);
+    TS_ASSERT_EQUALS(testee.getLauncherStatus(RightSide, 1), 12);
+    TS_ASSERT_EQUALS(testee.getLauncherStatus(RightSide, 2), 7);
+    TS_ASSERT_EQUALS(testee.getLauncherStatus(RightSide, 3), 7);
+
+    // Restore the token
+    testee.restoreStatus(*token);
+    TS_ASSERT_EQUALS(testee.getTime(), 150);
+    TS_ASSERT_EQUALS(testee.getShield(LeftSide), 50);
+    TS_ASSERT_EQUALS(testee.getShield(RightSide), 94);
+
+    // Play again
+    for (int i = 0; i < 60; ++i) {
+        TS_ASSERT_EQUALS(testee.playCycle(), true);
+    }
+    TS_ASSERT_EQUALS(testee.getTime(), 210);
+    TS_ASSERT_EQUALS(testee.getShield(LeftSide), 0);
+    TS_ASSERT_EQUALS(testee.getShield(RightSide), 81);
+
+    // Play to end
+    while (testee.playCycle()) {
+        // nix
+    }
+    testee.doneBattle(left, right);
+
+    // Record #10:
+    //        Ending time 302 (5:02)
+    //        left-destroyed
+    //  S:  0  D:158  C:268  A: 16   |     S: 65  D:  0  C:240  A: 10
+    TS_ASSERT_EQUALS(testee.getTime(), 302);
+    TS_ASSERT(!testee.getResult().contains(game::vcr::classic::LeftCaptured));
+    TS_ASSERT(testee.getResult().contains(game::vcr::classic::LeftDestroyed));
+    TS_ASSERT(!testee.getResult().contains(game::vcr::classic::RightCaptured));
+    TS_ASSERT(!testee.getResult().contains(game::vcr::classic::RightDestroyed));
+    TS_ASSERT_EQUALS(left.getShield(), 0);
+    TS_ASSERT_EQUALS(right.getShield(), 65);
+    TS_ASSERT_EQUALS(left.getDamage(), 158);
+    TS_ASSERT_EQUALS(right.getDamage(), 0);
+    TS_ASSERT_EQUALS(left.getCrew(), 268);
+    TS_ASSERT_EQUALS(right.getCrew(), 240);
+    TS_ASSERT_EQUALS(left.getNumTorpedoes(), 16);
+    TS_ASSERT_EQUALS(right.getNumTorpedoes(), 10);
+}
+

@@ -11,6 +11,7 @@
 #include "afl/string/format.hpp"
 #include "game/map/anyshiptype.hpp"
 #include "util/math.hpp"
+#include "game/spec/mission.hpp"
 
 namespace {
     /** Format name of a planet. */
@@ -217,6 +218,38 @@ game::map::Reverter*
 game::map::Universe::getReverter() const
 {
     return m_reverter.get();
+}
+
+const game::map::Object*
+game::map::Universe::getObject(Reference ref) const
+{
+    switch (ref.getType()) {
+     case Reference::Null:
+     case Reference::Player:
+     case Reference::MapLocation:
+        return 0;
+
+     case Reference::Ship:
+        return ships().get(ref.getId());
+     case Reference::Planet:
+     case Reference::Starbase:
+        return planets().get(ref.getId());
+     case Reference::Storm:
+        return ionStorms().get(ref.getId());
+     case Reference::Minefield:
+        return minefields().get(ref.getId());
+     case Reference::Ufo: {
+        UfoType& ty = const_cast<UfoType&>(ufos());
+        return ty.getObjectByIndex(ty.findIndexForId(ref.getId()));
+     }
+
+     case Reference::Hull:
+     case Reference::Engine:
+     case Reference::Beam:
+     case Reference::Torpedo:
+        return 0;
+    }
+    return 0;
 }
 
 void
@@ -482,3 +515,26 @@ game::map::Universe::getLocationName(Point pt, int flags,
 
     return afl::string::Format((flags & NameVerbose) != 0 ? tx.translateString("Deep Space (%d,%d)").c_str() : "(%d,%d)", pt.getX(), pt.getY());
 }
+
+// /** Check whether a ship is being towed.
+//     \param sid Ship Id */
+game::Id_t
+game::map::Universe::findShipTowing(int sid, int after) const
+{
+    // ex GUniverse::isShipTowed
+    AnyShipType ty(const_cast<Universe&>(*this));
+
+    int i = after;
+    while ((i = ty.findNextIndex(i)) != 0) {
+        const Ship* sh = ty.getObjectByIndex(i);
+        if (sh != 0
+            && sh->isPlayable(Object::ReadOnly)
+            && sh->getMission().orElse(0) == game::spec::Mission::msn_Tow
+            && sh->getMissionParameter(TowParameter).orElse(0) == sid)
+        {
+            return i;
+        }
+    }
+    return 0;
+}
+

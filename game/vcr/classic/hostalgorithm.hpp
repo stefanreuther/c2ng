@@ -1,12 +1,13 @@
 /**
   *  \file game/vcr/classic/hostalgorithm.hpp
+  *  \brief Class game::vcr::classic::HostAlgorithm
   */
 #ifndef C2NG_GAME_VCR_CLASSIC_HOSTALGORITHM_HPP
 #define C2NG_GAME_VCR_CLASSIC_HOSTALGORITHM_HPP
 
-#include "game/vcr/classic/algorithm.hpp"
-#include "game/spec/shiplist.hpp"
 #include "game/config/hostconfiguration.hpp"
+#include "game/spec/shiplist.hpp"
+#include "game/vcr/classic/algorithm.hpp"
 #include "game/vcr/statistic.hpp"
 
 namespace game { namespace vcr { namespace classic {
@@ -82,10 +83,13 @@ namespace game { namespace vcr { namespace classic {
             int16_t m_objectX;
             int16_t m_damageLimit;
             int16_t m_numFightersOut;
+            int m_torpKillPower, m_torpDamagePower;
+            int m_beamKillPower, m_beamDamagePower;
             Side m_side;
             Object m_obj;
 
-            void init(const Object& obj, Side side);
+            void init(const Object& obj, Side side, const game::spec::TorpedoVector_t& launchers);
+            void setBeamPower(const game::spec::BeamVector_t& beams);
         };
         class HostStatusToken;
 
@@ -97,9 +101,9 @@ namespace game { namespace vcr { namespace classic {
         inline Random_t getRandom_1_100();
         inline Random_t getRandom_1_17();
 
-        inline int32_t rdivadd(int32_t a, int32_t b, int32_t plus);
+        inline int32_t rdivadd(int32_t a, int32_t b, int32_t plus) const;
 
-        inline bool isFreighter(const Status& st);
+        static inline bool isFreighter(const Status& st);
 
         void hit(Status& st, int damage, int kill);
 

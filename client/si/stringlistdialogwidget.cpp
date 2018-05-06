@@ -14,6 +14,7 @@
 #include "ui/spacer.hpp"
 #include "ui/layout/hbox.hpp"
 #include "ui/widgets/button.hpp"
+#include "ui/widgets/standarddialogbuttons.hpp"
 
 // Constructor.
 client::si::StringListDialogWidget::StringListDialogWidget(gfx::ResourceProvider& provider, ui::ColorScheme& scheme,
@@ -53,20 +54,14 @@ client::si::StringListDialogWidget::run(ui::Root& root)
     //     list_group.add(h.add(new UIScrollbar(*this)));
     w.add(listGroup);
 
-    ui::Group& buttonGroup = h.addNew(new ui::Group(ui::layout::HBox::instance5));
-    ui::widgets::Button& btnOK     = h.addNew(new ui::widgets::Button(_("OK"), util::Key_Return, root));
-    ui::widgets::Button& btnCancel = h.addNew(new ui::widgets::Button(_("Cancel"), util::Key_Escape, root));
-    buttonGroup.add(btnOK);
-    buttonGroup.add(btnCancel);
-    buttonGroup.add(h.addNew(new ui::Spacer()));
-    btnOK.sig_fire.addNewClosure(loop.makeStop(1));
-    btnCancel.sig_fire.addNewClosure(loop.makeStop(0));
+    ui::widgets::StandardDialogButtons& btns = h.addNew(new ui::widgets::StandardDialogButtons(root));
+    btns.addStop(loop);
     // FIXME: help
     // if (!help.empty()) {
     //     button_group.add(h.add(new UIButton(_("H"), 'H')));
     //     w.add(h.add(new WHelpWidget(help)));
     // }
-    w.add(buttonGroup);
+    w.add(btns);
     // FIXME:
     // w.add(h.add(new UIQuit(cm_Escape)));
 

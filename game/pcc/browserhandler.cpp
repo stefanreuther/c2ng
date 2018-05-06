@@ -81,7 +81,7 @@ game::pcc::BrowserHandler::createAccountFolder(game::browser::Account& acc)
 }
 
 afl::base::Ptr<game::Root>
-game::pcc::BrowserHandler::loadGameRoot(afl::base::Ref<afl::io::Directory> /*dir*/)
+game::pcc::BrowserHandler::loadGameRoot(afl::base::Ref<afl::io::Directory> /*dir*/, const game::config::UserConfiguration& /*config*/)
 {
     // FIXME: do we need this? If folder is linked with server, process that.
     return 0;

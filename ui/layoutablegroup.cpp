@@ -4,8 +4,7 @@
 
 #include "ui/layoutablegroup.hpp"
 
-// /** \class UILayoutableWidget
-//     \brief Basic layoutable container
+// /** Basic layoutable container
 
 //     This widget provides the basis for a layoutable container. It has an UILayoutManager
 //     responsible for actual layout, and implements UIBaseComplexWidget's methods using

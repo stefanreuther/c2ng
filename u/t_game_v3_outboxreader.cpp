@@ -92,6 +92,28 @@ TestGameV3OutboxReader::testLoad30One()
     t.checkFinish();
 }
 
+/** Test reading a file containing a single message to host (special case). */
+void
+TestGameV3OutboxReader::testLoad30Host()
+{
+    Tester t("testLoad30One");
+
+    afl::charset::Utf8Charset cs;
+    afl::string::NullTranslator tx;
+    static const uint8_t DATA[] = {
+        1,0,                    // numMessages
+        13,0,0,0,               // address
+        6,0,                    // length
+        7,0,                    // from
+        12,0,                   // to
+        'n','o','p',26,'q','r',
+    };
+    afl::io::ConstMemoryStream ms(DATA);
+    t.expectCall("addMessage('abc\nde', 1)");
+    t.loadOutbox(ms, cs, tx);
+    t.checkFinish();
+}
+
 /** Test reading an empty 3.5 file.
     Should not generate any callbacks or errors. */
 void
@@ -191,7 +213,7 @@ TestGameV3OutboxReader::testLoad35Two()
     };
     afl::io::ConstMemoryStream ms(DATA);
     t.expectCall("addMessage('abc\nde', 14)");
-    t.expectCall("addMessage('fgh', 4096)");
+    t.expectCall("addMessage('fgh', 1)");
     t.loadOutbox35(ms, cs, tx);
     t.checkFinish();
 }
@@ -219,7 +241,7 @@ TestGameV3OutboxReader::testLoad35Invalid()
         's','t','u',26,'-',
     };
     afl::io::ConstMemoryStream ms(DATA);
-    t.expectCall("addMessage('fgh', 4096)");
+    t.expectCall("addMessage('fgh', 1)");
     t.loadOutbox35(ms, cs, tx);
     t.checkFinish();
 }

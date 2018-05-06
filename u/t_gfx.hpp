@@ -90,6 +90,7 @@ class TestGfxFontRequest : public CxxTest::TestSuite {
  public:
     void testSet();
     void testMatch();
+    void testCompare();
 };
 
 class TestGfxGraphicsException : public CxxTest::TestSuite {
@@ -165,6 +166,14 @@ class TestGfxSave : public CxxTest::TestSuite {
     void testUnaligned();
 };
 
+class TestGfxScan : public CxxTest::TestSuite {
+ public:
+    void testScanEmpty();
+    void testScanSmall();
+    void testScanLarge();
+    void testScanHuge();
+};
+
 class TestGfxTimer : public CxxTest::TestSuite {
  public:
     void testIt();
@@ -182,6 +191,11 @@ class TestGfxTypes : public CxxTest::TestSuite {
     void testMixColor();
     void testAddColor();
     void testGetColorDistance();
+};
+
+class TestGfxtypes : public CxxTest::TestSuite {
+ public:
+    void testParseColor();
 };
 
 #endif

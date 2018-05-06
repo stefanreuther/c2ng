@@ -21,8 +21,7 @@
 void
 TestGameRoot::testIt()
 {
-    // Prepare directories
-    afl::base::Ref<afl::io::Directory> specificationDirectory(afl::io::InternalDirectory::create("spec"));
+    // Prepare directory
     afl::base::Ref<afl::io::Directory> gameDirectory(afl::io::InternalDirectory::create("game"));
 
     // SpecificationLoader
@@ -38,11 +37,10 @@ TestGameRoot::testIt()
     std::auto_ptr<game::StringVerifier> stringVerifier(new game::test::StringVerifier());
     
     // Build a root
-    game::Root testee(specificationDirectory, gameDirectory, specLoader, hostVersion, regKey, stringVerifier);
+    game::Root testee(gameDirectory, specLoader, hostVersion, regKey, stringVerifier, game::Root::Actions_t());
     const game::Root& croot(testee);
 
     // Verify it
-    TS_ASSERT_EQUALS(&testee.specificationDirectory(), &*specificationDirectory);
     TS_ASSERT_EQUALS(&testee.gameDirectory(), &*gameDirectory);
     TS_ASSERT_EQUALS(&testee.specificationLoader(), &*specLoader);
     TS_ASSERT_EQUALS(testee.hostVersion().getKind(), game::HostVersion::PHost);
@@ -68,6 +66,8 @@ TestGameRoot::testIt()
             { }
         virtual void loadHistoryTurn(game::Turn& /*turn*/, game::Game& /*game*/, int /*player*/, int /*turnNumber*/, game::Root& /*root*/)
             { }
+        virtual String_t getProperty(Property /*p*/)
+            { return String_t(); }
     };
     afl::base::Ref<game::TurnLoader> turnLoader(*new NullTurnLoader());
     testee.setTurnLoader(turnLoader.asPtr());

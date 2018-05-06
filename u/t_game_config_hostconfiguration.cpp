@@ -34,8 +34,7 @@ TestGameConfigHostConfiguration::testAlias()
     HostConfiguration testee;
 
     // Get enumerator
-    afl::base::Ptr<HostConfiguration::Enumerator_t> e = testee.getOptions();
-    TS_ASSERT(e.get() != 0);
+    afl::base::Ref<HostConfiguration::Enumerator_t> e = testee.getOptions();
 
     // Count and verify options
     int numOptions = 0;
@@ -46,7 +45,7 @@ TestGameConfigHostConfiguration::testAlias()
         TS_ASSERT(info.second != 0);
         TS_ASSERT(!info.first.empty());
 
-        if (game::config::AliasOption* opt = dynamic_cast<game::config::AliasOption*>(info.second)) {
+        if (const game::config::AliasOption* opt = dynamic_cast<const game::config::AliasOption*>(info.second)) {
             // It's an alias option. Verify that it's valid.
             TS_ASSERT(opt->getForwardedOption() != 0);
             ++numAliases;

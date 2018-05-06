@@ -41,13 +41,17 @@ game::spec::FriendlyCodeList::FriendlyCodeList()
 { }
 
 // Make sublist of some other list.
-game::spec::FriendlyCodeList::FriendlyCodeList(const FriendlyCodeList& originalList, const game::map::Object& obj, const game::config::HostConfiguration& config)
+game::spec::FriendlyCodeList::FriendlyCodeList(const FriendlyCodeList& originalList,
+                                               const game::map::Object& obj,
+                                               const UnitScoreDefinitionList& scoreDefinitions,
+                                               const game::spec::ShipList& shipList,
+                                               const game::config::HostConfiguration& config)
     : m_data(),
       m_extraData()
 {
     // ex GFCodeList::GFCodeList(const GFCodeList& l, const GObject& o)
     for (Iterator_t i = originalList.begin(); i != originalList.end(); ++i) {
-        if ((*i)->worksOn(obj, config)) {
+        if ((*i)->worksOn(obj, scoreDefinitions, shipList, config)) {
             addCode(**i);
         }
     }
@@ -204,7 +208,7 @@ game::spec::FriendlyCodeList::loadExtraCodes(afl::io::Stream& in)
 
 // Check whether the specified friendly code is numeric.
 bool
-game::spec::FriendlyCodeList::isNumeric(const String_t& fc, const HostVersion& host) const
+game::spec::FriendlyCodeList::isNumeric(const String_t& fc, const HostSelection host) const
 {
     // ex GFCode::isNumeric
     String_t::size_type i = 0, end = fc.size();
@@ -285,7 +289,7 @@ game::spec::FriendlyCodeList::isSpecial(const String_t& fc, bool ignoreCase) con
 
 // Check whether a friendly code is a universal minefield friendly code.
 bool
-game::spec::FriendlyCodeList::isUniversalMinefieldFCode(const String_t& fc, bool tolerant, const HostVersion& host) const
+game::spec::FriendlyCodeList::isUniversalMinefieldFCode(const String_t& fc, bool tolerant, const HostSelection host) const
 {
     // ex GFCode::isUniversalMinefieldFCode
     if (host.hasCaseInsensitiveUniversalMinefieldFCodes()) {
@@ -299,7 +303,7 @@ game::spec::FriendlyCodeList::isUniversalMinefieldFCode(const String_t& fc, bool
 
 // Get friendly code's numeric value.
 int
-game::spec::FriendlyCodeList::getNumericValue(const String_t& fc, const HostVersion& host) const
+game::spec::FriendlyCodeList::getNumericValue(const String_t& fc, const HostSelection host) const
 {
     // ex GFCode::getNumericValue
     int n = 0;
@@ -312,10 +316,9 @@ game::spec::FriendlyCodeList::getNumericValue(const String_t& fc, const HostVers
 
 // Check whether a friendly code is permitted as random friendly code.
 bool
-game::spec::FriendlyCodeList::isAllowedRandomCode(const String_t& fc, const HostVersion& host)
+game::spec::FriendlyCodeList::isAllowedRandomCode(const String_t& fc, const HostSelection host)
 {
     // ex GFCode::isAllowedRandom
-    // FIXME: we could make this method more robust by dropping the dependency on HostVersion and always assuming worst-case
     return fc.length() == 3
         && !isUniversalMinefieldFCode(fc, true, host)
         && fc[0] != 'X' && fc[0] != 'x'
@@ -330,7 +333,7 @@ game::spec::FriendlyCodeList::isAllowedRandomCode(const String_t& fc, const Host
 // Generate a random friendly code.
 
 String_t
-game::spec::FriendlyCodeList::generateRandomCode(util::RandomNumberGenerator& rng, const HostVersion& host)
+game::spec::FriendlyCodeList::generateRandomCode(util::RandomNumberGenerator& rng, const HostSelection host)
 {
     // ex GFCode::generateRandomFCode()
     // To guarantee termination, this function bails out if it did not find a good enough code after a while.

@@ -375,5 +375,20 @@ TestGameHostVersion::testProperties()
     TS_ASSERT( HostVersion(HostVersion::SRace,   MKVERSION(3,22,0)).hasParallelShipTransfers());
     TS_ASSERT( HostVersion(HostVersion::PHost,   MKVERSION(3, 4,0)).hasParallelShipTransfers());
     TS_ASSERT(!HostVersion(HostVersion::NuHost,  MKVERSION(3, 0,0)).hasParallelShipTransfers());
+
+    // hasExtendedMissions: PHost, if enabled
+    config[config.AllowExtendedMissions].set(false);
+    TS_ASSERT(!HostVersion(HostVersion::Unknown, MKVERSION(3,22,0)).hasExtendedMissions(config));
+    TS_ASSERT(!HostVersion(HostVersion::Host,    MKVERSION(3,22,0)).hasExtendedMissions(config));
+    TS_ASSERT(!HostVersion(HostVersion::SRace,   MKVERSION(3,22,0)).hasExtendedMissions(config));
+    TS_ASSERT(!HostVersion(HostVersion::PHost,   MKVERSION(3, 4,0)).hasExtendedMissions(config));
+    TS_ASSERT(!HostVersion(HostVersion::NuHost,  MKVERSION(3, 0,0)).hasExtendedMissions(config));
+
+    config[config.AllowExtendedMissions].set(true);
+    TS_ASSERT(!HostVersion(HostVersion::Unknown, MKVERSION(3,22,0)).hasExtendedMissions(config));
+    TS_ASSERT(!HostVersion(HostVersion::Host,    MKVERSION(3,22,0)).hasExtendedMissions(config));
+    TS_ASSERT(!HostVersion(HostVersion::SRace,   MKVERSION(3,22,0)).hasExtendedMissions(config));
+    TS_ASSERT( HostVersion(HostVersion::PHost,   MKVERSION(3, 4,0)).hasExtendedMissions(config));
+    TS_ASSERT(!HostVersion(HostVersion::NuHost,  MKVERSION(3, 0,0)).hasExtendedMissions(config));
 }
 

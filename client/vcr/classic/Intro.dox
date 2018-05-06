@@ -1,0 +1,17 @@
+/*!
+     \namespace client::vcr::classic
+     \brief Classic VCR Playback
+
+     This namespace contains functions to play classic (1:1) combat.
+     In PCC2ng, VCR playback consists of a pipeline of modules.
+
+     - At the lowest layer, in the game thread, a game::vcr::classic::Algorithm plays the actual battle,
+       and is wrapped using a client::vcr::classic::Player to produce events.
+       These events are serialized and streamed into the GUI thread.
+     - In the GUI thread, events are translated into GUI actions using a client::vcr::classic::Scheduler instance.
+       We offer multiple scheduler classes.
+
+     Entry points:
+     - PlaybackScreen
+     - StandardScheduler
+ */

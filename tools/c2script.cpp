@@ -321,10 +321,11 @@ namespace {
 
         String_t defaultRoot = fs.makePathName(fs.makePathName(env.getInstallationDirectoryName(), "share"), "specs");
         game::v3::RootLoader loader(fs.openDirectory(params.arg_rootdir.orElse(defaultRoot)), profile, tx, session.log(), fs);
-        loader.setCharsetNew(params.gameCharset->clone());
 
         // Check game data
-        afl::base::Ptr<game::Root> root = loader.load(fs.openDirectory(params.arg_gamedir.orElse(".")), false);
+        // FIXME: load correct config!
+        const game::config::UserConfiguration uc;
+        afl::base::Ptr<game::Root> root = loader.load(fs.openDirectory(params.arg_gamedir.orElse(".")), *params.gameCharset, uc, false);
         if (root.get() == 0 || root->getTurnLoader().get() == 0) {
             session.log().write(afl::sys::Log::Error, LOG_NAME, tx.translateString("no game data found"));
             return 1;

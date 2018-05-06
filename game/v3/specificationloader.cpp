@@ -333,10 +333,12 @@ HullfuncParser::performAssignments(game::spec::ModifiedHullFunctionList::Functio
 }
 
 
-game::v3::SpecificationLoader::SpecificationLoader(afl::charset::Charset& charset,
+game::v3::SpecificationLoader::SpecificationLoader(afl::base::Ref<afl::io::Directory> dir,
+                                                   std::auto_ptr<afl::charset::Charset> charset,
                                                    afl::string::Translator& tx,
                                                    afl::sys::LogListener& log)
-    : m_charset(charset),
+    : m_directory(dir),
+      m_charset(charset),
       m_translator(tx),
       m_log(log)
 { }
@@ -345,15 +347,15 @@ void
 game::v3::SpecificationLoader::loadShipList(game::spec::ShipList& list, game::Root& root)
 {
     // ex game/spec.cc:loadSpecification
-    loadBeams(list, root.specificationDirectory());
-    loadLaunchers(list, root.specificationDirectory());
-    loadEngines(list, root.specificationDirectory());
-    loadHulls(list, root.specificationDirectory());
-    loadHullAssignments(list, root.specificationDirectory());
-    loadHullFunctions(list, root.specificationDirectory(), root.hostVersion(), root.hostConfiguration());
-    list.componentNamer().load(root.specificationDirectory(), m_translator, m_log);
-    loadFriendlyCodes(list, root.specificationDirectory());
-    loadMissions(list, root.specificationDirectory());
+    loadBeams(list, *m_directory);
+    loadLaunchers(list, *m_directory);
+    loadEngines(list, *m_directory);
+    loadHulls(list, *m_directory);
+    loadHullAssignments(list, *m_directory);
+    loadHullFunctions(list, *m_directory, root.hostVersion(), root.hostConfiguration());
+    list.componentNamer().load(*m_directory, m_translator, m_log);
+    loadFriendlyCodes(list, *m_directory);
+    loadMissions(list, *m_directory);
 
     list.sig_change.raise();
 }
@@ -372,7 +374,7 @@ game::v3::SpecificationLoader::loadBeams(game::spec::ShipList& list, afl::io::Di
         gt::Beam in;
         file->fullRead(afl::base::fromObject(in));
         if (gs::Beam* out = beams.create(i)) {
-            out->setName(m_charset.decode(in.name));
+            out->setName(m_charset->decode(in.name));
             unpackCost(out->cost(), in.cost);
             out->setMass(in.mass);
             out->setTechLevel(in.techLevel);
@@ -396,7 +398,7 @@ game::v3::SpecificationLoader::loadLaunchers(game::spec::ShipList& list, afl::io
         gt::Torpedo in;
         file->fullRead(afl::base::fromObject(in));
         if (gs::TorpedoLauncher* out = torps.create(i)) {
-            out->setName(m_charset.decode(in.name));
+            out->setName(m_charset->decode(in.name));
             out->torpedoCost().set(gs::Cost::Tritanium, 1);
             out->torpedoCost().set(gs::Cost::Duranium, 1);
             out->torpedoCost().set(gs::Cost::Molybdenum, 1);
@@ -424,7 +426,7 @@ game::v3::SpecificationLoader::loadEngines(game::spec::ShipList& list, afl::io::
         gt::Engine in;
         file->fullRead(afl::base::fromObject(in));
         if (gs::Engine* out = engines.create(i)) {
-            out->setName(m_charset.decode(in.name));
+            out->setName(m_charset->decode(in.name));
             unpackCost(out->cost(), in.cost);
             out->setTechLevel(in.techLevel);
 
@@ -451,7 +453,7 @@ game::v3::SpecificationLoader::loadHulls(game::spec::ShipList& list, afl::io::Di
         ++i;
         if (gs::Hull* out = hulls.create(i)) {
             out->clearHullFunctions();
-            out->setName(m_charset.decode(in.name));
+            out->setName(m_charset->decode(in.name));
             out->setExternalPictureNumber(in.pictureNumber);
             out->setInternalPictureNumber(i == 104 ? 152 : i == 105 ? 153 : in.pictureNumber);
             out->cost().set(gs::Cost::Tritanium, in.tritanium);
@@ -525,7 +527,7 @@ game::v3::SpecificationLoader::loadHullFunctions(game::spec::ShipList& list, afl
     if (ps.get()) {
         // shiplist.txt: PHost, new-style
         HullfuncParser p(list, host, config, m_translator, m_log);
-        p.setCharsetNew(m_charset.clone());
+        p.setCharsetNew(m_charset->clone());
         p.setSection("hullfunc", false);
         p.parseFile(*ps);
     } else {
@@ -533,7 +535,7 @@ game::v3::SpecificationLoader::loadHullFunctions(game::spec::ShipList& list, afl
         if (ps.get()) {
             // hullfunc.txt: PHost, old-style
             HullfuncParser p(list, host, config, m_translator, m_log);
-            p.setCharsetNew(m_charset.clone());
+            p.setCharsetNew(m_charset->clone());
             p.setSection("hullfunc", true);
             p.parseFile(*ps);
         } else {
@@ -587,7 +589,7 @@ game::v3::SpecificationLoader::loadMissions(game::spec::ShipList& list, afl::io:
     }
     ps = dir.openFileNT("mission.ini", FileSystem::OpenRead);
     if (ps.get()) {
-        msns.loadFromIniFile(*ps, m_charset);
+        msns.loadFromIniFile(*ps, *m_charset);
     }
 
     msns.sort();

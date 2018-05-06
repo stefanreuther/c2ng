@@ -1,14 +1,18 @@
 /**
   *  \file util/string.cpp
+  *  \brief String Utilities
   */
 
 #include <cstring>
 #include <algorithm>
 #include "util/string.hpp"
+#include "afl/charset/base64.hpp"
+#include "afl/charset/utf8.hpp"
+#include "afl/charset/utf8reader.hpp"
 #include "afl/string/char.hpp"
+#include "afl/string/format.hpp"
 #include "afl/string/parse.hpp"
 #include "util/stringparser.hpp"
-#include "afl/charset/base64.hpp"
 
 namespace {
     bool mustEncode(const String_t& word)
@@ -23,6 +27,7 @@ namespace {
     }
 }
 
+// String Match, PHost way.
 bool
 util::stringMatch(const char* pattern, const char* tester)
 {
@@ -43,12 +48,14 @@ util::stringMatch(const char* pattern, const char* tester)
     return *tester == 0;
 }
 
+// String Match, PHost way.
 bool
 util::stringMatch(const char* pattern, const String_t& tester)
 {
     return stringMatch(pattern, tester.c_str());
 }
 
+// Consume word from comma-separated list.
 bool
 util::eatWord(const char*& tpl, String_t& word)
 {
@@ -134,6 +141,27 @@ util::parsePlayerCharacter(const char ch, int& number)
     }
 }
 
+// Parse a boolean value.
+bool
+util::parseBooleanValue(const String_t& s, bool& result)
+{
+    if (stringMatch("No", s) || stringMatch("False", s)) {
+        result = false;
+        return true;
+    } else if (stringMatch("Yes", s) || stringMatch("True", s)) {
+        result = true;
+        return true;
+    } else {
+        int32_t tmp;
+        if (afl::string::strToInteger(s, tmp) && (tmp == 0 || tmp == 1)) {
+            result = (tmp != 0);
+            return true;
+        } else {
+            return false;
+        }
+    }
+}
+
 String_t
 util::formatOptions(String_t s)
 {
@@ -205,6 +233,7 @@ util::formatName(String_t name)
     return name;
 }
 
+// Encode MIME header.
 String_t
 util::encodeMimeHeader(String_t input, String_t charsetName)
 {
@@ -251,4 +280,31 @@ util::encodeMimeHeader(String_t input, String_t charsetName)
         }
     }
     return result;
+}
+
+// Encode as HTML.
+String_t
+util::encodeHtml(const String_t& input, bool rawUnicode)
+{
+    String_t escaped;
+    afl::charset::Utf8Reader rdr(afl::string::toBytes(input), 0);
+    afl::charset::Utf8 u8;
+    while (rdr.hasMore()) {
+        afl::charset::Unichar_t ch = rdr.eat();
+        if (ch == '&') {
+            escaped.append("&amp;");
+        } else if (ch == '"') {
+            escaped.append("&quot;");
+        } else if (ch == '<') {
+            escaped.append("&lt;");
+        } else if (ch == '>') {
+            escaped.append("&gt;");
+        } else if (ch == 39 || (ch > 127 && !rawUnicode)) {
+            // 39 = single quote, always encoded numerically because &apos; is not in XML.
+            escaped.append(afl::string::Format("&#%d;", ch));
+        } else {
+            u8.append(escaped, ch);
+        }
+    }
+    return escaped;
 }

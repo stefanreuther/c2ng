@@ -126,7 +126,7 @@ namespace {
             if (hdr.length < 0 || hdr.length > gt::MAX_MESSAGE_SIZE) {
                 return false;
             }
-            if (hdr.to <= 0 || hdr.to >= gt::NUM_OWNERS) {
+            if (hdr.to <= 0 || hdr.to > gt::NUM_OWNERS) {
                 return false;
             }
             if (sender == 0) {
@@ -290,7 +290,7 @@ namespace {
         OutboxSearch(Message& m)
             : m(m)
             {
-                for (int i = 0; i <= 12; ++i) {
+                for (int i = 0; i <= game::v3::structures::NUM_PLAYERS; ++i) {
                     playerList.create(i);
                 }
             }
@@ -298,7 +298,7 @@ namespace {
             {
                 ++m.index;
                 m.text   = text;
-                m.header = Format("TO: %s\n", game::formatPlayerSet(receivers, playerList, m.tx));
+                m.header = Format("TO: %s\n", game::formatPlayerHostSet(receivers, playerList, m.tx));
                 m.search();
             }
      private:
@@ -516,7 +516,7 @@ ConsoleMgrepApplication::appMain()
     bool option;
     while (parser.getNext(option, text)) {
         if (option) {
-            if (text == "h") {
+            if (text == "h" || text == "help") {
                 help();
             } else if (text == "C") {
                 // Fetch character set name

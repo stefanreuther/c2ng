@@ -6,13 +6,11 @@
 #include "game/interface/friendlycodecontext.hpp"
 
 #include "t_game_interface.hpp"
-#include "afl/charset/utf8charset.hpp"
-#include "afl/string/nulltranslator.hpp"
-#include "afl/sys/log.hpp"
-#include "game/v3/specificationloader.hpp"
-#include "game/v3/registrationkey.hpp"
-#include "game/v3/stringverifier.hpp"
 #include "afl/io/internaldirectory.hpp"
+#include "afl/string/nulltranslator.hpp"
+#include "game/test/registrationkey.hpp"
+#include "game/test/specificationloader.hpp"
+#include "game/test/stringverifier.hpp"
 #include "u/helper/contextverifier.hpp"
 
 /** Test FriendlyCodeContext. */
@@ -20,15 +18,12 @@ void
 TestGameInterfaceFriendlyCodeContext::testIt()
 {
     // Create a root (FIXME: what for?)
-    afl::charset::Utf8Charset charset;
-    afl::string::NullTranslator tx;
-    afl::sys::Log log;
-    afl::base::Ref<game::Root> root(*new game::Root(afl::io::InternalDirectory::create("specDir"),
-                                                    afl::io::InternalDirectory::create("gameDir"),
-                                                    *new game::v3::SpecificationLoader(charset, tx, log),
+    afl::base::Ref<game::Root> root(*new game::Root(afl::io::InternalDirectory::create("gameDir"),
+                                                    *new game::test::SpecificationLoader(),
                                                     game::HostVersion(),
-                                                    std::auto_ptr<game::RegistrationKey>(new game::v3::RegistrationKey(charset)),
-                                                    std::auto_ptr<game::StringVerifier>(new game::v3::StringVerifier(std::auto_ptr<afl::charset::Charset>(charset.clone())))));
+                                                    std::auto_ptr<game::RegistrationKey>(new game::test::RegistrationKey(game::RegistrationKey::Registered, 9)),
+                                                    std::auto_ptr<game::StringVerifier>(new game::test::StringVerifier()),
+                                                    game::Root::Actions_t()));
 
     // Create a ship list
     afl::base::Ref<game::spec::ShipList> shipList(*new game::spec::ShipList());

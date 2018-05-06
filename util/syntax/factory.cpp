@@ -5,7 +5,9 @@
 #include "util/syntax/factory.hpp"
 #include "util/syntax/chighlighter.hpp"
 #include "util/syntax/inihighlighter.hpp"
+#include "util/syntax/lisphighlighter.hpp"
 #include "util/syntax/nullhighlighter.hpp"
+#include "util/syntax/pascalhighlighter.hpp"
 #include "util/syntax/scripthighlighter.hpp"
 
 util::syntax::Factory::Factory(KeywordTable& tab)
@@ -69,6 +71,12 @@ util::syntax::Factory::create(String_t name, afl::base::Deleter& del)
     }
     if (name == "js" || name == "as" || name == "javascript" || name == "jscript") {
         return del.addNew(new CHighlighter(CHighlighter::LangJavaScript));
+    }
+    if (name == "pas") {
+        return del.addNew(new PascalHighlighter());
+    }
+    if (name == "el" || name == "lisp") {
+        return del.addNew(new LispHighlighter());
     }
     return del.addNew(new NullHighlighter());
 }

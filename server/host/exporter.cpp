@@ -211,7 +211,7 @@ server::host::Exporter::exportTool(ConfigurationBuilder& ini, afl::io::Directory
         m_log.write(afl::sys::LogListener::Trace, LOG_NAME, Format("Exporting host:%s -> %s (tool)", sourceName, dirEntry->getPathName()));
         server::file::FileSystemHandler targetHandler(m_fileSystem, dirEntry->getPathName());
         server::file::ClientDirectoryHandler sourceHandler(m_source, sourceName);
-        copyDirectory(targetHandler, sourceHandler, true);
+        copyDirectory(targetHandler, sourceHandler, server::file::CopyFlags_t(server::file::CopyRecursively));
     }
 
     // Copy config
@@ -259,7 +259,7 @@ server::host::Exporter::exportSubdirectory(const String_t& source, const String_
     m_log.write(afl::sys::LogListener::Trace, LOG_NAME, Format("Exporting host:%s -> %s (game)", source, dirEntry->getPathName()));
     server::file::FileSystemHandler targetHandler(m_fileSystem, dirEntry->getPathName());
     server::file::ClientDirectoryHandler sourceHandler(m_source, source);
-    copyDirectory(targetHandler, sourceHandler, true);
+    copyDirectory(targetHandler, sourceHandler, server::file::CopyFlags_t(server::file::CopyRecursively));
 }
 
 // Store configuration file.
@@ -307,7 +307,7 @@ server::host::Exporter::importBackups(const String_t& source, const String_t& ta
         m_log.write(afl::sys::LogListener::Trace, LOG_NAME, Format("Importing host:%s <- %s (backup)", source, targetName));
         server::file::FileSystemHandler targetHandler(m_fileSystem, targetName);
         server::file::ClientDirectoryHandler sourceHandler(m_source, source);
-        copyDirectory(sourceHandler, targetHandler, false);
+        copyDirectory(sourceHandler, targetHandler, server::file::CopyFlags_t());
     }
 }
 

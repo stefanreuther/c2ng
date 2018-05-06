@@ -89,6 +89,13 @@ namespace game {
             \return first slot after the given one. Null if end of list reached. */
         Player* getNextPlayer(int id) const;
 
+        /** Get name of a player.
+            Equivalent to get(id)->getName(which), but handles the case that get(id) returns null.
+            \param id Slot
+            \param name Which name to get
+            \return name */
+        String_t getPlayerName(int id, Player::Name which) const;
+
         /** Notify listeners.
             Call eventually after modifying players.
             If any player has its change flag set, resets it and invokes sig_change. */

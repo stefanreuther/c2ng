@@ -5,6 +5,8 @@
 #define C2NG_GFX_TYPES_HPP
 
 #include "afl/base/types.hpp"
+#include "afl/string/string.hpp"
+#include "util/stringparser.hpp"
 
 namespace gfx {
 
@@ -69,6 +71,15 @@ namespace gfx {
         \param x,y Colors
         \return distance metric (lower is closer, 0 if x==y) */
     int32_t getColorDistance(gfx::ColorQuad_t x, gfx::ColorQuad_t y);
+
+    /** Parse a color.
+        Accepted color formats are similar to CSS colors:
+        - "#rgb", "#rgba", "#rrggbb", "#rrggbbaa"
+        - "rgb(r,g,b)", "rgb(r,g,b,a)", where the parameters are numbers from [0,255] or [0%,100%]
+        \param p [in/out] StringParser instance
+        \param result [out] Result of parse, if any
+        \return true on success, false on error */
+    bool parseColor(util::StringParser& p, gfx::ColorQuad_t& result);
 
 }
 

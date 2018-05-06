@@ -38,26 +38,9 @@ server::talk::ServerApplication::~ServerApplication()
 { }
 
 bool
-server::talk::ServerApplication::handleCommandLineOption(const String_t& option, afl::sys::CommandLineParser& /*parser*/)
+server::talk::ServerApplication::handleCommandLineOption(const String_t& /*option*/, afl::sys::CommandLineParser& /*parser*/)
 {
-    if (option == "help") {
-        using afl::string::Format;
-        afl::io::TextWriter& out = standardOutput();
-        out.writeLine(Format(_("PCC2 Talk Server v%s - (c) 2017-2018 Stefan Reuther").c_str(), PCC2_VERSION));
-        out.writeLine();
-        out.writeLine(Format(_("Usage:\n"
-                               "  %s [-options]\n\n"
-                               "Options:\n"
-                               "%s"
-                               "\n"
-                               "Report bugs to <Streu@gmx.de>").c_str(),
-                             environment().getInvocationName(),
-                             util::formatOptions(Application::getHelp())));
-        exit(0);
-        return true;
-    } else {
-        return false;
-    }
+    return false;
 }
 
 void
@@ -159,4 +142,16 @@ server::talk::ServerApplication::handleConfiguration(const String_t& key, const 
     } else {
         return false;
     }
+}
+
+String_t
+server::talk::ServerApplication::getApplicationName() const
+{
+    return afl::string::Format(_("PCC2 Talk Server v%s - (c) 2017-2018 Stefan Reuther").c_str(), PCC2_VERSION);
+}
+
+String_t
+server::talk::ServerApplication::getCommandLineOptionHelp() const
+{
+    return String_t();
 }

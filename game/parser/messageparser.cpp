@@ -45,6 +45,7 @@ namespace {
             if (scope != game::parser::MessageTemplate::sAny) {
                 String_t::size_type i = 1;
                 while (i < line.size() && line[i] >= '0' && line[i] <= '9') {
+                    // FIXME: overflow check
                     offset = 10*offset + line[i] - '0';
                     ++i;
                 }
@@ -62,7 +63,7 @@ namespace {
                 }
             }
         }
-        tpl.addCheckInstruction(opcode + scope, offset, line);
+        tpl.addCheckInstruction(uint8_t(opcode + scope), offset, line);
     }
 
     /** Check that the template so far is sensible and generate warnings.

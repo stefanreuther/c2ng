@@ -55,6 +55,7 @@ class TestUtilConfigurationFile : public CxxTest::TestSuite {
     void testMergePreserve();
     void testMergeNamespaced();
     void testRemove();
+    void testAdd();
 };
 
 class TestUtilConfigurationFileParser : public CxxTest::TestSuite {
@@ -69,6 +70,13 @@ class TestUtilConstantAnswerProvider : public CxxTest::TestSuite {
     void testNo();
 };
 
+class TestUtilDigest : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testStaticInstance();
+    void testDynamicType();
+};
+
 class TestUtilFileNamePattern : public CxxTest::TestSuite {
  public:
     void testIt();
@@ -81,6 +89,13 @@ class TestUtilFileNamePattern : public CxxTest::TestSuite {
 class TestUtilFileParser : public CxxTest::TestSuite {
  public:
     void testInterface();
+};
+
+class TestUtilInstructionList : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testReadInsnOnly();
+    void testAppend();
 };
 
 class TestUtilIo : public CxxTest::TestSuite {
@@ -216,6 +231,14 @@ class TestUtilString : public CxxTest::TestSuite {
     void testParsePlayer();
     void testFormatOptions();
     void testEncodeMimeHeader();
+    void testParseBoolean();
+};
+
+class TestUtilStringInstructionList : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testReadWrong();
+    void testSwap();
 };
 
 class TestUtilStringList : public CxxTest::TestSuite {
@@ -235,9 +258,16 @@ class TestUtilUnicodeChars : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestUtilUpdater : public CxxTest::TestSuite {
+ public:
+    void testTrue();
+    void testFalse();
+};
+
 class TestUtilstring : public CxxTest::TestSuite {
  public:
     void testFormatName();
+    void testEncodeHtml();
 };
 
 #endif

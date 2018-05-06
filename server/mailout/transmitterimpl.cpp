@@ -118,6 +118,10 @@ server::mailout::TransmitterImpl::TransmitterImpl(Root& root,
       m_data()
 {
     // ex Transmitter::Transmitter
+
+    // Logger
+    m_smtpClient.log().addListener(m_root.log());
+
     // Start worker thread
     m_thread.start();
 }
@@ -126,6 +130,8 @@ server::mailout::TransmitterImpl::~TransmitterImpl()
 {
     stop();
     m_thread.join();
+
+    m_smtpClient.log().removeListener(m_root.log());
 }
 
 // Send a message. Called after an element is added to the Sending queue.

@@ -4,6 +4,7 @@
 #ifndef C2NG_GAME_V3_SPECIFICATIONLOADER_HPP
 #define C2NG_GAME_V3_SPECIFICATIONLOADER_HPP
 
+#include <memory>
 #include "game/spec/shiplist.hpp"
 #include "afl/io/directory.hpp"
 #include "afl/charset/charset.hpp"
@@ -16,7 +17,8 @@ namespace game { namespace v3 {
 
     class SpecificationLoader : public game::SpecificationLoader {
      public:
-        SpecificationLoader(afl::charset::Charset& charset,
+        SpecificationLoader(afl::base::Ref<afl::io::Directory> dir,
+                            std::auto_ptr<afl::charset::Charset> charset,
                             afl::string::Translator& tx,
                             afl::sys::LogListener& log);
 
@@ -34,7 +36,8 @@ namespace game { namespace v3 {
         void loadMissions(game::spec::ShipList& list, afl::io::Directory& dir);
 
      private:
-        afl::charset::Charset& m_charset;
+        afl::base::Ref<afl::io::Directory> m_directory;
+        std::auto_ptr<afl::charset::Charset> m_charset;
         afl::string::Translator& m_translator;
         afl::sys::LogListener& m_log;
     };

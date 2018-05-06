@@ -237,10 +237,11 @@ void
 util::plugin::Plugin::initFromConfigFile(String_t baseDir, String_t pluginName, afl::io::Stream& file)
 {
     // ex resmgr/resmgrcf.cc:loadResourceConfig
+    // @change: we accept '#' as comment
     afl::io::TextFile tf(file);
     String_t line;
     while (tf.readLine(line)) {
-        String_t::size_type n = line.find(';');
+        String_t::size_type n = line.find_first_of(";#");
         if (n != line.npos) {
             line.erase(n);
         }

@@ -80,6 +80,11 @@ namespace interpreter {
             \param value Newly-allocated value */
         void setNewGlobalValue(const char* name, afl::data::Value* value);
 
+        /** Get a global value.
+            \param name Name of value
+            \return Value */
+        afl::data::Value* getGlobalValue(const char* name) const;
+
         /** Access global property names.
             \return global property names */
         afl::data::NameMap& globalPropertyNames();

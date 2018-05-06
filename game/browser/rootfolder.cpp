@@ -29,8 +29,24 @@ game::browser::RootFolder::loadContent(afl::container::PtrVector<Folder>& result
     }
 }
 
+bool
+game::browser::RootFolder::loadConfiguration(game::config::UserConfiguration& /*config*/)
+{
+    return false;
+}
+
+void
+game::browser::RootFolder::saveConfiguration(const game::config::UserConfiguration& /*config*/)
+{ }
+
+bool
+game::browser::RootFolder::setLocalDirectoryName(String_t /*directoryName*/)
+{
+    return false;
+}
+
 afl::base::Ptr<game::Root>
-game::browser::RootFolder::loadGameRoot()
+game::browser::RootFolder::loadGameRoot(const game::config::UserConfiguration& /*config*/)
 {
     // No game in root
     return 0;

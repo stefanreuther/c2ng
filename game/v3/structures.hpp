@@ -258,6 +258,13 @@ namespace game { namespace v3 { namespace structures {
     };
     static_assert(sizeof(Outbox35MessageHeader) == 16, "sizeof Outbox35MessageHeader");
 
+    /** Planet position (XYPLAN.DAT). */
+    struct PlanetXY {
+        Int16_t     x, y;                                       ///< Position.
+        Int16_t     owner;                                      ///< Owner (mostly unset).
+    };
+    static_assert(sizeof(PlanetXY) == 6, "sizeof PlanetXY");
+
     /** Planet. PDATA contains these. */
     struct Planet {
         Int16_t     owner;                                      ///< Planet owner.

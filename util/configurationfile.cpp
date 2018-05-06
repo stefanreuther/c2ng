@@ -1,11 +1,12 @@
 /**
   *  \file util/configurationfile.cpp
   *  \brief Class util::ConfigurationFile
+  *
+  *  This class adds new functionality over PCC2, and replaces the ConfigFileUpdater class.
   */
 
 #include "util/configurationfile.hpp"
 #include "afl/string/char.hpp"
-#include "afl/string/format.hpp"
 #include "util/stringparser.hpp"
 
 using afl::string::charIsSpace;
@@ -24,12 +25,20 @@ namespace {
 
 // Constructor.
 util::ConfigurationFile::ConfigurationFile()
-    : m_elements()
+    : m_elements(),
+      m_whitespaceIsSignificant(false)
 { }
 
 // Destructor.
 util::ConfigurationFile::~ConfigurationFile()
 { }
+
+// Set significance of whitespace in values.
+void
+util::ConfigurationFile::setWhitespaceIsSignificant(bool flag)
+{
+    m_whitespaceIsSignificant = flag;
+}
 
 // Load from file.
 void
@@ -68,7 +77,9 @@ util::ConfigurationFile::load(afl::io::TextReader& in)
             p.parseWhile(charIsNotSpaceOrEqual, key);
             p.parseWhile(charIsSpace, tmp);
             if (!key.empty() && p.parseCharacter('=')) {
-                p.parseWhile(charIsSpace, tmp);
+                if (!m_whitespaceIsSignificant) {
+                    p.parseWhile(charIsSpace, tmp);
+                }
                 m_elements.pushBackNew(new Element(Assignment, sectionPrefix + strUCase(key), prefix + line.substr(0, p.getPosition()), p.getRemainder()));
             } else {
                 m_elements.pushBackNew(new Element(Generic, String_t(), prefix + line, String_t()));
@@ -175,16 +186,62 @@ util::ConfigurationFile::set(String_t section, String_t key, String_t value)
     } else if (section.empty()) {
         // Inserting into nameless section
         size_t insertPosition = findSectionEnd(0);
-        m_elements.insertNew(m_elements.begin() + insertPosition, new Element(Assignment, assignmentKey, afl::string::Format("  %s = ", key), value));
+        insertAssignment(insertPosition, assignmentKey, key, value);
     } else {
         if (findIndex(Section, section).get(existingSection)) {
             // Section exists
             size_t insertPosition = findSectionEnd(existingSection + 1);
-            m_elements.insertNew(m_elements.begin() + insertPosition, new Element(Assignment, assignmentKey, afl::string::Format("  %s = ", key), value));
+            insertAssignment(insertPosition, assignmentKey, key, value);
         } else {
             // Section does not exist
             m_elements.pushBackNew(new Element(Section, ucSection, "% " + section, String_t()));
-            m_elements.pushBackNew(new Element(Assignment, assignmentKey, afl::string::Format("  %s = ", key), value));
+            insertAssignment(m_elements.size(), assignmentKey, key, value);
+        }
+    }
+}
+
+// Add single value.
+void
+util::ConfigurationFile::add(String_t key, String_t value)
+{
+    String_t::size_type dot = key.find('.');
+    if (dot != String_t::npos) {
+        add(key.substr(0, dot), key.substr(dot+1), value);
+    } else {
+        add(String_t(), key, value);
+    }
+}
+
+// Set single value, sectioned.
+void
+util::ConfigurationFile::add(String_t section, String_t key, String_t value)
+{
+    String_t ucSection = afl::string::strUCase(section);
+    String_t ucKey = afl::string::strUCase(key);
+
+    String_t assignmentKey = ucSection;
+    if (!assignmentKey.empty()) {
+        assignmentKey += ".";
+    }
+    assignmentKey += ucKey;
+
+    size_t existingPosition = 0;
+    if (findIndex(Assignment, assignmentKey).get(existingPosition)) {
+        // Value exists, add new value after it
+        insertAssignment(existingPosition + 1, assignmentKey, key, value);
+    } else if (section.empty()) {
+        // Inserting into nameless section
+        insertAssignment(findSectionEnd(0), assignmentKey, key, value);
+    } else {
+        size_t existingSection = 0;
+        if (findIndex(Section, section).get(existingSection)) {
+            // Section exists
+            size_t insertPosition = findSectionEnd(existingSection + 1);
+            insertAssignment(insertPosition, assignmentKey, key, value);
+        } else {
+            // Section does not exist
+            m_elements.pushBackNew(new Element(Section, ucSection, "% " + section, String_t()));
+            insertAssignment(m_elements.size(), assignmentKey, key, value);
         }
     }
 }
@@ -199,6 +256,25 @@ util::ConfigurationFile::remove(String_t key)
         return true;
     } else {
         return false;
+    }
+}
+
+// Add header comment.
+void
+util::ConfigurationFile::addHeaderComment(const String_t& comment, bool force)
+{
+    if (!m_elements.empty()) {
+        Element& firstElement = *m_elements[0];
+        String_t::size_type n = firstElement.prefix.rfind('\n');
+        if (n == String_t::npos) {
+            // No comment present. Add one.
+            firstElement.prefix = comment + "\n" + firstElement.prefix;
+        } else if (force) {
+            // Comment present, replace it
+            firstElement.prefix = comment + firstElement.prefix.substr(n);
+        } else {
+            // Comment present, keep it
+        }
     }
 }
 
@@ -253,4 +329,48 @@ util::ConfigurationFile::findSectionEnd(size_t startIndex) const
         ++startIndex;
     }
     return startIndex;
+}
+
+// Helper to insert an assignment
+void
+util::ConfigurationFile::insertAssignment(size_t insertPosition,
+                                          const String_t& assignmentKey,
+                                          const String_t& key,
+                                          const String_t& value)
+{
+    // Determine whitespace prefix
+    String_t line = "  ";
+    if (insertPosition > 0 && m_elements[insertPosition-1]->type == Assignment) {
+        const Element& ele = *m_elements[insertPosition-1];
+        size_t n = 0;
+        while (n < ele.prefix.size() && afl::string::charIsSpace(ele.prefix[n])) {
+            ++n;
+        }
+        line.assign(ele.prefix, 0, n);
+    }
+
+    // Key
+    line += key;
+
+    // Determine assignment syntax
+    if (m_whitespaceIsSignificant) {
+        line += "=";
+    } else {
+        line += " = ";
+    }
+
+    // Add it
+    m_elements.insertNew(m_elements.begin() + insertPosition, new Element(Assignment, assignmentKey, line, value));
+}
+
+// Check for assignments.
+bool
+util::ConfigurationFile::hasAssignments() const
+{
+    for (size_t i = 0, n = m_elements.size(); i < n; ++i) {
+        if (m_elements[i]->type == Assignment) {
+            return true;
+        }
+    }
+    return false;
 }

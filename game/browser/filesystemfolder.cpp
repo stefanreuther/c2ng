@@ -48,10 +48,29 @@ game::browser::FileSystemFolder::loadContent(afl::container::PtrVector<Folder>& 
     result.sort(sortFolders);
 }
 
-afl::base::Ptr<game::Root>
-game::browser::FileSystemFolder::loadGameRoot()
+bool
+game::browser::FileSystemFolder::loadConfiguration(game::config::UserConfiguration& config)
 {
-    return m_parent.loadGameRoot(m_directory);
+    config.loadGameConfiguration(*m_directory, m_parent.log(), m_parent.translator());
+    return true;
+}
+
+void
+game::browser::FileSystemFolder::saveConfiguration(const game::config::UserConfiguration& config)
+{
+    config.saveGameConfiguration(*m_directory, m_parent.log(), m_parent.translator());
+}
+
+bool
+game::browser::FileSystemFolder::setLocalDirectoryName(String_t /*directoryName*/)
+{
+    return false;
+}
+
+afl::base::Ptr<game::Root>
+game::browser::FileSystemFolder::loadGameRoot(const game::config::UserConfiguration& config)
+{
+    return m_parent.loadGameRoot(m_directory, config);
 }
 
 String_t

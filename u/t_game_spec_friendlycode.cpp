@@ -14,6 +14,7 @@
 #include "afl/string/nulltranslator.hpp"
 #include "game/map/configuration.hpp"
 #include "game/map/minefield.hpp"
+#include "game/spec/shiplist.hpp"
 
 /** Test friendly code constructors. */
 void
@@ -113,10 +114,12 @@ TestGameSpecFriendlyCode::testWorksOn()
         TS_ASSERT(fedFC.worksOn(p, config));
 
         const game::map::Object& obj = p;
-        TS_ASSERT(planetFC.worksOn(obj, config));
-        TS_ASSERT(!baseFC.worksOn(obj, config));
-        TS_ASSERT(!shipFC.worksOn(obj, config));
-        TS_ASSERT(fedFC.worksOn(obj, config));
+        const game::spec::ShipList shipList;
+        const game::UnitScoreDefinitionList scoreDefinitions;
+        TS_ASSERT(planetFC.worksOn(obj, scoreDefinitions, shipList, config));
+        TS_ASSERT(!baseFC.worksOn(obj, scoreDefinitions, shipList, config));
+        TS_ASSERT(!shipFC.worksOn(obj, scoreDefinitions, shipList, config));
+        TS_ASSERT(fedFC.worksOn(obj, scoreDefinitions, shipList, config));
     }
 
     // Lizard planet
@@ -157,12 +160,14 @@ TestGameSpecFriendlyCode::testWorksOn()
     // Minefield
     {
         game::map::Minefield m(90);
+        const game::spec::ShipList shipList;
+        const game::UnitScoreDefinitionList scoreDefinitions;
         m.addReport(game::map::Point(2000, 2000), 2, m.IsMine, m.RadiusKnown, 100, 5, m.MinefieldLaid);
         m.setPlayability(m.ReadOnly);
-        TS_ASSERT(!planetFC.worksOn(m, config));
-        TS_ASSERT(!baseFC.worksOn(m, config));
-        TS_ASSERT(!shipFC.worksOn(m, config));
-        TS_ASSERT(!fedFC.worksOn(m, config));
+        TS_ASSERT(!planetFC.worksOn(m, scoreDefinitions, shipList, config));
+        TS_ASSERT(!baseFC.worksOn(m, scoreDefinitions, shipList, config));
+        TS_ASSERT(!shipFC.worksOn(m, scoreDefinitions, shipList, config));
+        TS_ASSERT(!fedFC.worksOn(m, scoreDefinitions, shipList, config));
     }
 }
 

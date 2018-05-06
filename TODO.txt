@@ -23,7 +23,7 @@ ABILITIES/ADVANTAGES.
 - Map Nu advantages to racial abilities or configuration.
 
 LOCAL/NETWORK WORKSPLIT.
-- Set up complete game directories for network v3 games.
+- [DONE] Set up complete game directories for network v3 games.
 - Cache Nu history results locally.
 
 SERVERS.
@@ -33,6 +33,7 @@ SERVERS.
 MESSAGES. Can we integrate all messages (in-game messages, PMs, activities, forum, VCR, files) into one interface?
 - Make an interface that provides heading/text/parsed data/VCR.
 - Cannot load everything locally, only in-game messages.
+- .rss parser for update notifications?
 
 FILER NG.
 - [DONE] Use SHA-1 addressing (like git) for implicit deduplication.
@@ -81,6 +82,8 @@ FILER NG.
   . 982452k object data with git (du -sk)
 
 SDL2/ANDROID.
+- [DONE] Basic port done.
+- Touch events!
 
 
 Features
@@ -108,3 +111,14 @@ INTERPRETER REWORKS.
 SUPPORT 8-BPP.
 - Need to disable or tweak graphical effects. It's easy to saturate the GUI thread by just scrolling around
   on the main screen.
+- Do we still need this?
+
+
+CLEANUP
+========
+
+- client::widgets::BusyIndicator -> ui::widgets
+- client::Downlink -> ui::Downlink
+- client::dialogs::DirectorySelectionDialog -> ui::dialogs
+- util::RequestSender<T> should have a function RequestSender<U> createRelatedSender(Closure<U&(T&)>)
+- too much code is using _() for translation

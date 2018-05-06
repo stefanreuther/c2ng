@@ -160,6 +160,11 @@ namespace client { namespace si {
             - Failed: process failed using uncaught "Abort" or other error
             \param error Process error for state Failed */
         void handleWait(uint32_t id, interpreter::Process::State state, interpreter::Error error);
+
+        /** Create ContextProvider.
+            Calls the current Control's createContextProvider, if any.
+            \return newly-allocated ContextProvider object */
+        ContextProvider* createContextProvider();
         ///@}
 
         /*!

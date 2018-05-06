@@ -1,3 +1,214 @@
+2018-05-05  Stefan Reuther  <streu@gmx.de>
+
+	* game/map/movementpredictor.cpp, game/map/movementpredictor.hpp: new [ex game/movement.h]
+
+2018-05-03  Stefan Reuther  <streu@gmx.de>
+
+	* game/actions/changeshipfriendlycode.cpp, game/actions/changeshipfriendlycode.hpp: new [ex game/fleetfc.h]
+
+2018-04-30  Stefan Reuther  <streu@gmx.de>
+
+	* game/map/planeteffectors.cpp, game/map/planeteffectors.hpp: new [ex game/planetpred.h]
+	* game/map/planetpredictor.cpp, game/map/planetpredictor.hpp: new [ex game/planetpred.h]
+	* game/v3/registry.cpp, game/v3/registry.hpp: new [ex game/greg.h]
+
+2018-04-29  Stefan Reuther  <streu@gmx.de>
+
+	* client/tiles/shipcargotile.cpp, client/tiles/shipcargotile.hpp: new [ex client/tiles/shipcargo.h]
+	* client/tiles/shipmovementtile.cpp, client/tiles/shipmovementtile.hpp: new [ex client/tiles/shipmovement.h]
+	* client/widgets/simplegauge.cpp, client/widgets/simplegauge.hpp: new [ex client/tiles/shipcargo.h]
+	* game/map/chunnelmission.cpp, game/map/chunnelmission.hpp: new [ex game/ship-form.cc]
+	* ui/widgets/simpletable.cpp, ui/widgets/simpletable.hpp: new [ex ui/table.h]
+	* ui/widgets/textbutton.cpp, ui/widgets/textbutton.hpp: new
+	* util/updater.hpp: new
+
+2018-04-22  Stefan Reuther  <streu@gmx.de>
+
+	* server/file/directorypage.cpp, server/file/directorypage.hpp: new
+
+2018-04-21  Stefan Reuther  <streu@gmx.de>
+
+	* game/parser/format.cpp, game/parser/format.hpp: new
+	* client/dialogs/inboxdialog.cpp, client/dialogs/inboxdialog.hpp: new [ex client/dialogs/inboxdlg.h]
+
+2018-04-15  Stefan Reuther  <streu@gmx.de>
+
+	* client/widgets/messageactionpanel.cpp, client/widgets/messageactionpanel.hpp: new [ex client/widgets/msgaction.h]
+
+2018-04-14  Stefan Reuther  <streu@gmx.de>
+
+	* game/reference.cpp, game/reference.hpp: new
+	* game/msg/configuration.cpp, game/msg/configuration.hpp: new [ex game/msg-conf.cc, game/msg-filter.cc]
+
+2018-04-11  Stefan Reuther  <streu@gmx.de>
+
+	* game/shipquery.cpp, game/shipquery.hpp: new [ex game/shipquery.h]
+
+2018-04-08  Stefan Reuther  <streu@gmx.de>
+
+	* client/vcr/classic/interleavedscheduler.cpp, client/vcr/classic/interleavedscheduler.hpp: new
+
+2018-04-02  Stefan Reuther  <streu@gmx.de>
+
+	* gfx/scan.cpp, gfx/scan.hpp: new [ex gfx/pixmap.cc]
+
+2018-04-01  Stefan Reuther  <streu@gmx.de>
+
+	* client/vcr/classic/event.hpp: new [ex client/vcr/classicplaybackscreen.hpp]
+	* client/vcr/classic/eventconsumer.hpp: new [ex client/vcr/classicplaybackscreen.hpp]
+	* client/vcr/classic/playbackscreen.cpp, client/vcr/classic/playbackscreen.hpp: new [ex client/vcr/classicplaybackscreen.hpp]
+	* client/vcr/classic/scheduler.hpp: new [ex client/vcr/classicplaybackscreen.hpp]
+	* client/vcr/classic/standardscheduler.cpp, client/vcr/classic/standardscheduler.hpp: new [ex client/vcr/classicplaybackscreen.hpp]
+	* client/vcr/classic/traditionalscheduler.cpp, client/vcr/classic/traditionalscheduler.hpp: new [ex client/vcr/classicplaybackscreen.hpp]
+
+2018-03-31  Stefan Reuther  <streu@gmx.de>
+
+	* util/syntax/lisphighlighter.cpp, util/syntax/lisphighlighter.hpp: new
+	* client/vcr/classic/renderer.cpp, client/vcr/classic/renderer.hpp: new
+	* client/vcr/classic/player.cpp, client/vcr/classic/player.hpp: new
+
+2018-03-29  Stefan Reuther  <streu@gmx.de>
+
+	* gfx/gen/colorrange.cpp, gfx/gen/colorrange.hpp: new
+	* gfx/gen/texture.cpp, gfx/gen/texture.hpp: new
+
+2018-03-25  Stefan Reuther  <streu@gmx.de>
+
+	* gfx/types.cpp (parseColor): new
+	* client/vcr/playbackcontrolwidget.cpp, client/vcr/playbackcontrolwidget.hpp: new [ex client/vcrvis.h]
+	* client/vcr/unitstatuswidget.cpp, client/vcr/unitstatuswidget.hpp: new [ex client/vcrvis.h]
+	* ui/res/winplanvcrprovider.cpp, ui/res/winplanvcrprovider.hpp: new [ex resmgr/res-wpvcr.h]
+
+2018-03-24  Stefan Reuther  <streu@gmx.de>
+
+	* gfx/windowparameters.hpp: new
+	* gfx/engine.hpp, ui/root.hpp: implement window parameters (title, icon)
+
+2018-03-22  Stefan Reuther  <streu@gmx.de>
+
+	* gfx/gen/shieldrenderer.cpp, gfx/gen/shieldrenderer.hpp: new [ex client/vcranim.h]
+
+2018-03-20  Stefan Reuther  <streu@gmx.de>
+
+	* gfx/gen/explosionrenderer.cpp, gfx/gen/explosionrenderer.hpp: new [ex client/vcranim.h]
+	* gfx/gen/particlerenderer.cpp, gfx/gen/particlerenderer.hpp: new [ex client/vcranim.h]
+
+2018-03-18  Stefan Reuther  <streu@gmx.de>
+
+	* client/vcr/beamsprite.cpp, client/vcr/beamsprite.hpp: new [ex client/vcranim.h]
+	* client/vcr/torpedosprite.cpp, client/vcr/torpedosprite.hpp: new [ex client/vcranim.h]
+
+2018-03-12  Stefan Reuther  <streu@gmx.de>
+
+	* game/vcr/classic/mirroringeventlistener.cpp, game/vcr/classic/mirroringeventlistener.hpp: new
+
+2018-03-11  Stefan Reuther  <streu@gmx.de>
+
+	* util/syntax/pascalhighlighter.cpp, util/syntax/pascalhighlighter.hpp: new
+
+2018-03-10  Stefan Reuther  <streu@gmx.de>
+
+	* client/vcr/classicplaybackscreen.cpp, client/vcr/classicplaybackscreen.hpp: new [totally incomplete]
+	* game/vcr/classic/eventlistener.hpp: new
+	* game/vcr/classic/eventrecorder.cpp, game/vcr/classic/eventrecorder.hpp: new
+	* game/vcr/classic/eventvisualizer.cpp, game/vcr/classic/eventvisualizer.hpp: new
+	* game/vcr/classic/utils.cpp, game/vcr/classic/utils.hpp: new
+	* gfx/anim/pixmapsprite.cpp, gfx/anim/pixmapsprite.hpp: new [ex gfx/sprite3d.h]
+	* ui/widgets/spritewidget.cpp, ui/widgets/spritewidget.hpp: new
+	* util/instructionlist.cpp, util/instructionlist.hpp: new
+	* util/stringinstructionlist.cpp, util/stringinstructionlist.hpp: new
+
+2018-03-07  Stefan Reuther  <streu@gmx.de>
+
+	* game/vcr/overview.hpp: new [ex client/dialogs/combatdiagram.h]
+
+2018-03-06  Stefan Reuther  <streu@gmx.de>
+
+	* game/vcr/classic/visualizer.hpp: clean up visualisation
+	* game/vcr/classic/hostalgorithm.cpp: clean up visualisation
+	* game/vcr/classic/pvcralgorithm.cpp: clean up visualisation
+
+2018-03-04  Stefan Reuther  <streu@gmx.de>
+
+	* gfx/anim/controller.cpp, gfx/anim/controller.hpp: new [ex gfx/sprite3d.h]
+	* gfx/anim/sprite.cpp, gfx/anim/sprite.hpp: new [ex gfx/sprite3d.h]
+	* client/dialogs/classicvcrdialog.cpp, client/dialogs/classicvcrdialog.hpp: new [ex client/vcrplay.h]
+	* client/widgets/classicvcrinfo.cpp, client/widgets/classicvcrinfo.hpp: new [ex client/vcrplay.h]
+
+2018-03-01  Stefan Reuther  <streu@gmx.de>
+
+	* game/interface/completionlist.cpp, game/interface/completionlist.hpp: new [ex client/dialogs/consoledlg.h]
+
+2018-02-25  Stefan Reuther  <streu@gmx.de>
+
+	* gfx/application.cpp, gfx/application.hpp: new
+	* gfx/gen/orbitconfig.cpp, gfx/gen/orbitconfig.hpp: new
+	* gfx/sdl2/engine.cpp, gfx/sdl2/engine.hpp: new
+	* gfx/sdl2/nullpresenter.cpp, gfx/sdl2/nullpresenter.hpp: new
+	* gfx/sdl2/presenter.hpp: new
+	* gfx/sdl2/streaminterface.cpp, gfx/sdl2/streaminterface.hpp: new
+	* gfx/sdl2/surface.cpp, gfx/sdl2/surface.hpp: new
+	* ui/pixmapcolorscheme.cpp, ui/pixmapcolorscheme.hpp: new
+	* ui/widgets/panel.cpp, ui/widgets/panel.hpp: new
+
+2018-02-24  Stefan Reuther  <streu@gmx.de>
+
+	* client/dialogs/directoryselectiondialog.cpp, client/dialogs/directoryselectiondialog.hpp: new
+	* client/imageloader.cpp, client/imageloader.hpp: new
+	* server/file/utils.cpp (copyDirectory): add ability to unpack tarballs
+	* util/directorybrowser.cpp, util/directorybrowser.hpp: new
+
+2018-02-18  Stefan Reuther  <streu@gmx.de>
+
+	* game/browser/folder.hpp: folder assignment, first version
+	* ui/widgets/standarddialogbuttons.cpp, ui/widgets/standarddialogbuttons.hpp: new
+
+2018-02-17  Stefan Reuther  <streu@gmx.de>
+
+	* client/dialogs/folderconfigdialog.cpp, client/dialogs/folderconfigdialog.hpp: new
+	* client/downlink.cpp, client/downlink.hpp: new
+	* ui/widgets/menuframe.cpp, ui/widgets/menuframe.hpp: new [ex ui/listbox.h]
+
+2018-02-13  Stefan Reuther  <streu@gmx.de>
+
+	* game/root.hpp: report possible actions
+
+2018-02-11  Stefan Reuther  <streu@gmx.de>
+
+	* game/browser/browser.hpp, game/browser/folder.hpp: add ability to configure a game
+	* ui/root.cpp (performDeferredRedraws): handle that a widget requests redraw while being redrawn
+	* ui/widgets/optiongrid.cpp, ui/widgets/optiongrid.hpp: new [ex client/widgets/optiongrid.h]
+
+2018-02-10  Stefan Reuther  <streu@gmx.de>
+
+	* game/v3/check/configuration.cpp, game/v3/check/configuration.hpp: new
+
+2018-02-03  Stefan Reuther  <streu@gmx.de>
+
+	* tools/c2check.cpp: new [ex check.pas]
+	* game/v3/check/application.cpp, game/v3/check/application.hpp: new [ex check.pas]
+	* game/v3/check/checker.cpp, game/v3/check/checker.hpp: new [ex check.pas]
+
+2018-01-29  Stefan Reuther  <streu@gmx.de>
+
+	* game/v3/trn/turnprocessor.cpp, game/v3/trn/turnprocessor.hpp: new
+	* server/host/configuration.hpp, server/host/game.cpp: implement "UsersSeeTemporaryTurns" option [#367]
+
+2018-01-27  Stefan Reuther  <streu@gmx.de>
+
+	* game/root.cpp: no longer contains a specification directory, as we may not even have one in network games
+
+2018-01-25  Stefan Reuther  <streu@gmx.de>
+
+	* game/v3/outboxreader.cpp: player 0 (not 12) means host to be able to support >11 players
+	* tools/c2mgrep.cpp, game/playerset.cpp: correctly show receiver of messages to host
+
+2018-01-23  Stefan Reuther  <streu@gmx.de>
+
+	* util/digest.cpp, util/digest.hpp: new [ex game/check-crc.cc]
+
+	-------------------- c2ng_2_40_3 (Milestone 3, version 2.40.3)
+
 2018-01-21  Stefan Reuther  <streu@gmx.de>
 
 	* scripts/doc.pl, P9/02_manual.pr: new

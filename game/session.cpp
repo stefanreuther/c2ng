@@ -47,8 +47,11 @@
 #include "interpreter/values.hpp"
 #include "game/interface/explosionfunction.hpp"
 #include "game/interface/commandinterface.hpp"
+#include "game/map/object.hpp"
 
 namespace {
+    using afl::string::Format;
+
     /** Maximum number of user files. */
     const size_t MAX_SCRIPT_FILES = 101;
 
@@ -259,6 +262,84 @@ game::Session::notifyListeners()
         g->notifyListeners();
     }
     m_world.notifyListeners();
+}
+
+bool
+game::Session::getReferenceName(Reference ref, String_t& result)
+{
+    // ex PCC1.x ThingName
+    // FIXME: can we find a better location for this function
+    // FIXME: cannot currently be const because InterpreterInterface is not const
+    switch (ref.getType()) {
+     case Reference::Null:
+        return false;
+
+     case Reference::Player:
+        // Report reference name plus player name
+        result = ref.toString(m_translator);
+        if (Root* r = m_root.get()) {
+            if (const Player* p = r->playerList().get(ref.getId())) {
+                result += ": ";
+                result += p->getName(Player::ShortName);
+            }
+        }
+        return true;
+ 
+     case Reference::MapLocation:
+        // Reference name is good enough.
+        result = ref.toString(m_translator);
+        return true;
+
+     case Reference::Ship:
+     case Reference::Planet:
+     case Reference::Starbase:
+     case Reference::Storm:
+        // Report the reference name plus object's name, if any.
+        // This allows a starbase reference to be shown as "Starbase #123: Melmac".
+        result = ref.toString(m_translator);
+        if (Game* g = m_game.get()) {
+            if (Turn* t = g->getViewpointTurn().get()) {
+                if (const game::map::Object* obj = t->universe().getObject(ref)) {
+                    String_t objName = obj->getName(game::map::Object::PlainName, m_translator, *this);
+                    if (!objName.empty()) {
+                        result += ": ";
+                        result += objName;
+                    }
+                }
+            }
+        }
+        return true;
+        
+     case Reference::Minefield:
+     case Reference::Ufo:
+        // Report the object's name if we can.
+        // This allows a minefield to be shown with the correct type,
+        // an Ufo with the correct Id.
+        result = ref.toString(m_translator);
+        if (Game* g = m_game.get()) {
+            if (Turn* t = g->getViewpointTurn().get()) {
+                if (const game::map::Object* obj = t->universe().getObject(ref)) {
+                    result = obj->getName(game::map::Object::LongName, m_translator, *this);
+                }
+            }
+        }
+        return true;
+
+     case Reference::Hull:
+     case Reference::Engine:
+     case Reference::Beam:
+     case Reference::Torpedo:
+        // Report the reference name plus component name.
+        result = ref.toString(m_translator);
+        if (game::spec::ShipList* shipList = m_shipList.get()) {
+            if (const game::spec::Component* p = shipList->getComponent(ref)) {
+                result += ": ";
+                result += p->getName(shipList->componentNamer());
+            }
+        }
+        return true;
+    }
+    return false;
 }
 
 afl::data::Value*

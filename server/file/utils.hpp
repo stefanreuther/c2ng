@@ -7,10 +7,18 @@
 
 #include <vector>
 #include "server/file/directoryhandler.hpp"
+#include "afl/bits/smallset.hpp"
 
 namespace server { namespace file {
 
     typedef std::vector<DirectoryHandler::Info> InfoVector_t;
+
+    enum CopyFlag {
+        CopyRecursively,
+        CopyExpandTarballs
+    };
+    typedef afl::bits::SmallSet<CopyFlag> CopyFlags_t;
+
 
 
     /** List a directory.
@@ -27,10 +35,10 @@ namespace server { namespace file {
 
         \param out Target directory
         \param in Source directory
-        \param recursive true for recursive copy
+        \param flags options
 
         \throw afl::except::FileProblemException on error */
-    void copyDirectory(DirectoryHandler& out, DirectoryHandler& in, bool recursive);
+    void copyDirectory(DirectoryHandler& out, DirectoryHandler& in, CopyFlags_t flags);
 
 
     /** Remove a directory's content.

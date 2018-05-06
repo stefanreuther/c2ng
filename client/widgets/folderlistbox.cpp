@@ -62,9 +62,12 @@ client::widgets::FolderListbox::drawItem(gfx::Canvas& can, gfx::Rectangle area, 
     ui::prepareHighContrastListItem(ctx, area, state);
     if (pItem != 0) {
         gfx::Rectangle imageArea = area.splitX(20);
-        if (m_icons.get() != 0) {
-            gfx::Point anchor(16 * (pItem->icon % 2), 16 * (pItem->icon / 2));
-            can.blit(imageArea.getTopLeft() - anchor, *m_icons, gfx::Rectangle(anchor, gfx::Point(16, 16)));
+        if (pItem->icon != iNone && m_icons.get() != 0) {
+            // The "files" image has rows of 2 icons of 16x16 each
+            int iconIndex = pItem->icon - 1;
+            int iconSize = 16;
+            gfx::Point anchor(iconSize * (iconIndex % 2), iconSize * (iconIndex / 2));
+            can.blit(imageArea.getTopLeft() - anchor, *m_icons, gfx::Rectangle(anchor, gfx::Point(iconSize, iconSize)));
         }
         outText(ctx, area.getTopLeft(), pItem->name);
     }

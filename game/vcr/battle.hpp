@@ -8,6 +8,7 @@
 #include "afl/string/translator.hpp"
 #include "game/config/hostconfiguration.hpp"
 #include "game/spec/shiplist.hpp"
+#include "game/playerlist.hpp"
 
 namespace game { namespace vcr {
 
@@ -65,6 +66,13 @@ namespace game { namespace vcr {
 
         /** Check whether Engine/Shield Bonus is active in this fight. */
         virtual bool isESBActive(const game::config::HostConfiguration& config) const = 0;
+
+
+        /*
+         *  Useful methods
+         */
+
+        String_t getDescription(const game::PlayerList& players, afl::string::Translator& tx);
     };
 
 } }

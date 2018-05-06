@@ -292,11 +292,7 @@ game::interface::getVcrSideProperty(game::vcr::Battle& battle, size_t side, VcrS
         /* @q Owner.Adj:Str (Combat Participant Property)
            @q Left.Owner.Adj:Str (Combat Property), Right.Owner.Adj:Str (Combat Property)
            Adjective name of this player. */
-        if (Player* pl = players.get(obj->getOwner())) {
-            return makeStringValue(pl->getName(Player::AdjectiveName));
-        } else {
-            return 0;
-        }
+        return makeStringValue(players.getPlayerName(obj->getOwner(), Player::AdjectiveName));
      case ivsOwnerId:
         /* @q Owner$:Int (Combat Participant Property)
            @q Left.Owner$:Int (Combat Property), Right.Owner$:Int (Combat Property)
@@ -306,11 +302,7 @@ game::interface::getVcrSideProperty(game::vcr::Battle& battle, size_t side, VcrS
         /* @q Owner:Str (Combat Participant Property)
            @q Left.Owner:Str (Combat Property), Right.Owner:Str (Combat Property)
            Short name of this player. */
-        if (Player* pl = players.get(obj->getOwner())) {
-            return makeStringValue(pl->getName(Player::ShortName));
-        } else {
-            return 0;
-        }
+        return makeStringValue(players.getPlayerName(obj->getOwner(), Player::ShortName));
      case ivsShield:
         /* @q Shield:Int (Combat Participant Property)
            @q Left.Shield:Int (Combat Property), Right.Shield:Int (Combat Property)

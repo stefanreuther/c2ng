@@ -6,11 +6,77 @@
 #include "game/config/configurationparser.hpp"
 #include "afl/charset/utf8charset.hpp"
 #include "afl/string/format.hpp"
+#include "game/config/booleanvalueparser.hpp"
+#include "afl/io/textfile.hpp"
 
 namespace {
     const char PCC2_INI[] = "pcc2.ini";
     const char LOG_NAME[] = "game.config.user";
+
+    typedef afl::bits::SmallSet<game::config::ConfigurationOption::Source> Sources_t;
+
+    void saveConfiguration(afl::io::Stream& out, const game::config::Configuration& in, Sources_t sources)
+    {
+        // FIXME: this function should probably in a more generic place.
+        // We are more aggressive overwriting config files than PCC2.
+        // Whereas PCC2 only updates known keys, we load all keys, so we can rewrite the files.
+        // However, this will lose comments and formatting.
+
+        // Text file
+        afl::io::TextFile tf(out);
+        tf.setCharsetNew(new afl::charset::Utf8Charset());
+
+        // Iterate
+        afl::base::Ref<game::config::Configuration::Enumerator_t> opts = in.getOptions();
+        game::config::Configuration::OptionInfo_t opt;
+        while (opts->getNextElement(opt)) {
+            if (opt.second != 0 && sources.contains(opt.second->getSource())) {
+                tf.writeLine(opt.first + " = " + opt.second->toString());
+            }
+        }
+
+        // Finish
+        tf.flush();
+    }    
 }
+
+const game::config::StringOptionDescriptor  game::config::UserConfiguration::Game_Charset = {
+    "Game.Charset"
+};
+const game::config::StringOptionDescriptor  game::config::UserConfiguration::Game_Type = {
+    "Game.Type"
+};
+const game::config::StringOptionDescriptor  game::config::UserConfiguration::Game_User = {
+    "Game.User"
+};
+const game::config::StringOptionDescriptor  game::config::UserConfiguration::Game_Host = {
+    "Game.Host"
+};
+const game::config::StringOptionDescriptor  game::config::UserConfiguration::Game_Id = {
+    "Game.Id"
+};
+const game::config::IntegerOptionDescriptor game::config::UserConfiguration::Game_Finished = {
+    "Game.Finished",
+    &BooleanValueParser::instance
+};
+const game::config::IntegerOptionDescriptor game::config::UserConfiguration::Game_ReadOnly = {
+    "Game.ReadOnly",
+    &BooleanValueParser::instance
+};
+const game::config::IntegerOptionDescriptor game::config::UserConfiguration::Game_AccessHostFiles = {
+    "Game.AccessHostFiles",
+    &BooleanValueParser::instance
+};
+
+const game::config::IntegerOptionDescriptor game::config::UserConfiguration::Display_ThousandsSep = {
+    "Display.ThousandsSep",
+    &BooleanValueParser::instance
+};
+const game::config::IntegerOptionDescriptor game::config::UserConfiguration::Display_Clans = {
+    "Display.Clans",
+    &BooleanValueParser::instance
+};
+
 
 // FIXME: port these...
 // ConfigStringOption opt_BackupTurn    (getUserPreferences(), "Backup.Turn");
@@ -34,6 +100,7 @@ void
 game::config::UserConfiguration::setDefaultValues()
 {
     // ex GUserPreferences::assignDefaults
+    UserConfiguration& me = *this;
 //     : CollapseOldMessages(*this, "Messages.CollapseOld", ValueBoolParser::instance),
 //       RewrapMessages(*this, "Messages.RewrapInbox", ValueBoolParser::instance),
 //       InstantBattleResult(*this, "VCR.InstantResult", ValueBoolParser::instance),
@@ -48,8 +115,6 @@ game::config::UserConfiguration::setDefaultValues()
 //       ChartMouseStickiness(*this, "Chart.MouseStickiness", ValueIntParser::instance),
 //       ChartScannerWarpWells(*this, "Chart.Scanner.WarpWells", ValueBoolParser::instance),
 //       TeamAutoSync(*this, "Team.AutoSync", ValueBoolParser::instance),
-//       DisplayThousandSep(*this, "Display.ThousandsSep", ValueBoolParser::instance),
-//       DisplayClans(*this, "Display.Clans", ValueBoolParser::instance),
 //       ExportShipFields(*this, "Export.ShipFields"),
 //       ExportPlanetFields(*this, "Export.PlanetFields")
 
@@ -70,11 +135,12 @@ game::config::UserConfiguration::setDefaultValues()
 
 //     TeamAutoSync.set(1);
 
-//     DisplayThousandSep.set(1);
-//     DisplayClans.set(0);
+    me[Display_ThousandsSep].set(1);
+    me[Display_Clans].set(0);
 
 //     ExportShipFields.set("Id@5,Name@20");
 //     ExportPlanetFields.set("Id@5,Name@20");
+    markAllOptionsUnset();
 }
 
 void
@@ -116,4 +182,50 @@ game::config::UserConfiguration::loadGameConfiguration(afl::io::Directory& dir, 
         parser.setCharsetNew(new afl::charset::Utf8Charset());
         parser.parseFile(*stream);
     }
+}
+
+void
+game::config::UserConfiguration::saveGameConfiguration(afl::io::Directory& dir, afl::sys::LogListener& log, afl::string::Translator& tx) const
+{
+    afl::base::Ptr<afl::io::Stream> stream = dir.openFileNT(PCC2_INI, afl::io::FileSystem::Create);
+    if (stream.get() != 0) {
+        log.write(log.Debug, LOG_NAME, afl::string::Format(tx.translateString("Writing configuration to %s...").c_str(), stream->getName()));
+        saveConfiguration(*stream, *this, Sources_t(ConfigurationOption::Game));
+    }
+}
+
+String_t
+game::config::UserConfiguration::getGameType() const
+{
+    if (const ConfigurationOption* p = getOptionByName(Game_Type.m_name)) {
+        return p->toString();
+    } else {
+        return String_t();
+    }
+}
+
+String_t
+game::config::UserConfiguration::formatNumber(int32_t n) const
+{
+    // ex numToString
+    String_t result = afl::string::Format("%d", n);
+    if ((*this)[Display_ThousandsSep]()) {
+        // The limit is to avoid placing a thousands-separator as "-,234"
+        size_t i = result.size();
+        size_t limit = (i > 0 && (result[0] < '0' || result[0] > '9')) ? 4 : 3;
+        while (i > limit) {
+            i -= 3;
+            result.insert(i, ",");
+        }
+    }
+    return result;
+}
+
+String_t
+game::config::UserConfiguration::formatPopulation(int32_t n) const
+{
+    // ex clansToString
+    return ((*this)[Display_Clans]()
+            ? formatNumber(n) + "c"
+            : formatNumber(100*n));
 }

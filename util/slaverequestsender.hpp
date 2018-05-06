@@ -34,7 +34,7 @@ namespace util {
         typedef SlaveRequest<ObjectType,SlaveType> SlaveRequest_t;
 
         /** Constructor.
-            Makes a SlaveRequestSender that executes SlaveRequest<ObjectType,SlaveTyoe>.
+            Makes a SlaveRequestSender that executes SlaveRequest<ObjectType,SlaveType>.
             Constructing the SlaveRequestSender will eventually cause SlaveObject::init() to be executed
             before the first request is handled.
 

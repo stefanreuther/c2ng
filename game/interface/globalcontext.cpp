@@ -113,7 +113,7 @@ namespace {
         // ex int/if/globalif.cc:lookupGlobalProperty
         afl::data::NameMap::Index_t ix = session.world().globalPropertyNames().getIndexByName(name);
         if (ix != afl::data::NameMap::nil) {
-            result = ix + NUM_GLOBAL_PROPERTIES;
+            result = static_cast<interpreter::Context::PropertyIndex_t>(ix + NUM_GLOBAL_PROPERTIES);
             return true;
         }
 

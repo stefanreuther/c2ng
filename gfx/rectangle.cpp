@@ -162,25 +162,16 @@ gfx::Rectangle::moveTo(Point where) throw()
     return movedBy;
 }
 
-// FIXME: remove
-// /** Move this rectangle such that it is contained within \c other.
-//     Does not change our size. */
-// void
-// Rectangle::moveInto(const Rectangle& other) throw()
-// {
-//     if (m_left < other.m_left)
-//         m_left = other.m_left;
-//     if (m_top < other.m_top)
-//         m_top = other.m_top;
-
-//     int avail_x = other.m_left + other.m_width - m_left;
-//     if (avail_x < m_width)
-//         m_left = other.m_left + other.m_width - m_width;
-
-//     int avail_y = other.m_top + other.m_height - m_top;
-//     if (avail_y < m_height)
-//         m_top = other.m_top + other.m_height - m_height;
-// }
+// Move this rectangle such that it is contained within \c other.
+void
+gfx::Rectangle::moveIntoRectangle(const Rectangle& other) throw()
+{
+    // ex Rectangle::moveInto
+    m_left = std::min(m_left, other.m_left + other.m_width  - m_width);
+    m_top  = std::min(m_top,  other.m_top  + other.m_height - m_height);
+    m_left = std::max(m_left, other.m_left);
+    m_top  = std::max(m_top,  other.m_top);
+}
 
 // Center this rectangle within another.
 void

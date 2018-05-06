@@ -7,6 +7,11 @@
 
 #include <cxxtest/TestSuite.h>
 
+class TestClientDownlink : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
 class TestClientObjectCursorFactory : public CxxTest::TestSuite {
  public:
     void testIt();

@@ -74,7 +74,7 @@ ConsoleSweepApplication::appMain()
                 params.opt_verbose = true;
             } else if (p == "a") {
                 params.selectedPlayers = game::PlayerSet_t::allUpTo(MAX_PLAYERS);
-            } else if (p == "h") {
+            } else if (p == "h" || p == "help") {
                 help(standardOutput());
             } else {
                 errorExit(afl::string::Format(_("invalid option specified. Use \"%s -h\" for help").c_str(), environment().getInvocationName()));
@@ -153,6 +153,7 @@ ConsoleSweepApplication::help(afl::io::TextWriter& out)
                                         "  -x       Increase verbosity\n"
                                         "\n"
                                         "Report bugs to <Streu@gmx.de>").c_str(), environment().getInvocationName()));
+    exit(0);
 }
 
 int main(int /*argc*/, char** argv)

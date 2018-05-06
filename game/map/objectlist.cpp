@@ -1,5 +1,7 @@
 /**
   *  \file game/map/objectlist.cpp
+  *
+  *  FIXME: do we need this?
   */
 
 #include "game/map/objectlist.hpp"

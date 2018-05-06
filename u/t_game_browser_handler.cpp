@@ -17,7 +17,7 @@ TestGameBrowserHandler::testIt()
             { return false; }
         virtual game::browser::Folder* createAccountFolder(game::browser::Account& /*acc*/)
             { return 0; }
-        virtual afl::base::Ptr<game::Root> loadGameRoot(afl::base::Ref<afl::io::Directory> /*dir*/)
+        virtual afl::base::Ptr<game::Root> loadGameRoot(afl::base::Ref<afl::io::Directory> /*dir*/, const game::config::UserConfiguration& /*config*/)
             { return 0; }
     };
     Tester t;

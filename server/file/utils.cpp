@@ -6,6 +6,11 @@
 #include <memory>
 #include "server/file/utils.hpp"
 #include "afl/except/fileproblemexception.hpp"
+#include "afl/io/archive/tarreader.hpp"
+#include "afl/io/constmemorystream.hpp"
+#include "afl/io/directoryentry.hpp"
+#include "afl/io/inflatetransform.hpp"
+#include "afl/io/transformreaderstream.hpp"
 #include "server/errors.hpp"
 #include "server/file/directoryhandler.hpp"
 
@@ -17,6 +22,26 @@ namespace {
         bool operator()(const DirectoryHandler::Info& a, const DirectoryHandler::Info& b)
             { return a.name < b.name; }
     };
+
+    /** Split extension off a file name.
+        \param fullName [in] Full file name (without directory etc.)
+        \param ext      [in] Expected extension
+        \param baseName [out] Basename
+        \retval true Extension matched, baseName has been set
+        \retval false Extension did not match */
+    bool splitExtension(const String_t& fullName, const char* ext, String_t& baseName)
+    {
+        // FIXME: duplicated in server/host/exporter.cpp
+        size_t n = std::strlen(ext);
+        if (fullName.size() > n) {
+            size_t splitPoint = fullName.size() - n;
+            if (fullName.compare(splitPoint, n, ext, n) == 0) {
+                baseName.assign(fullName, 0, splitPoint);
+                return true;
+            }
+        }
+        return false;
+    }
 
     /** Copy a file.
         \param out Output directory
@@ -49,7 +74,7 @@ namespace {
          case DirectoryHandler::IsDirectory: {
             std::auto_ptr<DirectoryHandler> outHandler(out.getDirectory(out.createDirectory(inChild.name)));
             std::auto_ptr<DirectoryHandler> inHandler(in.getDirectory(inChild));
-            copyDirectory(*outHandler, *inHandler, true);
+            copyDirectory(*outHandler, *inHandler, server::file::CopyFlags_t(server::file::CopyRecursively));
             break;
          }
         }
@@ -79,6 +104,33 @@ namespace {
          }
         }
     }
+
+    void copyTarball(DirectoryHandler& out, DirectoryHandler& in, const DirectoryHandler::Info& inChild, const String_t& outName)
+    {
+        // Get input file content
+        afl::base::Ref<afl::io::FileMapping> inMapping = in.getFile(inChild);
+        afl::io::ConstMemoryStream inStream(inMapping->get());
+
+        // Set up for reading a tarball
+        afl::io::InflateTransform tx(afl::io::InflateTransform::Gzip);
+        afl::base::Ref<afl::io::Stream> reader(*new afl::io::TransformReaderStream(inStream, tx));
+        afl::base::Ref<afl::io::Directory> dir(afl::io::archive::TarReader::open(reader, 0));
+
+        // Create directory
+        std::auto_ptr<server::file::DirectoryHandler> target(out.getDirectory(out.createDirectory(outName)));
+
+        // Copy content, one-by-one, but in lock-step order.
+        // This is required to allow reading a .tar.gz (which does not support random access) on-the-fly.
+        afl::base::Ref<afl::base::Enumerator<afl::base::Ptr<afl::io::DirectoryEntry> > > tarballContent(dir->getDirectoryEntries());
+        afl::base::Ptr<afl::io::DirectoryEntry> tarballEle;
+        while (tarballContent->getNextElement(tarballEle) && tarballEle.get() != 0) {
+            if (tarballEle->getFileType() == afl::io::DirectoryEntry::tFile) {
+                // Use a virtual file mapping. This gives maximum possiblities to avoid copying.
+                afl::base::Ref<afl::io::FileMapping> content = tarballEle->openFile(afl::io::FileSystem::OpenRead)->createVirtualMapping();
+                target->createFile(tarballEle->getTitle(), content->get());
+            }
+        }
+    }
 }
 
 
@@ -105,7 +157,7 @@ server::file::listDirectory(InfoVector_t& out, DirectoryHandler& dir)
 
 // Copy a directory or directory tree.
 void
-server::file::copyDirectory(DirectoryHandler& out, DirectoryHandler& in, bool recursive)
+server::file::copyDirectory(DirectoryHandler& out, DirectoryHandler& in, CopyFlags_t flags)
 {
     // Read content
     InfoVector_t inChildren;
@@ -122,14 +174,25 @@ server::file::copyDirectory(DirectoryHandler& out, DirectoryHandler& in, bool re
             // Ignore unknown
             break;
 
-         case DirectoryHandler::IsFile:
+         case DirectoryHandler::IsFile: {
             // Copy file
-            copyFile(out, in, ch);
+            String_t elementBaseName;
+            if (flags.contains(CopyExpandTarballs)
+                && (splitExtension(ch.name, ".tar.gz", elementBaseName)
+                    || splitExtension(ch.name, ".tgz", elementBaseName)))
+            {
+                // Compressed file
+                copyTarball(out, in, ch, elementBaseName);
+            } else {
+                // Normal file
+                copyFile(out, in, ch);
+            }
             break;
+         }
 
          case DirectoryHandler::IsDirectory:
             // Recursively copy directory if desired
-            if (recursive) {
+            if (flags.contains(CopyRecursively)) {
                 const DirectoryHandler::Info* outInfo = 0;
                 for (size_t j = 0, n = outChildren.size(); j < n; ++j) {
                     if (outChildren[j].name == ch.name) {
@@ -151,7 +214,7 @@ server::file::copyDirectory(DirectoryHandler& out, DirectoryHandler& in, bool re
 
                 // Handler for input
                 std::auto_ptr<DirectoryHandler> inHandler(in.getDirectory(ch));
-                copyDirectory(*outHandler, *inHandler, recursive);
+                copyDirectory(*outHandler, *inHandler, flags);
             }
             break;
         }

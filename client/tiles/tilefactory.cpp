@@ -19,6 +19,8 @@
 #include "ui/rich/documentview.hpp"
 #include "client/widgets/standarddataview.hpp"
 #include "client/widgets/commanddataview.hpp"
+#include "client/tiles/shipcargotile.hpp"
+#include "client/tiles/shipmovementtile.hpp"
 
 namespace {
     struct TileConfig {
@@ -422,8 +424,11 @@ client::tiles::TileFactory::createTile(String_t name, afl::base::Deleter& delete
         };
         return Factory().run(m_root, m_keys, 30, 6, "Tile.ShipEquipment", deleter, m_userSide, m_observer);
     }
-//     if (name == "SHIPCARGO")
-//         return new WShipCargoTile(selection);
+    if (name == "SHIPCARGO") {
+        ShipCargoTile& tile = deleter.addNew(new ShipCargoTile(m_root, m_keys));
+        tile.attach(m_observer);
+        return &tile;
+    }
     if (name == "SHIPMISSION") {
         class Factory : public DataViewFactory {
          public:
@@ -438,8 +443,11 @@ client::tiles::TileFactory::createTile(String_t name, afl::base::Deleter& delete
         };
         return Factory().run(m_root, m_keys, 30, 3, "Tile.ShipMission", deleter, m_userSide, m_observer);
     }
-//     if (name == "SHIPMOVEMENT")
-//         return new WShipMovementTile(selection);
+    if (name == "SHIPMOVEMENT") {
+        ShipMovementTile& tile = deleter.addNew(new ShipMovementTile(m_root, m_keys));
+        tile.attach(m_observer);
+        return &tile;
+    }
     if (name == "SHIPOVERVIEW") {
         return createDocumentViewTile("Tile.ShipOverview", m_root, 30, 12, deleter, m_userSide, m_observer);
     }

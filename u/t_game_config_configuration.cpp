@@ -55,8 +55,7 @@ TestGameConfigConfiguration::testEnum()
     testee[one].set(1);
 
     // Start enumeration
-    afl::base::Ptr<game::config::Configuration::Enumerator_t> e(testee.getOptions());
-    TS_ASSERT(e.get() != 0);
+    afl::base::Ref<game::config::Configuration::Enumerator_t> e(testee.getOptions());
 
     // Verify first element
     game::config::Configuration::OptionInfo_t info;
@@ -69,3 +68,47 @@ TestGameConfigConfiguration::testEnum()
     testee[two].set(3);
     e->getNextElement(info);
 }
+
+/** Test merge. */
+void
+TestGameConfigConfiguration::testMerge()
+{
+    using game::config::ConfigurationOption;
+
+    game::config::IntegerValueParser vp;
+    const game::config::IntegerOptionDescriptor one = { "one", &vp };
+    const game::config::IntegerOptionDescriptor three = { "three", &vp };
+
+    // Make configuration a
+    game::config::Configuration a;
+    a[one].set(1);
+    a[one].setSource(ConfigurationOption::User);
+    a.setOption("two", "2", ConfigurationOption::Game);
+
+    // Make configuration b
+    game::config::Configuration b;
+    b.setOption("one", "11", ConfigurationOption::System);
+    b.setOption("two", "22", ConfigurationOption::Default);
+    b[three].set(33);
+    b[three].setSource(ConfigurationOption::User);
+
+    // Merge
+    a.merge(b);
+
+    // Verify
+    ConfigurationOption* p1 = a.getOptionByName("one");
+    TS_ASSERT(p1 != 0);
+    TS_ASSERT_EQUALS(p1->toString(), "11");
+    TS_ASSERT_EQUALS(p1->getSource(), ConfigurationOption::User);
+
+    ConfigurationOption* p2 = a.getOptionByName("two");
+    TS_ASSERT(p2 != 0);
+    TS_ASSERT_EQUALS(p2->toString(), "2");
+    TS_ASSERT_EQUALS(p2->getSource(), ConfigurationOption::Game);
+
+    ConfigurationOption* p3 = a.getOptionByName("three");
+    TS_ASSERT(p3 != 0);
+    TS_ASSERT_EQUALS(p3->toString(), "33");
+    TS_ASSERT_EQUALS(p3->getSource(), ConfigurationOption::User);
+}
+

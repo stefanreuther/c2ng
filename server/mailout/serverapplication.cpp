@@ -52,22 +52,6 @@ server::mailout::ServerApplication::handleCommandLineOption(const String_t& opti
     if (option == "notx") {
         m_config.useTransmitter = false;
         return true;
-    } else if (option == "help") {
-        using afl::string::Format;
-        afl::io::TextWriter& out = standardOutput();
-        out.writeLine(Format(_("PCC2 Mail Queue Server v%s - (c) 2017-2018 Stefan Reuther").c_str(), PCC2_VERSION));
-        out.writeLine();
-        out.writeLine(Format(_("Usage:\n"
-                               "  %s [-options]\n\n"
-                               "Options:\n"
-                               "%s"
-                               "\n"
-                               "Report bugs to <Streu@gmx.de>").c_str(),
-                             environment().getInvocationName(),
-                             util::formatOptions(Application::getHelp() +
-                                                 "--notx\tDisable transmitter\n")));
-        exit(0);
-        return true;
     } else {
         return false;
     }
@@ -198,4 +182,16 @@ server::mailout::ServerApplication::handleConfiguration(const String_t& key, con
     } else {
         return false;
     }
+}
+
+String_t
+server::mailout::ServerApplication::getApplicationName() const
+{
+    return afl::string::Format(_("PCC2 Mail Queue Server v%s - (c) 2017-2018 Stefan Reuther").c_str(), PCC2_VERSION);
+}
+
+String_t
+server::mailout::ServerApplication::getCommandLineOptionHelp() const
+{
+    return "--notx\tDisable transmitter\n";
 }

@@ -18,10 +18,14 @@ WHAT IS PCC2?
   PCC2. It is intended to be 100% compatible to PCC2. However, it does
   away with many self-imposed limitations of PCC2.
 
-  Milestone Three expands upon previous versions by completing more
-  and more of the foundation code. It adds more properties to the
-  scripting language, more command-line utilities, and more
-  PlanetsCentral servers, but few if any fancy user features.
+  Milestone Four polishes a few of the existing features, and adds
+  some new: there is now a simple setup wizard for network games (in
+  particular, Nu), and a simple VCR.
+
+  On the back-end side, this version adds a port of CHECK, which was
+  never ported to PCC2 previously and fills the gap of a 32-/64-bit
+  capable turn checker outside PHost. Except for the PCC2 Web client,
+  PlanetsCentral now runs exclusively on c2ng-based servers.
 
 
 Project Goals
@@ -53,6 +57,7 @@ Milestone Three
   Browsing and loading local and network games ................. done
     Browse your hard disk as well as network.
     Support servers that do not have VGAP binary formats (Nu).
+    Milestone four adds long-needed configuration/setup menus.
 
   Manage multiple turns ........................................ done
     Browse history while playing.
@@ -78,6 +83,9 @@ Milestone Three
     Milestone Three adds all servers except for PCC2 Web, in better
     quality than before.
 
+  SDL2 ......................................................... done
+    Milestone four can be built using SDL2.
+
 
 What can you do with it?
 ========================
@@ -95,7 +103,9 @@ What can you do with it?
   - server address (you can leave this blank)
   A new entry will appear representing that account. You can enter it
   like a normal folder to browse your games; you will be asked for
-  your password the first time you do that in a session.
+  your password the first time you do that in a session. Also, c2ng
+  will ask you for a game directory where to place local files. If you
+  choose the default, c2ng will store the files in your user profile.
 
   Use arrow keys and [Enter] to browse. After entering a game, you
   will see a screen with F1/F2/F3 buttons. Use these to select a ship,
@@ -113,6 +123,7 @@ Program List
     . c2ng: graphical player client
 
   - Utilities
+    . c2check: turn checker
     . c2configtool: configuration handler
     . c2export: game data export
     . c2gfxgen: procedural graphics generation
@@ -152,7 +163,6 @@ Near Milestones
 Future Milestones
 ------------------
 
-  - port to SDL2
   - implement i18n
   - implement help
   - can we integrate forums/activities?

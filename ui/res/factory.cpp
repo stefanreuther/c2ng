@@ -8,6 +8,7 @@
 #include "ui/res/directoryprovider.hpp"
 #include "ui/res/resourcefileprovider.hpp"
 #include "ui/res/winplanbitmapprovider.hpp"
+#include "ui/res/winplanvcrprovider.hpp"
 
 namespace {
     bool hasPrefix(String_t& name, const char* pfx)
@@ -29,18 +30,11 @@ ui::res::createProvider(String_t name, String_t baseDirectory, afl::io::FileSyst
         return new DirectoryProvider(fs.openDirectory(fs.makePathName(baseDirectory, name)));
     } else if (hasPrefix(name, "wp")) {
         return new WinplanBitmapProvider(fs.openDirectory(fs.makePathName(baseDirectory, name)));
+    } else if (hasPrefix(name, "wpvcr")) {
+        return new WinplanVcrProvider(fs.openFile(fs.makePathName(baseDirectory, name), fs.OpenRead));
     } else {
         // Trim optional "res:" prefix
         hasPrefix(name, "res");
         return new ResourceFileProvider(fs.openFile(fs.makePathName(baseDirectory, name), fs.OpenRead));
     }
 }
-
-
-// FIXME: finish
-// static const ResProviderElem providers[] = {
-//     { "res",   &genResProvider<ResProviderResFile> },
-//     { "wp",    &genResProvider<ResProviderWinplanBitmaps> },
-//     { "wpvcr", &genResProvider<ResProviderWinplanVcr> },
-//     { "dir",   &genResDirectory }
-// };

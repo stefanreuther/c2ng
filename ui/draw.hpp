@@ -51,6 +51,8 @@ namespace ui {
     void drawFrameUp(gfx::Context<uint8_t>& ctx, gfx::Rectangle r);
     void drawFrameDown(gfx::Context<uint8_t>& ctx, gfx::Rectangle r);
 
+    void drawTiledArea(gfx::Context<uint8_t>& ctx, gfx::Rectangle r, const afl::base::Ptr<gfx::Canvas>& pix, uint8_t color, int alter);
+
     void drawWindow(gfx::Context<uint8_t>& ctx,
                     const gfx::Rectangle& extent,
                     gfx::ResourceProvider& provider,

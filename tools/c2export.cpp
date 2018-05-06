@@ -318,11 +318,12 @@ ConsoleExportApplication::appMain()
         afl::io::FileSystem& fs = fileSystem();
         String_t defaultRoot = fs.makePathName(fs.makePathName(environment().getInstallationDirectoryName(), "share"), "specs");
         game::v3::RootLoader loader(fs.openDirectory(arg_rootdir.orElse(defaultRoot)), profile, translator(), log(), fs);
-        loader.setCharsetNew(gameCharset->clone());
 
         // Check game data
+        // FIXME: load correct config!
         const String_t usedGameDir = arg_gamedir.orElse(".");
-        afl::base::Ptr<game::Root> root = loader.load(fs.openDirectory(usedGameDir), false);
+        const game::config::UserConfiguration uc;
+        afl::base::Ptr<game::Root> root = loader.load(fs.openDirectory(usedGameDir), *gameCharset, uc, false);
         if (root.get() == 0 || root->getTurnLoader().get() == 0) {
             errorExit(afl::string::Format(_("no game data found in directory \"%s\"").c_str(), usedGameDir));
         }

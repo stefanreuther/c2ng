@@ -10,7 +10,7 @@
 const char ui::res::SHIP[] = "ship";
 const char ui::res::PLANET[] = "planet";
 const char ui::res::BASE[] = "base";
-const char ui::res::RSHIP[] = "rship", ui::res::LSHIP[] = "lship";
+const char ui::res::VCR_RSHIP[] = "vcr.rship", ui::res::VCR_LSHIP[] = "vcr.lship";
 const char ui::res::VCR_FIGHTER[] = "vcr.ftr";
 
 // Make resource Id from prefix and one integer.

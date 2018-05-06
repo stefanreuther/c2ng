@@ -21,8 +21,23 @@ game::browser::UnsupportedAccountFolder::loadContent(afl::container::PtrVector<F
     // No content.
 }
 
+bool
+game::browser::UnsupportedAccountFolder::loadConfiguration(game::config::UserConfiguration& /*config*/)
+{
+    return false;
+}
+void
+game::browser::UnsupportedAccountFolder::saveConfiguration(const game::config::UserConfiguration& /*config*/)
+{ }
+
+bool
+game::browser::UnsupportedAccountFolder::setLocalDirectoryName(String_t /*directoryName*/)
+{
+    return false;
+}
+
 afl::base::Ptr<game::Root>
-game::browser::UnsupportedAccountFolder::loadGameRoot()
+game::browser::UnsupportedAccountFolder::loadGameRoot(const game::config::UserConfiguration& /*config*/)
 {
     // No content.
     return 0;

@@ -16,6 +16,7 @@
 #include "game/playerlist.hpp"
 #include "util/profiledirectory.hpp"
 #include "afl/io/filesystem.hpp"
+#include "game/config/userconfiguration.hpp"
 
 namespace game { namespace v3 {
 
@@ -30,9 +31,10 @@ namespace game { namespace v3 {
                    afl::sys::LogListener& log,
                    afl::io::FileSystem& fs);
 
-        void setCharsetNew(afl::charset::Charset* p);
-
-        afl::base::Ptr<Root> load(afl::base::Ref<afl::io::Directory> gameDirectory, bool forceEmpty);
+        afl::base::Ptr<Root> load(afl::base::Ref<afl::io::Directory> gameDirectory,
+                                  afl::charset::Charset& charset,
+                                  const game::config::UserConfiguration& config,
+                                  bool forceEmpty);
 
      private:
         afl::base::Ref<afl::io::Directory> m_defaultSpecificationDirectory;
@@ -43,14 +45,13 @@ namespace game { namespace v3 {
 
         DirectoryScanner m_scanner;
 
-        std::auto_ptr<afl::charset::Charset> m_charset;
-
-        void loadConfiguration(Root& root);
-        void loadPConfig(Root& root, afl::base::Ptr<afl::io::Stream> pconfig, afl::base::Ptr<afl::io::Stream> shiplist, game::config::ConfigurationOption::Source source);
+        void loadConfiguration(Root& root, afl::io::Directory& dir, afl::charset::Charset& charset);
+        void loadPConfig(Root& root, afl::base::Ptr<afl::io::Stream> pconfig, afl::base::Ptr<afl::io::Stream> shiplist, game::config::ConfigurationOption::Source source,
+                         afl::charset::Charset& charset);
         void loadHConfig(Root& root, afl::io::Stream& hconfig, game::config::ConfigurationOption::Source source);
         void loadRaceMapping(Root& root, afl::io::Stream& file, game::config::ConfigurationOption::Source source);
 
-        void loadRaceNames(PlayerList& list, afl::io::Directory& dir);
+        void loadRaceNames(PlayerList& list, afl::io::Directory& dir, afl::charset::Charset& charset);
     };
 
 } }

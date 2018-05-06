@@ -40,6 +40,13 @@ namespace game { namespace vcr { namespace classic {
         The Visualizer must live at least as long as the player. */
     class Algorithm : public afl::base::Deletable, private afl::base::Uncopyable {
      public:
+        /** Maximum coordinate.
+            X coordinates shall be normalized to [0,MAX_COORDINATE). */
+        static const int32_t MAX_COORDINATE = 640;
+
+        /** Maximum number of fighter tracks. */
+        static const int MAX_FIGHTER_TRACKS = 50;
+
         /** Constructor.
             \param vis Visualizer */
         explicit Algorithm(Visualizer& vis);
@@ -180,15 +187,6 @@ namespace game { namespace vcr { namespace classic {
         /** Get battle statistic.
             \param side side */
         virtual Statistic getStatistic(Side side) = 0;
-
-        // FIXME: what to do with these?
-        //    /** Manifest constants. Id values in the corresponding accessors are [0, VCRMF_xxx). */
-        //    enum {
-        //        VCRMF_MAX_BEAMS = 20,   ///< Max number of beams.
-        //        VCRMF_MAX_TORPS = 20,   ///< Max number of torpedo launchers.
-        //        VCRMF_MAX_FTRS  = 50,   ///< Max number of concurrently launched fighters.
-        //        VCRMF_MAX_BAYS  = 50    ///< Max number of fighter bays.
-        //    };
 
      private:
         Visualizer* m_pVisualizer;

@@ -12,6 +12,7 @@ server::host::Configuration::Configuration()
       workDirectory(),
       useCron(true),
       unpackBackups(false),
+      usersSeeTemporaryTurns(true),
       hostFileAddress(DEFAULT_ADDRESS, HOSTFILE_PORT)
 { }
 

@@ -114,3 +114,121 @@ TestGfxTypes::testGetColorDistance()
     // last now is the maximum possible distance. Differing alpha must still be higher.
     TS_ASSERT(gfx::getColorDistance(COLORQUAD_FROM_RGBA(0, 0, 0, 0), COLORQUAD_FROM_RGBA(10, 10, 10, 10)) > last);
 }
+
+/** Test parseColor(). */
+void
+TestGfxtypes::testParseColor()
+{
+    gfx::ColorQuad_t q;
+
+    // ok: #rgb
+    {
+        util::StringParser p("#234");
+        TS_ASSERT(gfx::parseColor(p, q));
+        TS_ASSERT(p.parseEnd());
+        TS_ASSERT_EQUALS(q, COLORQUAD_FROM_RGBA(0x22, 0x33, 0x44, 0xFF));
+    }
+
+    // ok: #rrggbb
+    {
+        util::StringParser p("#124567");
+        TS_ASSERT(gfx::parseColor(p, q));
+        TS_ASSERT(p.parseEnd());
+        TS_ASSERT_EQUALS(q, COLORQUAD_FROM_RGBA(0x12, 0x45, 0x67, 0xFF));
+    }
+
+    // ok: #rgba
+    {
+        util::StringParser p("#234A");
+        TS_ASSERT(gfx::parseColor(p, q));
+        TS_ASSERT(p.parseEnd());
+        TS_ASSERT_EQUALS(q, COLORQUAD_FROM_RGBA(0x22, 0x33, 0x44, 0xAA));
+    }
+
+    // ok: #rrggbbaa
+    {
+        util::StringParser p("#234A95CD");
+        TS_ASSERT(gfx::parseColor(p, q));
+        TS_ASSERT(p.parseEnd());
+        TS_ASSERT_EQUALS(q, COLORQUAD_FROM_RGBA(0x23, 0x4A, 0x95, 0xCD));
+    }
+
+    // ok: rgb(r,g,b)
+    {
+        util::StringParser p("rgb ( 1, 2 , 3 )");
+        TS_ASSERT(gfx::parseColor(p, q));
+        TS_ASSERT(p.parseEnd());
+        TS_ASSERT_EQUALS(q, COLORQUAD_FROM_RGBA(0x01, 0x02, 0x03, 0xFF));
+    }
+
+    // ok: rgb(r,g,b,a)
+    {
+        util::StringParser p("rgb(11,22,33,44)");
+        TS_ASSERT(gfx::parseColor(p, q));
+        TS_ASSERT(p.parseEnd());
+        TS_ASSERT_EQUALS(q, COLORQUAD_FROM_RGBA(11, 22, 33, 44));
+    }
+
+    // ok: using percent
+    {
+        util::StringParser p("rgb(25 % ,22,33,33%)");
+        TS_ASSERT(gfx::parseColor(p, q));
+        TS_ASSERT(p.parseEnd());
+        TS_ASSERT_EQUALS(q, COLORQUAD_FROM_RGBA(0x40, 22, 33, 0x54));
+    }
+
+    // failure: out-of-range value
+    {
+        util::StringParser p("rgb(1000,200,300)");
+        TS_ASSERT(!gfx::parseColor(p, q));
+    }
+
+    // failure: out-of-range percentage
+    {
+        util::StringParser p("rgb(10%,20%,300%)");
+        TS_ASSERT(!gfx::parseColor(p, q));
+    }
+
+    // failure: too few args
+    {
+        util::StringParser p("rgb(4,5)");
+        TS_ASSERT(!gfx::parseColor(p, q));
+    }
+
+    // failure: too many args
+    {
+        util::StringParser p("rgb(4,5,6,7,8)");
+        TS_ASSERT(!gfx::parseColor(p, q));
+    }
+
+    // failure: too short
+    {
+        util::StringParser p("#12");
+        TS_ASSERT(!gfx::parseColor(p, q));
+    }
+
+    // failure: wrong length
+    {
+        util::StringParser p("#12345");
+        TS_ASSERT(!gfx::parseColor(p, q));
+    }
+
+    // failure: bad keyword
+    {
+        util::StringParser p("lolwut?");
+        TS_ASSERT(!gfx::parseColor(p, q));
+    }
+
+    // failure: bad hex
+    {
+        util::StringParser p("#lolwut");
+        TS_ASSERT(!gfx::parseColor(p, q));
+    }
+
+    // failure: bad number
+    {
+        util::StringParser p("rgb(lol,wut,wtf)");
+        TS_ASSERT(!gfx::parseColor(p, q));
+    }
+}
+

@@ -97,6 +97,24 @@ game::map::Planet::Planet(Id_t id)
     afl::base::Memory<int>(m_historyTimestamps).fill(0);
 }
 
+game::map::Planet::Planet(const Planet& other)
+    : m_id(other.m_id),
+      m_name(other.m_name),
+      m_position(other.m_position),
+      m_knownToNotExist(other.m_knownToNotExist),
+      m_currentPlanetData(other.m_currentPlanetData),
+      m_currentBaseData(other.m_currentBaseData),
+      m_baseKind(other.m_baseKind),
+      m_planetKind(other.m_planetKind),
+      m_planetSource(other.m_planetSource),
+      m_baseSource(other.m_baseSource),
+      m_isPlanetKnownToHaveNatives(other.m_isPlanetKnownToHaveNatives),
+      m_industryLevel(other.m_industryLevel),
+      m_queuePosition(other.m_queuePosition),
+      m_queuePriority(other.m_queuePriority),
+      m_unitScores(other.m_unitScores)
+{ }
+
 game::map::Planet::~Planet()
 { }
 

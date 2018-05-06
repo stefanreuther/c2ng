@@ -27,6 +27,8 @@ namespace game { namespace v3 {
         virtual afl::base::Optional<int> getMinBaseStorage(int planetId, TechLevel area, int slot) const;
         virtual int getNumTorpedoesAllowedToSell(int planetId, int slot) const;
         virtual int getNumFightersAllowedToSell(int planetId) const;
+        virtual afl::base::Optional<String_t> getPreviousShipFriendlyCode(Id_t shipId) const;
+        virtual afl::base::Optional<String_t> getPreviousPlanetFriendlyCode(Id_t planetId) const;
 
         // v3::Reverter:
         void addShipData(int id, const game::map::ShipData& data);

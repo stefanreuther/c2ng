@@ -28,6 +28,7 @@
 #include "ui/window.hpp"
 #include "util/translation.hpp"
 #include "afl/base/refcounted.hpp"
+#include "client/si/contextreceiver.hpp"
 
 namespace {
     /*
@@ -115,17 +116,17 @@ namespace {
         DialogContextProvider(afl::base::Ref<CommonState> state)
             : m_state(state)
             { }
-        virtual void createContext(game::Session& session, interpreter::Process& proc)
+        virtual void createContext(game::Session& session, client::si::ContextReceiver& recv)
             {
                 // FIXME: this code should be in a common library probably
                 game::map::Object* obj = m_state->cursor().getCurrentObject();
                 if (dynamic_cast<game::map::Ship*>(obj) != 0) {
                     if (interpreter::Context* ctx = game::interface::ShipContext::create(obj->getId(), session)) {
-                        proc.pushNewContext(ctx);
+                        recv.addNewContext(ctx);
                     }
                 } else if (dynamic_cast<game::map::Planet*>(obj) != 0) {
                     if (interpreter::Context* ctx = game::interface::PlanetContext::create(obj->getId(), session)) {
-                        proc.pushNewContext(ctx);
+                        recv.addNewContext(ctx);
                     }
                 } else {
                     // FIXME?

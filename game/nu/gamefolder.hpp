@@ -30,7 +30,10 @@ namespace game { namespace nu {
 
         // Folder:
         virtual void loadContent(afl::container::PtrVector<Folder>& result);
-        virtual afl::base::Ptr<Root> loadGameRoot();
+        virtual bool loadConfiguration(game::config::UserConfiguration& config);
+        virtual void saveConfiguration(const game::config::UserConfiguration& config);
+        virtual bool setLocalDirectoryName(String_t directoryName);
+        virtual afl::base::Ptr<Root> loadGameRoot(const game::config::UserConfiguration& config);
         virtual String_t getName() const;
         virtual util::rich::Text getDescription() const;
         virtual bool isSame(const Folder& other) const;
@@ -44,6 +47,9 @@ namespace game { namespace nu {
         int32_t m_gameNr;
 
         afl::base::Ref<GameState> m_state;
+
+        const String_t* getGameFolderName() const;
+        String_t getGameIdAsString() const;
     };
 
 } }

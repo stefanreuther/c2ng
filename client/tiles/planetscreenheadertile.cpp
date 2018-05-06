@@ -9,6 +9,7 @@
 #include "afl/string/format.hpp"
 #include "ui/res/resid.hpp"
 #include "client/objectlistener.hpp"
+#include "game/map/planet.hpp"
 
 using ui::widgets::FrameGroup;
 

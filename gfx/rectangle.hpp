@@ -69,7 +69,23 @@ namespace gfx {
         Point getTopLeft() const
             { return Point(m_left, m_top); }
 
+        /** Get top-right point.
+            If the rectangle represents a pixel area, this point is just outside the rectangle;
+            the nearest point inside the rectangle (if exists) is (-1,0) from that.
+            \return point */
+        Point getTopRight() const
+            { return Point(getRightX(), m_top); }
+
+        /** Get bottom-left point.
+            If the rectangle represents a pixel area, this point is just outside the rectangle;
+            the nearest point inside the rectangle (if exists) is (0,-1) from that.
+            \return point */
+        Point getBottomLeft() const
+            { return Point(m_left, getBottomY()); }
+
         /** Get bottom-right point.
+            If the rectangle represents a pixel area, this point is just outside the rectangle;
+            the nearest point inside the rectangle (if exists) is (-1,-1) from that.
             \return point */
         Point getBottomRight() const
             { return Point(getRightX(), getBottomY()); }
@@ -163,6 +179,12 @@ namespace gfx {
             \return relative movement done. E.g. if a rectangle located at (5,5) is moved to (20,30), this returns (15,25).
             \post x == where.x && y == where.y */
         Point moveTo(Point where) throw();
+
+        /** Move this rectangle such that it is contained within \c other.
+            Does not change our size.
+            If this rectangle does not fit within \c other, it is aligned at the left/top border.
+            \param other Other rectangle */
+        void moveIntoRectangle(const Rectangle& other) throw();
 
         /** Move by relative distance.
             The distance is given in the components of a point.

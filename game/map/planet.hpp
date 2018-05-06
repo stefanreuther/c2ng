@@ -75,7 +75,7 @@ namespace game { namespace map {
 //     };
 
         explicit Planet(Id_t id);
-//     explicit GPlanet(const GPlanet&);
+        explicit Planet(const Planet& other);
         ~Planet();
 
 //     // Load and Save:

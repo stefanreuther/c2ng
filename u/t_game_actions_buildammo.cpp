@@ -46,6 +46,10 @@ namespace {
             { return 5; }
         virtual int getNumFightersAllowedToSell(int /*planetId*/) const
             { return 7; }
+        virtual afl::base::Optional<String_t> getPreviousShipFriendlyCode(game::Id_t /*shipId*/) const
+            { return afl::base::Nothing; }
+        virtual afl::base::Optional<String_t> getPreviousPlanetFriendlyCode(game::Id_t /*planetId*/) const
+            { return afl::base::Nothing; }
     };
 
     struct TestHarness {
@@ -62,12 +66,12 @@ namespace {
             : univ(),
               planet(*univ.planets().create(PLANET_ID)),
               shipList(*new game::spec::ShipList()),
-              root(*new game::Root(afl::io::InternalDirectory::create("spec dir"),
-                                   afl::io::InternalDirectory::create("game dir"),
+              root(*new game::Root(afl::io::InternalDirectory::create("game dir"),
                                    *new game::test::SpecificationLoader(),
                                    game::HostVersion(game::HostVersion::Host, MKVERSION(3, 22, 47)),
                                    std::auto_ptr<game::RegistrationKey>(new game::test::RegistrationKey(game::RegistrationKey::Unregistered, 5)),
-                                   std::auto_ptr<game::StringVerifier>(new game::test::StringVerifier()))),
+                                   std::auto_ptr<game::StringVerifier>(new game::test::StringVerifier()),
+                                   game::Root::Actions_t())),
               tx(),
               fs(),
               session(tx, fs),

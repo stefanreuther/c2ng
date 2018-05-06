@@ -369,7 +369,6 @@ namespace {
         /* Note that this is run when the game still points to the previous turn.
            We know that the current turn is unplayed. We require this situation:
 
-
            -2         played
            -1         unplayed    \
            -0         unplayed     > DROPOUT_DELAY

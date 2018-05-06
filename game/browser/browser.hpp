@@ -4,6 +4,7 @@
 #ifndef C2NG_GAME_BROWSER_BROWSER_HPP
 #define C2NG_GAME_BROWSER_BROWSER_HPP
 
+#include <memory>
 #include "afl/string/string.hpp"
 #include "afl/container/ptrvector.hpp"
 #include "afl/string/translator.hpp"
@@ -13,6 +14,8 @@
 #include "afl/io/filesystem.hpp"
 #include "afl/base/inlineoptional.hpp"
 #include "game/browser/handlerlist.hpp"
+#include "game/config/userconfiguration.hpp"
+#include "util/profiledirectory.hpp"
 
 namespace game { namespace browser {
 
@@ -30,6 +33,7 @@ namespace game { namespace browser {
                 afl::string::Translator& tx,
                 afl::sys::LogListener& log,
                 AccountManager& accounts,
+                util::ProfileDirectory& profile,
                 UserCallback& callback);
         ~Browser();
 
@@ -57,15 +61,23 @@ namespace game { namespace browser {
 
         OptionalIndex_t getSelectedChild() const;
         afl::base::Ptr<Root> getSelectedRoot() const;
+        game::config::UserConfiguration* getSelectedConfiguration() const;
+
+        void updateConfiguration();
 
         Folder* createAccountFolder(Account& account);
-        afl::base::Ptr<Root> loadGameRoot(afl::base::Ref<afl::io::Directory> dir);
+        afl::base::Ptr<Root> loadGameRoot(afl::base::Ref<afl::io::Directory> dir, const game::config::UserConfiguration& config);
+
+        String_t expandGameDirectoryName(String_t directoryName) const;
+        void setSelectedLocalDirectoryName(String_t directoryName);
+        void setSelectedLocalDirectoryAutomatically();
 
      private:
         afl::io::FileSystem& m_fileSystem;
         afl::string::Translator& m_translator;
         afl::sys::LogListener& m_log;
         AccountManager& m_accounts;
+        util::ProfileDirectory& m_profile;
         UserCallback& m_callback;
 
         // List of handlers.
@@ -85,6 +97,9 @@ namespace game { namespace browser {
         OptionalIndex_t m_selectedChild;
         bool m_childLoaded;
         afl::base::Ptr<Root> m_childRoot;
+        std::auto_ptr<game::config::UserConfiguration> m_childConfig;
+
+        bool trySetLocalDirectoryName(afl::io::Directory& gamesDir, String_t directoryName);
     };
 
 } }

@@ -3,23 +3,30 @@
   */
 
 #include "client/dialogs/consoledialog.hpp"
+#include "afl/base/optional.hpp"
+#include "afl/charset/utf8.hpp"
+#include "afl/string/format.hpp"
+#include "client/downlink.hpp"
+#include "client/si/contextprovider.hpp"
+#include "client/si/contextreceiver.hpp"
+#include "client/si/control.hpp"
+#include "client/widgets/consoleview.hpp"
+#include "game/interface/completionlist.hpp"
 #include "ui/eventloop.hpp"
-#include "ui/window.hpp"
-#include "ui/widgets/inputline.hpp"
 #include "ui/group.hpp"
+#include "ui/invisiblewidget.hpp"
 #include "ui/layout/hbox.hpp"
 #include "ui/layout/vbox.hpp"
-#include "ui/widgets/button.hpp"
 #include "ui/spacer.hpp"
-#include "client/si/control.hpp"
-#include "util/translation.hpp"
-#include "afl/string/format.hpp"
-#include "ui/invisiblewidget.hpp"
+#include "ui/widgets/button.hpp"
+#include "ui/widgets/inputline.hpp"
+#include "ui/widgets/standarddialogbuttons.hpp"
+#include "ui/widgets/stringlistbox.hpp"
+#include "ui/window.hpp"
 #include "util/messagecollector.hpp"
 #include "util/messagenotifier.hpp"
-#include "client/widgets/consoleview.hpp"
 #include "util/stringparser.hpp"
-#include "afl/base/optional.hpp"
+#include "util/translation.hpp"
 
 namespace {
     const int NLINES = 15;
@@ -33,6 +40,8 @@ namespace {
             : m_scrollback(0),
               m_view(view),
               m_input(input),
+              m_user(user),
+              m_root(root),
               m_collector(user.console()),
               m_notifier(root.engine().dispatcher()),
               m_format()
@@ -102,14 +111,14 @@ namespace {
                             } else {
                                 // else what?
                             }
-                                
+
                             if (p.parseEnd()) {
                                 break;
                             }
                             p.parseCharacter(',');
                         }
                     }
-                    
+
                     m_view.addLine(n, msg.m_message, align, bold, color);
                 }
                 m_view.setScrollbackIndicator(m_scrollback);
@@ -151,9 +160,90 @@ namespace {
                     requestActive();
                     doRecall(+1);
                     return true;
+                 case util::Key_Tab:
+                    doCompletion();
+                    return true;
                  default:
                     return defaultHandleKey(key, prefix);
                 }
+            }
+
+        void insertCompletion(const String_t& stem, const String_t& completion)
+            {
+                if (completion.size() > stem.size()) {
+                    m_input.setFlag(ui::widgets::InputLine::TypeErase, false);
+                    m_input.insertText(completion.substr(stem.size()));
+                }
+            }
+
+        void doCompletion()
+            {
+                client::Downlink link(m_root);
+                game::interface::CompletionList result;
+
+                class Query : public util::Request<game::Session> {
+                 public:
+                    Query(game::interface::CompletionList& result, const String_t& text, std::auto_ptr<client::si::ContextProvider> ctxp)
+                        : m_result(result),
+                          m_text(text),
+                          m_contextProvider(ctxp)
+                        { }
+                    virtual void handle(game::Session& session)
+                        {
+                            class Collector : public client::si::ContextReceiver {
+                             public:
+                                virtual void addNewContext(interpreter::Context* p)
+                                    { m_contexts.pushBackNew(p); }
+
+                                afl::container::PtrVector<interpreter::Context>& get()
+                                    { return m_contexts; }
+                             private:
+                                afl::container::PtrVector<interpreter::Context> m_contexts;
+                            };
+                            Collector c;
+                            if (m_contextProvider.get() != 0) {
+                                m_contextProvider->createContext(session, c);
+                            }
+                            buildCompletionList(m_result, m_text, session, false, c.get());
+                        }
+                 private:
+                    game::interface::CompletionList& m_result;
+                    String_t m_text;
+                    std::auto_ptr<client::si::ContextProvider> m_contextProvider;
+                };
+                Query q(result, afl::charset::Utf8().substr(m_input.getText(), 0, m_input.getCursorIndex()), std::auto_ptr<client::si::ContextProvider>(m_user.createContextProvider()));
+                link.call(m_user.gameSender(), q);
+
+                String_t stem = result.getStem();
+                String_t immediate = result.getImmediateCompletion();
+                if (immediate.size() > stem.size()) {
+                    insertCompletion(stem, immediate);
+                } else if (!result.isEmpty()) {
+                    ui::widgets::StringListbox list(m_root.provider(), m_root.colorScheme());
+                    int32_t i = 0;
+                    for (game::interface::CompletionList::Iterator_t it = result.begin(), e = result.end(); it != e; ++it) {
+                        list.addItem(i, *it);
+                        ++i;
+                    }
+                    list.sortItemsAlphabetically();
+                    if (ui::widgets::doStandardDialog(_("Completions"), list, true, m_root)
+                        && list.getCurrentKey(i))
+                    {
+                        game::interface::CompletionList::Iterator_t it = result.begin(), e = result.end();
+                        while (it != e && i != 0) {
+                            ++it, --i;
+                        }
+                        if (it != e) {
+                            insertCompletion(stem, *it);
+                        }
+                    } else {
+                    }
+                } else {
+                    // no completions available
+                }
+
+                // No matter what happened, should still clear TypeErase to avoid new input overwriting old one.
+                m_input.setFlag(ui::widgets::InputLine::TypeErase, false);
             }
 
         void doRecall(int direction)
@@ -207,6 +297,8 @@ namespace {
         int m_scrollback;
         client::widgets::ConsoleView& m_view;
         ui::widgets::InputLine& m_input;
+        client::si::UserSide& m_user;
+        ui::Root& m_root;
         util::MessageCollector& m_collector;
         util::MessageNotifier m_notifier;
         util::MessageMatcher m_format;

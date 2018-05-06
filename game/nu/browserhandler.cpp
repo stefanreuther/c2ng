@@ -12,9 +12,12 @@
 #include "afl/net/http/simpledownloadlistener.hpp"
 #include "afl/net/parameterencoder.hpp"
 #include "afl/string/format.hpp"
+#include "afl/string/parse.hpp"
 #include "game/browser/account.hpp"
+#include "game/browser/accountmanager.hpp"
 #include "game/browser/usercallback.hpp"
 #include "game/nu/accountfolder.hpp"
+#include "game/nu/gamefolder.hpp"
 
 namespace {
     const char LOG_NAME[] = "game.nu";
@@ -59,10 +62,26 @@ game::nu::BrowserHandler::createAccountFolder(game::browser::Account& acc)
 }
 
 afl::base::Ptr<game::Root>
-game::nu::BrowserHandler::loadGameRoot(afl::base::Ref<afl::io::Directory> /*dir*/)
+game::nu::BrowserHandler::loadGameRoot(afl::base::Ref<afl::io::Directory> dir, const game::config::UserConfiguration& config)
 {
-    // FIXME: do we need this? Look at folder content, if it's nu, open it.
-    return 0;
+    if (config.getGameType() == "nu") {
+        game::browser::Account* a = m_browser.accounts().findAccount(config[config.Game_User](), config.getGameType(), config[config.Game_Host]());
+        if (!a) {
+            return 0;
+        }
+        int32_t gameId;
+        if (!afl::string::strToInteger(config[config.Game_Id](), gameId)) {
+            return 0;
+        }
+
+        // FIXME: verify that the game Id is valid
+
+        a->setGameFolderName(afl::string::Format("%d", gameId), dir->getDirectoryName());
+
+        return GameFolder(*this, *a, gameId, 0).loadGameRoot(config);
+    } else {
+        return 0;
+    }
 }
 
 bool
@@ -199,6 +218,12 @@ afl::sys::LogListener&
 game::nu::BrowserHandler::log()
 {
     return m_browser.log();
+}
+
+game::browser::Browser&
+game::nu::BrowserHandler::browser()
+{
+    return m_browser;
 }
 
 afl::base::Ref<afl::io::Directory>

@@ -22,6 +22,7 @@
 #include "util/syntax/format.hpp"
 #include "util/syntax/highlighter.hpp"
 #include "util/syntax/segment.hpp"
+#include "util/string.hpp"
 
 using server::talk::TextNode;
 
@@ -133,19 +134,7 @@ void
 HtmlRenderer::renderText(const String_t& text)
 {
     // FIXME: work on a ConstStringMemory_t instead to save allocations?
-    String_t::size_type i = 0, n;
-    while ((n = text.find_first_of("<>&\"'", i)) != text.npos) {
-        result.append(text, i, n-i);
-        switch (text[n]) {
-         case '<':  result += "&lt;";   break;
-         case '>':  result += "&gt;";   break;
-         case '&':  result += "&amp;";  break;
-         case '"':  result += "&quot;"; break;
-         case '\'': result += "&#39;";  break;
-        }
-        i = n+1;
-    }
-    result.append(text, i, text.size()-i);
+    result += util::encodeHtml(text, true);
 }
 
 void

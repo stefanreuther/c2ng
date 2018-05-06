@@ -28,6 +28,8 @@
 #include "game/v3/command.hpp"
 #include "game/v3/commandcontainer.hpp"
 #include "game/v3/reverter.hpp"
+#include "game/v3/trn/turnprocessor.hpp"
+#include "util/translation.hpp"
 
 using afl::string::Format;
 using afl::except::FileFormatException;
@@ -129,12 +131,16 @@ namespace {
     }
 }
 
-game::v3::ResultLoader::ResultLoader(afl::charset::Charset& charset,
+game::v3::ResultLoader::ResultLoader(afl::base::Ref<afl::io::Directory> specificationDirectory,
+                                     afl::base::Ref<afl::io::Directory> defaultSpecificationDirectory,
+                                     std::auto_ptr<afl::charset::Charset> charset,
                                      afl::string::Translator& tx,
                                      afl::sys::LogListener& log,
                                      const DirectoryScanner& scanner,
                                      afl::io::FileSystem& fs)
-    : m_charset(charset),  // FIXME: lifetime!
+    : m_specificationDirectory(specificationDirectory),
+      m_defaultSpecificationDirectory(defaultSpecificationDirectory),
+      m_charset(charset),
       m_translator(tx),
       m_log(log),
       m_fileSystem(fs)
@@ -169,7 +175,7 @@ game::v3::ResultLoader::loadCurrentTurn(Turn& turn, Game& game, int player, game
 {
     // ex game/load.h:loadCommon
     // Initialize planets and bases
-    Loader ldr(m_charset, m_translator, m_log);
+    Loader ldr(*m_charset, m_translator, m_log);
     ldr.prepareUniverse(turn.universe());
 
     // Reverter
@@ -181,28 +187,26 @@ game::v3::ResultLoader::loadCurrentTurn(Turn& turn, Game& game, int player, game
     // xyplan.dat
     afl::base::Ptr<afl::io::Stream> file = root.gameDirectory().openFileNT(Format("xyplan%d.dat", player), afl::io::FileSystem::OpenRead);
     if (file.get() == 0) {
-        file = root.specificationDirectory().openFile("xyplan.dat", afl::io::FileSystem::OpenRead).asPtr();
+        file = m_specificationDirectory->openFile("xyplan.dat", afl::io::FileSystem::OpenRead).asPtr();
     }
     ldr.loadPlanetCoordinates(turn.universe(), *file);
     file = 0;
 
     // planet.nm
-    file = root.specificationDirectory().openFile("planet.nm", afl::io::FileSystem::OpenRead).asPtr();
+    file = m_specificationDirectory->openFile("planet.nm", afl::io::FileSystem::OpenRead).asPtr();
     ldr.loadPlanetNames(turn.universe(), *file);
     file = 0;
 
     // storm.nm
-    file = root.specificationDirectory().openFile("storm.nm", afl::io::FileSystem::OpenRead).asPtr();
+    file = m_specificationDirectory->openFile("storm.nm", afl::io::FileSystem::OpenRead).asPtr();
     ldr.loadIonStormNames(turn.universe(), *file);
 
     // load database
-    loadCurrentDatabases(turn, game, player, root, session, m_charset);
+    loadCurrentDatabases(turn, game, player, root, session, *m_charset);
 
     // ex GGameResultStorage::load(GGameTurn& trn)
     file = root.gameDirectory().openFile(Format("player%d.rst", player), afl::io::FileSystem::OpenRead).asPtr();
-    if (const game::Player* p = root.playerList().get(player)) {
-        m_log.write(m_log.Info, LOG_NAME, Format(m_translator.translateString("Loading %s RST file...").c_str(), p->getName(Player::AdjectiveName)));
-    }
+    m_log.write(m_log.Info, LOG_NAME, Format(m_translator.translateString("Loading %s RST file...").c_str(), root.playerList().getPlayerName(player, Player::AdjectiveName)));
     loadResult(turn, root, game, *file, player, true);
     file = 0;
 
@@ -250,25 +254,25 @@ void
 game::v3::ResultLoader::loadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root)
 {
     // Initialize planets and bases
-    Loader ldr(m_charset, m_translator, m_log);
+    Loader ldr(*m_charset, m_translator, m_log);
     ldr.prepareUniverse(turn.universe());
 
     // xyplan.dat
     // FIXME: backup this?
     afl::base::Ptr<afl::io::Stream> file = root.gameDirectory().openFileNT(Format("xyplan%d.dat", player), afl::io::FileSystem::OpenRead);
     if (file.get() == 0) {
-        file = root.specificationDirectory().openFile("xyplan.dat", afl::io::FileSystem::OpenRead).asPtr();
+        file = m_specificationDirectory->openFile("xyplan.dat", afl::io::FileSystem::OpenRead).asPtr();
     }
     ldr.loadPlanetCoordinates(turn.universe(), *file);
     file = 0;
 
     // planet.nm
-    file = root.specificationDirectory().openFile("planet.nm", afl::io::FileSystem::OpenRead).asPtr();
+    file = m_specificationDirectory->openFile("planet.nm", afl::io::FileSystem::OpenRead).asPtr();
     ldr.loadPlanetNames(turn.universe(), *file);
     file = 0;
 
     // storm.nm
-    file = root.specificationDirectory().openFile("storm.nm", afl::io::FileSystem::OpenRead).asPtr();
+    file = m_specificationDirectory->openFile("storm.nm", afl::io::FileSystem::OpenRead).asPtr();
     ldr.loadIonStormNames(turn.universe(), *file);
 
     // load turn file backup
@@ -278,9 +282,7 @@ game::v3::ResultLoader::loadHistoryTurn(Turn& turn, Game& game, int player, int 
     tpl.setTurnNumber(turnNumber);
 
     file = tpl.openFile(m_fileSystem, root.userConfiguration()[opt_BackupResult]()).asPtr();
-    if (const game::Player* p = root.playerList().get(player)) {
-        m_log.write(m_log.Info, LOG_NAME, Format(m_translator.translateString("Loading %s backup file...").c_str(), p->getName(Player::AdjectiveName)));
-    }
+    m_log.write(m_log.Info, LOG_NAME, Format(m_translator.translateString("Loading %s backup file...").c_str(), root.playerList().getPlayerName(player, Player::AdjectiveName)));
     loadResult(turn, root, game, *file, player, false);
     file = 0;
     // if (have_trn) {
@@ -299,6 +301,25 @@ game::v3::ResultLoader::loadHistoryTurn(Turn& turn, Game& game, int player, int 
     // // // // // maybeLoadFlakVcrs(trn, *game_file_dir, player);
 }
 
+String_t
+game::v3::ResultLoader::getProperty(Property p)
+{
+    switch (p) {
+     case LocalFileFormatProperty:
+        // igpFileFormatLocal: DOS, Windows
+        return "RST";
+
+     case RemoteFileFormatProperty:
+        // igpFileFormatRemote: turn file format
+        return "Windows";
+
+     case RootDirectoryProperty:
+        // igpRootDirectory:
+        return m_defaultSpecificationDirectory->getDirectoryName();
+    }
+    return String_t();
+}
+
 
 // /** Load a RST file. */
 void
@@ -309,7 +330,7 @@ game::v3::ResultLoader::loadResult(Turn& turn, Root& root, Game& game, afl::io::
 
     ResultFile result(file, m_translator);
     PlayerSet_t source(player);
-    Loader loader(m_charset, m_translator, m_log);
+    Loader loader(*m_charset, m_translator, m_log);
 
     // Gen
     structures::ResultGen gen;
@@ -409,213 +430,138 @@ void
 game::v3::ResultLoader::loadTurnfile(Turn& trn, Root& root, afl::io::Stream& file, int player)
 {
     // ex game/load-trn.cc:loadTurn
-    if (const game::Player* p = root.playerList().get(player)) {
-        m_log.write(m_log.Info, LOG_NAME, Format(m_translator.translateString("Loading %s TRN file...").c_str(), p->getName(Player::AdjectiveName)));
-    }
+    m_log.write(m_log.Info, LOG_NAME, Format(m_translator.translateString("Loading %s TRN file...").c_str(), root.playerList().getPlayerName(player, Player::AdjectiveName)));
 
-    TurnFile f(m_charset, file);
+    // Load, validate, and log.
+    TurnFile f(*m_charset, file);
+    if (f.getPlayer() != player) {
+        throw FileFormatException(file, Format(m_translator.translateString("Turn file belongs to player %d").c_str(), f.getPlayer()));
+    }
     if (f.getFeatures().contains(TurnFile::TaccomFeature)) {
         m_log.write(m_log.Info, LOG_NAME, Format(m_translator.translateString("Turn file contains %d attachment%!1{s%}").c_str(), f.getNumFiles()));
     }
-    f.sortCommands();
 
-    // Pass 1: verify commands
-    for (size_t i = 0, n = f.getNumCommands(); i < n; ++i) {
-        int cmdId;
-        TurnFile::CommandCode_t cmdCode;
-        TurnFile::CommandType cmdType;
-        if (f.getCommandId(i, cmdId) && f.getCommandCode(i, cmdCode) && f.getCommandType(i, cmdType)) {
-            switch (cmdType) {
-             case TurnFile::UndefinedCommand:
-                throw FileFormatException(file, Format(m_translator.translateString("Turn file contains invalid command code %d").c_str(), cmdCode));
-
-             case TurnFile::ShipCommand:
-                if (const game::map::Ship* sh = trn.universe().ships().get(cmdId)) {
-                    if (!sh->getShipSource().contains(player)) {
-                        throw FileFormatException(file, Format(m_translator.translateString("Turn file refers to ship %d which is not ours").c_str(), cmdId));
+    // Use TurnProcessor to load the turn file.
+    class LocalTurnProcessor : public game::v3::trn::TurnProcessor {
+     public:
+        LocalTurnProcessor(Turn& turn, Root& root, afl::io::Stream& file, int player, bool remapExplore, ResultLoader& parent)
+            : m_turn(turn),
+              m_root(root),
+              m_file(file),
+              m_player(player),
+              m_remapExplore(remapExplore),
+              m_parent(parent)
+            { }
+        void fail(const char* tpl, int arg)
+            { throw FileFormatException(m_file, Format(m_parent.m_translator.translateString(tpl).c_str(), arg)); }
+        virtual void handleInvalidCommand(int code)
+            { fail(N_("Turn file contains invalid command code %d"), code); }
+        virtual void validateShip(int id)
+            {
+                if (const game::map::Ship* sh = m_turn.universe().ships().get(id)) {
+                    if (!sh->getShipSource().contains(m_player)) {
+                        fail(N_("Turn file refers to ship %d which is not ours"), id);
                     }
                 } else {
-                    throw FileFormatException(file, Format(m_translator.translateString("Turn file refers to non-existant ship %d").c_str(), cmdId));
+                    fail(N_("Turn file refers to non-existant ship %d"), id);
                 }
-                break;
-
-             case TurnFile::PlanetCommand:
-                if (const game::map::Planet* pl = trn.universe().planets().get(cmdId)) {
-                    if (!pl->getPlanetSource().contains(player)) {
-                        throw FileFormatException(file, Format(m_translator.translateString("Turn file refers to planet %d which is not ours").c_str(), cmdId));
+            }
+        virtual void validatePlanet(int id)
+            {
+                if (const game::map::Planet* pl = m_turn.universe().planets().get(id)) {
+                    if (!pl->getPlanetSource().contains(m_player)) {
+                        fail(N_("Turn file refers to planet %d which is not ours"), id);
                     }
                 } else {
-                    throw FileFormatException(file, Format(m_translator.translateString("Turn file refers to non-existant planet %d").c_str(), cmdId));
+                    fail(N_("Turn file refers to non-existant planet %d"), id);
                 }
-                break;
-
-             case TurnFile::BaseCommand:
-                if (const game::map::Planet* pl = trn.universe().planets().get(cmdId)) {
-                    if (!pl->getBaseSource().contains(player)) {
-                        throw FileFormatException(file, Format(m_translator.translateString("Turn file refers to starbase %d which is not ours").c_str(), cmdId));
+            }
+        virtual void validateBase(int id)
+            {
+                if (const game::map::Planet* pl = m_turn.universe().planets().get(id)) {
+                    if (!pl->getBaseSource().contains(m_player)) {
+                        fail(N_("Turn file refers to starbase %d which is not ours"), id);
                     }
                 } else {
-                    throw FileFormatException(file, Format(m_translator.translateString("Turn file refers to non-existant starbase %d").c_str(), cmdId));
+                    fail(N_("Turn file refers to non-existant starbase %d"), id);
                 }
-                break;
-
-             case TurnFile::OtherCommand:
-                break;
             }
-        }
-    }
 
-    // Pass 2: process commands.
-    String_t timAllies;
-    const bool remapExplore = !root.hostVersion().isMissionAllowed(1);
-    m_log.write(m_log.Debug, LOG_NAME, Format(m_translator.translateString("Loading %d command%!1{s%}...").c_str(), f.getNumCommands()));
-    size_t i = 0;
-    while (i < f.getNumCommands()) {
-        // Get this command's Id and class
-        // (These calls will not fail; we have verified above.)
-        int cmdId = 0;
-        TurnFile::CommandType cmdType = TurnFile::UndefinedCommand;
-        f.getCommandId(i, cmdId);
-        f.getCommandType(i, cmdType);
-
-        switch (cmdType) {
-         case TurnFile::ShipCommand:
-            if (game::map::Ship* sh = trn.universe().ships().get(cmdId)) {
-                size_t n = f.findCommandRunLength(i);
-
-                game::map::ShipData data;
-                sh->getCurrentShipData(data);
-
-                structures::Ship rawData;
-                Packer(m_charset).packShip(rawData, cmdId, data, remapExplore);
-
-                while (n > 0) {
-                    TurnFile::CommandCode_t cmdCode;
-                    int cmdLength;
-                    if (f.getCommandCode(i, cmdCode) && f.getCommandLength(i, cmdLength)) {
-                        size_t offset = TurnFile::getCommandCodeRecordIndex(cmdCode);
-                        afl::base::ConstBytes_t cmdData = f.getCommandData(i);
-                        afl::base::fromObject(rawData).subrange(offset, cmdLength).copyFrom(cmdData);
-
-                        TurnFile::CommandCode_t nextCode;
-                        if (cmdCode == tcm_ShipChangeFc && n >= 2 && f.getCommandCode(i+1, nextCode) && nextCode == tcm_ShipChangeFc && cmdData.size() >= 3) {
-                            // might be THost alliance command
-                            char out[3];
-                            afl::base::fromObject(out).copyFrom(cmdData);
-                            if ((out[0] == 'f' && out[1] == 'f') || (out[0] == 'F' && out[1] == 'F') || (out[0] == 'e' && out[1] == 'e')) {
-                                timAllies.append(out, sizeof(out));
-                            }
-                        }
-                    }
-                    ++i, --n;
+        virtual void getShipData(int id, Ship_t& out, afl::charset::Charset& charset)
+            {
+                if (game::map::Ship* sh = m_turn.universe().ships().get(id)) {
+                    game::map::ShipData data;
+                    sh->getCurrentShipData(data);
+                    Packer(charset).packShip(out, id, data, m_remapExplore);
                 }
-
-                Packer(m_charset).unpackShip(data, rawData, remapExplore);
-                sh->addCurrentShipData(data, PlayerSet_t(player));
-            } else {
-                // cannot happen
-                ++i;
             }
-            break;
 
-         case TurnFile::PlanetCommand:
-            if (game::map::Planet* pl = trn.universe().planets().get(cmdId)) {
-                size_t n = f.findCommandRunLength(i);
-
-                game::map::PlanetData data;
-                pl->getCurrentPlanetData(data);
-
-                structures::Planet rawData;
-                Packer(m_charset).packPlanet(rawData, cmdId, data);
-
-                while (n > 0) {
-                    TurnFile::CommandCode_t cmdCode;
-                    int cmdLength;
-                    if (f.getCommandCode(i, cmdCode) && f.getCommandLength(i, cmdLength)) {
-                        if (cmdCode == tcm_PlanetBuildBase) {
-                            rawData.buildBaseFlag = 1;
-                        } else {
-                            size_t offset = TurnFile::getCommandCodeRecordIndex(cmdCode);
-                            afl::base::ConstBytes_t cmdData = f.getCommandData(i);
-                            afl::base::fromObject(rawData).subrange(offset, cmdLength).copyFrom(cmdData);
-                        }
-                    }
-                    ++i, --n;
+        virtual void getPlanetData(int id, Planet_t& out, afl::charset::Charset& charset)
+            {
+                if (game::map::Planet* pl = m_turn.universe().planets().get(id)) {
+                    game::map::PlanetData data;
+                    pl->getCurrentPlanetData(data);
+                    Packer(charset).packPlanet(out, id, data);
                 }
-
-                Packer(m_charset).unpackPlanet(data, rawData);
-                pl->addCurrentPlanetData(data, PlayerSet_t(player));
-            } else {
-                // cannot happen
-                ++i;
             }
-            break;
 
-         case TurnFile::BaseCommand:
-            if (game::map::Planet* pl = trn.universe().planets().get(cmdId)) {
-                size_t n = f.findCommandRunLength(i);
-
-                game::map::BaseData data;
-                pl->getCurrentBaseData(data);
-
-                structures::Base rawData;
-                Packer(m_charset).packBase(rawData, cmdId, data);
-
-                while (n > 0) {
-                    TurnFile::CommandCode_t cmdCode;
-                    int cmdLength;
-                    if (f.getCommandCode(i, cmdCode) && f.getCommandLength(i, cmdLength)) {
-                        size_t offset = TurnFile::getCommandCodeRecordIndex(cmdCode);
-                        afl::base::ConstBytes_t cmdData = f.getCommandData(i);
-                        afl::base::fromObject(rawData).subrange(offset, cmdLength).copyFrom(cmdData);
-                    }
-                    ++i, --n;
+        virtual void getBaseData(int id, Base_t& out, afl::charset::Charset& charset)
+            {
+                if (game::map::Planet* pl = m_turn.universe().planets().get(id)) {
+                    game::map::BaseData data;
+                    pl->getCurrentBaseData(data);
+                    Packer(charset).packBase(out, id, data);
                 }
-
-                Packer(m_charset).unpackBase(data, rawData);
-                pl->addCurrentBaseData(data, PlayerSet_t(player));
-            } else {
-                // cannot happen
-                ++i;
             }
-            break;
 
-         case TurnFile::OtherCommand: {
-            TurnFile::CommandCode_t cmdCode = 0;
-            f.getCommandCode(i, cmdCode);
-            if (cmdCode == tcm_SendMessage) {
-                afl::base::ConstBytes_t cmdData = f.getCommandData(i);
-                /* format of message is:
-                      id     = length
-                      data+0 = sender
-                      data+2 = receiver
-                      data+4 = text */
-                structures::Int16_t to;
-                to = 0;
-                afl::base::fromObject(to).copyFrom(cmdData.subrange(2, 2));
-                int size = cmdId;
+        virtual void storeShipData(int id, const Ship_t& in, afl::charset::Charset& charset)
+            {
+                if (game::map::Ship* sh = m_turn.universe().ships().get(id)) {
+                    game::map::ShipData data;
+                    Packer(charset).unpackShip(data, in, m_remapExplore);
+                    sh->addCurrentShipData(data, PlayerSet_t(m_player));
+                }
+            }
+
+        virtual void storePlanetData(int id, const Planet_t& in, afl::charset::Charset& charset)
+            {
+                if (game::map::Planet* pl = m_turn.universe().planets().get(id)) {
+                    game::map::PlanetData data;
+                    Packer(charset).unpackPlanet(data, in);
+                    pl->addCurrentPlanetData(data, PlayerSet_t(m_player));
+                }
+            }
+
+        virtual void storeBaseData(int id, const Base_t& in, afl::charset::Charset& charset)
+            {
+                if (game::map::Planet* pl = m_turn.universe().planets().get(id)) {
+                    game::map::BaseData data;
+                    Packer(charset).unpackBase(data, in);
+                    pl->addCurrentBaseData(data, PlayerSet_t(m_player));
+                }
+            }
+
+        virtual void addMessage(int to, String_t text)
+            {
+                // FIXME: host remapping!!!1 0<>12
                 if (to > 0 && to <= structures::NUM_OWNERS) {
-                    addMessage(trn, decodeMessage(cmdData.subrange(4, size), m_charset, false), player, PlayerSet_t(to));
+                    m_parent.addMessage(m_turn, text, m_player, PlayerSet_t(to));
                 }
-            } else if (cmdCode == tcm_ChangePassword) {
-                // FIXME -> trn.getGen(player).setPasswordFromTurn(f.getCommandData(i));
-            } else {
-                // unknown
             }
-            ++i;
-            break;
-         }
 
-         case TurnFile::UndefinedCommand:
-            // Cannot happen, but avoid lossage if it does anyway
-            ++i;
-            break;
-        }
-    }
+        virtual void addAllianceCommand(String_t text)
+            { CommandExtra::create(m_turn).create(m_player).addCommand(Command::phc_TAlliance, 0, text); }
+     private:
+        Turn& m_turn;
+        Root& m_root;
+        afl::io::Stream& m_file;
+        const int m_player;
+        bool m_remapExplore;
+        ResultLoader& m_parent;
+    };
 
-    if (!timAllies.empty()) {
-        CommandExtra::create(trn).create(player).addCommand(Command::phc_TAlliance, 0, m_charset.decode(afl::string::toBytes(timAllies)));
-    }
+    const bool remapExplore = !root.hostVersion().isMissionAllowed(1);
+    LocalTurnProcessor(trn, root, file, player, remapExplore, *this).handleTurnFile(f, *m_charset);
 }
 
 // /** Add message from message file. This decides whether the message is

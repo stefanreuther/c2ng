@@ -8,11 +8,11 @@
 #include "util/stringlist.hpp"
 #include "gfx/resourceprovider.hpp"
 #include "ui/colorscheme.hpp"
+#include "afl/functional/stringtable.hpp"
 
 namespace ui { namespace widgets {
 
-    // /** \class UIStandardListbox
-    //     \brief Standard List Box Widget
+    // /** Standard List Box Widget
 
     //     This class provides the standard list box widget used for most cases.
     //     It displays a UIStringList, and provides handy functions to access
@@ -40,6 +40,7 @@ namespace ui { namespace widgets {
 
         // StringListbox:
         void addItem(int32_t key, const String_t& s);
+        void addItems(const afl::functional::StringTable_t& tab);
         void sortItemsAlphabetically();
         void swapItems(util::StringList& other);
 

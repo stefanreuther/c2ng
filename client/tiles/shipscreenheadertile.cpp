@@ -69,12 +69,11 @@ client::tiles::ShipScreenHeaderTile::attach(ObjectObserverProxy& oop)
                                     : (levelKnown
                                        ? _("(Id #%d, %!s%s %s)")
                                        : _("(Id #%d, %!s%!s%s)")));
-                    game::Player* player = r->playerList().get(owner);
                     int hullNumber;
                     game::spec::Hull* hull = sh->getHull().get(hullNumber) ? sl->hulls().get(hullNumber) : 0;
                     m_subtitle = afl::string::Format(fmt.c_str(),
                                                      sh->getId(),
-                                                     player ? player->getName(game::Player::AdjectiveName) : "?",
+                                                     r->playerList().getPlayerName(owner, game::Player::AdjectiveName),
                                                      r->hostConfiguration().getExperienceLevelName(level, session.translator()),
                                                      (hull ? hull->getName(sl->componentNamer()) : _("ship")));
 

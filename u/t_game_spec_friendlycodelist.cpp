@@ -9,6 +9,8 @@
 #include "afl/io/constmemorystream.hpp"
 #include "afl/base/growablememory.hpp"
 #include "afl/sys/log.hpp"
+#include "game/map/planet.hpp"
+#include "game/spec/shiplist.hpp"
 
 /** Test isNumeric(). */
 void
@@ -32,6 +34,9 @@ TestGameSpecFriendlyCodeList::testNumeric()
     TS_ASSERT(!testee.isNumeric(" 1", host));
     TS_ASSERT(!testee.isNumeric("1 ", host));
     TS_ASSERT(!testee.isNumeric(" 1 ", host));
+    TS_ASSERT(!testee.isNumeric("-  ", host));
+    TS_ASSERT(!testee.isNumeric("  -", host));
+    TS_ASSERT(!testee.isNumeric("   ", host));
 
     host.set(host.PHost, MKVERSION(4,0,0));
     TS_ASSERT(testee.isNumeric("-11", host));
@@ -41,6 +46,9 @@ TestGameSpecFriendlyCodeList::testNumeric()
     TS_ASSERT(!testee.isNumeric(" 1", host));
     TS_ASSERT(!testee.isNumeric("1 ", host));
     TS_ASSERT(!testee.isNumeric(" 1 ", host));
+    TS_ASSERT(!testee.isNumeric("-  ", host));
+    TS_ASSERT(!testee.isNumeric("  -", host));
+    TS_ASSERT(!testee.isNumeric("   ", host));
 
     host.set(host.PHost, MKVERSION(4,0,8));
     TS_ASSERT(testee.isNumeric("-11", host));
@@ -54,12 +62,26 @@ TestGameSpecFriendlyCodeList::testNumeric()
     TS_ASSERT_EQUALS(testee.getNumericValue("1 ", host), 1);
     TS_ASSERT(testee.isNumeric(" 1 ", host));
     TS_ASSERT_EQUALS(testee.getNumericValue(" 1 ", host), 1);
+    TS_ASSERT(!testee.isNumeric("-  ", host));
+    TS_ASSERT(!testee.isNumeric("  -", host));
+    TS_ASSERT(!testee.isNumeric("   ", host));
 
     host.set(host.PHost, MKVERSION(3,4,9));
     TS_ASSERT(!testee.isNumeric(" 1 ", host));
 
     host.set(host.PHost, MKVERSION(3,4,11));
     TS_ASSERT(testee.isNumeric(" 1 ", host));
+
+    TS_ASSERT(testee.isNumeric("-11", testee.Pessimistic));
+    TS_ASSERT_EQUALS(testee.getNumericValue("-11", testee.Pessimistic), -11);
+    TS_ASSERT(!testee.isNumeric("--1", testee.Pessimistic));
+    TS_ASSERT( testee.isNumeric("1",   testee.Pessimistic));
+    TS_ASSERT( testee.isNumeric(" 1",  testee.Pessimistic));
+    TS_ASSERT( testee.isNumeric("1 ",  testee.Pessimistic));
+    TS_ASSERT( testee.isNumeric(" 1 ", testee.Pessimistic));
+    TS_ASSERT(!testee.isNumeric("-  ", testee.Pessimistic));
+    TS_ASSERT(!testee.isNumeric("  -", testee.Pessimistic));
+    TS_ASSERT(!testee.isNumeric("   ", testee.Pessimistic));
 }
 
 /** Test isAllowedRandomCode(). */
@@ -130,6 +152,9 @@ TestGameSpecFriendlyCodeList::testRandom()
     TS_ASSERT(!testee.isAllowedRandomCode("a", host));    // fails: length mismatch
     TS_ASSERT(!testee.isAllowedRandomCode("ab", host));   // fails: length mismatch
     TS_ASSERT(!testee.isAllowedRandomCode("abcd", host)); // fails: length mismatch
+
+    TS_ASSERT(testee.isAllowedRandomCode("-19", game::HostVersion(game::HostVersion::Host, MKVERSION(3,2,0))));
+    TS_ASSERT(!testee.isAllowedRandomCode("-19", game::spec::FriendlyCodeList::Pessimistic));
 }
 
 /** Test container behaviour. */
@@ -188,7 +213,9 @@ TestGameSpecFriendlyCodeList::testContainer()
     p.setPlayability(p.ReadOnly);
 
     const game::config::HostConfiguration hostConfig;
-    game::spec::FriendlyCodeList sublist(testee, p, hostConfig);
+    const game::spec::ShipList shipList;
+    const game::UnitScoreDefinitionList scoreDefinitions;
+    game::spec::FriendlyCodeList sublist(testee, p, scoreDefinitions, shipList, hostConfig);
     TS_ASSERT_EQUALS(sublist.size(), 2U);
     TS_ASSERT_EQUALS(sublist.at(0)->getCode(), "ffc");
     TS_ASSERT_EQUALS(sublist.at(1)->getCode(), "pfc");
@@ -288,15 +315,19 @@ TestGameSpecFriendlyCodeList::testUniversalMF()
     // Test
     TS_ASSERT(testee.isUniversalMinefieldFCode("mfx", false, phost));
     TS_ASSERT(testee.isUniversalMinefieldFCode("mfx", false, thost));
+    TS_ASSERT(testee.isUniversalMinefieldFCode("mfx", false, testee.Pessimistic));
     TS_ASSERT(!testee.isUniversalMinefieldFCode("abc", false, thost));
 
     TS_ASSERT(!testee.isUniversalMinefieldFCode("MFX", false, phost));
     TS_ASSERT(testee.isUniversalMinefieldFCode("MFX", false, thost));
+    TS_ASSERT(testee.isUniversalMinefieldFCode("MFX", false, testee.Pessimistic));
     TS_ASSERT(!testee.isUniversalMinefieldFCode("ABC", false, thost));
 
     TS_ASSERT(testee.isUniversalMinefieldFCode("MFX", true, phost));
     TS_ASSERT(testee.isUniversalMinefieldFCode("MFX", true, thost));
     TS_ASSERT(!testee.isUniversalMinefieldFCode("ABC", true, thost));
+
+    TS_ASSERT(!testee.isUniversalMinefieldFCode("ABC", false, testee.Pessimistic));
 }
 
 /** Test generateRandomCode() infinite loop avoidance. */
@@ -441,5 +472,25 @@ TestGameSpecFriendlyCodeList::testSyntaxErrors()
         TS_ASSERT_EQUALS(list.size(), 1U);
         TS_ASSERT_EQUALS(list.at(0)->getCode(), "lon");
     }
+}
+
+/** Test Pessimistic. */
+void
+TestGameSpecFriendlyCodeList::testPessimistic()
+{
+    using game::HostVersion;
+    game::spec::FriendlyCodeList testee;
+
+    TS_ASSERT( testee.isAllowedRandomCode(" 12", HostVersion(HostVersion::Host,  MKVERSION(3, 0, 0))));
+    TS_ASSERT(!testee.isAllowedRandomCode(" 12", HostVersion(HostVersion::PHost, MKVERSION(4, 1, 0))));
+    TS_ASSERT(!testee.isAllowedRandomCode(" 12", testee.Pessimistic));
+
+    TS_ASSERT( testee.isAllowedRandomCode("-12", HostVersion(HostVersion::Host,  MKVERSION(3, 0, 0))));
+    TS_ASSERT(!testee.isAllowedRandomCode("-12", HostVersion(HostVersion::PHost, MKVERSION(4, 1, 0))));
+    TS_ASSERT(!testee.isAllowedRandomCode("-12", testee.Pessimistic));
+
+    TS_ASSERT(!testee.isAllowedRandomCode("Mff", HostVersion(HostVersion::Host,  MKVERSION(3, 0, 0))));
+    TS_ASSERT(!testee.isAllowedRandomCode("Mff", HostVersion(HostVersion::PHost, MKVERSION(4, 1, 0)))); // not a special friendly code, but isAllowedRandomCode() always is pessimistic
+    TS_ASSERT(!testee.isAllowedRandomCode("Mff", testee.Pessimistic));
 }
 

@@ -30,12 +30,9 @@ namespace gfx {
 
         /** Create a window.
             NullEngine will create a RGBAPixmap.
-            \param width Width of window, pixels
-            \param height Height of window, pixels
-            \param bpp Bits per pixel (8/16/24/32 to pick a specific width; 0 to pick the default)
-            \param flags Flags
+            \param param Parameters
             \return newly-allocated RGBAPixmap */
-        virtual afl::base::Ref<Canvas> createWindow(int width, int height, int bpp, WindowFlags_t flags);
+        virtual afl::base::Ref<Canvas> createWindow(const WindowParameters& param);
 
         /** Load an image file.
             NullEngine will return an empty 1x1 RGBAPixmap for all requests.

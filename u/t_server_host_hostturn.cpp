@@ -41,9 +41,9 @@ namespace {
 
     class TestHarness {
      public:
-        TestHarness()
+        TestHarness(bool ustt)
             : m_db(), m_hostFile(), m_userFile(), m_null(), m_mail(m_null), m_runner(), m_fs(afl::io::FileSystem::getInstance()),
-              m_root(m_db, m_hostFile, m_userFile, m_mail, m_runner, m_fs, makeConfig()),
+              m_root(m_db, m_hostFile, m_userFile, m_mail, m_runner, m_fs, makeConfig(ustt)),
               m_hostFileClient(m_hostFile)
             { }
 
@@ -65,7 +65,7 @@ namespace {
         String_t createTurn(const char* timestamp);
 
      private:
-        static server::host::Configuration makeConfig();
+        static server::host::Configuration makeConfig(bool ustt);
 
         afl::net::redis::InternalDatabase m_db;
         server::file::InternalFileServer m_hostFile;
@@ -138,10 +138,11 @@ TestHarness::createTurn(const char* timestamp)
 }
 
 server::host::Configuration
-TestHarness::makeConfig()
+TestHarness::makeConfig(bool ustt)
 {
     server::host::Configuration config;
     config.workDirectory = "/tmp";
+    config.usersSeeTemporaryTurns = ustt;
     return config;
 }
 
@@ -155,7 +156,7 @@ void
 TestServerHostHostTurn::testSubmit()
 {
     // Prepare defaults
-    TestHarness h;
+    TestHarness h(false);
     int32_t gid = h.prepareGame(DEFAULT_TIMESTAMP);
     String_t dummyTurn = h.createTurn(DEFAULT_TIMESTAMP);
 
@@ -199,7 +200,7 @@ void
 TestServerHostHostTurn::testSubmitEmpty()
 {
     // Prepare defaults
-    TestHarness h;
+    TestHarness h(false);
 
     // Test
     server::host::Session session;
@@ -213,7 +214,7 @@ void
 TestServerHostHostTurn::testSubmitEmptyGame()
 {
     // Prepare defaults
-    TestHarness h;
+    TestHarness h(false);
     int32_t gid = h.prepareGame(DEFAULT_TIMESTAMP);
 
     // Test
@@ -228,7 +229,7 @@ void
 TestServerHostHostTurn::testSubmitStale()
 {
     // Prepare defaults
-    TestHarness h;
+    TestHarness h(false);
 
     // Test
     server::host::Session session;
@@ -242,7 +243,7 @@ void
 TestServerHostHostTurn::testSubmitStaleGame()
 {
     // Prepare defaults
-    TestHarness h;
+    TestHarness h(false);
     int32_t gid = h.prepareGame(DEFAULT_TIMESTAMP);
 
     // Staleness is NOT (currently) determined internally by c2host, even though we could compare timestamps.
@@ -267,7 +268,7 @@ void
 TestServerHostHostTurn::testSubmitWrongUser()
 {
     // Prepare defaults
-    TestHarness h;
+    TestHarness h(false);
     int32_t gid = h.prepareGame(DEFAULT_TIMESTAMP);
 
     // Test
@@ -287,7 +288,7 @@ void
 TestServerHostHostTurn::testSubmitEmail()
 {
     // Prepare defaults
-    TestHarness h;
+    TestHarness h(false);
     int32_t gid = h.prepareGame(DEFAULT_TIMESTAMP);
 
     // Test
@@ -308,7 +309,7 @@ void
 TestServerHostHostTurn::testSubmitEmailCase()
 {
     // Prepare defaults
-    TestHarness h;
+    TestHarness h(false);
     int32_t gid = h.prepareGame(DEFAULT_TIMESTAMP);
 
     // Test
@@ -329,7 +330,7 @@ void
 TestServerHostHostTurn::testSubmitWrongEmail()
 {
     // Prepare defaults
-    TestHarness h;
+    TestHarness h(false);
     h.prepareGame(DEFAULT_TIMESTAMP);
 
     // Test
@@ -345,7 +346,7 @@ void
 TestServerHostHostTurn::testSubmitEmailUser()
 {
     // Prepare defaults
-    TestHarness h;
+    TestHarness h(false);
     h.prepareGame(DEFAULT_TIMESTAMP);
 
     // Test
@@ -362,7 +363,7 @@ void
 TestServerHostHostTurn::testSubmitEmailStale()
 {
     // Prepare defaults
-    TestHarness h;
+    TestHarness h(false);
 
     // Test
     server::host::Session session;
@@ -376,7 +377,7 @@ void
 TestServerHostHostTurn::testStatus()
 {
     // Prepare defaults
-    TestHarness h;
+    TestHarness h(false);
     int32_t gid = h.prepareGame(DEFAULT_TIMESTAMP);
 
     // Three different contexts
@@ -425,7 +426,7 @@ TestServerHostHostTurn::testStatus()
 
     i = player2.getInfo(gid);
     TS_ASSERT(i.turnStates.isValid());
-    TS_ASSERT_EQUALS((*i.turnStates.get())[2], Game::TurnGreen);  // other player does not see Temporary flag
+    TS_ASSERT_EQUALS((*i.turnStates.get())[2], Game::TurnGreen);  // other player does not see Temporary flag, disabled in config
 
     // Submit a yellow turn
     h.hostFile().putFile("bin/checkturn.sh", "exit 1");
@@ -461,12 +462,63 @@ TestServerHostHostTurn::testStatus()
     TS_ASSERT_EQUALS((*i.turnStates.get())[2], Game::TurnGreen);  // other player does not see Yellow or Temporary flag
 }
 
+/** Test statuses, with the "users see temporary turns" option enabled. */
+void
+TestServerHostHostTurn::testStatusTempEnable()
+{
+    // Prepare defaults
+    TestHarness h(true);
+    int32_t gid = h.prepareGame(DEFAULT_TIMESTAMP);
+
+    // Only testing the "player2" context here
+    server::host::Session player2Session;
+    server::host::HostGame player2(player2Session, h.root());
+    player2Session.setUser("ub");
+
+    // Test
+    server::host::Session session;
+    server::host::HostTurn testee(session, h.root());
+
+    // Submit a correct turn
+    TS_ASSERT_THROWS_NOTHING(testee.submit(h.createTurn(DEFAULT_TIMESTAMP), afl::base::Nothing, afl::base::Nothing, afl::base::Nothing, afl::base::Nothing));
+
+    // Read out state
+    HostGame::Info i = player2.getInfo(gid);
+    TS_ASSERT(i.turnStates.isValid());
+    TS_ASSERT_EQUALS((*i.turnStates.get())[2], Game::TurnGreen);
+
+    // Mark temporary
+    TS_ASSERT_THROWS_NOTHING(testee.setTemporary(gid, SLOT_NR, true));
+
+    // Read out state
+    i = player2.getInfo(gid);
+    TS_ASSERT(i.turnStates.isValid());
+    TS_ASSERT_EQUALS((*i.turnStates.get())[2], Game::TurnGreen | Game::TurnIsTemporary);  // Temporary flag now visible
+
+    // Submit a yellow turn
+    h.hostFile().putFile("bin/checkturn.sh", "exit 1");
+    TS_ASSERT_THROWS_NOTHING(testee.submit(h.createTurn(DEFAULT_TIMESTAMP), afl::base::Nothing, afl::base::Nothing, afl::base::Nothing, afl::base::Nothing));
+
+    // Read out state
+    i = player2.getInfo(gid);
+    TS_ASSERT(i.turnStates.isValid());
+    TS_ASSERT_EQUALS((*i.turnStates.get())[2], Game::TurnGreen);  // other player does not see Yellow
+
+    // Mark temporary
+    TS_ASSERT_THROWS_NOTHING(testee.setTemporary(gid, SLOT_NR, true));
+
+    // Read out state
+    i = player2.getInfo(gid);
+    TS_ASSERT(i.turnStates.isValid());
+    TS_ASSERT_EQUALS((*i.turnStates.get())[2], Game::TurnGreen | Game::TurnIsTemporary);  // Temporary flag now visible
+}
+
 /** Test errors in setTemporary. */
 void
 TestServerHostHostTurn::testStatusErrors()
 {
     // Prepare defaults
-    TestHarness h;
+    TestHarness h(false);
     int32_t gid = h.prepareGame(DEFAULT_TIMESTAMP);
 
     // Test

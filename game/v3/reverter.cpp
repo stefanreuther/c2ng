@@ -103,6 +103,26 @@ game::v3::Reverter::getNumFightersAllowedToSell(int planetId) const
     }
 }
 
+afl::base::Optional<String_t>
+game::v3::Reverter::getPreviousShipFriendlyCode(Id_t shipId) const
+{
+    if (const game::map::ShipData* pShip = m_oldShipData.get(shipId)) {
+        return pShip->friendlyCode;
+    } else {
+        return afl::base::Nothing;
+    }
+}
+
+afl::base::Optional<String_t>
+game::v3::Reverter::getPreviousPlanetFriendlyCode(Id_t planetId) const
+{
+    if (const game::map::PlanetData* pPlanet = m_oldPlanetData.get(planetId)) {
+        return pPlanet->friendlyCode;
+    } else {
+        return afl::base::Nothing;
+    }
+}
+
 void
 game::v3::Reverter::addShipData(int id, const game::map::ShipData& data)
 {

@@ -60,6 +60,14 @@ namespace game {
             \return host version, @see MKVERSION. */
         int32_t getVersion() const;
 
+        /** Check for PHost.
+
+            DEPRECATED: try to not have dependencies of this type.
+            However, especially in porting old code this is pretty convenient.
+
+            \return true if host is PHost */
+        bool isPHost() const;
+
         /** Format as string.
             \param tx Translator to generate strings
             \return host version formatted as a string */
@@ -175,6 +183,9 @@ namespace game {
         /** Check for ability to do two cargo transfers from a ship.
             Classic VGAP can do that, Nu has only one slot to store the transfer. */
         bool hasParallelShipTransfers() const;
+
+        /** Check for extended missions. */
+        bool hasExtendedMissions(const game::config::HostConfiguration& config) const;
 
      private:
         /** Host type. */

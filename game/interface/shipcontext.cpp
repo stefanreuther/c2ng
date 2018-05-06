@@ -165,7 +165,7 @@ namespace {
         // Check user-defined properties
         afl::data::NameMap::Index_t ix = world.shipPropertyNames().getIndexByName(q);
         if (ix != afl::data::NameMap::nil) {
-            result = ix + NUM_SHIP_PROPERTIES;
+            result = static_cast<interpreter::Context::PropertyIndex_t>(ix + NUM_SHIP_PROPERTIES);
             return true;
         }
 
@@ -292,10 +292,10 @@ game::interface::ShipContext::get(PropertyIndex_t index)
                                        ShipProperty(ship_mapping[index].index),
                                        m_session.translator(),
                                        m_session.interface(),
-                                       m_root.asPtr(),
-                                       m_shipList.asPtr(),
-                                       m_game.asPtr(),
-                                       &m_game->currentTurn());
+                                       m_root,
+                                       m_shipList,
+                                       m_game,
+                                       m_game->currentTurn());
              case HullPropertyDomain:
                 if (const game::spec::Hull* h = getShipHull(*sh, m_shipList.get())) {
                     return getHullProperty(*h, HullProperty(ship_mapping[index].index), m_shipList.get(), m_root.get().hostConfiguration());

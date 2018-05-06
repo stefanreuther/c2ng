@@ -133,22 +133,6 @@ server::file::ServerApplication::handleCommandLineOption(const String_t& option,
         // @change was "-I" in PCC2
         m_instanceName = afl::string::strUCase(parser.getRequiredParameter("instance"));
         return true;
-    } else if (option == "help") {
-        using afl::string::Format;
-        afl::io::TextWriter& out = standardOutput();
-        out.writeLine(Format(_("PCC2 File Server v%s - (c) 2017-2018 Stefan Reuther").c_str(), PCC2_VERSION));
-        out.writeLine();
-        out.writeLine(Format(_("Usage:\n"
-                               "  %s [-options]\n\n"
-                               "Options:\n"
-                               "%s"
-                               "\n"
-                               "Report bugs to <Streu@gmx.de>").c_str(),
-                             environment().getInvocationName(),
-                             util::formatOptions(Application::getHelp() +
-                                                 "--instance=NAME\tInstance name (default: \"FILE\")\n")));
-        exit(0);
-        return true;
     } else {
         return false;
     }
@@ -230,3 +214,16 @@ server::file::ServerApplication::handleConfiguration(const String_t& key, const 
         return false;
     }
 }
+
+String_t
+server::file::ServerApplication::getApplicationName() const
+{
+    return afl::string::Format(_("PCC2 File Server v%s - (c) 2017-2018 Stefan Reuther").c_str(), PCC2_VERSION);
+}
+
+String_t
+server::file::ServerApplication::getCommandLineOptionHelp() const
+{
+    return "--instance=NAME\tInstance name (default: \"FILE\")\n";
+}
+

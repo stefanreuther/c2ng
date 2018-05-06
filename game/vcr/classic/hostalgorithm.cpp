@@ -1,5 +1,6 @@
 /**
   *  \file game/vcr/classic/hostalgorithm.cpp
+  *  \brief Class game::vcr::classic::HostAlgorithm
   */
 
 #include <algorithm>
@@ -33,7 +34,9 @@
    New new results, 'time ./testvcr tests/vcr/vcr2.dat specs 10000' on rocket (i5 3700 MHz, gcc-4.9, x64):
    + PCC2 20160323             2.90
    + ... with gcc-3.3 i386     6.34 (for comparison)
-   + C2NG 20160326             2.95 */
+   + c2ng 20160326             2.95
+   + c2ng 20180408             3.09
+   + cache weapon specs        2.95 */
 
 namespace {
     const int RANDOM_SIZE = 119;
@@ -107,6 +110,7 @@ class game::vcr::classic::HostAlgorithm::HostStatusToken : public game::vcr::cla
  public:
     HostStatusToken(const HostAlgorithm& parent);
     void restore(HostAlgorithm& parent) const;
+ private:
     Status m_leftStatus;
     Status m_rightStatus;
     int m_seed;
@@ -138,7 +142,7 @@ game::vcr::classic::HostAlgorithm::HostStatusToken::restore(HostAlgorithm& paren
 /********************************* Status ********************************/
 
 void
-game::vcr::classic::HostAlgorithm::Status::init(const Object& obj, Side side)
+game::vcr::classic::HostAlgorithm::Status::init(const Object& obj, Side side, const game::spec::TorpedoVector_t& launchers)
 {
     // ex VcrPlayerTHost::Status::clear
     for (int i = 0; i < VCR_MAX_BEAMS; ++i) {
@@ -157,6 +161,28 @@ game::vcr::classic::HostAlgorithm::Status::init(const Object& obj, Side side)
     m_side = side;
     m_obj = obj;
     m_obj.setShield(std::max(0, std::min(m_obj.getShield(), 100 - m_obj.getDamage())));
+
+    if (const game::spec::TorpedoLauncher* t = launchers.get(obj.getTorpedoType())) {
+        m_torpKillPower = 2*t->getKillPower();
+        m_torpDamagePower = 2*t->getDamagePower();
+    } else {
+        m_torpKillPower = 0;
+        m_torpDamagePower = 0;
+    }
+    m_beamKillPower = 0;
+    m_beamDamagePower = 0;
+}
+
+void
+game::vcr::classic::HostAlgorithm::Status::setBeamPower(const game::spec::BeamVector_t& beams)
+{
+    if (const game::spec::Beam* beam = beams.get(m_obj.getBeamType())) {
+        m_beamKillPower = beam->getKillPower();
+        m_beamDamagePower = beam->getDamagePower();
+    } else {
+        m_beamKillPower = 0;
+        m_beamDamagePower = 0;
+    }
 }
 
 /***************************** HostAlgorithm *****************************/
@@ -216,8 +242,10 @@ game::vcr::classic::HostAlgorithm::initBattle(const Object& left, const Object& 
     m_seed = seed % RANDOM_SIZE;
 
     // clear status
-    m_status[LeftSide].init(leftCopy, LeftSide);
-    m_status[RightSide].init(rightCopy, RightSide);
+    m_status[LeftSide].init(leftCopy, LeftSide, m_launchers);
+    m_status[RightSide].init(rightCopy, RightSide, m_launchers);
+    m_status[LeftSide].setBeamPower(m_beams);
+    m_status[RightSide].setBeamPower(m_beams);
     m_statistic[LeftSide] = leftCopy;
     m_statistic[RightSide] = rightCopy;
 
@@ -254,8 +282,6 @@ game::vcr::classic::HostAlgorithm::initBattle(const Object& left, const Object& 
     }
 
     m_time = 0;
-    // FIXME: port these:
-    //     vis->init();
 }
 
 // /** Finish up VCR. Take back fighters, explode, compute status. */
@@ -263,19 +289,17 @@ void
 game::vcr::classic::HostAlgorithm::doneBattle(Object& left, Object& right)
 {
     // ex VcrPlayerTHost::doneVcr
-//     ASSERT(status_word != VCRS_INVALID);
-
     // FIXME: explode fighters when mothership explodes -- NOT! too expensive in visualisation
     for (int i = 0; i < VCR_MAX_FTRS; ++i) {
         if (m_status[LeftSide].m_fighterStatus[i] != FighterIdle) {
             m_status[LeftSide].m_obj.addFighters(+1);
-            visualizer().landFighter(LeftSide, i);
+            visualizer().landFighter(*this, LeftSide, i);
             m_status[LeftSide].m_fighterStatus[i] = FighterIdle;
             --m_status[LeftSide].m_numFightersOut;
         }
         if (m_status[RightSide].m_fighterStatus[i] != FighterIdle) {
             m_status[RightSide].m_obj.addFighters(+1);
-            visualizer().landFighter(RightSide, i);
+            visualizer().landFighter(*this, RightSide, i);
             m_status[RightSide].m_fighterStatus[i] = FighterIdle;
             --m_status[RightSide].m_numFightersOut;
         }
@@ -316,10 +340,10 @@ game::vcr::classic::HostAlgorithm::doneBattle(Object& left, Object& right)
     }
 
     if (m_result.contains(LeftDestroyed)) {
-        visualizer().killObject(LeftSide);
+        visualizer().killObject(*this, LeftSide);
     }
     if (m_result.contains(RightDestroyed)) {
-        visualizer().killObject(RightSide);
+        visualizer().killObject(*this, RightSide);
     }
 
     left = m_status[LeftSide].m_obj;
@@ -491,23 +515,25 @@ int
 game::vcr::classic::HostAlgorithm::getFighterX(Side side, int id)
 {
     // ex VcrPlayerTHost::getFighterX
-    // FIXME: range check
-    return m_status[side].m_fighterX[id];
+    return (id >= VCR_MAX_FTRS
+            ? 0
+            : m_status[side].m_fighterX[id] * MAX_COORDINATE / 640);
 }
 
 game::vcr::classic::FighterStatus
 game::vcr::classic::HostAlgorithm::getFighterStatus(Side side, int id)
 {
     // ex VcrPlayerTHost::getFighterStatus
-    // FIXME: range check
-    return FighterStatus(m_status[side].m_fighterStatus[id]);
+    return (id >= VCR_MAX_FTRS
+            ? FighterIdle
+            : FighterStatus(m_status[side].m_fighterStatus[id]));
 }
 
 int
 game::vcr::classic::HostAlgorithm::getObjectX(Side side)
 {
     // ex VcrPlayerTHost::getObjectX
-    return m_status[side].m_objectX;
+    return m_status[side].m_objectX * MAX_COORDINATE / 640;
 }
 
 int32_t
@@ -603,7 +629,7 @@ game::vcr::classic::HostAlgorithm::getRandom_1_17()
 //     - nuflag=1: arithmetic rounding (nearest or up) */
 // FIXME: rename this one?
 int32_t
-game::vcr::classic::HostAlgorithm::rdivadd(int32_t a, int32_t b, int32_t plus)
+game::vcr::classic::HostAlgorithm::rdivadd(int32_t a, int32_t b, int32_t plus) const
 {
     // ex VcrPlayerTHost::rdivadd
     int32_t x = a / b + plus;
@@ -636,7 +662,7 @@ game::vcr::classic::HostAlgorithm::hit(Status& st, int damage, int kill)
     int shld = -rdivadd(80*damage, st.m_obj.getMass() + 1, 1 - st.m_obj.getShield());
     if (shld < 0) {
         st.m_obj.setShield(0);
-        long l = rdivadd(-80L*shld, st.m_obj.getMass() + 1, st.m_obj.getDamage() + 1);
+        int32_t l = rdivadd(-80L*shld, st.m_obj.getMass() + 1, st.m_obj.getDamage() + 1);
         if (l > 9999) {
             l = 9999;
         }
@@ -648,10 +674,12 @@ game::vcr::classic::HostAlgorithm::hit(Status& st, int damage, int kill)
             if (beam <= 0) {
                 if (m_status[LeftSide].m_obj.getBeamType() > 0) {
                     m_status[RightSide].m_obj.setBeamType(m_status[LeftSide].m_obj.getBeamType());
+                    m_status[RightSide].setBeamPower(m_beams);
                 }
             } else {
                 if (m_status[RightSide].m_obj.getBeamType() > beam) {
                     m_status[RightSide].m_obj.setBeamType(beam);
+                    m_status[RightSide].setBeamPower(m_beams);
                 }
             }
         }
@@ -683,7 +711,7 @@ game::vcr::classic::HostAlgorithm::launchFighter(Status& st)
             st.m_fighterStatus[i] = FighterAttacks;
             st.m_fighterX[i] = st.m_objectX;
             ++st.m_numFightersOut;
-            visualizer().startFighter(st.m_side, i);
+            visualizer().startFighter(*this, st.m_side, i);
             m_statistic[st.m_side].handleFightersAboard(st.m_obj.getNumFighters());
             return;
         }
@@ -713,7 +741,7 @@ game::vcr::classic::HostAlgorithm::fighterShoot(Status& st, Status& opp, int i)
     // ex VcrPlayerTHost::fighterShoot
     if (std::abs(st.m_fighterX[i] - opp.m_objectX) < 20) {
         hit(opp, 2, 2);
-        visualizer().fireBeam(st.m_side, i, -1, 1, 2, 2);
+        visualizer().fireBeam(*this, st.m_side, i, -1, 1, 2, 2);
     }
 }
 
@@ -723,7 +751,7 @@ void
 game::vcr::classic::HostAlgorithm::killFighter(Status& st, int i)
 {
     // ex VcrPlayerTHost::killFighter
-    visualizer().killFighter(st.m_side, i);
+    visualizer().killFighter(*this, st.m_side, i);
     st.m_fighterStatus[i] = FighterIdle;
     --st.m_numFightersOut;
 }
@@ -753,7 +781,7 @@ game::vcr::classic::HostAlgorithm::fighterStuff()
         } else if (m_status[LeftSide].m_fighterStatus[i] == FighterReturns) {
             if (m_status[LeftSide].m_fighterX[i] < m_status[LeftSide].m_objectX) {
                 m_status[LeftSide].m_obj.addFighters(+1);
-                visualizer().landFighter(LeftSide, i);
+                visualizer().landFighter(*this, LeftSide, i);
                 m_status[LeftSide].m_fighterStatus[i] = FighterIdle;
                 --m_status[LeftSide].m_numFightersOut;
             } else {
@@ -773,7 +801,7 @@ game::vcr::classic::HostAlgorithm::fighterStuff()
         } else if (m_status[RightSide].m_fighterStatus[i] == FighterReturns) {
             if (m_status[RightSide].m_fighterX[i] > m_status[RightSide].m_objectX) {
                 m_status[RightSide].m_obj.addFighters(+1);
-                visualizer().landFighter(RightSide, i);
+                visualizer().landFighter(*this, RightSide, i);
                 m_status[RightSide].m_fighterStatus[i] = FighterIdle;
                 --m_status[RightSide].m_numFightersOut;
             } else {
@@ -800,10 +828,10 @@ game::vcr::classic::HostAlgorithm::fighterStuff()
                             } else {
                                 /* regular fighter intercept code */
                                 if (n < 50) {
-                                    visualizer().fireBeam(RightSide, j, i, 1, 2, 2);
+                                    visualizer().fireBeam(*this, RightSide, j, i, 1, 2, 2);
                                     killFighter(m_status[LeftSide], i);
                                 } else {
-                                    visualizer().fireBeam(LeftSide, i, j, 1, 2, 2);
+                                    visualizer().fireBeam(*this, LeftSide, i, j, 1, 2, 2);
                                     killFighter(m_status[RightSide], j);
                                 }
                             }
@@ -829,7 +857,7 @@ game::vcr::classic::HostAlgorithm::rechargeBeams(Status& st)
         register int j = st.m_beamStatus[i];
         if (getRandom_1_100() > 50 && j < 100) {
             st.m_beamStatus[i] = j + st.m_obj.getBeamChargeRate();
-            visualizer().updateBeam(st.m_side, i);
+            visualizer().updateBeam(*this, st.m_side, i);
         }
     }
 }
@@ -841,15 +869,14 @@ game::vcr::classic::HostAlgorithm::fireBeam(Status& st, Status& opp, int which)
 {
     // ex VcrPlayerTHost::fireBeam
     int charge = st.m_beamStatus[which];
-    if (const game::spec::Beam* beam = m_beams.get(st.m_obj.getBeamType())) {
-        int da = rdivadd(charge * beam->getDamagePower(), 100, 0);
-        int ki = rdivadd(charge * beam->getKillPower(),   100, 0) * st.m_obj.getBeamKillRate();
-
-        hit(opp, da, ki);
-        visualizer().fireBeam(st.m_side, -1 - which, -1, 1, da, ki);
-    }
     st.m_beamStatus[which] = 0;
-    visualizer().updateBeam(st.m_side, which);
+    visualizer().updateBeam(*this, st.m_side, which);
+
+    int da = rdivadd(charge * st.m_beamDamagePower, 100, 0);
+    int ki = rdivadd(charge * st.m_beamKillPower,   100, 0) * st.m_obj.getBeamKillRate();
+
+    hit(opp, da, ki);
+    visualizer().fireBeam(*this, st.m_side, -1 - which, -1, 1, da, ki);
 }
 
 // /** Fire beams from specified object. Fires all beams that can
@@ -886,10 +913,10 @@ game::vcr::classic::HostAlgorithm::fireAtFighter(Status& st, Status& opp, int be
     }
 
     if (ftr_id >= 0) {
-        visualizer().fireBeam(st.m_side, -1 - beam, ftr_id, 1, 2, 2 /* FIXME */);
-        killFighter(opp, ftr_id);
         st.m_beamStatus[beam] = 0;
-        visualizer().updateBeam(st.m_side, beam);
+        visualizer().updateBeam(*this, st.m_side, beam);
+        visualizer().fireBeam(*this, st.m_side, -1 - beam, ftr_id, 1, 2, 2 /* FIXME */);
+        killFighter(opp, ftr_id);
     }
 }
 
@@ -920,13 +947,11 @@ game::vcr::classic::HostAlgorithm::fireTorp(Status& st, Status& opp, int launche
     // ex VcrPlayerTHost::fireTorp
     register int n = getRandom_1_100();
     if (n >= st.m_obj.getTorpMissRate()) {
-        if (const game::spec::TorpedoLauncher* t = m_launchers.get(st.m_obj.getTorpedoType())) {
-            hit(opp, 2*t->getDamagePower(), 2*t->getKillPower());
-        }
+        hit(opp, st.m_torpDamagePower, st.m_torpKillPower);
         m_statistic[st.m_side].handleTorpedoHit();
-        visualizer().fireTorpedo(st.m_side, n, launcher);
+        visualizer().fireTorpedo(*this, st.m_side, n, launcher);
     } else {
-        visualizer().fireTorpedo(st.m_side, -n, launcher);
+        visualizer().fireTorpedo(*this, st.m_side, -n, launcher);
     }
 }
 
@@ -942,11 +967,11 @@ game::vcr::classic::HostAlgorithm::fireTorpedoes(Status& st, Status& opp)
             if (st.m_launcherStatus[i] > 40 || (st.m_launcherStatus[i] > 30 && n < st.m_obj.getTorpedoType())) {
                 st.m_obj.addTorpedoes(-1);
                 st.m_launcherStatus[i] = 0;
-                visualizer().updateLauncher(st.m_side, i);
+                visualizer().updateLauncher(*this, st.m_side, i);
                 fireTorp(st, opp, i);
             }
             st.m_launcherStatus[i] += st.m_obj.getTorpChargeRate();
-            visualizer().updateLauncher(st.m_side, i);
+            visualizer().updateLauncher(*this, st.m_side, i);
         }
     }
 }

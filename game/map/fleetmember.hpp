@@ -81,8 +81,8 @@ namespace game { namespace map {
                         const game::config::HostConfiguration& config,
                         const game::spec::ShipList& shipList);
 
-        static const int AcceptLeaders = 1;
-        static const int OverrideLocks = 2;
+        static const int AcceptLeaders = 1;  // ex mlAcceptLeaders
+        static const int OverrideLocks = 2;  // ex mlOverrideLocks
 
         /** Check for locked mission.
             A mission can be locked (=prevented from change) if it is an intercept mission that is required

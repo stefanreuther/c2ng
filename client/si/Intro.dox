@@ -12,6 +12,7 @@
      - scripts must be able to call back into UI to show dialogs
      - scripts must be able to modify the UI to change contexts
      - scripts must be able to access UI properties
+     - neither has direct access to the other's objects
 
      <b>Overview:</b>
 
@@ -25,6 +26,10 @@
      or a number of processes such as a Task Manager command or the initial auto-task run.
 
      Callbacks from script to UI are synchronized on process Ids.
+
+     The user interface has some perceived state ("ship screen"), and processes created start in appropriate contexts.
+     This is communicated using ContextProvider objects that symbolically describe a context,
+     and can therefore be passed from user side to script side.
 
      <b>Entry Points:</b>
 

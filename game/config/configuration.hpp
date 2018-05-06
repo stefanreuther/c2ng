@@ -11,6 +11,7 @@
 #include "game/config/configurationoption.hpp"
 #include "afl/base/signal.hpp"
 #include "afl/base/enumerator.hpp"
+#include "afl/base/ref.hpp"
 
 namespace game { namespace config {
 
@@ -21,7 +22,7 @@ namespace game { namespace config {
         The regular way of accessing a configuration is by indexing the configuration with a descriptor.
         A descriptor is a pod-structure that defines name, type, and initial value of an option;
         see operator[].
-        
+
         If an option is accessed with a different type than the one already in the configuration, it is attempted to convert it.
         Typically, this will have the original user-supplied value in a StringOption, and the application-defined descriptor.
 
@@ -32,7 +33,7 @@ namespace game { namespace config {
         This class is completely different from the PCC2 version, to add more flexibility. */
     class Configuration {
      public:
-        typedef std::pair<String_t,ConfigurationOption*> OptionInfo_t;
+        typedef std::pair<String_t,const ConfigurationOption*> OptionInfo_t;
         typedef afl::base::Enumerator<OptionInfo_t> Enumerator_t;
 
         /** Constructor.
@@ -75,10 +76,24 @@ namespace game { namespace config {
 
         /** Enumeration.
             \return Enumerator that produces all options. */
-        afl::base::Ptr<Enumerator_t> getOptions();
+        afl::base::Ref<Enumerator_t> getOptions() const;
+
+        /** Merge another set of options.
+            Updates this configuration with options from the other one.
+            Merges only options that are not unset (=Default source).
+            Merged values will have the same source as in \c other if that is more specific than the existing value.
+
+            Types will not be carried over from \c other to \c *this, that is,
+            an option that has type string in \c *this will keep this type, even if it has a more detailed type in \c other.
+            As usual, the type will be converted to the descriptor's type on access.
+
+            \param other Other options */
+        void merge(const Configuration& other);
 
         /** Mark all options unset (default). */
         void markAllOptionsUnset();
+
+        void setAllOptionsSource(ConfigurationOption::Source source);
 
         /** Notify all listeners.
             If there is an option that is marked as changed, resets all options' change flags and broadcasts a sig_change. */

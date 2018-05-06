@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include "gfx/types.hpp"
+#include "afl/string/char.hpp"
 
 namespace {
     uint32_t mixMask(uint32_t a, uint32_t b, uint32_t mask, gfx::Alpha_t alpha)
@@ -11,6 +12,63 @@ namespace {
         a &= mask;
         b &= mask;
         return (a + ((b - a) * alpha / 255)) & mask;
+    }
+
+    bool isHexDigit(char c)
+    {
+        return (c >= '0' && c <= '9')
+            || (c >= 'A' && c <= 'F')
+            || (c >= 'a' && c <= 'f');
+    }
+
+    int parseHex(const char* p, size_t n)
+    {
+        int result = 0;
+        for (size_t i = 0; i < n; ++i) {
+            char ch = *p++;
+            result *= 16;
+            if (ch >= '0' && ch <= '9') {
+                result += (ch - '0');
+            } else if (ch >= 'A' && ch <= 'F') {
+                result += (ch - 'A' + 10);
+            } else if (ch >= 'a' && ch <= 'f') {
+                result += (ch - 'a' + 10);
+            } else {
+                // ignore; this is only called for valid digits
+            }
+        }
+        return result;
+    }
+
+    bool parseComponent(util::StringParser& p, uint8_t& out)
+    {
+        // Skip leading space
+        String_t tmp;
+        p.parseWhile(afl::string::charIsSpace, tmp);
+
+        // Value
+        int value;
+        if (!p.parseInt(value)) {
+            return false;
+        }
+        p.parseWhile(afl::string::charIsSpace, tmp);
+
+        // Validate
+        if (p.parseCharacter('%')) {
+            if (value < 0 || value > 100) {
+                return false;
+            }
+            value = (255 * value + 50) / 100;
+            p.parseWhile(afl::string::charIsSpace, tmp);
+        } else {
+            if (value < 0 || value > 255) {
+                return false;
+            }
+        }
+
+        // Produce result
+        out = static_cast<uint8_t>(value);
+        return true;
     }
 }
 
@@ -74,5 +132,75 @@ gfx::getColorDistance(gfx::ColorQuad_t x, gfx::ColorQuad_t y)
         return 0x40000;
     } else {
         return dr*dr + dg*dg + db*db;
+    }
+}
+
+bool
+gfx::parseColor(util::StringParser& p, gfx::ColorQuad_t& result)
+{
+    /* CSS:
+       #rgb #rrggbb #rgba #rrggbbaa
+       rgb(r,g,b) rgb(r%,g%,b%)
+       hsl(...)
+       name */
+    String_t tmp;
+    if (p.parseCharacter('#') && p.parseWhile(isHexDigit, tmp)) {
+        // Hex digit format
+        switch (tmp.size()) {
+         case 3:
+            result = COLORQUAD_FROM_RGB(17 * parseHex(&tmp[0], 1),
+                                        17 * parseHex(&tmp[1], 1),
+                                        17 * parseHex(&tmp[2], 1));
+            return true;
+         case 4:
+            result = COLORQUAD_FROM_RGBA(17 * parseHex(&tmp[0], 1),
+                                         17 * parseHex(&tmp[1], 1),
+                                         17 * parseHex(&tmp[2], 1),
+                                         17 * parseHex(&tmp[3], 1));
+            return true;
+         case 6:
+            result = COLORQUAD_FROM_RGB(parseHex(&tmp[0], 2),
+                                        parseHex(&tmp[2], 2),
+                                        parseHex(&tmp[4], 2));
+            return true;
+         case 8:
+            result = COLORQUAD_FROM_RGBA(parseHex(&tmp[0], 2),
+                                         parseHex(&tmp[2], 2),
+                                         parseHex(&tmp[4], 2),
+                                         parseHex(&tmp[6], 2));
+            return true;
+         default:
+            return false;
+        }
+    } else if (p.parseString("rgb")) {
+        // Functional format
+        // - opening paren
+        p.parseWhile(afl::string::charIsSpace, tmp);
+        if (!p.parseCharacter('(')) {
+            return false;
+        }
+
+        // - parse r,g,b
+        uint8_t r, g, b, a;
+        if (!parseComponent(p, r) || !p.parseCharacter(',') || !parseComponent(p, g) || !p.parseCharacter(',') || !parseComponent(p, b)) {
+            return false;
+        }
+        // - parse a
+        if (p.parseCharacter(',')) {
+            if (!parseComponent(p, a)) {
+                return false;
+            }
+        } else {
+            a = OPAQUE_ALPHA;
+        }
+        // - closing paren
+        if (!p.parseCharacter(')')) {
+            return false;
+        }
+        result = COLORQUAD_FROM_RGBA(r, g, b, a);
+        return true;
+    } else {
+        // Unsupported
+        return false;
     }
 }

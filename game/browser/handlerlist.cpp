@@ -52,11 +52,11 @@ game::browser::HandlerList::createAccountFolder(Account& acc)
 
 // Load game root for physical folder.
 afl::base::Ptr<game::Root>
-game::browser::HandlerList::loadGameRoot(afl::base::Ref<afl::io::Directory> dir)
+game::browser::HandlerList::loadGameRoot(afl::base::Ref<afl::io::Directory> dir, const game::config::UserConfiguration& config)
 {
     afl::base::Ptr<game::Root> result;
     for (size_t i = 0, n = m_handlers.size(); i < n; ++i) {
-        result = m_handlers[i]->loadGameRoot(dir);
+        result = m_handlers[i]->loadGameRoot(dir, config);
         if (result.get() != 0) {
             break;
         }

@@ -39,8 +39,25 @@ game::browser::FileSystemRootFolder::loadContent(afl::container::PtrVector<Folde
     }
 }
 
+bool
+game::browser::FileSystemRootFolder::loadConfiguration(game::config::UserConfiguration& /*config*/)
+{
+    // Root has no physical location, so we cannot load a configuration here
+    return false;
+}
+
+void
+game::browser::FileSystemRootFolder::saveConfiguration(const game::config::UserConfiguration& /*config*/)
+{ }
+
+bool
+game::browser::FileSystemRootFolder::setLocalDirectoryName(String_t /*directoryName*/)
+{
+    return false;
+}
+
 afl::base::Ptr<game::Root>
-game::browser::FileSystemRootFolder::loadGameRoot()
+game::browser::FileSystemRootFolder::loadGameRoot(const game::config::UserConfiguration& /*config*/)
 {
     // No games in file system root
     return 0;

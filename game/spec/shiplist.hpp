@@ -5,7 +5,9 @@
 #ifndef C2NG_GAME_SPEC_SHIPLIST_HPP
 #define C2NG_GAME_SPEC_SHIPLIST_HPP
 
+#include "afl/base/refcounted.hpp"
 #include "afl/base/signal.hpp"
+#include "game/reference.hpp"
 #include "game/spec/basichullfunctionlist.hpp"
 #include "game/spec/beam.hpp"
 #include "game/spec/componentvector.hpp"
@@ -14,11 +16,10 @@
 #include "game/spec/hull.hpp"
 #include "game/spec/hullassignmentlist.hpp"
 #include "game/spec/hullfunctionassignmentlist.hpp"
+#include "game/spec/missionlist.hpp"
 #include "game/spec/modifiedhullfunctionlist.hpp"
 #include "game/spec/standardcomponentnameprovider.hpp"
 #include "game/spec/torpedolauncher.hpp"
-#include "game/spec/missionlist.hpp"
-#include "afl/base/refcounted.hpp"
 
 namespace game { namespace spec {
 
@@ -86,6 +87,9 @@ namespace game { namespace spec {
         MissionList& missions();
         const MissionList& missions() const;
 
+        /** Get a component, given a reference. */
+        const Component* getComponent(Reference ref) const;
+
         /** Find racial abilities.
             We define a racial ability to be an ability which the given races have one every ship.
             We'll hide these during normal operation, to avoid cluttering up display real-estate with stuff everyone knows.
@@ -111,7 +115,7 @@ namespace game { namespace spec {
                                     PlayerSet_t playerLimit,
                                     ExperienceLevelSet_t levelLimit,
                                     bool includeNewShip,
-                                    bool includeRacialAbilities);
+                                    bool includeRacialAbilities) const;
 
         /** Get player mask for special function.
             \param basicFunctionId [in] basic function, hf_XXX (FIXME)

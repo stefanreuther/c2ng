@@ -3,33 +3,35 @@
   */
 
 #include "client/screens/controlscreen.hpp"
-#include "game/interface/shipcontext.hpp"
-#include "game/interface/planetcontext.hpp"
-#include "client/si/contextprovider.hpp"
-#include "client/objectcursorfactory.hpp"
-#include "util/slaveobject.hpp"
-#include "game/interface/userinterfacepropertyaccessor.hpp"
-#include "interpreter/values.hpp"
-#include "game/interface/iteratorcontext.hpp"
-#include "client/si/control.hpp"
-#include "ui/window.hpp"
-#include "ui/layout/vbox.hpp"
-#include "client/map/widget.hpp"
-#include "client/widgets/keymapwidget.hpp"
-#include "client/objectobserverproxy.hpp"
-#include "client/tiles/selectionheadertile.hpp"
-#include "client/objectlistener.hpp"
 #include "afl/base/refcounted.hpp"
-#include "client/tiles/shipscreenheadertile.hpp"
-#include "client/tiles/tilefactory.hpp"
+#include "client/map/widget.hpp"
+#include "client/objectcursorfactory.hpp"
+#include "client/objectlistener.hpp"
+#include "client/objectobserverproxy.hpp"
+#include "client/si/contextprovider.hpp"
+#include "client/si/contextreceiver.hpp"
+#include "client/si/control.hpp"
 #include "client/si/genericwidgetvalue.hpp"
 #include "client/si/widgetcommand.hpp"
-#include "interpreter/typehint.hpp"
 #include "client/si/widgetwrapper.hpp"
-#include "ui/prefixargument.hpp"
-#include "ui/layout/hbox.hpp"
+#include "client/tiles/selectionheadertile.hpp"
+#include "client/tiles/shipscreenheadertile.hpp"
+#include "client/tiles/tilefactory.hpp"
+#include "client/widgets/keymapwidget.hpp"
+#include "game/interface/iteratorcontext.hpp"
+#include "game/interface/planetcontext.hpp"
+#include "game/interface/shipcontext.hpp"
+#include "game/interface/userinterfacepropertyaccessor.hpp"
+#include "interpreter/typehint.hpp"
+#include "interpreter/values.hpp"
 #include "ui/group.hpp"
+#include "ui/layout/hbox.hpp"
+#include "ui/layout/vbox.hpp"
+#include "ui/prefixargument.hpp"
+#include "ui/skincolorscheme.hpp"
 #include "ui/spacer.hpp"
+#include "ui/widgets/panel.hpp"
+#include "util/slaveobject.hpp"
 
 namespace {
 
@@ -65,18 +67,18 @@ namespace {
         ScreenContextProvider(afl::base::Ref<ScreenState> state)
             : m_state(state)
             { }
-        virtual void createContext(game::Session& session, interpreter::Process& proc)
+        virtual void createContext(game::Session& session, client::si::ContextReceiver& recv)
             {
                 if (game::Game* g = session.getGame().get()) {
                     if (game::map::ObjectCursor* c = g->cursors().getCursorByNumber(m_state->screenNumber)) {
                         game::map::Object* obj = c->getCurrentObject();
                         if (dynamic_cast<game::map::Ship*>(obj) != 0) {
                             if (interpreter::Context* ctx = game::interface::ShipContext::create(obj->getId(), session)) {
-                                proc.pushNewContext(ctx);
+                                recv.addNewContext(ctx);
                             }
                         } else if (dynamic_cast<game::map::Planet*>(obj) != 0) {
                             if (interpreter::Context* ctx = game::interface::PlanetContext::create(obj->getId(), session)) {
-                                proc.pushNewContext(ctx);
+                                recv.addNewContext(ctx);
                             }
                         } else {
                             // FIXME?
@@ -267,7 +269,9 @@ client::screens::ControlScreen::run(client::si::InputState& in, client::si::Outp
     ScreenControl ctl(m_session, loop, state, out);
 
     // Build it
-    ui::Window panel("!Control Screen", root.provider(), root.colorScheme(), ui::BLUE_DARK_WINDOW, ui::layout::HBox::instance5);
+    ui::widgets::Panel panel(ui::layout::HBox::instance5, 2);
+    ui::SkinColorScheme panelColors(ui::DARK_COLOR_SET, root.colorScheme());
+    panel.setColorScheme(panelColors);
     client::widgets::KeymapWidget keys(m_session.gameSender(), root.engine().dispatcher(), ctl);
     client::ObjectObserverProxy oop(m_session.gameSender(), std::auto_ptr<client::ObjectCursorFactory>(new ScreenCursorFactory(state)));
 

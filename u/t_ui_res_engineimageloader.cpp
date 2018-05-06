@@ -14,7 +14,7 @@
 namespace {
     class BaseTestEngine : public gfx::Engine {
      public:
-        virtual afl::base::Ref<gfx::Canvas> createWindow(int /*width*/, int /*height*/, int /*bpp*/, WindowFlags_t /*flags*/)
+        virtual afl::base::Ref<gfx::Canvas> createWindow(const gfx::WindowParameters& /*param*/)
             { throw std::runtime_error("not implemented"); }
         virtual void handleEvent(gfx::EventConsumer& /*consumer*/, bool /*relativeMouseMovement*/)
             { throw std::runtime_error("not implemented"); }

@@ -19,6 +19,7 @@
 # include "gfx/sdl/engine.hpp"
 # include "gfx/sdl/streaminterface.hpp"
 # include "gfx/sdl/surface.hpp"
+# include "gfx/windowparameters.hpp"
 # include "util/translation.hpp"
 
 namespace {
@@ -239,19 +240,34 @@ gfx::sdl::Engine::~Engine()
 
 // Create a window.
 afl::base::Ref<gfx::Canvas>
-gfx::sdl::Engine::createWindow(int width, int height, int bpp, WindowFlags_t flags)
+gfx::sdl::Engine::createWindow(const WindowParameters& param)
 {
     int sdlFlags = 0;
-    if (flags.contains(FullscreenWindow)) {
+    if (param.fullScreen) {
         sdlFlags |= SDL_FULLSCREEN;
     }
-    if (flags.contains(ResizableWindow)) {
-        sdlFlags |= SDL_RESIZABLE;
+
+    if (!param.title.empty()) {
+        // SDL takes UTF-8 input since 1.2.10. How convenient.
+        // On earlier SDLs, there is no direct way to support non-ASCII window titles.
+        SDL_WM_SetCaption(param.title.c_str(), param.title.c_str());
     }
 
-    // FIXME: icon, title
+    if (param.icon.get() != 0) {
+        // Convert the icon to something manageable.
+        // It must be a SDL surface, but SDL can handle pretty much any format and converts that to OS limits.
+        Point iconSize = param.icon->getSize();
+        SDL_Surface* iconSurface = SDL_CreateRGBSurface(SDL_SWSURFACE, iconSize.getX(), iconSize.getY(), 32,
+                                                        0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
+        if (iconSurface) {
+            Surface iconCopy(iconSurface, true);
+            iconCopy.blit(Point(0, 0), *param.icon, Rectangle(Point(0, 0), iconSize));
+            iconCopy.ensureUnlocked();
+            SDL_WM_SetIcon(iconSurface, 0);
+        }
+    }
 
-    SDL_Surface* sfc = SDL_SetVideoMode(width, height, bpp, sdlFlags);
+    SDL_Surface* sfc = SDL_SetVideoMode(param.size.getX(), param.size.getY(), param.bitsPerPixel, sdlFlags);
     if (!sfc) {
         throw GraphicsException(afl::string::Format(_("Error setting video mode: %s").c_str(), SDL_GetError()));
     }

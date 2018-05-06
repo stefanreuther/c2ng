@@ -36,7 +36,7 @@ TestServerFileUtils::testCopy()
     InternalDirectoryHandler::Directory out("");
     InternalDirectoryHandler outHandler("root", out);
 
-    server::file::copyDirectory(outHandler, rootHandler, true);
+    server::file::copyDirectory(outHandler, rootHandler, server::file::CopyFlags_t(server::file::CopyRecursively));
 
     // Verify
     TS_ASSERT(outHandler.getFileByName("a")->get().equalContent(afl::string::toBytes("xyz")));
@@ -59,7 +59,7 @@ TestServerFileUtils::testCopyFlat()
     InternalDirectoryHandler::Directory out("");
     InternalDirectoryHandler outHandler("root", out);
 
-    server::file::copyDirectory(outHandler, rootHandler, false);
+    server::file::copyDirectory(outHandler, rootHandler, server::file::CopyFlags_t());
 
     // Verify
     TS_ASSERT(outHandler.getFileByName("a")->get().equalContent(afl::string::toBytes("xyz")));
@@ -80,7 +80,7 @@ TestServerFileUtils::testCopyConflict()
     InternalDirectoryHandler outHandler("root", out);
     outHandler.createFile("d", afl::base::Nothing);
 
-    TS_ASSERT_THROWS(server::file::copyDirectory(outHandler, rootHandler, true), afl::except::FileProblemException);
+    TS_ASSERT_THROWS(server::file::copyDirectory(outHandler, rootHandler, server::file::CopyFlags_t(server::file::CopyRecursively)), afl::except::FileProblemException);
 }
 
 /** Test copy conflict. */
@@ -96,7 +96,7 @@ TestServerFileUtils::testCopyConflict2()
     InternalDirectoryHandler outHandler("root", out);
     outHandler.createDirectory("a");
 
-    TS_ASSERT_THROWS(server::file::copyDirectory(outHandler, rootHandler, true), afl::except::FileProblemException);
+    TS_ASSERT_THROWS(server::file::copyDirectory(outHandler, rootHandler, server::file::CopyFlags_t(server::file::CopyRecursively)), afl::except::FileProblemException);
 }
 
 /** Test removeDirectoryContent. */

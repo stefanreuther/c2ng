@@ -1,5 +1,6 @@
 /**
   *  \file game/vcr/classic/nullvisualizer.hpp
+  *  \brief Class game::vcr::classic::NullVisualizer
   */
 #ifndef C2NG_GAME_VCR_CLASSIC_NULLVISUALIZER_HPP
 #define C2NG_GAME_VCR_CLASSIC_NULLVISUALIZER_HPP
@@ -8,31 +9,28 @@
 
 namespace game { namespace vcr { namespace classic {
 
-// /** \class VcrNullVisualizer
-//     \brief Null Visualizer
-
-//     This VCR visualizer does nothing. It is to be used for
-//     simulations, etc. */
+    /** Null Visualizer.
+        Ignores all calls. */
     class NullVisualizer : public Visualizer {
      public:
+        /** Constructor. */
         NullVisualizer();
 
+        /** Destructor. */
         ~NullVisualizer();
 
-        void startFighter(Side side, int track);
-        void landFighter(Side side, int track);
-        void killFighter(Side side, int track);
+        // Visualizer methods:
+        void startFighter(Algorithm& algo, Side side, int track);
+        void landFighter(Algorithm& algo, Side side, int track);
+        void killFighter(Algorithm& algo, Side side, int track);
 
-        void fireBeam(Side side, int track, int target, int hit, int damage, int kill);
-        void fireTorpedo(Side side, int hit, int launcher);
+        void fireBeam(Algorithm& algo, Side side, int track, int target, int hit, int damage, int kill);
+        void fireTorpedo(Algorithm& algo, Side side, int hit, int launcher);
 
-        void updateBeam(Side side, int id);
-        void updateLauncher(Side side, int id);
+        void updateBeam(Algorithm& algo, Side side, int id);
+        void updateLauncher(Algorithm& algo, Side side, int id);
 
-        void killObject(Side side);
-
-        // void redraw();
-        // void init();
+        void killObject(Algorithm& algo, Side side);
     };
 
 } } }

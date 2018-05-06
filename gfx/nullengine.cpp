@@ -8,6 +8,7 @@
 #include "gfx/rgbapixmap.hpp"
 #include "afl/sys/mutexguard.hpp"
 #include "afl/sys/time.hpp"
+#include "gfx/windowparameters.hpp"
 
 gfx::NullEngine::NullEngine()
     : m_timers(),
@@ -20,9 +21,9 @@ gfx::NullEngine::~NullEngine()
 { }
 
 afl::base::Ref<gfx::Canvas>
-gfx::NullEngine::createWindow(int width, int height, int /*bpp*/, WindowFlags_t /*flags*/)
+gfx::NullEngine::createWindow(const WindowParameters& param)
 {
-    return RGBAPixmap::create(width, height)->makeCanvas();
+    return RGBAPixmap::create(param.size.getX(), param.size.getY())->makeCanvas();
 }
 
 

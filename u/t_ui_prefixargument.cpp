@@ -22,7 +22,7 @@ TestUiPrefixArgument::testIt()
     // UI stuff
     gfx::NullEngine engine;
     gfx::NullResourceProvider provider;
-    ui::Root root(engine, provider, 100, 100, 8, gfx::Engine::WindowFlags_t());
+    ui::Root root(engine, provider, gfx::WindowParameters());
 
     // A simple widget
     class TestWidget : public ui::InvisibleWidget {

@@ -72,7 +72,7 @@ WidgetVerifier::run()
         // GUI mock
         gfx::NullEngine engine;
         gfx::NullResourceProvider provider;
-        ui::Root root(engine, provider, 100, 100, 32, gfx::Engine::WindowFlags_t());
+        ui::Root root(engine, provider, gfx::WindowParameters());
 
         // ScriptSide/UserSide/Control. A Control is needed because UserSide does not process callbacks without one.
         util::MessageCollector console;

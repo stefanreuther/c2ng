@@ -25,6 +25,7 @@ namespace game { namespace nu {
         virtual void loadCurrentTurn(Turn& turn, Game& game, int player, Root& root, Session& session);
         virtual void getHistoryStatus(int player, int turn, afl::base::Memory<HistoryStatus> status, const Root& root);
         virtual void loadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root);
+        virtual String_t getProperty(Property p);
 
      private:
         afl::base::Ref<GameState> m_gameState;

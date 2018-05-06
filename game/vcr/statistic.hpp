@@ -38,4 +38,22 @@ namespace game { namespace vcr {
 
 } }
 
+// Handle number of fighters aboard.
+inline void
+game::vcr::Statistic::handleFightersAboard(int n)
+{
+    // ex VcrPlayer::setStatFighters
+    if (n < m_minFightersAboard) {
+        m_minFightersAboard = n;
+    }
+}
+
+// Handle torpedo hit.
+inline void
+game::vcr::Statistic::handleTorpedoHit()
+{
+    // ex VcrPlayer::setStatTorpHit
+    ++m_torpedoHits;
+}
+
 #endif

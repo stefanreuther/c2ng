@@ -117,10 +117,10 @@ namespace game { namespace interface {
     afl::data::Value* getShipProperty(const game::map::Ship& sh, ShipProperty isp,
                                       afl::string::Translator& tx,
                                       InterpreterInterface& iface,
-                                      afl::base::Ptr<const Root> root,
-                                      afl::base::Ptr<const game::spec::ShipList> shipList,
-                                      afl::base::Ptr<const Game> game,
-                                      afl::base::Ptr<Turn> turn);
+                                      afl::base::Ref<const Root> root,
+                                      afl::base::Ref<const game::spec::ShipList> shipList,
+                                      afl::base::Ref<const Game> game,
+                                      afl::base::Ref<Turn> turn);
     void setShipProperty(game::map::Ship& sh, ShipProperty isp, afl::data::Value* value,
                          afl::base::Ref<Root> root,
                          afl::base::Ref<game::spec::ShipList> shipList,

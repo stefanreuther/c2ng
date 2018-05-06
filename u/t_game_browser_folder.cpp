@@ -15,7 +15,13 @@ TestGameBrowserFolder::testIt()
      public:
         virtual void loadContent(afl::container::PtrVector<game::browser::Folder>&)
             { }
-        virtual afl::base::Ptr<game::Root> loadGameRoot()
+        virtual bool loadConfiguration(game::config::UserConfiguration&)
+            { return false; }
+        virtual void saveConfiguration(const game::config::UserConfiguration&)
+            { }
+        virtual bool setLocalDirectoryName(String_t)
+            { return false; }
+        virtual afl::base::Ptr<game::Root> loadGameRoot(const game::config::UserConfiguration&)
             { return 0; }
         virtual String_t getName() const
             { return String_t(); }

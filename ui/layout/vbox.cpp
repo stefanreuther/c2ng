@@ -9,8 +9,7 @@
 ui::layout::VBox ui::layout::VBox::instance0(0);
 ui::layout::VBox ui::layout::VBox::instance5(5);
 
-// /** \class UIVBoxLayout
-//     \brief Vertical Box Layout
+// /** Vertical Box Layout
 
 //     Widgets will be arranged vertically, all the same width, below
 //     each other from top to bottom. This layout will completely cover

@@ -92,3 +92,17 @@ TestGfxFontRequest::testMatch()
               .match(gfx::FontRequest().setSize(1).setWeight(9).setSlant(3).setStyle(afl::base::Nothing)));
 }
 
+/** Test comparison. */
+void
+TestGfxFontRequest::testCompare()
+{
+    TS_ASSERT_EQUALS(gfx::FontRequest() == gfx::FontRequest(), true);
+    TS_ASSERT_EQUALS(gfx::FontRequest() != gfx::FontRequest(), false);
+
+    TS_ASSERT_EQUALS(gfx::FontRequest().addSize(1) == gfx::FontRequest().addSize(1), true);
+    TS_ASSERT_EQUALS(gfx::FontRequest().addSize(1) != gfx::FontRequest().addSize(1), false);
+
+    TS_ASSERT_EQUALS(gfx::FontRequest().addSize(1) == gfx::FontRequest().addWeight(2), false);
+    TS_ASSERT_EQUALS(gfx::FontRequest().addSize(1) != gfx::FontRequest().addWeight(2), true);
+}
+

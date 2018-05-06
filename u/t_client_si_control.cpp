@@ -44,7 +44,7 @@ TestClientSiControl::testMulti()
     // - UI side
     gfx::NullEngine engine;
     gfx::NullResourceProvider provider;
-    ui::Root root(engine, provider, 100, 100, 32, gfx::Engine::WindowFlags_t());
+    ui::Root root(engine, provider, gfx::WindowParameters());
 
     // - Script side
     afl::sys::Log log;
@@ -69,7 +69,7 @@ TestClientSiControl::testSingle()
     // - UI side
     gfx::NullEngine engine;
     gfx::NullResourceProvider provider;
-    ui::Root root(engine, provider, 100, 100, 32, gfx::Engine::WindowFlags_t());
+    ui::Root root(engine, provider, gfx::WindowParameters());
 
     // - Script side
     afl::sys::Log log;

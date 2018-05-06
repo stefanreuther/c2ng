@@ -158,6 +158,16 @@ ui::widgets::StringListbox::addItem(int32_t key, const String_t& s)
 }
 
 void
+ui::widgets::StringListbox::addItems(const afl::functional::StringTable_t& tab)
+{
+    int32_t i;
+    for (bool v = tab.getFirstKey(i); v; v = tab.getNextKey(i)) {
+        m_content.add(i, tab(i));
+    }
+    handleModelChange();
+}
+
+void
 ui::widgets::StringListbox::sortItemsAlphabetically()
 {
     // FIXME: preserve current key

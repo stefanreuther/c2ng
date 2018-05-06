@@ -5,8 +5,7 @@
 #include "ui/widgets/button.hpp"
 #include "ui/draw.hpp"
 
-// /** \class UIButton
-//     \brief Push button
+// /** Push button
 
 //     This class provides the look of a standard push-button. */
 

@@ -89,6 +89,7 @@ class TestGameSpecFriendlyCodeList : public CxxTest::TestSuite {
     void testLoad();
     void testSort();
     void testSyntaxErrors();
+    void testPessimistic();
 };
 
 class TestGameSpecHull : public CxxTest::TestSuite {

@@ -7,6 +7,11 @@
 
 #include <cxxtest/TestSuite.h>
 
+class TestServerApplication : public CxxTest::TestSuite {
+ public:
+    void testSimple();
+};
+
 class TestServerConfigurationHandler : public CxxTest::TestSuite {
  public:
     void testCommandLine();

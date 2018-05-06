@@ -29,12 +29,12 @@ namespace {
               planet(*univ.planets().create(72)),
               container(),
               shipList(),
-              root(afl::io::InternalDirectory::create("spec dir"),
-                   afl::io::InternalDirectory::create("game dir"),
+              root(afl::io::InternalDirectory::create("game dir"),
                    *new game::test::SpecificationLoader(),
                    game::HostVersion(game::HostVersion::Host, MKVERSION(3, 22, 47)),
                    std::auto_ptr<game::RegistrationKey>(new game::test::RegistrationKey(game::RegistrationKey::Unregistered, 5)),
-                   std::auto_ptr<game::StringVerifier>(new game::test::StringVerifier()))
+                   std::auto_ptr<game::StringVerifier>(new game::test::StringVerifier()),
+                   game::Root::Actions_t())
             { root.hostConfiguration().setDefaultValues(); }
 
         game::map::Universe univ;
@@ -63,6 +63,10 @@ namespace {
             { return 0; }
         virtual int getNumFightersAllowedToSell(int) const
             { return 0; }
+        virtual afl::base::Optional<String_t> getPreviousShipFriendlyCode(game::Id_t /*shipId*/) const
+            { return afl::base::Nothing; }
+        virtual afl::base::Optional<String_t> getPreviousPlanetFriendlyCode(game::Id_t /*planetId*/) const
+            { return afl::base::Nothing; }
     };
 
     void prepare(TestHarness& h)

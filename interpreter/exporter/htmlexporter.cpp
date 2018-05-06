@@ -8,6 +8,7 @@
 #include "afl/string/format.hpp"
 #include "interpreter/exporter/fieldlist.hpp"
 #include "interpreter/values.hpp"
+#include "util/string.hpp"
 
 interpreter::exporter::HtmlExporter::HtmlExporter(afl::io::TextWriter& file)
     : Exporter(),
@@ -60,21 +61,5 @@ interpreter::exporter::HtmlExporter::endTable()
 void
 interpreter::exporter::HtmlExporter::writeTag(const char* tagName, const String_t& content)
 {
-    String_t escaped;
-    afl::charset::Utf8Reader rdr(afl::string::toBytes(content), 0);
-    while (rdr.hasMore()) {
-        afl::charset::Unichar_t ch = rdr.eat();
-        if (ch == '&') {
-            escaped.append("&amp;");
-        } else if (ch == '<') {
-            escaped.append("&lt;");
-        } else if (ch == '>') {
-            escaped.append("&gt;");
-        } else if (ch <= 127) {
-            escaped.append(1, char(ch));
-        } else {
-            escaped.append(afl::string::Format("&#%d;", ch));
-        }
-    }
-    m_file.writeLine(afl::string::Format("    <%s>%s</%0$s>", tagName, escaped));
+    m_file.writeLine(afl::string::Format("    <%s>%s</%0$s>", tagName, util::encodeHtml(content, false)));
 }

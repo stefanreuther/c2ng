@@ -50,6 +50,9 @@ namespace util {
         /** Destructor. */
         ~ConfigurationFile();
 
+        /** Set significance of whitespace in values. */
+        void setWhitespaceIsSignificant(bool flag);
+
         /** Load from file.
             Loads the given file.
             The ConfigurationFile should be empty before calling this function.
@@ -84,6 +87,19 @@ namespace util {
             \param value Value */
         void set(String_t section, String_t key, String_t value);
 
+        /** Add single value.
+            Creates a new value. If that value already exists, this will be a duplicate assignment.
+            \param key Key; either just a single key, or "section.key"
+            \param value Value */
+        void add(String_t key, String_t value);
+
+        /** Set single value, sectioned.
+            Creates a new value. If that value already exists, this will be a duplicate assignment.
+            \param section Target section
+            \param key Key
+            \param value Value */
+        void add(String_t section, String_t key, String_t value);
+
         /** Remove value.
             Removes at most one instance of the key.
 
@@ -94,6 +110,12 @@ namespace util {
             \retval true Item was removed
             \retval false No such element found */
         bool remove(String_t key);
+
+        /** Add header comment.
+            <b>Restriction:</b> A header comment can only be added to a nonempty file
+            \param comment New comment. Must start with comment character.
+            \param force false: only add if none present; false: replace existing */
+        void addHeaderComment(const String_t& comment, bool force);
 
         /** Get number of elements.
             \return number of elements */
@@ -122,8 +144,18 @@ namespace util {
             \return Ending index [0,getNumElements()] */
         size_t findSectionEnd(size_t startIndex) const;
 
+        /** Check for assignments.
+            \return true if there are any assignments. false if there are only section headers and comments, making the file essentially empty. */
+        bool hasAssignments() const;
+
      private:
         afl::container::PtrVector<Element> m_elements;
+        bool m_whitespaceIsSignificant;
+
+        void insertAssignment(size_t insertPosition,
+                              const String_t& assignmentKey,
+                              const String_t& key,
+                              const String_t& value);
     };
 
 }

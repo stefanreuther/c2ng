@@ -14,7 +14,7 @@ TestGfxEngine::testIt()
 {
     class MyEngine : public gfx::Engine, private util::RequestDispatcher {
      public:
-        virtual afl::base::Ref<gfx::Canvas> createWindow(int /*width*/, int /*height*/, int /*bpp*/, WindowFlags_t /*flags*/)
+        virtual afl::base::Ref<gfx::Canvas> createWindow(const gfx::WindowParameters& /*param*/)
             { throw "nix"; }
         virtual afl::base::Ref<gfx::Canvas> loadImage(afl::io::Stream& /*file*/)
             { throw "nix"; }

@@ -48,7 +48,17 @@ class TestUtilSyntaxKeywordTable : public CxxTest::TestSuite {
     void testLoad();
 };
 
+class TestUtilSyntaxLispHighlighter : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
 class TestUtilSyntaxNullHighlighter : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
+class TestUtilSyntaxPascalHighlighter : public CxxTest::TestSuite {
  public:
     void testIt();
 };

@@ -7,10 +7,12 @@
 #include "client/session.hpp"
 #include "client/si/inputstate.hpp"
 #include "client/si/outputstate.hpp"
+#include "gfx/colorscheme.hpp"
+#include "util/skincolor.hpp"
 
 namespace client { namespace screens {
 
-    void doPlayerScreen(Session& session, client::si::InputState& in, client::si::OutputState& out, bool first);
+    void doPlayerScreen(Session& session, client::si::InputState& in, client::si::OutputState& out, gfx::ColorScheme<util::SkinColor::Color>& colorScheme, bool first);
 
 } }
 

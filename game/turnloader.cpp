@@ -70,6 +70,8 @@ game::TurnLoader::loadCurrentDatabases(Turn& turn, Game& game, int player, Root&
         // FIXME: port this: console.write(LOG_ERROR, format(_("%s: %s, file has been ignored"), e.getFileName(), e.what()));
     }
 
+    // Message configuration
+    game.messageConfiguration().load(root.gameDirectory(), player);
 }
 
 void

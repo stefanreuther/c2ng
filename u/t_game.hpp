@@ -119,11 +119,13 @@ class TestGamePlayerList : public CxxTest::TestSuite {
     void testSetup();
     void testChar();
     void testNotify();
+    void testGetName();
 };
 
 class TestGamePlayerSet : public CxxTest::TestSuite {
  public:
     void testFormat();
+    void testFormatPlayerHostSet();
 };
 
 class TestGameRegistrationKey : public CxxTest::TestSuite {

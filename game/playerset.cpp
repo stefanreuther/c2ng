@@ -51,3 +51,35 @@ game::formatPlayerSet(PlayerSet_t set, const PlayerList& list, afl::string::Tran
     }
     return result;
 }
+
+String_t
+game::formatPlayerHostSet(PlayerSet_t set, const PlayerList& list, afl::string::Translator& tx)
+{
+    const bool hasHost = set.contains(0);
+    const PlayerSet_t allPlayers = (list.getAllPlayers() - 0);
+    set &= allPlayers;
+
+    if (set == allPlayers) {
+        // everyone
+        if (hasHost) {
+            return tx.translateString("host, all players");
+        } else {
+            return tx.translateString("all players");
+        }
+    }
+    if (set.empty()) {
+        // nobody
+        if (hasHost) {
+            return tx.translateString("host");
+        } else {
+            return tx.translateString("nobody");
+        }
+    }
+
+    String_t formattedPlayers = formatPlayerSet(set, list, tx);
+    if (hasHost) {
+        // formattedPlayers can be "all but player X", so put host in front to make it unambiguous
+        formattedPlayers = afl::string::Format("host, %s", formattedPlayers);
+    }
+    return formattedPlayers;
+}

@@ -22,14 +22,21 @@ namespace game { namespace vcr { namespace classic {
 
     /** Status values (battle outcome). */
     enum BattleResult {
-        LeftDestroyed,      ///< Left object has been destroyed
-        RightDestroyed,     ///< Right object has been destroyed
-        LeftCaptured,       ///< Left object has been captured
-        RightCaptured,      ///< Right object has been captured
-        Timeout,            ///< Battle timed out
-        Stalemate,          ///< Stalemate (neither has ammo).
-        Invalid             ///< Battle cannot be played.
+        LeftDestroyed,      ///< Left object has been destroyed.
+        RightDestroyed,     ///< Right object has been destroyed.
+        LeftCaptured,       ///< Left object has been captured. Only valid if left object is a ship; planets are destroyed.
+        RightCaptured,      ///< Right object has been captured. Only valid if left object is a ship; planets are destroyed.
+        Timeout,            ///< Battle timed out. Used alone.
+        Stalemate,          ///< Stalemate (neither has ammo). Used alone.
+        Invalid             ///< Battle cannot be played. Used alone.
     };
+
+    /** Status bitset (battle outcome).
+        Normally, this is a unit set.
+        However, sometimes multiple "Destroyed" or "Captured" bits are set
+        if both units reach that state in the same battle tick.
+
+        The empty set means the status is not yet known. */
     typedef afl::bits::SmallSet<BattleResult> BattleResult_t;
 
     /** Fighter statuses.
@@ -46,8 +53,17 @@ namespace game { namespace vcr { namespace classic {
         RightSide
     };
 
+    Side flipSide(Side s);
+
     typedef int32_t Time_t;
 
 } } }
+
+
+inline game::vcr::classic::Side
+game::vcr::classic::flipSide(Side s)
+{
+    return s == LeftSide ? RightSide : LeftSide;
+}
 
 #endif

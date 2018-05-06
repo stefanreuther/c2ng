@@ -13,7 +13,7 @@ TestClientSiContextProvider::testIt()
 {
     class Tester : public client::si::ContextProvider {
      public:
-        virtual void createContext(game::Session& /*session*/, interpreter::Process& /*proc*/)
+        virtual void createContext(game::Session& /*session*/, client::si::ContextReceiver& /*proc*/)
             { }
     };
     Tester t;

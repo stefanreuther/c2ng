@@ -156,9 +156,9 @@
     <div class="tree">
       <div class="root hasnotify"><b>game::Session</b>
         <div class="optional ptr hasnotify">Root <em>: game::Root</em>
-          <div class="ptr virtual">SpecDir <em>: afl::io::Directory</em></div>
           <div class="ptr virtual">GameDir <em>: afl::io::Directory</em></div>
           <div class="ptr virtual">SpecLoader <em>: game::SpecificationLoader</em></div>
+          <div class="owned">Actions <em>: game::Root::Actions_t</em></div>
           <div class="owned">HostVersion <em>: game::HostVersion</em></div>
           <div class="owned virtual">RegKey <em>: game::RegistrationKey</em></div>
           <div class="owned haschange">HostConfig <em>: game::config::HostConfiguration</em></div>
@@ -209,6 +209,7 @@
             <div class="owned haschange">CurrentShip/Planet/Base, etc... <em>: game::map::SimpleObjectCursor</em></div>
           </div>
           <div class="owned haschange">HistoryTurnList <em>: game::HistoryTurnList</em></div>
+          <div class="owned">MessageConfiguration <em>: game::msg::Configuration</em></div>
           <div class="ptr hasnotify">Turn <em>: game::Turn</em>
             <div class="owned">Inbox <em>: game::msg::Inbox</em></div>
             <div class="owned">Outbox <em>: game::msg::Outbox</em></div>
@@ -299,6 +300,9 @@
       It is separate from game::Session to allow programs that use only one of them.
       All accesses to game::browser::Session happen in a single thread,
       which is the same one as the thread that accesses the game::Session.</p>
+    <p>The browser will eventually provide a game::Root.
+      The game::Root will contain a SpecificationLoader and a TurnLoader, presence of which determines what you can do with the game.
+      It will also contain a set of actions that can be applied to the directory associated with it.</p>
     <div class="tree">
       <div class="root hasnotify"><b>game::browser::Session</b>
         <div class="owned">AccountManager <em>: game::browser::AccountManager</em>

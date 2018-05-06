@@ -29,6 +29,8 @@ namespace ui { namespace widgets {
         void clear();
         void addItem(const util::rich::Text text, afl::base::Ptr<gfx::Canvas> image, bool accessible);
 
+        void setPreferredWidth(int width);
+
         void setRenderFlag(RenderFlag flag, bool value);
         bool hasRenderFlag(RenderFlag flag) const;
 
@@ -60,6 +62,7 @@ namespace ui { namespace widgets {
         ui::ColorScheme& m_colorScheme;
         afl::container::PtrVector<Item> m_items;
         RenderFlagSet_t m_renderFlags;
+        int m_preferredWidth;
 
         void render(size_t pos, size_t n);
     };

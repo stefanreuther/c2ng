@@ -1,5 +1,6 @@
 /**
   *  \file server/application.cpp
+  *  \brive Base class server::Application
   */
 
 #include "server/application.hpp"
@@ -12,6 +13,7 @@
 #include "server/configurationhandler.hpp"
 #include "server/interface/baseclient.hpp"
 #include "server/ports.hpp"
+#include "util/string.hpp"
 
 using afl::string::Format;
 
@@ -95,14 +97,6 @@ server::Application::run()
         reportError("Uncaught exception");
         return 1;
     }
-}
-
-String_t
-server::Application::getHelp() const
-{
-    return ConfigurationHandler::getHelp() +
-        "--log=CONFIG\tSet logger configuration\n"
-        "--proxy=URL\tAdd network proxy\n";
 }
 
 afl::sys::Environment&
@@ -203,6 +197,23 @@ server::Application::parseCommandLine(ConfigurationHandler& handler)
             if (!m_clientNetworkStack.add(url)) {
                 throw std::runtime_error(Format("Unrecognized proxy URL: \"%s\"", url));
             }
+        } else if (text == "h" || text == "help") {
+            using afl::string::Format;
+            afl::io::TextWriter& out = standardOutput();
+            out.writeLine(getApplicationName());
+            out.writeLine();
+            out.writeLine(Format("Usage:\n"
+                                 "  %s [-options]\n\n"
+                                 "Options:\n"
+                                 "%s"
+                                 "\n"
+                                 "Report bugs to <Streu@gmx.de>",
+                                 environment().getInvocationName(),
+                                 util::formatOptions(ConfigurationHandler::getHelp()
+                                                     + "--log=CONFIG\tSet logger configuration\n"
+                                                       "--proxy=URL\tAdd network proxy\n"
+                                                     + getCommandLineOptionHelp())));
+            exit(0);
         } else {
             if (!handleCommandLineOption(text, parser)) {
                 throw std::runtime_error(Format("Unrecognized command line option: \"-%s\"", text));

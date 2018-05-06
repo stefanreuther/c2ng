@@ -35,6 +35,11 @@ namespace server { namespace host {
         /** Backup mode. */
         bool unpackBackups;
 
+        /** Users see temporary turns flag.
+            If enabled (default since Jan 2018), users see the temporary flag for all turns.
+            If disabled, only the player of a slot sees that it is temporary. */
+        bool usersSeeTemporaryTurns;
+
         /** HostFile address.
             Since we're generating links to this service, it must be in the config. */
         afl::net::Name hostFileAddress;

@@ -14,7 +14,7 @@ namespace client { namespace widgets {
 
     class FolderListbox : public ui::widgets::AbstractListbox {
      public:
-        enum Icon { iFile, iGame, iFolder, iAccount, iUp, iComputer, iLink, iFavoriteFolder, iRoot, iFavorite };
+        enum Icon { iNone, iFile, iGame, iFolder, iAccount, iUp, iComputer, iLink, iFavoriteFolder, iRoot, iFavorite };
         struct Item {
             String_t name;
             int indent;

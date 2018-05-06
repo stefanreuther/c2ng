@@ -9,6 +9,7 @@
 #include "ui/res/resid.hpp"
 #include "client/objectlistener.hpp"
 #include "game/types.hpp"
+#include "game/map/planet.hpp"
 
 using ui::widgets::FrameGroup;
 

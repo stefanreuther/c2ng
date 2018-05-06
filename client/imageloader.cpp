@@ -1,0 +1,59 @@
+/**
+  *  \file client/imageloader.cpp
+  *  \brief Class client::ImageLoader
+  */
+
+#include "client/imageloader.hpp"
+#include "afl/base/signalconnection.hpp"
+#include "client/widgets/busyindicator.hpp"
+#include "util/translation.hpp"
+
+// Constructor.
+client::ImageLoader::ImageLoader(ui::Root& root)
+    : m_root(root),
+      m_loop(root),
+      m_unloadedImages()
+{ }
+
+// Load an image.
+void
+client::ImageLoader::loadImage(const String_t& name)
+{
+    bool flag;
+    m_root.provider().getImage(name, &flag);
+    if (!flag) {
+        m_unloadedImages.push_back(name);
+    }
+}
+
+// Wait for pending images.
+void
+client::ImageLoader::wait()
+{
+    if (!m_unloadedImages.empty()) {
+        afl::base::SignalConnection conn(m_root.provider().sig_imageChange.add(this, &ImageLoader::onImageChange));
+        client::widgets::BusyIndicator indicator(m_root, _("Loading..."));
+        indicator.setExtent(gfx::Rectangle(gfx::Point(), indicator.getLayoutInfo().getPreferredSize()));
+        m_root.moveWidgetToEdge(indicator, 1, 2, 10);
+        m_root.add(indicator);
+        m_loop.run();
+    }
+}
+
+void
+client::ImageLoader::onImageChange()
+{
+    std::vector<String_t>::iterator it = m_unloadedImages.begin();
+    while (it != m_unloadedImages.end()) {
+        bool flag;
+        m_root.provider().getImage(*it, &flag);
+        if (flag) {
+            it = m_unloadedImages.erase(it);
+        } else {
+            ++it;
+        }
+    }
+    if (m_unloadedImages.empty()) {
+        m_loop.stop(0);
+    }
+}

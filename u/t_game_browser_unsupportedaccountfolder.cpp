@@ -18,8 +18,9 @@ TestGameBrowserUnsupportedAccountFolder::testIt()
     afl::string::NullTranslator tx;
     game::browser::Account account;
     game::browser::UnsupportedAccountFolder testee(tx, account);
+    const game::config::UserConfiguration uc;
 
     TS_ASSERT(!testee.canEnter());
-    TS_ASSERT(testee.loadGameRoot().get() == 0);
+    TS_ASSERT(testee.loadGameRoot(uc).get() == 0);
 }
 

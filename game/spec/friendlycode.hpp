@@ -8,12 +8,20 @@
 #include "game/playerset.hpp"
 #include "afl/bits/smallset.hpp"
 #include "afl/string/string.hpp"
-#include "game/playerlist.hpp"
-#include "game/map/planet.hpp"
-#include "game/interpreterinterface.hpp"
 #include "game/config/hostconfiguration.hpp"
+#include "game/interpreterinterface.hpp"
+#include "game/playerlist.hpp"
+#include "game/unitscoredefinitionlist.hpp"
+
+namespace game { namespace map {
+    class Ship;
+    class Planet;
+    class Object;
+} }
 
 namespace game { namespace spec {
+
+    class ShipList;
 
     /** Special friendly code.
         This class defines a special friendly code.
@@ -67,11 +75,25 @@ namespace game { namespace spec {
 
         /** Check whether this friendly code works on an object.
             \param o Object
+            \param scoreDefinitions Ship score definitions
+            \param shipList Ship list
             \param config Host configuration
             \return true if friendly code is a valid/sensible choice for this object */
-        bool worksOn(const game::map::Object& o, const game::config::HostConfiguration& config) const;
+        bool worksOn(const game::map::Object& o,
+                     const UnitScoreDefinitionList& scoreDefinitions,
+                     const game::spec::ShipList& shipList,
+                     const game::config::HostConfiguration& config) const;
 
-        // FIXME: bool worksOn(const GShip& s) const;
+        /** Check whether this friendly code works on a ship.
+            \param s Ship
+            \param scoreDefinitions Ship score definitions
+            \param shipList Ship list
+            \param config Host configuration
+            \return true if friendly code is a valid/sensible choice for this ship */
+        bool worksOn(const game::map::Ship& s,
+                     const UnitScoreDefinitionList& scoreDefinitions,
+                     const game::spec::ShipList& shipList,
+                     const game::config::HostConfiguration& config) const;
 
         /** Check whether this friendly code works on a planet.
             \param p Planet

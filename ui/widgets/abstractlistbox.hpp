@@ -68,6 +68,7 @@ namespace ui { namespace widgets {
         void updateItem(size_t item);
         void updateCurrentItem();
         gfx::Rectangle getRelativeItemPosition(size_t item);
+        gfx::Rectangle getAbsoluteItemPosition(size_t item);
 
         bool getItemFromRelativePosition(gfx::Point pt, size_t& item, gfx::Rectangle& area);
         ItemState getItemState(size_t nr);

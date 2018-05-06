@@ -42,9 +42,17 @@ game::v3::OutboxReader::loadOutbox(afl::io::Stream& s, afl::charset::Charset& cs
         if (length < 0 || length > structures::MAX_MESSAGE_SIZE) {
             throw afl::except::FileFormatException(s, tx.translateString("Message too big"));
         }
-        if (to <= 0 || to > MAX_PLAYERS) {
+
+        // Convert receiver. In the file, 12 means Host; internally, 0 means Host.
+        int effectiveReceiver;
+        if (to == structures::NUM_OWNERS) {
+            effectiveReceiver = 0;
+        } else if (to > 0 && to <= structures::NUM_PLAYERS) {
+            effectiveReceiver = to;
+        } else {
             throw afl::except::FileFormatException(s, tx.translateString("Invalid message receiver"));
         }
+
         if (length != 0) {
             s.setPos(address-1);
 
@@ -52,7 +60,7 @@ game::v3::OutboxReader::loadOutbox(afl::io::Stream& s, afl::charset::Charset& cs
             messageText.resize(length);
             s.fullRead(messageText);
 
-            addMessage(decodeMessage(messageText, cs, false), PlayerSet_t(to));
+            addMessage(decodeMessage(messageText, cs, false), PlayerSet_t(effectiveReceiver));
         }
     }
 }
@@ -93,10 +101,14 @@ game::v3::OutboxReader::loadOutbox35(afl::io::Stream& s, afl::charset::Charset& 
             if (hdr.validFlag == '1') {
                 // Message is valid. Gather receivers.
                 PlayerSet_t receivers;
-                for (int i = 1; i <= structures::NUM_OWNERS; ++i) {
+                for (int i = 1; i <= structures::NUM_PLAYERS; ++i) {
                     if (hdr.receivers[i-1] == '1') {
                         receivers += i;
                     }
+                }
+                // Host
+                if (hdr.receivers[structures::NUM_OWNERS-1] == '1') {
+                    receivers += 0;
                 }
                 addMessage(decodeMessage(messageText, cs, false), receivers);
             }

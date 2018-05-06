@@ -10,8 +10,10 @@
 
 namespace client { namespace si {
 
+    class ContextReceiver;
+
     /** Context provider for a script.
-        This interface allows creation of contexts for a process.
+        This interface allows creation of contexts for a process or other.
 
         ContextProvider instances are passed from the user-interface thread to the worker thread.
         They must therefore not carry any shared data.
@@ -21,8 +23,8 @@ namespace client { namespace si {
      public:
         /** Create contexts.
             \param session Game session (input)
-            \param proc Process. Contexts should be created here. */
-        virtual void createContext(game::Session& session, interpreter::Process& proc) = 0;
+            \param recv Context receiver. Call addNewContext(). */
+        virtual void createContext(game::Session& session, ContextReceiver& recv) = 0;
     };
 
 } }

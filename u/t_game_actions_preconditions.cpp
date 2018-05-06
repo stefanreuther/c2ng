@@ -131,12 +131,12 @@ TestGameActionsPreconditions::testSession()
     {
         // Just a root
         game::Session session(tx, fs);
-        session.setRoot(new game::Root(afl::io::InternalDirectory::create("spec"),
-                                       afl::io::InternalDirectory::create("game"),
+        session.setRoot(new game::Root(afl::io::InternalDirectory::create("game"),
                                        *new game::test::SpecificationLoader(),
                                        game::HostVersion(),
                                        std::auto_ptr<game::RegistrationKey>(new game::test::RegistrationKey(game::RegistrationKey::Unknown, 100)),
-                                       std::auto_ptr<game::StringVerifier>(new game::test::StringVerifier())));
+                                       std::auto_ptr<game::StringVerifier>(new game::test::StringVerifier()),
+                                       game::Root::Actions_t()));
         TS_ASSERT_THROWS(game::actions::mustHaveShipList(session), game::Exception);
         TS_ASSERT_THROWS_NOTHING(game::actions::mustHaveRoot(session));
         TS_ASSERT_THROWS(game::actions::mustHaveGame(session), game::Exception);
@@ -153,12 +153,12 @@ TestGameActionsPreconditions::testSession()
         // Everything
         game::Session session(tx, fs);
         session.setShipList(new game::spec::ShipList());
-        session.setRoot(new game::Root(afl::io::InternalDirectory::create("spec"),
-                                       afl::io::InternalDirectory::create("game"),
+        session.setRoot(new game::Root(afl::io::InternalDirectory::create("game"),
                                        *new game::test::SpecificationLoader(),
                                        game::HostVersion(),
                                        std::auto_ptr<game::RegistrationKey>(new game::test::RegistrationKey(game::RegistrationKey::Unknown, 100)),
-                                       std::auto_ptr<game::StringVerifier>(new game::test::StringVerifier())));
+                                       std::auto_ptr<game::StringVerifier>(new game::test::StringVerifier()),
+                                       game::Root::Actions_t()));
         session.setGame(new game::Game());
         TS_ASSERT_THROWS_NOTHING(game::actions::mustHaveShipList(session));
         TS_ASSERT_THROWS_NOTHING(game::actions::mustHaveRoot(session));
