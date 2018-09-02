@@ -6,7 +6,7 @@
 #include "afl/base/countof.hpp"
 #include "afl/base/staticassert.hpp"
 #include "afl/string/format.hpp"
-#include "client/objectlistener.hpp"
+#include "client/proxy/objectlistener.hpp"
 #include "game/game.hpp"
 #include "game/map/chunnelmission.hpp"
 #include "game/map/ship.hpp"
@@ -105,9 +105,9 @@ client::tiles::ShipMovementTile::ShipMovementTile(ui::Root& root, client::widget
 }
 
 void
-client::tiles::ShipMovementTile::attach(ObjectObserverProxy& oop)
+client::tiles::ShipMovementTile::attach(client::proxy::ObjectObserver& oop)
 {
-    class Listener : public ObjectListener {
+    class Listener : public client::proxy::ObjectListener {
      public:
         Listener(util::RequestSender<ShipMovementTile> reply)
             : m_reply(reply)
@@ -357,8 +357,8 @@ client::tiles::ShipMovementTile::init(client::widgets::KeymapWidget& kmw)
     addChild(m_fleetFrame, 0);
 
     // Register buttons
-    kmw.addButton(m_warpButton);
-    kmw.addButton(m_chartButton);
-    kmw.addButton(m_queryButton);
-    kmw.addButton(m_fleetButton);
+    m_warpButton.dispatchKeyTo(kmw);
+    m_chartButton.dispatchKeyTo(kmw);
+    m_queryButton.dispatchKeyTo(kmw);
+    m_fleetButton.dispatchKeyTo(kmw);
 }

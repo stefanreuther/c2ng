@@ -5,7 +5,7 @@
 #include "client/tiles/selectionheadertile.hpp"
 #include "util/unicodechars.hpp"
 #include "client/marker.hpp"
-#include "client/objectlistener.hpp"
+#include "client/proxy/objectlistener.hpp"
 
 client::tiles::SelectionHeaderTile::SelectionHeaderTile(ui::Root& root, client::widgets::KeymapWidget& keys)
     : m_root(root),
@@ -17,8 +17,8 @@ client::tiles::SelectionHeaderTile::SelectionHeaderTile(ui::Root& root, client::
 {
     // ex WObjectSelectionHeaderTile::WObjectSelectionHeaderTile
     // ex WObjectSelectionHeaderTile::init
-    keys.addButton(m_next);
-    keys.addButton(m_prev);
+    m_next.dispatchKeyTo(keys);
+    m_prev.dispatchKeyTo(keys);
     addChild(m_prev, 0);
     addChild(m_next, 0);
     m_prev.setFont(gfx::FontRequest().addSize(-1));
@@ -112,7 +112,7 @@ client::tiles::SelectionHeaderTile::setStatus(String_t name, bool marked)
 }
 
 void
-client::tiles::SelectionHeaderTile::attach(ObjectObserverProxy& oop)
+client::tiles::SelectionHeaderTile::attach(client::proxy::ObjectObserver& oop)
 {
     class Job : public util::Request<SelectionHeaderTile> {
      public:
@@ -125,7 +125,7 @@ client::tiles::SelectionHeaderTile::attach(ObjectObserverProxy& oop)
         String_t m_name;
         bool m_marked;
     };
-    class Listener : public ObjectListener {
+    class Listener : public client::proxy::ObjectListener {
      public:
         Listener(util::RequestSender<SelectionHeaderTile> reply)
             : m_reply(reply)

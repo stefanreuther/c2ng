@@ -1,5 +1,6 @@
 /**
   *  \file game/playerset.hpp
+  *  \brief Type game::PlayerSet_t
   */
 #ifndef C2NG_GAME_PLAYERSET_HPP
 #define C2NG_GAME_PLAYERSET_HPP

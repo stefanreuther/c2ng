@@ -5,6 +5,7 @@
 #ifndef C2NG_GAME_V3_REGISTRATIONKEY_HPP
 #define C2NG_GAME_V3_REGISTRATIONKEY_HPP
 
+#include <memory>
 #include "game/registrationkey.hpp"
 #include "afl/string/string.hpp"
 #include "afl/charset/charset.hpp"
@@ -32,7 +33,7 @@ namespace game { namespace v3 {
 
         /** Constructor.
             \param charset Game character set */
-        explicit RegistrationKey(afl::charset::Charset& charset);
+        explicit RegistrationKey(std::auto_ptr<afl::charset::Charset> charset);
 
         // RegistrationKey methods:
         virtual Status getStatus() const;
@@ -65,7 +66,7 @@ namespace game { namespace v3 {
 
         String_t decode(size_t start) const;
 
-        afl::charset::Charset& m_charset;
+        std::auto_ptr<afl::charset::Charset> m_charset;
 
         uint32_t m_fizz[KEY_SIZE];
 

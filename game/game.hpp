@@ -7,13 +7,15 @@
 #include "afl/base/ptr.hpp"
 #include "afl/base/refcounted.hpp"
 #include "afl/base/signal.hpp"
+#include "game/config/hostconfiguration.hpp"
 #include "game/historyturnlist.hpp"
 #include "game/map/cursors.hpp"
 #include "game/map/markings.hpp"
+#include "game/msg/configuration.hpp"
+#include "game/parser/messageinformation.hpp"
 #include "game/score/turnscorelist.hpp"
 #include "game/teamsettings.hpp"
 #include "game/unitscoredefinitionlist.hpp"
-#include "game/msg/configuration.hpp"
 
 namespace game {
 
@@ -54,6 +56,21 @@ namespace game {
 
         game::msg::Configuration& messageConfiguration();
         const game::msg::Configuration& messageConfiguration() const;
+
+        /** Add message information.
+            This is the general "I got some information somewhere" call.
+            It will handle all sorts of information and add it to the current turn, treating it as scanner results.
+
+            Restrictions:
+            - ship information will be treated as unreliable (that is, this cannot create interceptable ships).
+            - it will only add to the current turn, even if it's dated at an older turn.
+            - future information will be discarded.
+
+            \param info Information
+            \param config Host configuration (can be updated with message information) */
+        void addMessageInformation(const game::parser::MessageInformation& info, game::config::HostConfiguration& config);
+
+        void synchronizeTeamsFromAlliances();
 
         void notifyListeners();
 

@@ -25,6 +25,8 @@ namespace game { namespace map {
     };
 
     void clearShipHistory(ShipHistoryData& d);
+    ShipHistoryData::Track* adjustShipHistory(ShipHistoryData& d, int turn);
+    ShipHistoryData::Track* getShipHistory(ShipHistoryData& d, int turn);
 
 } }
 

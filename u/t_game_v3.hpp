@@ -17,6 +17,7 @@ class TestGameV3CommandContainer : public CxxTest::TestSuite {
  public:
     void testContainer();
     void testSequence();
+    void testReplacePointer();
 };
 
 class TestGameV3CommandExtra : public CxxTest::TestSuite {

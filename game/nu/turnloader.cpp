@@ -205,6 +205,17 @@ game::nu::TurnLoader::loadCurrentTurn(Turn& turn, Game& /*game*/, int player, Ro
 }
 
 void
+game::nu::TurnLoader::saveCurrentTurn(Turn& turn, Game& game, int player, Root& root, Session& session)
+{
+    // FIXME
+    (void) turn;
+    (void) game;
+    (void) player;
+    (void) root;
+    (void) session;
+}
+
+void
 game::nu::TurnLoader::getHistoryStatus(int /*player*/, int turn, afl::base::Memory<HistoryStatus> status, const Root& /*root*/)
 {
     /*

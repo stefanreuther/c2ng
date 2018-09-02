@@ -45,7 +45,7 @@ namespace {
 }
 
 // Constructor.
-game::v3::RegistrationKey::RegistrationKey(afl::charset::Charset& charset)
+game::v3::RegistrationKey::RegistrationKey(std::auto_ptr<afl::charset::Charset> charset)
     : m_charset(charset),
       m_winplanString1(),
       m_winplanString2(),
@@ -214,8 +214,8 @@ game::v3::RegistrationKey::parseKey(afl::io::Stream& s)
             buffer.string3.m_bytes[i] -= 13;
             buffer.string4.m_bytes[i] -= 13;
         }
-        m_winplanString1 = m_charset.decode(buffer.string3);
-        m_winplanString2 = m_charset.decode(buffer.string4);
+        m_winplanString1 = m_charset->decode(buffer.string3);
+        m_winplanString2 = m_charset->decode(buffer.string4);
     } else if (flag == 666771) {
         /* valid, but not unlocked */
         initUnowned();
@@ -234,5 +234,5 @@ game::v3::RegistrationKey::decode(size_t start) const
     for (size_t i = 0; i < 25; ++i) {
         buffer[i] = uint8_t(m_fizz[start + i] * 5042 / (i+1) >> 16);
     }
-    return m_charset.decode(afl::bits::unpackFixedString(buffer));
+    return m_charset->decode(afl::bits::unpackFixedString(buffer));
 }

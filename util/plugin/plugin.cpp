@@ -115,6 +115,8 @@ util::plugin::Plugin::initFromPluginFile(String_t baseDir, String_t defFileName,
                     self.addItem(ScriptFile, value);
                 } else if (strCaseCompare(name, "resourcefile") == 0) {
                     self.addItem(ResourceFile, value);
+                } else if (strCaseCompare(name, "helpfile") == 0) {
+                    self.addItem(HelpFile, value);
                 } else if (name.size() >= 4 && strCaseCompare(name.substr(name.size()-4), "file") == 0) {
                     self.addItem(PlainFile, value);
                 } else if (strCaseCompare(name, "exec") == 0) {
@@ -290,6 +292,7 @@ util::plugin::Plugin::savePluginFile(afl::io::Stream& file) const
          case PlainFile:    tf.writeText("File = ");         break;
          case ScriptFile:   tf.writeText("ScriptFile = ");   break;
          case ResourceFile: tf.writeText("ResourceFile = "); break;
+         case HelpFile:     tf.writeText("HelpFile = ");     break;
          case Command:      tf.writeText("Exec = ");         break;
         }
         tf.writeLine(i->name);

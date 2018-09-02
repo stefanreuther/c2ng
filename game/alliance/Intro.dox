@@ -1,0 +1,6 @@
+/*!
+     \namespace game::alliance
+     \brief Alliances
+
+     This namespace contains all classes required to manage alliances.
+ */

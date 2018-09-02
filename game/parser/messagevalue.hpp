@@ -9,6 +9,7 @@
 #include "afl/string/string.hpp"
 #include "afl/base/types.hpp"
 #include "afl/string/translator.hpp"
+#include "game/alliance/offer.hpp"
 
 namespace game { namespace parser {
 
@@ -57,8 +58,14 @@ namespace game { namespace parser {
 
     /** Message index for object string attributes. */
     enum MessageStringIndex {
+        /* Generic: */
         ms_Name,
         ms_FriendlyCode,
+
+        /* Ufo: */
+        ms_UfoInfo1,
+        ms_UfoInfo2,
+
         ms_Max
     };
 
@@ -72,17 +79,38 @@ namespace game { namespace parser {
         mi_Damage,
         mi_Heading,
         mi_Speed,
+        mi_Type,                    // Mines, Ufos
+        mi_Mass,
 
         /* Minefields: */
         mi_MineUnits,
         mi_MineScanReason,
-        mi_MineType,
         mi_MineUnitsRemoved,
 
         /* Ships: */
         mi_ShipHull,
         mi_ShipFuel,
         mi_ShipRemoteFlag,
+        mi_ShipWaypointDX,
+        mi_ShipWaypointDY,
+        mi_ShipEngineType,
+        mi_ShipBeamType,
+        mi_ShipNumBeams,
+        mi_ShipNumBays,
+        mi_ShipLauncherType,
+        mi_ShipAmmo,
+        mi_ShipNumLaunchers,
+        mi_ShipMission,
+        mi_ShipTow,
+        mi_ShipIntercept,
+        mi_ShipEnemy,
+        mi_ShipCrew,
+        mi_ShipColonists,
+        mi_ShipSupplies,
+        mi_ShipCargoT,
+        mi_ShipCargoD,
+        mi_ShipCargoM,
+        mi_ShipMoney,
 
         /* Planets: */
         mi_PlanetTotalN,            // Total minerals, as in Dark Sense or Super Spy
@@ -97,6 +125,10 @@ namespace game { namespace parser {
         mi_PlanetMinedT,
         mi_PlanetMinedD,
         mi_PlanetMinedM,
+        mi_PlanetDensityN,
+        mi_PlanetDensityT,
+        mi_PlanetDensityD,
+        mi_PlanetDensityM,
         mi_PlanetCash,
         mi_PlanetSupplies,
         mi_PlanetHasBase,
@@ -105,9 +137,13 @@ namespace game { namespace parser {
         mi_PlanetDefense,
         mi_PlanetTemperature,
         mi_PlanetColonists,
+        mi_PlanetColonistHappiness,
+        mi_PlanetColonistTax,
         mi_PlanetActivity,
         mi_PlanetNativeRace,
         mi_PlanetNativeGov,
+        mi_PlanetNativeHappiness,
+        mi_PlanetNativeTax,
         mi_PlanetNatives,
         mi_PlanetHasNatives,
 
@@ -136,6 +172,14 @@ namespace game { namespace parser {
         // TODO: Scores
         // TODO: TUtil57Special
 
+        /* Ufo: */
+        mi_UfoRealId,
+        mi_UfoSpeedX,
+        mi_UfoSpeedY,
+        mi_UfoColor,
+        mi_UfoPlanetRange,
+        mi_UfoShipRange,
+
         mi_Max
     };
 
@@ -159,9 +203,8 @@ namespace game { namespace parser {
 
     /** Alliance value. For use with MessageAlliance.
         The string is the alliance identifier.
-        The GAllianceOffer is partially-filled in. */
-    // FIXME: missing
-    // typedef GMessageValue<string_t,GAllianceOffer> GMessageAllianceValue;
+        The Offer is partially-filled in. */
+    typedef MessageValue<String_t,game::alliance::Offer> MessageAllianceValue_t;
 
     /** Get human-readable name, given a string index.
         \param si String index

@@ -162,6 +162,7 @@ TestServerHostCommandHandler::testIt()
     TS_ASSERT_THROWS_NOTHING(testee.callVoid(Segment().pushBackString("MASTERADD").pushBackString("M").pushBackString("").pushBackString("").pushBackString("m")));
     TS_ASSERT_THROWS_NOTHING(testee.callVoid(Segment().pushBackString("SHIPLISTADD").pushBackString("S").pushBackString("").pushBackString("").pushBackString("s")));
     TS_ASSERT_THROWS_NOTHING(testee.callVoid(Segment().pushBackString("TOOLADD").pushBackString("T").pushBackString("").pushBackString("").pushBackString("t")));
+    TS_ASSERT_THROWS_NOTHING(testee.callVoid(Segment().pushBackString("STAT").pushBackString("game")));
 
     int gid = testee.callInt(Segment().pushBackString("NEWGAME"));
     TS_ASSERT_THROWS_NOTHING(testee.callVoid(Segment().pushBackString("GAMESETTYPE").pushBackInteger(gid).pushBackString("public")));

@@ -7,7 +7,9 @@
 #include "afl/string/char.hpp"
 #include "afl/sys/mutexguard.hpp"
 #include "server/host/exporter.hpp"
+#include "server/host/file/rootitem.hpp"
 #include "server/host/hostcron.hpp"
+#include "server/host/hostfile.hpp"
 #include "server/host/hostgame.hpp"
 #include "server/host/hostplayer.hpp"
 #include "server/host/hostschedule.hpp"
@@ -16,6 +18,7 @@
 #include "server/host/root.hpp"
 #include "server/host/session.hpp"
 #include "server/interface/hostcronserver.hpp"
+#include "server/interface/hostfileserver.hpp"
 #include "server/interface/hostgameserver.hpp"
 #include "server/interface/hostplayerserver.hpp"
 #include "server/interface/hostscheduleserver.hpp"
@@ -106,6 +109,12 @@ server::host::CommandHandler::handleCommand(const String_t& upcasedCommand, inte
         // SCHEDULExxx
         HostSchedule impl(m_session, m_root);
         ok = server::interface::HostScheduleServer(impl).handleCommand(upcasedCommand, args, result);
+    }
+    if (!ok) {
+        // GET, LS, ...
+        server::host::file::RootItem item(m_session, m_root);
+        HostFile impl(item);
+        ok = server::interface::HostFileServer(impl).handleCommand(upcasedCommand, args, result);
     }
     if (!ok) {
         // CRONxxx

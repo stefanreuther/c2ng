@@ -5,7 +5,7 @@
 
 #include "client/si/widgetwrapper.hpp"
 #include "afl/string/format.hpp"
-#include "client/objectlistener.hpp"
+#include "client/proxy/objectlistener.hpp"
 #include "client/si/genericwidgetvalue.hpp"
 #include "client/si/scriptside.hpp"
 #include "client/si/userside.hpp"
@@ -47,7 +47,7 @@ namespace {
      *  Normally, ObjectListener's job is to call back into the UI thread and let that decide what happens.
      *  We can do everything in one callback, though.
      */
-    class Listener : public client::ObjectListener {
+    class Listener : public client::proxy::ObjectListener {
      public:
         Listener(const client::si::WidgetReference& ref,
                  util::RequestSender<game::Session> gameSender,
@@ -200,7 +200,7 @@ client::si::WidgetWrapper::handleMouse(gfx::Point pt, MouseButtons_t pressedButt
 }
 
 void
-client::si::WidgetWrapper::attach(ObjectObserverProxy& oop, String_t command)
+client::si::WidgetWrapper::attach(client::proxy::ObjectObserver& oop, String_t command)
 {
     oop.addNewListener(new Listener(WidgetReference(m_holder, m_slot), m_gameSender, m_properties, command));
 }

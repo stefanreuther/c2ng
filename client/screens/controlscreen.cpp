@@ -6,8 +6,7 @@
 #include "afl/base/refcounted.hpp"
 #include "client/map/widget.hpp"
 #include "client/objectcursorfactory.hpp"
-#include "client/objectlistener.hpp"
-#include "client/objectobserverproxy.hpp"
+#include "client/proxy/objectlistener.hpp"
 #include "client/si/contextprovider.hpp"
 #include "client/si/contextreceiver.hpp"
 #include "client/si/control.hpp"
@@ -32,12 +31,33 @@
 #include "ui/spacer.hpp"
 #include "ui/widgets/panel.hpp"
 #include "util/slaveobject.hpp"
+#include "client/proxy/cursorobserverproxy.hpp"
 
 namespace {
 
+    /* FIXME: as of 20180827, this object is shared between threads but not modified.
+       Can we replace it by a by-value, not by-reference object? */
     struct ScreenState : public afl::base::RefCounted {
         int screenNumber;
         client::si::OutputState::Target ownTarget;
+
+        game::map::ObjectCursor* getCursor(game::Session& session) const
+            {
+                if (game::Game* g = session.getGame().get()) {
+                    return g->cursors().getCursorByNumber(screenNumber);
+                } else {
+                    return 0;
+                }
+            }
+
+        game::map::Object* getObject(game::Session& session) const
+            {
+                if (game::map::ObjectCursor* c = getCursor(session)) {
+                    return c->getCurrentObject();
+                } else {
+                    return 0;
+                }
+            }
     };
 
     class ScreenCursorFactory : public client::ObjectCursorFactory {
@@ -51,11 +71,7 @@ namespace {
                 m_game = session.getGame();
 
                 // Get the cursor
-                if (game::Game* g = m_game.get()) {
-                    return g->cursors().getCursorByNumber(m_state->screenNumber);
-                } else {
-                    return 0;
-                }
+                return m_state->getCursor(session);
             }
      private:
         afl::base::Ptr<game::Game> m_game;
@@ -69,21 +85,17 @@ namespace {
             { }
         virtual void createContext(game::Session& session, client::si::ContextReceiver& recv)
             {
-                if (game::Game* g = session.getGame().get()) {
-                    if (game::map::ObjectCursor* c = g->cursors().getCursorByNumber(m_state->screenNumber)) {
-                        game::map::Object* obj = c->getCurrentObject();
-                        if (dynamic_cast<game::map::Ship*>(obj) != 0) {
-                            if (interpreter::Context* ctx = game::interface::ShipContext::create(obj->getId(), session)) {
-                                recv.addNewContext(ctx);
-                            }
-                        } else if (dynamic_cast<game::map::Planet*>(obj) != 0) {
-                            if (interpreter::Context* ctx = game::interface::PlanetContext::create(obj->getId(), session)) {
-                                recv.addNewContext(ctx);
-                            }
-                        } else {
-                            // FIXME?
-                        }
+                game::map::Object* obj = m_state->getObject(session);
+                if (dynamic_cast<game::map::Ship*>(obj) != 0) {
+                    if (interpreter::Context* ctx = game::interface::ShipContext::create(obj->getId(), session)) {
+                        recv.addNewContext(ctx);
                     }
+                } else if (dynamic_cast<game::map::Planet*>(obj) != 0) {
+                    if (interpreter::Context* ctx = game::interface::PlanetContext::create(obj->getId(), session)) {
+                        recv.addNewContext(ctx);
+                    }
+                } else {
+                    // FIXME?
                 }
             }
      private:
@@ -106,6 +118,7 @@ namespace {
         virtual void done(game::Session& master)
             {
                 master.uiPropertyStack().remove(*this);
+                m_pSession = 0;
             }
 
         virtual bool get(game::interface::UserInterfaceProperty prop, std::auto_ptr<afl::data::Value>& result)
@@ -126,9 +139,24 @@ namespace {
                     return true;
                  case game::interface::iuiScanX:
                  case game::interface::iuiScanY:
+                    // FIXME: implement this! iuiScanX, iuiScanY
+                    result.reset();
+                    return true;
                  case game::interface::iuiChartX:
                  case game::interface::iuiChartY:
                     result.reset();
+                    if (m_pSession != 0) {
+                        if (game::map::MapObject* obj = dynamic_cast<game::map::MapObject*>(m_state->getObject(*m_pSession))) {
+                            game::map::Point pt;
+                            if (obj->getPosition(pt)) {
+                                if (prop == game::interface::iuiChartX) {
+                                    result.reset(interpreter::makeIntegerValue(pt.getX()));
+                                } else {
+                                    result.reset(interpreter::makeIntegerValue(pt.getY()));
+                                }
+                            }
+                        }
+                    }
                     return true;
                 }
                 return false;
@@ -201,7 +229,7 @@ namespace {
         afl::base::Ref<ScreenState> m_state;
     };
 
-    class ScreenMapUpdater : public client::ObjectListener {
+    class ScreenMapUpdater : public client::proxy::ObjectListener {
      public:
         ScreenMapUpdater(util::RequestSender<client::map::Widget> sender)
             : m_sender(sender)
@@ -273,7 +301,7 @@ client::screens::ControlScreen::run(client::si::InputState& in, client::si::Outp
     ui::SkinColorScheme panelColors(ui::DARK_COLOR_SET, root.colorScheme());
     panel.setColorScheme(panelColors);
     client::widgets::KeymapWidget keys(m_session.gameSender(), root.engine().dispatcher(), ctl);
-    client::ObjectObserverProxy oop(m_session.gameSender(), std::auto_ptr<client::ObjectCursorFactory>(new ScreenCursorFactory(state)));
+    client::proxy::CursorObserverProxy oop(m_session.gameSender(), std::auto_ptr<client::ObjectCursorFactory>(new ScreenCursorFactory(state)));
 
     ui::Group tileGroup(ui::layout::VBox::instance5);
     client::tiles::TileFactory(root, m_session.interface(), keys, oop).createLayout(tileGroup, m_definition.layoutName, deleter);

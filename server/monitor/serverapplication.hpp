@@ -44,8 +44,11 @@ namespace server { namespace monitor {
         String_t m_templateFileName;
         String_t m_statusFileName;
         int32_t m_updateInterval;
+        int32_t m_saveInterval;
 
         Status m_status;
+
+        void doSave();
     };
 
 } }

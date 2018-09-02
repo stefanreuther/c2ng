@@ -51,30 +51,6 @@ client::widgets::KeymapWidget::handleKey(util::Key_t key, int prefix)
     }
 }
 
-afl::base::Closure<void(int, util::Key_t)>*
-client::widgets::KeymapWidget::makeKey()
-{
-    class Handler : public afl::base::Closure<void(int, util::Key_t)> {
-     public:
-        Handler(KeymapWidget& self)
-            : m_self(self)
-            { }
-        void call(int prefix, util::Key_t key)
-            { m_self.handleKey(key, prefix); }
-        Handler* clone() const
-            { return new Handler(*this); }
-     private:
-        KeymapWidget& m_self;
-    };
-    return new Handler(*this);
-}
-
-void
-client::widgets::KeymapWidget::addButton(ui::widgets::AbstractButton& btn)
-{
-    btn.sig_fireKey.addNewClosure(makeKey());
-}
-
 void
 client::widgets::KeymapWidget::Trampoline::init(game::Session& s)
 {

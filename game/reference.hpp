@@ -44,6 +44,9 @@ namespace game {
 
         String_t toString(afl::string::Translator& tx) const;
 
+        bool operator==(const Reference& other) const;
+        bool operator!=(const Reference& other) const;
+
      private:
         Type m_type;
         int m_x;

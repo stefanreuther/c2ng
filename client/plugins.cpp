@@ -66,6 +66,15 @@ namespace {
             bco.addInstruction(Opcode::maIndirect, Opcode::miIMCall, 1);
             break;
 
+         case Plugin::HelpFile:
+            // Load help file
+            //   LoadHelpFile "..."
+            // (LoadHelpFile internally applies the plugin directory.)
+            addPushString(bco, item.name);
+            bco.addInstruction(Opcode::maPush, Opcode::sNamedShared, bco.addName("LOADHELPFILE"));
+            bco.addInstruction(Opcode::maIndirect, Opcode::miIMCall, 1);
+            break;
+
          case Plugin::Command:
             // Evaluate code
             //   Eval "..."

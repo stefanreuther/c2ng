@@ -4,7 +4,7 @@
 #ifndef C2NG_CLIENT_TILES_SHIPMOVEMENTTILE_HPP
 #define C2NG_CLIENT_TILES_SHIPMOVEMENTTILE_HPP
 
-#include "client/objectobserverproxy.hpp"
+#include "client/proxy/objectobserver.hpp"
 #include "client/widgets/collapsibledataview.hpp"
 #include "client/widgets/keymapwidget.hpp"
 #include "ui/widgets/button.hpp"
@@ -31,7 +31,7 @@ namespace client { namespace tiles {
         };
 
         ShipMovementTile(ui::Root& root, client::widgets::KeymapWidget& kmw);
-        void attach(ObjectObserverProxy& oop);
+        void attach(client::proxy::ObjectObserver& oop);
 
         void setData(const Data& data);
 

@@ -156,6 +156,13 @@ game::sim::Setup::getNumObjects() const
 }
 
 // Get object, given a slot number.
+const game::sim::Object*
+game::sim::Setup::getObject(Slot_t slot) const
+{
+    return const_cast<Setup*>(this)->getObject(slot);
+}
+
+// Get object, given a slot number.
 game::sim::Object*
 game::sim::Setup::getObject(Slot_t slot)
 {

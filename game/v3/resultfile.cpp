@@ -11,9 +11,11 @@
 
 // Constructor.
 game::v3::ResultFile::ResultFile(afl::io::Stream& file, afl::string::Translator& tx)
-    : m_file(file)
+    : m_file(file),
+      m_version(),
+      m_translator(tx)
 {
-    loadHeader(tx);
+    loadHeader();
 }
 
 // Destructor.
@@ -48,6 +50,32 @@ game::v3::ResultFile::hasSection(Section section) const
     return m_offset[section] > 0;
 }
 
+// Move file pointer to a section.
+void
+game::v3::ResultFile::seekToSection(Section section) const
+{
+    afl::io::Stream::FileSize_t pos = 0;
+    if (!getSectionOffset(section, pos)) {
+        // With a normal ResultFile, this cannot happen
+        throw afl::except::FileFormatException(m_file, m_translator.translateString("File is missing required section"));
+    }
+    m_file.setPos(pos);
+}
+
+// Get number of ship coordinates (number of ships in ShipXYSection).
+int
+game::v3::ResultFile::getNumShipCoordinates() const
+{
+    static_assert(ShipXYSection + 1 == GenSection, "Sections");
+    if (hasSection(ShipXYSection) && hasSection(GenSection)
+        && m_offset[GenSection] > m_offset[ShipXYSection]
+        && m_offset[GenSection] - m_offset[ShipXYSection] >= 999 * sizeof(game::v3::structures::ShipXY))
+    {
+        return 999;
+    } else {
+        return 500;
+    }
+}
 
 // Get underlying file.
 afl::io::Stream&
@@ -59,7 +87,7 @@ game::v3::ResultFile::getFile() const
 /** Load and validate header.
     This also figures out the version number. */
 void
-game::v3::ResultFile::loadHeader(afl::string::Translator& tx)
+game::v3::ResultFile::loadHeader()
 {
     // ex GResultFile::checkHeader
     // Initialize everything to default
@@ -76,12 +104,12 @@ game::v3::ResultFile::loadHeader(afl::string::Translator& tx)
     // RST must be seekable
     afl::io::Stream::FileSize_t size = m_file.getSize();
     if (size == 0) {
-        throw afl::except::FileFormatException(m_file, tx.translateString("Result file is not a regular file"));
+        throw afl::except::FileFormatException(m_file, m_translator.translateString("Result file is not a regular file"));
     }
 
     // Copy first 8 sections
     for (size_t i = 0; i < 8; ++i) {
-        setSectionAddress(Section(i), header.address[i], size, tx);
+        setSectionAddress(Section(i), header.address[i], size);
     }
 
     // Size of Winplan part
@@ -105,13 +133,13 @@ game::v3::ResultFile::loadHeader(afl::string::Translator& tx)
 
         // Copy pointers
         if (m_version >= 0) {
-            setSectionAddress(KoreSection, header.addressWindows, size, tx);
+            setSectionAddress(KoreSection, header.addressWindows, size);
             if (header.addressLeech > 0) {
-                setSectionAddress(LeechSection, header.addressLeech, size, tx);
+                setSectionAddress(LeechSection, header.addressLeech, size);
             }
         }
         if (m_version >= 1) {
-            setSectionAddress(SkoreSection, header.addressSkore, size, tx);
+            setSectionAddress(SkoreSection, header.addressSkore, size);
         }
     }
 }
@@ -120,13 +148,12 @@ game::v3::ResultFile::loadHeader(afl::string::Translator& tx)
     Validates the address, checking for obvious mistakes, and then stores them in our data structure.
     \param section section
     \param addressFromFile address as read from file (1-based)
-    \param fileSize file size
-    \param tx translator for error messages */
+    \param fileSize file size */
 void
-game::v3::ResultFile::setSectionAddress(Section section, int32_t addressFromFile, afl::io::Stream::FileSize_t fileSize, afl::string::Translator& tx)
+game::v3::ResultFile::setSectionAddress(Section section, int32_t addressFromFile, afl::io::Stream::FileSize_t fileSize)
 {
     if (addressFromFile < 32 || afl::io::Stream::FileSize_t(addressFromFile) >= fileSize) {
-        throw afl::except::FileFormatException(m_file, afl::string::Format(tx.translateString("Section %d has an invalid address").c_str(), int(section)));
+        throw afl::except::FileFormatException(m_file, afl::string::Format(m_translator.translateString("Section %d has an invalid address").c_str(), int(section)));
     }
     m_offset[section] = uint32_t(addressFromFile - 1);
 }

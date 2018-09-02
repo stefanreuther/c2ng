@@ -6,6 +6,7 @@
 
 #include "server/interface/filebase.hpp"
 #include "server/interface/composablecommandhandler.hpp"
+#include "afl/data/hashvalue.hpp"
 
 namespace server { namespace interface {
 
@@ -16,7 +17,7 @@ namespace server { namespace interface {
 
         virtual bool handleCommand(const String_t& upcasedCommand, interpreter::Arguments& args, std::auto_ptr<Value_t>& result);
 
-        static Value_t* packInfo(const FileBase::Info& info);
+        static afl::data::HashValue* packInfo(const FileBase::Info& info);
 
      private:
         FileBase& m_implementation;

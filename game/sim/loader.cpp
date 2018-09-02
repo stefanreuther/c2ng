@@ -1,6 +1,18 @@
 /**
   *  \file game/sim/loader.cpp
   *  \brief Class game::sim::Loader
+  *
+  *  PCC2 Comment:
+  *
+  *    There are multiple versions of the .ccb file format. Here, we
+  *    adopt the numbering used in the file format list, i.e. 0 =
+  *    "CCsim", 1 = "CCbsim0", 2 = "CCbsim1" etc. Files differ in record
+  *    sizes (more data for recent features added to the end), and in
+  *    content (version <= 1 has only one starbase torp type).
+  *
+  *    We read all file formats, but only save a selection of the more
+  *    recent ones. In this case, we generally use version 3, and use 4
+  *    if its features (FLAK rating overrides) are required.
   */
 
 #include <cstring>
@@ -11,6 +23,36 @@
 #include "game/sim/ship.hpp"
 #include "game/sim/structures.hpp"
 #include "util/translation.hpp"
+
+namespace st = game::sim::structures;
+
+namespace {
+    struct Header {
+        uint8_t     signature[st::MAGIC_LENGTH];
+        char        version;
+        uint8_t     terminator;
+        st::Int16_t count;
+    };
+
+    int getMinimumRequiredVersion(const game::sim::Object& obj)
+    {
+        int result;
+        if ((obj.getFlags() & ~0xFFFF) != 0) {
+            result = 5;
+        } else if ((obj.getFlags() & game::sim::Object::fl_RatingOverride) != 0) {
+            result = 4;
+        } else {
+            const game::sim::Ship* sh = dynamic_cast<const game::sim::Ship*>(&obj);
+            if (sh != 0 && sh->getInterceptId() != 0) {
+                result = 4;
+            } else {
+                result = 3;
+            }
+        }
+        return result;
+    }
+}
+
 
 // Constructor.
 game::sim::Loader::Loader(afl::charset::Charset& cs)
@@ -142,7 +184,7 @@ game::sim::Loader::load(afl::io::Stream& in, Setup& setup)
             } else {
                 pl->setFlags(uint16_t(data.flags) + 65536*data.flags2);
             }
-            
+
             if (version < 4) {
                 pl->setFlakRatingOverride(0);
                 pl->setFlakCompensationOverride(0);
@@ -152,5 +194,102 @@ game::sim::Loader::load(afl::io::Stream& in, Setup& setup)
                 pl->setFlakCompensationOverride(data.flakCompensation);
             }
         }
+    }
+}
+
+void
+game::sim::Loader::save(afl::io::Stream& out, const Setup& setup)
+{
+    // ex GSimState::save
+
+    // Figure out what version to save in
+    int version = 3;
+    for (Setup::Slot_t i = 0, n = setup.getNumObjects(); i < n; ++i) {
+        if (const Object* p = setup.getObject(i)) {
+            version = std::max(version, getMinimumRequiredVersion(*p));
+        }
+    }
+
+    // Write header
+    Header h;
+    std::memcpy(h.signature, st::MAGIC_V1, sizeof(st::MAGIC_V1));
+    h.version = static_cast<char>('0' + version - 1);
+    h.terminator = st::TERMINATOR;
+    if (setup.hasPlanet()) {
+        h.count = static_cast<int16_t>(setup.getNumShips() | 0x8000);
+    } else {
+        h.count = static_cast<int16_t>(setup.getNumShips());
+    }
+    out.fullWrite(afl::base::fromObject(h));
+
+    // Write ships
+    for (Setup::Slot_t i = 0, n = setup.getNumShips(); i < n; ++i) {
+        if (const Ship* sh = setup.getShip(i)) {
+            // ex GSimShip::storeData
+            st::SimShipData data;
+            data.object.name               = m_charset.encode(afl::string::toMemory(sh->getName()));
+            data.object.damage             = static_cast<int16_t>(sh->getDamage());
+            data.object.crew               = static_cast<int16_t>(sh->getCrew());
+            data.object.id                 = static_cast<int16_t>(sh->getId());
+            data.object.owner              = static_cast<uint8_t>(sh->getOwner());
+            data.object.raceOrZero         = 0;      // unused field
+            data.object.pictureNumber      = 0;      // unused field
+            data.object.hullTypeOrZero     = 0;      // unused field, hull is stored separately
+            data.object.beamType           = static_cast<int16_t>(sh->getBeamType());
+            data.object.numBeams           = static_cast<uint8_t>(sh->getNumBeams());
+            data.object.experienceLevel    = static_cast<uint8_t>(sh->getExperienceLevel());
+            data.object.numBays            = static_cast<int16_t>(sh->getNumBays());
+            data.object.launcherType       = static_cast<int16_t>(sh->getTorpedoType());
+            data.object.ammo               = static_cast<int16_t>(sh->getAmmo());
+            data.object.numLaunchersPacked = static_cast<int16_t>(sh->getNumLaunchers());
+            data.engineType                = static_cast<int16_t>(sh->getEngineType());
+            data.hullType                  = static_cast<int16_t>(sh->getHullType());
+            data.shield                    = static_cast<int16_t>(sh->getShield());
+            data.friendlyCode              = m_charset.encode(afl::string::toMemory(sh->getFriendlyCode()));
+            data.aggressiveness            = static_cast<int16_t>(sh->getAggressiveness());
+            data.mass                      = static_cast<int16_t>(sh->getMass());
+            data.flags                     = static_cast<int16_t>(sh->getFlags() & 0xFFFF);
+            data.flakRating                = sh->getFlakRatingOverride();
+            data.flakCompensation          = static_cast<int16_t>(sh->getFlakCompensationOverride());
+            data.interceptId               = static_cast<int16_t>(sh->getInterceptId());
+            data.flags2                    = static_cast<int16_t>(sh->getFlags() >> 16);
+
+            out.fullWrite(afl::base::fromObject(data).trim(st::RECORD_SIZES[version]));
+        }
+    }
+
+    // Write planet
+    if (const Planet* p = setup.getPlanet()) {
+        st::SimPlanetData data;
+
+        // ex GSimPlanet::storeData
+        // @change Removed support for version <= 1
+        for (int i = 0; i < st::NUM_TORPEDO_TYPES; ++i) {
+            data.numTorpedoes[i] = static_cast<int16_t>(p->getNumBaseTorpedoes(i+1));
+        }
+        data._pad0               = 0;
+        data.id                  = static_cast<int16_t>(p->getId());
+        data.owner               = static_cast<int16_t>(p->getOwner());
+        data._pad1               = 0;
+        data.beamTechLevel       = static_cast<int16_t>(p->getBaseBeamTech());
+        data._pad2               = 0;
+        data.experienceLevel     = static_cast<uint8_t>(p->getExperienceLevel());
+        data.numFighters         = static_cast<int16_t>(p->getNumBaseFighters());
+        data._pad3               = 0;
+        data.numTorpedoesOld     = 0;
+        data.torpedoTechLevel    = static_cast<int16_t>(p->getBaseTorpedoTech());
+        data.numBaseDefensePosts = static_cast<int16_t>(p->getBaseDefense());
+        data.numDefensePosts     = static_cast<int16_t>(p->getDefense());
+        data.shield              = static_cast<int16_t>(p->getShield());
+        data.friendlyCode        = m_charset.encode(afl::string::toMemory(p->getFriendlyCode()));
+        data.aggressiveness      = -1;
+        data._pad5               = 0;
+        data.flags               = static_cast<int16_t>(p->getFlags() & 0xFFFF);
+        data.flakRating          = p->getFlakRatingOverride();
+        data.flakCompensation    = static_cast<int16_t>(p->getFlakCompensationOverride());
+        data._pad6               = 0;
+        data.flags2              = static_cast<int16_t>(p->getFlags() >> 16);
+
+        out.fullWrite(afl::base::fromObject(data).trim(st::RECORD_SIZES[version]));
     }
 }

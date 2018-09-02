@@ -7,6 +7,7 @@
 
 #include "afl/base/types.hpp"
 #include "client/si/requestlink1.hpp"
+#include "afl/string/string.hpp"
 
 namespace client { namespace si {
 
@@ -69,6 +70,10 @@ namespace client { namespace si {
             \retval false object does not point at a process */
         bool isValid() const
             { return m_isValid; }
+
+        /** Format to string.
+            \return result */
+        String_t toString() const;
      private:
         uint32_t m_pid;
         bool m_wantResult;

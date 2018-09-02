@@ -16,6 +16,9 @@ TestGameMsgOutbox::testIt()
     // Environment
     afl::string::NullTranslator tx;
     game::PlayerList players;
+    for (int i = 1; i <= 11; ++i) {
+        players.create(i);
+    }
     players.create(3)->setName(game::Player::LongName, "Long Three");
 
     // Create an outbox with two messages
@@ -52,6 +55,9 @@ TestGameMsgOutbox::testMerge()
     // Environment
     afl::string::NullTranslator tx;
     game::PlayerList players;
+    for (int i = 1; i <= 11; ++i) {
+        players.create(i);
+    }
     players.create(3)->setName(game::Player::LongName, "Long Three");
 
     // Add. These messages will all be merged

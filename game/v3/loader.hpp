@@ -6,13 +6,17 @@
 #define C2NG_GAME_V3_LOADER_HPP
 
 #include "afl/charset/charset.hpp"
-#include "afl/string/translator.hpp"
-#include "game/map/universe.hpp"
+#include "afl/io/directory.hpp"
 #include "afl/io/stream.hpp"
-#include "game/playerset.hpp"
+#include "afl/string/translator.hpp"
 #include "afl/sys/loglistener.hpp"
+#include "game/map/universe.hpp"
 #include "game/msg/inbox.hpp"
+#include "game/playerset.hpp"
+#include "game/root.hpp"
+#include "game/session.hpp"
 #include "game/turn.hpp"
+#include "game/v3/structures.hpp"
 
 namespace game { namespace v3 {
 
@@ -44,7 +48,17 @@ namespace game { namespace v3 {
         /** Prepare universe.
             This creates all objects that are not created by the load functions.
             \param univ Target universe */
-        void prepareUniverse(game::map::Universe& univ);
+        void prepareUniverse(game::map::Universe& univ) const;
+
+        /** Prepare turn.
+            Creates v3 stuff.
+            - Reverter
+            - CommandExtra
+            - alliance handler
+            Call before loading data.
+            \param turn Target turn
+            \param root Associated root */
+        void prepareTurn(Turn& turn, const Root& root, Session& session, int player) const;
 
         /** Load planets.
             Loads PDATAx.DAT or the appropriate section from a result.
@@ -53,25 +67,25 @@ namespace game { namespace v3 {
             \param count Number of planets to load
             \param mode Load mode (load current and/or previous data)
             \param source Source of this information */
-        void loadPlanets(game::map::Universe& univ, afl::io::Stream& file, int count, LoadMode mode, PlayerSet_t source);
+        void loadPlanets(game::map::Universe& univ, afl::io::Stream& file, int count, LoadMode mode, PlayerSet_t source) const;
 
         /** Load planet coordinates.
             Loads an XYPLAN.DAT file.
             \param univ Target universe
             \param file File to read from */
-        void loadPlanetCoordinates(game::map::Universe& univ, afl::io::Stream& file);
+        void loadPlanetCoordinates(game::map::Universe& univ, afl::io::Stream& file) const;
 
         /** Load Planet Names.
             Loads a PLANET.NM file.
             \param univ Target universe
             \param file File to read from */
-        void loadPlanetNames(game::map::Universe& univ, afl::io::Stream& file);
+        void loadPlanetNames(game::map::Universe& univ, afl::io::Stream& file) const;
 
         /** Load Ion Storm Names.
             Loads a STORM.NM file.
             \param univ Target universe
             \param file File to read from */
-        void loadIonStormNames(game::map::Universe& univ, afl::io::Stream& file);
+        void loadIonStormNames(game::map::Universe& univ, afl::io::Stream& file) const;
 
         /** Load starbases.
             Loads BDATAx.DAT or the appropriate section from a RST.
@@ -80,7 +94,7 @@ namespace game { namespace v3 {
             \param count Number of starbases to load
             \param mode Load mode (load current and/or previous data)
             \param source Source of this information */
-        void loadBases(game::map::Universe& univ, afl::io::Stream& file, int count, LoadMode mode, PlayerSet_t source);
+        void loadBases(game::map::Universe& univ, afl::io::Stream& file, int count, LoadMode mode, PlayerSet_t source) const;
 
         /** Load SHIPXY file.
             \param univ Target universe
@@ -89,7 +103,7 @@ namespace game { namespace v3 {
             \param mode Load mode (load current and/or previous data)
             \param source Source of this information
             \param reject Reject these players. This is used for allied file loading; to not wreak havoc if player accidentially mixed up his files. */
-        void loadShipXY(game::map::Universe& univ, afl::io::Stream& file, afl::io::Stream::FileSize_t bytes, LoadMode mode, PlayerSet_t source, PlayerSet_t reject);
+        void loadShipXY(game::map::Universe& univ, afl::io::Stream& file, afl::io::Stream::FileSize_t bytes, LoadMode mode, PlayerSet_t source, PlayerSet_t reject) const;
 
         /** Load Ships.
             Loads SHIPx.DAT or the appropriate section from a RST.
@@ -98,7 +112,7 @@ namespace game { namespace v3 {
             \param count Number of ships to load
             \param mode Load mode (load current and/or previous data)
             \param source Source of this information */
-        void loadShips(game::map::Universe& univ, afl::io::Stream& file, int count, LoadMode mode, bool remapExplore, PlayerSet_t source);
+        void loadShips(game::map::Universe& univ, afl::io::Stream& file, int count, LoadMode mode, bool remapExplore, PlayerSet_t source) const;
 
         /** Load targets.
             Load TARGETx.DAT, TARGETx.EXT, or appropriate section from KOREx.DAT, UTILx.DAT or RST.
@@ -106,39 +120,75 @@ namespace game { namespace v3 {
             \param file File to read from
             \param count Number of targets to read
             \param fmt Format of targets (encrypted or plaintext)
-            \param source Source of this information */
-        void loadTargets(game::map::Universe& univ, afl::io::Stream& file, int count, TargetFormat fmt, PlayerSet_t source, int turnNumber);
+            \param source Source of this information
+            \param turnNumber Turn number */
+        void loadTargets(game::map::Universe& univ, afl::io::Stream& file, int count, TargetFormat fmt, PlayerSet_t source, int turnNumber) const;
+
+        /** Add a target.
+            Use when you have a ready-made target structure.
+            \param univ Target universe
+            \param target Target object
+            \param source Source of this information
+            \param turnNumber Turn number */
+        void addTarget(game::map::Universe& univ, const game::v3::structures::ShipTarget& target, PlayerSet_t source, int turnNumber) const;
 
         /** Load Minefields from KORE-style file.
             \param univ Target universe
             \param file File to read from
             \param count Number of minefields to load
             \param player Player who owns the KORE file */
-        void loadKoreMinefields(game::map::Universe& univ, afl::io::Stream& file, int count, int player, int turnNumber);
+        void loadKoreMinefields(game::map::Universe& univ, afl::io::Stream& file, int count, int player, int turnNumber) const;
 
         /** Load ion storms from KOREx.DAT.
             \param univ Target universe
             \param file File to read from
             \param count Number of ion storms to read */
-        void loadKoreIonStorms(game::map::Universe& univ, afl::io::Stream& file, int count);
+        void loadKoreIonStorms(game::map::Universe& univ, afl::io::Stream& file, int count) const;
 
         /** Load explosions from KOREx.DAT.
             \param univ Target universe
             \param file File to read from
             \param count Number of explosions to read */
-        void loadKoreExplosions(game::map::Universe& univ, afl::io::Stream& file, int count);
+        void loadKoreExplosions(game::map::Universe& univ, afl::io::Stream& file, int count) const;
 
         /** Load inbox.
             Load MDATAx.DAT, or appropriate section from RST or VPA.DB. */
-        void loadInbox(game::msg::Inbox& inbox, afl::io::Stream& file, int turn);
+        void loadInbox(game::msg::Inbox& inbox, afl::io::Stream& file, int turn) const;
 
         /** Load battles.
             \param turn Target turn
             \param file File to read from */
-        void loadBattles(game::Turn& turn, afl::io::Stream& file, const game::config::HostConfiguration& config);
+        void loadBattles(game::Turn& turn, afl::io::Stream& file, const game::config::HostConfiguration& config) const;
 
-        void loadUfos(game::map::Universe& univ, afl::io::Stream& file, int firstId, int count);
+        /** Load Ufos.
+            \param univ Target universe
+            \param file File to read from
+            \param firstId Id of first Ufo in file
+            \param count Number of Ufos to load */
+        void loadUfos(game::map::Universe& univ, afl::io::Stream& file, int firstId, int count) const;
 
+        /*
+         *  Combined Operations
+         */
+
+        /** Load common files.
+            - xyplan
+            - planet.nm
+            - storm.nm
+            \param gameDir Game directory
+            \param specDir Specification directory (union of gameDir and share/specs)
+            \param univ Target universe
+            \param player Player number */
+        void loadCommonFiles(afl::io::Directory& gameDir, afl::io::Directory& specDir, game::map::Universe& univ, int player) const;
+
+        /** Load result file.
+            \param turn Target turn
+            \param root Associated root
+            \param game Target game (receive scores)
+            \param file File to read from
+            \param player Player */
+        void loadResult(Turn& turn, const Root& root, Game& game, afl::io::Stream& file, int player) const;
+        
      private:
         afl::charset::Charset& m_charset;
         afl::string::Translator& m_translator;

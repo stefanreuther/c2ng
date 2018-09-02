@@ -162,12 +162,12 @@ client::widgets::ControlScreenHeader::createChildWidgets(ui::Root& root, KeymapW
             ui::widgets::ImageButton& btn = m_deleter.addNew(new ui::widgets::ImageButton(String_t(), BUTTONS[i].key, root, gfx::Point(105, 95)));
             ui::widgets::FrameGroup& innerFrame = m_deleter.addNew(new ui::widgets::FrameGroup(ui::layout::HBox::instance0, root.colorScheme(), ui::widgets::FrameGroup::LoweredFrame));
             innerFrame.add(btn);
-            kmw.addButton(btn);
+            btn.dispatchKeyTo(kmw);
             w = &innerFrame;
             m_image = &btn;
         } else {
             ui::widgets::Button& btn = m_deleter.addNew(new ui::widgets::Button(BUTTONS[i].text, BUTTONS[i].key, root));
-            kmw.addButton(btn);
+            btn.dispatchKeyTo(kmw);
             w = &btn;
         }
 

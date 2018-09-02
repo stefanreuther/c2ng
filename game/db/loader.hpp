@@ -11,6 +11,8 @@
 #include "game/map/drawingcontainer.hpp"
 #include "interpreter/vmio/valueloader.hpp"
 #include "game/game.hpp"
+#include "game/spec/shiplist.hpp"
+#include "game/unitscoredefinitionlist.hpp"
 
 namespace game { namespace db {
 
@@ -21,6 +23,8 @@ namespace game { namespace db {
         Loader(afl::charset::Charset& cs, interpreter::World& world);
 
         void load(afl::io::Stream& in, Turn& turn, Game& game, bool acceptProperties);
+
+        void save(afl::io::Stream& out, Turn& turn, Game& game, const game::spec::ShipList& shipList);
 
      private:
         enum Scope {
@@ -38,6 +42,13 @@ namespace game { namespace db {
         void loadPropertyRecord(afl::io::Stream& in, Scope scope, game::map::Universe& univ, const afl::data::NameMap& dbNames, afl::data::NameMap& liveNames, interpreter::vmio::ValueLoader& valueLoader);
 
         void loadUnitScoreRecord(afl::io::Stream& in, Scope scope, game::map::Universe& univ, UnitScoreDefinitionList& defs);
+
+        void saveDrawings(afl::io::Stream& out, const game::map::DrawingContainer& container, const DrawingAtomMap& map);
+
+        void savePropertyRecord(afl::io::Stream& out, uint16_t type, game::Id_t id, const afl::data::Segment* pData);
+
+        void saveUnitScores(afl::io::Stream& out, uint16_t type, Scope scope, const UnitScoreDefinitionList& defs, const game::map::Universe& univ);
+
     };
 
 } }

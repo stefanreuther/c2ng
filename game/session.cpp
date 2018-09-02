@@ -95,6 +95,7 @@ game::Session::Session(afl::string::Translator& tx, afl::io::FileSystem& fs)
       m_shipList(),
       m_game(),
       m_uiPropertyStack(),
+      m_editableAreas(),
       m_world(m_log, fs),
       m_rng(afl::sys::Time::getTickCounter()),
       m_plugins(tx, m_log),
@@ -175,6 +176,18 @@ const game::interface::UserInterfacePropertyStack&
 game::Session::uiPropertyStack() const
 {
     return m_uiPropertyStack;
+}
+
+void
+game::Session::setEditableAreas(AreaSet_t set)
+{
+    m_editableAreas = set;
+}
+
+game::Session::AreaSet_t
+game::Session::getEditableAreas() const
+{
+    return m_editableAreas;
 }
 
 interpreter::World&
@@ -342,6 +355,25 @@ game::Session::getReferenceName(Reference ref, String_t& result)
     return false;
 }
 
+bool
+game::Session::save()
+{
+    // Check environment
+    afl::base::Ptr<Root> pRoot = getRoot();
+    afl::base::Ptr<Game> pGame = getGame();
+    if (pRoot.get() == 0 || pGame.get() == 0) {
+        return false;
+    }
+    
+    afl::base::Ptr<TurnLoader> pLoader = pRoot->getTurnLoader();
+    if (pLoader.get() == 0) {
+        return false;
+    }
+    
+    pLoader->saveCurrentTurn(pGame->currentTurn(), *pGame, pGame->getViewpointPlayer(), *pRoot, *this);
+    return true;    
+}
+
 afl::data::Value*
 game::Session::evaluate(Scope scope, int id, String_t expr)
 {
@@ -491,7 +523,7 @@ game::Session::initWorld()
     m_world.setNewGlobalValue("NEWMARKER",        new game::interface::SimpleProcedure(*this, game::interface::IFNewMarker));
     m_world.setNewGlobalValue("NEWRECTANGLE",     new game::interface::SimpleProcedure(*this, game::interface::IFNewRectangle));
     m_world.setNewGlobalValue("NEWRECTANGLERAW",  new game::interface::SimpleProcedure(*this, game::interface::IFNewRectangleRaw));
-    // m_world.setNewGlobalValue("SAVEGAME",         new game::interface::SimpleProcedure(*this, game::interface::IFSaveGame));
+    m_world.setNewGlobalValue("SAVEGAME",         new game::interface::SimpleProcedure(*this, game::interface::IFSaveGame));
     // m_world.setNewGlobalValue("SELECTIONLOAD",    new game::interface::SimpleProcedure(*this, game::interface::IFSelectionLoad));
     // m_world.setNewGlobalValue("SELECTIONSAVE",    new game::interface::SimpleProcedure(*this, game::interface::IFSelectionSave));
     m_world.setNewGlobalValue("HISTORY.SHOWTURN", new game::interface::SimpleProcedure(*this, game::interface::IFHistoryShowTurn));

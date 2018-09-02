@@ -12,6 +12,7 @@
 #include "game/msg/outbox.hpp"
 #include "game/timestamp.hpp"
 #include "game/vcr/database.hpp"
+#include "game/alliance/container.hpp"
 
 namespace game {
 
@@ -46,6 +47,9 @@ namespace game {
         ExtraContainer<Turn>& extras();
         const ExtraContainer<Turn>& extras() const;
 
+        game::alliance::Container& alliances();
+        const game::alliance::Container& alliances() const;
+
         void notifyListeners();
 
      private:
@@ -62,7 +66,8 @@ namespace game {
         int m_databaseTurnNumber;
         Timestamp m_timestamp;
 
-        // (Alliances)
+        game::alliance::Container m_alliances;
+
         // (Gen)
         // (data set)                          whose players' data we have
     };

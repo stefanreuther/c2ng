@@ -9,6 +9,8 @@
 #include "game/map/configuration.hpp"
 #include "game/map/universe.hpp"
 
+namespace gp = game::parser;
+
 namespace {
     const char LOG_NAME[] = "game.map.planet";
 
@@ -64,6 +66,72 @@ namespace {
             || d.shipyardAction.isValid()
             || d.mission.isValid();
     }
+
+
+    void updateField16(int& field_time, int time,
+                       game::IntegerProperty_t& field_value, int32_t value)
+    {
+        if (field_time <= time || !field_value.isValid()) {
+            field_value = value;
+            if (field_time < time) {
+                field_time = time;
+            }
+        }
+    }
+
+    void updateField16(int& field_time, int time,
+                       game::NegativeProperty_t& field_value, int32_t value)
+    {
+        if (field_time <= time || !field_value.isValid()) {
+            field_value = value;
+            if (field_time < time) {
+                field_time = time;
+            }
+        }
+    }
+
+    void updateField32(int& field_time, int time, game::LongProperty_t& field_value, int32_t value)
+    {
+        if (field_time <= time || !field_value.isValid()) {
+            field_value = value;
+            if (field_time < time) {
+                field_time = time;
+            }
+        }
+    }
+
+    void updateAdd32(int& field_time, int time, game::LongProperty_t& field_value, int32_t added)
+    {
+        /* We want this to be idempotent in some way, so we cannot add on every
+           iteration we go through this. Since these reports come from meteorites,
+           we can assume only one such report per planet. */
+        if (!field_value.isValid()) {
+            field_value = added;
+            field_time = time;
+        } else if (field_time < time) {
+            field_value = field_value.orElse(0) + added;
+            field_time = time;
+        } else {
+            // bad luck.
+        }
+    }
+
+    /** Check acceptance of message information.
+        We must filter information so we don't by accident overwrite good, reliable
+        information with information from a scan. */
+    bool acceptMessageInformation(const game::map::Planet& pl, const gp::MessageValueBase& info)
+    {
+        // White-list of items that are always accepted
+        if (const gp::MessageIntegerValue_t* iv = dynamic_cast<const gp::MessageIntegerValue_t*>(&info)) {
+            if (iv->getIndex() == gp::mi_BaseQueuePos || iv->getIndex() == gp::mi_BaseQueuePriority) {
+                return true;
+            }
+        }
+
+        // Everything else is only accepted when we're in history
+        return pl.getPlanetSource().empty();
+    }
+
 }
 
 game::map::Planet::Planet(Id_t id)
@@ -143,6 +211,186 @@ game::map::Planet::addCurrentBaseData(const BaseData& data, PlayerSet_t source)
     // ex GPlanet::addBaseData
     m_currentBaseData = data;
     m_baseSource += source;
+}
+
+// /** Add message ifnormation. Process information received from messages or util.dat. */
+void
+game::map::Planet::addMessageInformation(const game::parser::MessageInformation& info)
+{
+    // ex GPlanet::addMessageInformation
+    // /* now process the information. For timestamp handling, we assume
+    //    that information comes in in full form, and in sequential order.
+    //    During normal operation, the timestamp checks will always succeed,
+    //    as pl.time[] starts with a previous turn number and, since
+    //    information comes in sequential order, msg_turn is either the
+    //    current turn number or the one before. */
+    const int16_t msg_turn = static_cast<int16_t>(info.getTurnNumber());
+    // PlanetInfo& pl = createPlanetInfo();
+    for (gp::MessageInformation::Iterator_t i = info.begin(); i != info.end(); ++i) {
+        if (!acceptMessageInformation(*this, **i)) {
+            // ignore
+        } else if (gp::MessageStringValue_t* sv = dynamic_cast<gp::MessageStringValue_t*>(*i)) {
+            switch (sv->getIndex()) {
+             case gp::ms_FriendlyCode:
+                // FCode always comes with an industry report, so associate it with colonists.
+                if (m_historyTimestamps[ColonistTime] <= msg_turn || !m_currentPlanetData.friendlyCode.isValid()) {
+                    m_currentPlanetData.friendlyCode = sv->getValue();
+                    if (m_historyTimestamps[ColonistTime] < msg_turn) {
+                        m_historyTimestamps[ColonistTime] = msg_turn;
+                    }
+                }
+                break;
+             default:
+                break;
+            }
+        } else if (gp::MessageIntegerValue_t* iv = dynamic_cast<gp::MessageIntegerValue_t*>(*i)) {
+            switch (iv->getIndex()) {
+             case gp::mi_X:
+             case gp::mi_Y:
+                // Is it useful to support these for planets?
+                break;
+             case gp::mi_Owner:
+                updateField16(m_historyTimestamps[ColonistTime], msg_turn, m_currentPlanetData.owner, iv->getValue());
+                break;
+             case gp::mi_PlanetTotalN:
+                // Total is reported by Dark Sense. Treat it as Ground.
+                updateField32(m_historyTimestamps[MineralTime], msg_turn, m_currentPlanetData.groundNeutronium, iv->getValue());
+                break;
+             case gp::mi_PlanetTotalT:
+                updateField32(m_historyTimestamps[MineralTime], msg_turn, m_currentPlanetData.groundTritanium, iv->getValue());
+                break;
+             case gp::mi_PlanetTotalD:
+                updateField32(m_historyTimestamps[MineralTime], msg_turn, m_currentPlanetData.groundDuranium, iv->getValue());
+                break;
+             case gp::mi_PlanetTotalM:
+                updateField32(m_historyTimestamps[MineralTime], msg_turn, m_currentPlanetData.groundMolybdenum, iv->getValue());
+                break;
+             case gp::mi_PlanetAddedN:
+                updateAdd32(m_historyTimestamps[MineralTime], msg_turn, m_currentPlanetData.groundNeutronium, iv->getValue());
+                break;
+             case gp::mi_PlanetAddedT:
+                updateAdd32(m_historyTimestamps[MineralTime], msg_turn, m_currentPlanetData.groundTritanium, iv->getValue());
+                break;
+             case gp::mi_PlanetAddedD:
+                updateAdd32(m_historyTimestamps[MineralTime], msg_turn, m_currentPlanetData.groundDuranium, iv->getValue());
+                break;
+             case gp::mi_PlanetAddedM:
+                updateAdd32(m_historyTimestamps[MineralTime], msg_turn, m_currentPlanetData.groundMolybdenum, iv->getValue());
+                break;
+             case gp::mi_PlanetMinedN:
+                updateField32(m_historyTimestamps[MineralTime], msg_turn, m_currentPlanetData.minedNeutronium, iv->getValue());
+                break;
+             case gp::mi_PlanetMinedT:
+                updateField32(m_historyTimestamps[MineralTime], msg_turn, m_currentPlanetData.minedTritanium, iv->getValue());
+                break;
+             case gp::mi_PlanetMinedD:
+                updateField32(m_historyTimestamps[MineralTime], msg_turn, m_currentPlanetData.minedDuranium, iv->getValue());
+                break;
+             case gp::mi_PlanetMinedM:
+                updateField32(m_historyTimestamps[MineralTime], msg_turn, m_currentPlanetData.minedMolybdenum, iv->getValue());
+                break;
+             case gp::mi_PlanetDensityN:
+                updateField16(m_historyTimestamps[MineralTime], msg_turn, m_currentPlanetData.densityNeutronium, iv->getValue());
+                break;
+             case gp::mi_PlanetDensityT:
+                updateField16(m_historyTimestamps[MineralTime], msg_turn, m_currentPlanetData.densityTritanium, iv->getValue());
+                break;
+             case gp::mi_PlanetDensityD:
+                updateField16(m_historyTimestamps[MineralTime], msg_turn, m_currentPlanetData.densityDuranium, iv->getValue());
+                break;
+             case gp::mi_PlanetDensityM:
+                updateField16(m_historyTimestamps[MineralTime], msg_turn, m_currentPlanetData.densityMolybdenum, iv->getValue());
+                break;
+             case gp::mi_PlanetCash:
+                updateField32(m_historyTimestamps[CashTime], msg_turn, m_currentPlanetData.money, iv->getValue());
+                break;
+             case gp::mi_PlanetSupplies:
+                updateField32(m_historyTimestamps[CashTime], msg_turn, m_currentPlanetData.supplies, iv->getValue());
+                break;
+             case gp::mi_PlanetHasBase:
+                updateField16(m_historyTimestamps[ColonistTime], msg_turn, m_currentPlanetData.baseFlag, iv->getValue());
+                break;
+             case gp::mi_PlanetMines:
+                updateField16(m_historyTimestamps[ColonistTime], msg_turn, m_currentPlanetData.numMines, iv->getValue());
+                break;
+             case gp::mi_PlanetFactories:
+                updateField16(m_historyTimestamps[ColonistTime], msg_turn, m_currentPlanetData.numFactories, iv->getValue());
+                break;
+             case gp::mi_PlanetDefense:
+                updateField16(m_historyTimestamps[ColonistTime], msg_turn, m_currentPlanetData.numDefensePosts, iv->getValue());
+                break;
+             case gp::mi_PlanetTemperature:
+                // Temperature has no timestamp field (because it changes only very seldom),
+                // and always comes with a Colonists or Natives report (explore/bioscan).
+                if (!m_currentPlanetData.temperature.isValid()
+                    || msg_turn >= m_historyTimestamps[ColonistTime]
+                    || msg_turn >= m_historyTimestamps[NativeTime])
+                {
+                    m_currentPlanetData.temperature = iv->getValue();
+                }
+                break;
+             case gp::mi_PlanetColonists:
+                updateField32(m_historyTimestamps[ColonistTime], msg_turn, m_currentPlanetData.colonistClans, iv->getValue());
+                break;
+             case gp::mi_PlanetColonistTax:
+                updateField16(m_historyTimestamps[ColonistTime], msg_turn, m_currentPlanetData.colonistTax, iv->getValue());
+                break;
+             case gp::mi_PlanetColonistHappiness:
+                updateField16(m_historyTimestamps[ColonistTime], msg_turn, m_currentPlanetData.colonistHappiness, iv->getValue());
+                break;
+             case gp::mi_PlanetActivity:
+                // FIXME: should be setIndustryLevel()
+                updateField16(m_historyTimestamps[ColonistTime], msg_turn, m_industryLevel, iv->getValue());
+                break;
+             case gp::mi_PlanetNativeRace:
+                updateField16(m_historyTimestamps[NativeTime], msg_turn, m_currentPlanetData.nativeRace, iv->getValue());
+                if (iv->getValue() == 0) {
+                    // Report of native race 0 means natives are gone
+                    updateField16(m_historyTimestamps[NativeTime], msg_turn, m_currentPlanetData.nativeGovernment, 0);
+                    updateField32(m_historyTimestamps[NativeTime], msg_turn, m_currentPlanetData.nativeClans,      0);
+                }
+                break;
+             case gp::mi_PlanetNativeGov:
+                updateField16(m_historyTimestamps[NativeTime], msg_turn, m_currentPlanetData.nativeGovernment, iv->getValue());
+                break;
+             case gp::mi_PlanetNatives:
+                updateField32(m_historyTimestamps[NativeTime], msg_turn, m_currentPlanetData.nativeClans, iv->getValue());
+                if (iv->getValue() == 0) {
+                    // Report of population 0 means natives are gone
+                    updateField16(m_historyTimestamps[NativeTime], msg_turn, m_currentPlanetData.nativeRace,       0);
+                    updateField16(m_historyTimestamps[NativeTime], msg_turn, m_currentPlanetData.nativeGovernment, 0);
+                }
+                break;
+             case gp::mi_PlanetNativeTax:
+                updateField16(m_historyTimestamps[NativeTime], msg_turn, m_currentPlanetData.nativeTax, iv->getValue());
+                break;
+             case gp::mi_PlanetNativeHappiness:
+                updateField16(m_historyTimestamps[NativeTime], msg_turn, m_currentPlanetData.nativeHappiness, iv->getValue());
+                break;
+             case gp::mi_PlanetHasNatives:
+                if (msg_turn >= m_historyTimestamps[NativeTime]) {
+                    m_isPlanetKnownToHaveNatives = (iv->getValue() != 0);
+                    if (msg_turn >= m_historyTimestamps[NativeTime]) {
+                        m_historyTimestamps[NativeTime] = msg_turn;
+                    }
+                }
+                break;
+             case gp::mi_BaseQueuePos:
+                m_queuePosition = iv->getValue();
+                break;
+             case gp::mi_BaseQueuePriority:
+                m_queuePriority = iv->getValue();
+                break;
+             default:
+                break;
+            }
+        } else {
+            // What? Ignore.
+        }
+    }
+
+    // Mark planet dirty, just in case
+    markDirty();
 }
 
 // /** Set planet position. */
@@ -562,7 +810,7 @@ game::map::Planet::setIndustryLevel(IntegerProperty_t level, const HostVersion& 
             }
             if (getIndustryLevel(mifa, host) > rawLevel) {
                 // our stored mine/factory count would yield a larger level than reported.
-                // This means our stored mi/fa is // outdated.
+                // This means our stored mi/fa is outdated.
                 setNumBuildings(MineBuilding, IntegerProperty_t());
                 setNumBuildings(FactoryBuilding, IntegerProperty_t());
             }
@@ -1140,34 +1388,6 @@ game::map::Planet::unitScores() const
 }
 
 
-// /** Add history file entry. */
-// void
-// GPlanet::addHistoryData(const TDbPlanet& data)
-// {
-//     if (planet_source.empty()) {
-//         // Accept only when not scanned otherwise
-//         PlanetInfo& pi = createPlanetInfo();
-//
-//         // FIXME: This assumes only one history data source. Otherwise, we have to merge.
-//         pi.data               = data.planet;
-//         pi.time[ts_Minerals]  = data.time[ts_Minerals];
-//         pi.time[ts_Colonists] = data.time[ts_Colonists];
-//         pi.time[ts_Natives]   = data.time[ts_Natives];
-//         pi.time[ts_Cash]      = data.time[ts_Cash];
-//         if (data.planet.factories >= 30000) {
-//             pi.data.factories = mp16_t().getRawValue();
-//             pi.industry_level = mp16_t(data.planet.factories - 30000);
-//         } else {
-//             pi.industry_level = mp16_t();
-//         }
-//         pi.known_to_have_natives = (data.known_to_have_natives != 0);
-//     }
-// }
-//
-//
-//
-//
-//
 // /** Get planet data record for storage in data files.
 //     \param dat [out] planet data */
 // void

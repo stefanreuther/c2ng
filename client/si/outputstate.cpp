@@ -27,3 +27,19 @@ client::si::OutputState::getTarget() const
 {
     return m_target;
 }
+
+String_t
+client::si::OutputState::toString(OutputState::Target target)
+{
+    const char* result = "?";
+    switch (target) {
+     case NoChange:     result = "NoChange";     break;
+     case ExitProgram:  result = "ExitProgram";  break;
+     case ExitGame:     result = "ExitGame";     break;
+     case PlayerScreen: result = "PlayerScreen"; break;
+     case ShipScreen:   result = "ShipScreen";   break;
+     case PlanetScreen: result = "PlanetScreen"; break;
+     case BaseScreen:   result = "BaseScreen";   break;
+    }
+    return result;
+}

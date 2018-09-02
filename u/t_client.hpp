@@ -17,9 +17,4 @@ class TestClientObjectCursorFactory : public CxxTest::TestSuite {
     void testIt();
 };
 
-class TestClientObjectListener : public CxxTest::TestSuite {
- public:
-    void testIt();
-};
-
 #endif

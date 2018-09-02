@@ -734,6 +734,7 @@ client::screens::BrowserScreen::BrowserScreen(ui::Root& root, util::RequestSende
     m_crumbs.sig_change.add(this, &BrowserScreen::onCrumbClicked);
     m_optionButton.sig_fire.add(this, &BrowserScreen::onAddAccount);
     m_info.setRenderFlag(m_info.UseBackgroundColorScheme, true);
+    m_info.setRenderFlag(m_info.NoShade, true);
 }
 
 int

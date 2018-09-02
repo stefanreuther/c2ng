@@ -91,6 +91,12 @@ class TestUtilFileParser : public CxxTest::TestSuite {
     void testInterface();
 };
 
+class TestUtilHelpIndex : public CxxTest::TestSuite {
+ public:
+    void testMulti();
+    void testMissing();
+};
+
 class TestUtilInstructionList : public CxxTest::TestSuite {
  public:
     void testIt();

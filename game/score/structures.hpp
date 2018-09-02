@@ -24,7 +24,7 @@ namespace game { namespace score { namespace structures {
 
     /// score.cc (PCC2 score db) header.
     struct ScoreHeader {
-        char        signature[8];                               ///< "CCstat0",26.
+        uint8_t     signature[8];                               ///< "CCstat0",26.
         UInt32_t    headerSize;                                 ///< Total size of header, pointer to entries.
         UInt16_t    numHeaderFields;                            ///< Fields in this header.
         UInt16_t    numEntries;                                 ///< Number of entries.
@@ -52,7 +52,7 @@ namespace game { namespace score { namespace structures {
 
     /// stat.cc (PCC1 score db) header.
     struct StatHeader {
-        char        signature[8];                               ///< "CC-Stat",26.
+        uint8_t     signature[8];                               ///< "CC-Stat",26.
         Int16_t     numEntries;
         Int16_t     recordSize;
     };

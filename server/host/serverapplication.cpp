@@ -157,7 +157,7 @@ server::host::ServerApplication::handleConfiguration(const String_t& key, const 
         if (afl::string::strToInteger(value, n) && n > 0) {
             m_config.timeScale = n;
         } else {
-            throw afl::except::CommandLineException(afl::string::Format("Invalid number for '%s'", key));
+            throw afl::except::CommandLineException(afl::string::Format("Invalid value for '%s'", key));
         }
         return true;
     } else if (key == "HOST.USERSSEETEMPORARYTURNS") {
@@ -167,6 +167,17 @@ server::host::ServerApplication::handleConfiguration(const String_t& key, const 
            c2ng/c2host-server only.
            @since PCC2 2.40.4 */
         if (!util::parseBooleanValue(value, m_config.usersSeeTemporaryTurns)) {
+            throw afl::except::CommandLineException(afl::string::Format("Invalid value for '%s'", key));
+        }
+        return true;
+    } else if (key == "HOST.KICKAFTERMISSED") {
+        /* @q Host.KickAfterMissed:Int (Config)
+           If nonzero, number of missed turns after which a player is removed from the game.
+           @since PCC2 2.40.5 */
+        int n;
+        if (afl::string::strToInteger(value, n) && n >= 0) {
+            m_config.numMissedTurnsForKick = n;
+        } else {
             throw afl::except::CommandLineException(afl::string::Format("Invalid value for '%s'", key));
         }
         return true;

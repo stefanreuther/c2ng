@@ -19,7 +19,8 @@ namespace ui { namespace widgets {
      public:
         enum RenderFlag {
             UseBackgroundColorScheme,
-            DisableWrap
+            DisableWrap,
+            NoShade
         };
         typedef afl::bits::SmallSet<RenderFlag> RenderFlagSet_t;
 
@@ -28,6 +29,7 @@ namespace ui { namespace widgets {
 
         void clear();
         void addItem(const util::rich::Text text, afl::base::Ptr<gfx::Canvas> image, bool accessible);
+        void setItemAccessible(size_t n, bool accessible);
 
         void setPreferredWidth(int width);
 

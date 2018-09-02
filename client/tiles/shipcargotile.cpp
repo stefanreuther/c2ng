@@ -6,7 +6,7 @@
 #include "afl/base/countof.hpp"
 #include "afl/base/staticassert.hpp"
 #include "afl/string/format.hpp"
-#include "client/objectlistener.hpp"
+#include "client/proxy/objectlistener.hpp"
 #include "game/config/userconfiguration.hpp"
 #include "game/map/ship.hpp"
 #include "game/root.hpp"
@@ -110,10 +110,10 @@ client::tiles::ShipCargoTile::init(ui::Root& root, client::widgets::KeymapWidget
     configureButton(m_reviewUnloadButton);
 
     // Attach buttons
-    kmw.addButton(m_cargoButton);
-    kmw.addButton(m_unloadButton);
-    kmw.addButton(m_reviewUnloadButton);
-    kmw.addButton(m_reviewTransferButton);
+    m_cargoButton.dispatchKeyTo(kmw);
+    m_unloadButton.dispatchKeyTo(kmw);
+    m_reviewUnloadButton.dispatchKeyTo(kmw);
+    m_reviewTransferButton.dispatchKeyTo(kmw);
 
     // Add widgets
     addChild(m_table, 0);
@@ -126,9 +126,9 @@ client::tiles::ShipCargoTile::init(ui::Root& root, client::widgets::KeymapWidget
 }
 
 void
-client::tiles::ShipCargoTile::attach(ObjectObserverProxy& oop)
+client::tiles::ShipCargoTile::attach(client::proxy::ObjectObserver& oop)
 {
-    class Listener : public ObjectListener {
+    class Listener : public client::proxy::ObjectListener {
      public:
         Listener(util::RequestSender<ShipCargoTile> reply)
             : m_reply(reply)

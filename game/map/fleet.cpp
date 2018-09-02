@@ -10,8 +10,10 @@
 #include "game/playerset.hpp"
 #include "game/spec/mission.hpp"
 #include "game/spec/missionlist.hpp"
+#include "afl/string/format.hpp"
 
 using game::spec::Mission;
+using afl::string::Format;
 
 namespace {
     /** Manipulating: check whether fleet member is being towed. */
@@ -113,6 +115,11 @@ game::map::Fleet::hasSpecialFunction(int basicFunction,
     }
 }
 
+String_t
+game::map::Fleet::getTitle(afl::string::Translator& tx, InterpreterInterface& iface) const
+{
+    return getTitle(m_ship, tx, iface);
+}
 
 // /** Synchronize a fleet member. Synchronizes waypoint of a single fleet member.
 //     \param univ Universe to work on
@@ -188,5 +195,16 @@ game::map::Fleet::synchronizeFleetMember(Universe& univ, Id_t sid,
         } else {
             // Leader does not exist? Error, ignore.
         }
+    }
+}
+
+String_t
+game::map::Fleet::getTitle(const Ship& ship, afl::string::Translator& tx, InterpreterInterface& iface)
+{
+    // ex getFleetTitle
+    if (ship.getFleetName().empty()) {
+        return Format(tx.translateString("Fleet %d: led by %s").c_str(), ship.getId(), ship.getName(Object::PlainName, tx, iface));
+    } else {
+        return Format(tx.translateString("Fleet %d: %s").c_str(), ship.getId(), ship.getFleetName());
     }
 }

@@ -30,6 +30,9 @@ namespace game { namespace sim {
             \change PCC2 version would access ship list data here */
         void load(afl::io::Stream& in, Setup& setup);
 
+
+        void save(afl::io::Stream& out, const Setup& setup);
+
      private:
         afl::charset::Charset& m_charset;
     };

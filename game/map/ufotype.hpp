@@ -8,6 +8,7 @@
 #include "game/map/ufo.hpp"
 #include "game/map/objecttype.hpp"
 #include "afl/container/ptrvector.hpp"
+#include "game/parser/messageinformation.hpp"
 
 namespace game { namespace map {
 
@@ -34,6 +35,7 @@ namespace game { namespace map {
         //    void addObjectData(const TUtil33GO& obj);
         //    void addHistoryData(const TDbUfo& ufo);
         Ufo* addUfo(int id, int type, int color);
+        void addMessageInformation(const game::parser::MessageInformation& info);
         void postprocess(int turn);
 
         //    // GObjectType:
@@ -52,7 +54,9 @@ namespace game { namespace map {
 
      private:
         typedef afl::container::PtrVector<Ufo> UfoList_t;
-        //    GUfo& getUfoById(int id);
+
+        Ufo* getUfoById(int id);
+
         //    GUfo& getUfoByIndex(int32_t index);
 
         // Universe link

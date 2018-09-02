@@ -11,6 +11,7 @@
 #include "afl/io/stream.hpp"
 #include "game/timestamp.hpp"
 #include "game/v3/structures.hpp"
+#include "game/v3/messagewriter.hpp"
 
 namespace game { namespace v3 {
 
@@ -120,7 +121,7 @@ namespace game { namespace v3 {
 
         \invariant !getFeatures().contains(TaccomFeature) <=> m_taccomHeader is zeroed
         \invariant !getFeatures().contains(WinplanFeature) <=> m_windowsTrailer is zeroed */
-    class TurnFile {
+    class TurnFile : public MessageWriter {
      public:
         typedef uint32_t CommandCode_t;
 
@@ -219,7 +220,14 @@ namespace game { namespace v3 {
             \return turn number, or 0 if not known */
         int tryGetTurnNr() const;
 
-//     void               setTemplock(const uint32_t* data);
+        /** Set player secret (templock, playerlog).
+            A set of turn files for the same game and turn created by the same computer must bear the same player secret.
+
+            This call updates the DOS trailer; it does not automatically update the turn,
+            and does not implicitly mark it dirty.
+
+            \param data Data */
+        void setPlayerSecret(const structures::TurnPlayerSecret& data);
 
         /** Set registration info.
             The turn number must be passed in as well, because Host uses it to validate the registration info for Winplan clients.
@@ -331,6 +339,24 @@ namespace game { namespace v3 {
             \return Command data; empty on error */
         afl::base::ConstBytes_t getCommandData(size_t index) const;
 
+        /** Send message data (create tcm_SendMessage command).
+            \param from Sender (player number)
+            \param to Receiver (player number, 0 for host)
+            \param data Message content (ROT13-encoded) */
+        virtual void sendMessageData(int from, int to, afl::base::ConstBytes_t data);
+
+        /** Send THost alliance commands.
+
+            For THost, the mere presence of a friendly code change command triggers an alliance action.
+            When we change the FCode back to what it should be, we can set alliances without sacrificing a ship for each action.
+            This function generates this command sequence.
+
+            \param commandSequence Command sequence (friendly codes, e.g. "ff1eea")
+            \param shipId Id of ship to transmit commands
+            \param shipFC Friendly code of ship to transmit commands */
+        void sendTHostAllies(const String_t& commandSequence, int shipId, const String_t& shipFC);
+
+
         /*
          *  Command definition accessors
          *
@@ -385,10 +411,9 @@ namespace game { namespace v3 {
             \param index [in] Command index, [0,getNumCommands()). Out-of-range values are ignored. */
         void deleteCommand(size_t index);
 
-//     /* Maketurn */
-//     void               makeShipCommands(int id, const char* old, const char* neu);
-//     void               makePlanetCommands(int id, const char* old, const char* neu);
-//     void               makeBaseCommands(int id, const char* old, const char* neu);
+        void makeShipCommands(int id, const structures::Ship& oldShip, const structures::Ship& newShip);
+        void makePlanetCommands(int id, const structures::Planet& oldPlanet, const structures::Planet& newPlanet);
+        void makeBaseCommands(int id, const structures::Base& oldBase, const structures::Base& newBase);
 
         /*
          *  Structure access
@@ -479,7 +504,7 @@ namespace game { namespace v3 {
         void parseTurnFileHeader(afl::io::Stream& stream, afl::io::Stream::FileSize_t offset, afl::io::Stream::FileSize_t length);
 
         void updateTurnFile(afl::base::GrowableMemory<uint8_t>& data, afl::base::GrowableMemory<uint32_t>& offsets);
-//     void makeCommands(int id, int low, int up, const char* old, const char* neu);
+        void makeCommands(int id, int low, int up, afl::base::ConstBytes_t oldObject, afl::base::ConstBytes_t newObject);
 
         String_t encodeString(const String_t& in) const;
     };

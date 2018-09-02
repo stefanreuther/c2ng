@@ -518,7 +518,8 @@ game::interface::IFHistoryShowTurn(interpreter::Process& /*proc*/, game::Session
     // Do we have a game loaded?
     Root* r = session.getRoot().get();
     Game* g = session.getGame().get();
-    if (g == 0 || r == 0) {
+    game::spec::ShipList* sl = session.getShipList().get();
+    if (g == 0 || r == 0 || sl == 0) {
         throw Exception(Exception::eUser, Exception::eUser);
     }
 
@@ -551,7 +552,7 @@ game::interface::IFHistoryShowTurn(interpreter::Process& /*proc*/, game::Session
                 r->getTurnLoader()->loadHistoryTurn(*t, *g, player, turn, *r);
                 t->universe().postprocess(game::PlayerSet_t(player), game::PlayerSet_t(player), game::map::Object::ReadOnly,
                                           r->hostVersion(), r->hostConfiguration(),
-                                          turn,
+                                          turn, *sl,
                                           session.translator(), session.log());
                 ht->handleLoadSucceeded(t);
             }
@@ -567,4 +568,19 @@ game::interface::IFHistoryShowTurn(interpreter::Process& /*proc*/, game::Session
 
     // Do it
     g->setViewpointTurnNumber(turn);
+}
+
+/* @q SaveGame (Global Command)
+   Save current game.
+   Depending on the game type, this will create and/or upload the turn file.
+
+   @since PCC 1.0.17, PCC2 1.99.12, PCC2 2.40.5 */
+void
+game::interface::IFSaveGame(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
+{
+    // ex int/if/globalif.cc:IFSaveGame
+    args.checkArgumentCount(0);
+    if (!session.save()) {
+        throw interpreter::Error("No game loaded");
+    }
 }

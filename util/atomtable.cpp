@@ -115,7 +115,7 @@ util::AtomTable::clear()
 
 // /** True iff atom corresponds to a string. */
 bool
-util::AtomTable::isAtom(Atom_t atom)
+util::AtomTable::isAtom(Atom_t atom) const
 {
     // ex util/atom.h:isAtom
     return (atom >= ATOM_LOWER_BOUND && atom < next);

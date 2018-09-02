@@ -17,7 +17,7 @@ client::widgets::Comment::Comment(ui::Root& root, KeymapWidget& kmw)
     m_text.setIsFlexible(true);
     add(m_text);
     add(m_button);
-    kmw.addButton(m_button);
+    m_button.dispatchKeyTo(kmw);
 }
 
 client::widgets::Comment::~Comment()

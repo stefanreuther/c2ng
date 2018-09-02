@@ -26,6 +26,8 @@ namespace game { namespace v3 {
         static CommandExtra& create(Turn& parent);
         static CommandExtra* get(Turn& parent);
 
+        static CommandContainer* get(Turn& parent, int player);
+
      private:
         Turn& m_parent;
         afl::container::PtrMap<int, CommandContainer> m_commandContainers;

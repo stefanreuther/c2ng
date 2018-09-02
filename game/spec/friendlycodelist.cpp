@@ -208,7 +208,7 @@ game::spec::FriendlyCodeList::loadExtraCodes(afl::io::Stream& in)
 
 // Check whether the specified friendly code is numeric.
 bool
-game::spec::FriendlyCodeList::isNumeric(const String_t& fc, const HostSelection host) const
+game::spec::FriendlyCodeList::isNumeric(const String_t& fc, const HostSelection host)
 {
     // ex GFCode::isNumeric
     String_t::size_type i = 0, end = fc.size();
@@ -303,7 +303,7 @@ game::spec::FriendlyCodeList::isUniversalMinefieldFCode(const String_t& fc, bool
 
 // Get friendly code's numeric value.
 int
-game::spec::FriendlyCodeList::getNumericValue(const String_t& fc, const HostSelection host) const
+game::spec::FriendlyCodeList::getNumericValue(const String_t& fc, const HostSelection host)
 {
     // ex GFCode::getNumericValue
     int n = 0;

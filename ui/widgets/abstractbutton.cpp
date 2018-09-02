@@ -120,6 +120,25 @@ ui::widgets::AbstractButton::defaultHandleMouse(gfx::Point pt, MouseButtons_t pr
     }
 }
 
+// Dispatch key activation to another widget.
+void
+ui::widgets::AbstractButton::dispatchKeyTo(Widget& target)
+{
+    class Handler : public afl::base::Closure<void(int, util::Key_t)> {
+     public:
+        Handler(Widget& target)
+            : m_target(target)
+            { }
+        void call(int prefix, util::Key_t key)
+            { m_target.handleKey(key, prefix); }
+        Handler* clone() const
+            { return new Handler(*this); }
+     private:
+        Widget& m_target;
+    };
+    sig_fireKey.addNewClosure(new Handler(target));
+}
+
 // Get associated key.
 util::Key_t
 ui::widgets::AbstractButton::getKey() const

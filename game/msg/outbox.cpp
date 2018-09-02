@@ -7,36 +7,47 @@
 #include "game/limits.hpp"
 
 namespace {
-    const uint16_t ALL_RECEIVERS_MASK = 0x1FFE;
-    const uint16_t UNIVERSAL_MASK = 0x0FFE;
-
-    /** Header line for a universal message. */
+    /* Header line for a universal message.
+       Used/recognized by other programs, don't translate. */
     const char UNIVERSAL_TEXT[] = "  <<< Universal Message >>>";
+
+    /* Header line for a message to ourselves and others.
+       Starts with a '<' to avoid PHost recognizing it as a command message.
+       We need to filter it out upon reception. */
     const char CC_SELF_PREFIX[] = "<CC: ";
+
+    /* Header line for a message to ourselves and others. */
     const char CC_PREFIX[] = "CC: ";
 
-    
-    bool isUniversalReceiver(game::PlayerSet_t receivers)
+
+    /* Check whether receiver indicates a universal message.
+       We consider a universal message to be one that goes to all real players (i.e. 1-11). */
+    bool isUniversalReceiver(game::PlayerSet_t receivers, const game::PlayerList& players)
     {
-        // FIXME: this does not deal with the receiver being "host" vs. "player >11 support"
-        return receivers.contains(game::PlayerSet_t::fromInteger(UNIVERSAL_MASK));
+        return receivers.contains(players.getAllPlayers());
     }
 
-    // /** Get "TO:" line for a receiver bitfield. */
-    String_t getReceiverText(game::PlayerSet_t bits,
-                             afl::string::Translator& tx,
-                             const game::PlayerList& players)
+    /* Get list of all allowed receivers.
+       We allow all real players plus player 0 (=host). */
+    game::PlayerSet_t getAllReceivers(const game::PlayerList& players)
+    {
+        return players.getAllPlayers() + 0;
+    }
+
+    /* Get "TO:" line for a receiver bitfield. */
+    String_t getReceiverText(game::PlayerSet_t bits, afl::string::Translator& tx, const game::PlayerList& players)
     {
         /* Note: do not translate "Host" here, because this function is
            also used to generate title lines for sent messages */
-        bits &= game::PlayerSet_t::fromInteger(ALL_RECEIVERS_MASK);
+        bits &= getAllReceivers(players);
         if (bits.empty()) {
+            // Message will not be sent, so we can translate this
             return tx.translateString("Nobody");
         } else if (bits.isUnitSet()) {
-            /* one receiver */
-            for (int i = 1; i <= game::MAX_PLAYERS; ++i) {
+            // One receiver
+            for (int i = 0; i <= game::MAX_PLAYERS; ++i) {
                 if (bits.contains(i)) {
-                    if (i == 12 /*FIXME*/) {
+                    if (i == 0) {
                         return "Host";
                     } else {
                         return players.getPlayerName(i, game::Player::LongName);
@@ -45,14 +56,14 @@ namespace {
             }
             return "Huh?";
         } else {
-            /* many receivers */
+            // Many receivers
             String_t rv;
-            for (int i = 1; i <= game::MAX_PLAYERS; ++i) {
+            for (int i = 0; i <= game::MAX_PLAYERS; ++i) {
                 if (bits.contains(i)) {
                     if (rv.length()) {
                         rv += " ";
                     }
-                    if (i == 12 /*FIXME*/) {
+                    if (i == 0) {
                         rv += "Host";
                     } else {
                         rv += afl::string::Format("%d", i);
@@ -136,7 +147,7 @@ game::msg::Outbox::getMessageHeading(size_t index, afl::string::Translator& tx, 
 {
     // ex GOutbox::getHeading
     if (index < m_messages.size()) {
-        if (isUniversalReceiver(m_messages[index]->receivers)) {
+        if (isUniversalReceiver(m_messages[index]->receivers, players)) {
             return "Universal Message";
         } else {
             return afl::string::Format(tx.translateString("To: %s").c_str(),
@@ -163,10 +174,10 @@ game::msg::Outbox::getMessageSendPrefix(size_t index, int receiver,
                                         const PlayerList& players) const
 {
     if (index < m_messages.size()) {
-        PlayerSet_t receivers = m_messages[index]->receivers & PlayerSet_t::fromInteger(ALL_RECEIVERS_MASK);
+        PlayerSet_t receivers = m_messages[index]->receivers & getAllReceivers(players);
 
         // Universal message? (all or all+host)
-        if (isUniversalReceiver(receivers)) {
+        if (isUniversalReceiver(receivers, players)) {
             return String_t(UNIVERSAL_TEXT) + '\n';
         }
 
@@ -177,7 +188,7 @@ game::msg::Outbox::getMessageSendPrefix(size_t index, int receiver,
             return pfx + getReceiverText(receivers, tx, players) + '\n';
         }
     }
-    return String_t();    
+    return String_t();
 }
 
 // /** Get raw text of a message. */
@@ -212,6 +223,15 @@ game::msg::Outbox::getMessageSender(size_t index) const
         return m_messages[index]->sender;
     } else {
         return 0;
+    }
+}
+
+void
+game::msg::Outbox::deleteMessagesAfter(size_t index)
+{
+    // ex GOutbox::deleteMessagesAfter
+    if (index < m_messages.size()) {
+        m_messages.resize(index);
     }
 }
 
@@ -252,6 +272,12 @@ game::msg::Outbox::addMessageFromFile(int sender, String_t text, PlayerSet_t rec
     }
 }
 
+void
+game::msg::Outbox::clear()
+{
+    m_messages.clear();
+}
+
 // /** Get headers to use for a message to /receivers/.
 //     These headers are displayed, but not part of the stored text. */
 String_t
@@ -261,13 +287,13 @@ game::msg::Outbox::getHeadersForDisplay(int sender,
                                         const PlayerList& players)
 {
     // ex GOutbox::getHeadersForDisplay
-    // FIXME: receivers &= GPlayerSet::fromInteger(ALL_RECEIVERS_MASK);
+    receivers &= getAllReceivers(players);
 
     String_t senderName = players.getPlayerName(sender, Player::LongName);
     String_t receiverText = getReceiverText(receivers, tx, players);
     String_t text = afl::string::Format(tx.translateString("<<< Sub Space Message >>>\nFROM: %s\nTO: %s\n").c_str(),
                                         senderName, receiverText);
-    if (isUniversalReceiver(receivers)) {
+    if (isUniversalReceiver(receivers, players)) {
         text += UNIVERSAL_TEXT;
         text += '\n';
     } else if (!receivers.isUnitSet()) {

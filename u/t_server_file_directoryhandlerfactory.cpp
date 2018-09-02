@@ -29,6 +29,7 @@ TestServerFileDirectoryHandlerFactory::testPathName()
     TS_ASSERT_EQUALS(DirectoryHandlerFactory::makePathName("ca:x", "d"), "d@ca:x");
     TS_ASSERT_EQUALS(DirectoryHandlerFactory::makePathName("a/b@ca:x", "d"), "a/b/d@ca:x");
     TS_ASSERT_EQUALS(DirectoryHandlerFactory::makePathName("a/b@g/h", "e"), "a/b/e@g/h");
+    TS_ASSERT_EQUALS(DirectoryHandlerFactory::makePathName("c2file://a@b:c/d", "e"), "c2file://a@b:c/d/e");
 }
 
 /** Test createDirectoryHandler. */

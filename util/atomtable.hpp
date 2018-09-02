@@ -33,7 +33,7 @@ namespace util {
 
         void clear();
 
-        bool isAtom(Atom_t atom);
+        bool isAtom(Atom_t atom) const;
 
      private:
         /** Manifest constants. */

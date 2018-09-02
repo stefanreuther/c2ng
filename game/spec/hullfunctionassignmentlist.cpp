@@ -148,21 +148,24 @@ game::spec::HullFunctionAssignmentList::getPlayersThatCan(int basicFunctionId,
                                                           bool useDefaults) const
 {
     // ex GHull::checkSet
+    /*
+     *  This used to first determine the 'players' set and resolve that into a hull function only if that was nonempty.
+     *  It turns out that determining the players is the expensive part (host configuration access).
+     *  Reversing the tests brings down the time for the MovementPredictor test from 15->2.5 seconds.
+     */
     PlayerSet_t result;
     for (size_t i = 0, n = m_entries.size(); i < n; ++i) {
-        PlayerSet_t players;
-        if (useDefaults) {
-            players += HullFunction::getDefaultAssignment(int32_t(m_entries[i].m_function), config, hull);
-        }
-        players += m_entries[i].m_addedPlayers;
-        players -= m_entries[i].m_removedPlayers;
-        if (!players.empty()) {
-            HullFunction function;
-            if (definitions.getFunctionDefinition(m_entries[i].m_function, function)) {
-                if (function.getLevels().containsAnyOf(levelLimit)) {
-                    if (basicDefinitions.matchFunction(basicFunctionId, function.getBasicFunctionId())) {
-                        result += players;
+        HullFunction function;
+        if (definitions.getFunctionDefinition(m_entries[i].m_function, function)) {
+            if (function.getLevels().containsAnyOf(levelLimit)) {
+                if (basicDefinitions.matchFunction(basicFunctionId, function.getBasicFunctionId())) {
+                    PlayerSet_t players;
+                    if (useDefaults) {
+                        players += HullFunction::getDefaultAssignment(int32_t(m_entries[i].m_function), config, hull);
                     }
+                    players += m_entries[i].m_addedPlayers;
+                    players -= m_entries[i].m_removedPlayers;
+                    result += players;
                 }
             }
         }

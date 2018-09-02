@@ -81,3 +81,17 @@ game::Reference::toString(afl::string::Translator& tx) const
     }
     return afl::string::Format(tx.translateString(fmt).c_str(), m_x, m_y);
 }
+
+bool
+game::Reference::operator==(const Reference& other) const
+{
+    return (m_type == other.m_type
+            && m_x == other.m_x
+            && m_y == other.m_y);
+}
+
+bool
+game::Reference::operator!=(const Reference& other) const
+{
+    return !operator==(other);
+}

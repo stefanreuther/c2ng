@@ -11,6 +11,8 @@
 #include "util/request.hpp"
 #include "util/requestreceiver.hpp"
 #include "util/requestsender.hpp"
+#include "util/slaverequest.hpp"
+#include "util/slaverequestsender.hpp"
 
 namespace client {
 
@@ -34,19 +36,34 @@ namespace client {
         /** Destructor. */
         ~Downlink();
 
-        /** Send request.
+        /** Send request (RequestSender).
             This will send the request using \c sender and wait for it being processed.
             It will return after the confirmation arrives.
 
             Note that this function cannot be called recursively
             (e.g. from a UI callback that is active while call() is active).
 
-            \tparam Target object type
+            \tparam T object type
             \param sender RequestSender to communicate with the target object
             \param req Request to execute
             \return true if request was executed, false if request could not be executed (other end died, or recursion). */
         template<typename T>
         bool call(util::RequestSender<T> sender, util::Request<T>& req);
+
+        /** Send request (SlaveRequestSender).
+            This will send the request using \c sender and wait for it being processed.
+            It will return after the confirmation arrives.
+
+            Note that this function cannot be called recursively
+            (e.g. from a UI callback that is active while call() is active).
+
+            \tparam T object type
+            \tparam S object type
+            \param sender SlaveRequestSender to communicate with the target object
+            \param req Request to execute
+            \return true if request was executed, false if request could not be executed (other end died, or recursion). */
+        template<typename T, typename S>
+        bool call(util::SlaveRequestSender<T,S>& sender, util::SlaveRequest<T,S>& req);
 
      private:
         /** Request wrapper.
@@ -64,6 +81,24 @@ namespace client {
                 { m_request.handle(t); m_success = true; }
          private:
             util::Request<T>& m_request;
+            util::RequestSender<Downlink> m_confirm;
+            bool m_success;
+        };
+
+        /** Request wrapper.
+            Same thing for SlaveRequestSender. */
+        template<typename T, typename S>
+        class SlaveRequestWrapper : public util::SlaveRequest<T,S> {
+         public:
+            SlaveRequestWrapper(util::SlaveRequest<T,S>& req, Downlink& link)
+                : m_request(req), m_confirm(link.m_receiver.getSender()), m_success(false)
+                { }
+            ~SlaveRequestWrapper()
+                { confirm(m_confirm, m_success); }
+            void handle(T& t, S& s)
+                { m_request.handle(t, s); m_success = true; }
+         private:
+            util::SlaveRequest<T, S>& m_request;
             util::RequestSender<Downlink> m_confirm;
             bool m_success;
         };
@@ -89,6 +124,21 @@ client::Downlink::call(util::RequestSender<T> sender, util::Request<T>& req)
     } else {
         setBusy(true);
         sender.postNewRequest(new RequestWrapper<T>(req, *this));
+        bool success = (m_loop.run() != 0);
+        setBusy(false);
+        return success;
+    }
+}
+
+template<typename T, typename S>
+bool
+client::Downlink::call(util::SlaveRequestSender<T,S>& sender, util::SlaveRequest<T,S>& req)
+{
+    if (m_busy) {
+        return false;
+    } else {
+        setBusy(true);
+        sender.postNewRequest(new SlaveRequestWrapper<T,S>(req, *this));
         bool success = (m_loop.run() != 0);
         setBusy(false);
         return success;

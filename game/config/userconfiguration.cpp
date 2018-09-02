@@ -76,6 +76,14 @@ const game::config::IntegerOptionDescriptor game::config::UserConfiguration::Dis
     "Display.Clans",
     &BooleanValueParser::instance
 };
+const game::config::StringOptionDescriptor game::config::UserConfiguration::Backup_Result = {
+    // ex opt_BackupResult
+    "Backup.Result",
+};
+const game::config::IntegerOptionDescriptor game::config::UserConfiguration::Team_AutoSync = {
+    "Team.AutoSync",
+    &BooleanValueParser::instance
+};
 
 
 // FIXME: port these...
@@ -114,7 +122,6 @@ game::config::UserConfiguration::setDefaultValues()
 //       ChartAnimThreshold(*this, "Chart.AnimThreshold", ValueIntParser::instance),
 //       ChartMouseStickiness(*this, "Chart.MouseStickiness", ValueIntParser::instance),
 //       ChartScannerWarpWells(*this, "Chart.Scanner.WarpWells", ValueBoolParser::instance),
-//       TeamAutoSync(*this, "Team.AutoSync", ValueBoolParser::instance),
 //       ExportShipFields(*this, "Export.ShipFields"),
 //       ExportPlanetFields(*this, "Export.PlanetFields")
 
@@ -133,7 +140,7 @@ game::config::UserConfiguration::setDefaultValues()
 //     ChartMouseStickiness.set(5);
 //     ChartScannerWarpWells.set(0);
 
-//     TeamAutoSync.set(1);
+    me[Team_AutoSync].set(1);
 
     me[Display_ThousandsSep].set(1);
     me[Display_Clans].set(0);

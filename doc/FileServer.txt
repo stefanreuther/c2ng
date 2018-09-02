@@ -1,0 +1,79 @@
+c2file-server
+=============
+
+Basic Operation
+----------------
+
+  c2file-server provides storage for user files. It includes:
+
+  - per-directory access control (ownership, read/write/list
+    permissions for non-owners)
+  - per-directory attributes (e.g. game name, state)
+  - basic game integration (e.g. find all registration keys)
+
+  Files are stored in a storage backend. The storage backend
+  represents the very same file hierarchy the user stored, as well as
+  metadata in a ".c2file" ini file.
+
+  c2file-server includes two storage backends:
+
+  (a) plain backend, with a 1:1 representation in the file system.
+
+  (b) content-addressable backend, that stores files in a git
+      repository. git is implemented internally. Each change is
+      performed "as-if" by 'git commit --amend'.
+      Content-addressability means each file's physical location is
+      determined by its content, leading to automatic de-duplication.
+
+  Since May 2018, PlanetsCentral.com runs the content-addressable
+  backend for host files.
+
+
+Content-Adressable Storage (aka "git backend", server::file::ca)
+-----------------------------------------------------------------
+
+(Original design documentation.)
+
+- Feasibility proof: backup of around 1360 host runs
+    1.1G with compressed backups, 7671 files
+       tarball (20161007-hostdata.tar.gz) --> 1028284795 bytes
+    5.7G with unpacked backups, 236k files
+    2.9G deduplicated, 87k files
+       tarball --> 490421264 bytes = 52% savings
+    1.1G deduplicated and individually compressed, 87k files
+       tarball --> 487724408 bytes
+  deduplication: unpack all embedded backups, deduplicate according to SHA1. Many files appear a few thousand times:
+  . 5465 x da39a3ee5e6b4b0d3255bfef95601890afd80709 empty file
+  . 3237 x 1489f923c4dca729178b3e3233458550d8dddf29 "\0\0"
+  . 2824 x abf24fe466a4aebb67df9c09c2e709f08ded11e6 planet.nm (10k)
+  . 2780 x 248007892b37290e57481fe14a6cc3bd14716253 storm.nm (1k)
+  . 2756 x 58035942b6e2767eff1067e8c4dfe841ac9b779e extmines.hst (114k)
+  . 2729 x c2bb2031892bd458f66765026b406b0ac71220b3 xtrafcod.txt (280b)
+  . 2691 x 4621a111daaee735ecf2efa1cacd88117fbd456c mission.ini (796b)
+  . 2065 x 774dcd1416072b15f5ea714a24a8a5befdd3b271 ptscore.log (188b)
+  . 1951 x ee1bd67ad9ada8e9f758d73e07e437f4ba206cfb amaster.src (42k)
+  . 1762 x c1e97145ed7f2f42fcffa6a040e623344e8086fb map.ini (37b)
+  . 1401 x e17e582f41605053e9ca23bbb8431dcad01397ac PList beamspec.dat (360b)
+  . 1401 x 2b157adab7b80f9f88d3294316e334e9ec6caa6e PList torpspec.dat (470b)
+  . 1376 x 9f1d18a684944457c37c4730318a82f36fef330d PList hullfunc.txt (25k)
+  . 1356 x 625207c88f4903b5b68c547e2bf10ac33e0336ec truehull.dat (440b)
+- TL;DR: deduplication PCc host data needs the same amount of on-disk storage, but reduces backup size in half.
+- Initial implementation (without reference counting / cleanup):
+  . 291568 user files / 20170224-hostdata
+  . 47 minutes conversion time on 'rocket'
+  . 7367168k user data (du -sk)
+  . 1865827 objects (=write amplification of 6.4)
+  . 8340792k object data (du -sk)
+  . 1947441k effective object data (file size)
+- Implementation with reference counting:
+  . 27 minutes conversion time on 'rocket' (~6:30 CPU)
+  . 113772 objects (55% savings)
+  . 925968k object data (du -sk)
+  . 615114k effective object data (file size)
+  . 9725501440 bytes written, 7566229504 cancelled (=short-lived objects)
+- For reference, with git:
+  . 113767 objects
+  . 982452k object data with git (du -sk)
+
+Last backup before switch:  1524368k  20180427-hostdata.tar.gz
+First backup after switch:   746796k  20180504-data.tar.gz

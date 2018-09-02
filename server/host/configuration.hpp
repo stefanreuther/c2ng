@@ -40,6 +40,10 @@ namespace server { namespace host {
             If disabled, only the player of a slot sees that it is temporary. */
         bool usersSeeTemporaryTurns;
 
+        /** Number of missed turns after which users are automatically kicked.
+            Zero means never. */
+        int numMissedTurnsForKick;
+
         /** HostFile address.
             Since we're generating links to this service, it must be in the config. */
         afl::net::Name hostFileAddress;

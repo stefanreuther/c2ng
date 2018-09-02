@@ -17,6 +17,7 @@
 #include "afl/io/xml/defaultentityhandler.hpp"
 #include "afl/charset/utf8.hpp"
 #include "util/rich/alignmentattribute.hpp"
+#include "util/charsetfactory.hpp"
 
 using interpreter::checkIntegerArg;
 using interpreter::checkStringArg;
@@ -423,7 +424,8 @@ game::interface::IFRXml(game::Session& /*session*/, interpreter::Arguments& args
     while (args.getNumArgs() > 0) {
         eh.addArgument(args.getNext());
     }
-    afl::io::xml::Reader rdr(ms, eh);
+    util::CharsetFactory csf;
+    afl::io::xml::Reader rdr(ms, eh, csf);
     util::rich::Parser p(rdr);
     p.readNext();
 

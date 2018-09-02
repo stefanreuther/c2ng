@@ -13,6 +13,7 @@ server::host::Configuration::Configuration()
       useCron(true),
       unpackBackups(false),
       usersSeeTemporaryTurns(true),
+      numMissedTurnsForKick(0),
       hostFileAddress(DEFAULT_ADDRESS, HOSTFILE_PORT)
 { }
 

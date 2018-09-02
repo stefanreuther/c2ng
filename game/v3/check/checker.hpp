@@ -9,6 +9,7 @@
 #include "afl/io/textwriter.hpp"
 #include "afl/base/memory.hpp"
 #include "game/v3/check/configuration.hpp"
+#include "game/v3/genfile.hpp"
 
 namespace game { namespace v3 { namespace check {
 
@@ -90,8 +91,7 @@ namespace game { namespace v3 { namespace check {
         Configuration m_config;
 
         struct DirStuff {
-            game::v3::structures::Gen gen;
-            uint8_t sig1[SIGNATURE_SIZE], sig2[SIGNATURE_SIZE];
+            game::v3::GenFile gen;
         };
 
         bool had_ck_error;

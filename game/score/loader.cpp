@@ -9,10 +9,11 @@
 #include "game/score/turnscorelist.hpp"
 #include "afl/base/growablememory.hpp"
 
-namespace structures = game::score::structures;
+namespace st = game::score::structures;
 
 namespace {
-    static const char SCORE_FILE_SIG[] = { 'C', 'C', 's', 't', 'a', 't', '0', 26 };
+    static const uint8_t SCORE_FILE_SIG[] = { 'C', 'C', 's', 't', 'a', 't', '0', 26 };
+    static const uint8_t STAT_FILE_SIG[]  = { 'C', 'C', '-', 'S', 't', 'a', 't', 26 };
 
     void loadRecord(afl::io::Stream& in,
                     game::score::TurnScore& record,
@@ -20,9 +21,9 @@ namespace {
     {
         // ex GStatRecord::loadData (sort-of)
         for (size_t slotIndex = 0, numSlots = slots.size(); slotIndex < numSlots; ++slotIndex) {
-            structures::Int32_t row[structures::NUM_PLAYERS];
+            st::Int32_t row[st::NUM_PLAYERS];
             in.fullRead(afl::base::fromObject(row));
-            for (int i = 0; i < structures::NUM_PLAYERS; ++i) {
+            for (int i = 0; i < st::NUM_PLAYERS; ++i) {
                 int32_t value = row[i];
                 if (value != -1) {
                     record.set(slots[slotIndex], i+1, value);
@@ -44,14 +45,14 @@ game::score::Loader::load(TurnScoreList& list, afl::io::Stream& in)
     list.clear();
 
     // Head header
-    structures::ScoreHeader new_header;
+    st::ScoreHeader new_header;
     in.fullRead(afl::base::fromObject(new_header));
     if (std::memcmp(new_header.signature, SCORE_FILE_SIG, sizeof(SCORE_FILE_SIG)) != 0) {
         throw afl::except::FileProblemException(in, m_translator.translateString("File is missing required signature"));
     }
     if (new_header.headerSize < sizeof(new_header)
         || new_header.numHeaderFields < 2
-        || new_header.recordHeaderSize < sizeof(structures::ScoreRecordHeader)
+        || new_header.recordHeaderSize < sizeof(st::ScoreRecordHeader)
         || new_header.headerFieldAddress[0] < sizeof(new_header)
         || new_header.headerFieldAddress[1] < sizeof(new_header))
     {
@@ -64,7 +65,7 @@ game::score::Loader::load(TurnScoreList& list, afl::io::Stream& in)
 
     /* Read record description */
     in.setPos(new_header.headerFieldAddress[0]);
-    afl::base::GrowableMemory<structures::Int16_t> slotIds;
+    afl::base::GrowableMemory<st::Int16_t> slotIds;
     slotIds.resize(new_header.numRecordFields);
     in.fullRead(slotIds.toBytes());
 
@@ -76,11 +77,11 @@ game::score::Loader::load(TurnScoreList& list, afl::io::Stream& in)
 
     /* Read score descriptions */
     in.setPos(new_header.headerFieldAddress[1]);
-    structures::UInt16_t rawNumDesc;
+    st::UInt16_t rawNumDesc;
     in.fullRead(rawNumDesc.m_bytes);
     for (size_t i = 0, n = rawNumDesc; i < n; ++i) {
         // Read raw description
-        structures::ScoreDescription rawDesc;
+        st::ScoreDescription rawDesc;
         in.fullRead(afl::base::fromObject(rawDesc));
 
         // Build description
@@ -95,7 +96,7 @@ game::score::Loader::load(TurnScoreList& list, afl::io::Stream& in)
     in.setPos(new_header.headerSize);
     // FIXME: loaded_records.reserve(new_header.numEntries);
     for (size_t i = 0, n = new_header.numEntries; i < n; ++i) {
-        structures::ScoreRecordHeader rh;
+        st::ScoreRecordHeader rh;
         in.fullRead(afl::base::fromObject(rh));
         if (new_header.recordHeaderSize > sizeof(rh)) {
             in.setPos(in.getPos() + (new_header.recordHeaderSize - sizeof(rh)));
@@ -109,105 +110,130 @@ game::score::Loader::load(TurnScoreList& list, afl::io::Stream& in)
 
 
 // /** Load old-style (PCC1.x) statistics file. */
-// void
-// GStatFile::loadOldFile(Stream& s)
-// {
-//     /* start with default schema */
-//     init();
+void
+game::score::Loader::loadOldFile(TurnScoreList& list, afl::io::Stream& in)
+{
+    // ex GStatFile::loadOldFile
+    // Start with default schema
+    list.clear();
 
-//     TStatHeader h;
-//     getStructureT(s, h);
-//     if (std::memcmp(h.signature, "CC-Stat\032", sizeof(h.signature)) != 0
-//         || h.entry_size < TStatRecord::size
-//         || h.entries < 0)
-//     {
-//         throw FileFormatException(s, _("Unsupported file format"));
-//     }
+    st::StatHeader h;
+    in.fullRead(afl::base::fromObject(h));
+    if (std::memcmp(h.signature, STAT_FILE_SIG, sizeof(STAT_FILE_SIG)) != 0
+        || h.recordSize < int16_t(sizeof(st::StatRecord))
+        || h.numEntries < 0)
+    {
+        throw afl::except::FileFormatException(in, m_translator.translateString("Unsupported file format"));
+    }
 
-//     /* figure out positions (since we use the default schema, we could also use
-//        constants, but it's more flexible this way) */
-//     const GStatIndex pi = getAddIndexForScore(ScoreId_Planets);
-//     const GStatIndex ci = getAddIndexForScore(ScoreId_Capital);
-//     const GStatIndex fi = getAddIndexForScore(ScoreId_Freighters);
-//     const GStatIndex bi = getAddIndexForScore(ScoreId_Bases);
-//     const GStatIndex qi = getAddIndexForScore(ScoreId_BuildPoints);
+    // Figure out slot positions
+    const TurnScoreList::Slot_t pi = list.addSlot(ScoreId_Planets);
+    const TurnScoreList::Slot_t ci = list.addSlot(ScoreId_Capital);
+    const TurnScoreList::Slot_t fi = list.addSlot(ScoreId_Freighters);
+    const TurnScoreList::Slot_t bi = list.addSlot(ScoreId_Bases);
+    const TurnScoreList::Slot_t qi = list.addSlot(ScoreId_BuildPoints);
 
-//     /* read individual records */
-//     for (int32_t i = 0; i < h.entries; ++i) {
-//         TStatRecord r;
-//         getStructureT(s, r);
-//         if (h.entry_size != TStatRecord::size)
-//             s.seek(s.getPos() + h.entry_size - TStatRecord::size);
+    // read individual records
+    const int16_t numEntries = h.numEntries;
+    const int16_t recordSize = h.recordSize;
+    for (int32_t i = 0; i < numEntries; ++i) {
+        st::StatRecord r;
+        in.fullRead(afl::base::fromObject(r));
+        if (recordSize != int16_t(sizeof(r))) {
+            in.setPos(in.getPos() + recordSize - sizeof(r));
+        }
 
-//         GStatRecord& sr = getRecordForTurn(r.header.turn, r.header.timestamp);
-//         for (int pl = 1; pl <= NUM_PLAYERS; ++pl) {
-//             sr(pi, pl) = r.scores[pl-1].num_planets;
-//             sr(ci, pl) = r.scores[pl-1].num_capital;
-//             sr(fi, pl) = r.scores[pl-1].num_freighters;
-//             sr(bi, pl) = r.scores[pl-1].num_bases;
-//             sr(qi, pl) = r.pbps[pl-1];
-//         }
-//     }
-// }
+        TurnScore& sr = list.addTurn(r.header.turn, r.header.timestamp);
+        for (int pl = 1; pl <= st::NUM_PLAYERS; ++pl) {
+            sr.set(pi, pl, int16_t(r.scores[pl-1].numPlanets));
+            sr.set(ci, pl, int16_t(r.scores[pl-1].numCapitalShips));
+            sr.set(fi, pl, int16_t(r.scores[pl-1].numFreighters));
+            sr.set(bi, pl, int16_t(r.scores[pl-1].numBases));
+            sr.set(qi, pl, int16_t(r.pbps[pl-1]));
+        }
+    }
+}
 
 
 // /** Save file. Writes the complete fileto the specified stream.
 //     This will save the file even if canSaveSafely() returns false; in this
 //     case, the new copy will contain less information than the file this
 //     was loaded from. */
-// void
-// GStatFile::save(Stream& s)
-// {
-//     using std::memcpy;
-//     char tmp[2];
-//     long start = s.getPos();
+void
+game::score::Loader::save(const TurnScoreList& list, afl::io::Stream& out)
+{
+    // ex GStatFile::save(Stream& s)
 
-//     /* Write preliminary header */
-//     TScoreHeader header;
-//     zeroFill(header);
-//     storeStructureT(s, header);
+    const afl::io::Stream::FileSize_t start = out.getPos();
 
-//     /* Write section 1: record definitions */
-//     header.subfield[0]   = s.getPos();
-//     header.record_fields = record_defs.size();
-//     for (uint32_t i = 0; i < record_defs.size(); ++i) {
-//         storeInt16(tmp, record_defs[i]);
-//         s.writeT(tmp, 2);
-//     }
+    // Write preliminary header
+    st::ScoreHeader header;
+    afl::base::fromObject(header).fill(0);
+    out.fullWrite(afl::base::fromObject(header));
 
-//     /* Write section 2: score definitions */
-//     header.subfield[1] = s.getPos();
-//     storeInt16(tmp, score_descriptions.size());
-//     s.writeT(tmp, 2);
-//     for (uint32_t i = 0; i < score_descriptions.size(); ++i)
-//         storeStructureT(s, score_descriptions[i]);
+    // Write section 1: record definitions
+    const size_t numScores = list.getNumScores();
+    header.headerFieldAddress[0] = uint16_t(out.getPos());
+    header.numRecordFields = uint16_t(numScores);
+    for (size_t i = 0; i < numScores; ++i) {
+        ScoreId_t id = 0;
+        list.getScoreByIndex(i, id);
 
-//     /* Write data */
-//     header.header_size   = s.getPos();
-//     header.header_fields = 2;
-//     header.entries       = loaded_records.size();
-//     header.record_header = TScoreRecordHeader::size;
-//     for (uint32_t i = 0; i < loaded_records.size(); ++i)
-//         loaded_records[i]->save(s);
+        st::UInt16_t packedId;
+        packedId = uint16_t(id);
+        out.fullWrite(packedId.m_bytes);
+    }
 
-//     /* Write header again */
-//     memcpy(header.signature, SCORE_FILE_SIG, sizeof(header.signature));
-//     s.seek(start);
-//     storeStructureT(s, header);
-// }
+    // Write section 2: score definitions
+    const size_t numDescriptions = list.getNumDescriptions();
+    header.headerFieldAddress[1] = uint16_t(out.getPos());
 
-// FIXME: port
-// /** Save to stream. Saves a header and the data. */
-// void
-// GStatRecord::save(Stream& s) const
-// {
-//     TScoreRecordHeader header;
-//     header.turn = turn;
-//     timestamp.storeRawData(header.timestamp);
-//     storeStructureT(s, header);
-//     for (GStatIndex i = 0; i < scores.size(); ++i) {
-//         TInt32 tmp;
-//         tmp.value = scores[i];
-//         storeStructureT(s, tmp);
-//     }
-// }
+    st::UInt16_t packedNum;
+    packedNum = uint16_t(numDescriptions);
+    out.fullWrite(packedNum.m_bytes);
+    for (size_t i = 0; i < numDescriptions; ++i) {
+        st::ScoreDescription sd;
+        afl::base::fromObject(sd).fill(0);
+        if (const TurnScoreList::Description* p = list.getDescriptionByIndex(i)) {
+            sd.name = m_charset.encode(afl::string::toMemory(p->name));
+            sd.scoreId = p->scoreId;
+            sd.turnLimit = p->turnLimit;
+            sd.winLimit = p->winLimit;
+        }
+        out.fullWrite(afl::base::fromObject(sd));
+    }
+
+    // Write data
+    const size_t numTurns = list.getNumTurns();
+    header.headerSize = uint16_t(out.getPos());
+    header.numHeaderFields = 2;
+    header.numEntries = uint16_t(numTurns);
+    header.recordHeaderSize = sizeof(st::ScoreRecordHeader);
+
+    for (size_t i = 0; i < numTurns; ++i) {
+        if (const TurnScore* p = list.getTurnByIndex(i)) {
+            // ex GStatRecord::save
+            // - header
+            st::ScoreRecordHeader rh;
+            rh.turn = int16_t(p->getTurnNumber());
+            p->getTimestamp().storeRawData(rh.timestamp);
+            out.fullWrite(afl::base::fromObject(rh));
+
+            // - content
+            afl::base::GrowableMemory<st::Int32_t> buffer;
+            for (size_t slot = 0; slot < numScores; ++slot) {
+                for (int player = 1; player <= st::NUM_PLAYERS; ++player) {
+                    st::Int32_t value;
+                    value = p->get(slot, player).orElse(-1);
+                    buffer.append(value);
+                }
+            }
+            out.fullWrite(buffer.toBytes());
+        }
+    }
+
+    // Write header again
+    afl::base::Bytes_t(header.signature).copyFrom(SCORE_FILE_SIG);
+    out.setPos(start);
+    out.fullWrite(afl::base::fromObject(header));
+}

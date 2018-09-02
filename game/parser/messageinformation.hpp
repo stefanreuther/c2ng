@@ -17,6 +17,7 @@
 
 #include "game/parser/messagevalue.hpp"
 #include "afl/container/ptrvector.hpp"
+#include "game/alliance/offer.hpp"
 
 namespace game { namespace parser {
 
@@ -33,6 +34,7 @@ namespace game { namespace parser {
             Starbase,            ///< Target is starbase given by Id.
             Minefield,           ///< Target is minefield given by Id.
             IonStorm,            ///< Target is ion storm given by Id.
+            Ufo,                 ///< Target is Ufo given by Id.
             Explosion,           ///< This message contains an explosion.
             Configuration,       ///< This message contains configuration information.
             PlayerScore,         ///< This message contains player scores. Id is optional and gives the util.dat score Id.
@@ -74,9 +76,25 @@ namespace game { namespace parser {
             \param value Score value */
         void addScoreValue(int player, int32_t value);
 
-        // FIXME: missing
-        // void addAllianceValue(string_t id, const GAllianceOffer& offer);
+        /** Add alliance value.
+            \pre getObjectType() == Alliance
+            \param id Alliance level identifier
+            \param offer Alliance offer */
+        void addAllianceValue(String_t id, const game::alliance::Offer& offer);
 
+        /** Get string value.
+            \param si  [in] String value index
+            \param out [out] Result
+            \retval true Value was found, \c out updated
+            \retval false Value not found, \c out unchanged */
+        bool getValue(MessageStringIndex si, String_t& out) const;
+
+        /** Get integer value.
+            \param si  [in] Integer value index
+            \param out [out] Result
+            \retval true Value was found, \c out updated
+            \retval false Value not found, \c out unchanged */
+        bool getValue(MessageIntegerIndex ii, int32_t& out) const;
 
         /** Get iterator to first contained value.
             \return iterator */

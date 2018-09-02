@@ -77,6 +77,11 @@ namespace ui { namespace widgets {
             \return true if event was handled */
         bool defaultHandleMouse(gfx::Point pt, MouseButtons_t pressedButtons);
 
+        /** Dispatch key activation to another widget.
+            If this button is triggered, calls the other widget's handleKey() method.
+            \param target Other widget. Lifetime must equal/exceed that of the button. */
+        void dispatchKeyTo(Widget& target);
+
         /** Get associated key.
             \return key */
         util::Key_t getKey() const;

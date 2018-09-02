@@ -138,12 +138,17 @@ server::file::DirectoryHandlerFactory::createDirectoryHandler(const String_t& st
 String_t
 server::file::DirectoryHandlerFactory::makePathName(const String_t& backendPath, const String_t& child)
 {
-    String_t::size_type p = backendPath.find('@');
-    if (p == String_t::npos) {
-        // No @, so this is just a backend ("/foo/bar", "ca:/foo", etc.)
-        return child + "@" + backendPath;
+    if (backendPath.size() >= 9 && backendPath.compare(0, 9, "c2file://", 9) == 0) {
+        // URL form
+        return backendPath + "/" + child;
     } else {
-        // Got a @, so this is PATH@BACKEND. Build PATH/child@BACKEND.
-        return backendPath.substr(0, p) + "/" + child + backendPath.substr(p);
+        String_t::size_type p = backendPath.find('@');
+        if (p == String_t::npos) {
+            // No @, so this is just a backend ("/foo/bar", "ca:/foo", etc.)
+            return child + "@" + backendPath;
+        } else {
+            // Got a @, so this is PATH@BACKEND. Build PATH/child@BACKEND.
+            return backendPath.substr(0, p) + "/" + child + backendPath.substr(p);
+        }
     }
 }

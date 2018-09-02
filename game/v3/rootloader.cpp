@@ -12,6 +12,8 @@
 #include "game/v3/resultloader.hpp"
 #include "game/v3/stringverifier.hpp"
 #include "game/v3/hconfig.hpp"
+#include "game/v3/utils.hpp"
+#include "game/v3/directoryloader.hpp"
 
 namespace gt = game::v3::structures;
 using afl::io::FileSystem;
@@ -54,7 +56,7 @@ game::v3::RootLoader::load(afl::base::Ref<afl::io::Directory> gameDirectory,
         spec->addDirectory(m_defaultSpecificationDirectory);
 
         // Registration key
-        std::auto_ptr<RegistrationKey> key(new RegistrationKey(charset));
+        std::auto_ptr<RegistrationKey> key(new RegistrationKey(std::auto_ptr<afl::charset::Charset>(charset.clone())));
         key->initFromDirectory(*gameDirectory, m_log);
 
         // Specification loader
@@ -68,6 +70,7 @@ game::v3::RootLoader::load(afl::base::Ref<afl::io::Directory> gameDirectory,
         actions += Root::aConfigureReadOnly;
         actions += Root::aSweep;
         if (m_scanner.getDirectoryFlags().containsAnyOf(DirectoryScanner::PlayerFlags_t() + DirectoryScanner::HaveResult + DirectoryScanner::HaveNewResult + DirectoryScanner::HaveOtherResult)) {
+            // FIXME: add a bit "suggest unpack" for HaveNewResult?
             actions += Root::aUnpack;
         }
         if (m_scanner.getDirectoryFlags().contains(DirectoryScanner::HaveUnpacked)) {
@@ -90,8 +93,12 @@ game::v3::RootLoader::load(afl::base::Ref<afl::io::Directory> gameDirectory,
         result->userConfiguration().merge(config);
 
         // Turn loader
-        if (m_scanner.getDirectoryFlags().contains(DirectoryScanner::HaveResult)) {
+        if (m_scanner.getDirectoryFlags().contains(DirectoryScanner::HaveUnpacked)) {
+            result->setTurnLoader(new DirectoryLoader(spec, m_defaultSpecificationDirectory, std::auto_ptr<afl::charset::Charset>(charset.clone()), m_translator, m_log, m_scanner, m_fileSystem));
+        } else if (m_scanner.getDirectoryFlags().contains(DirectoryScanner::HaveResult)) {
             result->setTurnLoader(new ResultLoader(spec, m_defaultSpecificationDirectory, std::auto_ptr<afl::charset::Charset>(charset.clone()), m_translator, m_log, m_scanner, m_fileSystem));
+        } else {
+            // nothing loadable
         }
     }
     return result;
@@ -227,31 +234,6 @@ game::v3::RootLoader::loadRaceMapping(Root& root, afl::io::Stream& file, game::c
             host.set(HostVersion::SRace, DEFAULT_HOST_VERSION);
             m_log.write(m_log.Info, LOG_NAME, afl::string::Format(m_translator.translateString("Host version not known, assuming %s").c_str(), host.toString(m_translator)));
         }
-    }
-}
-
-void
-game::v3::RootLoader::loadRaceNames(PlayerList& list, afl::io::Directory& dir, afl::charset::Charset& charset)
-{
-    // ex GRaceNameList::load
-    list.clear();
-
-    // Load the file
-    afl::base::Ref<afl::io::Stream> file = dir.openFile("race.nm", FileSystem::OpenRead);
-    gt::RaceNames in;
-    file->fullRead(afl::base::fromObject(in));
-    for (int player = 0; player < gt::NUM_PLAYERS; ++player) {
-        if (Player* out = list.create(player+1)) {
-            out->setName(Player::ShortName,     charset.decode(in.shortNames[player]));
-            out->setName(Player::LongName,      charset.decode(in.longNames[player]));
-            out->setName(Player::AdjectiveName, charset.decode(in.adjectiveNames[player]));
-            out->setOriginalNames();
-        }
-    }
-
-    // Create aliens
-    if (Player* aliens = list.create(gt::NUM_PLAYERS+1)) {
-        aliens->initAlien();
     }
 }
 

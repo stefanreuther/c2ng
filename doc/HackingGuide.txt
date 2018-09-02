@@ -52,12 +52,23 @@ Building PCC2ng
 ===============
 
   Prerequisites:
-  - C++ compiler
+  - C++ compiler (around g++ 3.3 era)
   - Perl
   - SDL 1.2 or SDL 2.0, matching SDL_image library
   - OpenSSL and zlib (OpenSSL not yet strictly required, but zlib is
     needed for several functions including communication with the
     planets.nu server).
+
+  Target operating systems are the same as for PCC2, that is:
+  - Linux (starting at 2.4 era, e.g. Debian Woody).
+  - Windows (starting at 32-bit era, e.g. Win95b or later). Because
+    c2ng includes network connectivity, you need to have the Winsock2
+    update installed.
+  These are old operating systems. c2ng (or rather, afl) includes code
+  to deal with deficiencies of old systems (mostly, Win95 missing
+  Unicode file operations and IPv6 support; old Linux using character
+  sets other than UTF-8), and I assume this code keeps working as long
+  as we don't need to change it.
 
 
 Building on Linux
@@ -78,6 +89,7 @@ Building on Linux
   If SDL 1.2 is found, c2ng is built against that, because the SDL 1.x
   port is currently more mature. If you have SDL 1.2 and SDL 2
   installed, and wish to build against SDL 2, use `--without-sdl`.
+  You can only build against one version at a time.
 
 
 Building on Windows (mingw)
@@ -386,9 +398,11 @@ Source Code Structure
   client         | guilib  | client source code
     dialogs      |         | dialogs
     map          |         | map renderer
+    proxy        |         | communication with game::Session
     screens      |         | control screens
     si           |         | script integration
     tiles        |         | tiles (=control screen widgets)
+    vcr          |         | VCR renderer
     widgets      |         | widgets
   ---------------+---------+---------------------------------------
   doc            | doc     | developer and user documentation
@@ -396,8 +410,10 @@ Source Code Structure
   game           | gamelib | game library; subdivided into
                  |         | more namespaces, in particular:
     actions      |         | complex actions
+    alliance     |         | alliance handling
     browser      |         | browser
     config       |         | configuration (pcc2.ini, pconfig.src)
+    db           |         | chart database handling
     interface    |         | script interface
     maint        |         | maintenance utilities
     map          |         | map objects (ship, planet, etc.)
@@ -405,24 +421,29 @@ Source Code Structure
     nu           |         | planets.nu integration
     parser       |         | message parsing
     pcc          |         | PlanetsCentral.com integration
+    ref          |         | operations on game::Reference
     score        |         | score handling
     sim          |         | combat simulator
     spec         |         | specification
     tables       |         | string tables
+    test         |         | test support classes
     v3           |         | VGAP3-specific code (as opposed to Nu)
     vcr          |         | VCR algorithms
   ---------------+---------+---------------------------------------
   gfx            | guilib  | graphics primitives
+    anim         |         | animations
     gen          |         | procedural generation
     sdl          |         | SDL 1.2 back-end
     sdl2         |         | SDL 2.0 back-end
   ---------------+---------+---------------------------------------
   interpreter    | gamelib | script interpreter
   ---------------+---------+---------------------------------------
-  main           | source  | entry points for GUI applications  
+  main           | source  | entry points for GUI applications
   ---------------+---------+---------------------------------------
   server         | serverl.| PlanetsCentral microservices
+    common       |         | common code
     interface    |         | interface classes
+    scripts      |         | initialisation scripts
     xxx          |         | "c2xxx" microservice/utility
   ---------------+---------+---------------------------------------
   share          | data    | data files
@@ -703,6 +724,9 @@ Terms
   "process group" - a set of processes that execute in sequence. UI always works
                     in process groups, because UI interactions can cause the
                     UI to be blocked on multiple processes.
+
+  "reference"     - symbolic name for a game object (class game::Reference).
+                    In PCC 1.x, this was a "Thing Id".
 
   "rune"          - an UTF-8 encoded character consisting of multiple bytes.
 

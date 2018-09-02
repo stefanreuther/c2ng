@@ -23,6 +23,7 @@ namespace game { namespace interface {
     void IFNewLineRaw(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args);
     void IFNewMarker(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args);
     void IFHistoryShowTurn(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args);
+    void IFSaveGame(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args);
 
 } }
 

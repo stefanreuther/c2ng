@@ -57,6 +57,7 @@ namespace {
         bool doFoldJump(PC_t pc);
         bool doPopPush(PC_t pc);
         bool doCompareNC(PC_t pc);
+        bool doIntCompare(PC_t pc);
 
         void clearInstruction(PC_t pc);
 
@@ -132,6 +133,7 @@ IntOptimizerState::iterate()
         { &IntOptimizerState::doFoldJump,          Opcode::maPush,     1, "FoldJump" },
         { &IntOptimizerState::doPopPush,           Opcode::maPop,      1, "PopPush" },
         { &IntOptimizerState::doCompareNC,         Opcode::maPush,     1, "CompareNC" },
+        { &IntOptimizerState::doIntCompare,        Opcode::maBinary,   3, "IntCompare" },
     };
 
     bool did = false;
@@ -830,6 +832,50 @@ IntOptimizerState::doCompareNC(PC_t pc)
     --bco(pc+1).minor;
     return true;
 }
+
+/** Convert binary operation that produces an integer, followed by comparison against 0, to direct jump-on-zero. */
+bool
+IntOptimizerState::doIntCompare(PC_t pc)
+{
+    // First operation
+    const uint8_t findType = bco(pc).minor;
+    if (findType != interpreter::biFindStr_NC && findType != interpreter::biFindStr) {
+        return false;
+    }
+
+    // Push zero
+    const uint8_t pushOp = bco(pc+1).major;
+    const uint8_t pushType = bco(pc+1).minor;
+    if (pushOp != Opcode::maPush || (pushType != Opcode::sInteger && pushType != Opcode::sBoolean) || bco(pc+1).arg != 0) {
+        return false;
+    }
+
+    // Comparison
+    const uint8_t cmpOp = bco(pc+2).major;
+    const uint8_t cmpType = bco(pc+2).minor;
+    if (cmpOp != Opcode::maBinary) {
+        return false;
+    }
+
+    if (cmpType == interpreter::biCompareEQ_NC || cmpType == interpreter::biCompareEQ) {
+        // op / pushint 0 / bcmpeq --> op / ubool
+        bco(pc+1).major = Opcode::maUnary;
+        bco(pc+1).minor = interpreter::unBool;
+        bco(pc+1).arg = 0;
+        clearInstruction(pc+2);
+        return true;
+    } else if (cmpType == interpreter::biCompareNE_NC || cmpType == interpreter::biCompareNE) {
+        // op / pushint 0 / bcmpne --> op / unot
+        bco(pc+1).major = Opcode::maUnary;
+        bco(pc+1).minor = interpreter::unNot;
+        bco(pc+1).arg = 0;
+        clearInstruction(pc+2);
+        return true;
+    } else {
+        return false;
+    }
+}
+
 
 /** Optimize the given bytecode object. It must not have been relocated yet.
     \param bco [in/out] Bytecode object

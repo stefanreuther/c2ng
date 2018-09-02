@@ -80,9 +80,9 @@ game::PlayerList::getPlayerFromCharacter(char ch) const
     }
 }
 
-// Expand names in string template.
+// Get character from player number.
 char
-game::PlayerList::getCharacterFromPlayer(int id) const
+game::PlayerList::getCharacterFromPlayer(int id)
 {
     // ex game/player.h:getPlayerChar
     // FIXME: might be better in class Player? util?
@@ -172,10 +172,11 @@ game::PlayerList::getNextPlayer(int id) const
 String_t
 game::PlayerList::getPlayerName(int id, Player::Name which) const
 {
+    String_t result;
     if (const Player* p = get(id)) {
-        return p->getName(which);
-    } else {
-        String_t result;
+        result = p->getName(which);
+    }
+    if (result.empty()) {
         switch (which) {
          case Player::ShortName:
          case Player::AdjectiveName:
@@ -190,8 +191,8 @@ game::PlayerList::getPlayerName(int id, Player::Name which) const
          case Player::EmailAddress:
             break;
         }
-        return result;
     }
+    return result;
 }
 
 // Notify listeners.

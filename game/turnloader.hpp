@@ -5,11 +5,11 @@
 #define C2NG_GAME_TURNLOADER_HPP
 
 #include "afl/base/deletable.hpp"
+#include "afl/base/refcounted.hpp"
 #include "afl/bits/smallset.hpp"
+#include "afl/charset/charset.hpp"
 #include "afl/string/translator.hpp"
 #include "game/playerset.hpp"
-#include "afl/charset/charset.hpp"
-#include "afl/base/refcounted.hpp"
 
 namespace game {
 
@@ -72,17 +72,25 @@ namespace game {
             \return player status */
         virtual PlayerStatusSet_t getPlayerStatus(int player, String_t& extra, afl::string::Translator& tx) const = 0;
 
-        /** Load turn.
+        /** Load current turn.
+
+            The resulting playability game's status will be set by the caller.
+
             \param turn [out] Turn to load. Should be completely initialized.
             \param game [in/out] Game object. May be updated with planet/ship score definitions, turn scores.
             \param player [in] Player number.
-            \param root [in/out] Root. May be updated with configuration.
-            FIXME: we may need to pass in a ShipList object to update ModifiedHullFunctionList? */
+            \param root [in/out] Root. May be updated with configuration. */
         virtual void loadCurrentTurn(Turn& turn, Game& game, int player, Root& root, Session& session) = 0;
 
-        // Other methods:
-        // - saveCurrentTurn
+        /** Save current turn.
+            This will save the current game, create and/or upload a turn file, etc.
+            This function must honor read/write mode restrictions defined by session.getEditableAreas().
 
+            \param turn [in] Turn to save.
+            \param game [in] Game object.
+            \param player [in] Player number.
+            \param root [in] Root. */
+        virtual void saveCurrentTurn(Turn& turn, Game& game, int player, Root& root, Session& session) = 0;
 
         /** Get history status.
             This function determines whether a number of turns have history information.
@@ -136,6 +144,8 @@ namespace game {
             - starchart (chartX.cc)
             - scores (scoreX.cc) */
         void loadHistoryDatabases(Turn& turn, Game& game, int player, int turnNumber, Root& root, afl::charset::Charset& charset);
+
+        void saveCurrentDatabases(Turn& turn, Game& game, int player, Root& root, Session& session, afl::charset::Charset& charset);
     };
 
 }

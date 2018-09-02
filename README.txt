@@ -18,14 +18,14 @@ WHAT IS PCC2?
   PCC2. It is intended to be 100% compatible to PCC2. However, it does
   away with many self-imposed limitations of PCC2.
 
-  Milestone Four polishes a few of the existing features, and adds
-  some new: there is now a simple setup wizard for network games (in
-  particular, Nu), and a simple VCR.
+  Milestone Five "Let's Get Dangerous" adds the ability to save data -
+  for now, for local games only. However, this means you now need to
+  use it with care: DO NOT RUN THIS ON YOUR ORIGINAL GAME DATA. With
+  this ability come ports of the Maketurn and Unpack utilities
+  (c2mkturn, c2unpack).
 
-  On the back-end side, this version adds a port of CHECK, which was
-  never ported to PCC2 previously and fills the gap of a 32-/64-bit
-  capable turn checker outside PHost. Except for the PCC2 Web client,
-  PlanetsCentral now runs exclusively on c2ng-based servers.
+  That aside, this version improves functionality a little pretty much
+  everywhere, but adds no major breakthroughs.
 
 
 Project Goals
@@ -128,10 +128,13 @@ Program List
     . c2export: game data export
     . c2gfxgen: procedural graphics generation
     . c2mgrep: message search
+    . c2mkturn: maketurn utility
     . c2plugin: plugin manager
+    . c2pluginw: plugin manager (simple GUI)
     . c2rater: game rating computer
     . c2script: scripting engine
     . c2sweep: game directory cleaner
+    . c2unpack: unpack utility
     . c2untrn: turn file decompiler
 
   - PlanetsCentral
@@ -155,7 +158,7 @@ Near Milestones
     . most v3 objects done now
     . Nu advantages (map to racial abilities and configuration)
   - more server integration
-  - data saving
+    . saving for server-based games
   - fancier GUI
   - more graphics resolutions!
 

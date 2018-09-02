@@ -7,6 +7,7 @@
 #include <memory>
 #include "afl/base/ptr.hpp"
 #include "afl/base/signalconnection.hpp"
+#include "afl/bits/smallset.hpp"
 #include "afl/io/filesystem.hpp"
 #include "afl/io/stream.hpp"
 #include "afl/string/translator.hpp"
@@ -47,6 +48,12 @@ namespace game {
         - Root, Session, Game, or Turn objects must not refer to each other. */
     class Session : private InterpreterInterface {
      public:
+        enum Area {
+            CommandArea,
+            LocalDataArea
+        };
+        typedef afl::bits::SmallSet<Area> AreaSet_t;
+
         explicit Session(afl::string::Translator& tx, afl::io::FileSystem& fs);
 
         ~Session();
@@ -68,6 +75,9 @@ namespace game {
         game::interface::UserInterfacePropertyStack& uiPropertyStack();
         const game::interface::UserInterfacePropertyStack& uiPropertyStack() const;
 
+        void setEditableAreas(AreaSet_t set);
+        AreaSet_t getEditableAreas() const;
+
         interpreter::World& world();
 
         InterpreterInterface& interface();
@@ -84,6 +94,8 @@ namespace game {
 
         bool getReferenceName(Reference ref, String_t& result);
 
+        bool save();
+
      private:
         afl::sys::Log m_log;
         afl::string::Translator& m_translator;
@@ -91,6 +103,7 @@ namespace game {
         afl::base::Ptr<game::spec::ShipList> m_shipList;
         afl::base::Ptr<Game> m_game;
         game::interface::UserInterfacePropertyStack m_uiPropertyStack;
+        AreaSet_t m_editableAreas;
         interpreter::World m_world;
         util::RandomNumberGenerator m_rng;
         util::plugin::Manager m_plugins;

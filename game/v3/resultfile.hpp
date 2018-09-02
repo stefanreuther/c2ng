@@ -63,6 +63,15 @@ namespace game { namespace v3 {
             \returns true iff given section is present */
         bool hasSection(Section section) const;
 
+        /** Move file pointer to a section.
+            \param section Desired section
+            \throw FileFormatException if section is not present */
+        void seekToSection(Section section) const;
+
+        /** Get number of ship coordinates (number of ships in ShipXYSection).
+            \return result */
+        int getNumShipCoordinates() const;
+
         /** Get underlying file.
             \return underlying file */
         afl::io::Stream& getFile() const;
@@ -79,8 +88,11 @@ namespace game { namespace v3 {
             These are real file offsets (0-based), but a result file cannot have a section at offset 0. */
         uint32_t m_offset[NUM_SECTIONS];
 
-        void loadHeader(afl::string::Translator& tx);
-        void setSectionAddress(Section section, int32_t addressFromFile, afl::io::Stream::FileSize_t fileSize, afl::string::Translator& tx);
+        /** Translator. */
+        afl::string::Translator& m_translator;
+
+        void loadHeader();
+        void setSectionAddress(Section section, int32_t addressFromFile, afl::io::Stream::FileSize_t fileSize);
     };
 } }
 

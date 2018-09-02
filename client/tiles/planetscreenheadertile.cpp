@@ -8,7 +8,7 @@
 #include "game/root.hpp"
 #include "afl/string/format.hpp"
 #include "ui/res/resid.hpp"
-#include "client/objectlistener.hpp"
+#include "client/proxy/objectlistener.hpp"
 #include "game/map/planet.hpp"
 
 using ui::widgets::FrameGroup;
@@ -28,7 +28,7 @@ client::tiles::PlanetScreenHeaderTile::PlanetScreenHeaderTile(ui::Root& root, cl
 }
 
 void
-client::tiles::PlanetScreenHeaderTile::attach(ObjectObserverProxy& oop)
+client::tiles::PlanetScreenHeaderTile::attach(client::proxy::ObjectObserver& oop)
 {
     class Job : public util::Request<ControlScreenHeader> {
      public:
@@ -79,7 +79,7 @@ client::tiles::PlanetScreenHeaderTile::attach(ObjectObserverProxy& oop)
         String_t m_image;
         bool m_marked;
     };
-    class Listener : public ObjectListener {
+    class Listener : public client::proxy::ObjectListener {
      public:
         Listener(util::RequestSender<ControlScreenHeader> reply)
             : m_reply(reply)

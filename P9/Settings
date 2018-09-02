@@ -48,7 +48,44 @@ end
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/map/movementpredictor.cpp \
+FILES_gamelib = game/actions/remotecontrolaction.cpp \
+    game/actions/remotecontrolaction.hpp game/ref/sortbynewlocation.cpp \
+    game/ref/sortbynewlocation.hpp game/ref/sortbylocation.cpp \
+    game/ref/sortbylocation.hpp game/ref/sortbydamage.cpp \
+    game/ref/sortbydamage.hpp game/ref/sortbybattleorder.cpp \
+    game/ref/sortbybattleorder.hpp game/ref/sortbyhullmass.cpp \
+    game/ref/sortbyhullmass.hpp game/ref/sortbytowgroup.cpp \
+    game/ref/sortbytowgroup.hpp game/ref/sortbyfleet.cpp \
+    game/ref/sortbyfleet.hpp game/ref/sortbymass.cpp game/ref/sortbymass.hpp \
+    game/ref/configuration.cpp game/ref/configuration.hpp \
+    game/ref/sortbyhulltype.cpp game/ref/sortbyhulltype.hpp \
+    game/ref/sortbyname.cpp game/ref/sortbyname.hpp game/ref/sortbyowner.cpp \
+    game/ref/sortbyowner.hpp game/ref/sortpredicate.cpp \
+    game/ref/nullpredicate.cpp game/ref/nullpredicate.hpp \
+    game/ref/sortbyid.cpp game/ref/sortbyid.hpp game/ref/sortpredicate.hpp \
+    game/ref/listobserver.cpp game/ref/listobserver.hpp \
+    game/ref/userlist.cpp game/ref/userlist.hpp game/ref/list.cpp \
+    game/ref/list.hpp game/battleorderrule.cpp game/battleorderrule.hpp \
+    game/v3/fizzfile.cpp game/v3/fizzfile.hpp game/v3/directoryloader.cpp \
+    game/v3/directoryloader.hpp game/v3/writer.cpp game/v3/writer.hpp \
+    game/map/minefieldmission.cpp game/map/minefieldmission.hpp \
+    game/v3/udata/parser.cpp game/v3/udata/parser.hpp \
+    game/v3/udata/reader.cpp game/v3/udata/reader.hpp \
+    game/alliance/hosthandler.cpp game/alliance/hosthandler.hpp \
+    game/alliance/phosthandler.cpp game/alliance/phosthandler.hpp \
+    game/alliance/container.cpp game/alliance/container.hpp \
+    game/alliance/handler.hpp game/alliance/offer.cpp \
+    game/alliance/offer.hpp game/alliance/level.cpp game/alliance/level.hpp \
+    game/v3/messagewriter.cpp game/v3/messagewriter.hpp game/v3/utils.cpp \
+    game/v3/utils.hpp game/v3/maketurnapplication.cpp \
+    game/v3/maketurnapplication.hpp game/v3/maketurn.cpp \
+    game/v3/maketurn.hpp game/v3/trn/fileset.cpp game/v3/trn/fileset.hpp \
+    game/db/packer.cpp game/db/packer.hpp game/v3/unpackapplication.cpp \
+    game/v3/unpackapplication.hpp game/v3/unpacker.cpp game/v3/unpacker.hpp \
+    game/v3/genfile.cpp game/v3/genfile.hpp util/helpindex.cpp \
+    util/helpindex.hpp util/plugin/dialogapplication.cpp \
+    util/plugin/dialogapplication.hpp util/plugin/consoleapplication.cpp \
+    util/plugin/consoleapplication.hpp game/map/movementpredictor.cpp \
     game/map/movementpredictor.hpp game/actions/changeshipfriendlycode.cpp \
     game/actions/changeshipfriendlycode.hpp game/map/planetpredictor.cpp \
     game/map/planetpredictor.hpp game/map/planeteffectors.cpp \
@@ -232,9 +269,7 @@ FILES_gamelib = game/map/movementpredictor.cpp \
     game/interface/globalcommands.hpp game/interface/simpleprocedure.cpp \
     game/interface/simpleprocedure.hpp game/historyturnlist.cpp \
     game/historyturnlist.hpp game/historyturn.cpp game/historyturn.hpp \
-    util/backupfile.cpp util/backupfile.hpp game/map/objectlist.cpp \
-    game/map/objectlist.hpp game/map/objectreference.cpp \
-    game/map/objectreference.hpp game/nu/turnloader.cpp \
+    util/backupfile.cpp util/backupfile.hpp game/nu/turnloader.cpp \
     game/nu/turnloader.hpp game/nu/specificationloader.cpp \
     game/nu/specificationloader.hpp game/nu/gamestate.cpp \
     game/nu/gamestate.hpp game/nu/registrationkey.cpp \
@@ -528,13 +563,38 @@ PROJ_AUTO += \
     gamelib:game/*.cpp,game/*.hpp,util/*.cpp,util/*.hpp,interpreter/*.cpp,interpreter/*.hpp
 
 TARGETS += guilib
-FILES_guilib = client/tiles/shipmovementtile.cpp \
-    client/tiles/shipmovementtile.hpp ui/widgets/textbutton.cpp \
-    ui/widgets/textbutton.hpp client/tiles/shipcargotile.cpp \
-    ui/widgets/simpletable.cpp ui/widgets/simpletable.hpp \
-    client/widgets/simplegauge.cpp client/widgets/simplegauge.hpp \
-    client/tiles/shipcargotile.hpp client/dialogs/inboxdialog.cpp \
-    client/dialogs/inboxdialog.hpp client/widgets/messageactionpanel.cpp \
+FILES_guilib = client/proxy/hullspecificationproxy.cpp \
+    client/proxy/hullspecificationproxy.hpp client/proxy/playerproxy.cpp \
+    client/proxy/playerproxy.hpp client/widgets/hullspecificationsheet.cpp \
+    client/widgets/hullspecificationsheet.hpp client/widgets/playerlist.cpp \
+    client/widgets/playerlist.hpp client/tiles/visualscanshipinfotile.cpp \
+    client/tiles/visualscanshipinfotile.hpp \
+    client/tiles/visualscanhullinfotile.cpp \
+    client/tiles/visualscanhullinfotile.hpp \
+    client/dialogs/visualscandialog.cpp client/dialogs/visualscandialog.hpp \
+    client/tiles/visualscanheadertile.cpp \
+    client/tiles/visualscanheadertile.hpp \
+    client/proxy/referencelistproxy.cpp client/proxy/referencelistproxy.hpp \
+    client/proxy/cursorobserverproxy.cpp \
+    client/proxy/cursorobserverproxy.hpp \
+    client/proxy/referenceobserverproxy.cpp client/proxy/objectobserver.hpp \
+    client/proxy/referenceobserverproxy.hpp client/proxy/objectlistener.hpp \
+    gfx/dimbackgroundcolorscheme.cpp gfx/dimbackgroundcolorscheme.hpp \
+    gfx/dimcolorscheme.cpp gfx/dimcolorscheme.hpp \
+    client/dialogs/referencesortorder.cpp \
+    client/dialogs/referencesortorder.hpp \
+    client/widgets/referencelistbox.cpp client/widgets/referencelistbox.hpp \
+    client/si/requestlink2.cpp client/widgets/alliancelevelgrid.cpp \
+    client/widgets/alliancelevelgrid.hpp client/dialogs/alliancedialog.cpp \
+    client/dialogs/alliancedialog.hpp client/widgets/alliancestatuslist.cpp \
+    client/widgets/alliancestatuslist.hpp client/help.cpp client/help.hpp \
+    client/tiles/shipmovementtile.cpp client/tiles/shipmovementtile.hpp \
+    ui/widgets/textbutton.cpp ui/widgets/textbutton.hpp \
+    client/tiles/shipcargotile.cpp ui/widgets/simpletable.cpp \
+    ui/widgets/simpletable.hpp client/widgets/simplegauge.cpp \
+    client/widgets/simplegauge.hpp client/tiles/shipcargotile.hpp \
+    client/dialogs/inboxdialog.cpp client/dialogs/inboxdialog.hpp \
+    client/widgets/messageactionpanel.cpp \
     client/widgets/messageactionpanel.hpp client/vcr/classic/event.cpp \
     client/vcr/classic/interleavedscheduler.cpp \
     client/vcr/classic/interleavedscheduler.hpp gfx/scan.cpp gfx/scan.hpp \
@@ -567,11 +627,10 @@ FILES_guilib = client/tiles/shipmovementtile.cpp \
     client/widgets/classicvcrinfo.hpp client/si/contextreceiver.hpp \
     ui/widgets/panel.cpp ui/widgets/panel.hpp ui/pixmapcolorscheme.cpp \
     ui/pixmapcolorscheme.hpp gfx/application.cpp gfx/application.hpp \
-    gfx/sdl2/nullpresenter.cpp gfx/sdl2/nullpresenter.hpp \
-    gfx/sdl2/presenter.hpp gfx/sdl2/streaminterface.cpp \
-    gfx/sdl2/streaminterface.hpp gfx/sdl2/surface.cpp gfx/sdl2/surface.hpp \
-    gfx/sdl2/engine.cpp gfx/sdl2/engine.hpp gfx/gen/orbitconfig.cpp \
-    gfx/gen/orbitconfig.hpp client/imageloader.cpp client/imageloader.hpp \
+    gfx/sdl2/streaminterface.cpp gfx/sdl2/streaminterface.hpp \
+    gfx/sdl2/surface.cpp gfx/sdl2/surface.hpp gfx/sdl2/engine.cpp \
+    gfx/sdl2/engine.hpp gfx/gen/orbitconfig.cpp gfx/gen/orbitconfig.hpp \
+    client/imageloader.cpp client/imageloader.hpp \
     client/dialogs/directoryselectiondialog.cpp \
     client/dialogs/directoryselectiondialog.hpp \
     ui/widgets/standarddialogbuttons.cpp \
@@ -654,9 +713,7 @@ FILES_guilib = client/tiles/shipmovementtile.cpp \
     gfx/nullengine.cpp gfx/nullengine.hpp \
     client/tiles/selectionheadertile.cpp \
     client/tiles/selectionheadertile.hpp client/si/contextprovider.hpp \
-    client/session.cpp client/session.hpp client/objectobserverproxy.cpp \
-    client/objectobserverproxy.hpp client/objectobserver.cpp \
-    client/objectobserver.hpp client/objectlistener.hpp client/marker.cpp \
+    client/session.cpp client/session.hpp client/marker.cpp \
     client/marker.hpp client/si/commands.cpp client/si/commands.hpp \
     client/widgets/keymapwidget.cpp client/widgets/keymapwidget.hpp \
     client/si/control.cpp client/si/control.hpp client/si/userside.cpp \
@@ -720,11 +777,28 @@ DEPEND_guilib = afl
 PROJ_AUTO += guilib:gfx/*.cpp,gfx/*.hpp,ui/*.cpp,ui/*.hpp,client/*.cpp,client/*.hpp
 
 TARGETS += serverlib
-FILES_serverlib = server/file/directorypage.cpp \
-    server/file/directorypage.hpp server/monitor/timeserieswriter.cpp \
-    server/monitor/timeserieswriter.hpp server/monitor/timeseriesloader.cpp \
-    server/monitor/timeseriesloader.hpp server/monitor/timeseries.cpp \
-    server/monitor/timeseries.hpp server/monitor/loadaverageobserver.cpp \
+FILES_serverlib = server/host/file/historyslotitem.cpp \
+    server/host/file/historyturnitem.cpp \
+    server/host/file/historyslotitem.hpp \
+    server/host/file/historyturnitem.hpp server/host/file/historyitem.cpp \
+    server/host/file/gameslotitem.cpp server/host/file/gameslotitem.hpp \
+    server/host/file/gameitem.cpp server/host/file/gameitem.hpp \
+    server/host/file/gamerootitem.cpp server/host/file/gamerootitem.hpp \
+    server/host/file/fileitem.cpp server/host/file/fileitem.hpp \
+    server/host/file/toolitem.cpp server/host/file/toolitem.hpp \
+    server/host/file/toolrootitem.cpp server/host/file/toolrootitem.hpp \
+    server/host/file/rootitem.cpp server/host/file/rootitem.hpp \
+    server/host/file/item.cpp server/host/file/item.hpp \
+    server/host/hostfile.cpp server/host/hostfile.hpp \
+    server/interface/hostfileclient.cpp server/interface/hostfileclient.hpp \
+    server/interface/hostfile.cpp server/interface/hostfileserver.cpp \
+    server/interface/hostfileserver.hpp server/interface/hostfile.hpp \
+    server/host/actions.cpp server/host/actions.hpp \
+    server/file/directorypage.cpp server/file/directorypage.hpp \
+    server/monitor/timeserieswriter.cpp server/monitor/timeserieswriter.hpp \
+    server/monitor/timeseriesloader.cpp server/monitor/timeseriesloader.hpp \
+    server/monitor/timeseries.cpp server/monitor/timeseries.hpp \
+    server/monitor/loadaverageobserver.cpp \
     server/monitor/loadaverageobserver.hpp server/monitor/statusobserver.cpp \
     server/monitor/badnessfileobserver.cpp \
     server/monitor/badnessfileobserver.hpp server/monitor/statuspage.cpp \
@@ -990,10 +1064,20 @@ FILES_c2mgrep = tools/c2mgrep.cpp
 TYPE_c2mgrep = app
 DEPEND_c2mgrep = gamelib afl
 
+TARGETS += c2mkturn
+FILES_c2mkturn = tools/c2mkturn.cpp
+TYPE_c2mkturn = app
+DEPEND_c2mkturn = gamelib afl
+
 TARGETS += c2plugin
 FILES_c2plugin = tools/c2plugin.cpp
 TYPE_c2plugin = app
 DEPEND_c2plugin = gamelib afl
+
+TARGETS += c2pluginw
+FILES_c2pluginw = tools/c2pluginw.cpp
+TYPE_c2pluginw = app
+DEPEND_c2pluginw = gamelib afl
 
 TARGETS += c2rater
 FILES_c2rater = tools/c2rater.cpp
@@ -1009,6 +1093,11 @@ TARGETS += c2sweep
 FILES_c2sweep = tools/c2sweep.cpp
 TYPE_c2sweep = app
 DEPEND_c2sweep = gamelib afl
+
+TARGETS += c2unpack
+FILES_c2unpack = tools/c2unpack.cpp
+TYPE_c2unpack = app
+DEPEND_c2unpack = gamelib afl
 
 TARGETS += c2untrn
 FILES_c2untrn = tools/c2untrn.cpp
@@ -1084,7 +1173,14 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_game_map_movementpredictor.cpp \
+FILES_testsuite = u/t_client_proxy_objectlistener.cpp u/t_client_proxy.hpp \
+    u/t_game_alliance_level.cpp u/t_game_alliance.hpp u/t_util_helpindex.cpp \
+    u/t_server_host_hostfile.cpp u/t_server_host_file_rootitem.cpp \
+    u/t_server_host_file_gamerootitem.cpp u/t_server_host_file_toolitem.cpp \
+    u/t_server_host_file_item.cpp u/t_server_host_file_fileitem.cpp \
+    u/t_server_host_file.hpp u/t_server_interface_hostfileserver.cpp \
+    u/t_server_interface_hostfileclient.cpp \
+    u/t_server_interface_hostfile.cpp u/t_game_map_movementpredictor.cpp \
     u/t_game_v3_reverter.cpp u/t_game_map_ship.cpp \
     u/t_game_map_planetpredictor.cpp u/t_util_updater.cpp \
     u/t_game_vcr_classic_utils.cpp \
@@ -1369,7 +1465,6 @@ FILES_testsuite = u/t_game_map_movementpredictor.cpp \
     u/t_game_registrationkey.cpp u/t_game_specificationloader.cpp \
     u/t_game_timestamp.cpp u/t_util_backupfile.cpp \
     u/t_interpreter_exporter_fieldlist.cpp u/t_interpreter_exporter.hpp \
-    u/t_game_map_objectlist.cpp u/t_game_map_objectreference.cpp \
     u/t_ui_widgets_focusiterator.cpp u/t_ui_widgets.hpp \
     u/t_ui_colorscheme.cpp u/t_ui_widget.cpp \
     u/t_client_dialogs_objectselectiondialog.cpp u/t_client_dialogs.hpp \
@@ -1387,9 +1482,9 @@ FILES_testsuite = u/t_game_map_movementpredictor.cpp \
     u/t_client_objectcursorfactory.cpp u/t_client_si_control.cpp \
     u/t_gfx_eventconsumer.cpp u/t_gfx_nullengine.cpp \
     u/t_client_si_contextprovider.cpp u/t_ui_res_imageloader.cpp \
-    u/t_ui_res_manager.cpp u/t_client_objectlistener.cpp u/t_client.hpp \
-    u/t_interpreter_keywords.cpp u/t_game_vcr_score.cpp \
-    u/t_game_vcr_object.cpp u/t_game_parser_datainterface.cpp \
+    u/t_ui_res_manager.cpp u/t_client.hpp u/t_interpreter_keywords.cpp \
+    u/t_game_vcr_score.cpp u/t_game_vcr_object.cpp \
+    u/t_game_parser_datainterface.cpp \
     u/t_game_interface_richtextfunctions.cpp u/t_game_v3_stringverifier.cpp \
     u/t_game_stringverifier.cpp u/t_client_si_usertask.cpp \
     u/t_client_si_requestlink2.cpp u/t_client_si_requestlink1.cpp \

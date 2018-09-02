@@ -1,12 +1,13 @@
 /**
   *  \file game/playerset.cpp
+  *  \brief Type game::PlayerSet_t
   */
 
 #include "game/playerset.hpp"
 #include "afl/string/format.hpp"
 #include "game/playerlist.hpp"
 
-// /** Format player set to nice human-readable string. */
+// Format set of players.
 String_t
 game::formatPlayerSet(PlayerSet_t set, const PlayerList& list, afl::string::Translator& tx)
 {
@@ -52,6 +53,7 @@ game::formatPlayerSet(PlayerSet_t set, const PlayerList& list, afl::string::Tran
     return result;
 }
 
+// Format set of players including host.
 String_t
 game::formatPlayerHostSet(PlayerSet_t set, const PlayerList& list, afl::string::Translator& tx)
 {
@@ -79,7 +81,7 @@ game::formatPlayerHostSet(PlayerSet_t set, const PlayerList& list, afl::string::
     String_t formattedPlayers = formatPlayerSet(set, list, tx);
     if (hasHost) {
         // formattedPlayers can be "all but player X", so put host in front to make it unambiguous
-        formattedPlayers = afl::string::Format("host, %s", formattedPlayers);
+        formattedPlayers = afl::string::Format(tx.translateString("host, %s").c_str(), formattedPlayers);
     }
     return formattedPlayers;
 }

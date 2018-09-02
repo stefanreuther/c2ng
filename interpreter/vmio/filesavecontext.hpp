@@ -10,6 +10,7 @@
 #include "afl/io/stream.hpp"
 #include "afl/base/uncopyable.hpp"
 #include "interpreter/process.hpp"
+#include "afl/container/ptrvector.hpp"
 
 namespace interpreter { namespace vmio {
 
@@ -68,16 +69,17 @@ namespace interpreter { namespace vmio {
         uint32_t m_objectIdCounter;
 
         // Save plan.
-        enum PlanObject {
-            poBytecode,
-            poProcess,
-            poArray,
-            poHash,
-            poStructType,
-            poStructValue
+        class Saver {
+         public:
+            virtual ~Saver()
+                { }
+            virtual void save(afl::io::Stream& out, FileSaveContext& parent) = 0;
         };
-        std::vector<const void*> m_planObjects;
-        std::vector<PlanObject> m_planTypes;
+        afl::container::PtrVector<Saver> m_plan;
+
+        /** Add to plan.
+            \param p Newly-allocated saver. Never null. */
+        void addPlanNew(Saver* p);
 
         /** Save a bytecode object.
             \param out  Stream to write to

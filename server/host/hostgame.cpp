@@ -12,14 +12,17 @@
 #include "afl/string/format.hpp"
 #include "afl/string/parse.hpp"
 #include "server/errors.hpp"
+#include "server/host/actions.hpp"
 #include "server/host/game.hpp"
 #include "server/host/gamecreator.hpp"
+#include "server/host/rank/victory.hpp"
 #include "server/host/root.hpp"
 #include "server/host/session.hpp"
 #include "server/host/talkadapter.hpp"
-#include "server/interface/hosttool.hpp"
-#include "server/host/rank/victory.hpp"
 #include "server/host/user.hpp"
+#include "server/interface/baseclient.hpp"
+#include "server/interface/filebaseclient.hpp"
+#include "server/interface/hosttool.hpp"
 
 server::host::HostGame::HostGame(Session& session, Root& root)
     : m_session(session),
@@ -255,7 +258,7 @@ String_t
 server::host::HostGame::getConfig(int32_t gameId, String_t key)
 {
     // ex planetscentral/host/cmdgame.h:doGetGameConfig
-    
+
     // Obtain simple access; read-only access
     GameArbiter::Guard guard(m_root.arbiter(), gameId, GameArbiter::Simple);
 
@@ -457,7 +460,7 @@ server::host::HostGame::getTools(int32_t gameId, std::vector<server::interface::
     // Check existence and permission
     Game game(m_root, gameId);
     m_session.checkPermission(game, Game::ReadPermission);
-    
+
     // Operate
     afl::data::StringList_t tools;
     game.tools().getAll(tools);
@@ -501,6 +504,9 @@ server::host::HostGame::updateGames(const afl::data::IntegerList_t& gameIds)
     // ex planetscentral/host/cmdgame.h:doGameUpdate
     m_session.checkAdmin();
 
+    server::interface::BaseClient(m_root.hostFile()).setUserContext(String_t());
+    server::interface::FileBaseClient hostFile(m_root.hostFile());
+
     for (size_t i = 0, n = gameIds.size(); i < n; ++i) {
         // Fetch a game
         const int32_t gameId = gameIds[i];
@@ -516,6 +522,9 @@ server::host::HostGame::updateGames(const afl::data::IntegerList_t& gameIds)
                 talk->handleGameStart(game, gameType);
             }
         }
+
+        // Update file history
+        importAllFileHistory(hostFile, game);
     }
 }
 

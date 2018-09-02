@@ -5,9 +5,10 @@
 #ifndef C2NG_GAME_SCORE_TURNSCORELIST_HPP
 #define C2NG_GAME_SCORE_TURNSCORELIST_HPP
 
-#include "game/score/turnscore.hpp"
 #include "afl/container/ptrvector.hpp"
+#include "game/parser/messageinformation.hpp"
 #include "game/score/scoreid.hpp"
+#include "game/score/turnscore.hpp"
 
 namespace game { namespace score {
 
@@ -54,6 +55,12 @@ namespace game { namespace score {
         /** Reset content.
             Clears the TurnScoreList to the same state it had after construction. */
         void clear();
+
+        /** Add parsed information.
+            Tries to merge the given information even if it is only partial.
+            \param info Information
+            \param ts Timestamp associated with info.getTurnNumber() */
+        void addMessageInformation(const game::parser::MessageInformation& info, const Timestamp& ts);
 
         /*
          *  Regular Access

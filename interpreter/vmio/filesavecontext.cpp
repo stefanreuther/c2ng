@@ -185,8 +185,7 @@ interpreter::vmio::FileSaveContext::FileSaveContext(afl::charset::Charset& cs)
       m_debugInformationEnabled(true),
       m_objectToId(),
       m_objectIdCounter(0),
-      m_planObjects(),
-      m_planTypes()
+      m_plan()
 {
     // ex IntVMSaveContext::IntVMSaveContext
 }
@@ -206,7 +205,7 @@ interpreter::vmio::FileSaveContext::setDebugInformation(bool enable)
 size_t
 interpreter::vmio::FileSaveContext::getNumPreparedObjects() const
 {
-    return m_planObjects.size();
+    return m_plan.size();
 }
 
 // Add process object.
@@ -214,14 +213,17 @@ void
 interpreter::vmio::FileSaveContext::addProcess(Process& proc)
 {
     // ex IntVMSaveContext::addProcess
-    /* Prepare it by saving into a temporary memory stream: this
-       causes its preconditions (=BCOs) to be saved */
-    afl::io::NullStream ns;
-    saveProcess(ns, proc);
-
-    /* Remember the plan */
-    m_planObjects.push_back(&proc);
-    m_planTypes.push_back(poProcess);
+    class ProcessSaver : public Saver {
+     public:
+        ProcessSaver(Process& p)
+            : m_process(p)
+            { }
+        virtual void save(afl::io::Stream& out, FileSaveContext& parent)
+            { parent.saveProcess(out, m_process); }
+     private:
+        Process& m_process;
+    };
+    addPlanNew(new ProcessSaver(proc));
 }
 
 // Save all pending objects.
@@ -229,28 +231,8 @@ void
 interpreter::vmio::FileSaveContext::save(afl::io::Stream& out)
 {
     // ex IntVMSaveContext::save
-    // ASSERT(m_planObjects.size() == m_planTypes.size());
-    for (size_t i = 0; i < m_planObjects.size(); ++i) {
-        switch (m_planTypes[i]) {
-         case poBytecode:
-            saveBCO(out, *static_cast<const BytecodeObject*>(m_planObjects[i]), m_objectToId[m_planObjects[i]]);
-            break;
-         case poProcess:
-            saveProcess(out, *static_cast<const Process*>(m_planObjects[i]));
-            break;
-         case poArray:
-            saveArray(out, *static_cast<const ArrayData*>(m_planObjects[i]), m_objectToId[m_planObjects[i]]);
-            break;
-         case poHash:
-            saveHash(out, *static_cast<const afl::data::Hash*>(m_planObjects[i]), m_objectToId[m_planObjects[i]]);
-            break;
-         case poStructType:
-            saveStructureType(out, *static_cast<const StructureTypeData*>(m_planObjects[i]), m_objectToId[m_planObjects[i]]);
-            break;
-         case poStructValue:
-            saveStructureValue(out, *static_cast<const StructureValueData*>(m_planObjects[i]), m_objectToId[m_planObjects[i]]);
-            break;
-        }
+    for (size_t i = 0, n = m_plan.size(); i < n; ++i) {
+        m_plan[i]->save(out, *this);
     }
 }
 
@@ -259,21 +241,22 @@ uint32_t
 interpreter::vmio::FileSaveContext::addBCO(const BytecodeObject& bco)
 {
     // ex IntVMSaveContext::addBCO
-    /* Is this item already known? */
+    class BCOSaver : public Saver {
+     public:
+        BCOSaver(const BytecodeObject& bco, uint32_t id)
+            : m_bco(bco), m_id(id)
+            { }
+        virtual void save(afl::io::Stream& out, FileSaveContext& parent)
+            { parent.saveBCO(out, m_bco, m_id); }
+     private:
+        const BytecodeObject& m_bco;
+        uint32_t m_id;
+    };
+
     uint32_t& id = m_objectToId[&bco];
     if (id == 0) {
-        /* This object is not yet known. Give it an Id. */
         id = ++m_objectIdCounter;
-
-        /* Save its preconditions. Note that if the BCO indirectly refers
-           to itself, the nested addBCO will see that it already has an
-           Id (although it is not yet planned) and just re-use that. */
-        afl::io::NullStream ns;
-        saveBCO(ns, bco, id);
-
-        /* Remember the plan */
-        m_planObjects.push_back(&bco);
-        m_planTypes.push_back(poBytecode);
+        addPlanNew(new BCOSaver(bco, id));
     }
     return id;
 }
@@ -282,19 +265,22 @@ uint32_t
 interpreter::vmio::FileSaveContext::addHash(const afl::data::Hash& hash)
 {
     // ex IntVMSaveContext::addHash
-    /* Is this item already known? */
+    class HashSaver : public Saver {
+     public:
+        HashSaver(const afl::data::Hash& hash, uint32_t id)
+            : m_hash(hash), m_id(id)
+            { }
+        virtual void save(afl::io::Stream& out, FileSaveContext& parent)
+            { parent.saveHash(out, m_hash, m_id); }
+     private:
+        const afl::data::Hash& m_hash;
+        uint32_t m_id;
+    };
+
     uint32_t& id = m_objectToId[&hash];
     if (id == 0) {
-        /* This object is not yet known. Give it an Id. */
         id = ++m_objectIdCounter;
-
-        /* Save its preconditions */
-        afl::io::NullStream ns;
-        saveHash(ns, hash, id);
-
-        /* Remember the plan */
-        m_planObjects.push_back(&hash);
-        m_planTypes.push_back(poHash);
+        addPlanNew(new HashSaver(hash, id));
     }
     return id;
 }
@@ -303,19 +289,22 @@ uint32_t
 interpreter::vmio::FileSaveContext::addArray(const ArrayData& array)
 {
     // ex IntVMSaveContext::addArray
-    /* Is this item already known? */
+    class ArraySaver : public Saver {
+     public:
+        ArraySaver(const ArrayData& array, uint32_t id)
+            : m_array(array), m_id(id)
+            { }
+        virtual void save(afl::io::Stream& out, FileSaveContext& parent)
+            { parent.saveArray(out, m_array, m_id); }
+     private:
+        const ArrayData& m_array;
+        uint32_t m_id;
+    };
+
     uint32_t& id = m_objectToId[&array];
     if (id == 0) {
-        /* This object is not yet known. Give it an Id. */
         id = ++m_objectIdCounter;
-
-        /* Save its preconditions */
-        afl::io::NullStream ns;
-        saveArray(ns, array, id);
-
-        /* Remember the plan */
-        m_planObjects.push_back(&array);
-        m_planTypes.push_back(poArray);
+        addPlanNew(new ArraySaver(array, id));
     }
     return id;
 }
@@ -324,19 +313,22 @@ uint32_t
 interpreter::vmio::FileSaveContext::addStructureType(const StructureTypeData& type)
 {
     // ex IntVMSaveContext::addStructureType
-    /* Is this item already known? */
+    class StructureTypeSaver : public Saver {
+     public:
+        StructureTypeSaver(const StructureTypeData& type, uint32_t id)
+            : m_type(type), m_id(id)
+            { }
+        virtual void save(afl::io::Stream& out, FileSaveContext& parent)
+            { parent.saveStructureType(out, m_type, m_id); }
+     private:
+        const StructureTypeData& m_type;
+        uint32_t m_id;
+    };
+
     uint32_t& id = m_objectToId[&type];
     if (id == 0) {
-        /* This object is not yet known. Give it an Id. */
         id = ++m_objectIdCounter;
-
-        /* Save its preconditions */
-        afl::io::NullStream ns;
-        saveStructureType(ns, type, id);
-
-        /* Remember the plan */
-        m_planObjects.push_back(&type);
-        m_planTypes.push_back(poStructType);
+        addPlanNew(new StructureTypeSaver(type, id));
     }
     return id;
 }
@@ -345,19 +337,22 @@ uint32_t
 interpreter::vmio::FileSaveContext::addStructureValue(const StructureValueData& value)
 {
     // ex IntVMSaveContext::addStructureValue
-    /* Is this item already known? */
+    class StructureValueSaver : public Saver {
+     public:
+        StructureValueSaver(const StructureValueData& value, uint32_t id)
+            : m_value(value), m_id(id)
+            { }
+        virtual void save(afl::io::Stream& out, FileSaveContext& parent)
+            { parent.saveStructureValue(out, m_value, m_id); }
+     private:
+        const StructureValueData& m_value;
+        uint32_t m_id;
+    };
+
     uint32_t& id = m_objectToId[&value];
     if (id == 0) {
-        /* This object is not yet known. Give it an Id. */
         id = ++m_objectIdCounter;
-
-        /* Save its preconditions */
-        afl::io::NullStream ns;
-        saveStructureValue(ns, value, id);
-
-        /* Remember the plan */
-        m_planObjects.push_back(&value);
-        m_planTypes.push_back(poStructValue);
+        addPlanNew(new StructureValueSaver(value, id));
     }
     return id;
 }
@@ -366,6 +361,19 @@ bool
 interpreter::vmio::FileSaveContext::isCurrentProcess(const Process* /*p*/)
 {
     return false;
+}
+
+void
+interpreter::vmio::FileSaveContext::addPlanNew(Saver* p)
+{
+    std::auto_ptr<Saver> pp(p);
+
+    // Save preconditions
+    afl::io::NullStream ns;
+    pp->save(ns, *this);
+
+    // Remember the plan
+    m_plan.pushBackNew(pp.release());
 }
 
 // Save a bytecode object.

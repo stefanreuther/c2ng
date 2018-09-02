@@ -161,6 +161,7 @@ class TestGameTeamSettings : public CxxTest::TestSuite {
     void testSet();
     void testModify();
     void testViewpoint();
+    void testLoadSave();
 };
 
 class TestGameTimestamp : public CxxTest::TestSuite {

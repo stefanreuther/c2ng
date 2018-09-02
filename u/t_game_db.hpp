@@ -26,6 +26,7 @@ class TestGameDbFleetLoader : public CxxTest::TestSuite {
     void testMovedName();
     void testDeleted();
     void testComments();
+    void testConflict();
 };
 
 class TestGameDbStructures : public CxxTest::TestSuite {

@@ -4,7 +4,6 @@
 
 #include <cmath>
 #include <stdexcept>
-#include <stdio.h>
 #include "game/maint/difficultyrater.hpp"
 #include "afl/base/countof.hpp"
 #include "afl/except/fileproblemexception.hpp"

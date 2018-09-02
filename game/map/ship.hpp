@@ -51,11 +51,7 @@ namespace game { namespace map {
 
         // Load and Save
         void       addCurrentShipData(const ShipData& data, PlayerSet_t source);
-    //     void       addTargetData(const TShipTarget& target, GPlayerSet source);
         void       addShipXYData(Point pt, int owner, int mass, PlayerSet_t source);
-    //     void       addRCEntry(int flag);
-    //     void       addShipHistoryData(const TDbShip& data);
-    //     void       addShipTrackEntry(const TDbShipTrackEntry& data, int turn);
         void       addMessageInformation(const game::parser::MessageInformation& info, PlayerSet_t source);
 
         void       getCurrentShipData(ShipData& out) const;
@@ -83,10 +79,18 @@ namespace game { namespace map {
         bool       hasFullShipData() const;
 
     //     // History accessors
-    //     int        getHistoryTimestamp(TDbShipTimestamp which_one) const;
+        int        getHistoryTimestamp(Timestamp kind) const;
+        int        getHistoryNewestLocationTurn() const;
+        ShipHistoryData::Track* getHistoryLocation(int turnNr) const;
     //     const TDbShipTrackEntry& getHistoryEntry(int turn) const;
     //     int        getHistoryNewestTurn() const;
     //     int        getHistoryOldestTurn() const;
+
+        // Test access
+        // These methods are NOT intended for consuming history.
+        // They are intended for setting up tests or for a potential host editor.
+        void setOwner(int owner);
+        void setPosition(Point pos);
 
         // Type accessors
         IntegerProperty_t getMass(const game::spec::ShipList& shipList) const;

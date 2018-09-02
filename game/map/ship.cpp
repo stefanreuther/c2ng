@@ -10,9 +10,9 @@
 
 namespace {
     template<typename PropertyType, typename ValueType>
-    void updateField(int& fieldTime, int time, PropertyType& fieldValue, ValueType value)
+    void updateField(int& fieldTime, int time, bool flag, PropertyType& fieldValue, ValueType value)
     {
-        if (fieldTime <= time || !fieldValue.isValid()) {
+        if (flag && (fieldTime <= time || !fieldValue.isValid())) {
             fieldValue = value;
             if (fieldTime < time) {
                 fieldTime = time;
@@ -127,7 +127,7 @@ game::map::Ship::addShipXYData(Point pt, int owner, int mass, PlayerSet_t source
 void
 game::map::Ship::addMessageInformation(const game::parser::MessageInformation& info, PlayerSet_t source)
 {
-    // ex GShip::addMessageInformation (expanded!)
+    // ex GShip::addMessageInformation (expanded!), GShip::addShipHistoryData
     namespace gp = game::parser;
 
     // Check acceptance of information for possibly current ship
@@ -138,59 +138,171 @@ game::map::Ship::addMessageInformation(const game::parser::MessageInformation& i
         if (gp::MessageIntegerValue_t* iv = dynamic_cast<gp::MessageIntegerValue_t*>(*i)) {
             switch (iv->getIndex()) {
              case gp::mi_Owner:
-                if (!isCurrent) {
-                    updateField(m_historyTimestamps[RestTime], turn, m_currentData.owner, iv->getValue());
+                updateField(m_historyTimestamps[RestTime], turn, !isCurrent, m_currentData.owner, iv->getValue());
+                break;
+
+             case gp::mi_ShipWaypointDX:
+                updateField(m_historyTimestamps[RestTime], turn, !isCurrent, m_currentData.waypointDX, iv->getValue());
+                break;
+
+             case gp::mi_ShipWaypointDY:
+                updateField(m_historyTimestamps[RestTime], turn, !isCurrent, m_currentData.waypointDY, iv->getValue());
+                break;
+
+             case gp::mi_ShipEngineType:
+                updateField(m_historyTimestamps[RestTime], turn, !isCurrent, m_currentData.engineType, iv->getValue());
+                break;
+
+             case gp::mi_ShipHull:
+                if (iv->getValue() != 0) {
+                    updateField(m_historyTimestamps[RestTime], turn, !isCurrent, m_currentData.hullType, iv->getValue());
                 }
                 break;
 
+             case gp::mi_ShipBeamType:
+                updateField(m_historyTimestamps[MilitaryTime], turn, !isCurrent, m_currentData.beamType, iv->getValue());
+                break;
+
+             case gp::mi_ShipNumBeams:
+                updateField(m_historyTimestamps[MilitaryTime], turn, !isCurrent, m_currentData.numBeams, iv->getValue());
+                break;
+
+             case gp::mi_ShipNumBays:
+                updateField(m_historyTimestamps[MilitaryTime], turn, !isCurrent, m_currentData.numBays, iv->getValue());
+                break;
+
+             case gp::mi_ShipLauncherType:
+                updateField(m_historyTimestamps[MilitaryTime], turn, !isCurrent, m_currentData.launcherType, iv->getValue());
+                break;
+
+             case gp::mi_ShipAmmo:
+                updateField(m_historyTimestamps[MilitaryTime], turn, !isCurrent, m_currentData.ammo, iv->getValue());
+                break;
+
+             case gp::mi_ShipNumLaunchers:
+                updateField(m_historyTimestamps[MilitaryTime], turn, !isCurrent, m_currentData.numLaunchers, iv->getValue());
+                break;
+
+             case gp::mi_ShipMission:
+                updateField(m_historyTimestamps[RestTime], turn, !isCurrent, m_currentData.mission, iv->getValue());
+                break;
+
+             case gp::mi_ShipEnemy:
+                updateField(m_historyTimestamps[RestTime], turn, !isCurrent, m_currentData.primaryEnemy, iv->getValue());
+                break;
+
+             case gp::mi_ShipTow:
+                updateField(m_historyTimestamps[RestTime], turn, !isCurrent, m_currentData.missionTowParameter, iv->getValue());
+                break;
+
+             case gp::mi_Damage:
+                updateField(m_historyTimestamps[MilitaryTime], turn, !isCurrent, m_currentData.damage, iv->getValue());
+                break;
+
+             case gp::mi_ShipCrew:
+                updateField(m_historyTimestamps[MilitaryTime], turn, !isCurrent, m_currentData.crew, iv->getValue());
+                break;
+
+             case gp::mi_ShipColonists:
+                updateField(m_historyTimestamps[RestTime], turn, !isCurrent, m_currentData.colonists, iv->getValue());
+                break;
+
+             case gp::mi_ShipFuel:
+                updateField(m_historyTimestamps[RestTime], turn, !isCurrent, m_currentData.neutronium, iv->getValue());
+                break;
+
+             case gp::mi_ShipCargoT:
+                updateField(m_historyTimestamps[RestTime], turn, !isCurrent, m_currentData.tritanium, iv->getValue());
+                break;
+
+             case gp::mi_ShipCargoD:
+                updateField(m_historyTimestamps[RestTime], turn, !isCurrent, m_currentData.duranium, iv->getValue());
+                break;
+
+             case gp::mi_ShipCargoM:
+                updateField(m_historyTimestamps[RestTime], turn, !isCurrent, m_currentData.molybdenum, iv->getValue());
+                break;
+
+             case gp::mi_ShipSupplies:
+                updateField(m_historyTimestamps[RestTime], turn, !isCurrent, m_currentData.supplies, iv->getValue());
+                break;
+
+             case gp::mi_ShipIntercept:
+                updateField(m_historyTimestamps[RestTime], turn, !isCurrent, m_currentData.missionInterceptParameter, iv->getValue());
+                break;
+
+             case gp::mi_ShipMoney:
+                updateField(m_historyTimestamps[RestTime], turn, !isCurrent, m_currentData.money, iv->getValue());
+                break;
+
+                /*
+                 *  Ship Track fields
+                 *
+                 *  If source is empty (=history, untrusted scan), add only to track.
+                 *  If source is nonempty (=trusted scan), add to ship proper.
+                 */
+                // ex GShip::addShipTrackEntry (sort-of)
+
              case gp::mi_Speed:
-                // FIXME: add intelligence: merge into history track
-                if (!isCurrent) {
-                    updateField(m_historyTimestamps[RestTime], turn, m_currentData.warpFactor, iv->getValue());
+                if (ShipHistoryData::Track* p = adjustShipHistory(m_historyData, turn)) {
+                    p->speed = iv->getValue();
+                }
+                if (!source.empty()) {
+                    m_currentData.warpFactor = iv->getValue();
                 }
                 break;
 
              case gp::mi_X:
-                // FIXME: add intelligence: merge into history track
-                if (!isCurrent) {
-                    updateField(m_historyTimestamps[RestTime], turn, m_currentData.x, iv->getValue());
+                if (ShipHistoryData::Track* p = adjustShipHistory(m_historyData, turn)) {
+                    p->x = iv->getValue();
+                }
+                if (!source.empty()) {
+                    m_currentData.x = iv->getValue();
                 }
                 break;
 
              case gp::mi_Y:
-                // FIXME: add intelligence: merge into history track
-                if (!isCurrent) {
-                    updateField(m_historyTimestamps[RestTime], turn, m_currentData.y, iv->getValue());
+                if (ShipHistoryData::Track* p = adjustShipHistory(m_historyData, turn)) {
+                    p->y = iv->getValue();
                 }
-                break;
-
-             case gp::mi_ShipHull:
-                if (!isCurrent) {
-                    updateField(m_historyTimestamps[RestTime], turn, m_currentData.hullType, iv->getValue());
+                if (!source.empty()) {
+                    m_currentData.y = iv->getValue();
                 }
                 break;
 
              case gp::mi_Heading:
-                // FIXME: add intelligence: merge into history track
-                if (!isCurrent) {
-                    updateField(m_historyTimestamps[RestTime], turn, m_scannedHeading, iv->getValue());
+                if (ShipHistoryData::Track* p = adjustShipHistory(m_historyData, turn)) {
+                    p->heading = iv->getValue();
+                }
+                if (!source.empty()) {
+                    m_scannedHeading = iv->getValue();
                 }
                 break;
 
-             // FIXME:
-             // case gp::mi_ShipRemoteFlag:
-             //    addRCEntry(iv->getValue());
-             //    break;
+             case gp::mi_Mass:
+                if (ShipHistoryData::Track* p = adjustShipHistory(m_historyData, turn)) {
+                    p->mass = iv->getValue();
+                }
+                if (!source.empty()) {
+                    m_scannedMass = iv->getValue();
+                }
+                break;
+
+             case gp::mi_ShipRemoteFlag:
+                // ex GShip::addRCEntry
+                m_remoteControlFlag = iv->getValue();
+                break;
 
              default:
                 break;
             }
         } else if (gp::MessageStringValue_t* sv = dynamic_cast<gp::MessageStringValue_t*>(*i)) {
             switch (sv->getIndex()) {
+             case gp::ms_FriendlyCode:
+                updateField(m_historyTimestamps[RestTime], turn, !isCurrent, m_currentData.friendlyCode, sv->getValue());
+                break;
              case gp::ms_Name:
-                if (isCurrent) {
-                    updateField(m_historyTimestamps[RestTime], turn, m_currentData.friendlyCode, sv->getValue());
-                }
+                updateField(m_historyTimestamps[RestTime], turn, !isCurrent, m_currentData.name, sv->getValue());
                 break;
 
              default:
@@ -266,13 +378,24 @@ game::map::Ship::combinedCheck1(Universe& univ, int turnNumber)
     // Update ship track.
     // The simplest way is to generate a whole new record and have the regular code assimilate it.
     if (isVisible()) {
-        // TDbShipTrackEntry e;
-        // e.x       = ship_info->data.x;
-        // e.y       = ship_info->data.y;
-        // e.speed   = getWarp().getRawValue();
-        // e.heading = getHeading().getRawValue();
-        // e.mass    = getMass().getRawValue();
-        // addShipTrackEntry(e, univ.getTurnNumber());
+        if (ShipHistoryData::Track* p = adjustShipHistory(m_historyData, turnNumber)) {
+            p->x = m_currentData.x;
+            p->y = m_currentData.y;
+            p->speed = m_currentData.warpFactor;
+            p->heading = getHeading();
+            // FIXME: using the scanned mass here is wrong for own ships for which we should compute the mass.
+            // Right now this is not a problem, but must be dealt with when the ship track is shown or saved again.
+            p->mass = m_scannedMass;
+        }
+    }
+
+    // FIXME: if we loaded the ship from history only, we may have ship-track info.
+    // If ship-track has current info, we can transform this into a guessed ship.
+    // For now, only take over the speed; X/Y's would make a guessed ship.
+    if (ShipHistoryData::Track* p = getShipHistory(m_historyData, turnNumber)) {
+        if (!m_currentData.warpFactor.isValid()) {
+            m_currentData.warpFactor = p->speed;
+        }
     }
 }
 
@@ -422,44 +545,32 @@ game::map::Ship::hasFullShipData() const
     return !m_shipSource.empty();
 }
 
-// FIXME: port
 // /** Get history timestamp. 0 means not set. */
-// int
-// GShip::getHistoryTimestamp(TDbShipTimestamp which_one) const
-// {
-//     if (ship_info != 0) {
-//         return ship_info->time[which_one];
-//     } else {
-//         return 0;
-//     }
-// }
+int
+game::map::Ship::getHistoryTimestamp(Timestamp kind) const
+{
+    return m_historyTimestamps[kind];
+}
 
-// FIXME: port
-// /** Get ship history entry for a turn.
-//     \param turn Turn number */
-// const TDbShipTrackEntry&
-// GShip::getHistoryEntry(int turn) const
-// {
-//     if (ship_info != 0 && turn <= ship_info->track_turn && turn > ship_info->track_turn - NUM_SHIP_TRACK_ENTRIES) {
-//         return ship_info->track[ship_info->track_turn - turn];
-//     } else {
-//         return blank_ship_track;
-//     }
-// }
-
-// FIXME: port
 // /** Get newest history turn. This is the newest turn for which we
 //     (may) have information. Iteration can use
 //     "for (t = getHistoryNewestTurn(); t > getHistoryOldestTurn(); --t)". */
-// int
-// GShip::getHistoryNewestTurn() const
-// {
-//     if (ship_info != 0) {
-//         return ship_info->track_turn;
-//     } else {
-//         return 0;
-//     }
-// }
+int
+game::map::Ship::getHistoryNewestLocationTurn() const
+{
+    // ex GShip::getHistoryNewestTurn
+    return m_historyData.trackTurn;
+}
+
+// /** Get ship history entry for a turn.
+//     \param turn Turn number */
+game::map::ShipHistoryData::Track*
+game::map::Ship::getHistoryLocation(int turnNr) const
+{
+    // ex GShip::getHistoryEntry
+    // FIXME: if turnNr==current, we want to report the computed mass, speed, heading here! See db::Loader.
+    return getShipHistory(const_cast<ShipHistoryData&>(m_historyData), turnNr);
+}
 
 // FIXME: port
 // /** Get oldest history turn. This is the turn before the oldest one
@@ -478,6 +589,23 @@ game::map::Ship::hasFullShipData() const
 //         return 0;
 //     }
 // }
+
+void
+game::map::Ship::setOwner(int owner)
+{
+    m_currentData.owner = owner;
+    markDirty();
+}
+
+void
+game::map::Ship::setPosition(Point pos)
+{
+    m_currentData.x = pos.getX();
+    m_currentData.y = pos.getY();
+    markDirty();
+}
+
+
 
 // 
 // /*
@@ -1400,22 +1528,6 @@ game::map::Ship::hasAnyShipSpecialFunctions() const
 //     return ship_info != 0 ? ship_info->data : blank_ship;
 // }
 
-// /** Adjust ship track info to start no later than turn.
-//     \post turn <= info.track_turn */
-// void
-// GShip::adjustShipTrack(int turn)
-// {
-//     ShipInfo& info = createShipInfo();
-//     if (turn > info.track_turn) {
-//         int adjust = turn - info.track_turn;
-//         for (int i = NUM_SHIP_TRACK_ENTRIES-1; i >= 0; --i) {
-//             info.track[i] = (i >= adjust
-//                              ? info.track[i - adjust]
-//                              : blank_ship_track);
-//         }
-//         info.track_turn = turn;
-//     }
-// }
 
 game::UnitScoreList&
 game::map::Ship::unitScores()

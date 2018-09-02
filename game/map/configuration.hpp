@@ -160,7 +160,7 @@ namespace game { namespace map {
         /** Get minimum distance between two points, considering map configuration.
             \param pt a,b points
             \return squared distance */
-        long getSquaredDistance(Point a, Point b) const;
+        int32_t getSquaredDistance(Point a, Point b) const;
 
         /*
          *  Sector numbers

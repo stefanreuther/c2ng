@@ -57,6 +57,17 @@ game::v3::CommandExtra::get(Turn& parent)
     return parent.extras().get(ID);
 }
 
+game::v3::CommandContainer*
+game::v3::CommandExtra::get(Turn& parent, int player)
+{
+    CommandExtra* p = get(parent);
+    if (p) {
+        return p->get(player);
+    } else {
+        return 0;
+    }
+}
+
 void
 game::v3::CommandExtra::onCommandChange(Command& cmd, bool /*added*/)
 {

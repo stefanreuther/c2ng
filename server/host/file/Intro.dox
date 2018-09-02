@@ -1,0 +1,13 @@
+/*!
+     \namespace server::host::file
+     \brief c2host server: file structure
+
+     This namespace implements the file structure for for the HostFile sub-service
+     (not to confuse with the HOSTFILE c2file-server instance).
+     That sub-service allows a client to obtain files from the HOSTFILE area,
+     using permission checks and path remappings implemented in c2host-server.
+
+     <b>Entry point:</b>
+
+     - server::host::file::RootItem
+ */

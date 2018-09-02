@@ -21,21 +21,6 @@ game::spec::Engine::Engine(int id)
 game::spec::Engine::~Engine()
 { }
 
-// Get fuel factor.
-bool
-game::spec::Engine::getFuelFactor(int warp, int32_t& fuelFactor) const
-{
-    if (warp <= 0) {
-        fuelFactor = 0;
-        return true;
-    } else if (warp <= MAX_WARP) {
-        fuelFactor = m_fuelFactors[warp-1];
-        return true;
-    } else {
-        return false;
-    }
-}
-
 // Set fuel factor.
 void
 game::spec::Engine::setFuelFactor(int warp, int32_t fuelFactor)

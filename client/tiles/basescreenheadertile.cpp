@@ -7,7 +7,7 @@
 #include "game/root.hpp"
 #include "afl/string/format.hpp"
 #include "ui/res/resid.hpp"
-#include "client/objectlistener.hpp"
+#include "client/proxy/objectlistener.hpp"
 #include "game/types.hpp"
 #include "game/map/planet.hpp"
 
@@ -27,7 +27,7 @@ client::tiles::BaseScreenHeaderTile::BaseScreenHeaderTile(ui::Root& root, client
 }
 
 void
-client::tiles::BaseScreenHeaderTile::attach(ObjectObserverProxy& oop)
+client::tiles::BaseScreenHeaderTile::attach(client::proxy::ObjectObserver& oop)
 {
     class Job : public util::Request<ControlScreenHeader> {
      public:
@@ -73,7 +73,7 @@ client::tiles::BaseScreenHeaderTile::attach(ObjectObserverProxy& oop)
         String_t m_image;
         bool m_marked;
     };
-    class Listener : public ObjectListener {
+    class Listener : public client::proxy::ObjectListener {
      public:
         Listener(util::RequestSender<ControlScreenHeader> reply)
             : m_reply(reply)

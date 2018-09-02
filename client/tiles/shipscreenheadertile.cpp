@@ -5,7 +5,7 @@
 #include "client/tiles/shipscreenheadertile.hpp"
 #include "util/translation.hpp"
 #include "game/map/ship.hpp"
-#include "client/objectlistener.hpp"
+#include "client/proxy/objectlistener.hpp"
 #include "game/game.hpp"
 #include "game/root.hpp"
 #include "afl/string/format.hpp"
@@ -35,7 +35,7 @@ client::tiles::ShipScreenHeaderTile::ShipScreenHeaderTile(ui::Root& root, client
 }
 
 void
-client::tiles::ShipScreenHeaderTile::attach(ObjectObserverProxy& oop)
+client::tiles::ShipScreenHeaderTile::attach(client::proxy::ObjectObserver& oop)
 {
     class Job : public util::Request<ControlScreenHeader> {
      public:
@@ -98,7 +98,7 @@ client::tiles::ShipScreenHeaderTile::attach(ObjectObserverProxy& oop)
         String_t m_image;
         bool m_marked;
     };
-    class Listener : public ObjectListener {
+    class Listener : public client::proxy::ObjectListener {
      public:
         Listener(util::RequestSender<ControlScreenHeader> reply)
             : m_reply(reply)

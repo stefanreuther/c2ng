@@ -175,10 +175,15 @@ game::v3::Packer::unpackBase(game::map::BaseData& out, const game::v3::structure
 void
 game::v3::Packer::packShip(game::v3::structures::Ship& out, int id, const game::map::ShipData& in, bool remapExplore)
 {
+    // ex GShip::getShipData (sort-of)
     out.shipId = static_cast<int16_t>(id);
 
     copyOut(out.owner, in.owner);
-    out.friendlyCode = m_charset.encode(afl::string::toMemory(in.friendlyCode.orElse("")));
+    if (const String_t* fc = in.friendlyCode.get()) {
+        out.friendlyCode = m_charset.encode(afl::string::toMemory(*fc));
+    } else {
+        afl::base::Bytes_t(out.friendlyCode.m_bytes).fill(0xFF);
+    }
     copyOut(out.warpFactor, in.warpFactor);
     copyOut(out.waypointDX, in.waypointDX);
     copyOut(out.waypointDY, in.waypointDY);
@@ -224,7 +229,12 @@ game::v3::Packer::packPlanet(game::v3::structures::Planet& out, int id, const ga
     int temp;
     copyOut(out.owner, in.owner);
     out.planetId = static_cast<int16_t>(id);
-    out.friendlyCode = m_charset.encode(afl::string::toMemory(in.friendlyCode.orElse("")));
+
+    if (const String_t* fc = in.friendlyCode.get()) {
+        out.friendlyCode = m_charset.encode(afl::string::toMemory(*fc));
+    } else {
+        afl::base::Bytes_t(out.friendlyCode.m_bytes).fill(0xFF);
+    }
     copyOut(out.numMines,                           in.numMines);
     copyOut(out.numFactories,                       in.numFactories);
     copyOut(out.numDefensePosts,                    in.numDefensePosts);
@@ -246,7 +256,7 @@ game::v3::Packer::packPlanet(game::v3::structures::Planet& out, int id, const ga
     copyOut(out.colonistTax,                        in.colonistTax);
     copyOut(out.nativeTax,                          in.nativeTax);
     copyOut(out.colonistHappiness,                  in.colonistHappiness);
-    copyOut(out.nativeHappiness,                    in.colonistHappiness);
+    copyOut(out.nativeHappiness,                    in.nativeHappiness);
     copyOut(out.nativeGovernment,                   in.nativeGovernment);
     copyOut(out.natives,                            in.nativeClans);
     copyOut(out.nativeRace,                         in.nativeRace);

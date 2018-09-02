@@ -55,10 +55,41 @@ game::parser::MessageInformation::addScoreValue(int player, int32_t value)
     m_values.pushBackNew(new MessageScoreValue_t(player, value));
 }
 
-// FIXME: missing
-// /** Add alliance value. For MessageAlliance only. */
-// GMessageInformation::addAllianceValue(string_t id, const GAllianceOffer& offer)
-// {
-//     ASSERT(obj == MessageAlliance);
-//     values.push_back(new GMessageAllianceValue(id, offer));
-// }
+// Add alliance value.
+void
+game::parser::MessageInformation::addAllianceValue(String_t id, const game::alliance::Offer& offer)
+{
+    // ex GMessageInformation::addAllianceValue
+    assert(m_type == Alliance);
+    m_values.pushBackNew(new MessageAllianceValue_t(id, offer));
+}
+
+// Get string value.
+bool
+game::parser::MessageInformation::getValue(MessageStringIndex si, String_t& out) const
+{
+    for (ConstIterator_t it = begin(), e = end(); it != e; ++it) {
+        if (MessageStringValue_t* sv = dynamic_cast<MessageStringValue_t*>(*it)) {
+            if (sv->getIndex() == si) {
+                out = sv->getValue();
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+// Get integer value.
+bool
+game::parser::MessageInformation::getValue(MessageIntegerIndex ii, int32_t& out) const
+{
+    for (ConstIterator_t it = begin(), e = end(); it != e; ++it) {
+        if (MessageIntegerValue_t* sv = dynamic_cast<MessageIntegerValue_t*>(*it)) {
+            if (sv->getIndex() == ii) {
+                out = sv->getValue();
+                return true;
+            }
+        }
+    }
+    return false;
+}

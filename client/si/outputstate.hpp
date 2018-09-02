@@ -5,6 +5,7 @@
 #define C2NG_CLIENT_SI_OUTPUTSTATE_HPP
 
 #include "client/si/requestlink2.hpp"
+#include "afl/string/string.hpp"
 
 namespace client { namespace si {
 
@@ -26,6 +27,8 @@ namespace client { namespace si {
 
         RequestLink2 getProcess() const;
         Target getTarget() const;
+
+        static String_t toString(OutputState::Target target);
 
      private:
         RequestLink2 m_process;

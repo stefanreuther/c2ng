@@ -6,7 +6,7 @@
 #include "interpreter/vmio/valueloader.hpp"
 
 #include <memory>
-#include <cstdio>
+#include <cstdio>               // sprintf
 #include "t_interpreter_vmio.hpp"
 #include "afl/base/countof.hpp"
 #include "afl/charset/utf8charset.hpp"

@@ -13,6 +13,7 @@
 #include "server/interface/hostgame.hpp"
 #include "server/interface/hostplayer.hpp"
 #include "server/common/racenames.hpp"
+#include "afl/net/redis/stringfield.hpp"
 
 namespace server { namespace host {
 
@@ -56,6 +57,56 @@ namespace server { namespace host {
             afl::net::redis::Subtree m_tree;
         };
 
+        /** Handle to a turn's "header" information.
+            \see Game::Turn::info() */
+        class TurnInfo {
+         public:
+            /** Constructor.
+                \param key Base */
+            explicit TurnInfo(afl::net::redis::HashKey key);
+
+            /** Access turn time (integer format).
+                \return key. Content is the same as Root::getTime(). */
+            afl::net::redis::IntegerField time();
+
+            /** Access turn time (VGAP string format).
+                \return key. Content is the same as game::Timestamp. */
+            afl::net::redis::StringField timestamp();
+
+            /** Access turn status.
+                \return key. Content is array of packed Int16LE. */
+            afl::net::redis::StringField turnStatus();
+
+            // /** Access relative directory name.
+            //     \return key. Content is name of directory relative to game's directory. */
+            // afl::net::redis::StringField relativeDirectory();
+
+         private:
+            afl::net::redis::HashKey m_key;
+        };
+
+        /** Handle to a turn's "backup files" information.
+            \see Game::Turn::files() */
+        class TurnFiles {
+         public:
+            /** Constructor.
+                \param tree Base */
+            TurnFiles(afl::net::redis::Subtree tree);
+
+            /** Access a player's files.
+                \param slot Slot number
+                \return key. Content is set of file names */
+            afl::net::redis::StringSetKey playerFiles(int slot);
+
+            /** Access global files (e.g. specification).
+                \param slot Slot number
+                \return key. Content is set of file names */
+            afl::net::redis::StringSetKey globalFiles();
+
+         private:
+            afl::net::redis::Subtree m_tree;
+        };
+
 
         /** Handle to a turn.
             \see Game::turn() */
@@ -72,7 +123,11 @@ namespace server { namespace host {
 
             /** Access turn information.
                 \return key. Contains time, timestamp, turnstatus. */
-            afl::net::redis::HashKey info();
+            TurnInfo info();
+
+            /** Access turn's backup file names.
+                \return key. */
+            TurnFiles files();
 
             /** Access player status.
                 \return key. Field names are player numbers, content is primary player's user Id */
@@ -454,6 +509,10 @@ namespace server { namespace host {
         /** Access "forum disabled" status.
             \return field */
         afl::net::redis::IntegerField forumDisabled();
+
+        /** Access "kick after missed turns" value.
+            \return field */
+        afl::net::redis::IntegerField numMissedTurnsForKick();
 
      private:
         afl::net::redis::Subtree m_game;

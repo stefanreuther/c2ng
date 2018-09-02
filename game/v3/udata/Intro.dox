@@ -1,0 +1,6 @@
+/*!
+     \namespace game::v3::udata
+     \brief util.dat handling
+
+     This namespace contains util.dat handling.
+ */

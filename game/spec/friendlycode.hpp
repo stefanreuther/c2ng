@@ -13,6 +13,10 @@
 #include "game/playerlist.hpp"
 #include "game/unitscoredefinitionlist.hpp"
 
+namespace game {
+    class RegistrationKey;
+}
+
 namespace game { namespace map {
     class Ship;
     class Planet;
@@ -100,6 +104,11 @@ namespace game { namespace spec {
             \param config Host configuration
             \return true if friendly code is a valid/sensible choice for this planet */
         bool worksOn(const game::map::Planet& p, const game::config::HostConfiguration& config) const;
+
+        /** Check whether this friendly code is allowed according to registration status.
+            \param key Key
+            \return true if code is allowed */
+        bool isPermitted(const RegistrationKey& key) const;
 
      private:
         static bool parseFlags(const String_t& s, const char* data, FlagSet_t& flags, PlayerSet_t& races);

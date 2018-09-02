@@ -17,6 +17,9 @@ namespace game { namespace score {
         Loader(afl::string::Translator& tx, afl::charset::Charset& cs);
 
         void load(TurnScoreList& list, afl::io::Stream& in);
+        void loadOldFile(TurnScoreList& list, afl::io::Stream& in);
+
+        void save(const TurnScoreList& list, afl::io::Stream& out);
 
      private:
         afl::string::Translator& m_translator;

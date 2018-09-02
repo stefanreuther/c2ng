@@ -6,6 +6,7 @@
 
 #include <memory>
 #include <SDL_surface.h>
+#include <SDL_render.h>
 #include "gfx/canvas.hpp"
 
 namespace gfx { namespace sdl2 {
@@ -50,8 +51,7 @@ namespace gfx { namespace sdl2 {
         void ensureLocked();
         void ensureUnlocked();
 
-        SDL_Surface* getSurface() const;
-        Rectangle extractUpdateRegion();
+        void presentUpdate(SDL_Texture* tex, SDL_Renderer* renderer);
 
      private:
         SDL_Surface* m_surface;

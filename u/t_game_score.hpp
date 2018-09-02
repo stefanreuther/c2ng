@@ -29,6 +29,10 @@ class TestGameScoreTurnScoreList : public CxxTest::TestSuite {
     void testDescription();
     void testTurn();
     void testDescriptionConstructor();
+    void testAddMessageInformationComplete();
+    void testAddMessageInformationJustId();
+    void testAddMessageInformationJustName();
+    void testAddMessageInformationJustNameNew();
 };
 
 #endif

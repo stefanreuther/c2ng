@@ -10,7 +10,6 @@
 # include "gfx/graphicsexception.hpp"
 # include "gfx/primitives.hpp"
 # include "gfx/sdl/modetraits.hpp"
-# include "gfx/sdl2/nullpresenter.hpp"
 # include "gfx/sdl2/surface.hpp"
 
 static_assert(SDL_ALPHA_OPAQUE == gfx::OPAQUE_ALPHA, "opaque polarity");
@@ -428,18 +427,23 @@ gfx::sdl2::Surface::ensureUnlocked()
     }
 }
 
-SDL_Surface*
-gfx::sdl2::Surface::getSurface() const
+void
+gfx::sdl2::Surface::presentUpdate(SDL_Texture* tex, SDL_Renderer* renderer)
 {
-    return m_surface;
-}
+    if (m_updateRegion.exists()) {
+        ensureUnlocked();
 
-gfx::Rectangle
-gfx::sdl2::Surface::extractUpdateRegion()
-{
-    Rectangle result = m_updateRegion;
-    m_updateRegion = Rectangle();
-    return result;
+        SDL_Rect r;
+        r.x = m_updateRegion.getLeftX();
+        r.y = m_updateRegion.getTopY();
+        r.w = m_updateRegion.getWidth();
+        r.h = m_updateRegion.getHeight();
+        SDL_UpdateTexture(tex, 0, m_surface->pixels, m_surface->pitch);
+        SDL_RenderCopy(renderer, tex, &r, &r);
+        SDL_RenderPresent(renderer);
+
+        m_updateRegion = Rectangle();
+    }
 }
 
 #endif

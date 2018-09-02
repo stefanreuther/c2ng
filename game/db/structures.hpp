@@ -8,14 +8,17 @@
 #include "afl/base/staticassert.hpp"
 #include "afl/bits/fixedstring.hpp"
 #include "afl/bits/int16le.hpp"
+#include "afl/bits/int32le.hpp"
 #include "afl/bits/uint16le.hpp"
 #include "afl/bits/uint32le.hpp"
 #include "afl/bits/value.hpp"
 #include "game/types.hpp"
+#include "game/v3/structures.hpp"
 
 namespace game { namespace db { namespace structures {
 
     typedef afl::bits::Value<afl::bits::Int16LE> Int16_t;
+    typedef afl::bits::Value<afl::bits::Int32LE> Int32_t;
     typedef afl::bits::Value<afl::bits::UInt16LE> UInt16_t;
     typedef afl::bits::Value<afl::bits::UInt32LE> UInt32_t;
     typedef afl::bits::Value<afl::bits::FixedString<50> > String50_t;
@@ -56,9 +59,64 @@ namespace game { namespace db { namespace structures {
     // PCC 1.1.7+:
     const uint16_t rUfoHistory     = 12;
 
+    /// Planet history record (rPlanetHistory, 1).
+    struct Planet {
+        game::v3::structures::Planet planet;                    ///< Planet data.
+        Int16_t     turn[4];                                    ///< Timestamps. @see DatabasePlanetTimestamp.
+        uint8_t     knownToHaveNatives;                         ///< true if we know this planet has natives.
+    };
+    static_assert(sizeof(Planet) == 94, "sizeof Planet");
+
+    /// Indexes for Planet::turn.
+    enum PlanetTimestamp {
+        PlanetMinerals,                                         ///< Mined/ground/density fields.
+        PlanetColonists,                                        ///< Population/owner/industry fields.
+        PlanetNatives,                                          ///< Native gov/pop/race fields.
+        PlanetCash                                              ///< Cash/supplies fields.
+    };
+
+    /// Ship history record (rShipHistory, 2).
+    struct Ship {
+        game::v3::structures::Ship ship;                        ///< Ship data.
+        Int16_t     turn[2];                                    ///< Timestamps. @see ShipTimestamp.
+    };
+    static_assert(sizeof(Ship) == 111, "sizeof Ship");
+
+    /** Indexes for Ship::turn. */
+    enum ShipTimestamp {
+        ShipArmsDamage,                                         ///< Arms/damage.
+        ShipRest                                                ///< Cargo etc.
+    };
+
+    /// Ship Track entry (part of rShipTrack, 3).
+    struct ShipTrackEntry {
+        Int16_t     x, y;                                       ///< Ship position.
+        int8_t      speed;                                      ///< Ship speed.
+        Int16_t     heading;                                    ///< Ship heading (angle, degrees).
+        Int16_t     mass;                                       ///< Ship mass.
+    };
+    static_assert(sizeof(ShipTrackEntry) == 9, "sizeof ShipTrackEntry");
+
+    /// Ship Track header (rShipTrack, 3). Followed by multiple ShipTrackEntry.
+    struct ShipTrackHeader {
+        Int16_t     id;                                         ///< Ship Id.
+        Int16_t     turn;                                       ///< Reference turn, i.e.\ turn of first ShipTrackEntry that follows (entries in reverse chronological order).
+    };
+    static_assert(sizeof(ShipTrackHeader) == 4, "sizeof ShipTrackHeader");
+
+    /// Minefield History Record (rMinefield, 4).
+    struct Minefield {
+        Int16_t     id;                                         ///< Minefield Id.
+        Int16_t     x, y;                                       ///< Minefield center.
+        Int16_t     owner;                                      ///< Minefield owner.
+        Int32_t     units;                                      ///< Minefield units.
+        Int16_t     type;                                       ///< Minefield type: 0=normal, 1=web.
+        Int16_t     turn;                                       ///< Turn number for which this information holds.
+    };
+    static_assert(sizeof(Minefield) == 16, "sizeof Minefield");
 
     /// User drawing (rPainting, 5).
-    struct DatabaseDrawing {
+    struct Drawing {
         uint8_t     type;                                       ///< Painting type, and comment flag.
         uint8_t     color;                                      ///< Painting color.
         Int16_t     x1, y1;                                     ///< Left-top or center position.
@@ -66,7 +124,7 @@ namespace game { namespace db { namespace structures {
         Int16_t     tag;                                        ///< User-defined tag.
         Int16_t     expirationTurn;                             ///< Turn of expiry.
     };
-    static_assert(sizeof(DatabaseDrawing) == 14, "sizeof DatabaseDrawing");
+    static_assert(sizeof(Drawing) == 14, "sizeof Drawing");
 
     /// Autobuild settings (rAutoBuild, 6).
     struct AutobuildSettings {
@@ -95,6 +153,17 @@ namespace game { namespace db { namespace structures {
         UInt16_t turn;
     };
     static_assert(sizeof(UnitScoreEntry) == 6, "sizeof UnitScoreEntry");
+
+    /** Ufo history (rUfoHistory, 12). */
+    struct Ufo {
+        Int16_t     id;                                         ///< Ufo Id.
+        game::v3::structures::Ufo ufo;                          ///< Ufo data as last seen.
+        Int32_t     realId;                                     ///< Real ID of object represented by Ufo.
+        Int16_t     turnLastSeen;                               ///< Turn in which Ufo was last seen.
+        Int16_t     xLastSeen, yLastSeen;                       ///< Location at which Ufo was last seen.
+        Int16_t     speedX, speedY;                             ///< Movement vector, if known.
+    };
+    static_assert(sizeof(Ufo) == 94, "sizeof Ufo");
 
 } } }
 

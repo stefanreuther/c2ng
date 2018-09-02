@@ -3,7 +3,6 @@
   *  \brief Test for server::mailin::MailInApplication
   */
 
-#include <stdio.h>
 #include "server/mailin/mailinapplication.hpp"
 
 #include "t_server_mailin.hpp"

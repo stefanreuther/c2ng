@@ -59,9 +59,9 @@ game::TurnLoader::loadCurrentDatabases(Turn& turn, Game& game, int player, Root&
         if (file.get() != 0) {
             // We have a score.cc file, load it
             game::score::Loader(session.translator(), charset).load(game.scores(), *file);
-            // } else if ((s = game_file_dir->openFileNT("stat.cc", Stream::C_READ)) != 0) {
-            //     /* we have a stat.cc file, load it */
-            //     statistics_file->loadOldFile(*s);
+        } else if ((file = root.gameDirectory().openFileNT("stat.cc", afl::io::FileSystem::OpenRead)).get() != 0) {
+            // We have a stat.cc file, load it
+            game::score::Loader(session.translator(), charset).loadOldFile(game.scores(), *file);
         } else {
             // No score file
         }
@@ -72,6 +72,9 @@ game::TurnLoader::loadCurrentDatabases(Turn& turn, Game& game, int player, Root&
 
     // Message configuration
     game.messageConfiguration().load(root.gameDirectory(), player);
+
+    // Teams
+    game.teamSettings().load(root.gameDirectory(), player, charset);
 }
 
 void
@@ -84,4 +87,29 @@ game::TurnLoader::loadHistoryDatabases(Turn& turn, Game& game, int player, int t
     (void) turnNumber;
     (void) root;
     (void) charset;
+}
+
+void
+game::TurnLoader::saveCurrentDatabases(Turn& turn, Game& game, int player, Root& root, Session& session, afl::charset::Charset& charset)
+{
+    // Save starchart
+    if (game::spec::ShipList* shipList = session.getShipList().get()) {
+        afl::base::Ref<afl::io::Stream> out = root.gameDirectory().openFile(afl::string::Format("chart%d.cc", player), afl::io::FileSystem::Create);
+        game::db::Loader(charset, session.world()).save(*out, turn, game, *shipList);
+    }
+
+    // Save scores
+    // ex saveStatisticsFile
+    if (!game.scores().hasFutureFeatures()) {
+        afl::base::Ref<afl::io::Stream> out = root.gameDirectory().openFile("score.cc", afl::io::FileSystem::Create);
+        game::score::Loader(session.translator(), charset).save(game.scores(), *out);
+    } else {
+        // FIXME: port this: console.write(LOG_WARN, _("The statistics file in game directory was written by a newer version of PCC2; changes not written."));
+    }
+
+    // Save message configuration
+    game.messageConfiguration().save(root.gameDirectory(), player);
+
+    // Teams
+    game.teamSettings().save(root.gameDirectory(), player, charset);
 }

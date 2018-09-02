@@ -7,6 +7,7 @@
 #include "game/map/circularobject.hpp"
 #include "game/types.hpp"
 #include "afl/bits/smallset.hpp"
+#include "game/parser/messageinformation.hpp"
 
 namespace game { namespace map {
 
@@ -59,6 +60,10 @@ namespace game { namespace map {
         void setPosition(Point pt);
         void setRadius(IntegerProperty_t r);
 
+        String_t getPlainName() const;
+
+        Point getLastPosition() const;
+
         int getLastTurn() const;
         void setLastTurn(int n);
 
@@ -75,6 +80,7 @@ namespace game { namespace map {
         //    void addObjectData(const TUtil33GO& obj);
         //    void addHistoryData(const TDbUfo& data);
         //    void addWormholeData(const TUtil14Wormhole& data, bool all, int turn);
+        void addMessageInformation(const game::parser::MessageInformation& info);
 
         void postprocess(int turn);
 

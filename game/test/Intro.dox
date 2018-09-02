@@ -1,5 +1,5 @@
 /*!
-     \namespace game
+     \namespace game::test
      \brief Test classes
 
      This namespace contains classes for testing.

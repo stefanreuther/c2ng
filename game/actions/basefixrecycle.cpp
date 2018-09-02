@@ -1,10 +1,11 @@
 /**
   *  \file game/actions/basefixrecycle.cpp
+  *  \brief Class game::actions::BaseFixRecycle
   */
 
 #include "game/actions/basefixrecycle.hpp"
-#include "game/exception.hpp"
 #include "game/actions/preconditions.hpp"
+#include "game/exception.hpp"
 
 game::actions::BaseFixRecycle::BaseFixRecycle(game::map::Planet& planet)
     : m_planet(planet)
@@ -44,6 +45,36 @@ game::actions::BaseFixRecycle::getValidActions(const game::map::Ship& sh) const
         // PHost: allows Fix to allies
         // THost: allows everything to everyone up to a certain version, only to owner from then
         result += FixShipyardAction;
+    }
+    return result;
+}
+
+game::actions::BaseFixRecycle::ShipyardActionSet_t
+game::actions::BaseFixRecycle::getValidActions(const game::map::Universe& univ) const
+{
+    // ex GStarbaseFixRecycleAction::getValidBaseActions
+    ShipyardActionSet_t result;
+    for (Id_t i = 1, n = univ.ships().size(); i <= n; ++i) {
+        if (const game::map::Ship* pShip = univ.ships().get(i)) {
+            result += getValidActions(*pShip);
+        }
+    }
+    return result;
+}
+
+std::vector<game::Id_t>
+game::actions::BaseFixRecycle::getValidShipIds(const game::map::Universe& univ, ShipyardAction action) const
+{
+    // ex GStarbaseFixRecycleAction::enumerateShipsFor
+    std::vector<Id_t> result;
+    if (action != NoShipyardAction) {
+        for (Id_t i = 1, n = univ.ships().size(); i <= n; ++i) {
+            if (const game::map::Ship* pShip = univ.ships().get(i)) {
+                if (getValidActions(*pShip).contains(action)) {
+                    result.push_back(i);
+                }
+            }
+        }
     }
     return result;
 }

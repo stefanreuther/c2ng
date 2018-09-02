@@ -11,7 +11,7 @@ namespace server { namespace interface {
 
     class FileBaseClient : public FileBase {
      public:
-        FileBaseClient(afl::net::CommandHandler& commandHandler);
+        explicit FileBaseClient(afl::net::CommandHandler& commandHandler);
         ~FileBaseClient();
 
         virtual void copyFile(String_t sourceFile, String_t destFile);

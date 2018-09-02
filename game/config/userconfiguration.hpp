@@ -42,9 +42,6 @@ namespace game { namespace config {
 //     ConfigIntOption ChartMouseStickiness;
 //     ConfigIntOption ChartScannerWarpWells;
 
-//     // Alliance
-//     ConfigIntOption TeamAutoSync;
-
 //     // Export
 //     ConfigStringOption ExportShipFields;
 //     ConfigStringOption ExportPlanetFields;
@@ -88,6 +85,10 @@ namespace game { namespace config {
 
         static const IntegerOptionDescriptor Display_ThousandsSep;
         static const IntegerOptionDescriptor Display_Clans;
+
+        static const StringOptionDescriptor Backup_Result;
+
+        static const IntegerOptionDescriptor Team_AutoSync;
     };
 
 } }

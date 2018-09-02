@@ -113,6 +113,11 @@ namespace game { namespace sim {
         /** Get object, given a slot number.
             \param slot Slot [0,getNumObjects())
             \return object; null if slot is out of range */
+        const Object* getObject(Slot_t slot) const;
+
+        /** Get object, given a slot number.
+            \param slot Slot [0,getNumObjects())
+            \return object; null if slot is out of range */
         Object* getObject(Slot_t slot);
 
         /*

@@ -1,3 +1,225 @@
+2018-08-31  Stefan Reuther  <streu@gmx.de>
+
+	* game/actions/remotecontrolaction.cpp, game/actions/remotecontrolaction.hpp: new [ex client/remote.h]
+	* ui/widgets/simpletable.cpp (setExtraColumns): new
+	* client/widgets/hullspecificationsheet.cpp, client/widgets/hullspecificationsheet.hpp: new [ex client/widgets/specview.h, client/widgets/specbaseinfo.h, client/widgets/specmaininfo.h, client/widgets/specbuildinfo.h]
+	* client/proxy/hullspecificationproxy.cpp, client/proxy/hullspecificationproxy.hpp: new
+	* client/proxy/playerproxy.cpp, client/proxy/playerproxy.hpp: new
+
+2018-08-28  Stefan Reuther  <streu@gmx.de>
+
+	* client/widgets/playerlist.cpp, client/widgets/playerlist.hpp: new [ex client/widgets/racelist.h]
+
+2018-08-27  Stefan Reuther  <streu@gmx.de>
+
+	* client/dialogs/visualscandialog.cpp, client/dialogs/visualscandialog.hpp: new [ex client/dlg-visual.h]
+	* client/tiles/visualscanheadertile.cpp, client/tiles/visualscanheadertile.hpp: new [ex client/tiles/visheader.h]
+	* client/tiles/visualscanhullinfotile.cpp, client/tiles/visualscanhullinfotile.hpp: new [ex client/tiles/vishull.h]
+	* client/tiles/visualscanshipinfotile.cpp, client/tiles/visualscanshipinfotile.hpp: new [ex client/tiles/visship.h]
+
+2018-08-26  Stefan Reuther  <streu@gmx.de>
+
+	* client/proxy/referencelistproxy.cpp, client/proxy/referencelistproxy.hpp: moved from client/widgets/referencelistconnector.hpp
+	* client/proxy/cursorobserverproxy.cpp, client/proxy/cursorobserverproxy.hpp: moved from client/objectobserverproxy.hpp, client/objectobserver.hpp
+	* client/proxy/objectlistener.hpp: moved from client/objectlistener.hpp
+	* client/proxy/objectobserver.hpp: new
+	* client/proxy/referenceobserverproxy.cpp, client/proxy/referenceobserverproxy.hpp: new
+
+2018-08-25  Stefan Reuther  <streu@gmx.de>
+
+	* gfx/dimbackgroundcolorscheme.cpp, gfx/dimbackgroundcolorscheme.hpp: new
+	* client/screens/playerscreen.cpp: preliminary menu structure
+
+2018-08-24  Stefan Reuther  <streu@gmx.de>
+
+	* client/dialogs/referencesortorder.cpp, client/dialogs/referencesortorder.hpp: new
+	* gfx/dimcolorscheme.cpp, gfx/dimcolorscheme.hpp: new
+
+2018-08-20  Stefan Reuther  <streu@gmx.de>
+
+	* game/ref/sortbylocation.cpp, game/ref/sortbylocation.hpp: new [ex game/objl-sort.cc]
+	* game/ref/sortbynewlocation.cpp, game/ref/sortbynewlocation.hpp: new [ex game/objl-sort.cc]
+
+2018-08-19  Stefan Reuther  <streu@gmx.de>
+
+	* client/widgets/referencelistconnector.cpp, client/widgets/referencelistconnector.hpp: new
+	* game/map/objectlist.cpp, game/map/objectlist.hpp: removed [replaced by ReferenceList, ReferenceUserList]
+	* game/map/objectreference.cpp, game/map/objectreference.hpp: removed [replaced by Reference]
+	* game/ref/configuration.cpp, game/ref/configuration.hpp: new [ex game/objl-user.cc]
+	* game/ref/list.cpp, game/ref/list.hpp: moved from game/referencelist.hpp
+	* game/ref/listobserver.cpp, game/ref/listobserver.hpp: moved from game/ref/referencelistobserver.hpp
+	* game/ref/nullpredicate.cpp, game/ref/nullpredicate.hpp: new
+	* game/ref/sortbybattleorder.cpp, game/ref/sortbybattleorder.hpp: new [ex game/objl-sort.cc]
+	* game/ref/sortbydamage.cpp, game/ref/sortbydamage.hpp: new [ex game/objl-sort.cc]
+	* game/ref/sortbyfleet.cpp, game/ref/sortbyfleet.hpp: new [ex game/objl-sort.cc]
+	* game/ref/sortbyhullmass.cpp, game/ref/sortbyhullmass.hpp: new [ex game/objl-sort.cc]
+	* game/ref/sortbyhulltype.cpp, game/ref/sortbyhulltype.hpp: new [ex game/objl-sort.cc]
+	* game/ref/sortbyid.cpp, game/ref/sortbyid.hpp: moved from game/sort/byid.hpp
+	* game/ref/sortbymass.cpp, game/ref/sortbymass.hpp: new [ex game/objl-sort.cc]
+	* game/ref/sortbyname.cpp, game/ref/sortbyname.hpp: new [ex game/objl-sort.cc]
+	* game/ref/sortbyowner.cpp, game/ref/sortbyowner.hpp: new [ex game/objl-sort.cc]
+	* game/ref/sortbytowgroup.cpp, game/ref/sortbytowgroup.hpp: new [ex game/objl-sort.cc]
+	* game/ref/sortpredicate.hpp: moved from game/sort/predicate.hpp
+	* game/ref/userlist.cpp, game/ref/userlist.hpp: new
+
+2018-08-16  Stefan Reuther  <streu@gmx.de>
+
+	* game/battleorderrule.cpp, game/battleorderrule.hpp: new
+
+2018-08-15  Stefan Reuther  <streu@gmx.de>
+
+	* client/widgets/referencelistbox.cpp, client/widgets/referencelistbox.hpp: new [ex client/widgets/objlist.h]
+	* game/referenceuserlist.cpp, game/referenceuserlist.hpp: new
+	* game/sort/predicate.hpp: new [ex game/objl-sort.cc]
+
+2018-08-12  Stefan Reuther  <streu@gmx.de>
+
+	* client/si/commands.cpp (IFCCViewInbox, IFCCViewCombat): new
+
+2018-08-11  Stefan Reuther  <streu@gmx.de>
+
+	* game/referencelist.cpp, game/referencelist.hpp: new [ex game/objlist.h, sort-of]
+	* game/v3/fizzfile.cpp, game/v3/fizzfile.hpp: new [ex game/check-fizz.cc]
+
+2018-08-10  Stefan Reuther  <streu@gmx.de>
+
+	* game/v3/directoryloader.cpp, game/v3/directoryloader.hpp: new [ex game/load-dir.cc]
+
+2018-08-05  Stefan Reuther  <streu@gmx.de>
+
+	* client/si/commands.cpp (IFUIEditAlliances): new
+
+2018-08-04  Stefan Reuther  <streu@gmx.de>
+
+	* client/dialogs/alliancedialog.cpp, client/dialogs/alliancedialog.hpp: new [ex client/dialogs/allydlg.h]
+	* client/widgets/alliancelevelgrid.cpp, client/widgets/alliancelevelgrid.hpp: new [ex client/dialogs/allylevelgrid.h]
+	* client/widgets/alliancestatuslist.cpp, client/widgets/alliancestatuslist.hpp: new [ex client/widgets/allylist.h]
+
+2018-07-29  Stefan Reuther  <streu@gmx.de>
+
+	* gfx/sdl2/nullpresenter.cpp, gfx/sdl2/nullpresenter.hpp: removed
+	* gfx/sdl2/presenter.hpp: removed
+	* gfx/sdl2/engine.cpp: optimize redraw
+	* game/v3/writer.cpp, game/v3/writer.hpp: new [ex game/save-msg.cc]
+	* game/map/minefieldmission.cpp, game/map/minefieldmission.hpp: new [ex game/ship-form.cc]
+
+2018-07-28  Stefan Reuther  <streu@gmx.de>
+
+	* game/v3/udata/parser.cpp, game/v3/udata/parser.hpp: new [ex game/utilparse.h]
+	* game/v3/udata/reader.cpp, game/v3/udata/reader.hpp: new [ex game/utilread.h]
+
+2018-07-24  Stefan Reuther  <streu@gmx.de>
+
+	* game/alliance/hosthandler.cpp, game/alliance/hosthandler.hpp: new [ex game/talliance.h]
+	* game/alliance/phosthandler.cpp, game/alliance/phosthandler.hpp: new [ex game/palliance.h]
+
+2018-07-22  Stefan Reuther  <streu@gmx.de>
+
+	* game/alliance/container.cpp, game/alliance/container.hpp: new [ex game/alliance.h]
+	* game/alliance/handler.hpp: new [ex game/alliance.h]
+	* game/alliance/level.cpp, game/alliance/level.hpp: new [ex game/alliance.h]
+	* game/alliance/offer.cpp, game/alliance/offer.hpp: new [ex game/alliance.h]
+
+2018-07-21  Stefan Reuther  <streu@gmx.de>
+
+	* tools/c2mkturn.cpp: new [ex tools/c2mkturn.cc]
+	* game/v3/maketurn.cpp, game/v3/maketurn.hpp: new [ex game/maketurn.h]
+	* game/v3/maketurnapplication.cpp, game/v3/maketurnapplication.hpp: new [ex tools/c2mkturn.cc]
+	* game/v3/messagewriter.cpp, game/v3/messagewriter.hpp: new
+	* game/v3/utils.cpp, game/v3/utils.hpp: new
+
+2018-07-17  Stefan Reuther  <streu@gmx.de>
+
+	* game/v3/trn/fileset.cpp, game/v3/trn/fileset.hpp: new [ex game/save-trn.h]
+
+2018-07-15  Stefan Reuther  <streu@gmx.de>
+
+	* game/turnloader.cpp (saveCurrentDatabases): save scores, chart database
+
+2018-07-14  Stefan Reuther  <streu@gmx.de>
+
+	* game/interface/globalcommands.cpp (IFSaveGame): new
+
+2018-07-08  Stefan Reuther  <streu@gmx.de>
+
+	* game/spec/hullfunctionassignmentlist.cpp (getPlayersThatCan): optimize
+
+2018-07-07  Stefan Reuther  <streu@gmx.de>
+
+	* game/db/packer.cpp, game/db/packer.hpp: new
+
+2018-07-05  Stefan Reuther  <streu@gmx.de>
+
+	* game/db/loader.cpp: add loading Ufos, Minefields
+	* game/map/ufo.cpp: add loading from database
+
+2018-07-03  Stefan Reuther  <streu@gmx.de>
+
+	* game/v3/unpackapplication.cpp, game/v3/unpackapplication.hpp: new [ex tools/c2unpack.cc]
+	* game/v3/unpacker.cpp, game/v3/unpacker.hpp: new [ex game/unpack.h]
+	* tools/c2unpack.cpp: new [ex tools/c2unpack.cc]
+
+2018-06-30  Stefan Reuther  <streu@gmx.de>
+
+	* game/v3/genfile.cpp, game/v3/genfile.hpp: new [ex game/gen.h]
+
+2018-06-29  Stefan Reuther  <streu@gmx.de>
+
+	* server/host/installer.cpp (installGameData): set correct permissions [#377]
+	* server/host/gamerating.cpp (computeGameRating): set correct permissions [#377]
+	* server/host/exporter.cpp (exportGame, importGame): set correct permissions [#377]
+	* server/host/hosttool.cpp: fix file name list
+
+2018-06-28  Stefan Reuther  <streu@gmx.de>
+
+	* client/si/commands.cpp (IFLoadHelpFile): new
+	* client/help.cpp, client/help.hpp: new
+
+2018-06-26  Stefan Reuther  <streu@gmx.de>
+
+	* util/helpindex.cpp, util/helpindex.hpp: new
+
+2018-06-17  Stefan Reuther  <streu@gmx.de>
+
+	* server/host/hostgame.cpp (updateGames): rebuild missing file history
+
+2018-06-03  Stefan Reuther  <streu@gmx.de>
+
+	* server/host/actions.cpp (processInactivityKicks): don't kick a newly-joined player
+
+2018-06-02  Stefan Reuther  <streu@gmx.de>
+
+	* server/host/hostfile.cpp, server/host/hostfile.hpp: new
+	* server/host/file/: new
+
+2018-05-27  Stefan Reuther  <streu@gmx.de>
+
+	* server/host/actions.cpp (importFileHistory): new
+	* server/interface/hostfile.cpp, server/interface/hostfile.hpp: new
+	* server/interface/hostfileclient.cpp, server/interface/hostfileclient.hpp: new
+	* server/interface/hostfileserver.cpp, server/interface/hostfileserver.hpp: new
+
+2018-05-21  Stefan Reuther  <streu@gmx.de>
+
+	* server/host/actions.cpp: new. Add Host.KickAfterMissed option
+
+2018-05-18  Stefan Reuther  <streu@gmx.de>
+
+	* server/monitor/serverapplication.cpp: add Monitor.SaveInterval option
+
+2018-05-17  Stefan Reuther  <streu@gmx.de>
+
+	* util/plugin/dialogapplication.cpp, util/plugin/dialogapplication.hpp: new [ex tools/c2pluginw.cc]
+	* tools/c2pluginw.cpp: new [ex tools/c2pluginw.cc]
+
+2018-05-13  Stefan Reuther  <streu@gmx.de>
+
+	* util/plugin/consoleapplication.cpp, util/plugin/consoleapplication.hpp: new
+
+2018-05-06  Stefan Reuther  <streu@gmx.de>
+
+	-------------------- c2ng_2_40_4 (version 2.40.4)
+
 2018-05-05  Stefan Reuther  <streu@gmx.de>
 
 	* game/map/movementpredictor.cpp, game/map/movementpredictor.hpp: new [ex game/movement.h]

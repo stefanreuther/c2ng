@@ -150,7 +150,7 @@ client::widgets::CommandDataView::addButton(String_t title, util::Key_t key)
     Line* p = m_lines.pushBackNew(new Line(title, key, root()));
     addChild(p->frame, 0);
     addChild(p->textPair, 0);
-    m_keys.addButton(p->button);
+    p->button.dispatchKeyTo(m_keys);
 }
 
 bool

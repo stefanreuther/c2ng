@@ -230,3 +230,27 @@ TestGameDbFleetLoader::testComments()
     TS_ASSERT_EQUALS(univ.ships().get(4)->getFleetName(), "");
 }
 
+/** Test loading conflicting fleets.
+    If a ship has changed owners and is member of a new fleet, loading must not overwrite this. */
+void
+TestGameDbFleetLoader::testConflict()
+{
+    game::map::Universe univ;
+
+    static const uint8_t DATA[] = {
+        'C','C','f','l','e','e','t',26,1,
+        3,0,              // number of ships
+        0,0, 0,0, 2,0,
+    };
+    createShip(univ, 1, 1);
+    createShip(univ, 2, 2);  // new owner, new ship Id
+    createShip(univ, 3, 2);
+    univ.ships().get(2)->setFleetNumber(3);
+    univ.ships().get(3)->setFleetNumber(3);
+
+    TS_ASSERT_THROWS_NOTHING(loadFile(univ, 1, DATA));
+
+    TS_ASSERT_EQUALS(univ.ships().get(1)->getFleetNumber(), 0);
+    TS_ASSERT_EQUALS(univ.ships().get(2)->getFleetNumber(), 3);
+    TS_ASSERT_EQUALS(univ.ships().get(3)->getFleetNumber(), 3);
+}

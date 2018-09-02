@@ -4,6 +4,7 @@
 
 #include "game/game.hpp"
 #include "game/turn.hpp"
+#include "game/alliance/container.hpp"
 
 game::Game::Game()
     : sig_viewpointTurnChange(),
@@ -180,6 +181,132 @@ const game::msg::Configuration&
 game::Game::messageConfiguration() const
 {
     return m_messageConfiguration;
+}
+
+void
+game::Game::addMessageInformation(const game::parser::MessageInformation& info, game::config::HostConfiguration& config)
+{
+    // ex GUniverse::addMessageInformation
+    using game::parser::MessageInformation;
+
+    // Do not accept information that claims to be newer than us
+    if (info.getTurnNumber() > currentTurn().getTurnNumber()) {
+        return;
+    }
+
+    // Dispatch
+    switch (info.getObjectType()) {
+     case MessageInformation::Ship:
+        // Ship: add normally, with no claim to reliability (=empty source set).
+        // To add information to be treated as reliable (e.g. target.dat file), add it to the ship directly.
+        if (game::map::Ship* pShip = currentTurn().universe().ships().get(info.getObjectId())) {
+            pShip->addMessageInformation(info, PlayerSet_t());
+        }
+        break;
+
+     case MessageInformation::Planet:
+     case MessageInformation::Starbase:
+        // Planet: add normally
+        if (game::map::Planet* pPlanet = currentTurn().universe().planets().get(info.getObjectId())) {
+            pPlanet->addMessageInformation(info);
+        }
+        break;
+
+     case MessageInformation::Minefield:
+        // Minefield: add normally. MinefieldType will deal with details.
+        currentTurn().universe().minefields().addMessageInformation(info);
+        break;
+
+     case MessageInformation::IonStorm:
+        // FIXME: implement ion storms (not implemented in PCC2)
+        break;
+
+     case MessageInformation::Ufo:
+        // Ufo: add normally. UfoType will deal with details.
+        currentTurn().universe().ufos().addMessageInformation(info);
+        break;
+
+     case MessageInformation::Explosion:
+        // FIXME: implement explosion (not implemented in PCC2)
+        break;
+
+     case MessageInformation::Configuration:
+        // Configuration: add it. Ignore the age here.
+        for (MessageInformation::Iterator_t i = info.begin(); i != info.end(); ++i) {
+            if (game::parser::MessageConfigurationValue_t* cv = dynamic_cast<game::parser::MessageConfigurationValue_t*>(*i)) {
+                try {
+                    config.setOption(cv->getIndex(),
+                                     cv->getValue(),
+                                     game::config::ConfigurationOption::Game);
+                }
+                catch (...) {
+                    // Ignore any error.
+                }
+            }
+        }
+        break;
+
+     case MessageInformation::PlayerScore:
+        // Score: we can add past scores only if we already know its timestamp.
+        if (info.getTurnNumber() == currentTurn().getTurnNumber()) {
+            scores().addMessageInformation(info, currentTurn().getTimestamp());
+        } else if (const game::score::TurnScore* ts = scores().getTurn(info.getTurnNumber())) {
+            scores().addMessageInformation(info, ts->getTimestamp());
+        } else {
+            // Cannot add this guy.
+        }
+        break;
+
+     case MessageInformation::Alliance:
+        // Alliance: add it. Ignore the age here.
+        // ex game/msgglobal.cc:mergeAllies
+        for (MessageInformation::Iterator_t i = info.begin(); i != info.end(); ++i) {
+            if (game::parser::MessageAllianceValue_t* cv = dynamic_cast<game::parser::MessageAllianceValue_t*>(*i)) {
+                game::alliance::Container& allies = currentTurn().alliances();
+                if (game::alliance::Offer* p = allies.getMutableOffer(allies.find(cv->getIndex()))) {
+                    p->merge(cv->getValue());
+                }
+            }
+        }
+        break;
+
+     case MessageInformation::NoObject:
+        break;
+    }
+}
+
+void
+game::Game::synchronizeTeamsFromAlliances()
+{
+    // ex game/team.cc:syncTeamsFromAlliances
+    // @change This does NOT check the preferences option
+    using game::alliance::Level;
+
+    const game::alliance::Container& allies = currentTurn().alliances();
+    TeamSettings& teams = teamSettings();
+    const int me = getViewpointPlayer();       // FIXME: was: getRealPlayerId();
+    const int myTeam = teams.getPlayerTeam(me);
+
+    if (!allies.getLevels().empty()) {
+        // We actually have alliances
+        for (int i = 1; i <= MAX_PLAYERS; ++i) {
+            if (i != me) {
+                // It's a relation to another player
+                if (teams.getPlayerTeam(i) == myTeam) {
+                    // They are on my team. Are we allied? If not, remove them.
+                    // (only check our offers; if we offer an alliance, we consider them on our team.)
+                    if (!allies.isAny(i, Level::IsOffer, true)) {
+                        teams.removePlayerTeam(i);
+                    }
+                } else {
+                    // They are not on my team.
+                    if (allies.isAny(i, Level::IsOffer, true)) {
+                        teams.setPlayerTeam(i, myTeam);
+                    }
+                }
+            }
+        }
+    }
 }
 
 void

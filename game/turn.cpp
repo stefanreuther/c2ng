@@ -13,7 +13,8 @@ game::Turn::Turn()
       m_battles(),
       m_turnNumber(0),
       m_databaseTurnNumber(0),
-      m_timestamp()
+      m_timestamp(),
+      m_alliances()
 { }
 
 game::Turn::~Turn()
@@ -116,6 +117,18 @@ const game::ExtraContainer<game::Turn>&
 game::Turn::extras() const
 {
     return m_extras;
+}
+
+game::alliance::Container&
+game::Turn::alliances()
+{
+    return m_alliances;
+}
+
+const game::alliance::Container&
+game::Turn::alliances() const
+{
+    return m_alliances;
 }
 
 void

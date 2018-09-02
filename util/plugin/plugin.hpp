@@ -19,6 +19,7 @@ namespace util { namespace plugin {
             PlainFile,              // Just a file to copy
             ScriptFile,             // A file to copy and Load()
             ResourceFile,           // A file to copy and LoadResource()
+            HelpFile,               // A file to copy and LoadHelpFile()
             Command                 // Not a file, just a command
         };
         struct Item {

@@ -10,7 +10,6 @@
 #include "afl/sys/mutex.hpp"
 #include "afl/sys/semaphore.hpp"
 #include "gfx/engine.hpp"
-#include "gfx/sdl2/presenter.hpp"
 #include "gfx/sdl2/surface.hpp"
 #include "gfx/timerqueue.hpp"
 #include "util/key.hpp"
@@ -44,8 +43,12 @@ namespace gfx { namespace sdl2 {
         afl::sys::LogListener& m_log;
 
         // Current window
-        std::auto_ptr<Presenter> m_presenter;
         afl::base::Ptr<Surface> m_window;
+        SDL_Window* m_sdlWindow;
+        SDL_Texture* m_sdlTexture;
+        SDL_Renderer* m_sdlRenderer;
+        void setWindowStuff(SDL_Window* win, SDL_Texture* tex, SDL_Renderer* renderer);
+        void clearWindowStuff();
 
         // Mouse grab
         bool m_disableGrab;                ///< If set, mouse grab is disabled. FIXME: make this configurable

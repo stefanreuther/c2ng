@@ -35,6 +35,8 @@ namespace game { namespace map {
 
         bool parseCoordinates(const String_t& s);
 
+        int compare(const Point& other) const;
+
         // --> in Configuration
         // bool parseSectorNumber(const string_t& s);
         // bool parseSectorNumber(int n);

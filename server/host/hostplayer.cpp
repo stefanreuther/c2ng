@@ -278,7 +278,7 @@ server::host::HostPlayer::list(int32_t gameId, bool all, std::map<int,Info>& res
         if ((gameState != HostGame::Running && gameState != HostGame::Finished) || game.turnNumber().get() <= 0) {
             all = false;
         } else {
-            turn1State = game.turn(1).info().stringField("turnstatus").get();
+            turn1State = game.turn(1).info().turnStatus().get();
         }
     }
 

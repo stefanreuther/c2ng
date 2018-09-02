@@ -7,6 +7,9 @@
 #include "afl/base/staticassert.hpp"
 #include "afl/except/fileformatexception.hpp"
 #include "afl/string/format.hpp"
+#include "game/alliance/hosthandler.hpp"
+#include "game/alliance/phosthandler.hpp"
+#include "game/game.hpp"
 #include "game/map/basedata.hpp"
 #include "game/map/ionstorm.hpp"
 #include "game/map/minefield.hpp"
@@ -16,11 +19,20 @@
 #include "game/map/ship.hpp"
 #include "game/map/ufotype.hpp"
 #include "game/parser/messageinformation.hpp"
+#include "game/v3/commandextra.hpp"
+#include "game/v3/genfile.hpp"
 #include "game/v3/inboxfile.hpp"
+#include "game/v3/packer.hpp"
+#include "game/v3/resultfile.hpp"
 #include "game/v3/reverter.hpp"
 #include "game/v3/structures.hpp"
 #include "game/vcr/classic/database.hpp"
-#include "game/v3/packer.hpp"
+#include "game/v3/utils.hpp"
+
+using afl::base::Ref;
+using afl::except::FileFormatException;
+using afl::io::Stream;
+using afl::string::Format;
 
 namespace {
     const char LOG_NAME[] = "game.v3.loader";
@@ -36,6 +48,20 @@ namespace {
         return name == String_t(afl::string::Format("Ship %d", shipId));
     }
 
+    struct KoreTargetHeader {
+        char sig[4];
+        game::v3::structures::UInt32_t num;
+    };
+
+    Stream::FileSize_t getShipXYSize(const game::v3::ResultFile& result)
+    {
+        Stream::FileSize_t start, end;
+        if (result.getSectionOffset(result.ShipXYSection, start) && result.getSectionOffset(result.GenSection, end) && end > start) {
+            return end - start;
+        } else {
+            return 0;
+        }
+    }
 }
 
 // Constructor.
@@ -47,7 +73,7 @@ game::v3::Loader::Loader(afl::charset::Charset& charset, afl::string::Translator
 
 // Prepare universe.
 void
-game::v3::Loader::prepareUniverse(game::map::Universe& univ)
+game::v3::Loader::prepareUniverse(game::map::Universe& univ) const
 {
     for (int i = 1; i <= structures::NUM_SHIPS; ++i) {
         univ.ships().create(i);
@@ -60,9 +86,32 @@ game::v3::Loader::prepareUniverse(game::map::Universe& univ)
     }
 }
 
+// Prepare turn.
+void
+game::v3::Loader::prepareTurn(Turn& turn, const Root& root, Session& session, int player) const
+{
+    // FIXME: design problem? We have one reverter, one set of alliances.
+    // This needs revision if we want to load multiple turns into one instance.
+    // FIXME: merge with prepareUniverse()?
+
+    // Reverter
+    turn.universe().setNewReverter(new Reverter(turn.universe(), session));
+
+    // Create CommandExtra. This allows further code to deal with PHost commands.
+    CommandExtra::create(turn);
+
+    // Alliances
+    if (root.hostVersion().isPHost()) {
+        turn.alliances().addNewHandler(new game::alliance::PHostHandler(root.hostVersion().getVersion(), turn, session, player));
+    } else {
+        turn.alliances().addNewHandler(new game::alliance::HostHandler(root.hostVersion().getVersion(), turn, player));
+    }
+
+}
+
 // Load planets.
 void
-game::v3::Loader::loadPlanets(game::map::Universe& univ, afl::io::Stream& file, int count, LoadMode mode, PlayerSet_t source)
+game::v3::Loader::loadPlanets(game::map::Universe& univ, afl::io::Stream& file, int count, LoadMode mode, PlayerSet_t source) const
 {
     // ex game/load.cc:loadPlanets
     m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loading %d planet%!1{s%}...").c_str(), count));
@@ -94,7 +143,7 @@ game::v3::Loader::loadPlanets(game::map::Universe& univ, afl::io::Stream& file, 
 
 // Load planet coordinate.
 void
-game::v3::Loader::loadPlanetCoordinates(game::map::Universe& univ, afl::io::Stream& file)
+game::v3::Loader::loadPlanetCoordinates(game::map::Universe& univ, afl::io::Stream& file) const
 {
     // ex game/load.h:loadPlanetXY
     m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loading up to %d planet position%!1{s%}...").c_str(), structures::NUM_PLANETS));
@@ -115,7 +164,7 @@ game::v3::Loader::loadPlanetCoordinates(game::map::Universe& univ, afl::io::Stre
 
 // Load planet names.
 void
-game::v3::Loader::loadPlanetNames(game::map::Universe& univ, afl::io::Stream& file)
+game::v3::Loader::loadPlanetNames(game::map::Universe& univ, afl::io::Stream& file) const
 {
     // ex game/load.h:loadPlanetNames
     m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loading %d planet name%!1{s%}...").c_str(), structures::NUM_PLANETS));
@@ -132,7 +181,7 @@ game::v3::Loader::loadPlanetNames(game::map::Universe& univ, afl::io::Stream& fi
 
 // Load Ion Storm Names.
 void
-game::v3::Loader::loadIonStormNames(game::map::Universe& univ, afl::io::Stream& file)
+game::v3::Loader::loadIonStormNames(game::map::Universe& univ, afl::io::Stream& file) const
 {
     // ex game/load.h:loadStormNames
     m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loading %d ion storm name%!1{s%}...").c_str(), structures::NUM_ION_STORMS));
@@ -149,7 +198,7 @@ game::v3::Loader::loadIonStormNames(game::map::Universe& univ, afl::io::Stream& 
 
 // Load starbases.
 void
-game::v3::Loader::loadBases(game::map::Universe& univ, afl::io::Stream& file, int count, LoadMode mode, PlayerSet_t source)
+game::v3::Loader::loadBases(game::map::Universe& univ, afl::io::Stream& file, int count, LoadMode mode, PlayerSet_t source) const
 {
     // ex game/load.h:loadBases
     m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loading %d starbase%!1{s%}...").c_str(), count));
@@ -181,7 +230,7 @@ game::v3::Loader::loadBases(game::map::Universe& univ, afl::io::Stream& file, in
 }
 
 void
-game::v3::Loader::loadShipXY(game::map::Universe& univ, afl::io::Stream& file, afl::io::Stream::FileSize_t bytes, LoadMode /*mode*/, PlayerSet_t source, PlayerSet_t reject)
+game::v3::Loader::loadShipXY(game::map::Universe& univ, afl::io::Stream& file, afl::io::Stream::FileSize_t bytes, LoadMode /*mode*/, PlayerSet_t source, PlayerSet_t reject) const
 {
     // ex game/load.cc:loadShipXY
 
@@ -224,7 +273,7 @@ game::v3::Loader::loadShipXY(game::map::Universe& univ, afl::io::Stream& file, a
 }
 
 void
-game::v3::Loader::loadShips(game::map::Universe& univ, afl::io::Stream& file, int count, LoadMode mode, bool remapExplore, PlayerSet_t source)
+game::v3::Loader::loadShips(game::map::Universe& univ, afl::io::Stream& file, int count, LoadMode mode, bool remapExplore, PlayerSet_t source) const
 {
     m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loading %d ship%!1{s%}...").c_str(), count));
     Reverter* pReverter = dynamic_cast<Reverter*>(univ.getReverter());
@@ -254,8 +303,9 @@ game::v3::Loader::loadShips(game::map::Universe& univ, afl::io::Stream& file, in
     }
 }
 
+// Load targets.
 void
-game::v3::Loader::loadTargets(game::map::Universe& univ, afl::io::Stream& file, int count, TargetFormat fmt, PlayerSet_t source, int turnNumber)
+game::v3::Loader::loadTargets(game::map::Universe& univ, afl::io::Stream& file, int count, TargetFormat fmt, PlayerSet_t source, int turnNumber) const
 {
     // ex game/load.cc:loadTargets
     m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loading %d visual contact%!1{s%}...").c_str(), count));
@@ -265,48 +315,54 @@ game::v3::Loader::loadTargets(game::map::Universe& univ, afl::io::Stream& file, 
 
         // Decrypt the target
         if (fmt == TargetEncrypted) {
-            for (int i = 0; i < 20; ++i) {
-                target.name.m_bytes[i] ^= 154-i;
-            }
+            encryptTarget(target);
         }
 
-        const int shipId = target.shipId;
-        map::Ship* s = univ.ships().get(shipId);
-        if (!s) {
-            m_log.write(m_log.Error, LOG_NAME, afl::string::Format(m_translator.translateString("Invalid ship Id #%d for visual contact. Target will be ignored").c_str(), shipId));
-        } else {
-            // Convert to message information
-            namespace gp = game::parser;
-            gp::MessageInformation info(gp::MessageInformation::Ship, shipId, turnNumber);
+        addTarget(univ, target, source, turnNumber);
 
-            // Simple values
-            info.addValue(gp::mi_Owner, target.owner);
-            info.addValue(gp::mi_Speed, target.warpFactor);
-            info.addValue(gp::mi_X, target.x);
-            info.addValue(gp::mi_Y, target.y);
-            info.addValue(gp::mi_ShipHull, target.hullType);
-
-            // Heading
-            int heading = target.heading;
-            if (heading >= 0) {
-                info.addValue(gp::mi_Heading, heading);
-            }
-
-            // Name (optional)
-            String_t name = m_charset.decode(target.name);
-            if (!isDummyName(name, shipId)) {
-                info.addValue(gp::ms_Name, name);
-            }
-
-            s->addMessageInformation(info, source);
-        }
         --count;
+    }
+}
+
+// Add a target.
+void
+game::v3::Loader::addTarget(game::map::Universe& univ, const game::v3::structures::ShipTarget& target, PlayerSet_t source, int turnNumber) const
+{
+    const int shipId = target.shipId;
+    map::Ship* s = univ.ships().get(shipId);
+    if (!s) {
+        m_log.write(m_log.Error, LOG_NAME, afl::string::Format(m_translator.translateString("Invalid ship Id #%d for visual contact. Target will be ignored").c_str(), shipId));
+    } else {
+        // Convert to message information
+        namespace gp = game::parser;
+        gp::MessageInformation info(gp::MessageInformation::Ship, shipId, turnNumber);
+
+        // Simple values
+        info.addValue(gp::mi_Owner, target.owner);
+        info.addValue(gp::mi_Speed, target.warpFactor);
+        info.addValue(gp::mi_X, target.x);
+        info.addValue(gp::mi_Y, target.y);
+        info.addValue(gp::mi_ShipHull, target.hullType);
+
+        // Heading
+        int heading = target.heading;
+        if (heading >= 0) {
+            info.addValue(gp::mi_Heading, heading);
+        }
+
+        // Name (optional)
+        String_t name = m_charset.decode(target.name);
+        if (!isDummyName(name, shipId)) {
+            info.addValue(gp::ms_Name, name);
+        }
+
+        s->addMessageInformation(info, source);
     }
 }
 
 // Load Minefields from KORE-style file.
 void
-game::v3::Loader::loadKoreMinefields(game::map::Universe& univ, afl::io::Stream& file, int count, int player, int turnNumber)
+game::v3::Loader::loadKoreMinefields(game::map::Universe& univ, afl::io::Stream& file, int count, int player, int turnNumber) const
 {
     // ex game/load.cc:loadKoreMinefields
     m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loading up to %d minefield%!1{s%}...").c_str(), count));
@@ -344,7 +400,7 @@ game::v3::Loader::loadKoreMinefields(game::map::Universe& univ, afl::io::Stream&
 }
 
 void
-game::v3::Loader::loadKoreIonStorms(game::map::Universe& univ, afl::io::Stream& file, int count)
+game::v3::Loader::loadKoreIonStorms(game::map::Universe& univ, afl::io::Stream& file, int count) const
 {
     // ex game/load.cc:loadKoreIonStorms
     m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loading up to %d ion storm%!1{s%}...").c_str(), count));
@@ -368,7 +424,7 @@ game::v3::Loader::loadKoreIonStorms(game::map::Universe& univ, afl::io::Stream& 
 }
 
 void
-game::v3::Loader::loadKoreExplosions(game::map::Universe& univ, afl::io::Stream& file, int count)
+game::v3::Loader::loadKoreExplosions(game::map::Universe& univ, afl::io::Stream& file, int count) const
 {
     // ex game/load.cc:loadKoreExplosions
     m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loading up to %d explosion%!1{s%}...").c_str(), count));
@@ -385,7 +441,7 @@ game::v3::Loader::loadKoreExplosions(game::map::Universe& univ, afl::io::Stream&
 }
 
 void
-game::v3::Loader::loadInbox(game::msg::Inbox& inbox, afl::io::Stream& file, int turn)
+game::v3::Loader::loadInbox(game::msg::Inbox& inbox, afl::io::Stream& file, int turn) const
 {
     InboxFile parser(file, m_charset);
     const size_t n = parser.getNumMessages();
@@ -401,7 +457,7 @@ game::v3::Loader::loadInbox(game::msg::Inbox& inbox, afl::io::Stream& file, int 
 }
 
 void
-game::v3::Loader::loadBattles(game::Turn& turn, afl::io::Stream& file, const game::config::HostConfiguration& config)
+game::v3::Loader::loadBattles(game::Turn& turn, afl::io::Stream& file, const game::config::HostConfiguration& config) const
 {
     afl::base::Ptr<game::vcr::classic::Database> db = new game::vcr::classic::Database();
     db->load(file, config, m_charset);
@@ -412,7 +468,7 @@ game::v3::Loader::loadBattles(game::Turn& turn, afl::io::Stream& file, const gam
 }
 
 void
-game::v3::Loader::loadUfos(game::map::Universe& univ, afl::io::Stream& file, int firstId, int count)
+game::v3::Loader::loadUfos(game::map::Universe& univ, afl::io::Stream& file, int firstId, int count) const
 {
     // ex game/load.h:loadUfos, GUfoType::addUfoData, GUfo::addUfoData
     game::map::UfoType& ufos = univ.ufos();
@@ -437,6 +493,117 @@ game::v3::Loader::loadUfos(game::map::Universe& univ, afl::io::Stream& file, int
                 out->setRadius(int(in.radius));
                 out->setIsSeenThisTurn(true);
             }
+        }
+    }
+}
+
+void
+game::v3::Loader::loadCommonFiles(afl::io::Directory& gameDir, afl::io::Directory& specDir, game::map::Universe& univ, int player) const
+{
+    {
+        afl::base::Ptr<Stream> file = gameDir.openFileNT(Format("xyplan%d.dat", player), afl::io::FileSystem::OpenRead);
+        if (file.get() == 0) {
+            file = specDir.openFile("xyplan.dat", afl::io::FileSystem::OpenRead).asPtr();
+        }
+        loadPlanetCoordinates(univ, *file);
+    }
+
+    // planet.nm
+    {
+        Ref<Stream> file = specDir.openFile("planet.nm", afl::io::FileSystem::OpenRead);
+        loadPlanetNames(univ, *file);
+    }
+
+    // storm.nm
+    {
+        Ref<Stream> file = specDir.openFile("storm.nm", afl::io::FileSystem::OpenRead);
+        loadIonStormNames(univ, *file);
+    }
+}
+
+void
+game::v3::Loader::loadResult(Turn& turn, const Root& root, Game& game, afl::io::Stream& file, int player) const
+{
+    // ex game/load-rst.cc:loadResult
+    structures::Int16_t n;
+
+    ResultFile result(file, m_translator);
+    PlayerSet_t source(player);
+
+    // Gen
+    GenFile gen;
+    result.seekToSection(ResultFile::GenSection);
+    gen.loadFromResult(file);
+    if (gen.getPlayerId() != player) {
+        throw FileFormatException(file, Format(m_translator.translateString("File is owned by player %d, should be %d").c_str(), gen.getPlayerId(), player));
+    }
+//     trn.setHaveData(player);
+//     trn.setGen(player, GGen(gen));
+    gen.copyScoresTo(game.scores());
+    turn.setTurnNumber(gen.getTurnNumber());
+    turn.setTimestamp(gen.getTimestamp());
+
+    // Ships
+    result.seekToSection(ResultFile::ShipSection);
+    file.fullRead(afl::base::fromObject(n));
+    loadShips(turn.universe(), file, n, LoadBoth, !root.hostVersion().isMissionAllowed(1), source);
+
+    // Targets
+    result.seekToSection(ResultFile::TargetSection);
+    file.fullRead(afl::base::fromObject(n));
+    loadTargets(turn.universe(), file, n, TargetPlaintext, source, turn.getTurnNumber());
+
+    // Planets
+    result.seekToSection(ResultFile::PlanetSection);
+    file.fullRead(afl::base::fromObject(n));
+    loadPlanets(turn.universe(), file, n, LoadBoth, source);
+
+    // Starbases
+    result.seekToSection(ResultFile::BaseSection);
+    file.fullRead(afl::base::fromObject(n));
+    loadBases(turn.universe(), file, n, LoadBoth, source);
+
+    // Messages
+    result.seekToSection(ResultFile::MessageSection);
+    loadInbox(turn.inbox(), file, gen.getTurnNumber());
+
+    // SHIPXY (must be after SHIP) <-- FIXME: why this comment (from PCC2)?
+    result.seekToSection(ResultFile::ShipXYSection);
+    loadShipXY(turn.universe(), file, getShipXYSize(result), LoadBoth, source, PlayerSet_t());
+
+    // VCRs
+    result.seekToSection(ResultFile::VcrSection);
+    loadBattles(turn, file, root.hostConfiguration());
+
+    // Windows part of RST
+    Stream::FileSize_t pos;
+    if (result.getSectionOffset(ResultFile::KoreSection, pos)) {
+        // KORE
+        file.setPos(pos);
+        loadKoreMinefields(turn.universe(), file, 500, player, turn.getTurnNumber());
+        loadKoreIonStorms(turn.universe(), file, 50);
+        loadKoreExplosions(turn.universe(), file, 50);
+//         player_racenames.load(s); /* FIXME: configurable? */
+//         host_racenames = player_racenames;
+        file.setPos(pos + 500*8+600+50*4+682);
+        loadUfos(turn.universe(), file, 1, 100);
+
+        file.setPos(pos + 500*8+600+50*4+682+7800);
+        KoreTargetHeader kth;
+        if (file.read(afl::base::fromObject(kth)) == sizeof(kth) && std::memcmp(kth.sig, "1120", 4) == 0) {
+            uint32_t n = kth.num;
+            if (n > uint32_t(game::v3::structures::NUM_SHIPS)) {
+                throw FileFormatException(file, m_translator.translateString("Unbelievable number of visual contacts"));
+            }
+            loadTargets(turn.universe(), file, n, TargetEncrypted, source, turn.getTurnNumber());
+        }
+    }
+
+    if (result.getSectionOffset(ResultFile::SkoreSection, pos)) {
+        // SKORE
+        file.setPos(pos);
+        if (file.read(afl::base::fromObject(n)) == sizeof(n) && n > 100) {
+            loadUfos(turn.universe(), file, 101, n - 100);
         }
     }
 }

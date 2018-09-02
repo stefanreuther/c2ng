@@ -37,21 +37,6 @@ namespace {
     using client::widgets::ClassicVcrInfo;
     using afl::string::Format;
 
-    util::SkinColor::Color getRelationColor(game::TeamSettings::Relation r)
-    {
-        // ex getPlayerColor, sort-of
-        // FIXME: move to general place?
-        switch (r) {
-         case game::TeamSettings::ThisPlayer:
-            return ui::SkinColor::Green;
-         case game::TeamSettings::AlliedPlayer:
-            return ui::SkinColor::Yellow;
-         case game::TeamSettings::EnemyPlayer:
-            return ui::SkinColor::Red;
-        }
-        return ui::SkinColor::Static;
-    }
-
     void prepareWarrior(ClassicVcrInfo::Data& out, size_t side, const game::vcr::classic::Battle& in, const game::vcr::Object& obj, game::Session& session)
     {
         // ex WVcrSelector::drawWarrior, WVcrSelector::drawContent
@@ -95,7 +80,7 @@ namespace {
         }
 
         out.info[side][line] = Format("%s (Id #%d, %s %s)", obj.getName(), obj.getId(), adj, type);
-        out.color[side][line] = getRelationColor(g->teamSettings().getPlayerRelation(obj.getOwner()));
+        out.color[side][line] = g->teamSettings().getPlayerColor(obj.getOwner());
         ++line;
 
         // Shield, Damage, Crew

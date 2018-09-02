@@ -101,6 +101,14 @@
         font-size: 80%;
         color: #666;
       }
+      strong {
+        display: block;
+        color: #55f;
+        font-size: 80%;
+        font-weight: normal;
+        font-style: normal;
+        margin-left: 0.5em;
+      }
     </style>
     <script>
       window.addEventListener('load', function() {
@@ -146,6 +154,8 @@
       <li><a href="#game">Game</a></li>
       <li><a href="#browser">Browser</a></li>
       <li><a href="#ui">User Interface</a></li>
+      <li><a href="#fileserver">File Server</a></li>
+      <li><a href="#hostserver">Host Server</a></li>
     </ul>
 
     <h2 id="game">Game</h2>
@@ -156,18 +166,18 @@
     <div class="tree">
       <div class="root hasnotify"><b>game::Session</b>
         <div class="optional ptr hasnotify">Root <em>: game::Root</em>
-          <div class="ptr virtual">GameDir <em>: afl::io::Directory</em></div>
-          <div class="ptr virtual">SpecLoader <em>: game::SpecificationLoader</em></div>
-          <div class="owned">Actions <em>: game::Root::Actions_t</em></div>
+          <div class="ptr virtual">GameDir <em>: afl::io::Directory</em>                    <strong>Local game directory</strong></div>
+          <div class="ptr virtual">SpecLoader <em>: game::SpecificationLoader</em>          <strong>Virtual object to load a ShipList</strong></div>
+          <div class="owned">Actions <em>: game::Root::Actions_t</em>                       <strong>Permitted actions on this game</strong></div>
           <div class="owned">HostVersion <em>: game::HostVersion</em></div>
           <div class="owned virtual">RegKey <em>: game::RegistrationKey</em></div>
           <div class="owned haschange">HostConfig <em>: game::config::HostConfiguration</em></div>
-          <div class="owned haschange">UserConfig <em>: game::config::UserConfiguration</em></div>
-          <div class="owned haschange">PlayerList <em>: game::PlayerList</em>
+          <div class="owned haschange">UserConfig <em>: game::config::UserConfiguration</em><strong>Includes directory configuration such as charset, editability</strong></div>
+          <div class="owned haschange">PlayerList <em>: game::PlayerList</em>               <strong>Players including race names, nicks, etc.</strong>
             <div class="owned">Player <em>: game::Player[]</em></div>
           </div>
-          <div class="optional ptr virtual">TurnLoader <em>: game::TurnLoader</em></div>
-          <div class="owned virtual">StringVerifier <em>: game::StringVerifier</em></div>
+          <div class="optional ptr virtual">TurnLoader <em>: game::TurnLoader</em>          <strong>Virtual object to load a game turn</strong></div>
+          <div class="owned virtual">StringVerifier <em>: game::StringVerifier</em>         <strong>Virtual object to define rules for string properties (e.g. permitted characters in friendly codes)</strong></div>
         </div>
         <div class="optional ptr haschange">ShipList <em>: game::spec::ShipList</em>
           <div class="owned">Beams <em>: game::spec::ComponentVector</em>
@@ -182,10 +192,12 @@
           <div class="owned">Hulls <em>: game::spec::ComponentVector</em>
             <div class="owned">Hull <em>: game::spec::Hull[]</em></div></div>
           <div class="owned">BasicHullFunctions <em>: game::spec::BasicHullFunctionList</em>
+            <strong>Definition of basic functions such as "Cloak" (hullfunc.cc)</strong>
             <div class="owned">Functions <em>: game::spec::BasicHullFunction[]</em></div>
             <div class="owned">DefaultAssignment <em>: (int,int)[]</em></div>
           </div>
           <div class="owned">ModifiedHullFunctions <em>: game::spec::ModifiedHullFunctionList</em>
+            <strong>Definition of modified hull functions such as "Cloak at experience level 3"</strong>
             <div class="owned">ModifiedFunction <em>: game::spec::HullFunction[]</em></div>
           </div>
           <div class="owned">RacialAbilities <em>: game::spec::HullFunctionAssignmentList</em></div>
@@ -269,8 +281,10 @@
         <div class="owned">RandomNumberGenerator <em>: util::RandomNumberGenerator</em></div>
         <div class="owned">InterpreterInterface <em>: game::InterpreterInterface</em></div>
         <div class="owned virtual">UserInterfacePropertyAccessor <em>: game::interface::UserInterfacePropertyAccessor[]</em></div>
+        <div class="owned">EditableAreas <em>: AreaSet_t</em><strong>Read-only/read-write status for database and turn data</strong></div>
         <div class="ref">Translator <em>: afl::string::Translator</em></div>
         <div class="owned hasnotify">World <em>: interpreterinterface::World</em>
+          <strong>Interpreter core with little VGAP interdependencies</strong>
           <div class="owned">GlobalPropertyNames, ShipPropertyNames, PlanetPropertyNames <em>: afl::data::NameMap</em></div>
           <div class="owned">GlobalPropertyValues <em>: afl::data::Segment</em></div>
           <div class="owned">ShipPropertyValues, PlanetPropertyValues <em>: interpreter::ObjectPropertyVector</em></div>
@@ -360,6 +374,39 @@
           </div>
         </div>
         <div class="ref">Translator <em>: afl::string::Translator</em></div>
+      </div>
+    </div>
+    <h2 id="fileserver">File Server</h2>
+    <p>Structure of the file server root.
+      Each command is processed using a shared root and a per-session state.</p>
+    <div class="tree">
+      <div class="root"><b>server::file::Root</b>
+        <div class="ref virtual">RootDirectory <em>: server::file::DirectoryItem</em>
+          <strong>Root directory (provides access to children)</strong></div>
+        <div class="ref virtual">DefaultSpecDirectory <em>: afl::io::Directory</em>
+          <strong>Default specification directory</strong></div>
+        <div class="owned">DefaultCharset <em>: afl::charset::CodepageCharset</em></div>
+        <div class="owned">DefaultRaceNames <em>: server::file::RaceNames_t</em></div>
+        <div class="owned">Scanner <em>: game::v3::DirectoryScanner</em></div>
+      </div>
+    </div>
+
+    <h2 id="hostserver">Host Server</h2>
+    <p>Structure of the host server root.
+      Each command is processed using a shared root and a per-session state.</p>
+    <div class="tree">
+      <div class="root"><b>server::host::Root</b>
+        <div class="ref virtual">Database <em>: afl::net::CommandHandler</em></div>
+        <div class="ref virtual">HostFile <em>: afl::net::CommandHandler</em></div>
+        <div class="ref virtual">UserFile <em>: afl::net::CommandHandler</em></div>
+        <div class="ref virtual">MailQueue <em>: server::interface::MailQueue</em></div>
+        <div class="ref">CheckturnRunner <em>: util::ProcessRunner</em></div>
+        <div class="ref virtual">FileSystem <em>: afl::io::FileSystem</em></div>
+        <div class="ref virtual optional">Cron <em>: server::host::Cron</em></div>
+        <div class="ref virtual optional">TalkListener <em>: server::host::TalkListener</em></div>
+        <div class="ref virtual optional">Router <em>: server::interface::SessionRouter</em></div>
+        <div class="owned">Arbiter <em>: server::host::GameArbiter</em></div>
+        <div class="owned">RNG <em>: util::RandomNumberGenerator</em></div>
       </div>
     </div>
   </body>

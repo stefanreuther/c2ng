@@ -108,7 +108,7 @@ namespace {
             static const char*const files[] = {
                 "amaster.src",  "amaster.src.frag",
                 "pconfig.src",  "pconfig.src.frag",
-                "pmaster.cfg"   "pmaster.cfg.frag"
+                "pmaster.cfg",  "pmaster.cfg.frag",
                 "shiplist.txt", "shiplist.txt.frag",
             };
             for (size_t i = 0; i < countof(files); ++i) {

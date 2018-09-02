@@ -8,7 +8,7 @@
 #include "afl/base/ptr.hpp"
 #include "ui/layoutablegroup.hpp"
 #include "ui/layout/manager.hpp"
-#include "gfx/colorscheme.hpp"
+#include "gfx/dimbackgroundcolorscheme.hpp"
 
 namespace ui { namespace widgets {
 
@@ -28,20 +28,7 @@ namespace ui { namespace widgets {
         virtual bool handleMouse(gfx::Point pt, MouseButtons_t pressedButtons);
 
      private:
-        class ColorScheme : public gfx::ColorScheme<util::SkinColor::Color> {
-         public:
-            ColorScheme(TransparentWindow& parent);
-            virtual gfx::Color_t getColor(util::SkinColor::Color index);
-            virtual void drawBackground(gfx::Canvas& can, const gfx::Rectangle& area);
-         private:
-            TransparentWindow& m_parent;
-            afl::base::Ptr<gfx::Canvas> m_cachedBackground;
-            gfx::Rectangle m_cachedSize;
-        };
-        friend class WindowColorScheme;
-
-        ColorScheme m_colorScheme;
-        gfx::ColorScheme<util::SkinColor::Color>& m_parentColors;
+        gfx::DimBackgroundColorScheme m_colorScheme;
     };
 
 } }

@@ -34,6 +34,7 @@
 #include "server/host/game.hpp"
 #include "server/host/root.hpp"
 #include "util/math.hpp"
+#include "server/interface/baseclient.hpp"
 
 namespace {
     const char LOG_NAME[] = "host.rating";
@@ -136,6 +137,8 @@ server::host::computeGameRating(Root& root, Game& g)
 {
     // ex planetscentral/host/rating.cc:computeGameRating
     try {
+        server::interface::BaseClient(root.hostFile()).setUserContext(String_t());
+
         String_t gameDir(g.getDirectory() + "/data");
         game::maint::DifficultyRater rater;
 

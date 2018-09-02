@@ -6,6 +6,7 @@
 #include "game/v3/resultfile.hpp"
 
 #include "u/t_game_v3.hpp"
+#include "afl/except/fileproblemexception.hpp"
 #include "afl/io/constmemorystream.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "u/files.hpp"
@@ -30,6 +31,7 @@ TestGameV3ResultFile::test30()
     TS_ASSERT(!result.hasSection(result.KoreSection));
     TS_ASSERT(!result.hasSection(result.LeechSection));
     TS_ASSERT(!result.hasSection(result.SkoreSection));
+    TS_ASSERT_EQUALS(&result.getFile(), &file);
     TS_ASSERT_EQUALS(result.getVersion(), -1);
 
     // Offset queries
@@ -53,6 +55,11 @@ TestGameV3ResultFile::test30()
     TS_ASSERT(!result.getSectionOffset(result.KoreSection, offset));
     TS_ASSERT(!result.getSectionOffset(result.LeechSection, offset));
     TS_ASSERT(!result.getSectionOffset(result.SkoreSection, offset));
+
+    // Test seeking
+    TS_ASSERT_THROWS_NOTHING(result.seekToSection(result.ShipSection));
+    TS_ASSERT_EQUALS(file.getPos(), 0x0021U);
+    TS_ASSERT_THROWS(result.seekToSection(result.KoreSection), afl::except::FileProblemException);
 }
 
 /** Test v3.5 result file. */
@@ -100,4 +107,9 @@ TestGameV3ResultFile::test35()
     TS_ASSERT(!result.getSectionOffset(result.LeechSection, offset));
     TS_ASSERT(result.getSectionOffset(result.SkoreSection, offset));
     TS_ASSERT_EQUALS(offset, 0x5E85U);
+
+    // Test seeking
+    TS_ASSERT_THROWS_NOTHING(result.seekToSection(result.ShipSection));
+    TS_ASSERT_EQUALS(file.getPos(), 0x0060U);
+    TS_ASSERT_THROWS(result.seekToSection(result.LeechSection), afl::except::FileProblemException);
 }

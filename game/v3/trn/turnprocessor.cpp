@@ -147,7 +147,9 @@ game::v3::trn::TurnProcessor::handleTurnFile(TurnFile& f, afl::charset::Charset&
                 int size = cmdId;
                 addMessage(to, decodeMessage(cmdData.subrange(4, size), charset, false));
             } else if (cmdCode == tcm_ChangePassword) {
-                // FIXME -> trn.getGen(player).setPasswordFromTurn(f.getCommandData(i));
+                NewPassword_t pass;
+                afl::base::Bytes_t(pass).copyFrom(f.getCommandData(i));
+                addNewPassword(pass);
             } else {
                 // unknown
             }

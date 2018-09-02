@@ -96,6 +96,14 @@ Sub CCUI.GotoBaseHere
   CCUI$GotoPlanet 3, Loc.X, Loc.Y
 EndSub
 
+% L, Shift-L, Shift-F1, etc.
+Sub CCUI.ListShips (X, Y, flags)
+  Local UI.Result
+  UI.ListShips X, Y, flags
+  If UI.Result
+    UI.GotoScreen 1, UI.Result
+  EndIf
+EndSub
 
 %%% Unit Manipulation
 

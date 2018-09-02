@@ -547,7 +547,7 @@ game::map::Configuration::getSimplePointAlias(Point pt, int image) const
 }
 
 // Get minimum distance between two points, considering map configuration.
-long
+int32_t
 game::map::Configuration::getSquaredDistance(Point a, Point b) const
 {
     // ex game/coord.cc:distanceSquared

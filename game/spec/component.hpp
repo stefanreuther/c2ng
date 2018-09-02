@@ -94,4 +94,68 @@ namespace game { namespace spec {
 
 } }
 
+
+// Get Id.
+inline int
+game::spec::Component::getId() const
+{
+    return m_id;
+}
+
+// Get mass of this component.
+inline int
+game::spec::Component::getMass() const
+{
+    return m_mass;
+}
+
+// Set mass of this component.
+inline void
+game::spec::Component::setMass(int mass)
+{
+    m_mass = mass;
+}
+
+// Get tech level of this component.
+inline int
+game::spec::Component::getTechLevel() const
+{
+    return m_techLevel;
+}
+
+// Set tech level of this component.
+inline void
+game::spec::Component::setTechLevel(int level)
+{
+    m_techLevel = level;
+}
+
+// Get cost of this component.
+inline game::spec::Cost&
+game::spec::Component::cost()
+{
+    return m_cost;
+}
+
+// Get cost of this component.
+inline const game::spec::Cost&
+game::spec::Component::cost() const
+{
+    return m_cost;
+}
+
+// Get name of this component.
+inline String_t
+game::spec::Component::getName(const ComponentNameProvider& provider) const
+{
+    return provider.getName(m_type, m_id, m_name);
+}
+
+// Get short name of this component.
+inline String_t
+game::spec::Component::getShortName(const ComponentNameProvider& provider) const
+{
+    return provider.getShortName(m_type, m_id, m_name, m_shortName);
+}
+
 #endif

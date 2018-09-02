@@ -110,6 +110,11 @@ class TestServerHostHostCron : public CxxTest::TestSuite {
     void testListPermissions();
 };
 
+class TestServerHostHostFile : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
 class TestServerHostHostGame : public CxxTest::TestSuite {
  public:
     void testNewGame();

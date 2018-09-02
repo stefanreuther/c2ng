@@ -205,12 +205,6 @@ server::host::Root::handleGameChange(int32_t gameId)
     }
 }
 
-server::interface::SessionRouter*
-server::host::Root::getRouter()
-{
-    return m_pRouter;
-}
-
 void
 server::host::Root::tryCloseRouterSessions(String_t key)
 {

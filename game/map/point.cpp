@@ -4,6 +4,7 @@
 
 #include "game/map/point.hpp"
 #include "afl/string/parse.hpp"
+#include "util/math.hpp"
 
 game::map::Point::Point()
     : m_x(0), m_y(0)
@@ -110,6 +111,15 @@ game::map::Point::parseCoordinates(const String_t& str)
     return true;
 }
 
+int
+game::map::Point::compare(const Point& other) const
+{
+    int result = util::compare3(m_y, other.m_y);
+    if (result == 0) {
+        result = util::compare3(m_x, other.m_x);        
+    }
+    return result;
+}
 
 long
 game::map::Point::getSquaredRawDistance(Point other) const

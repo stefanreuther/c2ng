@@ -30,6 +30,8 @@
 #include "client/vcr/classic/playbackscreen.hpp"
 #include "client/widgets/messageactionpanel.hpp"
 #include "client/dialogs/inboxdialog.hpp"
+#include "ui/widgets/transparentwindow.hpp"
+#include "ui/widgets/statictext.hpp"
 
 namespace {
     ui::widgets::AbstractButton& createImageButton(afl::base::Deleter& del, ui::Root& root, ui::LayoutableGroup& group, String_t text, util::Key_t key, String_t image)
@@ -45,6 +47,19 @@ namespace {
         frame.add(result);
         group.add(frame);
         return result;
+    }
+
+    ui::LayoutableGroup& createGroup(afl::base::Deleter& del, String_t name, ui::LayoutableGroup& parent, ui::Root& root, gfx::ColorScheme<util::SkinColor::Color>& colorScheme)
+    {
+        ui::LayoutableGroup& win = del.addNew(new ui::widgets::TransparentWindow(colorScheme, ui::layout::VBox::instance5));
+        win.setState(win.ModalState, false);
+        win.add(del.addNew(new ui::widgets::StaticText(name, util::SkinColor::Static, gfx::FontRequest().addSize(1), root.provider())));
+
+        ui::LayoutableGroup& content = del.addNew(new ui::Group(del.addNew(new ui::layout::Flow(4, false))));
+        win.add(content);
+
+        parent.add(win);
+        return content;
     }
 
     ui::widgets::AbstractButton& createActionButton(afl::base::Deleter& del, ui::Root& root, ui::LayoutableGroup& group, String_t text, util::Key_t key)
@@ -85,23 +100,58 @@ namespace {
                 ui::Root& root = m_session.root();
 
                 ui::LayoutableGroup& panel = del.addNew(new ui::widgets::Panel(ui::layout::HBox::instance5, 10));
-                panel.setColorScheme(colorScheme);                
+                panel.setColorScheme(colorScheme);
 
                 // Keymap handler
                 client::widgets::KeymapWidget& keys = del.addNew(new client::widgets::KeymapWidget(m_session.gameSender(), root.engine().dispatcher(), *this));
 
                 // Left group containing list of image buttons
                 ui::LayoutableGroup& leftGroup = del.addNew(new ui::Group(ui::layout::VBox::instance5));
-                keys.addButton(createImageButton(del, root, leftGroup, tx.translateString("F1 - Starships"), util::Key_F1, "menu.ship"));
-                keys.addButton(createImageButton(del, root, leftGroup, tx.translateString("F2 - Planets"),   util::Key_F2, "menu.planet"));
-                keys.addButton(createImageButton(del, root, leftGroup, tx.translateString("F3 - Starbases"), util::Key_F3, "menu.base"));
-                keys.addButton(createImageButton(del, root, leftGroup, tx.translateString("F4 - Starchart"), util::Key_F4, "menu.chart"));
+                createImageButton(del, root, leftGroup, tx.translateString("F1 - Starships"), util::Key_F1, "menu.ship").dispatchKeyTo(keys);
+                createImageButton(del, root, leftGroup, tx.translateString("F2 - Planets"),   util::Key_F2, "menu.planet").dispatchKeyTo(keys);
+                createImageButton(del, root, leftGroup, tx.translateString("F3 - Starbases"), util::Key_F3, "menu.base").dispatchKeyTo(keys);
+                createImageButton(del, root, leftGroup, tx.translateString("F4 - Starchart"), util::Key_F4, "menu.chart").dispatchKeyTo(keys);
                 leftGroup.add(del.addNew(new ui::Spacer()));
                 panel.add(leftGroup);
 
                 // Right group
                 ui::LayoutableGroup& rightGroup = del.addNew(new ui::Group(ui::layout::VBox::instance5));
                 rightGroup.add(m_docView);
+
+                // Panels
+                ui::LayoutableGroup& menuGroup = del.addNew(new ui::Group(del.addNew(new ui::layout::Flow(5, false))));
+
+                ui::LayoutableGroup& diploGroup = createGroup(del, tx.translateString("Diplomacy"), menuGroup, root, colorScheme);
+                createActionButton(del, root, diploGroup, tx.translateString("Alliances"), 'a').dispatchKeyTo(keys);
+                createActionButton(del, root, diploGroup, tx.translateString("Data Transfer"), 'd').dispatchKeyTo(keys);
+                createActionButton(del, root, diploGroup, tx.translateString("Teams"), 't').dispatchKeyTo(keys);
+
+                ui::LayoutableGroup& researchGroup = createGroup(del, tx.translateString("Research"), menuGroup, root, colorScheme);
+                createActionButton(del, root, researchGroup, tx.translateString("Search"), util::Key_F7).dispatchKeyTo(keys);
+                createActionButton(del, root, researchGroup, tx.translateString("Imperial Stats"), 'i').dispatchKeyTo(keys);
+                createActionButton(del, root, researchGroup, tx.translateString("Scores"), 's').dispatchKeyTo(keys);
+                createActionButton(del, root, researchGroup, tx.translateString("Battle Simulator"), 'b').dispatchKeyTo(keys);
+                createActionButton(del, root, researchGroup, tx.translateString("Starship Cost Calculator"), 'd').dispatchKeyTo(keys);
+
+                ui::LayoutableGroup& messagesGroup = createGroup(del, tx.translateString("Messages"), menuGroup, root, colorScheme);
+                createActionButton(del, root, messagesGroup, tx.translateString("Inbox"), 'm').dispatchKeyTo(keys);
+                createActionButton(del, root, messagesGroup, tx.translateString("Write"), 'w').dispatchKeyTo(keys);
+                createActionButton(del, root, messagesGroup, tx.translateString("Visual Combat Recordings"), 'v').dispatchKeyTo(keys);
+                createActionButton(del, root, messagesGroup, tx.translateString("View util.dat"), util::KeyMod_Alt + 'u').dispatchKeyTo(keys);
+
+                ui::LayoutableGroup& extraGroup = createGroup(del, tx.translateString("Extra"), menuGroup, root, colorScheme);
+                createActionButton(del, root, extraGroup, tx.translateString("Options"), util::KeyMod_Ctrl + 'o').dispatchKeyTo(keys);
+                createActionButton(del, root, extraGroup, tx.translateString("Console"), util::KeyMod_Alt + 'c').dispatchKeyTo(keys);
+                createActionButton(del, root, extraGroup, tx.translateString("Process Manager"), util::KeyMod_Alt + 'p').dispatchKeyTo(keys);
+                createActionButton(del, root, extraGroup, tx.translateString("Tip of the Day"), 't').dispatchKeyTo(keys);
+
+                ui::LayoutableGroup& fleetGroup = createGroup(del, tx.translateString("Fleet"), menuGroup, root, colorScheme);
+                createActionButton(del, root, fleetGroup, tx.translateString("Global Actions"), 'g').dispatchKeyTo(keys);
+                createActionButton(del, root, fleetGroup, tx.translateString("Fleets"), util::Key_F10).dispatchKeyTo(keys);
+                createActionButton(del, root, fleetGroup, tx.translateString("Ship History"), util::Key_F6).dispatchKeyTo(keys);
+                createActionButton(del, root, fleetGroup, tx.translateString("Selection"), util::KeyMod_Alt + '.').dispatchKeyTo(keys);
+
+                rightGroup.add(menuGroup);
                 rightGroup.add(del.addNew(new ui::Spacer()));
 
                 // Buttons
@@ -121,16 +171,9 @@ namespace {
                 //   V - Combat Recorder
                 //   ESC - Exit
                 //   H - Help
-                keys.addButton(createActionButton(del, root, btnGroup, tx.translateString("ESC - Exit"), util::Key_Escape));
+                createActionButton(del, root, btnGroup, tx.translateString("ESC - Exit"), util::Key_Escape).dispatchKeyTo(keys);
                 rightGroup.add(btnGroup);
                 panel.add(rightGroup);
-
-                // HACK
-                ui::widgets::KeyDispatcher disp;
-                disp.add('v', this, &PlayerScreen::doVcr);
-                disp.add('m', this, &PlayerScreen::doMessages);
-                panel.add(disp);
-                // /HACK
 
                 // Finish and display it
                 keys.setKeymapName("RACESCREEN");
@@ -163,28 +206,6 @@ namespace {
                 doc.add(s);
                 doc.finish();
                 m_docView.handleDocumentUpdate();
-            }
-
-        void doVcr()
-            {
-                client::dialogs::ClassicVcrDialog dlg(m_session.root(), m_session.gameSender());
-                dlg.sig_play.add(this, &PlayerScreen::doPlayVcr);
-                dlg.run();
-            }
-
-        void doPlayVcr(size_t index)
-            {
-                client::vcr::classic::PlaybackScreen screen(m_session.root(), m_session.translator(), m_session.gameSender(), index, m_session.interface().mainLog());
-                screen.run();
-            }
-        
-        void doMessages()
-            {
-                client::dialogs::InboxDialog dlg(m_session);
-                client::si::InputState in;
-                client::si::OutputState out;
-                dlg.run(in, out);
-                handleStateChange(m_session.interface(), out.getProcess(), out.getTarget());
             }
 
         virtual void handleStateChange(client::si::UserSide& us, client::si::RequestLink2 link, client::si::OutputState::Target target)

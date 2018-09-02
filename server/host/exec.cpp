@@ -22,6 +22,7 @@
 #include "afl/sys/thread.hpp"
 #include "game/v3/resultfile.hpp"
 #include "game/v3/structures.hpp"
+#include "server/host/actions.hpp"
 #include "server/host/exporter.hpp"
 #include "server/host/game.hpp"
 #include "server/host/gamecreator.hpp"
@@ -38,6 +39,8 @@ using server::host::Game;
 using server::interface::HostGame;
 using server::interface::BaseClient;
 using server::interface::FileBaseClient;
+using server::interface::FileBase;
+using afl::sys::LogListener;
 
 namespace {
     const char LOG_NAME[] = "host.exec";
@@ -54,7 +57,7 @@ namespace {
         afl::sys::Thread::sleep(2000);
 
         // Build command line
-        root.log().write(afl::sys::LogListener::Info, LOG_NAME, afl::string::Format("game %d: running host", gameId));
+        root.log().write(LogListener::Info, LOG_NAME, afl::string::Format("game %d: running host", gameId));
 
         util::ProcessRunner::Command cmd;
         cmd.command.push_back("/bin/sh");
@@ -78,7 +81,7 @@ namespace {
         \param gameDir Game directory
         \param score Place scores in this hash
         \param description Description hash */
-    void importGameScores(server::interface::FileBase& file,
+    void importGameScores(FileBase& file,
                           String_t gameDir,
                           afl::net::redis::HashKey score,
                           afl::net::redis::HashKey description)
@@ -167,7 +170,7 @@ namespace {
         creator.finishNewGame(newId, HostGame::Joining, game.getType());
 
         // Log
-        root.log().write(afl::sys::LogListener::Info, LOG_NAME, afl::string::Format("game %d: respawned %d as copy of %d", game.getId(), newId, newSourceId));
+        root.log().write(LogListener::Info, LOG_NAME, afl::string::Format("game %d: respawned %d as copy of %d", game.getId(), newId, newSourceId));
     }
 
     int32_t unimportGameData(server::host::Root& root, Game& game)
@@ -206,7 +209,7 @@ namespace {
             }
             catch (std::exception& e) {
                 // This handler will be hit if the game refers to a non-existant game as its copy-source.
-                root.log().write(afl::sys::LogListener::Error, LOG_NAME, afl::string::Format("game %d: respawn failed, %s", game.getId(), e.what()));
+                root.log().write(LogListener::Error, LOG_NAME, afl::string::Format("game %d: respawn failed, %s", game.getId(), e.what()));
             }
         }
 
@@ -256,9 +259,17 @@ namespace {
             }
             turnStatus[i-1] = int16_t(slotStatus ? status : -1);
         }
-        turn.info().intField("time").set(now);
-        turn.info().stringField("timestamp").set(turnTime);
-        turn.info().stringField("turnstatus").set(afl::string::fromBytes(afl::base::fromObject(turnStatus)));
+        turn.info().time().set(now);
+        turn.info().timestamp().set(turnTime);
+        turn.info().turnStatus().set(afl::string::fromBytes(afl::base::fromObject(turnStatus)));
+
+        // - files
+        try {
+            importFileHistory(hostFile, gamedir, turnNr, turn.files());
+        }
+        catch (std::exception& e) {
+            root.log().write(LogListener::Warn, LOG_NAME, "Failed to import file history", e);
+        }
 
         // - victory check
         if (server::host::rank::checkVictory(root, gamedir + "/data", game)) {
@@ -317,7 +328,7 @@ namespace {
                 BaseClient(root.userFile()).setUserContext(players[i]);
                 String_t trnData = FileBaseClient(root.userFile()).getFile(afl::string::Format("%s/player%d.trn", userGameDir, slot));
 
-                root.log().write(afl::sys::LogListener::Info, LOG_NAME, afl::string::Format("game %d: trying turn from 'user:%s'", game.getId(), userGameDir));
+                root.log().write(LogListener::Info, LOG_NAME, afl::string::Format("game %d: trying turn from 'user:%s'", game.getId(), userGameDir));
 
                 // Store on hostfile
                 BaseClient(root.hostFile()).setUserContext(players[i]);
@@ -338,7 +349,7 @@ namespace {
                 int32_t newState = (code + 1);
                 if (newState == Game::TurnGreen || newState == Game::TurnYellow) {
                     // Success!
-                    root.log().write(afl::sys::LogListener::Info, LOG_NAME, afl::string::Format("game %d: turn file from 'user:%s' succeeded", game.getId(), userGameDir));
+                    root.log().write(LogListener::Info, LOG_NAME, afl::string::Format("game %d: turn file from 'user:%s' succeeded", game.getId(), userGameDir));
                     gameSlot.turnStatus().set(newState);
 
                     // Do not update replacements. We're currently sweeping together fragments
@@ -520,10 +531,11 @@ server::host::runHost(util::ProcessRunner& runner, Root& root, int32_t gameId)
         Exporter(root.hostFile(), root.fileSystem(), root.log()).importGame(game, root, workdirEntry->getPathName());
         processTurnStatus(root, gameId);
         importGameData(root, game);
+        processInactivityKicks(root, gameId);
         ResultSender(root, game).sendAllResults();
     }
 
-    root.log().write(afl::sys::LogListener::Info, LOG_NAME, afl::string::Format("game %d: host completed", gameId));
+    root.log().write(LogListener::Info, LOG_NAME, afl::string::Format("game %d: host completed", gameId));
 }
 
 // Run master on a game.
@@ -551,7 +563,7 @@ server::host::runMaster(util::ProcessRunner& runner, Root& root, int32_t gameId)
 
     // Run it
     {
-        root.log().write(afl::sys::LogListener::Info, LOG_NAME, afl::string::Format("game %d: running master", gameId));
+        root.log().write(LogListener::Info, LOG_NAME, afl::string::Format("game %d: running master", gameId));
 
         util::ProcessRunner::Command cmd;
         cmd.command.push_back("/bin/sh");
@@ -580,5 +592,5 @@ server::host::runMaster(util::ProcessRunner& runner, Root& root, int32_t gameId)
         ResultSender(root, game).sendAllResults();
     }
 
-    root.log().write(afl::sys::LogListener::Info, LOG_NAME, afl::string::Format("game %d: master completed", gameId));
+    root.log().write(LogListener::Info, LOG_NAME, afl::string::Format("game %d: master completed", gameId));
 }

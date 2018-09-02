@@ -57,12 +57,13 @@ namespace {
                 pl->setPosition(game::map::Point(2222,3333));
                 pl->setName("Planet Express");
                 game::config::HostConfiguration config;
+                game::spec::ShipList shipList;
                 session.getGame()->currentTurn().universe().postprocess(/*playing:*/game::PlayerSet_t(1),
                                                                         /*available:*/game::PlayerSet_t(1),
                                                                         /*plability:*/game::map::Object::Playable,
                                                                         game::HostVersion(),
                                                                         config,
-                                                                        1,
+                                                                        1, shipList,
                                                                         tx, log);
 
                 // Create pseudo graphics infrastructure (must live longest!)

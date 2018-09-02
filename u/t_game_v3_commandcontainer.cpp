@@ -101,3 +101,26 @@ TestGameV3CommandContainer::testSequence()
     TS_ASSERT_EQUALS(it, cmds.end());
 }
 
+/** Test addNewCommand(), pointer replacement. */
+void
+TestGameV3CommandContainer::testReplacePointer()
+{
+    using game::v3::Command;
+    game::v3::CommandContainer cmds;
+    cmds.addNewCommand(new Command(Command::phc_GiveShip, 17, "3"));
+    cmds.addNewCommand(new Command(Command::phc_GiveShip, 32, "4"));
+    cmds.addNewCommand(new Command(Command::phc_GiveShip, 17, "5"));
+
+    const Command* a = cmds.getCommand(Command::phc_GiveShip, 17);
+    const Command* b = cmds.getCommand(Command::phc_GiveShip, 32);
+    TS_ASSERT(a);
+    TS_ASSERT(b);
+    TS_ASSERT_EQUALS(a->getArg(), "5");
+    TS_ASSERT_EQUALS(b->getArg(), "4");
+
+    int n = 0;
+    for (game::v3::CommandContainer::Iterator_t i = cmds.begin(); i != cmds.end(); ++i) {
+        ++n;
+    }
+    TS_ASSERT_EQUALS(n, 2);
+}

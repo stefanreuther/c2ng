@@ -1,7 +1,8 @@
 /**
   *  \file game/db/fleetloader.cpp
+  *  \brief Class game::db::FleetLoader
   *
-  *  PCC2 comment re Fleets:
+  *  <b>PCC2 comment re Fleets:</b>
   *
   *  Fleets are groups of ships with a common waypoint.
   *
@@ -28,7 +29,6 @@
   */
 
 #include <cstring>
-#include <stdio.h>
 #include "game/db/fleetloader.hpp"
 #include "afl/base/growablememory.hpp"
 #include "afl/base/staticassert.hpp"
@@ -61,10 +61,11 @@ namespace {
     static_assert(sizeof(MAGIC) == sizeof(FleetFileHeader().magic), "sizeof MAGIC");
 
 
-    // /** Loading: Check whether ship is a valid fleet member for a given player. For use during construction.
-    //     This checks source flags, not isPlayable(), because only source flags are valid at this time.
-    //     \param sh Ship to check
-    //     \param player Player to check for */
+    /** Loading: Check whether ship is a valid fleet member for a given player.
+        For use during construction.
+        This checks source flags, not isPlayable(), because only source flags are valid at this time.
+        \param sh Ship to check
+        \param player Player to check for */
     bool isValidFleetMember(const game::map::Ship& sh, const int player)
     {
         // ex game/fleet.cc:isValidFleetMember
@@ -75,15 +76,16 @@ namespace {
             && sh.getFleetNumber() == 0;
     }
 
-    // /** Loading: Build fleet from data. This takes fleet membership data loaded from the fleet file
-    //     and places it into the universe, avoiding conflicts with existing fleets.
-    //     \param univ     [in/out] Universe
-    //     \param fid      [in] Fleet Id, corresponding to an existing fleet
-    //     \param player   [in] Player number
-    //     \param fleetNrs [in/out] Fleet numbers loaded from file, indexed [0,NUM_SHIPS). Used slots will be zeroed.
-    //     \param nameNrs  [in/out] Name pointers, indexed [0,NUM_SHIPS). A nonzero entry means to load a name.
-    //                     Positive means to make this name the name of the corresponding fleet,
-    //                     negative means to ignore the name. */
+    /** Loading: Build fleet from data.
+        This takes fleet membership data loaded from the fleet file and places it into the universe,
+        avoiding conflicts with existing fleets.
+        \param univ     [in/out] Universe
+        \param fid      [in] Fleet Id, corresponding to an existing fleet
+        \param player   [in] Player number
+        \param fleetNrs [in/out] Fleet numbers loaded from file, indexed [0,NUM_SHIPS). Used slots will be zeroed.
+        \param nameNrs  [in/out] Name pointers, indexed [0,NUM_SHIPS). A nonzero entry means to load a name.
+                        Positive means to make this name the name of the corresponding fleet,
+                        negative means to ignore the name. */
     void buildFleet(game::map::Universe& univ,
                     const uint16_t fid,
                     const int player,
@@ -137,13 +139,10 @@ namespace {
         }
 
         // Build fleet and strike out of fleetNrs
-        // if (newfid != 0) {
-        //     ASSERT(isValidFleetMember(univ.getShip(newfid), player));
-        // }
         for (size_t i = 1; i <= fleetNrs.size(); ++i) {
             if (*fleetNrs.at(i-1) == fid) {
                 game::map::Ship* sh = univ.ships().get(game::Id_t(i));
-                if (sh != 0 && (newfid == 0 || isValidFleetMember(*sh, player))) {
+                if (sh != 0 && isValidFleetMember(*sh, player)) {
                     sh->setFleetNumber(newfid);
                 }
                 *fleetNrs.at(i-1) = 0;
@@ -152,13 +151,12 @@ namespace {
     }
 }
 
+// Constructor.
 game::db::FleetLoader::FleetLoader(afl::charset::Charset& cs)
     : m_charset(cs)
 { }
 
-// /** Load fleets. This will load the given player's fleetX.cc file, and
-//     populate his ships with the fleet data. This validates the data as far
-//     as required to make sure there are no collisions. */
+// Load fleets.
 void
 game::db::FleetLoader::load(afl::io::Directory& dir, game::map::Universe& univ, int playerNumber)
 {
@@ -226,12 +224,80 @@ game::db::FleetLoader::load(afl::io::Directory& dir, game::map::Universe& univ, 
         if (*nameNrs.at(i) != 0) {
             String_t comment = util::loadPascalString(*s, m_charset);
             if (*nameNrs.at(i) > 0) {
-//                 ASSERT(univ.isValidShipId(nameNrs[i]));
-//                 ASSERT(univ.getShip(nameNrs[i]).getFleetNumber() == nameNrs[i]);
                 if (game::map::Ship* sh = univ.ships().get(*nameNrs.at(i))) {
                     sh->setFleetName(comment);
                 }
             }
+        }
+    }
+}
+
+// Save fleets.
+void
+game::db::FleetLoader::save(afl::io::Directory& dir, const game::map::Universe& univ, int playerNumber)
+{
+    // ex game/fleet.cc:saveFleets
+    // Limit: process at least 500 ships even if universe has fewer.
+    const Id_t maxShipId = std::max(500, univ.ships().size());
+
+    // Build fleet list and find highest fleet member
+    afl::base::GrowableMemory<UInt16_t> fleetNrs;
+    fleetNrs.resize(maxShipId);
+    fleetNrs.toBytes().fill(0);
+
+    Id_t highestFleetMember = 0;
+    for (Id_t i = 1; i <= maxShipId; ++i) {
+        if (const game::map::Ship* pShip = univ.ships().get(i)) {
+            int shipOwner;
+            if (pShip->getShipSource().contains(playerNumber) && pShip->getOwner(shipOwner) && shipOwner == playerNumber) {
+                uint16_t fleetNr = static_cast<uint16_t>(pShip->getFleetNumber());
+                if (fleetNr != 0) {
+                    if (pShip->isFleetLeader() && !pShip->getFleetName().empty()) {
+                        fleetNr |= Name_Flag;
+                    }
+                    *fleetNrs.at(i-1) = fleetNr;
+                    highestFleetMember = i;
+                }
+            }
+        }
+    }
+
+    // If there is no fleet, erase the fleet file
+    const String_t fileName = afl::string::Format(FLEETFILE, playerNumber);
+    if (highestFleetMember == 0) {
+        dir.eraseNT(fileName);
+        return;
+    }
+
+    // Create file
+    afl::base::Ref<afl::io::Stream> s = dir.openFile(fileName, afl::io::FileSystem::Create);
+
+    // Decide upon file format (Host999 or normal)
+    FleetFileHeader header;
+    std::memcpy(header.magic, MAGIC, sizeof(MAGIC));
+    Id_t numFleets;
+    if (highestFleetMember <= 500) {
+        header.version = 0;
+        numFleets = 500;
+        s->fullWrite(afl::base::fromObject(header));
+    } else {
+        header.version = 1;
+        numFleets = maxShipId;
+        s->fullWrite(afl::base::fromObject(header));
+
+        UInt16_t rawCount;
+        rawCount = static_cast<uint16_t>(numFleets);
+        s->fullWrite(rawCount.m_bytes);
+    }
+
+    // Fleet data
+    s->fullWrite(fleetNrs.subrange(0, numFleets).toBytes());
+
+    // Comments
+    for (Id_t i = 1; i <= numFleets; ++i) {
+        if ((*fleetNrs.at(i-1) & Name_Flag) != 0) {
+            const game::map::Ship* pShip = univ.ships().get(i);
+            util::storePascalStringTruncate(*s, pShip ? pShip->getFleetName() : String_t(), m_charset);
         }
     }
 }

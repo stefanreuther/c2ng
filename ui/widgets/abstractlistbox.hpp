@@ -79,6 +79,7 @@ namespace ui { namespace widgets {
 
         afl::base::Signal<void(size_t)> sig_itemDoubleClick;
         afl::base::Signal<void(size_t)> sig_itemClick;
+        afl::base::Signal<void(size_t, gfx::Point)> sig_itemClickAt;
         afl::base::Signal<void(gfx::Point)> sig_menuRequest;
 
      private:
@@ -89,6 +90,7 @@ namespace ui { namespace widgets {
 
         bool m_mouseDown;
 
+        bool isFirstAccessibleItem(size_t nr);
         void makeVisible(const gfx::Rectangle& relativeArea);
         gfx::Point getRelativeToAbsoluteOffset();
     };

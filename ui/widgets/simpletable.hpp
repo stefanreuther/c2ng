@@ -42,6 +42,14 @@ namespace ui { namespace widgets {
                 \return *this */
             Range& setColor(uint8_t color);
 
+            /** Set number of extra columns to allocate for this cell value.
+                Zero means just this cell, one means this cell and the next one, and so on.
+                The skipped cells' values and attributes will be ignored.
+                (This would be HTML's "colspan" attribute, minus one.)
+                \param n Number of columns
+                \return *this */
+            Range& setExtraColumns(int n);
+
             /** Get subrange.
                 \param start 0-based index
                 \param count Number of cells
@@ -131,9 +139,10 @@ namespace ui { namespace widgets {
             gfx::FontRequest font;
             int alignX;
             int alignY;
+            int extraColumns;
             uint8_t color;
             Cell()
-                : text(), font(), alignX(0), alignY(0), color(ui::Color_White)
+                : text(), font(), alignX(0), alignY(0), extraColumns(0), color(ui::Color_White)
                 { }
         };
         struct Metric {

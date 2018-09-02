@@ -112,7 +112,6 @@ namespace server { namespace host {
         Cron* getCron();
         void handleGameChange(int32_t gameId);
 
-        server::interface::SessionRouter* getRouter();
         void tryCloseRouterSessions(String_t key);
 
 

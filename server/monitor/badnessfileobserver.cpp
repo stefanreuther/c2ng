@@ -3,7 +3,6 @@
   *  \brief Class server::monitor::BadnessFileObserver
   */
 
-#include <stdio.h>
 #include "server/monitor/badnessfileobserver.hpp"
 #include "afl/string/parse.hpp"
 #include "afl/io/stream.hpp"

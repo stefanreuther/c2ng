@@ -45,7 +45,7 @@ namespace {
         if it becomes available in the meantime, activate it.
         This allows fluent usage using the keyboard even in the presence of network / I/O latencies. */
     const afl::sys::Timeout_t ACTIVATION_GRACE_PERIOD = 500;
-    
+
     /** Convert HistoryTurn::Status into TurnListbox::Status. */
     TurnListbox::Status convertStatus(HistoryTurn::Status status)
     {
@@ -195,7 +195,8 @@ namespace {
                 std::vector<TurnListbox::Item> content;
                 game::Game* g = s.getGame().get();
                 game::Root* r = s.getRoot().get();
-                if (g != 0 && r != 0 && r->getTurnLoader().get() != 0) {
+                game::spec::ShipList* sl = s.getShipList().get();
+                if (g != 0 && r != 0 && sl != 0 && r->getTurnLoader().get() != 0) {
                     game::HistoryTurn* ht = g->previousTurns().get(m_turnNumber);
                     if (ht != 0 && ht->isLoadable()) {
                         // FIXME: code duplication to globalcommands.cpp
@@ -205,7 +206,7 @@ namespace {
                             r->getTurnLoader()->loadHistoryTurn(*t, *g, player, m_turnNumber, *r);
                             t->universe().postprocess(game::PlayerSet_t(player), game::PlayerSet_t(player), game::map::Object::ReadOnly,
                                                       r->hostVersion(), r->hostConfiguration(),
-                                                      m_turnNumber,
+                                                      m_turnNumber, *sl,
                                                       s.translator(), s.log());
                             ht->handleLoadSucceeded(t);
                         }
@@ -391,7 +392,7 @@ client::dialogs::TurnListDialog::handleSelect()
          case TurnListbox::WeaklyAvailable:
             // Will eventually become available
             return false;
-            
+
          case TurnListbox::Unavailable:
             // Failed
             ui::dialogs::MessageBox(util::rich::Parser::parseXml(m_translator.translateString("This turn is not available.\n\n"

@@ -8,11 +8,12 @@
 #include "game/spec/friendlycode.hpp"
 #include "afl/string/format.hpp"
 #include "game/limits.hpp"
+#include "game/map/planet.hpp"
+#include "game/map/ship.hpp"
+#include "game/registrationkey.hpp"
 #include "game/spec/hullfunction.hpp"
 #include "util/string.hpp"
 #include "util/translation.hpp"
-#include "game/map/planet.hpp"
-#include "game/map/ship.hpp"
 
 using game::spec::HullFunction;
 
@@ -143,6 +144,13 @@ game::spec::FriendlyCode::worksOn(const game::map::Planet& p, const game::config
         return true;
     }
     return false;
+}
+
+bool
+game::spec::FriendlyCode::isPermitted(const RegistrationKey& key) const
+{
+    return !m_flags.contains(RegisteredCode)
+        || key.getStatus() != RegistrationKey::Unregistered;
 }
 
 /** Parse a flag list.

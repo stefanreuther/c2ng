@@ -4,7 +4,6 @@
   */
 
 #include <stdexcept>
-#include <stdio.h>
 #include "game/spec/friendlycode.hpp"
 
 #include "t_game_spec.hpp"

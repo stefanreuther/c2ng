@@ -59,7 +59,7 @@ namespace game {
         /** Get character from player number.
             \param id Player number
             \return character; '\0' if number cannot be represented */
-        char getCharacterFromPlayer(int id) const;
+        static char getCharacterFromPlayer(int id);
 
         /** Expand names in string template.
             The string can contain placeholders
@@ -92,7 +92,7 @@ namespace game {
         /** Get name of a player.
             Equivalent to get(id)->getName(which), but handles the case that get(id) returns null.
             \param id Slot
-            \param name Which name to get
+            \param which Which name to get
             \return name */
         String_t getPlayerName(int id, Player::Name which) const;
 

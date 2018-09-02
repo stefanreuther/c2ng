@@ -7,6 +7,8 @@
 
 #include "t_game_score.hpp"
 
+namespace gp = game::parser;
+
 /** Test standard schema. */
 void
 TestGameScoreTurnScoreList::testSchema()
@@ -205,3 +207,147 @@ TestGameScoreTurnScoreList::testDescriptionConstructor()
     TS_ASSERT_EQUALS(d.turnLimit, 5);
     TS_ASSERT_EQUALS(d.winLimit, 300);
 }
+
+/** Test addMessageInformation(), complete data. */
+void
+TestGameScoreTurnScoreList::testAddMessageInformationComplete()
+{
+    game::score::TurnScoreList testee;
+
+    // Add message information
+    gp::MessageInformation mi(gp::MessageInformation::PlayerScore, 300, 42);
+    mi.addValue(gp::mi_ScoreTurnLimit, 5);
+    mi.addValue(gp::mi_ScoreWinLimit, 1000);
+    mi.addScoreValue(3, 400);
+    mi.addScoreValue(9, 100);
+    mi.addScoreValue(2, 50);
+    mi.addValue(gp::ms_Name, "xScore");
+    testee.addMessageInformation(mi, game::Timestamp());
+
+    // Verify resulting description
+    const game::score::TurnScoreList::Description* desc = testee.getDescription(300);
+    TS_ASSERT(desc != 0);
+    TS_ASSERT_EQUALS(desc->name, "xScore");
+    TS_ASSERT_EQUALS(desc->winLimit, 1000);
+    TS_ASSERT_EQUALS(desc->turnLimit, 5);
+    TS_ASSERT_EQUALS(desc->scoreId, 300);
+
+    // Verify resulting slot
+    game::score::TurnScoreList::Slot_t id;
+    TS_ASSERT(testee.getSlot(300, id));
+
+    // Verify resulting score
+    const game::score::TurnScore* ts = testee.getTurn(42);
+    TS_ASSERT(ts != 0);
+    TS_ASSERT_EQUALS(ts->getTurnNumber(), 42);
+    TS_ASSERT_EQUALS(ts->get(id, 3).orElse(0), 400);
+    TS_ASSERT_EQUALS(ts->get(id, 9).orElse(0), 100);
+    TS_ASSERT_EQUALS(ts->get(id, 2).orElse(0),  50);
+    TS_ASSERT_EQUALS(ts->get(id, 1).orElse(-1), -1);
+}
+
+/** Test addMessageInformation(), just Id given.
+    Must take over partial data. */
+void
+TestGameScoreTurnScoreList::testAddMessageInformationJustId()
+{
+    game::score::TurnScoreList testee;
+
+    // Define pre-existing score
+    game::score::TurnScoreList::Description origDesc;
+    origDesc.name = "orig name";
+    origDesc.scoreId = 30;
+    origDesc.turnLimit = 3;
+    origDesc.winLimit = 900;
+    testee.addDescription(origDesc);
+
+    // Add message information
+    gp::MessageInformation mi(gp::MessageInformation::PlayerScore, 30, 42);
+    mi.addValue(gp::mi_ScoreTurnLimit, 5);
+    mi.addScoreValue(3, 400);
+    testee.addMessageInformation(mi, game::Timestamp());
+
+    // Verify resulting description
+    const game::score::TurnScoreList::Description* desc = testee.getDescription(30);
+    TS_ASSERT(desc != 0);
+    TS_ASSERT_EQUALS(desc->name, "orig name");    // kept
+    TS_ASSERT_EQUALS(desc->winLimit, 900);        // kept
+    TS_ASSERT_EQUALS(desc->turnLimit, 5);         // overridden
+    TS_ASSERT_EQUALS(desc->scoreId, 30);          // kept
+
+    // Verify resulting slot
+    game::score::TurnScoreList::Slot_t id;
+    TS_ASSERT(testee.getSlot(30, id));
+
+    // Verify resulting score
+    const game::score::TurnScore* ts = testee.getTurn(42);
+    TS_ASSERT(ts != 0);
+    TS_ASSERT_EQUALS(ts->getTurnNumber(), 42);
+    TS_ASSERT_EQUALS(ts->get(id, 3).orElse(0), 400);
+}
+
+/** Test addMessageInformation(), just name given.
+    Must take over partial data. */
+void
+TestGameScoreTurnScoreList::testAddMessageInformationJustName()
+{
+    game::score::TurnScoreList testee;
+
+    // Define pre-existing score
+    game::score::TurnScoreList::Description origDesc;
+    origDesc.name = "name";
+    origDesc.scoreId = 777;
+    origDesc.turnLimit = 3;
+    origDesc.winLimit = 900;
+    testee.addDescription(origDesc);
+
+    // Add message information
+    gp::MessageInformation mi(gp::MessageInformation::PlayerScore, 0, 42);
+    mi.addValue(gp::mi_ScoreWinLimit, 200);
+    mi.addValue(gp::ms_Name, "name");
+    mi.addScoreValue(3, 400);
+    testee.addMessageInformation(mi, game::Timestamp());
+
+    // Verify resulting description
+    const game::score::TurnScoreList::Description* desc = testee.getDescription(777);
+    TS_ASSERT(desc != 0);
+    TS_ASSERT_EQUALS(desc->name, "name");         // kept
+    TS_ASSERT_EQUALS(desc->winLimit, 200);        // overridden
+    TS_ASSERT_EQUALS(desc->turnLimit, 3);         // kept
+    TS_ASSERT_EQUALS(desc->scoreId, 777);         // kept
+
+    // Verify resulting slot
+    game::score::TurnScoreList::Slot_t id;
+    TS_ASSERT(testee.getSlot(777, id));
+
+    // Verify resulting score
+    const game::score::TurnScore* ts = testee.getTurn(42);
+    TS_ASSERT(ts != 0);
+    TS_ASSERT_EQUALS(ts->getTurnNumber(), 42);
+    TS_ASSERT_EQUALS(ts->get(id, 3).orElse(0), 400);
+}
+
+/** Test addMessageInformation(), just name given, no pre-existing value.
+    Must take over partial data. */
+void
+TestGameScoreTurnScoreList::testAddMessageInformationJustNameNew()
+{
+    game::score::TurnScoreList testee;
+
+    // Add message information
+    gp::MessageInformation mi(gp::MessageInformation::PlayerScore, 0, 42);
+    mi.addValue(gp::mi_ScoreWinLimit, 200);
+    mi.addValue(gp::ms_Name, "new name");
+    mi.addScoreValue(3, 400);
+    testee.addMessageInformation(mi, game::Timestamp());
+
+    // Verify resulting description
+    TS_ASSERT(testee.getNumDescriptions() > 0);
+    const game::score::TurnScoreList::Description* desc = testee.getDescriptionByIndex(testee.getNumDescriptions()-1);
+    TS_ASSERT(desc != 0);
+    TS_ASSERT_EQUALS(desc->name, "new name");
+    TS_ASSERT_EQUALS(desc->winLimit, 200);
+    TS_ASSERT_EQUALS(desc->turnLimit, -1);      // not given, set to default
+    TS_ASSERT_DIFFERS(desc->scoreId, 0);
+}
+

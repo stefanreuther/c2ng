@@ -337,13 +337,13 @@ game::v3::check::Checker::checkSigs(const String_t& name, afl::io::Stream& dat, 
             // long message
             if (gdat != SIGNATURE_SIZE) {
                 logBlock(Format("CHECKSUM: %s%d.dat signature is only %d bytes, expecting 10.", name, m_player, gdat));
-            } else if (!memEq(sdat, stuff.sig2)) {
+            } else if (!memEq(sdat, stuff.gen.getSignature2())) {
                 logBlock(Format("CHECKSUM: %s%d.dat signature is invalid.", name, m_player));
             }
 
             if (gdis != SIGNATURE_SIZE) {
                 logBlock(Format("CHECKSUM: %s%d.dis signature is only %d bytes, expecting 10.", name, m_player, gdis));
-            } else if (!memEq(sdis, stuff.sig1)) {
+            } else if (!memEq(sdis, stuff.gen.getSignature1())) {
                 logBlock(Format("CHECKSUM: %s%d.dis signature is invalid.", name, m_player));
             }
         }
@@ -425,8 +425,9 @@ game::v3::check::Checker::loadGen(DirStuff& stuff)
     // load GEN file
     String_t ndat = Format("gen%d.dat", m_player);
     Ref<Stream> dat = openGameFile(ndat);
-    gs::Gen& gen = stuff.gen;
+    gs::Gen gen;
     dat->fullRead(afl::base::fromObject(gen));
+    stuff.gen = gen;
 
     if (gen.playerId != m_player) {
         logBlock(Format("INVALID: %s belongs to player %d, not %d", ndat, int(gen.playerId), m_player));
@@ -445,12 +446,6 @@ game::v3::check::Checker::loadGen(DirStuff& stuff)
         had_error = true;
     }
     checkChecksum(ndat + " timestamp", checksum(gen.timestamp), gen.timestampChecksum);
-
-    // generate signatures
-    for (size_t i = 0; i < SIGNATURE_SIZE; ++i) {
-        stuff.sig1[i] = gen.password[10+i];
-        stuff.sig2[i] = uint8_t(gen.password[10+i] + (i+1));
-    }
 }
 
 void
@@ -658,13 +653,13 @@ game::v3::check::Checker::loadChecksums(const DirStuff& stuff)
 
     // For the totals check, we assume what the file would be if it were syntactically correct with correct sig block.
     gs::Int16_t num;
-    uint32_t sigsum = checksum(stuff.sig1) + checksum(stuff.sig2);
+    uint32_t sigsum = checksum(stuff.gen.getSignature1()) + checksum(stuff.gen.getSignature2());
     num = int16_t(num_s);
-    checkChecksum("Ship totals", total_s + 2*checksum(num.m_bytes) + sigsum, stuff.gen.shipChecksum);
+    checkChecksum("Ship totals", total_s + 2*checksum(num.m_bytes) + sigsum, stuff.gen.getSectionChecksum(gs::ShipSection));
     num = int16_t(num_p);
-    checkChecksum("Planet totals", total_p + 2*checksum(num.m_bytes) + sigsum, stuff.gen.planetChecksum);
+    checkChecksum("Planet totals", total_p + 2*checksum(num.m_bytes) + sigsum, stuff.gen.getSectionChecksum(gs::PlanetSection));
     num = int16_t(num_b);
-    checkChecksum("Starbase totals", total_b + 2*checksum(num.m_bytes) + sigsum, stuff.gen.baseChecksum);
+    checkChecksum("Starbase totals", total_b + 2*checksum(num.m_bytes) + sigsum, stuff.gen.getSectionChecksum(gs::BaseSection));
 }
 
 void
@@ -874,6 +869,8 @@ game::v3::check::Checker::loadTurn(const uint8_t (&rst_timestamp)[18])
                 }
             }
         virtual void addMessage(int /*to*/, String_t /*text*/)
+            { }
+        virtual void addNewPassword(const NewPassword_t& /*pass*/)
             { }
         virtual void addAllianceCommand(String_t /*text*/)
             { }

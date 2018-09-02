@@ -16,6 +16,7 @@
 #include "util/rich/alignmentattribute.hpp"
 #include "afl/string/parse.hpp"
 #include "afl/base/optional.hpp"
+#include "util/charsetfactory.hpp"
 
 namespace {
     struct ColorMap {
@@ -321,8 +322,9 @@ util::rich::Text
 util::rich::Parser::parseXml(String_t source)
 {
     // ex RichParser::textFromXml
+    CharsetFactory csf;
     afl::io::ConstMemoryStream ms(afl::string::toBytes(source));
-    afl::io::xml::Reader rdr(ms, afl::io::xml::DefaultEntityHandler::getInstance());
+    afl::io::xml::Reader rdr(ms, afl::io::xml::DefaultEntityHandler::getInstance(), csf);
     Parser p(rdr);
     p.readNext();
     return p.parseText(true);

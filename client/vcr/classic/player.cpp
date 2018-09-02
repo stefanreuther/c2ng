@@ -59,6 +59,7 @@ client::vcr::classic::Player::initRequest(game::Session& session, size_t index)
             {
                 uint16_t seed = b->getSeed();
                 game::vcr::Object leftCopy = b->left(), rightCopy = b->right();
+                m_algorithm->setCapabilities(b->getCapabilities());
                 if (m_algorithm->checkBattle(leftCopy, rightCopy, seed)) {
                     session.world().logListener().write(afl::sys::LogListener::Error, LOG_NAME, "!VCR algorithm does not accept");
                 }

@@ -4,10 +4,13 @@
 #ifndef C2NG_GAME_TEAMSETTINGS_HPP
 #define C2NG_GAME_TEAMSETTINGS_HPP
 
-#include "game/playerarray.hpp"
-#include "afl/string/string.hpp"
 #include "afl/base/signal.hpp"
+#include "afl/charset/charset.hpp"
+#include "afl/io/directory.hpp"
+#include "afl/string/string.hpp"
 #include "afl/string/translator.hpp"
+#include "game/playerarray.hpp"
+#include "util/skincolor.hpp"
 
 namespace game {
 
@@ -40,12 +43,19 @@ namespace game {
         int getViewpointPlayer() const;
         Relation getPlayerRelation(int player) const;
 
+        util::SkinColor::Color getPlayerColor(int player) const;
+        static util::SkinColor::Color getRelationColor(Relation relation);
+
+        void load(afl::io::Directory& dir, int player, afl::charset::Charset& cs);
+        void save(afl::io::Directory& dir, int player, afl::charset::Charset& cs) const;
+
         // ex game/team.h:sig_team_change (and sig_player_change)
         afl::base::Signal<void()> sig_teamChange;
 
      private:
         int m_flags;
         int m_viewpointPlayer;
+        int m_passcode;
         PlayerArray<int> m_playerTeams;
         PlayerArray<String_t> m_teamNames;
         PlayerArray<int> m_sendConfig;

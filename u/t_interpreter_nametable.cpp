@@ -3,7 +3,7 @@
   *  \brief Test for interpreter::NameTable
   */
 
-#include <cstdio>
+#include <cstdio>               // sprintf
 #include "interpreter/nametable.hpp"
 
 #include "t_interpreter.hpp"

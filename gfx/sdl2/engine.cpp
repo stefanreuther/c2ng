@@ -223,6 +223,9 @@ namespace {
 gfx::sdl2::Engine::Engine(afl::sys::LogListener& log)
     : m_log(log),
       m_window(0),
+      m_sdlWindow(0),
+      m_sdlTexture(0),
+      m_sdlRenderer(0),
       m_disableGrab(false),
       m_grabEnabled(false),
       m_grabDelay(1000 / 10),
@@ -259,7 +262,8 @@ gfx::sdl2::Engine::Engine(afl::sys::LogListener& log)
 
 gfx::sdl2::Engine::~Engine()
 {
-    // // ex ui/event.cc:doneEvents
+    // ex ui/event.cc:doneEvents
+    clearWindowStuff();
     // SDL_SetEventFilter(0);
     SDL_QuitSubSystem(SDL_INIT_VIDEO | SDL_INIT_TIMER);
 }
@@ -330,38 +334,7 @@ gfx::sdl2::Engine::createWindow(const WindowParameters& param)
         throw GraphicsException(afl::string::Format(_("Error setting video mode (%s): %s").c_str(), "SDL_CreateRGBSurface", SDL_GetError()));
     }
 
-    class MyPresenter : public Presenter {
-     public:
-        MyPresenter(SDL_Window* window, SDL_Texture* tex, SDL_Renderer* renderer)
-            : m_window(window), m_texture(tex), m_renderer(renderer)
-            { }
-        ~MyPresenter()
-            {
-                // FIXME: I think SDL_DestroyRenderer is needed, but if I add it, valgrind sees a bad memory access:
-                // SDL_DestroyRenderer(m_renderer);
-                SDL_DestroyTexture(m_texture);
-                SDL_DestroyWindow(m_window);
-            }
-        virtual void present(SDL_Surface* sfc, const Rectangle& region)
-            {
-                if (region.exists()) {
-                    SDL_Rect r;
-                    r.x = region.getLeftX();
-                    r.y = region.getTopY();
-                    r.w = region.getWidth();
-                    r.h = region.getHeight();
-                    SDL_UpdateTexture(m_texture, NULL, sfc->pixels, sfc->pitch);
-                    SDL_RenderCopy(m_renderer, m_texture, &r, &r);
-                    SDL_RenderPresent(m_renderer);
-                }
-            }
-     private:
-        SDL_Window* m_window;
-        SDL_Texture* m_texture;
-        SDL_Renderer* m_renderer;
-    };
-
-    m_presenter.reset(new MyPresenter(window, tex, renderer));
+    setWindowStuff(window, tex, renderer);
     m_window = new Surface(sfc, true);
 
     return *m_window;
@@ -388,18 +361,6 @@ gfx::sdl2::Engine::loadImage(afl::io::Stream& file)
 void
 gfx::sdl2::Engine::handleEvent(EventConsumer& consumer, bool relativeMouseMovement)
 {
-    // Flush output
-    if (Surface* sfc = m_window.get()) {
-        sfc->ensureUnlocked();
-        if (m_presenter.get() != 0) {
-            // FIXME: clean this up. The Presenter interface is no longer needed.
-            m_presenter->present(sfc->getSurface(), sfc->extractUpdateRegion());
-        }
-    }
-
-    // // Update mouse grab
-    // setMouseGrab(relativeMouseMovement);
-
     // Performance hack.
     // SDL runs at 100 Hz. This means that a task that posts Runnables in lock-step mode
     // (i.e. a new Runnable is posted after the previous one confirmed)
@@ -410,10 +371,23 @@ gfx::sdl2::Engine::handleEvent(EventConsumer& consumer, bool relativeMouseMoveme
     // Posting a Runnable will post the semaphore, interrupting the wait.
     // This improves throughput good enough such that constructing a dialog such as
     // "CCUI.Ship.SetExtendedMission" no longer leads to a noticeable delay.
+    bool hasRunnable = false;
     if (m_lastWasRunnable) {
-        m_runnableSemaphore.wait(5);
+        hasRunnable = m_runnableSemaphore.wait(5);
         m_lastWasRunnable = false;
     }
+
+    if (!hasRunnable) {
+        // Flush output
+        if (Surface* sfc = m_window.get()) {
+            if (m_sdlTexture != 0 && m_sdlRenderer != 0) {
+                sfc->presentUpdate(m_sdlTexture, m_sdlRenderer);
+            }
+        }
+    }
+
+    // // Update mouse grab
+    // setMouseGrab(relativeMouseMovement);
 
     // Wait for event to arrive
     SDL_Event ev;
@@ -466,6 +440,31 @@ gfx::sdl2::Engine::createTimer()
 // /*
 //  *  Privates
 //  */
+
+void
+gfx::sdl2::Engine::setWindowStuff(SDL_Window* win, SDL_Texture* tex, SDL_Renderer* renderer)
+{
+    clearWindowStuff();
+    m_sdlWindow = win;
+    m_sdlTexture = tex;
+    m_sdlRenderer = renderer;
+}
+
+void
+gfx::sdl2::Engine::clearWindowStuff()
+{
+    // FIXME: I think SDL_DestroyRenderer is needed, but if I add it, valgrind sees a bad memory access:
+    // SDL_DestroyRenderer(m_renderer);
+    m_sdlRenderer = 0;
+    if (m_sdlTexture != 0) {
+        SDL_DestroyTexture(m_sdlTexture);
+        m_sdlTexture = 0;
+    }
+    if (m_sdlWindow != 0) {
+        SDL_DestroyWindow(m_sdlWindow);
+        m_sdlWindow = 0;
+    }
+}
 
 // /** Set mouse mode.
 //     \param enable true: grab mouse pointer and start reporting infinite movement; false: normal mouse behaviour */

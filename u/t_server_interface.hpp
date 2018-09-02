@@ -91,6 +91,27 @@ class TestServerInterfaceHostCronServer : public CxxTest::TestSuite {
     void testRoundtrip();
 };
 
+class TestServerInterfaceHostFile : public CxxTest::TestSuite {
+ public:
+    void testInterface();
+    void testFormat();
+    void testMergeInfo();
+};
+
+class TestServerInterfaceHostFileClient : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testUnpack();
+};
+
+class TestServerInterfaceHostFileServer : public CxxTest::TestSuite {
+ public:
+    void testServer();
+    void testError();
+    void testRoundtrip();
+    void testInteroperability();
+};
+
 class TestServerInterfaceHostGame : public CxxTest::TestSuite {
  public:
     void testInterface();

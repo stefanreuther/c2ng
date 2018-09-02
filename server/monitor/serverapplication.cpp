@@ -31,6 +31,9 @@ namespace {
     /* Default update interval in seconds */
     const int32_t DEFAULT_UPDATE_INTERVAL = 60;
 
+    /* Default save interval in seconds */
+    const int32_t DEFAULT_SAVE_INTERVAL = 3600;
+
     class ProtocolHandlerFactory : public afl::net::ProtocolHandlerFactory {
      public:
         ProtocolHandlerFactory(afl::net::http::Dispatcher& disp)
@@ -50,6 +53,7 @@ server::monitor::ServerApplication::ServerApplication(afl::sys::Environment& env
       m_templateFileName("share/server/monitor/monitor.html"),
       m_statusFileName(),
       m_updateInterval(DEFAULT_UPDATE_INTERVAL),
+      m_saveInterval(DEFAULT_SAVE_INTERVAL),
       m_status()
 {
     m_status.addNewObserver(new NetworkObserver("Web Server",       "WWW",      NetworkObserver::Web,     clientNetworkStack(), afl::net::Name(DEFAULT_ADDRESS, WWW_PORT)));
@@ -106,8 +110,15 @@ server::monitor::ServerApplication::serverMain()
 
     // Wait for termination request
     afl::async::Controller ctl;
+    uint32_t lastSaveTime = afl::sys::Time::getTickCounter();
     while (m_interrupt.wait(ctl, InterruptOperation::Kinds_t() + InterruptOperation::Break + InterruptOperation::Terminate, 1000 * m_updateInterval).empty()) {
         m_status.update();
+
+        uint32_t now = afl::sys::Time::getTickCounter();
+        if (static_cast<int32_t>((now - lastSaveTime) / 1000) >= m_saveInterval) {
+            doSave();
+            lastSaveTime = now;
+        }
     }
 
     // Stop
@@ -116,11 +127,7 @@ server::monitor::ServerApplication::serverMain()
     serverThread.join();
 
     // Save status
-    if (!m_statusFileName.empty()) {
-        afl::base::Ref<afl::io::Stream> file = fileSystem().openFile(m_statusFileName, afl::io::FileSystem::Create);
-        m_status.save(*file);
-        log().write(afl::sys::LogListener::Info, LOG_NAME, afl::string::Format("Status saved to \"%s\".", m_statusFileName));
-    }
+    doSave();
 }
 
 bool
@@ -158,6 +165,16 @@ server::monitor::ServerApplication::handleConfiguration(const String_t& key, con
         }
         m_updateInterval = n;
         return true;
+    } else if (key == "MONITOR.SAVEINTERVAL") {
+        /* @q Monitor.SaveInterval:Int (Config)
+           Interval for saving the history file, in seconds.
+           @since PCC2 2.40.5 */
+        int32_t n;
+        if (!afl::string::strToInteger(value, n) || n <= 0 || n > 40*86400) {
+            throw afl::except::CommandLineException(afl::string::Format("Invalid number for '%s'", key));
+        }
+        m_saveInterval = n;
+        return true;
     } else if (key == "MONITOR.HISTORYFILE") {
         /* @q Monitor.HistoryFile:Str (Config)
            Name of history file.
@@ -182,3 +199,12 @@ server::monitor::ServerApplication::getCommandLineOptionHelp() const
     return String_t();
 }
 
+void
+server::monitor::ServerApplication::doSave()
+{
+    if (!m_statusFileName.empty()) {
+        afl::base::Ref<afl::io::Stream> file = fileSystem().openFile(m_statusFileName, afl::io::FileSystem::Create);
+        m_status.save(*file);
+        log().write(afl::sys::LogListener::Info, LOG_NAME, afl::string::Format("Status saved to \"%s\".", m_statusFileName));
+    }
+}

@@ -53,6 +53,28 @@ game::map::UfoType::addUfo(int id, int type, int color)
     return result;
 }
 
+void
+game::map::UfoType::addMessageInformation(const game::parser::MessageInformation& info)
+{
+    namespace gp = game::parser;
+
+    // Try to obtain Ufo object
+    Ufo* existing = getUfoById(info.getObjectId());
+    if (existing == 0) {
+        // Does not exist. Do we have the essential information to create it?
+        // type/color are essential for addUfo().
+        int32_t type, color, x, y;
+        if (info.getValue(gp::mi_Type, type) && info.getValue(gp::mi_UfoColor, color) && info.getValue(gp::mi_X, x) && info.getValue(gp::mi_Y, y)) {
+            existing = addUfo(info.getObjectId(), type, color);
+        }
+    }
+
+    // Assimilate data
+    if (existing != 0) {
+        existing->addMessageInformation(info);
+    }
+}
+
 // /** Postprocess Ufos after loading. */
 void
 game::map::UfoType::postprocess(int turn)
@@ -152,8 +174,24 @@ game::map::UfoType::getPreviousIndex(Id_t index) const
 {
     // ex GUfoType::getPreviousIndex
     if (index == 0) {
-        return m_ufos.size();
+        return static_cast<Id_t>(m_ufos.size());
     } else {
         return index-1;
+    }
+}
+
+game::map::Ufo*
+game::map::UfoType::getUfoById(int id)
+{
+    // FIXME: binary search?
+    UfoList_t::iterator i = m_ufos.begin();
+    while (i != m_ufos.end() && (*i)->getId() < id) {
+        ++i;
+    }
+
+    if (i != m_ufos.end() && (*i)->getId() == id) {
+        return *i;
+    } else {
+        return 0;
     }
 }

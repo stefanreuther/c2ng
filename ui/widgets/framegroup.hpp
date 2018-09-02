@@ -7,6 +7,7 @@
 
 #include "ui/layoutablegroup.hpp"
 #include "ui/colorscheme.hpp"
+#include "afl/base/deleter.hpp"
 
 namespace ui { namespace widgets {
 
@@ -50,6 +51,12 @@ namespace ui { namespace widgets {
             \return Type */
         Type getType() const;
 
+        /** Wrap a single widget within a FrameGroup.
+            \param del Deleter. The FrameGroup instance will be added here.
+            \param colors UI color scheme to allow palette access
+            \param type Frame type (color)
+            \param widget Widget to add */
+        static FrameGroup& wrapWidget(afl::base::Deleter& del, ColorScheme& colors, Type type, Widget& widget);
 
         // LayoutableGroup:
         virtual gfx::Rectangle transformSize(gfx::Rectangle size, Transformation kind) const;

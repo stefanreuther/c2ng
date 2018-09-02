@@ -7,7 +7,7 @@
 #include "ui/root.hpp"
 #include "client/widgets/keymapwidget.hpp"
 #include "afl/base/deleter.hpp"
-#include "client/objectobserverproxy.hpp"
+#include "client/proxy/objectobserver.hpp"
 #include "afl/string/string.hpp"
 #include "ui/layoutablegroup.hpp"
 #include "ui/widget.hpp"
@@ -20,7 +20,7 @@ namespace client { namespace tiles {
         TileFactory(ui::Root& root,
                     client::si::UserSide& user,
                     client::widgets::KeymapWidget& keys,
-                    ObjectObserverProxy& observer);
+                    client::proxy::ObjectObserver& observer);
         ~TileFactory();
 
         ui::Widget* createTile(String_t name, afl::base::Deleter& deleter) const;
@@ -31,7 +31,7 @@ namespace client { namespace tiles {
         ui::Root& m_root;
         client::si::UserSide& m_userSide;
         client::widgets::KeymapWidget& m_keys;
-        ObjectObserverProxy& m_observer;
+        client::proxy::ObjectObserver& m_observer;
     };
 
 } }

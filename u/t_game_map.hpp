@@ -79,6 +79,8 @@ class TestGameMapMarkings : public CxxTest::TestSuite {
 class TestGameMapMovementPredictor : public CxxTest::TestSuite {
  public:
     void testCombinations();
+    void testMovement();
+    void testInterceptLoop();
 };
 
 class TestGameMapObject : public CxxTest::TestSuite {
@@ -89,18 +91,6 @@ class TestGameMapObject : public CxxTest::TestSuite {
 class TestGameMapObjectCursor : public CxxTest::TestSuite {
  public:
     void testIt();
-};
-
-class TestGameMapObjectList : public CxxTest::TestSuite {
- public:
-    void testEmpty();
-    void testContent();
-};
-
-class TestGameMapObjectReference : public CxxTest::TestSuite {
- public:
-    void testCompare();
-    void testAccessor();
 };
 
 class TestGameMapPlanetPredictor : public CxxTest::TestSuite {

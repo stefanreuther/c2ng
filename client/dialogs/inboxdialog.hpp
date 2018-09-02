@@ -7,22 +7,22 @@
 #include "client/downlink.hpp"
 #include "client/session.hpp"
 #include "client/si/control.hpp"
-#include "client/si/inputstate.hpp"
 #include "client/si/outputstate.hpp"
 #include "client/widgets/messageactionpanel.hpp"
 #include "game/playerset.hpp"
 #include "game/reference.hpp"
 #include "ui/eventloop.hpp"
 #include "ui/rich/documentview.hpp"
+#include "client/si/userside.hpp"
 
 namespace client { namespace dialogs {
 
     class InboxDialog : public client::si::Control {
      public:
-        InboxDialog(Session& session);
+        InboxDialog(client::si::UserSide& iface, ui::Root& root, afl::string::Translator& tx);
         ~InboxDialog();
 
-        void run(client::si::InputState& in, client::si::OutputState& out);
+        void run(client::si::OutputState& out);
 
         virtual void handleStateChange(client::si::UserSide& us, client::si::RequestLink2 link, client::si::OutputState::Target target);
         virtual void handleEndDialog(client::si::UserSide& us, client::si::RequestLink2 link, int code);
@@ -30,7 +30,7 @@ namespace client { namespace dialogs {
         virtual client::si::ContextProvider* createContextProvider();
 
      private:
-        Session& m_session;
+        ui::Root& m_root;
         Downlink m_link;
 
         class Query;

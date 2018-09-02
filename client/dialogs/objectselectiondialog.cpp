@@ -4,8 +4,7 @@
 
 #include "client/dialogs/objectselectiondialog.hpp"
 #include "client/objectcursorfactory.hpp"
-#include "client/objectlistener.hpp"
-#include "client/objectobserverproxy.hpp"
+#include "client/proxy/objectlistener.hpp"
 #include "client/si/contextprovider.hpp"
 #include "client/si/control.hpp"
 #include "client/tiles/tilefactory.hpp"
@@ -29,6 +28,7 @@
 #include "util/translation.hpp"
 #include "afl/base/refcounted.hpp"
 #include "client/si/contextreceiver.hpp"
+#include "client/proxy/cursorobserverproxy.hpp"
 
 namespace {
     /*
@@ -180,7 +180,7 @@ namespace {
         virtual client::si::ContextProvider* createContextProvider()
             { return new DialogContextProvider(m_state); }
 
-        void attach(client::ObjectObserverProxy& oop)
+        void attach(client::proxy::ObjectObserver& oop)
             {
                 // FIXME: move this into a separate class
                 class Updater : public util::Request<DialogControl> {
@@ -193,7 +193,7 @@ namespace {
                  private:
                     int m_id;
                 };
-                class Observer : public client::ObjectListener {
+                class Observer : public client::proxy::ObjectListener {
                  public:
                     Observer(util::RequestSender<DialogControl> sender)
                         : m_sender(sender)
@@ -219,7 +219,7 @@ namespace {
 
     /*
      *  Cursor Factory.
-     *  This class initializes the cursor within the CommonState and provides it to the ObjectObserverProxy.
+     *  This class initializes the cursor within the CommonState and provides it to the ObjectObserver.
      */
     class DialogCursorFactory : public client::ObjectCursorFactory {
      public:
@@ -316,7 +316,7 @@ client::dialogs::doObjectSelectionDialog(const ObjectSelectionDialog& def,
     afl::base::Ref<CommonState> state(*new CommonState(def.screenNumber));
 
     // Create ObjectObserver. This cause the CommonState to be initialized with the cursor we want.
-    client::ObjectObserverProxy oop(iface.gameSender(), std::auto_ptr<client::ObjectCursorFactory>(new DialogCursorFactory(state)));
+    client::proxy::CursorObserverProxy oop(iface.gameSender(), std::auto_ptr<client::ObjectCursorFactory>(new DialogCursorFactory(state)));
 
     // Set up script controls
     ui::EventLoop loop(root);
@@ -334,8 +334,8 @@ client::dialogs::doObjectSelectionDialog(const ObjectSelectionDialog& def,
 
     ui::widgets::Button& btnOK     = del.addNew(new ui::widgets::Button(tx.translateString("OK"),     util::Key_Return, root));
     ui::widgets::Button& btnCancel = del.addNew(new ui::widgets::Button(tx.translateString("Cancel"), util::Key_Escape, root));
-    keys.addButton(btnOK);
-    keys.addButton(btnCancel);
+    btnOK.dispatchKeyTo(keys);
+    btnCancel.dispatchKeyTo(keys);
 
     ui::Group& g = del.addNew(new ui::Group(ui::layout::HBox::instance5));
     g.add(btnOK);

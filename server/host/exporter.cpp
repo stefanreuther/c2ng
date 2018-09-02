@@ -21,6 +21,7 @@
 #include "server/host/game.hpp"
 #include "server/host/root.hpp"
 #include "server/interface/filebaseclient.hpp"
+#include "server/interface/baseclient.hpp"
 
 using afl::base::Ptr;
 using afl::base::Ref;
@@ -93,6 +94,8 @@ server::host::Exporter::exportGame(Game& game, Root& root, String_t fsDirName)
     // In classic, this only creates the c2host.ini file, and otherwise operates directly in the hostfile space.
     // c2ng uses copy-in/copy-out and therefore has to copy around files here.
     ConfigurationBuilder ini;
+
+    server::interface::BaseClient(root.hostFile()).setUserContext(String_t());
 
     uint32_t startTicks = afl::sys::Time::getTickCounter();
 
@@ -178,6 +181,8 @@ server::host::Exporter::importGame(Game& game, Root& root, String_t fsDirName)
 {
     uint32_t startTicks = afl::sys::Time::getTickCounter();
     Ref<Directory> target = m_fileSystem.openDirectory(fsDirName);
+
+    server::interface::BaseClient(root.hostFile()).setUserContext(String_t());
 
     // Import
     const char* GAME_PATH = "game";

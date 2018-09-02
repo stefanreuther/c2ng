@@ -3,7 +3,6 @@
   *  \brief Class server::console::ConsoleApplication
   */
 
-#include <stdio.h>
 #include "server/console/consoleapplication.hpp"
 #include "afl/base/optional.hpp"
 #include "afl/data/access.hpp"

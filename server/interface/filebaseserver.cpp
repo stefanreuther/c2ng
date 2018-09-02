@@ -294,7 +294,7 @@ server::interface::FileBaseServer::handleCommand(const String_t& upcasedCommand,
     }
 }
 
-server::interface::FileBaseServer::Value_t*
+afl::data::HashValue*
 server::interface::FileBaseServer::packInfo(const FileBase::Info& info)
 {
     /* @type FileStat

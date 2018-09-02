@@ -1,5 +1,6 @@
 /**
   *  \file util/plugin/installer.cpp
+  *  \brief Class util::plugin::Installer
   */
 
 #include "util/plugin/installer.hpp"
@@ -10,6 +11,8 @@
 #include "util/plugin/manager.hpp"
 #include "util/plugin/plugin.hpp"
 #include "util/translation.hpp"
+
+using afl::string::Format;
 
 namespace {
     const char LOG_NAME[] = "plugin.install";
@@ -54,10 +57,7 @@ namespace {
     }
 }
 
-// /** Constructor.
-//     \param mgr PluginManager
-//     \param rootDir Plugin root directory (points to PluginManager's root)
-//     \param pm Progress Monitor */
+// Constructor.
 util::plugin::Installer::Installer(Manager& mgr, afl::io::FileSystem& fs, afl::io::Directory& rootDir)
     : manager(mgr),
       m_fileSystem(fs),
@@ -72,15 +72,7 @@ util::plugin::Installer::Installer(Manager& mgr, afl::io::FileSystem& fs, afl::i
 util::plugin::Installer::~Installer()
 { }
 
-// /** Prepare installation.
-//     Checks whether the file name refers to a file that can be installed as a plugin.
-//     If so, makes a proto-plugin and returns it.
-//     The plugin remains owned by the PluginInstaller.
-//     The caller can examine it.
-//     It can be installed by calling doInstall().
-
-//     \param fileName File to install
-//     \return proto-plugin or null */
+// Prepare installation.
 util::plugin::Plugin*
 util::plugin::Installer::prepareInstall(String_t fileName)
 {
@@ -140,9 +132,68 @@ util::plugin::Installer::prepareInstall(String_t fileName)
     return apPlug.get();
 }
 
-// /** Install the prepared plugin.
-//     Throws exceptions on errors.
-//     \param dry true to simulate only */
+// Check for installation ambiguities.
+util::plugin::Installer::ScanResult
+util::plugin::Installer::checkInstallAmbiguity(String_t& out)
+{
+    // ex PluginInstaller::checkInstallAmbiguity
+    if (srcFile.get() == 0 && srcDir.get() != 0) {
+        // We do not have a source file.
+        // this means we are auto-converting and could be subject to ambiguities.
+        return scanDirectory(*srcDir, out);
+    } else {
+        return NoPlugin;
+    }
+}
+
+// Check preconditions for installation.
+afl::base::Optional<String_t>
+util::plugin::Installer::checkInstallPreconditions(afl::string::Translator& tx)
+{
+    // ex c2pluginw.cc:checkPreconditions, c2plugin.cc:checkPreconditions, plugindlg.cc:checkPreconditions
+    // Do we have a plugin?
+    if (apPlug.get() == 0) {
+        return afl::base::Nothing;
+    }
+    const Plugin& plug = *apPlug;
+
+    // Check for conflicts
+    std::vector<Plugin*> plugList;
+    manager.enumConflictingPlugins(plug, plugList);
+    if (!plugList.empty()) {
+        String_t message = Format(tx.translateString("Plugin \"%s\" conflicts with the following plugins:").c_str(), plug.getId());
+        for (size_t i = 0, n = plugList.size(); i < n; ++i) {
+            message += "\n";
+            message += Format("  %s (%s)", plugList[i]->getId(), plugList[i]->getName());
+        }
+        message += "\n";
+        message += tx.translateString("It cannot be installed.");
+        return message;
+    }
+
+    // Check for preconditions
+    Plugin::FeatureSet fset;
+    manager.enumFeatures(fset);
+    if (!plug.isSatisfied(fset)) {
+        String_t message = Format(tx.translateString("Plugin \"%s\" requires the following features:").c_str(), plug.getId());
+        Plugin::FeatureSet missing;
+        plug.enumMissingFeatures(fset, missing);
+        for (Plugin::FeatureSet::const_iterator it = missing.begin(), e = missing.end(); it != e; ++it) {
+            message += "\n  ";
+            message += it->first;
+            if (!it->second.empty()) {
+                message += " ";
+                message += it->second;
+            }
+        }
+        message += "\n";
+        message += tx.translateString("It cannot be installed.");
+        return message;
+    }
+    return afl::base::Nothing;
+}
+
+// Install the prepared plugin.
 void
 util::plugin::Installer::doInstall(bool dry)
 {
@@ -175,6 +226,7 @@ util::plugin::Installer::doInstall(bool dry)
              case Plugin::PlainFile:
              case Plugin::ScriptFile:
              case Plugin::ResourceFile:
+             case Plugin::HelpFile:
                 copyFile(*dir, *srcDir, item.name);
                 break;
 
@@ -203,30 +255,26 @@ util::plugin::Installer::doInstall(bool dry)
     srcDir  = 0;
 }
 
-// /** Check for installation ambiguities.
-//     An ambiguity is when the user chose a file to auto-convert,
-//     but there is a *.c2p he should probably use instead.
-//     \param out [out] Name of alternative *.c2p file
-//     \retval NoPlugin no ambiguity
-//     \retval OnePlugin there is one *.c2p file that could be installed instead, its name given in %out.
-//     \retval MultiplePlugins there are multiple *.c2p files that could be installed instead */
-util::plugin::Installer::ScanResult
-util::plugin::Installer::checkInstallAmbiguity(String_t& out)
+// Check preconditions for removal.
+afl::base::Optional<String_t>
+util::plugin::Installer::checkRemovePreconditions(const Plugin& plug, afl::string::Translator& tx)
 {
-    // ex PluginInstaller::checkInstallAmbiguity
-    if (srcFile.get() == 0 && srcDir.get() != 0) {
-        // We do not have a source file.
-        // this means we are auto-converting and could be subject to ambiguities.
-        return scanDirectory(*srcDir, out);
-    } else {
-        return NoPlugin;
+    std::vector<util::plugin::Plugin*> tmp;
+    manager.enumDependingPlugins(plug, tmp);
+    if (!tmp.empty()) {
+        String_t message = Format(tx.translateString("Plugin \"%s\" is required by the following plugins:").c_str(), plug.getId());
+        for (size_t i = 0, n = tmp.size(); i < n; ++i) {
+            message += "\n";
+            message += Format("  %s (%s)", tmp[i]->getId(), tmp[i]->getName());
+        }
+        message += "\n";
+        message += tx.translateString("It cannot be uninstalled.");
+        return message;
     }
+    return afl::base::Nothing;
 }
 
-// /** Remove a plugin.
-//     Deletes all associated files.
-//     \param pPlug Plugin
-//     \param dry true to simulate only */
+// Remove a plugin.
 bool
 util::plugin::Installer::doRemove(Plugin* pPlug, bool dry)
 {
@@ -251,6 +299,7 @@ util::plugin::Installer::doRemove(Plugin* pPlug, bool dry)
              case Plugin::PlainFile:
              case Plugin::ScriptFile:
              case Plugin::ResourceFile:
+             case Plugin::HelpFile:
                 if (!eraseFile(*dir, item.name, manager.log())) {
                     err = true;
                 }
@@ -280,7 +329,7 @@ util::plugin::Installer::doRemove(Plugin* pPlug, bool dry)
         err = true;
     }
     if (err) {
-        manager.log().write(afl::sys::LogListener::Warn, LOG_NAME, afl::string::Format(_("Uninstallation of '%s' might be incomplete.").c_str(), apPlug->getId()));
+        manager.log().write(afl::sys::LogListener::Warn, LOG_NAME, Format(_("Uninstallation of \"%s\" might be incomplete.").c_str(), apPlug->getId()));
     }
     return !err;
 }

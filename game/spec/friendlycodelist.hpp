@@ -162,7 +162,7 @@ namespace game { namespace spec {
             \param fc Friendly code
             \param host Host version
             \return true if friendly code is considered numeric */
-        bool isNumeric(const String_t& fc, const HostSelection host) const;
+        static bool isNumeric(const String_t& fc, const HostSelection host);
 
         /** Check whether a friendly code is an extra code.
             \param fc Friendly code
@@ -187,7 +187,7 @@ namespace game { namespace spec {
             \param fc Friendly code
             \param host Host version
             \return numeric value (1000 if code is not numeric) */
-        int getNumericValue(const String_t& fc, const HostSelection host) const;
+        static int getNumericValue(const String_t& fc, const HostSelection host);
 
         /** Check whether a friendly code is permitted as random friendly code.
             Random codes must be

@@ -58,4 +58,19 @@ namespace game { namespace spec {
 
 } }
 
+// Get fuel factor.
+inline bool
+game::spec::Engine::getFuelFactor(int warp, int32_t& fuelFactor) const
+{
+    if (warp <= 0) {
+        fuelFactor = 0;
+        return true;
+    } else if (warp <= MAX_WARP) {
+        fuelFactor = m_fuelFactors[warp-1];
+        return true;
+    } else {
+        return false;
+    }
+}
+
 #endif

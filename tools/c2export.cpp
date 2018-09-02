@@ -352,6 +352,7 @@ ConsoleExportApplication::appMain()
         session.getGame()->currentTurn().universe().postprocess(game::PlayerSet_t(arg_race), game::PlayerSet_t(arg_race), game::map::Object::ReadOnly,
                                                                 root->hostVersion(), root->hostConfiguration(),
                                                                 session.getGame()->currentTurn().getTurnNumber(),
+                                                                *session.getShipList(),
                                                                 translator(), log());
 
         // What do we want to export?

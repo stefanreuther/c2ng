@@ -87,9 +87,9 @@ namespace game { namespace spec {
         enum {
         //     // Standard missions
             msn_Explore     = 1,
-        //     msn_MineSweep   = 2,
-        //     msn_LayMines    = 3,
-        //     msn_Kill        = 4,
+            msn_MineSweep   = 2,
+            msn_LayMines    = 3,
+            msn_Kill        = 4,
         //     msn_SensorSweep = 5,
         //     msn_LnD         = 6,    // Colonize, Land&Disassemble, Decommission
             msn_Tow         = 7,
@@ -104,9 +104,9 @@ namespace game { namespace spec {
 
         //     // PHost extended missions. These numbers are relative to ExtMissionsStartAt.
         //     pmsn_BuildTorpsFromCargo = 0,
-        //     pmsn_LayMines            = 1,
-        //     pmsn_LayWeb              = 2,
-        //     pmsn_ScoopTorps          = 3,
+            pmsn_LayMines            = 1,
+            pmsn_LayWeb              = 2,
+            pmsn_ScoopTorps          = 3,
         //     pmsn_GatherBuildTorps    = 4,
         //     pmsn_BDmc                = 5,
         //     pmsn_XferTorp            = 6,
@@ -119,8 +119,8 @@ namespace game { namespace spec {
         //     pmsn_BUmc                = 13,
         //     pmsn_BUclans             = 14,
         //     pmsn_BeamUpMultiple      = 15,
-        //     pmsn_LayMinesIn          = 16,
-        //     pmsn_LayWebIn            = 17,
+            pmsn_LayMinesIn          = 16,
+            pmsn_LayWebIn            = 17,
             pmsn_Training            = 18
         };
 

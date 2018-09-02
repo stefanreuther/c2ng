@@ -21,6 +21,10 @@ namespace game { namespace msg {
         virtual String_t getMessageHeading(size_t index, afl::string::Translator& tx, PlayerList& players);
         virtual int getMessageTurnNumber(size_t index);
 
+        /*
+         *  In receiver list, 0 means host
+         */
+
         String_t getMessageSendPrefix(size_t index, int receiver,
                                       afl::string::Translator& tx,
                                       const PlayerList& players) const;
@@ -31,7 +35,7 @@ namespace game { namespace msg {
     //     void setReceiverMask(int index, GPlayerSet receivers);
     //     void setMessage(int index, string_t text, GPlayerSet receivers);
 
-    //     void     deleteMessagesAfter(int index);
+        void deleteMessagesAfter(size_t index);
     //     void     deleteMessage(int index);
 
         //     /** Set mailbox storage format. */
@@ -43,6 +47,7 @@ namespace game { namespace msg {
 
         void addMessage(int sender, String_t text, PlayerSet_t receivers);
         void addMessageFromFile(int sender, String_t text, PlayerSet_t receivers);
+        void clear();
 
         static String_t getHeadersForDisplay(int sender,
                                              PlayerSet_t receivers,

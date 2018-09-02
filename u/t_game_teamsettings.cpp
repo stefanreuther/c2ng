@@ -6,6 +6,12 @@
 #include "game/teamsettings.hpp"
 
 #include "t_game.hpp"
+#include "afl/base/ref.hpp"
+#include "afl/charset/codepage.hpp"
+#include "afl/charset/codepagecharset.hpp"
+#include "afl/io/constmemorystream.hpp"
+#include "afl/io/filemapping.hpp"
+#include "afl/io/internaldirectory.hpp"
 #include "afl/string/nulltranslator.hpp"
 
 /** Test initialisation.
@@ -112,3 +118,40 @@ TestGameTeamSettings::testViewpoint()
     TS_ASSERT_EQUALS(testee.getPlayerRelation(9), game::TeamSettings::ThisPlayer);
     TS_ASSERT_EQUALS(testee.getPlayerRelation(10), game::TeamSettings::EnemyPlayer);
 }
+
+/** Test Load/Save. */
+void
+TestGameTeamSettings::testLoadSave()
+{
+    // An actual team.cc file created by PCC1
+    static const uint8_t DATA[] = {
+        0x43, 0x43, 0x74, 0x65, 0x61, 0x6d, 0x30, 0x1a, 0x03, 0x00, 0x01, 0x02, 0x05, 0x09, 0x05, 0x02, 0x05, 0x02, 0x09, 0x02, 0x09, 0x0c, 0x04, 0x04,
+        0x04, 0x03, 0x04, 0x04, 0x04, 0x04, 0x03, 0x04, 0x03, 0x04, 0x05, 0x68, 0x75, 0x6d, 0x61, 0x6e, 0x12, 0x64, 0x69, 0x65, 0x20, 0x77, 0x6f, 0x20,
+        0x69, 0x63, 0x68, 0x20, 0x76, 0x65, 0x72, 0x68, 0x61, 0x75, 0x65, 0x00, 0x05, 0x68, 0x75, 0x6d, 0x61, 0x6e, 0x00, 0x00, 0x00, 0x00, 0x04, 0x69,
+        0x63, 0x6b, 0x65, 0x00, 0x07, 0x6b, 0x6c, 0x65, 0x6d, 0x65, 0x6e, 0x73, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+    };
+    afl::base::Ref<afl::io::InternalDirectory> dir = afl::io::InternalDirectory::create("gamedir");
+    dir->addStream("team9.cc", *new afl::io::ConstMemoryStream(DATA));
+
+    afl::charset::CodepageCharset cs(afl::charset::g_codepage437);
+    afl::string::NullTranslator tx;
+
+    // Test
+    game::TeamSettings testee;
+    TS_ASSERT_THROWS_NOTHING(testee.load(*dir, 9, cs));
+    TS_ASSERT_EQUALS(testee.getTeamName(1, tx), "human");
+    TS_ASSERT_EQUALS(testee.getTeamName(9, tx), "icke");
+
+    // Erase the file so it is guaranteed to be written back
+    dir->erase("team9.cc");
+    TS_ASSERT_THROWS(dir->openFile("team9.cc", afl::io::FileSystem::OpenRead), std::exception);
+
+    // Write back
+    testee.save(*dir, 9, cs);
+
+    // Verify file has been recreated with identical content
+    afl::base::Ref<afl::io::Stream> file = dir->openFile("team9.cc", afl::io::FileSystem::OpenRead);
+    TS_ASSERT_EQUALS(file->createVirtualMapping()->get().equalContent(DATA), true);
+}
+

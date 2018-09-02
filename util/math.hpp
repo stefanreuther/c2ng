@@ -62,6 +62,14 @@ namespace util {
         \return distance */
     double getDistanceFromDX(int dx, int dy);
 
+    /** Three-way compare.
+        \tparam T type to compare
+        \param a First value
+        \param b Second value
+        \return -1 if a<b, +1 if a>b, 0 if a==b */
+    template<typename T>
+    int compare3(const T& a, const T& b);
+
 }
 
 inline int32_t
@@ -87,6 +95,13 @@ util::divideAndRoundToEven(int32_t a, int b, int plus)
         ++x;
     }
     return x;
+}
+
+template<typename T>
+inline int
+util::compare3(const T& a, const T& b)
+{
+    return (a == b ? 0 : a < b ? -1 : +1);
 }
 
 #endif

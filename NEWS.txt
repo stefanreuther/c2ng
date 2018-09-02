@@ -1,0 +1,41 @@
+PCC2ng NEWS FILE
+================
+
+
+2.40.5
+------
+
+  Local game saving. Unpack and Maketurn utilities.
+
+
+2.40.4
+------
+
+  Folder configuration. Simple VCR.
+
+
+2.40.3
+------
+
+  Many more game attributes and commands. More PlanetsCentral servers
+  (host, mailout, monitor, nntp) and utilities (console, dbexport, mailin).
+
+
+2.40.2
+------
+
+  PlanetsCentral servers (talk, file, format).
+
+
+2.40.1
+------
+
+  Plugins. More commands. Script-controlled dialogs. Loads score and
+  map database. Procedurally-generated wallpapers.
+
+
+2.40
+----
+
+  First version: load local and network games, browse history.
+  Proof-of-concept GUI.

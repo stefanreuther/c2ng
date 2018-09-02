@@ -7,6 +7,7 @@
 #include "gfx/context.hpp"
 #include "gfx/complex.hpp"
 #include "afl/base/optional.hpp"
+#include "ui/layout/hbox.hpp"
 
 // Constructor.
 ui::widgets::FrameGroup::FrameGroup(ui::layout::Manager& mgr,
@@ -51,6 +52,15 @@ ui::widgets::FrameGroup::Type
 ui::widgets::FrameGroup::getType() const
 {
     return m_frameType;
+}
+
+// Wrap a single widget within a FrameGroup.
+ui::widgets::FrameGroup&
+ui::widgets::FrameGroup::wrapWidget(afl::base::Deleter& del, ColorScheme& colors, Type type, Widget& widget)
+{
+    FrameGroup& f = del.addNew(new FrameGroup(ui::layout::HBox::instance0, colors, type));
+    f.add(widget);
+    return f;
 }
 
 gfx::Rectangle

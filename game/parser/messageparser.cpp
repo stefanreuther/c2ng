@@ -5,14 +5,17 @@
 #include <algorithm>
 #include "game/parser/messageparser.hpp"
 #include "afl/io/textfile.hpp"
+#include "afl/string/format.hpp"
+#include "afl/string/parse.hpp"
+#include "game/alliance/offer.hpp"
 #include "game/parser/messageinformation.hpp"
 #include "game/parser/messagetemplate.hpp"
-#include "afl/string/format.hpp"
-#include "util/string.hpp"
-#include "afl/string/parse.hpp"
 #include "game/parser/messagevalue.hpp"
+#include "util/string.hpp"
+#include "game/parser/datainterface.hpp"
 
 using afl::string::strTrim;
+using game::alliance::Offer;
 
 namespace {
     const char LOG_NAME[] = "game.parser.msgparser";
@@ -95,65 +98,78 @@ namespace {
      *  parseMessage() helpers
      */
 
-    // FIXME: port this; needs allies
-    // /** Convert pre-parsed yes/no array into an array of offers. */
-    // static void
-    // generateSimpleAllies(GPlayerArray<GAllianceOffer::OfferType>& out, string_t value)
-    // {
-    //     for (int i = 1; i <= NUM_PLAYERS; ++i) {
-    //         string_t item = strTrim(strFirst(value, ","));
-    //         if (util::stringMatch("Yes", item)) {
-    //             out[i] = GAllianceOffer::Yes;
-    //         } else if (util::stringMatch("No", item)) {
-    //             out[i] = GAllianceOffer::No;
-    //         } else if (util::stringMatch("Conditional", item)) {
-    //             out[i] = GAllianceOffer::Conditional;
-    //         } else {
-    //             // ignore (in particular, this branch is taken when the field is empty)
-    //         }
-    //         strRemove(value, ",");
-    //     }
-    // }
+    /** Convert pre-parsed yes/no array into an array of offers. */
+    void generateSimpleAllies(game::PlayerArray<Offer::Type>& out, String_t value)
+    {
+        int playerNr = 0;
+        do {
+            ++playerNr;
 
-    // FIXME: port this; needs allies
-    // /** Generate allies from an array of "Race+!" elements. */
-    // static void
-    // generateFlagAllies(GAllianceOffer& out, string_t value)
-    // {
-    //     do {
-    //         string_t item = strFirst(value, ",");
+            String_t item = afl::string::strTrim(afl::string::strFirst(value, ","));
+            if (util::stringMatch("Yes", item)) {
+                out.set(playerNr, Offer::Yes);
+            } else if (util::stringMatch("No", item)) {
+                out.set(playerNr, Offer::No);
+            } else if (util::stringMatch("Conditional", item)) {
+                out.set(playerNr, Offer::Conditional);
+            } else {
+                // ignore (in particular, this branch is taken when the field is empty)
+            }
+        } while (afl::string::strRemove(value, ","));
+    }
 
-    //         // Parse off the alliance markers
-    //         bool excl = false;
-    //         bool plus = false;
-    //         size_t n = item.size();
-    //         while (n > 0) {
-    //             if (item[n-1] == '+') {
-    //                 plus = true;
-    //                 --n;
-    //             } else if (item[n-1] == '!') {
-    //                 excl = true;
-    //                 --n;
-    //             } else if (item[n-1] == ' ' || item[n-1] == ':') {
-    //                 --n;
-    //             } else {
-    //                 break;
-    //             }
-    //         }
+    /** Convert pre-parsed yes/no array into an array of offers, for FF allies.. */
+    void generateFFAllies(game::PlayerArray<Offer::Type>& out, String_t value)
+    {
+        int playerNr = 0;
+        do {
+            ++playerNr;
+            String_t item = afl::string::strTrim(afl::string::strFirst(value, ","));
+            if (item == "YES") {
+                out.set(playerNr, Offer::Yes);
+            } else if (!item.empty()) {
+                out.set(playerNr, Offer::No);
+            } else {
+                // ignore (in particular, this branch is taken when the field is empty)
+            }
+        } while (afl::string::strRemove(value, ","));
+    }
 
-    //         // What remains is a race name, I hope.
-    //         //   !     => this race has offered something to us
-    //         //   +     => we have offered something
-    //         item.erase(n);
-    //         for (int i = 1; i <= NUM_OWNERS; ++i) {
-    //             if (strCaseCmp(item, strTrim(host_racenames.getAdjName(i))) == 0) {
-    //                 out.theirOffer[i] = excl ? GAllianceOffer::Yes : GAllianceOffer::No;
-    //                 out.oldOffer[i]   = plus ? GAllianceOffer::Yes : GAllianceOffer::No;
-    //                 break;
-    //             }
-    //         }
-    //     } while (strRemove(value, ","));
-    // }
+    /** Generate allies from an array of "Race+!" elements. */
+    void generateFlagAllies(Offer& out, String_t value, const game::parser::DataInterface& iface)
+    {
+        do {
+            String_t item = afl::string::strFirst(value, ",");
+
+            // Parse off the alliance markers
+            bool excl = false;
+            bool plus = false;
+            size_t n = item.size();
+            while (n > 0) {
+                if (item[n-1] == '+') {
+                    plus = true;
+                    --n;
+                } else if (item[n-1] == '!') {
+                    excl = true;
+                    --n;
+                } else if (item[n-1] == ' ' || item[n-1] == ':') {
+                    --n;
+                } else {
+                    break;
+                }
+            }
+
+            // What remains is a race name, I hope.
+            //   !     => this race has offered something to us
+            //   +     => we have offered something
+            item.erase(n);
+
+            if (int player = iface.parseName(game::parser::DataInterface::AdjectiveRaceName, item)) {
+                out.theirOffer.set(player, excl ? Offer::Yes : Offer::No);
+                out.oldOffer.set(player,   plus ? Offer::Yes : Offer::No);
+            }
+        } while (afl::string::strRemove(value, ","));
+    }
 
 
     /** Generate output for one matching message template.
@@ -162,13 +178,13 @@ namespace {
         \param tpl        [in] template which matched
         \param turnNr     [in] message turn number
         \param info       [out] Information will be appended here */
-    static void
-    generateOutput(const std::vector<String_t>& values,
-                   const game::parser::MessageTemplate& tpl,
-                   const int turnNr,
-                   afl::container::PtrVector<game::parser::MessageInformation>& info,
-                   afl::string::Translator& tx,
-                   afl::sys::LogListener& log)
+    void generateOutput(const std::vector<String_t>& values,
+                        const game::parser::MessageTemplate& tpl,
+                        const game::parser::DataInterface& iface,
+                        const int turnNr,
+                        afl::container::PtrVector<game::parser::MessageInformation>& info,
+                        afl::string::Translator& tx,
+                        afl::sys::LogListener& log)
     {
         // ex game/msgparse.cc:generateOutput
         using namespace game::parser;
@@ -187,6 +203,7 @@ namespace {
          case MessageInformation::Planet:
          case MessageInformation::Starbase:
          case MessageInformation::IonStorm:
+         case MessageInformation::Ufo:
             /* Those are identified by a mandatory Id */
             if (tpl.getVariableSlotByName("ID", skipSlot)) {
                 id = parseIntegerValue(values[skipSlot]);
@@ -248,35 +265,39 @@ namespace {
 
         /* Now produce the values */
         if (tpl.getMessageType() == MessageInformation::Alliance) {
-            // FIXME: port this
-        //     /* Alliance case. Produce one GAllianceOffer and a name. */
-        //     GAllianceOffer offer;
-        //     string_t idStr;
+            // Alliance case. Produce one alliance offer and a name.
+            Offer offer;
+            String_t idStr;
 
-        //     for (uint_t i = 0; i < processLimit; ++i) {
-        //         const string_t varName = tpl.getVariableName(i);
-        //         if (values[i].empty() || varName == "_" || varName.empty())
-        //             continue;
+            for (size_t i = 0; i < processLimit; ++i) {
+                const String_t varName = tpl.getVariableName(i);
+                if (values[i].empty() || varName == "_" || varName.empty()) {
+                    continue;
+                }
 
-        //         if (varName == "NAME") {
-        //             idStr = values[i];
-        //         } else if (varName == "FROM") {
-        //             generateSimpleAllies(offer.theirOffer, values[i]);
-        //         } else if (varName == "TO") {
-        //             generateSimpleAllies(offer.oldOffer, values[i]);
-        //         } else if (varName == "FLAGS") {
-        //             generateFlagAllies(offer, values[i]);
-        //         } else {
-        //             console.write(LOG_ERROR, format(_("Message template \"%s\" generates unknown value \"%s\""),
-        //                                             tpl.getTemplateName(), tpl.getVariableName(i)));
-        //         }
-        //     }
+                if (varName == "NAME") {
+                    idStr = values[i];
+                } else if (varName == "FROM") {
+                    generateSimpleAllies(offer.theirOffer, values[i]);
+                } else if (varName == "TO") {
+                    generateSimpleAllies(offer.oldOffer, values[i]);
+                } else if (varName == "FROMFF") {
+                    generateFFAllies(offer.theirOffer, values[i]);
+                } else if (varName == "TOFF") {
+                    generateFFAllies(offer.oldOffer, values[i]);
+                } else if (varName == "FLAGS") {
+                    generateFlagAllies(offer, values[i], iface);
+                } else {
+                    log.write(log.Error, LOG_NAME, afl::string::Format(tx.translateString("Message template \"%s\" generates unknown value \"%s\"").c_str(),
+                                                                       tpl.getTemplateName(), tpl.getVariableName(i)));
+                }
+            }
 
-        //     if (idStr.empty()) {
-        //         console.write(LOG_ERROR, format(_("Message template \"%s\" did not produce name, ignoring"), tpl.getTemplateName()));
-        //         return;
-        //     }
-        //     pInfo->addAllianceValue(idStr, offer);
+            if (idStr.empty()) {
+                log.write(log.Error, LOG_NAME, afl::string::Format(tx.translateString("Message template \"%s\" did not produce name, ignoring").c_str(), tpl.getTemplateName()));
+            } else {
+                pInfo->addAllianceValue(idStr, offer);
+            }
         } else {
             /* Regular case */
             for (size_t i = 0; i < processLimit; ++i) {
@@ -480,7 +501,7 @@ game::parser::MessageParser::parseMessage(String_t theMessage, const DataInterfa
         std::vector<String_t> values;
         if ((*i)->match(lines, iface, values)) {
             // Matches. Produce output.
-            generateOutput(values, **i, turnNr - getMessageHeaderInformation(lines, MsgHdrAge), info, tx, log);
+            generateOutput(values, **i, iface, turnNr - getMessageHeaderInformation(lines, MsgHdrAge), info, tx, log);
             if (!(*i)->getContinueFlag()) {
                 break;
             }

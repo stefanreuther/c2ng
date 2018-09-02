@@ -77,6 +77,7 @@ namespace game { namespace map {
         Reverter* getReverter() const;
 
         const Object* getObject(Reference ref) const;
+        Object* getObject(Reference ref);
 
         /** Perform all updates.
             This will poll all updatable objects, and raise the appropriate signals. */
@@ -88,6 +89,7 @@ namespace game { namespace map {
         void postprocess(PlayerSet_t playingSet, PlayerSet_t availablePlayers, Object::Playability playability,
                          const game::HostVersion& host, const game::config::HostConfiguration& config,
                          int turnNumber,
+                         const game::spec::ShipList& shipList,
                          afl::string::Translator& tx, afl::sys::LogListener& log);
 
 

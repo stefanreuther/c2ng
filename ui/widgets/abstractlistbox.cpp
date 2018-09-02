@@ -80,7 +80,7 @@ ui::widgets::AbstractListbox::draw(gfx::Canvas& can)
             drawItem(filter, itemArea, itemNr, getItemState(itemNr));
             ++itemNr;
         }
-        
+
         // Draw following items
         size_t numItems = getNumItems();
         while (itemNr < numItems && r.getHeight() > 0) {
@@ -279,6 +279,7 @@ ui::widgets::AbstractListbox::handleMouse(gfx::Point pt, MouseButtons_t pressedB
                     requestRedraw();
                     sig_change.raise();
                     sig_itemClick.raise(itemNr);
+                    sig_itemClickAt.raise(itemNr, pt - r.getTopLeft());
                 }
             }
             m_mouseDown = false;
@@ -333,7 +334,7 @@ ui::widgets::AbstractListbox::getRelativeItemPosition(size_t item)
 {
     gfx::Rectangle result(0, 0, getExtent().getWidth(), getItemHeight(item));
     if (hasFlag(EqualSizes)) {
-        result.moveBy(gfx::Point(0, result.getHeight() * item));
+        result.moveBy(gfx::Point(0, result.getHeight() * static_cast<int>(item)));
     } else {
         for (size_t i = 0; i < item; ++i) {
             result.moveBy(gfx::Point(0, getItemHeight(i)));
@@ -375,7 +376,7 @@ ui::widgets::AbstractListbox::getItemFromRelativePosition(gfx::Point pt, size_t&
 
             // OK
             item = pos;
-            area = gfx::Rectangle(0, item*itemHeight, getExtent().getWidth(), itemHeight);
+            area = gfx::Rectangle(0, static_cast<int>(item)*itemHeight, getExtent().getWidth(), itemHeight);
             return true;
         } else {
             // Check it
@@ -449,7 +450,16 @@ ui::widgets::AbstractListbox::setCurrentItem(size_t nr, Direction dir)
         // OK
         if (nr != m_currentItem) {
             m_currentItem = nr;
-            makeVisible(getRelativeItemPosition(nr));
+
+            gfx::Rectangle itemPos = getRelativeItemPosition(nr);
+
+            // If this is the first selectable item, scroll up all the way to the top.
+            // This is required to make unselectable headings visible.
+            if (isFirstAccessibleItem(nr) && itemPos.getBottomY() <= getExtent().getHeight() - getHeaderHeight()) {
+                itemPos.include(gfx::Point());
+            }
+
+            makeVisible(itemPos);
             requestRedraw();          // FIXME: can we optimize to redraw only changed items?
             sig_change.raise();
         }
@@ -481,6 +491,15 @@ ui::widgets::AbstractListbox::handleModelChange()
     }
     requestRedraw();
     sig_change.raise();
+}
+
+bool
+ui::widgets::AbstractListbox::isFirstAccessibleItem(size_t nr)
+{
+    while (nr > 0 && !isItemAccessible(nr-1)) {
+        --nr;
+    }
+    return (nr == 0);
 }
 
 void

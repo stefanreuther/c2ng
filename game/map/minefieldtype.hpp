@@ -8,6 +8,7 @@
 #include "game/map/minefield.hpp"
 #include "game/map/objectvectortype.hpp"
 #include "game/playerset.hpp"
+#include "game/parser/messageinformation.hpp"
 
 namespace game { namespace map {
 
@@ -26,10 +27,7 @@ namespace game { namespace map {
         void erase(Id_t id);
         void setAllMinefieldsKnown(int player);
         void internalCheck(int currentTurn, const game::HostVersion& host, const game::config::HostConfiguration& config);
-
-        // Missing from PCC2:
-        // - begin/end --> use ObjectVector/ObjectVectorType methods
-        // - addMinefieldReport --> use create()->addMinefieldReport() (use erase() for 0-unit report)
+        void addMessageInformation(const game::parser::MessageInformation& info);
 
      private:
         // Players for which we ought to know all minefields

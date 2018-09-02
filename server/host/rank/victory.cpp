@@ -298,7 +298,7 @@ server::host::rank::computeGameRankings(Root& root, Game& game)
     for (int32_t turnNr = 2; turnNr <= currentTurn; ++turnNr) {
         // Process one turn
         Game::Turn turn(game.turn(turnNr));
-        String_t turnStatus = turn.info().stringField("turnstatus").get();
+        String_t turnStatus = turn.info().turnStatus().get();
         for (int slot = 1; slot <= Game::NUM_PLAYERS; ++slot) {
             // Do we have information about this slot?
             if (turnStatus.size() < 2U*slot) {

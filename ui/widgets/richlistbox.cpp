@@ -8,6 +8,7 @@
 #include "ui/draw.hpp"
 #include "ui/rich/imageobject.hpp"
 #include "ui/skincolorscheme.hpp"
+#include "gfx/dimcolorscheme.hpp"
 
 namespace {
     using util::SkinColor;
@@ -68,6 +69,18 @@ ui::widgets::RichListbox::addItem(const util::rich::Text text, afl::base::Ptr<gf
     size_t n = m_items.size();
     m_items.pushBackNew(new Item(text, image, accessible, m_provider));
     render(n, 1);
+}
+
+void
+ui::widgets::RichListbox::setItemAccessible(size_t n, bool accessible)
+{
+    if (n < m_items.size() && accessible != m_items[n]->accessible) {
+        m_items[n]->accessible = accessible;
+        updateItem(n);
+        if (n == getCurrentItem()) {
+            setCurrentItem(n);
+        }
+    }
 }
 
 void
@@ -136,15 +149,16 @@ ui::widgets::RichListbox::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t
     SkinColorScheme main(BLACK_COLOR_SET, m_colorScheme);
     SkinColorScheme inv(GRAY_COLOR_SET, m_colorScheme);
     InverseColorScheme inv2(getColorScheme());
+    gfx::ColorScheme<util::SkinColor::Color>& cs = hasRenderFlag(UseBackgroundColorScheme) ? getColorScheme() : main;
+    gfx::DimColorScheme shade(cs, can);
+
     gfx::Context<util::SkinColor::Color> ctx(can, main);
-    if (hasRenderFlag(UseBackgroundColorScheme)) {
-        ctx.useColorScheme(getColorScheme());
-    } else {
-        ctx.useColorScheme(main);
-    }
+    ctx.useColorScheme(cs);
     prepareHighContrastListItem(ctx, area, state);
     if (item < m_items.size()) {
-        if (state == FocusedItem) {
+        if (!hasRenderFlag(NoShade) && (hasState(DisabledState) || !m_items[item]->accessible)) {
+            ctx.useColorScheme(shade);
+        } else if (state == FocusedItem) {
             if (hasRenderFlag(UseBackgroundColorScheme)) {
                 ctx.useColorScheme(inv2);
             } else {

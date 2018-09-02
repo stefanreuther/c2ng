@@ -16,6 +16,7 @@
 #include "game/v3/registrationkey.hpp"
 #include "util/randomnumbergenerator.hpp"
 #include "util/translation.hpp"
+#include "afl/base/inlinememory.hpp"
 
 namespace {
     const int CURRENT_VERSION = 1;
@@ -395,14 +396,13 @@ game::v3::TurnFile::tryGetTurnNr() const
     return 0;
 }
 
-// /** Set templock block.
-//     Updates DOS trailer; does not automatically update turn,
-//     and does not implicitly mark it dirty. */
-// void
-// GTurnFile::setTemplock(const uint32_t* data)
-// {
-//     std::copy(data, data + 11, dos_trailer.players);
-// }
+// Set player secret (templock, playerlog).
+void
+game::v3::TurnFile::setPlayerSecret(const structures::TurnPlayerSecret& data)
+{
+    // ex GTurnFile::setTemplock
+    m_dosTrailer.playerSecret = data;
+}
 
 // Set registration info.
 void
@@ -616,6 +616,37 @@ game::v3::TurnFile::getCommandData(size_t index) const
     }
 }
 
+// Send message data (create tcm_SendMessage command).
+void
+game::v3::TurnFile::sendMessageData(int from, int to, afl::base::ConstBytes_t data)
+{
+    game::v3::structures::Int16_t header[2];
+    header[0] = static_cast<int16_t>(from);
+    header[1] = static_cast<int16_t>(to == 0 ? 12 : to);
+
+    addCommand(tcm_SendMessage, static_cast<int16_t>(data.size()), afl::base::fromObject(header));
+    addData(data);
+}
+
+// Send THost alliance commands.
+void
+game::v3::TurnFile::sendTHostAllies(const String_t& commandSequence, int shipId, const String_t& shipFC)
+{
+    afl::base::GrowableBytes_t encodedBuffer = m_charset.encode(afl::string::toMemory(commandSequence));
+    afl::base::Bytes_t encoded = encodedBuffer;
+    afl::base::InlineMemory<uint8_t,3> fcBuffer;
+    while (encoded.size() > 0) {
+        fcBuffer.fill(0);
+        fcBuffer.copyFrom(encoded.split(3));
+        addCommand(tcm_ShipChangeFc, shipId, fcBuffer);
+    }
+
+    fcBuffer.fill(0);
+    fcBuffer.copyFrom(m_charset.encode(afl::string::toMemory(shipFC)));
+    addCommand(tcm_ShipChangeFc, shipId, fcBuffer);
+}
+
+
 
 /*
  *  Command definition accessors
@@ -701,42 +732,41 @@ game::v3::TurnFile::deleteCommand(size_t index)
     m_isDirty = true;
 }
 
-// 
-// /*
-//  *  Maketurn
-//  */
-
 // /** Make commands for a ship.
 //     \param id Ship Id
 //     \param old Serialized old ship data (*.dis)
 //     \param neu Serialized new ship data (*.dat) */
-// void
-// GTurnFile::makeShipCommands(int id, const char* old, const char* neu)
-// {
-//     makeCommands(id, tcm_ShipFIRST, tcm_ShipLAST, old, neu);
-// }
+void
+game::v3::TurnFile::makeShipCommands(int id, const structures::Ship& oldShip, const structures::Ship& newShip)
+{
+    // ex GTurnFile::makeShipCommands
+    makeCommands(id, tcm_ShipFIRST, tcm_ShipLAST, afl::base::fromObject(oldShip), afl::base::fromObject(newShip));
+}
 
 // /** Make commands for a planet.
 //     \param id Planet Id
 //     \param old Serialized old planet data (*.dis)
 //     \param neu Serialized new planet data (*.dat) */
-// void
-// GTurnFile::makePlanetCommands(int id, const char* old, const char* neu)
-// {
-//     makeCommands(id, tcm_PlanetFIRST, tcm_PlanetLAST, old, neu);
-//     if (getUint16(old, 83) != getUint16(neu, 83))
-//         addCommand(tcm_PlanetBuildBase, id);
-// }
+void
+game::v3::TurnFile::makePlanetCommands(int id, const structures::Planet& oldPlanet, const structures::Planet& newPlanet)
+{
+    // ex GTurnFile::makePlanetCommands
+    makeCommands(id, tcm_PlanetFIRST, tcm_PlanetLAST, afl::base::fromObject(oldPlanet), afl::base::fromObject(newPlanet));
+    if (int16_t(oldPlanet.buildBaseFlag) != int16_t(newPlanet.buildBaseFlag)) {
+        addCommand(tcm_PlanetBuildBase, id);
+    }
+}
 
 // /** Make commands for a starbase.
 //     \param id Base Id
 //     \param old Serialized old base data (*.dis)
 //     \param neu Serialized new base data (*.dat) */
-// void
-// GTurnFile::makeBaseCommands(int id, const char* old, const char* neu)
-// {
-//     makeCommands(id, tcm_BaseFIRST, tcm_BaseLAST, old, neu);
-// }
+void
+game::v3::TurnFile::makeBaseCommands(int id, const structures::Base& oldBase, const structures::Base& newBase)
+{
+    // ex GTurnFile::makeBaseCommands
+    makeCommands(id, tcm_BaseFIRST, tcm_BaseLAST, afl::base::fromObject(oldBase), afl::base::fromObject(newBase));
+}
 
 
 /*
@@ -1156,19 +1186,21 @@ game::v3::TurnFile::updateTurnFile(afl::base::GrowableMemory<uint8_t>& data, afl
 //     \param id      Object Id
 //     \param low,up  Command range (e.g. tcm_ShipFIRST,tcm_ShipLAST)
 //     \param old,neu Old and new data */
-// void
-// GTurnFile::makeCommands(int id, int low, int up, const char* old, const char* neu)
-// {
-//     for (int i = low; i <= up; ++i) {
-//         register int index = COMMAND_DEFINITIONS[i].index;
-//         register int size = COMMAND_DEFINITIONS[i].size;
-//         if (std::memcmp(&old[index], &neu[index], size) != 0
-//             || (i == tcm_BaseBuildShip && getUint16(&neu[index]) != 0))
-//         {
-//             addCommand(i, id, &neu[index], size);
-//         }
-//     }
-// }
+void
+game::v3::TurnFile::makeCommands(int id, int low, int up, afl::base::ConstBytes_t oldObject, afl::base::ConstBytes_t newObject)
+{
+    // ex GTurnFile::makeCommands
+    static const uint8_t zero[2] = {0,0};
+    for (int i = low; i <= up; ++i) {
+        size_t index = COMMAND_DEFINITIONS[i].index;
+        size_t size = COMMAND_DEFINITIONS[i].size;
+        if (!oldObject.subrange(index, size).equalContent(newObject.subrange(index, size))
+            || (i == tcm_BaseBuildShip && !newObject.subrange(index, 2).equalContent(zero)))
+        {
+            addCommand(i, id, newObject.subrange(index, size));
+        }
+    }
+}
 
 /** Encode a string according to our character set.
     \param in String */

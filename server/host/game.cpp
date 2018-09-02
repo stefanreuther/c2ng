@@ -95,6 +95,58 @@ server::host::Game::Slot::rank()
     return m_tree.hashKey("status").intField("rank");
 }
 
+/***************************** Game::TurnInfo ****************************/
+
+server::host::Game::TurnInfo::TurnInfo(afl::net::redis::HashKey key)
+    : m_key(key)
+{ }
+
+// Access turn time (integer format).
+afl::net::redis::IntegerField
+server::host::Game::TurnInfo::time()
+{
+    return m_key.intField("time");
+}
+
+// Access turn time (VGAP string format).
+afl::net::redis::StringField
+server::host::Game::TurnInfo::timestamp()
+{
+    return m_key.stringField("timestamp");
+}
+
+// Access turn status.
+afl::net::redis::StringField
+server::host::Game::TurnInfo::turnStatus()
+{
+    return m_key.stringField("turnstatus");
+}
+
+// // Access relative directory name.
+// afl::net::redis::StringField
+// server::host::Game::TurnInfo::relativeDirectory()
+// {
+//     return m_key.stringField("dir");
+// }
+
+/**************************** Game::TurnFiles ****************************/
+
+server::host::Game::TurnFiles::TurnFiles(afl::net::redis::Subtree tree)
+    : m_tree(tree)
+{ }
+
+afl::net::redis::StringSetKey
+server::host::Game::TurnFiles::playerFiles(int slot)
+{
+    return m_tree.stringSetKey(afl::string::Format("%d", slot));
+}
+
+afl::net::redis::StringSetKey
+server::host::Game::TurnFiles::globalFiles()
+{
+    return m_tree.stringSetKey("all");
+}
+
 
 /******************************* Game::Turn ******************************/
 
@@ -111,10 +163,17 @@ server::host::Game::Turn::scores()
 }
 
 // Access turn information.
-afl::net::redis::HashKey
+server::host::Game::TurnInfo
 server::host::Game::Turn::info()
 {
-    return m_tree.hashKey("info");
+    return TurnInfo(m_tree.hashKey("info"));
+}
+
+// Access turn's backup file names.
+server::host::Game::TurnFiles
+server::host::Game::Turn::files()
+{
+    return TurnFiles(m_tree.subtree("files"));
 }
 
 // Access player status.
@@ -1108,4 +1167,11 @@ afl::net::redis::IntegerField
 server::host::Game::forumDisabled()
 {
     return settings().intField("forumDisable");
+}
+
+// Access "kick after missed turns" value.
+afl::net::redis::IntegerField
+server::host::Game::numMissedTurnsForKick()
+{
+    return settings().intField("kickAfterMissed");
 }

@@ -166,6 +166,7 @@ server::host::Installer::installGameData(Game& game, game::PlayerSet_t players, 
 
     // Server instances
     server::interface::BaseClient(m_root.userFile()).setUserContext(userId);
+    server::interface::BaseClient(m_root.hostFile()).setUserContext(String_t());
     server::interface::FileBaseClient userFile(m_root.userFile());
     server::interface::FileBaseClient hostFile(m_root.hostFile());
 

@@ -14,6 +14,7 @@
 #include "afl/sys/loglistener.hpp"
 #include "game/unitscorelist.hpp"
 #include "game/spec/hullassignmentlist.hpp"
+#include "game/parser/messageinformation.hpp"
 
 namespace game { namespace map {
 
@@ -82,7 +83,7 @@ namespace game { namespace map {
         void addCurrentPlanetData(const PlanetData& data, PlayerSet_t source);
         void addCurrentBaseData(const BaseData& data, PlayerSet_t source);
 //     void        addHistoryData(const TDbPlanet& data);
-//     void        addMessageInformation(const GMessageInformation& info);  // planet-hist.cc
+        void addMessageInformation(const game::parser::MessageInformation& info);
 
         void setPosition(Point pos);
         void setName(const String_t& name);
@@ -215,7 +216,7 @@ namespace game { namespace map {
         Id_t m_id;              // ID, always known
         String_t m_name;        // Name, always known
 
-        afl::base::Optional<Point> m_position;    // Position, known if m_positionKnown
+        afl::base::Optional<Point> m_position;    // Position
         bool m_knownToNotExist; // Override saying this planet does not exist
 
         PlanetData m_currentPlanetData;

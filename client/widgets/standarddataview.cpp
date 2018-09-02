@@ -94,7 +94,7 @@ client::widgets::StandardDataView::addNewButton(ButtonAlignment alignment, int x
     std::auto_ptr<ui::widgets::AbstractButton> abtn(btn);
     Button* p = m_buttons.pushBackNew(new Button(alignment, x, y, abtn, root()));
     addChild(p->frame, getFirstChild());
-    m_keys.addButton(*p->button);
+    p->button->dispatchKeyTo(m_keys);
 }
 
 void

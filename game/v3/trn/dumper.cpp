@@ -527,7 +527,7 @@ game::v3::trn::Dumper::showTrailer(const TurnFile& trn) const
     m_output.writeLine();
     m_output.writeLine("PlayerLog");
     for (int i = 0; i < game::v3::structures::NUM_PLAYERS; ++i) {
-        showLine(afl::string::Format("  Player%d", i+1), formatHex(dt.playerSecret[i]), String_t());
+        showLine(afl::string::Format("  Player%d", i+1), formatHex(dt.playerSecret.data[i]), String_t());
     }
 }
 

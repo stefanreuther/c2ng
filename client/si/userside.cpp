@@ -277,7 +277,7 @@ client::si::UserSide::executeKeyCommandWait(uint32_t id, String_t keymapName, ut
                 util::Atom_t a = (k != 0 ? k->lookupCommand(m_key) : 0);
                 if (a != 0) {
                     t.executeCommandWait(m_id, s, afl::string::Format("C2$Eval %d, %d", a, m_prefix), false,
-                                         afl::string::Format(s.translator().translate("Key '%s' in '%s'").c_str(), util::formatKey(m_key), m_keymapName),
+                                         afl::string::Format(s.translator().translateString("Key '%s' in '%s'").c_str(), util::formatKey(m_key), m_keymapName),
                                          m_contextProvider);
                 } else {
                     t.handleWait(m_id, interpreter::Process::Terminated, interpreter::Error(""));

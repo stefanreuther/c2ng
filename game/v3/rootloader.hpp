@@ -50,8 +50,6 @@ namespace game { namespace v3 {
                          afl::charset::Charset& charset);
         void loadHConfig(Root& root, afl::io::Stream& hconfig, game::config::ConfigurationOption::Source source);
         void loadRaceMapping(Root& root, afl::io::Stream& file, game::config::ConfigurationOption::Source source);
-
-        void loadRaceNames(PlayerList& list, afl::io::Directory& dir, afl::charset::Charset& charset);
     };
 
 } }

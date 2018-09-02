@@ -66,6 +66,21 @@ ui::widgets::SimpleTable::Range::setColor(uint8_t color)
     return *this;
 }
 
+ui::widgets::SimpleTable::Range&
+ui::widgets::SimpleTable::Range::setExtraColumns(int n)
+{
+    util::Updater up;
+    for (size_t i = 0, pos = m_start; i < m_count; ++i, pos += m_stride) {
+        assert(pos < m_table.m_cells.size());
+        up.set(m_table.m_cells[pos].extraColumns, n);
+    }
+    if (up) {
+        m_table.requestUpdateMetrics();
+        m_table.requestRedraw();
+    }
+    return *this;
+}
+
 ui::widgets::SimpleTable::Range
 ui::widgets::SimpleTable::Range::subrange(size_t start, size_t count)
 {
@@ -196,7 +211,9 @@ ui::widgets::SimpleTable::draw(gfx::Canvas& can)
 
     size_t row = 0;
     size_t column = 0;
-    for (size_t i = 0, n = m_cells.size(); i < n; ++i) {
+    size_t i = 0;
+    const size_t numCells = m_cells.size();
+    while (i < numCells) {
         // On first column, determine row area
         if (column == 0) {
             Metric rowMetric = getMetric(m_rowMetrics, row);
@@ -205,19 +222,27 @@ ui::widgets::SimpleTable::draw(gfx::Canvas& can)
         }
 
         // Determine cell area
-        Metric columnMetric = getMetric(m_columnMetrics, column);
-        gfx::Rectangle cellArea = rowArea.splitX(columnMetric.size);
-        rowArea.consumeX(columnMetric.padAfter);
+        const Cell& c = m_cells[i++];
+        Metric columnMetric = getMetric(m_columnMetrics, column++);
+        int size = columnMetric.size;
+        int padAfter = columnMetric.padAfter;
+        for (int extra = 0; extra < c.extraColumns && column < m_numColumns && i < numCells; ++extra) {
+            Metric nextMetric = getMetric(m_columnMetrics, column++);
+            size += padAfter;
+            size += nextMetric.size;
+            padAfter = nextMetric.padAfter;
+            ++i;
+        }
+        gfx::Rectangle cellArea = rowArea.splitX(size);
+        rowArea.consumeX(padAfter);
 
         // Render cell
-        const Cell& c = m_cells[i];
         ctx.useFont(*m_root.provider().getFont(c.font));
         ctx.setTextAlign(c.alignX, c.alignY);
         ctx.setColor(c.color);
         outTextF(ctx, cellArea, c.text);
 
         // Next cell
-        ++column;
         if (column == m_numColumns) {
             column = 0;
             ++row;
@@ -261,15 +286,76 @@ ui::widgets::SimpleTable::requestUpdateMetrics()
 void
 ui::widgets::SimpleTable::updateMetrics()
 {
+    // Start by processing the single-cell values
     size_t row = 0;
     size_t column = 0;
-    for (size_t i = 0, n = m_cells.size(); i < n; ++i) {
-        const Cell& c = m_cells[i];
+    size_t i = 0;
+    const size_t numCells = m_cells.size();
+    while (i < numCells) {
+        const Cell& c = m_cells[i++];
+
         afl::base::Ref<gfx::Font> font = m_root.provider().getFont(c.font);
         updateAutoMetric(m_rowMetrics, row, font->getTextHeight(c.text));
-        updateAutoMetric(m_columnMetrics, column, font->getTextWidth(c.text));
+        if (c.extraColumns == 0) {
+            // Single cell: update column metric
+            updateAutoMetric(m_columnMetrics, column, font->getTextWidth(c.text));
+            ++column;
+        } else {
+            // Multi cell: skip extra cells
+            ++column;
+            for (int extra = 0; extra < c.extraColumns && column < m_numColumns && i < numCells; ++extra) {
+                ++i;
+                ++column;
+            }
+        }
 
-        ++column;
+        if (column == m_numColumns) {
+            column = 0;
+            ++row;
+        }
+    }
+
+    // Post-process auto multi-colum cells
+    row = 0;
+    column = 0;
+    i = 0;
+    while (i < numCells) {
+        const Cell& c = m_cells[i++];
+        if (c.extraColumns == 0) {
+            // Single cell: skip (already processed above)
+            ++column;
+        } else {
+            // Multi cell: determine existing metrics.
+            // Sum up all metrics, determining the best column for a possible expansion.
+            size_t bestColumn = column;
+            Metric bestMetric = getMetric(m_columnMetrics, column);
+            ++column;
+
+            int size = bestMetric.size;
+            int padAfter = bestMetric.padAfter;
+            for (int extra = 0; extra < c.extraColumns && column < m_numColumns && i < numCells; ++extra) {
+                Metric extraMetric = getMetric(m_columnMetrics, column);
+                size += padAfter;
+                size += extraMetric.size;
+                padAfter = extraMetric.padAfter;
+                if (extraMetric.isAuto) {
+                    // Best column is rightmost column that is expansible (isAuto set).
+                    // A possible additional check would be to look for left-justified columns,
+                    // but that is a cell property, not a column property.
+                    bestMetric = extraMetric;
+                    bestColumn = column;
+                }
+                ++column;
+            }
+
+            // If we don't have enough space, expand the chosen column by the missing room.
+            afl::base::Ref<gfx::Font> font = m_root.provider().getFont(c.font);
+            int textWidth = font->getTextWidth(c.text);
+            if (textWidth > size) {
+                updateAutoMetric(m_columnMetrics, bestColumn, textWidth - size + bestMetric.size);
+            }
+        }
+
         if (column == m_numColumns) {
             column = 0;
             ++row;

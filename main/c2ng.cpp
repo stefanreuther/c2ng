@@ -299,10 +299,36 @@ namespace {
 
                                 m_root->getTurnLoader()->loadCurrentTurn(session.getGame()->currentTurn(), *session.getGame(), m_player, *m_root, session);
                                 session.getGame()->setViewpointPlayer(m_player);
-                                session.getGame()->currentTurn().universe().postprocess(game::PlayerSet_t(m_player), game::PlayerSet_t(m_player), game::map::Object::Playable,
+
+                                if (m_root->userConfiguration()[game::config::UserConfiguration::Team_AutoSync]()) {
+                                    session.getGame()->synchronizeTeamsFromAlliances();
+                                }
+
+                                game::map::Object::Playability playability;
+                                game::Session::AreaSet_t editableAreas;
+                                if (m_root->getPossibleActions().contains(game::Root::aLoadEditable) && !m_root->userConfiguration()[game::config::UserConfiguration::Game_ReadOnly]()) {
+                                    if (m_root->userConfiguration()[game::config::UserConfiguration::Game_Finished]()) {
+                                        // Finished game
+                                        playability = game::map::Object::ReadOnly;
+                                    } else {
+                                        // Active game
+                                        playability = game::map::Object::Playable;
+                                        editableAreas += game::Session::CommandArea;
+                                    }
+                                    editableAreas += game::Session::LocalDataArea;
+                                } else {
+                                    // View only
+                                    playability = game::map::Object::ReadOnly;
+                                }
+
+                                session.setEditableAreas(editableAreas);
+                                session.log().write(afl::sys::LogListener::Error, LOG_NAME, session.translator().translateString("Compiling starchart..."));
+                                session.getGame()->currentTurn().universe().postprocess(game::PlayerSet_t(m_player), game::PlayerSet_t(m_player), playability,
                                                                                         m_root->hostVersion(), m_root->hostConfiguration(),
                                                                                         session.getGame()->currentTurn().getTurnNumber(),
+                                                                                        *session.getShipList(),
                                                                                         session.translator(), session.log());
+                                session.getGame()->currentTurn().alliances().postprocess();
                                 ok = true;
                             }
                             catch (std::exception& e) {
@@ -348,7 +374,7 @@ namespace {
         util::RequestSender<game::browser::Session> m_browserSender;
         util::RequestSender<game::Session> m_gameSender;
     };
-    
+
 
     class RootOptions {
      public:
@@ -602,7 +628,7 @@ namespace {
               m_environment(env),
               m_fileSystem(fs)
             { }
-                          
+
         void appMain(gfx::Engine& engine)
             {
                 // Capture environment
@@ -620,8 +646,8 @@ namespace {
                 // Starting from here, log messages will be retrievable
                 util::MessageCollector collector;
                 log().addListener(collector);
-                console.setConfiguration("interpreter.process@Trace=hide");
-                collector.setConfiguration("interpreter.process@Trace=hide");
+                console.setConfiguration("interpreter.process@Trace=hide:client.si@Trace=hide");
+                collector.setConfiguration("interpreter.process@Trace=hide:client.si@Trace=hide");
 
                 // Parse command line.
                 CommandLineParameters params(translator());
@@ -712,7 +738,9 @@ namespace {
                     // Helpful information
                     ui::rich::DocumentView docView(root.getExtent().getSize(), 0, root.provider());
                     docView.setExtent(gfx::Rectangle(gfx::Point(0, 0), docView.getLayoutInfo().getPreferredSize()));
-                    docView.getDocument().add(util::rich::Parser::parseXml("<big>PCC2ng Milestone Four</big>"));
+                    docView.getDocument().add(util::rich::Parser::parseXml("<big>PCC2ng Milestone Five</big>"));
+                    docView.getDocument().addNewline();
+                    docView.getDocument().add(util::rich::Parser::parseXml("- Let's Get Dangerous -"));
                     docView.getDocument().addNewline();
                     docView.getDocument().addNewline();
                     docView.getDocument().add(util::rich::Parser::parseXml("<font color=\"dim\">&#xA9; 2017-2018 Stefan Reuther &lt;streu@gmx.de&gt;</font>"));

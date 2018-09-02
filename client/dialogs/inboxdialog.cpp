@@ -121,7 +121,7 @@ class client::dialogs::InboxDialog::Query : public util::Request<game::Session> 
         }
     void call(InboxDialog& parent)
         {
-            parent.m_link.call(parent.m_session.gameSender(), *this);
+            parent.m_link.call(parent.interface().gameSender(), *this);
             parent.setState(m_state);
         }
  private:
@@ -252,33 +252,28 @@ class client::dialogs::InboxDialog::LoadQuery : public Query {
 
 /****************************** InboxDialog ******************************/
 
-client::dialogs::InboxDialog::InboxDialog(Session& session)
-    : Control(session.interface(), session.root(), session.translator()),
-      m_session(session),
-      m_link(session.root()),
+client::dialogs::InboxDialog::InboxDialog(client::si::UserSide& iface, ui::Root& root, afl::string::Translator& tx)
+    : Control(iface, root, tx),
+      m_root(root),
+      m_link(root),
       m_state(),
       m_outputState(),
-      m_loop(session.root()),
-      m_actionPanel(session.root()),
-      m_content(session.root().provider().getFont(gfx::FontRequest().setStyle(1))->getCellSize().scaledBy(41, 22), 0, session.root().provider())
+      m_loop(root),
+      m_actionPanel(root),
+      m_content(root.provider().getFont(gfx::FontRequest().setStyle(1))->getCellSize().scaledBy(41, 22), 0, root.provider())
 { }
 
 client::dialogs::InboxDialog::~InboxDialog()
 { }
 
 void
-client::dialogs::InboxDialog::run(client::si::InputState& in, client::si::OutputState& out)
+client::dialogs::InboxDialog::run(client::si::OutputState& out)
 {
-    // FIXME: do we want an InputState? Compare doObjectSelectionDialog that only has an output state.
     // Initialize messenger
     InitQuery().call(*this);
     if (m_state.limit == 0) {
         return;
     }
-
-    // Execute a possible inbound process. This will return when the inbound process finished.
-    // If the inbound process requests a context change, this will already stop the m_loop.
-    continueProcessWait(in.getProcess());
 
     // Window
     //   HBox
@@ -289,14 +284,14 @@ client::dialogs::InboxDialog::run(client::si::InputState& in, client::si::Output
     //         Spacer
     //   Content
 
-    ui::Window win("!Messages", m_session.root().provider(), m_session.root().colorScheme(), ui::BLUE_BLACK_WINDOW, ui::layout::HBox::instance5);
+    ui::Window win("!Messages", m_root.provider(), m_root.colorScheme(), ui::BLUE_BLACK_WINDOW, ui::layout::HBox::instance5);
     ui::Group g1(ui::layout::VBox::instance5);
     g1.add(m_actionPanel);
 
     ui::Group g12(ui::layout::HBox::instance5);
-    ui::widgets::Button btnOK("!OK", util::Key_Escape, m_session.root());
+    ui::widgets::Button btnOK("!OK", util::Key_Escape, m_root);
     ui::Spacer spc;
-    ui::PrefixArgument prefix(m_session.root());
+    ui::PrefixArgument prefix(m_root);
     g12.add(btnOK);
     g12.add(spc);
     g1.add(g12);
@@ -312,8 +307,8 @@ client::dialogs::InboxDialog::run(client::si::InputState& in, client::si::Output
     // Reload state after pack() to format content with correct width
     setState(m_state);
 
-    m_session.root().centerWidget(win);
-    m_session.root().add(win);
+    m_root.centerWidget(win);
+    m_root.add(win);
 
     // Run (this will immediately exit if one of the above scripts requested a context change.)
     m_loop.run();

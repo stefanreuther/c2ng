@@ -54,19 +54,6 @@ namespace client { namespace widgets {
         // InvisibleWidget/Widget/EventConsumer:
         virtual bool handleKey(util::Key_t key, int prefix);
 
-        /** Make a key handler.
-            This can be attached to a button's sig_fireKey to make this button fire a keymap action.
-            Use as:
-            <pre>btn.sig_fireKey.addNewClosure(kw.makeKey());</pre>
-            \return newly-allocated closure */
-        afl::base::Closure<void(int, util::Key_t)>* makeKey();
-
-        /** Add a button.
-            This makes the button invoke keymap keys.
-            \todo set up other required magic such as "if button invokes a menu, anchor it at the button"
-            \param btn Button */
-        void addButton(ui::widgets::AbstractButton& btn);
-
      private:
         /** RequestReceiver to allow us to receive replies from script side. */
         util::RequestReceiver<KeymapWidget> m_reply;

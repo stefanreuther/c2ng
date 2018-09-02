@@ -1,5 +1,6 @@
 /**
   *  \file game/v3/trn/turnprocessor.hpp
+  *  \brief Interface game::v3::trn::TurnProcessor
   */
 #ifndef C2NG_GAME_V3_TRN_TURNPROCESSOR_HPP
 #define C2NG_GAME_V3_TRN_TURNPROCESSOR_HPP
@@ -15,6 +16,7 @@ namespace game { namespace v3 { namespace trn {
         typedef game::v3::structures::Ship   Ship_t;
         typedef game::v3::structures::Planet Planet_t;
         typedef game::v3::structures::Base   Base_t;
+        typedef uint8_t NewPassword_t[10];
 
         TurnProcessor();
         virtual ~TurnProcessor();
@@ -35,7 +37,7 @@ namespace game { namespace v3 { namespace trn {
         virtual void storeBaseData(int id, const Base_t& in, afl::charset::Charset& charset) = 0;
 
         virtual void addMessage(int to, String_t text) = 0;
-        // FIXME: password
+        virtual void addNewPassword(const NewPassword_t& pass) = 0;
         virtual void addAllianceCommand(String_t text) = 0;
     };
 

@@ -56,6 +56,7 @@ namespace {
 
         // Try it
         if (!game::actions::BaseFixRecycle(pl).set(action, ship)) {
+            // FIXME: PCC2 would also generate ePos if positions are different
             throw Exception(Exception::ePerm);
         }
     }

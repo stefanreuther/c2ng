@@ -286,7 +286,7 @@ TestServerInterfaceFileBaseServer::testRoundtrip()
     FileBaseMock mock("testRoundtrip");
     server::interface::FileBaseServer level1(mock);
     server::interface::FileBaseClient level2(level1);
-    server::interface::FileBaseClient level3(level2);
+    server::interface::FileBaseServer level3(level2);
     server::interface::FileBaseClient level4(level3);
 
     // copyFile

@@ -299,7 +299,7 @@ TestGamePlayerList::testGetName()
 
     TS_ASSERT_EQUALS(testee.getPlayerName(3, game::Player::LongName), "Long");
     TS_ASSERT_EQUALS(testee.getPlayerName(3, game::Player::EmailAddress), "e@mai.l");
-    TS_ASSERT_EQUALS(testee.getPlayerName(3, game::Player::AdjectiveName), "");
+    TS_ASSERT_EQUALS(testee.getPlayerName(3, game::Player::AdjectiveName), "Player 3");
 
     TS_ASSERT_EQUALS(testee.getPlayerName(1, game::Player::LongName), "Player 1");
     TS_ASSERT_EQUALS(testee.getPlayerName(1, game::Player::EmailAddress), "");

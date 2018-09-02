@@ -3,15 +3,16 @@
   */
 
 #include "game/map/universe.hpp"
-#include "game/map/planet.hpp"
-#include "game/map/objecttype.hpp"
-#include "game/map/anyplanettype.hpp"
-#include "game/map/ship.hpp"
-#include "game/map/reverter.hpp"
 #include "afl/string/format.hpp"
+#include "game/map/anyplanettype.hpp"
 #include "game/map/anyshiptype.hpp"
-#include "util/math.hpp"
+#include "game/map/fleet.hpp"
+#include "game/map/objecttype.hpp"
+#include "game/map/planet.hpp"
+#include "game/map/reverter.hpp"
+#include "game/map/ship.hpp"
 #include "game/spec/mission.hpp"
+#include "util/math.hpp"
 
 namespace {
     /** Format name of a planet. */
@@ -27,8 +28,34 @@ namespace {
                                    pl.getName(game::map::Planet::PlainName, tx, iface),
                                    pl.getId());
     }
-}
 
+
+    // /** Manipulating: Postprocess a fleet. This will remove all fleet members that do not
+    //     exist anymore. It will also synchronize the waypoints. */
+    void postprocessFleet(game::map::Universe& univ, game::map::Ship& leader,
+                          const game::config::HostConfiguration& config,
+                          const game::spec::ShipList& shipList)
+    {
+        // FIXME: do we need this code? As of 20180722, FleetLoader only produces valid, existing fleets.
+        // If we need it, the isPlayable() check should check ReadOnly.
+        // // Check leader
+        // if (!univ.isValidShipId(fid) || !univ.getShip(fid).isPlayable(GObject::Playable)) {
+        //     fid = removeFleetMember(univ, fid);
+        // }
+
+        // // Check members
+        // if (fid != 0) {
+        //     for (int i = 1; i <= NUM_SHIPS; ++i) {
+        //         if (univ.getShip(i).getFleetNumber() == fid && !univ.getShip(i).isPlayable(GObject::Playable)) {
+        //             removeFleetMember(univ, i);
+        //         }
+        //     }
+        // }
+
+        // Synchronize
+        game::map::Fleet(univ, leader).synchronize(config, shipList);
+    }
+}
 
 
 game::map::Universe::Universe()
@@ -104,7 +131,7 @@ game::map::Universe::planets()
     // ex GUniverse::getPlanet, GUniverse::isValidPlanetId (sort-of)
     return m_planets;
 }
-    
+
 const game::map::ObjectVector<game::map::Planet>&
 game::map::Universe::planets() const
 {
@@ -252,6 +279,12 @@ game::map::Universe::getObject(Reference ref) const
     return 0;
 }
 
+game::map::Object*
+game::map::Universe::getObject(Reference ref)
+{
+    return const_cast<Object*>(const_cast<const Universe*>(this)->getObject(ref));
+}
+
 void
 game::map::Universe::notifyListeners()
 {
@@ -291,6 +324,7 @@ void
 game::map::Universe::postprocess(PlayerSet_t playingSet, PlayerSet_t availablePlayers, Object::Playability playability,
                                  const game::HostVersion& host, const game::config::HostConfiguration& config,
                                  const int turnNumber,
+                                 const game::spec::ShipList& shipList,
                                  afl::string::Translator& tx, afl::sys::LogListener& log)
 {
 //     this->playing_set = playing_set;
@@ -358,6 +392,15 @@ game::map::Universe::postprocess(PlayerSet_t playingSet, PlayerSet_t availablePl
     for (Id_t i = 1, n = m_planets.size(); i <= n; ++i) {
         if (Planet* p = m_planets.get(i)) {
             p->combinedCheck2(*this, availablePlayers, turnNumber);
+        }
+    }
+
+    // Fleets
+    for (Id_t i = 1, n = m_ships.size(); i <= n; ++i) {
+        if (Ship* s = m_ships.get(i)) {
+            if (s->isFleetLeader()) {
+                postprocessFleet(*this, *s, config, shipList);
+            }
         }
     }
 

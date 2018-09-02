@@ -5,9 +5,15 @@
 #include "client/si/commands.hpp"
 #include "afl/base/optional.hpp"
 #include "afl/charset/utf8.hpp"
+#include "afl/string/format.hpp"
 #include "afl/string/string.hpp"
+#include "client/dialogs/alliancedialog.hpp"
+#include "client/dialogs/classicvcrdialog.hpp"
+#include "client/dialogs/inboxdialog.hpp"
 #include "client/dialogs/objectselectiondialog.hpp"
 #include "client/dialogs/turnlistdialog.hpp"
+#include "client/dialogs/visualscandialog.hpp"
+#include "client/help.hpp"
 #include "client/si/control.hpp"
 #include "client/si/dialogfunction.hpp"
 #include "client/si/listboxfunction.hpp"
@@ -18,6 +24,8 @@
 #include "client/si/usercall.hpp"
 #include "client/si/userside.hpp"
 #include "client/si/usertask.hpp"
+#include "client/vcr/classic/playbackscreen.hpp"
+#include "game/actions/preconditions.hpp"
 #include "game/exception.hpp"
 #include "game/game.hpp"
 #include "game/interface/plugincontext.hpp"
@@ -44,13 +52,18 @@ using client::si::RequestLink2;
 using client::si::ScriptSide;
 
 namespace {
+    const char*const LOG_NAME = "client.si";
+
     class StateChangeTask : public UserTask {
      public:
         StateChangeTask(OutputState::Target target)
             : m_target(target)
             { }
         void handle(UserSide& ui, Control& ctl, RequestLink2 link)
-            { ctl.handleStateChange(ui, link, m_target); }
+            {
+                ui.mainLog().write(afl::sys::LogListener::Trace, LOG_NAME, afl::string::Format("<%p> handleStateChange(%s, %s)", &ctl, link.toString(), OutputState::toString(m_target)));
+                ctl.handleStateChange(ui, link, m_target);
+            }
      private:
         OutputState::Target m_target;
     };
@@ -101,6 +114,49 @@ namespace {
         // Do it
         si.postNewTask(link, new StateChangeTask(target));
     }
+
+    struct PluginContext {
+        String_t name;
+        String_t directory;
+    };
+
+    PluginContext findPluginContext(RequestLink1 link)
+    {
+        PluginContext result;
+        result.name = "Script";
+        result.directory = "";
+
+        const afl::container::PtrVector<interpreter::Context>& ctxs = link.getProcess().getContexts();
+        for (size_t i = ctxs.size(); i > 0; --i) {
+            if (game::interface::PluginContext* plugContext = dynamic_cast<game::interface::PluginContext*>(ctxs[i-1])) {
+                // Fetch plugin's Id and directory to produce a context
+                std::auto_ptr<afl::data::Value> tmp;
+                interpreter::Context::PropertyIndex_t index;
+                if (interpreter::Context* indexContext = plugContext->lookup("ID", index)) {
+                    tmp.reset(indexContext->get(index));
+                    result.name = interpreter::toString(tmp.get(), false);
+                }
+                if (interpreter::Context* dirContext = plugContext->lookup("DIRECTORY", index)) {
+                    tmp.reset(dirContext->get(index));
+                    result.directory = interpreter::toString(tmp.get(), false);
+                }
+                break;
+            }
+        }
+
+        return result;
+    }
+
+
+    void trySaveSession(game::Session& session)
+    {
+        try {
+            session.save();
+        }
+        catch (std::exception& e) {
+            session.log().write(afl::sys::LogListener::Error, LOG_NAME, session.translator().translateString("Unable to save game"), e);
+        }
+    }
 }
 
 /* @q LoadResource name:Str (Global Command)
@@ -140,32 +196,13 @@ client::si::IFLoadResource(game::Session& session, ScriptSide& si, RequestLink1 
     // We want "LoadResource" statements from a plugin's "Exec" to be registered
     // with the same origin as resources loaded directly.
     // For c2ng, we also use the plugin's base directory.
-    String_t contextName = "Script";
-    String_t contextDir = "";
-
-    const afl::container::PtrVector<interpreter::Context>& ctxs = link.getProcess().getContexts();
-    for (size_t i = ctxs.size(); i > 0; --i) {
-        if (game::interface::PluginContext* plugContext = dynamic_cast<game::interface::PluginContext*>(ctxs[i-1])) {
-            // Fetch plugin's Id and directory to produce a context
-            std::auto_ptr<afl::data::Value> tmp;
-            interpreter::Context::PropertyIndex_t index;
-            if (interpreter::Context* indexContext = plugContext->lookup("ID", index)) {
-                tmp.reset(indexContext->get(index));
-                contextName = interpreter::toString(tmp.get(), false);
-            }
-            if (interpreter::Context* dirContext = plugContext->lookup("DIRECTORY", index)) {
-                tmp.reset(dirContext->get(index));
-                contextDir = interpreter::toString(tmp.get(), false);
-            }
-            break;
-        }
-    }
+    PluginContext context = findPluginContext(link);
 
     // Create the resource.
     // FIXME: We are in a state where we are allowed to do I/O (and where exceptions are allowed to be thrown).
     // This may change when we add resource providers that need UI access.
     // At that time, we might have to defer creation of the provider into the RelayTask or ManagerRequest.
-    std::auto_ptr<ui::res::Provider> provider(ui::res::createProvider(resourceName, contextDir, session.world().fileSystem()));
+    std::auto_ptr<ui::res::Provider> provider(ui::res::createProvider(resourceName, context.directory, session.world().fileSystem()));
 
     // The Manager task that adds the created provider into the resource manager.
     class ManagerRequest : public util::Request<ui::res::Manager> {
@@ -201,8 +238,37 @@ client::si::IFLoadResource(game::Session& session, ScriptSide& si, RequestLink1 
         std::auto_ptr<ui::res::Provider> m_provider;
         const String_t m_contextName;
     };
-    si.postNewTask(link, new RelayTask(provider, contextName));
+    si.postNewTask(link, new RelayTask(provider, context.name));
 }
+
+/* @q LoadHelpFile name:Str (Global Command)
+   Load a help file.
+   PCC2 help files are files in a custom XML format.
+   Help files can be added using plugins (HelpFile= directive), or using this command.
+
+   This command does not verify that the file actually exists;
+   if the given name does not refer to a valid help file,
+   a console message will be printed, but the command will not fail.
+
+   @since PCC2 2.0.5, PCC2 2.40.5 */
+void
+client::si::IFLoadHelpFile(game::Session& session, ScriptSide& /*si*/, RequestLink1 link, interpreter::Arguments& args)
+{
+    args.checkArgumentCount(1);
+
+    // Fetch argument
+    String_t arg;
+    if (!interpreter::checkStringArg(arg, args.getNext())) {
+        return;
+    }
+
+    // Check context
+    PluginContext context = findPluginContext(link);
+
+    // Add it
+    getHelpIndex(session).addFile(session.world().fileSystem().makePathName(context.directory, arg), context.name);
+}
+
 
 /* @q MessageBox text:Str, Optional heading:Str (Global Command)
    Display a message.
@@ -237,10 +303,11 @@ client::si::IFMessageBox(game::Session& session, ScriptSide& si, RequestLink1 li
    This command will also terminate the current process (as if the {End} command had been used).
    @since PCC2 1.99.26, PCC2 2.40 */
 void
-client::si::IFSystemExitClient(game::Session& /*session*/, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+client::si::IFSystemExitClient(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
 {
     // ex IFSystemExitClient
     args.checkArgumentCount(0);
+    trySaveSession(session);
     si.postNewTask(link, new StateChangeTask(OutputState::ExitProgram));
 }
 
@@ -249,11 +316,75 @@ client::si::IFSystemExitClient(game::Session& /*session*/, ScriptSide& si, Reque
    Saves the game and returns to the <a href="pcc2:gamesel">game selection</a> menu.
    @since PCC2 1.99.10, PCC2 2.40 */
 void
-client::si::IFSystemExitRace(game::Session& /*session*/, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+client::si::IFSystemExitRace(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
 {
     // ex IFSystemExitRace
     args.checkArgumentCount(0);
+    trySaveSession(session);
     si.postNewTask(link, new StateChangeTask(OutputState::ExitGame));
+}
+
+// @since PCC2 2.40.5
+void
+client::si::IFCCViewCombat(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    args.checkArgumentCount(0);
+    session.notifyListeners();
+    game::actions::mustHaveGame(session);
+
+    class PlayHandler : public afl::base::Closure<void(size_t)> {
+     public:
+        PlayHandler(UserSide& iface, Control& ctl)
+            : m_interface(iface),
+              m_control(ctl)
+            { }
+        virtual void call(size_t index)
+            {
+                client::vcr::classic::PlaybackScreen screen(m_control.root(), m_control.translator(), m_interface.gameSender(), index, m_interface.mainLog());
+                screen.run();
+            }
+        virtual PlayHandler* clone() const
+            { return new PlayHandler(m_interface, m_control); }
+     private:
+        UserSide& m_interface;
+        Control& m_control;
+    };
+
+    class CombatTask : public UserTask {
+     public:
+        virtual void handle(UserSide& iface, Control& ctl, RequestLink2 link)
+            {
+                client::dialogs::ClassicVcrDialog dlg(ctl.root(), iface.gameSender());
+                dlg.sig_play.addNewClosure(new PlayHandler(iface, ctl));
+                dlg.run();
+                iface.continueProcess(link);
+            }
+    };
+
+    si.postNewTask(link, new CombatTask());
+}
+
+// @since PCC2 2.40.5
+void
+client::si::IFCCViewInbox(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    // ex IFCCViewInbox
+    args.checkArgumentCount(0);
+    session.notifyListeners();
+    game::actions::mustHaveGame(session);
+
+    class Task : public UserTask {
+     public:
+        virtual void handle(UserSide& iface, Control& ctl, RequestLink2 link)
+            {
+                OutputState out;
+                client::dialogs::InboxDialog(iface, ctl.root(), ctl.translator()).run(out);
+
+                iface.joinProcess(link, out.getProcess());
+                ctl.handleStateChange(iface, link, out.getTarget());
+            }
+    };
+    si.postNewTask(link, new Task());
 }
 
 /* @q UI.ChooseObject screen:Int (Global Command)
@@ -431,6 +562,34 @@ client::si::IFUIChooseTurn(game::Session& session, ScriptSide& si, RequestLink1 
     } else {
         throw game::Exception(game::Exception::eUser, session.translator().translateString("No race loaded"));
     }
+}
+
+/* @q UI.EditAlliances (Global Command)
+   Alliance editor dialog.
+   Brings up a dialog that allows the user to <a href="pcc2:allies">edit alliances</a>.
+   This command takes no further parameters.
+
+   @since PCC2 1.99.23, PCC2 2.40.5 */
+void
+client::si::IFUIEditAlliances(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    class Task : public UserTask {
+     public:
+        void handle(UserSide& iface, Control& ctl, RequestLink2 link)
+            {
+                client::dialogs::AllianceDialog(ctl.root(), iface.gameSender(), ctl.translator())
+                    .run(iface.gameSender());
+                iface.continueProcess(link);
+            }
+    };
+
+    // Preconditions
+    args.checkArgumentCount(0);
+    game::actions::mustHaveGame(session);
+    session.notifyListeners();                   // ex flushUI
+
+    // Do it
+    si.postNewTask(link, new Task());
 }
 
 /* @q UI.EndDialog Optional code:Int (Global Command)
@@ -670,6 +829,124 @@ client::si::IFUIInput(game::Session& session, ScriptSide& si, RequestLink1 link,
     si.postNewTask(link, new Task(prompt, title, defaultText, maxChars, flags, width));
 }
 
+/* @q UI.ListShips x:Int, y:Int, Optional flags:Any, ok:Str, heading:Str (Global Command)
+   List ships (visual scanner).
+
+   Lists all ships at position %x,%y using the <a href="pcc2:listship">Visual Scan</a> window.
+   The last three parameters are optional and modify behaviour details.
+
+   The %flags parameter contains a list of flag letters:
+   - "f": allow the user to choose foreign ships. If this is not specified,
+     the "OK" button will be disabled for foreign ships. This flag implies "A".
+   - "a": list all ships at the specified location. By default, only your ships are listed.
+   - "e": when there is only one matching ship, return it and do not display the dialog at all.
+   - "s": only show ships that we "safely" see, i.e. no guessed ships.
+   - a ship Id to exclude. That ship will not be listed.
+
+   The %ok string specifies the name of the "OK" button, it defaults to <tt>"OK"</tt>.
+   Likewise, the %heading specifies the window title, it defaults to <tt>"List Ships"</tt>.
+
+   The chosen ship Id (or EMPTY if the user canceled) is returned in {UI.Result}.
+   If no ship matches, a dialog is displayed and EMPTY is returned.
+   This command can't be used in text mode.
+
+   For example, this command sequence sets a "Tow" mission:
+   | UI.ListShips Loc.X, Loc.Y, "fae" & Id, "Choose", "Tow Ship"
+   | If UI.Result Then SetMission 7, 0, UI.Result
+   This command is equivalent to the <kbd>Ctrl-F1</kbd> key command (switch to ship):
+   | UI.ListShips UI.X, UI.Y, "e" & Id
+   | If UI.Result Then UI.GotoScreen 1, UI.Result
+
+   @since PCC 1.1.1, PCC2 1.99.10, PCC2 2.0.5
+   @see UI.ChooseObject, UI.ListShipPrediction */
+void
+client::si::IFUIListShips(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    /* UI.ListShips x, y[, flags, ok, heading]
+       Flags: F = allow selection of foreign ships; implies A
+              A = list all ships
+              E = do not display a dialog if there is only one ship
+              S = only safe ships, no guessed ones */
+    args.checkArgumentCount(2, 5);
+
+    // Read args
+    int32_t x, y;
+    int32_t flags = 0, except = 0;
+    String_t ok = session.translator().translateString("OK");
+    String_t heading = session.translator().translateString("List Ships");
+
+    if (!interpreter::checkIntegerArg(x, args.getNext(), 0, 10000)) {
+        return;
+    }
+    if (!interpreter::checkIntegerArg(y, args.getNext(), 0, 10000)) {
+        return;
+    }
+    interpreter::checkFlagArg(flags, &except, args.getNext(), "FAES");
+    interpreter::checkStringArg(ok, args.getNext());
+    interpreter::checkStringArg(heading, args.getNext());
+
+    // /* Validate */
+    // if (except < 0 || except > NUM_SHIPS)
+    //     throw IntError::rangeError();
+    // mustHaveTurn();
+
+    // /* Prepare */
+    // flushUI();
+    // if (exc.checkForBreak())
+    //     return;
+
+    // Post command
+    class Task : public UserTask {
+     public:
+        Task(game::map::Point pos,
+             int flags, game::Id_t excludeShip,
+             String_t okName, String_t title)
+            : m_pos(pos), m_flags(flags), m_excludeShip(excludeShip), m_okName(okName), m_title(title)
+            { }
+        void handle(UserSide& ui, Control& ctl, RequestLink2 link)
+            {
+                // Configure dialog
+                client::dialogs::VisualScanDialog dialog(ctl.root(), ui.gameSender(), ctl.translator());
+                dialog.setTitle(m_title);
+                dialog.setOkName(m_okName);
+                dialog.setAllowForeignShips((m_flags & 1) != 0);
+                dialog.setEarlyExit((m_flags & 4) != 0);
+
+                game::ref::List::Options_t opts;
+                if ((m_flags & 1) != 0 || (m_flags & 2) != 0) {
+                    opts += game::ref::List::IncludeForeignShips;
+                }
+                if ((m_flags & 8) != 0) {
+                    opts += game::ref::List::SafeShipsOnly;
+                }
+
+                // Execute dialog
+                game::Reference resultReference;
+                if (dialog.loadCurrent(m_pos, opts, m_excludeShip)) {
+                    resultReference = dialog.run();
+                }
+
+                // Process result
+                std::auto_ptr<afl::data::Value> resultValue;
+                if (resultReference.isSet()) {
+                    resultValue.reset(interpreter::makeIntegerValue(resultReference.getId()));
+                }
+                ui.setVariable(link, "UI.RESULT", resultValue);
+                ui.continueProcess(link);
+            }
+
+     private:
+        game::map::Point m_pos;
+        int m_flags;
+        game::Id_t m_excludeShip;
+        String_t m_okName;
+        String_t m_title;
+    };
+
+    session.notifyListeners();
+    si.postNewTask(link, new Task(game::map::Point(x, y), flags, except, ok, heading));
+}
+
 /* @q UI.Message text:RichText, Optional title:Str, buttons:Str (Global Command)
    Display a message.
    This displays a standard message box with the specified %text and %title,
@@ -866,16 +1143,18 @@ client::si::registerCommands(UserSide& ui)
                 // s.world().setNewGlobalValue("CC$TRANSFERSHIP",       IFCCTransferShip);
                 // s.world().setNewGlobalValue("CC$TRANSFERUNLOAD",     IFCCTransferUnload);
                 // s.world().setNewGlobalValue("CC$USEKEYMAP",          IFCCUseKeymap);
-                // s.world().setNewGlobalValue("CC$VIEWINBOX",          IFCCViewInbox);
+                s.world().setNewGlobalValue("CC$VIEWCOMBAT",         new ScriptProcedure(s, &si, IFCCViewCombat));
+                s.world().setNewGlobalValue("CC$VIEWINBOX",          new ScriptProcedure(s, &si, IFCCViewInbox));
                 // s.world().setNewGlobalValue("CHART.SETVIEW",         IFChartSetView);
                 s.world().setNewGlobalValue("LOADRESOURCE",          new ScriptProcedure(s, &si, IFLoadResource));
+                s.world().setNewGlobalValue("LOADHELPFILE",          new ScriptProcedure(s, &si, IFLoadHelpFile));
                 s.world().setNewGlobalValue("LISTBOX",               new ListboxFunction(s, &si));
                 s.world().setNewGlobalValue("MESSAGEBOX",            new ScriptProcedure(s, &si, IFMessageBox));
                 s.world().setNewGlobalValue("SYSTEM.EXITCLIENT",     new ScriptProcedure(s, &si, IFSystemExitClient));
                 s.world().setNewGlobalValue("SYSTEM.EXITRACE",       new ScriptProcedure(s, &si, IFSystemExitRace));
                 s.world().setNewGlobalValue("UI.CHOOSEOBJECT",       new ScriptProcedure(s, &si, IFUIChooseObject));
                 s.world().setNewGlobalValue("UI.CHOOSETURN",         new ScriptProcedure(s, &si, IFUIChooseTurn));
-                // s.world().setNewGlobalValue("UI.EDITALLIANCES",      IFUIEditAlliances);
+                s.world().setNewGlobalValue("UI.EDITALLIANCES",      new ScriptProcedure(s, &si, IFUIEditAlliances));
                 s.world().setNewGlobalValue("UI.DIALOG",             new DialogFunction(s, &si));
                 s.world().setNewGlobalValue("UI.ENDDIALOG",          new ScriptProcedure(s, &si, IFUIEndDialog));
                 // s.world().setNewGlobalValue("UI.FILEWINDOW",         IFUIFileWindow);
@@ -888,7 +1167,7 @@ client::si::registerCommands(UserSide& ui)
                 // s.world().setNewGlobalValue("UI.KEYMAPINFO",         IFUIKeymapInfo);
                 // s.world().setNewGlobalValue("UI.LISTFLEETS",         IFUIListFleets);
                 // s.world().setNewGlobalValue("UI.LISTSHIPPREDICTION", IFUIListShipPrediction);
-                // s.world().setNewGlobalValue("UI.LISTSHIPS",          IFUIListShips);
+                s.world().setNewGlobalValue("UI.LISTSHIPS",          new ScriptProcedure(s, &si, IFUIListShips));
                 s.world().setNewGlobalValue("UI.MESSAGE",            new ScriptProcedure(s, &si, IFUIMessage));
                 // s.world().setNewGlobalValue("UI.OVERLAYMESSAGE",     IFUIOverlayMessage);
                 // s.world().setNewGlobalValue("UI.PLANETINFO",         IFUIPlanetInfo);
@@ -896,7 +1175,6 @@ client::si::registerCommands(UserSide& ui)
                 // s.world().setNewGlobalValue("UI.SEARCH",             IFUISearch);
                 // s.world().setNewGlobalValue("UI.SELECTIONMANAGER",   IFUISelectionManager);
                 s.world().setNewGlobalValue("UI.UPDATE",             new ScriptProcedure(s, &si, IFUIUpdate));
-
             }
     };
     ui.postNewRequest(new Task());

@@ -64,6 +64,20 @@ game::db::DrawingAtomMap::get(uint16_t value) const
     return util::Atom_t(value);
 }
 
+// /** Convert internal atom to external.
+//     \param value Value stored in GDrawing object
+//     \return equivalent value to store in file */
+uint16_t
+game::db::DrawingAtomMap::getExternalValue(util::Atom_t atom) const
+{
+    // ex GDrawingAtomMap::getExternalValue
+    Map_t::const_iterator i = m_atoms.find(atom);
+    if (i != m_atoms.end()) {
+        return i->second;
+    }
+    return int16_t(atom);
+}
+
 // /** Save object to stream. This is used to create the rPaintingTags
 //     (11) record in chartX.cc. */
 void
