@@ -18,7 +18,8 @@ namespace client { namespace si {
             PlayerScreen,
             ShipScreen,
             PlanetScreen,
-            BaseScreen
+            BaseScreen,
+            Starchart
         };
 
         OutputState();

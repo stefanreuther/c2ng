@@ -31,6 +31,10 @@ TestServerInterfaceHostPlayer::testInterface()
             { return String_t(); }
         virtual FileStatus checkFile(int32_t /*gameId*/, String_t /*userId*/, String_t /*fileName*/, afl::base::Optional<String_t> /*dirName*/)
             { return FileStatus(); }
+        virtual void set(int32_t /*gameId*/, String_t /*userId*/, String_t /*key*/, String_t /*value*/)
+            { }
+        virtual String_t get(int32_t /*gameId*/, String_t /*userId*/, String_t /*key*/)
+            { return String_t(); }
     };
     Tester t;
 }

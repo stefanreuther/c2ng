@@ -108,6 +108,11 @@ namespace {
                 checkCall(Format("getPosts(%d,%s)", fid, formatListParameters(params)));
                 return consumeReturnValue<afl::data::Value*>();
             }
+        virtual int32_t findForum(String_t key)
+            {
+                checkCall(Format("findForum(%d)", key));
+                return consumeReturnValue<int>();
+            }
 
         static String_t formatListParameters(const ListParameters& params)
             {
@@ -272,6 +277,11 @@ TestServerInterfaceTalkForumServer::testIt()
     mock.expectCall("getPosts(6,range(10,20),sort(TIME))");
     mock.provideReturnValue<afl::data::Value*>(server::makeIntegerValue(9));
     TS_ASSERT_EQUALS(testee.callInt(Segment().pushBackString("FORUMLSPOST").pushBackInteger(6).pushBackString("SORT").pushBackString("time").pushBackString("LIMIT").pushBackInteger(10).pushBackInteger(20)), 9);
+
+    // findForum
+    mock.expectCall("findForum(talk)");
+    mock.provideReturnValue(45);
+    TS_ASSERT_EQUALS(testee.callInt(Segment().pushBackString("FORUMBYNAME").pushBackString("talk")), 45);
 
     // Variations
     mock.expectCall("add()");
@@ -499,6 +509,11 @@ TestServerInterfaceTalkForumServer::testRoundtrip()
         std::auto_ptr<afl::data::Value> p(level4.getPosts(6, param));
         TS_ASSERT_EQUALS(server::toInteger(p.get()), 9);
     }
+
+    // findForum
+    mock.expectCall("findForum(bugs)");
+    mock.provideReturnValue(23);
+    TS_ASSERT_EQUALS(level4.findForum("bugs"), 23);
 
     mock.checkFinish();
 }

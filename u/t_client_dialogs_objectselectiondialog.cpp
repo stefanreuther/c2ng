@@ -141,6 +141,12 @@ namespace {
                             // We do not expect a PopupConsole directed at this control
                             TS_ASSERT(0);
                         }
+                    virtual void handleSetViewRequest(client::si::UserSide& /*ui*/, client::si::RequestLink2 /*link*/, String_t /*name*/, bool /*withKeymap*/)
+                        {
+                            // We do not expect a Chart.SetView directed at this control
+                            TS_ASSERT(0);
+                        }
+
                     virtual client::si::ContextProvider* createContextProvider()
                         {
                             // We do not provide context

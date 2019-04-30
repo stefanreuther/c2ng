@@ -102,6 +102,9 @@ server::host::Exporter::exportGame(Game& game, Root& root, String_t fsDirName)
     removeDirectoryContent(m_fileSystem, fsDirName);
     Ref<Directory> target = m_fileSystem.openDirectory(fsDirName);
 
+    // Bindir
+    ini.addValue("bindir", root.config().binDirectory);
+
     // Export settings
     exportHash(ini, "game_settings", game.settings());
     ini.addValue("game_name", game.getName());

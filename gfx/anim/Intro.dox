@@ -1,0 +1,6 @@
+/*!
+     \namespace gfx::anim
+     \brief Animations
+
+     This namespace contains code to support animations.
+ */

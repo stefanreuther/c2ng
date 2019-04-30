@@ -80,6 +80,46 @@ server::interface::HostCronServer::handleCommand(const String_t& upcasedCommand,
         args.checkArgumentCount(1);
         result.reset(makeIntegerValue(m_implementation.kickstartGame(toInteger(args.getNext()))));
         return true;
+    } else if (upcasedCommand == "CRONSUSPEND") {
+        /* @q CRONSUSPEND time:Int (Host Command)
+           Suspend scheduler for the given relative time.
+           No games will run until that time has passed.
+
+           If the scheduler already is suspended, this command renews the suspension
+           (or, if time is given as 0, cancels it).
+
+           Suspension is invisible on other external interfaces, and not persistent.
+
+           Permissions: admin
+
+           @see Host.InitialSuspend
+           @since PCC2 2.40.6 */
+        args.checkArgumentCount(1);
+        m_implementation.suspendScheduler(toInteger(args.getNext()));
+        result.reset(makeStringValue("OK"));
+        return true;
+    } else if (upcasedCommand == "CRONLSBROKEN") {
+        /* @q CRONLSBROKEN (Host Command)
+           List broken games and reasons of breakage.
+
+           Returns a list of alternating game Ids (GID) and breakage reasons (Str).
+
+           Permissions: admin
+
+           @since PCC2 2.40.6
+           @rettype GID */
+        args.checkArgumentCount(0);
+
+        HostCron::BrokenMap_t g;
+        m_implementation.getBrokenGames(g);
+
+        afl::data::Vector::Ref_t resultVector = afl::data::Vector::create();
+        for (HostCron::BrokenMap_t::const_iterator it = g.begin(); it != g.end(); ++it) {
+            resultVector->pushBackNew(makeIntegerValue(it->first));
+            resultVector->pushBackNew(makeStringValue(it->second));
+        }
+        result.reset(new afl::data::VectorValue(resultVector));
+        return true;
     } else {
         return false;
     }

@@ -153,6 +153,10 @@ ui::widgets::FrameGroup::draw(gfx::Canvas& can)
     defaultDrawChildren(can);
 }
 
+void
+ui::widgets::FrameGroup::handleStateChange(State /*st*/, bool /*enable*/)
+{ }
+
 // EventConsumer:
 bool
 ui::widgets::FrameGroup::handleKey(util::Key_t key, int prefix)

@@ -10,6 +10,8 @@
 #include "afl/base/optional.hpp"
 #include "server/interface/mailqueue.hpp"
 #include "server/errors.hpp"
+#include "afl/data/hash.hpp"
+#include "afl/data/hashvalue.hpp"
 
 server::interface::MailQueueServer::MailQueueServer(MailQueue& impl)
     : m_implementation(impl)
@@ -43,6 +45,7 @@ server::interface::MailQueueServer::call(const Segment_t& command)
                                " CANCEL uid\n"
                                " REQUEST user\n"
                                " RUNQUEUE\n"
+                               " STATUS user\n"
                                "Send mail:\n"
                                " MAIL tpl [uid]\n"
                                " PARAM name value\n"
@@ -135,6 +138,19 @@ server::interface::MailQueueServer::call(const Segment_t& command)
         args.checkArgumentCount(0);
         m_implementation.runQueue();
         return makeStringValue("OK");
+    } else if (cmd == "STATUS") {
+        /* @q STATUS user:UID (Mailout Command)
+           Get user's email status.
+           @retkey address:Str Email address
+           @retkey status:Str Address status ("u", "r", "c")
+           @uses email:$EMAIL:status */
+        args.checkArgumentCount(1);
+        MailQueue::UserStatus st = m_implementation.getUserStatus(toString(args.getNext()));
+
+        afl::data::Hash::Ref_t h = afl::data::Hash::create();
+        h->setNew("address", makeStringValue(st.address));
+        h->setNew("status",  makeStringValue(MailQueue::formatAddressStatus(st.status)));
+        return new afl::data::HashValue(h);
     } else {
         throw std::runtime_error(UNKNOWN_COMMAND);
     }

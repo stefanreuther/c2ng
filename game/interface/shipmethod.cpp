@@ -15,12 +15,12 @@
 using game::Exception;
 
 namespace {
-    void setBaseShipyardOrder(game::map::Ship& ship, afl::base::Ref<game::Turn> turn, game::ShipyardAction action)
+    void setBaseShipyardOrder(game::map::Ship& ship, game::Turn& turn, game::ShipyardAction action)
     {
         // ex int/if/shipif.h:setBaseOrder, game/action/basefix.cc:checkBaseAction
 
         // Get universe
-        game::map::Universe& univ = turn->universe();
+        game::map::Universe& univ = turn.universe();
 
         // Find the planet
         game::map::Point shipPosition;
@@ -43,9 +43,9 @@ void
 game::interface::callShipMethod(game::map::Ship& sh, ShipMethod ism, interpreter::Arguments& args,
                                 interpreter::Process& process,
                                 Session& session,
-                                afl::base::Ref<Root> root,
-                                afl::base::Ref<game::spec::ShipList> shipList,
-                                afl::base::Ref<Turn> turn)
+                                Root& root,
+                                game::spec::ShipList& shipList,
+                                Turn& turn)
 {
     // ex int/if/shipif.h:callShipMethod
     switch (ism) {
@@ -133,7 +133,7 @@ game::interface::callShipMethod(game::map::Ship& sh, ShipMethod ism, interpreter
         if (!sh.isPlayable(game::map::Object::Playable)) {
             throw interpreter::Error::notAssignable();
         }
-        if (!game::map::FleetMember(turn->universe(), sh).setMission(m, i, t, root->hostConfiguration(), *shipList)) {
+        if (!game::map::FleetMember(turn.universe(), sh).setMission(m, i, t, root.hostConfiguration(), shipList)) {
             throw Exception(Exception::eFleet);
         }
         break;
@@ -179,7 +179,7 @@ game::interface::callShipMethod(game::map::Ship& sh, ShipMethod ism, interpreter
         if (!sh.isPlayable(game::map::Object::Playable)) {
             throw interpreter::Error::notAssignable();
         }
-        if (!game::map::FleetMember(turn->universe(), sh).setWaypoint(game::map::Point(x, y), root->hostConfiguration(), *shipList)) {
+        if (!game::map::FleetMember(turn.universe(), sh).setWaypoint(game::map::Point(x, y), root.hostConfiguration(), shipList)) {
             throw Exception(Exception::eFleet);
         }
         break;
@@ -225,7 +225,7 @@ game::interface::callShipMethod(game::map::Ship& sh, ShipMethod ism, interpreter
            @see CargoUnload, CargoUpload, CargoTransferWait
            @since PCC 1.0.10, PCC2 1.99.12, PCC2 2.40.3
            @diff The "proxy" ability is present in PCC 1.0.10, and PCC2 2.40.3 (PCC2ng), but not in PCC2. */
-        doCargoTransfer(sh, process, args, session, *turn, *root);
+        doCargoTransfer(sh, process, args, session, turn, root);
         break;
 
      case ismCargoUnload:
@@ -245,7 +245,7 @@ game::interface::callShipMethod(game::map::Ship& sh, ShipMethod ism, interpreter
            @see CargoUpload, CargoTransfer
            @since PCC 1.0.10, PCC2 1.99.12, PCC2 2.40.3 */
         // ex IFShipCargoUnload
-        doCargoUnload(sh, false, process, args, session, *turn, *root);
+        doCargoUnload(sh, false, process, args, session, turn, root);
         break;
 
      case ismCargoUpload:
@@ -263,7 +263,7 @@ game::interface::callShipMethod(game::map::Ship& sh, ShipMethod ism, interpreter
            @see CargoUnload, CargoTransfer, CargoUploadWait
            @since PCC 1.0.10, PCC2 1.99.12, PCC2 2.40.3 */
         // ex IFShipCargoUpload
-        doCargoUnload(sh, true, process, args, session, *turn, *root);
+        doCargoUnload(sh, true, process, args, session, turn, root);
         break;
 
      case ismSetFleet:

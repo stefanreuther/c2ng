@@ -124,51 +124,14 @@ client::widgets::ReferenceListbox::drawItem(gfx::Canvas& can, gfx::Rectangle are
 
     // Draw
     if (const Item_t* it = getItem(item)) {
-        switch (it->type) {
-         case UserList::OtherItem:
-         case UserList::ReferenceItem:
-            ctx.useFont(*m_root.provider().getFont(gfx::FontRequest()));
-            if (it->marked) {
-                ctx.setColor(util::SkinColor::Selection);
-                drawSelection(ctx, area.splitX(15).getCenter(), 1, 2);
-            } else {
-                area.consumeX(5);
-            }
-            ctx.setColor(it->color);
-            ctx.setTextAlign(0, 0);
-            // FIXME: PCC2 allows to draw an info text
-            outTextF(ctx, area, it->name);
-            break;
-
-         case UserList::DividerItem:
-         case UserList::SubdividerItem: {
-            // FIXME: this is incomplete
-            ctx.useFont(*m_root.provider().getFont(gfx::FontRequest().addWeight(1)));
-            ctx.setColor(util::SkinColor::Faded);
-
-            int y = area.getTopY() + ctx.getFont()->getCellSize().getY() / 2 - 1;
-            int max = std::max(0, std::min(ctx.getFont()->getTextWidth(it->name), area.getWidth() - 30));
-
-            drawHLine(ctx, area.getLeftX() + 2,        y, area.getLeftX() + 28);
-            drawHLine(ctx, area.getLeftX() + 32 + max, y, area.getLeftX() + area.getWidth() - 2);
-            if (it->type == UserList::DividerItem) {
-                drawHLine(ctx, area.getLeftX() + 2,        y - 2, area.getLeftX() + 28);
-                drawHLine(ctx, area.getLeftX() + 32 + max, y - 2, area.getLeftX() + area.getWidth() - 2);
-                drawHLine(ctx, area.getLeftX() + 2,        y + 2, area.getLeftX() + 28);
-                drawHLine(ctx, area.getLeftX() + 32 + max, y + 2, area.getLeftX() + area.getWidth() - 2);
-            }
-
-            outTextF(ctx, gfx::Point(area.getLeftX() + 30, area.getTopY()), max, it->name);
-            break;
-         }
-        }
+        drawItem(ctx, area, *it, m_root.provider());
     }
 }
 
 void
-client::widgets::ReferenceListbox::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+client::widgets::ReferenceListbox::handlePositionChange(gfx::Rectangle& oldPosition)
 {
-    handleModelChange();
+    defaultHandlePositionChange(oldPosition);
 }
 
 ui::layout::Info
@@ -189,4 +152,50 @@ const client::widgets::ReferenceListbox::Item_t*
 client::widgets::ReferenceListbox::getItem(size_t index) const
 {
     return m_content.get(index);
+}
+
+void
+client::widgets::ReferenceListbox::drawItem(gfx::Context<util::SkinColor::Color>& ctx,
+                                            gfx::Rectangle area,
+                                            const Item_t& item,
+                                            gfx::ResourceProvider& provider)
+{
+    ctx.setTextAlign(0, 0);
+    switch (item.type) {
+     case UserList::OtherItem:
+     case UserList::ReferenceItem:
+        ctx.useFont(*provider.getFont(gfx::FontRequest()));
+        if (item.marked) {
+            ctx.setColor(util::SkinColor::Selection);
+            drawSelection(ctx, area.splitX(15).getCenter(), 1, 2);
+        } else {
+            area.consumeX(5);
+        }
+        ctx.setColor(item.color);
+        // FIXME: PCC2 allows to draw an info text
+        outTextF(ctx, area, item.name);
+        break;
+
+     case UserList::DividerItem:
+     case UserList::SubdividerItem: {
+        // FIXME: this is incomplete
+        ctx.useFont(*provider.getFont(gfx::FontRequest().addWeight(1)));
+        ctx.setColor(util::SkinColor::Faded);
+
+        int y = area.getTopY() + ctx.getFont()->getCellSize().getY() / 2 - 1;
+        int max = std::max(0, std::min(ctx.getFont()->getTextWidth(item.name), area.getWidth() - 30));
+
+        drawHLine(ctx, area.getLeftX() + 2,        y, area.getLeftX() + 28);
+        drawHLine(ctx, area.getLeftX() + 32 + max, y, area.getLeftX() + area.getWidth() - 2);
+        if (item.type == UserList::DividerItem) {
+            drawHLine(ctx, area.getLeftX() + 2,        y - 2, area.getLeftX() + 28);
+            drawHLine(ctx, area.getLeftX() + 32 + max, y - 2, area.getLeftX() + area.getWidth() - 2);
+            drawHLine(ctx, area.getLeftX() + 2,        y + 2, area.getLeftX() + 28);
+            drawHLine(ctx, area.getLeftX() + 32 + max, y + 2, area.getLeftX() + area.getWidth() - 2);
+        }
+
+        outTextF(ctx, gfx::Point(area.getLeftX() + 30, area.getTopY()), max, item.name);
+        break;
+     }
+    }
 }

@@ -24,6 +24,8 @@ namespace server { namespace interface {
         virtual void setDirectory(int32_t gameId, String_t userId, String_t dirName);
         virtual String_t getDirectory(int32_t gameId, String_t userId);
         virtual FileStatus checkFile(int32_t gameId, String_t userId, String_t fileName, afl::base::Optional<String_t> dirName);
+        virtual void set(int32_t gameId, String_t userId, String_t key, String_t value);
+        virtual String_t get(int32_t gameId, String_t userId, String_t key);
 
         static Info unpackInfo(const Value_t* p);
 

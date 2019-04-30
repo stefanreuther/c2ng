@@ -22,9 +22,6 @@ namespace server { namespace talk {
         /// Base URL. Used to build URLs when no base URL specified by the command is available.
         String_t baseUrl;
 
-        /// User key. Secret seed to encrypt passwords.
-        String_t userKey;
-
         /// Path host. Hostname of this server to use in RfC "Path" and "Xref" headers.
         String_t pathHost;
     };

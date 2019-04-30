@@ -163,6 +163,11 @@ class TestInterpreterFusion : public CxxTest::TestSuite {
     void testMisc();
 };
 
+class TestInterpreterGenericValue : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
 class TestInterpreterHashValue : public CxxTest::TestSuite {
  public:
     void testEmpty();
@@ -185,6 +190,12 @@ class TestInterpreterKeywords : public CxxTest::TestSuite {
 class TestInterpreterMemoryCommandSource : public CxxTest::TestSuite {
  public:
     void testIt();
+};
+
+class TestInterpreterMutexContext : public CxxTest::TestSuite {
+ public:
+    void testSave();
+    void testBasics();
 };
 
 class TestInterpreterMutexList : public CxxTest::TestSuite {
@@ -303,6 +314,16 @@ class TestInterpreterOptimizer : public CxxTest::TestSuite {
     void testFailAbsolute2();
     void testFailFoldUnary();
     void testFailFoldBinary();
+    void testIntCompare();
+    void testTailMerge();
+    void testLabelFailure1();
+    void testLabelFailure2();
+    void testLabelFailure3();
+    void testLabelFailure4();
+    void testLabelFailure5();
+    void testDeadStore1();
+    void testDeadStore2();
+    void testDeadStore3();
 };
 
 class TestInterpreterProcedureValue : public CxxTest::TestSuite {

@@ -39,6 +39,19 @@ game::map::MarkingVector::clear()
     m_data.clear();
 }
 
+// Merge.
+void
+game::map::MarkingVector::mergeFrom(const MarkingVector& other)
+{
+    size_t otherSize = other.m_data.size();
+    if (otherSize > m_data.size()) {
+        m_data.resize(otherSize);
+    }
+    for (size_t i = 0; i < otherSize; ++i) {
+        m_data[i] |= other.m_data[i];
+    }
+}
+
 // Initialize from ObjectType.
 void
 game::map::MarkingVector::copyFrom(ObjectType& type)

@@ -6,8 +6,18 @@
 
 #include "afl/bits/smallset.hpp"
 #include "afl/string/string.hpp"
+#include "game/config/hostconfiguration.hpp"
 #include "game/playerset.hpp"
 #include "game/types.hpp"
+
+namespace game {
+    class RegistrationKey;
+    class HostVersion;
+}
+
+namespace game { namespace map {
+    class Ship;
+} }
 
 namespace game { namespace spec {
 
@@ -76,6 +86,9 @@ namespace game { namespace spec {
         String_t   getSetCommand() const;
         void       setSetCommand(String_t cmd);
 
+        // Inquiry
+        bool worksOn(const game::map::Ship& ship, const game::config::HostConfiguration& config, const HostVersion& host, const RegistrationKey& key) const;
+
         // Script execution
         // bool       worksOn(GShip& ship) const;
         // string_t   getLabel(GShip& ship) const;
@@ -118,7 +131,7 @@ namespace game { namespace spec {
         //     pmsn_GatherBuildFtr      = 12,
         //     pmsn_BUmc                = 13,
         //     pmsn_BUclans             = 14,
-        //     pmsn_BeamUpMultiple      = 15,
+            pmsn_BeamUpMultiple      = 15,
             pmsn_LayMinesIn          = 16,
             pmsn_LayWebIn            = 17,
             pmsn_Training            = 18

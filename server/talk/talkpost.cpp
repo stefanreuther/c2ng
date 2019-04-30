@@ -266,7 +266,7 @@ server::talk::TalkPost::render(int32_t postId, const server::interface::TalkRend
     render::Options temporaryOptions(m_session.renderOptions());
     temporaryOptions.updateFrom(options);
 
-    return render::render(msg.text().get(), ctx, temporaryOptions, m_root);
+    return render::renderText(msg.text().get(), ctx, temporaryOptions, m_root);
 }
 
 void
@@ -281,7 +281,7 @@ server::talk::TalkPost::render(afl::base::Memory<const int32_t> postIds, afl::da
             result.push_back("");
         } else {
             ctx.setMessageId(*p);
-            result.push_back(render::render(msg.text().get(), ctx, m_session.renderOptions(), m_root));
+            result.push_back(render::renderText(msg.text().get(), ctx, m_session.renderOptions(), m_root));
         }
     }
 }

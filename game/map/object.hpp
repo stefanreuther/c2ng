@@ -40,13 +40,6 @@ namespace game { namespace map {
 //     Actual change notification is done by GUniverse. */
     class Object : public afl::base::Deletable {
      public:
-        /** A name. Identifies a name that can be queried with getName(). */
-        enum Name {
-            PlainName,                 /**< Just the unit's name. Example: "USS Dull" */
-            LongName,                  /**< Long name, including the Id number. Example: "Ship #1: USS Dull" */
-            DetailedName               /**< Name with details. Example: "Ship #1: USS Dull (Fed Outrider)" or "Ship #1: USS Dull: colonizer" */
-        };
-
         /** Playability level. */
         enum Playability {
             NotPlayable,               /**< Not playable. For example a foreign ship. */
@@ -67,7 +60,7 @@ namespace game { namespace map {
             A name can always be produced, even if the object isn't actually known.
             In this case, a synthetic name ("Ship #99") is produced.
             \param which Which name format to return */
-        virtual String_t getName(Name which, afl::string::Translator& tx, InterpreterInterface& iface) const = 0;
+        virtual String_t getName(ObjectName which, afl::string::Translator& tx, InterpreterInterface& iface) const = 0;
 
         /** Get Id number of this object.
             The Id is always known. */

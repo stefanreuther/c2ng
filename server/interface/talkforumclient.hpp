@@ -24,6 +24,7 @@ namespace server { namespace interface {
         virtual afl::data::Value* getThreads(int32_t fid, const ListParameters& params);
         virtual afl::data::Value* getStickyThreads(int32_t fid, const ListParameters& params);
         virtual afl::data::Value* getPosts(int32_t fid, const ListParameters& params);
+        virtual int32_t findForum(String_t key);
 
         static Info unpackInfo(const afl::data::Value* value);
         static void packListParameters(afl::data::Segment& cmd, const ListParameters& params);

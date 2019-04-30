@@ -50,6 +50,11 @@ namespace interpreter {
             \param fd File number */
         void closeFile(size_t fd);
 
+        /** Get file by number.
+            \param fd File number
+            \return File instance; null if file is not open */
+        afl::io::TextFile* getFile(size_t fd) const;
+
         /** Prepare a file for appending.
             Call immediately after openFile() with a newly-opened file.
             This will detect the file's character set and move the file pointer to the end.

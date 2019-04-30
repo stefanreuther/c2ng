@@ -226,7 +226,7 @@ namespace {
                         ++i;
                     }
                     list.sortItemsAlphabetically();
-                    if (ui::widgets::doStandardDialog(_("Completions"), list, true, m_root)
+                    if (ui::widgets::doStandardDialog(_("Completions"), String_t(), list, true, m_root)
                         && list.getCurrentKey(i))
                     {
                         game::interface::CompletionList::Iterator_t it = result.begin(), e = result.end();
@@ -383,6 +383,7 @@ namespace {
                  case client::si::OutputState::ShipScreen:
                  case client::si::OutputState::PlanetScreen:
                  case client::si::OutputState::BaseScreen:
+                 case client::si::OutputState::Starchart:
                     // Dispatch to parent
                     us.detachProcess(link);
                     m_outputState.set(link, target);
@@ -398,6 +399,8 @@ namespace {
                 ui.continueProcess(link);
             }
 
+        virtual void handleSetViewRequest(client::si::UserSide& ui, client::si::RequestLink2 link, String_t name, bool withKeymap)
+            { m_parentControl.handleSetViewRequest(ui, link, name, withKeymap); }
         virtual client::si::ContextProvider* createContextProvider()
             {
                 return m_parentControl.createContextProvider();

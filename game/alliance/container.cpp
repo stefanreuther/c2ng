@@ -65,12 +65,12 @@ game::alliance::Container::addLevel(const Level& level)
 // /** Add a new handler.
 //     \param handler Newly-allocated alliance handler */
 void
-game::alliance::Container::addNewHandler(Handler* handler)
+game::alliance::Container::addNewHandler(Handler* handler, afl::string::Translator& tx)
 {
     // ex GAlliances::addNewHandler
     if (handler != 0) {
         m_handlers.pushBackNew(handler);
-        handler->init(*this);
+        handler->init(*this, tx);
     }
 }
 
@@ -185,7 +185,7 @@ game::alliance::Container::isAny(int player, Level::Flag flag, bool fromUs) cons
 // /** Set all offers by type.
 //     Sets all offers to the specified player for all levels defined by the given flag.
 //     This can be used to quickly set a set of levels without specifying its identifier.
-    
+
 //     \param player Player to modify
 //     \param flag Flag to check (IsOffer, NeedsOffer, IsEnemy)
 //     \param set true to set negative offers (Unknown, No) to positive (Yes).

@@ -4,6 +4,7 @@
   */
 
 #include "server/common/root.hpp"
+#include "server/common/util.hpp"
 
 namespace {
     /* Database root nodes.
@@ -40,4 +41,32 @@ afl::net::redis::HashKey
 server::common::Root::defaultProfile()
 {
     return afl::net::redis::HashKey(m_db, DEFAULT_PROFILE);
+}
+
+// /** Map login name to user Id.
+//     \param db Database Client
+//     \param login Login name
+//     \return user Id; empty string if invalid */
+// FIXME: here? Give it an Optional<String_t> or return-bool style interface?
+String_t
+server::common::Root::getUserIdFromLogin(String_t login)
+{
+    // ex User::getUserIdFromLogin
+    String_t simplifiedLogin = simplifyUserName(login);
+    if (simplifiedLogin.empty()) {
+        // Name consists of illegal characters only
+        return String_t();
+    }
+    String_t userId = userByName(simplifiedLogin).get();
+    if (userId.find_first_not_of("0") == String_t::npos) {
+        // does not exist, return empty string
+        return String_t();
+    }
+    return userId;
+}
+
+afl::net::redis::StringKey
+server::common::Root::userByName(String_t simplifiedName)
+{
+    return afl::net::redis::Subtree(m_db, "uid:").stringKey(simplifiedName);
 }

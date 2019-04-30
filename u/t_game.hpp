@@ -7,6 +7,12 @@
 
 #include <cxxtest/TestSuite.h>
 
+class TestGameBattleOrderRule : public CxxTest::TestSuite {
+ public:
+    void testGetShipBattleOrder();
+    void testGetPlanetBattleOrder();
+};
+
 class TestGameCargoContainer : public CxxTest::TestSuite {
  public:
     void testInterface();

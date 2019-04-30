@@ -20,6 +20,10 @@ ui::Group::draw(gfx::Canvas& can)
     defaultDrawChildren(can);
 }
 
+void
+ui::Group::handleStateChange(State /*st*/, bool /*enable*/)
+{ }
+
 bool
 ui::Group::handleKey(util::Key_t key, int prefix)
 {

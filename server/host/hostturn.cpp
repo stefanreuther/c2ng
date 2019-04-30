@@ -23,12 +23,13 @@
 #include "server/interface/filebaseclient.hpp"
 #include "server/interface/hostgame.hpp"
 #include "server/host/user.hpp"
+#include "server/host/schedule.hpp"
 
 using server::interface::HostGame;
 
 namespace {
     const char LOG_NAME[] = "host.turn";
-    
+
     // FIXME: duplicated from hostplayer.cpp
     size_t indexOf(const afl::data::StringList_t& list, const String_t& ele)
     {
@@ -38,6 +39,27 @@ namespace {
             ++i;
         }
         return i;
+    }
+
+    /* Check whether to suggest "allow temporary".
+       This is not a hard condition, just a suggestion; we accept TRNMARKTEMP at all times but it may not always make sense.
+       We suggest "allow temporary" if
+       - schedule is "run when all turns are in" or "run at fixed schedule, but allow to run earlier"
+       - hostDelay is >= 5 minutes (so there's actually time to do it) */
+    bool checkAllowTemp(server::host::Game& g)
+    {
+        afl::net::redis::Subtree schedule = g.getSchedule();
+        String_t currentSchedule = schedule.stringListKey("list")[0];
+        if (currentSchedule.empty()) {
+            return false;
+        }
+
+        server::host::Schedule sch;
+        sch.loadFrom(schedule.hashKey(currentSchedule));
+
+        return (sch.getType() == server::interface::HostSchedule::Quick
+                || sch.getHostEarly())
+            && sch.getHostDelay() >= 5;
     }
 }
 
@@ -91,7 +113,7 @@ server::host::HostTurn::submit(const String_t& blob,
 
     // Check existence and permission
     Game game(m_root, gameNumber);
-    
+
     afl::data::StringList_t players;
     game.listPlayers(slotNumber, players);
 
@@ -202,6 +224,7 @@ server::host::HostTurn::submit(const String_t& blob,
                        << info.orElse("(none)"));
 
     // Update
+    bool allowTemp = false;
     if (newState == Game::TurnYellow || newState == Game::TurnGreen) {
         // Store the turn
         server::interface::FileBaseClient(m_root.hostFile()).putFile(afl::string::Format("%s/in/player%d.trn", game.getDirectory(), slotNumber), blob);
@@ -220,6 +243,9 @@ server::host::HostTurn::submit(const String_t& blob,
 
         // Distribute turn.
         Installer(m_root).installFileMulti(game, players, afl::string::Format("player%d.trn", slotNumber), blob, slotNumber);
+
+        // Check desired status for allowTemp
+        allowTemp = checkAllowTemp(game);
     }
 
     // Mark user active
@@ -230,12 +256,15 @@ server::host::HostTurn::submit(const String_t& blob,
 
     // Build protocol result
     Result result;
-    result.state = newState;
-    result.output = output;
-    result.gameId = gameNumber;
-    result.slot = slotNumber;
+    result.state         = newState;
+    result.output        = output;
+    result.gameId        = gameNumber;
+    result.slot          = slotNumber;
     result.previousState = existingState;
-    result.userId = user;
+    result.turnNumber    = game.turnNumber().get();
+    result.userId        = user;
+    result.gameName      = game.getName();
+    result.allowTemp     = allowTemp;
     return result;
 }
 

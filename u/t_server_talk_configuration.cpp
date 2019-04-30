@@ -14,7 +14,6 @@ TestServerTalkConfiguration::testIt()
 {
     server::talk::Configuration testee;
     TS_ASSERT(testee.pathHost.size() > 0);
-    TS_ASSERT(testee.userKey.size() > 0);
     TS_ASSERT(testee.baseUrl.size() > 0);
     TS_ASSERT(testee.messageIdSuffix.size() > 0);
     TS_ASSERT(testee.messageIdSuffix.find('@') != String_t::npos);

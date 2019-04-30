@@ -28,7 +28,7 @@ game::formatExperienceLevelSet(ExperienceLevelSet_t set,
         // one level
         for (int i = 0; i <= MAX_EXPERIENCE_LEVELS; ++i) {
             if (set.contains(i)) {
-                return afl::string::Format(tx.translateString("level %d").c_str(), i);
+                return afl::string::Format(tx("level %d"), i);
             }
         }
     }
@@ -41,7 +41,7 @@ game::formatExperienceLevelSet(ExperienceLevelSet_t set,
 
     if (minLevel != 0 && set + ExperienceLevelSet_t::allUpTo(minLevel-1) == allLevels) {
         // all levels from X onwards
-        return afl::string::Format(tx.translateString("level %d+").c_str(), minLevel);
+        return afl::string::Format(tx("level %d+"), minLevel);
     }
 
     // mixed

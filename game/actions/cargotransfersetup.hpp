@@ -5,10 +5,12 @@
 #ifndef C2NG_GAME_ACTIONS_CARGOTRANSFERSETUP_HPP
 #define C2NG_GAME_ACTIONS_CARGOTRANSFERSETUP_HPP
 
+#include "game/config/hostconfiguration.hpp"
 #include "game/hostversion.hpp"
 #include "game/map/object.hpp"
 #include "game/map/universe.hpp"
 #include "game/spec/shiplist.hpp"
+#include "game/turn.hpp"
 
 namespace game { namespace actions {
 
@@ -71,12 +73,21 @@ namespace game { namespace actions {
         static CargoTransferSetup fromShipShip(const game::map::Universe& univ, int leftId, int rightId);
 
         /** Construct for jettison.
-            This validates the ships' Ids, visibility/playability status and position (jettison not allowed when orbiting a planet).
+            This validates the ship's Ids, visibility/playability status and position (jettison not allowed when orbiting a planet).
             After build(), the ship will appear as CargoTransfer::get(0), the jettison transporter will appear as CargoTransfer::get(1).
             \param univ Universe
             \param shipId Ship Id
             \return setup */
         static CargoTransferSetup fromShipJettison(const game::map::Universe& univ, int shipId);
+
+        /** Construct for beam-up-multiple mission.
+            This validates the ship's Ids, visibility/playability status, position (mission not allowed when orbiting a planet), and configuration.
+            After build(), the ship will appear as CargoTransfer::get(0), the planet will appear as CargoTransfer::get(1).
+            \param turn Turn
+            \param shipId Ship Id
+            \param config Host configuration
+            \return setup */
+        static CargoTransferSetup fromShipBeamUp(const game::Turn& turn, int shipId, const game::config::HostConfiguration& config);
 
         /** Swap sides.
             Reverses the order in which results will be produced in build(). */
@@ -85,6 +96,11 @@ namespace game { namespace actions {
         /** Get setup status.
             \return status */
         Result getStatus() const;
+
+        /** Check validity.
+            Shortcut for getStatus() == Ready.
+            \return validity */
+        bool isValid() const;
 
         /** Check valid proxy.
             \param univ Universe
@@ -113,14 +129,15 @@ namespace game { namespace actions {
 
         /** Build CargoTransfer action.
             \param action   [out] Target action. Must be constructed and empty.
-            \param univ     [in/out] Universe
+            \param turn     [in/out] Turn
             \param iface    [in] Interface (needed to construct CargoContainer descendants)
             \param config   [in] Host configuration (needed to construct CargoContainer descendants)
             \param shipList [in] Ship list (needed to construct CargoContainer descendants)
             \param version  [in] Host version (needed to construct CargoContainer descendants)
-            \throw Exception if setup is incomplete/impossible */
+            \pre isValid()
+            \throw Exception if setup is incomplete/impossible (precondition not satisfied) */
         void build(CargoTransfer& action,
-                   game::map::Universe& univ,
+                   Turn& turn,
                    InterpreterInterface& iface,
                    const game::config::HostConfiguration& config,
                    const game::spec::ShipList& shipList,
@@ -133,7 +150,9 @@ namespace game { namespace actions {
             UseShipStorage,     // Use ShipStorage(this side)
             UseOtherUnload,     // Use ShipTransporter(other side, UnloadTransporter, this side)
             UseOtherTransfer,   // Use ShipTransporter(other side, TransferTransporter, this side)
-            UseProxyTransfer    // Use ShipTransporter(proxy, UnloadTransporter, this side)
+            UseProxyTransfer,   // Use ShipTransporter(proxy, UnloadTransporter, this side)
+            UseBeamUpShip,      // Use BeamUpShipTransfer(this side)
+            UseBeamUpPlanet     // Use BeamUpPlanetTransfer(this side, other side)
         };
 
         enum Side {

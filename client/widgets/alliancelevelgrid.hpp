@@ -5,11 +5,12 @@
 #define C2NG_CLIENT_WIDGETS_ALLIANCELEVELGRID_HPP
 
 #include <vector>
-#include "ui/simplewidget.hpp"
+#include "afl/base/signal.hpp"
 #include "afl/string/string.hpp"
+#include "afl/string/translator.hpp"
 #include "game/alliance/offer.hpp"
 #include "ui/root.hpp"
-#include "afl/base/signal.hpp"
+#include "ui/simplewidget.hpp"
 
 namespace client { namespace widgets {
 
@@ -17,7 +18,7 @@ namespace client { namespace widgets {
      public:
         typedef game::alliance::Offer::Type OfferType_t;
 
-        AllianceLevelGrid(ui::Root& root);
+        AllianceLevelGrid(ui::Root& root, afl::string::Translator& tx);
 
         void add(size_t ref, String_t name);
         void setOffer(size_t ref, OfferType_t theirOffer, OfferType_t ourOffer);
@@ -35,6 +36,7 @@ namespace client { namespace widgets {
 
      private:
         ui::Root& m_root;
+        afl::string::Translator& m_translator;
         
         struct Item {
             size_t ref;

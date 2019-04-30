@@ -279,7 +279,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
                                  afl::base::Ref<const Root> root,                      // needed for configuration
                                  afl::base::Ref<const game::spec::ShipList> shipList,  // needed for spec access
                                  afl::base::Ref<const Game> game,                      // needed for ship scores
-                                 afl::base::Ref<Turn> turn)                            // needed for location names
+                                 afl::base::Ref<const Turn> turn)                      // needed for location names
 {
     // ex int/if/shipif.h:getShipProperty
     /* Combat participant properties often share names and meaning with ship properties,
@@ -517,7 +517,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
             if (game::map::Ship* leader = turn->universe().ships().get(fid)) {
                 String_t result = leader->getFleetName();
                 if (result.empty()) {
-                    result = leader->getName(game::map::Object::LongName, tx, iface);
+                    result = leader->getName(LongName, tx, iface);
                 }
                 return makeStringValue(result);
             }
@@ -680,7 +680,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
            @assignable
            @see SetName (Ship Command) */
         if (sh.isVisible()) {
-            return makeStringValue(sh.getName(sh.PlainName, tx, iface));
+            return makeStringValue(sh.getName(PlainName, tx, iface));
         } else {
             return 0;
         }
@@ -698,7 +698,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
         if (sh.getPosition(pt)) {
             if (const Id_t pid = turn->universe().getPlanetAt(pt)) {
                 if (const game::map::Planet* p = turn->universe().planets().get(pid)) {
-                    return makeStringValue(p->getName(p->PlainName, tx, iface));
+                    return makeStringValue(p->getName(PlainName, tx, iface));
                 }
             }
         }
@@ -790,7 +790,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
            Name of cargo transfer target ship. */
         if (sh.getTransporterTargetId(sh.TransferTransporter).get(n)) {
             if (const game::map::Ship* otherShip = turn->universe().ships().get(n)) {
-                return makeStringValue(otherShip->getName(game::map::Object::PlainName, tx, iface));
+                return makeStringValue(otherShip->getName(PlainName, tx, iface));
             }
         }
         return 0;
@@ -836,7 +836,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
                 return makeStringValue("Jettison");
             }
             if (const game::map::Planet* pl = turn->universe().planets().get(n)) {
-                return makeStringValue(pl->getName(game::map::Object::PlainName, tx, iface));
+                return makeStringValue(pl->getName(PlainName, tx, iface));
             }
         }
         return 0;
@@ -949,9 +949,9 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
 //     \param value New value */
 void
 game::interface::setShipProperty(game::map::Ship& sh, ShipProperty isp, afl::data::Value* value,
-                                 afl::base::Ref<Root> root,
-                                 afl::base::Ref<game::spec::ShipList> shipList,
-                                 afl::base::Ref<Turn> turn)
+                                 Root& root,
+                                 game::spec::ShipList& shipList,
+                                 Turn& turn)
 {
     // ex int/if/shipif.h:setShipProperty
 
@@ -970,7 +970,7 @@ game::interface::setShipProperty(game::map::Ship& sh, ShipProperty isp, afl::dat
     switch (isp) {
      case ispFCode:
         if (checkStringArg(sv, value)) {
-            if (!root->stringVerifier().isValidString(StringVerifier::FriendlyCode, sv)) {
+            if (!root.stringVerifier().isValidString(StringVerifier::FriendlyCode, sv)) {
                 throw interpreter::Error::rangeError();
             }
             sh.setFriendlyCode(sv);
@@ -984,14 +984,14 @@ game::interface::setShipProperty(game::map::Ship& sh, ShipProperty isp, afl::dat
             int m = (isp == ispMissionId        ? iv : sh.getMission().orElse(0));
             int i = (isp == ispMissionIntercept ? iv : sh.getMissionParameter(InterceptParameter).orElse(0));
             int t = (isp == ispMissionTow       ? iv : sh.getMissionParameter(TowParameter).orElse(0));
-            if (!game::map::FleetMember(turn->universe(), sh).setMission(m, i, t, root->hostConfiguration(), *shipList)) {
+            if (!game::map::FleetMember(turn.universe(), sh).setMission(m, i, t, root.hostConfiguration(), shipList)) {
                 throw Exception(Exception::eFleet, Exception::eFleet);
             }
         }
         break;
      case ispName:
         if (checkStringArg(sv, value)) {
-            if (!root->stringVerifier().isValidString(StringVerifier::ShipName, sv)) {
+            if (!root.stringVerifier().isValidString(StringVerifier::ShipName, sv)) {
                 throw interpreter::Error::rangeError();
             }
             sh.setName(sv);
@@ -999,7 +999,7 @@ game::interface::setShipProperty(game::map::Ship& sh, ShipProperty isp, afl::dat
         break;
      case ispSpeedId:
         if (checkIntegerArg(iv, value, 0, game::spec::Engine::MAX_WARP)) {
-            if (!game::map::FleetMember(turn->universe(), sh).setWarpFactor(iv, root->hostConfiguration(), *shipList)) {
+            if (!game::map::FleetMember(turn.universe(), sh).setWarpFactor(iv, root.hostConfiguration(), shipList)) {
                 throw Exception(Exception::eFleet, Exception::eFleet);
             }
         }
@@ -1008,7 +1008,7 @@ game::interface::setShipProperty(game::map::Ship& sh, ShipProperty isp, afl::dat
         if (checkIntegerArg(iv, value, 0, MAX_PLAYERS)) {
             // \change allow setting PE to all players from playerList, including aliens.
             // PHost allows [0,12], Tim-Host has no restriction.
-            if (root->playerList().get(iv) == 0) {
+            if (root.playerList().get(iv) == 0) {
                 throw interpreter::Error::rangeError();
             }
             sh.setPrimaryEnemy(iv);
@@ -1016,14 +1016,14 @@ game::interface::setShipProperty(game::map::Ship& sh, ShipProperty isp, afl::dat
         break;
      case ispFleetName:
         if (checkStringArg(sv, value)) {
-            if (!game::map::FleetMember(turn->universe(), sh).setFleetName(sv)) {
+            if (!game::map::FleetMember(turn.universe(), sh).setFleetName(sv)) {
                 throw interpreter::Error::notAssignable();
             }
         }
         break;
      case ispFleetId:
         if (checkIntegerArg(iv, value)) {
-            if (!game::map::FleetMember(turn->universe(), sh).setFleetNumber(iv, root->hostConfiguration(), *shipList)) {
+            if (!game::map::FleetMember(turn.universe(), sh).setFleetNumber(iv, root.hostConfiguration(), shipList)) {
                 throw interpreter::Error::rangeError();
             }
         }

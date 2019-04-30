@@ -4,10 +4,11 @@
 
 #include <algorithm>
 #include "client/widgets/alliancelevelgrid.hpp"
-#include "util/translation.hpp"
 #include "afl/base/countof.hpp"
+#include "afl/functional/stringtable.hpp"
 #include "gfx/complex.hpp"
 #include "gfx/context.hpp"
+#include "util/translation.hpp"
 
 using afl::base::Ptr;
 using afl::base::Ref;
@@ -51,10 +52,11 @@ namespace {
 }
 
 
-client::widgets::AllianceLevelGrid::AllianceLevelGrid(ui::Root& root)
+client::widgets::AllianceLevelGrid::AllianceLevelGrid(ui::Root& root, afl::string::Translator& tx)
     : SimpleWidget(),
       sig_toggleOffer(),
       m_root(root),
+      m_translator(tx),
       m_items(),
       m_position(0),
       m_mouseDown(false)
@@ -121,7 +123,7 @@ client::widgets::AllianceLevelGrid::draw(gfx::Canvas& can)
                   y + metric.labelHeight/2 + i*metric.labelHeight,
                   y + metric.labelHeight*NUM_LABELS - 2);
         ctx.setColor(util::SkinColor::Static);
-        outText(ctx, Point(x + metric.gridSize*NUM_LABELS, y + metric.labelHeight*i), _(LABEL_TEXT[i]));
+        outText(ctx, Point(x + metric.gridSize*NUM_LABELS, y + metric.labelHeight*i), m_translator(LABEL_TEXT[i]));
     }
 
     // Checkboxes and Labels
@@ -166,10 +168,7 @@ client::widgets::AllianceLevelGrid::getLayoutInfo() const
     const Metric metric = getMetric(m_root);
 
     const Ref<Font> labelFont = m_root.provider().getFont(gfx::FontRequest().addSize(-1));
-    int labelWidth = 0;
-    for (int i = 0; i < NUM_LABELS; ++i) {
-        labelWidth = std::max(labelWidth, labelFont->getTextWidth(_(LABEL_TEXT[i])));
-    }
+    int labelWidth = labelFont->getMaxTextWidth(afl::functional::createStringTable(LABEL_TEXT).map(m_translator));
 
     const Ref<Font> itemFont = m_root.provider().getFont(gfx::FontRequest().addSize(+1));
     for (size_t i = 0, n = m_items.size(); i < n; ++i) {

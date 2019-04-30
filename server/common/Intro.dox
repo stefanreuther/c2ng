@@ -1,0 +1,6 @@
+/*!
+     \namespace server::common
+     \brief Common server code
+
+     This namespace contains code common to several of the servers.
+ */

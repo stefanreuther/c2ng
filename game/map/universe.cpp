@@ -25,7 +25,7 @@ namespace {
                                     : ((flags & game::map::Universe::NameVerbose) != 0
                                        ? tx.translateString("%s (Planet #%d)")
                                        : tx.translateString("%s (#%d)"))).c_str(),
-                                   pl.getName(game::map::Planet::PlainName, tx, iface),
+                                   pl.getName(game::PlainName, tx, iface),
                                    pl.getId());
     }
 
@@ -252,6 +252,7 @@ game::map::Universe::getObject(Reference ref) const
 {
     switch (ref.getType()) {
      case Reference::Null:
+     case Reference::Special:
      case Reference::Player:
      case Reference::MapLocation:
         return 0;
@@ -505,10 +506,10 @@ game::map::Universe::getGravityPlanetAt(Point pt,
     \param pt position to check
     \returns Id number of a ship at position \c pt, or zero if none. */
 game::Id_t
-game::map::Universe::getAnyShipAt(Point pt)
+game::map::Universe::getAnyShipAt(Point pt) const
 {
     // ex GUniverse::getAnyShipAt
-    return AnyShipType(*this).findFirstObjectAt(m_config.getCanonicalLocation(pt));
+    return AnyShipType(const_cast<Universe&>(*this)).findFirstObjectAt(m_config.getCanonicalLocation(pt));
 }
 
 // /** Get name of a location in human-readable form.
@@ -523,7 +524,7 @@ game::map::Universe::getLocationName(Point pt, int flags,
                                      const game::config::HostConfiguration& config,
                                      const HostVersion& host,
                                      afl::string::Translator& tx,
-                                     InterpreterInterface& iface)
+                                     InterpreterInterface& iface) const
 {
     // ex GUniverse::getLocationName
     if (Id_t pid = getPlanetAt(pt)) {
@@ -535,7 +536,7 @@ game::map::Universe::getLocationName(Point pt, int flags,
     if ((flags & NameShips) != 0) {
         if (Id_t sid = getAnyShipAt(pt)) {
             if (const Ship* sh = ships().get(sid)) {
-                return sh->getName(Ship::LongName, tx, iface);
+                return sh->getName(LongName, tx, iface);
             }
         }
     }
@@ -546,7 +547,7 @@ game::map::Universe::getLocationName(Point pt, int flags,
                 return afl::string::Format(((flags & NameVerbose) != 0
                                             ? tx.translateString("near %s (Planet #%d)")
                                             : tx.translateString("near %s (#%d)")).c_str(),
-                                           pl->getName(Planet::PlainName, tx, iface),
+                                           pl->getName(PlainName, tx, iface),
                                            pl->getId());
             }
         }

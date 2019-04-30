@@ -9,6 +9,5 @@
 server::talk::Configuration::Configuration()
     : messageIdSuffix("@localhost"),
       baseUrl("http://localhost/"),
-      userKey("unset"),
       pathHost("localhost")
 { }

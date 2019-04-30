@@ -13,6 +13,8 @@
 #include "game/map/planetstorage.hpp"
 #include "game/map/shipstorage.hpp"
 #include "game/map/shiptransporter.hpp"
+#include "game/map/beamupshiptransfer.hpp"
+#include "game/map/beamupplanettransfer.hpp"
 
 using afl::base::Memory;
 using game::map::Object;
@@ -186,6 +188,32 @@ game::actions::CargoTransferSetup::fromShipJettison(const game::map::Universe& u
     return CargoTransferSetup(UseShipStorage, shipId, UseOtherUnload, 0);
 }
 
+game::actions::CargoTransferSetup
+game::actions::CargoTransferSetup::fromShipBeamUp(const game::Turn& turn, int shipId, const game::config::HostConfiguration& config)
+{
+    // Validate configuration
+    if (!config[config.AllowBeamUpMultiple]()) {
+        return CargoTransferSetup();
+    }
+
+    // Validate ship Id: must exist and be playable
+    const game::map::Universe& univ = turn.universe();
+    const Ship* pShip = univ.ships().get(shipId);
+    game::map::Point shipPos;
+    if (pShip == 0 || !pShip->getPosition(shipPos) || !pShip->isPlayable(Object::Playable)) {
+        return CargoTransferSetup();
+    }
+
+    // Validate position: there must be a planet
+    Id_t planetId = univ.getPlanetAt(shipPos);
+    if (planetId == 0) {
+        return CargoTransferSetup();
+    }
+
+    // OK
+    return CargoTransferSetup(UseBeamUpShip, shipId, UseBeamUpPlanet, planetId);
+}
+
 // Swap sides.
 void
 game::actions::CargoTransferSetup::swapSides()
@@ -212,6 +240,13 @@ game::actions::CargoTransferSetup::getStatus() const
     } else {
         return Ready;
     }
+}
+
+// Check validity.
+bool
+game::actions::CargoTransferSetup::isValid() const
+{
+    return getStatus() == Ready;
 }
 
 // Check valid proxy.
@@ -256,6 +291,8 @@ game::actions::CargoTransferSetup::getConflictingTransferShipId(const game::map:
          case UsePlanetStorage:
          case UseShipStorage:
          case UseOtherUnload:
+         case UseBeamUpShip:
+         case UseBeamUpPlanet:
             break;
 
          case UseOtherTransfer:
@@ -284,12 +321,14 @@ game::actions::CargoTransferSetup::cancelConflictingTransfer(game::map::Universe
 // Build CargoTransfer action.
 void
 game::actions::CargoTransferSetup::build(CargoTransfer& action,
-                                         game::map::Universe& univ,
+                                         Turn& turn,
                                          InterpreterInterface& iface,
                                          const game::config::HostConfiguration& config,
                                          const game::spec::ShipList& shipList,
                                          const game::HostVersion& version)
 {
+    game::map::Universe& univ = turn.universe();
+
     // Deflect call if setup is invalid and user didn't notice.
     if (getStatus() != Ready) {
         throw Exception(Exception::ePerm);
@@ -331,6 +370,14 @@ game::actions::CargoTransferSetup::build(CargoTransfer& action,
 
          case UseProxyTransfer:
             action.addNew(new game::map::ShipTransporter(getShip(univ, m_ids[Proxy]), Ship::TransferTransporter, thisId, iface, univ, version));
+            break;
+
+         case UseBeamUpShip:
+            action.addNew(new game::map::BeamUpShipTransfer(getShip(univ, thisId), iface, shipList, turn, config));
+            break;
+
+         case UseBeamUpPlanet:
+            action.addNew(new game::map::BeamUpPlanetTransfer(getPlanet(univ, thisId), getShip(univ, otherId), iface, turn, config));
             break;
         }
     }

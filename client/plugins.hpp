@@ -34,8 +34,9 @@ namespace client {
 
     /** Create a file loader.
         \param fileName Name of file
+        \param origin Value to set as origin
         \return BytecodeObject that, when executed, will load the given file or print an error message. */
-    interpreter::BCORef_t createFileLoader(const String_t& fileName);
+    interpreter::BCORef_t createFileLoader(const String_t& fileName, const String_t& origin);
 
 }
 

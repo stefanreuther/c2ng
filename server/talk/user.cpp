@@ -69,13 +69,6 @@ server::talk::User::newsrc()
     return forumData().subtree("newsrc");
 }
 
-// Get user's password hash.
-afl::net::redis::StringKey
-server::talk::User::passwordHash()
-{
-    return tree().stringKey("password");
-}
-
 // Get PM data for user.
 afl::net::redis::Subtree
 server::talk::User::pmFolderData()

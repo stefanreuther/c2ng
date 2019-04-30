@@ -26,24 +26,9 @@ game::ref::SortByName::getClass(const Reference& /*a*/) const
 String_t
 game::ref::SortByName::getName(const Reference& a) const
 {
-    // Try to resolve as plain object name
-    // FIXME: make this a function of Session?
-    if (Game* g = m_session.getGame().get()) {
-        Turn* t = g->getViewpointTurn().get();
-        if (t == 0) {
-            t = &g->currentTurn();
-        }
-        if (const game::map::Object* obj = t->universe().getObject(a)) {
-            String_t name = obj->getName(game::map::Object::PlainName, m_session.translator(), m_session.interface());
-            if (!name.empty()) {
-                return name;
-            }
-        }
-    }
-
-    // Resolve as reference name
+    // Resolve as plain name; if that does not work, as reference name.
     String_t name;
-    if (!m_session.getReferenceName(a, name)) {
+    if (!m_session.getReferenceName(a, PlainName, name)) {
         name = a.toString(m_session.translator());
     }
     return name;

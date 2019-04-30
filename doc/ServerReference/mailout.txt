@@ -1,0 +1,36 @@
+##
+##  c2mailout
+##
+
+@q Mailout (Service)
+@noproto
+The "Mailout" service queues outgoing internet email and manages confirmation requests.
+
+The Host service is accessible using
+- "mailout" context on the console
+- {@group Mailout Command} (a {pcc:resp|RESP service})
+
+<h2>Domain Model</h2>
+
+Mailout queues <b>messages</b>.
+Each message consists of a template, template variables, possible attachments, and receivers.
+Messages can also have a <b>unique identifier</b> to cancel older incarnations
+(e.g. if a new result file is produced before the first one has been sent, the first one is cancelled).
+Messages internally have an <b>Id</b> that is not visible on any external interface.
+
+When a message is addressed to a user,
+Mailout manages <b>email confirmation status</b> to verify that it is allowed to send email to a given address.
+
+<h2>Storage</h2>
+
+The mailout service stores all its data in the {@group Database}.
+It can be ordered to access a {File (Service)|file service} using {ATTACH (Mailout Command)},
+but has no intrinsic connection to a file service.
+
+@uses Mailout.Host, Mailout.Port, Mailout.Threads, Mailout.TemplateDir, Mailout.MaxAge
+@uses SMTP.Host, SMTP.Port, SMTP.From, SMTP.FQDN
+---
+
+@group Mailout Command
+This {pcc:resp|RESP} interface is the interface to the {Mailout (Service)|Mailout} service.
+---

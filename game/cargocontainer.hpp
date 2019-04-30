@@ -12,6 +12,7 @@
 #include "afl/bits/smallset.hpp"
 #include "afl/string/translator.hpp"
 #include "game/element.hpp"
+#include "util/vector.hpp"
 
 namespace game {
 
@@ -154,7 +155,7 @@ namespace game {
         afl::base::Signal<void()> sig_change;
 
      private:
-        std::vector<int32_t> m_delta;    ///< Current deltas, indexed by Element::Type. Nonpresent values treated as 0.
+        util::Vector<int32_t,Element::Type> m_delta;    ///< Current deltas, indexed by Element::Type. Nonpresent values treated as 0.
         bool m_overload;                 ///< Overload flag.
     };
 

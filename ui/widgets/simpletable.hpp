@@ -50,6 +50,12 @@ namespace ui { namespace widgets {
                 \return *this */
             Range& setExtraColumns(int n);
 
+            /** Set underlining for all cells in range.
+                This will underline the whole cell.
+                \param flag true to underline
+                \return *this */
+            Range& setUnderline(bool flag);
+
             /** Get subrange.
                 \param start 0-based index
                 \param count Number of cells
@@ -125,6 +131,12 @@ namespace ui { namespace widgets {
             \param width Gap width */
         void setColumnPadding(size_t column, int width);
 
+        /** Set number of rows.
+            This can be used to make the table larger or shorter.
+            New cells will not yet have any content or format.
+            \param numRows new number */
+        void setNumRows(size_t numRows);
+
         // Widget:
         virtual void draw(gfx::Canvas& can);
         virtual void handleStateChange(State st, bool enable);
@@ -141,8 +153,9 @@ namespace ui { namespace widgets {
             int alignY;
             int extraColumns;
             uint8_t color;
+            bool underlined;
             Cell()
-                : text(), font(), alignX(0), alignY(0), extraColumns(0), color(ui::Color_White)
+                : text(), font(), alignX(0), alignY(0), extraColumns(0), color(ui::Color_White), underlined(false)
                 { }
         };
         struct Metric {

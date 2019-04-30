@@ -9,6 +9,7 @@
 #include "afl/base/ptr.hpp"
 #include "afl/base/refcounted.hpp"
 #include "afl/bits/smallset.hpp"
+#include "afl/charset/charset.hpp"
 #include "afl/io/directory.hpp"
 #include "game/config/hostconfiguration.hpp"
 #include "game/config/userconfiguration.hpp"
@@ -91,12 +92,14 @@ namespace game {
             \param hostVersion host version, see m_hostVersion
             \param registrationKey registration status, see m_registrationKey. Must not be null.
             \param stringVerifier string verifier, see m_stringVerifier. Must not be null.
+            \param charset Character set for files in gameDirectory.
             \param actions allowed actions */
         Root(afl::base::Ref<afl::io::Directory> gameDirectory,
              afl::base::Ref<SpecificationLoader> specLoader,
              game::HostVersion hostVersion,
              std::auto_ptr<RegistrationKey> registrationKey,
              std::auto_ptr<StringVerifier> stringVerifier,
+             std::auto_ptr<afl::charset::Charset> charset,
              Actions_t actions);
 
         /** Destructor. */
@@ -114,6 +117,10 @@ namespace game {
             See m_hostVersion. */
         HostVersion& hostVersion();
         const HostVersion& hostVersion() const;
+
+        /** Access character set.
+            See m_charset. */
+        afl::charset::Charset& charset() const;
 
         /** Access host configuration.
             See m_hostConfiguration. */
@@ -191,6 +198,10 @@ namespace game {
         /** String verifier.
             This is an implementation-specific class implementing verification of strings. */
         std::auto_ptr<StringVerifier> m_stringVerifier;
+
+        /** Character set for files in m_gameDirectory.
+            This applies to common files (which need a character set even if we're playing from a server that provides one). */
+        std::auto_ptr<afl::charset::Charset> m_charset;
 
         /** Turn loader. */
         // FIXME: this is incomplete; possibly change it again

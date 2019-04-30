@@ -1,54 +1,41 @@
 # -*- makefile -*-
 #
-#  Project Root
+#  Project Variables
+#
+#  This used to generate Makefiles. We now use the Accidental Build
+#  System (Rules.pl, Make.pl). This file remains to store just the
+#  file lists because I happen to have a nice IDE integration for
+#  that.
 #
 
-# This defines the Makefiles we want to make:
-GENERATE = Makefile.min Makefile
-INCLUDE_Makefile = Rules-unix.mak Settings-unix.mak
-INCLUDE_Makefile.min = Rules-mingw.mak
-
-## Configuration
-include config.mk
-CXX = $(CONFIG_C2NG_CXX)
-AR = $(CONFIG_C2NG_AR)
-LIBS = $(CONFIG_C2NG_LIBS)
-PERL = $(CONFIG_C2NG_PERL)
-RM = rm -f
-STRIP = strip
-RANLIB = :
-
-# Import AFL
-include $(CONFIG_C2NG_AFL_DIR)/config.mk
-TARGETS += afl
-TYPE_afl = prebuilt-lib
-LIBDIR_afl := $(CONFIG_C2NG_AFL_DIR)
-LIBEXTRA_afl := $(CONFIG_AFL_LIBS)
-CXXFLAGS = -I$(CONFIG_C2NG_AFL_DIR) -I. $(CONFIG_C2NG_CXXFLAGS)
-LDFLAGS = $(CONFIG_AFL_LDFLAGS) $(CONFIG_C2NG_LDFLAGS)
-CXXTESTDIR = $(CONFIG_AFL_CXXTESTDIR)
-
-# Define "all" targets
-all: all-guilib-$(CONFIG_C2NG_HAVE_GUILIB) all-cxxtest-$(CONFIG_C2NG_HAVE_CXXTEST)
-all-guilib-yes: all-guilib-no $(OUTPUT_$(PROJECTS_guiapp))
-all-guilib-no: $(OUTPUT_$(PROJECTS_app))
-all-cxxtest-yes: $(OUTPUT_$(PROJECTS_testapp))
-all-cxxtest-no: 
-MAIN_TARGETS += all all-sdl-yes all-sdl-no all-cxxtest-yes all-cxxtest-no
-
-# Define "guiapp" type
-begin guiapp
-PARENT = app
-LIBS_$(NAME) +:= $(CONFIG_C2NG_GUILIBS)
-end
-begin testapp
-PARENT = app
-LIBS_$(NAME) +:= $(CONFIG_C2NG_GUILIBS)
-end
+GENERATE = 
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/actions/remotecontrolaction.cpp \
+FILES_gamelib = util/process/nullfactory.cpp util/process/nullfactory.hpp \
+    util/process/posixfactory.cpp util/process/posixfactory.hpp \
+    util/process/subprocess.hpp util/process/factory.hpp \
+    game/map/minefieldformula.cpp game/map/minefieldformula.hpp \
+    interpreter/consoleapplication.cpp interpreter/consoleapplication.hpp \
+    game/map/location.cpp game/map/location.hpp \
+    game/map/beamupplanettransfer.cpp game/map/beamupplanettransfer.hpp \
+    game/map/beamupshiptransfer.cpp game/map/beamupshiptransfer.hpp \
+    util/vector.hpp game/ref/sortbytransfertarget.cpp \
+    game/ref/sortbytransfertarget.hpp game/map/boundingbox.cpp \
+    game/map/boundingbox.hpp game/maint/raterapplication.cpp \
+    game/maint/raterapplication.hpp game/maint/sweepapplication.cpp \
+    game/maint/sweepapplication.hpp \
+    interpreter/exporter/consoleapplication.cpp \
+    interpreter/exporter/consoleapplication.hpp \
+    game/v3/trn/dumperapplication.cpp game/v3/trn/dumperapplication.hpp \
+    util/keymapinformation.cpp util/keymapinformation.hpp \
+    game/interface/vmfile.cpp game/interface/vmfile.hpp \
+    game/data/friendlycode.cpp game/data/friendlycode.hpp \
+    util/numberformatter.cpp util/numberformatter.hpp game/map/locker.cpp \
+    game/map/locker.hpp game/interface/consolecommands.cpp \
+    game/interface/consolecommands.hpp game/interface/markingfunctions.cpp \
+    game/interface/markingfunctions.hpp interpreter/genericvalue.hpp \
+    game/actions/remotecontrolaction.cpp \
     game/actions/remotecontrolaction.hpp game/ref/sortbynewlocation.cpp \
     game/ref/sortbynewlocation.hpp game/ref/sortbylocation.cpp \
     game/ref/sortbylocation.hpp game/ref/sortbydamage.cpp \
@@ -563,7 +550,55 @@ PROJ_AUTO += \
     gamelib:game/*.cpp,game/*.hpp,util/*.cpp,util/*.hpp,interpreter/*.cpp,interpreter/*.hpp
 
 TARGETS += guilib
-FILES_guilib = client/proxy/hullspecificationproxy.cpp \
+FILES_guilib = client/map/minefieldmissionoverlay.cpp \
+    client/map/minefieldmissionoverlay.hpp client/map/prefixoverlay.cpp \
+    client/map/prefixoverlay.hpp client/tiles/starchartheadertile.cpp \
+    client/tiles/starchartheadertile.hpp client/map/starchartoverlay.cpp \
+    client/map/starchartoverlay.hpp client/map/location.cpp \
+    client/map/location.hpp client/proxy/maplocationproxy.cpp \
+    client/proxy/maplocationproxy.hpp client/map/screen.cpp \
+    client/map/screen.hpp ui/widgets/scrollbar.cpp ui/widgets/scrollbar.hpp \
+    client/dialogs/helpdialog.cpp client/dialogs/helpdialog.hpp \
+    ui/rich/documentparser.cpp ui/rich/documentparser.hpp \
+    client/proxy/helpproxy.cpp client/proxy/helpproxy.hpp \
+    client/dialogs/cargotransferdialog.cpp \
+    client/dialogs/cargotransferdialog.hpp \
+    client/widgets/cargotransferline.cpp \
+    client/widgets/cargotransferline.hpp \
+    client/widgets/cargotransferheader.cpp \
+    client/widgets/cargotransferheader.hpp \
+    client/proxy/cargotransferproxy.cpp client/proxy/cargotransferproxy.hpp \
+    client/proxy/cargotransfersetupproxy.cpp \
+    client/proxy/cargotransfersetupproxy.hpp client/cargotransfer.cpp \
+    client/cargotransfer.hpp client/proxy/shipspeedproxy.cpp \
+    client/proxy/shipspeedproxy.hpp client/widgets/shipspeedwidget.cpp \
+    client/widgets/shipspeedwidget.hpp client/dialogs/shipspeeddialog.cpp \
+    client/dialogs/shipspeeddialog.hpp client/dialogs/keymapdialog.cpp \
+    client/dialogs/keymapdialog.hpp client/proxy/keymapproxy.cpp \
+    client/proxy/keymapproxy.hpp client/si/commandtask.cpp \
+    client/si/commandtask.hpp client/si/scripttask.hpp \
+    client/dialogs/screenhistorydialog.cpp \
+    client/dialogs/screenhistorydialog.hpp \
+    client/proxy/screenhistoryproxy.cpp client/proxy/screenhistoryproxy.hpp \
+    client/screenhistory.cpp client/screenhistory.hpp \
+    client/proxy/friendlycodeproxy.cpp client/proxy/friendlycodeproxy.hpp \
+    client/dialogs/friendlycodedialog.cpp \
+    client/dialogs/friendlycodedialog.hpp \
+    client/widgets/friendlycodelist.cpp client/widgets/friendlycodelist.hpp \
+    ui/widgets/decimalselector.cpp ui/widgets/decimalselector.hpp \
+    client/proxy/configurationproxy.cpp client/proxy/configurationproxy.hpp \
+    client/widgets/costdisplay.cpp client/widgets/costdisplay.hpp \
+    client/dialogs/techupgradedialog.cpp \
+    client/dialogs/techupgradedialog.hpp client/widgets/techbar.cpp \
+    client/widgets/techbar.hpp ui/widgets/numberselector.cpp \
+    ui/widgets/numberselector.hpp ui/widgets/focusablegroup.cpp \
+    ui/widgets/focusablegroup.hpp client/proxy/lockproxy.cpp \
+    client/proxy/lockproxy.hpp client/map/movementoverlay.cpp \
+    client/map/movementoverlay.hpp client/map/scanneroverlay.cpp \
+    client/map/scanneroverlay.hpp client/map/callback.hpp \
+    client/map/overlay.cpp client/map/overlay.hpp \
+    client/widgets/scanresult.cpp client/widgets/scanresult.hpp \
+    client/proxy/hullspecificationproxy.cpp \
     client/proxy/hullspecificationproxy.hpp client/proxy/playerproxy.cpp \
     client/proxy/playerproxy.hpp client/widgets/hullspecificationsheet.cpp \
     client/widgets/hullspecificationsheet.hpp client/widgets/playerlist.cpp \
@@ -777,7 +812,88 @@ DEPEND_guilib = afl
 PROJ_AUTO += guilib:gfx/*.cpp,gfx/*.hpp,ui/*.cpp,ui/*.hpp,client/*.cpp,client/*.hpp
 
 TARGETS += serverlib
-FILES_serverlib = server/host/file/historyslotitem.cpp \
+FILES_serverlib = server/host/hostranking.cpp server/host/hostranking.hpp \
+    server/interface/hostrankingclient.cpp \
+    server/interface/hostrankingserver.cpp \
+    server/interface/hostrankingserver.hpp \
+    server/interface/hostrankingclient.hpp server/interface/hostranking.hpp \
+    server/host/hosthistory.cpp server/host/hosthistory.hpp \
+    server/interface/hosthistoryclient.cpp \
+    server/interface/hosthistoryclient.hpp \
+    server/interface/hosthistoryserver.cpp \
+    server/interface/hosthistoryserver.hpp server/interface/hosthistory.hpp \
+    server/talk/talkaddress.cpp server/talk/talkaddress.hpp \
+    server/interface/talkaddressclient.cpp \
+    server/interface/talkaddressclient.hpp \
+    server/interface/talkaddressserver.cpp \
+    server/interface/talkaddressserver.hpp server/interface/talkaddress.hpp \
+    server/interface/mailqueue.cpp server/user/userdata.cpp \
+    server/user/userdata.hpp server/interface/userdataclient.cpp \
+    server/interface/userdataclient.hpp server/interface/userdataserver.cpp \
+    server/interface/userdataserver.hpp server/interface/userdata.hpp \
+    server/common/util.cpp server/common/util.hpp \
+    server/user/configuration.cpp server/user/configuration.hpp \
+    server/user/classicencrypter.cpp server/user/classicencrypter.hpp \
+    server/user/passwordencrypter.hpp server/user/usermanagement.cpp \
+    server/user/usermanagement.hpp server/interface/usermanagementclient.cpp \
+    server/interface/usermanagementclient.hpp \
+    server/interface/usermanagementserver.cpp \
+    server/interface/usermanagementserver.hpp \
+    server/interface/usermanagement.hpp server/common/randomidgenerator.cpp \
+    server/common/randomidgenerator.hpp \
+    server/common/numericalidgenerator.cpp \
+    server/common/numericalidgenerator.hpp server/common/idgenerator.hpp \
+    server/user/token.cpp server/user/token.hpp server/user/user.cpp \
+    server/user/user.hpp server/user/usertoken.cpp server/user/usertoken.hpp \
+    server/user/root.cpp server/user/root.hpp server/user/commandhandler.cpp \
+    server/user/commandhandler.hpp server/user/serverapplication.cpp \
+    server/user/serverapplication.hpp server/interface/usertokenclient.cpp \
+    server/interface/usertokenclient.hpp \
+    server/interface/usertokenserver.cpp \
+    server/interface/usertokenserver.hpp server/interface/usertoken.hpp \
+    server/router/session.cpp server/router/session.hpp \
+    server/router/root.cpp server/router/root.hpp \
+    server/router/configuration.cpp server/router/configuration.hpp \
+    server/router/sessionrouter.cpp server/router/sessionrouter.hpp \
+    server/interface/sessionroutersingleserver.cpp \
+    server/interface/sessionroutersingleserver.hpp \
+    server/router/serverapplication.cpp server/router/serverapplication.hpp \
+    server/host/hostslot.cpp server/host/hostslot.hpp \
+    server/interface/hostslotclient.cpp server/interface/hostslotclient.hpp \
+    server/interface/hostslotserver.cpp server/interface/hostslotserver.hpp \
+    server/interface/hostslot.hpp server/play/shipmissionpacker.cpp \
+    server/play/shipmissionpacker.hpp \
+    server/play/planetfriendlycodepacker.cpp \
+    server/play/planetfriendlycodepacker.hpp \
+    server/play/shipfriendlycodepacker.cpp \
+    server/play/shipfriendlycodepacker.hpp \
+    server/play/planetcommandhandler.cpp \
+    server/play/planetcommandhandler.hpp server/play/shipcommandhandler.cpp \
+    server/play/shipcommandhandler.hpp server/play/commandhandler.hpp \
+    server/play/configurationpacker.cpp server/play/configurationpacker.hpp \
+    server/play/vcrpacker.cpp server/play/vcrpacker.hpp \
+    server/play/messagepacker.cpp server/play/messagepacker.hpp \
+    server/play/ufopacker.cpp server/play/ufopacker.hpp \
+    server/play/minefieldpacker.cpp server/play/minefieldpacker.hpp \
+    server/play/ionstormpacker.cpp server/play/ionstormpacker.hpp \
+    server/play/planetpacker.cpp server/play/planetpacker.hpp \
+    server/play/shippacker.cpp server/play/shippacker.hpp \
+    server/play/truehullpacker.cpp server/play/truehullpacker.hpp \
+    server/play/hullpacker.cpp server/play/hullpacker.hpp \
+    server/play/enginepacker.cpp server/play/enginepacker.hpp \
+    server/play/beampacker.cpp server/play/beampacker.hpp \
+    server/play/torpedopacker.cpp server/play/torpedopacker.hpp \
+    server/play/playerpacker.cpp server/play/playerpacker.hpp \
+    server/play/mainpacker.cpp server/play/mainpacker.hpp \
+    server/play/planetxypacker.cpp server/play/planetxypacker.hpp \
+    server/play/packer.cpp server/play/shipxypacker.cpp \
+    server/play/shipxypacker.hpp server/play/packerlist.cpp \
+    server/play/packerlist.hpp server/play/packer.hpp \
+    server/play/gameaccess.cpp server/play/gameaccess.hpp \
+    server/play/consoleapplication.cpp server/play/consoleapplication.hpp \
+    server/interface/gameaccessserver.cpp \
+    server/interface/gameaccessserver.hpp server/interface/gameaccess.hpp \
+    server/host/file/historyslotitem.cpp \
     server/host/file/historyturnitem.cpp \
     server/host/file/historyslotitem.hpp \
     server/host/file/historyturnitem.hpp server/host/file/historyitem.cpp \
@@ -998,8 +1114,7 @@ FILES_serverlib = server/host/file/historyslotitem.cpp \
     server/talk/render/mailrenderer.hpp server/talk/render/htmlrenderer.cpp \
     server/talk/render/htmlrenderer.hpp server/talk/parse/bbparser.cpp \
     server/talk/parse/bbparser.hpp server/talk/parse/bblexer.cpp \
-    server/talk/parse/bblexer.hpp server/talk/util.cpp server/talk/util.hpp \
-    server/talk/user.cpp server/talk/user.hpp \
+    server/talk/parse/bblexer.hpp server/talk/user.cpp server/talk/user.hpp \
     server/interface/talkgroupclient.cpp \
     server/interface/talkgroupclient.hpp server/talk/talkgroup.cpp \
     server/talk/talkgroup.hpp server/interface/talkgroupserver.cpp \
@@ -1165,6 +1280,26 @@ FILES_c2monitor-server = server/c2monitor.cpp
 TYPE_c2monitor-server = app
 DEPEND_c2monitor-server = serverlib gamelib afl
 
+TARGETS += c2play-server
+FILES_c2play-server = server/c2play.cpp
+TYPE_c2play-server = app
+DEPEND_c2play-server = serverlib gamelib afl
+
+TARGETS += c2router-server
+FILES_c2router-server = server/c2router.cpp
+TYPE_c2router-server = app
+DEPEND_c2router-server = serverlib gamelib afl
+
+TARGETS += c2user-server
+FILES_c2user-server = server/c2user.cpp
+TYPE_c2user-server = app
+DEPEND_c2user-server = serverlib gamelib afl
+
+TARGETS += c2logger
+FILES_c2logger = server/c2logger.cpp
+TYPE_c2logger = app
+DEPEND_c2logger = serverlib afl
+
 # Main entry points (GUIs)
 TARGETS += c2ng
 FILES_c2ng = main/c2ng.cpp
@@ -1173,12 +1308,47 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_client_proxy_objectlistener.cpp u/t_client_proxy.hpp \
-    u/t_game_alliance_level.cpp u/t_game_alliance.hpp u/t_util_helpindex.cpp \
-    u/t_server_host_hostfile.cpp u/t_server_host_file_rootitem.cpp \
-    u/t_server_host_file_gamerootitem.cpp u/t_server_host_file_toolitem.cpp \
-    u/t_server_host_file_item.cpp u/t_server_host_file_fileitem.cpp \
-    u/t_server_host_file.hpp u/t_server_interface_hostfileserver.cpp \
+FILES_testsuite = u/t_server_interface_hostrankingserver.cpp \
+    u/t_server_interface_hostrankingclient.cpp \
+    u/t_server_interface_hostranking.cpp \
+    u/t_server_interface_hosthistoryserver.cpp \
+    u/t_server_interface_hosthistoryclient.cpp \
+    u/t_server_interface_hosthistory.cpp u/t_server_talk_talkaddress.cpp \
+    u/t_server_interface_talkaddressserver.cpp \
+    u/t_server_interface_talkaddressclient.cpp \
+    u/t_server_interface_talkaddress.cpp u/t_server_user_userdata.cpp \
+    u/t_server_user_commandhandler.cpp \
+    u/t_server_interface_userdataserver.cpp \
+    u/t_server_interface_userdataclient.cpp \
+    u/t_server_interface_userdata.cpp u/t_server_user_user.cpp \
+    u/t_server_common_randomidgenerator.cpp u/t_server_user_usertoken.cpp \
+    u/t_server_user_token.cpp u/t_server_user_usermanagement.cpp \
+    u/t_server_user_classicencrypter.cpp \
+    u/t_server_user_passwordencrypter.cpp u/t_server_user_configuration.cpp \
+    u/t_server_user.hpp u/t_server_common_util.cpp \
+    u/t_server_interface_usermanagementserver.cpp \
+    u/t_server_interface_usermanagementclient.cpp \
+    u/t_server_interface_usermanagement.cpp \
+    u/t_server_interface_usertokenserver.cpp \
+    u/t_server_interface_usertokenclient.cpp \
+    u/t_server_interface_usertoken.cpp u/t_util_process_subprocess.cpp \
+    u/t_util_process_factory.cpp u/t_util_process.hpp \
+    u/t_game_ref_nullpredicate.cpp u/t_game_ref_sortpredicate.cpp \
+    u/t_game_ref.hpp u/t_client_proxy_objectobserver.cpp \
+    u/t_game_battleorderrule.cpp u/t_game_map_basestorage.cpp \
+    u/t_server_interface_hostslotserver.cpp \
+    u/t_server_interface_hostslotclient.cpp \
+    u/t_server_interface_hostslot.cpp u/t_server_play_commandhandler.cpp \
+    u/t_server_play_packer.cpp u/t_server_play.hpp \
+    u/t_server_interface_gameaccess.cpp u/t_util_numberformatter.cpp \
+    u/t_interpreter_mutexcontext.cpp u/t_game_alliance_handler.cpp \
+    u/t_interpreter_genericvalue.cpp u/t_client_proxy_objectlistener.cpp \
+    u/t_client_proxy.hpp u/t_game_alliance_level.cpp u/t_game_alliance.hpp \
+    u/t_util_helpindex.cpp u/t_server_host_hostfile.cpp \
+    u/t_server_host_file_rootitem.cpp u/t_server_host_file_gamerootitem.cpp \
+    u/t_server_host_file_toolitem.cpp u/t_server_host_file_item.cpp \
+    u/t_server_host_file_fileitem.cpp u/t_server_host_file.hpp \
+    u/t_server_interface_hostfileserver.cpp \
     u/t_server_interface_hostfileclient.cpp \
     u/t_server_interface_hostfile.cpp u/t_game_map_movementpredictor.cpp \
     u/t_game_v3_reverter.cpp u/t_game_map_ship.cpp \
@@ -1402,9 +1572,9 @@ FILES_testsuite = u/t_client_proxy_objectlistener.cpp u/t_client_proxy.hpp \
     u/t_server_talk_parse_bblexer.cpp u/t_server_talk_parse.hpp \
     u/t_server_interface_talkrenderserver.cpp \
     u/t_server_interface_talkrenderclient.cpp u/t_server_format_utils.cpp \
-    u/t_server_talk_root.cpp u/t_server_talk_util.cpp \
-    u/t_server_talk_render_context.cpp u/t_server_talk_render_options.cpp \
-    u/t_server_talk_render.hpp u/t_server_interface_talksyntaxserver.cpp \
+    u/t_server_talk_root.cpp u/t_server_talk_render_context.cpp \
+    u/t_server_talk_render_options.cpp u/t_server_talk_render.hpp \
+    u/t_server_interface_talksyntaxserver.cpp \
     u/t_server_interface_talksyntaxclient.cpp \
     u/t_server_interface_talkrender.cpp u/t_server_interface_talkgroup.cpp \
     u/t_server_talk_linkformatter.cpp u/t_server_talk_group.cpp \
@@ -1552,32 +1722,3 @@ FILES_testsuite = u/t_client_proxy_objectlistener.cpp u/t_client_proxy.hpp \
 TYPE_testsuite = testapp
 DEPEND_testsuite = serverlib guilib gamelib afl
 PROJ_AUTO += testsuite:u/*.cpp,u/*.hpp
-
-HEADERS_testsuite = u/t_*.hpp
-
-test: $(OUTPUT_testsuite)
-	@echo "        Running testsuite..."
-	@$(RUN) ./$(OUTPUT_testsuite)
-
-testsuite.cpp: $(HEADERS_testsuite)
-	@echo "        Generating test driver..."
-	@$(PERL) $(CXXTESTDIR)/cxxtestgen.pl --gui=TestController --have-eh --error-printer -o $@ $(HEADERS_testsuite)
-
-distclean: 
-	$(RM) testsuite.cpp
-
-.PHONY: tags
-tags: 
-	@etags --recurse client game gfx interpreter main server tools ui util
-
-# We must define _CXXTEST_HAVE_EH and _CXXTEST_HAVE_STD for test cases,
-# but not for testsuite.cpp, where cxxtest automatically defines it.
-CXXFLAGS_$(FILES_testsuite) +:= -I$(CXXTESTDIR) -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g
-CXXFLAGS_testsuite.cpp +:= -U_CXXTEST_HAVE_EH -U_CXXTEST_HAVE_STD -O0
-
-# This module uses floating-point, and will get a x86/x64 difference
-# without this option.
-CXXFLAGS_gfx/gen/spaceview.cpp +:= -ffloat-store
-
-# Must rename some object files because ar only looks at basenames.
-PROJ_UNIQUE_STEMS = 1

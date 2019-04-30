@@ -513,7 +513,6 @@ namespace {
     {
         // ex int/if/baseif.cc:IFBaseBuildFighters
         args.checkArgumentCount(1, 2);
-        game::spec::ShipList& shipList = game::actions::mustHaveShipList(session);
 
         int32_t amount;
         if (!interpreter::checkIntegerArg(amount, args.getNext(), -game::MAX_NUMBER, game::MAX_NUMBER)) {

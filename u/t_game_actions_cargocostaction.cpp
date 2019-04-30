@@ -50,12 +50,14 @@ TestGameActionsCargoCostAction::testNormal()
     TS_ASSERT_EQUALS(testee.getRemainingAmount(Element::Molybdenum), 37);
     TS_ASSERT_EQUALS(testee.getRemainingAmount(Element::Supplies),   36);
     TS_ASSERT_EQUALS(testee.getRemainingAmount(Element::Money),      35);
+    TS_ASSERT_EQUALS(testee.getRemainingAmountAsCost().toCargoSpecString(), "39T 38D 37M 36S 35$");
 
     TS_ASSERT_EQUALS(testee.getMissingAmount(Element::Tritanium),  0);
     TS_ASSERT_EQUALS(testee.getMissingAmount(Element::Duranium),   0);
     TS_ASSERT_EQUALS(testee.getMissingAmount(Element::Molybdenum), 0);
     TS_ASSERT_EQUALS(testee.getMissingAmount(Element::Supplies),   0);
     TS_ASSERT_EQUALS(testee.getMissingAmount(Element::Money),      0);
+    TS_ASSERT_EQUALS(testee.getMissingAmountAsCost().toCargoSpecString(), "");
 }
 
 /** Test a missing mineral. */
@@ -79,12 +81,14 @@ TestGameActionsCargoCostAction::testMissingMineral()
     TS_ASSERT_EQUALS(testee.getRemainingAmount(Element::Molybdenum), 50);
     TS_ASSERT_EQUALS(testee.getRemainingAmount(Element::Supplies),   50);
     TS_ASSERT_EQUALS(testee.getRemainingAmount(Element::Money),      50);
+    TS_ASSERT_EQUALS(testee.getRemainingAmountAsCost().toCargoSpecString(), "5T 50D 50M 50S 50$");
 
     TS_ASSERT_EQUALS(testee.getMissingAmount(Element::Tritanium),  5);
     TS_ASSERT_EQUALS(testee.getMissingAmount(Element::Duranium),   0);
     TS_ASSERT_EQUALS(testee.getMissingAmount(Element::Molybdenum), 0);
     TS_ASSERT_EQUALS(testee.getMissingAmount(Element::Supplies),   0);
     TS_ASSERT_EQUALS(testee.getMissingAmount(Element::Money),      0);
+    TS_ASSERT_EQUALS(testee.getMissingAmountAsCost().toCargoSpecString(), "5T");
 }
 
 /** Test missing money. Will be compensated by selling supplies. */
@@ -166,12 +170,14 @@ TestGameActionsCargoCostAction::testMissingLotsOfMoney()
     TS_ASSERT_EQUALS(testee.getRemainingAmount(Element::Molybdenum), 50);
     TS_ASSERT_EQUALS(testee.getRemainingAmount(Element::Supplies),   -210);
     TS_ASSERT_EQUALS(testee.getRemainingAmount(Element::Money),      10);
+    TS_ASSERT_EQUALS(testee.getRemainingAmountAsCost().toCargoSpecString(), "50TDM -210S 10$");
 
     TS_ASSERT_EQUALS(testee.getMissingAmount(Element::Tritanium),  0);
     TS_ASSERT_EQUALS(testee.getMissingAmount(Element::Duranium),   0);
     TS_ASSERT_EQUALS(testee.getMissingAmount(Element::Molybdenum), 0);
     TS_ASSERT_EQUALS(testee.getMissingAmount(Element::Supplies),   220);
     TS_ASSERT_EQUALS(testee.getMissingAmount(Element::Money),      0);
+    TS_ASSERT_EQUALS(testee.getMissingAmountAsCost().toCargoSpecString(), "220S");
 }
 
 /** Test multiple modifications.

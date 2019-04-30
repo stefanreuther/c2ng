@@ -192,7 +192,7 @@ namespace server { namespace talk { namespace render { namespace {
 } } } }
 
 String_t
-server::talk::render::render(const String_t& text, const Context& ctx, const Options& opts, Root& root)
+server::talk::render::renderText(const String_t& text, const Context& ctx, const Options& opts, Root& root)
 {
     // ex RenderState::render
     const String_t& format = opts.getFormat();
@@ -216,66 +216,71 @@ server::talk::render::render(const String_t& text, const Context& ctx, const Opt
     } else {
         // transformation required
         std::auto_ptr<TextNode> tree(doParse(text, root.recognizer()));
+        return renderText(tree, ctx, opts, root);
+    }
+}
 
-        // perform conversions
-        // FIXME: port to StringParser?
-        String_t fmt = format;
-        while (1) {
-            if (fmt.size() > 6 && fmt.compare(0, 6, "quote:", 6) == 0) {
-                // quote: quote entire message
-                fmt.erase(0, 6);
-                std::auto_ptr<TextNode> tmp(new TextNode(TextNode::maGroup, TextNode::miGroupQuote));
+String_t
+server::talk::render::renderText(std::auto_ptr<TextNode> tree, const Context& ctx, const Options& opts, Root& root)
+{
+    // perform conversions
+    // FIXME: port to StringParser?
+    String_t fmt = opts.getFormat();
+    while (1) {
+        if (fmt.size() > 6 && fmt.compare(0, 6, "quote:", 6) == 0) {
+            // quote: quote entire message
+            fmt.erase(0, 6);
+            std::auto_ptr<TextNode> tmp(new TextNode(TextNode::maGroup, TextNode::miGroupQuote));
 
-                if (ctx.getMessageId() > 0) {
-                    // messageId is trusted, so no permission checks required
-                    Message m(root, ctx.getMessageId());
-                    User u(root, m.author().get());
-                    tmp->text = afl::string::Format("%s;%d", u.getLoginName(), ctx.getMessageId());
-                } else if (!ctx.getMessageAuthor().empty()) {
-                    User u(root, ctx.getMessageAuthor());
-                    tmp->text = u.getLoginName();
-                } else {
-                    // No context information given for quote
-                }
-                tmp->children.swap(tree->children);
-                tree->children.pushBackNew(tmp.release());
-            } else if (fmt.size() > 8 && fmt.compare(0, 8, "noquote:", 8) == 0) {
-                // noquote: remove all quotes
-                fmt.erase(0, 8);
-                tree->stripQuotes();
-            } else if (fmt.size() > 6 && fmt.compare(0, 6, "break:", 6) == 0) {
-                // render up to break
-                fmt.erase(0, 6);
-                stripBreak(tree.get());
-            } else if (fmt.size() > 6 && fmt.compare(0, 9, "abstract:", 9) == 0) {
-                // render abstract
-                fmt.erase(0, 9);
-                tree->stripQuotes();
-                Abstract().strip(tree.get());
-            } else if (fmt.size() > 6 && fmt.compare(0, 6, "force:", 6) == 0) {
-                // force: null operation just to force re-rendering
-                fmt.erase(0, 6);
+            if (ctx.getMessageId() > 0) {
+                // messageId is trusted, so no permission checks required
+                Message m(root, ctx.getMessageId());
+                User u(root, m.author().get());
+                tmp->text = afl::string::Format("%s;%d", u.getLoginName(), ctx.getMessageId());
+            } else if (!ctx.getMessageAuthor().empty()) {
+                User u(root, ctx.getMessageAuthor());
+                tmp->text = u.getLoginName();
             } else {
-                break;
+                // No context information given for quote
             }
-        }
-
-        // render it
-        String_t::size_type len;
-        server::talk::InlineRecognizer::Kinds_t set;
-        if (fmt == "html") {
-            return renderHTML(*tree, ctx, opts, root);
-        } else if (isForum(fmt, set, len) && len == fmt.size()) {
-            return renderBB(*tree, ctx, opts, root, set);
-        } else if (fmt == "mail") {
-            return renderMail(tree.get(), ctx, opts, root, false);
-        } else if (fmt == "news") {
-            return renderMail(tree.get(), ctx, opts, root, true);
-        } else if (fmt == "text") {
-            return renderText(tree.get(), ctx, root);
+            tmp->children.swap(tree->children);
+            tree->children.pushBackNew(tmp.release());
+        } else if (fmt.size() > 8 && fmt.compare(0, 8, "noquote:", 8) == 0) {
+            // noquote: remove all quotes
+            fmt.erase(0, 8);
+            tree->stripQuotes();
+        } else if (fmt.size() > 6 && fmt.compare(0, 6, "break:", 6) == 0) {
+            // render up to break
+            fmt.erase(0, 6);
+            stripBreak(tree.get());
+        } else if (fmt.size() > 6 && fmt.compare(0, 9, "abstract:", 9) == 0) {
+            // render abstract
+            fmt.erase(0, 9);
+            tree->stripQuotes();
+            Abstract().strip(tree.get());
+        } else if (fmt.size() > 6 && fmt.compare(0, 6, "force:", 6) == 0) {
+            // force: null operation just to force re-rendering
+            fmt.erase(0, 6);
         } else {
-            // error
-            return "ERROR: invalid format '" + fmt + "'";
+            break;
         }
+    }
+
+    // render it
+    String_t::size_type len;
+    server::talk::InlineRecognizer::Kinds_t set;
+    if (fmt == "html") {
+        return renderHTML(*tree, ctx, opts, root);
+    } else if (isForum(fmt, set, len) && len == fmt.size()) {
+        return renderBB(*tree, ctx, opts, root, set);
+    } else if (fmt == "mail") {
+        return renderMail(tree.get(), ctx, opts, root, false);
+    } else if (fmt == "news") {
+        return renderMail(tree.get(), ctx, opts, root, true);
+    } else if (fmt == "text") {
+        return renderText(tree.get(), ctx, root);
+    } else {
+        // error
+        return "ERROR: invalid format '" + fmt + "'";
     }
 }

@@ -9,20 +9,27 @@
 #include "afl/base/closure.hpp"
 #include "afl/base/optional.hpp"
 #include "afl/base/ref.hpp"
+#include "afl/base/uncopyable.hpp"
 #include "afl/except/commandlineexception.hpp"
 #include "afl/io/filesystem.hpp"
 #include "afl/net/http/client.hpp"
-#include "afl/net/http/defaultconnectionprovider.hpp"
+#include "afl/net/http/clientconnection.hpp"
+#include "afl/net/http/clientconnectionprovider.hpp"
 #include "afl/net/http/manager.hpp"
+#include "afl/net/securenetworkstack.hpp"
 #include "afl/net/tunnel/tunnelablenetworkstack.hpp"
 #include "afl/string/format.hpp"
+#include "afl/string/messages.hpp"
 #include "afl/string/nulltranslator.hpp"
+#include "afl/string/parse.hpp"
 #include "afl/string/proxytranslator.hpp"
 #include "afl/sys/dialog.hpp"
 #include "afl/sys/environment.hpp"
 #include "afl/sys/longcommandlineparser.hpp"
+#include "afl/sys/mutexguard.hpp"
 #include "afl/sys/thread.hpp"
 #include "afl/test/translator.hpp"
+#include "client/map/screen.hpp"
 #include "client/plugins.hpp"
 #include "client/screens/browserscreen.hpp"
 #include "client/screens/controlscreen.hpp"
@@ -36,6 +43,7 @@
 #include "game/browser/browser.hpp"
 #include "game/browser/directoryhandler.hpp"
 #include "game/game.hpp"
+#include "game/interface/vmfile.hpp"
 #include "game/nu/browserhandler.hpp"
 #include "game/pcc/browserhandler.hpp"
 #include "game/session.hpp"
@@ -73,37 +81,29 @@ namespace {
 
     const char PROGRAM_TITLE[] = "PCC2 v" PCC2_VERSION;
 
-
-    void waitForInitialisation(client::Session& clientSession, uint32_t waitId)
-    {
-        // Create a Control.
-        // This is required to allow background scripts (=plugin initialisation) to call into UI.
-        // We don't allow major interactions yet, though.
-        class NullControl : public client::si::Control {
-         public:
-            NullControl(client::Session& session)
-                : Control(session.interface(), session.root(), session.translator())
-                { }
-            virtual void handleStateChange(client::si::UserSide& ui, client::si::RequestLink2 link, client::si::OutputState::Target /*target*/)
-                { ui.continueProcessWithFailure(link, "Context error"); }
-            virtual void handleEndDialog(client::si::UserSide& ui, client::si::RequestLink2 link, int /*code*/)
-                { ui.continueProcessWithFailure(link, "Context error"); }
-            virtual void handlePopupConsole(client::si::UserSide& ui, client::si::RequestLink2 link)
-                { ui.continueProcessWithFailure(link, "Context error"); }
-            virtual client::si::ContextProvider* createContextProvider()
-                { return 0; }
-        };
-        NullControl ctl(clientSession);
-        ctl.attachPreparedWait(waitId);
-    }
-
-    class ScriptInitializer : public util::SlaveRequest<game::Session, client::si::ScriptSide> {
+    class NullControl : public client::si::Control {
      public:
-        ScriptInitializer(afl::base::Ref<afl::io::Directory> resourceDirectory, uint32_t waitId)
-            : m_resourceDirectory(resourceDirectory),
-              m_waitId(waitId)
+        NullControl(client::Session& session)
+            : Control(session.interface(), session.root(), session.translator())
             { }
-        virtual void handle(game::Session& t, client::si::ScriptSide& ss)
+        virtual void handleStateChange(client::si::UserSide& ui, client::si::RequestLink2 link, client::si::OutputState::Target /*target*/)
+            { ui.continueProcessWithFailure(link, "Context error"); }
+        virtual void handleEndDialog(client::si::UserSide& ui, client::si::RequestLink2 link, int /*code*/)
+            { ui.continueProcessWithFailure(link, "Context error"); }
+        virtual void handlePopupConsole(client::si::UserSide& ui, client::si::RequestLink2 link)
+            { ui.continueProcessWithFailure(link, "Context error"); }
+        virtual void handleSetViewRequest(client::si::UserSide& ui, client::si::RequestLink2 link, String_t /*name*/, bool /*withKeymap*/)
+            { ui.continueProcessWithFailure(link, "Context error"); }
+        virtual client::si::ContextProvider* createContextProvider()
+            { return 0; }
+    };
+
+    class ScriptInitializer : public client::si::ScriptTask {
+     public:
+        ScriptInitializer(afl::base::Ref<afl::io::Directory> resourceDirectory)
+            : m_resourceDirectory(resourceDirectory)
+            { }
+        virtual interpreter::Process* execute(uint32_t pgid, game::Session& t, Verbosity& /*v*/)
             {
                 // Configure load directory
                 t.world().setSystemLoadDirectory(m_resourceDirectory.asPtr());
@@ -113,21 +113,19 @@ namespace {
 
                 // Create process to load core.q
                 interpreter::Process& coreProcess = processList.create(t.world(), "<Core>");
-                coreProcess.pushFrame(client::createFileLoader("core.q"), false);
+                coreProcess.pushFrame(client::createFileLoader("core.q", "core.q"), false);
 
                 // Create process to load plugins
                 interpreter::Process& pluginProcess = processList.create(t.world(), "<PluginLoader>");
                 pluginProcess.pushFrame(client::createLoaderForUnloadedPlugins(t.plugins()), false);
 
-                // Execute both processes in one group
-                uint32_t pgid = processList.allocateProcessGroup();
+                // Execute both processes
                 processList.resumeProcess(coreProcess, pgid);
                 processList.resumeProcess(pluginProcess, pgid);
-                ss.executeProcessGroupWait(m_waitId, pgid, t);
+                return 0;
             }
      private:
         afl::base::Ref<afl::io::Directory> m_resourceDirectory;
-        const uint32_t m_waitId;
     };
 
     class PluginInitializer : public util::Request<game::Session> {
@@ -143,12 +141,10 @@ namespace {
                 // The plugins are loaded through the script interface, which upper-cases the names before looking them up.
                 try {
                     // Global cc-res.cfg
-                    afl::base::Ptr<afl::io::Stream> configFile = m_resourceDirectory->openFileNT("cc-res.cfg", afl::io::FileSystem::OpenRead);
-                    if (configFile.get() != 0) {
-                        std::auto_ptr<util::plugin::Plugin> plug(new util::plugin::Plugin("(GLOBAL CC-RES.CFG)"));
-                        plug->initFromConfigFile(m_profile.open()->getDirectoryName(), session.translator().translateString("Global cc-res.cfg"), *configFile);
-                        session.plugins().addNewPlugin(plug.release());
-                    }
+                    afl::base::Ref<afl::io::Stream> configFile = m_resourceDirectory->openFile("cc-res.cfg", afl::io::FileSystem::OpenRead);
+                    std::auto_ptr<util::plugin::Plugin> plug(new util::plugin::Plugin("(GLOBAL CC-RES.CFG)"));
+                    plug->initFromConfigFile(m_profile.open()->getDirectoryName(), session.translator()("Global cc-res.cfg"), *configFile);
+                    session.plugins().addNewPlugin(plug.release());
                 }
                 catch (...) { }
 
@@ -157,7 +153,7 @@ namespace {
                     afl::base::Ptr<afl::io::Stream> configFile = m_profile.openFileNT("cc-res.cfg");
                     if (configFile.get() != 0) {
                         std::auto_ptr<util::plugin::Plugin> plug(new util::plugin::Plugin("(USER CC-RES.CFG)"));
-                        plug->initFromConfigFile(m_profile.open()->getDirectoryName(), session.translator().translateString("User cc-res.cfg"), *configFile);
+                        plug->initFromConfigFile(m_profile.open()->getDirectoryName(), session.translator()("User cc-res.cfg"), *configFile);
                         session.plugins().addNewPlugin(plug.release());
                     }
                 }
@@ -322,17 +318,26 @@ namespace {
                                 }
 
                                 session.setEditableAreas(editableAreas);
-                                session.log().write(afl::sys::LogListener::Error, LOG_NAME, session.translator().translateString("Compiling starchart..."));
+                                session.log().write(afl::sys::LogListener::Error, LOG_NAME, session.translator()("Compiling starchart..."));
                                 session.getGame()->currentTurn().universe().postprocess(game::PlayerSet_t(m_player), game::PlayerSet_t(m_player), playability,
                                                                                         m_root->hostVersion(), m_root->hostConfiguration(),
                                                                                         session.getGame()->currentTurn().getTurnNumber(),
                                                                                         *session.getShipList(),
                                                                                         session.translator(), session.log());
                                 session.getGame()->currentTurn().alliances().postprocess();
+
+                                // Load VM
+                                try {
+                                    game::interface::loadVM(session, m_player);
+                                }
+                                catch (std::exception& e) {
+                                    session.log().write(afl::sys::LogListener::Error, LOG_NAME, session.translator()("Unable to scripts and auto-tasks"), e);
+                                }
+                                
                                 ok = true;
                             }
                             catch (std::exception& e) {
-                                session.log().write(afl::sys::LogListener::Error, LOG_NAME, session.translator().translateString("Unable to load turn"), e);
+                                session.log().write(afl::sys::LogListener::Error, LOG_NAME, session.translator()("Unable to load turn"), e);
                                 session.setGame(0);
                                 session.setRoot(0);
                                 session.setShipList(0);
@@ -375,6 +380,108 @@ namespace {
         util::RequestSender<game::Session> m_gameSender;
     };
 
+    class ConnectionProvider : public afl::net::http::ClientConnectionProvider,
+                               private afl::base::Stoppable,
+                               private afl::base::Uncopyable
+    {
+     public:
+        ConnectionProvider(afl::net::http::Client& client, afl::net::NetworkStack& stack)
+            : m_client(client),
+              m_networkStack(stack),
+              m_secureNetworkStack(),
+              m_wake(0),
+              m_mutex(),
+              m_stop(false),
+              m_thread("ConnectionProvider", *this)
+            { m_thread.start(); }
+        ~ConnectionProvider()
+            { }
+        void requestNewConnection()
+            { m_wake.post(); }
+     private:
+        // Thread:
+        virtual void run()
+            {
+                try {
+                    m_secureNetworkStack.reset(new afl::net::SecureNetworkStack(m_networkStack));
+                }
+                catch (std::exception& e) {
+                    // FIXME: log it
+                }
+                while (1) {
+                    // Wait for something to happen
+                    m_wake.wait();
+
+                    // Stop requested?
+                    {
+                        afl::sys::MutexGuard g(m_mutex);
+                        if (m_stop) {
+                            break;
+                        }
+                    }
+
+                    // Create requested connections
+                    afl::net::Name name;
+                    String_t scheme;
+                    while (m_client.getUnsatisfiedTarget(name, scheme)) {
+                        if (scheme == "http") {
+                            tryConnect(m_networkStack, name, scheme);
+                        } else if (scheme == "https" && m_secureNetworkStack.get() != 0) {
+                            tryConnect(*m_secureNetworkStack, name, scheme);
+                        } else {
+                            // Mismatching scheme, request cannot be fulfilled
+                            m_client.cancelRequestsByTarget(name, scheme,
+                                                            afl::net::http::ClientRequest::UnsupportedProtocol,
+                                                            afl::string::Messages::invalidUrl());
+                        }
+                    }
+                }
+            }
+        virtual void stop()
+            {
+                {
+                    afl::sys::MutexGuard g(m_mutex);
+                    m_stop = true;
+                }
+                m_wake.post();
+            }
+
+        void tryConnect(afl::net::NetworkStack& stack, const afl::net::Name& name, const String_t& scheme)
+            {
+                const uint32_t CONNECTION_TIMEOUT = 30000;
+                try {
+                    // Try connecting...
+                    afl::base::Ref<afl::net::Socket> socket = stack.connect(name, CONNECTION_TIMEOUT);
+                    m_client.addNewConnection(new afl::net::http::ClientConnection(name, scheme, socket));
+                }
+                catch (std::exception& e) {
+                    // Regular failure case
+                    m_client.cancelRequestsByTarget(name, scheme,
+                                                    afl::net::http::ClientRequest::ConnectionFailed,
+                                                    e.what());
+                }
+                catch (...) {
+                    // Irregular failure case; avoid that exceptions kill the thread
+                    m_client.cancelRequestsByTarget(name, scheme,
+                                                    afl::net::http::ClientRequest::ConnectionFailed,
+                                                    afl::string::Messages::unknownError());
+                }
+            }
+
+        // Integration:
+        afl::net::http::Client& m_client;
+        afl::net::NetworkStack& m_networkStack;
+        std::auto_ptr<afl::net::SecureNetworkStack> m_secureNetworkStack;
+
+        // Work:
+        afl::sys::Semaphore m_wake;
+        afl::sys::Mutex m_mutex;
+        bool m_stop;
+
+        // Thread: must be last
+        afl::sys::Thread m_thread;
+    };
+
 
     class RootOptions {
      public:
@@ -387,14 +494,14 @@ namespace {
             {
                 m_params.size = gfx::Point(800, 600);
                 m_params.bitsPerPixel = 32;
-                m_params.title = m_translator.translateString("Planets Command Center II (c2ng)");
+                m_params.title = m_translator("Planets Command Center II (c2ng)");
             }
         String_t getHelp()
             {
-                return m_translator.translateString("-fullscreen"     "\tRun fullscreen\n"
-                                                    "-windowed"       "\tRun in a window\n"
-                                                    "-bpp=N"          "\tUse color depth of N bits per pixel\n"
-                                                    "-size=W[xH]"     "\tUse resolution of WxH pixels\n");
+                return m_translator("-fullscreen"     "\tRun fullscreen\n"
+                                    "-windowed"       "\tRun in a window\n"
+                                    "-bpp=N"          "\tUse color depth of N bits per pixel\n"
+                                    "-size=W[xH]"     "\tUse resolution of WxH pixels\n");
             }
         bool handleOption(const String_t& option, afl::sys::CommandLineParser& parser)
             {
@@ -410,10 +517,10 @@ namespace {
                     util::StringParser sp(parser.getRequiredParameter(option));
                     int bpp = 0;
                     if (!sp.parseInt(bpp) || !sp.parseEnd()) {
-                        throw afl::except::CommandLineException(m_translator.translateString("Invalid parameter to \"-bpp\""));
+                        throw afl::except::CommandLineException(m_translator("Invalid parameter to \"-bpp\""));
                     }
                     if (bpp != 8 && bpp != 16 && bpp != 32) {
-                        throw afl::except::CommandLineException(m_translator.translateString("Parameter to \"-bpp\" must be 8, 16 or 32"));
+                        throw afl::except::CommandLineException(m_translator("Parameter to \"-bpp\" must be 8, 16 or 32"));
                     }
                     m_params.bitsPerPixel = bpp;
                     return true;
@@ -425,21 +532,21 @@ namespace {
                     util::StringParser sp(parser.getRequiredParameter(option));
                     int w = 0, h = 0;
                     if (!sp.parseInt(w)) {
-                        throw afl::except::CommandLineException(m_translator.translateString("Invalid parameter to \"-size\""));
+                        throw afl::except::CommandLineException(m_translator("Invalid parameter to \"-size\""));
                     }
                     if (sp.parseCharacter('X') || sp.parseCharacter('x') || sp.parseCharacter('*')) {
                         if (!sp.parseInt(h)) {
-                            throw afl::except::CommandLineException(m_translator.translateString("Invalid parameter to \"-size\""));
+                            throw afl::except::CommandLineException(m_translator("Invalid parameter to \"-size\""));
                         }
                     } else {
                         // FIXME: PCC2 had a special case to recognize 1200 as 1200x1024, which is the only non-4:3 resolution.
                         h = 3*w/4;
                     }
                     if (!sp.parseEnd()) {
-                        throw afl::except::CommandLineException(m_translator.translateString("Invalid parameter to \"-size\""));
+                        throw afl::except::CommandLineException(m_translator("Invalid parameter to \"-size\""));
                     }
                     if (w < MIN_WIDTH || h < MIN_HEIGHT || w > MAX_DIM || h > MAX_DIM) {
-                        throw afl::except::CommandLineException(m_translator.translateString("Parameter to \"-size\" is out of range"));
+                        throw afl::except::CommandLineException(m_translator("Parameter to \"-size\" is out of range"));
                     }
                     m_params.size = gfx::Point(w, h);
                     return true;
@@ -465,7 +572,8 @@ namespace {
               m_gameDirectory(),
               m_proxyAddress(),
               m_commandLineResources(),
-              m_translator(tx)
+              m_translator(tx),
+              m_requestThreadDelay(0)
             { }
 
         void parse(afl::base::Ref<afl::sys::Environment::CommandLine_t> cmdl, afl::sys::Dialog& dialog)
@@ -483,8 +591,14 @@ namespace {
                             m_proxyAddress = parser.getRequiredParameter(text);
                         } else if (text == "help") {
                             doHelp(dialog);
+                        } else if (text == "debug-request-delay") {
+                            int value = 0;
+                            if (!afl::string::strToInteger(parser.getRequiredParameter(text), value) || value < 0) {
+                                throw afl::except::CommandLineException(afl::string::Format(m_translator("Invalid argument to command line parameter \"-%s\""), text));
+                            }
+                            m_requestThreadDelay = value;
                         } else {
-                            throw afl::except::CommandLineException(afl::string::Format(m_translator.translateString("Unknown command line parameter \"-%s\"").c_str(), text));
+                            throw afl::except::CommandLineException(afl::string::Format(m_translator("Unknown command line parameter \"-%s\""), text));
                         }
                     } else {
                         if (!m_haveGameDirectory) {
@@ -496,6 +610,9 @@ namespace {
                     }
                 }
             }
+
+        int getRequestThreadDelay() const
+            { return m_requestThreadDelay; }
 
         bool getGameDirectory(String_t& dir)
             {
@@ -511,15 +628,15 @@ namespace {
             {
                 String_t help = PROGRAM_TITLE;
                 help += "\n\n";
-                help += m_translator.translateString("Usage: c2ng [-options] gamedir");
+                help += m_translator("Usage: c2ng [-options] gamedir");
                 help += "\n\n";
-                help += m_translator.translateString("Options:");
+                help += m_translator("Options:");
                 help += "\n";
-                help += util::formatOptions(m_translator.translateString("-resource=NAME\tAdd resource provider\n"
-                                                                         "-proxy=URL\tSet network proxy\n")
+                help += util::formatOptions(m_translator("-resource=NAME\tAdd resource provider\n"
+                                                         "-proxy=URL\tSet network proxy\n")
                                             + m_rootOptions.getHelp());
                 help += "\n";
-                help += m_translator.translateString("(c) copyright 2017-2018 Stefan Reuther <streu@gmx.de>");
+                help += m_translator("(c) copyright 2017-2019 Stefan Reuther <streu@gmx.de>");
                 help += "\n";
                 dialog.showInfo(help, PROGRAM_TITLE);
                 std::exit(0);
@@ -541,6 +658,7 @@ namespace {
         afl::base::Optional<String_t> m_proxyAddress;
         std::vector<String_t> m_commandLineResources;
         afl::string::Translator& m_translator;
+        int m_requestThreadDelay;
     };
 
     afl::base::Ref<gfx::Canvas> generateGameBackground(afl::sys::LogListener& log, gfx::Point size, afl::string::Translator& tx)
@@ -550,7 +668,7 @@ namespace {
         gfx::gen::OrbitConfig config;
         config.setSize(size);
         afl::base::Ref<gfx::Canvas> result = config.render(rng)->makeCanvas();
-        log.write(log.Trace, LOG_NAME, afl::string::Format(tx.translateString("Rendered game background in %d ms").c_str(), afl::sys::Time::getTickCounter() - ticks));
+        log.write(log.Trace, LOG_NAME, afl::string::Format(tx("Rendered game background in %d ms"), afl::sys::Time::getTickCounter() - ticks));
         return result;
     }
 
@@ -562,7 +680,7 @@ namespace {
         cfg.setSize(size);
         cfg.setNumSuns(0);
         afl::base::Ref<gfx::Canvas> result = cfg.render(rng)->makeCanvas();
-        log.write(log.Trace, LOG_NAME, afl::string::Format(tx.translateString("Rendered browser background in %d ms").c_str(), afl::sys::Time::getTickCounter() - ticks));
+        log.write(log.Trace, LOG_NAME, afl::string::Format(tx("Rendered browser background in %d ms"), afl::sys::Time::getTickCounter() - ticks));
         return result;
     }
 
@@ -614,6 +732,16 @@ namespace {
                 in.setProcess(out.getProcess());
                 state = out.getTarget();
                 break;
+
+             case OutputState::Starchart:
+                client::map::Screen(session.interface(),
+                                    session.root(),
+                                    session.translator(),
+                                    session.gameSender()).run(in, out);
+                in = InputState();
+                in.setProcess(out.getProcess());
+                state = out.getTarget();
+                break;
             }
         }
     }
@@ -660,7 +788,7 @@ namespace {
 
                 // Set up GUI
                 // - objects
-                log().write(log().Debug, LOG_NAME, translator().translateString("Starting GUI..."));
+                log().write(log().Debug, LOG_NAME, translator()("Starting GUI..."));
                 ui::res::Manager mgr;
                 mgr.addNewImageLoader(new ui::res::EngineImageLoader(engine));
                 mgr.addNewImageLoader(new ui::res::CCImageLoader());
@@ -685,10 +813,10 @@ namespace {
 
                 // Set up HTTP
                 // FIXME: do this here? We would have to do this elsewhere if it takes time; like, for loading config files.
-                log().write(afl::sys::Log::Debug, LOG_NAME, translator().translateString("Starting network..."));
+                log().write(afl::sys::Log::Debug, LOG_NAME, translator()("Starting network..."));
                 afl::net::http::Client client;
                 afl::sys::Thread clientThread("http", client);
-                client.setNewConnectionProvider(new afl::net::http::DefaultConnectionProvider(client, net));
+                client.setNewConnectionProvider(new ConnectionProvider(client, net));
                 clientThread.start();
                 afl::net::http::Manager httpManager(client);
 
@@ -696,7 +824,7 @@ namespace {
                 // This thread may now do nothing else than GUI.
                 // All I/O accesses must from now on go through a background thread.
                 // Set up session objects. None of these constructors block (I hope).
-                log().write(afl::sys::Log::Debug, LOG_NAME, translator().translateString("Starting background thread..."));
+                log().write(afl::sys::Log::Debug, LOG_NAME, translator()("Starting background thread..."));
                 game::browser::Session browserSession(translator(), log());
                 game::Session gameSession(translator(), fs);
                 gameSession.log().addListener(log());
@@ -706,7 +834,7 @@ namespace {
 
                 // Set up background thread and request receivers.
                 // These must be after the session objects so that they die before them, allowing final requests to finish.
-                util::RequestThread backgroundThread("game.background", log());
+                util::RequestThread backgroundThread("game.background", log(), params.getRequestThreadDelay());
                 util::RequestReceiver<game::browser::Session> browserReceiver(backgroundThread, browserSession);
                 util::RequestReceiver<game::Session> gameReceiver(backgroundThread, gameSession);
 
@@ -715,9 +843,7 @@ namespace {
 
                 // Initialize by posting requests to the background thread.
                 // (This will not take time.)
-                uint32_t scriptWaitId = clientSession.interface().allocateWaitId();
                 gameReceiver.getSender().postNewRequest(new PluginInitializer(resourceDirectory, profile, params.getCommandLineResources()));
-                clientSession.interface().postNewRequest(new ScriptInitializer(resourceDirectory, scriptWaitId));
                 browserReceiver.getSender().postNewRequest(new BrowserInitializer(fs, defaultSpecDirectory, profile, httpManager));
                 {
                     String_t initialGameDirectory;
@@ -726,9 +852,15 @@ namespace {
                     }
                 }
 
-                // Wait for completion of initialisation
-                waitForInitialisation(clientSession, scriptWaitId);
-                log().write(afl::sys::Log::Debug, LOG_NAME, translator().translateString("Initialisation complete"));
+                // Script initialisation, wait for completion
+                // (The NullControl will make us essentially responsive to UI from scripts.)
+                {
+                    NullControl ctl(clientSession);
+                    std::auto_ptr<client::si::ScriptTask> t(new ScriptInitializer(resourceDirectory));
+                    ctl.executeTaskWait(t);
+                }
+
+                log().write(afl::sys::Log::Debug, LOG_NAME, translator()("Initialisation complete"));
 
                 // Start game browser
                 // FIXME: wrap this loop in a try/catch
@@ -738,12 +870,10 @@ namespace {
                     // Helpful information
                     ui::rich::DocumentView docView(root.getExtent().getSize(), 0, root.provider());
                     docView.setExtent(gfx::Rectangle(gfx::Point(0, 0), docView.getLayoutInfo().getPreferredSize()));
-                    docView.getDocument().add(util::rich::Parser::parseXml("<big>PCC2ng Milestone Five</big>"));
-                    docView.getDocument().addNewline();
-                    docView.getDocument().add(util::rich::Parser::parseXml("- Let's Get Dangerous -"));
+                    docView.getDocument().add(util::rich::Parser::parseXml("<big>PCC2ng Milestone Six</big>"));
                     docView.getDocument().addNewline();
                     docView.getDocument().addNewline();
-                    docView.getDocument().add(util::rich::Parser::parseXml("<font color=\"dim\">&#xA9; 2017-2018 Stefan Reuther &lt;streu@gmx.de&gt;</font>"));
+                    docView.getDocument().add(util::rich::Parser::parseXml("<font color=\"dim\">&#xA9; 2017-2019 Stefan Reuther &lt;streu@gmx.de&gt;</font>"));
                     docView.getDocument().addNewline();
                     docView.getDocument().finish();
                     docView.handleDocumentUpdate();
@@ -759,6 +889,7 @@ namespace {
                     if (result != 0) {
                         // OK, play
                         play(clientSession);
+                        clientSession.interface().reset();
                     } else {
                         // Close
                         break;

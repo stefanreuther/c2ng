@@ -112,7 +112,7 @@ namespace game { namespace interface {
         \param root      Root (needed for configuration)
         \param shipList  Ship list (needed for specifications)
         \param game      Game (needed for unit score definitions)
-        \param turn      Turn (needed for related units to name locations; cannot be const because name accessors are not const)
+        \param turn      Turn (needed for related units to name locations)
         \return property value */
     afl::data::Value* getShipProperty(const game::map::Ship& sh, ShipProperty isp,
                                       afl::string::Translator& tx,
@@ -120,11 +120,11 @@ namespace game { namespace interface {
                                       afl::base::Ref<const Root> root,
                                       afl::base::Ref<const game::spec::ShipList> shipList,
                                       afl::base::Ref<const Game> game,
-                                      afl::base::Ref<Turn> turn);
+                                      afl::base::Ref<const Turn> turn);
     void setShipProperty(game::map::Ship& sh, ShipProperty isp, afl::data::Value* value,
-                         afl::base::Ref<Root> root,
-                         afl::base::Ref<game::spec::ShipList> shipList,
-                         afl::base::Ref<Turn> turn);
+                         Root& root,
+                         game::spec::ShipList& shipList,
+                         Turn& turn);
 
 } }
 

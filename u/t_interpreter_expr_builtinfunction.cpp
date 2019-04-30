@@ -297,7 +297,7 @@ TestInterpreterExprBuiltinFunction::testMinMax()
     h.checkIntegerExpression("strcase(if(max(-1,0),99,22))", 22);
     h.checkIntegerExpression("if(strcase(max(-1,0));1,99,22)", 99);
     h.checkBadExpression("strcase(max(1,2)):=3");
-    
+
     // Strings
     h.checkStringExpression("min('h','a','l','l','o')", "a");
     h.checkStringExpression("max('h','a','l','l','o')", "o");
@@ -598,7 +598,7 @@ TestInterpreterExprBuiltinFunction::testSubstr()
     h.checkIntegerExpression("if(mid('foobar',3,1),8,2)",8);
     h.checkIntegerExpression("if(mid('foobar',30,1);1,8,2)",8);
     h.checkBadExpression("mid('foobar',2,1):='a'");                 // FIXME: This may get legalized someday
-    
+
     // Left
     h.checkStringExpression("left('foobar',-3)", "");
     h.checkStringExpression("left('foobar',-2)", "");
@@ -1099,6 +1099,11 @@ TestInterpreterExprBuiltinFunction::testEval()
     h.checkIntegerExpression("if(eval(1),2,3)", 2);
     h.checkIntegerExpression("if(eval(0);1,2,3)", 2);
     h.checkBadExpression("eval(1):=2");
+
+    // Two-argument forms
+    // FIXME: cannot test the actual eval(expr,context) form yet
+    h.checkNullExpression("eval('1',z(0))");
+    h.checkFailureExpression("eval('1',1)");
 }
 
 /** Test miscellaneous. */

@@ -8,6 +8,7 @@
 #include "gfx/point.hpp"
 #include "afl/string/string.hpp"
 #include "afl/base/deletable.hpp"
+#include "afl/functional/mapping.hpp"
 
 namespace gfx {
 
@@ -33,6 +34,8 @@ namespace gfx {
         int getEmWidth();
         int getLineHeight();
         Point getCellSize();
+
+        int getMaxTextWidth(const afl::functional::Mapping<int,String_t>& tab);
     };
 
     void outText(BaseContext& ctx, Point pt, String_t text);

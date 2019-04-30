@@ -123,6 +123,10 @@ client::si::IFWidgetRun(game::Session& session, ScriptSide& ss, const WidgetRefe
                 // FIXME
                 us.continueProcess(link);
             }
+        virtual void handleSetViewRequest(UserSide& ui, RequestLink2 link, String_t name, bool withKeymap)
+            {
+                defaultHandleSetViewRequest(ui, link, name, withKeymap);
+            }
         virtual ContextProvider* createContextProvider()
             {
                 return new RunContextProvider(m_link);

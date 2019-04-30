@@ -90,6 +90,10 @@ namespace {
            EMPTY if the current screen has no iterator.
            @since PCC2 2.40 */
         { "UI.ITERATOR",           game::interface::iuiIterator,          UIPropertyDomain,       interpreter::thNone },
+        /* @q UI.Keymap:Str (Global Property)
+           Name of the current keymap.
+           @since PCC2 2.40.6 */
+        { "UI.KEYMAP",             game::interface::iuiKeymap,            UIPropertyDomain,       interpreter::thString },
         /* @q UI.Screen:Int (Global Property)
            Number of current screen. See {UI.GotoScreen} for a list.
            0 if no control screen is active.

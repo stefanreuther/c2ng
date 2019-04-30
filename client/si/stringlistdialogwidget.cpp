@@ -15,6 +15,7 @@
 #include "ui/layout/hbox.hpp"
 #include "ui/widgets/button.hpp"
 #include "ui/widgets/standarddialogbuttons.hpp"
+#include "ui/widgets/scrollbar.hpp"
 
 // Constructor.
 client::si::StringListDialogWidget::StringListDialogWidget(gfx::ResourceProvider& provider, ui::ColorScheme& scheme,
@@ -48,10 +49,10 @@ client::si::StringListDialogWidget::run(ui::Root& root)
     ui::Window& w = h.addNew(new ui::Window(m_dialogTitle, root.provider(), root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
     ui::widgets::FrameGroup& listGroup = h.addNew(new ui::widgets::FrameGroup(ui::layout::HBox::instance0, root.colorScheme(), ui::widgets::FrameGroup::LoweredFrame));
     listGroup.add(*this);
-    // FIXME: scrollbar
     // FIXME: the following assumes we get as many lines from layout as we request.
-    // if (getSize() > lines)
-    //     list_group.add(h.add(new UIScrollbar(*this)));
+    if (getLayoutInfo().getPreferredSize().getY() < int(getNumItems()) * getItemHeight(0)) {
+        listGroup.add(h.addNew(new ui::widgets::Scrollbar(*this, root)));
+    }
     w.add(listGroup);
 
     ui::widgets::StandardDialogButtons& btns = h.addNew(new ui::widgets::StandardDialogButtons(root));

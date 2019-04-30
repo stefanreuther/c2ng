@@ -50,6 +50,10 @@ ui::widgets::MenuFrame::draw(gfx::Canvas& can)
     defaultDrawChildren(can);
 }
 
+void
+ui::widgets::MenuFrame::handleStateChange(State /*st*/, bool /*enable*/)
+{ }
+
 bool
 ui::widgets::MenuFrame::handleKey(util::Key_t key, int prefix)
 {

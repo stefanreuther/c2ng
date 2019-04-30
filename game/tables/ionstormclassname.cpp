@@ -13,15 +13,15 @@ game::tables::IonStormClassName::get(int32_t voltage) const
 {
     // ex game/tables.h:getIonStormClassName
     if (voltage < 50) {
-        return m_translator.translateString("harmless");
+        return m_translator("harmless");
     } else if (voltage < 100) {
-        return m_translator.translateString("moderate");
+        return m_translator("moderate");
     } else if (voltage < 150) {
-        return m_translator.translateString("strong");
+        return m_translator("strong");
     } else if (voltage < 200) {
-        return m_translator.translateString("dangerous");
+        return m_translator("dangerous");
     } else {
-        return m_translator.translateString("VERY dangerous");
+        return m_translator("VERY dangerous");
     }
 }
 

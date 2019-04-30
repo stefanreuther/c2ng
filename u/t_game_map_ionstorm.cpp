@@ -22,7 +22,7 @@ TestGameMapIonStorm::testIt()
 
     // Test initial state
     game::map::IonStorm i(3);
-    TS_ASSERT_EQUALS(i.getName(game::map::Object::PlainName, tx, iface), "Ion storm #3");
+    TS_ASSERT_EQUALS(i.getName(game::PlainName, tx, iface), "Ion storm #3");
     TS_ASSERT_EQUALS(i.getId(), 3);
     TS_ASSERT_EQUALS(i.getOwner(n), true);
     TS_ASSERT_EQUALS(n, 0);
@@ -46,9 +46,9 @@ TestGameMapIonStorm::testIt()
     i.setIsGrowing(true);
 
     // Verify
-    TS_ASSERT_EQUALS(i.getName(game::map::Object::PlainName, tx, iface), "Klothilde");
-    TS_ASSERT_EQUALS(i.getName(game::map::Object::LongName, tx, iface), "Ion storm #3: Klothilde");
-    TS_ASSERT_EQUALS(i.getName(game::map::Object::DetailedName, tx, iface), "Ion storm #3: Klothilde");
+    TS_ASSERT_EQUALS(i.getName(game::PlainName, tx, iface), "Klothilde");
+    TS_ASSERT_EQUALS(i.getName(game::LongName, tx, iface), "Ion storm #3: Klothilde");
+    TS_ASSERT_EQUALS(i.getName(game::DetailedName, tx, iface), "Ion storm #3: Klothilde");
     TS_ASSERT_EQUALS(i.getId(), 3);
     TS_ASSERT_EQUALS(i.getOwner(n), true);
     TS_ASSERT_EQUALS(n, 0);

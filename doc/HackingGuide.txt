@@ -13,10 +13,9 @@ PCC2ng HACKING GUIDE
   - Memory Management
   - Graphics Primitives
   - Source Code Structure
-  - Naming Conventions
+  - Coding Conventions
   - Scripting
   - Character Sets
-  - Modules
   - Terms
 
 
@@ -104,36 +103,6 @@ Building on Windows (mingw)
 
 
 
-Key differences to PCC2
-=======================
-
-  No global variables with state. A global stateless instance is ok
-  (such as ui::layout::HBox::instance5), a global config file is not.
-
-  Use C++2003. Namespaces, templates, STL, and multiple inheritance
-  are no longer rocket science as they were when PCC2 started. Staying
-  with C++2003 allows us to use the same toolchains used to build it
-  like we used for PCC2, and thus produce very portable binaries.
-  Changing to C++11 or newer is low priority, but will happen when a
-  similarily-portable build environment can be produced.
-
-  Assume a modern OS. File names need no longer (try to) be 8.3
-  conformant. Threads are available. Object file naming conflicts are
-  solved by the build systems. Objects larger than 64k are possible
-  (but don't overdo it).
-
-  Use the "afl" OS abstractions. This replaces the whacky "cpluslib"
-  and "arch" modules from PCC2.
-
-  Do not access global instances of afl objects (FileSystem,
-  Environment, NetworkStack). Instead, have your main function hand
-  them to you.
-
-  Design for testability. Most of the testability is actually already
-  obtained by following the "no globals" policy.
-
-
-
 Initialisation
 ==============
 
@@ -172,6 +141,7 @@ Threads
   - main thread (UI)
   - session thread (game)
   - optional infrastructure threads (e.g., HTTP, resource loading)
+  - optional worker threads (e.g. multi-threaded simulator)
 
 
 Communication and Locking
@@ -209,6 +179,8 @@ Communication and Locking
       slave object. Create a SlaveRequestSender and use that to
       communicate with the slave object.
 
+  A bunch of classes to implement these patterns is implemented in
+  client::proxy.
 
 
 Data Structures
@@ -229,8 +201,8 @@ Data Structures
 
 
 
-Maybe types and Data Validity
------------------------------
+Optional types and Data Validity
+--------------------------------
 
   All properties of units are exported as Optional types. Those differ
   from PCC2's Maybe by having a cleaner interface; you cannot forget
@@ -486,10 +458,13 @@ Makefiles
 
 
 
-Naming Conventions
+Coding Conventions
 ==================
 
-  FooBar           class/struct
+Naming
+------
+
+  FooBar           class/struct, enum member
 
   FooBar_t         typedef
 
@@ -503,6 +478,56 @@ Naming Conventions
 
   As per common convention, the directory name matches the namespace
   of a component, and the file name matches the class name, if any.
+
+
+General Style
+-------------
+
+  (Note that I'm working in automotive, maybe this shines through :)
+
+  Indentation with four spaces, 1TBS; sub-statements fully braced.
+  Doxygen comments.
+
+  Check all pointers received from other classes. Use references if
+  possible to avoid the need for pointer checks. Convert a smart
+  pointer or reference to a dumb one only for short-lived objects.
+
+  Code should be warning-free (including -Wall -Wextra -Wconversion).
+
+  Do not override a virtual method that your parent class already
+  implemented. Corollary: do not implement a virtual method with the
+  intend of a descendant overriding it again. This makes it ambiguous
+  whether/when/how the descendant needs to call the inherited method.
+  A signal typically is a better way to implement optional callouts.
+  Default behaviour can be implemented in a method that the descendant
+  calls (see for example ui::Widget::defaultHandleKey).
+
+  No global variables with state. A global stateless instance is ok
+  (such as ui::layout::HBox::instance5), a global config file is not.
+  Don't access other modules' globals when initializing yours (static
+  initialisation order fiasco).
+
+  Use C++2003. Namespaces, templates, STL, and multiple inheritance
+  are no longer rocket science as they were when PCC2 started. Staying
+  with C++2003 allows us to use the same toolchains used to build it
+  like we used for PCC2, and thus produce very portable binaries.
+  Changing to C++11 or newer is low priority, but will happen when a
+  similarily-portable build environment can be produced.
+
+  Assume a modern OS. File names need no longer (try to) be 8.3
+  conformant. Threads are available. Object file naming conflicts are
+  solved by the build systems. Objects larger than 64k are possible
+  (but don't overdo it).
+
+  Use the "afl" OS abstractions. This replaces the whacky "cpluslib"
+  and "arch" modules from PCC2.
+
+  Do not access global instances of afl objects (FileSystem,
+  Environment, NetworkStack, Translator). Instead, have your main
+  function hand them to you.
+
+  Design for testability. Most of the testability is actually already
+  obtained by following the "no globals" policy.
 
 
 
@@ -526,8 +551,8 @@ Lifetimes
 
   All scripting information lives in an interpreter::World, which in
   turn lives in a game::Session. Conversely, no script object can
-  legally outlive its World or Session, and can thus happily carry
-  dumb references around.
+  legally outlive its World or Session; it can thus happily carry
+  dumb references to those around.
 
   The game::Session keeps smart pointers to a game::Root,
   game::ShipList, and game::Game. Script objects must therefore keep

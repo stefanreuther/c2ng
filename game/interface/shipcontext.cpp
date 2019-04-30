@@ -204,7 +204,7 @@ namespace {
         virtual void call(interpreter::Process& proc, interpreter::Arguments& a)
             {
                 if (game::map::Ship* sh = m_turn->universe().ships().get(m_id)) {
-                    game::interface::callShipMethod(*sh, m_method, a, proc, m_session, m_root, m_shipList, m_turn);
+                    game::interface::callShipMethod(*sh, m_method, a, proc, m_session, *m_root, *m_shipList, *m_turn);
                 }
             }
 
@@ -257,7 +257,7 @@ game::interface::ShipContext::set(PropertyIndex_t index, afl::data::Value* value
             // Builtin property
             switch (ShipDomain(ship_mapping[index].domain)) {
              case ShipPropertyDomain:
-                setShipProperty(*sh, ShipProperty(ship_mapping[index].index), value, m_root, m_shipList, m_game->currentTurn());
+                setShipProperty(*sh, ShipProperty(ship_mapping[index].index), value, *m_root, *m_shipList, m_game->currentTurn());
                 break;
              case HullPropertyDomain:
              case ComponentPropertyDomain:

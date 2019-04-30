@@ -241,9 +241,11 @@ namespace interpreter {
             The bytecode is independent from the execution context and can be executed when desired.
             (World is needed for logging, file access, and special commands.)
             \param file File to compile
+            \param origin Origin
+            \param level Optimisation level
             \return newly-allocated byte code
             \throw Error on error */
-        BCORef_t compileFile(afl::io::Stream& file);
+        BCORef_t compileFile(afl::io::Stream& file, const String_t& origin, int level);
 
         /** Compile a command.
             This is a shortcut to compile a fire-and-forget command that does not produce a result.

@@ -116,6 +116,12 @@ server::mailout::MailQueue::runQueue()
     }
 }
 
+server::interface::MailQueue::UserStatus
+server::mailout::MailQueue::getUserStatus(String_t user)
+{
+    return m_root.getUserStatus(user);
+}
+
 server::mailout::Message&
 server::mailout::MailQueue::currentMessage()
 {

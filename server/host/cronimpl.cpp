@@ -241,6 +241,7 @@ server::host::CronImpl::CronImpl(Root& root, util::ProcessRunner& runner)
       m_wake(0),
       m_stopFlag(false),
       m_changedGames(),
+      m_suspendUntil(0),
       m_futureEvents(),
       m_dueEvents()
 {
@@ -311,6 +312,21 @@ server::host::CronImpl::handleGameChange(int32_t gameId)
     {
         afl::sys::MutexGuard g(m_mutex);
         m_changedGames.push_back(gameId);
+    }
+    m_wake.post();
+}
+
+// Suspend scheduler.
+void
+server::host::CronImpl::suspendScheduler(Time_t absTime)
+{
+    m_root.log().write(afl::sys::LogListener::Info, LOG_NAME, afl::string::Format("suspend until %d", absTime));
+    {
+        afl::sys::MutexGuard g(m_mutex);
+        for (std::list<Event_t>::const_iterator p = m_futureEvents.begin(); p != m_futureEvents.end(); ++p) {
+            m_changedGames.push_back(p->gameId);
+        }
+        m_suspendUntil = absTime;
     }
     m_wake.post();
 }
@@ -488,6 +504,8 @@ server::host::CronImpl::generateInitialSchedule()
         }
     }
 
+    adjustForSuspension(m_futureEvents);
+
     m_futureEvents.sort(ByTime());
 }
 
@@ -525,6 +543,10 @@ server::host::CronImpl::processRequests()
         }
         if (!result.empty()) {
             logAction("updated", result.front());
+
+            // Adjust for suspension: outside mutex to avoid having two mutexes;
+            // after logAction to see both times (updated+deferred).
+            adjustForSuspension(result);
         }
 
         // Update global schedule: replace this game's old schedule item with a
@@ -578,6 +600,8 @@ server::host::CronImpl::runDueItem(const int32_t gameId, std::list<Event_t>& new
         m_root.gameRoot().subtree(gameId).hashKey("settings").intField("hostRunNow").remove();
     }
 
+    adjustForSuspension(newSchedule);
+
     if (newSchedule.empty() || newSchedule.front().time > now) {
         // Schedule is no longer current, event happens in the future.
         // This happens, for example, when
@@ -610,6 +634,29 @@ server::host::CronImpl::runDueItem(const int32_t gameId, std::list<Event_t>& new
     {
         afl::sys::MutexGuard g(m_root.mutex());
         computeGameTimes(now, m_root, gameId, newSchedule);
+        adjustForSuspension(newSchedule);
+    }
+}
+
+void
+server::host::CronImpl::adjustForSuspension(std::list<Event_t>& newSchedule)
+{
+    afl::sys::MutexGuard g(m_mutex);
+    for (std::list<Event_t>::iterator it = newSchedule.begin(); it != newSchedule.end(); ++it) {
+        switch (it->action) {
+         case HostCron::UnknownAction:
+         case HostCron::NoAction:
+         case HostCron::ScheduleChangeAction:
+            break;
+
+         case HostCron::HostAction:
+         case HostCron::MasterAction:
+            if (m_suspendUntil > it->time) {
+                it->time = m_suspendUntil;
+                logAction("deferred", *it);
+            }
+            break;
+        }
     }
 }
 

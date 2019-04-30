@@ -13,6 +13,11 @@ class TestServerCommonRaceNames : public CxxTest::TestSuite {
     void testError();
 };
 
+class TestServerCommonRandomIdGenerator : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
 class TestServerCommonRoot : public CxxTest::TestSuite {
  public:
     void testIt();
@@ -37,6 +42,11 @@ class TestServerCommonSessionProtocolHandlerFactory : public CxxTest::TestSuite 
 class TestServerCommonUser : public CxxTest::TestSuite {
  public:
     void testRealName();
+};
+
+class TestServerCommonutil : public CxxTest::TestSuite {
+ public:
+    void testSimplifyUserName();
 };
 
 #endif

@@ -71,7 +71,7 @@ game::map::Ufo::~Ufo()
 
 // Object:
 String_t
-game::map::Ufo::getName(Name which, afl::string::Translator& tx, InterpreterInterface& /*iface*/) const
+game::map::Ufo::getName(ObjectName which, afl::string::Translator& tx, InterpreterInterface& /*iface*/) const
 {
     // ex GUfo::getName
     switch (which) {

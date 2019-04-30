@@ -1,0 +1,10 @@
+/*!
+     \namespace server::console
+     \brief c2console utility
+
+     This namespace contains the c2console utility.
+     c2console allows accessing PlanetsCentral servers from the command line.
+
+     Entry point:
+     - server::console::ConsoleApplication
+ */

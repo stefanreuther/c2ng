@@ -1,5 +1,6 @@
 /**
   *  \file server/interface/talkthread.hpp
+  *  \brief Interface server::interface::TalkThread
   */
 #ifndef C2NG_SERVER_INTERFACE_TALKTHREAD_HPP
 #define C2NG_SERVER_INTERFACE_TALKTHREAD_HPP
@@ -7,49 +8,68 @@
 #include "afl/base/deletable.hpp"
 #include "afl/base/memory.hpp"
 #include "afl/base/types.hpp"
-#include "afl/string/string.hpp"
 #include "afl/data/value.hpp"
+#include "afl/string/string.hpp"
 #include "server/interface/talkforum.hpp"
 #include "server/types.hpp"
 
 namespace server { namespace interface {
 
+    /** Talk Thread Interface.
+        This interface allows access and manipulation of forum threads.
+
+        Forum threads are created by using TalkPost::create().
+        Threads contain a hierarchy of postings.
+        A thread can be sticky to allow the user interface to keep it on top even if there are other newer threads. */
     class TalkThread : public afl::base::Deletable {
      public:
         typedef TalkForum::ListParameters ListParameters;
 
+        /** Information about a thread. */
         struct Info {
-            String_t subject;
-            int32_t forumId;
-            int32_t firstPostId;
-            int32_t lastPostId;
-            Time_t lastTime;
-            bool isSticky;
+            String_t subject;       ///< Thread subject (plain text).
+            int32_t forumId;        ///< Containing forum's Id.
+            int32_t firstPostId;    ///< First (oldest) posting in this thread.
+            int32_t lastPostId;     ///< Last (newest) posting in this thread.
+            Time_t lastTime;        ///< Time of last posting in this thread.
+            bool isSticky;          ///< True if thread is sticky.
         };
 
-        // @q THREADSTAT thread:TID (Talk Command)
-        // @retval TalkThreadInfo information about thread
+        /** Get information about a forum thread (THREADSTAT).
+            \param threadId thread Id
+            \return information */
         virtual Info getInfo(int32_t threadId) = 0;
 
-        // @q THREADMSTAT thread:TID... (Talk Command)
-        // @retval TalkThreadInfo[] information
+        /** Get information about multiple forum threads (THREADMSTAT).
+            \param [in] threadId List of thread Ids
+            \param [out] result Receives information */
         virtual void getInfo(afl::base::Memory<const int32_t> threadIds, afl::container::PtrVector<Info>& result) = 0;
 
-        // @q THREADLSPOST thread:TID [listParameters...] (Talk Command)
+        /** List postings in a thread (THREADLSPOST).
+            \param threadIds Thread Ids
+            \param params List parameters
+            \return Newly-allocated value, as determined by parameters (can be single value or list) */
         virtual afl::data::Value* getPosts(int32_t threadId, const ListParameters& params) = 0;
 
-        // @q THREADSTICKY thread:TID flag:Int (Talk Command)
+        /** Set thread stickyness (THREADSTICKY).
+            \param threadId thread Id
+            \param flag Stickiness flag */
         virtual void setSticky(int32_t threadId, bool flag) = 0;
 
-        // @q THREADPERMS thread:TID [perm:Str ...] (Talk Command)
-        // @retval Int permissions
+        /** Get thread permissions (THREADPERMS).
+            \param threadId thread Id
+            \param permissions List of permission names to query
+            \return bitfield */
         virtual int getPermissions(int32_t threadId, afl::base::Memory<const String_t> permissionList) = 0;
 
-        // @q THREADMV thread:TID forum:FID (Talk Command)
+        /** Move thread to another forum (THREADMV).
+            \param threadId thread Id
+            \param forumId new forum Id */
         virtual void moveToForum(int32_t threadId, int32_t forumId) = 0;
 
-        // @q THREADRM thread:TID (Talk Command)
-        // @retval Int 0=thread did not exist, 1=thread removed
+        /** Remove a thread (THREADRM).
+            \param threadId thread Id
+            \return true if thread was removed, false if it did not exist */
         virtual bool remove(int32_t threadId) = 0;
     };
 

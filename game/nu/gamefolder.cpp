@@ -12,6 +12,7 @@
 #include "game/nu/registrationkey.hpp"
 #include "game/nu/stringverifier.hpp"
 #include "game/nu/turnloader.hpp"
+#include "afl/charset/utf8charset.hpp"
 
 namespace {
     using afl::string::Format;
@@ -112,6 +113,7 @@ game::nu::GameFolder::loadGameRoot(const game::config::UserConfiguration& config
                                          HostVersion(HostVersion::NuHost, MKVERSION(3,2,0)),
                                          std::auto_ptr<game::RegistrationKey>(new RegistrationKey(a("player"))),
                                          std::auto_ptr<game::StringVerifier>(new StringVerifier()),
+                                         std::auto_ptr<afl::charset::Charset>(new afl::charset::Utf8Charset()),
                                          actions);
 
     // FIXME -> root->userConfiguration().loadUserConfiguration(m_profile, m_log, m_translator);

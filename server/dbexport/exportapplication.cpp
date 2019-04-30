@@ -7,7 +7,7 @@
 #include "afl/base/optional.hpp"
 #include "afl/net/resp/client.hpp"
 #include "afl/string/format.hpp"
-#include "afl/sys/standardcommandlineparser.hpp"
+#include "afl/sys/longcommandlineparser.hpp"
 #include "server/dbexport/dbexporter.hpp"
 #include "server/ports.hpp"
 #include "util/translation.hpp"
@@ -34,7 +34,7 @@ server::dbexport::ExportApplication::appMain()
 {
     // Parse args until we obtain a command
     afl::base::Ref<afl::sys::Environment::CommandLine_t> commandLine(environment().getCommandLine());
-    afl::sys::StandardCommandLineParser commandLineParser(commandLine);
+    afl::sys::LongCommandLineParser commandLineParser(commandLine);
     String_t p;
     bool opt;
     afl::base::Optional<String_t> command;
@@ -92,7 +92,7 @@ void
 server::dbexport::ExportApplication::help()
 {
     afl::io::TextWriter& out = standardOutput();
-    out.writeLine(Format(_("PCC2 Database Export v%s - (c) 2017-2018 Stefan Reuther").c_str(), PCC2_VERSION));
+    out.writeLine(Format(_("PCC2 Database Export v%s - (c) 2017-2019 Stefan Reuther").c_str(), PCC2_VERSION));
     out.writeLine();
     out.writeLine(Format(_("Usage: c2dbexport [--config=FILE] [-DKEY=VALUE] COMMAND [ARGS...]\n"
                            "\n"

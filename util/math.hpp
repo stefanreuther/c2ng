@@ -26,6 +26,11 @@ namespace util {
         \return x*x */
     int32_t squareInteger(int32_t x);
 
+    /** Square a floating-point value.
+        \param x Value
+        \return x*x */
+    double squareFloat(double x);
+
     /** Divide a/b, and round result arithmetically.
         Uses integer arithmetic only.
         \pre a >= 0, b > 0 */
@@ -74,6 +79,12 @@ namespace util {
 
 inline int32_t
 util::squareInteger(int32_t x)
+{
+    return x*x;
+}
+
+inline double
+util::squareFloat(double x)
 {
     return x*x;
 }

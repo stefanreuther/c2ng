@@ -1,0 +1,2286 @@
+Fragments for the script interpreter manual
+
+
+===
+===  Main Manual Prosa
+===
+
+@page group:int:intro, Introduction
+--------------------------------------------------------------------------------
+
+@page int:intro, Introduction
+@in group:int:intro
+
+PCC includes a scripting language.
+The script interpreter understands a simple programming language remotely based upon newer BASIC dialects,
+and extended to be useful in a VGAP context.
+
+The scripting language is used for...
+<ul class="compact">
+ <li>Connecting keys and actions ("keybindings").
+   You can change these bindings using the {Bind} command.</li>
+ <li>Searching objects using the <a href="pcc2:search">search function</a>, and labeling objects in the starchart.</li>
+ <li><a href="pcc2:taskscreen">auto tasks</a>.</li>
+</ul>
+
+The scripting language started out as a search/query language,
+and evolved into a simple interpreted language in PCC 1.x.
+In PCC2, the underlying technology changes a lot, but the language remains largely the same.
+However, some dirty corners have been cleaned up, making the language a little more logical and consistent.
+
+This manual documents the PCC2 version of the language.
+However, I attempted to document where PCC2 and PCC 1.x differ;
+a {int:index:versions|version index} is available.
+PCC2 NG improves on PCC2, but the basic principles remain the same.
+
+<h2>Structure of this Manual</h2>
+
+<ul class="compact">
+ <li>{int:basic|Basic Concepts}</li>
+ <li>{int:expr|Expressions}</li>
+ <li>{int:statement|Statements}</li>
+ <li>{int:index|Reference}</li>
+ <li>{int:appendix|Appendix}</li>
+</ul>
+
+Everyone should read the Basic Concepts part.
+If you wish to use Search and Labels, you need to read just the Expressions part.
+If you wish to write scripts, you should also read the Statements part.
+The Reference parts contains many indexes for reference.
+--------------------------------------------------------------------------------
+@page int:basic, Basic Concepts
+@in group:int:intro
+<ul class="compact">
+ <li>{int:basic:names|Names and Context}</li>
+ <li>{int:basic:namingconv|Naming Conventions}</li>
+ <li>{int:basic:types|Types}</li>
+ <li>{int:basic:fileio|Accessing Files}</li>
+</ul>
+--------------------------------------------------------------------------------
+@page int:basic:names, Names and Context
+@in group:int:intro
+
+Names identify things.
+Many programming languages therefore call them <em>identifiers</em>.
+A name can contain letters, digits, and the special characters "." (dot), "$" (dollar), and "_" (underscore);
+it may not start with a digit or dot, and may not end with a dot, though.
+PCC predefines many names you can use in various ways.
+Those are called <em>properties</em> (properties of objects, such as the name of a ship) and <em>functions</em>.
+You can also define your own names: <em>variables</em> and <em>subroutines</em>.
+
+The meaning of a name depends on the current <em>context</em>.
+For example, the word <tt>Mission</tt> can stand for the mission of a ship or for the mission of a starbase,
+which are governed by completely different rules.
+However, names have been chosen in such a way that similar things are represented by similar names.
+For example, you can use <tt>Name="Ares"</tt> to search for ships and planets having that name,
+and <tt>Owner$=7</tt> searches for everything owned by player 7.
+
+The current context is determined by the place you're invoking a script from.
+For example, a planet label expression is always evaluated in the context of the planet.
+A search expression is evaluated in all possible contexts, as defined by your selection
+in the <a href="pcc2:search">search dialog</a>.
+
+Contexts stack.
+You can temporarily open another context to look at another object's properties.
+For example, using the {Find()|Find function} to find a ship, as in
+<tt>Find(Ship, Name="Ares", Id)</tt>, will evaluate the test and return expressions (second and third parameter)
+in ship context.
+Likewise, the {int:name:with|With} command will execute commands in a specified context.
+
+Contexts are not only established by objects.
+The "outermost" context always contains all {int:name:dim:elementarycommand|global variables}.
+Each executing function, subroutine or script will establish a context for its local variables.
+Every name is looked up in the innermost context first.
+If it is not found there, the outer contexts are considered until one provides a definition.
+
+There are important exceptions to these rules.
+For example, in <tt>Sin(30)</tt>, <tt>Sin</tt> always means the {Sin()|sine function},
+no matter what context is active.
+Those exceptions are:
+- some {int:expr:lit|literals} and {int:expr:operators|operator keywords}
+- {int:index:group:elementaryfunction|Elementary Functions}
+- {int:index:group:elementarycommand|Elementary Commands}
+Those always mean the same thing, regardless of the current context, and cannot be redefined.
+
+<h2>Namespaces</h2>
+
+In PCC2, all functions, subroutines, structures, and variables share a single namespace.
+That is, if you have a global variable %A, you cannot have a function named %A at the same time.
+(You can, however, have a local variable %A, and that will "shadow" the global one due to the context stack.)
+
+In contrast, in PCC 1.x, subroutines and variables had separate namespaces,
+so you could have a subroutines named the same as a variable.
+However, this is confusing and hard to use, so it should be avoided.
+
+In both versions, the following have namespaces separate from variables and subroutines:
+- hooks ({On}, {RunHook})
+- keymaps ({Bind}, {CreateKeymap})
+That is, defining a keymap %ShipScreen will not interfere with a command, variable or hook named %ShipScreen.
+--------------------------------------------------------------------------------
+@page int:basic:namingconv, Naming Conventions
+@in group:int:intro
+
+Property names follow some simple guidelines that aim to help you memorize properties.
+
+The shortest name always gives a nice human-readable summary of an item.
+For example, <tt>{Mission (Ship Property)|Mission}</tt> yields a ship's mission in text form ("Tow a ship").
+By adding more words, you can ask for details.
+For example, <tt>{Mission.Tow}</tt> yields the "Tow" parameter of the mission.
+Alternatively, adding a dollar sign gives the internal representation.
+For example, <tt>{Mission$ (Ship Property)|Mission$}</tt> yields the mission number (7).
+
+For programming, writing search queries, etc., you will probably use the "$" forms most often.
+For formatting text, you will most likely use the short standard form.
+
+When you define your own names, it makes sense to give them a unique prefix to avoid clashes with others' names
+(in case you're using scripts developed by others).
+
+Internally, PCC uses some names starting with <tt>CC$</tt>.
+Those names are undocumented and subject to change without notice.
+You should not use them.
+Currently, many keybindings are implemented using a <tt>CC$</tt> name.
+If you want to modify such a keybinding, it's best to copy the existing one.
+For example, as of beta 9, the "change primary enemy" function (<kbd>E</kbd> on ship screen)
+is implemented as <tt>CC$ChangePE</tt>.
+To assign this function to the <kbd>P</kbd> key, you should write
+| Bind Ship "p" := Key(Ship, "e")
+instead of <tt>Bind Ship "p" := "CC$ChangePE"</tt>.
+This is guaranteed to keep working in future versions.
+--------------------------------------------------------------------------------
+@page int:basic:types, Types
+@in group:int:intro
+All names, values and expressions have a type.
+The type defines what you can do with the thing.
+PCC internally tracks these types.
+If you use a value in a way its type does not allow, PCC will show you an appropriate error message.
+Here are the most important data types:
+
+<dl>
+ <di term="Numbers">
+  PCC supports fractional and whole numbers (integers).
+  PCC internally tracks for each value whether it's fractional or integer.
+  In general, operations between integers yield integers,
+  whereas operations involving a fractional number yield a fractional number.
+  Some operations require their operands to be integers, many accept either kind.
+  For details, see {int:index:type:int|Integers} and {int:index:type:num|Numbers}.</di>
+ <di term="Boolean (Truth Values)">
+  Boolean values can be %True or %False and are used to represent yes&#47;no answers,
+  for example, the results of comparisons.
+  Whenever PCC needs a boolean value,
+  it also accepts numbers (0 means %False (everything below 0.000001, actually), other values mean %True)
+  or strings (the empty string "" means %False, other values mean %True).
+  Likewise, PCC also accepts booleans when it needs a number, %False converts into zero,
+  %True converts into 1.
+  For details, see {int:index:type:bool|Booleans}.</di>
+ <di term="Strings">
+  Strings can contain arbitrary text, such as the name of a starship.
+  For details, see {int:index:type:str|Strings}.</di>
+ <di term="Arrays and Hashes">
+  These contain other objects.
+  For example, <tt>Ship</tt> is an array containing all ships.
+  Arrays are indexed with numbers, hashes are indexed with strings.
+  For details, see {int:index:type:array|Arrays}.</di>
+ <di term="Functions">
+  Functions compute values from other values.
+  For example, <tt>Sqrt</tt> is a function, and <tt>Sqrt(9)</tt> computes square-root-of-9.
+  You can also define your own functions using the <tt>{Function}</tt> command.
+  For details, see {int:index:group:elementaryfunction|Elementary Functions} and {int:index:group:function|Functions}.</di>
+ <di term="Objects">
+  The result of an array reference like <tt>Ship(17)</tt> is the object, ship #17.
+  You can access that object's properties by adding a dot followed by a property name,
+  as in <tt>Ship(17).Name</tt>, or by using it with the <tt>{With}</tt> command.</di>
+</dl>
+
+For more details, see the {int:index:types|Data Type index}, which describes these types in all their
+variants along with cross-references.
+
+A very special value is EMPTY.
+This value is used for unknown values.
+For example, when you don't own a ship, it will yield EMPTY for its %Cargo.N (fuel amount).
+As a general rule, an operation will yield EMPTY if one of their operands are EMPTY,
+and a command will not do anything if a mandatory argument is EMPTY,
+but exceptions exist.
+In a boolean context (<tt>{If}</tt>), EMPTY counts as %False.
+
+Technically, subroutines and regular (=not elementary) commands are also represented as values.
+The only thing you can do with those, however, is {int:statement:types|invoke them} in a command.
+You cannot use them meaningfully in expressions.
+
+<b>Note:</b> Unlike PCC 1.x, PCC2 currently permits all sorts of interesting (and dangerous) things.
+For example, you can "assign" arrays, functions, and commands, as in <tt>Ship := Planet</tt> or <tt>NewLine := NewRectangle</tt>.
+This will, of course, break a lot of things.
+For example, when you do <tt>Ship := Planet</tt>, ships will no longer be accessible,
+and the expression <tt>Ship(3)</tt> will refer to planet #3.
+On the other hand, this can also be used for good, for example to pass a function name to another function
+("function pointer" or "closure" as known from other programming languages).
+PCC2 doesn't yet block those things.
+See {int:appendix:experimental|Experimental Features} for details.
+--------------------------------------------------------------------------------
+@page int:basic:fileio, Accessing Files
+@in group:int:intro
+
+Scripts can access files.
+File access works almost identical between PCC 1.x and PCC2, but many limits have been raised in PCC2.
+
+Files must be <em>opened</em> using the <tt>{Open}</tt> command before you can work with them.
+When opening, you associate a <em>file number</em> with the file.
+The file number is an integer between 1 and 100 (1 and 20 in PCC 1.x).
+You can assign your own file number, or use the <tt>{FreeFile()}</tt> function to get an unused one (recommended!).
+When you're done with the file, you <em>close</em> it using the <tt>{Close}</tt> command.
+This makes the file number available for future re-use.
+
+In all commands, the file number is, by convention, written with a leading <tt>#</tt>.
+This is optional for all file-related commands except for <tt>{Print}</tt>
+(which needs the <tt>#</tt> sign to know that this is a file number, not a value to print).
+
+Text files can be accessed using the <tt>{Input}</tt> and <tt>{Print}</tt> commands.
+PCC2 will automatically convert them from the game character set.
+As an exception, if they start with a UTF-8 byte order mark, they will be read as UTF-8.
+PCC 1.x will access all files with the game character set.
+
+Binary files can be accessed using the <tt>{Get}</tt> and <tt>{Put}</tt> commands.
+Those transfer data to and from a special <em>data block</em> object stored in a variable.
+You can dissect this data block using the <tt>{GetWord()}</tt> function and its relatives,
+and modify it using <tt>{SetWord}</tt> and relatives.
+
+For example, a %xyplan.dat file consists of records of 6 byte each.
+You could read those using a script like this:
+| % Open the file
+| Dim fd = FreeFile()
+| Open "xyplan.dat" For Input As #fd
+|
+| % Read coordinates
+| Dim i, block, x, y
+| For i:=1 To 500 Do
+|   Get #fd, block, 6
+|   x := GetWord(block, 0)
+|   y := GetWord(block, 2)
+|   Print "Planet ", i, " is at ", x, ",", y
+| Next
+
+See {int:index:type:blob|Data Type Blob} for details.
+
+<h2>On File Names</h2>
+
+PCC2 runs on operating systems that have different conventions how a file name looks like.
+If you wish to build a file name, you should therefore use the {MakeFileName} function;
+to split a file name into components, use {GetFileName} and {GetDirectoryName}.
+
+In PCC 1.x, you could just concatenate a directory name such as {System.GameDirectory} and a file name.
+This does no longer work in PCC2!
+
+<h2>Pitfalls</h2>
+
+In PCC 1.x, a <em>data block</em> was just a string.
+In PCC2, it is a whole new data type which cannot be used with string manipulation functions
+(which was possible but deprecated in PCC 1.x).
+
+File I/O is buffered.
+When you write something to a file, the change may not immediately show up on the disk.
+If you open the same file on another file number, that other file number will also not immediately see the changes.
+Changes will be written out when you call <tt>{Close}</tt>.
+--------------------------------------------------------------------------------
+
+
+
+===
+===  Expressions
+===
+
+
+--------------------------------------------------------------------------------
+@page group:int:expr, Expressions
+--------------------------------------------------------------------------------
+@page int:expr, Expressions
+@in group:int:expr
+
+Expressions compute values.
+They do so by combining elementary values (literals, properties, variables) using operators and functions.
+The following sections describe expressions.
+
+- {int:expr:lit|Literals}
+- {int:expr:general|General Rules}
+- {int:expr:operators|Operators}
+- {int:expr:functions|Functions}
+- {int:expr:grammar|Formal Grammar}
+--------------------------------------------------------------------------------
+@page int:expr:lit, Expressions: Literals
+@in group:int:expr
+
+You can directly specify numbers, strings, and boolean values.
+Values of other types must be created using functions.
+
+<em>Integers and Fractional Numbers</em> can be specified as decimal numbers.
+The "." is used as the decimal point.
+A number is integer if it fits into a 32-bit integer number, otherwise it's treated as real.
+The number &#x3c0;=3.141592 (circumference/diameter ratio of a circle) can be specified as %PI.
+
+<em>Strings</em> can be specified in two ways:
+- Using <em>single quotes</em>: the string starts with a single quote and ends at the next one.
+- Using <em>double quotes</em>: those support escaping. A backslash "\" performs a special function:
+  <dl>
+   <di term="\n"> is a newline character.</di>
+   <di term="\\"> is a backslash character.</di>
+   <di term="\&quot;"> is a double-quote character.</di>
+  </dl>
+
+<em>Boolean values</em> can be specified directly as %True and %False.
+
+<b>See also:</b> {int:basic:types|Types}, {int:index:types|Type Index}
+--------------------------------------------------------------------------------
+@page int:expr:general, Expressions: General Rules
+@in group:int:expr
+
+Expressions combine values to compute new values using {int:expr:operators|operators} or {int:expr:functions|functions}.
+
+Most of these operators and functions return EMPTY when one of their arguments is EMPTY.
+In PCC2, operations taking more than one argument usually evaluate them all
+(although not necessarily from left to right),
+even if the result would be known after evaluating only some.
+Exceptions are explicitly specified.
+This is a difference to PCC 1.x, which would sometimes stop evaluating early.
+
+String operations are case-insensitive by default.
+That is, "A" compares equal to "a".
+To get case-sensitive operations, use the <tt>{StrCase()}</tt> function.
+Note that only the basic latin letters are treated case-insensitively;
+special characters such as "&#228;" or "&#x0434;" are always handled case-sensitive.
+
+Some operations taking numerical operands only work with integers.
+When doing arithmetic, PCC keeps track of which values are integers and which are fractions.
+Arithmetic operators and "+", "-", "*" yield integers when their operands are integers,
+others like "&#47;" may generate fractions even when used on integers.
+
+If you violate the rules, for example, by comparing a number and a string,
+or by using a fractional number where an integer is required, you will get an error.
+The <a href="pcc2:search">Search</a> function will treat these cases as a mismatch.
+Scripts will be aborted unless they catch the error with a <tt>{Try}</tt> statement.
+--------------------------------------------------------------------------------
+@page int:expr:operators, Expressions: Operators
+@in group:int:expr
+
+The following table shows all operators supported by PCC2.
+Operators have a certain <em>precedence</em> or <em>binding strength</em>,
+which determines which parts of the expression belong to that operator.
+For example, in <tt>2 + 3 * 4</tt>, the precedence of <tt>*</tt> is higher than the precedence of <tt>+</tt>,
+so the multiplication is performed first.
+The addition then adds <tt>2</tt> and the result of <tt>3 * 4</tt>.
+The table shows operators in increasing order of precedence, i.e. later operators are evaluated
+before those shown first.
+
+<table>
+ <tr><tn width="2">(1)</tn> <td width="7">a;&nbsp;b</td><td width="25">Sequence: evaluate a, discard its result, then evaluate b. This is needed very rarely, but can be useful to perform an assignment before producing the actual value in a search expression, for example.</td></tr>
+ <tr>          <tn>(2)</tn> <td>a&nbsp;:=&nbsp;b</td>   <td>Assignment: evaluate b, and assign it to a. Returns b.</td></tr>
+ <tr>          <tn>(3)</tn> <td>a&nbsp;%Or&nbsp;b</td>   <td>Logical Or: return %True if either operand is %True. If the result is known after evaluating a (i.e. a is %True), does not evaluate b (short-circuit evaluation).</td></tr>
+ <tr>          <tn></tn>    <td>a&nbsp;%Xor&nbsp;b</td>  <td>Logical Exclusive-Or: return %True if one operand is %True and one is %False. If the result is known after evaluating a (i.e. a is EMPTY), does not evaluate b (short-circuit evaluation).</td></tr>
+ <tr>          <tn>(4)</tn> <td>a&nbsp;%And&nbsp;b</td>  <td>Logical And: return %False if either operand is %False. If the result is known after evaluating a (i.e. a is %False), does not evaluate b (short-circuit evaluation).</td></tr>
+ <tr>          <tn>(5)</tn> <td>%Not&nbsp;a</td>         <td>Logical Not: return %True if operand is %False, %False if operand is %True.</td></tr>
+ <tr>          <tn>(6)</tn> <td>a&nbsp;=&nbsp;b</td>    <td>Comparison: return %True if a is identical to b. Values must have comparable types; when you attempt to compare a number and a string, this will generate an error.</td></tr>
+ <tr>          <tn></tn>    <td>a&nbsp;&lt;>&nbsp;b</td><td>Comparison: return %True if a is different from b. Note that values still must have comparable types.</td></tr>
+ <tr>          <tn></tn>    <td>a&nbsp;&lt;&nbsp;b</td> <td>Comparison: return %True if a is less than b.</td></tr>
+ <tr>          <tn></tn>    <td>a&nbsp;>&nbsp;b</td>    <td>Comparison: return %True if a is greater than b.</td></tr>
+ <tr>          <tn></tn>    <td>a&nbsp;&lt;=&nbsp;b</td><td>Comparison: return %True if a less or equal to b.</td></tr>
+ <tr>          <tn></tn>    <td>a&nbsp;>=&nbsp;b</td>   <td>Comparison: return %True if a is greater or equal to b.</td></tr>
+ <tr>          <tn>(7)</tn> <td>a&nbsp;#&nbsp;b</td>    <td>Concatenation: convert a and b to strings and concatenate them.</td></tr>
+ <tr>          <tn></tn>    <td>a&nbsp;&amp;&nbsp;b</td><td>Concatenation: convert a and b to strings and concatenate them. If either is EMPTY but the other is not, treat the EMPTY one as empty string.</td></tr>
+ <tr>          <tn>(8)</tn> <td>a&nbsp;+&nbsp;b</td>    <td>Addition: add a and b, which may be numbers or strings.</td></tr>
+ <tr>          <tn></tn>    <td>a&nbsp;-&nbsp;b</td>    <td>Subtraction: subtract b from a, which must both be numbers.</td></tr>
+ <tr>          <tn>(9)</tn> <td>a&nbsp;*&nbsp;b</td>    <td>Multiplication: multiply a and b, which must both be numbers.</td></tr>
+ <tr>          <tn></tn>    <td>a&nbsp;&#47;&nbsp;b</td><td>Division: divide a by b, which must both be numbers.</td></tr>
+ <tr>          <tn></tn>    <td>a&nbsp;\&nbsp;b</td>    <td>Integer division: divide a by b, which must both be integers, and discard the remainder.</td></tr>
+ <tr>          <tn></tn>    <td>a&nbsp;%Mod&nbsp;b</td>  <td>Integer remainder: divide a by b and return the remainder. Both operands must be integers.</td></tr>
+ <tr>          <tn>(10)</tn><td>-a</td>                 <td>Negation: change sign of a, which must be a number.</td></tr>
+ <tr>          <tn></tn>    <td>+a</td>                 <td>Unary plus: do not change sign of a, which must be a number. Exists for symmetry with "-".</td></tr>
+ <tr>          <tn>(11)</tn><td>a&nbsp;^&nbsp;b</td>    <td>Power: compute a-to-the-bth. Both operands must be numbers.</td></tr>
+</table>
+
+<h2>Operands</h2>
+
+Operands to operators are shown as "a" and "b" above.
+The following things are possible operands:
+- <a href="int:expr:lit">literals</a>.
+- an expression of higher precedence, as shown in the multiplication/addition example above the table.
+- an expression within parentheses.
+- a {int:expr:functions|function call}.
+- a variable or property.
+--------------------------------------------------------------------------------
+@page int:expr:functions, Expressions: Functions
+@in group:int:expr
+
+A function invocation has the general form
+| NameOfFunction(FirstParameter, SecondParameter, ...)
+There are two kinds of functions, <em>elementary functions</em> and <em>regular functions</em>.
+
+<h2>Elementary Functions</h2>
+
+Elementary functions are built into the interpreter core.
+They perform elementary computations, much like {int:expr:operators|built-in operators}.
+An elementary function is recognized whenever its name appears followed by a "(" in an expression,
+even if there is a variable or property of the same name.
+
+You cannot define own elementary functions.
+Some of these functions have a special syntax, that is, parameters that don't follow regular rules,
+are evaluated in a different order than for regular functions, or not at all.
+
+See {int:index:group:elementaryfunction|Elementary Functions} for a list of elementary functions.
+
+<h2>Regular Functions</h2>
+
+Regular functions behave regularily: first, their parameters are evaluated,
+then, the function is invoked to produce a result.
+
+PCC comes with many regular functions predefined.
+Those perform computations, or access object contexts.
+In PCC2, you can also define your own functions using the {Function} command
+(PCC 1.x does not allow user-defined functions).
+Those functions are available globally unless a local variable or property "shadows" them.
+
+Some contexts provide object-specific functions which are documented as properties of the object,
+for example, the {HasFunction (Ship Property)|HasFunction} ship property.
+
+See {int:index:group:function|Functions} for a list of regular global functions,
+{int:index:group:context|Contexts} for a list of context functions.
+--------------------------------------------------------------------------------
+@page int:expr:grammar, Expressions: Formal Grammar
+@in group:int:expr
+
+This formal grammar describes expressions.
+Terminal symbols are in quotes, or described in text.
+Nonterminals are underlined.
+
+Whenever an expression is required, PCC accepts a <u>%sequence</u>.
+The only exception is the {Bind} elementary command, which takes <u><tt>or-expr</tt></u>s
+(because it has assignments <tt>:=</tt> as part of its syntax).
+
+<pre>
+<u>sequence</u>:
+    <u>assignment</u>
+    <u>sequence</u> ";" <u>assignment</u>
+
+<u>assignment</u>:
+    <u>or-expr</u>
+    <u>assignment</u> ":=" <u>or-expr</u>
+
+<u>or-expr</u>:
+    <u>and-expr</u>
+    <u>or-expr</u> "Or" <u>and-expr</u>
+    <u>or-expr</u> "Xor" <u>and-expr</u>
+
+<u>and-expr</u>:
+    <u>not-expr</u>
+    <u>and-expr</u> "And" <u>not-expr</u>
+
+<u>not-expr</u>:
+    <u>comparison</u>
+    "Not" <u>not-expr</u>
+
+<u>comparison</u>:
+    <u>concat-expr</u>
+    <u>comparison</u> "=" <u>concat-expr</u>
+    <u>comparison</u> "&lt;" <u>concat-expr</u>
+    <u>comparison</u> ">" <u>concat-expr</u>
+    <u>comparison</u> "&lt;=" <u>concat-expr</u>
+    <u>comparison</u> ">=" <u>concat-expr</u>
+    <u>comparison</u> "&lt;>" <u>concat-expr</u>
+
+<u>concat-expr</u>:
+    <u>add-expr</u>
+    <u>concat-expr</u> "#" <u>add-expr</u>
+    <u>concat-expr</u> "&amp;" <u>add-expr</u>
+
+<u>add-expr</u>:
+    <u>mult-expr</u>
+    <u>add-expr</u> "+" <u>mult-expr</u>
+    <u>add-expr</u> "-" <u>mult-expr</u>
+
+<u>mult-expr</u>:
+    <u>neg-expr</u>
+    <u>mult-expr</u> "*" <u>neg-expr</u>
+    <u>mult-expr</u> "&#47;" <u>neg-expr</u>
+    <u>mult-expr</u> "\" <u>neg-expr</u>
+    <u>mult-expr</u> "Mod" <u>neg-expr</u>
+
+<u>neg-expr</u>:
+    <u>pow-expr</u>
+    "-" <u>neg-expr</u>
+    "+" <u>neg-expr</u>
+    "Not" <u>neg-expr</u>          <font color="red">% Note 1</font>
+
+<u>pow-expr</u>:
+    <u>primary-expr</u>
+    <u>primary-expr</u> "^" <u>neg-expr</u>
+
+<u>primary-expr</u>:
+    "(" <u>sequence</u> ")"
+    <u>string-literal</u>
+    <u>integer-literal</u>
+    <u>float-literal</u>
+    "True"                  <font color="red">% Note 2</font>
+    "False"                 <font color="red">% Note 2</font>
+    "Pi"                    <font color="red">% Note 3</font>
+    <u>identifier</u> <u>invocation</u>*
+
+<u>invocation</u>:
+    "(" <u>arguments</u> ")"
+    "." <u>identifier</u>          <font color="red">% Note 4</font>
+    "->" <u>identifier</u>         <font color="red">% Note 4</font>
+
+<u>arguments</u>:
+    nothing
+    <u>sequence</u> ("," <u>sequence</u>)*
+
+<u>identifier</u>:
+    sequence of letters, "$", "_", digits, ".",
+      not starting with a digit or period
+      not ending with a period
+
+<u>string-literal</u>:
+    "'" (any character except for "'")* "'"
+    """ (any character except for """ and "\",
+         or "\" followed by any character) """
+
+<u>integer-literal</u>:
+    digit digit*
+      A value is an integer if it fits into 32 bits.
+      Otherwise, it's float.
+
+<u>float-literal</u>:
+    <u>integer-literal</u>
+    digit digit* "."
+    digit* "." digit digit*
+</pre>
+
+Notes:
+- <font color="red">1</font>: <tt>Not a=b</tt> is always interpreted as
+  a <u>not-expr</u>, binding as <tt>Not (a=b)</tt>.
+  This grammar rule just allows <tt>-Not a=b</tt>, which is interpreted as
+  <tt>(-(Not a)) = b</tt>.
+- <font color="red">2</font>: these are the boolean literals
+- <font color="red">3</font>: this is a float literal
+- <font color="red">4</font>: <tt>.</tt> and <tt>-></tt> have essentially the same meaning.
+  However, because the dot can also be part of names, <tt>a.b</tt> is always interpreted as a single identifier.
+  To access member %b of object %a, use <tt>a->b</tt>.
+--------------------------------------------------------------------------------
+
+
+===
+===  Statements
+===
+
+--------------------------------------------------------------------------------
+@page group:int:statement, Scripts
+--------------------------------------------------------------------------------
+@page int:statement, Scripts
+@in group:int:statement
+
+A script or auto task is a list of Statements (also called Commands).
+Statements perform actions, or control execution of other statements.
+
+- {int:statement:types|Statement Types}
+- {int:statement:scripts|Script Files}
+- {int:statement:autotasks|Auto Tasks}
+- {int:statement:processes|Processes}
+- {int:statement:startup|Startup} (how to add your own scripts to PCC)
+- {int:statement:plugins|Plugins} (how to add package your scripts for others)
+--------------------------------------------------------------------------------
+@page int:statement:types, Scripts: Statement Types
+@in group:int:statement
+
+<h2>Elementary vs. Expression vs. Normal</h2>
+
+<h3>Elementary Commands</h3>
+
+PCC supports a number of Elementary Commands.
+Those statements often control execution of other statements,
+like the <tt>{If (Elementary Command)|If}</tt> conditional statements,
+or cause them to be executed repeatedly, like the <tt>{For}</tt> loop.
+Elementary Commands often have a special syntax, and special rules how to evaluate their parameters.
+
+See {int:index:group:elementarycommand|Elementary Commands} for a list of all Elementary Commands.
+
+<h3>Expression Statement</h3>
+
+An expression statement consists of an {int:expr|expression} on a line by itself.
+The expression is evaluated and its result discarded.
+The expression therefore normally is an assignment operation, such as
+| a := Ship(10).Loc.X
+which is evaluated for its side-effect of changing the value of the variable %a.
+
+If the outermost operator is an equality comparison, as in
+| a = Ship(10).Loc.X
+PCC automatically converts that into an assignment,
+because treating it as a comparison and discarding the result would be pointless.
+
+If the expression starts with a keyword that also is an Elementary Command,
+it is interpreted as that Elementary Command
+(this applies to {Dim} and {If}, which can be commands or function calls).
+If you really want it as an expression, wrap it into parentheses.
+
+<h3>Regular Commands</h3>
+
+A regular command has the form
+| NameOfCommand FirstParameter, SecondParameter, ...
+The parameters are evaluated and then passed to the command.
+
+There are a number of {int:index:group:globalcommand|Global Commands}.
+You can add your own global commands by defining subroutines using the {Sub} command.
+Many contexts provide object-specific commands that manipulate that object.
+
+<h2>Multi-line vs. Single-line</h2>
+
+Most commands are single-line commands, i.e. occupy just one line.
+Such commands can be entered on the <a href="pcc2:console">Console</a>, for example.
+
+Some Elementary Command are complex enough to need multiple lines.
+For example, an {If (Elementary Command)|If/Then/Else} statement might look like this:
+| If Owner$=My.Race$ Then
+|   NewCircle Loc.X, Loc.Y, 10
+| Else
+|   NewRectangle Loc.X-10, Loc.Y-10, Loc.X+10, Loc.Y+10
+| EndIf
+
+As a general rule, a command that starts as a single-line command cannot continue as a multi-line command.
+This is <font color="red">invalid</font>:
+| ForEach Ship Do If Owner$=My.Race$ Then
+|   Print Name
+| EndIf
+It must be written as
+| ForEach Ship Do
+|   If Owner$=My.Race$ Then
+|     Print Name
+|   EndIf
+| Next
+
+Multi-line commands can only be used within {int:statement:scripts|scripts}.
+You cannot define your own multi-line commands.
+--------------------------------------------------------------------------------
+@page int:statement:scripts, Scripts: Script Files
+@in group:int:statement
+
+Scripts are files that contain commands.
+By convention, these scripts have the file extension <tt>.q</tt>.
+They are normal text files which you can create using any text editor,
+such as Notepad, Emacs, etc.
+
+Scripts can contain single-line and multi-line commands.
+
+Scripts can contain comments: everything after a percent sign is ignored by the interpreter
+(actually, the % sign can be used to terminate every statement or expression,
+but it only makes sense in scripts).
+Use comments to document your scripts, for example:
+| % Suspend script for one turn.
+| % Execution proceeds next turn (or later, when a turn is missed).
+| Sub WaitOneTurn ()
+|   Local t = Turn          % Save turn number
+|   Do While t = Turn       % Wait until turn number changes
+|     Stop
+|   Loop
+| EndSub
+
+Script files must contain complete commands.
+A multi-line command that started in a file must end within the same file.
+--------------------------------------------------------------------------------
+@page int:statement:autotasks, Scripts: Auto Tasks
+@in group:int:statement
+
+Auto-tasks are a special kind of script which you can edit within PCC2 on the <a href="pcc2:taskscreen">Task Screens</a>.
+
+An auto-task is a list of commands.
+Commands that can change control flow, such as {If (Elementary Command)|If} or {ForEach}, are not allowed.
+You can, however, define a {Sub|subroutine} and call that.
+
+A special command is %Restart.
+This command is supported in auto-tasks only, and cannot be used in normal scripts.
+It will cause the auto-task to restart from the beginning.
+
+<b>Note:</b> Internally, an auto-task is a little more than just a script containing a list of commands.
+Auto-tasks provide automatic error handling.
+If an auto-task contains an error, it will be stopped with a <a href="pcc2:notify">notification</a>,
+and you will be given the opportunity to fix it.
+A regular script will be terminated when it encounters an error.
+--------------------------------------------------------------------------------
+@page int:statement:processes, Scripts: Processes
+@in group:int:statement
+
+Normally, a script is started (with a keystroke or a command on the console), executes, and terminates.
+However, you can also define scripts that run for a longer time,
+{int:statement:autotasks|Auto Tasks} being the most prominent example.
+Such scripts will normally do something, wait for the next turn, the continue their operation, and so on.
+
+Such an executing {int:statement:scripts|script} or {int:statement:autotasks|auto-task} is called a process.
+If you execute the same script twice, that will be two processes.
+
+Every process has its own set of {Static|static} and {Local|local variables}.
+{Shared|Shared variables} will be shared between all processes.
+Whereas there is no way that one process can access another process' static and local variables,
+shared variables can be changed while the process waits.
+
+A process waits by executing the {Stop} command.
+When you exit PCC, all active processes will be saved to a file
+(<tt>vmX.cc</tt> in PCC 1.x, <tt>scriptX.cc</tt> in PCC2).
+When you start PCC again, that file will be loaded and all processes continued.
+They must now check whether they can continue, and execute another {Stop} if not.
+
+PCC comes with a number of commands predefined that wait for certain conditions to happen,
+e.g. {WaitOneTurn}, {MoveTo}.
+
+<h3>Limitations</h3>
+
+Processes cannot suspend at every place.
+For example, if a process currently examining a {int:index:group:drawingproperty|drawing property} calls %WaitOneTurn,
+it will be terminated because PCC cannot uniquely identify a drawing and find it again next turn.
+In general, everything from your Result file that has an %Id can be found again, everything else can not.
+
+Suspending will save the processes' static and local variables.
+Shared variables will not be saved.
+You must make sure that the woken-up processes finds them in the state they expect.
+This also applies to subroutine and function definitions.
+If the script tries to call a subroutine next turn, you must make sure it is available
+(e.g. by defining it through your {int:statement:startup|startup script}.
+
+<h3>Tips</h3>
+
+Do not suspend from within {Function (Elementary Command)|functions}.
+Functions can be executed, for example, from search queries,
+and you wouldn't want your search query to be delayed to next turn.
+
+You can examine and manipulate running processes using the <a href="pcc2:processmgr">Process Manager</a>.
+--------------------------------------------------------------------------------
+@page int:statement:startup, Scripts: Startup
+@in group:int:statement
+
+There are a few ways to have PCC2 execute your scripts automatically.
+
+<ul>
+ <li>Immediately after starting, PCC2 looks for a script <tt>pcc2init.q</tt>.
+  <ul>
+   <li><b>Windows:</b> in your profile folder, subdirectory <tt>PCC2</tt>
+    (for example, <tt>C:\Documents and Settings\YourName\Application Data\PCC2</tt>
+     or <tt>C:\Users\YourName\AppData\PCC2</tt>)</li>
+   <li><b>Unix:</b> your home directory, subdirectory <tt>.pcc2</tt>
+    (for example, <tt>/home/yourname/.pcc2</tt>)</li>
+  </ul>
+  Note that this directory changed in {int:index:version:pcc21.99.13|beta 13};
+  previous versions look for that file directly in the profile/home directory.</li>
+ <li>PCC2 also loads {int:statement:plugins|plugins}.</li>
+ <li>After setting up game directory names, PCC2 looks for a script <tt>autoexec.q</tt> in your
+  game directory (very similar to how PCC 1.x looks for <tt>autoexec.q</tt>).
+  This file is run in the {EnterDirectory} hook.</li>
+</ul>
+
+These scripts can contain your code.
+In particular, it makes sense to put the following things into your startup scripts:
+
+<ul>
+ <li>Subroutine definitions ({Sub} statement).</li>
+ <li>Property definitions ({CreateShipProperty} and {CreatePlanetProperty} statements).</li>
+ <li>Key bindings ({Bind} statement) that make your subroutines accessible from the graphical interface.</li>
+ <li>Hook definitions ({On} statement) that execute your subroutines at various events
+  (currently of interest is the <em>Load</em> event, which you can use to perform some tasks whenever
+  PCC2 loads your game).</li>
+</ul>
+
+If you have written a useful script, it may make sense to wrap it as a {int:statement:plugins|plugin}.
+
+In addition, you can load script files from the console by typing a command such as
+<tt>Load "/path/to/script.q"</tt>, and you can execute subroutines by simply calling them from the console.
+
+One big difference between PCC 1.x and PCC2 is that PCC2 has a game chooser
+that allows you to load multiple games in one session.
+This means that it is possible that PCC2 loads your <tt>autoexec.q</tt> file multiple times
+in one session, whereas PCC 1.x will only load it once.
+--------------------------------------------------------------------------------
+@page int:statement:plugins, Scripts: Plugins
+@in group:int:statement
+
+Since 1.99.25, PCC2 supports plugins.
+Plugins are a standardized way to get scripts (and resources) into PCC2 without having to manually edit files as if it were 1992.
+
+A plugin is defined by a <tt>*.c2p</tt> file.
+This file contains information about the plugin and links to the actual files that make up the plugin.
+It is a regular ".ini" file that supports the following keywords:
+
+<ul>
+ <li><tt>Name = &lt;short name of plugin&gt;</tt><br />
+  This is displayed in menus as the plugin title.</li>
+ <li><tt>Description = &lt;long description&gt;</tt><br />
+  A longer description.
+  You can use multiple Description lines to produce multiple paragraphs.</li>
+ <li><tt>Provides = &lt;feature&gt;, &lt;feature&gt;</tt><br />
+  <tt>Requires = &lt;feature&gt;, &lt;feature&gt;</tt><br />
+  Dependencies, see below.</li>
+ <li><tt>File = &lt;file name&gt;</tt><br />
+  A regular file that comes with the plugin.</li>
+ <li><tt>ScriptFile = &lt;file name&gt;</tt><br />
+  A script file that comes with the plugin.
+  The file is automatically loaded as if by {Load (Elementary Command)|Load}.</li>
+ <li><tt>ResourceFile = &lt;resource file&gt;</tt><br />
+  A resource (*.res) file that comes with the plugin.
+  The file is automatically loaded as if it were listed at the end of <tt>cc-res.cfg</tt>.</li>
+ <li><tt>HelpFile = &lt;help file&gt;</tt><br />
+  A help (*.xml) file that comes with the plugin.
+  Help pages from that file are made available to the {UI.Help} command.</li>
+ <li><tt>&lt;type&gt;File = &lt;file name&gt;</tt><br />
+  For upward-compatibility, PCC2 also accepts file types it doesn't understand, and just installs them normally.</li>
+ <li><tt>Exec = &lt;script command&gt;</tt><br />
+  A script command that is executed when the plugin is loaded.</li>
+</ul>
+
+Order of Script/Resource/Exec is significant, i.e. an Exec command can rely on a previous Script to be loaded.
+
+For installation, files from File/Script/Resource must reside in the same directory as the <tt>*.c2p</tt> file.
+When a file <tt>myplugin.c2p</tt> file is installed, it is copied into the directory <tt>~/.pcc2/plugins/</tt>,
+and the referenced files are copied to <tt>~/.pcc2/plugins/myplugin/</tt>
+(different paths on Windows).
+
+The name of the plugin definition file serves as the plugin identifier in technical contexts (scripts, command line)
+see {System.Plugin}.
+
+The Script and Exec commands will be executed within the plugin's context,
+and have access to the {int:index:group:pluginproperty|plugin properties}.
+
+PlayVCR will only load Resource files.
+
+When uninstalling or updating a plugin, PCC2 will unload resource
+files provided by the plugin, but it will not unload scripts.
+
+<h3>Dependencies</h3>
+
+PCC2 has a rudimentary dependency management system.
+Plugins can provide and require features.
+You cannot install a plugin if a dependency is missing, and you cannot remove a plugin if another one relies on it.
+
+Each feature is a word optionally followed by a version number, for example, <tt>"Coyote"</tt> or <tt>"Acme 1.0"</tt>.
+Case is not significant.
+A plugin that requires a particular version number will also accept higher version numbers.
+
+Default features:
+- "PCC 2.40.6" (current PCC2 version, whichever is current)
+- each plugin definition file, say, <tt>myplugin.c2p</tt>, provides the plugin identifier ("MYPLUGIN") as a feature
+
+<h3>Zipped Plugins</h3>
+
+For simplicity, PCC2 also allows compressing all files of a plugin (including the <tt>*.c2p</tt> file) into a single zip file.
+To identify these files as plugins, we use the file extension <tt>.c2z</tt> (but normal <tt>.zip</tt> is accepted as well).
+This is the standard way of distributing plugins over the web.
+
+<h3>Unpackaged Plugins</h3>
+
+The <a href="pcc2:plugins">plugin installer</a> and the <tt>c2plugin</tt> tool will also accept
+regular script (<tt>*.q</tt>) and resource (<tt>*.res</tt>) files for installation.
+They will then internally generate a plugin description.
+This is useful for testing.
+
+When you're giving away a plugin, it is strongly recommended to add a <tt>*.c2p</tt> file,
+and ideally package it up as a <tt>*.c2z</tt>.
+--------------------------------------------------------------------------------
+
+===
+===  Indexes
+===
+
+@page group:int:index, Index
+--------------------------------------------------------------------------------
+
+@page int:index, Index
+@in group:int:index
+
+- {int:index:names|Alphabetical Index} - all commands, properties, functions, etc.
+- {int:index:groups|Groups} - commands and properties by area, e.g. {int:index:group:shipproperty|ship properties}, etc.
+- {int:index:types|Data Types} - a cross-reference of data types.
+- {int:index:versions|Version Changes} - a cross-reference of what was introduced when.
+--------------------------------------------------------------------------------
+
+
+===
+===  Types
+===
+
+--------------------------------------------------------------------------------
+@type Any
+Functions documented to accept or return <em>Any</em> accept more than one data type.
+--------------------------------------------------------------------------------
+@type Array
+Arrays are created using the {Dim} command.
+When you call a {Sub}/{Function} taking a variable number of arguments,
+those are passed in as an array as well.
+
+@diff Arrays are supported since PCC2 1.99.12. They are not supported in PCC 1.x.
+
+Built-in object collections such as {Ship} or {Planet} are technically not arrays,
+but mostly behave like arrays.
+--------------------------------------------------------------------------------
+@type Blob
+Data blocks (blobs for short) are used for binary file I/O.
+
+To read a file, you use {Get} to read a block of data, and then disassemble that block using functions
+{GetByte}, {GetWord}, {GetLong} and {GetStr}.
+To write into a binary file, you build the block using {SetByte}, {SetWord}, {SetLong} and {SetStr},
+and then write it into the file using {Put}.
+
+@diff In PCC 1.x, blobs are actually <a href="int:index:type:str">strings</a> and are limited to 255 bytes.
+PCC2 implements blobs as a separate data type, and has no size limit.
+--------------------------------------------------------------------------------
+@type Bool
+Boolean values are truth values that can be either <tt>True</tt> or <tt>False</tt>.
+To get a boolean value, you can use the keywords <tt>True</tt> and <tt>False</tt>.
+More often, you will create boolean values using comparisons or logical operations.
+
+Whenever a boolean value is required, you can also use
+- a number. Zero (anything less than 10^-6 in magnitude) is treated as False,
+  other values are True.
+- a string. The empty string "" is treated as False, other values are True.
+
+Whenever a number is required, you can also use a boolean value.
+True converts into 1, False converts into 0.
+--------------------------------------------------------------------------------
+@type Cargo
+You often need to compute the total cost of something in minerals.
+Doing this mineral-by-mineral is cumbersome, that's why there are some functions to manipulate cargo sets.
+Cargo sets are nothing more than specially formatted <a href="int:index:type:str">strings</a>.
+
+For example, the price of a Mark 8 torpedo is 1 kt of Tritanium, Molybdenum and Duranium, and 54 megacredits.
+In PCC, this cost can be represented as "1tdm 54$".
+The price of 13 torpedoes is then easily computed using
+| CMul("1tdm 54$", 13)
+
+A cargo set consists of a sequence of numbers followed by units (cargo types).
+The following cargo types are defined:
+<table>
+ <tr><td>n t d m</td>     <td>The four standard minerals</td></tr>
+ <tr><td>$</td>           <td>Money (megacredits)</td></tr>
+ <tr><td>s</td>           <td>Supplies</td></tr>
+ <tr><td>c</td>           <td>Colonist clans</td></tr>
+ <tr><td>f</td>           <td>Fighters</td></tr>
+ <tr><td>w</td>           <td>Torpedoes</td></tr>
+</table>
+
+Like you see in the above example, you can attach multiple units to each number
+("1tdm" is one kt Tritanium, one kt Duranium, and one kt Molybdenum).
+And, you can write multiple such blocks.
+Note that there must not be a space between the number and the units.
+
+For compatibility with PHost, PCC also accepts PHost's notation where a single cargo type precedes the number.
+For example, the cost of a Mark 8 torpedo would be "T1 D1 M1 $54" in PHost format.
+--------------------------------------------------------------------------------
+@type Expr
+Functions documented to accept a parameter of type <em>Expr</em> are special.
+They usually evaluate these expressions in a non-standard sequence.
+For example, {If()} will only evaluate the second or third argument, but never both.
+These special properties are only available for elementary functions and commands.
+You cannot write functions or subroutines that take <em>Expr</em> parameters.
+--------------------------------------------------------------------------------
+@type File
+Files are referenced by numbers in PCC.
+You normally use the {FreeFile()} function to obtain a currently-unused file number.
+(Alternatively, you can hard-code file numbers, but this is not recommended.)
+
+By convention, file numbers are written with a leading hash sign:
+| Dim fd = FreeFile()
+| Open "test.txt" For Input As #fd
+In most cases, however, it is clear from context that you mean a file number, so you can omit the hash sign.
+The only case where the hash sign is required is the {Print} function.
+
+@diff The number of allowed files differs between PCC versions.
+PCC2 allows file numbers from 1 to 100, PCC 1.x only allows 1..20.
+(If you use {FreeFile} to obtain file numbers, you will not notice this difference,
+except for being able to open more files.)
+--------------------------------------------------------------------------------
+@type Hash
+Hashes are unordered data stores indexed by a string.
+Normally, a hash is created using {Dim}:
+| Dim h As Hash
+It can then be used like this:
+| h("key") := "value"
+| Print h("key")
+The key must always be a string.
+It is interpreted case-sensitively.
+Reading keys that have never been written returns EMPTY.
+
+You can iterate through the content of a hash using {ForEach}:
+| ForEach h Do Print Key, "=", Value
+See {int:index:group:hashelementproperty|Hash Element Properties} for details.
+
+@diff Hashes are supported since PCC2 1.99.15. They are not supported in PCC 1.x.
+--------------------------------------------------------------------------------
+@type Hook
+Commands documented to take a parameter of type <em>Hook</em> are special.
+In place of the hook parameter, you specify the name of a hook (not as a string!),
+for example,
+| On Load Do MyAddon.Initialize
+This special behaviour is only available for elementary functions and commands.
+You cannot write functions or subroutines that take <em>Hook</em> parameters.
+
+PCC offers a set of predefined hooks that run when a particular event happens.
+These are documented in the group {int:index:group:hook|Hooks} (and also listed below as "properties").
+--------------------------------------------------------------------------------
+@type Int
+Most functions in PCC that operate on numbers do not care whether the numbers are integral or fractional;
+those are documented as taking a {int:index:type:num|Num}.
+However, some operations are only sensible on integers.
+Those are documented as taking type %Int, and will refuse to work with fractional numbers.
+{int:index:type:bool|Bools} automatically convert to integers, where
+%True converts to 1, %False to 0.
+
+If you have a fractional number, you can use {Int} or {Round} to convert it to an integer.
+
+In general, the result of an operation involving fractional numbers is again a fractional number,
+whereas the result of an operation involving integers can be an integer if possible.
+
+PCC 1.x and PCC2 track a value's type very closely, thus <tt>2.5*2</tt> is a fractional number
+because it started out with one.
+PCC2 Web relaxes these rules a little, and looks at the actual values.
+In PCC2 Web, <tt>2.5*2</tt> is a valid integer.
+--------------------------------------------------------------------------------
+@type Keymap
+Functions documented to take a parameter of type <em>Keymap</em> are special.
+In place of the keymap parameter, you specify the name of the keymap, as a symbol (not as a string!),
+for example,
+| Key(Global, "Alt-X")
+This special behaviour is only available for elementary functions and commands.
+You cannot write functions or subroutines that take <em>Keymap</em> parameters.
+
+Keymaps have a separate namespace from variables,
+i.e. a keymap %MyStuff and a variable %MyStuff are not related in any way.
+
+A keymap contains a set of keystrokes and commands active in a particular context.
+A keymap can have one or more parent keymaps that "extend" the keymap.
+A key is looked up first in the keymap itself.
+If it is not found there, it is searched for in the parents.
+
+PCC predefines a set of keymaps.
+Those are listed below as "properties".
+You can define your own keymaps using {CreateKeymap}, manipulate them using {Bind}, and use them using {UseKeymap}.
+
+Predefined keymaps are defined a little different between PCC 1.x and PCC2.
+The following overview applies to PCC2 and, where appropriate, also for 1.x.
+
+<table>
+ <tr><td width="18">{Global (Keymap)|Global}</td>                        <td width="17">(Base for all predefined keymaps)</td></tr>
+ <tr><td>{Ship (Keymap)|Ship}</td>                                       <td>Whenever a ship is active.</td></tr>
+ <tr><td>{Planet (Keymap)|Planet}</td>                                   <td>Whenever a planet is active.</td></tr>
+ <tr><td>{Base (Keymap)|Base}</td>                                       <td>Whenever a base is active.</td></tr>
+ <tr><td>{Fleet (Keymap)|Fleet}</td>                                     <td>Whenever a fleet is active.</td></tr>
+ <tr><td>{ControlScreen (Keymap)|ControlScreen}(Global)</td>             <td>Active on all control screens.</td></tr>
+ <tr><td>{ShipScreen (Keymap)|ShipScreen}(Ship, ControlScreen)</td>      <td>Active on ship screen.</td></tr>
+ <tr><td>{PlanetScreen (Keymap)|PlanetScreen}(Planet, ControlScreen)</td><td>Active on planet screen.</td></tr>
+ <tr><td>{BaseScreen (Keymap)|BaseScreen}(Base, ControlScreen)</td>      <td>Active on base screen.</td></tr>
+ <tr><td>{FleetScreen (Keymap)|FleetScreen}(Fleet, ControlScreen)</td>   <td>Active on fleet screen.</td></tr>
+ <tr><td>{HistoryScreen (Keymap)|HistoryScreen}(ControlScreen)</td>      <td>Active on ship history screen.</td></tr>
+ <tr><td>{AutoTaskScreen (Keymap)|AutoTaskScreen}(ControlScreen)</td>    <td>Active on auto task screen.</td></tr>
+ <tr><td>{Starchart (Keymap)|Starchart}(Global)</td>                     <td>Active on starchart.</td></tr>
+ <tr><td>{ShipLock (Keymap)|ShipLock}(Ship, Starchart)</td>              <td>Active when a ship is selected in the starchart.</td></tr>
+ <tr><td>{PlanetLock (Keymap)|PlanetLock}(Planet, Starchart)</td>        <td>Active when a planet is selected in the starchart.</td></tr>
+ <tr><td>{UnknownPlanetLock (Keymap)|UnknownPlanetLock}(PlanetLock)</td> <td>Active when an unknown planet is selected in the starchart.</td></tr>
+ <tr><td>{BaseLock (Keymap)|BaseLock}(Base, Starchart)</td>              <td>Active when a base is selected in the starchart.</td></tr>
+ <tr><td>{RaceScreen (Keymap)|RaceScreen}(Global)</td>                   <td>Active on race screen.</td></tr>
+ <!--<tr><td>ShipBuildScreen(Global)</td>                                <td>Active on ship build screen.</td></tr>-->
+</table>
+--------------------------------------------------------------------------------
+@type Num
+PCC supports integral and fractional numbers.
+They are entered like usual, for example
+| 1
+| 42
+| 17.4
+| .99
+
+Integral numbers have 32 bits, and a range of +/-2147483647.
+
+Fractional numbers have 48 bits, with about 10 significant digits and a range of about +/- 10^39.
+This is the precision used in data files; internally, PCC2 uses 64 bit precision.
+
+Most operations do not care whether their numeric parameters are integral or fractional.
+<a href="int:index:type:bool">Bools</a> automatically convert to numbers, where
+%True converts to 1, %False to 0.
+
+Some operations require integer numbers; those are documented as taking parameter type
+<a href="int:index:type:int">Int</a>.
+--------------------------------------------------------------------------------
+@type Obj
+An object is something that has properties.
+PCC offers all game data in the form of objects.
+For example, there is an object for each ship, whose properties describe that ship's type, name, mission, and so on.
+
+<h2>Accessing Objects</h2>
+
+To access the built-in objects, you use the {int:index:group:context|Context} functions.
+For example,
+| Ship(13)
+| Beam(Ship(13).Beam$)
+
+You can also create your own objects using the {Struct} and {Dim (Elementary Command)|Dim} commands.
+| Struct Pair
+|   First, Second
+| EndStruct
+| Dim p As Pair        % p now is an object
+
+<h2>Accessing Object Properties</h2>
+
+There are several ways to access object properties.
+
+<b>Directly:</b> write the object name, followed by a dot, and the property name.
+| Print Ship(13).Name
+| Print Beam(Ship(13).Beam$).Name
+Because the dot can also be part of a name, this does not work when the object is just a name.
+%p.First would be interpreted as a single variable, not as a property of %p.
+Therefore, you can also use <tt>-></tt> instead of the dot:
+| Print p->First
+| Print p->Second
+
+<b>Using %With:</b> You can use the {With} statement to temporarily bring object properties into scope:
+| With Ship(13) Do
+|   Print Name        % prints the ship's name
+| EndWith
+| With p Do
+|   Print First       % prints p->First
+| EndWith
+
+<b>Using %ForEach:</b> For context functions, you can use {ForEach} to iterate over all objects of that type.
+| ForEach Ship Do
+|   Print Name        % print the names of all ships
+| Next
+--------------------------------------------------------------------------------
+@type RichText
+Rich text is text with attributes, such as colors, font styles, etc.
+PCC2 uses rich text to build parts of the graphical interface.
+
+Rich text is created and operated upon using functions.
+You cannot use standard operators such as "+" or "=" to work with rich text.
+
+All functions that expect rich text also accept regular <a href="int:index:type:str">strings</a> instead.
+
+@diff Rich Text is supported since PCC 1.99.21. It is not supported by PCC 1.x.
+--------------------------------------------------------------------------------
+@type Str
+A string is a piece of text, a sequence of characters.
+Strings are specified by using single or double quotes:
+| "one string"
+| 'another one'
+Double-quoted strings allow using the "\" to insert special characters, single-quoted strings do not.
+- <tt>\n</tt> inserts a newline character
+- <tt>\"</tt> inserts a double-quote
+- <tt>\\</tt> inserts a backslash
+
+In PCC 1.x, strings are limited to 255 characters.
+PCC2 has no such limit.
+
+In PCC2 since 1.1.12, strings store Unicode characters.
+In previous versions, strings hold the extended ASCII set used as the game character set.
+For external data, this restriction still holds;
+characters not in the game character set are removed because they cannot be stored.
+--------------------------------------------------------------------------------
+
+
+===
+===  Groups
+===
+
+--------------------------------------------------------------------------------
+@group Beam Property
+
+This section describes all beam weapon properties.
+These can be accessed using <tt>{Beam (Function)|Beam}(id).FIELD</tt>, where the Id number is an integer between 1 and 10.
+The beam number is the position of the beam in the selection list. {Beam$} in ship context yields a beam Id.
+--------------------------------------------------------------------------------
+@group Combat Property
+
+This section describes all combat (VCR) properties.
+These can be accessed using <tt>{Vcr (Function)|Vcr}(n).FIELD</tt>, where the index %n goes from 1 to {My.VCRs}.
+Alternatively, use {ForEach} to iterate through the array.
+
+Classic combat in VGA Planets resolves combat in 1:1 pairs.
+Each combat recording therefore contains a fight between two units.
+Their properties are provided as %Left.XXX and %Right.XXX.
+
+PCC2 also supports fleet combat, namely FLAK, which allows many more units in a single fight.
+Therefore, each fight also has a {Unit (Combat Property)|Unit} property which is an array of
+individual {int:index:group:combatparticipantproperty|combat participants}.
+The total number of units in the fight is in the {NumUnits (Combat Property)|NumUnits} property.
+For classic combat, this property is 2, allowing for <tt>Units(1)</tt> (corresponding to %Left.XXX),
+and <tt>Units(2)</tt> (corresponding to %Right.XXX). For fleet combat, there are more elements.
+--------------------------------------------------------------------------------
+@group Combat Participant Property
+
+This section describes all combat participant properties.
+Each unit taking part in a fight is described by one such object.
+It can be accessed using <tt>{Unit (Combat Property)|Unit}(n)</tt> as a {int:index:group:combatproperty|combat property}.
+
+For example, this code iterates through all fights, then through all units, and prints their names:
+| ForEach Vcr Do ForEach Unit Do Print Name
+Properties of the first and second combat participants are also accessible as %Left.Xxx and %Right.Xxx
+combat properties.
+--------------------------------------------------------------------------------
+@group Context
+Each expression is evaluated in a particular context which defines which properties are available.
+Using the context references, you can temporarily switch to a different context to access another object's properties.
+For example, <tt>{Ship()|Ship}(2).Name</tt> yields the name of ship 2, regardless where you are.
+
+If the argument to a context reference is out of range or EMPTY, the return value is EMPTY.
+Use this to your advantage.
+
+In addition, context references are used with the {With} statement.
+There it is an error for a context reference to return EMPTY.
+Context references are also used with the {ForEach} statement.
+There, you do not specify an Id.
+Instead, the command iterates through all objects of that type.
+See {int:index:type:obj|Objects} for details.
+
+@diff Since PCC 1.0.18, context references use singular words.
+The older plural words (<tt>Ships(id)</tt>) continue to be available in PCC 1.x,
+but are not available in PCC2.
+Use only the singular words.
+{ForEach} always used the singular words.
+--------------------------------------------------------------------------------
+@group Drawing Command
+The following commands can be used for drawings.
+To execute a drawing command, use the <tt>{ForEach} Marker</tt> statement.
+
+See also {NewMarker}, {NewLine} etc. for commands to create drawings.
+--------------------------------------------------------------------------------
+@group Drawing Property
+You can iterate through markers and other drawings using the <tt>{ForEach} Marker</tt> statement.
+You can read their properties; certain properties can also be assigned-to.
+
+Markers/drawings can be created using the PCC starchart, or with the
+{NewMarker} command and its relatives.
+If some property can't be changed the way you wish, simply delete the drawing and create it anew.
+
+Scripts inside drawing context can't suspend (using {Stop}).
+Markers do not have a unique handle, so PCC would not know where to wake them up again.
+--------------------------------------------------------------------------------
+@group Elementary Command
+These commands are the core of the scripting system.
+They allow you structuring your programs, and interacting with the interpreter.
+Many of them have a special syntax.
+
+Most of these commands have little or no knowledge of the Planet game,
+for commands to interact with your game, see {int:index:group:globalcommand|Global Commands},
+{int:index:group:shipcommand|Ship Commands}, {int:index:group:planetcommand|Planet Commands},
+and other sections.
+
+The names of these commands are reserved.
+You cannot define own subroutines or variables named identical to elementary commands.
+A line starting with the name of an elementary command is always interpreted as that elementary command,
+even if there is an {int:index:group:elementaryfunction|Elementary Function} of the same name.
+--------------------------------------------------------------------------------
+@group Elementary Function
+These functions are the core of the scripting system.
+They perform elementary computations, much like built-in operators.
+Some of them have a special syntax.
+
+Most of these functions have little or no knowledge of the Planet game,
+for commands to interact with your game, see {int:index:group:function|Functions},
+{int:index:group:context|Contexts}, and other sections.
+
+An elementary function is recognized whenever its name appears followed by a "(" in an expression,
+even if that name has been defined with a different meaning.
+<tt>Z(0)</tt> will always refer to the {Z()} function, even if there is a local variable %Z.
+--------------------------------------------------------------------------------
+@group Engine Property
+This section describes all engine properties.
+These can be accessed using <tt>{Engine (Context)|Engine}(id).FIELD</tt>,
+where the Id number is an integer between 1 and 9.
+The engine number is the position of the engine in the selection list.
+{Engine$ (Ship Property)|Engine$} in ship context yields an engine Id.
+--------------------------------------------------------------------------------
+@group Function
+These functions are available globally.
+
+Unlike {int:index:group:elementaryfunction|Elementary Functions}, they have a regular syntax:
+| NameOfFunction(FirstParameter, SecondParameter, ...)
+They will always evaluate all parameters, and then execute the function.
+
+You can define your own functions using {Function}.
+--------------------------------------------------------------------------------
+@group Global Command
+Global commands are valid virtually anywhere.
+They affect the game or your turn at whole, not only one particular object.
+
+Unlike {int:index:group:elementarycommand|Elementary Commands}, they have a regular syntax:
+| NameOfCommand FirstParameter, SecondParameter, ...
+They will always evaluate all parameters, and then execute the command.
+
+You can define your own commands using {Sub}.
+--------------------------------------------------------------------------------
+@group Global Property
+Global properties are available everywhere.
+They give information on the game as whole.
+Basically, there are four groups:
+- %System.xxx contain information on PCC and the Planets game system on your computer.
+- %Turn.xxx contain information on the turn number.
+- %My.xxx describe your race and your score.
+- %Ships.xxx show how many ships are in the game.
+- plus some others.
+Many things are derived from your score, and will be wrong if the host uses a score blanker
+(a program which prevents that you see your enemy's score).
+
+Global properties can optionally be prefixed with <tt>Global.</tt>
+when their name would otherwise be shadowed by another variable.
+
+Also see {int:index:group:globalvariable|Global Variables}.
+--------------------------------------------------------------------------------
+@group Global Variable
+Global variables are available everywhere.
+Unlike {int:index:group:globalproperty|Global Properties}, these are true variables that behave nicely:
+you can change their values,
+and you can "localize" them (using <tt>{Dim (Elementary Command)|Dim Local}</tt>) so that commands or
+subroutines you call use the local version instead of the global one.
+
+Global variables can optionally be prefixed with <tt>Global.</tt>
+when their name would otherwise be shadowed by another variable.
+--------------------------------------------------------------------------------
+@group Hash Element Property
+You can iterate through the elements of a {int:index:type:hash|Hash} using {ForEach}:
+| Dim hh As Hash
+| % ...
+| ForEach hh Do
+|   Print Key, " = ", Value
+| Next
+--------------------------------------------------------------------------------
+@group Hook
+This section describes all predefined hooks.
+A hook is run when a specific event happens.
+You can register commands to be executed at that event using the {On} command.
+
+Also see {int:index:type:hook|hook cross-reference}.
+--------------------------------------------------------------------------------
+@group Hull Property
+This section describes all hull properties.
+These can be accessed using <tt>{Hull (Context)|Hull}(id).FIELD</tt>,
+where the hull Id is an integer between 1 and 105.
+Such hull Ids can be found in a ship's {Hull$ (Ship Property)|Hull$} property,
+or on the ship specification page (<kbd>S</kbd> on ship screen).
+
+Some of these properties are also accessible in {int:index:group:shipproperty|ship context}.
+--------------------------------------------------------------------------------
+@group Incoming Message Command
+The following commands can be used for messages.
+--------------------------------------------------------------------------------
+@group Incoming Message Property
+You can iterate through your incoming messages using the <tt>{ForEach} {InMsg}</tt> statement,
+and read out their text.
+
+Scripts inside message context can't suspend (using {Stop}).
+This interface is intended for reading out message texts only.
+--------------------------------------------------------------------------------
+@group Internal
+These are internal properties and commands.
+They are used by the interpreter, or for the implementation of various PCC functions.
+They are listed here for completeness;
+you should not use these in your own scripts.
+--------------------------------------------------------------------------------
+@group Keymap
+This section describes all predefined keymaps.
+A keymap is defined using {CreateKeymap} and can be manipulated using {Bind}.
+
+Also see {int:index:type:keymap|keymap cross-reference}.
+--------------------------------------------------------------------------------
+@group Listbox Command
+These commands are used when building list boxes.
+See {Listbox()} for details.
+--------------------------------------------------------------------------------
+@group Minefield Command
+The following commands can be used for minefields.
+--------------------------------------------------------------------------------
+@group Minefield Property
+The following properties are available for searching and printing,
+and in scripts using the <tt>{Minefield()}</tt> function and the <tt>{ForEach} Minefield</tt> command.
+
+PCC records minefield information, and keeps it during turns.
+Minefields you scanned once are managed by PCC even if you don't currently see them.
+The information you get here is approximated by PCC, by assuming the minefield was left there undisturbed,
+subject only to natural decay.
+The %LastScan property can tell you how old the minefield is, decide for yourself if you want to trust it or not.
+--------------------------------------------------------------------------------
+@group Planet Command
+These commands are valid at planets and starbases, and can be used to manipulate these objects.
+
+To execute a planet command, either call the script from an appropriate place
+(e.g., console called on planet screen), or use the <tt>{With} Planet(id) Do</tt> command.
+--------------------------------------------------------------------------------
+@group Planet Property
+This section describes all planet properties.
+These can be accessed using <tt>{Planet (Context)|Planet}(id).FIELD</tt>,
+using a {ForEach} loop, and with the search and print functions.
+
+Many planet properties are only known for own planets.
+If not, they yield EMPTY, even if not explicitly stated here.
+Some properties are also known and remembered for planets you visit, scan or otherwise get information about.
+
+Starbase properties are also accessible from planets and all yield EMPTY if there is no base.
+
+Planet properties can be prefixed with <tt>Planet.</tt>. This makes it possible
+to refer to a planet property which is currently shadowed by an equally-named property of another object.
+--------------------------------------------------------------------------------
+@group Player Property
+The following properties are available during printing, when printing a "Scores" section.
+They describe the score record for each player.
+
+They are also accessible using the {Player()} function.
+When no game is loaded, only the race names are known, all other properties yield EMPTY then.
+--------------------------------------------------------------------------------
+@group Plugin Property
+This section describes plugin properties.
+These can be accessed using <tt>{System.Plugin}(id).FIELD</tt>.
+--------------------------------------------------------------------------------
+@group Ship Command
+These commands are valid on starships, and can be used to give orders to them.
+
+To execute a ship command, either call the script from an appropriate place
+(e.g., console called on ship screen), or use the <tt>{With} Ship(id) Do</tt> command.
+--------------------------------------------------------------------------------
+@group Ship Property
+This section describes all ship properties.
+These can be accessed using <tt>{Ship (Context)|Ship}(id).FIELD</tt>,
+using a {ForEach} loop, and with the search and print functions.
+
+Many ship properties are only known for own ships.
+Some are also known for visual contacts, and only a few for non-visual contacts
+(you may get non-visual contacts if you receive DOS-style RST files).
+Ships whose position was guessed by PCC also count as non-visual contacts.
+Unknown values are EMPTY, even if not explicitly stated here.
+
+Ship properties can be prefixed with <tt>Ship.</tt>.
+This makes it possible to refer to a ship property which is currently shadowed by an
+equally-named property of another object.
+For example, the following is a more complicated way to say <tt>CargoUpload "300n"</tt>:
+| With Planet(Orbit$) Do CargoTransfer Ship.Id, "300n"
+Without the explicit <tt>Ship.</tt>, this would pass a planet Id where
+{CargoTransfer (Planet Command)|CargoTransfer} expects a ship Id, which makes no sense.
+
+Some of the ship properties can be assigned.
+If that would violate any constraint of a fleet (i.e. you try to change the speed of an ordinary member),
+the assignment is silently ignored.
+--------------------------------------------------------------------------------
+@group Storm Command
+These commands are valid at ion storms.
+
+To execute an ion storm command, use the <tt>{With} {Storm (Context)|Storm}(id) Do</tt> command.
+--------------------------------------------------------------------------------
+@group Storm Property
+Ion storm properties are available for searching and printing, using the <tt>{ForEach} Storm</tt> command,
+and the <tt>{Storm (Context)|Storm}(id).FIELD</tt> context.
+
+If you're using the Windows TRN format, you usually see all current ion storms,
+otherwise you only see storms which are new or in your normal scanner range.
+--------------------------------------------------------------------------------
+@group Torpedo Property
+This section describes all torpedo system properties.
+These can be accessed using <tt>{Torpedo (Function)|Torpedo}(id).FIELD</tt>
+and <tt>{Launcher (Function)|Launcher}(id).FIELD</tt>, where the Id number is an integer between 1 and 10.
+The torpedo number is the position of the beam in the selection list. {Torp$} in ship context yields a torpedo Id.
+
+Properties provided by %Torpedo and %Launcher are mostly identical and differ only in that
+the former gives mass and cost of a torpedo, whereas the latter gives mass and cost of a launcher.
+--------------------------------------------------------------------------------
+@group Ufo Command
+These commands are valid at Ufos.
+
+To execute an Ufo command, use the <tt>{With} {Ufo (Context)|Ufo}(id) Do</tt> command.
+--------------------------------------------------------------------------------
+@group Ufo Property
+Ufo properties are available for searching and printing, using the <tt>{ForEach} Ufo</tt> command,
+and the <tt>{Ufo (Context)|Ufo}(id).FIELD</tt> context.
+
+Ufos are provided by add-on programs and represent objects in space other than ships, planets,
+minefields, and ion storms.
+PCC collects and merges Ufo information from Winplan-style result files,
+and PHost's "General Object" and wormholes.
+--------------------------------------------------------------------------------
+@group File Property
+File properties are accessible using the <tt>{ForEach} {DirectoryEntry}(dir)</tt> command.
+--------------------------------------------------------------------------------
+
+
+===
+===  Versions
+===
+
+--------------------------------------------------------------------------------
+@version PCC2 2.40
+First "Next Generation" version.
+--------------------------------------------------------------------------------
+@version PCC2 2.40.1
+--------------------------------------------------------------------------------
+@version PCC2 2.40.3
+--------------------------------------------------------------------------------
+@version PCC2 2.40.5
+--------------------------------------------------------------------------------
+@version PCC2 2.40.6
+--------------------------------------------------------------------------------
+@version PCC2 2.0.5
+--------------------------------------------------------------------------------
+@version PCC2 2.0.4
+--------------------------------------------------------------------------------
+@version PCC2 2.0.3
+--------------------------------------------------------------------------------
+@version PCC2 2.0.2
+--------------------------------------------------------------------------------
+@version PCC2 2.0.1
+--------------------------------------------------------------------------------
+@version PCC2 2.0
+--------------------------------------------------------------------------------
+@version PCC2 1.99.26
+--------------------------------------------------------------------------------
+@version PCC2 1.99.25
+This version introduces {int:statement:plugins|plugins}
+and closes some gaps still remaining between PCC 1.x and PCC2.
+--------------------------------------------------------------------------------
+@version PCC2 1.99.24
+--------------------------------------------------------------------------------
+@version PCC2 1.99.23
+--------------------------------------------------------------------------------
+@version PCC2 1.99.22
+--------------------------------------------------------------------------------
+@version PCC2 1.99.21
+- this manual.
+--------------------------------------------------------------------------------
+@version PCC2 1.99.20
+--------------------------------------------------------------------------------
+@version PCC2 1.99.19
+--------------------------------------------------------------------------------
+@version PCC2 1.99.17
+--------------------------------------------------------------------------------
+@version PCC2 1.99.16
+--------------------------------------------------------------------------------
+@version PCC2 1.99.15
+- Hashes.
+--------------------------------------------------------------------------------
+@version PCC2 1.99.13
+- {Marked} property for Ufos, Minefields, and Ion Storms.
+- variable-argument {Function|functions}/{Sub|subroutines} (<tt>Sub x(a())</tt>).
+--------------------------------------------------------------------------------
+@version PCC2 1.99.12
+- Unicode support.
+- File I/O.
+- Arrays.
+--------------------------------------------------------------------------------
+@version PCC2 1.99.10
+- multi-turn scripts ({Stop} etc.).
+- add an optimizer to improve execution speed.
+--------------------------------------------------------------------------------
+@version PCC2 1.99.9
+First version of PCC2 that can execute commands.
+--------------------------------------------------------------------------------
+@version PCC2 1.99.8
+First version of PCC2 that can evaluate expressions,
+with <a href="pcc2:search">Search</a>, object labels, and <a href="pcc2:console">console</a>.
+--------------------------------------------------------------------------------
+@version PCC 1.1.20
+--------------------------------------------------------------------------------
+@version PCC 1.1.19
+--------------------------------------------------------------------------------
+@version PCC 1.1.18
+Various improvements and fixes to match the advances made with the PCC2 script interpreter:
+
+- slight modifications to {IsSpecialFCode()}, {Random()}, {SetName}.
+- {ForEach} supports iteration over all arrays (e.g. <tt>ForEach Beam Do...</tt>).
+- global variables, properties, context references and functions can be prefixed with <tt>Global.</tt>.
+  This is required at several places in PCC2.
+  Due to the completely different structure of the interpreter in PCC 1.x,
+  there are places where 1.x accepts the `Global.' prefix and PCC2 does not, and vice versa.
+  Therefore, this prefix should only be used where it is required.
+  The typical case looks like this:
+  <pre>
+    With Ship(1) Do Print Hull(Hull$).Name
+  </pre>
+  This will fail in PCC2, which interprets <tt>Hull</tt> as the ship's {Hull (Ship Property)|Hull} property.
+  It can be made work by writing
+  <pre>
+    With Ship(1) Do Print Global.Hull(Hull$).Name
+  </pre>
+  and thus explicitly saying that you're meaning the global array of hulls, not the local `Hull' property.
+--------------------------------------------------------------------------------
+@version PCC 1.1.17
+
+- When the result of operators <tt>/</tt> and <tt>^</tt> is an integer, the result now
+  will have integer type (this is to make things like <tt>BitOr(2^5, 2^10)</tt> work).
+--------------------------------------------------------------------------------
+@version PCC 1.1.16
+
+- {Score} property on starships and planets.
+- Markers can now be assigned color 0 to make them invisible and inaccessible through the normal user interface.
+- Accesses to properties of non-existing objects yielded an error since 1.1.12.
+  they now again yield EMPTY as documented.
+--------------------------------------------------------------------------------
+@version PCC 1.1.15
+- {HasFunction (Ship Property)|HasFunction()} property on starships.
+--------------------------------------------------------------------------------
+@version PCC 1.1.13
+- <tt>{If (Elementary Command)|If}</tt> now supports <tt>Else If</tt>.
+- <tt>{Select (Elementary Command)|Select Case}</tt> statement.
+- access to message properties ({InMsg()}).
+- {Turn.IsNew} and {NewTurn|On NewTurn} hook.
+--------------------------------------------------------------------------------
+@version PCC 1.1.12
+- change in hull function implementation; {Hull.Special.Str} and {H:Special.Str} are no longer supported.
+  {H:Hull.Special} and {H:Special} remain available under the old definition.
+--------------------------------------------------------------------------------
+@version PCC 1.1.11
+--------------------------------------------------------------------------------
+@version PCC 1.1.10
+- improved interface to user keymaps ({UseKeymap}, {Key()}).
+--------------------------------------------------------------------------------
+@version PCC 1.1.7
+- very minor changes only: range of listbox identifiers increased to 32 bits,
+  new Ufo properties to catch up with backend improvements.
+--------------------------------------------------------------------------------
+@version PCC 1.1.6
+- atoms used as marker tags survive exit and reload.
+--------------------------------------------------------------------------------
+@version PCC 1.1.5
+--------------------------------------------------------------------------------
+@version PCC 1.1.4
+- ship build screen finally works (i.e. you access the chosen build order,
+  not the one at the base, from console and keybindings).
+- %Tech properties handled more consistent.
+--------------------------------------------------------------------------------
+@version PCC 1.1.3
+- the %Load hook is now run before auto tasks.
+--------------------------------------------------------------------------------
+@version PCC 1.1.2
+--------------------------------------------------------------------------------
+@version PCC 1.1.1
+--------------------------------------------------------------------------------
+@version PCC 1.1
+--------------------------------------------------------------------------------
+@version PCC 1.0.19
+- {UI.Input}, {UI.InputFCode} and {UI.FileWindow} work in text mode.
+--------------------------------------------------------------------------------
+@version PCC 1.0.18
+- user interface to {Notify} improved.
+- array references now use singular words, for consistency with {ForEach} (see {int:index:group:context|contexts}).
+--------------------------------------------------------------------------------
+@version PCC 1.0.17
+--------------------------------------------------------------------------------
+@version PCC 1.0.16
+- Auto tasks.
+--------------------------------------------------------------------------------
+@version PCC 1.0.15
+- auto-declares ship/planet properties from the starcharts file if needed.
+- control screen keymaps are active in the starcharts.
+- more user interface commands.
+--------------------------------------------------------------------------------
+@version PCC 1.0.14
+- file I/O finally works as it should.
+- marker manipulation.
+- more user interface automation.
+--------------------------------------------------------------------------------
+@version PCC 1.0.13
+- file I/O.
+- several object properties can be assigned-to.
+--------------------------------------------------------------------------------
+@version PCC 1.0.12
+- last-minute: CCS standalone interpreter.
+- user-definable key bindings ({Bind}).
+--------------------------------------------------------------------------------
+@version PCC 1.0.11
+- some new functions and contexts.
+- name lookup is now more consistent. That is
+  <pre>
+   Dim Shared Name
+   With Ships(1) Do Name := "USS " & Name
+  </pre>
+  does no longer read the ship name (right side) but assign to the global variable (left side).
+  They now both refer to the ship name (which can't yet be assigned to).
+- can print backtraces on error.
+--------------------------------------------------------------------------------
+@version PCC 1.0.10
+- Cargo transfer.
+- <tt>Planet.</tt> and <tt>Ship.</tt> prefixes for properties.
+- operator names are now reserved words, so you can no longer call a variable or procedure
+  %Mod (previously, you could write commands such as <tt>mod mod mod mod</tt>
+  if you had a subroutine %mod and a variable %mod).
+--------------------------------------------------------------------------------
+@version PCC 1.0.9
+- Increased interpreter speed.
+- Hooks ({On}, {RunHook}).
+- Some commands for user-interface interaction.
+- Changed interface of function {Cfg}. You do no longer need to know the binary formats of HConfig and PConfig.
+- Running commands from the command line: <tt>cc /k</tt>.
+- Some changes to the interpreter internals to ease other implementations of the CCScript language.
+--------------------------------------------------------------------------------
+@version PCC 1.0.8
+- User-definable properties ({CreateShipProperty}, {CreatePlanetProperty}),
+  along with a new starcharts file format and a much better planet/ship history.
+- Assignment to context reference, e.g., <tt>Ships(10).Comment := "Attack"</tt>.
+- Some new properties.
+- Original PCC 1.x scripting manual.
+--------------------------------------------------------------------------------
+@version PCC 1.0.7
+- {Load} and subroutine invocations now also work inside one-line commands, e.g., <tt>ForEach Ship Do TweakWaypoint</tt>.
+- {Stop} now works, though a bit different than described in 1.0.6.
+- {Break} and {Continue} now do the Right Thing&#x2122; most of the time in one-line loops,
+  but don't work in all of them.
+  The use of {Break} and {Continue} in one-line loops is very little,
+  so I don't want to invest much more brain resources in them.
+- one-line loops can now be stopped with <kbd>Ctrl-C</kbd>.
+- the semantics of {BuildShip} have been changed a little.
+- the semantics of the %Or and %And operators have been changed a bit,
+  they are now more intuitively defined.
+  Previously, <tt>Z(0) or True</tt> was EMPTY.
+  now it is %True because %Or should yield true if at least one of the operands is true -- which it obviously is.
+- PCC 1.0.7 runs in protected mode if possible, making much more memory available for scripts.
+- there is now a task manager <kbd>Alt-Q</kbd>.
+--------------------------------------------------------------------------------
+@version PCC 1.0.6
+- multi-line commands.
+- object references ({int:index:group:context|contexts}).
+- scripts files ({Load}).
+--------------------------------------------------------------------------------
+@version PCC 1.0.5
+First version that supports scripting, as one-line commands entered at the console.
+--------------------------------------------------------------------------------
+@version PCC 1.0.4
+--------------------------------------------------------------------------------
+@version PCC 0.99.7
+--------------------------------------------------------------------------------
+@version PCC 0.99.6
+--------------------------------------------------------------------------------
+@version PCC 0.99.2
+--------------------------------------------------------------------------------
+@version PCC 0.99
+First version with Print function.
+--------------------------------------------------------------------------------
+@version PCC 0.98.5
+--------------------------------------------------------------------------------
+@version PCC 0.98.3
+First version with Search function.
+--------------------------------------------------------------------------------
+
+
+
+===
+===  Appendix
+===
+@page group:int:appendix, Appendix
+--------------------------------------------------------------------------------
+
+@page int:appendix, Appendix
+@in group:int:appendix
+
+- {int:appendix:1vs2|Differences between PCC 1.x and PCC2}
+- {int:appendix:experimental|Experimental Features}
+- {int:appendix:rationale|Rationale}
+--------------------------------------------------------------------------------
+@page int:appendix:1vs2, Changes between PCC 1.x and PCC2
+@in group:int:appendix
+
+This section contains known and intentional differences between the PCC 1.x and the PCC2 version
+of the scripting language.
+Often, new versions of PCC 1.x or PCC2 introduce new commands, functions or properties.
+Those are referenced in the {int:index:versions|Version Index}.
+
+<h2>Implementation Differences</h2>
+
+The basic principle of the script interpreter differs completely between PCC 1.x and PCC2.
+Whereas PCC2 compiles a script into an internal representation before executing it
+(like most script interpreters do today), PCC 1.x interprets the script line-by-line.
+This allows PCC 1.x to execute scripts with much less memory than PCC2, which is an issue
+for a DOS application, but is no longer relevant today.
+
+Other differences:
+
+- In PCC 1.x identifiers are truncated to 31 characters.
+  PCC2 allows up to 255 (this limit is imposed by PCC2 using similar file formats as PCC 1.x).
+- PCC 1.x limits string values to 255 characters. PCC2 does not.
+  {int:index:version:pcc1.0.18|PCC 1.0.18} can read long property fields written by PCC2,
+  and truncates accordingly.
+- PCC 1.x allows unterminated string constants; the constant ends at the end of the line.
+  PCC2 does not allow that.
+  Likewise, code that is never executed can be syntactically invalid in PCC 1.x; PCC2 does not permit that.
+- PCC 1.x uses 48-bit floating point internally and externally.
+  PCC2 uses 64-bit floating point internally and 48-bit externally.
+- Error messages may read differently.
+- In PCC 1.x, not all arguments of a function/operator may be evaluated when one of them is EMPTY
+  (this is undefined, actually). PCC2 generally evaluates them all.
+- PCC 1.x has a rather weird name lookup scheme.
+  In particular, it does not prevent you from defining subroutines named <tt>If</tt> or similar,
+  which would then break almost everything.
+  PCC2 has an (almost) consistent name resolution scheme.
+  {int:index:group:elementarycommand|Elementary Commands} and {int:index:group:elementaryfunction|Elementary Functions},
+  many of which have a special syntax, are reserved and cannot be overridden.
+  Everything else is found using regular name lookup.
+- In some cases, name lookup rules can break things that used to work.
+  Whereas PCC 1.x allows you to evaluate <tt>Hull(17)</tt> or even <tt>Hull(Hull$)</tt> in ship context,
+  PCC2 does not, because in ship context,
+  %Hull refers to the ship's {int:name:hull:shipproperty|Hull property}.
+  In PCC 1.x, this worked because %Hull was an elementary function
+  (all functions were elementary in PCC 1.x, except for a really small number of array properties).<br />
+  I am considering implementing a hack around this, though, because it's pretty annoying.
+- {Cfg()} does not distinguish Integer and Boolean options, and always returns Integer.
+- <tt>{System.Err}</tt> can be localized in PCC2.
+  In PCC 1.x, the last error caught using %Try/%Else was stored in a global %System.Err property.
+  In PCC2, you can define a local variable of that name to catch the error messages without disturbing the caller.
+
+<h2>Unimplemented Features</h2>
+
+- %Beams(), %Engines(), %Hulls(), %Launchers(), %Minefields(), %Planets(), %Players(), %Ships(), %Storms(), %Torpedoes():
+  the plural array names are not implemented in PCC2.
+  Use the singular names (e.g. {Ship()}, {Torpedo()}) instead.
+  Although PCC 1.x originally introduced the plural names,
+  singular names have been supported and preferred since {int:index:version:pcc1.0.18|PCC 1.0.18}.
+  Their main advantage is that they are consistent between use as array for indexing, and use in %ForEach.
+- <tt>Hull().Special.Str</tt>, <tt>Ship().Hull.Special.Str</tt>:
+  These properties have been obsolete since PCC 1.1.12 and have just returned an empty string since then.
+  PCC2 drops them entirely.
+- PCC 1.x allows <tt>On xxx Do Return</tt> to exit a hook.
+  Everything added after that line is not executed.
+  This is not supported in PCC2.
+
+--------------------------------------------------------------------------------
+@page int:appendix:experimental, Experimental Features
+@in group:int:appendix
+
+This section describes experimental features of the interpreter in PCC2.
+They may still change their behaviour or be removed completely.
+They are not generally intended for the casual user.
+
+This section does not apply to PCC 1.x.
+
+In this section, "subroutine" refers to a subroutine defined with {Sub}, or to a function defined with {Function}.
+
+<h2>Subroutine and Object References</h2>
+
+Normally, a subroutine or structure type is global:
+executing a {Sub}/{Function}/{Struct} statement makes the subroutine or type available to all other scripts in the system.
+Subroutines and types are defined in the same context as global variables (<tt>{Dim} Shared</tt>).
+
+Because these things are normal objects, they can be assigned as usual:
+
+| Sub Foo (x)
+|   Print x
+| EndSub
+| Dim Bar := Foo
+
+This defines a subroutine %Foo.
+A variable %Bar is defined and set to %Foo, making it an alternative way to refer to this subroutine.
+To call the subroutine, you could therefore use
+
+| Foo "this"
+| Bar "or this"
+
+The same goes for arrays, objects, types, context references, etc.
+
+| Dim a := Ship
+| Dim b := a(1)
+| Dim c := b->Name   % same as c := Ship(1).Name
+
+This feature isn't widely advertised because it can easily lead to problems if used wrong:
+- not all references can be saved in the <tt>scriptX.cc</tt> file when PCC2 closes and reloads.
+  If such a reference appears in a process's variable when that process is about to be saved,
+  the process will be terminated.
+- it's possible to build cyclic references which PCC2's memory manager cannot resolve, so your
+  script will leak memory if you do not resolve cycles.
+- it's plenty of rope to hang yourself. For example, after "<tt>Ship := Planet</tt>",
+  the reference "<tt>Ship(12)</tt>" will actually give you planet #12, and ships will no longer be accessible.
+
+Note that this only applies to regular subroutines and builtin commands.
+It does not apply to elementary commands.
+It is not possible to make a variable with an alternative name for, say, %If,
+and it is not possible to make %If mean anything else than the {If|default meaning}.
+
+<h2>Local Subroutines</h2>
+
+It is possible to define subroutines in local (subroutine scope) or static (script scope) context.
+
+To enable the feature, use <tt>{Option} LocalSubs(1)</tt>.
+Then, define subroutines using <tt>Local Sub...</tt>.
+For example,
+
+| Option LocalSubs(1)
+| Sub PrintSquare(n)
+|   Local Function MakeRow(n)
+|     Return String(n, "X")
+|   EndFunction
+|   Local i
+|   For i:=1 To n Do Print MakeRow(n)
+| EndSub
+
+In this example, the %MakeRow function is only defined during the execution of the %PrintSquare function.
+It is not available to any other function.
+
+Be careful that some code will be executed outside the current function. For example,
+| Sub Initialize
+|   Local Sub Callback    % wrong!
+|     Print "something"
+|   EndSub
+|   On Load Do Callback   % wrong!
+| EndSub
+will not work. When the <tt>On Load</tt> hook runs, %Initialize will have finished executing,
+and %Callback is no longer defined.
+
+<h2>Local Types</h2>
+
+Like subroutines, you can also define types locally.
+
+To enable the feature, use <tt>{Option} LocalTypes(1)</tt>.
+Then, define types using <tt>Local Struct...</tt>.
+
+For example:
+
+| Option LocalTypes(1)
+| Function MakePair(x,y)
+|   Local Struct Pair
+|     X, Y
+|   EndStruct
+|   Dim a As Pair
+|   a->X := x
+|   a->Y := y
+|   Return a
+| EndFunction
+
+<h2>Types are Functions</h2>
+
+The documented way to define an instance of a type is <tt>Dim...As</tt>.
+| Struct Coord
+|   X, Y
+| EndStruct
+| Dim pos As Coord
+
+Defining such a structure actually just defines a <em>constructor function</em> named the same as the type.
+Thus, you can also create instances of a type by using a function call:
+| Dim pos2 := Coord()
+| pos := Coord()
+
+The advantage of this notation is that you can use it everywhere, not just in %Dim statements.
+
+--------------------------------------------------------------------------------
+@page int:appendix:rationale, Rationale
+@in group:int:appendix
+
+This section explains the ideas behind the scripting language, and why things are as they are.
+
+<h2>BASICoid syntax</h2>
+
+The language syntax vaguely resembles BASIC.
+
+In the beginning, there was the report and query language.
+Essentially, we have three major language families to choose from,
+and BASIC turns out to be the easiest one for a report and query language.
+Here's a sample expression:
+| Owner=My.Race And Orbit.Enemy
+In Pascal style, we'd need additional parentheses, and in C style, we'd have to use "strange" operators
+(remember our audience is not just programmers):
+| (Owner=My.Race) And Orbit.Enemy
+| Owner==My.Race && Owner.Enemy
+
+All this completely neglects the underlying language's type system and naming rules.
+Here, BASIC wins again by being so un-standardized in that area that it doesn't hurt when we add a new dialect :-)
+Besides, I never claimed this to be BASIC.
+
+However, since PCC2 does byte-compilation, it's now possible to add different front-ends with little effort.
+
+<h2>Untypedness</h2>
+
+The language is untyped, i.e. it does not require programmers to declare what
+types of values they want to store in variables.
+
+Besides this being the de-facto standard in scripting languages,
+a 100% requirement for the language was to have the notion of an unknown value (EMPTY).
+So, even if we'd allow variables that always contain numbers, they'd have to be able to accept numbers-or-EMPTY.
+Allowing it to accept numbers-or-EMPTY-or-anything-else just makes not much of a difference.
+
+<h2>Dynamic Scope</h2>
+
+Dynamic scope means a name is looked up in its current execution context,
+and needn't be declared in the function it's used in.
+
+This allows many useful features, such as searching for units owned by player 2
+by using the expression <tt>Owner$=2</tt>, and have PCC automatically select
+ship, planet, or other context.
+
+In PCC 1.x, dynamic scope is the only way to pass values back from a function,
+without completely reverting to global variables. This is required by things like <tt>{UI.Input}</tt>.
+Although PCC2 allows functions, it keeps this model of user-interface interaction.
+--------------------------------------------------------------------------------
+
+
+
+
+@q AfterExit:Hook (Hook)
+@noproto
+| On AfterExit Do command
+Commands registered for the %AfterExit {int:index:type:hook|hook} are run
+immediately after a the user has left a game and returned to the game/race selection screen.
+@since PCC2 1.99.25, PCC 1.0.10
+--------------------------------------------------------------------------------
+@q BeforeLoad:Hook (Hook)
+@noproto
+| On BeforeLoad Do command
+Commands registered for the %BeforeLoad {int:index:type:hook|hook} are run
+just before game data is loaded.
+@since PCC2 1.99.25, PCC 1.0.10
+--------------------------------------------------------------------------------
+@q EnterDirectory:Hook (Hook)
+@noproto
+| On EnterDirectory Do command
+Commands registered for the %EnterDirectory {int:index:type:hook|hook} are run
+when a directory is entered, before game data is loaded, just before {BeforeLoad}.
+@since PCC2 1.99.9
+--------------------------------------------------------------------------------
+@q Exit:Hook (Hook)
+@noproto
+| On Exit Do command
+Commands registered for the %Exit {int:index:type:hook|hook} are run just before exiting a game.
+This is the right place to save state.
+@since PCC2 1.99.25, PCC 1.0.9
+--------------------------------------------------------------------------------
+@q Load:Hook (Hook)
+@noproto
+| On Load Do command
+Commands registered for the %Load {int:index:type:hook|hook} are run immediately after a game has been loaded.
+This is the right place to load data that is needed for playing.
+@since PCC2 1.99.9, PCC 1.0.9
+--------------------------------------------------------------------------------
+@q Maketurn:Hook (Hook)
+@noproto
+| On Maketurn Do command
+Commands registered for the %Maketurn {int:index:type:hook|hook} are run
+after turn files have been compiled by the Maketurn function.
+
+<b>Note:</b> This functionality does not exist in PCC2.
+@since PCC 1.1.4
+--------------------------------------------------------------------------------
+@q NewTurn:Hook (Hook)
+@noproto
+| On NewTurn Do command
+Commands registered for the %NewTurn {int:index:type:hook|hook} are run
+immediately after {Load (Hook)} when PCC is started first in a new turn.
+@since PCC2 1.99.12, PCC 1.1.13
+--------------------------------------------------------------------------------
+@q Quit:Hook (Hook)
+@noproto
+| On Quit Do command
+Commands registered for the %Quit {int:index:type:hook|hook} are run just before PCC closes.
+@since PCC 1.0.10, PCC2 1.99.25
+--------------------------------------------------------------------------------
+@q Unpack:Hook (Hook)
+@noproto
+| On Unpack Do command
+Commands registered for the %Unpack {int:index:type:hook|hook} are run
+after result files have been unpacked.
+
+<b>Note:</b> This functionality does not exist in PCC2.
+@since PCC 1.1.4
+--------------------------------------------------------------------------------
+@q UnpackScan:Hook (Hook)
+@noproto
+| On UnpackScan Do command
+Commands registered for the %UnpackScan {int:index:type:hook|hook} are run
+just before PCC looks for new result files.
+
+<b>Note:</b> This functionality does not exist in PCC2.
+@since PCC 1.1.4
+--------------------------------------------------------------------------------
+
+
+
+
+@q Global:Keymap (Keymap)
+@noproto
+| Bind Global key := command
+Keys on this {int:index:type:keymap|keymap} are active at every place where PCC consults a keymap.
+@since PCC 1.0.19, PCC2 1.99.9
+--------------------------------------------------------------------------------
+@q Ship:Keymap (Keymap)
+@noproto
+| Bind Ship key := command
+Keys on this {int:index:type:keymap|keymap} are active whenever focus is on a ship.
+- starship screen (via {ShipScreen (Keymap)|ShipScreen keymap})
+- ship history screen (via {HistoryScreen (Keymap)|HistoryScreen keymap})
+- ship lock on starchart (via {ShipLock (Keymap)|ShipLock keymap})
+@since PCC 1.1.17, PCC2 1.99.9
+@@ Ship(ControlScreen) in 1.1.17
+--------------------------------------------------------------------------------
+@q Planet:Keymap (Keymap)
+@noproto
+| Bind Planet key := command
+Keys on this {int:index:type:keymap|keymap} are active whenever focus is on a planet.
+- planet screen (via {PlanetScreen (Keymap)|PlanetScreen keymap})
+- planet lock on starchart (via {PlanetLock (Keymap)|PlanetLock keymap})
+@since PCC 1.1.17, PCC2 1.99.9
+@@ Planet(ControlScreen) in 1.1.17
+--------------------------------------------------------------------------------
+@q Base:Keymap (Keymap)
+@noproto
+| Bind Base key := command
+Keys on this {int:index:type:keymap|keymap} are active whenever focus is on a starbase.
+- starbase screen (via {BaseScreen (Keymap)|BaseScreen keymap})
+- starbase lock on starchart (via {BaseLock (Keymap)|BaseLock keymap})
+@since PCC2 1.99.9
+@@ not in PCC 1.x
+--------------------------------------------------------------------------------
+@q Fleet:Keymap (Keymap)
+@noproto
+| Bind Fleet key := command
+Keys on this {int:index:type:keymap|keymap} are active whenever focus is on a fleet.
+- fleet screen (via {FleetScreen (Keymap)|FleetScreen keymap})
+@since PCC2 1.99.9
+@@ not in PCC 1.x
+--------------------------------------------------------------------------------
+@q ControlScreen:Keymap (Keymap)
+@noproto
+| Bind ControlScreen key := command
+Keys on this {int:index:type:keymap|keymap} are active on all control screens.
+- starship screen (via {ShipScreen (Keymap)|ShipScreen keymap})
+- planet screen (via {PlanetScreen (Keymap)|PlanetScreen keymap})
+- starbase screen (via {BaseScreen (Keymap)|BaseScreen keymap})
+- ship history screen (via {HistoryScreen (Keymap)|HistoryScreen keymap})
+- fleet screen (via {FleetScreen (Keymap)|FleetScreen keymap})
+- auto task screen (via {AutoTaskScreen (Keymap)|AutoTaskScreen keymap} and its descendants)
+
+This keymap includes (derives from) {Global (Keymap)|Global}.
+@since PCC2 1.99.9, PCC 1.0.12
+--------------------------------------------------------------------------------
+@q ShipScreen:Keymap (Keymap)
+@noproto
+| Bind ShipScreen key := command
+Keys on this {int:index:type:keymap|keymap} are active on the <a href="pcc2:shipscreen">ship screen</a>.
+
+This keymap includes (derives from) {ControlScreen (Keymap)|ControlScreen} and {Ship (Keymap)|Ship}.
+@since PCC 1.0.12, PCC2 1.99.9
+@@ derives only Ship in PCC 1.x
+--------------------------------------------------------------------------------
+@q PlanetScreen:Keymap (Keymap)
+@noproto
+| Bind PlanetScreen key := command
+Keys on this {int:index:type:keymap|keymap} are active on the <a href="pcc2:planetscreen">planet screen</a>.
+
+This keymap includes (derives from) {ControlScreen (Keymap)|ControlScreen} and {Planet (Keymap)|Planet}.
+@since PCC 1.0.12, PCC2 1.99.9
+@@ derives only Planet in PCC 1.x
+--------------------------------------------------------------------------------
+@q BaseScreen:Keymap (Keymap)
+@noproto
+| Bind BaseScreen key := command
+Keys on this {int:index:type:keymap|keymap} are active on the <a href="pcc2:basescreen">base screen</a>.
+
+This keymap includes (derives from) {ControlScreen (Keymap)|ControlScreen} and {Base (Keymap)|Base}.
+@since PCC 1.0.12, PCC2 1.99.9
+@@ derives only ControlScreen in PCC 1.x
+--------------------------------------------------------------------------------
+@q FleetScreen:Keymap (Keymap)
+@noproto
+| Bind FleetScreen key := command
+Keys on this {int:index:type:keymap|keymap} are active on the <a href="pcc2:fleetscreen">fleet screen</a>.
+
+This keymap includes (derives from) {ControlScreen (Keymap)|ControlScreen} and {Fleet (Keymap)|Fleet}.
+@since PCC 1.0.14, PCC2 1.99.9
+@@ derives only ControlScreen in PCC 1.x
+--------------------------------------------------------------------------------
+@q HistoryScreen:Keymap (Keymap)
+@noproto
+| Bind HistoryScreen key := command
+Keys on this {int:index:type:keymap|keymap} are active on the <a href="pcc2:historyscreen">starship history screen</a>.
+
+This keymap includes (derives from) {ControlScreen (Keymap)|ControlScreen} and {Ship (Keymap)|Ship}.
+@since PCC 1.0.15, PCC2 1.99.9
+@@ derives only ControlScreen in PCC 1.x
+@@ derives only ControlScreen before 1.99.15
+--------------------------------------------------------------------------------
+@q AutoTaskScreen:Keymap (Keymap)
+@noproto
+| Bind AutoTaskScreen key := command
+Keys on this {int:index:type:keymap|keymap} are active on the <a href="pcc2:taskscreen">auto task screens</a>.
+- ship task screen (via {ShipTaskScreen (Keymap)|ShipTaskScreen keymap})
+- planet task screen (via {PlanetTaskScreen (Keymap)|PlanetTaskScreen keymap})
+- starbase task screen (via {BaseTaskScreen (Keymap)|BaseTaskScreen keymap})
+
+This keymap includes (derives from) {ControlScreen (Keymap)|ControlScreen}.
+@since PCC 1.0.16, PCC2 1.99.9
+--------------------------------------------------------------------------------
+@q ShipTaskScreen:Keymap (Keymap)
+@noproto
+| Bind ShipTaskScreen key := command
+Keys on this {int:index:type:keymap|keymap} are active on the <a href="pcc2:shiptaskscreen">ship auto task screens</a>.
+
+This keymap includes (derives from) {AutoTaskScreen (Keymap)|AutoTaskScreen}.
+@since PCC2 1.99.16
+--------------------------------------------------------------------------------
+@q PlanetTaskScreen:Keymap (Keymap)
+@noproto
+| Bind PlanetTaskScreen key := command
+Keys on this {int:index:type:keymap|keymap} are active on the <a href="pcc2:planettaskscreen">planet auto task screens</a>.
+
+This keymap includes (derives from) {AutoTaskScreen (Keymap)|AutoTaskScreen}.
+@since PCC2 1.99.16
+--------------------------------------------------------------------------------
+@q BaseTaskScreen:Keymap (Keymap)
+@noproto
+| Bind BaseTaskScreen key := command
+Keys on this {int:index:type:keymap|keymap} are active on the <a href="pcc2:basetaskscreen">starbase auto task screens</a>.
+
+This keymap includes (derives from) {AutoTaskScreen (Keymap)|AutoTaskScreen}.
+@since PCC2 1.99.16
+--------------------------------------------------------------------------------
+@q Starchart:Keymap (Keymap)
+@noproto
+| Bind Starchart key := command
+Keys on this {int:index:type:keymap|keymap} are active on the <a href="pcc2:starchart">starchart</a>.
+When an object is locked, that object's keymap is active as well
+({ShipLock (Keymap)|ShipLock},
+{PlanetLock (Keymap)|PlanetLock},
+{BaseLock (Keymap)|BaseLock},
+{UnknownPlanetLock (Keymap)|UnknownPlanetLock})).
+
+This keymap includes (derives from) {Global (Keymap)|Global}.
+@since PCC2 1.99.9, PCC 1.0.15
+--------------------------------------------------------------------------------
+@q ShipLock:Keymap (Keymap)
+@noproto
+| Bind ShipLock key := command
+Keys on this {int:index:type:keymap|keymap} are active when a ship is locked on the <a href="pcc2:starchart">starchart</a>.
+
+This keymap includes (derives from) {Starchart (Keymap)|Starchart} and {Ship (Keymap)|Ship}.
+@since PCC2 1.99.9
+--------------------------------------------------------------------------------
+@q PlanetLock:Keymap (Keymap)
+@noproto
+| Bind PlanetLock key := command
+Keys on this {int:index:type:keymap|keymap} are active when a planet is locked on the <a href="pcc2:starchart">starchart</a>.
+An unknown planet (nothing but location and name known) uses the {UnknownPlanetLock (Keymap)|UnknownPlanetLock} keymap instead,
+which includes (derives from) this one.
+
+This keymap includes (derives from) {Starchart (Keymap)|Starchart} and {Planet (Keymap)|Planet}.
+@since PCC2 1.99.9
+--------------------------------------------------------------------------------
+@q BaseLock:Keymap (Keymap)
+@noproto
+| Bind BaseLock key := command
+Keys on this {int:index:type:keymap|keymap} are active when a starbase is locked on the <a href="pcc2:starchart">starchart</a>.
+A starbase can be locked at using <kbd>B</kbd> from a planet.
+
+This keymap includes (derives from) {Starchart (Keymap)|Starchart} and {Base (Keymap)|Base}.
+@since PCC2 1.99.9
+--------------------------------------------------------------------------------
+@q UnknownPlanetLock:Keymap (Keymap)
+@noproto
+| Bind UnknownPlanetLock key := command
+Keys on this {int:index:type:keymap|keymap} are active when an unknown planet
+(nothing but location and name known) planet is locked on the <a href="pcc2:starchart">starchart</a>.
+
+This keymap includes (derives from) {PlanetLock (Keymap)|PlanetLock}.
+@since PCC2 1.99.10
+--------------------------------------------------------------------------------
+@q RaceScreen:Keymap (Keymap)
+@noproto
+| Bind RaceScreen key := command
+Keys on this {int:index:type:keymap|keymap} are active on the <a href="pcc2:racescreen">race screen</a> (player main menu).
+
+This keymap includes (derives from) {Global (Keymap)|Global}.
+@since PCC2 1.99.9, PCC 1.1.17
+--------------------------------------------------------------------------------
+@q ShipBuildScreen:Keymap (Keymap)
+@noproto
+| Bind ShipBuildScreen key := command
+Keys on this {int:index:type:keymap|keymap} are active on the <a href="pcc2:buildship">ship build screen</a>.
+
+This keymap includes (derives from) {Global (Keymap)|Global}.
+
+<b>Note:</b> This functionality does not exist in PCC2.
+Although keys can be defined, they will not be honored.
+@since PCC 1.0.15
+@@ defined since 1.99.9
+--------------------------------------------------------------------------------

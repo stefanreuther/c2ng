@@ -28,6 +28,7 @@
 #include "ui/widgets/imagebutton.hpp"
 #include "ui/widgets/quit.hpp"
 #include "util/unicodechars.hpp"
+#include "client/proxy/configurationproxy.hpp"
 
 using ui::widgets::FrameGroup;
 using ui::widgets::AbstractButton;
@@ -456,7 +457,8 @@ client::dialogs::VisualScanDialog::SpecPeer::SpecPeer(ui::Root& root, Window& pa
       m_specSheet(root,
                   false /* FIXME: hasPerTurnCosts */,
                   client::proxy::PlayerProxy(parent.m_gameSender).getAllPlayers(link),
-                  client::proxy::PlayerProxy(parent.m_gameSender).getPlayerNames(link, game::Player::AdjectiveName))
+                  client::proxy::PlayerProxy(parent.m_gameSender).getPlayerNames(link, game::Player::AdjectiveName),
+                  client::proxy::ConfigurationProxy(parent.m_gameSender).getNumberFormatter(link))
 {
     m_window.add(m_specSheet);
     m_window.pack();

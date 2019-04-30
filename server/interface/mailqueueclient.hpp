@@ -22,6 +22,7 @@ namespace server { namespace interface {
         virtual void confirmAddress(String_t address, String_t key, afl::base::Optional<String_t> info);
         virtual void requestAddress(String_t user);
         virtual void runQueue();
+        virtual UserStatus getUserStatus(String_t user);
 
      private:
         afl::net::CommandHandler& m_commandHandler;

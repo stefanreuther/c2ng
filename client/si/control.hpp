@@ -16,6 +16,7 @@ namespace client { namespace si {
 
     class UserSide;
     class ContextProvider;
+    class ScriptTask;
 
     // FIXME: for testability and configurability, it makes sense to split this class into a listener half (UserSide callback)
     // and an actual implementation (EventLoop/Root etc.)
@@ -24,9 +25,9 @@ namespace client { namespace si {
         Control(UserSide& iface, ui::Root& root, afl::string::Translator& tx);
         virtual ~Control();
 
-        void attachPreparedWait(uint32_t waitId);
         void executeCommandWait(String_t command, bool verbose, String_t name);
         void executeKeyCommandWait(String_t keymapName, util::Key_t key, int prefix);
+        void executeTaskWait(std::auto_ptr<ScriptTask> task);
         void continueProcessWait(RequestLink2 link);
         void handleWait(uint32_t id, interpreter::Process::State state, interpreter::Error error);
         void setInteracting(bool state);
@@ -46,12 +47,15 @@ namespace client { namespace si {
         virtual void handleStateChange(UserSide& ui, RequestLink2 link, OutputState::Target target) = 0;
         virtual void handleEndDialog(UserSide& ui, RequestLink2 link, int code) = 0;
         virtual void handlePopupConsole(UserSide& ui, RequestLink2 link) = 0;
+        virtual void handleSetViewRequest(UserSide& ui, RequestLink2 link, String_t name, bool withKeymap) = 0;
         virtual ContextProvider* createContextProvider() = 0;
 
      protected:
         void defaultHandlePopupConsole(UserSide& ui, RequestLink2 link);
+        void defaultHandleSetViewRequest(UserSide& ui, RequestLink2 link, String_t name, bool withKeymap);
 
      private:
+        void executeTaskInternal(std::auto_ptr<ScriptTask> task, String_t name);
         void updateBlocker();
 
         bool m_waiting;

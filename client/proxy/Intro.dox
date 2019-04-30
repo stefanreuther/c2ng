@@ -8,7 +8,7 @@
 
      - synchronous, two-way proxy: you call a method on the proxy. On return, you have a result.
        Since calls into the game thread may block, this will have to suspend the UI,
-       and requires the called to provide a Downlink object.
+       and requires the caller to provide a Downlink object.
        Typical uses include configuration inquiries that can affect the UI flow.
        Synchronous proxies can be short-lived.
 

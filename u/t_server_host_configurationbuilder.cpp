@@ -7,6 +7,9 @@
 
 #include "t_server_host.hpp"
 
+/** Test ConfigurationBuilder.
+    A: perform various addValue() calls with valid and invalid parameters
+    E: correct result produced */
 void
 TestServerHostConfigurationBuilder::testIt()
 {
@@ -30,6 +33,18 @@ TestServerHostConfigurationBuilder::testIt()
         server::host::ConfigurationBuilder testee;
         testee.addValue("a", "b, c, d");
         TS_ASSERT(testee.getContent().equalContent(afl::string::toBytes("a=b,\\ c,\\ d\n")));
+    }
+    // Bad value
+    {
+        server::host::ConfigurationBuilder testee;
+        testee.addValue("a", "x\ny");
+        TS_ASSERT(testee.getContent().equalContent(afl::string::toBytes("a=x\n")));
+    }
+    // Unicode value
+    {
+        server::host::ConfigurationBuilder testee;
+        testee.addValue("qq", "x\xc3\xb6y");
+        TS_ASSERT(testee.getContent().equalContent(afl::string::toBytes("qq=x\xc3\xb6y\n")));
     }
 }
 

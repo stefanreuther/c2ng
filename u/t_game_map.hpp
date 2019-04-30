@@ -7,6 +7,13 @@
 
 #include <cxxtest/TestSuite.h>
 
+class TestGameMapBaseStorage : public CxxTest::TestSuite {
+ public:
+    void testAccess();
+    void testValid();
+    void testClear();
+};
+
 class TestGameMapCircularObject : public CxxTest::TestSuite {
  public:
     void testIt();
@@ -104,6 +111,12 @@ class TestGameMapPlanetPredictor : public CxxTest::TestSuite {
 class TestGameMapPoint : public CxxTest::TestSuite {
  public:
     void testBasics();
+    void testModify();
+    void testOperators();
+    void testParse();
+    void testParseFail();
+    void testCompare();
+    void testDistance();
 };
 
 class TestGameMapRenderList : public CxxTest::TestSuite {

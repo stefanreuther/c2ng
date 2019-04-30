@@ -74,6 +74,11 @@ class TestServerInterfaceFormatServer : public CxxTest::TestSuite {
     void testErrors();
 };
 
+class TestServerInterfaceGameAccess : public CxxTest::TestSuite {
+ public:
+    void testInterface();
+};
+
 class TestServerInterfaceHostCron : public CxxTest::TestSuite {
  public:
     void testInterface();
@@ -136,6 +141,23 @@ class TestServerInterfaceHostGameServer : public CxxTest::TestSuite {
     void testRoundtrip();
 };
 
+class TestServerInterfaceHostHistory : public CxxTest::TestSuite {
+ public:
+    void testInterface();
+};
+
+class TestServerInterfaceHostHistoryClient : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
+class TestServerInterfaceHostHistoryServer : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testErrors();
+    void testRoundtrip();
+};
+
 class TestServerInterfaceHostPlayer : public CxxTest::TestSuite {
  public:
     void testInterface();
@@ -151,6 +173,23 @@ class TestServerInterfaceHostPlayerClient : public CxxTest::TestSuite {
 };
 
 class TestServerInterfaceHostPlayerServer : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testErrors();
+    void testRoundtrip();
+};
+
+class TestServerInterfaceHostRanking : public CxxTest::TestSuite {
+ public:
+    void testInterface();
+};
+
+class TestServerInterfaceHostRankingClient : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
+class TestServerInterfaceHostRankingServer : public CxxTest::TestSuite {
  public:
     void testIt();
     void testErrors();
@@ -175,6 +214,23 @@ class TestServerInterfaceHostScheduleServer : public CxxTest::TestSuite {
  public:
     void testIt();
     void testErrors();
+    void testRoundtrip();
+};
+
+class TestServerInterfaceHostSlot : public CxxTest::TestSuite {
+ public:
+    void testInterface();
+};
+
+class TestServerInterfaceHostSlotClient : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
+class TestServerInterfaceHostSlotServer : public CxxTest::TestSuite {
+ public:
+    void testServer();
+    void testError();
     void testRoundtrip();
 };
 
@@ -219,6 +275,7 @@ class TestServerInterfaceHostTurnServer : public CxxTest::TestSuite {
 class TestServerInterfaceMailQueue : public CxxTest::TestSuite {
  public:
     void testInterface();
+    void testAddressStatus();
 };
 
 class TestServerInterfaceMailQueueClient : public CxxTest::TestSuite {
@@ -237,6 +294,23 @@ class TestServerInterfaceSessionRouter : public CxxTest::TestSuite {
     void testInterface();
     void testParse();
     void testFormat();
+};
+
+class TestServerInterfaceTalkAddress : public CxxTest::TestSuite {
+ public:
+    void testInterface();
+};
+
+class TestServerInterfaceTalkAddressClient : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
+class TestServerInterfaceTalkAddressServer : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testErrors();
+    void testRoundtrip();
 };
 
 class TestServerInterfaceTalkFolder : public CxxTest::TestSuite {
@@ -404,6 +478,57 @@ class TestServerInterfaceTalkUserClient : public CxxTest::TestSuite {
 class TestServerInterfaceTalkUserServer : public CxxTest::TestSuite {
  public:
     void testIt();
+    void testErrors();
+    void testRoundtrip();
+};
+
+class TestServerInterfaceUserData : public CxxTest::TestSuite {
+ public:
+    void testInterface();
+};
+
+class TestServerInterfaceUserDataClient : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
+class TestServerInterfaceUserDataServer : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testErrors();
+    void testRoundtrip();
+};
+
+class TestServerInterfaceUserManagement : public CxxTest::TestSuite {
+ public:
+    void testInterface();
+};
+
+class TestServerInterfaceUserManagementClient : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
+class TestServerInterfaceUserManagementServer : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testErrors();
+    void testRoundtrip();
+};
+
+class TestServerInterfaceUserToken : public CxxTest::TestSuite {
+ public:
+    void testInterface();
+};
+
+class TestServerInterfaceUserTokenClient : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
+class TestServerInterfaceUserTokenServer : public CxxTest::TestSuite {
+ public:
+    void testServer();
     void testErrors();
     void testRoundtrip();
 };

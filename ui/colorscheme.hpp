@@ -73,8 +73,12 @@ namespace ui {
         Color_DarkPink2        = 127, ///< not so dark pink
         Color_GreenScale       = 128, ///< 16 scales of green (COLOR_BLACK, COLOR_GREENSCALE, ... COLOR_GREENSCALE + 15)
         Color_DarkYellowScale  = 144, ///< 8 scales of yellow (COLOR_BLACK, COLOR_DARKYELLOWSCALE, ... COLOR_DARKYELLOWSCALE + 7)
-    
-        Color_Unused8          = 152, ///< 8 slots unused
+
+        /* New in c2ng */
+        Color_PanelBack24      = 152, ///< Starchart panel background, 24-bit version (used with alpha=192).
+        Color_PanelFrame24     = 153, ///< Starchart panel frame, 24-bit version (used with alpha=192).
+        Color_PanelBack8       = 154, ///< Starchart panel background, 8-bit version (used with alpha=255, 50% fill).
+        Color_PanelFrame8      = 155, ///< Starchart panel frame, 8-bit version (used with alpha=255).
 
         /* colors available for image mixing */
         Color_Avail            = 160

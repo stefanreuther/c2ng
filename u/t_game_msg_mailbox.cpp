@@ -15,9 +15,9 @@ TestGameMsgMailbox::testIt()
      public:
         virtual size_t getNumMessages()
             { return 0; }
-        virtual String_t getMessageText(size_t /*index*/, afl::string::Translator& /*tx*/, game::PlayerList& /*players*/)
+        virtual String_t getMessageText(size_t /*index*/, afl::string::Translator& /*tx*/, const game::PlayerList& /*players*/)
             { return String_t(); }
-        virtual String_t getMessageHeading(size_t /*index*/, afl::string::Translator& /*tx*/, game::PlayerList& /*players*/)
+        virtual String_t getMessageHeading(size_t /*index*/, afl::string::Translator& /*tx*/, const game::PlayerList& /*players*/)
             { return String_t(); }
         virtual int getMessageTurnNumber(size_t /*index*/)
             { return 0; }

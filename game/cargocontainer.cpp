@@ -7,7 +7,7 @@
 
 // Constructor.
 game::CargoContainer::CargoContainer()
-    : m_delta(),
+    : m_delta(Element::begin()),
       m_overload(false)
 { }
 
@@ -20,11 +20,7 @@ void
 game::CargoContainer::change(Element::Type type, int32_t delta)
 {
     if (delta != 0) {
-        size_t index = static_cast<size_t>(type);
-        if (m_delta.size() < index+1) {
-            m_delta.resize(index+1);
-        }
-        m_delta[index] += delta;
+        m_delta.set(type, m_delta.get(type) + delta);
         sig_change.raise();
     }
 }
@@ -33,12 +29,7 @@ game::CargoContainer::change(Element::Type type, int32_t delta)
 int32_t
 game::CargoContainer::getChange(Element::Type type) const
 {
-    size_t index = static_cast<size_t>(type);
-    if (index < m_delta.size()) {
-        return m_delta[index];
-    } else {
-        return 0;
-    }
+    return m_delta.get(type);
 }
 
 // Get effective amount.
@@ -80,8 +71,8 @@ game::CargoContainer::isValid() const
 bool
 game::CargoContainer::isEmpty() const
 {
-    for (size_t i = 0; i < m_delta.size(); ++i) {
-        if (m_delta[i] != 0) {
+    for (Element::Type i = Element::begin(); i < m_delta.size(); ++i) {
+        if (m_delta.get(i) != 0) {
             return false;
         }
     }
@@ -111,5 +102,5 @@ game::CargoContainer::isOverload() const
 game::Element::Type
 game::CargoContainer::getTypeLimit() const
 {
-    return static_cast<Element::Type>(m_delta.size());
+    return m_delta.size();
 }

@@ -33,6 +33,11 @@ namespace game { namespace map {
             \post get(x)==0 for all x */
         void clear();
 
+        /** Merge.
+            Add the other vector's data to this one.
+            \post get(x)=true if get(x) was true before, or other.get(x) was true. */
+        void mergeFrom(const MarkingVector& other);
+
         /** Initialize from ObjectType.
             Copies all isMarked() bits from the ObjectType into this MarkingVector.
             \param type ObjectType

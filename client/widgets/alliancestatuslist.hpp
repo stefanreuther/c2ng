@@ -5,10 +5,11 @@
 #define C2NG_CLIENT_WIDGETS_ALLIANCESTATUSLIST_HPP
 
 #include <vector>
-#include "ui/widgets/abstractlistbox.hpp"
-#include "afl/bits/smallset.hpp"
-#include "ui/root.hpp"
 #include "afl/base/signal.hpp"
+#include "afl/bits/smallset.hpp"
+#include "afl/string/translator.hpp"
+#include "ui/root.hpp"
+#include "ui/widgets/abstractlistbox.hpp"
 
 namespace client { namespace widgets {
 
@@ -34,7 +35,7 @@ namespace client { namespace widgets {
         };
         typedef afl::bits::SmallSet<ItemFlag> ItemFlags_t;
 
-        AllianceStatusList(ui::Root& root);
+        AllianceStatusList(ui::Root& root, afl::string::Translator& tx);
 
         void add(int id, const String_t& name, ItemFlags_t flags);
         void setFlags(int id, ItemFlags_t flags);
@@ -56,6 +57,7 @@ namespace client { namespace widgets {
 
      private:
         ui::Root& m_root;
+        afl::string::Translator& m_translator;
 
         struct Item {
             int id;

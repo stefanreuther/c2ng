@@ -22,10 +22,21 @@ namespace client { namespace map {
         void setCenter(game::map::Point center);
         void setRenderList(afl::base::Ptr<game::map::RenderList> renderList);
 
+        const gfx::Rectangle& getExtent() const;
+
         void draw(gfx::Canvas& can, ui::ColorScheme& colorScheme, gfx::ResourceProvider& provider) const;
 
         void getPreferredWorldRange(game::map::Point& min, game::map::Point& max) const;
         void getMinimumWorldRange(game::map::Point& min, game::map::Point& max) const;
+
+        gfx::Point scale(game::map::Point pt) const;
+        int scale(int r) const;
+        int getCrossSize() const;
+
+        game::map::Point unscale(gfx::Point pt) const;
+        int unscale(int r) const;
+
+        game::map::Point getCenter() const;
 
      private:
         class Listener;
@@ -35,10 +46,6 @@ namespace client { namespace map {
         int m_zoomMultiplier;
         int m_zoomDivider;
         game::map::Point m_center;
-
-        gfx::Point scale(game::map::Point pt) const;
-        int scale(int r) const;
-        int getCrossSize() const;
     };
 
 } }

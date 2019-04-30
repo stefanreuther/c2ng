@@ -14,6 +14,7 @@
 #include "afl/io/internaldirectory.hpp"
 #include "server/file/internaldirectoryhandler.hpp"
 #include "server/file/ca/root.hpp"
+#include "afl/data/access.hpp"
 
 #define TS_ASSERT_THROWS_CODE(call, code)                               \
                               do {                                      \
@@ -564,7 +565,11 @@ TestServerFileFileBase::testStat()
     TS_ASSERT_THROWS_CODE(testee.getFileInformation("both/f"), "403");
     TS_ASSERT_THROWS_CODE(testee.getFileInformation("none"), "403");
     TS_ASSERT_THROWS_CODE(testee.getFileInformation("none/f"), "403");
-    TS_ASSERT_THROWS_CODE(testee.getFileInformation("listable"), "403");
+
+    // STAT(listable) is allowed: this is the same usecase as /file.cgi/user, i.e. get information
+    // about an item whose parent is not listable. See #390.
+    TS_ASSERT_THROWS_NOTHING(i = testee.getFileInformation("listable"));
+    TS_ASSERT_EQUALS(i.type, FileBase::IsDirectory);
 
     TS_ASSERT_THROWS_NOTHING(i = testee.getFileInformation("listable/f"));
     TS_ASSERT_EQUALS(i.type, FileBase::IsFile);
@@ -1262,3 +1267,19 @@ TestServerFileFileBase::testCopyUnderlay()
     TS_ASSERT_EQUALS(testee.getFileInformation("a").size.orElse(-1), 7);
     TS_ASSERT_EQUALS(testee.getFileInformation("b").size.orElse(-1), 7);
 }
+
+/** Test file upload content snooping. */
+void
+TestServerFileFileBase::testSnoop()
+{
+    Testbench tb;
+    server::file::FileBase testee(tb.session, tb.root);
+
+    testee.createDirectory("a");
+    testee.createDirectory("a/b");
+    testee.putFile("a/b/pconfig.src", "GAMENAME = Hi There");
+
+    std::auto_ptr<afl::data::Value> p(testee.getDirectoryProperty("a/b", "name"));
+    TS_ASSERT_EQUALS(afl::data::Access(p).toString(), "Hi There");
+}
+

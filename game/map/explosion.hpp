@@ -18,7 +18,7 @@ namespace game { namespace map {
         virtual bool getPosition(Point& result) const;
 
         // Object:
-        virtual String_t getName(Name which, afl::string::Translator& tx, InterpreterInterface& iface) const;
+        virtual String_t getName(ObjectName which, afl::string::Translator& tx, InterpreterInterface& iface) const;
         virtual Id_t getId() const;
         virtual bool getOwner(int& result) const;
 

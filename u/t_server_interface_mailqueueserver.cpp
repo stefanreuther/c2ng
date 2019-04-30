@@ -7,12 +7,14 @@
 
 #include <stdexcept>
 #include "t_server_interface.hpp"
+#include "afl/data/access.hpp"
 #include "afl/string/format.hpp"
 #include "afl/test/callreceiver.hpp"
 #include "server/interface/mailqueue.hpp"
 #include "server/interface/mailqueueclient.hpp"
 
 using afl::string::Format;
+using afl::data::Access;
 
 namespace {
     class MailQueueMock : public server::interface::MailQueue, public afl::test::CallReceiver {
@@ -53,6 +55,11 @@ namespace {
 
         virtual void runQueue()
             { checkCall("runQueue()"); }
+        virtual UserStatus getUserStatus(String_t user)
+            {
+                checkCall(Format("getUserStatus(%s)", user));
+                return consumeReturnValue<UserStatus>();
+            }
     };
 }
 
@@ -95,6 +102,18 @@ TestServerInterfaceMailQueueServer::testIt()
 
     mock.expectCall("runQueue()");
     testee.callVoid(Segment().pushBackString("RUNQUEUE"));
+
+    {
+        server::interface::MailQueue::UserStatus us;
+        us.address = "j@arkham.gov";
+        us.status = server::interface::MailQueue::Confirmed;
+        mock.expectCall("getUserStatus(joker)");
+        mock.provideReturnValue(us);
+
+        std::auto_ptr<afl::data::Value> p(testee.call(Segment().pushBackString("STATUS").pushBackString("joker")));
+        TS_ASSERT_EQUALS(Access(p)("address").toString(), "j@arkham.gov");
+        TS_ASSERT_EQUALS(Access(p)("status").toString(), "c");
+    }
 
     // Variations
     mock.expectCall("startMessage(The-Template,no-id)");
@@ -154,6 +173,18 @@ TestServerInterfaceMailQueueServer::testRoundtrip()
 
     mock.expectCall("runQueue()");
     level4.runQueue();
+
+    {
+        server::interface::MailQueue::UserStatus us;
+        us.address = "j@arkham.gov";
+        us.status = server::interface::MailQueue::Confirmed;
+        mock.expectCall("getUserStatus(joker)");
+        mock.provideReturnValue(us);
+
+        server::interface::MailQueue::UserStatus out = level4.getUserStatus("joker");
+        TS_ASSERT_EQUALS(out.address, "j@arkham.gov");
+        TS_ASSERT_EQUALS(out.status, server::interface::MailQueue::Confirmed);
+    }
 
     mock.checkFinish();
 }

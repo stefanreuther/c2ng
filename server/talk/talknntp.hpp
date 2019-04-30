@@ -16,7 +16,6 @@ namespace server { namespace talk {
         TalkNNTP(Session& session, Root& root);
         ~TalkNNTP();
 
-        virtual String_t checkUser(String_t loginName, String_t password);
         virtual void listNewsgroups(afl::container::PtrVector<Info>& result);
         virtual Info findNewsgroup(String_t newsgroupName);
         virtual int32_t findMessage(String_t rfcMsgId);

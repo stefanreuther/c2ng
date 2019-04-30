@@ -53,6 +53,10 @@ ui::Window::draw(gfx::Canvas& can)
     defaultDrawChildren(can);
 }
 
+void
+ui::Window::handleStateChange(State /*st*/, bool /*enable*/)
+{ }
+
 gfx::Rectangle
 ui::Window::transformSize(gfx::Rectangle size, Transformation kind) const
 {

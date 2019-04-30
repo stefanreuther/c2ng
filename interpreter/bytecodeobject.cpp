@@ -79,6 +79,7 @@ interpreter::BytecodeObject::BytecodeObject()
       m_isVarargs(false),
       m_name(),
       file_name(),
+      m_origin(),
       line_numbers()
 {
     // ex IntBytecodeObject::IntBytecodeObject
@@ -245,6 +246,26 @@ interpreter::BytecodeObject::addLabel(Label_t label)
 {
     // ex IntBytecodeObject::addLabel
     addInstruction(Opcode::maJump, Opcode::jSymbolic, label);
+}
+
+void
+interpreter::BytecodeObject::insertLabel(Label_t label, PC_t pc)
+{
+    if (pc <= m_code.size()) {
+        // Insert label
+        Opcode o;
+        o.major = Opcode::maJump;
+        o.minor = Opcode::jSymbolic;
+        o.arg   = label;
+        m_code.insert(m_code.begin() + pc, o);
+
+        // Update debug information
+        for (size_t i = 0, n = line_numbers.size(); i < n; i += 2) {
+            if (line_numbers[i] >= pc) {
+                ++line_numbers[i];
+            }
+        }
+    }
 }
 
 // /** Add a jump. */
@@ -530,6 +551,8 @@ interpreter::BytecodeObject::append(const BytecodeObject& other)
              case Opcode::miSpecialInstance:
              case Opcode::miSpecialResizeArray:
              case Opcode::miSpecialBind:
+             case Opcode::miSpecialFirst:
+             case Opcode::miSpecialNext:
                 // Copy verbatim
                 m_code.push_back(o);
                 break;

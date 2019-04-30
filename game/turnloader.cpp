@@ -44,8 +44,10 @@ game::TurnLoader::getDefaultPlayer(PlayerSet_t baseSet) const
 
 
 void
-game::TurnLoader::loadCurrentDatabases(Turn& turn, Game& game, int player, Root& root, Session& session, afl::charset::Charset& charset)
+game::TurnLoader::loadCurrentDatabases(Turn& turn, Game& game, int player, Root& root, Session& session)
 {
+    afl::charset::Charset& charset = root.charset();
+
     // Starchart DB
     afl::base::Ptr<afl::io::Stream> file = root.gameDirectory().openFileNT(afl::string::Format("chart%d.cc", player), afl::io::FileSystem::OpenRead);
     if (file.get() != 0) {

@@ -5,6 +5,7 @@
 
 #include "server/file/directoryhandler.hpp"
 
+#include <stdexcept>
 #include "t_server_file.hpp"
 
 /** Interface test. */

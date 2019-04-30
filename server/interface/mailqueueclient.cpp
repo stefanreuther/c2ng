@@ -2,10 +2,14 @@
   *  \file server/interface/mailqueueclient.cpp
   */
 
+#include <memory>
 #include "server/interface/mailqueueclient.hpp"
 #include "afl/data/segment.hpp"
+#include "afl/data/access.hpp"
+#include "server/types.hpp"
 
 using afl::data::Segment;
+using afl::data::Access;
 
 server::interface::MailQueueClient::MailQueueClient(afl::net::CommandHandler& commandHandler)
     : m_commandHandler(commandHandler)
@@ -83,4 +87,14 @@ void
 server::interface::MailQueueClient::runQueue()
 {
     m_commandHandler.callVoid(Segment().pushBackString("RUNQUEUE"));
+}
+
+server::interface::MailQueue::UserStatus
+server::interface::MailQueueClient::getUserStatus(String_t user)
+{
+    std::auto_ptr<Value_t> p(m_commandHandler.call(Segment().pushBackString("STATUS").pushBackString(user)));
+    UserStatus result;
+    result.address = Access(p)("address").toString();
+    result.status = parseAddressStatus(Access(p)("status").toString());
+    return result;
 }

@@ -1,0 +1,11 @@
+/*!
+     \namespace util::syntax
+     \brief Syntax highlighting
+
+     This namespace contains classes to parse text as various computer language for highlighting.
+     This is used for the PlanetsCentral forum and the PCC2 help viewer.
+
+     Entry point:
+     - util::syntax::Highlighter
+     - util::syntax::Factory
+ */

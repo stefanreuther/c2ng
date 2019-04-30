@@ -13,7 +13,7 @@ namespace ui {
      public:
         LayoutableGroup(ui::layout::Manager& mgr);
         // virtual void draw(gfx::Canvas& can);
-        virtual void handleStateChange(State st, bool enable);
+        // virtual void handleStateChange(State st, bool enable);
         virtual void requestChildRedraw(Widget& child, const gfx::Rectangle& area);
         virtual void handleChildAdded(Widget& child);
         virtual void handleChildRemove(Widget& child);

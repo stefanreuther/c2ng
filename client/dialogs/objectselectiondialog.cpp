@@ -39,8 +39,9 @@ namespace {
     class CommonState : public afl::base::RefCounted {
      public:
         // Constructor.
-        CommonState(int screenNumber)
+        CommonState(int screenNumber, const String_t& keymapName)
             : m_screenNumber(screenNumber),
+              m_keymapName(keymapName),
               m_game(),
               m_cursor(),
               conn_viewpointTurnChange()
@@ -72,8 +73,13 @@ namespace {
         game::map::ObjectCursor& cursor()
             { return m_cursor; }
 
+        // Get keymap name.
+        const String_t& getKeymapName() const
+            { return m_keymapName; }
+
      private:
         const int m_screenNumber;
+        const String_t m_keymapName;
         afl::base::Ptr<game::Game> m_game;
         game::map::SimpleObjectCursor m_cursor;
         afl::base::SignalConnection conn_viewpointTurnChange;
@@ -163,6 +169,7 @@ namespace {
                  case OutputState::ShipScreen:
                  case OutputState::PlanetScreen:
                  case OutputState::BaseScreen:
+                 case OutputState::Starchart:
                     ui.detachProcess(link);
                     m_outputState.set(link, target);
                     m_loop.stop(0);
@@ -177,6 +184,8 @@ namespace {
                 m_outputState.set(link, client::si::OutputState::NoChange);
                 m_loop.stop(code);
             }
+        virtual void handleSetViewRequest(client::si::UserSide& ui, client::si::RequestLink2 link, String_t name, bool withKeymap)
+            { defaultHandleSetViewRequest(ui, link, name, withKeymap); }
         virtual client::si::ContextProvider* createContextProvider()
             { return new DialogContextProvider(m_state); }
 
@@ -255,8 +264,9 @@ namespace {
             {
                 switch (prop) {
                  case game::interface::iuiScreenNumber:
-                    result.reset();
-                    return true;
+                    return false;
+                 case game::interface::iuiScreenRegistered:
+                    return false;
                  case game::interface::iuiIterator:
                     result.reset(new game::interface::IteratorContext(*new DialogIteratorProvider(m_state)));
                     return true;
@@ -268,6 +278,9 @@ namespace {
                  case game::interface::iuiChartX:
                  case game::interface::iuiChartY:
                     result.reset();
+                    return true;
+                 case game::interface::iuiKeymap:
+                    result.reset(interpreter::makeStringValue(m_state->getKeymapName()));
                     return true;
                 }
                 return false;
@@ -313,7 +326,7 @@ client::dialogs::doObjectSelectionDialog(const ObjectSelectionDialog& def,
     afl::string::Translator& tx = parentControl.translator();
 
     // Create common state
-    afl::base::Ref<CommonState> state(*new CommonState(def.screenNumber));
+    afl::base::Ref<CommonState> state(*new CommonState(def.screenNumber, def.keymapName));
 
     // Create ObjectObserver. This cause the CommonState to be initialized with the cursor we want.
     client::proxy::CursorObserverProxy oop(iface.gameSender(), std::auto_ptr<client::ObjectCursorFactory>(new DialogCursorFactory(state)));

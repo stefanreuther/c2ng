@@ -107,6 +107,18 @@ namespace util {
         \return encoded text */
     String_t encodeHtml(const String_t& input, bool rawUnicode);
 
+    /** Add trailing character.
+        If the given string does not end in @c ch, appends it.
+        \param s [in/out] String
+        \param ch Character */
+    void addTrailingCharacter(String_t& s, char ch);
+
+    /** Remove trailing character.
+        If the given string ends in @ch, removes it. (Same as Perl 'chomp').
+        \param s [in/out] String
+        \param ch Character */
+    void removeTrailingCharacter(String_t& s, char ch);
+
 }
 
 #endif

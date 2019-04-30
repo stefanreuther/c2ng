@@ -26,11 +26,16 @@ void
 interpreter::BlobValue::store(TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& /*cs*/, SaveContext& /*ctx*/) const
 {
     // ex IntBlobValue::store
-    out.tag = out.Tag_Blob;
-    out.value = m_data.size();
-    aux.handleFullData(m_data);
-}
+    // Limit to 4G to avoid messing up file formats.
+    afl::base::ConstBytes_t data = m_data;
+    if (sizeof(size_t) > sizeof(uint32_t)) {
+        data.trim(0xFFFFFFFF);
+    }
 
+    out.tag = out.Tag_Blob;
+    out.value = uint32_t(data.size());
+    aux.handleFullData(data);
+}
 
 interpreter::BlobValue*
 interpreter::BlobValue::clone() const

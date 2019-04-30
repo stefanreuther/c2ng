@@ -30,14 +30,14 @@ namespace {
      public:
         TestHarness()
             : action(),
-              univ(),
+              turn(),
               interface(),
               config(),
               shipList(),
               version(game::HostVersion::PHost, MKVERSION(3,5,0))
             { config.setDefaultValues(); }
         game::actions::CargoTransfer action;
-        game::map::Universe univ;
+        game::Turn turn;
         game::test::InterpreterInterface interface;
         game::config::HostConfiguration config;
         game::spec::ShipList shipList;
@@ -60,7 +60,7 @@ namespace {
         }
 
         // Create ship
-        Ship* pShip = univ.ships().create(shipId);
+        Ship* pShip = turn.universe().ships().create(shipId);
 
         // - seed the ship to make it visible
         game::map::ShipData sd;
@@ -88,7 +88,7 @@ namespace {
     void TestHarness::preparePlanet(int planetId, int owner, Object::Playability playability)
     {
         // Create planet
-        Planet* pPlanet = univ.planets().create(planetId);
+        Planet* pPlanet = turn.universe().planets().create(planetId);
 
         pPlanet->setPosition(game::map::Point(LOC_X, LOC_Y));
 
@@ -121,10 +121,10 @@ TestGameActionsCargoTransferSetup::testInit()
 
     // Status report
     TS_ASSERT_EQUALS(testee.getStatus(), CargoTransferSetup::Impossible);
-    TS_ASSERT_EQUALS(testee.getConflictingTransferShipId(h.univ), 0);
+    TS_ASSERT_EQUALS(testee.getConflictingTransferShipId(h.turn.universe()), 0);
 
     // Building throws
-    TS_ASSERT_THROWS(testee.build(h.action, h.univ, h.interface, h.config, h.shipList, h.version), game::Exception);
+    TS_ASSERT_THROWS(testee.build(h.action, h.turn, h.interface, h.config, h.shipList, h.version), game::Exception);
 }
 
 /** Test creation from nonexistant objects.
@@ -146,20 +146,20 @@ TestGameActionsCargoTransferSetup::testOwnShipOwnShip()
     TestHarness h;
     h.prepareShip(10, 5, Object::Playable);
     h.prepareShip(20, 5, Object::Playable);
-    CargoTransferSetup testee = CargoTransferSetup::fromShipShip(h.univ, 10, 20);
+    CargoTransferSetup testee = CargoTransferSetup::fromShipShip(h.turn.universe(), 10, 20);
 
     // Use result
     TS_ASSERT_EQUALS(testee.getStatus(), CargoTransferSetup::Ready);
-    TS_ASSERT_EQUALS(testee.getConflictingTransferShipId(h.univ), 0);
-    testee.build(h.action, h.univ, h.interface, h.config, h.shipList, h.version);
+    TS_ASSERT_EQUALS(testee.getConflictingTransferShipId(h.turn.universe()), 0);
+    testee.build(h.action, h.turn, h.interface, h.config, h.shipList, h.version);
 
     // Move
     TS_ASSERT_EQUALS(h.action.move(Element::Neutronium, 5, 0, 1, false, false), 5);
     h.action.commit();
 
     // Verify result of move
-    TS_ASSERT_EQUALS(h.univ.ships().get(10)->getCargo(Element::Neutronium).orElse(-1), 5);
-    TS_ASSERT_EQUALS(h.univ.ships().get(20)->getCargo(Element::Neutronium).orElse(-1), 15);
+    TS_ASSERT_EQUALS(h.turn.universe().ships().get(10)->getCargo(Element::Neutronium).orElse(-1), 5);
+    TS_ASSERT_EQUALS(h.turn.universe().ships().get(20)->getCargo(Element::Neutronium).orElse(-1), 15);
 }
 
 /** Test creation of a transfer between two played ships of different owners.
@@ -170,22 +170,22 @@ TestGameActionsCargoTransferSetup::testOwnShipAlliedShip()
     TestHarness h;
     h.prepareShip(10, 5, Object::Playable);
     h.prepareShip(20, 7, Object::Playable);       // note different race, but playable
-    CargoTransferSetup testee = CargoTransferSetup::fromShipShip(h.univ, 10, 20);
+    CargoTransferSetup testee = CargoTransferSetup::fromShipShip(h.turn.universe(), 10, 20);
 
     // Use result
     TS_ASSERT_EQUALS(testee.getStatus(), CargoTransferSetup::Ready);
-    TS_ASSERT_EQUALS(testee.getConflictingTransferShipId(h.univ), 0);
-    testee.build(h.action, h.univ, h.interface, h.config, h.shipList, h.version);
+    TS_ASSERT_EQUALS(testee.getConflictingTransferShipId(h.turn.universe()), 0);
+    testee.build(h.action, h.turn, h.interface, h.config, h.shipList, h.version);
 
     // Move
     TS_ASSERT_EQUALS(h.action.move(Element::Neutronium, 3, 0, 1, false, false), 3);
     h.action.commit();
 
     // Verify result of move
-    TS_ASSERT_EQUALS(h.univ.ships().get(10)->getCargo(Element::Neutronium).orElse(-1), 7);
-    TS_ASSERT_EQUALS(h.univ.ships().get(10)->getTransporterCargo(Ship::TransferTransporter, Element::Neutronium).orElse(-1), 3);
-    TS_ASSERT_EQUALS(h.univ.ships().get(10)->getTransporterTargetId(Ship::TransferTransporter).orElse(-1), 20);
-    TS_ASSERT_EQUALS(h.univ.ships().get(20)->getCargo(Element::Neutronium).orElse(-1), 10);
+    TS_ASSERT_EQUALS(h.turn.universe().ships().get(10)->getCargo(Element::Neutronium).orElse(-1), 7);
+    TS_ASSERT_EQUALS(h.turn.universe().ships().get(10)->getTransporterCargo(Ship::TransferTransporter, Element::Neutronium).orElse(-1), 3);
+    TS_ASSERT_EQUALS(h.turn.universe().ships().get(10)->getTransporterTargetId(Ship::TransferTransporter).orElse(-1), 20);
+    TS_ASSERT_EQUALS(h.turn.universe().ships().get(20)->getCargo(Element::Neutronium).orElse(-1), 10);
 }
 
 /** Test creation of a transfer between a played ship and a scanned ship of a different owner.
@@ -196,22 +196,22 @@ TestGameActionsCargoTransferSetup::testOwnShipForeignShip()
     TestHarness h;
     h.prepareShip(10, 5, Object::Playable);
     h.prepareShip(20, 7, Object::NotPlayable);       // note different race and not playable
-    CargoTransferSetup testee = CargoTransferSetup::fromShipShip(h.univ, 10, 20);
+    CargoTransferSetup testee = CargoTransferSetup::fromShipShip(h.turn.universe(), 10, 20);
 
     // Use result
     TS_ASSERT_EQUALS(testee.getStatus(), CargoTransferSetup::Ready);
-    TS_ASSERT_EQUALS(testee.getConflictingTransferShipId(h.univ), 0);
-    testee.build(h.action, h.univ, h.interface, h.config, h.shipList, h.version);
+    TS_ASSERT_EQUALS(testee.getConflictingTransferShipId(h.turn.universe()), 0);
+    testee.build(h.action, h.turn, h.interface, h.config, h.shipList, h.version);
 
     // Move
     TS_ASSERT_EQUALS(h.action.move(Element::Neutronium, 3, 0, 1, false, false), 3);
     h.action.commit();
 
     // Verify result of move
-    TS_ASSERT_EQUALS(h.univ.ships().get(10)->getCargo(Element::Neutronium).orElse(-1), 7);
-    TS_ASSERT_EQUALS(h.univ.ships().get(10)->getTransporterCargo(Ship::TransferTransporter, Element::Neutronium).orElse(-1), 3);
-    TS_ASSERT_EQUALS(h.univ.ships().get(10)->getTransporterTargetId(Ship::TransferTransporter).orElse(-1), 20);
-    TS_ASSERT_EQUALS(h.univ.ships().get(20)->getCargo(Element::Neutronium).orElse(-1), 10);
+    TS_ASSERT_EQUALS(h.turn.universe().ships().get(10)->getCargo(Element::Neutronium).orElse(-1), 7);
+    TS_ASSERT_EQUALS(h.turn.universe().ships().get(10)->getTransporterCargo(Ship::TransferTransporter, Element::Neutronium).orElse(-1), 3);
+    TS_ASSERT_EQUALS(h.turn.universe().ships().get(10)->getTransporterTargetId(Ship::TransferTransporter).orElse(-1), 20);
+    TS_ASSERT_EQUALS(h.turn.universe().ships().get(20)->getCargo(Element::Neutronium).orElse(-1), 10);
 }
 
 /** Test creation of a transfer between a scanned ship of a different owner and a played ship.
@@ -222,12 +222,12 @@ TestGameActionsCargoTransferSetup::testForeignShipOwnShip()
     TestHarness h;
     h.prepareShip(10, 7, Object::NotPlayable);      // note different owner and not playable
     h.prepareShip(20, 5, Object::Playable);
-    CargoTransferSetup testee = CargoTransferSetup::fromShipShip(h.univ, 10, 20);
+    CargoTransferSetup testee = CargoTransferSetup::fromShipShip(h.turn.universe(), 10, 20);
 
     // Use result
     TS_ASSERT_EQUALS(testee.getStatus(), CargoTransferSetup::Ready);
-    TS_ASSERT_EQUALS(testee.getConflictingTransferShipId(h.univ), 0);
-    testee.build(h.action, h.univ, h.interface, h.config, h.shipList, h.version);
+    TS_ASSERT_EQUALS(testee.getConflictingTransferShipId(h.turn.universe()), 0);
+    testee.build(h.action, h.turn, h.interface, h.config, h.shipList, h.version);
 
     // Move
     TS_ASSERT_EQUALS(h.action.move(Element::Neutronium, 4, 0, 1, false, false), 0);  // fails, cannot transfer this direction!
@@ -235,10 +235,10 @@ TestGameActionsCargoTransferSetup::testForeignShipOwnShip()
     h.action.commit();
 
     // Verify result of move
-    TS_ASSERT_EQUALS(h.univ.ships().get(10)->getCargo(Element::Neutronium).orElse(-1), 10);
-    TS_ASSERT_EQUALS(h.univ.ships().get(20)->getCargo(Element::Neutronium).orElse(-1), 6);
-    TS_ASSERT_EQUALS(h.univ.ships().get(20)->getTransporterCargo(Ship::TransferTransporter, Element::Neutronium).orElse(-1), 4);
-    TS_ASSERT_EQUALS(h.univ.ships().get(20)->getTransporterTargetId(Ship::TransferTransporter).orElse(-1), 10);
+    TS_ASSERT_EQUALS(h.turn.universe().ships().get(10)->getCargo(Element::Neutronium).orElse(-1), 10);
+    TS_ASSERT_EQUALS(h.turn.universe().ships().get(20)->getCargo(Element::Neutronium).orElse(-1), 6);
+    TS_ASSERT_EQUALS(h.turn.universe().ships().get(20)->getTransporterCargo(Ship::TransferTransporter, Element::Neutronium).orElse(-1), 4);
+    TS_ASSERT_EQUALS(h.turn.universe().ships().get(20)->getTransporterTargetId(Ship::TransferTransporter).orElse(-1), 10);
 }
 
 /** Test creation of transfer between two scanned ships.
@@ -249,11 +249,11 @@ TestGameActionsCargoTransferSetup::testForeignShipForeignShip()
     TestHarness h;
     h.prepareShip(10, 7, Object::NotPlayable);      // note not playable
     h.prepareShip(20, 5, Object::NotPlayable);      // note not playable
-    CargoTransferSetup testee = CargoTransferSetup::fromShipShip(h.univ, 10, 20);
+    CargoTransferSetup testee = CargoTransferSetup::fromShipShip(h.turn.universe(), 10, 20);
 
     // Use result
     TS_ASSERT_EQUALS(testee.getStatus(), CargoTransferSetup::Impossible);
-    TS_ASSERT_THROWS(testee.build(h.action, h.univ, h.interface, h.config, h.shipList, h.version), game::Exception);
+    TS_ASSERT_THROWS(testee.build(h.action, h.turn, h.interface, h.config, h.shipList, h.version), game::Exception);
 }
 
 /** Test creation of a transfer between a played ship and a scanned ship of a different owner, conflict case.
@@ -267,29 +267,29 @@ TestGameActionsCargoTransferSetup::testOwnShipForeignShipConflict()
     h.prepareShip(30, 8, Object::NotPlayable);       // for exposition only
 
     // Ship 10 starts with a cargo transfer
-    h.univ.ships().get(10)->setTransporterTargetId(Ship::TransferTransporter, 30);
-    h.univ.ships().get(10)->setTransporterCargo(Ship::TransferTransporter, Element::Neutronium, 8);
+    h.turn.universe().ships().get(10)->setTransporterTargetId(Ship::TransferTransporter, 30);
+    h.turn.universe().ships().get(10)->setTransporterCargo(Ship::TransferTransporter, Element::Neutronium, 8);
 
     // Build new transfer. We will have a conflict.
-    CargoTransferSetup testee = CargoTransferSetup::fromShipShip(h.univ, 10, 20);
+    CargoTransferSetup testee = CargoTransferSetup::fromShipShip(h.turn.universe(), 10, 20);
     TS_ASSERT_EQUALS(testee.getStatus(), CargoTransferSetup::Ready);
-    TS_ASSERT_EQUALS(testee.getConflictingTransferShipId(h.univ), 10);
+    TS_ASSERT_EQUALS(testee.getConflictingTransferShipId(h.turn.universe()), 10);
 
     // Solve the conflict.
-    testee.cancelConflictingTransfer(h.univ, 10);
-    TS_ASSERT_EQUALS(testee.getConflictingTransferShipId(h.univ), 0);
-    TS_ASSERT_EQUALS(h.univ.ships().get(10)->getCargo(Element::Neutronium).orElse(-1), 18);
-    testee.build(h.action, h.univ, h.interface, h.config, h.shipList, h.version);
+    testee.cancelConflictingTransfer(h.turn.universe(), 10);
+    TS_ASSERT_EQUALS(testee.getConflictingTransferShipId(h.turn.universe()), 0);
+    TS_ASSERT_EQUALS(h.turn.universe().ships().get(10)->getCargo(Element::Neutronium).orElse(-1), 18);
+    testee.build(h.action, h.turn, h.interface, h.config, h.shipList, h.version);
 
     // Move
     TS_ASSERT_EQUALS(h.action.move(Element::Neutronium, 3, 0, 1, false, false), 3);
     h.action.commit();
 
     // Verify result of move
-    TS_ASSERT_EQUALS(h.univ.ships().get(10)->getCargo(Element::Neutronium).orElse(-1), 15);
-    TS_ASSERT_EQUALS(h.univ.ships().get(10)->getTransporterCargo(Ship::TransferTransporter, Element::Neutronium).orElse(-1), 3);
-    TS_ASSERT_EQUALS(h.univ.ships().get(10)->getTransporterTargetId(Ship::TransferTransporter).orElse(-1), 20);
-    TS_ASSERT_EQUALS(h.univ.ships().get(20)->getCargo(Element::Neutronium).orElse(-1), 10);
+    TS_ASSERT_EQUALS(h.turn.universe().ships().get(10)->getCargo(Element::Neutronium).orElse(-1), 15);
+    TS_ASSERT_EQUALS(h.turn.universe().ships().get(10)->getTransporterCargo(Ship::TransferTransporter, Element::Neutronium).orElse(-1), 3);
+    TS_ASSERT_EQUALS(h.turn.universe().ships().get(10)->getTransporterTargetId(Ship::TransferTransporter).orElse(-1), 20);
+    TS_ASSERT_EQUALS(h.turn.universe().ships().get(20)->getCargo(Element::Neutronium).orElse(-1), 10);
 }
 
 /** Test creation of a transfer between a played ship and a scanned ship of a different owner, conflict, auto-cancel.
@@ -303,24 +303,24 @@ TestGameActionsCargoTransferSetup::testOwnShipForeignShipAutoCancel()
     h.prepareShip(30, 8, Object::NotPlayable);       // for exposition only
 
     // Ship 10 starts with a cargo transfer
-    h.univ.ships().get(10)->setTransporterTargetId(Ship::TransferTransporter, 30);
-    h.univ.ships().get(10)->setTransporterCargo(Ship::TransferTransporter, Element::Neutronium, 8);
+    h.turn.universe().ships().get(10)->setTransporterTargetId(Ship::TransferTransporter, 30);
+    h.turn.universe().ships().get(10)->setTransporterCargo(Ship::TransferTransporter, Element::Neutronium, 8);
 
     // Build new transfer. We will have a conflict which we ignore.
-    CargoTransferSetup testee = CargoTransferSetup::fromShipShip(h.univ, 10, 20);
+    CargoTransferSetup testee = CargoTransferSetup::fromShipShip(h.turn.universe(), 10, 20);
     TS_ASSERT_EQUALS(testee.getStatus(), CargoTransferSetup::Ready);
-    TS_ASSERT_EQUALS(testee.getConflictingTransferShipId(h.univ), 10);
-    testee.build(h.action, h.univ, h.interface, h.config, h.shipList, h.version);
+    TS_ASSERT_EQUALS(testee.getConflictingTransferShipId(h.turn.universe()), 10);
+    testee.build(h.action, h.turn, h.interface, h.config, h.shipList, h.version);
 
     // Move
     TS_ASSERT_EQUALS(h.action.move(Element::Neutronium, 3, 0, 1, false, false), 3);
     h.action.commit();
 
     // Verify result of move
-    TS_ASSERT_EQUALS(h.univ.ships().get(10)->getCargo(Element::Neutronium).orElse(-1), 15);
-    TS_ASSERT_EQUALS(h.univ.ships().get(10)->getTransporterCargo(Ship::TransferTransporter, Element::Neutronium).orElse(-1), 3);
-    TS_ASSERT_EQUALS(h.univ.ships().get(10)->getTransporterTargetId(Ship::TransferTransporter).orElse(-1), 20);
-    TS_ASSERT_EQUALS(h.univ.ships().get(20)->getCargo(Element::Neutronium).orElse(-1), 10);
+    TS_ASSERT_EQUALS(h.turn.universe().ships().get(10)->getCargo(Element::Neutronium).orElse(-1), 15);
+    TS_ASSERT_EQUALS(h.turn.universe().ships().get(10)->getTransporterCargo(Ship::TransferTransporter, Element::Neutronium).orElse(-1), 3);
+    TS_ASSERT_EQUALS(h.turn.universe().ships().get(10)->getTransporterTargetId(Ship::TransferTransporter).orElse(-1), 20);
+    TS_ASSERT_EQUALS(h.turn.universe().ships().get(20)->getCargo(Element::Neutronium).orElse(-1), 10);
 }
 
 /** Test creation of a transfer between mismatching ships.
@@ -335,21 +335,21 @@ TestGameActionsCargoTransferSetup::testShipMismatch()
     // Move ship 66
     {
         game::map::ShipData sd;
-        h.univ.ships().get(66)->getCurrentShipData(sd);
+        h.turn.universe().ships().get(66)->getCurrentShipData(sd);
         sd.x = LOC_X + 1;
         sd.y = LOC_Y;
-        h.univ.ships().get(66)->addCurrentShipData(sd, game::PlayerSet_t(5));
+        h.turn.universe().ships().get(66)->addCurrentShipData(sd, game::PlayerSet_t(5));
     }
 
     // Create various failing actions
     // - different location
-    TS_ASSERT_EQUALS(CargoTransferSetup::fromShipShip(h.univ, 55, 66).getStatus(), CargoTransferSetup::Impossible);
+    TS_ASSERT_EQUALS(CargoTransferSetup::fromShipShip(h.turn.universe(), 55, 66).getStatus(), CargoTransferSetup::Impossible);
     // - same Id
-    TS_ASSERT_EQUALS(CargoTransferSetup::fromShipShip(h.univ, 55, 55).getStatus(), CargoTransferSetup::Impossible);
+    TS_ASSERT_EQUALS(CargoTransferSetup::fromShipShip(h.turn.universe(), 55, 55).getStatus(), CargoTransferSetup::Impossible);
     // - first does not exist, second does
-    TS_ASSERT_EQUALS(CargoTransferSetup::fromShipShip(h.univ, 1, 55).getStatus(), CargoTransferSetup::Impossible);
+    TS_ASSERT_EQUALS(CargoTransferSetup::fromShipShip(h.turn.universe(), 1, 55).getStatus(), CargoTransferSetup::Impossible);
     // - second does not exist, first does
-    TS_ASSERT_EQUALS(CargoTransferSetup::fromShipShip(h.univ, 55, 1).getStatus(), CargoTransferSetup::Impossible);
+    TS_ASSERT_EQUALS(CargoTransferSetup::fromShipShip(h.turn.universe(), 55, 1).getStatus(), CargoTransferSetup::Impossible);
 }
 
 /** Test creation of Jettison action, normal case.
@@ -360,19 +360,19 @@ TestGameActionsCargoTransferSetup::testJettisonNormal()
     TestHarness h;
     h.prepareShip(42, 5, Object::Playable);
 
-    CargoTransferSetup testee = CargoTransferSetup::fromShipJettison(h.univ, 42);
+    CargoTransferSetup testee = CargoTransferSetup::fromShipJettison(h.turn.universe(), 42);
     TS_ASSERT_EQUALS(testee.getStatus(), CargoTransferSetup::Ready);
-    TS_ASSERT_EQUALS(testee.getConflictingTransferShipId(h.univ), 0);
-    testee.build(h.action, h.univ, h.interface, h.config, h.shipList, h.version);
+    TS_ASSERT_EQUALS(testee.getConflictingTransferShipId(h.turn.universe()), 0);
+    testee.build(h.action, h.turn, h.interface, h.config, h.shipList, h.version);
 
     // Move
     TS_ASSERT_EQUALS(h.action.move(Element::Neutronium, 3, 0, 1, false, false), 3);
     h.action.commit();
 
     // Verify result of move
-    TS_ASSERT_EQUALS(h.univ.ships().get(42)->getCargo(Element::Neutronium).orElse(-1), 7);
-    TS_ASSERT_EQUALS(h.univ.ships().get(42)->getTransporterCargo(Ship::UnloadTransporter, Element::Neutronium).orElse(-1), 3);
-    TS_ASSERT_EQUALS(h.univ.ships().get(42)->getTransporterTargetId(Ship::UnloadTransporter).orElse(-1), 0);
+    TS_ASSERT_EQUALS(h.turn.universe().ships().get(42)->getCargo(Element::Neutronium).orElse(-1), 7);
+    TS_ASSERT_EQUALS(h.turn.universe().ships().get(42)->getTransporterCargo(Ship::UnloadTransporter, Element::Neutronium).orElse(-1), 3);
+    TS_ASSERT_EQUALS(h.turn.universe().ships().get(42)->getTransporterTargetId(Ship::UnloadTransporter).orElse(-1), 0);
 }
 
 /** Test creation of Jettison action, failure cases.
@@ -385,9 +385,9 @@ TestGameActionsCargoTransferSetup::testJettisonFail()
 
     // Failure cases:
     // - nonexistant ship
-    TS_ASSERT_EQUALS(CargoTransferSetup::fromShipJettison(h.univ, 1).getStatus(), CargoTransferSetup::Impossible);
+    TS_ASSERT_EQUALS(CargoTransferSetup::fromShipJettison(h.turn.universe(), 1).getStatus(), CargoTransferSetup::Impossible);
     // - existing but not played
-    TS_ASSERT_EQUALS(CargoTransferSetup::fromShipJettison(h.univ, 42).getStatus(), CargoTransferSetup::Impossible);
+    TS_ASSERT_EQUALS(CargoTransferSetup::fromShipJettison(h.turn.universe(), 42).getStatus(), CargoTransferSetup::Impossible);
 }
 
 /** Test creation of Jettison action, failure at planet.
@@ -399,7 +399,7 @@ TestGameActionsCargoTransferSetup::testJettisonFailPlanet()
     h.prepareShip(42, 5, Object::NotPlayable);
     h.preparePlanet(99, 2, Object::NotPlayable);
 
-    TS_ASSERT_EQUALS(CargoTransferSetup::fromShipJettison(h.univ, 42).getStatus(), CargoTransferSetup::Impossible);
+    TS_ASSERT_EQUALS(CargoTransferSetup::fromShipJettison(h.turn.universe(), 42).getStatus(), CargoTransferSetup::Impossible);
 }
 
 /** Test creation of planet/ship transfer, own units.
@@ -411,18 +411,18 @@ TestGameActionsCargoTransferSetup::testOwnPlanetOwnShip()
     h.prepareShip(42, 5, Object::Playable);
     h.preparePlanet(99, 5, Object::Playable);
 
-    CargoTransferSetup testee = CargoTransferSetup::fromPlanetShip(h.univ, 99, 42);
+    CargoTransferSetup testee = CargoTransferSetup::fromPlanetShip(h.turn.universe(), 99, 42);
     TS_ASSERT_EQUALS(testee.getStatus(), CargoTransferSetup::Ready);
-    TS_ASSERT_EQUALS(testee.getConflictingTransferShipId(h.univ), 0);
-    testee.build(h.action, h.univ, h.interface, h.config, h.shipList, h.version);
+    TS_ASSERT_EQUALS(testee.getConflictingTransferShipId(h.turn.universe()), 0);
+    testee.build(h.action, h.turn, h.interface, h.config, h.shipList, h.version);
 
     // Move
     TS_ASSERT_EQUALS(h.action.move(Element::Neutronium, 5, 0, 1, false, false), 5);
     h.action.commit();
 
     // Verify result of move
-    TS_ASSERT_EQUALS(h.univ.ships().get(42)->getCargo(Element::Neutronium).orElse(-1), 15);
-    TS_ASSERT_EQUALS(h.univ.planets().get(99)->getCargo(Element::Neutronium).orElse(-1), 995);
+    TS_ASSERT_EQUALS(h.turn.universe().ships().get(42)->getCargo(Element::Neutronium).orElse(-1), 15);
+    TS_ASSERT_EQUALS(h.turn.universe().planets().get(99)->getCargo(Element::Neutronium).orElse(-1), 995);
 }
 
 /** Test creation of planet/ship transfer, allied units.
@@ -434,10 +434,10 @@ TestGameActionsCargoTransferSetup::testOwnPlanetAlliedShip()
     h.prepareShip(42, 5, Object::Playable);
     h.preparePlanet(99, 8, Object::Playable);      // note different owner
 
-    CargoTransferSetup testee = CargoTransferSetup::fromPlanetShip(h.univ, 99, 42);
+    CargoTransferSetup testee = CargoTransferSetup::fromPlanetShip(h.turn.universe(), 99, 42);
     TS_ASSERT_EQUALS(testee.getStatus(), CargoTransferSetup::Ready);
-    TS_ASSERT_EQUALS(testee.getConflictingTransferShipId(h.univ), 0);
-    testee.build(h.action, h.univ, h.interface, h.config, h.shipList, h.version);
+    TS_ASSERT_EQUALS(testee.getConflictingTransferShipId(h.turn.universe()), 0);
+    testee.build(h.action, h.turn, h.interface, h.config, h.shipList, h.version);
 
     // Move
     TS_ASSERT_EQUALS(h.action.move(Element::Neutronium, 5, 0, 1, false, false), 0);     // planet->ship fails
@@ -445,10 +445,10 @@ TestGameActionsCargoTransferSetup::testOwnPlanetAlliedShip()
     h.action.commit();
 
     // Verify result of move
-    TS_ASSERT_EQUALS(h.univ.ships().get(42)->getCargo(Element::Neutronium).orElse(-1), 5);
-    TS_ASSERT_EQUALS(h.univ.ships().get(42)->getTransporterTargetId(Ship::UnloadTransporter).orElse(-1), 99);
-    TS_ASSERT_EQUALS(h.univ.ships().get(42)->getTransporterCargo(Ship::UnloadTransporter, Element::Neutronium).orElse(-1), 5);
-    TS_ASSERT_EQUALS(h.univ.planets().get(99)->getCargo(Element::Neutronium).orElse(-1), 1000);
+    TS_ASSERT_EQUALS(h.turn.universe().ships().get(42)->getCargo(Element::Neutronium).orElse(-1), 5);
+    TS_ASSERT_EQUALS(h.turn.universe().ships().get(42)->getTransporterTargetId(Ship::UnloadTransporter).orElse(-1), 99);
+    TS_ASSERT_EQUALS(h.turn.universe().ships().get(42)->getTransporterCargo(Ship::UnloadTransporter, Element::Neutronium).orElse(-1), 5);
+    TS_ASSERT_EQUALS(h.turn.universe().planets().get(99)->getCargo(Element::Neutronium).orElse(-1), 1000);
 }
 
 /** Test creation of planet/ship transfer, foreign ship.
@@ -464,31 +464,31 @@ TestGameActionsCargoTransferSetup::testOwnPlanetForeignShip()
     h.prepareShip(300, 8, Object::NotPlayable);
 
     // Create transfer.
-    CargoTransferSetup testee = CargoTransferSetup::fromPlanetShip(h.univ, 99, 42);
+    CargoTransferSetup testee = CargoTransferSetup::fromPlanetShip(h.turn.universe(), 99, 42);
     TS_ASSERT_EQUALS(testee.getStatus(), CargoTransferSetup::NeedProxy);
 
     // Try proxies
-    TS_ASSERT(!testee.isValidProxy(h.univ, 300));  // wrong owner and not playable
-    TS_ASSERT(!testee.isValidProxy(h.univ, 200));  // wrong owner
-    TS_ASSERT(!testee.isValidProxy(h.univ, 42));
-    TS_ASSERT( testee.isValidProxy(h.univ, 100));  // valid
+    TS_ASSERT(!testee.isValidProxy(h.turn.universe(), 300));  // wrong owner and not playable
+    TS_ASSERT(!testee.isValidProxy(h.turn.universe(), 200));  // wrong owner
+    TS_ASSERT(!testee.isValidProxy(h.turn.universe(), 42));
+    TS_ASSERT( testee.isValidProxy(h.turn.universe(), 100));  // valid
 
     // Set correct proxy
-    TS_ASSERT(testee.setProxy(h.univ, 100));
+    TS_ASSERT(testee.setProxy(h.turn.universe(), 100));
     TS_ASSERT_EQUALS(testee.getStatus(), CargoTransferSetup::Ready);
-    TS_ASSERT_EQUALS(testee.getConflictingTransferShipId(h.univ), 0);
-    testee.build(h.action, h.univ, h.interface, h.config, h.shipList, h.version);
+    TS_ASSERT_EQUALS(testee.getConflictingTransferShipId(h.turn.universe()), 0);
+    testee.build(h.action, h.turn, h.interface, h.config, h.shipList, h.version);
 
     // Move
     TS_ASSERT_EQUALS(h.action.move(Element::Neutronium, 5, 0, 1, false, false), 5);
     h.action.commit();
 
     // Verify result of move
-    TS_ASSERT_EQUALS(h.univ.ships().get(42)->getCargo(Element::Neutronium).orElse(-1), 10);
-    TS_ASSERT_EQUALS(h.univ.ships().get(100)->getCargo(Element::Neutronium).orElse(-1), 10);
-    TS_ASSERT_EQUALS(h.univ.ships().get(100)->getTransporterTargetId(Ship::TransferTransporter).orElse(-1), 42);
-    TS_ASSERT_EQUALS(h.univ.ships().get(100)->getTransporterCargo(Ship::TransferTransporter, Element::Neutronium).orElse(-1), 5);
-    TS_ASSERT_EQUALS(h.univ.planets().get(99)->getCargo(Element::Neutronium).orElse(-1), 995);
+    TS_ASSERT_EQUALS(h.turn.universe().ships().get(42)->getCargo(Element::Neutronium).orElse(-1), 10);
+    TS_ASSERT_EQUALS(h.turn.universe().ships().get(100)->getCargo(Element::Neutronium).orElse(-1), 10);
+    TS_ASSERT_EQUALS(h.turn.universe().ships().get(100)->getTransporterTargetId(Ship::TransferTransporter).orElse(-1), 42);
+    TS_ASSERT_EQUALS(h.turn.universe().ships().get(100)->getTransporterCargo(Ship::TransferTransporter, Element::Neutronium).orElse(-1), 5);
+    TS_ASSERT_EQUALS(h.turn.universe().planets().get(99)->getCargo(Element::Neutronium).orElse(-1), 995);
 }
 
 /** Test creation of planet/ship transfer, foreign planet.
@@ -501,10 +501,10 @@ TestGameActionsCargoTransferSetup::testForeignPlanetOwnShip()
     h.prepareShip(42, 5, Object::Playable);
     h.preparePlanet(99, 8, Object::NotPlayable);      // note different owner and playability
 
-    CargoTransferSetup testee = CargoTransferSetup::fromPlanetShip(h.univ, 99, 42);
+    CargoTransferSetup testee = CargoTransferSetup::fromPlanetShip(h.turn.universe(), 99, 42);
     TS_ASSERT_EQUALS(testee.getStatus(), CargoTransferSetup::Ready);
-    TS_ASSERT_EQUALS(testee.getConflictingTransferShipId(h.univ), 0);
-    testee.build(h.action, h.univ, h.interface, h.config, h.shipList, h.version);
+    TS_ASSERT_EQUALS(testee.getConflictingTransferShipId(h.turn.universe()), 0);
+    testee.build(h.action, h.turn, h.interface, h.config, h.shipList, h.version);
 
     // Move
     TS_ASSERT_EQUALS(h.action.move(Element::Neutronium, 5, 0, 1, false, false), 0);     // planet->ship fails
@@ -512,10 +512,10 @@ TestGameActionsCargoTransferSetup::testForeignPlanetOwnShip()
     h.action.commit();
 
     // Verify result of move
-    TS_ASSERT_EQUALS(h.univ.ships().get(42)->getCargo(Element::Neutronium).orElse(-1), 5);
-    TS_ASSERT_EQUALS(h.univ.ships().get(42)->getTransporterTargetId(Ship::UnloadTransporter).orElse(-1), 99);
-    TS_ASSERT_EQUALS(h.univ.ships().get(42)->getTransporterCargo(Ship::UnloadTransporter, Element::Neutronium).orElse(-1), 5);
-    TS_ASSERT_EQUALS(h.univ.planets().get(99)->getCargo(Element::Neutronium).orElse(-1), 1000);
+    TS_ASSERT_EQUALS(h.turn.universe().ships().get(42)->getCargo(Element::Neutronium).orElse(-1), 5);
+    TS_ASSERT_EQUALS(h.turn.universe().ships().get(42)->getTransporterTargetId(Ship::UnloadTransporter).orElse(-1), 99);
+    TS_ASSERT_EQUALS(h.turn.universe().ships().get(42)->getTransporterCargo(Ship::UnloadTransporter, Element::Neutronium).orElse(-1), 5);
+    TS_ASSERT_EQUALS(h.turn.universe().planets().get(99)->getCargo(Element::Neutronium).orElse(-1), 1000);
 }
 
 /** Test creation of planet/ship transfer, foreign ship.
@@ -531,21 +531,21 @@ TestGameActionsCargoTransferSetup::testForeignShipOwnPlanet()
     h.prepareShip(300, 8, Object::NotPlayable);
 
     // Create transfer.
-    CargoTransferSetup testee = CargoTransferSetup::fromPlanetShip(h.univ, 99, 42);
+    CargoTransferSetup testee = CargoTransferSetup::fromPlanetShip(h.turn.universe(), 99, 42);
     testee.swapSides();
     TS_ASSERT_EQUALS(testee.getStatus(), CargoTransferSetup::NeedProxy);
 
     // Try proxies
-    TS_ASSERT(!testee.isValidProxy(h.univ, 300));  // wrong owner and not playable
-    TS_ASSERT(!testee.isValidProxy(h.univ, 200));  // wrong owner
-    TS_ASSERT(!testee.isValidProxy(h.univ, 42));
-    TS_ASSERT( testee.isValidProxy(h.univ, 100));  // valid
+    TS_ASSERT(!testee.isValidProxy(h.turn.universe(), 300));  // wrong owner and not playable
+    TS_ASSERT(!testee.isValidProxy(h.turn.universe(), 200));  // wrong owner
+    TS_ASSERT(!testee.isValidProxy(h.turn.universe(), 42));
+    TS_ASSERT( testee.isValidProxy(h.turn.universe(), 100));  // valid
 
     // Set correct proxy
-    TS_ASSERT(testee.setProxy(h.univ, 100));
+    TS_ASSERT(testee.setProxy(h.turn.universe(), 100));
     TS_ASSERT_EQUALS(testee.getStatus(), CargoTransferSetup::Ready);
-    TS_ASSERT_EQUALS(testee.getConflictingTransferShipId(h.univ), 0);
-    testee.build(h.action, h.univ, h.interface, h.config, h.shipList, h.version);
+    TS_ASSERT_EQUALS(testee.getConflictingTransferShipId(h.turn.universe()), 0);
+    testee.build(h.action, h.turn, h.interface, h.config, h.shipList, h.version);
 
     // Move
     TS_ASSERT_EQUALS(h.action.move(Element::Neutronium, 5, 0, 1, false, false), 0);   // fails
@@ -553,11 +553,11 @@ TestGameActionsCargoTransferSetup::testForeignShipOwnPlanet()
     h.action.commit();
 
     // Verify result of move
-    TS_ASSERT_EQUALS(h.univ.ships().get(42)->getCargo(Element::Neutronium).orElse(-1), 10);
-    TS_ASSERT_EQUALS(h.univ.ships().get(100)->getCargo(Element::Neutronium).orElse(-1), 10);
-    TS_ASSERT_EQUALS(h.univ.ships().get(100)->getTransporterTargetId(Ship::TransferTransporter).orElse(-1), 42);
-    TS_ASSERT_EQUALS(h.univ.ships().get(100)->getTransporterCargo(Ship::TransferTransporter, Element::Neutronium).orElse(-1), 5);
-    TS_ASSERT_EQUALS(h.univ.planets().get(99)->getCargo(Element::Neutronium).orElse(-1), 995);
+    TS_ASSERT_EQUALS(h.turn.universe().ships().get(42)->getCargo(Element::Neutronium).orElse(-1), 10);
+    TS_ASSERT_EQUALS(h.turn.universe().ships().get(100)->getCargo(Element::Neutronium).orElse(-1), 10);
+    TS_ASSERT_EQUALS(h.turn.universe().ships().get(100)->getTransporterTargetId(Ship::TransferTransporter).orElse(-1), 42);
+    TS_ASSERT_EQUALS(h.turn.universe().ships().get(100)->getTransporterCargo(Ship::TransferTransporter, Element::Neutronium).orElse(-1), 5);
+    TS_ASSERT_EQUALS(h.turn.universe().planets().get(99)->getCargo(Element::Neutronium).orElse(-1), 995);
 }
 
 /** Test creation of planet/ship transfer, foreign ship, conflict case.
@@ -573,30 +573,30 @@ TestGameActionsCargoTransferSetup::testOwnPlanetForeignShipConflict()
     h.prepareShip(200, 8, Object::Playable);
 
     // Ship 100 starts with a cargo transfer
-    h.univ.ships().get(100)->setTransporterTargetId(Ship::TransferTransporter, 200);
-    h.univ.ships().get(100)->setTransporterCargo(Ship::TransferTransporter, Element::Neutronium, 20);
+    h.turn.universe().ships().get(100)->setTransporterTargetId(Ship::TransferTransporter, 200);
+    h.turn.universe().ships().get(100)->setTransporterCargo(Ship::TransferTransporter, Element::Neutronium, 20);
 
     // Create transfer.
-    CargoTransferSetup testee = CargoTransferSetup::fromPlanetShip(h.univ, 99, 42);
+    CargoTransferSetup testee = CargoTransferSetup::fromPlanetShip(h.turn.universe(), 99, 42);
     TS_ASSERT_EQUALS(testee.getStatus(), CargoTransferSetup::NeedProxy);
 
     // Set correct proxy
-    TS_ASSERT(testee.setProxy(h.univ, 100));
+    TS_ASSERT(testee.setProxy(h.turn.universe(), 100));
     TS_ASSERT_EQUALS(testee.getStatus(), CargoTransferSetup::Ready);
 
     // This produces a conflict. Auto-solve it.
-    TS_ASSERT_EQUALS(testee.getConflictingTransferShipId(h.univ), 100);
-    testee.build(h.action, h.univ, h.interface, h.config, h.shipList, h.version);
+    TS_ASSERT_EQUALS(testee.getConflictingTransferShipId(h.turn.universe()), 100);
+    testee.build(h.action, h.turn, h.interface, h.config, h.shipList, h.version);
 
     // Move
     TS_ASSERT_EQUALS(h.action.move(Element::Neutronium, 5, 0, 1, false, false), 5);
     h.action.commit();
 
     // Verify result of move
-    TS_ASSERT_EQUALS(h.univ.ships().get(42)->getCargo(Element::Neutronium).orElse(-1), 10);
-    TS_ASSERT_EQUALS(h.univ.ships().get(100)->getCargo(Element::Neutronium).orElse(-1), 30);
-    TS_ASSERT_EQUALS(h.univ.ships().get(100)->getTransporterTargetId(Ship::TransferTransporter).orElse(-1), 42);
-    TS_ASSERT_EQUALS(h.univ.ships().get(100)->getTransporterCargo(Ship::TransferTransporter, Element::Neutronium).orElse(-1), 5);
-    TS_ASSERT_EQUALS(h.univ.planets().get(99)->getCargo(Element::Neutronium).orElse(-1), 995);
+    TS_ASSERT_EQUALS(h.turn.universe().ships().get(42)->getCargo(Element::Neutronium).orElse(-1), 10);
+    TS_ASSERT_EQUALS(h.turn.universe().ships().get(100)->getCargo(Element::Neutronium).orElse(-1), 30);
+    TS_ASSERT_EQUALS(h.turn.universe().ships().get(100)->getTransporterTargetId(Ship::TransferTransporter).orElse(-1), 42);
+    TS_ASSERT_EQUALS(h.turn.universe().ships().get(100)->getTransporterCargo(Ship::TransferTransporter, Element::Neutronium).orElse(-1), 5);
+    TS_ASSERT_EQUALS(h.turn.universe().planets().get(99)->getCargo(Element::Neutronium).orElse(-1), 995);
 }
 

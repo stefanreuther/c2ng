@@ -17,11 +17,11 @@ namespace server { namespace interface {
         virtual ~SessionRouterClient();
 
         virtual String_t getStatus();
-        virtual String_t getInfo(int32_t sessionId);
-        virtual String_t talk(int32_t sessionId, String_t command);
-        virtual void sessionAction(int32_t sessionId, Action action);
-        virtual void groupAction(String_t key, Action action, afl::data::IntegerList_t& result);
-        virtual int32_t create(afl::base::Memory<const String_t> args);
+        virtual String_t getInfo(SessionId_t sessionId);
+        virtual String_t talk(SessionId_t sessionId, String_t command);
+        virtual void sessionAction(SessionId_t sessionId, Action action);
+        virtual void groupAction(String_t key, Action action, afl::data::StringList_t& result);
+        virtual SessionId_t create(afl::base::Memory<const String_t> args);
         virtual String_t getConfiguration();
 
      private:

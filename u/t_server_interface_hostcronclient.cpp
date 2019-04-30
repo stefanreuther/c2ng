@@ -153,5 +153,35 @@ TestServerInterfaceHostCronClient::testIt()
         bool ok = testee.kickstartGame(92);
         TS_ASSERT(ok);
     }
+
+    // suspendScheduler
+    {
+        mock.expectCall("CRONSUSPEND, 15");
+        mock.provideNewResult(server::makeStringValue("x"));
+        testee.suspendScheduler(15);
+    }
+
+    // getBrokenGames
+    {
+        Vector::Ref_t vec = Vector::create();
+        vec->pushBackInteger(10);
+        vec->pushBackString("x");
+        vec->pushBackInteger(15);
+        vec->pushBackString("y");
+        vec->pushBackInteger(77);
+        vec->pushBackString("z");
+        mock.expectCall("CRONLSBROKEN");
+        mock.provideNewResult(new VectorValue(vec));
+
+        server::interface::HostCron::BrokenMap_t m;
+        testee.getBrokenGames(m);
+
+        TS_ASSERT_EQUALS(m.size(), 3U);
+        TS_ASSERT_EQUALS(m[10], "x");
+        TS_ASSERT_EQUALS(m[15], "y");
+        TS_ASSERT_EQUALS(m[77], "z");
+    }
+
+    mock.checkFinish();
 }
 

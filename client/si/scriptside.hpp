@@ -7,15 +7,14 @@
 #include <vector>
 #include <set>
 #include "afl/base/signalconnection.hpp"
+#include "afl/base/weaktarget.hpp"
 #include "afl/data/value.hpp"
+#include "client/si/requestlink2.hpp"
+#include "client/si/scripttask.hpp"
+#include "game/extra.hpp"
 #include "game/session.hpp"
-#include "interpreter/arguments.hpp"
 #include "interpreter/process.hpp"
 #include "util/requestsender.hpp"
-#include "util/slaveobject.hpp"
-#include "client/si/requestlink2.hpp"
-#include "afl/base/weaktarget.hpp"
-#include "game/extra.hpp"
 
 namespace client { namespace si {
 
@@ -39,26 +38,12 @@ namespace client { namespace si {
          *  handleWait() will reflect the result to the UserSide.
          */
 
-        /** Execute a command.
-            This will compile the command into a BCO, create a new process with that BCO, and run the process in a new process group.
-
-            After execution finishes (and possibly generates callbacks to the UserSide),
-            it will eventually call handleWait() which will reflect the result to the UserSide.
-            \param id       Wait Id for the handleWait() callback
-            \param session  Session to work on
-            \param command  Command (string)
-            \param verbose  false: just execute the command; true: log command and possible result on console
-            \param name     Name of process
-            \param ctxp     ContextProvider (null if none required). The ContextProvider provides initial context for the process */
-        void executeCommandWait(uint32_t id, game::Session& session, String_t command, bool verbose, String_t name, std::auto_ptr<ContextProvider> ctxp);
-
-        /** Execute a process group.
-            After execution finishes (and possibly generates callbacks to the UserSide),
-            it will eventually call handleWait() which will reflect the result to the UserSide.
-            \param id       Wait Id
-            \param pgid     Process group Id
+        /** Execute a task.
+            This will provide the given task with a new process group to run in and run it.
+            \param waitId   Wait Id for the handleWait() callback
+            \param task     The task
             \param session  Session to work on */
-        void executeProcessGroupWait(uint32_t id, uint32_t pgid, game::Session& session);
+        void executeTask(uint32_t waitId, std::auto_ptr<ScriptTask> task, game::Session& session);
 
         /** Continue a detached process.
             Executes the process identified by the given RequestLink2 (and all other processes in the same process group).
@@ -146,14 +131,12 @@ namespace client { namespace si {
             uint32_t waitId;
             uint32_t processGroupId;
             interpreter::Process* process;
-            bool verbose;
-            bool hasResult;
-            Wait(uint32_t waitId, uint32_t processGroupId, interpreter::Process* process, bool verbose, bool hasResult)
-                : waitId(waitId), processGroupId(processGroupId), process(process),
-                  verbose(verbose), hasResult(hasResult)
+            ScriptTask::Verbosity verbosity;
+            Wait(uint32_t waitId, uint32_t processGroupId, interpreter::Process* process, ScriptTask::Verbosity verbosity)
+                : waitId(waitId), processGroupId(processGroupId), process(process), verbosity(verbosity)
                 { }
             Wait()
-                : waitId(0), processGroupId(0), process(0), verbose(false), hasResult(false)
+                : waitId(0), processGroupId(0), process(0), verbosity(ScriptTask::Default)
                 { }
         };
         std::vector<Wait> m_waits;

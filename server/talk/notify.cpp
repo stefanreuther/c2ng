@@ -73,7 +73,7 @@ server::talk::notifyMessage(Message& msg, Topic& topic, Forum& forum, Root& root
         opts.setBaseUrl(root.config().baseUrl);
         opts.setFormat("mail");
 
-        const String_t renderedText = server::talk::render::render(msg.text().get(), ctx, opts, root);
+        const String_t renderedText = server::talk::render::renderText(msg.text().get(), ctx, opts, root);
 
         mq.startMessage("talk-topic-message", afl::base::Nothing);
         mq.addParameter("forum", forum.name().get());
@@ -127,7 +127,7 @@ server::talk::notifyMessage(Message& msg, Topic& topic, Forum& forum, Root& root
         opts.setBaseUrl(root.config().baseUrl);
         opts.setFormat("mail");
 
-        const String_t renderedText = server::talk::render::render(msg.text().get(), ctx, opts, root);
+        const String_t renderedText = server::talk::render::renderText(msg.text().get(), ctx, opts, root);
 
         mq.startMessage("talk-forum-message", afl::base::Nothing);
         mq.addParameter("forum", forum.name().get());
@@ -158,7 +158,7 @@ server::talk::notifyPM(UserPM& msg, const afl::data::StringList_t& notifyIndivid
         mq.addParameter("subject", msg.subject().get());
         mq.addParameter("author", User(root, author).getScreenName());
         mq.addParameter("id", afl::string::Format("%d", msg.getId()));
-        mq.addParameter("message", server::talk::render::render(msg.text().get(), ctx, opts, root));
+        mq.addParameter("message", server::talk::render::renderText(msg.text().get(), ctx, opts, root));
         mq.send(notifyIndividual);
     }
 

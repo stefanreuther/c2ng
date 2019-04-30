@@ -401,7 +401,7 @@ game::map::Ship::combinedCheck1(Universe& univ, int turnNumber)
 
 
 String_t
-game::map::Ship::getName(Name which, afl::string::Translator& tx, InterpreterInterface& iface) const
+game::map::Ship::getName(ObjectName which, afl::string::Translator& tx, InterpreterInterface& iface) const
 {
     // ex GShip::getName
     // Figure out plain name

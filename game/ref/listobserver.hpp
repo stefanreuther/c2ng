@@ -12,6 +12,7 @@
 namespace game { namespace ref {
 
     class Configuration;
+    class ConfigurationSelection;
 
     class ListObserver {
      public:
@@ -20,6 +21,8 @@ namespace game { namespace ref {
         void setList(const List& list);
         void setExtra(const UserList& list);
         void setSession(Session& session);
+
+        void setConfigurationSelection(const ConfigurationSelection& sel);
 
         Configuration getConfig() const;
         void setConfig(const Configuration& config);
@@ -33,6 +36,7 @@ namespace game { namespace ref {
         UserList m_extraList;
         UserList m_resultList;
 
+        const ConfigurationSelection* m_pConfigurationSelection;
         Session* m_pSession;
 
         afl::base::SignalConnection conn_viewpointTurnChange;

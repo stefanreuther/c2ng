@@ -42,53 +42,6 @@ game::map::RenderOptions::toggleOptions(Options_t which)
     sig_change.raise();
 }
 
-// FIXME: retire (toggleOptionKey). This is the wrong abstraction.
-// /** Toggle an option, given a key.
-//     \param c Key (modifiers removed)
-//     \retval true Key handled
-//     \retval false Key not recognized */
-// bool
-// GChartOptions::toggleOptionKey(uint32_t c)
-// {
-//     switch (c) {
-//      case 'm':
-//         toggleOptions(co_Mine);
-//         return true;
-//      case 'a':
-//         toggleOptions(co_ShipDots);
-//         return true;
-//      case 'd':
-//         toggleOptions(co_Labels);
-//         return true;
-//      case 'i':
-//         toggleOptions(co_Ion);
-//         return true;
-//      case 'v':
-//         toggleOptions(co_Trails);
-//         return true;
-//      case 't':
-//         toggleOptions(co_Selection);
-//         return true;
-//      case 's':
-//         toggleOptions(co_Sectors);
-//         return true;
-//      case 'b':
-//         toggleOptions(co_Borders);
-//         return true;
-//      case 'u':
-//         toggleOptions(co_Ufo);
-//         return true;
-//      case 'p':
-//         toggleOptions(co_Drawings);
-//         return true;
-//      case 'w':
-//         toggleOptions(co_WarpWells);
-//         return true;
-//      default:
-//         return false;
-//     }
-// }
-
 // /** Copy from another option set. */
 void
 game::map::RenderOptions::copyFrom(const RenderOptions& opts)

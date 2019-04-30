@@ -16,9 +16,10 @@ namespace server { namespace nntp {
     class Root {
      public:
         /** Constructor.
-            \param talk Talk connection
+            \param talk c2talk connection
+            \param user c2user connection
             \param baseUrl Base URL for links */
-        Root(afl::net::CommandHandler& talk, const String_t& baseUrl);
+        Root(afl::net::CommandHandler& talk, afl::net::CommandHandler& user, const String_t& baseUrl);
 
         /** Access logger.
             \return logger */
@@ -30,9 +31,13 @@ namespace server { namespace nntp {
             \return Id */
         uint32_t allocateId();
 
-        /** Access talk.
-            \return talk connection */
+        /** Access c2talk.
+            \return c2talk connection */
         afl::net::CommandHandler& talk();
+
+        /** Access c2user.
+            \return c2user connection */
+        afl::net::CommandHandler& user();
 
         /** Configure reconnection.
             Execute before every command that accesses the Talk service. */
@@ -44,6 +49,7 @@ namespace server { namespace nntp {
 
      private:
         afl::net::CommandHandler& m_talk;
+        afl::net::CommandHandler& m_user;
         String_t m_baseUrl;
         afl::sys::Log m_log;
         uint32_t m_idCounter;

@@ -92,14 +92,13 @@ namespace server { namespace talk {
         afl::net::redis::IntegerKey lastForumId();
         afl::net::redis::IntegerSetKey allForums();
         afl::net::redis::HashKey newsgroupMap();
+        afl::net::redis::HashKey forumMap();
 
         afl::net::redis::Subtree emailRoot();
 
         afl::net::redis::Subtree defaultFolderRoot();
         afl::net::redis::Subtree pmRoot();
         afl::net::redis::Subtree rfcMessageIdRoot();
-
-        String_t getUserIdFromLogin(String_t login);
 
         /** Check a user's permissions.
             Most code will use Session::hasPermission/Session::checkPermission, but notify needs to verify permissions without a session.

@@ -80,11 +80,16 @@ namespace {
 void
 BBRenderer::renderChildrenPG(const TextNode& n)
 {
-    for (size_t i = 0, e = n.children.size(); i != e; ++i) {
-        if (i != 0) {
-            result += "\n\n";
+    if (n.major == TextNode::maParagraph && n.minor == TextNode::miParFragment) {
+        // FIXME: do we need the miParFragment condition?
+        renderPG(n);
+    } else {
+        for (size_t i = 0, e = n.children.size(); i != e; ++i) {
+            if (i != 0) {
+                result += "\n\n";
+            }
+            renderPG(*n.children[i]);
         }
-        renderPG(*n.children[i]);
     }
 }
 
@@ -328,6 +333,7 @@ BBRenderer::renderPG(const TextNode& n)
             break;
          default:
          case TextNode::miParNormal:
+         case TextNode::miParFragment:
             renderChildrenInline(n, false);
             break;
         }

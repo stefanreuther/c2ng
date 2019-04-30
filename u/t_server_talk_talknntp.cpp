@@ -23,59 +23,6 @@ using server::talk::TalkForum;
 using server::talk::TalkPost;
 using afl::data::Access;
 
-/** Test login (checkUser()). */
-void
-TestServerTalkTalkNNTP::testLogin()
-{
-    using afl::net::redis::Subtree;
-
-    // Infrastructure
-    afl::net::NullCommandHandler mq;
-    afl::net::redis::InternalDatabase db;
-    Subtree(db, "user:").subtree("1009").stringKey("password").set("1,52YluJAXWKqqhVThh22cNw");
-    Subtree(db, "uid:").stringKey("a_b").set("1009");
-    Subtree(db, "uid:").stringKey("root").set("0");
-
-    // Test it
-    {
-        server::talk::Configuration config;
-        config.userKey = "xyz";
-        server::talk::Root root(db, mq, config);
-        server::talk::Session session;
-        server::talk::TalkNNTP testee(session, root);
-
-        // Success cases
-        TS_ASSERT_EQUALS(testee.checkUser("a_b", "z"), "1009");
-        TS_ASSERT_EQUALS(testee.checkUser("A_B", "z"), "1009");
-        TS_ASSERT_EQUALS(testee.checkUser("A->B", "z"), "1009");
-
-        // Error cases
-        TS_ASSERT_THROWS(testee.checkUser("root", ""), std::exception);
-        TS_ASSERT_THROWS(testee.checkUser("a_b", ""), std::exception);
-        TS_ASSERT_THROWS(testee.checkUser("a_b", "zzz"), std::exception);
-        TS_ASSERT_THROWS(testee.checkUser("a_b", "Z"), std::exception);
-        TS_ASSERT_THROWS(testee.checkUser("", "Z"), std::exception);
-        TS_ASSERT_THROWS(testee.checkUser("/", "Z"), std::exception);
-
-        // User context does not change outcome
-        session.setUser("a");
-        TS_ASSERT_EQUALS(testee.checkUser("a_b", "z"), "1009");
-        TS_ASSERT_THROWS(testee.checkUser("a_b", "Z"), std::exception);
-    }
-
-    // Test it with different user key. This must make the test fail
-    {
-        server::talk::Configuration config;
-        config.userKey = "abc";
-        server::talk::Root root(db, mq, config);
-        server::talk::Session session;
-        server::talk::TalkNNTP testee(session, root);
-
-        TS_ASSERT_THROWS(testee.checkUser("a_b", "z"), std::exception);
-        TS_ASSERT_THROWS(testee.checkUser("root", ""), std::exception);
-    }
-}
-
 /** Test newsgroup access commands: listNewsgroups(), findNewsgroup(), listNewsgroupsByGroup(). */
 void
 TestServerTalkTalkNNTP::testGroups()

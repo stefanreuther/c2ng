@@ -184,7 +184,7 @@ void
 game::v3::UnpackApplication::help()
 {
     afl::io::TextWriter& out = standardOutput();
-    out.writeLine(afl::string::Format(_("PCC2 Result File Unpacker v%s - (c) 2010-2018 Stefan Reuther").c_str(), PCC2_VERSION));
+    out.writeLine(afl::string::Format(_("PCC2 Result File Unpacker v%s - (c) 2010-2019 Stefan Reuther").c_str(), PCC2_VERSION));
     out.writeLine();
     out.writeLine(afl::string::Format(_("Usage:\n"
                                         "  %s [-h]\n"

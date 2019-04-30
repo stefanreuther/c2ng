@@ -20,6 +20,7 @@
 #include "game/test/registrationkey.hpp"
 #include "game/test/specificationloader.hpp"
 #include "game/test/stringverifier.hpp"
+#include "afl/charset/utf8charset.hpp"
 
 namespace {
     class TestHarness {
@@ -34,6 +35,7 @@ namespace {
                    game::HostVersion(game::HostVersion::Host, MKVERSION(3, 22, 47)),
                    std::auto_ptr<game::RegistrationKey>(new game::test::RegistrationKey(game::RegistrationKey::Unregistered, 5)),
                    std::auto_ptr<game::StringVerifier>(new game::test::StringVerifier()),
+                   std::auto_ptr<afl::charset::Charset>(new afl::charset::Utf8Charset()),
                    game::Root::Actions_t())
             { root.hostConfiguration().setDefaultValues(); }
 

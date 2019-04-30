@@ -5,6 +5,8 @@
 
 #include <stdexcept>
 #include "server/file/filebase.hpp"
+#include "afl/io/constmemorystream.hpp"
+#include "afl/io/textfile.hpp"
 #include "server/errors.hpp"
 #include "server/file/directoryitem.hpp"
 #include "server/file/fileitem.hpp"
@@ -12,6 +14,35 @@
 #include "server/file/root.hpp"
 #include "server/file/session.hpp"
 #include "server/types.hpp"
+#include "util/configurationfile.hpp"
+
+namespace {
+    void snoopFileContent(server::file::DirectoryItem& dir,
+                          const String_t& fileName,
+                          const String_t& content)
+    {
+        if (fileName == "pconfig.src") {
+            // Load
+            using util::ConfigurationFile;
+            afl::io::ConstMemoryStream ms(afl::string::toBytes(content));
+            afl::io::TextFile rdr(ms);
+            ConfigurationFile file;
+            file.load(rdr);
+
+            // Check
+            const ConfigurationFile::Element* ele = file.findElement(ConfigurationFile::Assignment, "phost.gamename");
+            if (!ele) {
+                ele = file.findElement(ConfigurationFile::Assignment, "gamename");
+            }
+            if (ele != 0) {
+                String_t value = afl::string::strTrim(ele->value);
+                if (!value.empty()) {
+                    dir.setProperty("prop:name", value);
+                }
+            }
+        }
+    }
+}
 
 server::file::FileBase::FileBase(Session& session, Root& root)
     : m_session(session),
@@ -224,8 +255,11 @@ server::file::FileBase::putFile(String_t fileName, String_t content)
     PathResolver res(m_root, m_root.rootDirectory(), m_session.getUser());
     res.resolvePath(fileName);
     res.checkPermission(DirectoryItem::AllowWrite);
-    res.getDirectory().readContent(m_root);
-    res.getDirectory().createFile(fileName, afl::string::toBytes(content));
+
+    DirectoryItem& dir = res.getDirectory();
+    dir.readContent(m_root);
+    dir.createFile(fileName, afl::string::toBytes(content));
+    snoopFileContent(dir, fileName, content);
 }
 
 void

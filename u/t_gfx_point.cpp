@@ -65,3 +65,16 @@ TestGfxPoint::testIt()
     TS_ASSERT_EQUALS(&(ss << p), &ss);
     TS_ASSERT_EQUALS(ss.str(), "18,20");
 }
+
+/** Test extendRight, extendBelow. */
+void
+TestGfxPoint::testExtend()
+{
+    using gfx::Point;
+    TS_ASSERT_EQUALS(Point(10, 5).extendRight(Point(20, 4)),  Point(30, 5));
+    TS_ASSERT_EQUALS(Point(10, 5).extendRight(Point(20, 12)), Point(30, 12));
+
+    TS_ASSERT_EQUALS(Point(10, 5).extendBelow(Point(20, 4)),  Point(20, 9));
+    TS_ASSERT_EQUALS(Point(10, 5).extendBelow(Point( 5, 12)), Point(10, 17));
+}
+

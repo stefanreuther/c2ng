@@ -7,6 +7,7 @@
 #include "client/si/requestlink1.hpp"
 #include "client/si/requestlink2.hpp"
 #include "client/si/scriptprocedure.hpp"
+#include "client/si/usercall.hpp"
 #include "client/si/userside.hpp"
 #include "client/si/usertask.hpp"
 #include "interpreter/bytecodeobject.hpp"
@@ -19,16 +20,6 @@
 
 namespace {
     using interpreter::makeBooleanValue;
-    class ProcessContextReceiver : public client::si::ContextReceiver {
-     public:
-        ProcessContextReceiver(interpreter::Process& proc)
-            : m_process(proc)
-            { }
-        virtual void addNewContext(interpreter::Context* pContext)
-            { m_process.pushNewContext(pContext); }
-     private:
-        interpreter::Process& m_process;
-    };
 }
 
 client::si::ScriptSide::ScriptSide(util::RequestSender<UserSide> reply)
@@ -41,72 +32,15 @@ client::si::ScriptSide::~ScriptSide()
 { }
 
 void
-client::si::ScriptSide::executeCommandWait(uint32_t id, game::Session& session, String_t command, bool verbose, String_t name, std::auto_ptr<ContextProvider> ctxp)
+client::si::ScriptSide::executeTask(uint32_t waitId, std::auto_ptr<ScriptTask> task, game::Session& session)
 {
-    // Log it
-    if (verbose) {
-        session.log().write(afl::sys::LogListener::Info, "script.input", command);
-    }
-
-    // Create process
     interpreter::ProcessList& processList = session.world().processList();
-    interpreter::Process& proc = processList.create(session.world(), name);
-
-    // Create BCO
-    interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
-    if (ctxp.get() != 0) {
-        ProcessContextReceiver recv(proc);
-        ctxp->createContext(session, recv);
-    }
-
-    // Create compilation context
-    interpreter::MemoryCommandSource mcs(command);
-    interpreter::DefaultStatementCompilationContext scc(session.world());
-    scc.withContextProvider(&proc);
-    scc.withFlag(scc.RefuseBlocks);
-    scc.withFlag(scc.LinearExecution);
-    if (!verbose) {
-        scc.withFlag(scc.ExpressionsAreStatements);
-    }
-
-    // Compile
-    interpreter::StatementCompiler::StatementResult result;
-    try {
-        interpreter::StatementCompiler sc(mcs);
-        result = sc.compile(*bco, scc);
-        sc.finishBCO(*bco, scc);
-    }
-    catch (std::exception& e) {
-        if (interpreter::Error* pe = dynamic_cast<interpreter::Error*>(&e)) {
-            session.logError(*pe);
-        } else {
-            session.logError(interpreter::Error(e.what()));
-        }
-
-        // Immediately fail it
-        proc.setState(interpreter::Process::Failed);
-        handleWait(id, interpreter::Process::Failed, e.what());
-        return;
-    }
-
-    // Create a wait
     uint32_t pgid = processList.allocateProcessGroup();
-    m_waits.push_back(Wait(id, pgid, &proc, verbose, result == interpreter::StatementCompiler::CompiledExpression));
+    ScriptTask::Verbosity v = ScriptTask::Default;
+    interpreter::Process* p = task->execute(pgid, session, v);
 
-    // Populate process group
-    proc.pushFrame(bco, false);
-    processList.resumeProcess(proc, pgid);
+    m_waits.push_back(Wait(waitId, pgid, p, v));
     processList.startProcessGroup(pgid);
-
-    // Execute
-    runProcesses(session);
-}
-
-void
-client::si::ScriptSide::executeProcessGroupWait(uint32_t id, uint32_t pgid, game::Session& session)
-{
-    m_waits.push_back(Wait(id, pgid, 0, false, false));
-    session.world().processList().startProcessGroup(pgid);
     runProcesses(session);
 }
 
@@ -118,7 +52,7 @@ client::si::ScriptSide::continueProcessWait(uint32_t id, game::Session& session,
     if (!link.getProcessId(pid)) {
         handleWait(id, interpreter::Process::Terminated, interpreter::Error(""));
     } else if (interpreter::Process* p = list.getProcessById(pid)) {
-        m_waits.push_back(Wait(id, p->getProcessGroupId(), 0, false, false));
+        m_waits.push_back(Wait(id, p->getProcessGroupId(), 0, ScriptTask::Default));
         if (link.isWantResult()) {
             p->pushNewValue(0);
         }
@@ -370,12 +304,12 @@ client::si::ScriptSide::onProcessGroupFinish(game::Session& session, uint32_t pg
             interpreter::Error e = w.process->getError();
             switch (w.process->getState()) {
              case interpreter::Process::Suspended:
-                if (w.verbose) {
+                if (w.verbosity != ScriptTask::Default) {
                     session.log().write(afl::sys::LogListener::Info, "script.state", session.translator().translateString("Suspended."));
                 }
                 break;
              case interpreter::Process::Frozen:
-                if (w.verbose) {
+                if (w.verbosity != ScriptTask::Default) {
                     session.log().write(afl::sys::LogListener::Info, "script.state", session.translator().translateString("Frozen."));
                 }
                 break;
@@ -384,7 +318,7 @@ client::si::ScriptSide::onProcessGroupFinish(game::Session& session, uint32_t pg
              case interpreter::Process::Waiting:
                 break;
              case interpreter::Process::Ended:
-                if (w.verbose && w.hasResult) {
+                if (w.verbosity == ScriptTask::Result) {
                     afl::data::Value* p = w.process->getResult();
                     if (p == 0) {
                         session.log().write(afl::sys::LogListener::Info, "script.empty", "Empty");
@@ -396,7 +330,7 @@ client::si::ScriptSide::onProcessGroupFinish(game::Session& session, uint32_t pg
              case interpreter::Process::Terminated:
                 // Terminated, i.e. "End" statement. Log only when user specified an expression,
                 // to tell them why they don't get a result.
-                if (w.verbose && w.hasResult) {
+                if (w.verbosity == ScriptTask::Result) {
                     session.log().write(afl::sys::LogListener::Info, "script.state", session.translator().translateString("Terminated."));
                 }
                 break;

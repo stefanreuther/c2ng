@@ -1,0 +1,9 @@
+/*!
+     \namespace game::v3::check
+     \brief Turn checker
+
+     This namespace contains the v3 turn checker.
+
+     Entry point:
+     - game::v3::check::Checker
+ */

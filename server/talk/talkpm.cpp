@@ -318,7 +318,7 @@ server::talk::TalkPM::render(int32_t folder, int32_t pmid, const Options& option
         render::Options temporaryOptions(m_session.renderOptions());
         temporaryOptions.updateFrom(options);
 
-        return render::render(UserPM(m_root, pmid).text().get(), ctx, temporaryOptions, m_root);
+        return render::renderText(UserPM(m_root, pmid).text().get(), ctx, temporaryOptions, m_root);
     }
 }
 
@@ -338,7 +338,7 @@ server::talk::TalkPM::render(int32_t folder, afl::base::Memory<const int32_t> pm
             // Render the message
             render::Context ctx(m_session.getUser());
             ctx.setMessageAuthor(UserPM(m_root, pmid).author().get());
-            result.pushBackNew(new String_t(render::render(UserPM(m_root, pmid).text().get(), ctx, m_session.renderOptions(), m_root)));
+            result.pushBackNew(new String_t(render::renderText(UserPM(m_root, pmid).text().get(), ctx, m_session.renderOptions(), m_root)));
         }
     }
 }

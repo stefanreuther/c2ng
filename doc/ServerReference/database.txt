@@ -1,0 +1,904 @@
+User Management
+================
+
+@q uid:$USERNAME : Int (Database)
+Map user name to user Id.
+Presence of this item means user name is taken.
+User exists if {user:$UID:name} exists and maps back here (it can map to 0 to block user names).
+---
+
+@q user:uid : Int (Database)
+Last used user Id.
+---
+
+@q user:all : IntSet (Database)
+Live user Ids.
+---
+
+
+@q user:active : IntSet (Database)
+Set of active users.
+A user is active if they have submitted at least one turn file.
+---
+
+@q user:$UID:name : Str (Database)
+Name of this user.
+@see uid:$USERNAME
+---
+
+@q user:$UID:password : Str (Database)
+Password.
+Format is $type,$code.
+Currently, $type=1, and $code=base64(md5(config[user.key] + password)).
+---
+
+@q user:$UID:profile : Hash (Database)
+User profile.
+Bag of user-specific information.
+Most information is optional.
+Items not found here are looked up in {default:profile}.
+Upon account creation, {default:profilecopy} is copied into the user profile.
+
+<h2>Identification</h2>
+@key realname:Str                    Real name (if entered)
+@key screenname:Str                  Screen name (visible to other users, defaults to user name, must not be blank)
+@key email:Str                       Email address (if entered)
+@key infoemailflag:Int               Nonzero to allow other logged-in users to see the email address
+@key inforealnameflag:Int            Nonzero to allow other users to see the real name
+@key infowebsite:Str                 Website URL (if entered)
+@key infocountry:Str                 Country (if entered)
+@key infotown:Str                    Town (if entered)
+@key infooccupation:Str              Occupation (if entered)
+@key infobirthday:Str                Birthday (if entered)
+
+<h2>Preferences</h2>
+@c          [- mailformat                 Default mail format ("text", "html")]
+@key mailgametype:Str                Game mail type ("info", "rst", "zip", "none")
+@key mailpmtype:Str                  PM mail type ("info", "msg", "none")
+@key language:Str                    auto, en, de, ...
+
+<h2>Account creation (for abuse tracking)</h2>
+@key createtime:Int                  Account creation time, seconds since epoch (unix format), decimal
+@key createua:Str                    <tt>User-Agent</tt> header (if present)
+@key createaccept:Str                <tt>Accept</tt> header (if present)
+@key createacceptcharset:Str         <tt>Accept-Charset</tt> header (if present)
+@key createacceptlanguage:Str        <tt>Accept-Language</tt> header (if present)
+@key createip:Str                    IP address
+@key termsversion:Int                User has accepted this version of the terms of use
+
+@c        + Last log-in time (not yet implemented)
+@c          [- lastlogin                  Time]
+@c          [- lastip                     IP address]
+
+<h2>Permissions</h2>
+@key limitfiles:Int                  Maximum number of files
+@key limitkbytes:Int                 Maximum file size, kbytes
+@key allowupload:Int                 Nonzero: User is allowed to upload files
+@key allowadmin:Int                  Nonzero: User has administrative rights
+@key allowpost:Int                   Nonzero: User is allowed to post in the forum (set to 1 in default:profile so it can be selectively disabled)
+@c          [- allowjoin                  User is allowed to join games]
+
+<h2>Joining games</h2>
+@c          [- joinlimit                  Maximum number of games (-1 = infinite)]
+@key joinautowatch:Int               Nonzero: Automatically watch game's forum when joining
+
+<h2>Ranking</h2>
+@key rank:Int                        Player's rank (0=Spaceman apprentice)
+@key rankpoints:Int                  Player rank points
+@key turnreliability:Int             Reliability rating, scaled by 1000
+@key turnsplayed:Int                 Number of turns played
+@key turnsmissed:Int                 Number of turns missed
+
+<h2>Forum</h2>
+@key talkautowatch:Int               Nonzero: Automatically watch a thread after posting in it
+@key talkwatchindividual:Int         Nonzero: Send mails for individual messages
+@key talkautolink:Int                Nonzero: Link auto-tag option
+@key talkautosmiley:Int              Nonzero: Smiley auto-tag option
+
+<h2>Antispam</h2>
+@key spam:Int                        1=identified as spammer, 0=not a spammer, 2=not a spammer but can see spam
+---
+
+@q user:$UID:app:data:$KEY : Str (Database)
+User application data.
+---
+@q user:$UID:app:list : StrList (Database)
+List of user application data keys, in LRU order.
+The most recently-set key is on the left.
+---
+@q user:$UID:app:size : Int (Database)
+Total size of user's application data.
+Computed as <tt>2*strlen(key) + strlen(value)</tt>.
+---
+
+@q user:$UID:ownedGames : IntSet (Database)
+Set of Ids of games I own.
+Set of all $GIDs that have {game:$GID:owner} = $UID.
+---
+
+@q user:$UID:games : IntHash (Database)
+Reference counter for games, indexed by game Id.
+- 0=I was in this game
+- 1=I am in this game
+- 2=I am in this game twice, etc.
+
+Therefore, the keys are the set of all $GIDs for which there is a {game:$GID:user:$UID}.
+The value is the same as {game:$GID:users}->$UID.
+HLEN can be used to get number of games played, HKEYS to get the games.
+---
+
+// [user:$UID:abook : set]
+//         address book, set of users.
+
+@q default:profile : Hash (Database)
+Default profile.
+Values in this hash define defaults for values not on users' profiles.
+Changing the default:profile will change the behaviour of existing users.
+@see user:$UID:profile
+---
+
+@q default:profilecopy : Hash (Database)
+Default profile.
+This is copied when making new users.
+Changing the default:profilecopy will not change the behaviour of existing users.
+@see user:$UID:profile
+---
+
+
+@q token:t:$TOKEN : Hash (Database)
+Login keys.
+
+@key user:UID            User
+@key type:Str            Type (login, reset, api)
+@key until:Int           Expiration date
+---
+
+@q token:all : StrSet (Database)
+Set of all live login keys.
+---
+
+@q user:$UID:tokens:$TOKENTYPE : StrSet (Database)
+Set of login tokens owned by this user
+@see token:t:$TOKEN
+---
+
+
+
+Email
+======
+
+[email:$EMAIL:info : hash]
+        Information about an email address
+        [- allowmulti                   Allow this address to be used by multiple users]
+
+@q email:$EMAIL:status : Hash (Database)
+Status for an email address.
+Multiple accounts can share an email address,
+therefore the user Id is part of the hash keys.
+
+@key status/$USER:Str   Status
+@key status/anon:Str    "b": blocked from receiving mail from new users
+@key expire/$USER:Time  Expiration time of confirmation request
+@key confirm/$USER:Str  Additional confirmation information for abuse tracking ("time=$time,ip=$ip")
+
+Address status:
+- Not present/"u": unconfirmed
+- "r": requested
+- "c": confirmed
+- "b": blocked
+---
+
+@q mqueue:sending : IntSet (Database)
+List of all mail Ids in queue.
+---
+
+@q mqueue:preparing : IntSet (Database)
+List of all mail Ids not yet sent.
+This is used to clean up in case something crashes while preparing a mail.
+---
+
+@q mqueue:uniqid : IntHash (Database)
+Maps unique Ids, so that if mqueue:uniqid->$UID==$ID, {mqueue:msg:$ID:data}->uniqid==$UID
+If a mail has a %uniqid, it is valid only if this value actually points back to the mail.
+---
+
+@q mqueue:msg:id : Int (Database)
+Last used mail Id.
+---
+
+@q mqueue:msg:$ID:data : Hash (Database)
+Definition of the message.
+@key template:Str                   Template to use
+@key uniqid:Str                     Unique Id (mail is not valid if {mqueue:uniqid}->$UID no longer maps here)
+@key expire:Time                    Expiration time (mail is deleted if not sent at this time)
+---
+
+@q mqueue:msg:$ID:args : Hash (Database)
+Arguments. Passed as-is to message template.
+---
+
+@q mqueue:msg:$ID:attach : StrList (Database)
+List of attachment URLs.
+Supported formats:
+- "c2file://[uid@]host:port/path/file"
+  File "path/file" from a {File (Service)|c2file instance} on host:port, using the specified uid (if none
+  given, the one from the user:uid address; if none given, "anon") in the {USER (File Command)|USER} command
+@c        [- data:[MIME-Type][;charset=encoding][;base64],data]
+@c          Attach 'data'. Open points:
+@c          . real data URLs would URL-encode the data. Modify to "data is always unencoded,
+@c            option ';base64' is not supported"? Or "additional option ';raw'"?
+@c          . need a name. ';name=foo'?
+---
+
+@q mqueue:msg:$ID:to : StrSet (Database)
+Set of addresses to send this message to. Each can be
+- "mail:FOO@BAR"    (send to mail address - never checked for permission)
+- "user:$UID"       (send to user id - checked for permission)
+---
+
+
+
+
+Forum/Messaging
+================
+
+
+@q msgid:$MSGID : MID (Database)
+Maps RFC message Id to message number.
+---
+
+@q msg:id : Int (Database)
+Last used message Id.
+---
+
+@q msg:$MID:header : Hash (Database)
+Message header
+@key thread:TID                        Thread Id of message
+@key parent:MID                        Message Id of parent message
+@key time:Time                         Timestamp
+@key edittime:Time                     Timestamp of last edit
+@key author:UID                        User Id of author of message
+@key subject:Str                       Subject of message if different from thread subject
+@key msgid:Str                         RFC message Id if nonstandard
+@key rfcheader:Str                     RFC header if provided with message, excluding Content-XXX headers
+@key seq:Int                           Sequence number (updated when posting is edited)
+@key prevseq:Int                       Previous sequence number (copied from seq when posting is edited)
+@key prevmsgid:Str                     Previous message Id (copied from msgid when posting is edited)
+---
+
+@q msg:$MID:text : TalkText (Database)
+Message text.
+---
+
+@q thread:id : Int (Database)
+Last used thread Id ({@type TID})
+---
+
+@q thread:$TID:header : Hash (Database)
+@key subject:Str                       Thread subject
+@key forum:FID                         Forum Id of thread
+@key firstpost:MID                     MID of first posting
+@key readperm:TalkPerm                 If present, permission needed to read this thread (if not present, forum permissions apply)
+@key answerperm:TalkPerm               If present, permission needed to answer to this thread (if not present, forum permissions apply)
+@key sticky:Int                        1 if thread is sticky
+@key lastpost:MID                      MID of last posting
+@key lasttime:Time                     Time of last action, including edits
+---
+
+@q thread:$TID:messages : IntSet (Database)
+Set of MIDs of all messages in this thread
+---
+
+@q thread:$TID:watchers : StrSet (Database)
+Set of UIDs watching this thread.
+@see user:$UID:forum:watchedThreads
+---
+
+@q forum:id : Int (Database)
+Last used forum Id ({@type FID})
+---
+
+@q forum:all : IntSet (Database)
+Set of all forums
+---
+
+@q forum:byname : IntHash (Database)
+Well-known forums.
+Maps names to forum Ids.
+Used to figure out whether a forum is created, i.e. forum:byname->news is the Id of
+a news forum if it has been created by init.con; it's not used elsewhere.
+Implemented in init.con, not used by servers.
+---
+
+@q forum:newsgroups : Hash (Database)
+Maps newsgroup names to FIDs.
+---
+
+@q forum:$FID:header : Hash (Database)
+Forum header.
+@key name:Str                      Name of forum
+@key parent:GRID                   Parent GRID, if any
+@key description:TalkText          Description (subtitle) of forum, in same format as message content
+@key newsgroup:Str                 Newsgroup name of forum
+@key readperm:TalkPerm             Permission needed to read this forum (if not present: root console only)
+@key writeperm:TalkPerm            Permission needed to post to this forum (if not present: root console only)
+@key answerperm:TalkPerm           Permission needed to post a reply to this forum (if not present: use writeperm)
+@key deleteperm:TalkPerm           Permission needed to delete postings/threads from this forum (if not present: root console only)
+@key key:Str                       Sort key for displaying groups
+@key msgseq:Int                    Sequence number
+@key time:Time                     Time of creation (needed for NNTP)
+@key lastpost:MID                  MID of last posting
+@key lasttime:Time                 Time of last action
+---
+
+@q forum:$FID:messages : IntSet (Database)
+Set of all MIDs in this forum
+---
+
+@q forum:$FID:threads : IntSet (Database), forum:$FID:stickythreads : IntSet (Database)
+Set of all TIDs in this forum.
+---
+
+@q forum:$FID:watchers : StrSet (Database)
+Set of UIDs watching this forum.
+---
+
+@q user:$UID:forum:watchedThreads : IntSet (Database), user:$UID:forum:watchedForums : IntSet (Database)
+Set of TIDs/FIDs I'm watching.
+@see forum:$FID:watchers
+@see thread:$TID:watchers
+---
+
+@q user:$UID:forum:notifiedThreads : IntSet (Database)
+@q user:$UID:forum:notifiedForums : IntSet (Database)
+If the user watches an item, and configured "one mail until I revisit it",
+it is set here when that item notified. Cleared whenever the user visits it.
+---
+
+@q user:$UID:forum:newsrc:data : StrHash (Database), user:$UID:forum:newsrc:index : Int (Database)
+Bitset of read posts.
+These two fields represent a large bitset.
+The bitset is split into lines of 1024 bytes = 8192 bits.
+The hash key is the line number, starting at 0.
+Each bit is 1 if the message is already read.
+
+Compaction:
+- treat all lines < index as "all-1"
+- otherwise, look into the hash
+- if line is missing, treat as "all-0"
+---
+
+@q user:$UID:forum:posted : IntSet (Database)
+Set of MIDs by this user
+---
+
+
+
+@q group:$GRID:header : Hash (Database)
+Group header.
+@key name:Str                          Name
+@key description:TalkText              Description
+@key parent:GRID                       If present, GRID of parent group
+@key key:Str                           Sort key for displaying groups
+@key unlisted:Int                      If nonzero, do not allow listing the content of this group on the web interface
+
+Well-known GRIDs (used by servers):
+- %root
+- %active                        Active/joining games
+- %finished                      Finished games
+---
+
+@q group:$GRID:groups : StrSet (Database), group:$GRID:forums : IntSet (Database)
+GRIDs of subgroups or FIDs of forums.
+
+These are sets, not lists, to allow movement from one group to another.
+Sort is external by the group's or forum's header->key.
+Therefore, moving a game forum from %active to %finished automatically sorts it correctly.
+---
+
+
+@q pm:id : Int (Database)
+Id counter.
+---
+
+@q pm:$PMID:header : Hash (Database)
+PM header.
+@key author:UID                        User who sent it
+@key to:TalkAddr                       Users who receive it, comma-separated list.
+@key time:Time                         Time when sent
+@key subject:Str                       Subject
+@key flags/$USER:TalkFlag              Flags for users; bitfield
+@key ref:Int                           Reference counter (in how many {user:$UID:pm:folder:$UFID:messages}'s is this message?)
+@key parent:PMID                       parent message for a reply
+---
+
+
+@q pm:$PMID:text : TalkText (Database)
+Text of PM.
+---
+
+@q user:$UID:pm:folder:$UFID:messages : IntSet (Database)
+Set of messages in this folder
+---
+
+@q user:$UID:pm:folder:$UFID:header : Hash (Database)
+Hash of folder information.
+@key name:Str
+@key description:Str
+@key unread:Int                        >0 if there are unread messages
+
+Both user-created folders ({user:$UID:pm:folder:all}) and default folders ({default:folder:all})
+can have header information.
+Information in this hash overrides information from {default:folder:$UFID:header}.
+---
+
+@q user:$UID:pm:folder:id : Int (Database)
+Id counter for allocating user folders ({@type UFID}).
+Starts at 100 (i.e. if unset, treat as if it were 100).
+---
+
+@q user:$UID:pm:folder:all : IntSet (Database)
+Set of all user folders.
+---
+
+@q default:folder:all : IntSet (Database)
+Set of default folders
+
+Well-known default folders:
+- 1 (inbox)
+- 2 (outbox)
+---
+
+@q default:folder:$UFID:header : Hash (Database)
+Header of default folder
+@key name:Str
+@key description:Str
+---
+
+
+
+Game
+=====
+
+@q game:lastid : GID (Database)
+Last used game Id.
+---
+
+@q game:all : IntSet (Database)
+Set of all games.
+Contains {@type GID|game Ids}.
+---
+
+@q game:state:$STATE : IntSet (Database)
+Set of all games, by state.
+Contains {@type GID|game Ids}.
+@param $STATE:HostGameState
+---
+
+@q game:pubstate:$STATE : IntSet (Database)
+Set of all public games, by state.
+Contains {@type GID|game Ids}.
+@param $STATE:HostGameState
+---
+
+@q game:broken : IntSet (Database)
+Set of broken games which will not host.
+This is set when the scheduler detects a problem with a game
+to prevent it from running against a wall again and again.
+A game can only be removed from this set using the admin console.
+---
+
+@q game:hours : IntHash (Database)
+Approximate number of games hosting at an hour.
+Key is the hour (0-23).
+Used for load-balancing for new games.
+---
+
+@q game:$GID:name : Str (Database)
+Name of game.
+---
+
+@q game:$GID:state : HostGameState (Database)
+State of game.
+---
+
+@q game:$GID:type : HostGameType (Database)
+Type (visibility) of game.
+---
+
+@q game:$GID:owner : UID (Database)
+UID of game owner, if any.
+---
+
+@q game:$GID:crashmessage : Str (Database)
+Error message for broken games.
+Valid if game is in {game:broken}.
+---
+
+@q game:$GID:player:$P:users : StrList (Database)
+List of player UIDs playing this slot.
+First: slot owner. Last: current player/replacement
+
+Empty: unoccupied slot.
+---
+
+@q game:$GID:player:$P:status : Hash (Database)
+@key slot:Int (1=open/0=dead) [open is available or played, dead is not available]
+@key turn:HostTurnStatus
+@c        [- time (timestamp of turn upload or state change)]
+@key rank:Int (if game is finished, this slot's rank; 1-11 for places, 0 allowed for deaths)
+---
+
+@q game:$GID:users : IntHash (Database)
+Reference counter for all users who ever participated in this game.
+---
+
+@q game:$GID:user:$UID : Hash (Database)
+Per-user configuration.
+@key mailgametype:Str ("info", "zip", "rst", "none", "default")
+     Defaults to user:$UID:preferences->mailgametype
+@key hasPlayerFiles:Int (bool)
+@key gameDir:FileName (directory in user filer where to copy turns to/from)
+@c        [- lastTimeJoined (time when joined or confirmed)]
+---
+
+@q game:$GID:turn:$TURN:scores : Hash (Database)
+Archive data.
+@key planets:Str
+@key freighters:Str
+@key capital:Str
+@key bases:Str
+@key timscore:Str
+@key score:Str
+All scores are in pack("V11") format (=32-bit little endian), with -1 = unknown.
+---
+
+@q game:$GID:turn:$TURN:info : Hash (Database)
+Archive data.
+@key time:Time (=scheduler time)
+@key timestamp:Str (=host timestamp)
+@key turnstatus:Str (=player:$P:status in pack("v11") format, -1 for unavailable slots (=dead))
+@c         (- dir (=directory name relative to gamedir, see ...files))
+---
+
+@q game:$GID:turn:$TURN:player : Hash (Database)
+Archive data.
+For each player, the player who's primarily in charge of this slot.
+---
+
+@q game:$GID:turn:$TURN:files:$SLOT : StrSet (Database), game:$GID:turn:$TURN:files:all : StrSet (Database)
+Historical file names.
+Contains the list of all files that have been sent out this turn (result and player files).
+
+Each of these keys contains a set of file names.
+Files are found in directory <tt>$DIR/backup/pre-$NEXTTURN</tt>,
+where $DIR is the game's base directory ({game:$GID:dir}), and $NEXTTURN is $TURN+1.
+@since PCC2 2.40.5
+---
+
+@q game:$GID:rankpoints : IntHash (Database)
+Indexed by player; rank points given to players, corresponding to game:$GAME:settings->rankTurn.
+Used to revert point distribution.
+---
+
+@q game:$GID:scores : StrHash (Database)
+Maps score names to descriptions, e.g. "score => PTScore"
+---
+
+@q game:$GID:dir : FileName (Database)
+Game directory in host filer.
+---
+
+@q game:$GID:schedule:list : IntList (Database)
+List of schedule IDs (numbers). First is current schedule.
+---
+
+@q game:$GID:schedule:$SID : HostSchedule (Database)
+Schedule identified by schedule Id $SID.
+In the database, this information is stored as a hash.
+@c        // Times are minutes (Unix Time / 60)
+@c        - type (0=stopped / 1=weekly / 2=daily / 3=asap / 4=manual)
+@c        - weekdays (if weekly: sum of 1<<0(Sunday) .. 1<<6(Saturday))
+@c        - interval (if daily: days between host)
+@c        - daytime (if weekly/daily: preferred day time (minutes))
+@c        - hostEarly (if weekly/daily: host early when all turns are in; defaults to true if asap)
+@c        - hostDelay (if hostEarly or asap: delay after last turn submission, minutes, default: 30)
+@c        - hostLimit (skip next host if host terminated more than this many minutes after start, default: 360 = 6 hours)
+@c        - condition (0=none / 1=turn / 2=time)
+@c        - condTurn (if turn: drop this condition at turn N)
+@c        - condTime (if time: drop this condition at time)
+@c        [- tempLimit (time limit for temporary turns)]
+---
+
+@q game:$GID:schedule:lastId : Int (Database)
+last used schedule Id.
+---
+
+@q game:$GID:settings : Hash (Database)
+Game settings
+@key description:Str           (Game description.)
+@key lastHostTime:Time         (Time of last host run)
+@key lastTurnSubmitted:Time
+@c          ... if host runs before lastScheduledHost, lastScheduledHost/nextScheduledHost remain
+@c          ... if host runs at lastScheduledHost or later (e.g. at nextScheduledHost),
+@c              lastScheduledHost:=nextScheduledHost, and nextScheduledHost is computed anew.
+@c          ... if host finishes after nextScheduledHost + hostLimit, compute lastScheduledHost and
+@c              nextScheduledHost from scratch
+@key lastPlayerJoined:Time     (Time when last player joined.)
+@key lastScheduleChange:Time   (Time of last manual schedule change, i.e. {SCHEDULEADD} etc.)
+@key nextHostTime:Time         (optional, computed by cron from schedule, missing if next event is not a host.)
+@key host:Str                  (Id of host program, see {prog:host:prog:$HOST})
+@key hostHasRun:Int            (flag, 0 or 1, reset after host run, evaluated by runhost.sh; to import games where host has already run.)
+@key master:Str                (Id of master program, see {prog:master:prog:$MASTER})
+@key masterHasRun:Int          (flag, 0 or 1)
+@key shiplist:Str              (Id of shiplist, see {prog:sl:prog:$SHIPLIST})
+@key turn:Int                  (turn number)
+@key timestamp:Str             (host timestamp)
+@key endCondition:Str          (end condition)
+@c FIXME         "open" (no end condition except if provided by tool, default; tool has kind "referee" if any)
+@c FIXME         "turn" (end at endTurn. if endProbability set: with endProbability%; endTurn+1 with 1.5*endProbability%, ...)
+@c FIXME         "score" (end when someone reaches described score and keeps it for endTurn turns)
+@key endTurn:Int
+@key endProbability:Int
+@key endScore:Int
+@key endScoreName:Str          (name of score deciding victory, e.g. "planets", "timscore"; default: score or timscore)
+@key endChanged:Int            (bool, set if end condition changed)
+@key kickAfterMissed:Int       (optional, number of turns after which to kick, negative or missing=default)
+@key configChanged:Int         (bool, set if config [tools, shiplist, ...] changed)
+@key scheduleChanged:Int       (bool, set if schedule changed)
+@key copyOf:GID                (Id of game this is a copy of, if any)
+@key copyEnable:Int            (0 or 1, if 1: if a game whose %copyOf points here goes joining->running, make a new, joining, copy of game copyNext; this one if copyNext is not set)
+@key copyNext:GID
+@key copyPending:Int           (0 or 1, set to 1 when copy should be executed but has not yet been)
+@key rankDisable:Int           (0 or 1, set to disable all ranking for this game)
+@key rankTurn:Int              (turn number up to which ranking has been computed, see {game:$GID:rankpoints})
+@key hostRunNow:Int            (0 or 1, for manual schedule, deleted by c2host)
+@key forum:FID                 (forum Id, if any)
+@key forumDisable:Int          (disable forum management)
+@key joinMulti:Int             (allow joining as multiple players)
+@c       [- joinConfirmTime (time in minutes after join when to send confirmation request)]
+@c        [- joinKickTime (time in minutes after confirmation when to kick)]
+
+These parameters are passed to host scripts as environment variables <tt>game_settings_<em>key</em></tt>.
+---
+
+@q game:$GID:cache : Hash (Database)
+Cache for expensive variables.
+Erased whenever something happens which could change this ({GAMEADDTOOL}, {GAMERMTOOL}, {GAMESET} host/master,...);
+everything computed and cached when needed
+@key difficulty:Int (precomputed difficulty)
+@c [- racenames (race.nm file image)]
+---
+
+@q game:$GID:tools : StrSet (Database)
+Set of tools, see {prog:tool:prog:$TOOL}.
+---
+
+@q game:$GID:tool:$TOOL:settings : Hash (Database)
+Settings for a tool.
+@c        [==> passed to scripts as game_tool_<kind>_<foo> -- not yet implemented]
+---
+
+@q game:$GID:toolkind : Hash (Database)
+Map tool kinds to tools.
+Used to ensure we have only one tool of a kind in a game.
+Passed to scripts as <tt>game_tool_<em>kind</em>=<em>tool</em></tt>.
+---
+
+[game:$GID:tmp:configchange : hash]
+        Volatile record of configuration changes. Processing: when finding this entry,
+        send mail with the config change to players.
+        - time                  Time of last config change
+        - tool:$TOOL            1=added, 2=removed
+        - schedule              1=schedule was changed
+        - master                1=settings->master was changed
+        - host                  1=settings->host was changed
+        - end                   1=settings->endXXX was changed
+        - type                  1=type was changed
+
+@q game:bytime:$TIMESTAMP : GID (Database)
+Map timestamp to game number.
+Erased when host starts.
+Set after host terminates.
+---
+
+@q game:bynameprefix : IntHash (Database)
+Index is the name of a game ("Titan"), value is the number of games with this name "stem".
+Used for generating names for copyEnable games.
+---
+
+
+
+Programs
+=========
+
+
+@q prog:host:prog:$HOST : Hash (Database), prog:tool:prog:$TOOL : Hash (Database), prog:sl:prog:$SHIPLIST : Hash (Database), prog:master:prog:$MASTER : Hash (Database)
+Description of a host/addon/shiplist/master.
+@key description:Str    ("PHost 4.1e", "PHost latest")
+@key path:FileName      (path in host filer, "tools/phost-latest")
+@key program:Str        (program name, "phost4")
+@c  options (optional)
+@key kind:Str           ("phost4", "thost")
+@key mainurl:Str
+@key docurl:Str
+@key extradescription:Str
+@key difficulty:Int     (precomputed difficulty, percentage)
+@key useDifficulty:Int  (1 to use this difficulty, 0 if it's only informational)
+@key files:Str          (list of user-viewable files, separated by comma)
+@c        - [alt (comma-separated list. When non-empty, random tool replacement: when added to a non-preparing game, or when game transitions to joining, one element is chosen randomly.)]
+@c        - [needs (comma-separated list. "hv:$HOST-VERSION", "hk:$HOST-KIND", "sv:/sk:/mv:/mk:/tv:/tk:" (same for shiplist/master/tool), "-XX" (block))]
+
+Resolved values are passed to host scripts:
+- game_host_&lt;key&gt;
+- game_sl_&lt;key&gt;
+- game_tool_&lt;kind&gt;_&lt;key&gt; (that is, there will be, say, 'game_tool_explmap_kind=explmap')
+- game_master_&lt;key&gt;
+---
+
+@q prog:host:list : StrSet (Database), prog:tool:list : StrSet (Database), prog:sl:list : StrSet (Database), prog:master:list : StrSet (Database)
+List of all hosts/addons/shiplists/masters.
+---
+
+@q prog:host:default : Str (Database), prog:sl:default : Str (Database), prog:master:default : Str (Database)
+Default host/shiplist/master.
+---
+
+
+History
+========
+
+@q global:history : StrList (Database), game:$GID:history : StrList (Database), user:$UID:history : StrList (Database)
+History of events.
+Events are logged globally in this %global:history, and locally in %game:$GID:history and %user:$UID:history.
+Each event is a string consistring of ":"-separated fields,
+starting with a timestamp (minutes since epoch).
+
+- $TIME:game-join:$GID:$UID:$SLOT          (game, user) {PLAYERJOIN} as themselves
+- $TIME:game-join-other:$GID:$UID:$SLOT    (game, user) {PLAYERJOIN} by someone else
+- $TIME:game-kick:$GID:$UID:$SLOT          (game, user) user automatically removed due to inactivity ({Host.KickAfterMissed})
+- $TIME:game-resign:$GID:$UID:$SLOT        (game, user) {PLAYERRESIGN} as themselves, slot empty
+- $TIME:game-resign-dead:$GID:$UID:$SLOT   (game, user) {PLAYERRESIGN} as themselves (or auto-remove), slot empty, zero score
+- $TIME:game-resign-other:$GID:$UID:$SLOT  (game, user) {PLAYERRESIGN} by someone else, slot empty
+- $TIME:game-subst:$GID:$UID:$SLOT         (game, user) {PLAYERSUBST}
+- $TIME:game-state:$GID:$NEWSTATE          (game, global) {GAMESETSTATE}
+- $TIME:game-state:$GID:$NEWSTATE:$UID     (game, global) {GAMESETSTATE} to %finished, $UID is victor
+---
+
+
+Tracker
+========
+
+t:bug:all : set
+t:bug:id : int
+
+t:bug:$BUGID:data : hash; index is field name
+t:bug:$BUGID:data:$FIELD : set
+t:bug:$BUGID:data:$FIELD : string
+
+t:bug:$BUGID:notes : set
+
+t:bug:$BUGID:type : string
+t:bug:$BUGID:status : string
+
+t:type:$TYPE : set
+t:status:$STATUS : set
+        Index for type/status (backlink is t:bug:$BUGID:type/status)
+
+t:data:$FIELD:$VALUE : set
+        Index for t:bug:$BUGID:data:$FIELD with nonunique values
+t:data:$FIELD : hash
+        Reference counters with values
+
+t:data:$FIELD : hash
+        Index for t:bug:$BUGID:data:$FIELD with unique values
+
+t:note:all : set
+t:note:id : int
+t:note:$NID:data : hash
+        - type                  (note, attachment, ...)
+        - body
+        - author
+        - date
+t:note:$NID:bug : string
+        Backlink to bug
+
+
+Abuse Tracking
+===============
+
+Make some forward/backward mappings
+
+abuse:ip:f:$IP         : hash (User -> usecount for one IP)
+abuse:ip:b:$UID        : hash (IP -> usecount for one user)
+abuse:ip:s:$UID:$IP    : hash
+        - time
+
+        A logging operation would do
+          HINCRBY abuse:ip:f:$IP $UID 1
+          HINCRBY abuse:ip:b:$UID $IP 1
+          HSET abuse:ip:s:$UID:$IP $TIME
+
+abuse:ua:f:$UA         : hash (User -> usecount for one browser user agent)
+abuse:ua:b:$UID        : hash (UA -> usecount for one user)
+abuse:ua:s:$UID:$IP    : hash
+        - time
+
+        A logging operation would do
+          HINCRBY abuse:ua:f:$UA $UID 1
+          HINCRBY abuse:ua:b:$UID $UA 1
+          HSET abuse:ua:s:$UID:$UA $TIME
+
+abuse:key:f:$KEY       : hash (User -> usecount for one key)
+abuse:key:b:$UID       : hash (Key -> usecount for one user)
+abuse:key:s:$UID:$KEY  : hash (needed?)
+        - time
+abuse:key:l:$KEY       : list
+        - List of $UID:$GID:$SLOT:$TIME for this key. Truncated to, maybe, 100.
+
+        A logging operation would do
+          HINCRBY abuse:key:f:$KEY $UID 1
+          HINCRBY abuse:key:b:$UID $KEY 1
+          HSET abuse:key:s:$UID:$KEY $TIME
+          RPUSH abuse:key:l:$KEY $UID:$GID:$SLOT:$TIME
+          LTRIM abuse:key:l:$KEY -100 -1 (?)
+
+Operations that log IP/UA:
+- login including autologin
+- logout
+- forum post
+- mail submission
+- turn upload
+- game configuration
+
+Operations that log keys:
+- turn upload or game host (which?)
+
+
+Invitations
+============
+
+invite:key:$KEY : int
+        Maps keys to Ids
+
+invite:id : int
+        Last used Invite Id
+
+invite:$ID:header : hash
+        - description           Description, optional
+        - timeLimit             Token not usable after this time
+        - userLimit             Token not usable if userCount exceeds userLimit
+        - userCount             Number of users using this token
+        - url                   Relative URL ("host/game.cgi/123") to redirect user after use of token
+
+invite:$ID:action : list
+        Array of strings, each describing an action.
+        - "userAddProfile:$KEY:$VALUE"
+          user:$UID:profile->$KEY := $VALUE
+        - "userAddGame:$GID"
+          user:$UID:games->$GID |= 0
+          game:$GID:users->$UID |= 0
+
+invite:$ID:log : list
+        Array of strings. How about "$TIME:$UID:$IP"?
+
+
+Wiki
+=====
+
+wiki:p:id : int
+        Last used page Id
+
+wiki:p:$ID:header : hash
+        - name                  Page name
+
+wiki:p:$ID:text : string
+        Page text ("forum:foo", "wiki:foo")
+
+wiki:p:$ID:out : set
+wiki:p:$ID:in : set
+        Outgoing / incoming links
+
+wiki:name:$NAME : int
+        Maps page names to Ids
+

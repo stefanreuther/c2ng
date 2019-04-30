@@ -22,6 +22,9 @@
      background: #000;
      color: #ccc;
      font-family: sans-serif;
+     max-width: 60em;
+     margin-left: auto;
+     margin-right: auto;
    }
    h1 {
      color: #fff;
@@ -102,6 +105,8 @@
    .colordim        { color: #666; }
    .colordim b      { color: #ccc; }
    .colordim kbd    { background-color: #aaa; }
+   .small           { font-size: 80%; }
+   .big             { font-size: 125%; }
    /* TOC link */
    a.toclink {
      display: block;
@@ -285,6 +290,18 @@
 
  <xsl:template match="font[@color]">
   <span class="color{@color}">
+   <xsl:apply-templates />
+  </span>
+ </xsl:template>
+
+ <xsl:template match="small">
+  <span class="small">
+   <xsl:apply-templates />
+  </span>
+ </xsl:template>
+
+ <xsl:template match="big">
+  <span class="big">
    <xsl:apply-templates />
   </span>
  </xsl:template>

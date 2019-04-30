@@ -250,7 +250,7 @@ TestGameV3Loader::testLoadShips()
         TS_ASSERT_EQUALS(sh->getDamage().orElse(-1),                             0);
         TS_ASSERT_EQUALS(sh->getCrew().orElse(0),                                102);
         TS_ASSERT_EQUALS(sh->getCargo(Element::Colonists).orElse(-1),            0);
-        TS_ASSERT_EQUALS(sh->getName(game::map::Object::PlainName, tx, iface),   "Ortega B");
+        TS_ASSERT_EQUALS(sh->getName(game::PlainName, tx, iface),                "Ortega B");
         TS_ASSERT_EQUALS(sh->getCargo(Element::Neutronium).orElse(-1),           197);
         TS_ASSERT_EQUALS(sh->getCargo(Element::Tritanium).orElse(-1),            0);
         TS_ASSERT_EQUALS(sh->getCargo(Element::Duranium).orElse(-1),             0);

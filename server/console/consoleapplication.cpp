@@ -154,6 +154,7 @@ server::console::ConsoleApplication::ConsoleApplication(afl::sys::Environment& e
     m_availableContexts.pushBackNew(new ConnectionContextFactory("mailout", MAILOUT_PORT, m_networkStack));
     m_availableContexts.pushBackNew(new ConnectionContextFactory("redis", DB_PORT, m_networkStack));
     m_availableContexts.pushBackNew(new ConnectionContextFactory("talk", TALK_PORT, m_networkStack));
+    m_availableContexts.pushBackNew(new ConnectionContextFactory("user", USER_PORT, m_networkStack));
     m_availableContexts.pushBackNew(new RouterContextFactory("router", m_networkStack));
 
     // Be quiet by default.
@@ -282,7 +283,7 @@ void
 server::console::ConsoleApplication::help()
 {
     afl::io::TextWriter& out = standardOutput();
-    out.writeLine(Format(_("PCC2 Console v%s - (c) 2017-2018 Stefan Reuther").c_str(), PCC2_VERSION));
+    out.writeLine(Format(_("PCC2 Console v%s - (c) 2017-2019 Stefan Reuther").c_str(), PCC2_VERSION));
     out.writeLine();
     out.writeLine(Format(_("Usage:\n"
                            "  %s [-h]\n"

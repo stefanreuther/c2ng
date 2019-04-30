@@ -105,6 +105,22 @@ namespace gfx {
         Point scaledBy(Point other) const
             { return Point(m_x * other.m_x, m_y * other.m_y); }
 
+        /** Extend area to the right.
+            Assuming this point and \c other describe the size of two rectangles,
+            respectively, modifies this to describe the size of the bounding rectangle
+            if both are laid next to each other.
+            \param other Other dimension
+            \return *this */
+        Point& extendRight(Point other);
+
+        /** Extend area below.
+            Assuming this point and \c other describe the size of two rectangles,
+            respectively, modifies this to describe the size of the bounding rectangle
+            if both are laid below to each other.
+            \param other Other dimension
+            \return *this */
+        Point& extendBelow(Point other);
+
      private:
         int m_x;    ///< X coordinate.
         int m_y;    ///< Y coordinate.

@@ -2,6 +2,7 @@
  *  \file ui/rich/statictext.cpp
  */
 
+#include <algorithm>
 #include "ui/rich/statictext.hpp"
 #include "gfx/context.hpp"
 
@@ -20,7 +21,7 @@ ui::rich::StaticText::setText(const util::rich::Text& text)
 {
     // ex UIRichStatic::setText
     m_document.clear();
-    m_document.setPageWidth(m_width);
+    m_document.setPageWidth(std::max(getExtent().getWidth(), m_width));
     m_document.add(text);
     m_document.finish();
 }

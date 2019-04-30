@@ -5,8 +5,13 @@
 #include <ctime>
 #include "client/screens/playerscreen.hpp"
 #include "afl/string/format.hpp"
+#include "client/dialogs/classicvcrdialog.hpp"
+#include "client/dialogs/inboxdialog.hpp"
 #include "client/si/control.hpp"
+#include "client/si/scripttask.hpp"
+#include "client/vcr/classic/playbackscreen.hpp"
 #include "client/widgets/keymapwidget.hpp"
+#include "client/widgets/messageactionpanel.hpp"
 #include "game/game.hpp"
 #include "game/root.hpp"
 #include "game/turn.hpp"
@@ -22,18 +27,18 @@
 #include "ui/widgets/button.hpp"
 #include "ui/widgets/framegroup.hpp"
 #include "ui/widgets/imagebutton.hpp"
+#include "ui/widgets/keydispatcher.hpp"
 #include "ui/widgets/panel.hpp"
+#include "ui/widgets/statictext.hpp"
+#include "ui/widgets/transparentwindow.hpp"
 #include "ui/window.hpp"
 #include "util/requestreceiver.hpp"
-#include "client/dialogs/classicvcrdialog.hpp"
-#include "ui/widgets/keydispatcher.hpp"
-#include "client/vcr/classic/playbackscreen.hpp"
-#include "client/widgets/messageactionpanel.hpp"
-#include "client/dialogs/inboxdialog.hpp"
-#include "ui/widgets/transparentwindow.hpp"
-#include "ui/widgets/statictext.hpp"
+#include "interpreter/values.hpp"
+#include "interpreter/arguments.hpp"
 
 namespace {
+    const char*const KEYMAP_NAME = "RACESCREEN";
+
     ui::widgets::AbstractButton& createImageButton(afl::base::Deleter& del, ui::Root& root, ui::LayoutableGroup& group, String_t text, util::Key_t key, String_t image)
     {
         // Create container group
@@ -107,10 +112,10 @@ namespace {
 
                 // Left group containing list of image buttons
                 ui::LayoutableGroup& leftGroup = del.addNew(new ui::Group(ui::layout::VBox::instance5));
-                createImageButton(del, root, leftGroup, tx.translateString("F1 - Starships"), util::Key_F1, "menu.ship").dispatchKeyTo(keys);
-                createImageButton(del, root, leftGroup, tx.translateString("F2 - Planets"),   util::Key_F2, "menu.planet").dispatchKeyTo(keys);
-                createImageButton(del, root, leftGroup, tx.translateString("F3 - Starbases"), util::Key_F3, "menu.base").dispatchKeyTo(keys);
-                createImageButton(del, root, leftGroup, tx.translateString("F4 - Starchart"), util::Key_F4, "menu.chart").dispatchKeyTo(keys);
+                createImageButton(del, root, leftGroup, tx("F1 - Starships"), util::Key_F1, "menu.ship").dispatchKeyTo(keys);
+                createImageButton(del, root, leftGroup, tx("F2 - Planets"),   util::Key_F2, "menu.planet").dispatchKeyTo(keys);
+                createImageButton(del, root, leftGroup, tx("F3 - Starbases"), util::Key_F3, "menu.base").dispatchKeyTo(keys);
+                createImageButton(del, root, leftGroup, tx("F4 - Starchart"), util::Key_F4, "menu.chart").dispatchKeyTo(keys);
                 leftGroup.add(del.addNew(new ui::Spacer()));
                 panel.add(leftGroup);
 
@@ -121,35 +126,35 @@ namespace {
                 // Panels
                 ui::LayoutableGroup& menuGroup = del.addNew(new ui::Group(del.addNew(new ui::layout::Flow(5, false))));
 
-                ui::LayoutableGroup& diploGroup = createGroup(del, tx.translateString("Diplomacy"), menuGroup, root, colorScheme);
-                createActionButton(del, root, diploGroup, tx.translateString("Alliances"), 'a').dispatchKeyTo(keys);
-                createActionButton(del, root, diploGroup, tx.translateString("Data Transfer"), 'd').dispatchKeyTo(keys);
-                createActionButton(del, root, diploGroup, tx.translateString("Teams"), 't').dispatchKeyTo(keys);
+                ui::LayoutableGroup& diploGroup = createGroup(del, tx("Diplomacy"), menuGroup, root, colorScheme);
+                createActionButton(del, root, diploGroup, tx("Alliances"), 'a').dispatchKeyTo(keys);
+                createActionButton(del, root, diploGroup, tx("Data Transfer"), 'd').dispatchKeyTo(keys);
+                createActionButton(del, root, diploGroup, tx("Teams"), 't').dispatchKeyTo(keys);
 
-                ui::LayoutableGroup& researchGroup = createGroup(del, tx.translateString("Research"), menuGroup, root, colorScheme);
-                createActionButton(del, root, researchGroup, tx.translateString("Search"), util::Key_F7).dispatchKeyTo(keys);
-                createActionButton(del, root, researchGroup, tx.translateString("Imperial Stats"), 'i').dispatchKeyTo(keys);
-                createActionButton(del, root, researchGroup, tx.translateString("Scores"), 's').dispatchKeyTo(keys);
-                createActionButton(del, root, researchGroup, tx.translateString("Battle Simulator"), 'b').dispatchKeyTo(keys);
-                createActionButton(del, root, researchGroup, tx.translateString("Starship Cost Calculator"), 'd').dispatchKeyTo(keys);
+                ui::LayoutableGroup& researchGroup = createGroup(del, tx("Research"), menuGroup, root, colorScheme);
+                createActionButton(del, root, researchGroup, tx("Search"), util::Key_F7).dispatchKeyTo(keys);
+                createActionButton(del, root, researchGroup, tx("Imperial Stats"), 'i').dispatchKeyTo(keys);
+                createActionButton(del, root, researchGroup, tx("Scores"), 's').dispatchKeyTo(keys);
+                createActionButton(del, root, researchGroup, tx("Battle Simulator"), 'b').dispatchKeyTo(keys);
+                createActionButton(del, root, researchGroup, tx("Starship Cost Calculator"), 'd').dispatchKeyTo(keys);
 
-                ui::LayoutableGroup& messagesGroup = createGroup(del, tx.translateString("Messages"), menuGroup, root, colorScheme);
-                createActionButton(del, root, messagesGroup, tx.translateString("Inbox"), 'm').dispatchKeyTo(keys);
-                createActionButton(del, root, messagesGroup, tx.translateString("Write"), 'w').dispatchKeyTo(keys);
-                createActionButton(del, root, messagesGroup, tx.translateString("Visual Combat Recordings"), 'v').dispatchKeyTo(keys);
-                createActionButton(del, root, messagesGroup, tx.translateString("View util.dat"), util::KeyMod_Alt + 'u').dispatchKeyTo(keys);
+                ui::LayoutableGroup& messagesGroup = createGroup(del, tx("Messages"), menuGroup, root, colorScheme);
+                createActionButton(del, root, messagesGroup, tx("Inbox"), 'm').dispatchKeyTo(keys);
+                createActionButton(del, root, messagesGroup, tx("Write"), 'w').dispatchKeyTo(keys);
+                createActionButton(del, root, messagesGroup, tx("Visual Combat Recordings"), 'v').dispatchKeyTo(keys);
+                createActionButton(del, root, messagesGroup, tx("View util.dat"), util::KeyMod_Alt + 'u').dispatchKeyTo(keys);
 
-                ui::LayoutableGroup& extraGroup = createGroup(del, tx.translateString("Extra"), menuGroup, root, colorScheme);
-                createActionButton(del, root, extraGroup, tx.translateString("Options"), util::KeyMod_Ctrl + 'o').dispatchKeyTo(keys);
-                createActionButton(del, root, extraGroup, tx.translateString("Console"), util::KeyMod_Alt + 'c').dispatchKeyTo(keys);
-                createActionButton(del, root, extraGroup, tx.translateString("Process Manager"), util::KeyMod_Alt + 'p').dispatchKeyTo(keys);
-                createActionButton(del, root, extraGroup, tx.translateString("Tip of the Day"), 't').dispatchKeyTo(keys);
+                ui::LayoutableGroup& extraGroup = createGroup(del, tx("Extra"), menuGroup, root, colorScheme);
+                createActionButton(del, root, extraGroup, tx("Options"), util::KeyMod_Ctrl + 'o').dispatchKeyTo(keys);
+                createActionButton(del, root, extraGroup, tx("Console"), util::KeyMod_Alt + 'c').dispatchKeyTo(keys);
+                createActionButton(del, root, extraGroup, tx("Process Manager"), util::KeyMod_Alt + 'p').dispatchKeyTo(keys);
+                createActionButton(del, root, extraGroup, tx("Tip of the Day"), 't').dispatchKeyTo(keys);
 
-                ui::LayoutableGroup& fleetGroup = createGroup(del, tx.translateString("Fleet"), menuGroup, root, colorScheme);
-                createActionButton(del, root, fleetGroup, tx.translateString("Global Actions"), 'g').dispatchKeyTo(keys);
-                createActionButton(del, root, fleetGroup, tx.translateString("Fleets"), util::Key_F10).dispatchKeyTo(keys);
-                createActionButton(del, root, fleetGroup, tx.translateString("Ship History"), util::Key_F6).dispatchKeyTo(keys);
-                createActionButton(del, root, fleetGroup, tx.translateString("Selection"), util::KeyMod_Alt + '.').dispatchKeyTo(keys);
+                ui::LayoutableGroup& fleetGroup = createGroup(del, tx("Fleet"), menuGroup, root, colorScheme);
+                createActionButton(del, root, fleetGroup, tx("Global Actions"), 'g').dispatchKeyTo(keys);
+                createActionButton(del, root, fleetGroup, tx("Fleets"), util::Key_F10).dispatchKeyTo(keys);
+                createActionButton(del, root, fleetGroup, tx("Ship History"), util::Key_F6).dispatchKeyTo(keys);
+                createActionButton(del, root, fleetGroup, tx("Selection"), util::KeyMod_Alt + '.').dispatchKeyTo(keys);
 
                 rightGroup.add(menuGroup);
                 rightGroup.add(del.addNew(new ui::Spacer()));
@@ -171,12 +176,15 @@ namespace {
                 //   V - Combat Recorder
                 //   ESC - Exit
                 //   H - Help
-                createActionButton(del, root, btnGroup, tx.translateString("ESC - Exit"), util::Key_Escape).dispatchKeyTo(keys);
+                createActionButton(del, root, btnGroup, tx("ESC - Exit"), util::Key_Escape).dispatchKeyTo(keys);
                 rightGroup.add(btnGroup);
                 panel.add(rightGroup);
 
+                // Publish UI properties
+                util::SlaveRequestSender<game::Session,Proprietor> prop(m_session.gameSender(), new Proprietor());
+
                 // Finish and display it
-                keys.setKeymapName("RACESCREEN");
+                keys.setKeymapName(KEYMAP_NAME);
                 panel.add(keys);
                 panel.setExtent(root.getExtent());
                 panel.setState(ui::Widget::ModalState, true);
@@ -190,8 +198,37 @@ namespace {
                 // If the inbound process already requested a context change, bad things would happen if we start another process here.
                 // Therefore, we rather lose the init hooks in this case.
                 // (This will not normally happen because if first=true, there will be no inbound process.)
+                class InitTask : public client::si::ScriptTask {
+                 public:
+                    virtual interpreter::Process* execute(uint32_t pgid, game::Session& session, Verbosity& /*v*/)
+                        {
+                            // Access
+                            interpreter::ProcessList& list = session.world().processList();
+
+                            // Create a task to run the 'Load' hook
+                            interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
+                            bco->addInstruction(interpreter::Opcode::maPush,
+                                                interpreter::Opcode::sNamedShared,
+                                                bco->addName("C2$RUNLOADHOOK"));
+                            bco->addInstruction(interpreter::Opcode::maIndirect,
+                                                interpreter::Opcode::miIMCall, 0);
+                            interpreter::Process& proc = list.create(session.world(), "Turn Initialisation");
+                            proc.pushFrame(bco, false);
+                            proc.setPriority(0);
+                            list.handlePriorityChange(proc);
+                            list.resumeProcess(proc, pgid);
+
+                            // Revive all auto-tasks
+                            list.resumeSuspendedProcesses(pgid);
+
+                            // We don't need to observe a process
+                            return 0;
+                        }
+                };
+
                 if (first && !m_loop.isStopped()) {
-                    executeCommandWait("C2$RunLoadHook", false, "Turn Initialisation");
+                    std::auto_ptr<client::si::ScriptTask> p(new InitTask());
+                    executeTaskWait(p);
                 }
 
                 // Run (this will immediately exit if one of the above scripts requested a context change.)
@@ -222,6 +259,7 @@ namespace {
                  case OutputState::ShipScreen:
                  case OutputState::PlanetScreen:
                  case OutputState::BaseScreen:
+                 case OutputState::Starchart:
                     us.detachProcess(link);
                     m_outputState.set(link, target);
                     m_loop.stop(0);
@@ -231,10 +269,9 @@ namespace {
         virtual void handlePopupConsole(client::si::UserSide& ui, client::si::RequestLink2 link)
             { defaultHandlePopupConsole(ui, link); }
         virtual void handleEndDialog(client::si::UserSide& ui, client::si::RequestLink2 link, int /*code*/)
-            {
-                ui.continueProcess(link);
-            }
-
+            { ui.continueProcess(link); }
+        virtual void handleSetViewRequest(client::si::UserSide& ui, client::si::RequestLink2 link, String_t name, bool withKeymap)
+            { defaultHandleSetViewRequest(ui, link, name, withKeymap); }
         virtual client::si::ContextProvider* createContextProvider()
             { return 0; }
 
@@ -243,6 +280,131 @@ namespace {
         ui::EventLoop m_loop;
         ui::rich::DocumentView m_docView;
         util::RequestReceiver<PlayerScreen> m_receiver;
+
+        class Proprietor : public util::SlaveObject<game::Session>,
+                           public game::interface::UserInterfacePropertyAccessor
+        {
+         public:
+            Proprietor()
+                : m_pSession()
+                { }
+            virtual void init(game::Session& master)
+                {
+                    m_pSession = &master;
+                    master.uiPropertyStack().add(*this);
+                }
+            virtual void done(game::Session& master)
+                {
+                    master.uiPropertyStack().remove(*this);
+                    m_pSession = 0;
+                }
+
+            virtual bool get(game::interface::UserInterfaceProperty prop, std::auto_ptr<afl::data::Value>& result)
+                {
+                    // ex WPlayerScreen::getProperty
+                    switch (prop) {
+                     case game::interface::iuiScreenNumber:
+                        result.reset(interpreter::makeIntegerValue(0));
+                        return true;
+                     case game::interface::iuiScreenRegistered:
+                        return false;
+                     case game::interface::iuiIterator:
+                        result.reset();
+                        return true;
+                     case game::interface::iuiSimFlag:
+                        result.reset(interpreter::makeBooleanValue(0));
+                        return true;
+                     case game::interface::iuiScanX:
+                     case game::interface::iuiChartX:
+                        getCursorLocation(game::map::Point::X, result);
+                        return true;
+                     case game::interface::iuiScanY:
+                     case game::interface::iuiChartY:
+                        getCursorLocation(game::map::Point::Y, result);
+                        return true;
+                     case game::interface::iuiKeymap:
+                        result.reset(interpreter::makeStringValue(KEYMAP_NAME));
+                        return true;
+                    }
+                    return false;
+                }
+            virtual bool set(game::interface::UserInterfaceProperty prop, afl::data::Value* p)
+                {
+                    // ex WPlayerScreen::setProperty
+                    switch (prop) {
+                     case game::interface::iuiScreenNumber:
+                     case game::interface::iuiScreenRegistered:
+                     case game::interface::iuiIterator:
+                     case game::interface::iuiSimFlag:
+                     case game::interface::iuiKeymap:
+                        return false;
+                     case game::interface::iuiScanX:
+                     case game::interface::iuiChartX:
+                        setCursorLocation(game::map::Point::X, p);
+                        return true;
+                     case game::interface::iuiScanY:
+                     case game::interface::iuiChartY:
+                        setCursorLocation(game::map::Point::Y, p);
+                        return true;
+                    }
+                    return false;
+                }
+
+         private:
+            void getCursorLocation(game::map::Point::Component c, std::auto_ptr<afl::data::Value>& result)
+                {
+                    if (m_pSession == 0) {
+                        result.reset();
+                        return;
+                    }
+
+                    game::Game* pGame = m_pSession->getGame().get();
+                    if (pGame == 0) {
+                        result.reset();
+                        return;
+                    }
+
+                    game::map::Point pt;
+                    if (!pGame->cursors().location().getPosition(pt)) {
+                        result.reset();
+                        return;
+                    }
+
+                    result.reset(interpreter::makeIntegerValue(pt.get(c)));
+                }
+
+            void setCursorLocation(game::map::Point::Component c, afl::data::Value* p)
+                {
+                    int32_t value;
+                    if (!interpreter::checkIntegerArg(value, p, 0, game::MAX_NUMBER)) {
+                        return;
+                    }
+
+                    if (m_pSession == 0) {
+                        // Cannot happen
+                        throw interpreter::Error::notAssignable();
+                    }
+
+                    game::Game* pGame = m_pSession->getGame().get();
+                    if (pGame == 0) {
+                        // Cannot happen
+                        throw interpreter::Error::notAssignable();
+                    }
+
+                    // Get old position. If this fails, it leaves the point default-initialized.
+                    // This is needed to bootstrap.
+                    game::map::Point pt;
+                    pGame->cursors().location().getPosition(pt);
+
+                    // Only call set() if this actually is a change, to avoid losing track of an object.
+                    if (value != pt.get(c)) {
+                        pt.set(c, value);
+                        pGame->cursors().location().set(pt);
+                    }
+                }
+
+            game::Session* m_pSession;
+        };
 
         class Trampoline : public util::SlaveObject<game::Session> {
          public:
@@ -270,6 +432,7 @@ namespace {
                         game::Root* root = m_pSession->getRoot().get();
                         game::Game* game = m_pSession->getGame().get();
                         if (root != 0 && game != 0) {
+                            afl::string::Translator& tx = m_pSession->translator();
                             if (game::Player* p = root->playerList().get(game->getViewpointPlayer())) {
                                 info = p->getName(game::Player::LongName);
                                 if (!p->getName(game::Player::UserName).empty()) {
@@ -277,10 +440,10 @@ namespace {
                                     info += p->getName(game::Player::UserName);
                                 }
                             } else {
-                                info = afl::string::Format("!Player %d", game->getViewpointPlayer());
+                                info = afl::string::Format(tx("Player %d"), game->getViewpointPlayer());
                             }
                             info += "\n";
-                            info += afl::string::Format("!%d message%!1{s%}", game->currentTurn().inbox().getNumMessages());
+                            info += afl::string::Format(tx("%d message%!1{s%}"), game->currentTurn().inbox().getNumMessages());
                             info += "\n";
                         }
                     }

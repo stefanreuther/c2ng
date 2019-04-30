@@ -29,6 +29,8 @@ namespace server {
     const char*const INVALID_RECEIVER            = "400 Invalid receiver";
     const char*const BAD_REQUEST                 = "400 Bad request";
     const char*const INVALID_VALUE               = "400 Invalid value";
+    const char*const BAD_TOKEN_TYPE              = "400 Bad token type";
+    const char*const INVALID_KEY                 = "400 Invalid key";
 
     // 401 Unauthorized
     const char*const INVALID_USERNAME            = "401 Invalid user name or password";
@@ -39,6 +41,7 @@ namespace server {
     const char*const NOT_AUTHOR                  = "403 Not author";
     const char*const MUST_HAVE_USER_CONTEXT      = "403 Must have user context";
     const char*const USER_NOT_ALLOWED            = "403 USER not allowed";
+    const char*const CANNOT_START_SESSION        = "403 Forbidden";              // used by c2router if exec fails
 
     // 404 Not found. We reserve the possibility to distinguish the type in the error message, but don't do that yet.
     const char*const FORUM_NOT_FOUND             = "404 Not found";
@@ -68,6 +71,7 @@ namespace server {
 
     // 410 Gone
     const char*const NO_SCHEDULE                 = "410 Game does not have a schedule";
+    const char*const TOKEN_EXPIRED               = "410 Token expired";
 
     // 412 Precondition failed
     const char*const NO_RECEIVERS                = "412 No receivers";
@@ -87,6 +91,11 @@ namespace server {
 
     // 422 Unprocessable Entity
     const char*const INVALID_FILE_FORMAT         = "422 Invalid file format";
+
+    // 45x c2router only
+    const char*const TOO_MANY_SESSIONS           = "451 Too many sessions";
+    const char*const SESSION_TIMED_OUT           = "452 Session timed out";
+    const char*const SESSION_CONFLICT            = "453 Conflicting session already active";
 
     // 500 Internal server error
     const char*const DATABASE_ERROR              = "500 Database error";

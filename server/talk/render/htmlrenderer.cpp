@@ -269,7 +269,11 @@ HtmlRenderer::renderUserLink(const TextNode& n)
     server::talk::User u(m_root, userId);
 
     // Build it
-    result += "<a class=\"userlink\" href=\"";
+    result += "<a class=\"userlink";
+    if (userId == m_context.getUser()) {
+        result += " userlink-me";
+    }
+    result += "\" href=\"";
     renderText(m_options.getBaseUrl());
     result += m_root.linkFormatter().makeUserUrl(u.getLoginName());
     result += "\">";
@@ -580,6 +584,7 @@ HtmlRenderer::render(const TextNode& n)
             break;
          case TextNode::miParBreak:
             break;
+         case TextNode::miParFragment:
          default:
             renderChildren(n);
             break;

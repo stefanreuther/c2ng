@@ -244,6 +244,20 @@ util::rich::Parser::parse()
     return result;
 }
 
+// Access reader.
+afl::io::xml::BaseReader&
+util::rich::Parser::reader()
+{
+    return m_reader;
+}
+
+// Get current token.
+afl::io::xml::BaseReader::Token
+util::rich::Parser::getCurrentToken() const
+{
+    return m_currentToken;
+}
+
 // Append string to Text.
 void
 util::rich::Parser::appendText(Text& out, bool& haveSpace, const String_t& in)
@@ -322,6 +336,7 @@ util::rich::Text
 util::rich::Parser::parseXml(String_t source)
 {
     // ex RichParser::textFromXml
+    // ex parseRichText(?) - difference is that that guy does p.parse(), which allows <br>
     CharsetFactory csf;
     afl::io::ConstMemoryStream ms(afl::string::toBytes(source));
     afl::io::xml::Reader rdr(ms, afl::io::xml::DefaultEntityHandler::getInstance(), csf);

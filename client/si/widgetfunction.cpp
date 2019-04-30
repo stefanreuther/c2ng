@@ -181,6 +181,9 @@ namespace client { namespace si { namespace {
         This implements the common pattern. */
     class Factory {
      public:
+        virtual ~Factory()
+            { }
+
         /** Parse arguments.
             This function is executed within the interpreter thread.
             \param session Session (for example, to access atoms)

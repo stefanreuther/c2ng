@@ -35,6 +35,9 @@ namespace util {
             \param fs File system instance */
         Application(afl::sys::Environment& env, afl::io::FileSystem& fs);
 
+        /** Destructor. */
+        ~Application();
+
         /** Run the application.
             Invokes appMain() with exception protection.
             \return return code (exit code) */

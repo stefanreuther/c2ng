@@ -19,6 +19,8 @@ TestServerHostCron::testInterface()
             { }
         virtual void handleGameChange(int32_t /*gameId*/)
             { }
+        virtual void suspendScheduler(server::Time_t /*absTime*/)
+            { }
     };
     Tester t;
 }

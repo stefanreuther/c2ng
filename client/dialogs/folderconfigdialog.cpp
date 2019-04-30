@@ -171,7 +171,7 @@ namespace {
         box.addItems(tab);
         box.setCurrentKey(current);
 
-        if (doStandardDialog(title, box, true, root)) {
+        if (doStandardDialog(title, String_t(), box, true, root)) {
             return box.getCurrentKey(current);
         } else {
             return false;
@@ -207,7 +207,7 @@ Dialog::run()
 {
     afl::base::SignalConnection conn(m_grid.sig_click.add(this, &Dialog::onOptionClick));
     updateData();
-    return doStandardDialog(m_translator.translateString("Folder Configuration"), m_grid, false, m_root);
+    return doStandardDialog(m_translator.translateString("Folder Configuration"), String_t(), m_grid, false, m_root);
 }
 
 void

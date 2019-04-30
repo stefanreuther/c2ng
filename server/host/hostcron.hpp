@@ -24,6 +24,8 @@ namespace server { namespace host {
         virtual Event getGameEvent(int32_t gameId);
         virtual void listGameEvents(afl::base::Optional<int32_t> limit, std::vector<Event>& result);
         virtual bool kickstartGame(int32_t gameId);
+        virtual void suspendScheduler(int32_t relativeTime);
+        virtual void getBrokenGames(BrokenMap_t& result);
 
      private:
         Session& m_session;

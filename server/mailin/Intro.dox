@@ -1,0 +1,10 @@
+/*!
+     \namespace server::mailin
+     \brief c2mailin utility
+
+     This namespace contains the c2mailin utility.
+     This utility parses email messages and feeds received turn files into c2host-server.
+
+     Entry point:
+     - server::mailin::MailintApplication
+ */

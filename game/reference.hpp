@@ -15,6 +15,7 @@ namespace game {
         enum Type {
             // Misc
             Null,
+            Special,
             Player,
             MapLocation,
 

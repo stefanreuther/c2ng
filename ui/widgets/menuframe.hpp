@@ -34,6 +34,7 @@ namespace ui { namespace widgets {
         // LayoutableGroup/Widget:
         virtual gfx::Rectangle transformSize(gfx::Rectangle size, Transformation kind) const;
         virtual void draw(gfx::Canvas& can);
+        virtual void handleStateChange(State st, bool enable);
         virtual bool handleKey(util::Key_t key, int prefix);
         virtual bool handleMouse(gfx::Point pt, MouseButtons_t pressedButtons);
 

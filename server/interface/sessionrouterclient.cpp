@@ -60,18 +60,18 @@ server::interface::SessionRouterClient::getStatus()
 }
 
 String_t
-server::interface::SessionRouterClient::getInfo(int32_t sessionId)
+server::interface::SessionRouterClient::getInfo(SessionId_t sessionId)
 {
-    afl::net::line::SimpleQuery cmd(afl::string::Format("INFO %d", sessionId));
+    afl::net::line::SimpleQuery cmd(afl::string::Format("INFO %s", sessionId));
     call(cmd);
     return cmd.getResult();
 }
 
 String_t
-server::interface::SessionRouterClient::talk(int32_t sessionId, String_t command)
+server::interface::SessionRouterClient::talk(SessionId_t sessionId, String_t command)
 {
     // S. Talks to a session and produces a result.
-    afl::net::line::SimpleQuery cmd(afl::string::Format("S %d\n%s", sessionId, command));
+    afl::net::line::SimpleQuery cmd(afl::string::Format("S %s\n%s", sessionId, command));
     call(cmd);
 
     afl::string::ConstStringMemory_t result = afl::string::toMemory(cmd.getResult());
@@ -84,7 +84,7 @@ server::interface::SessionRouterClient::talk(int32_t sessionId, String_t command
 }
 
 void
-server::interface::SessionRouterClient::sessionAction(int32_t sessionId, Action action)
+server::interface::SessionRouterClient::sessionAction(SessionId_t sessionId, Action action)
 {
     // CLOSE/RESTART/SAVE/SAVENN with session Id
     // CLOSE/SAVE/SAVENN: produces
@@ -93,7 +93,7 @@ server::interface::SessionRouterClient::sessionAction(int32_t sessionId, Action 
     // - "200 OK"
     // - "500 Restart failed"
     // - "452 Session timed out"
-    OneLineCommand cmd(afl::string::Format("%s %d", formatAction(action), sessionId));
+    OneLineCommand cmd(afl::string::Format("%s %s", formatAction(action), sessionId));
     call(cmd);
     if (cmd.getResult().compare(0, 4, "200 ", 4) != 0) {
         throw afl::except::RemoteErrorException(m_name.toString(), cmd.getResult());
@@ -101,12 +101,12 @@ server::interface::SessionRouterClient::sessionAction(int32_t sessionId, Action 
 }
 
 void
-server::interface::SessionRouterClient::groupAction(String_t key, Action action, afl::data::IntegerList_t& result)
+server::interface::SessionRouterClient::groupAction(String_t key, Action action, afl::data::StringList_t& result)
 {
     // CLOSE/RESTART/SAVE/SAVENN with group key.
     class GroupCommand : public afl::net::line::LineHandler {
      public:
-        GroupCommand(String_t cmd, afl::data::IntegerList_t& result)
+        GroupCommand(String_t cmd, afl::data::StringList_t& result)
             : m_command(cmd),
               m_first(true),
               m_result(result)
@@ -121,10 +121,7 @@ server::interface::SessionRouterClient::groupAction(String_t key, Action action,
                 if (m_first) {
                     m_first = false;
                 } else {
-                    int32_t n;
-                    if (afl::string::strToInteger(line, n)) {
-                        m_result.push_back(n);
-                    }
+                    m_result.push_back(line);
                 }
                 return false;
             }
@@ -133,13 +130,13 @@ server::interface::SessionRouterClient::groupAction(String_t key, Action action,
      private:
         String_t m_command;
         bool m_first;
-        afl::data::IntegerList_t& m_result;
+        afl::data::StringList_t& m_result;
     };
     GroupCommand cmd(afl::string::Format("%s -%s", formatAction(action), key), result);
     call(cmd);
 }
 
-int32_t
+server::interface::SessionRouter::SessionId_t
 server::interface::SessionRouterClient::create(afl::base::Memory<const String_t> args)
 {
     // NEW. Returns session Id.
@@ -159,14 +156,11 @@ server::interface::SessionRouterClient::create(afl::base::Memory<const String_t>
 
     // Extract the session Id
     String_t result = cmd.getResult().substr(4);
-    String_t::size_type pos = 0;
-    int32_t sessionId = 0;
-    if (!afl::string::strToInteger(result, sessionId, pos)) {
-        if (!afl::string::strToInteger(result.substr(0, pos), sessionId, pos)) {
-            throw afl::except::InvalidDataException(afl::string::Messages::invalidNumber());
-        }
+    String_t::size_type pos = result.find(' ');
+    if (pos != String_t::npos) {
+        result.erase(pos);
     }
-    return sessionId;
+    return result;
 }
 
 String_t

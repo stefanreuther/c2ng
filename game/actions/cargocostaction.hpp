@@ -45,12 +45,20 @@ namespace game { namespace actions {
             \return remaining amount */
         int32_t getRemainingAmount(Element::Type type) const;
 
+        /** Get remaining amount as Cost structure.
+            \return remaining amount */
+        game::spec::Cost getRemainingAmountAsCost() const;
+
         /** Get missing amount.
             If this transaction is valid, this will return 0.
             Otherwise, it returns the amount that needs to be added to the container to make the transaction valid.
             \param type Element type to query
             \return remaining amount */
         int32_t getMissingAmount(Element::Type type) const;
+
+        /** Get missing amount as Cost structure.
+            \return remaining amount */
+        game::spec::Cost getMissingAmountAsCost() const;
 
         /** Check validity.
             The transaction will be valid if the CargoContainer can pay the cost.

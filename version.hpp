@@ -5,8 +5,8 @@
 #ifndef C2NG_VERSION_HPP
 #define C2NG_VERSION_HPP
 
-#define PCC2_VERSION "2.40.5 (c2ng)"
-#define PCC2_VERSION_CODE 240005
+#define PCC2_VERSION "2.40.6 (c2ng)"
+#define PCC2_VERSION_CODE 240006
 
 #define PCC2_URL     "http://phost.de/~stefan/pcc2.html"
 

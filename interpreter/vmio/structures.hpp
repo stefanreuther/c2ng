@@ -99,6 +99,20 @@ namespace interpreter { namespace vmio { namespace structures {
     };
     static_assert(sizeof(ObjectHeader) == 16, "sizeof ObjectHeader");
 
+    /** Object file header. */
+    struct ObjectFileHeader {
+        char magic[6];                           ///< Magic number.
+        uint8_t version;                         ///< Version (=OBJECT_FILE_VERSION).
+        uint8_t zero;                            ///< Zero for now.
+        UInt16_t headerSize;                     ///< Size of following header (=OBJECT_FILE_HEADER_SIZE).
+        UInt32_t entry;                          ///< ID of entry point (=ID of a BCO).
+    };
+    static_assert(sizeof(ObjectFileHeader) == 14, "sizeof ObjectFileHeader");
+
+    const char OBJECT_FILE_MAGIC[6]       = {'C','C','o','b','j',26};
+    const uint8_t OBJECT_FILE_VERSION     = 100;
+    const uint8_t OBJECT_FILE_HEADER_SIZE = 4;
+
 } } }
 
 #endif

@@ -89,6 +89,9 @@ namespace {
 
         virtual void handleGameChange(int32_t /*gameId*/)
             { }
+
+        virtual void suspendScheduler(server::Time_t /*absTime*/)
+            { }
     };
 }
 
@@ -122,6 +125,11 @@ TestHarness::makeConfig()
     return config;
 }
 
+/** Simple test.
+    Verifies correct command dispatching.
+
+    A: Set up a minimal environment. Execute a command from each section.
+    E: Commands are executed and produce correct results. */
 void
 TestServerHostCommandHandler::testIt()
 {
@@ -176,5 +184,36 @@ TestServerHostCommandHandler::testIt()
     std::auto_ptr<Value_t> p(testee.call(Segment().pushBackString("CRONGET").pushBackInteger(1)));
     TS_ASSERT_EQUALS(Access(p)("action").toString(), "master");
     TS_ASSERT_EQUALS(Access(p)("time").toInteger(), 99);
+}
+
+/** Test HELP command.
+    A: invoke all variants of the HELP command
+    E: section help returned correctly. Section pages are distinct from main page. Correct links on main page. */
+void
+TestServerHostCommandHandler::testHelp()
+{
+    // Environment
+    TestHarness h;
+    server::host::Session session;
+
+    // Testee
+    server::host::CommandHandler testee(h.root(), session);
+
+    String_t mainHelp = testee.callString(Segment().pushBackString("HELP"));
+
+    static const char*const SECTIONS[] = { "HOST", "MASTER", "TOOL", "SHIPLIST", "CRON", "FILE", "GAME", "PLAYER", "SCHEDULE", 0 };
+    for (size_t i = 0; SECTIONS[i] != 0; ++i) {
+        // Verify help page
+        String_t sectionHelp = testee.callString(Segment().pushBackString("HELP").pushBackString(SECTIONS[i]));
+        TS_ASSERT(sectionHelp.size() > 30);
+        TS_ASSERT(sectionHelp != mainHelp);
+        TS_ASSERT(mainHelp.find(String_t(SECTIONS[i]) + "->") != String_t::npos);
+
+        // Verify case-blindness
+        TS_ASSERT_EQUALS(testee.callString(Segment().pushBackString("HELP").pushBackString(afl::string::strLCase(SECTIONS[i]))), sectionHelp);
+    }
+
+    // Bad page name is not an error, but returns the main page
+    TS_ASSERT_EQUALS(testee.callString(Segment().pushBackString("HELP").pushBackString("whatever")), mainHelp);
 }
 

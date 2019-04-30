@@ -284,7 +284,7 @@ server::host::HostPlayer::list(int32_t gameId, bool all, std::map<int,Info>& res
 
     for (int i = 1; i <= Game::NUM_PLAYERS; ++i) {
         if ((turn1State.size() >= 2U*i
-             && afl::bits::Int16LE::unpack(*reinterpret_cast<const afl::bits::Int16LE::Bytes_t*>(turn1State.data() + 2*i)) >= 0)
+             && afl::bits::Int16LE::unpack(*reinterpret_cast<const afl::bits::Int16LE::Bytes_t*>(turn1State.data() + 2*(i-1))) >= 0)
             || game.isSlotInGame(i))
         {
             result.insert(std::make_pair(i, game.describeSlot(i, m_session.getUser(), raceNames)));
@@ -364,19 +364,7 @@ String_t
 server::host::HostPlayer::getDirectory(int32_t gameId, String_t userId)
 {
     // ex planetscentral/host/cmdplayer.h:doPlayerGetDir
-
-    // Obtain simple access; read-only access
-    GameArbiter::Guard guard(m_root.arbiter(), gameId, GameArbiter::Simple);
-
-    // Check existence and permission
-    Game game(m_root, gameId);
-    m_session.checkPermission(game, Game::ReadPermission);
-
-    if ((!m_session.isAdmin() && m_session.getUser() != userId) || !game.isUserOnGame(userId)) {
-        throw std::runtime_error(PERMISSION_DENIED);
-    }
-
-    return game.getPlayerConfig(userId, "gameDir");
+    return get(gameId, userId, "gameDir");
 }
 
 server::interface::HostPlayer::FileStatus
@@ -429,3 +417,33 @@ server::host::HostPlayer::checkFile(int32_t gameId, String_t userId, String_t fi
     return Refuse;
 }
 
+void
+server::host::HostPlayer::set(int32_t gameId, String_t userId, String_t key, String_t value)
+{
+    // Obtain simple access
+    GameArbiter::Guard guard(m_root.arbiter(), gameId, GameArbiter::Simple);
+
+    Game game(m_root, gameId);
+    if ((!m_session.isAdmin() && m_session.getUser() != userId) || !game.isUserOnGame(userId)) {
+        throw std::runtime_error(PERMISSION_DENIED);
+    }
+
+    game.setPlayerConfig(userId, key, value);
+}
+
+String_t
+server::host::HostPlayer::get(int32_t gameId, String_t userId, String_t key)
+{
+    // Obtain simple access; read-only access
+    GameArbiter::Guard guard(m_root.arbiter(), gameId, GameArbiter::Simple);
+
+    // Check existence and permission
+    Game game(m_root, gameId);
+    m_session.checkPermission(game, Game::ReadPermission);
+
+    if ((!m_session.isAdmin() && m_session.getUser() != userId) || !game.isUserOnGame(userId)) {
+        throw std::runtime_error(PERMISSION_DENIED);
+    }
+
+    return game.getPlayerConfig(userId, key);
+}

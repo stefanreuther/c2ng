@@ -30,6 +30,8 @@ namespace interpreter { namespace vmio {
         ObjectLoader(afl::charset::Charset& cs, LoadContext& ctx);
         ~ObjectLoader();
 
+        BCORef_t loadObjectFile(afl::base::Ref<afl::io::Stream> s);
+
         void load(afl::base::Ref<afl::io::Stream> s);
 
         BCORef_t getBCO(uint32_t id);

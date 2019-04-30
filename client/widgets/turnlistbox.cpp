@@ -154,10 +154,9 @@ client::widgets::TurnListbox::handleKey(util::Key_t key, int prefix)
 }
 
 void
-client::widgets::TurnListbox::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+client::widgets::TurnListbox::handlePositionChange(gfx::Rectangle& oldPosition)
 {
-    // FIXME: do we need to do something here?
-    requestRedraw();
+    defaultHandlePositionChange(oldPosition);
 }
 
 void

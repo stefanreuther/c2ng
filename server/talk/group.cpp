@@ -127,7 +127,7 @@ server::talk::Group::describe(const server::talk::render::Context& ctx, const se
     // FIXME: this traditionally does not report "key" although it could now.
     server::interface::TalkGroup::Description result;
     result.name = name().get();
-    result.description = server::talk::render::render(description().get(), ctx, opts, root);
+    result.description = server::talk::render::renderText(description().get(), ctx, opts, root);
     result.parentGroup = getParent();
     result.unlisted = unlisted().get() != 0;
     return result;

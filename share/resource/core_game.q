@@ -124,7 +124,7 @@ EndFunction
 % Find ship cloning at a planet.
 % Returns the Id of the ship that is cloning at planet %pid.
 % If no ship is trying to clone, or cloning is forbidden, returns EMPTY.
-% @since PCC2 1.99.10, PCC 2.40.1
+% @since PCC2 1.99.10, PCC2 2.40.1
 Function FindShipCloningAt (pid)
   If Cfg("AllowShipCloning")
     % FindShip returns the first ship, which is just what we need
@@ -133,6 +133,32 @@ Function FindShipCloningAt (pid)
     Return Z(0)
   EndIf
 EndFunction
+
+
+% @q SelectionLoad file:File, Optional flags:Str (Global Command)
+% Load selection from file.
+%
+% The %flags argument is a combination of the following options:
+% - %t ("timeless") to ignore the timestamp of the selection file and load the file even if it doesn't match
+% - %a ("all") to accept loading files that contain all selection layers (refused by default)
+% - %m ("merge") to merge the selection instead of replacing it
+% - %u ("user interaction") to ask the user for confirmation before loading the file
+% - a selection layer number to load the file into that layer
+% @see SelectionSave, Selection.Layer
+% @since PCC 1.1.3, PCC2 1.99.13, PCC2 2.40.6
+Sub SelectionLoad (file, Optional flags)
+  % ex SelectionLoadAskUI::ask
+  Local state, q, UI.Result, ok
+  state := CC$SelReadHeader(file, flags)
+  q := CC$SelGetQuestion(state)
+  If q Then
+    UI.Message Format(Translate("%s. Do you want to load this file?"), q), Translate("Load Selection"), Translate("Yes No")
+    ok := (UI.Result = 1)
+  Else
+    ok := True
+  EndIf
+  If ok Then CC$SelReadContent(state)
+EndSub
 
 
 %%% More Game Functions
@@ -197,6 +223,7 @@ EndFunction
 % Call from ship context: get label of current ship
 % @since PCC2 2.40.1
 Function CCVP.ShipMissionLabel
+  % ex GMission::getLabel
   Local tmp, System.Err
 
   % Try the label expression
@@ -247,6 +274,16 @@ Function CCVP.HappyColor(happy)
   EndIf
 EndFunction
 
+% @since PCC2 2.40.6
+Function CCVP.PlayerColor(p)
+  If p=My.Race$ Then
+    Return "green"
+  Else If Global.Player(p).Team = My.Team Then
+    Return "yellow"
+  Else
+    Return "red"
+  EndIf
+EndFunction
 
 % Render number
 % @since PCC2 2.40.1

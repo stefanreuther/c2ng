@@ -90,6 +90,9 @@ namespace {
 
         virtual void handleGameChange(int32_t gameId)
             { checkCall(Format("handleGameChange(%d)", gameId)); }
+
+        virtual void suspendScheduler(server::Time_t absTime)
+            { checkCall(Format("suspendScheduler(%d)", absTime)); }
     };
 }
 
@@ -791,3 +794,52 @@ TestServerHostHostPlayer::testGameState()
     TS_ASSERT_THROWS(testee.substitute(gid, 3, "u2"), std::exception);
     TS_ASSERT_THROWS(testee.resign(gid, 1, "u2"), std::exception);
 }
+
+void
+TestServerHostHostPlayer::testGetSet()
+{
+    using server::host::HostPlayer;
+
+    TestHarness h;
+    server::host::Session rootSession;
+    server::host::Session userSession;
+    server::host::Session otherSession;
+    h.addUsers();
+    userSession.setUser("u4");
+    otherSession.setUser("u9");
+
+    // Create two games and join a user
+    int32_t gid1 = h.createNewGame(HostGame::PublicGame, HostGame::Joining);
+    int32_t gid2 = h.createNewGame(HostGame::PublicGame, HostGame::Joining);
+    TS_ASSERT_EQUALS(gid1, 1);
+    TS_ASSERT_EQUALS(gid2, 2);
+    HostPlayer(rootSession, h.root()).join(gid1, 3, "u4");
+    HostPlayer(rootSession, h.root()).join(gid2, 4, "u4");
+
+    // Initial value: empty
+    // - success cases: root, player themselves
+    TS_ASSERT_EQUALS(HostPlayer(rootSession, h.root()).get(gid1, "u4", "mailgametype"), "");
+    TS_ASSERT_EQUALS(HostPlayer(rootSession, h.root()).get(gid2, "u4", "mailgametype"), "");
+    TS_ASSERT_EQUALS(HostPlayer(userSession, h.root()).get(gid1, "u4", "mailgametype"), "");
+    TS_ASSERT_EQUALS(HostPlayer(userSession, h.root()).get(gid2, "u4", "mailgametype"), "");
+
+    // - failure cases: different player, player not on game
+    TS_ASSERT_THROWS(HostPlayer(otherSession, h.root()).get(gid1, "u4", "mailgametype"), std::exception);
+    TS_ASSERT_THROWS(HostPlayer(rootSession, h.root()).get(gid1, "u77", "mailgametype"), std::exception);
+
+    // Change it
+    // - success cases: root, player themselves
+    TS_ASSERT_THROWS_NOTHING(HostPlayer(userSession, h.root()).set(gid1, "u4", "mailgametype", "zip"));
+    TS_ASSERT_THROWS_NOTHING(HostPlayer(rootSession, h.root()).set(gid2, "u4", "mailgametype", "rst"));
+
+    // - failure cases: different player, player not on game
+    TS_ASSERT_THROWS(HostPlayer(otherSession, h.root()).set(gid2, "u4",  "mailgametype", "info"), std::exception);
+    TS_ASSERT_THROWS(HostPlayer(rootSession,  h.root()).set(gid2, "u77", "mailgametype", "info"), std::exception);
+
+    // Verify
+    TS_ASSERT_EQUALS(HostPlayer(rootSession, h.root()).get(gid1, "u4", "mailgametype"), "zip");
+    TS_ASSERT_EQUALS(HostPlayer(rootSession, h.root()).get(gid2, "u4", "mailgametype"), "rst");
+    TS_ASSERT_EQUALS(HostPlayer(userSession, h.root()).get(gid1, "u4", "mailgametype"), "zip");
+    TS_ASSERT_EQUALS(HostPlayer(userSession, h.root()).get(gid2, "u4", "mailgametype"), "rst");
+}
+

@@ -55,24 +55,28 @@ EndSub
 % Previous unit [PgUp etc.]
 % @since PCC2 2.40.1
 Sub CCUI.SelectPrevious
+  Local System.Err
   Try With UI.Iterator Do CurrentIndex := PreviousIndex(CurrentIndex, "w")
 EndSub
 
 % Next unit [PgDn etc.]
 % @since PCC2 2.40.1
 Sub CCUI.SelectNext
+  Local System.Err
   Try With UI.Iterator Do CurrentIndex := NextIndex(CurrentIndex, "w")
 EndSub
 
 % Previous marked unit [Ctrl+PgUp etc.]
 % @since PCC2 2.40.1
 Sub CCUI.SelectPreviousMarked
+  Local System.Err
   Try With UI.Iterator Do CurrentIndex := PreviousIndex(CurrentIndex, "wm")
 EndSub
 
 % Next marked unit [Ctrl+PgDn etc.]
 % @since PCC2 2.40.1
 Sub CCUI.SelectNextMarked
+  Local System.Err
   Try With UI.Iterator Do CurrentIndex := NextIndex(CurrentIndex, "wm")
 EndSub
 
@@ -80,6 +84,7 @@ EndSub
 % @since PCC2 2.40.1
 Sub CCUI$GotoPlanet (screen, x, y)
   % ex CC$PlanetAt
+  Local System.Err
   Local pid := PlanetAt(X, Y, 1)
   If pid Then Try UI.GotoScreen screen, pid
 EndSub
@@ -97,12 +102,76 @@ Sub CCUI.GotoBaseHere
 EndSub
 
 % L, Shift-L, Shift-F1, etc.
+% @since PCC2 2.40.5
 Sub CCUI.ListShips (X, Y, flags)
   Local UI.Result
   UI.ListShips X, Y, flags
   If UI.Result
     UI.GotoScreen 1, UI.Result
   EndIf
+EndSub
+
+% F on ship/planet/base screen
+% @since PCC2 2.40.6
+Sub CC$ChangeFCode
+  Local UI.Result
+  UI.InputFCode "d", FCode
+  SetFCode UI.Result
+EndSub
+
+% C-p/C-s on ship screen. Only review the transfer if it is present.
+Sub CC$ReviewShipTransfer (kind, Id)
+  If Id Then CC$TransferShip kind, Id
+EndSub
+
+% c on ship/history screen
+Sub CC$ShipCargo
+  If Played Then
+    CC$TransferShip 0,0
+  Else
+    CC$CargoHistory % FIXME: not implemented
+  EndIf
+EndSub
+
+% u on ship screen
+Sub CC$ShipUnload
+  If Played Then
+    If Orbit$ Then
+      CC$TransferUnload
+    Else
+      MessageBox Translate("We are not orbiting a planet, sir. If you want to jettison cargo, use the 'c' command instead."), Translate("Cargo Transfer")
+    EndIf
+  EndIf
+EndSub
+
+% Shift/Ctrl-F4
+Sub CC$GotoChart (X, Y)
+  If IsEmpty(X) Or IsEmpty(Y) Then
+    UI.GotoScreen 4
+  Else
+    UI.GotoChart X,Y
+  EndIf
+EndSub
+
+% B on starchart in planet view
+Sub CC$BaseLock
+  Local System.Err
+  If Base.YesNo Then
+    Chart.SetView 'BaseLock'
+  Else
+    Try CC$BuildBase
+  EndIf
+EndSub
+
+% P on starchart in starbase view
+Sub CC$PlanetLock
+  Chart.SetView 'PlanetLock'
+EndSub
+
+% ESC on starchart. Since this hides the view, it will also turn off the keymap,
+% so the next ESC will exit the map.
+Sub CC$HidePanel
+  Chart.SetView ''
 EndSub
 
 %%% Unit Manipulation
@@ -221,11 +290,44 @@ EndSub
 % @since PCC2 2.40.1
 Sub CCUI.Ship.SetMission
   % FIXME: totally incomplete!
-  Local UI.Result
+  Local _ := Translate
+  Local UI.Result, System.Err
+  Local i := Id
   If Played Then
-    CCUI.Ship.ChooseExtendedMission Mission$, Mission.Intercept, Mission.Tow
+    % Build listbox
+    Local a := Listbox(_("Ship Mission"), Mission$, 340, 12, "pcc2:shipscreen")
+    ForEach Global.Mission Do
+      Try
+        % Check preconditions
+        % @change SRace check (host.isMissionAllowed) now in mission.cc
+        If BitAnd(Race$, 2^Cfg("PlayerSpecialMission", Ship(i).Owner.Real))=0 Then Abort
+        If InStr(Flags, "r") And System.GameType$ Then Abort
+        If InStr(Flags, "i") And Ship(i).Fleet$ And Ship(i).Fleet$<>i Then Abort
+        If Condition And Not Eval(Condition, Ship(i)) Then Abort
+
+        % All tests passed, add it
+        Call a->AddItem Number, Format("%s - %s", Key, Name)
+      EndTry
+    Next
+    Call a->AddItem, -1, _("# - Extended Mission")
+    Call a->Run
+
+    % Process result
     If Not IsEmpty(UI.Result) Then
-      SetMission UI.Result(0), UI.Result(1), UI.Result(2)
+      If UI.Result=-1 Then
+        % Extended Mission
+        CCUI.Ship.ChooseExtendedMission Mission$, Mission.Intercept, Mission.Tow
+        If Not IsEmpty(UI.Result) Then
+          SetMission UI.Result(0), UI.Result(1), UI.Result(2)
+        EndIf
+      Else
+        % FIXME: regular mission parameters
+        SetMission UI.Result
+
+        % Execute 'OnSet=' command
+        i := Global.Mission(Mission$, Owner.Real).Command
+        If i Then Eval i
+      EndIf
     EndIf
   EndIf
 EndSub

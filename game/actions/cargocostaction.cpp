@@ -49,6 +49,19 @@ game::actions::CargoCostAction::getRemainingAmount(Element::Type type) const
     return m_container.getEffectiveAmount(type);
 }
 
+// Get remaining amount as Cost structure.
+game::spec::Cost
+game::actions::CargoCostAction::getRemainingAmountAsCost() const
+{
+    game::spec::Cost result;
+    result.set(m_cost.Tritanium,  getRemainingAmount(Element::Tritanium));
+    result.set(m_cost.Duranium,   getRemainingAmount(Element::Duranium));
+    result.set(m_cost.Molybdenum, getRemainingAmount(Element::Molybdenum));
+    result.set(m_cost.Money,      getRemainingAmount(Element::Money));
+    result.set(m_cost.Supplies,   getRemainingAmount(Element::Supplies));
+    return result;
+}
+
 // Get missing amount.
 int32_t
 game::actions::CargoCostAction::getMissingAmount(Element::Type type) const
@@ -63,6 +76,19 @@ game::actions::CargoCostAction::getMissingAmount(Element::Type type) const
     } else {
         return 0;
     }
+}
+
+// Get missing amount as Cost structure.
+game::spec::Cost
+game::actions::CargoCostAction::getMissingAmountAsCost() const
+{
+    game::spec::Cost result;
+    result.set(m_cost.Tritanium,  getMissingAmount(Element::Tritanium));
+    result.set(m_cost.Duranium,   getMissingAmount(Element::Duranium));
+    result.set(m_cost.Molybdenum, getMissingAmount(Element::Molybdenum));
+    result.set(m_cost.Money,      getMissingAmount(Element::Money));
+    result.set(m_cost.Supplies,   getMissingAmount(Element::Supplies));
+    return result;
 }
 
 // Check validity.

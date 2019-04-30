@@ -49,6 +49,9 @@ namespace {
         virtual void handleGameChange(int32_t gameId)
             { checkCall(Format("handleGameChange(%d)", gameId)); }
 
+        virtual void suspendScheduler(server::Time_t absTime)
+            { checkCall(Format("suspendScheduler(%d)", absTime ? 1 : 0)); }
+
         void provideSampleList();
     };
 
@@ -135,6 +138,10 @@ TestServerHostHostCron::testNull()
     TS_ASSERT_EQUALS(testee.kickstartGame(12), false);
     TS_ASSERT_EQUALS(testee.kickstartGame(39), true);
     TS_ASSERT_EQUALS(IntegerSetKey(h.db(), "game:broken").contains(39), false);
+
+    // Suspend
+    TS_ASSERT_THROWS_NOTHING(testee.suspendScheduler(0));
+    TS_ASSERT_THROWS_NOTHING(testee.suspendScheduler(1));
 }
 
 /** Test operation with a cron instance (standard). */
@@ -195,6 +202,14 @@ TestServerHostHostCron::testNonNull()
     m.expectCall("handleGameChange(39)");
     TS_ASSERT_EQUALS(testee.kickstartGame(39), true);
     TS_ASSERT_EQUALS(IntegerSetKey(h.db(), "game:broken").contains(39), false);
+
+    // Suspend
+    m.expectCall("suspendScheduler(0)");
+    TS_ASSERT_THROWS_NOTHING(testee.suspendScheduler(0));
+    m.expectCall("suspendScheduler(1)");
+    TS_ASSERT_THROWS_NOTHING(testee.suspendScheduler(77));
+
+    m.checkFinish();
 }
 
 /** Test listGameEvents() operation with permissions. */

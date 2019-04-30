@@ -162,8 +162,19 @@ server::file::PathResolver::resolveToItem(String_t itemName, DirectoryItem::Perm
             throw std::runtime_error(PERMISSION_DENIED);
         }
     }
-    if (!hasPermission(priv)) {
-        throw std::runtime_error(PERMISSION_DENIED);
+    if (priv == DirectoryItem::AllowList) {
+        if (DirectoryItem* dir = dynamic_cast<DirectoryItem*>(it)) {
+            // STAT on a directory: target directory (not container!) must be listable
+            dir->readContent(m_root);
+            if (!dir->hasPermission(m_user, priv)) {
+                throw std::runtime_error(PERMISSION_DENIED);
+            }
+        } else {
+            // STAT on a file: directory must be listable
+            checkPermission(priv);
+        }
+    } else {
+        checkPermission(priv);
     }
     return *it;
 }

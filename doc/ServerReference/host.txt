@@ -1,0 +1,99 @@
+##
+##  c2host
+##
+
+@q Host (Service)
+@noproto
+The "Host" service manages hosted games.
+It manages files inside the {HostFile (Service)|HostFile} service
+and information in the database,
+and includes a scheduler.
+
+Since c2ng, Host no longer accesses {HostFile (Service)|HostFile}'s filespace.
+Instead, it copies data in and out of a temporary directory to run host or the turn checker.
+
+The Host service can also send mails using {Mailout (Service)}
+and set up forums for new games using {Talk (Service)}.
+
+The Host service is accessible using
+- "host" context on the console
+- {@group Host Command} (a {pcc:resp|RESP service})
+- {@group Host API} (a {pcc:api|web API})
+
+<h2>Domain Model</h2>
+
+The host service has a <b>list of Host versions, Master versions, Ship Lists, and Tools</b>.
+A selection of those is combined to form a game.
+
+The host service has a list of <b>Games</b>.
+Each can have a different lifecycle status (joining, running, etc.) and visibility.
+Each game has <b>player slots</b>.
+Each slot can have multiple <b>players</b> (main player, replacements).
+
+<h2>Storage</h2>
+
+Host stores game data in the {HostFile (Service)|HostFile} service.
+As of 2019, the Host service is the only entity that shall access these files.
+It has commands to serve files with access checking (e.g. {GET (Host Command)}).
+
+Host also stores information in the database.
+It accesses user profiles for configuration.
+
+Important data types:
+- {@type GID} (game Id, a number)
+- {@type UID} (user Id, not interpreted by the filer)
+
+@uses Host.Host, Host.Port, Host.TimeScale, Host.Threads
+@uses HostFile.BaseDir, HostFile.Port, HostFile.Host
+@uses Redis.Host, Redis.Port
+@uses File.Host, File.Port
+@uses Mailout.Host, Mailout.Port
+@uses Talk.Host, Talk.Port
+@uses Router.Host, Router.Port
+---
+
+@group Host Command
+This {pcc:resp|RESP} interface is the interface to the {Host (Service)|Host} service.
+Host commands can also be accessed through the {@group Host API}.
+---
+@group Host API
+The "host" {pcc:api|API endpoint} accesses hosted games.
+It accesses the {@group Host Command|host service}.
+---
+
+
+
+############################### Types ################################
+
+@type GID
+This type represents a game Id.
+Game Ids are integers, see {@type Int}, with 0 not corresponding to a game.
+---
+@type HostGameState
+State of a game, given as a {@type Str|string}.
+- preparing (not on any list)
+- joining   (on join list if public)
+- running   (on running-game list if public)
+- finished  (on finished-game list if public)
+- deleted   (deleted, will not be hosted nor listed)
+---
+@type HostGameType
+Type (visibility) of a game, given as a {@type Str|string}.
+- private   (not on any list, only accessible to players)
+- unlisted  (not on any list, but accessible by URL)
+- public    (on public lists)
+- test      (not on any list, only accessible to owner, does not count for scoring)
+---
+@type HostTurnStatus
+Status of a turn file, given as an {@type Int|integer}.
+- 0   (missing)
+- 1   (green)
+- 2   (yellow)
+- 3   (red)
+- 4   (bad)
+- 5   (stale)
+- 6   (dead (=no turn submitted, but race has score 0 so he does not need to))
+- +16 (turn is temporary)
+
+red/bad/stale are persisted only if there is no previous green/yellow turn.
+---

@@ -5,12 +5,12 @@
 #define C2NG_GAME_INTERFACE_SHIPMETHOD_HPP
 
 #include "game/map/ship.hpp"
-#include "interpreter/process.hpp"
-#include "interpreter/arguments.hpp"
 #include "game/root.hpp"
+#include "game/session.hpp"
 #include "game/spec/shiplist.hpp"
 #include "game/turn.hpp"
-#include "game/session.hpp"
+#include "interpreter/arguments.hpp"
+#include "interpreter/process.hpp"
 
 namespace game { namespace interface {
 
@@ -35,9 +35,9 @@ namespace game { namespace interface {
     void callShipMethod(game::map::Ship& sh, ShipMethod ism, interpreter::Arguments& args,
                         interpreter::Process& process,                        // needed for cargo transfer which needs it for CARGO.REMAINDER
                         Session& session,                                     // needed for world()
-                        afl::base::Ref<Root> root,                            // needed for setShipProperty() which needs it for config
-                        afl::base::Ref<game::spec::ShipList> shipList,        // needed for setShipProperty() which needs it for Engines
-                        afl::base::Ref<Turn> turn);                           // needed for setShipProperty() which needs it for universe
+                        Root& root,                                           // needed for setShipProperty() which needs it for config
+                        game::spec::ShipList& shipList,                       // needed for setShipProperty() which needs it for Engines
+                        Turn& turn);                                          // needed for setShipProperty() which needs it for universe
 
 } }
 

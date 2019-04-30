@@ -13,7 +13,9 @@
 game::ref::ListObserver::ListObserver()
     : m_mainList(),
       m_extraList(),
-      m_resultList()
+      m_resultList(),
+      m_pConfigurationSelection(&REGULAR),
+      m_pSession(0)
 { }
 
 void
@@ -42,12 +44,18 @@ game::ref::ListObserver::setSession(Session& session)
     }
 }
 
+void
+game::ref::ListObserver::setConfigurationSelection(const ConfigurationSelection& sel)
+{
+    m_pConfigurationSelection = &sel;
+}
+
 game::ref::Configuration
 game::ref::ListObserver::getConfig() const
 {
     Configuration fig;
     if (m_pSession != 0) {
-        fetchConfiguration(*m_pSession, fig);
+        fetchConfiguration(*m_pSession, *m_pConfigurationSelection, fig);
     }
     return fig;
 }
@@ -56,7 +64,7 @@ void
 game::ref::ListObserver::setConfig(const Configuration& config)
 {
     if (m_pSession != 0) {
-        storeConfiguration(*m_pSession, config);
+        storeConfiguration(*m_pSession, *m_pConfigurationSelection, config);
     }
     updateResultList();
 }
@@ -75,7 +83,7 @@ game::ref::ListObserver::updateResultList()
     if (m_pSession != 0) {
         // Sorting
         Configuration fig;
-        fetchConfiguration(*m_pSession, fig);
+        fetchConfiguration(*m_pSession, *m_pConfigurationSelection, fig);
         afl::base::Deleter del;
         SortPredicate& firstPredicate  = createSortPredicate(fig.order.first,  *m_pSession, del);
         SortPredicate& secondPredicate = createSortPredicate(fig.order.second, *m_pSession, del);

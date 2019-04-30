@@ -31,7 +31,6 @@ TestServerTalkUser::testBasicProperties()
     userTree.hashKey("profile").stringField("screenname").set("the screen name");
     userTree.stringKey("name").set("the_login_name");
     userTree.subtree("forum").intSetKey("posted").add(42);
-    userTree.stringKey("password").set("12345");     // That's the stupidest combination I've ever heard of in my life! That's the kinda thing an idiot would have on his luggage!
     userTree.subtree("pm:folder").intKey("id").set(105);
     userTree.subtree("pm:folder").intSetKey("all").add(103);
     userTree.subtree("forum").intSetKey("watchedForums").add(99);
@@ -53,7 +52,6 @@ TestServerTalkUser::testBasicProperties()
     TS_ASSERT_EQUALS(testee.getScreenName(), "the screen name");
     TS_ASSERT_EQUALS(testee.getLoginName(), "the_login_name");
     TS_ASSERT(testee.postedMessages().contains(42));
-    TS_ASSERT_EQUALS(testee.passwordHash().get(), "12345");  // That's amazing! I've got the same combination on my luggage!
 
     TS_ASSERT_EQUALS(testee.pmFolderCount().get(), 105);
     TS_ASSERT(testee.pmFolders().contains(103));

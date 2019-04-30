@@ -13,7 +13,7 @@ void
 TestServerNntpRoot::testIt()
 {
     afl::net::NullCommandHandler nch;
-    server::nntp::Root testee(nch, "http://huh");
+    server::nntp::Root testee(nch, nch, "http://huh");
 
     // Simple methods
     TS_ASSERT_THROWS_NOTHING(testee.log().write(afl::sys::Log::Info, "channel", "msg"));

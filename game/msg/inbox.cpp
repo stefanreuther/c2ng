@@ -57,7 +57,7 @@ game::msg::Inbox::getNumMessages()
 }
 
 String_t
-game::msg::Inbox::getMessageText(size_t index, afl::string::Translator& /*tx*/, PlayerList& /*players*/)
+game::msg::Inbox::getMessageText(size_t index, afl::string::Translator& /*tx*/, const PlayerList& /*players*/)
 {
     // ex GInbox::getText
     if (index < m_messages.size()) {
@@ -68,7 +68,7 @@ game::msg::Inbox::getMessageText(size_t index, afl::string::Translator& /*tx*/, 
 }
 
 String_t
-game::msg::Inbox::getMessageHeading(size_t index, afl::string::Translator& tx, PlayerList& players)
+game::msg::Inbox::getMessageHeading(size_t index, afl::string::Translator& tx, const PlayerList& players)
 {
     // ex GInbox::getHeading
     // This is the same algorithm as in PCC 1.x.

@@ -1,0 +1,485 @@
+######################################################################
+##
+##  Pages
+##
+######################################################################
+
+
+@page pcc:intro, Introduction
+This document describes the PlanetsCentral infrastructure.
+
+PlanetsCentral consists of a number of interacting services.
+See {@group Service|Services} for a list.
+The services usually talk a {pcc:resp|command/response protocol based on RESP}.
+These commands are exposed to the Web using a {pcc:api|web API},
+although most parts of the website directly access the underlying service
+(that is, to view a forum, the server calls the {@group Talk Command}s,
+not the client's browser calls the {@group Talk API}).
+
+This document contains all elements (commands, database keys, configuration, data types) cross-referenced.
+Possible entry points:
+- {@group Service|Services}
+- {@group Database|Database Keys}
+- {pcc:index:groups|Index of Groups}
+- {pcc:index:types|Index of Data Types}
+- {pcc:index:names|Alphabetical Index}
+---
+
+@page pcc:resp, RESP Services
+PlanetsCentral services use an variant of RESP (redis serialisation protocol) as the over-the-wire format.
+
+<h2>Machine Format</h2>
+
+Objects are serialized as follows:
+- null/undefined is represented as "$-1\r\n"
+- a string, number or blob is represented as "$<em>n</em>\r\n<em>string</em>\r\n",
+  where n is the number of bytes in the string (bulk reply).
+- a list is represented as "*<em>n</em>\r\n",
+  where n is the number of array elements,
+  followed by the individual elements (multi-bulk reply).
+  PlanetsCentral services allow arbitrary nesting in responses.
+- a hash is represented as a list of keys and values.
+
+In addition, the following formats are supported:
+- a number can be given as ":<em>n</em>\r\n"
+- a success reply is given as "+<em>text</em>\r\n".
+  This is semantically equivalent to a string.
+  Since c2ng, this format is accepted but no longer generated.
+  Instead, we return success replies as "$" strings.
+- an error reply is given as "-<em>text</em>\r\n".
+
+A command is represented as a list of strings, starting with the command word.
+For example, to execute the command "GAMELIST TYPE public",
+send the list ["GAMELIST", "TYPE", "public"],
+serialized as "*3\r\n$8\r\nGAMELIST\r\n$4\r\nTYPE\r\n$6\r\npublic\r\n".
+
+<h2>Simple Format</h2>
+
+As a simplification for manual use with telnet, PlanetsCentral services also accept a simple one-line format,
+i.e. you can send the command "GAMELIST TYPE public" as-is.
+
+The simple format is not intended to be used for machine/machine communication.
+It does not support quoting for parameters that contain spaces or other control characters.
+
+Responses are always sent in the machine format.
+
+<h2>Command Conventions</h2>
+
+Commands are case-insensitive.
+It is customary to use upper-case from programs, and lower-case when typing commands on the {pcc:console|console}.
+
+A command documented as
+| COMMAND a:Int b:Str [c:Str]
+accepts two to three parameters which must be passed in the given order.
+If parameters have keywords, as in
+| COMMAND a:Int b:Str [CODE c:Str] [DATA d:Str]
+the keyword parameters can be given in any order.
+
+All servers have a {PING} command for monitoring and a {HELP} command.
+
+Commands documented without a return value return a "OK" reply.
+
+Connections accept multiple commands.
+
+For the classic implementations, every connection uses up one worker thread,
+thus the server must be configured for an appropriate number of threads when long-lived connections are required,
+see {@group Config}, *.Threads.
+
+Since c2ng, the number of connections is not limited by the server;
+all connections are handled with a single thread.
+
+Connections can simply be closed after a command when they are no longer needed.
+Pipelining is not supported.
+
+<h2>Permissions</h2>
+
+Servers start without a user context.
+In this context ("admin context"), all operations are permitted unconditionally.
+
+The {USER} command selects a user context.
+This activates permission checks for the given user ({@type UID}).
+All web sites and APIs therefore start by setting the user context.
+That aside, servers do not have a user database and do not check credentals.
+---
+
+@page pcc:api, APIs
+PlanetsCentral web APIs are accessed through special endpoints.
+
+Parameters are passed as regular WWW form parameters.
+PlanetsCentral supports POST and GET.
+POST may use regular form encoding or multi-part.
+Requests that modify data must use POST.
+
+The form parameter %action defines the action to perform.
+Additional parameters are required depending on the action, and can be given in any order.
+%action can be omitted to perform a null operation (for authenticating maybe).
+
+Authentication information is taken from the regular login cookie,
+but can also be passed directly in the API call.
+
+<h2>Command Conventions</h2>
+
+Command and parameter names are case-sensitive, i.e. must be specified in lower case.
+
+Typical command verbs consist of an object name, an optional "m", and an action, for example, "postmstat".
+- the object name defines the object we work on, e.g. "post" for a forum posting.
+- if the "m" is not given, the command operates on one object and has a single Id parameter
+  (e.g. "mid" for a message Id). If the "m" is given, the command operates on a list of objects and takes
+  a list parameter (e.g. "mids" for a list of message Ids).
+- the action specifies what information you want to get or change, e.g. "stat" to obtain header information.
+
+The command %api_info will produce a self-description for each API endpoint.
+
+<h2>Common Parameters</h2>
+
+- action=<em>action</em><br/>
+  Action to perform.
+- api_type=<em>type</em><br/>
+  Generate result with this MIME type.
+  Accepted values:
+  <ul>
+   <li>text/json (default), text/plain: plain JSON string</li>
+   <li>text/html: wrap the JSON into a HTML &lt;script&gt; tag.</li>
+  </ul>
+- api_callback=<em>name</em><br/>
+  Wrap the result in a function call for <em>name</em> (JSONP)
+
+For example, if XMLHttpRequest cannot be used, one could use "api_callback=window.parent.foo&amp;api_type=text/html"
+on a HTML form targeting an invisible IFRAME to get the API results called back to function %foo.
+
+<h3>Token Authentication</h3>
+
+The recommended way to talk to the API from a standalone program is to use an API key.
+
+- api_key=<em>key</em>
+
+The key can be obtained by using the {whoami (User API)} command, and specifying user/password as shown in the next section.
+
+<h3>Password Authentication</h3>
+
+- api_user=<em>username</em>
+- api_password=<em>password</em>
+- api_mode=<em>mode</em> (optional)
+  <ul>
+    <li>0 (default, do not generate a cookie)</li>
+    <li>1 (generate a log-in cookie)</li>
+  </ul>
+
+<h3>Cookie Authentication</h3>
+
+If no authentication parameter is given, the API tries to use a log-in cookie from the regular website.
+This is used when JavaScript from the website talks to the API.
+
+<h2>Response Formats</h2>
+
+Responses are always JSON hashes, with a few exceptions explicitly documented.
+If the request was successful, it will have a field %result with value 1.
+Requested data will be in additional fields.
+
+If the request was unsuccessful, it will have a field %result with value 0.
+An error message will be reported in fields %error and %errorCode (e.g. %error="Forbidden", %errorCode=403).
+
+Very hard errors can cause the response to not contain any JSON hash at all.
+---
+
+@page pcc:console, Console
+The <tt>c2console</tt> utility allows to easily talk to every service.
+It also provides some minimal scripting capabilities.
+
+<h2>Variables</h2>
+
+The console has a set of internal "environment" variables.
+Those can be set with the {setenv (Global Console Command)|setenv command}, and used in commands.
+
+<h2>Command Syntax</h2>
+
+Each line is split into words.
+The first word is the command, following words are parameters.
+Special characters:
+- # (hash): starts a comment. The remainder of the line is ignored.
+- $n, ${\nnn}: variable reference.
+  Multi-character names need to be enclosed in parentheses.
+- "...": double-quoted string. The content of the quotes is NOT split into words.
+  Variable references are resolved within a double-quoted string.
+  In addition, the backslash is special:
+  <ul>
+    <li>\xNN (two hex digits): produces a single byte</li>
+    <li>\uNNNN (four hex digits): produces a UTF-8 rune</li>
+    <li>\0, \t, \r, \n: produces a null byte, tab, carriage-return, linefeed</li>
+    <li>other characters are quoted (e.g. \" to produce a double quote)</li>
+  </ul>
+- '...': single-quoted string. The string ends at the next single quote, no quoting or variables.
+- {\...}: brace block. The block can span multiple lines.
+  Its content is valid console command syntax; it ends at the matching closing brace.
+  In particular, nested braces are allowed.
+  Variables are NOT expanded.
+  This syntax is typically used for commands that take other commands as parameters,
+  which will in turn expand the variables with the then-current values.
+
+<h2>Commands and Contexts</h2>
+
+There are a few {@group Global Console Command|Global Console Commands}.
+
+In addition, each service can be addressed directly or as a context:
+- "<tt>host gamestat 17</tt>" will send the <tt>gamestat 17</tt> command to the host service.
+- "<tt>host</tt>" will enter "host" context.
+  All commands that are not internally recognized are sent to the host service.
+  Use {.. (Global Console Command)} to leave the context.
+---
+
+
+######################################################################
+##
+##  Groups
+##
+######################################################################
+
+@group Database
+This group contains all redis database keys.
+They can be accessed using the c2console "redis" context.
+---
+@group Config
+This group contains all configuration keys.
+
+The name of the configuration file is given by the environment variable %C2CONFIG
+and defaults to <tt>c2config.txt</tt>.
+The configuration file contains "name=value" assignments.
+
+The idea is to pass the %C2CONFIG environment variable to all participating services
+including CGI scripts, and configure all services at once.
+Some services use configuration keys that belong to other services to find these other services.
+---
+@group Service
+This group contains all services.
+---
+@group Global Console Command
+These commands are valid on the {pcc:console|console} in every context.
+---
+
+
+######################################################################
+##
+##  APIs
+##
+######################################################################
+
+
+
+######################################################################
+##
+##  Types
+##
+######################################################################
+
+@type Int
+This type represents integers.
+- in the database, it can be accessed using regular key accesses.
+- in RESP calls and responses, it is represented as a string (bulk) or one-liner.
+- in API calls and responses, it is represented as a number.
+Internally, PlanetsCentral operates on 32-bit integers.
+The protocols allow for larger values.
+
+If a string is provided when a number is needed, it should be parsed as a decimal number.
+An empty string should be treated as 0.
+---
+
+@type Bool
+This type represents truth values.
+We follow the C/C++ interpretation of treating 0=false, nonzero=true; generators create 1=true.
+
+In configuration files, we accept "No"/"False" and "Yes"/"True" in addition to numerical values.
+
+See {@type Int}.
+---
+
+@type Str
+This type represents strings.
+- in the database, it can be accessed using regular key accesses.
+- in RESP calls and responses, it is represented as a string (bulk) or one-liner.
+- in API calls and responses, it is represented as a string (calls are percent-encoded if needed).
+Strings always are UTF-8 encoded.
+API calls may use different encodings but that is not recommended.
+If a number is provided when a string is needed, it should be formatted as a decimal number.
+---
+
+@type Blob
+This type represents blobs.
+- in the database, it can be accessed using regular key accesses.
+- in RESP calls and responses, it is represented as a string (bulk) or one-liner.
+Unlike strings, blobs do not have a character encoding, and are only treated as a byte sequence.
+Blobs therefore do not appear in API calls and responses.
+---
+
+@type Hash
+This type represents a hash of unknown/mixed value type.
+- in the database, it can be accessed using hash commands.
+- in RESP responses, it is represented as a list (multi-bulk) containing keys and values.
+- in API responses, it is represented as an object.
+Hashes do not appear in RESP or API calls.
+---
+
+@type IntHash
+This type represents a hash where all values are integers.
+- in the database, it can be accessed using hash commands.
+- in RESP responses, it is represented as a list (multi-bulk) containing keys and values.
+- in API responses, it is represented as an object.
+Hashes do not appear in RESP or API calls.
+---
+
+@type StrHash
+This type represents a hash where all values are strings.
+- in the database, it can be accessed using hash commands.
+- in RESP responses, it is represented as a list (multi-bulk) containing keys and values.
+- in API responses, it is represented as an object.
+Hashes do not appear in RESP or API calls.
+---
+
+@type IntSet
+This type represents a (unordered) set of integers.
+- in the database, it can be accessed using set commands
+- in RESP responses, it is represented as a list (multi-bulk) of integers.
+- in API responses, it is represented as an array of integers.
+Sets do not appear in RESP or API calls.
+---
+
+@type StrSet
+This type represents a (unordered) set of strings.
+- in the database, it can be accessed using set commands
+- in RESP responses, it is represented as a list (multi-bulk) of strings.
+- in API responses, it is represented as an array of strings.
+Sets do not appear in RESP or API calls.
+---
+
+@type List
+This type represents a list of unknown/mixed/complex value type.
+- in the database, it can be accessed using list commands.
+- in RESP calls and responses, it is represented as a list (multi-bulk).
+- in API calls, it is represented as a comma-delimited list.
+- in API responses, it is represented as an array.
+---
+
+@type StrList
+This type represents an (ordered) list of strings.
+- in the database, it can be accessed using list commands
+- in RESP calls and responses, it is represented as a list (multi-bulk) of strings.
+- in API calls, it is represented as a comma-delimited list; strings containing a comma cannot be represented.
+- in API responses, it is represented as an array of strings.
+---
+
+@type IntList
+This type represents an (ordered) list of integers.
+- in the database, it can be accessed using list commands
+- in RESP calls and responses, it is represented as a list (multi-bulk) of integers.
+- in API calls, it is represented as a comma-delimited list.
+- in API responses, it is represented as an array of integers.
+---
+
+@type Any
+This is a placeholder for commands that can accept or return mixed types.
+See the command description for details.
+---
+
+@type Code
+Code is a {@type Str|string} containing a one or more {pcc:console|console commands}.
+Multiple commands are separated by newlines.
+Normally, the a Code parameter is given as a braced block ({\...}).
+---
+
+@type Env
+A {@type Str|string} containing the name of an {pcc:console|console environment variable}.
+---
+
+######################################################################
+##
+##  Application types
+##
+######################################################################
+
+@type UID
+User Id.
+For user management, user Ids are integers, see {@type Int}, with 0 not corresponding to a user.
+Consumers (i.e. application servers) should treat them as opaque strings.
+
+User Ids are only used in the database and in server protocols.
+The API uses {@type UserName|user names}.
+---
+
+@type Time
+Timestamp.
+With few exceptions, times are specified as minutes-since-epoch (i.e. Unix-time divided by 60).
+Better precision is rarely required, and this allows easy year-2038 safety.
+---
+
+@type UserProfile
+A user's profile, public version, as a {@type Hash}.
+@key email:Str            (only if permitted, or for own profile)
+@key infobirthday:Str
+@key infocountry:Str
+@key infoemailflag:Int    (only for own profile)
+@key infooccupation:Str
+@key inforealnameflag:Int (only for own profile)
+@key infotown:Str
+@key rank:Int
+@key rankpoints:Int
+@key realname:Str         (only if permitted, or for own profile)
+@key result:Int           (success indicator, 1)
+@key screenname:Str
+@key turnreliability:Int
+@key turnsmissed:Int
+@key turnsplayed:Int
+See {user:$UID:profile}.
+---
+
+@type UserName
+A user name, given as a {@type Str|string}.
+Valid user names consists of lower-case letters and underscores.
+
+The public APIs never expose {@type UID|user Ids}.
+Users are always referenced by name, which is translated by the API.
+---
+
+############################## Config ################################
+
+@q WWW.Key:Str (Config)
+Secret key for generating various cookies.
+
+Originally, all cookies and tokens were signed with this secret.
+As of 20190420, only legacy login cookies and mail confirmation tokens are signed this way.
+Log-in cookies and password recovery tokens are managed using {MAKETOKEN}.
+---
+@q WWW.URL:Str (Config)
+Website base URL.
+---
+@q Redis.Host:Str (Config)
+Listen address for the Redis ({@group Database}) service.
+---
+@q Redis.Port:Int (Config)
+Port number for the Redis ({@group Database}) service.
+---
+@q WWW.MessageHTML:Str (Config)
+A message to be shown as a notification on every page.
+For critical information ("hosting currently suspended").
+---
+@q WWW.Class:Str (Config)
+Additional CSS class to be added to each page's &lt;body&gt; tag.
+For seasonal events.
+---
+
+
+############################# Versions ###############################
+(to make them referencable)
+
+@version PCC2 1.99.18
+----
+@version PCC2 1.99.19
+----
+@version PCC2 1.99.21
+----
+@version PCC2 2.40.3
+----
+@version PCC2 2.40.4
+----
+@version PCC2 2.40.5
+----
+@version PCC2 2.40.6
+----

@@ -29,6 +29,10 @@ ui::widgets::TransparentWindow::draw(gfx::Canvas& can)
     defaultDrawChildren(can);
 }
 
+void
+ui::widgets::TransparentWindow::handleStateChange(State /*st*/, bool /*enable*/)
+{ }
+
 gfx::Rectangle
 ui::widgets::TransparentWindow::transformSize(gfx::Rectangle size, Transformation kind) const
 {

@@ -41,13 +41,13 @@ game::map::ShipTransporter::getName(afl::string::Translator& tx) const
         if (m_targetId == 0) {
             return _("Jettison");
         } else if (const Planet* p = m_universe.planets().get(m_targetId)) {
-            return p->getName(Object::PlainName, tx, m_interface);
+            return p->getName(PlainName, tx, m_interface);
         } else {
             return afl::string::Format(_("Planet %d").c_str(), m_targetId);
         }
     } else {
         if (const Ship* s = m_universe.ships().get(m_targetId)) {
-            return s->getName(Object::PlainName, tx, m_interface);
+            return s->getName(PlainName, tx, m_interface);
         } else {
             return afl::string::Format(_("Ship %d").c_str(), m_targetId);
         }

@@ -23,13 +23,13 @@ ui::LayoutableGroup::LayoutableGroup(ui::layout::Manager& mgr)
       m_manager(mgr)
 { }
 
-void
-ui::LayoutableGroup::handleStateChange(State st, bool enable)
-{
-    // FIXME: what to do?
-    (void) st;
-    (void) enable;
-}
+// void
+// ui::LayoutableGroup::handleStateChange(State st, bool enable)
+// {
+//     // FIXME: what to do?
+//     (void) st;
+//     (void) enable;
+// }
 
 void
 ui::LayoutableGroup::requestChildRedraw(Widget& /*child*/, const gfx::Rectangle& area)

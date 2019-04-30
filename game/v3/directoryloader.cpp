@@ -180,7 +180,7 @@ game::v3::DirectoryLoader::loadCurrentTurn(Turn& turn, Game& game, int player, R
     ldr.loadCommonFiles(root.gameDirectory(), *m_specificationDirectory, turn.universe(), player);
 
     // load database
-    loadCurrentDatabases(turn, game, player, root, session, *m_charset);
+    loadCurrentDatabases(turn, game, player, root, session);
 
     // ex game/load.h:loadDirectory
     m_log.write(m_log.Info, LOG_NAME, Format(m_translator.translateString("Loading %s data...").c_str(), root.playerList().getPlayerName(player, Player::AdjectiveName)));
@@ -333,7 +333,7 @@ game::v3::DirectoryLoader::saveCurrentTurn(Turn& turn, Game& /*game*/, int playe
     FizzFile fizz;
     ControlFile control;
     fizz.load(dir);
-    control.load(dir, player);
+    control.load(dir, player, m_translator, m_log);
     if (!fizz.isValid()) {
         m_log.write(m_log.Warn, LOG_NAME, m_translator.translateString("File \"fizz.bin\" not found. Game data may not be usable with other programs."));
     }
@@ -413,7 +413,7 @@ game::v3::DirectoryLoader::saveCurrentTurn(Turn& turn, Game& /*game*/, int playe
         ->fullWrite(afl::base::fromObject(genData));
 
     updateGameRegistry(dir, turn.getTimestamp());
-    control.save(dir);
+    control.save(dir, m_translator, m_log);
     fizz.save(dir);
 }
 

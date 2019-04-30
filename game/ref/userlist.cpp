@@ -57,7 +57,7 @@ game::ref::UserList::add(const List& list, Session& session, const SortPredicate
         // Actual item
         // - name
         String_t name;
-        if (!session.getReferenceName(r, name)) {
+        if (!session.getReferenceName(r, DetailedName, name)) {
             name = r.toString(session.translator());
         }
 

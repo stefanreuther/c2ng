@@ -7,6 +7,7 @@
 
 #include "server/interface/hostcron.hpp"
 #include "afl/base/deletable.hpp"
+#include "server/types.hpp"
 
 namespace server { namespace host {
 
@@ -36,6 +37,10 @@ namespace server { namespace host {
             Called when the game changed in a way that may need recomputation of the next action.
             \param gameId Game Id */
         virtual void handleGameChange(int32_t gameId) = 0;
+
+        /** Suspend scheduler.
+            \param absTime Absolute time */
+        virtual void suspendScheduler(Time_t absTime) = 0;
     };
 
 } }

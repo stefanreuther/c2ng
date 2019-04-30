@@ -10,6 +10,7 @@
 class TestServerHostCommandHandler : public CxxTest::TestSuite {
  public:
     void testIt();
+    void testHelp();
 };
 
 class TestServerHostConfiguration : public CxxTest::TestSuite {
@@ -59,6 +60,8 @@ class TestServerHostCronImpl : public CxxTest::TestSuite {
     void testRunningExpireDate();
     void testRunningExpireUpdate();
     void testRunningChangeProtection();
+    void testSuspend();
+    void testSuspendStartup();
 };
 
 class TestServerHostExporter : public CxxTest::TestSuite {
@@ -161,6 +164,7 @@ class TestServerHostHostPlayer : public CxxTest::TestSuite {
     void testDirectoryMove();
     void testCheckFile();
     void testGameState();
+    void testGetSet();
 };
 
 class TestServerHostHostSchedule : public CxxTest::TestSuite {

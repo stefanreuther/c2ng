@@ -514,6 +514,10 @@ namespace server { namespace host {
             \return field */
         afl::net::redis::IntegerField numMissedTurnsForKick();
 
+        /** Access history.
+            \return string list */
+        afl::net::redis::StringListKey history();
+
      private:
         afl::net::redis::Subtree m_game;
         const int32_t m_gameId;

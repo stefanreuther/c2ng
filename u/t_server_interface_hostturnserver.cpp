@@ -58,6 +58,9 @@ TestServerInterfaceHostTurnServer::testIt()
         r.slot = 7;
         r.previousState = 2;
         r.userId = "u";
+        r.turnNumber = 82;
+        r.gameName = "Battle";
+        r.allowTemp = true;
         mock.expectCall("submit(foo,-1,-1,-,-)");
         mock.provideReturnValue(r);
 
@@ -69,6 +72,9 @@ TestServerInterfaceHostTurnServer::testIt()
         TS_ASSERT_EQUALS(a("slot").toInteger(), 7);
         TS_ASSERT_EQUALS(a("previous").toInteger(), 2);
         TS_ASSERT_EQUALS(a("user").toString(), "u");
+        TS_ASSERT_EQUALS(a("name").toString(), "Battle");
+        TS_ASSERT_EQUALS(a("turn").toInteger(), 82);
+        TS_ASSERT_EQUALS(a("allowtemp").toInteger(), 1);
     }
     {
         mock.expectCall("submit(bar,231,-1,x@y.z,-)");
@@ -140,6 +146,9 @@ TestServerInterfaceHostTurnServer::testRoundtrip()
         in.slot = 7;
         in.previousState = 2;
         in.userId = "u";
+        in.turnNumber = 72;
+        in.gameName = "Party";
+        in.allowTemp = true;
         mock.expectCall("submit(foo,-1,-1,-,-)");
         mock.provideReturnValue(in);
 
@@ -150,6 +159,9 @@ TestServerInterfaceHostTurnServer::testRoundtrip()
         TS_ASSERT_EQUALS(out.slot, 7);
         TS_ASSERT_EQUALS(out.previousState, 2);
         TS_ASSERT_EQUALS(out.userId, "u");
+        TS_ASSERT_EQUALS(out.turnNumber, 72);
+        TS_ASSERT_EQUALS(out.gameName, "Party");
+        TS_ASSERT_EQUALS(out.allowTemp, true);
     }
     {
         mock.expectCall("submit(bar,231,-1,x@y.z,-)");

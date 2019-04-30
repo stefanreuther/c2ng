@@ -100,7 +100,7 @@ namespace game { namespace map {
         void        combinedCheck2(const Universe& univ, PlayerSet_t availablePlayers, int turnNumber);
 
         // MapObject interface:
-        virtual String_t getName(Name which, afl::string::Translator& tx, InterpreterInterface& iface) const;
+        virtual String_t getName(ObjectName which, afl::string::Translator& tx, InterpreterInterface& iface) const;
         virtual Id_t getId() const;
         virtual bool getOwner(int& result) const;
         virtual bool getPosition(Point& result) const;

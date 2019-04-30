@@ -66,6 +66,7 @@ game::Reference::toString(afl::string::Translator& tx) const
     const char* fmt = "";
     switch (m_type) {
      case Null:                                       break;
+     case Special:      /* do not name it! */         break;
      case Player:       fmt = N_("Player #%d");       break;
      case MapLocation:  fmt = N_("(%d,%d)");          break;
      case Ship:         fmt = N_("Ship #%d");         break;

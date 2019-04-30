@@ -1,0 +1,167 @@
+##
+##  c2file
+##
+
+
+@q File (Service), HostFile (Service)
+@noproto
+There are two instances of the "File" service.
+
+- The "file" instances manages user files, mainly users' games for online play.
+- The "hostfile" instance manages host files, mainly host directories,
+  specification files, incoming turn files and outgoing result files.
+
+The File services are accessible using
+- "file" and "hostfile" contexts on the console
+- {@group File Command} (a {pcc:resp|RESP service})
+- {@group File API} (a {pcc:api|web API})
+
+<h2>Domain Model</h2>
+
+A file service offers a hierarchical list of <b>files</b>, grouped in <b>directories</b>.
+Files and directories are specified by a {@type FileName}.
+
+Files have no additional metadata.
+
+Directories can have some metadata:
+- owner
+- {@type FilePermissions|file permissions}
+- additional metadata in the form of textual key/value pairs.
+
+The File service knows about VGAP file formats in that it can parse some files.
+In particular, it can find and list directories containing game data.
+
+<h2>Storage</h2>
+
+The file services store their files in the file system.
+They do not access the database.
+Metadata is stored in a dotfile inside a directory.
+
+As of c2ng, the file service supports three modes of operation:
+- 1:1 mapping to file system (classic).
+  This allows concurrent access to the files by additional programs.
+- content-addressable storage.
+  This stores files in a bare git repository.
+  The advantages are automatic de-duplication and compression.
+  PlanetsCentral's data is highly repetetive (e.g. each result file appears in the host's data,
+  pre-turn backup, post-turn backup, player's data), so this allows large space savings,
+  and allows us to serve backups to users.
+  The disadvantage is that it does no longer allow concurrent access by other programs.
+  We implement only parts of the git storage, so git can read it but should better not write it.
+- in-memory storage. This is mainly used for testing.
+
+The "hostfile" instance is now only accessed by the {Host (Service)|Host service},
+the web interface uses appropriate commands to have Host map the path names and perform access checking.
+
+Important data types:
+- {@type FileName} (file name)
+- {@type UID} (user Id, not interpreted by the filer)
+
+@uses File.Host, HostFile.Host
+@uses File.Port, HostFile.Port
+@uses File.BaseDir, HostFile.BaseDir
+@uses File.SizeLimit, HostFile.SizeLimit
+@uses File.Threads, HostFile.Threads
+---
+
+
+@group File Command
+This {pcc:resp|RESP} interface is the interface to the {File (Service)|File} and {HostFile (Service)|HostFile} services.
+File commands can also be accessed through the {@group File API}.
+---
+@group File API
+The "file" {pcc:api|API endpoint} accesses users' files.
+It uses {@group File Command|file commands} from the "file" instance.
+---
+
+
+
+
+############################### Types ################################
+
+@type FileStat
+File information.
+@key type:FileType             (type of file)
+@key visibility:FileVisibility (directories: visibility indicator)
+@key size:Int                  (files: size in bytes)
+See also {@type FileInfo}.
+---
+@type FileRegInfo
+Registration information.
+@key path:FileName  (directory name)
+@key file:FileName  (registration key file name)
+@key reg:Int        (0=unregistered, 1=registered)
+@key key1:Str       (registration key first line)
+@key key2:Str       (registration key second line)
+---
+@type FileGameInfo
+Game information
+@key path:Str         (game directory name)
+@key name:Str         (game name**)
+@key game:GID         (game ID**)
+@key finished:Int     (0=running, 1=finished**)
+@key hosttime:Int     (next host time**)
+@key races:StrHash    (maps race numbers to race names for all played races)
+@key missing:StrList  (names of missing/not uploaded game files)
+@key conflict:IntList (list of races that have conflicting data)
+
+** These are actually directory properties provided by the Host service (see {PROPSET}).
+Therefore, the "unset" value is an empty string, not 0.
+---
+@type FileInfo
+File Information.
+@key name:Str                  (file name, not including the directory name)
+@key type:FileType             (type of file)
+@key visibility:FileVisibility (directories: visibility indicator)
+@key size:Int                  (files: size in bytes)
+@key url:Str                   (files: download address)
+See also {@type FileStat}.
+---
+@type FileType
+The file type is given as {@type Str|string}. It can be
+- "file" (regular file)
+- "dir" (subdirectory)
+- "unknown" (anything else; currently not possible)
+
+For files, a download address is provided.
+This will be a full path name not including the server name.
+@used
+---
+@type FileName
+Name of a file or directory (depending on context) given as a {@type Str|string}.
+Valid characters are alphanumerics, "-", "_", and ".".
+File names are case-insensitive; the canonical representation is lower-case.
+Name components are separated by "/" and must not start with ".".
+
+<h2>User Filer</h2>
+
+- user file names start with <tt>u/</tt> followed by a user name,
+  followed by the user's file structure,
+  for example, <tt>u/tester/games/42/chart9.cc</tt>
+- server registration keys are under <tt>r/</tt>
+- demo games are under <tt>d/</tt> (not accessible via API)
+
+<h2>Host Filer</h2>
+
+- <tt>games/$GID</tt> contains the games
+- <tt>tools/$TOOLNAME</tt> contains tools (host, master, addons)
+- <tt>shiplist/$SHIPLIST</tt> contains shiplists
+- <tt>bin</tt> contains scripts
+---
+@type FileVisibility
+Visibility of a directory, integer.
+- 0: only the owner of the directory can access it
+- 1: some permissions have been granted
+- 2: world permissions have been granted
+See also: {@type FilePermissions}
+@used
+---
+@type FilePermissions
+Permissions for a directory, specified as a {@type Str|string}.
+Each character specifies one permission:
+- "r": read (user can read existing files)
+- "w": write (user can modify existing files or create new ones)
+- "l": list (user can list the content of this directory)
+- "a": access control (user can grant new permissions)
+See also: {@type FileVisibility}
+---

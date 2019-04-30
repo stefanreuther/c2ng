@@ -131,7 +131,9 @@ namespace interpreter {
             miSpecialNewHash,           ///< Make blank hash.
             miSpecialInstance,          ///< Make new struct instance.
             miSpecialResizeArray,       ///< Resize array, given dimensions. arg is number of dimensions, which are on stack.
-            miSpecialBind               ///< Bind arguments to make a closure. arg is number of arguments.
+            miSpecialBind,              ///< Bind arguments to make a closure. arg is number of arguments.
+            miSpecialFirst,             ///< Iterate over TOS, just produce context value.
+            miSpecialNext               ///< Advance TOS, produce boolean.
         };
 
         /** Get template for disassembling this opcode.
@@ -195,6 +197,16 @@ namespace interpreter {
             For fused instructions, returns the original opcode.
             \return external opcode */
         uint8_t getExternalMajor() const;
+
+        /** Compare for equality.
+            \param other Other opcode
+            \return true if opcodes are identical */
+        bool operator==(const Opcode& other) const;
+
+        /** Compare for inequality.
+            \param other Other opcode
+            \return true if opcodes are different */
+        bool operator!=(const Opcode& other) const;
     };
 
 }
@@ -260,6 +272,20 @@ inline bool
 interpreter::Opcode::isLabel() const
 {
     return major == maJump && (minor & ~jSymbolic) == 0;
+}
+
+// Compare for equality.
+inline bool
+interpreter::Opcode::operator==(const Opcode& other) const
+{
+    return major == other.major && minor == other.minor && arg == other.arg;
+}
+
+// Compare for inequality.
+inline bool
+interpreter::Opcode::operator!=(const Opcode& other) const
+{
+    return !operator==(other);
 }
 
 #endif

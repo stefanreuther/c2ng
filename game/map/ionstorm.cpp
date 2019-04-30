@@ -24,7 +24,7 @@ game::map::IonStorm::~IonStorm()
 
 // Object:
 String_t
-game::map::IonStorm::getName(Name which, afl::string::Translator& tx, InterpreterInterface& /*iface*/) const
+game::map::IonStorm::getName(ObjectName which, afl::string::Translator& tx, InterpreterInterface& /*iface*/) const
 {
     // ex GIonStorm::getName
     if (m_name.empty()) {

@@ -1,5 +1,6 @@
 /**
   *  \file game/battleorderrule.cpp
+  *  \brief Class game::BattleOrderRule
   */
 
 #include "game/battleorderrule.hpp"
@@ -43,10 +44,12 @@ game::BattleOrderRule::get(const game::map::Ship& sh) const
         || (sh.getNumBays().get(numBays) && numBays > 0);
 
     // Enemy
-    int enemy;
-    bool hasEnemy = (sh.getPrimaryEnemy().get(enemy) && enemy != 0);
+    bool hasEnemy = (sh.getPrimaryEnemy().orElse(0) != 0);
 
-    return getShipBattleOrder(friendlyCode, hasWeapons, hasEnemy, hasKillMission);
+    // Fuel
+    bool hasFuel = (sh.getCargo(Element::Neutronium).orElse(0)) != 0;
+
+    return getShipBattleOrder(friendlyCode, hasWeapons, hasEnemy, hasKillMission, hasFuel);
 }
 
 int
@@ -90,8 +93,9 @@ game::BattleOrderRule::get(const game::sim::Ship& sh) const
     int agg = sh.getAggressiveness();
     bool hasEnemy = (agg == sh.agg_Kill || (agg > sh.agg_Passive && agg < sh.agg_NoFuel));
     bool hasKillMission = (agg == sh.agg_Kill);
+    bool hasFuel = (agg != sh.agg_NoFuel);
 
-    return getShipBattleOrder(sh.getFriendlyCode(), hasWeapons, hasEnemy, hasKillMission);
+    return getShipBattleOrder(sh.getFriendlyCode(), hasWeapons, hasEnemy, hasKillMission, hasFuel);
 }
 
 int
@@ -105,7 +109,8 @@ int
 game::BattleOrderRule::getShipBattleOrder(const String_t& friendlyCode,
                                           bool hasWeapons,
                                           bool hasEnemy,
-                                          bool hasKillMission) const
+                                          bool hasKillMission,
+                                          bool hasFuel) const
 {
     // ex game/objl-sort.cc:sortByBattleOrder (part)
     int value = game::spec::FriendlyCodeList::getNumericValue(friendlyCode, m_host);
@@ -123,6 +128,9 @@ game::BattleOrderRule::getShipBattleOrder(const String_t& friendlyCode,
             }
         }
     } else {
+        if (!hasFuel) {
+            value = 1000;
+        }
         if (value == 1000) {
             if (!hasKillMission) {
                 value += 10;
@@ -148,7 +156,7 @@ game::BattleOrderRule::getPlanetBattleOrder(const String_t& friendlyCode, bool h
     if (friendlyCode == "ATT" || friendlyCode == "NUK") {
         value = 0;
     } else {
-        int value = game::spec::FriendlyCodeList::getNumericValue(friendlyCode, m_host);
+        value = game::spec::FriendlyCodeList::getNumericValue(friendlyCode, m_host);
         if (value == 1000) {
             if (hasDefense) {
                 value = 1001;

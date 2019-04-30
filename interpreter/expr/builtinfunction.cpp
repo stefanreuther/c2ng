@@ -13,6 +13,7 @@
 #include "interpreter/error.hpp"
 #include "afl/data/stringvalue.hpp"
 #include "interpreter/expr/identifiernode.hpp"
+#include "interpreter/expr/literalnode.hpp"
 
 using interpreter::expr::FunctionCallNode;
 using interpreter::CompilationContext;
@@ -270,7 +271,7 @@ IntCaseFunctionNode::compileValue(BytecodeObject& bco, const CompilationContext&
         args[1]->compileValue(bco, cc);
     }
     bco.addInstruction(Opcode::maBinary,
-                       cc.hasFlag(CompilationContext::CaseBlind) ? minor+1 : minor,
+                       cc.hasFlag(CompilationContext::CaseBlind) ? uint8_t(minor+1) : minor,
                        0);
 }
 
@@ -382,8 +383,15 @@ IntFindFunctionCallNode::compileValue(BytecodeObject& bco, const CompilationCont
     bco.addPushLiteral(0);
     bco.addJump(Opcode::jAlways, end);
     bco.addLabel(ift);
-    compileFCValue(bco, ncc, which, args);
-    bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialEndIndex, 0);
+    if (which == FC_Generic && dynamic_cast<interpreter::expr::LiteralNode*>(args[2]) != 0) {
+        // Find(whatever, const): generate the constant after the endindex command, so it can merge with a possible following operation
+        bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialEndIndex, 0);
+        args[2]->compileValue(bco, cc);
+    } else {
+        // Standard mode
+        compileFCValue(bco, ncc, which, args);
+        bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialEndIndex, 0);
+    }
     bco.addLabel(end);
 }
 
@@ -494,8 +502,36 @@ IntKeyFunctionCallNode::compileValue(BytecodeObject& bco, const CompilationConte
 void
 IntEvalFunctionCallNode::compileValue(BytecodeObject& bco, const CompilationContext& cc)
 {
-    args[0]->compileValue(bco, cc);
-    bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialEvalExpr, 0);
+    if (args.size() == 1) {
+        // Eval(x):
+        //   <x>
+        //   sevalx
+        args[0]->compileValue(bco, cc);
+        bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialEvalExpr, 0);
+    } else {
+        // Eval(x, obj):
+        //   <obj>
+        //   je null
+        //   <x>
+        //   swap 1F
+        //   swith <obj>
+        //   sevalx
+        //   sendwith
+        // 1:
+        BytecodeObject::Label_t skip = bco.makeLabel();
+        args[1]->compileValue(bco, cc);
+        bco.addJump(Opcode::jIfEmpty, skip);
+
+        CompilationContext ncc = cc;
+        ncc.withoutFlag(CompilationContext::LocalContext);
+        args[0]->compileValue(bco, cc);
+
+        bco.addInstruction(Opcode::maStack, Opcode::miStackSwap, 1);
+        bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialWith, 0);
+        bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialEvalExpr, 0);
+        bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialEndWith, 0);
+        bco.addLabel(skip);
+    }
 }
 
 // void
@@ -754,15 +790,18 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
        @see IsArray (Elementary Function), Dim (Elementary Command) */
     { "DIM",         1, 2,       makeOneTwo,  interpreter::biArrayDim },
 
-    /* @q Eval(s:Str):Any (Elementary Function)
+    /* @q Eval(s:Str, Optional c:Obj):Any (Elementary Function)
        Evaluate an expression given as string.
        For example, <tt>Eval("2+2")</tt> returns 4.
 
-       If the parameter is EMPTY, returns EMPTY.
+       If the second parameter is specified, the expression is evaluated in that context.
+
+       If any parameter is EMPTY, returns EMPTY.
        
        @since PCC2 1.99.9
+       @change The two-argument form is supported since PCC2 2.40.6.
        @see Eval (Elementary Command) */
-    { "EVAL",        1, 1,       makeEval,    0 },
+    { "EVAL",        1, 2,       makeEval,    0 },
 
     /* @q Exp(n:Num):Num (Elementary Function)
        Exponential function.

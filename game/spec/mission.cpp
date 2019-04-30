@@ -3,9 +3,12 @@
   */
 
 #include "game/spec/mission.hpp"
-#include "game/playerset.hpp"
-#include "game/limits.hpp"
 #include "afl/string/char.hpp"
+#include "game/hostversion.hpp"
+#include "game/limits.hpp"
+#include "game/map/ship.hpp"
+#include "game/playerset.hpp"
+#include "game/registrationkey.hpp"
 #include "util/string.hpp"
 
 namespace {
@@ -298,6 +301,61 @@ game::spec::Mission::setSetCommand(String_t cmd)
 {
     // ex GMission::setSetCommand
     cmd_onset = cmd;
+}
+
+// /** True iff mission (might) work on the specified ship. Actually,
+//     this should return true if we want the user to be able to set the
+//     mission on the specified ship. */
+bool
+game::spec::Mission::worksOn(const game::map::Ship& ship, const game::config::HostConfiguration& config, const HostVersion& host, const RegistrationKey& key) const
+{
+    // ex GMission::worksOn
+    // Ship owner needs to be known and valid.
+    const int shipOwner = ship.getRealOwner().orElse(0);
+    if (shipOwner == 0) {
+        return false;
+    }
+    
+    // Don't allow mission 1 for SRace
+    if (!host.isMissionAllowed(m_number)) {
+        return false;
+    }
+
+    // Check race mask
+    if (!m_raceMask.contains(config.getPlayerMissionNumber(shipOwner))) {
+        return false;
+    }
+
+    // Check registration status
+    if (m_flags.contains(RegisteredMission) && key.getStatus() == RegistrationKey::Unregistered) {
+        return false;
+    }
+
+    // Check waypoint permission
+    if (m_flags.contains(WaypointMission) && ship.isFleetMember()) {
+        return false;
+    }
+
+    // FIXME/@change: we do not check the expression condition
+    // // Check mission.cc condition
+    // IntBCORef bco = compileExpression(exp_condition, IntCompilationContext());
+    // if (bco) {
+    //     // Run it
+    //     IntExecutionContext exec("Temporary: Mission");
+    //     exec.pushNewContext(new IntShipContext(ship.getId()));
+    //     exec.pushNewFrame(new IntExecutionFrame(bco));
+    //     if (runTemporaryProcess(exec)) {
+    //         // Evaluated successfully
+    //         if (getBoolValue(exec.getResult()) <= 0) {
+    //             return false;
+    //         }
+    //     } else {
+    //         // Mission is not permitted if expression fails (same as in PCC 1.x)
+    //         return false;
+    //     }
+    // }
+
+    return true;
 }
 
 /** Parse mission.cc description line.

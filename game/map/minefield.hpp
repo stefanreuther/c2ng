@@ -10,6 +10,8 @@
 
 namespace game { namespace map {
 
+    class Universe;
+
     class Minefield : public CircularObject {
      public:
         enum TypeReport {
@@ -33,10 +35,12 @@ namespace game { namespace map {
 
         // Constructor and Destructor:
         Minefield(Id_t id);
+        Minefield(const Minefield& other);
+        Minefield(Id_t id, Point center, int owner, bool isWeb, int32_t units);
         virtual ~Minefield();
 
         // Object:
-        virtual String_t getName(Name which, afl::string::Translator& tx, InterpreterInterface& iface) const;
+        virtual String_t getName(ObjectName which, afl::string::Translator& tx, InterpreterInterface& iface) const;
         virtual Id_t getId() const;
         virtual bool getOwner(int& result) const;
 
@@ -51,6 +55,8 @@ namespace game { namespace map {
         void addReport(Point pos, int owner, TypeReport type, SizeReport size, int32_t sizeValue, int turn, ReasonReport reason);
         void internalCheck(int currentTurn, const game::HostVersion& host, const game::config::HostConfiguration& config);
         void erase();
+
+        void setUnits(int32_t units);
 
         // Minefield inquiry methods:
         bool isValid() const;
@@ -81,6 +87,7 @@ namespace game { namespace map {
         int32_t m_previousUnits;
 
         // cached current (current turn)
+        int m_currentTurn;
         int m_currentRadius;
         int32_t m_currentUnits;
     };

@@ -78,6 +78,7 @@ void
 ui::rich::DocumentView::setTopY(int topY)
 {
     // ex UIRichDocument::scrollTo
+    // FIXME: replace by setPageTop()
     int maxY = doc.getDocumentHeight() - getExtent().getHeight();
     if (topY > maxY) {
         topY = maxY;
@@ -94,6 +95,7 @@ ui::rich::DocumentView::setTopY(int topY)
         if (hover_link != Document::nil && !doc.isLinkVisible(hover_link, gfx::Rectangle(0, topY, getExtent().getWidth(), getExtent().getHeight()))) {
             setHoverLink(Document::nil);
         }
+        sig_change.raise();
         requestRedraw();
     }
 }
@@ -134,6 +136,31 @@ int
 ui::rich::DocumentView::getTotalSize()
 {
     return doc.getDocumentHeight();
+}
+
+void
+ui::rich::DocumentView::setPageTop(int top)
+{
+    setTopY(top);
+}
+
+void
+ui::rich::DocumentView::scroll(Operation op)
+{
+    switch (op) {
+     case LineUp:
+        addTopY(-m_provider.getFont(gfx::FontRequest())->getLineHeight());
+        break;
+     case LineDown:
+        addTopY(+m_provider.getFont(gfx::FontRequest())->getLineHeight());
+        break;
+     case PageUp:
+        addTopY(-getExtent().getHeight());
+        break;
+     case PageDown:
+        addTopY(+getExtent().getHeight());
+        break;
+    }
 }
 
 void
@@ -220,18 +247,18 @@ ui::rich::DocumentView::handleKey(util::Key_t key, int /*prefix*/)
         switch (key) {
          case util::Key_Up:
          case util::Key_WheelUp:
-            addTopY(-m_provider.getFont(gfx::FontRequest())->getLineHeight());
+            scroll(LineUp);
             return true;
          case util::Key_Down:
          case util::Key_WheelDown:
-            addTopY(+m_provider.getFont(gfx::FontRequest())->getLineHeight());
+            scroll(LineDown);
             return true;
          case util::Key_PgUp:
-            addTopY(-getExtent().getHeight());
+            scroll(PageUp);
             return true;
          case util::Key_PgDn:
          case ' ':
-            addTopY(+getExtent().getHeight());
+            scroll(PageDown);
             return true;
          case util::Key_PgUp + util::KeyMod_Ctrl:
          case util::Key_Home + util::KeyMod_Ctrl:

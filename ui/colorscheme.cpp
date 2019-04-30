@@ -160,10 +160,11 @@ const gfx::ColorQuad_t ui::STANDARD_COLORS[] = {
     COLORQUAD_FROM_RGB( 93,  93,   0),    // 149
     COLORQUAD_FROM_RGB(109, 109,   0),    // 150
     COLORQUAD_FROM_RGB(125, 125,   0),    // 151
-    COLORQUAD_FROM_RGB(  0,   0,   0),    // 152
-    COLORQUAD_FROM_RGB(  0,   0,   0),    // 153
-    COLORQUAD_FROM_RGB(  0,   0,   0),    // 154
-    COLORQUAD_FROM_RGB(  0,   0,   0),    // 155
+    // Colors starting here new in c2ng:
+    COLORQUAD_FROM_RGB( 24,  32,  40),    // 152
+    COLORQUAD_FROM_RGB( 96, 112, 128),    // 153
+    COLORQUAD_FROM_RGB( 18,  24,  30),    // 154
+    COLORQUAD_FROM_RGB( 72,  84,  96),    // 155
     COLORQUAD_FROM_RGB(  0,   0,   0),    // 156
     COLORQUAD_FROM_RGB(  0,   0,   0),    // 157
     COLORQUAD_FROM_RGB(  0,   0,   0),    // 158

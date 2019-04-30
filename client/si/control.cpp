@@ -6,6 +6,7 @@
 #include "client/si/userside.hpp"
 #include "client/dialogs/consoledialog.hpp"
 #include "afl/string/format.hpp"
+#include "client/si/commandtask.hpp"
 
 using afl::sys::LogListener;
 using afl::string::Format;
@@ -39,42 +40,52 @@ client::si::Control::~Control()
 }
 
 void
-client::si::Control::attachPreparedWait(uint32_t waitId)
-{
-    m_interface.mainLog().write(LogListener::Trace, LOG_NAME, Format("<%p> attachPreparedWait => %d", this, waitId));
-    m_waiting = true;
-    m_interacting = false;
-    m_id = waitId;
-    updateBlocker();
-    m_loop.run();
-}
-
-void
 client::si::Control::executeCommandWait(String_t command, bool verbose, String_t name)
 {
     // replaces int/simple.h:runHook (using command "RunHook ...")
     // replaces int/simple.h:executeStatement (using command "C2$Eval atom, prefix" or similar)
-    std::auto_ptr<ContextProvider> ctxp(createContextProvider());
-    m_waiting = true;
-    m_interacting = false;
-    m_id = m_interface.allocateWaitId();
-    m_interface.mainLog().write(LogListener::Trace, LOG_NAME, Format("<%p> executeCommandWait('%s') => %d", this, name, m_id));
-    m_interface.executeCommandWait(m_id, command, verbose, name, ctxp);
-    updateBlocker();
-    m_loop.run();
+    std::auto_ptr<ContextProvider> ctxp(m_interface.createContextProvider());
+    std::auto_ptr<ScriptTask> t(new CommandTask(command, verbose, name, ctxp));
+    executeTaskInternal(t, Format("executeCommandWait('%s')", name));
 }
 
 void
 client::si::Control::executeKeyCommandWait(String_t keymapName, util::Key_t key, int prefix)
 {
-    std::auto_ptr<ContextProvider> ctxp(createContextProvider());
-    m_waiting = true;
-    m_interacting = false;
-    m_id = m_interface.allocateWaitId();
-    m_interface.mainLog().write(LogListener::Trace, LOG_NAME, Format("<%p> executeKeyCommandWait('%s') => %d", this, util::formatKey(key), m_id));
-    m_interface.executeKeyCommandWait(m_id, keymapName, key, prefix, ctxp);
-    updateBlocker();
-    m_loop.run();
+    class Task : public ScriptTask {
+     public:
+        Task(String_t keymapName, util::Key_t key, int prefix, std::auto_ptr<ContextProvider> ctxp)
+            : m_keymapName(keymapName), m_key(key), m_prefix(prefix), m_contextProvider(ctxp)
+            { }
+        virtual interpreter::Process* execute(uint32_t pgid, game::Session& session, Verbosity& v)
+            {
+                util::KeymapRef_t k = session.world().keymaps().getKeymapByName(m_keymapName);
+                util::Atom_t a = (k != 0 ? k->lookupCommand(m_key) : 0);
+                if (a != 0) {
+                    return CommandTask(afl::string::Format("C2$Eval %d, %d", a, m_prefix),
+                                       false,
+                                       afl::string::Format(session.translator()("Key '%s' in '%s'").c_str(), util::formatKey(m_key), m_keymapName),
+                                       m_contextProvider).execute(pgid, session, v);
+                } else {
+                    return 0;
+                }
+            }
+     private:
+        uint32_t m_id;
+        String_t m_keymapName;
+        util::Key_t m_key;
+        int m_prefix;
+        std::auto_ptr<ContextProvider> m_contextProvider;
+    };
+    std::auto_ptr<ContextProvider> ctxp(m_interface.createContextProvider());
+    std::auto_ptr<ScriptTask> t(new Task(keymapName, key, prefix, ctxp));
+    executeTaskInternal(t, Format("executeKeyCommandWait('%s')", util::formatKey(key)));
+}
+
+void
+client::si::Control::executeTaskWait(std::auto_ptr<ScriptTask> task)
+{
+    executeTaskInternal(task, "executeTask()");
 }
 
 void
@@ -127,6 +138,13 @@ client::si::Control::defaultHandlePopupConsole(UserSide& ui, RequestLink2 link)
 }
 
 void
+client::si::Control::defaultHandleSetViewRequest(UserSide& ui, RequestLink2 link, String_t /*name*/, bool /*withKeymap*/)
+{
+    // Default behaviour for Chart.SetView is to reject it
+    ui.continueProcessWithFailure(link, "Context error");
+}
+
+void
 client::si::Control::updateBlocker()
 {
     bool newState = m_waiting && !m_interacting;
@@ -139,4 +157,16 @@ client::si::Control::updateBlocker()
             m_blocker.replayEvents();
         }
     }
+}
+
+void
+client::si::Control::executeTaskInternal(std::auto_ptr<ScriptTask> task, String_t name)
+{
+    m_waiting = true;
+    m_interacting = false;
+    m_id = m_interface.allocateWaitId();
+    m_interface.mainLog().write(LogListener::Trace, LOG_NAME, Format("<%p> %s => %d", this, name, m_id));
+    m_interface.executeTaskWait(m_id, task);
+    updateBlocker();
+    m_loop.run();
 }

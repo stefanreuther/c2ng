@@ -34,11 +34,11 @@ game::v3::CommandContainer::clear()
 
 // Get command by type and Id.
 const game::v3::Command*
-game::v3::CommandContainer::getCommand(Command::Type typ, Id_t id)
+game::v3::CommandContainer::getCommand(Command::Type typ, Id_t id) const
 {
     // ex GCommandContainer::getCommand
     // FIXME: can this be const?
-    Iterator_t i = findCommand(typ, id);
+    Iterator_t i = const_cast<CommandContainer*>(this)->findCommand(typ, id);
     if (i != cmds.end())
         return *i;
     else

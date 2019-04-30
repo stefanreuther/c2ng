@@ -35,7 +35,7 @@ namespace {
             {
                 afl::data::NameMap::Index_t ix = m_world.globalPropertyNames().getIndexByName(name);
                 if (ix != afl::data::NameMap::nil) {
-                    result = ix;
+                    result = PropertyIndex_t(ix);
                     return this;
                 } else {
                     return 0;

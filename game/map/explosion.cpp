@@ -53,7 +53,7 @@ game::map::Explosion::getPosition(Point& result) const
 
 // Object:
 String_t
-game::map::Explosion::getName(Name /*which*/, afl::string::Translator& tx, InterpreterInterface& /*iface*/) const
+game::map::Explosion::getName(ObjectName /*which*/, afl::string::Translator& tx, InterpreterInterface& /*iface*/) const
 {
     if (!m_shipName.empty()) {
         return afl::string::Format(tx.translateString("Explosion of %s%!d%!0{ (#%1$d)%}").c_str(), m_shipName, m_shipId);

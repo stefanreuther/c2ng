@@ -13,6 +13,7 @@
 #include "game/playerarray.hpp"
 #include "client/proxy/hullspecificationproxy.hpp"
 #include "afl/base/signal.hpp"
+#include "util/numberformatter.hpp"
 
 namespace client { namespace widgets {
 
@@ -23,7 +24,8 @@ namespace client { namespace widgets {
         HullSpecificationSheet(ui::Root& root,
                                bool hasPerTurnCosts,
                                game::PlayerSet_t allPlayers,
-                               const game::PlayerArray<String_t>& playerNames);
+                               const game::PlayerArray<String_t>& playerNames,
+                               util::NumberFormatter fmt);
 
         void setContent(const HullSpecification_t& data);
 
@@ -37,12 +39,12 @@ namespace client { namespace widgets {
         ui::Root& m_root;
 
         bool m_hasPerTurnCosts;
+        util::NumberFormatter m_formatter;
 
         ui::widgets::StaticText* m_pTitle;
         ui::widgets::ImageButton* m_pImage;
         ui::widgets::SimpleTable* m_pTables[3];
         PlayerList* m_pPlayerLists[3];
-        
     };
 
 } }

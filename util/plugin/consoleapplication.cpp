@@ -11,6 +11,9 @@
 #include "util/plugin/manager.hpp"
 #include "util/translation.hpp"
 #include "version.hpp"
+#include "afl/sys/standardcommandlineparser.hpp"
+#include "util/string.hpp"
+#include "afl/base/nullenumerator.hpp"
 
 using afl::string::Format;
 
@@ -24,7 +27,7 @@ namespace {
         virtual afl::base::Ref<afl::io::DirectoryEntry> getDirectoryEntryByName(String_t name)
             { return *new Entry(*this, name); }
         virtual afl::base::Ref<afl::base::Enumerator<afl::base::Ptr<afl::io::DirectoryEntry> > > getDirectoryEntries()
-            { return *new Enum(); }
+            { return *new afl::base::NullEnumerator<afl::base::Ptr<afl::io::DirectoryEntry> >(); }
         virtual afl::base::Ptr<Directory> getParentDirectory()
             { return new NullDirectory(); }
         virtual String_t getDirectoryName()
@@ -32,12 +35,6 @@ namespace {
         virtual String_t getTitle()
             { return String_t(); }
      private:
-        class Enum : public afl::base::Enumerator<afl::base::Ptr<afl::io::DirectoryEntry> > {
-         public:
-            bool getNextElement(afl::base::Ptr<afl::io::DirectoryEntry>&)
-                { return false; }
-        };
-
         class Entry : public afl::io::DirectoryEntry {
          public:
             Entry(afl::base::Ref<afl::io::Directory> parent, String_t name)
@@ -134,24 +131,22 @@ util::plugin::ConsoleApplication::doList(afl::sys::Environment::CommandLine_t& c
     // We do not take arguments
     enum { Default, Long, Short } f = Default;
     bool ordered = false;
-    String_t arg;
-    while (cmdl.getNextElement(arg)) {
-        const char* p = arg.c_str();         // FIXME
-        if (*p == '-') {
-            while (const char ch = *++p) {
-                switch (ch) {
-                 case 'l': f = Long; break;
-                 case 'b': f = Short; break;
-                 case 'o': ordered = true; break;
-                 default:
-                 {
-                     char str[3] = {'-',ch,0};
-                     errorExit(Format(_("Unknown option `%s'").c_str(), str));
-                 }
-                }
-            }
+
+    afl::sys::StandardCommandLineParser parser(cmdl);
+    String_t text;
+    bool option;
+    while (parser.getNext(option, text)) {
+        if (!option) {
+            errorExit(_("This command does not take positional parameters"));
+        }
+        if (text == "l") {
+            f = Long;
+        } else if (text == "b") {
+            f = Short;
+        } else if (text == "o") {
+            ordered = true;
         } else {
-            errorExit(_("too many arguments"));
+            errorExit(Format(_("Unknown option \"-%s\"").c_str(), text));
         }
     }
 
@@ -216,20 +211,24 @@ util::plugin::ConsoleApplication::doAdd(afl::sys::Environment::CommandLine_t& cm
     bool did = false;
     bool err = false;
     bool force = false;
-    String_t option;
-    while (cmdl.getNextElement(option)) {
-        if (option == "-n") {
-            dry = true;
-        } else if (option == "-f") {
-            force = true;
-        } else if (!option.empty() && option[0] == '-') {
-            errorExit(Format(_("Unknown option `%s'").c_str(), option));
+    afl::sys::StandardCommandLineParser parser(cmdl);
+    String_t text;
+    bool option;
+    while (parser.getNext(option, text)) {
+        if (option) {
+            if (text == "n") {
+                dry = true;
+            } else if (text == "-f") {
+                force = true;
+            } else {
+                errorExit(Format(_("Unknown option \"-%s\"").c_str(), text));
+            }
         } else {
             did = true;
             try {
-                Plugin* plug = installer.prepareInstall(option);
+                Plugin* plug = installer.prepareInstall(text);
                 if (!plug) {
-                    errorOutput().writeLine(Format(_("%s: Unknown file type").c_str(), option));
+                    errorOutput().writeLine(Format(_("%s: Unknown file type").c_str(), text));
                     err = true;
                 } else {
                     if (mgr.getPluginById(plug->getId())) {
@@ -279,17 +278,21 @@ util::plugin::ConsoleApplication::doRemove(afl::sys::Environment::CommandLine_t&
     bool did = false;
     bool err = false;
     bool force = false;
-    String_t opt;
-    while (cmdl.getNextElement(opt)) {
-        if (opt == "-n") {
-            dry = true;
-        } else if (opt == "-f") {
-            force = true;
-        } else if (!opt.empty() && opt[0] == '-') {
-            errorExit(Format(_("Unknown option `%s'").c_str(), opt));
+    afl::sys::StandardCommandLineParser parser(cmdl);
+    String_t text;
+    bool option;
+    while (parser.getNext(option, text)) {
+        if (option) {
+            if (text == "n") {
+                dry = true;
+            } else if (text == "f") {
+                force = true;
+            } else {
+                errorExit(Format(_("Unknown option \"-%s\"").c_str(), text));
+            }
         } else {
             did = true;
-            if (Plugin* pPlug = mgr.getPluginById(afl::string::strUCase(opt))) {
+            if (Plugin* pPlug = mgr.getPluginById(afl::string::strUCase(text))) {
                 if (force || checkRemovePlugin(errorOutput(), installer, *pPlug)) {
                     standardOutput().writeLine(Format(_("Removing plugin '%s'...").c_str(), pPlug->getId()));
                     installer.doRemove(pPlug, dry);
@@ -297,7 +300,7 @@ util::plugin::ConsoleApplication::doRemove(afl::sys::Environment::CommandLine_t&
                     err = true;
                 }
             } else {
-                errorOutput().writeLine(Format(_("Plugin '%s' is not known.").c_str(), opt));
+                errorOutput().writeLine(Format(_("Plugin '%s' is not known.").c_str(), text));
                 err = true;
             }
         }
@@ -320,12 +323,16 @@ util::plugin::ConsoleApplication::doTest(afl::sys::Environment::CommandLine_t& c
     bool did = false;
     bool err = false;
     bool verbose = false;
-    String_t p;
-    while (cmdl.getNextElement(p)) {
-        if (p == "-v") {
-            verbose = true;
-        } else if (!p.empty() && p[0] == '-') {
-            errorExit(Format(_("Unknown option `%s'").c_str(), p));
+    afl::sys::StandardCommandLineParser parser(cmdl);
+    String_t text;
+    bool option;
+    while (parser.getNext(option, text)) {
+        if (option) {
+            if (text == "v") {
+                verbose = true;
+            } else {
+                errorExit(Format(_("Unknown option \"-%s\"").c_str(), text));
+            }
         } else {
             // Create plugin manager and installer separately for each item
             Manager mgr(translator(), log());
@@ -333,27 +340,27 @@ util::plugin::ConsoleApplication::doTest(afl::sys::Environment::CommandLine_t& c
             did = true;
 
             try {
-                Plugin* plug = installer.prepareInstall(p);
+                Plugin* plug = installer.prepareInstall(text);
                 if (!plug) {
-                    errorOutput().writeLine(Format(_("%s: Unknown file type").c_str(), p));
+                    errorOutput().writeLine(Format(_("%s: Unknown file type").c_str(), text));
                     err = true;
                 } else {
                     installer.doInstall(false);
                     if (verbose) {
-                        standardOutput().writeLine(Format(_("%s: Plugin '%s' (%s) tested successfully.").c_str(), p, plug->getName(), plug->getId()));
+                        standardOutput().writeLine(Format(_("%s: Plugin '%s' (%s) tested successfully.").c_str(), text, plug->getName(), plug->getId()));
                     }
                 }
             }
             catch (afl::except::FileProblemException& e) {
-                if (p == e.getFileName()) {
-                    errorOutput().writeLine(Format("%s: %s", p, e.what()));
+                if (text == e.getFileName()) {
+                    errorOutput().writeLine(Format("%s: %s", text, e.what()));
                 } else {
-                    errorOutput().writeLine(Format("%s: %s: %s", p, e.getFileName(), e.what()));
+                    errorOutput().writeLine(Format("%s: %s: %s", text, e.getFileName(), e.what()));
                 }
                 err = true;
             }
             catch (std::exception& e) {
-                errorOutput().writeLine(Format("%s: %s", p, e.what()));
+                errorOutput().writeLine(Format("%s: %s", text, e.what()));
                 err = true;
             }
         }
@@ -369,7 +376,7 @@ util::plugin::ConsoleApplication::doTest(afl::sys::Environment::CommandLine_t& c
 void
 util::plugin::ConsoleApplication::doHelp(afl::sys::Environment::CommandLine_t& /*cmdl*/)
 {
-    standardOutput().writeText(Format(_("PCC2 Plugin Manager v%s - (c) 2015-2018 Stefan Reuther\n").c_str(), PCC2_VERSION));
+    standardOutput().writeText(Format(_("PCC2 Plugin Manager v%s - (c) 2015-2019 Stefan Reuther\n").c_str(), PCC2_VERSION));
     standardOutput().writeText(Format(_("\n"
                                         "Usage:\n"
                                         "  %s -h|help\n"
@@ -384,15 +391,15 @@ util::plugin::ConsoleApplication::doHelp(afl::sys::Environment::CommandLine_t& /
                                         "                  Test given plugins\n"
                                         "\n"
                                         "Options:\n"
-                                        " -l               List more details\n"
-                                        " -b               List fewer details\n"
-                                        " -o               List in load order (default: alphabetical)\n"
-                                        " -n               Dry run (don't modify anything, just check)\n"
-                                        " -f               Ignore dependencies/requirements\n"
-                                        " -v               Verbose\n"
-                                        "\n"
+                                        "%s\n"
                                         "Report bugs to <Streu@gmx.de>\n").c_str(),
-                                      environment().getInvocationName()));
+                                      environment().getInvocationName(),
+                                      util::formatOptions(_(" -l\tList more details\n"
+                                                            " -b\tList fewer details\n"
+                                                            " -o\tList in load order (default: alphabetical)\n"
+                                                            " -n\tDry run (don't modify anything, just check)\n"
+                                                            " -f\tIgnore dependencies/requirements\n"
+                                                            " -v\tVerbose\n"))));
     exit(0);
 }
 

@@ -27,7 +27,7 @@ game::formatPlayerSet(PlayerSet_t set, const PlayerList& list, afl::string::Tran
         // one player
         for (int i = 0, n = list.size(); i < n; ++i) {
             if (set == PlayerSet_t(i)) {
-                return afl::string::Format(tx.translateString("player %d").c_str(), i);
+                return afl::string::Format(tx("player %d"), i);
             }
         }
     }
@@ -35,7 +35,7 @@ game::formatPlayerSet(PlayerSet_t set, const PlayerList& list, afl::string::Tran
         // all but one player
         for (int i = 0, n = list.size(); i < n; ++i) {
             if (set == allPlayers - i) {
-                return afl::string::Format(tx.translateString("all but player %d").c_str(), i);
+                return afl::string::Format(tx("all but player %d"), i);
             }
         }
     }
@@ -81,7 +81,7 @@ game::formatPlayerHostSet(PlayerSet_t set, const PlayerList& list, afl::string::
     String_t formattedPlayers = formatPlayerSet(set, list, tx);
     if (hasHost) {
         // formattedPlayers can be "all but player X", so put host in front to make it unambiguous
-        formattedPlayers = afl::string::Format(tx.translateString("host, %s").c_str(), formattedPlayers);
+        formattedPlayers = afl::string::Format(tx("host, %s"), formattedPlayers);
     }
     return formattedPlayers;
 }

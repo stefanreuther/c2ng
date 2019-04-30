@@ -1,0 +1,10 @@
+/*!
+     \namespace server::play
+     \brief c2play-server utility
+
+     This namespace contains the c2play server.
+     This server serves game data for PCC2 Web.
+
+     Entry point:
+     - server::play::ConsoleApplication
+ */

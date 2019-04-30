@@ -144,6 +144,12 @@ server::interface::TalkForumClient::getPosts(int32_t fid, const ListParameters& 
     return m_commandHandler.call(cmd);
 }
 
+int32_t
+server::interface::TalkForumClient::findForum(String_t key)
+{
+    return m_commandHandler.callInt(Segment().pushBackString("FORUMBYNAME").pushBackString(key));
+}
+
 server::interface::TalkForum::Info
 server::interface::TalkForumClient::unpackInfo(const afl::data::Value* value)
 {

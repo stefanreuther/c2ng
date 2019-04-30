@@ -13,10 +13,13 @@
 using afl::io::Stream;
 using afl::io::FileSystem;
 using afl::base::Ptr;
+using afl::sys::LogListener;
 namespace gs = game::v3::structures;
 
 const size_t game::v3::ControlFile::CONTROL_MIN;
 const size_t game::v3::ControlFile::CONTROL_MAX;
+
+const char*const LOG_NAME = "game.v3.control";
 
 // Default constructor.
 game::v3::ControlFile::ControlFile()
@@ -35,7 +38,7 @@ game::v3::ControlFile::clear()
 
 // Load data from directory.
 void
-game::v3::ControlFile::load(afl::io::Directory& dir, int player)
+game::v3::ControlFile::load(afl::io::Directory& dir, int player, afl::string::Translator& tx, afl::sys::LogListener& log)
 {
     // ex game/checksum.h:loadControl
     clear();
@@ -52,7 +55,7 @@ game::v3::ControlFile::load(afl::io::Directory& dir, int player)
             m_fileOwner = player;
         } else {
             // No file.
-            // FIXME: console.write(LOG_INFO, _("No control file (checksums) loaded"));
+            log.write(LogListener::Info, LOG_NAME, tx("No control file (checksums) loaded"));
             m_fileOwner = -1;
         }
     }
@@ -70,12 +73,12 @@ game::v3::ControlFile::load(afl::io::Directory& dir, int player)
 
 // Save data to directory.
 void
-game::v3::ControlFile::save(afl::io::Directory& dir)
+game::v3::ControlFile::save(afl::io::Directory& dir, afl::string::Translator& tx, afl::sys::LogListener& log)
 {
     // ex game/checksum.h:saveControl
     if (m_fileOwner < 0) {
         // We did not load a file, so we do not save one.
-        // FIXME: console.write(LOG_INFO, _("Control file (checksums) will not be created"));
+        log.write(LogListener::Info, LOG_NAME, tx("Control file (checksums) will not be created"));
     } else {
         // Save it
         Ptr<Stream> f = dir.openFileNT(m_fileOwner == 0
@@ -84,7 +87,7 @@ game::v3::ControlFile::save(afl::io::Directory& dir)
                                        FileSystem::Create);
         if (f.get() == 0) {
             // Creating the file failed. This is not fatal for us.
-            // FIXME: console.write(LOG_ERROR, _("Control file (checksums) can't be created"));
+            log.write(LogListener::Error, LOG_NAME, tx("Control file (checksums) can't be created"));
         } else {
             // Figure out size of file. Normally, this is 6002 bytes (which is 1500.5 longs).
             // In case of a Host999 game, write the full maximum.

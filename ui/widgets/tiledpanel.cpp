@@ -45,6 +45,10 @@ ui::widgets::TiledPanel::draw(gfx::Canvas& can)
     defaultDrawChildren(can);
 }
 
+void
+ui::widgets::TiledPanel::handleStateChange(State /*st*/, bool /*enable*/)
+{ }
+
 bool
 ui::widgets::TiledPanel::handleKey(util::Key_t key, int prefix)
 {

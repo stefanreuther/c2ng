@@ -59,6 +59,7 @@ namespace {
         // - convert infinities and overflows to max REAL
         // - convert underflows to 0.0
         // - convert NaNs to EMPTY (!)
+        // If anyone knows how to get rid of the conversion warning (g++ 4.9, glibc 2.19) at this place, go ahead...
         if (isnan(value)) {
             sv.tag   = sv.Tag_Empty;
             sv.value = 0;
@@ -101,7 +102,7 @@ namespace {
                 mant *= 256.0;
                 int32_t bits2 = int32_t(mant);
                 // Build result
-                sv.tag   = exp | (256*bits2);
+                sv.tag   = uint16_t(exp | (256*bits2));
                 sv.value = bits1 | sign;
             }
         }
@@ -122,12 +123,21 @@ interpreter::SaveVisitor::visitString(const String_t& str)
     // ex IntStringValue::store
     afl::base::GrowableBytes_t converted = m_charset.encode(afl::string::toMemory(str));
 
+    // In theory, a script could build a 10G string. We can only save 4G max.
+    // Given that it's unlikely that anyone ever successfully does this, and that PCC1 truncates
+    // to 256 without comment, let's truncate here as well.
+    // To all those guys with your 128G RAM, keep building big strings,
+    // but you won't cause bad file formats to be written :)
+    if (sizeof(size_t) > sizeof(uint32_t)) {
+        converted.trim(0xFFFFFFFF);
+    }
+
     // \change We now always use Long String format.
     // PCC2 would have tried to use Short String format (Tag_String, PCC 1.0.8, January 2001) when saving a chart.cc file.
     // We don't know here whether we're saving a chart.cc file.
     // However, since all versions of PCC2 since 1.0.18 (April 2002) can read Long String format, let's keep the code simple.
     m_out.tag   = TagNode::Tag_LongString;
-    m_out.value = converted.size();
+    m_out.value = uint32_t(converted.size());
     m_aux.handleFullData(converted);
 }
 

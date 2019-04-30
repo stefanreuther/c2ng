@@ -10,6 +10,7 @@
 #include "afl/sys/log.hpp"
 #include "server/common/root.hpp"
 #include "server/mailout/configuration.hpp"
+#include "server/interface/mailqueue.hpp"
 
 namespace server { namespace mailout {
 
@@ -88,6 +89,11 @@ namespace server { namespace mailout {
             \param info    Tracking information to store (free-form text)
             \return true if confirmation was accepted, false if key was invalid */
         bool confirmMail(String_t mail, String_t key, String_t info);
+
+        /** Get user's email status.
+            \param user User Id
+            \return status */
+        server::interface::MailQueue::UserStatus getUserStatus(String_t user);
 
         /** Get current time.
             We store MINUTES since epoch.

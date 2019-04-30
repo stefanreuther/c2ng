@@ -35,6 +35,7 @@
 #include "server/interface/talknntpclient.hpp"
 #include "server/interface/talkpostclient.hpp"
 #include "server/interface/talkrender.hpp"
+#include "server/interface/usermanagementclient.hpp"
 #include "server/nntp/root.hpp"
 #include "server/nntp/session.hpp"
 #include "server/types.hpp"
@@ -45,6 +46,7 @@ using server::interface::TalkNNTP;
 using server::interface::TalkNNTPClient;
 using server::interface::TalkPostClient;
 using server::interface::TalkRender;
+using server::interface::UserManagementClient;
 
 namespace {
     const char*const LOG_NAME = "nntp.command";
@@ -643,7 +645,7 @@ server::nntp::LineHandler::handleAuthinfo(String_t args, afl::net::line::LineSin
         if (m_session.auth_status == Session::NeedPass) {
             m_root.configureReconnect();
             try {
-                m_session.auth_uid = TalkNNTPClient(m_root.talk()).checkUser(m_session.auth_user, eatRest(args));
+                m_session.auth_uid = UserManagementClient(m_root.user()).login(m_session.auth_user, eatRest(args));
                 m_session.auth_status = Session::Authenticated;
                 m_session.m_groupListCache.clear();
                 response.handleLine("281 Authentification accepted");

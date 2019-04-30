@@ -82,6 +82,7 @@ game::v3::RootLoader::load(afl::base::Ref<afl::io::Directory> gameDirectory,
                           m_scanner.getDirectoryHostVersion(),
                           std::auto_ptr<game::RegistrationKey>(key),
                           std::auto_ptr<game::StringVerifier>(new StringVerifier(std::auto_ptr<afl::charset::Charset>(charset.clone()))),
+                          std::auto_ptr<afl::charset::Charset>(charset.clone()),
                           Root::Actions_t(actions));
 
         // Configuration

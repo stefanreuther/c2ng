@@ -34,6 +34,8 @@ TestServerInterfaceTalkForum::testIt()
             { return 0; }
         virtual afl::data::Value* getPosts(int32_t /*fid*/, const ListParameters& /*params*/)
             { return 0; }
+        virtual int32_t findForum(String_t /*key*/)
+            { return 0; }
     };
     Tester t;
 }
@@ -61,6 +63,8 @@ TestServerInterfaceTalkForum::testGetValue()
         virtual afl::data::Value* getStickyThreads(int32_t /*fid*/, const ListParameters& /*params*/)
             { return 0; }
         virtual afl::data::Value* getPosts(int32_t /*fid*/, const ListParameters& /*params*/)
+            { return 0; }
+        virtual int32_t findForum(String_t /*key*/)
             { return 0; }
     };
 

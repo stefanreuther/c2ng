@@ -49,6 +49,7 @@ namespace {
              case TextNode::miParCode: return "code";
              case TextNode::miParCentered: return "centered";
              case TextNode::miParBreak: return "break";
+             case TextNode::miParFragment: return "fragment";
             }
             return "par-?";
          case TextNode::maGroup:

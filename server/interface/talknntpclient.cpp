@@ -16,12 +16,6 @@ server::interface::TalkNNTPClient::TalkNNTPClient(afl::net::CommandHandler& comm
 server::interface::TalkNNTPClient::~TalkNNTPClient()
 { }
 
-String_t
-server::interface::TalkNNTPClient::checkUser(String_t loginName, String_t password)
-{
-    return m_commandHandler.callString(Segment().pushBackString("NNTPUSER").pushBackString(loginName).pushBackString(password));
-}
-
 void
 server::interface::TalkNNTPClient::listNewsgroups(afl::container::PtrVector<Info>& result)
 {

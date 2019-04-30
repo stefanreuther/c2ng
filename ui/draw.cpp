@@ -328,7 +328,8 @@ ui::drawButton(gfx::Context<uint8_t>& ctx,
         int x = ex + ctx.getTextAlign().getY()*(ew-16)/2 + delta + 8;
         int y = ey + ctx.getTextAlign().getY()*eh/2 + delta;
         if (state.contains(ui::Widget::DisabledState)) {
-            ctx.setColor(ui::Color_Black);
+            // @change PCC2/PCC1 used Color_Black
+            ctx.setColor(ui::Color_Grayscale + 7);
         } else {
             ctx.setColor(ui::Color_Shield + 5);
         }

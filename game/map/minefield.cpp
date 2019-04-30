@@ -20,18 +20,49 @@ game::map::Minefield::Minefield(Id_t id)
       m_reason(NoReason),
       m_previousTurn(0),
       m_previousUnits(0),
+      m_currentTurn(0),
       m_currentRadius(0),
       m_currentUnits(0)
 {
     // ex GMinefield::GMinefield
 }
 
+game::map::Minefield::Minefield(const Minefield& other)
+    : m_id(other.m_id),
+      m_position(other.m_position),
+      m_owner(other.m_owner),
+      m_isWeb(other.m_isWeb),
+      m_units(other.m_units),
+      m_turn(other.m_turn),
+      m_reason(other.m_reason),
+      m_previousTurn(other.m_previousTurn),
+      m_previousUnits(other.m_previousUnits),
+      m_currentTurn(other.m_currentTurn),
+      m_currentRadius(other.m_currentRadius),
+      m_currentUnits(other.m_currentUnits)
+{ }
+
+game::map::Minefield::Minefield(Id_t id, Point center, int owner, bool isWeb, int32_t units)
+    : m_id(id),
+      m_position(center),
+      m_owner(owner),
+      m_isWeb(isWeb),
+      m_units(units),
+      m_turn(0),
+      m_reason(MinefieldScanned),
+      m_previousTurn(0),
+      m_previousUnits(units),
+      m_currentTurn(0),
+      m_currentRadius(getRadiusFromUnits(units)),
+      m_currentUnits(units)
+{ }
+
 game::map::Minefield::~Minefield()
 { }
 
 // Object:
 String_t
-game::map::Minefield::getName(Name /*which*/, afl::string::Translator& tx, InterpreterInterface& iface) const
+game::map::Minefield::getName(ObjectName /*which*/, afl::string::Translator& tx, InterpreterInterface& iface) const
 {
     // ex GMinefield::getName
     String_t result;
@@ -205,6 +236,7 @@ game::map::Minefield::internalCheck(int currentTurn, const game::HostVersion& ho
     for (int i = m_turn; i < currentTurn; ++i) {
         u = getUnitsAfterDecay(u, host, config);
     }
+    m_currentTurn = currentTurn;
     m_currentUnits = u;
     m_currentRadius = getRadiusFromUnits(u);
 }
@@ -220,9 +252,27 @@ game::map::Minefield::erase()
     m_reason = NoReason;
     m_previousTurn = 0;
     m_previousUnits = 0;
+    m_currentTurn = 0;
     m_currentRadius = 0;
     m_currentUnits = 0;
     sig_change.raise(getId());
+}
+
+void
+game::map::Minefield::setUnits(int32_t units)
+{
+    if (units != m_currentUnits) {
+        // Update units
+        m_currentUnits = units;
+        m_currentRadius = getRadiusFromUnits(units);
+        m_units = units;
+
+        // Update scan meta-information
+        m_turn = m_currentTurn;
+        m_reason = NoReason;
+
+        sig_change.raise(getId());
+    }
 }
 
 bool
@@ -278,12 +328,12 @@ game::map::Minefield::getUnitsAfterDecay(int32_t origUnits, const game::HostVers
 int32_t
 game::map::Minefield::getUnitsForLaying(const game::HostVersion& host, const game::config::HostConfiguration& config) const
 {
-    // ex GMinefield::getUnitsForLaying
+    // ex GMinefield::getUnitsForLaying, ship.pas:MinefieldUnitsForLaying
     if (host.isMineLayingAfterMineDecay()) {
         return getUnitsAfterDecay(getUnits(), host, config);
     } else {
         return getUnits();
-    } 
+    }
 }
 
 int

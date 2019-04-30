@@ -33,7 +33,7 @@ String_t
 game::map::ShipStorage::getName(afl::string::Translator& tx) const
 {
     // ex GShipTransfer::getName
-    return m_ship.getName(Ship::PlainName, tx, m_interface);
+    return m_ship.getName(PlainName, tx, m_interface);
 }
 
 game::CargoContainer::Flags_t
@@ -89,22 +89,22 @@ game::map::ShipStorage::getMaxAmount(Element::Type type) const
                              : pHull != 0 ? pHull->getMaxCargo()
                              : 0);
         int32_t rest = available
-            - getAmount(Element::Tritanium) - getAmount(Element::Duranium)
-            - getAmount(Element::Molybdenum) - getAmount(Element::Supplies)
-            - getAmount(Element::Colonists);
+            - getEffectiveAmount(Element::Tritanium) - getEffectiveAmount(Element::Duranium)
+            - getEffectiveAmount(Element::Molybdenum) - getEffectiveAmount(Element::Supplies)
+            - getEffectiveAmount(Element::Colonists);
 
         const int numLaunchers = m_ship.getNumLaunchers().orElse(0);
         const int torpType = m_ship.getTorpedoType().orElse(0);
         if (torpType > 0 && numLaunchers > 0) {
-            rest -= getAmount(Element::fromTorpedoType(torpType));
+            rest -= getEffectiveAmount(Element::fromTorpedoType(torpType));
         }
 
         const int numBays = m_ship.getNumBays().orElse(0);
         if (numBays > 0) {
-            rest -= getAmount(Element::Fighters);
+            rest -= getEffectiveAmount(Element::Fighters);
         }
 
-        rest += getAmount(type);
+        rest += getEffectiveAmount(type);
 
         // FIXME: protect against negative?
         return std::min(MAX_CARGO, rest);

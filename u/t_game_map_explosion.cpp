@@ -19,21 +19,21 @@ TestGameMapExplosion::testName()
     // Default
     {
         game::map::Explosion t(0, game::map::Point(1,1));
-        TS_ASSERT_EQUALS(t.getName(t.PlainName, tx, iface), "Explosion");
+        TS_ASSERT_EQUALS(t.getName(game::PlainName, tx, iface), "Explosion");
     }
 
     // Just a ship name
     {
         game::map::Explosion t(0, game::map::Point(1,1));
         t.setShipName("USS Dull");
-        TS_ASSERT_EQUALS(t.getName(t.PlainName, tx, iface), "Explosion of USS Dull");
+        TS_ASSERT_EQUALS(t.getName(game::PlainName, tx, iface), "Explosion of USS Dull");
     }
 
     // Just a ship Id
     {
         game::map::Explosion t(0, game::map::Point(1,1));
         t.setShipId(42);
-        TS_ASSERT_EQUALS(t.getName(t.PlainName, tx, iface), "Explosion of ship #42");
+        TS_ASSERT_EQUALS(t.getName(game::PlainName, tx, iface), "Explosion of ship #42");
     }
 
     // Name and Id
@@ -41,6 +41,6 @@ TestGameMapExplosion::testName()
         game::map::Explosion t(0, game::map::Point(1,1));
         t.setShipName("USS Dull");
         t.setShipId(42);
-        TS_ASSERT_EQUALS(t.getName(t.PlainName, tx, iface), "Explosion of USS Dull (#42)");
+        TS_ASSERT_EQUALS(t.getName(game::PlainName, tx, iface), "Explosion of USS Dull (#42)");
     }
 }

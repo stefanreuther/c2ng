@@ -5,7 +5,6 @@
 
 #include <memory>
 #include "server/talk/root.hpp"
-#include "server/talk/util.hpp"
 #include "server/talk/user.hpp"
 #include "server/types.hpp"
 #include "afl/net/redis/field.hpp"
@@ -156,6 +155,12 @@ server::talk::Root::newsgroupMap()
     return forumRoot().hashKey("newsgroups");
 }
 
+afl::net::redis::HashKey
+server::talk::Root::forumMap()
+{
+    return forumRoot().hashKey("byname");
+}
+
 afl::net::redis::Subtree
 server::talk::Root::emailRoot()
 {
@@ -180,28 +185,6 @@ server::talk::Root::rfcMessageIdRoot()
     return afl::net::redis::Subtree(m_db, RFC_MSGID_ROOT);
 }
 
-
-// /** Map login name to user Id.
-//     \param db Database Client
-//     \param login Login name
-//     \return user Id; empty string if invalid */
-// FIXME: here? Give it an Optional<String_t> or return-bool style interface?
-String_t
-server::talk::Root::getUserIdFromLogin(String_t login)
-{
-    // ex User::getUserIdFromLogin
-    String_t simplifiedLogin = simplifyUserName(login);
-    if (simplifiedLogin.empty()) {
-        // Name consists of illegal characters only
-        return String_t();
-    }
-    String_t userId = afl::net::redis::Subtree(m_db, "uid:").stringKey(simplifiedLogin).get();
-    if (userId.find_first_not_of("0") == String_t::npos) {
-        // does not exist, return empty string
-        return String_t();
-    }
-    return userId;
-}
 
 // /** Privilege check.
 //     \param privString privilege string to check against

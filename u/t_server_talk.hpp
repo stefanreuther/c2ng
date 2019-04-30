@@ -86,6 +86,15 @@ class TestServerTalkSpam : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestServerTalkTalkAddress : public CxxTest::TestSuite {
+ public:
+    void testParse();
+    void testRenderRaw();
+    void testRenderHTML();
+    void testRenderOther();
+    void testCompat();
+};
+
 class TestServerTalkTalkFolder : public CxxTest::TestSuite {
  public:
     void testIt();
@@ -96,6 +105,7 @@ class TestServerTalkTalkForum : public CxxTest::TestSuite {
  public:
     void testListOperation();
     void testIt();
+    void testFindForum();
 };
 
 class TestServerTalkTalkGroup : public CxxTest::TestSuite {
@@ -105,7 +115,6 @@ class TestServerTalkTalkGroup : public CxxTest::TestSuite {
 
 class TestServerTalkTalkNNTP : public CxxTest::TestSuite {
  public:
-    void testLogin();
     void testGroups();
     void testFindMessage();
     void testListMessages();
@@ -197,11 +206,6 @@ class TestServerTalkUserPM : public CxxTest::TestSuite {
     void testIt();
     void testAllocate();
     void testSort();
-};
-
-class TestServerTalkUtil : public CxxTest::TestSuite {
- public:
-    void testSimplifyUserName();
 };
 
 #endif

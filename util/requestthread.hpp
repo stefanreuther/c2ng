@@ -23,8 +23,10 @@ namespace util {
      public:
         /** Constructor.
             This starts the thread.
-            \param name Name of the thread */
-        RequestThread(String_t name, afl::sys::LogListener& log);
+            \param name Name of the thread
+            \param log Logger
+            \param delay Delay (for debugging). Should normally be left off/default to 0. */
+        RequestThread(String_t name, afl::sys::LogListener& log, int delay = 0);
 
         /** Destructor.
             This stops the thread. */
@@ -60,6 +62,9 @@ namespace util {
 
         /** Stop flag. Protected by m_taskMutex. */
         bool m_stop;
+
+        /** Request delay. */
+        int m_delay;
     };
 
 }

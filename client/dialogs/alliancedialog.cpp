@@ -19,7 +19,6 @@
 #include "ui/widgets/focusiterator.hpp"
 #include "ui/widgets/framegroup.hpp"
 #include "ui/widgets/statictext.hpp"
-#include "util/translation.hpp"
 
 using client::widgets::AllianceLevelGrid;
 using client::widgets::AllianceStatusList;
@@ -36,7 +35,7 @@ using ui::widgets::StaticText;
 client::dialogs::AllianceDialog::AllianceDialog(ui::Root& root,
                                                 util::RequestSender<game::Session> gameSender,
                                                 afl::string::Translator& tx)
-    : Window(tx.translateString("Edit Alliances"),
+    : Window(tx("Edit Alliances"),
              root.provider(),
              root.colorScheme(),
              ui::BLUE_WINDOW,
@@ -49,19 +48,19 @@ client::dialogs::AllianceDialog::AllianceDialog(ui::Root& root,
       m_data()
 {
     // ex WAllyWindow::WAllyWindow
-    initDialog();
+    initDialog(tx);
     initContent(gameSender);
 }
 
 void
-client::dialogs::AllianceDialog::run(util::RequestSender<game::Session> gameSender)
+client::dialogs::AllianceDialog::run(util::RequestSender<game::Session> gameSender, afl::string::Translator& tx)
 {
     // ex doAllianceDialog (sort-of)
 
     // Do we actually allow alliances?
     if (m_data.alliances.getLevels().size() == 0) {
-        ui::dialogs::MessageBox(_("Your host does not support alliances, or PCC2 does not know how to configure them."),
-                                _("Edit Alliances"),
+        ui::dialogs::MessageBox(tx("Your host does not support alliances, or PCC2 does not know how to configure them."),
+                                tx("Edit Alliances"),
                                 m_root).doOkDialog();
     } else {
         pack();
@@ -105,7 +104,7 @@ client::dialogs::AllianceDialog::writeBack(util::RequestSender<game::Session> ga
 }
 
 void
-client::dialogs::AllianceDialog::initDialog()
+client::dialogs::AllianceDialog::initDialog(afl::string::Translator& tx)
 {
     // Build the dialog
     // VBox
@@ -124,22 +123,22 @@ client::dialogs::AllianceDialog::initDialog()
     //    ["Teams"]
     //     Spacer
     //     "Help"
-    m_pList = &m_deleter.addNew(new AllianceStatusList(m_root));
+    m_pList = &m_deleter.addNew(new AllianceStatusList(m_root, tx));
     m_pList->sig_selectPlayer.add(this, &AllianceDialog::onSelectPlayer);
     m_pList->sig_toggleAlliance.add(this, &AllianceDialog::onToggleAlliance);
 
-    m_pGrid = &m_deleter.addNew(new AllianceLevelGrid(m_root));
+    m_pGrid = &m_deleter.addNew(new AllianceLevelGrid(m_root, tx));
     m_pGrid->sig_toggleOffer.add(this, &AllianceDialog::onToggleOffer);
 
     Group& g1  = m_deleter.addNew(new Group(HBox::instance5));
     Group& g11 = m_deleter.addNew(new Group(VBox::instance5));
-    g11.add(m_deleter.addNew(new StaticText(_("Alliances:"), util::SkinColor::Static, gfx::FontRequest().addSize(1), m_root.provider())));
+    g11.add(m_deleter.addNew(new StaticText(tx("Alliances:"), util::SkinColor::Static, gfx::FontRequest().addSize(1), m_root.provider())));
     g11.add(ui::widgets::FrameGroup::wrapWidget(m_deleter, m_root.colorScheme(), ui::widgets::FrameGroup::LoweredFrame, *m_pList));
     g11.add(m_deleter.addNew(new Spacer()));
     g1.add(g11);
 
     Group& g12 = m_deleter.addNew(new Group(VBox::instance5));
-    g12.add(m_deleter.addNew(new StaticText(_("Status:"), ui::SkinColor::Static, gfx::FontRequest().addSize(1), m_root.provider())));
+    g12.add(m_deleter.addNew(new StaticText(tx("Status:"), ui::SkinColor::Static, gfx::FontRequest().addSize(1), m_root.provider())));
     g12.add(*m_pGrid);
     g12.add(m_deleter.addNew(new Spacer()));
     g1.add(g12);
@@ -147,14 +146,14 @@ client::dialogs::AllianceDialog::initDialog()
 
     Group& g2 = m_deleter.addNew(new Group(HBox::instance5));
 
-    Button& btnOK     = m_deleter.addNew(new Button(_("OK"),     util::Key_Return, m_root));
-    Button& btnCancel = m_deleter.addNew(new Button(_("Cancel"), util::Key_Escape, m_root));
+    Button& btnOK     = m_deleter.addNew(new Button(tx("OK"),     util::Key_Return, m_root));
+    Button& btnCancel = m_deleter.addNew(new Button(tx("Cancel"), util::Key_Escape, m_root));
     btnOK.sig_fire.addNewClosure(m_loop.makeStop(1));
     btnCancel.sig_fire.addNewClosure(m_loop.makeStop(0));
     g2.add(btnOK);
     g2.add(btnCancel);
     g2.add(m_deleter.addNew(new Spacer()));
-    // FIXME->g2.add(m_deleter.addNew(new UIButton(_("Help"), 'h')));
+    // FIXME->g2.add(m_deleter.addNew(new UIButton(tx("Help"), 'h')));
     add(g2);
 
     FocusIterator& fi = m_deleter.addNew(new FocusIterator(FocusIterator::Horizontal + FocusIterator::Tab));

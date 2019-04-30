@@ -1,0 +1,22 @@
+!-
+!-  NOTE: this is sent to unverified addresses!
+!-
+From: PlanetsCentral Host <host@planetscentral.com>
+Subject: [PlanetsCentral] Turn file rejected
+
+Hi,
+
+your turn file was REJECTED.
+I was unable to parse the file.
+
+Please resubmit the correct file, by mail or by using the web interface at
+<http://planetscentral.com/login.cgi?returnto=host/>.
+
+
+>> Mail Information
+
+Subject:    $(mail_subject)
+From:       $(mail_from)
+Date:       $(mail_date)
+Message-Id: $(mail_messageid)
+File Path:  $(mail_path)

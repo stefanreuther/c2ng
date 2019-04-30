@@ -17,7 +17,7 @@
 
 % @q CC$LibraryVersion:Str (Internal)
 % Version of the standard library (<tt>core.q</tt>).
-Dim Shared CC$LibraryVersion = '2.40.1'
+Dim Shared CC$LibraryVersion = '2.40.6'
 
 %%% Console-Mode Replacements for GUI routines %%%%%%%%%%%%%%%%%%%%%%
 
@@ -79,7 +79,7 @@ If Not System.GUI Then
     Abort "Not in graphics mode"
   EndSub
 
-  % FIXME: IFUIInput(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
+  % UI.Input is implemented in game/interface/consolecommands.cpp.
 
   % UI.Message generates a console message and a prompt
   Sub UI.Message (text, Optional heading, buttons)
@@ -148,6 +148,112 @@ If System.GUI Then
 EndIf % System.GUI
 
 
+%%% Task Support %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% @q Notify s:Str, Optional t:Int (Global Command)
+% Notify message.
+% This command stops execution of an auto task, and informs the player of an event using the message text %s.
+% These messages are displayed in the notification message window,
+% from which users can resume execution of an auto task, or stop it.
+% The text will be word-wrapped to fit in the window;
+% it can also contain carriage returns to force line breaks.
+%
+% The message window will automatically include the name of the object the
+% auto task belongs to, so the message need not repeat that. For example,
+% <pre class="ccscript">
+%   Notify "out of fuel"
+% </pre>
+% will generate the following message:
+% <pre>
+%   (-s0124)<<< Notify >>>
+%   FROM: Auto Task Ship #124
+%
+%   out of fuel
+% </pre>
+%
+% When the turn number %t is specified, the message will pop up in the specified turn
+% (and execution of the calling script will suspend that long),
+% otherwise it will be sent immediately.
+%
+% A message sent using %Notify will remain active until it is confirmed.
+% If the player does not confirm a message during this PCC session, it will pop up again in the next session.
+% @see AddNotify
+% @since PCC2 1.99.16, PCC 1.0.18, PCC2 2.40.6
+Sub Notify (s, Optional t)
+  % This is implemented totally different from PCC 1.x.
+  % This command initially appeared in 1.0.16, where it was morally equivalent to 'Print'.
+  If Not IsEmpty(t) Then
+    Do While Turn < t
+      Stop
+    Loop
+  EndIf
+  Do
+    CC$Notify s, True
+    Stop
+  Loop While Not CC$NotifyConfirmed()
+EndSub
+
+% @q AddNotify s:Str (Global Command)
+% Notify message.
+% This command informs the player of an event using the message text %s.
+% These messages are displayed in the notification message window.
+% The text will be word-wrapped to fit in the window;
+% it can also contain carriage returns to force line breaks.
+%
+% The message window will automatically include the name of the object the
+% auto task belongs to, so the message need not repeat that. For example,
+% <pre class="ccscript">
+%   AddNotify "out of fuel"
+% </pre>
+% will generate the following message:
+% <pre>
+%   (-s0124)<<< Notify >>>
+%   FROM: Auto Task Ship #124
+%
+%   out of fuel
+% </pre>
+%
+% Messages sent using %AddNotify will only be visible for the PCC session in which the command was used.
+% Unlike %Notify, execution of the script will automatically continue after the command,
+% the message needs not be confirmed by the user.
+% @see Notify
+% @since PCC2 1.99.16, PCC 1.1.16, PCC2 2.40.6
+Sub AddNotify (s)
+  CC$Notify s, False
+EndSub
+
+% @q CC$AutoReCheck:void (Internal)
+% Part of the implementation of {Restart}. A call of this routine is generated before the loop jump.
+% This routine makes sure we do not enter infinite loops.
+% This routine is used by PCC2/c2ng auto tasks and therefore needs to be present in both for interoperability.
+Sub CC$AutoReCheck
+  % Create process-local variable upon first entry into this routine
+  Dim Static CC$AutoReState
+  % Error when we're getting here again with a turn number we've already seen
+  If CC$AutoReState = Turn
+    Notify Translate("This Auto Task performed a \"Restart\" loop without intervening delays. You should probably use \"WaitOneTurn\".")
+    CC$AutoReState := 0
+  Else
+    CC$AutoReState := Turn
+  EndIf
+EndSub
+
+% @q CC$AutoExec cmd:Str (Internal)
+% Execute auto task command. An auto task command <tt>foo</tt> is
+% actually coded as <tt>CC$AutoExec "foo"</tt>. This implements error handling.
+% This routine is used by PCC2/c2ng auto tasks and therefore needs to be present in both for interoperability.
+Sub CC$AutoExec(cmd)
+  Do
+    Try
+      Eval cmd
+      Return
+    Else
+      Notify Translate("Error during execution of auto task: ") + System.Err
+    EndTry
+  Loop
+EndSub
+
+
 %%% Internals
 
 % c2ng internal: This function is used to execute commands bound to keys.
@@ -159,6 +265,12 @@ EndSub
 % c2ng internal: Game setup
 % @since PCC2 2.40.1
 Sub C2$RunLoadHook
+  % Internal initialisation
+  % FIXME: use actual Chart.Geo configuration
+  Chart.X := 2000
+  Chart.Y := 2000
+
+  % Hooks
   RunHook Load
   If Turn.IsNew Then RunHook NewTurn
 EndSub
@@ -246,10 +358,13 @@ CreateKeymap PlanetSelectionDialog(SelectionDialog)
 CreateKeymap BaseSelectionDialog(SelectionDialog)
 
 % Global Bindings
-Bind Global          "a-c"    := "UI.PopupConsole"
-Bind Global          "quit"   := "CCUI.ExitClient"
-Bind Global          "a-up"   := "CCUI.History.PreviousTurn"
-Bind Global          "a-down" := "CCUI.History.NextTurn"
+Bind Global           "a-c"    := "UI.PopupConsole"
+Bind Global           "a-k"    := "UI.KeymapInfo"
+Bind Global           "quit"   := "CCUI.ExitClient"
+Bind Global           "a-up"   := "CCUI.History.PreviousTurn"
+Bind Global           "a-down" := "CCUI.History.NextTurn"
+Bind Global           "bs"     := "CC$PopScreenHistory"
+Bind Global           "a-bs"   := "CC$ListScreenHistory"
 
 % Control Screen Bindings
 Bind ControlScreen    "."      := "CCUI.ToggleSelection"
@@ -261,45 +376,96 @@ Bind ControlScreen    "c-pgdn" := "CCUI.SelectNextMarked",     "c-wheeldn" := "C
 Bind ControlScreen    "f1"     := "CCUI.GotoScreen 1"
 Bind ControlScreen    "f2"     := "CCUI.GotoScreen 2"
 Bind ControlScreen    "f3"     := "CCUI.GotoScreen 3"
+Bind ControlScreen    "f4"     := "CC$GotoChart Chart.X, Chart.Y"
 Bind ControlScreen    "c-f2"   := "CCUI.GotoPlanetHere"
 Bind ControlScreen    "c-f3"   := "CCUI.GotoBaseHere"
+Bind ControlScreen    "c-f4"   := "CC$GotoChart UI.X, UI.Y"
 Bind ControlScreen    "c-f8"   := "CCUI.GotoBaseHere"
+Bind ControlScreen    "s-f4"   := "CC$GotoChart Chart.X, Chart.Y"
 Bind ControlScreen    "s-l"    := "CCUI.ListShips Chart.X, Chart.Y, 'a'"
 Bind ControlScreen    "c-l"    := "CCUI.ListShips UI.X, UI.Y, 'a'"
 Bind ControlScreen    "l"      := "CCUI.ListShips UI.X, UI.Y, 'a'"
 
+Bind Ship             "c"      := "CC$ShipCargo"
 Bind Ship             "e"      := "CCUI.Ship.SetEnemy"
+Bind Ship             "f"      := "CC$ChangeFCode"
 Bind Ship             "g"      := "CCUI.Give"
 Bind Ship             "m"      := "CCUI.Ship.SetMission"
 Bind Ship             "n"      := "CCUI.Ship.Rename"
+Bind Ship             "u"      := "CC$ShipUnload"
+Bind Ship             "c-j"    := "Try CC$TransferShip 2, 0"
+Bind Ship             "c-p"    := "CC$ReviewShipTransfer 2, Transfer.Unload.Id"
+Bind Ship             "c-s"    := "CC$ReviewShipTransfer 1, Transfer.Ship.Id"
 Bind Ship             "f9"     := "CCUI.Ship.SetComment"
+Bind ShipScreen       "h"      := "UI.Help 'pcc2:shipscreen'"
+Bind ShipScreen       "alt-h"  := "UI.Help 'pcc2:shipscreen'"
+Bind ShipScreen       "w"      := "CC$ChangeSpeed"          % FIXME: fleet handling (CC$WithShipWaypoint)
 Bind ShipScreen       "f8"     := "CCUI.GotoBaseHere"
+Bind ShipTaskScreen   "c"      := "CC$ShipCargo"
+Bind ShipTaskScreen   "h"      := "UI.Help 'pcc2:shiptaskscreen'"
+Bind ShipTaskScreen   "alt-h"  := "UI.Help 'pcc2:shiptaskscreen'"
+Bind ShipTaskScreen   "u"      := "CC$ShipUnload"
 Bind ShipTaskScreen   "f9"     := "CCUI.Ship.SetComment"
 Bind ShipTaskScreen   "f8"     := "CCUI.GotoBaseHere"
 
+Bind HistoryScreen    "h"      := "UI.Help 'pcc2:historyscreen'"
+Bind HistoryScreen    "alt-h"  := "UI.Help 'pcc2:historyscreen'"
+
+Bind FleetScreen      "h"      := "UI.Help 'pcc2:fleetscreen'"
+Bind FleetScreen      "alt-h"  := "UI.Help 'pcc2:fleetscreen'"
+
+Bind Planet           "c"      := "Try CC$TransferPlanet 0"
+Bind Planet           "f"      := "CC$ChangeFCode"
 Bind Planet           "g"      := "CCUI.Give"
+Bind PlanetScreen     "h"      := "UI.Help 'pcc2:planetscreen'"
+Bind PlanetScreen     "alt-h"  := "UI.Help 'pcc2:planetscreen'"
+Bind Planet           "u"      := "Try CC$TransferPlanet 1"
 Bind Planet           "f9"     := "CCUI.Planet.SetComment"
+Bind PlanetTaskScreen "h"     := "UI.Help 'pcc2:planettaskscreen'"
+Bind PlanetTaskScreen "alt-h" := "UI.Help 'pcc2:planettaskscreen'"
 Bind PlanetTaskScreen "f8"     := "CCUI.GotoBaseHere"
 Bind PlanetTaskScreen "f9"     := "CCUI.Planet.SetComment"
 
+Bind Base             "c"      := "CC$TransferPlanet 0"
+Bind Base             "f"      := "CC$ChangeFCode"
 Bind Base             "m"      := "CCUI.Base.SetMission"
+Bind Base             "t"      := "CC$ChangeTech"
+Bind Base             "u"      := "CC$TransferPlanet 1"
 Bind Base             "f9"     := "CCUI.Planet.SetComment"
+Bind BaseScreen       "h"      := "UI.Help 'pcc2:basescreen'"
+Bind BaseScreen       "alt-h"  := "UI.Help 'pcc2:basescreen'"
 Bind BaseScreen       "f8"     := "CCUI.GotoPlanetHere"
+Bind BaseTaskScreen   "h"      := "UI.Help 'pcc2:basetaskscreen'"
+Bind BaseTaskScreen   "alt-h"  := "UI.Help 'pcc2:basetaskscreen'"
 Bind BaseTaskScreen   "f9"     := "CCUI.Planet.SetComment"
 Bind BaseTaskScreen   "f8"     := "CCUI.GotoPlanetHere"
 
+Bind FleetScreen      "f"      := "CC$ChangeFCode"
 Bind FleetScreen      "g"      := "CCUI.Give"
 Bind FleetScreen      "f9"     := "CCUI.Planet.SetComment"
 
-
 % Starchart Bindings
+Bind Starchart        "esc"    := "UI.GotoScreen 0"
+Bind Starchart        "f4"     := "UI.GotoScreen 0"
+Bind Starchart        "h"      := "UI.Help 'pcc2:starchart'"
+Bind Starchart        "alt-h"  := "UI.Help 'pcc2:starchart'"
+Bind ShipLock         "."      := "CCUI.ToggleSelection"
+Bind ShipLock         "esc"    := "CC$HidePanel"
+Bind PlanetLock       "."      := "CCUI.ToggleSelection"
+Bind PlanetLock       "b"      := "CC$BaseLock"
+Bind PlanetLock       "esc"    := "CC$HidePanel"
+Bind BaseLock         "esc"    := "CC$HidePanel"
+Bind BaseLock         "p"      := "CC$PlanetLock"
 
 % Race Screen Bindings
 Bind RaceScreen       "esc"    := "CCUI.ExitRace"
 Bind RaceScreen       "f1"     := "CCUI.GotoScreen 1"
 Bind RaceScreen       "f2"     := "CCUI.GotoScreen 2"
 Bind RaceScreen       "f3"     := "CCUI.GotoScreen 3"
+Bind RaceScreen       "f4"     := "UI.GotoScreen 4"
 Bind RaceScreen       "a"      := "UI.EditAlliances"
+Bind RaceScreen       "h"      := "UI.Help 'pcc2:racescreen'"
+Bind RaceScreen       "alt-h"  := "UI.Help 'pcc2:racescreen'"
 Bind RaceScreen       "m"      := "CC$ViewInbox"
 Bind RaceScreen       "v"      := "CC$ViewCombat"
 

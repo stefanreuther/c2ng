@@ -29,11 +29,6 @@ TestServerInterfaceTalkNNTPClient::testIt()
     afl::test::CommandHandler mock("testIt");
     server::interface::TalkNNTPClient testee(mock);
 
-    // checkUser
-    mock.expectCall("NNTPUSER, theUser, thePassword");
-    mock.provideNewResult(makeStringValue("1030"));
-    TS_ASSERT_EQUALS(testee.checkUser("theUser", "thePassword"), "1030");
-
     // listNewsgroups
     {
         mock.expectCall("NNTPLIST");

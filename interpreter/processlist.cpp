@@ -147,6 +147,20 @@ interpreter::ProcessList::resumeProcess(Process& proc, uint32_t pgid)
     }
 }
 
+// Resume all suspended processes.
+void
+interpreter::ProcessList::resumeSuspendedProcesses(uint32_t pgid)
+{
+    // ex runRunnableProcesses, sort-of
+    for (size_t i = 0, n = m_processes.size(); i != n; ++i) {
+        Process& p = *m_processes[i];
+        if (p.getState() == Process::Suspended) {
+            p.setState(Process::Runnable);
+            p.setProcessGroupId(pgid);
+        }
+    }
+}
+
 // Terminate a process.
 void
 interpreter::ProcessList::terminateProcess(Process& proc)

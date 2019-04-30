@@ -92,7 +92,7 @@ namespace game {
 
         void notifyListeners();
 
-        bool getReferenceName(Reference ref, String_t& result);
+        bool getReferenceName(Reference ref, ObjectName which, String_t& result);
 
         bool save();
 

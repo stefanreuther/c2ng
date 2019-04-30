@@ -27,6 +27,7 @@ namespace server {
     const uint16_t TALK_PORT     = 5555;
     const uint16_t DB_PORT       = 6379;
     const uint16_t NNTP_PORT     = 1119;
+    const uint16_t USER_PORT     = 6526;
 
     const uint16_t SMTP_PORT     = 25;
 

@@ -10,6 +10,7 @@
 #include "game/config/integeroption.hpp"
 #include "game/config/stringoption.hpp"
 #include "util/profiledirectory.hpp"
+#include "util/numberformatter.hpp"
 
 namespace game { namespace config {
 
@@ -51,6 +52,10 @@ namespace game { namespace config {
             Use this function to access a UserConfiguration during loading to avoid modifying it.
             \return Game type; empty if none set */
         String_t getGameType() const;
+
+        /** Get number formatter.
+            \return NumberFormatter */
+        util::NumberFormatter getNumberFormatter() const;
 
         /** Format a number.
             \param n Number

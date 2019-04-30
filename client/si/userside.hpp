@@ -15,6 +15,8 @@
 #include "client/si/requestlink2.hpp"
 #include "game/extraidentifier.hpp"
 #include "util/messagecollector.hpp"
+#include "client/screenhistory.hpp"
+#include "client/si/scripttask.hpp"
 
 namespace client { namespace si {
 
@@ -64,6 +66,11 @@ namespace client { namespace si {
 
         afl::sys::Log& mainLog()
             { return m_mainLog; }
+
+        ScreenHistory& history()
+            { return m_history; }
+
+        void reset();
 
 
         /*!
@@ -134,19 +141,12 @@ namespace client { namespace si {
             \param link Process identification */
         void continueProcessWait(uint32_t id, RequestLink2 link);
 
-        /** Execute a command and setup wait.
-            Completion will eventually be signalled using a handleWait() callback.
-            \param id Wait Id allocated with allocateWaitId().
-            \param command Command to execute (one-line command). */
-        void executeCommandWait(uint32_t id, String_t command, bool verbose, String_t name, std::auto_ptr<ContextProvider> ctxp);
-
-        /** Execute a key command and setup wait.
-            Completion will eventually be signalled using a handleWait() callback.
-            \param id Wait Id allocated with allocateWaitId().
-            \param keymapName Keymap name
-            \param key Key. The key is looked up in the keymap and then executed.
-            \param prefix Prefix argument */
-        void executeKeyCommandWait(uint32_t id, String_t keymapName, util::Key_t key, int prefix, std::auto_ptr<ContextProvider> ctxp);
+        /** Execute a task.
+            This will provide the given task with a new process group to run in and run it.
+            Completion of the process group will eventually be signalled using a handleWait() callback.
+            \param waitId   Wait Id for the handleWait() callback
+            \param task     The task */
+        void executeTaskWait(uint32_t id, std::auto_ptr<ScriptTask> task);
 
         /** Handle successful wait.
             Finds the associated Control, and calls it's handleWait() function.
@@ -192,6 +192,7 @@ namespace client { namespace si {
         util::RequestReceiver<UserSide> m_receiver;
         util::MessageCollector& m_console;
         afl::sys::Log& m_mainLog;
+        ScreenHistory m_history;
 
         uint32_t m_waitIdCounter;
 

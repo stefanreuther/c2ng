@@ -96,6 +96,7 @@ client::createPluginLoader(const util::plugin::Plugin& plugin)
     interpreter::BytecodeObject& bco = *result;
     bco.setFileName(plugin.getDefinitionFileName());
     bco.setName(plugin.getId());
+    bco.setOrigin(plugin.getId());
 
     // Create plugin context
     addPushString(bco, plugin.getId());
@@ -172,12 +173,13 @@ client::createLoaderForUnloadedPlugins(util::plugin::Manager& manager)
 
 // Create a file loader.
 interpreter::BCORef_t
-client::createFileLoader(const String_t& fileName)
+client::createFileLoader(const String_t& fileName, const String_t& origin)
 {
     // Create a BCO
     interpreter::BCORef_t result(*new interpreter::BytecodeObject());
     interpreter::BytecodeObject& bco = *result;
     bco.setName(afl::string::Format("<FileLoader:%s>", fileName));
+    bco.setOrigin(origin);
 
     // Wrap in a try/else to be able to log error messages
     interpreter::BytecodeObject::Label_t catchLabel = bco.makeLabel();

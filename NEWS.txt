@@ -2,6 +2,13 @@ PCC2ng NEWS FILE
 ================
 
 
+2.40.6
+------
+
+  Starchart. Cargo transfer. Help (no content yet). A bunch of more
+  game functions. Major additions to PlanetsCentral servers.
+
+
 2.40.5
 ------
 

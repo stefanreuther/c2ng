@@ -29,6 +29,9 @@ namespace server { namespace host {
         /** Work directory. */
         String_t workDirectory;
 
+        /** Binary directory. */
+        String_t binDirectory;
+
         /** Cron. */
         bool useCron;
 
@@ -47,6 +50,9 @@ namespace server { namespace host {
         /** HostFile address.
             Since we're generating links to this service, it must be in the config. */
         afl::net::Name hostFileAddress;
+
+        /** Initial suspension time. */
+        Time_t initialSuspend;
 
         /** Convert time.
             On the wire, times are always given in minutes-since-epoch.

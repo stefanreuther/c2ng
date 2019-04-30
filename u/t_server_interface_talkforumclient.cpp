@@ -263,6 +263,12 @@ TestServerInterfaceTalkForumClient::testIt()
         afl::data::Access a(p);
         TS_ASSERT_EQUALS(a.getArraySize(), 2U);
     }
+
+    // findForum
+    mock.expectCall("FORUMBYNAME, news");
+    mock.provideNewResult(server::makeIntegerValue(17));
+    TS_ASSERT_EQUALS(testee.findForum("news"), 17);
+
     mock.checkFinish();
 }
 

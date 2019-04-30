@@ -128,7 +128,7 @@ namespace interpreter {
         game::map::Object* getInvokingObject() const;
         void handleFunctionCall(BCORef_t bco, Segment_t& args, bool wantResult);
 
-        bool handleLoad(String_t name);
+        bool handleLoad(String_t name, const String_t& origin);
 
         // void setNotificationMessage(IntNotificationMessage* msg);
         // IntNotificationMessage* getNotificationMessage() const;

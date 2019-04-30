@@ -106,9 +106,9 @@ server::talk::Newsrc::set(int32_t messageId)
         loadCache(line);
         int32_t byte = column >> 3;
         int32_t bit = (column & 7);
-        uint8_t mask = (1 << bit);
+        uint8_t mask = uint8_t(1 << bit);
         if ((uint8_t(cache[byte]) & mask) == 0) {
-            cache[byte] |= mask;
+            cache[byte] = uint8_t(cache[byte] | mask);
             cacheDirty = true;
         }
     }
@@ -137,9 +137,9 @@ server::talk::Newsrc::clear(int32_t messageId)
     loadCache(line);
     int32_t byte = column >> 3;
     int32_t bit = (column & 7);
-    uint8_t mask = (1 << bit);
+    uint8_t mask = uint8_t(1 << bit);
     if ((uint8_t(cache[byte]) & mask) != 0) {
-        cache[byte] &= ~mask;
+        cache[byte] = uint8_t(cache[byte] & ~mask);
         cacheDirty = true;
     }
 }

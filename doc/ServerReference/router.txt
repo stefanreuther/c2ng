@@ -1,0 +1,58 @@
+##
+##  c2router / c2play
+##
+
+@q Router (Service)
+@noproto
+The "Router" server manages active PCC2 Web sessions and routes commands to the respective {Play (Service)|c2play server} instances.
+It can optionally connect to the {File (Service)|File service} to notify it of changes.
+
+The Router server accepts a simple, "HTTP-like" protocol.
+- a request is read on a line, containing a {@group Router Command|command word} and optional arguments.
+- optionally, more information follows on following lines.
+- the router replies with a response header line ("200 OK"),
+  optionally followed by the response body, and closes the TCP connection.
+
+The Router service is accessible using
+- "router" context on the console
+- {@group Router Command}
+- {@group Play API} (a {pcc:api|web API})
+
+@uses Router.Host, Router.Port, Router.Server, Router.Timeout, Router.VirginTimeout
+@uses Router.MaxSessions, Router.NewSessionsWin, Router.FileNotify
+@uses File.Host, File.Port
+---
+
+@group Router Command
+These commands are the interface to the {Router (Service)|Router service}.
+---
+
+@type RouterSession
+A RouterSession value identifies a session on the {Router (Service)|Router service}.
+Traditionally, session identifiers were numbers, and now are randomized tokens.
+Users should treat them as an opaque word.
+---
+
+@group Play API
+The "play" {pcc:api|API endpoint} allows interactive access to game data.
+It accesses the {@group Router Command|router service}.
+---
+
+@q Play (Service)
+@noproto
+The "Play" service is managed by {Router (Service)|Router}.
+Router allows starting, talking to, and stopping Play instances.
+
+The Play service talks a simple line-based protocol to Router.
+- a request is read on a line, containing a {@group Game Access Command|command word} and optional arguments.
+- for POST, more information follows on following lines, terminated with a line containing a single ".".
+- the server replies with a response header line.
+  If that line starts with "2" ("200 OK"), a response body follows, terminated by line containing a single ".".
+
+Play instances are configured via command line passed with {NEW (Router Command)}.
+---
+
+@group Game Access Command
+These commands are implemented by the {Play (Service)|Play service},
+which is managed by {Router (Service)|Router}.
+---

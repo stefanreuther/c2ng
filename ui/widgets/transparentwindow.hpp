@@ -23,6 +23,7 @@ namespace ui { namespace widgets {
         TransparentWindow(gfx::ColorScheme<util::SkinColor::Color>& parentColors, ui::layout::Manager& manager);
 
         virtual void draw(gfx::Canvas& can);
+        virtual void handleStateChange(State st, bool enable);
         virtual gfx::Rectangle transformSize(gfx::Rectangle size, Transformation kind) const;
         virtual bool handleKey(util::Key_t key, int prefix);
         virtual bool handleMouse(gfx::Point pt, MouseButtons_t pressedButtons);

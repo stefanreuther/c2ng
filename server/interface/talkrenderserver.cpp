@@ -33,7 +33,7 @@ server::interface::TalkRenderServer::handleCommand(const String_t& upcasedComman
            - mail: render into internet email.
            - news: render into a Usenet posting.
            - text: produce just the raw text.
-           - format<em>LS</em>: produce BBcode (with auto-link, auto-smiley option as given).
+           - forum<em>LS</em>: produce BBcode (with auto-link, auto-smiley option as given).
            If %fmt equals the format of the original {@type TalkText},
            the original text is returned as-is.
 

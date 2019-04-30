@@ -32,4 +32,7 @@ TestServerInterfaceHostTurn::testInit()
     TS_ASSERT_EQUALS(t.slot, 0);
     TS_ASSERT_EQUALS(t.previousState, 0);
     TS_ASSERT_EQUALS(t.userId, "");
+    TS_ASSERT_EQUALS(t.gameName, "");
+    TS_ASSERT_EQUALS(t.turnNumber, 0);
+    TS_ASSERT_EQUALS(t.allowTemp, false);
 }

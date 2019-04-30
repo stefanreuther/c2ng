@@ -22,10 +22,10 @@ namespace client { namespace dialogs {
      public:
         AllianceDialog(ui::Root& root, util::RequestSender<game::Session> gameSender, afl::string::Translator& tx);
 
-        void run(util::RequestSender<game::Session> gameSender);
+        void run(util::RequestSender<game::Session> gameSender, afl::string::Translator& tx);
 
      private:
-        void initDialog();
+        void initDialog(afl::string::Translator& tx);
         void initContent(util::RequestSender<game::Session> gameSender);
         void writeBack(util::RequestSender<game::Session> gameSender);
 

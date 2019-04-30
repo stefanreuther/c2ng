@@ -121,8 +121,6 @@ client::tiles::ShipMovementTile::attach(client::proxy::ObjectObserver& oop)
                 game::Root* root = s.getRoot().get();
                 game::spec::ShipList* shipList = s.getShipList().get();
                 if (sh != 0 && root != 0 && shipList != 0 && g != 0 && sh->getShipKind() == game::map::Ship::CurrentShip) {
-                    game::config::UserConfiguration& uc = root->userConfiguration();
-
                     // FIXME: towing!!!!1
                     game::map::ShipPredictor crystal_ball(g->currentTurn().universe(),
                                                           sh->getId(),
@@ -157,9 +155,9 @@ client::tiles::ShipMovementTile::attach(client::proxy::ObjectObserver& oop)
                     if (sh->getMission().orElse(0) == game::spec::Mission::msn_Intercept
                         && (otherShip = g->currentTurn().universe().ships().get(sh->getMissionParameter(game::InterceptParameter).orElse(0))) != 0)
                     {
-                        job->data.text[Data::Waypoint] = otherShip->getName(game::map::Object::PlainName, s.translator(), s.interface());
+                        job->data.text[Data::Waypoint] = otherShip->getName(game::PlainName, s.translator(), s.interface());
                     } else if (is_chunnel && (otherShip = g->currentTurn().universe().ships().get(chd.getTargetId())) != 0) {
-                        job->data.text[Data::Waypoint] = afl::string::Format(_("chunnel to %s").c_str(), otherShip->getName(game::map::Object::PlainName, s.translator(), s.interface()));
+                        job->data.text[Data::Waypoint] = afl::string::Format(_("chunnel to %s").c_str(), otherShip->getName(game::PlainName, s.translator(), s.interface()));
                     } else {
                         game::map::Point wp;
                         sh->getWaypoint().get(wp);

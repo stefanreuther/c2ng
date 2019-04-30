@@ -54,6 +54,7 @@ namespace server { namespace host {
         virtual Event_t getGameEvent(int32_t gameId);
         virtual void listGameEvents(std::vector<Event_t>& result);
         virtual void handleGameChange(int32_t gameId);
+        virtual void suspendScheduler(Time_t absTime);
 
      private:
         Root& m_root;
@@ -67,6 +68,7 @@ namespace server { namespace host {
         bool m_stopFlag;               // protected by mutex
 
         std::list<int32_t> m_changedGames;  // protected by mutex
+        Time_t m_suspendUntil;  ///< Scheduler suspended until this time.
 
         // Schedule
         // Note: Event_t is ex ScheduleItem
@@ -85,6 +87,7 @@ namespace server { namespace host {
         void processRequests();
         void moveDueItems();
         void runDueItem(int32_t gameId, std::list<Event_t>& newSchedule);
+        void adjustForSuspension(std::list<Event_t>& newSchedule);
     };
 
     /** Compute actions for a game.

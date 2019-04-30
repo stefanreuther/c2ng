@@ -540,7 +540,7 @@ game::map::Planet::combinedCheck2(const Universe& univ, PlayerSet_t availablePla
 
 
 String_t
-game::map::Planet::getName(Name which, afl::string::Translator& tx, InterpreterInterface& iface) const
+game::map::Planet::getName(ObjectName which, afl::string::Translator& tx, InterpreterInterface& iface) const
 {
     // ex GPlanet::getName
     // FIXME: make the default name "", and handle that specially here

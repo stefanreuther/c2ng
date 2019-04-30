@@ -1,0 +1,28 @@
+##
+##  c2format
+##
+
+@q Format (Service)
+@noproto
+The "Format" service packs and unpacks binary VGAP data into readable structured or textual data.
+
+The Format service has no data store and does not access other services.
+
+The Format service is accessible using
+- "format" context on the console
+- {@group Format Command} (a {pcc:resp|RESP service})
+- {@group Format API} and {@group Spec API} ({pcc:api|web API}s)
+---
+
+@group Format Command
+This {pcc:resp|RESP} interface is the interface to the {Format (Service)|Format} service.
+Format commands can also be accessed through the {@group Format API} and the {@group Spec API}.
+---
+@group Format API
+The "format" {pcc:api|API endpoint} can be used to pack/unpack VGAP files using the {@group Format Command|format service}.
+It can consume uploaded files or produce files for download.
+---
+@group Spec API
+The "spec" {pcc:api|API endpoint} can be used to access ship list information.
+It uses the {Format (Service)} to render the data, and {HostFile (Service)} to access files.
+---

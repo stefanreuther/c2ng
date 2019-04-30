@@ -1,0 +1,10 @@
+/*!
+     \namespace server::dbexport
+     \brief c2dbexport utility
+
+     This namespace contains the c2dbexport utility.
+     This utility allows to export parts of a PlanetsCentral database.
+
+     Entry point:
+     - server::dbexport::ExportApplication
+ */

@@ -1,0 +1,10 @@
+/*!
+     \namespace server::monitor
+     \brief c2monitor-server utility
+
+     This namespace contains the c2monitor server.
+     This server observes the other servers and publishes the status as a web page.
+
+     Entry point:
+     - server::monitor::ServerApplication
+ */

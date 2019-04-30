@@ -157,7 +157,7 @@ server::host::file::HistoryItem::getInfo()
 server::host::file::Item*
 server::host::file::HistoryItem::find(const String_t& name)
 {
-    // Directly parse tue turn number.
+    // Directly parse the turn number.
     // Using direct parsing instead of defaultFind() drastically improves performance:
     //    c2systest host/50_gamerootitem: 10.5s -> 7.5s real time (-30%)
     //    testsuite ServerHostFile: 0.45 -> 0.41s real time (-10%)

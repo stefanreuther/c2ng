@@ -16,6 +16,7 @@
 #include "game/test/registrationkey.hpp"
 #include "game/test/stringverifier.hpp"
 #include "game/test/specificationloader.hpp"
+#include "afl/charset/utf8charset.hpp"
 
 /** Simple test. */
 void
@@ -35,9 +36,12 @@ TestGameRoot::testIt()
 
     // StringVerifier
     std::auto_ptr<game::StringVerifier> stringVerifier(new game::test::StringVerifier());
-    
+
+    // Charset
+    std::auto_ptr<afl::charset::Charset> charset(new afl::charset::Utf8Charset());
+
     // Build a root
-    game::Root testee(gameDirectory, specLoader, hostVersion, regKey, stringVerifier, game::Root::Actions_t());
+    game::Root testee(gameDirectory, specLoader, hostVersion, regKey, stringVerifier, charset, game::Root::Actions_t());
     const game::Root& croot(testee);
 
     // Verify it
@@ -47,12 +51,14 @@ TestGameRoot::testIt()
     TS_ASSERT_EQUALS(testee.hostVersion().getVersion(), MKVERSION(4,0,0));
     TS_ASSERT(dynamic_cast<game::test::RegistrationKey*>(&testee.registrationKey()) != 0);
     TS_ASSERT(dynamic_cast<game::test::StringVerifier*>(&testee.stringVerifier()) != 0);
+    TS_ASSERT(dynamic_cast<afl::charset::Utf8Charset*>(&testee.charset()) != 0);
     TS_ASSERT(testee.getTurnLoader().get() == 0);
 
     // Verify accessors
     TS_ASSERT_EQUALS(&testee.hostVersion(), &croot.hostVersion());
     TS_ASSERT_EQUALS(&testee.hostConfiguration(), &croot.hostConfiguration());
     TS_ASSERT_EQUALS(&testee.userConfiguration(), &croot.userConfiguration());
+    TS_ASSERT(dynamic_cast<afl::charset::Utf8Charset*>(&croot.charset()) != 0);
     TS_ASSERT_EQUALS(&testee.playerList(), &croot.playerList());
 
     // Set a TurnLoader

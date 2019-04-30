@@ -88,7 +88,7 @@ client::dialogs::InboxDialog::State::load(game::Session& session, size_t index)
     this->dim = isFiltered(session, *inbox, index);
     // goto1, goto1name
     this->goto2 = fmt.firstLink;
-    session.getReferenceName(fmt.firstLink, this->goto2Name);
+    session.getReferenceName(fmt.firstLink, game::LongName, this->goto2Name);
     this->reply = fmt.reply;
     this->replyAll = fmt.replyAll;
     if (!fmt.reply.empty()) {
@@ -335,6 +335,7 @@ client::dialogs::InboxDialog::handleStateChange(client::si::UserSide& us, client
      case OutputState::ShipScreen:
      case OutputState::PlanetScreen:
      case OutputState::BaseScreen:
+     case OutputState::Starchart:
         us.detachProcess(link);
         m_outputState.set(link, target);
         m_loop.stop(0);
@@ -354,6 +355,12 @@ void
 client::dialogs::InboxDialog::handlePopupConsole(client::si::UserSide& us, client::si::RequestLink2 link)
 {
     defaultHandlePopupConsole(us, link);
+}
+
+void
+client::dialogs::InboxDialog::handleSetViewRequest(client::si::UserSide& ui, client::si::RequestLink2 link, String_t name, bool withKeymap)
+{
+    defaultHandleSetViewRequest(ui, link, name, withKeymap);
 }
 
 client::si::ContextProvider*

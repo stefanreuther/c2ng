@@ -54,10 +54,6 @@ namespace server { namespace talk {
             \return subtree for newsrc data */
         afl::net::redis::Subtree newsrc();
 
-        /** Get user's password hash.
-            \return password hash */
-        afl::net::redis::StringKey passwordHash();
-
         /** Get PM data for user.
             Used for manual access to user's PM data (not recommended normally).
             \return subtree containing forum data. */

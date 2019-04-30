@@ -85,6 +85,10 @@ namespace interpreter {
             \param pgid process group Id */
         void resumeProcess(Process& proc, uint32_t pgid);
 
+        /** Resume all suspended processes.
+            \param pgid process group Id */
+        void resumeSuspendedProcesses(uint32_t pgid);
+
         /** Terminate a process.
             Marks the process terminated. Call removeTerminatedProcesses() to actually remove the object.
             If there is another process in this process' process group, selects the next process; call run() to actually run it.

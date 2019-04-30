@@ -18,7 +18,10 @@ namespace server { namespace interface {
             int32_t gameId;
             int32_t slot;
             int32_t previousState;
+            int32_t turnNumber;
             String_t userId;
+            String_t gameName;
+            bool allowTemp;
 
             Result();
             ~Result();

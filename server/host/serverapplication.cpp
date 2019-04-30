@@ -47,7 +47,20 @@ server::host::ServerApplication::ServerApplication(afl::sys::Environment& env, a
       m_routerAddress(DEFAULT_ADDRESS, ROUTER_PORT),
       m_config(),
       m_interrupt(intr)
-{ }
+{
+    m_config.binDirectory = env.getInstallationDirectoryName();
+
+    try {
+        afl::base::Ref<afl::io::DirectoryEntry> entry = fs.openDirectory(m_config.binDirectory)->getDirectoryEntryByName("bin");
+        if (entry->getFileType() == afl::io::DirectoryEntry::tDirectory) {
+            m_config.binDirectory = entry->getPathName();
+        }
+    }
+    catch (...)
+    {
+        // Ignore errors. These mean 'bin' does not exist.
+    }
+}
 
 server::host::ServerApplication::~ServerApplication()
 { }
@@ -107,6 +120,9 @@ server::host::ServerApplication::serverMain()
     std::auto_ptr<Cron> pCron;
     if (m_config.useCron) {
         pCron.reset(new CronImpl(root, hostRunner));
+        if (m_config.initialSuspend > 0) {
+            pCron->suspendScheduler(root.getTime() + m_config.initialSuspend);
+        }
         log().write(afl::sys::LogListener::Info, LOG_NAME, "Scheduler enabled");
     } else {
         log().write(afl::sys::LogListener::Info, LOG_NAME, "Scheduler disabled");
@@ -207,6 +223,29 @@ server::host::ServerApplication::handleConfiguration(const String_t& key, const 
            Ignored in c2ng/c2host-server for compatibility reasons.
            Number of threads (=maximum number of parallel connections). */
         return true;
+    } else if (key == "HOST.INITIALSUSPEND") {
+        /* @q Host.InitialSuspend:Int (Config)
+           Suspend scheduler for the given relative time after startup.
+           No games will run until that time has passed.
+
+           The intention is to give users (and the mail fetcher) time to submit turns after a server outage, before running hosts.
+
+           @since PCC2 2.40.6 */
+        Time_t n;
+        if (afl::string::strToInteger(value, n) && n >= 0) {
+            m_config.initialSuspend = n;
+        } else {
+            throw afl::except::CommandLineException(afl::string::Format("Invalid value for '%s'", key));
+        }
+        return true;
+    } else if (key == "BINDIR") {
+        /* @q BinDir:Str (Config)
+           Pointer to directory containing binary files.
+           Passed to subprocesses as <tt>bindir</tt> in <tt>c2host.ini</tt>.
+
+           @since PCC2 2.40.6 */
+        m_config.binDirectory = value;
+        return true;
     } else if (key == "HOSTFILE.BASEDIR") {
         // Defined by Hostfile.
         // c2host-classic requires access to basedir; c2host-ng does not.
@@ -303,7 +342,7 @@ server::host::ServerApplication::setupWorkDirectory()
 String_t
 server::host::ServerApplication::getApplicationName() const
 {
-    return afl::string::Format(_("PCC2 Host Server v%s - (c) 2017-2018 Stefan Reuther").c_str(), PCC2_VERSION);
+    return afl::string::Format(_("PCC2 Host Server v%s - (c) 2017-2019 Stefan Reuther").c_str(), PCC2_VERSION);
 }
 
 String_t

@@ -31,7 +31,7 @@ game::map::PlanetStorage::getName(afl::string::Translator& tx) const
     // ex GPlanetTransfer::getName
     // FIXME: PCC 1.x says "$NAME starbase" or "planet $NAME" here.
     // should we use same wording?
-    return m_planet.getName(Planet::PlainName, tx, m_interface);
+    return m_planet.getName(PlainName, tx, m_interface);
 }
 
 game::CargoContainer::Flags_t

@@ -19,6 +19,10 @@ TestServerInterfaceHostCron::testInterface()
             { }
         virtual bool kickstartGame(int32_t /*gameId*/)
             { return false; }
+        virtual void suspendScheduler(int32_t /*relativeTime*/)
+            { }
+        virtual void getBrokenGames(BrokenMap_t& /*result*/)
+            { }
     };
     Tester t;
 }

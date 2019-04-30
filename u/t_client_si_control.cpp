@@ -31,6 +31,8 @@ namespace {
             { ui.continueProcess(link); }
         virtual void handlePopupConsole(client::si::UserSide& ui, client::si::RequestLink2 link)
             { ui.continueProcess(link); }
+        virtual void handleSetViewRequest(client::si::UserSide& ui, client::si::RequestLink2 link, String_t /*name*/, bool /*withKeymap*/)
+            { ui.continueProcessWithFailure(link, "Context error"); }
         virtual client::si::ContextProvider* createContextProvider()
             { return 0; }
     };

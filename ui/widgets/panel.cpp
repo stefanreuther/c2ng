@@ -37,6 +37,10 @@ ui::widgets::Panel::draw(gfx::Canvas& can)
     defaultDrawChildren(can);
 }
 
+void
+ui::widgets::Panel::handleStateChange(State /*st*/, bool /*enable*/)
+{ }
+
 bool
 ui::widgets::Panel::handleKey(util::Key_t key, int prefix)
 {

@@ -119,7 +119,7 @@ game::interface::getUfoProperty(const game::map::Ufo& ufo, UfoProperty iup,
      case iupName:
     //     /* @q Name:Str (Ufo Property)
     //        Name of Ufo. */
-        return makeStringValue(ufo.getName(ufo.PlainName, tx, iface));
+        return makeStringValue(ufo.getName(PlainName, tx, iface));
      case iupRadius:
     //     /* @q Radius:Int (Ufo Property)
     //        Radius of Ufo in ly. */

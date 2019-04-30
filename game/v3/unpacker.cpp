@@ -277,7 +277,7 @@ game::v3::Unpacker::finish(afl::io::Directory& dir, ResultFile& file)
 {
     // ex GUnpacker::unpack (part)
     // Load control file. We don't care what kind it is, since we'll be rewriting it anyway.
-    m_control.load(dir, m_playerId);
+    m_control.load(dir, m_playerId, m_translator, m_log);
 
     // Unpack ships, planets, bases
     saveShips(dir);
@@ -342,7 +342,7 @@ game::v3::Unpacker::finish(afl::io::Directory& dir, ResultFile& file)
         m_control.setFileOwner(0);
         break;
     }
-    m_control.save(dir);
+    m_control.save(dir, m_translator, m_log);
 }
 
 // Get turn number.

@@ -23,6 +23,7 @@ namespace game { namespace ref {
     const int ConfigSortByDamage      = 9;
     const int ConfigSortByName        = 10;
     const int ConfigSortByNewPosition = 11;
+    const int ConfigSortByTransferTarget = 12;
 
     SortPredicate& createSortPredicate(int config, Session& session, afl::base::Deleter& del);
 
@@ -34,8 +35,13 @@ namespace game { namespace ref {
         // FIXME: favorites
     };
 
-    void fetchConfiguration(Session& session, Configuration& config);
-    void storeConfiguration(Session& session, const Configuration& config);
+    struct ConfigurationSelection;
+
+    extern const ConfigurationSelection REGULAR;
+    extern const ConfigurationSelection CARGO_TRANSFER;
+
+    void fetchConfiguration(Session& session, const ConfigurationSelection& sel, Configuration& config);
+    void storeConfiguration(Session& session, const ConfigurationSelection& sel, const Configuration& config);
 
 } }
 

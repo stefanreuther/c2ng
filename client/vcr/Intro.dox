@@ -1,0 +1,6 @@
+/*!
+     \namespace client::vcr
+     \brief VCR Playback
+
+     This namespace contains functions to play combat.
+ */

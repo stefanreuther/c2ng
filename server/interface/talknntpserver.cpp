@@ -27,28 +27,24 @@ server::interface::TalkNNTPServer::~TalkNNTPServer()
 bool
 server::interface::TalkNNTPServer::handleCommand(const String_t& upcasedCommand, interpreter::Arguments& args, std::auto_ptr<Value_t>& result)
 {
-    if (upcasedCommand == "NNTPUSER") {
-        /* @q NNTPUSER user:UserName pass:Str (Talk Command)
-           Authenticate user.
-           This checks the user's credentials against the database.
-           It does not change the user context.
+    /* @q NNTPUSER user:UserName pass:Str (Talk Command)
+       Authenticate user.
+       This checks the user's credentials against the database.
+       It does not change the user context.
 
-           Permissions: none.
+       Permissions: none.
 
-           @err 401 Failed (invalid user name)
-           @err 401 Bad user Id (user does not exist)
-           @err 401 Bad hash (invalid user profile)
-           @err 401 Bad password (invalid password)
+       This command was removed in c2ng 2.40.6. Use {LOGIN (User Command)} instead.
 
-           @retval UID user Id
+       @err 401 Failed (invalid user name)
+       @err 401 Bad user Id (user does not exist)
+       @err 401 Bad hash (invalid user profile)
+       @err 401 Bad password (invalid password)
 
-           @uses uid:$USERNAME, user:$UID:password */
-        args.checkArgumentCount(2);
-        String_t username = toString(args.getNext());
-        String_t password = toString(args.getNext());
-        result.reset(makeStringValue(m_implementation.checkUser(username, password)));
-        return true;
-    } else if (upcasedCommand == "NNTPLIST") {
+       @retval UID user Id
+
+       @uses uid:$USERNAME, user:$UID:password */
+    if (upcasedCommand == "NNTPLIST") {
         /* @q NNTPLIST (Talk Command)
            List forums as newsgroups.
            Lists all forums that can be read by the current user.

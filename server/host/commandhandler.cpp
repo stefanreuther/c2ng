@@ -13,6 +13,7 @@
 #include "server/host/hostgame.hpp"
 #include "server/host/hostplayer.hpp"
 #include "server/host/hostschedule.hpp"
+#include "server/host/hostslot.hpp"
 #include "server/host/hosttool.hpp"
 #include "server/host/hostturn.hpp"
 #include "server/host/root.hpp"
@@ -22,9 +23,14 @@
 #include "server/interface/hostgameserver.hpp"
 #include "server/interface/hostplayerserver.hpp"
 #include "server/interface/hostscheduleserver.hpp"
+#include "server/interface/hostslotserver.hpp"
 #include "server/interface/hosttoolserver.hpp"
 #include "server/interface/hostturnserver.hpp"
 #include "server/types.hpp"
+#include "server/host/hosthistory.hpp"
+#include "server/interface/hosthistoryserver.hpp"
+#include "server/interface/hostrankingserver.hpp"
+#include "server/host/hostranking.hpp"
 
 
 server::host::CommandHandler::CommandHandler(Root& root, Session& session)
@@ -117,6 +123,21 @@ server::host::CommandHandler::handleCommand(const String_t& upcasedCommand, inte
         ok = server::interface::HostFileServer(impl).handleCommand(upcasedCommand, args, result);
     }
     if (!ok) {
+        // SLOTxxx
+        HostSlot impl(m_session, m_root);
+        ok = server::interface::HostSlotServer(impl).handleCommand(upcasedCommand, args, result);
+    }
+    if (!ok) {
+        // HISTxxx
+        HostHistory impl(m_session, m_root);
+        ok = server::interface::HostHistoryServer(impl).handleCommand(upcasedCommand, args, result);
+    }
+    if (!ok) {
+        // RANKxxx
+        HostRanking impl(m_session, m_root);
+        ok = server::interface::HostRankingServer(impl).handleCommand(upcasedCommand, args, result);
+    }
+    if (!ok) {
         // CRONxxx
         HostCron impl(m_session, m_root);
         ok = server::interface::HostCronServer(impl).handleCommand(upcasedCommand, args, result);
@@ -143,7 +164,15 @@ server::host::CommandHandler::getHelp(String_t topic) const
         return "CRON Commands:\n"
             " CRONGET gid\n"
             " CRONKICK gid\n"
-            " CRONLIST [LIMIT n]\n";
+            " CRONLIST [LIMIT n]\n"
+            " CRONLSBROKEN\n"
+            " CRONSUSPEND time\n";
+    } else if (topic == "FILE") {
+        return "File Commands:\n"
+            " LS dir\n"
+            " GET file\n"
+            " STAT path\n"
+            " PSTAT path\n";
     } else if (topic == "GAME") {
         return "GAME Commands:\n"
             " NEWGAME\n"
@@ -195,19 +224,32 @@ server::host::CommandHandler::getHelp(String_t topic) const
             " DELAY n\n"
             " LIMIT n\n"
             " UNTILTURN n|UNTILTIME n|FOREVER\n";
+    } else if (topic == "SLOT") {
+        return "Slot Commands:\n"
+            " SLOTLS gid\n"
+            " SLOTADD gid slot...\n"
+            " SLOTRM gid slot...\n";
+    } else if (topic == "HIST") {
+        return "History Commands:\n"
+            " HISTEVENTS [GAME gid] [USER uid] [LIMIT n]\n"
+            " HISTTURN gid [LIMIT n] [UNTIL turn] [SCORE name] [STATUS] [PLAYER]\n";
     } else {
         return "Commands:\n"
             " PING\n"
             " HELP [<topic>]\n"
             " USER <uid>\n"
             " CRON->\n"
+            " FILE->\n"
             " GAME->\n"
+            " HIST->\n"
             " HOST->\n"
             " MASTER->\n"
             " PLAYER->\n"
             " SCHEDULE->\n"
             " SHIPLIST->\n"
+            " SLOT->\n"
             " TOOL->\n"
+            " RANKLIST [SORT <field>] [REVERSE] [FIELDS <field>...]\n"
             " TRN <data> [GAME <gid> [SLOT <slot>]] [MAIL <mail>]\n"
             " TRNMARKTEMP <gid> <slot> <state>\n"
             "This is c2host-ng.\n";

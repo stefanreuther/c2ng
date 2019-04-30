@@ -65,7 +65,7 @@
 #    + @retkey, @retval, @err, @todo, @diff (but without their magical properties of
 #      adding backlinks)
 #
-#  - generica pages can be written using
+#  - generic pages can be written using
 #      @page link,name
 #    The following markup commands are supported:
 #    + @in page (place this page within another / hierarchy)
@@ -134,6 +134,7 @@ my %byKind;
 
 # what -> name -> { doc => [],
 #                   name => '',
+#                   locationLabel => 'file:line',
 #                   did => 0|1 }
 # what is "type", "group", "version"
 my %descriptions;
@@ -142,7 +143,8 @@ my %descriptions;
 # Each page is { name => '',
 #                title => '',
 #                doc => [],
-#                parent => '' }
+#                parent => '',
+#                locationLabel => 'file:line' }
 my @pages;
 
 # link -> 1 if used
@@ -163,37 +165,45 @@ foreach (@ARGV) {
         exit 0;
     }
     open FILE, "< $_" or die "$_: $!";
+    my $lineNr = 0;
     while (defined(my $line = <FILE>)) {
         $line =~ s/[\r\n]//g;
+        ++$lineNr;
         if (my ($prefix, $command, $args) = $line =~ /^(.*?)\@(q|type|group|page|version)\s+(.*)/) {
             # Read the comment
             my @args = ($args);
             my @lines;
+            my $locationLabel = "$_:$lineNr";
             if ($prefix =~ m|%\s*$|) {
                 # CCScript: % @q blah
                 while (defined($line = <FILE>) && $line =~ m|^\s*%|) {
                     $line =~ s/[\r\n]//g;
+                    ++$lineNr;
                     if (length($line) > length($prefix)) {
                         push @lines, substr($line, length($prefix));
                     } else {
                         push @lines, '';
                     }
                 }
+                ++$lineNr;
             } elsif ($prefix =~ m|\#\s*$|) {
                 # Perl: # @q blah
                 while (defined($line = <FILE>) && $line =~ m|^\s*\#|) {
                     $line =~ s/[\r\n]//g;
+                    ++$lineNr;
                     if (length($line) > length($prefix)) {
                         push @lines, substr($line, length($prefix));
                     } else {
                         push @lines, '';
                     }
                 }
+                ++$lineNr;
             } elsif ($prefix =~ m|/\*+\s*|) {
                 # C++: /* @q blah
                 if ($args !~ s|\*+/||) {
                     while (defined($line = <FILE>)) {
                         $line =~ s/[\r\n]//g;
+                        ++$lineNr;
                         my $end = $line =~ s|\*+/||;
                         if (length($line) > length($prefix)) {
                             push @lines, substr($line, length($prefix));
@@ -202,16 +212,20 @@ foreach (@ARGV) {
                         }
                         last if $end;
                     }
+                    ++$lineNr;
                 }
             } elsif ($prefix eq '') {
                 # Text file: read until ---
                 while (defined($line = <FILE>) && $line !~ m|^---+[\r\n]*$|) {
                     $line =~ s/[\r\n]//g;
+                    ++$lineNr;
                     push @lines, $line;
                 }
+                ++$lineNr;
             } else {
                 # What?
-                warn "WARNING: Unparsed: '$prefix'";
+                warn "$_:$lineNr: WARNING: Unparsed: '$prefix'\n";
+                next;
             }
 
             # Continuations
@@ -234,15 +248,15 @@ foreach (@ARGV) {
             # Save it away
             if ($command eq 'q') {
                 foreach (@args) {
-                    processDocumentation($_, @lines);
+                    processDocumentation($locationLabel, $_, @lines);
                 }
             } elsif ($command eq 'page') {
                 foreach (@args) {
-                    processPage($_, @lines);
+                    processPage($locationLabel, $_, @lines);
                 }
             } else {
                 foreach (@args) {
-                    processDescription($command, $_, @lines);
+                    processDescription($locationLabel, $command, $_, @lines);
                 }
             }
         }
@@ -306,7 +320,7 @@ foreach my $b (sort keys %byLowercaseBasename) {
         if (!$obj->{didUses}) {
             $obj->{didUses} = 1;
             foreach my $link (@{$obj->{uses}}) {
-                my $solved = resolveNameToObject($link);
+                my $solved = resolveNameToObject($obj->{locationLabel}, $link);
                 if (defined($solved)) {
                     push @{$solved->{usedBy}}, $obj
                       unless grep {$_ eq $obj} @{$solved->{usedBy}};
@@ -378,6 +392,7 @@ print "</help>\n";
 ################################# Parsing #################################
 
 sub processDocumentation {
+    my $locationLabel = shift;
     my $header = shift;
     my $obj = { baseNames => {},
                 kinds => {},
@@ -389,7 +404,8 @@ sub processDocumentation {
                 didUses => 0,
                 did => 0,
                 assignable => 0,
-                proto => 1 };
+                proto => 1,
+                locationLabel => $locationLabel };
 
     # Process the prototype
     my $theName;
@@ -401,7 +417,7 @@ sub processDocumentation {
         if (s|\s+\(([^\)]+)\)?$||) { $kind = $1; }
         my $proto = $_;
         if ($kind eq '') {
-            warn "WARNING: missing kind for '$proto'\n";
+            warn "$locationLabel: WARNING: missing kind for '$proto'\n";
         }
 
         # Function or property?
@@ -410,15 +426,17 @@ sub processDocumentation {
             # name(arg:type...):type
             $obj->{type} = 'function';
             if ($ret eq '') {
-                warn "WARNING: Missing return type in '$proto', assuming 'Any'";
+                warn "$locationLabel: WARNING: Missing return type in '$proto', assuming 'Any'\n";
                 $ret = 'Any';
             }
             push @{$obj->{baseNames}{$name}}, $proto;
             push @{$byBasename{$name}}, $obj;
             if ($kind !~ /internal/i) {
-                push @{$byDataType{$ret}{result}{$name}}, $obj
-                  unless $ret eq 'void';
-                processArgumentList($args, $name, $obj);
+                if ($ret ne 'void') {
+                    push @{$byDataType{$ret}{result}{$name}}, $obj;
+                    $byDataType{$ret}{locationLabel} ||= $locationLabel;
+                }
+                processArgumentList($locationLabel, $args, $name, $obj);
             }
         } elsif (($name,$args) = $proto =~ m|^(\S+)\s+([^:].*)$|) {
             # name arg:type
@@ -426,7 +444,7 @@ sub processDocumentation {
             push @{$obj->{baseNames}{$name}}, $proto;
             push @{$byBasename{$name}}, $obj;
             if ($kind !~ /internal/i) {
-                processArgumentList($args, $name, $obj);
+                processArgumentList($locationLabel, $args, $name, $obj);
             }
         } elsif (($kind =~ /\b(command|api|service)\b/i && (($name) = $proto =~ m|(^\S+)$|)) || (($name) = $proto =~ m|(^\S+):void$|)) {
             # name
@@ -441,9 +459,10 @@ sub processDocumentation {
             push @{$byBasename{$name}}, $obj;
             if ($kind !~ /internal/i) {
                 push @{$byDataType{$type}{type}{$name}}, $obj;
+                $byDataType{$type}{locationLabel} ||= $locationLabel;
             }
         } else {
-            warn "WARNING: Could not understand this prototype: '$proto'";
+            warn "$locationLabel: WARNING: Could not understand this prototype: '$proto'\n";
             next
         }
 
@@ -451,6 +470,7 @@ sub processDocumentation {
         foreach (split /,\s*/, $kind) {
             push @{$obj->{kinds}{$_}}, $proto;
             push @{$byKind{$_}{items}{$name}}, $obj;
+            $byKind{$_}{locationLabel} ||= $locationLabel;
         }
 
         # Remember the name
@@ -472,12 +492,15 @@ sub processDocumentation {
             $needBlank = 1;
         } elsif (/^\s*\@type\s+(.*)/) {
             push @{$byDataType{$1}{type}{$theName}}, $obj;
+            $byDataType{$1}{locationLabel} ||= $locationLabel;
             $needBlank = 1;
         } elsif (/^\s*\@argtype\s+(.*)/) {
             push @{$byDataType{$1}{arg}{$theName}}, $obj;
+            $byDataType{$1}{locationLabel} ||= $locationLabel;
             $needBlank = 1;
         } elsif (/^\s*\@rettype\s+(.*)/) {
             push @{$byDataType{$1}{result}{$theName}}, $obj;
+            $byDataType{$1}{locationLabel} ||= $locationLabel;
             $needBlank = 1;
         } elsif (/^\s*\@noproto/) {
             $obj->{proto} = 0;
@@ -486,6 +509,7 @@ sub processDocumentation {
             foreach (split /,\s*/, $1) {
                 push @{$obj->{since}}, $_;
                 push @{$bySince{$_}{items}{$theName}}, $obj;
+                $bySince{$_}{locationLabel} ||= $locationLabel;
             }
             $needBlank = 1;
         } elsif (/^\s*\@returns?\b(.*)/) {
@@ -505,12 +529,14 @@ sub processDocumentation {
                 # @retkey name:type description
                 # @retval type description
                 push @{$byDataType{$1}{result}{$theName}}, $obj
-                  unless grep {$_ eq $obj} @{$byDataType{$1}{result}{$theName}};
+                    unless grep {$_ eq $obj} @{$byDataType{$1}{result}{$theName}};
+                $byDataType{$1}{locationLabel} ||= $locationLabel;
             }
             if (/^\s*\@key\s+\S+:([^\s\[]+)/) {
                 # @key name:type description
                 push @{$byDataType{$1}{type}{$theName}}, $obj
-                  unless grep {$_ eq $obj} @{$byDataType{$1}{type}{$theName}};
+                    unless grep {$_ eq $obj} @{$byDataType{$1}{type}{$theName}};
+                $byDataType{$1}{locationLabel} ||= $locationLabel;
             }
             if ($needBlank) {
                 push @{$obj->{doc}}, '';
@@ -523,15 +549,17 @@ sub processDocumentation {
 
 
 sub processArgumentList {
-    my ($args, $name, $obj) = @_;
+    my ($locationLabel, $args, $name, $obj) = @_;
     if (defined($args) && $args ne '') {
         my %did;
         foreach (split /[,=\s]+/, $args) {
             s|[.()]+$||;
             if (/:([^\[\]\(\)]+)/) {
                 if (!exists $did{$1}) {
-                    push @{$byDataType{$1}{arg}{$name}}, $obj
-                      unless $1 eq 'void';
+                    if ($1 ne 'void') {
+                        push @{$byDataType{$1}{arg}{$name}}, $obj;
+                        $byDataType{$1}{locationLabel} ||= $locationLabel;
+                    }
                     $did{$1} = 1;
                 }
             }
@@ -540,10 +568,12 @@ sub processArgumentList {
 }
 
 sub processDescription {
+    my $locationLabel = shift;
     my $what = shift;
     my $name = shift;
     my $result =  { doc => [],
                     did => 0,
+                    locationLabel => $locationLabel,
                     name => $name };
     foreach (@_) {
         if (/^\@name\s+(.*)/) {
@@ -561,6 +591,7 @@ sub processDescription {
 }
 
 sub processPage {
+    my $locationLabel = shift;
     my $name = shift;
     my $title = $name;
     if ($name =~ s|,\s*(.*)||) {
@@ -570,7 +601,8 @@ sub processPage {
                    did => 0,
                    name => $name,
                    title => $title,
-                   parent => '' };
+                   parent => '',
+                   locationLabel => $locationLabel };
 
     # Process the documentation
     my $needBlank = 0;
@@ -601,7 +633,7 @@ sub generateTypeIndex {
     my $n = shift;
     print "  <page id=\"".escape($byDataType{$n}{LINK})."\">\n";
     print "   <h1>Data Type <em>".escape($n)."</em></h1>\n";
-    generateDescription('type', $n);
+    generateDescription($byDataType{$n}{locationLabel}, 'type', $n);
     generateTypeIndexPart($n, 'arg', 'Commands and Functions taking <em>'.escape($n).'</em> as Parameter');
     generateTypeIndexPart($n, 'result', 'Functions returning <em>'.escape($n).'</em>');
     generateTypeIndexPart($n, 'type', 'Properties of type <em>'.escape($n).'</em>');
@@ -625,7 +657,7 @@ sub generateVersionIndex {
     my $n = shift;
     print "  <page id=\"".escape($bySince{$n}{LINK})."\">\n";
     print "   <h1>Version ".escape($n)."</h1>\n";
-    generateDescription('version', $n);
+    generateDescription($bySince{$n}{locationLabel}, 'version', $n);
     print "   <p>Items introduced in this version:</p>\n";
     generateIndex(' ', $bySince{$n}{items}, sort keys %{$bySince{$n}{items}});
     print "  </page>\n";
@@ -639,7 +671,7 @@ sub generateGroupIndex {
     my $n = shift;
     print "  <page id=\"".escape($byKind{$n}{LINK})."\">\n";
     print "   <h1>".escape($n)."</h1>\n";
-    generateDescription('group', $n);
+    generateDescription($byKind{$n}{locationLabel}, 'group', $n);
     generateIndex(' ', $byKind{$n}{items}, sort {lc($a) cmp lc($b)} keys %{$byKind{$n}{items}});
     print "  </page>\n";
 }
@@ -664,7 +696,7 @@ sub generatePages {
             # Generate
             print $indent."<page id=\"".escape($p->{name})."\">\n";
             print $indent." <h1>".escape($p->{title})."</h1>\n";
-            generateMarkup($p->{doc}, "\@page $p->{name}");
+            generateMarkup($p->{locationLabel}, $p->{doc}, "\@page $p->{name}");
 
             # Generate children
             if ($filter) {
@@ -677,13 +709,19 @@ sub generatePages {
 }
 
 sub generateDescription {
+    my $locationLabel = shift;
     my $what = shift;
     my $name = shift;
     if (!exists $descriptions{$what}{$name}) {
-        warn "WARNING: no description for '\@$what $name'";
+        if (defined $locationLabel) {
+            warn "$locationLabel: WARNING: no description for '\@$what $name' which is first used here\n";
+        } else {
+            warn "WARNING: no description for '\@$what $name'\n";
+        }
     } else {
-        generateMarkup($descriptions{$what}{$name}{doc}, "\@$what $name");
+        generateMarkup($descriptions{$what}{$name}{locationLabel}, $descriptions{$what}{$name}{doc}, "\@$what $name");
         $descriptions{$what}{$name}{did} = 1;
+        generateLocation($descriptions{$what}{$name});
     }
 }
 
@@ -745,7 +783,7 @@ sub generateDocumentation {
     }
 
     # Documentation
-    generateMarkup($p->{doc}, (sort {lc($a) cmp lc($b)} keys %{$p->{baseNames}})[0]);
+    generateMarkup($p->{locationLabel}, $p->{doc}, (sort {lc($a) cmp lc($b)} keys %{$p->{baseNames}})[0]);
 
     # Since
     if (@{$p->{since}}) {
@@ -757,14 +795,14 @@ sub generateDocumentation {
     # See also
     if (@{$p->{see}}) {
         print "   <p><b>See also: </b>",
-          join(', ', map {processLink($_)} @{$p->{see}}),
+          join(', ', map {processLink($p->{locationLabel}, $_)} @{$p->{see}}),
             "</p>\n";
     }
 
     # Uses
     if (@{$p->{uses}}) {
         print "   <p><b>Uses: </b>",
-          join(', ', map {processLink($_)} @{$p->{uses}}),
+          join(', ', map {processLink($p->{locationLabel}, $_)} @{$p->{uses}}),
             "</p>\n";
     }
 
@@ -774,6 +812,9 @@ sub generateDocumentation {
           join(', ', map{'<a href="'.escape($_->{link}).'">'.escape((sort keys %{$_->{baseNames}})[0]).'</a>'} @{$p->{usedBy}}),
             "</p>\n";
     }
+
+    # Source
+    generateLocation($p);
 
     print "  </page>\n";
 }
@@ -876,6 +917,7 @@ sub generatePrototype {
 }
 
 sub generateMarkup {
+    my $locationLabel = shift;
     my $p = shift;
     my $name = shift;
     # 0 = outside;                  no tags open,  cursor at beginning of line
@@ -904,17 +946,17 @@ sub generateMarkup {
         } elsif ($state == 2) {
             # Explicit <$tag>
             if (m|^</$tag|) {
-                print processMarkup($_)."\n";
+                print processMarkup($locationLabel, $_)."\n";
                 $state = 0;
             } else {
-                print "\n".processMarkup($_);
+                print "\n".processMarkup($locationLabel, $_);
             }
         } elsif (/^<(pre|ul|ol|dl|table|p|h[1-6])/) {
             # Starting explicit tag
             print $closer[$state];
             $state = 2;
             $tag = $1;
-            print "    ", processMarkup($_);
+            print "    ", processMarkup($locationLabel, $_);
         } elsif (/^\s*\@retkey\s+(\S+):([^\s\[]+)([\[\]]*)(.*)/) {
             # Start or continue @retkey list
             if ($state != 5) {
@@ -925,7 +967,7 @@ sub generateMarkup {
             } else {
                 print "</li>\n";
             }
-            generateRetKeyLine($1, $2, $3, $4);
+            generateRetKeyLine($locationLabel, $1, $2, $3, $4);
         } elsif (/^\s*\@key\s+(\S+):([^\s\[]+)([\[\]]*)(.*)/) {
             # Start or continue @key list
             if ($state != 7) {
@@ -936,11 +978,11 @@ sub generateMarkup {
             } else {
                 print "</li>\n";
             }
-            generateRetKeyLine($1, $2, $3, $4);
+            generateRetKeyLine($locationLabel, $1, $2, $3, $4);
         } elsif (/^\s*\@retval\s+([^\s\[]+)([\[\]]*)(.*)/) {
             # Return value; implicit start of a paragraph
             print $closer[$state];
-            print "    <p><b>Return value</b> (", processTypeLink($1), $2, "):", processMarkup($3);
+            print "    <p><b>Return value</b> (", processTypeLink($1), $2, "):", processMarkup($locationLabel, $3);
             $state = 1;
         } elsif (/^\s*\@err\s*(.*)/) {
             # Start or continue @error list
@@ -952,7 +994,7 @@ sub generateMarkup {
             } else {
                 print "</li>\n";
             }
-            print "     <li>", processMarkup($1);
+            print "     <li>", processMarkup($locationLabel, $1);
         } elsif (/^-\s+(.*)/) {
             # Start or continue implicit <ul> list
             if ($state != 3) {
@@ -962,10 +1004,10 @@ sub generateMarkup {
             } else {
                 print "</li>\n";
             }
-            print "     <li>", processMarkup($1);
+            print "     <li>", processMarkup($locationLabel, $1);
         } elsif ($closer[$state] =~ m|</li>| && /^\s+(.*)/) {
             # Continue implicit list
-            print "\n     ", processMarkup($1);
+            print "\n     ", processMarkup($locationLabel, $1);
         } elsif (/^\|(.*)/) {
             # Start or continue implicit <pre>
             if ($state != 4) {
@@ -978,7 +1020,7 @@ sub generateMarkup {
             if ($firstPre) {
                 print generatePrototype($1);
             } else {
-                print processMarkup($1);
+                print processMarkup($locationLabel, $1);
             }
         } elsif ($_ ne '') {
             # Start or continue implicit <p>
@@ -989,7 +1031,7 @@ sub generateMarkup {
             } else {
                 print "\n    ";
             }
-            print processMarkup($_);
+            print processMarkup($locationLabel, $_);
         } else {
             print $closer[$state];
             $state = 0;
@@ -1011,9 +1053,18 @@ sub generateMarkup {
     }
 }
 
+sub generateLocation {
+    my $p = shift;
+    if (defined($p->{locationLabel})) {
+        my $ll = $p->{locationLabel};
+        $ll =~ s|^(\.\./)+||;
+        print "   <p><font color=\"dim\"><small>(from ".escape($ll).")</small></font></p>\n";
+    }
+}
+
 sub generateRetKeyLine {
-    my ($name, $type, $array, $rest) = @_;
-    print "     <li><tt>", escape($name), '<font color="dim">:', processTypeLink($type), escape($array), "</font></tt>", processMarkup($rest);
+    my ($locationLabel, $name, $type, $array, $rest) = @_;
+    print "     <li><tt>", escape($name), '<font color="dim">:', processTypeLink($type), escape($array), "</font></tt>", processMarkup($locationLabel, $rest);
 }
 
 sub processTypeLink {
@@ -1026,19 +1077,21 @@ sub processTypeLink {
 }
 
 sub processMarkup {
+    my $locationLabel = shift;
     my $t = shift;
     $t =~ s|\@todo|<b>TODO:</b>|g;
     $t =~ s|\@diff|<b>Version Differences:</b>|g;
     $t =~ s!%(([A-Za-z0-9_\$]|\.[A-Za-z0-9_\$])+(\(\))?)!<tt>$1</tt>!g;
     $t =~ s|<(?=[^/!A-Za-z])|&lt;|g;
     $t =~ s|&(?=[^\#A-Za-z])|&amp;|g;
-    $t =~ s|\{(.*?)\}|processLink($1)|eg;
+    $t =~ s|\{(.*?)\}|processLink($locationLabel, $1)|eg;
     $t =~ s|\bEMPTY\b|<font color="dim">EMPTY</font>|g;
     $t;
 }
 
 sub processLink {
     # Parse link
+    my $locationLabel = shift;
     my $orig = shift;
     my $link = $orig;
     my $text = $orig;
@@ -1057,13 +1110,15 @@ sub processLink {
     }
 
     # Resolve link
-    if ($link =~ /^@(type|group|version)\s+(.*)/) {
+    if ($link =~ /^\\(.*)/) {
+        return "{".escape($1)."}";
+    } elsif ($link =~ /^@(type|group|version)\s+(.*)/) {
         if (!$hadText) {
             $text = $2
         }
         my $obj = ($1 eq 'type' ? $byDataType{$2} : $1 eq 'group' ? $byKind{$2} : $bySince{$2});
         if (!defined $obj) {
-            warn "WARNING: Cannot resolve link '$orig', not found";
+            warn "$locationLabel: WARNING: Cannot resolve link '$orig': not found\n";
             return escape($text);
         } else {
             return "<a href=\"".escape($obj->{LINK})."\">".escape($text)."</a>";
@@ -1073,7 +1128,13 @@ sub processLink {
                                   && ($func == 0 || $_->{type} eq 'function') } @{$byBasename{$link}};
         if (@candidates == 0) {
             # Error case
-            warn "WARNING: Cannot resolve link '$orig', '$link' exists, but not with kind '$kind'";
+            warn "$locationLabel: WARNING: Cannot resolve link '$orig': '$link' exists, but not with kind '$kind'\n";
+            foreach (@{$byBasename{$link}}) {
+                my $loc = $_->{locationLabel};
+                foreach (sort keys %{$_->{kinds}}) {
+                    warn "$locationLabel:   candidate kind: $_ ($loc)\n";
+                }
+            }
             return escape($text);
         } elsif (@candidates == 1) {
             # Success case
@@ -1084,11 +1145,11 @@ sub processLink {
         }
     } elsif ($link =~ m|^\S+:\S+$|) {
         if (!exists $usedLinks{$link}) {
-            warn "WARNING: no page named '$link' (proceeding anyway)\n";
+            warn "$locationLabel: WARNING: no page named '$link' (proceeding anyway)\n";
         }
         return "<a href=\"".escape($link)."\">".escape($text)."</a>";
     } else {
-        warn "WARNING: Cannot resolve link '$orig', not found";
+        warn "$locationLabel: WARNING: Cannot resolve link '$orig': not found\n";
         return escape($text);
     }
 }
@@ -1098,6 +1159,7 @@ sub processLink {
 # so what remains are formats "name", "name (kind)" and "name()".
 sub resolveNameToObject {
     # Parse link
+    my $locationLabel = shift;
     my $orig = shift;
     my $link = $orig;
     my $kind = '';
@@ -1115,14 +1177,14 @@ sub resolveNameToObject {
                                   && ($func == 0 || $_->{type} eq 'function') } @{$byBasename{$link}};
         if (@candidates != 1) {
             # Ambiguous or type mismatch
-            warn "WARNING: Cannot resolve link '$orig', no unique match'";
+            warn "$locationLabel: WARNING: Cannot resolve link '$orig': no unique match'\n";
             return undef;
         } else {
             # Success case
             return $candidates[0];
         }
     } else {
-        warn "WARNING: Cannot resolve link '$orig', not found";
+        warn "$locationLabel: WARNING: Cannot resolve link '$orig': not found\n";
         return undef;
     }
 }
@@ -1162,7 +1224,7 @@ sub compareVersions {
 sub properName {
     my $obj = shift;
     my $n = shift;
-    foreach (keys %{$obj->{baseNames}}) {
+    foreach (sort keys %{$obj->{baseNames}}) {
         if (lc($_) eq $n) {
             return $_;
         }

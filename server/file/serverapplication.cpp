@@ -218,7 +218,7 @@ server::file::ServerApplication::handleConfiguration(const String_t& key, const 
 String_t
 server::file::ServerApplication::getApplicationName() const
 {
-    return afl::string::Format(_("PCC2 File Server v%s - (c) 2017-2018 Stefan Reuther").c_str(), PCC2_VERSION);
+    return afl::string::Format(_("PCC2 File Server v%s - (c) 2017-2019 Stefan Reuther").c_str(), PCC2_VERSION);
 }
 
 String_t

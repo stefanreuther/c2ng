@@ -336,13 +336,14 @@ interpreter::World::fileSystem()
 
 // Compile a file.
 interpreter::BCORef_t
-interpreter::World::compileFile(afl::io::Stream& file)
+interpreter::World::compileFile(afl::io::Stream& file, const String_t& origin, int level)
 {
     // Generate compilation objects
     afl::io::TextFile tf(file);
     FileCommandSource fcs(tf);
     BCORef_t nbco = *new BytecodeObject();
     nbco->setFileName(file.getName());
+    nbco->setOrigin(origin);
 
     // Compile
     try {
@@ -351,6 +352,7 @@ interpreter::World::compileFile(afl::io::Stream& file)
         scc.withFlag(CompilationContext::LocalContext)
             .withFlag(CompilationContext::ExpressionsAreStatements)
             .withFlag(CompilationContext::LinearExecution);
+        sc.setOptimisationLevel(level);
         sc.compileList(*nbco, scc);
         sc.finishBCO(*nbco, scc);
         return nbco;

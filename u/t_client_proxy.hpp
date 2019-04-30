@@ -11,4 +11,9 @@ class TestClientProxyObjectListener : public CxxTest::TestSuite {
  public:
 };
 
+class TestClientProxyObjectObserver : public CxxTest::TestSuite {
+ public:
+    void testInterface();
+};
+
 #endif

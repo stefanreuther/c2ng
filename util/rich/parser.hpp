@@ -64,6 +64,15 @@ namespace util { namespace rich {
             \return parsed content */
         Text parse();
 
+        /** Access reader.
+            \return Reader this was constructed from. */
+        afl::io::xml::BaseReader& reader();
+
+        /** Get current token.
+            This is the token that will be consumed next.
+            \return Current token */
+        afl::io::xml::BaseReader::Token getCurrentToken() const;
+
         /** Append string to Text.
             This collapses multiple spaces into one, and strips newlines.
             \param out       [in/out] Text to append to

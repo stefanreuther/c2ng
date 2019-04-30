@@ -6,8 +6,9 @@
 #include "server/nntp/root.hpp"
 #include "afl/net/reconnectable.hpp"
 
-server::nntp::Root::Root(afl::net::CommandHandler& talk, const String_t& baseUrl)
+server::nntp::Root::Root(afl::net::CommandHandler& talk, afl::net::CommandHandler& user, const String_t& baseUrl)
     : m_talk(talk),
+      m_user(user),
       m_baseUrl(baseUrl),
       m_log(),
       m_idCounter(0)
@@ -29,6 +30,12 @@ afl::net::CommandHandler&
 server::nntp::Root::talk()
 {
     return m_talk;
+}
+
+afl::net::CommandHandler&
+server::nntp::Root::user()
+{
+    return m_user;
 }
 
 void

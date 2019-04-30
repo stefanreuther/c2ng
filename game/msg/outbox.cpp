@@ -132,7 +132,7 @@ game::msg::Outbox::getNumMessages()
 // /** Get text of message /index/ (0-based). The return value will
 //     include headers. */
 String_t
-game::msg::Outbox::getMessageText(size_t index, afl::string::Translator& tx, PlayerList& players)
+game::msg::Outbox::getMessageText(size_t index, afl::string::Translator& tx, const PlayerList& players)
 {
     // ex GOutbox::getText
     if (index < m_messages.size()) {
@@ -143,7 +143,7 @@ game::msg::Outbox::getMessageText(size_t index, afl::string::Translator& tx, Pla
 }
 
 String_t
-game::msg::Outbox::getMessageHeading(size_t index, afl::string::Translator& tx, PlayerList& players)
+game::msg::Outbox::getMessageHeading(size_t index, afl::string::Translator& tx, const PlayerList& players)
 {
     // ex GOutbox::getHeading
     if (index < m_messages.size()) {

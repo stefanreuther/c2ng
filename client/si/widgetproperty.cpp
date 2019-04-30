@@ -13,6 +13,7 @@
 #include "client/si/widgetreference.hpp"
 #include "ui/widgets/checkbox.hpp"
 #include "ui/widgets/radiobutton.hpp"
+#include "interpreter/arguments.hpp"
 
 /*
  *  Direct Widget Access

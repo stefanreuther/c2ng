@@ -44,6 +44,9 @@ server::interface::HostTurnServer::handleCommand(const String_t& upcasedCommand,
            @retkey slot:Int (detected slot number, same as %slot parameter if specified)
            @retkey previous:HostTurnStatus (previous turn file state)
            @retkey user:UID (can be blank)
+           @retkey name:Str (game name, since 2.40.6)
+           @retkey allowtemp:Bool (allow TRNMARKTEMP command, since 2.40.6)
+           @retkey turn:Int (turn number, since 2.40.6)
 
            @err 404 Game does not exist
            @err 403 Permission denied (only admin can use MAIL; user does not play this race)
@@ -90,6 +93,9 @@ server::interface::HostTurnServer::handleCommand(const String_t& upcasedCommand,
         h->setNew("slot",     makeIntegerValue(r.slot));
         h->setNew("previous", makeIntegerValue(r.previousState));
         h->setNew("user",     makeStringValue(r.userId));
+        h->setNew("name",     makeStringValue(r.gameName));
+        h->setNew("turn",     makeIntegerValue(r.turnNumber));
+        h->setNew("allowtemp", makeIntegerValue(r.allowTemp));
         result.reset(new HashValue(h));
         return true;
     } else if (upcasedCommand == "TRNMARKTEMP") {

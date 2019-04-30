@@ -10,11 +10,13 @@
 server::host::Configuration::Configuration()
     : timeScale(60),
       workDirectory(),
+      binDirectory("."),
       useCron(true),
       unpackBackups(false),
       usersSeeTemporaryTurns(true),
       numMissedTurnsForKick(0),
-      hostFileAddress(DEFAULT_ADDRESS, HOSTFILE_PORT)
+      hostFileAddress(DEFAULT_ADDRESS, HOSTFILE_PORT),
+      initialSuspend(0)
 { }
 
 // Convert time.

@@ -28,6 +28,7 @@ server::nntp::ServerApplication::ServerApplication(afl::sys::Environment& env, a
     : Application(LOG_NAME, env, fs, net),
       m_listenAddress(DEFAULT_ADDRESS, NNTP_PORT),
       m_talkAddress(DEFAULT_ADDRESS, TALK_PORT),
+      m_userAddress(DEFAULT_ADDRESS, USER_PORT),
       m_baseUrl(),
       m_interrupt(intr)
 { }
@@ -50,9 +51,10 @@ server::nntp::ServerApplication::serverMain()
     // Talk is stateful, so it cannot be auto-reconnect.
     afl::base::Deleter del;
     afl::net::CommandHandler& talk(createClient(m_talkAddress, del, false));
+    afl::net::CommandHandler& user(createClient(m_userAddress, del, true));
 
     // Set up root (global data)
-    Root root(talk, m_baseUrl);
+    Root root(talk, user, m_baseUrl);
     root.log().addListener(log());
 
     // Protocol Handler
@@ -95,6 +97,12 @@ server::nntp::ServerApplication::handleConfiguration(const String_t& key, const 
     } else if (key == "NNTP.PORT") {
         m_listenAddress.setService(value);
         return true;
+    } else if (key == "USER.HOST") {
+        m_userAddress.setName(value);
+        return true;
+    } else if (key == "USER.PORT") {
+        m_userAddress.setService(value);
+        return true;
     } else if (key == "TALK.HOST") {
         m_talkAddress.setName(value);
         return true;
@@ -113,7 +121,7 @@ server::nntp::ServerApplication::handleConfiguration(const String_t& key, const 
 String_t
 server::nntp::ServerApplication::getApplicationName() const
 {
-    return afl::string::Format(_("PCC2 NNTP Server v%s - (c) 2017-2018 Stefan Reuther").c_str(), PCC2_VERSION);
+    return afl::string::Format(_("PCC2 NNTP Server v%s - (c) 2017-2019 Stefan Reuther").c_str(), PCC2_VERSION);
 }
 
 String_t

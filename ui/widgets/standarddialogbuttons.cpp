@@ -11,6 +11,7 @@
 #include "ui/widgets/framegroup.hpp"
 #include "ui/window.hpp"
 #include "util/translation.hpp"
+#include "ui/widgets/statictext.hpp"
 
 // Constructor.
 ui::widgets::StandardDialogButtons::StandardDialogButtons(ui::Root& root)
@@ -40,18 +41,24 @@ ui::widgets::StandardDialogButtons::init()
 {
     m_pOK     = &m_deleter.addNew(new Button(_("OK"),     util::Key_Return, m_root));
     m_pCancel = &m_deleter.addNew(new Button(_("Cancel"), util::Key_Escape, m_root));
+    add(m_deleter.addNew(new ui::Spacer()));
     add(*m_pOK);
     add(*m_pCancel);
-    add(m_deleter.addNew(new ui::Spacer()));
 }
 
 // Execute dialog with standard dialog buttons.
 bool
-ui::widgets::doStandardDialog(String_t title, Widget& content, bool framed, Root& root)
+ui::widgets::doStandardDialog(String_t title, String_t prompt, Widget& content, bool framed, Root& root)
 {
+    // ex UIInputLine::run, UINumberSelector::doStandardDialog
     // Window
     afl::base::Deleter del;
     ui::Window& window = del.addNew(new ui::Window(title, root.provider(), root.colorScheme(), BLUE_WINDOW, ui::layout::VBox::instance5));
+
+    // Prompt
+    if (!prompt.empty()) {
+        window.add(del.addNew(new StaticText(prompt, util::SkinColor::Static, gfx::FontRequest().addSize(1), root.provider())));
+    }
 
     // Content
     ui::LayoutableGroup* container = &window;
@@ -65,6 +72,7 @@ ui::widgets::doStandardDialog(String_t title, Widget& content, bool framed, Root
     StandardDialogButtons& buttons = del.addNew(new StandardDialogButtons(root));
     window.add(buttons);
     window.pack();
+    content.requestFocus();
 
     // Operate
     EventLoop loop(root);

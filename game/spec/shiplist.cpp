@@ -185,6 +185,7 @@ game::spec::ShipList::getComponent(Reference ref) const
 {
     switch (ref.getType()) {
      case Reference::Null:
+     case Reference::Special:
      case Reference::Player:
      case Reference::MapLocation:
      case Reference::Ship:

@@ -21,7 +21,10 @@ server::interface::HostTurn::Result::Result()
       gameId(0),
       slot(0),
       previousState(0),
-      userId()
+      turnNumber(0),
+      userId(),
+      gameName(),
+      allowTemp(false)
 { }
 
 server::interface::HostTurn::Result::~Result()

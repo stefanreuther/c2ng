@@ -1,0 +1,7 @@
+/*!
+     \namespace game::ref
+     \brief Object references
+
+     This namespace contains code to deal with symbolic object references (game::Reference),
+     in particular, to maintain lists of them.
+ */

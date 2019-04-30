@@ -105,13 +105,13 @@ namespace game { namespace map {
                                 const game::config::HostConfiguration& config,
                                 const HostVersion& host) const;
 
-        Id_t getAnyShipAt(Point pt);
+        Id_t getAnyShipAt(Point pt) const;
 
         String_t getLocationName(Point pt, int flags,
                                  const game::config::HostConfiguration& config,
                                  const HostVersion& host,
                                  afl::string::Translator& tx,
-                                 InterpreterInterface& iface);
+                                 InterpreterInterface& iface) const;
 
         Id_t findShipTowing(int sid, int after = 0) const;
 

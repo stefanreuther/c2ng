@@ -3,12 +3,11 @@
   */
 
 #include "game/alliance/hosthandler.hpp"
-#include "util/translation.hpp"
-#include "game/v3/structures.hpp"
+#include "afl/string/char.hpp"
 #include "game/v3/command.hpp"
 #include "game/v3/commandcontainer.hpp"
 #include "game/v3/commandextra.hpp"
-#include "afl/string/char.hpp"
+#include "game/v3/structures.hpp"
 #include "util/string.hpp"
 
 using game::v3::Command;
@@ -33,14 +32,14 @@ game::alliance::HostHandler::~HostHandler()
 { }
 
 void
-game::alliance::HostHandler::init(Container& allies)
+game::alliance::HostHandler::init(Container& allies, afl::string::Translator& tx)
 {
     // ex GTHostAllianceHandler::processVersion
     // We pretend all host versions have alliances.
     // This is the same as PCC 1.x.
-    allies.addLevel(Level(_("Standard alliance"), ALLIANCE_ID, Level::Flags_t(Level::IsOffer)));
+    allies.addLevel(Level(tx("Standard alliance"), ALLIANCE_ID, Level::Flags_t(Level::IsOffer)));
     if (m_version == 0 || m_version >= MKVERSION(3,22,39)) {
-        allies.addLevel(Level(_("Vision alliance"), STRONG_ID, Level::Flags_t(Level::NeedsOffer)));
+        allies.addLevel(Level(tx("Vision alliance"), STRONG_ID, Level::Flags_t(Level::NeedsOffer)));
     }
 }
 

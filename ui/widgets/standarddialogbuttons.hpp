@@ -16,7 +16,9 @@ namespace ui { namespace widgets {
         Many dialogs have "OK", "Cancel" and (optionally) "Help" buttons.
         This widget simplifies and standardizes this button list.
 
-        Convention for now: "OK", "Cancel" on the left, "Help" on the right (FIXME: help not implemented yet)
+        Convention for now: "OK", "Cancel" on the right, "Help" on the left (FIXME: help not implemented yet).
+        Rationale: looks best for most widgets.
+
         Having this in a widget allows possible future configurability or adaption to system convention. */
     class StandardDialogButtons : public ui::Group {
      public:
@@ -52,12 +54,13 @@ namespace ui { namespace widgets {
 
     /** Execute dialog with standard dialog buttons.
         This is a convenience method for doing a standard data entry dialog.
-        \param title   Titel of dialog
+        \param title   Title of dialog
+        \param prompt  Prompt to show above content
         \param content Content of dialog
         \param framed  true to add a lowered frame around the content
         \param root    Root
         \return true if dialog was confirmed, false on cancel */
-    bool doStandardDialog(String_t title, Widget& content, bool framed, Root& root);
+    bool doStandardDialog(String_t title, String_t prompt, Widget& content, bool framed, Root& root);
 
 } }
 

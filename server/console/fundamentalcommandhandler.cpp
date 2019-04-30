@@ -28,11 +28,11 @@ server::console::FundamentalCommandHandler::call(const String_t& cmd, interprete
         /* @q foreach VAR:Env BODY:Code ITEMS... (Global Console Command)
            Iterate through ITEMS, and execute some CODE with VAR set to the respective value.
            For example,
-           <pre>foreach i {echo $i} 1 2 3</pre>
+           <pre>foreach i {\echo $i} 1 2 3</pre>
            will print three lines: 1, 2, 3.
 
            The unconventional syntax of listing the items to iterate over last allows for the form
-           <pre>command | foreach i {code...}</pre>
+           <pre>command | foreach i {\code...}</pre>
            where %command is a command producing a list of output (e.g. "redis smembers SET", "host gamelist id").
 
            @since PCC2 1.99.18, PCC2 2.40.3 */

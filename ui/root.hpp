@@ -72,6 +72,22 @@ namespace ui {
             Those will be performed on the next handleEvent() call. */
         void handleEvent();
 
+        /** Handle an event, relative-mouse version.
+            This waits for and dispatches a single event.
+            It returns after the event has been dispatched.
+
+            Note that event processing may have accumulated redraw requests.
+            Those will be performed on the next handleEvent() call.
+
+            This function produces relative mouse events and dispatches them to the EventConsumer.
+            It does NOT call the regular widget hierarchy's event handling functions.
+
+            Use this function instead of calling Engine::handleEvent() directly to keep
+            the local event queue (postKeyEvent() etc.) and deferred redraws working.
+
+            \param consumer EventConsumer target */
+        void handleEventRelative(EventConsumer& consumer);
+
         /** Post a mouse event.
             Makes sure that a future handleEvent() call will eventually process a mouse event even if the mouse state didn't change. */
         void postMouseEvent();
@@ -150,6 +166,10 @@ namespace ui {
             \param offset Distance to edge. When anchored at an edge (0 or 2),
                           leave that many pixels from that edge. */
         void moveWidgetToEdge(Widget& widget, int xPos, int yPos, int offset);
+
+        /** Save a screenshot.
+            Saves the current canvas by invoking sig_screenshot with the right parameters. */
+        void saveScreenshot();
 
         afl::base::Signal<void(gfx::Canvas&)> sig_screenshot;
 

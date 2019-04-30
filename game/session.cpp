@@ -48,6 +48,7 @@
 #include "game/interface/explosionfunction.hpp"
 #include "game/interface/commandinterface.hpp"
 #include "game/map/object.hpp"
+#include "game/interface/markingfunctions.hpp"
 
 namespace {
     using afl::string::Format;
@@ -278,26 +279,32 @@ game::Session::notifyListeners()
 }
 
 bool
-game::Session::getReferenceName(Reference ref, String_t& result)
+game::Session::getReferenceName(Reference ref, ObjectName which, String_t& result)
 {
     // ex PCC1.x ThingName
     // FIXME: can we find a better location for this function
     // FIXME: cannot currently be const because InterpreterInterface is not const
     switch (ref.getType()) {
      case Reference::Null:
+     case Reference::Special:
         return false;
 
      case Reference::Player:
         // Report reference name plus player name
-        result = ref.toString(m_translator);
         if (Root* r = m_root.get()) {
             if (const Player* p = r->playerList().get(ref.getId())) {
-                result += ": ";
-                result += p->getName(Player::ShortName);
+                if (which == PlainName) {
+                    result = p->getName(Player::ShortName);
+                } else {
+                    result = ref.toString(m_translator);
+                    result += ": ";
+                    result += p->getName(Player::ShortName);
+                }
+                return true;
             }
         }
-        return true;
- 
+        return false;
+
      case Reference::MapLocation:
         // Reference name is good enough.
         result = ref.toString(m_translator);
@@ -307,50 +314,52 @@ game::Session::getReferenceName(Reference ref, String_t& result)
      case Reference::Planet:
      case Reference::Starbase:
      case Reference::Storm:
-        // Report the reference name plus object's name, if any.
-        // This allows a starbase reference to be shown as "Starbase #123: Melmac".
-        result = ref.toString(m_translator);
+     case Reference::Minefield:
+     case Reference::Ufo:
+        // Return normal object's name.
         if (Game* g = m_game.get()) {
             if (Turn* t = g->getViewpointTurn().get()) {
                 if (const game::map::Object* obj = t->universe().getObject(ref)) {
-                    String_t objName = obj->getName(game::map::Object::PlainName, m_translator, *this);
-                    if (!objName.empty()) {
-                        result += ": ";
-                        result += objName;
+                    if (ref.getType() == Reference::Starbase && which != PlainName) {
+                        // Special case: report the reference name plus object's name, if any.
+                        // This allows a starbase reference to be shown as "Starbase #123: Melmac".
+                        result = ref.toString(m_translator);
+                        result += obj->getName(PlainName, m_translator, *this);
+                        if (which == DetailedName) {
+                            String_t comment = this->getComment(Planet, ref.getId());
+                            if (!comment.empty()) {
+                                result += ": ";
+                                result += comment;
+                            }
+                        }
+                        return true;
+                    } else {
+                        result = obj->getName(which, m_translator, *this);
+                        return !result.empty();
                     }
                 }
             }
         }
-        return true;
-        
-     case Reference::Minefield:
-     case Reference::Ufo:
-        // Report the object's name if we can.
-        // This allows a minefield to be shown with the correct type,
-        // an Ufo with the correct Id.
-        result = ref.toString(m_translator);
-        if (Game* g = m_game.get()) {
-            if (Turn* t = g->getViewpointTurn().get()) {
-                if (const game::map::Object* obj = t->universe().getObject(ref)) {
-                    result = obj->getName(game::map::Object::LongName, m_translator, *this);
-                }
-            }
-        }
-        return true;
+        return false;
 
      case Reference::Hull:
      case Reference::Engine:
      case Reference::Beam:
      case Reference::Torpedo:
         // Report the reference name plus component name.
-        result = ref.toString(m_translator);
-        if (game::spec::ShipList* shipList = m_shipList.get()) {
+        if (const game::spec::ShipList* shipList = m_shipList.get()) {
             if (const game::spec::Component* p = shipList->getComponent(ref)) {
-                result += ": ";
-                result += p->getName(shipList->componentNamer());
+                if (which == PlainName) {
+                    result = p->getName(shipList->componentNamer());
+                } else {
+                    result = ref.toString(m_translator);
+                    result += ": ";
+                    result += p->getName(shipList->componentNamer());
+                }
+                return true;
             }
         }
-        return true;
+        return false;
     }
     return false;
 }
@@ -364,14 +373,14 @@ game::Session::save()
     if (pRoot.get() == 0 || pGame.get() == 0) {
         return false;
     }
-    
+
     afl::base::Ptr<TurnLoader> pLoader = pRoot->getTurnLoader();
     if (pLoader.get() == 0) {
         return false;
     }
-    
+
     pLoader->saveCurrentTurn(pGame->currentTurn(), *pGame, pGame->getViewpointPlayer(), *pRoot, *this);
-    return true;    
+    return true;
 }
 
 afl::data::Value*
@@ -425,9 +434,23 @@ game::Session::getComment(Scope scope, int id)
 }
 
 bool
-game::Session::hasTask(Scope /*scope*/, int /*id*/)
+game::Session::hasTask(Scope scope, int id)
 {
-    // FIXME: implement me
+    // FIXME: consider changing the signature to take an object,
+    // to avoid the reverse-mapping into a universe.
+    if (const Game* g = m_game.get()) {
+        using interpreter::Process;
+        const game::map::Universe& univ = g->currentTurn().universe();
+        const interpreter::ProcessList& list = world().processList();
+        switch (scope) {
+         case Ship:
+            return list.getProcessByObject(univ.ships().get(id), Process::pkShipTask) != 0;
+         case Planet:
+            return list.getProcessByObject(univ.planets().get(id), Process::pkPlanetTask) != 0;
+         case Base:
+            return list.getProcessByObject(univ.planets().get(id), Process::pkBaseTask) != 0;
+        }
+    }
     return false;
 }
 
@@ -506,6 +529,11 @@ game::Session::initWorld()
     m_world.setNewGlobalValue("RSTRING",       new game::interface::SimpleFunction(*this, game::interface::IFRString));
     m_world.setNewGlobalValue("RSTYLE",        new game::interface::SimpleFunction(*this, game::interface::IFRStyle));
     m_world.setNewGlobalValue("RXML",          new game::interface::SimpleFunction(*this, game::interface::IFRXml));
+
+    m_world.setNewGlobalValue("CC$SELREADHEADER",  new game::interface::SimpleFunction(*this, game::interface::IFCCSelReadHeader));
+    m_world.setNewGlobalValue("CC$SELREADCONTENT", new game::interface::SimpleFunction(*this, game::interface::IFCCSelReadContent));
+    m_world.setNewGlobalValue("CC$SELGETQUESTION", new game::interface::SimpleFunction(*this, game::interface::IFCCSelGetQuestion));
+    m_world.setNewGlobalValue("SELECTIONSAVE",     new game::interface::SimpleProcedure(*this, game::interface::IFSelectionSave));
 
     m_world.setNewGlobalValue("ADDCOMMAND",       new game::interface::SimpleProcedure(*this, game::interface::IFAddCommand));
     m_world.setNewGlobalValue("ADDCONFIG",        new game::interface::SimpleProcedure(*this, game::interface::IFAddConfig));

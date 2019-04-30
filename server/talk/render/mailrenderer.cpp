@@ -347,6 +347,13 @@ MailRenderer::renderPG(TextNode* n)
             renderChildrenInline(n);
             flushLine();
             break;
+         case TextNode::miParFragment:
+            renderChildrenInline(n);
+            flushLine();
+            if (!result.empty() && result[result.size()-1] == '\n') {
+                result.erase(result.size()-1);
+            }
+            break;
         }
      default:
         break;
@@ -357,12 +364,17 @@ MailRenderer::renderPG(TextNode* n)
 void
 MailRenderer::renderChildrenPG(TextNode* n)
 {
-    for (size_t i = 0, e = n->children.size(); i != e; ++i) {
-        if (i != 0) {
-            result += prefix;
-            result += "\n";
+    if (n->major == TextNode::maParagraph && n->minor == TextNode::miParFragment) {
+        // FIXME: do we need the miParFragment condition?
+        renderPG(n);
+    } else {
+        for (size_t i = 0, e = n->children.size(); i != e; ++i) {
+            if (i != 0) {
+                result += prefix;
+                result += "\n";
+            }
+            renderPG(n->children[i]);
         }
-        renderPG(n->children[i]);
     }
 }
 

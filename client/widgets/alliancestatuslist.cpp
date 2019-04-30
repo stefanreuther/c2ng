@@ -9,6 +9,7 @@
 #include "ui/draw.hpp"
 #include "ui/colorscheme.hpp"
 #include "gfx/complex.hpp"
+#include "afl/functional/stringtable.hpp"
 
 using afl::base::Ref;
 using gfx::Font;
@@ -24,11 +25,12 @@ namespace {
 }
 
 
-client::widgets::AllianceStatusList::AllianceStatusList(ui::Root& root)
+client::widgets::AllianceStatusList::AllianceStatusList(ui::Root& root, afl::string::Translator& tx)
     : AbstractListbox(),
       sig_selectPlayer(),
       sig_toggleAlliance(),
       m_root(root),
+      m_translator(tx),
       m_items()
 {
     sig_itemClickAt.add(this, &AllianceStatusList::onItemClickAt);
@@ -133,11 +135,11 @@ client::widgets::AllianceStatusList::drawItem(gfx::Canvas& can, gfx::Rectangle a
             if (it.flags.contains(TheyOffer)) {
                 leftColor = ui::Color_GreenScale + 9;
                 textColor = ui::Color_White;
-                text      = _(STATUS_LABELS[3]);
+                text      = m_translator(STATUS_LABELS[3]);
             } else {
                 leftColor = ui::Color_Yellow;
                 textColor = ui::Color_Black;
-                text      = _(STATUS_LABELS[2]);
+                text      = m_translator(STATUS_LABELS[2]);
             }
             rightColor = enemy ? uint8_t(ui::Color_Red) : leftColor;
         } else {
@@ -145,11 +147,11 @@ client::widgets::AllianceStatusList::drawItem(gfx::Canvas& can, gfx::Rectangle a
                 leftColor  = ui::Color_Yellow;
                 rightColor = enemy ? uint8_t(ui::Color_Red) : leftColor;
                 textColor  = ui::Color_Black;
-                text       = _(STATUS_LABELS[1]);
+                text       = m_translator(STATUS_LABELS[1]);
             } else {
                 leftColor = rightColor = enemy ? ui::Color_Red : ui::Color_Fire+5;
                 textColor = ui::Color_Yellow;
-                text      = enemy ? _(STATUS_LABELS[4]) : _(STATUS_LABELS[0]);
+                text      = enemy ? m_translator(STATUS_LABELS[4]) : m_translator(STATUS_LABELS[0]);
             }
         }
 
@@ -181,8 +183,10 @@ client::widgets::AllianceStatusList::drawItem(gfx::Canvas& can, gfx::Rectangle a
 }
 
 void
-client::widgets::AllianceStatusList::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
-{ }
+client::widgets::AllianceStatusList::handlePositionChange(gfx::Rectangle& oldPosition)
+{
+    defaultHandlePositionChange(oldPosition);
+}
 
 ui::layout::Info
 client::widgets::AllianceStatusList::getLayoutInfo() const
@@ -227,11 +231,7 @@ client::widgets::AllianceStatusList::computeWidth(int& leftWidth, int& rightWidt
     Ref<Font> font = m_root.provider().getFont(gfx::FontRequest());
 
     // Right width
-    // FIXME: this used StaticTranslatedStringTable, but we don't have that
-    rightWidth = 0;
-    for (size_t i = 0; i < countof(STATUS_LABELS); ++i) {
-        rightWidth = std::max(rightWidth, font->getTextWidth(_(STATUS_LABELS[i])));
-    }
+    rightWidth = font->getMaxTextWidth(afl::functional::createStringTable(STATUS_LABELS).map(m_translator));
     rightWidth += 10;
 
     // Left width

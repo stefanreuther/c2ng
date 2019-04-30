@@ -38,7 +38,7 @@ namespace {
             if (s->getShipKind() == Ship::GuessedShip) {
                 result.title = Format(tx.translateString("Ship #%d (guessed position!)").c_str(), s->getId());
             } else {
-                result.title = s->getName(Object::LongName, tx, session.interface());
+                result.title = s->getName(game::LongName, tx, session.interface());
             }
 
             // Line 2: (our <ship>)
@@ -114,7 +114,7 @@ namespace {
             }
         } else if (obj != 0) {
             // Something else
-            result.title = obj->getName(Object::PlainName, tx, session.interface());
+            result.title = obj->getName(game::PlainName, tx, session.interface());
         } else {
             // Nothing. Leave result default.initialized.
         }

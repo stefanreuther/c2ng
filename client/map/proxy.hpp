@@ -5,16 +5,17 @@
 #define C2NG_CLIENT_MAP_PROXY_HPP
 
 #include "afl/base/signal.hpp"
-#include "util/requestsender.hpp"
+#include "game/map/renderlist.hpp"
+#include "game/map/viewport.hpp"
+#include "game/session.hpp"
 #include "util/requestdispatcher.hpp"
 #include "util/requestreceiver.hpp"
+#include "util/requestsender.hpp"
 #include "util/slaverequestsender.hpp"
-#include "game/session.hpp"
-#include "game/map/viewport.hpp"
-#include "game/map/renderlist.hpp"
 
 namespace client { namespace map {
 
+    /** Synchronous, bidirectional proxy for starchart rendering. */
     class Proxy {
      public:
         // FIXME: This will re-render and update the observer whenever anything changes.

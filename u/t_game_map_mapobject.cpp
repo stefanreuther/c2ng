@@ -14,7 +14,7 @@ TestGameMapMapObject::testIt()
     class Tester : public game::map::MapObject {
      public:
         // Object:
-        virtual String_t getName(Name /*which*/, afl::string::Translator& /*tx*/, game::InterpreterInterface& /*iface*/) const
+        virtual String_t getName(game::ObjectName /*which*/, afl::string::Translator& /*tx*/, game::InterpreterInterface& /*iface*/) const
             { return String_t(); }
         virtual game::Id_t getId() const
             { return game::Id_t(); }

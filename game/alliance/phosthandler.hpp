@@ -15,7 +15,7 @@ namespace game { namespace alliance {
         PHostHandler(int32_t version, Turn& turn, Session& session, int player);
         ~PHostHandler();
 
-        virtual void init(Container& allies);
+        virtual void init(Container& allies, afl::string::Translator& tx);
         virtual void postprocess(Container& allies);
         virtual void handleChanges(const Container& allies);
 

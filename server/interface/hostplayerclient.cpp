@@ -108,6 +108,18 @@ server::interface::HostPlayerClient::checkFile(int32_t gameId, String_t userId, 
     return result;
 }
 
+void
+server::interface::HostPlayerClient::set(int32_t gameId, String_t userId, String_t key, String_t value)
+{
+    m_commandHandler.callVoid(Segment().pushBackString("PLAYERSET").pushBackInteger(gameId).pushBackString(userId).pushBackString(key).pushBackString(value));
+}
+
+String_t
+server::interface::HostPlayerClient::get(int32_t gameId, String_t userId, String_t key)
+{
+    return m_commandHandler.callString(Segment().pushBackString("PLAYERGET").pushBackInteger(gameId).pushBackString(userId).pushBackString(key));
+}
+
 server::interface::HostPlayer::Info
 server::interface::HostPlayerClient::unpackInfo(const Value_t* p)
 {

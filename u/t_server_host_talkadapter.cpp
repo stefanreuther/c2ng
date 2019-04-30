@@ -76,6 +76,8 @@ namespace {
             { throw std::runtime_error("unexpected"); }
         virtual afl::data::Value* getPosts(int32_t /*fid*/, const ListParameters& /*params*/)
             { throw std::runtime_error("unexpected"); }
+        virtual int32_t findForum(String_t /*key*/)
+            { throw std::runtime_error("unexpected"); }
 
      private:
         typedef std::map<String_t, String_t> DataMap_t;

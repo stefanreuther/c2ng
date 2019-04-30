@@ -132,6 +132,7 @@ class TestGfxPixmapCanvasImpl : public CxxTest::TestSuite {
 class TestGfxPoint : public CxxTest::TestSuite {
  public:
     void testIt();
+    void testExtend();
 };
 
 class TestGfxPrimitives : public CxxTest::TestSuite {

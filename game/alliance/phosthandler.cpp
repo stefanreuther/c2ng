@@ -125,24 +125,24 @@ game::alliance::PHostHandler::~PHostHandler()
 { }
 
 void
-game::alliance::PHostHandler::init(Container& allies)
+game::alliance::PHostHandler::init(Container& allies, afl::string::Translator& tx)
 {
     // ex GPHostAllianceHandler::processVersion (sort-of)
     afl::base::Ptr<Root> root = m_session.getRoot();
     if (root.get() != 0) {
         if (root->hostConfiguration()[HostConfiguration::CPEnableAllies]()) {
             // Add the main alliance level
-            allies.addLevel(Level(_("Alliance offer"), MAIN_ID, Level::Flags_t(Level::IsOffer)));
+            allies.addLevel(Level(tx("Alliance offer"), MAIN_ID, Level::Flags_t(Level::IsOffer)));
 
             // Add the sub levels
             for (size_t i = 0; i < NUM_LEVELS; ++i) {
-                allies.addLevel(Level(_(LEVEL_NAMES[i]), LEVEL_IDS[i], Level::Flags_t(Level::NeedsOffer) + Level::AllowConditional));
+                allies.addLevel(Level(tx(LEVEL_NAMES[i]), LEVEL_IDS[i], Level::Flags_t(Level::NeedsOffer) + Level::AllowConditional));
             }
         }
 
         if (m_version >= MKVERSION(4,0,8) && root->hostConfiguration()[HostConfiguration::CPEnableEnemies]()) {
             // Add the enemies, if supported by host
-            allies.addLevel(Level(_("Enemy"), ENEMY_ID, Level::Flags_t(Level::IsEnemy)));
+            allies.addLevel(Level(tx("Enemy"), ENEMY_ID, Level::Flags_t(Level::IsEnemy)));
         }
     }   
 }

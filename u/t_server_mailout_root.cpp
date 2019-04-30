@@ -77,7 +77,7 @@ TestServerMailoutRoot::testResolveMailBlocked()
     afl::net::redis::InternalDatabase db;
     server::mailout::Root testee(db, makeConfig());
     HashKey(db, "email:x@y:status").stringField("status/anon").set("b");
-    
+
     String_t smtpAddress;
     String_t authUser;
     TS_ASSERT_THROWS(testee.resolveAddress("mail:x@y", smtpAddress, authUser), std::exception);
@@ -265,7 +265,7 @@ TestServerMailoutRoot::testPrepareQueue()
             { }
         std::map<int32_t, int32_t> mids;
     };
-    
+
     afl::net::redis::InternalDatabase db;
     server::mailout::Root testee(db, makeConfig());
     TransmitterMock tx;
@@ -291,5 +291,53 @@ TestServerMailoutRoot::testPrepareQueue()
     TS_ASSERT_EQUALS(tx.mids.size(), 2U);
     TS_ASSERT_EQUALS(tx.mids[9], 1);
     TS_ASSERT_EQUALS(tx.mids[84], 1);
+}
+
+/** Test getUserStatus(), regular case. */
+void
+TestServerMailoutRoot::testGetUserStatus()
+{
+    using server::interface::MailQueue;
+
+    afl::net::redis::InternalDatabase db;
+    server::mailout::Root testee(db, makeConfig());
+
+    HashKey(db, "user:1009:profile").stringField("email").set("ad@re.ss");
+    HashKey(db, "email:ad@re.ss:status").stringField("status/1009").set("c");
+    HashKey(db, "email:ad@re.ss:status").intField("expire/1009").set(testee.getCurrentTime() - 10);
+
+    MailQueue::UserStatus st = testee.getUserStatus("1009");
+    TS_ASSERT_EQUALS(st.address, "ad@re.ss");
+    TS_ASSERT_EQUALS(st.status, MailQueue::Confirmed);
+}
+
+/** Test getUserStatus(), empty database (aka user has no email). */
+void
+TestServerMailoutRoot::testGetUserStatusEmpty()
+{
+    using server::interface::MailQueue;
+
+    afl::net::redis::InternalDatabase db;
+    server::mailout::Root testee(db, makeConfig());
+
+    MailQueue::UserStatus st = testee.getUserStatus("1009");
+    TS_ASSERT_EQUALS(st.address, "");
+    TS_ASSERT_EQUALS(st.status, MailQueue::NotSet);
+}
+
+/** Test getUserStatus(), half-empty database (aka user created but not yet requested). */
+void
+TestServerMailoutRoot::testGetUserStatusUnconfirmed()
+{
+    using server::interface::MailQueue;
+
+    afl::net::redis::InternalDatabase db;
+    server::mailout::Root testee(db, makeConfig());
+
+    HashKey(db, "user:1009:profile").stringField("email").set("ad@re.ss");
+
+    MailQueue::UserStatus st = testee.getUserStatus("1009");
+    TS_ASSERT_EQUALS(st.address, "ad@re.ss");
+    TS_ASSERT_EQUALS(st.status, MailQueue::Unconfirmed);
 }
 

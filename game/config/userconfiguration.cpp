@@ -211,28 +211,21 @@ game::config::UserConfiguration::getGameType() const
     }
 }
 
+util::NumberFormatter
+game::config::UserConfiguration::getNumberFormatter() const
+{
+    return util::NumberFormatter((*this)[Display_ThousandsSep](), (*this)[Display_Clans]());
+}
+
+
 String_t
 game::config::UserConfiguration::formatNumber(int32_t n) const
 {
-    // ex numToString
-    String_t result = afl::string::Format("%d", n);
-    if ((*this)[Display_ThousandsSep]()) {
-        // The limit is to avoid placing a thousands-separator as "-,234"
-        size_t i = result.size();
-        size_t limit = (i > 0 && (result[0] < '0' || result[0] > '9')) ? 4 : 3;
-        while (i > limit) {
-            i -= 3;
-            result.insert(i, ",");
-        }
-    }
-    return result;
+    return getNumberFormatter().formatNumber(n);
 }
 
 String_t
 game::config::UserConfiguration::formatPopulation(int32_t n) const
 {
-    // ex clansToString
-    return ((*this)[Display_Clans]()
-            ? formatNumber(n) + "c"
-            : formatNumber(100*n));
+    return getNumberFormatter().formatPopulation(n);
 }

@@ -5,6 +5,7 @@
 
 #include "server/mailin/mailinapplication.hpp"
 
+#include <map>
 #include "t_server_mailin.hpp"
 #include "afl/data/stringlist.hpp"
 #include "afl/io/constmemorystream.hpp"
@@ -45,6 +46,8 @@ namespace {
             { return "."; }
         virtual String_t getInstallationDirectoryName()
             { return m_installationDirectory; }
+        virtual afl::string::LanguageCode getUserLanguage()
+            { return afl::string::LanguageCode(); }
         virtual afl::base::Ref<afl::io::TextWriter> attachTextWriter(Channel ch)
             { return *new afl::io::TextFile(*attachStream(ch)); }
         virtual afl::base::Ref<afl::io::TextReader> attachTextReader(Channel ch)

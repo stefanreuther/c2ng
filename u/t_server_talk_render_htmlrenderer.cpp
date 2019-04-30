@@ -7,6 +7,10 @@
 
 #include "t_server_talk_render.hpp"
 #include "afl/net/nullcommandhandler.hpp"
+#include "afl/net/redis/hashkey.hpp"
+#include "afl/net/redis/internaldatabase.hpp"
+#include "afl/net/redis/stringfield.hpp"
+#include "afl/net/redis/stringkey.hpp"
 #include "server/talk/render/context.hpp"
 #include "server/talk/render/options.hpp"
 
@@ -348,6 +352,77 @@ TestServerTalkRenderHTMLRenderer::testSpecial()
         par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " after"));
 
         TS_ASSERT_EQUALS(renderHTML(tn, ctx, opts, root), "<p>before <img src=\"http://base/path/res/smileys/smile.png\" width=\"16\" height=\"16\" alt=\":smile:\" /> after</p>\n");
+    }
+}
+
+/** Test rendering user links. */
+void
+TestServerTalkRenderHTMLRenderer::testUser()
+{
+    using server::talk::render::renderHTML;
+    using server::talk::TextNode;
+    using server::talk::InlineRecognizer;
+    using afl::net::redis::StringKey;
+    using afl::net::redis::HashKey;
+
+    // Environment
+    const server::talk::render::Context ctx("1000");
+    server::talk::render::Options opts;
+    opts.setBaseUrl("http://base/path/");
+
+    afl::net::NullCommandHandler nch;
+    afl::net::redis::InternalDatabase db;
+    server::talk::Root root(db, nch, server::talk::Configuration());
+
+    // Create two users
+    StringKey(db, "uid:fred").set("1000");
+    StringKey(db, "uid:wilma").set("1001");
+    StringKey(db, "user:1000:name").set("fred");
+    StringKey(db, "user:1001:name").set("wilma");
+    HashKey(db, "user:1000:profile").stringField("screenname").set("Fred F");
+    HashKey(db, "user:1001:profile").stringField("screenname").set("Wilma F");
+
+    // Regular user link
+    {
+        TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
+        TextNode& par(*tn.children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal)));
+        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "[ "));
+        par.children.pushBackNew(new TextNode(TextNode::maLink, TextNode::miLinkUser, "wilma"));
+        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " ]"));
+
+        TS_ASSERT_EQUALS(renderHTML(tn, ctx, opts, root), "<p>[ <a class=\"userlink\" href=\"http://base/path/userinfo.cgi/wilma\">Wilma F</a> ]</p>\n");
+    }
+
+    // Regular user link to user himself
+    {
+        TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
+        TextNode& par(*tn.children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal)));
+        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "[ "));
+        par.children.pushBackNew(new TextNode(TextNode::maLink, TextNode::miLinkUser, "fred"));
+        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " ]"));
+
+        TS_ASSERT_EQUALS(renderHTML(tn, ctx, opts, root), "<p>[ <a class=\"userlink userlink-me\" href=\"http://base/path/userinfo.cgi/fred\">Fred F</a> ]</p>\n");
+    }
+
+    // Unknown user
+    {
+        TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
+        TextNode& par(*tn.children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal)));
+        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "[ "));
+        par.children.pushBackNew(new TextNode(TextNode::maLink, TextNode::miLinkUser, "barney"));
+        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " ]"));
+
+        TS_ASSERT_EQUALS(renderHTML(tn, ctx, opts, root), "<p>[ <span class=\"tfailedlink\">user barney</span> ]</p>\n");
+    }
+
+    // Partial tree, just a paragraph fragment
+    {
+        TextNode tn(TextNode::maParagraph, TextNode::miParFragment);
+        tn.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "[ "));
+        tn.children.pushBackNew(new TextNode(TextNode::maLink, TextNode::miLinkUser, "wilma"));
+        tn.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " ]"));
+
+        TS_ASSERT_EQUALS(renderHTML(tn, ctx, opts, root), "[ <a class=\"userlink\" href=\"http://base/path/userinfo.cgi/wilma\">Wilma F</a> ]");
     }
 }
 

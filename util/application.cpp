@@ -44,6 +44,9 @@ util::Application::Application(afl::sys::Environment& env, afl::io::FileSystem& 
     m_logger.attachWriter(true, m_errorOutput.asPtr());
 }
 
+util::Application::~Application()
+{ }
+
 int
 util::Application::run()
 {

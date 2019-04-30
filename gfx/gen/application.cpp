@@ -153,7 +153,7 @@ void
 gfx::gen::Application::showHelp()
 {
     afl::io::TextWriter& w = standardOutput();
-    w.writeLine(Format(_("PCC2 Procedural Graphics Generator v%s - (c) 2017-2018 Stefan Reuther").c_str(), PCC2_VERSION));
+    w.writeLine(Format(_("PCC2 Procedural Graphics Generator v%s - (c) 2017-2019 Stefan Reuther").c_str(), PCC2_VERSION));
     w.writeText(Format(_("\n"
                          "Usage:\n"
                          "  %s [-h]\n"

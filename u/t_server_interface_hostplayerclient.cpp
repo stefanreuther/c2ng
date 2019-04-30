@@ -174,6 +174,16 @@ TestServerInterfaceHostPlayerClient::testIt()
     mock.provideNewResult(server::makeStringValue("refuse"));
     TS_ASSERT_EQUALS(testee.checkFile(5, "uid", "file.dat", String_t("d")), HostPlayer::Refuse);
 
+    // get
+    mock.expectCall("PLAYERGET, 17, uu, kk");
+    mock.provideNewResult(server::makeStringValue("the value"));
+    TS_ASSERT_EQUALS(testee.get(17, "uu", "kk"), "the value");
+
+    // set
+    mock.expectCall("PLAYERSET, 32, mm, nn, oo");
+    mock.provideNewResult(server::makeStringValue("OK"));
+    TS_ASSERT_THROWS_NOTHING(testee.set(32, "mm", "nn", "oo"));
+
     mock.checkFinish();
 }
 

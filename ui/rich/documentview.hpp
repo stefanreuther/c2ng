@@ -52,6 +52,8 @@ namespace ui { namespace rich {
         virtual int getCursorTop();
         virtual int getCursorSize();
         virtual int getTotalSize();
+        virtual void setPageTop(int top);
+        virtual void scroll(Operation op);
 
         // SimpleWidget:
         virtual void draw(gfx::Canvas& can);

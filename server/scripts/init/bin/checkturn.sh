@@ -37,31 +37,53 @@ fi
 cp "$gamedir/in/new/player$player.trn" "$gamedir/data/player$player.trn" || exit 10
 
 # Run host to check status
-"$game_host_path/$game_host_program" -c$player "$gamedir/data" "$game_host_path"
-code=$?
+if test "$game_host_kind" = host; then
+  #
+  #  THost
+  #
 
-# Remove turn again
-rm -f "$gamedir/data/player$player.trn"
-
-# Evaluate status
-if test $code = 0; then
-  # ok
-  mv "$gamedir/in/new/player$player.trn" "$gamedir/in/player$player.trn"
-  exit 0
-elif test $code = 2; then
-  # stale
-  rm -f "$gamedir/in/new/player$player.trn"
-  exit 4
-elif test $code = 64; then
-  # yellow
-  mv "$gamedir/in/new/player$player.trn" "$gamedir/in/player$player.trn"
-  exit 1
-elif test $code -ge 128; then
-  # red
-  rm -f "$gamedir/in/new/player$player.trn"
-  exit 2
+  "$bindir/c2check" -r $player "$gamedir/data" "$game_host_path"
+  code=$?
+  if test $code = 0; then
+    # ok
+    mv "$gamedir/in/new/player$player.trn" "$gamedir/in/player$player.trn"
+    exit 0
+  else
+    # unspecified error. Report "stale"
+    rm -f "$gamedir/in/new/player$player.trn"
+    exit 4
+  fi
 else
-  # damaged
-  rm -f "$gamedir/in/new/player$player.trn"
-  exit 3
+  #
+  #  Assume PHost
+  #
+
+  "$game_host_path/$game_host_program" -c$player "$gamedir/data" "$game_host_path"
+  code=$?
+
+  # Remove turn again
+  rm -f "$gamedir/data/player$player.trn"
+
+  # Evaluate status
+  if test $code = 0; then
+    # ok
+    mv "$gamedir/in/new/player$player.trn" "$gamedir/in/player$player.trn"
+    exit 0
+  elif test $code = 2; then
+    # stale
+    rm -f "$gamedir/in/new/player$player.trn"
+    exit 4
+  elif test $code = 64; then
+    # yellow
+    mv "$gamedir/in/new/player$player.trn" "$gamedir/in/player$player.trn"
+    exit 1
+  elif test $code -ge 128; then
+    # red
+    rm -f "$gamedir/in/new/player$player.trn"
+    exit 2
+  else
+    # damaged
+    rm -f "$gamedir/in/new/player$player.trn"
+    exit 3
+  fi
 fi

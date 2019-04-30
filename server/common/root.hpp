@@ -48,6 +48,10 @@ namespace server { namespace common {
             \return default profile */
         afl::net::redis::HashKey defaultProfile();
 
+        String_t getUserIdFromLogin(String_t login);
+
+        afl::net::redis::StringKey userByName(String_t simplifiedName);
+
      private:
         afl::net::CommandHandler& m_db;
     };

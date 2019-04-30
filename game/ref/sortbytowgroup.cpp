@@ -49,9 +49,9 @@ game::ref::SortByTowGroup::getClass(const Reference& a) const
     // ex diviTowGroup
     int key = getTowGroupKey(a) >> 1;
     if (const game::map::Ship* pShip = m_universe.ships().get(key)) {
-        return afl::string::Format(m_translator.translateString("towing %s").c_str(), pShip->getName(game::map::Object::PlainName, m_translator, m_interface));
+        return afl::string::Format(m_translator("towing %s"), pShip->getName(PlainName, m_translator, m_interface));
     } else {
-        return m_translator.translateString("not in a tow group");
+        return m_translator("not in a tow group");
     }
 
 }

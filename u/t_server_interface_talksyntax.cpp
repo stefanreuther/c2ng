@@ -5,6 +5,7 @@
 
 #include "server/interface/talksyntax.hpp"
 
+#include <stdexcept>
 #include "t_server_interface.hpp"
 
 /** Interface test. */

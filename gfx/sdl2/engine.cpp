@@ -386,8 +386,8 @@ gfx::sdl2::Engine::handleEvent(EventConsumer& consumer, bool relativeMouseMoveme
         }
     }
 
-    // // Update mouse grab
-    // setMouseGrab(relativeMouseMovement);
+    // Update mouse grab
+    setMouseGrab(relativeMouseMovement);
 
     // Wait for event to arrive
     SDL_Event ev;
@@ -468,22 +468,16 @@ gfx::sdl2::Engine::clearWindowStuff()
 
 // /** Set mouse mode.
 //     \param enable true: grab mouse pointer and start reporting infinite movement; false: normal mouse behaviour */
-// void
-// gfx::sdl2::Engine::setMouseGrab(bool enable)
-// {
-//     // ex ui/event.cc:setMouseMode
-//     if (!m_disableGrab && (enable != m_grabEnabled)) {
-//         m_grabEnabled = enable;
-//         if (enable) {
-//             SDL_ShowCursor(0);
-//             SDL_WM_GrabInput(SDL_GRAB_ON);
-//             m_grabEnableTime = afl::sys::Time::getTickCounter();
-//         } else {
-//             SDL_ShowCursor(1);
-//             SDL_WM_GrabInput(SDL_GRAB_OFF);
-//         }
-//     }
-// }
+void
+gfx::sdl2::Engine::setMouseGrab(bool enable)
+{
+    // ex ui/event.cc:setMouseMode
+    if (!m_disableGrab && (enable != m_grabEnabled)) {
+        m_grabEnabled = enable;
+        SDL_SetRelativeMouseMode(enable ? SDL_TRUE : SDL_FALSE);
+        m_grabEnableTime = afl::sys::Time::getTickCounter();
+    }
+}
 
 /** Convert and dispatch SDL event.
     \param se       SDL event

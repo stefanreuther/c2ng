@@ -68,9 +68,8 @@
 ; missions have hardwired interpretation.
 ;
 ; SRace is re-interpreting mission numbers such that mission 1 is actually
-; mission 9. This is handled transparently by PCC: with SRace, mission 1
-; is never allowed to be set no matter what is in this file, and mission 9
-; ends up being written to data files as mission 1.
+; mission 9. This remapping is handled transparently by PCC, although this
+; file still needs to have the right condition.
 ;=============================================================================
 
 ; If you want PCC to be able to name a mission, but not set it, use
@@ -83,6 +82,7 @@
 
 ;==== Normal Missions ====
 1,,Explore
+                c = System.Host$<>1
 2,,Mine Sweep
                 s = M-Sweep
 3,,Lay Mines

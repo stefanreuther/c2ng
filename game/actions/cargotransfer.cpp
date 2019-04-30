@@ -240,6 +240,43 @@ game::actions::CargoTransfer::isSupplySaleAllowed() const
     return false;
 }
 
+// Get permitted element types.
+game::ElementTypes_t
+game::actions::CargoTransfer::getElementTypes(const game::spec::ShipList& shipList) const
+{
+    // ex doCargoTransfer (part)
+    // Check general availability
+    ElementTypes_t allowedTypes;
+    ElementTypes_t presentTypes;
+    for (Element::Type type = Element::begin(), end = Element::end(shipList); type != end; ++type) {
+        bool allowed = true;
+        bool present = false;
+        for (size_t i = 0, n = m_units.size(); i < n; ++i) {
+            if (!m_units[i]->canHaveElement(type)) {
+                allowed = false;
+            }
+            if (m_units[i]->getAmount(type) > m_units[i]->getMinAmount(type)) {
+                present = true;
+            }
+        }
+        if (allowed) {
+            allowedTypes += type;
+        }
+        if (present) {
+            presentTypes += type;
+        }
+    }
+
+    // If we can sell supplies, pretend money is present
+    if (presentTypes.contains(Element::Supplies) && !presentTypes.contains(Element::Money)) {
+        if (isSupplySaleAllowed()) {
+            presentTypes += Element::Money;
+        }
+    }
+
+    return allowedTypes & presentTypes;
+}
+
 // Check validity of transaction.
 bool
 game::actions::CargoTransfer::isValid() const

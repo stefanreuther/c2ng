@@ -27,6 +27,7 @@ namespace client { namespace dialogs {
         virtual void handleStateChange(client::si::UserSide& us, client::si::RequestLink2 link, client::si::OutputState::Target target);
         virtual void handleEndDialog(client::si::UserSide& us, client::si::RequestLink2 link, int code);
         virtual void handlePopupConsole(client::si::UserSide& us, client::si::RequestLink2 link);
+        virtual void handleSetViewRequest(client::si::UserSide& ui, client::si::RequestLink2 link, String_t name, bool withKeymap);
         virtual client::si::ContextProvider* createContextProvider();
 
      private:

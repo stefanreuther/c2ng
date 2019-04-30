@@ -385,7 +385,7 @@ game::interface::getBaseProperty(const game::map::Planet& pl, BaseProperty ibp,
             int id;
             if (pl.getBaseShipyardId().get(id)) {
                 if (const game::map::Ship* ship = t->universe().ships().get(id)) {
-                    return makeStringValue(ship->getName(game::map::Object::PlainName, tx, iface));
+                    return makeStringValue(ship->getName(PlainName, tx, iface));
                 }
             }
         }
@@ -400,10 +400,10 @@ game::interface::getBaseProperty(const game::map::Planet& pl, BaseProperty ibp,
             if (pl.getBaseShipyardId().get(id) && pl.getBaseShipyardAction().get(nr)) {
                 if (const game::map::Ship* ship = t->universe().ships().get(id)) {
                     if (nr == FixShipyardAction) {
-                        return makeStringValue(afl::string::Format("Fix %s", ship->getName(game::map::Object::PlainName, tx, iface)));
+                        return makeStringValue(afl::string::Format("Fix %s", ship->getName(PlainName, tx, iface)));
                     }
                     if (nr == RecycleShipyardAction) {
-                        return makeStringValue(afl::string::Format("Recycle %s", ship->getName(game::map::Object::PlainName, tx, iface)));
+                        return makeStringValue(afl::string::Format("Recycle %s", ship->getName(PlainName, tx, iface)));
                     }
                 }
             }

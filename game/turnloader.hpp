@@ -136,7 +136,7 @@ namespace game {
             - starchart (chartX.cc)
             - scores (scoreX.cc)
             FIXME: script VM? probably not here. */
-        void loadCurrentDatabases(Turn& turn, Game& game, int player, Root& root, Session& session, afl::charset::Charset& charset);
+        void loadCurrentDatabases(Turn& turn, Game& game, int player, Root& root, Session& session);
 
         /** Load history turn databases.
             This method should be called by the loadHistoryTurn() method, with the same parameters,

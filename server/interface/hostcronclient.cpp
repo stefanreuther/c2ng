@@ -43,6 +43,23 @@ server::interface::HostCronClient::kickstartGame(int32_t gameId)
     return m_commandHandler.callInt(Segment().pushBackString("CRONKICK").pushBackInteger(gameId));
 }
 
+void
+server::interface::HostCronClient::suspendScheduler(int32_t relativeTime)
+{
+    m_commandHandler.callVoid(Segment().pushBackString("CRONSUSPEND").pushBackInteger(relativeTime));
+}
+
+void
+server::interface::HostCronClient::getBrokenGames(BrokenMap_t& result)
+{
+    std::auto_ptr<afl::data::Value> p(m_commandHandler.call(Segment().pushBackString("CRONLSBROKEN")));
+    afl::data::Access a(p);
+    for (size_t i = 0, n = a.getArraySize(); i < n; i += 2) {
+        int32_t gameId = a[i].toInteger();
+        result[gameId] = a[i+1].toString();
+    }
+}
+
 server::interface::HostCron::Event
 server::interface::HostCronClient::unpackEvent(const afl::data::Value* p)
 {

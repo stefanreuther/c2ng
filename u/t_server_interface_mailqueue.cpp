@@ -29,7 +29,29 @@ TestServerInterfaceMailQueue::testInterface()
             { }
         virtual void runQueue()
             { }
+        virtual UserStatus getUserStatus(String_t /*user*/)
+            { return UserStatus(); }
     };
     Tester t;
+}
+
+/** Test parseAddressStatus(), formatAddressStatus(). */
+void
+TestServerInterfaceMailQueue::testAddressStatus()
+{
+    using server::interface::MailQueue;
+
+    TS_ASSERT_EQUALS(MailQueue::parseAddressStatus(""),  MailQueue::NotSet);
+    TS_ASSERT_EQUALS(MailQueue::parseAddressStatus("u"), MailQueue::Unconfirmed);
+    TS_ASSERT_EQUALS(MailQueue::parseAddressStatus("c"), MailQueue::Confirmed);
+    TS_ASSERT_EQUALS(MailQueue::parseAddressStatus("b"), MailQueue::Blocked);
+    TS_ASSERT_EQUALS(MailQueue::parseAddressStatus("r"), MailQueue::Requested);
+
+    TS_ASSERT_EQUALS("",  MailQueue::formatAddressStatus(MailQueue::NotSet));
+    TS_ASSERT_EQUALS("u", MailQueue::formatAddressStatus(MailQueue::Unconfirmed));
+    TS_ASSERT_EQUALS("c", MailQueue::formatAddressStatus(MailQueue::Confirmed));
+    TS_ASSERT_EQUALS("b", MailQueue::formatAddressStatus(MailQueue::Blocked));
+    TS_ASSERT_EQUALS("r", MailQueue::formatAddressStatus(MailQueue::Requested));
+
 }
 

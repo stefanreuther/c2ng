@@ -5,6 +5,34 @@
 
 #include <stdexcept>
 #include "util/keymap.hpp"
+#include "util/keymapinformation.hpp"
+
+namespace {
+    void doDescribe(util::KeymapInformation& result, const util::Keymap& map, size_t level, size_t maxDepth)
+    {
+        // Do not add a keymap twice (can happen through multiple inheritance)
+        if (result.find(map.getName()) == result.nil) {
+            // Add this keymap
+            result.add(level, map.getName());
+
+            // Add parents
+            size_t np = map.getNumDirectParents();
+            if (np != 0 && level >= maxDepth) {
+                // Level exceeded: just placeholder
+                result.add(level + 1, String_t());
+            } else {
+                // All parents
+                for (size_t i = 0; i < np; ++i) {
+                    util::KeymapRef_t r = map.getDirectParent(i);
+                    if (r != 0) {
+                        doDescribe(result, *r, level + 1, maxDepth);
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 // Constructor.
 util::Keymap::Keymap(const String_t& name)
@@ -131,6 +159,14 @@ bool
 util::Keymap::isChanged() const
 {
     return m_changed;
+}
+
+// Describe keymap structure.
+void
+util::Keymap::describe(KeymapInformation& result, size_t maxDepth) const
+{
+    // ex client/dialogs/keymapdlg.cc:formatKeymapTree (part)
+    doDescribe(result, *this, 0, maxDepth);
 }
 
 /** Look up a key, recursively.

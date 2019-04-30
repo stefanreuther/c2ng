@@ -1,64 +1,112 @@
 /**
   *  \file server/interface/hostplayer.hpp
+  *  \brief Interface server::interface::HostPlayer
   */
 #ifndef C2NG_SERVER_INTERFACE_HOSTPLAYER_HPP
 #define C2NG_SERVER_INTERFACE_HOSTPLAYER_HPP
 
 #include <map>
 #include "afl/base/deletable.hpp"
+#include "afl/base/optional.hpp"
 #include "afl/base/types.hpp"
 #include "afl/data/stringlist.hpp"
-#include "afl/base/optional.hpp"
 #include "afl/string/string.hpp"
 
 namespace server { namespace interface {
 
+    /** Host Player interface.
+        This interface allows manipulating players associated with games. */
     class HostPlayer : public afl::base::Deletable {
      public:
+        /** Information about a player slot in a game. */
         struct Info {
-            String_t longName;
-            String_t shortName;
-            String_t adjectiveName;
-            afl::data::StringList_t userIds;
-            int32_t numEditable;
-            bool joinable;
+            String_t longName;                ///< Long race name.
+            String_t shortName;               ///< Short race name.
+            String_t adjectiveName;           ///< Adjective race name.
+            afl::data::StringList_t userIds;  ///< Players in this slot. First is primary.
+            int32_t numEditable;              ///< Number of slots current player can modify.
+            bool joinable;                    ///< True if current player can join this slot.
 
             Info();
         };
 
+        /** File creation permission. */
         enum FileStatus {
-            Stale,              // directory is stale, file upload allowed
-            Allow,              // file upload allowed, use FileBase.putFile
-            Turn,               // turn file, use HostTurn.submit
-            Refuse              // file upload not allowed
+            Stale,              ///< Directory is stale, file upload allowed.
+            Allow,              ///< File upload allowed, use FileBase.putFile.
+            Turn,               ///< Turn file, use HostTurn.submit.
+            Refuse              ///< File upload not allowed.
         };
 
-        // PLAYERJOIN game:GID slot:Int user:UID
+
+        /** Join a game (PLAYERJOIN).
+            \param gameId game Id
+            \param slot Slot number
+            \param userId user Id */
         virtual void join(int32_t gameId, int32_t slot, String_t userId) = 0;
 
-        // PLAYERSUBST game:GID slot:Int user:UID
+        /** Set replacement player (PLAYERSUBST).
+            \param gameId game Id
+            \param slot Slot number
+            \param userId user Id */
         virtual void substitute(int32_t gameId, int32_t slot, String_t userId) = 0;
 
-        // PLAYERRESIGN game:GID slot:Int user:UID
+        /** Remove player (PLAYERRESIGN).
+            \param gameId game Id
+            \param slot Slot number
+            \param userId user Id */
         virtual void resign(int32_t gameId, int32_t slot, String_t userId) = 0;
 
-        // PLAYERADD game:GID user:UID
+        /** Add player to game (PLAYERADD).
+            \param gameId game Id
+            \param userId user Id */
         virtual void add(int32_t gameId, String_t userId) = 0;
 
-        // PLAYERLS game:GID [ALL]
+        /** Get information about all players in a game (PLAYERLS).
+            \param [in] gameId game Id
+            \param [in] all true to return all current slot, false to return all slots ever
+            \param [out] Result */
         virtual void list(int32_t gameId, bool all, std::map<int,Info>& result) = 0;
 
-        // PLAYERSTAT game:GID slot:Int
+        /** Get information about one player slot (PLAYERSTAT).
+            \param gameId game Id
+            \param slot Slot
+            \return information */
         virtual Info getInfo(int32_t gameId, int32_t slot) = 0;
 
-        // PLAYERSETDIR game:GID user:UID dir:FileName
+        /** Set directory name for online play (PLAYERSETDIR).
+            \param gameId game Id
+            \param userId user Id
+            \param dirName directory name */
         virtual void setDirectory(int32_t gameId, String_t userId, String_t dirName) = 0;
 
-        // PLAYERGETDIR game:GID user:UID
+        /** Get directory name for online play (PLAYERGETDIR).
+            \param gameId game Id
+            \param userId user Id
+            \return directory name */
         virtual String_t getDirectory(int32_t gameId, String_t userId) = 0;
 
-        // PLAYERCHECKFILE game:GID user:UID name:Str [DIR dir:FileName]
+        /** Check file creation permission (PLAYERCHECKFILE).
+            \param gameId game Id
+            \param userId user Id
+            \param fileName file name
+            \param dirName directory name
+            \return file creation permission */
         virtual FileStatus checkFile(int32_t gameId, String_t userId, String_t fileName, afl::base::Optional<String_t> dirName) = 0;
+
+        /** Set player-specific configuration value (PLAYERSET).
+            \param gameId game Id
+            \param userId user Id
+            \param key Key
+            \param value New value */
+        virtual void set(int32_t gameId, String_t userId, String_t key, String_t value) = 0;
+
+        /** Get player-specific configuration value (PLAYERGET).
+            \param gameId game Id
+            \param userId user Id
+            \param key Key
+            \return value */
+        virtual String_t get(int32_t gameId, String_t userId, String_t key) = 0;
 
         static String_t formatFileStatus(FileStatus st);
         static bool parseFileStatus(const String_t& str, FileStatus& st);

@@ -17,12 +17,6 @@ using afl::string::Format;
 namespace {
     const int PAD = 5;
 
-    String_t numToString(int32_t n)
-    {
-        // FIXME: honor user configuration re thousands-separator
-        return Format("%d", n);
-    }
-
     game::PlayerSet_t takePlayers(game::PlayerSet_t& set, int count)
     {
         game::PlayerSet_t result;
@@ -57,15 +51,15 @@ namespace {
         tab.cell(2, 5).setText(_("kt"));
     }
 
-    void setFirstTable(ui::widgets::SimpleTable& tab, const client::proxy::HullSpecificationProxy::HullSpecification& data)
+    void setFirstTable(ui::widgets::SimpleTable& tab, const client::proxy::HullSpecificationProxy::HullSpecification& data, const util::NumberFormatter& fmt)
     {
         // ex WSpecBaseInfo::drawContent (part)
-        tab.cell(1, 0).setText(numToString(data.mass));
-        tab.cell(1, 1).setText(numToString(data.numEngines));
-        tab.cell(1, 2).setText(numToString(data.techLevel));
-        tab.cell(1, 3).setText(numToString(data.maxCrew));
-        tab.cell(1, 4).setText(numToString(data.maxCargo));
-        tab.cell(1, 5).setText(numToString(data.maxFuel));
+        tab.cell(1, 0).setText(fmt.formatNumber(data.mass));
+        tab.cell(1, 1).setText(fmt.formatNumber(data.numEngines));
+        tab.cell(1, 2).setText(fmt.formatNumber(data.techLevel));
+        tab.cell(1, 3).setText(fmt.formatNumber(data.maxCrew));
+        tab.cell(1, 4).setText(fmt.formatNumber(data.maxCargo));
+        tab.cell(1, 5).setText(fmt.formatNumber(data.maxFuel));
     }
 
     void initSecondTable(ui::widgets::SimpleTable& tab)
@@ -80,7 +74,7 @@ namespace {
         // FIXME -> tab.cell(0, 3).setText(_("..."));
     }
 
-    void setSecondTable(ui::widgets::SimpleTable& tab, const client::proxy::HullSpecificationProxy::HullSpecification& data)
+    void setSecondTable(ui::widgets::SimpleTable& tab, const client::proxy::HullSpecificationProxy::HullSpecification& data, const util::NumberFormatter& fmt)
     {
         // ex WSpecMainInfo::drawContent
         String_t w;
@@ -104,7 +98,7 @@ namespace {
         }
         tab.cell(1, 0).setText(w);
         tab.cell(1, 1).setText(Format(_("%d%% damage").c_str(), data.mineHitDamage));
-        tab.cell(1, 2).setText(numToString(data.hullId));
+        tab.cell(1, 2).setText(fmt.formatNumber(data.hullId));
 
         // FIXME: hullfuncs
     }
@@ -152,17 +146,17 @@ namespace {
         tab.clearColumnWidth(3);
     }
 
-    void setThirdTable(ui::widgets::SimpleTable& tab, const client::proxy::HullSpecificationProxy::HullSpecification& data)
+    void setThirdTable(ui::widgets::SimpleTable& tab, const client::proxy::HullSpecificationProxy::HullSpecification& data, const util::NumberFormatter& fmt)
     {
         // ex WSpecBuildInfo::drawContent (part)
-        tab.cell(1, 1).setText(numToString(data.cost.get(game::spec::Cost::Money)));
-        tab.cell(1, 2).setText(numToString(data.cost.get(game::spec::Cost::Tritanium)));
-        tab.cell(1, 3).setText(numToString(data.cost.get(game::spec::Cost::Duranium)));
-        tab.cell(1, 4).setText(numToString(data.cost.get(game::spec::Cost::Molybdenum)));
+        tab.cell(1, 1).setText(fmt.formatNumber(data.cost.get(game::spec::Cost::Money)));
+        tab.cell(1, 2).setText(fmt.formatNumber(data.cost.get(game::spec::Cost::Tritanium)));
+        tab.cell(1, 3).setText(fmt.formatNumber(data.cost.get(game::spec::Cost::Duranium)));
+        tab.cell(1, 4).setText(fmt.formatNumber(data.cost.get(game::spec::Cost::Molybdenum)));
 
-        tab.cell(4, 1).setText(numToString(data.pointsToBuild));
-        tab.cell(4, 2).setText(numToString(data.pointsForKilling));
-        tab.cell(4, 3).setText(numToString(data.pointsForScrapping));
+        tab.cell(4, 1).setText(fmt.formatNumber(data.pointsToBuild));
+        tab.cell(4, 2).setText(fmt.formatNumber(data.pointsForKilling));
+        tab.cell(4, 3).setText(fmt.formatNumber(data.pointsForScrapping));
     }
 }
 
@@ -170,11 +164,13 @@ namespace {
 client::widgets::HullSpecificationSheet::HullSpecificationSheet(ui::Root& root,
                                                                 bool hasPerTurnCosts,
                                                                 game::PlayerSet_t allPlayers,
-                                                                const game::PlayerArray<String_t>& playerNames)
+                                                                const game::PlayerArray<String_t>& playerNames,
+                                                                util::NumberFormatter fmt)
     : Group(ui::layout::VBox::instance5),
       m_deleter(),
       m_root(root),
-      m_hasPerTurnCosts(hasPerTurnCosts)
+      m_hasPerTurnCosts(hasPerTurnCosts),
+      m_formatter(fmt)
 {
     init();
     initPlayerLists(allPlayers, playerNames);
@@ -190,13 +186,13 @@ client::widgets::HullSpecificationSheet::setContent(const HullSpecification_t& d
         m_pImage->setImage(data.image.empty() ? RESOURCE_ID("nvc") : data.image);
     }
     if (m_pTables[0] != 0) {
-        setFirstTable(*m_pTables[0], data);
+        setFirstTable(*m_pTables[0], data, m_formatter);
     }
     if (m_pTables[1] != 0) {
-        setSecondTable(*m_pTables[1], data);
+        setSecondTable(*m_pTables[1], data, m_formatter);
     }
     if (m_pTables[2] != 0) {
-        setThirdTable(*m_pTables[2], data);
+        setThirdTable(*m_pTables[2], data, m_formatter);
     }
     for (int i = 0; i < 3; ++i) {
         if (m_pPlayerLists[i] != 0) {

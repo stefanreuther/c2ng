@@ -226,6 +226,23 @@ interpreter::vmio::FileSaveContext::addProcess(Process& proc)
     addPlanNew(new ProcessSaver(proc));
 }
 
+// Save as object file.
+void
+interpreter::vmio::FileSaveContext::saveObjectFile(afl::io::Stream& out, uint32_t entry)
+{
+    // Save header
+    structures::ObjectFileHeader header;
+    std::memcpy(header.magic, structures::OBJECT_FILE_MAGIC, sizeof(header.magic));
+    header.version = structures::OBJECT_FILE_VERSION;
+    header.zero = 0;
+    header.headerSize = structures::OBJECT_FILE_HEADER_SIZE;
+    header.entry = entry;
+    out.fullWrite(afl::base::fromObject(header));
+
+    // Save content
+    save(out);
+}
+
 // Save all pending objects.
 void
 interpreter::vmio::FileSaveContext::save(afl::io::Stream& out)

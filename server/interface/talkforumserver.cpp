@@ -63,7 +63,6 @@ server::interface::TalkForumServer::handleCommand(const String_t& upcasedCommand
 
            @uses forum:$FID:header, group:$GRID:forums, forum:newsgroups
            @err 404 Not found
-           @argtype Str
            @argtype GRID
            @argtype TalkText
            @argtype TalkPerm */
@@ -281,6 +280,20 @@ server::interface::TalkForumServer::handleCommand(const String_t& upcasedCommand
         parseListParameters(p, args);
 
         result.reset(m_implementation.getPosts(fid, p));
+        return true;
+    } else if (upcasedCommand == "FORUMBYNAME") {
+        /* @q FORUMBYNAME name:Str (Talk Command)
+           Get forum by well-known name.
+           Well-known names are configured out-of-band during site setup;
+           as of 20190413, c2talk-server has no way to modify this configuration.
+
+           @rettype FID
+           @uses forum:byname
+           @since PCC2 2.40.6 */
+        args.checkArgumentCount(1);
+
+        int32_t fid = m_implementation.findForum(toString(args.getNext()));
+        result.reset(makeIntegerValue(fid));
         return true;
     } else {
         return false;

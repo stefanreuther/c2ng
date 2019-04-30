@@ -21,6 +21,7 @@
 #include "game/test/registrationkey.hpp"
 #include "game/test/stringverifier.hpp"
 #include "game/test/specificationloader.hpp"
+#include "afl/charset/utf8charset.hpp"
 
 namespace {
     void addBase(game::map::Planet& planet)
@@ -136,6 +137,7 @@ TestGameActionsPreconditions::testSession()
                                        game::HostVersion(),
                                        std::auto_ptr<game::RegistrationKey>(new game::test::RegistrationKey(game::RegistrationKey::Unknown, 100)),
                                        std::auto_ptr<game::StringVerifier>(new game::test::StringVerifier()),
+                                       std::auto_ptr<afl::charset::Charset>(new afl::charset::Utf8Charset()),
                                        game::Root::Actions_t()));
         TS_ASSERT_THROWS(game::actions::mustHaveShipList(session), game::Exception);
         TS_ASSERT_THROWS_NOTHING(game::actions::mustHaveRoot(session));
@@ -158,6 +160,7 @@ TestGameActionsPreconditions::testSession()
                                        game::HostVersion(),
                                        std::auto_ptr<game::RegistrationKey>(new game::test::RegistrationKey(game::RegistrationKey::Unknown, 100)),
                                        std::auto_ptr<game::StringVerifier>(new game::test::StringVerifier()),
+                                       std::auto_ptr<afl::charset::Charset>(new afl::charset::Utf8Charset()),
                                        game::Root::Actions_t()));
         session.setGame(new game::Game());
         TS_ASSERT_THROWS_NOTHING(game::actions::mustHaveShipList(session));

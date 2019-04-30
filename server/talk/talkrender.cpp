@@ -27,5 +27,5 @@ server::talk::TalkRender::render(const String_t& text, const Options& opts)
 
     // Context
     server::talk::render::Context ctx(m_session.getUser());
-    return server::talk::render::render(text, ctx, temporaryOptions, m_root);
+    return server::talk::render::renderText(text, ctx, temporaryOptions, m_root);
 }

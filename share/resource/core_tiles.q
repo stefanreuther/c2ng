@@ -217,7 +217,7 @@ EndSub
 % - call SetButton to configure buttons "b","e","m","f" if desired
 Sub Tile.ShipMission
   % ex WShipMissionTile::drawData
-  Local t, bc
+  Local t, bc, System.Err
 
   % Line 1: Mission
   t := RAdd(Translate("Mission:"), " ", RStyle(If(CCVP.ShipHasMissionWarning(), "yellow", "green"), CCVP.ShipMissionLabel()), "\n")
@@ -534,7 +534,7 @@ Sub Tile.PlanetEconomy
   % Buttons
   If CCVP.AllowGive() Then
     If GetCommand("give planet " & Id) Then
-      SetButton "g", "green"
+      SetButton "g", "yellow"
     Else
       SetButton "g", "none"
     EndIf
@@ -569,6 +569,185 @@ Sub Tile.PlanetLink
   Else
     SetLeftText 'f8', RStyle("white,big", Translate("Build starbase"))
   EndIf
+EndSub
+
+% Planet Minerals (Starchart)
+% - called in planet context
+% - call SetContent with 25x5 rich text
+% @since PCC2 2.40.6
+Sub Tile.NarrowPlanetMinerals
+  % ex WNarrowPlanetMineralTile::drawData
+  Option LocalSubs(1)
+  Local Function Green(t)
+    Return RStyle("green", t)
+  EndFunction
+  Local Function Row(name, mined, ground, density)
+    Local r = RAlign(name, 30)
+    If IsEmpty(mined)
+      r := RAdd(r, RAlign(' ', 100))
+    Else
+      r := RAdd(r, RAlign(Green(CCVP.NumberToString(mined)), 70, 2), RAlign(Green(' ' & Translate("kt")), 30))
+    EndIf
+    If IsEmpty(ground)
+      r := RAdd(r, RAlign(' ', 100))
+    Else
+      r := RAdd(r, RAlign(Green(CCVP.NumberToString(ground)), 70, 2), RAlign(Green(' ' & Translate("kt")), 30))
+    EndIf
+    If Not IsEmpty(density)
+      r := RAdd(r, RAlign(RStyle("green", density & "%"), 30, 2))
+    EndIf
+    Return RAdd(r, "\n")
+  EndFunction
+
+
+  Local _ = Translate
+  Local t = RAdd(RAlign(_("Mined"), 100, 2), RAlign(_("Ground"), 100, 2), "\n")
+  t := RAdd(t, Row(_("Neu:"), Mined.N, Ground.N, Density.N))
+  t := RAdd(t, Row(_("Tri:"), Mined.T, Ground.T, Density.T))
+  t := RAdd(t, Row(_("Dur:"), Mined.D, Ground.D, Density.D))
+  t := RAdd(t, Row(_("Mol:"), Mined.M, Ground.M, Density.M))
+  SetContent t
+EndSub
+
+% Planet Economy (Starchart)
+% - called in planet context
+% - call SetContent with 25x3 rich text
+% @since PCC2 2.40.6
+Sub Tile.NarrowPlanetEconomy
+  % ex WNarrowPlanetEconomyTile::drawData
+  Option LocalSubs(1)
+  Local Function Green(t)
+    Return RStyle("green", t)
+  EndFunction
+  Local Function Line(e1, n1, e2, n2, u2)
+    Local r := RAlign(e1 & ':', 60)
+    r := RAdd(r, RAlign(If(IsEmpty(n1), ' ', Green(n1)), 40, 2), '  ')
+    r := RAdd(r, RAlign(If(IsEmpty(e2), ' ', e2 & ':'),  60))
+    r := RAdd(r, RAlign(If(IsEmpty(n2), ' ', Green(n2)), 60, 2), ' ')
+    If Not IsEmpty(n2)
+      r := RAdd(r, Green(u2))
+    EndIf
+    Return RAdd(r, "\n")
+  EndFunction
+
+  Local _ = Translate
+  Local t =    Line(_("Mines"),     Mines,     _("Money"),    Money,    _("mc"))
+  t := RAdd(t, Line(_("Factories"), Factories, _("Supplies"), Supplies, _("kt")))
+  t := RAdd(t, Line(_("Defense"),   Defense,   Z(0),          Z(0),     ""))
+  SetContent t
+EndSub
+
+% Planet Colonists (Starchart)
+% - called in planet context
+% - call SetContent with 25x3 rich text
+% @since PCC2 2.40.6
+Sub Tile.NarrowPlanetColonists
+  % ex WNarrowPlanetColonistTile::drawData
+  Local t, c
+  If Not IsEmpty(Owner$) Then
+    If Owner$=0 Then
+      t := Translate("No colonists.")
+    Else
+      % Line 1: Owner/clans
+      c := CCVP.PlayerColor(Owner$)
+      If IsEmpty(Colonists) Then
+        t := RStyle(c, Owner)
+      Else
+        t := RStyle(c, Format(Translate("%s, %d clan%!1{s%}"), Owner, CCVP.NumberToString(Colonists)))
+      EndIf
+      t := RAdd(t, "\n")
+
+      % Line 2: Happiness (if known)
+      If Not IsEmpty(Colonists.Happy$) Then
+        t := RAdd(t, RStyle(CCVP.HappyColor(Colonists.Happy$), Format("%s (%d)", Colonists.Happy, Colonists.Happy$)))
+      EndIf
+      t := RAdd(t, "\n")
+
+      % Line 3: Tax Rate
+      If Not IsEmpty(Colonists.Tax) Then
+        t := RAdd(t, Translate("Tax Rate:"), " ", RStyle("green", Format("%d%%", Colonists.Tax)))
+      EndIf
+    EndIf
+  Else
+    t := ''
+  EndIf
+  SetContent t
+EndSub
+
+% Planet Natives (Starchart)
+% - called in planet context
+% - call SetContent with 25x4 rich text
+% @since PCC2 2.40.6
+Sub Tile.NarrowPlanetNatives
+  % ex WNarrowPlanetNativeTile::drawData
+  % FIXME: this does not yet handle the "known to have natives, but not known which ones" case
+  Local t
+  If Not IsEmpty(Natives.Race$) Then
+    % FIXME -> if (!pl->getNativeRace().isKnown()) {
+    %     /* This means this planet is known to have natives, but we don't know which ones. */
+    %     ctx.setColor(UIColor::tc_Static);
+    %     outTextF(ctx, x, y, w, _("Planet has natives."));
+    %     return;
+    % }
+    If Natives.Race$=0 Then
+      t := Translate("No natives.")
+    Else
+      % Line 1: Race/Population
+      If IsEmpty(Natives) Then
+        t := RStyle("green", Natives.Race)
+      Else
+        t := RStyle("green", Format(Translate("%s natives, %d clan%!1{s%}"), Natives.Race, CCVP.NumberToString(Natives)))
+      EndIf
+      t := RAdd(t, "\n")
+
+      % Line 2: Government
+      If Not IsEmpty(Natives.Gov) Then
+        t := RAdd(t, RStyle("green", Natives.Gov))
+      Else
+        t := RAdd(t, Translate("Unknown government."))
+      EndIf
+      t := RAdd(t, "\n")
+
+      % Line 3: Happiness
+      If Not IsEmpty(Natives.Happy) Then
+        t := RAdd(t, RStyle(CCVP.HappyColor(Natives.Happy$), Format("%s (%d)", Natives.Happy, Natives.Happy$)))
+      EndIf
+      t := RAdd(t, "\n")
+
+      % Line 4: Tax rate
+      If Not IsEmpty(Natives.Tax) Then
+        t := RAdd(t, Translate("Tax Rate:"), " ", RStyle("green", Format("%d%%", Natives.Tax)))
+      EndIf
+    EndIf
+  Else
+    t := ''
+  EndIf
+  SetContent t
+EndSub
+
+% Planet FCode (Starchart)
+% - called in planet context
+% - call SetContent with 25x2 rich text
+% @since PCC2 2.40.6
+Sub Tile.NarrowPlanetFCode
+  % ex WNarrowPlanetFCodeTile::drawData
+  % Line 1
+  Local t = ''
+  If Not IsEmpty(FCode) Then
+    t := RAdd(Translate("Friendly Code:"), " ", RStyle("green", FCode))
+  EndIf
+  t := RAdd(t, "\n")
+
+  % Line 2
+  Select Case Base
+    Case 'present'
+      t := RAdd(t,                 Translate("Starbase present"))
+    Case 'being built'
+      t := RAdd(t, RStyle("green", Translate("Starbase being built")))
+    Case Else
+      t := RAdd(t,                 Translate("No starbase"))
+  EndSelect
+  SetContent t
 EndSub
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Base Data %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

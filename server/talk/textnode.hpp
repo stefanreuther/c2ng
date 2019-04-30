@@ -54,7 +54,8 @@ namespace server { namespace talk {
             miParNormal,                // normal paragraph
             miParCode,                  // [code], language in text
             miParCentered,              // [center]
-            miParBreak                  // Cut mark for blog entries
+            miParBreak,                 // Cut mark for blog entries
+            miParFragment               // fragment of a paragraph; for use by ADDRMRENDER
         };
 
         enum GroupFormat {

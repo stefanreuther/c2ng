@@ -162,6 +162,11 @@ class TestUtilMessageNotifier : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestUtilNumberFormatter : public CxxTest::TestSuite {
+ public:
+    void testFormat();
+};
+
 class TestUtilPrefixArgument : public CxxTest::TestSuite {
  public:
     void testIt();

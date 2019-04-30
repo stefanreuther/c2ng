@@ -7,6 +7,18 @@
 #include "afl/bits/uint32le.hpp"
 #include "interpreter/savecontext.hpp"
 
+namespace {
+    uint32_t trimSize(size_t sz)
+    {
+        // This is used for string sizes, so we need not go all the way up to 4G.
+        uint32_t result = 0x100000;
+        if (sz < result) {
+            result = static_cast<uint32_t>(sz);
+        }
+        return result;
+    }
+}
+
 // /** Constructor.
 //     \param mtx Mutex. Must have one reference allocated to this object. */
 interpreter::MutexContext::MutexContext(MutexList::Mutex* mtx)
@@ -109,10 +121,13 @@ interpreter::MutexContext::store(TagNode& out, afl::io::DataSink& aux, afl::char
     out.tag   = TagNode::Tag_Mutex;
     out.value = ctx.isCurrentProcess(m_mutex->getOwner());
 
+    uint32_t nameSize = trimSize(m_mutex->getName().size());
+    uint32_t noteSize = trimSize(m_mutex->getNote().size());
+
     afl::bits::Value<afl::bits::UInt32LE> header[2];
-    header[0] = m_mutex->getName().size();
-    header[1] = m_mutex->getNote().size();
+    header[0] = nameSize;
+    header[1] = noteSize;
     aux.handleFullData(afl::base::fromObject(header));
-    aux.handleFullData(afl::string::toBytes(m_mutex->getName()));
-    aux.handleFullData(afl::string::toBytes(m_mutex->getNote()));
+    aux.handleFullData(afl::string::toBytes(m_mutex->getName()).trim(static_cast<size_t>(nameSize)));
+    aux.handleFullData(afl::string::toBytes(m_mutex->getNote()).trim(static_cast<size_t>(noteSize)));
 }

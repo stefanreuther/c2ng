@@ -63,6 +63,7 @@ server::monitor::ServerApplication::ServerApplication(afl::sys::Environment& env
     m_status.addNewObserver(new NetworkObserver("Host File Server", "HOSTFILE", NetworkObserver::Service, clientNetworkStack(), afl::net::Name(DEFAULT_ADDRESS, HOSTFILE_PORT)));
     m_status.addNewObserver(new NetworkObserver("Host Manager",     "HOST",     NetworkObserver::Service, clientNetworkStack(), afl::net::Name(DEFAULT_ADDRESS, HOST_PORT)));
     m_status.addNewObserver(new NetworkObserver("Mail Manager",     "MAILOUT",  NetworkObserver::Service, clientNetworkStack(), afl::net::Name(DEFAULT_ADDRESS, MAILOUT_PORT)));
+    m_status.addNewObserver(new NetworkObserver("User Manager",     "USER",     NetworkObserver::Service, clientNetworkStack(), afl::net::Name(DEFAULT_ADDRESS, USER_PORT)));
     m_status.addNewObserver(new NetworkObserver("Forum",            "TALK",     NetworkObserver::Service, clientNetworkStack(), afl::net::Name(DEFAULT_ADDRESS, TALK_PORT)));
     m_status.addNewObserver(new NetworkObserver("Binary File I/O",  "FORMAT",   NetworkObserver::Service, clientNetworkStack(), afl::net::Name(DEFAULT_ADDRESS, FORMAT_PORT)));
     m_status.addNewObserver(new BadnessFileObserver("Mail Fetch", "POP3.ERROR", fileSystem()));
@@ -190,7 +191,7 @@ server::monitor::ServerApplication::handleConfiguration(const String_t& key, con
 String_t
 server::monitor::ServerApplication::getApplicationName() const
 {
-    return afl::string::Format(_("PCC2 Monitor Server v%s - (c) 2017-2018 Stefan Reuther").c_str(), PCC2_VERSION);
+    return afl::string::Format(_("PCC2 Monitor Server v%s - (c) 2017-2019 Stefan Reuther").c_str(), PCC2_VERSION);
 }
 
 String_t

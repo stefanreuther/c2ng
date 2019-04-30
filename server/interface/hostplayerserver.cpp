@@ -110,7 +110,7 @@ server::interface::HostPlayerServer::handleCommand(const String_t& upcasedComman
         return true;
     } else if (upcasedCommand == "PLAYERLS") {
         /* @q PLAYERLS game:GID [ALL] (Host Command)
-           Get information about all players.
+           Get information about all players in a game.
            By default, reports all current (not dead) slots; with ALL, reports information about all slots.
 
            Permissions: read-access to game.
@@ -231,6 +231,43 @@ server::interface::HostPlayerServer::handleCommand(const String_t& upcasedComman
 
         HostPlayer::FileStatus status = m_implementation.checkFile(gameId, userId, fileName, gameDirToCheck);
         result.reset(makeStringValue(HostPlayer::formatFileStatus(status)));
+        return true;
+    } else if (upcasedCommand == "PLAYERSET") {
+        /* @q PLAYERSET game:GID user:UID key:Str value:Str (Host Command)
+           Set player-specific configuration value.
+
+           Permissions: admin or same as %user.
+
+           @uses game:$GID:user:$UID
+           @see PLAYERSETDIR, PLAYERGET
+           @since PCC2 2.40.6 */
+        args.checkArgumentCount(4);
+        int32_t gameId  = toInteger(args.getNext());
+        String_t userId = toString(args.getNext());
+        String_t key    = toString(args.getNext());
+        String_t value  = toString(args.getNext());
+
+        m_implementation.set(gameId, userId, key, value);
+
+        result.reset(makeStringValue("OK"));
+        return true;
+    } else if (upcasedCommand == "PLAYERGET") {
+        /* @q PLAYERGET game:GID user:UID key:Str (Host Command)
+           Get player-specific configuration value.
+
+           Permissions: admin or same as %user.
+
+           @retval Str value
+           @uses game:$GID:user:$UID
+           @see PLAYERGETDIR, PLAYERSET
+           @since PCC2 2.40.6 */
+        args.checkArgumentCount(3);
+        int32_t gameId  = toInteger(args.getNext());
+        String_t userId = toString(args.getNext());
+        String_t key    = toString(args.getNext());
+
+        String_t value = m_implementation.get(gameId, userId, key);
+        result.reset(makeStringValue(value));
         return true;
     } else {
         return false;

@@ -6,6 +6,7 @@
 #include "ui/widgets/simpletable.hpp"
 #include "gfx/context.hpp"
 #include "util/updater.hpp"
+#include "gfx/complex.hpp"
 
 ui::widgets::SimpleTable::Range&
 ui::widgets::SimpleTable::Range::setText(const String_t& text)
@@ -76,6 +77,24 @@ ui::widgets::SimpleTable::Range::setExtraColumns(int n)
     }
     if (up) {
         m_table.requestUpdateMetrics();
+        m_table.requestRedraw();
+    }
+    return *this;
+}
+
+ui::widgets::SimpleTable::Range&
+ui::widgets::SimpleTable::Range::setUnderline(bool flag)
+{
+    // FIXME: different underline modes:
+    // - whole cell (this one)
+    // - just the text
+    // - in the pad area (as cell divider)
+    util::Updater up;
+    for (size_t i = 0, pos = m_start; i < m_count; ++i, pos += m_stride) {
+        assert(pos < m_table.m_cells.size());
+        up.set(m_table.m_cells[pos].underlined, flag);
+    }
+    if (up) {
         m_table.requestRedraw();
     }
     return *this;
@@ -203,6 +222,14 @@ ui::widgets::SimpleTable::setColumnPadding(size_t column, int width)
 }
 
 void
+ui::widgets::SimpleTable::setNumRows(size_t numRows)
+{
+    m_numRows = numRows;
+    m_cells.resize(m_numColumns * m_numRows);
+    m_rowMetrics.resize(m_numRows);
+}
+
+void
 ui::widgets::SimpleTable::draw(gfx::Canvas& can)
 {
     gfx::Context<uint8_t> ctx(can, m_root.colorScheme());
@@ -241,6 +268,15 @@ ui::widgets::SimpleTable::draw(gfx::Canvas& can)
         ctx.setTextAlign(c.alignX, c.alignY);
         ctx.setColor(c.color);
         outTextF(ctx, cellArea, c.text);
+        if (c.underlined) {
+            // This position computation is the combination of the computations in outTextF and ui::rich::Document::draw() for underlining.
+            int textHeight = ctx.getFont()->getTextHeight(c.text);
+            int y = (cellArea.getTopY()
+                     + cellArea.getHeight() * c.alignY / 2
+                     - textHeight * c.alignY / 2
+                     + textHeight * 17/20);
+            drawHLine(ctx, cellArea.getLeftX(), y, cellArea.getRightX()-1);
+        }
 
         // Next cell
         if (column == m_numColumns) {

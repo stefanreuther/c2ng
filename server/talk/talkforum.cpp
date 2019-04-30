@@ -183,6 +183,12 @@ server::talk::TalkForum::getPosts(int32_t fid, const ListParameters& params)
     return executeListOperation(params, f.messages(), Message::MessageSorter(m_root));
 }
 
+int32_t
+server::talk::TalkForum::findForum(String_t key)
+{
+    return m_root.forumMap().intField(key).get();
+}
+
 afl::data::Value*
 server::talk::TalkForum::executeListOperation(const ListParameters& params, afl::net::redis::IntegerSetKey key, const Sorter& sorter)
 {

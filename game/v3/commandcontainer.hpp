@@ -46,7 +46,7 @@ namespace game { namespace v3 {
             \param typ Type to search
             \param id  Id to search
             \return matching command, if any */
-        const Command* getCommand(Command::Type typ, Id_t id);
+        const Command* getCommand(Command::Type typ, Id_t id) const;
 
         /** Add a command.
             If a command with the same typ/id pair exists, it is overwritten;

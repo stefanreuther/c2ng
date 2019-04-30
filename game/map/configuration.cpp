@@ -10,6 +10,7 @@
 #include "game/config/integeroption.hpp"
 #include "game/config/integervalueparser.hpp"
 #include "game/config/enumvalueparser.hpp"
+#include "util/math.hpp"
 
 namespace {
     /*
@@ -385,8 +386,8 @@ game::map::Configuration::getCanonicalLocation(Point pt) const
 
      case Circular:
         // Wrap into range
-        int32_t dist = pt.getSquaredRawDistance(m_center);
-        if (dist > int32_t(m_size.getX())*m_size.getX()) {
+        int32_t dist = int32_t(pt.getSquaredRawDistance(m_center));
+        if (dist > util::squareInteger(m_size.getX())) {
             // pwrap formulas
             double radius = 2*m_size.getX() - std::sqrt(double(dist));
             double angle  = std::atan2(double(m_center.getX() - pt.getX()), double(m_center.getY() - pt.getY()));
@@ -551,7 +552,7 @@ int32_t
 game::map::Configuration::getSquaredDistance(Point a, Point b) const
 {
     // ex game/coord.cc:distanceSquared
-    return getSimpleNearestAlias(a, b).getSquaredRawDistance(b);
+    return int32_t(getSimpleNearestAlias(a, b).getSquaredRawDistance(b));
 }
 
 // Parse a sector number.
@@ -574,8 +575,8 @@ game::map::Configuration::parseSectorNumber(int n, Point& result)
     }
 
     // Compute location
-    static const int secX[] = { -950,   50, -950,   50 };
-    static const int secY[] = {  950,  950,  -50,  -50 };
+    static const int16_t secX[] = { -950,   50, -950,   50 };
+    static const int16_t secY[] = {  950,  950,  -50,  -50 };
     int newX = m_center.getX() + secX[n / 100 - 1] + 100*((n % 100) / 10);
     int newY = m_center.getY() + secY[n / 100 - 1] - 100*(n % 10);
 

@@ -35,6 +35,7 @@ namespace server { namespace nntp {
      private:
         afl::net::Name m_listenAddress;
         afl::net::Name m_talkAddress;
+        afl::net::Name m_userAddress;
 
         String_t m_baseUrl;   // ex www_prefix
 

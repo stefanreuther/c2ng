@@ -19,6 +19,7 @@ namespace ui { namespace widgets {
 
         // Widget:
         virtual void draw(gfx::Canvas& can);
+        virtual void handleStateChange(State st, bool enable);
 
         // EventConsumer:
         virtual bool handleKey(util::Key_t key, int prefix);

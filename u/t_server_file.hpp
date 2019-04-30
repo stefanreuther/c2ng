@@ -80,6 +80,7 @@ class TestServerFileFileBase : public CxxTest::TestSuite {
     void testLimits();
     void testCopy();
     void testCopyUnderlay();
+    void testSnoop();
 };
 
 class TestServerFileFileGame : public CxxTest::TestSuite {

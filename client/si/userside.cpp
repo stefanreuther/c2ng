@@ -4,14 +4,16 @@
   */
 
 #include "client/si/userside.hpp"
+#include "afl/string/format.hpp"
 #include "client/si/control.hpp"
 #include "client/si/requestlink1.hpp"
 #include "client/si/requestlink2.hpp"
 #include "client/si/scriptside.hpp"
-#include "client/si/usertask.hpp"
-#include "afl/string/format.hpp"
 #include "client/si/usercall.hpp"
+#include "client/si/usertask.hpp"
 #include "game/extraidentifier.hpp"
+
+const size_t SCREEN_HISTORY_SIZE = 50;
 
 const game::ExtraIdentifier<game::Session, client::si::ScriptSide> client::si::SCRIPTSIDE_ID = {{}};
 
@@ -22,6 +24,7 @@ client::si::UserSide::UserSide(util::RequestSender<game::Session> gameSender, ut
       m_receiver(self, *this),
       m_console(console),
       m_mainLog(mainLog),
+      m_history(SCREEN_HISTORY_SIZE),
       m_waitIdCounter(0)
 {
     // Create the ScriptSide
@@ -83,6 +86,13 @@ client::si::UserSide::postNewRequest(util::SlaveRequest<game::Session, ScriptSid
     };
     std::auto_ptr<util::SlaveRequest<game::Session, ScriptSide> > p(request);
     m_gameSender.postNewRequest(new Task(p));
+}
+
+void
+client::si::UserSide::reset()
+{
+    // FIXME: if we have anything to reset in the game::Session, do so here
+    m_history.clear();
 }
 
 // Continue a process after UI callout.
@@ -233,64 +243,21 @@ client::si::UserSide::continueProcessWait(uint32_t id, RequestLink2 link)
     postNewRequest(new ContinueTask(id, link));
 }
 
-// Execute a command and setup wait.
 void
-client::si::UserSide::executeCommandWait(uint32_t id, String_t command, bool verbose, String_t name, std::auto_ptr<ContextProvider> ctxp)
+client::si::UserSide::executeTaskWait(uint32_t id, std::auto_ptr<ScriptTask> task)
 {
     class StartTask : public util::SlaveRequest<game::Session, ScriptSide> {
      public:
-        StartTask(uint32_t id, String_t cmd, bool verbose, String_t name, std::auto_ptr<ContextProvider> ctxp)
-            : m_id(id),
-              m_command(cmd),
-              m_verbose(verbose),
-              m_name(name),
-              m_contextProvider(ctxp)
+        StartTask(uint32_t id, std::auto_ptr<ScriptTask> task)
+            : m_id(id), m_task(task)
             { }
         void handle(game::Session& s, ScriptSide& t)
-            { t.executeCommandWait(m_id, s, m_command, m_verbose, m_name, m_contextProvider); }
+            { t.executeTask(m_id, m_task, s); }
      private:
         uint32_t m_id;
-        String_t m_command;
-        bool m_verbose;
-        String_t m_name;
-        std::auto_ptr<ContextProvider> m_contextProvider;
+        std::auto_ptr<ScriptTask> m_task;
     };
-    postNewRequest(new StartTask(id, command, verbose, name, ctxp));
-}
-
-// Execute a key command and setup wait.
-void
-client::si::UserSide::executeKeyCommandWait(uint32_t id, String_t keymapName, util::Key_t key, int prefix, std::auto_ptr<ContextProvider> ctxp)
-{
-    class StartTask : public util::SlaveRequest<game::Session, ScriptSide> {
-     public:
-        StartTask(uint32_t id, String_t keymapName, util::Key_t key, int prefix, std::auto_ptr<ContextProvider> ctxp)
-            : m_id(id),
-              m_keymapName(keymapName),
-              m_key(key),
-              m_prefix(prefix),
-              m_contextProvider(ctxp)
-            { }
-        void handle(game::Session& s, ScriptSide& t)
-            {
-                util::KeymapRef_t k = s.world().keymaps().getKeymapByName(m_keymapName);
-                util::Atom_t a = (k != 0 ? k->lookupCommand(m_key) : 0);
-                if (a != 0) {
-                    t.executeCommandWait(m_id, s, afl::string::Format("C2$Eval %d, %d", a, m_prefix), false,
-                                         afl::string::Format(s.translator().translateString("Key '%s' in '%s'").c_str(), util::formatKey(m_key), m_keymapName),
-                                         m_contextProvider);
-                } else {
-                    t.handleWait(m_id, interpreter::Process::Terminated, interpreter::Error(""));
-                }
-            }
-     private:
-        uint32_t m_id;
-        String_t m_keymapName;
-        util::Key_t m_key;
-        int m_prefix;
-        std::auto_ptr<ContextProvider> m_contextProvider;
-    };
-    postNewRequest(new StartTask(id, keymapName, key, prefix, ctxp));
+    postNewRequest(new StartTask(id, task));
 }
 
 // Handle successful wait.

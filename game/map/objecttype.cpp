@@ -208,6 +208,22 @@ game::map::ObjectType::findIndexForId(Id_t id)
     return 0;
 }
 
+// FIXME: do we need this guy? findIndex
+// /** Given an object, find its index.
+//     \param type Object type
+//     \param obj Object to find
+//     \return index if found, otherwise 0 */
+// static int
+// findIndex(GObjectType& type, GObject* obj)
+// {
+//     for (int i = type.findNextIndex(0); i != 0; i = type.findNextIndex(i)) {
+//         if (type.isValidIndex(i) && &type.getObjectByIndex(i) == obj) {
+//             return i;
+//         }
+//     }
+//     return 0;
+// }
+
 bool
 game::map::ObjectType::notifyObjectListeners()
 {

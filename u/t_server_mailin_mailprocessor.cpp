@@ -86,6 +86,8 @@ namespace {
             { TS_ASSERT(0); }
         virtual void runQueue()
             { TS_ASSERT(0); }
+        virtual UserStatus getUserStatus(String_t /*user*/)
+            { TS_ASSERT(0); return UserStatus(); }
 
         Message* extract();
         bool empty() const;
@@ -177,6 +179,9 @@ HostMock::handleCommand(const String_t& upcasedCommand, interpreter::Arguments& 
             h->setNew("slot",     makeIntegerValue(m_slot));
             h->setNew("previous", makeIntegerValue(0));
             h->setNew("user",     makeStringValue(m_user));
+            h->setNew("name",     makeStringValue(afl::string::Format("Game %d", m_gameId)));
+            h->setNew("turn",     makeIntegerValue(75));
+            h->setNew("allowtemp", makeIntegerValue(1));
             result.reset(new HashValue(h));
             break;
         }
@@ -184,6 +189,7 @@ HostMock::handleCommand(const String_t& upcasedCommand, interpreter::Arguments& 
     }
     if (upcasedCommand == "GAMEGETNAME") {
         // Emulate GAMEGETNAME, if correct state is configured
+        // As of 20190310, should no longer be needed.
         int32_t i = server::toInteger(args.getNext());
         TS_ASSERT_EQUALS(m_mode, Success);
         TS_ASSERT_EQUALS(m_gameId, i);
@@ -192,6 +198,7 @@ HostMock::handleCommand(const String_t& upcasedCommand, interpreter::Arguments& 
     }
     if (upcasedCommand == "GAMEGET") {
         // Emulate GAMEGET...turn, if correct state is configured
+        // As of 20190310, should no longer be needed.
         int32_t i = server::toInteger(args.getNext());
         String_t what = server::toString(args.getNext());
         TS_ASSERT_EQUALS(m_mode, Success);
@@ -305,6 +312,7 @@ TestServerMailinMailProcessor::testTurn()
     TS_ASSERT_EQUALS(m->parameters["trn_status"], "1");
     TS_ASSERT_EQUALS(m->parameters["trn_output"], "output...");
     TS_ASSERT_EQUALS(m->parameters["gameid"], "32");
+    TS_ASSERT_EQUALS(m->parameters["gameturn"], "75");
     TS_ASSERT_EQUALS(m->parameters["gamename"], "Game 32");
     TS_ASSERT_EQUALS(m->parameters["mail_subject"], "test");
 

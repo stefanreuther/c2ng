@@ -409,7 +409,7 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
      case ippName:
         /* @q Name:Str (Planet Property)
            Name of planet. */
-        return makeStringValue(pl.getName(pl.PlainName, tx, iface));
+        return makeStringValue(pl.getName(PlainName, tx, iface));
      case ippNativeChange:
         /* @q Natives.Change$:Int (Planet Property)
            Native happiness change, numeric value. */

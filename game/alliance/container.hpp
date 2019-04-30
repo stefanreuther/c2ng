@@ -10,6 +10,7 @@
 #include "afl/base/types.hpp"
 #include "afl/string/string.hpp"
 #include "afl/container/ptrvector.hpp"
+#include "afl/string/translator.hpp"
 
 namespace game { namespace alliance {
 
@@ -27,7 +28,7 @@ namespace game { namespace alliance {
 
         void postprocess();
         void addLevel(const Level& level);
-        void addNewHandler(Handler* handler);
+        void addNewHandler(Handler* handler, afl::string::Translator& tx);
 
         void copyFrom(const Container& other);
 

@@ -62,6 +62,13 @@ namespace game {
         TowParameter             ///< Tow parameter.
     };
 
+    /** A name. Identifies a name that can be queried with getName(). */
+    enum ObjectName {
+        PlainName,                 /**< Just the unit's name. Example: "USS Dull" */
+        LongName,                  /**< Long name, including the Id number. Example: "Ship #1: USS Dull" */
+        DetailedName               /**< Name with details. Example: "Ship #1: USS Dull (Fed Outrider)" or "Ship #1: USS Dull: colonizer" */
+    };
+
     enum TechLevel {
         EngineTech,                                             ///< Engine tech level.
         HullTech,                                               ///< Hull tech level.

@@ -56,6 +56,14 @@ class client::proxy::ReferenceObserverProxy::Slave : public SlaveObject<game::Se
     void addNewListener(game::Session& /*session*/, ObjectListener* pListener)
         {
             m_listeners.pushBackNew(pListener);
+            if (m_pSession != 0 && m_pObject != 0) {
+                pListener->handle(*m_pSession, m_pObject);
+            }
+        }
+
+    void removeAllListeners()
+        {
+            m_listeners.clear();
         }
 
     void setReference(game::Session& session, Reference ref)
@@ -148,4 +156,17 @@ client::proxy::ReferenceObserverProxy::addNewListener(ObjectListener* pListener)
         std::auto_ptr<ObjectListener> m_listener;
     };
     m_slave.postNewRequest(new Job(std::auto_ptr<ObjectListener>(pListener)));
+}
+
+void
+client::proxy::ReferenceObserverProxy::removeAllListeners()
+{
+    // FIXME: this is a stop-gap measure to get rid of temporary observers, as are used on the starchart
+    // The real solution would give ObjectListeners a way to remove themselves.
+    class Job : public util::SlaveRequest<game::Session,Slave> {
+     public:
+        void handle(game::Session& /*s*/, Slave& oo)
+            { oo.removeAllListeners(); }
+    };
+    m_slave.postNewRequest(new Job());
 }

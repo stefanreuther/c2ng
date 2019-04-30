@@ -15,6 +15,7 @@ game::Root::Root(afl::base::Ref<afl::io::Directory> gameDirectory,
                  game::HostVersion hostVersion,
                  std::auto_ptr<game::RegistrationKey> registrationKey,
                  std::auto_ptr<StringVerifier> stringVerifier,
+                 std::auto_ptr<afl::charset::Charset> charset,
                  Actions_t actions)
     : m_gameDirectory(gameDirectory),
       m_specificationLoader(specLoader),
@@ -24,6 +25,7 @@ game::Root::Root(afl::base::Ref<afl::io::Directory> gameDirectory,
       m_playerList(),
       m_registrationKey(registrationKey),
       m_stringVerifier(stringVerifier),
+      m_charset(charset),
       m_turnLoader(),
       m_actions(actions)
 { }
@@ -58,6 +60,13 @@ const game::HostVersion&
 game::Root::hostVersion() const
 {
     return m_hostVersion;
+}
+
+// Access character set.
+afl::charset::Charset&
+game::Root::charset() const
+{
+    return *m_charset;
 }
 
 // Access host configuration.

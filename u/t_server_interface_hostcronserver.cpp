@@ -42,6 +42,19 @@ namespace {
                 checkCall(Format("kick(%d)", gameId));
                 return consumeReturnValue<bool>();
             }
+        virtual void suspendScheduler(int32_t relativeTime)
+            {
+                checkCall(Format("suspend(%d)", relativeTime));
+            }
+        virtual void getBrokenGames(BrokenMap_t& result)
+            {
+                checkCall("getBrokenGames()");
+                int n = consumeReturnValue<int>();
+                while (n-- > 0) {
+                    int gid = consumeReturnValue<int>();
+                    result[gid] = consumeReturnValue<String_t>();
+                }
+            }
     };
 }
 
@@ -105,6 +118,35 @@ TestServerInterfaceHostCronServer::testIt()
         TS_ASSERT_EQUALS(testee.callInt(Segment().pushBackString("CRONKICK").pushBackInteger(13)), 0);
     }
 
+    // CRONSUSPEND
+    {
+        mock.expectCall("suspend(0)");
+        TS_ASSERT_THROWS_NOTHING(testee.callVoid(Segment().pushBackString("CRONSUSPEND").pushBackInteger(0)));
+
+        mock.expectCall("suspend(9999)");
+        TS_ASSERT_THROWS_NOTHING(testee.callVoid(Segment().pushBackString("CRONSUSPEND").pushBackInteger(9999)));
+    }
+
+    // CRONLSBROKEN
+    {
+        mock.expectCall("getBrokenGames()");
+        mock.provideReturnValue(2);
+        mock.provideReturnValue(42);
+        mock.provideReturnValue(String_t("first excuse"));
+        mock.provideReturnValue(77);
+        mock.provideReturnValue(String_t("second excuse"));
+
+        std::auto_ptr<server::Value_t> p;
+        TS_ASSERT_THROWS_NOTHING(p.reset(testee.call(Segment().pushBackString("CRONLSBROKEN"))));
+        afl::data::Access a(p);
+
+        TS_ASSERT_EQUALS(a.getArraySize(), 4U);
+        TS_ASSERT_EQUALS(a[0].toInteger(), 42);
+        TS_ASSERT_EQUALS(a[1].toString(), "first excuse");
+        TS_ASSERT_EQUALS(a[2].toInteger(), 77);
+        TS_ASSERT_EQUALS(a[3].toString(), "second excuse");
+    }
+
     // Variations
     mock.expectCall("kick(77)");
     mock.provideReturnValue(false);
@@ -129,6 +171,7 @@ TestServerInterfaceHostCronServer::testErrors()
     TS_ASSERT_THROWS(testee.callVoid(empty), std::exception);
     TS_ASSERT_THROWS(testee.callVoid(Segment().pushBackString("CRONKICK")), std::exception);
     TS_ASSERT_THROWS(testee.callVoid(Segment().pushBackString("CRONLIST").pushBackString("LIMIT")), std::exception);
+    TS_ASSERT_THROWS(testee.callVoid(Segment().pushBackString("CRONSUSPEND")), std::exception);
 
     // Bad keywords
     TS_ASSERT_THROWS(testee.callVoid(Segment().pushBackString("CRONLIST").pushBackString("")), std::exception);
@@ -198,4 +241,26 @@ TestServerInterfaceHostCronServer::testRoundtrip()
     mock.expectCall("kick(17)");
     mock.provideReturnValue(false);
     TS_ASSERT(!level4.kickstartGame(17));
+
+    // suspend
+    mock.expectCall("suspend(3)");
+    TS_ASSERT_THROWS_NOTHING(level4.suspendScheduler(3));
+
+    // getBrokenGames
+    {
+        mock.expectCall("getBrokenGames()");
+        mock.provideReturnValue(2);
+        mock.provideReturnValue(42);
+        mock.provideReturnValue(String_t("first excuse"));
+        mock.provideReturnValue(77);
+        mock.provideReturnValue(String_t("second excuse"));
+
+        HostCron::BrokenMap_t result;
+        TS_ASSERT_THROWS_NOTHING(level4.getBrokenGames(result));
+
+        TS_ASSERT_EQUALS(result.size(), 2U);
+        TS_ASSERT_EQUALS(result[42], "first excuse");
+        TS_ASSERT_EQUALS(result[77], "second excuse");
+    }
+    mock.checkFinish();
 }

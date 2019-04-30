@@ -123,7 +123,7 @@ ui::Root::handleKey(util::Key_t key, int prefix)
 
     switch (key ^ (util::KeyMod_Ctrl + util::KeyMod_Shift)) {
      case 's':
-        sig_screenshot.raise(*m_window);
+        saveScreenshot();
         return true;
 
      case 'q':
@@ -186,6 +186,18 @@ ui::Root::handleEvent()
         handleMouse(m_mousePosition, m_mouseButtons);
     } else {
         m_engine.handleEvent(*this, false);
+    }
+}
+
+void
+ui::Root::handleEventRelative(EventConsumer& consumer)
+{
+    performDeferredRedraws();
+    std::auto_ptr<afl::base::Runnable> t(m_localTaskQueue.extractFront());
+    if (t.get() != 0) {
+        t->run();
+    } else {
+        m_engine.handleEvent(consumer, true);
     }
 }
 
@@ -279,6 +291,13 @@ ui::Root::moveWidgetToEdge(Widget& widget, int xPos, int yPos, int offset)
     gfx::Rectangle widgetPos = widget.getExtent();
     widgetPos.moveToEdge(getExtent(), xPos, yPos, offset);
     widget.setExtent(widgetPos);
+}
+
+// Save a screenshot.
+void
+ui::Root::saveScreenshot()
+{
+    sig_screenshot.raise(*m_window);
 }
 
 void

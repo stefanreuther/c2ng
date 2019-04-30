@@ -33,7 +33,10 @@ Variables:
 "
 }
 
-. ./config.lib
+case "$0" in
+    */*) . ${0%/*}/config.lib ;;
+    *)   .         config.lib ;;
+esac
 
 ##
 ##  Programs

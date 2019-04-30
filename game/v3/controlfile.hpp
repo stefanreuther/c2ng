@@ -8,6 +8,8 @@
 #include "afl/io/directory.hpp"
 #include "game/types.hpp"
 #include "game/v3/structures.hpp"
+#include "afl/string/translator.hpp"
+#include "afl/sys/loglistener.hpp"
 
 namespace game { namespace v3 {
 
@@ -37,13 +39,15 @@ namespace game { namespace v3 {
         /** Load data from directory.
             Checks for presence of a checksum file, loads that, and sets the owner accordingly.
             \param dir Directory
-            \param player Player number to look for */
-        void load(afl::io::Directory& dir, int player);
+            \param player Player number to look for
+            \param tx Translator
+            \param log Log listener */
+        void load(afl::io::Directory& dir, int player, afl::string::Translator& tx, afl::sys::LogListener& log);
 
         /** Save data to directory.
             If the file owner is set to a valid value (>= 0), creates the file.
             \param dir Directory */
-        void save(afl::io::Directory& dir);
+        void save(afl::io::Directory& dir, afl::string::Translator& tx, afl::sys::LogListener& log);
 
         /** Set checksum.
             \param section Section in file (object type)

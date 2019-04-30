@@ -315,3 +315,14 @@ game::map::MinefieldMission::checkScoopMission(const Ship& ship,
         return false;
     }
 }
+
+// Mission ordering:
+//   PHost:          THost:
+//     Mine decay
+//     Mine lay      Mine lay
+//     MDM
+//     Mine Sweep    Mine sweep
+//                   Mine decay
+//                   MDM
+//     Web drain     Web drain
+// --> lay/sweep is after decay in PHost, before decay in Host (getUnitsForLaying())

@@ -145,7 +145,7 @@ game::v3::ResultLoader::loadCurrentTurn(Turn& turn, Game& game, int player, game
     ldr.loadCommonFiles(root.gameDirectory(), *m_specificationDirectory, turn.universe(), player);
 
     // load database
-    loadCurrentDatabases(turn, game, player, root, session, *m_charset);
+    loadCurrentDatabases(turn, game, player, root, session);
 
     // ex GGameResultStorage::load(GGameTurn& trn)
     {

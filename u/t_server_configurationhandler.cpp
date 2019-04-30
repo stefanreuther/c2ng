@@ -145,6 +145,8 @@ namespace {
             { return "/settings"; }
         virtual String_t getInstallationDirectoryName()
             { return "/install"; }
+        virtual afl::string::LanguageCode getUserLanguage()
+            { return afl::string::LanguageCode(); }
         virtual afl::base::Ref<afl::io::TextWriter> attachTextWriter(Channel /*ch*/)
             { throw std::runtime_error("attachTextWriter unsupported"); }
         virtual afl::base::Ref<afl::io::TextReader> attachTextReader(Channel /*ch*/)

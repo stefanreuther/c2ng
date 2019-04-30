@@ -178,6 +178,7 @@
           </div>
           <div class="optional ptr virtual">TurnLoader <em>: game::TurnLoader</em>          <strong>Virtual object to load a game turn</strong></div>
           <div class="owned virtual">StringVerifier <em>: game::StringVerifier</em>         <strong>Virtual object to define rules for string properties (e.g. permitted characters in friendly codes)</strong></div>
+          <div class="optional ptr virtual">Charset <em>: afl::charset::Charset</em>        <strong>Virtual object to describe the character set of files in <i>GameDir</i></strong></div>
         </div>
         <div class="optional ptr haschange">ShipList <em>: game::spec::ShipList</em>
           <div class="owned">Beams <em>: game::spec::ComponentVector</em>
@@ -219,6 +220,7 @@
           <div class="owned haschange">Teams <em>: game::TeamSettings</em></div>
           <div class="owned">Cursors <em>: game::map::Cursors</em>
             <div class="owned haschange">CurrentShip/Planet/Base, etc... <em>: game::map::SimpleObjectCursor</em></div>
+            <div class="owned">Location<em>: game::map::Location</em></div>
           </div>
           <div class="owned haschange">HistoryTurnList <em>: game::HistoryTurnList</em></div>
           <div class="owned">MessageConfiguration <em>: game::msg::Configuration</em></div>
@@ -382,7 +384,10 @@
     <div class="tree">
       <div class="root"><b>server::file::Root</b>
         <div class="ref virtual">RootDirectory <em>: server::file::DirectoryItem</em>
-          <strong>Root directory (provides access to children)</strong></div>
+          <strong>Root directory (provides access to children)</strong>
+          <div class="owned virtual">Handler <em>: server::file::DirectoryHandler</em>
+            <strong>Defines how data is actually stored (direct, internal, CA, ...)</strong></div>
+        </div>
         <div class="ref virtual">DefaultSpecDirectory <em>: afl::io::Directory</em>
           <strong>Default specification directory</strong></div>
         <div class="owned">DefaultCharset <em>: afl::charset::CodepageCharset</em></div>

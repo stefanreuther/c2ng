@@ -30,6 +30,8 @@ TestUtilApplication::testInit()
             { return String_t(); }
         virtual String_t getInstallationDirectoryName()
             { return String_t(); }
+        virtual afl::string::LanguageCode getUserLanguage()
+            { return afl::string::LanguageCode(); }
         virtual afl::base::Ref<afl::io::TextWriter> attachTextWriter(Channel /*ch*/)
             { throw std::runtime_error("no ref"); }
         virtual afl::base::Ref<afl::io::TextReader> attachTextReader(Channel /*ch*/)
@@ -87,6 +89,8 @@ TestUtilApplication::testExit()
             { return String_t(); }
         virtual String_t getInstallationDirectoryName()
             { return String_t(); }
+        virtual afl::string::LanguageCode getUserLanguage()
+            { return afl::string::LanguageCode(); }
         virtual afl::base::Ref<afl::io::TextWriter> attachTextWriter(Channel /*ch*/)
             { return *new afl::io::TextFile(*m_stream); }
         virtual afl::base::Ref<afl::io::TextReader> attachTextReader(Channel /*ch*/)

@@ -16,7 +16,11 @@ namespace {
     }
 
     /** Check for characters guaranteed not to be mangled by a shell.
-        All other characters must be quoted somehow. */
+        All other characters must be quoted somehow.
+
+        For Unicode characters (>= 0x80) we probably don't have any guarantees,
+        but on the other hand we cannot escape these characters in any way.
+        Thus, pass them on and hope for the best. */
     bool isSafeCharacter(const char c)
     {
         return isIdentifierCharacter(c)
@@ -25,7 +29,8 @@ namespace {
             || c == '+'
             || c == '/'
             || c == ':'
-            || c == ',';
+            || c == ','
+            || uint8_t(c) >= 0x80;
     }
 
     /** Check for a valid identifier.

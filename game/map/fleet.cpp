@@ -203,7 +203,7 @@ game::map::Fleet::getTitle(const Ship& ship, afl::string::Translator& tx, Interp
 {
     // ex getFleetTitle
     if (ship.getFleetName().empty()) {
-        return Format(tx.translateString("Fleet %d: led by %s").c_str(), ship.getId(), ship.getName(Object::PlainName, tx, iface));
+        return Format(tx.translateString("Fleet %d: led by %s").c_str(), ship.getId(), ship.getName(PlainName, tx, iface));
     } else {
         return Format(tx.translateString("Fleet %d: %s").c_str(), ship.getId(), ship.getFleetName());
     }

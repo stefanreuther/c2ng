@@ -211,7 +211,7 @@ server::host::Root::tryCloseRouterSessions(String_t key)
     static const char LOG_NAME[] = "host.router";
     if (m_pRouter != 0) {
         try {
-            afl::data::IntegerList_t tmp;
+            afl::data::StringList_t tmp;
             m_pRouter->groupAction(key, server::interface::SessionRouter::Close, tmp);
         }
         catch (std::exception& e) {

@@ -37,8 +37,8 @@ namespace game { namespace msg {
 
         // Mailbox:
         virtual size_t getNumMessages();
-        virtual String_t getMessageText(size_t index, afl::string::Translator& tx, PlayerList& players);
-        virtual String_t getMessageHeading(size_t index, afl::string::Translator& tx, PlayerList& players);
+        virtual String_t getMessageText(size_t index, afl::string::Translator& tx, const PlayerList& players);
+        virtual String_t getMessageHeading(size_t index, afl::string::Translator& tx, const PlayerList& players);
         virtual int getMessageTurnNumber(size_t index);
 
         // Manipulation

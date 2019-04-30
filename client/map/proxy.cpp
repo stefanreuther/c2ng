@@ -39,6 +39,7 @@ class client::map::Proxy::Trampoline : public util::SlaveObject<game::Session> {
 
     virtual void done(game::Session& /*session*/)
         {
+            conn_viewpointTurnChange.disconnect();
             m_renderer.reset();
             m_viewport.reset();
             m_game = 0;

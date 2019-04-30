@@ -8,6 +8,7 @@
 #include "afl/string/string.hpp"
 #include "interpreter/arguments.hpp"
 #include "server/errors.hpp"
+#include "server/interface/talkaddressserver.hpp"
 #include "server/interface/talkfolderserver.hpp"
 #include "server/interface/talkforumserver.hpp"
 #include "server/interface/talkgroupserver.hpp"
@@ -20,6 +21,7 @@
 #include "server/interface/talkuserserver.hpp"
 #include "server/talk/root.hpp"
 #include "server/talk/session.hpp"
+#include "server/talk/talkaddress.hpp"
 #include "server/talk/talkfolder.hpp"
 #include "server/talk/talkforum.hpp"
 #include "server/talk/talkgroup.hpp"
@@ -113,6 +115,11 @@ server::talk::CommandHandler::handleCommand(const String_t& upcasedCommand, inte
         ok = server::interface::TalkPMServer(impl).handleCommand(upcasedCommand, args, result);
     }
     if (!ok) {
+        // ADDR
+        TalkAddress impl(m_session, m_root);
+        ok = server::interface::TalkAddressServer(impl).handleCommand(upcasedCommand, args, result);
+    }
+    if (!ok) {
         // NNTP
         TalkNNTP impl(m_session, m_root);
         ok = server::interface::TalkNNTPServer(impl).handleCommand(upcasedCommand, args, result);
@@ -135,6 +142,7 @@ server::talk::CommandHandler::getHelp(String_t topic) const
     } else if (topic == "FORUM") {
         return "Forum commands:\n"
             "FORUMADD [<key> <value>...]\n"
+            "FORUMBYNAME <name>\n"
             "FORUMGET <fid> <key>\n"
             "FORUMLSPOST <fid> <listoptions>\n"
             "FORUMLSSTICKY <fid> <listoptions>\n"
@@ -203,6 +211,10 @@ server::talk::CommandHandler::getHelp(String_t topic) const
             "PMRENDER <ufid> <pmid> <renderoptions>\n"
             "PMRM <ufid> <pmid>...\n"
             "PMSTAT <ufid> <pmid>\n";
+    } else if (topic == "ADDR") {
+        return "ADDR commands:\n"
+            "ADDRMPARSE <addr>...\n"
+            "ADDRMRENDER <to>...\n";
     } else if (topic == "NNTP") {
         return "NNTP commands:\n"
             "NNTPFORUMLS <fid>\n"
@@ -264,6 +276,7 @@ server::talk::CommandHandler::getHelp(String_t topic) const
             "GROUP->\n"
             "NNTP->\n"
             "OPTIONS->\n"
+            "ADDR->\n"
             "PM->\n"
             "POST->\n"
             "RENDER->\n"

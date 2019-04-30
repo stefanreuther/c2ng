@@ -7,6 +7,9 @@
 
 #include "t_server_interface.hpp"
 #include "afl/test/commandhandler.hpp"
+#include "afl/data/hashvalue.hpp"
+#include "afl/data/hash.hpp"
+#include "server/types.hpp"
 
 /** Mail queue client tests. */
 void
@@ -63,6 +66,19 @@ TestServerInterfaceMailQueueClient::testIt()
     mock.expectCall("RUNQUEUE");
     mock.provideNewResult(0);
     testee.runQueue();
+
+    // getUserStatus/STATUS
+    {
+        afl::data::Hash::Ref_t h = afl::data::Hash::create();
+        h->setNew("address", server::makeStringValue("foo@bar"));
+        h->setNew("status", server::makeStringValue("r"));
+        mock.expectCall("STATUS, jack");
+        mock.provideNewResult(new afl::data::HashValue(h));
+
+        server::interface::MailQueueClient::UserStatus st = testee.getUserStatus("jack");
+        TS_ASSERT_EQUALS(st.address, "foo@bar");
+        TS_ASSERT_EQUALS(st.status, server::interface::MailQueueClient::Requested);
+    }
 
     mock.checkFinish();
 }

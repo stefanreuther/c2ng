@@ -79,6 +79,17 @@ interpreter::FileTable::closeFile(size_t fd)
     }
 }
 
+// Get file by number.
+afl::io::TextFile*
+interpreter::FileTable::getFile(size_t fd) const
+{
+    if (fd < m_files.size() && m_files[fd] != 0) {
+        return &m_files[fd]->textFile;
+    } else {
+        return 0;
+    }
+}
+
 // Prepare a file for appending.
 void
 interpreter::FileTable::prepareForAppend(size_t fd)

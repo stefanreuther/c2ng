@@ -1677,7 +1677,7 @@ interpreter::StatementCompiler::compileLoad(BytecodeObject& bco, const Statement
                     // FIXME: deal with recursion. Right now, recursion is implicitly broken because compileFile does not set PreexecuteLoad.
                     // However, it is desirable to compile a nested file with PreexecuteLoad, too, as long as recursion is prevented.
                     scc.world().logListener().write(afl::sys::LogListener::Trace, "script.trace", afl::string::Format("Preloading \"%s\"...", fileName));
-                    SubroutineValue subv(scc.world().compileFile(*file));
+                    SubroutineValue subv(scc.world().compileFile(*file, bco.getOrigin(), m_optimisationLevel));
                     bco.addPushLiteral(&subv);
                     bco.addInstruction(Opcode::maIndirect, Opcode::miIMCall, 0);
                     precompiled = true;
@@ -1827,6 +1827,9 @@ interpreter::StatementCompiler::compileOption(BytecodeObject& /*bco*/, const Sta
          use, but as a way out if I broke something and optimisation breaks your script.)
 
        As of PCC2 1.99.22, no level 2 or 3 optimisations are implemented.
+
+       As of PCC2 2.40.6, level 2 enables code merging.
+       This will reduce the precision of line numbers given in error messages and is thus not enabled by default.
 
        Place the command at the beginning of your script or subroutine.
        It will affect this script/subroutine and everything defined within,
@@ -2448,6 +2451,7 @@ interpreter::StatementCompiler::compileSub(BytecodeObject& bco, const StatementC
     nbco->setIsProcedure(proc);
     nbco->setName(name);
     nbco->setFileName(bco.getFileName());
+    nbco->setOrigin(bco.getOrigin());
 
     /* Read parameters */
     if (tok.checkAdvance(tok.tLParen) && !tok.checkAdvance(tok.tRParen)) {
@@ -2570,6 +2574,7 @@ interpreter::StatementCompiler::compileStruct(BytecodeObject& bco, const Stateme
     BCORef_t ctorBCO = *new BytecodeObject();
     ctorBCO->setIsProcedure(false);
     ctorBCO->setFileName(bco.getFileName());
+    ctorBCO->setOrigin(bco.getOrigin());
     ctorBCO->addLineNumber(m_commandSource.getLineNumber());
     ctorBCO->addPushLiteral(&typeValue);
     ctorBCO->addInstruction(Opcode::maSpecial, Opcode::miSpecialInstance, 0);

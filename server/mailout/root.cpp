@@ -147,7 +147,6 @@ bool
 server::mailout::Root::resolveAddress(String_t address, String_t& smtpAddress, String_t& authUser)
 {
     // ex Transmitter::resolveAddress
-    // ReconnectingGuard g(database_rc);
     afl::net::redis::Subtree emailRoot(m_db, EMAIL_ROOT);
 
     if (address.size() > 5 && address.compare(0, 5, "mail:", 5) == 0) {
@@ -220,8 +219,10 @@ server::mailout::Root::confirmMail(String_t mail, String_t key, String_t info)
         return false;
     }
 
+    // FIXME: should we verify that this actually IS the user's current email address?
+    // User may have changed their address in the meantime.
+
     // OK, operate
-    // ReconnectingGuard g(database_rc);
     afl::net::redis::HashKey emailInfo(afl::net::redis::Subtree(m_db, EMAIL_ROOT).subtree(mail).hashKey("status"));
     emailInfo.stringField("status/" + user).set("c");
     if (info.empty()) {
@@ -231,6 +232,29 @@ server::mailout::Root::confirmMail(String_t mail, String_t key, String_t info)
     }
     log().write(afl::sys::Log::Info, LOG_NAME_AUTH, Format("request for '%s' user '%s' accepted", mail.c_str(), user.c_str()));
     return true;
+}
+
+// Get user's email status.
+server::interface::MailQueue::UserStatus
+server::mailout::Root::getUserStatus(String_t user)
+{
+    using server::interface::MailQueue;
+
+    MailQueue::UserStatus result;
+
+    afl::net::redis::Subtree emailRoot(m_db, EMAIL_ROOT);
+    afl::net::redis::Subtree userRoot(m_db, USER_ROOT);
+    String_t userEmail = userRoot.subtree(user).hashKey("profile").stringField("email").get();
+    if (!userEmail.empty()) {
+        afl::net::redis::HashKey emailInfo(emailRoot.subtree(userEmail).hashKey("status"));
+        String_t emailStatus = emailInfo.stringField("status/" + user).get();
+
+        result.address = userEmail;
+        result.status = (emailStatus.empty()
+                         ? MailQueue::Unconfirmed
+                         : MailQueue::parseAddressStatus(emailStatus));
+    }
+    return result;
 }
 
 // Get current time.

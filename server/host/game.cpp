@@ -418,7 +418,7 @@ server::host::Game::addGameHistoryItem(Root& root, String_t what, String_t args,
 {
     // ex Game::addGameHistoryItem
     String_t message = afl::string::Format("%d:%s:%d:%s", root.config().getUserTimeFromTime(root.getTime()), what, m_gameId, args);
-    m_game.stringListKey("history").pushFront(message);
+    history().pushFront(message);
     if (global) {
         root.globalHistory().pushFront(message);
     }
@@ -430,7 +430,7 @@ server::host::Game::addUserHistoryItem(Root& root, String_t what, String_t args,
 {
     // ex Game::addUserHistoryItem
     String_t message = afl::string::Format("%d:%s:%d:%s", root.config().getUserTimeFromTime(root.getTime()), what, m_gameId, args);
-    m_game.stringListKey("history").pushFront(message);
+    history().pushFront(message);
     User(root, player).history().pushFront(message);
 }
 
@@ -447,7 +447,12 @@ void
 server::host::Game::setPlayerConfig(String_t player, String_t name, String_t value)
 {
     // ex Game::setPlayerConfig
-    m_game.subtree("user").hashKey(player).stringField(name).set(value);
+    afl::net::redis::StringField field = m_game.subtree("user").hashKey(player).stringField(name);
+    if (value.empty()) {
+        field.remove();
+    } else {
+        field.set(value);
+    }
 }
 
 // Get per-user integer configuration value.
@@ -975,7 +980,9 @@ server::host::Game::describeSlot(int32_t slot, String_t forUser, const server::c
     bool occupied = result.userIds.size() > 0;
 
     result.numEditable = numEditable;
-    result.joinable = !occupied && (!isUserOnGameAsPrimary(forUser) || isMultiJoinAllowed());
+    result.joinable = !occupied
+        && isSlotInGame(slot)
+        && (!isUserOnGameAsPrimary(forUser) || isMultiJoinAllowed());
     return result;
 }
 
@@ -1174,4 +1181,11 @@ afl::net::redis::IntegerField
 server::host::Game::numMissedTurnsForKick()
 {
     return settings().intField("kickAfterMissed");
+}
+
+// Access history.
+afl::net::redis::StringListKey
+server::host::Game::history()
+{
+    return m_game.stringListKey("history");
 }

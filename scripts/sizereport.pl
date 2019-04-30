@@ -40,6 +40,7 @@ use strict;
 my $tree = {};
 my $calls = 0;
 my $objs = 0;
+my $weak = 1;
 
 foreach my $f (@ARGV) {
     if ($f eq '--calls') {
@@ -50,10 +51,15 @@ foreach my $f (@ARGV) {
         $objs = 1;
         next;
     }
+    if ($f eq '--nonweak') {
+        $weak = 0;
+        next;
+    }
     open PIPE, "readelf -Ws $f | c++filt |" or die "popen($f)";
     while (<PIPE>) {
         #                                     Num        Value       Size    Type    Bind    Vis   Ndx  Name
         if (my ($size,$type,$bind,$name) = /^[\s\d]+:\s*[0-9a-f]+\s+(\d+)\s+(\S+)\s+(\S+)\s+\S+\s+\S+\s+(.+)/i) {
+            next if $bind eq 'WEAK' && !$weak;
             if (($type eq 'FUNC' || ($objs && $type eq 'OBJECT')) && $size > 0) {
                 my @parsedName = parseName($name);
                 my $root = $tree;

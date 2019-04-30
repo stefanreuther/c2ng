@@ -63,6 +63,20 @@ namespace {
         server::host::Root m_root;
     };
 
+    HostCron::Event waitForEvent(server::host::Cron& cron, int32_t gameId)
+    {
+        // Wait until host time has been determined.
+        // This computation happens asynchronously.
+        HostCron::Event e;
+        for (int i = 0; i < 10; ++i) {
+            e = cron.getGameEvent(gameId);
+            if (e.action == HostCron::HostAction) {
+                break;
+            }
+            afl::sys::Thread::sleep(50);
+        }
+        return e;
+    }
 }
 
 void
@@ -974,5 +988,85 @@ TestServerHostCronImpl::testRunningChangeProtection()
     TS_ASSERT_EQUALS(sch.front().action, HostCron::HostAction);
     TS_ASSERT_EQUALS(sch.front().gameId, GAME_ID);
     TS_ASSERT_EQUALS(sch.front().time, 4159 /* lastScheduleChange + SCHEDULE_CHANGE_GRACE_PERIOD(=10) */);
+}
+
+/** Test suspendScheduler(). */
+void
+TestServerHostCronImpl::testSuspend()
+{
+    const int GAME_ID = 7777;
+
+    // Set up
+    TestHarness h;
+    server::Time_t t0 = h.root().getTime();
+    h.createGame(GAME_ID, HostGame::Running);
+    h.setGameConfig(GAME_ID, "turn", 3);
+    h.setGameConfig(GAME_ID, "lastHostTime", t0 - 1);        // Host just ran
+    h.setGameConfig(GAME_ID, "lastTurnSubmitted", t0);
+    h.setGameConfig(GAME_ID, "lastScheduleChange", t0 - 10000);
+    h.setSchedule(GAME_ID, 77, "type", 2);              // daily
+    h.setSchedule(GAME_ID, 77, "interval", 1);          // daily
+    h.setSchedule(GAME_ID, 77, "daytime", 0);
+    h.addSchedule(GAME_ID, 77);
+    for (int s = 1; s <= 11; ++s) {
+        h.setTurnState(GAME_ID, s, Game::TurnGreen);
+        h.addPlayer(GAME_ID, s, 600+s);
+    }
+
+    // Start the timer
+    util::ProcessRunner runner;
+    server::host::CronImpl cron(h.root(), runner);
+
+    // Computed action must be host action less than 2 days away
+    HostCron::Event e = waitForEvent(cron, GAME_ID);
+    TS_ASSERT_EQUALS(e.action, HostCron::HostAction);
+    TS_ASSERT_LESS_THAN(e.time, t0 + 2*MINUTES_PER_DAY);
+    server::Time_t t1 = e.time;
+
+    // Defer host for three days
+    cron.suspendScheduler(t0 + 3*MINUTES_PER_DAY);
+    e = waitForEvent(cron, GAME_ID);
+    TS_ASSERT_EQUALS(e.action, HostCron::HostAction);
+    TS_ASSERT_EQUALS(e.time, t0 + 3*MINUTES_PER_DAY);
+
+    // Un-defer; must revert to previous time
+    cron.suspendScheduler(0);
+    e = waitForEvent(cron, GAME_ID);
+    TS_ASSERT_EQUALS(e.action, HostCron::HostAction);
+    TS_ASSERT_EQUALS(e.time, t1);
+}
+
+/** Test suspended startup. */
+void
+TestServerHostCronImpl::testSuspendStartup()
+{
+    const int GAME_ID = 90210;
+
+    // Set up
+    TestHarness h;
+    server::Time_t t0 = h.root().getTime();
+    h.createGame(GAME_ID, HostGame::Running);
+    h.setGameConfig(GAME_ID, "turn", 3);
+    h.setGameConfig(GAME_ID, "lastHostTime", t0 - 1);        // Host just ran
+    h.setGameConfig(GAME_ID, "lastTurnSubmitted", t0);
+    h.setGameConfig(GAME_ID, "lastScheduleChange", t0 - 10000);
+    h.setSchedule(GAME_ID, 77, "type", 2);              // daily
+    h.setSchedule(GAME_ID, 77, "interval", 1);          // daily
+    h.setSchedule(GAME_ID, 77, "daytime", 0);
+    h.addSchedule(GAME_ID, 77);
+    for (int s = 1; s <= 11; ++s) {
+        h.setTurnState(GAME_ID, s, Game::TurnGreen);
+        h.addPlayer(GAME_ID, s, 600+s);
+    }
+
+    // Start the timer
+    util::ProcessRunner runner;
+    server::host::CronImpl cron(h.root(), runner);
+    cron.suspendScheduler(t0 + 3*MINUTES_PER_DAY);
+
+    // Defer host for three days
+    HostCron::Event e = waitForEvent(cron, GAME_ID);
+    TS_ASSERT_EQUALS(e.action, HostCron::HostAction);
+    TS_ASSERT_EQUALS(e.time, t0 + 3*MINUTES_PER_DAY);
 }
 

@@ -51,6 +51,9 @@ class TestServerMailoutRoot : public CxxTest::TestSuite {
     void testConfirmMail();
     void testConfirmMailFail();
     void testPrepareQueue();
+    void testGetUserStatus();
+    void testGetUserStatusEmpty();
+    void testGetUserStatusUnconfirmed();
 };
 
 class TestServerMailoutSession : public CxxTest::TestSuite {

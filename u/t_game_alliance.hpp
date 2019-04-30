@@ -7,6 +7,11 @@
 
 #include <cxxtest/TestSuite.h>
 
+class TestGameAllianceHandler : public CxxTest::TestSuite {
+ public:
+    void testInterface();
+};
+
 class TestGameAllianceLevel : public CxxTest::TestSuite {
  public:
     void testIt();

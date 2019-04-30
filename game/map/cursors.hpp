@@ -5,6 +5,7 @@
 #define C2NG_GAME_MAP_CURSORS_HPP
 
 #include "game/map/simpleobjectcursor.hpp"
+#include "game/map/location.hpp"
 
 namespace game { namespace map {
 
@@ -21,6 +22,7 @@ namespace game { namespace map {
         SimpleObjectCursor& currentPlanet();
         SimpleObjectCursor& currentBase();
         SimpleObjectCursor& currentIonStorm();
+        Location& location();
 
         ObjectCursor* getCursorByNumber(int nr);
         ObjectType* getTypeByNumber(int nr);
@@ -36,6 +38,7 @@ namespace game { namespace map {
         SimpleObjectCursor m_currentPlanet;
         SimpleObjectCursor m_currentBase;
         SimpleObjectCursor m_currentIonStorm;
+        Location m_location;
     };
 
 } }

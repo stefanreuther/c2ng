@@ -1,5 +1,6 @@
 /**
   *  \file game/ref/sortpredicate.cpp
+  *  \brief Class game::ref::SortPredicate
   */
 
 #include "game/ref/sortpredicate.hpp"

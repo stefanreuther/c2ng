@@ -105,7 +105,7 @@ server::format::ServerApplication::handleCommandLineOption(const String_t& /*opt
 String_t
 server::format::ServerApplication::getApplicationName() const
 {
-    return afl::string::Format(_("PCC2 Format Server v%s - (c) 2017-2018 Stefan Reuther").c_str(), PCC2_VERSION);
+    return afl::string::Format(_("PCC2 Format Server v%s - (c) 2017-2019 Stefan Reuther").c_str(), PCC2_VERSION);
 }
 
 String_t

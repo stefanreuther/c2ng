@@ -21,6 +21,8 @@ namespace client { namespace proxy {
 
         virtual void addNewListener(ObjectListener* pListener);
 
+        void removeAllListeners();
+
      private:
         class Slave;
 

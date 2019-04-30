@@ -197,6 +197,8 @@ TestServerMailoutMailQueue::testConfirmSuccessTransmit()
     TransmitterMock tx("testConfirmSuccessTransmit");
     root.setTransmitter(&tx);
 
+    HashKey(db, "user:1002:profile").stringField("email").set("u@h");
+
     // Expect
     tx.expectCall("notifyAddress(u@h)");
 
@@ -207,6 +209,11 @@ TestServerMailoutMailQueue::testConfirmSuccessTransmit()
     TS_ASSERT_EQUALS(HashKey(db, "email:u@h:status").stringField("status/1002").get(), "c");
     TS_ASSERT_EQUALS(HashKey(db, "email:u@h:status").stringField("confirm/1002").get(), "info");
     tx.checkFinish();
+
+    // Also query status
+    server::interface::MailQueue::UserStatus st = testee.getUserStatus("1002");
+    TS_ASSERT_EQUALS(st.address, "u@h");
+    TS_ASSERT_EQUALS(st.status, server::interface::MailQueue::Confirmed);
 }
 
 /** Test runQueue(), without transmitter. */

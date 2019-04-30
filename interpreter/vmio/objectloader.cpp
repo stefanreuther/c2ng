@@ -3,18 +3,18 @@
   */
 
 #include "interpreter/vmio/objectloader.hpp"
-#include "afl/except/fileformatexception.hpp"
-#include "util/translation.hpp"
 #include "afl/base/growablememory.hpp"
-#include "afl/bits/value.hpp"
-#include "afl/bits/uint32le.hpp"
-#include "afl/except/filetooshortexception.hpp"
-#include "afl/io/limitedstream.hpp"
-#include "interpreter/vmio/structures.hpp"
-#include "interpreter/vmio/valueloader.hpp"
-#include "interpreter/vmio/processloadcontext.hpp"
 #include "afl/bits/int16le.hpp"
 #include "afl/bits/int32le.hpp"
+#include "afl/bits/uint32le.hpp"
+#include "afl/bits/value.hpp"
+#include "afl/except/fileformatexception.hpp"
+#include "afl/except/filetooshortexception.hpp"
+#include "afl/io/limitedstream.hpp"
+#include "interpreter/vmio/processloadcontext.hpp"
+#include "interpreter/vmio/structures.hpp"
+#include "interpreter/vmio/valueloader.hpp"
+#include "util/translation.hpp"
 
 namespace {
     using interpreter::vmio::structures::UInt32_t;
@@ -158,7 +158,7 @@ class interpreter::vmio::ObjectLoader::LoadObject {
  private:
     afl::io::Stream& m_stream;
     uint32_t m_objectSize;
-    std::auto_ptr<afl::io::Stream> m_propertyStream;
+    afl::base::Ptr<afl::io::Stream> m_propertyStream;
     afl::io::Stream::FileSize_t m_nextProperty;
     uint32_t m_propertyId;
     afl::io::Stream::FileSize_t m_nextObject;
@@ -235,7 +235,7 @@ interpreter::vmio::ObjectLoader::LoadObject::readProperty(uint32_t& id, uint32_t
     consumeObjectSize(propertySize);
 
     // Initialize content
-    m_propertyStream.reset(new afl::io::LimitedStream(m_stream, m_nextProperty, propertySize));
+    m_propertyStream = new afl::io::LimitedStream(m_stream, m_nextProperty, propertySize);
     m_nextProperty += propertySize;
 
     // Produce result
@@ -252,6 +252,30 @@ interpreter::vmio::ObjectLoader::ObjectLoader(afl::charset::Charset& cs, LoadCon
 
 interpreter::vmio::ObjectLoader::~ObjectLoader()
 { }
+
+interpreter::BCORef_t
+interpreter::vmio::ObjectLoader::loadObjectFile(afl::base::Ref<afl::io::Stream> s)
+{
+    // Read header
+    structures::ObjectFileHeader header;
+    s->fullRead(afl::base::fromObject(header));
+    if (std::memcmp(header.magic, structures::OBJECT_FILE_MAGIC, sizeof(header.magic)) != 0
+        || header.version != structures::OBJECT_FILE_VERSION
+        || header.zero != 0
+        || header.headerSize < structures::OBJECT_FILE_HEADER_SIZE)
+    {
+        throw afl::except::FileFormatException(*s, _("Invalid file header"));
+    }
+
+    // Adjust file pointer
+    s->setPos(s->getPos() + header.headerSize - structures::OBJECT_FILE_HEADER_SIZE);
+
+    // Read
+    load(s);
+
+    // Produce result
+    return getBCO(header.entry);
+}
 
 // /** Load VM file.
 //     \param s Stream to read from
@@ -540,6 +564,14 @@ interpreter::vmio::ObjectLoader::loadFrames(Process& proc, LoadContext& ctx, afl
                 frame->pc = frameHeader.pc;
                 frame->contextSP = frameHeader.contextSP;
                 frame->exceptionSP = frameHeader.exceptionSP;
+
+                // Creating the frame will set up BCO locals.
+                // We load these later.
+                afl::data::NameMap().swap(frame->localNames);
+
+                // Creating the frame will have created a FrameContext.
+                // We will create the FrameContext later when loading contexts, so we do not need it.
+                proc.popContext();
                 break;
              }
 

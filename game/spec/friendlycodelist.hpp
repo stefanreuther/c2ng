@@ -69,9 +69,12 @@ namespace game { namespace spec {
             The new list will contain all friendly codes valid for object o.
             \param originalList Original list
             \param obj Object to generate list for
+            \param scoreDefinitions Ship score definitions
+            \param shipList Ship list
             \param config Host configuration
 
-            Note that this copies only friendly codes; it does not copy the extra friendly codes. */
+            Note that this copies only actual friendly codes (which have a FriendlyCode object);
+            it does not copy the extra friendly codes (that are only reserved as special). */
         FriendlyCodeList(const FriendlyCodeList& originalList,
                          const game::map::Object& obj,
                          const UnitScoreDefinitionList& scoreDefinitions,

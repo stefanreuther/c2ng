@@ -33,7 +33,7 @@ client::tiles::PlanetScreenHeaderTile::attach(client::proxy::ObjectObserver& oop
     class Job : public util::Request<ControlScreenHeader> {
      public:
         Job(game::Session& session, game::map::Object* obj)
-            : m_name(obj != 0 ? obj->getName(game::map::Object::PlainName, session.translator(), session.interface()) : String_t()),
+            : m_name(obj != 0 ? obj->getName(game::PlainName, session.translator(), session.interface()) : String_t()),
               m_subtitle(),
               m_marked(obj != 0 && obj->isMarked())
             {

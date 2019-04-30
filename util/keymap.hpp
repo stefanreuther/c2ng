@@ -13,6 +13,7 @@
 namespace util {
 
     class Keymap;
+    class KeymapInformation;
 
     /** Keymap reference.
         User code dealing with keymaps uses objects of type KeymapRef.
@@ -100,6 +101,11 @@ namespace util {
         /** Check whether this keymap was changed.
             \return true if keymap was changed */
         bool isChanged() const;
+
+        /** Describe keymap structure.
+            \param result   [out] Result
+            \param maxDepth [in]  Maximum recursion depth */
+        void describe(KeymapInformation& result, size_t maxDepth) const;
 
      private:
         struct Entry {

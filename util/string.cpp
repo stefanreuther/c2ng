@@ -308,3 +308,19 @@ util::encodeHtml(const String_t& input, bool rawUnicode)
     }
     return escaped;
 }
+
+void
+util::addTrailingCharacter(String_t& s, char ch)
+{
+    if (s.empty() || s[s.size()-1] != ch) {
+        s += ch;
+    }
+}
+
+void
+util::removeTrailingCharacter(String_t& s, char ch)
+{
+    if (!s.empty() && s[s.size()-1] == ch) {
+        s.erase(s.size()-1);
+    }
+}

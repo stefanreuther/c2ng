@@ -76,11 +76,13 @@ namespace ui { namespace rich {
 
         /** Link id. To users, this is an opaque value which uniquely identifies a link.
             Internally, it is the index into \c content pointing to the LinkTarget item. */
-        typedef uint32_t LinkId_t;
+        typedef size_t LinkId_t;
         static const LinkId_t nil = LinkId_t(-1);
 
         Document(gfx::ResourceProvider& provider);
         ~Document();
+
+        gfx::ResourceProvider& provider();
 
         void clear();
         void setPageWidth(int width);
@@ -162,7 +164,7 @@ namespace ui { namespace rich {
            - bo_width: width of current block object placeholder
            - bo_height: remaining height of current block object placeholder.
            Nonzero defines the object as being partially placed. */
-        uint32_t bo_index[2];
+        size_t bo_index[2];
         int bo_width[2];
         int bo_height[2];
 

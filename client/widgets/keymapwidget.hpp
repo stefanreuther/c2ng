@@ -4,18 +4,13 @@
 #ifndef C2NG_CLIENT_WIDGETS_KEYMAPWIDGET_HPP
 #define C2NG_CLIENT_WIDGETS_KEYMAPWIDGET_HPP
 
-#include "ui/invisiblewidget.hpp"
+#include "client/proxy/keymapproxy.hpp"
 #include "client/si/control.hpp"
-#include "util/requestsender.hpp"
-#include "util/requestreceiver.hpp"
-#include "util/requestdispatcher.hpp"
 #include "game/session.hpp"
+#include "ui/invisiblewidget.hpp"
 #include "util/keymap.hpp"
-#include "util/slaveobject.hpp"
-#include "util/slaverequestsender.hpp"
-#include "afl/base/signalconnection.hpp"
-#include "afl/base/closure.hpp"
-#include "ui/widgets/abstractbutton.hpp"
+#include "util/requestdispatcher.hpp"
+#include "util/requestsender.hpp"
 
 namespace client { namespace widgets {
 
@@ -28,13 +23,11 @@ namespace client { namespace widgets {
         To avoid having to go to scripts for <em>every</em> key, we fetch a set of bound keys from the keymap.
         Only for those that match, we go to the script world.
 
-        Because keymaps may change in the script world, we must set up a listener using a trampoline.
-
         \todo Feature: user keymaps ("UseKeymap xxx")
 
         \todo If the game thread hangs, this will make the UI perceived-hang.
         We should set up an emergency keymap in this case. */
-    class KeymapWidget : public ui::InvisibleWidget {
+    class KeymapWidget : public ui::InvisibleWidget, private client::proxy::KeymapProxy::Listener {
      public:
         /** Constructor.
             \param gameSender Sender to game session
@@ -55,8 +48,11 @@ namespace client { namespace widgets {
         virtual bool handleKey(util::Key_t key, int prefix);
 
      private:
-        /** RequestReceiver to allow us to receive replies from script side. */
-        util::RequestReceiver<KeymapWidget> m_reply;
+        // KeymapProxy::Listener
+        virtual void updateKeyList(util::KeySet_t& keys);
+
+        /** Keymap proxy. Allows us to access the keymap. */
+        client::proxy::KeymapProxy m_proxy;
 
         /** Script controller. */
         client::si::Control& m_control;
@@ -66,24 +62,6 @@ namespace client { namespace widgets {
 
         /** Current keymap name. */
         String_t m_keymapName;
-
-        class Trampoline : public util::SlaveObject<game::Session> {
-         public:
-            Trampoline(util::RequestSender<KeymapWidget> reply)
-                : conn_keymapChange(),
-                  m_reply(reply),
-                  m_keymapName()
-                { }
-            void init(game::Session&);
-            void done(game::Session&);
-            void setKeymapName(game::Session&, String_t keymapName);
-            void update(game::Session& s);
-         private:
-            afl::base::SignalConnection conn_keymapChange;
-            util::RequestSender<KeymapWidget> m_reply;
-            String_t m_keymapName;
-        };
-        util::SlaveRequestSender<game::Session, Trampoline> m_slave;
     };
 
 } }

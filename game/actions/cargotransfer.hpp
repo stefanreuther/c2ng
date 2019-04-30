@@ -78,7 +78,7 @@ namespace game { namespace actions {
 
         /** Move cargo specified by a CargoSpec.
             \param amount       [in/out] On input, cargo to move. On output, cargo not moved. If amount.isZero(), everything was moved.
-            \param shipList     [in] Ship list (needed to determine number of torpedoes)
+            \param shipList     [in] Ship list (needed to determine number of torpedo types)
             \param from         [in] Index of source unit
             \param to           [in] Index of target unit
             \param sellSupplies [in] If enabled, convert supplies to mc */
@@ -102,6 +102,14 @@ namespace game { namespace actions {
             Supply sale requires at least one unit with CargoContainer::SupplySale present.
             \return true if condition fulfilled */
         bool isSupplySaleAllowed() const;
+
+        /** Get permitted element types.
+            An element type is permitted in the transfer if it is supported on ALL participants, and a nonzero amount is present.
+
+            \param shipList     [in] Ship list (needed to determine number of torpedo types)
+
+            \return set of all element types */
+        ElementTypes_t getElementTypes(const game::spec::ShipList& shipList) const;
 
         /** Check validity of transaction.
             The transaction is valid if

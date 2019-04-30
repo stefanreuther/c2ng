@@ -105,6 +105,7 @@ namespace interpreter {
         void     addInstruction(Opcode::Major major, uint8_t minor, uint16_t arg);
         void     addVariableReferenceInstruction(Opcode::Major major, const String_t& name, const CompilationContext& cc);
         void     addLabel(Label_t label);
+        void     insertLabel(Label_t label, PC_t pc);
         void     addJump(uint8_t flags, Label_t label);
         void     addPushLiteral(afl::data::Value* literal);
         uint16_t addName(String_t name);
@@ -128,6 +129,11 @@ namespace interpreter {
         const afl::data::NameMap& getLocalNames() const;  // FIXME: rename to getLocalVariableNames
         afl::data::NameMap& getLocalNames()
             { return m_localNames; }
+
+        void setOrigin(const String_t& origin)
+            { m_origin = origin; }
+        const String_t getOrigin() const
+            { return m_origin; }
 
         const afl::data::NameMap& getNames() const
             { return m_names; }
@@ -164,6 +170,7 @@ namespace interpreter {
         bool                  m_isVarargs;
         String_t              m_name;
         String_t              file_name;
+        String_t              m_origin;
         std::vector<uint32_t> line_numbers; ///< Line numbers. Pairs of address,line.
     };
 }

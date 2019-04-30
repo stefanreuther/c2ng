@@ -68,6 +68,8 @@ namespace {
             { TS_ASSERT(0); }
         virtual void runQueue()
             { TS_ASSERT(0); }
+        virtual UserStatus getUserStatus(String_t /*user*/)
+            { TS_ASSERT(0); return UserStatus(); }
 
         Message* extract(String_t receiver);
         bool empty() const;

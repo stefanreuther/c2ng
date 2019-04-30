@@ -13,6 +13,8 @@
 #include "afl/data/vector.hpp"
 #include "afl/data/vectorvalue.hpp"
 #include "afl/net/nullcommandhandler.hpp"
+#include "afl/net/redis/hashkey.hpp"
+#include "afl/net/redis/integerfield.hpp"
 #include "afl/net/redis/internaldatabase.hpp"
 #include "afl/net/redis/sortoperation.hpp"
 #include "afl/test/commandhandler.hpp"
@@ -325,5 +327,41 @@ TestServerTalkTalkForum::testIt()
         TS_ASSERT_THROWS(TalkForum(userSession, root).getStickyThreads(7, TalkForum::ListParameters()), std::exception);
         TS_ASSERT_THROWS(TalkForum(userSession, root).getPosts(7, TalkForum::ListParameters()), std::exception);
     }
+}
+
+/** Test findForum(). */
+void
+TestServerTalkTalkForum::testFindForum()
+{
+    using server::talk::TalkPost;
+    using server::talk::TalkForum;
+    using server::talk::TalkGroup;
+    using afl::data::Access;
+
+    // Infrastructure
+    afl::net::redis::InternalDatabase db;
+    afl::net::NullCommandHandler mq;
+    server::talk::Root root(db, mq, server::talk::Configuration());
+    server::talk::Session rootSession;
+    server::talk::Session userSession;
+    userSession.setUser("a");
+
+    // Create a bunch of forums
+    const String_t config[] = { "name", "f" };
+    for (int i = 0; i < 10; ++i) {
+        TalkForum(rootSession, root).add(config);
+    }
+    int32_t fid = TalkForum(rootSession, root).add(config);
+    TS_ASSERT_EQUALS(fid, 11);
+
+    // Configure
+    afl::net::redis::HashKey(db, "forum:byname").intField("news").set(fid);
+
+    // Test
+    TS_ASSERT_EQUALS(TalkForum(rootSession, root).findForum("news"), fid);
+    TS_ASSERT_EQUALS(TalkForum(userSession, root).findForum("news"), fid);
+
+    TS_ASSERT_EQUALS(TalkForum(rootSession, root).findForum("other"), 0);
+    TS_ASSERT_EQUALS(TalkForum(userSession, root).findForum("other"), 0);
 }
 

@@ -97,8 +97,8 @@ ui::rich::Document::Splitter::handleText(String_t text)
     // ex RichTextSplitter::handleText
     int add = (nkey ? 7 : 0);
     gfx::FontRequest req;
-    req.setSize(nbig);
-    req.setWeight(nbold);
+    req.setSize(int16_t(nbig));
+    req.setWeight(int16_t(nbold));
     req.setStyle(nfixed > 0 ? 1 : 0);
 
     util::SkinColor::Color color = !colors.empty() ? colors.back() : util::SkinColor::Static;
@@ -243,6 +243,12 @@ ui::rich::Document::Document(gfx::ResourceProvider& provider)
 
 ui::rich::Document::~Document()
 { }
+
+gfx::ResourceProvider&
+ui::rich::Document::provider()
+{
+    return m_provider;
+}
 
 // /** Clear this document. Resets everything except for the page width. */
 void
@@ -624,7 +630,7 @@ ui::rich::Document::draw(gfx::Context<util::SkinColor::Color>& ctx, gfx::Rectang
                         // No shade
                     }
                     ctx.setColor(util::SkinColor::Link);
-                    ctx.setLinePattern(0x55 << (pos.getLeftX()&1));
+                    ctx.setLinePattern(uint8_t(0x55 << (pos.getLeftX()&1)));
                     drawHLine(ctx, pos.getLeftX(), pos.getTopY() + font->getLineHeight()*17/20, pos.getRightX()-1);
                     ctx.setLinePattern(gfx::SOLID_LINE);
                     if (it.color != util::SkinColor::Static) {

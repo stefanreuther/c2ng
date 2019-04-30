@@ -363,6 +363,12 @@ client::map::Renderer::setRenderList(afl::base::Ptr<game::map::RenderList> rende
     m_renderList = renderList;
 }
 
+const gfx::Rectangle&
+client::map::Renderer::getExtent() const
+{
+    return m_area;
+}
+
 void
 client::map::Renderer::draw(gfx::Canvas& can, ui::ColorScheme& colorScheme, gfx::ResourceProvider& provider) const
 {
@@ -447,4 +453,32 @@ client::map::Renderer::getCrossSize() const
     } else {
         return n;
     }
+}
+
+// /** Convert screen point to game point. */
+game::map::Point
+client::map::Renderer::unscale(gfx::Point pt) const
+{
+    // ex GChartViewport::unscaleXY
+    gfx::Point screenCenter = m_area.getCenter();
+    return game::map::Point(unscale(pt.getX() - screenCenter.getX()) + m_center.getX(),
+                            unscale(screenCenter.getY() - pt.getY()) + m_center.getY());
+}
+
+// /** Unscale. Convert screen distance into game distance. */
+int
+client::map::Renderer::unscale(int r) const
+{
+    // ex GChartViewport::unscale
+    if ((-1)/2 == 0 && r < 0) {
+        return -(-int32_t(r) * m_zoomDivider) / m_zoomMultiplier;
+    } else {
+        return int32_t(r) * m_zoomDivider / m_zoomMultiplier;
+    }
+}
+
+game::map::Point
+client::map::Renderer::getCenter() const
+{
+    return m_center;
 }

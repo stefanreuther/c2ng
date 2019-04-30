@@ -22,6 +22,11 @@
 #include "interpreter/binaryoperation.hpp"
 #include "afl/data/stringvalue.hpp"
 #include "afl/data/floatvalue.hpp"
+#include "interpreter/tokenizer.hpp"
+#include "interpreter/expr/node.hpp"
+#include "interpreter/expr/parser.hpp"
+#include "interpreter/process.hpp"
+#include "afl/data/scalarvalue.hpp"
 
 using interpreter::Opcode;
 using interpreter::BytecodeObject;
@@ -71,6 +76,31 @@ namespace {
         return isInstruction(insn, major, minor)
             && insn.arg == arg;
     }
+
+    void checkExpression(const char* expr, int32_t expectedValue, int level)
+    {
+        afl::sys::Log logger;
+        afl::io::NullFileSystem fs;
+        interpreter::World world(logger, fs);
+
+        interpreter::Tokenizer tok(expr);
+        std::auto_ptr<interpreter::expr::Node> node(interpreter::expr::Parser(tok).parse());
+        TSM_ASSERT_EQUALS(expr, tok.getCurrentToken(), tok.tEnd);
+
+        interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
+        node->compileValue(*bco, interpreter::CompilationContext(world));
+
+        optimize(world, *bco, level);
+
+        interpreter::Process exec(world, "checkScalarExpression", 9);
+        exec.pushFrame(bco, false);
+        bool ok = exec.runTemporary();
+        TSM_ASSERT(expr, ok);
+
+        afl::data::ScalarValue* resv = dynamic_cast<afl::data::ScalarValue*>(exec.getResult());
+        TSM_ASSERT(expr, resv != 0);
+        TSM_ASSERT_EQUALS(expr, resv->getValue(), expectedValue);
+    }
 }
 
 /*
@@ -86,7 +116,7 @@ TestInterpreterOptimizer::testStoreDrop1()
     s.bco.addInstruction(Opcode::maStore, Opcode::sLocal, s.bco.addLocalVariable("A"));
     s.bco.addInstruction(Opcode::maStack, Opcode::miStackDrop, 1);
 
-    optimize(s.world, s.bco, 2);
+    optimize(s.world, s.bco, 1);
 
     TS_ASSERT_EQUALS(s.bco.getNumInstructions(), 1U);
     TS_ASSERT(isInstruction(s.bco(0), Opcode::maPop, Opcode::sLocal));
@@ -103,7 +133,7 @@ TestInterpreterOptimizer::testStoreDrop2()
     s.bco.addInstruction(Opcode::maStore, Opcode::sLocal, s.bco.addLocalVariable("A"));
     s.bco.addInstruction(Opcode::maStack, Opcode::miStackDrop, 2);
 
-    optimize(s.world, s.bco, 2);
+    optimize(s.world, s.bco, 1);
 
     TS_ASSERT_EQUALS(s.bco.getNumInstructions(), 2U);
     TS_ASSERT(isInstruction(s.bco(0), Opcode::maPop, Opcode::sLocal));
@@ -120,7 +150,7 @@ TestInterpreterOptimizer::testStoreDrop3()
     s.bco.addInstruction(Opcode::maStore, Opcode::sLocal, s.bco.addLocalVariable("A"));
     s.bco.addInstruction(Opcode::maStack, Opcode::miStackDrop, 0);
 
-    optimize(s.world, s.bco, 2);
+    optimize(s.world, s.bco, 1);
 
     TS_ASSERT_EQUALS(s.bco.getNumInstructions(), 1U);
     TS_ASSERT(isInstruction(s.bco(0), Opcode::maStore, Opcode::sLocal));
@@ -138,7 +168,7 @@ TestInterpreterOptimizer::testStoreDrop4()
     s.bco.addInstruction(Opcode::maStack, Opcode::miStackDrop, 0);
     s.bco.addInstruction(Opcode::maStack, Opcode::miStackDrop, 1);
 
-    optimize(s.world, s.bco, 2);
+    optimize(s.world, s.bco, 1);
 
     TS_ASSERT_EQUALS(s.bco.getNumInstructions(), 1U);
     TS_ASSERT(isInstruction(s.bco(0), Opcode::maPop, Opcode::sLocal));
@@ -441,7 +471,6 @@ TestInterpreterOptimizer::testInvertJumps4()
     optimize(s.world, s.bco, 2);
 
     TS_ASSERT_EQUALS(s.bco.getNumInstructions(), 1U);
-    //TS_ASSERT(isInstruction(s.bco(0), Opcode::maStack, Opcode::miStackDrop, 1));
     TS_ASSERT(isInstruction(s.bco(0), Opcode::maUnary, interpreter::unInc,  0));
 }
 
@@ -2345,7 +2374,8 @@ TestInterpreterOptimizer::testFoldJump1()
     s.bco.addInstruction(Opcode::maUnary,  interpreter::unInc, 0);
     s.bco.addInstruction(Opcode::maJump,   Opcode::jSymbolic,  lend);
 
-    optimize(s.world, s.bco, 2);
+    // Use level 1 only for now, level 2 will trigger tail merging
+    optimize(s.world, s.bco, 1);
 
     TS_ASSERT_EQUALS(s.bco.getNumInstructions(), 12U);
 
@@ -2361,6 +2391,23 @@ TestInterpreterOptimizer::testFoldJump1()
     TS_ASSERT(isInstruction(s.bco(10), Opcode::maUnary, interpreter::unInc, 0));
 
     TS_ASSERT(isInstruction(s.bco(11), Opcode::maJump,  Opcode::jSymbolic, lend));
+
+    // Now optimize again with level 2 to exercise tail merging
+    optimize(s.world, s.bco, 2);
+
+    TS_ASSERT_EQUALS(s.bco.getNumInstructions(), 11U);
+
+    TS_ASSERT(isInstruction(s.bco(3),  Opcode::maJump,  Opcode::jSymbolic, la));
+    TS_ASSERT(isInstruction(s.bco(4),  Opcode::maJump,  Opcode::jSymbolic | Opcode::jAlways));
+
+    TS_ASSERT(isInstruction(s.bco(5),  Opcode::maJump,  Opcode::jSymbolic, lb));
+    TS_ASSERT(isInstruction(s.bco(6),  Opcode::maUnary, interpreter::unDec, 0));
+
+    TS_ASSERT(isInstruction(s.bco(7),  Opcode::maJump,  Opcode::jSymbolic, lc));
+    TS_ASSERT(isInstruction(s.bco(8),  Opcode::maUnary, interpreter::unNeg, 0));
+    TS_ASSERT(isInstruction(s.bco(9),  Opcode::maJump,  Opcode::jSymbolic));
+    
+    TS_ASSERT(isInstruction(s.bco(10), Opcode::maUnary, interpreter::unInc, 0));
 }
 
 /** Test folding of push-literal + conditional jump, with false condition. */
@@ -2530,7 +2577,7 @@ TestInterpreterOptimizer::testPopPush1()
     s.bco.addInstruction(Opcode::maPop,  Opcode::sLocal, lv);
     s.bco.addInstruction(Opcode::maPush, Opcode::sLocal, lv);
 
-    optimize(s.world, s.bco, 2);
+    optimize(s.world, s.bco, 1);
 
     TS_ASSERT_EQUALS(s.bco.getNumInstructions(), 1U);
     TS_ASSERT(isInstruction(s.bco(0), Opcode::maStore, Opcode::sLocal));
@@ -2549,7 +2596,7 @@ TestInterpreterOptimizer::testPopPush2()
     s.bco.addInstruction(Opcode::maPop,  Opcode::sNamedVariable, lv);
     s.bco.addInstruction(Opcode::maPush, Opcode::sNamedVariable, lv);
 
-    optimize(s.world, s.bco, 2);
+    optimize(s.world, s.bco, 1);
 
     TS_ASSERT_EQUALS(s.bco.getNumInstructions(), 2U);
     TS_ASSERT(isInstruction(s.bco(0), Opcode::maPop,  Opcode::sNamedVariable));
@@ -2573,7 +2620,7 @@ TestInterpreterOptimizer::testPopPush3()
     s.bco.addInstruction(Opcode::maPop,  Opcode::sLocal,       lv);
     s.bco.addInstruction(Opcode::maPush, Opcode::sNamedShared, gv);
 
-    optimize(s.world, s.bco, 2);
+    optimize(s.world, s.bco, 1);
 
     TS_ASSERT_EQUALS(s.bco.getNumInstructions(), 2U);
     TS_ASSERT(isInstruction(s.bco(0), Opcode::maPop,  Opcode::sLocal,       lv));
@@ -2843,3 +2890,255 @@ TestInterpreterOptimizer::testFailFoldBinary()
     TS_ASSERT(isInstruction(s.bco(5), Opcode::maBinary, interpreter::biMult, 0));
     TS_ASSERT(isInstruction(s.bco(7), Opcode::maBinary, interpreter::biPow, 0));
 }
+
+/** Test folding of integer comparison. We had a bug here. */
+void
+TestInterpreterOptimizer::testIntCompare()
+{
+    // Verify actual execution
+    checkExpression("if(instr('a', 'ba')=0, 3, 12)", 3, 2);
+    checkExpression("if(instr('a', 'ba')<>0, 3, 12)", 12, 2);
+    checkExpression("if(instr('ba', 'a')=0, 3, 12)", 12, 2);
+    checkExpression("if(instr('ba', 'a')<>0, 3, 12)", 3, 2);
+
+    checkExpression("if(bitand(1, 2)=0, 3, 12)", 3, 0);
+    checkExpression("if(bitand(1, 2)=0, 3, 12)", 3, 2);
+    checkExpression("if(bitand(1, 2)<>0, 3, 12)", 12, 0);
+    checkExpression("if(bitand(1, 2)<>0, 3, 12)", 12, 2);
+    checkExpression("if(bitand(z(0), 2)=0, 3, 12)", 12, 0);
+    checkExpression("if(bitand(z(0), 2)=0, 3, 12)", 12, 2);
+    checkExpression("if(bitand(z(0), 2)<>0, 3, 12)", 12, 0);
+    checkExpression("if(bitand(z(0), 2)<>0, 3, 12)", 12, 2);
+
+    // Verify patterns
+    Stuff s;
+
+    // bfindstr, pushint 0, bcmpeq -> bfindstr, unot
+    s.bco.addInstruction(Opcode::maBinary, interpreter::biFindStr, 0);
+    s.bco.addInstruction(Opcode::maPush, Opcode::sInteger, 0);
+    s.bco.addInstruction(Opcode::maBinary, interpreter::biCompareEQ, 0);
+
+    // bfindstr, pushint 0, bcmpne -> bfindstr, ubool
+    s.bco.addInstruction(Opcode::maBinary, interpreter::biFindStr, 0);
+    s.bco.addInstruction(Opcode::maPush, Opcode::sInteger, 0);
+    s.bco.addInstruction(Opcode::maBinary, interpreter::biCompareNE, 0);
+
+    // bfindstr, pushint 1, bcmpne -> unchanged
+    s.bco.addInstruction(Opcode::maBinary, interpreter::biFindStr, 0);
+    s.bco.addInstruction(Opcode::maPush, Opcode::sInteger, 1);
+    s.bco.addInstruction(Opcode::maBinary, interpreter::biCompareNE, 0);
+
+    // bfindstr, pushint 0, bcmpge -> unchanged
+    s.bco.addInstruction(Opcode::maBinary, interpreter::biFindStr, 0);
+    s.bco.addInstruction(Opcode::maPush, Opcode::sInteger, 0);
+    s.bco.addInstruction(Opcode::maBinary, interpreter::biCompareGE, 0);
+
+    optimize(s.world, s.bco, 2);
+
+    TS_ASSERT_EQUALS(s.bco.getNumInstructions(), 10U);
+    TS_ASSERT(isInstruction(s.bco(0), Opcode::maBinary, interpreter::biFindStr, 0));
+    TS_ASSERT(isInstruction(s.bco(1), Opcode::maUnary,  interpreter::unNot, 0));
+
+    TS_ASSERT(isInstruction(s.bco(2), Opcode::maBinary, interpreter::biFindStr, 0));
+    TS_ASSERT(isInstruction(s.bco(3), Opcode::maUnary,  interpreter::unBool, 0));
+
+    TS_ASSERT(isInstruction(s.bco(4), Opcode::maBinary, interpreter::biFindStr, 0));
+    TS_ASSERT(isInstruction(s.bco(5), Opcode::maPush,   Opcode::sInteger, 1));
+    TS_ASSERT(isInstruction(s.bco(6), Opcode::maBinary, interpreter::biCompareNE, 0));
+
+    TS_ASSERT(isInstruction(s.bco(7), Opcode::maBinary, interpreter::biFindStr, 0));
+    TS_ASSERT(isInstruction(s.bco(8), Opcode::maPush,   Opcode::sInteger, 0));
+    TS_ASSERT(isInstruction(s.bco(9), Opcode::maBinary, interpreter::biCompareGE, 0));
+}
+
+/** Test doTailMerge(). */
+void
+TestInterpreterOptimizer::testTailMerge()
+{
+    // Verify actual execution
+    checkExpression("if(1, 4+5, 3+5)", 9, 1);
+    checkExpression("if(1, 4+5, 3+5)", 9, 2);
+    checkExpression("if(0, 4+5, 3+5)", 8, 1);
+    checkExpression("if(0, 4+5, 3+5)", 8, 2);
+
+    // Verify pattern: 'if (a, b+1, c+1)'
+    Stuff s;
+    BytecodeObject::Label_t lElse = s.bco.makeLabel();
+    BytecodeObject::Label_t lEnd = s.bco.makeLabel();
+
+    s.bco.addInstruction(Opcode::maPush, Opcode::sNamedVariable, s.bco.addName("A"));
+    s.bco.addInstruction(Opcode::maJump, Opcode::jSymbolic + Opcode::jIfFalse + Opcode::jIfEmpty + Opcode::jPopAlways, lElse);
+    s.bco.addInstruction(Opcode::maPush, Opcode::sNamedVariable, s.bco.addName("B"));
+    s.bco.addInstruction(Opcode::maUnary, interpreter::unInc, 0);
+    s.bco.addInstruction(Opcode::maJump, Opcode::jSymbolic + Opcode::jAlways, lEnd);
+    s.bco.addInstruction(Opcode::maJump, Opcode::jSymbolic, lElse);
+    s.bco.addInstruction(Opcode::maPush, Opcode::sNamedVariable, s.bco.addName("C"));
+    s.bco.addInstruction(Opcode::maUnary, interpreter::unInc, 0);
+    s.bco.addInstruction(Opcode::maJump, Opcode::jSymbolic, lEnd);
+
+    optimize(s.world, s.bco, 2);
+                         
+    TS_ASSERT_EQUALS(s.bco.getNumInstructions(), 8U);
+
+    TS_ASSERT(isInstruction(s.bco(0), Opcode::maPush, Opcode::sNamedVariable));    
+    TS_ASSERT(isInstruction(s.bco(1), Opcode::maJump, Opcode::jSymbolic + Opcode::jIfFalse + Opcode::jIfEmpty + Opcode::jPopAlways, lElse));    
+    TS_ASSERT(isInstruction(s.bco(2), Opcode::maPush, Opcode::sNamedVariable));    
+    TS_ASSERT(isInstruction(s.bco(3), Opcode::maJump, Opcode::jSymbolic + Opcode::jAlways));    
+    TS_ASSERT(isInstruction(s.bco(4), Opcode::maJump, Opcode::jSymbolic));    
+    TS_ASSERT(isInstruction(s.bco(5), Opcode::maPush, Opcode::sNamedVariable));    
+    TS_ASSERT(isInstruction(s.bco(6), Opcode::maJump, Opcode::jSymbolic));    
+    TS_ASSERT(isInstruction(s.bco(7), Opcode::maUnary, interpreter::unInc));    
+}
+
+/** Test failure to optimize because of label inconsistencies:
+    Verify preconditions for future tests */
+void
+TestInterpreterOptimizer::testLabelFailure1()
+{
+    Stuff s;
+    s.bco.setNumLabels(20);
+    s.bco.addInstruction(Opcode::maJump, Opcode::jSymbolic, 7);
+    s.bco.addInstruction(Opcode::maUnary, interpreter::unPos, 0);
+    s.bco.addInstruction(Opcode::maUnary, interpreter::unPos, 0);
+
+    optimize(s.world, s.bco, 2);
+
+    TS_ASSERT_EQUALS(s.bco.getNumInstructions(), 1U);
+    TS_ASSERT(isInstruction(s.bco(0), Opcode::maUnary, interpreter::unPos));
+}
+
+/** Test failure to optimize because of absolute label. */
+void
+TestInterpreterOptimizer::testLabelFailure2()
+{
+    Stuff s;
+    s.bco.addInstruction(Opcode::maJump, 0, 99);
+    s.bco.addInstruction(Opcode::maUnary, interpreter::unPos, 0);
+    s.bco.addInstruction(Opcode::maUnary, interpreter::unPos, 0);
+
+    optimize(s.world, s.bco, 2);
+
+    // Number of instructions unchanged
+    TS_ASSERT_EQUALS(s.bco.getNumInstructions(), 3U);
+}
+
+/** Test failure to optimize because of absolute jump */
+void
+TestInterpreterOptimizer::testLabelFailure3()
+{
+    Stuff s;
+    s.bco.addInstruction(Opcode::maJump, Opcode::jAlways, 2);
+    s.bco.addInstruction(Opcode::maUnary, interpreter::unPos, 0);
+    s.bco.addInstruction(Opcode::maUnary, interpreter::unPos, 0);
+
+    optimize(s.world, s.bco, 2);
+
+    // Number of instructions unchanged
+    TS_ASSERT_EQUALS(s.bco.getNumInstructions(), 3U);
+}
+
+/** Test failure to optimize because of out-of-range label. This used to assert. */
+void
+TestInterpreterOptimizer::testLabelFailure4()
+{
+    Stuff s;
+    s.bco.setNumLabels(44);
+    s.bco.addInstruction(Opcode::maJump, Opcode::jSymbolic, 44);
+    s.bco.addInstruction(Opcode::maUnary, interpreter::unPos, 0);
+    s.bco.addInstruction(Opcode::maUnary, interpreter::unPos, 0);
+
+    optimize(s.world, s.bco, 2);
+
+    // Number of instructions unchanged
+    TS_ASSERT_EQUALS(s.bco.getNumInstructions(), 3U);
+}
+
+/** Test failure to optimize because of out-of-range jump. This used to assert. */
+void
+TestInterpreterOptimizer::testLabelFailure5()
+{
+    Stuff s;
+    s.bco.setNumLabels(44);
+    s.bco.addInstruction(Opcode::maJump, Opcode::jSymbolic + Opcode::jAlways, 44);
+    s.bco.addInstruction(Opcode::maUnary, interpreter::unPos, 0);
+    s.bco.addInstruction(Opcode::maUnary, interpreter::unPos, 0);
+
+    optimize(s.world, s.bco, 2);
+
+    // Number of instructions unchanged
+    TS_ASSERT_EQUALS(s.bco.getNumInstructions(), 3U);
+}
+
+/** Test dead store removal: "return" case. */
+void
+TestInterpreterOptimizer::testDeadStore1()
+{
+    Stuff s;
+    BytecodeObject::Label_t label = s.bco.makeLabel();
+    uint16_t var = s.bco.addLocalVariable("X");
+
+    // Label to make stuff after return referenced
+    s.bco.addJump(Opcode::jDecZero, label);
+
+    // Return
+    s.bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialNewHash, 0);
+    s.bco.addInstruction(Opcode::maStore,   Opcode::sLocal, var);
+    s.bco.addInstruction(Opcode::maUnary,   interpreter::unAbs, 0);
+    s.bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialReturn, 1);
+
+    // After return
+    s.bco.addLabel(label);
+    s.bco.addInstruction(Opcode::maPush,    Opcode::sInteger, 42);
+
+    optimize(s.world, s.bco, 2);
+
+    // 5 instructions remain
+    TS_ASSERT_EQUALS(s.bco.getNumInstructions(), 6U);
+    TS_ASSERT(isInstruction(s.bco(1), Opcode::maSpecial, Opcode::miSpecialNewHash, 0));
+    TS_ASSERT(isInstruction(s.bco(2), Opcode::maUnary, interpreter::unAbs,         0));
+    TS_ASSERT(isInstruction(s.bco(3), Opcode::maSpecial, Opcode::miSpecialReturn,  1));
+}
+
+/** Test dead store removal: "return at end of function" case. */
+void
+TestInterpreterOptimizer::testDeadStore2()
+{
+    Stuff s;
+    uint16_t var = s.bco.addLocalVariable("X");
+
+    s.bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialNewHash, 0);
+    s.bco.addInstruction(Opcode::maPop,     Opcode::sLocal, var);
+    s.bco.addInstruction(Opcode::maUnary,   interpreter::unAbs, 0);
+    s.bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialReturn, 1);
+
+    optimize(s.world, s.bco, 2);
+
+    // 4 instructions remain, pop has been converted into drop
+    TS_ASSERT_EQUALS(s.bco.getNumInstructions(), 4U);
+    TS_ASSERT(isInstruction(s.bco(0), Opcode::maSpecial, Opcode::miSpecialNewHash, 0));
+    TS_ASSERT(isInstruction(s.bco(1), Opcode::maStack,   Opcode::miStackDrop,      1));
+    TS_ASSERT(isInstruction(s.bco(2), Opcode::maUnary,   interpreter::unAbs,       0));
+    TS_ASSERT(isInstruction(s.bco(3), Opcode::maSpecial, Opcode::miSpecialReturn,  1));
+}
+
+
+/** Test dead store removal: "end of function" case. */
+void
+TestInterpreterOptimizer::testDeadStore3()
+{
+    Stuff s;
+    uint16_t var = s.bco.addLocalVariable("X");
+
+    s.bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialNewHash, 0);
+    s.bco.addInstruction(Opcode::maPop,     Opcode::sLocal, var);
+    s.bco.addInstruction(Opcode::maUnary,   interpreter::unAbs, 0);
+
+    optimize(s.world, s.bco, 2);
+
+    // 4 instructions remain, pop has been converted into drop
+    TS_ASSERT_EQUALS(s.bco.getNumInstructions(), 3U);
+    TS_ASSERT(isInstruction(s.bco(0), Opcode::maSpecial, Opcode::miSpecialNewHash, 0));
+    TS_ASSERT(isInstruction(s.bco(1), Opcode::maStack,   Opcode::miStackDrop,      1));
+    TS_ASSERT(isInstruction(s.bco(2), Opcode::maUnary,   interpreter::unAbs,       0));
+}
+

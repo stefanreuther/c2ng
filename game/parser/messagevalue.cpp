@@ -138,100 +138,100 @@ game::parser::getNameFromIndex(MessageIntegerIndex ii, afl::string::Translator& 
 {
     // ex game/parser.h:getNameForItem
     switch (ii) {
-     case mi_X:                 return tx.translateString("X");
-     case mi_Y:                 return tx.translateString("Y");
-     case mi_Radius:            return tx.translateString("Radius");
-     case mi_Owner:             return tx.translateString("Owner");
-     case mi_Damage:            return tx.translateString("Damage");
-     case mi_Heading:           return tx.translateString("Heading");
-     case mi_Speed:             return tx.translateString("Speed");
-     case mi_Type:              return tx.translateString("Type");
-     case mi_Mass:              return tx.translateString("Mass");
+     case mi_X:                 return tx("X");
+     case mi_Y:                 return tx("Y");
+     case mi_Radius:            return tx("Radius");
+     case mi_Owner:             return tx("Owner");
+     case mi_Damage:            return tx("Damage");
+     case mi_Heading:           return tx("Heading");
+     case mi_Speed:             return tx("Speed");
+     case mi_Type:              return tx("Type");
+     case mi_Mass:              return tx("Mass");
 
         /* Minefields: */
-     case mi_MineUnits:         return tx.translateString("Mine Units");
-     case mi_MineScanReason:    return tx.translateString("Mine Scan Reason");
-     case mi_MineUnitsRemoved:  return tx.translateString("Mine Units Removed");
+     case mi_MineUnits:         return tx("Mine Units");
+     case mi_MineScanReason:    return tx("Mine Scan Reason");
+     case mi_MineUnitsRemoved:  return tx("Mine Units Removed");
 
         /* Ships: */
-     case mi_ShipHull:          return tx.translateString("Hull Type");
-     case mi_ShipFuel:          return tx.translateString("Fuel");
-     case mi_ShipRemoteFlag:    return tx.translateString("Remote-control flag");
-     case mi_ShipWaypointDX:    return tx.translateString("Waypoint DX");
-     case mi_ShipWaypointDY:    return tx.translateString("Waypoint DY");
-     case mi_ShipEngineType:    return tx.translateString("Engine Type");
-     case mi_ShipBeamType:      return tx.translateString("Beam Type");
-     case mi_ShipNumBeams:      return tx.translateString("Number of Beams");
-     case mi_ShipNumBays:       return tx.translateString("Number of Fighter Bays");
-     case mi_ShipLauncherType:  return tx.translateString("Torpedo Type");
-     case mi_ShipAmmo:          return tx.translateString("Ammo");
-     case mi_ShipNumLaunchers:  return tx.translateString("Number of Torpedo Launchers");
-     case mi_ShipMission:       return tx.translateString("Mission");
-     case mi_ShipTow:           return tx.translateString("Mission Tow");
-     case mi_ShipIntercept:     return tx.translateString("Mission Intercept");
-     case mi_ShipEnemy:         return tx.translateString("Primary Enemy");
-     case mi_ShipCrew:          return tx.translateString("Crew");
-     case mi_ShipColonists:     return tx.translateString("Colonists aboard");
-     case mi_ShipSupplies:      return tx.translateString("Supplies aboard");
-     case mi_ShipCargoT:        return tx.translateString("Tritanium aboard");
-     case mi_ShipCargoD:        return tx.translateString("Duranium aboard");
-     case mi_ShipCargoM:        return tx.translateString("Molybdenum aboard");
-     case mi_ShipMoney:         return tx.translateString("Money aboard");
+     case mi_ShipHull:          return tx("Hull Type");
+     case mi_ShipFuel:          return tx("Fuel");
+     case mi_ShipRemoteFlag:    return tx("Remote-control flag");
+     case mi_ShipWaypointDX:    return tx("Waypoint DX");
+     case mi_ShipWaypointDY:    return tx("Waypoint DY");
+     case mi_ShipEngineType:    return tx("Engine Type");
+     case mi_ShipBeamType:      return tx("Beam Type");
+     case mi_ShipNumBeams:      return tx("Number of Beams");
+     case mi_ShipNumBays:       return tx("Number of Fighter Bays");
+     case mi_ShipLauncherType:  return tx("Torpedo Type");
+     case mi_ShipAmmo:          return tx("Ammo");
+     case mi_ShipNumLaunchers:  return tx("Number of Torpedo Launchers");
+     case mi_ShipMission:       return tx("Mission");
+     case mi_ShipTow:           return tx("Mission Tow");
+     case mi_ShipIntercept:     return tx("Mission Intercept");
+     case mi_ShipEnemy:         return tx("Primary Enemy");
+     case mi_ShipCrew:          return tx("Crew");
+     case mi_ShipColonists:     return tx("Colonists aboard");
+     case mi_ShipSupplies:      return tx("Supplies aboard");
+     case mi_ShipCargoT:        return tx("Tritanium aboard");
+     case mi_ShipCargoD:        return tx("Duranium aboard");
+     case mi_ShipCargoM:        return tx("Molybdenum aboard");
+     case mi_ShipMoney:         return tx("Money aboard");
 
         /* Planets: */
-     case mi_PlanetTotalN:      return tx.translateString("Total Neutronium");
-     case mi_PlanetTotalT:      return tx.translateString("Total Tritanium");
-     case mi_PlanetTotalD:      return tx.translateString("Total Duranium");
-     case mi_PlanetTotalM:      return tx.translateString("Total Molybdenum");
-     case mi_PlanetAddedN:      return tx.translateString("Added Neutronium");
-     case mi_PlanetAddedT:      return tx.translateString("Added Tritanium");
-     case mi_PlanetAddedD:      return tx.translateString("Added Duranium");
-     case mi_PlanetAddedM:      return tx.translateString("Added Molybdenum");
-     case mi_PlanetMinedN:      return tx.translateString("Mined Neutronium");
-     case mi_PlanetMinedT:      return tx.translateString("Mined Tritanium");
-     case mi_PlanetMinedD:      return tx.translateString("Mined Duranium");
-     case mi_PlanetMinedM:      return tx.translateString("Mined Molybdenum");
-     case mi_PlanetDensityN:    return tx.translateString("Neutronium Density");
-     case mi_PlanetDensityT:    return tx.translateString("Tritanium Density");
-     case mi_PlanetDensityD:    return tx.translateString("Duranium Density");
-     case mi_PlanetDensityM:    return tx.translateString("Molybdenum Density");
-     case mi_PlanetCash:        return tx.translateString("Money");
-     case mi_PlanetSupplies:    return tx.translateString("Supplies");
-     case mi_PlanetHasBase:     return tx.translateString("Has Base");
-     case mi_PlanetMines:       return tx.translateString("Mineral Mines");
-     case mi_PlanetFactories:   return tx.translateString("Factories");
-     case mi_PlanetDefense:     return tx.translateString("Defense Posts");
-     case mi_PlanetTemperature: return tx.translateString("Temperature");
-     case mi_PlanetColonists:   return tx.translateString("Colonist Clans");
-     case mi_PlanetColonistHappiness: return tx.translateString("Colonist Happiness");
-     case mi_PlanetColonistTax: return tx.translateString("Colonist Tax");
-     case mi_PlanetActivity:    return tx.translateString("Industrial activity");
-     case mi_PlanetNativeRace:  return tx.translateString("Native Race");
-     case mi_PlanetNativeGov:   return tx.translateString("Native Government");
-     case mi_PlanetNativeHappiness: return tx.translateString("Native Happiness");
-     case mi_PlanetNativeTax:   return tx.translateString("Native Tax");
-     case mi_PlanetNatives:     return tx.translateString("Native Population");
-     case mi_PlanetHasNatives:  return tx.translateString("Natives present");
+     case mi_PlanetTotalN:      return tx("Total Neutronium");
+     case mi_PlanetTotalT:      return tx("Total Tritanium");
+     case mi_PlanetTotalD:      return tx("Total Duranium");
+     case mi_PlanetTotalM:      return tx("Total Molybdenum");
+     case mi_PlanetAddedN:      return tx("Added Neutronium");
+     case mi_PlanetAddedT:      return tx("Added Tritanium");
+     case mi_PlanetAddedD:      return tx("Added Duranium");
+     case mi_PlanetAddedM:      return tx("Added Molybdenum");
+     case mi_PlanetMinedN:      return tx("Mined Neutronium");
+     case mi_PlanetMinedT:      return tx("Mined Tritanium");
+     case mi_PlanetMinedD:      return tx("Mined Duranium");
+     case mi_PlanetMinedM:      return tx("Mined Molybdenum");
+     case mi_PlanetDensityN:    return tx("Neutronium Density");
+     case mi_PlanetDensityT:    return tx("Tritanium Density");
+     case mi_PlanetDensityD:    return tx("Duranium Density");
+     case mi_PlanetDensityM:    return tx("Molybdenum Density");
+     case mi_PlanetCash:        return tx("Money");
+     case mi_PlanetSupplies:    return tx("Supplies");
+     case mi_PlanetHasBase:     return tx("Has Base");
+     case mi_PlanetMines:       return tx("Mineral Mines");
+     case mi_PlanetFactories:   return tx("Factories");
+     case mi_PlanetDefense:     return tx("Defense Posts");
+     case mi_PlanetTemperature: return tx("Temperature");
+     case mi_PlanetColonists:   return tx("Colonist Clans");
+     case mi_PlanetColonistHappiness: return tx("Colonist Happiness");
+     case mi_PlanetColonistTax: return tx("Colonist Tax");
+     case mi_PlanetActivity:    return tx("Industrial activity");
+     case mi_PlanetNativeRace:  return tx("Native Race");
+     case mi_PlanetNativeGov:   return tx("Native Government");
+     case mi_PlanetNativeHappiness: return tx("Native Happiness");
+     case mi_PlanetNativeTax:   return tx("Native Tax");
+     case mi_PlanetNatives:     return tx("Native Population");
+     case mi_PlanetHasNatives:  return tx("Natives present");
 
         /* Bases: */
-     case mi_BaseQueuePos:      return tx.translateString("Build Queue Position");
-     case mi_BaseQueuePriority: return tx.translateString("Build Priority");
+     case mi_BaseQueuePos:      return tx("Build Queue Position");
+     case mi_BaseQueuePriority: return tx("Build Priority");
 
         /* Score: */
-     case mi_ScoreWinLimit:     return tx.translateString("Score Win Limit");
-     case mi_ScoreTurnLimit:    return tx.translateString("Score Turn Limit");
+     case mi_ScoreWinLimit:     return tx("Score Win Limit");
+     case mi_ScoreTurnLimit:    return tx("Score Turn Limit");
 
         /* Ion Storm: */
-     case mi_IonVoltage:        return tx.translateString("Voltage");
-     case mi_IonStatus:         return tx.translateString("Storm Status");
+     case mi_IonVoltage:        return tx("Voltage");
+     case mi_IonStatus:         return tx("Storm Status");
 
         /* Ufo: */
-     case mi_UfoRealId:         return tx.translateString("Real ID");
-     case mi_UfoSpeedX:         return tx.translateString("X Movement");
-     case mi_UfoSpeedY:         return tx.translateString("Y Movement");
-     case mi_UfoColor:          return tx.translateString("Color");
-     case mi_UfoPlanetRange:    return tx.translateString("Visibility Range from Planet");
-     case mi_UfoShipRange:      return tx.translateString("Visibility Range from Ship");
+     case mi_UfoRealId:         return tx("Real ID");
+     case mi_UfoSpeedX:         return tx("X Movement");
+     case mi_UfoSpeedY:         return tx("Y Movement");
+     case mi_UfoColor:          return tx("Color");
+     case mi_UfoPlanetRange:    return tx("Visibility Range from Planet");
+     case mi_UfoShipRange:      return tx("Visibility Range from Ship");
 
      case mi_Max:               return "?";
     }

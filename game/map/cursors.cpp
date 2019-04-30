@@ -10,7 +10,8 @@ game::map::Cursors::Cursors()
       m_currentShip(),
       m_currentPlanet(),
       m_currentBase(),
-      m_currentIonStorm()
+      m_currentIonStorm(),
+      m_location()
 { }
 
 game::map::Cursors::~Cursors()
@@ -31,6 +32,7 @@ game::map::Cursors::setUniverse(Universe* univ)
         m_currentBase.setObjectType(0);
         m_currentIonStorm.setObjectType(0);
     }
+    m_location.setUniverse(univ);
 }
 
 game::map::SimpleObjectCursor&
@@ -55,6 +57,12 @@ game::map::SimpleObjectCursor&
 game::map::Cursors::currentIonStorm()
 {
     return m_currentIonStorm;
+}
+
+game::map::Location&
+game::map::Cursors::location()
+{
+    return m_location;
 }
 
 game::map::ObjectCursor*

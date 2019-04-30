@@ -1,0 +1,51 @@
+##
+##  c2user
+##
+
+@q User (Service)
+@noproto
+The "User" service manages user profiles and tokens.
+It stores information in the database.
+
+The User service is accessible using
+- "user" context on the console
+- {@group User Command} (a {pcc:resp|RESP service})
+- {@group User API} (a {pcc:api|web API})
+
+<h2>Domain Model</h2>
+
+The User service manages <b>users</b>.
+Each user has a <b>profile</b> containing their settings.
+The main attributes are
+- user's log-in name (restricted character set, "machine-readable")
+- user's screen name
+- password
+
+The User service can also manage <b>tokens</b>.
+A token is a random number that maps to a user Id, type, and expiration time.
+This is used by the web frontend to manage user accesses.
+
+The User service does <em>not</em> maintain a queryable user list.
+This is a privacy consideration: mere presence of a user account should not be public.
+A list of users active on the Host is maintained by the {Host (Service)|Host service}.
+
+<h2>Storage</h2>
+
+Important data types:
+- {@type UID} (user Id)
+
+Note that user Ids are trusted by all services, and must not be taken from user input.
+
+@uses User.Host, User.Port, User.Key
+@uses Redis.Host, Redis.Port
+@uses User.Data.MaxKeySize, User.Data.MaxValueSize, User.Data.MaxTotalSize
+---
+
+@group User Command
+This {pcc:resp|RESP} interface is the interface to the {User (Service)|User} service.
+User commands can also be accessed through the {@group User API}.
+---
+@group User API
+The "user" {pcc:api|API endpoint} accesses usered games.
+It accesses the {@group User Command|user service}.
+---

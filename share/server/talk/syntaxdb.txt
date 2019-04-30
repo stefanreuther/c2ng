@@ -1,0 +1,1856 @@
+#
+#  Syntax Database for Highlighter
+#
+#  foo {           Start a group in which every key is prefixed with "foo."
+#    key = value   Make a key/value pair
+#  }               End a group
+#
+#  Keys:
+#     ini.<section>.<key>.link       Link for <key> in <section>
+#     ini.<section>.<key>.info       Info (hover title) for <key> in <section>
+#
+#  Values: "$key" copies the value of a key. Everything else is just plain text.
+#
+
+ini.phost {
+    AllowAdvancedRefinery {
+        link = http://phost.de/phost4doc/config.html#AllowAdvancedRefinery
+        info = Enable advanced refinery (mineral -> fuel)
+    }
+    AllowAlchemy {
+        link = http://phost.de/phost4doc/config.html#AllowAlchemy
+        info = Enable alchemy functions
+    }
+    AllowAlliedChunneling {
+        link = http://phost.de/phost4doc/config.html#AllowAlliedChunneling
+        info = Enable chunneling between allied races, not just within one race
+    }
+    AllowAlternativeCombat {
+        link = http://phost.de/phost4doc/config.html#AllowAlternativeCombat
+        info = Enable alternative combat formulas
+    }
+    AllowAlternativeTowing {
+        link = http://phost.de/phost4doc/config.html#AllowAlternativeTowing
+        info = Enable alternative towing rule-set
+    }
+    AllowAnonymousMessages {
+        link = http://phost.de/phost4doc/config.html#AllowAnonymousMessages
+        info = Enable anonymous messages (rumors) to be sent
+    }
+    AllowAntiCloakShips {
+        link = http://phost.de/phost4doc/config.html#AllowAntiCloakShips
+        info = Enable anti-cloak functions
+    }
+    AllowBeamUpClans {
+        link = http://phost.de/phost4doc/config.html#AllowBeamUpClans
+        info = Enable the "Beam up Clans" mission
+    }
+    AllowBeamUpMultiple {
+        link = http://phost.de/phost4doc/config.html#AllowBeamUpMultiple
+        info = Enable the "Beam up Multiple" mission
+    }
+    AllowBioscanners {
+        link = http://phost.de/phost4doc/config.html#AllowBioscanners
+        info = Enable bio-scanning functions
+    }
+    AllowBoardingParties {
+        link = http://phost.de/phost4doc/config.html#AllowBoardingParties
+        info = Enable tow-capture ability of Crystals and Privateers
+    }
+    AllowBuildFighters {
+        link = http://phost.de/phost4doc/config.html#AllowBuildFighters
+        info = Configure races that can build fighters on starships
+    }
+    AllowChunneling {
+        link = http://phost.de/phost4doc/config.html#AllowChunneling
+        info = Enable the chunneling functions
+    }
+    AllowCloakFailMessages {
+        link = http://phost.de/phost4doc/config.html#AllowCloakFailMessages
+        info = Enable messages that explain when cloaking fails
+    }
+    AllowCloakedShipsAttack {
+        link = http://phost.de/phost4doc/config.html#AllowCloakedShipsAttack
+        info = Allow cloaked ships to attack uncloaked ships with matching Primary Enemy
+    }
+    AllowColoniesSweepWebs {
+        link = http://phost.de/phost4doc/config.html#AllowColoniesSweepWebs
+        info = Allow Colonial fighters to sweep web mines
+    }
+    AllowCrystalTowCapture {
+        link = http://phost.de/phost4doc/config.html#AllowCrystalTowCapture
+        info = Enable tow-capture ability of Crystals
+    }
+    AllowDeluxeSuperSpy {
+        link = http://phost.de/phost4doc/config.html#AllowDeluxeSuperSpy
+        info = Enable the Super Spy mission to change planetary friendly codes
+    }
+    AllowESBonusAgainstPlanets {
+        link = http://phost.de/phost4doc/config.html#AllowESBonusAgainstPlanets
+        info = Enable the Engine-Shield bonus in ship/planet fights
+    }
+    AllowEatingSupplies {
+        link = http://phost.de/phost4doc/config.html#AllowEatingSupplies
+        info = Allow overpopulations to eat supplies instead of dying
+    }
+    AllowEngineShieldBonus {
+        link = http://phost.de/phost4doc/config.html#AllowEngineShieldBonus
+        info = Enable the Engine-Shield bonus
+    }
+    AllowExtendedMissions {
+        link = http://phost.de/phost4doc/config.html#AllowExtendedMissions
+        info = Enable extended (=PHost-only) missions
+    }
+    AllowFedCombatBonus {
+        link = http://phost.de/phost4doc/config.html#AllowFedCombatBonus
+        info = Enable Federation combat bonus (more bays, shield repair)
+    }
+    AllowGamblingShips {
+        link = http://phost.de/phost4doc/config.html#AllowGamblingShips
+        info = Enable gambling (Lady Royale) ability
+    }
+    AllowGloryDevice {
+        link = http://phost.de/phost4doc/config.html#AllowGloryDevice
+        info = Enable Glory Device (self destruct) ability
+    }
+    AllowGravityWells {
+        link = http://phost.de/phost4doc/config.html#AllowGravityWells
+        info = Enable planetary gravity wells
+    }
+    AllowHiss {
+        link = http://phost.de/phost4doc/config.html#AllowHiss
+        info = Enable Lizard Hisssss mission
+    }
+    AllowHyperWarps {
+        link = http://phost.de/phost4doc/config.html#AllowHyperWarps
+        info = Enable the Hyperjump ability
+    }
+    AllowHyperjumpGravWells {
+        link = http://phost.de/phost4doc/config.html#AllowHyperjumpGravWells
+        info = Enable planetary gravity wells for ships that hyperjump
+    }
+    AllowImperialAssault {
+        link = http://phost.de/phost4doc/config.html#AllowImperialAssault
+        info = Enable the Imperial Assault (Super Star Destroyer) ability
+    }
+    AllowIncompatibleConfiguration {
+        link = http://phost.de/phost4doc/config.html#AllowIncompatibleConfiguration
+        info = Allow usage of configuration options that make the game incompatible with Winplan/planets.exe
+    }
+    AllowInterceptAttack {
+        link = http://phost.de/phost4doc/config.html#AllowInterceptAttack
+        info = Allow cloak-capable ships pick their opponent first in combat
+    }
+    AllowMeteorMessages {
+        link = http://phost.de/phost4doc/config.html#AllowMeteorMessages
+        info = Enable messages reporting meteor impacts
+    }
+    AllowMinefields {
+        link = http://phost.de/phost4doc/config.html#AllowMinefields
+        info = Allow minefields to be laid
+    }
+    AllowMinesDestroyMines {
+        link = http://phost.de/phost4doc/config.html#AllowMinesDestroyMines
+        info = Enable that hostile minefields destroy each other when they overlap
+    }
+    AllowMinesDestroyWebs {
+        link = http://phost.de/phost4doc/config.html#AllowMinesDestroyWebs
+        info = Enable that hostile minefields of different types destroy each other when they overlap
+    }
+    AllowMoreThan500Minefields {
+        link = http://phost.de/phost4doc/config.html#AllowMoreThan500Minefields
+        info = Defines, for each player, whether they are able to receive more than 500 minefields in their result
+    }
+    AllowMoreThan50Targets {
+        link = http://phost.de/phost4doc/config.html#AllowMoreThan50Targets
+        info = Defines, for each player, whether they are able to receive more than 50 target ships in their result
+    }
+    AllowNewNatives {
+        link = http://phost.de/phost4doc/config.html#AllowNewNatives
+        info = If enabled, new natives appear on planets randomly
+    }
+    AllowNoFuelMovement {
+        link = http://phost.de/phost4doc/config.html#AllowNoFuelMovement
+        info = Enable ships without Neutronium fuel to use their impulse drive to go Warp 1
+    }
+    AllowOneEngineTowing {
+        link = http://phost.de/phost4doc/config.html#AllowOneEngineTowing
+        info = Allow ships with just one engine to tow
+    }
+    AllowPlanetAttacks {
+        link = http://phost.de/phost4doc/config.html#AllowPlanetAttacks
+        info = Allow planets to attack ships in orbit using the ATT/NUK friendly codes
+    }
+    AllowPlayerMessages {
+        link = http://phost.de/phost4doc/config.html#AllowPlayerMessages
+        info = Allow in-game messages between players
+    }
+    AllowPriorityBuild {
+        link = http://phost.de/phost4doc/config.html#AllowPriorityBuild
+        info = Allow players to control their build order using PBx friendly codes
+    }
+    AllowPrivateerTowCapture {
+        link = http://phost.de/phost4doc/config.html#AllowPrivateerTowCapture
+        info = Enable tow-capture ability of Privateers
+    }
+    AllowRGAOnUnowned {
+        link = http://phost.de/phost4doc/config.html#AllowRGAOnUnowned
+        info = Allow the Rebel Ground Attack mission on unowned planets
+    }
+    AllowRebelGroundAttack {
+        link = http://phost.de/phost4doc/config.html#AllowRebelGroundAttack
+        info = Allow the Rebel Ground Attack mission
+    }
+    AllowRegisteredFunctions {
+        link = http://phost.de/phost4doc/config.html#AllowRegisteredFunctions
+        info = Allow registered-only functions for registered players (tech 7-10, certain missions and friendly codes)
+    }
+    AllowScienceMissions {
+        link = http://phost.de/phost4doc/config.html#AllowScienceMissions
+        info = Allow terraforming functions
+    }
+    AllowShipCloning {
+        link = http://phost.de/phost4doc/config.html#AllowShipCloning
+        info = Allow ships to be cloned at starbases using the cln friendly code
+    }
+    AllowShipNames {
+        link = http://phost.de/phost4doc/config.html#AllowShipNames
+        info = Allow players to see each other's ship names
+    }
+    AllowSuperRefit {
+        link = http://phost.de/phost4doc/config.html#AllowSuperRefit
+        info = Allow the Fed Super Refit mission
+    }
+    AllowTowCloakedShips {
+        link = http://phost.de/phost4doc/config.html#AllowTowCloakedShips
+        info = Allow players to continue a Tow mission even if the towed ship cloaks and is no longer visible
+    }
+
+    # Pseudo option, not supported by PHost. It's described but shouldn't appear in any config.
+    # AllowVPAFeatures {
+    #     link = http://phost.de/phost4doc/config.html#AllowVPAFeatures
+    # }
+    AllowWebMines {
+        link = http://phost.de/phost4doc/config.html#AllowWebMines
+        info = Allow Crystals to lay web mine fields
+    }
+    AllowWormholes {
+        link = http://phost.de/phost4doc/config.html#AllowWormholes
+        info = Enables wormholes
+    }
+    AllowWraparoundMap {
+        link = http://phost.de/phost4doc/config.html#AllowWraparoundMap
+        info = Enables wraparound, ships leaving one map edge come in at the opposite side
+    }
+    AlternativeAntiCloak {
+        link = http://phost.de/phost4doc/config.html#AlternativeAntiCloak
+        info = Enable alternative anti-cloak rules (allies are immune)
+    }
+    AlternativeMinesDestroyMines {
+        link = http://phost.de/phost4doc/config.html#AlternativeMinesDestroyMines
+        info = Enable alternative mines-destroy-mines rules (only when mines are laid)
+    }
+    AntiCloakImmunity {
+        link = http://phost.de/phost4doc/config.html#AntiCloakImmunity
+        info = Configure which races are immune to anti-cloak ships
+    }
+    BaseFighterCost {
+        link = http://phost.de/phost4doc/config.html#BaseFighterCost
+        info = Cost of fighters built on starbases for each player
+    }
+    BaseTechCost {
+        link = http://phost.de/phost4doc/config.html#BaseTechCost
+        info = Relative cost of tech-levels for each player
+    }
+    BayLaunchInterval {
+        link = http://phost.de/phost4doc/config.html#BayLaunchInterval
+        info = Combat: time between two fighter launches
+    }
+    BayRechargeBonus {
+        link = http://phost.de/phost4doc/config.html#BayRechargeBonus
+        info = Combat: fighter bay recharge bonus, depending on bay count
+    }
+    BayRechargeRate {
+        link = http://phost.de/phost4doc/config.html#BayRechargeRate
+        info = Combat: fighter bay recharge rate
+    }
+    BeamFiringRange {
+        link = http://phost.de/phost4doc/config.html#BeamFiringRange
+        info = Combat: range for firing beam at enemy
+    }
+    BeamHitBonus {
+        link = http://phost.de/phost4doc/config.html#BeamHitBonus
+        info = Combat: beam hit rate bonus, depending on beam type
+    }
+    BeamHitFighterCharge {
+        link = http://phost.de/phost4doc/config.html#BeamHitFighterCharge
+        info = Combat: beam charge required to hit fighter
+    }
+    BeamHitFighterRange {
+        link = http://phost.de/phost4doc/config.html#BeamHitFighterRange
+        info = Combat: range for firing beam at fighter
+    }
+    BeamHitOdds {
+        link = http://phost.de/phost4doc/config.html#BeamHitOdds
+        info = Combat: beam hit rate when firing at enemy
+    }
+    BeamHitShipCharge {
+        link = http://phost.de/phost4doc/config.html#BeamHitShipCharge
+        info = Combat: beam charge required to hit enemy
+    }
+    BeamRechargeBonus {
+        link = http://phost.de/phost4doc/config.html#BeamRechargeBonus
+        info = Combat: beam recharge rate bonus, depending on beam type
+    }
+    BeamRechargeRate {
+        link = http://phost.de/phost4doc/config.html#BeamRechargeRate
+        info = Combat: beam recharge rate
+    }
+    BorgAssimilationRate {
+        link = http://phost.de/phost4doc/config.html#BorgAssimilationRate
+        info = Percent of natives assimilated by Borg each turn
+    }
+    BuildChangeRelativePenalty {
+        link = http://phost.de/phost4doc/config.html#BuildChangeRelativePenalty
+        info = Build queue priority penalty for changing a build order, relative
+    }
+    BuildPointReport {
+        link = http://phost.de/phost4doc/config.html#BuildPointReport
+        info = Enable build point report messages
+    }
+    BuildQueue {
+        link = http://phost.de/phost4doc/config.html#BuildQueue
+        info = Build queue mode
+    }
+    CPEnableAllies {
+        link = http://phost.de/phost4doc/config.html#CPEnableAllies
+        info = Allow players to change their alliances
+    }
+    CPEnableBigTargets {
+        link = http://phost.de/phost4doc/config.html#CPEnableBigTargets
+        info = Allow players to change their AllowMoreThan50Targets setting
+    }
+    CPEnableEnemies {
+        link = http://phost.de/phost4doc/config.html#CPEnableEnemies
+        info = Allow players to change their permanent enemies
+    }
+    CPEnableGive {
+        link = http://phost.de/phost4doc/config.html#CPEnableGive
+        info = Allow players to give away ships and planets
+    }
+    CPEnableLanguage {
+        link = http://phost.de/phost4doc/config.html#CPEnableLanguage
+        info = Allow players to change their message language
+    }
+    CPEnableMessage {
+        link = http://phost.de/phost4doc/config.html#CPEnableMessage
+        info = Allow players to send messages using the command processor
+    }
+    CPEnableRaceName {
+        link = http://phost.de/phost4doc/config.html#CPEnableRaceName
+        info = Allow players to change their race name
+    }
+    CPEnableRefit {
+        link = http://phost.de/phost4doc/config.html#CPEnableRefit
+        info = Allow players to use the Super Refit detail control command
+    }
+    CPEnableRemote {
+        link = http://phost.de/phost4doc/config.html#CPEnableRemote
+        info = Allow players to remotely-control allied ships
+    }
+    CPEnableRumor {
+        link = http://phost.de/phost4doc/config.html#CPEnableRumor
+        info = Enable anonymous messages (rumors) to be sent
+    }
+    CPEnableSend {
+        link = http://phost.de/phost4doc/config.html#CPEnableSend
+        info = Allow players to request files from the host
+    }
+    CPEnableShow {
+        link = http://phost.de/phost4doc/config.html#CPEnableShow
+        info = Allow players to show own units around
+    }
+    CPNumMinefields {
+        link = http://phost.de/phost4doc/config.html#CPNumMinefields
+        info = Allow players to change their AllowMoreThan500Minefields setting
+    }
+    ClimateDeathRate {
+        link = http://phost.de/phost4doc/config.html#ClimateDeathRate
+        info = Rate at which overpopulation dies
+    }
+    ClimateLimitsPopulation {
+        link = http://phost.de/phost4doc/config.html#ClimateLimitsPopulation
+        info = Configure whether maximum population depends on planet's climate
+    }
+    CloakFailureRate {
+        link = http://phost.de/phost4doc/config.html#CloakFailureRate
+        info = Percentage rate at which cloak fails
+    }
+    CloakFuelBurn {
+        link = http://phost.de/phost4doc/config.html#CloakFuelBurn
+        info = Amount of fuel burned each turn for cloaking, for 100 kt ship
+    }
+    CloakMineOddsWarpBonusX100 {
+        link = http://phost.de/phost4doc/config.html#CloakMineOddsWarpBonusX100
+        info = Mine hit odds bonus for going slower than Warp 9 when cloaked
+    }
+    CloakedMineTravelSafeWarp {
+        link = http://phost.de/phost4doc/config.html#CloakedMineTravelSafeWarp
+        info = Speed at which travelling through mines is safe when cloaked
+    }
+
+    # old option
+    ColonialFighterSweepRange {
+        link = http://phost.de/phost4doc/config.html#ColonialFighterSweepRange
+        info = Mine sweep range for Colonial fighters
+    }
+
+    # old option
+    ColonialFighterSweepRate {
+        link = http://phost.de/phost4doc/config.html#ColonialFighterSweepRate
+        info = Mine sweep rate for Colonial fighters
+    }
+    ColoniesBuildFighters {
+        link = http://phost.de/phost4doc/config.html#ColoniesBuildFighters
+        info = Allow Colonies to build fighters in space
+    }
+    ColonistCombatCaptureRate {
+        link = http://phost.de/phost4doc/config.html#ColonistCombatCaptureRate
+        info = Percentage of colonists left alive by a ship that captures a planet
+    }
+    ColonistCombatSurvivalRate {
+        link = http://phost.de/phost4doc/config.html#ColonistCombatSurvivalRate
+        info = Percentage of colonists that survive when a planet is captured
+    }
+    ColonistTaxRate {
+        link = http://phost.de/phost4doc/config.html#ColonistTaxRate
+        info = Relative colonist tax income, per player
+    }
+    ConfigLevel {
+        link = http://phost.de/phost4doc/config.html#ConfigLevel
+        info = Configure PHost's pickyness when reading the configuration file
+    }
+    CrewKillScaling {
+        link = http://phost.de/phost4doc/config.html#CrewKillScaling
+        info = Combat: relative weapon crew kill power
+    }
+    CrystalSinTempBehavior {
+        link = http://phost.de/phost4doc/config.html#CrystalSinTempBehavior
+        info = Configures whether the Crystal max population formula uses sines or a linear scale
+    }
+    CrystalsPreferDeserts {
+        link = http://phost.de/phost4doc/config.html#CrystalsPreferDeserts
+        info = Configures whether the Crystals prefer desert climate, or temperate planets like everyone else
+    }
+    CumulativePillaging {
+        link = http://phost.de/phost4doc/config.html#CumulativePillaging
+        info = Allow multiple Klingon ships to pillage one planet
+    }
+    DamageLevelForAntiCloakFail {
+        link = http://phost.de/phost4doc/config.html#DamageLevelForAntiCloakFail
+        info = Damage level at which anti-cloak functions fail
+    }
+    DamageLevelForChunnelFail {
+        link = http://phost.de/phost4doc/config.html#DamageLevelForChunnelFail
+        info = Damage level at which chunnel functions fail
+    }
+    DamageLevelForCloakFail {
+        link = http://phost.de/phost4doc/config.html#DamageLevelForCloakFail
+        info = Damage level at which cloak functions fail
+    }
+    DamageLevelForHyperjumpFail {
+        link = http://phost.de/phost4doc/config.html#DamageLevelForHyperjumpFail
+        info = Damage level at which hyperjump functions fail
+    }
+    DamageLevelForTerraformFail {
+        link = http://phost.de/phost4doc/config.html#DamageLevelForTerraformFail
+        info = Damage level at which terraforming functions fail
+    }
+    DarkSenseRange {
+        link = http://phost.de/phost4doc/config.html#DarkSenseRange
+        info = Range of Empire Dark Sense
+    }
+    DefenseForUndetectable {
+        link = http://phost.de/phost4doc/config.html#DefenseForUndetectable
+        info = Number of defense posts required to be invisible to Sensor Sweep
+    }
+    DefenseToBlockBioscan {
+        link = http://phost.de/phost4doc/config.html#DefenseToBlockBioscan
+        info = Number of defense posts required to be invisible to bioscanners
+    }
+    DelayAllianceCommands {
+        link = http://phost.de/phost4doc/config.html#DelayAllianceCommands
+        info = When enabled, alliance changes are executed at the end of the turn, not at the beginning
+    }
+    DeleteOldMessages {
+        link = http://phost.de/phost4doc/config.html#DeleteOldMessages
+        info = Controls whether messages from a missed turn are deleted or resent
+    }
+    DisablePasswords {
+        link = http://phost.de/phost4doc/config.html#DisablePasswords
+        info = Allows hosts to disable the built-in result file passwords
+    }
+    EModBayRechargeBonus {
+        link = http://phost.de/phost4doc/config.html#EModBayRechargeBonus
+        info = Experience modificator to BayRechargeBonus
+    }
+    EModBayRechargeRate {
+        link = http://phost.de/phost4doc/config.html#EModBayRechargeRate
+        info = Experience modificator to BayRechargeRate
+    }
+    EModBeamHitBonus {
+        link = http://phost.de/phost4doc/config.html#EModBeamHitBonus
+        info = Experience modificator to BeamHitBonus
+    }
+    EModBeamHitFighterCharge {
+        link = http://phost.de/phost4doc/config.html#EModBeamHitFighterCharge
+        info = Experience modificator to BeamHitFighterCharge
+    }
+    EModBeamHitOdds {
+        link = http://phost.de/phost4doc/config.html#EModBeamHitOdds
+        info = Experience modificator to BeamHitOdds
+    }
+    EModBeamRechargeBonus {
+        link = http://phost.de/phost4doc/config.html#EModBeamRechargeBonus
+        info = Experience modificator to BeamRechargeBonus
+    }
+    EModBeamRechargeRate {
+        link = http://phost.de/phost4doc/config.html#EModBeamRechargeRate
+        info = Experience modificator to BeamRechargeRate
+    }
+    EModCrewKillScaling {
+        link = http://phost.de/phost4doc/config.html#EModCrewKillScaling
+        info = Experience modificator to CrewKillScaling
+    }
+    EModEngineShieldBonusRate {
+        link = http://phost.de/phost4doc/config.html#EModEngineShieldBonusRate
+        info = Experience modificator to EngineShieldBonusRate
+    }
+    EModExtraFighterBays {
+        link = http://phost.de/phost4doc/config.html#EModExtraFighterBays
+        info = Experience modificator to ExtraFighterBays
+    }
+    EModFighterBeamExplosive {
+        link = http://phost.de/phost4doc/config.html#EModFighterBeamExplosive
+        info = Experience modificator to FighterBeamExplosive
+    }
+    EModFighterBeamKill {
+        link = http://phost.de/phost4doc/config.html#EModFighterBeamKill
+        info = Experience modificator to FighterBeamKill
+    }
+    EModFighterMovementSpeed {
+        link = http://phost.de/phost4doc/config.html#EModFighterMovementSpeed
+        info = Experience modificator to FighterMovementSpeed
+    }
+    EModHullDamageScaling {
+        link = http://phost.de/phost4doc/config.html#EModHullDamageScaling
+        info = Experience modificator to HullDamageScaling
+    }
+    EModMaxFightersLaunched {
+        link = http://phost.de/phost4doc/config.html#EModMaxFightersLaunched
+        info = Experience modificator to MaxFightersLaunched
+    }
+    EModMineHitOddsBonus {
+        link = http://phost.de/phost4doc/config.html#EModMineHitOddsBonus
+        info = Experience modificator to MineHitOddsBonus
+    }
+    EModPlanetaryTorpsPerTube {
+        link = http://phost.de/phost4doc/config.html#EModPlanetaryTorpsPerTube
+        info = Experience modificator to PlanetaryTorpsPerTube
+    }
+    EModShieldDamageScaling {
+        link = http://phost.de/phost4doc/config.html#EModShieldDamageScaling
+        info = Experience modificator to ShieldDamageScaling
+    }
+    EModShieldKillScaling {
+        link = http://phost.de/phost4doc/config.html#EModShieldKillScaling
+        info = Experience modificator to ShieldKillScaling
+    }
+    EModStrikesPerFighter {
+        link = http://phost.de/phost4doc/config.html#EModStrikesPerFighter
+        info = Experience modificator to StrikesPerFighter
+    }
+    EModTorpHitBonus {
+        link = http://phost.de/phost4doc/config.html#EModTorpHitBonus
+        info = Experience modificator to TorpHitBonus
+    }
+    EModTorpHitOdds {
+        link = http://phost.de/phost4doc/config.html#EModTorpHitOdds
+        info = Experience modificator to TorpHitOdds
+    }
+    EModTubeRechargeBonus {
+        link = http://phost.de/phost4doc/config.html#EModTubeRechargeBonus
+        info = Experience modificator to TubeRechargeBonus
+    }
+    EModTubeRechargeRate {
+        link = http://phost.de/phost4doc/config.html#EModTubeRechargeRate
+        info = Experience modificator to TubeRechargeRate
+    }
+    EPAcademyScale {
+        link = http://phost.de/phost4doc/config.html#EPAcademyScale
+        info = Relative bonus of Academy ships for Training mission
+    }
+    EPCombatBoostLevel {
+        link = http://phost.de/phost4doc/config.html#EPCombatBoostLevel
+        info = Configures an experience bonus for close combat outcomes
+    }
+    EPCombatBoostRate {
+        link = http://phost.de/phost4doc/config.html#EPCombatBoostRate
+        info = Configures an experience bonus for close combat outcomes
+    }
+    EPCombatDamageScaling {
+        link = http://phost.de/phost4doc/config.html#EPCombatDamageScaling
+        info = Experience points for making damage
+    }
+    EPCombatKillScaling {
+        link = http://phost.de/phost4doc/config.html#EPCombatKillScaling
+        info = Experience points for killing an enemy in combat
+    }
+    EPPlanetAging {
+        link = http://phost.de/phost4doc/config.html#EPPlanetAging
+        info = Experience points for aging, for planets
+    }
+    EPPlanetGovernment {
+        link = http://phost.de/phost4doc/config.html#EPPlanetGovernment
+        info = Experience points for having a good government, for planets
+    }
+    EPRecrewScaling {
+        link = http://phost.de/phost4doc/config.html#EPRecrewScaling
+        info = Experience point change when a ship changes crew
+    }
+    EPShipAging {
+        link = http://phost.de/phost4doc/config.html#EPShipAging
+        info = Experience points for aging, for ships
+    }
+    EPShipAlchemy100KT {
+        link = http://phost.de/phost4doc/config.html#EPShipAlchemy100KT
+        info = Experience points for performing alchemy, for 100 kt result mineral
+    }
+    EPShipBuild1000TorpUnits {
+        link = http://phost.de/phost4doc/config.html#EPShipBuild1000TorpUnits
+        info = Experience points for building torpedoes, for 1000 mine units equivalent
+    }
+    EPShipBuild10Fighters {
+        link = http://phost.de/phost4doc/config.html#EPShipBuild10Fighters
+        info = Experience points for building fighters, for 10 fighters
+    }
+    EPShipChunnel {
+        link = http://phost.de/phost4doc/config.html#EPShipChunnel
+        info = Experience points for performing a chunnel
+    }
+    EPShipHyperjump {
+        link = http://phost.de/phost4doc/config.html#EPShipHyperjump
+        info = Experience points for performing a hyperjump
+    }
+    EPShipIonStorm100MEV {
+        link = http://phost.de/phost4doc/config.html#EPShipIonStorm100MEV
+        info = Experience points for surviving an ion storm, 100 MeV
+    }
+    EPShipMovement100LY {
+        link = http://phost.de/phost4doc/config.html#EPShipMovement100LY
+        info = Experience points for moving 100 ly
+    }
+    EPTrainingScale {
+        link = http://phost.de/phost4doc/config.html#EPTrainingScale
+        info = Relative experience points gained by training
+    }
+    EngineShieldBonusRate {
+        link = http://phost.de/phost4doc/config.html#EngineShieldBonusRate
+        info = Combat: Engine-Shield bonus, relative to engine cost
+    }
+    ExactExperienceReports {
+        link = http://phost.de/phost4doc/config.html#ExactExperienceReports
+        info = Enable exact experience point reports instead of just levels
+    }
+    ExperienceLevelNames {
+        link = http://phost.de/phost4doc/config.html#ExperienceLevelNames
+        info = Names of experience levels
+    }
+    ExperienceLevels {
+        link = http://phost.de/phost4doc/config.html#ExperienceLevels
+        info = Experience point thresholds corresponding to levels
+    }
+    ExperienceLimit {
+        link = http://phost.de/phost4doc/config.html#ExperienceLimit
+        info = Maximum number of experience points a unit can have
+    }
+    ExtMissionsStartAt {
+        link = http://phost.de/phost4doc/config.html#ExtMissionsStartAt
+        info = Configures the Id number of the first PHost extended missions
+    }
+    ExtendedSensorSweep {
+        link = http://phost.de/phost4doc/config.html#ExtendedSensorSweep
+        info = Enables Sensor Sweep to find minefields and wormholes as well
+    }
+    ExtraFighterBays {
+        link = http://phost.de/phost4doc/config.html#ExtraFighterBays
+        info = Combat: extra fighter bays, for each race
+    }
+    FactoriesForDetectable {
+        link = http://phost.de/phost4doc/config.html#FactoriesForDetectable
+        info = Number of factories on a planet that make it visible to Sensor Sweep
+    }
+    FighterBeamExplosive {
+        link = http://phost.de/phost4doc/config.html#FighterBeamExplosive
+        info = Combat: explosive power of fighter beams
+    }
+    FighterBeamKill {
+        link = http://phost.de/phost4doc/config.html#FighterBeamKill
+        info = Combat: kill power of fighter beams
+    }
+    FighterFiringRange {
+        link = http://phost.de/phost4doc/config.html#FighterFiringRange
+        info = Combat: firing range of fighter beams
+    }
+    FighterKillOdds {
+        link = http://phost.de/phost4doc/config.html#FighterKillOdds
+        info = Combat: odds of a fighter killing an enemy fighter
+    }
+    FighterMovementSpeed {
+        link = http://phost.de/phost4doc/config.html#FighterMovementSpeed
+        info = Combat: movement speed of fighters
+    }
+    FighterSweepRange {
+        link = http://phost.de/phost4doc/config.html#FighterSweepRange
+        info = Mine sweeping range for fighters
+    }
+    FighterSweepRate {
+        link = http://phost.de/phost4doc/config.html#FighterSweepRate
+        info = Mine sweeping rate for fighters
+    }
+    FilterPlayerMessages {
+        link = http://phost.de/phost4doc/config.html#FilterPlayerMessages
+        info = For each player, whether they want bulk messages to be omitted from their result
+    }
+    FireOnAttackFighters {
+        link = http://phost.de/phost4doc/config.html#FireOnAttackFighters
+        info = Combat: prefer firing on attacking fighters
+    }
+    FreeFighterCost {
+        link = http://phost.de/phost4doc/config.html#FreeFighterCost
+        info = Cost of fighters that starbases automatically build
+    }
+    FreeFighters {
+        link = http://phost.de/phost4doc/config.html#FreeFighters
+        info = Number of fighters automatically built by starbases
+    }
+    FuelUsagePerFightFor100KT {
+        link = http://phost.de/phost4doc/config.html#FuelUsagePerFightFor100KT
+        info = Fuel burnt by a 100 kt ship for each fight performed
+    }
+    FuelUsagePerTurnFor100KT {
+        link = http://phost.de/phost4doc/config.html#FuelUsagePerTurnFor100KT
+        info = Fuel burnt by a 100 kt ship each turn
+    }
+    GameName {
+        link = http://phost.de/phost4doc/config.html#GameName
+        info = Name of the game
+    }
+    GravityWellRange {
+        link = http://phost.de/phost4doc/config.html#GravityWellRange
+        info = Size of planetary gravity wells
+    }
+    GroundDefenseFactor {
+        link = http://phost.de/phost4doc/config.html#GroundDefenseFactor
+        info = For each race, their strength when defending in ground combat
+    }
+    GroundKillFactor {
+        link = http://phost.de/phost4doc/config.html#GroundKillFactor
+        info = For each race, their strength when attacking in ground combat
+    }
+    HissEffectRate {
+        link = http://phost.de/phost4doc/config.html#HissEffectRate
+        info = Happiness increase by performing the Hisssss mission
+    }
+    HullDamageScaling {
+        link = http://phost.de/phost4doc/config.html#HullDamageScaling
+        info = Combat: relative weapon hull damage power
+    }
+    HullTechNotSlowedByMines {
+        link = http://phost.de/phost4doc/config.html#HullTechNotSlowedByMines
+        info = Ships at this tech or higher are not slowed down by mine hits
+    }
+    IonStormActivity {
+        link = http://phost.de/phost4doc/config.html#IonStormActivity
+        info = Approximate number of ion storms that are active simultaneously
+    }
+    IonStormsHideMines {
+        link = http://phost.de/phost4doc/config.html#IonStormsHideMines
+        info = If enabled, minefields cannot be seen when covered by an ion storm
+    }
+    Language {
+        link = http://phost.de/phost4doc/config.html#Language
+        info = Language for the host, and each player
+    }
+    LargeMeteorOreRanges {
+        link = http://phost.de/phost4doc/config.html#LargeMeteorOreRanges
+        info = Mineral ranges for large meteors
+    }
+    LargeMeteorsImpacting {
+        link = http://phost.de/phost4doc/config.html#LargeMeteorsImpacting
+        info = Number of large meteors per turn
+    }
+    MapTruehullByPlayerRace {
+        link = http://phost.de/phost4doc/config.html#MapTruehullByPlayerRace
+        info = Configures the interpretation of the truehull.dat file
+    }
+    MaxColTempSlope {
+        link = http://phost.de/phost4doc/config.html#MaxColTempSlope
+        info = Configures the Maximum Number of Colonists formula for arctic/desert planets
+    }
+    MaxFightersLaunched {
+        link = http://phost.de/phost4doc/config.html#MaxFightersLaunched
+        info = Combat: maximum number of fighters that can be active simultaneously
+    }
+    MaxPlanetaryIncome {
+        link = http://phost.de/phost4doc/config.html#MaxPlanetaryIncome
+        info = Maximum tax income per planet, per turn
+    }
+    MaxShipsHissing {
+        link = http://phost.de/phost4doc/config.html#MaxShipsHissing
+        info = Maximum number of ships that can Hisssss at one planet
+    }
+    MaximumDefenseOnBase {
+        link = http://phost.de/phost4doc/config.html#MaximumDefenseOnBase
+        info = Maximum number of starbase defense posts
+    }
+    MaximumFightersOnBase {
+        link = http://phost.de/phost4doc/config.html#MaximumFightersOnBase
+        info = Maximum number of fighters on a starbase
+    }
+    MaximumIonStormRadius {
+        link = http://phost.de/phost4doc/config.html#MaximumIonStormRadius
+        info = Maximum radius of an ion storm
+    }
+    MaximumIonStormVoltage {
+        link = http://phost.de/phost4doc/config.html#MaximumIonStormVoltage
+        info = Maximum voltage of an ion storm
+    }
+    MaximumMinefieldRadius {
+        link = http://phost.de/phost4doc/config.html#MaximumMinefieldRadius
+        info = Maximum radius of a minefield
+    }
+    MaximumMinefieldsPerPlayer {
+        link = http://phost.de/phost4doc/config.html#MaximumMinefieldsPerPlayer
+        info = Maximum number of minefields each player is allowed to lay
+    }
+    MaximumWebMinefieldRadius {
+        link = http://phost.de/phost4doc/config.html#MaximumWebMinefieldRadius
+        info = Maximum radius of a web minefield
+    }
+    MeteorShowerOdds {
+        link = http://phost.de/phost4doc/config.html#MeteorShowerOdds
+        info = Percentage of planets that receive a meteor shower, each turn
+    }
+    MeteorShowerOreRanges {
+        link = http://phost.de/phost4doc/config.html#MeteorShowerOreRanges
+        info = Mineral ranges for meteor showers
+    }
+    MineDecayRate {
+        link = http://phost.de/phost4doc/config.html#MineDecayRate
+        info = Decay rate for regular minefields, each turn
+    }
+    MineHitDamageFor100KT {
+        link = http://phost.de/phost4doc/config.html#MineHitDamageFor100KT
+        info = Damage taken by a mine hit, for 100 kt ship
+    }
+    MineHitOdds {
+        link = http://phost.de/phost4doc/config.html#MineHitOdds
+        info = Odds of hitting a minefield, for travelling 1 ly
+    }
+    MineHitOddsWhenCloakedX10 {
+        link = http://phost.de/phost4doc/config.html#MineHitOddsWhenCloakedX10
+        info = Odds of hitting a minefield, for travelling 1 ly cloaked, x10
+    }
+    MineIdNeedsPermission {
+        link = http://phost.de/phost4doc/config.html#MineIdNeedsPermission
+        info = When enabled, only allies can lay mines in your identity
+    }
+    MineOddsWarpBonusX100 {
+        link = http://phost.de/phost4doc/config.html#MineOddsWarpBonusX100
+        info = Mine hit odds bonus for going slower than Warp 9
+    }
+    MineScanRange {
+        link = http://phost.de/phost4doc/config.html#MineScanRange
+        info = Visibility range for minefields
+    }
+    MineSweepRange {
+        link = http://phost.de/phost4doc/config.html#MineSweepRange
+        info = Range from which minefields can be swept
+    }
+    MineSweepRate {
+        link = http://phost.de/phost4doc/config.html#MineSweepRate
+        info = Rate at which minefields can be swept
+    }
+    MineTravelSafeWarp {
+        link = http://phost.de/phost4doc/config.html#MineTravelSafeWarp
+        info = Speed at which travelling through mines is safe
+    }
+    MinesForDetectable {
+        link = http://phost.de/phost4doc/config.html#MinesForDetectable
+        info = Number of mines on a planet that make it visible to Sensor Sweep
+    }
+    MinimumChunnelDistance {
+        link = http://phost.de/phost4doc/config.html#MinimumChunnelDistance
+        info = Minimum distance of chunneling
+    }
+    MinimumHappiness {
+        link = http://phost.de/phost4doc/config.html#MinimumHappiness
+        info = Minimum happiness on a planet after its owner changes
+    }
+
+    # Accepted by PHost as alias to NewNativesPopulationRange, but not documented
+    # NativeClansRange {
+    #     link = http://phost.de/phost4doc/config.html#NativeClansRange
+    # }
+
+    NativeClimateDeathRate {
+        link = http://phost.de/phost4doc/config.html#NativeClimateDeathRate
+        info = Rate at which native overpopulation dies
+    }
+    NativeCombatSurvivalRate {
+        link = http://phost.de/phost4doc/config.html#NativeCombatSurvivalRate
+        info = Percentage of natives that survive when a planet is captured
+    }
+
+    # Accepted by PHost as alias to NewNativesPopulationRange, but not documented
+    # NativeGovFrequencies {
+    #     link = http://phost.de/phost4doc/config.html#NativeGovFrequencies
+    # }
+
+    NativeTaxRate {
+        link = http://phost.de/phost4doc/config.html#NativeTaxRate
+        info = Relative native tax income, per player
+    }
+
+    # Accepted by PHost as alias to NewNativesRaceRate, but not documented
+    # NativeTypeFrequencies {
+    #     link = http://phost.de/phost4doc/config.html#NativeTypeFrequencies
+    # }
+
+    NewNativesGovernmentRate {
+        link = http://phost.de/phost4doc/config.html#NewNativesGovernmentRate
+        info = Relative frequencies of native governments
+    }
+    NewNativesPerTurn {
+        link = http://phost.de/phost4doc/config.html#NewNativesPerTurn
+        info = Number of new native populations discovered per turn
+    }
+    NewNativesPopulationRange {
+        link = http://phost.de/phost4doc/config.html#NewNativesPopulationRange
+        info = Population range for newly discovered natives
+    }
+    NewNativesRaceRate {
+        link = http://phost.de/phost4doc/config.html#NewNativesRaceRate
+        info = Relative frequencies of native races
+    }
+    NumExperienceLevels {
+        link = http://phost.de/phost4doc/config.html#NumExperienceLevels
+        info = Number of experience levels (aside from the base level 0)
+    }
+    NumMinefields {
+        link = http://phost.de/phost4doc/config.html#NumMinefields
+        info = Maximum number of minefields allowed in the universe
+    }
+    NumShips {
+        link = http://phost.de/phost4doc/config.html#NumShips
+        info = Maximum number of ships allowed in the universe
+    }
+    PALAggressorKillPointsPer10KT {
+        link = http://phost.de/phost4doc/config.html#PALAggressorKillPointsPer10KT
+        info = Build points: points for killing another unit when being aggressor, per 10 kt enemy mass
+    }
+    PALAggressorPointsPer10KT {
+        link = http://phost.de/phost4doc/config.html#PALAggressorPointsPer10KT
+        info = Build points: points for being an aggressor in combat, per 10 kt enemy mass
+    }
+    PALBoardingPartyPer10Crew {
+        link = http://phost.de/phost4doc/config.html#PALBoardingPartyPer10Crew
+        info = Build points: points for boarding a ship, per 10 enemy crewmen
+    }
+    PALCombatAggressor {
+        link = http://phost.de/phost4doc/config.html#PALCombatAggressor
+        info = Build points: points for being an aggressor in combat
+    }
+    PALCombatBaseScaling {
+        link = http://phost.de/phost4doc/config.html#PALCombatBaseScaling
+        info = Build points: relative scaling of points for starbases
+    }
+    PALCombatPlanetScaling {
+        link = http://phost.de/phost4doc/config.html#PALCombatPlanetScaling
+        info = Build points: relative scaling of points for planets
+    }
+    PALDecayPerTurn {
+        link = http://phost.de/phost4doc/config.html#PALDecayPerTurn
+        info = Build points: percentage of points that decay each turn
+    }
+    PALGloryDamagePer10KT {
+        link = http://phost.de/phost4doc/config.html#PALGloryDamagePer10KT
+        info = Build points: points for damaging an enemy ship using a glory device, per 10 kt enemy mass
+    }
+    PALGloryDevice {
+        link = http://phost.de/phost4doc/config.html#PALGloryDevice
+        info = Build points: points for using a glory device
+    }
+    PALGloryDevicePer10KT {
+        link = http://phost.de/phost4doc/config.html#PALGloryDevicePer10KT
+        info = Build points: points for using a glory device, per 10 kt ship mass
+    }
+    PALGloryKillPer10KT {
+        link = http://phost.de/phost4doc/config.html#PALGloryKillPer10KT
+        info = Build points: points for killing an enemy ship using a glory device, per 10 kt enemy mass
+    }
+    PALGroundAttackPer100Clans {
+        link = http://phost.de/phost4doc/config.html#PALGroundAttackPer100Clans
+        info = Build points: points for performing ground attack with 100 clans
+    }
+    PALImperialAssault {
+        link = http://phost.de/phost4doc/config.html#PALImperialAssault
+        info = Build points: points for performing Imperial Assault
+    }
+    PALIncludesESB {
+        link = http://phost.de/phost4doc/config.html#PALIncludesESB
+        info = Build points: whether Engine-Shield bonus is included in mass computations
+    }
+    PALOpponentKillPointsPer10KT {
+        link = http://phost.de/phost4doc/config.html#PALOpponentKillPointsPer10KT
+        info = Build points: points for killing another unit when being opponent, per 10 kt enemy mass
+    }
+    PALOpponentPointsPer10KT {
+        link = http://phost.de/phost4doc/config.html#PALOpponentPointsPer10KT
+        info = Build points: points for being opponent in combat, per 10 kt enemy mass
+    }
+    PALPillage {
+        link = http://phost.de/phost4doc/config.html#PALPillage
+        info = Build points: points for performing Klingon Pillage
+    }
+    PALPlayerRate {
+        link = http://phost.de/phost4doc/config.html#PALPlayerRate
+        info = Build points: relative scaling of points for each player
+    }
+    PALRGA {
+        link = http://phost.de/phost4doc/config.html#PALRGA
+        info = Build points: points for performing Rebel Ground Attack
+    }
+    PALRecyclingPer10KT {
+        link = http://phost.de/phost4doc/config.html#PALRecyclingPer10KT
+        info = Build points: points for recycling a 10 kt ship
+    }
+    PALShipCapturePer10Crew {
+        link = http://phost.de/phost4doc/config.html#PALShipCapturePer10Crew
+        info = Build points: points for capturing a ship, per 10 crew
+    }
+    PALShipMinekillPer10KT {
+        link = http://phost.de/phost4doc/config.html#PALShipMinekillPer10KT
+        info = Build points: points for killing a 10 kt ship with a minefield
+    }
+    PBPCloneCostRate {
+        link = http://phost.de/phost4doc/config.html#PBPCloneCostRate
+        info = Build points required for cloning (relative to normal build)
+    }
+    PBPCostPer100KT {
+        link = http://phost.de/phost4doc/config.html#PBPCostPer100KT
+        info = Build points required to build a 100 kt ship
+    }
+    PBPMinimumCost {
+        link = http://phost.de/phost4doc/config.html#PBPMinimumCost
+        info = Miniumm number of build points required to build a ship
+    }
+    PlanetaryTorpsPerTube {
+        link = http://phost.de/phost4doc/config.html#PlanetaryTorpsPerTube
+        info = Combat: Number of free torpedoes each planetary torpedo launcher has
+    }
+    PlanetsAttackKlingons {
+        link = http://phost.de/phost4doc/config.html#PlanetsAttackKlingons
+        info = Configure whether planets can use ATT/NUK to attack Klingons
+    }
+    PlanetsAttackRebels {
+        link = http://phost.de/phost4doc/config.html#PlanetsAttackRebels
+        info = Configure whether planets can use ATT/NUK to attack Rebels
+    }
+    PlanetsHaveTubes {
+        link = http://phost.de/phost4doc/config.html#PlanetsHaveTubes
+        info = Combat: whether planets have torpedo tubes
+    }
+    PlayerRace {
+        link = http://phost.de/phost4doc/config.html#PlayerRace
+        info = For each player, which race he plays
+    }
+    PlayerSpecialMission {
+        link = http://phost.de/phost4doc/config.html#PlayerSpecialMission
+        info = For each player, which special mission he can perform
+    }
+    ProductionRate {
+        link = http://phost.de/phost4doc/config.html#ProductionRate
+        info = Supply production rate (factories, Bovinoids), for each player
+    }
+    RGANeedsBeams {
+        link = http://phost.de/phost4doc/config.html#RGANeedsBeams
+        info = When enabled, Rebels need beams to perform their Ground Attack mission
+    }
+    RaceGrowthRate {
+        link = http://phost.de/phost4doc/config.html#RaceGrowthRate
+        info = Relative growth rate for each player
+    }
+    RaceMiningRate {
+        link = http://phost.de/phost4doc/config.html#RaceMiningRate
+        info = Relative mining rate for each player
+    }
+    RaceTaxRate {
+        link = http://phost.de/phost4doc/config.html#RaceTaxRate
+        info = Relative taxation rate for each player
+    }
+    RamScoopFuelPerLY {
+        link = http://phost.de/phost4doc/config.html#RamScoopFuelPerLY
+        info = Amount of fuel produced by the Ram Scoop ship when travelling 1 ly
+    }
+    RandomMeteorRate {
+        link = http://phost.de/phost4doc/config.html#RandomMeteorRate
+        info = Percent chance that a single large meteor strikes a random planet, per turn
+    }
+    RebelsBuildFighters {
+        link = http://phost.de/phost4doc/config.html#RebelsBuildFighters
+        info = Allow Rebels to build fighters in space
+    }
+    RecycleRate {
+        link = http://phost.de/phost4doc/config.html#RecycleRate
+        info = Percentage of minerals recovered when recycling a starship
+    }
+    RobCloakedChance {
+        link = http://phost.de/phost4doc/config.html#RobCloakedChance
+        info = Percentage chance that Privateers can Rob a cloaked ship
+    }
+    RobCloakedShips {
+        link = http://phost.de/phost4doc/config.html#RobCloakedShips
+        info = Whether Privateers can Rob a cloaked ship
+    }
+    RobFailureOdds {
+        link = http://phost.de/phost4doc/config.html#RobFailureOdds
+        info = Percentage risk of failure in Privateer Rob
+    }
+    RobotsBuildFighters {
+        link = http://phost.de/phost4doc/config.html#RobotsBuildFighters
+        info = Allow Robots to build fighters in space
+    }
+    RoundGravityWells {
+        link = http://phost.de/phost4doc/config.html#RoundGravityWells
+        info = Whether planetary gravity wells are round or square
+    }
+    SBQBoostExpX100 {
+        link = http://phost.de/phost4doc/config.html#SBQBoostExpX100
+        info = Build queue: Configures the effect of the number of a player's bases on the build queue
+    }
+    SBQBuildChangePenalty {
+        link = http://phost.de/phost4doc/config.html#SBQBuildChangePenalty
+        info = Build queue priority penalty for changing a build order, absolute
+    }
+    SBQBuildPALBoost {
+        link = http://phost.de/phost4doc/config.html#SBQBuildPALBoost
+        info = Build queue: activity boost for existing build orders
+    }
+    SBQNewBuildPALBoost {
+        link = http://phost.de/phost4doc/config.html#SBQNewBuildPALBoost
+        info = Build queue: activity boost for new build orders
+    }
+    SBQPointsForAging {
+        link = http://phost.de/phost4doc/config.html#SBQPointsForAging
+        info = Build queue: fixed boost for existing build orders
+    }
+    ScanRange {
+        link = http://phost.de/phost4doc/config.html#ScanRange
+        info = Distance at which enemy ships are visible
+    }
+    ScoringMethod {
+        link = http://phost.de/phost4doc/config.html#ScoringMethod
+        info = Configures the scoring system used in result files (has no effect on add-on scores)
+    }
+    SensorRange {
+        link = http://phost.de/phost4doc/config.html#SensorRange
+        info = Distance at which enemy planets can be scanned using Sensor Sweep
+    }
+    ShieldDamageScaling {
+        link = http://phost.de/phost4doc/config.html#ShieldDamageScaling
+        info = Combat: relative shield damage power, from weapon's damage power
+    }
+    ShieldKillScaling {
+        link = http://phost.de/phost4doc/config.html#ShieldKillScaling
+        info = Combat: relative shield damage power, from weapon's kill power
+    }
+    ShipCloneCostRate {
+        link = http://phost.de/phost4doc/config.html#ShipCloneCostRate
+        info = Relative money cost when cloning ships, for each player
+    }
+    ShipFighterCost {
+        link = http://phost.de/phost4doc/config.html#ShipFighterCost
+        info = Cost of fighters built on ships
+    }
+    ShipMovementSpeed {
+        link = http://phost.de/phost4doc/config.html#ShipMovementSpeed
+        info = Combat: ship movement speed
+    }
+    SpyDetectionChance {
+        link = http://phost.de/phost4doc/config.html#SpyDetectionChance
+        info = Chance that a Super Spy friendly code detection team is detected
+    }
+    StandoffDistance {
+        link = http://phost.de/phost4doc/config.html#StandoffDistance
+        info = Combat: distance at which ships stop approaching each other
+    }
+    StarbaseCost {
+        link = http://phost.de/phost4doc/config.html#StarbaseCost
+        info = Cost of a starbase
+    }
+    StrikesPerFighter {
+        link = http://phost.de/phost4doc/config.html#StrikesPerFighter
+        info = Combat: number of shots a fighter will place before returning
+    }
+    StructureDecayOnUnowned {
+        link = http://phost.de/phost4doc/config.html#StructureDecayOnUnowned
+        info = Number of mines, factories, and defenses that decay each turn on unowned planets
+    }
+    StructureDecayPerTurn {
+        link = http://phost.de/phost4doc/config.html#StructureDecayPerTurn
+        info = Number of mines, factories, and defenses over limit that decay each turn
+    }
+    TerraformRate {
+        link = http://phost.de/phost4doc/config.html#TerraformRate
+        info = Temperature change by Terraforming ships, per turn
+    }
+    TonsScoreCountsPlanets {
+        link = http://phost.de/phost4doc/config.html#TonsScoreCountsPlanets
+        info = Whether the tons score also counts conquered planets
+    }
+    TorpFiringRange {
+        link = http://phost.de/phost4doc/config.html#TorpFiringRange
+        info = Combat: distance at which torpedoes are fired
+    }
+    TorpHitBonus {
+        link = http://phost.de/phost4doc/config.html#TorpHitBonus
+        info = Combat: torpedo hit odds bonus, depending on torpedo type
+    }
+    TorpHitOdds {
+        link = http://phost.de/phost4doc/config.html#TorpHitOdds
+        info = Combat: torpedo hit odds
+    }
+    TowStrengthDistanceScale {
+        link = http://phost.de/phost4doc/config.html#TowStrengthDistanceScale
+        info = Tow strength, depending on distance towed
+    }
+    TowStrengthEngineScale {
+        link = http://phost.de/phost4doc/config.html#TowStrengthEngineScale
+        info = Tow strength, depending on engine type
+    }
+    TowedShipsBreakFree {
+        link = http://phost.de/phost4doc/config.html#TowedShipsBreakFree
+        info = When enabled, towed ships break free when the tower drops the tow
+    }
+    TowedShipsCooperate {
+        link = http://phost.de/phost4doc/config.html#TowedShipsCooperate
+        info = When enabled, friendly towed ships don't try to overpower the tower
+    }
+    TransuraniumDecayRate {
+        link = http://phost.de/phost4doc/config.html#TransuraniumDecayRate
+        info = Relative amount of new minerals appearing on planets, each turn
+    }
+    TubeRechargeBonus {
+        link = http://phost.de/phost4doc/config.html#TubeRechargeBonus
+        info = Combat: torpedo tube recharge rate bonus, depending on torpedo type
+    }
+    TubeRechargeRate {
+        link = http://phost.de/phost4doc/config.html#TubeRechargeRate
+        info = Combat: torpedo tube recharge rate
+    }
+    UnitsPerTorpRate {
+        link = http://phost.de/phost4doc/config.html#UnitsPerTorpRate
+        info = Number of mine units produced by a single type-10 torpedo
+    }
+    UnitsPerWebRate {
+        link = http://phost.de/phost4doc/config.html#UnitsPerWebRate
+        info = Number of web mine units produced by a single type-10 torpedo
+    }
+    UseAccurateFuelModel {
+        link = http://phost.de/phost4doc/config.html#UseAccurateFuelModel
+        info = Configures the fuel consumption formula
+    }
+    UseBaseTorpsInCombat {
+        link = http://phost.de/phost4doc/config.html#UseBaseTorpsInCombat
+        info = When enabled, starbases fire their torpedoes in combat
+    }
+    WebDrainFuelLoss {
+        link = http://phost.de/phost4doc/config.html#WebDrainFuelLoss
+        info = Amount of fuel drained by web mines, per turn
+    }
+    WebHitDamageFor100KT {
+        link = http://phost.de/phost4doc/config.html#WebHitDamageFor100KT
+        info = Damage taken by a web mine hit, for 100 kt ship
+    }
+    WebHitFuelLoss {
+        link = http://phost.de/phost4doc/config.html#WebHitFuelLoss
+        info = Amount of fuel drained by web mines, per mine hit
+    }
+    WebMineDecayRate {
+        link = http://phost.de/phost4doc/config.html#WebMineDecayRate
+        info = Decay rate for web minefields, each turn
+    }
+    WebMineHitOdds {
+        link = http://phost.de/phost4doc/config.html#WebMineHitOdds
+        info = Odds of hitting a web mine field, for travelling 1 ly
+    }
+    WebMineOddsWarpBonusX100 {
+        link = http://phost.de/phost4doc/config.html#WebMineOddsWarpBonusX100
+        info = Mine hit odds bonus for going slower than Warp 9, for web mines
+    }
+    WebMineSweepRange {
+        link = http://phost.de/phost4doc/config.html#WebMineSweepRange
+        info = Range from which web minefields can be swept
+    }
+    WebMineSweepRate {
+        link = http://phost.de/phost4doc/config.html#WebMineSweepRate
+        info = Rate at which web minefields can be swept
+    }
+    WebMineTravelSafeWarp {
+        link = http://phost.de/phost4doc/config.html#WebMineTravelSafeWarp
+        info = Speed at which travelling through mines is safe, for web mines
+    }
+    WormholeUFOsStartAt {
+        link = http://phost.de/phost4doc/config.html#WormholeUFOsStartAt
+        info = Configures the placement of Wormholes in the result file
+    }
+    WraparoundRectangle {
+        link = http://phost.de/phost4doc/config.html#WraparoundRectangle
+        info = When wraparound is enabled, configures the size of the map
+    }
+    WrmDisplacement {
+        link = http://phost.de/phost4doc/config.html#WrmDisplacement
+        info = Wormholes: movement speed per turn
+    }
+    WrmEntryPowerX100 {
+        link = http://phost.de/phost4doc/config.html#WrmEntryPowerX100
+        info = Wormholes: determines the wormhole's entry radius
+    }
+    WrmMassAdd {
+        link = http://phost.de/phost4doc/config.html#WrmMassAdd
+        info = Wormholes: mass growth per turn
+    }
+    WrmRandDisplacement {
+        link = http://phost.de/phost4doc/config.html#WrmRandDisplacement
+        info = Wormholes: random movement speed per turn
+    }
+    WrmRandMass {
+        link = http://phost.de/phost4doc/config.html#WrmRandMass
+        info = Wormholes: random mass growth per turn
+    }
+    WrmRandStability {
+        link = http://phost.de/phost4doc/config.html#WrmRandStability
+        info = Wormholes: random stability growth per turn
+    }
+    WrmScanRange {
+        link = http://phost.de/phost4doc/config.html#WrmScanRange
+        info = Distance at which all wormholes are visible
+    }
+    WrmStabilityAddX10 {
+        link = http://phost.de/phost4doc/config.html#WrmStabilityAddX10
+        info = Wormholes: stability growth per turn
+    }
+    WrmTravelCloaked {
+        link = http://phost.de/phost4doc/config.html#WrmTravelCloaked
+        info = Whether ships can remain cloaked after traveling a wormhole
+    }
+    WrmTravelDistDivisor {
+        link = http://phost.de/phost4doc/config.html#WrmTravelDistDivisor
+        info = Determines a ship's fuel usage for traveling a wormhole
+    }
+    WrmTravelWarpSpeed {
+        link = http://phost.de/phost4doc/config.html#WrmTravelWarpSpeed
+        info = Determines a ship's fuel usage for traveling a wormhole
+    }
+    WrmVoluntaryTravel {
+        link = http://phost.de/phost4doc/config.html#WrmVoluntaryTravel
+        info = Whether wormhole travel is voluntary
+    }
+}
+
+ini.amaster {
+    MaxMapCounter.info             = Number of iterations for map creation
+    MaxPlanetCounter.info          = Number of iterations for planet creation
+    MaxHWCounter.info              = Number of iterations for homeworld assignment
+    RaceIsPlaying.info             = What players are active in this game
+    PlayerRace.info                = $ini.phost.PlayerRace.info
+    MapTruehullByPlayerRace.info   = $ini.phost.MapTruehullByPlayerRace.info
+    AllowWraparoundMap.info        = $ini.phost.AllowWraparoundMap.info
+    WraparoundRectangle.info       = $ini.phost.WraparoundRectangle.info
+    BorderWidth.info               = Size of map seam
+    CrystalsPreferDeserts.info     = $ini.phost.CrystalsPreferDeserts.info
+    CrystalSinTempBehavior.info    = $ini.phost.CrystalSinTempBehavior.info
+    ClimateLimitsPopulation.info   = $ini.phost.ClimateLimitsPopulation.info
+    MaxColTempSlope.info           = $ini.phost.MaxColTempSlope.info
+    Password1.info                 = Initial RST password for player 1
+    Password2.info                 = Initial RST password for player 2
+    Password3.info                 = Initial RST password for player 3
+    Password4.info                 = Initial RST password for player 4
+    Password5.info                 = Initial RST password for player 5
+    Password6.info                 = Initial RST password for player 6
+    Password7.info                 = Initial RST password for player 7
+    Password8.info                 = Initial RST password for player 8
+    Password9.info                 = Initial RST password for player 9
+    Password10.info                = Initial RST password for player 10
+    Password11.info                = Initial RST password for player 11
+    PlanetSurfaceRanges.info       = Mineral ranges for non-homeworld planets
+    PlanetDensityRanges.info       = Mineral density ranges for non-homeworld planets
+    PlanetCoreRangesUsual.info     = Mineral core ranges for non-homeworld planets, usual
+    PlanetCoreRangesAlternate.info = Mineral core ranges for non-homeworld planets, alternate
+    PlanetCoreUsualFrequency.info  = Chance that a planet is "usual" for mineral core ranges
+    NativesOnPlanetFrequency.info  = Probability that a planet has natives
+    NativeTypeFrequencies.info     = Relative frequency of native races
+    NativeGovFrequencies.info      = Relative frequency of native governments
+    NativeRange.info               = Native population range, unit is 10 clans
+    DefaultNativesHappy.info       = Initial native happiness
+    DefaultColonistHappy.info      = Initial colonist happiness
+    OwnedPlanets.info              = Number of planets each player starts with
+    OwnedBases.info                = Number of bases each player starts with
+    BaseHopsNumber.info            = Affects the distance of initial starbases from homeworld
+    BaseHopsFactor.info            = Affects the distance of initial starbases from homeworld
+    BaseHopsLimit.info             = Affects the distance of initial starbases from homeworld
+    BindPlanetsToBases.info        = Affects initial starbase placement
+    Planet1.info                   = Definition of first owned planet
+    Planet2.info                   = Definition of second owned planet
+    HomePlanet1.info               = Definition of first home planet
+    HomePlanet2.info               = Definition of second home planet
+    DefaultHomePlanet.info         = Definition of other home planets
+    NoAmorphousOnHomePlanets.info  = Make sure home planets do not have amorphous natives
+    AllOwnedPlanetsTheSame.info    = Make the initial planets the same for all players
+    AllPlayerPlanetsTheSame.info   = Make all initial planets for a player identical
+    BioSupport.info                = Make initial planets have sensible temperature
+    BioSupportLevel.info           = Affects allowed deviations from optimum temperature
+    PlanetsTempRange.info          = Planet temperature range
+    OwnedPlanetsTempRange.info     = Temperature range for owned planets
+    AdjustPopulations.info         = Avoid placing populations that are too big for the planet climate
+    HomeworldsRadius.info          = Minimum distance between homeworlds
+    HomeworldsRange.info           = Coordinate range for homeworlds
+    ProvideHomeworlds.info         = If enabled, homeworld Ids are taken from "Homeworlds" parameter
+    Homeworlds.info                = Homeworld planet Ids
+    HomeworldClans.info            = Number of clans on homeworld
+    HomeworldCash.info             = Cash on homeworld
+    HomeworldCoreN.info            = Neutronium in homeworld core
+    HomeworldCoreT.info            = Tritanium in homeworld core
+    HomeworldCoreD.info            = Duranium in homeworld core
+    HomeworldCoreM.info            = Molybdenum in homeworld core
+    HomeworldSurfaceN.info         = Neutronium on homeworld surface
+    HomeworldSurfaceT.info         = Tritanium on homeworld surface
+    HomeworldSurfaceD.info         = Duranium on homeworld surface
+    HomeworldSurfaceM.info         = Molybdenum on homeworld surface
+    HomeworldDensityN.info         = Neutronium density in homeworld core
+    HomeworldDensityT.info         = Tritanium density in homeworld core
+    HomeworldDensityD.info         = Duranium density in homeworld core
+    HomeworldDensityM.info         = Molybdenum density in homeworld core
+    HomeworldMines.info            = Mineral mines on homeworld
+    HomeworldFactories.info        = Factories on homeworld
+    HomeworldDefence.info          = Defense posts on homeworld
+    HomeworldSupplies.info         = Supplies on homeworld
+    HomeworldColonistTax.info      = Initial colonist tax rate on homeworld
+    HomeworldColonistHappy.info    = Colonist happiness on homeworld
+    BaseFreeDefence.info           = Defense posts on initial starbase
+    BaseFreeFighters.info          = Fighters on initial starbase
+    BaseFreeHulls.info             = Start with some free hulls
+    BaseFreeEngines.info           = Start with some free engines
+    BaseFreeBeams.info             = Start with some free beams
+    BaseFreeTorps.info             = Start with some free torpedoes
+    AllBasesTheSame.info           = If enabled, all initial bases are the same
+    AdjustBasesTechs.info          = Set initial tech levels depending on planet natives
+    StartingEngineTech.info        = Initial Engine tech level
+    StartingHullTech.info          = Initial Hull tech level
+    StartingBeamTech.info          = Initial Beam tech level
+    StartingTubeTech.info          = Initial Torpedo tech level
+    FreeShips.info                 = Start with free ships at the homeworld
+    FreeShipsOnBases.info          = Start with free ships at the starbases
+    FreeShipsNumber.info           = Number of free ships per base
+    FreeShipsAllTheSame.info       = If set, all players receive the same initial ships
+    FreeShipsHull.info             = Type of the initial ships, if FreeShipsAllTheSame is set
+    FreeShipsEngines.info          = Engine type of initial ships
+    FreeShipsBeams.info            = Beam type of initial ships
+    FreeShipsTubes.info            = Torpedo type of initial ships
+    FreeShipsAmmo.info             = Ammunition on initial ships#
+    NearFarPlanetCheck.info        = Enables planet location fairness check
+    NearPlanetsNo.info             = Number of near planets each player must have
+    NearSearchRadius.info          = Maximum distance for near planets
+    FarPlanetsNo.info              = Number of far planets each player must have
+    FarSearchRadius.info           = Maximum distance for far planets
+    NativeCashCheck.info           = Enables planet income fairness check
+    NativeCash.info                = Income range for each player
+    NativeCashSearchRadius.info    = Distance for income fairness check
+    MineCheck.info                 = Enables planet mining fairness check
+    MineTritanium.info             = Amount of Tritanium each player must be able to mine
+    MineDuranium.info              = Amount of Duranium each player must be able to mine
+    MineMolybdenium.info           = Amount of Molybdenum each player must be able to mine
+    MineSearchRadius.info          = Distance for mining fairness check
+    MaxMineTurns.info              = Turns for mining fairness check
+    CreateWormholes.info           = Enable creation of wormholes
+    WormholeNumber.info            = Number of wormholes to make
+    MaxWormholesCounter.info       = Number of iterations for wormhole creation
+    NoWormholesNearHomeworlds.info = Disallow wormholes near homeworlds
+    MinWormHomeDistance.info       = What is considered near a homeworld
+    NoWormholesNearPlanets.info    = Disallow wormholes near planets
+    MinWormPlanetDistance.info     = What is considered near a planet
+    MinWormholesDistance.info      = Minimum distance between wormholes
+    MinWormholeLength.info         = Minimum distance covered by a wormhole
+    WormholeUniDirChance.info      = Percentage chance that a wormhole is unidirectional
+    WormholeStartMoveChance.info   = Percentage chance that a wormhole entry point moves
+    WormholeEndMoveChance.info     = Percentage chance that a wormhole exit point moves
+    WormholeStartRange.info        = Allowed coordinates of wormhole entries
+    WormholeEndRange.info          = Allowed coordinates of wormhole exits
+    WormholeInstabilityRange.info  = Range for initial wormhole instabilities
+    WormholeMassRange.info         = Range for initial wormhole masses
+    CreateMap.info                 = Enable creation of a new random map
+    PlanetsMinDistance.info        = Minimum distance between planets
+    PlanetsNumber.info             = Number of planets
+    FixMapChecksums.info           = Make sure the map fits the required checksum
+    CreateIonStorms.info           = Enable creation of ion storms
+    IonStormsNumber.info           = Number of ion storms to make
+    IonStormsCenterRange.info      = Allowed coordinates of ion storms
+    IonStormsVoltageRange.info     = Range for ion storm initial voltage
+    IonStormsRadiusRange.info      = Range for ion storm initial radius
+    NoIonStormsNearHomeworlds.info = Disallow ion storms near homeworlds
+    MinIonStormsHomeDistance.info  = What is considered near a homeworld
+}
+
+ini.pmaster {
+    Scenario.info                   = Scenario (classic, ashes, disunited)
+    RaceIsPlaying.info              = $ini.amaster.RaceIsPlaying.info
+    Password1.info                  = $ini.amaster.Password1.info
+    Password2.info                  = $ini.amaster.Password2.info
+    Password3.info                  = $ini.amaster.Password3.info
+    Password4.info                  = $ini.amaster.Password4.info
+    Password5.info                  = $ini.amaster.Password5.info
+    Password6.info                  = $ini.amaster.Password6.info
+    Password7.info                  = $ini.amaster.Password7.info
+    Password8.info                  = $ini.amaster.Password8.info
+    Password9.info                  = $ini.amaster.Password9.info
+    Password10.info                 = $ini.amaster.Password10.info
+    Password11.info                 = $ini.amaster.Password11.info
+    PlanetSurfaceRanges.info        = $ini.amaster.PlanetSurfaceRanges.info
+    PlanetDensityRanges.info        = $ini.amaster.PlanetDensityRanges.info
+    PlanetCoreRangesUsual.info      = $ini.amaster.PlanetCoreRangesUsual.info
+    PlanetCoreRangesAlternate.info  = $ini.amaster.PlanetCoreRangesAlternate.info
+    PlanetCoreUsualFrequency.info   = $ini.amaster.PlanetCoreUsualFrequency.info
+    NativesOnPlanetFrequency.info   = $ini.amaster.NativesOnPlanetFrequency.info
+    NativeTypeFrequencies.info      = $ini.amaster.NativeTypeFrequencies.info
+    NativeGovFrequencies.info       = $ini.amaster.NativeGovFrequencies.info
+    NativeClansRange.info           = Native population range, unit is clans
+    Homeworlds.info                 = Ids of homeworld planets
+    HomeworldsRadius.info           = Radius of circle on which homeworlds are placed
+    HomeworldClans.info             = $ini.amaster.HomeworldClans.info
+    DesertCrystalHomeworld.info     = $ini.amaster.CrystalsPreferDeserts.info
+    HomeworldCash.info              = $ini.amaster.HomeworldCash.info
+    HomeworldBase.info              = For each player, whether they start with a starbase
+    HomeworldCoreN.info             = $ini.amaster.HomeworldCoreN.info
+    HomeworldCoreT.info             = $ini.amaster.HomeworldCoreT.info
+    HomeworldCoreD.info             = $ini.amaster.HomeworldCoreD.info
+    HomeworldCoreM.info             = $ini.amaster.HomeworldCoreM.info
+    HomeworldSurfaceN.info          = $ini.amaster.HomeworldSurfaceN.info
+    HomeworldSurfaceT.info          = $ini.amaster.HomeworldSurfaceT.info
+    HomeworldSurfaceD.info          = $ini.amaster.HomeworldSurfaceD.info
+    HomeworldSurfaceM.info          = $ini.amaster.HomeworldSurfaceM.info
+    StartingEngineTech.info         = $ini.amaster.StartingEngineTech.info
+    TwoFreeShips.info               = For each player, whether they start with two free ships
+    OldEmpireRace.info              = (Empire scenario) Race that plays the Old Empire
+    OldEmpirePlanets.info           = (Empire scenario) Number of planets owned by the Old Empire
+    OwnedPlanets.info               = (Ashes scenario) Number of planets owned by each player
+    AllOwnedPlanetsTheSame.info     = $ini.amaster.AllOwnedPlanetsTheSame.info
+}
+
+ini.explmap {
+    ScanRanges.info          = Maximum scan range for each race (safe range if random scanning is not used)
+    DetectRanges.info        = Safe scan range for each race (if random scanning is used)
+    DefenseBonusPercent.info = Anti-scan Defense bonus for each race
+    ShareAlliedPlanets.info  = Enable that allies see each others planets
+    ShareScannedPlanets.info = Enable that allies see planets scanned by each other
+    UseRandomScanning.info   = Use random scanning, detection probability depends on distance
+    SensorSweepsCount.info   = Enable location of all planets scanned with regular Sensor Sweep
+    DarkSenseLocates.info    = Enable location of all planets scanned with Dark Sense (requires SensorSweepsCount)
+}
+
+ini.map {
+    size.info    = Map size in light-years (see pconfig.src WraparoundRectangle)
+    wrap.info    = Enable wrapped map (see pconfig.src AllowWraparoundMap)
+    explore.info = Enable ExploreMap support
+}
+
+# hullfunc.txt allows abbreviations. Define some common ones.
+ini.hullfunc {
+    Hull.info           = Set the hulls to which the next assignments apply
+    Hull.link           = http://phost.de/phost4doc/hullfunc.html#Hull
+    Function.info       = Set the function to which the next assignments apply
+    Function.link       = http://phost.de/phost4doc/hullfunc.html#Function
+    Func.info           = Set the function to which the next assignments apply
+    Func.link           = http://phost.de/phost4doc/hullfunc.html#Function
+    RacesAllowed.info   = Assign selected function to hulls, for a set of races
+    RacesAllowed.link   = http://phost.de/phost4doc/hullfunc.html#RacesAllowed
+    Races.info          = Assign selected function to hulls, for a set of races
+    Races.link          = http://phost.de/phost4doc/hullfunc.html#RacesAllowed
+    PlayersAllowed.info = Assign selected function to hulls, for a set of players
+    PlayersAllowed.link = http://phost.de/phost4doc/hullfunc.html#PlayersAllowed
+    Players.info        = Assign selected function to hulls, for a set of players
+    Players.link        = http://phost.de/phost4doc/hullfunc.html#PlayersAllowed
+    Initialize.info     = Initialize hull functions
+    Initialize.link     = http://phost.de/phost4doc/hullfunc.html#Initialize
+    Init.info           = Initialize hull functions
+    Init.link           = http://phost.de/phost4doc/hullfunc.html#Initialize
+    AssignTo.info       = Determine when subsequent assignments take effect
+    AssignTo.link       = http://phost.de/phost4doc/hullfunc.html#AssignTo
+    Assign.info         = Determine when subsequent assignments take effect
+    Assign.link         = http://phost.de/phost4doc/hullfunc.html#AssignTo
+    Level.info          = Define an experience level restriction for the next assignment
+    Level.link          = http://phost.de/phost4doc/hullfunc.html#Level
+}
+
+ini.pcontrol {
+    AUXHOST1.info       = Define a command to be executed before most host operation
+    AUXHOST2.info       = Define a command to be executed after most host operation
+    Addon.info          = Add an add-on to the host run
+    Addon.link          = http://phost.de/phost4doc/pcontrol.html#addon
+
+    TransferOwner {
+        info = Modify "Ownership Transfer" stage
+        link = http://phost.de/phost4doc/pcontrol.html#TransferOwner
+    }
+    LargeMeteors {
+        info = Modify "Large Meteors impact" stage
+        link = http://phost.de/phost4doc/pcontrol.html#LargeMeteors
+    }
+    MeteorShowers {
+        info = Modify "Meteor Showers" stage
+        link = http://phost.de/phost4doc/pcontrol.html#MeteorShowers
+    }
+    AntiCloak_1 {
+        info = Modify first "Anti-Cloak" stage
+        link = http://phost.de/phost4doc/pcontrol.html#AntiCloak_1
+    }
+    DeluxeSuperSpy {
+        info = Modify "Super Spy Deluxe" (friendly code change) stage
+        link = http://phost.de/phost4doc/pcontrol.html#DeluxeSuperSpy
+    }
+    NewNativesAppear {
+        info = Modify "New Natives appear on planets" stage
+        link = http://phost.de/phost4doc/pcontrol.html#NewNativesAppear
+    }
+    RobMission {
+        info = Modify "Privateer Rob Mission" stage
+        link = http://phost.de/phost4doc/pcontrol.html#RobMission
+    }
+    GamblingShips {
+        info = Modify "Gambling Ships produce cash" stage
+        link = http://phost.de/phost4doc/pcontrol.html#GamblingShips
+    }
+    CargoDump {
+        info = Modify "Ships dump cargo on planets" stage
+        link = http://phost.de/phost4doc/pcontrol.html#CargoDump
+    }
+    CargoTransfer {
+        info = Modify "Ships transfer cargo to other ships" stage
+        link = http://phost.de/phost4doc/pcontrol.html#CargoTransfer
+    }
+    TrimShipCargo {
+        info = Modify "Trim excess cargo from ships" stage
+        link = http://phost.de/phost4doc/pcontrol.html#TrimShipCargo
+    }
+    CrewExchange {
+        info = Modify "Crew exchange mission" stage
+        link = http://phost.de/phost4doc/pcontrol.html#CrewExchange
+    }
+    Training {
+        info = Modify "Training mission" stage
+        link = http://phost.de/phost4doc/pcontrol.html#Training
+    }
+    BeamTransfers {
+        info = Modify "Beam transfers between ships" stage
+        link = http://phost.de/phost4doc/pcontrol.html#BeamTransfers
+    }
+    GatherMission {
+        info = Modify "Ships gather cargo" stage
+        link = http://phost.de/phost4doc/pcontrol.html#GatherMission
+    }
+    BeamUpCredits {
+        info = Modify "Ships gather credits" stage
+        link = http://phost.de/phost4doc/pcontrol.html#BeamUpCredits
+    }
+    MinefieldDecay {
+        info = Modify "Minefields decay" stage
+        link = http://phost.de/phost4doc/pcontrol.html#MinefieldDecay
+    }
+    MineLaying {
+        info = Modify "Ships lay mines" stage
+        link = http://phost.de/phost4doc/pcontrol.html#MineLaying
+    }
+    MinesDestroyMines {
+        info = Modify "Mines destroy mines" stage
+        link = http://phost.de/phost4doc/pcontrol.html#MinesDestroyMines
+    }
+    MineSweeping {
+        info = Modify "Ships sweep mines" stage
+        link = http://phost.de/phost4doc/pcontrol.html#MineSweeping
+    }
+    MinefieldScan {
+        info = Modify "Minefield scan" stage
+        link = http://phost.de/phost4doc/pcontrol.html#MinefieldScan
+    }
+    WebDraining {
+        info = Modify "Web mines drain fuel" stage
+        link = http://phost.de/phost4doc/pcontrol.html#WebDraining
+    }
+    MoveIonStorms {
+        info = Modify "Ion storms move" stage
+        link = http://phost.de/phost4doc/pcontrol.html#MoveIonStorms
+    }
+    IonStormEffects {
+        info = Modify "Ion storms affect ships" stage
+        link = http://phost.de/phost4doc/pcontrol.html#IonStormEffects
+    }
+    NewIonStorms {
+        info = Modify "New ion storms appear" stage
+        link = http://phost.de/phost4doc/pcontrol.html#NewIonStorms
+    }
+    IonStormReports {
+        info = Modify "Ion storm reports sent out" stage
+        link = http://phost.de/phost4doc/pcontrol.html#IonStormReports
+    }
+    SpecialMissions_1 {
+        info = Modify "Super Refit, Self Repair, Hiss mission" stage
+        link = http://phost.de/phost4doc/pcontrol.html#SpecialMissions_1
+    }
+    BuildFighters {
+        info = Modify "Ships build fighters" stage
+        link = http://phost.de/phost4doc/pcontrol.html#BuildFighters
+    }
+    BuildTorpedoes {
+        info = Modify "Ships build torpedoes" stage
+        link = http://phost.de/phost4doc/pcontrol.html#BuildTorpedoes
+    }
+    Alchemy {
+        info = Modify "Alchemy ships" stage
+        link = http://phost.de/phost4doc/pcontrol.html#Alchemy
+    }
+    ShipBuildOrders {
+        info = Modify "Prepare ship build orders" stage
+        link = http://phost.de/phost4doc/pcontrol.html#ShipBuildOrders
+    }
+    ShipBuilding_1 {
+        info = Modify first "Ship Building" stage
+        link = http://phost.de/phost4doc/pcontrol.html#ShipBuilding_1
+    }
+    DumpOldBaseParts {
+        info = Modify "Starbases recycle unused parts" stage
+        link = http://phost.de/phost4doc/pcontrol.html#DumpOldBaseParts
+    }
+    BaseMissions_1 {
+        info = Modify "Fix/Recycle, Maximize Defense, Load Torpedoes, Force Surrender starbase missions" stage
+        link = http://phost.de/phost4doc/pcontrol.html#BaseMissions_1
+    }
+    SupplyRepair_1 {
+        info = Modify first "Ships use supplies to repair themselves" stage
+        link = http://phost.de/phost4doc/pcontrol.html#SupplyRepair_1
+    }
+    BoardingParties {
+        info = Modify "Boarding" stage
+        link = http://phost.de/phost4doc/pcontrol.html#BoardingParties
+    }
+    FreeFighters {
+        info = Modify "Starbases build free fighters" stage
+        link = http://phost.de/phost4doc/pcontrol.html#FreeFighters
+    }
+    TowResolution {
+        info = Modify "Tow conflict resolution" stage
+        link = http://phost.de/phost4doc/pcontrol.html#TowResolution
+    }
+    Movement {
+        info = Modify "Ships move" stage
+        link = http://phost.de/phost4doc/pcontrol.html#Movement
+    }
+    GloryDevices {
+        info = Modify "Glory devices detonate" stage
+        link = http://phost.de/phost4doc/pcontrol.html#GloryDevices
+    }
+    Chunneling {
+        info = Modify "Chunneling" stage
+        link = http://phost.de/phost4doc/pcontrol.html#Chunneling
+    }
+    AntiCloak_2 {
+        info = Modify second "Anti-Cloak" stage
+        link = http://phost.de/phost4doc/pcontrol.html#AntiCloak_2
+    }
+    ColonizeMission {
+        info = Modify "Colonize mission" stage
+        link = http://phost.de/phost4doc/pcontrol.html#ColonizeMission
+    }
+    SupplyRepair_2 {
+        info = Modify second "Ships use supplies to repair themselves" stage
+        link = http://phost.de/phost4doc/pcontrol.html#SupplyRepair_2
+    }
+    BaseMissions_2 {
+        info = Modify "Refuel, Repair, Unload starbase missions" stage
+        link = http://phost.de/phost4doc/pcontrol.html#BaseMissions_2
+    }
+    Combat {
+        info = Modify "Combat" stage
+        link = http://phost.de/phost4doc/pcontrol.html#Combat
+    }
+    SupplyRepair_3 {
+        info = Modify third "Ships use supplies to repair themselves" stage
+        link = http://phost.de/phost4doc/pcontrol.html#SupplyRepair_3
+    }
+    Terraforming {
+        info = Modify "Terraforming ships" stage
+        link = http://phost.de/phost4doc/pcontrol.html#Terraforming
+    }
+    WormholeScan {
+        info = Modify "Scan for wormholes" stage
+        link = http://phost.de/phost4doc/pcontrol.html#WormholeScan
+    }
+    SensorSweep {
+        info = Modify "Sensor sweep mission" stage
+        link = http://phost.de/phost4doc/pcontrol.html#SensorSweep
+    }
+    SpecialMissions_2 {
+        info = Modify "Pillage, RGA, Dark Sense missions" stage
+        link = http://phost.de/phost4doc/pcontrol.html#SpecialMissions_2
+    }
+    PlanetaryProduction {
+        info = Modify "Planetary production" stage
+        link = http://phost.de/phost4doc/pcontrol.html#PlanetaryProduction
+    }
+    PlanetaryHappiness {
+        info = Modify "Planetary happiness" stage
+        link = http://phost.de/phost4doc/pcontrol.html#PlanetaryHappiness
+    }
+    PlanetaryTaxation {
+        info = Modify "Planetary taxation" stage
+        link = http://phost.de/phost4doc/pcontrol.html#PlanetaryTaxation
+    }
+    PlanetaryGrowth {
+        info = Modify "Planetary population growth" stage
+        link = http://phost.de/phost4doc/pcontrol.html#PlanetaryGrowth
+    }
+    PlanetaryLosses {
+        info = Modify "Planetary losses" stage
+        link = http://phost.de/phost4doc/pcontrol.html#PlanetaryLosses
+    }
+    ShipBuilding_2 {
+        info = Modify second "Ship Building" stage
+        link = http://phost.de/phost4doc/pcontrol.html#ShipBuilding_2
+    }
+    Assimilation {
+        info = Modify "Borgs assimilate natives" stage
+        link = http://phost.de/phost4doc/pcontrol.html#Assimilation
+    }
+    SuperSpyMission {
+        info = Modify "Super Spy mission" stage
+        link = http://phost.de/phost4doc/pcontrol.html#SuperSpyMission
+    }
+    ShipExploration {
+        info = Modify "Exploration reports" stage
+        link = http://phost.de/phost4doc/pcontrol.html#ShipExploration
+    }
+    Experience {
+        info = Modify "Experience upgrades" stage
+        link = http://phost.de/phost4doc/pcontrol.html#Experience
+    }
+}

@@ -46,6 +46,15 @@ namespace interpreter { namespace vmio {
             \param proc The process object */
         void addProcess(Process& proc);
 
+        /** Save as object file.
+            An object file is just an object pool with a minimum header, with no reference to game data.
+            It cannot contain processes, just compiled code.
+            As of 2018, object files are mostly used for testing;
+            our compiler is fast enough that scripts are compiled each time when used.
+            \param out Stream to save to
+            \param entry ID of entry-point BCO (obtained by adding it with addBCO()) */
+        void saveObjectFile(afl::io::Stream& out, uint32_t entry);
+
         /** Save all pending objects.
             \param out Stream to save to */
         void save(afl::io::Stream& out);

@@ -10,6 +10,8 @@
 #include "afl/io/internaldirectory.hpp"
 #include "afl/io/directoryentry.hpp"
 #include "afl/io/filemapping.hpp"
+#include "afl/string/nulltranslator.hpp"
+#include "afl/sys/log.hpp"
 
 namespace {
     const uint8_t TEST_PATTERN[] = {1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8};
@@ -20,6 +22,8 @@ void
 TestGameV3ControlFile::testSave()
 {
     game::v3::ControlFile testee;
+    afl::string::NullTranslator tx;
+    afl::sys::Log log;
 
     // Empty directory
     afl::base::Ref<afl::io::InternalDirectory> dir = afl::io::InternalDirectory::create("foo");
@@ -29,7 +33,7 @@ TestGameV3ControlFile::testSave()
     testee.set(game::v3::structures::ShipSection, 500, 1);
     testee.set(game::v3::structures::PlanetSection, 500, 1);
     testee.set(game::v3::structures::BaseSection, 500, 1);
-    testee.save(*dir);
+    testee.save(*dir, tx, log);
     TS_ASSERT_EQUALS(dir->getDirectoryEntryByName("control.dat")->getFileType(), afl::io::DirectoryEntry::tUnknown);
     
     afl::base::Ptr<afl::io::DirectoryEntry> entry;
@@ -41,6 +45,8 @@ void
 TestGameV3ControlFile::testSaveDOS()
 {
     game::v3::ControlFile testee;
+    afl::string::NullTranslator tx;
+    afl::sys::Log log;
 
     // Empty directory
     afl::base::Ref<afl::io::InternalDirectory> dir = afl::io::InternalDirectory::create("foo");
@@ -51,7 +57,7 @@ TestGameV3ControlFile::testSaveDOS()
     testee.set(game::v3::structures::ShipSection, 500, 1);
     testee.set(game::v3::structures::PlanetSection, 500, 1);
     testee.set(game::v3::structures::BaseSection, 500, 1);
-    testee.save(*dir);
+    testee.save(*dir, tx, log);
     TS_ASSERT_EQUALS(dir->getDirectoryEntryByName("control.dat")->getFileType(), afl::io::DirectoryEntry::tFile);
     TS_ASSERT_EQUALS(dir->getDirectoryEntryByName("control.dat")->getFileSize(), 6002U);
 }
@@ -61,6 +67,8 @@ void
 TestGameV3ControlFile::testSaveWin()
 {
     game::v3::ControlFile testee;
+    afl::string::NullTranslator tx;
+    afl::sys::Log log;
 
     // Empty directory
     afl::base::Ref<afl::io::InternalDirectory> dir = afl::io::InternalDirectory::create("foo");
@@ -71,7 +79,7 @@ TestGameV3ControlFile::testSaveWin()
     testee.set(game::v3::structures::ShipSection, 500, 1);
     testee.set(game::v3::structures::PlanetSection, 500, 1);
     testee.set(game::v3::structures::BaseSection, 500, 1);
-    testee.save(*dir);
+    testee.save(*dir, tx, log);
     TS_ASSERT_EQUALS(dir->getDirectoryEntryByName("contrl6.dat")->getFileType(), afl::io::DirectoryEntry::tFile);
     TS_ASSERT_EQUALS(dir->getDirectoryEntryByName("contrl6.dat")->getFileSize(), 6002U);
 }
@@ -81,6 +89,8 @@ void
 TestGameV3ControlFile::testSaveBig()
 {
     game::v3::ControlFile testee;
+    afl::string::NullTranslator tx;
+    afl::sys::Log log;
 
     // Empty directory
     afl::base::Ref<afl::io::InternalDirectory> dir = afl::io::InternalDirectory::create("foo");
@@ -91,7 +101,7 @@ TestGameV3ControlFile::testSaveBig()
     testee.set(game::v3::structures::ShipSection, 501, 1);
     testee.set(game::v3::structures::PlanetSection, 500, 1);
     testee.set(game::v3::structures::BaseSection, 500, 1);
-    testee.save(*dir);
+    testee.save(*dir, tx, log);
     TS_ASSERT_EQUALS(dir->getDirectoryEntryByName("contrl6.dat")->getFileType(), afl::io::DirectoryEntry::tFile);
     TS_ASSERT_EQUALS(dir->getDirectoryEntryByName("contrl6.dat")->getFileSize(), 9996U);
 }
@@ -101,18 +111,20 @@ void
 TestGameV3ControlFile::testLoadDOS()
 {
     game::v3::ControlFile testee;
+    afl::string::NullTranslator tx;
+    afl::sys::Log log;
 
     // Create a DOS file and load it
     {
         afl::base::Ref<afl::io::InternalDirectory> dir = afl::io::InternalDirectory::create("foo");
         dir->openFile("control.dat", afl::io::FileSystem::Create)->fullWrite(TEST_PATTERN);
-        testee.load(*dir, 3);
+        testee.load(*dir, 3, tx, log);
     }
 
     // Write again into a new directory and verify it's there
     {
         afl::base::Ref<afl::io::InternalDirectory> dir = afl::io::InternalDirectory::create("foo");
-        testee.save(*dir);
+        testee.save(*dir, tx, log);
         TS_ASSERT_EQUALS(dir->getDirectoryEntryByName("control.dat")->getFileType(), afl::io::DirectoryEntry::tFile);
 
         afl::base::Ref<afl::io::FileMapping> map(dir->openFile("control.dat", afl::io::FileSystem::OpenRead)->createVirtualMapping());
@@ -125,18 +137,20 @@ void
 TestGameV3ControlFile::testLoadWindows()
 {
     game::v3::ControlFile testee;
+    afl::string::NullTranslator tx;
+    afl::sys::Log log;
 
     // Create a Windows file and load it
     {
         afl::base::Ref<afl::io::InternalDirectory> dir = afl::io::InternalDirectory::create("foo");
         dir->openFile("contrl3.dat", afl::io::FileSystem::Create)->fullWrite(TEST_PATTERN);
-        testee.load(*dir, 3);
+        testee.load(*dir, 3, tx, log);
     }
 
     // Write again into a new directory and verify it's there
     {
         afl::base::Ref<afl::io::InternalDirectory> dir = afl::io::InternalDirectory::create("foo");
-        testee.save(*dir);
+        testee.save(*dir, tx, log);
         TS_ASSERT_EQUALS(dir->getDirectoryEntryByName("contrl3.dat")->getFileType(), afl::io::DirectoryEntry::tFile);
 
         afl::base::Ref<afl::io::FileMapping> map(dir->openFile("contrl3.dat", afl::io::FileSystem::OpenRead)->createVirtualMapping());
@@ -149,17 +163,19 @@ void
 TestGameV3ControlFile::testLoadEmpty()
 {
     game::v3::ControlFile testee;
+    afl::string::NullTranslator tx;
+    afl::sys::Log log;
 
     // Load empty directory
     {
         afl::base::Ref<afl::io::InternalDirectory> dir = afl::io::InternalDirectory::create("foo");
-        testee.load(*dir, 3);
+        testee.load(*dir, 3, tx, log);
     }
 
     // Save again
     {
         afl::base::Ref<afl::io::InternalDirectory> dir = afl::io::InternalDirectory::create("foo");
-        testee.save(*dir);
+        testee.save(*dir, tx, log);
 
         afl::base::Ptr<afl::io::DirectoryEntry> entry;
         TS_ASSERT(!dir->getDirectoryEntries()->getNextElement(entry));
@@ -171,6 +187,8 @@ void
 TestGameV3ControlFile::testRange()
 {
     game::v3::ControlFile testee;
+    afl::string::NullTranslator tx;
+    afl::sys::Log log;
 
     // These accesses are out-of-range and should be ignored
     testee.set(game::v3::structures::ShipSection, 9999, 1);
@@ -180,7 +198,7 @@ TestGameV3ControlFile::testRange()
     // Save and verify that it's empty
     afl::base::Ref<afl::io::InternalDirectory> dir = afl::io::InternalDirectory::create("foo");
     testee.setFileOwner(0);
-    testee.save(*dir);
+    testee.save(*dir, tx, log);
     TS_ASSERT_EQUALS(dir->getDirectoryEntryByName("control.dat")->getFileType(), afl::io::DirectoryEntry::tFile);
 
     afl::base::Ref<afl::io::FileMapping> map(dir->openFile("control.dat", afl::io::FileSystem::OpenRead)->createVirtualMapping());

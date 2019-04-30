@@ -53,6 +53,52 @@ ui::widgets::AbstractListbox::getTotalSize()
     }
 }
 
+void
+ui::widgets::AbstractListbox::setPageTop(int /*top*/)
+{
+    // FIXME: implement this
+}
+
+void
+ui::widgets::AbstractListbox::scroll(Operation op)
+{
+    switch (op) {
+     case LineUp:
+        if (m_currentItem > 0) {
+            setCurrentItem(m_currentItem-1, GoUp);
+        }
+        break;
+
+     case LineDown:
+        setCurrentItem(m_currentItem+1, GoDown);
+        break;
+
+     case PageUp: {
+        size_t itemNr;
+        gfx::Rectangle itemArea;
+        if (getItemFromRelativePosition(getRelativeItemPosition(m_currentItem).getTopLeft() - gfx::Point(0, getPageSize()), itemNr, itemArea)) {
+            setCurrentItem(itemNr, GoUp);
+        } else {
+            setCurrentItem(0, GoDown);
+        }
+        break;
+     }
+
+     case PageDown: {
+        size_t itemNr;
+        gfx::Rectangle itemArea;
+        if (getItemFromRelativePosition(getRelativeItemPosition(m_currentItem).getTopLeft() + gfx::Point(0, getPageSize()), itemNr, itemArea)) {
+            setCurrentItem(itemNr, GoDown);
+        } else if (size_t nr = getNumItems()) {
+            setCurrentItem(nr-1, GoUp);
+        } else {
+            // empty
+        }
+        break;
+     }
+    }
+}
+
 // Widget virtuals:
 void
 ui::widgets::AbstractListbox::draw(gfx::Canvas& can)
@@ -114,6 +160,15 @@ ui::widgets::AbstractListbox::handleStateChange(State st, bool enable)
     }
 }
 
+void
+ui::widgets::AbstractListbox::defaultHandlePositionChange(gfx::Rectangle& /*oldPosition*/)
+{
+    makeVisible(getRelativeItemPosition(m_currentItem));
+
+    // A scrollbar may need to be redrawn
+    sig_change.raise();
+}
+
 bool
 ui::widgets::AbstractListbox::defaultHandleKey(util::Key_t key, int /*prefix*/)
 {
@@ -123,15 +178,15 @@ ui::widgets::AbstractListbox::defaultHandleKey(util::Key_t key, int /*prefix*/)
          case util::Key_Up:
          case util::Key_WheelUp:
             requestActive();
-            if (!hasFlag(Blocked) && m_currentItem > 0) {
-                setCurrentItem(m_currentItem-1, GoUp);
+            if (!hasFlag(Blocked)) {
+                scroll(LineUp);
             }
             return true;
          case util::Key_Down:
          case util::Key_WheelDown:
             requestActive();
             if (!hasFlag(Blocked)) {
-                setCurrentItem(m_currentItem+1, GoDown);
+                scroll(LineDown);
             }
             return true;
          case util::Key_Home:
@@ -153,13 +208,7 @@ ui::widgets::AbstractListbox::defaultHandleKey(util::Key_t key, int /*prefix*/)
             if (!hasFlag(NoPageKeys) || (key & util::KeyMod_Shift) != 0) {
                 requestActive();
                 if (!hasFlag(Blocked)) {
-                    size_t itemNr;
-                    gfx::Rectangle itemArea;
-                    if (getItemFromRelativePosition(getRelativeItemPosition(m_currentItem).getTopLeft() - gfx::Point(0, getPageSize()), itemNr, itemArea)) {
-                        setCurrentItem(itemNr, GoUp);
-                    } else {
-                        setCurrentItem(0, GoDown);
-                    }
+                    scroll(PageUp);
                 }
                 return true;
             }
@@ -169,15 +218,7 @@ ui::widgets::AbstractListbox::defaultHandleKey(util::Key_t key, int /*prefix*/)
             if (!hasFlag(NoPageKeys) || (key & util::KeyMod_Shift) != 0) {
                 requestActive();
                 if (!hasFlag(Blocked)) {
-                    size_t itemNr;
-                    gfx::Rectangle itemArea;
-                    if (getItemFromRelativePosition(getRelativeItemPosition(m_currentItem).getTopLeft() + gfx::Point(0, getPageSize()), itemNr, itemArea)) {
-                        setCurrentItem(itemNr, GoDown);
-                    } else if (size_t nr = getNumItems()) {
-                        setCurrentItem(nr-1, GoUp);
-                    } else {
-                        // empty
-                    }
+                    scroll(PageDown);
                 }
                 return true;
             }
@@ -505,23 +546,40 @@ ui::widgets::AbstractListbox::isFirstAccessibleItem(size_t nr)
 void
 ui::widgets::AbstractListbox::makeVisible(const gfx::Rectangle& relativeArea)
 {
-    int topY = relativeArea.getTopY();
-    int h    = relativeArea.getHeight();
+    const int topY = relativeArea.getTopY();
+    const int h    = relativeArea.getHeight();
+    const int totalHeight = getTotalSize();
+    const int oldTopY = m_topY;
 
-    int availableHeight = getExtent().getHeight() - getHeaderHeight();
+    const int availableHeight = getExtent().getHeight() - getHeaderHeight();
     if (availableHeight <= 0) {
-        // don't change anything, it's not visible
+        // Don't change anything, it's not visible
+    } else if (availableHeight >= totalHeight) {
+        // We have enough space for all content. No need for scrolling.
+        m_topY = 0;
     } else if (h > availableHeight) {
+        // This item is larger than the widget. Moving it to top is the best we can do.
         m_topY = topY;
-        requestRedraw();
-    } else if (topY < m_topY) {
-        m_topY = topY;
-        requestRedraw();
-    } else if (topY + h > m_topY + availableHeight) {
-        m_topY = topY + h - availableHeight;
-        requestRedraw();
     } else {
-        // No change needed
+        if (topY < m_topY) {
+            // Widget is above top. Move up.
+            m_topY = topY;
+        } else if (topY + h > m_topY + availableHeight) {
+            // Widget is below bottom. Move down.
+            m_topY = topY + h - availableHeight;
+        } else {
+            // No change needed
+        }
+
+        // Do not scroll down to leave unoccupied space
+        const int maxTopY = totalHeight - availableHeight;
+        if (m_topY > maxTopY) {
+            m_topY = maxTopY;
+        }
+    }
+
+    if (oldTopY != m_topY) {
+        requestRedraw();
     }
 }
 

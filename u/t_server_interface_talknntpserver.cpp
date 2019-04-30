@@ -28,11 +28,6 @@ namespace {
         TalkNNTPMock(afl::test::Assert a)
             : CallReceiver(a)
             { }
-        virtual String_t checkUser(String_t loginName, String_t password)
-            {
-                checkCall(Format("checkUser(%s,%s)", loginName, password));
-                return consumeReturnValue<String_t>();
-            }
         virtual void listNewsgroups(afl::container::PtrVector<Info>& result)
             {
                 checkCall("listNewsgroups()");
@@ -99,15 +94,6 @@ TestServerInterfaceTalkNNTPServer::testIt()
 {
     TalkNNTPMock mock("testIt");
     server::interface::TalkNNTPServer testee(mock);
-
-    // checkUser
-    mock.expectCall("checkUser(uu,pp)");
-    mock.provideReturnValue<String_t>("1045");
-    TS_ASSERT_EQUALS(testee.callString(Segment().pushBackString("NNTPUSER").pushBackString("uu").pushBackString("pp")), "1045");
-
-    mock.expectCall("checkUser(u\xc2\x80,pp)");
-    mock.provideReturnValue<String_t>("1046");
-    TS_ASSERT_EQUALS(testee.callString(Segment().pushBackString("NNTPUSER").pushBackString("u\xc2\x80").pushBackString("pp")), "1046");
 
     // listNewsgroups
     {
@@ -253,15 +239,6 @@ TestServerInterfaceTalkNNTPServer::testRoundtrip()
     server::interface::TalkNNTPClient level2(level1);
     server::interface::TalkNNTPServer level3(level2);
     server::interface::TalkNNTPClient level4(level3);
-
-    // checkUser
-    mock.expectCall("checkUser(uu,pp)");
-    mock.provideReturnValue<String_t>("1045");
-    TS_ASSERT_EQUALS(level4.checkUser("uu", "pp"), "1045");
-
-    mock.expectCall("checkUser(u\xc2\x80,pp)");
-    mock.provideReturnValue<String_t>("1046");
-    TS_ASSERT_EQUALS(level4.checkUser("u\xc2\x80", "pp"), "1046");
 
     // listNewsgroups
     {

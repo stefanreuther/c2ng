@@ -8,7 +8,6 @@
 #include "afl/net/headerfield.hpp"
 #include "afl/string/format.hpp"
 #include "afl/sys/log.hpp"
-#include "server/interface/hostgameclient.hpp"
 #include "server/interface/hostturnclient.hpp"
 
 using afl::sys::Log;
@@ -175,7 +174,6 @@ server::mailin::MailProcessor::processTurnFile(const afl::net::MimeParser& root,
 
     // Submit a turn file command.
     server::interface::HostTurnClient turnClient(m_host);
-    server::interface::HostGameClient gameClient(m_host);
 
     server::interface::HostTurn::Result result;
     try {
@@ -209,17 +207,15 @@ server::mailin::MailProcessor::processTurnFile(const afl::net::MimeParser& root,
     }
 
     // Generate a reply
-    const String_t gameName = gameClient.getName(result.gameId);
-    const String_t gameTurn = gameClient.getConfig(result.gameId, "turn");
     m_log.write(Log::Info, LOG_NAME,
                 Format("[ok] file '%s': user '%s', game '%d', slot %d, state %d")
                 << path << result.userId << result.gameId << result.slot << result.state);
 
     // Send mail
     m_mailQueue.startMessage("turn", String_t(Format("turn-%s-%d-%d", result.userId, result.gameId, result.slot)));
-    m_mailQueue.addParameter("gamename", gameName);
+    m_mailQueue.addParameter("gamename", result.gameName);
     m_mailQueue.addParameter("gameid", Format("%d", result.gameId));
-    m_mailQueue.addParameter("gameturn", gameTurn);
+    m_mailQueue.addParameter("gameturn", Format("%d", result.turnNumber));
     m_mailQueue.addParameter("slot", Format("%d", result.slot));
     m_mailQueue.addParameter("trn_status", Format("%d", result.state));
     m_mailQueue.addParameter("trn_output", result.output);

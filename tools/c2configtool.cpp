@@ -179,7 +179,7 @@ void
 ConsoleConfigApplication::showHelp()
 {
     afl::io::TextWriter& w = standardOutput();
-    w.writeLine(afl::string::Format(_("Configuration Tool v%s - (c) 2018 Stefan Reuther").c_str(), PCC2_VERSION));
+    w.writeLine(afl::string::Format(_("Configuration Tool v%s - (c) 2018-2019 Stefan Reuther").c_str(), PCC2_VERSION));
     w.writeText(afl::string::Format(_("\n"
                                       "Usage:\n"
                                       "  %s [-OPTIONS|FILES...]\n"

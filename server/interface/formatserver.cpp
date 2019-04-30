@@ -92,7 +92,6 @@ server::interface::FormatServer::call(const Segment_t& command)
            The character set defines the character encoding in the returned blob and defaults to Latin-1.
 
            @rettype Blob
-           @argtype Str
            @see UNPACK (Format Command) */
         FormatConfig cfg;
         parseFormatConfig(cfg, args);

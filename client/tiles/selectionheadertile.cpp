@@ -136,7 +136,7 @@ client::tiles::SelectionHeaderTile::attach(client::proxy::ObjectObserver& oop)
                 bool marked = false;
                 if (obj) {
                     marked = obj->isMarked();
-                    name = obj->getName(game::map::Object::LongName,
+                    name = obj->getName(game::LongName,
                                         s.translator(),
                                         s.interface());
                 }

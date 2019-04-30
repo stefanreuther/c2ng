@@ -13,8 +13,6 @@ TestServerInterfaceTalkNNTP::testIt()
 {
     class Tester : public server::interface::TalkNNTP {
      public:
-        virtual String_t checkUser(String_t /*loginName*/, String_t /*password*/)
-            { return String_t(); }
         virtual void listNewsgroups(afl::container::PtrVector<Info>& /*result*/)
             { }
         virtual Info findNewsgroup(String_t /*newsgroupName*/)

@@ -136,9 +136,6 @@ server::talk::ServerApplication::handleConfiguration(const String_t& key, const 
     } else if (key == "MAILOUT.PORT") {
         m_mailAddress.setService(value);
         return true;
-    } else if (key == "USER.KEY") {
-        m_config.userKey = value;
-        return true;
     } else {
         return false;
     }
@@ -147,7 +144,7 @@ server::talk::ServerApplication::handleConfiguration(const String_t& key, const 
 String_t
 server::talk::ServerApplication::getApplicationName() const
 {
-    return afl::string::Format(_("PCC2 Talk Server v%s - (c) 2017-2018 Stefan Reuther").c_str(), PCC2_VERSION);
+    return afl::string::Format(_("PCC2 Talk Server v%s - (c) 2017-2019 Stefan Reuther").c_str(), PCC2_VERSION);
 }
 
 String_t

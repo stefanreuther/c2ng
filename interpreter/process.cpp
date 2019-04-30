@@ -1133,7 +1133,7 @@ interpreter::Process::executeInstruction()
             if (valueStack.top() != 0) {
                 String_t name = toString(valueStack.top(), false);
                 valueStack.popBack();
-                if (!handleLoad(name)) {
+                if (!handleLoad(name, f.bco->getOrigin())) {
                     valueStack.pushBackNew(makeStringValue("File not found"));
                 } else {
                     valueStack.pushBackNew(0);
@@ -1208,6 +1208,38 @@ interpreter::Process::executeInstruction()
          case Opcode::miSpecialBind:
             handleBind(op.arg);
             break;
+         case Opcode::miSpecialFirst:
+            /* Start iteration */
+            /* @since 2.0.7, 2.40.6 */
+            checkStack(1);
+            if (CallableValue* iv = dynamic_cast<CallableValue*>(valueStack.top())) {
+                /* We have something to iterate over */
+                Context* con = iv->makeFirstContext();
+                valueStack.popBack();
+                valueStack.pushBackNew(con);
+            } else {
+                /* This is not a set */
+                throw Error::typeError(Error::ExpectIterable);
+            }
+            break;
+
+         case Opcode::miSpecialNext:
+            /* Continue iteration */
+            /* @since 2.0.7, 2.40.6 */
+            checkStack(1);
+            if (Context* ctx = dynamic_cast<Context*>(valueStack.top())) {
+                /* It's a context, advance */
+                if (!ctx->next()) {
+                    /* End of iteration, dump it */
+                    valueStack.popBack();
+                    valueStack.pushBackNew(0);
+                }
+            } else {
+                /* Wrong usage, not a set */
+                throw Error::typeError(Error::ExpectIterable);
+            }
+            break;
+
          default:
             handleInvalidOpcode();
         }
@@ -1459,7 +1491,7 @@ interpreter::Process::handleFunctionCall(BCORef_t bco, Segment_t& args, bool wan
 //     \retval false file not found
 //     \throw IntError on compilation error */
 bool
-interpreter::Process::handleLoad(String_t name)
+interpreter::Process::handleLoad(String_t name, const String_t& origin)
 {
     // ex IntExecutionContext::handleLoad
     afl::base::Ptr<afl::io::Stream> file = m_world.openLoadFile(name);
@@ -1468,7 +1500,7 @@ interpreter::Process::handleLoad(String_t name)
         return false;
     } else {
         // Make new frame
-        pushFrame(m_world.compileFile(*file), false);
+        pushFrame(m_world.compileFile(*file, origin, StatementCompiler::DEFAULT_OPTIMISATION_LEVEL), false);
         return true;
     }
 }

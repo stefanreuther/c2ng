@@ -62,7 +62,7 @@ game::interface::getExplosionProperty(const game::map::Explosion& expl,
         /* @q Name:Str (Explosion Property)
            User-friendly name of this explosion.
            @since PCC2 2.40.1 */
-        return makeStringValue(expl.getName(expl.PlainName, tx, iface));
+        return makeStringValue(expl.getName(PlainName, tx, iface));
 
      case iepTypeStr:
         /* @q Type:Str (Explosion Property)

@@ -31,6 +31,9 @@ TestServerInterfaceHostTurnClient::testIt()
         h->setNew("slot",     server::makeIntegerValue(8));
         h->setNew("previous", server::makeIntegerValue(1));
         h->setNew("user",     server::makeStringValue("uu"));
+        h->setNew("name",     server::makeStringValue("The Game"));
+        h->setNew("turn",     server::makeIntegerValue(27));
+        h->setNew("allowtemp", server::makeIntegerValue(1));
 
         mock.expectCall("TRN, content, GAME, 99, SLOT, 7, MAIL, u@h.d, INFO, detail");
         mock.provideNewResult(new HashValue(h));
@@ -42,6 +45,9 @@ TestServerInterfaceHostTurnClient::testIt()
         TS_ASSERT_EQUALS(r.slot, 8);
         TS_ASSERT_EQUALS(r.previousState, 1);
         TS_ASSERT_EQUALS(r.userId, "uu");
+        TS_ASSERT_EQUALS(r.gameName, "The Game");
+        TS_ASSERT_EQUALS(r.turnNumber, 27);
+        TS_ASSERT_EQUALS(r.allowTemp, true);
     }
 
     // - partial [no result]
@@ -56,6 +62,9 @@ TestServerInterfaceHostTurnClient::testIt()
         TS_ASSERT_EQUALS(r.slot, 0);
         TS_ASSERT_EQUALS(r.previousState, 0);
         TS_ASSERT_EQUALS(r.userId, "");
+        TS_ASSERT_EQUALS(r.gameName, "");
+        TS_ASSERT_EQUALS(r.turnNumber, 0);
+        TS_ASSERT_EQUALS(r.allowTemp, false);
     }
 
     // - partial

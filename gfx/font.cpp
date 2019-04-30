@@ -2,6 +2,7 @@
   *  \file gfx/font.cpp
   */
 
+#include <algorithm>
 #include "gfx/font.hpp"
 #include "gfx/context.hpp"
 #include "afl/charset/utf8.hpp"
@@ -25,6 +26,17 @@ gfx::Point
 gfx::Font::getCellSize()
 {
     return Point(getEmWidth(), getLineHeight());
+}
+
+int
+gfx::Font::getMaxTextWidth(const afl::functional::Mapping<int,String_t>& tab)
+{
+    int result = 0;
+    int i;
+    for (bool ok = tab.getFirstKey(i); ok; ok = tab.getNextKey(i)) {
+        result = std::max(result, getTextWidth(tab(i)));
+    }
+    return result;
 }
 
 

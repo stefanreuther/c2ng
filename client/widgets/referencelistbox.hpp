@@ -64,6 +64,11 @@ namespace client { namespace widgets {
         virtual ui::layout::Info getLayoutInfo() const;
         virtual bool handleKey(util::Key_t key, int prefix);
 
+        static void drawItem(gfx::Context<util::SkinColor::Color>& ctx,
+                             gfx::Rectangle area,
+                             const Item_t& item,
+                             gfx::ResourceProvider& provider);
+
      private:
         ui::Root& m_root;
         game::ref::UserList m_content;

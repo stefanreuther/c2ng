@@ -56,6 +56,13 @@ namespace {
                 checkCall(Format("checkFile(%d,%s,%s,%s)", gameId, userId, fileName, dirName.orElse("-")));
                 return consumeReturnValue<FileStatus>();
             }
+        virtual void set(int32_t gameId, String_t userId, String_t key, String_t value)
+            { checkCall(Format("set(%d,%s,%s,%s)", gameId, userId, key, value)); }
+        virtual String_t get(int32_t gameId, String_t userId, String_t key)
+            {
+                checkCall(Format("get(%d,%s,%s)", gameId, userId, key));
+                return consumeReturnValue<String_t>();
+            }
     };
 }
 
@@ -195,6 +202,15 @@ TestServerInterfaceHostPlayerServer::testIt()
     mock.expectCall("checkFile(9,oo,xyplan.dat,e/f/g)");
     mock.provideReturnValue(HostPlayer::Stale);
     TS_ASSERT_EQUALS(testee.callString(Segment().pushBackString("PLAYERCHECKFILE").pushBackInteger(9).pushBackString("oo").pushBackString("xyplan.dat").pushBackString("DIR").pushBackString("e/f/g")), "stale");
+
+    // get
+    mock.expectCall("get(10,uq,fun)");
+    mock.provideReturnValue<String_t>("answer");
+    TS_ASSERT_EQUALS(testee.callString(Segment().pushBackString("PLAYERGET").pushBackInteger(10).pushBackString("uq").pushBackString("fun")), "answer");
+
+    // set
+    mock.expectCall("set(10,uq,k,v)");
+    TS_ASSERT_THROWS_NOTHING(testee.callVoid(Segment().pushBackString("PLAYERSET").pushBackInteger(10).pushBackString("uq").pushBackString("k").pushBackString("v")));
 
     // Variants
     mock.expectCall("join(5,3,u)");
@@ -360,6 +376,15 @@ TestServerInterfaceHostPlayerServer::testRoundtrip()
     mock.expectCall("checkFile(9,oo,xyplan.dat,e/f/g)");
     mock.provideReturnValue(HostPlayer::Stale);
     TS_ASSERT_EQUALS(level4.checkFile(9, "oo", "xyplan.dat", String_t("e/f/g")), HostPlayer::Stale);
+
+    // set
+    mock.expectCall("set(10,u,kk,vv)");
+    TS_ASSERT_THROWS_NOTHING(level4.set(10, "u", "kk", "vv"));
+
+    // get
+    mock.expectCall("get(11,uu,kkk)");
+    mock.provideReturnValue<String_t>("vvv");
+    TS_ASSERT_EQUALS(level4.get(11, "uu", "kkk"), "vvv");
 
     mock.checkFinish();
 }

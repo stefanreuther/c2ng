@@ -1,97 +1,34 @@
 /**
   *  \file game/point.cpp
+  *  \brief Class game::map::Point
   */
 
 #include "game/map/point.hpp"
 #include "afl/string/parse.hpp"
 #include "util/math.hpp"
 
-game::map::Point::Point()
-    : m_x(0), m_y(0)
-{ }
-
-game::map::Point::Point(int x, int y)
-    : m_x(x), m_y(y)
-{ }
-
+// Get component.
 int
-game::map::Point::getX() const
+game::map::Point::get(Component c) const
 {
-    return m_x;
+    switch (c) {
+     case X: return m_x;
+     case Y: return m_y;
+    }
+    return 0;
 }
 
-int
-game::map::Point::getY() const
-{
-    return m_y;
-}
-
+// Set component.
 void
-game::map::Point::setX(int x)
+game::map::Point::set(Component c, int v)
 {
-    m_x = x;
+    switch (c) {
+     case X: m_x = v; break;
+     case Y: m_y = v; break;
+    }
 }
 
-void
-game::map::Point::setY(int y)
-{
-    m_y = y;
-}
-
-void
-game::map::Point::addX(int dx)
-{
-    m_x += dx;
-}
-
-void
-game::map::Point::addY(int dy)
-{
-    m_y += dy;
-}
-
-bool
-game::map::Point::operator==(Point rhs) const
-{
-    return m_x == rhs.m_x && m_y == rhs.m_y;
-}
-
-bool
-game::map::Point::operator!=(Point rhs) const
-{
-    return m_x != rhs.m_x || m_y != rhs.m_y;
-}
-
-game::map::Point
-game::map::Point::operator+(Point other) const
-{
-    return Point(m_x + other.m_x, m_y + other.m_y);
-}
-
-game::map::Point
-game::map::Point::operator-(Point other) const
-{
-    return Point(m_x - other.m_x, m_y - other.m_y);
-}
-
-game::map::Point&
-game::map::Point::operator+=(Point other)
-{
-    m_x += other.m_x; m_y += other.m_y;
-    return *this;
-}
-
-game::map::Point&
-game::map::Point::operator-=(Point other)
-{
-    m_x -= other.m_x;
-    m_y -= other.m_y;
-    return *this;
-}
-
-/** Set this point by parsing a coordinate pair.
-    \param str Coordinate
-    \return true on success */
+// Parse coordinates.
 bool
 game::map::Point::parseCoordinates(const String_t& str)
 {
@@ -111,16 +48,18 @@ game::map::Point::parseCoordinates(const String_t& str)
     return true;
 }
 
+// Three-way comparison.
 int
 game::map::Point::compare(const Point& other) const
 {
     int result = util::compare3(m_y, other.m_y);
     if (result == 0) {
-        result = util::compare3(m_x, other.m_x);        
+        result = util::compare3(m_x, other.m_x);
     }
     return result;
 }
 
+// Get squared distance to another point.
 long
 game::map::Point::getSquaredRawDistance(Point other) const
 {
@@ -130,6 +69,7 @@ game::map::Point::getSquaredRawDistance(Point other) const
     return dx*dx + dy*dy;
 }
 
+// Check distance.
 bool
 game::map::Point::isCloserThan(Point other, long distance) const
 {

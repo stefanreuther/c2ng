@@ -53,6 +53,9 @@ server::interface::HostTurnClient::submit(const String_t& blob,
     r.slot = a("slot").toInteger();
     r.previousState = a("previous").toInteger();
     r.userId = a("user").toString();
+    r.turnNumber = a("turn").toInteger();
+    r.gameName = a("name").toString();
+    r.allowTemp = a("allowtemp").toInteger() != 0;
     return r;
 }
 

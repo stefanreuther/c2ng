@@ -6,31 +6,28 @@
 
 #include <vector>
 #include "game/types.hpp"
+#include "util/vector.hpp"
 
 namespace game { namespace map {
 
-    class BaseStorage {
+    class BaseStorage : public util::Vector<IntegerProperty_t, int> {
      public:
         BaseStorage();
 
         ~BaseStorage();
 
-        void set(int slot, IntegerProperty_t amount);
-
-        IntegerProperty_t get(int slot) const;
-
-        const IntegerProperty_t* at(int slot) const;
-
-        IntegerProperty_t* at(int slot);
-
         bool isValid() const;
-
-        void clear();
-
-     private:
-        std::vector<IntegerProperty_t> m_content;
     };
 
 } }
+
+inline
+game::map::BaseStorage::BaseStorage()
+    : util::Vector<IntegerProperty_t, int>(1)
+{ }
+
+inline
+game::map::BaseStorage::~BaseStorage()
+{ }
 
 #endif

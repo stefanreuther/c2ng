@@ -1,0 +1,171 @@
+##
+##  c2talk
+##
+
+@q Talk (Service)
+@noproto
+The "Talk" service manages user-to-user communication.
+This includes three responsibilities:
+- forum
+- private mail
+- rendering
+
+<h2>Access</h2>
+
+The Talk service is accessible using
+- "talk" context on the console
+- {@group Talk Command} (a {pcc:resp|RESP service})
+- {@group Talk API} for forum and rendering (a {pcc:api|web API})
+- {@group Mail API} for private mail (a {pcc:api|web API})
+
+<h2>Domain Model</h2>
+
+<h3>Forum</h3>
+
+<b>Forums</b> are organized into a hierarchy of <b>groups</b>.
+Each <b>forum</b> can contain a number of threads, each thread can contain a number of <b>postings</b> (messages).
+Access control is provided for forums and threads.
+The data structures allow rendering the forum contents as a classic flat web forum, a hierarchy of postings,
+or a Usenet newsgroup via <b>NNTP</b>.
+
+Important forum data types:
+- {@type MID} (message/posting Id. Do not confuse with NNTP Message-IDs.)
+- {@type TID} (thread Id.)
+- {@type FID} (forum Id.)
+- {@type GRID} (forum group Id.)
+
+<h3>Private Mail</h3>
+
+<b>Mails</b> can be written from one user to a group of users or roles ("player 3 in game 9").
+Mails are organized into <b>folders</b>; each user has their own private folders not accessible to other users.
+Mails are stored in a single instance referenced on each use.
+That is, if user A sends mail to B and C, a link will be stored in A's outbox and B's and C's inbox.
+A message is deleted when the last user removes their links.
+
+Important mail data types:
+- {@type UFID} (user folder Id.)
+- {@type PMID} (mail Id. Must always be specified with a UFID.)
+
+<h3>Rendering</h3>
+
+The Talk service translates between a variety of message formats (BBcode, HTML, RFC text/plain, etc.).
+Text such as message bodies or forum descriptions are always stored with a type tag to preserve the original type.
+Upon use, they are converted.
+
+The renderer can provide <b>syntax highlighting</b> for posted source code or configuration files
+and therefore includes a queryable keyword database to provide links and descriptions for various keywords.
+
+<h2>Storage</h2>
+
+The Talk service stores all its data in the {@group Database}.
+It can send mails using {Mailout (Service)}.
+It accesses user profile data to store per-user data and access configuration.
+It also reads parts of the host database to be able to render game references and resolve "to: players of game" addresses.
+
+The syntax database is read from a file on startup and kept in memory (not modifiable during runtime).
+
+@uses Talk.Host, Talk.Port, Talk.Threads, Talk.MsgID, Talk.Path, Talk.WWWRoot, Talk.SyntaxDB
+@uses Redis.Host, Redis.Port, Mailout.Host, Mailout.Port, User.Key
+---
+
+
+@group Talk Command
+This {pcc:resp|RESP} interface is the interface to the {Talk (Service)|Talk} service.
+Talk commands can also be accessed through the {@group Talk API} and the {@group Mail API}.
+---
+@group Talk API
+The "talk" {pcc:api|API endpoint} accesses forum and rendering commands
+of the {@group Talk Command|talk service}.
+---
+@group Mail API
+The "mail" {pcc:api|API endpoint} accesses mail-related commands
+of the {@group Talk Command|talk service}.
+---
+
+
+############################### Types ################################
+
+@type MID
+This type represents a posting Id.
+Posting Ids are integers, see {@type Int}, with 0 not corresponding to a message.
+
+See {msg:id}, {thread:$TID:messages}, {forum:$FID:messages}.
+---
+@type TID
+This type represents a thread Id.
+Thread Ids are integers, see {@type Int}, with 0 not corresponding to a thread.
+
+See {thread:id}, {forum:$FID:threads}.
+---
+@type FID
+This type represents a forum Id.
+Forum Ids are integers, see {@type Int}, with 0 not corresponding to a forum.
+
+See {forum:id}, {forum:all}.
+---
+@type PMID
+This type represents a PM (mail) Id.
+PM Ids are integers, see {@type Int}, with 0 not corresponding to a PM.
+PMs are global because we implement single-instance store,
+but the API requires it to be associated with a {@type UFID}
+to make sure the user actually has the message he operates on.
+
+See {pm:id}, {user:$UID:pm:folder:$UFID:messages}.
+---
+@type UFID
+This type represents a user's PM folder Id.
+User folder Ids are integers, see {@type Int}, with 0 not corresponding to a folder.
+Well-known folders have low Ids:
+- 1: inbox
+- 2: outbox
+User-created folder Ids start at 100.
+
+See {user:$UID:pm:folder:id}, {user:$UID:pm:folder:all}, {default:folder:all}.
+@used
+---
+@type GRID
+Forum group Id. A {@type Str|string}.
+A forum can be member of a group.
+Groups can be nested.
+
+See {group:$GRID:groups}.
+---
+@type TalkText
+Longer texts in the Talk service can have different types and are converted by the Talk service as needed
+(see {PMRENDER}, {POSTRENDER}).
+
+Text starts with a type tag:
+- forum<em>&lt;flags&gt;</em>:XX (BBcode. The flags can include <b>S</b> for auto-smileys and <b>L</b> for auto-links; other capital letters for forward-compatibility.)
+- text:XX (plaintext. Newlines are paragraph boundaries.)
+- code:<em>&lt;language&gt;</em>:XX (code, rendered with syntax-coloring.)
+@c [- html:XX           trusted HTML (t.b.d.)]
+@c [- mail:XX           mail format (quotes with '>' etc.)]
+---
+@type TalkAddr
+Receivers of a PM are stored in a {@type Str|string}.
+A PM can have multiple receivers, separated by commas.
+The following receiver formats are accepted:
+- "u:{@type UID}"      - (server commands only) named user
+- "{@type UserName}"   - (API only) named user
+- "g:{@type GID}"      - all players in game (users in {game:$GID:users} with nonzero reference count)
+- "g:{@type GID}:slot" - slot in a game (users in {game:$GID:player:$P:users})
+---
+@type TalkFlag
+PMs have a user-specific set of flags associated with them.
+Flags are stored as {@type Int|integer} and interpreted as a bitfield.
+- 1 = read
+- 2 = replied
+- 4 = forwarded
+---
+@type TalkPerm
+Forum or thread permissions are stored as a {@type Str|string}
+containing a comma-separated list of access-control entries.
+
+Each access-control entry is one of:
+- "p:<em>property</em>" (e.g. "p:allowpost"): user must have the given <em>property</em> nonzero in their profile
+  ({user:$UID:profile})
+- "u:{@type UID}" (e.g. "p:1001"): given user is allowed
+- "g:{@type GID}" (e.g. "g:1"): user must exist in {game:$GID:users} (value does not matter, i.e. could be zero)
+- "all": allowed for everyone
+- "-<em>ACE</em>" (e.g. "-u:anon"): negated value, i.e. forbid if ACE matches
+---

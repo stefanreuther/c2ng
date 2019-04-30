@@ -22,6 +22,7 @@
 #include "ui/window.hpp"
 #include "util/translation.hpp"
 #include "util/unicodechars.hpp"
+#include "ui/widgets/standarddialogbuttons.hpp"
 
 namespace {
     size_t getPreviousWordBoundary(afl::charset::Utf8& u8, const String_t& str, size_t pos)
@@ -62,7 +63,7 @@ ui::widgets::InputLine::InputLine(size_t maxLength, Root& root)
       m_pixelOffset(0),
       m_text(),
       m_font(),
-      m_preferredLength(maxLength < 40 ? maxLength : 40),
+      m_preferredLength(maxLength < 40 ? int(maxLength) : 40),
       m_root(root),
       m_utf8()
 {
@@ -214,37 +215,8 @@ ui::widgets::InputLine::getCursorIndex() const
 bool
 ui::widgets::InputLine::doStandardDialog(String_t title, String_t prompt)
 {
-    // ex  UIInputLine::run (totally modified)
-//     if (width * font_ems[FONT_TITLE] > ui_root->getExtent().w - 40)
-//         width = (ui_root->getExtent().w - 40) / font_ems[FONT_TITLE];
-    afl::base::Deleter del;
-    EventLoop loop(m_root);
-
-    Window& window = del.addNew(new Window(title, m_root.provider(), m_root.colorScheme(), BLUE_WINDOW, ui::layout::VBox::instance5));
-    // FIXME: border 10
-
-    window.add(del.addNew(new StaticText(prompt, SkinColor::Static, gfx::FontRequest().addSize(1), m_root.provider())));
-    window.add(*this);
-
-    ui::widgets::Quit quit(m_root, loop);
-    Group& buttons = del.addNew(new Group(ui::layout::HBox::instance5));
-    buttons.add(del.addNew(new Spacer()));
-
-    Button& okButton = del.addNew(new Button(_("OK"), util::Key_Return, m_root));
-    Button& cancelButton = del.addNew(new Button(_("Cancel"), util::Key_Escape, m_root));
-    okButton.sig_fire.addNewClosure(loop.makeStop(1));
-    cancelButton.sig_fire.addNewClosure(loop.makeStop(0));
-    buttons.add(okButton);
-    buttons.add(cancelButton);
-    window.add(buttons);
-    window.add(quit);
-
-    // Do it
-    window.pack();
-    requestFocus();
-    m_root.centerWidget(window);
-    m_root.addChild(window, 0);
-    return loop.run() != 0;
+    // ex UIInputLine::run (totally modified)
+    return ui::widgets::doStandardDialog(title, prompt, *this, false, m_root);
 }
 
 // EventConsumer:

@@ -8,14 +8,15 @@
 #include "util/translation.hpp"
 
 // Constructor.
-util::RequestThread::RequestThread(String_t name, afl::sys::LogListener& log)
+util::RequestThread::RequestThread(String_t name, afl::sys::LogListener& log, int delay)
     : m_thread(),
       m_taskMutex(),
       m_taskSemaphore(0),
       m_taskQueue(),
       m_name(name),
       m_log(log),
-      m_stop(false)
+      m_stop(false),
+      m_delay(delay)
 {
     m_thread.reset(new afl::sys::Thread(name, *this));
     m_thread->start();
@@ -62,7 +63,10 @@ util::RequestThread::run()
         // Process tasks
         // FIXME: check termination requests between tasks?
         for (size_t i = 0, n = tasks.size(); i < n; ++i) {
-            // for testing: m_thread->sleep(1000);
+            // Request delay. This is a testing feature, so no need to check for termination here.
+            if (m_delay > 0) {
+                m_thread->sleep(m_delay);
+            }
             try {
                 tasks[i]->run();
             }

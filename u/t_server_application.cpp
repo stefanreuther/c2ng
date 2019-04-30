@@ -8,17 +8,13 @@
 #include "t_server.hpp"
 #include "afl/io/nullfilesystem.hpp"
 #include "afl/net/nullnetworkstack.hpp"
+#include "afl/base/nullenumerator.hpp"
 
 namespace {
-    class NullCommandLine : public afl::base::Enumerator<String_t> {
-     public:
-        bool getNextElement(String_t&)
-            { return false; }
-    };
     class TestEnvironment : public afl::sys::Environment {
      public:
         virtual afl::base::Ref<CommandLine_t> getCommandLine()
-            { return *new NullCommandLine(); }
+            { return *new afl::base::NullEnumerator<String_t>(); }
         virtual String_t getInvocationName()
             { return "TestEnvironment"; }
         virtual String_t getEnvironmentVariable(const String_t& /*name*/)
@@ -27,6 +23,8 @@ namespace {
             { return "/settings"; }
         virtual String_t getInstallationDirectoryName()
             { return "/install"; }
+        virtual afl::string::LanguageCode getUserLanguage()
+            { return afl::string::LanguageCode(); }
         virtual afl::base::Ref<afl::io::TextWriter> attachTextWriter(Channel /*ch*/)
             { throw std::runtime_error("attachTextWriter unsupported"); }
         virtual afl::base::Ref<afl::io::TextReader> attachTextReader(Channel /*ch*/)

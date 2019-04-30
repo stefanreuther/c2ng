@@ -4,20 +4,18 @@
 
 #include <stdexcept>
 #include "server/talk/talknntp.hpp"
+#include "afl/data/hashvalue.hpp"
+#include "afl/string/parse.hpp"
 #include "server/errors.hpp"
-#include "afl/checksums/md5.hpp"
-#include "afl/charset/base64.hpp"
+#include "server/talk/accesschecker.hpp"
+#include "server/talk/forum.hpp"
+#include "server/talk/group.hpp"
+#include "server/talk/message.hpp"
+#include "server/talk/render/context.hpp"
+#include "server/talk/render/options.hpp"
 #include "server/talk/root.hpp"
 #include "server/talk/session.hpp"
 #include "server/talk/user.hpp"
-#include "server/talk/render/context.hpp"
-#include "server/talk/render/options.hpp"
-#include "afl/string/parse.hpp"
-#include "server/talk/forum.hpp"
-#include "server/talk/message.hpp"
-#include "server/talk/accesschecker.hpp"
-#include "afl/data/hashvalue.hpp"
-#include "server/talk/group.hpp"
 
 server::talk::TalkNNTP::TalkNNTP(Session& session, Root& root)
     : m_session(session), m_root(root)
@@ -25,39 +23,6 @@ server::talk::TalkNNTP::TalkNNTP(Session& session, Root& root)
 
 server::talk::TalkNNTP::~TalkNNTP()
 { }
-
-String_t
-server::talk::TalkNNTP::checkUser(String_t loginName, String_t password)
-{
-    // ex doNntpUser
-    // Check user name
-    const String_t userId = m_root.getUserIdFromLogin(loginName);
-    if (userId.empty()) {
-        throw std::runtime_error(INVALID_USERNAME);
-    }
-
-    // Get their password
-    String_t correctHash = User(m_root, userId).passwordHash().get();
-    if (correctHash.empty()) {
-        throw std::runtime_error(INVALID_PASSWORD);
-    }
-
-    // Validate
-    afl::checksums::MD5 ctx;
-    ctx.add(afl::string::toBytes(m_root.config().userKey));
-    ctx.add(afl::string::toBytes(password));
-
-    uint8_t hashBuffer[afl::checksums::MD5::MAX_HASH_SIZE];
-    String_t userHash = "1," + afl::string::fromBytes(afl::charset::Base64().encode(afl::string::toMemory(afl::string::fromBytes(ctx.getHash(hashBuffer)))));
-    while (userHash.size() > 0 && userHash[userHash.size()-1] == '=') {
-        userHash.erase(userHash.size()-1);
-    }
-    if (userHash == correctHash) {
-        return userId;
-    } else {
-        throw std::runtime_error(INVALID_PASSWORD);
-    }
-}
 
 void
 server::talk::TalkNNTP::listNewsgroups(afl::container::PtrVector<Info>& result)

@@ -56,6 +56,8 @@ namespace {
         "instance",
         "resizearray\t%u",
         "bind",
+        "first",
+        "next",
     };
 
     const char* formatEnum(uint8_t minor, afl::base::Memory<const char*const> values)

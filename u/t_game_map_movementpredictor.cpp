@@ -15,6 +15,7 @@
 #include "game/test/specificationloader.hpp"
 #include "game/test/stringverifier.hpp"
 #include "game/turn.hpp"
+#include "afl/charset/utf8charset.hpp"
 
 using game::map::Point;
 using game::map::Ship;
@@ -80,6 +81,7 @@ TestGameMapMovementPredictor::testCombinations()
                     game::HostVersion(),
                     std::auto_ptr<game::RegistrationKey>(new game::test::RegistrationKey(game::test::RegistrationKey::Unregistered, 6)),
                     std::auto_ptr<game::StringVerifier>(new game::test::StringVerifier()),
+                    std::auto_ptr<afl::charset::Charset>(new afl::charset::Utf8Charset()),
                     game::Root::Actions_t());
 
     // Ship list
@@ -138,6 +140,7 @@ TestGameMapMovementPredictor::testMovement()
                     game::HostVersion(),
                     std::auto_ptr<game::RegistrationKey>(new game::test::RegistrationKey(game::test::RegistrationKey::Unregistered, 6)),
                     std::auto_ptr<game::StringVerifier>(new game::test::StringVerifier()),
+                    std::auto_ptr<afl::charset::Charset>(new afl::charset::Utf8Charset()),
                     game::Root::Actions_t());
 
     // Ship list
@@ -197,6 +200,7 @@ TestGameMapMovementPredictor::testInterceptLoop()
                     game::HostVersion(),
                     std::auto_ptr<game::RegistrationKey>(new game::test::RegistrationKey(game::test::RegistrationKey::Unregistered, 6)),
                     std::auto_ptr<game::StringVerifier>(new game::test::StringVerifier()),
+                    std::auto_ptr<afl::charset::Charset>(new afl::charset::Utf8Charset()),
                     game::Root::Actions_t());
 
     // Ship list

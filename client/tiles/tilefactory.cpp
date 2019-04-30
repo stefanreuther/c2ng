@@ -3,24 +3,25 @@
   */
 
 #include "client/tiles/tilefactory.hpp"
-#include "client/tiles/selectionheadertile.hpp"
-#include "client/tiles/errortile.hpp"
 #include "afl/string/format.hpp"
-#include "util/translation.hpp"
-#include "client/tiles/shipscreenheadertile.hpp"
-#include "client/tiles/planetscreenheadertile.hpp"
-#include "client/tiles/basescreenheadertile.hpp"
-#include "client/si/widgetwrapper.hpp"
-#include "interpreter/nametable.hpp"
-#include "interpreter/typehint.hpp"
 #include "client/si/genericwidgetvalue.hpp"
 #include "client/si/userside.hpp"
 #include "client/si/widgetcommand.hpp"
-#include "ui/rich/documentview.hpp"
-#include "client/widgets/standarddataview.hpp"
-#include "client/widgets/commanddataview.hpp"
+#include "client/si/widgetwrapper.hpp"
+#include "client/tiles/basescreenheadertile.hpp"
+#include "client/tiles/errortile.hpp"
+#include "client/tiles/planetscreenheadertile.hpp"
+#include "client/tiles/selectionheadertile.hpp"
 #include "client/tiles/shipcargotile.hpp"
 #include "client/tiles/shipmovementtile.hpp"
+#include "client/tiles/shipscreenheadertile.hpp"
+#include "client/tiles/starchartheadertile.hpp"
+#include "client/widgets/commanddataview.hpp"
+#include "client/widgets/standarddataview.hpp"
+#include "interpreter/nametable.hpp"
+#include "interpreter/typehint.hpp"
+#include "ui/rich/documentview.hpp"
+#include "util/translation.hpp"
 
 namespace {
     struct TileConfig {
@@ -78,36 +79,36 @@ namespace {
 //     { 0, 0, 0 }
 // };
 
-// static const TileConfig ship_lock[] = {
-//     { "NARROWHEADER",        0, 0 },
-//     { "NARROWSHIPEQUIPMENT", 0, 0 },
-//     { "NARROWSHIPCARGO",     0, 0 },
-//     { "NARROWSHIPMISSION",   0, 0 },
-//     { 0, 0, 0 },
-// };
+    static const TileConfig ship_lock[] = {
+        { "NARROWHEADER",        0, 0 },
+        { "NARROWSHIPEQUIPMENT", 0, 0 },
+        { "NARROWSHIPCARGO",     0, 0 },
+        { "NARROWSHIPMISSION",   0, 0 },
+        { 0, 0, 0 },
+    };
 
-// static const TileConfig planet_lock[] = {
-//     { "NARROWHEADER",          0, 0 },
-//     { "NARROWPLANETMINERAL",   0, 0 },
-//     { "NARROWPLANETECONOMY",   0, 0 },
-//     { "NARROWPLANETCOLONISTS", 0, 0 },
-//     { "NARROWPLANETNATIVES",   0, 0 },
-//     { "NARROWPLANETFCODE",     0, 0 },
-//     { 0, 0, 0 },
-// };
+    static const TileConfig planet_lock[] = {
+        { "NARROWHEADER",          0, 0 },
+        { "NARROWPLANETMINERAL",   0, 0 },
+        { "NARROWPLANETECONOMY",   0, 0 },
+        { "NARROWPLANETCOLONISTS", 0, 0 },
+        { "NARROWPLANETNATIVES",   0, 0 },
+        { "NARROWPLANETFCODE",     0, 0 },
+        { 0, 0, 0 },
+    };
 
-// static const TileConfig unknown_planet_lock[] = {
-//     { "NARROWHEADER", 0, 0 },
-//     { 0, 0, 0 },
-// };
+    static const TileConfig unknown_planet_lock[] = {
+        { "NARROWHEADER", 0, 0 },
+        { 0, 0, 0 },
+    };
 
-// static const TileConfig base_lock[] = {
-//     { "NARROWHEADER",        0, 0 },
-//     { "NARROWPLANETMINERAL", 0, 0 },
-//     { "NARROWBASETECH",      0, 0 },
-//     { "NARROWBASEORDER",     0, 0 },
-//     { 0, 0, 0 },
-// };
+    static const TileConfig base_lock[] = {
+        { "NARROWHEADER",        0, 0 },
+        { "NARROWPLANETMINERAL", 0, 0 },
+        { "NARROWBASETECH",      0, 0 },
+        { "NARROWBASEORDER",     0, 0 },
+        { 0, 0, 0 },
+    };
 
 // static const TileConfig shiptask_screen[] = {
 //     { "SHIPTASKHEADER",      0, 0 },
@@ -163,14 +164,14 @@ namespace {
 //         return history_screen;
 //     if (name == "FLEETSCREEN")
 //         return fleet_screen;
-//     if (name == "PLANETLOCK")
-//         return planet_lock;
-//     if (name == "SHIPLOCK")
-//         return ship_lock;
-//     if (name == "BASELOCK")
-//         return base_lock;
-//     if (name == "UNKNOWNPLANETLOCK")
-//         return unknown_planet_lock;
+        } else if (name == "PLANETLOCK") {
+            return planet_lock;
+        } else if (name == "SHIPLOCK") {
+            return ship_lock;
+        } else if (name == "BASELOCK") {
+            return base_lock;
+        } else if (name == "UNKNOWNPLANETLOCK") {
+            return unknown_planet_lock;
 //     if (name == "SHIPTASKSCREEN")
 //         return shiptask_screen;
 //     if (name == "PLANETTASKSCREEN")
@@ -295,6 +296,12 @@ client::tiles::TileFactory::createTile(String_t name, afl::base::Deleter& delete
             }
     };
 
+    class NullFactory : public DataViewFactory {
+     public:
+        void configure(client::widgets::StandardDataView& /*dv*/, ui::Root& /*root*/)
+            { }
+    };
+
     // Base
     if (name == "BASEHEADER") {
         BaseScreenHeaderTile& tile = deleter.addNew(new BaseScreenHeaderTile(m_root, m_keys));
@@ -302,14 +309,8 @@ client::tiles::TileFactory::createTile(String_t name, afl::base::Deleter& delete
         return &tile;
     }
     if (name == "BASEMINERAL") {
-        class Factory : public DataViewFactory {
-         public:
-            void configure(client::widgets::StandardDataView& /*dv*/, ui::Root& /*root*/)
-                {
-                    // ex WBaseMineralTile::WBaseMineralTile
-                }
-        };
-        return Factory().run(m_root, m_keys, 30, 4, "Tile.BaseMineral", deleter, m_userSide, m_observer);
+        // ex WBaseMineralTile::WBaseMineralTile
+        return NullFactory().run(m_root, m_keys, 30, 4, "Tile.BaseMineral", deleter, m_userSide, m_observer);
     }
     if (name == "BASETECH") {
         class Factory : public DataViewFactory {
@@ -369,12 +370,7 @@ client::tiles::TileFactory::createTile(String_t name, afl::base::Deleter& delete
         return Factory().run(m_root, m_keys, 30, 8, "Tile.PlanetEconomy", deleter, m_userSide, m_observer);
     }
     if (name == "PLANETNATIVES") {
-        class Factory : public DataViewFactory {
-         public:
-            void configure(client::widgets::StandardDataView& /*dv*/, ui::Root& /*root*/)
-                { }
-        };
-        return Factory().run(m_root, m_keys, 30, 4, "Tile.PlanetNatives", deleter, m_userSide, m_observer);
+        return NullFactory().run(m_root, m_keys, 30, 4, "Tile.PlanetNatives", deleter, m_userSide, m_observer);
     }
     if (name == "PLANETCOLONISTS") {
         class Factory : public DataViewFactory {
@@ -504,25 +500,33 @@ client::tiles::TileFactory::createTile(String_t name, afl::base::Deleter& delete
 //     if (name == "TASKEDITOR")
 //         return new WAutoTaskEditorTile(selection);
 
-//     // Narrow
-//     if (name == "NARROWHEADER")
-//         return new WNarrowHeaderTile(selection);
+    // Narrow
+    if (name == "NARROWHEADER") {
+        StarchartHeaderTile& tile = deleter.addNew(new StarchartHeaderTile(m_root));
+        tile.attach(m_observer);
+        return &tile;
+    }
 //     if (name == "NARROWSHIPEQUIPMENT")
 //         return new WNarrowShipEquipmentTile(selection);
 //     if (name == "NARROWSHIPCARGO")
 //         return new WNarrowShipCargoTile(selection);
 //     if (name == "NARROWSHIPMISSION")
 //         return new WNarrowShipMissionTile(selection);
-//     if (name == "NARROWPLANETMINERAL")
-//         return new WNarrowPlanetMineralTile(selection);
-//     if (name == "NARROWPLANETECONOMY")
-//         return new WNarrowPlanetEconomyTile(selection);
-//     if (name == "NARROWPLANETCOLONISTS")
-//         return new WNarrowPlanetColonistTile(selection);
-//     if (name == "NARROWPLANETNATIVES")
-//         return new WNarrowPlanetNativeTile(selection);
-//     if (name == "NARROWPLANETFCODE")
-//         return new WNarrowPlanetFCodeTile(selection);
+    if (name == "NARROWPLANETMINERAL") {
+        return NullFactory().run(m_root, m_keys, 25, 5, "Tile.NarrowPlanetMinerals", deleter, m_userSide, m_observer);
+    }
+    if (name == "NARROWPLANETECONOMY") {
+        return NullFactory().run(m_root, m_keys, 25, 3, "Tile.NarrowPlanetEconomy", deleter, m_userSide, m_observer);
+    }
+    if (name == "NARROWPLANETCOLONISTS") {
+        return NullFactory().run(m_root, m_keys, 25, 3, "Tile.NarrowPlanetColonists", deleter, m_userSide, m_observer);
+    }
+    if (name == "NARROWPLANETNATIVES") {
+        return NullFactory().run(m_root, m_keys, 25, 4, "Tile.NarrowPlanetNatives", deleter, m_userSide, m_observer);
+    }
+    if (name == "NARROWPLANETFCODE") {
+        return NullFactory().run(m_root, m_keys, 25, 2, "Tile.NarrowPlanetFCode", deleter, m_userSide, m_observer);
+    }
 //     if (name == "NARROWBASETECH")
 //         return new WNarrowBaseTechTile(selection);
 //     if (name == "NARROWBASEORDER")

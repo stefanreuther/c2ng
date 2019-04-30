@@ -87,10 +87,9 @@ client::widgets::FolderListbox::handleKey(util::Key_t key, int prefix)
 }
 
 void
-client::widgets::FolderListbox::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+client::widgets::FolderListbox::handlePositionChange(gfx::Rectangle& oldPosition)
 {
-    // FIXME: do we need to do something here?
-    requestRedraw();
+    defaultHandlePositionChange(oldPosition);
 }
 
 void

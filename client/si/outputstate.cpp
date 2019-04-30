@@ -40,6 +40,7 @@ client::si::OutputState::toString(OutputState::Target target)
      case ShipScreen:   result = "ShipScreen";   break;
      case PlanetScreen: result = "PlanetScreen"; break;
      case BaseScreen:   result = "BaseScreen";   break;
+     case Starchart:    result = "Starchart";    break;
     }
     return result;
 }

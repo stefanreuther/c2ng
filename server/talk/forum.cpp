@@ -231,7 +231,7 @@ server::talk::Forum::describe(const server::talk::render::Context& ctx, const se
     server::interface::TalkForum::Info result;
     result.name = name().get();
     result.parentGroup = getParent();
-    result.description = server::talk::render::render(description().get(), ctx, opts, root);
+    result.description = server::talk::render::renderText(description().get(), ctx, opts, root);
     result.newsgroupName = getNewsgroup();
     return result;
 }
@@ -246,7 +246,7 @@ server::talk::Forum::describeAsNewsgroup(const server::talk::render::Context& ct
     result.firstSequenceNumber = 1;
     result.lastSequenceNumber = lastMessageSequenceNumber().get();
     result.writeAllowed = session.hasPermission(writePermissions().get(), root);
-    result.description = server::talk::render::render(description().get(), ctx, opts, root);
+    result.description = server::talk::render::renderText(description().get(), ctx, opts, root);
     return result;
 }
 

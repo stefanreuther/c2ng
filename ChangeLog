@@ -1,3 +1,403 @@
+2019-04-19  Stefan Reuther  <streu@gmx.de>
+
+	* server/host/hosthistory.cpp (getTurns): add SINCETIME clause. Correctly report external time format.
+
+2019-04-18  Stefan Reuther  <streu@gmx.de>
+
+	* server/host/hostranking.cpp, server/host/hostranking.hpp: new
+	* server/interface/hostranking.hpp: new
+	* server/interface/hostrankingclient.cpp, server/interface/hostrankingclient.hpp: new
+	* server/interface/hostrankingserver.cpp, server/interface/hostrankingserver.hpp: new
+
+2019-04-14  Stefan Reuther  <streu@gmx.de>
+
+	* server/host/hosthistory.cpp, server/host/hosthistory.hpp: new
+	* server/interface/hosthistory.hpp: new
+	* server/interface/hosthistoryclient.cpp, server/interface/hosthistoryclient.hpp: new
+	* server/interface/hosthistoryserver.cpp, server/interface/hosthistoryserver.hpp: new
+
+2019-04-13  Stefan Reuther  <streu@gmx.de>
+
+	* server/interface/hostplayer.hpp: add PLAYERGET, PLAYERSET commands
+	* server/interface/talkforum.hpp: add FORUMBYNAME command
+
+2019-04-12  Stefan Reuther  <streu@gmx.de>
+
+	* server/interface/hostcron.hpp: add CRONLSBROKEN command
+
+2019-04-10  Stefan Reuther  <streu@gmx.de>
+
+	* interpreter/opcode.hpp: add sfirst/snext instructions
+
+2019-04-06  Stefan Reuther  <streu@gmx.de>
+
+	* scripts/doc.pl: update and fix most warnings
+
+2019-03-31  Stefan Reuther  <streu@gmx.de>
+
+	* server/talk/talkaddress.cpp (render): format 'raw' produces inverse to parse()
+
+2019-03-30  Stefan Reuther  <streu@gmx.de>
+
+	* server/interface/talkaddress.hpp: new
+	* server/interface/talkaddressclient.cpp, server/interface/talkaddressclient.hpp: new
+	* server/interface/talkaddressserver.cpp, server/interface/talkaddressserver.hpp: new
+	* server/talk/talkaddress.cpp, server/talk/talkaddress.hpp: new
+
+2019-03-24  Stefan Reuther  <streu@gmx.de>
+
+	* server/interface/mailqueue.cpp, server/interface/mailqueue.hpp: add STATUS (getUserStatus) command
+	* server/interface/mailqueueclient.cpp, server/interface/mailqueueclient.hpp: implemented interface change
+	* server/interface/mailqueueserver.cpp: implemented interface change
+	* server/mailout/mailqueue.cpp, server/mailout/mailqueue.hpp: implemented interface change
+	* server/mailout/root.cpp, server/mailout/root.hpp: implemented interface change
+	* main/c2ng.cpp: quick & dirty SSL support
+
+2019-03-21  Stefan Reuther  <streu@gmx.de>
+
+	* server/file/filebase.cpp: if pconfig.src is uploaded, automatically set prop:name
+	* server/interface/userdata.hpp: new
+	* server/interface/userdataclient.cpp, server/interface/userdataclient.hpp: new
+	* server/interface/userdataserver.cpp, server/interface/userdataserver.hpp: new
+	* server/user/userdata.cpp, server/user/userdata.hpp: new
+
+2019-03-17  Stefan Reuther  <streu@gmx.de>
+
+	* server/interface/talknntp.hpp (checkUser): remove method
+	* server/nntp/linehandler.cpp: use user server for login check
+
+2019-03-13  Stefan Reuther  <streu@gmx.de>
+
+	* server/common/util.cpp, server/common/util.hpp: moved here from server/talk/util.cpp
+	* server/user/classicencrypter.cpp, server/user/classicencrypter.hpp: new
+	* server/user/configuration.cpp, server/user/configuration.hpp: new
+	* server/user/passwordencrypter.hpp: new
+	* server/user/usermanagement.cpp, server/user/usermanagement.hpp: new
+
+2019-03-11  Stefan Reuther  <streu@gmx.de>
+
+	* server/interface/usermanagement.hpp: new
+	* server/interface/usermanagementclient.cpp, server/interface/usermanagementclient.hpp: new
+	* server/interface/usermanagementserver.cpp, server/interface/usermanagementserver.hpp: new
+
+2019-03-10  Stefan Reuther  <streu@gmx.de>
+
+	* server/interface/hostturn.cpp, server/interface/hostturn.hpp: TRN command now provides game name, turn number, allow-temp suggestion
+	* server/host/hostturn.cpp: implemented interface change
+	* server/interface/hostturnclient.cpp: implemented interface change
+	* server/interface/hostturnserver.cpp: implemented interface change
+	* server/mailin/mailprocessor.cpp: use information provided by TRN command
+
+2019-03-05  Stefan Reuther  <streu@gmx.de>
+
+	* server/monitor/serverapplication.cpp: add user server
+
+2019-03-04  Stefan Reuther  <streu@gmx.de>
+
+	* server/router/session.cpp: adjust logging
+
+2019-03-03  Stefan Reuther  <streu@gmx.de>
+
+	* server/user/usertoken.cpp: adjust token parameters
+
+2019-02-27  Stefan Reuther  <streu@gmx.de>
+
+	* server/c2user.cpp: new
+	* server/common/idgenerator.hpp: moved here
+	* server/common/numericalidgenerator.cpp, server/common/numericalidgenerator.hpp: moved here
+	* server/common/randomidgenerator.cpp, server/common/randomidgenerator.hpp: moved here
+	* server/interface/usertoken.hpp: new
+	* server/interface/usertokenclient.cpp, server/interface/usertokenclient.hpp: new
+	* server/interface/usertokenserver.cpp, server/interface/usertokenserver.hpp: new
+	* server/user/commandhandler.cpp, server/user/commandhandler.hpp: new
+	* server/user/root.cpp, server/user/root.hpp: new
+	* server/user/serverapplication.cpp, server/user/serverapplication.hpp: new
+	* server/user/token.cpp, server/user/token.hpp: new
+	* server/user/user.cpp, server/user/user.hpp: new
+	* server/user/usertoken.cpp, server/user/usertoken.hpp: new
+
+2019-02-23  Stefan Reuther  <streu@gmx.de>
+
+	* doc/ServerReference/: import from planetscentral repository
+
+2019-02-16  Stefan Reuther  <streu@gmx.de>
+
+	* server/file/pathresolver.cpp (resolveToItem): access to a directory needs to be validated against the permissions of the directory, not its container [#390]
+
+2019-02-09  Stefan Reuther  <streu@gmx.de>
+
+	* Removed old build system
+
+2019-02-06  Stefan Reuther  <streu@gmx.de>
+
+	* server/router/idgenerator.hpp: new
+	* server/router/numericalidgenerator.cpp, server/router/numericalidgenerator.hpp: new
+	* server/router/randomidgenerator.cpp, server/router/randomidgenerator.hpp: new
+
+2019-02-05  Stefan Reuther  <streu@gmx.de>
+
+	* server/interface/sessionrouter.hpp: changed type of session-Id from integer to string
+
+2019-01-27  Stefan Reuther  <streu@gmx.de>
+
+	* server/router/root.cpp, server/router/session.cpp, server/router/sessionrouter.cpp: rework session conflict resolution
+	* util/process/nullfactory.cpp: new
+
+2019-01-26  Stefan Reuther  <streu@gmx.de>
+
+	* util/process/factory.hpp: new
+	* util/process/subprocess.hpp: new
+	* util/process/posixfactory.cpp: new
+
+2019-01-22  Stefan Reuther  <streu@gmx.de>
+
+	* server/router/configuration.cpp, server/router/configuration.hpp: new
+	* server/router/root.cpp, server/router/root.hpp: new
+	* server/router/session.cpp, server/router/session.hpp: new [ex server/session.cc]
+
+2019-01-20  Stefan Reuther  <streu@gmx.de>
+
+	* server/interface/sessionroutersingleserver.cpp, server/interface/sessionroutersingleserver.hpp: new [ex server/router.cc]
+	* server/router/serverapplication.cpp, server/router/serverapplication.hpp: new [ex server/router.cc]
+	* server/router/sessionrouter.cpp, server/router/sessionrouter.hpp: new [ex server/router.cc]
+	* server/c2logger.cpp: new [ex planetscentral/logger.cc]
+
+2019-01-17  Stefan Reuther  <streu@gmx.de>
+
+	* game/map/minefieldformula.cpp, game/map/minefieldformula.hpp: new
+	* client/map/minefieldmissionoverlay.cpp, client/map/minefieldmissionoverlay.hpp: new [ex client/screens/shipscreen.cc]
+
+2018-12-29  Stefan Reuther  <streu@gmx.de>
+
+	* share/resource/core_ui.q, share/resource/core_tiles.q: new tiles. Do not destroy user's SYSTEM.ERR.
+	* interpreter/optimizer.cpp (doDeadStore): new optimisation
+
+2018-12-28  Stefan Reuther  <streu@gmx.de>
+
+	* interpreter/optimizer.cpp (doTailMerge): new optimisation
+	* client/proxy/referenceobserverproxy.cpp, client/map/screen.cpp: make view changes happen without warning
+
+2018-12-27  Stefan Reuther  <streu@gmx.de>
+
+	* client/map/prefixoverlay.cpp, client/map/prefixoverlay.hpp: new [ex client/chart/prefixmode.h]
+	* interpreter/consoleapplication.cpp, interpreter/consoleapplication.hpp: new
+
+2018-12-25  Stefan Reuther  <streu@gmx.de>
+
+	* client/tiles/starchartheadertile.cpp, client/tiles/starchartheadertile.hpp: new [ex client/tiles/nheader.h]
+
+2018-12-23  Stefan Reuther  <streu@gmx.de>
+
+	* client/map/starchartoverlay.cpp, client/map/starchartoverlay.hpp: new [ex client/chart/standardmode.h]
+
+2018-12-21  Stefan Reuther  <streu@gmx.de>
+
+	* util/requestthread.cpp: make request delay configurable for testing
+
+2018-12-20  Stefan Reuther  <streu@gmx.de>
+
+	* client/map/location.cpp, client/map/location.hpp: new [ex client/chartloc.h]
+	* client/proxy/maplocationproxy.cpp, client/proxy/maplocationproxy.hpp: new
+	* game/map/location.cpp, game/map/location.hpp: new
+
+2018-12-19  Stefan Reuther  <streu@gmx.de>
+
+	* client/map/screen.cpp, client/map/screen.hpp: new, preliminary
+
+2018-12-15  Stefan Reuther  <streu@gmx.de>
+
+	* share/specs/mission.cc, share/resource/core_ui.q: add mission list
+
+2018-12-14  Stefan Reuther  <streu@gmx.de>
+
+	* interpreter/expr/builtinfunction.cpp: add two-argument EVAL function
+
+2018-12-12  Stefan Reuther  <streu@gmx.de>
+
+	* ui/widgets/scrollbar.cpp, ui/widgets/scrollbar.hpp: new [ex ui/listbox.cc]
+
+2018-12-10  Stefan Reuther  <streu@gmx.de>
+
+	* client/dialogs/helpdialog.cpp, client/dialogs/helpdialog.hpp: new [ex client/dialogs/helpdlg.h]
+
+2018-12-09  Stefan Reuther  <streu@gmx.de>
+
+	* interpreter/optimizer.cpp (doIntCompare): fix bad optimisation
+	* client/proxy/helpproxy.cpp, client/proxy/helpproxy.hpp: new
+	* ui/rich/documentparser.cpp, ui/rich/documentparser.hpp: new [ex ui/richhelp.cc]
+
+2018-11-30  Stefan Reuther  <streu@gmx.de>
+
+	* game/map/beamupplanettransfer.cpp, game/map/beamupplanettransfer.hpp: new [ex game/bum.cc]
+	* game/map/beamupshiptransfer.cpp, game/map/beamupshiptransfer.hpp: new [ex game/bum.cc]
+
+2018-11-25  Stefan Reuther  <streu@gmx.de>
+
+	* client/dialogs/cargotransferdialog.cpp, client/dialogs/cargotransferdialog.hpp: new [ex client/dlg-cargo.cc]
+	* client/widgets/cargotransferheader.cpp, client/widgets/cargotransferheader.hpp: new [ex client/dlg-cargo.cc]
+	* client/widgets/cargotransferline.cpp, client/widgets/cargotransferline.hpp: new [ex client/dlg-cargo.cc]
+
+2018-11-24  Stefan Reuther  <streu@gmx.de>
+
+	* client/cargotransfer.cpp, client/cargotransfer.hpp: new [ex client/dlg-cargo.cc]
+	* client/proxy/cargotransferproxy.cpp, client/proxy/cargotransferproxy.hpp: new
+	* client/proxy/cargotransfersetupproxy.cpp, client/proxy/cargotransfersetupproxy.hpp: new
+	* game/ref/sortbytransfertarget.cpp, game/ref/sortbytransfertarget.hpp: new
+	* util/vector.hpp: new
+
+2018-11-11  Stefan Reuther  <streu@gmx.de>
+
+	* game/map/boundingbox.cpp, game/map/boundingbox.hpp: new [ex game/bbox.h]
+
+2018-11-04  Stefan Reuther  <streu@gmx.de>
+
+	* client/dialogs/shipspeeddialog.cpp, client/dialogs/shipspeeddialog.hpp: new [ex client/dlg-warp.cc]
+	* client/proxy/shipspeedproxy.cpp, client/proxy/shipspeedproxy.hpp: new [ex client/dlg-warp.cc]
+	* client/widgets/shipspeedwidget.cpp, client/widgets/shipspeedwidget.hpp: new [ex client/dlg-warp.cc]
+
+2018-10-28  Stefan Reuther  <streu@gmx.de>
+
+	* server/host/hostplayer.cpp (list): fix off-by-one causing PLAYERLS ALL to list wrong slots in games with fewer than 11 players
+	* server/host/game.cpp (describeSlot): do not list died slots as joinable
+
+2018-10-27  Stefan Reuther  <streu@gmx.de>
+
+	* server/host/hostslot.cpp, server/host/hostslot.hpp: new
+	* server/interface/hostslot.hpp: new
+	* server/interface/hostslotclient.cpp, server/interface/hostslotclient.hpp: new
+	* server/interface/hostslotserver.cpp, server/interface/hostslotserver.hpp: new
+
+2018-10-14  Stefan Reuther  <streu@gmx.de>
+
+	* client/dialogs/keymapdialog.cpp, client/dialogs/keymapdialog.hpp: new [ex client/dialogs/keymapdlg.cc]
+	* client/proxy/keymapproxy.cpp, client/proxy/keymapproxy.hpp: new
+	* game/maint/raterapplication.cpp, game/maint/raterapplication.hpp: new
+	* game/maint/sweepapplication.cpp, game/maint/sweepapplication.hpp: new
+	* game/v3/trn/dumperapplication.cpp, game/v3/trn/dumperapplication.hpp: new
+	* interpreter/bytecodeobject.hpp: track origin (plugin) of bytecode objects
+	* interpreter/exporter/consoleapplication.cpp, interpreter/exporter/consoleapplication.hpp: new
+	* util/keymapinformation.cpp, util/keymapinformation.hpp: new
+
+2018-10-03  Stefan Reuther  <streu@gmx.de>
+
+	* client/si/commandtask.cpp, client/si/commandtask.hpp: new
+	* client/si/scripttask.hpp: new
+	* client/si/scriptside.cpp: reworked the UserSide<>ScriptSide transition
+
+2018-09-30  Stefan Reuther  <streu@gmx.de>
+
+	* client/screens/playerscreen.cpp: run auto-tasks
+
+2018-09-27  Stefan Reuther  <streu@gmx.de>
+
+	* game/session.cpp (hasTask): implement
+	* game/interface/vmfile.cpp, game/interface/vmfile.hpp: new [ex int/vmfile.cc]
+
+2018-09-23  Stefan Reuther  <streu@gmx.de>
+
+	* server/play/commandhandler.hpp: new [ex server/objcmd.cc]
+	* server/play/planetcommandhandler.cpp, server/play/planetcommandhandler.hpp: new [ex server/objcmd.cc]
+	* server/play/planetfriendlycodepacker.cpp, server/play/planetfriendlycodepacker.hpp: new [ex server/queryout.cc]
+	* server/play/shipcommandhandler.cpp, server/play/shipcommandhandler.hpp: new [ex server/objcmd.cc]
+	* server/play/shipfriendlycodepacker.cpp, server/play/shipfriendlycodepacker.hpp: new [ex server/queryout.cc]
+	* server/play/shipmissionpacker.cpp, server/play/shipmissionpacker.hpp: new [ex server/queryout.cc]
+
+2018-09-22  Stefan Reuther  <streu@gmx.de>
+
+	* server/play/configurationpacker.cpp, server/play/configurationpacker.hpp: new [ex server/cfgout.cc]
+	* server/play/ionstormpacker.cpp, server/play/ionstormpacker.hpp: new [ex server/objout.cc]
+	* server/play/messagepacker.cpp, server/play/messagepacker.hpp: new [ex server/objout.cc]
+	* server/play/minefieldpacker.cpp, server/play/minefieldpacker.hpp: new [ex server/objout.cc]
+	* server/play/planetpacker.cpp, server/play/planetpacker.hpp: new [ex server/objout.cc]
+	* server/play/shippacker.cpp, server/play/shippacker.hpp: new [ex server/objout.cc]
+	* server/play/ufopacker.cpp, server/play/ufopacker.hpp: new [ex server/objout.cc]
+	* server/play/vcrpacker.cpp, server/play/vcrpacker.hpp: new [ex server/objout.cc]
+
+2018-09-20  Stefan Reuther  <streu@gmx.de>
+
+	* server/play/beampacker.cpp, server/play/beampacker.hpp: new [ex server/objout.cc]
+	* server/play/enginepacker.cpp, server/play/enginepacker.hpp: new [ex server/objout.cc]
+	* server/play/hullpacker.cpp, server/play/hullpacker.hpp: new [ex server/objout.cc]
+	* server/play/mainpacker.cpp, server/play/mainpacker.hpp: new [ex server/objout.cc]
+	* server/play/planetxypacker.cpp, server/play/planetxypacker.hpp: new [ex server/objout.cc]
+	* server/play/playerpacker.cpp, server/play/playerpacker.hpp: new [ex server/objout.cc]
+	* server/play/torpedopacker.cpp, server/play/torpedopacker.hpp: new [ex server/objout.cc]
+	* server/play/truehullpacker.cpp, server/play/truehullpacker.hpp: new [ex server/objout.cc]
+
+2018-09-18  Stefan Reuther  <streu@gmx.de>
+
+	* server/c2play.cpp: new [ex server/server.cc]
+	* server/interface/gameaccess.hpp: new
+	* server/interface/gameaccessserver.cpp, server/interface/gameaccessserver.hpp: new
+	* server/play/consoleapplication.cpp, server/play/consoleapplication.hpp: new [ex server/server.cc]
+	* server/play/gameaccess.cpp, server/play/gameaccess.hpp: new [ex server/server.cc]
+	* server/play/packer.cpp, server/play/packer.hpp: new [ex server/objout.h]
+	* server/play/packerlist.cpp, server/play/packerlist.hpp: new [ex server/postobj.h]
+	* server/play/shipxypacker.cpp, server/play/shipxypacker.hpp: new [ex server/objout.h]
+
+2018-09-16  Stefan Reuther  <streu@gmx.de>
+
+	* client/screenhistory.cpp, client/screenhistory.hpp: new [ex client/screens.h]
+	* client/dialogs/screenhistorydialog.cpp, client/dialogs/screenhistorydialog.hpp: new [ex client/history.h]
+	* client/proxy/screenhistoryproxy.cpp, client/proxy/screenhistoryproxy.hpp: new
+
+2018-09-10  Stefan Reuther  <streu@gmx.de>
+
+	* ui/widgets/abstractlistbox.cpp: properly deal with size changes, selections outside viewport, etc.
+	* client/proxy/friendlycodeproxy.cpp, client/proxy/friendlycodeproxy.hpp: new
+
+2018-09-09  Stefan Reuther  <streu@gmx.de>
+
+	* client/dialogs/friendlycodedialog.cpp, client/dialogs/friendlycodedialog.hpp: new [ex client/dlg-fcode.h]
+	* client/proxy/configurationproxy.cpp, client/proxy/configurationproxy.hpp: new [incomplete]
+	* client/widgets/friendlycodelist.cpp, client/widgets/friendlycodelist.hpp: new [ex client/dlg-fcode.h]
+	* game/data/friendlycode.cpp, game/data/friendlycode.hpp: new
+	* ui/widgets/decimalselector.cpp, ui/widgets/decimalselector.hpp: new [ex ui/widgets/decimalsel.h]
+	* util/numberformatter.cpp, util/numberformatter.hpp: new
+
+2018-09-08  Stefan Reuther  <streu@gmx.de>
+
+	* client/dialogs/techupgradedialog.cpp, client/dialogs/techupgradedialog.hpp: new [ex client/dlg-tech.h]
+	* client/widgets/costdisplay.cpp, client/widgets/costdisplay.hpp: new [ex client/dlg-tech.h]
+	* client/widgets/techbar.cpp, client/widgets/techbar.hpp: new [ex client/dlg-tech.h]
+	* ui/widgets/focusablegroup.cpp, ui/widgets/focusablegroup.hpp: new [ex ui/widgets/focusgroup.h]
+	* ui/widgets/numberselector.cpp, ui/widgets/numberselector.hpp: new [ex ui/widgets/numbersel.h]
+
+2018-09-07  Stefan Reuther  <streu@gmx.de>
+
+	* client/map/movementoverlay.cpp, client/map/movementoverlay.hpp: new
+	* client/proxy/lockproxy.cpp, client/proxy/lockproxy.hpp: new
+
+2018-09-06  Stefan Reuther  <streu@gmx.de>
+
+	* game/map/locker.cpp, game/map/locker.hpp: new [ex game/lock.h]
+	* client/map/callback.hpp: new
+	* client/map/overlay.cpp, client/map/overlay.hpp: new [ex client/chartmode.h]
+	* client/map/scanneroverlay.cpp, client/map/scanneroverlay.hpp: new [ex client/wscanchart.h]
+
+2018-09-04  Stefan Reuther  <streu@gmx.de>
+
+	* client/widgets/scanresult.cpp, client/widgets/scanresult.hpp: new [ex client/widgets/scanresult.h]
+
+2018-09-03  Stefan Reuther  <streu@gmx.de>
+
+	* game/interface/consolecommands.cpp, game/interface/consolecommands.hpp: new [ex int/if/conif.h]
+	* interpreter/genericvalue.hpp: new
+	* game/interface/markingfunctions.cpp, game/interface/markingfunctions.hpp: new [ex game/selio.h]
+	* game/session.cpp (getReferenceName): allow to retrieve plain/long/detailed names
+
+2018-09-02  Stefan Reuther  <streu@gmx.de>
+
+	* server/scripts/init/bin/checkturn.sh: use c2check if host is Tim-Host
+	* server/interface/hostcron.hpp: new command, CRONSUSPEND
+	* server/host/serverapplication.cpp: new option, HOST.INITIALSUSPEND
+	new option: BINDIR, exported as $bindir through c2game.ini to running host
+	* server/host/cronimpl.cpp (suspendScheduler): new
+
+2018-09-01  Stefan Reuther  <streu@gmx.de>
+
+	-------------------- c2ng_2_40_5 (version 2.40.5)
+
 2018-08-31  Stefan Reuther  <streu@gmx.de>
 
 	* game/actions/remotecontrolaction.cpp, game/actions/remotecontrolaction.hpp: new [ex client/remote.h]
@@ -1815,7 +2215,7 @@
 2016-04-25  Stefan Reuther  <streu@gmx.de>
 
 	* gfx/fontlist.cpp, gfx/fontlist.hpp: new
-        * gfx/resourceprovider.hpp: new [replaces gfx/resourceloader.hpp]
+	* gfx/resourceprovider.hpp: new [replaces gfx/resourceloader.hpp]
 	* ui/defaultresourceprovider.cpp, ui/defaultresourceprovider.hpp: new
 
 2016-04-24  Stefan Reuther  <streu@gmx.de>

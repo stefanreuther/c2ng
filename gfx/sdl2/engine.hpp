@@ -76,7 +76,7 @@ namespace gfx { namespace sdl2 {
         afl::container::PtrQueue<afl::base::Runnable> m_taskQueue;
 
         // // Event utilities
-        // void setMouseGrab(bool enable);
+        void setMouseGrab(bool enable);
         bool convertEvent(const SDL_Event& se, EventConsumer& consumer, bool infinite);
         bool handleMouse(EventConsumer& consumer, const SDL_MouseButtonEvent& be, bool infinite, uint32_t addButton);
         void handleTextInput(EventConsumer& consumer, const char* text, util::Key_t mod);
