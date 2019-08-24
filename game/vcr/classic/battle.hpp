@@ -1,12 +1,13 @@
 /**
   *  \file game/vcr/classic/battle.hpp
+  *  \brief Class game::vcr::classic::Battle
   */
 #ifndef C2NG_GAME_VCR_CLASSIC_BATTLE_HPP
 #define C2NG_GAME_VCR_CLASSIC_BATTLE_HPP
 
 #include "game/vcr/battle.hpp"
-#include "game/vcr/object.hpp"
 #include "game/vcr/classic/types.hpp"
+#include "game/vcr/object.hpp"
 #include "game/vcr/score.hpp"
 
 namespace game { namespace vcr { namespace classic {
@@ -111,7 +112,7 @@ namespace game { namespace vcr { namespace classic {
             on it. */
         Algorithm* createAlgorithm(Visualizer& vis,
                                    const game::config::HostConfiguration& config,
-                                   const game::spec::ShipList& shipList);
+                                   const game::spec::ShipList& shipList) const;
 
         /** Create a player algorithm for a given algorithm name
             \param type Algorithm name
@@ -133,10 +134,19 @@ namespace game { namespace vcr { namespace classic {
                            const game::config::HostConfiguration& config,
                            const game::spec::ShipList& shipList) const;
 
+        /** Access left object.
+            \return object */
         const Object& left() const
             { return m_before[0]; }
+
+        /** Access right object.
+            \return object */
         const Object& right() const
             { return m_before[1]; }
+
+        /** Apply classic shield limits.
+            Freighters do not have shields. */
+        void applyClassicLimits();
 
      private:
         // Attributes from GClassicVcr:

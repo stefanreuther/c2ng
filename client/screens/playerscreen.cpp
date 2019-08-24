@@ -200,7 +200,7 @@ namespace {
                 // (This will not normally happen because if first=true, there will be no inbound process.)
                 class InitTask : public client::si::ScriptTask {
                  public:
-                    virtual interpreter::Process* execute(uint32_t pgid, game::Session& session, Verbosity& /*v*/)
+                    virtual void execute(uint32_t pgid, game::Session& session)
                         {
                             // Access
                             interpreter::ProcessList& list = session.world().processList();
@@ -220,9 +220,6 @@ namespace {
 
                             // Revive all auto-tasks
                             list.resumeSuspendedProcesses(pgid);
-
-                            // We don't need to observe a process
-                            return 0;
                         }
                 };
 
@@ -259,6 +256,9 @@ namespace {
                  case OutputState::ShipScreen:
                  case OutputState::PlanetScreen:
                  case OutputState::BaseScreen:
+                 case OutputState::ShipTaskScreen:
+                 case OutputState::PlanetTaskScreen:
+                 case OutputState::BaseTaskScreen:
                  case OutputState::Starchart:
                     us.detachProcess(link);
                     m_outputState.set(link, target);
@@ -309,6 +309,7 @@ namespace {
                      case game::interface::iuiScreenRegistered:
                         return false;
                      case game::interface::iuiIterator:
+                     case game::interface::iuiAutoTask:
                         result.reset();
                         return true;
                      case game::interface::iuiSimFlag:
@@ -335,6 +336,7 @@ namespace {
                      case game::interface::iuiScreenNumber:
                      case game::interface::iuiScreenRegistered:
                      case game::interface::iuiIterator:
+                     case game::interface::iuiAutoTask:
                      case game::interface::iuiSimFlag:
                      case game::interface::iuiKeymap:
                         return false;

@@ -48,6 +48,10 @@ client::widgets::ControlScreenHeader::ControlScreenHeader(ui::Root& root, Keymap
     // ex WControlScreenHeaderTile::WControlScreenHeaderTile
     createChildWidgets(root, kmw);
     setChildWidgetPositions();
+
+    // Disable so it doesn't get focus (and the TaskEditorTile gets it instead)
+    // FIXME: should we have an opt-in FocusableState instead?
+    setState(DisabledState, true);
 }
 
 client::widgets::ControlScreenHeader::~ControlScreenHeader()

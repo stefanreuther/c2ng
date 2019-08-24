@@ -12,7 +12,17 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = util/process/nullfactory.cpp util/process/nullfactory.hpp \
+FILES_gamelib = interpreter/taskpredictor.cpp interpreter/taskpredictor.hpp \
+    game/interface/taskeditorcontext.cpp \
+    game/interface/taskeditorcontext.hpp interpreter/taskeditor.cpp \
+    interpreter/taskeditor.hpp game/actions/taxationaction.cpp \
+    game/actions/taxationaction.hpp game/interface/referencelistcontext.cpp \
+    game/interface/referencelistcontext.hpp \
+    game/interface/referencecontext.cpp game/interface/referencecontext.hpp \
+    game/searchquery.cpp game/searchquery.hpp game/interface/ufomethod.cpp \
+    game/interface/ufomethod.hpp game/v3/parser.cpp game/v3/parser.hpp \
+    game/test/simpleturn.cpp game/test/simpleturn.hpp \
+    util/process/nullfactory.cpp util/process/nullfactory.hpp \
     util/process/posixfactory.cpp util/process/posixfactory.hpp \
     util/process/subprocess.hpp util/process/factory.hpp \
     game/map/minefieldformula.cpp game/map/minefieldformula.hpp \
@@ -550,7 +560,15 @@ PROJ_AUTO += \
     gamelib:game/*.cpp,game/*.hpp,util/*.cpp,util/*.hpp,interpreter/*.cpp,interpreter/*.hpp
 
 TARGETS += guilib
-FILES_guilib = client/map/minefieldmissionoverlay.cpp \
+FILES_guilib = client/tiles/taskeditortile.cpp \
+    client/tiles/taskeditortile.hpp client/proxy/taskeditorproxy.cpp \
+    client/proxy/taskeditorproxy.hpp client/dialogs/taxationdialog.cpp \
+    client/dialogs/taxationdialog.hpp client/proxy/taxationproxy.cpp \
+    client/proxy/taxationproxy.hpp client/dialogs/fileselectiondialog.cpp \
+    client/dialogs/fileselectiondialog.hpp client/widgets/filelistbox.cpp \
+    client/widgets/filelistbox.hpp client/proxy/searchproxy.cpp \
+    client/proxy/searchproxy.hpp client/dialogs/searchdialog.cpp \
+    client/dialogs/searchdialog.hpp client/map/minefieldmissionoverlay.cpp \
     client/map/minefieldmissionoverlay.hpp client/map/prefixoverlay.cpp \
     client/map/prefixoverlay.hpp client/tiles/starchartheadertile.cpp \
     client/tiles/starchartheadertile.hpp client/map/starchartoverlay.cpp \
@@ -812,8 +830,11 @@ DEPEND_guilib = afl
 PROJ_AUTO += guilib:gfx/*.cpp,gfx/*.hpp,ui/*.cpp,ui/*.hpp,client/*.cpp,client/*.hpp
 
 TARGETS += serverlib
-FILES_serverlib = server/host/hostranking.cpp server/host/hostranking.hpp \
-    server/interface/hostrankingclient.cpp \
+FILES_serverlib = server/user/saltedpasswordencrypter.cpp \
+    server/user/saltedpasswordencrypter.hpp \
+    server/user/multipasswordencrypter.cpp \
+    server/user/multipasswordencrypter.hpp server/host/hostranking.cpp \
+    server/host/hostranking.hpp server/interface/hostrankingclient.cpp \
     server/interface/hostrankingserver.cpp \
     server/interface/hostrankingserver.hpp \
     server/interface/hostrankingclient.hpp server/interface/hostranking.hpp \
@@ -1308,7 +1329,15 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_server_interface_hostrankingserver.cpp \
+FILES_testsuite = u/t_game_interface_cargofunctions.cpp \
+    u/t_server_user_saltedpasswordencrypter.cpp \
+    u/t_server_user_multipasswordencrypter.cpp \
+    u/t_interpreter_taskeditor.cpp u/t_game_actions_taxationaction.cpp \
+    u/t_game_map_shippredictor.cpp u/t_util_requestsender.cpp \
+    u/t_ui_layout_info.cpp u/t_game_searchquery.cpp \
+    u/t_game_alliance_offer.cpp u/t_game_map_beamupshiptransfer.cpp \
+    u/t_game_map_shipstorage.cpp u/t_gfx_application.cpp \
+    u/t_server_interface_hostrankingserver.cpp \
     u/t_server_interface_hostrankingclient.cpp \
     u/t_server_interface_hostranking.cpp \
     u/t_server_interface_hosthistoryserver.cpp \
@@ -1717,8 +1746,8 @@ FILES_testsuite = u/t_server_interface_hostrankingserver.cpp \
     u/t_game_config_booleanvalueparser.cpp \
     u/t_game_config_integervalueparser.cpp u/t_game_config.hpp \
     u/t_game_config_configuration.cpp u/t_game_spec_hullfunctionlist.cpp \
-    u/t_game_v3_resultfile.cpp u/t_game_v3.hpp testsuite.cpp \
-    u/t_game_spec.hpp u/t_game_spec_cost.cpp
+    u/t_game_v3_resultfile.cpp u/t_game_v3.hpp u/t_game_spec.hpp \
+    u/t_game_spec_cost.cpp
 TYPE_testsuite = testapp
 DEPEND_testsuite = serverlib guilib gamelib afl
 PROJ_AUTO += testsuite:u/*.cpp,u/*.hpp

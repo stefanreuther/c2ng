@@ -1,5 +1,6 @@
 /**
   *  \file gfx/application.cpp
+  *  \brief Class gfx::Application
   */
 
 #include <stdexcept>
@@ -16,6 +17,7 @@ typedef gfx::sdl2::Engine Engine_t;
 # define NO_ENGINE
 #endif
 
+// Constructor.
 gfx::Application::Application(afl::sys::Dialog& dialog, afl::string::Translator& tx, const String_t& title)
     : m_dialog(dialog),
       m_translator(tx),
@@ -25,7 +27,7 @@ gfx::Application::Application(afl::sys::Dialog& dialog, afl::string::Translator&
 
 #ifndef NO_ENGINE
 /* If we don't have an engine, let linking fail.
-   This way, code that does not reference need an engine still builds even if it is contained in guilib. */
+   This way, code that does not need an engine still builds even if it is contained in guilib. */
 int
 gfx::Application::run()
 {

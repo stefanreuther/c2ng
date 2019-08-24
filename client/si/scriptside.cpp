@@ -36,10 +36,9 @@ client::si::ScriptSide::executeTask(uint32_t waitId, std::auto_ptr<ScriptTask> t
 {
     interpreter::ProcessList& processList = session.world().processList();
     uint32_t pgid = processList.allocateProcessGroup();
-    ScriptTask::Verbosity v = ScriptTask::Default;
-    interpreter::Process* p = task->execute(pgid, session, v);
+    task->execute(pgid, session);
 
-    m_waits.push_back(Wait(waitId, pgid, p, v));
+    m_waits.push_back(Wait(waitId, pgid));
     processList.startProcessGroup(pgid);
     runProcesses(session);
 }
@@ -50,36 +49,34 @@ client::si::ScriptSide::continueProcessWait(uint32_t id, game::Session& session,
     interpreter::ProcessList& list = session.world().processList();
     uint32_t pid;
     if (!link.getProcessId(pid)) {
-        handleWait(id, interpreter::Process::Terminated, interpreter::Error(""));
+        handleWait(id);
     } else if (interpreter::Process* p = list.getProcessById(pid)) {
-        m_waits.push_back(Wait(id, p->getProcessGroupId(), 0, ScriptTask::Default));
+        m_waits.push_back(Wait(id, p->getProcessGroupId()));
         if (link.isWantResult()) {
             p->pushNewValue(0);
         }
         list.continueProcess(*p);
         runProcesses(session);
     } else {
-        handleWait(id, interpreter::Process::Terminated, interpreter::Error(""));
+        handleWait(id);
     }
 }
 
 
 void
-client::si::ScriptSide::handleWait(uint32_t id, interpreter::Process::State state, interpreter::Error error)
+client::si::ScriptSide::handleWait(uint32_t id)
 {
     class Request : public util::Request<UserSide> {
      public:
-        Request(uint32_t id, interpreter::Process::State state, interpreter::Error error)
-            : m_id(id), m_state(state), m_error(error)
+        Request(uint32_t id)
+            : m_id(id)
             { }
         void handle(UserSide& ui)
-            { ui.handleWait(m_id, m_state, m_error); }
+            { ui.handleWait(m_id); }
      private:
         uint32_t m_id;
-        interpreter::Process::State m_state;
-        interpreter::Error m_error;
     };
-    m_reply.postNewRequest(new Request(id, state, error));
+    m_reply.postNewRequest(new Request(id));
 }
 
 void
@@ -232,7 +229,7 @@ client::si::ScriptSide::detachProcess(game::Session& session, RequestLink2 link)
         if (interpreter::Process* p = list.getProcessById(pid)) {
             Wait w;
             while (extractWait(p->getProcessGroupId(), w)) {
-                handleWait(w.waitId, interpreter::Process::Waiting, interpreter::Error(""));
+                handleWait(w.waitId);
             }
         }
     }
@@ -297,57 +294,15 @@ client::si::ScriptSide::done(game::Session& /*session*/)
 void
 client::si::ScriptSide::onProcessGroupFinish(game::Session& session, uint32_t pgid)
 {
+    // Signal everyone who waits on us
     Wait w;
     while (extractWait(pgid, w)) {
-        // Report state
-        if (w.process != 0) {
-            interpreter::Error e = w.process->getError();
-            switch (w.process->getState()) {
-             case interpreter::Process::Suspended:
-                if (w.verbosity != ScriptTask::Default) {
-                    session.log().write(afl::sys::LogListener::Info, "script.state", session.translator().translateString("Suspended."));
-                }
-                break;
-             case interpreter::Process::Frozen:
-                if (w.verbosity != ScriptTask::Default) {
-                    session.log().write(afl::sys::LogListener::Info, "script.state", session.translator().translateString("Frozen."));
-                }
-                break;
-             case interpreter::Process::Runnable:
-             case interpreter::Process::Running:
-             case interpreter::Process::Waiting:
-                break;
-             case interpreter::Process::Ended:
-                if (w.verbosity == ScriptTask::Result) {
-                    afl::data::Value* p = w.process->getResult();
-                    if (p == 0) {
-                        session.log().write(afl::sys::LogListener::Info, "script.empty", "Empty");
-                    } else {
-                        session.log().write(afl::sys::LogListener::Info, "script.result", interpreter::toString(p, true));
-                    }
-                }
-                break;
-             case interpreter::Process::Terminated:
-                // Terminated, i.e. "End" statement. Log only when user specified an expression,
-                // to tell them why they don't get a result.
-                if (w.verbosity == ScriptTask::Result) {
-                    session.log().write(afl::sys::LogListener::Info, "script.state", session.translator().translateString("Terminated."));
-                }
-                break;
-
-             case interpreter::Process::Failed:
-                // See below.
-                // session.logError(e);
-                break;
-            }
-            handleWait(w.waitId, w.process->getState(), e);
-        } else {
-            handleWait(w.waitId, interpreter::Process::Terminated, interpreter::Error(""));
-        }
+        handleWait(w.waitId);
     }
 
-    // FIXME: is this right here? This is a stopgap measure to see failing scripts.
-    // There should be a more specific reporting of failing scripts (e.g. to tell a tile updater that its command failed.)
+    // Report failed processes
+    // This reports failure for all processes in this process group,
+    // which could have any origin (e.g. loaded from VM) and have long lost their finalizer.
     const interpreter::ProcessList::Vector_t& processes = session.world().processList().getProcessList();
     for (size_t i = 0, n = processes.size(); i < n; ++i) {
         if (interpreter::Process* p = processes[i]) {
@@ -357,7 +312,10 @@ client::si::ScriptSide::onProcessGroupFinish(game::Session& session, uint32_t pg
         }
     }
 
+    // Notify listeners about changes by the terminated process group
     session.notifyListeners();
+
+    // Caller is (indirectly) runProcesses() who will clean up.
 }
 
 bool

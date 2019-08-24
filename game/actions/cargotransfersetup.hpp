@@ -81,7 +81,7 @@ namespace game { namespace actions {
         static CargoTransferSetup fromShipJettison(const game::map::Universe& univ, int shipId);
 
         /** Construct for beam-up-multiple mission.
-            This validates the ship's Ids, visibility/playability status, position (mission not allowed when orbiting a planet), and configuration.
+            This validates the ship's Ids, visibility/playability status, position (mission only useful when orbiting a planet), and configuration.
             After build(), the ship will appear as CargoTransfer::get(0), the planet will appear as CargoTransfer::get(1).
             \param turn Turn
             \param shipId Ship Id

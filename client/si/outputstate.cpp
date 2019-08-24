@@ -33,14 +33,17 @@ client::si::OutputState::toString(OutputState::Target target)
 {
     const char* result = "?";
     switch (target) {
-     case NoChange:     result = "NoChange";     break;
-     case ExitProgram:  result = "ExitProgram";  break;
-     case ExitGame:     result = "ExitGame";     break;
-     case PlayerScreen: result = "PlayerScreen"; break;
-     case ShipScreen:   result = "ShipScreen";   break;
-     case PlanetScreen: result = "PlanetScreen"; break;
-     case BaseScreen:   result = "BaseScreen";   break;
-     case Starchart:    result = "Starchart";    break;
+     case NoChange:         result = "NoChange";         break;
+     case ExitProgram:      result = "ExitProgram";      break;
+     case ExitGame:         result = "ExitGame";         break;
+     case PlayerScreen:     result = "PlayerScreen";     break;
+     case ShipScreen:       result = "ShipScreen";       break;
+     case PlanetScreen:     result = "PlanetScreen";     break;
+     case BaseScreen:       result = "BaseScreen";       break;
+     case ShipTaskScreen:   result = "ShipTaskScreen";   break;
+     case PlanetTaskScreen: result = "PlanetTaskScreen"; break;
+     case BaseTaskScreen:   result = "BaseTaskScreen";   break;
+     case Starchart:        result = "Starchart";        break;
     }
     return result;
 }

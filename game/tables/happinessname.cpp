@@ -14,17 +14,17 @@ game::tables::HappinessName::get(int happy) const
 {
     // ex game/tables.h:getHappinessName
     if (happy >= 90) {
-        return m_translator.translateString("happy");
+        return m_translator("happy");
     } else if (happy >= 70) {
-        return m_translator.translateString("calm");
+        return m_translator("calm");
     } else if (happy >= 50) {
-        return m_translator.translateString("unhappy");
+        return m_translator("unhappy");
     } else if (happy >= 40) {
-        return m_translator.translateString("very angry");
+        return m_translator("very angry");
     } else if (happy >= 20) {
-        return m_translator.translateString("rioting");
+        return m_translator("rioting");
     } else {
-        return m_translator.translateString("fighting");
+        return m_translator("fighting");
     }
 }
 

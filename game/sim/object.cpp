@@ -255,6 +255,8 @@ game::sim::Object::hasAbility(Ability which, const game::spec::ShipList& shipLis
      case DoubleTorpedoChargeAbility:  setBit = fl_DoubleTorpChargeSet; activeBit = fl_DoubleTorpCharge; break;
      case ElusiveAbility:              setBit = fl_ElusiveSet;          activeBit = fl_Elusive;          break;
      case SquadronAbility:             setBit = fl_SquadronSet;         activeBit = fl_Squadron;         break;
+     case ShieldGeneratorAbility:      setBit = fl_ShieldGeneratorSet;  activeBit = fl_ShieldGenerator;  break;
+     case CloakedBaysAbility:          setBit = fl_CloakedBaysSet;      activeBit = fl_CloakedBays;      break;
     }
 
     int32_t flags = getFlags();

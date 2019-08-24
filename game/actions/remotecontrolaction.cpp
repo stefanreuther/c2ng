@@ -153,6 +153,7 @@ game::actions::RemoteControlAction::setState(Verb verb)
         result = false;
     } else if (RC_VERB_INDEX[oldState] == verb) {
         // I was in the right state at the beginning of the turn
+        // This will signal change via CommandContainer::sig_commandChange -> CommandExtra
         result = cc->removeCommand(Command::phc_RemoteControl, m_shipId);
     } else if ((RC_VERB_INDEX[oldState] ^ 1) == verb) {
         // I can reach the desired state by issuing a command
@@ -161,11 +162,6 @@ game::actions::RemoteControlAction::setState(Verb verb)
         // The state cannot be reached, e.g. "drop" for a ship I own.
         result = false;
     }
-
-    // FIXME: should not be needed:
-    // if (result) {
-    //     sh.markDirty();
-    // }
 
     return result;
 }
@@ -187,7 +183,4 @@ game::actions::RemoteControlAction::toggleState()
     } else {
         cc->addCommand(Command::phc_RemoteControl, m_shipId, RC_VERBS[newVerb]);
     }
-
-    // FIXME: should not be needed:
-    // sh.markDirty();
 }

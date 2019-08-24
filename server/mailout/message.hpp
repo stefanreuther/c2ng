@@ -15,15 +15,51 @@
 
 namespace server { namespace mailout {
 
+    class Root;
+
     /** A message.
-        Represents a message that is being worked on, to access its database properties. */
+        Represents a message that is being worked on, to access its database properties.
+
+        <b>Lifecycle of a Message</b>
+
+        (a) after creation:
+        - in preparingMessages()
+        - not in uniqueIdMap()
+        - data partially populated
+
+        (b.1) when sending (Message::send()):
+        - in preparingMessages()
+        - in uniqueIdMap()
+        - data completely populated
+
+        (b.2)
+        - in sendingMessages()
+        - in uniqueIdMap()
+        - data completely populated
+        Note that send() is not atomic making this two states.
+
+        (c) after MailQueue::cancelMessage():
+        - in sendingMessages()
+        - not in uniqueIdMap()
+        - data completely populated
+        If transmitter handles this message, it will discard it.
+
+        (d) after transmission (Message::remove()):
+        - not in sendingMessages()
+        - in uniqueIdMap()
+        - data removed */
     class Message {
      public:
+        enum State {
+            Preparing,
+            Sending
+        };
+
         /** Constructor.
-            \param root  Subtree of the "mqueue:" database (Root::mailRoot)
+            \param root  Service root
             \param mid   Message Id
-            \param state State of this message ("preparing", "sending") */
-        Message(afl::net::redis::Subtree root, int32_t mid, String_t state);
+            \param state State of this message */
+        Message(Root& root, int32_t mid, State state);
 
         /** Access template name.
             \return database handle */
@@ -67,12 +103,19 @@ namespace server { namespace mailout {
         int32_t getId() const;
 
      private:
-        afl::net::redis::Subtree m_root;
+        Root& m_root;
         afl::net::redis::Subtree m_message;
         int32_t m_messageId;
-        String_t m_state;
+        State m_state;
     };
 
 } }
+
+// Get message Id.
+inline int32_t
+server::mailout::Message::getId() const
+{
+    return m_messageId;
+}
 
 #endif

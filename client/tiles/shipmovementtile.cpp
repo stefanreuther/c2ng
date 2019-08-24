@@ -120,6 +120,7 @@ client::tiles::ShipMovementTile::attach(client::proxy::ObjectObserver& oop)
                 game::Game* g = s.getGame().get();
                 game::Root* root = s.getRoot().get();
                 game::spec::ShipList* shipList = s.getShipList().get();
+                afl::string::Translator& tx = s.translator();
                 if (sh != 0 && root != 0 && shipList != 0 && g != 0 && sh->getShipKind() == game::map::Ship::CurrentShip) {
                     // FIXME: towing!!!!1
                     game::map::ShipPredictor crystal_ball(g->currentTurn().universe(),
@@ -157,7 +158,7 @@ client::tiles::ShipMovementTile::attach(client::proxy::ObjectObserver& oop)
                     {
                         job->data.text[Data::Waypoint] = otherShip->getName(game::PlainName, s.translator(), s.interface());
                     } else if (is_chunnel && (otherShip = g->currentTurn().universe().ships().get(chd.getTargetId())) != 0) {
-                        job->data.text[Data::Waypoint] = afl::string::Format(_("chunnel to %s").c_str(), otherShip->getName(game::PlainName, s.translator(), s.interface()));
+                        job->data.text[Data::Waypoint] = afl::string::Format(tx("chunnel to %s"), otherShip->getName(game::PlainName, s.translator(), s.interface()));
                     } else {
                         game::map::Point wp;
                         sh->getWaypoint().get(wp);
@@ -172,7 +173,7 @@ client::tiles::ShipMovementTile::attach(client::proxy::ObjectObserver& oop)
 
                     // Distance
                     double dist = util::getDistanceFromDX(sh->getWaypointDX().orElse(0), sh->getWaypointDY().orElse(0));
-                    job->data.text[Data::Distance] = afl::string::Format(_("%.2f ly").c_str(), dist);
+                    job->data.text[Data::Distance] = afl::string::Format(tx("%.2f ly"), dist);
                     job->data.colors[Data::Distance] = is_chunnel
                         ? ((chd.getFailureReasons() & chd.chf_Distance) != 0
                            ? SkinColor::Yellow
@@ -188,42 +189,42 @@ client::tiles::ShipMovementTile::attach(client::proxy::ObjectObserver& oop)
                     // Warp
                     int warpFactor = sh->getWarpFactor().orElse(0);
                     if (warpFactor == 0 && (sh->getWaypointDX().orElse(0) != 0 || sh->getWaypointDY().orElse(0) != 0)) {
-                        job->data.text[Data::WarpFactor] = _("not moving");
+                        job->data.text[Data::WarpFactor] = tx("not moving");
                         job->data.colors[Data::WarpFactor] = SkinColor::Red;
                     } else {
                         if (is_hyper) {
-                            job->data.text[Data::WarpFactor] = _("Hyperdrive");
+                            job->data.text[Data::WarpFactor] = tx("Hyperdrive");
                             job->data.colors[Data::WarpFactor] = SkinColor::Green;
                         } else if (warpFactor == 0 && !is_chunnel) {
-                            job->data.text[Data::WarpFactor] = _("not moving");
+                            job->data.text[Data::WarpFactor] = tx("not moving");
                             job->data.colors[Data::WarpFactor] = SkinColor::Green;
                         } else {
-                            job->data.text[Data::WarpFactor] = afl::string::Format(_("Warp %d").c_str(), warpFactor);
+                            job->data.text[Data::WarpFactor] = afl::string::Format(tx("Warp %d"), warpFactor);
                             job->data.colors[Data::WarpFactor] = (is_chunnel && warpFactor > 0 ? SkinColor::Yellow : SkinColor::Green);
                         }
                     }
 
                     // E.T.A.
                     if (is_chunnel && chd.getFailureReasons() == 0) {
-                        job->data.text[Data::Eta] = _("chunnel");
+                        job->data.text[Data::Eta] = tx("chunnel");
                         job->data.colors[Data::Eta] = SkinColor::Green;
                     } else if ((sh->getWaypointDX().orElse(0) == 0 && sh->getWaypointDY().orElse(0) == 0)
                                && (sh->getWarpFactor().orElse(0) > 0
                                    || sh->getMission().orElse(0) != game::spec::Mission::msn_Intercept))
                     {
-                        job->data.text[Data::Eta] = _("at waypoint");
+                        job->data.text[Data::Eta] = tx("at waypoint");
                         job->data.colors[Data::Eta] = SkinColor::Green;
                     } else if (is_hyper) {
-                        job->data.text[Data::Eta] = _("unknown"); // FIXME?
+                        job->data.text[Data::Eta] = tx("unknown"); // FIXME?
                         job->data.colors[Data::Eta] = SkinColor::Green;
                     } else if (sh->getWarpFactor().orElse(0) == 0) {
-                        job->data.text[Data::Eta] = _("not moving");
+                        job->data.text[Data::Eta] = tx("not moving");
                         job->data.colors[Data::Eta] = SkinColor::Red;
                     } else if (crystal_ball.isAtTurnLimit()) {
-                        job->data.text[Data::Eta] = _("too long");
+                        job->data.text[Data::Eta] = tx("too long");
                         job->data.colors[Data::Eta] = SkinColor::Green;
                     } else {
-                        job->data.text[Data::Eta] = afl::string::Format(_("%d turn%!1{s%}").c_str(), crystal_ball.getNumTurns());
+                        job->data.text[Data::Eta] = afl::string::Format(tx("%d turn%!1{s%}"), crystal_ball.getNumTurns());
                         job->data.colors[Data::Eta] = SkinColor::Green;
                     }
 
@@ -240,15 +241,15 @@ client::tiles::ShipMovementTile::attach(client::proxy::ObjectObserver& oop)
 
                     if (is_chunnel) {
                         move_fuel = 50;
-                        job->data.text[Data::FuelUsage] = afl::string::Format(_("chunnel, %d kt").c_str(), root->userConfiguration().formatNumber(move_fuel));
+                        job->data.text[Data::FuelUsage] = afl::string::Format(tx("chunnel, %d kt"), root->userConfiguration().formatNumber(move_fuel));
                     } else {
-                        job->data.text[Data::FuelUsage] = afl::string::Format(_("%d kt").c_str(), root->userConfiguration().formatNumber(move_fuel));
+                        job->data.text[Data::FuelUsage] = afl::string::Format(tx("%d kt"), root->userConfiguration().formatNumber(move_fuel));
                     }
                     if (cloak_fuel > 0 || turn_fuel > 0) {
                         if (turn_fuel == 0) {
-                            job->data.text[Data::FuelUsage] += afl::string::Format(_(" (+%d kt cloak)").c_str(), cloak_fuel);
+                            job->data.text[Data::FuelUsage] += afl::string::Format(tx(" (+%d kt cloak)"), cloak_fuel);
                         } else {
-                            job->data.text[Data::FuelUsage] += afl::string::Format(_(" (+%d kt)").c_str(), cloak_fuel+turn_fuel);
+                            job->data.text[Data::FuelUsage] += afl::string::Format(tx(" (+%d kt)"), cloak_fuel+turn_fuel);
                         }
                     }
 
@@ -268,7 +269,7 @@ client::tiles::ShipMovementTile::attach(client::proxy::ObjectObserver& oop)
                             towee->getMass(*shipList).get(towee_mass);
                         }
                     }
-                    job->data.text[Data::EngineLoad] = afl::string::Format(_("%d kt").c_str(), root->userConfiguration().formatNumber(sh->getMass(*shipList).orElse(0) + towee_mass));
+                    job->data.text[Data::EngineLoad] = afl::string::Format(tx("%d kt"), root->userConfiguration().formatNumber(sh->getMass(*shipList).orElse(0) + towee_mass));
                     job->data.colors[Data::EngineLoad] = SkinColor::Green;
 
                     // Fleet status

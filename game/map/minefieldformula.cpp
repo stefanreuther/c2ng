@@ -72,10 +72,10 @@ game::map::isMinefieldEndangered(const Minefield& field, const Universe& univ, c
         ? HostConfiguration::WebMineSweepRange
         : HostConfiguration::MineSweepRange;
 
-    // Determine minimum range
-    int minRange = config[range](1);
+    // Determine maximum range
+    int maxRange = config[range](1);
     for (int i = 2; i <= MAX_PLAYERS; ++i) {
-        minRange = std::min(minRange, config[range](i));
+        maxRange = std::max(maxRange, config[range](i));
     }
 
     // Check planets
@@ -88,7 +88,7 @@ game::map::isMinefieldEndangered(const Minefield& field, const Universe& univ, c
                 && pPlanet->getPosition(pt)
                 && (!pPlanet->getOwner(plOwner) || plOwner != mfOwner)
                 && hasPossibleEnemyShip(univ, pt, mfOwner)
-                && univ.config().getSquaredDistance(mfCenter, pt) <= util::squareFloat(radius + minRange))
+                && univ.config().getSquaredDistance(mfCenter, pt) <= util::squareFloat(radius + maxRange))
             {
                 return true;
             }

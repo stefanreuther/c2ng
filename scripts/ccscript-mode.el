@@ -49,6 +49,7 @@
 ;;  19/Jun/2010  ccscript-electric-punct honors prefix arg
 ;;  07/Aug/2010  Brute-force assembler support (ccasm-mode)
 ;;  12/Nov/2016  Rewrite
+;;  13/Jul/2019  Some new syntax
 
 (defvar ccscript-mode-hook nil)
 
@@ -63,7 +64,7 @@
 
 (defconst ccscript-font-lock-keywords-1
   (list
-   (cons (concat "\\<" (regexp-opt '("Abort" "And" "Break" "Case" "Close" "Continue" "Dim" "Do" "Else" "End"
+   (cons (concat "\\<" (regexp-opt '("Abort" "And" "As" "Break" "Call" "Case" "Close" "Continue" "Dim" "Do" "Else" "End"
                                      "EndFunction" "EndIf" "EndSelect" "EndSub" "EndTry" "EndWith" "For" 
                                      "ForEach" "Function" "If" "Is" "Local" "Loop" "Mod" "Next" "Not" "On" "Open"
                                      "Option" "Optional" "Or" "Return" "RunHook" "Select" "Shared" "Static"
@@ -127,7 +128,7 @@ Otherwise, return nil."
   (if (ccscript-check-operand)
       (progn
 	(while (and (ccscript-check-re "[ \t]*")
-		    (ccscript-check-re "[-=.+*/\\&#^;]\\|\\<\\(mod\\|and\\|x?or\\)\\>\\|[<>:][=>]?")
+		    (ccscript-check-re "[=.+*/\\&#^;]\\|\\<\\(mod\\|and\\|x?or\\)\\>\\|[<>:][=>]?\\|->?")
 		    (ccscript-check-operand)))
 	t)
     nil)
@@ -164,6 +165,7 @@ or not (nil)"
        ;; Indent after `ForEach' or `With' if this is a multiline loop
        ((and (ccscript-check-re "\\<\\(foreach\\|with\\)\\>")
 	     (ccscript-check-expr))
+        (ccscript-check-re "\\<as\\>[ \t]+[a-zA-Z0-9_$]+[ \t]*")
 	(ccscript-check-re "\\<do\\>")
 	(if (or (ccscript-check-re "[ \t]*$")
 		(ccscript-check-re "[ \t]*%"))

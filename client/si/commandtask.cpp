@@ -8,10 +8,62 @@
 #include "interpreter/defaultstatementcompilationcontext.hpp"
 #include "interpreter/error.hpp"
 #include "client/si/contextreceiver.hpp"
+#include "interpreter/values.hpp"
 
 using interpreter::Process;
 using interpreter::ProcessList;
 using interpreter::StatementCompiler;
+
+namespace {
+    class DefaultFinalizer : public interpreter::Process::Finalizer {
+     public:
+        DefaultFinalizer(game::Session& session, bool showResult)
+            : m_session(session),
+              m_showResult(showResult)
+            { }
+        virtual void finalizeProcess(interpreter::Process& p)
+            {
+                using afl::sys::LogListener;
+                LogListener& log = m_session.log();
+                switch (p.getState()) {
+                 case interpreter::Process::Suspended:
+                    log.write(LogListener::Info, "script.state", m_session.translator().translateString("Suspended."));
+                    break;
+                 case interpreter::Process::Frozen:
+                    log.write(LogListener::Info, "script.state", m_session.translator().translateString("Frozen."));
+                    break;
+                 case interpreter::Process::Runnable:
+                 case interpreter::Process::Running:
+                 case interpreter::Process::Waiting:
+                    break;
+                 case interpreter::Process::Ended:
+                    if (m_showResult) {
+                        afl::data::Value* result = p.getResult();
+                        if (result == 0) {
+                            log.write(LogListener::Info, "script.empty", "Empty");
+                        } else {
+                            log.write(LogListener::Info, "script.result", interpreter::toString(result, true));
+                        }
+                    }
+                    break;
+                 case interpreter::Process::Terminated:
+                    // Terminated, i.e. "End" statement. Log only when user specified an expression,
+                    // to tell them why they don't get a result.
+                    if (m_showResult) {
+                        log.write(LogListener::Info, "script.state", m_session.translator().translateString("Terminated."));
+                    }
+                    break;
+
+                 case interpreter::Process::Failed:
+                    // Logged by onProcessGroupFinish.
+                    break;
+                }
+            }
+     private:
+        game::Session& m_session;
+        bool m_showResult;
+    };
+}
 
 client::si::CommandTask::CommandTask(String_t command, bool verbose, String_t name, std::auto_ptr<ContextProvider> ctxp)
     : m_command(command),
@@ -20,8 +72,8 @@ client::si::CommandTask::CommandTask(String_t command, bool verbose, String_t na
       m_contextProvider(ctxp)
 { }
 
-interpreter::Process*
-client::si::CommandTask::execute(uint32_t pgid, game::Session& session, Verbosity& v)
+void
+client::si::CommandTask::execute(uint32_t pgid, game::Session& session)
 {
     // Helper to push contexts into a process
     class ProcessContextReceiver : public ContextReceiver {
@@ -71,8 +123,9 @@ client::si::CommandTask::execute(uint32_t pgid, game::Session& session, Verbosit
         proc.pushFrame(bco, false);
         processList.resumeProcess(proc, pgid);
 
-        v = m_verbose ? result == StatementCompiler::CompiledExpression ? ScriptTask::Result : ScriptTask::Verbose : ScriptTask::Default;
-        return &proc;
+        if (m_verbose) {
+            proc.setNewFinalizer(new DefaultFinalizer(session, result == StatementCompiler::CompiledExpression));
+        }
     }
     catch (std::exception& e) {
         if (interpreter::Error* pe = dynamic_cast<interpreter::Error*>(&e)) {
@@ -83,6 +136,5 @@ client::si::CommandTask::execute(uint32_t pgid, game::Session& session, Verbosit
 
         // Immediately fail it
         proc.setState(Process::Failed);
-        return 0;
     }
 }

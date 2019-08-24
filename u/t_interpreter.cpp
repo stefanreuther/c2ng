@@ -252,9 +252,6 @@ ExpressionTestHelper::checkFloatExpression(const char* expr, double result)
     }
 }
 
-// /** Check expression for execution error.
-//     The expression must compile, but may not execute.
-//     \param expr Expression */
 void
 ExpressionTestHelper::checkFailureExpression(const char* expr)
 {
@@ -284,7 +281,6 @@ ExpressionTestHelper::checkFailureExpression(const char* expr)
     }
 }
 
-// check expression that parses, but does not compile
 void
 ExpressionTestHelper::checkBadExpression(const char* expr)
 {
@@ -300,6 +296,15 @@ ExpressionTestHelper::checkBadExpression(const char* expr)
     interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
     TSM_ASSERT_THROWS(expr, node->compileValue(*bco, interpreter::CompilationContext(world)), interpreter::Error);
 }
+
+void
+ExpressionTestHelper::checkRejectedExpression(const char* expr)
+{
+    interpreter::Tokenizer tok(expr);
+    std::auto_ptr<interpreter::expr::Node> node;
+    TSM_ASSERT_THROWS(expr, node.reset(interpreter::expr::Parser(tok).parse()), interpreter::Error);
+}
+
 
 void
 ExpressionTestHelper::checkScalarExpression(const char* expr, int result, bool isBool)

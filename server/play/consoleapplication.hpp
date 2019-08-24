@@ -4,6 +4,7 @@
 #ifndef C2NG_SERVER_PLAY_CONSOLEAPPLICATION_HPP
 #define C2NG_SERVER_PLAY_CONSOLEAPPLICATION_HPP
 
+#include <map>
 #include "util/application.hpp"
 #include "afl/net/networkstack.hpp"
 
@@ -18,6 +19,7 @@ namespace server { namespace play {
      private:
         void help();
 
+        std::map<String_t, String_t> m_properties;
     };
 
 } }

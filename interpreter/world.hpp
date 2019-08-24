@@ -300,11 +300,12 @@ namespace interpreter {
         // ex IntExecutionContext::global_context
         afl::container::PtrVector<Context> m_globalContexts;
 
+        // ex int/mutex.h globals
+        // Must be before ProcessList because processes reference it in destructor
+        MutexList m_mutexList;
+
         // ex int/process.cc:process_list
         ProcessList m_processList;
-
-        // ex int/mutex.h globals
-        MutexList m_mutexList;
 
         // ex int/file.h globals
         FileTable m_fileTable;

@@ -1,3 +1,153 @@
+2019-08-22  Stefan Reuther  <streu@gmx.de>
+
+	* server/mailout/root.cpp (cleanupUniqueIdMap): new
+	* server/user/usermanagement.cpp: new command: DELUSER
+
+2019-08-21  Stefan Reuther  <streu@gmx.de>
+
+	* server/user/serverapplication.cpp: new option: USER.PROFILE.MAXVALUESIZE
+	* server/user/multipasswordencrypter.cpp, server/user/multipasswordencrypter.hpp: new
+	* server/user/saltedpasswordencrypter.cpp, server/user/saltedpasswordencrypter.hpp: new
+
+2019-08-20  Stefan Reuther  <streu@gmx.de>
+
+	* interpreter/taskpredictor.cpp, interpreter/taskpredictor.hpp: new [ex int/predict.cc]
+	* client/tiles/taskeditortile.cpp: clean up and implement some commands
+
+2019-08-16  Stefan Reuther  <streu@gmx.de>
+
+	* game/interface/globalfunctions.cpp (IFAutoTask): new
+	* game/interface/taskeditorcontext.cpp, game/interface/taskeditorcontext.hpp: new
+
+2019-08-11  Stefan Reuther  <streu@gmx.de>
+
+	* client/proxy/taskeditorproxy.cpp, client/proxy/taskeditorproxy.hpp: new
+	* client/tiles/taskeditortile.cpp, client/tiles/taskeditortile.hpp: new [ex client/tiles/taskedittile.cc]
+
+2019-08-10  Stefan Reuther  <streu@gmx.de>
+
+	* interpreter/taskeditor.cpp, interpreter/taskeditor.hpp: new [ex int/autotask.cc]
+
+2019-08-07  Stefan Reuther  <streu@gmx.de>
+
+	* client/dialogs/taxationdialog.cpp, client/dialogs/taxationdialog.hpp: new [ex client/dlg-tax.cc]
+	* client/proxy/taxationproxy.cpp, client/proxy/taxationproxy.hpp: new
+	* game/actions/taxationaction.cpp, game/actions/taxationaction.hpp: new
+
+2019-08-06  Stefan Reuther  <streu@gmx.de>
+
+	* gfx/sdl2/engine.cpp: correctly handle Shift-Space
+
+2019-07-30  Stefan Reuther  <streu@gmx.de>
+
+	* game/map/shippredictor.cpp: add support for THost pythagoras bug. Add support for PHost <3.4h/4.0e UseAccurateFuelModel bug.
+
+2019-07-28  Stefan Reuther  <streu@gmx.de>
+
+	* util/requestsender.hpp (convert): new
+
+2019-07-27  Stefan Reuther  <streu@gmx.de>
+
+	* util/requestsender.hpp: rework to allow custom implementations
+	* client/dialogs/fileselectiondialog.cpp, client/dialogs/fileselectiondialog.hpp: new [ex client/dialogs/filedlg.cc]
+	* client/widgets/filelistbox.cpp, client/widgets/filelistbox.hpp: new [ex client/widgets/filechoose.cc]
+
+2019-07-20  Stefan Reuther  <streu@gmx.de>
+
+	* ui/cardgroup.cpp, ui/cardgroup.hpp: now for real [ex ui/widgets/cardgroup.h]
+
+2019-07-19  Stefan Reuther  <streu@gmx.de>
+
+	* client/dialogs/searchdialog.cpp: initial UI/script integration
+
+2019-07-17  Stefan Reuther  <streu@gmx.de>
+
+	* share/resource/core_ui.q: fine-tuning
+	* client/proxy/searchproxy.cpp: fine-tuning
+
+2019-07-16  Stefan Reuther  <streu@gmx.de>
+
+	* interpreter/optimizer.cpp (doMergeJumps): new optimisation
+
+2019-07-14  Stefan Reuther  <streu@gmx.de>
+
+	* client/dialogs/searchdialog.cpp, client/dialogs/searchdialog.hpp: new [ex client/dialogs/searchdlg.cc]
+	* client/proxy/searchproxy.cpp, client/proxy/searchproxy.hpp: new
+	* ui/group.cpp, ui/group.hpp: mark throw()
+	* ui/layoutablegroup.cpp, ui/layoutablegroup.hpp: mark throw()
+	* ui/spacer.cpp, ui/spacer.hpp: mark throw()
+	* ui/widget.cpp, ui/widget.hpp: mark throw()
+
+2019-07-13  Stefan Reuther  <streu@gmx.de>
+
+	* game/interface/referencelistcontext.cpp, game/interface/referencelistcontext.hpp: new (ReferenceList() function)
+	* game/interface/referencecontext.cpp, game/interface/referencecontext.hpp: new (Reference(), LocationReference() functions)
+	* share/resource/core_game.q: add more functions
+
+2019-07-11  Stefan Reuther  <streu@gmx.de>
+
+	* game/searchquery.cpp, game/searchquery.hpp: new [ex client/search.cc]
+
+2019-07-07  Stefan Reuther  <streu@gmx.de>
+
+	* interpreter/process.hpp (Finalizer): new
+
+2019-07-02  Stefan Reuther  <streu@gmx.de>
+
+	* game/interface/ufomethod.cpp, game/interface/ufomethod.hpp: new
+	* game/map/ufotype.hpp: slight optimisations
+
+2019-06-25  Stefan Reuther  <streu@gmx.de>
+
+	* game/v3/parser.cpp, game/v3/parser.hpp: new
+
+2019-06-16  Stefan Reuther  <streu@gmx.de>
+
+	* Rules.pl: make it possible to build only documentation stuff
+
+2019-06-09  Stefan Reuther  <streu@gmx.de>
+
+	* game/v3/udata/parser.cpp: add condition for ESB
+
+2019-05-20  Stefan Reuther  <streu@gmx.de>
+
+	* game/map/minefieldformula.cpp (isMinefieldEndangered): need to use max sweep range (not min) for pessimistic advice
+	* game/map/ship.cpp: fine-tune history processing
+
+2019-05-17  Stefan Reuther  <streu@gmx.de>
+
+	* game/map/ship.cpp: improve history information processing; create guessed ships
+	* game/v3/udata/parser.cpp: add information from VCRs into ship history
+
+2019-05-12  Stefan Reuther  <streu@gmx.de>
+
+	* interpreter/statementcompiler.cpp: 'ForEach <obj> As <name>' can keep LocalContext flag
+	* server/play/consoleapplication.cpp, server/play/gameaccess.cpp, server/play/mainpacker.cpp: add ability to pass general properties [ex server/prop.cc]
+
+2019-05-11  Stefan Reuther  <streu@gmx.de>
+
+	* testapps/: add test applications
+	* game/sim/ability.hpp: add Nu abilities [#260,#239,#254,#243]
+	* game/sim/object.cpp, game/sim/object.hpp: add Nu abilities [#260,#239,#254,#243]
+	* game/sim/planet.cpp, game/sim/ship.cpp: add Nu abilities [#260,#239,#254,#243]
+	* game/vcr/object.cpp, game/vcr/object.hpp: move shield limit into loader
+	* game/vcr/classic/battle.cpp, game/vcr/classic/battle.hpp: move shield limit into loader
+	* game/vcr/classic/database.cpp: move shield limit into loader
+	* game/vcr/classic/hostalgorithm.cpp, game/vcr/classic/hostalgorithm.hpp: move shield limit into loader
+
+2019-05-05  Stefan Reuther  <streu@gmx.de>
+
+	* interpreter/statementcompiler.cpp: add 'ForEach <obj> As <name>' syntax
+	* interpreter/consoleapplication.cpp: fix core.q auto-load when '-k' is used
+
+2019-05-04  Stefan Reuther  <streu@gmx.de>
+
+	* game/interface/globalfunctions.cpp: add OBJECTISAT function
+
+2019-04-29  Stefan Reuther  <streu@gmx.de>
+
+	-------------------- c2ng_2_40_6 (version 2.40.6)
+
 2019-04-19  Stefan Reuther  <streu@gmx.de>
 
 	* server/host/hosthistory.cpp (getTurns): add SINCETIME clause. Correctly report external time format.

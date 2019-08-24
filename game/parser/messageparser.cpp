@@ -8,11 +8,11 @@
 #include "afl/string/format.hpp"
 #include "afl/string/parse.hpp"
 #include "game/alliance/offer.hpp"
+#include "game/parser/datainterface.hpp"
 #include "game/parser/messageinformation.hpp"
 #include "game/parser/messagetemplate.hpp"
 #include "game/parser/messagevalue.hpp"
 #include "util/string.hpp"
-#include "game/parser/datainterface.hpp"
 
 using afl::string::strTrim;
 using game::alliance::Offer;
@@ -31,7 +31,7 @@ namespace {
         \param tpl Message template
         \param opcode Base opcode
         \param line Line to process */
-    static void parseCheckInstruction(game::parser::MessageTemplate& tpl, uint8_t opcode, String_t line)
+    void parseCheckInstruction(game::parser::MessageTemplate& tpl, uint8_t opcode, String_t line)
     {
         uint8_t scope = game::parser::MessageTemplate::sAny;
         int8_t offset = 0;
@@ -65,8 +65,8 @@ namespace {
                     scope = game::parser::MessageTemplate::sAny;
                 }
             }
+            tpl.addCheckInstruction(uint8_t(opcode + scope), offset, line);
         }
-        tpl.addCheckInstruction(uint8_t(opcode + scope), offset, line);
     }
 
     /** Check that the template so far is sensible and generate warnings.

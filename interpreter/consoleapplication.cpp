@@ -564,7 +564,11 @@ interpreter::ConsoleApplication::appMain()
     if (!params.opt_nostdlib && params.mode == ExecMode) {
         String_t corePath = fs.makePathName(fs.makePathName(environment().getInstallationDirectoryName(), "share"), "resource");
         params.loadPath.insert(params.loadPath.begin(), corePath);
-        params.job.insert(params.job.begin(), fs.makePathName(corePath, "core.q"));
+        if (params.opt_commands) {
+            params.job.insert(params.job.begin(), "Load 'core.q'");
+        } else {
+            params.job.insert(params.job.begin(), fs.makePathName(corePath, "core.q"));
+        }
     }
 
     // Register console commands.

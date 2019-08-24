@@ -19,6 +19,7 @@
 #include "util/slaverequestsender.hpp"
 #include "client/screenhistory.hpp"
 #include "client/map/minefieldmissionoverlay.hpp"
+#include "interpreter/process.hpp"
 
 namespace client { namespace screens {
 
@@ -27,12 +28,16 @@ namespace client { namespace screens {
         struct Definition {
             client::si::OutputState::Target target;
             ScreenHistory::Type historyType;
+            interpreter::Process::ProcessKind taskType;
             const char* layoutName;
             const char* keymapName;
         };
         static const Definition ShipScreen;
         static const Definition PlanetScreen;
         static const Definition BaseScreen;
+        static const Definition ShipTaskScreen;
+        static const Definition PlanetTaskScreen;
+        static const Definition BaseTaskScreen;
 
         ControlScreen(Session& session, int nr, const Definition& def);
 
@@ -45,10 +50,11 @@ namespace client { namespace screens {
          public:
             int screenNumber;
             client::si::OutputState::Target ownTarget;
+            interpreter::Process::ProcessKind taskType;
             String_t keymapName;
 
-            State(int screenNumber, client::si::OutputState::Target ownTarget, const String_t& keymapName)
-                : screenNumber(screenNumber), ownTarget(ownTarget), keymapName(keymapName)
+            State(int screenNumber, client::si::OutputState::Target ownTarget, interpreter::Process::ProcessKind taskType, const String_t& keymapName)
+                : screenNumber(screenNumber), ownTarget(ownTarget), taskType(taskType), keymapName(keymapName)
                 { }
 
             game::map::ObjectCursor* getCursor(game::Session& session) const;

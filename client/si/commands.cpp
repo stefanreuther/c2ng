@@ -4,6 +4,7 @@
 
 #include "client/si/commands.hpp"
 #include "afl/base/optional.hpp"
+#include "afl/base/staticassert.hpp"
 #include "afl/charset/utf8.hpp"
 #include "afl/except/assertionfailedexception.hpp"
 #include "afl/string/format.hpp"
@@ -17,12 +18,14 @@
 #include "client/dialogs/keymapdialog.hpp"
 #include "client/dialogs/objectselectiondialog.hpp"
 #include "client/dialogs/screenhistorydialog.hpp"
+#include "client/dialogs/searchdialog.hpp"
 #include "client/dialogs/shipspeeddialog.hpp"
 #include "client/dialogs/techupgradedialog.hpp"
 #include "client/dialogs/turnlistdialog.hpp"
 #include "client/dialogs/visualscandialog.hpp"
 #include "client/help.hpp"
 #include "client/proxy/screenhistoryproxy.hpp"
+#include "client/proxy/searchproxy.hpp"
 #include "client/si/control.hpp"
 #include "client/si/dialogfunction.hpp"
 #include "client/si/listboxfunction.hpp"
@@ -44,6 +47,7 @@
 #include "game/map/objecttype.hpp"
 #include "game/registrationkey.hpp"
 #include "game/root.hpp"
+#include "game/searchquery.hpp"
 #include "game/turn.hpp"
 #include "interpreter/arguments.hpp"
 #include "interpreter/values.hpp"
@@ -57,6 +61,8 @@
 #include "ui/widgets/standarddialogbuttons.hpp"
 #include "util/rich/parser.hpp"
 #include "util/rich/text.hpp"
+#include "client/dialogs/fileselectiondialog.hpp"
+#include "client/dialogs/taxationdialog.hpp"
 
 using client::si::UserTask;
 using client::si::UserSide;
@@ -151,6 +157,18 @@ namespace {
                 break;
              case ScreenHistory::Starbase:
                 ctl.handleStateChange(iface, link, OutputState::BaseScreen);
+                ok = true;
+                break;
+             case ScreenHistory::ShipTask:
+                ctl.handleStateChange(iface, link, OutputState::ShipTaskScreen);
+                ok = true;
+                break;
+             case ScreenHistory::PlanetTask:
+                ctl.handleStateChange(iface, link, OutputState::PlanetTaskScreen);
+                ok = true;
+                break;
+             case ScreenHistory::StarbaseTask:
+                ctl.handleStateChange(iface, link, OutputState::BaseTaskScreen);
                 ok = true;
                 break;
              case ScreenHistory::Starchart:
@@ -434,6 +452,36 @@ client::si::IFCCChangeSpeed(game::Session& session, ScriptSide& si, RequestLink1
         } else {
             si.postNewTask(link, new Task(sh->getId()));
         }
+    } else {
+        throw interpreter::Error::contextError();
+    }
+}
+
+// @since PCC2 2.40.7
+void
+client::si::IFCCChangeTaxes(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    // ex IFCCChangeTaxes
+    class Task : public UserTask {
+     public:
+        Task(game::Id_t pid)
+            : m_pid(pid)
+            { }
+        virtual void handle(UserSide& iface, Control& ctl, RequestLink2 link)
+            {
+                client::dialogs::doTaxationDialog(m_pid, afl::base::Nothing, ctl.root(), ctl.translator(), iface.gameSender());
+                iface.continueProcess(link);
+            }
+     private:
+        game::Id_t m_pid;
+    };
+
+    args.checkArgumentCount(0);
+    game::actions::mustHaveGame(session);
+
+    game::map::Planet* pl = dynamic_cast<game::map::Planet*>(link.getProcess().getCurrentObject());
+    if (pl != 0 && pl->isPlayable(game::map::Object::Playable)) {
+        si.postNewTask(link, new Task(pl->getId()));
     } else {
         throw interpreter::Error::contextError();
     }
@@ -990,6 +1038,96 @@ client::si::IFUIEndDialog(game::Session& /*session*/, ScriptSide& si, RequestLin
     si.postNewTask(link, new EndTask(code));
 }
 
+/* @q UI.FileWindow title:Str, wildcard:Str, Optional helpId:Str (Global Command)
+   File selection.
+
+   Opens  the "select a file" dialog and lets the user choose a file.
+   The %title argument specifies what to show in the window title,
+   the %wildcard is a wildcard which specifies the default filter.
+   For example, to choose a log file, do
+   | UI.FileWindow "Choose Log File", "*.log"
+
+   The optional third argument specifies a help page to use,
+   it defaults to the help page for the file window.
+   See {UI.Help} for more information.
+
+   When the user hits "OK", this command returns the chosen file in
+   {UI.Result}; when the user cancels, UI.Result is set to EMPTY.
+
+   The file dialog uses the variable {UI.Directory} to initialize and store the current directory.
+
+   In text mode, this command gives a simple, no-frills input line ({UI.Input}).
+
+   @c This command also accepts a fourth argument that deals with
+   @c predefined file names; details are still undocumented at this place.
+
+   @diff In PCC 1.x, the help Id is an integer. In PCC2, it is a string.
+   @since PCC2 1.99.21, PCC 1.0.15, PCC2 2.40.7 */
+void
+client::si::IFUIFileWindow(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    // ex IFUIFileWindow
+    class SessionFileSystem : public afl::base::Closure<afl::io::FileSystem& (game::Session&)> {
+     public:
+        virtual afl::io::FileSystem& call(game::Session& session)
+            { return session.world().fileSystem(); }
+        virtual SessionFileSystem* clone() const
+            { return new SessionFileSystem(); }
+    };
+    class Task : public UserTask {
+     public:
+        Task(const String_t& title, const String_t& pattern, const String_t& helpId, const String_t& dirName)
+            : m_title(title),
+              m_pattern(pattern),
+              m_helpId(helpId),
+              m_dirName(dirName)
+            { }
+        void handle(UserSide& ui, Control& ctl, RequestLink2 link)
+            {
+                client::dialogs::FileSelectionDialog dlg(ctl.root(), ui.gameSender().convert(new SessionFileSystem()), m_title);
+                dlg.setFolder(m_dirName);
+                dlg.setPattern(m_pattern);
+                // FIXME: help Id
+
+                bool ok = (dlg.run() != 0);
+
+                // Set UI.RESULT
+                std::auto_ptr<afl::data::Value> value;
+                if (ok) {
+                    value.reset(interpreter::makeStringValue(dlg.getResult()));
+                }
+                ui.setVariable(link, "UI.RESULT", value);
+
+                // Update UI.DIRECTORY
+                value.reset(interpreter::makeStringValue(dlg.getFolder()));
+                ui.setVariable(link, "UI.DIRECTORY", value);
+
+                // Continue
+                ui.continueProcess(link);
+            }
+     private:
+        String_t m_title, m_pattern, m_helpId, m_dirName;
+    };
+
+    // Parse args
+    args.checkArgumentCount(2, 3);
+
+    String_t title, pattern, helpId;
+    if (!interpreter::checkStringArg(title, args.getNext()) || !interpreter::checkStringArg(pattern, args.getNext())) {
+        return;
+    }
+    interpreter::checkStringArg(helpId, args.getNext());
+
+    // Get current directory
+    String_t dirName = interpreter::toString(link.getProcess().getVariable("UI.DIRECTORY"), false);
+    if (dirName.empty()) {
+        dirName = session.world().fileSystem().getWorkingDirectoryName();
+    }
+
+    si.postNewTask(link, new Task(title, pattern, helpId, dirName));
+}
+
+
 /* @q UI.GotoChart x:Int, y:Int (Global Command)
    Go to starchart.
    This command activates the <a href="pcc2:starchart">starchart</a> at the specified position.
@@ -1079,6 +1217,18 @@ client::si::IFUIGotoScreen(game::Session& session, ScriptSide& si, RequestLink1 
 
      case 4:
         si.postNewTask(link, new StateChangeTask(OutputState::Starchart));
+        break;
+
+     case 11:
+        enterScreen(game::map::Cursors::ShipScreen, OutputState::ShipTaskScreen, obj, session, si, link);
+        break;
+
+     case 12:
+        enterScreen(game::map::Cursors::PlanetScreen, OutputState::PlanetTaskScreen, obj, session, si, link);
+        break;
+
+     case 13:
+        enterScreen(game::map::Cursors::BaseScreen, OutputState::BaseTaskScreen, obj, session, si, link);
         break;
 
      default:
@@ -1771,6 +1921,96 @@ client::si::IFUIPopupConsole(game::Session& /*session*/, ScriptSide& si, Request
     si.postNewTask(link, new PopupConsoleTask());
 }
 
+/* @q UI.Search Optional query:Str, flags:Any (Global Command)
+   Search.
+
+   When called with no parameters, just opens the <a href="pcc2:search">Search</a> dialog.
+   When a search query is present, it is immmediately evaluated.
+   The %query parameter is the search string, the %flags specify the kind of search:
+   - "P": include planets in search.
+   - "S": include ships in search.
+   - "B": include starbases in search.
+   - "U": include UFOs in search.
+   - "O": include the other objects in search.
+   - "1": search for name or Id.
+   - "2": search for expression which is true (default).
+   - "3": search for expression which is false.
+   - "4": search for location.
+   Briefly, letters correspond to the checklist in the top-left of the search window,
+   digits correspond to the selection list in the top-right.
+   You can specify any number of letters but only one digit.
+   By default, all objects are searched for an expression which is true.
+
+   @since PCC2 1.99.10, PCC 1.1.2, PCC2 2.40.7 */
+void
+client::si::IFUISearch(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    // ex IFUISearch
+    /* UI.Search [text, flags]
+       flags: PSBUO = planets, ships, bases, ufos, others
+              1234  = name, true, false, location */
+    using game::SearchQuery;
+    SearchQuery q = client::proxy::SearchProxy::savedQuery(session);
+
+    bool immediate = false;
+    args.checkArgumentCount(0, 2);
+    if (args.getNumArgs() > 0) {
+        // Fetch text
+        String_t text;
+        immediate = true;
+        if (!interpreter::checkStringArg(text, args.getNext())) {
+            return;
+        }
+        q.setQuery(text);
+    }
+    if (args.getNumArgs() > 0) {
+        // Fetch flags
+        int32_t kind = 1;
+        int32_t objs = 0;
+        static_assert(SearchQuery::SearchShips   == 0, "SearchShips");
+        static_assert(SearchQuery::SearchPlanets == 1, "SearchPlanets");
+        static_assert(SearchQuery::SearchBases   == 2, "SearchBases");
+        static_assert(SearchQuery::SearchUfos    == 3, "SearchUfos");
+        static_assert(SearchQuery::SearchOthers  == 4, "SearchOthers");
+
+        if (!interpreter::checkFlagArg(objs, &kind, args.getNext(), "SPBUO")) {
+            return;
+        }
+
+        // Kind
+        switch (kind) {
+         case 1:  q.setMatchType(SearchQuery::MatchName);     break;
+         case 2:  q.setMatchType(SearchQuery::MatchTrue);     break;
+         case 3:  q.setMatchType(SearchQuery::MatchFalse);    break;
+         case 4:  q.setMatchType(SearchQuery::MatchLocation); break;
+         default: throw interpreter::Error::rangeError();
+        }
+
+        // Objects
+        q.setSearchObjects(SearchQuery::SearchObjects_t::fromInteger(objs));
+    }
+
+    class Task : public UserTask {
+     public:
+        Task(const SearchQuery& q, bool immediate)
+            : m_query(q), m_immediate(immediate)
+            { }
+        void handle(UserSide& ui, Control& ctl, RequestLink2 link)
+            {
+                OutputState out;
+                client::dialogs::doSearchDialog(m_query, m_immediate, ui, ctl.root(), ctl.translator(), out);
+                ui.joinProcess(link, out.getProcess());
+                ctl.handleStateChange(ui, link, out.getTarget());
+            }
+     private:
+        SearchQuery m_query;
+        bool m_immediate;
+    };
+    session.notifyListeners();
+    si.postNewTask(link, new Task(q, immediate));
+}
+
+
 /* @q UI.Update Optional flag:Bool (Global Command)
    Update graphical user interface.
    This causes all the screen to be redrawn.
@@ -1845,7 +2085,7 @@ client::si::registerCommands(UserSide& ui)
                 // s.world().setNewGlobalValue("CC$CHANGEMISSION",      new ScriptProcedure(s, &si, IFCCChangeMission));
                 // s.world().setNewGlobalValue("CC$CHANGEPE",           new ScriptProcedure(s, &si, IFCCChangePE));
                 s.world().setNewGlobalValue("CC$CHANGESPEED",        new ScriptProcedure(s, &si, IFCCChangeSpeed));
-                // s.world().setNewGlobalValue("CC$CHANGETAXES",        new ScriptProcedure(s, &si, IFCCChangeTaxes));
+                s.world().setNewGlobalValue("CC$CHANGETAXES",        new ScriptProcedure(s, &si, IFCCChangeTaxes));
                 s.world().setNewGlobalValue("CC$CHANGETECH",         new ScriptProcedure(s, &si, IFCCChangeTech));
                 // s.world().setNewGlobalValue("CC$CHANGEWAYPOINT",     new ScriptProcedure(s, &si, IFCCChangeWaypoint));
                 // s.world().setNewGlobalValue("CC$CSBROWSE",           new ScriptProcedure(s, &si, IFCCCSBrowse));
@@ -1879,7 +2119,7 @@ client::si::registerCommands(UserSide& ui)
                 s.world().setNewGlobalValue("UI.EDITALLIANCES",      new ScriptProcedure(s, &si, IFUIEditAlliances));
                 s.world().setNewGlobalValue("UI.DIALOG",             new DialogFunction(s, &si));
                 s.world().setNewGlobalValue("UI.ENDDIALOG",          new ScriptProcedure(s, &si, IFUIEndDialog));
-                // s.world().setNewGlobalValue("UI.FILEWINDOW",         IFUIFileWindow);
+                s.world().setNewGlobalValue("UI.FILEWINDOW",         new ScriptProcedure(s, &si, IFUIFileWindow));
                 s.world().setNewGlobalValue("UI.GOTOCHART",          new ScriptProcedure(s, &si, IFUIGotoChart));
                 s.world().setNewGlobalValue("UI.GOTOSCREEN",         new ScriptProcedure(s, &si, IFUIGotoScreen));
                 s.world().setNewGlobalValue("UI.HELP",               new ScriptProcedure(s, &si, IFUIHelp));
@@ -1894,7 +2134,7 @@ client::si::registerCommands(UserSide& ui)
                 // s.world().setNewGlobalValue("UI.OVERLAYMESSAGE",     IFUIOverlayMessage);
                 // s.world().setNewGlobalValue("UI.PLANETINFO",         IFUIPlanetInfo);
                 s.world().setNewGlobalValue("UI.POPUPCONSOLE",       new ScriptProcedure(s, &si, IFUIPopupConsole));
-                // s.world().setNewGlobalValue("UI.SEARCH",             IFUISearch);
+                s.world().setNewGlobalValue("UI.SEARCH",             new ScriptProcedure(s, &si, IFUISearch));
                 // s.world().setNewGlobalValue("UI.SELECTIONMANAGER",   IFUISelectionManager);
                 s.world().setNewGlobalValue("UI.UPDATE",             new ScriptProcedure(s, &si, IFUIUpdate));
             }

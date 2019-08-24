@@ -1,5 +1,6 @@
 /**
   *  \file game/alliance/offer.cpp
+  *  \brief Structure game::alliance::Offer
   */
 
 #include "game/alliance/offer.hpp"
@@ -16,8 +17,7 @@ namespace {
 }
 
 
-// /** Constructor.
-//     Make blank (unknown) alliance offer. */
+// Constructor.
 game::alliance::Offer::Offer()
 {
     // ex GAllianceOffer::GAllianceOffer
@@ -26,8 +26,7 @@ game::alliance::Offer::Offer()
     newOffer.setAll(Unknown);
 }
 
-// /** Merge two alliance offer sets.
-//     Values from the other set are copied into this one, excluding Unknown values.. */
+// Merge.
 void
 game::alliance::Offer::merge(const Offer& other)
 {
@@ -37,7 +36,7 @@ game::alliance::Offer::merge(const Offer& other)
     mergeSet(newOffer, other.newOffer);
 }
 
-// /** Check whether the given OfferType means a positive offer. */
+// Check for positive offer.
 bool
 game::alliance::Offer::isOffer(Type type)
 {

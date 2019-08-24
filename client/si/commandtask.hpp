@@ -14,7 +14,7 @@ namespace client { namespace si {
     class CommandTask : public ScriptTask {
      public:
         CommandTask(String_t command, bool verbose, String_t name, std::auto_ptr<ContextProvider> ctxp);
-        virtual interpreter::Process* execute(uint32_t pgid, game::Session& session, Verbosity& v);
+        virtual void execute(uint32_t pgid, game::Session& session);
 
      private:
         String_t m_command;

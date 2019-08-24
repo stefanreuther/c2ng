@@ -1,15 +1,16 @@
 /**
   *  \file game/vcr/classic/battle.cpp
+  *  \brief Class game::vcr::classic::Battle
   */
 
 #include "game/vcr/classic/battle.hpp"
-#include "util/translation.hpp"
-#include "game/vcr/classic/algorithm.hpp"
-#include "game/vcr/classic/nullvisualizer.hpp"
-#include "game/vcr/classic/hostalgorithm.hpp"
-#include "game/vcr/classic/pvcralgorithm.hpp"
 #include "afl/string/format.hpp"
+#include "game/vcr/classic/algorithm.hpp"
+#include "game/vcr/classic/hostalgorithm.hpp"
+#include "game/vcr/classic/nullvisualizer.hpp"
+#include "game/vcr/classic/pvcralgorithm.hpp"
 #include "game/vcr/classic/utils.hpp"
+#include "util/translation.hpp"
 
 namespace {
     int getBuildPointMass(const game::vcr::Object& obj,
@@ -291,7 +292,7 @@ game::vcr::classic::Battle::getResult() const
 game::vcr::classic::Algorithm*
 game::vcr::classic::Battle::createAlgorithm(Visualizer& vis,
                                             const game::config::HostConfiguration& config,
-                                            const game::spec::ShipList& shipList)
+                                            const game::spec::ShipList& shipList) const
 {
     // ex GClassicVcrEntry::createPlayer
     return createAlgorithmForType(m_type, vis, config, shipList);
@@ -410,6 +411,13 @@ game::vcr::classic::Battle::computeScores(Score& score,
     }
 }
 
+void
+game::vcr::classic::Battle::applyClassicLimits()
+{
+    // ex GClassicVcrEntry::applyClassicLimits
+    m_before[0].applyClassicLimits();
+    m_before[1].applyClassicLimits();
+}
 
 // FIXME: remove, no longer needed
 // inline void

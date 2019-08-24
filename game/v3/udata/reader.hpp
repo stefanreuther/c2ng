@@ -50,6 +50,11 @@ namespace game { namespace v3 { namespace udata {
         /** Handle error. Reports a file format error (i.e. file too short). */
         // ex GUtilReader::failure
         virtual void handleError(afl::io::Stream& in) = 0;
+
+        /** Handle end of file.
+            Called after the last handleRecord().
+            This method can perform cleanup tasks. */
+        virtual void handleEnd() = 0;
     };
 
 } } }

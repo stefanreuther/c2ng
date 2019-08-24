@@ -254,7 +254,7 @@ game::v3::Unpacker::prepare(ResultFile& file, int player)
     m_gen.loadFromResult(file.getFile());
     if (m_gen.getPlayerId() != player) {
         if (!m_ignoreErrors) {
-            throw FileFormatException(file.getFile(), Format(m_translator.translateString("File is owned by player %d, should be %d").c_str(), m_gen.getPlayerId(), player));
+            throw FileFormatException(file.getFile(), Format(m_translator("File is owned by player %d, should be %d"), m_gen.getPlayerId(), player));
         }
     }
 
@@ -383,7 +383,7 @@ game::v3::Unpacker::loadShips(ResultFile& result)
 
     int count = rawCount;
     if (count < 0 || count > gt::NUM_SHIPS) {
-        throw FileFormatException(s, m_translator.translateString("Invalid number of ships"));
+        throw FileFormatException(s, m_translator("Invalid number of ships"));
     }
 
     // Content
@@ -393,7 +393,7 @@ game::v3::Unpacker::loadShips(ResultFile& result)
     // Verify checksum
     if (ByteSum().add(m_disShips.toBytes(), 0) != m_gen.getSectionChecksum(gt::ShipSection)) {
         if (!m_ignoreErrors) {
-            throw FileFormatException(s, m_translator.translateString("Checksum mismatch in ship section"));
+            throw FileFormatException(s, m_translator("Checksum mismatch in ship section"));
         }
     }
 
@@ -417,7 +417,7 @@ game::v3::Unpacker::loadPlanets(ResultFile& result)
 
     int count = rawCount;
     if (count < 0 || count > gt::NUM_PLANETS) {
-        throw FileFormatException(s, m_translator.translateString("Invalid number of planets"));
+        throw FileFormatException(s, m_translator("Invalid number of planets"));
     }
 
     // Content
@@ -427,7 +427,7 @@ game::v3::Unpacker::loadPlanets(ResultFile& result)
     // Verify checksum
     if (ByteSum().add(m_disPlanets.toBytes(), 0) != m_gen.getSectionChecksum(gt::PlanetSection)) {
         if (!m_ignoreErrors) {
-            throw FileFormatException(s, m_translator.translateString("Checksum mismatch in planet section"));
+            throw FileFormatException(s, m_translator("Checksum mismatch in planet section"));
         }
     }
 
@@ -451,7 +451,7 @@ game::v3::Unpacker::loadBases(ResultFile& result)
 
     int count = rawCount;
     if (count < 0 || count > gt::NUM_PLANETS) {
-        throw FileFormatException(s, m_translator.translateString("Invalid number of bases"));
+        throw FileFormatException(s, m_translator("Invalid number of bases"));
     }
 
     // Content
@@ -461,7 +461,7 @@ game::v3::Unpacker::loadBases(ResultFile& result)
     // Verify checksum
     if (ByteSum().add(m_disBases.toBytes(), 0) != m_gen.getSectionChecksum(gt::BaseSection)) {
         if (!m_ignoreErrors) {
-            throw FileFormatException(s, m_translator.translateString("Checksum mismatch in base section"));
+            throw FileFormatException(s, m_translator("Checksum mismatch in base section"));
         }
     }
 
@@ -502,7 +502,7 @@ game::v3::Unpacker::saveShips(afl::io::Directory& dir)
     }
     m_gen.setSectionChecksum(gt::ShipSection, gameChecksum);
 
-    m_log.write(afl::sys::Log::Info, LOG_NAME, Format(_("Unpacked %d ship%!1{s%}.").c_str(), m_datShips.size()));
+    m_log.write(afl::sys::Log::Info, LOG_NAME, Format(m_translator("Unpacked %d ship%!1{s%}."), m_datShips.size()));
 }
 
 /** Save planets.
@@ -538,7 +538,7 @@ game::v3::Unpacker::savePlanets(afl::io::Directory& dir)
     }
     m_gen.setSectionChecksum(gt::PlanetSection, gameChecksum);
 
-    m_log.write(afl::sys::Log::Info, LOG_NAME, Format(_("Unpacked %d planet%!1{s%}.").c_str(), m_datPlanets.size()));
+    m_log.write(afl::sys::Log::Info, LOG_NAME, Format(m_translator("Unpacked %d planet%!1{s%}."), m_datPlanets.size()));
 }
 
 /** Save starbases.
@@ -574,7 +574,7 @@ game::v3::Unpacker::saveBases(afl::io::Directory& dir)
     }
     m_gen.setSectionChecksum(gt::BaseSection, gameChecksum);
 
-    m_log.write(afl::sys::Log::Info, LOG_NAME, Format(_("Unpacked %d starbase%!1{s%}.").c_str(), m_datBases.size()));
+    m_log.write(afl::sys::Log::Info, LOG_NAME, Format(m_translator("Unpacked %d starbase%!1{s%}."), m_datBases.size()));
 }
 
 /** Save "genX.dat" file.
@@ -611,7 +611,7 @@ game::v3::Unpacker::saveTargetExt(afl::io::Directory& dir, const TargetBuffer_t&
         dat->fullWrite(m_gen.getSignature2());
 
         if (m_verbose) {
-            m_log.write(afl::sys::Log::Info, LOG_NAME, Format(_("Unpacked %d visual contact%!1{s%} to \"target%d.ext\".").c_str(), targetBuffer.size(), m_playerId));
+            m_log.write(afl::sys::Log::Info, LOG_NAME, Format(m_translator("Unpacked %d visual contact%!1{s%} to \"target%d.ext\"."), targetBuffer.size(), m_playerId));
         }
     } else {
         // No additional targets, scrap the file
@@ -638,7 +638,7 @@ game::v3::Unpacker::unpackTargets(afl::io::Directory& dir, ResultFile& result, T
 
     int16_t count = rawCount;
     if (count < 0 || count > gt::NUM_SHIPS) {
-        throw FileFormatException(s, m_translator.translateString("Invalid number of targets"));
+        throw FileFormatException(s, m_translator("Invalid number of targets"));
     }
 
     // If target.ext is requested, only extract 50 targets; the others go in target.ext.
@@ -664,9 +664,9 @@ game::v3::Unpacker::unpackTargets(afl::io::Directory& dir, ResultFile& result, T
     dat->fullWrite(m_gen.getSignature2());
 
     if (m_verbose && targetsInFile != count) {
-        m_log.write(afl::sys::Log::Info, LOG_NAME, Format(_("Unpacked %d visual contact%!1{s%} to \"target%d.dat\".").c_str(), targetsInFile, m_playerId));
+        m_log.write(afl::sys::Log::Info, LOG_NAME, Format(m_translator("Unpacked %d visual contact%!1{s%} to \"target%d.dat\"."), targetsInFile, m_playerId));
     } else {
-        m_log.write(afl::sys::Log::Info, LOG_NAME, Format(_("Unpacked %d visual contact%!1{s%}.").c_str(), count));
+        m_log.write(afl::sys::Log::Info, LOG_NAME, Format(m_translator("Unpacked %d visual contact%!1{s%}."), count));
     }
 }
 
@@ -688,7 +688,7 @@ game::v3::Unpacker::unpackVcrs(afl::io::Directory& dir, ResultFile& result)
 
     int16_t count = rawCount;
     if (count < 0) {
-        throw FileFormatException(s, m_translator.translateString("VCR file is invalid"));
+        throw FileFormatException(s, m_translator("VCR file is invalid"));
     }
 
     dat->fullWrite(rawCount.m_bytes);
@@ -699,7 +699,7 @@ game::v3::Unpacker::unpackVcrs(afl::io::Directory& dir, ResultFile& result)
     // Add signature
     dat->fullWrite(m_gen.getSignature2());
 
-    m_log.write(afl::sys::Log::Info, LOG_NAME, Format(_("Unpacked %d combat recording%!1{s%}.").c_str(), count));
+    m_log.write(afl::sys::Log::Info, LOG_NAME, Format(m_translator("Unpacked %d combat recording%!1{s%}."), count));
 }
 
 /** Unpack shipxy section.
@@ -716,7 +716,7 @@ game::v3::Unpacker::unpackShipXY(afl::io::Directory& dir, ResultFile& result)
     dat->copyFrom(s, numEntries * sizeof(gt::ShipXY));
     dat->fullWrite(m_gen.getSignature2());
 
-    m_log.write(afl::sys::Log::Info, LOG_NAME, Format(_("Unpacked ship location file with %d entries.").c_str(), numEntries));
+    m_log.write(afl::sys::Log::Info, LOG_NAME, Format(m_translator("Unpacked ship location file with %d entries."), numEntries));
 }
 
 /** Unpack messages. Creates mdata.dat file.
@@ -733,7 +733,7 @@ game::v3::Unpacker::unpackMessages(afl::io::Directory& dir, ResultFile& result)
     s.fullRead(rawCount.m_bytes);
     int16_t count = rawCount;
     if (count < 0) {
-        throw FileFormatException(s, _("Message file is invalid"));
+        throw FileFormatException(s, m_translator("Message file is invalid"));
     }
 
     // Read index
@@ -745,7 +745,7 @@ game::v3::Unpacker::unpackMessages(afl::io::Directory& dir, ResultFile& result)
     for (int i = 0; i < count; ++i) {
         gt::IncomingMessageHeader* mh = index.at(i);
         if (mh->address <= 0 || mh->length <= 0) {
-            throw FileFormatException(s, _("Message file is invalid"));
+            throw FileFormatException(s, m_translator("Message file is invalid"));
         }
     }
 
@@ -777,7 +777,7 @@ game::v3::Unpacker::unpackMessages(afl::io::Directory& dir, ResultFile& result)
     dat->fullWrite(rawCount.m_bytes);
     dat->fullWrite(index.toBytes());
 
-    m_log.write(afl::sys::Log::Info, LOG_NAME, Format(_("Unpacked %d message%!1{s%}.").c_str(), count));
+    m_log.write(afl::sys::Log::Info, LOG_NAME, Format(m_translator("Unpacked %d message%!1{s%}."), count));
 }
 
 /** Unpack KORE file.
@@ -834,7 +834,7 @@ game::v3::Unpacker::unpackKore(afl::io::Directory& dir, ResultFile& result, Targ
     if (validRaceNames && m_acceptRaceNames) {
         // FIXME: PCC2 would ask if race names differ. We operate non-interactively.
         dir.openFile("race.nm", FileSystem::Create)->fullWrite(rstRaceNameBuffer);
-        m_log.write(afl::sys::Log::Info, LOG_NAME, _("Unpacked race name file."));
+        m_log.write(afl::sys::Log::Info, LOG_NAME, m_translator("Unpacked race name file."));
     }
 
     // Ufos
@@ -858,7 +858,7 @@ game::v3::Unpacker::unpackKore(afl::io::Directory& dir, ResultFile& result, Targ
 
         int32_t count = rawCount;
         if (count < 0 || count > gt::NUM_SHIPS) {
-            throw FileFormatException(s, _("Unbelievable number of visual contacts"));
+            throw FileFormatException(s, m_translator("Unbelievable number of visual contacts"));
         }
 
         for (int32_t i = 0; i < count; ++i) {
@@ -877,7 +877,7 @@ game::v3::Unpacker::unpackKore(afl::io::Directory& dir, ResultFile& result, Targ
     dat->fullWrite(m_gen.getSignature2());
 
     if (m_verbose) {
-        m_log.write(afl::sys::Log::Info, LOG_NAME, _("Unpacked version 3.5 object file (kore)."));
+        m_log.write(afl::sys::Log::Info, LOG_NAME, m_translator("Unpacked version 3.5 object file (kore)."));
     }
 }
 
@@ -908,7 +908,7 @@ game::v3::Unpacker::unpackSkore(afl::io::Directory& dir, ResultFile& result)
     int count = rawCount;
     if (count <= 100) {
         if (m_verbose) {
-            m_log.write(afl::sys::Log::Info, LOG_NAME, _("Extended Ufo database exists but is empty."));
+            m_log.write(afl::sys::Log::Info, LOG_NAME, m_translator("Extended Ufo database exists but is empty."));
         }
         return;
     }
@@ -927,7 +927,7 @@ game::v3::Unpacker::unpackSkore(afl::io::Directory& dir, ResultFile& result)
     // Copy Ufo data
     dat->copyFrom(s, sizeof(gt::Ufo) * (count - 100));
 
-    m_log.write(afl::sys::Log::Info, LOG_NAME, Format(_("Unpacked %d additional Ufo%!1{s%}.").c_str(), count - 100));
+    m_log.write(afl::sys::Log::Info, LOG_NAME, Format(m_translator("Unpacked %d additional Ufo%!1{s%}."), count - 100));
 }
 
 /** Create blank files.
@@ -1017,7 +1017,7 @@ game::v3::Unpacker::removeGameFile(afl::io::Directory& dir, const String_t& name
 void
 game::v3::Unpacker::fail(const char* tpl, int arg)
 {
-    throw FileFormatException(String_t("<turn>"), Format(m_translator.translateString(tpl).c_str(), arg));
+    throw FileFormatException(String_t("<turn>"), Format(m_translator(tpl), arg));
 }
 
 void

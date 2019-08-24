@@ -1,13 +1,14 @@
 /**
   *  \file game/vcr/classic/pvcralgorithm.cpp
+  *  \brief Class game::vcr::classic::PVCRAlgorithm
   */
 
 #include <algorithm>
 #include "game/vcr/classic/pvcralgorithm.hpp"
-#include "game/vcr/classic/visualizer.hpp"
-#include "game/vcr/classic/statustoken.hpp"
-#include "util/math.hpp"
 #include "game/v3/structures.hpp"
+#include "game/vcr/classic/statustoken.hpp"
+#include "game/vcr/classic/visualizer.hpp"
+#include "util/math.hpp"
 
 /*
   This seems to be pretty optimisation-resistant.
@@ -73,12 +74,14 @@
   + cache config in algo        AC: 4.83,   Non-AC: 1.60
   + 20180304 all types int      AC: 4.57,   Non-AC: 1.60
   + 20180304 inlining           AC: 4.35,   Non-AC: 1.42
-  + 20180304 precompute specs   AC: 4.24,   Non-AC: 1.42 */
+  + 20180304 precompute specs   AC: 4.24,   Non-AC: 1.42
+  + 20190511                    AC: 3.99,   Non-AC: 1.32
+  + 20190511 beamFindNearest,   AC; 3.95,   Non-AC: 1.32 */
 
 using util::divideAndRound;
 
 namespace {
-    // /** Bitmask of VCR capabilities supported by this player. */
+    /** Bitmask of VCR capabilities supported by this player. */
     const uint16_t SUPPORTED_CAPABILITIES = game::v3::structures::DeathRayCapability | game::v3::structures::ExperienceCapability | game::v3::structures::BeamCapability;
 
     /** Movement timer. We check whether standoff distance has been
@@ -261,8 +264,8 @@ game::vcr::classic::PVCRAlgorithm::~PVCRAlgorithm()
 }
 
 // Algorithm methods:
-// /** Check and correct VCR. Returns true iff an error was corrected,
-//     false if the VCR was ok. */
+
+// Check and correct VCR.
 bool
 game::vcr::classic::PVCRAlgorithm::checkBattle(Object& left, Object& right, uint16_t& /*seed*/)
 {
@@ -272,8 +275,7 @@ game::vcr::classic::PVCRAlgorithm::checkBattle(Object& left, Object& right, uint
     return leftResult || rightResult;
 }
 
-// /** Initialize VCR Player. Creates shadow copies of configuration
-//     parameters and pre-charges weapons. */
+// Initialize VCR Player.
 void
 game::vcr::classic::PVCRAlgorithm::initBattle(const Object& left, const Object& right, uint16_t seed)
 {
@@ -439,12 +441,10 @@ game::vcr::classic::PVCRAlgorithm::initBattle(const Object& left, const Object& 
     }
 
     initActivityDetector();
-    // FIXME: init vis
-//     visualizer().init();
 }
 
 
-// /** Finish up VCR. */
+// Finish up VCR.
 void
 game::vcr::classic::PVCRAlgorithm::doneBattle(Object& left, Object& right)
 {
@@ -528,8 +528,7 @@ game::vcr::classic::PVCRAlgorithm::setCapabilities(uint16_t cap)
     return true;
 }
 
-// /** Play one cycle. Slightly different than in PCC 1.x due to
-//     more-precisely specified semantics. */
+// Play one cycle.
 bool
 game::vcr::classic::PVCRAlgorithm::playCycle()
 {
@@ -571,9 +570,7 @@ game::vcr::classic::PVCRAlgorithm::playCycle()
     return true;
 }
 
-// /** Fast forward. The PHost 'Fast Forward' scheme is a little more
-//     complicated than the one for THost because most values are
-//     configurable, and because the PRNG is more complicated. */
+// Fast forward.
 void
 game::vcr::classic::PVCRAlgorithm::playFastForward()
 {
@@ -747,9 +744,9 @@ struct game::vcr::classic::PVCRAlgorithm::PVCRStatusToken : public StatusToken {
         { }
 };
 
-// /** Save status. Easy mindless way, just save everything. Actually, we
-//     could re-compute status[].f and one_f/right_probab from the VCR
-//     record, but I'm too lazy to do that now. */
+// Save status.
+// Easy mindless way, just save everything.
+// Actually, we could re-compute status[].f and one_f/right_probab from the VCR record, but I'm too lazy to do that now.
 game::vcr::classic::StatusToken*
 game::vcr::classic::PVCRAlgorithm::createStatusToken()
 {
@@ -811,7 +808,7 @@ game::vcr::classic::PVCRAlgorithm::getStatistic(Side side)
  *  - "a+b*-c" instead of "a-b*c"
  */
 
-// /** Random Number Generator. Basic linear congruence. */
+/** Random Number Generator. Basic linear congruence. */
 uint32_t
 game::vcr::classic::PVCRAlgorithm::random64k()
 {
@@ -821,8 +818,8 @@ game::vcr::classic::PVCRAlgorithm::random64k()
 }
 
 #ifdef PVCR_PREPARED_RNG
-// /** Random Number Generator. Returns a random number uniformly in [0,max),
-//     where max is the parameter passed to PreparedRNG::operator=. */
+/** Random Number Generator.
+    \return random number uniformly in [0,max), where max is the parameter passed to PreparedRNG::operator=. */
 int
 game::vcr::classic::PVCRAlgorithm::randomRange(const PreparedRNG& rng)
 {
@@ -835,9 +832,9 @@ game::vcr::classic::PVCRAlgorithm::randomRange(const PreparedRNG& rng)
     return i / rng.divi;
 }
 
-// /** Prepare random number generator. The PreparedRNG can later be
-//     passed to randomRange to return a number in [0,max). Doing it this
-//     way avoids one division instruction (or more) per RNG invocation. */
+/** Prepare random number generator.
+    The PreparedRNG can later be passed to randomRange to return a number in [0,max).
+    Doing it this way avoids one division instruction (or more) per RNG invocation. */
 void
 game::vcr::classic::PVCRAlgorithm::PreparedRNG::operator=(uint32_t max)
 {
@@ -852,8 +849,8 @@ game::vcr::classic::PVCRAlgorithm::PreparedRNG::operator=(uint32_t max)
     }
 }
 #else
-/** Random Number Generator. Returns a random number uniformly
-    in [0, max) */
+/** Random Number Generator.
+    \return random number uniformly in [0, max) */
 int
 game::vcr::classic::PVCRAlgorithm::randomRange(uint32_t max)
 {
@@ -867,8 +864,8 @@ game::vcr::classic::PVCRAlgorithm::randomRange(uint32_t max)
 }
 #endif
 
-/** Random Number Generator. Same as randomRange(100), optimized to
-    avoid divisions. */
+/** Random Number Generator.
+    Same as randomRange(100), optimized to avoid divisions. */
 int
 game::vcr::classic::PVCRAlgorithm::randomRange100()
 {
@@ -880,8 +877,8 @@ game::vcr::classic::PVCRAlgorithm::randomRange100()
     return i / (65536U*655U);
 }
 
-/** Random Number Generator. Compute a random number uniformly in [0,100)
-    and return true iff it is smaller than comp. */
+/** Random Number Generator.
+    Compute a random number uniformly in [0,100) and return true iff it is smaller than comp. */
 bool
 game::vcr::classic::PVCRAlgorithm::randomRange100LT(int comp)
 {
@@ -901,12 +898,15 @@ game::vcr::classic::PVCRAlgorithm::randomRange100LT(int comp)
 /*
  *  Hit
  */
-// /** Hit object, back-end.
-//     \param Formula formula set in use (AlternativeFormula, RegularFormula).
-//     \param st    object being hit
-//     \param kill  anti-life (x-ray) power of weapon
-//     \param expl  explosive power of weapon
-//     \param is_death_ray true iff this weapon emits death rays. */
+
+/** Hit object, back-end.
+    \tparam Formula formula set in use (AlternativeFormula, RegularFormula).
+    \param st    object being hit
+    \param kill  anti-life (x-ray) power of weapon
+    \param expl  explosive power of weapon
+    \param is_death_ray true iff this weapon emits death rays.
+    \retval true battle ends
+    \retval false battle continues */
 template<typename Formula>
 inline bool
 game::vcr::classic::PVCRAlgorithm::hitT(Status& st, int kill, int expl, bool is_death_ray)
@@ -928,14 +928,12 @@ game::vcr::classic::PVCRAlgorithm::hitT(Status& st, int kill, int expl, bool is_
                 damage_rate = 0;
                 st.r.shield_scaled -= damage_s;
             }
+            if (damage_rate <= 0)
+                return false;
         }
 
         /* Shields are down -- do damage */
-        if (damage_rate <= 0)
-            return false;
-
         st.r.damage_scaled2 += Formula::computeHullDamageS(expl, kill, st) * damage_rate;
-
         if (st.r.damage_scaled2 >= st.f.damage_limit_scaled) {
             return true;
         }
@@ -967,12 +965,11 @@ game::vcr::classic::PVCRAlgorithm::hitT(Status& st, int kill, int expl, bool is_
                 damage_rate = 0;
                 st.r.shield -= damage;
             }
+            if (damage_rate <= 0)
+                return false;
         }
 
         /* Shields are down -- do damage */
-        if (damage_rate <= 0)
-            return false;
-
         st.r.damage += Formula::computeHullDamage(expl, kill, st) * damage_rate / 100.0;
 
         if (int(st.r.damage + 0.5) >= st.f.damage_limit) {
@@ -992,13 +989,13 @@ game::vcr::classic::PVCRAlgorithm::hitT(Status& st, int kill, int expl, bool is_
 #endif
 }
 
-// /** Hit object.
-//     \param st    object being hit
-//     \param kill  anti-life (x-ray) power of weapon
-//     \param expl  explosive power of weapon
-//     \param is_death_ray true iff this weapon emits death rays. "hit"
-//     can't itself check for this, because a beam may end up here with
-//     expl=0 when fired while partially charged */
+/** Hit object.
+    \param st    object being hit
+    \param kill  anti-life (x-ray) power of weapon
+    \param expl  explosive power of weapon
+    \param is_death_ray true iff this weapon emits death rays.
+    \retval true battle ends
+    \retval false battle continues */
 bool
 game::vcr::classic::PVCRAlgorithm::hit(Status& st, int kill, int expl, bool is_death_ray)
 {
@@ -1027,7 +1024,7 @@ game::vcr::classic::PVCRAlgorithm::hit(Status& st, int kill, int expl, bool is_d
 
 /** Compute bay recharge rate. Documented formula. Used for initialisation. */
 int
-game::vcr::classic::PVCRAlgorithm::computeBayRechargeRate(int num, const Object& obj)
+game::vcr::classic::PVCRAlgorithm::computeBayRechargeRate(int num, const Object& obj) const
 {
     // ex VcrPlayerPHost::computeBayRechargeRate
     int i = getExperienceModifiedValue(m_config[m_config.BayRechargeBonus], m_config[m_config.EModBayRechargeBonus], obj, -500, 500) * num
@@ -1247,7 +1244,7 @@ game::vcr::classic::PVCRAlgorithm::fighterAttack(Status& st, Status& opp)
 
 /** Compute beam hit odds. Documented formula. Used during initialisation. */
 int
-game::vcr::classic::PVCRAlgorithm::computeBeamHitOdds(const game::spec::Beam& beam, const Object& obj)
+game::vcr::classic::PVCRAlgorithm::computeBeamHitOdds(const game::spec::Beam& beam, const Object& obj) const
 {
     // ex VcrPlayerPHost::computeBeamHitOdds
     int i = getExperienceModifiedValue(m_config[m_config.BeamHitBonus], m_config[m_config.EModBeamHitBonus], obj, -4095, 4095)
@@ -1259,7 +1256,7 @@ game::vcr::classic::PVCRAlgorithm::computeBeamHitOdds(const game::spec::Beam& be
 /** Compute beam recharge rate. Documented formula. Used during
     initialisation. */
 int
-game::vcr::classic::PVCRAlgorithm::computeBeamRechargeRate(const game::spec::Beam& beam, const Object& obj)
+game::vcr::classic::PVCRAlgorithm::computeBeamRechargeRate(const game::spec::Beam& beam, const Object& obj) const
 {
     // ex VcrPlayerPHost::computeBeamRechargeRate
     int i = (((beam.getKillPower() + beam.getDamagePower()) * getExperienceModifiedValue(m_config[m_config.BeamRechargeBonus], m_config[m_config.EModBeamRechargeBonus], obj, -4095, 4095)) / 100
@@ -1285,48 +1282,51 @@ game::vcr::classic::PVCRAlgorithm::beamRecharge(Status& st)
 /** Find nearest-possible fighter. Returns fighter index [0,VCR_MAX_FTRS),
     or -1 if none. */
 inline int
-game::vcr::classic::PVCRAlgorithm::beamFindNearestFighter(const Status& st, const Status& opp)
+game::vcr::classic::PVCRAlgorithm::beamFindNearestFighter(const Status& st, const Status& opp) const
 {
     // ex VcrPlayerPHost::beamFindNearestFighter
-    int32_t mindist = 100000;
+    // Only look for fighters if we expect to find some
     int fighter = -1;
+    if (opp.r.m_activeFighters != 0) {
+        int32_t mindist = st.f.BeamHitFighterRange+1;
+        const int32_t my_x = st.r.m_objectX;
+        const bool foaf = m_fireOnAttackFighters;
 
-    /* When enemy does not have a fighter, don't fire at one... */
-    if (opp.r.m_activeFighters == 0)
-        return -1;
+        int retreatingFighter = -1;
+        bool hasAttackingFighter = false;
 
-    int32_t my_x = st.r.m_objectX;
-
-    /* Look for a matching fighters. When we're asked to fire on
-       attacking fighters only, accept only those first. */
-    for (int i = 0, limit = opp.f.MaxFightersLaunched; i < limit; ++i)
-        if (opp.r.m_fighterStatus[i] == FighterAttacks
-            || (!m_fireOnAttackFighters && opp.r.m_fighterStatus[i] != FighterIdle))
-        {
-            int32_t d = std::abs(my_x - opp.r.m_fighterX[i]);
-            if (d < mindist) {
-                mindist = d;
-                fighter = i;
+        // One-pass algorithm:
+        // - if FireOnAttackFighters is set:
+        //   . look for the closest attacking fighter that is in range
+        //   . if no attacking fighter at all, look for the first returning one (need not be in range!)
+        // - if FireOnAttackFighters is not set
+        //   . look for the closest fighter in range
+        for (int i = 0, limit = opp.f.MaxFightersLaunched; i < limit; ++i) {
+            const int fs = opp.r.m_fighterStatus[i];
+            if (fs != FighterIdle) {
+                if (fs == FighterAttacks) {
+                    hasAttackingFighter = true;
+                }
+                if (fs == FighterAttacks || !foaf) {
+                    // "closest in range" rule
+                    int32_t d = std::abs(my_x - opp.r.m_fighterX[i]);
+                    if (d < mindist) {
+                        mindist = d;
+                        fighter = i;
+                    }
+                }
+                if (fs != FighterAttacks && retreatingFighter < 0 && foaf) {
+                    // "first returning" rule: just remember the first we saw
+                    retreatingFighter = i;
+                }
             }
         }
-
-    /* No fighter found. Check retreating fighters. Any of them does.
-       Interestingly enough, PHost only checks distances for the first
-       pass, not for the second one. */
-    if (fighter < 0 && m_fireOnAttackFighters) {
-        for (int i = 0, limit = opp.f.MaxFightersLaunched; i < limit; ++i)
-            if (opp.r.m_fighterStatus[i] != FighterIdle) {
-                fighter = i;
-                break;
-            }
-        return fighter;
-    } else {
-        /* Found a fighter on first pass. Must be in range. */
-        if (mindist > st.f.BeamHitFighterRange)
-            return -1;
-        else
-            return fighter;
+        if (foaf && !hasAttackingFighter) {
+            fighter = retreatingFighter;
+        }
     }
+
+    return fighter;
 }
 
 /** Fire beams on /side/. \returns true iff battle ends. */
@@ -1335,10 +1335,6 @@ game::vcr::classic::PVCRAlgorithm::beamFire(Status& st, Status& opp)
 {
     // ex VcrPlayerPHost::beamFire
     const int beam_mx = st.r.obj.getNumBeams();
-    if (beam_mx <= 0) {
-        return false;
-    }
-
     for (int beam = 0; beam < beam_mx; ++beam) {
         /* Can we fire at a fighter? */
         if (st.r.m_beamStatus[beam] >= st.f.BeamHitFighterCharge) {
@@ -1387,7 +1383,7 @@ game::vcr::classic::PVCRAlgorithm::beamFire(Status& st, Status& opp)
 
 /** Compute torpedo hit odds. Documented formula. Used in initialisation. */
 int
-game::vcr::classic::PVCRAlgorithm::computeTorpHitOdds(const game::spec::TorpedoLauncher& torp, const Object& obj)
+game::vcr::classic::PVCRAlgorithm::computeTorpHitOdds(const game::spec::TorpedoLauncher& torp, const Object& obj) const
 {
     // ex VcrPlayerPHost::computeTorpHitOdds
     int i = ((getExperienceModifiedValue(m_config[m_config.TorpHitBonus], m_config[m_config.EModTorpHitBonus], obj, -4095, 4095) * (torp.getKillPower() + torp.getDamagePower())) / 100
@@ -1398,7 +1394,7 @@ game::vcr::classic::PVCRAlgorithm::computeTorpHitOdds(const game::spec::TorpedoL
 /** Compute torpedo recharge rate. Documented formula. Used in
     initialisation. */
 int
-game::vcr::classic::PVCRAlgorithm::computeTubeRechargeRate(const game::spec::TorpedoLauncher& torp, const Object& obj)
+game::vcr::classic::PVCRAlgorithm::computeTubeRechargeRate(const game::spec::TorpedoLauncher& torp, const Object& obj) const
 {
     // ex VcrPlayerPHost::computeTubeRechargeRate
     int i = (((getExperienceModifiedValue(m_config[m_config.TubeRechargeBonus], m_config[m_config.EModTubeRechargeBonus], obj, -4095, 4095) * (torp.getKillPower() + torp.getDamagePower())) / 100
@@ -1482,7 +1478,7 @@ game::vcr::classic::PVCRAlgorithm::moveObjects()
 
 /** Check whether object still has offensive capabilities. */
 inline bool
-game::vcr::classic::PVCRAlgorithm::canStillFight(const Status& st, const Status& opp)
+game::vcr::classic::PVCRAlgorithm::canStillFight(const Status& st, const Status& opp) const
 {
     // ex VcrPlayerPHost::canStillFight
     // FIXME: null-pointer checks!
@@ -1609,9 +1605,9 @@ game::vcr::classic::PVCRAlgorithm::checkCombatActivity()
 }
 
 
-// /** Verify one side of VCR. */
+/** Verify one side of VCR. */
 bool
-game::vcr::classic::PVCRAlgorithm::checkSide(Object& obj)
+game::vcr::classic::PVCRAlgorithm::checkSide(Object& obj) const
 {
     // ex VcrPlayerPHost::checkVcrSide
     bool err = false;

@@ -20,7 +20,7 @@ namespace game { namespace db {
 
     class Loader {
      public:
-        Loader(afl::charset::Charset& cs, interpreter::World& world);
+        Loader(afl::charset::Charset& cs, interpreter::World& world, afl::string::Translator& tx);
 
         void load(afl::io::Stream& in, Turn& turn, Game& game, bool acceptProperties);
 
@@ -34,6 +34,7 @@ namespace game { namespace db {
 
         afl::charset::Charset& m_charset;
         interpreter::World& m_world;
+        afl::string::Translator& m_translator;
 
         afl::sys::LogListener& log();
 

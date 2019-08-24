@@ -19,7 +19,6 @@
 #include "gfx/save.hpp"
 #include "util/randomnumbergenerator.hpp"
 #include "util/string.hpp"
-#include "util/translation.hpp"
 #include "version.hpp"
 
 using afl::string::Format;
@@ -121,10 +120,11 @@ gfx::gen::Application::Application(afl::sys::Environment& env, afl::io::FileSyst
 void
 gfx::gen::Application::appMain()
 {
+    afl::string::Translator& tx = translator();
     afl::base::Ref<afl::sys::Environment::CommandLine_t> cmdl = environment().getCommandLine();
     String_t verb;
     if (!cmdl->getNextElement(verb)) {
-        errorExit(Format(_("no command specified. Use \"%s -h\" for help").c_str(), environment().getInvocationName()));
+        errorExit(Format(tx("no command specified. Use \"%s -h\" for help"), environment().getInvocationName()));
     }
 
     if (verb.size() > 1 && verb[0] == '-' && verb[1] == '-') {
@@ -145,57 +145,58 @@ gfx::gen::Application::appMain()
     } else if (verb == "texture") {
         doTexture(*cmdl);
     } else {
-        errorExit(Format(_("invalid command \"%s\" specified. Use \"%s -h\" for help").c_str(), verb, environment().getInvocationName()));
+        errorExit(Format(tx("invalid command \"%s\" specified. Use \"%s -h\" for help"), verb, environment().getInvocationName()));
     }
 }
 
 void
 gfx::gen::Application::showHelp()
 {
+    afl::string::Translator& tx = translator();
     afl::io::TextWriter& w = standardOutput();
-    w.writeLine(Format(_("PCC2 Procedural Graphics Generator v%s - (c) 2017-2019 Stefan Reuther").c_str(), PCC2_VERSION));
-    w.writeText(Format(_("\n"
-                         "Usage:\n"
-                         "  %s [-h]\n"
-                         "  %0$s COMMAND [-OPTS]\n\n"
-                         "%s"
-                         "\n"
-                         "Report bugs to <Streu@gmx.de>\n").c_str(),
+    w.writeLine(Format(tx("PCC2 Procedural Graphics Generator v%s - (c) 2017-2019 Stefan Reuther"), PCC2_VERSION));
+    w.writeText(Format(tx("\n"
+                          "Usage:\n"
+                          "  %s [-h]\n"
+                          "  %0$s COMMAND [-OPTS]\n\n"
+                          "%s"
+                          "\n"
+                          "Report bugs to <Streu@gmx.de>\n"),
                        environment().getInvocationName(),
-                       util::formatOptions(_("Common options:\n"
-                                             "-w WIDTH\tSet width\n"
-                                             "-h HEIGHT\tSet height\n"
-                                             "-S SEED\tSet seed\n"
-                                             "-o FILE.bmp\tSet output file (mandatory)\n"
-                                             "\n"
-                                             "Command \"space\": space view/starfield/nebula\n"
-                                             "-s SUNS\tSet number of suns\n"
-                                             "-p PROB\tSet star probability\n"
-                                             "\n"
-                                             "Command \"planet\": single planet\n"
-                                             "-x NN, -y NN\tSet planet position (percentage)\n"
-                                             "-r NN\tSet planet radius (percentage)\n"
-                                             "-t NN\tSet planet temperature\n"
-                                             "-X NN, -Y NN, -Z NN\tSet (invisible) sun position (percentage)\n"
-                                             "\n"
-                                             "Command \"orbit\": space view with planet in foreground\n"
-                                             "-x NN, -y NN\tSet planet position (percentage)\n"
-                                             "-r NN\tSet planet radius (percentage)\n"
-                                             "-n NN\tSet number of stars\n"
-                                             "\n"
-                                             "Command \"explosion\": generic explosion\n"
-                                             "-n NN\tSet size (number of hotspots)\n"
-                                             "-v NN\tSet speed\n"
-                                             "\n"
-                                             "Command \"shield\": shield effect\n"
-                                             "-n NN\tSet size (number of hotspots)\n"
-                                             "-a NN\tAngle (0-7)\n"
-                                             "\n"
-                                             "Command \"texture\": textures\n"
-                                             "fill(COLOR)\tFill with solid color\n"
-                                             "noise(RANGE)\tFill with noise\n"
-                                             "brush(RANGE[,angle=N,n=N])\tAdd brushed metal effect\n"
-                                             "circ(RANGE,X,Y,R[,NOISE])\tAdd circular gradient effect\n"))));
+                       util::formatOptions(tx("Common options:\n"
+                                              "-w WIDTH\tSet width\n"
+                                              "-h HEIGHT\tSet height\n"
+                                              "-S SEED\tSet seed\n"
+                                              "-o FILE.bmp\tSet output file (mandatory)\n"
+                                              "\n"
+                                              "Command \"space\": space view/starfield/nebula\n"
+                                              "-s SUNS\tSet number of suns\n"
+                                              "-p PROB\tSet star probability\n"
+                                              "\n"
+                                              "Command \"planet\": single planet\n"
+                                              "-x NN, -y NN\tSet planet position (percentage)\n"
+                                              "-r NN\tSet planet radius (percentage)\n"
+                                              "-t NN\tSet planet temperature\n"
+                                              "-X NN, -Y NN, -Z NN\tSet (invisible) sun position (percentage)\n"
+                                              "\n"
+                                              "Command \"orbit\": space view with planet in foreground\n"
+                                              "-x NN, -y NN\tSet planet position (percentage)\n"
+                                              "-r NN\tSet planet radius (percentage)\n"
+                                              "-n NN\tSet number of stars\n"
+                                              "\n"
+                                              "Command \"explosion\": generic explosion\n"
+                                              "-n NN\tSet size (number of hotspots)\n"
+                                              "-v NN\tSet speed\n"
+                                              "\n"
+                                              "Command \"shield\": shield effect\n"
+                                              "-n NN\tSet size (number of hotspots)\n"
+                                              "-a NN\tAngle (0-7)\n"
+                                              "\n"
+                                              "Command \"texture\": textures\n"
+                                              "fill(COLOR)\tFill with solid color\n"
+                                              "noise(RANGE)\tFill with noise\n"
+                                              "brush(RANGE[,angle=N,n=N])\tAdd brushed metal effect\n"
+                                              "circ(RANGE,X,Y,R[,NOISE])\tAdd circular gradient effect\n"))));
     exit(0);
 }
 
@@ -208,35 +209,36 @@ gfx::gen::Application::doSpace(afl::base::Ref<afl::sys::Environment::CommandLine
 
     // Parse command line
     afl::sys::StandardCommandLineParser parser(cmdl);
+    afl::string::Translator& tx = translator();
     String_t text;
     bool option;
     while (parser.getNext(option, text)) {
         if (!option) {
-            errorExit(_("This command does not take positional parameters"));
+            errorExit(tx("This command does not take positional parameters"));
         }
         if (handleCommonOption(opts, text, parser)) {
             // ok
         } else if (text == "s") {
             int n;
             if (!strToInteger(parser.getRequiredParameter(text), n) || n < 0) {
-                errorExit(Format(_("parameter for \"-%s\" is invalid").c_str(), text));
+                errorExit(Format(tx("parameter for \"-%s\" is invalid"), text));
             }
             config.setNumSuns(n);
         } else if (text == "p") {
             int p;
             if (!strToInteger(parser.getRequiredParameter(text), p) || p < 0 || p >= 100) {
-                errorExit(Format(_("parameter for \"-%s\" is invalid").c_str(), text));
+                errorExit(Format(tx("parameter for \"-%s\" is invalid"), text));
             }
             config.setStarProbability(p);
         } else {
-            errorExit(Format(_("invalid option specified. Use \"%s -h\" for help").c_str(), environment().getInvocationName()));
+            errorExit(Format(tx("invalid option specified. Use \"%s -h\" for help"), environment().getInvocationName()));
         }
     }
 
     // Finalize
     const String_t* pOutputFileName = opts.outputFileName.get();
     if (pOutputFileName == 0) {
-        errorExit(_("output file name (\"-o\") not specified"));
+        errorExit(tx("output file name (\"-o\") not specified"));
     }
     config.setSize(Point(opts.w, opts.h));
 
@@ -257,51 +259,52 @@ gfx::gen::Application::doPlanet(afl::base::Ref<afl::sys::Environment::CommandLin
 
     // Parse command line
     afl::sys::StandardCommandLineParser parser(cmdl);
+    afl::string::Translator& tx = translator();
     String_t text;
     bool option;
     while (parser.getNext(option, text)) {
         if (!option) {
-            errorExit(_("This command does not take positional parameters"));
+            errorExit(tx("This command does not take positional parameters"));
         }
         if (handleCommonOption(opts, text, parser)) {
             // ok
         } else if (text == "x") {
             if (!strToInteger(parser.getRequiredParameter(text), px)) {
-                errorExit(Format(_("parameter for \"-%s\" is invalid").c_str(), text));
+                errorExit(Format(tx("parameter for \"-%s\" is invalid"), text));
             }
         } else if (text == "y") {
             if (!strToInteger(parser.getRequiredParameter(text), py)) {
-                errorExit(Format(_("parameter for \"-%s\" is invalid").c_str(), text));
+                errorExit(Format(tx("parameter for \"-%s\" is invalid"), text));
             }
         } else if (text == "r") {
             if (!strToInteger(parser.getRequiredParameter(text), pr) || pr <= 0) {
-                errorExit(Format(_("parameter for \"-%s\" is invalid").c_str(), text));
+                errorExit(Format(tx("parameter for \"-%s\" is invalid"), text));
             }
         } else if (text == "t") {
             if (!strToInteger(parser.getRequiredParameter(text), pt) || pt < 0 || pt > 100) {
-                errorExit(Format(_("parameter for \"-%s\" is invalid").c_str(), text));
+                errorExit(Format(tx("parameter for \"-%s\" is invalid"), text));
             }
         } else if (text == "X") {
             if (!strToInteger(parser.getRequiredParameter(text), sx)) {
-                errorExit(Format(_("parameter for \"-%s\" is invalid").c_str(), text));
+                errorExit(Format(tx("parameter for \"-%s\" is invalid"), text));
             }
         } else if (text == "Y") {
             if (!strToInteger(parser.getRequiredParameter(text), sy)) {
-                errorExit(Format(_("parameter for \"-%s\" is invalid").c_str(), text));
+                errorExit(Format(tx("parameter for \"-%s\" is invalid"), text));
             }
         } else if (text == "Z") {
             if (!strToInteger(parser.getRequiredParameter(text), sz)) {
-                errorExit(Format(_("parameter for \"-%s\" is invalid").c_str(), text));
+                errorExit(Format(tx("parameter for \"-%s\" is invalid"), text));
             }
         } else {
-            errorExit(Format(_("invalid option specified. Use \"%s -h\" for help").c_str(), environment().getInvocationName()));
+            errorExit(Format(tx("invalid option specified. Use \"%s -h\" for help"), environment().getInvocationName()));
         }
     }
 
     // Finalize
     const String_t* pOutputFileName = opts.outputFileName.get();
     if (pOutputFileName == 0) {
-        errorExit(_("output file name (\"-o\") not specified"));
+        errorExit(tx("output file name (\"-o\") not specified"));
     }
 
     PlanetConfig config;
@@ -328,39 +331,40 @@ gfx::gen::Application::doOrbit(afl::base::Ref<afl::sys::Environment::CommandLine
 
     // Parse command line
     afl::sys::StandardCommandLineParser parser(cmdl);
+    afl::string::Translator& tx = translator();
     String_t text;
     bool option;
     while (parser.getNext(option, text)) {
         if (!option) {
-            errorExit(_("This command does not take positional parameters"));
+            errorExit(tx("This command does not take positional parameters"));
         }
         if (handleCommonOption(opts, text, parser)) {
             // ok
         } else if (text == "x") {
             if (!strToInteger(parser.getRequiredParameter(text), px)) {
-                errorExit(Format(_("parameter for \"-%s\" is invalid").c_str(), text));
+                errorExit(Format(tx("parameter for \"-%s\" is invalid"), text));
             }
         } else if (text == "y") {
             if (!strToInteger(parser.getRequiredParameter(text), py)) {
-                errorExit(Format(_("parameter for \"-%s\" is invalid").c_str(), text));
+                errorExit(Format(tx("parameter for \"-%s\" is invalid"), text));
             }
         } else if (text == "r") {
             if (!strToInteger(parser.getRequiredParameter(text), pr) || pr <= 0) {
-                errorExit(Format(_("parameter for \"-%s\" is invalid").c_str(), text));
+                errorExit(Format(tx("parameter for \"-%s\" is invalid"), text));
             }
         } else if (text == "n") {
             if (!strToInteger(parser.getRequiredParameter(text), n) || n < 0) {
-                errorExit(Format(_("parameter for \"-%s\" is invalid").c_str(), text));
+                errorExit(Format(tx("parameter for \"-%s\" is invalid"), text));
             }
         } else {
-            errorExit(Format(_("invalid option specified. Use \"%s -h\" for help").c_str(), environment().getInvocationName()));
+            errorExit(Format(tx("invalid option specified. Use \"%s -h\" for help"), environment().getInvocationName()));
         }
     }
 
     // Finalize
     const String_t* pOutputFileName = opts.outputFileName.get();
     if (pOutputFileName == 0) {
-        errorExit(_("output file name (\"-o\") not specified"));
+        errorExit(tx("output file name (\"-o\") not specified"));
     }
 
     OrbitConfig config;
@@ -385,31 +389,32 @@ gfx::gen::Application::doExplosion(afl::base::Ref<afl::sys::Environment::Command
     
     // Parse command line
     afl::sys::StandardCommandLineParser parser(cmdl);
+    afl::string::Translator& tx = translator();
     String_t text;
     bool option;
     while (parser.getNext(option, text)) {
         if (!option) {
-            errorExit(_("This command does not take positional parameters"));
+            errorExit(tx("This command does not take positional parameters"));
         }
         if (handleCommonOption(opts, text, parser)) {
             // ok
         } else if (text == "n") {
             if (!strToInteger(parser.getRequiredParameter(text), size) || size <= 0) {
-                errorExit(Format(_("parameter for \"-%s\" is invalid").c_str(), text));
+                errorExit(Format(tx("parameter for \"-%s\" is invalid"), text));
             }
         } else if (text == "v") {
             if (!strToInteger(parser.getRequiredParameter(text), speed) || speed <= 0) {
-                errorExit(Format(_("parameter for \"-%s\" is invalid").c_str(), text));
+                errorExit(Format(tx("parameter for \"-%s\" is invalid"), text));
             }
         } else {
-            errorExit(Format(_("invalid option specified. Use \"%s -h\" for help").c_str(), environment().getInvocationName()));
+            errorExit(Format(tx("invalid option specified. Use \"%s -h\" for help"), environment().getInvocationName()));
         }
     }
 
     // Finalize
     const String_t* pOutputFileName = opts.outputFileName.get();
     if (pOutputFileName == 0) {
-        errorExit(_("output file name (\"-o\") not specified"));
+        errorExit(tx("output file name (\"-o\") not specified"));
     }
 
     // Generate
@@ -429,31 +434,32 @@ gfx::gen::Application::doShield(afl::base::Ref<afl::sys::Environment::CommandLin
     
     // Parse command line
     afl::sys::StandardCommandLineParser parser(cmdl);
+    afl::string::Translator& tx = translator();
     String_t text;
     bool option;
     while (parser.getNext(option, text)) {
         if (!option) {
-            errorExit(_("This command does not take positional parameters"));
+            errorExit(tx("This command does not take positional parameters"));
         }
         if (handleCommonOption(opts, text, parser)) {
             // ok
         } else if (text == "n") {
             if (!strToInteger(parser.getRequiredParameter(text), size) || size <= 0) {
-                errorExit(Format(_("parameter for \"-%s\" is invalid").c_str(), text));
+                errorExit(Format(tx("parameter for \"-%s\" is invalid"), text));
             }
         } else if (text == "a") {
             if (!strToInteger(parser.getRequiredParameter(text), angle) || angle < 0) {
-                errorExit(Format(_("parameter for \"-%s\" is invalid").c_str(), text));
+                errorExit(Format(tx("parameter for \"-%s\" is invalid"), text));
             }
         } else {
-            errorExit(Format(_("invalid option specified. Use \"%s -h\" for help").c_str(), environment().getInvocationName()));
+            errorExit(Format(tx("invalid option specified. Use \"%s -h\" for help"), environment().getInvocationName()));
         }
     }
 
     // Finalize
     const String_t* pOutputFileName = opts.outputFileName.get();
     if (pOutputFileName == 0) {
-        errorExit(_("output file name (\"-o\") not specified"));
+        errorExit(tx("output file name (\"-o\") not specified"));
     }
 
     // Generate
@@ -472,6 +478,7 @@ gfx::gen::Application::doTexture(afl::base::Ref<afl::sys::Environment::CommandLi
     
     // Parse command line
     afl::sys::StandardCommandLineParser parser(cmdl);
+    afl::string::Translator& tx = translator();
     String_t text;
     bool option;
     while (parser.getNext(option, text)) {
@@ -481,7 +488,7 @@ gfx::gen::Application::doTexture(afl::base::Ref<afl::sys::Environment::CommandLi
             if (handleCommonOption(opts, text, parser)) {
                 // ok
             } else {
-                errorExit(Format(_("invalid option specified. Use \"%s -h\" for help").c_str(), environment().getInvocationName()));
+                errorExit(Format(tx("invalid option specified. Use \"%s -h\" for help"), environment().getInvocationName()));
             }
         }
     }
@@ -489,7 +496,7 @@ gfx::gen::Application::doTexture(afl::base::Ref<afl::sys::Environment::CommandLi
     // Finalize
     const String_t* pOutputFileName = opts.outputFileName.get();
     if (pOutputFileName == 0) {
-        errorExit(_("output file name (\"-o\") not specified"));
+        errorExit(tx("output file name (\"-o\") not specified"));
     }
 
     // Create pixmap
@@ -508,18 +515,18 @@ gfx::gen::Application::handleCommonOption(CommonOptions& opt, const String_t& te
 {
     if (text == "w") {
         if (!strToInteger(parser.getRequiredParameter(text), opt.w) || opt.w <= 0) {
-            errorExit(Format(_("parameter for \"-%s\" is invalid").c_str(), text));
+            errorExit(Format(translator()("parameter for \"-%s\" is invalid"), text));
         }
         return true;
     } else if (text == "h") {
         if (!strToInteger(parser.getRequiredParameter(text), opt.h) || opt.h <= 0) {
-            errorExit(Format(_("parameter for \"-%s\" is invalid").c_str(), text));
+            errorExit(Format(translator()("parameter for \"-%s\" is invalid"), text));
         }
         return true;
     } else if (text == "S") {
         uint32_t seed = 0;
         if (!strToInteger(parser.getRequiredParameter(text), seed)) {
-            errorExit(Format(_("parameter for \"-%s\" is invalid").c_str(), text));
+            errorExit(Format(translator()("parameter for \"-%s\" is invalid"), text));
         }
         opt.rng.setSeed(seed);
         return true;

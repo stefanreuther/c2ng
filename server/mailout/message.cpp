@@ -4,11 +4,12 @@
   */
 
 #include "server/mailout/message.hpp"
+#include "server/mailout/root.hpp"
 
 // Constructor.
-server::mailout::Message::Message(afl::net::redis::Subtree root, int32_t mid, String_t state)
+server::mailout::Message::Message(Root& root, int32_t mid, State state)
     : m_root(root),
-      m_message(root.subtree("msg").subtree(mid)),
+      m_message(root.mailRoot().subtree("msg").subtree(mid)),
       m_messageId(mid),
       m_state(state)
 {
@@ -72,7 +73,7 @@ server::mailout::Message::remove()
     arguments().remove();
     attachments().remove();
     receivers().remove();
-    m_root.intSetKey(m_state).remove(m_messageId);
+    (m_state == Sending ? m_root.sendingMessages() : m_root.preparingMessages()).remove(m_messageId);
 }
 
 // Prepare message for sending.
@@ -82,17 +83,10 @@ server::mailout::Message::send()
     // ex Message::send
     String_t uniqid = uniqueId().get();
     if (!uniqid.empty()) {
-        m_root.hashKey("uniqid").intField(uniqid).set(m_messageId);
+        m_root.uniqueIdMap().intField(uniqid).set(m_messageId);
     }
-    if (m_state != "sending") {
-        m_root.intSetKey(m_state).moveTo(m_messageId, m_root.intSetKey("sending"));
-        m_state = "sending";
+    if (m_state != Sending) {
+        m_root.preparingMessages().moveTo(m_messageId, m_root.sendingMessages());
+        m_state = Sending;
     }
-}
-
-// Get message Id.
-int32_t
-server::mailout::Message::getId() const
-{
-    return m_messageId;
 }

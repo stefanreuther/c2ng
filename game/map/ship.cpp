@@ -138,6 +138,8 @@ game::map::Ship::addMessageInformation(const game::parser::MessageInformation& i
         if (gp::MessageIntegerValue_t* iv = dynamic_cast<gp::MessageIntegerValue_t*>(*i)) {
             switch (iv->getIndex()) {
              case gp::mi_Owner:
+                // Update RestTime with owner.
+                // PCC1 does not always update a timestamp here.
                 updateField(m_historyTimestamps[RestTime], turn, !isCurrent, m_currentData.owner, iv->getValue());
                 break;
 
@@ -150,6 +152,10 @@ game::map::Ship::addMessageInformation(const game::parser::MessageInformation& i
                 break;
 
              case gp::mi_ShipEngineType:
+                // Engine type goes into RestTime slot.
+                // PCC1 is inconsistent here:
+                //   ccmain.ParseVCRShip: RestTurn
+                //   ccinit.ProcessShipResult: MilitaryTime
                 updateField(m_historyTimestamps[RestTime], turn, !isCurrent, m_currentData.engineType, iv->getValue());
                 break;
 
@@ -354,18 +360,27 @@ game::map::Ship::internalCheck()
         m_kind = NoShip;
     }
 
-    // FIXME: c2ng additional checks:
-    // - if it's not CurrentShip, copy current to previous
+    // Make sure owner is known, nonzero for everything but NoShip
+    // FIXME: check whether this can still happen in c2ng
+    if (m_currentData.owner.isSame(0)) {
+        // Ships without owner are generated from explosion records (Util1Bang).
+        // If anything else reports an unowned ship, that's an error in the data files.
+        // Reset ship type
+        m_kind = NoShip;
 
-    // FIXME: things that could be checked in here:
-    // - make sure owner is known, nonzero for everything but NoShip
+        // Avoid that anyone trusts this data
+        m_shipSource = m_targetSource = m_xySource = PlayerSet_t();
+
+        // Remove known data. If this data leaks into chartX.cc files, PCC2 < 2.0.7 will crash.
+        m_currentData = ShipData();
+    }
 }
 
 // /** Combined checks, phase 1.
 //     This will do all post-processing which needs a partner to interact with.
 //     It requires the playability to be filled in. */
 void
-game::map::Ship::combinedCheck1(Universe& univ, int turnNumber)
+game::map::Ship::combinedCheck1(Universe& univ, PlayerSet_t availablePlayers, int turnNumber)
 {
     // FIXME: remove parameter?
     (void) univ;
@@ -373,6 +388,24 @@ game::map::Ship::combinedCheck1(Universe& univ, int turnNumber)
     // Update ages
     if (hasFullShipData()) {
         m_historyTimestamps[MilitaryTime] = m_historyTimestamps[RestTime] = turnNumber;
+    }
+
+    // If ship claims to exists, but we don't have current data, it's destroyed. Remove it.
+    int owner;
+    if (getOwner(owner) && availablePlayers.contains(owner) && m_shipSource.empty()) {
+        // Clear current data
+        m_currentData.x = IntegerProperty_t();
+        m_currentData.y = IntegerProperty_t();
+        m_currentData.warpFactor = IntegerProperty_t();
+        m_scannedHeading = IntegerProperty_t();
+        m_scannedMass = IntegerProperty_t();
+
+        // Clear current turn's history data, we know it does not exist this turn
+        if (ShipHistoryData::Track* p = getShipHistory(m_historyData, turnNumber)) {
+            *p = ShipHistoryData::Track();
+        }
+
+        m_kind = HistoryShip;
     }
 
     // Update ship track.
@@ -389,12 +422,19 @@ game::map::Ship::combinedCheck1(Universe& univ, int turnNumber)
         }
     }
 
-    // FIXME: if we loaded the ship from history only, we may have ship-track info.
     // If ship-track has current info, we can transform this into a guessed ship.
-    // For now, only take over the speed; X/Y's would make a guessed ship.
     if (ShipHistoryData::Track* p = getShipHistory(m_historyData, turnNumber)) {
+        // Warp factor
         if (!m_currentData.warpFactor.isValid()) {
             m_currentData.warpFactor = p->speed;
+        }
+
+        // Location
+        if (m_kind == HistoryShip && p->x.isValid() && p->y.isValid()) {
+            m_kind = GuessedShip;
+            m_currentData.x = p->x;
+            m_currentData.y = p->y;
+            m_scannedMass = p->mass;
         }
     }
 }
@@ -637,11 +677,11 @@ void
 game::map::Ship::setHull(IntegerProperty_t h)
 {
     // ex GShip::setHullId, GShip::ShipInfo::init
-// FIXME: sanitize
-//     // Sanitize. Hull=0 is in some databases.
-//     if (h.getRawValue() == 0) {
-//         h = mp16_t();
-//     }
+    // Sanitize. Hull=0 is in some databases.
+    int checkValue = 0;
+    if (h.get(checkValue) && checkValue == 0) {
+        h = IntegerProperty_t();
+    }
 
     int oldValue = 0, newValue = 0;
     if (getHull().get(oldValue) && h.get(newValue) && oldValue != newValue) {

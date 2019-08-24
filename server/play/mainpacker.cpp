@@ -8,8 +8,9 @@
 #include "game/interface/globalcontext.hpp"
 #include "game/spec/shiplist.hpp"
 
-server::play::MainPacker::MainPacker(game::Session& session)
-    : m_session(session)
+server::play::MainPacker::MainPacker(game::Session& session, const std::map<String_t, String_t>& props)
+    : m_session(session),
+      m_properties(props)
 { }
 
 server::Value_t*
@@ -41,10 +42,12 @@ server::play::MainPacker::buildValue() const
         addValueNew(*hv, makeIntegerValue(sl->hulls().size()), "NUMHULLS");
     }
 
-    // FIXME: Global properties
-    // w.startObject("PROP");
-    // writeProperties(w);
-    // w.endObject();
+    // Global properties
+    afl::base::Ref<afl::data::Hash> props(afl::data::Hash::create());
+    for (std::map<String_t, String_t>::const_iterator it = m_properties.begin(); it != m_properties.end(); ++it) {
+        addValueNew(*props, makeStringValue(it->second), it->first.c_str());
+    }
+    addValueNew(*hv, new afl::data::HashValue(props), "PROP");
 
     return new afl::data::HashValue(hv);
 }

@@ -232,6 +232,9 @@ game::vcr::classic::Database::load(afl::io::Stream& file,
     // OK, now store type in all VCRs.
     for (afl::container::PtrVector<Battle>::iterator i = m_battles.begin(); i != m_battles.end(); ++i) {
         (*i)->setType(type, capabilities);
+        if (type == Host) {
+            (*i)->applyClassicLimits();
+        }
     }
 }
 

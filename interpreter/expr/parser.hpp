@@ -44,7 +44,6 @@ namespace interpreter { namespace expr {
 
         void makeUnary(SimpleRValueNode* n);
         void makeBinary(SimpleRValueNode* n);
-        void makeTernary(SimpleRValueNode* n);
 
         Tokenizer& tok;
         afl::container::PtrVector<Node> stack;

@@ -1,18 +1,13 @@
 /**
   *  \file server/play/packer.cpp
+  *  \brief Interface server::play::Packer
   */
 
 #include <stdexcept>
 #include "server/play/packer.hpp"
 #include "afl/string/format.hpp"
 
-// /** Write value from script to JSON output. Automatically picks
-//     integer or string output depending on property type. When the
-//     property is not defined, it is not written to JSON output.
-//     \param w JSON writer
-//     \param con Object context
-//     \param scriptName Name of property to obtain from context
-//     \param jsonName Name of property in JSON output */
+// Fetch value from Context and add to Hash.
 void
 server::play::Packer::addValue(afl::data::Hash& hv, interpreter::Context& ctx, const char* scriptName, const char* jsonName)
 {
@@ -27,12 +22,7 @@ server::play::Packer::addValue(afl::data::Hash& hv, interpreter::Context& ctx, c
     addValueNew(hv, pContext->get(index), jsonName);
 }
 
-// /** Write value from script to JSON output. Automatically picks
-//     integer or string output depending on property type. When the
-//     value is not defined, it is not written to JSON output.
-//     \param w JSON writer
-//     \param value Value. Will be freed.
-//     \param jsonout Name of property in JSON output */
+// Add new value to Hash.
 void
 server::play::Packer::addValueNew(afl::data::Hash& hv, Value_t* value, const char* jsonName)
 {

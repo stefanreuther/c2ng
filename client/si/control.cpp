@@ -57,17 +57,15 @@ client::si::Control::executeKeyCommandWait(String_t keymapName, util::Key_t key,
         Task(String_t keymapName, util::Key_t key, int prefix, std::auto_ptr<ContextProvider> ctxp)
             : m_keymapName(keymapName), m_key(key), m_prefix(prefix), m_contextProvider(ctxp)
             { }
-        virtual interpreter::Process* execute(uint32_t pgid, game::Session& session, Verbosity& v)
+        virtual void execute(uint32_t pgid, game::Session& session)
             {
                 util::KeymapRef_t k = session.world().keymaps().getKeymapByName(m_keymapName);
                 util::Atom_t a = (k != 0 ? k->lookupCommand(m_key) : 0);
                 if (a != 0) {
-                    return CommandTask(afl::string::Format("C2$Eval %d, %d", a, m_prefix),
-                                       false,
-                                       afl::string::Format(session.translator()("Key '%s' in '%s'").c_str(), util::formatKey(m_key), m_keymapName),
-                                       m_contextProvider).execute(pgid, session, v);
-                } else {
-                    return 0;
+                    CommandTask(afl::string::Format("C2$Eval %d, %d", a, m_prefix),
+                                false,
+                                afl::string::Format(session.translator()("Key '%s' in '%s'").c_str(), util::formatKey(m_key), m_keymapName),
+                                m_contextProvider).execute(pgid, session);
                 }
             }
      private:
@@ -103,11 +101,8 @@ client::si::Control::continueProcessWait(RequestLink2 link)
 }
 
 void
-client::si::Control::handleWait(uint32_t id, interpreter::Process::State state, interpreter::Error error)
+client::si::Control::handleWait(uint32_t id)
 {
-    // FIXME
-    (void) state;
-    (void) error;
     if (id == m_id) {
         m_interface.mainLog().write(LogListener::Trace, LOG_NAME, Format("<%p> handleWait <= %d", this, m_id));
         m_waiting = false;

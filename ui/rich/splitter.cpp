@@ -23,8 +23,8 @@ ui::rich::Splitter::handleText(String_t text)
 {
     // ex RichTextSplitter::handleText
     gfx::FontRequest req;
-    req.setSize(m_big);
-    req.setWeight(m_bold);
+    req.setSize(static_cast<int16_t>(m_big));
+    req.setWeight(static_cast<int16_t>(m_bold));
     req.setStyle(m_fixed > 0 ? 1 : 0);
 
     util::SkinColor::Color color = !m_colors.empty() ? m_colors.back() : util::SkinColor::Static;

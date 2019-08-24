@@ -7,6 +7,11 @@
 
 #include <cxxtest/TestSuite.h>
 
+class TestGfxApplication : public CxxTest::TestSuite {
+ public:
+    void testInterface();
+};
+
 class TestGfxBaseColorScheme : public CxxTest::TestSuite {
  public:
     void testIt();

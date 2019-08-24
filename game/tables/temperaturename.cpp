@@ -14,15 +14,15 @@ game::tables::TemperatureName::get(int temp) const
 {
     // ex game/tables.h:getTemperatureName
     if (temp <= 14) {
-        return m_translator.translateString("arctic");
+        return m_translator("arctic");
     } else if (temp <= 39) {
-        return m_translator.translateString("cool");
+        return m_translator("cool");
     } else if (temp <= 64) {
-        return m_translator.translateString("warm");
+        return m_translator("warm");
     } else if (temp <= 84) {
-        return m_translator.translateString("tropical");
+        return m_translator("tropical");
     } else {
-        return m_translator.translateString("desert");
+        return m_translator("desert");
     }
 }
 

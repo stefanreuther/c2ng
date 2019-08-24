@@ -31,30 +31,23 @@ namespace {
             return false;
 
          case ScreenHistory::Ship:
+         case ScreenHistory::ShipTask:
             return pTurn->universe().playedShips().getObjectByIndex(ref.getX()) != 0;
 
          case ScreenHistory::Planet:
+         case ScreenHistory::PlanetTask:
             return pTurn->universe().playedPlanets().getObjectByIndex(ref.getX()) != 0;
 
          case ScreenHistory::Starbase:
+         case ScreenHistory::StarbaseTask:
             return pTurn->universe().playedBases().getObjectByIndex(ref.getX()) != 0;
 
          case ScreenHistory::Starchart:
             return true;
             //  case RaceScreen:
             //     return true;
-
-            //  case ShipTaskScreen:
-            //     return current_ship_type.isValidIndex(x);
-
-            //  case PlanetTaskScreen:
-            //     return current_planet_type.isValidIndex(x);
-
             //  case HistoryScreen:
             //     return current_histship_type.isValidIndex(x);
-
-            //  case BaseTaskScreen:
-            //     return current_base_type.isValidIndex(x);
 
             //  case FleetScreen:
             //     return current_fleet_type.isValidIndex(x);
@@ -89,6 +82,24 @@ namespace {
             }
             break;
 
+         case ScreenHistory::ShipTask:
+            if (session.getReferenceName(Reference(Reference::Ship, ref.getX()), PlainName, tmp)) {
+                return Format(tx("Ship Task #%d: %s"), ref.getX(), tmp);
+            }
+            break;
+
+         case ScreenHistory::PlanetTask:
+            if (session.getReferenceName(Reference(Reference::Planet, ref.getX()), PlainName, tmp)) {
+                return Format(tx("Planet Task #%d: %s"), ref.getX(), tmp);
+            }
+            break;
+
+         case ScreenHistory::StarbaseTask:
+            if (session.getReferenceName(Reference(Reference::Planet, ref.getX()), PlainName, tmp)) {
+                return Format(tx("Starbase Task #%d: %s"), ref.getX(), tmp);
+            }
+            break;
+
          case ScreenHistory::Starchart:
             return Format(tx("Starchart (%d,%d)"), ref.getX(), ref.getY());
      // case RaceScreen:
@@ -97,12 +108,6 @@ namespace {
      //    return format(_("Ship History %d: %s"), x, getDisplayedTurn().getCurrentUniverse().getShip(x).getName(GObject::PlainName));
      // case FleetScreen:
      //    return getFleetTitle(getDisplayedTurn().getCurrentUniverse(), x);
-     // case ShipTaskScreen:
-     //    return format(_("Ship Task #%d: %s"), x, getDisplayedTurn().getCurrentUniverse().getShip(x).getName(GObject::PlainName));
-     // case PlanetTaskScreen:
-     //    return format(_("Planet Task #%d: %s"), x, getDisplayedTurn().getCurrentUniverse().getPlanet(x).getName(GObject::PlainName));
-     // case BaseTaskScreen:
-     //    return format(_("Starbase Task #%d: %s"), x, getDisplayedTurn().getCurrentUniverse().getPlanet(x).getName(GObject::PlainName));
         }
         return String_t();
     }
@@ -135,12 +140,15 @@ namespace {
             return false;
 
          case ScreenHistory::Ship:
+         case ScreenHistory::ShipTask:
             return setCursor(pGame->cursors().currentShip(), ref.getX());
 
          case ScreenHistory::Planet:
+         case ScreenHistory::PlanetTask:
             return setCursor(pGame->cursors().currentPlanet(), ref.getX());
 
          case ScreenHistory::Starbase:
+         case ScreenHistory::StarbaseTask:
             return setCursor(pGame->cursors().currentBase(), ref.getX());
 
          case ScreenHistory::Starchart:

@@ -1,13 +1,22 @@
 /**
   *  \file game/db/drawingatommap.cpp
+  *  \brief Class game::db::DrawingAtomMap
   */
 
 #include "game/db/drawingatommap.hpp"
-#include "game/db/structures.hpp"
 #include "afl/base/growablememory.hpp"
+#include "afl/string/format.hpp"
+#include "game/db/structures.hpp"
 #include "util/io.hpp"
 
-// /** Create blank map. */
+namespace {
+    const char*const LOG_NAME = "game.db";
+
+    /** Start value for allocation of external atoms. */
+    const uint16_t EXTERNAL_ATOM_MIN = 20000;
+}
+
+// Create blank map.
 game::db::DrawingAtomMap::DrawingAtomMap()
     : m_atoms(),
       m_counter(EXTERNAL_ATOM_MIN)
@@ -19,8 +28,7 @@ game::db::DrawingAtomMap::~DrawingAtomMap()
 { }
 
 
-// /** Clear this map. The object will behave as if it had just been constructed.
-//     \post isEmpty() */
+// Clear this map.
 void
 game::db::DrawingAtomMap::clear()
 {
@@ -29,7 +37,7 @@ game::db::DrawingAtomMap::clear()
     m_counter = EXTERNAL_ATOM_MIN;
 }
 
-// /** Check for emptiness. */
+// Check for emptiness.
 bool
 game::db::DrawingAtomMap::isEmpty() const
 {
@@ -37,8 +45,7 @@ game::db::DrawingAtomMap::isEmpty() const
     return m_counter == EXTERNAL_ATOM_MIN;
 }
 
-// /** Add new internal atom. Registers that \c a is used as an atom by a
-//     relevant drawing. */
+// Add new internal atom.
 void
 game::db::DrawingAtomMap::add(util::Atom_t a)
 {
@@ -48,9 +55,7 @@ game::db::DrawingAtomMap::add(util::Atom_t a)
     }
 }
 
-// /** Convert external atom to internal.
-//     \param value Value read from file
-//     \return equivalent atom to use internally */
+// Convert external atom to internal.
 util::Atom_t
 game::db::DrawingAtomMap::get(uint16_t value) const
 {
@@ -64,9 +69,7 @@ game::db::DrawingAtomMap::get(uint16_t value) const
     return util::Atom_t(value);
 }
 
-// /** Convert internal atom to external.
-//     \param value Value stored in GDrawing object
-//     \return equivalent value to store in file */
+// Convert internal atom to external.
 uint16_t
 game::db::DrawingAtomMap::getExternalValue(util::Atom_t atom) const
 {
@@ -78,10 +81,10 @@ game::db::DrawingAtomMap::getExternalValue(util::Atom_t atom) const
     return int16_t(atom);
 }
 
-// /** Save object to stream. This is used to create the rPaintingTags
-//     (11) record in chartX.cc. */
+// Save object to stream.
 void
-game::db::DrawingAtomMap::save(afl::io::Stream& out, afl::charset::Charset& cs, const util::AtomTable& table) const
+game::db::DrawingAtomMap::save(afl::io::Stream& out, afl::charset::Charset& cs, const util::AtomTable& table,
+                               afl::sys::LogListener& log, afl::string::Translator& tx) const
 {
     // ex GDrawingAtomMap::save
     // build value array
@@ -92,7 +95,7 @@ game::db::DrawingAtomMap::save(afl::io::Stream& out, afl::charset::Charset& cs, 
             // too big. PCC 1.x supports up to 64000 bytes for the whole
             // Atom Translation entry, and 16000 is a very optimistic
             // estimate how many fit in there.
-            // FIXME: console.write(LOG_WARN, _("Too many different marker tags. Some were ignored."));
+            log.write(afl::sys::LogListener::Warn, LOG_NAME, tx("Too many different marker tags. Some were ignored."));
             break;
         }
         tmp = i->second;
@@ -113,20 +116,17 @@ game::db::DrawingAtomMap::save(afl::io::Stream& out, afl::charset::Charset& cs, 
     }
 
     if (failed_strings != 0) {
-    //     FIXME -> console.write(LOG_WARN, format(_("%d marker tag%!1{s%} were too long to be stored in the chart file, and were truncated to 255 characters."),
-    //                                    failed_strings));
+        log.write(afl::sys::LogListener::Warn, LOG_NAME,
+                  afl::string::Format(tx("%d marker tag%!1{s were%| was%} too long to be stored in the chart file, and truncated to 255 characters."),
+                                      failed_strings));
     }
 }
 
-// /** Save object from stream. This is used to load the rPaintingTags
-//     (11) record from chartX.cc. */
+// Load object from stream.
 void
 game::db::DrawingAtomMap::load(afl::io::Stream& in, afl::charset::Charset& cs, util::AtomTable& table)
 {
     // ex GDrawingAtomMap::load
-    // FIXME: this does not maintain /counter/ and will thus yield an inconsistent state.
-    // Maybe it makes sense to move this into a separate class where we can also make
-    // a decent get() function?
     clear();
 
     // load 'count' field

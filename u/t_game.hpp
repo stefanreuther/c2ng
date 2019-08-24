@@ -144,6 +144,14 @@ class TestGameRoot : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestGameSearchQuery : public CxxTest::TestSuite {
+ public:
+    void testCompileExpression();
+    void testErrors();
+    void testLocation();
+    void testAccessor();
+};
+
 class TestGameShipBuildOrder : public CxxTest::TestSuite {
  public:
     void testIt();

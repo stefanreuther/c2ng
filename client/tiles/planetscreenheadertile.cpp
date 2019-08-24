@@ -13,18 +13,18 @@
 
 using ui::widgets::FrameGroup;
 
-client::tiles::PlanetScreenHeaderTile::PlanetScreenHeaderTile(ui::Root& root, client::widgets::KeymapWidget& kmw)
+client::tiles::PlanetScreenHeaderTile::PlanetScreenHeaderTile(ui::Root& root, client::widgets::KeymapWidget& kmw, bool forTask)
     : ControlScreenHeader(root, kmw),
       m_receiver(root.engine().dispatcher(), *this)
 {
     // ex WPlanetScreenHeaderTile::WPlanetScreenHeaderTile
-    enableButton(btnAuto, FrameGroup::NoFrame);
-    enableButton(btnAdd,  FrameGroup::NoFrame);
-    // enableButton(btnSend, FrameGroup::NoFrame); // FIXME: missing in PCC2!
-
-    // FIXME: alternative personalities
-    //   Planet Task: CScr
-    //   Planet:      Auto + Add + Send
+    if (forTask) {
+        enableButton(btnCScr, FrameGroup::NoFrame);
+    } else {
+        enableButton(btnAuto, FrameGroup::NoFrame);
+        enableButton(btnAdd,  FrameGroup::NoFrame);
+        // enableButton(btnSend, FrameGroup::NoFrame); // FIXME: missing in PCC2!
+    }
 }
 
 void

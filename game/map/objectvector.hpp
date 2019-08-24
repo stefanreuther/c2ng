@@ -33,9 +33,9 @@ T*
 game::map::ObjectVector<T>::create(Id_t id)
 {
     if (id > 0) {
-        // FIXME: give PtrVector a resize()?
-        while (id > static_cast<Id_t>(m_components.size())) {
-            m_components.pushBackNew(0);
+        size_t requiredSize = static_cast<size_t>(id);
+        if (m_components.size() < requiredSize) {
+            m_components.resize(requiredSize);
         }
         if (m_components[id-1] == 0) {
             m_components.replaceElementNew(id-1, new T(id));

@@ -32,6 +32,11 @@ TestServerInterfaceUserManagementClient::testIt()
         TS_ASSERT_EQUALS(testee.add("u2", "p2", kv), "i2");
     }
 
+    // remove
+    mock.expectCall("DELUSER, kk");
+    mock.provideNewResult(server::makeStringValue("OK"));
+    TS_ASSERT_THROWS_NOTHING(testee.remove("kk"));
+
     // login
     mock.expectCall("LOGIN, n, pw");
     mock.provideNewResult(server::makeStringValue("id"));

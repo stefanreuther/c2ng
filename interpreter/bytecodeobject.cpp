@@ -61,6 +61,16 @@ namespace {
             return afl::base::Nothing;
         }
     }
+
+    template<typename T>
+    uint16_t packIndex(T nativeIndex)
+    {
+        uint16_t packedIndex = uint16_t(nativeIndex);
+        if (nativeIndex != packedIndex) {
+            throw interpreter::Error::tooComplex();
+        }
+        return packedIndex;
+    }
 }
 
 
@@ -222,7 +232,7 @@ interpreter::BytecodeObject::addVariableReferenceInstruction(Opcode::Major major
         // Is it a local variable?
         afl::data::NameMap::Index_t ix = m_localNames.getIndexByName(name);
         if (ix != m_localNames.nil) {
-            addInstruction(major, Opcode::sLocal, uint16_t(ix));
+            addInstruction(major, Opcode::sLocal, packIndex(ix));
             return;
         }
 
@@ -230,7 +240,7 @@ interpreter::BytecodeObject::addVariableReferenceInstruction(Opcode::Major major
         if (cc.hasFlag(CompilationContext::AlsoGlobalContext)) {
             ix = cc.world().globalPropertyNames().getIndexByName(name);
             if (ix != m_localNames.nil) {
-                addInstruction(major, Opcode::sShared, uint16_t(ix));
+                addInstruction(major, Opcode::sShared, packIndex(ix));
                 return;
             }
         }
@@ -322,12 +332,7 @@ uint16_t
 interpreter::BytecodeObject::addName(String_t name)
 {
     // ex IntBytecodeObject::addName
-    afl::data::NameMap::Index_t nativeIndex = m_names.addMaybe(name);
-    uint16_t packedIndex = uint16_t(nativeIndex);
-    if (nativeIndex != packedIndex) {
-        throw Error::tooComplex();
-    }
-    return packedIndex;
+    return packIndex(m_names.addMaybe(name));
 }
 
 
@@ -360,9 +365,7 @@ void
 interpreter::BytecodeObject::relocate()
 {
     // ex IntBytecodeObject::relocate
-    // FIXME: can we degrade gracefully when there's more than 64k instructions?
-
-    std::vector<PC_t> addresses(num_labels, PC_t(m_code.size()));
+    std::vector<uint16_t> addresses(num_labels, uint16_t(-1));
 
     // Find existing labels
     PC_t outAdr = 0;
@@ -372,7 +375,11 @@ interpreter::BytecodeObject::relocate()
             if (m_code[i].minor & Opcode::jSymbolic) {
                 /* Symbolic label. Note its address. */
                 assert(m_code[i].arg < addresses.size());
-                addresses[m_code[i].arg] = outAdr;
+                if (outAdr >= 0x10000) {
+                    // Code too large, need to remain in symbolic mode
+                    return;
+                }
+                addresses[m_code[i].arg] = static_cast<uint16_t>(outAdr);
             } else {
                 /* Absolute label aka NOP */
             }
@@ -463,7 +470,7 @@ interpreter::BytecodeObject::append(const BytecodeObject& other)
     PC_t absBase = m_code.size();
     Label_t symBase = num_labels;
 
-    num_labels += other.num_labels;
+    num_labels = packIndex(static_cast<uint32_t>(num_labels) + other.num_labels);
     m_code.reserve(m_code.size() + other.m_code.size());
 
     // Copy the code
@@ -489,8 +496,7 @@ interpreter::BytecodeObject::append(const BytecodeObject& other)
                 // FIXME: this works as long as all locals are unique or compatible.
                 // It will fail when we have overlapping locals that were intended to be unique, which could happen when inlining.
                 // We should make up some rules about how the two BCOs have to be related.
-                // FIXME: handle 64k overflow
-                addInstruction(maj, o.minor, m_localNames.addMaybe(other.m_localNames.getNameByIndex(o.arg)));
+                addInstruction(maj, o.minor, packIndex(m_localNames.addMaybe(other.m_localNames.getNameByIndex(o.arg))));
                 break;
              case Opcode::sLiteral:
                 // Adjust literal

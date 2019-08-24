@@ -53,7 +53,7 @@ String_t
 game::spec::FriendlyCode::getDescription(const PlayerList& playerList) const
 {
     // ex GFCode::getDescription
-    return playerList.expandNames(m_description);
+    return playerList.expandNames(m_description, false);
 }
 
 // Get flags.

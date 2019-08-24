@@ -39,6 +39,7 @@ namespace game { namespace ref {
 
     extern const ConfigurationSelection REGULAR;
     extern const ConfigurationSelection CARGO_TRANSFER;
+    extern const ConfigurationSelection SEARCH;
 
     void fetchConfiguration(Session& session, const ConfigurationSelection& sel, Configuration& config);
     void storeConfiguration(Session& session, const ConfigurationSelection& sel, const Configuration& config);

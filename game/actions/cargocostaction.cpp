@@ -45,7 +45,6 @@ int32_t
 game::actions::CargoCostAction::getRemainingAmount(Element::Type type) const
 {
     // ex GCargoCostTransaction::getRemainingCargo
-    // FIXME: this function uses Element::Type, not Cost::Type.
     return m_container.getEffectiveAmount(type);
 }
 
@@ -67,7 +66,6 @@ int32_t
 game::actions::CargoCostAction::getMissingAmount(Element::Type type) const
 {
     // ex GCargoCostTransaction::getMissingCargo
-    // FIXME: this function uses Element::Type, not Cost::Type.
     // FIXME: the original version had some logic about when to report missing supplies.
     int32_t amount = m_container.getEffectiveAmount(type);
     int32_t limit = m_container.getMinAmount(type);

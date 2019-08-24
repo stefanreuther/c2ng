@@ -26,7 +26,7 @@ const gfx::gen::PerlinNoise::Triplet_t gfx::gen::PerlinNoise::grad3[] = {
 gfx::gen::PerlinNoise::PerlinNoise(util::RandomNumberGenerator& rng)
 {
     for (size_t i = 0; i < 256; ++i) {
-        uint8_t value = rng(256);
+        uint8_t value = static_cast<uint8_t>(rng(256));
         perm[i + 256] = perm[i] = value;
         perm12[i + 256] = perm12[i] = value % 12;
     }

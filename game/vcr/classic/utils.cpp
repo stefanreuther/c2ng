@@ -58,49 +58,49 @@ game::vcr::classic::formatBattleResult(BattleResult_t result,
 
     String_t s;
     if (result.empty()) {
-        s = tx.translateString("unknown. Wait while computing...");
+        s = tx("unknown. Wait while computing...");
     } else if (result == Invalid) {
-        s = tx.translateString("Battle cannot be played!");
+        s = tx("Battle cannot be played!");
     } else if (result == Timeout) {
-        s = tx.translateString("Battle timed out (too long).");
+        s = tx("Battle timed out (too long).");
     } else if (result == Stalemate) {
-        s = tx.translateString("Stalemate.");
+        s = tx("Stalemate.");
     } else if (result == LeftDestroyed) {
         if (me == 0) {
-            s = Format(tx.translateString("We were destroyed%s.").c_str(), insert);
+            s = Format(tx("We were destroyed%s.").c_str(), insert);
         } else if (me == 1) {
-            s = Format(tx.translateString("We won%s.").c_str(), insert);
+            s = Format(tx("We won%s.").c_str(), insert);
         } else {
-            s = Format(tx.translateString("%s won%s.").c_str(), rightName, insert);
+            s = Format(tx("%s won%s.").c_str(), rightName, insert);
         }
     } else if (result == RightDestroyed) {
         if (me == 1) {
-            s = Format(tx.translateString("We were destroyed%s.").c_str(), insert);
+            s = Format(tx("We were destroyed%s.").c_str(), insert);
         } else if (me == 0) {
-            s = Format(tx.translateString("We won%s.").c_str(), insert);
+            s = Format(tx("We won%s.").c_str(), insert);
         } else {
-            s = Format(tx.translateString("%s won%s.").c_str(), leftName, insert);
+            s = Format(tx("%s won%s.").c_str(), leftName, insert);
         }
     } else if (result == LeftCaptured) {
         if (me == 0) {
-            s = Format(tx.translateString("They have captured our ship%s.").c_str(), insert);
+            s = Format(tx("They have captured our ship%s.").c_str(), insert);
         } else if (me == 1) {
-            s = Format(tx.translateString("We captured their ship%s.").c_str(), insert);
+            s = Format(tx("We captured their ship%s.").c_str(), insert);
         } else {
-            s = Format(tx.translateString("%s was captured.").c_str(), leftName);
+            s = Format(tx("%s was captured.").c_str(), leftName);
         }
     } else if (result == RightCaptured) {
         if (me == 1) {
-            s = Format(tx.translateString("They have captured our ship%s.").c_str(), insert);
+            s = Format(tx("They have captured our ship%s.").c_str(), insert);
         } else if (me == 0) {
-            s = Format(tx.translateString("We captured their ship%s.").c_str(), insert);
+            s = Format(tx("We captured their ship%s.").c_str(), insert);
         } else {
-            s = Format(tx.translateString("%s was captured.").c_str(), rightName);
+            s = Format(tx("%s was captured.").c_str(), rightName);
         }
     } else if (result == BattleResult_t(LeftDestroyed) + RightDestroyed) {
-        s = tx.translateString("Both were destroyed.");
+        s = tx("Both were destroyed.");
     } else {
-        s = tx.translateString("Both are disabled.");
+        s = tx("Both are disabled.");
     }
     return s;
 }

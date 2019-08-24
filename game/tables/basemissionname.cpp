@@ -17,19 +17,19 @@ game::tables::BaseMissionName::get(int mission) const
     // ex game/tables.h:getBaseMissionName
     switch (mission) {
      case 0:
-        return m_translator.translateString("none");
+        return m_translator("none");
      case 1:
-        return m_translator.translateString("Refuel ships");
+        return m_translator("Refuel ships");
      case 2:
-        return m_translator.translateString("Maximize defense");
+        return m_translator("Maximize defense");
      case 3:
-        return m_translator.translateString("Load torpedoes onto ships");
+        return m_translator("Load torpedoes onto ships");
      case 4:
-        return m_translator.translateString("Unload incoming ships");
+        return m_translator("Unload incoming ships");
      case 5:
-        return m_translator.translateString("Repair base");
+        return m_translator("Repair base");
      case 6:
-        return m_translator.translateString("Force surrender");
+        return m_translator("Force surrender");
      default:
         return "?";
     }

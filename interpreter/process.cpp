@@ -7,6 +7,7 @@
 #include "interpreter/process.hpp"
 #include "afl/data/floatvalue.hpp"
 #include "afl/data/integervalue.hpp"
+#include "afl/except/fileproblemexception.hpp"
 #include "afl/io/directory.hpp"
 #include "afl/io/filesystem.hpp"
 #include "afl/io/stream.hpp"
@@ -18,6 +19,7 @@
 #include "interpreter/closure.hpp"
 #include "interpreter/compilationcontext.hpp"
 #include "interpreter/defaultstatementcompilationcontext.hpp"
+#include "interpreter/error.hpp"
 #include "interpreter/expr/parser.hpp"
 #include "interpreter/filecommandsource.hpp"
 #include "interpreter/hashvalue.hpp"
@@ -35,7 +37,6 @@
 #include "interpreter/values.hpp"
 #include "interpreter/world.hpp"
 #include "util/translation.hpp"
-#include "afl/except/fileproblemexception.hpp"
 
 namespace {
 
@@ -154,7 +155,9 @@ interpreter::Process::Process(World& world, String_t name, uint32_t processId)
       // notification_message(0),
       m_processKind(pkDefault),
       m_processGroupId(0),
-      m_processId(processId)
+      m_processId(processId),
+      m_pFreezer(0),
+      m_finalizer()
 {
     // ex IntExecutionContext::IntExecutionContext
     const afl::container::PtrVector<Context>& globalContexts = world.globalContexts();
@@ -440,6 +443,36 @@ interpreter::Process::getProcessKind() const
     return m_processKind;
 }
 
+void
+interpreter::Process::freeze(Freezer& p)
+{
+    if (m_state != Suspended || m_pFreezer != 0) {
+        throw Error("Process busy");
+    }
+    m_state = Frozen;
+    m_pFreezer = &p;
+}
+
+void
+interpreter::Process::unfreeze()
+{
+    if (m_state == Frozen) {
+        // OK
+        m_state = Suspended;
+        m_pFreezer = 0;
+    } else {
+        // Error. Because we expect this to be called from a destructor, do not throw.
+        // However, we have a World, so we can log.
+        m_world.logListener().write(afl::sys::LogListener::Warn, m_processName, "Internal error: process in wrong state");
+    }
+}
+
+interpreter::Process::Freezer*
+interpreter::Process::getFreezer() const
+{
+    return m_pFreezer;
+}
+
 // /** Add trace corresponding to last executed instruction to the specified IntError object. */
 void
 interpreter::Process::addTraceTo(Error& err)
@@ -493,7 +526,9 @@ interpreter::Process::addTraceTo(Error& err)
             /* Procedure name known. Generate name to use for actual formatting. */
             SubroutineValue* sv = dynamic_cast<SubroutineValue*>(m_world.globalValues()[m_world.globalPropertyNames().getIndexByName(bcoName)]);
             if (sv == 0 || &bco.get() != &sv->getBytecodeObject().get()) {
-                bcoName = afl::string::Format("(%s)", bcoName);
+                if (bcoName.empty() || (bcoName[0] != '(') || (bcoName[bcoName.size()-1] != ')')) {
+                    bcoName = afl::string::Format("(%s)", bcoName);
+                }
             }
 
             if (fileName.size() != 0 && lineNr != 0) {
@@ -1622,6 +1657,21 @@ interpreter::Process::makeFrameContext(size_t level)
         return new FrameContext(*m_frames[level]);
     } else {
         return 0;
+    }
+}
+
+void
+interpreter::Process::setNewFinalizer(Finalizer* p)
+{
+    m_finalizer.reset(p);
+}
+
+void
+interpreter::Process::finalize()
+{
+    std::auto_ptr<Finalizer> oldFinalizer(m_finalizer);
+    if (oldFinalizer.get()) {
+        oldFinalizer->finalizeProcess(*this);
     }
 }
 

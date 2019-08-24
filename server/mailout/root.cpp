@@ -10,6 +10,7 @@
 #include "afl/net/redis/integerfield.hpp"
 #include "afl/net/redis/stringfield.hpp"
 #include "afl/string/format.hpp"
+#include "afl/string/parse.hpp"
 #include "afl/sys/time.hpp"
 #include "server/mailout/configuration.hpp"
 #include "server/mailout/message.hpp"
@@ -17,6 +18,7 @@
 #include "server/types.hpp"
 
 using afl::string::Format;
+using afl::sys::LogListener;
 
 namespace {
     const char*const EMAIL_ROOT = "email:";
@@ -63,10 +65,22 @@ server::mailout::Root::mailRoot()
     return afl::net::redis::Subtree(m_db, "mqueue:");
 }
 
-const server::mailout::Configuration&
-server::mailout::Root::config() const
+afl::net::redis::HashKey
+server::mailout::Root::uniqueIdMap()
 {
-    return m_config;
+    return mailRoot().hashKey("uniqid");
+}
+
+afl::net::redis::IntegerSetKey
+server::mailout::Root::preparingMessages()
+{
+    return mailRoot().intSetKey("preparing");
+}
+
+afl::net::redis::IntegerSetKey
+server::mailout::Root::sendingMessages()
+{
+    return mailRoot().intSetKey("sending");
 }
 
 // Prepare mail queues.
@@ -75,24 +89,23 @@ server::mailout::Root::prepareQueues()
 {
     // ex Transmitter::start
     // @change This originally was a function of Transmitter; moved to Root because it does not need Transmitter's privates.
-    afl::net::redis::Subtree root(mailRoot());
 
     // Discard partially-prepared messages
     afl::data::IntegerList_t partial;
-    root.intSetKey("preparing").getAll(partial);
+    preparingMessages().getAll(partial);
     for (size_t i = 0; i < partial.size(); ++i) {
-        Message(root, partial[i], "preparing").remove();
+        Message(*this, partial[i], Message::Preparing).remove();
     }
-    log().write(afl::sys::LogListener::Info, LOG_NAME_QUEUE, Format("%d partial messages deleted", partial.size()));
+    log().write(LogListener::Info, LOG_NAME_QUEUE, Format("%d partial messages deleted", partial.size()));
 
     // Trigger sending of outgoing mail
     if (Transmitter* p = getTransmitter()) {
         afl::data::IntegerList_t out;
-        root.intSetKey("sending").getAll(out);
+        sendingMessages().getAll(out);
         for (size_t i = 0; i < out.size(); ++i) {
             p->send(out[i]);
         }
-        log().write(afl::sys::LogListener::Info, LOG_NAME_QUEUE, Format("%d items initially in queue", out.size()));
+        log().write(LogListener::Info, LOG_NAME_QUEUE, Format("%d items initially in queue", out.size()));
     }
 }
 
@@ -101,11 +114,10 @@ std::auto_ptr<server::mailout::Message>
 server::mailout::Root::allocateMessage()
 {
     // ex planetscentral/mailout/message.cc:allocateMessage
-    afl::net::redis::Subtree root(mailRoot());
-    int32_t mid = ++root.subtree("msg").intKey("id");
-    root.intSetKey("preparing").add(mid);
+    int32_t mid = ++mailRoot().subtree("msg").intKey("id");
+    preparingMessages().add(mid);
 
-    std::auto_ptr<server::mailout::Message> result(new server::mailout::Message(root, mid, "preparing"));
+    std::auto_ptr<server::mailout::Message> result(new server::mailout::Message(*this, mid, Message::Preparing));
     result->expireTime().set(getCurrentTime() + m_config.maximumAge);
     return result;
 }
@@ -134,7 +146,7 @@ server::mailout::Root::requestConfirmation(String_t user, String_t userEmail)
     msg->receivers().add("mail:" + userEmail);
 
     // Log it
-    log().write(afl::sys::Log::Info, LOG_NAME_AUTH, Format("[msg:%d] confirmation request for '%s', user '%s' queued", msg->getId(), userEmail, user));
+    log().write(LogListener::Info, LOG_NAME_AUTH, Format("[msg:%d] confirmation request for '%s', user '%s' queued", msg->getId(), userEmail, user));
     msg->send();
 
     if (Transmitter* p = getTransmitter()) {
@@ -208,14 +220,14 @@ server::mailout::Root::confirmMail(String_t mail, String_t key, String_t info)
     String_t decoded = afl::charset::Base64().decode(afl::string::toBytes(key));
     String_t::size_type n = decoded.find(',');
     if (n == 0 || n >= decoded.size()) {
-        log().write(afl::sys::Log::Info, LOG_NAME_AUTH, Format("request for '%s' is syntactically invalid", mail.c_str()));
+        log().write(LogListener::Info, LOG_NAME_AUTH, Format("request for '%s' is syntactically invalid", mail.c_str()));
         return false;
     }
     String_t user(decoded, 0, n);
 
     // Check hash
     if (key != getConfirmLink(m_config, user, mail)) {
-        log().write(afl::sys::Log::Info, LOG_NAME_AUTH, Format("request for '%s' lacks proper signature", mail.c_str()));
+        log().write(LogListener::Info, LOG_NAME_AUTH, Format("request for '%s' lacks proper signature", mail.c_str()));
         return false;
     }
 
@@ -230,8 +242,41 @@ server::mailout::Root::confirmMail(String_t mail, String_t key, String_t info)
     } else {
         emailInfo.stringField("confirm/" + user).set(info);
     }
-    log().write(afl::sys::Log::Info, LOG_NAME_AUTH, Format("request for '%s' user '%s' accepted", mail.c_str(), user.c_str()));
+    log().write(LogListener::Info, LOG_NAME_AUTH, Format("request for '%s' user '%s' accepted", mail.c_str(), user.c_str()));
     return true;
+}
+
+// Clean up expired Ids.
+void
+server::mailout::Root::cleanupUniqueIdMap()
+{
+    // Fetch all mappings
+    afl::data::StringList_t data;
+    uniqueIdMap().getAll(data);
+
+    // Operate
+    int count = 0;
+    for (size_t i = 0; i+1 < data.size(); i += 2) {
+        const String_t& uniqueId = data[i];
+        int32_t msgId;
+        if (afl::string::strToInteger(data[i+1], msgId)) {
+            // Found a message that could be in states (b.1), (b.2) or (d)
+            // (Must check in this order in case a message moves from preparing -> sending queue)
+            if (!preparingMessages().contains(msgId) && !sendingMessages().contains(msgId)) {
+                // It's a deleted message (status (d)) - ditch it
+                // NOTE: this is an unsafe operation. Whereas all operations in this service are atomic / fully parallelizable,
+                // this one is not. If during us determining this uniqueId to be no longer needed a new message is created
+                // using that Id, this will cancel the new message as well.
+                // As of 20190822, this is not a problem because all message queueing happens in the same thread, only the
+                // transmitter operates in parallel.
+                uniqueIdMap().intField(uniqueId).remove();
+                ++count;
+            }
+        }
+    }
+    if (count > 0) {
+        log().write(LogListener::Info, LOG_NAME_QUEUE, Format("removed %d stale Ids", count));
+    }
 }
 
 // Get user's email status.

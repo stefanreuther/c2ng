@@ -31,6 +31,7 @@ class TestServerFileDirectoryHandler : public CxxTest::TestSuite {
  public:
     void testInterface();
     void testFind();
+    void testConvertSize();
 };
 
 class TestServerFileDirectoryHandlerFactory : public CxxTest::TestSuite {

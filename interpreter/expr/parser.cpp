@@ -413,15 +413,3 @@ interpreter::expr::Parser::makeBinary(SimpleRValueNode* n)
     n->setBinary(a, b);
     stack.pushBackNew(n);
 }
-
-/** Make ternary operation. Expects three tree nodes on the stack.
-    \param n Tree node, will be pushed onto the stack */
-void
-interpreter::expr::Parser::makeTernary(SimpleRValueNode* n)
-{
-    Node* c = stack.extractLast();
-    Node* b = stack.extractLast();
-    Node* a = stack.extractLast();
-    n->setTernary(a, b, c);
-    stack.pushBackNew(n);
-}

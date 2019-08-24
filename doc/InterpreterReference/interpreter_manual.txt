@@ -1032,6 +1032,11 @@ because it started out with one.
 PCC2 Web relaxes these rules a little, and looks at the actual values.
 In PCC2 Web, <tt>2.5*2</tt> is a valid integer.
 --------------------------------------------------------------------------------
+@type Iterator
+An iterator references a current object from a set.
+Control screens observe iterators, i.e. the ship screen observes the ship iterator;
+changing the iterator changes the displayed ship.
+--------------------------------------------------------------------------------
 @type Keymap
 Functions documented to take a parameter of type <em>Keymap</em> are special.
 In place of the keymap parameter, you specify the name of the keymap, as a symbol (not as a string!),
@@ -1141,6 +1146,13 @@ Therefore, you can also use <tt>-></tt> instead of the dot:
 |   Print Name        % print the names of all ships
 | Next
 --------------------------------------------------------------------------------
+@type Reference
+A Reference is a handle to an object (unit, component, etc.).
+PCC2 uses References at many places, for example, to represent object lists.
+
+A reference can be created using {Reference()} or {LocationReference()}.
+You can access {@group Reference Property|reference properties}.
+--------------------------------------------------------------------------------
 @type RichText
 Rich text is text with attributes, such as colors, font styles, etc.
 PCC2 uses rich text to build parts of the graphical interface.
@@ -1165,10 +1177,14 @@ Double-quoted strings allow using the "\" to insert special characters, single-q
 In PCC 1.x, strings are limited to 255 characters.
 PCC2 has no such limit.
 
-In PCC2 since 1.1.12, strings store Unicode characters.
+In PCC2 since 1.99.12, strings store Unicode characters.
 In previous versions, strings hold the extended ASCII set used as the game character set.
 For external data, this restriction still holds;
 characters not in the game character set are removed because they cannot be stored.
+--------------------------------------------------------------------------------
+@type Widget
+Widgets are used to build dialog windows.
+Widgets are created using {@group Widget Function|Widget Functions}.
 --------------------------------------------------------------------------------
 
 
@@ -1284,6 +1300,10 @@ where the Id number is an integer between 1 and 9.
 The engine number is the position of the engine in the selection list.
 {Engine$ (Ship Property)|Engine$} in ship context yields an engine Id.
 --------------------------------------------------------------------------------
+@group Friendly Code Property
+The following properties are available for friendly code definitions and can be accessed using the
+{FCode (Function)|FCode()} function.
+--------------------------------------------------------------------------------
 @group Function
 These functions are available globally.
 
@@ -1393,6 +1413,10 @@ The information you get here is approximated by PCC, by assuming the minefield w
 subject only to natural decay.
 The %LastScan property can tell you how old the minefield is, decide for yourself if you want to trust it or not.
 --------------------------------------------------------------------------------
+@group Mission Property
+The following properties are available for mission definitions and can be accessed using the
+{Mission (Function)|Mission()} function.
+--------------------------------------------------------------------------------
 @group Planet Command
 These commands are valid at planets and starbases, and can be used to manipulate these objects.
 
@@ -1423,6 +1447,13 @@ When no game is loaded, only the race names are known, all other properties yiel
 @group Plugin Property
 This section describes plugin properties.
 These can be accessed using <tt>{System.Plugin}(id).FIELD</tt>.
+--------------------------------------------------------------------------------
+@group Reference Property
+This section describes all {@type Reference|reference} properties.
+--------------------------------------------------------------------------------
+@group Reference List
+This section describes operations/attributes of reference lists.
+A reference list is created using {ReferenceList()}.
 --------------------------------------------------------------------------------
 @group Ship Command
 These commands are valid on starships, and can be used to give orders to them.
@@ -1491,6 +1522,35 @@ and PHost's "General Object" and wormholes.
 @group File Property
 File properties are accessible using the <tt>{ForEach} {DirectoryEntry}(dir)</tt> command.
 --------------------------------------------------------------------------------
+@group Explosion Property
+Explosion properties are accessible using the <tt>{ForEach} {Explosion}</tt> command.
+
+@change Explosions are an own type with own properties in PCC2ng.
+In PCC 1.x, explosions are treated as special kind of markers; PCC2 does not have them accessible to scripts.
+--------------------------------------------------------------------------------
+@group Friendly Code Property
+Friendly Code properties are accessible using the {FCode()|FCode (Function)} and the <tt>{ForEach} FCode</tt> command.
+They provide access to predefined friendly codes (<tt>fcodes.</tt>).
+
+@change Explosions are an own type with own properties in PCC2ng.
+In PCC 1.x, explosions are treated as special kind of markers; PCC2 does not have them accessible to scripts.
+--------------------------------------------------------------------------------
+@group Widget Function
+Widget functions are used to create {@type Widget|user interface widgets}.
+--------------------------------------------------------------------------------
+@group Auto Task Property
+Auto task properties are accessed using the {AutoTask()} function or the {UI.AutoTask} property.
+--------------------------------------------------------------------------------
+@group Auto Task Command
+Auto task commands are accessed using the {AutoTask()} function or the {UI.AutoTask} property.
+For example,
+| With UI.AutoTask Do Add "WaitOneTurn"
+adds a {WaitOneTurn} command to the current auto task.
+
+<b>Note:</b> "Auto Task Commands" are commands to manipulate an auto task, not the commands you build an auto task from.
+Auto tasks will contain {@group Planet Command|planet commands}, {@group Ship Command|ship commands},
+and {@group Global Command|global commands}.
+--------------------------------------------------------------------------------
 
 
 ===
@@ -1498,16 +1558,19 @@ File properties are accessible using the <tt>{ForEach} {DirectoryEntry}(dir)</tt
 ===
 
 --------------------------------------------------------------------------------
-@version PCC2 2.40
-First "Next Generation" version.
+@version PCC2 2.40.7
+- add auto-task editor ({AutoTask()}, {@group Auto Task Property})
 --------------------------------------------------------------------------------
-@version PCC2 2.40.1
---------------------------------------------------------------------------------
-@version PCC2 2.40.3
+@version PCC2 2.40.6
 --------------------------------------------------------------------------------
 @version PCC2 2.40.5
 --------------------------------------------------------------------------------
-@version PCC2 2.40.6
+@version PCC2 2.40.3
+--------------------------------------------------------------------------------
+@version PCC2 2.40.1
+--------------------------------------------------------------------------------
+@version PCC2 2.40
+First "Next Generation" version.
 --------------------------------------------------------------------------------
 @version PCC2 2.0.5
 --------------------------------------------------------------------------------
@@ -1772,6 +1835,16 @@ of the scripting language.
 Often, new versions of PCC 1.x or PCC2 introduce new commands, functions or properties.
 Those are referenced in the {int:index:versions|Version Index}.
 
+<h2>Major New Features</h2>
+
+This list does not claim completeness.
+
+- PCC2 allows {Function|user-defined functions}.
+- PCC2 exposes many more functions and properties to scripts, for example {@type RichText|Rich Text} or
+  {@group Mission Property|Missions}.
+- PCC2 allows {Dim (Elementary Command)|array} and {@type Hash|hash} values.
+- PCC2ng allows {UI.Dialog|user-defined dialogs}.
+
 <h2>Implementation Differences</h2>
 
 The basic principle of the script interpreter differs completely between PCC 1.x and PCC2.
@@ -1782,11 +1855,10 @@ for a DOS application, but is no longer relevant today.
 
 Other differences:
 
-- In PCC 1.x identifiers are truncated to 31 characters.
-  PCC2 allows up to 255 (this limit is imposed by PCC2 using similar file formats as PCC 1.x).
+- In PCC 1.x identifiers are truncated to 31 characters. PCC2 allows up to 255.
 - PCC 1.x limits string values to 255 characters. PCC2 does not.
   {int:index:version:pcc1.0.18|PCC 1.0.18} can read long property fields written by PCC2,
-  and truncates accordingly.
+  and truncates accordingly. PCC2 supports Unicode.
 - PCC 1.x allows unterminated string constants; the constant ends at the end of the line.
   PCC2 does not allow that.
   Likewise, code that is never executed can be syntactically invalid in PCC 1.x; PCC2 does not permit that.
@@ -1813,6 +1885,9 @@ Other differences:
 - <tt>{System.Err}</tt> can be localized in PCC2.
   In PCC 1.x, the last error caught using %Try/%Else was stored in a global %System.Err property.
   In PCC2, you can define a local variable of that name to catch the error messages without disturbing the caller.
+- The relations between {@group Keymap|keymaps} is different.
+- Script status is stored in different files with different formats between PCC1 (<tt>vmX.cc</tt>)
+  and PCC2 (<tt>scriptX.cc</tt>). Script status can be interchanged between PCC2, PCC2ng, and PCC2 Web.
 
 <h2>Unimplemented Features</h2>
 

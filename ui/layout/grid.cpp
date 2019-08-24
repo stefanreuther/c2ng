@@ -27,8 +27,8 @@ namespace {
             int prefY = info.getPreferredSize().getY();
             int minX  = info.getMinSize().getX();
             int minY  = info.getMinSize().getY();
-            bool flexH = info.isGrowHorizontal();
-            bool flexV = info.isGrowVertical();
+            uint8_t flexH = info.isGrowHorizontal();
+            uint8_t flexV = info.isGrowVertical();
 
             // override with required values
             int n;

@@ -10,19 +10,6 @@
 #include "afl/io/directoryentry.hpp"
 #include "afl/io/internalfilemapping.hpp"
 
-namespace {
-    template<typename T>
-    afl::base::Optional<int32_t> convertSize(T sz)
-    {
-        int32_t converted = int32_t(sz);
-        if (converted >= 0 && T(converted) == sz) {
-            return converted;
-        } else {
-            return afl::base::Nothing;
-        }
-    }
-}
-
 server::file::FileSystemHandler::FileSystemHandler(afl::io::FileSystem& fs, String_t name)
     : m_fileSystem(fs),
       m_name(name)

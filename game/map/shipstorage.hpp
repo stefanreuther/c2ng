@@ -34,8 +34,6 @@ namespace game { namespace map {
         InterpreterInterface& m_interface;
         const game::spec::ShipList& m_shipList;
         afl::base::SignalConnection m_changeConnection;
-
-        const game::spec::Hull* getHull() const;
     };
 
 } }

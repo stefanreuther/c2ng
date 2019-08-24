@@ -7,7 +7,7 @@
 bool
 game::map::BaseStorage::isValid() const
 {
-    for (size_t i = 0, n = size(); i < n; ++i) {
+    for (int i = 0, n = size(); i < n; ++i) {
         if (get(i).isValid()) {
             return true;
         }

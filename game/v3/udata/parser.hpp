@@ -10,9 +10,10 @@
 #include "game/config/hostconfiguration.hpp"
 #include "game/game.hpp"
 #include "game/parser/messageinformation.hpp"
-#include "game/spec/modifiedhullfunctionlist.hpp"
+#include "game/spec/shiplist.hpp"
 #include "game/v3/structures.hpp"
 #include "game/v3/udata/reader.hpp"
+#include "util/vector.hpp"
 
 namespace game { namespace v3 { namespace udata {
 
@@ -22,12 +23,12 @@ namespace game { namespace v3 { namespace udata {
             \param game       Game. Data will be stored here (mostly, its currentTurn(), but also scores and score definitions)
             \param playerNr   Player number.
             \param config     Host configuration. Could be updated by received data.
-            \param modList    Modified hull function list. Could be updated by received data.
+            \param shipList   Ship list. The modified hull function list could be updated by received data.
             \param cs         Character set. Used for decoding strings. */
         Parser(Game& game,
                int playerNr,
                game::config::HostConfiguration& config,
-               game::spec::ModifiedHullFunctionList& modList,
+               game::spec::ShipList& shipList,
                afl::charset::Charset& cs,
                afl::string::Translator& tx,
                afl::sys::LogListener& log);
@@ -35,6 +36,7 @@ namespace game { namespace v3 { namespace udata {
         // Reader:
         virtual bool handleRecord(uint16_t recordId, afl::base::ConstBytes_t data);
         virtual void handleError(afl::io::Stream& in);
+        virtual void handleEnd();
 
      private:
         enum Scope {
@@ -42,16 +44,22 @@ namespace game { namespace v3 { namespace udata {
             PlanetScope
         };
 
+        // Fixed data
         Game& m_game;
-        int m_player;
-        game::config::HostConfiguration& m_hostConfiguration; 
-        game::spec::ModifiedHullFunctionList& m_modList;
+        const int m_player;
+        game::config::HostConfiguration& m_hostConfiguration;
+        game::spec::ShipList& m_shipList;
         afl::charset::Charset& m_charset;
         afl::string::Translator& m_translator;
         afl::sys::LogListener& m_log;
 
+        // Dynamic data
+        util::Vector<uint8_t,Id_t> m_destroyedShips;
+        std::vector<game::v3::structures::Util7Battle> m_battleResults;
+
         int getTurnNumber() const;
 
+        void markShipKilled(Id_t id);
         void processAlliances(const game::v3::structures::Util22Alliance& allies);
         void processEnemies(uint16_t enemies);
         void processScoreRecord(afl::base::ConstBytes_t data, Scope scope, UnitScoreDefinitionList& defs);

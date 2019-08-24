@@ -14,6 +14,7 @@
 #include "afl/net/redis/stringlistkey.hpp"
 #include "afl/net/redis/stringsetkey.hpp"
 #include "afl/net/redis/subtree.hpp"
+#include "server/mailout/root.hpp"
 
 using afl::net::redis::HashKey;
 using afl::net::redis::IntegerSetKey;
@@ -27,9 +28,10 @@ TestServerMailoutMessage::testDatabase()
 {
     // Environment
     afl::net::redis::InternalDatabase db;
+    server::mailout::Root root(db, server::mailout::Configuration());
 
     // Set up
-    server::mailout::Message testee(Subtree(db, "m:"), 54, "preparing");
+    server::mailout::Message testee(root, 54, server::mailout::Message::Preparing);
     TS_ASSERT_EQUALS(testee.getId(), 54);
 
     // Set properties of message
@@ -41,12 +43,12 @@ TestServerMailoutMessage::testDatabase()
     testee.expireTime().set(1984);
 
     // Verify properties
-    TS_ASSERT_EQUALS(HashKey(db, "m:msg:54:data").stringField("template").get(), "tp");
-    TS_ASSERT_EQUALS(HashKey(db, "m:msg:54:data").stringField("uniqid").get(), "uid");
-    TS_ASSERT_EQUALS(HashKey(db, "m:msg:54:args").stringField("a1").get(), "v1");
-    TS_ASSERT_EQUALS(StringListKey(db, "m:msg:54:attach")[0], "att");
-    TS_ASSERT(StringSetKey(db, "m:msg:54:to").contains("r"));
-    TS_ASSERT_EQUALS(HashKey(db, "m:msg:54:data").intField("expire").get(), 1984);
+    TS_ASSERT_EQUALS(HashKey(db, "mqueue:msg:54:data").stringField("template").get(), "tp");
+    TS_ASSERT_EQUALS(HashKey(db, "mqueue:msg:54:data").stringField("uniqid").get(), "uid");
+    TS_ASSERT_EQUALS(HashKey(db, "mqueue:msg:54:args").stringField("a1").get(), "v1");
+    TS_ASSERT_EQUALS(StringListKey(db, "mqueue:msg:54:attach")[0], "att");
+    TS_ASSERT(StringSetKey(db, "mqueue:msg:54:to").contains("r"));
+    TS_ASSERT_EQUALS(HashKey(db, "mqueue:msg:54:data").intField("expire").get(), 1984);
 }
 
 /** Test remove(). */
@@ -55,16 +57,17 @@ TestServerMailoutMessage::testRemove()
 {
     // Environment
     afl::net::redis::InternalDatabase db;
+    server::mailout::Root root(db, server::mailout::Configuration());
 
     // Set up
-    server::mailout::Message testee(Subtree(db, "m:"), 27, "preparing");
+    server::mailout::Message testee(root, 27, server::mailout::Message::Preparing);
     testee.templateName().set("tp");
     testee.attachments().pushBack("att");
 
     // Verify that this hit the database
     {
         afl::data::StringList_t keys;
-        Subtree(db, "m:").getKeyNames(keys);
+        Subtree(db, "mqueue:").getKeyNames(keys);
         TS_ASSERT(keys.size() > 0);
     }
 
@@ -74,7 +77,7 @@ TestServerMailoutMessage::testRemove()
     // Database must now be empty
     {
         afl::data::StringList_t keys;
-        Subtree(db, "m:").getKeyNames(keys);
+        Subtree(db, "mqueue:").getKeyNames(keys);
         TS_ASSERT_EQUALS(keys.size(), 0U);
     }
 }
@@ -85,20 +88,21 @@ TestServerMailoutMessage::testSend()
 {
     // Environment
     afl::net::redis::InternalDatabase db;
+    server::mailout::Root root(db, server::mailout::Configuration());
 
     // Set up
-    server::mailout::Message testee(Subtree(db, "m:"), 92, "preparing");
+    server::mailout::Message testee(root, 92, server::mailout::Message::Preparing);
     testee.templateName().set("tp");
     testee.uniqueId().set("zx");
     testee.receivers().add("r");
-    IntegerSetKey(db, "m:preparing").add(92);
+    IntegerSetKey(db, "mqueue:preparing").add(92);
 
     // Send
     testee.send();
 
     // Verify
-    TS_ASSERT_EQUALS(HashKey(db, "m:uniqid").intField("zx").get(), 92);
-    TS_ASSERT(IntegerSetKey(db, "m:sending").contains(92));
-    TS_ASSERT(!IntegerSetKey(db, "m:preparing").contains(92));
+    TS_ASSERT_EQUALS(HashKey(db, "mqueue:uniqid").intField("zx").get(), 92);
+    TS_ASSERT(IntegerSetKey(db, "mqueue:sending").contains(92));
+    TS_ASSERT(!IntegerSetKey(db, "mqueue:preparing").contains(92));
 }
 

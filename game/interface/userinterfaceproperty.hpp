@@ -9,6 +9,7 @@ namespace game { namespace interface {
     /** User interface property identifier. */
     enum UserInterfaceProperty {
         iuiScreenNumber,               ///< Current screen number (UI.Screen).
+        iuiAutoTask,                   ///< Current auto task (UI.AutoTask).
         iuiIterator,                   ///< Current iterator (UI.Iterator).
         iuiScreenRegistered,           ///< true iff current screen is on screen history.
         iuiSimFlag,                    ///< true iff we are in the simulator (System.Sim).

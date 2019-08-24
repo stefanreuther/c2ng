@@ -10,5 +10,6 @@ server::user::Configuration::Configuration()
     : userKey("unset"),
       userDataMaxKeySize(1024),
       userDataMaxValueSize(1024*1024),
-      userDataMaxTotalSize(1536*1024)
+      userDataMaxTotalSize(1536*1024),
+      profileMaxValueSize(10240)
 { }

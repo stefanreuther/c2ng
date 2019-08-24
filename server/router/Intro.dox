@@ -1,0 +1,10 @@
+/*!
+     \namespace server::router
+     \brief c2router server
+
+     This namespace implements the c2router service.
+     c2router manages PCC2 Web (c2play) sessions.
+
+     - server::router::Root
+     - server::router::Session
+ */

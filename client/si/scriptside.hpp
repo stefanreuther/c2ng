@@ -58,10 +58,8 @@ namespace client { namespace si {
 
         /** Wait callback.
             Signals the wait result to the UserSide.
-            \param id       Wait Id
-            \param state    Process state
-            \param error    Error */
-        void handleWait(uint32_t id, interpreter::Process::State state, interpreter::Error error);
+            \param id       Wait Id */
+        void handleWait(uint32_t id);
 
         /*
          *  Request Submission
@@ -130,13 +128,11 @@ namespace client { namespace si {
         struct Wait {
             uint32_t waitId;
             uint32_t processGroupId;
-            interpreter::Process* process;
-            ScriptTask::Verbosity verbosity;
-            Wait(uint32_t waitId, uint32_t processGroupId, interpreter::Process* process, ScriptTask::Verbosity verbosity)
-                : waitId(waitId), processGroupId(processGroupId), process(process), verbosity(verbosity)
+            Wait(uint32_t waitId, uint32_t processGroupId)
+                : waitId(waitId), processGroupId(processGroupId)
                 { }
             Wait()
-                : waitId(0), processGroupId(0), process(0), verbosity(ScriptTask::Default)
+                : waitId(0), processGroupId(0)
                 { }
         };
         std::vector<Wait> m_waits;

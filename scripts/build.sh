@@ -57,7 +57,7 @@ shift
 case "$arch" in
   ""|native)
     name="native"
-    set -- AFL_DIR=$SRC/../afl/.build-native/result --disable-sdl
+    set -- AFL_DIR=$SRC/../afl/.build-native/result --disable-sdl ENABLE_TEST_APPS=1
     ;;
 
   mingw32-cross)

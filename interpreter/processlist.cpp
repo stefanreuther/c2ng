@@ -34,7 +34,8 @@
 interpreter::ProcessList::ProcessList()
     : m_processes(),
       m_processGroupId(0),
-      m_processId(0)
+      m_processId(0),
+      m_running(false)
 { }
 
 // Destructor.
@@ -58,13 +59,6 @@ interpreter::ProcessList::allocateProcessGroup()
     return ++m_processGroupId;
 }
 
-// Allocate a process group Id.
-uint32_t
-interpreter::ProcessList::allocateProcessId()
-{
-    return ++m_processId;
-}
-
 // Start a process group.
 void
 interpreter::ProcessList::startProcessGroup(uint32_t pgid)
@@ -79,6 +73,15 @@ interpreter::ProcessList::startProcessGroup(uint32_t pgid)
         }
     }
     if (!ok) {
+        // Finalize entire process group
+        for (size_t i = 0; i != m_processes.size(); ++i) {
+            Process& proc = *m_processes[i];
+            if (proc.getProcessGroupId() == pgid) {
+                proc.finalize();
+            }
+        }
+
+        // Tell caller
         sig_processGroupFinish.raise(pgid);
     }
 }
@@ -147,7 +150,7 @@ interpreter::ProcessList::resumeProcess(Process& proc, uint32_t pgid)
     }
 }
 
-// Resume all suspended processes.
+// Resume all suspended processes and place them in the given process group.
 void
 interpreter::ProcessList::resumeSuspendedProcesses(uint32_t pgid)
 {
@@ -249,52 +252,63 @@ void
 interpreter::ProcessList::run()
 {
     // ex int/process.h:runRunnableProcesses, sort-of
-    while (Process* proc = findRunningProcess()) {
-        proc->run();
+    // We must avoid being called recursively, i.e. if a process causes ProcessList::run to be called again.
+    if (!m_running) {
+        m_running = true;
+        try {
+            while (Process* proc = findRunningProcess()) {
+                proc->run();
 
-        bool handled = false;
-        switch (proc->getState()) {
-         case Process::Suspended:
-            // Voluntary suspend. Start another one from this process group.
-            startProcessGroup(proc->getProcessGroupId());
-            handled = true;
-            break;
+                bool handled = false;
+                switch (proc->getState()) {
+                 case Process::Suspended:
+                    // Voluntary suspend. Start another one from this process group.
+                    startProcessGroup(proc->getProcessGroupId());
+                    handled = true;
+                    break;
 
-         case Process::Frozen:
-            // Someone froze it. Hope they will un-thaw it.
-            // This normally should not happen, and if this process is restarted, it will most likely run in a new process group.
-            // Thus, continue this group.
-            startProcessGroup(proc->getProcessGroupId());
-            handled = true;
-            break;
+                 case Process::Frozen:
+                    // Someone froze it. Hope they will un-thaw it.
+                    // This normally should not happen, and if this process is restarted, it will most likely run in a new process group.
+                    // Thus, continue this group.
+                    startProcessGroup(proc->getProcessGroupId());
+                    handled = true;
+                    break;
 
-         case Process::Runnable:
-         case Process::Running:
-            // run() should not exit with a process in this state.
-            // Mark it failed and proceed with the process group.
-            proc->setState(Process::Failed);
-            startProcessGroup(proc->getProcessGroupId());
-            handled = true;
-            break;
+                 case Process::Runnable:
+                 case Process::Running:
+                    // run() should not exit with a process in this state.
+                    // Mark it failed and proceed with the process group.
+                    proc->setState(Process::Failed);
+                    startProcessGroup(proc->getProcessGroupId());
+                    handled = true;
+                    break;
 
-         case Process::Waiting:
-            // Process waits. Someone will wake it.
-            handled = true;
-            break;
+                 case Process::Waiting:
+                    // Process waits. Someone will wake it.
+                    handled = true;
+                    break;
 
-         case Process::Ended:
-         case Process::Terminated:
-         case Process::Failed:
-            // Process ended in one way or another. Start another one from this process group.
-            handled = true;
-            startProcessGroup(proc->getProcessGroupId());
-            break;
+                 case Process::Ended:
+                 case Process::Terminated:
+                 case Process::Failed:
+                    // Process ended in one way or another. Start another one from this process group.
+                    handled = true;
+                    startProcessGroup(proc->getProcessGroupId());
+                    break;
+                }
+
+                if (!handled) {
+                    // Fallback (could be the switch's default, but that would suppress the "not all values handled" warning)
+                    proc->setState(Process::Failed);
+                    startProcessGroup(proc->getProcessGroupId());
+                }
+            }
+            m_running = false;
         }
-
-        if (!handled) {
-            // Fallback (could be the switch's default, but that would suppress the "not all values handled" warning)
-            proc->setState(Process::Failed);
-            startProcessGroup(proc->getProcessGroupId());
+        catch (...) {
+            m_running = false;
+            throw;
         }
     }
 }
@@ -430,6 +444,13 @@ interpreter::ProcessList::getProcessList() const
 {
     // ex int/process.h:getProcessList
     return m_processes;
+}
+
+// Allocate a process group Id.
+inline uint32_t
+interpreter::ProcessList::allocateProcessId()
+{
+    return ++m_processId;
 }
 
 interpreter::Process*

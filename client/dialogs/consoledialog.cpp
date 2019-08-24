@@ -383,6 +383,9 @@ namespace {
                  case client::si::OutputState::ShipScreen:
                  case client::si::OutputState::PlanetScreen:
                  case client::si::OutputState::BaseScreen:
+                 case client::si::OutputState::ShipTaskScreen:
+                 case client::si::OutputState::PlanetTaskScreen:
+                 case client::si::OutputState::BaseTaskScreen:
                  case client::si::OutputState::Starchart:
                     // Dispatch to parent
                     us.detachProcess(link);

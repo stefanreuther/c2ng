@@ -10,7 +10,6 @@
 #include "game/map/planet.hpp"
 #include "game/map/ship.hpp"
 #include "game/map/universe.hpp"
-#include "util/translation.hpp"
 #include "afl/base/countof.hpp"
 #include "game/limits.hpp"
 
@@ -39,17 +38,17 @@ game::map::ShipTransporter::getName(afl::string::Translator& tx) const
     // ex GShipTransporterTransfer::getName
     if (m_type == Ship::UnloadTransporter) {
         if (m_targetId == 0) {
-            return _("Jettison");
+            return tx("Jettison");
         } else if (const Planet* p = m_universe.planets().get(m_targetId)) {
             return p->getName(PlainName, tx, m_interface);
         } else {
-            return afl::string::Format(_("Planet %d").c_str(), m_targetId);
+            return afl::string::Format(tx("Planet %d").c_str(), m_targetId);
         }
     } else {
         if (const Ship* s = m_universe.ships().get(m_targetId)) {
             return s->getName(PlainName, tx, m_interface);
         } else {
-            return afl::string::Format(_("Ship %d").c_str(), m_targetId);
+            return afl::string::Format(tx("Ship %d").c_str(), m_targetId);
         }
     }
 }

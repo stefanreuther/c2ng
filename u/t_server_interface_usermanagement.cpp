@@ -15,6 +15,8 @@ TestServerInterfaceUserManagement::testInterface()
      public:
         virtual String_t add(String_t /*userName*/, String_t /*password*/, afl::base::Memory<const String_t> /*config*/)
             { return String_t(); }
+        virtual void remove(String_t /*userId*/)
+            { }
         virtual String_t login(String_t /*userName*/, String_t /*password*/)
             { return String_t(); }
         virtual String_t getUserIdByName(String_t /*userName*/)

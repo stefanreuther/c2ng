@@ -8,6 +8,7 @@
 #include "afl/base/deletable.hpp"
 #include "afl/string/string.hpp"
 #include "game/spec/componentvector.hpp"
+#include "game/config/hostconfiguration.hpp"
 
 namespace game { namespace vcr {
 
@@ -267,6 +268,25 @@ namespace game { namespace vcr {
             \param hulls Hull definitions
             \return picture number; zero if no picture number can be generated */
         int getGuessedShipPicture(const game::spec::HullVector_t& hulls) const;
+
+        /** Guess engine.
+            \param engines Engine definitions
+            \param pAssumedHull Pointer to hull. Can be null (function will return 0); you can pass h.get(getGuessedHull(h)).
+            \param withESB Whether ESB is active in this fight
+            \param config Host configuration
+            \return Engine number; zero if ambiguous or impossible */
+        int getGuessedEngine(const game::spec::EngineVector_t& engines,
+                             const game::spec::Hull* pAssumedHull,
+                             bool withESB,
+                             const game::config::HostConfiguration& config) const;
+
+        /** Check for freighter.
+            \return true if ship has no weapons. */
+        bool isFreighter() const;
+
+        /** Apply classic shield limits.
+            Freighters do not have shields. */
+        void applyClassicLimits();
 
      private:
         typedef int Value_t;

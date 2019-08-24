@@ -27,6 +27,7 @@ class TestGameParserMessageParser : public CxxTest::TestSuite {
     void testMulti();
     void testScore();
     void testDelta();
+    void testTimAllies();
 };
 
 class TestGameParserMessageTemplate : public CxxTest::TestSuite {

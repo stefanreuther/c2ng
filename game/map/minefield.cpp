@@ -74,7 +74,7 @@ game::map::Minefield::getName(ObjectName /*which*/, afl::string::Translator& tx,
 
     String_t adj;
     if (iface.getPlayerAdjective(m_owner, adj)) {
-        result += "(";
+        result += " (";
         result += adj;
         result += ")";
     }

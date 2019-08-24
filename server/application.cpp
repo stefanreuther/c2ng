@@ -1,6 +1,6 @@
 /**
   *  \file server/application.cpp
-  *  \brive Base class server::Application
+  *  \brief Base class server::Application
   */
 
 #include "server/application.hpp"

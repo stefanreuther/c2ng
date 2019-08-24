@@ -85,6 +85,12 @@ namespace {
         { "TURN.DATE",             game::interface::igpTurnDate,          GlobalPropertyDomain,   interpreter::thString },
         { "TURN.ISNEW",            game::interface::igpTurnIsNew,         GlobalPropertyDomain,   interpreter::thBool },
         { "TURN.TIME",             game::interface::igpTurnTime,          GlobalPropertyDomain,   interpreter::thString },
+        /* @q UI.AutoTask:Obj (Global Property)
+           Current auto task if on an auto task screen.
+           EMPTY if the current screen is not an auto task screen.
+           @since PCC2 2.40.7
+           @see @group Auto Task Property, AutoTask() */
+        { "UI.AUTOTASK",           game::interface::iuiAutoTask,          UIPropertyDomain,       interpreter::thNone },
         /* @q UI.Iterator:Iterator (Global Property)
            Iterator controlling current screen or dialog.
            EMPTY if the current screen has no iterator.

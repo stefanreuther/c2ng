@@ -16,9 +16,3 @@ game::map::PlayedPlanetType::isValid(const Planet& p) const
     // ex GPlayedPlanetType::isValidIndex
     return p.isPlayable(Object::ReadOnly);
 }
-
-
-void foo(game::map::Universe& u)
-{
-    game::map::PlayedPlanetType t(u);
-}

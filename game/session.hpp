@@ -16,11 +16,12 @@
 #include "game/interface/userinterfacepropertyaccessor.hpp"
 #include "game/interface/userinterfacepropertystack.hpp"
 #include "game/interpreterinterface.hpp"
+#include "game/reference.hpp"
 #include "game/spec/shiplist.hpp"
 #include "interpreter/error.hpp"
+#include "interpreter/taskeditor.hpp"
 #include "interpreter/world.hpp"
 #include "util/plugin/manager.hpp"
-#include "game/reference.hpp"
 
 namespace game {
 
@@ -77,6 +78,9 @@ namespace game {
 
         void setEditableAreas(AreaSet_t set);
         AreaSet_t getEditableAreas() const;
+
+        afl::base::Ptr<interpreter::TaskEditor> getAutoTaskEditor(Id_t id, interpreter::Process::ProcessKind kind, bool create);
+        void releaseAutoTaskEditor(afl::base::Ptr<interpreter::TaskEditor>& ptr);
 
         interpreter::World& world();
 

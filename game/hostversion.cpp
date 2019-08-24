@@ -73,19 +73,19 @@ game::HostVersion::toString(afl::string::Translator& tx) const
 {
     switch (m_kind) {
      case Unknown:
-        return tx.translateString("unknown");
+        return tx("unknown");
 
      case Host:
-        return formatVersion(tx.translateString("Host"), m_version, true);
+        return formatVersion(tx("Host"), m_version, true);
 
      case SRace:
-        return formatVersion(tx.translateString("SRace"), m_version, true);
+        return formatVersion(tx("SRace"), m_version, true);
 
      case PHost:
-        return formatVersion(tx.translateString("PHost"), m_version, false);
+        return formatVersion(tx("PHost"), m_version, false);
 
      case NuHost:
-        return formatVersion(tx.translateString("NuHost"), m_version, true);
+        return formatVersion(tx("NuHost"), m_version, true);
     }
     return String_t();
 }
@@ -334,6 +334,15 @@ game::HostVersion::hasExtendedMissions(const game::config::HostConfiguration& co
 {
     return m_kind == PHost
         && config[config.AllowExtendedMissions]() != 0;
+}
+
+// Check for bug in UseAccurateFuelModel computation.
+bool
+game::HostVersion::hasAccurateFuelModelBug() const
+{
+    return (m_version < MKVERSION(3,4,8))
+        || (m_version >= MKVERSION(4,0,0)
+            && m_version < MKVERSION(4,0,5));
 }
 
 

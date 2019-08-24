@@ -14,15 +14,15 @@ game::tables::HappinessChangeName::get(int change) const
 {
     // ex game/tables.h:getHappyChangeName
     if (change < -5) {
-        return m_translator.translateString("They HATE you!");
+        return m_translator("They HATE you!");
     } else if (change < 0) {
-        return m_translator.translateString("They are angry about you!");
+        return m_translator("They are angry about you!");
     } else if (change == 0) {
-        return m_translator.translateString("They are undecided about you.");
+        return m_translator("They are undecided about you.");
     } else if (change > 4) {
-        return m_translator.translateString("They LOVE you.");
+        return m_translator("They LOVE you.");
     } else {
-        return m_translator.translateString("They like your leadership.");
+        return m_translator("They like your leadership.");
     }
 }
 

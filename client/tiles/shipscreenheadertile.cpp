@@ -13,25 +13,28 @@
 
 using ui::widgets::FrameGroup;
 
-client::tiles::ShipScreenHeaderTile::ShipScreenHeaderTile(ui::Root& root, client::widgets::KeymapWidget& kmw)
+client::tiles::ShipScreenHeaderTile::ShipScreenHeaderTile(ui::Root& root, client::widgets::KeymapWidget& kmw, Kind k)
     : ControlScreenHeader(root, kmw),
       m_receiver(root.engine().dispatcher(), *this)
 {
     // ex WShipScreenHeaderTile::WShipScreenHeaderTile
-    enableButton(btnAuto, FrameGroup::NoFrame);
-    enableButton(btnAdd,  FrameGroup::NoFrame);
-    enableButton(btnTab,  FrameGroup::NoFrame);
-    enableButton(btnName, FrameGroup::NoFrame);
+    switch (k) {
+     case ShipScreen:
+        enableButton(btnAuto, FrameGroup::NoFrame);
+        enableButton(btnName, FrameGroup::NoFrame);
+        enableButton(btnAdd,  FrameGroup::NoFrame);
+        enableButton(btnTab,  FrameGroup::NoFrame);
+        break;
 
-    // FIXME: alternative personalities
-    // enum Kind {
-    //     ShipScreen,
-    //     HistoryScreen,
-    //     ShipTaskScreen
-    // };
-    // Ship Screen:    Name, Auto, Tab, Add
-    // History Screen:             Tab, Add
-    // Task Screen:          CScr
+     case HistoryScreen:
+        enableButton(btnAdd,  FrameGroup::NoFrame);
+        enableButton(btnTab,  FrameGroup::NoFrame);
+        break;
+
+     case ShipTaskScreen:
+        enableButton(btnCScr, FrameGroup::NoFrame);
+        break;
+    }
 }
 
 void

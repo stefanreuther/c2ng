@@ -68,8 +68,9 @@ namespace game {
             - "%%" for a literal percent sign
             Use this to format friendly codes, missions, etc.
             \param tpl Template
+            \param useOriginalNames if true, use original names (OriginalAdjectiveName), otherwise, use normal names (AdjectiveName).
             \return expanded string */
-        String_t expandNames(String_t tpl) const;
+        String_t expandNames(String_t tpl, bool useOriginalNames) const;
 
         /** Get set of all players.
             \return set of players where Player::isReal() is true */

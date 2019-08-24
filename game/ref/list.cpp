@@ -119,6 +119,14 @@ game::ref::List::operator[](size_t pos) const
             : Reference());
 }
 
+void
+game::ref::List::set(size_t pos, Reference ref)
+{
+    if (pos < m_content.size()) {
+        m_content[pos] = ref;
+    }
+}
+
 size_t
 game::ref::List::size() const
 {

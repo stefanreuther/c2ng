@@ -335,6 +335,9 @@ client::dialogs::InboxDialog::handleStateChange(client::si::UserSide& us, client
      case OutputState::ShipScreen:
      case OutputState::PlanetScreen:
      case OutputState::BaseScreen:
+     case OutputState::ShipTaskScreen:
+     case OutputState::PlanetTaskScreen:
+     case OutputState::BaseTaskScreen:
      case OutputState::Starchart:
         us.detachProcess(link);
         m_outputState.set(link, target);

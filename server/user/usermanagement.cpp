@@ -3,6 +3,7 @@
   */
 
 #include "server/user/usermanagement.hpp"
+#include "afl/base/countof.hpp"
 #include "afl/data/vector.hpp"
 #include "afl/data/vectorvalue.hpp"
 #include "afl/net/redis/stringfield.hpp"
@@ -12,8 +13,10 @@
 #include "server/user/passwordencrypter.hpp"
 #include "server/user/root.hpp"
 #include "server/user/user.hpp"
+#include "server/user/usertoken.hpp"
 
 using afl::string::Format;
+using afl::sys::Log;
 
 const char*const LOG_NAME = "user.mgmt";
 
@@ -37,7 +40,7 @@ server::user::UserManagement::add(String_t userName, String_t password, afl::bas
 
     // Allocate user Id
     String_t userId = m_root.allocateUserId();
-    m_root.log().write(afl::sys::Log::Info, LOG_NAME, Format("(%s) creating user '%s'", userId, simplifiedName));
+    m_root.log().write(Log::Info, LOG_NAME, Format("(%s) creating user '%s'", userId, simplifiedName));
 
     // Initialize profile
     // - password
@@ -61,6 +64,61 @@ server::user::UserManagement::add(String_t userName, String_t password, afl::bas
     m_root.allUsers().add(userId);
 
     return userId;
+}
+
+void
+server::user::UserManagement::remove(String_t userId)
+{
+    // Fetch and invalidate user name
+    User u(m_root, userId);
+    String_t name = u.tree().stringKey("name").replaceBy(String_t());
+
+    // Remove from user->uid mapping
+    // This is not atomic, but ought to be safe because the above 'name' operation is atomic.
+    if (!name.empty() && m_root.userByName(name).get() == userId) {
+        m_root.userByName(name).remove();
+        m_root.log().write(Log::Info, LOG_NAME, Format("(%s) removing user '%s'", userId, name));
+
+        // Clear selected profile information
+        // - password
+        u.passwordHash().remove();
+
+        // - tokens
+        const String_t tokenTypes[] = { "login", "api", "reset" };
+        UserToken(m_root).clearToken(userId, tokenTypes);
+
+        // - profile fields
+        // Primary objectives are to delete information set by the user, to comply with privacy laws,
+        // but to keep permission regulations, so that a user account forbidden from posting does not
+        // regain that ability by deleting the user account and re-using a forgotten authentication
+        // somehow.
+        // Secondary objective is to clean up the database.
+        static const char*const profileFields[] = {
+            // identifying information
+            "email", "infoemailflag",
+            "realname", "inforealnameflag",
+            "infowebsite", "infocountry", "infotown", "infooccupation", "infobirthday",
+
+            // preferences we no longer need
+            //   FIXME: should these be deleted by owning microservices?
+            "language",
+            "mailgametype", "mailpmtype",
+            "talkautowatch", "talkwatchindividual", "talkautolink", "talkautosmiley",
+            "rank", "rankpoints", "turnreliability", "turnsplayed", "turnsmissed",
+
+            // creation header fields
+            "createtime", "createip", "createua", "createaccept", "createacceptcharset", "createacceptlanguage",
+            "termsversion",
+
+            // keep allowpost, allowupload, spam etc. for permission checks.
+        };
+        for (size_t i = 0; i < countof(profileFields); ++i) {
+            u.profile().stringField(profileFields[i]).remove();
+        }
+
+        // - revert screen name customisation
+        u.profile().stringField("screenname").set(Format("(%s)", name));
+    }
 }
 
 String_t
@@ -92,7 +150,7 @@ server::user::UserManagement::login(String_t userName, String_t password)
 
      case PasswordEncrypter::ValidNeedUpdate:
         // Password needs update
-        m_root.log().write(afl::sys::Log::Info, LOG_NAME, Format("(%s) password upgrade user", userId));
+        m_root.log().write(Log::Info, LOG_NAME, Format("(%s) password upgrade user", userId));
         u.passwordHash().set(m_root.encrypter().encryptPassword(password, userId));
         break;
     }
@@ -144,9 +202,15 @@ void
 server::user::UserManagement::setProfile(String_t userId, afl::base::Memory<const String_t> config)
 {
     User u(m_root, userId);
+    const size_t limit = m_root.config().profileMaxValueSize;
     while (const String_t* pKey = config.eat()) {
         if (const String_t* pValue = config.eat()) {
-            u.profile().stringField(*pKey).set(*pValue);
+            if (limit != 0 && pValue->size() > limit) {
+                m_root.log().write(Log::Warn, LOG_NAME, Format("(%s) profile value '%s' exceeds limit (%d bytes)", userId, *pKey, pValue->size()));
+                u.profile().stringField(*pKey).set(pValue->substr(0, limit));
+            } else {
+                u.profile().stringField(*pKey).set(*pValue);
+            }
         }
     }
 }
@@ -154,6 +218,6 @@ server::user::UserManagement::setProfile(String_t userId, afl::base::Memory<cons
 void
 server::user::UserManagement::setPassword(String_t userId, String_t password)
 {
-    m_root.log().write(afl::sys::Log::Info, LOG_NAME, Format("(%s) password change", userId));
+    m_root.log().write(Log::Info, LOG_NAME, Format("(%s) password change", userId));
     User(m_root, userId).passwordHash().set(m_root.encrypter().encryptPassword(password, userId));
 }

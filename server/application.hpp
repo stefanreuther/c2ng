@@ -1,6 +1,6 @@
 /**
   *  \file server/application.hpp
-  *  \brive Base class server::Application
+  *  \brief Base class server::Application
   */
 #ifndef C2NG_SERVER_APPLICATION_HPP
 #define C2NG_SERVER_APPLICATION_HPP

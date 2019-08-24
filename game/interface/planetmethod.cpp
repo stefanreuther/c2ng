@@ -67,7 +67,7 @@ namespace {
         // Check arguments
         bool wantBase = true;
         args.checkArgumentCount(0, 1);
-        if (args.getNumArgs() > 0) {              // FIXME: this is inconsistent in that a missing arg means true, not ignore
+        if (args.getNumArgs() > 0) {
             if (!interpreter::checkBooleanArg(wantBase, args.getNext())) {
                 return;
             }

@@ -7,6 +7,18 @@
 
 #include <cxxtest/TestSuite.h>
 
+class TestGameInterfaceCargoFunctions : public CxxTest::TestSuite {
+ public:
+    void testCheckCargoSpecArg();
+    void testCAdd();
+    void testCCompare();
+    void testCDiv();
+    void testCExtract();
+    void testCMul();
+    void testCRemove();
+    void testCSub();
+};
+
 class TestGameInterfaceEngineContext : public CxxTest::TestSuite {
  public:
     void testIt();

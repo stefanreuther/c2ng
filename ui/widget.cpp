@@ -1,12 +1,14 @@
 /**
   *  \file ui/widget.cpp
+  *  \brief Base class ui::Widgets
   */
 
 #include <cassert>
 #include "ui/widget.hpp"
 #include "afl/except/assertionfailedexception.hpp"
 
-ui::Widget::Widget()
+// Constructor.
+ui::Widget::Widget() throw()
     : m_parent(0),
       m_nextSibling(0),
       m_previousSibling(0),
@@ -19,6 +21,7 @@ ui::Widget::Widget()
       m_extent()
 { }
 
+// Destructor.
 ui::Widget::~Widget()
 {
     // ex UIBaseWidget::~UIBaseWidget
@@ -78,8 +81,7 @@ ui::Widget::~Widget()
     m_lastChild = 0;
 }
 
-// /** Set status. Call this to change the status flags. Derived widgets
-//     can override onStateChange() to react on status changes. */
+// Set state.
 void
 ui::Widget::setState(State st, bool enable)
 {
@@ -118,18 +120,6 @@ ui::Widget::setState(State st, bool enable)
     }
 }
 
-bool
-ui::Widget::hasState(State st) const
-{
-    return m_states.contains(st);
-}
-
-ui::Widget::States_t
-ui::Widget::getStates() const
-{
-    return m_states;
-}
-
 
 /*
  *  Redraw
@@ -141,7 +131,7 @@ ui::Widget::getStates() const
  *  - Root: remember request for execution
  */
 
-
+// Request redraw of the given area.
 void
 ui::Widget::requestRedraw(const gfx::Rectangle& area)
 {
@@ -151,6 +141,7 @@ ui::Widget::requestRedraw(const gfx::Rectangle& area)
     sig_handleRedraw.raise(*this, area);
 }
 
+// Request redraw of this widget.
 void
 ui::Widget::requestRedraw()
 {
@@ -163,8 +154,8 @@ ui::Widget::requestRedraw()
  *
  *  Invariant: FocusState <=> m_parent->m_focusedChild==this
  */
-    
 
+// Request this widget to be focused (and all siblings be not focused).
 void
 ui::Widget::requestFocus()
 {
@@ -179,6 +170,7 @@ ui::Widget::requestFocus()
     }
 }
 
+// Set focused child.
 void
 ui::Widget::setFocusedChild(Widget* w)
 {
@@ -194,7 +186,7 @@ ui::Widget::setFocusedChild(Widget* w)
     }
 }
 
-// /** Get focus state. */
+// Get focus state.
 ui::Widget::Focus
 ui::Widget::getFocusState() const
 {
@@ -229,36 +221,7 @@ ui::Widget::getFocusState() const
 }
 
 
-// FIXME: delete. This function has the wrong abstraction.
-// It is used by UIFocusIterator.
-// /** Get focused widget. When called on a focused group, returns the
-//     innermost focused child widget.
-
-//     Note: can't be const because it might return /this/. */
-// UIBaseWidget*
-// UIBaseWidget::getFocusedWidget()
-// {
-//     if (hasState(st_Focused))
-//         if (focused_child != 0)
-//             return focused_child->getFocusedWidget();
-//         else
-//             return this;
-//     else
-//         return 0;
-// }
-
-
-// /** Obtain logical focus. You must call this function prior
-//     reacting to user actions. A well-behaved widget
-//     - calls setSelectedWidget() when the user talks to it. This sets this
-//       widget's st_Selected status flag;
-//     - calls clearSelectedWidget() when it determines that the user no
-//       longer talks to it.
-//     - possibly overrides onStateChange() to react when it loses st_Selected.
-
-//     This is to prevent things like two buttons being depressed
-//     simultaneously because one of them did not notice that the user
-//     moved the mouse out of it. */
+// Request this widget to be the active widget (and all siblings be not active).
 void
 ui::Widget::requestActive()
 {
@@ -269,13 +232,7 @@ ui::Widget::requestActive()
     }
 }
 
-// /** Give logical focus to widget.
-//     If w points to a widget, that widget wants to get the input focus.
-//     Take it away from the one which currently has it, and give it to
-//     the specified widget. Also grab the logical focus for this
-//     UIBaseWidgetContainer, to make this process happen recursively.
-
-//     \pre w != 0 => w->getParent() == this */
+// Set active widget.
 void
 ui::Widget::setActiveChild(Widget* w)
 {
@@ -291,8 +248,7 @@ ui::Widget::setActiveChild(Widget* w)
     }
 }
 
-// /** Drop logical focus. If this widget is currently selected, unselect it.
-//     FIXME: this currently only works for leaf widgets. */
+// Request this widget to be not active anymore.
 void
 ui::Widget::dropActive()
 {
@@ -315,14 +271,7 @@ ui::Widget::dropActive()
  */
 
 
-// /** Add widget. Note that bases usually provide an own add() method (e.g. UIWidget::add(),
-//     UILayoutableWidget::add()) to support a particular child widget policy. Those methods
-//     ultimately call addChildWidget(). You should generally be using those method instead of
-//     addChildWidget().
-
-//     \param the_widget widget to add
-//     \param add_after add after this widget. 0 means add at front. Otherwise, must
-//                      be a child widget of us. */
+// Add child widget.
 void
 ui::Widget::addChild(Widget& child, Widget* addAfter)
 {
@@ -373,18 +322,14 @@ ui::Widget::addChild(Widget& child, Widget* addAfter)
     handleChildAdded(child);
 }
 
-/** Remove child widget. The child widget will then no longer be part of
-    this widget. */
+// Remove child widget.
 void
 ui::Widget::removeChild(Widget& child)
 {
     // ex UIBaseWidget::removeChildWidget
     assert(child.m_parent == this);
 
-    // Notify descendant. FIXME: I'm not 100% sure whether it's right to notify here.
-    // pro: descendant can know where in the list it is
-    // con: descendant cannot easily perform immediate redraw, because it does not know
-    //   how the new list will look like
+    // Notify descendant
     handleChildRemove(child);
 
     // Remove prev/next links
@@ -422,6 +367,7 @@ ui::Widget::removeChild(Widget& child)
     child.setState(FocusedState, false);
 }
 
+// Set widget extent (position and size).
 void
 ui::Widget::setExtent(const gfx::Rectangle& extent)
 {
@@ -436,12 +382,7 @@ ui::Widget::setExtent(const gfx::Rectangle& extent)
     }
 }
 
-const gfx::Rectangle&
-ui::Widget::getExtent() const
-{
-    return m_extent;
-}
-
+// Set color scheme.
 void
 ui::Widget::setColorScheme(gfx::ColorScheme<util::SkinColor::Color>& scheme)
 {
@@ -449,6 +390,7 @@ ui::Widget::setColorScheme(gfx::ColorScheme<util::SkinColor::Color>& scheme)
     m_colorScheme = &scheme;
 }
 
+// Get color scheme.
 gfx::ColorScheme<util::SkinColor::Color>&
 ui::Widget::getColorScheme() const
 {
@@ -460,6 +402,7 @@ ui::Widget::getColorScheme() const
     }
 }
 
+// Default key handler.
 bool
 ui::Widget::defaultHandleKey(util::Key_t key, int prefix)
 {
@@ -483,6 +426,7 @@ ui::Widget::defaultHandleKey(util::Key_t key, int prefix)
     return false;
 }
 
+// Default mouse handler.
 bool
 ui::Widget::defaultHandleMouse(gfx::Point pt, MouseButtons_t pressedButtons)
 {
@@ -506,6 +450,7 @@ ui::Widget::defaultHandleMouse(gfx::Point pt, MouseButtons_t pressedButtons)
     return false;
 }
 
+// Default child drawing.
 void
 ui::Widget::defaultDrawChildren(gfx::Canvas& can)
 {

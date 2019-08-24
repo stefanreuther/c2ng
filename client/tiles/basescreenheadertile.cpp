@@ -13,17 +13,17 @@
 
 using ui::widgets::FrameGroup;
 
-client::tiles::BaseScreenHeaderTile::BaseScreenHeaderTile(ui::Root& root, client::widgets::KeymapWidget& kmw)
+client::tiles::BaseScreenHeaderTile::BaseScreenHeaderTile(ui::Root& root, client::widgets::KeymapWidget& kmw, bool forTask)
     : ControlScreenHeader(root, kmw),
       m_receiver(root.engine().dispatcher(), *this)
 {
     // ex WBaseScreenHeaderTile::WBaseScreenHeaderTile
-    enableButton(btnAuto, FrameGroup::NoFrame);
-    enableButton(btnAdd,  FrameGroup::NoFrame);
-
-    // FIXME: alternative personalities
-    //   Base Task: CScr
-    //   Base:      Auto + Add
+    if (forTask) {
+        enableButton(btnCScr, FrameGroup::NoFrame);
+    } else {
+        enableButton(btnAuto, FrameGroup::NoFrame);
+        enableButton(btnAdd,  FrameGroup::NoFrame);
+    }
 }
 
 void

@@ -2,6 +2,13 @@ PCC2ng NEWS FILE
 ================
 
 
+2.40.7
+------
+
+  Auto Tasks. Search. Taxation. Support for THost Pythagoras bug. Minor
+  improvements to PlanetsCentral servers.
+
+
 2.40.6
 ------
 

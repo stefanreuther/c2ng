@@ -1,5 +1,6 @@
 /**
   *  \file gfx/application.hpp
+  *  \brief Class gfx::Application
   */
 #ifndef C2NG_GFX_APPLICATION_HPP
 #define C2NG_GFX_APPLICATION_HPP

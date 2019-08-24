@@ -144,6 +144,14 @@ class TestGameActionsPreconditions : public CxxTest::TestSuite {
     void testSession();
 };
 
+class TestGameActionsTaxationAction : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testNormal();
+    void testNormalTim();
+    void testIncomeLimit();
+};
+
 class TestGameActionsTechUpgrade : public CxxTest::TestSuite {
  public:
     void testFail();

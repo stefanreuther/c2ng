@@ -11,7 +11,7 @@ namespace ui {
 
     class LayoutableGroup : public Widget {
      public:
-        LayoutableGroup(ui::layout::Manager& mgr);
+        LayoutableGroup(ui::layout::Manager& mgr) throw();
         // virtual void draw(gfx::Canvas& can);
         // virtual void handleStateChange(State st, bool enable);
         virtual void requestChildRedraw(Widget& child, const gfx::Rectangle& area);

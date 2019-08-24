@@ -18,7 +18,7 @@
 // /** Constructor.
 //     \param layout Layout manager. Needs to live at least as long as the widget.
 //     \param id     Widget id */
-ui::LayoutableGroup::LayoutableGroup(ui::layout::Manager& mgr)
+ui::LayoutableGroup::LayoutableGroup(ui::layout::Manager& mgr) throw()
     : Widget(),
       m_manager(mgr)
 { }

@@ -36,7 +36,8 @@
    + ... with gcc-3.3 i386     6.34 (for comparison)
    + c2ng 20160326             2.95
    + c2ng 20180408             3.09
-   + cache weapon specs        2.95 */
+   + cache weapon specs        2.95
+   + division in fireBeamsAtF  2.83 */
 
 namespace {
     const int RANDOM_SIZE = 119;
@@ -102,6 +103,18 @@ namespace {
 	8,	16,	11,	3,	14,	12,	3,
 	11,	8,	12,	2,	7,	6,	4,	13
     };
+
+    void advance(int16_t& value, int change)
+    {
+        // Warning avoider
+        value = static_cast<int16_t>(value + change);
+    }
+
+    void advance(uint8_t& value, int change)
+    {
+        // Warning avoider
+        value = static_cast<uint8_t>(value + change);
+    }
 }
 
 /**************************** HostStatusToken ****************************/
@@ -160,7 +173,7 @@ game::vcr::classic::HostAlgorithm::Status::init(const Object& obj, Side side, co
     m_numFightersOut = 0;
     m_side = side;
     m_obj = obj;
-    m_obj.setShield(std::max(0, std::min(m_obj.getShield(), 100 - m_obj.getDamage())));
+    // Shield adjustments now in applyClassicLimits
 
     if (const game::spec::TorpedoLauncher* t = launchers.get(obj.getTorpedoType())) {
         m_torpKillPower = 2*t->getKillPower();
@@ -224,7 +237,7 @@ game::vcr::classic::HostAlgorithm::checkBattle(Object& left, Object& right, uint
     return leftResult || rightResult || seedResult;
 }
 
-// /** Init. Set up for playing. */
+// Init. Set up for playing.
 void
 game::vcr::classic::HostAlgorithm::initBattle(const Object& left, const Object& right, uint16_t seed)
 {
@@ -240,6 +253,7 @@ game::vcr::classic::HostAlgorithm::initBattle(const Object& left, const Object& 
 
     // okay, we'll be able to play it.
     m_seed = seed % RANDOM_SIZE;
+    // FIXME: if (seed < 0) { Nu Twister thing }
 
     // clear status
     m_status[LeftSide].init(leftCopy, LeftSide, m_launchers);
@@ -256,21 +270,7 @@ game::vcr::classic::HostAlgorithm::initBattle(const Object& left, const Object& 
         m_status[RightSide].m_objectX = 570;
     }
 
-    // Left shield
-    if (isFreighter(m_status[LeftSide])) {
-        m_status[LeftSide].m_obj.setShield(0);
-    }
-
-    // Right shield
-    if (!m_status[RightSide].m_obj.isPlanet()) {
-        if (isFreighter(m_status[RightSide])) {
-            m_status[RightSide].m_obj.setShield(0);
-        }
-    } else {
-        if (m_status[RightSide].m_obj.getCrew() <= 0) {
-            m_status[RightSide].m_obj.setShield(0);
-        }
-    }
+    // Shield adjustments now in applyClassicLimits()
 
     preloadWeapons(m_status[LeftSide]);
     preloadWeapons(m_status[RightSide]);
@@ -284,7 +284,7 @@ game::vcr::classic::HostAlgorithm::initBattle(const Object& left, const Object& 
     m_time = 0;
 }
 
-// /** Finish up VCR. Take back fighters, explode, compute status. */
+// Finish up VCR. Take back fighters, explode, compute status.
 void
 game::vcr::classic::HostAlgorithm::doneBattle(Object& left, Object& right)
 {
@@ -357,7 +357,7 @@ game::vcr::classic::HostAlgorithm::setCapabilities(uint16_t cap)
     return cap == 0;
 }
 
-// /** Play one cycle. */
+// Play one cycle.
 bool
 game::vcr::classic::HostAlgorithm::playCycle()
 {
@@ -421,9 +421,9 @@ game::vcr::classic::HostAlgorithm::playCycle()
     return true;
 }
 
-// /** Fast forward. In torp/torp battles, nothing happens until ships are
-//     in torpedo range. So start there instead.
-//     \todo the same applies to freighters */
+// Fast forward.
+// In torp/torp battles, nothing happens until ships are in torpedo range. So start there instead.
+// \todo the same applies to freighters
 void
 game::vcr::classic::HostAlgorithm::playFastForward()
 {
@@ -543,7 +543,7 @@ game::vcr::classic::HostAlgorithm::getDistance()
     return (m_status[RightSide].m_objectX - m_status[LeftSide].m_objectX) * int32_t(100);
 }
 
-// /** Save status. The easy mindless way -- just save everything. */
+// Save status. The easy mindless way - just save everything.
 game::vcr::classic::StatusToken*
 game::vcr::classic::HostAlgorithm::createStatusToken()
 {
@@ -551,7 +551,7 @@ game::vcr::classic::HostAlgorithm::createStatusToken()
     return new HostStatusToken(*this);
 }
 
-// /** Restore status. */
+// Restore status.
 void
 game::vcr::classic::HostAlgorithm::restoreStatus(const StatusToken& token)
 {
@@ -585,21 +585,20 @@ game::vcr::classic::HostAlgorithm::getStatistic(Side side)
 
 
 
-// /** Random number between 1 and 20. The infamous VCR random number
-//     generator. Fetches the value from a table.
+/** Random number between 1 and 20.
+    The infamous VCR random number generator.
+    Fetches the value from a table.
 
-//     For those who don't know it yet: VCR.EXE has a table with 119
-//     "random" numbers in the range [0,1000]. During a fight, these are
-//     repeatedly used and scaled to the requested range; the seed field
-//     in a VCR record is the initial index into the array (1 meaning the
-//     first entry). This implementation of the VCR uses three tables
-//     with pre-scaled values to avoid the costly rescale operation.
-//     Although VCR.EXE actually uses five ranges, it turns out that we
-//     can safely omit two of them by re-scaling the tests.
+    VCR.EXE has a table with 119 "random" numbers in the range [0,1000].
+    During a fight, these are repeatedly used and scaled to the requested range;
+    the seed field in a VCR record is the initial index into the array
+    (1 meaning the first entry).
+    This implementation of the VCR uses three tables with pre-scaled values to avoid the costly rescale operation.
+    Although VCR.EXE actually uses five ranges, it turns out that we can safely omit two of them by re-scaling the tests.
 
-//     Our seed runs from 1 to RANDOM_SIZE, although this spelling of the
-//     random number generator also allows setting it to zero (meaning
-//     the same as RANDOM_SIZE). */
+    Our seed runs from 1 to RANDOM_SIZE, although this spelling of the
+    random number generator also allows setting it to zero (meaning
+    the same as RANDOM_SIZE). */
 game::vcr::classic::HostAlgorithm::Random_t
 game::vcr::classic::HostAlgorithm::getRandom_1_20()
 {
@@ -608,7 +607,8 @@ game::vcr::classic::HostAlgorithm::getRandom_1_20()
     return RANDOM_TABLE_1_20[(m_seed = (m_seed >= RANDOM_SIZE ? 1 : m_seed+1))-1];
 }
 
-// /** Random number between 1 and 100. @see psrandom_1_20(). */
+/** Random number between 1 and 100.
+    @see getRandom_1_20(). */
 game::vcr::classic::HostAlgorithm::Random_t
 game::vcr::classic::HostAlgorithm::getRandom_1_100()
 {
@@ -616,7 +616,8 @@ game::vcr::classic::HostAlgorithm::getRandom_1_100()
     return RANDOM_TABLE_1_100[(m_seed = (m_seed >= RANDOM_SIZE ? 1 : m_seed+1))-1];
 }
 
-// /** Random number between 1 and 17. @see psrandom_1_20(). */
+/** Random number between 1 and 17.
+    @see getRandom_1_20(). */
 game::vcr::classic::HostAlgorithm::Random_t
 game::vcr::classic::HostAlgorithm::getRandom_1_17()
 {
@@ -624,10 +625,9 @@ game::vcr::classic::HostAlgorithm::getRandom_1_17()
     return RANDOM_TABLE_1_17[(m_seed = (m_seed >= RANDOM_SIZE ? 1 : m_seed+1))-1];
 }
 
-// /** Compute a/b+plus, using variable rounding.
-//     - nuflag=0: IEEE rounding (nearest or even)
-//     - nuflag=1: arithmetic rounding (nearest or up) */
-// FIXME: rename this one?
+/** Compute a/b+plus, using variable rounding.
+    - nuflag=0: IEEE rounding (nearest or even)
+    - nuflag=1: arithmetic rounding (nearest or up) */
 int32_t
 game::vcr::classic::HostAlgorithm::rdivadd(int32_t a, int32_t b, int32_t plus) const
 {
@@ -640,21 +640,10 @@ game::vcr::classic::HostAlgorithm::rdivadd(int32_t a, int32_t b, int32_t plus) c
     return x;
 }
 
-// /** Check if freighter. \return true iff side (0 or 1) is a freighter. */
-// FIXME: move into Object?
-bool
-game::vcr::classic::HostAlgorithm::isFreighter(const Status& st)
-{
-    // ex VcrPlayerTHost::isFreighter
-    return st.m_obj.getNumBeams() == 0
-        && st.m_obj.getNumLaunchers() == 0
-        && st.m_obj.getNumBays() == 0;
-}
-
-// /** Hit object.
-//     \param side     who is hit
-//     \param damage   `damage' (explosive) power of weapon
-//     \param kill     `kill' (x-ray) power of weapon */
+/** Hit object.
+    \param st       who is hit
+    \param damage   damage (explosive) power of weapon
+    \param kill     kill (x-ray) power of weapon */
 void
 game::vcr::classic::HostAlgorithm::hit(Status& st, int damage, int kill)
 {
@@ -662,7 +651,7 @@ game::vcr::classic::HostAlgorithm::hit(Status& st, int damage, int kill)
     int shld = -rdivadd(80*damage, st.m_obj.getMass() + 1, 1 - st.m_obj.getShield());
     if (shld < 0) {
         st.m_obj.setShield(0);
-        int32_t l = rdivadd(-80L*shld, st.m_obj.getMass() + 1, st.m_obj.getDamage() + 1);
+        int32_t l = rdivadd(-int32_t(80)*shld, st.m_obj.getMass() + 1, st.m_obj.getDamage() + 1);
         if (l > 9999) {
             l = 9999;
         }
@@ -699,8 +688,10 @@ game::vcr::classic::HostAlgorithm::hit(Status& st, int damage, int kill)
     st.m_obj.setShield(shld);
 }
 
-// /** Start a fighter. Attempts to launch a fighter.
-//     \pre Object has fighters. */
+/** Start a fighter.
+    Attempts to launch a fighter.
+    \param st Launching unit
+    \pre Object has fighters. */
 void
 game::vcr::classic::HostAlgorithm::launchFighter(Status& st)
 {
@@ -718,8 +709,9 @@ game::vcr::classic::HostAlgorithm::launchFighter(Status& st)
     }
 }
 
-// /** Start fighter. Start fighter from specified side, if
-//     preconditions fulfilled. */
+/** Start fighter.
+    Start fighter from specified side, if preconditions fulfilled.
+    \param st Launching unit */
 void
 game::vcr::classic::HostAlgorithm::launchFighters(Status& st)
 {
@@ -732,9 +724,11 @@ game::vcr::classic::HostAlgorithm::launchFighters(Status& st)
     }
 }
 
-// /** Fighter fires. The fighter on track i fires at its opponent,
-//     if it's close enough. */
-// void
+/** Fighter fires.
+    The fighter on track i fires at its opponent, if it's close enough.
+    \param st Fighter's unit
+    \param opp Opponent
+    \param i Fighter track */
 void
 game::vcr::classic::HostAlgorithm::fighterShoot(Status& st, Status& opp, int i)
 {
@@ -745,8 +739,9 @@ game::vcr::classic::HostAlgorithm::fighterShoot(Status& st, Status& opp, int i)
     }
 }
 
-// /** Kill fighter. The fighter on track i, specified side, is killed
-//     and removed from the game. */
+/** Kill fighter. The fighter on track i, specified side, is killed and removed from the game.
+    \param st Fighter's unit
+    \param i Fighter track */
 void
 game::vcr::classic::HostAlgorithm::killFighter(Status& st, int i)
 {
@@ -756,11 +751,10 @@ game::vcr::classic::HostAlgorithm::killFighter(Status& st, int i)
     --st.m_numFightersOut;
 }
 
-// /** Fighter stuff.
-
-//     - Fighter movement
-//     - Fighters fire at enemy
-//     - Fighter intercept */
+/** Fighter stuff.
+    - Fighter movement
+    - Fighters fire at enemy
+    - Fighter intercept */
 void
 game::vcr::classic::HostAlgorithm::fighterStuff()
 {
@@ -773,9 +767,9 @@ game::vcr::classic::HostAlgorithm::fighterStuff()
         if (m_status[LeftSide].m_fighterStatus[i] == FighterAttacks) {
             if (m_status[LeftSide].m_fighterX[i] > m_status[RightSide].m_objectX + 10) {
                 m_status[LeftSide].m_fighterStatus[i] = FighterReturns;
-                m_status[LeftSide].m_fighterX[i] -= 4;
+                advance(m_status[LeftSide].m_fighterX[i], -4);
             } else {
-                m_status[LeftSide].m_fighterX[i] += 4;
+                advance(m_status[LeftSide].m_fighterX[i], +4);
                 fighterShoot(m_status[LeftSide], m_status[RightSide], i);
             }
         } else if (m_status[LeftSide].m_fighterStatus[i] == FighterReturns) {
@@ -785,7 +779,7 @@ game::vcr::classic::HostAlgorithm::fighterStuff()
                 m_status[LeftSide].m_fighterStatus[i] = FighterIdle;
                 --m_status[LeftSide].m_numFightersOut;
             } else {
-                m_status[LeftSide].m_fighterX[i] -= 4;
+                advance(m_status[LeftSide].m_fighterX[i], -4);
             }
         }
 
@@ -793,9 +787,9 @@ game::vcr::classic::HostAlgorithm::fighterStuff()
         if (m_status[RightSide].m_fighterStatus[i] == FighterAttacks) {
             if (m_status[RightSide].m_fighterX[i] < m_status[LeftSide].m_objectX - 10) {
                 m_status[RightSide].m_fighterStatus[i] = FighterReturns;
-                m_status[RightSide].m_fighterX[i] += 4;
+                advance(m_status[RightSide].m_fighterX[i], +4);
             } else {
-                m_status[RightSide].m_fighterX[i] -= 4;
+                advance(m_status[RightSide].m_fighterX[i], -4);
                 fighterShoot(m_status[RightSide], m_status[LeftSide], i);
             }
         } else if (m_status[RightSide].m_fighterStatus[i] == FighterReturns) {
@@ -805,7 +799,7 @@ game::vcr::classic::HostAlgorithm::fighterStuff()
                 m_status[RightSide].m_fighterStatus[i] = FighterIdle;
                 --m_status[RightSide].m_numFightersOut;
             } else {
-                m_status[RightSide].m_fighterX[i] += 4;
+                advance(m_status[RightSide].m_fighterX[i], +4);
             }
         }
     }
@@ -843,11 +837,9 @@ game::vcr::classic::HostAlgorithm::fighterStuff()
     }
 }
 
-// /** \name Beam Weapons. */
-// //@{
-
-// /** Recharge beams of one side. Beams recharge randomly up to
-//     level 100. */
+/** Recharge beams of one side.
+    Beams recharge randomly up to level 100.
+    \param st Unit */
 inline void
 game::vcr::classic::HostAlgorithm::rechargeBeams(Status& st)
 {
@@ -856,14 +848,16 @@ game::vcr::classic::HostAlgorithm::rechargeBeams(Status& st)
     for (int i = 0; i < mx; ++i) {
         register int j = st.m_beamStatus[i];
         if (getRandom_1_100() > 50 && j < 100) {
-            st.m_beamStatus[i] = j + st.m_obj.getBeamChargeRate();
+            st.m_beamStatus[i] = static_cast<int8_t>(j + st.m_obj.getBeamChargeRate());
             visualizer().updateBeam(*this, st.m_side, i);
         }
     }
 }
 
-// /** Fire beam. Hits the enemy with a beam of object from, beam number
-//     which. */
+/** Fire beam. Hits the enemy with a beam of object from, beam number which.
+    \param st Firing unit
+    \param opp Opponent
+    \param which Beam number */
 inline void
 game::vcr::classic::HostAlgorithm::fireBeam(Status& st, Status& opp, int which)
 {
@@ -879,8 +873,10 @@ game::vcr::classic::HostAlgorithm::fireBeam(Status& st, Status& opp, int which)
     visualizer().fireBeam(*this, st.m_side, -1 - which, -1, 1, da, ki);
 }
 
-// /** Fire beams from specified object. Fires all beams that can
-//     fire. */
+/** Fire beams from specified object.
+    Fires all beams that can fire.
+    \param st Firing unit
+    \param opp Opponent */
 void
 game::vcr::classic::HostAlgorithm::fireBeams(Status& st, Status& opp)
 {
@@ -893,8 +889,11 @@ game::vcr::classic::HostAlgorithm::fireBeams(Status& st, Status& opp)
     }
 }
 
-// /** Fire at fighters. Fires the specified beam at an enemy fighter,
-//     if possible. */
+/** Fire at fighters.
+    Fires the specified beam at an enemy fighter, if possible.
+    \param st Firing unit
+    \param opp Opponent
+    \param beam Beam number */
 void
 game::vcr::classic::HostAlgorithm::fireAtFighter(Status& st, Status& opp, int beam)
 {
@@ -920,15 +919,20 @@ game::vcr::classic::HostAlgorithm::fireAtFighter(Status& st, Status& opp, int be
     }
 }
 
-// /** Fire beams at fighter. Fire all beams that can fire at enemy
-//     fighters. */
+/** Fire beams at fighter.
+    Fire all beams that can fire at enemy fighters.
+    \param st Firing unit
+    \param opp Opponent */
 void
 game::vcr::classic::HostAlgorithm::fireBeamsAtFighter(Status& st, Status& opp)
 {
     // ex VcrPlayerTHost::fireBeamsAtFighter
     if (!opp.m_numFightersOut) {
         // enemy has no fighters, so just advance the seed; saves some 2..3% run time
-        m_seed = (m_seed + st.m_obj.getNumBeams()) % RANDOM_SIZE;
+        m_seed += st.m_obj.getNumBeams();
+        if (m_seed >= RANDOM_SIZE) {
+            m_seed -= RANDOM_SIZE;
+        }
     } else {
         for (int i = 0, n = st.m_obj.getNumBeams(); i < n; ++i) {
             int pick = getRandom_1_20();
@@ -939,8 +943,11 @@ game::vcr::classic::HostAlgorithm::fireBeamsAtFighter(Status& st, Status& opp)
     }
 }
 
-// /** Fire torpedo. Launches one torpedo from the specified
-//     object. */
+/** Fire torpedo.
+    Launches one torpedo from the specified object.
+    \param st Firing unit
+    \param opp Opponent
+    \param launcher Launcher number */
 inline void
 game::vcr::classic::HostAlgorithm::fireTorp(Status& st, Status& opp, int launcher)
 {
@@ -955,8 +962,10 @@ game::vcr::classic::HostAlgorithm::fireTorp(Status& st, Status& opp, int launche
     }
 }
 
-// /** Fire torpedo. Fires all ready torpedoes from the specified
-//     object at the enemy. */
+/** Fire torpedo.
+    Fires all ready torpedoes from the specified object at the enemy.
+    \param st Firing unit
+    \param opp Opponent */
 void
 game::vcr::classic::HostAlgorithm::fireTorpedoes(Status& st, Status& opp)
 {
@@ -970,14 +979,15 @@ game::vcr::classic::HostAlgorithm::fireTorpedoes(Status& st, Status& opp)
                 visualizer().updateLauncher(*this, st.m_side, i);
                 fireTorp(st, opp, i);
             }
-            st.m_launcherStatus[i] += st.m_obj.getTorpChargeRate();
+            advance(st.m_launcherStatus[i], +st.m_obj.getTorpChargeRate());
             visualizer().updateLauncher(*this, st.m_side, i);
         }
     }
 }
 
-// /** Charge weapons. If the specified object has full shields,
-//     it also starts with fully-charged weapons. */
+/** Charge weapons.
+    If the specified object has full shields, it also starts with fully-charged weapons.
+    \param st Unit */
 void
 game::vcr::classic::HostAlgorithm::preloadWeapons(Status& st)
 {
@@ -990,10 +1000,11 @@ game::vcr::classic::HostAlgorithm::preloadWeapons(Status& st)
     }
 }
 
-// /** Check one side of VCR. Fixes out-of-range values, and
-//     returns true iff there was such a fix needed. */
+/** Check one side of VCR.
+    Fixes out-of-range values, and returns true iff there was such a fix needed.
+    \param obj Unit */
 bool
-game::vcr::classic::HostAlgorithm::checkSide(Object& obj)
+game::vcr::classic::HostAlgorithm::checkSide(Object& obj) const
 {
     // ex VcrPlayerTHost::checkVcrSide
     bool err = false;

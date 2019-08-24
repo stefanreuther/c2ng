@@ -64,21 +64,21 @@ game::Element::getName(Type t, afl::string::Translator& tx, const game::spec::Sh
     // ex getCargoName
     switch (t) {
      case Neutronium:
-        return tx.translateString("Neutronium");
+        return tx("Neutronium");
      case Tritanium:
-        return tx.translateString("Tritanium");
+        return tx("Tritanium");
      case Duranium:
-        return tx.translateString("Duranium");
+        return tx("Duranium");
      case Molybdenum:
-        return tx.translateString("Molybdenum");
+        return tx("Molybdenum");
      case Fighters:
-        return tx.translateString("Fighters");
+        return tx("Fighters");
      case Colonists:
-        return tx.translateString("Colonists");
+        return tx("Colonists");
      case Supplies:
-        return tx.translateString("Supplies");
+        return tx("Supplies");
      case Money:
-        return tx.translateString("Money");
+        return tx("Money");
      default:
         int torpedoType;
         if (isTorpedoType(t, torpedoType)) {

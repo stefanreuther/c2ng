@@ -17,4 +17,10 @@ class TestGameAllianceLevel : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestGameAllianceOffer : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testIsOffer();
+};
+
 #endif

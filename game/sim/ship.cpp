@@ -384,6 +384,8 @@ game::sim::Ship::hasImpliedAbility(Ability which, const game::spec::ShipList& sh
      case DoubleTorpedoChargeAbility:
      case ElusiveAbility:
      case SquadronAbility:
+     case ShieldGeneratorAbility:
+     case CloakedBaysAbility:
         return false;
     }
     return false;

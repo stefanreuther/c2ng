@@ -50,6 +50,18 @@ namespace server { namespace mailout {
             \return database node */
         afl::net::redis::Subtree mailRoot();
 
+        /** Access Message Unique Id mapping.
+            \return hash of unique Id to message */
+        afl::net::redis::HashKey uniqueIdMap();
+
+        /** Access set of messages being prepared (partial messages).
+            \return database node */
+        afl::net::redis::IntegerSetKey preparingMessages();
+
+        /** Access set of messages being sent (complete messages).
+            \return database node */
+        afl::net::redis::IntegerSetKey sendingMessages();
+
         /** Access configuration.
             \return configuration. */
         const Configuration& config() const;
@@ -90,6 +102,9 @@ namespace server { namespace mailout {
             \return true if confirmation was accepted, false if key was invalid */
         bool confirmMail(String_t mail, String_t key, String_t info);
 
+        /** Clean up expired Ids. */
+        void cleanupUniqueIdMap();
+
         /** Get user's email status.
             \param user User Id
             \return status */
@@ -127,6 +142,12 @@ inline server::mailout::Transmitter*
 server::mailout::Root::getTransmitter()
 {
     return m_transmitter;
+}
+
+inline const server::mailout::Configuration&
+server::mailout::Root::config() const
+{
+    return m_config;
 }
 
 #endif

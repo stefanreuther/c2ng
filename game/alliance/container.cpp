@@ -81,7 +81,6 @@ void
 game::alliance::Container::copyFrom(const Container& other)
 {
     // ex GAlliances::copyFrom
-    // FIXME: const?
     for (Index_t i = 0; i < other.m_levels.size(); ++i) {
         const Index_t index = find(other.m_levels[i].getId());
         if (index != nil) {

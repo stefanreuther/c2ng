@@ -54,7 +54,7 @@ namespace {
 
         // Make visible
         sh.internalCheck();
-        sh.combinedCheck1(h.univ, 82);
+        sh.combinedCheck1(h.univ, game::PlayerSet_t(owner), 82);
         sh.setPlayability(game::map::Object::Playable);
     }
 }

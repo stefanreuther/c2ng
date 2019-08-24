@@ -23,7 +23,7 @@ game::interface::FriendlyCodeFunction::get(interpreter::Arguments& args)
        or
        | With FCode(fc) Do ...
 
-       @see int:index:group:fcproperty|Friendly Code Properties
+       @see int:index:group:friendlycodeproperty|Friendly Code Properties
        @since PCC2 2.40.1 */
     args.checkArgumentCount(1);
 

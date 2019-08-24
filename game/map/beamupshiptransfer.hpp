@@ -42,8 +42,6 @@ namespace game { namespace map {
         const game::config::HostConfiguration& m_config;
 
         util::Vector<int32_t,Element::Type> m_amount;
-
-        const game::spec::Hull* getHull() const;
     };
 
     void parseBeamUpCommand(util::Vector<int32_t,Element::Type>& out, Turn& turn, const Ship& ship, int factor);

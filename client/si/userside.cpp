@@ -262,10 +262,10 @@ client::si::UserSide::executeTaskWait(uint32_t id, std::auto_ptr<ScriptTask> tas
 
 // Handle successful wait.
 void
-client::si::UserSide::handleWait(uint32_t id, interpreter::Process::State state, interpreter::Error error)
+client::si::UserSide::handleWait(uint32_t id)
 {
     for (size_t i = m_controls.size(); i > 0; --i) {
-        m_controls[i-1]->handleWait(id, state, error);
+        m_controls[i-1]->handleWait(id);
     }
 }
 

@@ -237,3 +237,143 @@ TestServerUserUserManagement::testLogin()
     }
 }
 
+/** Test profile limitations. */
+void
+TestServerUserUserManagement::testProfileLimit()
+{
+    // Environment
+    server::user::Configuration fig;
+    fig.profileMaxValueSize = 5;
+    server::common::NumericalIdGenerator gen;
+    server::user::ClassicEncrypter enc("foo");
+    afl::net::redis::InternalDatabase db;
+    server::user::Root root(db, gen, enc, fig);
+
+    // Testee
+    server::user::UserManagement testee(root);
+
+    // Create a user. Must succeed.
+    String_t id;
+    String_t config[] = { "realname", "John",
+                          "createua", "wget/1.16" };
+    TS_ASSERT_THROWS_NOTHING(id = testee.add("joe_luser", "secret", config));
+    TS_ASSERT_DIFFERS(id, "");
+
+    // Verify created profile
+    std::auto_ptr<afl::data::Value> p;
+    TS_ASSERT_THROWS_NOTHING(p.reset(testee.getProfileRaw(id, "realname")));
+    TS_ASSERT_EQUALS(Access(p).toString(), "John");
+    TS_ASSERT_THROWS_NOTHING(p.reset(testee.getProfileRaw(id, "createua")));
+    TS_ASSERT_EQUALS(Access(p).toString(), "wget/");  // truncated
+    TS_ASSERT_THROWS_NOTHING(p.reset(testee.getProfileRaw(id, "screenname")));
+    TS_ASSERT_EQUALS(Access(p).toString(), "joe_l");  // truncated
+
+    // Update profile
+    String_t update[] = { "infotown", "York",
+                          "infooccupation", "Whatever" };
+    TS_ASSERT_THROWS_NOTHING(testee.setProfile(id, update));
+    TS_ASSERT_THROWS_NOTHING(p.reset(testee.getProfileRaw(id, "infotown")));
+    TS_ASSERT_EQUALS(Access(p).toString(), "York");
+    TS_ASSERT_THROWS_NOTHING(p.reset(testee.getProfileRaw(id, "infooccupation")));
+    TS_ASSERT_EQUALS(Access(p).toString(), "Whate");  // truncated
+}
+
+/** Test profile limit turned off.
+    Setting the limit to 0 means no limit. */
+void
+TestServerUserUserManagement::testProfileNoLimit()
+{
+    // Environment
+    server::user::Configuration fig;
+    fig.profileMaxValueSize = 0;
+    server::common::NumericalIdGenerator gen;
+    server::user::ClassicEncrypter enc("foo");
+    afl::net::redis::InternalDatabase db;
+    server::user::Root root(db, gen, enc, fig);
+
+    // Testee
+    server::user::UserManagement testee(root);
+
+    // Create a user. Must succeed.
+    String_t id;
+    String_t config[] = { "createua", "wget/1.16" };
+    TS_ASSERT_THROWS_NOTHING(id = testee.add("joe_luser", "secret", config));
+    TS_ASSERT_DIFFERS(id, "");
+
+    // Verify created profile
+    std::auto_ptr<afl::data::Value> p;
+    TS_ASSERT_THROWS_NOTHING(p.reset(testee.getProfileRaw(id, "createua")));
+    TS_ASSERT_EQUALS(Access(p).toString(), "wget/1.16");  // not truncated
+}
+
+/** Test profile limit at defaults. */
+void
+TestServerUserUserManagement::testProfileDefaultLimit()
+{
+    // Environment
+    server::common::NumericalIdGenerator gen;
+    server::user::ClassicEncrypter enc("foo");
+    afl::net::redis::InternalDatabase db;
+    server::user::Root root(db, gen, enc, server::user::Configuration());
+
+    // Testee
+    server::user::UserManagement testee(root);
+
+    // Create a user. Must succeed.
+    String_t id;
+    String_t config[] = { "infotown", String_t(20000, 'X') };
+    TS_ASSERT_THROWS_NOTHING(id = testee.add("joe_luser", "secret", config));
+    TS_ASSERT_DIFFERS(id, "");
+
+    // Verify created profile
+    std::auto_ptr<afl::data::Value> p;
+    TS_ASSERT_THROWS_NOTHING(p.reset(testee.getProfileRaw(id, "infotown")));
+    TS_ASSERT_EQUALS(Access(p).toString().substr(0, 1000), String_t(1000, 'X'));  // preserve sensible start
+}
+
+void
+TestServerUserUserManagement::testRemove()
+{
+    // Environment
+    server::common::NumericalIdGenerator gen;
+    server::user::ClassicEncrypter enc("foo");
+    afl::net::redis::InternalDatabase db;
+    server::user::Root root(db, gen, enc, server::user::Configuration());
+
+    // Testee
+    server::user::UserManagement testee(root);
+
+    // Create a user. Must succeed.
+    String_t id;
+    String_t config[] = { "infotown", "Arrakis", "screenname", "Jonathan" };
+    TS_ASSERT_THROWS_NOTHING(id = testee.add("joe", "secret", config));
+    TS_ASSERT_DIFFERS(id, "");
+
+    // Verify profile content
+    TS_ASSERT_EQUALS(testee.getUserIdByName("joe"), id);
+    TS_ASSERT_EQUALS(testee.getNameByUserId(id), "joe");
+    TS_ASSERT_EQUALS(testee.login("joe", "secret"), id);
+    std::auto_ptr<afl::data::Value> p;
+    TS_ASSERT_THROWS_NOTHING(p.reset(testee.getProfileRaw(id, "screenname")));
+    TS_ASSERT_EQUALS(Access(p).toString(), "Jonathan");
+
+    // Remove the user
+    TS_ASSERT_THROWS_NOTHING(testee.remove(id));
+    TS_ASSERT_THROWS(testee.getUserIdByName("joe"), std::exception);
+    TS_ASSERT_EQUALS(testee.getNameByUserId(id), "");
+    TS_ASSERT_THROWS(testee.login("joe", "secret"), std::exception);
+    TS_ASSERT_THROWS_NOTHING(p.reset(testee.getProfileRaw(id, "screenname")));
+    TS_ASSERT_EQUALS(Access(p).toString(), "(joe)");
+    TS_ASSERT_THROWS_NOTHING(p.reset(testee.getProfileRaw(id, "infotown")));
+    TS_ASSERT_EQUALS(Access(p).toString(), "");
+
+    // Create another joe. Must succeed and create a different Id.
+    String_t id2;
+    String_t config2[] = { "infotown", "Corrino", "screenname", "Joseph" };
+    TS_ASSERT_THROWS_NOTHING(id2 = testee.add("joe", "secret", config2));
+    TS_ASSERT_DIFFERS(id2, "");
+    TS_ASSERT_DIFFERS(id2, id);
+    TS_ASSERT_EQUALS(testee.getUserIdByName("joe"), id2);
+    TS_ASSERT_EQUALS(testee.getNameByUserId(id2), "joe");
+}
+

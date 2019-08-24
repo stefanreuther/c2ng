@@ -145,9 +145,10 @@ namespace {
     }
 }
 
-game::db::Loader::Loader(afl::charset::Charset& cs, interpreter::World& world)
+game::db::Loader::Loader(afl::charset::Charset& cs, interpreter::World& world, afl::string::Translator& tx)
     : m_charset(cs),
-      m_world(world)
+      m_world(world),
+      m_translator(tx)
 { }
 
 // /** Load starchart database.
@@ -388,7 +389,7 @@ game::db::Loader::save(afl::io::Stream& out, Turn& turn, Game& game, const game:
         computeAtomMap(map, univ.drawings(), m_world.atomTable());
         if (!map.isEmpty()) {
             startRecord(out, dt::rPaintingTags, rs);
-            map.save(out, m_charset, m_world.atomTable());
+            map.save(out, m_charset, m_world.atomTable(), log(), m_translator);
             endRecord(out, rs);
         }
         startRecord(out, dt::rPainting, rs);

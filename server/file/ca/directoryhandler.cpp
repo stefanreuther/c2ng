@@ -243,7 +243,7 @@ server::file::ca::DirectoryHandler::createFile(String_t name, afl::base::ConstBy
 
     Info result(name, IsFile);
     result.contentId = id.toHex();
-    result.size = content.size();
+    result.size = convertSize(content.size());
     return result;
 }
 
@@ -298,7 +298,7 @@ server::file::ca::DirectoryHandler::readContent(Callback& callback)
     while (entry.parse(bytes)) {
         Info info(entry.getName(), entry.getType());
         if (entry.getType() == IsFile) {
-            info.size = m_content->store().getObjectSize(entry.getId(), ObjectStore::DataObject);
+            info.size = convertSize(m_content->store().getObjectSize(entry.getId(), ObjectStore::DataObject));
         }
         if (entry.getType() != IsDirectory) {
             info.contentId = entry.getId().toHex();

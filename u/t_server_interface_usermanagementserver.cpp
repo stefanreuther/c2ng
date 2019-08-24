@@ -7,10 +7,10 @@
 #include "server/interface/usermanagementserver.hpp"
 
 #include "t_server_interface.hpp"
-#include "server/interface/usermanagement.hpp"
-#include "afl/test/callreceiver.hpp"
-#include "afl/string/format.hpp"
 #include "afl/data/access.hpp"
+#include "afl/string/format.hpp"
+#include "afl/test/callreceiver.hpp"
+#include "server/interface/usermanagement.hpp"
 #include "server/interface/usermanagementclient.hpp"
 
 using afl::string::Format;
@@ -34,6 +34,10 @@ namespace {
                 check += ")";
                 checkCall(check);
                 return consumeReturnValue<String_t>();
+            }
+        virtual void remove(String_t userId)
+            {
+                checkCall(Format("remove(%s)", userId));
             }
         virtual String_t login(String_t userName, String_t password)
             {
@@ -116,6 +120,10 @@ TestServerInterfaceUserManagementServer::testIt()
     mock.expectCall("add(uu,pp)");
     mock.provideReturnValue(String_t("id2"));
     TS_ASSERT_EQUALS(testee.callString(Segment().pushBackString("ADDUSER").pushBackString("uu").pushBackString("pp")), "id2");
+
+    // remove
+    mock.expectCall("remove(ii)");
+    TS_ASSERT_THROWS_NOTHING(testee.callVoid(Segment().pushBackString("DELUSER").pushBackString("ii")));
 
     // login
     mock.expectCall("login(nn,gg)");
@@ -209,6 +217,7 @@ TestServerInterfaceUserManagementServer::testErrors()
     TS_ASSERT_THROWS(testee.callVoid(Segment().pushBackString("PASSWD")), std::exception);
     TS_ASSERT_THROWS(testee.callVoid(Segment().pushBackString("PASSWD").pushBackString("a")), std::exception);
     TS_ASSERT_THROWS(testee.callVoid(Segment().pushBackString("PASSWD").pushBackString("a").pushBackString("a").pushBackString("a")), std::exception);
+    TS_ASSERT_THROWS(testee.callVoid(Segment().pushBackString("DELUSER")), std::exception);
 
     // Not detected: add() or setProfile() with an odd number of k,v arguments
 }
@@ -235,6 +244,10 @@ TestServerInterfaceUserManagementServer::testRoundtrip()
         mock.provideReturnValue(String_t("id2"));
         TS_ASSERT_EQUALS(level4.add("uu", "pp", afl::base::Nothing), "id2");
     }
+
+    // remove
+    mock.expectCall("remove(jj)");
+    TS_ASSERT_THROWS_NOTHING(level4.remove("jj"));
 
     // login
     mock.expectCall("login(nn,gg)");

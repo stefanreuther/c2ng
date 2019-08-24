@@ -3,11 +3,13 @@
   */
 
 #include "game/interface/ufocontext.hpp"
+#include "game/interface/ufomethod.hpp"
+#include "game/interface/ufoproperty.hpp"
 #include "interpreter/error.hpp"
 #include "interpreter/nametable.hpp"
-#include "interpreter/typehint.hpp"
-#include "game/interface/ufoproperty.hpp"
+#include "interpreter/procedurevalue.hpp"
 #include "interpreter/propertyacceptor.hpp"
+#include "interpreter/typehint.hpp"
 
 namespace {
 
@@ -26,7 +28,7 @@ namespace {
         { "LASTSCAN",       game::interface::iupLastScan,      UfoPropertyDomain, interpreter::thInt },
         { "LOC.X",          game::interface::iupLocX,          UfoPropertyDomain, interpreter::thInt },
         { "LOC.Y",          game::interface::iupLocY,          UfoPropertyDomain, interpreter::thInt },
-        { "MARK",           0,                                 UfoMethodDomain,   interpreter::thProcedure },
+        { "MARK",           game::interface::iumMark,          UfoMethodDomain,   interpreter::thProcedure },
         { "MARKED",         game::interface::iupMarked,        UfoPropertyDomain, interpreter::thBool },
         { "MOVE.DX",        game::interface::iupMoveDX,        UfoPropertyDomain, interpreter::thInt },
         { "MOVE.DY",        game::interface::iupMoveDY,        UfoPropertyDomain, interpreter::thInt },
@@ -35,17 +37,37 @@ namespace {
         { "SPEED",          game::interface::iupSpeedName,     UfoPropertyDomain, interpreter::thString },
         { "SPEED$",         game::interface::iupSpeedInt,      UfoPropertyDomain, interpreter::thInt },
         { "TYPE",           game::interface::iupType,          UfoPropertyDomain, interpreter::thInt },
-        { "UNMARK",         1,                                 UfoMethodDomain,   interpreter::thProcedure },
+        { "UNMARK",         game::interface::iumUnmark,        UfoMethodDomain,   interpreter::thProcedure },
         { "VISIBLE.PLANET", game::interface::iupVisiblePlanet, UfoPropertyDomain, interpreter::thInt },
         { "VISIBLE.SHIP",   game::interface::iupVisibleShip,   UfoPropertyDomain, interpreter::thInt },
     };
 
+    class UfoMethodValue : public interpreter::ProcedureValue {
+     public:
+        UfoMethodValue(game::Id_t slot,
+                       game::interface::UfoMethod ism,
+                       afl::base::Ref<game::Turn> turn)
+            : m_slot(slot),
+              m_method(ism),
+              m_turn(turn)
+            { }
 
-// static const IntObjectProcedureValue::call_t ufo_methods[] = {
-//     IFObjMark,                  // 0
-//     IFObjUnmark,                // 1
-// };
+        // ProcedureValue:
+        virtual void call(interpreter::Process& /*proc*/, interpreter::Arguments& a)
+            {
+                if (game::map::Ufo* ufo = m_turn->universe().ufos().getUfoByIndex(m_slot)) {
+                    game::interface::callUfoMethod(*ufo, m_method, a);
+                }
+            }
 
+        virtual UfoMethodValue* clone() const
+            { return new UfoMethodValue(m_slot, m_method, m_turn); }
+
+     private:
+        const game::Id_t m_slot;
+        const game::interface::UfoMethod m_method;
+        const afl::base::Ref<game::Turn> m_turn;
+    };
 }
 
 
@@ -93,9 +115,7 @@ game::interface::UfoContext::get(PropertyIndex_t index)
          case UfoPropertyDomain:
             return getUfoProperty(*ufo, UfoProperty(UFO_MAPPING[index].index), m_session.translator(), m_session.interface());
          case UfoMethodDomain:
-            // FIXME
-            // return new IntObjectProcedureValue(*it, getDisplayedTurn().getCurrentUniverse(), ufo_methods[ufo_mapping[index].index]);
-            return 0;
+            return new UfoMethodValue(m_slot, UfoMethod(UFO_MAPPING[index].index), m_turn);
         }
         return 0;
     } else {

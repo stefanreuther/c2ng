@@ -7,6 +7,10 @@
 #include "game/config/hostconfiguration.hpp"
 #include "game/spec/missionlist.hpp"
 #include "game/spec/mission.hpp"
+#include "game/spec/hull.hpp"
+#include "game/spec/shiplist.hpp"
+#include "game/cargocontainer.hpp"
+#include "game/element.hpp"
 
 namespace game { namespace map {
 
@@ -17,6 +21,9 @@ namespace game { namespace map {
     const game::spec::Mission* getShipMissionByNumber(int nr, const Ship& ship, const game::config::HostConfiguration& config, const game::spec::MissionList& missions);
 
     void setInterceptWaypoint(Universe& univ, Ship& sh);
+
+    const game::spec::Hull* getShipHull(const Ship& ship, const game::spec::ShipList& shipList);
+    int32_t getShipTransferMaxCargo(const CargoContainer& cont, Element::Type type, const Ship& ship, const game::spec::ShipList& shipList);
 
 } }
 

@@ -35,6 +35,7 @@
 #include "ui/spacer.hpp"
 #include "ui/widgets/panel.hpp"
 #include "util/slaveobject.hpp"
+#include "game/interface/taskeditorcontext.hpp"
 
 using interpreter::makeBooleanValue;
 using interpreter::makeIntegerValue;
@@ -63,20 +64,45 @@ namespace {
 const client::screens::ControlScreen::Definition client::screens::ControlScreen::ShipScreen = {
     client::si::OutputState::ShipScreen,
     ScreenHistory::Ship,
+    interpreter::Process::pkDefault,
     "SHIPSCREEN",
     "SHIPSCREEN",
 };
 const client::screens::ControlScreen::Definition client::screens::ControlScreen::PlanetScreen = {
     client::si::OutputState::PlanetScreen,
     ScreenHistory::Planet,
+    interpreter::Process::pkDefault,
     "PLANETSCREEN",
     "PLANETSCREEN",
 };
 const client::screens::ControlScreen::Definition client::screens::ControlScreen::BaseScreen = {
     client::si::OutputState::BaseScreen,
     ScreenHistory::Starbase,
+    interpreter::Process::pkDefault,
     "BASESCREEN",
     "BASESCREEN",
+};
+
+const client::screens::ControlScreen::Definition client::screens::ControlScreen::ShipTaskScreen = {
+    client::si::OutputState::ShipTaskScreen,
+    ScreenHistory::ShipTask,
+    interpreter::Process::pkShipTask,
+    "SHIPTASKSCREEN",
+    "SHIPTASKSCREEN",
+};
+const client::screens::ControlScreen::Definition client::screens::ControlScreen::PlanetTaskScreen = {
+    client::si::OutputState::PlanetTaskScreen,
+    ScreenHistory::PlanetTask,
+    interpreter::Process::pkPlanetTask,
+    "PLANETTASKSCREEN",
+    "PLANETTASKSCREEN",
+};
+const client::screens::ControlScreen::Definition client::screens::ControlScreen::BaseTaskScreen = {
+    client::si::OutputState::BaseTaskScreen,
+    ScreenHistory::StarbaseTask,
+    interpreter::Process::pkBaseTask,
+    "BASETASKSCREEN",
+    "BASETASKSCREEN",
 };
 
 
@@ -230,6 +256,16 @@ client::screens::ControlScreen::Proprietor::get(game::interface::UserInterfacePr
         result.reset(makeIntegerValue(m_state->screenNumber));
         return true;
 
+     case game::interface::iuiAutoTask:
+        // UI.AutoTask
+        result.reset();
+        if (m_pSession != 0) {
+            if (game::map::Object* obj = m_state->getObject(*m_pSession)) {
+                result.reset(game::interface::TaskEditorContext::create(*m_pSession, m_state->taskType, obj->getId()));
+            }
+        }
+        return true;
+
      case game::interface::iuiIterator:
         // UI.Iterator: created from state
         if (m_pSession != 0 && m_pSession->getGame().get() != 0) {
@@ -339,7 +375,7 @@ client::screens::ControlScreen::ControlScreen(Session& session, int nr, const De
       m_session(session),
       m_number(nr),
       m_definition(def),
-      m_state(*new State(nr, def.target, def.keymapName)),
+      m_state(*new State(nr, def.target, def.taskType, def.keymapName)),
       m_deleter(),
       m_loop(m_session.root()),
       m_outputState(),
@@ -415,6 +451,9 @@ client::screens::ControlScreen::handleStateChange(client::si::UserSide& us, clie
      case OutputState::ShipScreen:
      case OutputState::PlanetScreen:
      case OutputState::BaseScreen:
+     case OutputState::ShipTaskScreen:
+     case OutputState::PlanetTaskScreen:
+     case OutputState::BaseTaskScreen:
         if (target == m_state->ownTarget) {
             us.continueProcess(link);
         } else {

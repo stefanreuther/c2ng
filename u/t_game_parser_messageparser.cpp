@@ -6,16 +6,16 @@
 #include "game/parser/messageparser.hpp"
 
 #include "t_game_parser.hpp"
-#include "afl/string/nulltranslator.hpp"
-#include "afl/sys/log.hpp"
 #include "afl/io/constmemorystream.hpp"
-#include "game/parser/datainterface.hpp"
-#include "util/stringparser.hpp"
-#include "game/parser/messageinformation.hpp"
-#include "afl/string/string.hpp"
-#include "game/playerlist.hpp"
-#include "game/player.hpp"
 #include "afl/string/format.hpp"
+#include "afl/string/nulltranslator.hpp"
+#include "afl/string/string.hpp"
+#include "afl/sys/log.hpp"
+#include "game/parser/datainterface.hpp"
+#include "game/parser/messageinformation.hpp"
+#include "game/player.hpp"
+#include "game/playerlist.hpp"
+#include "util/stringparser.hpp"
 
 namespace {
     // FIXME: duplicated/extended from _messagetemplate.cpp
@@ -31,7 +31,7 @@ namespace {
                 bool ok = false;
                 switch (which) {
                  case ShortRaceName:     ok = sp.parseString("s"); break;
-                 case FullRaceName:      ok = sp.parseString("f"); break;
+                 case LongRaceName:      ok = sp.parseString("f"); break;
                  case AdjectiveRaceName: ok = sp.parseString("a"); break;
                  case HullName:          ok = sp.parseString("h"); break;
                 }
@@ -43,7 +43,7 @@ namespace {
                 }
             }
         virtual String_t expandRaceNames(String_t name) const
-            { return m_playerList.expandNames(name); }
+            { return m_playerList.expandNames(name, true); }
      private:
         void setupPlayerList()
             {
@@ -547,6 +547,92 @@ TestGameParserMessageParser::testDelta()
         TS_ASSERT_EQUALS(info[0]->getObjectType(), game::parser::MessageInformation::Ship);
         TS_ASSERT_EQUALS(info[0]->getObjectId(), 200);
         TS_ASSERT_EQUALS(getValue<game::parser::MessageIntegerValue_t>(*info[0], game::parser::mi_PlanetTotalN, "TotalN"), 530);
+    }
+}
+
+/** Test tim-alliance handling. */
+void
+TestGameParserMessageParser::testTimAllies()
+{
+    using game::alliance::Offer;
+
+    const char* FILE =
+        "alliance,Classic allies\n"
+        "  kind   = c\n"
+        "  check  = Priority Points\n"
+        "  check  = Build Queue\n"
+        "  array  = +1,$ $\n"
+        "  assign = Flags, _\n"
+        "  values = thost.ally\n"
+        "  assign = Name\n"
+        "alliance,Strong allies\n"
+        "  kind   = g\n"
+        "  check  = FF allies\n"
+        "  array  = +1,Race: $ $ / $\n"
+        "  assign = Index, ToFF, FromFF\n"
+        "  values = thost.ff\n"
+        "  assign = Name\n";
+    afl::string::NullTranslator tx;
+    afl::sys::Log log;
+    afl::io::ConstMemoryStream ms(afl::string::toBytes(FILE));
+
+    // Load
+    game::parser::MessageParser testee;
+    TS_ASSERT_THROWS_NOTHING(testee.load(ms, tx, log));
+    TS_ASSERT_EQUALS(testee.getNumTemplates(), 2U);
+    MockDataInterface ifc;
+
+    // Parse message
+    {
+        afl::container::PtrVector<game::parser::MessageInformation> info;
+        TS_ASSERT_THROWS_NOTHING(testee.parseMessage("(-c0000)<<< Priority Points >>>\n"
+                                                     "(For Ship Build Queue)\n"
+                                                     "a1   :          16\n"
+                                                     "a2              15\n"
+                                                     "a3  + :         20\n"
+                                                     "bogus4   :      3\n"
+                                                     "a5         :    20\n"
+                                                     "a6       :      2\n"
+                                                     "a7            : 7\n"
+                                                     "a8           !  19\n"
+                                                     "a9     +! :     15\n"
+                                                     "a10   +! :      5\n"
+                                                     "a11        :    13\n"
+                                                     "HOST Version 3.22.020\n"
+                                                     "Compiled: Nov 26, 1997",
+                                                     ifc, 30, info, tx, log));
+        TS_ASSERT_EQUALS(info.size(), 1U);
+        TS_ASSERT(info[0] != 0);
+        TS_ASSERT_EQUALS(info[0]->getObjectType(), game::parser::MessageInformation::Alliance);
+        TS_ASSERT_EQUALS(info[0]->getObjectId(), 0);
+
+        Offer o = getValue<game::parser::MessageAllianceValue_t>(*info[0], "thost.ally", "thost.ally");
+        TS_ASSERT_EQUALS(o.oldOffer.get(3), Offer::Yes);
+        TS_ASSERT_EQUALS(o.oldOffer.get(7), Offer::No);
+        TS_ASSERT_EQUALS(o.oldOffer.get(9), Offer::Yes);
+        TS_ASSERT_EQUALS(o.theirOffer.get(3), Offer::No);
+        TS_ASSERT_EQUALS(o.theirOffer.get(7), Offer::No);
+        TS_ASSERT_EQUALS(o.theirOffer.get(9), Offer::Yes);
+    }
+    {
+        afl::container::PtrVector<game::parser::MessageInformation> info;
+        TS_ASSERT_THROWS_NOTHING(testee.parseMessage("(-g0000)FF / ff Allies:\n"
+                                                     "Race:  4 YES / YES\n"
+                                                     "Race:  7 YES / yes\n"
+                                                     "Race:  2 yes / no\n",
+                                                     ifc, 30, info, tx, log));
+        TS_ASSERT_EQUALS(info.size(), 1U);
+        TS_ASSERT(info[0] != 0);
+        TS_ASSERT_EQUALS(info[0]->getObjectType(), game::parser::MessageInformation::Alliance);
+        TS_ASSERT_EQUALS(info[0]->getObjectId(), 0);
+
+        Offer o = getValue<game::parser::MessageAllianceValue_t>(*info[0], "thost.ff", "thost.ff");
+        TS_ASSERT_EQUALS(o.oldOffer.get(2), Offer::No);
+        TS_ASSERT_EQUALS(o.oldOffer.get(4), Offer::Yes);
+        TS_ASSERT_EQUALS(o.oldOffer.get(7), Offer::Yes);
+        TS_ASSERT_EQUALS(o.theirOffer.get(2), Offer::No);
+        TS_ASSERT_EQUALS(o.theirOffer.get(4), Offer::Yes);
+        TS_ASSERT_EQUALS(o.theirOffer.get(7), Offer::No);
     }
 }
 

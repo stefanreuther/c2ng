@@ -21,8 +21,19 @@ class ExpressionTestHelper {
     void checkNullExpression(const char* expr);
     void checkStringExpression(const char* expr, const char* result);
     void checkFloatExpression(const char* expr, double result);
+
+    /** Check expression for execution error.
+        The expression must compile, but may not execute.
+        \param expr Expression */
     void checkFailureExpression(const char* expr);
+
+    /** Check expression that parses, but does not compile.
+        \param expr Expression */
     void checkBadExpression(const char* expr);
+
+    /** Check expression that does not parse.
+        \param expr Expression */
+    void checkRejectedExpression(const char* expr);
 
     void checkStatement(const char* stmt);
     void checkIntegerExpressionStatement(const char* expr, int value);
@@ -334,6 +345,8 @@ class TestInterpreterProcedureValue : public CxxTest::TestSuite {
 class TestInterpreterProcess : public CxxTest::TestSuite {
  public:
     void testProperties();
+    void testFreeze();
+    void testFreeze2();
 };
 
 class TestInterpreterProcessList : public CxxTest::TestSuite {
@@ -407,6 +420,16 @@ class TestInterpreterStructureValueData : public CxxTest::TestSuite {
 class TestInterpreterTagNode : public CxxTest::TestSuite {
  public:
     void testHeader();
+};
+
+class TestInterpreterTaskEditor : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testAddToEmpty();
+    void testRoundtrip();
+    void testConflict();
+    void testFormat();
+    void testIsValidCommand();
 };
 
 class TestInterpreterTernaryOperation : public CxxTest::TestSuite {

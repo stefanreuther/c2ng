@@ -18,9 +18,9 @@
 #include "game/v3/loader.hpp"
 #include "game/v3/outboxreader.hpp"
 #include "game/v3/packer.hpp"
+#include "game/v3/parser.hpp"
 #include "game/v3/registry.hpp"
 #include "game/v3/structures.hpp"
-#include "game/v3/udata/parser.hpp"
 #include "game/v3/writer.hpp"
 #include "util/backupfile.hpp"
 
@@ -169,8 +169,6 @@ game::v3::DirectoryLoader::getPlayerStatus(int player, String_t& extra, afl::str
 void
 game::v3::DirectoryLoader::loadCurrentTurn(Turn& turn, Game& game, int player, Root& root, Session& session)
 {
-    const char*const LOCATION = "DirectoryLoader::loadCurrentTurn";
-
     // Initialize
     Loader ldr(*m_charset, m_translator, m_log);
     ldr.prepareUniverse(turn.universe());
@@ -310,12 +308,19 @@ game::v3::DirectoryLoader::loadCurrentTurn(Turn& turn, Game& game, int player, R
     }
 
     // Util
+    Parser mp(m_translator, m_log, game, player, root, session);
     {
         afl::base::Ptr<Stream> s = dir.openFileNT(Format("util%d.dat", player), FileSystem::OpenRead);
         if (s.get() != 0) {
-            game::spec::ShipList* sl = session.getShipList().get();
-            checkAssertion(sl != 0, "ship list exists", LOCATION);
-            game::v3::udata::Parser(game, player, root.hostConfiguration(), sl->modifiedHullFunctions(), *m_charset, m_translator, m_log).read(*s);
+            mp.loadUtilData(*s, *m_charset);
+        }
+    }
+
+    // Message parser
+    {
+        afl::base::Ptr<Stream> file = m_specificationDirectory->openFileNT("msgparse.ini", afl::io::FileSystem::OpenRead);
+        if (file.get() != 0) {
+            mp.parseMessages(*file, turn.inbox());
         }
     }
 
@@ -466,15 +471,9 @@ game::v3::DirectoryLoader::loadHistoryTurn(Turn& turn, Game& game, int player, i
     //     loadTurn(trn, *trnfile, player);
     // }
 
-    // // // // // loadFleets(trn, *game_file_dir, player);
-
-    // // // // // /* Util */
-    // // // // // /* FIXME: it is ugly to do this here; loadDirectory does it itself */
-    // // // // // if (Ptr<Stream> s = game_file_dir->openFileNT(Format("util%d.dat", player), Stream::C_READ))
-    // // // // //     (GUtilParser(trn, player)).read(*s);
-
-    // // // // // /* FLAK */
-    // // // // // maybeLoadFlakVcrs(trn, *game_file_dir, player);
+    // FIXME: history fleets not loaded here
+    // FIXME: alliances not loaded until here; would need message/util.dat parsing
+    // FIXME: load FLAK
 }
 
 String_t

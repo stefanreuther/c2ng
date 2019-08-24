@@ -103,8 +103,6 @@ namespace game { namespace vcr { namespace classic {
 
         inline int32_t rdivadd(int32_t a, int32_t b, int32_t plus) const;
 
-        static inline bool isFreighter(const Status& st);
-
         void hit(Status& st, int damage, int kill);
 
         inline void launchFighter(Status& st);
@@ -122,9 +120,9 @@ namespace game { namespace vcr { namespace classic {
         inline void fireTorp(Status& st, Status& opp, int launcher);
         void fireTorpedoes(Status& st, Status& opp);
 
-        void preloadWeapons(Status& st);
+        static void preloadWeapons(Status& st);
 
-        bool checkSide(Object& obj);
+        bool checkSide(Object& obj) const;
     };
 
 } } }

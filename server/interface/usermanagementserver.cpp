@@ -38,6 +38,15 @@ server::interface::UserManagementServer::handleCommand(const String_t& upcasedCo
 
         result.reset(makeStringValue(m_implementation.add(userName, password, config)));
         return true;
+    } else if (upcasedCommand == "DELUSER") {
+        /* @q DELUSER uid:UID (User Command)
+           Delete a user.
+           Postcondition is that the user does not exist, so this will not fail if the user Id does not exist.
+           @since PCC2 2.40.7 */
+        args.checkArgumentCount(1);
+        m_implementation.remove(toString(args.getNext()));
+        result.reset(makeStringValue("OK"));
+        return true;
     } else if (upcasedCommand == "LOGIN") {
         /* @q LOGIN name:Str pass:Str (User Command)
            Check user password (log in).

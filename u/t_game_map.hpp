@@ -14,6 +14,16 @@ class TestGameMapBaseStorage : public CxxTest::TestSuite {
     void testClear();
 };
 
+class TestGameMapBeamUpShipTransfer : public CxxTest::TestSuite {
+ public:
+    void testParse();
+};
+
+class TestGameMapBeamupShipTransfer : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
 class TestGameMapCircularObject : public CxxTest::TestSuite {
  public:
     void testIt();
@@ -130,6 +140,17 @@ class TestGameMapRenderList : public CxxTest::TestSuite {
 class TestGameMapShip : public CxxTest::TestSuite {
  public:
     void testInit();
+};
+
+class TestGameMapShipPredictor : public CxxTest::TestSuite {
+ public:
+    void testFuelUsageHost();
+    void testFuelUsagePHost();
+};
+
+class TestGameMapShipStorage : public CxxTest::TestSuite {
+ public:
+    void testIt();
 };
 
 class TestGameMapViewport : public CxxTest::TestSuite {

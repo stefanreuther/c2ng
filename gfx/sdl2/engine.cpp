@@ -35,15 +35,27 @@ namespace {
     }
 
     /** Simplify modifier for text input.
-        (a) Shift normally affects the case of the character typed, ignore it.
+        (a) Shift normally affects the case of the character typed.
+            We cannot entirely ignore it because we want to capture Shift-Space as such.
         (b) AltGr (RALT) affacts the character typed and often comes with CTRL. */
     uint32_t simplifyModifier(uint32_t m)
     {
-        m &= ~(KMOD_LSHIFT | KMOD_RSHIFT);
         if ((m & KMOD_RALT) != 0) {
             m &= ~(KMOD_RALT | KMOD_CTRL);
         }
         return m;
+    }
+
+    /** Simplify a text key with modifier. */
+    util::Key_t simplifyKey(util::Key_t key)
+    {
+        switch (key & ~util::KeyMod_Shift) {
+         case ' ':
+            return key;
+
+         default:
+            return key & ~util::KeyMod_Shift;
+        }
     }
 
     /** Convert SDL key modifier to internal key modifier.
@@ -639,7 +651,7 @@ gfx::sdl2::Engine::handleTextInput(EventConsumer& consumer, const char* text, ut
     // FIXME: probably some code breaks if this actually produces multiple events
     afl::charset::Utf8Reader rdr(afl::string::toBytes(text), 0);
     while (rdr.hasMore()) {
-        consumer.handleKey(rdr.eat() | mod, 0);
+        consumer.handleKey(simplifyKey(rdr.eat() | mod), 0);
     }
 }
 

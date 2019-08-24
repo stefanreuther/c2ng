@@ -29,7 +29,7 @@ namespace client { namespace si {
         void executeKeyCommandWait(String_t keymapName, util::Key_t key, int prefix);
         void executeTaskWait(std::auto_ptr<ScriptTask> task);
         void continueProcessWait(RequestLink2 link);
-        void handleWait(uint32_t id, interpreter::Process::State state, interpreter::Error error);
+        void handleWait(uint32_t id);
         void setInteracting(bool state);
 
         ui::Root& root()

@@ -95,12 +95,15 @@ TestInterpreterProcessList::testAllocateProcessGroup()
     TS_ASSERT_DIFFERS(c, a);
 
     // Process Ids
-    a = testee.allocateProcessId();
-    b = testee.allocateProcessId();
-    c = testee.allocateProcessId();
-    TS_ASSERT_DIFFERS(a, b);
-    TS_ASSERT_DIFFERS(b, c);
-    TS_ASSERT_DIFFERS(c, a);
+    afl::sys::Log log;
+    afl::io::NullFileSystem fs;
+    interpreter::World world(log, fs);
+    interpreter::Process& pa = testee.create(world, "a");
+    interpreter::Process& pb = testee.create(world, "b");
+    interpreter::Process& pc = testee.create(world, "c");
+    TS_ASSERT_DIFFERS(pa.getProcessId(), pb.getProcessId());
+    TS_ASSERT_DIFFERS(pb.getProcessId(), pc.getProcessId());
+    TS_ASSERT_DIFFERS(pc.getProcessId(), pa.getProcessId());
 }
 
 /** Test execution vs suspension.

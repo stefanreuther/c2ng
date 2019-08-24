@@ -49,6 +49,9 @@
 #include "game/interface/commandinterface.hpp"
 #include "game/map/object.hpp"
 #include "game/interface/markingfunctions.hpp"
+#include "game/interface/referencecontext.hpp"
+#include "game/interface/referencelistcontext.hpp"
+#include "interpreter/taskeditor.hpp"
 
 namespace {
     using afl::string::Format;
@@ -189,6 +192,104 @@ game::Session::AreaSet_t
 game::Session::getEditableAreas() const
 {
     return m_editableAreas;
+}
+
+afl::base::Ptr<interpreter::TaskEditor>
+game::Session::getAutoTaskEditor(Id_t id, interpreter::Process::ProcessKind kind, bool create)
+{
+    // ex getAutoTaskForObject
+    using interpreter::Process;
+    using interpreter::TaskEditor;
+
+    // Need to have a game
+    if (m_game.get() == 0) {
+        return 0;
+    }
+
+    // Determine object
+    game::map::Object* obj = 0;
+    switch (kind) {
+     case Process::pkShipTask:
+        obj = m_game->currentTurn().universe().ships().get(id);
+        break;
+     case Process::pkPlanetTask:
+     case Process::pkBaseTask:
+        obj = m_game->currentTurn().universe().planets().get(id);
+        break;
+     case Process::pkDefault:
+        // Invalid
+        break;
+    }
+    if (obj == 0) {
+        return 0;
+    }
+
+    // Find the process
+    Process* proc = m_world.processList().getProcessByObject(obj, kind);
+    if (proc == 0 && create) {
+        // Create process
+        String_t fmt = (kind == Process::pkShipTask
+                        ? m_translator("Auto Task Ship %d")
+                        : kind == Process::pkPlanetTask
+                        ? m_translator("Auto Task Planet %d")
+                        : m_translator("Auto Task Starbase %d"));
+        proc = &m_world.processList().create(m_world, afl::string::Format(fmt, id));
+
+        // Place in appropriate context
+        // (Note that this fails if the Session is not fully-populated, e.g. has no ship list.)
+        interpreter::Context* ctx = 0;
+        if (kind == Process::pkShipTask) {
+            ctx = game::interface::ShipContext::create(id, *this);
+        } else {
+            ctx = game::interface::PlanetContext::create(id, *this);
+        }
+        if (ctx != 0) {
+            proc->pushNewContext(ctx);
+        }
+        proc->markContextTOS();
+
+        // Mark as auto-task
+        proc->setProcessKind(kind);
+    }
+    if (proc == 0) {
+        return 0;
+    }
+
+    // Try to create (re-use) editor
+    try {
+        TaskEditor* ed = dynamic_cast<TaskEditor*>(proc->getFreezer());
+        if (ed != 0) {
+            return ed;
+        } else {
+            return new TaskEditor(*proc);
+        }
+    }
+    catch (interpreter::Error& err) {
+        logError(err);
+        return 0;
+    }
+}
+
+
+void
+game::Session::releaseAutoTaskEditor(afl::base::Ptr<interpreter::TaskEditor>& ptr)
+{
+    if (ptr.get() != 0) {
+        // Remember the process
+        interpreter::Process& proc = ptr->process();
+
+        // Clear the TaskEditor. This will make the process runnable.
+        ptr.reset();
+
+        // Run the process
+        if (proc.getFreezer() == 0) {
+            interpreter::ProcessList& pl = world().processList();
+            uint32_t pgid = pl.allocateProcessGroup();
+            pl.resumeProcess(proc, pgid);
+            pl.startProcessGroup(pgid);
+            pl.run();
+        }
+    }
 }
 
 interpreter::World&
@@ -483,6 +584,7 @@ game::Session::initWorld()
 {
     // ex initInterpreterGameInterface()
     // // Add global variables
+    m_world.setNewGlobalValue("AUTOTASK",      new game::interface::SimpleFunction(*this, game::interface::IFAutoTask));
     m_world.setNewGlobalValue("BEAM",          new game::interface::BeamFunction(*this));
     m_world.setNewGlobalValue("CADD",          new game::interface::SimpleFunction(*this, game::interface::IFCAdd));
     // defineGlobalValue("CC$NOTIFYCONFIRMED", new IntCCNotifyConfirmed());
@@ -506,6 +608,7 @@ game::Session::initWorld()
     m_world.setNewGlobalValue("MARKER" ,       new game::interface::DrawingFunction(*this));
     m_world.setNewGlobalValue("MINEFIELD",     new game::interface::MinefieldFunction(*this));
     m_world.setNewGlobalValue("MISSION",       new game::interface::MissionFunction(*this));
+    m_world.setNewGlobalValue("OBJECTISAT",    new game::interface::SimpleFunction(*this, game::interface::IFObjectIsAt));
     m_world.setNewGlobalValue("PLANET",        new game::interface::PlanetFunction(*this));
     m_world.setNewGlobalValue("PLANETAT",      new game::interface::SimpleFunction(*this, game::interface::IFPlanetAt));
     m_world.setNewGlobalValue("PLAYER",        new game::interface::PlayerFunction(*this));
@@ -529,6 +632,10 @@ game::Session::initWorld()
     m_world.setNewGlobalValue("RSTRING",       new game::interface::SimpleFunction(*this, game::interface::IFRString));
     m_world.setNewGlobalValue("RSTYLE",        new game::interface::SimpleFunction(*this, game::interface::IFRStyle));
     m_world.setNewGlobalValue("RXML",          new game::interface::SimpleFunction(*this, game::interface::IFRXml));
+
+    m_world.setNewGlobalValue("REFERENCE",         new game::interface::SimpleFunction(*this, game::interface::IFReference));
+    m_world.setNewGlobalValue("LOCATIONREFERENCE", new game::interface::SimpleFunction(*this, game::interface::IFLocationReference));
+    m_world.setNewGlobalValue("REFERENCELIST",     new game::interface::SimpleFunction(*this, game::interface::IFReferenceList));
 
     m_world.setNewGlobalValue("CC$SELREADHEADER",  new game::interface::SimpleFunction(*this, game::interface::IFCCSelReadHeader));
     m_world.setNewGlobalValue("CC$SELREADCONTENT", new game::interface::SimpleFunction(*this, game::interface::IFCCSelReadContent));

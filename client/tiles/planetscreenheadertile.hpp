@@ -13,7 +13,7 @@ namespace client { namespace tiles {
 
     class PlanetScreenHeaderTile : public client::widgets::ControlScreenHeader {
      public:
-        PlanetScreenHeaderTile(ui::Root& root, client::widgets::KeymapWidget& kmw);
+        PlanetScreenHeaderTile(ui::Root& root, client::widgets::KeymapWidget& kmw, bool forTask);
         void attach(client::proxy::ObjectObserver& oop);
 
      private:

@@ -811,5 +811,40 @@ TestInterpreterExprParser::testPrecedence()
     h.checkBooleanExpression("1 or 1 and 0", true);
     h.checkBooleanExpression("(1 or 1) and 0", false);
     h.checkBooleanExpression("1 or (1 and 0)", true);
+
+    // Negation vs. NOT
+    h.checkIntegerExpression("-NOT 0", -1);
+    h.checkIntegerExpression("-NOT 1", 0);
+    h.checkIntegerExpression("+NOT 0", 1);
+    h.checkBooleanExpression("not -1", false);
+    h.checkBooleanExpression("not +0", true);
 }
 
+void
+TestInterpreterExprParser::testErrors()
+{
+    ExpressionTestHelper h;
+
+    // Parens
+    h.checkRejectedExpression("(1+2");
+    h.checkRejectedExpression("(3*(1+2)");
+    h.checkRejectedExpression("z(1");
+
+    // Argument count for builtin
+    h.checkRejectedExpression("z()");
+    h.checkIntegerExpression("z(1)", 1);
+    h.checkRejectedExpression("z(1,2)");
+    h.checkRejectedExpression("z(1,,2)");
+
+    // Assignment
+    h.checkBadExpression("sin(1) := 2");
+
+    // Member reference
+    h.checkNullExpression("z(0).foo");
+    h.checkNullExpression("z(0)->foo");
+    h.checkRejectedExpression("z(0).'x'");
+    h.checkRejectedExpression("z(0)->3");
+
+    // Bad syntax
+    h.checkRejectedExpression(",");
+}

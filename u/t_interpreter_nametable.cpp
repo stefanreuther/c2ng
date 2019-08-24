@@ -13,16 +13,16 @@ void
 TestInterpreterNameTable::testLookup()
 {
     static const interpreter::NameTable tab[] = {
-        { "B", 0, 0, 0 },
-        { "C", 0, 0, 0 },
-        { "D", 0, 0, 0 },
-        { "E", 0, 0, 0 },
-        { "F", 0, 0, 0 },
-        { "G", 0, 0, 0 },
-        { "H", 0, 0, 0 },
-        { "I", 0, 0, 0 },
-        { "J", 0, 0, 0 },
-        { "K", 0, 0, 0 },
+        { "B", 0, 0, interpreter::thNone },
+        { "C", 0, 0, interpreter::thNone },
+        { "D", 0, 0, interpreter::thNone },
+        { "E", 0, 0, interpreter::thNone },
+        { "F", 0, 0, interpreter::thNone },
+        { "G", 0, 0, interpreter::thNone },
+        { "H", 0, 0, interpreter::thNone },
+        { "I", 0, 0, interpreter::thNone },
+        { "J", 0, 0, interpreter::thNone },
+        { "K", 0, 0, interpreter::thNone },
     };
     const size_t SIZE = sizeof(tab) / sizeof(tab[0]);
 

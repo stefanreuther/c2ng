@@ -157,7 +157,7 @@ namespace {
         pRev->addShipData(id, sd);
 
         pShip->internalCheck();
-        pShip->combinedCheck1(h.univ, TURN_NR);
+        pShip->combinedCheck1(h.univ, game::PlayerSet_t(owner), TURN_NR);
         pShip->setPlayability(game::map::Object::Playable);
 
         return *pShip;

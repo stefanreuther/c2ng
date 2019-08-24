@@ -123,10 +123,10 @@ game::parser::getNameFromIndex(MessageStringIndex si, afl::string::Translator& t
 {
     // ex game/parser.h:getNameForItem
     switch (si) {
-     case ms_Name:         return tx.translateString("Name");
-     case ms_FriendlyCode: return tx.translateString("FCode");
-     case ms_UfoInfo1:     return tx.translateString("Info 1");
-     case ms_UfoInfo2:     return tx.translateString("Info 2");
+     case ms_Name:         return tx("Name");
+     case ms_FriendlyCode: return tx("FCode");
+     case ms_UfoInfo1:     return tx("Info 1");
+     case ms_UfoInfo2:     return tx("Info 2");
      case ms_Max:          return "?";
     }
     return "?";

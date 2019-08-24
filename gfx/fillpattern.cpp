@@ -1,5 +1,6 @@
 /**
   *  \file gfx/fillpattern.cpp
+  *  \brief Class gfx::FillPattern
   */
 
 #include <algorithm>
@@ -22,28 +23,25 @@ const gfx::FillPattern gfx::FillPattern::GRAY25(GRAY25_INIT);
 const gfx::FillPattern gfx::FillPattern::LTSLASH(LTSLASH_INIT);
 const gfx::FillPattern gfx::FillPattern::GRAY50_ALT(GRAY50_ALT_INIT);
 
-// /** Construct blank pattern. Constructs a pattern that is all-zero. */
+// Construct blank pattern.
 gfx::FillPattern::FillPattern() throw()
 {
     std::fill(m_pattern, m_pattern+SIZE, uint8_t(0));
 }
 
-// /** Construct pattern from byte array.
-//     \param init pointer to 8 bytes */
+// Construct pattern from byte array.
 gfx::FillPattern::FillPattern(const uint8_t (&init)[SIZE]) throw()
 {
     std::copy(init, init+SIZE, m_pattern);
 }
 
-// /** Construct pattern with specified value. Constructs a pattern that
-//     contains the specified value in each line. */
+// Construct pattern with specified value.
 gfx::FillPattern::FillPattern(uint8_t value) throw()
 {
     std::fill(m_pattern, m_pattern+SIZE, value);
 }
 
-// /** Check for blank pattern. \returns true iff the pattern is all-zero,
-//     i.e. when it is used for filling something, nothing would happen. */
+// Check for blank pattern.
 bool
 gfx::FillPattern::isBlank() const throw()
 {
@@ -55,9 +53,7 @@ gfx::FillPattern::isBlank() const throw()
     return true;
 }
 
-// /** Check for black pattern. \returns true iff the pattern is all-one,
-//     i.e. filling something with it would result in a completely filled
-//     surface. */
+// Check for black pattern.
 bool
 gfx::FillPattern::isBlack() const throw()
 {
@@ -69,8 +65,7 @@ gfx::FillPattern::isBlack() const throw()
     return true;
 }
 
-// /** Shift pattern to the left. \returns reference to this pattern
-//     to allow chaining. */
+// Shift pattern to the left.
 gfx::FillPattern&
 gfx::FillPattern::shiftLeft(int amount) throw()
 {
@@ -81,20 +76,14 @@ gfx::FillPattern::shiftLeft(int amount) throw()
     return *this;
 }
 
-// /** Shift pattern to the right. \returns reference to this pattern
-//     to allow chaining. */
+// Shift pattern to the right.
 gfx::FillPattern&
 gfx::FillPattern::shiftRight(int amount) throw()
 {
-    amount &= (SIZE-1);
-    for (size_t i = 0; i < SIZE; ++i) {
-        m_pattern[i] = afl::bits::rotateRight8(m_pattern[i], amount);
-    }
-    return *this;
+    return shiftLeft(-amount);
 }
 
-// /** Shift pattern up. \returns reference to this pattern
-//     to allow chaining. */
+// Shift pattern up.
 gfx::FillPattern&
 gfx::FillPattern::shiftUp(int amount) throw()
 {
@@ -105,21 +94,14 @@ gfx::FillPattern::shiftUp(int amount) throw()
     return *this;
 }
 
-// /** Shift pattern down. \returns reference to this pattern
-//     to allow chaining. */
+// Shift pattern down.
 gfx::FillPattern&
 gfx::FillPattern::shiftDown(int amount) throw()
 {
-    FillPattern tmp = *this;
-    for (size_t i = 0; i < SIZE; ++i) {
-        m_pattern[i] = tmp.m_pattern[(i - size_t(amount)) % SIZE];
-    }
-    return *this;
+    return shiftUp(-amount);
 }
 
-// /** `Or' two patterns. The result has 1-bits where either of the two
-//     patterns had 1-bits. \returns reference to this pattern to allow
-//     chaining. */
+// "Or" two patterns.
 gfx::FillPattern&
 gfx::FillPattern::operator|=(const FillPattern& rhs) throw()
 {
@@ -129,7 +111,7 @@ gfx::FillPattern::operator|=(const FillPattern& rhs) throw()
     return *this;
 }
 
-// /** `Or' pattern with value. \overload */
+// "Or" pattern with value.
 gfx::FillPattern&
 gfx::FillPattern::operator|=(uint8_t value) throw()
 {
@@ -139,9 +121,7 @@ gfx::FillPattern::operator|=(uint8_t value) throw()
     return *this;
 }
 
-// /** `And' two patterns. The result has 1-bits where both of the two
-//     patterns had 1-bits. \returns reference to this pattern to allow
-//     chaining. */
+// "And" two patterns.
 gfx::FillPattern&
 gfx::FillPattern::operator&=(const FillPattern& rhs) throw()
 {
@@ -151,7 +131,7 @@ gfx::FillPattern::operator&=(const FillPattern& rhs) throw()
     return *this;
 }
 
-// /** `And' pattern and value. \overload */
+// "And" pattern with value.
 gfx::FillPattern&
 gfx::FillPattern::operator&=(uint8_t value) throw()
 {
@@ -161,9 +141,7 @@ gfx::FillPattern::operator&=(uint8_t value) throw()
     return *this;
 }
 
-// /** `Xor' two patterns. The result has 1-bits where either of the two
-//     patterns (but not both) had 1-bits. \returns reference to this
-//     pattern to allow chaining. */
+// "Xor" two patterns.
 gfx::FillPattern&
 gfx::FillPattern::operator^=(const FillPattern& rhs) throw()
 {
@@ -173,7 +151,7 @@ gfx::FillPattern::operator^=(const FillPattern& rhs) throw()
     return *this;
 }
 
-// /** `Xor' pattern and value. \overload */
+// "Xor" pattern with value.
 gfx::FillPattern&
 gfx::FillPattern::operator^=(uint8_t value) throw()
 {
@@ -183,8 +161,7 @@ gfx::FillPattern::operator^=(uint8_t value) throw()
     return *this;
 }
 
-// /** Invert pattern. Turns black into white and vice versa.
-//     \returns reference to this pattern to allow chaining */
+// Invert pattern.
 gfx::FillPattern&
 gfx::FillPattern::invert() throw()
 {
@@ -194,8 +171,7 @@ gfx::FillPattern::invert() throw()
     return *this;
 }
 
-// /** Flip pattern horizontally. Swaps left and right.
-//     \returns reference to this pattern to allow chaining */
+// Flip pattern horizontally.
 gfx::FillPattern&
 gfx::FillPattern::flipHorizontal() throw()
 {
@@ -205,8 +181,7 @@ gfx::FillPattern::flipHorizontal() throw()
     return *this;
 }
 
-// /** Flip pattern vertically. Swaps top and bottom.
-//     \returns reference to this pattern to allow chaining */
+// Flip pattern vertically.
 gfx::FillPattern&
 gfx::FillPattern::flipVertical() throw()
 {

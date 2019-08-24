@@ -41,6 +41,11 @@ const game::ref::ConfigurationSelection game::ref::CARGO_TRANSFER = {
     { "Sort.Cargo.Secondary", &game::config::IntegerValueParser::instance, game::ref::ConfigSortById },
 };
 
+const game::ref::ConfigurationSelection game::ref::SEARCH = {
+    { "Sort.Search",           &game::config::IntegerValueParser::instance, game::ref::ConfigSortById },
+    { "Sort.Search.Secondary", &game::config::IntegerValueParser::instance, game::ref::ConfigSortById },
+};
+
 game::ref::SortPredicate&
 game::ref::createSortPredicate(int config, Session& session, afl::base::Deleter& del)
 {

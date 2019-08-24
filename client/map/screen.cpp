@@ -133,6 +133,7 @@ class client::map::Screen::Properties : public util::SlaveObject<game::Session>,
                 result.reset(interpreter::makeIntegerValue(1));
                 return true;
              case game::interface::iuiIterator:
+             case game::interface::iuiAutoTask:
                 result.reset();
                 return true;
              case game::interface::iuiSimFlag:
@@ -344,6 +345,9 @@ client::map::Screen::handleStateChange(client::si::UserSide& ui, client::si::Req
      case OutputState::ShipScreen:
      case OutputState::PlanetScreen:
      case OutputState::BaseScreen:
+     case OutputState::ShipTaskScreen:
+     case OutputState::PlanetTaskScreen:
+     case OutputState::BaseTaskScreen:
      case OutputState::ExitProgram:
      case OutputState::ExitGame:
      case OutputState::PlayerScreen:

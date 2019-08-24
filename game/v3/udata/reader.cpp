@@ -32,6 +32,7 @@ game::v3::udata::Reader::read(afl::io::Stream& in)
             break;
         }
     }
+    handleEnd();
 }
 
 // Check whether this is a valid UTILx.DAT.

@@ -5,10 +5,10 @@
 #define C2NG_GAME_INTERFACE_UFOCONTEXT_HPP
 
 #include "game/game.hpp"
-#include "interpreter/context.hpp"
 #include "game/map/ufo.hpp"
-#include "game/turn.hpp"
 #include "game/session.hpp"
+#include "game/turn.hpp"
+#include "interpreter/context.hpp"
 
 namespace game { namespace interface {
 

@@ -14,7 +14,9 @@
 #include "server/ports.hpp"
 #include "server/user/classicencrypter.hpp"
 #include "server/user/commandhandler.hpp"
+#include "server/user/multipasswordencrypter.hpp"
 #include "server/user/root.hpp"
+#include "server/user/saltedpasswordencrypter.hpp"
 #include "util/translation.hpp"
 #include "version.hpp"
 
@@ -69,8 +71,13 @@ server::user::ServerApplication::serverMain()
     server::common::RandomIdGenerator gen(fileSystem());
 
     // Password encrypter
-    // FIXME: make something better here
+#if 0
     ClassicEncrypter enc(m_config.userKey);
+#else
+    SaltedPasswordEncrypter primary(gen);
+    ClassicEncrypter secondary(m_config.userKey);
+    MultiPasswordEncrypter enc(primary, secondary);
+#endif
 
     // Set up root
     Root root(db, gen, enc, m_config);
@@ -139,6 +146,12 @@ server::user::ServerApplication::handleConfiguration(const String_t& key, const 
            Maximum total size of all user data ({UGET}/{USET}).
            @since PCC2 2.40.6 */
         m_config.userDataMaxTotalSize = parseSize(key, value);
+        return true;
+    } else if (key == "USER.PROFILE.MAXVALUESIZE") {
+        /* @q User.Profile.MaxValueSize:Int (Config)
+           Maximum size of a value in {SET (User Command)}.
+           @since PCC2 2.40.7 */
+        m_config.profileMaxValueSize = parseSize(key, value);
         return true;
     } else {
         return false;

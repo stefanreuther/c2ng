@@ -103,7 +103,7 @@ namespace {
         ScriptInitializer(afl::base::Ref<afl::io::Directory> resourceDirectory)
             : m_resourceDirectory(resourceDirectory)
             { }
-        virtual interpreter::Process* execute(uint32_t pgid, game::Session& t, Verbosity& /*v*/)
+        virtual void execute(uint32_t pgid, game::Session& t)
             {
                 // Configure load directory
                 t.world().setSystemLoadDirectory(m_resourceDirectory.asPtr());
@@ -122,7 +122,6 @@ namespace {
                 // Execute both processes
                 processList.resumeProcess(coreProcess, pgid);
                 processList.resumeProcess(pluginProcess, pgid);
-                return 0;
             }
      private:
         afl::base::Ref<afl::io::Directory> m_resourceDirectory;
@@ -728,6 +727,27 @@ namespace {
 
              case OutputState::BaseScreen:
                 client::screens::ControlScreen(session, game::map::Cursors::BaseScreen, client::screens::ControlScreen::BaseScreen).run(in, out);
+                in = InputState();
+                in.setProcess(out.getProcess());
+                state = out.getTarget();
+                break;
+
+             case OutputState::ShipTaskScreen:
+                client::screens::ControlScreen(session, game::map::Cursors::ShipScreen, client::screens::ControlScreen::ShipTaskScreen).run(in, out);
+                in = InputState();
+                in.setProcess(out.getProcess());
+                state = out.getTarget();
+                break;
+
+             case OutputState::PlanetTaskScreen:
+                client::screens::ControlScreen(session, game::map::Cursors::PlanetScreen, client::screens::ControlScreen::PlanetTaskScreen).run(in, out);
+                in = InputState();
+                in.setProcess(out.getProcess());
+                state = out.getTarget();
+                break;
+
+             case OutputState::BaseTaskScreen:
+                client::screens::ControlScreen(session, game::map::Cursors::BaseScreen, client::screens::ControlScreen::BaseTaskScreen).run(in, out);
                 in = InputState();
                 in.setProcess(out.getProcess());
                 state = out.getTarget();

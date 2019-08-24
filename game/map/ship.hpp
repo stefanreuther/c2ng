@@ -61,7 +61,7 @@ namespace game { namespace map {
     //     void       getShipHistoryData(TDbShip& the_data) const;
 
         void       internalCheck();
-        void       combinedCheck1(Universe& univ, int turnNumber);
+        void       combinedCheck1(Universe& univ, PlayerSet_t availablePlayers, int turnNumber);
 
         // MapObject interface
         virtual String_t getName(ObjectName which, afl::string::Translator& tx, InterpreterInterface& iface) const;

@@ -195,17 +195,13 @@ server::mailout::TransmitterImpl::processWork()
         return;
     }
 
-    // Process message
-    afl::net::redis::Subtree root(m_root.mailRoot());
-    afl::data::StringList_t receivers;
-
     // Obtain message object
-    Message msg(root, mid, "sending");
+    Message msg(m_root, mid, Message::Sending);
 
     // Still active?
     bool active = true;
     String_t uid = msg.uniqueId().get();
-    if (!uid.empty() && root.hashKey("uniqid").intField(uid).get() != mid) {
+    if (!uid.empty() && m_root.uniqueIdMap().intField(uid).get() != mid) {
         m_root.log().write(afl::sys::LogListener::Info, LOG_NAME, Format("[msg:%d] expired (replaced by new instance)", mid));
         active = false;
     }
@@ -222,6 +218,7 @@ server::mailout::TransmitterImpl::processWork()
     }
 
     // Get receivers
+    afl::data::StringList_t receivers;
     msg.receivers().getAll(receivers);
 
     // Send it

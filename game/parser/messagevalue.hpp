@@ -159,18 +159,9 @@ namespace game { namespace parser {
         mi_IonVoltage,
         mi_IonStatus,
 
-        // TODO: TUtil7Battle
-        // TODO: TUtil10Target
         // TODO: TUtil14Wormhole
-        // TODO: TUtil17Ion
-        // TODO: TUtil33GO
         // TODO: TUtil34FTP
-        // TODO: TUtil38PAL
         // TODO: TUtil42GODestroyed
-        // TODO: TUtil43MinefieldQuota
-        // TODO: TUtil47NonExistantPlanets
-        // TODO: Scores
-        // TODO: TUtil57Special
 
         /* Ufo: */
         mi_UfoRealId,

@@ -20,21 +20,20 @@ namespace interpreter {
         Processes are run in process groups.
         When several processes are put in the same process group, one is picked (startProcessGroup()) and run.
         The next process from the same process group runs when the previous one completes.
-        That's why <b>process state changes should only be made through ProcessList</b>.
-        Changes made on the process itself (other than those it makes itself while it is executing) may cause that trigger be missed and the process group get stuck.
+        Process completion means the process terminated successfully or unsuccessfully, or suspended.
+        For this to work, <b>external process state changes should only be made through ProcessList</b>.
+        Changes made on the process itself (other than those it does on itself while it is executing) may cause that trigger be missed and the process group get stuck.
 
         Processes may wait for UI.
         To avoid that another process kicks in, this will defer the whole process group.
         However, UI may start new processes in new process groups (recursive processes).
 
-        PCC2's ability to run temporary processes is currently retained.
-        Temporary processes cannot suspend or wait.
-        This feature is deprecated.
-
         c2ng change: PCC1 and PCC2 do not have process groups.
         Instead, they runs all processes one after the other.
         This works because they never have recursive processes.
-        Synchronisation with user interface is rather whacky in PCC1/PCC2. */
+        Synchronisation with user interface is rather whacky in PCC1/PCC2.
+        PCC2 has temporary processes to execute expressions and immediately return a result.
+        c2ng does no longer support that. */
     class ProcessList {
      public:
         typedef afl::container::PtrVector<Process> Vector_t;
@@ -61,9 +60,6 @@ namespace interpreter {
             \return new process group Id */
         uint32_t allocateProcessGroup();
 
-        /** Allocate a process Id. */
-        uint32_t allocateProcessId();
-
         /** Start a process group.
             If the process still has processes, selects one of them. Call run() to actually run it.
             If the process group has no more processes, declares it finished using sig_processGroupFinish.
@@ -85,7 +81,8 @@ namespace interpreter {
             \param pgid process group Id */
         void resumeProcess(Process& proc, uint32_t pgid);
 
-        /** Resume all suspended processes.
+        /** Resume all suspended processes and place them in the given process group.
+            Run the process group (startProcessGroup(), run()) to run them.
             \param pgid process group Id */
         void resumeSuspendedProcesses(uint32_t pgid);
 
@@ -149,6 +146,9 @@ namespace interpreter {
         afl::base::Signal<void(uint32_t)> sig_processGroupFinish;
 
      private:
+        /** Allocate a process Id. */
+        uint32_t allocateProcessId();
+
         Process* findRunningProcess() const;
 
         /** Process list. */
@@ -159,6 +159,9 @@ namespace interpreter {
 
         /** Counter for new process Ids. */
         uint32_t m_processId;
+
+        /** Marker for recursive invocation. */
+        bool m_running;
     };
 
 }

@@ -13,4 +13,13 @@ class TestUiLayoutGrid : public CxxTest::TestSuite {
     void testEmpty();
 };
 
+class TestUiLayoutInfo : public CxxTest::TestSuite {
+ public:
+    void testInit();
+    void testInitFixed();
+    void testInitIgnored();
+    void testAnd();
+    void testMake();
+};
+
 #endif

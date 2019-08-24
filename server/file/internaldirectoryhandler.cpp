@@ -51,7 +51,7 @@ server::file::InternalDirectoryHandler::createFile(String_t name, afl::base::Con
     p->content.append(content);
 
     Info result(name, IsFile);
-    result.size = static_cast<int32_t>(p->content.size());
+    result.size = convertSize(p->content.size());
     return result;
 }
 
@@ -81,7 +81,7 @@ server::file::InternalDirectoryHandler::readContent(Callback& callback)
     for (size_t i = 0, n = m_dir.files.size(); i < n; ++i) {
         if (File* p = m_dir.files[i]) {
             Info info(p->name, IsFile);
-            info.size = static_cast<int32_t>(p->content.size());
+            info.size = convertSize(p->content.size());
             callback.addItem(info);
         }
     }

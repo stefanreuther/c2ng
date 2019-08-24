@@ -1,63 +1,53 @@
 /**
   *  \file ui/layout/info.cpp
+  *  \brief Class ui::layout::Info
   */
 
 #include "ui/layout/info.hpp"
 
-ui::layout::Info::Info(gfx::Point minSize, gfx::Point prefSize, Growth growth)
+// General constructor.
+ui::layout::Info::Info(gfx::Point minSize, gfx::Point prefSize, Growth growth) throw()
     : m_minSize(minSize),
       m_preferredSize(prefSize),
       m_growth(growth)
 { }
 
-ui::layout::Info::Info(gfx::Point fixedSize)
+// Fixed-size constructor.
+ui::layout::Info::Info(gfx::Point fixedSize) throw()
     : m_minSize(fixedSize),
       m_preferredSize(fixedSize),
       m_growth(Fixed)
 { }
 
-ui::layout::Info::Info()
+// No-layout/invisible constructor.
+ui::layout::Info::Info() throw()
     : m_minSize(),
       m_preferredSize(),
       m_growth(NoLayout)
 { }
 
-gfx::Point
-ui::layout::Info::getMinSize() const
-{
-    return m_minSize;
-}
-
-gfx::Point
-ui::layout::Info::getPreferredSize() const
-{
-    return m_preferredSize;
-}
-
-ui::layout::Info::Growth
-ui::layout::Info::getGrowthBehaviour() const
-{
-    return m_growth;
-}
-
+// Check for horizontal growth.
 bool
-ui::layout::Info::isGrowHorizontal() const
+ui::layout::Info::isGrowHorizontal(Growth g)
 {
-    return m_growth == GrowHorizontal || m_growth == GrowBoth;
+    return g == GrowHorizontal || g == GrowBoth;
 }
 
+// Check for vertical growth.
 bool
-ui::layout::Info::isGrowVertical() const
+ui::layout::Info::isGrowVertical(Growth g)
 {
-    return m_growth == GrowVertical || m_growth == GrowBoth;
+    return g == GrowVertical || g == GrowBoth;
 }
 
+// Check for ignored widget.
 bool
-ui::layout::Info::isIgnored() const
+ui::layout::Info::isIgnored(Growth g)
 {
-    return m_growth == NoLayout;
+    return g == NoLayout;
 }
 
+// Make growth behaviour from parameters.
 ui::layout::Info::Growth
 ui::layout::Info::makeGrowthBehaviour(bool h, bool v, bool ignore)
 {
@@ -70,4 +60,17 @@ ui::layout::Info::makeGrowthBehaviour(bool h, bool v, bool ignore)
         : (v
            ? GrowVertical
            : Fixed);
+}
+
+// Combine two growth behaviours with "And".
+ui::layout::Info::Growth
+ui::layout::Info::andGrowthBehaviour(Growth a, Growth b)
+{
+    return isIgnored(a)
+        ? b
+        : isIgnored(b)
+        ? a
+        : makeGrowthBehaviour(isGrowHorizontal(a) & isGrowHorizontal(b),
+                              isGrowVertical(a)   & isGrowVertical(b),
+                              false);
 }

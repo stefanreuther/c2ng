@@ -4,6 +4,7 @@
 #ifndef C2NG_SERVER_PLAY_GAMEACCESS_HPP
 #define C2NG_SERVER_PLAY_GAMEACCESS_HPP
 
+#include <map>
 #include "server/interface/gameaccess.hpp"
 #include "game/session.hpp"
 #include "util/messagecollector.hpp"
@@ -16,7 +17,7 @@ namespace server { namespace play {
 
     class GameAccess : public server::interface::GameAccess {
      public:
-        GameAccess(game::Session& session, util::MessageCollector& console);
+        GameAccess(game::Session& session, util::MessageCollector& console, const std::map<String_t, String_t>& props);
 
         virtual void save();
         virtual String_t getStatus();
@@ -27,11 +28,12 @@ namespace server { namespace play {
         game::Session& m_session;
         util::MessageCollector& m_console;
         util::MessageCollector::MessageNumber_t m_lastMessage;
+        const std::map<String_t, String_t>& m_properties;
 
         Value_t* getObject(util::StringParser& p);
         Value_t* getQuery(util::StringParser& p);
 
-        static Packer* createPacker(util::StringParser& p, game::Session& session);
+        Packer* createPacker(util::StringParser& p);
         static Packer* createQueryPacker(util::StringParser& p, game::Session& session);
         static CommandHandler* createCommandHandler(util::StringParser& p, game::Session& session);
     };

@@ -76,7 +76,7 @@ void
 server::mailout::MailQueue::cancelMessage(String_t uniqueId)
 {
     // ex MailoutConnection::doCancel
-    m_root.mailRoot().hashKey("uniqid").field(uniqueId).remove();
+    m_root.uniqueIdMap().field(uniqueId).remove();
 }
 
 void
@@ -111,6 +111,7 @@ server::mailout::MailQueue::requestAddress(String_t user)
 void
 server::mailout::MailQueue::runQueue()
 {
+    m_root.cleanupUniqueIdMap();
     if (Transmitter* p = m_root.getTransmitter()) {
         p->runQueue();
     }

@@ -54,6 +54,7 @@ class TestServerMailoutRoot : public CxxTest::TestSuite {
     void testGetUserStatus();
     void testGetUserStatusEmpty();
     void testGetUserStatusUnconfirmed();
+    void testCleanup();
 };
 
 class TestServerMailoutSession : public CxxTest::TestSuite {

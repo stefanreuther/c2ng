@@ -341,3 +341,27 @@ TestServerMailoutRoot::testGetUserStatusUnconfirmed()
     TS_ASSERT_EQUALS(st.status, MailQueue::Unconfirmed);
 }
 
+/** Test cleanupUniqueIdMap(). */
+void
+TestServerMailoutRoot::testCleanup()
+{
+    // Database content (derived from an actual planetscentral.com state)
+    afl::net::redis::InternalDatabase db;
+    IntegerKey(db, "mqueue:msg:id").set(44848);
+    IntegerSetKey(db, "mqueue:sending").add(43218);
+    HashKey(db, "mqueue:uniqid").intField("confirmation-2588mike").set(12646);
+    HashKey(db, "mqueue:uniqid").intField("confirmation-2878828247").set(31072);
+    HashKey(db, "mqueue:uniqid").intField("confirmation-4e7dfdg").set(41310);
+    HashKey(db, "mqueue:uniqid").intField("confirmation-Alexander").set(2367);
+    HashKey(db, "mqueue:uniqid").intField("confirmation-Bernd").set(261);
+    HashKey(db, "mqueue:uniqid").intField("confirmation-Bjoern").set(24792);
+    HashKey(db, "mqueue:uniqid").intField("confirmation-Carsten").set(24);
+    HashKey(db, "mqueue:uniqid").intField("post-3003").set(43219);
+
+    // Testee
+    server::mailout::Root testee(db, makeConfig());
+    testee.cleanupUniqueIdMap();
+
+    TS_ASSERT_EQUALS(HashKey(db, "mqueue:uniqid").size(), 0);
+}
+

@@ -5,6 +5,7 @@
 
 #include "game/vcr/object.hpp"
 #include "game/spec/hull.hpp"
+#include "game/spec/engine.hpp"
 
 // /** Default constructor. */
 game::vcr::Object::Object()
@@ -120,5 +121,84 @@ game::vcr::Object::getGuessedShipPicture(const game::spec::HullVector_t& hulls) 
         return hull->getInternalPictureNumber();
     } else {
         return getPicture();
+    }
+}
+
+int
+game::vcr::Object::getGuessedEngine(const game::spec::EngineVector_t& engines,
+                                    const game::spec::Hull* pAssumedHull,
+                                    bool withESB,
+                                    const game::config::HostConfiguration& config) const
+{
+    // ex client/widgets/vcrinfomain.cc:identifyEngine
+    // Don't guess if we don't know the hull
+    if (isPlanet() || pAssumedHull == 0) {
+        return 0;
+    }
+
+    // Compute effective ESB.
+    int32_t esb;
+    if (withESB) {
+        esb = config[config.EngineShieldBonusRate](getOwner());
+    } else {
+        esb = 0;
+    }
+
+    if (config[config.NumExperienceLevels]() > 0 && getExperienceLevel() > 0) {
+        esb += config[config.EModEngineShieldBonusRate](getExperienceLevel());
+    }
+
+    // Figure out mass that must be accounted for by ESB
+    int32_t massDiff = getMass() - pAssumedHull->getMass();
+    if (config.getPlayerRaceNumber(getOwner()) == 1) {
+        // Scotty bonus
+        massDiff -= 50;
+    }
+
+    // Is 360 kt bonus applicable?
+    bool is360 = (getMass() > 140+360 && getNumBays() > 0);
+
+    int result = 0;
+    for (int i = 1, n = engines.size(); i <= n; ++i) {
+        if (const game::spec::Engine* p = engines.get(i)) {
+            int32_t thisESB = esb * p->cost().get(game::spec::Cost::Money) / 100;
+            int32_t remain = massDiff - thisESB;
+            if (remain == 0 || (is360 && remain == 360)) {
+                if (result != 0) {
+                    return 0;
+                } else {
+                    result = i;
+                }
+            }
+        }
+    }
+    return result;
+}
+
+// Check for freighter.
+bool
+game::vcr::Object::isFreighter() const
+{
+    // ex GVcrObject::isFreighter
+    return getNumBeams() == 0
+        && getNumLaunchers() == 0
+        && getNumBays() == 0;
+}
+
+// Apply classic shield limits.
+void
+game::vcr::Object::applyClassicLimits()
+{
+    // ex GVcrObject::applyClassicLimits
+    setShield(std::max(0, std::min(getShield(), 100 - getDamage())));
+
+    if (!isPlanet()) {
+        if (isFreighter()) {
+            setShield(0);
+        }
+    } else {
+        if (getCrew() <= 0) {
+            setShield(0);
+        }
     }
 }

@@ -23,6 +23,8 @@ client::tiles::SelectionHeaderTile::SelectionHeaderTile(ui::Root& root, client::
     addChild(m_next, 0);
     m_prev.setFont(gfx::FontRequest().addSize(-1));
     m_next.setFont(gfx::FontRequest().addSize(-1));
+
+    setState(DisabledState, true); // FIXME: disable so it doesn't get focus - should we have a FocusableState instead?
 }
 
 client::tiles::SelectionHeaderTile::~SelectionHeaderTile()

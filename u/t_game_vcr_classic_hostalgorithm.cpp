@@ -205,6 +205,11 @@ namespace {
         result.setTorpMissRate(in.torpMissRate);
         result.setTorpChargeRate(in.torpChargeRate);
         result.setCrewDefenseRate(in.crewDefenseRate);
+
+        // The objects are derived from real VCR files. Since we moved applyClassicLimits() from VCR core
+        // to the loader, we need to do it here as well.
+        result.applyClassicLimits();
+
         return result;
     }
 }

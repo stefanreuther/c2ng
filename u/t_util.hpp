@@ -203,6 +203,11 @@ class TestUtilRequestReceiver : public CxxTest::TestSuite {
     void testDie();
 };
 
+class TestUtilRequestSender : public CxxTest::TestSuite {
+ public:
+    void testConvert();
+};
+
 class TestUtilRequestThread : public CxxTest::TestSuite {
  public:
     void testIt();

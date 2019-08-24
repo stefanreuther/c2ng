@@ -169,6 +169,9 @@ namespace {
                  case OutputState::ShipScreen:
                  case OutputState::PlanetScreen:
                  case OutputState::BaseScreen:
+                 case OutputState::ShipTaskScreen:
+                 case OutputState::PlanetTaskScreen:
+                 case OutputState::BaseTaskScreen:
                  case OutputState::Starchart:
                     ui.detachProcess(link);
                     m_outputState.set(link, target);
@@ -277,6 +280,7 @@ namespace {
                  case game::interface::iuiScanY:
                  case game::interface::iuiChartX:
                  case game::interface::iuiChartY:
+                 case game::interface::iuiAutoTask:
                     result.reset();
                     return true;
                  case game::interface::iuiKeymap:

@@ -17,7 +17,6 @@
 #include "game/v3/utils.hpp"
 #include "util/charsetfactory.hpp"
 #include "util/string.hpp"
-#include "util/translation.hpp"
 #include "version.hpp"
 
 using afl::base::Ref;
@@ -58,6 +57,7 @@ game::v3::MaketurnApplication::appMain()
     bool optForce = false;
 
     afl::sys::StandardCommandLineParser parser(environment().getCommandLine());
+    afl::string::Translator& tx = translator();
     String_t text;
     bool isOption;
     while (parser.getNext(isOption, text)) {
@@ -69,14 +69,14 @@ game::v3::MaketurnApplication::appMain()
             } else if (text == "log") {
                 consoleLogger().setConfiguration(parser.getRequiredParameter("log"));
             } else {
-                errorExit(afl::string::Format(_("invalid option specified. Use \"%s -h\" for help").c_str(), environment().getInvocationName()));
+                errorExit(afl::string::Format(tx("invalid option specified. Use \"%s -h\" for help"), environment().getInvocationName()));
             }
         } else if (!gameDir.isValid()) {
             gameDir = text;
         } else if (!rootDir.isValid()) {
             rootDir = text;
         } else {
-            errorExit(_("too many arguments"));
+            errorExit(tx("too many arguments"));
         }
     }
 
@@ -99,11 +99,11 @@ game::v3::MaketurnApplication::appMain()
     scanner.scan(*gameDirObj, *charset, false);
 
     if (!scanner.getDirectoryFlags().contains(DirectoryScanner::HaveUnpacked)) {
-        errorExit(afl::string::Format(_("directory '%s' does not contain unpacked game data").c_str(), gameDirObj->getDirectoryName()));
+        errorExit(afl::string::Format(tx("directory '%s' does not contain unpacked game data"), gameDirObj->getDirectoryName()));
     }
     if (scanner.getDirectoryFlags().contains(DirectoryScanner::HaveConflict) && !optForce) {
-        errorExit(afl::string::Format(_("directory '%s' contains data from different games.\n"
-                                        "NOTE: use '-f' to force compilation of turn files anyway").c_str(), gameDirObj->getDirectoryName()));
+        errorExit(afl::string::Format(tx("directory '%s' contains data from different games.\n"
+                                         "NOTE: use '-f' to force compilation of turn files anyway"), gameDirObj->getDirectoryName()));
     }
 
     // Race names (needed for log messages and multi-player messages)
@@ -131,16 +131,17 @@ void
 game::v3::MaketurnApplication::help()
 {
     afl::io::TextWriter& out = standardOutput();
-    out.writeLine(afl::string::Format(_("PCC2 Turn File Compiler v%s - (c) 2010-2019 Stefan Reuther").c_str(), PCC2_VERSION));
+    afl::string::Translator& tx = translator();
+    out.writeLine(afl::string::Format(tx("PCC2 Turn File Compiler v%s - (c) 2010-2019 Stefan Reuther"), PCC2_VERSION));
     out.writeLine();
-    out.writeLine(afl::string::Format(_("Usage:\n"
-                                        "  %s [-h]\n"
-                                        "  %$0s [-f] [GAMEDIR]\n\n"
-                                        "%s\n"
-                                        "Report bugs to <Streu@gmx.de>").c_str(),
+    out.writeLine(afl::string::Format(tx("Usage:\n"
+                                         "  %s [-h]\n"
+                                         "  %$0s [-f] [GAMEDIR]\n\n"
+                                         "%s\n"
+                                         "Report bugs to <Streu@gmx.de>").c_str(),
                                       environment().getInvocationName(),
-                                      util::formatOptions("Options:\n"
-                                                          "-f\tForce operation even on file conflicts\n"
-                                                          "--log=CONFIG\tSet logger configuration\n")));
+                                      util::formatOptions(tx("Options:\n"
+                                                             "-f\tForce operation even on file conflicts\n"
+                                                             "--log=CONFIG\tSet logger configuration\n"))));
     exit(0);
 }

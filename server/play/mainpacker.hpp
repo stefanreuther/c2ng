@@ -11,13 +11,14 @@ namespace server { namespace play {
 
     class MainPacker : public Packer {
      public:
-        MainPacker(game::Session& session);
+        MainPacker(game::Session& session, const std::map<String_t, String_t>& props);
 
         Value_t* buildValue() const;
         String_t getName() const;
 
      private:
         game::Session& m_session;
+        const std::map<String_t, String_t>& m_properties;
     };
 
 } }

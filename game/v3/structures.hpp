@@ -813,6 +813,11 @@ namespace game { namespace v3 { namespace structures {
     };
     static_assert(sizeof(Util7Battle) == 32, "sizeof Util7Battle");
 
+    static const int16_t UNIT_WON = 0;                          ///< Battle result: this unit won/survived.
+    static const int16_t UNIT_CAPTURED = 1;                     ///< Battle result: this unit was captured.
+    static const int16_t UNIT_DESTROYED = 2;                    ///< Battle result: this unit got destroyed.
+    static const int16_t UNIT_NO_AMMO = 3;                      ///< Battle result: this unit ran out of ammo (and the other, too).
+
     /** Record type 8: Meteor. */
     struct Util8Meteor {
         Int16_t     planetId;                                   ///< Planet Id.

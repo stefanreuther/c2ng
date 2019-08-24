@@ -53,6 +53,7 @@ class TestInterpreterExprParser : public CxxTest::TestSuite {
     void testNegation();
     void testPower();
     void testPrecedence();
+    void testErrors();
 };
 
 #endif

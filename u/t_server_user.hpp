@@ -22,9 +22,20 @@ class TestServerUserConfiguration : public CxxTest::TestSuite {
     void testInitialisation();
 };
 
+class TestServerUserMultiPasswordEncrypter : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
 class TestServerUserPasswordEncrypter : public CxxTest::TestSuite {
  public:
     void testInterface();
+};
+
+class TestServerUserSaltedPasswordEncrypter : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testDifference();
 };
 
 class TestServerUserToken : public CxxTest::TestSuite {
@@ -52,6 +63,10 @@ class TestServerUserUserManagement : public CxxTest::TestSuite {
     void testBlockedName();
     void testProfile();
     void testLogin();
+    void testProfileLimit();
+    void testProfileNoLimit();
+    void testProfileDefaultLimit();
+    void testRemove();
 };
 
 class TestServerUserUserToken : public CxxTest::TestSuite {

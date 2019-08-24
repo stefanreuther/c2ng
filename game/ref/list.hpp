@@ -37,6 +37,7 @@ namespace game { namespace ref {
         void clear();
 
         Reference operator[](size_t pos) const;
+        void set(size_t pos, Reference ref);
         size_t size() const;
 
         void sort(const SortPredicate& pred);

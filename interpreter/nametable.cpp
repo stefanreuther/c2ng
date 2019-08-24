@@ -7,7 +7,7 @@
 
 // Look up name in table.
 bool
-interpreter::lookupName(const afl::data::NameQuery& name, afl::base::Memory<const NameTable> tab, interpreter::Context::PropertyIndex_t& index)
+interpreter::lookupName(const afl::data::NameQuery& name, afl::base::Memory<const NameTable> tab, Context::PropertyIndex_t& index)
 {
     // ex int/if/ifutil.h:lookupName
     size_t low = 0;
@@ -28,7 +28,7 @@ interpreter::lookupName(const afl::data::NameQuery& name, afl::base::Memory<cons
 
     while (const NameTable* ele = tab.eat()) {
         if (name.match(ele->name)) {
-            index = low;
+            index = Context::PropertyIndex_t(low);
             return true;
         }
         ++low;

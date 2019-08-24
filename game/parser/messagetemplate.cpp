@@ -16,8 +16,8 @@ using afl::string::strCaseCompare;
 
 namespace {
     /** Format a number into a string.
-    We cannot use numToString, because that honors user configuration
-    and might mangle the values to be not parseable. */
+        We cannot use numToString, because that honors user configuration
+        and might mangle the values to be not parseable. */
     String_t formatNumber(int32_t i)
     {
         return afl::string::Format("%d", i);
@@ -58,7 +58,7 @@ namespace {
         value = strTrim(value);
         if (type == "RACE") {
             /* Full race name */
-            if (int i = iface.parseName(iface.FullRaceName, value)) {
+            if (int i = iface.parseName(iface.LongRaceName, value)) {
                 return formatNumber(i);
             } else {
                 return String_t();

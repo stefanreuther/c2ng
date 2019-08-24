@@ -2,7 +2,10 @@
   *  \file game/map/ufotype.cpp
   */
 
+#include <cassert>
 #include "game/map/ufotype.hpp"
+
+const game::Id_t ID_OFFSET = 1;
 
 game::map::UfoType::UfoType(Universe& univ)
     : m_universe(univ),
@@ -26,24 +29,16 @@ game::map::UfoType::addUfo(int id, int type, int color)
         return 0;
     }
 
-    // FIXME: binary search?
-    UfoList_t::iterator i = m_ufos.begin();
-    while (i != m_ufos.end() && (*i)->getId() < id) {
-        ++i;
-    }
-
-    // Create the Ufo
-    // (This function's interface allows to reject a creation request.)
-    Ufo* result = 0;
-    if (i == m_ufos.end()) {
-        // does not exist, and has higher Id than we know so far
-        result = m_ufos.pushBackNew(new Ufo(id));
-    } else if ((*i)->getId() == id) {
-        // does already exist
-        result = *i;
+    // Find index. findUfoIndexById returns 1-based index.
+    Id_t index = findUfoIndexById(id);
+    Ufo* result = getUfoByIndex(index);
+    if (result != 0 && result->getId() == id) {
+        // Accept existing Ufo
     } else {
-        // does not exist, have to insert in the middle
-        result = m_ufos.insertNew(i, new Ufo(id));
+        // Create new Ufo
+        size_t i = static_cast<size_t>(index - ID_OFFSET);
+        assert(i <= m_ufos.size());
+        result = m_ufos.insertNew(m_ufos.begin() + i, new Ufo(id));
     }
 
     if (result != 0) {
@@ -144,11 +139,11 @@ game::map::Ufo*
 game::map::UfoType::getObjectByIndex(Id_t index)
 {
     // ex GUfoType::getObjectByIndex, GUfoType::getUfoByIndex
-    if (index > 0 && index <= Id_t(m_ufos.size()) && m_ufos[index-1]->isValid()) {
-        return m_ufos[index-1];
-    } else {
-        return 0;
+    Ufo* p = getUfoByIndex(index);
+    if (p != 0 && !p->isValid()) {
+        p = 0;
     }
+    return p;
 }
 
 game::map::Universe*
@@ -180,18 +175,34 @@ game::map::UfoType::getPreviousIndex(Id_t index) const
     }
 }
 
-game::map::Ufo*
-game::map::UfoType::getUfoById(int id)
+game::Id_t
+game::map::UfoType::findUfoIndexById(int id)
 {
+    // ex GUfoType::getFirstAt, sort-of
     // FIXME: binary search?
     UfoList_t::iterator i = m_ufos.begin();
     while (i != m_ufos.end() && (*i)->getId() < id) {
         ++i;
     }
+    return ID_OFFSET + Id_t(i - m_ufos.begin());
+}
 
-    if (i != m_ufos.end() && (*i)->getId() == id) {
-        return *i;
+game::map::Ufo*
+game::map::UfoType::getUfoByIndex(Id_t index)
+{
+    if (index > 0 && index <= Id_t(m_ufos.size())) {
+        return m_ufos[index - ID_OFFSET];
     } else {
         return 0;
     }
+}
+
+game::map::Ufo*
+game::map::UfoType::getUfoById(int id)
+{
+    Ufo* p = getUfoByIndex(findUfoIndexById(id));
+    if (p && p->getId() != id) {
+        p = 0;
+    }
+    return p;
 }

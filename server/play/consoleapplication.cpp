@@ -74,6 +74,16 @@ server::play::ConsoleApplication::appMain()
             } else if (p == "R" || p == "W") {
                 // session conflict management; skip those
                 commandLine.getRequiredParameter(p);
+            } else if (p == "D") {
+                // property
+                String_t key = commandLine.getRequiredParameter(p);
+                String_t value;
+                String_t::size_type eq = key.find('=');
+                if (eq != String_t::npos) {
+                    value.assign(key, eq+1, String_t::npos);
+                    key.erase(eq);
+                }
+                m_properties[key] = value;
             } else {
                 errorExit(Format(tx("invalid option '%s' specified. Use '%s -h' for help."), p, environment().getInvocationName()));
             }
@@ -150,11 +160,6 @@ server::play::ConsoleApplication::appMain()
                                                             *session.getShipList(),
                                                             tx, session.log());
 
-    // FIXME: /* Load properties */ -- needs to be different in ng
-    // if (Ptr<Stream> prop = game_file_dir->openFileNT(".c2file", Stream::C_READ)) {
-    //     loadProperties(*prop);
-    // }
-
     // Interact
     class Sink : public afl::net::line::LineSink {
      public:
@@ -170,7 +175,7 @@ server::play::ConsoleApplication::appMain()
     afl::base::Ref<afl::io::TextReader> reader = environment().attachTextReader(afl::sys::Environment::Input);
 
     Sink sink(standardOutput());
-    GameAccess impl(session, logCollector);
+    GameAccess impl(session, logCollector, m_properties);
     server::interface::GameAccessServer server(impl);
     bool stop = server.handleOpening(sink);
     while (!stop) {
@@ -194,7 +199,8 @@ server::play::ConsoleApplication::help()
     const String_t options =
         util::formatOptions(tx("Options:\n"
                                "-Ccs\tSet game character set\n"
-                               "-Rkey, -Wkey\tIgnored; used for session conflict resolution\n"));
+                               "-Rkey, -Wkey\tIgnored; used for session conflict resolution\n"
+                               "-Dkey=value\tDefine a property\n"));
 
     afl::io::TextWriter& out = standardOutput();
     out.writeLine(Format(tx("PCC2 Play Server v%s - (c) 2019 Stefan Reuther").c_str(), PCC2_VERSION));

@@ -1,18 +1,23 @@
 /**
   *  \file game/vcr/classic/pvcralgorithm.hpp
+  *  \brief Class game::vcr::classic::PVCRAlgorithm
   */
 #ifndef C2NG_GAME_VCR_CLASSIC_PVCRALGORITHM_HPP
 #define C2NG_GAME_VCR_CLASSIC_PVCRALGORITHM_HPP
 
-#include "game/vcr/classic/algorithm.hpp"
 #include "game/config/hostconfiguration.hpp"
 #include "game/spec/shiplist.hpp"
+#include "game/vcr/classic/algorithm.hpp"
 #include "game/vcr/statistic.hpp"
 
 namespace game { namespace vcr { namespace classic {
 
+/* If defined, compute everything possible in integers.
+   If not defined, use floating-point (same as PHost's internal implementation). */
 #define PVCR_INTEGER
 
+/* If defined, optimize random number generation.
+   If not defined, use direct implementation closer to original one. */
 #define PVCR_PREPARED_RNG
 
     /** PHost VCR algorithm.
@@ -87,16 +92,17 @@ namespace game { namespace vcr { namespace classic {
 
         /** Changing values. */
         struct RunningStatus {
-            int  m_beamStatus[VCR_MAX_BEAMS];        ///< Beam status, [0, ~1000]
-            int  m_launcherStatus[VCR_MAX_TORPS];        ///< Torpedo launcher status, [0, ~1000]
-            int  m_bayStatus[VCR_MAX_BAYS];          ///< Fighter bay status, [0, ~1000]
-            uint8_t m_fighterStatus[VCR_MAX_FTRS];      ///< Fighter status, [0, 2]
-            int  m_fighterStrikesLeft[VCR_MAX_FTRS];  ///< Fighter strikes remaining
-            int  m_fighterX[VCR_MAX_FTRS];           ///< Fighter X position, in meters
-            int  m_objectX;                             ///< X position of baseship, in meters
-            int  m_activeFighters;                 ///< Number of fighters currently out
-            int  m_launchCountdown;                  ///< Countdown to next fighter launch
-            Object obj;
+            int  m_beamStatus[VCR_MAX_BEAMS];            ///< Beam status, [0, ~1000].
+            int  m_launcherStatus[VCR_MAX_TORPS];        ///< Torpedo launcher status, [0, ~1000].
+            int  m_bayStatus[VCR_MAX_BAYS];              ///< Fighter bay status, [0, ~1000].
+            uint8_t m_fighterStatus[VCR_MAX_FTRS];       ///< Fighter status, [0, 2].
+            int  m_fighterStrikesLeft[VCR_MAX_FTRS];     ///< Fighter strikes remaining.
+            int  m_fighterX[VCR_MAX_FTRS];               ///< Fighter X position, in meters.
+            int  m_objectX;                              ///< X position of baseship, in meters.
+            int  m_activeFighters;                       ///< Number of fighters currently out.
+            int  m_launchCountdown;                      ///< Countdown to next fighter launch.
+            Object obj;                                  ///< Object.
+            
 #ifndef PVCR_INTEGER
             double shield;        ///< Shield status, [0, 100]
             double damage;        ///< Damage, [0, 150]
@@ -123,7 +129,7 @@ namespace game { namespace vcr { namespace classic {
         typedef int RandomConfig_t;
 #endif
 
-//     /** Precomputed values which do not change. */
+        /** Precomputed values which do not change. */
         struct FixedStatus {
             RandomConfig_t beam_recharge;  ///< Precomputed gross beam recharge rate.
             RandomConfig_t bay_recharge;   ///< Precomputed torp recharge rate
@@ -208,33 +214,33 @@ namespace game { namespace vcr { namespace classic {
         static inline bool hitT(Status& st, int kill, int expl, bool is_death_ray);
         bool hit(Status& st, int kill, int expl, bool is_death_ray);
 
-        inline int computeBayRechargeRate(int num, const Object& obj);
+        inline int computeBayRechargeRate(int num, const Object& obj) const;
         void fighterRecharge(Status& st);
         void fighterLaunch(Status& st);
         void fighterMove(Status& st);
         void fighterIntercept();
         bool fighterAttack(Status& st, Status& opp);
 
-        inline int computeBeamHitOdds(const game::spec::Beam& beam, const Object& obj);
-        inline int computeBeamRechargeRate(const game::spec::Beam& beam, const Object& obj);
+        inline int computeBeamHitOdds(const game::spec::Beam& beam, const Object& obj) const;
+        inline int computeBeamRechargeRate(const game::spec::Beam& beam, const Object& obj) const;
         void beamRecharge(Status& st);
-        int beamFindNearestFighter(const Status& st, const Status& oppst);
+        int beamFindNearestFighter(const Status& st, const Status& oppst) const;
         bool beamFire(Status& st, Status& opp);
 
-        inline int computeTorpHitOdds(const game::spec::TorpedoLauncher& torp, const Object& obj);
-        inline int computeTubeRechargeRate(const game::spec::TorpedoLauncher& torp, const Object& obj);
+        inline int computeTorpHitOdds(const game::spec::TorpedoLauncher& torp, const Object& obj) const;
+        inline int computeTubeRechargeRate(const game::spec::TorpedoLauncher& torp, const Object& obj) const;
         void torpsRecharge(Status& st);
         bool torpsFire(Status& st, Status& opp);
 
         void moveObjects();
-        bool canStillFight(const Status& st, const Status& opp);
+        bool canStillFight(const Status& st, const Status& opp) const;
 
         void initActivityDetector();
-        bool compareDetectorStatus(const DetectorStatus& a, const Status& st);
-        void setDetectorStatus(DetectorStatus& a, const Status& st);
+        static bool compareDetectorStatus(const DetectorStatus& a, const Status& st);
+        static void setDetectorStatus(DetectorStatus& a, const Status& st);
         bool checkCombatActivity();
 
-        bool checkSide(Object& obj);
+        bool checkSide(Object& obj) const;
     };
 
 } } }

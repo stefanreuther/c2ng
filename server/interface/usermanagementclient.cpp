@@ -25,6 +25,12 @@ server::interface::UserManagementClient::add(String_t userName, String_t passwor
     return m_commandHandler.callString(seg);
 }
 
+void
+server::interface::UserManagementClient::remove(String_t userId)
+{
+    m_commandHandler.callVoid(Segment().pushBackString("DELUSER").pushBackString(userId));
+}
+
 String_t
 server::interface::UserManagementClient::login(String_t userName, String_t password)
 {

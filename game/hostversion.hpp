@@ -187,6 +187,12 @@ namespace game {
         /** Check for extended missions. */
         bool hasExtendedMissions(const game::config::HostConfiguration& config) const;
 
+        /** Check for bug in UseAccurateFuelModel computation.
+            For PHost with UseAccurateFuelModel enabled, a ship can burn, say, 3.2 kt fuel.
+            This means if it starts the move with 4 kt, it will have 1 kt remaining,
+            but if it starts the move with 3 kt, it'll run dry. */
+        bool hasAccurateFuelModelBug() const;
+
      private:
         /** Host type. */
         Kind m_kind;

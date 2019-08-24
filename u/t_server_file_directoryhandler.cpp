@@ -111,3 +111,23 @@ TestServerFileDirectoryHandler::testFind()
     TS_ASSERT(!testee.findItem("a.", out));
     TS_ASSERT(!testee.findItem("c/", out));
 }
+
+/** Test convertSize(). */
+void
+TestServerFileDirectoryHandler::testConvertSize()
+{
+    using server::file::convertSize;
+
+    // From integer literal
+    TS_ASSERT_EQUALS(server::file::convertSize(0).orElse(42), 0);
+    TS_ASSERT_EQUALS(server::file::convertSize(99).orElse(42), 99);
+    TS_ASSERT_EQUALS(server::file::convertSize(-1).orElse(42), 42);
+
+    // From 64-bit unsigned integer
+    TS_ASSERT_EQUALS(server::file::convertSize(static_cast<uint64_t>(0)).orElse(42), 0);
+    TS_ASSERT_EQUALS(server::file::convertSize(static_cast<uint64_t>(99)).orElse(42), 99);
+    TS_ASSERT_EQUALS(server::file::convertSize(static_cast<uint64_t>(0x200000000ULL)).orElse(42), 42);
+    TS_ASSERT_EQUALS(server::file::convertSize(static_cast<uint64_t>(0xFFFFFFFFULL)).orElse(42), 42);
+    TS_ASSERT_EQUALS(server::file::convertSize(static_cast<uint64_t>(0x7FFFFFFFULL)).orElse(42), 0x7FFFFFFF);
+}
+

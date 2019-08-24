@@ -26,6 +26,10 @@ TestGamePlayerList::testExpand()
     pl->setName(Player::LongName,      "The Solar Federation");
     pl->setName(Player::AdjectiveName, "Fed");
 
+    pl->setName(Player::OriginalShortName,     "The Old Feds");
+    pl->setName(Player::OriginalLongName,      "The Old Solar Federation");
+    pl->setName(Player::OriginalAdjectiveName, "Old Fed");
+
     pl = testee.create(2);
     TS_ASSERT(pl);
     pl->setName(Player::ShortName,     "The Lizards");
@@ -58,6 +62,7 @@ TestGamePlayerList::testExpand()
     pl = testee.get(1);
     TS_ASSERT(pl);
     TS_ASSERT_EQUALS(pl->getName(Player::ShortName), "The Feds");
+    TS_ASSERT_EQUALS(pl->getName(Player::OriginalShortName), "The Old Feds");
     TS_ASSERT(pl->isReal());
 
     pl = testee.get(11);
@@ -87,37 +92,39 @@ TestGamePlayerList::testExpand()
     TS_ASSERT(testee.create(-1) == 0);
 
     // Expansions
-    TS_ASSERT_EQUALS(testee.expandNames("a %-5 ship"), "a Privateer ship");
-    TS_ASSERT_EQUALS(testee.expandNames("attack %5!"), "attack The Privateers!");
-    TS_ASSERT_EQUALS(testee.expandNames("%1..."), "The Feds...");
-    TS_ASSERT_EQUALS(testee.expandNames("%1."), "The Feds.");
-    TS_ASSERT_EQUALS(testee.expandNames("%1"), "The Feds");
-    TS_ASSERT_EQUALS(testee.expandNames("%a..."), "The Rebels...");
-    TS_ASSERT_EQUALS(testee.expandNames("...%b"), "...The Colonies");
-    TS_ASSERT_EQUALS(testee.expandNames("%A..."), "The Rebels...");
-    TS_ASSERT_EQUALS(testee.expandNames("...%B"), "...The Colonies");
-    TS_ASSERT_EQUALS(testee.expandNames("%-A..."), "Rebel...");
-    TS_ASSERT_EQUALS(testee.expandNames("...%-B"), "...Colonial");
-    TS_ASSERT_EQUALS(testee.expandNames("%1%2"), "The FedsThe Lizards");
-    TS_ASSERT_EQUALS(testee.expandNames("a%%b"), "a%b");
-    TS_ASSERT_EQUALS(testee.expandNames("%%"), "%");
-    TS_ASSERT_EQUALS(testee.expandNames("%%1"), "%1");
+    TS_ASSERT_EQUALS(testee.expandNames("a %-5 ship", false), "a Privateer ship");
+    TS_ASSERT_EQUALS(testee.expandNames("attack %5!", false), "attack The Privateers!");
+    TS_ASSERT_EQUALS(testee.expandNames("%1...", false), "The Feds...");
+    TS_ASSERT_EQUALS(testee.expandNames("%1.", false), "The Feds.");
+    TS_ASSERT_EQUALS(testee.expandNames("%1.", true), "The Old Feds.");
+    TS_ASSERT_EQUALS(testee.expandNames("%-1 ship", true), "Old Fed ship");
+    TS_ASSERT_EQUALS(testee.expandNames("%1", false), "The Feds");
+    TS_ASSERT_EQUALS(testee.expandNames("%a...", false), "The Rebels...");
+    TS_ASSERT_EQUALS(testee.expandNames("...%b", false), "...The Colonies");
+    TS_ASSERT_EQUALS(testee.expandNames("%A...", false), "The Rebels...");
+    TS_ASSERT_EQUALS(testee.expandNames("...%B", false), "...The Colonies");
+    TS_ASSERT_EQUALS(testee.expandNames("%-A...", false), "Rebel...");
+    TS_ASSERT_EQUALS(testee.expandNames("...%-B", false), "...Colonial");
+    TS_ASSERT_EQUALS(testee.expandNames("%1%2", false), "The FedsThe Lizards");
+    TS_ASSERT_EQUALS(testee.expandNames("a%%b", false), "a%b");
+    TS_ASSERT_EQUALS(testee.expandNames("%%", false), "%");
+    TS_ASSERT_EQUALS(testee.expandNames("%%1", false), "%1");
 
     // Those are out-of-spec. As of 20110102, '%' quotes, i.e. keeps the
     // offending character (this is to avoid eating partial UTF-8 runes).
     // \change Unlike PCC2, c2ng expands %0 and %c because we have corresponding slots in our table.
-    TS_ASSERT_EQUALS(testee.expandNames("%0"), "Nobody");
-    TS_ASSERT_EQUALS(testee.expandNames("%01"), "Nobody1");
-    TS_ASSERT_EQUALS(testee.expandNames("%c"), "Alien Marauders");
-    TS_ASSERT_EQUALS(testee.expandNames("%d"), "d");
-    TS_ASSERT_EQUALS(testee.expandNames("%x"), "x");
-    TS_ASSERT_EQUALS(testee.expandNames("%."), ".");
-    TS_ASSERT_EQUALS(testee.expandNames("%-"), "");
-    TS_ASSERT_EQUALS(testee.expandNames("%-."), ".");
-    TS_ASSERT_EQUALS(testee.expandNames("%"), "");
+    TS_ASSERT_EQUALS(testee.expandNames("%0", false), "Nobody");
+    TS_ASSERT_EQUALS(testee.expandNames("%01", false), "Nobody1");
+    TS_ASSERT_EQUALS(testee.expandNames("%c", false), "Alien Marauders");
+    TS_ASSERT_EQUALS(testee.expandNames("%d", false), "d");
+    TS_ASSERT_EQUALS(testee.expandNames("%x", false), "x");
+    TS_ASSERT_EQUALS(testee.expandNames("%.", false), ".");
+    TS_ASSERT_EQUALS(testee.expandNames("%-", false), "");
+    TS_ASSERT_EQUALS(testee.expandNames("%-.", false), ".");
+    TS_ASSERT_EQUALS(testee.expandNames("%", false), "");
 
     // Make sure this doesn't produce error characters by breaking UTF-8
-    String_t a = testee.expandNames("a%\xc3\x80");
+    String_t a = testee.expandNames("a%\xc3\x80", false);
     afl::charset::Utf8Reader rdr(afl::string::toBytes(a), 0);
     while (rdr.hasMore()) {
         afl::charset::Unichar_t ch = rdr.eat();

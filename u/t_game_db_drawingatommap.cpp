@@ -12,6 +12,8 @@
 #include "afl/base/staticassert.hpp"
 #include "afl/bits/value.hpp"
 #include "afl/bits/uint16le.hpp"
+#include "afl/sys/log.hpp"
+#include "afl/string/nulltranslator.hpp"
 
 namespace {
     // Image of the file for testSave().
@@ -53,7 +55,9 @@ TestGameDbDrawingAtomMap::testSave()
     // Save
     afl::io::InternalStream stream;
     afl::charset::Utf8Charset cs;
-    testee.save(stream, cs, tab);
+    afl::sys::Log log;
+    afl::string::NullTranslator tx;
+    testee.save(stream, cs, tab, log, tx);
 
     // Result is
     //   word(2)        number of elements

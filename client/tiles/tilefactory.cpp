@@ -22,6 +22,7 @@
 #include "interpreter/typehint.hpp"
 #include "ui/rich/documentview.hpp"
 #include "util/translation.hpp"
+#include "client/tiles/taskeditortile.hpp"
 
 namespace {
     struct TileConfig {
@@ -29,6 +30,8 @@ namespace {
         const char* title;      // may be null
         int type;
     };
+
+    const ui::Widget::State DisabledState = ui::Widget::DisabledState;
 
     const TileConfig ship_screen[] = {
         { "SHIPHEADER",    0, 0 },
@@ -110,26 +113,26 @@ namespace {
         { 0, 0, 0 },
     };
 
-// static const TileConfig shiptask_screen[] = {
-//     { "SHIPTASKHEADER",      0, 0 },
-//     { "TASKEDITOR",          N_("Auto Task:"), 0 },
-//     { "SHIPTASKCOMMAND",     0, 0 },
-//     { 0, 0, 0 },
-// };
+    static const TileConfig shiptask_screen[] = {
+        { "SHIPTASKHEADER",      0, 0 },
+        { "SHIPTASKEDITOR",      N_("Auto Task:"), 0 },
+        { "SHIPTASKCOMMAND",     0, 0 },
+        { 0, 0, 0 },
+    };
 
-// static const TileConfig planettask_screen[] = {
-//     { "PLANETTASKHEADER",    0, 0 },
-//     { "TASKEDITOR",          N_("Auto Task:"), 0 },
-//     { "PLANETTASKCOMMAND",   0, 0 },
-//     { 0, 0, 0 },
-// };
+    static const TileConfig planettask_screen[] = {
+        { "PLANETTASKHEADER",    0, 0 },
+        { "PLANETTASKEDITOR",    N_("Auto Task:"), 0 },
+        { "PLANETTASKCOMMAND",   0, 0 },
+        { 0, 0, 0 },
+    };
 
-// static const TileConfig basetask_screen[] = {
-//     { "BASETASKHEADER",      0, 0 },
-//     { "TASKEDITOR",          N_("Auto Task:"), 0 },
-//     { "BASETASKCOMMAND",     0, 0 },
-//     { 0, 0, 0 },
-// };
+    static const TileConfig basetask_screen[] = {
+        { "BASETASKHEADER",      0, 0 },
+        { "BASETASKEDITOR",      N_("Auto Task:"), 0 },
+        { "BASETASKCOMMAND",     0, 0 },
+        { 0, 0, 0 },
+    };
 
     const TileConfig shipsel_dialog[] = {
         { "OBJHEADER",          0, 0 },
@@ -172,12 +175,12 @@ namespace {
             return base_lock;
         } else if (name == "UNKNOWNPLANETLOCK") {
             return unknown_planet_lock;
-//     if (name == "SHIPTASKSCREEN")
-//         return shiptask_screen;
-//     if (name == "PLANETTASKSCREEN")
-//         return planettask_screen;
-//     if (name == "BASETASKSCREEN")
-//         return basetask_screen;
+        } else if (name == "SHIPTASKSCREEN") {
+            return shiptask_screen;
+        } else if (name == "PLANETTASKSCREEN") {
+            return planettask_screen;
+        } else if (name == "BASETASKSCREEN") {
+            return basetask_screen;
         } else if (name == "SHIPSELECTIONDIALOG") {
             return shipsel_dialog;
         } else if (name == "PLANETSELECTIONDIALOG") {
@@ -205,6 +208,7 @@ namespace {
                                                                root.provider()));
         client::si::WidgetWrapper& wrap = deleter.addNew(new client::si::WidgetWrapper(user, p, NAMES));
         wrap.attach(oop, name);
+        wrap.setState(DisabledState, true); // FIXME: disable so it doesn't get focus - should we have a FocusableState instead?
         return &wrap;
     }
 
@@ -233,6 +237,7 @@ namespace {
         configure(*p, root);
         client::si::WidgetWrapper& wrap = deleter.addNew(new client::si::WidgetWrapper(user, std::auto_ptr<ui::Widget>(p), NAMES));
         wrap.attach(oop, name);
+        wrap.setState(DisabledState, true); // FIXME: disable so it doesn't get focus - should we have a FocusableState instead?
         return &wrap;
     }
 
@@ -262,6 +267,7 @@ namespace {
         configure(*p);
         client::si::WidgetWrapper& wrap = deleter.addNew(new client::si::WidgetWrapper(user, std::auto_ptr<ui::Widget>(p), NAMES));
         wrap.attach(oop, name);
+        wrap.setState(DisabledState, true); // FIXME: disable so it doesn't get focus - should we have a FocusableState instead?
         return &wrap;
     }
 }
@@ -304,7 +310,12 @@ client::tiles::TileFactory::createTile(String_t name, afl::base::Deleter& delete
 
     // Base
     if (name == "BASEHEADER") {
-        BaseScreenHeaderTile& tile = deleter.addNew(new BaseScreenHeaderTile(m_root, m_keys));
+        BaseScreenHeaderTile& tile = deleter.addNew(new BaseScreenHeaderTile(m_root, m_keys, false));
+        tile.attach(m_observer);
+        return &tile;
+    }
+    if (name == "BASETASKHEADER") {
+        BaseScreenHeaderTile& tile = deleter.addNew(new BaseScreenHeaderTile(m_root, m_keys, true));
         tile.attach(m_observer);
         return &tile;
     }
@@ -349,7 +360,12 @@ client::tiles::TileFactory::createTile(String_t name, afl::base::Deleter& delete
 
     // Planet
     if (name == "PLANETHEADER") {
-        PlanetScreenHeaderTile& tile = deleter.addNew(new PlanetScreenHeaderTile(m_root, m_keys));
+        PlanetScreenHeaderTile& tile = deleter.addNew(new PlanetScreenHeaderTile(m_root, m_keys, false));
+        tile.attach(m_observer);
+        return &tile;
+    }
+    if (name == "PLANETTASKHEADER") {
+        PlanetScreenHeaderTile& tile = deleter.addNew(new PlanetScreenHeaderTile(m_root, m_keys, true));
         tile.attach(m_observer);
         return &tile;
     }
@@ -402,7 +418,12 @@ client::tiles::TileFactory::createTile(String_t name, afl::base::Deleter& delete
 
     // Ship
     if (name == "SHIPHEADER") {
-        ShipScreenHeaderTile& tile = deleter.addNew(new ShipScreenHeaderTile(m_root, m_keys));
+        ShipScreenHeaderTile& tile = deleter.addNew(new ShipScreenHeaderTile(m_root, m_keys, ShipScreenHeaderTile::ShipScreen));
+        tile.attach(m_observer);
+        return &tile;
+    }
+    if (name == "SHIPTASKHEADER") {
+        ShipScreenHeaderTile& tile = deleter.addNew(new ShipScreenHeaderTile(m_root, m_keys, ShipScreenHeaderTile::ShipTaskScreen));
         tile.attach(m_observer);
         return &tile;
     }
@@ -423,6 +444,7 @@ client::tiles::TileFactory::createTile(String_t name, afl::base::Deleter& delete
     if (name == "SHIPCARGO") {
         ShipCargoTile& tile = deleter.addNew(new ShipCargoTile(m_root, m_keys));
         tile.attach(m_observer);
+        tile.setState(DisabledState, true); // FIXME: disable so it doesn't get focus - should we have a FocusableState instead?
         return &tile;
     }
     if (name == "SHIPMISSION") {
@@ -442,15 +464,19 @@ client::tiles::TileFactory::createTile(String_t name, afl::base::Deleter& delete
     if (name == "SHIPMOVEMENT") {
         ShipMovementTile& tile = deleter.addNew(new ShipMovementTile(m_root, m_keys));
         tile.attach(m_observer);
+        tile.setState(DisabledState, true); // FIXME: disable so it doesn't get focus - should we have a FocusableState instead?
         return &tile;
     }
     if (name == "SHIPOVERVIEW") {
         return createDocumentViewTile("Tile.ShipOverview", m_root, 30, 12, deleter, m_userSide, m_observer);
     }
 
-//     // History
-//     if (name == "HISTORYHEADER")
-//         return new WShipScreenHeaderTile(selection, WShipScreenHeaderTile::HistoryScreen);
+    // History
+    if (name == "HISTORYHEADER") {
+        ShipScreenHeaderTile& tile = deleter.addNew(new ShipScreenHeaderTile(m_root, m_keys, ShipScreenHeaderTile::HistoryScreen));
+        tile.attach(m_observer);
+        return &tile;
+    }
 //     if (name == "HISTORYPOSITION")
 //         return new WHistoryShipPositionTile(selection);
 //     if (name == "HISTORYEQUIPMENT")
@@ -484,26 +510,35 @@ client::tiles::TileFactory::createTile(String_t name, afl::base::Deleter& delete
         return Factory().run(m_root, m_keys, client::widgets::CommandDataView::ButtonsRight, "Tile.Comment", deleter, m_userSide, m_observer);
     }
 
-//     // Tasks
-//     if (name == "SHIPTASKHEADER")
-//         return new WShipScreenHeaderTile(selection, WShipScreenHeaderTile::ShipTaskScreen);
+    // Tasks
+    // @change: we need to distinguish between different task types because the tile selects the task
 //     if (name == "SHIPTASKCOMMAND")
 //         return new WShipAutoTaskCommandTile(selection);
-//     if (name == "PLANETTASKHEADER")
-//         return new WPlanetScreenHeaderTile(selection, true);
 //     if (name == "PLANETTASKCOMMAND")
 //         return new WPlanetAutoTaskCommandTile(selection);
-//     if (name == "BASETASKHEADER")
-//         return new WBaseScreenHeaderTile(selection, true);
 //     if (name == "BASETASKCOMMAND")
 //         return new WBaseAutoTaskCommandTile(selection);
-//     if (name == "TASKEDITOR")
-//         return new WAutoTaskEditorTile(selection);
+    if (name == "SHIPTASKEDITOR") {
+        TaskEditorTile& tile = deleter.addNew(new TaskEditorTile(m_root, m_userSide, interpreter::Process::pkShipTask));
+        tile.attach(m_observer);
+        return &tile;
+    }
+    if (name == "PLANETTASKEDITOR") {
+        TaskEditorTile& tile = deleter.addNew(new TaskEditorTile(m_root, m_userSide, interpreter::Process::pkPlanetTask));
+        tile.attach(m_observer);
+        return &tile;
+    }
+    if (name == "BASETASKEDITOR") {
+        TaskEditorTile& tile = deleter.addNew(new TaskEditorTile(m_root, m_userSide, interpreter::Process::pkBaseTask));
+        tile.attach(m_observer);
+        return &tile;
+    }
 
     // Narrow
     if (name == "NARROWHEADER") {
         StarchartHeaderTile& tile = deleter.addNew(new StarchartHeaderTile(m_root));
         tile.attach(m_observer);
+        tile.setState(DisabledState, true); // FIXME: disable so it doesn't get focus - should we have a FocusableState instead?
         return &tile;
     }
 //     if (name == "NARROWSHIPEQUIPMENT")

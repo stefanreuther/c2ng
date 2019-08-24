@@ -17,7 +17,9 @@ namespace game { namespace sim {
         DoubleBeamChargeAbility,     // ex sf_DoubleBeamCharge,
         DoubleTorpedoChargeAbility,  // ex sf_DoubleTorpCharge,
         ElusiveAbility,              // ex sf_Elusive,
-        SquadronAbility              // ex sf_Squadron
+        SquadronAbility,             // ex sf_Squadron
+        ShieldGeneratorAbility,      // ex sf_ShieldGenerator
+        CloakedBaysAbility           // ex sf_CloakedBays
     };
 
 } }

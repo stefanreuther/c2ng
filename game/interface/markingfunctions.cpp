@@ -207,7 +207,7 @@ namespace {
 }
 
 
-/* @q CC$SelReadHeader(file:File, flags:Str):Any (Internal Function)
+/* @q CC$SelReadHeader(file:File, flags:Str):Any (Internal)
    Read selection file header and prepare a state.
    Returns the state.
    @since PCC2 2.40.6 */
@@ -311,7 +311,7 @@ game::interface::IFCCSelReadHeader(game::Session& session, interpreter::Argument
     return new StateValue_t(result);
 }
 
-/* @q CC$SelReadContent(Obj:Any):void (Internal Function)
+/* @q CC$SelReadContent(Obj:Any):void (Internal)
    Read selection file content according to given state.
    Returns the state.
    @since PCC2 2.40.6 */
@@ -365,7 +365,7 @@ game::interface::IFCCSelReadContent(game::Session& session, interpreter::Argumen
     return 0;
 }
 
-/* @q CC$SelGetQuestion(obj:Any):Str (Internal Function)
+/* @q CC$SelGetQuestion(obj:Any):Str (Internal)
    If the selection state needs us to ask any questions, return the question text.
    @since PCC2 2.40.6 */
 afl::data::Value*

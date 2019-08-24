@@ -160,6 +160,163 @@ Sub SelectionLoad (file, Optional flags)
   If ok Then CC$SelReadContent(state)
 EndSub
 
+% @q EnqueueShip h:Int, e:Int, Optional bt:Int, bc:Int, tt:Int, tc:Int (Planet Command)
+% Build a ship. Parameters are the same as for %BuildShip.
+% Whereas %BuildShip immediately replaces the build order,
+% this command waits until the starbase is done building its current order.
+% This command also waits until sufficient resources are available to place the order.
+%
+% This command is intended to be used in auto tasks.
+% @see BuildShip, Stop
+% @since PCC2 1.99.10, PCC 1.0.6, PCC2 2.40.7
+Sub EnqueueShip (h, e, Optional bt, bc, tt, tc)
+  % wait until pending build order performed
+  Do While Build.YesNo
+    Stop
+  Loop
+  % wait until build order successfully delivered
+  Do
+    Try
+      BuildShip h, e, bt, bc, tt, tc
+      Break
+    EndTry
+    Stop
+  Loop
+EndSub
+
+% @q CargoUploadWait amount:Cargo, Optional flags:Str (Ship Command)
+% Load cargo from planet, wait until amount loaded.
+% This command is similar to {CargoUpload}, see there for details about its parameters.
+% It will try to load cargo from the planet this ship is orbiting.
+% It will continue execution when enough cargo has been loaded.
+%
+% For example,
+% | CargoUpload "200n"
+% will load 200 kt Neutronium on this ship.
+% If the planet has more than 200 kt Neutronium, they will be loaded immediately;
+% if the planet has less, the ship will wait for newly-mined Neutronium, or Neutronium unloaded by ships,
+% until 200 kt have been loaded.
+% If this ship has not enough free cargo room, it will also wait until some becomes available.
+%
+% Note that when you unload cargo from this ship while %CargoUploadWait is active,
+% that cargo will be uploaded again and count towards the limit.
+% If the planet has 100 kt fuel while you try to load 200, everything will be uploaded.
+% If you now unload these 100 kt again, %CargoUploadWait will load them up again and finish successfully,
+% as it now has loaded 200 kt total.
+% @see CargoUpload, CargoTransferWait
+% @since PCC 1.0.11, PCC2 1.99.21, PCC2 2.40.7
+Sub CargoUploadWait (cargo, Optional flags)
+  Local Cargo.Remainder = cargo
+  Do
+    CargoUpload Cargo.Remainder, flags & "n"
+    If Not Cargo.Remainder Then Return
+    Stop
+  Loop
+EndSub
+
+% @q CargoTransferWait amount:Cargo, target:Int, Optional flags:Any (Ship Command, Planet Command)
+% Transfers cargo to a ship, wait until amount transferred.
+% This command is similar to {CargoTransfer}, see there for details about its parameters.
+% It will try to transfer cargo from this unit to ship %sid.
+% It will continue execution when all cargo has been transferred.
+%
+% For example,
+% | CargoTransfer "200n", 42
+% will load 200 kt Neutronium onto ship 42.
+% If the unit this command is invoked from has enough cargo, and the receiving ship has enough free room,
+% the command will succeed immediately.
+% Otherwise, the script will wait until cargo or free room becomes available,
+% and continue until all cargo has been transferred.
+% @see CargoUpload, CargoUploadWait
+% @since PCC 1.0.11, PCC2 1.99.21, PCC2 2.40.7
+Sub CargoTransferWait (sid, cargo, Optional flags)
+  Local Cargo.Remainder = cargo
+  Do
+    CargoTransfer sid, Cargo.Remainder, flags & "n"
+    If Not Cargo.Remainder Then Return
+    Stop
+  Loop
+EndSub
+
+
+% @q CargoUnloadAllShips (Ship Command, Planet Command)
+% Unload all ships at this location. Can be called from ship or planet.
+% @since PCC2 1.99.16, PCC2 2.40.7
+Sub CargoUnloadAllShips
+  Local thisX = Loc.X, thisY = Loc.Y
+  Local Cargo.Remainder
+  If Not PlanetAt(thisX, thisY) Then
+    Abort "No planet at this location"
+  Else
+    ForEach Ship Do
+      If Loc.X=thisX And Loc.Y=thisY And Played Then
+        CargoUnload "10000tdmcs$", "n"
+      EndIf
+    Next
+  EndIf
+EndSub
+
+
+% @q BuildMinesWait amount:Int (Planet Command)
+% Build mines, wait as necessary.
+% If %amount mines cannot be built immediately due to lacking resources or colonists,
+% this command waits until they have been built.
+% @see BuildMines, Stop
+% @since PCC2 1.99.10, PCC 1.0.17, PCC2 2.40.7
+Sub BuildMinesWait (amount)
+  Local Build.Remainder = amount
+  Do
+    BuildMines Build.Remainder, "n"
+    If Not Build.Remainder Then Return
+    Stop
+  Loop
+EndSub
+
+% @q BuildFactoriesWait amount:Int (Planet Command)
+% Build factories, wait as necessary.
+% If %amount factories cannot be built immediately due to lacking resources or colonists,
+% this command waits until they have been built.
+% @see BuildFactories, Stop
+% @since PCC2 1.99.10, PCC 1.0.17, PCC2 2.40.7
+Sub BuildFactoriesWait (amount)
+  Local Build.Remainder = amount
+  Do
+    BuildFactories Build.Remainder, "n"
+    If Not Build.Remainder Then Return
+    Stop
+  Loop
+EndSub
+
+% @q BuildDefenseWait amount:Int (Planet Command)
+% Build defense posts, wait as necessary.
+% If %amount defense posts cannot be built immediately due to lacking resources or colonists,
+% this command waits until they have been built.
+% @see BuildDefense, Stop
+% @since PCC2 1.99.10, PCC 1.0.17, PCC2 2.40.7
+Sub BuildDefenseWait (amount)
+  Local Build.Remainder = amount
+  Do
+    BuildDefense Build.Remainder, "n"
+    If Not Build.Remainder Then Return
+    Stop
+  Loop
+EndSub
+
+% @q BuildBaseDefenseWait amount:Int (Planet Command)
+% Build starbase defense, wait as necessary.
+% If %amount defense posts cannot be built immediately due to lacking resources or colonists,
+% this command waits until they have been built.
+% @see BuildBaseDefense, Stop
+% @since PCC2 1.99.10, PCC 1.0.17, PCC2 2.40.7
+Sub BuildBaseDefenseWait (amount)
+  Local Build.Remainder = amount
+  Do
+    BuildBaseDefense Build.Remainder, "n"
+    If Not Build.Remainder Then Return
+    Stop
+  Loop
+EndSub
+
 
 %%% More Game Functions
 

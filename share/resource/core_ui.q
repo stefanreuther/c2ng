@@ -80,6 +80,13 @@ Sub CCUI.SelectNextMarked
   Try With UI.Iterator Do CurrentIndex := NextIndex(CurrentIndex, "wm")
 EndSub
 
+% Go-to-object with "error handling"
+% @since PCC2 2.40.7
+Sub CCUI$GotoObject (Screen, Id)
+  % ex CC$GotoObject
+  If Id Then Try UI.GotoScreen Screen, Id
+EndSub
+
 % Planet or starbase at X,Y
 % @since PCC2 2.40.1
 Sub CCUI$GotoPlanet (screen, x, y)
@@ -153,6 +160,24 @@ Sub CC$GotoChart (X, Y)
   EndIf
 EndSub
 
+% C-m no ship screen: go to chunnel mate
+Sub CC$GotoMate
+  Local mate
+  If HasFunction('Chunneling') Or HasFunction('ChunnelSelf') Or HasFunction('ChunnelOthers') Then
+    mate := Val(FCode)
+    If mate And Ship(mate).Played And (Ship(mate).HasFunction('Chunneling') Or Ship(mate).HasFunction('ChunnelTarget')) Then
+      UI.GotoScreen 1, mate
+    EndIf
+  EndIf
+EndSub
+
+% Alt-m on ship screen: search ships that have us as chunnel mate
+Sub CC$SearchMate
+  If HasFunction("Chunneling") Or HasFunction("ChunnelTarget") Then
+    UI.Search "(HasFunction('Chunneling') Or HasFunction('ChunnelSelf') Or HasFunction('ChunnelOthers')) And Val(FCode)=" & Id, "s2"
+  EndIf
+EndSub
+
 % B on starchart in planet view
 Sub CC$BaseLock
   Local System.Err
@@ -173,6 +198,8 @@ EndSub
 Sub CC$HidePanel
   Chart.SetView ''
 EndSub
+
+
 
 %%% Unit Manipulation
 
@@ -407,5 +434,230 @@ Sub CCUI.Give
     Else
       CCUI$Give Translate("Give Ship To..."), "give ship " & Id, Owner.Real
     EndIf
+  EndIf
+EndSub
+
+% Search backend
+%  flags - as for UI.Search
+%  match - a function taking an object, returning match (must not throw)
+% Returns
+%  a ReferenceList() - success
+%  a string - "regular" failure
+% This function must not throw; throw means irregular failure with scary error message
+% @since PCC2 2.40.7
+Function CCUI$Search(flags, match)
+  Dim obj, own, result, hasObjects=0
+  result := ReferenceList()
+  own := (InStr(flags, 'm'))
+
+  % Planets/Bases
+  If InStr(flags, 'p') Then
+    ForEach Planet As obj Do
+      If (Not own Or obj->Played) Then
+        hasObjects := 1
+        If Match(obj) Then Call result->AddObjects 'p', obj->Id
+      EndIf
+    Next
+  Else
+    If InStr(flags, 'b') Then
+      ForEach Planet As obj Do
+        If (Not own Or obj->Played) And Obj->Base.YesNo Then
+          hasObjects := 1
+          If Match(obj) Then Call result->AddObjects 'b', obj->Id
+        EndIf
+      Next
+    EndIf
+  EndIf
+
+  % Ships
+  If InStr(flags, 's') Then
+    ForEach Ship As obj Do
+      If (Not own Or obj->Played) Then
+        hasObjects := 1
+        If Match(obj) Then Call result->AddObjects 's', obj->Id
+      EndIf
+    Next
+  EndIf
+
+  % Ufos
+  If InStr(flags, 'u') And Not own Then
+    ForEach Ufo As obj Do
+      hasObjects := 1
+      If Match(obj) Then Call result->AddObjects 'u', obj->Id
+    Next
+  EndIf
+
+  % Minefields and Ion Storms
+  If InStr(flags, 'o') And Not own Then
+    ForEach Minefield As Obj Do
+      hasObjects := 1
+      If Match(obj) Then Call result->AddObjects 'm', obj->Id
+    Next
+    ForEach Storm As Obj Do
+      hasObjects := 1
+      If Match(obj) Then Call result->AddObjects 'i', obj->Id
+    Next
+  EndIf
+
+  % If we have no results, check why
+  If Dim(result->Objects)=0 Then
+    If Not hasObjects Then Return Translate("There are no objects of the requested kind.")
+    % FIXME: deal with runtime errors from e.g. misspelled property names
+  EndIf
+
+  Return result
+EndFunction
+
+% @since PCC2 2.40.7
+Function CCUI$TryGotoScreen(screen, id)
+  % ex postGoToScreen (sort-of)
+  Local System.Err
+  If IsEmpty(screen) Or IsEmpty(id) Then
+    Return False
+  Else
+    Try
+      UI.GotoScreen screen, id
+      Return True
+    Else
+      Return False
+    EndTry
+  EndIf
+EndFunction
+
+% @since PCC2 2.40.7
+Function CCUI$TryGotoChart(x, y)
+  % ex postGoToChart (sort-of)
+  Local System.Err
+  If IsEmpty(x) Or IsEmpty(y) Then
+    Return False
+  Else
+    UI.GotoChart x, y
+    Return True
+  EndIf
+EndFunction
+
+
+% @q UI.GotoReference ref:Reference (Global Command)
+% Go to referenced object.
+% If that object has a control screen or information window, opens that.
+% Otherwise, shows it on the starchart.
+% @since PCC2 2.40.7
+% @see UI.GotoScreen
+Sub UI.GotoReference(ref)
+  % ex postGoToObject
+  Select Case ref->Kind
+    Case 'ship'
+      CCUI$TryGotoScreen(1, ref->Id) Or CCUI$TryGotoChart(ref->Object->Loc.X, ref->Object->Loc.Y)
+    Case 'planet'
+      CCUI$TryGotoScreen(2, ref->Id) Or CCUI$TryGotoChart(ref->Object->Loc.X, ref->Object->Loc.Y)
+    Case 'base'
+      CCUI$TryGotoScreen(3, ref->Id) Or CCUI$TryGotoScreen(2, ref->Id) Or CCUI$TryGotoChart(ref->Object->Loc.X, ref->Object->Loc.Y)
+    Case 'location'
+      CCUI$TryGotoChart(ref->Loc.X, ref->Loc.Y)
+    Case 'minefield', 'ufo', 'storm'
+      % FIXME: try to show info dialog
+      CCUI$TryGotoChart(ref->Object->Loc.X, ref->Object->Loc.Y)
+  EndSelect
+EndSub
+
+
+%
+%  Auto Tasks
+%
+%  (ex WAutoTaskScreen::handleEvent)
+%
+
+% @since PCC2 2.40.7
+Sub CCUI.Task.ToggleComment
+  Local cmd = UI.AutoTask->Lines(UI.AutoTask->Cursor)
+  If Not IsEmpty(Z(cmd))
+    If Left(cmd, 1) = '%' Then
+      cmd := Trim(Mid(cmd, 2))
+    Else
+      cmd := '% ' & cmd
+    EndIf
+
+    % This may fail if the new command is not valid, e.g. when trying to un-comment '% If 1'
+    Try UI.AutoTask->Lines(UI.AutoTask->Cursor) := cmd
+  EndIf
+EndSub
+
+% @since PCC2 2.40.7
+Sub CCUI.Task.SetCurrent
+  % ex WAutoTaskObjectSelection::setPC
+  Try
+    With UI.AutoTask Do Current := Cursor
+  EndTry
+EndSub
+
+% @since PCC2 2.40.7
+Sub CCUI.Task.DeleteCurrent
+  % ex WAutoTaskScreen::handleEvent / case SDLK_DELETE
+  Try
+    With UI.AutoTask Do Delete Cursor, 1
+  EndTry
+EndSub
+
+% @since PCC2 2.40.7
+Sub CCUI.Task.DeleteAll
+  % ex WAutoTaskScreen::handleEvent / case ss_Ctrl + SDLK_DELETE
+  Local UI.Result
+  UI.Message Translate("Delete this auto task?"), Translate("Auto Task"), Translate("Yes No")
+  If UI.Result = 1 Then
+    Try
+      With UI.AutoTask Do Delete 0, Dim(Lines)
+    EndTry
+  EndIf
+EndSub
+
+% @since PCC2 2.40.7
+Sub CCUI.Task.SaveToFile
+  % ex WAutoTaskScreen::handleSave
+  Local UI.Result, System.Err, name, fd, i, task
+  UI.FileWindow Translate("Save Task"), "*.cct"
+  If Not IsEmpty(UI.Result)
+    name := UI.Result
+    Try
+      fd := FreeFile()
+      Open name For Output As #fd
+      task := UI.AutoTask->Lines
+      For i:=0 To Dim(task)-1 Do Print #fd, task(i)
+      Close #fd
+    Else
+      MessageBox Format(Translate("Unable to create file %s: %s"), name, System.Err), Translate("Save Task")
+    EndTry
+  EndIf
+EndSub
+
+% @since PCC2 2.40.7
+Sub CCUI.Task.LoadFromFile
+  % ex WAutoTaskScreen::handleLoad
+  Local UI.Result, System.Err, name, fd, numBadLines, cmd
+  UI.FileWindow Translate("Load Task"), "*.cct"
+  If Not IsEmpty(UI.Result)
+    name := UI.Result
+    Try
+      fd := FreeFile()
+      Open name For Input As #fd
+
+      % Load file line-by-line to catch errors
+      numBadLines := 0
+      Do
+        Input #fd, cmd, 1
+        If IsEmpty(cmd) Then Break
+        Try
+          Call UI.AutoTask->Add cmd
+        Else
+          numBadLines := numBadLines + 1
+        EndTry
+      Loop
+      Close #fd
+
+      If numBadLines Then
+        MessageBox Format(Translate("This file contained %d line%1{ which is%|s which are%} not permitted in Auto Tasks. %1{It has%|They have%} been skipped."), numBadLines), Translate("Load Task")
+      EndIf
+    Else
+      MessageBox Format(Translate("Unable to open file %s: %s"), name, System.Err), Translate("Load Task")
+    EndTry
   EndIf
 EndSub

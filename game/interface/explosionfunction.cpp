@@ -5,6 +5,18 @@
 #include "game/interface/explosionfunction.hpp"
 #include "interpreter/error.hpp"
 
+/* @q Explosion:Any (Context)
+   @noproto
+   | ForEach Explosion Do ...
+   | Find(Explosion, ...)
+
+   The <tt>Explosion</tt> array contains all current explosion reports.
+
+   Because explosions have no Id, therefore it is not possible to access a specific explosion.
+   The <tt>Explosion</tt> array can only be used to iterate over,
+   for example, using the {ForEach} command or the {Find} function.
+
+   @since PCC2 2.40.1 */
 game::interface::ExplosionFunction::ExplosionFunction(Session& session)
     : m_session(session)
 { }

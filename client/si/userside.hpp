@@ -151,15 +151,8 @@ namespace client { namespace si {
         /** Handle successful wait.
             Finds the associated Control, and calls it's handleWait() function.
             Called by ScriptSide.
-            \param id Wait Id
-            \param state Resulting process state. Notable process states:
-            - Suspended: process executed "Stop"
-            - Waiting: process executed a UI command that detached using detachProcess()
-            - Ended: process ran to end
-            - Terminated: process executed "End" (or: wait didn't observe a particular process, and process group ended normally)
-            - Failed: process failed using uncaught "Abort" or other error
-            \param error Process error for state Failed */
-        void handleWait(uint32_t id, interpreter::Process::State state, interpreter::Error error);
+            \param id Wait Id */
+        void handleWait(uint32_t id);
 
         /** Create ContextProvider.
             Calls the current Control's createContextProvider, if any.

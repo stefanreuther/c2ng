@@ -1,30 +1,35 @@
 /**
   *  \file game/interface/globalfunctions.cpp
+  *  \brief Global Functions
   */
 
 #include <cmath>
 #include "game/interface/globalfunctions.hpp"
-#include "interpreter/values.hpp"
-#include "afl/string/format.hpp"
 #include "afl/base/staticassert.hpp"
-#include "interpreter/error.hpp"
-#include "afl/data/scalarvalue.hpp"
 #include "afl/data/floatvalue.hpp"
+#include "afl/data/scalarvalue.hpp"
 #include "afl/data/stringvalue.hpp"
-#include "game/spec/shiplist.hpp"
-#include "game/game.hpp"
-#include "game/root.hpp"
-#include "interpreter/context.hpp"
-#include "game/turn.hpp"
+#include "afl/string/format.hpp"
+#include "game/actions/preconditions.hpp"
 #include "game/config/booleanvalueparser.hpp"
+#include "game/game.hpp"
+#include "game/map/circularobject.hpp"
+#include "game/root.hpp"
+#include "game/spec/shiplist.hpp"
+#include "game/turn.hpp"
+#include "interpreter/context.hpp"
+#include "interpreter/error.hpp"
+#include "interpreter/values.hpp"
+#include "interpreter/process.hpp"
+#include "game/interface/taskeditorcontext.hpp"
 
-using interpreter::checkStringArg;
-using interpreter::checkIntegerArg;
 using interpreter::checkBooleanArg;
-using interpreter::makeStringValue;
-using interpreter::makeIntegerValue;
+using interpreter::checkIntegerArg;
+using interpreter::checkStringArg;
 using interpreter::makeBooleanValue;
 using interpreter::makeFloatValue;
+using interpreter::makeIntegerValue;
+using interpreter::makeStringValue;
 
 namespace {
     afl::data::Value* makeScalarValue(int32_t value, const game::config::ValueParser& parser)
@@ -104,6 +109,53 @@ namespace {
     }
 }
 
+/* @q AutoTask(type:Int, Id:Int):Obj (Function)
+   Access auto-task.
+   The first parameter is the type of task to access:
+   - 1: ship task
+   - 2: planet task
+   - 3: starbase task
+   The second parameter is the object Id.
+
+   The resulting object allows reading and manipulating the auto task using {@group Auto Task Property|Auto Task Properties}.
+   If the unit does not have an auto task, a blank one will be created and can be populated.
+
+   An auto task can only be accessed when it is suspended.
+   Accessing the auto task will prevent it from executing.
+   An auto task is blocked as long as one object returned by AutoTask() exists.
+   Multiple distinct AutoTask() objects exist and all show the same state.
+
+   The <a href="pcc2:taskscreen">auto task screens</a> show a cursor which is also part of an auto task being edited.
+   The cursor state is maintained as long as an AutoTask() object or the auto task screen is active.
+   When all AutoTask() objects are gone, the cursor is reset.
+
+   @since PCC2 2.40.7 */
+afl::data::Value*
+game::interface::IFAutoTask(game::Session& session, interpreter::Arguments& args)
+{
+    args.checkArgumentCount(2);
+
+    // Parse args
+    int32_t type, id;
+    if (!checkIntegerArg(type, args.getNext())
+        || !checkIntegerArg(id, args.getNext()))
+    {
+        return 0;
+    }
+
+    // Convert args
+    interpreter::Process::ProcessKind k;
+    switch (type) {
+     case 1: k = interpreter::Process::pkShipTask;   break;
+     case 2: k = interpreter::Process::pkPlanetTask; break;
+     case 3: k = interpreter::Process::pkBaseTask;   break;
+     default: throw interpreter::Error::rangeError();
+    }
+
+    return TaskEditorContext::create(session, k, id);
+}
+
+
 /* @q Cfg(key:Str, Optional player:Int):Any (Function)
    Access host configuration.
    The first parameter is the name of a configuration option as used in <tt>pconfig.src</tt>,
@@ -148,21 +200,21 @@ game::interface::IFCfg(game::Session& session, interpreter::Arguments& args)
 }
 
 
-// /* @q Distance(obj1:Any, x2:Int, y2:Int):Num (Function)
-//    @noproto
-//    | Distance(x1:Int, y1:Int, x2:Int, y2:Int):Num
-//    | Distance(x1:Int, y1:Int, obj2:Any):Num
-//    | Distance(obj1:Any, x2:Int, y2:Int):Num
-//    | Distance(obj1:Any, obj2:Any):Num
-//    Compute distance between two points.
-//    Points can be specified as two integers for an X/Y coordinate pair,
-//    or an object which must have {Loc.X} and {Loc.Y} properties.
-//    Examples:
-//    | Distance(1000, 1000, 1200, 1200)
-//    | Distance(Ship(10), Planet(30))
+/* @q Distance(obj1:Any, x2:Int, y2:Int):Num (Function)
+   @noproto
+   | Distance(x1:Int, y1:Int, x2:Int, y2:Int):Num
+   | Distance(x1:Int, y1:Int, obj2:Any):Num
+   | Distance(obj1:Any, x2:Int, y2:Int):Num
+   | Distance(obj1:Any, obj2:Any):Num
+   Compute distance between two points.
+   Points can be specified as two integers for an X/Y coordinate pair,
+   or an object which must have {Loc.X} and {Loc.Y} properties.
+   Examples:
+   | Distance(1000, 1000, 1200, 1200)
+   | Distance(Ship(10), Planet(30))
 
-//    If a wrapped map is being used, the map seam is also considered and the shortest possible distance is reported.
-//    @since PCC 1.0.11, PCC2 1.99.8, PCC2 2.40.1 */
+   If a wrapped map is being used, the map seam is also considered and the shortest possible distance is reported.
+   @since PCC 1.0.11, PCC2 1.99.8, PCC2 2.40.1 */
 afl::data::Value*
 game::interface::IFDistance(game::Session& session, interpreter::Arguments& args)
 {
@@ -246,27 +298,27 @@ game::interface::IFDistance(game::Session& session, interpreter::Arguments& args
 }
 
 
-// /* @q Format(fmt:Str, args:Any...):Str (Function)
-//    Format a string.
-//    The format string can contain placeholders, each of which is replaced by one of the arguments,
-//    similar to the %sprintf function found in many programming languages.
+/* @q Format(fmt:Str, args:Any...):Str (Function)
+   Format a string.
+   The format string can contain placeholders, each of which is replaced by one of the arguments,
+   similar to the %sprintf function found in many programming languages.
 
-//    Some placeholders:
-//    - <tt>&#37;d</tt> formats an integer as a decimal number ("99")
-//    - <tt>&#37;e</tt> formats a fraction in exponential format ("9.99e+1")
-//    - <tt>&#37;f</tt> formats a fraction as regular decimal fraction ("99.9")
-//    - <tt>&#37;g</tt> auto-selects between <tt>&#37;e</tt> and <tt>&#37;f</tt>
-//    - <tt>&#37;x</tt> formats an integer as an octal number ("143")
-//    - <tt>&#37;s</tt> formats a string
-//    - <tt>&#37;x</tt> formats an integer as a hexadecimal number ("63")
+   Some placeholders:
+   - <tt>&#37;d</tt> formats an integer as a decimal number ("99")
+   - <tt>&#37;e</tt> formats a fraction in exponential format ("9.99e+1")
+   - <tt>&#37;f</tt> formats a fraction as regular decimal fraction ("99.9")
+   - <tt>&#37;g</tt> auto-selects between <tt>&#37;e</tt> and <tt>&#37;f</tt>
+   - <tt>&#37;x</tt> formats an integer as an octal number ("143")
+   - <tt>&#37;s</tt> formats a string
+   - <tt>&#37;x</tt> formats an integer as a hexadecimal number ("63")
 
-//    You can specify a decimal number between the percent sign and the letter
-//    to format the result with at least that many places.
+   You can specify a decimal number between the percent sign and the letter
+   to format the result with at least that many places.
 
-//    This function supports up to 10 arguments (plus the format string) in one call.
+   This function supports up to 10 arguments (plus the format string) in one call.
 
-//    @since PCC2 1.99.9, PCC2 2.40
-//    @see RXml */
+   @since PCC2 1.99.9, PCC2 2.40
+   @see RXml */
 afl::data::Value*
 game::interface::IFFormat(game::Session& /*session*/, interpreter::Arguments& args)
 {
@@ -313,14 +365,80 @@ game::interface::IFFormat(game::Session& /*session*/, interpreter::Arguments& ar
     return makeStringValue(formatter);
 }
 
-// /* @q PlanetAt(x:Int, y:Int, Optional flag:Bool):Int (Function)
-//    Get planet by location.
+/* @q ObjectIsAt(obj:Any, x:Int, y:Int):Bool (Function)
+   Check whether object is at or covers a given coordinate.
 
-//    Returns the Id number of the planet at position (%x,%y).
-//    When %flag is True (nonzero, nonempty), returns the planet whose gravity wells are in effect at that place;
-//    when %flag is False or not specified at all, returns only exact matches.
-//    If there is no such planet, it returns zero.
-//    @since PCC 1.0.18, PCC2 1.99.9, PCC2 2.40.1 */
+   Objects that cover a single point (ships, planets) must be at that very location.
+   Objects that cover an area (minefields, ion storms, Ufos) must cover that location.
+   Wrap is considered.
+
+   Returns a boolean value, or EMPTY if any parameter is EMPTY.
+   @since PCC2 2.40.7 */
+afl::data::Value*
+game::interface::IFObjectIsAt(game::Session& session, interpreter::Arguments& args)
+{
+    // This is intended to implement search.
+    // searchPlanets, searchShips:
+    //    match = s.getPos() == query.location;
+    // searchUfos, searchIonStorms:
+    //    match = distanceSquared(it->getPos(), query.location) <= square(it->getRadius());
+    // searchMinefields:
+    //    match = distanceSquared(mf->getPos(), query.location) <= mf->getUnits();
+
+    // Parse args
+    int32_t x, y;
+    args.checkArgumentCount(3);
+    afl::data::Value* obj = args.getNext();
+    if (!obj) {
+        return 0;
+    }
+    if (!checkIntegerArg(x, args.getNext()) || !checkIntegerArg(y, args.getNext())) {
+        return 0;
+    }
+
+    // Validate object
+    interpreter::Context* ctx = dynamic_cast<interpreter::Context*>(obj);
+    if (ctx == 0) {
+        throw interpreter::Error::typeError(interpreter::Error::ExpectRecord);
+    }
+
+    const game::map::MapObject* mapObj = dynamic_cast<const game::map::MapObject*>(ctx->getObject());
+    if (mapObj == 0) {
+        throw interpreter::Error::typeError(interpreter::Error::ExpectRecord);
+    }
+
+    // Must have a current turn to access map configuration
+    const Game& g = game::actions::mustHaveGame(session);
+    const game::map::Configuration& config = g.currentTurn().universe().config();
+
+    // Different handling depending on object type
+    game::map::Point thisPoint(x, y);
+    game::map::Point objPos;
+    if (!mapObj->getPosition(objPos)) {
+        return 0;
+    }
+    if (const game::map::CircularObject* circObj = dynamic_cast<const game::map::CircularObject*>(mapObj)) {
+        // Circular
+        int32_t r2;
+        if (!circObj->getRadiusSquared(r2)) {
+            return 0;
+        }
+        return makeBooleanValue(config.getSquaredDistance(thisPoint, objPos) <= r2);
+    } else {
+        // Point
+        return makeBooleanValue(config.getCanonicalLocation(thisPoint) == objPos);
+    }
+}
+
+
+/* @q PlanetAt(x:Int, y:Int, Optional flag:Bool):Int (Function)
+   Get planet by location.
+
+   Returns the Id number of the planet at position (%x,%y).
+   When %flag is True (nonzero, nonempty), returns the planet whose gravity wells are in effect at that place;
+   when %flag is False or not specified at all, returns only exact matches.
+   If there is no such planet, it returns zero.
+   @since PCC 1.0.18, PCC2 1.99.9, PCC2 2.40.1 */
 afl::data::Value*
 game::interface::IFPlanetAt(game::Session& session, interpreter::Arguments& args)
 {
@@ -336,7 +454,6 @@ game::interface::IFPlanetAt(game::Session& session, interpreter::Arguments& args
     // Fetch optional flag argument
     bool flag = false;
     if (args.getNumArgs() > 0) {
-        // FIXME: this is inconsistent in that a missing argument does not equal a null argument
         if (!checkBooleanArg(flag, args.getNext())) {
             return 0;
         }
@@ -391,18 +508,20 @@ game::interface::IFPref(game::Session& session, interpreter::Arguments& args)
 }
 
 
-// /* @q Random(a:Int, Optional b:Int):Int (Function)
-//    Generate random number.
-//    With one parameter, generates a random number in range [0,a) (i.e. including zero, not including %a).
-//    With two parameters, generates a random number in range [a,b) (i.e. including %a, not including %b).
+/* @q Random(a:Int, Optional b:Int):Int (Function)
+   Generate random number.
+   With one parameter, generates a random number in range [0,a) (i.e. including zero, not including %a).
+   With two parameters, generates a random number in range [a,b) (i.e. including %a, not including %b).
 
-//    For example, <tt>Random(10)</tt> generates random numbers between 0 and 9, as does <tt>Random(0, 10)</tt>.
+   For example, <tt>Random(10)</tt> generates random numbers between 0 and 9, as does <tt>Random(0, 10)</tt>.
 
-//    <tt>Random(1,500)</tt> generates random numbers between 1 and 499,
-//    <tt>Random(500,1)</tt> generates random numbers between 2 and 500
-//    (the first parameter always included in the range, the second one is not).
+   <tt>Random(1,500)</tt> generates random numbers between 1 and 499,
+   <tt>Random(500,1)</tt> generates random numbers between 2 and 500
+   (the first parameter always included in the range, the second one is not).
 
-//    @since PCC 1.0.7, PCC2 1.99.9, PCC2 2.40 */
+   The maximum value for either parameter ix 32767 (=15 bit).
+
+   @since PCC 1.0.7, PCC2 1.99.9, PCC2 2.40 */
 afl::data::Value*
 game::interface::IFRandom(game::Session& session, interpreter::Arguments& args)
 {
@@ -431,10 +550,10 @@ game::interface::IFRandom(game::Session& session, interpreter::Arguments& args)
     }
 }
 
-// /* @q RandomFCode():Str (Function)
-//    Generate a random friendly code.
-//    The friendly code will not have a special meaning.
-//    @since PCC 1.1.11, PCC2 1.99.8, PCC2 2.40.1 */
+/* @q RandomFCode():Str (Function)
+   Generate a random friendly code.
+   The friendly code will not have a special meaning.
+   @since PCC 1.1.11, PCC2 1.99.8, PCC2 2.40.1 */
 afl::data::Value*
 game::interface::IFRandomFCode(game::Session& session, interpreter::Arguments& args)
 {
@@ -450,12 +569,12 @@ game::interface::IFRandomFCode(game::Session& session, interpreter::Arguments& a
     }
 }
 
-// /* @q Translate(str:Str):Str (Function)
-//    Translate a string.
-//    Uses PCC's internal language database to reproduce the English string given as parameter
-//    in the user's preferred language.
-//    If the string is not contained in the language database, returns the original string.
-//    @since PCC2 1.99.9, PCC2 2.40 */
+/* @q Translate(str:Str):Str (Function)
+   Translate a string.
+   Uses PCC's internal language database to reproduce the English string given as parameter
+   in the user's preferred language.
+   If the string is not contained in the language database, returns the original string.
+   @since PCC2 1.99.9, PCC2 2.40 */
 afl::data::Value*
 game::interface::IFTranslate(game::Session& session, interpreter::Arguments& args)
 {
@@ -466,15 +585,15 @@ game::interface::IFTranslate(game::Session& session, interpreter::Arguments& arg
         return 0;
     } else {
         return makeStringValue(session.translator().translateString(s));
-    }    
+    }
 }
 
-// /* @q Truehull(slot:Int, Optional player:Int):Int (Function)
-//    Access per-player hull assignments.
-//    Returns the Id of the %slot'th hull number the specified %player can build.
-//    If the %player parameter is omitted, uses your player slot.
-//    If the specified slot does not contain a buildable hull, returns 0.
-//    @since PCC 1.0.12, PCC2 1.99.8, PCC2 2.40 */
+/* @q Truehull(slot:Int, Optional player:Int):Int (Function)
+   Access per-player hull assignments.
+   Returns the Id of the %slot'th hull number the specified %player can build.
+   If the %player parameter is omitted, uses your player slot.
+   If the specified slot does not contain a buildable hull, returns 0.
+   @since PCC 1.0.12, PCC2 1.99.8, PCC2 2.40 */
 afl::data::Value*
 game::interface::IFTruehull(game::Session& session, interpreter::Arguments& args)
 {
@@ -487,7 +606,6 @@ game::interface::IFTruehull(game::Session& session, interpreter::Arguments& args
     }
 
     if (args.getNumArgs() > 0) {
-        // FIXME: this is inconsistent in that a missing argument does not equal a null argument
         if (!checkIntegerArg(player, args.getNext())) {
             return 0;
         }

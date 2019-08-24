@@ -1,0 +1,10 @@
+/*!
+     \namespace server::user
+     \brief c2user server
+
+     This namespace implements the c2user service.
+     c2user manages user accounts.
+
+     - server::user::CommandHandler
+     - server::user::Root
+ */

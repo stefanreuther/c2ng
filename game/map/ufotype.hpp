@@ -17,6 +17,10 @@ namespace game { namespace map {
     // This means
     // - possibly O(n**2) creation (but O(n) iteration, where PCC2 has O(n**2))
     // - cannot deal with multiple ufos with same Id, different type
+    // We address ufos by index which means indexes change when Ufos are added or removed.
+    // Should that be required, we need to make some stable-reference mechanism
+    // (low-fi version: just validate that Id/index still match) and use that for at least
+    // UfoContext, possibly also Reference.
 
     class Universe;
 
@@ -50,7 +54,18 @@ namespace game { namespace map {
         //    const_iterator begin() const;
         //    const_iterator end() const;
 
-        //    iterator getFirstAt(int id);
+        /** Find index for an Ufo, given an Id.
+            If an Ufo with the given Id exists, returns the (1-based) index such that getUfoByIndex() will return that Ufo.
+            If an Ufo with the given Id does not exist, returns the (1-based) index where it would have to be inserted in the sequence.
+            \param id Desired Id
+            \return 1-based index, compatible with getUfoByIndex(), getObjectByIndex(). */
+        Id_t findUfoIndexById(int id);
+
+        /** Get Ufo by index.
+            Unlike the getObjectByIndex() method, this may return an object whose isValid() is false.
+            \param index 1-based index
+            \return Ufo, or null */
+        Ufo* getUfoByIndex(Id_t index);
 
      private:
         typedef afl::container::PtrVector<Ufo> UfoList_t;

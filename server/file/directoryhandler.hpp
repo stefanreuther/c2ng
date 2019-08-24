@@ -177,6 +177,21 @@ namespace server { namespace file {
         bool findItem(String_t name, Info& info);
     };
 
+    /** Convert size from original type to API type, if representable.
+        \tparam T (implicit) original type
+        \param sz original size
+        \return sz if representable, otherwise Nothing */
+    template<typename T>
+    afl::base::Optional<int32_t> convertSize(T sz)
+    {
+        int32_t converted = int32_t(sz);
+        if (converted >= 0 && T(converted) == sz) {
+            return converted;
+        } else {
+            return afl::base::Nothing;
+        }
+    }
+
 } }
 
 #endif

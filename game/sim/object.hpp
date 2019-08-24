@@ -197,11 +197,15 @@ namespace game { namespace sim {
         static const int32_t fl_ElusiveSet          = 128*65536;   ///< Elusive bit is effective.
         static const int32_t fl_Squadron            = 256*65536;   ///< Ship is a fighter squadron (unkillable, respawns).
         static const int32_t fl_SquadronSet         = 512*65536;   ///< Squadron bit is effective.
+        static const int32_t fl_ShieldGenerator     = 1024*65536;  ///< Ship has a shield generator.
+        static const int32_t fl_ShieldGeneratorSet  = 2048*65536;  ///< Shield generator bit is effective.
+        static const int32_t fl_CloakedBays         = 4096*65536;  ///< Ship has cloaked fighter bays.
+        static const int32_t fl_CloakedBaysSet      = 8192*65536;  ///< Cloaked fighter bays bit is effective.
 
         static const int32_t fl_RandomDigits      = fl_RandomFC1 + fl_RandomFC2 + fl_RandomFC3;
         static const int32_t fl_FunctionSetBits   = (fl_PlanetImmunitySet | fl_CommanderSet | fl_FullWeaponrySet
                                                      | fl_TripleBeamKillSet | fl_DoubleBeamChargeSet | fl_DoubleTorpChargeSet
-                                                     | fl_ElusiveSet | fl_SquadronSet);
+                                                     | fl_ElusiveSet | fl_SquadronSet | fl_ShieldGeneratorSet | fl_CloakedBaysSet);
 
      private:
         // common

@@ -95,6 +95,7 @@ namespace interpreter {
         StatementResult compileWith(BytecodeObject& bco, const StatementCompilationContext& scc);
         StatementResult compileExpressionStatement(BytecodeObject& bco, const StatementCompilationContext& scc);
         StatementResult compileProcedureCall(BytecodeObject& bco, const StatementCompilationContext& scc);
+        StatementResult compileLoopBody(BytecodeObject& bco, StatementCompilationContext& subcc);
         void compileVariableDefinition(BytecodeObject& bco, const StatementCompilationContext& scc, Opcode::Scope scope);
         bool compileInitializer(BytecodeObject& bco, const StatementCompilationContext& scc);
         bool compileTypeInitializer(BytecodeObject& bco, const StatementCompilationContext& scc, const String_t& typeName);

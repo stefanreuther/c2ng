@@ -13,7 +13,13 @@ namespace client { namespace tiles {
 
     class ShipScreenHeaderTile : public client::widgets::ControlScreenHeader {
      public:
-        ShipScreenHeaderTile(ui::Root& root, client::widgets::KeymapWidget& kmw);
+        enum Kind {
+            ShipScreen,
+            HistoryScreen,
+            ShipTaskScreen
+        };
+
+        ShipScreenHeaderTile(ui::Root& root, client::widgets::KeymapWidget& kmw, Kind k);
         void attach(client::proxy::ObjectObserver& oop);
 
      private:

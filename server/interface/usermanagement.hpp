@@ -18,6 +18,9 @@ namespace server { namespace interface {
         // ADDUSER name pass [key value...]
         virtual String_t add(String_t userName, String_t password, afl::base::Memory<const String_t> config) = 0;
 
+        // DELUSER name
+        virtual void remove(String_t userId) = 0;
+
         // LOGIN user pass
         virtual String_t login(String_t userName, String_t password) = 0;
 

@@ -57,6 +57,7 @@ namespace {
         bool doEraseUnusedLabels(PC_t pc);
         bool doInvertJumps(PC_t pc);
         bool doThreadJumps(PC_t pc);
+        bool doMergeJumps(PC_t pc);
         bool doRemoveUnused(PC_t pc);
         bool doMergeNegation(PC_t pc);
         bool doUnaryCondition(PC_t pc);
@@ -108,6 +109,7 @@ OptimizerState::iterate()
         { &OptimizerState::doEraseUnusedLabels, Opcode::maJump,     0, "EraseUnusedLabels" },
         { &OptimizerState::doInvertJumps,       Opcode::maJump,     2, "InvertJumps" },
         { &OptimizerState::doThreadJumps,       Opcode::maJump,     0, "ThreadJumps" },
+        { &OptimizerState::doMergeJumps,        Opcode::maJump,     1, "MergeJumps" },
         { &OptimizerState::doRemoveUnused,      Opcode::maJump,     1, "RemoveUnused" },
         { &OptimizerState::doRemoveUnused,      Opcode::maSpecial,  1, "RemoveUnused" },
         { &OptimizerState::doMergeNegation,     Opcode::maUnary,    1, "MergeNegation" },
@@ -387,6 +389,28 @@ OptimizerState::doThreadJumps(PC_t pc)
         --m_labelInfo[m_bco(pc).arg].useCount;
         m_bco(pc).arg = target_label;
         ++m_labelInfo[m_bco(pc).arg].useCount;
+        return true;
+    } else {
+        return false;
+    }
+}
+
+/** Merge conditional jump followed by unconditional jump to same target.
+    This appears if a condition is evaluated and ignored, e.g. if someone does "func1() or func2()" as a statement. */
+bool
+OptimizerState::doMergeJumps(PC_t pc)
+{
+    if (m_bco(pc).isRegularJump()
+        && m_bco(pc+1).isRegularJump()
+        && (m_bco(pc+1).minor & Opcode::jAlways) == Opcode::jAlways
+        && m_bco(pc).arg == m_bco(pc+1).arg
+        && (m_bco(pc).minor & Opcode::jSymbolic) == (m_bco(pc+1).minor & Opcode::jSymbolic))
+    {
+        // If first jump is 'jXXp', turn it into 'drop 1'; otherwise, turn into 'drop 0' aka NOP.
+        uint16_t arg = ((m_bco(pc).minor & Opcode::jPopAlways) != 0) ? 1 : 0;
+        m_bco(pc).major = Opcode::maStack;
+        m_bco(pc).minor = Opcode::miStackDrop;
+        m_bco(pc).arg   = arg;
         return true;
     } else {
         return false;

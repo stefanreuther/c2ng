@@ -4,12 +4,13 @@
 #ifndef C2NG_INTERPRETER_PROCESS_HPP
 #define C2NG_INTERPRETER_PROCESS_HPP
 
-#include "interpreter/contextprovider.hpp"
-#include "interpreter/bytecodeobject.hpp"
-#include "afl/data/segment.hpp"
-#include "afl/data/namemap.hpp"
-#include "interpreter/error.hpp"
+#include "afl/base/deletable.hpp"
 #include "afl/base/signal.hpp"
+#include "afl/data/namemap.hpp"
+#include "afl/data/segment.hpp"
+#include "interpreter/bytecodeobject.hpp"
+#include "interpreter/contextprovider.hpp"
+#include "interpreter/error.hpp"
 
 namespace interpreter {
 
@@ -17,8 +18,6 @@ namespace interpreter {
 
     class Process : public ContextProvider {
         // ex IntExecutionContext
-        // friend class IntVMSaveContext;
-        // friend class IntVMLoadContext;
      public:
         typedef BytecodeObject::PC_t PC_t;
         typedef afl::data::Segment Segment_t;
@@ -61,7 +60,31 @@ namespace interpreter {
             pkPlanetTask,
             pkBaseTask
         };
-    
+
+        /** Finalizer.
+            A process can have one finalizer.
+            The finalizer's job is to report the process status to some observer.
+            The driver (ProcessList) needs to call finalize() to run the finalizer at an appropriate place.
+
+            Finalizers are not persisted in any way,
+            their job is to report a status back to someone who started the process on the UI.
+            If the process suspends, the finalizer will be called to report the suspension. */
+        class Finalizer : public afl::base::Deletable {
+         public:
+            /** Perform finalisation for this process.
+                \param p Process */
+            virtual void finalizeProcess(Process& p) = 0;
+        };
+
+        /** Freezer.
+            If a process is in state Frozen, the Freezer links to the component that froze it.
+            So far, this is just a tag interface. */
+        class Freezer {
+         protected:
+            virtual ~Freezer()
+                { }
+        };
+
         Process(World& world, String_t name, uint32_t processId);
         ~Process();
 
@@ -111,6 +134,10 @@ namespace interpreter {
         void            setProcessKind(ProcessKind k);
         ProcessKind     getProcessKind() const;
 
+        void            freeze(Freezer& p);
+        void            unfreeze();
+        Freezer*        getFreezer() const;
+
         // Execution:
         void addTraceTo(Error& err);
         void run();
@@ -141,6 +168,10 @@ namespace interpreter {
             { return m_exceptions; }
 
         Context* makeFrameContext(size_t level);
+
+        // Finalizer
+        void setNewFinalizer(Finalizer* p);
+        void finalize();
 
         afl::base::Signal<void()> sig_invalidate;
 
@@ -211,6 +242,12 @@ namespace interpreter {
 
         /** Process Id. */
         uint32_t m_processId;
+
+        /** Freezer.
+            If non-null, the task is in state Frozen, and the pointee is responsible for unfreezing it. */
+        Freezer* m_pFreezer;
+
+        std::auto_ptr<Finalizer> m_finalizer;
     };
 
 }

@@ -17,22 +17,21 @@ Overview
   providing a specific function.
 
   - Network services
-    + c2file (file store)
-    + c2format (binary file parsers for eventual use by web applications)
-    + c2host (game hosting: configuration, scheduler)
-    + c2mailout (mail queue)
-    + c2monitor (status monitor)
-    + c2nntp (forum/NNTP adaptor)
-    + c2router (c2server multiplexer)
-    + c2talk (forum/PMs)
+    + c2file-server (file store)
+    + c2format-server (binary file parsers for eventual use by web applications)
+    + c2host-server (game hosting: configuration, scheduler)
+    + c2mailout-server (mail queue)
+    + c2monitor-server (status monitor)
+    + c2nntp-server (forum/NNTP adaptor)
+    + c2router-server (c2server multiplexer)
+    + c2talk-server (forum/PMs)
+    + c2user-server (user management)
 
   - Utilities
     + c2console (console for all of the above)
     + c2logger (log file redirector)
     + c2mailin (utility to parse RfC mail and feed it into c2host)
-    + c2server (server mode VGAP client)
-
-  (The PCC2 utility distribution also includes c2rater and c2dbdump.)
+    + c2play-server (server mode VGAP client, formerly c2server)
 
   These servers use redis as data store, and (optionally) some disk
   directory. They talk to each other using the redis serialisation
@@ -49,7 +48,9 @@ Overview
   This architecture style is nowadays refered to as microservices.
   Although the target aims for all services built from the same
   source, running different versions or implementations in one setup
-  is an explicitly supported use-case.
+  is an explicitly supported use-case which in particular allows
+  testing "old" (PCC2-based) implementations against the "new"
+  c2ng-based implementations.
 
 
 Structure of a RESP Server
@@ -155,6 +156,23 @@ Security Model
   between a USER command and a function command would execute the
   function command with no access checking.
 
+
+Data Distribution
+-----------------
+
+  Some data is stored in redis. Every piece of nontrivial data has an
+  owning service, and all accesses (especially, modifications) need to
+  go through the owning service. However, to simplify implementation,
+  other services are allowed to read the data.
+
+  Some data is stored on disk. Originally, disk data was shared
+  between services (i.e. c2host maintains all host data and c2file
+  serves it out to clients). The new target architecture makes c2file
+  manage the file storage, and all file accesses need to go through
+  it.
+
+  All accesses from the web frontend go through the microservices, the
+  web frontend does no longer access redis or filespaces directly.
 
 
 -eof-

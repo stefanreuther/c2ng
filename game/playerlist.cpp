@@ -97,7 +97,7 @@ game::PlayerList::getCharacterFromPlayer(int id)
 
 // Get set of all players.
 String_t
-game::PlayerList::expandNames(const String_t tpl) const
+game::PlayerList::expandNames(const String_t tpl, bool useOriginalNames) const
 {
     // ex GRaceNameList::expandNames
     String_t result;
@@ -108,9 +108,9 @@ game::PlayerList::expandNames(const String_t tpl) const
         result.append(tpl, pos, n - pos);
         ++n;
 
-        Player::Name which = Player::ShortName;
+        Player::Name which = useOriginalNames ? Player::OriginalShortName : Player::ShortName;
         if (n < tpl.size() && tpl[n] == '-') {
-            which = Player::AdjectiveName;
+            which = useOriginalNames ? Player::OriginalAdjectiveName : Player::AdjectiveName;
             ++n;
         }
         if (n < tpl.size()) {

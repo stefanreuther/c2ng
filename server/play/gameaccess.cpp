@@ -34,10 +34,11 @@
 #include "server/play/vcrpacker.hpp"
 #include "util/stringparser.hpp"
 
-server::play::GameAccess::GameAccess(game::Session& session, util::MessageCollector& console)
+server::play::GameAccess::GameAccess(game::Session& session, util::MessageCollector& console, const std::map<String_t, String_t>& props)
     : m_session(session),
       m_console(console),
-      m_lastMessage(0)
+      m_lastMessage(0),
+      m_properties(props)
 { }
 
 void
@@ -130,7 +131,7 @@ server::play::GameAccess::getObject(util::StringParser& p)
 
     while (1) {
         // Parse one element
-        std::auto_ptr<Packer> thisPacker(createPacker(p, m_session));
+        std::auto_ptr<Packer> thisPacker(createPacker(p));
         if (thisPacker.get() == 0) {
             fail = true;
             break;
@@ -167,16 +168,17 @@ server::play::GameAccess::getQuery(util::StringParser& p)
 }
 
 server::play::Packer*
-server::play::GameAccess::createPacker(util::StringParser& p, game::Session& session)
+server::play::GameAccess::createPacker(util::StringParser& p)
 {
     // ex server/getobj.cc:createWriter
+    game::Session& session = m_session;
     int n;
     if (p.parseString("shipxy")) {
         return new ShipXYPacker(session);
     } else if (p.parseString("planetxy")) {
         return new PlanetXYPacker(session);
     } else if (p.parseString("main")) {
-        return new MainPacker(session);
+        return new MainPacker(session, m_properties);
     } else if (p.parseString("player")) {
         return new PlayerPacker(session);
     } else if (p.parseString("torp")) {

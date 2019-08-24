@@ -16,21 +16,16 @@ namespace client {
             // NullScreen        = -1,
             // RaceScreen        = 0,
 
-            // ShipScreen        = 1,
-            // PlanetScreen      = 2,
-            // BaseScreen        = 3,
-            // Starchart         = 4,
-
             // HistoryScreen     = 6,
 
             // FleetScreen       = 10,
-            // ShipTaskScreen    = 11,
-            // PlanetTaskScreen  = 12,
-            // BaseTaskScreen    = 13
             Null,
             Ship,
             Planet,
             Starbase,
+            ShipTask,
+            PlanetTask,
+            StarbaseTask,
             Starchart
         };
 

@@ -21,6 +21,6 @@ interpreter::PropertyAcceptor::enumTable(afl::base::Memory<const NameTable> tab)
 {
     // ex IntPropertyAcceptor::enumMapping
     while (const NameTable* p = tab.eat()) {
-        addProperty(p->name, TypeHint(p->type));
+        addProperty(p->name, p->type);
     }
 }

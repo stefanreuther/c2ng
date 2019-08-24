@@ -1310,8 +1310,6 @@ interpreter::StatementCompiler::compileFor(BytecodeObject& bco, const StatementC
     /* ...end expression... */
     std::auto_ptr<interpreter::expr::Node> end(interpreter::expr::Parser(tok).parse());
 
-    bool oneliner = tok.checkAdvance("DO");
-
     /* Generate code for head */
     /*
                   <end>                 ; b             ; break must include drop
@@ -1377,25 +1375,10 @@ interpreter::StatementCompiler::compileFor(BytecodeObject& bco, const StatementC
     bco.addInstruction(Opcode::maBinary, biCompareLE, 0);          /* no need to handle CaseBlind, we're dealing with numbers */
     bco.addJump(Opcode::jIfFalse | Opcode::jIfEmpty | Opcode::jPopAlways, lout);
 
+    ForStatementCompilationContext subcc(scc, !endIsLiteral, lcontinue, lbreak);
+
     /* Body */
-    StatementResult result;
-    if (tok.getCurrentToken() == tok.tEnd) {
-        /* Multi-line */
-        if (scc.hasFlag(scc.RefuseBlocks))
-            throw Error::invalidMultiline();
-        m_commandSource.readNextLine();
-        compileList(bco, ForStatementCompilationContext(scc, !endIsLiteral, lcontinue, lbreak).setBlockSyntax());
-        if (!tok.checkAdvance("NEXT"))
-            throw Error::expectKeyword("Next");
-        parseEndOfLine();
-        result = CompiledBlock;
-    } else {
-        /* One-liner */
-        if (!oneliner)
-            throw Error::expectKeyword("Do");
-        compile(bco, ForStatementCompilationContext(scc, !endIsLiteral, lcontinue, lbreak).setOneLineSyntax());
-        result = CompiledStatement;
-    }
+    StatementResult result = compileLoopBody(bco, subcc);
 
     /* Compile tail */
     bco.addLabel(lcontinue);
@@ -1421,7 +1404,9 @@ interpreter::StatementCompiler::compileForEach(BytecodeObject& bco, const Statem
        @noproto
        | ForEach set Do command
        |
-       | ForEach set [Do]
+       | ForEach set As name Do command
+       |
+       | ForEach set [As name] [Do]
        |   commands
        | Next
        Iteration over object array.
@@ -1429,11 +1414,24 @@ interpreter::StatementCompiler::compileForEach(BytecodeObject& bco, const Statem
        The loop will iterate through all objects in that set,
        and execute the command or command list for each of them.
 
+       By default, with no <tt>As name</tt> clause,
+       the commands will be executed in an appropriate context,
+       as if {With} were used.
        For example,
        | ForEach Minefield Do
        |   If LastScan < Turn-10 Then Delete
        | Next
        will delete all minefields not seen within the last 10 turns.
+
+       If <tt>As name</tt> is given, %name is a name of a variable.
+       For each iteration, %name will be set refer to the respective object.
+       For example,
+       | Dim mf
+       | ForEach Minefield As mf Do
+       |   If Distance(mf, 1010, 1020) < mf->Radius Then Print mf->Id
+       | Next
+       will print the Ids of all minefields that cover (1010,1020).
+       This syntax is available since PCC2 2.40.7.
 
        @see Break, Continue, For, Do, Count(), Find()
        @since PCC2 1.99.9, PCC 1.0.6 */
@@ -1450,84 +1448,129 @@ interpreter::StatementCompiler::compileForEach(BytecodeObject& bco, const Statem
 
     Tokenizer& tok = m_commandSource.tokenizer();
 
+    /* Make labels */
+    const BytecodeObject::Label_t lagain    = bco.makeLabel();
+    const BytecodeObject::Label_t lend      = bco.makeLabel();
+    const BytecodeObject::Label_t lcontinue = bco.makeLabel();
+
     /* Compile scope expression */
     tok.readNextToken();
     std::auto_ptr<interpreter::expr::Node> scope_expr(interpreter::expr::Parser(tok).parse());
+    if (tok.checkAdvance("AS")) {
+        /* Named iteration variable */
+        /*     <expr>             break: j end
+               sfirst
+            again:
+               storevar <var>
+               jfe end
+               <body>
+            continue:
+               snext
+               j again
+            end:
+               drop 1 */
+        // FIXME: potential future extension: "ForEach Ship As Local S" --> automatic implied "Dim S"
+        if (tok.getCurrentToken() != tok.tIdentifier) {
+            throw Error::expectIdentifier("variable name");
+        }
+        String_t name = tok.getCurrentString();
+        validateName(scc, name);
+        tok.readNextToken();
 
-    /* Make label */
-    BytecodeObject::Label_t lagain    = bco.makeLabel();
-    BytecodeObject::Label_t lend      = bco.makeLabel();
-    BytecodeObject::Label_t lcontinue = bco.makeLabel();
+        /* Context for child code */
+        class ForEachStatementCompilationContext : public StatementCompilationContext {
+         public:
+            ForEachStatementCompilationContext(const StatementCompilationContext& parent,
+                                               BytecodeObject::Label_t lcontinue,
+                                               BytecodeObject::Label_t lend)
+                : StatementCompilationContext(parent),
+                  lcontinue(lcontinue),
+                  lend(lend)
+                {
+                    withoutFlag(LinearExecution);
+                }
+            void compileBreak(BytecodeObject& bco) const
+                { bco.addJump(Opcode::jAlways, lend); }
+            void compileContinue(BytecodeObject& bco) const
+                { bco.addJump(Opcode::jAlways, lcontinue); }
+            void compileCleanup(BytecodeObject& bco) const
+                {
+                    bco.addInstruction(Opcode::maStack, Opcode::miStackDrop, 1);
+                    defaultCompileCleanup(bco);
+                }
+         private:
+            BytecodeObject::Label_t lcontinue, lend;
+        };
 
-    /* Context for child code */
-    struct ForEachStatementCompilationContext : public StatementCompilationContext {
-        ForEachStatementCompilationContext(const StatementCompilationContext& parent,
-                                           BytecodeObject::Label_t lcontinue,
-                                           BytecodeObject::Label_t lend)
-            : StatementCompilationContext(parent),
-              lcontinue(lcontinue),
-              lend(lend)
-            {
-                withoutFlag(LocalContext);
-                withoutFlag(LinearExecution);
-                withContextProvider(0);
-            }
-        void compileBreak(BytecodeObject& bco) const
-            {
-                bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialEndIndex, 0);
-                bco.addJump(Opcode::jAlways, lend);
-            }
-        void compileContinue(BytecodeObject& bco) const
-            {
-                bco.addJump(Opcode::jAlways, lcontinue);
-            }
-        void compileCleanup(BytecodeObject& bco) const
-            {
-                defaultCompileCleanup(bco);
-            }
+        ForEachStatementCompilationContext subcc(scc, lcontinue, lend);
 
-        BytecodeObject::Label_t lcontinue, lend;
-    };
+        /* Compile loop head */
+        scope_expr->compileValue(bco, scc);
+        bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialFirst, 0);
+        bco.addLabel(lagain);
+        bco.addVariableReferenceInstruction(Opcode::maStore, name, scc);
+        bco.addJump(Opcode::jIfFalse | Opcode::jIfEmpty, lend);
 
-    ForEachStatementCompilationContext subcc(scc, lcontinue, lend);
+        /* Compile loop body */
+        StatementResult result = compileLoopBody(bco, subcc);
 
-    /* Compile loop head */
-    scope_expr->compileValue(bco, scc);
-    bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialFirstIndex, 0);
-    bco.addJump(Opcode::jIfFalse | Opcode::jIfEmpty | Opcode::jPopAlways, lend);
-    bco.addLabel(lagain);
-
-    /* Compile loop body */
-    bool oneliner = tok.checkAdvance("DO");
-    StatementResult result;
-    if (tok.getCurrentToken() != tok.tEnd) {
-        /* Single line */
-        if (!oneliner)
-            throw Error::expectKeyword("Do");
-        subcc.setOneLineSyntax();
-        compile(bco, subcc);
-        result = CompiledStatement;
+        /* Compile loop tail */
+        bco.addLabel(lcontinue);
+        bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialNext, 0);
+        bco.addJump(Opcode::jAlways, lagain);
+        bco.addLabel(lend);
+        bco.addInstruction(Opcode::maStack, Opcode::miStackDrop, 1);
+        return result;
     } else {
-        /* Multi-line */
-        if (scc.hasFlag(CompilationContext::RefuseBlocks))
-            throw Error::invalidMultiline();
+        /* Context for child code */
+        class ForEachStatementCompilationContext : public StatementCompilationContext {
+         public:
+            ForEachStatementCompilationContext(const StatementCompilationContext& parent,
+                                               BytecodeObject::Label_t lcontinue,
+                                               BytecodeObject::Label_t lend)
+                : StatementCompilationContext(parent),
+                  lcontinue(lcontinue),
+                  lend(lend)
+                {
+                    withoutFlag(LocalContext);
+                    withoutFlag(LinearExecution);
+                    withContextProvider(0);
+                }
+            void compileBreak(BytecodeObject& bco) const
+                {
+                    bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialEndIndex, 0);
+                    bco.addJump(Opcode::jAlways, lend);
+                }
+            void compileContinue(BytecodeObject& bco) const
+                {
+                    bco.addJump(Opcode::jAlways, lcontinue);
+                }
+            void compileCleanup(BytecodeObject& bco) const
+                {
+                    defaultCompileCleanup(bco);
+                }
+         private:
+            BytecodeObject::Label_t lcontinue, lend;
+        };
 
-        subcc.setBlockSyntax();
-        m_commandSource.readNextLine();
-        compileList(bco, subcc);
-        if (!tok.checkAdvance("NEXT"))
-            throw Error::expectKeyword("Next");
-        parseEndOfLine();
-        result = CompiledBlock;
+        ForEachStatementCompilationContext subcc(scc, lcontinue, lend);
+
+        /* Compile loop head */
+        scope_expr->compileValue(bco, scc);
+        bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialFirstIndex, 0);
+        bco.addJump(Opcode::jIfFalse | Opcode::jIfEmpty | Opcode::jPopAlways, lend);
+        bco.addLabel(lagain);
+
+        /* Compile loop body */
+        StatementResult result = compileLoopBody(bco, subcc);
+
+        /* Compile loop tail */
+        bco.addLabel(lcontinue);
+        bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialNextIndex, 0);
+        bco.addJump(Opcode::jIfTrue | Opcode::jPopAlways, lagain);
+        bco.addLabel(lend);
+        return result;
     }
-
-    /* Compile loop tail */
-    bco.addLabel(subcc.lcontinue);
-    bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialNextIndex, 0);
-    bco.addJump(Opcode::jIfTrue | Opcode::jPopAlways, lagain);
-    bco.addLabel(lend);
-
-    return result;
 }
 
 /** Compile "If" statement.
@@ -2927,6 +2970,35 @@ interpreter::StatementCompiler::compileProcedureCall(BytecodeObject& bco, const 
     bco.addInstruction(Opcode::maIndirect, Opcode::miIMCall + Opcode::miIMRefuseFunctions, uint16_t(args.size()));
 
     return CompiledStatement;
+}
+
+interpreter::StatementCompiler::StatementResult
+interpreter::StatementCompiler::compileLoopBody(BytecodeObject& bco, StatementCompilationContext& subcc)
+{
+    Tokenizer& tok = m_commandSource.tokenizer();
+    bool oneliner = tok.checkAdvance("DO");
+    StatementResult result;
+    if (tok.getCurrentToken() != tok.tEnd) {
+        /* Single line */
+        if (!oneliner)
+            throw Error::expectKeyword("Do");
+        subcc.setOneLineSyntax();
+        compile(bco, subcc);
+        result = CompiledStatement;
+    } else {
+        /* Multi-line */
+        if (subcc.hasFlag(CompilationContext::RefuseBlocks))
+            throw Error::invalidMultiline();
+
+        subcc.setBlockSyntax();
+        m_commandSource.readNextLine();
+        compileList(bco, subcc);
+        if (!tok.checkAdvance("NEXT"))
+            throw Error::expectKeyword("Next");
+        parseEndOfLine();
+        result = CompiledBlock;
+    }
+    return result;
 }
 
 /** Compile variable definition.

@@ -14,6 +14,7 @@
 #include "game/turn.hpp"
 #include "game/v3/loader.hpp"
 #include "game/v3/structures.hpp"
+#include "game/vcr/classic/database.hpp"
 
 namespace gt = game::v3::structures;
 namespace gp = game::parser;
@@ -49,23 +50,120 @@ namespace {
         Content m_content;
         bool m_ok;
     };
+
+
+    const gt::Util7Battle* getBattleResult(const std::vector<gt::Util7Battle>& bs,
+                                           const game::vcr::classic::Battle& entry)
+    {
+        // ex phost.pas:GetBattleResult, game/utilparse.cc:getBattleResult
+        for (size_t i = 0, n = bs.size(); i < n; ++i) {
+            const gt::Util7Battle& cand = bs[i];
+            if (cand.ids[0] == entry.left().getId()
+                && cand.ids[1] == entry.right().getId()
+                && ((cand.battleType != 0) == (entry.right().isPlanet()))
+                && cand.owners[0] == entry.left().getOwner()
+                && cand.owners[1] == entry.right().getOwner()
+                && (cand.seed == 0 || uint16_t(cand.seed) == uint16_t(entry.getSeed())))
+            {
+                return &cand;
+            }
+        }
+        return 0;
+    }
+
+    void processPlanetResult(game::Turn& trn, const game::vcr::Object& obj, game::map::Point& pos)
+    {
+        if (obj.isPlanet()) {
+            if (game::map::Planet* pPlanet = trn.universe().planets().get(obj.getId())) {
+                // Update position if known
+                pPlanet->getPosition(pos);
+
+                // Report last-turn ownership
+                MessageInformation info(MessageInformation::Planet, obj.getId(), trn.getTurnNumber()-1);
+                info.addValue(gp::mi_Owner, obj.getOwner());
+                pPlanet->addMessageInformation(info);
+            }
+        }
+    }
+
+    void processShipResult(game::Turn& trn,
+                           const game::vcr::Object& obj,
+                           const game::map::Point& pos,
+                           const util::Vector<uint8_t,game::Id_t>& destroyedShips,
+                           const gt::Util7Battle* br,
+                           size_t side,
+                           bool useESB,
+                           const game::spec::ShipList& shipList,
+                           const game::config::HostConfiguration& config)
+    {
+        if (!obj.isPlanet()) {
+            if (game::map::Ship* pShip = trn.universe().ships().get(obj.getId())) {
+                // Prepare some last-turn information
+                MessageInformation info(MessageInformation::Ship, obj.getId(), trn.getTurnNumber()-1);
+                info.addValue(gp::ms_Name, obj.getName());
+                if (int hullNr = obj.getGuessedHull(shipList.hulls())) {
+                    info.addValue(gp::mi_ShipHull, hullNr);
+                    if (int engineNr = obj.getGuessedEngine(shipList.engines(), shipList.hulls().get(hullNr), useESB, config)) {
+                        info.addValue(gp::mi_ShipEngineType, engineNr);
+                    }
+                }
+                info.addValue(gp::mi_Owner, obj.getOwner());
+                info.addValue(gp::mi_ShipBeamType, obj.getBeamType());
+                info.addValue(gp::mi_ShipNumBeams, obj.getNumBeams());
+                info.addValue(gp::mi_ShipNumBays, obj.getNumBays());
+                info.addValue(gp::mi_ShipLauncherType, obj.getTorpedoType());
+                info.addValue(gp::mi_ShipNumLaunchers, obj.getNumLaunchers());
+                info.addValue(gp::mi_ShipAmmo, obj.getNumBays() == 0 ? obj.getNumTorpedoes() : obj.getNumFighters());
+                info.addValue(gp::mi_Damage, obj.getDamage());
+                pShip->addMessageInformation(info, game::PlayerSet_t());
+
+                // Prepare current-turn information
+                if (!destroyedShips.get(obj.getId())) {
+                    MessageInformation newInfo(MessageInformation::Ship, obj.getId(), trn.getTurnNumber());
+                    if (pos != game::map::Point(0, 0)) {
+                        newInfo.addValue(gp::mi_X, pos.getX());
+                        newInfo.addValue(gp::mi_Y, pos.getY());
+                    }
+                    if (br != 0) {
+                        newInfo.addValue(gp::mi_Damage, br->damageAfter[side]);
+                        if (obj.getNumBays() != 0 && obj.getNumFighters() != 0) {
+                            newInfo.addValue(gp::mi_ShipAmmo, br->numFightersAfter[side]);
+                        }
+                        if (obj.getNumLaunchers() != 0 && obj.getNumTorpedoes() != 0) {
+                            newInfo.addValue(gp::mi_ShipAmmo, br->numTorpedoesAfter[side]);
+                        }
+                        newInfo.addValue(gp::mi_Owner, br->result[side] == 1 ? br->owners[!side] : br->owners[side]);
+                    }
+                    pShip->addMessageInformation(newInfo, game::PlayerSet_t());
+                }
+            }
+        }
+    }
+
+    bool checkEsbAgainst(const game::vcr::Object& obj, const game::config::HostConfiguration& config)
+    {
+        return config[config.AllowEngineShieldBonus]()
+            && (!obj.isPlanet() || config[config.AllowESBonusAgainstPlanets]());
+    }
 }
 
 
 game::v3::udata::Parser::Parser(Game& game,
                                 int playerNr,
                                 game::config::HostConfiguration& config,
-                                game::spec::ModifiedHullFunctionList& modList,
+                                game::spec::ShipList& shipList,
                                 afl::charset::Charset& cs,
                                 afl::string::Translator& tx,
                                 afl::sys::LogListener& log)
     : m_game(game),
       m_player(playerNr),
       m_hostConfiguration(config),
-      m_modList(modList),
+      m_shipList(shipList),
       m_charset(cs),
       m_translator(tx),
-      m_log(log)
+      m_log(log),
+      m_destroyedShips(),
+      m_battleResults()
 { }
 
 // Reader:
@@ -115,6 +213,7 @@ game::v3::udata::Parser::handleRecord(uint16_t recordId, afl::base::ConstBytes_t
                 info.addValue(gp::ms_Name, m_charset.decode(bang.shipName));
             }
             processMessageInformation(info);
+            markShipKilled(bang.shipId);
         }
         break;
 
@@ -133,6 +232,10 @@ game::v3::udata::Parser::handleRecord(uint16_t recordId, afl::base::ConstBytes_t
                 info.addValue(gp::ms_Name, m_charset.decode(hit.shipName));
             }
             processMessageInformation(info);
+            if (hit.damage >= 100) {
+                // This is PHost; anything over 100 kills the ship
+                markShipKilled(hit.shipId);
+            }
         }
         break;
 
@@ -197,7 +300,23 @@ game::v3::udata::Parser::handleRecord(uint16_t recordId, afl::base::ConstBytes_t
         }
         break;
 
-        // TODO: TUtil7Battle
+     case 7:
+        // Battle
+        if (data.size() >= 26) {
+            gt::Util7Battle report;
+            fromObject(report).fill(0);
+            fromObject(report).copyFrom(data);
+            m_battleResults.push_back(report);
+
+            // If either ship blew up, mark so
+            if (report.result[0] == gt::UNIT_DESTROYED) {
+                markShipKilled(report.ids[0]);
+            }
+            if (report.battleType == 0 && report.result[1] == gt::UNIT_DESTROYED) {
+                markShipKilled(report.ids[1]);
+            }
+        }
+        break;
 
      case 8:
         // Meteor
@@ -315,6 +434,7 @@ game::v3::udata::Parser::handleRecord(uint16_t recordId, afl::base::ConstBytes_t
             MessageInformation info(MessageInformation::Ship, report->shipId, getTurnNumber());
             info.addValue(gp::mi_Damage, 999);
             processMessageInformation(info);
+            markShipKilled(report->shipId);
         }
         break;
 
@@ -392,6 +512,7 @@ game::v3::udata::Parser::handleRecord(uint16_t recordId, afl::base::ConstBytes_t
             MessageInformation info(MessageInformation::Ship, report->shipId, getTurnNumber());
             info.addValue(gp::mi_Damage, 999);
             processMessageInformation(info);
+            markShipKilled(report->shipId);
         }
         break;
 
@@ -414,6 +535,9 @@ game::v3::udata::Parser::handleRecord(uint16_t recordId, afl::base::ConstBytes_t
                 info.addValue(gp::ms_Name, m_charset.decode(report.name));
             }
             processMessageInformation(info);
+            if (report.damage >= 100) {
+                markShipKilled(report.shipId);
+            }
         }
         break;
 
@@ -695,7 +819,7 @@ game::v3::udata::Parser::handleRecord(uint16_t recordId, afl::base::ConstBytes_t
         if (Eater<gt::Int16_t> id = data) {
             if (game::map::Ship* pShip = m_game.currentTurn().universe().ships().get(*id)) {
                 while (Eater<gt::Int16_t> func = data) {
-                    pShip->addShipSpecialFunction(m_modList.getFunctionIdFromHostId(*func));
+                    pShip->addShipSpecialFunction(m_shipList.modifiedHullFunctions().getFunctionIdFromHostId(*func));
                 }
             }
         }
@@ -732,7 +856,7 @@ game::v3::udata::Parser::handleRecord(uint16_t recordId, afl::base::ConstBytes_t
         if (Eater<gt::Util57Special> report = data) {
             game::spec::HullFunction func(report->basicId, ExperienceLevelSet_t::fromInteger(report->experienceMask));
             func.setHostId(report->functionId);
-            m_modList.getFunctionIdFromDefinition(func);
+            m_shipList.modifiedHullFunctions().getFunctionIdFromDefinition(func);
         }
         break;
 
@@ -752,10 +876,66 @@ game::v3::udata::Parser::handleError(afl::io::Stream& in)
     m_log.write(afl::sys::LogListener::Warn, LOG_NAME, afl::string::Format("%s: %s", in.getName(), m_translator.translateString("File too short")));
 }
 
+void
+game::v3::udata::Parser::handleEnd()
+{
+    // ex GUtilMessageParser::finish
+    // ex ccinit.pas:ProcessBattleResults
+    // FIXME: call this when there are no VCRs
+    afl::base::Ptr<game::vcr::Database> db = m_game.currentTurn().getBattles();
+    game::vcr::classic::Database* classicDB = dynamic_cast<game::vcr::classic::Database*>(db.get());
+    if (classicDB == 0) {
+        return;
+    }
+
+    for (size_t i = 0, n = classicDB->getNumBattles(); i < n; ++i) {
+        if (game::vcr::classic::Battle* battle = classicDB->getBattle(i)) {
+            const gt::Util7Battle* result = getBattleResult(m_battleResults, *battle);
+            game::map::Point pos;
+            if (result != 0) {
+                if (result->x != 0 && result->y != 0) {
+                    pos = game::map::Point(result->x, result->y);
+                }
+            }
+
+            // Try to process results. Planets first because these may produce an Id for later.
+            processPlanetResult(m_game.currentTurn(), battle->left(), pos);
+            processPlanetResult(m_game.currentTurn(), battle->right(), pos);
+
+            processShipResult(m_game.currentTurn(), battle->left(),  pos, m_destroyedShips, result, 0, checkEsbAgainst(battle->right(), m_hostConfiguration), m_shipList, m_hostConfiguration);
+            processShipResult(m_game.currentTurn(), battle->right(), pos, m_destroyedShips, result, 1, checkEsbAgainst(battle->left(),  m_hostConfiguration), m_shipList, m_hostConfiguration);
+
+            // {... add experience levels ...}
+            // { FIXME: maybe add some heuristics w.r.t. Commander ships? }
+            // IF (pconf<>NIL) AND (pconf^.main.NumExperienceLevels > 0) THEN BEGIN
+            //   FOR side:=Left TO Right DO BEGIN
+            //     SetStr(uhdr.name, 50, 'Experience');
+            //     uhdr.id := uscore_Experience;
+            //     uhdr.limit := pconf^.main.NumExperienceLevels;
+            //     ush := AddUnitScore((side = Left) OR (VCRs^[i].BattleType = 0), uhdr, 1);
+            //     AddUnitScoreEntry(ush, VCRs^[i].Objs[side].Id, VCRs^[i].Objs[side].Level, Gen.TurnNr-1);
+            //   END;
+            // END;
+        }
+    }
+}
+
 int
 game::v3::udata::Parser::getTurnNumber() const
 {
     return m_game.currentTurn().getTurnNumber();
+}
+
+void
+game::v3::udata::Parser::markShipKilled(Id_t id)
+{
+    // ex GUtilMessageParser::killShip
+    // If we know that a ship was destroyed, we mark it killed, to avoid that we "resurrect" it through a VCR.
+    // For example, if we see an explosion from a ship, and a VCR that ship survives, we don't create a ship scan.
+    // This is not perfect, but will work most of the time. (It's also the same that PCC 1.x does.)
+    // A possible failure could be a ship being destroyed by a minefield or glory device (=explosion marker),
+    // rebuilt and refueled by a starbase, and winning a fight.
+    m_destroyedShips.set(id, 1);
 }
 
 void

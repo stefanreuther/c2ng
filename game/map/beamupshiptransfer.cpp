@@ -21,14 +21,12 @@
 #include "game/actions/preconditions.hpp"
 #include "game/cargospec.hpp"
 #include "game/map/fleetmember.hpp"
+#include "game/map/shiputils.hpp"
 #include "game/v3/command.hpp"
 #include "game/v3/commandcontainer.hpp"
 #include "game/v3/commandextra.hpp"
 
 namespace {
-    const int32_t MAX_CARGO = game::MAX_NUMBER;
-    const int32_t MAX_OVERLOAD = 20000;
-
     using game::v3::Command;
     using game::v3::CommandContainer;
     using game::v3::CommandExtra;
@@ -93,46 +91,7 @@ int32_t
 game::map::BeamUpShipTransfer::getMaxAmount(Element::Type type) const
 {
     // ex GShipBumTransfer::getMaxCargo (totally changed)
-    // FIXME: this function is copied from ShipStorage
-    switch (type) {
-     case Element::Neutronium:
-        if (isOverload()) {
-            return MAX_CARGO;
-        } else if (const game::spec::Hull* pHull = getHull()) {
-            return pHull->getMaxFuel();
-        } else {
-            return 0;
-        }
-
-     case Element::Money:
-        return MAX_CARGO;
-
-     default:
-        const game::spec::Hull* pHull = getHull();
-        int32_t available = (isOverload() ? MAX_OVERLOAD
-                             : pHull != 0 ? pHull->getMaxCargo()
-                             : 0);
-        int32_t rest = available
-            - getEffectiveAmount(Element::Tritanium) - getEffectiveAmount(Element::Duranium)
-            - getEffectiveAmount(Element::Molybdenum) - getEffectiveAmount(Element::Supplies)
-            - getEffectiveAmount(Element::Colonists);
-
-        const int numLaunchers = m_ship.getNumLaunchers().orElse(0);
-        const int torpType = m_ship.getTorpedoType().orElse(0);
-        if (torpType > 0 && numLaunchers > 0) {
-            rest -= getEffectiveAmount(Element::fromTorpedoType(torpType));
-        }
-
-        const int numBays = m_ship.getNumBays().orElse(0);
-        if (numBays > 0) {
-            rest -= getEffectiveAmount(Element::Fighters);
-        }
-
-        rest += getEffectiveAmount(type);
-
-        // FIXME: protect against negative?
-        return std::min(MAX_CARGO, rest);
-    }
+    return getShipTransferMaxCargo(*this, type, m_ship, m_shipList);
 }
 
 int32_t
@@ -160,13 +119,10 @@ game::map::BeamUpShipTransfer::commit()
     cs.set(CargoSpec::Supplies,   m_amount.get(Element::Supplies)   + getChange(Element::Supplies));
     cs.set(CargoSpec::Colonists,  m_amount.get(Element::Colonists)  + getChange(Element::Colonists));
 
-    // GShip& ship = trn.getCurrentUniverse().getShip(sid);
-    // const int bumMission = config.ExtMissionsStartAt() + GMission::pmsn_BeamUpMultiple;
-    // GCommandContainer& cmds = trn.getCommands(ship.getOwner());
     int shipOwner = 0;
     m_ship.getOwner(shipOwner);
 
-    int missionNumber = m_config[m_config.ExtMissionsStartAt]() + game::spec::Mission::pmsn_BeamUpMultiple;
+    const int missionNumber = m_config[m_config.ExtMissionsStartAt]() + game::spec::Mission::pmsn_BeamUpMultiple;
 
     if (cs.isZero()) {
         if (CommandContainer* cc = CommandExtra::get(m_turn, shipOwner)) {
@@ -199,14 +155,6 @@ game::map::BeamUpShipTransfer::commit()
     // PCC2 explicitly marked the ship dirty.
     // Our CommandExtra::onCommandChange does that automatically.
 }
-
-const game::spec::Hull*
-game::map::BeamUpShipTransfer::getHull() const
-{
-    return m_shipList.hulls().get(m_ship.getHull().orElse(-1));
-}
-
-
 
 void
 game::map::parseBeamUpCommand(util::Vector<int32_t,Element::Type>& out, Turn& turn, const Ship& ship, int factor)

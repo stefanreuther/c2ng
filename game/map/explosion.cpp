@@ -170,13 +170,3 @@ game::map::Explosion::merge(const Explosion& other)
     markDirty();
     return true;
 }
-
-
-
-// FIXME: retire (not needed?)
-// /** Set explosion position. */
-// inline void
-// GExplosion::setPos(GPoint pos)
-// {
-//     this->pos = pos;
-// }

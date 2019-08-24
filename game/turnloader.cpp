@@ -12,6 +12,10 @@
 #include "afl/except/fileproblemexception.hpp"
 #include "game/score/loader.hpp"
 
+namespace {
+    const char*const LOG_NAME = "game.db";
+}
+
 int
 game::TurnLoader::getDefaultPlayer(PlayerSet_t baseSet) const
 {
@@ -51,7 +55,7 @@ game::TurnLoader::loadCurrentDatabases(Turn& turn, Game& game, int player, Root&
     // Starchart DB
     afl::base::Ptr<afl::io::Stream> file = root.gameDirectory().openFileNT(afl::string::Format("chart%d.cc", player), afl::io::FileSystem::OpenRead);
     if (file.get() != 0) {
-        game::db::Loader(charset, session.world()).load(*file, turn, game, true);
+        game::db::Loader(charset, session.world(), session.translator()).load(*file, turn, game, true);
     }
 
     // Score DB
@@ -97,7 +101,7 @@ game::TurnLoader::saveCurrentDatabases(Turn& turn, Game& game, int player, Root&
     // Save starchart
     if (game::spec::ShipList* shipList = session.getShipList().get()) {
         afl::base::Ref<afl::io::Stream> out = root.gameDirectory().openFile(afl::string::Format("chart%d.cc", player), afl::io::FileSystem::Create);
-        game::db::Loader(charset, session.world()).save(*out, turn, game, *shipList);
+        game::db::Loader(charset, session.world(), session.translator()).save(*out, turn, game, *shipList);
     }
 
     // Save scores
@@ -106,7 +110,7 @@ game::TurnLoader::saveCurrentDatabases(Turn& turn, Game& game, int player, Root&
         afl::base::Ref<afl::io::Stream> out = root.gameDirectory().openFile("score.cc", afl::io::FileSystem::Create);
         game::score::Loader(session.translator(), charset).save(game.scores(), *out);
     } else {
-        // FIXME: port this: console.write(LOG_WARN, _("The statistics file in game directory was written by a newer version of PCC2; changes not written."));
+        session.log().write(afl::sys::LogListener::Warn, LOG_NAME, session.translator()("The statistics file in game directory was written by a newer version of PCC2; changes not written."));
     }
 
     // Save message configuration

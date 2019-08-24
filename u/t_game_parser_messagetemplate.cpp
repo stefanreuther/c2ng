@@ -37,7 +37,7 @@ namespace {
                 bool ok = false;
                 switch (which) {
                  case ShortRaceName:     ok = sp.parseString("s"); break;
-                 case FullRaceName:      ok = sp.parseString("f"); break;
+                 case LongRaceName:      ok = sp.parseString("f"); break;
                  case AdjectiveRaceName: ok = sp.parseString("a"); break;
                  case HullName:          ok = sp.parseString("h"); break;
                 }

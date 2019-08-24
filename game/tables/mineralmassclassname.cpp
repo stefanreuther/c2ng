@@ -13,17 +13,17 @@ game::tables::MineralMassClassName::get(int32_t mass) const
 {
     // ex game/tables.h:getMineralMassClassName
     if (mass >= 5000) {
-        return m_translator.translateString("abundant");
+        return m_translator("abundant");
     } else if (mass >= 1200) {
-        return m_translator.translateString("very common");
+        return m_translator("very common");
     } else if (mass >= 600) {
-        return m_translator.translateString("common");
+        return m_translator("common");
     } else if (mass >= 100) {
-        return m_translator.translateString("rare");
+        return m_translator("rare");
     } else if (mass > 0) {
-        return m_translator.translateString("very rare");
+        return m_translator("very rare");
     } else {
-        return m_translator.translateString("none");
+        return m_translator("none");
     }
 }
 

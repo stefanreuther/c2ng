@@ -6,19 +6,19 @@
 #include "ui/spacer.hpp"
 
 // Construct growable spacer.
-ui::Spacer::Spacer()
+ui::Spacer::Spacer() throw()
     : SimpleWidget(),
       m_info(gfx::Point(), gfx::Point(), ui::layout::Info::GrowBoth)
 { }
 
 // Construct fixed-size spacer.
-ui::Spacer::Spacer(gfx::Point size)
+ui::Spacer::Spacer(gfx::Point size) throw()
     : SimpleWidget(),
       m_info(size)
 { }
 
 // Construct custom spacer.
-ui::Spacer::Spacer(ui::layout::Info info)
+ui::Spacer::Spacer(ui::layout::Info info) throw()
     : SimpleWidget(),
       m_info(info)
 { }

@@ -387,7 +387,7 @@ game::map::Universe::postprocess(PlayerSet_t playingSet, PlayerSet_t availablePl
     // Combined checks
     for (Id_t i = 1, n = m_ships.size(); i <= n; ++i) {
         if (Ship* s = m_ships.get(i)) {
-            s->combinedCheck1(*this, turnNumber);
+            s->combinedCheck1(*this, availablePlayers, turnNumber);
         }
     }
     for (Id_t i = 1, n = m_planets.size(); i <= n; ++i) {
