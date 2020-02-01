@@ -14,7 +14,6 @@
 #include "afl/sys/time.hpp"
 #include "server/interface/mailqueueclient.hpp"
 #include "server/mailin/mailprocessor.hpp"
-#include "util/translation.hpp"
 #include "version.hpp"
 #include "server/ports.hpp"
 #include "util/string.hpp"
@@ -221,7 +220,7 @@ server::mailin::MailInApplication::saveRejectedMail(afl::base::ConstBytes_t buff
 String_t
 server::mailin::MailInApplication::getApplicationName() const
 {
-    return afl::string::Format(_("PCC2 Incoming Mail Processor v%s - (c) 2017-2019 Stefan Reuther").c_str(), PCC2_VERSION);
+    return afl::string::Format("PCC2 Incoming Mail Processor v%s - (c) 2017-2020 Stefan Reuther", PCC2_VERSION);
 }
 
 String_t

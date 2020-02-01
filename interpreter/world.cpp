@@ -293,6 +293,7 @@ interpreter::World::getLocalLoadDirectory() const
 afl::base::Ptr<afl::io::Stream>
 interpreter::World::openLoadFile(const String_t name) const
 {
+    // ex ccexec.pas:Struc_Load (sort-of)
     // FIXME: this calls openFileNT on a Directory, giving it a possibly relative or absolute path name instead of just a file name.
     // This is the same as in PCC2, and it happens to work due to the way how our Directory descendants are implemented, but it is so far not contractual.
     afl::base::Ptr<afl::io::Stream> result;

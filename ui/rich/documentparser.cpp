@@ -218,7 +218,16 @@ ui::rich::DocumentParser::parseBulletList(int listLevel)
             m_parser.readNext();
         } else if (m_parser.isOpeningTag("li")) {
             // List item
-            const char* bullet = bullets[listLevel % countof(bullets)];
+            String_t bullet = bullets[listLevel % countof(bullets)];
+
+            // Parse "<li bullet="...">"
+            while (m_parser.getCurrentToken() == BaseReader::TagAttribute) {
+                if (m_parser.reader().getName() == "bullet") {
+                    bullet = m_parser.reader().getValue();
+                }
+                m_parser.readNext();
+            }
+            
             int margin = m_document.getLeftMargin();
             m_document.addAt(margin, bullet);
             m_document.add(" "); /* needed to make sure setLeftMargin does not indent the bullet! */

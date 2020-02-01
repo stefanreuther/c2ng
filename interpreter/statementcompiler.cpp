@@ -226,6 +226,11 @@ interpreter::StatementCompiler::compile(BytecodeObject& bco, const StatementComp
             /* @q EndIf (Elementary Command)
                @noproto
                This keyword is part of the {If} statement, see there. */
+         case kwEndOn:
+            /* @q EndOn (Elementary Command)
+               @noproto
+               This keyword is part of the {On} statement, see there.
+               @since PCC2 2.40.8 */
          case kwEndSelect:
          case kwEndSub:
             /* @q EndSub (Elementary Command)
@@ -723,6 +728,7 @@ interpreter::StatementCompiler::compileBind(BytecodeObject& bco, const Statement
     /* @q Bind keymap:Keymap key:Str := action:Any... (Elementary Command)
        Assign keys.
        This command arranges that %action is invoked when the %key is pressed while %keymap is active.
+       %keymap is an identifier or {ByName()} expression.
        The %key is a string specifying the key, the %action is either a string containing a command,
        or a numeric atom (see {Atom}, {Key}).
 
@@ -786,7 +792,8 @@ interpreter::StatementCompiler::compileBind(BytecodeObject& bco, const Statement
            drop 1 */
     Tokenizer& tok = m_commandSource.tokenizer();
     tok.readNextToken();
-    compileKeymapName(bco, scc, "keymap name");
+    compileNameString(bco, scc, "keymap name");
+    bco.addInstruction(Opcode::maUnary, unKeyLookup, 0);
 
     /* Parse assignments */
     while (1) {
@@ -897,7 +904,7 @@ interpreter::StatementCompiler::compileCreateKeymap(BytecodeObject& bco, const S
     /* @q CreateKeymap name(parent:Keymap...),... (Elementary Command)
        Create a keymap.
        A keymap contains a set of keystrokes and commands active in a particular context.
-       The %name is an identifier that names the new keymap; this keymap must not yet exist.
+       The %name is an identifier or {ByName()} expression that names the new keymap; this keymap must not yet exist.
        If desired, one or more parent keymaps can be specified in parentheses;
        if the keymap should not have a parent keymap, the parentheses can be omitted.
 
@@ -925,17 +932,13 @@ interpreter::StatementCompiler::compileCreateKeymap(BytecodeObject& bco, const S
     Tokenizer& tok = m_commandSource.tokenizer();
     tok.readNextToken();
     while (1) {
-        if (tok.getCurrentToken() != tok.tIdentifier)
-            throw Error::expectIdentifier("keymap name");
-
-        afl::data::StringValue keymapName(tok.getCurrentString());
-        bco.addPushLiteral(&keymapName);
+        compileNameString(bco, scc, "keymap name");
         bco.addInstruction(Opcode::maUnary, unKeyCreate, 0);
-        tok.readNextToken();
         if (tok.checkAdvance(tok.tLParen)) {
             if (!tok.checkAdvance(tok.tRParen)) {
                 while (1) {
-                    compileKeymapName(bco, scc, "parent keymap name");
+                    compileNameString(bco, scc, "parent keymap name");
+                    bco.addInstruction(Opcode::maUnary, unKeyLookup, 0);
                     bco.addInstruction(Opcode::maBinary, biKeyAddParent, 0);
                     if (tok.checkAdvance(tok.tComma)) {
                         // continue
@@ -1165,6 +1168,8 @@ interpreter::StatementCompiler::compileDo(BytecodeObject& bco, const StatementCo
     bco.addLabel(lagain);
 
     /* Compile head condition */
+    // @change It seems PCC1 treats EMPTY as always-fail (does not enter loop, does not continue loop).
+    // This interpreter treats EMPTY the same as false.
     Tokenizer& tok = m_commandSource.tokenizer();
     tok.readNextToken();
     if (tok.checkAdvance("WHILE")) {
@@ -1753,10 +1758,16 @@ interpreter::StatementCompiler::compileOn(BytecodeObject& bco, const StatementCo
 {
     // ex IntStatementCompiler::compileOn
     /* @q On event:Hook Do command (Elementary Command)
+       @noproto
+       | On event Do command
+       |
+       | On event Do
+       |   commands
+       | EndDo
        Execute command on event.
        Stores the specified command to be executed when the %event happens.
 
-       The %event is an identifier.
+       The %event is an identifier or {ByName()} expression.
        Predefined identifiers for %event are listed <a href="int:index:type:hook">here</a>.
 
        You can define any number of commands for each event.
@@ -1766,19 +1777,17 @@ interpreter::StatementCompiler::compileOn(BytecodeObject& bco, const StatementCo
        using a command such as <tt>On event Do Return</tt>.
        This was never documented, and does not work in PCC2.
 
+       @diff The multi-line form is supported since PCC2 2.0.8 and 2.40.8 (c2ng).
+
        @see RunHook
        @since PCC2 1.99.9, PCC 1.0.9 */
 
     /* Parse */
     Tokenizer& tok = m_commandSource.tokenizer();
-    if (tok.readNextToken() != tok.tIdentifier)
-        throw Error::expectIdentifier("hook name");
-    String_t name = tok.getCurrentString();
     tok.readNextToken();
-    if (!tok.checkAdvance("DO"))
-        throw Error::expectKeyword("Do");
-    if (tok.getCurrentToken() == tok.tEnd)
-        throw Error::invalidMultiline(); // FIXME: is this a good error message?
+    compileNameString(bco, scc, "hook name");
+
+    bool oneliner = tok.checkAdvance("DO");
 
     /* Context for embedded command: one-liner, behaves like regular
        function body, Return not allowed. */
@@ -1787,7 +1796,6 @@ interpreter::StatementCompiler::compileOn(BytecodeObject& bco, const StatementCo
         HookCompilationContext(World& world)
             : StatementCompilationContext(world)
             {
-                setOneLineSyntax();
                 withFlag(LocalContext);
                 withFlag(LinearExecution);
             }
@@ -1804,17 +1812,40 @@ interpreter::StatementCompiler::compileOn(BytecodeObject& bco, const StatementCo
     BCORef_t nbco = *new BytecodeObject();
     nbco->setIsProcedure(true);
     nbco->setFileName(bco.getFileName());
-    compile(*nbco, HookCompilationContext(scc.world()));
+
+    StatementResult r;
+    if (tok.getCurrentToken() != tok.tEnd) {
+        /* Single line */
+        if (!oneliner) {
+            throw Error::expectKeyword("Do");
+        }
+        compile(*nbco, HookCompilationContext(scc.world()).setOneLineSyntax());
+        r = CompiledBlock;
+    } else {
+        /* Multiple lines */
+        if (scc.hasFlag(CompilationContext::RefuseBlocks)) {
+            throw Error::invalidMultiline();
+        }
+        m_commandSource.readNextLine();
+
+        /* Compile content */
+        compileList(*nbco, HookCompilationContext(scc.world()).setBlockSyntax());
+
+        /* EndDo command */
+        if (!tok.checkAdvance("ENDON")) {
+            throw Error::expectKeyword("EndOn");
+        }
+        parseEndOfLine();
+        r = CompiledStatement;
+    }
 
     /* Compile this command */
-    afl::data::StringValue sv(name);
-    bco.addPushLiteral(&sv);
     SubroutineValue subv(nbco);
     bco.addPushLiteral(&subv);
     bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialAddHook, 0);
     finishBCO(*nbco, scc);
 
-    return CompiledStatement;
+    return r;
 }
 
 /** Compile "Option" statement.
@@ -2136,24 +2167,19 @@ interpreter::StatementCompiler::compileReturn(BytecodeObject& bco, const Stateme
     \param bco [out] bytecode output
     \param scc [in] statement compilation context */
 interpreter::StatementCompiler::StatementResult
-interpreter::StatementCompiler::compileRunHook(BytecodeObject& bco, const StatementCompilationContext& /*scc*/)
+interpreter::StatementCompiler::compileRunHook(BytecodeObject& bco, const StatementCompilationContext& scc)
 {
     // ex IntStatementCompiler::compileRunHook
     /* @q RunHook event:Hook (Elementary Command)
        Run hook commands.
        Executes the commands registered for the %event using {On}.
-       The %event is an identifier.
+       The %event is an identifier or {ByName()} expression.
        If no commands are registered for that event, nothing happens.
        @since PCC2 1.99.9, PCC 1.0.9 */
 
-    /* Fetch name */
     Tokenizer& tok = m_commandSource.tokenizer();
-    if (tok.readNextToken() != tok.tIdentifier)
-        throw Error::expectIdentifier("hook name");
-
-    /* Compile */
-    afl::data::StringValue sv(tok.getCurrentString());
-    bco.addPushLiteral(&sv);
+    tok.readNextToken();
+    compileNameString(bco, scc, "hook name");
     bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialRunHook, 0);
 
     /* Most now be at end */
@@ -2828,7 +2854,8 @@ interpreter::StatementCompiler::compileUseKeymap(BytecodeObject& bco, const Stat
        @since PCC2 1.99.22, PCC 1.1.10 */
     Tokenizer& tok = m_commandSource.tokenizer();
     tok.readNextToken();
-    compileKeymapName(bco, scc, "keymap name");
+    compileNameString(bco, scc, "keymap name");
+    bco.addInstruction(Opcode::maUnary, unKeyLookup, 0);
 
     /* For simplicity, push prefix */
     bco.addVariableReferenceInstruction(Opcode::maPush, "UI.PREFIX", scc);
@@ -3290,31 +3317,56 @@ interpreter::StatementCompiler::compileSelectCondition(BytecodeObject& bco, cons
     }
 }
 
-/** Compile a keymap name.
+/** Compile a name.
     \param bco Target BCO
     \param scc Statement compilation context
     \param ttl Name for error messages
 
-    As of 20131103, a keymap always is a symbol. This makes it impossible to write a function
-    that takes a keymap as parameter without resorting to Eval, although the bytecode would
-    permit that.
-
-    This function therefore isolates the logic for most instances of a keymap, so possible future
-    syntax could be added easily: Bind, UseKeymap, parent in CreateKeymap. Other keymap references
-    that do not use this function: new keymap in CreateKeymap, Key() function. */
+    This is used for keymap names and hook names.
+    Before 2.0.8 / 2.40.8, keymap/hook names always were symbols.
+    This made it impossible to write a function that takes a keymap as parameter without resorting to Eval,
+    although the bytecode would permit that. */
 void
-interpreter::StatementCompiler::compileKeymapName(BytecodeObject& bco, const StatementCompilationContext& /*scc*/, const char* ttl)
+interpreter::StatementCompiler::compileNameString(BytecodeObject& bco, const StatementCompilationContext& scc, const char* ttl)
 {
-    // ex IntStatementCompiler::compileKeymapName
+    /* @q ByName():Keymap (Elementary Function)
+       @noproto
+       | ByName(name:Str):Keymap
+       | ByName(name:Str):Hook
+       Commands that operate on keymaps and hooks take the keymap or hook name as an identifier.
+       That is, <tt>RunHook X</tt> will run the hook named "X", even if X is a variable.
+
+       If you wish to fetch the hook/keymap name from a variable or expression, you can write <tt>ByName(expression)</tt>,
+       where the %expression produces the actual name.
+
+       <b>Note:</b>
+       <tt>ByName()</tt> can only be used at places where keymap or hook names are required, nowhere else.
+
+       @since PCC2 2.40.8, PCC2 2.0.8
+       @rettype Hook */
+
+    // ex IntStatementCompiler::compileKeymapName (sort-of)
+    // also see builtinfunction.cpp
     Tokenizer& tok = m_commandSource.tokenizer();
     if (tok.getCurrentToken() != tok.tIdentifier) {
         throw Error::expectIdentifier(ttl);
     }
-
-    afl::data::StringValue keymap(tok.getCurrentString());
-    bco.addPushLiteral(&keymap);
-    bco.addInstruction(Opcode::maUnary, unKeyLookup, 0);
+    String_t name = tok.getCurrentString();
     tok.readNextToken();
+    if (tok.getCurrentToken() == tok.tLParen && name == "BYNAME") {
+        // ByName(expr) syntax
+        tok.readNextToken();
+        std::auto_ptr<interpreter::expr::Node> node(interpreter::expr::Parser(m_commandSource.tokenizer()).parse());
+        if (!tok.checkAdvance(tok.tRParen)) {
+            throw Error::expectSymbol(")");
+        }
+        node->compileValue(bco, scc);
+        bco.addInstruction(Opcode::maUnary, unUCase, 0);
+    } else {
+        // Leave it at the name
+        afl::data::StringValue sv(name);
+        bco.addPushLiteral(&sv);
+    }
 }
 
 /** Compile definition of a subroutine.

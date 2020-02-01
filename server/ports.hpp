@@ -11,6 +11,8 @@
 #ifndef C2NG_SERVER_PORTS_HPP
 #define C2NG_SERVER_PORTS_HPP
 
+#include "afl/base/types.hpp"
+
 namespace server {
 
     // Web client / user file

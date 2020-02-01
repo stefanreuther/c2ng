@@ -14,6 +14,9 @@
 #include "game/config/integervalueparser.hpp"
 #include "game/config/booleanvalueparser.hpp"
 #include "game/limits.hpp"
+#include "interpreter/indexablevalue.hpp"
+#include "afl/data/vector.hpp"
+#include "afl/data/vectorvalue.hpp"
 
 using interpreter::checkIntegerArg;
 using interpreter::checkStringArg;
@@ -96,6 +99,54 @@ namespace {
             config[desc];
         } else {
             throw interpreter::Error::rangeError();
+        }
+    }
+}
+
+
+bool
+game::interface::checkPlayerSetArg(PlayerSet_t& result, afl::data::Value* value)
+{
+    // FIXME: here?
+    result.clear();
+    if (interpreter::IndexableValue* iv = dynamic_cast<interpreter::IndexableValue*>(value)) {
+        // We need to use IndexableValue because that allows retrieving values without having a process.
+        // In contrast, FArrayDim checks CallableValue.
+        if (iv->getDimension(0) != 1) {
+            throw interpreter::Error::typeError(interpreter::Error::ExpectIterable);
+        }
+
+        int32_t dim = iv->getDimension(1);
+        for (int32_t i = 0; i < dim; ++i) {
+            afl::data::Segment seg;
+            seg.pushBackInteger(i);
+            interpreter::Arguments args(seg, 0, 1);
+
+            std::auto_ptr<afl::data::Value> val(iv->get(args));
+
+            int playerNr = 0;
+            if (interpreter::checkIntegerArg(playerNr, val.get(), 0, MAX_PLAYERS)) {
+                result += playerNr;
+            }
+        }
+        return true;
+    } else if (afl::data::VectorValue* vv = dynamic_cast<afl::data::VectorValue*>(value)) {
+        // We get those if input is JSON, i.e. on the API / c2play
+        afl::data::Vector& vec = *vv->getValue();
+        for (size_t i = 0, n = vec.size(); i < n; ++i) {
+            int playerNr = 0;
+            if (interpreter::checkIntegerArg(playerNr, vec[i], 0, MAX_PLAYERS)) {
+                result += playerNr;
+            }
+        }
+        return true;
+    } else {
+        int playerNr = 0;
+        if (interpreter::checkIntegerArg(playerNr, value, 0, MAX_PLAYERS)) {
+            result += playerNr;
+            return true;
+        } else {
+            return false;
         }
     }
 }
@@ -237,6 +288,43 @@ game::interface::IFAddPref(interpreter::Process& /*proc*/, game::Session& sessio
     r.userConfiguration().setOption(afl::string::strTrim(String_t(text, 0, n)),
                                     afl::string::strTrim(String_t(text, n+1)),
                                     game::config::ConfigurationOption::User);
+}
+
+/* @q AuthPlayer player:Int, password:Str (Global Command)
+   Defines a player password.
+   When you load the specified player's data, and the password matches, PCC2 will not ask for the password.
+   It is not an error to specify the wrong password with this command.
+
+   This command can be placed in your <a href="int:statement:startup">autoexec.q</a> file in your game directory.
+   For example, when you're playing the Feds, you could put the following in the game's <tt>autoexec.q</tt> file:
+   |  On BeforeLoad Do AuthPlayer 1, "kirk"     % the Fed password
+   This will let you open the Fed RST without being prompted for passwords on your computer
+   (but everyone else on other computers without this script will still have to know it).
+
+   Passwords are forgotten whenever you leave the <a href="pcc2:racescreen">race screen</a>,
+   so you should regenerate it in the {BeforeLoad} hook.
+
+   @change In PCC2NG (2.40+), {AuthPlayer} commands stack.
+   Providing multiple passwords will check all of them.
+
+   @since PCC 1.1.1, PCC2 1.99.25, PCC2 2.40.8 */
+void
+game::interface::IFAuthPlayer(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
+{
+    // ex int/if/globalif.cc:IFAuthPlayer
+    // Parse args
+    args.checkArgumentCount(2);
+    int32_t playerNr;
+    String_t password;
+    if (!interpreter::checkIntegerArg(playerNr, args.getNext(), 1, MAX_PLAYERS) || !checkStringArg(password, args.getNext())) {
+        return;
+    }
+
+    // Remember password
+    std::auto_ptr<AuthCache::Item> it(new AuthCache::Item());
+    it->playerNr = playerNr;
+    it->password = password;
+    session.authCache().addNew(it.release());
 }
 
 /* @q CC$SelectionExec layer:Int, code:Str (Internal)
@@ -583,4 +671,38 @@ game::interface::IFSaveGame(interpreter::Process& /*proc*/, game::Session& sessi
     if (!session.save()) {
         throw interpreter::Error("No game loaded");
     }
+}
+
+/** @q SendMessage player:Int, text:Str... (Global Command)
+    Send a message.
+    The player number can be a single integer to send to one player,
+    or an array of integers to send to multiple players.
+    For example,
+    | SendMessage Array(3,4), "Hi there"
+    | SendMessage 7, "Knock knock"
+    sends a message to players 3 and 4 and another one to player 7.
+
+    @since PCC2 2.40.8 */
+void
+game::interface::IFSendMessage(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
+{
+    args.checkArgumentCountAtLeast(2);
+
+    game::PlayerSet_t receivers;
+    if (!checkPlayerSetArg(receivers, args.getNext())) {
+        return;
+    }
+    
+    String_t text;
+    while (args.getNumArgs() > 0) {
+        String_t line;
+        if (!interpreter::checkStringArg(line, args.getNext())) {
+            return;
+        }
+        text += line;
+        text += '\n';
+    }
+
+    Game& g = game::actions::mustHaveGame(session);
+    g.currentTurn().outbox().addMessage(g.getViewpointPlayer(), text, receivers);
 }

@@ -382,7 +382,7 @@ interpreter::exporter::ConsoleApplication::help()
 {
     afl::io::TextWriter& out = standardOutput();
     afl::string::Translator& tx = translator();
-    out.writeLine(afl::string::Format(tx("PCC2 Export v%s - (c) 2017-2019 Stefan Reuther"), PCC2_VERSION));
+    out.writeLine(afl::string::Format(tx("PCC2 Export v%s - (c) 2017-2020 Stefan Reuther"), PCC2_VERSION));
     out.writeLine();
     out.writeLine(afl::string::Format(tx("Usage:\n"
                                          "  %s [-h]\n"

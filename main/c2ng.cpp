@@ -635,7 +635,7 @@ namespace {
                                                          "-proxy=URL\tSet network proxy\n")
                                             + m_rootOptions.getHelp());
                 help += "\n";
-                help += m_translator("(c) copyright 2017-2019 Stefan Reuther <streu@gmx.de>");
+                help += m_translator("(c) copyright 2017-2020 Stefan Reuther <streu@gmx.de>");
                 help += "\n";
                 dialog.showInfo(help, PROGRAM_TITLE);
                 std::exit(0);
@@ -885,6 +885,7 @@ namespace {
                 // Start game browser
                 // FIXME: wrap this loop in a try/catch
                 // FIXME: create the background image in the background thread
+                // FIXME: run hooks
                 ui::PixmapColorScheme docColors(root, generateBrowserBackground(log(), root.getExtent().getSize(), translator()));
                 while (1) {
                     // Helpful information
@@ -893,7 +894,7 @@ namespace {
                     docView.getDocument().add(util::rich::Parser::parseXml("<big>PCC2ng Milestone Six</big>"));
                     docView.getDocument().addNewline();
                     docView.getDocument().addNewline();
-                    docView.getDocument().add(util::rich::Parser::parseXml("<font color=\"dim\">&#xA9; 2017-2019 Stefan Reuther &lt;streu@gmx.de&gt;</font>"));
+                    docView.getDocument().add(util::rich::Parser::parseXml("<font color=\"dim\">&#xA9; 2017-2020 Stefan Reuther &lt;streu@gmx.de&gt;</font>"));
                     docView.getDocument().addNewline();
                     docView.getDocument().finish();
                     docView.handleDocumentUpdate();

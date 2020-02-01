@@ -28,7 +28,9 @@ namespace client { namespace si {
         wifNewRadiobutton,
         wifNewFlowBox,
         wifNewGridBox,
-        wifNewLabel
+        wifNewLabel,
+        wifNewNumberInput,
+        wifNewPseudoInput
     };
 
     /** Get name table for a dialog.
@@ -54,6 +56,8 @@ namespace client { namespace si {
     afl::data::Value* IFWidgetNewFlowBox(game::Session& session, ScriptSide& ss, const WidgetReference& ref, interpreter::Arguments& args);
     afl::data::Value* IFWidgetNewGridBox(game::Session& session, ScriptSide& ss, const WidgetReference& ref, interpreter::Arguments& args);
     afl::data::Value* IFWidgetNewLabel(game::Session& session, ScriptSide& ss, const WidgetReference& ref, interpreter::Arguments& args);
+    afl::data::Value* IFWidgetNewNumberInput(game::Session& session, ScriptSide& ss, const WidgetReference& ref, interpreter::Arguments& args);
+    afl::data::Value* IFWidgetNewPseudoInput(game::Session& session, ScriptSide& ss, const WidgetReference& ref, interpreter::Arguments& args);
 
     /** Call widget function.
         \param func     Which function to call

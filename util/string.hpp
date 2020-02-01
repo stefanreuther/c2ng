@@ -119,6 +119,13 @@ namespace util {
         \param ch Character */
     void removeTrailingCharacter(String_t& s, char ch);
 
+    /** Add list element.
+        Append element to string, inserting delimiter if needed.
+        \param s [in/out] String
+        \param delim Delimiter
+        \param ele Element */
+    void addListItem(String_t& s, String_t delim, String_t ele);
+
 }
 
 #endif

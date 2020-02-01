@@ -111,6 +111,7 @@ void
 interpreter::MutexList::Mutex::removeReference()
 {
     // ex IntMutex::removeReference
+    // ex hooks.pas:RemoveLock
     if (--m_referenceCounter == 0) {
         if (m_container != 0 && m_slot < m_container->m_mutexObjects.size()) {
             m_container->m_mutexObjects[m_slot] = 0;
@@ -155,6 +156,7 @@ interpreter::MutexList::Mutex*
 interpreter::MutexList::create(const String_t& name, const String_t& note, const Process* owner)
 {
     // ex IntMutex::create
+    // ex hooks.pas:AddLock
     // Get slot for this mutex. An existing slot will be recycled.
     afl::data::NameMap::Index_t slot = m_mutexNames.addMaybe(name);
 
@@ -193,6 +195,7 @@ interpreter::MutexList::Mutex*
 interpreter::MutexList::query(const String_t& name) const
 {
     // ex IntMutex::query
+    // ex hooks.pas:QueryLock
     afl::data::NameMap::Index_t slot = m_mutexNames.getIndexByName(name);
     return getMutexBySlot(slot);
 }
@@ -202,6 +205,7 @@ void
 interpreter::MutexList::disownLocksByProcess(const Process* process)
 {
     // ex IntMutex::disownLocksByProcess
+    // ex hooks.pas:RemoveLocksForProcess
     for (size_t i = 0, e = m_mutexObjects.size(); i < e; ++i) {
         if (m_mutexObjects[i] != 0 && m_mutexObjects[i]->getOwner() == process) {
             m_mutexObjects[i]->setOwner(0);

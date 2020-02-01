@@ -93,9 +93,7 @@ client::map::ScannerOverlay::setPositions(game::map::Point origin, game::map::Po
     u.set(m_target, target);
     u.set(m_valid, true);
     if (u) {
-        if (Callback* cb = getCallback()) {
-            cb->requestRedraw();
-        }
+        requestRedraw();
     }
 }
 
@@ -105,8 +103,6 @@ client::map::ScannerOverlay::clearPositions()
     util::Updater u;
     u.set(m_valid, false);
     if (u) {
-        if (Callback* cb = getCallback()) {
-            cb->requestRedraw();
-        }
+        requestRedraw();
     }
 }

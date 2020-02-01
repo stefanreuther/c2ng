@@ -258,7 +258,7 @@ EndSub
 
 % c2ng internal: This function is used to execute commands bound to keys.
 % @since PCC2 2.40
-Sub C2$Eval(code, UI.Prefix)
+Sub C2$Eval(code, UI.Prefix, UI.Key)
   Eval AtomStr(code)
 EndSub
 
@@ -291,6 +291,14 @@ CreatePlanetProperty Comment
 % or being disturbed by other scripts.
 % @assignable
 Dim Shared UI.Result
+
+% @q UI.Key:Str (Global Variable)
+% Key that invoked the last user-interface operation.
+% If an operation is invoked from a keymap, the invoking key is stored here.
+% This variable is used by {UI.Menu} to anchor the menu.
+% @assignable
+% @since PCC2 2.40.8
+Dim Shared UI.Key
 
 % @q UI.Directory:Str (Global Variable)
 % Current directory.
@@ -377,10 +385,13 @@ Bind ControlScreen    "f1"     := "CCUI.GotoScreen 1"
 Bind ControlScreen    "f2"     := "CCUI.GotoScreen 2"
 Bind ControlScreen    "f3"     := "CCUI.GotoScreen 3"
 Bind ControlScreen    "f4"     := "CC$GotoChart Chart.X, Chart.Y"
+Bind ControlScreen    "f5"     := "CC$PlanetInfo Chart.X, Chart.Y"
 Bind ControlScreen    "f7"     := "UI.Search"
+Bind ControlScreen    "s-f5"   := "CC$PlanetInfo Chart.X, Chart.Y"
 Bind ControlScreen    "c-f2"   := "CCUI.GotoPlanetHere"
 Bind ControlScreen    "c-f3"   := "CCUI.GotoBaseHere"
 Bind ControlScreen    "c-f4"   := "CC$GotoChart UI.X, UI.Y"
+Bind ControlScreen    "c-f5"   := "CC$PlanetInfo UI.X, UI.Y"
 Bind ControlScreen    "c-f8"   := "CCUI.GotoBaseHere"
 Bind ControlScreen    "c-h"    := "UI.Search Chart.X & ', ' & Chart.Y, 'spbuo4'"
 Bind ControlScreen    "c-l"    := "CCUI.ListShips UI.X, UI.Y, 'a'"
@@ -409,6 +420,8 @@ Bind Ship             "c-s"    := "CC$ReviewShipTransfer 1, Transfer.Ship.Id"
 Bind Ship             "alt-i"  := "UI.Search 'Mission.Intercept=' & Id, 's2'"
 Bind Ship             "alt-t"  := "UI.Search 'Mission.Tow=' & Id, 's2'"
 Bind Ship             "f9"     := "CCUI.Ship.SetComment"
+Bind ShipScreen       "a"      := "CC$ChangeWaypoint"       % FIXME: fleet handling (CC$WithShipWaypoint)
+Bind ShipScreen       "b"      := "CCUI.ShipBaseMenu"
 Bind ShipScreen       "h"      := "UI.Help 'pcc2:shipscreen'"
 Bind ShipScreen       "w"      := "CC$ChangeSpeed"          % FIXME: fleet handling (CC$WithShipWaypoint)
 Bind ShipScreen       "alt-h"  := "UI.Help 'pcc2:shipscreen'"
@@ -430,15 +443,22 @@ Bind HistoryScreen    "alt-h"  := "UI.Help 'pcc2:historyscreen'"
 Bind FleetScreen      "h"      := "UI.Help 'pcc2:fleetscreen'"
 Bind FleetScreen      "alt-h"  := "UI.Help 'pcc2:fleetscreen'"
 
+Bind PlanetScreen     "b"      := "CC$BuildStructures 0"
 Bind Planet           "c"      := "Try CC$TransferPlanet 0"
+Bind PlanetScreen     "d"      := "CC$BuildStructures 2"
 Bind Planet           "f"      := "CC$ChangeFCode"
 Bind Planet           "g"      := "CCUI.Give"
 Bind PlanetScreen     "h"      := "UI.Help 'pcc2:planetscreen'"
 Bind PlanetScreen     "alt-h"  := "UI.Help 'pcc2:planetscreen'"
+Bind PlanetScreen     "m"      := "CC$BuildStructures 1"
+Bind Planet           "s"      := "CC$SellSupplies"
+Bind Planet           "c-s"    := "CC$BuySupplies"
 Bind Planet           "t"      := "CC$ChangeTaxes"
 Bind Planet           "u"      := "Try CC$TransferPlanet 1"
+Bind Planet           "f8"     := "CCUI.Planet.BuildOrGoToBase"
 Bind Planet           "f9"     := "CCUI.Planet.SetComment"
 Bind PlanetScreen     "ret"    := "CCUI$GotoObject 12, Id"
+Bind PlanetScreen     "tab"    := "CC$BuildStructures 0"
 Bind PlanetTaskScreen "h"     := "UI.Help 'pcc2:planettaskscreen'"
 Bind PlanetTaskScreen "alt-h" := "UI.Help 'pcc2:planettaskscreen'"
 Bind PlanetTaskScreen "f8"     := "CCUI.GotoBaseHere"
@@ -446,8 +466,10 @@ Bind PlanetTaskScreen "f9"     := "CCUI.Planet.SetComment"
 Bind PlanetTaskScreen "ret"    := "CCUI$GotoObject 2, Id"
 
 Bind Base             "c"      := "CC$TransferPlanet 0"
+Bind Base             "d"      := "CC$BuildStructures 2"
 Bind Base             "f"      := "CC$ChangeFCode"
 Bind Base             "m"      := "CCUI.Base.SetMission"
+Bind Base             "q"      := "CC$ManageBuildQueue"
 Bind Base             "t"      := "CC$ChangeTech"
 Bind Base             "u"      := "CC$TransferPlanet 1"
 Bind Base             "f9"     := "CCUI.Planet.SetComment"
@@ -468,10 +490,13 @@ Bind FleetScreen      "f9"     := "CCUI.Planet.SetComment"
 % Starchart Bindings
 Bind Starchart        "esc"    := "UI.GotoScreen 0"
 Bind Starchart        "f4"     := "UI.GotoScreen 0"
+Bind Starchart        "f5"     := "CC$PlanetInfo UI.X, UI.Y"
 Bind Starchart        "f7"     := "UI.Search"
 Bind Starchart        "h"      := "UI.Help 'pcc2:starchart'"
+Bind Starchart        "s-f5"   := "CC$PlanetInfo UI.X, UI.Y"
 Bind Starchart        "alt-h"  := "UI.Help 'pcc2:starchart'"
 Bind Starchart        "c-h"    := "UI.Search UI.X & ', ' & UI.Y, 'spbuo4'"
+Bind Starchart        "c-f5"   := "CC$PlanetInfo UI.X, UI.Y"
 Bind ShipLock         "."      := "CCUI.ToggleSelection"
 Bind ShipLock         "esc"    := "CC$HidePanel"
 Bind PlanetLock       "."      := "CCUI.ToggleSelection"

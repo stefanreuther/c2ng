@@ -5,6 +5,12 @@
      This namespace contains classes to manage game specifications (ship lists).
      This includes actual specification files (hullspec etc.) as well as additional files that specify hull functions, friendly codes, missions, etc.
 
+     Most specification items are long-lived objects that live inside a ShipList object;
+     a SpecificationLoader is responsible for populating these.
+
+     As an exception, classes Torpedo and Fighter are intended to be short-lived because they only expose data stored in other objects
+     (TorpedoLauncher, HostConfiguration).
+
      <b>Entry point:</b>
 
      - game::spec::ShipList

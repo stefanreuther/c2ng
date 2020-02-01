@@ -63,7 +63,7 @@ namespace interpreter {
         \param value [in] Value given by user
         \return true if value was specified, false if value was null (out not changed)
         \throw Error if value is invalid */
-    bool checkIntegerArg(int32_t& out, afl::data::Value* value);
+    bool checkIntegerArg(int32_t& out, const afl::data::Value* value);
 
     /** Check integer argument with range.
         \param out   [out] Result will be placed here
@@ -72,7 +72,7 @@ namespace interpreter {
         \param min   [in] Maximum accepted value
         \return true if value was specified, false if value was null (out not changed)
         \throw Error if value is invalid */
-    bool checkIntegerArg(int32_t& out, afl::data::Value* value, int32_t min, int32_t max);
+    bool checkIntegerArg(int32_t& out, const afl::data::Value* value, int32_t min, int32_t max);
 
     /** Check boolean argument.
         \param out   [out] Result will be placed here

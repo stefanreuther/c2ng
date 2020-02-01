@@ -8,6 +8,7 @@
 #include "util/skincolor.hpp"
 #include "gfx/fontrequest.hpp"
 #include "gfx/resourceprovider.hpp"
+#include "afl/base/optional.hpp"
 
 namespace ui { namespace widgets {
 
@@ -19,6 +20,7 @@ namespace ui { namespace widgets {
         StaticText& setText(const String_t& text);
         StaticText& setIsFlexible(bool flex);
         StaticText& setColor(util::SkinColor::Color color);
+        StaticText& setForcedWidth(int width);
 
         // SimpleWidget:
         virtual void draw(gfx::Canvas& can);
@@ -33,6 +35,7 @@ namespace ui { namespace widgets {
         util::SkinColor::Color m_color;
         gfx::FontRequest m_font;
         gfx::ResourceProvider& m_provider;
+        afl::base::Optional<int> m_forcedWidth;
         int m_align;
         bool m_isFlexible;
     };

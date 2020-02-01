@@ -91,8 +91,15 @@ client::si::UserSide::postNewRequest(util::SlaveRequest<game::Session, ScriptSid
 void
 client::si::UserSide::reset()
 {
-    // FIXME: if we have anything to reset in the game::Session, do so here
     m_history.clear();
+
+    // FIXME: here?
+    class Task : public util::Request<game::Session> {
+     public:
+        void handle(game::Session& session)
+            { session.authCache().clear(); }
+    };
+    m_gameSender.postNewRequest(new Task());
 }
 
 // Continue a process after UI callout.

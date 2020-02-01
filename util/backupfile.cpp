@@ -96,6 +96,7 @@ String_t
 util::BackupFile::expandFileName(afl::io::FileSystem& fs, String_t tpl)
 {
     // ex GBackupFileTemplate::expandFileName
+    // ex ccmkturn.pas:DoExpand
     String_t result;
     afl::charset::Utf8Reader rdr(afl::string::toBytes(tpl), 0);
     afl::charset::Utf8 u8(0);

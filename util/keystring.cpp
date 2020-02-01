@@ -35,6 +35,12 @@ util::KeyString::KeyString(const String_t& s)
       m_string(s)
 { }
 
+// Construct from explicit parameters.
+util::KeyString::KeyString(const String_t& s, Key_t key)
+    : m_key(key),
+      m_string(s)
+{ }
+
 // Get string.
 const String_t&
 util::KeyString::getString() const

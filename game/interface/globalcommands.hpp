@@ -10,9 +10,12 @@
 
 namespace game { namespace interface {
 
+    bool checkPlayerSetArg(PlayerSet_t& result, afl::data::Value* value);
+
     void IFAddConfig(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args);
     void IFAddFCode(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args);
     void IFAddPref(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args);
+    void IFAuthPlayer(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args);
     void IFCCSelectionExec(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args);
     void IFCreateConfigOption(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args);
     void IFCreatePrefOption(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args);
@@ -24,6 +27,7 @@ namespace game { namespace interface {
     void IFNewMarker(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args);
     void IFHistoryShowTurn(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args);
     void IFSaveGame(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args);
+    void IFSendMessage(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args);
 
 } }
 

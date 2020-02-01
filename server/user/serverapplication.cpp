@@ -17,7 +17,6 @@
 #include "server/user/multipasswordencrypter.hpp"
 #include "server/user/root.hpp"
 #include "server/user/saltedpasswordencrypter.hpp"
-#include "util/translation.hpp"
 #include "version.hpp"
 
 using afl::async::InterruptOperation;
@@ -167,7 +166,7 @@ server::user::ServerApplication::handleCommandLineOption(const String_t& /*optio
 String_t
 server::user::ServerApplication::getApplicationName() const
 {
-    return afl::string::Format(_("PCC2 User Server v%s - (c) 2019 Stefan Reuther").c_str(), PCC2_VERSION);
+    return afl::string::Format("PCC2 User Server v%s - (c) 2020 Stefan Reuther", PCC2_VERSION);
 }
 
 String_t

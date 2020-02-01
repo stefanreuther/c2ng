@@ -19,7 +19,6 @@
 #include "server/monitor/statuspage.hpp"
 #include "server/ports.hpp"
 #include "util/string.hpp"
-#include "util/translation.hpp"
 #include "version.hpp"
 
 using afl::async::InterruptOperation;
@@ -191,7 +190,7 @@ server::monitor::ServerApplication::handleConfiguration(const String_t& key, con
 String_t
 server::monitor::ServerApplication::getApplicationName() const
 {
-    return afl::string::Format(_("PCC2 Monitor Server v%s - (c) 2017-2019 Stefan Reuther").c_str(), PCC2_VERSION);
+    return afl::string::Format("PCC2 Monitor Server v%s - (c) 2017-2020 Stefan Reuther", PCC2_VERSION);
 }
 
 String_t

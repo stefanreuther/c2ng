@@ -58,6 +58,8 @@ TestGameActionsCargoCostAction::testNormal()
     TS_ASSERT_EQUALS(testee.getMissingAmount(Element::Supplies),   0);
     TS_ASSERT_EQUALS(testee.getMissingAmount(Element::Money),      0);
     TS_ASSERT_EQUALS(testee.getMissingAmountAsCost().toCargoSpecString(), "");
+
+    TS_ASSERT_EQUALS(testee.getAvailableAmountAsCost().toCargoSpecString(), "50TDM 50S 50$");
 }
 
 /** Test a missing mineral. */

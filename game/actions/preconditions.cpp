@@ -45,6 +45,24 @@ game::actions::mustHavePlayedBase(const game::map::Planet& planet)
     }
 }
 
+game::map::Planet&
+game::actions::mustExist(game::map::Planet* planet)
+{
+    if (planet == 0) {
+        throw Exception(Exception::eRange, _("The planet does not exist"));
+    }
+    return *planet;
+}
+
+game::map::Ship&
+game::actions::mustExist(game::map::Ship* ship)
+{
+    if (ship == 0) {
+        throw Exception(Exception::eRange, _("The ship does not exist"));
+    }
+    return *ship;
+}
+
 
 // FIXME: remove
 // /** Check for a turn.

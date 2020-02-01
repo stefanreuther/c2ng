@@ -123,6 +123,29 @@ game::v3::Reverter::getPreviousPlanetFriendlyCode(Id_t planetId) const
     }
 }
 
+bool
+game::v3::Reverter::getPreviousShipMission(int shipId, int& m, int& i, int& t) const
+{
+    if (const game::map::ShipData* pShip = m_oldShipData.get(shipId)) {
+        return pShip->mission.get(m)
+            && pShip->missionInterceptParameter.get(i)
+            && pShip->missionTowParameter.get(t);
+    } else {
+        return false;
+    }
+}
+
+bool
+game::v3::Reverter::getPreviousShipBuildOrder(int planetId, ShipBuildOrder& result) const
+{
+    if (const BaseData* previousData = m_oldBaseData.get(planetId)) {
+        result = previousData->shipBuildOrder;
+        return true;
+    } else {
+        return false;
+    }
+}
+
 void
 game::v3::Reverter::addShipData(int id, const game::map::ShipData& data)
 {

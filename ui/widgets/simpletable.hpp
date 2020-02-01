@@ -97,6 +97,10 @@ namespace ui { namespace widgets {
             \return Handle to all cells of the requested column; empty range if parameters are out of range */
         Range column(size_t x);
 
+        /** Get handle to entire table.
+            \return Handle to all cells. */
+        Range all();
+
         /** Set height of a row.
             This row will have this exact height in pixels.
             \param row Row (0-based)

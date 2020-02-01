@@ -39,8 +39,10 @@ namespace game { namespace map {
         virtual afl::base::Optional<String_t> getPreviousShipFriendlyCode(Id_t shipId) const = 0;
         virtual afl::base::Optional<String_t> getPreviousPlanetFriendlyCode(Id_t planetId) const = 0;
 
-        // // - determine previous mission
-        // virtual void getPreviousShipMission(int shipId, int& m, int& i, int& t) const = 0;
+        // - determine previous mission
+        virtual bool getPreviousShipMission(int shipId, int& m, int& i, int& t) const = 0;
+
+        virtual bool getPreviousShipBuildOrder(int planetId, ShipBuildOrder& result) const = 0;
 
         // // - prepare/execute location reset
         // virtual void resetLocation(Point pt, Modes_t modes) const = 0;

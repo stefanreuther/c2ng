@@ -181,9 +181,7 @@ client::map::StarchartOverlay::handleMouse(gfx::Point /*pt*/, MouseButtons_t /*p
 void
 client::map::StarchartOverlay::onChange()
 {
-    if (Callback* pCB = getCallback()) {
-        pCB->requestRedraw();
-    }
+    requestRedraw();
 }
 
 void

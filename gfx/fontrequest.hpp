@@ -7,6 +7,7 @@
 
 #include "afl/base/types.hpp"
 #include "afl/base/inlineoptional.hpp"
+#include "afl/string/string.hpp"
 
 namespace gfx {
 
@@ -30,6 +31,10 @@ namespace gfx {
             Creates a font request with all parameters known-zero (=default font). */
         FontRequest();
         // FontRequest(afl::base::NothingType);
+
+        FontRequest(const char* str);
+
+        FontRequest(const String_t& str);
 
         /** Add size.
             Increases the size; if size is currently unknown, sets it.
@@ -62,6 +67,27 @@ namespace gfx {
             \param n Style
             \return *this */
         FontRequest& setStyle(Value_t n);
+
+        /** Parse request string.
+            Interprets the string as a sequence of control characters:
+            - "+" (larger, addSize(+1))
+            - "-" (smaller, addSize(-1))
+            - "b" (bold, addWeight(+1))
+            - "l" (lighter, addWeight(-1))
+            - "i" (italic, setSlant(1))
+            - "u" (upright, setSlant(0))
+            - "f" (fixed, setStyle(1))
+            - "p" (proportional, setStyle(0))
+
+            \param str String
+            \return *this */
+        FontRequest& parse(const char* str);
+
+        /** Parse request string.
+            \overload
+            \param str String
+            \return *this */
+        FontRequest& parse(const String_t& str);
 
         /** Get size.
             \return size */

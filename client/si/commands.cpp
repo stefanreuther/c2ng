@@ -11,19 +11,29 @@
 #include "afl/string/string.hpp"
 #include "client/cargotransfer.hpp"
 #include "client/dialogs/alliancedialog.hpp"
+#include "client/dialogs/buildstarbasedialog.hpp"
+#include "client/dialogs/buildstructuresdialog.hpp"
+#include "client/dialogs/buysuppliesdialog.hpp"
+#include "client/dialogs/cargohistorydialog.hpp"
 #include "client/dialogs/classicvcrdialog.hpp"
+#include "client/dialogs/fileselectiondialog.hpp"
 #include "client/dialogs/friendlycodedialog.hpp"
 #include "client/dialogs/helpdialog.hpp"
 #include "client/dialogs/inboxdialog.hpp"
 #include "client/dialogs/keymapdialog.hpp"
+#include "client/dialogs/navchartdialog.hpp"
 #include "client/dialogs/objectselectiondialog.hpp"
+#include "client/dialogs/planetinfodialog.hpp"
 #include "client/dialogs/screenhistorydialog.hpp"
 #include "client/dialogs/searchdialog.hpp"
+#include "client/dialogs/sellsuppliesdialog.hpp"
 #include "client/dialogs/shipspeeddialog.hpp"
+#include "client/dialogs/taxationdialog.hpp"
 #include "client/dialogs/techupgradedialog.hpp"
 #include "client/dialogs/turnlistdialog.hpp"
 #include "client/dialogs/visualscandialog.hpp"
 #include "client/help.hpp"
+#include "client/proxy/chunnelproxy.hpp"
 #include "client/proxy/screenhistoryproxy.hpp"
 #include "client/proxy/searchproxy.hpp"
 #include "client/si/control.hpp"
@@ -44,7 +54,9 @@
 #include "game/interface/richtextfunctions.hpp"
 #include "game/interface/richtextvalue.hpp"
 #include "game/interface/vmfile.hpp"
+#include "game/map/fleetmember.hpp"
 #include "game/map/objecttype.hpp"
+#include "game/map/shipinfo.hpp"
 #include "game/registrationkey.hpp"
 #include "game/root.hpp"
 #include "game/searchquery.hpp"
@@ -59,10 +71,11 @@
 #include "ui/widgets/decimalselector.hpp"
 #include "ui/widgets/inputline.hpp"
 #include "ui/widgets/standarddialogbuttons.hpp"
+#include "util/math.hpp"
 #include "util/rich/parser.hpp"
 #include "util/rich/text.hpp"
-#include "client/dialogs/fileselectiondialog.hpp"
-#include "client/dialogs/taxationdialog.hpp"
+#include "util/unicodechars.hpp"
+#include "client/dialogs/buildqueuedialog.hpp"
 
 using client::si::UserTask;
 using client::si::UserSide;
@@ -422,6 +435,143 @@ client::si::IFSystemExitRace(game::Session& session, ScriptSide& si, RequestLink
     si.postNewTask(link, new StateChangeTask(OutputState::ExitGame));
 }
 
+// @since PCC2 2.40.8
+void
+client::si::IFCCBuildBase(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    // ex IFCCBuildBase
+    class Task : public UserTask {
+     public:
+        Task(game::Id_t pid)
+            : m_pid(pid)
+            { }
+        virtual void handle(UserSide& iface, Control& ctl, RequestLink2 link)
+            {
+                client::dialogs::doBuildStarbaseDialog(ctl.root(), iface.gameSender(), ctl.translator(), m_pid);
+                iface.continueProcess(link);
+            }
+     private:
+        game::Id_t m_pid;
+    };
+
+    args.checkArgumentCount(0);
+    session.notifyListeners();
+    game::actions::mustHaveGame(session);
+
+    game::map::Planet* pl = dynamic_cast<game::map::Planet*>(link.getProcess().getCurrentObject());
+    if (pl != 0 && pl->isPlayable(game::map::Object::Playable)) {
+        si.postNewTask(link, new Task(pl->getId()));
+    } else {
+        throw interpreter::Error::contextError();
+    }
+}
+
+// @since PCC2 2.40.8
+void
+client::si::IFCCBuildStructures(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    class Task : public UserTask {
+     public:
+        Task(game::Id_t pid, int page)
+            : m_pid(pid), m_page(page)
+            { }
+        virtual void handle(UserSide& iface, Control& ctl, RequestLink2 link)
+            {
+                client::dialogs::doBuildStructuresDialog(ctl.root(), iface.gameSender(), ctl.translator(), m_pid, m_page);
+                iface.continueProcess(link);
+            }
+     private:
+        game::Id_t m_pid;
+        int m_page;
+    };
+
+    args.checkArgumentCount(0, 1);
+    int32_t page = 0;
+    interpreter::checkIntegerArg(page, args.getNext(), 0, 2);
+
+    session.notifyListeners();
+    game::actions::mustHaveGame(session);
+
+    game::map::Planet& pl = game::actions::mustExist(dynamic_cast<game::map::Planet*>(link.getProcess().getCurrentObject()));
+    game::actions::mustBePlayed(pl);
+
+    si.postNewTask(link, new Task(pl.getId(), page));
+}
+
+// @since PCC2 2.40.8
+void
+client::si::IFCCBuySupplies(game::Session& /*session*/, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    // ex IFCCBuySupplies
+    args.checkArgumentCount(0);
+
+    // Must be our planet
+    game::map::Planet* pPlanet = dynamic_cast<game::map::Planet*>(link.getProcess().getCurrentObject());
+    if (pPlanet == 0) {
+        throw interpreter::Error::contextError();
+    }
+    game::actions::mustBePlayed(*pPlanet);
+
+    // Do it
+    class DialogTask : public UserTask {
+     public:
+        DialogTask(game::Id_t id)
+            : m_id(id)
+            { }
+        virtual void handle(UserSide& iface, Control& ctl, RequestLink2 link)
+            {
+                client::dialogs::doBuySuppliesDialog(ctl.root(), iface.gameSender(), m_id, 0, 0, ctl.translator());
+                iface.continueProcess(link);
+            }
+     private:
+        game::Id_t m_id;
+    };
+    si.postNewTask(link, new DialogTask(pPlanet->getId()));
+}
+
+
+// @since PCC2 2.40.8
+void
+client::si::IFCCCargoHistory(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    // ex IFCCCargoHistory
+    args.checkArgumentCount(0);
+
+    // Must be on a ship
+    const game::map::Ship* pShip = dynamic_cast<game::map::Ship*>(link.getProcess().getCurrentObject());
+    if (pShip == 0) {
+        throw interpreter::Error::contextError();
+    }
+    session.notifyListeners();
+
+    // Do it
+    class DialogTask : public UserTask {
+     public:
+        DialogTask(game::Session& session, const game::map::Ship& ship)
+            : m_data()
+            {
+                int currentTurn = game::actions::mustHaveGame(session).currentTurn().getTurnNumber();
+                util::NumberFormatter fmt = game::actions::mustHaveRoot(session).userConfiguration().getNumberFormatter();
+                game::spec::ShipList& shipList = game::actions::mustHaveShipList(session);
+                afl::string::Translator& tx = session.translator();
+
+                packShipLastKnownCargo(m_data, ship, currentTurn, fmt, shipList, tx);
+                packShipMassRanges    (m_data, ship,              fmt, shipList, tx);
+            }
+
+        virtual void handle(UserSide& iface, Control& ctl, RequestLink2 link)
+            {
+                client::dialogs::doCargoHistory(m_data, ctl.root(), ctl.translator());
+                iface.continueProcess(link);
+            }
+
+     private:
+        game::map::ShipCargoInfos_t m_data;
+    };
+    si.postNewTask(link, new DialogTask(session, *pShip));
+}
+
+
 // @since PCC2 2.40.6
 void
 client::si::IFCCChangeSpeed(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
@@ -518,6 +668,188 @@ client::si::IFCCChangeTech(game::Session& session, ScriptSide& si, RequestLink1 
     }
 }
 
+// @since PCC2 2.40.8
+void
+client::si::IFCCChangeWaypoint(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    // ex IFCCChangeWaypoint
+    // FIXME: can we publish doNavigationChart in its entirety and do the post-processing in a script?
+
+    class WaypointTask : public util::Request<game::Session> {
+     public:
+        WaypointTask(game::Id_t id, game::map::Point pos)
+            : m_id(id), m_position(pos)
+            { }
+
+        virtual void handle(game::Session& session)
+            {
+                game::Root& r = game::actions::mustHaveRoot(session);
+                game::spec::ShipList& sl = game::actions::mustHaveShipList(session);
+                game::map::Universe& univ = game::actions::mustHaveGame(session).currentTurn().universe();
+                game::map::Ship& sh = game::actions::mustExist(univ.ships().get(m_id));
+                game::map::FleetMember fm(univ, sh);
+
+                fm.setWaypoint(m_position, r.hostConfiguration(), sl);
+
+                // setFleetWaypoint(univ, ship.getId(), chart.getScannerTarget());
+                // /* FIXME: setOptimumWarp does not belong here. Better do it in the script. But how? */
+                // FIXME: as of 20200103, setOptimumWarp is not ported yet.
+                // setOptimumWarp(univ, ship.getId());
+                // if (ship.isFleetLeader()) {
+                //     synchronizeFleet(univ, ship.getId());
+                // }
+            }
+
+     private:
+        game::Id_t m_id;
+        game::map::Point m_position;
+    };
+
+
+    class Task : public UserTask {
+     public:
+        Task(const client::dialogs::NavChartState& in)
+            : m_state(in)
+            { }
+        virtual void handle(UserSide& iface, Control& ctl, RequestLink2 link)
+            {
+                afl::string::Translator& tx = ctl.translator();
+                client::dialogs::NavChartResult result;
+                client::dialogs::doNavigationChart(result, m_state, ctl.root(), iface.gameSender(), tx);
+                switch (result.result) {
+                 case client::dialogs::NavChartResult::Location: {
+                    Downlink link(ctl.root());
+                    WaypointTask t(m_state.shipId, result.position);
+                    link.call(iface.gameSender(), t);
+                    break;
+                 }
+                 case client::dialogs::NavChartResult::Chunnel: {
+                    client::proxy::ChunnelProxy proxy(ctl.root().engine().dispatcher(), iface.gameSender());
+                    Downlink link(ctl.root());
+
+                    afl::data::StringList_t status = proxy.setupChunnel(link, m_state.shipId, result.shipId);
+                    if (!status.empty()) {
+                        String_t msg = tx("Please fix the following problems to make the chunnel work:");
+                        for (size_t i = 0; i < status.size(); ++i) {
+                            msg += "\n" UTF_BULLET " ";
+                            msg += status[i];
+                        }
+                        ui::dialogs::MessageBox(msg, tx("Chunnel"), ctl.root()).doOkDialog();
+                    }
+                    break;
+                 }
+                 case client::dialogs::NavChartResult::Ship:
+                 case client::dialogs::NavChartResult::Canceled:
+                    break;
+                }
+                iface.continueProcess(link);
+            }
+     private:
+        client::dialogs::NavChartState m_state;
+    };
+
+    args.checkArgumentCount(0);
+    session.notifyListeners();
+    game::spec::ShipList& shipList = game::actions::mustHaveShipList(session);
+    game::Root& root = game::actions::mustHaveRoot(session);
+    game::Game& g = game::actions::mustHaveGame(session);
+
+    // if (exc.checkForBreak())
+    //     return;
+
+    game::map::Ship* sh = dynamic_cast<game::map::Ship*>(link.getProcess().getCurrentObject());
+    game::map::Point pos;
+    if (sh != 0 && sh->isPlayable(game::map::Object::Playable) && sh->getPosition(pos)) {
+        if (sh->isFleetMember()) {
+            throw game::Exception(game::Exception::eFleet);
+        } else {
+            client::dialogs::NavChartState in;
+            in.title = session.translator()("Select Waypoint");
+            in.center = pos;
+            in.origin = in.center;
+            in.target = sh->getWaypoint().orElse(in.origin);
+            in.shipId = sh->getId();
+            in.hyperjumping = sh->isHyperdriving(g.shipScores(), shipList, root.hostConfiguration());
+            in.speed = util::squareInteger(sh->getWarpFactor().orElse(0));
+            if (sh->hasSpecialFunction(game::spec::HullFunction::Gravitonic, g.shipScores(), shipList, root.hostConfiguration())) {
+                in.speed *= 2;
+            }
+
+            in.acceptLocation = true;
+            in.acceptShip = false;
+            in.acceptChunnel = sh->hasSpecialFunction(game::spec::HullFunction::FirecloudChunnel, g.shipScores(), shipList, root.hostConfiguration())
+                || sh->hasSpecialFunction(game::spec::HullFunction::ChunnelSelf, g.shipScores(), shipList, root.hostConfiguration())
+                || sh->hasSpecialFunction(game::spec::HullFunction::ChunnelOthers, g.shipScores(), shipList, root.hostConfiguration());
+
+            si.postNewTask(link, new Task(in));
+        }
+    } else {
+        throw interpreter::Error::contextError();
+    }
+}
+
+// @since PCC2 2.40.8
+// CC$ChooseInterceptTarget title
+void
+client::si::IFCCChooseInterceptTarget(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    // ex WShipArgWindow::init (sort-of)
+    class Task : public UserTask {
+     public:
+        Task(const client::dialogs::NavChartState& in)
+            : m_state(in)
+            { }
+        virtual void handle(UserSide& iface, Control& ctl, RequestLink2 link)
+            {
+                afl::string::Translator& tx = ctl.translator();
+                client::dialogs::NavChartResult result;
+                client::dialogs::doNavigationChart(result, m_state, ctl.root(), iface.gameSender(), tx);
+
+                std::auto_ptr<afl::data::Value> r;
+                if (result.result == client::dialogs::NavChartResult::Ship) {
+                    r.reset(interpreter::makeIntegerValue(result.shipId));
+                }
+                iface.setVariable(link, "UI.RESULT", r);
+                iface.continueProcess(link);
+            }
+     private:
+        client::dialogs::NavChartState m_state;
+    };
+
+    args.checkArgumentCount(1);
+    String_t title;
+    if (!interpreter::checkStringArg(title, args.getNext())) {
+        return;
+    }
+
+    session.notifyListeners();
+    game::spec::ShipList& shipList = game::actions::mustHaveShipList(session);
+    game::Root& root = game::actions::mustHaveRoot(session);
+    game::Game& g = game::actions::mustHaveGame(session);
+
+    // if (exc.checkForBreak())
+    //     return;
+
+    game::map::Ship* sh = dynamic_cast<game::map::Ship*>(link.getProcess().getCurrentObject());
+    game::map::Point pos;
+    if (sh != 0 && sh->isPlayable(game::map::Object::Playable) && sh->getPosition(pos)) {
+        client::dialogs::NavChartState in;
+        in.title = title;
+        in.center = pos;
+        in.origin = in.center;
+        in.target = sh->getWaypoint().orElse(in.origin);
+        in.shipId = sh->getId();
+        in.hyperjumping = false;
+        in.speed = 0;
+        in.acceptLocation = false;
+        in.acceptShip = true;
+        in.acceptChunnel = false;
+        si.postNewTask(link, new Task(in));
+    } else {
+        throw interpreter::Error::contextError();
+    }
+}
+
 // @since PCC2 2.40.6
 void
 client::si::IFCCListScreenHistory(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
@@ -551,6 +883,38 @@ client::si::IFCCListScreenHistory(game::Session& session, ScriptSide& si, Reques
     si.postNewTask(link, new Task(isCurrentScreenRegistered(session)));
 }
 
+// @since PCC2 2.40.8
+void
+client::si::IFCCManageBuildQueue(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    args.checkArgumentCount(0);
+    session.notifyListeners();
+    game::actions::mustHaveGame(session);
+
+    // Focus on planet if possible (but don't fail if not)
+    game::Id_t planetId = 0;
+    game::map::Planet* pPlanet = dynamic_cast<game::map::Planet*>(link.getProcess().getCurrentObject());
+    if (pPlanet != 0) {
+        planetId = pPlanet->getId();
+    }
+
+    // Do it
+    class Task : public UserTask {
+     public:
+        Task(game::Id_t planetId)
+            : m_planetId(planetId)
+            { }
+        virtual void handle(UserSide& iface, Control& ctl, RequestLink2 link)
+            {
+                client::dialogs::doBuildQueueDialog(m_planetId, ctl.root(), iface.gameSender(), ctl.translator());
+                iface.continueProcess(link);
+            }
+     private:
+        game::Id_t m_planetId;
+    };
+    si.postNewTask(link, new Task(planetId));
+}
+
 // @since PCC2 2.40.6
 void
 client::si::IFCCPopScreenHistory(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
@@ -577,6 +941,37 @@ client::si::IFCCPopScreenHistory(game::Session& session, ScriptSide& si, Request
     game::actions::mustHaveGame(session);
 
     si.postNewTask(link, new Task(isCurrentScreenRegistered(session)));
+}
+
+// @since PCC2 2.40.8
+void
+client::si::IFCCSellSupplies(game::Session& /*session*/, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    // ex IFCCSellSupplies
+    args.checkArgumentCount(0);
+
+    // Must be our planet
+    game::map::Planet* pPlanet = dynamic_cast<game::map::Planet*>(link.getProcess().getCurrentObject());
+    if (pPlanet == 0) {
+        throw interpreter::Error::contextError();
+    }
+    game::actions::mustBePlayed(*pPlanet);
+
+    // Do it
+    class DialogTask : public UserTask {
+     public:
+        DialogTask(game::Id_t id)
+            : m_id(id)
+            { }
+        virtual void handle(UserSide& iface, Control& ctl, RequestLink2 link)
+            {
+                client::dialogs::doSellSuppliesDialog(ctl.root(), iface.gameSender(), m_id, 0, 0, ctl.translator());
+                iface.continueProcess(link);
+            }
+     private:
+        game::Id_t m_id;
+    };
+    si.postNewTask(link, new DialogTask(pPlanet->getId()));
 }
 
 // @since PCC2 2.40.6
@@ -825,6 +1220,7 @@ client::si::IFChartSetView(game::Session& session, ScriptSide& si, RequestLink1 
 void
 client::si::IFUIChooseObject(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
 {
+    // ex userint.pas:UserInt_UI_ChooseObject
     class Task : public UserTask {
      public:
         Task(const client::dialogs::ObjectSelectionDialog& def)
@@ -1067,6 +1463,8 @@ void
 client::si::IFUIFileWindow(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
 {
     // ex IFUIFileWindow
+    // ex userint.pas:UserInt_UI_FileWindow
+    // FIXME: fourth argument, select-id (integer) in PCC1
     class SessionFileSystem : public afl::base::Closure<afl::io::FileSystem& (game::Session&)> {
      public:
         virtual afl::io::FileSystem& call(game::Session& session)
@@ -1252,6 +1650,7 @@ void
 client::si::IFUIHelp(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
 {
     // ex IFUIHelp
+    // ex userint.pas:UserInt_UI_Help
     String_t pageName;
     args.checkArgumentCount(1);
     if (!interpreter::checkStringArg(pageName, args.getNext())) {
@@ -1266,7 +1665,7 @@ client::si::IFUIHelp(game::Session& session, ScriptSide& si, RequestLink1 link, 
         virtual void handle(UserSide& iface, Control& ctl, RequestLink2 link)
             {
                 client::dialogs::doHelpDialog(ctl.root(), iface.gameSender(), m_pageName);
-                iface.continueProcess(link);   
+                iface.continueProcess(link);
             }
      private:
         String_t m_pageName;
@@ -1451,10 +1850,11 @@ client::si::IFUIInput(game::Session& session, ScriptSide& si, RequestLink1 link,
 void
 client::si::IFUIInputFCode(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
 {
+    // ex IFUIInputFCode
+    // ex userint.pas:UserInt_UI_InputFCode
     using game::spec::FriendlyCodeList;
     using game::spec::FriendlyCode;
 
-    // ex IFUIInputFCode
     enum {
         ShipFlag       = 1,
         PlanetFlag     = 2,
@@ -1574,7 +1974,7 @@ client::si::IFUIInputFCode(game::Session& session, ScriptSide& si, RequestLink1 
 }
 
 
-/* @q UI.InputNumber title:Str, Optional min:Int, max:Int, current:Int, help:Any (Global Command)
+/* @q UI.InputNumber title:Str, Optional min:Int, max:Int, current:Int, help:Any, label:Str (Global Command)
    Number input.
    This command prompts for a number, using the standard number input window.
 
@@ -1583,6 +1983,7 @@ client::si::IFUIInputFCode(game::Session& session, ScriptSide& si, RequestLink1 
    - %min,%max: the acceptable range of numbers (defaults to 0..10000).
    - %current: the current value (defaults to 0).
    - %help: help page to associate with dialog.
+   - %label: prompt, if you want it different from the title (PCC 2.40.8+)
    Only the first parameter is mandatory.
 
    The result will be returned in {UI.Result}.
@@ -1600,8 +2001,9 @@ void
 client::si::IFUIInputNumber(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
 {
     // ex IFUIInputNumber
+    // ex userint.pas:UserInt_UI_InputNumber
     // Check arguments
-    args.checkArgumentCount(1, 5);
+    args.checkArgumentCount(1, 6);
 
     String_t title;
     if (!interpreter::checkStringArg(title, args.getNext())) {
@@ -1620,6 +2022,9 @@ client::si::IFUIInputNumber(game::Session& session, ScriptSide& si, RequestLink1
     String_t help;
     interpreter::checkStringArg(help, args.getNext());
 
+    String_t prompt = title;
+    interpreter::checkStringArg(prompt, args.getNext());
+
     // Adjust arguments
     if (max < min) {
         std::swap(min, max);
@@ -1628,8 +2033,8 @@ client::si::IFUIInputNumber(game::Session& session, ScriptSide& si, RequestLink1
     // Do it.
     class Task : public UserTask {
      public:
-        Task(const String_t& title, int32_t min, int32_t max, int32_t current, const String_t& help)
-            : m_title(title), m_min(min), m_max(max), m_current(current), m_help(help)
+        Task(const String_t& title, int32_t min, int32_t max, int32_t current, const String_t& help, const String_t& prompt)
+            : m_title(title), m_min(min), m_max(max), m_current(current), m_help(help), m_prompt(prompt)
             { }
         virtual void handle(UserSide& ui, Control& ctl, RequestLink2 link)
             {
@@ -1641,7 +2046,7 @@ client::si::IFUIInputNumber(game::Session& session, ScriptSide& si, RequestLink1
                 // Dialog
                 // FIXME: honor 'm_help'
                 afl::base::Deleter del;
-                bool ok = ui::widgets::doStandardDialog(m_title, m_title, sel.addButtons(del, ctl.root()), false, ctl.root());
+                bool ok = ui::widgets::doStandardDialog(m_title, m_prompt, sel.addButtons(del, ctl.root()), false, ctl.root());
 
                 // Result
                 std::auto_ptr<afl::data::Value> result;
@@ -1657,10 +2062,11 @@ client::si::IFUIInputNumber(game::Session& session, ScriptSide& si, RequestLink1
         int32_t m_max;
         int32_t m_current;
         String_t m_help;
+        String_t m_prompt;
     };
     session.notifyListeners();
     // FIXME: if (exc.checkForBreak()) return;
-    si.postNewTask(link, new Task(title, min, max, current, help));
+    si.postNewTask(link, new Task(title, min, max, current, help, prompt));
 }
 
 /* @q UI.KeymapInfo [name:Str] (Global Command)
@@ -1734,6 +2140,7 @@ client::si::IFUIKeymapInfo(game::Session& session, ScriptSide& si, RequestLink1 
 void
 client::si::IFUIListShips(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
 {
+    // ex userint.pas:UserInt_UI_ListShips
     /* UI.ListShips x, y[, flags, ok, heading]
        Flags: F = allow selection of foreign ships; implies A
               A = list all ships
@@ -1906,6 +2313,44 @@ client::si::IFUIMessage(game::Session& session, ScriptSide& si, RequestLink1 lin
     si.postNewTask(link, new Task(pContent, title, afl::string::strTrim(buttons)));
 }
 
+/* @q UI.PlanetInfo pid:Int (Global Command)
+   Open <a href="pcc2:envscreen">planet information</a> for planet %pid.
+   @since PCC2 1.99.10, PCC2 2.40.8 */
+void
+client::si::IFUIPlanetInfo(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    // ex IFUIPlanetInfo
+    args.checkArgumentCount(1);
+
+    int32_t pid;
+    if (!interpreter::checkIntegerArg(pid, args.getNext())) {
+        return;
+    }
+    if (!game::actions::mustHaveGame(session).currentTurn().universe().planets().get(pid)) {
+        throw interpreter::Error::rangeError();
+    }
+
+    class Task : public UserTask {
+     public:
+        Task(game::Id_t id)
+            : m_id(id)
+            { }
+        void handle(UserSide& ui, Control& ctl, RequestLink2 link)
+            {
+                client::dialogs::doPlanetInfoDialog(ctl.root(),
+                                                    ui.gameSender(),
+                                                    m_id,
+                                                    ctl.translator());
+                ui.continueProcess(link);
+            }
+     private:
+        game::Id_t m_id;
+    };
+    session.notifyListeners();
+    si.postNewTask(link, new Task(pid));
+}
+
+
 /* @q UI.PopupConsole (Global Command)
    Open the <a href="pcc2:console">console</a>.
    The script continues running there.
@@ -1946,6 +2391,7 @@ void
 client::si::IFUISearch(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
 {
     // ex IFUISearch
+    // ex userint.pas:UserInt_UI_Search
     /* UI.Search [text, flags]
        flags: PSBUO = planets, ships, bases, ufos, others
               1234  = name, true, false, location */
@@ -2077,24 +2523,26 @@ client::si::registerCommands(UserSide& ui)
                 // // Procedures
                 // s.world().setNewGlobalValue("CC$ADDTOSIM",           new ScriptProcedure(s, &si, IFCCAddToSim));
                 // s.world().setNewGlobalValue("CC$BUILDAMMO",          new ScriptProcedure(s, &si, IFCCBuildAmmo));
-                // s.world().setNewGlobalValue("CC$BUILDBASE",          new ScriptProcedure(s, &si, IFCCBuildBase));
+                s.world().setNewGlobalValue("CC$BUILDBASE",          new ScriptProcedure(s, &si, IFCCBuildBase));
                 // s.world().setNewGlobalValue("CC$BUILDSHIP",          new ScriptProcedure(s, &si, IFCCBuildShip));
-                // s.world().setNewGlobalValue("CC$BUILDSTRUCTURES",    new ScriptProcedure(s, &si, IFCCBuildStructures));
-                // s.world().setNewGlobalValue("CC$BUYSUPPLIES",        new ScriptProcedure(s, &si, IFCCBuySupplies));
-                // s.world().setNewGlobalValue("CC$CARGOHISTORY",       new ScriptProcedure(s, &si, IFCCCargoHistory));
+                s.world().setNewGlobalValue("CC$BUILDSTRUCTURES",    new ScriptProcedure(s, &si, IFCCBuildStructures));
+                s.world().setNewGlobalValue("CC$BUYSUPPLIES",        new ScriptProcedure(s, &si, IFCCBuySupplies));
+                s.world().setNewGlobalValue("CC$CARGOHISTORY",       new ScriptProcedure(s, &si, IFCCCargoHistory));
                 // s.world().setNewGlobalValue("CC$CHANGEMISSION",      new ScriptProcedure(s, &si, IFCCChangeMission));
                 // s.world().setNewGlobalValue("CC$CHANGEPE",           new ScriptProcedure(s, &si, IFCCChangePE));
                 s.world().setNewGlobalValue("CC$CHANGESPEED",        new ScriptProcedure(s, &si, IFCCChangeSpeed));
                 s.world().setNewGlobalValue("CC$CHANGETAXES",        new ScriptProcedure(s, &si, IFCCChangeTaxes));
                 s.world().setNewGlobalValue("CC$CHANGETECH",         new ScriptProcedure(s, &si, IFCCChangeTech));
-                // s.world().setNewGlobalValue("CC$CHANGEWAYPOINT",     new ScriptProcedure(s, &si, IFCCChangeWaypoint));
+                s.world().setNewGlobalValue("CC$CHANGEWAYPOINT",     new ScriptProcedure(s, &si, IFCCChangeWaypoint));
+                s.world().setNewGlobalValue("CC$CHOOSEINTERCEPTTARGET", new ScriptProcedure(s, &si, IFCCChooseInterceptTarget));
                 // s.world().setNewGlobalValue("CC$CSBROWSE",           new ScriptProcedure(s, &si, IFCCCSBrowse));
                 // s.world().setNewGlobalValue("CC$GIVE",               new ScriptProcedure(s, &si, IFCCGive));
                 s.world().setNewGlobalValue("CC$LISTSCREENHISTORY",  new ScriptProcedure(s, &si, IFCCListScreenHistory));
+                s.world().setNewGlobalValue("CC$MANAGEBUILDQUEUE",   new ScriptProcedure(s, &si, IFCCManageBuildQueue));
                 s.world().setNewGlobalValue("CC$POPSCREENHISTORY",   new ScriptProcedure(s, &si, IFCCPopScreenHistory));
                 // s.world().setNewGlobalValue("CC$REMOTECONTROL",      new ScriptProcedure(s, &si, IFCCRemoteControl));
                 // s.world().setNewGlobalValue("CC$RESET",              new ScriptProcedure(s, &si, IFCCReset));
-                // s.world().setNewGlobalValue("CC$SELLSUPPLIES",       new ScriptProcedure(s, &si, IFCCSellSupplies));
+                s.world().setNewGlobalValue("CC$SELLSUPPLIES",       new ScriptProcedure(s, &si, IFCCSellSupplies));
                 // s.world().setNewGlobalValue("CC$SENDMESSAGE",        new ScriptProcedure(s, &si, IFCCSendMessage));
                 // s.world().setNewGlobalValue("CC$SETTINGS",           new ScriptProcedure(s, &si, IFCCSettings));
                 // s.world().setNewGlobalValue("CC$SHIPCOSTCALC",       new ScriptProcedure(s, &si, IFCCShipCostCalc),
@@ -2132,7 +2580,7 @@ client::si::registerCommands(UserSide& ui)
                 s.world().setNewGlobalValue("UI.LISTSHIPS",          new ScriptProcedure(s, &si, IFUIListShips));
                 s.world().setNewGlobalValue("UI.MESSAGE",            new ScriptProcedure(s, &si, IFUIMessage));
                 // s.world().setNewGlobalValue("UI.OVERLAYMESSAGE",     IFUIOverlayMessage);
-                // s.world().setNewGlobalValue("UI.PLANETINFO",         IFUIPlanetInfo);
+                s.world().setNewGlobalValue("UI.PLANETINFO",         new ScriptProcedure(s, &si, IFUIPlanetInfo));
                 s.world().setNewGlobalValue("UI.POPUPCONSOLE",       new ScriptProcedure(s, &si, IFUIPopupConsole));
                 s.world().setNewGlobalValue("UI.SEARCH",             new ScriptProcedure(s, &si, IFUISearch));
                 // s.world().setNewGlobalValue("UI.SELECTIONMANAGER",   IFUISelectionManager);

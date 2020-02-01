@@ -111,6 +111,10 @@ game::v3::RootLoader::loadConfiguration(Root& root, afl::io::Directory& dir, afl
     // ex game/config.cc:initConfig
     game::config::HostConfiguration& config = root.hostConfiguration();
     config.setDefaultValues();
+    root.hostVersion().setImpliedHostConfiguration(config);
+
+    // FIXME: PCC1 shows warning if fewer than 70 pconfig keys
+    // FIXME: PCC1 shows warning if both PCONFIG.SRC and FRIDAY.DAT
 
     // Check pconfig.src
     // FIXME: do we really want to load these from specificationDirectory()?

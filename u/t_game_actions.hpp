@@ -136,6 +136,15 @@ class TestGameActionsCargoTransferSetup : public CxxTest::TestSuite {
     void testOwnPlanetForeignShipConflict();
 };
 
+class TestGameActionsChangeBuildQueue : public CxxTest::TestSuite {
+ public:
+    void testBasic();
+    void testIncrease();
+    void testDecrease();
+    void testPBPs();
+    void testClone();
+};
+
 class TestGameActionsPreconditions : public CxxTest::TestSuite {
  public:
     void testShip();

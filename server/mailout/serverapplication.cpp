@@ -19,7 +19,6 @@
 #include "server/mailout/transmitterimpl.hpp"
 #include "server/ports.hpp"
 #include "util/string.hpp"
-#include "util/translation.hpp"
 #include "version.hpp"
 
 namespace {
@@ -187,7 +186,7 @@ server::mailout::ServerApplication::handleConfiguration(const String_t& key, con
 String_t
 server::mailout::ServerApplication::getApplicationName() const
 {
-    return afl::string::Format(_("PCC2 Mail Queue Server v%s - (c) 2017-2019 Stefan Reuther").c_str(), PCC2_VERSION);
+    return afl::string::Format("PCC2 Mail Queue Server v%s - (c) 2017-2020 Stefan Reuther", PCC2_VERSION);
 }
 
 String_t

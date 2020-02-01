@@ -17,7 +17,6 @@
 #include "game/v3/turnfile.hpp"
 #include "game/v3/unpacker.hpp"
 #include "util/string.hpp"
-#include "util/translation.hpp"
 #include "version.hpp"
 #include "afl/io/multidirectory.hpp"
 
@@ -56,6 +55,7 @@ game::v3::UnpackApplication::appMain()
     PlayerSet_t players;
 
     afl::sys::StandardCommandLineParser parser(environment().getCommandLine());
+    afl::string::Translator& tx = translator();
     String_t text;
     bool option;
     while (parser.getNext(option, text)) {
@@ -83,7 +83,7 @@ game::v3::UnpackApplication::appMain()
             } else if (text == "h" || text == "help") {
                 help();
             } else {
-                errorExit(afl::string::Format(_("invalid option specified. Use \"%s -h\" for help").c_str(), environment().getInvocationName()));
+                errorExit(afl::string::Format(tx("invalid option specified. Use \"%s -h\" for help"), environment().getInvocationName()));
             }
         } else {
             int n;
@@ -98,7 +98,7 @@ game::v3::UnpackApplication::appMain()
                 // Root directory - has no meaning in c2ng, accepted for compatibility
                 rootDirName = text;
             } else {
-                errorExit(_("too many arguments"));
+                errorExit(tx("too many arguments"));
             }
         }
     }
@@ -120,7 +120,7 @@ game::v3::UnpackApplication::appMain()
                 opened = true;
 
                 ResultFile rstFile(*rst, translator());
-                log().write(afl::sys::Log::Info, LOG_NAME, afl::string::Format(_("=== Unpacking player %d... ===").c_str(), i));
+                log().write(afl::sys::Log::Info, LOG_NAME, afl::string::Format(tx("=== Unpacking player %d... ==="), i));
 
                 theUnpacker.prepare(rstFile, i);
 
@@ -131,7 +131,7 @@ game::v3::UnpackApplication::appMain()
                     if (trn.get() != 0) {
                         TurnFile trnFile(theUnpacker.charset(), *trn);
                         if (validateTurn(i, rstFile, trnFile)) {
-                            log().write(afl::sys::Log::Info, LOG_NAME, afl::string::Format(_("Using turn file %s.").c_str(), trnName));
+                            log().write(afl::sys::Log::Info, LOG_NAME, afl::string::Format(tx("Using turn file %s."), trnName));
                             theUnpacker.turnProcessor().handleTurnFile(trnFile, theUnpacker.charset());
                         }
                     }
@@ -155,7 +155,7 @@ game::v3::UnpackApplication::appMain()
     }
 
     if (!count) {
-        errorExit(afl::string::Format(_("no result files found. Use \"%s -h\" for help").c_str(), environment().getInvocationName()));
+        errorExit(afl::string::Format(tx("no result files found. Use \"%s -h\" for help"), environment().getInvocationName()));
     }
 
     exit(retval);
@@ -184,24 +184,25 @@ void
 game::v3::UnpackApplication::help()
 {
     afl::io::TextWriter& out = standardOutput();
-    out.writeLine(afl::string::Format(_("PCC2 Result File Unpacker v%s - (c) 2010-2019 Stefan Reuther").c_str(), PCC2_VERSION));
+    afl::string::Translator& tx = translator();
+    out.writeLine(afl::string::Format(tx("PCC2 Result File Unpacker v%s - (c) 2010-2020 Stefan Reuther"), PCC2_VERSION));
     out.writeLine();
-    out.writeLine(afl::string::Format(_("Usage:\n"
-                                        "  %s [-h]\n"
-                                        "  %$0s [-wdatnfdx] [PLAYER] [GAMEDIR]\n\n"
-                                        "%s\n"
-                                        "Report bugs to <Streu@gmx.de>").c_str(),
+    out.writeLine(afl::string::Format(tx("Usage:\n"
+                                         "  %s [-h]\n"
+                                         "  %$0s [-wdatnfdx] [PLAYER] [GAMEDIR]\n\n"
+                                         "%s\n"
+                                         "Report bugs to <Streu@gmx.de>"),
                                       environment().getInvocationName(),
-                                      util::formatOptions("Options:\n"
-                                                          "-w\tCreate Windows (3.5) format [default]\n"
-                                                          "-d\tCreate DOS (3.0) format\n"
-                                                          "-a\tIgnore version 3.5 part of RST\n"
-                                                          "-t\tCreate TARGETx.EXT files\n"
-                                                          "-n\tDo not attempt to fix host-side errors\n"
-                                                          "-f\tForce unpack of files with failing checksums\n"
-                                                          "-x\tIncrease verbosity\n"
-                                                          "-R\tRefuse race name updates\n"
-                                                          "-u\tUnpack turn files as well\n"
-                                                          "--log=CONFIG\tSet logger configuration\n")));
+                                      util::formatOptions(tx("Options:\n"
+                                                             "-w\tCreate Windows (3.5) format [default]\n"
+                                                             "-d\tCreate DOS (3.0) format\n"
+                                                             "-a\tIgnore version 3.5 part of RST\n"
+                                                             "-t\tCreate TARGETx.EXT files\n"
+                                                             "-n\tDo not attempt to fix host-side errors\n"
+                                                             "-f\tForce unpack of files with failing checksums\n"
+                                                             "-x\tIncrease verbosity\n"
+                                                             "-R\tRefuse race name updates\n"
+                                                             "-u\tUnpack turn files as well\n"
+                                                             "--log=CONFIG\tSet logger configuration\n"))));
     exit(0);
 }

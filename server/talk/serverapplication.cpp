@@ -16,7 +16,6 @@
 #include "server/talk/session.hpp"
 #include "util/string.hpp"
 #include "version.hpp"
-#include "util/translation.hpp"
 
 using afl::async::InterruptOperation;
 
@@ -144,7 +143,7 @@ server::talk::ServerApplication::handleConfiguration(const String_t& key, const 
 String_t
 server::talk::ServerApplication::getApplicationName() const
 {
-    return afl::string::Format(_("PCC2 Talk Server v%s - (c) 2017-2019 Stefan Reuther").c_str(), PCC2_VERSION);
+    return afl::string::Format("PCC2 Talk Server v%s - (c) 2017-2020 Stefan Reuther", PCC2_VERSION);
 }
 
 String_t

@@ -17,6 +17,7 @@
 #include "game/root.hpp"
 #include "game/turn.hpp"
 #include "ui/widgets/standarddialogbuttons.hpp"
+#include "ui/dialogs/messagebox.hpp"
 
 namespace {
     const int Special_Jettison = 1;
@@ -47,6 +48,9 @@ namespace {
                 }
                 return result;
             }
+
+        bool isEmpty()
+            { return m_list.getNumItems() == 0; }
 
      private:
         ui::Root& m_root;
@@ -153,38 +157,44 @@ client::doShipCargoTransfer(ui::Root& root,
     ObjectSelectionDialog dlg(root, proxy);
     proxy.setConfigurationSelection(game::ref::CARGO_TRANSFER);
     proxy.setContentNew(std::auto_ptr<client::proxy::ReferenceListProxy::Initializer_t>(new Initializer(shipId)));
-    // FIXME: need to deal with empty list
+    proxy.waitIdle(link);
 
-    // Build a CargoTransferSetup
-    game::Reference ref = dlg.run(tx("Transfer cargo to..."));
-    client::proxy::CargoTransferSetupProxy setupProxy(gameSender);
-    game::actions::CargoTransferSetup setup;
-    switch (ref.getType()) {
-     case game::Reference::Ship:
-        setup = setupProxy.createShipShip(link, shipId, ref.getId());
-        break;
-
-     case game::Reference::Planet:
-        setup = setupProxy.createPlanetShip(link, ref.getId(), shipId);
-        setup.swapSides();
-        break;
-
-     case game::Reference::Special:
-        switch (ref.getId()){
-         case Special_Jettison:
-            setup = setupProxy.createShipJettison(link, shipId);
+    if (dlg.isEmpty()) {
+        ui::dialogs::MessageBox(tx("There's no other unit here we could transfer to or from."),
+                                tx("Cargo Transfer"),
+                                root).doOkDialog();
+    } else {
+        // Build a CargoTransferSetup
+        game::Reference ref = dlg.run(tx("Transfer cargo to..."));
+        client::proxy::CargoTransferSetupProxy setupProxy(gameSender);
+        game::actions::CargoTransferSetup setup;
+        switch (ref.getType()) {
+         case game::Reference::Ship:
+            setup = setupProxy.createShipShip(link, shipId, ref.getId());
             break;
 
-         case Special_BeamUpMultiple:
-            setup = setupProxy.createShipBeamUp(link, shipId);
+         case game::Reference::Planet:
+            setup = setupProxy.createPlanetShip(link, ref.getId(), shipId);
+            setup.swapSides();
+            break;
+
+         case game::Reference::Special:
+            switch (ref.getId()){
+             case Special_Jettison:
+                setup = setupProxy.createShipJettison(link, shipId);
+                break;
+
+             case Special_BeamUpMultiple:
+                setup = setupProxy.createShipBeamUp(link, shipId);
+                break;
+            }
+
+         default:
             break;
         }
 
-     default:
-        break;
+        doCargoTransfer(root, gameSender, tx, setup);
     }
-
-    doCargoTransfer(root, gameSender, tx, setup);
 }
 
 void
@@ -230,12 +240,16 @@ client::doPlanetCargoTransfer(ui::Root& root,
     ObjectSelectionDialog dlg(root, proxy);
     proxy.setConfigurationSelection(game::ref::CARGO_TRANSFER);
     proxy.setContentNew(std::auto_ptr<client::proxy::ReferenceListProxy::Initializer_t>(new Initializer(planetId)));
-    // FIXME: need to deal with empty list
-    // messageBox(_("There's none of our ships orbiting this planet."),
-    //            _("Cargo Transfer"));
+    proxy.waitIdle(link);
 
-    // Build a CargoTransferSetup
-    game::Reference ref = dlg.run(unload ? tx("Unload ship...") : tx("Transfer cargo to..."));
-    client::proxy::CargoTransferSetupProxy setupProxy(gameSender);
-    doCargoTransfer(root, gameSender, tx, setupProxy.createPlanetShip(link, planetId, ref.getId()));
+    if (dlg.isEmpty()) {
+        ui::dialogs::MessageBox(tx("There's none of our ships orbiting this planet."),
+                                tx("Cargo Transfer"),
+                                root).doOkDialog();
+    } else {
+        // Build a CargoTransferSetup
+        game::Reference ref = dlg.run(unload ? tx("Unload ship...") : tx("Transfer cargo to..."));
+        client::proxy::CargoTransferSetupProxy setupProxy(gameSender);
+        doCargoTransfer(root, gameSender, tx, setupProxy.createPlanetShip(link, planetId, ref.getId()));
+    }
 }

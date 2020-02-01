@@ -8,7 +8,7 @@
   *  in strings intended for translation, because xgettext will not
   *  handle that.
   *
-  *  (c) 2001-2018 Stefan Reuther <Streu@gmx.de>
+  *  (c) 2001-2020 Stefan Reuther <Streu@gmx.de>
   *
   *  This program is free software; you can redistribute it and/or
   *  modify it under the terms of file `COPYING' that comes with the
@@ -52,5 +52,6 @@
 #define UTF_CHECK_MARK       "\xE2\x9C\x93"       /* U+2713 */
 #define UTF_BALLOT_CROSS     "\xE2\x9C\x97"       /* U+2717 */
 #define UTF_ALMOST_EQUAL     "\xE2\x89\x88"       /* U+2248, ~~ */
+#define UTF_STOPWATCH        "\xE2\x8F\xB1"       /* U+23F1, used in place of a proper clock icon (U+1F550 is outside BMP) */
 
 #endif

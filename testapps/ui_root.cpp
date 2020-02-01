@@ -45,6 +45,9 @@
 #include "util/rich/parser.hpp"
 #include "util/rich/styleattribute.hpp"
 #include "client/widgets/filelistbox.hpp"
+#include "ui/widgets/simpletable.hpp"
+#include "ui/widgets/tabbar.hpp"
+#include "afl/string/format.hpp"
 #ifdef HAVE_SDL
 # include "gfx/sdl/engine.hpp"
 typedef gfx::sdl::Engine Engine_t;
@@ -357,6 +360,43 @@ namespace {
                      ui::EventLoop loop(m_root);
                      btn.sig_fire.addNewClosure(loop.makeStop(1));
                      loop.run();
+                     return true;
+                 }
+
+                 case 't':
+                 {
+                     ui::widgets::SimpleTable t(m_root, 3, 4);
+                     t.column(0).subrange(0, 3).setExtraColumns(1);
+                     t.cell(0, 0).setText("Amount:");
+                     t.cell(0, 1).setText("Auto-B. Goal:");
+                     t.cell(0, 2).setText("Maximum:");
+
+                     t.column(2).subrange(0, 3).setColor(ui::Color_Green).setTextAlign(2, 0);
+                     t.cell(2, 0).setText("12");
+                     t.cell(2, 1).setText("[max]");
+                     t.cell(2, 2).setText("213");
+                     
+                     t.cell(0, 3).setText("Cost:");
+                     t.cell(1, 3).setExtraColumns(1).setColor(ui::Color_Green).setText("4 mc + 1 supply").setTextAlign(2, 0);
+
+                     testWidget(t);
+                     return true;
+                 }
+
+                 case 'T':
+                 {
+                     afl::base::Deleter del;
+                     ui::Group g(ui::layout::VBox::instance5);
+                     ui::CardGroup cc;
+                     ui::widgets::TabBar bar(m_root, cc);
+                     for (int i = 0; i < 5; ++i) {
+                         ui::widgets::Button& btn = del.addNew(new ui::widgets::Button(afl::string::Format("Button %d", i), 'x', m_root));
+                         cc.add(btn);
+                         bar.addPage(afl::string::Format("Page %d", i), 'a' + i, btn);
+                     }
+                     g.add(bar);
+                     g.add(cc);
+                     testWidget(g);
                      return true;
                  }
 

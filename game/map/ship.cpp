@@ -730,6 +730,7 @@ game::IntegerProperty_t
 game::map::Ship::getRealOwner() const
 {
     // ex GShip::getRealOwner
+    // ex shipacc.pas:RealShipOwner
     int n;
     if (m_remoteControlFlag > 0) {
         return m_remoteControlFlag;
@@ -995,6 +996,14 @@ game::map::Ship::setNumLaunchers(IntegerProperty_t count)
 // /*
 //  *  Mission accessors
 //  */
+
+String_t
+game::map::Ship::getName() const
+{
+    String_t plainName;
+    m_currentData.name.get(plainName);
+    return plainName;
+}
 
 // /** Set ship name.
 //     \param str New name */

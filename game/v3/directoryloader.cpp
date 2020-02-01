@@ -71,6 +71,7 @@ namespace {
     /* Compute checksum over an array of bytes, shortcut. */
     uint32_t computeChecksum(const afl::base::ConstBytes_t bytes)
     {
+        // ex control.pas:Checksum (sort-of)
         return afl::checksums::ByteSum().add(bytes, 0);
     }
 

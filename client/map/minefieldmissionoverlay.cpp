@@ -37,9 +37,7 @@ client::map::MinefieldMissionOverlay::setEffects(game::map::MinefieldEffects_t d
 
     // Minor optimisation: do not redraw if old and new are empty
     if (!oldEmpty || !m_data.empty()) {
-        if (Callback* p = getCallback()) {
-            p->requestRedraw();
-        }
+        requestRedraw();
     }
 }
 

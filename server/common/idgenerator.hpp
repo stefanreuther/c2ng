@@ -1,5 +1,6 @@
 /**
   *  \file server/common/idgenerator.hpp
+  *  \brief Interface server::common::IdGenerator
   */
 #ifndef C2NG_SERVER_COMMON_IDGENERATOR_HPP
 #define C2NG_SERVER_COMMON_IDGENERATOR_HPP

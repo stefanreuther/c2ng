@@ -1750,6 +1750,7 @@ String_t
 game::config::HostConfiguration::getExperienceLevelName(int level, afl::string::Translator& tx) const
 {
     // ex game/config.cc::getExperienceLevelName
+    // ex pconfig.pas:ExperienceLevelName
     String_t s = (*this)[ExperienceLevelNames]();
     for (int i = 0; i < level; ++i) {
         afl::string::strRemove(s, ",");

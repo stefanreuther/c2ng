@@ -33,7 +33,7 @@ namespace {
         }
 
         // Execute
-        if (!game::actions::BaseFixRecycle(*planet).set(action, &ship)) {
+        if (!game::actions::BaseFixRecycle(*planet).set(action, turn.universe(), &ship)) {
             throw Exception(Exception::ePerm);
         }
     }
@@ -63,6 +63,7 @@ game::interface::callShipMethod(game::map::Ship& sh, ShipMethod ism, interpreter
            @see Comment (Ship Property)
            @since PCC 1.0.5, PCC2 1.99.9, PCC2 2.40.1 */
         // ex int/if/shipif.h:IFShipSetComment
+        // ex shipint.pas:Ship_SetComment
         args.checkArgumentCount(1);
         if (afl::data::Value* value = args.getNext()) {
             if (afl::data::Segment* seg = session.world().shipProperties().create(sh.getId())) {
@@ -78,6 +79,7 @@ game::interface::callShipMethod(game::map::Ship& sh, ShipMethod ism, interpreter
            @see FCode (Ship Property)
            @since PCC 1.0.5, PCC2 1.99.9, PCC2 2.40.1 */
         // ex int/if/shipif.h:IFShipSetFCode
+        // ex shipint.pas:Ship_SetFCode
         args.checkArgumentCount(1);
         setShipProperty(sh, ispFCode, args.getNext(), root, shipList, turn);
         break;
@@ -88,6 +90,7 @@ game::interface::callShipMethod(game::map::Ship& sh, ShipMethod ism, interpreter
            @see Enemy$ (Ship Property)
            @since PCC 1.0.5, PCC2 1.99.9, PCC2 2.40.1 */
         // ex int/if/shipif.h:IFShipSetEnemy
+        // ex shipint.pas:Ship_SetEnemy
         args.checkArgumentCount(1);
         setShipProperty(sh, ispEnemyId, args.getNext(), root, shipList, turn);
         break;
@@ -98,6 +101,7 @@ game::interface::callShipMethod(game::map::Ship& sh, ShipMethod ism, interpreter
            @see Speed$ (Ship Property)
            @since PCC 1.0.5, PCC2 1.99.9, PCC2 2.40.1 */
         // ex int/if/shipif.h:IFShipSetSpeed
+        // ex shipint.pas:Ship_SetSpeed
         args.checkArgumentCount(1);
         setShipProperty(sh, ispSpeedId, args.getNext(), root, shipList, turn);
         break;
@@ -108,6 +112,7 @@ game::interface::callShipMethod(game::map::Ship& sh, ShipMethod ism, interpreter
            @see Name (Ship Property)
            @since PCC 1.0.5, PCC2 1.99.9, PCC2 2.40.1 */
         // ex int/if/shipif.h:IFShipSetName
+        // ex shipint.pas:Ship_SetName
         args.checkArgumentCount(1);
         setShipProperty(sh, ispName, args.getNext(), root, shipList, turn);
         break;
@@ -119,6 +124,7 @@ game::interface::callShipMethod(game::map::Ship& sh, ShipMethod ism, interpreter
            @see Mission$ (Ship Property), Mission.Intercept, Mission.Tow
            @since PCC 1.0.5, PCC2 1.99.9, PCC2 2.40.1 */
         // ex int/if/shipif.h:IFShipSetMission
+        // ex shipint.pas:Ship_SetMission
         int32_t m = 0, i = 0, t = 0;
 
         // Evaluate arguments
@@ -146,6 +152,7 @@ game::interface::callShipMethod(game::map::Ship& sh, ShipMethod ism, interpreter
            @see FixShip (Planet Command)
            @since PCC 1.0.5, PCC2 1.99.9, PCC2 2.40.1 */
         // ex int/if/shipif.h:IFShipFixShip
+        // ex shipint.pas:Ship_FixShip
         args.checkArgumentCount(0);
         setBaseShipyardOrder(sh, turn, FixShipyardAction);
         break;
@@ -157,6 +164,7 @@ game::interface::callShipMethod(game::map::Ship& sh, ShipMethod ism, interpreter
            @see FixShip (Planet Command)
            @since PCC 1.0.5, PCC2 1.99.9, PCC2 2.40.1 */
         // ex int/if/shipif.h:IFShipRecycleShip
+        // ex shipint.pas:Ship_RecycleShip
         args.checkArgumentCount(0);
         setBaseShipyardOrder(sh, turn, RecycleShipyardAction);
         break;
@@ -168,6 +176,7 @@ game::interface::callShipMethod(game::map::Ship& sh, ShipMethod ism, interpreter
            @see MoveTo
            @since PCC 1.0.5, PCC2 1.99.9, PCC2 2.40.1 */
         // ex int/if/shipif.h:IFShipSetWaypoint
+        // ex shipint.pas:Ship_SetWaypoint
         int32_t x, y;
         args.checkArgumentCount(2);
         if (!interpreter::checkIntegerArg(x, args.getNext(), 0, MAX_NUMBER)) {
@@ -280,6 +289,7 @@ game::interface::callShipMethod(game::map::Ship& sh, ShipMethod ism, interpreter
            @see Fleet$ (Ship Property)
            @since PCC 1.0.13, PCC2 1.99.17, PCC2 2.40.3 */
         // ex IFShipSetFleet
+        // ex shipint.pas:Ship_SetFleet
         args.checkArgumentCount(1);
         setShipProperty(sh, ispFleetId, args.getNext(), root, shipList, turn);
         break;

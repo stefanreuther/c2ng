@@ -82,7 +82,7 @@ namespace {
 
                     // Create script
                     interpreter::MemoryCommandSource mcs;
-                    mcs.addLine("Sub C2$Eval(code, UI.Prefix)");
+                    mcs.addLine("Sub C2$Eval(code, UI.Prefix, UI.Key)");
                     mcs.addLine(" Eval AtomStr(code)");
                     mcs.addLine("EndSub");
                     mcs.addLine("CreateKeymap Global, Ship, Planet, Base, Fleet");

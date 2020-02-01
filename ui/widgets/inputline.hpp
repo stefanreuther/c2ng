@@ -63,6 +63,7 @@ namespace ui { namespace widgets {
         virtual ui::layout::Info getLayoutInfo() const;
 
         afl::base::Signal<void()> sig_change;
+        afl::base::Signal<void()> sig_activate;
 
      private:
         /** Hotkey to focus this widget. */
@@ -89,6 +90,9 @@ namespace ui { namespace widgets {
 
         /** Static/dynamic flags. */
         Flags_t m_flags;
+
+        /** True if mouse button is down. */
+        bool m_mouseDown;
 
         /** User-interface root. */
         Root& m_root;

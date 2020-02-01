@@ -19,6 +19,7 @@ afl::data::Value*
 interpreter::makeBooleanValue(int value)
 {
     // ex int/value.h:makeBoolValue(int value)
+    // ex ccexpr.pas:ReturnBool
     if (value < 0) {
         return 0;
     } else {
@@ -84,6 +85,8 @@ interpreter::makeOptionalStringValue(const afl::base::Optional<String_t>& value)
 int
 interpreter::getBooleanValue(const afl::data::Value* value)
 {
+    // ex ccexpr.pas:BoolValue
+
     // What should this return for values that are neither int, nor float, nor string?
     // In PCC2 up to 2.0.1, we produced EMPTY which means out-of-range context accesses and correct accesses are indistinguishable
     // unless you resort to hacks such as "Ships(ID_TO_TEST) # ''" (produces a string for valid Ids, EMPTY otherwise).
@@ -132,6 +135,7 @@ interpreter::getBooleanValue(const afl::data::Value* value)
 String_t
 interpreter::toString(const afl::data::Value* value, bool readable)
 {
+    // ex ccexpr.pas:Stringify
     class ToStringVisitor : public afl::data::Visitor {
      public:
         ToStringVisitor(bool readable)
@@ -209,6 +213,7 @@ String_t
 interpreter::quoteString(const String_t& value)
 {
     // ex int/value.h:quoteString
+    // ex ccexpr.pas:Quote
     if (value.find_first_of("\"\\\n") == value.npos) {
         // No meta-characters, use unquoted double-quote string
         return "\"" + value + "\"";

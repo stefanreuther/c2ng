@@ -277,13 +277,16 @@ void
 client::si::IFListboxAddItem(ScriptSide& ss, const WidgetReference& ref, interpreter::Arguments& args)
 {
     // ex IntListboxClosure::call (part)
+    // ex userint.pas:Listbox_AddItem
     /* @q AddItem id:Int, text:Str (Listbox Command)
        Add an item to the list box.
        The item will be added at the end.
        The %text is displayed on the listbox.
        The %id will be used to select an item and report the user selection.
 
-       @see Listbox()
+       If the listbox is used to prepare a menu, the %id should be an {Atom()|atom}.
+
+       @see Listbox(), UI.Menu
        @since PCC 1.1.1, PCC2 1.99.25, PCC2 2.40.1 */
 
     // Parse args
@@ -323,6 +326,7 @@ void
 client::si::IFListboxDialogRun(game::Session& session, ScriptSide& ss, const WidgetReference& ref, interpreter::Process& proc, interpreter::Arguments& args)
 {
     // ex IntListboxClosure::call
+    // ex userint.pas:Listbox_Run
     /* @q Run (Listbox Command)
        Shows the list box and let the user select an item.
        If the user confirms the selection, the chosen item's %id is stored in {UI.Result}.
@@ -362,6 +366,50 @@ client::si::IFListboxDialogRun(game::Session& session, ScriptSide& ss, const Wid
     args.checkArgumentCount(0);
     session.notifyListeners();
     ss.postNewTask(RequestLink1(proc, false), new RunTask(ref));
+}
+
+// @since PCC2 2.40.8
+void
+client::si::IFListboxDialogRunMenu(game::Session& session, ScriptSide& ss, const WidgetReference& ref, interpreter::Process& proc, interpreter::Arguments& args)
+{
+    class RunTask : public UserTask {
+     public:
+        RunTask(const WidgetReference& ref, const String_t& anchor)
+            : m_ref(ref), m_anchor(anchor)
+            { }
+        void handle(UserSide& us, Control& ctl, RequestLink2 link)
+            {
+                StringListDialogWidget* w = dynamic_cast<StringListDialogWidget*>(m_ref.get(us));
+                if (w == 0 || w->getParent() != 0) {
+                    // Cannot-happen events which would make the universe collapse if they happen
+                    us.continueProcessWithFailure(link, "Internal error: wrong widget");
+                } else {
+                    // Do it.
+                    std::auto_ptr<afl::data::Value> result;
+                    if (w->runMenu(ctl.root(), m_anchor)) {
+                        int32_t i;
+                        if (w->getCurrentKey(i)) {
+                            result.reset(interpreter::makeIntegerValue(i));
+                        }
+                    }
+                    us.setVariable(link, "UI.RESULT", result);
+                    us.continueProcess(link);
+                }
+            }
+     private:
+        const WidgetReference m_ref;
+        const String_t m_anchor;
+    };
+
+    // Do it
+    String_t anchor;
+    args.checkArgumentCount(1);
+    if (!interpreter::checkStringArg(anchor, args.getNext())) {
+        return;
+    }
+
+    session.notifyListeners();
+    ss.postNewTask(RequestLink1(proc, false), new RunTask(ref, anchor));
 }
 
 void
@@ -431,6 +479,10 @@ client::si::callWidgetCommand(WidgetCommand cmd, game::Session& session, ScriptS
         IFListboxDialogRun(session, ss, ref, proc, args);
         break;
 
+     case wicListboxDialogRunMenu:
+        IFListboxDialogRunMenu(session, ss, ref, proc, args);
+        break;
+
      case wicCheckboxSetValue:
         args.checkArgumentCount(1);
         setWidgetProperty(wipCheckboxValue, args.getNext(), ss, ref);
@@ -460,6 +512,11 @@ client::si::callWidgetCommand(WidgetCommand cmd, game::Session& session, ScriptS
 
      case wicCommandViewSetRightText:
         setIndexedWidgetProperty(wipCommandViewRightText, args, ss, ref);
+        break;
+
+     case wicNumberInputSetValue:
+        args.checkArgumentCount(1);
+        setWidgetProperty(wipNumberInputValue, args.getNext(), ss, ref);
         break;
     }
 }

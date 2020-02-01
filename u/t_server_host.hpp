@@ -165,6 +165,7 @@ class TestServerHostHostPlayer : public CxxTest::TestSuite {
     void testCheckFile();
     void testGameState();
     void testGetSet();
+    void testProfilePermission();
 };
 
 class TestServerHostHostSchedule : public CxxTest::TestSuite {

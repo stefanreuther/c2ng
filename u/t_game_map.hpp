@@ -24,6 +24,14 @@ class TestGameMapBeamupShipTransfer : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestGameMapChunnelMission : public CxxTest::TestSuite {
+ public:
+    void testRangesPHost();
+    void testRangesTHost();
+    void testAbilities();
+    void testCombinationAbilities();
+};
+
 class TestGameMapCircularObject : public CxxTest::TestSuite {
  public:
     void testIt();
@@ -93,6 +101,12 @@ class TestGameMapMarkings : public CxxTest::TestSuite {
     void testSetLayer();
 };
 
+class TestGameMapMinefield : public CxxTest::TestSuite {
+ public:
+    void testUnitsAfterDecayHost();
+    void testUnitsAfterDecayPHost();
+};
+
 class TestGameMapMovementPredictor : public CxxTest::TestSuite {
  public:
     void testCombinations();
@@ -108,6 +122,48 @@ class TestGameMapObject : public CxxTest::TestSuite {
 class TestGameMapObjectCursor : public CxxTest::TestSuite {
  public:
     void testIt();
+};
+
+class TestGameMapPlanet : public CxxTest::TestSuite {
+ public:
+    void testAutobuildSettings();
+};
+
+class TestGameMapPlanetFormula : public CxxTest::TestSuite {
+ public:
+    void testGetColonistChange();
+    void testTaxSeriesTHost();
+    void testTaxSeriesPHost();
+    void testTemperatureSeriesFedTHost();
+    void testTemperatureSeriesFedPHost();
+    void testTemperatureSeriesCryTHost();
+    void testTemperatureSeriesCryPHost();
+    void testBuildingSeriesTHost();
+    void testBuildingSeriesPHost();
+    void testNativeTaxSeriesTHost();
+    void testNativeTaxSeriesPHost();
+    void testNativeTaxBuildingSeriesTHost();
+    void testNativeTaxBuildingSeriesPHost();
+    void testBuildingLimitSeries();
+};
+
+class TestGameMapPlanetInfo : public CxxTest::TestSuite {
+ public:
+    void testPackPlanetMineralInfo();
+    void testPackPlanetMineralInfoMineOverride();
+    void testPackPlanetMineralInfoEmpty();
+    void testDescribePlanetClimate();
+    void testDescribePlanetClimateEmpty();
+    void testDescribePlanetClimateDifferent();
+    void testDescribePlanetNatives();
+    void testDescribePlanetNativesEmpty();
+    void testDescribePlanetColony();
+    void testDescribePlanetColonyEmpty();
+    void testDescribePlanetColonyRGA();
+    void testDescribePlanetBuildingEffects();
+    void testDescribePlanetBuildingEffectsEmpty();
+    void testDescribePlanetDefenseEffects();
+    void testPackGroundDefenseInfo();
 };
 
 class TestGameMapPlanetPredictor : public CxxTest::TestSuite {

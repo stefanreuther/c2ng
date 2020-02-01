@@ -23,6 +23,8 @@ namespace {
     const int SCMaxIconHeight = 50;
     const int SCMaxIconWidth  = 300;
 
+    const int MAX_ZOOM = 10;
+
     void drawCross(gfx::BaseContext& ctx, gfx::Point pt, int size)
     {
         // ex GChartViewport::drawCross (part)
@@ -481,4 +483,32 @@ game::map::Point
 client::map::Renderer::getCenter() const
 {
     return m_center;
+}
+
+bool
+client::map::Renderer::zoomIn()
+{
+    if (m_zoomDivider > 1) {
+        --m_zoomDivider;
+        return true;
+    } else if (m_zoomMultiplier < MAX_ZOOM) {
+        ++m_zoomMultiplier;
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool
+client::map::Renderer::zoomOut()
+{
+    if (m_zoomMultiplier > 1) {
+        --m_zoomMultiplier;
+        return true;
+    } else if (m_zoomDivider < MAX_ZOOM) {
+        ++m_zoomDivider;
+        return true;
+    } else {
+        return false;
+    }
 }

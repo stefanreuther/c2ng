@@ -1013,6 +1013,10 @@ You cannot write functions or subroutines that take <em>Hook</em> parameters.
 
 PCC offers a set of predefined hooks that run when a particular event happens.
 These are documented in the group {int:index:group:hook|Hooks} (and also listed below as "properties").
+
+Since 2.0.8 / 2.40.8, you can also specify the name of the hook as an expression using the {ByName()} pseudo-function:
+| On ByName(n) Do Whatever
+Here, the name of the hook is specified in variable %n.
 --------------------------------------------------------------------------------
 @type Int
 Most functions in PCC that operate on numbers do not care whether the numbers are integral or fractional;
@@ -1056,6 +1060,10 @@ If it is not found there, it is searched for in the parents.
 PCC predefines a set of keymaps.
 Those are listed below as "properties".
 You can define your own keymaps using {CreateKeymap}, manipulate them using {Bind}, and use them using {UseKeymap}.
+
+Since 2.0.8 / 2.40.8, you can also specify keymap names as an expression using the {ByName()} pseudo-function:
+| Bind ByName(n) "x" := "My.Command"
+Here, the name of the keymap is specified in variable %n.
 
 Predefined keymaps are defined a little different between PCC 1.x and PCC2.
 The following overview applies to PCC2 and, where appropriate, also for 1.x.
@@ -1558,6 +1566,8 @@ and {@group Global Command|global commands}.
 ===
 
 --------------------------------------------------------------------------------
+@version PCC2 2.40.8
+--------------------------------------------------------------------------------
 @version PCC2 2.40.7
 - add auto-task editor ({AutoTask()}, {@group Auto Task Property})
 --------------------------------------------------------------------------------
@@ -1571,6 +1581,12 @@ and {@group Global Command|global commands}.
 --------------------------------------------------------------------------------
 @version PCC2 2.40
 First "Next Generation" version.
+--------------------------------------------------------------------------------
+@version PCC2 2.0.8
+--------------------------------------------------------------------------------
+@version PCC2 2.0.7
+--------------------------------------------------------------------------------
+@version PCC2 2.0.6
 --------------------------------------------------------------------------------
 @version PCC2 2.0.5
 --------------------------------------------------------------------------------

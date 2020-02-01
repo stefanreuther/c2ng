@@ -47,7 +47,9 @@ namespace interpreter {
         unDec,                      ///< Decrement numeric.
         unIsProcedure,              ///< Check for procedure.
         unFileNr,                   ///< Convert integer into file number.
-        unIsArray                   ///< Check for array (and return number of dimensions).
+        unIsArray,                  ///< Check for array (and return number of dimensions).
+        unUCase,                    ///< Convert string to upper-case.
+        unLCase                     ///< Convert string to lower-case.
     };
 
     const char* getUnaryName(uint8_t op);

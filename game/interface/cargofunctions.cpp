@@ -23,6 +23,7 @@ namespace {
     void doCExtractRemove(game::CargoSpec& cs, int32_t& total, const String_t& s)
     {
         // ex int/if/globalif.h:doCExtractRemove
+        // ex ccexpr.pas:extract_remove_help
         total = 0;
         for (String_t::size_type i = 0; i < s.size(); ++i) {
             if (uint8_t(s[i]) > ' ') {
@@ -43,6 +44,7 @@ bool
 game::interface::checkCargoSpecArg(CargoSpec& out, const afl::data::Value* value)
 {
     // ex int/if/ifutil.h:checkCargoSpecArg
+    // ex ccexpr.pas:ParseCargospecFromNode
     if (value == 0) {
         return false;
     }
@@ -64,6 +66,7 @@ afl::data::Value*
 game::interface::IFCAdd(game::Session& /*session*/, interpreter::Arguments& args)
 {
     // ex int/if/globalif.h:IFCAdd
+    // ex ccexpr.pas:op_CADD_func
     // At least one arg (PCC 1.x: at least two)
     args.checkArgumentCountAtLeast(1);
 
@@ -89,6 +92,7 @@ afl::data::Value*
 game::interface::IFCCompare(game::Session& /*session*/, interpreter::Arguments& args)
 {
     // ex int/if/globalif.h:IFCCompare
+    // ex ccexpr.pas:op_CCOMPARE_func
     args.checkArgumentCount(2);
 
     CargoSpec a, b;
@@ -119,6 +123,7 @@ afl::data::Value*
 game::interface::IFCDiv(game::Session& /*session*/, interpreter::Arguments& args)
 {
     // ex int/if/globalif.h:IFCDiv
+    // ex ccexpr.pas:op_CDIV_func
     args.checkArgumentCount(2);
 
     CargoSpec a;
@@ -161,6 +166,7 @@ afl::data::Value*
 game::interface::IFCExtract(game::Session& /*session*/, interpreter::Arguments& args)
 {
     // ex int/if/globalif.h:IFCExtract
+    // ex ccexpr.pas:op_CEXTRACT_func
     args.checkArgumentCount(2);
 
     // Get first arg
@@ -190,6 +196,7 @@ afl::data::Value*
 game::interface::IFCMul(game::Session& /*session*/, interpreter::Arguments& args)
 {
     // ex int/if/globalif.h:IFCMul
+    // ex ccexpr.pas:op_CMUL_func
     args.checkArgumentCount(2);
 
     // Get first arg
@@ -218,6 +225,7 @@ afl::data::Value*
 game::interface::IFCRemove(game::Session& /*session*/, interpreter::Arguments& args)
 {
     // ex int/if/globalif.h:IFCRemove
+    // ex ccexpr.pas:op_CREMOVE_func
     args.checkArgumentCount(2);
 
     // Get first arg
@@ -249,6 +257,7 @@ afl::data::Value*
 game::interface::IFCSub(game::Session& /*session*/, interpreter::Arguments& args)
 {
     // ex int/if/globalif.h:IFCSub
+    // ex ccexpr.pas:op_CSUB_func
     args.checkArgumentCountAtLeast(2);
 
     CargoSpec dif;

@@ -19,11 +19,19 @@ namespace client { namespace si {
     void IFSystemExitClient(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     void IFSystemExitRace(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
 
+    void IFCCBuildBase(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
+    void IFCCBuildStructures(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
+    void IFCCBuySupplies(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
+    void IFCCCargoHistory(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     void IFCCChangeSpeed(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     void IFCCChangeTaxes(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     void IFCCChangeTech(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
+    void IFCCChangeWaypoint(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
+    void IFCCChooseInterceptTarget(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     void IFCCListScreenHistory(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
+    void IFCCManageBuildQueue(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     void IFCCPopScreenHistory(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
+    void IFCCSellSupplies(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     void IFCCTransferPlanet(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     void IFCCTransferShip(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     void IFCCTransferUnload(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
@@ -45,6 +53,7 @@ namespace client { namespace si {
     void IFUIKeymapInfo(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     void IFUIListShips(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     void IFUIMessage(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
+    void IFUIPlanetInfo(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     void IFUIPopupConsole(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     void IFUISearch(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     void IFUIUpdate(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);

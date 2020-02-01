@@ -159,7 +159,7 @@ namespace {
  */
 
 bool
-HostMock::handleCommand(const String_t& upcasedCommand, interpreter::Arguments& args, std::auto_ptr<Value_t>& result)
+HostMock::handleCommand(const String_t& upcasedCommand, interpreter::Arguments& /*args*/, std::auto_ptr<Value_t>& result)
 {
     if (upcasedCommand == "TRN") {
         switch (m_mode) {
@@ -185,26 +185,6 @@ HostMock::handleCommand(const String_t& upcasedCommand, interpreter::Arguments& 
             result.reset(new HashValue(h));
             break;
         }
-        return true;
-    }
-    if (upcasedCommand == "GAMEGETNAME") {
-        // Emulate GAMEGETNAME, if correct state is configured
-        // As of 20190310, should no longer be needed.
-        int32_t i = server::toInteger(args.getNext());
-        TS_ASSERT_EQUALS(m_mode, Success);
-        TS_ASSERT_EQUALS(m_gameId, i);
-        result.reset(makeStringValue(afl::string::Format("Game %d", i)));
-        return true;
-    }
-    if (upcasedCommand == "GAMEGET") {
-        // Emulate GAMEGET...turn, if correct state is configured
-        // As of 20190310, should no longer be needed.
-        int32_t i = server::toInteger(args.getNext());
-        String_t what = server::toString(args.getNext());
-        TS_ASSERT_EQUALS(m_mode, Success);
-        TS_ASSERT_EQUALS(m_gameId, i);
-        TS_ASSERT_EQUALS(what, "turn");
-        result.reset(makeIntegerValue(75));
         return true;
     }
     return false;

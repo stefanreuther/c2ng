@@ -15,6 +15,7 @@ String_t
 game::tables::BaseMissionName::get(int mission) const
 {
     // ex game/tables.h:getBaseMissionName
+    // ex planint.pas:SBMissionName
     switch (mission) {
      case 0:
         return m_translator("none");

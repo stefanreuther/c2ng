@@ -38,6 +38,9 @@ namespace client { namespace map {
 
         game::map::Point getCenter() const;
 
+        bool zoomIn();
+        bool zoomOut();
+
      private:
         class Listener;
 

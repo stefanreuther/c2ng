@@ -73,24 +73,8 @@ EndSub
 % @since PCC 0.99.7, PCC2 1.99.8, PCC2 2.40.1
 Function ShipName (sid)
   % ex int/if/globalif.h:IFShipNameGet
+  % ex ccexpr.pas:op_SHIPNAME_func
   Return Global.Ship(sid).Name
-EndFunction
-
-% @q IsSpecialFCode(fc:Str):Bool (Function)
-% Check for special friendly code.
-% Returns true if the friendly code given as a parameter is a special friendly code.
-% @since PCC 1.1.4, PCC2 1.99.8, PCC2 2.40.1
-Function IsSpecialFCode(fc)
-  % ex int/if/globalif.h:IFIsSpecialFCodeGet
-  If Not IsEmpty(fc)
-    If Find(Global.FCode, Left(fc,3)=Name And InStr(Flags,'u')=0, True)
-      Return True
-    Else
-      Return False
-    EndIf
-  Else
-    Return Z(0)
-  EndIf
 EndFunction
 
 % @q PlanetName(pid:Int):Str (Function)
@@ -99,6 +83,7 @@ EndFunction
 % @since PCC 0.99.7, PCC2 1.99.8, PCC2 2.40.1
 Function PlanetName (pid)
   % ex int/if/globalif.h:IFPlanetNameGet
+  % ex ccexpr.pas:op_PLANETNAME_func
   Return Global.Planet(pid).Name
 EndFunction
 
@@ -148,16 +133,22 @@ EndFunction
 % @since PCC 1.1.3, PCC2 1.99.13, PCC2 2.40.6
 Sub SelectionLoad (file, Optional flags)
   % ex SelectionLoadAskUI::ask
-  Local state, q, UI.Result, ok
-  state := CC$SelReadHeader(file, flags)
-  q := CC$SelGetQuestion(state)
-  If q Then
-    UI.Message Format(Translate("%s. Do you want to load this file?"), q), Translate("Load Selection"), Translate("Yes No")
-    ok := (UI.Result = 1)
+  Local state, q, UI.Result, ok, oldPos
+  oldPos := FPos(file)
+  Try
+    state := CC$SelReadHeader(file, flags)
+    q := CC$SelGetQuestion(state)
+    If q Then
+      UI.Message Format(Translate("%s. Do you want to load this file?"), q), Translate("Load Selection"), Translate("Yes No")
+      ok := (UI.Result = 1)
+    Else
+      ok := True
+    EndIf
+    If ok Then CC$SelReadContent(state)
   Else
-    ok := True
-  EndIf
-  If ok Then CC$SelReadContent(state)
+    Seek file, oldPos
+    Abort System.Err
+  EndTry
 EndSub
 
 % @q EnqueueShip h:Int, e:Int, Optional bt:Int, bc:Int, tt:Int, tc:Int (Planet Command)
@@ -385,7 +376,12 @@ Function CCVP.ShipMissionLabel
 
   % Try the label expression
   tmp := Global.Mission(Mission$, Owner.Real).Label
-  If tmp Then Try Return Eval(tmp)
+  If tmp Then
+    Try
+      tmp := Eval(tmp)
+      If tmp Then Return tmp
+    EndTry
+  EndIf
 
   % If that fails, try the name
   tmp := Global.Mission(Mission$, Owner.Real).Name

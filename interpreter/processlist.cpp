@@ -30,6 +30,17 @@
 #include "interpreter/processlist.hpp"
 #include "interpreter/process.hpp"
 
+namespace {
+    uint32_t allocateId(uint32_t& var)
+    {
+        ++var;
+        if (var == 0) {
+            ++var;
+        }
+        return var;
+    }
+}
+
 // Make new, empty ProcessList
 interpreter::ProcessList::ProcessList()
     : m_processes(),
@@ -56,7 +67,7 @@ interpreter::ProcessList::create(World& world, String_t name)
 uint32_t
 interpreter::ProcessList::allocateProcessGroup()
 {
-    return ++m_processGroupId;
+    return allocateId(m_processGroupId);
 }
 
 // Start a process group.
@@ -252,6 +263,7 @@ void
 interpreter::ProcessList::run()
 {
     // ex int/process.h:runRunnableProcesses, sort-of
+    // ex ccexec.pas:RunRunnableProcesses, sort-of
     // We must avoid being called recursively, i.e. if a process causes ProcessList::run to be called again.
     if (!m_running) {
         m_running = true;
@@ -330,6 +342,7 @@ void
 interpreter::ProcessList::removeTerminatedProcesses()
 {
     // ex int/process.h:killTerminatedProcesses
+    // ex ccexec.pas:KillTerminatedProcesses
     size_t i = 0, o = 0;
     while (i < m_processes.size()) {
         switch (m_processes[i]->getState()) {
@@ -378,6 +391,7 @@ void
 interpreter::ProcessList::handlePriorityChange(Process& proc)
 {
     // ex int/process.h:handlePriorityChange
+    // ex ccexec.pas:EnqueueProcess, Reschedule
     /* FIXME: check the interaction of this routine and runRunnableProcesses.
        This will change the list runRunnableProcesses is iterating. */
 
@@ -450,7 +464,7 @@ interpreter::ProcessList::getProcessList() const
 inline uint32_t
 interpreter::ProcessList::allocateProcessId()
 {
-    return ++m_processId;
+    return allocateId(m_processId);
 }
 
 interpreter::Process*

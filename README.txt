@@ -4,8 +4,8 @@
                          Next Generation (c2ng)
 
 
-WHAT IS PCC2?
-==============
+WHAT IS PCC2 (c2ng)?
+=====================
 
   PCC2 is a re-write of the semi-popular VGA Planets 3 client PCC 1.x.
 
@@ -18,14 +18,9 @@ WHAT IS PCC2?
   PCC2. It is intended to be 100% compatible to PCC2. However, it does
   away with many self-imposed limitations of PCC2.
 
-  Milestone Five "Let's Get Dangerous" adds the ability to save data -
-  for now, for local games only. However, this means you now need to
-  use it with care: DO NOT RUN THIS ON YOUR ORIGINAL GAME DATA. With
-  this ability come ports of the Maketurn and Unpack utilities
-  (c2mkturn, c2unpack).
-
-  That aside, this version improves functionality a little pretty much
-  everywhere, but adds no major breakthroughs.
+  As of January 2020, c2ng is still incomplete. End-users should
+  remain with PCC2 or PCC1. However, the back-end code is complete
+  enough that c2ng now runs behind PlanetsCentral.com exclusively.
 
 
 Project Goals

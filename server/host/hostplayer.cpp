@@ -71,7 +71,9 @@ server::host::HostPlayer::join(int32_t gameId, int32_t slot, String_t userId)
     HostGame::Type gameType = game.getType();
     bool isAdminAccess = (m_session.isAdmin() || m_session.getUser() == game.getOwner());
     if (!(isAdminAccess
-          || ((gameType == HostGame::PublicGame || gameType == HostGame::UnlistedGame) && m_session.getUser() == userId)))
+          || ((gameType == HostGame::PublicGame || gameType == HostGame::UnlistedGame)
+              && m_session.getUser() == userId
+              && User(m_root, userId).isJoinAllowed())))
     {
         throw std::runtime_error(PERMISSION_DENIED);
     }

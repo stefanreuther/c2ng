@@ -324,3 +324,14 @@ util::removeTrailingCharacter(String_t& s, char ch)
         s.erase(s.size()-1);
     }
 }
+
+void
+util::addListItem(String_t& s, String_t delim, String_t ele)
+{
+    if (!ele.empty()) {
+        if (!s.empty()) {
+            s += delim;
+        }
+        s += ele;
+    }
+}

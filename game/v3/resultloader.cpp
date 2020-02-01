@@ -117,9 +117,9 @@ game::v3::ResultLoader::getPlayerStatus(int player, String_t& extra, afl::string
     DirectoryScanner::PlayerFlags_t flags = m_playerFlags.get(player);
     if (flags.contains(DirectoryScanner::HaveResult)) {
         if (flags.contains(DirectoryScanner::HaveTurn)) {
-            extra = tx.translateString("RST + TRN");
+            extra = tx("RST + TRN");
         } else {
-            extra = tx.translateString("RST");
+            extra = tx("RST");
         }
         result += Available;
         result += Playable;
@@ -148,7 +148,7 @@ game::v3::ResultLoader::loadCurrentTurn(Turn& turn, Game& game, int player, game
     // ex GGameResultStorage::load(GGameTurn& trn)
     {
         Ref<Stream> file = root.gameDirectory().openFile(Format("player%d.rst", player), afl::io::FileSystem::OpenRead);
-        m_log.write(m_log.Info, LOG_NAME, Format(m_translator.translateString("Loading %s RST file...").c_str(), root.playerList().getPlayerName(player, Player::AdjectiveName)));
+        m_log.write(m_log.Info, LOG_NAME, Format(m_translator("Loading %s RST file..."), root.playerList().getPlayerName(player, Player::AdjectiveName)));
         ldr.loadResult(turn, root, game, *file, player);
 
         // Backup
@@ -161,7 +161,7 @@ game::v3::ResultLoader::loadCurrentTurn(Turn& turn, Game& game, int player, game
             tpl.copyFile(m_fileSystem, root.userConfiguration()[UserConfiguration::Backup_Result](), *file);
         }
         catch (std::exception& e) {
-            m_log.write(m_log.Warn, LOG_NAME, m_translator.translateString("Unable to create backup file"), e);
+            m_log.write(m_log.Warn, LOG_NAME, m_translator("Unable to create backup file"), e);
         }
     }
 
@@ -205,7 +205,7 @@ game::v3::ResultLoader::saveCurrentTurn(Turn& turn, Game& game, int player, Root
     const char*const LOCATION = "ResultLoader::saveCurrentTurn";
     if (session.getEditableAreas().contains(Session::CommandArea)) {
         game::v3::trn::FileSet turns(root.gameDirectory(), *m_charset);
-        m_log.write(m_log.Info, LOG_NAME, _("Generating turn commands..."));
+        m_log.write(m_log.Info, LOG_NAME, m_translator("Generating turn commands..."));
 
         // Create turn file
         TurnFile& thisTurn = turns.create(player, turn.getTimestamp(), turn.getTurnNumber());
@@ -293,7 +293,7 @@ game::v3::ResultLoader::saveCurrentTurn(Turn& turn, Game& game, int player, Root
                     if (const Command* pc = *i) {
                         if (pc->getCommand() == Command::phc_TAlliance) {
                             if (pAllianceShip == 0) {
-                                m_log.write(m_log.Warn, LOG_NAME, Format(_("Player %d has no ship; alliance changes not transmitted").c_str(), player));
+                                m_log.write(m_log.Warn, LOG_NAME, Format(m_translator("Player %d has no ship; alliance changes not transmitted"), player));
                             } else {
                                 thisTurn.sendTHostAllies(pc->getArg(), pAllianceShip->getId(), pAllianceShip->getFriendlyCode().orElse(""));
                             }
@@ -377,7 +377,7 @@ game::v3::ResultLoader::loadHistoryTurn(Turn& turn, Game& game, int player, int 
 
     {
         Ref<Stream> file = tpl.openFile(m_fileSystem, root.userConfiguration()[UserConfiguration::Backup_Result]());
-        m_log.write(m_log.Info, LOG_NAME, Format(m_translator.translateString("Loading %s backup file...").c_str(), root.playerList().getPlayerName(player, Player::AdjectiveName)));
+        m_log.write(m_log.Info, LOG_NAME, Format(m_translator("Loading %s backup file..."), root.playerList().getPlayerName(player, Player::AdjectiveName)));
         ldr.loadResult(turn, root, game, *file, player);
     }
 
@@ -417,15 +417,15 @@ void
 game::v3::ResultLoader::loadTurnfile(Turn& trn, Root& root, afl::io::Stream& file, int player) const
 {
     // ex game/load-trn.cc:loadTurn
-    m_log.write(m_log.Info, LOG_NAME, Format(m_translator.translateString("Loading %s TRN file...").c_str(), root.playerList().getPlayerName(player, Player::AdjectiveName)));
+    m_log.write(m_log.Info, LOG_NAME, Format(m_translator("Loading %s TRN file..."), root.playerList().getPlayerName(player, Player::AdjectiveName)));
 
     // Load, validate, and log.
     TurnFile f(*m_charset, file);
     if (f.getPlayer() != player) {
-        throw FileFormatException(file, Format(m_translator.translateString("Turn file belongs to player %d").c_str(), f.getPlayer()));
+        throw FileFormatException(file, Format(m_translator("Turn file belongs to player %d"), f.getPlayer()));
     }
     if (f.getFeatures().contains(TurnFile::TaccomFeature)) {
-        m_log.write(m_log.Info, LOG_NAME, Format(m_translator.translateString("Turn file contains %d attachment%!1{s%}").c_str(), f.getNumFiles()));
+        m_log.write(m_log.Info, LOG_NAME, Format(m_translator("Turn file contains %d attachment%!1{s%}"), f.getNumFiles()));
     }
 
     // Use TurnProcessor to load the turn file.
@@ -440,7 +440,7 @@ game::v3::ResultLoader::loadTurnfile(Turn& trn, Root& root, afl::io::Stream& fil
               m_parent(parent)
             { }
         void fail(const char* tpl, int arg)
-            { throw FileFormatException(m_file, Format(m_parent.m_translator.translateString(tpl).c_str(), arg)); }
+            { throw FileFormatException(m_file, Format(m_parent.m_translator(tpl), arg)); }
         virtual void handleInvalidCommand(int code)
             { fail(N_("Turn file contains invalid command code %d"), code); }
         virtual void validateShip(int id)

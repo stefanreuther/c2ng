@@ -18,6 +18,15 @@ server::host::User::User(Root& root, String_t userId)
 server::host::User::~User()
 { }
 
+// Check whether user can join games.
+bool
+server::host::User::isJoinAllowed()
+{
+    // Unset means yes
+    std::auto_ptr<afl::data::Value> value(getProfileRaw("allowjoin"));
+    return value.get() == 0 || toInteger(value.get()) != 0;
+}
+
 // Access set of owned games.
 afl::net::redis::IntegerSetKey
 server::host::User::ownedGames()

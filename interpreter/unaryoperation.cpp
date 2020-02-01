@@ -44,6 +44,8 @@ namespace {
         "isproc",
         "filenr",
         "isarray",
+        "ucase",
+        "lcase",
     };
 }
 

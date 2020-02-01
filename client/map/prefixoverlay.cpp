@@ -83,9 +83,7 @@ client::map::PrefixOverlay::handleKey(util::Key_t key, int /*prefix*/, const Ren
     // ex WPrefixChartMode::handleEvent
     switch (m_value.handleKey(key)) {
      case util::PrefixArgument::Accepted:
-        if (client::map::Callback* pCB = getCallback()) {
-            pCB->requestRedraw();
-        }
+        requestRedraw();
         return true;
 
      case util::PrefixArgument::Canceled:
@@ -121,9 +119,7 @@ void
 client::map::PrefixOverlay::onTimer()
 {
     m_blink = !m_blink;
-    if (client::map::Callback* pCB = getCallback()) {
-        pCB->requestRedraw();
-    }
+    requestRedraw();
     m_timer->setInterval(BLINK_INTERVAL);
 }
 

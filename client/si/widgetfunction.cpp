@@ -25,6 +25,7 @@
 #include "client/si/widgetfunction.hpp"
 #include "afl/base/ref.hpp"
 #include "afl/base/staticassert.hpp"
+#include "client/si/compoundwidget.hpp"
 #include "client/si/control.hpp"
 #include "client/si/genericwidgetvalue.hpp"
 #include "client/si/scriptside.hpp"
@@ -45,6 +46,7 @@
 #include "ui/spacer.hpp"
 #include "ui/widgets/button.hpp"
 #include "ui/widgets/checkbox.hpp"
+#include "ui/widgets/decimalselector.hpp"
 #include "ui/widgets/focusiterator.hpp"
 #include "ui/widgets/framegroup.hpp"
 #include "ui/widgets/inputline.hpp"
@@ -102,6 +104,13 @@ namespace {
         { "VALUE",                 client::si::wipRadiobuttonValue, client::si::WidgetPropertyDomain,      interpreter::thInt },
     };
 
+    static const interpreter::NameTable NUMBERINPUT_MAP[] = {
+        { "FOCUS",                 client::si::wicFocus,            client::si::WidgetCommandDomain,       interpreter::thProcedure },
+        { "FOCUSED",               client::si::wipFocused,          client::si::WidgetPropertyDomain,      interpreter::thBool },
+        { "SETVALUE",              client::si::wicNumberInputSetValue, client::si::WidgetCommandDomain,    interpreter::thProcedure },
+        { "VALUE",                 client::si::wipNumberInputValue, client::si::WidgetPropertyDomain,      interpreter::thInt },
+    };
+
     static const interpreter::NameTable GROUP_MAP[] = {
         { "NEWBUTTON",             client::si::wifNewButton,        client::si::WidgetFunctionDomain,      interpreter::thFunction },
         { "NEWCHECKBOX",           client::si::wifNewCheckbox,      client::si::WidgetFunctionDomain,      interpreter::thFunction },
@@ -112,6 +121,8 @@ namespace {
         { "NEWINPUT",              client::si::wifNewInput,         client::si::WidgetFunctionDomain,      interpreter::thFunction },
         { "NEWKEYBOARDFOCUS",      client::si::wifNewKeyboardFocus, client::si::WidgetFunctionDomain,      interpreter::thFunction },
         { "NEWLABEL",              client::si::wifNewLabel,         client::si::WidgetFunctionDomain,      interpreter::thFunction },
+        { "NEWNUMBERINPUT",        client::si::wifNewNumberInput,   client::si::WidgetFunctionDomain,      interpreter::thFunction },
+        { "NEWPSEUDOINPUT",        client::si::wifNewPseudoInput,   client::si::WidgetFunctionDomain,      interpreter::thFunction },
         { "NEWRADIOBUTTON",        client::si::wifNewRadiobutton,   client::si::WidgetFunctionDomain,      interpreter::thFunction },
         { "NEWSPACER",             client::si::wifNewSpacer,        client::si::WidgetFunctionDomain,      interpreter::thFunction },
         { "NEWVBOX",               client::si::wifNewVBox,          client::si::WidgetFunctionDomain,      interpreter::thFunction },
@@ -128,6 +139,8 @@ namespace {
         { "NEWINPUT",              client::si::wifNewInput,         client::si::WidgetFunctionDomain,      interpreter::thFunction },
         { "NEWKEYBOARDFOCUS",      client::si::wifNewKeyboardFocus, client::si::WidgetFunctionDomain,      interpreter::thFunction },
         { "NEWLABEL",              client::si::wifNewLabel,         client::si::WidgetFunctionDomain,      interpreter::thFunction },
+        { "NEWNUMBERINPUT",        client::si::wifNewNumberInput,   client::si::WidgetFunctionDomain,      interpreter::thFunction },
+        { "NEWPSEUDOINPUT",        client::si::wifNewPseudoInput,   client::si::WidgetFunctionDomain,      interpreter::thFunction },
         { "NEWRADIOBUTTON",        client::si::wifNewRadiobutton,   client::si::WidgetFunctionDomain,      interpreter::thFunction },
         { "NEWSPACER",             client::si::wifNewSpacer,        client::si::WidgetFunctionDomain,      interpreter::thFunction },
         { "NEWVBOX",               client::si::wifNewVBox,          client::si::WidgetFunctionDomain,      interpreter::thFunction },
@@ -144,6 +157,8 @@ namespace {
         { "NEWINPUT",              client::si::wifNewInput,         client::si::WidgetFunctionDomain,      interpreter::thFunction },
         { "NEWKEYBOARDFOCUS",      client::si::wifNewKeyboardFocus, client::si::WidgetFunctionDomain,      interpreter::thFunction },
         { "NEWLABEL",              client::si::wifNewLabel,         client::si::WidgetFunctionDomain,      interpreter::thFunction },
+        { "NEWNUMBERINPUT",        client::si::wifNewNumberInput,   client::si::WidgetFunctionDomain,      interpreter::thFunction },
+        { "NEWPSEUDOINPUT",        client::si::wifNewPseudoInput,   client::si::WidgetFunctionDomain,      interpreter::thFunction },
         { "NEWRADIOBUTTON",        client::si::wifNewRadiobutton,   client::si::WidgetFunctionDomain,      interpreter::thFunction },
         { "NEWSPACER",             client::si::wifNewSpacer,        client::si::WidgetFunctionDomain,      interpreter::thFunction },
         { "NEWVBOX",               client::si::wifNewVBox,          client::si::WidgetFunctionDomain,      interpreter::thFunction },
@@ -153,6 +168,7 @@ namespace {
     static const interpreter::NameTable STRINGLIST_DIALOG_MAP[] = {
         { "ADDITEM",               client::si::wicListboxAddItem,   client::si::WidgetCommandDomain,       interpreter::thProcedure },
         { "RUN",                   client::si::wicListboxDialogRun, client::si::WidgetCommandDomain,       interpreter::thProcedure },
+        { "RUNMENU",               client::si::wicListboxDialogRunMenu, client::si::WidgetCommandDomain,   interpreter::thProcedure },
     };
 
 
@@ -171,6 +187,49 @@ namespace {
                 throw interpreter::Error("Invalid key name");
             }
             return true;
+        }
+    }
+
+    int convertWidth(int width, int flags, ui::Root& root, const gfx::FontRequest& font)
+    {
+        int result;
+        if (width == 0) {
+            result = root.getExtent().getWidth() / 2;
+        } else {
+            result = width;
+        }
+        if (width == 0 || (flags & 32) == 0) {
+            if (int em = root.provider().getFont(font)->getEmWidth()) {
+                result /= em;
+            }
+        }
+        return result;
+    }
+
+    void applyFlags(ui::widgets::InputLine& widget, int flags)
+    {
+        // Convert flags
+        //   N = numeric
+        //   H = on high ASCII
+        //   P = password masking
+        //   F = frame
+        //   G = game charset
+        //   M = width is in ems
+        if ((flags & 1) != 0) {
+            widget.setFlag(widget.NumbersOnly, true);
+        }
+        if ((flags & 2) != 0) {
+            widget.setFlag(widget.NoHi, true);
+        }
+        if ((flags & 4) != 0) {
+            widget.setFlag(widget.Hidden, true);
+        }
+        // FIXME: flag 'F' (framed) must be implemented differently
+        // if ((flags & 8) != 0) {
+        //     widget.setFlag(widget.Framed, true);
+        // }
+        if ((flags & 16) != 0) {
+            widget.setFlag(widget.GameChars, true);
         }
     }
 }
@@ -510,45 +569,15 @@ client::si::IFWidgetNewInput(game::Session& session, ScriptSide& ss, const Widge
                 font.addSize(1);
 
                 // Convert length
-                int width;
-                if (m_width == 0) {
-                    width = ctl.root().getExtent().getWidth() / 2;
-                } else {
-                    width = m_width;
-                }
-                if (m_width == 0 || (m_flags & 32) == 0) {
-                    if (int em = ctl.root().provider().getFont(font)->getEmWidth()) {
-                        width /= em;
-                    }
-                }
+                const int width = convertWidth(m_width, m_flags, ctl.root(), font);
 
                 // Build a widget
-                std::auto_ptr<ui::widgets::InputLine> widget(new ui::widgets::InputLine(m_maxChars, m_width, ctl.root()));
+                std::auto_ptr<ui::widgets::InputLine> widget(new ui::widgets::InputLine(m_maxChars, width, ctl.root()));
                 widget->setFont(font);
 
                 // Convert flags
-                //   N = numeric
-                //   H = on high ASCII
-                //   P = password masking
-                //   F = frame
-                //   G = game charset
-                //   M = width is in ems
-                if ((m_flags & 1) != 0) {
-                    widget->setFlag(widget->NumbersOnly, true);
-                }
-                if ((m_flags & 2) != 0) {
-                    widget->setFlag(widget->NoHi, true);
-                }
-                if ((m_flags & 4) != 0) {
-                    widget->setFlag(widget->Hidden, true);
-                }
-                // FIXME: flag 'F' (framed) must be implemented differently
-                // if ((m_flags & 8) != 0) {
-                //     widget.setFlag(widget.Framed, true);
-                // }
-                if ((m_flags & 16) != 0) {
-                    widget->setFlag(widget->GameChars, true);
-                }
+                applyFlags(*widget, m_flags);
+
                 widget->setText(m_defaultText);
                 if (m_key != 0) {
                     widget->setHotkey(m_key);
@@ -832,7 +861,7 @@ client::si::IFWidgetNewGridBox(game::Session& session, ScriptSide& ss, const Wid
     return GridFactory().run(session, ss, ref, args, GROUP_MAP);
 }
 
-/* @q NewLabel(text:Str):Widget (Widget Function)
+/* @q NewLabel(text:Str, Optional style:Str):Widget (Widget Function)
    Creates a simple static label.
 
    @temporary
@@ -847,21 +876,147 @@ client::si::IFWidgetNewLabel(game::Session& session, ScriptSide& ss, const Widge
      public:
         virtual bool parseArgs(game::Session& /*session*/, interpreter::Arguments& args)
             {
-                args.checkArgumentCount(1);
+                args.checkArgumentCount(1, 2);
                 if (!checkStringArg(m_text, args.getNext())) {
                     return false;
-                } else {
-                    return true;
                 }
+
+                String_t style;
+                m_font = gfx::FontRequest().addSize(1);
+                if (checkStringArg(style, args.getNext())) {
+                    m_font.parse(style);
+                }
+                return true;
             }
         virtual ui::Widget* makeWidget(UserSide& /*user*/, Control& ctl, WidgetHolder& /*holder*/)
             {
-                return new ui::widgets::StaticText(m_text, util::SkinColor::Static, gfx::FontRequest().addSize(1), ctl.root().provider());
+                return new ui::widgets::StaticText(m_text, util::SkinColor::Static, m_font, ctl.root().provider());
             }
      private:
         String_t m_text;
+        gfx::FontRequest m_font;
     };
     return LabelFactory().run(session, ss, ref, args, afl::base::Nothing);
+}
+
+/* @q NewNumberInput(Optional min:Int, max:Int, current:Int, step:Int):Widget (Widget Function)
+   Creates a number input field.
+
+   @temporary
+
+   @see UI.InputNumber
+   @since PCC2 2.40.8 */
+afl::data::Value*
+client::si::IFWidgetNewNumberInput(game::Session& session, ScriptSide& ss, const WidgetReference& ref, interpreter::Arguments& args)
+{
+    class NumberInputFactory : public Factory {
+     public:
+        NumberInputFactory()
+            : m_min(0), m_max(10000), m_current(0), m_step(10)
+            { }
+        virtual bool parseArgs(game::Session& /*session*/, interpreter::Arguments& args)
+            {
+                args.checkArgumentCount(0, 4);
+                interpreter::checkIntegerArg(m_min, args.getNext());
+                interpreter::checkIntegerArg(m_max, args.getNext());
+                interpreter::checkIntegerArg(m_current, args.getNext());
+                interpreter::checkIntegerArg(m_step, args.getNext());
+                if (m_max < m_min) {
+                    std::swap(m_min, m_max);
+                }
+                return true;
+            }
+        virtual ui::Widget* makeWidget(UserSide& user, Control& ctl, WidgetHolder& holder)
+            {
+                ui::widgets::DecimalSelector& inner = holder.deleter(user)
+                    .addNew(new ui::widgets::DecimalSelector(ctl.root(), holder.createInteger(user), m_min, m_max, m_step));
+                ui::Widget& outer = inner.addButtons(holder.deleter(user), ctl.root());
+                return new CompoundWidget<ui::widgets::DecimalSelector>(inner, outer);
+            }
+     private:
+        int32_t m_min, m_max, m_current, m_step;
+    };
+    return NumberInputFactory().run(session, ss, ref, args, NUMBERINPUT_MAP);
+}
+
+/* @q NewPseudoInput(Optional content:Str, key:Str, command:Any, flags:Str):Widget (Widget Function)
+   Creates a pseudo-input field.
+   A pseudo-input field looks like a regular input field, but does not actually accept input.
+   Instead, it will trigger a command when clicked.
+
+   @temporary
+
+   @see NewInput
+   @since PCC2 2.40.8 */
+afl::data::Value*
+client::si::IFWidgetNewPseudoInput(game::Session& session, ScriptSide& ss, const WidgetReference& ref, interpreter::Arguments& args)
+{
+    class CommandWrap : public afl::base::Closure<void()> {
+     public:
+        CommandWrap(afl::base::Closure<void(int)>* c)
+            : m_closure(c)
+            { }
+        virtual CommandWrap* clone() const
+            { return new CommandWrap(m_closure->clone()); }
+        virtual void call()
+            { m_closure->call(0); }
+     private:
+        afl::base::Closure<void(int)>* m_closure;
+    };
+
+    class InputFactory : public Factory {
+     public:
+        InputFactory()
+            : m_defaultText(),
+              m_key(0),
+              m_commandAtom(0),
+              m_flags(0),
+              m_width(0)  /* FIXME: ui_root->getExtent().w / 2 */
+            { }
+        virtual bool parseArgs(game::Session& session, interpreter::Arguments& args)
+            {
+                args.checkArgumentCount(0, 4);
+                checkStringArg(m_defaultText, args.getNext());
+                checkOptionalKeyArg(m_key, args.getNext());
+                interpreter::checkCommandAtomArg(m_commandAtom, args.getNext(), session.world().atomTable());
+                checkFlagArg(m_flags, &m_width, args.getNext(), "NHPFGM");
+                return true;
+            }
+        virtual ui::Widget* makeWidget(UserSide& /*user*/, Control& ctl, WidgetHolder& holder)
+            {
+                // Font
+                gfx::FontRequest font;
+                font.addSize(1);
+
+                // Convert length
+                const int width = convertWidth(m_width, m_flags, ctl.root(), font);
+
+                // Build a widget
+                std::auto_ptr<ui::widgets::InputLine> widget(new ui::widgets::InputLine(10000, width, ctl.root()));
+                widget->setFont(font);
+
+                // Convert flags
+                applyFlags(*widget, m_flags);
+                widget->setText(m_defaultText);
+                if (m_key != 0) {
+                    widget->setHotkey(m_key);
+                }
+
+                // Make it pseudo
+                widget->setFlag(widget->NonEditable, true);
+                widget->sig_activate.addNewClosure(new CommandWrap(holder.makeCommand(m_commandAtom)));
+
+                return widget.release();
+            }
+     private:
+        String_t m_defaultText;
+        util::Key_t m_key;
+        util::Atom_t m_commandAtom;
+        int32_t m_flags;
+        int32_t m_width;
+    };
+
+    return InputFactory().run(session, ss, ref, args, INPUT_MAP);
 }
 
 // Call widget function.
@@ -893,6 +1048,10 @@ client::si::callWidgetFunction(WidgetFunction func, game::Session& session, Scri
         return IFWidgetNewGridBox(session, ss, ref, args);
      case wifNewLabel:
         return IFWidgetNewLabel(session, ss, ref, args);
+     case wifNewNumberInput:
+        return IFWidgetNewNumberInput(session, ss, ref, args);
+     case wifNewPseudoInput:
+        return IFWidgetNewPseudoInput(session, ss, ref, args);
     }
     return 0;
 }

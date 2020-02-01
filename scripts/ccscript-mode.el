@@ -50,6 +50,7 @@
 ;;  07/Aug/2010  Brute-force assembler support (ccasm-mode)
 ;;  12/Nov/2016  Rewrite
 ;;  13/Jul/2019  Some new syntax
+;;  29/Sep/2019  More new syntax
 
 (defvar ccscript-mode-hook nil)
 
@@ -65,7 +66,7 @@
 (defconst ccscript-font-lock-keywords-1
   (list
    (cons (concat "\\<" (regexp-opt '("Abort" "And" "As" "Break" "Call" "Case" "Close" "Continue" "Dim" "Do" "Else" "End"
-                                     "EndFunction" "EndIf" "EndSelect" "EndSub" "EndTry" "EndWith" "For" 
+                                     "EndFunction" "EndIf" "EndOn" "EndSelect" "EndSub" "EndTry" "EndWith" "For" 
                                      "ForEach" "Function" "If" "Is" "Local" "Loop" "Mod" "Next" "Not" "On" "Open"
                                      "Option" "Optional" "Or" "Return" "RunHook" "Select" "Shared" "Static"
                                      "Stop" "Sub" "To" "Then" "Try" "Until" "While" "With" "Xor"))
@@ -160,7 +161,7 @@ or not (nil)"
        ((looking-at "\\<local[ \t]+\\(sub\\|function\\)\\>")
 	'(0 . 1))
        ;; Outdent `EndWith', `EndSub' etc.
-       ((looking-at "\\<\\(endwith\\|endsub\\|endfunction\\|endtry\\|endif\\|next\\|loop\\)\\>")
+       ((looking-at "\\<\\(endwith\\|endon\\|endsub\\|endfunction\\|endtry\\|endif\\|next\\|loop\\)\\>")
 	'(-1 . 0))
        ;; Indent after `ForEach' or `With' if this is a multiline loop
        ((and (ccscript-check-re "\\<\\(foreach\\|with\\)\\>")
@@ -182,6 +183,14 @@ or not (nil)"
        ((and (ccscript-check-re "\\<\\(if\\)\\>")
 	     (ccscript-check-expr))
 	(ccscript-check-re "\\<then\\>")
+	(if (or (ccscript-check-re "[ \t]*$")
+		(ccscript-check-re "[ \t]*%"))
+	    '(0 . 1)
+	  '(0 . 0)))
+       ;; Indent after `On' if this is a multi-line statement
+       ((and (ccscript-check-re "\\<\\(on\\)\\>")
+	     (ccscript-check-expr))
+	(ccscript-check-re "\\<do\\>")
 	(if (or (ccscript-check-re "[ \t]*$")
 		(ccscript-check-re "[ \t]*%"))
 	    '(0 . 1)

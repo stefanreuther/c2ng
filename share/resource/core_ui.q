@@ -136,7 +136,7 @@ Sub CC$ShipCargo
   If Played Then
     CC$TransferShip 0,0
   Else
-    CC$CargoHistory % FIXME: not implemented
+    CC$CargoHistory
   EndIf
 EndSub
 
@@ -199,6 +199,11 @@ Sub CC$HidePanel
   Chart.SetView ''
 EndSub
 
+% F5
+Sub CC$PlanetInfo (X, Y)
+  Local pid = PlanetAt(X,Y,True)
+  If pid Then UI.PlanetInfo pid
+EndSub
 
 
 %%% Unit Manipulation
@@ -248,6 +253,17 @@ Sub CCUI.Planet.SetComment
   % ex core.q:CC$SetPlanetComment
   UI.Input Translate("Enter new comment for this planet:"), Translate("Edit Comment"), 255, "gm30", Comment
   SetComment UI.Result
+EndSub
+
+% Build or go to base [F8]
+% @since PCC2 2.40.8
+Sub CCUI.Planet.BuildOrGoToBase
+  % ex core.q:CC$BuildOrGotoBase
+  If Base.YesNo
+    Try UI.GotoScreen 3, Id
+  Else
+    Try CC$BuildBase
+  EndIf
 EndSub
 
 
@@ -313,10 +329,197 @@ Sub CCUI.Ship.ChooseExtendedMission (m, i, t)
   EndIf
 EndSub
 
+% Choose single mission parameter.
+% - title: window title (mission name)
+% - label: label/prompt for input (parameter name)
+% - type: type of parameter (Tow.Type, Intercept.Type)
+% - flags: parameter flags
+% - value: initial value
+% - sid: invoking ship
+% Returns entered parameter, EMPTY if cancelled
+% @since PCC2 2.40.8
+Function CCUI$Ship.ChooseOneMissionParameter (title, label, type, flags, value, sid)
+  % ex client/dlg-mission.cc:getMissionArg
+  Local UI.Result
+  Local HELP = 'pcc2:shipscreen'
+  Local notThis = InStr(flags, '!')
+  Local ownOnly = InStr(flags, 'o')
+  Local p
+  Select Case type
+    Case 'p'
+      % PlanetParameter
+      If ownOnly Then
+        UI.ChooseObject 2
+        Return UI.Result
+      Else
+        % FIXME: this is slow because it performs 500 UI/Game transitions. Fortunately it is not used.
+        % FIXME: this looks plain. Fortunately it is not used.
+        Local list = Listbox(title, value)
+        ForEach Global.Planet As p Do Call list->AddItem p->Id, p->Name
+        Call list->Run
+        Return UI.Result
+      EndIf
+
+    Case 's'
+      % ShipParameter
+      % FIXME: deal with "notThis" and "ownOnly" parameters
+      CC$ChooseInterceptTarget title
+      Return UI.Result
+
+    Case 'h'
+      % HereParameter
+      Local dialogFlags = 'e'
+      If Not ownOnly Then dialogFlags := dialogFlags & 'f'
+      If notThis And sid Then dialogFlags := dialogFlags & sid
+      UI.ListShips Global.Ship(sid).Loc.X, Global.Ship(sid).Loc.Y, dialogFlags, Translate("OK"), title
+      Return UI.Result
+
+    Case 'b'
+      % BaseParameter
+      UI.ChooseObject 3
+      Return UI.Result
+
+    Case 'y'
+      % PlayerParameter
+      Local list = Listbox(title, value)
+      ForEach Global.Player As p Do
+        If Not notThis Or Not sid Or Global.Ship(sid).Owner$=p->Race$ Then
+          Call list->AddItem p->Race$, Format("%X - %s", p->Race$, p->Race.Short)
+        EndIf
+      Next
+      Call list->Run
+      Return UI.Result
+
+    Case Else
+      % also 'n': IntegerParameter
+      UI.InputNumber title, 0, 10000, value, HELP, If(IsEmpty(label), title, label)
+      Return UI.Result
+  EndSelect
+EndFunction
+
+Function CCUI$Ship.ChooseTwoMissionParameters (newM, args, sid)
+  % ex getTwoMissionArgs
+  % Event Handlers
+  Option LocalSubs(1)
+  Local Sub OnOK
+    Local i, v
+    For i:=0 To 1 Do
+      If types(i) = "n" Then
+        v := Val(widgets(i).Value)
+        If IsEmpty(v) Or v<0 Or v>10000 Then
+          Call widgets(i).Focus
+          Return
+        EndIf
+        args(i) := v
+      EndIf
+    Next
+    UI.EndDialog 1
+  EndSub
+  Local Sub OnCancel
+    UI.EndDialog 0
+  EndSub
+  Local Sub OnEdit (i)
+    Local v = CCUI$Ship.ChooseOneMissionParameter (newM->Name, names(i), types(i), flags(i), args(i), sid)
+    If Not IsEmpty(v) Then
+      args(i) := v
+      widgets(i).Value := FormatParam(i)
+    EndIf
+  EndSub
+
+  % Local state
+  Dim widgets(2)
+  Local types = Array(newM->Intercept.Type, newM->Tow.Type)
+  Local names = Array(newM->Intercept.Name, newM->Tow.Name)
+  Local flags = Array(newM->Intercept.Flags, newM->Tow.Flags)
+  Local keys = Array('alt-i', 'alt-t')
+  Local UI.Result
+
+  Local Function FormatParam(i)
+    % ex WShipArgWidget::drawContent
+    Local s
+    Local v = args(i)
+    Select Case types(i)
+      Case 'p', 'b'
+        s := If(v, Global.Planet(v).Name, Translate("<not set>"))
+      Case 's', 'h'
+        s := If(v, Global.Ship(v).Name, Translate("<not set>"))
+      Case 'y'
+        s := If(v, Global.Player(v).Race.Short, Translate("<not set>"))
+    EndSelect
+    If IsEmpty(s) Or Not s Then s := v
+    Return s
+  EndFunction
+
+  % Dialog
+  Local a := UI.Dialog(newM->Name)
+  Local aa := a->NewGridBox(2)
+  Local i, wantAdvice
+  For i:=0 To 1 Do
+    % ex client/dlg-mission.cc:createWidget
+    aa->NewLabel(names(i))
+    If types(i) = "n" Then
+      widgets(i) := aa->NewFrame("lowered", 1)->NewInput(5, "5nm", args(i), keys(i))
+    Else
+      widgets(i) := aa->NewFrame("lowered", 1)->NewPseudoInput(FormatParam(i), keys(i), "OnEdit " & i, "5nm")
+      wantAdvice := True
+    EndIf
+  Next
+
+  If wantAdvice Then
+    a->NewLabel(Translate("Press space on a field to change it."), '-')
+  EndIf
+
+  Local ab := a->NewHBox()
+  ab->NewButton(Translate("OK"),     "ret", "OnOK")
+  ab->NewButton(Translate("Cancel"), "esc", "OnCancel")
+  ab->NewSpacer()
+  a->NewKeyboardFocus("vt", widgets(0), widgets(1))
+  Call a->Run
+  Return UI.Result
+EndFunction
+
+% Edit mission parameters
+% - newM: mission (Mission() result)
+% - args: two-element array of parameters, pre-initialized with current values
+% - sid: invoking ship
+% Returns nonzero on success, args updated in-place.
+% @since PCC2 2.40.8
+Function CCUI$Ship.ChooseMissionParameters (newM, args, sid)
+  Local n
+  If newM->Intercept.Type
+    If newM->Tow.Type
+      Return CCUI$Ship.ChooseTwoMissionParameters (newM, args, sid)
+    Else
+      % One parameter (intercept)
+      n := CCUI$Ship.ChooseOneMissionParameter(newM->Name, newM->Intercept.Name, newM->Intercept.Type, newM->Intercept.Flags, args(0), sid)
+      If Not IsEmpty(n)
+        args(0) := n
+        Return 1
+      Else
+        Return 0
+      EndIf
+    EndIf
+  Else
+    If newM->Tow.Type
+      % One parameter (tow)
+      n := CCUI$Ship.ChooseOneMissionParameter(newM->Name, newM->Tow.Name, newM->Tow.Type, newM->Tow.Flags, args(1), sid)
+      If Not IsEmpty(n)
+        args(1) := n
+        Return 1
+      Else
+        Return 0
+      EndIf
+    Else
+      % No parameters
+      Return 1
+    EndIf
+  EndIf
+EndFunction
+
+
 % Ship mission [M]
 % @since PCC2 2.40.1
 Sub CCUI.Ship.SetMission
-  % FIXME: totally incomplete!
   Local _ := Translate
   Local UI.Result, System.Err
   Local i := Id
@@ -341,19 +544,33 @@ Sub CCUI.Ship.SetMission
 
     % Process result
     If Not IsEmpty(UI.Result) Then
-      If UI.Result=-1 Then
+      % Tow chain warning
+      Local newNr = UI.Result
+      If newNr=7 And FindShip(Mission$=7 And Mission.Tow=i) Then
+        UI.Message _("This ship is already being towed. Tow chains will not work.\nContinue anyway?"), _("Ship Mission"), _("Yes No")
+        If UI.Result<>1 Then Return
+      EndIf
+
+      If newNr=-1 Then
         % Extended Mission
         CCUI.Ship.ChooseExtendedMission Mission$, Mission.Intercept, Mission.Tow
         If Not IsEmpty(UI.Result) Then
           SetMission UI.Result(0), UI.Result(1), UI.Result(2)
         EndIf
       Else
-        % FIXME: regular mission parameters
-        SetMission UI.Result
+        % Normal mission
+        Local args(2)
+        Local newM = Global.Mission(newNr,    Owner.Real)
+        Local oldM = Global.Mission(Mission$, Owner.Real)
+        args(0) := If((newNr = Mission$) Or (newM->Intercept.Name = oldM->Intercept.Name), Mission.Intercept, 0)
+        args(1) := If((newNr = Mission$) Or (newM->Tow.Name       = oldM->Tow.Name),       Mission.Tow,       0)
+        If CCUI$Ship.ChooseMissionParameters(newM, args, Id)
+          SetMission newNr, args(0), args(1)
 
-        % Execute 'OnSet=' command
-        i := Global.Mission(Mission$, Owner.Real).Command
-        If i Then Eval i
+          % Execute 'OnSet=' command
+          i := newM->Command
+          If i Then Eval i
+        EndIf
       EndIf
     EndIf
   EndIf
@@ -659,5 +876,43 @@ Sub CCUI.Task.LoadFromFile
     Else
       MessageBox Format(Translate("Unable to open file %s: %s"), name, System.Err), Translate("Load Task")
     EndTry
+  EndIf
+EndSub
+
+%
+%  Menus
+%
+
+% @q UI.Menu name:Str (Global Command)
+% Show named menu and execute a command from it.
+% This command creates a listbox and runs the hook given by %name to populate it.
+% The hook will call {AddItem} to add commands to it; the %id in each call will be an atom.
+% If the user chooses a menu item, the command given by the {Atom()|atom} will be run.
+% @see Listbox(), UI.Key
+% @since PCC2 2.40.8
+Sub UI.Menu(name)
+  Local UI.Result, m
+  m := Listbox(name)
+  With m Do RunHook ByName(name)
+  Call m->RunMenu UI.Key
+  If Not IsEmpty(UI.Result) Then
+    Local UI.Key, UI.Prefix           % neutralize environment
+    Eval AtomStr(UI.Result)
+  EndIf
+EndSub
+
+% Starship 'b' menu
+On ShipBaseMenu Do
+  % If Fighter.Bays Then AddItem 0, Translate("Build fighters")
+  % If Torp.LCount  Then AddItem 0, Translate("Build torpedoes")
+  AddItem Atom("UI.GotoScreen 3, Orbit$"), Translate("Starbase screen")
+EndOn
+
+Sub CCUI.ShipBaseMenu
+  % ex WShipScreen::doShipBaseMenu
+  If Planet(Orbit$).Played And Planet(Orbit$).Base.YesNo Then
+    UI.Menu "ShipBaseMenu"
+  Else
+    MessageBox Translate("We are not at one of our starbases."), Translate("Starbase Commands")
   EndIf
 EndSub

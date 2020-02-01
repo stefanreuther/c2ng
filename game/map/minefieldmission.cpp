@@ -34,7 +34,19 @@ game::map::MinefieldMission::checkLayMission(const Ship& ship,
                                              const UnitScoreDefinitionList& shipScores,
                                              const game::spec::ShipList& shipList)
 {
+    return checkLayMission(ship, univ, root.hostVersion(), root.registrationKey(), root.hostConfiguration(), shipScores, shipList);
+}
+
+bool
+game::map::MinefieldMission::checkLayMission(const Ship& ship, const Universe& univ,
+                                             const HostVersion& hostVersion,
+                                             const RegistrationKey& key,
+                                             const game::config::HostConfiguration& config,
+                                             const UnitScoreDefinitionList& shipScores,
+                                             const game::spec::ShipList& shipList)
+{
     // ex parseMineLayingMission
+    // ex shipacc.pas:ComputeMineDrop (part)
     // Check whether all required values are known
     int mission = 0, towId = 0, interceptId = 0, torpedoType = 0, numLaunchers = 0, torps = 0, owner = 0;
     if (!ship.getMission().get(mission)
@@ -59,8 +71,6 @@ game::map::MinefieldMission::checkLayMission(const Ship& ship,
     int race = 0;                            // Lay as this race?
     int reqid = 0;                           // Require this Id?
     int torplimit = 0;                       // Torpedo limit
-    const game::config::HostConfiguration& config = root.hostConfiguration();
-    const HostVersion& host = root.hostVersion();
     if (mission == Mission::msn_LayMines) {
         // Lay mines: honors mix, mdx, but no other parameters
         usemix = usemdx = true;
@@ -68,7 +78,7 @@ game::map::MinefieldMission::checkLayMission(const Ship& ship,
         // Lay web (race is checked later): honors, mix, mdx, but no other parameters
         usemix = usemdx = true;
         makeweb = true;
-    } else if (!host.isPHost() || root.registrationKey().getStatus() != RegistrationKey::Registered) {
+    } else if (!hostVersion.isPHost() || key.getStatus() != RegistrationKey::Registered) {
         // Following missions only for registered players in PHost
         // FIXME: as for fcodes, we could query mission.cc for presence of these missions
         return false;
@@ -109,8 +119,8 @@ game::map::MinefieldMission::checkLayMission(const Ship& ship,
         const game::spec::FriendlyCodeList::Iterator_t fci = fcList.getCodeByName(fc);
         const bool validfc = (fci == fcList.end()
                               || (*fci != 0
-                                  && (*fci)->worksOn(ship, shipScores, shipList, root.hostConfiguration())
-                                  && (*fci)->isPermitted(root.registrationKey())));
+                                  && (*fci)->worksOn(ship, shipScores, shipList, config)
+                                  && (*fci)->isPermitted(key)));
         if (validfc && fc.size() == 3) {
             if (usemix && fc[0] == 'm' && fc[1] == 'i') {
                 // miX
@@ -163,7 +173,7 @@ game::map::MinefieldMission::checkLayMission(const Ship& ship,
             return false;
         }
 
-        if (host.hasAutomaticMineIdentity()) {
+        if (hostVersion.hasAutomaticMineIdentity()) {
             mf->getOwner(race);
         }
 
@@ -174,7 +184,7 @@ game::map::MinefieldMission::checkLayMission(const Ship& ship,
         ship.getPosition(shipPos);
         if (mfOwner != race
             || mf->isWeb() != makeweb
-            || univ.config().getSquaredDistance(mfPos, shipPos) > mf->getUnitsForLaying(host, config))
+            || univ.config().getSquaredDistance(mfPos, shipPos) > mf->getUnitsForLaying(hostVersion, config))
         {
             return false;
         }
@@ -183,7 +193,7 @@ game::map::MinefieldMission::checkLayMission(const Ship& ship,
         int32_t closest = 0;
         Point shipPos;
         ship.getPosition(shipPos);
-        if (host.hasMinefieldCenterBug()) {
+        if (hostVersion.hasMinefieldCenterBug()) {
             for (Id_t i = mfc.findNextIndex(0); i != 0; i = mfc.findNextIndex(i)) {
                 if (const Minefield* mf = mfc.get(i)) {
                     int mfOwner;
@@ -195,7 +205,7 @@ game::map::MinefieldMission::checkLayMission(const Ship& ship,
                             // Minefield matches type and is close.
                             // We note its Id only when we're inside;
                             // set it to zero if we're outside the field and make a new one
-                            reqid = (dist <= mf->getUnitsForLaying(host, config) ? i : 0);
+                            reqid = (dist <= mf->getUnitsForLaying(hostVersion, config) ? i : 0);
                             closest = dist;
                         }
                     }
@@ -209,7 +219,7 @@ game::map::MinefieldMission::checkLayMission(const Ship& ship,
                         Point mfPos;
                         mf->getPosition(mfPos);
                         int32_t dist = univ.config().getSquaredDistance(mfPos, shipPos);
-                        if (dist <= mf->getUnitsForLaying(host, config) && (reqid == 0 || dist < closest)) {
+                        if (dist <= mf->getUnitsForLaying(hostVersion, config) && (reqid == 0 || dist < closest)) {
                             // Minefield matches type and is close, and we're inside
                             reqid = i;
                             closest = dist;

@@ -1,3 +1,191 @@
+2020-01-26  Stefan Reuther  <streu@gmx.de>
+
+	* client/dialogs/buildqueuedialog.cpp, client/dialogs/buildqueuedialog.hpp: new
+	* client/proxy/buildqueueproxy.cpp, client/proxy/buildqueueproxy.hpp: new
+	* game/actions/changebuildqueue.cpp, game/actions/changebuildqueue.hpp: new
+
+2020-01-18  Stefan Reuther  <streu@gmx.de>
+
+	* game/hostversion.cpp (setImpliedHostConfiguration): new
+
+2020-01-13  Stefan Reuther  <streu@gmx.de>
+
+	* share/resource/core_game.q (SelectionLoad): restore file position on error (PCC1 behaviour)
+	* game/spec/shiplist.cpp (findRacialAbilities): failed to recognize all racial abilities; wrongly recognized others
+
+2020-01-11  Stefan Reuther  <streu@gmx.de>
+
+	* share/resource/core_ui.q: finish mission parameter input
+	* client/si/widgetfunction.cpp (NewPseudoInput): new
+	* ui/widgets/inputline.hpp (sig_activate): new
+
+2020-01-08  Stefan Reuther  <streu@gmx.de>
+
+	* client/si/widgetfunction.cpp (NewNumberInput): new
+	* client/si/compoundwidget.hpp: new
+
+2020-01-07  Stefan Reuther  <streu@gmx.de>
+
+	* game/hostversion.cpp, game/hostversion.hpp: improve chunnel handling
+	* game/map/chunnelmission.cpp, game/map/chunnelmission.hpp: improve chunnel handling. Ship with ChunnelSelf + ChunnelOthers will chunnel all.
+
+2020-01-04  Stefan Reuther  <streu@gmx.de>
+
+	* client/dialogs/cargohistorydialog.cpp, client/dialogs/cargohistorydialog.hpp: new [ex client/dialogs/cargohist.cc]
+
+2020-01-03  Stefan Reuther  <streu@gmx.de>
+
+	* client/dialogs/navchartdialog.cpp, client/dialogs/navchartdialog.hpp: new [ex client/dialogs/navchart.cc]
+	* client/map/movementoverlay.cpp: handle double-click
+	* client/map/renderer.cpp: handle zoom
+	* client/map/widget.cpp: handle zoom
+	* client/proxy/chunnelproxy.cpp, client/proxy/chunnelproxy.hpp: new
+	* game/ref/userlist.cpp (empty): new
+	* share/resource/core_ui.q: more mission arguments
+	* ui/widgets/button.cpp: use configured font
+
+2019-12-31  Stefan Reuther  <streu@gmx.de>
+
+	* client/map/waypointoverlay.cpp, client/map/waypointoverlay.hpp: new
+	* game/map/shipinfo.cpp, game/map/shipinfo.hpp: new
+
+2019-12-30  Stefan Reuther  <streu@gmx.de>
+
+	* share/resource/core_game.q (CCVP.ShipMissionLabel): must not return empty/null
+	* share/resource/core_ui.q: some mission arguments
+	* client/dialogs/visualscandialog.cpp: handle Return key (successful confirmation)
+	* client/si/commands.cpp (IFUIInputNumber): add 6th argument
+	* client/si/widgetholder.cpp (makeCommand): fix invocation of C2$Eval, broken since 2019-09-28
+
+2019-12-27  Stefan Reuther  <streu@gmx.de>
+
+	* client/dialogs/buildstructuresdialog.cpp: defense prediction
+
+2019-12-25  Stefan Reuther  <streu@gmx.de>
+
+	* client/dialogs/buildstructuresdialog.cpp: mining prediction, defense prediction
+
+2019-12-24  Stefan Reuther  <streu@gmx.de>
+
+	* client/dialogs/grounddefensedialog.cpp, client/dialogs/grounddefensedialog.hpp: new [ex client/dlg-groundcombat.cc]
+	* client/dialogs/planetinfodialog.cpp, client/dialogs/planetinfodialog.hpp: new [ex client/scr-env.cc]
+	* client/proxy/planetinfoproxy.cpp, client/proxy/planetinfoproxy.hpp: new
+	* client/widgets/planetmineralinfo.cpp, client/widgets/planetmineralinfo.hpp: new [ex client/tiles/planetmining.cc]
+	* game/map/planetinfo.cpp, game/map/planetinfo.hpp: new [ex client/scr-env.cc]
+	* share/resource/font1.fnt etc.: add U+23F1 (UTF_STOPWATCH)
+	* ui/rich/documentparser.cpp: add custom bullet support
+	* ui/widgets/simpletable.cpp, ui/widgets/simpletable.hpp (all): new
+	* util/string.cpp, util/string.hpp (addListItem): new
+	* util/unicodechars.hpp: add U+23F1 (UTF_STOPWATCH)
+
+2019-12-17  Stefan Reuther  <streu@gmx.de>
+
+	* server/play/maincommandhandler.cpp, server/play/maincommandhandler.hpp: new
+	* game/interface/globalcommands.cpp (IFSendMessage): new command
+
+2019-12-15  Stefan Reuther  <streu@gmx.de>
+
+	* server/play/messagepacker.cpp: fix off-by-one error making last message inaccessible
+
+2019-12-14  Stefan Reuther  <streu@gmx.de>
+
+	* game/map/planetformula.cpp (getColonistSafeTax): we do not need a tax to be set to determine safe tax
+
+2019-11-24  Stefan Reuther  <streu@gmx.de>
+
+	* game/map/planetformula.cpp (getColonistChange): fix formula
+
+2019-11-23  Stefan Reuther  <streu@gmx.de>
+
+	* game/map/shiptransporter.cpp: do not offer "Unload" for Jettison
+
+2019-10-17  Stefan Reuther  <streu@gmx.de>
+
+	* game/authcache.cpp, game/authcache.hpp: new
+
+2019-10-15  Stefan Reuther  <streu@gmx.de>
+
+	* game/map/beamupshiptransfer.cpp: reset to last mission if beam-up-multiple is cancelled
+
+2019-10-13  Stefan Reuther  <streu@gmx.de>
+
+	* game/interface/inboxcontext.cpp, game/interface/inboxcontext.hpp: new [ex int/if/msgif.cc]
+	* game/interface/inboxfunction.cpp, game/interface/inboxfunction.hpp: new [ex int/if/msgif.cc]
+
+2019-10-12  Stefan Reuther  <streu@gmx.de>
+
+	* game/interface/notificationfunctions.cpp, game/interface/notificationfunctions.hpp: new
+	* game/interface/notificationstore.cpp, game/interface/notificationstore.hpp: new [ex int/notify.cc]
+
+2019-09-28  Stefan Reuther  <streu@gmx.de>
+
+	* share/resource/core_ui.q: add ship 'b' command
+	* client/si/stringlistdialogwidget.cpp: add 'RunMenu' command
+	* interpreter/statementcompiler.cpp: add multi-line "On"
+
+2019-09-27  Stefan Reuther  <streu@gmx.de>
+
+	* ui/widgets/tabbar.cpp, ui/widgets/tabbar.hpp: new [ex ui/widgets/cardtab.cc]
+
+2019-09-25  Stefan Reuther  <streu@gmx.de>
+
+	* client/dialogs/goaldialog.cpp, client/dialogs/goaldialog.hpp: new [ex client/dialogs/goaldialog.cc, client/widgets/goalinput.cc]
+
+2019-09-21  Stefan Reuther  <streu@gmx.de>
+
+	* client/dialogs/buysuppliesdialog.cpp, client/dialogs/buysuppliesdialog.hpp: new [ex client/dlg-supplies.cc]
+	* client/dialogs/sellsuppliesdialog.cpp, client/dialogs/sellsuppliesdialog.hpp: new [ex client/dlg-supplies.cc]
+	* client/proxy/convertsuppliesproxy.cpp, client/proxy/convertsuppliesproxy.hpp: new
+	* game/actions/convertsupplies.cpp, game/actions/convertsupplies.hpp: new
+
+2019-09-19  Stefan Reuther  <streu@gmx.de>
+
+	* client/dialogs/buildstructuresdialog.cpp, client/dialogs/buildstructuresdialog.hpp: new [ex client/dlg-structure.cc]
+	* client/proxy/buildstructuresproxy.cpp, client/proxy/buildstructuresproxy.hpp: new [ex client/dlg-structure.cc]
+
+2019-09-09  Stefan Reuther  <streu@gmx.de>
+
+	* client/dialogs/buildstarbasedialog.cpp, client/dialogs/buildstarbasedialog.hpp: new [ex client/act-planet.cc]
+	* client/proxy/buildstarbaseproxy.cpp, client/proxy/buildstarbaseproxy.hpp: new
+
+2019-09-08  Stefan Reuther  <streu@gmx.de>
+
+	* game/map/shippredictor.cpp: handle Refinery variants, mkt, FuelUsagePerTurnFor100KT, mine laying (same as PCC 1.x/PCC2)
+
+2019-09-01  Stefan Reuther  <streu@gmx.de>
+
+	* game/map/minefield.cpp (getUnitsAfterDecay): THost has an additional "-1"
+	* interpreter/expr/parser.cpp (parseSequence): add "Lone ";" at end of line is not allowed" error message (same as PCC 1.x)
+
+2019-08-31  Stefan Reuther  <streu@gmx.de>
+
+	* game/cargospec.cpp (sellSuppliesIfNeeded): "-1$ -2S" should not convert to "-3$" (affects CSub()); cleanup
+	* interpreter/savevisitor.cpp (visitString): limit strings to 2G for file compatibility with 1.x
+	* game/interface/globalfunctions.cpp (Distance): accept real numbers (same as PCC 1.x)
+	* game/interface/globalfunctions.cpp (IsSpecialFCode): implement in C++, honor XTRFCODE.TXT (same as PCC 1.x)
+
+2019-08-28  Stefan Reuther  <streu@gmx.de>
+
+	* interpreter/tokenizer.cpp: add support for "\t" (same as PCC 2.0.7)
+	* game/spec/fighter.cpp, game/spec/fighter.hpp: new [ex game/spec.h]
+
+2019-08-27  Stefan Reuther  <streu@gmx.de>
+
+	* interpreter/unaryexecution.cpp (FChr): refuse out-of-range character codes
+	* interpreter/binaryexecution.cpp (FDivide): produce integer if possible (same as PCC 1.x / 2.0.7)
+
+2019-08-25  Stefan Reuther  <streu@gmx.de>
+
+	* server/host/user.cpp, server/host/hostplayer.cpp: add per-user ability to disable joining
+	* interpreter/statementcompiler.cpp, interpreter/statementcompiler.hpp: add ByName()
+	* interpreter/unaryexecution.cpp: add UCase(), LCase()
+	* interpreter/unaryoperation.cpp, interpreter/unaryoperation.hpp: add UCase(), LCase()
+	* interpreter/expr/builtinfunction.cpp: add UCase(), LCase(), ByName()
+
+2019-08-24  Stefan Reuther  <streu@gmx.de>
+
+	-------------------- c2ng_2_40_7 (version 2.40.7)
+
 2019-08-22  Stefan Reuther  <streu@gmx.de>
 
 	* server/mailout/root.cpp (cleanupUniqueIdMap): new

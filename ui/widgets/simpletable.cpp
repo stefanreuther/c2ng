@@ -161,6 +161,12 @@ ui::widgets::SimpleTable::column(size_t x)
     }
 }
 
+ui::widgets::SimpleTable::Range
+ui::widgets::SimpleTable::all()
+{
+    return Range(*this, 0, 1, m_numRows * m_numColumns);
+}
+
 void
 ui::widgets::SimpleTable::setRowHeight(size_t row, int height)
 {

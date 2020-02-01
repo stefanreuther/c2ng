@@ -3,6 +3,7 @@
   *  \brief Class game::spec::ShipList
   */
 
+#include <stdio.h>
 #include "game/spec/shiplist.hpp"
 
 // Constructor.
@@ -219,7 +220,12 @@ game::spec::ShipList::findRacialAbilities(const game::config::HostConfiguration&
         return;
     }
     HullFunctionAssignmentList& referenceAssignments = referenceHull->getHullFunctions(true /* assigned to hull */);
-    for (size_t i = 0, n = referenceAssignments.getNumEntries(); i < n; ++i) {
+
+    size_t i = referenceAssignments.getNumEntries();
+    while (i > 0) {
+        // Go backward because we will be deleting things from referenceAssignments
+        --i;
+
         // Hull #1 has some hull function for a particular set of players.
         if (const HullFunctionAssignmentList::Entry* entry = referenceAssignments.getEntryByIndex(i)) {
             const ModifiedHullFunctionList::Function_t function = entry->m_function;
@@ -238,6 +244,7 @@ game::spec::ShipList::findRacialAbilities(const game::config::HostConfiguration&
                                 + otherEntry->m_addedPlayers
                                 - otherEntry->m_removedPlayers);
                 } else {
+                    players.clear();
                     break;
                 }
             }
@@ -252,16 +259,14 @@ game::spec::ShipList::findRacialAbilities(const game::config::HostConfiguration&
             // except for race 1 on ship Z" should normally better be represented as racial abilities for 2 and 3.
             if (!players.empty()) {
                 m_racialAbilities.change(function, players, PlayerSet_t());
-                for (int hullNr = 1, numHulls = hulls().size(); hullNr < numHulls; ++hullNr) {
-                    if (Hull* hull = hulls().get(hullNr)) {
-                        if (const HullFunctionAssignmentList::Entry* entry = hull->getHullFunctions(true).findEntry(function)) {
-                            if (players == (HullFunction::getDefaultAssignment(int32_t(function), config, *hull)
-                                            - entry->m_addedPlayers
-                                            + entry->m_removedPlayers))
-                            {
-                                // exact match
-                                hull->getHullFunctions(true).removeEntry(function);
-                            }
+                for (Hull* hull = hulls().findNext(0); hull != 0; hull = hulls().findNext(hull->getId())) {
+                    if (const HullFunctionAssignmentList::Entry* entry = hull->getHullFunctions(true).findEntry(function)) {
+                        if (players == (HullFunction::getDefaultAssignment(int32_t(function), config, *hull)
+                                        - entry->m_addedPlayers
+                                        + entry->m_removedPlayers))
+                        {
+                            // exact match
+                            hull->getHullFunctions(true).removeEntry(function);
                         }
                     }
                 }

@@ -23,6 +23,7 @@ void
 game::map::MinefieldType::erase(Id_t id)
 {
     // ex GMinefieldType::erase, sort-of
+    // ex accessor.pas:DeleteMinefield, sort-of
     if (Minefield* p = get(id)) {
         if (p->isValid()) {
             p->erase();
@@ -76,6 +77,7 @@ void
 game::map::MinefieldType::addMessageInformation(const game::parser::MessageInformation& info)
 {
     // ex GMinefieldType::addMinefieldReport
+    // ex accessor.pas:LookupMine (part)
     namespace gp = game::parser;
     Minefield* existing = get(info.getObjectId());
 

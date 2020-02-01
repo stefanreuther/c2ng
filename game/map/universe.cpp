@@ -432,6 +432,7 @@ game::map::Universe::getPlanetAt(Point pt,
                                  const HostVersion& host) const
 {
     // ex GUniverse::getPlanetAt
+    // ex planacc.pas:GravityPlanetAt
     Id_t rv = getPlanetAt(pt);
     if (rv == 0 && gravityFlag) {
         rv = getGravityPlanetAt(pt, config, host);
@@ -450,6 +451,7 @@ game::map::Universe::getGravityPlanetAt(Point pt,
                                         const HostVersion& host) const
 {
     // ex GUniverse::getGravityPlanetAt
+    // ex planacc.pas:GravityPlanet
     /* easy case */
     if (!config[config.AllowGravityWells]()) {
         return 0;
@@ -509,6 +511,7 @@ game::Id_t
 game::map::Universe::getAnyShipAt(Point pt) const
 {
     // ex GUniverse::getAnyShipAt
+    // ex shipacc.pas:ShipAt
     return AnyShipType(const_cast<Universe&>(*this)).findFirstObjectAt(m_config.getCanonicalLocation(pt));
 }
 
@@ -527,6 +530,7 @@ game::map::Universe::getLocationName(Point pt, int flags,
                                      InterpreterInterface& iface) const
 {
     // ex GUniverse::getLocationName
+    // ex shipacc.pas:LocationStr
     if (Id_t pid = getPlanetAt(pt)) {
         if (const Planet* pl = planets().get(pid)) {
             return formatPlanetName(*pl, tx, iface, flags);

@@ -40,6 +40,17 @@ class TestGameInterfaceFriendlyCodeContext : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestGameInterfaceGlobalCommands : public CxxTest::TestSuite {
+ public:
+    void testCheckPlayerArgNull();
+    void testCheckPlayerArgWrong();
+    void testCheckPlayerArgInt();
+    void testCheckPlayerArgArray();
+    void testCheckPlayerArgIntRange();
+    void testCheckPlayerArgArrayRange();
+    void testCheckPlayerArgVector();
+};
+
 class TestGameInterfaceIteratorProvider : public CxxTest::TestSuite {
  public:
     void testIt();

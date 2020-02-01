@@ -45,6 +45,7 @@ ui::widgets::StaticText::setIsFlexible(bool flex)
 {
     // ex UIStaticText::setFlexible
     m_isFlexible = flex;
+    m_forcedWidth = afl::base::Nothing;
     return *this;
 }
 
@@ -53,6 +54,14 @@ ui::widgets::StaticText::setColor(util::SkinColor::Color color)
 {
     m_color = color;
     requestRedraw();
+    return *this;
+}
+
+ui::widgets::StaticText&
+ui::widgets::StaticText::setForcedWidth(int width)
+{
+    m_forcedWidth = width;
+    m_isFlexible = false;
     return *this;
 }
 
@@ -85,7 +94,8 @@ ui::widgets::StaticText::getLayoutInfo() const
 {
     // ex UIStaticText::getLayoutInfo
     afl::base::Ref<gfx::Font> font = m_provider.getFont(m_font);
-    gfx::Point pt(font->getTextWidth(m_text), font->getTextHeight(m_text));
+    const int *pWidth = m_forcedWidth.get();
+    gfx::Point pt(pWidth != 0 ? *pWidth : font->getTextWidth(m_text), font->getTextHeight(m_text));
     return ui::layout::Info(pt, pt, m_isFlexible ? ui::layout::Info::GrowHorizontal : ui::layout::Info::Fixed);
 }
 

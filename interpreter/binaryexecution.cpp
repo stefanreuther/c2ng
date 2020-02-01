@@ -56,6 +56,7 @@ namespace {
         \return argument status */
     Arithmetic checkArithmetic(ArithmeticPair& pair, const afl::data::Value* a, const afl::data::Value* b)
     {
+        // ex ccexpr.pas:MakeComp
 #if 1
         // Visitor version of type switch: 6% faster on "for i:=1 to 3000000 do j:=i+1" benchmark, 1.7k larger than dynamic_cast version
         class VBase : public afl::data::Visitor {
@@ -197,6 +198,7 @@ namespace {
 
     String_t convertCase(const afl::data::StringValue* sv, bool doit)
     {
+        // ex ccexpr.pas:UpProc
         if (doit)
             return afl::string::strUCase(sv->getValue());
         else
@@ -209,6 +211,7 @@ namespace {
         \return Result */
     Comparison compare(const afl::data::Value* a, const afl::data::Value* b, bool caseblind)
     {
+        // ex ccexpr.pas:Compare
 #if 1
         // Visitor version of type switch: again 6% faster on "for i:=1 to 3000000 do j:=i+1" benchmark, 1.8k larger than dynamic_cast version
         class VBase : public afl::data::Visitor {
@@ -387,6 +390,7 @@ namespace {
 
     afl::data::Value* FAnd(interpreter::World& /*world*/, const afl::data::Value* a, const afl::data::Value* b)
     {
+        // ex ccexpr.pas:op_AND (part)
         // Logical And, ternary logic
         //   e_f_t
         // e|e f e
@@ -404,6 +408,7 @@ namespace {
 
     afl::data::Value* FOr(interpreter::World& /*world*/, const afl::data::Value* a, const afl::data::Value* b)
     {
+        // ex ccexpr.pas:op_OR (part)
         // Logical Or, ternary logic
         //   e_f_t
         // e|e e t
@@ -421,6 +426,7 @@ namespace {
 
     afl::data::Value* FXor(interpreter::World& /*world*/, const afl::data::Value* a, const afl::data::Value* b)
     {
+        // ex ccexpr.pas:op_XOR
         // Logical Xor, ternary logic
         //   e_f_t
         // e|e e e
@@ -436,6 +442,7 @@ namespace {
 
     afl::data::Value* FAdd(interpreter::World& /*world*/, const afl::data::Value* a, const afl::data::Value* b)
     {
+        // ex ccexpr.pas:op_PLUS
         // Arithmetical addition or string concatenation
         ArithmeticPair p;
         switch (checkArithmetic(p, a, b)) {
@@ -457,6 +464,7 @@ namespace {
 
     afl::data::Value* FSub(interpreter::World& /*world*/, const afl::data::Value* a, const afl::data::Value* b)
     {
+        // ex ccexpr.pas:op_MINUS
         // Subtraction
         ArithmeticPair p;
         switch (checkArithmetic(p, a, b)) {
@@ -473,6 +481,7 @@ namespace {
 
     afl::data::Value* FMult(interpreter::World& /*world*/, const afl::data::Value* a, const afl::data::Value* b)
     {
+        // ex ccexpr.pas:op_MUL
         // Multiplication
         ArithmeticPair p;
         switch (checkArithmetic(p, a, b)) {
@@ -489,16 +498,21 @@ namespace {
 
     afl::data::Value* FDivide(interpreter::World& /*world*/, const afl::data::Value* a, const afl::data::Value* b)
     {
+        // ex ccexpr.pas:op_REALDIV
         // Division
         ArithmeticPair p;
         switch (checkArithmetic(p, a, b)) {
          case ariNull:
             return 0;
          case ariInt:
-            // FIXME: PCC1.x returns integer if result is integer
-            if (p.ib == 0)
+            if (p.ib == 0) {
                 throw Error("Divide by zero");
-            return makeFloatValue(double(p.ia) / double(p.ib));
+            }
+            if (p.ia % p.ib == 0) {
+                return makeIntegerValue(p.ia / p.ib);
+            } else {
+                return makeFloatValue(double(p.ia) / double(p.ib));
+            }
          case ariFloat:
             if (std::fabs(p.fb) < 1.0E-06)          // FIXME?
                 throw Error("Divide by zero");
@@ -510,6 +524,7 @@ namespace {
 
     afl::data::Value* FIntegerDivide(interpreter::World& /*world*/, const afl::data::Value* a, const afl::data::Value* b)
     {
+        // ex ccexpr.pas:op_DIV
         // Integer division
         ArithmeticPair p;
         switch (checkArithmetic(p, a, b)) {
@@ -526,6 +541,7 @@ namespace {
 
     afl::data::Value* FRemainder(interpreter::World& /*world*/, const afl::data::Value* a, const afl::data::Value* b)
     {
+        // ex ccexpr.pas:op_MOD
         // Integer remainder
         ArithmeticPair p;
         switch (checkArithmetic(p, a, b)) {
@@ -542,6 +558,7 @@ namespace {
 
     afl::data::Value* FPow(interpreter::World& /*world*/, const afl::data::Value* a, const afl::data::Value* b)
     {
+        // ex ccexpr.pas:op_POW
         // Exponentiation
         if (a == 0 || b == 0)
             return 0;
@@ -625,6 +642,7 @@ namespace {
 
     afl::data::Value* FConcat(interpreter::World& /*world*/, const afl::data::Value* a, const afl::data::Value* b)
     {
+        // ex ccexpr.pas:op_HASH
         // Concatenation, null annihilates
         if (a == 0 || b == 0)
             return 0;
@@ -634,9 +652,10 @@ namespace {
 
     afl::data::Value* FConcatEmpty(interpreter::World& /*world*/, const afl::data::Value* a, const afl::data::Value* b)
     {
+        // ex ccexpr.pas:op_CONCAT
         // Concatenation, null interpolates
         if (a == 0 && b == 0) {
-            // FIXME: PCC 1.x does not special-case this, and returns "" for EMPTY & EMPTY.
+            // @diff PCC 1.x does not special-case this, and returns "" for EMPTY & EMPTY.
             return 0;
         } else {
             String_t result;
@@ -653,6 +672,7 @@ namespace {
 
     afl::data::Value* FCompareEQ(const afl::data::Value* a, const afl::data::Value* b, bool caseblind)
     {
+        // ex ccexpr.pas:op_EQ
         // Compare for equality
         Comparison cmp = compare(a, b, caseblind);
         return (cmp == cmpNull)
@@ -662,6 +682,7 @@ namespace {
 
     afl::data::Value* FCompareNE(const afl::data::Value* a, const afl::data::Value* b, bool caseblind)
     {
+        // ex ccexpr.pas:op_NE
         // Compare for inequality
         Comparison cmp = compare(a, b, caseblind);
         return (cmp == cmpNull)
@@ -671,6 +692,7 @@ namespace {
 
     afl::data::Value* FCompareLE(const afl::data::Value* a, const afl::data::Value* b, bool caseblind)
     {
+        // ex ccexpr.pas:op_LE
         // Compare for less/equal
         Comparison cmp = compare(a, b, caseblind);
         return (cmp == cmpNull)
@@ -680,6 +702,7 @@ namespace {
 
     afl::data::Value* FCompareLT(const afl::data::Value* a, const afl::data::Value* b, bool caseblind)
     {
+        // ex ccexpr.pas:op_LT
         // Compare for less than
         Comparison cmp = compare(a, b, caseblind);
         return (cmp == cmpNull)
@@ -689,6 +712,7 @@ namespace {
 
     afl::data::Value* FCompareGE(const afl::data::Value* a, const afl::data::Value* b, bool caseblind)
     {
+        // ex ccexpr.pas:op_GE
         // Compare for greater/equal
         Comparison cmp = compare(a, b, caseblind);
         return (cmp == cmpNull)
@@ -698,6 +722,7 @@ namespace {
 
     afl::data::Value* FCompareGT(const afl::data::Value* a, const afl::data::Value* b, bool caseblind)
     {
+        // ex ccexpr.pas:op_GT
         // Compare for greater than
         Comparison cmp = compare(a, b, caseblind);
         return (cmp == cmpNull)
@@ -707,6 +732,7 @@ namespace {
 
     afl::data::Value* FMin(const afl::data::Value* a, const afl::data::Value* b, bool caseblind)
     {
+        // ex ccexpr.pas:op_MIN_func (sort-of)
         // Compute minimum
         Comparison cmp = compare(a, b, caseblind);
         if (cmp == cmpNull)
@@ -719,6 +745,7 @@ namespace {
 
     afl::data::Value* FMax(const afl::data::Value* a, const afl::data::Value* b, bool caseblind)
     {
+        // ex ccexpr.pas:op_MAX_func (sort-of)
         // Compute maximum
         Comparison cmp = compare(a, b, caseblind);
         if (cmp == cmpNull)
@@ -731,6 +758,7 @@ namespace {
 
     afl::data::Value* FFirstStr(const afl::data::Value* a, const afl::data::Value* b, bool caseblind)
     {
+        // ex ccexpr.pas:op_FIRST_func
         // Split string at delimiter, return first part
         if (a == 0 || b == 0)
             return 0;
@@ -750,6 +778,7 @@ namespace {
 
     afl::data::Value* FRestStr(const afl::data::Value* a, const afl::data::Value* b, bool caseblind)
     {
+        // ex ccexpr.pas:op_REST_func
         // Split string at delimiter, return remainder
         if (a == 0 || b == 0)
             return 0;
@@ -769,6 +798,7 @@ namespace {
 
     afl::data::Value* FFindStr(const afl::data::Value* a, const afl::data::Value* b, bool caseblind)
     {
+        // ex ccexpr.pas:op_INSTR_func
         // Find substring
         if (a == 0 || b == 0)
             return 0;
@@ -780,13 +810,14 @@ namespace {
 
         String_t::size_type apos = convertCase(sa, caseblind).find(convertCase(sb, caseblind));
         if (apos != String_t::npos)
-            return makeIntegerValue(afl::charset::Utf8().byteToCharPos(sa->getValue(), apos) + 1);
+            return makeIntegerValue(static_cast<int32_t>(afl::charset::Utf8().byteToCharPos(sa->getValue(), apos)) + 1);
         else
             return makeIntegerValue(0);
     }
 
     afl::data::Value* FBitAnd(interpreter::World& /*world*/, const afl::data::Value* a, const afl::data::Value* b)
     {
+        // ex ccexpr.pas:op_BITAND_func
         // Bitwise and
         ArithmeticPair p;
         switch (checkArithmetic(p, a, b)) {
@@ -801,6 +832,7 @@ namespace {
 
     afl::data::Value* FBitOr(interpreter::World& /*world*/, const afl::data::Value* a, const afl::data::Value* b)
     {
+        // ex ccexpr.pas:op_BITOR_func
         // Bitwise or
         ArithmeticPair p;
         switch (checkArithmetic(p, a, b)) {
@@ -815,6 +847,7 @@ namespace {
 
     afl::data::Value* FBitXor(interpreter::World& /*world*/, const afl::data::Value* a, const afl::data::Value* b)
     {
+        // ex ccexpr.pas:op_BITXOR_func
         // Bitwise Xor
         ArithmeticPair p;
         switch (checkArithmetic(p, a, b)) {
@@ -829,6 +862,7 @@ namespace {
 
     afl::data::Value* FStr(interpreter::World& /*world*/, const afl::data::Value* a, const afl::data::Value* b)
     {
+        // ex ccexpr.pas:StrProc, op_STR_func (part)
         // Stringification with precision
         if (a == 0 || b == 0)
             return 0;
@@ -857,6 +891,7 @@ namespace {
 
     afl::data::Value* FAtan(interpreter::World& /*world*/, const afl::data::Value* a, const afl::data::Value* b)
     {
+        // ex ccexpr.pas:op_ATAN_func
         // Arc-tangent
         double value;
         ArithmeticPair p;
@@ -900,6 +935,7 @@ namespace {
 
     afl::data::Value* FRCut(interpreter::World& /*world*/, const afl::data::Value* a, const afl::data::Value* b)
     {
+        // ex ccexpr.pas:op_LEFT_func
         // Remove after Nth character
         if (a == 0 || b == 0)
             return 0;
@@ -921,6 +957,7 @@ namespace {
 
     afl::data::Value* FEndCut(interpreter::World& /*world*/, const afl::data::Value* a, const afl::data::Value* b)
     {
+        // ex ccexpr.pas:op_RIGHT_func
         // Remove all but last N characters
         if (a == 0 || b == 0)
             return 0;
@@ -933,8 +970,8 @@ namespace {
         String_t ssa = sa->getValue();
         int32_t  iib = ib->getValue();
         if (iib > 0) {
-            uint32_t have = afl::charset::Utf8().length(ssa);
-            if (uint32_t(iib) < have)
+            size_t have = afl::charset::Utf8().length(ssa);
+            if (size_t(iib) < have)
                 ssa = afl::charset::Utf8().substr(ssa, have - iib, String_t::npos);
         } else {
             ssa.clear();
@@ -944,6 +981,7 @@ namespace {
 
     afl::data::Value* FStrMult(interpreter::World& /*world*/, const afl::data::Value* a, const afl::data::Value* b)
     {
+        // ex ccexpr.pas:op_STRING_func
         // Replicate string
         if (a == 0 || b == 0)
             return 0;

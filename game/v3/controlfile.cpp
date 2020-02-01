@@ -41,6 +41,7 @@ void
 game::v3::ControlFile::load(afl::io::Directory& dir, int player, afl::string::Translator& tx, afl::sys::LogListener& log)
 {
     // ex game/checksum.h:loadControl
+    // ex control.pas:LoadControl
     clear();
 
     Ptr<Stream> f = dir.openFileNT("control.dat", FileSystem::OpenRead);
@@ -76,6 +77,7 @@ void
 game::v3::ControlFile::save(afl::io::Directory& dir, afl::string::Translator& tx, afl::sys::LogListener& log)
 {
     // ex game/checksum.h:saveControl
+    // ex control.pas:SaveControl
     if (m_fileOwner < 0) {
         // We did not load a file, so we do not save one.
         log.write(LogListener::Info, LOG_NAME, tx("Control file (checksums) will not be created"));
@@ -107,6 +109,12 @@ game::v3::ControlFile::save(afl::io::Directory& dir, afl::string::Translator& tx
 
             afl::bits::packArray<afl::bits::UInt32LE>(actualBuffer, m_data);
             f->fullWrite(actualBuffer);
+            f.reset();
+
+            // Remove control.dat if we wrote contrlX.dat.
+            if (m_fileOwner > 0) {
+                dir.eraseNT("control.dat");
+            }
         }
     }
 }

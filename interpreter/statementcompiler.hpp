@@ -102,7 +102,7 @@ namespace interpreter {
         void compileArgumentExpression(BytecodeObject& bco, const StatementCompilationContext& scc);
         void compileArgumentCondition(BytecodeObject& bco, const StatementCompilationContext& scc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff);
         void compileSelectCondition(BytecodeObject& bco, const StatementCompilationContext& scc, BytecodeObject::Label_t ldo);
-        void compileKeymapName(BytecodeObject& bco, const StatementCompilationContext& scc, const char* ttl);
+        void compileNameString(BytecodeObject& bco, const StatementCompilationContext& scc, const char* ttl);
         void compileSubroutineDefinition(BytecodeObject& bco, const StatementCompilationContext& scc, BCORef_t sub, const String_t& name, Opcode::Scope scope);
         void parseArgumentList(afl::container::PtrVector<interpreter::expr::Node>& args);
         void parseEndOfLine();

@@ -289,7 +289,6 @@ game::actions::BuildAmmo::getItemCost(Element::Type type, game::spec::Cost& cost
 {
     int torpType;
     if (type == Element::Fighters) {
-        // FIXME: we're currently lacking a "Fighter" class
         int owner = getPlanetOwner(m_planet);
         cost = m_root.hostConfiguration()[game::config::HostConfiguration::BaseFighterCost](owner);
         techLevel = 1;

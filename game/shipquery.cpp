@@ -64,6 +64,7 @@ game::ShipQuery::complete(const game::map::Universe& univ,
                           const int defaultOwner)
 {
     // ex GShipQuery::complete
+    // ex shipacc.pas:FillHullFuncSelection
 
     // FIXME: split this to get a second signature that takes no universe/scoreDefs for use e.g. in sim.
 

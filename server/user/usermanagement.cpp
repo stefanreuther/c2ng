@@ -150,7 +150,7 @@ server::user::UserManagement::login(String_t userName, String_t password)
 
      case PasswordEncrypter::ValidNeedUpdate:
         // Password needs update
-        m_root.log().write(Log::Info, LOG_NAME, Format("(%s) password upgrade user", userId));
+        m_root.log().write(Log::Info, LOG_NAME, Format("(%s) password upgrade", userId));
         u.passwordHash().set(m_root.encrypter().encryptPassword(password, userId));
         break;
     }

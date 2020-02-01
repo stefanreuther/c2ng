@@ -8,6 +8,7 @@ void
 interpreter::expr::AssignmentNode::compileValue(BytecodeObject& bco, const CompilationContext& cc)
 {
     // ex IntAssignmentNode::compileValue
+    // ex ccexpr.pas:op_ASSIGN2 (sort-of)
     a->compileStore(bco, cc, *b);
 }
 

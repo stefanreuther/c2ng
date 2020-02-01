@@ -14,8 +14,10 @@
 #include "game/registrationkey.hpp"
 #include "util/math.hpp"
 #include "afl/bits/bits.hpp"
+#include "game/map/minefieldmission.hpp"
 
 using game::spec::HullFunction;
+using game::spec::Cost;
 using game::config::HostConfiguration;
 
 namespace {
@@ -24,12 +26,43 @@ namespace {
         return d < 0 ? -1 : d > 0 ? +1 : 0;
     }
 
+    const int AlchemyTri = 1;
+    const int AlchemyDur = 2;
+    const int AlchemyMol = 4;
+
+    int getAlchemyFCodeValue(const String_t fc, const game::HostVersion& host, const game::RegistrationKey& key, bool enable)
+    {
+        // ex shipacc.pas:AlchemyFCValue
+        int result = AlchemyTri + AlchemyDur + AlchemyMol;
+        if (enable && key.getStatus() == game::RegistrationKey::Registered) {
+            if (fc == "alt") {
+                result = AlchemyTri;
+            } else if (fc == "ald") {
+                result = AlchemyDur;
+            } else if (fc == "alm") {
+                result = AlchemyMol;
+            } else if (host.hasAlchemyExclusionFCodes()) {
+                if (fc == "nat") {
+                    result -= AlchemyTri;
+                } else if (fc == "nad") {
+                    result -= AlchemyDur;
+                } else if (fc == "nam") {
+                    result -= AlchemyMol;
+                }
+            }
+        }
+        return result;
+    }
+
+
     // /** Perform refinery reaction.
     //     \param s   [in/out] Ship
     //     \param ore [in/out] Ore to consume
     //     \param sup [in/out] Supplies to consume */
     void doRefinery(game::map::ShipData& ship, game::IntegerProperty_t& ore, int& sup, const game::spec::Hull& hull)
     {
+        // ex game/shippredict.cc:doRefinery
+        // ex shipacc.pas:DoRefinery
         const int haveFuel = ship.neutronium.orElse(0);
         const int haveOre  = ore.orElse(0);
         int n = hull.getMaxFuel() - haveOre;
@@ -49,6 +82,8 @@ namespace {
     //     \param ratio [in] Supply conversion ratio */
     void doDirectRefinery(game::map::ShipData& ship, const int ratio, const game::spec::Hull& hull)
     {
+        // ex game/shippredict.cc:doDirectRefinery
+        // ex shipacc.pas:DoDirectRefinery
         const int haveFuel = ship.neutronium.orElse(0);
         const int haveSupplies = ship.supplies.orElse(0);
         const int free = hull.getMaxFuel() - haveFuel;
@@ -66,33 +101,47 @@ namespace {
     //     this is what the %rounder is used for. */
     void doAlchemy(const String_t& shipFCode, game::map::ShipData& ship, const game::HostVersion& host, const game::RegistrationKey& key)
     {
+        // ex game/shippredict.cc:doAlchemy
         // Merlin converts 3 Sup -> 1 Min
         int t = 0, d = 0, m = 0;
         int haveSupplies = ship.supplies.orElse(0);
         int mins = haveSupplies / 3;
-        int rounder = host.getKind() == host.PHost ? 1 : 3;           // FIXME: make this a property of game::Host
-        if (key.getStatus() == game::RegistrationKey::Registered) {   // FIXME: classic had per-player keys
-            if (shipFCode == "alt") {
-                t = rounder*(mins/rounder);
-            } else if (shipFCode == "ald") {
-                d = rounder*(mins/rounder);
-            } else if (shipFCode == "alm") {
-                m = rounder*(mins/rounder);
-            } else if (host.getKind() == host.PHost) {
-                if (shipFCode == "nat") {
-                    d = m = mins/2;
-                } else if (shipFCode == "nad") {
-                    t = m = mins/2;
-                } else if (shipFCode == "nam") {
-                    t = d = mins/2;
-                } else {
-                    t = d = m = mins/3;
-                }
-            } else {
-                t = d = m = mins/3;
-            }
-        } else {
+        int rounder = host.isAlchemyRounding() ? 3 : 1;
+        switch (getAlchemyFCodeValue(shipFCode, host, key, true)) {
+         case AlchemyTri:
+            t = rounder*(mins/rounder);
+            // FIXME: used_fc = true;
+            break;
+
+         case AlchemyDur:
+            d = rounder*(mins/rounder);
+            // FIXME: used_fc = true;
+            break;
+
+         case AlchemyMol:
+            m = rounder*(mins/rounder);
+            // FIXME: used_fc = true;
+            break;
+
+         case AlchemyDur + AlchemyMol:
+            d = m = mins/2;
+            // FIXME: used_fc = true;
+            break;
+
+         case AlchemyMol + AlchemyTri:
+            t = m = mins/2;
+            // FIXME: used_fc = true;
+            break;
+
+         case AlchemyTri + AlchemyDur:
+            t = d = mins/2;
+            // FIXME: used_fc = true;
+            break;
+
+         default:
             t = d = m = mins/3;
+            // FIXME: used_fc = true;
+            break;
         }
 
         ship.supplies   = haveSupplies - 3*(t+d+m);
@@ -124,13 +173,12 @@ namespace {
         ship.y = new_pos.getY();
     }
 
-    int
-    getEngineLoad(const game::map::Universe& univ,
-                  const game::map::ShipData& ship,
-                  int towee_id,
-                  const game::map::ShipData* towee_override,
-                  bool tow_corr,
-                  const game::spec::ShipList& shipList)
+    int getEngineLoad(const game::map::Universe& univ,
+                      const game::map::ShipData& ship,
+                      int towee_id,
+                      const game::map::ShipData* towee_override,
+                      bool tow_corr,
+                      const game::spec::ShipList& shipList)
     {
         int mass = getShipMass(ship, shipList).orElse(0);
         if (ship.mission.orElse(0) == game::spec::Mission::msn_Tow) {
@@ -168,6 +216,7 @@ namespace {
         See http://phost.de/~stefan/fuelusage.html */
     int32_t timDistance(int dx, int dy)
     {
+        // ex shipacc.pas:TimDist
         static const uint8_t TABLE[168][21] = {
             { 253,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255 },
             { 249,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255 },
@@ -378,6 +427,7 @@ namespace {
                          const game::config::HostConfiguration& config,
                          const game::HostVersion& host)
     {
+        // ex shipacc.pas:ComputeFuelUsage
         int warp = ship.warpFactor.orElse(0);
         if (warp <= 0) {
             return 0;
@@ -424,6 +474,23 @@ namespace {
             }
             return res_int;
         }
+    }
+
+    int computeTurnFuel(const game::map::Ship& ship,
+                        const game::config::HostConfiguration& config,
+                        const game::spec::ShipList& shipList,
+                        int eta)
+    {
+        // FIXME: do we have this elsewhere?
+        // ex shipacc.pas:TurnFuelUsage (sort-of)
+        const game::spec::Hull* hull = shipList.hulls().get(ship.getHull().orElse(0));
+        int fuel = (hull != 0
+                    ? (int32_t(config[config.FuelUsagePerTurnFor100KT](ship.getRealOwner().orElse(0))) * hull->getMass() + 99) / 100
+                    : 0);
+        if (eta != 0) {
+            fuel *= eta;
+        }
+        return fuel;
     }
 }
 
@@ -510,6 +577,8 @@ void
 game::map::ShipPredictor::computeTurn()
 {
     // ex GShipTurnPredictor::computeTurn
+    // ex shipacc.pas:ComputeTurn
+
     // is this actually a predictable ship?
     if (!valid) {
         return;
@@ -524,62 +593,115 @@ game::map::ShipPredictor::computeTurn()
         return;
     }
 
-// //     {+++ Mine Laying +++}
-// //     IF (s.Neutronium<>0) AND (ComputeMineDrop(@s, md)) THEN BEGIN
-// //       Dec(s.Torps, md.torps);
-// //     END;
+    // Mine laying
+    // This is a hack: checkLayMission() takes a Ship, but we only have a ShipData.
+    // However, with turns_computed=0, both still have the same content.
+    MinefieldMission md;
+    if (turns_computed == 0 && md.checkLayMission(*real_ship, univ, m_hostVersion, m_key, m_hostConfiguration, m_scoreDefinitions, m_shipList)) {
+        int torps = ship.ammo.orElse(0);
+        ship.ammo = torps - std::min(torps, md.getNumTorpedoes());
+   //      ship.ammo -= std::min(int(ship.ammo), md.num_torps);
+   // FIXME:     if (md.used_fcode) {
+   //          used_properties |= UsedFCode;
+   //      }
+   // FIXME:     if (md.used_mission) {
+   //          used_properties |= UsedMission;
+   //      }
+   //  }
+    }
 
-//     // Special Missions I (Super Refit, Self Repair, Hiss, Rob) would go here
-// //   {+++ lfm, mkt, ... +++}
-// //   IF ((GetStr(s.fc, 3)='mkt')
-// //       OR ((pconf<>NIL) AND (s.Mission = pconf^.main.ExtMissionsStartAt + pmsn_BuildTorpsFromCargo)))
-// //    AND (s.TLauncher>0) AND (s.TLaunCnt>0) AND (s.Neutronium>0) THEN
-// //   BEGIN
-// //     { mkt }
-// //     i := s.Tritanium;
-// //     IF i > s.Duranium THEN i := s.Duranium;
-// //     IF i > s.Molybdenum THEN i := s.Molybdenum;
-// //     IF Torps[s.TLauncher].TorpCost>0 THEN BEGIN
-// //       j := s.Money DIV Torps[s.TLauncher].TorpCost;
-// //       IF i > j THEN i := j;
-// //     END;
-// //     Inc(s.Torps, i);
-// //     Dec(s.Tritanium, i);
-// //     Dec(s.Duranium, i);
-// //     Dec(s.Molybdenum, i);
-// //     Dec(s.Money, Torps[s.TLauncher].TorpCost * i);
-// //   END;
+    // Special Missions I (Super Refit, Self Repair, Hiss, Rob) would go here
+    const String_t shipFCode = ship.friendlyCode.orElse("");
+    bool is_mkt_fc = (shipFCode == "mkt");
+    if ((is_mkt_fc
+         || (m_hostVersion.isPHost()
+             && ship.mission.orElse(0) == m_hostConfiguration[m_hostConfiguration.ExtMissionsStartAt]() + game::spec::Mission::pmsn_BuildTorpsFromCargo))
+        && ship.numLaunchers.orElse(0) > 0
+        && ship.neutronium.orElse(0) > 0)
+    {
+        if (const game::spec::TorpedoLauncher* tl = m_shipList.launchers().get(ship.launcherType.orElse(0))) {
+            // Determine available resources
+            Cost cargo;
+            cargo.set(Cost::Tritanium,  ship.tritanium.orElse(0));
+            cargo.set(Cost::Duranium,   ship.duranium.orElse(0));
+            cargo.set(Cost::Molybdenum, ship.molybdenum.orElse(0));
+            cargo.set(Cost::Money,      ship.money.orElse(0));
+            cargo.set(Cost::Supplies,   ship.supplies.orElse(0));
+
+            // Determine number of torpedoes to build by dividing that by the cost
+            int n = cargo.getMaxAmount(pHull->getMaxCargo(), tl->torpedoCost());
+
+            // Determine new cargo
+            cargo -= tl->torpedoCost() * n;
+
+            // Add
+            ship.ammo       = ship.ammo.orElse(0) + n;
+            ship.tritanium  = cargo.get(Cost::Tritanium);
+            ship.duranium   = cargo.get(Cost::Duranium);
+            ship.molybdenum = cargo.get(Cost::Molybdenum);
+            ship.money      = cargo.get(Cost::Money);
+            ship.supplies   = cargo.get(Cost::Supplies);
+
+            // FIXME: if (n > 0) {
+            //          if (is_mkt_fc) {
+            //              used_properties |= UsedFCode;
+            //          } else {
+            //              used_properties |= UsedMission;
+            //          }
+            //      }
+        }
+    }
 
     // Alchemy
-    const String_t shipFCode = ship.friendlyCode.orElse("");
     if (shipFCode != "NAL") {
         if (real_ship->hasSpecialFunction(HullFunction::MerlinAlchemy, m_scoreDefinitions, m_shipList, m_hostConfiguration)) {
-            if (m_hostConfiguration[HostConfiguration::AllowAdvancedRefinery]() != 0
+            if (m_hostVersion.hasAlchemyCombinations()
+                && m_hostConfiguration[HostConfiguration::AllowAdvancedRefinery]() != 0
                 && real_ship->hasSpecialFunction(HullFunction::AriesRefinery, m_scoreDefinitions, m_shipList, m_hostConfiguration))
             {
-                // FIXME: handle alm, nam, etc.
+                // Alchemy + AdvancedRefinery -> 3:1 direct refinery
                 doDirectRefinery(ship, 3, *pHull);
-            } else if (real_ship->hasSpecialFunction(HullFunction::NeutronicRefinery, m_scoreDefinitions, m_shipList, m_hostConfiguration)) {
-                // FIXME: handle alm, nam, etc.
+            } else if (m_hostVersion.hasAlchemyCombinations()
+                       && real_ship->hasSpecialFunction(HullFunction::NeutronicRefinery, m_scoreDefinitions, m_shipList, m_hostConfiguration))
+            {
+                // Alchemy + Refinery -> 4:1 direct refinery
                 doDirectRefinery(ship, 4, *pHull);
             } else {
+                // Regular Alchemy
                 doAlchemy(shipFCode, ship, m_hostVersion, m_key);
+            }
+        } else if (real_ship->hasSpecialFunction(HullFunction::AriesRefinery, m_scoreDefinitions, m_shipList, m_hostConfiguration)
+                   && m_hostConfiguration[HostConfiguration::AllowAdvancedRefinery]() != 0
+                   && (m_hostVersion.hasAlchemyCombinations()
+                       || !real_ship->hasSpecialFunction(HullFunction::NeutronicRefinery, m_scoreDefinitions, m_shipList, m_hostConfiguration)))
+        {
+            // Aries converts 1 Min -> 1 Neu
+            // If host does not have hasAlchemyCombinations(), the lesser Refinery ability takes precedence!
+            int which = getAlchemyFCodeValue(shipFCode, m_hostVersion, m_key, m_hostVersion.hasRefineryFCodes());
+            int supplies = 0x7FFF;  // we assume that no ship has more cargo
+            if ((which & AlchemyTri) != 0) {
+                doRefinery(ship, ship.tritanium,  supplies, *pHull);
+            }
+            if ((which & AlchemyDur) != 0) {
+                doRefinery(ship, ship.duranium,   supplies, *pHull);
+            }
+            if ((which & AlchemyMol) != 0) {
+                doRefinery(ship, ship.molybdenum, supplies, *pHull);
             }
         } else if (real_ship->hasSpecialFunction(HullFunction::NeutronicRefinery, m_scoreDefinitions, m_shipList, m_hostConfiguration)) {
             // Neutronic refinery converts 1 Sup + 1 Min -> 1 Neu
-            // FIXME: handle alm, nam, etc.
+            int which = getAlchemyFCodeValue(shipFCode, m_hostVersion, m_key, m_hostVersion.hasRefineryFCodes());
             int supplies = ship.supplies.orElse(0);
-            doRefinery(ship, ship.tritanium,  supplies, *pHull);
-            doRefinery(ship, ship.duranium,   supplies, *pHull);
-            doRefinery(ship, ship.molybdenum, supplies, *pHull);
+            if ((which & AlchemyTri) != 0) {
+                doRefinery(ship, ship.tritanium,  supplies, *pHull);
+            }
+            if ((which & AlchemyDur) != 0) {
+                doRefinery(ship, ship.duranium,   supplies, *pHull);
+            }
+            if ((which & AlchemyMol) != 0) {
+                doRefinery(ship, ship.molybdenum, supplies, *pHull);
+            }
             ship.supplies = supplies;
-        } else if (real_ship->hasSpecialFunction(HullFunction::AriesRefinery, m_scoreDefinitions, m_shipList, m_hostConfiguration)) {
-            // Aries converts 1 Min -> 1 Neu
-            // FIXME: handle alm, nam, etc.
-            int supplies = 0x7FFF;  // we assume that no ship has more cargo
-            doRefinery(ship, ship.tritanium,  supplies, *pHull);
-            doRefinery(ship, ship.duranium,   supplies, *pHull);
-            doRefinery(ship, ship.molybdenum, supplies, *pHull);
         } else {
             // Not an alchemy ship
         }
@@ -615,6 +737,7 @@ game::map::ShipPredictor::computeTurn()
     bool canCloak = real_ship->hasSpecialFunction(HullFunction::Cloak, m_scoreDefinitions, m_shipList, m_hostConfiguration);
     bool canAdvancedCloak = real_ship->hasSpecialFunction(HullFunction::AdvancedCloak, m_scoreDefinitions, m_shipList, m_hostConfiguration);
     if ((canCloak || canAdvancedCloak) && m_shipList.missions().isMissionCloaking(ship.mission.orElse(0), ship.owner.orElse(0), m_hostConfiguration, m_hostVersion)) {
+        // ex shipacc.pas:CloakFuel (sort-of)
         int neededFuel = canAdvancedCloak ? 0 : getCloakFuel(0, real_ship->getRealOwner().orElse(0), m_hostConfiguration, *pHull);
         int haveFuel = ship.neutronium.orElse(0);
         if (haveFuel <= neededFuel
@@ -692,6 +815,7 @@ game::map::ShipPredictor::computeTurn()
         ship.waypointDX = ship.waypointDY = 0;
         ship.warpFactor = 0;
         normalizePosition(ship, univ.config());
+        // FIXME: IF pconf<>NIL THEN s.FC := '???';
         // // FIXME: gravity wells?
     } else if (dist2 > 0 && ship.warpFactor.orElse(0) > 0) {
         // Normal movement
@@ -780,7 +904,7 @@ game::map::ShipPredictor::computeTurn()
         int wp_x = ship.x.orElse(0) + ship.waypointDX.orElse(0);
         int wp_y = ship.y.orElse(0) + ship.waypointDY.orElse(0);
 
-        if (ship.warpFactor.orElse(0) > 0 && univ.getPlanetAt(Point(ship.x.orElse(0), ship.y.orElse(0))) == 0) {
+        if (ship.warpFactor.orElse(0) > 1 && univ.getPlanetAt(Point(ship.x.orElse(0), ship.y.orElse(0))) == 0) {
             Id_t gpid = univ.getGravityPlanetAt(Point(ship.x.orElse(0), ship.y.orElse(0)), m_hostConfiguration, m_hostVersion);
             if (const Planet* p = univ.planets().get(gpid)) {
                 // Okay, there is a planet. Move the ship.
@@ -824,7 +948,15 @@ game::map::ShipPredictor::computeTurn()
         }
     }
 
-    // turn is over.
+    // Turn fuel usage
+    int fuel = computeTurnFuel(*real_ship, m_hostConfiguration, m_shipList, 1);
+    if (ship.neutronium.orElse(0) >= 0) {
+        ship.neutronium = std::max(0, ship.neutronium.orElse(0) - fuel);
+    } else {
+        // already dropped below 0. Keep it this way to let them see they consume too much.
+    }
+
+    // Turn is over.
     ++turns_computed;
 }
 
@@ -833,6 +965,7 @@ void
 game::map::ShipPredictor::computeMovement()
 {
     // ex GShipTurnPredictor::computeMovement
+    // ex shipacc.pas:ComputeMovement
     if (valid) {
         const int final_turn = turns_computed + MOVEMENT_TIME_LIMIT;
         while ((ship.waypointDX.orElse(0) || ship.waypointDY.orElse(0)) && turns_computed < final_turn) {

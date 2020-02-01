@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/expr/builtinfunction.hpp
+  *  \brief Code Generation for Builtin Functions
   */
 #ifndef C2NG_INTERPRETER_EXPR_BUILTINFUNCTION_HPP
 #define C2NG_INTERPRETER_EXPR_BUILTINFUNCTION_HPP
@@ -26,7 +27,14 @@ namespace interpreter { namespace expr {
         uint8_t generator_arg;
     };
 
-    const BuiltinFunctionDescriptor* lookupBuiltinFunction(String_t name);
+    /** Look up descriptor for a builtin function.
+        Builtin functions are directly encoded into the bytecode, and can thus not be redefined by the user.
+
+        \paran name Function name
+
+        \return Descriptor, pointing to static storage. Null if this is not a builtin function.
+        Call desc.generator(desc) to obtain a FunctionCallNode. */
+    const BuiltinFunctionDescriptor* lookupBuiltinFunction(const String_t& name);
 
 } }
 

@@ -1114,5 +1114,10 @@ TestInterpreterExprBuiltinFunction::testMisc()
 
     // This does not execute because we don't have a user-defined function (but it compiles)
     h.checkFailureExpression("udf(9)");
-}
 
+    // This does not compile
+    h.checkBadExpression("ByName('a')");
+    h.checkBadExpression("ByName('a'):=2");
+    h.checkBadExpression("If(ByName('a'),1,2)");
+    h.checkBadExpression("If(ByName('a');1,1,2)");
+}

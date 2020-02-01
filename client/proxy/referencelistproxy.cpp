@@ -131,6 +131,18 @@ client::proxy::ReferenceListProxy::isIdle() const
 }
 
 void
+client::proxy::ReferenceListProxy::waitIdle(Downlink& link)
+{
+    class Request : public util::SlaveRequest<game::Session, Observer> {
+     public:
+        virtual void handle(game::Session&, Observer&)
+            { }
+    };
+    Request r;
+    link.call(m_observerSender, r);
+}
+
+void
 client::proxy::ReferenceListProxy::onMenu(gfx::Point pt)
 {
     game::ref::Configuration order = getConfig();

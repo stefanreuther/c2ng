@@ -14,7 +14,6 @@
 #include "server/nntp/root.hpp"
 #include "server/nntp/session.hpp"
 #include "server/ports.hpp"
-#include "util/translation.hpp"
 #include "util/string.hpp"
 #include "version.hpp"
 
@@ -121,7 +120,7 @@ server::nntp::ServerApplication::handleConfiguration(const String_t& key, const 
 String_t
 server::nntp::ServerApplication::getApplicationName() const
 {
-    return afl::string::Format(_("PCC2 NNTP Server v%s - (c) 2017-2019 Stefan Reuther").c_str(), PCC2_VERSION);
+    return afl::string::Format("PCC2 NNTP Server v%s - (c) 2017-2020 Stefan Reuther", PCC2_VERSION);
 }
 
 String_t

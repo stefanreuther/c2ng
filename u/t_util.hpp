@@ -21,6 +21,7 @@ class TestUtilApplication : public CxxTest::TestSuite {
 class TestUtilAtomTable : public CxxTest::TestSuite {
  public:
     void testAtom();
+    void testManyAtoms();
 };
 
 class TestUtilBackupFile : public CxxTest::TestSuite {
@@ -278,6 +279,12 @@ class TestUtilUpdater : public CxxTest::TestSuite {
  public:
     void testTrue();
     void testFalse();
+};
+
+class TestUtilVector : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void test1Based();
 };
 
 class TestUtilstring : public CxxTest::TestSuite {

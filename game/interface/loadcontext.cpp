@@ -67,51 +67,39 @@ game::interface::LoadContext::loadContext(const interpreter::TagNode& tag, afl::
     using interpreter::TagNode;
     switch (tag.tag) {
      case TagNode::Tag_Ship:
-        // Ship. Check range.
         return ShipContext::create(tag.value, m_session);
 
      case TagNode::Tag_Planet:
-        // Planet. Check range.
         return PlanetContext::create(tag.value, m_session);
 
      case TagNode::Tag_Minefield:
-        // We currently have no constraints on minefield Ids
         return MinefieldContext::create(tag.value, m_session, true);
 
      case TagNode::Tag_Ion:
-        // Ion storm. Check range.
         return IonStormContext::create(tag.value, m_session);
 
      case TagNode::Tag_Hull:
-        // Hull. Check range.
         return HullContext::create(tag.value, m_session);
 
      case TagNode::Tag_Engine:
-        // Engine. Check range.
         return EngineContext::create(tag.value, m_session);
 
      case TagNode::Tag_Beam:
-        // Beam. Check range.
         return BeamContext::create(tag.value, m_session);
 
      case TagNode::Tag_Torpedo:
-        // Torpedo. Check range.
         return TorpedoContext::create(false, tag.value, m_session);
 
      case TagNode::Tag_Launcher:
-        // Torpedo launcher. Check range.
         return TorpedoContext::create(true, tag.value, m_session);
 
      case TagNode::Tag_Global:
-        // Global context; unique.
         return new GlobalContext(m_session);
 
      case TagNode::Tag_Iterator:
-        // Iterator.
         return makeIteratorValue(m_session.getGame(), tag.value, false);
 
      case TagNode::Tag_Player:
-        // Player. Check range.
         return PlayerContext::create(tag.value, m_session);
 
      default:

@@ -22,7 +22,6 @@
 #include "server/router/root.hpp"
 #include "server/router/sessionrouter.hpp"
 #include "util/string.hpp"
-#include "util/translation.hpp"
 #include "version.hpp"
 
 namespace {
@@ -229,7 +228,7 @@ server::router::ServerApplication::handleCommandLineOption(const String_t& /*opt
 String_t
 server::router::ServerApplication::getApplicationName() const
 {
-    return afl::string::Format(_("PCC2 Router Server v%s - (c) 2019 Stefan Reuther").c_str(), PCC2_VERSION);
+    return afl::string::Format("PCC2 Router Server v%s - (c) 2019-2020 Stefan Reuther", PCC2_VERSION);
 }
 
 String_t

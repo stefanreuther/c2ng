@@ -100,6 +100,12 @@ game::ref::UserList::size() const
 }
 
 bool
+game::ref::UserList::empty() const
+{
+    return m_items.empty();
+}
+
+bool
 game::ref::UserList::find(Reference ref, size_t& pos) const
 {
     for (size_t i = 0, n = m_items.size(); i < n; ++i) {

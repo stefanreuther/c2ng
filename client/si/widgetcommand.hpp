@@ -32,6 +32,7 @@ namespace client { namespace si {
 
         wicListboxAddItem,
         wicListboxDialogRun,
+        wicListboxDialogRunMenu,
 
         wicCheckboxSetValue,
         wicRadiobuttonSetValue,
@@ -41,7 +42,9 @@ namespace client { namespace si {
 
         wicCommandViewSetButton,
         wicCommandViewSetLeftText,
-        wicCommandViewSetRightText
+        wicCommandViewSetRightText,
+
+        wicNumberInputSetValue
     };
 
     void IFWidgetRun(game::Session& session, ScriptSide& ss, const WidgetReference& ref, interpreter::Process& proc, interpreter::Arguments& args);
@@ -49,6 +52,7 @@ namespace client { namespace si {
     void IFKeyboardFocusAdd(ScriptSide& ss, const WidgetReference& ref, interpreter::Arguments& args);
     void IFListboxAddItem(ScriptSide& ss, const WidgetReference& ref, interpreter::Arguments& args);
     void IFListboxDialogRun(game::Session& session, ScriptSide& ss, const WidgetReference& ref, interpreter::Process& proc, interpreter::Arguments& args);
+    void IFListboxDialogRunMenu(game::Session& session, ScriptSide& ss, const WidgetReference& ref, interpreter::Process& proc, interpreter::Arguments& args);
 
     void callWidgetCommand(WidgetCommand cmd, game::Session& session, ScriptSide& ss, const WidgetReference& ref, interpreter::Process& proc, interpreter::Arguments& args);
 

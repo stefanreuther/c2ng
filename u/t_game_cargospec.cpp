@@ -522,3 +522,44 @@ TestGameCargoSpec::testToString()
     TS_ASSERT_EQUALS(game::CargoSpec("5d 5d 5d", false).toCargoSpecString(), "15D");
     TS_ASSERT_EQUALS(game::CargoSpec("10t 10d 10m 30$", false).toCargoSpecString(), "10TDM 30$");
 }
+
+/** Test sellSuppliesIfNeeded(). */
+void
+TestGameCargoSpec::testSellSuppliesIfNeeded()
+{
+    // Lack of money entirely compensated
+    {
+        game::CargoSpec a("-5$ 10s", false);
+        a.sellSuppliesIfNeeded();
+        TS_ASSERT_EQUALS(a.toCargoSpecString(), "5S");
+    }
+
+    // Lack of money entirely compensated eating all supplies
+    {
+        game::CargoSpec a("-5$ 5s", false);
+        a.sellSuppliesIfNeeded();
+        TS_ASSERT_EQUALS(a.toCargoSpecString(), "");
+    }
+
+    // Lack of supplies cannot be compensated
+    {
+        game::CargoSpec a("10$ -5s", false);
+        a.sellSuppliesIfNeeded();
+        TS_ASSERT_EQUALS(a.toCargoSpecString(), "-5S 10$");
+    }
+
+    // Lack of money partially compensated
+    {
+        game::CargoSpec a("-10$ 5s", false);
+        a.sellSuppliesIfNeeded();
+        TS_ASSERT_EQUALS(a.toCargoSpecString(), "-5$");
+    }
+
+    // Lack of everything left unchanged
+    {
+        game::CargoSpec a("-3$ -7s", false);
+        a.sellSuppliesIfNeeded();
+        TS_ASSERT_EQUALS(a.toCargoSpecString(), "-7S -3$");
+    }
+}
+

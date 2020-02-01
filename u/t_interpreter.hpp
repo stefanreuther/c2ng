@@ -452,6 +452,50 @@ class TestInterpreterTypeHint : public CxxTest::TestSuite {
     void testHeader();
 };
 
+class TestInterpreterUnaryExecution : public CxxTest::TestSuite {
+ public:
+    void testInvalid();
+    void testNot();
+    void testBool();
+    void testNeg();
+    void testPos();
+    void testSin();
+    void testCos();
+    void testTan();
+    void testZap();
+    void testAbs();
+    void testExp();
+    void testLog();
+    void testBitNot();
+    void testIsEmpty();
+    void testIsNum();
+    void testIsString();
+    void testAsc();
+    void testChr();
+    void testStr();
+    void testSqrt();
+    void testTrunc();
+    void testRound();
+    void testLTrim();
+    void testRTrim();
+    void testLRTrim();
+    void testLength();
+    void testVal();
+    void testTrace();
+    void testNot2();
+    void testAtom();
+    void testAtomStr();
+    void testKeyCreate();
+    void testKeyLookup();
+    void testInc();
+    void testDec();
+    void testIsProcedure();
+    void testFileNr();
+    void testIsArray();
+    void testUCase();
+    void testLCase();
+};
+
 class TestInterpreterUnaryOperation : public CxxTest::TestSuite {
  public:
     void testName();

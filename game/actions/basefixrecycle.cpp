@@ -80,9 +80,14 @@ game::actions::BaseFixRecycle::getValidShipIds(const game::map::Universe& univ, 
 }
 
 bool
-game::actions::BaseFixRecycle::set(ShipyardAction action, game::map::Ship* ship)
+game::actions::BaseFixRecycle::set(ShipyardAction action, game::map::Universe& univ, game::map::Ship* ship)
 {
     // ex GStarbaseFixRecycleAction::setAction
+    // Mark old ship (its status changes implicitly from "being fixed" to "not being worked on")
+    if (game::map::Ship* oldShip = univ.ships().get(m_planet.getBaseShipyardId().orElse(0))) {
+        oldShip->markDirty();
+    }
+
     if (action == NoShipyardAction) {
         // Clearing the action is always allowed
         m_planet.setBaseShipyardOrder(NoShipyardAction, 0);

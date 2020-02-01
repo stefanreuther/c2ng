@@ -26,6 +26,7 @@
 #include "game/root.hpp"
 #include "interpreter/error.hpp"
 #include "interpreter/values.hpp"
+#include "game/actions/convertsupplies.hpp"
 
 using game::Exception;
 
@@ -36,6 +37,7 @@ namespace {
                               game::Turn& turn)
     {
         // Parse args
+        // ex planint.pas:sb_order
         int32_t n;
         args.checkArgumentCount(1);
         if (!interpreter::checkIntegerArg(n, args.getNext())) {
@@ -55,7 +57,7 @@ namespace {
         }
 
         // Try it
-        if (!game::actions::BaseFixRecycle(pl).set(action, ship)) {
+        if (!game::actions::BaseFixRecycle(pl).set(action, turn.universe(), ship)) {
             // FIXME: PCC2 would also generate ePos if positions are different
             throw Exception(Exception::ePerm);
         }
@@ -64,6 +66,7 @@ namespace {
     void doBuildBase(game::map::Planet& planet, interpreter::Arguments& args, game::Session& session, game::Root& root)
     {
         // ex IFPlanetBuildBase
+        // ex planint.pas:Planet_BuildBase
         // Check arguments
         bool wantBase = true;
         args.checkArgumentCount(0, 1);
@@ -83,6 +86,7 @@ namespace {
     void doAutobuild(game::map::Planet& planet, interpreter::Arguments& args, game::Session& session, game::Root& root)
     {
         // ex IFPlanetAutoBuild
+        // ex planint.pas:Planet_Autobuild
         args.checkArgumentCount(0);
 
         game::config::HostConfiguration& config = root.hostConfiguration();
@@ -101,6 +105,7 @@ namespace {
                            const game::PlanetaryBuilding type)
     {
         // ex int/if/planetif.cc:doStructureBuild
+        // ex planint.pas:BuildStructuresS
         args.checkArgumentCount(1, 2);
         int32_t count = 0;
         int32_t flag = 0;
@@ -135,6 +140,7 @@ namespace {
                         game::Turn& turn)
     {
         // ex int/if/planetif.cc:IFPlanetSellSupplies
+        // ex planint.pas:Planet_SellSupplies
         // Fetch arguments
         args.checkArgumentCount(1, 2);
 
@@ -146,46 +152,19 @@ namespace {
         int32_t flag = 0;
         interpreter::checkFlagArg(flag, 0, args.getNext(), "N");
 
-        // Planet must be played
-        game::actions::mustBePlayed(pl);
-        int32_t availableSupplies = pl.getCargo(game::Element::Supplies).orElse(0);
-        int32_t availableMoney    = pl.getCargo(game::Element::Money).orElse(0);
-
         // Do it
-        int32_t undid;
-        if (amount == 0) {
-            // No change
-            undid = 0;
-        } else if (amount > 0) {
-            // Sell supplies.
-            // FIXME: PCC2 has a transaction for that. We don't.
-            int32_t suppliesToConvert = std::min(amount, availableSupplies);
-            undid = amount - suppliesToConvert;
-            if (flag == 0 && undid != 0) {
+        game::actions::ConvertSupplies a(pl);
+        a.setUndoInformation(turn.universe());
+
+        int32_t did = a.sellSupplies(amount, (flag != 0));
+        if (flag == 0) {
+            // Partial not allowed - report error
+            if (did != amount) {
                 throw game::Exception(game::Exception::ePerm);
             }
-
-            pl.setCargo(game::Element::Supplies, availableSupplies - suppliesToConvert);
-            pl.setCargo(game::Element::Money,    availableMoney    + suppliesToConvert);
         } else {
-            // Buy supples. We do not yet have a transaction for that. FIXME.
-            int32_t buyLimit = 0;
-            if (game::map::Reverter* rev = turn.universe().getReverter()) {
-                buyLimit = std::min(availableMoney, rev->getSuppliesAllowedToBuy(pl.getId()));
-            }
-            int32_t suppliesToConvert = std::min(-amount, buyLimit);
-            undid = suppliesToConvert + amount;
-            if (flag == 0 && undid != 0) {
-                throw game::Exception(game::Exception::ePerm);
-            }
-
-            pl.setCargo(game::Element::Supplies, availableSupplies + suppliesToConvert);
-            pl.setCargo(game::Element::Money,    availableMoney    - suppliesToConvert);
-        }
-
-        // Set variable
-        if (flag != 0) {
-            afl::data::IntegerValue iv(undid);
+            // Partial allowed - report remainder
+            afl::data::IntegerValue iv(amount - did);
             process.setVariable("BUILD.REMAINDER", &iv);
         }
     }
@@ -197,6 +176,7 @@ namespace {
                    game::Root& root)
     {
         // ex IFBaseSetTech
+        // ex planint.pas:Planet_SetTech
         args.checkArgumentCount(2);
 
         // Fetch arguments
@@ -274,6 +254,7 @@ namespace {
                         game::Root& root)
     {
         // ex int/if/baseif.cc:IFBaseBuildEngines
+        // ex planint.pas:Planet_BuildEngines
         args.checkArgumentCount(2, 3);
 
         game::spec::ShipList& shipList = game::actions::mustHaveShipList(session);
@@ -302,6 +283,7 @@ namespace {
                       game::Root& root)
     {
         // ex int/if/baseif.cc:IFBaseBuildHulls
+        // ex planint.pas:Planet_BuildHulls
         args.checkArgumentCount(2, 3);
 
         game::spec::ShipList& shipList = game::actions::mustHaveShipList(session);
@@ -342,6 +324,7 @@ namespace {
                           game::Root& root)
     {
         // ex int/if/baseif.cc:IFBaseBuildLaunchers
+        // ex planint.pas:Planet_BuildLaunchers
         args.checkArgumentCount(2, 3);
 
         game::spec::ShipList& shipList = game::actions::mustHaveShipList(session);
@@ -370,6 +353,7 @@ namespace {
                       game::Root& root)
     {
         // ex int/if/baseif.cc:IFBaseBuildBeams
+        // ex planint.pas:Planet_BuildBeams
         args.checkArgumentCount(2, 3);
 
         game::spec::ShipList& shipList = game::actions::mustHaveShipList(session);
@@ -396,6 +380,7 @@ namespace {
                      game::Root& root)
     {
         // ex int/if/baseif.cc:IFBaseBuildShip
+        // ex planint.pas:Planet_BuildShip
         // Parse args
         game::spec::ShipList& shipList = game::actions::mustHaveShipList(session);
         game::ShipBuildOrder o;
@@ -484,6 +469,7 @@ namespace {
                           game::Root& root)
     {
         // ex int/if/baseif.cc:IFBaseBuildTorps
+        // ex planint.pas:Planet_BuildTorps
         args.checkArgumentCount(2, 3);
         game::spec::ShipList& shipList = game::actions::mustHaveShipList(session);
 
@@ -512,6 +498,7 @@ namespace {
                          game::Root& root)
     {
         // ex int/if/baseif.cc:IFBaseBuildFighters
+        // ex planint.pas:Planet_BuildFighters
         args.checkArgumentCount(1, 2);
 
         int32_t amount;
@@ -577,6 +564,7 @@ game::interface::callPlanetMethod(game::map::Planet& pl,
            @see Comment (Planet Property)
            @since PCC 1.0.5, PCC2 1.99.9, PCC2 2.40.1 */
         // ex IFPlanetSetComment
+        // ex planint.pas:Planet_SetComment
         args.checkArgumentCount(1);
         if (afl::data::Value* value = args.getNext()) {
             if (afl::data::Segment* seg = session.world().planetProperties().create(pl.getId())) {
@@ -591,6 +579,7 @@ game::interface::callPlanetMethod(game::map::Planet& pl,
            Fix (repair) a ship. The %sid is a ship Id, or 0 to cancel a pending shipyard order.
            @since PCC2 1.99.9, PCC 1.0.5, PCC2 2.40.1 */
         // ex IFBaseFixShip
+        // ex planint.pas:Planet_FixShip
         setBaseShipyardOrder(pl, FixShipyardAction, args, turn);
         break;
 
@@ -599,6 +588,7 @@ game::interface::callPlanetMethod(game::map::Planet& pl,
            Recycle a ship. The %sid is a ship Id, or 0 to cancel a pending shipyard order.
            @since PCC2 1.99.9, PCC 1.0.5, PCC2 2.40.1 */
         // ex IFBaseRecycleShip
+        // ex planint.pas:Planet_RecycleShip
         setBaseShipyardOrder(pl, RecycleShipyardAction, args, turn);
         break;
 
@@ -631,6 +621,7 @@ game::interface::callPlanetMethod(game::map::Planet& pl,
            @see BuildDefenseWait
            @since PCC 1.0.5, PCC2 1.99.9, PCC2 2.40.3 */
         // ex IFPlanetBuildDefense
+        // ex planint.pas:Planet_BuildDefense
         doBuildStructures(pl, process, args, session, turn, root, DefenseBuilding);
         break;
 
@@ -647,6 +638,7 @@ game::interface::callPlanetMethod(game::map::Planet& pl,
            @see BuildFactoriesWait
            @since PCC 1.0.5, PCC2 1.99.9, PCC2 2.40.3 */
         // ex IFPlanetBuildFactories
+        // ex planint.pas:Planet_BuildFactories
         doBuildStructures(pl, process, args, session, turn, root, FactoryBuilding);
         break;
 
@@ -663,6 +655,7 @@ game::interface::callPlanetMethod(game::map::Planet& pl,
            @see BuildMinesWait
            @since PCC 1.0.5, PCC2 1.99.9, PCC2 2.40.3 */
         // ex IFPlanetBuildMines
+        // ex planint.pas:Planet_BuildMines
         doBuildStructures(pl, process, args, session, turn, root, MineBuilding);
         break;
 
@@ -672,6 +665,7 @@ game::interface::callPlanetMethod(game::map::Planet& pl,
            @see Colonists.Tax
            @since PCC 1.0.5, PCC2 1.99.9, PCC2 2.40.1 */
         // ex IFPlanetSetColonistTax
+        // ex planint.pas:Planet_SetColonistTax
         args.checkArgumentCount(1);
         setPlanetProperty(pl, ippColonistTax, args.getNext(), root);
         break;
@@ -682,6 +676,7 @@ game::interface::callPlanetMethod(game::map::Planet& pl,
            @see Natives.Tax
            @since PCC 1.0.5, PCC2 1.99.9, PCC2 2.40.1 */
         // ex IFPlanetSetNativeTax
+        // ex planint.pas:Planet_SetNativeTax
         args.checkArgumentCount(1);
         setPlanetProperty(pl, ippNativeTax, args.getNext(), root);
         break;
@@ -692,6 +687,7 @@ game::interface::callPlanetMethod(game::map::Planet& pl,
            @see FCode (Planet Property)
            @since PCC 1.0.5, PCC2 1.99.9, PCC2 2.40.1 */
         // ex IFPlanetSetFCode
+        // ex planint.pas:Planet_SetFCode
         args.checkArgumentCount(1);
         setPlanetProperty(pl, ippFCode, args.getNext(), root);
         break;
@@ -701,6 +697,7 @@ game::interface::callPlanetMethod(game::map::Planet& pl,
            Set starbase mission.
            @since PCC2 1.99.9, PCC 1.0.5, PCC2 2.40.1 */
         // ex IFBaseSetMission
+        // ex planint.pas:Planet_SetMission
         args.checkArgumentCount(1);
         setBaseProperty(pl, ibpMission, args.getNext());
         break;
@@ -718,6 +715,7 @@ game::interface::callPlanetMethod(game::map::Planet& pl,
            @see BuildBaseDefenseWait
            @since PCC 1.0.5, PCC2 1.99.9, PCC2 2.40.3 */
         // ex IFPlanetBuildBaseDefense
+        // ex planint.pas:Planet_BuildBaseDefense
         doBuildStructures(pl, process, args, session, turn, root, BaseDefenseBuilding);
         break;
 
@@ -942,6 +940,9 @@ game::interface::parseBuildShipCommand(interpreter::Arguments& args, ShipBuildOr
         if (beamcount < 0 || beamcount > pHull->getMaxBeams()) {
             throw Error::rangeError();
         }
+        if (shipList.beams().get(beam) == 0) {
+            throw Error::rangeError();
+        }
         o.setBeamType(beam);
         o.setNumBeams(beamcount);
     }
@@ -955,6 +956,9 @@ game::interface::parseBuildShipCommand(interpreter::Arguments& args, ShipBuildOr
         o.setNumLaunchers(0);
     } else {
         if (torpcount < 0 || torpcount > pHull->getMaxLaunchers()) {
+            throw Error::rangeError();
+        }
+        if (shipList.launchers().get(torp) == 0) {
             throw Error::rangeError();
         }
         o.setLauncherType(torp);

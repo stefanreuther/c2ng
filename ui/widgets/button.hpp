@@ -6,12 +6,14 @@
 
 #include "ui/widgets/abstractbutton.hpp"
 #include "ui/colorscheme.hpp"
+#include "util/keystring.hpp"
 
 namespace ui { namespace widgets {
 
     class Button : public AbstractButton {
      public:
         Button(String_t text, util::Key_t key, ui::Root& root);
+        Button(const util::KeyString& ks, ui::Root& root);
         ~Button();
 
         virtual void draw(gfx::Canvas& can);

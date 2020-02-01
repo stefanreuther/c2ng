@@ -1,37 +1,58 @@
 /**
   *  \file game/map/chunnelmission.cpp
+  *  \brief Class game::map::ChunnelMission and related functions
   */
 
 #include "game/map/chunnelmission.hpp"
+#include "afl/base/countof.hpp"
+#include "afl/string/format.hpp"
 #include "afl/string/parse.hpp"
+#include "game/map/fleetmember.hpp"
 #include "game/map/ship.hpp"
 #include "game/map/universe.hpp"
 #include "game/spec/hullfunction.hpp"
 #include "game/spec/mission.hpp"
 #include "util/math.hpp"
+#include "util/translation.hpp"
 
 using game::spec::HullFunction;
+using game::config::HostConfiguration;
+using game::map::ChunnelMission;
+
+namespace {
+    bool canReceiveChunnel(const game::map::Ship& ship, const game::UnitScoreDefinitionList& shipScores, const game::spec::ShipList& shipList, const game::Root& root)
+    {
+        return ship.hasSpecialFunction(HullFunction::FirecloudChunnel, shipScores, shipList, root.hostConfiguration())
+            || ship.hasSpecialFunction(HullFunction::ChunnelTarget, shipScores, shipList, root.hostConfiguration());
+    }
+
+    int getInitiatorCapabilities(const game::map::Ship& ship, const game::UnitScoreDefinitionList& shipScores, const game::spec::ShipList& shipList, const game::Root& root)
+    {
+        int result;
+        if (ship.hasSpecialFunction(HullFunction::FirecloudChunnel, shipScores, shipList, root.hostConfiguration())) {
+            // Ship can do everything
+            result = ChunnelMission::chk_Self | ChunnelMission::chk_Others;
+        } else {
+            // Check both of the lesser abilities, ship may have both
+            result = 0;
+            if (ship.hasSpecialFunction(HullFunction::ChunnelSelf, shipScores, shipList, root.hostConfiguration())) {
+                result |= ChunnelMission::chk_Self;
+            }
+            if (ship.hasSpecialFunction(HullFunction::ChunnelOthers, shipScores, shipList, root.hostConfiguration())) {
+                result |= ChunnelMission::chk_Others;
+            }
+        }
+        return result;
+    }
+}
 
 
+// Constructor.
 game::map::ChunnelMission::ChunnelMission()
     : m_target(0), m_failure(0), m_kind(0)
 { }
 
-// /** Check chunnel mission.
-//     \param sh [in] Potential chunnel initiator
-//     \param univ [in] Universe
-//     \param cd [out] Chunnel info
-//     \return true iff ship is chunneling
-
-//     Postconditions:
-//     - if ship does not chunnel, ch.target is 0
-//     - if ship does chunnel, ch.target is ship id, and target ship does exist
-//       . then, ch.failure contains bitfield of reasons why chunnel fails
-//         (consequently, it's 0 to predict success)
-//       . ch.kind is the kind of chunnel, bitfield of ship classes to take with
-//         me (consequently, nonzero for a successful result)
-
-//     Originally shipacc.pas::CheckChunnel. */
+// Parse a ship's chunnel mission.
 bool
 game::map::ChunnelMission::check(const Ship& sh, const Universe& univ,
                                  const UnitScoreDefinitionList& scoreDefinitions,
@@ -39,6 +60,7 @@ game::map::ChunnelMission::check(const Ship& sh, const Universe& univ,
                                  const Root& root)
 {
     // ex parseChunnelMission
+    // ex shipacc.pas:CheckChunnel
     m_target  = 0;
     m_failure = 0;
     m_kind    = 0;
@@ -53,22 +75,11 @@ game::map::ChunnelMission::check(const Ship& sh, const Universe& univ,
         && sid != sh.getId()
         && (mate = univ.ships().get(sid)) != 0)
     {
-        if (mate->isPlayable(Object::Playable)
-            && (mate->hasSpecialFunction(HullFunction::FirecloudChunnel, scoreDefinitions, shipList, root.hostConfiguration())
-                || mate->hasSpecialFunction(HullFunction::ChunnelTarget, scoreDefinitions, shipList, root.hostConfiguration())))
-        {
+        if (mate->isPlayable(Object::Playable) && canReceiveChunnel(*mate, scoreDefinitions, shipList, root)) {
             /* Target exists and can receive a chunnel. Can we start one?
                Note that we have rejected self-chunnel above. Hosts fail it
                implicitly for violating minimum distance. */
-            if (sh.hasSpecialFunction(HullFunction::FirecloudChunnel, scoreDefinitions, shipList, root.hostConfiguration())) {
-                m_kind = chk_Self | chk_Others;
-            } else if (sh.hasSpecialFunction(HullFunction::ChunnelSelf, scoreDefinitions, shipList, root.hostConfiguration())) {
-                m_kind = chk_Self;
-            } else if (sh.hasSpecialFunction(HullFunction::ChunnelOthers, scoreDefinitions, shipList, root.hostConfiguration())) {
-                m_kind = chk_Others;
-            } else {
-                // Not a chunneler
-            }
+            m_kind = getInitiatorCapabilities(sh, scoreDefinitions, shipList, root);
 
             /* Found? */
             if (m_kind != 0) {
@@ -76,25 +87,22 @@ game::map::ChunnelMission::check(const Ship& sh, const Universe& univ,
 
                 /* Now figure out failure modes
                    - mate is moving/being towed/fuelless/excessively damaged
-                   - we have < 51 fuel
+                   - we have too little fuel
                    - we are moving/being towed/excessively damaged
                    - minimum distance violated */
-                m_failure |= checkChunnelFailures(*mate, univ,  0, root);
-                m_failure |= checkChunnelFailures(sh,    univ, 50, root) * (chf_Damaged/chf_MateDamaged);
-                bool isPHost = root.hostVersion().getKind() == HostVersion::PHost; // FIXME: make accessors!
-                const game::config::HostConfiguration& config = root.hostConfiguration();
-                if (root.hostVersion().hasExtendedMissions(config) && sh.getMission().orElse(0) == game::spec::Mission::pmsn_Training + config[config.ExtMissionsStartAt]()) {
+                int minFuel = root.hostVersion().getMinimumFuelToInitiateChunnel() - 1;
+                m_failure |= checkChunnelFailures(*mate, univ, 0, root);
+                m_failure |= checkChunnelFailures(sh,    univ, minFuel, root) * (chf_Damaged/chf_MateDamaged);
+                const HostConfiguration& config = root.hostConfiguration();
+                if (root.hostVersion().hasExtendedMissions(config) && sh.getMission().orElse(0) == game::spec::Mission::pmsn_Training + config[HostConfiguration::ExtMissionsStartAt]()) {
                     m_failure |= chf_Training;
                 }
 
-                /* Distance check:
-                   HOST uses    ERND(Sqrt(....)) >= 100, i.e.   Sqrt(....) >= 99.5
-                   PHost uses   Trunc(Sqrt(....)) >= MCD, i.e.  Sqrt(....) >= MCD */
-                int32_t dist = isPHost ? util::squareInteger(config[config.MinimumChunnelDistance]()) : 9901;
+                // Distance check
                 Point shipPosition, matePosition;
                 if (!sh.getPosition(shipPosition)
                     || !mate->getPosition(matePosition)
-                    || univ.config().getSquaredDistance(shipPosition, matePosition) < dist)
+                    || !root.hostVersion().isValidChunnelDistance2(univ.config().getSquaredDistance(shipPosition, matePosition), config))
                 {
                     m_failure |= chf_Distance;
                 }
@@ -112,9 +120,10 @@ game::map::ChunnelMission::check(const Ship& sh, const Universe& univ,
 int
 game::map::ChunnelMission::checkChunnelFailures(const Ship& sh, const Universe& univ, const int minFuel, const Root& root)
 {
+    // ex shipacc.pas:CheckChunnelFailures
     int result = 0;
     bool isPHost = root.hostVersion().getKind() == HostVersion::PHost; // FIXME: make accessors or solve this using appropriate default configuration
-    if (isPHost && sh.getDamage().orElse(0) >= root.hostConfiguration()[game::config::HostConfiguration::DamageLevelForChunnelFail]()) {
+    if (isPHost && sh.getDamage().orElse(0) >= root.hostConfiguration()[HostConfiguration::DamageLevelForChunnelFail]()) {
         result |= chf_MateDamaged;
     }
     if (sh.getCargo(game::Element::Neutronium).orElse(0) <= minFuel) {
@@ -127,4 +136,99 @@ game::map::ChunnelMission::checkChunnelFailures(const Ship& sh, const Universe& 
         result |= chf_MateTowed;
     }
     return result;
+}
+
+
+afl::data::StringList_t
+game::map::formatChunnelFailureReasons(int failures, afl::string::Translator& tx)
+{
+    // ex game/ship-form.cc:formatChunnelFailures
+    static const char*const problems[] = {
+        N_("Initiator damaged"),
+        N_("Initiator needs fuel"),
+        N_("Initiator moving"),
+        N_("Initiator under tow"),
+        N_("Initiator is training"),
+        N_("Mate damaged"),
+        N_("Mate needs fuel"),
+        N_("Mate moving"),
+        N_("Mate under tow"),
+        N_("Distance too short"),
+    };
+    static const int problemFlags[] = {
+        ChunnelMission::chf_Damaged,
+        ChunnelMission::chf_Fuel,
+        ChunnelMission::chf_Moving,
+        ChunnelMission::chf_Towed,
+        ChunnelMission::chf_Training,
+        ChunnelMission::chf_MateDamaged,
+        ChunnelMission::chf_MateFuel,
+        ChunnelMission::chf_MateMoving,
+        ChunnelMission::chf_MateTowed,
+        ChunnelMission::chf_Distance,
+    };
+
+    afl::data::StringList_t result;
+    for (size_t i = 0; i < countof(problemFlags); ++i) {
+        if (failures & problemFlags[i]) {
+            result.push_back(tx(problems[i]));
+        }
+    }
+    return result;
+}
+
+// Check validity of a chunnel mate.
+bool
+game::map::isValidChunnelMate(const Ship& initiator,
+                              const Ship& mate,
+                              const Configuration& mapConfig,
+                              const Root& root,
+                              const UnitScoreDefinitionList& shipScores,
+                              const game::spec::ShipList& shipList)
+{
+    // ex client/widgets/navwidget.cc:isValidChunnelMate
+    int initOwner, mateOwner;
+    Point initPos, matePos;
+
+    return initiator.getId() != mate.getId()
+        && initiator.getOwner(initOwner)
+        && initiator.getPosition(initPos)
+        && getInitiatorCapabilities(initiator, shipScores, shipList, root) != 0
+        && mate.getOwner(mateOwner)
+        && mate.getPosition(matePos)
+        && mate.isPlayable(game::map::Object::ReadOnly)
+        && mateOwner == initOwner
+        && mate.getFleetNumber() == 0
+        && canReceiveChunnel(mate, shipScores, shipList, root)
+        && root.hostVersion().isValidChunnelDistance2(mapConfig.getSquaredDistance(initPos, matePos), root.hostConfiguration());
+}
+
+// Set up a chunnel.
+void
+game::map::setupChunnel(Ship& initiator, Ship& mate, Universe& univ,
+                        const game::config::HostConfiguration& config,
+                        const game::spec::ShipList& shipList)
+{
+    // Clear speed and waypoint, set FC
+    {
+        game::map::Point pt;
+        initiator.getPosition(pt);
+
+        FleetMember initFM(univ, initiator);
+        initFM.setWaypoint(pt, config, shipList);
+        initFM.setWarpFactor(0, config, shipList);
+        initiator.setFriendlyCode(String_t(afl::string::Format("%03d", mate.getId())));
+    }
+
+    // Mate
+    if (mate.isPlayable(game::map::Object::Playable)) {
+        // For simplicity, use the fleet calls (although mates never are fleet members)
+        game::map::Point pt;
+        mate.getPosition(pt);
+
+        FleetMember mateFM(univ, mate);
+        mateFM.setWaypoint(pt, config, shipList);
+        mateFM.setWarpFactor(0, config, shipList);
+        // FIXME: if mate orbits a planet, PCC 1.x loads fuel onto it (PCC2 doesn't).
+    }
 }

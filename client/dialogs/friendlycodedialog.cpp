@@ -52,6 +52,7 @@ bool
 client::dialogs::FriendlyCodeDialog::run()
 {
     // ex WFCodeWindow::init
+    // ex fcode.pas:ChangeFCode
     // VBox
     //   HBox
     //     UIStaticText "FCode:"

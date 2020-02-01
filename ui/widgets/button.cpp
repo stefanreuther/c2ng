@@ -15,6 +15,12 @@ ui::widgets::Button::Button(String_t text, util::Key_t key, ui::Root& root)
       m_font(gfx::FontRequest().addSize(1))
 { }
 
+ui::widgets::Button::Button(const util::KeyString& ks, ui::Root& root)
+    : AbstractButton(root, ks.getKey()),
+      m_text(ks.getString()),
+      m_font(gfx::FontRequest().addSize(1))
+{ }
+
 ui::widgets::Button::~Button()
 { }
 
@@ -44,7 +50,7 @@ ui::widgets::Button::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
 ui::layout::Info
 ui::widgets::Button::getLayoutInfo() const
 {
-    afl::base::Ref<gfx::Font> font = root().provider().getFont(gfx::FontRequest().addSize(1));
+    afl::base::Ref<gfx::Font> font = root().provider().getFont(m_font);
     int h = font->getTextHeight("Tp")*9/8;
     int w = (m_text.size() == 1
              ? h

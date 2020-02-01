@@ -12,8 +12,19 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = interpreter/taskpredictor.cpp interpreter/taskpredictor.hpp \
-    game/interface/taskeditorcontext.cpp \
+FILES_gamelib = game/actions/changebuildqueue.cpp \
+    game/actions/changebuildqueue.hpp game/test/root.cpp game/test/root.hpp \
+    game/map/shipinfo.cpp game/map/shipinfo.hpp game/map/planetinfo.cpp \
+    game/map/planetinfo.hpp game/authcache.cpp game/authcache.hpp \
+    game/interface/inboxfunction.cpp game/interface/inboxfunction.hpp \
+    game/interface/inboxcontext.cpp game/interface/inboxcontext.hpp \
+    game/interface/notificationfunctions.cpp \
+    game/interface/notificationfunctions.hpp \
+    game/interface/notificationstore.cpp \
+    game/interface/notificationstore.hpp game/actions/convertsupplies.cpp \
+    game/actions/convertsupplies.hpp game/spec/fighter.cpp \
+    game/spec/fighter.hpp interpreter/taskpredictor.cpp \
+    interpreter/taskpredictor.hpp game/interface/taskeditorcontext.cpp \
     game/interface/taskeditorcontext.hpp interpreter/taskeditor.cpp \
     interpreter/taskeditor.hpp game/actions/taxationaction.cpp \
     game/actions/taxationaction.hpp game/interface/referencelistcontext.cpp \
@@ -560,11 +571,38 @@ PROJ_AUTO += \
     gamelib:game/*.cpp,game/*.hpp,util/*.cpp,util/*.hpp,interpreter/*.cpp,interpreter/*.hpp
 
 TARGETS += guilib
-FILES_guilib = client/tiles/taskeditortile.cpp \
-    client/tiles/taskeditortile.hpp client/proxy/taskeditorproxy.cpp \
-    client/proxy/taskeditorproxy.hpp client/dialogs/taxationdialog.cpp \
-    client/dialogs/taxationdialog.hpp client/proxy/taxationproxy.cpp \
-    client/proxy/taxationproxy.hpp client/dialogs/fileselectiondialog.cpp \
+FILES_guilib = client/proxy/buildqueueproxy.cpp \
+    client/proxy/buildqueueproxy.hpp client/dialogs/buildqueuedialog.cpp \
+    client/dialogs/buildqueuedialog.hpp client/si/compoundwidget.hpp \
+    client/dialogs/cargohistorydialog.cpp \
+    client/dialogs/cargohistorydialog.hpp client/proxy/chunnelproxy.cpp \
+    client/proxy/chunnelproxy.hpp client/dialogs/navchartdialog.cpp \
+    client/dialogs/navchartdialog.hpp client/map/waypointoverlay.cpp \
+    client/map/waypointoverlay.hpp client/dialogs/grounddefensedialog.cpp \
+    client/dialogs/grounddefensedialog.hpp \
+    client/dialogs/planetinfodialog.cpp client/dialogs/planetinfodialog.hpp \
+    client/widgets/planetmineralinfo.cpp \
+    client/widgets/planetmineralinfo.hpp client/proxy/planetinfoproxy.cpp \
+    client/proxy/planetinfoproxy.hpp ui/widgets/tabbar.cpp \
+    ui/widgets/tabbar.hpp client/dialogs/goaldialog.cpp \
+    client/dialogs/goaldialog.hpp client/dialogs/buysuppliesdialog.cpp \
+    client/dialogs/buysuppliesdialog.hpp \
+    client/dialogs/sellsuppliesdialog.cpp \
+    client/dialogs/sellsuppliesdialog.hpp \
+    client/proxy/convertsuppliesproxy.cpp \
+    client/proxy/convertsuppliesproxy.hpp \
+    client/proxy/buildstructuresproxy.cpp \
+    client/proxy/buildstructuresproxy.hpp \
+    client/dialogs/buildstructuresdialog.cpp \
+    client/dialogs/buildstructuresdialog.hpp \
+    client/dialogs/buildstarbasedialog.cpp \
+    client/dialogs/buildstarbasedialog.hpp \
+    client/proxy/buildstarbaseproxy.cpp client/proxy/buildstarbaseproxy.hpp \
+    client/tiles/taskeditortile.cpp client/tiles/taskeditortile.hpp \
+    client/proxy/taskeditorproxy.cpp client/proxy/taskeditorproxy.hpp \
+    client/dialogs/taxationdialog.cpp client/dialogs/taxationdialog.hpp \
+    client/proxy/taxationproxy.cpp client/proxy/taxationproxy.hpp \
+    client/dialogs/fileselectiondialog.cpp \
     client/dialogs/fileselectiondialog.hpp client/widgets/filelistbox.cpp \
     client/widgets/filelistbox.hpp client/proxy/searchproxy.cpp \
     client/proxy/searchproxy.hpp client/dialogs/searchdialog.cpp \
@@ -830,7 +868,9 @@ DEPEND_guilib = afl
 PROJ_AUTO += guilib:gfx/*.cpp,gfx/*.hpp,ui/*.cpp,ui/*.hpp,client/*.cpp,client/*.hpp
 
 TARGETS += serverlib
-FILES_serverlib = server/user/saltedpasswordencrypter.cpp \
+FILES_serverlib = server/play/maincommandhandler.cpp \
+    server/play/maincommandhandler.hpp \
+    server/user/saltedpasswordencrypter.cpp \
     server/user/saltedpasswordencrypter.hpp \
     server/user/multipasswordencrypter.cpp \
     server/user/multipasswordencrypter.hpp server/host/hostranking.cpp \
@@ -1329,7 +1369,15 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_game_interface_cargofunctions.cpp \
+FILES_testsuite = u/t_game_actions_changebuildqueue.cpp \
+    u/t_game_map_planetinfo.cpp u/t_game_map_chunnelmission.cpp \
+    u/t_game_limits.cpp u/t_server_common_idgenerator.cpp \
+    u/t_util_vector.cpp u/t_server_ports.cpp u/t_client_map_overlay.cpp \
+    u/t_client_map.hpp u/t_game_interface_globalcommands.cpp \
+    u/t_game_map_planetformula.cpp u/t_game_authcache.cpp \
+    u/t_game_map_planet.cpp u/t_game_map_minefield.cpp \
+    u/t_game_spec_fighter.cpp u/t_interpreter_unaryexecution.cpp \
+    u/t_game_interface_cargofunctions.cpp \
     u/t_server_user_saltedpasswordencrypter.cpp \
     u/t_server_user_multipasswordencrypter.cpp \
     u/t_interpreter_taskeditor.cpp u/t_game_actions_taxationaction.cpp \

@@ -69,6 +69,7 @@ afl::data::Value*
 PlanetArrayProperty::get(Arguments& args)
 {
     // ex PlanetArrayProperty::get
+    // ex planint.pas:ResolveScoreFunction
     switch (m_property) {
      case game::interface::ippScore: {
         // FIXME: /* Documented in shipproperty.cc */
@@ -76,6 +77,7 @@ PlanetArrayProperty::get(Arguments& args)
         game::UnitScoreList::Index_t index;
         int16_t value, turn;
         args.checkArgumentCount(1);
+        // @change PCC 1.x returns null on range error, we fail the call
         if (checkIntegerArg(id, args.getNext(), 0, 0x7FFF)
             && m_game->planetScores().lookup(int16_t(id), index)
             && m_planet.unitScores().get(index, value, turn))

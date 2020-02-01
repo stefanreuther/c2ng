@@ -106,3 +106,26 @@ TestGfxFontRequest::testCompare()
     TS_ASSERT_EQUALS(gfx::FontRequest().addSize(1) != gfx::FontRequest().addWeight(2), true);
 }
 
+/** Test parse(). */
+void
+TestGfxFontRequest::testParse()
+{
+    // All signatures
+    TS_ASSERT_EQUALS(gfx::FontRequest("+")                   == gfx::FontRequest().addSize(1), true);
+    TS_ASSERT_EQUALS(gfx::FontRequest().parse("+")           == gfx::FontRequest().addSize(1), true);
+    TS_ASSERT_EQUALS(gfx::FontRequest(String_t("+"))         == gfx::FontRequest().addSize(1), true);
+    TS_ASSERT_EQUALS(gfx::FontRequest().parse(String_t("+")) == gfx::FontRequest().addSize(1), true);
+
+    // Combinations
+    TS_ASSERT_EQUALS(gfx::FontRequest("+++-") == gfx::FontRequest().addSize(2),   true);
+    TS_ASSERT_EQUALS(gfx::FontRequest("bbb")  == gfx::FontRequest().addWeight(3), true);
+
+    // Variants
+    TS_ASSERT_EQUALS(gfx::FontRequest("b")  == gfx::FontRequest().addWeight(1),  true);
+    TS_ASSERT_EQUALS(gfx::FontRequest("l")  == gfx::FontRequest().addWeight(-1), true);
+    TS_ASSERT_EQUALS(gfx::FontRequest("f")  == gfx::FontRequest().setStyle(1),   true);
+    TS_ASSERT_EQUALS(gfx::FontRequest("fp") == gfx::FontRequest().setStyle(0),   true);
+    TS_ASSERT_EQUALS(gfx::FontRequest("i")  == gfx::FontRequest().setSlant(1),   true);
+    TS_ASSERT_EQUALS(gfx::FontRequest("iu") == gfx::FontRequest().setSlant(0),   true);
+}
+

@@ -127,7 +127,7 @@ void
 game::maint::SweepApplication::help(afl::io::TextWriter& out)
 {
     afl::string::Translator& tx = translator();
-    out.writeLine(Format(tx("PCC2 Game Directory Cleaner v%s - (c) 2010-2019 Stefan Reuther").c_str(), PCC2_VERSION));
+    out.writeLine(Format(tx("PCC2 Game Directory Cleaner v%s - (c) 2010-2020 Stefan Reuther").c_str(), PCC2_VERSION));
     out.writeLine();
     out.writeLine(Format(tx("Usage:\n"
                             "  %s [-h]\n"

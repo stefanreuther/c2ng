@@ -13,22 +13,6 @@
 #include "util/translation.hpp"
 
 // Constructor.
-ui::dialogs::MessageBox::MessageBox(const char* text, String_t title, Root& root)
-    : Window(title, root.provider(), root.colorScheme(), BLUE_WINDOW, ui::layout::VBox::instance5),
-      m_deleter(),
-      m_buttonGroup(m_deleter.addNew(new Group(ui::layout::HBox::instance5))),
-      m_keyDispatcher(m_deleter.addNew(new ui::widgets::KeyDispatcher())),
-      m_root(root),
-      m_loop(root),
-      m_flags(),
-      m_firstCommand(0),
-      m_lastCommand(0)
-{
-    // ex UIMessageBox::UIMessageBox
-    init(text);
-}
-
-// Constructor.
 ui::dialogs::MessageBox::MessageBox(String_t text, String_t title, Root& root)
     : Window(title, root.provider(), root.colorScheme(), BLUE_WINDOW, ui::layout::VBox::instance5),
       m_deleter(),

@@ -60,6 +60,11 @@ namespace game { namespace actions {
             \return remaining amount */
         game::spec::Cost getMissingAmountAsCost() const;
 
+        /** Get available amount as Cost structure.
+            This is a convenience method to access the underlying cargo container.
+            \return available amount (before cost has been subtracted) */
+        game::spec::Cost getAvailableAmountAsCost() const;
+
         /** Check validity.
             The transaction will be valid if the CargoContainer can pay the cost.
             \return validity */

@@ -13,6 +13,7 @@ String_t
 game::tables::TemperatureName::get(int temp) const
 {
     // ex game/tables.h:getTemperatureName
+    // ex planint.pas:TempStr
     if (temp <= 14) {
         return m_translator("arctic");
     } else if (temp <= 39) {

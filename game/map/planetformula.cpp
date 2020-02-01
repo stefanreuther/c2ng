@@ -8,6 +8,8 @@
 #include "game/map/planet.hpp"
 #include "util/math.hpp"
 
+using game::config::HostConfiguration;
+
 namespace {
     /** Compute happiness change target for "Safe Tax" method. */
     int computeHappinessTarget(int happy)
@@ -81,6 +83,7 @@ game::NegativeProperty_t
 game::map::getColonistChange(const Planet& pl, const game::config::HostConfiguration& config, const HostVersion& host, int tax, int mifa)
 {
     // ex game/planetform.h:getColonistChange
+    // ex planint.pas:ColonistChange
     int32_t colos;
     int owner;
     int temp;
@@ -113,7 +116,7 @@ game::map::getColonistChange(const Planet& pl, const game::config::HostConfigura
     // ex game/planetform.h:getColonistChange
     int tax, mi, fa;
     if (pl.getColonistTax().get(tax) && pl.getNumBuildings(MineBuilding).get(mi) && pl.getNumBuildings(FactoryBuilding).get(fa)) {
-        return getColonistChange(pl, config, host, mi, fa);
+        return getColonistChange(pl, config, host, tax, mi + fa);
     } else {
         return afl::base::Nothing;
     }
@@ -127,6 +130,7 @@ game::LongProperty_t
 game::map::getColonistDue(const Planet& pl, const game::config::HostConfiguration& config, const HostVersion& host, int tax)
 {
     // ex game/planetform.h:getColonistDue
+    // ex planacc.pas:ColonistDue
     // Note that these formulas differ in rounding only. PHost uses
     // `Round', THost uses `ERnd' aka `I-don't-care-how-it-rounds'.
     int owner;
@@ -179,11 +183,10 @@ game::map::getColonistSafeTax(const Planet& pl, const game::config::HostConfigur
 {
     // ex game/planetform.h:getColonistSafeTax
 
-    int owner, tax, happy, temp;
+    int owner, happy, temp;
     int32_t colos;
     if (pl.getOwner(owner)
         && pl.getCargo(Element::Colonists).get(colos)
-        && pl.getColonistTax().get(tax)
         && pl.getColonistHappiness().get(happy)
         && pl.getTemperature().get(temp))
     {
@@ -311,6 +314,7 @@ game::NegativeProperty_t
 game::map::getNativeChange(const Planet& pl, const HostVersion& host, int tax, int mifa)
 {
     // ex game/planetform.h:getNativeChange
+    // ex planint.pas:NativesChange
     // Change to PCC2: checks pop>0
     int gov, race;
     int32_t pop;
@@ -373,10 +377,11 @@ game::map::getNativeDue(const Planet& pl, const game::config::HostConfiguration&
     \param gov    government factor (SPI)
     \param pop    native clans
     \param owner  owner (for production rates) */
-game::LongProperty_t
+int32_t
 game::map::getNativeDue(int tax, int race, int gov, int32_t pop, int owner, const game::config::HostConfiguration& config, const HostVersion& host)
 {
     // ex game/planetform.h:getNativeDue
+    // ex planacc.pas:NativesDue
     int32_t due;
     if (host.getKind() == HostVersion::PHost) {
         due = util::divideAndRound(util::divideAndRound(tax * gov * pop, 5000) * config[config.NativeTaxRate](owner), 100);
@@ -512,6 +517,7 @@ game::IntegerProperty_t
 game::map::getNativeBaseTax(const Planet& pl, const game::config::HostConfiguration& config, const HostVersion& host, int happyTarget)
 {
     // ex game/planetform.h:getNativeBaseTax
+    // ex envscan.pas:BaseTax
     // Check preconditions
     int owner, race, gov;
     int32_t pop;
@@ -526,10 +532,10 @@ game::map::getNativeBaseTax(const Planet& pl, const game::config::HostConfigurat
         int tax = host.getNativeTaxRateLimit(owner, config);
         while (tax > 0) {
             /* Host 3.22.040 formula:
-               Trunc(1000.0 - sqrt(Planet.Natives) - 85 * Planet.NativeTax
-               - (Planet.Mines + .Factories) DIV 2
-               - 50*(10-Planet.NativeGov))
-               DIV 100
+                 Trunc(1000.0 - sqrt(Planet.Natives) - 85 * Planet.NativeTax
+                              - (Planet.Mines + .Factories) DIV 2
+                              - 50*(10-Planet.NativeGov))
+                   DIV 100
                change:=5 + Trunc(spi/2 - (Sqrt(Natives) + 85*LONGINT(tax) + 100/2) / 100);
                change:=5 + Trunc(50*spi - (85*LONGINT(tax) + 50) - Sqrt(Natives)) DIV 100;
                since MIFA is even, the same formula can be used for PHost and THost. */
@@ -677,6 +683,39 @@ game::map::getMiningCapacity(const Planet& pl, const game::config::HostConfigura
     }
 }
 
+game::IntegerProperty_t
+game::map::getSensorVisibility(const Planet& pl, const game::config::HostConfiguration& config, const HostVersion& host)
+{
+    int mines, factories, defense;
+    if (pl.getNumBuildings(MineBuilding).get(mines)
+        && pl.getNumBuildings(FactoryBuilding).get(factories)
+        && pl.getNumBuildings(DefenseBuilding).get(defense))
+    {
+        // Parameters
+        int dfu, mfd, ffd;
+        if (host.isPHost()) {
+            dfu = config[HostConfiguration::DefenseForUndetectable]();
+            mfd = config[HostConfiguration::MinesForDetectable]();
+            ffd = config[HostConfiguration::FactoriesForDetectable]();
+        } else {
+            dfu = 15;
+            mfd = 21;
+            ffd = 16;
+        }
+
+        if (defense >= dfu
+            || dfu <= 0                   // avoid division by zero in pathological case
+            || (mines < mfd && factories < ffd))
+        {
+            return 0;
+        } else {
+            return 100 - (defense * 100) / dfu;
+        }
+    } else {
+        return afl::base::Nothing;
+    }
+}
+
 /** Compute cost for a tech level upgrade.
     Returns the cost for upgrading from %fromTech to %toTech.
     \param player Player to compute this for
@@ -686,6 +725,7 @@ game::map::getMiningCapacity(const Planet& pl, const game::config::HostConfigura
 int32_t
 game::map::getBaseTechCost(int player, int fromTech, int toTech, const game::config::HostConfiguration& config)
 {
+    // ex accessor.pas:TechCost
     /* Going from tech i to i+1 costs 100*i mc, thus going from 0 to i
        costs 100*\sum[0,i] i = 100*(i*(i-1)/2) = 50*i*(i-1).
 

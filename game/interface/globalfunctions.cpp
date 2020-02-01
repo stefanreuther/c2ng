@@ -173,6 +173,7 @@ afl::data::Value*
 game::interface::IFCfg(game::Session& session, interpreter::Arguments& args)
 {
     // ex int/if/globalif.h:IFCfgGet
+    // ex ccexpr.pas:op_CFG_func
     args.checkArgumentCount(1, 2);
 
     // Config key
@@ -219,6 +220,7 @@ afl::data::Value*
 game::interface::IFDistance(game::Session& session, interpreter::Arguments& args)
 {
     // ex int/if/globalif.h:IFDistanceGet
+    // ex ccexpr.pas:op_DISTANCE_func
     game::map::Point points[2];
 
     for (int i = 0; i < 2; ++i) {
@@ -245,42 +247,26 @@ game::interface::IFDistance(game::Session& session, interpreter::Arguments& args
             /* Fetch values */
             std::auto_ptr<afl::data::Value> vx(xcv->get(x));
             std::auto_ptr<afl::data::Value> vy(ycv->get(y));
-            if (!vx.get() || !vy.get()) {
+            int32_t ix, iy;
+            if (!checkIntegerArg(ix, vx.get()) || !checkIntegerArg(iy, vy.get())) {
                 return 0;
             }
 
-            /* Must be integers */
-            // FIXME: can we use checkIntegerArg here?
-            afl::data::ScalarValue* vix = dynamic_cast<afl::data::ScalarValue*>(vx.get());
-            afl::data::ScalarValue* viy = dynamic_cast<afl::data::ScalarValue*>(vy.get());
-            if (!vix || !viy) {
-                throw interpreter::Error::typeError(interpreter::Error::ExpectInteger);
-            }
-
-            points[i] = game::map::Point(vix->getValue(), viy->getValue());
-        } else if (afl::data::ScalarValue* iv = dynamic_cast<afl::data::ScalarValue*>(theValue)) {
-            /* Integer. There must be another integer. */
+            points[i] = game::map::Point(ix, iy);
+        } else {
+            /* Possibly integer. There must be another integer. */
             if (args.getNumArgs() == 0) {
                 throw interpreter::Error("Too few arguments for \"Distance\"");
             }
             afl::data::Value* otherValue = args.getNext();
 
             /* Null? */
-            if (!otherValue) {
+            int ix, iy;
+            if (!checkIntegerArg(ix, theValue) || !checkIntegerArg(iy, otherValue)) {
                 return 0;
             }
 
-            /* Integer? */
-            // FIXME: can we use checkIntegerArg here?
-            afl::data::ScalarValue* iv2 = dynamic_cast<afl::data::ScalarValue*>(otherValue);
-            if (!iv2) {
-                throw interpreter::Error::typeError(interpreter::Error::ExpectInteger);
-            }
-
-            points[i] = game::map::Point(iv->getValue(), iv2->getValue());
-        } else {
-            /* Error. */
-            throw interpreter::Error::typeError();
+            points[i] = game::map::Point(ix, iy);
         }
     }
 
@@ -328,8 +314,8 @@ game::interface::IFFormat(game::Session& /*session*/, interpreter::Arguments& ar
     args.checkArgumentCount(1, LIMIT+1);
 
     // First, find the format string
-    String_t fmt; {
-    if (!checkStringArg(fmt, args.getNext()))
+    String_t fmt;
+    if (!checkStringArg(fmt, args.getNext())) {
         return 0;
     }
 
@@ -363,6 +349,36 @@ game::interface::IFFormat(game::Session& /*session*/, interpreter::Arguments& ar
 
     // Format
     return makeStringValue(formatter);
+}
+
+/* @q IsSpecialFCode(fc:Str):Bool (Function)
+   Check for special friendly code.
+   Returns true if the friendly code given as a parameter is a special friendly code.
+
+   A special friendly code is one defined as special through the <tt>fcodes.cc</tt> file, or through <tt>xtrfcode.txt</tt>.
+   Note that PCC2 before 2.0.8/2.40.8 does not consider <tt>xtrfcode.txt</tt>.
+
+   @since PCC 1.1.4, PCC2 1.99.8, PCC2 2.40.1 */
+afl::data::Value*
+game::interface::IFIsSpecialFCode(game::Session& session, interpreter::Arguments& args)
+{
+    // ex int/if/globalif.h:IFIsSpecialFCodeGet
+    // ex ccexpr.pas:op_ISSPECIALFCODE_func
+
+    // Parse args
+    args.checkArgumentCount(1);
+
+    String_t str;
+    if (!checkStringArg(str, args.getNext())) {
+        return 0;
+    }
+
+    // Do it
+    game::spec::FriendlyCodeList& list = game::actions::mustHaveShipList(session).friendlyCodes();
+    if (str.size() > 3) {
+        str.erase(3);
+    }
+    return makeBooleanValue(list.isSpecial(str, true) || list.isExtra(str));
 }
 
 /* @q ObjectIsAt(obj:Any, x:Int, y:Int):Bool (Function)
@@ -443,6 +459,7 @@ afl::data::Value*
 game::interface::IFPlanetAt(game::Session& session, interpreter::Arguments& args)
 {
     // ex int/if/globalif.h:IFPlanetAtGet
+    // ex ccexpr.pas:op_PLANETAT_func
     int32_t x, y;
 
     // Fetch x,y parameters
@@ -526,6 +543,7 @@ afl::data::Value*
 game::interface::IFRandom(game::Session& session, interpreter::Arguments& args)
 {
     // ex int/if/globalif.h:IFRandom
+    // ex ccexpr.pas:op_RANDOM_func
     int32_t lo, hi;
     args.checkArgumentCount(1, 2);
     if (!checkIntegerArg(lo, args.getNext(), 0, 0x7FFF)) {
@@ -558,6 +576,7 @@ afl::data::Value*
 game::interface::IFRandomFCode(game::Session& session, interpreter::Arguments& args)
 {
     // ex int/if/globalif.h:IFRandomFCode
+    // ex ccexpr.pas:op_RANDOMFCODE_func
     args.checkArgumentCount(0);
 
     game::spec::ShipList* shipList = session.getShipList().get();
@@ -598,6 +617,7 @@ afl::data::Value*
 game::interface::IFTruehull(game::Session& session, interpreter::Arguments& args)
 {
     // ex int/if/globalif.h:IFTruehull
+    // ex ccexpr.pas:op_TRUEHULL_func
     int32_t slot, player;
 
     args.checkArgumentCount(1, 2);

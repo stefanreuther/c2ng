@@ -70,9 +70,6 @@ namespace game { namespace v3 { namespace structures {
 
 //     MAX_HULLS   = NUM_PLAYERS*NUM_HULLS_PER_PLAYER, ///< Maximum number of hulls.
 
-//     MAX_AUTOBUILD_SPEED = 100,      ///< Maximum speed for autobuild.
-//     MAX_AUTOBUILD_GOAL  = 1000,     ///< Maximum goal for autobuild. Displayed as "Max".
-
 //     /* Manifest Constants for VCRs */
 //     MAX_FIGHTER_LIMIT = 50,         ///< Maximum number of fighters active in a VCR.
 //     MAX_BEAM_LIMIT    = 20,         ///< Maximum number of beams in a VCR.

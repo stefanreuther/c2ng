@@ -13,6 +13,7 @@ String_t
 game::tables::HappinessName::get(int happy) const
 {
     // ex game/tables.h:getHappinessName
+    // ex planint.pas:HappyStr
     if (happy >= 90) {
         return m_translator("happy");
     } else if (happy >= 70) {

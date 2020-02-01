@@ -245,12 +245,14 @@ Sub Tile.ShipMission
   bc := "none"
   Try
     % FIXME: handle cloning. PCC 1.x uses green if cloning, yellow if conflict (multiple cloners)
-    Select Case Planet(Orbit$).Shipyard.Action
-      Case "Fix"
-        bc := "green"
-      Case "Recycle"
-        bc := "red"
-    EndSelect
+    If Planet(Orbit$).Shipyard.Id = Id Then
+      Select Case Planet(Orbit$).Shipyard.Action
+        Case "Fix"
+          bc := "green"
+        Case "Recycle"
+          bc := "red"
+      EndSelect
+    EndIf
   EndTry
   SetButton "b", bc
 EndSub
@@ -808,13 +810,14 @@ Sub Tile.BaseOrder
     If IsEmpty(c) Then
       SetLeftText 'b', RStyle("yellow", Format(Translate("Building a %s"), Build))
     Else
-      SetLeftText 'b', RStyle("red", Format(Translate("Cloning, and building a %s", Build)))
+      SetLeftText 'b', RStyle("red", Format(Translate("Cloning, and building a %s"), Build))
     EndIf
   Else
     If IsEmpty(c) Then
       SetLeftText 'b', Translate("Build a new ship...")
     Else
-      SetLeftText 'b', RStyle("yellow", Format(Translate("Cloning %s", ShipName(c))))
+      SetLeftText 'b', RStyle("yellow", Format(Translate("Cloning %s"), ShipName(c)))
+      
     EndIf
   EndIf
   If Not IsEmpty(Build.QPos)

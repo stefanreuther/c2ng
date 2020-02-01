@@ -23,6 +23,7 @@ game::interface::UfoContext*
 game::interface::UfoFunction::get(interpreter::Arguments& args)
 {
     // ex int/if/ufoif.h:IFUfoGet
+    // ex values.pas:CreateUfoContext
     int32_t id;
     args.checkArgumentCount(1, 1);
     if (!interpreter::checkIntegerArg(id, args.getNext(), 0, 32767)) {

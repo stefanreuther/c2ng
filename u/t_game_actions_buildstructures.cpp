@@ -141,11 +141,30 @@ TestGameActionsBuildStructures::testResourceLimit()
     TestHarness h;
     game::actions::BuildStructures a(h.planet, h.container, h.config);
 
+    // Check how callbacks are suppressed
+    int counter = 0;
+    class Listener : public afl::base::Closure<void()> {
+     public:
+        Listener(int& counter)
+            : m_counter(counter)
+            { }
+        virtual void call()
+            { ++m_counter; }
+        virtual Listener* clone() const
+            { return new Listener(m_counter); }
+     private:
+        int& m_counter;
+    };
+    a.sig_change.addNewClosure(new Listener(counter));
+
     // We have 100$ 20S. This is enough to build 10 defenses, leaving 10S.
     TS_ASSERT_EQUALS(a.addLimitCash(game::DefenseBuilding, 100), 10);
 
     // 10S is enough to build 2 factories, leaving 2S.
     TS_ASSERT_EQUALS(a.addLimitCash(game::FactoryBuilding, 100), 2);
+
+    // There must be exactly two callbacks (one for each addLimitCash call); everything else been consumed by Deferer.
+    TS_ASSERT_EQUALS(counter, 2);
 
     // Commit and verify
     TS_ASSERT_THROWS_NOTHING(a.commit());

@@ -134,6 +134,7 @@ afl::data::Value*
 game::interface::VcrContext::get(PropertyIndex_t index)
 {
     // ex IntVcrContext::get
+    // ex values.pas:CVcrContext.ResolveValue
     if (game::vcr::Battle* battle = getBattle()) {
         switch (VcrDomain(vcr_mapping[index].domain)) {
          case VcrPropertyDomain:

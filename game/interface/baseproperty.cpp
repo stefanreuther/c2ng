@@ -76,7 +76,11 @@ namespace {
 
     game::IntegerProperty_t getBaseAmmoStore(const game::map::Planet& p, const game::spec::ShipList& shipList, int n)
     {
-        if (n > shipList.launchers().size()) {
+        // ex planint.pas:fetch_storage (part)
+        int numLaunchers = shipList.launchers().size();
+        if (n > numLaunchers+1) {
+            return afl::base::Nothing;
+        } else if (n > numLaunchers) {
             return p.getCargo(game::Element::Fighters);
         } else {
             return p.getCargo(game::Element::fromTorpedoType(n));
@@ -204,6 +208,7 @@ afl::data::Value*
 BaseArrayProperty::performArrayReference(Function_t func, int limit, int32_t arg, bool hull)
 {
     // ex IntBaseArrayProperty::performArrayReference
+    // ex planint.pas:ArrayRef
     if (arg == 0) {
         int32_t sum = 0;
         for (int i = 1; i <= limit; ++i) {

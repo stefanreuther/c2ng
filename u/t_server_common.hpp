@@ -7,6 +7,11 @@
 
 #include <cxxtest/TestSuite.h>
 
+class TestServerCommonIdGenerator : public CxxTest::TestSuite {
+ public:
+    void testInterface();
+};
+
 class TestServerCommonRaceNames : public CxxTest::TestSuite {
  public:
     void testSuccess();

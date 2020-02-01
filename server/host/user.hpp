@@ -28,6 +28,9 @@ namespace server { namespace host {
         /** Destructor. */
         ~User();
 
+        /** Check whether user can join games. */
+        bool isJoinAllowed();
+
         /** Access set of owned games.
             \return set of owned games */
         afl::net::redis::IntegerSetKey ownedGames();

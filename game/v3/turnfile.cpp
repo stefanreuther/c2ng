@@ -694,6 +694,7 @@ game::v3::TurnFile::getCommandCodeRecordIndex(CommandCode_t code)
 void
 game::v3::TurnFile::addCommand(CommandCode_t cmd, int id)
 {
+    // ex ccmkturn.pas:NewCommand
     afl::bits::Value<afl::bits::Int16LE> buf[2];
     m_offsets.append(uint32_t(m_data.size()));
     buf[0] = int16_t(cmd);
@@ -1190,6 +1191,7 @@ void
 game::v3::TurnFile::makeCommands(int id, int low, int up, afl::base::ConstBytes_t oldObject, afl::base::ConstBytes_t newObject)
 {
     // ex GTurnFile::makeCommands
+    // ex ccmkturn.pas:MakeCommandsForFile (sort-of)
     static const uint8_t zero[2] = {0,0};
     for (int i = low; i <= up; ++i) {
         size_t index = COMMAND_DEFINITIONS[i].index;

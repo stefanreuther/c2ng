@@ -376,7 +376,7 @@ util::plugin::ConsoleApplication::doTest(afl::sys::Environment::CommandLine_t& c
 void
 util::plugin::ConsoleApplication::doHelp(afl::sys::Environment::CommandLine_t& /*cmdl*/)
 {
-    standardOutput().writeText(Format(_("PCC2 Plugin Manager v%s - (c) 2015-2019 Stefan Reuther\n").c_str(), PCC2_VERSION));
+    standardOutput().writeText(Format(_("PCC2 Plugin Manager v%s - (c) 2015-2020 Stefan Reuther\n").c_str(), PCC2_VERSION));
     standardOutput().writeText(Format(_("\n"
                                         "Usage:\n"
                                         "  %s -h|help\n"

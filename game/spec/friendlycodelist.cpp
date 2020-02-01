@@ -211,6 +211,7 @@ bool
 game::spec::FriendlyCodeList::isNumeric(const String_t& fc, const HostSelection host)
 {
     // ex GFCode::isNumeric
+    // ex fcode.pas:IsNumerical
     String_t::size_type i = 0, end = fc.size();
     if (host.hasSpacePaddedFCodes()) {
         // Host allows space padding, so trim whitespace.
@@ -253,6 +254,7 @@ bool
 game::spec::FriendlyCodeList::isExtra(const String_t& fc) const
 {
     // ex GFCode::isExtraFC
+    // ex fcode.pas:IsXtrFcode
     // FIXME: rewrite using Memory<>
     const uint8_t* p = m_extraData.begin();
     const uint8_t* end = m_extraData.end();
@@ -276,6 +278,7 @@ game::spec::FriendlyCodeList::isExtra(const String_t& fc) const
 bool
 game::spec::FriendlyCodeList::isSpecial(const String_t& fc, bool ignoreCase) const
 {
+    // ex fcode.pas:IsSpecial
     for (Iterator_t i = begin(), e = end(); i != e; ++i) {
         bool match = (ignoreCase
                       ? afl::string::strCaseCompare(fc, (*i)->getCode()) == 0
@@ -316,7 +319,7 @@ game::spec::FriendlyCodeList::getNumericValue(const String_t& fc, const HostSele
 
 // Check whether a friendly code is permitted as random friendly code.
 bool
-game::spec::FriendlyCodeList::isAllowedRandomCode(const String_t& fc, const HostSelection host)
+game::spec::FriendlyCodeList::isAllowedRandomCode(const String_t& fc, const HostSelection host) const
 {
     // ex GFCode::isAllowedRandom
     return fc.length() == 3
@@ -333,9 +336,10 @@ game::spec::FriendlyCodeList::isAllowedRandomCode(const String_t& fc, const Host
 // Generate a random friendly code.
 
 String_t
-game::spec::FriendlyCodeList::generateRandomCode(util::RandomNumberGenerator& rng, const HostSelection host)
+game::spec::FriendlyCodeList::generateRandomCode(util::RandomNumberGenerator& rng, const HostSelection host) const
 {
     // ex GFCode::generateRandomFCode()
+    // ex fcode.pas:RandomFCode
     // To guarantee termination, this function bails out if it did not find a good enough code after a while.
     // I have never seen this happen in real life.
     // However, lusers can configure their system to trigger the termination guard

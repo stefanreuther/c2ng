@@ -116,7 +116,7 @@ namespace game { namespace spec {
         //     msn_BUSup       = 15,
 
         //     // PHost extended missions. These numbers are relative to ExtMissionsStartAt.
-        //     pmsn_BuildTorpsFromCargo = 0,
+            pmsn_BuildTorpsFromCargo = 0,
             pmsn_LayMines            = 1,
             pmsn_LayWeb              = 2,
             pmsn_ScoopTorps          = 3,

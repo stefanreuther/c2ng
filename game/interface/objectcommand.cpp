@@ -44,6 +44,8 @@ void
 game::interface::IFObjMark(game::map::Object& obj, interpreter::Arguments& args)
 {
     // ex int/if/objif.h:IFObjMark
+    // ex shipint.pas:Ship_Mark
+    // ex planint.pas:Planet_Mark
     /* @q Mark Optional flag:Bool (Planet Command, Ship Command, Ufo Command, Storm Command, Minefield Command)
        Mark object.
        Marks the current object.
@@ -64,6 +66,8 @@ game::interface::IFObjMark(game::map::Object& obj, interpreter::Arguments& args)
 void
 game::interface::IFObjUnmark(game::Session& /*session*/, game::map::Object& obj, interpreter::Process& /*proc*/, interpreter::Arguments& args)
 {
+    // ex shipint.pas;Ship_Unmark
+    // ex planint.pas:Planet_Unmark
     IFObjUnmark(obj, args);
 }
 

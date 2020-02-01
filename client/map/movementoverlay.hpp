@@ -49,6 +49,7 @@ namespace client { namespace map {
         bool getPosition(game::map::Point& out) const;
 
         afl::base::Signal<void(game::map::Point)> sig_move;
+        afl::base::Signal<void(game::map::Point)> sig_doubleClick;
 
      private:
         util::RequestSender<game::Session> m_gameSender;

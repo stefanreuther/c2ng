@@ -32,6 +32,7 @@ game::v3::UndoInformation::set(const game::map::Universe& univ,
                                int planetId)
 {
     // ex GUndoInformation::computeInformation
+    // ex planacc.pas:GetUndoableSupplies, CountAmmo, ComputeMinimumTech
     clear();
 
     // Fetch planets. This function only works if we have undo information and are playing this unit.

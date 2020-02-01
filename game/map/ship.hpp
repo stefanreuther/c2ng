@@ -134,6 +134,7 @@ namespace game { namespace map {
         void               setNumLaunchers(IntegerProperty_t count);
 
         // Mission accessors
+        String_t           getName() const;
         void               setName(const String_t& str);
         IntegerProperty_t  getMission() const;
         void               setMission(IntegerProperty_t m, IntegerProperty_t i, IntegerProperty_t t);

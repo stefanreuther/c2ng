@@ -18,11 +18,15 @@ namespace util {
      public:
         /** Construct from string literal.
             \param s string literal */
-        KeyString(const char* s);
+        explicit KeyString(const char* s);
 
         /** Construct from string.
             \param s string */
-        KeyString(const String_t& s);
+        explicit KeyString(const String_t& s);
+
+        /** Construct from explicit paramters.
+            \param s string */
+        KeyString(const String_t& s, Key_t key);
 
         /** Get string.
             This string is used to label the button.

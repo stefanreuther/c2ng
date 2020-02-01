@@ -23,7 +23,8 @@ namespace game { namespace spec {
             Hull,
             Engine,
             Beam,
-            Torpedo
+            Torpedo,
+            Fighter
         };
 
         /** Get regular name.

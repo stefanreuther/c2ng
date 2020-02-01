@@ -52,11 +52,17 @@
 #include "game/interface/referencecontext.hpp"
 #include "game/interface/referencelistcontext.hpp"
 #include "interpreter/taskeditor.hpp"
+#include "game/interface/notificationfunctions.hpp"
+#include "game/interface/inboxfunction.hpp"
 
 namespace {
     using afl::string::Format;
 
-    /** Maximum number of user files. */
+    /** Maximum number of user files.
+
+        - PCC1: 20, defining a range of 1..20 for user, 0 for internal use.
+        - PCC2: 101, defining a range of allowing 0..100, which are all accessible to the user
+          (but slot 0 is never returned by FreeFile()) */
     const size_t MAX_SCRIPT_FILES = 101;
 
     // /** Compile expression, simple interface. Compiles the expression into a byte-code object.
@@ -103,7 +109,9 @@ game::Session::Session(afl::string::Translator& tx, afl::io::FileSystem& fs)
       m_world(m_log, fs),
       m_rng(afl::sys::Time::getTickCounter()),
       m_plugins(tx, m_log),
+      m_authCache(),
       m_extra(),
+      m_notifications(m_world.processList()),
       conn_hostConfigToMap(),
       conn_userConfigToMap()
 {
@@ -180,6 +188,18 @@ const game::interface::UserInterfacePropertyStack&
 game::Session::uiPropertyStack() const
 {
     return m_uiPropertyStack;
+}
+
+game::interface::NotificationStore&
+game::Session::notifications()
+{
+    return m_notifications;
+}
+
+const game::interface::NotificationStore&
+game::Session::notifications() const
+{
+    return m_notifications;
 }
 
 void
@@ -314,6 +334,12 @@ util::plugin::Manager&
 game::Session::plugins()
 {
     return m_plugins;
+}
+
+game::AuthCache&
+game::Session::authCache()
+{
+    return m_authCache;
 }
 
 game::ExtraContainer<game::Session>&
@@ -499,6 +525,7 @@ game::Session::evaluate(Scope scope, int id, String_t expr)
     // Create context
     switch (scope) {
      case Ship:
+        // ex shipint.pas:EvalShip
         if (m_game.get() != 0 && m_root.get() != 0 && m_shipList.get() != 0 && m_game->currentTurn().universe().ships().get(id) != 0) {
             proc.pushNewContext(new game::interface::ShipContext(id, *this, *m_root, *m_game, *m_shipList));
         }
@@ -583,11 +610,10 @@ void
 game::Session::initWorld()
 {
     // ex initInterpreterGameInterface()
-    // // Add global variables
     m_world.setNewGlobalValue("AUTOTASK",      new game::interface::SimpleFunction(*this, game::interface::IFAutoTask));
     m_world.setNewGlobalValue("BEAM",          new game::interface::BeamFunction(*this));
     m_world.setNewGlobalValue("CADD",          new game::interface::SimpleFunction(*this, game::interface::IFCAdd));
-    // defineGlobalValue("CC$NOTIFYCONFIRMED", new IntCCNotifyConfirmed());
+    m_world.setNewGlobalValue("CC$NOTIFYCONFIRMED", new game::interface::NotifyConfirmedFunction(*this));
     m_world.setNewGlobalValue("CCOMPARE",      new game::interface::SimpleFunction(*this, game::interface::IFCCompare));
     m_world.setNewGlobalValue("CDIV",          new game::interface::SimpleFunction(*this, game::interface::IFCDiv));
     m_world.setNewGlobalValue("CEXTRACT",      new game::interface::SimpleFunction(*this, game::interface::IFCExtract));
@@ -602,7 +628,8 @@ game::Session::initWorld()
     m_world.setNewGlobalValue("FCODE",         new game::interface::FriendlyCodeFunction(*this));
     m_world.setNewGlobalValue("GETCOMMAND",    new game::interface::SimpleFunction(*this, game::interface::IFGetCommand));
     m_world.setNewGlobalValue("HULL",          new game::interface::HullFunction(*this));
-    // defineGlobalValue("INMSG",              new IntSimpleIndexableValue(IFInmsgDim,     IFInmsgGet,          IFInmsgMake));
+    m_world.setNewGlobalValue("INMSG",         new game::interface::InboxFunction(*this));
+    m_world.setNewGlobalValue("ISSPECIALFCODE", new game::interface::SimpleFunction(*this, game::interface::IFIsSpecialFCode));
     m_world.setNewGlobalValue("ITERATOR",      new game::interface::SimpleFunction(*this, game::interface::IFIterator));
     m_world.setNewGlobalValue("LAUNCHER",      new game::interface::TorpedoFunction(true, *this));
     m_world.setNewGlobalValue("MARKER" ,       new game::interface::DrawingFunction(*this));
@@ -646,8 +673,8 @@ game::Session::initWorld()
     m_world.setNewGlobalValue("ADDCONFIG",        new game::interface::SimpleProcedure(*this, game::interface::IFAddConfig));
     m_world.setNewGlobalValue("ADDFCODE",         new game::interface::SimpleProcedure(*this, game::interface::IFAddFCode));
     m_world.setNewGlobalValue("ADDPREF",          new game::interface::SimpleProcedure(*this, game::interface::IFAddPref));
-    // m_world.setNewGlobalValue("AUTHPLAYER",       new game::interface::SimpleProcedure(*this, game::interface::IFAuthPlayer));
-    // m_world.setNewGlobalValue("CC$NOTIFY",        new game::interface::SimpleProcedure(*this, game::interface::IFCCNotify));
+    m_world.setNewGlobalValue("AUTHPLAYER",       new game::interface::SimpleProcedure(*this, game::interface::IFAuthPlayer));
+    m_world.setNewGlobalValue("CC$NOTIFY",        new game::interface::SimpleProcedure(*this, game::interface::IFCCNotify));
     m_world.setNewGlobalValue("CC$SELECTIONEXEC", new game::interface::SimpleProcedure(*this, game::interface::IFCCSelectionExec));
     m_world.setNewGlobalValue("CREATECONFIGOPTION", new game::interface::SimpleProcedure(*this, game::interface::IFCreateConfigOption));
     m_world.setNewGlobalValue("CREATEPREFOPTION", new game::interface::SimpleProcedure(*this, game::interface::IFCreatePrefOption));
@@ -659,8 +686,7 @@ game::Session::initWorld()
     m_world.setNewGlobalValue("NEWRECTANGLE",     new game::interface::SimpleProcedure(*this, game::interface::IFNewRectangle));
     m_world.setNewGlobalValue("NEWRECTANGLERAW",  new game::interface::SimpleProcedure(*this, game::interface::IFNewRectangleRaw));
     m_world.setNewGlobalValue("SAVEGAME",         new game::interface::SimpleProcedure(*this, game::interface::IFSaveGame));
-    // m_world.setNewGlobalValue("SELECTIONLOAD",    new game::interface::SimpleProcedure(*this, game::interface::IFSelectionLoad));
-    // m_world.setNewGlobalValue("SELECTIONSAVE",    new game::interface::SimpleProcedure(*this, game::interface::IFSelectionSave));
+    m_world.setNewGlobalValue("SENDMESSAGE",      new game::interface::SimpleProcedure(*this, game::interface::IFSendMessage));
     m_world.setNewGlobalValue("HISTORY.SHOWTURN", new game::interface::SimpleProcedure(*this, game::interface::IFHistoryShowTurn));
 
     // Add global context (=properties)

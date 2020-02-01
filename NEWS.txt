@@ -1,6 +1,13 @@
 PCC2ng NEWS FILE
 ================
 
+2.40.8
+------
+
+  More PCC1 compatibility (same as PCC 2.0.7) and script commands.
+  Build starbases, structures. Sell/buy supplies. Planet info (F5).
+  Ship waypoints and missions. Build queue manager.
+
 
 2.40.7
 ------

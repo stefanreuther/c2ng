@@ -144,6 +144,7 @@ String_t
 interpreter::vmio::ValueLoader::loadPascalString(uint32_t flag, afl::io::Stream& aux)
 {
     // ex IntStringValue::IntStringValue (part), getPascalStringT
+    // ex ccexpr.pas:MaybeLoadString (part)
     if (flag != 0) {
         return util::loadPascalString(aux, m_charset);
     } else {
@@ -156,6 +157,10 @@ String_t
 interpreter::vmio::ValueLoader::loadLongString(uint32_t length, afl::io::Stream& aux)
 {
     // ex IntStringValue::IntStringValue (part)
+    // ex ccexpr.pas:MaybeLoadString (part)
+    // Note: PCC 1.x ignores strings > 2 GB (treats them as null).
+    // We therefore now avoid writing > 2 GB (2.0.8+, 2.40.8+).
+    // This function still reads the whole 4 GB (or SIZE_MAX) if possible.
     afl::base::GrowableBytes_t buffer;
     buffer.resize(length);
     aux.fullRead(buffer);

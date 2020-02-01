@@ -35,6 +35,9 @@ namespace client { namespace map {
         virtual void requestRedraw(gfx::Rectangle& area);
 
         void addOverlay(Overlay& over);
+        void setZoomToInclude(game::map::Point pt);
+        void zoomIn();
+        void zoomOut();
 
         const Renderer& renderer() const;
         

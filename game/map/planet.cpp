@@ -1,11 +1,12 @@
 /**
   *  \file game/map/planet.cpp
+  *  \brief Class game::map::Planet
   */
 
 #include <algorithm>
 #include "game/map/planet.hpp"
-#include "afl/string/format.hpp"
 #include "afl/base/memory.hpp"
+#include "afl/string/format.hpp"
 #include "game/map/configuration.hpp"
 #include "game/map/universe.hpp"
 
@@ -134,6 +135,7 @@ namespace {
 
 }
 
+// Construct new planet.
 game::map::Planet::Planet(Id_t id)
     : m_id(id),
       m_name("?"),
@@ -165,6 +167,7 @@ game::map::Planet::Planet(Id_t id)
     afl::base::Memory<int>(m_historyTimestamps).fill(0);
 }
 
+// Copy a planet.
 game::map::Planet::Planet(const Planet& other)
     : m_id(other.m_id),
       m_name(other.m_name),
@@ -183,13 +186,11 @@ game::map::Planet::Planet(const Planet& other)
       m_unitScores(other.m_unitScores)
 { }
 
+// Destructor.
 game::map::Planet::~Planet()
 { }
 
-// /** Add .dat file entry.
-//     This assumes that when we see a planet through several .dat files, we get the same one each time.
-//     \param dat parsed .dat file entry
-//     \param source source flag value to use for this entry */
+// Add planet .dat file entry.
 void
 game::map::Planet::addCurrentPlanetData(const PlanetData& data, PlayerSet_t source)
 {
@@ -204,7 +205,7 @@ game::map::Planet::addCurrentPlanetData(const PlanetData& data, PlayerSet_t sour
     m_planetSource += source;
 }
 
-// /** Add starbase .dat file entry. See addPlanetData() for details. */
+// Add starbase .dat file entry.
 void
 game::map::Planet::addCurrentBaseData(const BaseData& data, PlayerSet_t source)
 {
@@ -213,19 +214,18 @@ game::map::Planet::addCurrentBaseData(const BaseData& data, PlayerSet_t source)
     m_baseSource += source;
 }
 
-// /** Add message ifnormation. Process information received from messages or util.dat. */
+// Add message information.
 void
 game::map::Planet::addMessageInformation(const game::parser::MessageInformation& info)
 {
     // ex GPlanet::addMessageInformation
-    // /* now process the information. For timestamp handling, we assume
-    //    that information comes in in full form, and in sequential order.
-    //    During normal operation, the timestamp checks will always succeed,
-    //    as pl.time[] starts with a previous turn number and, since
-    //    information comes in sequential order, msg_turn is either the
-    //    current turn number or the one before. */
+    /* For timestamp handling, we assume that information comes in in
+       full form, and in sequential order. During normal operation,
+       the timestamp checks will always succeed, as pl.time[] starts
+       with a previous turn number and, since information comes in
+       sequential order, msg_turn is either the current turn number or
+       the one before. */
     const int16_t msg_turn = static_cast<int16_t>(info.getTurnNumber());
-    // PlanetInfo& pl = createPlanetInfo();
     for (gp::MessageInformation::Iterator_t i = info.begin(); i != info.end(); ++i) {
         if (!acceptMessageInformation(*this, **i)) {
             // ignore
@@ -393,7 +393,7 @@ game::map::Planet::addMessageInformation(const game::parser::MessageInformation&
     markDirty();
 }
 
-// /** Set planet position. */
+// Set position.
 void
 game::map::Planet::setPosition(Point pt)
 {
@@ -402,7 +402,7 @@ game::map::Planet::setPosition(Point pt)
     markDirty();
 }
 
-// /** Set planet name. */
+// Set planet name.
 void
 game::map::Planet::setName(const String_t& name)
 {
@@ -411,12 +411,16 @@ game::map::Planet::setName(const String_t& name)
     markDirty();
 }
 
-// /** Set whether non-existance of this planet is known. There is no way
-//     to explicitly specify that a planet does not exist. To build maps
-//     with fewer than 500 planets, people move planets to odd positions.
-//     Recent PHosts send a util.dat message whenever they consider a
-//     planet to be non-existant, to make sure that the clients' idea of
-//     which planets do exist agrees with PHost's. */
+// Get name.
+String_t
+game::map::Planet::getName(afl::string::Translator& /*tx*/) const
+{
+    // Passing Translator as placeholder in case we ever want to
+    // return something like "Planet 99"
+    return m_name;
+}
+
+// Set whether non-existance of this planet is known.
 void
 game::map::Planet::setKnownToNotExist(bool value)
 {
@@ -424,25 +428,23 @@ game::map::Planet::setKnownToNotExist(bool value)
     markDirty();
 }
 
+// Get current planet data for storage.
 void
 game::map::Planet::getCurrentPlanetData(PlanetData& data) const
 {
     data = m_currentPlanetData;
 }
 
+// Get current starbase data for storage.
 void
 game::map::Planet::getCurrentBaseData(BaseData& data) const
 {
     data = m_currentBaseData;
 }
 
-// /** Do internal checks for this planet.
-//     Internal checks do not require a partner to interact with.
-//     This will fix the problems, and display appropriate messages. */
+// Do internal checks for this planet.
 void
-game::map::Planet::internalCheck(const Configuration& config,
-                                 afl::string::Translator& tx,
-                                 afl::sys::LogListener& log)
+game::map::Planet::internalCheck(const Configuration& config, afl::string::Translator& tx, afl::sys::LogListener& log)
 {
     // ex GPlanet::internalCheck
 
@@ -501,9 +503,7 @@ game::map::Planet::internalCheck(const Configuration& config,
     }
 }
 
-// /** Combined checks, phase 2.
-//     This will do all post-processing which needs a partner to interact with.
-//     It requires the playability to be filled in. */
+// Combined checks, phase 2.
 void
 game::map::Planet::combinedCheck2(const Universe& univ, PlayerSet_t availablePlayers, int turnNumber)
 {
@@ -1374,6 +1374,20 @@ game::map::Planet::setAutobuildSpeed(PlanetaryBuilding ps, int value)
     }
 }
 
+void
+game::map::Planet::applyAutobuildSettings(const AutobuildSettings& settings)
+{
+    for (size_t i = 0; i < NUM_PLANETARY_BUILDING_TYPES; ++i) {
+        const PlanetaryBuilding bb = PlanetaryBuilding(i);
+        int value;
+        if (settings.goal[i].get(value)) {
+            setAutobuildGoal(bb, value);
+        }
+        if (settings.speed[i].get(value)) {
+            setAutobuildSpeed(bb, value);
+        }
+    }
+}
 
 game::UnitScoreList&
 game::map::Planet::unitScores()

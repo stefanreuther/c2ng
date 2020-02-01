@@ -628,12 +628,13 @@ TestInterpreterExprParser::testDivide()
     // ex IntParseExprTestSuite::testDivide
     ExpressionTestHelper h;
     // Integers
-    h.checkFloatExpression("16/4", 4.0);
-    h.checkFloatExpression("10/1", 10.0);
+    h.checkIntegerExpression("16/4", 4);
+    h.checkIntegerExpression("10/1", 10);
     h.checkNullExpression("z(0) / 10");
     h.checkNullExpression("10 / z(0)");
 
     // Floats
+    h.checkFloatExpression("16.0/4.0", 4.0);
     h.checkFloatExpression("2.0/4.0", 0.5);
     h.checkFloatExpression("10.0/4.0", 2.5);
     h.checkNullExpression("z(0) / 10.0");
@@ -642,6 +643,7 @@ TestInterpreterExprParser::testDivide()
     // Mixed
     h.checkFloatExpression("2 / 4.0", 0.5);
     h.checkFloatExpression("2.0 / 4", 0.5);
+    h.checkFloatExpression("4 / 2.0", 2.0);
 
     // Errors
     h.checkFailureExpression("10/'a'");

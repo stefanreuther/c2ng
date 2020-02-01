@@ -17,7 +17,7 @@ namespace server { namespace play {
 
     class GameAccess : public server::interface::GameAccess {
      public:
-        GameAccess(game::Session& session, util::MessageCollector& console, const std::map<String_t, String_t>& props);
+        GameAccess(game::Session& session, util::MessageCollector& console);
 
         virtual void save();
         virtual String_t getStatus();
@@ -28,7 +28,6 @@ namespace server { namespace play {
         game::Session& m_session;
         util::MessageCollector& m_console;
         util::MessageCollector::MessageNumber_t m_lastMessage;
-        const std::map<String_t, String_t>& m_properties;
 
         Value_t* getObject(util::StringParser& p);
         Value_t* getQuery(util::StringParser& p);

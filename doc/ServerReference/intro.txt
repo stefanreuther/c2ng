@@ -464,6 +464,9 @@ For critical information ("hosting currently suspended").
 Additional CSS class to be added to each page's &lt;body&gt; tag.
 For seasonal events.
 ---
+@q WWW.ForceSSL:Int (Config)
+Nonzero to force redirect to SSL (for GET requests without query parameters on port 80).
+---
 
 
 ############################# Versions ###############################

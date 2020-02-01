@@ -23,6 +23,7 @@ namespace {
         "END",
         "ENDFUNCTION",
         "ENDIF",
+        "ENDON",
         "ENDSELECT",
         "ENDSTRUCT",
         "ENDSUB",

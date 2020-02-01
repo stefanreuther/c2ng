@@ -14,6 +14,8 @@ String_t
 game::tables::HeadingName::get(int heading) const
 {
     // ex game/tables.h:getHeadingName
+    // ex accessor.pas:Compass
+
     // FIXME: those cannot easily be translated because they're so short.
     // One way to make them translatable is to put them into a big string
     // containing all headings, and have this function return a string.

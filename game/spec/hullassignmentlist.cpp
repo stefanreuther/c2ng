@@ -60,6 +60,7 @@ int
 game::spec::HullAssignmentList::getIndexFromHull(const game::config::HostConfiguration& config, int player, int hullNr) const
 {
     // ex game/spec.cc:getTruehullSlot
+    // ex planint.pas:TruehullSlot
     int mappedPlayer = mapPlayer(config, player);
     if (mappedPlayer < 0 || mappedPlayer >= int(m_mapping.size())) {
         // player does not exist

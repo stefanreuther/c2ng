@@ -368,6 +368,7 @@ game::spec::MissionList::isMissionCloaking(int mission_id,
                                            const HostVersion& host) const
 {
     // ex game/mission.cc:isMissionCloaking
+    // ex shipacc.pas:ShipIsCloaking (...which checks ship abilities, too)
     // This is an instance function to allow some configurable logic later
     const bool hasXM = host.hasExtendedMissions(config);
     const int  emsa = config[config.ExtMissionsStartAt]();

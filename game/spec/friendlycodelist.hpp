@@ -210,14 +210,14 @@ namespace game { namespace spec {
             \param fc Friendly code
             \param host Host version
             \return friendly code is a valid result for generateRandomCode() */
-        bool isAllowedRandomCode(const String_t& fc, const HostSelection host);
+        bool isAllowedRandomCode(const String_t& fc, const HostSelection host) const;
 
         /** Generate a random friendly code.
             See isAllowedRandomCode() for conditions for random friendly codes.
             \param rng Random number generator
             \param host Host version
             \return newly-generated code */
-        String_t generateRandomCode(util::RandomNumberGenerator& rng, const HostSelection host);
+        String_t generateRandomCode(util::RandomNumberGenerator& rng, const HostSelection host) const;
 
      private:
         /** Special friendly codes. */

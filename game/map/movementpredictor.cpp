@@ -1,5 +1,6 @@
 /**
   *  \file game/map/movementpredictor.cpp
+  *  \brief Class game::map::MovementPredictor
   */
 
 #include <cassert>
@@ -13,15 +14,16 @@
 
 using game::spec::Mission;
 
+// Default constructor.
 game::map::MovementPredictor::MovementPredictor()
     : m_info()
 { }
 
+// Destructor.
 game::map::MovementPredictor::~MovementPredictor()
 { }
 
-// /** Compute movement and fill in ships' predicted position fields.
-//     Loosely based upon shipacc.pas::InitMovementPrediction */
+// Compute one turn of movement.
 void
 game::map::MovementPredictor::computeMovement(const Universe& univ,
                                               const Game& game,
@@ -29,6 +31,7 @@ game::map::MovementPredictor::computeMovement(const Universe& univ,
                                               const Root& root)
 {
     // ex GMovementPredictor::computeMovement
+    // ex shipacc.pas:InitMovementPrediction (loosely based)
     init(univ);
     resolveTows(univ);
     while (moveShips(univ, game, shipList, root)) {
@@ -36,7 +39,7 @@ game::map::MovementPredictor::computeMovement(const Universe& univ,
     }
 }
 
-// /** Get position of a ship. */
+// Get ship position.
 bool
 game::map::MovementPredictor::getShipPosition(Id_t sid, Point& out) const
 {
@@ -49,7 +52,7 @@ game::map::MovementPredictor::getShipPosition(Id_t sid, Point& out) const
     }
 }
 
-// /** Get cargo of a ship. */
+// Get ship cargo.
 bool
 game::map::MovementPredictor::getShipCargo(Id_t sid, Cargo_t& out) const
 {
@@ -63,8 +66,9 @@ game::map::MovementPredictor::getShipCargo(Id_t sid, Cargo_t& out) const
 }
 
 
-// /** Initialize movement info.
-//     Initialize all ship's status and waypoint. */
+/** Initialize movement info.
+    Initialize all ship's status and waypoint.
+    \param univ Universe */
 void
 game::map::MovementPredictor::init(const Universe& univ)
 {
@@ -89,8 +93,9 @@ game::map::MovementPredictor::init(const Universe& univ)
     }
 }
 
-// /** Tow resolution.
-//     Set all towing/towed ships' status. */
+/** Tow resolution.
+    Set all towing/towed ships' status.
+    \param univ Universe */
 void
 game::map::MovementPredictor::resolveTows(const Universe& univ)
 {
@@ -279,16 +284,20 @@ game::map::MovementPredictor::moveShips(const Universe& univ,
     return moved;
 }
 
-// /** Check valid intercept.
-//     The intercept must be in a status that allows us to resolve it,
-//     i.e. it must not target a nonexisting ship. That is:
-//     - valid Id
-//     - not referring to a nonexistant ship
-//     - not referring to itself (this condition is actually redundant with the current implementation) */
+/** Check valid intercept.
+    The intercept must be in a status that allows us to resolve it,
+    i.e. it must not target a nonexisting ship. That is:
+    - valid Id
+    - not referring to a nonexistant ship
+    - not referring to itself (this condition is actually redundant with the current implementation)
+
+    \param sh Ship to check
+    \return Info of intercept target, if any */
 game::map::MovementPredictor::Info*
 game::map::MovementPredictor::getInterceptTarget(const Ship& sh) const
 {
     // ex GMovementPredictor::isValidIntercept
+    // ex shipacc.pas:Intercepting
     int msn = sh.getMission().orElse(0);
     int i = sh.getMissionParameter(InterceptParameter).orElse(0);
     if (msn == Mission::msn_Intercept && i != sh.getId()) {
@@ -297,7 +306,6 @@ game::map::MovementPredictor::getInterceptTarget(const Ship& sh) const
         return 0;
     }
 }
-
 
 void
 game::map::MovementPredictor::copyCargo(Info& info, const Ship& sh, Cargo_t::Type infoElement, Element::Type shipElement)

@@ -391,3 +391,45 @@ TestGameSpecShipList::testGetHullFunctions()
     }
 }
 
+/** Test racial abilities, many abilities.
+    Tests many hulls, many abilities. */
+void
+TestGameSpecShipList::testFindRacialAbilitiesMany()
+{
+    game::spec::ShipList testee;
+
+    // Create 10 hulls with 5 functions each
+    for (int i = 1; i <= 10; ++i) {
+        game::spec::Hull* pHull = testee.hulls().create(i);
+        TS_ASSERT(pHull != 0);
+
+        for (int f = 1; f <= 5; ++f) {
+            pHull->changeHullFunction(ModifiedHullFunctionList::Function_t(f), game::PlayerSet_t::allUpTo(9), game::PlayerSet_t(), true);
+        }
+    }
+
+    // Some more hulls that don't have functions; they don't even have the associated slot.
+    for (int i = 11; i <= 15; ++i) {
+        testee.hulls().create(i);
+    }
+
+    // Do it
+    game::config::HostConfiguration hostConfig;
+    testee.findRacialAbilities(hostConfig);
+
+    // The functions must not be converted to racial abilities
+    for (int f = 1; f <= 5; ++f) {
+        const game::spec::HullFunctionAssignmentList::Entry* p =
+            testee.racialAbilities().findEntry(ModifiedHullFunctionList::Function_t(f));
+        TS_ASSERT(p == 0);
+    }
+}
+
+/** Test racial abilities, many abilities.
+    Tests many hulls, many abilities, but some don't have the ability. */
+void
+TestGameSpecShipList::testFindRacialAbilitiesHoley()
+{
+    game::spec::ShipList testee;
+}
+

@@ -55,6 +55,8 @@ void
 game::map::DrawingContainer::erase(Iterator_t it)
 {
     // ex GDrawingContainer::erase
+    // ex accessor.pas:DeletePainting (sort-of)
+
     // sig_deleted.raise(it);
     m_drawings.erase(it);
     sig_change.raise();

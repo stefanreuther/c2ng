@@ -4,16 +4,18 @@
   */
 
 #include "client/si/widgetproperty.hpp"
+#include "client/si/compoundwidget.hpp"
 #include "client/si/scriptside.hpp"
 #include "client/si/usercall.hpp"
 #include "client/si/values.hpp"
+#include "client/si/widgetreference.hpp"
+#include "interpreter/arguments.hpp"
 #include "interpreter/values.hpp"
+#include "ui/widgets/checkbox.hpp"
+#include "ui/widgets/decimalselector.hpp"
 #include "ui/widgets/framegroup.hpp"
 #include "ui/widgets/inputline.hpp"
-#include "client/si/widgetreference.hpp"
-#include "ui/widgets/checkbox.hpp"
 #include "ui/widgets/radiobutton.hpp"
-#include "interpreter/arguments.hpp"
 
 /*
  *  Direct Widget Access
@@ -67,6 +69,13 @@ client::si::getWidgetProperty(WidgetProperty p, ui::Widget* w)
      case wipRadiobuttonValue:
         if (ui::widgets::RadioButton* b = dynamic_cast<ui::widgets::RadioButton*>(w)) {
             return interpreter::makeIntegerValue(b->value().get());
+        } else {
+            return 0;
+        }
+
+     case wipNumberInputValue:
+        if (CompoundWidget<ui::widgets::DecimalSelector>* b = dynamic_cast<CompoundWidget<ui::widgets::DecimalSelector>*>(w)) {
+            return interpreter::makeIntegerValue(b->widget().value().get());
         } else {
             return 0;
         }
@@ -140,6 +149,16 @@ client::si::setWidgetProperty(WidgetProperty p, afl::data::Value* value, ui::Wid
             throw interpreter::Error::notAssignable();
         }
         break;
+
+     case wipNumberInputValue:
+        if (CompoundWidget<ui::widgets::DecimalSelector>* b = dynamic_cast<CompoundWidget<ui::widgets::DecimalSelector>*>(w)) {
+            int32_t intValue;
+            if (interpreter::checkIntegerArg(intValue, value)) {
+                b->widget().value().set(intValue);
+            }
+        } else {
+            throw interpreter::Error::notAssignable();
+        }
     }
 }
 

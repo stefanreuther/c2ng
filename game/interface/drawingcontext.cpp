@@ -165,6 +165,7 @@ game::interface::DrawingContext::store(interpreter::TagNode& /*out*/, afl::io::D
 game::interface::DrawingContext*
 game::interface::DrawingContext::create(Session& session)
 {
+    // ex values.pas:CreateMarkerContext
     Game* game = session.getGame().get();
     if (game == 0) {
         return 0;

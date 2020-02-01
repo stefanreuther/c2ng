@@ -262,6 +262,9 @@ client::si::ScriptSide::runProcesses(game::Session& session)
     if (m_waits.empty()) {
         processList.removeTerminatedProcesses();
     }
+
+    // Clean up messages
+    session.notifications().removeOrphanedMessages();
 }
 
 void

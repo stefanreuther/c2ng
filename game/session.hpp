@@ -12,7 +12,9 @@
 #include "afl/io/stream.hpp"
 #include "afl/string/translator.hpp"
 #include "afl/sys/log.hpp"
+#include "game/authcache.hpp"
 #include "game/extracontainer.hpp"
+#include "game/interface/notificationstore.hpp"
 #include "game/interface/userinterfacepropertyaccessor.hpp"
 #include "game/interface/userinterfacepropertystack.hpp"
 #include "game/interpreterinterface.hpp"
@@ -76,6 +78,9 @@ namespace game {
         game::interface::UserInterfacePropertyStack& uiPropertyStack();
         const game::interface::UserInterfacePropertyStack& uiPropertyStack() const;
 
+        game::interface::NotificationStore& notifications();
+        const game::interface::NotificationStore& notifications() const;
+
         void setEditableAreas(AreaSet_t set);
         AreaSet_t getEditableAreas() const;
 
@@ -89,6 +94,8 @@ namespace game {
         util::RandomNumberGenerator& rng();
 
         util::plugin::Manager& plugins();
+
+        AuthCache& authCache();
 
         ExtraContainer<Session>& extra();
 
@@ -111,7 +118,9 @@ namespace game {
         interpreter::World m_world;
         util::RandomNumberGenerator m_rng;
         util::plugin::Manager m_plugins;
+        AuthCache m_authCache;
         ExtraContainer<Session> m_extra;
+        game::interface::NotificationStore m_notifications;
 
         afl::base::SignalConnection conn_hostConfigToMap;
         afl::base::SignalConnection conn_userConfigToMap;

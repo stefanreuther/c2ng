@@ -1,5 +1,6 @@
 /**
   *  \file client/map/overlay.cpp
+  *  \brief Interface client::map::Overlay
   */
 
 #include "client/map/overlay.hpp"
@@ -23,7 +24,15 @@ client::map::Overlay::setCallback(Callback* p)
 }
 
 client::map::Callback*
-client::map::Overlay::getCallback()
+client::map::Overlay::getCallback() const
 {
     return m_pCallback;
+}
+
+void
+client::map::Overlay::requestRedraw() const
+{
+    if (m_pCallback != 0) {
+        m_pCallback->requestRedraw();
+    }
 }

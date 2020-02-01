@@ -227,6 +227,7 @@ game::interface::PlanetContext::~PlanetContext()
 game::interface::PlanetContext*
 game::interface::PlanetContext::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
 {
+    // ex planint.pas:CPlanetContext.ResolveValue
     if (name.startsWith("PLANET.")) {
         return lookupPlanetProperty(afl::data::NameQuery(name, 7), m_session.world(), result) ? this : 0;
     } else {
@@ -311,6 +312,7 @@ game::interface::PlanetContext::get(PropertyIndex_t index)
 bool
 game::interface::PlanetContext::next()
 {
+    // ex planint.pas:CPlanetContext.Next
     if (int id = game::map::AnyPlanetType(m_game->currentTurn().universe()).findNextIndex(m_id)) {
         m_id = id;
         return true;
@@ -357,6 +359,7 @@ game::interface::PlanetContext::store(interpreter::TagNode& out, afl::io::DataSi
 game::interface::PlanetContext*
 game::interface::PlanetContext::create(int id, Session& session)
 {
+    // ex planint.pas:CPlanetContext.Load (sort-of), planint.pas:CreatePlanetContext
     Game* game = session.getGame().get();
     Root* root = session.getRoot().get();
     if (game != 0 && root != 0 && game->currentTurn().universe().planets().get(id) != 0) {

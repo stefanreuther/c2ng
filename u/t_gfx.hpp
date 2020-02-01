@@ -96,6 +96,7 @@ class TestGfxFontRequest : public CxxTest::TestSuite {
     void testSet();
     void testMatch();
     void testCompare();
+    void testParse();
 };
 
 class TestGfxGraphicsException : public CxxTest::TestSuite {

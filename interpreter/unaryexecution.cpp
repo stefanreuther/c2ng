@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/unaryexecution.cpp
+  *  \brief Execution of Unary Operations
   */
 
 #include <cmath>
@@ -7,27 +8,28 @@
 #include <cstring>
 #include "interpreter/unaryexecution.hpp"
 #include "afl/base/countof.hpp"
-#include "interpreter/values.hpp"
-#include "interpreter/error.hpp"
-#include "afl/data/scalarvalue.hpp"
-#include "afl/data/floatvalue.hpp"
-#include "util/math.hpp"
-#include "afl/data/stringvalue.hpp"
-#include "afl/charset/utf8reader.hpp"
 #include "afl/charset/utf8.hpp"
-#include "interpreter/world.hpp"
-#include "interpreter/keymapvalue.hpp"
+#include "afl/charset/utf8reader.hpp"
+#include "afl/data/floatvalue.hpp"
+#include "afl/data/scalarvalue.hpp"
+#include "afl/data/stringvalue.hpp"
+#include "afl/data/visitor.hpp"
 #include "afl/sys/loglistener.hpp"
 #include "interpreter/callablevalue.hpp"
+#include "interpreter/error.hpp"
 #include "interpreter/filevalue.hpp"
-#include "afl/data/visitor.hpp"
+#include "interpreter/keymapvalue.hpp"
+#include "interpreter/values.hpp"
+#include "interpreter/world.hpp"
+#include "util/math.hpp"
+#include "interpreter/arguments.hpp"
 
 using interpreter::Error;
 using interpreter::getBooleanValue;
 using interpreter::makeBooleanValue;
+using interpreter::makeFloatValue;
 using interpreter::makeIntegerValue;
 using interpreter::makeSizeValue;
-using interpreter::makeFloatValue;
 using interpreter::makeStringValue;
 
 namespace {
@@ -94,6 +96,7 @@ namespace {
         \throws Error if bad user-supplied argument */
     double prepareTrig(const afl::data::Value* arg)
     {
+        // ex ccexpr.pas:TrigFunc
         // Fetch value
         double value;
         if (const afl::data::ScalarValue* iv = dynamic_cast<const afl::data::ScalarValue*>(arg))
@@ -112,6 +115,7 @@ namespace {
 
     afl::data::Value* FNot(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
+        // ex ccexpr.pas:op_NOT
         // logical not
         int value = getBooleanValue(arg);
         if (value >= 0) {
@@ -122,12 +126,14 @@ namespace {
 
     afl::data::Value* FBool(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
+        // ex ccexpr.pas:op_BOOL
         // conversion to bool, i.e. double not
         return makeBooleanValue(getBooleanValue(arg));
     }
 
     afl::data::Value* FNeg(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
+        // ex ccexpr.pas:op_NEGATE
         // arithmetic negation
         ArithmeticArg a;
         switch (checkArithmetic(a, arg)) {
@@ -160,6 +166,7 @@ namespace {
 
     afl::data::Value* FSin(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
+        // ex ccexpr.pas:op_SIN_func
         // Sine
         if (!arg)
             return 0;
@@ -169,6 +176,7 @@ namespace {
 
     afl::data::Value* FCos(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
+        // ex ccexpr.pas:op_COS_func
         // Cosine
         if (!arg)
             return 0;
@@ -178,6 +186,7 @@ namespace {
 
     afl::data::Value* FTan(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
+        // ex ccexpr.pas:op_TAN_func
         // Tangent
         if (!arg) {
             return 0;
@@ -194,6 +203,7 @@ namespace {
 
     afl::data::Value* FZap(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
+        // ex ccexpr.pas:op_ZAP_func
         // Turn false into null
         if (!arg)
             return 0;
@@ -205,6 +215,7 @@ namespace {
 
     afl::data::Value* FAbs(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
+        // ex ccexpr.pas:op_ABS_func
         // Absolute value
         ArithmeticArg a;
         switch (checkArithmetic(a, arg)) {
@@ -259,6 +270,7 @@ namespace {
 
     afl::data::Value* FBitNot(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
+        // ex ccexpr.pas:op_BITNOT_func
         // Bitwise negation
         ArithmeticArg a;
         switch (checkArithmetic(a, arg)) {
@@ -274,14 +286,16 @@ namespace {
 
     afl::data::Value* FIsEmpty(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
+        // ex ccexpr.pas:op_ISEMPTY_func
         // Check emptiness (null)
         return makeBooleanValue(arg == 0);
     }
 
     afl::data::Value* FIsNum(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
+        // ex ccexpr.pas:op_ISNUM_func
         // Check numericness
-        // FIXME: PCC 1.x returns False for bools
+        // @change PCC 1.x returns False for bools
         return makeBooleanValue(arg != 0
                                 && (dynamic_cast<const afl::data::ScalarValue*>(arg) != 0
                                     || dynamic_cast<const afl::data::FloatValue*>(arg) != 0));
@@ -289,6 +303,7 @@ namespace {
 
     afl::data::Value* FIsString(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
+        // ex ccexpr.pas:op_ISSTRING_func
         // Check string
         return makeBooleanValue(arg != 0
                                 && dynamic_cast<const afl::data::StringValue*>(arg) != 0);
@@ -296,6 +311,7 @@ namespace {
 
     afl::data::Value* FAsc(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
+        // ex ccexpr.pas:op_ASC_func
         // Get ASCII/Unicode code of (stringified) arg
         if (arg == 0)
             return 0;
@@ -311,10 +327,14 @@ namespace {
 
     afl::data::Value* FChr(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
+        // ex ccexpr.pas:op_CHR_func
         // Get character from ASCII/Unicode code
         if (arg == 0) {
             return 0;
         } else if (const afl::data::ScalarValue* iv = dynamic_cast<const afl::data::ScalarValue*>(arg)) {
+            if (iv->getValue() < 0 || iv->getValue() > int32_t(afl::charset::UNICODE_MAX)) {
+                throw interpreter::Error::rangeError();
+            }
             String_t tmp;
             afl::charset::Utf8().append(tmp, iv->getValue());
             return makeStringValue(tmp);
@@ -325,6 +345,7 @@ namespace {
 
     afl::data::Value* FStr(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
+        // ex ccexpr.pas:StrProc1, ccexpr.pas:op_STR_func
         // Simple stringification
         if (arg == 0)
             return 0;
@@ -333,6 +354,7 @@ namespace {
 
     afl::data::Value* FSqrt(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
+        // ex ccexpr.pas:op_SQRT_func
         // Square root
         ArithmeticArg a;
         switch (checkArithmetic(a, arg)) {
@@ -353,24 +375,19 @@ namespace {
 
     afl::data::Value* FTrunc(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
+        // ex ccexpr.pas:op_INT_func
         // Truncate fractional digits
-        ArithmeticArg a;
-        switch (checkArithmetic(a, arg)) {
-         case ariNull:
+        int32_t iv = 0;
+        if (interpreter::checkIntegerArg(iv, arg)) {
+            return makeIntegerValue(iv);
+        } else {
             return 0;
-         case ariInt:
-            return makeIntegerValue(a.ia);
-         case ariFloat:
-            if (std::fabs(a.fa) > 2147483647.0)
-                throw Error::rangeError();
-            return makeIntegerValue(int32_t(a.fa));
-         default:
-            throw Error::typeError(Error::ExpectNumeric);
         }
     }
 
     afl::data::Value* FRound(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
+        // ex ccexpr.pas:op_ROUND_func
         // Round arithmetically
         ArithmeticArg a;
         switch (checkArithmetic(a, arg)) {
@@ -393,6 +410,7 @@ namespace {
 
     afl::data::Value* FLTrim(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
+        // ex ccexpr.pas:op_LTRIM_func
         // Trim left whitespace
         if (arg == 0)
             return 0;
@@ -404,6 +422,7 @@ namespace {
 
     afl::data::Value* FRTrim(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
+        // ex ccexpr.pas:op_RTRIM_func
         // Trim right whitespace
         if (arg == 0)
             return 0;
@@ -415,6 +434,7 @@ namespace {
 
     afl::data::Value* FLRTrim(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
+        // ex ccexpr.pas:op_TRIM_func
         // Trim both whitespace
         if (arg == 0)
             return 0;
@@ -426,8 +446,9 @@ namespace {
 
     afl::data::Value* FLength(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
+        // ex ccexpr.pas:op_LEN_func
         // Get length of string
-        // FIXME: PCC 1.x stringifies. Should we, too?
+        // @change PCC 1.x stringifies, we don't.
         if (arg == 0)
             return 0;
         else if (const afl::data::StringValue* sv = dynamic_cast<const afl::data::StringValue*>(arg))
@@ -438,7 +459,9 @@ namespace {
 
     afl::data::Value* FVal(interpreter::World& /*world*/, const afl::data::Value* arg)
     {
+        // ex ccexpr.pas:op_VAL_func
         // Evaluate
+        // @change PCC 1.x refuses "Val('999999999')" because that's too large for int, we accept it as float.
         if (arg == 0) {
             return 0;
         } else if (const afl::data::StringValue* sv = dynamic_cast<const afl::data::StringValue*>(arg)) {
@@ -481,6 +504,7 @@ namespace {
 
     afl::data::Value* FAtom(interpreter::World& world, const afl::data::Value* arg)
     {
+        // ex ccexpr.pas:op_ATOM_func
         // String to atom
         if (arg == 0)
             return 0;
@@ -489,6 +513,7 @@ namespace {
 
     afl::data::Value* FAtomStr(interpreter::World& world, const afl::data::Value* arg)
     {
+        // ex ccexpr.pas:op_ATOMSTR_func
         // Atom to string
         if (arg == 0)
             return 0;
@@ -600,6 +625,28 @@ namespace {
             return makeIntegerValue(0);
     }
 
+    afl::data::Value* FUCase(interpreter::World& /*world*/, const afl::data::Value* arg)
+    {
+        // Convert to upper case
+        if (arg == 0)
+            return 0;
+        else if (const afl::data::StringValue* sv = dynamic_cast<const afl::data::StringValue*>(arg))
+            return makeStringValue(afl::string::strUCase(sv->getValue()));
+        else
+            throw Error::typeError(Error::ExpectString);
+    }
+
+    afl::data::Value* FLCase(interpreter::World& /*world*/, const afl::data::Value* arg)
+    {
+        // Convert to lower case
+        if (arg == 0)
+            return 0;
+        else if (const afl::data::StringValue* sv = dynamic_cast<const afl::data::StringValue*>(arg))
+            return makeStringValue(afl::string::strLCase(sv->getValue()));
+        else
+            throw Error::typeError(Error::ExpectString);
+    }
+
     afl::data::Value* (*const unary_ops[])(interpreter::World&, const afl::data::Value*) = {
         FNot,
         FBool,
@@ -638,15 +685,14 @@ namespace {
         FIsProcedure,
         FFileNr,
         FIsArray,
+        FUCase,
+        FLCase,
     };
 }
 
-// /** Execute unary operation.
-//     \param op Operation, IntUnaryOperation
-//     \param arg User-supplied argument taken from value stack
-//     \return New value to push on value stack */
+// Execute unary operation.
 afl::data::Value*
-interpreter::executeUnaryOperation(World& world, uint8_t op, afl::data::Value* arg)
+interpreter::executeUnaryOperation(World& world, uint8_t op, const afl::data::Value* arg)
 {
     // ex int/unary.h:executeUnaryOperation(uint8_t op, IntValue* arg)
     if (op < countof(unary_ops)) {

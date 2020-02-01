@@ -125,6 +125,7 @@ game::interface::MinefieldContext::get(PropertyIndex_t index)
 bool
 game::interface::MinefieldContext::next()
 {
+    // ex values.pas:CMineContext.Next
     if (int id = m_game->currentTurn().universe().minefields().findNextIndex(m_id)) {
         m_id = id;
         return true;
@@ -171,6 +172,7 @@ game::interface::MinefieldContext::store(interpreter::TagNode& out, afl::io::Dat
 game::interface::MinefieldContext*
 game::interface::MinefieldContext::create(int id, Session& session, bool force)
 {
+    // ex values.pas:CreateMinefieldContext
     Game* g = session.getGame().get();
     Root* r = session.getRoot().get();
     // FIXME: the minefields().get() test is not in PCC2 for MinefieldFunction::get()

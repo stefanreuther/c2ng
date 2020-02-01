@@ -193,6 +193,42 @@ namespace game {
             but if it starts the move with 3 kt, it'll run dry. */
         bool hasAccurateFuelModelBug() const;
 
+        /** Check for alchemy combination function support.
+            In PHost 4.0i/3.4k, combinations of alchemy functions produce sensible "best of" functionality,
+            e.g. Refinery + AdvancedRefinery = AdvancedRefinery.
+            Previously, combinations were not very well thought-out, making the above
+            combination produce Refinery only. */
+        bool hasAlchemyCombinations() const;
+
+        /** Check for refinery friendly code support.
+            If true, the "alX" and "naX" friendly codes affect refinery ships as well. */
+        bool hasRefineryFCodes() const;
+
+        /** Check for alchemy exclusion friendly codes ("naX"). */
+        bool hasAlchemyExclusionFCodes() const;
+
+        /** Check for rounding in "alX" alchemy.
+            Even with "alX" friendly code, THost consumes supplies in steps of 9. */
+        bool isAlchemyRounding() const;
+
+        /** Check for valid chunnel distance.
+            Host and PHost implement rules different here.
+            \param dist2 Distance, squared
+            \param config Host configuration
+            \return true if a chunnel with this distance will work */
+        bool isValidChunnelDistance2(int32_t dist2, const game::config::HostConfiguration& config) const;
+
+        /** Get minimum fuel to initiate a chunnel.
+            Whereas PHost requires the ship to have remaining fuel after burning 50 kt,
+            Host accepts ships that run dry. */
+        int getMinimumFuelToInitiateChunnel() const;
+
+        /** Set configuration options implied by this host version.
+            This way, code can just use the configuration
+            instead of implementing a "should I query hconfig or use fixed value" switch.
+            \param [out] config Configuration to update */
+        void setImpliedHostConfiguration(game::config::HostConfiguration& config);
+
      private:
         /** Host type. */
         Kind m_kind;

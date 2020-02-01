@@ -20,7 +20,8 @@ namespace client { namespace si {
         wipEnabled,
         wipFocused,
         wipCheckboxValue,
-        wipRadiobuttonValue
+        wipRadiobuttonValue,
+        wipNumberInputValue
     };
 
     /** Get property of widget (UI side).

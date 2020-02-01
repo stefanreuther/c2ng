@@ -13,6 +13,7 @@ String_t
 game::tables::HappinessChangeName::get(int change) const
 {
     // ex game/tables.h:getHappyChangeName
+    // ex planint.pas:ChangeStr
     if (change < -5) {
         return m_translator("They HATE you!");
     } else if (change < 0) {

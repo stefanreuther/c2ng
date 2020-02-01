@@ -64,6 +64,8 @@ ui::widgets::InputLine::InputLine(size_t maxLength, Root& root)
       m_text(),
       m_font(),
       m_preferredLength(maxLength < 40 ? int(maxLength) : 40),
+      m_flags(),
+      m_mouseDown(false),
       m_root(root),
       m_utf8()
 {
@@ -86,6 +88,8 @@ ui::widgets::InputLine::InputLine(size_t maxLength, int preferredLength, Root& r
       m_text(),
       m_font(),
       m_preferredLength(preferredLength),
+      m_flags(),
+      m_mouseDown(false),
       m_root(root),
       m_utf8()
 {
@@ -229,6 +233,7 @@ ui::widgets::InputLine::handleKey(util::Key_t key, int /*prefix*/)
         if (key == m_hotkey) {
             requestActive();
             requestFocus();
+            sig_activate.raise();
             return true;
         }
     } else {
@@ -363,13 +368,21 @@ ui::widgets::InputLine::handleKey(util::Key_t key, int /*prefix*/)
          }
 
          default:
-            if ((key & util::KeyMod_Mask) == 0 && (key < util::Key_FirstSpecial) && acceptUnicode(key)) {
-                /* Self-insert */
-                String_t n;
-                m_utf8.append(n, key);
-                requestActive();
-                insertText(n);
-                return true;
+            if (m_flags.contains(NonEditable)) {
+                if (key == ' ') {
+                    requestActive();
+                    sig_activate.raise();
+                    return true;
+                }
+            } else {
+                if ((key & util::KeyMod_Mask) == 0 && (key < util::Key_FirstSpecial) && acceptUnicode(key)) {
+                    /* Self-insert */
+                    String_t n;
+                    m_utf8.append(n, key);
+                    requestActive();
+                    insertText(n);
+                    return true;
+                }
             }
             break;
         }
@@ -385,6 +398,7 @@ ui::widgets::InputLine::handleMouse(gfx::Point pt, MouseButtons_t pressedButtons
         requestFocus();
 
         m_root.consumeMousePrefixArgument();
+        m_mouseDown = true;
 
         // Find new position
         afl::base::Ref<gfx::Font> font = m_root.provider().getFont(m_font);
@@ -403,6 +417,11 @@ ui::widgets::InputLine::handleMouse(gfx::Point pt, MouseButtons_t pressedButtons
         requestRedraw();
         return true;
     } else {
+        bool down = m_mouseDown;
+        m_mouseDown = false;
+        if (pressedButtons.empty() && down && hasState(FocusedState) && hasState(ActiveState)) {
+            sig_activate.raise();
+        }
         return false;
     }
 }

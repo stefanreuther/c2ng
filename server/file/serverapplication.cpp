@@ -19,7 +19,6 @@
 #include "server/file/session.hpp"
 #include "server/ports.hpp"
 #include "version.hpp"
-#include "util/translation.hpp"
 #include "util/string.hpp"
 
 using afl::async::InterruptOperation;
@@ -218,7 +217,7 @@ server::file::ServerApplication::handleConfiguration(const String_t& key, const 
 String_t
 server::file::ServerApplication::getApplicationName() const
 {
-    return afl::string::Format(_("PCC2 File Server v%s - (c) 2017-2019 Stefan Reuther").c_str(), PCC2_VERSION);
+    return afl::string::Format("PCC2 File Server v%s - (c) 2017-2020 Stefan Reuther", PCC2_VERSION);
 }
 
 String_t

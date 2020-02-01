@@ -322,6 +322,7 @@ SearchDialog::run(bool immediate)
     g4.add(del.addNew(new ui::Spacer()));
     g4.add(m_btnHelp);
     win.add(g4);
+    m_btnGoto.sig_fire.add(this, &SearchDialog::onGoto);
     m_btnClose.sig_fire.addNewClosure(m_loop.makeStop(0));
 
     // Admin

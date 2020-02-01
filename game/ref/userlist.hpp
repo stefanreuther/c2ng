@@ -55,6 +55,8 @@ namespace game { namespace ref {
 
         size_t size() const;
 
+        bool empty() const;
+
         bool find(Reference ref, size_t& pos) const;
 
         bool operator==(const UserList& other) const;

@@ -27,6 +27,7 @@ namespace interpreter {
         kwEnd,
         kwEndFunction,
         kwEndIf,
+        kwEndOn,
         kwEndSelect,
         kwEndStruct,
         kwEndSub,

@@ -28,8 +28,14 @@ Name of this user.
 
 @q user:$UID:password : Str (Database)
 Password.
-Format is $type,$code.
-Currently, $type=1, and $code=base64(md5(config[user.key] + password)).
+Format is $type,$data.
+
+ClassicEncrypter:
+- $type=1, $code=base64(md5(config[user.key] + password))
+
+SaltedPasswordEncrypter (since August 2019):
+- $type=2, $code=salt + "," + hex(sha1("2," + salt + "," + userId + "," + password)
+
 ---
 
 @q user:$UID:profile : Hash (Database)
@@ -76,7 +82,7 @@ Upon account creation, {default:profilecopy} is copied into the user profile.
 @key allowupload:Int                 Nonzero: User is allowed to upload files
 @key allowadmin:Int                  Nonzero: User has administrative rights
 @key allowpost:Int                   Nonzero: User is allowed to post in the forum (set to 1 in default:profile so it can be selectively disabled)
-@c          [- allowjoin                  User is allowed to join games]
+@key allowjoin:Int                   User is allowed to join games
 
 <h2>Joining games</h2>
 @c          [- joinlimit                  Maximum number of games (-1 = infinite)]

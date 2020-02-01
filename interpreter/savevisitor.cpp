@@ -123,14 +123,13 @@ interpreter::SaveVisitor::visitString(const String_t& str)
     // ex IntStringValue::store
     afl::base::GrowableBytes_t converted = m_charset.encode(afl::string::toMemory(str));
 
-    // In theory, a script could build a 10G string. We can only save 4G max.
+    // In theory, a script could build a 10G string. We can only save 4G max,
     // Given that it's unlikely that anyone ever successfully does this, and that PCC1 truncates
     // to 256 without comment, let's truncate here as well.
+    // PCC 1.x also causes strings >2G to be misinterpreted. Thus, truncate at 2G.
     // To all those guys with your 128G RAM, keep building big strings,
     // but you won't cause bad file formats to be written :)
-    if (sizeof(size_t) > sizeof(uint32_t)) {
-        converted.trim(0xFFFFFFFF);
-    }
+    converted.trim(0x7FFFFFFF);
 
     // \change We now always use Long String format.
     // PCC2 would have tried to use Short String format (Tag_String, PCC 1.0.8, January 2001) when saving a chart.cc file.
@@ -210,6 +209,7 @@ interpreter::SaveVisitor::save(afl::io::DataSink& out,
                                afl::charset::Charset& cs, SaveContext& ctx)
 {
     // ex IntDataSegment::save
+    // ex ccexpr.pas:CVariables.SaveToStream
     // Collect headers in one sink, aux data in another
     afl::io::InternalSink headers;
     afl::io::InternalSink aux;
@@ -277,6 +277,7 @@ void
 interpreter::SaveVisitor::saveNames(afl::io::DataSink& out, const afl::data::NameMap& names, size_t slots, afl::charset::Charset& cs)
 {
     // ex IntVariableNames::save
+    // ex ccexpr.pas:CNameList.SaveToStream
     size_t todo = std::min(slots, names.getNumNames());
     for (size_t i = 0; i < todo; ++i) {
         util::storePascalStringTruncate(out, names.getNameByIndex(i), cs);

@@ -179,12 +179,18 @@ bool
 client::map::MovementOverlay::handleMouse(gfx::Point pt, MouseButtons_t pressedButtons, const Renderer& ren)
 {
     if (!pressedButtons.empty()) {
+        bool dbl   = pressedButtons.contains(gfx::EventConsumer::DoubleClick);
         bool shift = pressedButtons.contains(gfx::EventConsumer::ShiftKey);
         bool ctrl  = pressedButtons.contains(gfx::EventConsumer::CtrlKey);
+        pressedButtons -= gfx::EventConsumer::DoubleClick;
         pressedButtons -= gfx::EventConsumer::ShiftKey;
         pressedButtons -= gfx::EventConsumer::CtrlKey;
 
-        if (pressedButtons == MouseButtons_t(gfx::EventConsumer::LeftButton)) {
+        if (dbl) {
+            if (m_valid) {
+                sig_doubleClick.raise(m_position);
+            }
+        } else if (pressedButtons == MouseButtons_t(gfx::EventConsumer::LeftButton)) {
             lockItem(ren.unscale(pt), true, ctrl, shift, ren);
         } else if (pressedButtons == MouseButtons_t(gfx::EventConsumer::RightButton)) {
             lockItem(ren.unscale(pt), false, ctrl, shift, ren);

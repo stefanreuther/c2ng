@@ -99,6 +99,7 @@ bool
 game::interface::HullContext::next()
 {
     // ex IntHullContext::next
+    // ex shipint.pas:CHullspecContext.Next
     if (const game::spec::Hull* h = m_shipList->hulls().findNext(m_number)) {
         m_number = h->getId();
         return true;
@@ -146,6 +147,7 @@ game::interface::HullContext::store(interpreter::TagNode& out, afl::io::DataSink
 game::interface::HullContext*
 game::interface::HullContext::create(int nr, Session& session)
 {
+    // ex shipint.pas:CreateHullspecContext
     // FIXME: this refuses creating a HullContext for nonexistant hulls.
     // Nu has discontinuous hull Ids. Should we allow creating them?
     game::spec::ShipList* list = session.getShipList().get();

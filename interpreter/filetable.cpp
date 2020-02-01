@@ -109,6 +109,7 @@ bool
 interpreter::FileTable::checkFileArg(size_t& fd, const afl::data::Value* arg, bool mustBeOpen)
 {
     // ex int/file.cc:checkFileArg
+    // ex fileint.pas:EvalFD
     // Check for null
     if (!arg) {
         return false;

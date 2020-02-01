@@ -4,6 +4,7 @@
   */
 
 #include "gfx/fontrequest.hpp"
+#include "afl/string/char.hpp"
 
 namespace {
     bool matchValue(gfx::FontRequest::Value_t requested, gfx::FontRequest::Value_t provided)
@@ -15,6 +16,23 @@ namespace {
             return r == p;
         } else {
             return true;
+        }
+    }
+
+    void parseString(gfx::FontRequest& req, afl::string::ConstStringMemory_t m)
+    {
+        while (const char* p = m.eat()) {
+            switch (afl::string::charToLower(*p)) {
+             case '+': req.addSize(+1);   break;
+             case '-': req.addSize(-1);   break;
+             case 'b': req.addWeight(+1); break;
+             case 'l': req.addWeight(-1); break;
+             case 'i': req.setSlant(1);   break;
+             case 'u': req.setSlant(0);   break;
+             case 'f': req.setStyle(1);   break;
+             case 'p': req.setStyle(0);   break;
+             default:                     break;
+            }
         }
     }
 }
@@ -33,6 +51,24 @@ gfx::FontRequest::FontRequest()
 //       m_slant(),
 //       m_style()
 // { }
+
+gfx::FontRequest::FontRequest(const char* str)
+    : m_size(0),
+      m_weight(0),
+      m_slant(0),
+      m_style(0)
+{
+    parse(str);
+}
+
+gfx::FontRequest::FontRequest(const String_t& str)
+    : m_size(0),
+      m_weight(0),
+      m_slant(0),
+      m_style(0)
+{
+    parse(str);
+}
 
 // Add size.
 gfx::FontRequest&
@@ -79,6 +115,22 @@ gfx::FontRequest&
 gfx::FontRequest::setStyle(Value_t n)
 {
     m_style = n;
+    return *this;
+}
+
+// Parse request string.
+gfx::FontRequest&
+gfx::FontRequest::parse(const char* str)
+{
+    parseString(*this, afl::string::toMemory(str));
+    return *this;
+}
+
+// Parse request string.
+gfx::FontRequest&
+gfx::FontRequest::parse(const String_t& str)
+{
+    parseString(*this, afl::string::toMemory(str));
     return *this;
 }
 

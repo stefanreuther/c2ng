@@ -25,6 +25,11 @@ class TestServerErrors : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestServerPorts : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
 class TestServerTypes : public CxxTest::TestSuite {
  public:
     void testToInteger();

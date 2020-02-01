@@ -31,6 +31,7 @@ game::interface::callMinefieldMethod(game::map::Minefield& mf, MinefieldMethod i
 
            After this command, all properties of the current minefield will yield EMPTY.
            @since PCC 1.0.12, PCC2 1.99.17, PCC2 2.40.1 */
+        // ex values.pas:Minefield_Delete
         args.checkArgumentCount(0);
         univ.minefields().erase(mf.getId());
         break;

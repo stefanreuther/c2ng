@@ -22,6 +22,19 @@ namespace game { namespace actions {
         but you can build more than you have money for (to compute the price). */
     class BuildStructures {
      public:
+        /** Description of a building.
+            \see describe(PlanetaryBuilding) */
+        struct Description {
+            /** Name of building (untranslated). */
+            const char*const untranslatedBuildingName;
+
+            /** Building cost in human-readable form (untranslated). */
+            const char*const untranslatedBuildingCost;
+
+            /** Name of image resource. */
+            const char*const imageName;
+        };
+
         /** Constructor.
             The action starts out with no modification.
             Call setUndoInformation() if you intend to scrap buildings.
@@ -73,9 +86,19 @@ namespace game { namespace actions {
         int getMinBuildings(PlanetaryBuilding type) const;
 
         /** Get maximum number of buildings permitted in this transaction.
+            This limit can be higher than getMaxBuildingsRuleLimit() if the planet started out with more
+            buildings than currently permitted, because colonists have been removed.
+            The current number of buildings never exceeds this limit.
             \param type building type
             \return limit */
         int getMaxBuildings(PlanetaryBuilding type) const;
+
+        /** Get maximum number of buildings according to rules.
+            This is the limit you want to show to users.
+            The current number of buildings can be more than this.
+            \param type building type
+            \return limit */
+        int getMaxBuildingsRuleLimit(PlanetaryBuilding type) const;
 
         /** Get current target number of buildings.
             \param type building type
@@ -95,6 +118,16 @@ namespace game { namespace actions {
         /** Access underlying CargoCostAction.
             \return CargoCostAction */
         const CargoCostAction& costAction() const;
+
+        /** Access underlying planet.
+            \return planet */
+        const game::map::Planet& planet() const;
+
+        /** Describe a building type.
+            Provides information usable for presenting the building to users.
+            \param building Type
+            \return description */
+        static const Description& describe(PlanetaryBuilding building);
 
         /** Signal: change.
             Called when anything in this transaction changes. */
@@ -117,9 +150,14 @@ namespace game { namespace actions {
         afl::base::SignalConnection m_planetChangeConnection;
         afl::base::SignalConnection m_costChangeConnection;
 
+        class Deferer;
+        int m_deferLevel;
+        bool m_notificationNeeded;
+
         void updateUpperLimits();
         void updateCost();
         void updatePlanet();
+        void notifyListeners();
     };
 
 } }

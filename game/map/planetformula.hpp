@@ -45,7 +45,7 @@ namespace game { namespace map {
     NegativeProperty_t getNativeChange(const Planet& pl, const HostVersion& host, int tax, int mifa);
     NegativeProperty_t getNativeChange(const Planet& pl, const HostVersion& host);
     LongProperty_t     getNativeDue(const Planet& pl, const game::config::HostConfiguration& config, const HostVersion& host, int tax);
-    LongProperty_t     getNativeDue(int tax, int race, int gov, int32_t pop, int owner, const game::config::HostConfiguration& config, const HostVersion& host);
+    int32_t            getNativeDue(int tax, int race, int gov, int32_t pop, int owner, const game::config::HostConfiguration& config, const HostVersion& host);
     LongProperty_t     getNativeDueLimited(const Planet& pl, const game::config::HostConfiguration& config, const HostVersion& host, int tax, int32_t rem_inc);
     IntegerProperty_t  getNativeSafeTax(const Planet& pl, const game::config::HostConfiguration& config, const HostVersion& host, int mifa);
     IntegerProperty_t  getNativeBaseTax(const Planet& pl, const game::config::HostConfiguration& config, const HostVersion& host, int happyTarget);
@@ -59,6 +59,7 @@ namespace game { namespace map {
      *  Mining formulas
      */
     IntegerProperty_t  getMiningCapacity(const Planet& pl, const game::config::HostConfiguration& config, const HostVersion& host, Element::Type type, int mines);
+    IntegerProperty_t  getSensorVisibility(const Planet& pl, const game::config::HostConfiguration& config, const HostVersion& host);
 
 
     /*

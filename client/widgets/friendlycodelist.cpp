@@ -77,6 +77,7 @@ void
 client::widgets::FriendlyCodeList::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state)
 {
     // ex WFCodeListbox::drawPart
+    // ex fcode.pas:CFCodeListbox.DrawPart
     afl::base::Deleter del;
     gfx::Context<util::SkinColor::Color> ctx(can, getColorScheme());
     ctx.useFont(*m_root.provider().getFont(gfx::FontRequest()));

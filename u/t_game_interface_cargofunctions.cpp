@@ -433,5 +433,29 @@ TestGameInterfaceCargoFunctions::testCSub()
         seg.pushBackString("3T");
         CF_ASSERT_STRING(game::interface::IFCSub(session, args), "4T");
     }
+
+    // CSub("10$", "5S") = "-5S 100$"
+    {
+        afl::data::Segment seg;
+        seg.pushBackString("10$");
+        seg.pushBackString("5S");
+        CF_ASSERT_STRING(game::interface::IFCSub(session, args), "-5S 10$");
+    }
+
+    // CSub("10S", "5$") = "5S"
+    {
+        afl::data::Segment seg;
+        seg.pushBackString("10S");
+        seg.pushBackString("5$");
+        CF_ASSERT_STRING(game::interface::IFCSub(session, args), "5S");
+    }
+
+    // CSub("-5S", "3$") = "-5S -3$"
+    {
+        afl::data::Segment seg;
+        seg.pushBackString("-5S");
+        seg.pushBackString("3$");
+        CF_ASSERT_STRING(game::interface::IFCSub(session, args), "-5S -3$");
+    }
 }
 

@@ -109,6 +109,7 @@ game::interface::IonStormContext::get(PropertyIndex_t index)
 bool
 game::interface::IonStormContext::next()
 {
+    // ex values.pas:CIonContext.Next
     if (int id = m_game->currentTurn().universe().ionStormType().findNextIndex(m_id)) {
         m_id = id;
         return true;
@@ -155,6 +156,7 @@ game::interface::IonStormContext::store(interpreter::TagNode& out, afl::io::Data
 game::interface::IonStormContext*
 game::interface::IonStormContext::create(int id, Session& session)
 {
+    // ex values.pas:CreateStormContext
     Game* game = session.getGame().get();
     if (game != 0 && game->currentTurn().universe().ionStorms().get(id) != 0) {
         return new IonStormContext(id, session, *game);

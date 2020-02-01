@@ -667,7 +667,7 @@ void
 ConsoleMgrepApplication::help()
 {
     afl::io::TextWriter& out = standardOutput();
-    out.writeLine(Format(_("PCC2 Message Search v%s - (c) 2011-2019 Stefan Reuther").c_str(), PCC2_VERSION));
+    out.writeLine(Format(_("PCC2 Message Search v%s - (c) 2011-2020 Stefan Reuther").c_str(), PCC2_VERSION));
     out.writeLine();
     out.writeLine(Format(_("Usage:\n"
                            "  %s [-h]\n"

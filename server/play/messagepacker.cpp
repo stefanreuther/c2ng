@@ -32,7 +32,7 @@ server::play::MessagePacker::buildValue() const
     game::PlayerList& pl = r.playerList();
 
     // Validate number
-    if (m_index <= 0 || size_t(m_index) >= inbox.getNumMessages()) {
+    if (m_index <= 0 || size_t(m_index) > inbox.getNumMessages()) {
         throw std::runtime_error(ITEM_NOT_FOUND);
     }
     size_t realIndex = size_t(m_index - 1);

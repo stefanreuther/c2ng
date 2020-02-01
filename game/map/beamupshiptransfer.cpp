@@ -25,6 +25,7 @@
 #include "game/v3/command.hpp"
 #include "game/v3/commandcontainer.hpp"
 #include "game/v3/commandextra.hpp"
+#include "game/map/reverter.hpp"
 
 namespace {
     using game::v3::Command;
@@ -129,23 +130,25 @@ game::map::BeamUpShipTransfer::commit()
             cc->removeCommand(Command::phc_Beamup, m_ship.getId());
         }
         if (m_ship.getMission().orElse(0) == missionNumber) {
-            // FIXME: implement "reset mission to previous value"
-            //         /* Ship has mission "Beam up multiple". Try to set it away */
-            //         const GShip& oldShip = trn.getPreviousUniverse().getShip(sid);
-            //         if (oldShip.getShipKind() != GShip::CurrentShip
-            //             || oldShip.getMission() == bumMission
-            //             || !setFleetMission(trn.getCurrentUniverse(), sid,
-            //                                 oldShip.getMission(),
-            //                                 oldShip.getInterceptId(),
-            //                                 oldShip.getTowId()))
-            //         {
-            //             /* oldShip is not a current ship (should not happen),
-            //                it also has a "Beam up multiple" mission,
-            //                or resetting failed (maybe because the ship started
-            //                the turn with Intercept and is now member of a fleet),
-            //                so clear it. */
-            FleetMember(m_turn.universe(), m_ship).setMission(0, 0, 0, m_config, m_shipList);
-            //         }
+            // Reset to previous mission.
+            // If the ship had a different mission at the beginning of the turn, and that was not "beam up multiple", use that.
+            bool resetOK = false;
+            if (Reverter* pRev = m_turn.universe().getReverter()) {
+                int m, i, t;
+                if (pRev->getPreviousShipMission(m_ship.getId(), m, i, t)) {
+                    if (m != missionNumber) {
+                        // No need to handle setMission() failure. If it fails, there's nothing we can do.
+                        // However, if this is a blocked fleet member, it shouldn't have mission "beam up multiple" in the first place.
+                        FleetMember(m_turn.universe(), m_ship).setMission(m, i, t, m_config, m_shipList);
+                        resetOK = true;
+                    }
+                }
+            }
+
+            // If mission was not reset above, clear it to "none".
+            if (!resetOK) {
+                FleetMember(m_turn.universe(), m_ship).setMission(0, 0, 0, m_config, m_shipList);
+            }
         }
     } else {
         CommandExtra::create(m_turn).create(shipOwner).addCommand(Command::phc_Beamup, m_ship.getId(), cs.toPHostString());

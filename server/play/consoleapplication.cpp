@@ -6,26 +6,27 @@
 #include "afl/charset/charset.hpp"
 #include "afl/charset/codepage.hpp"
 #include "afl/charset/codepagecharset.hpp"
+#include "afl/io/nullfilesystem.hpp"
 #include "afl/net/line/linesink.hpp"
 #include "afl/string/format.hpp"
 #include "afl/string/parse.hpp"
 #include "afl/sys/standardcommandlineparser.hpp"
-#include "game/limits.hpp"
-#include "server/interface/gameaccess.hpp"
-#include "server/interface/gameaccessserver.hpp"
-#include "util/charsetfactory.hpp"
-#include "util/string.hpp"
-#include "version.hpp"
-#include "game/session.hpp"
-#include "afl/io/nullfilesystem.hpp"
-#include "util/messagecollector.hpp"
-#include "util/profiledirectory.hpp"
-#include "game/v3/rootloader.hpp"
-#include "game/turnloader.hpp"
 #include "game/game.hpp"
+#include "game/limits.hpp"
+#include "game/session.hpp"
 #include "game/specificationloader.hpp"
 #include "game/turn.hpp"
+#include "game/turnloader.hpp"
+#include "game/v3/rootloader.hpp"
+#include "server/interface/gameaccess.hpp"
+#include "server/interface/gameaccessserver.hpp"
 #include "server/play/gameaccess.hpp"
+#include "server/play/mainpacker.hpp"
+#include "util/charsetfactory.hpp"
+#include "util/messagecollector.hpp"
+#include "util/profiledirectory.hpp"
+#include "util/string.hpp"
+#include "version.hpp"
 
 using afl::string::Format;
 
@@ -160,6 +161,9 @@ server::play::ConsoleApplication::appMain()
                                                             *session.getShipList(),
                                                             tx, session.log());
 
+    // Store properties in session
+    getSessionProperties(session) = m_properties;
+
     // Interact
     class Sink : public afl::net::line::LineSink {
      public:
@@ -175,7 +179,7 @@ server::play::ConsoleApplication::appMain()
     afl::base::Ref<afl::io::TextReader> reader = environment().attachTextReader(afl::sys::Environment::Input);
 
     Sink sink(standardOutput());
-    GameAccess impl(session, logCollector, m_properties);
+    GameAccess impl(session, logCollector);
     server::interface::GameAccessServer server(impl);
     bool stop = server.handleOpening(sink);
     while (!stop) {
@@ -203,7 +207,7 @@ server::play::ConsoleApplication::help()
                                "-Dkey=value\tDefine a property\n"));
 
     afl::io::TextWriter& out = standardOutput();
-    out.writeLine(Format(tx("PCC2 Play Server v%s - (c) 2019 Stefan Reuther").c_str(), PCC2_VERSION));
+    out.writeLine(Format(tx("PCC2 Play Server v%s - (c) 2019-2020 Stefan Reuther").c_str(), PCC2_VERSION));
     out.writeLine();
     out.writeLine(Format(tx("Usage:\n"
                             "  %s [-h]\n"

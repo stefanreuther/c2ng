@@ -22,5 +22,9 @@ TestUtilKeyString::testIt()
     util::KeyString test3(String_t("No"));
     TS_ASSERT_EQUALS(test3.getKey(), util::Key_t('n'));
     TS_ASSERT_EQUALS(test3.getString(), "No");
+
+    util::KeyString test4("ha", util::Key_F7);
+    TS_ASSERT_EQUALS(test4.getKey(), util::Key_F7);
+    TS_ASSERT_EQUALS(test4.getString(), "ha");
 }
 

@@ -36,6 +36,7 @@
 #include "ui/widgets/panel.hpp"
 #include "util/slaveobject.hpp"
 #include "game/interface/taskeditorcontext.hpp"
+#include "client/map/waypointoverlay.hpp"
 
 using interpreter::makeBooleanValue;
 using interpreter::makeIntegerValue;
@@ -167,34 +168,50 @@ class client::screens::ControlScreen::ContextProvider : public client::si::Conte
 class client::screens::ControlScreen::Updater : public client::proxy::ObjectListener {
  public:
     Updater(util::RequestSender<ControlScreen> reply)
-        : m_reply(reply)
+        : m_reply(reply),
+          m_lastObject(0),
+          m_lastPosition()
         { }
     virtual void handle(game::Session&, game::map::Object* obj)
         {
-            if (game::map::MapObject* mo = dynamic_cast<game::map::MapObject*>(obj)) {
-                Point pt;
-                bool hasPosition = mo->getPosition(pt);
-                
+            game::map::MapObject* mo = dynamic_cast<game::map::MapObject*>(obj);
+
+            Point pt;
+            bool hasPosition = mo != 0 && mo->getPosition(pt);
+
+            if (mo != 0 && (mo != m_lastObject || pt != m_lastPosition)) {
+                Point target;
+                game::map::Ship* pShip = dynamic_cast<game::map::Ship*>(mo);
+                if (pShip == 0 || !pShip->getWaypoint().get(target)) {
+                    target = pt;
+                }
+
                 class Req : public util::Request<ControlScreen> {
                  public:
-                    Req(bool hasPosition, Point pt, game::Id_t id)
-                        : m_hasPosition(hasPosition), m_point(pt), m_id(id)
+                    Req(bool hasPosition, Point pt, Point target, game::Id_t id)
+                        : m_hasPosition(hasPosition), m_point(pt), m_target(target), m_id(id)
                         { }
                     virtual void handle(ControlScreen& cs)
                         {
                             cs.setId(m_id);
-                            cs.setPositions(m_point, m_point);
+                            cs.setPositions(m_point, m_target);
                         }
                  private:
                     bool m_hasPosition;
                     Point m_point;
+                    Point m_target;
                     game::Id_t m_id;
                 };
-                m_reply.postNewRequest(new Req(hasPosition, pt, mo->getId()));
+
+                m_reply.postNewRequest(new Req(hasPosition, pt, target, mo->getId()));
+                m_lastPosition = pt;
+                m_lastObject = mo;
             }
         }
  private:
     util::RequestSender<ControlScreen> m_reply;
+    game::map::MapObject* m_lastObject;
+    Point m_lastPosition;
 };
 
 
@@ -430,6 +447,12 @@ client::screens::ControlScreen::run(client::si::InputState& in, client::si::Outp
     m_mapWidget.addOverlay(m_scannerOverlay);
     m_mapWidget.addOverlay(m_movementOverlay);
     m_mapWidget.addOverlay(m_minefieldOverlay);
+
+    {
+        client::map::WaypointOverlay& wo = m_deleter.addNew(new client::map::WaypointOverlay(root));
+        m_mapWidget.addOverlay(wo);
+        wo.attach(oop);
+    }
 
     m_movementOverlay.sig_move.add(this, &ControlScreen::onScannerMove);
 

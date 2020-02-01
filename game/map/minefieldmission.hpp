@@ -22,6 +22,12 @@ namespace game { namespace map {
                              const Root& root,
                              const UnitScoreDefinitionList& shipScores,
                              const game::spec::ShipList& shipList);
+        bool checkLayMission(const Ship& ship, const Universe& univ,
+                             const HostVersion& hostVersion,
+                             const RegistrationKey& key,
+                             const game::config::HostConfiguration& config,
+                             const UnitScoreDefinitionList& shipScores,
+                             const game::spec::ShipList& shipList);
         bool checkScoopMission(const Ship& ship,
                                const Root& root,
                                const UnitScoreDefinitionList& shipScores,

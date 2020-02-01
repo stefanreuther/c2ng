@@ -126,6 +126,7 @@ bool
 util::parseKey(String_t str, Key_t& result)
 {
     // ex int/keymap.h:parseKey
+    // ex keymaps.pas:ParseKeycode
     // Upcase it
     str = afl::string::strUCase(str);
 

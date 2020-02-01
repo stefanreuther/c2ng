@@ -6,6 +6,9 @@
 #include "game/hostversion.hpp"
 #include "afl/string/format.hpp"
 #include "game/limits.hpp"
+#include "util/math.hpp"
+
+using game::config::HostConfiguration;
 
 namespace {
     String_t formatVersion(String_t hostName, int32_t version, bool host)
@@ -249,6 +252,7 @@ bool
 game::HostVersion::isExactHyperjumpDistance2(int32_t distSquared) const
 {
     // ex GHost::isExactHyperjumpDistance2
+    // ex shipacc.pas:IsExactHyperjump
     if (m_kind != PHost && m_version < MKVERSION(3,20,0)) {
         // These hosts do waypoint trimming, so all jumps are inexact.
         // FIXME: PCC 1.x additionally tests for Dosplan TRN format
@@ -301,6 +305,7 @@ bool
 game::HostVersion::isPBPGame(const game::config::HostConfiguration& config) const
 {
     // ex GHost::isPBPGame
+    // ex pconfig.pas:IsPBPGame
     return m_kind != PHost
         || afl::string::strCaseCompare(config[config.BuildQueue]().substr(0, 3), "pbp") == 0;
 }
@@ -309,6 +314,7 @@ game::HostVersion::isPBPGame(const game::config::HostConfiguration& config) cons
 bool
 game::HostVersion::isEugeneGame(const game::config::HostConfiguration& config) const
 {
+    // ex pconfig.pas:IsEugeneGame
     return m_kind == PHost
         && (config.getPlayersWhereEnabled(config.FuelUsagePerFightFor100KT).nonempty()
             || config.getPlayersWhereEnabled(config.FuelUsagePerTurnFor100KT).nonempty());
@@ -340,39 +346,106 @@ game::HostVersion::hasExtendedMissions(const game::config::HostConfiguration& co
 bool
 game::HostVersion::hasAccurateFuelModelBug() const
 {
-    return (m_version < MKVERSION(3,4,8))
-        || (m_version >= MKVERSION(4,0,0)
-            && m_version < MKVERSION(4,0,5));
+    return m_kind == PHost
+        && ((m_version < MKVERSION(3,4,8))
+            || (m_version >= MKVERSION(4,0,0)
+                && m_version < MKVERSION(4,0,5)));
 }
 
+// Check for alchemy combination function support.
+bool
+game::HostVersion::hasAlchemyCombinations() const
+{
+    return m_kind == PHost
+        && (m_version >= MKVERSION(4,0,9)              // 4.0i
+            || (m_version < MKVERSION(4,0,0)
+                && m_version >= MKVERSION(3,4,11)));   // 3.4k
+}
 
-// FIXME: delete or move elsewhere
-// /** Finish loading. This will fill in information that is still
-//     missing.
-//     - for THost, guess version number from HConfig size. */
-// void
-// GHost::finish()
-// {
-//     if (!m_version) {
-//         if (isTHost()) {
-//             if (hconfig_size > 338)
-//                 m_version = MKVERSION(3,22,36);
-//             else if (hconfig_size > 336)
-//                 m_version = MKVERSION(3,22,22);
-//             else if (hconfig_size > 302)
-//                 m_version = MKVERSION(3,20,0);
-//             else if (hconfig_size > 298)
-//                 m_version = MKVERSION(3,13,2);
-//             else if (hconfig_size > 288)
-//                 m_version = MKVERSION(3,12,3);
-//             else if (hconfig_size > 186)
-//                 m_version = MKVERSION(3,11,1);
-//             else if (hconfig_size > 10)
-//                 m_version = MKVERSION(3,10,0); // 3.10 (?)
-//             else
-//                 m_version = MKVERSION(3,0,0);
-//         } else {
-//             m_version = MKVERSION(3,4,0);
-//         }
-//     }
-// }
+// Check for refinery friendly code support.
+bool
+game::HostVersion::hasRefineryFCodes() const
+{
+    return m_kind == PHost
+        && (m_version >= MKVERSION(4,0,11)             // 4.0k
+            || (m_version < MKVERSION(4,0,0)
+                && m_version >= MKVERSION(3,4,13)));   // 3.4m
+}
+
+// Check for alchemy exclusion friendly codes ("naX"). */
+bool
+game::HostVersion::hasAlchemyExclusionFCodes() const
+{
+    return m_kind == PHost;
+}
+
+// Check for rounding in "alX" alchemy.
+bool
+game::HostVersion::isAlchemyRounding() const
+{
+    // Don't know about NuHost, but let's assume they don't emulate this.
+    return m_kind == Host
+        || m_kind == SRace;
+}
+
+// Check for valid chunnel distance.
+bool
+game::HostVersion::isValidChunnelDistance2(int32_t dist2, const game::config::HostConfiguration& config) const
+{
+    if (m_kind == PHost) {
+        // PHost comparison is "Trunc(Sqrt(dist2)) >= MCD". i.e. "Sqrt(dist2) >= MCD".
+        return dist2 >= util::squareInteger(config[config.MinimumChunnelDistance]());
+    } else {
+        // Host comparison is "ERND(Sqrt(dist2)) >= 100", i.e. "Sqrt(dist2) >= 99.5"
+        // Host bug: up to 3.22.25, host forgot the Sqrt() and compares "dist2 >= 100", making the limit 10 ly; however, it has always been documented as 100 ly.
+        return dist2 >= 9901;
+    }
+}
+
+// Get minimum fuel to initiate a chunnel.
+int
+game::HostVersion::getMinimumFuelToInitiateChunnel() const
+{
+    if (m_kind == PHost) {
+        return 51;
+    } else {
+        return 50;
+    }
+}
+
+// Set configuration options implied by this host version.
+void
+game::HostVersion::setImpliedHostConfiguration(game::config::HostConfiguration& config)
+{
+    switch (m_kind) {
+     case Unknown:
+     case Host:
+     case SRace:
+     case NuHost:
+        // pconfig.pas:GetMaxDefenseOnBase
+        config[HostConfiguration::MaximumDefenseOnBase].set(200);
+
+        // pconfig.pas:GetMaxFightersOnBase
+        config[HostConfiguration::MaximumFightersOnBase].set(60);
+
+        // pconfig.pas:GetShipFighterCost
+        config[HostConfiguration::ShipFighterCost].set("T3 M2 S5");
+
+        // pconfig.pas:GetFighterCost
+        config[HostConfiguration::BaseFighterCost].set("T3 M2 $100");
+
+        // pconfig.pas:GetBaseCost
+        config[HostConfiguration::StarbaseCost].set("T402 D120 M340 $900");
+
+        // pconfig.pas:IsShowCommandAvailable
+        config[HostConfiguration::CPEnableShow].set(false);
+        break;
+
+     case PHost:
+        // pconfig.pas:IsShowCommandAvailable
+        if (m_version < MKVERSION(4,0,8)) {
+            config[HostConfiguration::CPEnableShow].set(false);
+        }
+        break;
+    }
+}

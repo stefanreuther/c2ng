@@ -7,6 +7,13 @@
 
 #include <cxxtest/TestSuite.h>
 
+class TestGameAuthCache : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testMulti();
+    void testFail();
+};
+
 class TestGameBattleOrderRule : public CxxTest::TestSuite {
  public:
     void testGetShipBattleOrder();
@@ -33,6 +40,7 @@ class TestGameCargoSpec : public CxxTest::TestSuite {
     void testDivide1();
     void testDivide2();
     void testToString();
+    void testSellSuppliesIfNeeded();
 };
 
 class TestGameElement : public CxxTest::TestSuite {
@@ -93,9 +101,15 @@ class TestGameHostVersion : public CxxTest::TestSuite {
     void testAccessor();
     void testVersion();
     void testProperties();
+    void testSetImpliedHostConfiguration();
 };
 
 class TestGameInterpreterInterface : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
+class TestGameLimits : public CxxTest::TestSuite {
  public:
     void testIt();
 };

@@ -1,5 +1,6 @@
 /**
   *  \file game/map/movementpredictor.hpp
+  *  \brief Class game::map::MovementPredictor
   */
 #ifndef C2NG_GAME_MAP_MOVEMENTPREDICTOR_HPP
 #define C2NG_GAME_MAP_MOVEMENTPREDICTOR_HPP
@@ -18,19 +19,47 @@ namespace game { namespace map {
     class Ship;
     class ShipPredictor;
 
+    /** Movement prediction for universe-at-once.
+        Resolves intercept and tow missions and computes movement for all ships in the proper order.
+        Internally, uses ShipPredictor to resolve the individual ships. */
     class MovementPredictor {
      public:
+        /** Shortcut type name. */
         typedef game::spec::Cost Cargo_t;
 
+        /** Default constructor.
+            Makes blank object.
+            Call computeMovement() to fill it in. */
         MovementPredictor();
+
+        /** Destructor. */
         ~MovementPredictor();
 
+        /** Compute one turn of movement.
+            Populates all predicted position and cargo information.
+            \param univ     Universe to start with
+            \param game     Game (required for shipScores)
+            \param shipList Ship list
+            \param root     Root (required for hostConfiguration, hostVersion, registrationKey) */
         void computeMovement(const Universe& univ,
                              const Game& game,
                              const game::spec::ShipList& shipList,
                              const Root& root);
 
+        /** Get ship position.
+            Call after computeMovement().
+            \param [in]  sid  Ship Id
+            \param [out] out  Position
+            \retval true success
+            \retval false ship position not known, \c out not set */
         bool getShipPosition(Id_t sid, Point& out) const;
+
+        /** Get ship cargo.
+            Call after computeMovement().
+            \param [in]  sid  Ship Id
+            \param [out] out  Cargo
+            \retval true success
+            \retval false ship position not known, \c out not set */
         bool getShipCargo(Id_t sid, Cargo_t& out) const;
 
      private:

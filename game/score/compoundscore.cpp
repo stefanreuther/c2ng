@@ -33,6 +33,7 @@ game::score::CompoundScore::CompoundScore(const TurnScoreList& list, DefaultScor
         break;
 
      case TimScore:
+        // ex accessor.pas:Score (sort-of)
         add(list, ScoreId_Freighters, 1);
         add(list, ScoreId_Capital, 10);
         add(list, ScoreId_Planets, 10);

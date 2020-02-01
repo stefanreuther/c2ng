@@ -1,25 +1,26 @@
 /**
   *  \file interpreter/expr/builtinfunction.cpp
+  *  \brief Code Generation for Builtin Functions
   */
 
 #include <cassert>
 #include <climits>
 #include "interpreter/expr/builtinfunction.hpp"
-#include "interpreter/expr/functioncallnode.hpp"
-#include "interpreter/opcode.hpp"
-#include "interpreter/unaryoperation.hpp"
-#include "interpreter/binaryoperation.hpp"
 #include "afl/base/countof.hpp"
-#include "interpreter/error.hpp"
 #include "afl/data/stringvalue.hpp"
+#include "interpreter/binaryoperation.hpp"
+#include "interpreter/error.hpp"
+#include "interpreter/expr/functioncallnode.hpp"
 #include "interpreter/expr/identifiernode.hpp"
 #include "interpreter/expr/literalnode.hpp"
+#include "interpreter/opcode.hpp"
+#include "interpreter/unaryoperation.hpp"
 
-using interpreter::expr::FunctionCallNode;
-using interpreter::CompilationContext;
 using interpreter::BytecodeObject;
+using interpreter::CompilationContext;
 using interpreter::Opcode;
 using interpreter::expr::BuiltinFunctionDescriptor;
+using interpreter::expr::FunctionCallNode;
 
 namespace {
     enum {
@@ -167,6 +168,23 @@ namespace {
             { defaultCompileEffect(bco, cc); }
         void compileCondition(BytecodeObject& bco, const CompilationContext& cc, BytecodeObject::Label_t ift, BytecodeObject::Label_t iff)
             { defaultCompileCondition(bco, cc, ift, iff); }
+    };
+
+    /** "ByName" function. The first argument of this function is a
+        keymap, not an expression. */
+    class IntByNameFunctionCallNode : public FunctionCallNode {
+     public:
+        void compileValue(BytecodeObject& /*bco*/, const CompilationContext& /*cc*/)
+            { throw interpreter::Error("\"ByName\" not allowed here"); }
+        void compileEffect(BytecodeObject& /*bco*/, const CompilationContext& /*cc*/)
+            { throw interpreter::Error("\"ByName\" not allowed here"); }
+        void compileCondition(BytecodeObject& /*bco*/, const CompilationContext& /*cc*/, BytecodeObject::Label_t /*ift*/, BytecodeObject::Label_t /*iff*/)
+            { throw interpreter::Error("\"ByName\" not allowed here"); }
+        void compileName(BytecodeObject& bco, const CompilationContext& cc)
+            {
+                args[0]->compileValue(bco, cc);
+                bco.addInstruction(Opcode::maUnary, interpreter::unUCase, 0);
+            }
     };
 
     /** "Eval" function. This unary function evaluates its string
@@ -350,6 +368,7 @@ compileFCValue(BytecodeObject& bco, const CompilationContext& cc, uint8_t which,
 void
 IntFindFunctionCallNode::compileValue(BytecodeObject& bco, const CompilationContext& cc)
 {
+    // ex ccexpr.pas:find_func (sort-of)
     //     <array>
     //     firstindex
     //     jfep 2F
@@ -398,6 +417,7 @@ IntFindFunctionCallNode::compileValue(BytecodeObject& bco, const CompilationCont
 void
 IntCountFunctionCallNode::compileValue(BytecodeObject& bco, const CompilationContext& cc)
 {
+    // ex ccexpr.pas:count_func (sort-of)
     //     pushint 0
     //     <array>
     //     firstindex
@@ -483,14 +503,18 @@ IntStrCaseFunctionCallNode::compileValue(BytecodeObject& bco, const CompilationC
 void
 IntKeyFunctionCallNode::compileValue(BytecodeObject& bco, const CompilationContext& cc)
 {
-    interpreter::expr::IdentifierNode* id = dynamic_cast<interpreter::expr::IdentifierNode*>(args[0]);
-    if (!id) {
+    // ex ccexpr.pas:op_KEY_func
+    // Push keymap
+    if (interpreter::expr::IdentifierNode* id = dynamic_cast<interpreter::expr::IdentifierNode*>(args[0])) {
+        // Keymap literal (classic)
+        afl::data::StringValue keymap(id->getIdentifier());
+        bco.addPushLiteral(&keymap);
+    } else if (IntByNameFunctionCallNode* bcn = dynamic_cast<IntByNameFunctionCallNode*>(args[0])) {
+        // ByName(xx) syntax
+        bcn->compileName(bco, cc);
+    } else {
         throw interpreter::Error::typeError(interpreter::Error::ExpectKeymap);
     }
-
-    // Push keymap
-    afl::data::StringValue keymap(id->getIdentifier());
-    bco.addPushLiteral(&keymap);
     bco.addInstruction(Opcode::maUnary, interpreter::unKeyLookup, 0);
 
     // Evaluate key
@@ -605,6 +629,12 @@ makeKey(const BuiltinFunctionDescriptor&)
 }
 
 static FunctionCallNode*
+makeByName(const BuiltinFunctionDescriptor&)
+{
+    return new IntByNameFunctionCallNode();
+}
+
+static FunctionCallNode*
 makeEval(const BuiltinFunctionDescriptor&)
 {
     return new IntEvalFunctionCallNode();
@@ -620,7 +650,7 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
     /* @q Abs(x:Num):Num (Elementary Function)
        Returns the absolute value of its argument.
        If the argument is EMPTY, returns EMPTY.
-       @since PCC2 1.99.8, PCC 0.98.3 */
+       @since PCC2 2.40, PCC2 1.99.8, PCC 0.98.3 */
     { "ABS",         1, 1,       makeBuiltin, interpreter::unAbs },
     // { "ARRAY",    0, INT_MAX, makeArray,   0 },
 
@@ -633,7 +663,7 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
        which can be an (almost) arbitrary non-negative integer.
        In previous versions, it returns the code in the extended ASCII set used as the game character set,
        which is in the range 0..255.
-       @since PCC2 1.99.8, PCC 0.98.5 */
+       @since PCC2 2.40, PCC2 1.99.8, PCC 0.98.5 */
     { "ASC",         1, 1,       makeBuiltin, interpreter::unAsc },
 
     /* @q ATan(x:Num, Optional y:Num):Num (Elementary Function)
@@ -653,7 +683,7 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
 
        If any parameter is EMPTY, or if both parameters are 0, returns EMPTY.
 
-       @since PCC2 1.99.8, PCC 0.98.3 */
+       @since PCC2 2.40, PCC2 1.99.8, PCC 0.98.3 */
     { "ATAN",        1, 2,       makeOneTwo,  interpreter::biATan },
 
     /* @q Atom(s:Str):Int (Elementary Function)
@@ -664,7 +694,7 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
 
        The empty string "" always maps to the atom 0.
        If the parameter is EMPTY, returns EMPTY.
-       @since PCC2 1.99.8, PCC 1.0.12 */
+       @since PCC2 2.40, PCC2 1.99.8, PCC 1.0.12 */
     { "ATOM",        1, 1,       makeBuiltin, interpreter::unAtom },
 
     /* @q AtomStr(n:Int):Str (Elementary Function)
@@ -672,7 +702,7 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
        This is the same string that was passed to Atom() when it returned %n.
 
        If the parameter is EMPTY, returns EMPTY.
-       @since PCC2 1.99.8, PCC 1.0.12 */
+       @since PCC2 2.40, PCC2 1.99.8, PCC 1.0.12 */
     { "ATOMSTR",     1, 1,       makeBuiltin, interpreter::unAtomStr },
 
     /* @q BitAnd(n:Int...):Int (Elementary Function)
@@ -680,7 +710,7 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
        All parameters must be integers; if one parameter is EMPTY, the result is EMPTY.
 
        @diff Whereas PCC2 allows any number of parameters, PCC 1.x has a limit of 6.
-       @since PCC2 1.99.8, PCC 1.1.17 */
+       @since PCC2 2.40, PCC2 1.99.8, PCC 1.1.17 */
     { "BITAND",      1, INT_MAX, makeFold,    interpreter::biBitAnd },
 
     /* @q BitNot(n:Int):Int (Elementary Function)
@@ -694,7 +724,7 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
        All parameters must be integers; if one parameter is EMPTY, the result is EMPTY.
 
        @diff Whereas PCC2 allows any number of parameters, PCC 1.x has a limit of 6.
-       @since PCC2 1.99.8, PCC 1.1.17 */
+       @since PCC2 2.40, PCC2 1.99.8, PCC 1.1.17 */
     { "BITOR",       1, INT_MAX, makeFold,    interpreter::biBitOr },
 
     /* @q BitXor(n:Int...):Int (Elementary Function)
@@ -702,8 +732,17 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
        All parameters must be integers; if one parameter is EMPTY, the result is EMPTY.
 
        @diff Whereas PCC2 allows any number of parameters, PCC 1.x has a limit of 6.
-       @since PCC2 1.99.8, PCC 1.1.17 */
+       @since PCC2 2.40, PCC2 1.99.8, PCC 1.1.17 */
     { "BITXOR",      1, INT_MAX, makeFold,    interpreter::biBitXor },
+
+    // BYNAME is a placeholder to
+    //   (a) permit the implementation of the KEY() function. Unlike the keymap/hook commands
+    //       that parse the identifier-or-byname syntax themselves (StatementCompiler::compileNameString),
+    //       KEY() will receive a fully-parsed expression tree and dissect that.
+    //       Instead of distinguishing between token sequences, it will look at the shape of the expression tree.
+    //   (b) refuse BYNAME at places where it does not belong
+    // BYNAME is documented in statementcompiler.cpp.
+    { "BYNAME",      1, 1,       makeByName,  0 },
 
     { "CC$TRACE",    1, 1,       makeBuiltin, interpreter::unTrace },
 
@@ -723,7 +762,7 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
        but fonts in codepage 866 (cyrillic) exist in the CCFonts package.
 
        If the parameter is EMPTY, returns EMPTY.
-       @since PCC2 1.99.8, PCC 0.98.5 */
+       @since PCC2 2.40, PCC2 1.99.8, PCC 0.98.5 */
     { "CHR",         1, 1,       makeBuiltin, interpreter::unChr },
     { "CHR$",        1, 1,       makeBuiltin, interpreter::unChr },
 
@@ -733,7 +772,7 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
        The result is a value between -1 and +1.
 
        If the parameter is EMPTY, returns EMPTY.
-       @since PCC2 1.99.8, PCC 0.98.3
+       @since PCC2 2.40, PCC2 1.99.8, PCC 0.98.3
        @see Sin, Tan */
     { "COS",         1, 1,       makeBuiltin, interpreter::unCos },
 
@@ -743,7 +782,7 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
        The expression %q is evaluated for each object, as if within a %ForEach loop,
        and the object is counted if it returns true.
        If %q is not specified, all objects are counted.
-       @since PCC2 1.99.9 */
+       @since PCC2 2.40, PCC2 1.99.9 */
     { "COUNT",       1, 2,       makeCount,   FC_Generic },
 
     /* @q CountPlanets(q:Expr):Int (Elementary Function)
@@ -751,7 +790,7 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
        The expression %q is evaluated for each planet, and the planet is counted if it returns true.
 
        This function is (almost) equivalent to <tt>Count(Planet, q)</tt>.
-       @since PCC2 1.99.9, PCC 1.0.11 */
+       @since PCC2 2.40, PCC2 1.99.9, PCC 1.0.11 */
     { "COUNTPLANETS",1, 1,       makeCount,   FC_Planet },
 
     /* @q CountShips(q:Expr):Int (Elementary Function)
@@ -759,7 +798,7 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
        The expression %q is evaluated for each ship, and the ship is counted if it returns true.
 
        This function is (almost) equivalent to <tt>Count(Ship, q)</tt>.
-       @since PCC2 1.99.9, PCC 1.0.11 */
+       @since PCC2 2.40, PCC2 1.99.9, PCC 1.0.11 */
     { "COUNTSHIPS",  1, 1,       makeCount,   FC_Ship },
 
     /* @q Dim(a:Array, Optional d:Int):Int (Elementary Function)
@@ -786,7 +825,7 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
        | For i:=1 To Dim(Ships) Do ...
        Better, however, is to use {ForEach}.
 
-       @since PCC2 1.99.12
+       @since PCC2 2.40, PCC2 1.99.12
        @see IsArray (Elementary Function), Dim (Elementary Command) */
     { "DIM",         1, 2,       makeOneTwo,  interpreter::biArrayDim },
 
@@ -797,8 +836,8 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
        If the second parameter is specified, the expression is evaluated in that context.
 
        If any parameter is EMPTY, returns EMPTY.
-       
-       @since PCC2 1.99.9
+
+       @since PCC2 2.40, PCC2 1.99.9
        @change The two-argument form is supported since PCC2 2.40.6.
        @see Eval (Elementary Command) */
     { "EVAL",        1, 2,       makeEval,    0 },
@@ -809,7 +848,7 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
        This is the inverse to the %Log function.
 
        If the parameter is EMPTY, returns EMPTY.
-       @since PCC2 1.99.8 */
+       @since PCC2 2.40, PCC2 1.99.8 */
     { "EXP",         1, 1,       makeBuiltin, interpreter::unExp },
 
     /* @q Find(a:Array, q:Expr, v:Expr):Any (Elementary Function)
@@ -818,7 +857,7 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
        The expression %q is evaluated for each object, as if within a %ForEach loop.
        If it returns true, the function returns %v evaluated in that object's context.
        If no object matches, the return value is EMPTY.
-       @since PCC2 1.99.9
+       @since PCC2 2.40, PCC2 1.99.9
        @see FindShip, FindPlanet */
     { "FIND",        3, 3,       makeFind,    FC_Generic },
 
@@ -829,7 +868,7 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
        If no planet matches, the return value is EMPTY.
 
        This function is (almost) equivalent to <tt>Find(Planet, q, Id)</tt>.
-       @since PCC2 1.99.9, PCC 1.0.11
+       @since PCC2 2.40, PCC2 1.99.9, PCC 1.0.11
        @see Find */
     { "FINDPLANET",  1, 1,       makeFind,    FC_Planet },
 
@@ -840,7 +879,7 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
        If no ship matches, the return value is EMPTY.
 
        This function is (almost) equivalent to <tt>Find(Ship, q, Id)</tt>.
-       @since PCC2 1.99.9, PCC 1.0.11
+       @since PCC2 2.40, PCC2 1.99.9, PCC 1.0.11
        @see Find */
     { "FINDSHIP",    1, 1,       makeFind,    FC_Ship },
 
@@ -863,7 +902,7 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
 
        If any parameter is EMPTY, this function returns EMPTY.
 
-       @since PCC2 1.99.8, PCC 1.0.17 */
+       @since PCC2 2.40, PCC2 1.99.8, PCC 1.0.17 */
     { "FIRST",       2, 2,       makeCase,    interpreter::biFirstStr },
 
     /* @q If(cond:Bool, yes:Expr, Optional no:Expr):Any (Elementary Function)
@@ -872,7 +911,7 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
        Otherwise, if the condition is false or EMPTY, evaluates %no and returns its value
        (and if %no is not specified, just returns EMPTY).
 
-       @since PCC2 1.99.8, PCC 0.98.5 */
+       @since PCC2 2.40, PCC2 1.99.8, PCC 0.98.5 */
     { "IF",          2, 3,       makeIf,      0 },
 
     /* @q InStr(haystack:Str, needle:Str):Str (Elementary Function)
@@ -892,7 +931,7 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
 
        If any parameter is EMPTY, this function returns EMPTY.
 
-       @since PCC2 1.99.8, PCC 0.99.2 */
+       @since PCC2 2.40, PCC2 1.99.8, PCC 0.99.2 */
     { "INSTR",       2, 2,       makeCase,    interpreter::biFindStr },
 
     /* @q Int(n:Num):Int (Elementary Function)
@@ -909,7 +948,7 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
 
        If the parameter is EMPTY, this function returns EMPTY.
 
-       @since PCC2 1.99.8, PCC 0.98.3
+       @since PCC2 2.40, PCC2 1.99.8, PCC 0.98.3
        @see Round */
     { "INT",         1, 1,       makeBuiltin, interpreter::unTrunc },
 
@@ -928,7 +967,7 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
        Since 1.99.22, this function also works for builtin arrays such as {Ship()}.
 
        @see Dim (Elementary Function)
-       @since PCC2 1.99.12 */
+       @since PCC2 2.40, PCC2 1.99.12 */
     { "ISARRAY",     1, 1,       makeBuiltin, interpreter::unIsArray },
 
     /* @q IsEmpty(a:Any):Bool (Elementary Function)
@@ -936,7 +975,7 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
        If the parameter is EMPTY, returns %True.
        Otherwise, returns %False.
 
-       @since PCC2 1.99.8, PCC 0.98.3 */
+       @since PCC2 2.40, PCC2 1.99.8, PCC 0.98.3 */
     { "ISEMPTY",     1, 1,       makeBuiltin, interpreter::unIsEmpty },
 
     /* @q IsNum(a:Any):Bool (Elementary Function)
@@ -947,14 +986,14 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
        @diff PCC 1.x returns False for Booleans.
        PCC2 returns True, since a Boolean can be used wherever a number is required.
 
-       @since PCC2 1.99.8, PCC 1.0.14 */
+       @since PCC2 2.40, PCC2 1.99.8, PCC 1.0.14 */
     { "ISNUM",       1, 1,       makeBuiltin, interpreter::unIsNum },
 
     /* @q IsString(a:Any):Bool (Elementary Function)
        Check for number.
        If the parameter is a string, returns True.
        Otherwise, returns False.
-       @since PCC2 1.99.8, PCC 1.0.14 */
+       @since PCC2 2.40, PCC2 1.99.8, PCC 1.0.14 */
     { "ISSTRING",    1, 1,       makeBuiltin, interpreter::unIsString },
 
     /* @q Key(k:Keymap, key:Str):Int (Elementary Function)
@@ -973,9 +1012,19 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
        @diff It is an error in PCC2 if the keymap does not exist.
        PCC 1.x just returns EMPTY in this case.
 
-       @since PCC2 1.99.9, PCC 1.1.10
+       @since PCC2 2.40, PCC2 1.99.9, PCC 1.1.10
        @see Bind */
     { "KEY",         2, 2,       makeKey,     0 },
+
+    /* @q LCase(s:Str):Str (Elementary Function)
+       Convert string to lower case.
+       Returns the string with all ASCII characters converted to lower-case.
+
+       If the parameter is EMPTY, returns EMPTY.
+
+       @since PCC2 2.40.8, PCC2 2.0.8
+       @see UCase */
+    { "LCASE",       1, 1,       makeBuiltin, interpreter::unLCase },
 
     /* @q Left(s:Str, n:Int):Str (Elementary Function)
        Get initial (left) part of a string.
@@ -984,13 +1033,13 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
        If any parameter is EMPTY, returns EMPTY.
        If %n is negative, returns an empty string.
 
-       @since PCC2 1.99.8, PCC 0.99.2 */
+       @since PCC2 2.40, PCC2 1.99.8, PCC 0.99.2 */
     { "LEFT",        2, 2,       makeBuiltin, interpreter::biRCut },
 
     /* @q Len(s:Str):Int (Elementary Function)
        Get length of string.
        Returns the number of characters within the string.
-       @since PCC2 1.99.8, PCC 0.98.5 */
+       @since PCC2 2.40, PCC2 1.99.8, PCC 0.98.5 */
     { "LEN",         1, 1,       makeBuiltin, interpreter::unLength },
 
     /* @q Log(n:Num):Num (Elementary Function)
@@ -1000,7 +1049,7 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
        This is the inverse to the %Exp function.
 
        If the parameter is EMPTY, returns EMPTY.
-       @since PCC2 1.99.8 */
+       @since PCC2 2.40, PCC2 1.99.8 */
     { "LOG",         1, 1,       makeBuiltin, interpreter::unLog },
 
     /* @q LTrim(s:Str):Str (Elementary Function)
@@ -1009,7 +1058,7 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
 
        If the parameter is EMPTY, returns EMPTY.
 
-       @since PCC2 1.99.8, PCC 0.99
+       @since PCC2 2.40, PCC2 1.99.8, PCC 0.99
        @see Trim, RTrim */
     { "LTRIM",       1, 1,       makeBuiltin, interpreter::unLTrim },
 
@@ -1022,7 +1071,7 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
        Use %StrCase to compare case-sensitive.
 
        @diff Whereas PCC2 allows any number of parameters, PCC 1.x has a limit of 6.
-       @since PCC2 1.99.8, PCC 1.0.7
+       @since PCC2 2.40, PCC2 1.99.8, PCC 1.0.7
        @see StrCase, Min */
     { "MAX",         1, INT_MAX, makeFold,    interpreter::biMax },
 
@@ -1033,7 +1082,7 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
 
        If any parameter is EMPTY, returns EMPTY.
 
-       @since PCC2 1.99.8, PCC 0.99.2
+       @since PCC2 2.40, PCC2 1.99.8, PCC 0.99.2
        @see RMid, Left, Right */
     { "MID",         2, 3,       makeMid,     0 },
 
@@ -1046,7 +1095,7 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
        Use %StrCase to compare case-sensitive.
 
        @diff Whereas PCC2 allows any number of parameters, PCC 1.x has a limit of 6.
-       @since PCC2 1.99.8, PCC 1.0.7
+       @since PCC2 2.40, PCC2 1.99.8, PCC 1.0.7
        @see StrCase, Max */
     { "MIN",         1, INT_MAX, makeFold,    interpreter::biMin },
 
@@ -1057,7 +1106,7 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
        Normally, hashes are created using {Dim|Dim ... As Hash},
        but this function remains available as a shortcut.
 
-       @since PCC2 1.99.15 */
+       @since PCC2 2.40, PCC2 1.99.15 */
     { "NEWHASH",     0, 0,       makeBuiltin, Opcode::miSpecialNewHash },
 
     /* @q Rest(delim:Str, list:Str):Str (Elementary Function)
@@ -1079,7 +1128,7 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
 
        If any parameter is EMPTY, this function returns EMPTY.
 
-       @since PCC2 1.99.8, PCC 1.0.17
+       @since PCC2 2.40, PCC2 1.99.8, PCC 1.0.17
        @see First */
     { "REST",        2, 2,       makeCase,    interpreter::biRestStr },
 
@@ -1090,7 +1139,7 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
        If any parameter is EMPTY, returns EMPTY.
        If %n is negative, returns an empty string.
 
-       @since PCC2 1.99.8, PCC 0.99.2 */
+       @since PCC2 2.40, PCC2 1.99.8, PCC 0.99.2 */
     { "RIGHT",       2, 2,       makeBuiltin, interpreter::biEndCut },
 
     /* @q Round(n:Num):Int (Elementary Function)
@@ -1108,7 +1157,7 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
 
        If the parameter is EMPTY, this function returns EMPTY.
 
-       @since PCC2 1.99.8, PCC 0.98.3
+       @since PCC2 2.40, PCC2 1.99.8, PCC 0.98.3
        @see Int */
     { "ROUND",       1, 1,       makeBuiltin, interpreter::unRound },
 
@@ -1118,7 +1167,7 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
 
        If the parameter is EMPTY, returns EMPTY.
 
-       @since PCC2 1.99.8, PCC 0.99
+       @since PCC2 2.40, PCC2 1.99.8, PCC 0.99
        @see Trim, LTrim */
     { "RTRIM",       1, 1,       makeBuiltin, interpreter::unRTrim },
 
@@ -1128,7 +1177,7 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
        The result is a value between -1 and +1.
 
        If the parameter is EMPTY, returns EMPTY.
-       @since PCC2 1.99.8, PCC 0.98.3
+       @since PCC2 2.40, PCC2 1.99.8, PCC 0.98.3
        @see Cos, Tan */
     { "SIN",         1, 1,       makeBuiltin, interpreter::unSin },
 
@@ -1146,7 +1195,7 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
        </pre>
        Note that PCC also offers a %Distance function.
 
-       @since PCC2 1.99.8, PCC 0.98.3 */
+       @since PCC2 2.40, PCC2 1.99.8, PCC 0.98.3 */
     { "SQR",         1, 1,       makeBuiltin, interpreter::unSqrt },
     { "SQRT",        1, 1,       makeBuiltin, interpreter::unSqrt },
 
@@ -1159,7 +1208,7 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
 
        If any parameter is EMPTY, this function returns EMPTY.
 
-       @since PCC2 1.99.8, PCC 0.98.3 */
+       @since PCC2 2.40, PCC2 1.99.8, PCC 0.98.3 */
     { "STR",         1, 2,       makeOneTwo,  interpreter::biStr },
 
     /* @q StrCase(x:Expr):Any (Elementary Function)
@@ -1175,7 +1224,7 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
        Note that case-sensitivity only applies to operations that happen directly in the expression %x.
        If %x calls a user-defined function, that function's body operates case-insensitive again.
 
-       @since PCC2 1.99.8, PCC 1.0.4 */
+       @since PCC2 2.40, PCC2 1.99.8, PCC 1.0.4 */
     { "STRCASE",     1, 1,       makeStrCase, 0 },
 
     /* @q String(n:Int, Optional s:Str):Str (Elementary Function), String$(n:Int, Optional s:Str):Str (Elementary Function)
@@ -1184,7 +1233,7 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
        If %s is not specified, returns a string containing %n spaces.
 
        If any parameter is EMPTY, this function returns EMPTY.
-       @since PCC2 1.99.8, PCC 0.98.5 */
+       @since PCC2 2.40, PCC2 1.99.8, PCC 0.98.5 */
     { "STRING",      1, 2,       makeOneTwo,  interpreter::biStrMult },
     { "STRING$",     1, 2,       makeOneTwo,  interpreter::biStrMult },
 
@@ -1196,7 +1245,7 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
        The tangent of 90&#176; or 270&#176; cannot be computed and produces an error.
 
        If the parameter is EMPTY, returns EMPTY.
-       @since PCC2 1.99.8, PCC 0.98.3
+       @since PCC2 2.40, PCC2 1.99.8, PCC 0.98.3
        @see Sin, Cos */
     { "TAN",         1, 1,       makeBuiltin, interpreter::unTan },
 
@@ -1206,16 +1255,26 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
 
        If the parameter is EMPTY, returns EMPTY.
 
-       @since PCC2 1.99.8, PCC 0.99
+       @since PCC2 2.40, PCC2 1.99.8, PCC 0.99
        @see LTrim, RTrim */
     { "TRIM",        1, 1,       makeBuiltin, interpreter::unLRTrim },
+
+    /* @q UCase(s:Str):Str (Elementary Function)
+       Convert string to upper case.
+       Returns the string with all ASCII characters converted to lower-case.
+
+       If the parameter is EMPTY, returns EMPTY.
+
+       @since PCC2 2.40.8, PCC2 2.0.8
+       @see LCase */
+    { "UCASE",       1, 1,       makeBuiltin, interpreter::unUCase },
 
     /* @q Val(s:Str):Num (Elementary Function)
        Convert string to number.
        Attempts to interpret the string as a number, and returns that.
        If the string does not look like a number, returns EMPTY (leading and trailing whitespace is OK, though).
 
-       @since PCC2 1.99.8, PCC 0.99.6 */
+       @since PCC2 2.40, PCC2 1.99.8, PCC 0.99.6 */
     { "VAL",         1, 1,       makeBuiltin, interpreter::unVal },
 
     /* @q Z(x:Any):Any (Elementary Function), Zap(x:Any):Any (Elementary Function)
@@ -1228,7 +1287,7 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
        </pre>
        will return a string like "10 mc" if there is some money, but disappear if there's none.
 
-       @since PCC2 1.99.8, PCC 0.98.5 */
+       @since PCC2 2.40, PCC2 1.99.8, PCC 0.98.5 */
     { "Z",           1, 1,       makeBuiltin, interpreter::unZap },
     { "ZAP",         1, 1,       makeBuiltin, interpreter::unZap },
 };
@@ -1236,7 +1295,7 @@ static const BuiltinFunctionDescriptor builtin_functions[] = {
 /** Look up descriptor for a builtin function. Builtin functions are directly
     encoded into the bytecode, and can thus not be redefined by the user. */
 const BuiltinFunctionDescriptor*
-interpreter::expr::lookupBuiltinFunction(String_t name)
+interpreter::expr::lookupBuiltinFunction(const String_t& name)
 {
     /* Quick & Dirty. */
     for (size_t i = 0; i < countof(builtin_functions); ++i) {

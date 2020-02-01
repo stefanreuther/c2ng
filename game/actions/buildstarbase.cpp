@@ -22,6 +22,7 @@ game::actions::BuildStarbase::BuildStarbase(game::map::Planet& planet,
       m_configChangeConnection(config.sig_change.add(this, &BuildStarbase::update))
 {
     // ex GPlanetBuildStarbaseAction::GPlanetBuildStarbaseAction
+    // ex planint.pas:BuildBase (sort-of)
     mustBePlayed(planet);
 
     if (wantBase == m_planet.isBuildingBase()) {

@@ -145,7 +145,7 @@ client::si::WidgetHolder::makeCommand(util::Atom_t cmd)
             {
                 if (WidgetHolder* p = m_holder.get()) {
                     if (Control* ctl = p->getControl()) {
-                        ctl->executeCommandWait(afl::string::Format("C2$Eval %d, %d", m_command, prefix),
+                        ctl->executeCommandWait(afl::string::Format("C2$Eval %d, %d, ''", m_command, prefix),
                                                 false,
                                                 ctl->translator().translateString("Event Callback"));
                     }

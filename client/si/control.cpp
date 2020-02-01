@@ -7,6 +7,7 @@
 #include "client/dialogs/consoledialog.hpp"
 #include "afl/string/format.hpp"
 #include "client/si/commandtask.hpp"
+#include "interpreter/values.hpp"
 
 using afl::sys::LogListener;
 using afl::string::Format;
@@ -62,7 +63,7 @@ client::si::Control::executeKeyCommandWait(String_t keymapName, util::Key_t key,
                 util::KeymapRef_t k = session.world().keymaps().getKeymapByName(m_keymapName);
                 util::Atom_t a = (k != 0 ? k->lookupCommand(m_key) : 0);
                 if (a != 0) {
-                    CommandTask(afl::string::Format("C2$Eval %d, %d", a, m_prefix),
+                    CommandTask(afl::string::Format("C2$Eval %d, %d, %s", a, m_prefix, interpreter::quoteString(util::formatKey(m_key))),
                                 false,
                                 afl::string::Format(session.translator()("Key '%s' in '%s'").c_str(), util::formatKey(m_key), m_keymapName),
                                 m_contextProvider).execute(pgid, session);

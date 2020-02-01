@@ -1,12 +1,13 @@
 /**
   *  \file game/cargospec.hpp
+  *  \brief Class game::CargoSpec
   */
 #ifndef C2NG_GAME_CARGOSPEC_HPP
 #define C2NG_GAME_CARGOSPEC_HPP
 
 #include "afl/base/types.hpp"
-#include "game/spec/cost.hpp"
 #include "afl/string/string.hpp"
+#include "game/spec/cost.hpp"
 
 namespace game {
 

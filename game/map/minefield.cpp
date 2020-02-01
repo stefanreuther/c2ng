@@ -311,15 +311,17 @@ int32_t
 game::map::Minefield::getUnitsAfterDecay(int32_t origUnits, const game::HostVersion& host, const game::config::HostConfiguration& config) const
 {
     // ex GMinefield::getUnitsAfterDecay
+    // ex accessor.pas:MinesAfterDecay
     int decayRate = m_isWeb ? config[config.WebMineDecayRate](m_owner) : config[config.MineDecayRate](m_owner);
     if (!host.isRoundingMineDecay()) {
         /* PHost formula */
         return origUnits * (100 - decayRate) / 100;
     } else {
         /* THost formula (3.22.040). Actual formula is
-             ERND(orig_units - orig_units*decay_rate/100)
+             ERND(origUnits - origUnits*decayRate/100) - 1
            which should yield the same results. */
-        return util::divideAndRoundToEven(origUnits * (100-decayRate), 100, 0);
+        /* Note that THost 3.0 does not have MineDecayRate, and thus only does "origUnits-1". */
+        return std::max(0, util::divideAndRoundToEven(origUnits * (100-decayRate), 100, 0) - 1);
     }
 }
 

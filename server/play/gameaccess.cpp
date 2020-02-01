@@ -14,6 +14,7 @@
 #include "server/play/enginepacker.hpp"
 #include "server/play/hullpacker.hpp"
 #include "server/play/ionstormpacker.hpp"
+#include "server/play/maincommandhandler.hpp"
 #include "server/play/mainpacker.hpp"
 #include "server/play/messagepacker.hpp"
 #include "server/play/minefieldpacker.hpp"
@@ -34,11 +35,10 @@
 #include "server/play/vcrpacker.hpp"
 #include "util/stringparser.hpp"
 
-server::play::GameAccess::GameAccess(game::Session& session, util::MessageCollector& console, const std::map<String_t, String_t>& props)
+server::play::GameAccess::GameAccess(game::Session& session, util::MessageCollector& console)
     : m_session(session),
       m_console(console),
-      m_lastMessage(0),
-      m_properties(props)
+      m_lastMessage(0)
 { }
 
 void
@@ -178,7 +178,7 @@ server::play::GameAccess::createPacker(util::StringParser& p)
     } else if (p.parseString("planetxy")) {
         return new PlanetXYPacker(session);
     } else if (p.parseString("main")) {
-        return new MainPacker(session, m_properties);
+        return new MainPacker(session);
     } else if (p.parseString("player")) {
         return new PlayerPacker(session);
     } else if (p.parseString("torp")) {
@@ -237,6 +237,8 @@ server::play::GameAccess::createCommandHandler(util::StringParser& p, game::Sess
         return new ShipCommandHandler(session, n);
     } else if (p.parseString("obj/planet") && p.parseInt(n)) {
         return new PlanetCommandHandler(session, n);
+    } else if (p.parseString("obj/main")) {
+        return new MainCommandHandler(session);
     } else {
         return 0;
     }

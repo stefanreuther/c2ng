@@ -33,12 +33,6 @@ namespace ui { namespace dialogs {
             \param text Message box content
             \param title Message box window title
             \param root UI root */
-        MessageBox(const char* text, String_t title, Root& root);
-
-        /** Constructor.
-            \param text Message box content
-            \param title Message box window title
-            \param root UI root */
         MessageBox(String_t text, String_t title, Root& root);
 
         /** Constructor.

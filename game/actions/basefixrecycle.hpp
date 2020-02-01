@@ -53,9 +53,10 @@ namespace game { namespace actions {
             Other actions can only be set if a valid ship is passed.
 
             \param action Action to set
+            \param univ Universe
             \param ship Ship to use
             \return true on success */
-        bool set(ShipyardAction action, game::map::Ship* ship);
+        bool set(ShipyardAction action, game::map::Universe& univ, game::map::Ship* ship);
 
      private:
         game::map::Planet& m_planet;

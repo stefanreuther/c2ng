@@ -162,6 +162,33 @@ client::map::Widget::addOverlay(Overlay& over)
     over.setCallback(this);
 }
 
+void
+client::map::Widget::setZoomToInclude(game::map::Point pt)
+{
+    // Simple brute-force solution
+    while (!getExtent().contains(m_renderer.scale(pt)) && m_renderer.zoomOut()) {
+        // nix
+    }
+    maybeRequestNewRange();
+    requestRedraw();
+}
+
+void
+client::map::Widget::zoomIn()
+{
+    m_renderer.zoomIn();
+    maybeRequestNewRange();
+    requestRedraw();
+}
+
+void
+client::map::Widget::zoomOut()
+{
+    m_renderer.zoomOut();
+    maybeRequestNewRange();
+    requestRedraw();
+}
+
 const client::map::Renderer&
 client::map::Widget::renderer() const
 {

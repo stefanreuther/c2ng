@@ -157,9 +157,6 @@ namespace interpreter {
 
         bool handleLoad(String_t name, const String_t& origin);
 
-        // void setNotificationMessage(IntNotificationMessage* msg);
-        // IntNotificationMessage* getNotificationMessage() const;
-
         // bool checkForBreak();
         // static void setNewGlobalContext(IntContext* p);
         // static void setBreakHandler(bool check_break());
@@ -222,9 +219,6 @@ namespace interpreter {
 
         // /** Global context template. \see setNewGlobalContext */
         // static std::auto_ptr<IntContext> global_context;
-
-        // /** Notification message associated with this process. */
-        // IntNotificationMessage* notification_message;
 
         /** Process kind. This is used for labelling and finding the process;
             it has no effect upon its execution. Think of this as an extension

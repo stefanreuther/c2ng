@@ -1,20 +1,21 @@
 /**
   *  \file game/map/planet.hpp
+  *  \brief Class game::map::Planet
   */
 #ifndef C2NG_GAME_MAP_PLANET_HPP
 #define C2NG_GAME_MAP_PLANET_HPP
 
+#include "afl/base/optional.hpp"
+#include "afl/sys/loglistener.hpp"
+#include "game/element.hpp"
+#include "game/hostversion.hpp"
+#include "game/map/basedata.hpp"
 #include "game/map/mapobject.hpp"
 #include "game/map/planetdata.hpp"
-#include "game/playerset.hpp"
-#include "afl/base/optional.hpp"
-#include "game/map/basedata.hpp"
-#include "game/hostversion.hpp"
-#include "game/element.hpp"
-#include "afl/sys/loglistener.hpp"
-#include "game/unitscorelist.hpp"
-#include "game/spec/hullassignmentlist.hpp"
 #include "game/parser/messageinformation.hpp"
+#include "game/playerset.hpp"
+#include "game/spec/hullassignmentlist.hpp"
+#include "game/unitscorelist.hpp"
 
 namespace game { namespace map {
 
@@ -61,51 +62,109 @@ namespace game { namespace map {
         };
 
         enum Timestamp {
-            MineralTime,           // Mined/ground/density
-            ColonistTime,          // Population/owner/industry
-            NativeTime,            // Native gov/pop/race
-            CashTime               // Cash/supplies
+            MineralTime,            ///< Mined/ground/density
+            ColonistTime,           ///< Population/owner/industry
+            NativeTime,             ///< Native gov/pop/race
+            CashTime                ///< Cash/supplies
         };
 
-//     enum {
-//         FlagOwnShipsInOrbit     = 1,    ///< Own ship(s) in orbit.
-//         FlagAlliedShipsInOrbit  = 2,    ///< Allied ship(s) in orbit.
-//         FlagEnemyShipsInOrbit   = 4,    ///< Enemy ship(s) in orbit.
-//         FlagGuessedAllyInOrbit  = 8,    ///< Guessed allied ship(s) in orbit.
-//         FlagGuessedEnemyInOrbit = 16    ///< Guessed enemy ship(s) in orbit.
-//     };
+        struct AutobuildSettings {
+            IntegerProperty_t goal[NUM_PLANETARY_BUILDING_TYPES];
+            IntegerProperty_t speed[NUM_PLANETARY_BUILDING_TYPES];
+        };
 
+
+        /** Construct new planet.
+            \param id Id */
         explicit Planet(Id_t id);
-        explicit Planet(const Planet& other);
+
+        /** Copy a planet.
+            \param other Other planet */
+        Planet(const Planet& other);
+
+        /** Destructor. */
         ~Planet();
 
-//     // Load and Save:
+
+        /*
+         *  Load and Save
+         */
+
+        /** Add planet .dat file entry.
+            \param data Parsed data file
+            \param source Source flag to use for this entry */
         void addCurrentPlanetData(const PlanetData& data, PlayerSet_t source);
+
+        /** Add starbase .dat file entry.
+            \param data Parsed data file
+            \param source Source flag to use for this entry */
         void addCurrentBaseData(const BaseData& data, PlayerSet_t source);
-//     void        addHistoryData(const TDbPlanet& data);
+
+        /** Add message information.
+            Processes information received from messages, history, or util.dat.
+            \param info Information */
         void addMessageInformation(const game::parser::MessageInformation& info);
 
+        /** Set position.
+            \param pos Position */
         void setPosition(Point pos);
+
+        /** Set planet name.
+            \param name Name */
         void setName(const String_t& name);
+
+        /** Get name.
+            \param tx Translator */
+        String_t getName(afl::string::Translator& tx) const;
+
+        /** Set whether non-existance of this planet is known.
+            There is no way to explicitly specify that a planet does not exist.
+            To build maps with fewer than 500 planets, people move planets to far-away positions.
+            Recent PHosts send a util.dat message whenever they consider a planet to be non-existant,
+            to make sure that the clients' idea of which planets do exist agrees with PHost's.
+            \param value flag (true: planet does not exist) */
         void setKnownToNotExist(bool value);
 
+        /** Get current planet data for storage.
+            \param [out] data */
         void getCurrentPlanetData(PlanetData& data) const;
+
+        /** Get current starbase data for storage.
+            \param [out] data */
         void getCurrentBaseData(BaseData& data) const;
-//     void        getBaseData(TStarbase& bdat) const;
-//     void        getHistoryData(TDbPlanet& data) const;
 
-        void        internalCheck(const Configuration& config,
-                                  afl::string::Translator& tx,
-                                  afl::sys::LogListener& log);
-        void        combinedCheck2(const Universe& univ, PlayerSet_t availablePlayers, int turnNumber);
+        /** Do internal checks for this planet.
+            Internal checks do not require a partner to interact with.
+            This will determine the planet kind,
+            fix possible the problems, and log appropriate messages.
+            \param config Map configuration
+            \param tx Translator
+            \param log Logger */
+        void internalCheck(const Configuration& config, afl::string::Translator& tx, afl::sys::LogListener& log);
 
-        // MapObject interface:
+        /** Combined checks, phase 2.
+            This will do all post-processing which needs a partner to interact with.
+            It requires the playability to be filled in.
+            \param univ Universe
+            \param availablePlayers Players for which we have current data
+            \param turnNumber Turn number */
+        void combinedCheck2(const Universe& univ, PlayerSet_t availablePlayers, int turnNumber);
+
+
+        /*
+         *  MapObject interface:
+         */
+
         virtual String_t getName(ObjectName which, afl::string::Translator& tx, InterpreterInterface& iface) const;
         virtual Id_t getId() const;
         virtual bool getOwner(int& result) const;
         virtual bool getPosition(Point& result) const;
 
-        // Planet status accessors:
+
+        /*
+         *  Planet status accessors:
+         */
+
         bool        isVisible() const;
         PlayerSet_t getPlanetSource() const;
         void        addPlanetSource(PlayerSet_t p);
@@ -113,13 +172,19 @@ namespace game { namespace map {
         bool        hasFullPlanetData() const;
         int         getHistoryTimestamp(Timestamp kind) const;
 
-        // Base status accessors:
+
+        /*
+         *  Base status accessors:
+         */
+
         PlayerSet_t getBaseSource() const;
         void        addBaseSource(PlayerSet_t p);
         bool        hasBase() const;
         bool        hasFullBaseData() const;
 
-        // Owner accessors:
+        /*
+         *  Owner accessors:
+         */
         void               setOwner(IntegerProperty_t owner);
 
         // Structure accessors:
@@ -195,8 +260,6 @@ namespace game { namespace map {
         void               setBaseBuildOrder(const ShipBuildOrder& order);
         IntegerProperty_t  getBaseBuildOrderHullIndex() const;
 
-//     int         findShipCloningHere(const GUniverse& trn) const;
-
         // Build queue accessors:
         IntegerProperty_t  getBaseQueuePosition() const;
         void               setBaseQueuePosition(IntegerProperty_t pos);
@@ -208,6 +271,7 @@ namespace game { namespace map {
         void        setAutobuildGoal(PlanetaryBuilding ps, int value);
         int         getAutobuildSpeed(PlanetaryBuilding ps) const;
         void        setAutobuildSpeed(PlanetaryBuilding ps, int value);
+        void        applyAutobuildSettings(const AutobuildSettings& settings);
 
         UnitScoreList& unitScores();
         const UnitScoreList& unitScores() const;

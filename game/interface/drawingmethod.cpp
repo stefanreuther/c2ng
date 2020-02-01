@@ -13,6 +13,7 @@ namespace {
                          game::map::DrawingContainer::Iterator_t it,
                          interpreter::Arguments& args)
     {
+        // ex values.pas:Marker_Delete
         args.checkArgumentCount(0);
         if (*it != 0) {
             container.erase(it);
@@ -27,8 +28,14 @@ namespace {
                              game::map::DrawingContainer::Iterator_t it,
                              interpreter::Arguments& args)
     {
+        // ex values.pas:Marker_SetComment
         args.checkArgumentCount(1);
         if (*it != 0) {
+            // FIXME: PCC1 limits to markers:
+            // IF (context^.pp^.Typ<>3) THEN BEGIN
+            //   FPError_Str := 'Not a marker';
+            //   Exit;
+            // END;
             setDrawingProperty(**it, game::interface::idpComment, args.getNext());
             container.sig_change.raise();
         }
@@ -42,6 +49,7 @@ namespace {
                            game::map::DrawingContainer::Iterator_t it,
                            interpreter::Arguments& args)
     {
+        // ex values.pas:Marker_SetColor
         args.checkArgumentCount(1);
         if (*it != 0) {
             setDrawingProperty(**it, game::interface::idpColor, args.getNext());

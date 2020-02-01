@@ -283,7 +283,7 @@ void
 server::console::ConsoleApplication::help()
 {
     afl::io::TextWriter& out = standardOutput();
-    out.writeLine(Format(_("PCC2 Console v%s - (c) 2017-2019 Stefan Reuther").c_str(), PCC2_VERSION));
+    out.writeLine(Format(_("PCC2 Console v%s - (c) 2017-2020 Stefan Reuther").c_str(), PCC2_VERSION));
     out.writeLine();
     out.writeLine(Format(_("Usage:\n"
                            "  %s [-h]\n"

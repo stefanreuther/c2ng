@@ -15,6 +15,7 @@
 #include "util/requestreceiver.hpp"
 #include "util/requestsender.hpp"
 #include "util/slaverequestsender.hpp"
+#include "client/downlink.hpp"
 
 namespace client { namespace proxy {
 
@@ -29,6 +30,8 @@ namespace client { namespace proxy {
         void setContentNew(std::auto_ptr<Initializer_t> pInit);
 
         bool isIdle() const;
+
+        void waitIdle(Downlink& link);
 
         void onMenu(gfx::Point pt);
 

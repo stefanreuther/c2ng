@@ -127,8 +127,10 @@ struct client::dialogs::VisualScanDialog::ShipData {
     String_t image;
     FrameGroup::Type imageFrame;
     FrameGroup::Type remoteFrame;
+    game::Reference ref;
+    bool isPlayable;
     ShipData()
-        : image(), imageFrame(FrameGroup::NoFrame), remoteFrame(FrameGroup::NoFrame)
+        : image(), imageFrame(FrameGroup::NoFrame), remoteFrame(FrameGroup::NoFrame), ref(), isPlayable(false)
         { }
 };
 
@@ -249,6 +251,10 @@ class client::dialogs::VisualScanDialog::Window {
     FrameGroup* m_pRemoteFrame;
     AbstractButton* m_pListButton;
     AbstractButton* m_pSpecButton;
+    AbstractButton* m_pOKButton;
+
+    game::Reference m_playableReference;
+    bool m_isPlayable;
 
     bool m_allowRemoteControl;
 
@@ -295,7 +301,13 @@ client::dialogs::VisualScanDialog::Listener::handle(game::Session& session, game
         }
 
         // Remote frame
-        // FIXME: missing (getRemoteControlColor, getNewRemoteControlState)
+        // FIXME: missing (getRemoteControlColor, getNewRemoteControlState),
+
+        // Reference
+        data.ref = game::Reference(game::Reference::Ship, pShip->getId());
+
+        // Playability
+        data.isPlayable = pShip->isPlayable(game::map::Object::Playable);
     }
 
     m_reply.postNewRequest(new Reply(data));
@@ -311,11 +323,15 @@ client::dialogs::VisualScanDialog::KeyHandler::handleKey(util::Key_t key, int /*
 {
     // ex WVisualScanWindow::handleEvent
     switch (key) {
-     // case SDLK_RETURN:
-     // case SDLK_F1:
-     //    if (allow_foreign || getCurrentObjectReference()->isPlayable(GObject::Playable))
-     //        stop(1);
-     //    return true;
+     case util::Key_Return:
+     case util::Key_F1:
+        if (/* m_allowForeignShips || */
+            (m_parent.m_playableReference == m_parent.getCurrentReference()
+             && m_parent.m_isPlayable))
+        {
+            m_parent.m_loop.stop(1);
+        }
+        return true;
 
      case util::Key_Escape:
         m_parent.m_loop.stop(0);
@@ -490,6 +506,9 @@ client::dialogs::VisualScanDialog::Window::Window(ui::Root& root, util::RequestS
       m_pRemoteFrame(0),
       m_pListButton(0),
       m_pSpecButton(0),
+      m_pOKButton(0),
+      m_playableReference(),
+      m_isPlayable(false),
       m_allowRemoteControl(false),
       m_mode(NormalMode),
       m_listPeer(),
@@ -611,6 +630,7 @@ client::dialogs::VisualScanDialog::Window::run(String_t title, String_t okName)
     // Dialog buttons
     Button& btnOK = h.addNew(new Button(okName, util::Key_Return, m_root));
     btnOK.dispatchKeyTo(keys);
+    m_pOKButton = &btnOK;
     Button& btnCancel = h.addNew(new Button(m_translator.translateString("ESC"), util::Key_Escape, m_root));
     btnCancel.dispatchKeyTo(keys);
     Button& btnAdd = h.addNew(new Button(m_translator.translateString("Add"), util::Key_Insert, m_root));
@@ -664,6 +684,15 @@ client::dialogs::VisualScanDialog::Window::setData(const ShipData& data)
     }
     if (m_pRemoteFrame != 0) {
         m_pRemoteFrame->setType(data.remoteFrame);
+    }
+
+    m_playableReference = data.ref;
+    m_isPlayable = data.isPlayable;
+
+    if (m_playableReference == getCurrentReference()) {
+        if (m_pOKButton != 0) {
+            m_pOKButton->setState(ui::Widget::DisabledState, !m_isPlayable);
+        }
     }
 }
 
@@ -826,6 +855,8 @@ bool
 client::dialogs::VisualScanDialog::loadCurrent(game::map::Point pos, game::ref::List::Options_t options, game::Id_t excludeShip)
 {
     // Build initial list
+    // FIXME: do NOT construct a Downlink here; instead, have the caller supply one.
+    // We do not want this to happen invisibly behind the scene.
     Downlink link(m_root);
     game::ref::List list;
     ListBuilder b(list, pos, options, excludeShip);

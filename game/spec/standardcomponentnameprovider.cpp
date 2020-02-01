@@ -33,12 +33,14 @@ class game::spec::StandardComponentNameProvider::NameFileParser : public util::F
  public:
     static_assert(countof(NAMES) == NUM_TRANSLATIONS, "countof(NAMES)");
 
+    typedef std::map<String_t, String_t> Map_t;
+
     NameFileParser(StandardComponentNameProvider& parent, afl::string::Translator& tx, afl::sys::LogListener& log)
         : util::FileParser(";#"),
           m_parent(parent),
           m_translator(tx),
           m_log(log),
-          m_section(-1)
+          m_section(0)
         { }
 
     virtual void handleLine(const String_t& fileName, int lineNr, String_t line)
@@ -55,14 +57,14 @@ class game::spec::StandardComponentNameProvider::NameFileParser : public util::F
                 } else {
                     // new section
                     const String_t sectionName(afl::string::strUCase(String_t(line, n+1, p-n-1)));
-                    m_section = -1;
+                    m_section = 0;
                     for (size_t i = 0; i < NUM_TRANSLATIONS; ++i) {
                         if (sectionName == NAMES[i]) {
-                            m_section = i;
+                            m_section = &m_parent.m_translations[i];
                         }
                     }
                 }
-            } else if (m_section >= 0) {
+            } else if (m_section != 0) {
                 String_t::size_type p = line.find('=');
                 if (p == String_t::npos) {
                     // syntax error
@@ -73,7 +75,7 @@ class game::spec::StandardComponentNameProvider::NameFileParser : public util::F
                     const String_t value(afl::string::strTrim(String_t(line, p+1)));
 
                     // FIXME: PCC2 handled numbered entries here.
-                    std::map<String_t, String_t>& tx = m_parent.m_translations[m_section];
+                    Map_t& tx = *m_section;
                     if (tx.find(name) == tx.end()) {
                         tx.insert(std::make_pair(name, value));
                     }
@@ -95,7 +97,7 @@ class game::spec::StandardComponentNameProvider::NameFileParser : public util::F
     StandardComponentNameProvider& m_parent;
     afl::string::Translator& m_translator;
     afl::sys::LogListener& m_log;
-    int m_section;
+    Map_t* m_section;
 };
 
 
@@ -116,6 +118,7 @@ String_t
 game::spec::StandardComponentNameProvider::getShortName(Type type, int /*index*/, const String_t& name, const String_t& shortName) const
 {
     // ex game/specsn.cc:getShortName, but totally modified
+    // PCC2 would special-case fighters here; we set their short name in the Fighter constructor.
     if (!shortName.empty()) {
         return shortName;
     } else {

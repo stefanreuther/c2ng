@@ -81,7 +81,9 @@ void
 game::interface::doCargoTransfer(game::map::Planet& pl, interpreter::Process& process, interpreter::Arguments& args, Session& session, Turn& turn, const Root& root)
 {
     // ex int/if/planetif.cc:IFPlanetCargoTransfer
+    // ex planint.pas:Planet_CargoTransfer
     // Args are cargospec, ship Id, OSNJ flags + proxy ID
+    // @change PCC1 accepts 'J' flags, but that makes no sense for planets
     args.checkArgumentCount(2, 3);
 
     String_t cargospec;
@@ -108,6 +110,7 @@ void
 game::interface::doCargoTransfer(game::map::Ship& sh, interpreter::Process& process, interpreter::Arguments& args, Session& session, Turn& turn, const Root& root)
 {
     // ex int/if/shipif.cc:IFShipCargoTransfer
+    // ex shipint.pas:Ship_CargoTransfer
     // Args are cargospec, target ship Id, flags O/S/N (overload, supply sale, no-fail)
     String_t cargospec;
     int32_t target_sid;

@@ -45,6 +45,7 @@ bool
 interpreter::Tokenizer::checkAdvance(const char* keyword)
 {
     // ex IntTokenizer::checkAdvance
+    // ex ccexpr.pas:ChompWord
     if (getCurrentToken() == tIdentifier && getCurrentString() == keyword) {
         read();
         return true;
@@ -59,6 +60,7 @@ void
 interpreter::Tokenizer::read()
 {
     // ex IntTokenizer::checkAdvance
+    // ex ccexpr.pas:GetSymbol
 
     // Skip whitespace
     const String_t::size_type limit = m_line.size();
@@ -203,6 +205,9 @@ interpreter::Tokenizer::read()
                 } else if (m_line[m_pos] == 'n' && quoted) {
                     m_currentString += "\n";
                     quoted = false;
+                } else if (m_line[m_pos] == 't' && quoted) {
+                    m_currentString += "\t";
+                    quoted = false;
                 } else {
                     m_currentString += m_line[m_pos];
                     quoted = false;
@@ -336,6 +341,7 @@ interpreter::Tokenizer::readNumber()
 bool
 interpreter::Tokenizer::isIdentifierCharacter(char c)
 {
+    // ex ccexpr.pas:IsID
     return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '$' || c == '_' || (c >= '0' && c <= '9') || c == '.';
 }
 

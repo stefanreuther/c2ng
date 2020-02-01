@@ -31,6 +31,7 @@ using afl::string::Format;
 using afl::net::redis::StringKey;
 using afl::net::redis::StringListKey;
 using afl::net::redis::StringSetKey;
+using afl::net::redis::HashKey;
 
 namespace {
     class TestHarness {
@@ -795,6 +796,7 @@ TestServerHostHostPlayer::testGameState()
     TS_ASSERT_THROWS(testee.resign(gid, 1, "u2"), std::exception);
 }
 
+/** Test game settings. */
 void
 TestServerHostHostPlayer::testGetSet()
 {
@@ -843,3 +845,53 @@ TestServerHostHostPlayer::testGetSet()
     TS_ASSERT_EQUALS(HostPlayer(userSession, h.root()).get(gid2, "u4", "mailgametype"), "rst");
 }
 
+/** Test joining with profile permissions. */
+void
+TestServerHostHostPlayer::testProfilePermission()
+{
+    using server::host::HostPlayer;
+
+    TestHarness h;
+    h.addUsers();
+
+    // Session that has joining allowed in profile
+    server::host::Session allowedSession;
+    allowedSession.setUser("u1");
+    HashKey(h.db(), "user:u1:profile").intField("allowjoin").set(1);
+
+    // Session that has joining disabled in profile
+    server::host::Session forbiddenSession;
+    forbiddenSession.setUser("u2");
+    HashKey(h.db(), "user:u2:profile").intField("allowjoin").set(0);
+
+    // Session that says nothing in profile
+    server::host::Session defaultSession;
+    defaultSession.setUser("u3");
+
+    // Admin session
+    server::host::Session rootSession;
+
+    // Do it
+    // - u1 can join
+    {
+        int32_t gid = h.createNewGame(HostGame::PublicGame, HostGame::Joining);
+        TS_ASSERT_THROWS_NOTHING(HostPlayer(allowedSession, h.root()).join(gid, 1, "u1"));
+    }
+    // - u2 can not join
+    {
+        int32_t gid = h.createNewGame(HostGame::PublicGame, HostGame::Joining);
+        TS_ASSERT_THROWS(HostPlayer(forbiddenSession, h.root()).join(gid, 2, "u2"), std::exception);
+    }
+    // - u3 can join
+    {
+        int32_t gid = h.createNewGame(HostGame::PublicGame, HostGame::Joining);
+        TS_ASSERT_THROWS_NOTHING(HostPlayer(defaultSession, h.root()).join(gid, 3, "u3"));
+    }
+    // - root can join anyone
+    {
+        int32_t gid = h.createNewGame(HostGame::PublicGame, HostGame::Joining);
+        TS_ASSERT_THROWS_NOTHING(HostPlayer(rootSession, h.root()).join(gid, 1, "u1"));
+        TS_ASSERT_THROWS_NOTHING(HostPlayer(rootSession, h.root()).join(gid, 2, "u2"));
+        TS_ASSERT_THROWS_NOTHING(HostPlayer(rootSession, h.root()).join(gid, 3, "u3"));
+    }
+}

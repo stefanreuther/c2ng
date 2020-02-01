@@ -19,81 +19,6 @@
 #include "client/si/genericwidgetvalue.hpp"
 #include "client/si/widgetfunction.hpp"
 
-namespace {
-    // /** Listbox data. */
-    // struct ListboxData : public afl::base::RefCounted {
-    //     ListboxData(client::si::ScriptSide* ss, afl::base::Ref<client::si::WidgetHolder> holder)
-    //         : title(),
-    //           current(-1),
-    //           width(320),
-    //           height(-1),
-    //           help(),
-    //           m_pScriptSide(ss),
-    //           holder(holder),
-    //           widgetIndex(0)
-    //         { }
-
-    //     String_t title;
-    //     int32_t current;
-    //     int32_t width;
-    //     int32_t height;
-    //     String_t help;
-
-    //     afl::base::WeakLink<client::si::ScriptSide> m_pScriptSide;
-
-    //     afl::base::Ref<client::si::WidgetHolder> holder;
-    //     size_t widgetIndex;
-    // };
-
-    // enum ListboxCommand {
-    //     lbcAddItem,
-    //     lbcRun
-    // };
-
-    // const interpreter::NameTable LISTBOX_TABLE[] = {
-    //     { "ADDITEM",     lbcAddItem,   0,     interpreter::thProcedure },
-    //     { "RUN",         lbcRun,       0,     interpreter::thProcedure },
-    // };
-
-    // class ListboxValue : public interpreter::SingleContext {
-    //  public:
-    //     ListboxValue(afl::base::Ref<ListboxData> data)
-    //         : m_data(data)
-    //         { }
-    //     virtual ListboxValue* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
-    //         { return lookupName(name, LISTBOX_TABLE, result) ? this : 0; }
-    //     virtual void set(PropertyIndex_t /*index*/, afl::data::Value* /*value*/)
-    //         { throw interpreter::Error::notAssignable(); }
-    //     virtual afl::data::Value* get(PropertyIndex_t index)
-    //         {
-    //             switch (ListboxCommand(LISTBOX_TABLE[index].index)) {
-    //              case lbcAddItem:
-    //                 return new client::si::WidgetCommandValue(client::si::wicListboxAddItem, m_data->m_pScriptSide.get(), WidgetReference(m_data->holder, m_data->widgetIndex));
-    //              case lbcRun:
-    //                 return 0;
-    //             }
-    //             return 0;
-    //         }
-    //     virtual ListboxValue* clone() const
-    //         { return new ListboxValue(m_data); }
-    //     virtual void enumProperties(interpreter::PropertyAcceptor& acceptor)
-    //         { acceptor.enumTable(LISTBOX_TABLE); }
-
-    //     virtual game::map::Object* getObject()
-    //         { return 0; }
-    //     virtual String_t toString(bool /*readable*/) const
-    //         { return "#<widget>"; }
-    //     virtual void store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, interpreter::SaveContext& /*ctx*/) const
-    //         { throw interpreter::Error::notSerializable(); }
-
-    //  private:
-    //     afl::base::Ref<ListboxData> m_data;
-    // };
-
-    
-}
-
-
 client::si::ListboxFunction::ListboxFunction(game::Session& session, ScriptSide* pScriptSide)
     : m_session(session),
       m_pScriptSide(pScriptSide)
@@ -165,6 +90,7 @@ afl::data::Value*
 client::si::ListboxFunction::get(interpreter::Arguments& args)
 {
     // ex int/if/listif.h:IFListbox
+    // ex userint.pas:op_LISTBOX_func
     args.checkArgumentCount(1, 5);
 
     // Must have a ScriptSide

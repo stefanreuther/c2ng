@@ -34,6 +34,7 @@ TestGameHostVersion::testFormat()
     TS_ASSERT_EQUALS(HostVersion(HostVersion::PHost, MKVERSION(3,20,0)).toString(tx), "PHost 3.20");
     TS_ASSERT_EQUALS(HostVersion(HostVersion::PHost, MKVERSION(3,4,5)).toString(tx), "PHost 3.4e");
     TS_ASSERT_EQUALS(HostVersion(HostVersion::PHost, MKVERSION(3,22,27)).toString(tx), "PHost 3.22.027");
+    TS_ASSERT_EQUALS(HostVersion(HostVersion::PHost, MKVERSION(3,4,13)).toString(tx), "PHost 3.4m");
 
     // SRace (Tim-Host variant)
     TS_ASSERT_EQUALS(HostVersion(HostVersion::SRace, 0).toString(tx), "SRace");
@@ -390,5 +391,133 @@ TestGameHostVersion::testProperties()
     TS_ASSERT(!HostVersion(HostVersion::SRace,   MKVERSION(3,22,0)).hasExtendedMissions(config));
     TS_ASSERT( HostVersion(HostVersion::PHost,   MKVERSION(3, 4,0)).hasExtendedMissions(config));
     TS_ASSERT(!HostVersion(HostVersion::NuHost,  MKVERSION(3, 0,0)).hasExtendedMissions(config));
+
+    // hasAccurateFuelModelBug: PHost <3.4h, 4.0e
+    TS_ASSERT(!HostVersion(HostVersion::Unknown, MKVERSION(3,22,0)).hasAccurateFuelModelBug());
+    TS_ASSERT(!HostVersion(HostVersion::Host,    MKVERSION(3,22,0)).hasAccurateFuelModelBug());
+    TS_ASSERT(!HostVersion(HostVersion::SRace,   MKVERSION(3,22,0)).hasAccurateFuelModelBug());
+    TS_ASSERT( HostVersion(HostVersion::PHost,   MKVERSION(3, 4,0)).hasAccurateFuelModelBug());
+    TS_ASSERT( HostVersion(HostVersion::PHost,   MKVERSION(4, 0,0)).hasAccurateFuelModelBug());
+    TS_ASSERT(!HostVersion(HostVersion::PHost,   MKVERSION(3, 4,8)).hasAccurateFuelModelBug());
+    TS_ASSERT(!HostVersion(HostVersion::PHost,   MKVERSION(3, 5,0)).hasAccurateFuelModelBug());
+    TS_ASSERT(!HostVersion(HostVersion::PHost,   MKVERSION(4, 0,5)).hasAccurateFuelModelBug());
+    TS_ASSERT(!HostVersion(HostVersion::PHost,   MKVERSION(4, 1,0)).hasAccurateFuelModelBug());
+    TS_ASSERT(!HostVersion(HostVersion::NuHost,  MKVERSION(3, 0,0)).hasAccurateFuelModelBug());
+
+    // hasAlchemyCombinations: PHost >= 4.0i, 3.4k
+    TS_ASSERT(!HostVersion(HostVersion::Unknown, MKVERSION(3,22, 0)).hasAlchemyCombinations());
+    TS_ASSERT(!HostVersion(HostVersion::Host,    MKVERSION(3,22, 0)).hasAlchemyCombinations());
+    TS_ASSERT(!HostVersion(HostVersion::SRace,   MKVERSION(3,22, 0)).hasAlchemyCombinations());
+    TS_ASSERT(!HostVersion(HostVersion::PHost,   MKVERSION(3, 4, 0)).hasAlchemyCombinations());
+    TS_ASSERT(!HostVersion(HostVersion::PHost,   MKVERSION(4, 0, 0)).hasAlchemyCombinations());
+    TS_ASSERT( HostVersion(HostVersion::PHost,   MKVERSION(3, 4,11)).hasAlchemyCombinations());
+    TS_ASSERT( HostVersion(HostVersion::PHost,   MKVERSION(3, 5, 0)).hasAlchemyCombinations());
+    TS_ASSERT( HostVersion(HostVersion::PHost,   MKVERSION(4, 0, 9)).hasAlchemyCombinations());
+    TS_ASSERT( HostVersion(HostVersion::PHost,   MKVERSION(4, 1, 0)).hasAlchemyCombinations());
+    TS_ASSERT(!HostVersion(HostVersion::NuHost,  MKVERSION(3, 0, 0)).hasAlchemyCombinations());
+
+    // hasRefineryFCodes: PHost >= 3.4m, 4.0k
+    TS_ASSERT(!HostVersion(HostVersion::Unknown, MKVERSION(3,22, 0)).hasRefineryFCodes());
+    TS_ASSERT(!HostVersion(HostVersion::Host,    MKVERSION(3,22, 0)).hasRefineryFCodes());
+    TS_ASSERT(!HostVersion(HostVersion::SRace,   MKVERSION(3,22, 0)).hasRefineryFCodes());
+    TS_ASSERT(!HostVersion(HostVersion::PHost,   MKVERSION(3, 4, 0)).hasRefineryFCodes());
+    TS_ASSERT(!HostVersion(HostVersion::PHost,   MKVERSION(4, 0, 0)).hasRefineryFCodes());
+    TS_ASSERT( HostVersion(HostVersion::PHost,   MKVERSION(3, 4,13)).hasRefineryFCodes());
+    TS_ASSERT( HostVersion(HostVersion::PHost,   MKVERSION(3, 5, 0)).hasRefineryFCodes());
+    TS_ASSERT( HostVersion(HostVersion::PHost,   MKVERSION(4, 0,11)).hasRefineryFCodes());
+    TS_ASSERT( HostVersion(HostVersion::PHost,   MKVERSION(4, 1, 0)).hasRefineryFCodes());
+    TS_ASSERT(!HostVersion(HostVersion::NuHost,  MKVERSION(3, 0, 0)).hasRefineryFCodes());
+
+    // hasAlchemyExclusionFCodes: PHost only
+    TS_ASSERT(!HostVersion(HostVersion::Unknown, MKVERSION(3,22,0)).hasAlchemyExclusionFCodes());
+    TS_ASSERT(!HostVersion(HostVersion::Host,    MKVERSION(3,22,0)).hasAlchemyExclusionFCodes());
+    TS_ASSERT(!HostVersion(HostVersion::SRace,   MKVERSION(3,22,0)).hasAlchemyExclusionFCodes());
+    TS_ASSERT( HostVersion(HostVersion::PHost,   MKVERSION(3, 4,0)).hasAlchemyExclusionFCodes());
+    TS_ASSERT(!HostVersion(HostVersion::NuHost,  MKVERSION(3, 0,0)).hasAlchemyExclusionFCodes());
+
+    // isAlchemyRounding
+    TS_ASSERT(!HostVersion(HostVersion::Unknown, MKVERSION(3,22,0)).isAlchemyRounding());
+    TS_ASSERT( HostVersion(HostVersion::Host,    MKVERSION(3,22,0)).isAlchemyRounding());
+    TS_ASSERT( HostVersion(HostVersion::SRace,   MKVERSION(3,22,0)).isAlchemyRounding());
+    TS_ASSERT(!HostVersion(HostVersion::PHost,   MKVERSION(3, 4,0)).isAlchemyRounding());
+    TS_ASSERT(!HostVersion(HostVersion::NuHost,  MKVERSION(3, 0,0)).isAlchemyRounding());
+
+    // isValidChunnelDistance2
+    // - 10000 (=100 ly) is ok for everyone
+    config[config.MinimumChunnelDistance].set(100);
+    TS_ASSERT( HostVersion(HostVersion::Unknown, MKVERSION(3,22,0)).isValidChunnelDistance2(10000, config));
+    TS_ASSERT( HostVersion(HostVersion::Host,    MKVERSION(3,22,0)).isValidChunnelDistance2(10000, config));
+    TS_ASSERT( HostVersion(HostVersion::SRace,   MKVERSION(3,22,0)).isValidChunnelDistance2(10000, config));
+    TS_ASSERT( HostVersion(HostVersion::PHost,   MKVERSION(3, 4,0)).isValidChunnelDistance2(10000, config));
+    TS_ASSERT( HostVersion(HostVersion::NuHost,  MKVERSION(3, 0,0)).isValidChunnelDistance2(10000, config));
+
+    // - 9901 (=99.5 ly) is ok for Host
+    TS_ASSERT( HostVersion(HostVersion::Unknown, MKVERSION(3,22,0)).isValidChunnelDistance2(9901, config));
+    TS_ASSERT( HostVersion(HostVersion::Host,    MKVERSION(3,22,0)).isValidChunnelDistance2(9901, config));
+    TS_ASSERT( HostVersion(HostVersion::SRace,   MKVERSION(3,22,0)).isValidChunnelDistance2(9901, config));
+    TS_ASSERT(!HostVersion(HostVersion::PHost,   MKVERSION(3, 4,0)).isValidChunnelDistance2(9901, config));
+    TS_ASSERT( HostVersion(HostVersion::NuHost,  MKVERSION(3, 0,0)).isValidChunnelDistance2(9901, config));
+
+    // - 100 (=10 ly) is not ok for anyone
+    TS_ASSERT(!HostVersion(HostVersion::Unknown, MKVERSION(3,22,0)).isValidChunnelDistance2(10, config));
+    TS_ASSERT(!HostVersion(HostVersion::Host,    MKVERSION(3,22,0)).isValidChunnelDistance2(10, config));
+    TS_ASSERT(!HostVersion(HostVersion::SRace,   MKVERSION(3,22,0)).isValidChunnelDistance2(10, config));
+    TS_ASSERT(!HostVersion(HostVersion::PHost,   MKVERSION(3, 4,0)).isValidChunnelDistance2(10, config));
+    TS_ASSERT(!HostVersion(HostVersion::NuHost,  MKVERSION(3, 0,0)).isValidChunnelDistance2(10, config));
+
+    // getMinimumFuelToInitiateChunnel
+    TS_ASSERT_EQUALS(HostVersion(HostVersion::Unknown, MKVERSION(3,22,0)).getMinimumFuelToInitiateChunnel(), 50);
+    TS_ASSERT_EQUALS(HostVersion(HostVersion::Host,    MKVERSION(3,22,0)).getMinimumFuelToInitiateChunnel(), 50);
+    TS_ASSERT_EQUALS(HostVersion(HostVersion::SRace,   MKVERSION(3,22,0)).getMinimumFuelToInitiateChunnel(), 50);
+    TS_ASSERT_EQUALS(HostVersion(HostVersion::PHost,   MKVERSION(3, 4,0)).getMinimumFuelToInitiateChunnel(), 51);
+    TS_ASSERT_EQUALS(HostVersion(HostVersion::NuHost,  MKVERSION(3, 0,0)).getMinimumFuelToInitiateChunnel(), 50);
+}
+
+/** Test setImpliedHostConfiguration(). */
+void
+TestGameHostVersion::testSetImpliedHostConfiguration()
+{
+    using game::config::HostConfiguration;
+    using game::HostVersion;
+
+    // Base case
+    {
+        HostConfiguration c;
+        c.setDefaultValues();
+        TS_ASSERT_EQUALS(c[HostConfiguration::CPEnableShow](), true);
+    }
+
+    // Host
+    {
+        HostConfiguration c;
+        c.setDefaultValues();
+        HostVersion(HostVersion::Host, MKVERSION(3,22,0)).setImpliedHostConfiguration(c);
+        TS_ASSERT_EQUALS(c[HostConfiguration::CPEnableShow](), false);
+    }
+
+    // Old PHost
+    {
+        HostConfiguration c;
+        c.setDefaultValues();
+        HostVersion(HostVersion::PHost, MKVERSION(3,2,5)).setImpliedHostConfiguration(c);
+        TS_ASSERT_EQUALS(c[HostConfiguration::CPEnableShow](), false);
+    }
+
+    // New PHost
+    {
+        HostConfiguration c;
+        c.setDefaultValues();
+        HostVersion(HostVersion::PHost, MKVERSION(4,1,5)).setImpliedHostConfiguration(c);
+        TS_ASSERT_EQUALS(c[HostConfiguration::CPEnableShow](), true);
+    }
+
+    // ...but it's not unconditionally enabled
+    {
+        HostConfiguration c;
+        c.setDefaultValues();
+        c[HostConfiguration::CPEnableShow].set(false);
+        HostVersion(HostVersion::PHost, MKVERSION(4,1,5)).setImpliedHostConfiguration(c);
+        TS_ASSERT_EQUALS(c[HostConfiguration::CPEnableShow](), false);
+    }
 }
 

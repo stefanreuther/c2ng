@@ -118,6 +118,7 @@ game::Id_t
 game::map::ObjectType::findPreviousIndexWrap(Id_t index, bool marked)
 {
     // ex GObjectType::findPreviousIndexWrap
+    // ex types.pas:CObjectType.Prev
     Id_t n = findPreviousIndexNoWrap(index, marked);
     if (n == 0) {
         n = findPreviousIndexNoWrap(0, marked);
@@ -130,6 +131,7 @@ game::Id_t
 game::map::ObjectType::findNextIndexWrap(Id_t index, bool marked)
 {
     // ex GObjectType::findNextIndexWrap
+    // ex types.pas:CObjectType.Next
     Id_t n = findNextIndexNoWrap(index, marked);
     if (n == 0) {
         n = findNextIndexNoWrap(0, marked);

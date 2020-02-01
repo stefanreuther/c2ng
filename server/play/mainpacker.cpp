@@ -7,10 +7,19 @@
 #include "afl/data/hashvalue.hpp"
 #include "game/interface/globalcontext.hpp"
 #include "game/spec/shiplist.hpp"
+#include "game/extraidentifier.hpp"
 
-server::play::MainPacker::MainPacker(game::Session& session, const std::map<String_t, String_t>& props)
-    : m_session(session),
-      m_properties(props)
+namespace {
+    struct PropertyExtra : public game::Extra {
+        std::map<String_t, String_t> props;
+    };
+    const game::ExtraIdentifier<game::Session, PropertyExtra> PROPERTY_ID = {{}};
+}
+
+
+
+server::play::MainPacker::MainPacker(game::Session& session)
+    : m_session(session)
 { }
 
 server::Value_t*
@@ -44,7 +53,9 @@ server::play::MainPacker::buildValue() const
 
     // Global properties
     afl::base::Ref<afl::data::Hash> props(afl::data::Hash::create());
-    for (std::map<String_t, String_t>::const_iterator it = m_properties.begin(); it != m_properties.end(); ++it) {
+
+    const std::map<String_t, String_t>& propsIn = getSessionProperties(m_session);
+    for (std::map<String_t, String_t>::const_iterator it = propsIn.begin(); it != propsIn.end(); ++it) {
         addValueNew(*props, makeStringValue(it->second), it->first.c_str());
     }
     addValueNew(*hv, new afl::data::HashValue(props), "PROP");
@@ -56,4 +67,10 @@ String_t
 server::play::MainPacker::getName() const
 {
     return "main";
+}
+
+std::map<String_t, String_t>&
+server::play::getSessionProperties(game::Session& session)
+{
+    return session.extra().create(PROPERTY_ID).props;
 }

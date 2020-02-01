@@ -150,6 +150,7 @@ namespace {
         virtual void compileCommand(Tokenizer& tok, BytecodeObject& bco, const StatementCompilationContext& scc)
             {
                 // ex int/file.cc:SFOpen
+                // ex fileint.pas:File_Open (part)
                 // Read file name argument
                 tok.readNextToken();
                 std::auto_ptr<Node> fileName(interpreter::expr::Parser(tok).parse());
@@ -236,6 +237,7 @@ namespace {
         virtual void compileCommand(Tokenizer& tok, BytecodeObject& bco, const StatementCompilationContext& scc)
             {
                 // ex int/file.cc:compileSet
+                // ex fileint.pas:setxxx_internal (part)
 
                 // Read arguments
                 afl::container::PtrVector<Node> xn;
@@ -285,6 +287,7 @@ namespace {
         virtual void compileCommand(Tokenizer& tok, BytecodeObject& bco, const StatementCompilationContext& scc)
             {
                 // ex int/file.cc:SFSetStr
+                // ex fileint.pas:File_SetStr (part)
                 // Read arguments
                 afl::container::PtrVector<Node> xn;
                 tok.readNextToken();
@@ -351,6 +354,7 @@ namespace {
         \return Return value for user, newly-allocated afl::data::Value object */
     afl::data::Value* extractInt(Arguments& args, size_t size)
     {
+        // ex fileint.pas:op_GETxxx
         interpreter::BlobValue* bv;
         int32_t index;
 
@@ -462,6 +466,7 @@ namespace {
     afl::data::Value* IFCCOpen(World& world, Arguments& args)
     {
         // ex int/file.cc:IFCCOpen
+        // ex fileint.pas:File_Open (part)
         // Read args
         size_t fd;
         String_t filename;
@@ -520,6 +525,8 @@ namespace {
        Backend to {SetByte}, {SetWord}, {SetLong}. */
     afl::data::Value* IFCCSetInt(World& /*world*/, Arguments& args)
     {
+        // ex fileint.pas:setxxx_internal (part)
+
         /* Implementation notes: PCC 1.x does not modify the output value
            if one of the parameters is null. This means we have to return
            a copy of our first argument for the same effect.
@@ -551,6 +558,7 @@ namespace {
         // execute
         while (args.getNumArgs() != 0) {
             // read argument
+            // FIXME: PCC1 checks ranges (0..255 for SetByte, -32768..+32767 for SetWord)
             int32_t theValue;
             if (!checkIntegerArg(theValue, args.getNext())) {
                 return afl::data::Value::cloneOf(first);
@@ -572,6 +580,7 @@ namespace {
        Backend to {SetStr}. */
     afl::data::Value* IFCCSetStr(World& /*world*/, Arguments& args)
     {
+        // ex fileint.pas:File_SetStr (part)
         int32_t index, size;
         String_t value;
 
@@ -618,6 +627,7 @@ namespace {
        @since PCC2 1.99.12, PCC 1.0.13, PCC2 2.40.1 */
     afl::data::Value* IFFPos(World& world, Arguments& args)
     {
+        // ex fileint.pas:op_FPOS
         TextFile* tf;
         args.checkArgumentCount(1);
         if (!world.fileTable().checkFileArg(tf, args.getNext())) {
@@ -639,6 +649,7 @@ namespace {
        @since PCC2 1.99.12, PCC 1.0.13, PCC2 2.40.1 */
     afl::data::Value* IFFreeFile(World& world, Arguments& args)
     {
+        // ex fileint.pas:op_FREEFILE_func
         args.checkArgumentCount(0);
         size_t result = world.fileTable().getFreeFile();
         if (result == 0) {
@@ -659,6 +670,7 @@ namespace {
        @since PCC2 1.99.12, PCC 1.0.13, PCC2 2.40.1 */
     afl::data::Value* IFFSize(World& world, Arguments& args)
     {
+        // ex fileint.pas:op_FSIZE
         TextFile* tf;
         args.checkArgumentCount(1);
         if (!world.fileTable().checkFileArg(tf, args.getNext())) {
@@ -673,6 +685,7 @@ namespace {
        @since PCC2 1.99.12, PCC 1.0.13, PCC2 2.40.1 */
     afl::data::Value* IFGetByte(World& /*world*/, Arguments& args)
     {
+        // ex fileint.pas:op_GETBYTE
         return extractInt(args, 1);
     }
 
@@ -683,6 +696,7 @@ namespace {
        @since PCC2 1.99.12, PCC 1.1.20, PCC2 2.40.1 */
     afl::data::Value* IFGetDirectoryName(World& world, Arguments& args)
     {
+        // ex ccexpr.pas:op_GETDIRECTORYNAME_func
         String_t a;
         args.checkArgumentCount(1);
         if (!checkStringArg(a, args.getNext())) {
@@ -699,6 +713,7 @@ namespace {
        @since PCC2 1.99.12, PCC 1.1.20, PCC2 2.40.1 */
     afl::data::Value* IFGetFileName(World& world, Arguments& args)
     {
+        // ex ccexpr.pas:op_GETFILENAME_func
         String_t a;
         args.checkArgumentCount(1);
         if (!checkStringArg(a, args.getNext())) {
@@ -714,6 +729,7 @@ namespace {
        @since PCC2 1.99.12, PCC 1.0.13, PCC2 2.40.1 */
     afl::data::Value* IFGetLong(World& /*world*/, Arguments& args)
     {
+        // ex fileint.pas:op_GETWORD
         return extractInt(args, 4);
     }
 
@@ -724,6 +740,7 @@ namespace {
        @since PCC2 1.99.12, PCC 1.0.13, PCC2 2.40.1 */
     afl::data::Value* IFGetStr(World& /*world*/, Arguments& args)
     {
+        // ex fileint.pas:op_GETSTR_func
         interpreter::BlobValue* bv;
         int32_t index, size;
 
@@ -745,6 +762,7 @@ namespace {
        @since PCC2 1.99.12, PCC 1.0.13, PCC2 2.40.1 */
     afl::data::Value* IFGetWord(World& /*world*/, Arguments& args)
     {
+        // ex fileint.pas:op_GETLONG
         return extractInt(args, 2);
     }
 
@@ -758,6 +776,7 @@ namespace {
        @since PCC2 1.99.12, PCC 1.1.20, PCC2 2.40.1 */
     afl::data::Value* IFMakeFileName(World& world, Arguments& args)
     {
+        // ex ccexpr.pas:op_MAKEFILENAME_func
         String_t a, b;
         args.checkArgumentCountAtLeast(1);
         if (!checkStringArg(a, args.getNext())) {

@@ -152,7 +152,6 @@ interpreter::Process::Process(World& world, String_t name, uint32_t processId)
       m_processName(name),
       m_processPriority(50),
       m_processError(String_t()),
-      // notification_message(0),
       m_processKind(pkDefault),
       m_processGroupId(0),
       m_processId(processId),
@@ -173,11 +172,6 @@ interpreter::Process::Process(World& world, String_t name, uint32_t processId)
 interpreter::Process::~Process()
 {
     // ex IntExecutionContext::~IntExecutionContext
-
-    // FIXME: port this
-    // // Termination of a process deletes its associated message.
-    // // Use setNotificationMessage which implements the whole protocol.
-    // setNotificationMessage(0);
 
     // Disown all my mutexes
     m_world.mutexList().disownLocksByProcess(this);
@@ -1405,6 +1399,7 @@ interpreter::Context*
 interpreter::Process::lookup(const afl::data::NameQuery& q, Context::PropertyIndex_t& index)
 {
     // ex IntExecutionContext::lookup
+    // ex ccexpr.pas:ResolveName (part)
     for (size_t i = m_contexts.size(); i > 0; --i) {
         Context* c = m_contexts[i-1];
         if (Context* fc = c->lookup(q, index)) {
@@ -1518,8 +1513,8 @@ interpreter::Process::handleFunctionCall(BCORef_t bco, Segment_t& args, bool wan
 // {
 //     ::check_break = check_break;
 // }
-//
-//
+
+
 // /** Handle Load instruction. Loads and compiles the file, and pushes an appropriate frame executing it.
 //     \param name File name given by user
 //     \retval true file loaded and compiled successfully
@@ -1541,37 +1536,6 @@ interpreter::Process::handleLoad(String_t name, const String_t& origin)
 }
 
 
-// /** Set notification message. The message will be associated with this
-//     process. In case another message was associated with the process,
-//     it will be removed.
-//     \param msg Message. Can be 0 to delete this process' message. */
-// void
-// IntExecutionContext::setNotificationMessage(IntNotificationMessage* msg)
-// {
-//     if (notification_message != msg) {
-//         /* Detach old message. Note that oldmsg->remove will call
-//            setNotificationMessage(0), so first get the message out
-//            of the way. */
-//         IntNotificationMessage* oldmsg = notification_message;
-//         notification_message = 0;
-//         if (oldmsg != 0) {
-//             oldmsg->remove();
-//         }
-//
-//         /* Attach new message */
-//         notification_message = msg;
-//         if (msg != 0) {
-//             msg->setAssociatedProcess(this);
-//         }
-//     }
-// }
-//
-// /** Get current notification message. */
-// IntNotificationMessage*
-// IntExecutionContext::getNotificationMessage() const
-// {
-//     return notification_message;
-// }
 //
 // /** Check whether the user wants to break. */
 // bool

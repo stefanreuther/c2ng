@@ -1,10 +1,12 @@
 /**
   *  \file util/vector.hpp
+  *  \brief Template class util::Vector
   */
 #ifndef C2NG_UTIL_VECTOR_HPP
 #define C2NG_UTIL_VECTOR_HPP
 
 #include <vector>
+#include "afl/base/types.hpp"
 
 namespace util {
 
@@ -21,21 +23,50 @@ namespace util {
     template<typename Value, typename Index>
     class Vector {
      public:
+        /** Constructor.
+            \param minIndex Minimum index */
         explicit Vector(Index minIndex = Index());
 
+        /** Destructor. */
         ~Vector();
 
+        /** Set value at index.
+            If the element is after the current end of the vector, it will be created.
+            If the element is before minIndex, the call will be ignored.
+            \param index Index
+            \param value Value */
         void set(Index index, Value value);
 
+        /** Get value at index.
+            If the element exists, it is returned as a copy.
+            If the element does not exist, a default-constructed value is returned.
+            \param index Index */
         Value get(Index index) const;
 
+        /** Get pointer to element at index.
+            If the element exists, a pointer is returned.
+            If the element does not exist, a null pointer is returned.
+            \param index Index */
         const Value* at(Index index) const;
 
+        /** Get pointer to element at index.
+            \overload */
         Value* at(Index index);
 
+        /** Clear vector.
+            \post size() == minIndex */
         void clear();
 
+        /** Get size.
+            Elements at this or a larger index will not exist.
+            For a 1-based vector with elements 1,2,3, this will be 4.
+            For a 0-based vector with elements 0,1,2, this will be 3.
+            \return size */
         Index size() const;
+
+        /** Check emptiness.
+            \return true if the underlying vector is empty, i.e. size() == minIndex */
+        bool empty() const;
 
      private:
         std::vector<Value> m_data;
@@ -110,6 +141,13 @@ inline Index
 util::Vector<Value,Index>::size() const
 {
     return Index(m_data.size() + m_minIndex);
+}
+
+template<typename Value, typename Index>
+inline bool
+util::Vector<Value,Index>::empty() const
+{
+    return m_data.empty();
 }
 
 #endif

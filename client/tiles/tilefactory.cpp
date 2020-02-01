@@ -406,7 +406,7 @@ client::tiles::TileFactory::createTile(String_t name, afl::base::Deleter& delete
                     dv.addNewButton(dv.Bottom, 0, 0, new ui::widgets::Button("F", 'f', root));
                 }
         };
-        return Factory().run(m_root, m_keys, 30, 3, "Tile.PlanetFCode", deleter, m_userSide, m_observer);
+        return Factory().run(m_root, m_keys, 30, 2, "Tile.PlanetFCode", deleter, m_userSide, m_observer);
     }
     if (name == "PLANETLINK") {
         // ex WPlanetBaseTile::WPlanetBaseTile

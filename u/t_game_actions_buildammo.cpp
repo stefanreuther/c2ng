@@ -51,6 +51,10 @@ namespace {
             { return afl::base::Nothing; }
         virtual afl::base::Optional<String_t> getPreviousPlanetFriendlyCode(game::Id_t /*planetId*/) const
             { return afl::base::Nothing; }
+        virtual bool getPreviousShipMission(int /*shipId*/, int& /*m*/, int& /*i*/, int& /*t*/) const
+            { return false; }
+        virtual bool getPreviousShipBuildOrder(int /*planetId*/, game::ShipBuildOrder& /*result*/) const
+            { return false; }
     };
 
     struct TestHarness {

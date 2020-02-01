@@ -121,6 +121,7 @@ game::interface::PlayerContext::store(interpreter::TagNode& out, afl::io::DataSi
 game::interface::PlayerContext*
 game::interface::PlayerContext::create(int nr, Session& session)
 {
+    // ex values.pas:CreatePlayerContext
     // Valid state?
     Game* g = session.getGame().get();
     Root* r = session.getRoot().get();

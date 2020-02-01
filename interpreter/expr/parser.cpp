@@ -38,6 +38,7 @@ interpreter::expr::Parser::Parser(Tokenizer& tok)
 interpreter::expr::Node*
 interpreter::expr::Parser::parse()
 {
+    // ex ccexpr.pas:GetExpr
     parseSequence();
     return stack.extractLast();
 }
@@ -47,6 +48,7 @@ interpreter::expr::Parser::parse()
 interpreter::expr::Node*
 interpreter::expr::Parser::parseNA()
 {
+    // ex ccexpr.pas:GetExprNA
     parseOr();
     return stack.extractLast();
 }
@@ -54,10 +56,18 @@ interpreter::expr::Parser::parseNA()
 void
 interpreter::expr::Parser::parseSequence()
 {
+    // ex ccexpr.pas:NParse0
     // sequence ::= assignment
     //            | sequence ';' assignment
     parseAssignment();
     while (tok.checkAdvance(tok.tSemicolon)) {
+        // A line 'a := b;' will produce the error message "Expected operand" by default.
+        // It is easy to generate a more helpful error message for this case (same as in PCC1),
+        // this is not an additional grammar restriction.
+        if (tok.getCurrentToken() == tok.tEnd) {
+            throw Error("Lone \";\" at end of line is not allowed");
+        }
+
         parseAssignment();
         makeBinary(new SequenceNode());
     }
@@ -66,6 +76,8 @@ interpreter::expr::Parser::parseSequence()
 void
 interpreter::expr::Parser::parseAssignment()
 {
+    // ex ccexpr.pas:NParse0b
+    // @diff Different handling of file numbers, see parsePrimary().
     // assignment ::= or-expr
     //              | or-expr ':=' assignment
     parseOr();
@@ -78,6 +90,7 @@ interpreter::expr::Parser::parseAssignment()
 void
 interpreter::expr::Parser::parseOr()
 {
+    // ex ccexpr.pas:NParse0a
     // or-expr ::= and-expr
     //           | or-expr 'Or' and-expr
     //           | or-expr 'Xor' and-expr
@@ -98,6 +111,7 @@ interpreter::expr::Parser::parseOr()
 void
 interpreter::expr::Parser::parseAnd()
 {
+    // ex ccexpr.pas:NParse1
     // and-expr ::= not-expr
     //            | and-expr 'And' not-expr
     parseNot();
@@ -110,6 +124,7 @@ interpreter::expr::Parser::parseAnd()
 void
 interpreter::expr::Parser::parseNot()
 {
+    // ex ccexpr.pas:NParse2
     // not-expr ::= comparison
     //            | 'Not' not-expr
     int n = 0;
@@ -131,6 +146,7 @@ interpreter::expr::Parser::parseNot()
 void
 interpreter::expr::Parser::parseComparison()
 {
+    // ex ccexpr.pas:NParse3
     // comparison ::= concat-expr
     //              | comparison '=' concat-expr
     //              | comparison '<' concat-expr
@@ -164,6 +180,7 @@ interpreter::expr::Parser::parseComparison()
 void
 interpreter::expr::Parser::parseConcat()
 {
+    // ex ccexpr.pas:NParse4
     // concat-expr ::= add-expr
     //               | concat-expr "#" add-expr
     //               | concat-expr "&" add-expr
@@ -185,6 +202,7 @@ interpreter::expr::Parser::parseConcat()
 void
 interpreter::expr::Parser::parseAdd()
 {
+    // ex ccexpr.pas:NParse5
     // add-expr ::= mult-expr
     //            | add-expr "+" mult-expr
     //            | add-expr "-" mult-expr
@@ -206,6 +224,7 @@ interpreter::expr::Parser::parseAdd()
 void
 interpreter::expr::Parser::parseMult()
 {
+    // ex ccexpr.pas:NParse6
     // mult-expr ::= neg-expr
     //             | mult-expr "*" neg-expr
     //             | mult-expr "/" neg-expr
@@ -233,6 +252,7 @@ interpreter::expr::Parser::parseMult()
 void
 interpreter::expr::Parser::parseNeg()
 {
+    // ex ccexpr.pas:NParse7
     // neg-expr ::= pow-expr
     //            | "-" neg-expr
     //            | "+" neg-expr
@@ -271,6 +291,7 @@ interpreter::expr::Parser::parseNeg()
 void
 interpreter::expr::Parser::parsePow()
 {
+    // ex ccexpr.pas:NParse8
     // pow-expr ::= primary-expr
     //            | primary-expr "^" neg-expr
     parsePrimary();
@@ -293,6 +314,10 @@ interpreter::expr::Parser::parsePow()
 void
 interpreter::expr::Parser::parsePrimary()
 {
+    // ex ccexpr.pas:NParse9
+    // @diff Different handling of file numbers between PCC 1.x and PCC2:
+    // PCC 1.x parenthesizes "#a:=b" as "#(a:=b)", we parenthesize it as "(#a) := b".
+    // Neither makes much sense so we accept that difference for now.
     if (tok.checkAdvance(tok.tLParen)) {
         // Parenthesized expression
         parseSequence();
@@ -324,6 +349,7 @@ interpreter::expr::Parser::parsePrimary()
         String_t fname = tok.getCurrentString();
 
         // Special handling for builtin functions
+        // ex ccexpr.pas:ParseCall
         const BuiltinFunctionDescriptor* bif;
         if (tok.readNextToken() == tok.tLParen && (bif = lookupBuiltinFunction(fname)) != 0) {
             // Builtin function

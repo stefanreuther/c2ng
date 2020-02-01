@@ -89,6 +89,19 @@ game::actions::CargoCostAction::getMissingAmountAsCost() const
     return result;
 }
 
+// Get available amount as Cost structure.
+game::spec::Cost
+game::actions::CargoCostAction::getAvailableAmountAsCost() const
+{
+    game::spec::Cost result;
+    result.set(m_cost.Tritanium,  m_container.getAmount(Element::Tritanium));
+    result.set(m_cost.Duranium,   m_container.getAmount(Element::Duranium));
+    result.set(m_cost.Molybdenum, m_container.getAmount(Element::Molybdenum));
+    result.set(m_cost.Money,      m_container.getAmount(Element::Money));
+    result.set(m_cost.Supplies,   m_container.getAmount(Element::Supplies));
+    return result;
+}
+
 // Check validity.
 bool
 game::actions::CargoCostAction::isValid() const

@@ -241,6 +241,7 @@ game::interface::ShipContext*
 game::interface::ShipContext::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
 {
     // ex IntShipContext::lookup
+    // ex shipint.pas:CShipContext.ResolveValue, CShipContext.Identify
     if (name.startsWith("SHIP.")) {
         return lookupShipProperty(afl::data::NameQuery(name, 5), m_session.world(), result) ? this : 0;
     } else {
@@ -351,6 +352,7 @@ game::interface::ShipContext::get(PropertyIndex_t index)
 bool
 game::interface::ShipContext::next()
 {
+    // ex shipint.pas:CShipContext.Next
     if (int id = game::map::AnyShipType(m_game->currentTurn().universe()).findNextIndex(m_id)) {
         m_id = id;
         return true;
@@ -376,6 +378,7 @@ void
 game::interface::ShipContext::enumProperties(interpreter::PropertyAcceptor& acceptor)
 {
     // ex IntShipContext::enumProperties
+    // ex shipint.pas:CShipContext.EnumValues
     acceptor.enumNames(m_session.world().shipPropertyNames());
     acceptor.enumTable(ship_mapping);
 }
@@ -399,6 +402,7 @@ game::interface::ShipContext::store(interpreter::TagNode& out, afl::io::DataSink
 game::interface::ShipContext*
 game::interface::ShipContext::create(int id, Session& session)
 {
+    // ex shipint.pas:CreateShipContext
     Game* game = session.getGame().get();
     Root* root = session.getRoot().get();
     game::spec::ShipList* shipList = session.getShipList().get();

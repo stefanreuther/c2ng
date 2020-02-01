@@ -67,6 +67,11 @@ class TestGameSpecEngine : public CxxTest::TestSuite {
     void testFuel();
 };
 
+class TestGameSpecFighter : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
 class TestGameSpecFriendlyCode : public CxxTest::TestSuite {
  public:
     void testFCode();
@@ -174,6 +179,8 @@ class TestGameSpecShipList : public CxxTest::TestSuite {
     void testRacialAbilitiesEmpty();
     void testRacialAbilitiesFail();
     void testGetHullFunctions();
+    void testFindRacialAbilitiesMany();
+    void testFindRacialAbilitiesHoley();
 };
 
 class TestGameSpecStandardComponentNameProvider : public CxxTest::TestSuite {

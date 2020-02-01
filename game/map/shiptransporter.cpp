@@ -58,7 +58,11 @@ game::map::ShipTransporter::getFlags() const
 {
     // ex GShipTransporterTransfer::GShipTransporterTransfer [part]
     if (m_type == Ship::UnloadTransporter) {
-        return Flags_t() + UnloadTarget;
+        if (m_targetId == 0) {
+            return Flags_t();
+        } else {
+            return Flags_t() + UnloadTarget;
+        }
     } else {
         return Flags_t() + UnloadSource;
     }

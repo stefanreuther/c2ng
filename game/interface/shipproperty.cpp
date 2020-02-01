@@ -66,6 +66,7 @@ namespace {
     /** Classify ship. This yields the ship's category as a string, 0 if unknown. */
     const char* classifyShip(const game::map::Ship& sh, const game::spec::ShipList& shipList)
     {
+        // ex shipacc.pas:ShipType (sort-of)
         game::IntegerProperty_t beams = sh.getNumBeams();
         game::IntegerProperty_t tubes = sh.getNumLaunchers();
         game::IntegerProperty_t bays = sh.getNumBays();
@@ -159,6 +160,7 @@ ShipArrayProperty::ShipArrayProperty(Type type,
 afl::data::Value*
 ShipArrayProperty::get(interpreter::Arguments& args)
 {
+    // ex shipint.pas:CShipContext.ResolveFuncall (sort-of)
     switch (m_type) {
      case Score:
         /* @q Score:Int() (Ship Property, Planet Property)

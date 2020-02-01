@@ -1,16 +1,21 @@
 /**
   *  \file game/cargospec.cpp
+  *  \brief Class game::CargoSpec
   */
 
 #include <cstring>
-#include <cctype>
 #include "game/cargospec.hpp"
-#include "afl/string/format.hpp"
+#include "afl/base/staticassert.hpp"
 #include "afl/bits/smallset.hpp"
+#include "afl/string/char.hpp"
+#include "afl/string/format.hpp"
 #include "game/limits.hpp"
 
 namespace {
-    const char cargo_type_letters[]    = "NTDMFCS$W";
+    /** Cargo type letters.
+        Indexes match CargoSpec::Type. */
+    const char CARGO_TYPE_LETTERS[] = "NTDMFCS$W";
+    static_assert(sizeof(CARGO_TYPE_LETTERS) == game::CargoSpec::LIMIT+1, "CARGO_TYPE_LETTERS vs. LIMIT");
 
     /** Parse number from string.
         \param result [out] number
@@ -53,7 +58,7 @@ namespace {
         String_t::size_type limit = value.size();
         static const char max[] = "max";
         for (j = 0; j < 3; ++j) {
-            if (ii+j >= limit || std::tolower(uint8_t(value[ii+j])) != max[j]) {
+            if (ii+j >= limit || afl::string::charToLower(value[ii+j]) != max[j]) {
                 break;
             }
         }
@@ -157,7 +162,7 @@ game::CargoSpec::toPHostString() const
             if (!result.empty()) {
                 result += ' ';
             }
-            result += cargo_type_letters[i];
+            result += CARGO_TYPE_LETTERS[i];
             result += afl::string::Format("%d", m_amounts[i]);
         }
     }
@@ -171,6 +176,7 @@ game::CargoSpec::toPHostString() const
 String_t
 game::CargoSpec::toCargoSpecString() const
 {
+    // ex ccexpr.pas:CargospecToString
     String_t result;
     afl::bits::SmallSet<Type> did;
 
@@ -188,7 +194,7 @@ game::CargoSpec::toCargoSpecString() const
             if (!result.empty()) {
                 result += ' ';
             }
-            result += afl::string::Format("%d%c", m_amounts[i], cargo_type_letters[i]);
+            result += afl::string::Format("%d%c", m_amounts[i], CARGO_TYPE_LETTERS[i]);
         }
     }
     return result;
@@ -212,9 +218,11 @@ bool
 game::CargoSpec::parse(const String_t& str, bool acceptMax)
 {
     // ex GCargoSpec::parse
+    // ex ccexpr.pas:ParseCargospec
+    // ex pconfig.pas:ParseCost
     clear();
 
-    /* Like PCC 1.x, we accept cargospecs and PHost format:
+    /* Unlike PCC 1.x, we accept cargospecs and PHost format:
           Cargospec:  123TDM
           PHost:      T123 D123 M123 */
     String_t::size_type i = 0;
@@ -343,7 +351,8 @@ void
 game::CargoSpec::sellSuppliesIfNeeded()
 {
     // ex GCargoSpec::doSupplySale()
-    if (m_amounts[Money] < 0) {
+    // ex ccexpr.pas:ConvertSupplies
+    if (m_amounts[Money] < 0 && m_amounts[Supplies] > 0) {
         if (m_amounts[Supplies] >= -m_amounts[Money]) {
             // Enough supplies to cover this money shortage
             m_amounts[Supplies] += m_amounts[Money];
@@ -401,13 +410,12 @@ game::CargoSpec::divide(const CargoSpec& other, int32_t& result) const
     return did;
 }
 
-// /** Convert character into cargo type.
-//     \return el_XXX on success, -1 on failure. */
+// Convert character into cargo type.
 bool
 game::CargoSpec::charToType(char c, Type& type)
 {
-    if (const char* p = std::strchr(cargo_type_letters, std::toupper(uint8_t(c)))) {
-        type = Type(p - cargo_type_letters);
+    if (const char* p = std::strchr(CARGO_TYPE_LETTERS, afl::string::charToUpper(c))) {
+        type = Type(p - CARGO_TYPE_LETTERS);
         return true;
     }
     return false;

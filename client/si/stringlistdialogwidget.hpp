@@ -20,6 +20,7 @@ namespace client { namespace si {
                                String_t dialogTitle, int32_t current, int32_t width, int32_t height, String_t help);
 
         bool run(ui::Root& root);
+        bool runMenu(ui::Root& root, const String_t& anchor);
 
      private:
         String_t m_dialogTitle;

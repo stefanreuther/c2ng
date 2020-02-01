@@ -76,18 +76,19 @@ interpreter::checkArgumentCount(size_t have, size_t min, size_t max)
 
 // Check integer argument.
 bool
-interpreter::checkIntegerArg(int32_t& out, afl::data::Value* value)
+interpreter::checkIntegerArg(int32_t& out, const afl::data::Value* value)
 {
     // ex int/if/ifutil.h:checkIntArg
+    // ex ccexpr.pas:Intify
     if (value == 0) {
         return false;
     }
 
-    if (afl::data::ScalarValue* iv = dynamic_cast<afl::data::ScalarValue*>(value)) {
+    if (const afl::data::ScalarValue* iv = dynamic_cast<const afl::data::ScalarValue*>(value)) {
         // Regular integer.
         out = iv->getValue();
         return true;
-    } else if (afl::data::FloatValue* fv = dynamic_cast<afl::data::FloatValue*>(value)) {
+    } else if (const afl::data::FloatValue* fv = dynamic_cast<const afl::data::FloatValue*>(value)) {
         // We truncate here. This is what PCC 1.x does. Let's hope that IEEE FP is precise
         // enough that we don't lose enough precision to get off-by-one results, like HOST.EXE.
         double v = fv->getValue();
@@ -103,7 +104,7 @@ interpreter::checkIntegerArg(int32_t& out, afl::data::Value* value)
 
 // Check integer argument with range.
 bool
-interpreter::checkIntegerArg(int32_t& out, afl::data::Value* value, int32_t min, int32_t max)
+interpreter::checkIntegerArg(int32_t& out, const afl::data::Value* value, int32_t min, int32_t max)
 {
     // ex int/if/ifutil.h:checkIntArg
     bool result = checkIntegerArg(out, value);
