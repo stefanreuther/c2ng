@@ -1,30 +1,39 @@
 /**
   *  \file game/map/ufo.hpp
+  *  \brief Class game::map::Ufo
   */
 #ifndef C2NG_GAME_MAP_UFO_HPP
 #define C2NG_GAME_MAP_UFO_HPP
 
-#include "game/map/circularobject.hpp"
-#include "game/types.hpp"
 #include "afl/bits/smallset.hpp"
+#include "game/map/circularobject.hpp"
 #include "game/parser/messageinformation.hpp"
+#include "game/types.hpp"
 
 namespace game { namespace map {
 
+    class Configuration;
+
+    /** Ufo.
+        Represents an Ufo, General Object, or Wormhole.
+        These objects have certain informative properties, and in addition:
+        - optional connection to another object (Wormhole connection)
+        - can be stored in history database
+        
+        \see UfoType for details. */
     class Ufo : public CircularObject {
      public:
-        // Constructor and Destructor
-        Ufo(Id_t id);
-        //    GUfo(const GUfo& other);
+        /** Constructor.
+            \param id Id */
+        explicit Ufo(Id_t id);
+
+        /** Destructor. */
         ~Ufo();
-        //    GUfo& operator=(const GUfo& rhs);
 
         // Object:
         virtual String_t getName(ObjectName which, afl::string::Translator& tx, InterpreterInterface& iface) const;
         virtual Id_t getId() const;
         virtual bool getOwner(int& result) const;
-
-        // MapObject:
         virtual bool getPosition(Point& result) const;
 
         // CircularObject:
@@ -36,7 +45,6 @@ namespace game { namespace map {
 
         int getColorCode() const;
         void setColorCode(int n);
-        //    uint8    getColor() const;
         IntegerProperty_t getSpeed() const;
         void setSpeed(IntegerProperty_t speed);
         IntegerProperty_t getHeading() const;
@@ -54,7 +62,6 @@ namespace game { namespace map {
         void setInfo2(String_t info);
         int32_t getRealId() const;
         void setRealId(int32_t id);
-        //    GPoint   getOtherEndPos() const;  <-- not used
 
         void setName(String_t name);
         void setPosition(Point pt);
@@ -70,36 +77,43 @@ namespace game { namespace map {
         Point getMovementVector() const;
         void setMovementVector(Point vec);
 
-        // Links:
+        /*
+         *  Links
+         */
+
+        /** Disconnect from other Ufo.
+            \post getOtherEnd()=0 */
         void disconnect();
+
+        /** Connect with another Ufo.
+            This creates a bidirectional link.
+            If either end is already connected, that connection is removed first.
+            \param other Other Ufo
+            \post getOtherEnd()=&other */
         void connectWith(Ufo& other);
+
+        /** Get other end.
+            \return Other end */
         Ufo* getOtherEnd() const;
 
-        //    /* Loader interface */
-        //    void addUfoData(const TUfo& data);
-        //    void addObjectData(const TUtil33GO& obj);
-        //    void addHistoryData(const TDbUfo& data);
-        //    void addWormholeData(const TUtil14Wormhole& data, bool all, int turn);
+        /*
+         *  Loader interface
+         */
+
+        /** Add message information.
+            \param info Message information addressed at this Ufo */
         void addMessageInformation(const game::parser::MessageInformation& info);
 
-        void postprocess(int turn);
+        /** Postprocess after loading.
+            \param turn Current turn
+            \param mapConfig Map config */
+        void postprocess(int turn, const Configuration& mapConfig);
 
         bool isStoredInHistory() const;
-        //    void getHistoryData(TDbUfo& data) const;
         void setIsStoredInHistory(bool value);
 
         bool isSeenThisTurn() const;
         void setIsSeenThisTurn(bool value);
-
-        //    /* Accessors */
-
-        //    void     setMovementVector(GPoint movement_vector);
-
-        //    /* Values for flags */
-        //    enum {
-        //        UfoSeenThisTurn     = 1,
-        //        UfoStoredInDatabase = 2
-        //    };
 
      private:
         enum Flag {
@@ -128,8 +142,6 @@ namespace game { namespace map {
         Point m_movementVector;              // movement_vector;
         afl::bits::SmallSet<Flag> m_flags;   // flags
         Ufo* m_otherEnd;                     // other_end
-
-        //    void copyUfo(const TUfo& data);
     };
 
 } }

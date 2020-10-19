@@ -7,13 +7,15 @@
 #include "game/spec/friendlycode.hpp"
 
 #include "t_game_spec.hpp"
-#include "game/playerlist.hpp"
-#include "game/map/planet.hpp"
-#include "afl/sys/log.hpp"
 #include "afl/string/nulltranslator.hpp"
+#include "afl/sys/log.hpp"
 #include "game/map/configuration.hpp"
 #include "game/map/minefield.hpp"
+#include "game/map/planet.hpp"
+#include "game/map/ship.hpp"
+#include "game/playerlist.hpp"
 #include "game/spec/shiplist.hpp"
+#include "game/test/registrationkey.hpp"
 
 /** Test friendly code constructors. */
 void
@@ -131,7 +133,7 @@ TestGameSpecFriendlyCode::testWorksOn()
         TS_ASSERT(!shipFC.worksOn(p, config));
         TS_ASSERT(!fedFC.worksOn(p, config));
     }
-    
+
     // Unknown planet
     {
         game::map::Planet p(9);
@@ -168,5 +170,107 @@ TestGameSpecFriendlyCode::testWorksOn()
         TS_ASSERT(!shipFC.worksOn(m, scoreDefinitions, shipList, config));
         TS_ASSERT(!fedFC.worksOn(m, scoreDefinitions, shipList, config));
     }
+}
+
+/** Test worksOn(), for ships. */
+void
+TestGameSpecFriendlyCode::testWorksOnShip()
+{
+    // Environment
+    game::UnitScoreDefinitionList scoreDefinitions;
+    game::spec::ShipList shipList;
+    game::config::HostConfiguration config;
+    config.setDefaultValues();
+
+    const int HULL_NR = 12;
+    shipList.hulls().create(HULL_NR);
+
+    afl::sys::Log log;
+    afl::string::NullTranslator tx;
+
+    // Some fcodes
+    game::spec::FriendlyCode planetFC("pfc", "p,xxx");
+    game::spec::FriendlyCode shipFC("sfc", "s,xxx");
+    game::spec::FriendlyCode fedFC("ffc", "s+1,xxx");
+    game::spec::FriendlyCode capFC("cfc", "sc,xxx");
+    game::spec::FriendlyCode alchemyFC("afc", "sa,xxx");
+
+    // Fed ship
+    {
+        game::map::Ship sh(9);
+        sh.setOwner(1);
+        sh.setHull(HULL_NR);
+        sh.setPlayability(sh.ReadOnly);
+        TS_ASSERT(!planetFC.worksOn(sh, scoreDefinitions, shipList, config));
+        TS_ASSERT(shipFC.worksOn(sh, scoreDefinitions, shipList, config));
+        TS_ASSERT(fedFC.worksOn(sh, scoreDefinitions, shipList, config));
+        TS_ASSERT(!capFC.worksOn(sh, scoreDefinitions, shipList, config));
+        TS_ASSERT(!alchemyFC.worksOn(sh, scoreDefinitions, shipList, config));
+
+        const game::map::Object& obj = sh;
+        TS_ASSERT(!planetFC.worksOn(obj, scoreDefinitions, shipList, config));
+        TS_ASSERT(shipFC.worksOn(obj, scoreDefinitions, shipList, config));
+        TS_ASSERT(fedFC.worksOn(obj, scoreDefinitions, shipList, config));
+        TS_ASSERT(!capFC.worksOn(obj, scoreDefinitions, shipList, config));
+        TS_ASSERT(!alchemyFC.worksOn(obj, scoreDefinitions, shipList, config));
+    }
+
+    // Lizard warship
+    {
+        game::map::Ship sh(9);
+        sh.setOwner(2);
+        sh.setHull(HULL_NR);
+        sh.setPlayability(sh.ReadOnly);
+        sh.setNumBays(1);
+        TS_ASSERT(shipFC.worksOn(sh, scoreDefinitions, shipList, config));
+        TS_ASSERT(!fedFC.worksOn(sh, scoreDefinitions, shipList, config));
+        TS_ASSERT(capFC.worksOn(sh, scoreDefinitions, shipList, config));
+        TS_ASSERT(!alchemyFC.worksOn(sh, scoreDefinitions, shipList, config));
+   }
+
+    // Alchemy ship
+    {
+        game::map::Ship sh(9);
+        sh.setOwner(2);
+        sh.setHull(HULL_NR);
+        sh.setPlayability(sh.ReadOnly);
+        sh.setNumBeams(1);
+        sh.setBeamType(10);
+        sh.addShipSpecialFunction(game::spec::HullFunction::NeutronicRefinery);
+        TS_ASSERT(shipFC.worksOn(sh, scoreDefinitions, shipList, config));
+        TS_ASSERT(!fedFC.worksOn(sh, scoreDefinitions, shipList, config));
+        TS_ASSERT(capFC.worksOn(sh, scoreDefinitions, shipList, config));
+        TS_ASSERT(alchemyFC.worksOn(sh, scoreDefinitions, shipList, config));
+    }
+
+    // Remote-controlled ship
+    {
+        game::map::Ship sh(9);
+        sh.setOwner(1);
+        sh.setHull(HULL_NR);
+
+        game::parser::MessageInformation info(game::parser::MessageInformation::Ship, 9, 100);
+        info.addValue(game::parser::mi_ShipRemoteFlag, 4);
+        sh.addMessageInformation(info, game::PlayerSet_t(1));
+
+        sh.setPlayability(sh.ReadOnly);
+        TS_ASSERT(!fedFC.worksOn(sh, scoreDefinitions, shipList, config));
+    }
+}
+
+/** Test isPermitted(). */
+void
+TestGameSpecFriendlyCode::testIsPermitted()
+{
+    game::spec::FriendlyCode unregFC("ufc", "s,xxx");
+    game::spec::FriendlyCode regFC("rfc", "sr,xxx");
+
+    game::test::RegistrationKey unregKey(game::RegistrationKey::Unregistered, 6);
+    game::test::RegistrationKey regKey(game::RegistrationKey::Registered, 10);
+
+    TS_ASSERT(unregFC.isPermitted(unregKey));
+    TS_ASSERT(unregFC.isPermitted(regKey));
+    TS_ASSERT(!regFC.isPermitted(unregKey));
+    TS_ASSERT(regFC.isPermitted(regKey));
 }
 

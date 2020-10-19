@@ -6,7 +6,6 @@
 
 #include "afl/base/signalconnection.hpp"
 #include "game/cargocontainer.hpp"
-#include "game/interpreterinterface.hpp"
 #include "game/map/ship.hpp"
 #include "game/hostversion.hpp"
 
@@ -19,7 +18,6 @@ namespace game { namespace map {
         ShipTransporter(Ship& sh,
                         Ship::Transporter type,
                         Id_t targetId,
-                        InterpreterInterface& iface,
                         const Universe& univ,
                         HostVersion hostVersion);
 
@@ -35,7 +33,6 @@ namespace game { namespace map {
         Ship& m_ship;
         Ship::Transporter m_type;
         Id_t m_targetId;
-        InterpreterInterface& m_interface;
         const Universe& m_universe;
         bool m_allowParallelTransfer;
 

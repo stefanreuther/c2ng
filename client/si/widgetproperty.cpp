@@ -92,7 +92,7 @@ client::si::setWidgetProperty(WidgetProperty p, afl::data::Value* value, ui::Wid
         if (ui::widgets::FrameGroup* g = dynamic_cast<ui::widgets::FrameGroup*>(w)) {
             String_t stringValue;
             if (interpreter::checkStringArg(stringValue, value)) {
-                ui::widgets::FrameGroup::Type type;
+                ui::FrameType type;
                 if (!parseFrameType(type, stringValue)) {
                     throw interpreter::Error::rangeError();
                 }

@@ -1,0 +1,12 @@
+/*!
+     \namespace game::spec::info
+     \brief Specification browsing
+
+     This namespace contains functions and classes to browse game specifications.
+     This includes standalone functions to format stuff (game/spec/info/info.hpp),
+     as well as the backend to the Universe Almanac feature (game::spec::info::Browser).
+
+     <b>Entry point:</b>
+
+     - game::spec::info::Browser
+ */

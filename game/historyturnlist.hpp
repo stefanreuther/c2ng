@@ -1,5 +1,6 @@
 /**
   *  \file game/historyturnlist.hpp
+  *  \brief Class game::HistoryTurnList
   */
 #ifndef C2NG_GAME_HISTORYTURNLIST_HPP
 #define C2NG_GAME_HISTORYTURNLIST_HPP
@@ -14,14 +15,30 @@ namespace game {
     class Root;
     class Timestamp;
 
+    /** List of history turns. */
     class HistoryTurnList {
      public:
+        /** Constructor.
+            Makes an empty list. */
         HistoryTurnList();
+
+        /** Destructor. */
         ~HistoryTurnList();
 
+        /** Get HistoryTurn object by turn number.
+            \param nr Turn number
+            \return HistoryTurn object; can be null */
         HistoryTurn* get(int nr) const;
+
+        /** Create HistoryTurn object by turn number.
+            \param nr Turn number
+            \return HistoryTurn object; can be null if turn number is invalid */
         HistoryTurn* create(int nr);
 
+        /** Find newest unknown turn number.
+            \param currentTurn Current turn (not in HistoryTurnList; assumed to be known)
+            \return Greatest turn number that is not known, i.e. marked as HistoryTurn::Unknown or not contained in the HistoryTurnList,
+                    and precedes a known turn (currentTurn or known HistoryTurn); can be 0. */
         int findNewestUnknownTurnNumber(int currentTurn) const;
 
         /** Initialize from turn scores.

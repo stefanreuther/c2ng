@@ -8,6 +8,7 @@
 #include "ui/layoutablegroup.hpp"
 #include "ui/colorscheme.hpp"
 #include "afl/base/deleter.hpp"
+#include "ui/draw.hpp"
 
 namespace ui { namespace widgets {
 
@@ -16,21 +17,11 @@ namespace ui { namespace widgets {
         In addition, the group leaves a configurable padding (setPadding) to the content. */
     class FrameGroup : public LayoutableGroup {
      public:
-        /// Frame type (color).
-        enum Type {
-            NoFrame,            ///< Don't draw a frame. ex WColorFrame cf_None, using fw=2
-            RedFrame,           ///< Red frame.          ex WColorFrame cf_Red, using fw=2
-            YellowFrame,        ///< Yellow frame.       ex WColorFrame cf_Yellow, using fw=2
-            GreenFrame,         ///< Green frame.        ex WColorFrame cf_Green, using fw=2
-            RaisedFrame,        ///< Raised 3D frame.
-            LoweredFrame        ///< Lowered 3D frame.   ex UIFrameGroup, using fw=1, pad=frame-1
-        };
-
         /** Constructor.
             \param mgr Layout manager for content
             \param colors UI color scheme to allow palette access
             \param type Frame type (color) */
-        FrameGroup(ui::layout::Manager& mgr, ColorScheme& colors, Type type);
+        FrameGroup(ui::layout::Manager& mgr, ColorScheme& colors, FrameType type);
 
         /** Set frame width.
             This function should only be called during dialog setup (before layout).
@@ -45,18 +36,18 @@ namespace ui { namespace widgets {
         /** Set type (color).
             This function can be called at any time during the dialog.
             \param type New type */
-        void setType(Type type);
+        void setType(FrameType type);
 
         /** Get type (color).
             \return Type */
-        Type getType() const;
+        FrameType getType() const;
 
         /** Wrap a single widget within a FrameGroup.
             \param del Deleter. The FrameGroup instance will be added here.
             \param colors UI color scheme to allow palette access
             \param type Frame type (color)
             \param widget Widget to add */
-        static FrameGroup& wrapWidget(afl::base::Deleter& del, ColorScheme& colors, Type type, Widget& widget);
+        static FrameGroup& wrapWidget(afl::base::Deleter& del, ColorScheme& colors, FrameType type, Widget& widget);
 
         // LayoutableGroup:
         virtual gfx::Rectangle transformSize(gfx::Rectangle size, Transformation kind) const;
@@ -71,7 +62,7 @@ namespace ui { namespace widgets {
 
      private:
         ColorScheme& m_colors;
-        Type m_frameType;
+        FrameType m_frameType;
         int m_frameWidth;
         int m_padding;
     };

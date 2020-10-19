@@ -1,16 +1,17 @@
 /**
   *  \file game/turnloader.cpp
+  *  \brief Base class game::TurnLoader
   */
 
 #include "game/turnloader.hpp"
-#include "afl/string/nulltranslator.hpp"
-#include "game/limits.hpp"
-#include "game/db/loader.hpp"
-#include "game/root.hpp"
-#include "afl/string/format.hpp"
-#include "game/session.hpp"
 #include "afl/except/fileproblemexception.hpp"
+#include "afl/string/format.hpp"
+#include "afl/string/nulltranslator.hpp"
+#include "game/db/loader.hpp"
+#include "game/limits.hpp"
+#include "game/root.hpp"
 #include "game/score/loader.hpp"
+#include "game/session.hpp"
 
 namespace {
     const char*const LOG_NAME = "game.db";
@@ -96,7 +97,7 @@ game::TurnLoader::loadHistoryDatabases(Turn& turn, Game& game, int player, int t
 }
 
 void
-game::TurnLoader::saveCurrentDatabases(Turn& turn, Game& game, int player, Root& root, Session& session, afl::charset::Charset& charset)
+game::TurnLoader::saveCurrentDatabases(const Turn& turn, const Game& game, int player, const Root& root, Session& session, afl::charset::Charset& charset)
 {
     // Save starchart
     if (game::spec::ShipList* shipList = session.getShipList().get()) {

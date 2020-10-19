@@ -3,9 +3,11 @@
   */
 
 #include "client/dialogs/objectselectiondialog.hpp"
-#include "client/objectcursorfactory.hpp"
-#include "client/proxy/objectlistener.hpp"
+#include "afl/base/refcounted.hpp"
+#include "game/proxy/cursorobserverproxy.hpp"
+#include "game/proxy/objectlistener.hpp"
 #include "client/si/contextprovider.hpp"
+#include "client/si/contextreceiver.hpp"
 #include "client/si/control.hpp"
 #include "client/tiles/tilefactory.hpp"
 #include "client/widgets/keymapwidget.hpp"
@@ -13,6 +15,7 @@
 #include "game/interface/iteratorprovider.hpp"
 #include "game/interface/planetcontext.hpp"
 #include "game/interface/shipcontext.hpp"
+#include "game/map/objectcursorfactory.hpp"
 #include "game/map/simpleobjectcursor.hpp"
 #include "game/turn.hpp"
 #include "interpreter/error.hpp"
@@ -26,9 +29,6 @@
 #include "ui/widgets/button.hpp"
 #include "ui/window.hpp"
 #include "util/translation.hpp"
-#include "afl/base/refcounted.hpp"
-#include "client/si/contextreceiver.hpp"
-#include "client/proxy/cursorobserverproxy.hpp"
 
 namespace {
     /*
@@ -98,18 +98,21 @@ namespace {
      */
     class DialogIteratorProvider : public game::interface::IteratorProvider {
      public:
-        DialogIteratorProvider(afl::base::Ref<CommonState> state)
-            : m_state(state)
+        DialogIteratorProvider(game::Session& session, afl::base::Ref<CommonState> state)
+            : m_session(session), m_state(state)
             { }
         virtual game::map::ObjectCursor* getCursor()
             { return &m_state->cursor(); }
         virtual game::map::ObjectType* getType()
             { return m_state->cursor().getObjectType(); }
+        virtual game::Session& getSession()
+            { return m_session; }
         virtual void store(interpreter::TagNode& /*out*/)
             { throw interpreter::Error::notSerializable(); }
         virtual String_t toString()
             { return "#<iterator>"; }
      private:
+        game::Session& m_session;
         afl::base::Ref<CommonState> m_state;
     };
 
@@ -124,18 +127,9 @@ namespace {
             { }
         virtual void createContext(game::Session& session, client::si::ContextReceiver& recv)
             {
-                // FIXME: this code should be in a common library probably
                 game::map::Object* obj = m_state->cursor().getCurrentObject();
-                if (dynamic_cast<game::map::Ship*>(obj) != 0) {
-                    if (interpreter::Context* ctx = game::interface::ShipContext::create(obj->getId(), session)) {
-                        recv.addNewContext(ctx);
-                    }
-                } else if (dynamic_cast<game::map::Planet*>(obj) != 0) {
-                    if (interpreter::Context* ctx = game::interface::PlanetContext::create(obj->getId(), session)) {
-                        recv.addNewContext(ctx);
-                    }
-                } else {
-                    // FIXME?
+                if (interpreter::Context* ctx = game::interface::createObjectContext(obj, session)) {
+                    recv.addNewContext(ctx);
                 }
             }
      private:
@@ -192,7 +186,7 @@ namespace {
         virtual client::si::ContextProvider* createContextProvider()
             { return new DialogContextProvider(m_state); }
 
-        void attach(client::proxy::ObjectObserver& oop)
+        void attach(game::proxy::ObjectObserver& oop)
             {
                 // FIXME: move this into a separate class
                 class Updater : public util::Request<DialogControl> {
@@ -205,7 +199,7 @@ namespace {
                  private:
                     int m_id;
                 };
-                class Observer : public client::proxy::ObjectListener {
+                class Observer : public game::proxy::ObjectListener {
                  public:
                     Observer(util::RequestSender<DialogControl> sender)
                         : m_sender(sender)
@@ -233,7 +227,7 @@ namespace {
      *  Cursor Factory.
      *  This class initializes the cursor within the CommonState and provides it to the ObjectObserver.
      */
-    class DialogCursorFactory : public client::ObjectCursorFactory {
+    class DialogCursorFactory : public game::map::ObjectCursorFactory {
      public:
         DialogCursorFactory(afl::base::Ref<CommonState> state)
             : m_state(state)
@@ -256,12 +250,19 @@ namespace {
     {
      public:
         DialogUserInterfaceProperties(afl::base::Ref<CommonState> state)
-            : m_state(state)
+            : m_state(state),
+              m_pSession(0)
             { }
         virtual void init(game::Session& master)
-            { master.uiPropertyStack().add(*this); }
+            {
+                master.uiPropertyStack().add(*this);
+                m_pSession = &master;
+            }
         virtual void done(game::Session& master)
-            { master.uiPropertyStack().remove(*this); }
+            {
+                master.uiPropertyStack().remove(*this);
+                m_pSession = 0;
+            }
 
         virtual bool get(game::interface::UserInterfaceProperty prop, std::auto_ptr<afl::data::Value>& result)
             {
@@ -271,7 +272,11 @@ namespace {
                  case game::interface::iuiScreenRegistered:
                     return false;
                  case game::interface::iuiIterator:
-                    result.reset(new game::interface::IteratorContext(*new DialogIteratorProvider(m_state)));
+                    if (m_pSession) {
+                        result.reset(new game::interface::IteratorContext(*new DialogIteratorProvider(*m_pSession, m_state)));
+                    } else {
+                        result.reset();
+                    }
                     return true;
                  case game::interface::iuiSimFlag:
                     result.reset(interpreter::makeBooleanValue(0));
@@ -293,6 +298,7 @@ namespace {
             { return false; }
      private:
         afl::base::Ref<CommonState> m_state;
+        game::Session* m_pSession;
     };
 }
 
@@ -326,6 +332,7 @@ client::dialogs::doObjectSelectionDialog(const ObjectSelectionDialog& def,
                                          client::si::Control& parentControl,
                                          client::si::OutputState& outputState)
 {
+    // ex WObjectSelectionDialog (sort-of)
     ui::Root& root = parentControl.root();
     afl::string::Translator& tx = parentControl.translator();
 
@@ -333,7 +340,7 @@ client::dialogs::doObjectSelectionDialog(const ObjectSelectionDialog& def,
     afl::base::Ref<CommonState> state(*new CommonState(def.screenNumber, def.keymapName));
 
     // Create ObjectObserver. This cause the CommonState to be initialized with the cursor we want.
-    client::proxy::CursorObserverProxy oop(iface.gameSender(), std::auto_ptr<client::ObjectCursorFactory>(new DialogCursorFactory(state)));
+    game::proxy::CursorObserverProxy oop(iface.gameSender(), std::auto_ptr<game::map::ObjectCursorFactory>(new DialogCursorFactory(state)));
 
     // Set up script controls
     ui::EventLoop loop(root);

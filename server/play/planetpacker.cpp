@@ -74,6 +74,10 @@ server::play::PlanetPacker::buildValue() const
     addValue(*hv, ctx, "TECH.HULL", "TECH.HULL");
     addValue(*hv, ctx, "TECH.TORPEDO", "TECH.TORPEDO");
     addValue(*hv, ctx, "TEMP$", "TEMP");
+    addValue(*hv, ctx, "TURN.COLONISTS", "TURN.COLONISTS");
+    addValue(*hv, ctx, "TURN.MINERALS", "TURN.MINERALS");
+    addValue(*hv, ctx, "TURN.MONEY", "TURN.MONEY");
+    addValue(*hv, ctx, "TURN.NATIVES", "TURN.NATIVES");
 
     // Ground minerals
     afl::base::Ref<afl::data::Hash> ground(afl::data::Hash::create());
@@ -151,7 +155,7 @@ server::play::PlanetPacker::buildValue() const
         {
             afl::base::Ref<afl::data::Vector> launchers(afl::data::Vector::create());
             launchers->pushBackInteger(0);
-            for (int i = 0; i <= numTorpedoTypes; ++i) {
+            for (int i = 1; i <= numTorpedoTypes; ++i) {
                 launchers->pushBackInteger(pPlanet->getBaseStorage(game::TorpedoTech, i).orElse(0));
             }
             addValueNew(*hv, new afl::data::VectorValue(launchers), "STORAGE.LAUNCHERS");

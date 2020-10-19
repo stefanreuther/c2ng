@@ -21,6 +21,8 @@ namespace server { namespace play {
         int m_hullNr;
     };
 
+    Value_t* packHullFunctionList(const game::spec::HullFunctionList& list);
+
 } }
 
 #endif

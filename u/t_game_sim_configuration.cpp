@@ -24,6 +24,11 @@ TestGameSimConfiguration::testIt()
     TS_ASSERT_EQUALS(t.getBalancingMode(), t.BalanceNone);
     TS_ASSERT_EQUALS(t.getMode(), t.VcrPHost4);
 
+    // Accessors
+    const game::sim::Configuration& ct = t;
+    TS_ASSERT_EQUALS(&t.enemySettings(), &ct.enemySettings());
+    TS_ASSERT_EQUALS(&t.allianceSettings(), &ct.allianceSettings());
+
     // Modify
     const game::config::HostConfiguration hostConfig;
     const game::TeamSettings teams;

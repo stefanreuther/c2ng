@@ -9,7 +9,7 @@
 #include "game/map/anyplanettype.hpp"
 #include "game/map/anyshiptype.hpp"
 #include "game/map/configuration.hpp"
-#include "game/map/mapobject.hpp"
+#include "game/map/object.hpp"
 #include "game/map/universe.hpp"
 
 namespace {
@@ -42,6 +42,7 @@ game::map::Locker::Locker(Point target, const Configuration& config)
     // ex GLockData::GLockData
 }
 
+// Set range limit.
 void
 game::map::Locker::setRangeLimit(Point min, Point max)
 {
@@ -49,15 +50,14 @@ game::map::Locker::setRangeLimit(Point min, Point max)
     m_max = max;
 }
 
+// Set limitation to marked objects.
 void
 game::map::Locker::setMarkedOnly(bool flag)
 {
     m_markedOnly = flag;
 }
 
-// /** Add a point to the set.
-//     \param pt      coordinates
-//     \param marked  true iff the object at these coordinates is marked */
+// Add single point candidate.
 void
 game::map::Locker::addPoint(Point pt, bool marked, Reference obj)
 {
@@ -85,24 +85,23 @@ game::map::Locker::addPoint(Point pt, bool marked, Reference obj)
     }
 }
 
-// /** Add an object to the set. This uses the object's coordinates and selection status.
-//     \param obj the object */
+// Add object candidate.
 void
-game::map::Locker::addObject(const MapObject& obj, Reference::Type type)
+game::map::Locker::addObject(const Object& obj, Reference::Type type)
 {
     // ex GLockData::addObject
     Point pt;
     if (obj.getPosition(pt)) {
-        addPoint(pt, obj.isMarked(), Reference(type, obj.getId()));
+        addPoint(pt, obj.isMarked(), type == Reference::Null ? Reference() : Reference(type, obj.getId()));
     }
 }
 
-// /** Lock onto planets. Processes all planets in /univ/ using the lock
-//     data /data/. */
+// Add planets.
 void
 game::map::Locker::addPlanets(const Universe& univ)
 {
     // ex findPlanet
+    // ex find.pas:FindPlanet
     AnyPlanetType ty(const_cast<Universe&>(univ));
     for (Id_t pid = ty.findNextIndex(0); pid != 0; pid = ty.findNextIndex(pid)) {
         if (const Planet* pl = ty.getObjectByIndex(pid)) {
@@ -111,12 +110,12 @@ game::map::Locker::addPlanets(const Universe& univ)
     }
 }
 
-// /** Lock onto ships. Processes all ships in /univ/ using the lock data
-//     /data/. */
+// Add ships.
 void
 game::map::Locker::addShips(const Universe& univ)
 {
     // ex findShip
+    // ex find.pas:FindShip, FindShipOrMarker
     AnyShipType ty(const_cast<Universe&>(univ));
     for (Id_t sid = ty.findNextIndex(0); sid != 0; sid = ty.findNextIndex(sid)) {
         if (const Ship* sh = ty.getObjectByIndex(sid)) {
@@ -125,12 +124,13 @@ game::map::Locker::addShips(const Universe& univ)
     }
 }
 
-// /** Lock onto Ufo. Processes all ufos in /univ/ using the lock data
-//     /data/. */
+// Add Ufos.
 void
 game::map::Locker::addUfos(const Universe& univ)
 {
     // ex findUfo
+    // ex find.pas:FindPlanetOrUfo
+    // FIXME(?): handle outside points for circular objects?
     UfoType& ty(const_cast<UfoType&>(univ.ufos()));
     for (Id_t i = ty.findNextIndex(0); i != 0; i = ty.findNextIndex(i)) {
         if (const Ufo* u = ty.getObjectByIndex(i)) {
@@ -139,8 +139,7 @@ game::map::Locker::addUfos(const Universe& univ)
     }
 }
 
-// /** Lock onto minefields. Processes all minefields in /univ/ using the
-//     lock data /data/. */
+// Add minefields.
 void
 game::map::Locker::addMinefields(const Universe& univ)
 {
@@ -153,8 +152,7 @@ game::map::Locker::addMinefields(const Universe& univ)
     }
 }
 
-// /** Lock onto marker. Processes all markers (=drawings of type MarkerDrawing)
-//     from /univ/ using lock data /data/. */
+// Add drawings.
 void
 game::map::Locker::addDrawings(const Universe& univ, const Drawing* ignore)
 {
@@ -179,11 +177,7 @@ game::map::Locker::addDrawings(const Universe& univ, const Drawing* ignore)
     }
 }
 
-// /** Main entry point: do locking according to mode.
-//     \param univ   universe to process
-//     \param data   GLockData object that does the work
-//     \param mode   event, corresponds to the mouse button the user pressed
-//     \see setLockMode() */
+// Add universe (main entry point).
 void
 game::map::Locker::addUniverse(const Universe& univ, int32_t items, const Drawing* ignoreDrawing)
 {
@@ -204,28 +198,21 @@ game::map::Locker::addUniverse(const Universe& univ, int32_t items, const Drawin
     }
 }
 
-
-// /** Get found point. If the found object is across a map border,
-//     this will return the coordinates mapped into the map instance
-//     of /clicked/. Do not assume that this is one of the points
-//     added with addPoint(); in case none was in range, the clicked
-//     point is returned as is. */
+// Get found point.
 game::map::Point
 game::map::Locker::getFoundPoint() const
 {
     return m_foundPoint;
 }
 
-// /** Get found object. May be null if the found point does not
-//     correspond to an object. */
+// Get found object.
 game::Reference
 game::map::Locker::getFoundObject() const
 {
     return m_foundObject;
 }
 
-// /** Check point for inclusion in result. Does not mangle the point any
-//     further, just checks it. */
+/* Check point for inclusion in result. Does not mangle the point any further, just checks it. */
 void
 game::map::Locker::addPointRaw(Point pt, Reference obj)
 {

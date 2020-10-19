@@ -1,5 +1,6 @@
 /**
   *  \file game/vcr/classic/types.hpp
+  *  \brief Types for Classic VCR
   */
 #ifndef C2NG_GAME_VCR_CLASSIC_TYPES_HPP
 #define C2NG_GAME_VCR_CLASSIC_TYPES_HPP
@@ -9,6 +10,7 @@
 
 namespace game { namespace vcr { namespace classic {
 
+    /** Battle algorithm types. */
     enum Type {
         // xref game::vcr::classic::Battle::getAlgorithmName
         Unknown,            ///< Unknown.
@@ -47,14 +49,20 @@ namespace game { namespace vcr { namespace classic {
         FighterReturns
     };
 
-
+    /** Side of a VCR. */
     enum Side {
         LeftSide,
         RightSide
     };
 
+    /** Get other side.
+        \param s Side
+        \return other side */
     Side flipSide(Side s);
 
+    /** Type for time into a battle.
+        Battles start at time 0.
+        Time is visualized as seconds since start in PCC. */
     typedef int32_t Time_t;
 
 } } }

@@ -25,7 +25,6 @@ namespace game { namespace map {
         ~ObjectObserver();
 
         Object* getCurrentObject();
-        Universe* getCurrentUniverse();
 
         ObjectCursor& cursor();
         ObjectType* getObjectType();

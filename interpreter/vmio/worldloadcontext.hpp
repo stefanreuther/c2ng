@@ -7,6 +7,7 @@
 
 #include "interpreter/vmio/loadcontext.hpp"
 #include "interpreter/world.hpp"
+#include "interpreter/processlist.hpp"
 
 namespace interpreter { namespace vmio {
 
@@ -21,8 +22,9 @@ namespace interpreter { namespace vmio {
      public:
         /** Constructor.
             \param parent Parent context (mainly needed for loading application's contexts)
-            \param world World used to create processes and mutexes */
-        WorldLoadContext(LoadContext& parent, World& world);
+            \param processList ProcessList used to create processes
+            \param world World used to create mutexes */
+        WorldLoadContext(LoadContext& parent, ProcessList& processList, World& world);
 
         // LoadContext:
         virtual afl::data::Value* loadBCO(uint32_t id);
@@ -37,6 +39,7 @@ namespace interpreter { namespace vmio {
 
      private:
         LoadContext& m_parent;
+        ProcessList& m_processList;
         World& m_world;
     };
 

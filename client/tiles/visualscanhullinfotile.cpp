@@ -4,7 +4,7 @@
 
 #include "client/tiles/visualscanhullinfotile.hpp"
 #include "afl/string/format.hpp"
-#include "client/proxy/objectlistener.hpp"
+#include "game/proxy/objectlistener.hpp"
 #include "game/config/userconfiguration.hpp"
 #include "game/map/ship.hpp"
 #include "game/root.hpp"
@@ -190,7 +190,7 @@ client::tiles::VisualScanHullInfoTile::setContent(const Content& content)
 }
 
 void
-client::tiles::VisualScanHullInfoTile::attach(client::proxy::ObjectObserver& oop)
+client::tiles::VisualScanHullInfoTile::attach(game::proxy::ObjectObserver& oop)
 {
     class Updater : public util::Request<VisualScanHullInfoTile> {
      public:
@@ -203,7 +203,7 @@ client::tiles::VisualScanHullInfoTile::attach(client::proxy::ObjectObserver& oop
         Content m_content;
     };
 
-    class Listener : public client::proxy::ObjectListener {
+    class Listener : public game::proxy::ObjectListener {
      public:
         Listener(util::RequestSender<VisualScanHullInfoTile> reply)
             : m_reply(reply)

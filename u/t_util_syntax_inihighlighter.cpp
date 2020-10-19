@@ -124,6 +124,19 @@ TestUtilSyntaxIniHighlighter::testSections()
     TS_ASSERT_EQUALS(parseContinuation(testee, r), "\n");
     TS_ASSERT(!testee.scan(r));
 
+    // ...with space
+    testee.init(afl::string::toMemory("[foo]  \ni=1"));
+    TS_ASSERT(testee.scan(r));
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::SectionFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "[foo]");
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::DefaultFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "  \n");
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::NameFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "i");
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::DefaultFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "=1");
+    TS_ASSERT(!testee.scan(r));
+
     // ...indented
     testee.init(afl::string::toMemory("    [foo]"));
     TS_ASSERT(testee.scan(r));
@@ -140,6 +153,19 @@ TestUtilSyntaxIniHighlighter::testSections()
     TS_ASSERT_EQUALS(parseContinuation(testee, r), "[foo]");
     TS_ASSERT_EQUALS(r.getFormat(), util::syntax::CommentFormat);
     TS_ASSERT_EQUALS(parseContinuation(testee, r), "#bar");
+    TS_ASSERT(!testee.scan(r));
+
+    // ...with comment and newline
+    testee.init(afl::string::toMemory("[foo]#bar\ni=1"));
+    TS_ASSERT(testee.scan(r));
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::SectionFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "[foo]");
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::CommentFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "#bar\n");
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::NameFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "i");
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::DefaultFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "=1");
     TS_ASSERT(!testee.scan(r));
 
     // ...with space and comment
@@ -303,6 +329,26 @@ TestUtilSyntaxIniHighlighter::testAssignment()
     TS_ASSERT_EQUALS(parseContinuation(testee, r), " = hi");
     TS_ASSERT(!testee.scan(r));
 
+    // ...with no assigment
+    testee.init(afl::string::toMemory("x\n"));
+    TS_ASSERT(testee.scan(r));
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::NameFormat);
+    TS_ASSERT_EQUALS(r.getInfo(), "ex info");
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "x");
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::DefaultFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "\n");
+    TS_ASSERT(!testee.scan(r));
+
+    // ...with no assigment, with space
+    testee.init(afl::string::toMemory("x \n"));
+    TS_ASSERT(testee.scan(r));
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::NameFormat);
+    TS_ASSERT_EQUALS(r.getInfo(), "ex info");
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "x");
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::DefaultFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), " \n");
+    TS_ASSERT(!testee.scan(r));
+
     // ...with array
     testee.init(afl::string::toMemory("  y[2] = ho"));
     TS_ASSERT(testee.scan(r));
@@ -407,3 +453,20 @@ TestUtilSyntaxIniHighlighter::testAssignment()
     TS_ASSERT_EQUALS(parseContinuation(testee, r), " = fy");
     TS_ASSERT(!testee.scan(r));
 }
+
+void
+TestUtilSyntaxIniHighlighter::testOther()
+{
+    util::syntax::KeywordTable tab;
+    util::syntax::IniHighlighter testee(tab, "x");
+    util::syntax::Segment r;
+
+    // Invalid line (not highlighted)
+    testee.init(afl::string::toMemory("=#\n"));
+    TS_ASSERT(testee.scan(r));
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::DefaultFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "=#\n");
+    TS_ASSERT(!testee.scan(r));
+
+}
+

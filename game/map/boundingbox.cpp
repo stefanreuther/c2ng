@@ -139,7 +139,7 @@ void
 game::map::BoundingBox::addType(const ObjectType& ty)
 {
     for (Id_t i = ty.findNextIndex(0); i != 0; i = ty.findNextIndex(i)) {
-        if (const MapObject* obj = dynamic_cast<const MapObject*>(const_cast<ObjectType&>(ty).getObjectByIndex(i))) {
+        if (const Object* obj = const_cast<ObjectType&>(ty).getObjectByIndex(i)) {
             Point pos;
             if (obj->getPosition(pos)) {
                 if (const CircularObject* circ = dynamic_cast<const CircularObject*>(obj)) {

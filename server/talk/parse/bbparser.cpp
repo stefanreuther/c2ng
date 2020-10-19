@@ -3,6 +3,7 @@
   */
 
 #include <cstring>
+#include <memory>
 #include "server/talk/parse/bbparser.hpp"
 #include "afl/base/countof.hpp"
 #include "afl/string/string.hpp"
@@ -21,7 +22,7 @@ namespace {
         const char* rgb;
 
         static const BBColor* findColorByName(const char* name);
-        static const BBColor* findColorByValue(const char* rgb);
+        // static const BBColor* findColorByValue(const char* rgb);
     };
 
     const BBColor colors[] = {
@@ -59,15 +60,15 @@ namespace {
         return 0;
     }
 
-    const BBColor* BBColor::findColorByValue(const char* rgb)
-    {
-        for (size_t i = 0; i < countof(colors); ++i) {
-            if (std::strcmp(colors[i].rgb, rgb) == 0) {
-                return &colors[i];
-            }
-        }
-        return 0;
-    }
+    // const BBColor* BBColor::findColorByValue(const char* rgb)
+    // {
+    //     for (size_t i = 0; i < countof(colors); ++i) {
+    //         if (std::strcmp(colors[i].rgb, rgb) == 0) {
+    //             return &colors[i];
+    //         }
+    //     }
+    //     return 0;
+    // }
 
 
     /*
@@ -198,20 +199,20 @@ namespace {
 
     /** Complete a link node.
         If the user didn't specify the link as the attribute, derive it from the content. */
-    void completeLink(TextNode* node)
+    void completeLink(TextNode& node)
     {
-        if (node->text.empty()) {
+        if (node.text.empty()) {
             // There is no target attribute. Get it from the content.
-            if (node->children.size() == 1 && node->children[0]->major == TextNode::maPlain) {
+            if (node.children.size() == 1 && node.children[0]->major == TextNode::maPlain) {
                 // It contains just plain text, as in "[user]fruno[/user]".
                 // This will give it an empty content, so the renderer will
                 // generate it anew.
-                node->text = afl::string::strTrim(node->children[0]->text);
-                node->children.popBack();
+                node.text = afl::string::strTrim(node.children[0]->text);
+                node.children.popBack();
             } else {
                 // The content has formatting, as in "[user][b]f[/b]runo[/user]".
                 // Assume the user wants to keep that, and just use the raw text.
-                node->text = afl::string::strTrim(node->getTextContent());
+                node.text = afl::string::strTrim(node.getTextContent());
             }
         }
     }
@@ -637,8 +638,7 @@ server::talk::parse::BBParser::close()
 {
     // ex BBParser::close
     // FIXME: ASSERT(stack.size() > 1);
-    // FIXME: use auto_ptr
-    TextNode* node = stack.extractLast();
+    std::auto_ptr<TextNode> node(stack.extractLast());
     bool keep = true;
     switch (TextNode::MajorKind(node->major)) {
      case TextNode::maPlain:
@@ -651,7 +651,7 @@ server::talk::parse::BBParser::close()
         keep = !node->children.empty();
         break;
      case TextNode::maLink:
-        completeLink(node);
+        completeLink(*node);
         keep = true;
         break;
      case TextNode::maParagraph:
@@ -666,16 +666,14 @@ server::talk::parse::BBParser::close()
         break;
      case TextNode::maSpecial:
         if (node->minor == TextNode::miSpecialImage) {
-            completeLink(node);
+            completeLink(*node);
         }
         keep = true;
         break;
     }
 
     if (keep) {
-        stack.back()->children.pushBackNew(node);
-    } else {
-        delete node;
+        stack.back()->children.pushBackNew(node.release());
     }
 }
 

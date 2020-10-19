@@ -43,3 +43,39 @@ TestGameSpecTorpedoLauncher::testIt()
     TS_ASSERT_EQUALS(const_cast<const game::spec::TorpedoLauncher&>(testee).cost().get(game::spec::Cost::Tritanium), 3);
 }
 
+void
+TestGameSpecTorpedoLauncher::testDerivedInformation()
+{
+    // Mark 6 Photon
+    game::spec::TorpedoLauncher t(8);
+    t.setKillPower(46);
+    t.setDamagePower(80);
+    t.torpedoCost() = game::spec::Cost::fromString("35$ 1TDM");
+
+    // Host configuration using defaults
+    game::config::HostConfiguration config;
+
+    // Independant of host version
+    game::spec::Cost c;
+    TS_ASSERT_EQUALS(t.getMinefieldCost(1, 1000, false, config, c), true);
+    TS_ASSERT_EQUALS(c.toPHostString(), "T15 D15 M15 $546");
+
+    TS_ASSERT_EQUALS(t.getMinefieldCost(9, 1000, false, config, c), true);
+    TS_ASSERT_EQUALS(c.toPHostString(), "T3 D3 M3 $136");
+
+    // Host
+    {
+        game::HostVersion h(game::HostVersion::Host, MKVERSION(3, 22, 40));
+        TS_ASSERT_EQUALS(t.getRechargeTime(1, h, config), 32);
+        TS_ASSERT_EQUALS(t.getHitOdds(1, h, config), 66);
+    }
+
+    // PHost
+    {
+        game::HostVersion h(game::HostVersion::PHost, MKVERSION(4, 0, 5));
+        TS_ASSERT_EQUALS(t.getRechargeTime(1, h, config), 44);
+        TS_ASSERT_EQUALS(t.getHitOdds(1, h, config), 65);
+    }
+
+}
+

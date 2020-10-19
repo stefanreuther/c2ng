@@ -22,7 +22,6 @@
 #include "interpreter/subroutinevalue.hpp"
 #include "interpreter/world.hpp"
 
-using afl::data::Access;
 using afl::data::BooleanValue;
 using afl::data::FloatValue;
 using afl::data::Hash;
@@ -168,6 +167,9 @@ TestInterpreterUnaryExecution::testNeg()
     p.reset(executeUnaryOperation(h.world, interpreter::unNeg, addr(FloatValue(-2.5))));
     TS_ASSERT_EQUALS(toFloat(p), 2.5);
 
+    p.reset(executeUnaryOperation(h.world, interpreter::unNeg, addr(BooleanValue(true))));
+    TS_ASSERT_EQUALS(toInteger(p), -1);
+
     TS_ASSERT_THROWS(p.reset(executeUnaryOperation(h.world, interpreter::unNeg, addr(StringValue("x")))), interpreter::Error);
 }
 
@@ -186,6 +188,9 @@ TestInterpreterUnaryExecution::testPos()
 
     p.reset(executeUnaryOperation(h.world, interpreter::unPos, addr(FloatValue(-2.5))));
     TS_ASSERT_EQUALS(toFloat(p), -2.5);
+
+    p.reset(executeUnaryOperation(h.world, interpreter::unPos, addr(BooleanValue(true))));
+    TS_ASSERT_EQUALS(toInteger(p), 1);
 
     TS_ASSERT_THROWS(p.reset(executeUnaryOperation(h.world, interpreter::unPos, addr(StringValue("x")))), interpreter::Error);
 }
@@ -960,7 +965,7 @@ TestInterpreterUnaryExecution::testInc()
     TS_ASSERT_THROWS(p.reset(executeUnaryOperation(h.world, interpreter::unInc, addr(StringValue("x")))), interpreter::Error);
 }
 
-/** Test unInc: decrement numerical. */
+/** Test unDec: decrement numerical. */
 void
 TestInterpreterUnaryExecution::testDec()
 {

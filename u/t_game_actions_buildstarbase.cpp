@@ -10,7 +10,6 @@
 #include "afl/string/nulltranslator.hpp"
 #include "game/exception.hpp"
 #include "game/element.hpp"
-#include "game/test/interpreterinterface.hpp"
 #include "game/map/planetstorage.hpp"
 
 using game::Element;
@@ -34,7 +33,6 @@ namespace {
     struct TestHarness {
         game::config::HostConfiguration config;
         game::map::Planet planet;
-        game::test::InterpreterInterface iface;
         game::map::PlanetStorage container;
         afl::string::NullTranslator tx;
 
@@ -44,8 +42,7 @@ namespace {
     TestHarness::TestHarness()
         : config(),
           planet(99),
-          iface(),
-          container(preparePlanet(planet), iface, config),
+          container(preparePlanet(planet), config),
           tx()
     {
         config.setDefaultValues();

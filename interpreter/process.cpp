@@ -1,6 +1,11 @@
 /**
   *  \file interpreter/process.cpp
+  *  \brief Class interpreter::Process
   */
+
+/* This is a HACK: in g++-4.9.3 i686-pc-cygwin, <stdexcept> somehow prevents that <stdint.h>
+   (and thus afl/base/types.hpp) defines INT32_MAX. So, include the latter first. */
+#include "afl/base/types.hpp"
 
 #include <cassert>
 #include <stdexcept>
@@ -37,22 +42,13 @@
 #include "interpreter/values.hpp"
 #include "interpreter/world.hpp"
 #include "util/translation.hpp"
+#include "afl/string/nulltranslator.hpp"
 
 namespace {
 
     const char LOG_NAME[] = "interpreter.process";
 
-// std::auto_ptr<IntContext> IntExecutionContext::global_context;
-//
-// static bool
-// noBreak()
-// {
-//     return false;
-// }
-//
-// static bool (*check_break)() = noBreak;
-//
-//
+
     void validateCalledObject(bool isProcedure, uint8_t minor)
     {
         using interpreter::Error;
@@ -71,7 +67,7 @@ namespace {
 interpreter::Process::Frame::Frame(BCORef_t bco)
     : bco(bco),
       pc(0),
-      localNames(bco->getLocalNames()),
+      localNames(bco->localVariables()),
       contextSP(0),
       exceptionSP(0),
       frameSP(0),
@@ -126,8 +122,13 @@ class interpreter::Process::FrameContext : public interpreter::SingleContext {
         { return "#<stack-frame>"; }
     virtual void store(TagNode& out, afl::io::DataSink& /*aux*/, afl::charset::Charset& /*cs*/, SaveContext& /*ctx*/) const
         {
+            uint32_t packedSP = static_cast<uint32_t>(m_frame.frameSP);
+            if (packedSP != m_frame.frameSP) {
+                throw Error::tooComplex();
+            }
+
             out.tag   = TagNode::Tag_Frame;
-            out.value = m_frame.frameSP;
+            out.value = packedSP;
         }
 
     // Value:
@@ -145,7 +146,7 @@ class interpreter::Process::FrameContext : public interpreter::SingleContext {
 
 
 
-/** Constructor. */
+// Create process.
 interpreter::Process::Process(World& world, String_t name, uint32_t processId)
     : m_world(world),
       m_state(Suspended),
@@ -168,7 +169,7 @@ interpreter::Process::Process(World& world, String_t name, uint32_t processId)
     m_contextTOS = m_contexts.size();
 }
 
-/** Destructor. */
+// Destructor.
 interpreter::Process::~Process()
 {
     // ex IntExecutionContext::~IntExecutionContext
@@ -179,15 +180,14 @@ interpreter::Process::~Process()
     sig_invalidate.raise();
 }
 
-// /** Push new frame. This frame will execute util termination, then execution
-//     will resume at the current frame. */
+// Push new frame (subroutine call).
 interpreter::Process::Frame&
 interpreter::Process::pushFrame(BCORef_t bco, bool wantResult)
 {
     // ex IntExecutionContext::pushNewFrame
     Frame* frame = new Frame(bco);
     frame->contextSP   = m_contexts.size();
-    frame->exceptionSP = m_exceptions.size();
+    frame->exceptionSP = m_exceptionHandlers.size();
     frame->frameSP     = m_frames.size();
     frame->wantResult  = wantResult;
     m_frames.pushBackNew(frame);
@@ -195,7 +195,7 @@ interpreter::Process::pushFrame(BCORef_t bco, bool wantResult)
     return *frame;
 }
 
-// /** Pop frame. Execution resumes at previous frame. */
+// Pop frame (subroutine return).
 void
 interpreter::Process::popFrame()
 {
@@ -207,8 +207,8 @@ interpreter::Process::popFrame()
     while (m_contexts.size() > frame->contextSP) {
         m_contexts.popBack();
     }
-    while (m_exceptions.size() > frame->exceptionSP) {
-        m_exceptions.popBack();
+    while (m_exceptionHandlers.size() > frame->exceptionSP) {
+        m_exceptionHandlers.popBack();
     }
 
     /* Generate result */
@@ -226,19 +226,23 @@ interpreter::Process::popFrame()
     m_frames.popBack();
 }
 
+// Get number of active frames.
 size_t
 interpreter::Process::getNumActiveFrames() const
 {
     return m_frames.size();
 }
 
+// Get outermost frame.
 interpreter::Process::Frame*
 interpreter::Process::getOutermostFrame()
 {
-    // FIXME: empty?
-    return m_frames[0];
+    return (!m_frames.empty()
+            ? m_frames[0]
+            : 0);
 }
 
+// Get frame by index.
 const interpreter::Process::Frame*
 interpreter::Process::getFrame(size_t nr) const
 {
@@ -247,10 +251,20 @@ interpreter::Process::getFrame(size_t nr) const
             : 0);
 }
 
+// Create Context for frame.
+interpreter::Context*
+interpreter::Process::makeFrameContext(size_t nr) const
+{
+    // ex IntVMLoadContext::makeFrameContext
+    if (nr < m_frames.size()) {
+        return new FrameContext(*m_frames[nr]);
+    } else {
+        return 0;
+    }
+}
 
-// /** Push exception handler. If program triggers an error, execution resumes
-//     in the current frame at the specified program counter.
-//     \param pc Program counter */
+
+// Push exception handler (catch).
 void
 interpreter::Process::pushExceptionHandler(PC_t pc)
 {
@@ -260,9 +274,10 @@ interpreter::Process::pushExceptionHandler(PC_t pc)
     e->contextSP = m_contexts.size();
     e->frameSP   = m_frames.size();
     e->pc        = pc;
-    m_exceptions.pushBackNew(e);
+    m_exceptionHandlers.pushBackNew(e);
 }
 
+// Push exception handler (deserialisation).
 void
 interpreter::Process::pushExceptionHandler(PC_t pc, size_t frameSP, size_t contextSP, size_t valueSP)
 {
@@ -271,35 +286,48 @@ interpreter::Process::pushExceptionHandler(PC_t pc, size_t frameSP, size_t conte
     e->contextSP = contextSP;
     e->frameSP   = frameSP;
     e->pc        = pc;
-    m_exceptions.pushBackNew(e);
+    m_exceptionHandlers.pushBackNew(e);
 }
 
-// /** Pop exception handler. Cancels a previous pushExceptionHandler. */
+// Pop exception handler (uncatch).
 void
 interpreter::Process::popExceptionHandler()
 {
     // ex IntExecutionContext::popExceptionHandler()
-    m_exceptions.popBack();
+    if (m_exceptionHandlers.empty()) {
+        throw Error::internalError("no catch [suncatch]");
+    }
+    m_exceptionHandlers.popBack();
 }
 
-// /** Push a new context. This one will be the first one used to look up variables. */
+// Access exception handlers.
+const afl::container::PtrVector<interpreter::Process::ExceptionHandler>&
+interpreter::Process::getExceptionHandlers() const
+{
+    return m_exceptionHandlers;
+}
+
+// Push a new context.
 void
 interpreter::Process::pushNewContext(Context* ctx)
 {
     // ex IntExecutionContext::pushNewContext
+    assert(ctx);
     m_contexts.pushBackNew(ctx);
 }
 
-// /** Copy contexts from a template. */
+// Push new contexts from template.
 void
 interpreter::Process::pushContextsFrom(afl::container::PtrVector<Context>& ctxs)
 {
     // ex IntExecutionContext::pushContextsFrom
+    // FIXME: needed?
     for (size_t i = 0; i < ctxs.size(); ++i) {
         pushNewContext(ctxs.extractElement(i));
     }
 }
 
+// Mark top-of-context stack.
 void
 interpreter::Process::markContextTOS()
 {
@@ -307,6 +335,7 @@ interpreter::Process::markContextTOS()
     m_contextTOS = m_contexts.size();
 }
 
+// Set top-of-context-stack.
 bool
 interpreter::Process::setContextTOS(size_t n)
 {
@@ -318,45 +347,79 @@ interpreter::Process::setContextTOS(size_t n)
     }
 }
 
-// /** Pop context. Cancels a previous pushNewContext. */
+// Get top-of-context-stack.
+size_t
+interpreter::Process::getContextTOS() const
+{
+    return m_contextTOS;
+}
+
+// Pop context.
 void
 interpreter::Process::popContext()
 {
     // ex IntExecutionContext::popContext()
     m_contexts.popBack();
+
+    // Fix up contextTOS.
+    // This is to avoid that an implicitly set contextTOS survives too long.
+    if (m_contextTOS > m_contexts.size()) {
+        m_contextTOS = m_contexts.size();
+    }
 }
 
+// Access list of contexts.
 const afl::container::PtrVector<interpreter::Context>&
 interpreter::Process::getContexts() const
 {
     return m_contexts;
 }
 
+// Push new value.
 void
 interpreter::Process::pushNewValue(afl::data::Value* v)
 {
     m_valueStack.pushBackNew(v);
 }
 
+// Drop topmost value.
 void
 interpreter::Process::dropValue()
 {
+    // FIXME: only required by TaskEditor::save
     m_valueStack.popBack();
 }
 
-afl::data::Value*
-interpreter::Process::getResult()
+// Get process result (top of value stack).
+const afl::data::Value*
+interpreter::Process::getResult() const
 {
-    // FIXME: what if empty?
-    return m_valueStack.top();
+    return m_valueStack.size() != 0 ? m_valueStack.top() : 0;
 }
 
+// Get size of stack.
 size_t
 interpreter::Process::getStackSize() const
 {
     return m_valueStack.size();
 }
 
+// Access value stack.
+const
+interpreter::Process::Segment_t&
+interpreter::Process::getValueStack() const
+{
+    return m_valueStack;
+}
+
+// Access value stack.
+interpreter::Process::Segment_t&
+interpreter::Process::getValueStack()
+{
+    return m_valueStack;
+}
+
+// Set process status.
 void
 interpreter::Process::setState(State ps)
 {
@@ -364,6 +427,7 @@ interpreter::Process::setState(State ps)
     m_state = ps;
 }
 
+// Get process status.
 interpreter::Process::State
 interpreter::Process::getState() const
 {
@@ -371,30 +435,35 @@ interpreter::Process::getState() const
     return m_state;
 }
 
+// Set process group Id.
 void
 interpreter::Process::setProcessGroupId(uint32_t pgid)
 {
     m_processGroupId = pgid;
 }
 
+// Get process group Id.
 uint32_t
 interpreter::Process::getProcessGroupId() const
 {
     return m_processGroupId;
 }
 
+// Get process Id.
 uint32_t
 interpreter::Process::getProcessId() const
 {
     return m_processId;
 }
 
+// Set process name.
 void
 interpreter::Process::setName(String_t name)
 {
     m_processName = name;
 }
 
+// Get process name.
 String_t
 interpreter::Process::getName() const
 {
@@ -402,6 +471,7 @@ interpreter::Process::getName() const
     return m_processName;
 }
 
+// Set priority.
 void
 interpreter::Process::setPriority(int pri)
 {
@@ -409,6 +479,7 @@ interpreter::Process::setPriority(int pri)
     m_processPriority = pri;
 }
 
+// Get priority.
 int
 interpreter::Process::getPriority() const
 {
@@ -416,6 +487,7 @@ interpreter::Process::getPriority() const
     return m_processPriority;
 }
 
+// Get last error message.
 const interpreter::Error&
 interpreter::Process::getError() const
 {
@@ -423,6 +495,7 @@ interpreter::Process::getError() const
     return m_processError;
 }
 
+// Set process kind.
 void
 interpreter::Process::setProcessKind(ProcessKind k)
 {
@@ -430,6 +503,7 @@ interpreter::Process::setProcessKind(ProcessKind k)
     m_processKind = k;
 }
 
+// Get process kind.
 interpreter::Process::ProcessKind
 interpreter::Process::getProcessKind() const
 {
@@ -437,6 +511,7 @@ interpreter::Process::getProcessKind() const
     return m_processKind;
 }
 
+// Freeze process (set state from Suspended to Frozen).
 void
 interpreter::Process::freeze(Freezer& p)
 {
@@ -447,6 +522,7 @@ interpreter::Process::freeze(Freezer& p)
     m_pFreezer = &p;
 }
 
+// Unfreeze process (set state from Frozen to Suspended).
 void
 interpreter::Process::unfreeze()
 {
@@ -461,15 +537,23 @@ interpreter::Process::unfreeze()
     }
 }
 
+// Get freezer.
 interpreter::Process::Freezer*
 interpreter::Process::getFreezer() const
 {
     return m_pFreezer;
 }
 
-// /** Add trace corresponding to last executed instruction to the specified IntError object. */
+// Access world.
+interpreter::World&
+interpreter::Process::world() const
+{
+    return m_world;
+}
+
+// Add current position to an error trace.
 void
-interpreter::Process::addTraceTo(Error& err)
+interpreter::Process::addTraceTo(Error& err) const
 {
     // ex IntExecutionContext::addTraceTo
     static const char*const firstformats[] = {
@@ -501,7 +585,7 @@ interpreter::Process::addTraceTo(Error& err)
              x         x         x       "in procedure/function %s, file %s, line %d" */
         Frame* frame = m_frames[i-1];
         BCORef_t bco = m_frames[i-1]->bco;
-        String_t bcoName = bco->getName();
+        String_t bcoName = bco->getSubroutineName();
         String_t fileName = m_world.fileSystem().getFileName(bco->getFileName());
         uint32_t lineNr = bco->getLineNumber(frame->pc - 1);
 
@@ -547,7 +631,7 @@ interpreter::Process::addTraceTo(Error& err)
     }
 }
 
-// /** Run this process. */
+// Run process (set state to Running).
 void
 interpreter::Process::run()
 {
@@ -588,22 +672,7 @@ interpreter::Process::run()
     logProcessState("end");
 }
 
-// /** Run temporary process. Runs the given process, which is a stack
-//     object of the caller (not created with createProcess). The process
-//     is not permitted to suspend.
-
-//     \retval true  The process has run till its end and finished normally.
-//                   If it contained an expression, that expression's result
-//                   is available on the stack (exec.getResult()).
-//     \retval false The process has terminated abnormally. This happens when
-//                   the process received an error, but also when it
-//                   executed an 'End' statement. In this case, it has not
-//                   produced a result. */
-//
-// c2ng comment:
-//     try to avoid runTemporary(). Processes that execute in runTemporary() will not have a process group Id assigned
-//     and thus escape the regular process state machine. In particular, this means they must fail if they wait.
-//     For c2ng, this means they cannot call UI. In the JavaScript version, this would mean they cannot fetch data.
+// Run temporary process.
 bool
 interpreter::Process::runTemporary()
 {
@@ -657,8 +726,7 @@ interpreter::Process::runTemporary()
     }
 }
 
-
-// /** Execute a single instruction. */
+// Execute a single instruction.
 void
 interpreter::Process::executeInstruction()
 {
@@ -1008,6 +1076,9 @@ interpreter::Process::executeInstruction()
             checkStack(1);
             if (!valueStack.top()) {
                 /* Dereferencing null stays null, no change to stack */
+                if (op.minor == Opcode::miIMCall) {
+                    valueStack.popBack();
+                }
             } else if (Context* cv = dynamic_cast<Context*>(valueStack.top())) {
                 /* It's a context */
                 Context::PropertyIndex_t index;
@@ -1101,6 +1172,9 @@ interpreter::Process::executeInstruction()
             break;
          case Opcode::miSpecialEndWith:
             /* Cancel previous miSpecialWith */
+            if (m_contexts.empty()) {
+                throw Error::internalError("no context [sendwith]");
+            }
             popContext();
             break;
          case Opcode::miSpecialFirstIndex:
@@ -1124,7 +1198,9 @@ interpreter::Process::executeInstruction()
             break;
          case Opcode::miSpecialNextIndex:
             /* Continue iteration */
-            if (m_contexts.back()->next()) {
+            if (m_contexts.empty()) {
+                throw Error::internalError("no context [snextindex]");
+            } else if (m_contexts.back()->next()) {
                 valueStack.pushBackNew(makeBooleanValue(1));
             } else {
                 popContext();
@@ -1133,6 +1209,9 @@ interpreter::Process::executeInstruction()
             break;
          case Opcode::miSpecialEndIndex:
             /* Cancel iteration */
+            if (m_contexts.empty()) {
+                throw Error::internalError("no context [sendindex]");
+            }
             popContext();
             break;
          case Opcode::miSpecialEvalStatement:
@@ -1365,6 +1444,7 @@ interpreter::Process::executeInstruction()
                 ++f.pc;
             } else {
                 // We cannot operate on this. Just push it.
+                // The next instruction will be the maUnary which will execute normally.
             }
             valueStack.pushBackNew(v);
         } else {
@@ -1378,11 +1458,12 @@ interpreter::Process::executeInstruction()
 }
 
 
-// /** Suspend this process to perform UI operations. */
+// Suspend this process to perform UI operations (set state to Waiting).
 void
 interpreter::Process::suspendForUI()
 {
     // ex IntExecutionContext::suspendForUI, sort-of
+    // ex ccexec.pas:ForceInterpreterCallback, sort-of
     // FIXME: original code verifies that process is actually running
     // FIXME: pre-execute jumps and frame terminations to cause the process to execute prematurely
     // - be careful with frames catching UI.RESULT
@@ -1391,10 +1472,7 @@ interpreter::Process::suspendForUI()
     m_world.notifyListeners();
 }
 
-// /** Perform name lookup.
-//     \param name  [in] Name to look up
-//     \param index [out] If found, the context's cookie for access to the name
-//     \return Context containing the name, 0 if none */
+// Look up value.
 interpreter::Context*
 interpreter::Process::lookup(const afl::data::NameQuery& q, Context::PropertyIndex_t& index)
 {
@@ -1409,12 +1487,6 @@ interpreter::Process::lookup(const afl::data::NameQuery& q, Context::PropertyInd
     return 0;
 }
 
-// /** Set variable in this process. This consumes possible exceptions.
-//     It is intended to be used by implementations of commands which set
-//     variables by name; generally, those are "UI.RESULT" or
-//     "CARGO.REMAINDER" which may not fail.
-//     \retval true assignment succeeded
-//     \retval false assignment failed */
 bool
 interpreter::Process::setVariable(String_t name, afl::data::Value* value)
 {
@@ -1430,8 +1502,7 @@ interpreter::Process::setVariable(String_t name, afl::data::Value* value)
     return false;
 }
 
-// /** Get variable in this process.
-//     \return variable value; Null if variable is not set. */
+// Get variable from this process.
 afl::data::Value*
 interpreter::Process::getVariable(String_t name)
 {
@@ -1444,10 +1515,11 @@ interpreter::Process::getVariable(String_t name)
     }
 }
 
-// /** Get object this process is currently in. */
+// Get game object this process is working on.
 game::map::Object*
 interpreter::Process::getCurrentObject() const
 {
+    // FIXME: replace by getCurrentObjectContext to drop the game dependency?
     // ex IntExecutionContext::getCurrentObject
     for (size_t i = m_contexts.size(); i > 0; --i) {
         if (game::map::Object* obj = m_contexts[i-1]->getObject()) {
@@ -1457,7 +1529,7 @@ interpreter::Process::getCurrentObject() const
     return 0;
 }
 
-// /** Get object this process was invoked from. */
+// Get game object this process was invoked from.
 game::map::Object*
 interpreter::Process::getInvokingObject() const
 {
@@ -1470,10 +1542,7 @@ interpreter::Process::getInvokingObject() const
     return 0;
 }
 
-// /** Handle user function call instruction.
-//     \param bco called function
-//     \param args arguments provided by user (can be modified)
-//     \param wantResult true if we expect a result, false if we don't */
+// Handle user subroutine invocation.
 void
 interpreter::Process::handleFunctionCall(BCORef_t bco, Segment_t& args, bool wantResult)
 {
@@ -1492,7 +1561,10 @@ interpreter::Process::handleFunctionCall(BCORef_t bco, Segment_t& args, bool wan
     /* Copy the varargs */
     if (bco->isVarargs()) {
         va = new ArrayData();
-        va->addDimension(numVarArgs);
+        if (numVarArgs > INT32_MAX) {
+            throw Error::tooComplex();
+        }
+        va->addDimension(static_cast<int32_t>(numVarArgs));
         args.transferLastTo(numVarArgs, va->content);
     }
 
@@ -1505,21 +1577,7 @@ interpreter::Process::handleFunctionCall(BCORef_t bco, Segment_t& args, bool wan
     }
 }
 
-// FIXME: port/remove
-// /** Set break handler. This function is called periodically to check
-//     whether the user wants to break. */
-// void
-// IntExecutionContext::setBreakHandler(bool check_break())
-// {
-//     ::check_break = check_break;
-// }
-
-
-// /** Handle Load instruction. Loads and compiles the file, and pushes an appropriate frame executing it.
-//     \param name File name given by user
-//     \retval true file loaded and compiled successfully
-//     \retval false file not found
-//     \throw IntError on compilation error */
+// Handle "Load" command.
 bool
 interpreter::Process::handleLoad(String_t name, const String_t& origin)
 {
@@ -1535,48 +1593,14 @@ interpreter::Process::handleLoad(String_t name, const String_t& origin)
     }
 }
 
-
-//
-// /** Check whether the user wants to break. */
-// bool
-// IntExecutionContext::checkForBreak()
-// {
-//     /* Check for break, and set termination flag. We cannot just discard
-//        the executing frames because we're still in executeInstruction which
-//        still refers to one of them. */
-//     bool result = check_break();
-//     if (result)
-//         m_processState = psTerminated;
-//     return result;
-// }
-
-// /** Check that stack contains a number of values. */
-inline void
-interpreter::Process::checkStack(uint32_t required)
-{
-    // ex IntExecutionContext::checkStack
-    if (m_valueStack.size() < required)
-        throw Error::internalError("stack error");
-}
-
-// /** Handle invalid opcode. */
-void
-interpreter::Process::handleInvalidOpcode()
-{
-    // ex IntExecutionContext::handleInvalidOpcode()
-    throw Error::internalError("invalid opcode");
-}
-
-// /** Handle exception. Transfers control to the most recently pushed exception handler,
-//     if any, and have it process exception e. If there is no active handler, stops
-//     the bytecode process. */
+// Handle exception.
 void
 interpreter::Process::handleException(String_t e, String_t trace)
 {
     // ex IntExecutionContext::handleException
-    if (m_exceptions.size()) {
+    if (m_exceptionHandlers.size()) {
         /* There is a user-specified exception handler */
-        ExceptionHandler* eh = m_exceptions.back();
+        ExceptionHandler* eh = m_exceptionHandlers.back();
 
         /* Unwind stacks */
         while (m_valueStack.size() > eh->valueSP) {
@@ -1596,7 +1620,7 @@ interpreter::Process::handleException(String_t e, String_t trace)
         m_frames.back()->pc = eh->pc;
 
         /* Pop exception frame */
-        m_exceptions.popBack();
+        m_exceptionHandlers.popBack();
 
         /* We may have been called from a suspended process, so make us runnable again */
         m_state = Running;
@@ -1610,26 +1634,14 @@ interpreter::Process::handleException(String_t e, String_t trace)
     }
 }
 
-// /** Make stack frame context by Id. This is used to deserialize stack
-//     frame contexts. It only works while actually deserializing a process.
-//     \param id Id read from file
-//     \return IntExecutionFrameContext object; 0 if those are not allowed here */
-interpreter::Context*
-interpreter::Process::makeFrameContext(size_t level)
-{
-    if (level < m_frames.size()) {
-        return new FrameContext(*m_frames[level]);
-    } else {
-        return 0;
-    }
-}
-
+// Set finalizer.
 void
 interpreter::Process::setNewFinalizer(Finalizer* p)
 {
     m_finalizer.reset(p);
 }
 
+// Call and discard finalizer.
 void
 interpreter::Process::finalize()
 {
@@ -1639,93 +1651,114 @@ interpreter::Process::finalize()
     }
 }
 
-// /** Handle Dim instruction.
-//     \param values data segment affected by this instruction
-//     \param names name list affected by this instruction
-//     \param index index into our name table */
+/** Check that stack contains a number of values. */
+inline void
+interpreter::Process::checkStack(uint32_t required)
+{
+    // ex IntExecutionContext::checkStack
+    if (m_valueStack.size() < required)
+        throw Error::internalError("stack error");
+}
+
+/** Handle invalid opcode. */
+void
+interpreter::Process::handleInvalidOpcode()
+{
+    // ex IntExecutionContext::handleInvalidOpcode()
+    throw Error::internalError("invalid opcode");
+}
+
+
+
+/** Handle Dim instruction.
+    \param values data segment affected by this instruction
+    \param names name list affected by this instruction
+    \param index index into our name table */
 void
 interpreter::Process::handleDim(Segment_t& values, NameMap_t& names, uint16_t index)
 {
     // ex IntExecutionContext::handleDim
-    /* Check stack */
+    // Check stack
     checkStack(1);
 
-    /* Check name. Must not be blank. */
+    // Check name. Must not be blank.
     const String_t name = m_frames.back()->bco->getName(index);
-    if (name.size() == 0)
+    if (name.size() == 0) {
         handleInvalidOpcode();
+    }
 
-    /* Does it already exist? */
+    // Does it already exist?
     NameMap_t::Index_t existing = names.getIndexByName(name);
     if (existing == NameMap_t::nil) {
-        /* No, add it */
+        // No, add it
         values.set(names.add(name), m_valueStack.top());
     }
 
     m_valueStack.popBack();
 }
 
-// /** Handle "sevals" statement. Compiles the arguments into a new temporary BCO
-//     and pushes a frame executing that.
-//     \param nargs Number of arguments given (=number of script lines) */
+/** Handle "sevals" statement.
+    Compiles the arguments into a new temporary BCO and pushes a frame executing that.
+    \param nargs Number of arguments given (=number of script lines) */
 void
 interpreter::Process::handleEvalStatement(uint16_t nargs)
 {
     // ex IntExecutionContext::handleEvalStatement
-    /* Verify stack */
+    // Verify stack
     checkStack(nargs);
 
-    /* Build command source */
+    // Build command source
     MemoryCommandSource mcs;
     for (size_t i = 0; i < nargs; ++i) {
         mcs.addLine(toString(m_valueStack.top(nargs-i-1), false));
     }
 
-    /* Drop args */
+    // Drop args
     m_valueStack.popBackN(nargs);
 
-    /* Prepare compilation */
+    // Prepare compilation
     DefaultStatementCompilationContext scc(m_world);
     if (nargs == 1) {
-        /* One-liner */
+        // One-liner
         scc.withFlag(scc.LocalContext)
             .withFlag(scc.ExpressionsAreStatements)
             .withFlag(scc.RefuseBlocks)
             .withFlag(scc.LinearExecution)
             .withContextProvider(this);
     } else {
-        /* Multi-line block */
+        // Multi-line block
         scc.withFlag(scc.LocalContext)
             .withFlag(scc.ExpressionsAreStatements)
             .withFlag(scc.LinearExecution)
             .withContextProvider(0);
     }
 
-    /* Compile */
+    // Compile
     BCORef_t bco = *new BytecodeObject();
     StatementCompiler sc(mcs);
     sc.compileList(*bco, scc);
     sc.finishBCO(*bco, scc);
-    bco->setName("Eval");
+    bco->setSubroutineName("Eval");
 
-    /* Execute */
+    // Execute
     pushFrame(bco, false);
 }
 
-// /** Handle "sevalx" instruction. Compiles the stack top into a new BCO,
-//     and pushes a frame executing that and returning a single result. */
+/** Handle "sevalx" instruction.
+    Compiles the stack top into a new BCO, and pushes a frame executing that and returning a single result. */
 void
 interpreter::Process::handleEvalExpression()
 {
     // ex IntExecutionContext::handleEvalExpression
-    /* Verify stack */
+    // Verify stack
     checkStack(1);
 
-    /* Eval(0) stays 0 */
-    if (m_valueStack.top() == 0)
+    // Eval(0) stays 0
+    if (m_valueStack.top() == 0) {
         return;
+    }
 
-    /* Compile */
+    // Compile
     Tokenizer tok(toString(m_valueStack.top(), false));
     std::auto_ptr<interpreter::expr::Node> expr(interpreter::expr::Parser(tok).parse());
     if (tok.getCurrentToken() != tok.tEnd) {
@@ -1739,31 +1772,31 @@ interpreter::Process::handleEvalExpression()
     bco->addInstruction(Opcode::maSpecial, Opcode::miSpecialReturn, 1);
     optimize(m_world, *bco, 1);
     bco->relocate();
-    bco->setName("Eval");
+    bco->setSubroutineName("Eval");
 
-    /* Execute */
+    // Execute
     pushFrame(bco, true);
 }
 
-// /** Handle "saddhook" instruction. */
+/** Handle "saddhook" instruction. */
 void
 interpreter::Process::handleAddHook()
 {
     // ex IntExecutionContext::handleAddHook
-    /* Verify stack */
+    // Verify stack
     checkStack(2);
     if (m_valueStack.top() == 0 || m_valueStack.top(1) == 0) {
         m_valueStack.popBackN(2);
         return;
     }
 
-    /* Verify code */
+    // Verify code
     SubroutineValue* sv = dynamic_cast<SubroutineValue*>(m_valueStack.top());
     if (!sv) {
         throw Error::typeError(Error::ExpectProcedure);
     }
 
-    /* Verify name */
+    // Verify name
     String_t hookName = "ON " + toString(m_valueStack.top(1), false);
     NameMap_t::Index_t pos = m_world.globalPropertyNames().addMaybe(hookName);
     BCOPtr_t hook; // FIXME: can we make this use BCORef?
@@ -1771,7 +1804,7 @@ interpreter::Process::handleAddHook()
         /* Create it */
         hook = new BytecodeObject();
         hook->setIsProcedure(true);
-        hook->setName(hookName);
+        hook->setSubroutineName(hookName);
         m_world.globalValues().setNew(pos, new SubroutineValue(*hook));
     } else {
         /* Use existing */
@@ -1782,84 +1815,93 @@ interpreter::Process::handleAddHook()
         hook = sv->getBytecodeObject().asPtr();
     }
 
-    /* Add it */
+    // Add it
     hook->addPushLiteral(sv);
     hook->addInstruction(Opcode::maIndirect, Opcode::miIMCall, 0);
 
-    /* Clean up stack */
+    // Clean up stack
     m_valueStack.popBackN(2);
 }
 
-/** Handle "snewarray" instruction. */
+/** Handle "snewarray" instruction.
+    \param ndim Number of dimensions */
 void
 interpreter::Process::handleNewArray(uint16_t ndim)
 {
     // ex IntExecutionContext::handleNewArray
-    /* Check preconditions */
-    if (ndim == 0)
+    // Check preconditions
+    if (ndim == 0) {
         handleInvalidOpcode();
+    }
     checkStack(ndim);
 
-    /* Create array object */
+    // Create array object
     afl::base::Ref<ArrayData> ad = *new ArrayData();
     for (size_t i = 0; i < ndim; ++i) {
         afl::data::ScalarValue* iv = dynamic_cast<afl::data::ScalarValue*>(m_valueStack.top(ndim - i - 1));
-        if (!iv)
+        if (!iv) {
             throw Error::typeError(Error::ExpectInteger);
-        if (!ad->addDimension(iv->getValue()))
+        }
+        if (!ad->addDimension(iv->getValue())) {
             throw Error::rangeError();
+        }
     }
     m_valueStack.popBackN(ndim);
     m_valueStack.pushBackNew(new ArrayValue(ad));
 }
 
-// /** Handle "sresizearray" instruction. */
+/** Handle "sresizearray" instruction.
+    \param ndim Number of dimensions */
 void
 interpreter::Process::handleResizeArray(uint16_t ndim)
 {
     // ex IntExecutionContext::handleResizeArray
-    /* Check preconditions */
-    if (ndim == 0)
+    // Check preconditions
+    if (ndim == 0) {
         handleInvalidOpcode();
+    }
     checkStack(ndim+1);
 
-    /* Create dummy array object */
+    // Create dummy array object
     ArrayData ad;
     for (size_t i = 0; i < ndim; ++i) {
         afl::data::ScalarValue* iv = dynamic_cast<afl::data::ScalarValue*>(m_valueStack.top(ndim - i - 1));
-        if (!iv)
+        if (!iv) {
             throw Error::typeError(Error::ExpectInteger);
-        if (!ad.addDimension(iv->getValue()))
+        }
+        if (!ad.addDimension(iv->getValue())) {
             throw Error::rangeError();
+        }
     }
     m_valueStack.popBackN(ndim);
 
-    /* Fetch the array object */
+    // Fetch the array object
     ArrayValue* a = dynamic_cast<ArrayValue*>(m_valueStack.top());
     if (!a) {
         throw Error::typeError(Error::ExpectArray);
     }
     afl::base::Ref<ArrayData> origAD = a->getData();
 
-    /* Modify it */
+    // Modify it
     origAD->resize(ad);
     m_valueStack.popBack();
 }
 
-// /** Handle "smakelist" instruction. */
+/** Handle "smakelist" instruction.
+    \param nelems Number of elements */
 void
 interpreter::Process::handleMakeList(uint16_t nelems)
 {
     // ex IntExecutionContext::handleMakeList
-    /* Check preconditions */
+    // Check preconditions
     checkStack(nelems);
 
-    /* Create array object */
+    // Create array object
     afl::base::Ref<ArrayData> ad = *new ArrayData();
     if (!ad->addDimension(nelems))
         throw Error::rangeError();
 
-    /* Populate it */
+    // Populate it
     m_valueStack.transferLastTo(nelems, ad->content);
     m_valueStack.pushBackNew(new ArrayValue(ad));
 }
@@ -1872,33 +1914,34 @@ interpreter::Process::handleNewHash()
     m_valueStack.pushBackNew(new HashValue(afl::data::Hash::create()));
 }
 
-// /** Handle "sbind" instruction. */
+/** Handle "sbind" instruction.
+    \param nargs Number of arguments */
 void
 interpreter::Process::handleBind(uint16_t nargs)
 {
     // ex IntExecutionContext::handleBind(uint16_t nargs)
-    /* Check preconditions.
-       Note that "sbind 0" is an expensive nop; let's allow it in case it someday allows something clever. */
+    // Check preconditions.
+    // Note that "sbind 0" is an expensive nop; let's allow it in case it someday allows something clever.
     checkStack(nargs + 1);
 
-    /* Build the closure */
+    // Build the closure
     std::auto_ptr<Closure> c(new Closure());
     if (CallableValue* func = dynamic_cast<CallableValue*>(m_valueStack.top())) {
-        /* OK */
+        // OK
         c->setNewFunction(func);
         m_valueStack.extractTop();
     } else {
-        /* Error */
+        // Error
         throw Error::typeError(Error::ExpectCallable);
     }
     c->addNewArgumentsFrom(m_valueStack, nargs);
 
-    /* Return */
+    // Return
     m_valueStack.pushBackNew(c.release());
 }
 
-// /** Handle decrement.
-//     \return true iff result is zero */
+/** Handle decrement.
+    \return true iff result is zero */
 bool
 interpreter::Process::handleDecrement()
 {
@@ -1948,20 +1991,26 @@ interpreter::Process::getReferencedValue(const Opcode& op)
 void
 interpreter::Process::logProcessState(const char* why)
 {
-    const char* state = "?";
-    switch (m_state) {
-     case Suspended:  state = "Suspended"; break;
-     case Frozen:     state = "Frozen"; break;
-     case Runnable:   state = "Runnable"; break;
-     case Running:    state = "Running"; break;
-     case Waiting:    state = "Waiting"; break;
-     case Ended:      state = "Ended"; break;
-     case Terminated: state = "Terminated"; break;
-     case Failed:     state = "Failed"; break;
-    }
+    afl::string::NullTranslator tx;
 
     // Write a brief message:
     //   run 17@33 Running 'UI.Foo'
     m_world.logListener().write(afl::sys::LogListener::Trace, LOG_NAME,
-                                afl::string::Format("%s %d@%d %s, '%s'") << why << m_processId << m_processGroupId << state << m_processName);
+                                afl::string::Format("%s %d@%d %s, '%s'") << why << m_processId << m_processGroupId << toString(m_state, tx) << m_processName);
+}
+
+String_t
+interpreter::toString(Process::State st, afl::string::Translator& tx)
+{
+    switch (st) {
+     case Process::Suspended:  return tx("Suspended");
+     case Process::Frozen:     return tx("Frozen");
+     case Process::Runnable:   return tx("Runnable");
+     case Process::Running:    return tx("Running");
+     case Process::Waiting:    return tx("Waiting");
+     case Process::Ended:      return tx("Ended");
+     case Process::Terminated: return tx("Terminated");
+     case Process::Failed:     return tx("Failed");
+    }
+    return "?";
 }

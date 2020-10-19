@@ -32,13 +32,12 @@ namespace {
     }
 }
 
-game::db::Packer::Packer(Turn& turn, afl::charset::Charset& cs)
-    : m_turn(turn),
-      m_charset(cs)
+game::db::Packer::Packer(afl::charset::Charset& cs)
+    : m_charset(cs)
 { }
 
 void
-game::db::Packer::addUfo(const structures::Ufo& ufo)
+game::db::Packer::addUfo(Turn& turn, const structures::Ufo& ufo)
 {
     // Add Ufo through message interface instead of directly setting properties.
     // This allows it to reject obsolete data.
@@ -71,19 +70,19 @@ game::db::Packer::addUfo(const structures::Ufo& ufo)
     info.addValue(gp::mi_UfoSpeedY, ufo.speedY);
 
     // Add it
-    if (gm::Ufo* pUfo = m_turn.universe().ufos().addUfo(ufo.id, ufo.ufo.typeCode, ufo.ufo.color)) {
+    if (gm::Ufo* pUfo = turn.universe().ufos().addUfo(ufo.id, ufo.ufo.typeCode, ufo.ufo.color)) {
         pUfo->addMessageInformation(info);
         pUfo->setIsStoredInHistory(true);
     }
 }
 
 void
-game::db::Packer::addPlanet(const structures::Planet& planet)
+game::db::Packer::addPlanet(Turn& turn, const structures::Planet& planet)
 {
     // ex GPlanet::addHistoryData (remotely related)
     // Fetch the planet
     const int id = planet.planet.planetId;
-    gm::Planet*const p = m_turn.universe().planets().get(id);
+    gm::Planet*const p = turn.universe().planets().get(id);
     if (p == 0) {
         return;
     }
@@ -165,7 +164,7 @@ game::db::Packer::addPlanet(const structures::Planet& planet)
 }
 
 void
-game::db::Packer::addShip(const structures::Ship& ship)
+game::db::Packer::addShip(Turn& turn, const structures::Ship& ship)
 {
     // ex GPlanet::addHistoryData (remotely related)
     /*
@@ -179,7 +178,7 @@ game::db::Packer::addShip(const structures::Ship& ship)
      */
     // Fetch the ship
     const int id = ship.ship.shipId;
-    gm::Ship*const sh = m_turn.universe().ships().get(id);
+    gm::Ship*const sh = turn.universe().ships().get(id);
     if (sh == 0) {
         return;
     }
@@ -228,15 +227,15 @@ game::db::Packer::addShip(const structures::Ship& ship)
 }
 
 void
-game::db::Packer::addShipTrack(int id, int turn, const structures::ShipTrackEntry& entry)
+game::db::Packer::addShipTrack(Turn& turn, int id, int turnNr, const structures::ShipTrackEntry& entry)
 {
-    gm::Ship*const sh = m_turn.universe().ships().get(id);
+    gm::Ship*const sh = turn.universe().ships().get(id);
     if (sh == 0) {
         return;
     }
 
     // Create it
-    gp::MessageInformation info(gp::MessageInformation::Ship, id, turn);
+    gp::MessageInformation info(gp::MessageInformation::Ship, id, turnNr);
     addValueMaybe(info, gp::mi_X,        entry.x,       -1);
     addValueMaybe(info, gp::mi_Y,        entry.y,       -1);
     addValueMaybe(info, gp::mi_Speed,    entry.speed,   -1);

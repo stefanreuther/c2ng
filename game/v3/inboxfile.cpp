@@ -113,7 +113,7 @@ namespace {
 String_t
 game::v3::decodeMessage(afl::base::ConstBytes_t data, afl::charset::Charset& charset, bool rewrap)
 {
-    // ex game/msg.h:getMessageFromArray
+    // ex game/msg.h:getMessageFromArray, readmsg.pas:DecodeMessage (but slightly different)
     afl::base::GrowableBytes_t result;
     enum { None, Before, Inside } rewrapStatus;
 

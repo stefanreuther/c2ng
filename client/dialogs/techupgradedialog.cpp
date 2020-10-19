@@ -12,6 +12,7 @@
 #include "game/exception.hpp"
 #include "game/game.hpp"
 #include "game/map/planetstorage.hpp"
+#include "game/proxy/configurationproxy.hpp"
 #include "game/root.hpp"
 #include "game/session.hpp"
 #include "game/spec/shiplist.hpp"
@@ -28,7 +29,6 @@
 #include "util/slaveobject.hpp"
 #include "util/slaverequestsender.hpp"
 #include "util/translation.hpp"
-#include "client/proxy/configurationproxy.hpp"
 
 using client::widgets::CostDisplay;
 using game::NUM_TECH_AREAS;
@@ -157,7 +157,7 @@ TechUpgradeSlave::init(game::Session& session)
         }
 
         // Create tech upgrade action (checks preconditions)
-        m_pContainer.reset(new game::map::PlanetStorage(*pPlanet, session.interface(), m_pRoot->hostConfiguration()));
+        m_pContainer.reset(new game::map::PlanetStorage(*pPlanet, m_pRoot->hostConfiguration()));
         m_pAction.reset(new game::actions::TechUpgrade(*pPlanet, *m_pContainer, *m_pShipList, *m_pRoot));
         m_pAction->setUndoInformation(m_pTurn->universe());
     }
@@ -232,7 +232,7 @@ TechUpgradeDialog::TechUpgradeDialog(ui::Root& root, util::RequestSender<game::S
       m_link(root),
       m_techLevels(),
       m_buttons(root),
-      m_costDisplay(root, CostDisplay::Types_t(Cost::Money), client::proxy::ConfigurationProxy(gameSender).getNumberFormatter(m_link)),
+      m_costDisplay(root, CostDisplay::Types_t(Cost::Money), game::proxy::ConfigurationProxy(gameSender).getNumberFormatter(m_link)),
       m_reply(root.engine().dispatcher(), *this),
       m_slave(gameSender, new TechUpgradeSlave(pid)),
       m_numOutstandingReplies(0),

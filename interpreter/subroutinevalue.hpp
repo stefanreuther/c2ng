@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/subroutinevalue.hpp
+  *  \brief Class interpreter::SubroutineValue
   */
 #ifndef C2NG_INTERPRETER_SUBROUTINEVALUE_HPP
 #define C2NG_INTERPRETER_SUBROUTINEVALUE_HPP
@@ -10,12 +11,18 @@
 namespace interpreter {
 
     /** Subroutine value.
-        Value referring to a subroutine.
-        This is used to implement the 'pushsub' opcode. */
+        Value referring to a subroutine (BytecodeObject). */
     class SubroutineValue : public CallableValue {
      public:
-        SubroutineValue(BCORef_t bco);
+        /** Constructor.
+            \param bco Bytecode object */
+        explicit SubroutineValue(BCORef_t bco);
+
+        /** Destructor. */
         ~SubroutineValue();
+
+        /** Get bytecode object.
+            \return BytecodeObject */
         BCORef_t getBytecodeObject() const;
 
         // CallableValue:

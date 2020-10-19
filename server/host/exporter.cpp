@@ -194,8 +194,7 @@ server::host::Exporter::importGame(Game& game, Root& root, String_t fsDirName)
     importSubdirectory(gamePath + "/in", gameEntry->getPathName(), "in");
     importSubdirectory(gamePath + "/out", gameEntry->getPathName(), "out");
     importSubdirectory(gamePath + "/data", gameEntry->getPathName(), "data");
-
-    // FIXME: deal with logfiles? (runhost.log, runmaster.log)
+    importLogFiles(gamePath, gameEntry->getPathName());
     importBackups(gamePath + "/backup", gameEntry->getPathName(), "backup", root.config().unpackBackups);
 
     // Log
@@ -274,7 +273,9 @@ server::host::Exporter::exportSubdirectory(const String_t& source, const String_
 void
 server::host::Exporter::storeConfigurationFile(const ConfigurationBuilder& ini, afl::io::Directory& parent)
 {
-    parent.openFile("c2host.ini", afl::io::FileSystem::Create)->fullWrite(ini.getContent());
+    afl::base::ConstBytes_t content = ini.getContent();
+    m_log.write(afl::sys::LogListener::Trace, LOG_NAME, Format("Exporting configuration (%d bytes) -> %s", content.size(), parent.getDirectoryName()));
+    parent.openFile("c2host.ini", afl::io::FileSystem::Create)->fullWrite(content);
 }
 
 // Import a subdirectory.
@@ -289,6 +290,19 @@ server::host::Exporter::importSubdirectory(const String_t& source, const String_
 
     // This synchronizes the target back into the source.
     synchronizeDirectories(sourceHandler, targetHandler);
+}
+
+// Import logfiles.
+void
+server::host::Exporter::importLogFiles(const String_t& source, const String_t& targetName)
+{
+    m_log.write(afl::sys::LogListener::Trace, LOG_NAME, Format("Importing host:%s <- %s (logs)", source, targetName));
+
+    server::file::FileSystemHandler targetHandler(m_fileSystem, targetName);
+    server::file::ClientDirectoryHandler sourceHandler(m_source, source);
+
+    // Copy files, not recursively
+    server::file::copyDirectory(sourceHandler, targetHandler, server::file::CopyFlags_t());
 }
 
 // Import backups.

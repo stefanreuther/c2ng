@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/statementcompiler.cpp
+  *  \brief Class interpreter::StatementCompiler
   */
 
 #include <cstring>
@@ -10,6 +11,8 @@
 #include "interpreter/arguments.hpp"
 #include "interpreter/callablevalue.hpp"
 #include "interpreter/commandsource.hpp"
+#include "interpreter/context.hpp"
+#include "interpreter/contextprovider.hpp"
 #include "interpreter/defaultstatementcompilationcontext.hpp"
 #include "interpreter/error.hpp"
 #include "interpreter/expr/builtinfunction.hpp"
@@ -24,11 +27,16 @@
 #include "interpreter/statementcompilationcontext.hpp"
 #include "interpreter/structuretype.hpp"
 #include "interpreter/subroutinevalue.hpp"
-#include "interpreter/world.hpp"
 #include "interpreter/values.hpp"
+#include "interpreter/world.hpp"
 #include "util/charsetfactory.hpp"
 
 namespace {
+    using interpreter::CompilationContext;
+    using interpreter::Error;
+    using interpreter::StatementCompilationContext;
+    using interpreter::Tokenizer;
+
     enum TypeKeyword {
         tkNone,
         tkAny,
@@ -55,17 +63,41 @@ namespace {
         }
     }
 
-
-    static String_t stripPrefix(const String_t& s, const char* pfx)
+    /** Strip prefix from an identifier.
+        \param s   [in] Identifier given by user
+        \param pfx [in] Prefix
+        \return adjusted string */
+    String_t stripPrefix(const String_t& s, const char* pfx)
     {
         size_t pfxlen = std::strlen(pfx);
         if (s.compare(0, pfxlen, pfx, pfxlen) == 0) {
             if (s.size() == pfxlen) {
-                throw interpreter::Error("Invalid identifier");
+                // Cannot happen, "SHIP." tokenizes as "SHIP" + ".", not an identifier
+                throw Error("Invalid identifier");
             }
             return String_t(s, pfxlen);
         }
         return s;
+    }
+
+    /** Ensure we are allowed to execute multiline commands. */
+    void validateMultiline(const StatementCompilationContext& cc)
+    {
+        if (cc.hasFlag(CompilationContext::RefuseBlocks)) {
+            throw Error::invalidMultiline();
+        }
+    }
+
+    /** Check for a next element separated by comma. */
+    bool parseNext(Tokenizer& tok)
+    {
+        if (tok.checkAdvance(Tokenizer::tComma)) {
+            return true;
+        } else if (tok.getCurrentToken() == Tokenizer::tEnd) {
+            return false;
+        } else {
+            throw Error::expectSymbol(",");
+        }
     }
 
     /** Parse argument to an "Option" command.
@@ -73,35 +105,33 @@ namespace {
         \param tok Tokenizer to read from
         \param min,max Range to accept
         \return value */
-    static int parseOptionArgument(interpreter::Tokenizer& tok, int min, int max)
+    int parseOptionArgument(interpreter::Tokenizer& tok, int min, int max)
     {
         if (tok.checkAdvance(tok.tLParen)) {
             /* Parentheses given. Read sign. */
             bool negate = false;
-            while (1) {
-                if (tok.checkAdvance(tok.tPlus)) {
-                    // ok
-                } else if (tok.checkAdvance(tok.tMinus)) {
-                    negate = true;
-                } else {
-                    break;
-                }
+            if (tok.checkAdvance(tok.tPlus)) {
+                // ok
+            } else if (tok.checkAdvance(tok.tMinus)) {
+                negate = true;
+            } else {
+                // nothing
             }
 
             /* Read number. */
             if (tok.getCurrentToken() != tok.tInteger && tok.getCurrentToken() != tok.tBoolean) {
-                throw interpreter::Error("Expecting integer");
+                throw Error("Expecting integer");
             }
             int val = tok.getCurrentInteger();
             if (negate) {
                 val = -val;
             }
             if (val < min || val > max) {
-                throw interpreter::Error::rangeError();
+                throw Error::rangeError();
             }
             tok.readNextToken();
             if (!tok.checkAdvance(tok.tRParen)) {
-                throw interpreter::Error::expectSymbol(")");
+                throw Error::expectSymbol(")");
             }
             return val;
         } else {
@@ -117,7 +147,7 @@ const int interpreter::StatementCompiler::MAX_OPTIMISATION_LEVEL;
 const int interpreter::StatementCompiler::DEFAULT_OPTIMISATION_LEVEL;
 
 
-
+// Constructor.
 interpreter::StatementCompiler::StatementCompiler(CommandSource& cs)
     : m_commandSource(cs),
       m_allowLocalTypes(false),
@@ -128,7 +158,8 @@ interpreter::StatementCompiler::StatementCompiler(CommandSource& cs)
     cs.readNextLine();
 }
 
-interpreter::StatementCompiler::StatementResult
+// Compile a statement.
+interpreter::StatementCompiler::Result
 interpreter::StatementCompiler::compile(BytecodeObject& bco, const StatementCompilationContext& scc)
 {
     // ex IntStatementCompiler::compile
@@ -371,22 +402,21 @@ interpreter::StatementCompiler::compile(BytecodeObject& bco, const StatementComp
                 /* Ambiguous command (expression or subroutine call) */
                 return compileAmbiguousStatement(bco, scc);
             }
-
-         default:
-            throw Error("Not implemented");
         }
+        throw Error("Not implemented");
     } else {
         /* Anything else, must be expression */
         return compileExpressionStatement(bco, scc);
     }
 }
 
-interpreter::StatementCompiler::StatementResult
+// Compile statement list.
+interpreter::StatementCompiler::Result
 interpreter::StatementCompiler::compileList(BytecodeObject& bco, const StatementCompilationContext& scc)
 {
     // ex IntStatementCompiler::compileList
     while (1) {
-        switch (StatementResult r = compile(bco, scc)) {
+        switch (Result r = compile(bco, scc)) {
          case EndOfInput:
          case Terminator:
             return r;
@@ -402,14 +432,16 @@ interpreter::StatementCompiler::compileList(BytecodeObject& bco, const Statement
     }
 }
 
+// Set optimisation level.
 void
 interpreter::StatementCompiler::setOptimisationLevel(int level)
 {
     m_optimisationLevel = level;
 }
 
+// Finish a BCO.
 void
-interpreter::StatementCompiler::finishBCO(BytecodeObject& bco, const StatementCompilationContext& scc)
+interpreter::StatementCompiler::finishBCO(BytecodeObject& bco, const StatementCompilationContext& scc) const
 {
     // ex IntStatementCompiler::finishBCO
     if (m_optimisationLevel > 0) {
@@ -429,7 +461,7 @@ interpreter::StatementCompiler::finishBCO(BytecodeObject& bco, const StatementCo
     an error if we find nothing.
 
     The complicated case is if we don't have an execution context. We try to determine
-    the trype of a statement by looking at the second token. It can be either a possible
+    the type of a statement by looking at the second token. It can be either a possible
     first token in an expression, or a possible second one. If it is a possible first,
     but not a possible second, we have a subroutine call. If it is a possible second, but
     not a possible first, we have an expression.
@@ -446,13 +478,15 @@ interpreter::StatementCompiler::finishBCO(BytecodeObject& bco, const StatementCo
 
     This used to be compiled into a "Eval" statement, but this was much less efficient
     and will break lexical scoping. */
-interpreter::StatementCompiler::StatementResult
+interpreter::StatementCompiler::Result
 interpreter::StatementCompiler::compileAmbiguousStatement(BytecodeObject& bco, const StatementCompilationContext& scc)
 {
     // ex IntStatementCompiler::compileAmbiguousStatement
     const String_t name = m_commandSource.tokenizer().getCurrentString();
     if (ContextProvider* cp = scc.getContextProvider()) {
-        /* We have an execution context, so we can actually look up the value to see what it is. */
+        /* We have an execution context, so we can actually look up the value to see what it is.
+           Note that it is an error to have a ContextProvider and be in multi-line mode;
+           see StatementCompilationContext::withContextProvider. */
         bool is_proc;
         Context::PropertyIndex_t index;
         if (Context* con = cp->lookup(name, index)) {
@@ -551,7 +585,7 @@ interpreter::StatementCompiler::compileAmbiguousStatement(BytecodeObject& bco, c
     \param name [in] Name in first position
     \param bco [out] bytecode output
     \param scc [in] statement compilation context */
-interpreter::StatementCompiler::StatementResult
+interpreter::StatementCompiler::Result
 interpreter::StatementCompiler::compileAmbiguousSingleWord(const String_t& name, BytecodeObject& bco, const StatementCompilationContext& scc)
 {
     // ex IntStatementCompiler::compileAmbiguousSingleWord
@@ -582,7 +616,7 @@ interpreter::StatementCompiler::compileAmbiguousSingleWord(const String_t& name,
     \param paren [in] true iff name is followed by an opening parenthesis
     \param bco [out] bytecode output
     \param scc [in] statement compilation context */
-interpreter::StatementCompiler::StatementResult
+interpreter::StatementCompiler::Result
 interpreter::StatementCompiler::compileAmbiguousRuntimeSwitch(const String_t& name, bool paren, BytecodeObject& bco, const StatementCompilationContext& scc)
 {
     // ex IntStatementCompiler::compileAmbiguousRuntimeSwitch
@@ -687,7 +721,7 @@ interpreter::StatementCompiler::compileAmbiguousRuntimeSwitch(const String_t& na
 /** Compile "Abort" statement.
     \param bco [out] bytecode output
     \param scc [in] statement compilation context */
-interpreter::StatementCompiler::StatementResult
+interpreter::StatementCompiler::Result
 interpreter::StatementCompiler::compileAbort(BytecodeObject& bco, const StatementCompilationContext& scc)
 {
     // ex IntStatementCompiler::compileAbort
@@ -721,7 +755,7 @@ interpreter::StatementCompiler::compileAbort(BytecodeObject& bco, const Statemen
 /** Compile "Bind" statement.
     \param bco Bytecode output
     \param scc Statement compilation context */
-interpreter::StatementCompiler::StatementResult
+interpreter::StatementCompiler::Result
 interpreter::StatementCompiler::compileBind(BytecodeObject& bco, const StatementCompilationContext& scc)
 {
     // ex IntStatementCompiler::compileBind
@@ -801,20 +835,17 @@ interpreter::StatementCompiler::compileBind(BytecodeObject& bco, const Statement
         expr->compileValue(bco, scc);
 
         /* Here, we only accept ":=", because "=" is swallowed by parseNA anyway. */
-        if (!tok.checkAdvance(tok.tAssign))
+        if (!tok.checkAdvance(tok.tAssign)) {
             throw Error::expectSymbol(":=");
+        }
 
         expr.reset(interpreter::expr::Parser(m_commandSource.tokenizer()).parseNA());
         expr->compileValue(bco, scc);
 
         bco.addInstruction(Opcode::maTernary, teKeyAdd, 0);
 
-        if (tok.getCurrentToken() == tok.tEnd) {
+        if (!parseNext(tok)) {
             break;
-        } else if (tok.checkAdvance(tok.tComma)) {
-            /* ok */
-        } else {
-            throw Error::expectSymbol(",");
         }
     }
 
@@ -826,7 +857,7 @@ interpreter::StatementCompiler::compileBind(BytecodeObject& bco, const Statement
 /** Compile "Call" statement.
     \param bco Bytecode output
     \param scc Statement compilation context */
-interpreter::StatementCompiler::StatementResult
+interpreter::StatementCompiler::Result
 interpreter::StatementCompiler::compileCall(BytecodeObject& bco, const StatementCompilationContext& scc)
 {
     /* @q Call command args, ... (Elementary Command)
@@ -897,7 +928,7 @@ interpreter::StatementCompiler::compileCall(BytecodeObject& bco, const Statement
 /** Compile "CreateKeymap" statement.
     \param bco Bytecode output
     \param scc Statement compilation context */
-interpreter::StatementCompiler::StatementResult
+interpreter::StatementCompiler::Result
 interpreter::StatementCompiler::compileCreateKeymap(BytecodeObject& bco, const StatementCompilationContext& scc)
 {
     // ex IntStatementCompiler::compileCreateKeymap
@@ -953,13 +984,8 @@ interpreter::StatementCompiler::compileCreateKeymap(BytecodeObject& bco, const S
         }
         bco.addInstruction(Opcode::maStack, Opcode::miStackDrop, 1);
 
-        if (tok.checkAdvance(tok.tComma)) {
-            // continue
-        } else if (tok.getCurrentToken() == tok.tEnd) {
-            // end
+        if (!parseNext(tok)) {
             break;
-        } else {
-            throw Error::garbageAtEnd(false);
         }
     }
     return CompiledStatement;
@@ -968,7 +994,7 @@ interpreter::StatementCompiler::compileCreateKeymap(BytecodeObject& bco, const S
 /** Compile "CreateShipProperty" or "CreatePlanetProperty" statement.
     \param bco Bytecode output
     \param scc Statement compilation context */
-interpreter::StatementCompiler::StatementResult
+interpreter::StatementCompiler::Result
 interpreter::StatementCompiler::compileCreateProperty(BytecodeObject& bco, const StatementCompilationContext& /*scc*/, Opcode::Special minor, const char* prefix)
 {
     // ex IntStatementCompiler::compileCreateProperty
@@ -1001,18 +1027,13 @@ interpreter::StatementCompiler::compileCreateProperty(BytecodeObject& bco, const
     Tokenizer& tok = m_commandSource.tokenizer();
     tok.readNextToken();
     while (1) {
-        if (tok.getCurrentToken() != tok.tIdentifier)
+        if (tok.getCurrentToken() != tok.tIdentifier) {
             throw Error::expectIdentifier("property name");
+        }
         bco.addInstruction(Opcode::maSpecial, minor, bco.addName(stripPrefix(tok.getCurrentString(), prefix)));
         tok.readNextToken();
-        if (tok.checkAdvance(tok.tComma)) {
-            // OK, another one
-        } else if (tok.getCurrentToken() == tok.tEnd) {
-            // OK, end
+        if (!parseNext(tok)) {
             break;
-        } else {
-            // Error
-            throw Error::garbageAtEnd(false);
         }
     }
     return CompiledStatement;
@@ -1021,7 +1042,7 @@ interpreter::StatementCompiler::compileCreateProperty(BytecodeObject& bco, const
 /** Compile "Dim" statement.
     \param bco Bytecode output
     \param scc Statement compilation context */
-interpreter::StatementCompiler::StatementResult
+interpreter::StatementCompiler::Result
 interpreter::StatementCompiler::compileDim(BytecodeObject& bco, const StatementCompilationContext& scc)
 {
     // ex IntStatementCompiler::compileDim
@@ -1103,7 +1124,7 @@ interpreter::StatementCompiler::compileDim(BytecodeObject& bco, const StatementC
 /** Compile "Do" (generic loop) statement.
     \param bco [out] bytecode output
     \param scc [in] statement compilation context */
-interpreter::StatementCompiler::StatementResult
+interpreter::StatementCompiler::Result
 interpreter::StatementCompiler::compileDo(BytecodeObject& bco, const StatementCompilationContext& scc)
 {
     // ex IntStatementCompiler::compileDo
@@ -1157,8 +1178,7 @@ interpreter::StatementCompiler::compileDo(BytecodeObject& bco, const StatementCo
     };
 
     /* Allowed? */
-    if (scc.hasFlag(CompilationContext::RefuseBlocks))
-        throw Error::invalidMultiline();
+    validateMultiline(scc);
 
     /* Make labels */
     BytecodeObject::Label_t lagain    = bco.makeLabel();
@@ -1183,8 +1203,9 @@ interpreter::StatementCompiler::compileDo(BytecodeObject& bco, const StatementCo
     m_commandSource.readNextLine();
     bco.addLabel(ldo);
     compileList(bco, DoStatementCompilationContext(scc, lcontinue, lbreak));
-    if (!tok.checkAdvance("LOOP"))
+    if (!tok.checkAdvance("LOOP")) {
         throw Error::expectKeyword("Loop");
+    }
 
     /* Compile tail condition */
     bco.addLabel(lcontinue);
@@ -1204,7 +1225,7 @@ interpreter::StatementCompiler::compileDo(BytecodeObject& bco, const StatementCo
 /** Compile "Eval" statement.
     \param bco [out] bytecode output
     \param scc [in] statement compilation context */
-interpreter::StatementCompiler::StatementResult
+interpreter::StatementCompiler::Result
 interpreter::StatementCompiler::compileEval(BytecodeObject& bco, const StatementCompilationContext& scc)
 {
     // ex IntStatementCompiler::compileEval
@@ -1235,7 +1256,7 @@ interpreter::StatementCompiler::compileEval(BytecodeObject& bco, const Statement
 /** Compile "For" (counting loop) statement.
     \param bco [out] bytecode output
     \param scc [in] statement compilation context */
-interpreter::StatementCompiler::StatementResult
+interpreter::StatementCompiler::Result
 interpreter::StatementCompiler::compileFor(BytecodeObject& bco, const StatementCompilationContext& scc)
 {
     // ex IntStatementCompiler::compileFor
@@ -1299,18 +1320,21 @@ interpreter::StatementCompiler::compileFor(BytecodeObject& bco, const StatementC
     tok.readNextToken();
 
     /* ...induction variable... */
-    if (tok.getCurrentToken() != tok.tIdentifier)
+    if (tok.getCurrentToken() != tok.tIdentifier) {
         throw Error::expectIdentifier("variable name");
+    }
     const String_t var = tok.getCurrentString();
     tok.readNextToken();
 
-    if (!tok.checkAdvance(tok.tEQ) && !tok.checkAdvance(tok.tAssign))
+    if (!tok.checkAdvance(tok.tEQ) && !tok.checkAdvance(tok.tAssign)) {
         throw Error::expectSymbol("=", ":=");
+    }
 
     /* ...start expression... */
     std::auto_ptr<interpreter::expr::Node> start(interpreter::expr::Parser(tok).parse());
-    if (!tok.checkAdvance("TO"))
+    if (!tok.checkAdvance("TO")) {
         throw Error::expectKeyword("To");
+    }
 
     /* ...end expression... */
     std::auto_ptr<interpreter::expr::Node> end(interpreter::expr::Parser(tok).parse());
@@ -1383,7 +1407,7 @@ interpreter::StatementCompiler::compileFor(BytecodeObject& bco, const StatementC
     ForStatementCompilationContext subcc(scc, !endIsLiteral, lcontinue, lbreak);
 
     /* Body */
-    StatementResult result = compileLoopBody(bco, subcc);
+    Result result = compileLoopBody(bco, subcc);
 
     /* Compile tail */
     bco.addLabel(lcontinue);
@@ -1391,8 +1415,9 @@ interpreter::StatementCompiler::compileFor(BytecodeObject& bco, const StatementC
     bco.addInstruction(Opcode::maUnary, unInc, 0);
     bco.addJump(Opcode::jAlways, lagain);
     bco.addLabel(lout);
-    if (!endIsLiteral)
+    if (!endIsLiteral) {
         bco.addInstruction(Opcode::maStack, Opcode::miStackDrop, 1);
+    }
     bco.addLabel(lbreak);
 
     return result;
@@ -1401,7 +1426,7 @@ interpreter::StatementCompiler::compileFor(BytecodeObject& bco, const StatementC
 /** Compile "ForEach" (set loop) statement.
     \param bco [out] bytecode output
     \param scc [in] statement compilation context */
-interpreter::StatementCompiler::StatementResult
+interpreter::StatementCompiler::Result
 interpreter::StatementCompiler::compileForEach(BytecodeObject& bco, const StatementCompilationContext& scc)
 {
     // ex IntStatementCompiler::compileForEach
@@ -1495,7 +1520,12 @@ interpreter::StatementCompiler::compileForEach(BytecodeObject& bco, const Statem
                     withoutFlag(LinearExecution);
                 }
             void compileBreak(BytecodeObject& bco) const
-                { bco.addJump(Opcode::jAlways, lend); }
+                {
+                    /* This will leave the induction variable set to the current value.
+                       This is not an explicitly documented feature for now; leaving it anyway for
+                       now because it may allow for something clever. */
+                    bco.addJump(Opcode::jAlways, lend);
+                }
             void compileContinue(BytecodeObject& bco) const
                 { bco.addJump(Opcode::jAlways, lcontinue); }
             void compileCleanup(BytecodeObject& bco) const
@@ -1517,7 +1547,7 @@ interpreter::StatementCompiler::compileForEach(BytecodeObject& bco, const Statem
         bco.addJump(Opcode::jIfFalse | Opcode::jIfEmpty, lend);
 
         /* Compile loop body */
-        StatementResult result = compileLoopBody(bco, subcc);
+        Result result = compileLoopBody(bco, subcc);
 
         /* Compile loop tail */
         bco.addLabel(lcontinue);
@@ -1567,7 +1597,7 @@ interpreter::StatementCompiler::compileForEach(BytecodeObject& bco, const Statem
         bco.addLabel(lagain);
 
         /* Compile loop body */
-        StatementResult result = compileLoopBody(bco, subcc);
+        Result result = compileLoopBody(bco, subcc);
 
         /* Compile loop tail */
         bco.addLabel(lcontinue);
@@ -1581,7 +1611,7 @@ interpreter::StatementCompiler::compileForEach(BytecodeObject& bco, const Statem
 /** Compile "If" statement.
     \param bco [out] bytecode output
     \param scc [in] statement compilation context */
-interpreter::StatementCompiler::StatementResult
+interpreter::StatementCompiler::Result
 interpreter::StatementCompiler::compileIf(BytecodeObject& bco, const StatementCompilationContext& scc)
 {
     // ex IntStatementCompiler::compileIf
@@ -1627,8 +1657,9 @@ interpreter::StatementCompiler::compileIf(BytecodeObject& bco, const StatementCo
     /* Single or multiple lines? */
     if (tok.getCurrentToken() != tok.tEnd) {
         /* Single line */
-        if (!oneliner)
+        if (!oneliner) {
             throw Error::expectKeyword("Then");
+        }
 
         /* Compile 'Then' (will return CompiledStatement) */
         compile(bco, DefaultStatementCompilationContext(scc).setOneLineSyntax().withoutFlag(CompilationContext::LinearExecution));
@@ -1638,8 +1669,7 @@ interpreter::StatementCompiler::compileIf(BytecodeObject& bco, const StatementCo
         return CompiledStatement;
     } else {
         /* Multiple lines */
-        if (scc.hasFlag(CompilationContext::RefuseBlocks))
-            throw Error::invalidMultiline();
+        validateMultiline(scc);
         m_commandSource.readNextLine();
 
         /* Compile 'Then' part. */
@@ -1661,8 +1691,9 @@ interpreter::StatementCompiler::compileIf(BytecodeObject& bco, const StatementCo
                     bco.addLabel(ift);
                     tok.checkAdvance("THEN");
                 } else {
-                    if (hadElse)
+                    if (hadElse) {
                         throw Error::misplacedKeyword("Else");
+                    }
                     hadElse = true;
                 }
                 parseEndOfLine();
@@ -1670,8 +1701,9 @@ interpreter::StatementCompiler::compileIf(BytecodeObject& bco, const StatementCo
             } else if (tok.checkAdvance("ENDIF")) {
                 parseEndOfLine();
                 bco.addLabel(endif);
-                if (!hadElse)
+                if (!hadElse) {
                     bco.addLabel(iff);
+                }
                 break;
             } else {
                 throw Error::expectKeyword("Else", "EndIf");
@@ -1684,7 +1716,7 @@ interpreter::StatementCompiler::compileIf(BytecodeObject& bco, const StatementCo
 /** Compile "Load" statement.
     \param bco [out] bytecode output
     \param scc [in] statement compilation context */
-interpreter::StatementCompiler::StatementResult
+interpreter::StatementCompiler::Result
 interpreter::StatementCompiler::compileLoad(BytecodeObject& bco, const StatementCompilationContext& scc, bool mustSucceed)
 {
     // ex IntStatementCompiler::compileLoad
@@ -1753,7 +1785,7 @@ interpreter::StatementCompiler::compileLoad(BytecodeObject& bco, const Statement
 /** Compile "On" statement.
     \param bco [out] bytecode output
     \param scc [in] statement compilation context */
-interpreter::StatementCompiler::StatementResult
+interpreter::StatementCompiler::Result
 interpreter::StatementCompiler::compileOn(BytecodeObject& bco, const StatementCompilationContext& scc)
 {
     // ex IntStatementCompiler::compileOn
@@ -1789,8 +1821,7 @@ interpreter::StatementCompiler::compileOn(BytecodeObject& bco, const StatementCo
 
     bool oneliner = tok.checkAdvance("DO");
 
-    /* Context for embedded command: one-liner, behaves like regular
-       function body, Return not allowed. */
+    /* Context for embedded command: behaves like regular function body, Return not allowed. */
     class HookCompilationContext : public StatementCompilationContext {
      public:
         HookCompilationContext(World& world)
@@ -1812,31 +1843,30 @@ interpreter::StatementCompiler::compileOn(BytecodeObject& bco, const StatementCo
     BCORef_t nbco = *new BytecodeObject();
     nbco->setIsProcedure(true);
     nbco->setFileName(bco.getFileName());
+    nbco->setOrigin(bco.getOrigin());
 
-    StatementResult r;
+    Result r;
     if (tok.getCurrentToken() != tok.tEnd) {
         /* Single line */
         if (!oneliner) {
             throw Error::expectKeyword("Do");
         }
         compile(*nbco, HookCompilationContext(scc.world()).setOneLineSyntax());
-        r = CompiledBlock;
+        r = CompiledStatement;
     } else {
         /* Multiple lines */
-        if (scc.hasFlag(CompilationContext::RefuseBlocks)) {
-            throw Error::invalidMultiline();
-        }
+        validateMultiline(scc);
         m_commandSource.readNextLine();
 
         /* Compile content */
         compileList(*nbco, HookCompilationContext(scc.world()).setBlockSyntax());
 
-        /* EndDo command */
+        /* EndOn command */
         if (!tok.checkAdvance("ENDON")) {
             throw Error::expectKeyword("EndOn");
         }
         parseEndOfLine();
-        r = CompiledStatement;
+        r = CompiledBlock;
     }
 
     /* Compile this command */
@@ -1851,7 +1881,7 @@ interpreter::StatementCompiler::compileOn(BytecodeObject& bco, const StatementCo
 /** Compile "Option" statement.
     \param bco [out] bytecode output
     \param scc [in] statement compilation context */
-interpreter::StatementCompiler::StatementResult
+interpreter::StatementCompiler::Result
 interpreter::StatementCompiler::compileOption(BytecodeObject& /*bco*/, const StatementCompilationContext& scc)
 {
     // ex IntStatementCompiler::compileOption
@@ -1928,9 +1958,7 @@ interpreter::StatementCompiler::compileOption(BytecodeObject& /*bco*/, const Sta
 
     /* Command permitted only in multiline context, to refuse silly things
        such as "If 0 Then Option ...." */
-    if (scc.hasFlag(CompilationContext::RefuseBlocks)) {
-        throw Error::invalidMultiline();
-    }
+    validateMultiline(scc);
 
     /* Parse it */
     Tokenizer& tok = m_commandSource.tokenizer();
@@ -1946,14 +1974,17 @@ interpreter::StatementCompiler::compileOption(BytecodeObject& /*bco*/, const Sta
         /* Process option */
         if (opname == "ENCODING") {
             /* "Encoding('string')" */
-            if (!tok.checkAdvance(tok.tLParen))
+            if (!tok.checkAdvance(tok.tLParen)) {
                 throw Error::expectSymbol("(");
-            if (tok.getCurrentToken() != tok.tString)
+            }
+            if (tok.getCurrentToken() != tok.tString) {
                 throw Error("Expecting string");
+            }
             String_t encname = tok.getCurrentString();
             tok.readNextToken();
-            if (!tok.checkAdvance(tok.tRParen))
+            if (!tok.checkAdvance(tok.tRParen)) {
                 throw Error::expectSymbol(")");
+            }
 
             /* Interpret it */
             afl::charset::Charset* cs = util::CharsetFactory().createCharset(encname);
@@ -1992,11 +2023,8 @@ interpreter::StatementCompiler::compileOption(BytecodeObject& /*bco*/, const Sta
         }
 
         /* Another one? */
-        if (tok.getCurrentToken() == tok.tEnd) {
+        if (!parseNext(tok)) {
             break;
-        }
-        if (!tok.checkAdvance(tok.tComma)) {
-            throw Error::expectSymbol(",");
         }
     }
 
@@ -2006,7 +2034,7 @@ interpreter::StatementCompiler::compileOption(BytecodeObject& /*bco*/, const Sta
 /** Compile "Print" statement.
     \param bco [out] bytecode output
     \param scc [in] statement compilation context */
-interpreter::StatementCompiler::StatementResult
+interpreter::StatementCompiler::Result
 interpreter::StatementCompiler::compilePrint(BytecodeObject& bco, const StatementCompilationContext& scc)
 {
     // ex IntStatementCompiler::compilePrint
@@ -2064,7 +2092,7 @@ interpreter::StatementCompiler::compilePrint(BytecodeObject& bco, const Statemen
 /** Compile "ReDim" statement.
     \param bco [out] bytecode output
     \param scc [in] statement compilation context */
-interpreter::StatementCompiler::StatementResult
+interpreter::StatementCompiler::Result
 interpreter::StatementCompiler::compileReDim(BytecodeObject& bco, const StatementCompilationContext& scc)
 {
     // ex IntStatementCompiler::compileReDim
@@ -2119,18 +2147,17 @@ interpreter::StatementCompiler::compileReDim(BytecodeObject& bco, const Statemen
 
         /* Do it */
         bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialResizeArray, uint16_t(numDims));
-        if (!tok.checkAdvance(tok.tComma)) {
+        if (!parseNext(tok)) {
             break;
         }
     }
-    parseEndOfLine();
     return CompiledStatement;
 }
 
 /** Compile "Return" statement.
     \param bco [out] bytecode output
     \param scc [in] statement compilation context */
-interpreter::StatementCompiler::StatementResult
+interpreter::StatementCompiler::Result
 interpreter::StatementCompiler::compileReturn(BytecodeObject& bco, const StatementCompilationContext& scc)
 {
     // ex IntStatementCompiler::compileReturn
@@ -2166,7 +2193,7 @@ interpreter::StatementCompiler::compileReturn(BytecodeObject& bco, const Stateme
 /** Compile "RunHook" statement.
     \param bco [out] bytecode output
     \param scc [in] statement compilation context */
-interpreter::StatementCompiler::StatementResult
+interpreter::StatementCompiler::Result
 interpreter::StatementCompiler::compileRunHook(BytecodeObject& bco, const StatementCompilationContext& scc)
 {
     // ex IntStatementCompiler::compileRunHook
@@ -2183,7 +2210,6 @@ interpreter::StatementCompiler::compileRunHook(BytecodeObject& bco, const Statem
     bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialRunHook, 0);
 
     /* Most now be at end */
-    tok.readNextToken();
     parseEndOfLine();
 
     return CompiledStatement;
@@ -2193,7 +2219,7 @@ interpreter::StatementCompiler::compileRunHook(BytecodeObject& bco, const Statem
     \param bco [out] bytecode output
     \param scc [in] statement compilation context
     \param scope [in] the scope */
-interpreter::StatementCompiler::StatementResult
+interpreter::StatementCompiler::Result
 interpreter::StatementCompiler::compileScope(BytecodeObject& bco, const StatementCompilationContext& scc, Opcode::Scope scope)
 {
     // ex IntStatementCompiler::compileScope
@@ -2242,7 +2268,7 @@ interpreter::StatementCompiler::compileScope(BytecodeObject& bco, const Statemen
 /** Compile "Select Case" statement.
     \param bco [out] bytecode output
     \param scc [in] statement compilation context */
-interpreter::StatementCompiler::StatementResult
+interpreter::StatementCompiler::Result
 interpreter::StatementCompiler::compileSelect(BytecodeObject& bco, const StatementCompilationContext& scc)
 {
     // ex IntStatementCompiler::compileSelect
@@ -2306,14 +2332,16 @@ interpreter::StatementCompiler::compileSelect(BytecodeObject& bco, const Stateme
     /* Parse head */
     Tokenizer& tok = m_commandSource.tokenizer();
     tok.readNextToken();
-    if (!tok.checkAdvance("CASE"))
+    if (!tok.checkAdvance("CASE")) {
         throw Error::expectKeyword("Case");
+    }
     compileArgumentExpression(bco, scc);
     parseEndOfLine();
 
     /* Is it valid? */
-    if (scc.hasFlag(scc.RefuseBlocks))
+    if (scc.hasFlag(scc.RefuseBlocks)) {
         throw Error::invalidMultiline();
+    }
 
     /* Find first case */
     while (1) {
@@ -2347,8 +2375,9 @@ interpreter::StatementCompiler::compileSelect(BytecodeObject& bco, const Stateme
             bco.addInstruction(Opcode::maStack, Opcode::miStackDrop, 1);
             compileList(bco, DefaultStatementCompilationContext(scc).setBlockSyntax().withoutFlag(CompilationContext::LinearExecution));
             bco.addJump(Opcode::jAlways, lout);
-            if (!tok.checkAdvance("ENDSELECT"))
+            if (!tok.checkAdvance("ENDSELECT")) {
                 throw Error::expectKeyword("EndSelect");
+            }
             break;
         } else {
             /* Possibly multi-part condition. */
@@ -2361,10 +2390,12 @@ interpreter::StatementCompiler::compileSelect(BytecodeObject& bco, const Stateme
             compileList(bco, DefaultStatementCompilationContext(scc).setBlockSyntax().withoutFlag(CompilationContext::LinearExecution));
             bco.addJump(Opcode::jAlways, lout);
             bco.addLabel(ldont);
-            if (tok.checkAdvance("ENDSELECT"))
+            if (tok.checkAdvance("ENDSELECT")) {
                 break;
-            if (!tok.checkAdvance("CASE"))
+            }
+            if (!tok.checkAdvance("CASE")) {
                 throw Error::expectKeyword("EndSelect", "Case");
+            }
         }
     }
     parseEndOfLine();
@@ -2377,7 +2408,7 @@ interpreter::StatementCompiler::compileSelect(BytecodeObject& bco, const Stateme
     \param bco [out] bytecode output
     \param scc [in] statement compilation context
     \param proc [in] true if this is going to be a procedure (Sub), false if it's a function */
-interpreter::StatementCompiler::StatementResult
+interpreter::StatementCompiler::Result
 interpreter::StatementCompiler::compileSelectionExec(BytecodeObject& bco, const StatementCompilationContext& /*scc*/)
 {
     // ex IntStatementCompiler::compileSelectionExec
@@ -2406,15 +2437,17 @@ interpreter::StatementCompiler::compileSelectionExec(BytecodeObject& bco, const 
     SelectionExpression::compile(tok, expr);
     if (tok.checkAdvance(tok.tAssign) || tok.checkAdvance(tok.tEQ)) {
         /* It is an assignment */
-        if (expr.size() != 1)
+        if (expr.size() != 1) {
             throw Error::notAssignable();
+        }
 
-        if (expr[0] == SelectionExpression::opCurrent)
+        if (expr[0] == SelectionExpression::opCurrent) {
             target = 0;
-        else if (expr[0] >= SelectionExpression::opFirstLayer && expr[0] < SelectionExpression::opFirstLayer + SelectionExpression::NUM_SELECTION_LAYERS)
+        } else if (expr[0] >= SelectionExpression::opFirstLayer && expr[0] < SelectionExpression::opFirstLayer + SelectionExpression::NUM_SELECTION_LAYERS) {
             target = expr[0] - SelectionExpression::opFirstLayer + 1;
-        else
+        } else {
             throw Error::notAssignable();
+        }
 
         /* Read actual expression */
         expr.clear();
@@ -2437,7 +2470,7 @@ interpreter::StatementCompiler::compileSelectionExec(BytecodeObject& bco, const 
     \param scc [in] statement compilation context
     \param proc [in] true if this is going to be a procedure (Sub), false if it's a function
     \param scope [in] Target scope */
-interpreter::StatementCompiler::StatementResult
+interpreter::StatementCompiler::Result
 interpreter::StatementCompiler::compileSub(BytecodeObject& bco, const StatementCompilationContext& scc, bool proc, Opcode::Scope scope)
 {
     // ex IntStatementCompiler::compileSub
@@ -2503,14 +2536,16 @@ interpreter::StatementCompiler::compileSub(BytecodeObject& bco, const StatementC
        @see Sub
        @since PCC2 1.99.9 */
 
-    if (scc.hasFlag(scc.RefuseBlocks))
+    if (scc.hasFlag(scc.RefuseBlocks)) {
         throw Error::invalidMultiline();
+    }
 
     /* Read function name */
     Tokenizer& tok = m_commandSource.tokenizer();
     tok.readNextToken();
-    if (tok.getCurrentToken() != tok.tIdentifier)
+    if (tok.getCurrentToken() != tok.tIdentifier) {
         throw Error::expectIdentifier(proc ? "subroutine name" : "function name");
+    }
     const String_t name = tok.getCurrentString();
     validateName(scc, name);
     tok.readNextToken();
@@ -2518,7 +2553,7 @@ interpreter::StatementCompiler::compileSub(BytecodeObject& bco, const StatementC
     /* Create new BCO */
     BCORef_t nbco = *new BytecodeObject();
     nbco->setIsProcedure(proc);
-    nbco->setName(name);
+    nbco->setSubroutineName(name);
     nbco->setFileName(bco.getFileName());
     nbco->setOrigin(bco.getOrigin());
 
@@ -2527,8 +2562,9 @@ interpreter::StatementCompiler::compileSub(BytecodeObject& bco, const StatementC
         bool optional = false;
         while (1) {
             if (tok.checkAdvance("OPTIONAL")) {
-                if (optional)
+                if (optional) {
                     throw Error::misplacedKeyword("Optional");
+                }
                 optional = true;
             }
             if (tok.getCurrentToken() != tok.tIdentifier) {
@@ -2541,18 +2577,21 @@ interpreter::StatementCompiler::compileSub(BytecodeObject& bco, const StatementC
             if (tok.checkAdvance(tok.tLParen)) {
                 /* Varargs: must have two closing parens now, one for the varargs
                    thing, one to close the parameter list */
-                if (!tok.checkAdvance(tok.tRParen) || !tok.checkAdvance(tok.tRParen))
+                if (!tok.checkAdvance(tok.tRParen) || !tok.checkAdvance(tok.tRParen)) {
                     throw Error::expectSymbol(")");
+                }
                 nbco->addLocalVariable(name);
                 nbco->setIsVarargs(true);
                 break;
             }
 
             nbco->addArgument(name, optional);
-            if (tok.checkAdvance(tok.tRParen))
+            if (tok.checkAdvance(tok.tRParen)) {
                 break;
-            if (!tok.checkAdvance(tok.tComma))
+            }
+            if (!tok.checkAdvance(tok.tComma)) {
                 throw Error::expectSymbol(",", ")");
+            }
         }
     }
     parseEndOfLine();
@@ -2567,12 +2606,14 @@ interpreter::StatementCompiler::compileSub(BytecodeObject& bco, const StatementC
                       .withFlag(CompilationContext::LinearExecution));
 
     /* If it is a function, make sure it returns anything */
-    if (!proc)
+    if (!proc) {
         nbco->addPushLiteral(0);
+    }
     subSC.finishBCO(*nbco, scc);
 
-    if (!tok.checkAdvance(proc ? "ENDSUB" : "ENDFUNCTION"))
+    if (!tok.checkAdvance(proc ? "ENDSUB" : "ENDFUNCTION")) {
         throw Error::expectKeyword(proc ? "EndSub" : "EndFunction");
+    }
     tok.checkAdvance(name.c_str());
     parseEndOfLine();
 
@@ -2586,7 +2627,7 @@ interpreter::StatementCompiler::compileSub(BytecodeObject& bco, const StatementC
     \param bco [out] bytecode output
     \param scc [in] statement compilation context
     \param scope [in] Target scope */
-interpreter::StatementCompiler::StatementResult
+interpreter::StatementCompiler::Result
 interpreter::StatementCompiler::compileStruct(BytecodeObject& bco, const StatementCompilationContext& scc, Opcode::Scope scope)
 {
     // ex IntStatementCompiler::compileStruct
@@ -2621,14 +2662,16 @@ interpreter::StatementCompiler::compileStruct(BytecodeObject& bco, const Stateme
        @see Dim
        @since PCC2 1.99.19 */
 
-    if (scc.hasFlag(scc.RefuseBlocks))
+    if (scc.hasFlag(scc.RefuseBlocks)) {
         throw Error::invalidMultiline();
+    }
 
     /* Read structure name */
     Tokenizer& tok = m_commandSource.tokenizer();
     tok.readNextToken();
-    if (tok.getCurrentToken() != tok.tIdentifier)
+    if (tok.getCurrentToken() != tok.tIdentifier) {
         throw Error::expectIdentifier("structure name");
+    }
 
     String_t name = tok.getCurrentString();
     validateName(scc, name);
@@ -2647,7 +2690,7 @@ interpreter::StatementCompiler::compileStruct(BytecodeObject& bco, const Stateme
     ctorBCO->addLineNumber(m_commandSource.getLineNumber());
     ctorBCO->addPushLiteral(&typeValue);
     ctorBCO->addInstruction(Opcode::maSpecial, Opcode::miSpecialInstance, 0);
-    ctorBCO->setName(name);
+    ctorBCO->setSubroutineName(name);
 
     /* Read content */
     bool reading = true;
@@ -2663,14 +2706,17 @@ interpreter::StatementCompiler::compileStruct(BytecodeObject& bco, const Stateme
             ctorBCO->addLineNumber(m_commandSource.getLineNumber());
             switch (lookupKeyword(tok.getCurrentString())) {
              case kwEndStruct:
+                tok.readNextToken();
+                parseEndOfLine();
                 reading = false;
                 break;
              case kwNone:
                 /* Read variables */
                 while (1) {
                     /* Read name */
-                    if (tok.getCurrentToken() != tok.tIdentifier)
+                    if (tok.getCurrentToken() != tok.tIdentifier) {
                         throw Error::expectIdentifier("variable name");
+                    }
                     String_t field = tok.getCurrentString();
                     validateName(scc, field);
                     if (typeValue.getType()->names().getIndexByName(field) != afl::data::NameMap::nil)
@@ -2688,11 +2734,10 @@ interpreter::StatementCompiler::compileStruct(BytecodeObject& bco, const Stateme
                         ctorBCO->addInstruction(Opcode::maStack, Opcode::miStackDup, 1);
                         ctorBCO->addInstruction(Opcode::maMemref, Opcode::miIMPop, ctorBCO->addName(field));
                     }
-                    if (!tok.checkAdvance(tok.tComma))
+                    if (!parseNext(tok)) {
                         break;
+                    }
                 }
-                if (tok.getCurrentToken() != tok.tEnd)
-                    throw Error::expectSymbol(",");
                 break;
              default:
                 throw Error::misplacedKeyword(tok.getCurrentString().c_str());
@@ -2716,7 +2761,7 @@ interpreter::StatementCompiler::compileStruct(BytecodeObject& bco, const Stateme
 /** Compile "Try" statement.
     \param bco [out] bytecode output
     \param scc [in] statement compilation context */
-interpreter::StatementCompiler::StatementResult
+interpreter::StatementCompiler::Result
 interpreter::StatementCompiler::compileTry(BytecodeObject& bco, const StatementCompilationContext& scc)
 {
     // ex IntStatementCompiler::compileTry
@@ -2776,8 +2821,7 @@ interpreter::StatementCompiler::compileTry(BytecodeObject& bco, const StatementC
 
     if (tok.readNextToken() == tok.tEnd) {
         /* Multi-line */
-        if (scc.hasFlag(CompilationContext::RefuseBlocks))
-            throw Error::invalidMultiline();
+        validateMultiline(scc);
         m_commandSource.readNextLine();
         compileList(bco, TryStatementCompilationContext(scc).setBlockSyntax());
         bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialUncatch, 0);
@@ -2795,8 +2839,9 @@ interpreter::StatementCompiler::compileTry(BytecodeObject& bco, const StatementC
             bco.addVariableReferenceInstruction(Opcode::maPop, "SYSTEM.ERR", scc);
             bco.addLabel(lend);
         }
-        if (!tok.checkAdvance("ENDTRY"))
+        if (!tok.checkAdvance("ENDTRY")) {
             throw Error::expectKeyword("EndTry");
+        }
         parseEndOfLine();
         return CompiledBlock;
     } else {
@@ -2814,7 +2859,7 @@ interpreter::StatementCompiler::compileTry(BytecodeObject& bco, const StatementC
 /** Compile "UseKeymap" statement.
     \param bco [out] bytecode output
     \param scc [in] statement compilation context */
-interpreter::StatementCompiler::StatementResult
+interpreter::StatementCompiler::Result
 interpreter::StatementCompiler::compileUseKeymap(BytecodeObject& bco, const StatementCompilationContext& scc)
 {
     // ex IntStatementCompiler::compileUseKeymap
@@ -2872,7 +2917,7 @@ interpreter::StatementCompiler::compileUseKeymap(BytecodeObject& bco, const Stat
 /** Compile "With" statement.
     \param bco [out] bytecode output
     \param scc [in] statement compilation context */
-interpreter::StatementCompiler::StatementResult
+interpreter::StatementCompiler::Result
 interpreter::StatementCompiler::compileWith(BytecodeObject& bco, const StatementCompilationContext& scc)
 {
     // ex IntStatementCompiler::compileWith
@@ -2926,19 +2971,20 @@ interpreter::StatementCompiler::compileWith(BytecodeObject& bco, const Statement
     bool oneliner = tok.checkAdvance("DO");
     if (tok.getCurrentToken() == tok.tEnd) {
         /* Multi-line */
-        if (scc.hasFlag(CompilationContext::RefuseBlocks))
-            throw Error::invalidMultiline();
+        validateMultiline(scc);
         m_commandSource.readNextLine();
         compileList(bco, WithStatementCompilationContext(scc).setBlockSyntax());
-        if (!tok.checkAdvance("ENDWITH"))
+        if (!tok.checkAdvance("ENDWITH")) {
             throw Error::expectKeyword("EndWith");
+        }
         parseEndOfLine();
         bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialEndWith, 0);
         return CompiledBlock;
     } else {
         /* One line */
-        if (!oneliner)
+        if (!oneliner) {
             throw Error::expectKeyword("Do");
+        }
         compile(bco, WithStatementCompilationContext(scc).setOneLineSyntax());
         bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialEndWith, 0);
         return CompiledStatement;
@@ -2948,14 +2994,15 @@ interpreter::StatementCompiler::compileWith(BytecodeObject& bco, const Statement
 /** Compile expression statement.
     \param bco [out] bytecode output
     \param scc [in] statement compilation context */
-interpreter::StatementCompiler::StatementResult
+interpreter::StatementCompiler::Result
 interpreter::StatementCompiler::compileExpressionStatement(BytecodeObject& bco, const StatementCompilationContext& scc)
 {
     // ex IntStatementCompiler::compileExpressionStatement(BytecodeObject& bco, const IntStatementCompilationContext& scc)
     /* Parse expression */
     std::auto_ptr<interpreter::expr::Node> node(interpreter::expr::Parser(m_commandSource.tokenizer()).parse());
-    if (m_commandSource.tokenizer().getCurrentToken() != Tokenizer::tEnd)
+    if (m_commandSource.tokenizer().getCurrentToken() != Tokenizer::tEnd) {
         throw Error::garbageAtEnd(true);
+    }
 
     /* If the topmost node is a comparison for equality, compile an assignment instead. */
     if (interpreter::expr::CaseNode* cen = dynamic_cast<interpreter::expr::CaseNode*>(node.get())) {
@@ -2977,7 +3024,7 @@ interpreter::StatementCompiler::compileExpressionStatement(BytecodeObject& bco, 
 /** Compile procedure call. Assumes current token being the procedure name.
     \param bco [out] Bytecode goes here
     \param scc [in] Compilation flags */
-interpreter::StatementCompiler::StatementResult
+interpreter::StatementCompiler::Result
 interpreter::StatementCompiler::compileProcedureCall(BytecodeObject& bco, const StatementCompilationContext& scc)
 {
     // ex IntStatementCompiler::compileProcedureCall(BytecodeObject& bco, const IntStatementCompilationContext& scc)
@@ -2989,8 +3036,9 @@ interpreter::StatementCompiler::compileProcedureCall(BytecodeObject& bco, const 
     /* Compile args */
     afl::container::PtrVector<interpreter::expr::Node> args;
     parseArgumentList(args);
-    for (size_t i = 0; i != args.size(); ++i)
+    for (size_t i = 0; i != args.size(); ++i) {
         args[i]->compileValue(bco, scc);
+    }
 
     /* Call */
     bco.addVariableReferenceInstruction(Opcode::maPush, name, scc);
@@ -2999,29 +3047,30 @@ interpreter::StatementCompiler::compileProcedureCall(BytecodeObject& bco, const 
     return CompiledStatement;
 }
 
-interpreter::StatementCompiler::StatementResult
+interpreter::StatementCompiler::Result
 interpreter::StatementCompiler::compileLoopBody(BytecodeObject& bco, StatementCompilationContext& subcc)
 {
     Tokenizer& tok = m_commandSource.tokenizer();
     bool oneliner = tok.checkAdvance("DO");
-    StatementResult result;
+    Result result;
     if (tok.getCurrentToken() != tok.tEnd) {
         /* Single line */
-        if (!oneliner)
+        if (!oneliner) {
             throw Error::expectKeyword("Do");
+        }
         subcc.setOneLineSyntax();
         compile(bco, subcc);
         result = CompiledStatement;
     } else {
         /* Multi-line */
-        if (subcc.hasFlag(CompilationContext::RefuseBlocks))
-            throw Error::invalidMultiline();
-
+        validateMultiline(subcc);
         subcc.setBlockSyntax();
         m_commandSource.readNextLine();
         compileList(bco, subcc);
-        if (!tok.checkAdvance("NEXT"))
+        if (!tok.checkAdvance("NEXT")) {
             throw Error::expectKeyword("Next");
+        }
+        // FIXME: 'Next i' syntax?
         parseEndOfLine();
         result = CompiledBlock;
     }
@@ -3042,11 +3091,13 @@ interpreter::StatementCompiler::compileVariableDefinition(BytecodeObject& bco, c
     Tokenizer& tok = m_commandSource.tokenizer();
     while (1) {
         /* Read name */
-        if (tok.getCurrentToken() != tok.tIdentifier)
+        if (tok.getCurrentToken() != tok.tIdentifier) {
             throw Error::expectIdentifier("variable name");
+        }
         String_t name = tok.getCurrentString();
-        if (scope == Opcode::sShared)
+        if (scope == Opcode::sShared) {
             name = stripPrefix(name, "GLOBAL.");
+        }
         validateName(scc, name);
         tok.readNextToken();
 
@@ -3089,17 +3140,16 @@ interpreter::StatementCompiler::compileVariableDefinition(BytecodeObject& bco, c
             }
         } else {
             /* General version */
-            if (isNull)
+            if (isNull) {
                 bco.addPushLiteral(0);
+            }
             bco.addInstruction(Opcode::maDim, scope, bco.addName(name));
         }
 
-        if (!tok.checkAdvance(tok.tComma))
+        if (!parseNext(tok)) {
             break;
+        }
     }
-
-    if (tok.getCurrentToken() != tok.tEnd)
-        throw Error::expectSymbol(",");
 }
 
 /** Compile optional initializer. If an initializer is present, compiles it and returns true.
@@ -3122,16 +3172,19 @@ interpreter::StatementCompiler::compileInitializer(BytecodeObject& bco, const St
         while (1) {
             compileArgumentExpression(bco, scc);
             ++n;
-            if (tok.checkAdvance(tok.tRParen))
+            if (tok.checkAdvance(tok.tRParen)) {
                 break;
-            if (!tok.checkAdvance(tok.tComma))
+            }
+            if (!tok.checkAdvance(tok.tComma)) {
                 throw Error::expectSymbol(",", ")");
+            }
         }
         bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialNewArray, uint16_t(n));
         if (tok.checkAdvance("AS")) {
             // Type initializer
-            if (tok.getCurrentToken() != tok.tIdentifier)
+            if (tok.getCurrentToken() != tok.tIdentifier) {
                 throw Error::expectIdentifier("type name");
+            }
             String_t typeName = tok.getCurrentString();
             tok.readNextToken();
             if (identifyType(typeName) != tkAny) {
@@ -3169,6 +3222,7 @@ interpreter::StatementCompiler::compileInitializer(BytecodeObject& bco, const St
                     bco.addInstruction(Opcode::maStack, Opcode::miStackDup, uint16_t(2*i));
                 }
                 if (!compileTypeInitializer(bco, scc, typeName)) {
+                    // Cannot happen, compileTypeInitializer() returns false only for tkAny
                     bco.addPushLiteral(0);
                 }
                 bco.addInstruction(Opcode::maStack, Opcode::miStackDup, uint16_t(2*n+1));
@@ -3190,8 +3244,9 @@ interpreter::StatementCompiler::compileInitializer(BytecodeObject& bco, const St
         compileArgumentExpression(bco, scc);
         return true;
     } else if (tok.checkAdvance("AS")) {
-        if (tok.getCurrentToken() != tok.tIdentifier)
+        if (tok.getCurrentToken() != tok.tIdentifier) {
             throw Error::expectIdentifier("type name");
+        }
         String_t typeName = tok.getCurrentString();
         tok.readNextToken();
         return compileTypeInitializer(bco, scc, typeName);
@@ -3286,20 +3341,21 @@ interpreter::StatementCompiler::compileSelectCondition(BytecodeObject& bco, cons
         uint8_t relation = biCompareEQ_NC;
         if (tok.checkAdvance("IS")) {
             /* Relation sign plus expression */
-            if (tok.checkAdvance(tok.tGT))
+            if (tok.checkAdvance(tok.tGT)) {
                 relation = biCompareGT_NC;
-            else if (tok.checkAdvance(tok.tGE))
+            } else if (tok.checkAdvance(tok.tGE)) {
                 relation = biCompareGE_NC;
-            else if (tok.checkAdvance(tok.tLT))
+            } else if (tok.checkAdvance(tok.tLT)) {
                 relation = biCompareLT_NC;
-            else if (tok.checkAdvance(tok.tLE))
+            } else if (tok.checkAdvance(tok.tLE)) {
                 relation = biCompareLE_NC;
-            else if (tok.checkAdvance(tok.tNE))
+            } else if (tok.checkAdvance(tok.tNE)) {
                 relation = biCompareNE_NC;
-            else if (tok.checkAdvance(tok.tEQ))
+            } else if (tok.checkAdvance(tok.tEQ)) {
                 relation = biCompareEQ_NC;
-            else
+            } else {
                 throw Error("Expecting relation");
+            }
         }
         /* Single expression */
         bco.addInstruction(Opcode::maStack, Opcode::miStackDup, 0);
@@ -3307,12 +3363,8 @@ interpreter::StatementCompiler::compileSelectCondition(BytecodeObject& bco, cons
         bco.addInstruction(Opcode::maBinary, relation, 0);
         bco.addJump(Opcode::jIfTrue | Opcode::jPopAlways, ldo);
 
-        if (tok.getCurrentToken() == tok.tEnd) {
+        if (!parseNext(tok)) {
             break;
-        } else if (tok.checkAdvance(tok.tComma)) {
-            /* There's another one */
-        } else {
-            throw Error::expectSymbol(",");
         }
     }
 }
@@ -3427,8 +3479,9 @@ void
 interpreter::StatementCompiler::parseEndOfLine()
 {
     // ex IntStatementCompiler::parseEndOfLine()
-    if (m_commandSource.tokenizer().getCurrentToken() != Tokenizer::tEnd)
+    if (m_commandSource.tokenizer().getCurrentToken() != Tokenizer::tEnd) {
         throw Error::garbageAtEnd(false);
+    }
 }
 
 /** Validate name. Throws error if the name should not be used. */
@@ -3445,11 +3498,7 @@ interpreter::StatementCompiler::validateName(const StatementCompilationContext& 
 
 
 
-/** Parse argument list. Parses comma-separated list of expressions.
-    Terminates successfully when finding end of line. Note that this only
-    parses, it does not compile the expressions.
-    \param tok  [in] Tokenizer
-    \param args [out] Arguments expression trees are accumulated here */
+// Parse argument list.
 void
 interpreter::parseCommandArgumentList(Tokenizer& tok, afl::container::PtrVector<interpreter::expr::Node>& args)
 {
@@ -3457,15 +3506,8 @@ interpreter::parseCommandArgumentList(Tokenizer& tok, afl::container::PtrVector<
         /* We have some arguments */
         while (1) {
             args.pushBackNew(interpreter::expr::Parser(tok).parse());
-            if (tok.getCurrentToken() == tok.tComma) {
-                /* Okay, we have one more */
-                tok.readNextToken();
-            } else if (tok.getCurrentToken() == tok.tEnd) {
-                /* Okay, this was the last one */
+            if (!parseNext(tok)) {
                 break;
-            } else {
-                /* Error */
-                throw Error::garbageAtEnd(true);
             }
         }
     }

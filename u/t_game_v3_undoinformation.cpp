@@ -6,6 +6,7 @@
 #include "game/v3/undoinformation.hpp"
 
 #include "t_game_v3.hpp"
+#include "afl/charset/utf8charset.hpp"
 #include "afl/io/internaldirectory.hpp"
 #include "afl/io/nullfilesystem.hpp"
 #include "afl/string/nulltranslator.hpp"
@@ -18,8 +19,8 @@
 #include "game/test/registrationkey.hpp"
 #include "game/test/specificationloader.hpp"
 #include "game/test/stringverifier.hpp"
+#include "game/turn.hpp"
 #include "game/v3/reverter.hpp"
-#include "afl/charset/utf8charset.hpp"
 
 namespace {
     const int PLANET_ID = 92;
@@ -29,7 +30,8 @@ namespace {
     const int Y = 2222;
 
     struct TestHarness {
-        game::map::Universe univ;
+        game::Turn turn;
+        game::map::Universe& univ;
         game::map::Planet& planet;
         afl::base::Ref<game::spec::ShipList> shipList;
         afl::base::Ref<game::Root> root;
@@ -39,7 +41,8 @@ namespace {
         game::config::HostConfiguration& config;
 
         TestHarness()
-            : univ(),
+            : turn(),
+              univ(turn.universe()),
               planet(*univ.planets().create(PLANET_ID)),
               shipList(*new game::spec::ShipList()),
               root(*new game::Root(afl::io::InternalDirectory::create("game dir"),
@@ -56,6 +59,7 @@ namespace {
             {
                 root->hostConfiguration().setDefaultValues();
                 session.setShipList(shipList.asPtr());
+                session.setRoot(root.asPtr());
             }
     };
 
@@ -119,7 +123,7 @@ namespace {
 
     game::v3::Reverter& prepareReverter(TestHarness& h)
     {
-        game::v3::Reverter* pRev = new game::v3::Reverter(h.univ, h.session);
+        game::v3::Reverter* pRev = new game::v3::Reverter(h.turn, h.session);
         h.univ.setNewReverter(pRev);
 
         game::map::BaseData bd;
@@ -229,6 +233,7 @@ TestGameV3UndoInformation::testSupplySale()
     game::v3::UndoInformation testee;
     testee.set(h.univ, *h.shipList, h.config, rev, PLANET_ID);
     TS_ASSERT_EQUALS(testee.getSuppliesAllowedToBuy(), 100);
+    TS_ASSERT_EQUALS(rev.getSuppliesAllowedToBuy(PLANET_ID), 100);
 }
 
 /** Test torpedo upgrade. */
@@ -256,12 +261,15 @@ TestGameV3UndoInformation::testTorpedoUpgrade()
 
     // We can downgrade torpedo tech up to 3, that's what we built
     TS_ASSERT_EQUALS(testee.getMinTechLevel(game::TorpedoTech), 3);
+    TS_ASSERT_EQUALS(rev.getMinTechLevel(PLANET_ID, game::TorpedoTech).orElse(-1), 3);
 
     // We can downgrade beam tech up to 1, nothing has been built
     TS_ASSERT_EQUALS(testee.getMinTechLevel(game::BeamTech), 1);
+    TS_ASSERT_EQUALS(rev.getMinTechLevel(PLANET_ID, game::BeamTech).orElse(-1), 1);
 
     // We can sell 5 torpedoes
     TS_ASSERT_EQUALS(testee.getNumTorpedoesAllowedToSell(3), 5);
+    TS_ASSERT_EQUALS(rev.getNumTorpedoesAllowedToSell(PLANET_ID, 3), 5);
 }
 
 /** Test torpedo upgrade with a ship. */
@@ -293,12 +301,15 @@ TestGameV3UndoInformation::testTorpedoShip()
 
     // We can downgrade torpedo tech up to 3, that's what we built on the ship
     TS_ASSERT_EQUALS(testee.getMinTechLevel(game::TorpedoTech), 3);
+    TS_ASSERT_EQUALS(rev.getMinTechLevel(PLANET_ID, game::TorpedoTech).orElse(-1), 3);
 
     // We can downgrade beam tech up to 1, nothing has been built
     TS_ASSERT_EQUALS(testee.getMinTechLevel(game::BeamTech), 1);
+    TS_ASSERT_EQUALS(rev.getMinTechLevel(PLANET_ID, game::BeamTech).orElse(-1), 1);
 
     // We can sell 3 torpedoes (those on the ship)
     TS_ASSERT_EQUALS(testee.getNumTorpedoesAllowedToSell(3), 3);
+    TS_ASSERT_EQUALS(rev.getNumTorpedoesAllowedToSell(PLANET_ID, 3), 3);
 }
 
 /** Test supply sale, ship transfer (#362). */
@@ -315,7 +326,7 @@ TestGameV3UndoInformation::testSupplyShip()
 
     // Create two ships
     game::map::Ship& myShip = prepareShip(h, 100, OWNER);
-    game::map::Ship& theirShip = prepareShip(h, 300, OWNER+1);
+    /*game::map::Ship& theirShip =*/ prepareShip(h, 300, OWNER+1);
 
     // Move supplies into cargo transporter
     myShip.setTransporterTargetId(myShip.TransferTransporter, 300);
@@ -331,5 +342,6 @@ TestGameV3UndoInformation::testSupplyShip()
 
     // We did not sell any supplies, so we cannot buy any!
     TS_ASSERT_EQUALS(testee.getSuppliesAllowedToBuy(), 0);
+    TS_ASSERT_EQUALS(rev.getSuppliesAllowedToBuy(PLANET_ID), 0);
 }
 

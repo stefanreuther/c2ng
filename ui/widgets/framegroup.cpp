@@ -12,7 +12,7 @@
 // Constructor.
 ui::widgets::FrameGroup::FrameGroup(ui::layout::Manager& mgr,
                                     ColorScheme& colors,
-                                    Type type)
+                                    FrameType type)
     : LayoutableGroup(mgr),
       m_colors(colors),
       m_frameType(type),
@@ -38,7 +38,7 @@ ui::widgets::FrameGroup::setPadding(int size)
 
 // Set type (color).
 void
-ui::widgets::FrameGroup::setType(Type type)
+ui::widgets::FrameGroup::setType(FrameType type)
 {
     // ex WColorFrame::setColor
     if (m_frameType != type) {
@@ -48,7 +48,7 @@ ui::widgets::FrameGroup::setType(Type type)
 }
 
 // Get type (color).
-ui::widgets::FrameGroup::Type
+ui::FrameType
 ui::widgets::FrameGroup::getType() const
 {
     return m_frameType;
@@ -56,7 +56,7 @@ ui::widgets::FrameGroup::getType() const
 
 // Wrap a single widget within a FrameGroup.
 ui::widgets::FrameGroup&
-ui::widgets::FrameGroup::wrapWidget(afl::base::Deleter& del, ColorScheme& colors, Type type, Widget& widget)
+ui::widgets::FrameGroup::wrapWidget(afl::base::Deleter& del, ColorScheme& colors, FrameType type, Widget& widget)
 {
     FrameGroup& f = del.addNew(new FrameGroup(ui::layout::HBox::instance0, colors, type));
     f.add(widget);
@@ -84,70 +84,9 @@ void
 ui::widgets::FrameGroup::draw(gfx::Canvas& can)
 {
     // ex UIFrameGroup::drawContent, WColorFrame::drawContent
-    // Determine colors
-    afl::base::Optional<uint8_t> leftOuter, leftInner, rightOuter, rightInner;
-    switch (m_frameType) {
-     case NoFrame:
-        // Draw nothing
-        break;
-
-     case RedFrame:
-        leftOuter = rightOuter = Color_Fire + 6;
-        leftInner = rightInner = Color_Fire + 8;
-        break;
-
-     case YellowFrame:
-        leftOuter = rightOuter = Color_DarkYellow;
-        leftInner = rightInner = Color_BrightYellow;
-        break;
-
-     case GreenFrame:
-        leftOuter = rightOuter = Color_GreenScale + 8;
-        leftInner = rightInner = Color_GreenScale + 10;
-        break;
-
-     case RaisedFrame:
-        leftOuter = leftInner = Color_White;
-        rightOuter = rightInner = Color_Black;
-        break;
-
-     case LoweredFrame:
-        leftOuter = leftInner = Color_Black;
-        rightOuter = rightInner = Color_White;
-        break;
-    }
-
-    // Determine widths
-    // These formulas make a 1px frame use the outer color and evenly split a 2px frame.
-    int innerWidth = m_frameWidth / 2;
-    int outerWidth = m_frameWidth - innerWidth;
-
-    // Draw
+    // Draw frame
     gfx::Context<uint8_t> ctx(can, m_colors);
-    gfx::Rectangle r(getExtent());
-    if (outerWidth > 0 && outerWidth < r.getWidth() && outerWidth < r.getHeight()) {
-        uint8_t color;
-        if (leftOuter.get(color)) {
-            drawSolidBar(ctx, gfx::Rectangle(r.getLeftX(), r.getTopY(),              r.getWidth() - outerWidth, outerWidth),                 color);
-            drawSolidBar(ctx, gfx::Rectangle(r.getLeftX(), r.getTopY() + outerWidth, outerWidth,                r.getHeight() - outerWidth), color);
-        }
-        if (rightOuter.get(color)) {
-            drawSolidBar(ctx, gfx::Rectangle(r.getRightX() - outerWidth, r.getTopY(),                 outerWidth,                r.getHeight() - outerWidth), color);
-            drawSolidBar(ctx, gfx::Rectangle(r.getLeftX() + outerWidth,  r.getBottomY() - outerWidth, r.getWidth() - outerWidth, outerWidth),                 color);
-        }
-    }
-    r.grow(-outerWidth, -outerWidth);
-    if (innerWidth > 0 && innerWidth < r.getWidth() && innerWidth < r.getHeight()) {
-        uint8_t color;
-        if (leftInner.get(color)) {
-            drawSolidBar(ctx, gfx::Rectangle(r.getLeftX(), r.getTopY(), r.getWidth() - innerWidth, innerWidth), color);
-            drawSolidBar(ctx, gfx::Rectangle(r.getLeftX(), r.getTopY() + innerWidth, innerWidth, r.getHeight() - innerWidth), color);
-        }
-        if (rightInner.get(color)) {
-            drawSolidBar(ctx, gfx::Rectangle(r.getRightX() - innerWidth, r.getTopY(), innerWidth, r.getHeight() - innerWidth), color);
-            drawSolidBar(ctx, gfx::Rectangle(r.getLeftX() + innerWidth,  r.getBottomY() - innerWidth, r.getWidth() - innerWidth, innerWidth), color);
-        }
-    }
+    drawFrame(ctx, getExtent(), m_frameType, m_frameWidth);
 
     // Draw children
     defaultDrawChildren(can);

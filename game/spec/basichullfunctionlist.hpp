@@ -75,7 +75,17 @@ namespace game { namespace spec {
             \see addDefaultAssignment */
         void performDefaultAssignments(ComponentVector<Hull>& hulls) const;
 
+        /** Get number of functions.
+            \return Number of functions */
+        size_t getNumFunctions() const;
+
+        /** Get function by index.
+            \param index Index [0,getNumFunctions())
+            \return Function definition; null if index is invalid */
+        const BasicHullFunction* getFunctionByIndex(size_t index) const;
+
      private:
+        /** Function definitions. */
         afl::container::PtrVector<BasicHullFunction> m_functions;
 
         /** Default assignments. Contains a list of pairs (hull,basicFunctionId). */

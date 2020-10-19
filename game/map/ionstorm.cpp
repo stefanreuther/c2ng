@@ -1,5 +1,10 @@
 /**
   *  \file game/map/ionstorm.cpp
+  *  \brief Class game::map::IonStorm
+  *
+  *  FIXME: as of 20200815, setters do not mark an IonStorm changed.
+  *  The trivial solution, using Updater, does not work because IntegerProperty_t
+  *  is not comparable.
   */
 
 #include "game/map/ionstorm.hpp"
@@ -56,7 +61,6 @@ game::map::IonStorm::getOwner(int& result) const
     return true;
 }
 
-// MapObject:
 bool
 game::map::IonStorm::getPosition(Point& result) const
 {
@@ -185,6 +189,47 @@ game::map::IonStorm::isActive() const
     int volt;
     return getVoltage().get(volt)
         && volt > 0;
+}
+
+void
+game::map::IonStorm::addMessageInformation(const game::parser::MessageInformation& info)
+{
+    // Allow voltage=0 to remove a storm. Otherwise, we need at minimum position, radius.
+    namespace gp = game::parser;
+    int32_t x, y, radius, voltage;
+    if (info.getValue(gp::mi_IonVoltage, voltage)) {
+        if (voltage == 0) {
+            // Remove the storm
+            setVoltage(voltage);
+            setIsGrowing(false);
+        } else {
+            // Try to create the storm
+            if (info.getValue(gp::mi_X, x) && info.getValue(gp::mi_Y, y) && info.getValue(gp::mi_Radius, radius)) {
+                // Success
+                setPosition(Point(x, y));
+                setVoltage(voltage);
+                setRadius(radius);
+
+                // Try to set status. Either explicit from message, or implicit from voltage
+                int status;
+                if (info.getValue(gp::mi_IonStatus, status)) {
+                    setIsGrowing(status != 0);
+                } else {
+                    setIsGrowing((voltage & 1) != 0);
+                }
+
+                // Try to set movement vector
+                int speed, heading;
+                if (info.getValue(gp::mi_Speed, speed) && info.getValue(gp::mi_Heading, heading)) {
+                    setSpeed(speed);
+                    setHeading(heading);
+                }
+
+                // Try to set the name
+                info.getValue(gp::ms_Name, m_name);
+            }
+        }
+    }
 }
 
 String_t

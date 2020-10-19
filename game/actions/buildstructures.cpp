@@ -300,7 +300,7 @@ game::actions::BuildStructures::describe(PlanetaryBuilding building)
         },
     };
 
-    return (building < NUM_PLANETARY_BUILDING_TYPES
+    return (size_t(building) < NUM_PLANETARY_BUILDING_TYPES
             ? DESCRIPTIONS[building]
             : DESCRIPTIONS[0]);
 }

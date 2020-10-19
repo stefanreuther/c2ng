@@ -153,6 +153,10 @@ namespace {
         { "TECH.TORPEDO",              game::interface::ibpTorpedoTech,       BasePropertyDomain,   interpreter::thInt },
         { "TEMP",                      game::interface::ippTempStr,           PlanetPropertyDomain, interpreter::thString },
         { "TEMP$",                     game::interface::ippTemp,              PlanetPropertyDomain, interpreter::thInt },
+        { "TURN.COLONISTS",            game::interface::ippColonistTime,      PlanetPropertyDomain, interpreter::thInt },
+        { "TURN.MINERALS",             game::interface::ippMineralTime,       PlanetPropertyDomain, interpreter::thInt },
+        { "TURN.MONEY",                game::interface::ippCashTime,          PlanetPropertyDomain, interpreter::thInt },
+        { "TURN.NATIVES",              game::interface::ippNativeTime,        PlanetPropertyDomain, interpreter::thInt },
         { "TYPE",                      game::interface::ippTypeStr,           PlanetPropertyDomain, interpreter::thString },
         { "TYPE.SHORT",                game::interface::ippTypeChar,          PlanetPropertyDomain, interpreter::thString },
         { "UNMARK",                    game::interface::ipmUnmark,            PlanetMethodDomain,   interpreter::thProcedure },
@@ -165,7 +169,7 @@ namespace {
         // Check user-defined properties
         afl::data::NameMap::Index_t ix = world.planetPropertyNames().getIndexByName(q);
         if (ix != afl::data::NameMap::nil) {
-            result = static_cast<interpreter::Context::PropertyIndex_t>(ix + NUM_PLANET_PROPERTIES);
+            result = ix + NUM_PLANET_PROPERTIES;
             return true;
         }
 
@@ -287,7 +291,6 @@ game::interface::PlanetContext::get(PropertyIndex_t index)
                                        m_session.translator(),
                                        m_root->hostConfiguration(),
                                        m_session.getShipList(),
-                                       m_session.interface(),
                                        &m_game->currentTurn());
              case OwnerPropertyDomain:
                 if (pl->getOwner(owner)) {

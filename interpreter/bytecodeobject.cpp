@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/bytecodeobject.cpp
+  *  \brief Class interpreter::BytecodeObject
   */
 
 #include <cassert>
@@ -76,140 +77,148 @@ namespace {
 
 
 
-// /** Construct blank BCO. */
+// Constructor.
 interpreter::BytecodeObject::BytecodeObject()
-    : m_data(),
+    : m_literals(),
       m_names(),
       m_code(),
-      num_labels(0),
-      m_localNames(),
+      m_numLabels(0),
+      m_localVariables(),
       m_minArgs(0),
       m_maxArgs(0),
       m_isProcedure(true),
       m_isVarargs(false),
-      m_name(),
-      file_name(),
+      m_subroutineName(),
+      m_fileName(),
       m_origin(),
-      line_numbers()
+      m_lineNumbers()
 {
     // ex IntBytecodeObject::IntBytecodeObject
 }
 
-// /** Destructor. */
+// Destructor.
 interpreter::BytecodeObject::~BytecodeObject()
 { }
 
-// /** Add named argument.
-//     \param name Name of argument
-//     \param optional true if this argument is optional
-
-//     addArgument(name, true) should not be followed by addArgument(name, false). */
+// Add named argument.
 void
 interpreter::BytecodeObject::addArgument(String_t name, bool optional)
 {
-    m_localNames.add(name);
-    m_maxArgs = m_localNames.getNumNames();
+    m_localVariables.add(name);
+    m_maxArgs = m_localVariables.getNumNames();
     if (!optional) {
-        m_minArgs = m_localNames.getNumNames();
+        m_minArgs = m_localVariables.getNumNames();
     }
 }
 
-// /** Get name of this BCO. Note that although this is a procedure name, it may not
-//     correspond with the current content of that procedure. */
+// Get subroutine name.
 String_t
-interpreter::BytecodeObject::getName() const
+interpreter::BytecodeObject::getSubroutineName() const
 {
     // ex IntBytecodeObject::getName
-    return m_name;
+    return m_subroutineName;
 }
 
-// /** Set name of this BCO. */
+// Set subroutine name.
 void
-interpreter::BytecodeObject::setName(String_t name)
+interpreter::BytecodeObject::setSubroutineName(String_t name)
 {
     // ex IntBytecodeObject::setName
-    m_name = name;
+    m_subroutineName = name;
 }
 
-// /** Get file name of this BCO. */
+// Get origin identifier.
+String_t
+interpreter::BytecodeObject::getOrigin() const
+{
+    return m_origin;
+}
+
+// Set origin identifier.
+void
+interpreter::BytecodeObject::setOrigin(const String_t& origin)
+{
+    m_origin = origin;
+}
+
+// Get file name.
 String_t
 interpreter::BytecodeObject::getFileName() const
 {
     // ex IntBytecodeObject::getFileName
-    return file_name;
+    return m_fileName;
 }
 
-// /** Set file name of this BCO. */
+// Set file name.
 void
 interpreter::BytecodeObject::setFileName(String_t fileName)
 {
     // ex IntBytecodeObject::setFileName
-    this->file_name = fileName;
+    this->m_fileName = fileName;
 }
 
-// /** Notice current line number for debugging. */
+// Remember current line number.
 void
 interpreter::BytecodeObject::addLineNumber(uint32_t line)
 {
     // ex IntBytecodeObject::addLineNumber
     uint32_t address = uint32_t(m_code.size());
 
-    if (line_numbers.size() == 0
-        || (line != line_numbers[line_numbers.size()-1] && address != line_numbers[line_numbers.size()-2]))
+    if (m_lineNumbers.size() == 0
+        || (line != m_lineNumbers[m_lineNumbers.size()-1] && address != m_lineNumbers[m_lineNumbers.size()-2]))
     {
         /* First pair, or new line at new address */
-        line_numbers.push_back(address);
-        line_numbers.push_back(line);
-    } else if (address == line_numbers[line_numbers.size()-2]) {
+        m_lineNumbers.push_back(address);
+        m_lineNumbers.push_back(line);
+    } else if (address == m_lineNumbers[m_lineNumbers.size()-2]) {
         /* Same address as last pair, i.e. last line compiled to 0 instructions */
-        line_numbers[line_numbers.size()-1] = line;
+        m_lineNumbers[m_lineNumbers.size()-1] = line;
     } else {
         /* Same line as last pair, but different address, i.e. nested statement */
     }
 }
 
-// add line number, for loading
+// Add line/address pair.
 void
 interpreter::BytecodeObject::addLineNumber(uint32_t line, uint32_t pc)
 {
-    line_numbers.push_back(pc);
-    line_numbers.push_back(line);
+    m_lineNumbers.push_back(pc);
+    m_lineNumbers.push_back(line);
 }
 
 
-// /** Get line number for a particular PC. */
+// Get line number for program counter.
 uint32_t
 interpreter::BytecodeObject::getLineNumber(PC_t pc) const
 {
     // ex IntBytecodeObject::getLineNumber
     /* Slow and simple */
-    if (line_numbers.size() == 0 || pc < line_numbers[0]) {
+    if (m_lineNumbers.size() == 0 || pc < m_lineNumbers[0]) {
         return 0;
     }
 
     uint32_t i = 0;
-    while (i+2 < line_numbers.size() && pc >= line_numbers[i+2]) {
+    while (i+2 < m_lineNumbers.size() && pc >= m_lineNumbers[i+2]) {
         i += 2;
     }
-    return line_numbers[i+1];
+    return m_lineNumbers[i+1];
 }
 
-// /** Make a new label for future reference. This label can be used in as many jumps
-//     as needed (addJump), and must be placed exactly once using addLabel. */
+// Make a new label for future reference.
 interpreter::BytecodeObject::Label_t
 interpreter::BytecodeObject::makeLabel()
 {
     // ex IntBytecodeObject::makeLabel
-    Label_t oldCount = num_labels;
-    Label_t newCount = Label_t(num_labels + 1);
+    Label_t oldCount = m_numLabels;
+    Label_t newCount = Label_t(m_numLabels + 1);
     if (newCount == 0) {
         throw Error::tooComplex();
     }
-    num_labels = newCount;
+    m_numLabels = newCount;
     return oldCount;
 }
 
-// /** Add an instruction. */
+// Add an instruction.
 void
 interpreter::BytecodeObject::addInstruction(Opcode::Major major, uint8_t minor, uint16_t arg)
 {
@@ -221,17 +230,14 @@ interpreter::BytecodeObject::addInstruction(Opcode::Major major, uint8_t minor, 
     m_code.push_back(o);
 }
 
-// /** Add variable-referencing instruction.
-//     \param major Major opcode
-//     \param name  Name of referenced variable
-//     \param cc    Compilation context */
+// Add a variable-referencing instruction.
 void
 interpreter::BytecodeObject::addVariableReferenceInstruction(Opcode::Major major, const String_t& name, const CompilationContext& cc)
 {
     if (cc.hasFlag(CompilationContext::LocalContext)) {
         // Is it a local variable?
-        afl::data::NameMap::Index_t ix = m_localNames.getIndexByName(name);
-        if (ix != m_localNames.nil) {
+        afl::data::NameMap::Index_t ix = m_localVariables.getIndexByName(name);
+        if (ix != afl::data::NameMap::nil) {
             addInstruction(major, Opcode::sLocal, packIndex(ix));
             return;
         }
@@ -239,7 +245,7 @@ interpreter::BytecodeObject::addVariableReferenceInstruction(Opcode::Major major
         // Is it a global variable?
         if (cc.hasFlag(CompilationContext::AlsoGlobalContext)) {
             ix = cc.world().globalPropertyNames().getIndexByName(name);
-            if (ix != m_localNames.nil) {
+            if (ix != afl::data::NameMap::nil) {
                 addInstruction(major, Opcode::sShared, packIndex(ix));
                 return;
             }
@@ -250,7 +256,7 @@ interpreter::BytecodeObject::addVariableReferenceInstruction(Opcode::Major major
     addInstruction(major, Opcode::sNamedVariable, addName(name));
 }
 
-// /** Place a label. */
+// Place a label.
 void
 interpreter::BytecodeObject::addLabel(Label_t label)
 {
@@ -258,6 +264,7 @@ interpreter::BytecodeObject::addLabel(Label_t label)
     addInstruction(Opcode::maJump, Opcode::jSymbolic, label);
 }
 
+// Insert a label in the middle of code.
 void
 interpreter::BytecodeObject::insertLabel(Label_t label, PC_t pc)
 {
@@ -270,15 +277,15 @@ interpreter::BytecodeObject::insertLabel(Label_t label, PC_t pc)
         m_code.insert(m_code.begin() + pc, o);
 
         // Update debug information
-        for (size_t i = 0, n = line_numbers.size(); i < n; i += 2) {
-            if (line_numbers[i] >= pc) {
-                ++line_numbers[i];
+        for (size_t i = 0, n = m_lineNumbers.size(); i < n; i += 2) {
+            if (m_lineNumbers[i] >= pc) {
+                ++m_lineNumbers[i];
             }
         }
     }
 }
 
-// /** Add a jump. */
+// Add jump instruction.
 void
 interpreter::BytecodeObject::addJump(uint8_t flags, Label_t label)
 {
@@ -286,8 +293,7 @@ interpreter::BytecodeObject::addJump(uint8_t flags, Label_t label)
     addInstruction(Opcode::maJump, flags | Opcode::jSymbolic, label);
 }
 
-// /** Add a "push literal" instruction. Checks whether the literal can be
-//     encoded as a single instruction; otherwise generates a new literal table slot. */
+// Add push-literal instruction.
 void
 interpreter::BytecodeObject::addPushLiteral(afl::data::Value* literal)
 {
@@ -316,18 +322,17 @@ interpreter::BytecodeObject::addPushLiteral(afl::data::Value* literal)
 
     // None of the above, so use general way
     uint16_t existing;
-    if (findLiteral(m_data, literal).get(existing)) {
+    if (findLiteral(m_literals, literal).get(existing)) {
         // Recycle existing literal
         addInstruction(Opcode::maPush, Opcode::sLiteral, existing);
     } else {
         // FIXME: check 16-bit range
-        m_data.pushBack(literal);
-        addInstruction(Opcode::maPush, Opcode::sLiteral, uint16_t(m_data.size()-1));
+        m_literals.pushBack(literal);
+        addInstruction(Opcode::maPush, Opcode::sLiteral, uint16_t(m_literals.size()-1));
     }
 }
 
-// /** Add a name for reference by later instructions. Existing names are recycled if
-//     possible. */
+// Add name (symbol) for later reference.
 uint16_t
 interpreter::BytecodeObject::addName(String_t name)
 {
@@ -336,12 +341,7 @@ interpreter::BytecodeObject::addName(String_t name)
 }
 
 
-// /** Check whether this BCO contains any instruction that potentially calls user code.
-//     This can be
-//     - callind, pushind, procind (for convenience, any maIndirect)
-//     - sevalx
-//     - sevals
-//     - srunhook */
+// Check for potential call into user code.
 bool
 interpreter::BytecodeObject::hasUserCall() const
 {
@@ -359,13 +359,12 @@ interpreter::BytecodeObject::hasUserCall() const
     return false;
 }
 
-// /** Turn symbolic references into absolute references. Also eliminates
-//     null operations (absolute labels). */
+// Turn symbolic references into absolute references.
 void
 interpreter::BytecodeObject::relocate()
 {
     // ex IntBytecodeObject::relocate
-    std::vector<uint16_t> addresses(num_labels, uint16_t(-1));
+    std::vector<uint16_t> addresses(m_numLabels, uint16_t(-1));
 
     // Find existing labels
     PC_t outAdr = 0;
@@ -392,7 +391,7 @@ interpreter::BytecodeObject::relocate()
     std::vector<Opcode> oldCode;
     std::vector<uint32_t> oldDebug;
     m_code.swap(oldCode);
-    line_numbers.swap(oldDebug);
+    m_lineNumbers.swap(oldDebug);
     uint32_t dbgIndex = 0;
     for (PC_t i = 0; i != oldCode.size(); ++i) {
         /* Update debug information */
@@ -422,8 +421,7 @@ interpreter::BytecodeObject::relocate()
     }
 }
 
-// /** Compact code. This drops all NOPs. This is a subset of relocate()
-//     used for optimisation. */
+// Compact code.
 void
 interpreter::BytecodeObject::compact()
 {
@@ -432,7 +430,7 @@ interpreter::BytecodeObject::compact()
     std::vector<Opcode> oldCode;
     std::vector<uint32_t> oldDebug;
     m_code.swap(oldCode);
-    line_numbers.swap(oldDebug);
+    m_lineNumbers.swap(oldDebug);
     uint32_t dbgIndex = 0;
     for (PC_t i = 0; i != oldCode.size(); ++i) {
         /* Update debug information */
@@ -450,28 +448,28 @@ interpreter::BytecodeObject::compact()
     }
 }
 
-// /** Copy local variables from another BCO. */
+// Copy local variables from another BCO.
 void
 interpreter::BytecodeObject::copyLocalVariablesFrom(const BytecodeObject& other)
 {
     // ex IntBytecodeObject::copyLocals
-    for (afl::data::NameMap::Index_t i = 0, e = other.m_localNames.getNumNames(); i != e; ++i) {
-        m_localNames.add(other.m_localNames.getNameByIndex(i));
+    for (afl::data::NameMap::Index_t i = 0, e = other.m_localVariables.getNumNames(); i != e; ++i) {
+        m_localVariables.add(other.m_localVariables.getNameByIndex(i));
     }
 }
 
-// /** Append another byte-code object.
-//     Note that this trusts the BCO to contain no invalid opcodes. */
+// Append code from another BCO.
 void
 interpreter::BytecodeObject::append(const BytecodeObject& other)
 {
     // ex IntBytecodeObject::append
     // Remember base address of insertion
     PC_t absBase = m_code.size();
-    Label_t symBase = num_labels;
+    Label_t symBase = m_numLabels;
 
-    num_labels = packIndex(static_cast<uint32_t>(num_labels) + other.num_labels);
+    m_numLabels = packIndex(static_cast<uint32_t>(m_numLabels) + other.m_numLabels);
     m_code.reserve(m_code.size() + other.m_code.size());
+    // FIXME: refuse if code size exceeds 16 bit range?
 
     // Copy the code
     for (PC_t i = 0; i != other.m_code.size(); ++i) {
@@ -496,11 +494,11 @@ interpreter::BytecodeObject::append(const BytecodeObject& other)
                 // FIXME: this works as long as all locals are unique or compatible.
                 // It will fail when we have overlapping locals that were intended to be unique, which could happen when inlining.
                 // We should make up some rules about how the two BCOs have to be related.
-                addInstruction(maj, o.minor, packIndex(m_localNames.addMaybe(other.m_localNames.getNameByIndex(o.arg))));
+                addInstruction(maj, o.minor, packIndex(m_localVariables.addMaybe(other.m_localVariables.getNameByIndex(o.arg))));
                 break;
              case Opcode::sLiteral:
                 // Adjust literal
-                addPushLiteral(other.m_data[o.arg]);
+                addPushLiteral(other.m_literals[o.arg]);
                 break;
              case Opcode::sInteger:
              case Opcode::sBoolean:
@@ -577,9 +575,7 @@ interpreter::BytecodeObject::append(const BytecodeObject& other)
     // is no debug information in BCOs we merge.
 }
 
-// /** Find jump target. If the jump is symbolic, looks up the target label.
-//     \param minor Minor opcode from the maJump instruction
-//     \param arg Parameter */
+// Find jump target.
 interpreter::BytecodeObject::PC_t
 interpreter::BytecodeObject::getJumpTarget(uint8_t minor, uint16_t arg) const
 {
@@ -598,7 +594,7 @@ interpreter::BytecodeObject::getJumpTarget(uint8_t minor, uint16_t arg) const
     }
 }
 
-// /** Get the human-readable value of the instruction at address \c index. */
+// Format instruction in human-readable way.
 String_t
 interpreter::BytecodeObject::getDisassembly(PC_t index, const World& w) const
 {
@@ -622,13 +618,17 @@ interpreter::BytecodeObject::getDisassembly(PC_t index, const World& w) const
             /* If we have a hint, append that as well */
             switch (mode) {
              case 'n':
-                result += " <";
-                result += getName(arg);
-                result += ">";
+                if (arg < m_names.getNumNames()) {
+                    result += " <";
+                    result += getName(arg);
+                    result += ">";
+                } else {
+                    result += " !invalid";
+                }
                 break;
              case 'l': /* literal */
                 result += " <";
-                result += toString(m_data[arg], true);
+                result += toString(m_literals[arg], true);
                 result += ">";
                 break;
              case 'd': /* signed */
@@ -643,9 +643,9 @@ interpreter::BytecodeObject::getDisassembly(PC_t index, const World& w) const
                 }
                 break;
              case 'L': /* local given by address */
-                if (arg < m_localNames.getNumNames()) {
+                if (arg < m_localVariables.getNumNames()) {
                     result += " <";
-                    result += m_localNames.getNameByIndex(arg);
+                    result += m_localVariables.getNameByIndex(arg);
                     result += ">";
                 }
                 break;

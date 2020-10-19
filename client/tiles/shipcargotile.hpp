@@ -4,7 +4,7 @@
 #ifndef C2NG_CLIENT_TILES_SHIPCARGOTILE_HPP
 #define C2NG_CLIENT_TILES_SHIPCARGOTILE_HPP
 
-#include "client/proxy/objectobserver.hpp"
+#include "game/proxy/objectobserver.hpp"
 #include "client/widgets/collapsibledataview.hpp"
 #include "client/widgets/keymapwidget.hpp"
 #include "client/widgets/simplegauge.hpp"
@@ -38,7 +38,7 @@ namespace client { namespace tiles {
         };
 
         ShipCargoTile(ui::Root& root, client::widgets::KeymapWidget& kmw);
-        void attach(client::proxy::ObjectObserver& oop);
+        void attach(game::proxy::ObjectObserver& oop);
 
         void setData(const Data& data);
 

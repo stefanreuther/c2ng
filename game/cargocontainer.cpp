@@ -55,7 +55,7 @@ game::CargoContainer::isValid() const
     // This means that a "no-op" transaction from an invalid state is valid.
     // It also means that we can safely check only the content of the m_delta vector,
     // and don't get different behaviour if the transaction came about by being non-"no-op" temporarily.
-    for (Element::Type t = Element::begin(); static_cast<size_t>(t) < m_delta.size(); ++t) {
+    for (Element::Type t = Element::begin(); t < m_delta.size(); ++t) {
         int32_t delta = getChange(t);
         if (delta != 0) {
             int32_t effectiveAmount = getAmount(t) + delta;

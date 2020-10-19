@@ -16,14 +16,12 @@
 game::map::ShipTransporter::ShipTransporter(Ship& sh,
                                             Ship::Transporter type,
                                             Id_t targetId,
-                                            InterpreterInterface& iface,
                                             const Universe& univ,
                                             HostVersion hostVersion)
     : CargoContainer(),
       m_ship(sh),
       m_type(type),
       m_targetId(targetId),
-      m_interface(iface),
       m_universe(univ),
       m_allowParallelTransfer(hostVersion.hasParallelShipTransfers()),
       m_changeConnection(sh.sig_change.add(&sig_change, &afl::base::Signal<void()>::raise))
@@ -40,13 +38,13 @@ game::map::ShipTransporter::getName(afl::string::Translator& tx) const
         if (m_targetId == 0) {
             return tx("Jettison");
         } else if (const Planet* p = m_universe.planets().get(m_targetId)) {
-            return p->getName(PlainName, tx, m_interface);
+            return p->getName(tx);
         } else {
             return afl::string::Format(tx("Planet %d").c_str(), m_targetId);
         }
     } else {
         if (const Ship* s = m_universe.ships().get(m_targetId)) {
-            return s->getName(PlainName, tx, m_interface);
+            return s->getName();
         } else {
             return afl::string::Format(tx("Ship %d").c_str(), m_targetId);
         }

@@ -71,9 +71,90 @@ TestGameMsgOutbox::testMerge()
     TS_ASSERT_EQUALS(testee.getNumMessages(), 1U);
     TS_ASSERT_EQUALS(testee.getMessageHeading(0, tx, players), "To: 4 5 6 7");
     TS_ASSERT_EQUALS(testee.getMessageSender(0), 4);
-    TS_ASSERT_EQUALS(testee.getMessageReceiverMask(0).toInteger(), 0xF0U);
+    TS_ASSERT_EQUALS(testee.getMessageReceivers(0).toInteger(), 0xF0U);
     TS_ASSERT_EQUALS(testee.getMessageRawText(0), "text");
     TS_ASSERT_EQUALS(testee.getMessageSendPrefix(0, 4, tx, players), "<CC: 5 6 7\n");
     TS_ASSERT_EQUALS(testee.getMessageSendPrefix(0, 5, tx, players), "CC: 4 6 7\n");
+}
+
+/** Test add/delete. */
+void
+TestGameMsgOutbox::testAddDelete()
+{
+    game::msg::Outbox testee;
+    size_t tmp = 0;
+
+    // Add 3 messages. Ids must be distinct, consistent, order as expected.
+    game::Id_t a = testee.addMessage(1, "a", game::PlayerSet_t(4));
+    game::Id_t b = testee.addMessage(1, "b", game::PlayerSet_t(4));
+    game::Id_t c = testee.addMessage(1, "c", game::PlayerSet_t(4));
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT_DIFFERS(a, c);
+    TS_ASSERT_DIFFERS(b, c);
+    TS_ASSERT_DIFFERS(a, 0);
+    TS_ASSERT_DIFFERS(b, 0);
+    TS_ASSERT_DIFFERS(c, 0);
+
+    TS_ASSERT(testee.findMessageById(a, tmp));
+    TS_ASSERT_EQUALS(tmp, 0U);
+    TS_ASSERT(testee.findMessageById(b, tmp));
+    TS_ASSERT_EQUALS(tmp, 1U);
+    TS_ASSERT(testee.findMessageById(c, tmp));
+    TS_ASSERT_EQUALS(tmp, 2U);
+
+    TS_ASSERT_EQUALS(testee.getMessageId(0), a);
+    TS_ASSERT_EQUALS(testee.getMessageId(1), b);
+    TS_ASSERT_EQUALS(testee.getMessageId(2), c);
+
+    // Delete b, and add a new one. Verify consistency of new Ids.
+    testee.deleteMessage(1);
+    game::Id_t d = testee.addMessage(1, "d", game::PlayerSet_t(4));
+    TS_ASSERT_DIFFERS(d, 0);
+    TS_ASSERT_DIFFERS(d, a);
+    TS_ASSERT_DIFFERS(d, b);
+    TS_ASSERT_DIFFERS(d, c);
+
+    TS_ASSERT(testee.findMessageById(a, tmp));
+    TS_ASSERT_EQUALS(tmp, 0U);
+    TS_ASSERT(!testee.findMessageById(b, tmp));
+    TS_ASSERT(testee.findMessageById(c, tmp));
+    TS_ASSERT_EQUALS(tmp, 1U);
+    TS_ASSERT(testee.findMessageById(d, tmp));
+    TS_ASSERT_EQUALS(tmp, 2U);
+
+    TS_ASSERT_EQUALS(testee.getMessageId(0), a);
+    TS_ASSERT_EQUALS(testee.getMessageId(1), c);
+    TS_ASSERT_EQUALS(testee.getMessageId(2), d);
+}
+
+/** Test message modification. */
+void
+TestGameMsgOutbox::testModify()
+{
+    game::msg::Outbox testee;
+    testee.addMessage(1, "a", game::PlayerSet_t(4));
+    TS_ASSERT_EQUALS(testee.getMessageRawText(0), "a");
+    TS_ASSERT_EQUALS(testee.getMessageReceivers(0), game::PlayerSet_t(4));
+    TS_ASSERT_EQUALS(testee.getMessageSender(0), 1);
+
+    testee.setMessageText(0, "b");
+    TS_ASSERT_EQUALS(testee.getMessageRawText(0), "b");
+    TS_ASSERT_EQUALS(testee.getMessageSender(0), 1);
+
+    testee.setMessageReceivers(0, game::PlayerSet_t(6));
+    TS_ASSERT_EQUALS(testee.getMessageRawText(0), "b");
+    TS_ASSERT_EQUALS(testee.getMessageReceivers(0), game::PlayerSet_t(6));
+    TS_ASSERT_EQUALS(testee.getMessageSender(0), 1);
+}
+
+/** Test out-of-range access. */
+void
+TestGameMsgOutbox::testOutOfRange()
+{
+    game::msg::Outbox testee;
+    TS_ASSERT_EQUALS(testee.getMessageRawText(999), "");
+    TS_ASSERT_EQUALS(testee.getMessageId(999), 0);
+    TS_ASSERT_EQUALS(testee.getMessageReceivers(999), game::PlayerSet_t());
+    TS_ASSERT_EQUALS(testee.getMessageSender(999), 0);
 }
 

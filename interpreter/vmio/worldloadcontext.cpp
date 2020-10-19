@@ -6,8 +6,9 @@
 #include "interpreter/vmio/worldloadcontext.hpp"
 #include "interpreter/mutexcontext.hpp"
 
-interpreter::vmio::WorldLoadContext::WorldLoadContext(LoadContext& parent, World& world)
+interpreter::vmio::WorldLoadContext::WorldLoadContext(LoadContext& parent, ProcessList& processList, World& world)
     : m_parent(parent),
+      m_processList(processList),
       m_world(world)
 { }
 
@@ -60,11 +61,11 @@ interpreter::vmio::WorldLoadContext::loadMutex(const String_t& name, const Strin
 interpreter::Process*
 interpreter::vmio::WorldLoadContext::createProcess()
 {
-    return &m_world.processList().create(m_world, "<Loaded Process>");
+    return &m_processList.create(m_world, "<Loaded Process>");
 }
 
 void
 interpreter::vmio::WorldLoadContext::finishProcess(Process& proc)
 {
-    m_world.processList().handlePriorityChange(proc);
+    m_processList.handlePriorityChange(proc);
 }

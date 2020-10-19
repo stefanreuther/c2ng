@@ -1,0 +1,49 @@
+PCC2ng NEWS FILE - Technical Version
+====================================
+
+  This file contains changes relevant for people building things with
+  PCC2ng. User-related changes are in NEWS.txt. Script-related changes
+  (e.g. new properties or commands) can be found in the scripting
+  manual.
+
+
+2.40.9
+------
+
+### c2play-server: STORAGE.LAUNCHERS
+
+  STORAGE.LAUNCHERS was reporting incorrect value (off-by-one
+  indexes); this has been fixed to match the CCScript
+  STORAGE.LAUNCHERS property.
+
+
+### all servers, c2console: command line
+
+  The `-D` command-line option to override a configuration option now
+  works as it should. Some programs (prominently, c2console) were
+  requiring `--D` instead. This has been fixed, the correct syntax is
+  `-DKEY=VALUE`.
+
+  As a side effect, the options `nocron` (host) and `notx` (mailout)
+  options now need to be written with two dashes (`--nocron`); they
+  have always been documented this way, but were previously accepted
+  with a single dash as well.
+
+
+### all programs: source code
+
+  The `main()` functions are now all under `main/`.
+
+  The game proxies have been moved from `client/` to `game/` and no
+  longer have hard dependencies to UI code. They can therefore now (in
+  theory) be used to build a UI using a different toolkit.
+
+
+
+2.40.8
+------
+
+### c2play-server: messages
+
+  A bug preventing access to the last message has been fixed.
+

@@ -18,6 +18,7 @@
 #include "interpreter/expr/parser.hpp"
 #include "interpreter/optimizer.hpp"
 #include "interpreter/subroutinevalue.hpp"
+#include "util/string.hpp"
 
 namespace {
     using interpreter::Opcode;
@@ -27,7 +28,7 @@ namespace {
     const uint16_t OBJARG_ADDR = 0;
 
     /** Optimisation level. */
-    const int OPT_LEVEL = 2;          // FIXME: configurable?
+    const int DEFAULT_OPTIMISATION_LEVEL = 2;
 
 
 
@@ -191,28 +192,20 @@ namespace {
         bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialReturn, 1);
         endTry(bco, catchLabel);
     }
-
-    void addSep(String_t& out, const String_t& other)
-    {
-        if (!out.empty()) {
-            out += ", ";
-        }
-        out += other;
-    }
 }
 
 
 
 // Constructor.
 game::SearchQuery::SearchQuery()
-    : m_matchType(MatchName), m_objects(allObjects()), m_playedOnly(false), m_query()
+    : m_matchType(MatchName), m_objects(allObjects()), m_playedOnly(false), m_query(), m_optimisationLevel(DEFAULT_OPTIMISATION_LEVEL)
 {
     // ex initSearch
 }
 
 // Construct query from parameters.
 game::SearchQuery::SearchQuery(MatchType matchType, SearchObjects_t objs, String_t query)
-    : m_matchType(matchType), m_objects(objs), m_playedOnly(false), m_query(query)
+    : m_matchType(matchType), m_objects(objs), m_playedOnly(false), m_query(query), m_optimisationLevel(DEFAULT_OPTIMISATION_LEVEL)
 { }
 
 // Destructor.
@@ -287,6 +280,13 @@ game::SearchQuery::getPlayedOnly() const
     return m_playedOnly;
 }
 
+// Set optimisation level.
+void
+game::SearchQuery::setOptimisationLevel(int level)
+{
+    m_optimisationLevel = level;
+}
+
 // Get search objects as string.
 String_t
 game::SearchQuery::getSearchObjectsAsString() const
@@ -323,7 +323,7 @@ game::SearchQuery::compileExpression(interpreter::World& world) const
     interpreter::BCORef_t fun = *new interpreter::BytecodeObject();
     fun->addArgument("OBJ", false);
     fun->setIsProcedure(false);
-    fun->setName("(Search Query)");
+    fun->setSubroutineName("(Search Query)");
 
     // Create function body according to search type.
     // Each of these function bodies returns True on match.
@@ -355,10 +355,10 @@ game::SearchQuery::compileExpression(interpreter::World& world) const
     fun->addInstruction(Opcode::maSpecial, Opcode::miSpecialReturn, 1);
 
     // Finalize the function
-    if (OPT_LEVEL > 0) {
-        optimize(world, *fun, OPT_LEVEL);
+    if (m_optimisationLevel > 0) {
+        optimize(world, *fun, m_optimisationLevel);
     }
-    if (OPT_LEVEL >= 0) {
+    if (m_optimisationLevel >= 0) {
         fun->relocate();
     }
     return fun;
@@ -372,7 +372,7 @@ game::SearchQuery::compile(interpreter::World& world) const
     // CCUI$Search is defined in core.q.
     interpreter::BCORef_t fun = *new BytecodeObject();
     fun->setIsProcedure(false);
-    fun->setName("(Search Query)");
+    fun->setSubroutineName("(Search Query)");
 
     afl::data::StringValue flagValue(getSearchObjectsAsString());
     fun->addPushLiteral(&flagValue);
@@ -396,18 +396,18 @@ game::SearchQuery::formatSearchObjects(SearchObjects_t objs, afl::string::Transl
     } else {
         String_t result;
         if (objs.contains(SearchShips)) {
-            addSep(result, tx("ships"));
+            util::addListItem(result, ", ", tx("ships"));
         }
         if (objs.contains(SearchPlanets)) {
-            addSep(result, tx("planets"));
+            util::addListItem(result, ", ", tx("planets"));
         } else if (objs.contains(SearchBases)) {
-            addSep(result, tx("starbases"));
+            util::addListItem(result, ", ", tx("starbases"));
         }
         if (objs.contains(SearchUfos)) {
-            addSep(result, tx("ufos"));
+            util::addListItem(result, ", ", tx("ufos"));
         }
         if (objs.contains(SearchOthers)) {
-            addSep(result, tx("others"));
+            util::addListItem(result, ", ", tx("others"));
         }
         return result;
     }

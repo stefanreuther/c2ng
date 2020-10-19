@@ -12,6 +12,37 @@
 #include "afl/io/constmemorystream.hpp"
 #include "game/score/turnscore.hpp"
 #include "afl/except/fileproblemexception.hpp"
+#include "afl/io/internalstream.hpp"
+
+namespace {
+    // File content (from a test game, p119deb)
+    const uint8_t OLD_FILE[] = {
+        0x43, 0x43, 0x2d, 0x53, 0x74, 0x61, 0x74, 0x1a, 0x02, 0x00, 0x82, 0x00,
+        0x03, 0x00, 0x30, 0x34, 0x2d, 0x32, 0x33, 0x2d, 0x32, 0x30, 0x30, 0x39,
+        0x30, 0x35, 0x3a, 0x31, 0x31, 0x3a, 0x30, 0x35, 0x05, 0x00, 0x02, 0x00,
+        0x02, 0x00, 0x01, 0x00, 0x04, 0x00, 0x00, 0x00, 0x04, 0x00, 0x01, 0x00,
+        0x05, 0x00, 0x00, 0x00, 0x04, 0x00, 0x01, 0x00, 0x04, 0x00, 0x00, 0x00,
+        0x04, 0x00, 0x01, 0x00, 0x05, 0x00, 0x00, 0x00, 0x04, 0x00, 0x01, 0x00,
+        0x04, 0x00, 0x01, 0x00, 0x02, 0x00, 0x01, 0x00, 0x04, 0x00, 0x00, 0x00,
+        0x04, 0x00, 0x01, 0x00, 0x04, 0x00, 0x00, 0x00, 0x04, 0x00, 0x01, 0x00,
+        0x04, 0x00, 0x00, 0x00, 0x03, 0x00, 0x01, 0x00, 0x04, 0x00, 0x00, 0x00,
+        0x03, 0x00, 0x01, 0x00, 0x04, 0x00, 0x00, 0x00, 0x03, 0x00, 0x01, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x26, 0x00,
+        0x31, 0x31, 0x2d, 0x30, 0x35, 0x2d, 0x32, 0x30, 0x30, 0x39, 0x30, 0x35,
+        0x3a, 0x31, 0x30, 0x3a, 0x35, 0x33, 0x0b, 0x00, 0x05, 0x00, 0x01, 0x00,
+        0x00, 0x00, 0x2b, 0x00, 0x41, 0x00, 0x0c, 0x00, 0x08, 0x00, 0x3c, 0x00,
+        0x2f, 0x00, 0x15, 0x00, 0x09, 0x00, 0x44, 0x00, 0x20, 0x00, 0x17, 0x00,
+        0x12, 0x00, 0x2f, 0x00, 0x1f, 0x00, 0x0f, 0x00, 0x08, 0x00, 0x41, 0x00,
+        0x2d, 0x00, 0x12, 0x00, 0x0c, 0x00, 0x2b, 0x00, 0x2d, 0x00, 0x18, 0x00,
+        0x04, 0x00, 0x3e, 0x00, 0x19, 0x00, 0x15, 0x00, 0x0f, 0x00, 0x19, 0x00,
+        0x0d, 0x00, 0x07, 0x00, 0x04, 0x00, 0x36, 0x00, 0x20, 0x00, 0x12, 0x00,
+        0x0b, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x5a, 0x04, 0x00, 0x00, 0x00, 0x00
+    };
+}
+
 
 /** Test a simple file. */
 void
@@ -198,5 +229,192 @@ TestGameScoreLoader::testErrors()
         afl::io::ConstMemoryStream ms(FILE);
         TS_ASSERT_THROWS(testee.load(list, ms), afl::except::FileProblemException);
     }
+}
+
+/** Test loadOldFile(). */
+void
+TestGameScoreLoader::testLoadOld()
+{
+    // TurnScoreList:
+    game::score::TurnScoreList list;
+
+    // Load it
+    {
+        afl::string::NullTranslator tx;
+        afl::charset::Utf8Charset cs;
+        afl::io::ConstMemoryStream ms(OLD_FILE);
+        TS_ASSERT_THROWS_NOTHING(game::score::Loader(tx, cs).loadOldFile(list, ms));
+    }
+
+    // Verify
+    TS_ASSERT_EQUALS(list.getNumTurns(), 2U);
+    TS_ASSERT_EQUALS(list.getNumScores(), 5U);   // pla/cap/fre/bas/pbp
+    TS_ASSERT_EQUALS(list.getNumDescriptions(), 0U);
+    TS_ASSERT_EQUALS(list.getTurnByIndex(0)->getTurnNumber(), 3);
+    TS_ASSERT_EQUALS(list.getTurnByIndex(1)->getTurnNumber(), 38);
+
+    // Slots
+    game::score::TurnScore::Slot_t planetSlot, freighterSlot, capitalSlot, baseSlot, pbpSlot;
+    TS_ASSERT(list.getSlot(game::score::ScoreId_Planets,     planetSlot));
+    TS_ASSERT(list.getSlot(game::score::ScoreId_Freighters,  freighterSlot));
+    TS_ASSERT(list.getSlot(game::score::ScoreId_Capital,     capitalSlot));
+    TS_ASSERT(list.getSlot(game::score::ScoreId_Bases,       baseSlot));
+    TS_ASSERT(list.getSlot(game::score::ScoreId_BuildPoints, pbpSlot));
+
+    // Verify scores
+    const game::score::TurnScore* p = list.getTurn(3);
+    TS_ASSERT(p != 0);
+    TS_ASSERT_EQUALS(p->get(planetSlot,    1).orElse(-1), 5);
+    TS_ASSERT_EQUALS(p->get(freighterSlot, 1).orElse(-1), 2);
+    TS_ASSERT_EQUALS(p->get(capitalSlot,   1).orElse(-1), 2);
+    TS_ASSERT_EQUALS(p->get(baseSlot,      1).orElse(-1), 1);
+    TS_ASSERT_EQUALS(p->get(pbpSlot,       1).orElse(-1), 0);
+
+    TS_ASSERT_EQUALS(p->get(planetSlot,    7).orElse(-1), 4);
+    TS_ASSERT_EQUALS(p->get(freighterSlot, 7).orElse(-1), 4);
+    TS_ASSERT_EQUALS(p->get(capitalSlot,   7).orElse(-1), 0);
+    TS_ASSERT_EQUALS(p->get(baseSlot,      7).orElse(-1), 1);
+    TS_ASSERT_EQUALS(p->get(pbpSlot,       7).orElse(-1), 0);
+
+    p = list.getTurn(38);
+    TS_ASSERT(p != 0);
+    TS_ASSERT_EQUALS(p->get(planetSlot,    9).orElse(-1), 25);
+    TS_ASSERT_EQUALS(p->get(freighterSlot, 9).orElse(-1), 7);
+    TS_ASSERT_EQUALS(p->get(capitalSlot,   9).orElse(-1), 13);
+    TS_ASSERT_EQUALS(p->get(baseSlot,      9).orElse(-1), 4);
+    TS_ASSERT_EQUALS(p->get(pbpSlot,       9).orElse(-1), 1114);
+}
+
+void
+TestGameScoreLoader::testLoadOldErrors()
+{
+    // Environment
+    afl::string::NullTranslator tx;
+    afl::charset::Utf8Charset cs;
+    game::score::Loader testee(tx, cs);
+
+    // Truncated file
+    {
+        static const uint8_t FILE[] = {
+            0x43, 0x43, 0x2d, 0x53, 0x74, 0x61, 0x74, 0x1a, 0x02, 0x00, 0x82, 0x00,
+            0x03, 0x00, 0x30, 0x34, 0x2d, 0x32, 0x33, 0x2d, 0x32, 0x30, 0x30, 0x39,
+            0x30, 0x35, 0x3a, 0x31, 0x31, 0x3a, 0x30, 0x35, 0x05, 0x00, 0x02, 0x00,
+            0x02, 0x00, 0x01, 0x00, 0x04, 0x00, 0x00, 0x00, 0x04, 0x00, 0x01, 0x00,
+            0x05, 0x00, 0x00, 0x00, 0x04, 0x00, 0x01, 0x00, 0x04, 0x00, 0x00, 0x00,
+            0x04, 0x00, 0x01, 0x00, 0x05, 0x00, 0x00, 0x00, 0x04, 0x00, 0x01, 0x00,
+        };
+        game::score::TurnScoreList list;
+        afl::io::ConstMemoryStream ms(FILE);
+        TS_ASSERT_THROWS(testee.loadOldFile(list, ms), afl::except::FileProblemException);
+    }
+
+    // Truncated signature
+    {
+        static const uint8_t FILE[] = { 0x43, 0x43, 0x2d, 0x53, 0x74, 0x61, 0x74 };
+        game::score::TurnScoreList list;
+        afl::io::ConstMemoryStream ms(FILE);
+        TS_ASSERT_THROWS(testee.loadOldFile(list, ms), afl::except::FileProblemException);
+    }
+
+    // Truncated header
+    {
+        static const uint8_t FILE[] = { 0x43, 0x43, 0x2d, 0x53, 0x74, 0x61, 0x74, 0x1a, 0x02, 0x00, 0x82 };
+        game::score::TurnScoreList list;
+        afl::io::ConstMemoryStream ms(FILE);
+        TS_ASSERT_THROWS(testee.loadOldFile(list, ms), afl::except::FileProblemException);
+    }
+
+
+    // Size too small
+    {
+        static const uint8_t FILE[] = {                              // vvvv too small
+            0x43, 0x43, 0x2d, 0x53, 0x74, 0x61, 0x74, 0x1a, 0x02, 0x00, 0x80, 0x00,
+            0x03, 0x00, 0x30, 0x34, 0x2d, 0x32, 0x33, 0x2d, 0x32, 0x30, 0x30, 0x39,
+        };
+        game::score::TurnScoreList list;
+        afl::io::ConstMemoryStream ms(FILE);
+        TS_ASSERT_THROWS(testee.loadOldFile(list, ms), afl::except::FileProblemException);
+    }
+
+    // Bad count
+    {
+        static const uint8_t FILE[] = {                  // vvvvvvvvvv negative
+            0x43, 0x43, 0x2d, 0x53, 0x74, 0x61, 0x74, 0x1a, 0xff, 0xff, 0x82, 0x00,
+            0x03, 0x00, 0x30, 0x34, 0x2d, 0x32, 0x33, 0x2d, 0x32, 0x30, 0x30, 0x39,
+        };
+        game::score::TurnScoreList list;
+        afl::io::ConstMemoryStream ms(FILE);
+        TS_ASSERT_THROWS(testee.loadOldFile(list, ms), afl::except::FileProblemException);
+    }
+}
+
+/** Test save(). */
+void
+TestGameScoreLoader::testSave()
+{
+    // Populate a TurnScoreList and save it.
+    // Reload and check that it's still the same.
+    afl::io::InternalStream s;
+
+    // Load & Save it
+    {
+        game::score::TurnScoreList list;
+        afl::string::NullTranslator tx;
+        afl::charset::Utf8Charset cs;
+        afl::io::ConstMemoryStream ms(OLD_FILE);
+        TS_ASSERT_THROWS_NOTHING(game::score::Loader(tx, cs).loadOldFile(list, ms));
+        TS_ASSERT_THROWS_NOTHING(game::score::Loader(tx, cs).save(list, s));
+    }
+
+    // Minimum verification
+    TS_ASSERT(s.getSize() > 8);
+    TS_ASSERT_SAME_DATA(s.getContent().at(0), "CCstat0", 6);
+    s.setPos(0);
+
+    // Load again
+    game::score::TurnScoreList list;
+    {
+        afl::string::NullTranslator tx;
+        afl::charset::Utf8Charset cs;
+        TS_ASSERT_THROWS_NOTHING(game::score::Loader(tx, cs).load(list, s));
+    }
+
+    // Verify. Since we seeded with the same data as in testLoadOld(), this is the same test set.
+    TS_ASSERT_EQUALS(list.getNumTurns(), 2U);
+    TS_ASSERT_EQUALS(list.getNumScores(), 5U);   // pla/cap/fre/bas/pbp
+    TS_ASSERT_EQUALS(list.getNumDescriptions(), 0U);
+    TS_ASSERT_EQUALS(list.getTurnByIndex(0)->getTurnNumber(), 3);
+    TS_ASSERT_EQUALS(list.getTurnByIndex(1)->getTurnNumber(), 38);
+
+    // Slots
+    game::score::TurnScore::Slot_t planetSlot, freighterSlot, capitalSlot, baseSlot, pbpSlot;
+    TS_ASSERT(list.getSlot(game::score::ScoreId_Planets,     planetSlot));
+    TS_ASSERT(list.getSlot(game::score::ScoreId_Freighters,  freighterSlot));
+    TS_ASSERT(list.getSlot(game::score::ScoreId_Capital,     capitalSlot));
+    TS_ASSERT(list.getSlot(game::score::ScoreId_Bases,       baseSlot));
+    TS_ASSERT(list.getSlot(game::score::ScoreId_BuildPoints, pbpSlot));
+
+    // Verify scores
+    const game::score::TurnScore* p = list.getTurn(3);
+    TS_ASSERT(p != 0);
+    TS_ASSERT_EQUALS(p->get(planetSlot,    1).orElse(-1), 5);
+    TS_ASSERT_EQUALS(p->get(freighterSlot, 1).orElse(-1), 2);
+    TS_ASSERT_EQUALS(p->get(capitalSlot,   1).orElse(-1), 2);
+    TS_ASSERT_EQUALS(p->get(baseSlot,      1).orElse(-1), 1);
+    TS_ASSERT_EQUALS(p->get(pbpSlot,       1).orElse(-1), 0);
+
+    TS_ASSERT_EQUALS(p->get(planetSlot,    7).orElse(-1), 4);
+    TS_ASSERT_EQUALS(p->get(freighterSlot, 7).orElse(-1), 4);
+    TS_ASSERT_EQUALS(p->get(capitalSlot,   7).orElse(-1), 0);
+    TS_ASSERT_EQUALS(p->get(baseSlot,      7).orElse(-1), 1);
+    TS_ASSERT_EQUALS(p->get(pbpSlot,       7).orElse(-1), 0);
+
+    p = list.getTurn(38);
+    TS_ASSERT(p != 0);
+    TS_ASSERT_EQUALS(p->get(planetSlot,    9).orElse(-1), 25);
+    TS_ASSERT_EQUALS(p->get(freighterSlot, 9).orElse(-1), 7);
+    TS_ASSERT_EQUALS(p->get(capitalSlot,   9).orElse(-1), 13);
+    TS_ASSERT_EQUALS(p->get(baseSlot,      9).orElse(-1), 4);
+    TS_ASSERT_EQUALS(p->get(pbpSlot,       9).orElse(-1), 1114);
 }
 

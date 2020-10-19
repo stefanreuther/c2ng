@@ -6,6 +6,7 @@
 #include "game/actions/techupgrade.hpp"
 
 #include "t_game_actions.hpp"
+#include "afl/charset/utf8charset.hpp"
 #include "afl/io/internaldirectory.hpp"
 #include "afl/io/nullfilesystem.hpp"
 #include "afl/string/nulltranslator.hpp"
@@ -16,8 +17,8 @@
 #include "game/test/registrationkey.hpp"
 #include "game/test/specificationloader.hpp"
 #include "game/test/stringverifier.hpp"
+#include "game/turn.hpp"
 #include "game/v3/reverter.hpp"
-#include "afl/charset/utf8charset.hpp"
 
 namespace {
     const int X = 1234;
@@ -27,7 +28,8 @@ namespace {
     const int PLANET_ID = 363;
 
     struct TestHarness {
-        game::map::Universe univ;
+        game::Turn turn;
+        game::map::Universe& univ;
         game::map::Planet& planet;
         afl::base::Ref<game::spec::ShipList> shipList;
         afl::base::Ref<game::Root> root;
@@ -37,7 +39,8 @@ namespace {
         game::config::HostConfiguration& config;
 
         TestHarness()
-            : univ(),
+            : turn(),
+              univ(turn.universe()),
               planet(*univ.planets().create(PLANET_ID)),
               shipList(*new game::spec::ShipList()),
               root(*new game::Root(afl::io::InternalDirectory::create("game dir"),
@@ -121,7 +124,7 @@ namespace {
 
     void prepareReverter(TestHarness& h)
     {
-        game::v3::Reverter* pRev = new game::v3::Reverter(h.univ, h.session);
+        game::v3::Reverter* pRev = new game::v3::Reverter(h.turn, h.session);
         h.univ.setNewReverter(pRev);
 
         game::map::BaseData bd;

@@ -348,6 +348,7 @@ gfx::sdl2::Engine::createWindow(const WindowParameters& param)
 
     setWindowStuff(window, tex, renderer);
     m_window = new Surface(sfc, true);
+    m_disableGrab = param.disableGrab;
 
     return *m_window;
 }

@@ -34,6 +34,9 @@ namespace {
         if (flags.contains(FriendlyCode::UnspecialCode)) {
             result += 'u';
         }
+        if (flags.contains(FriendlyCode::PrefixCode)) {
+            result += 'x';
+        }
         return result;
     }
 }
@@ -63,6 +66,7 @@ game::interface::getFriendlyCodeProperty(const game::spec::FriendlyCode& fc, Fri
            - "a": code is valid for alchemy ships
            - "r": this is a registered-only code
            - "u": this is not a special friendly code
+           - "x": this is a prefix, not a code (since PCC2 2.40.9)
            @since PCC2 2.40.1 */
         return makeStringValue(convertFlags(fc.getFlags()));
      case ifpRaces:

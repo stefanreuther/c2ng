@@ -48,7 +48,7 @@ bool
 util::plugin::DialogApplication::checkPreconditions(Installer& inst)
 {
     String_t msg;
-    if (inst.checkInstallPreconditions(afl::string::Translator::getSystemInstance()).get(msg)) {
+    if (inst.checkInstallPreconditions(translator()).get(msg)) {
         m_dialog.showError(msg, windowTitle());
         return false;
     }
@@ -70,7 +70,8 @@ util::plugin::DialogApplication::doAdd(const std::vector<String_t>& items)
     afl::base::Ref<afl::io::Directory> pluginDir = pluginDirEntry->openDirectory();
 
     // Create plugin manager and installer
-    Manager mgr(translator(), log());
+    afl::string::Translator& tx = translator();
+    Manager mgr(tx, log());
     mgr.findPlugins(*pluginDir);
     Installer installer(mgr, fileSystem(), *pluginDir);
 
@@ -79,10 +80,10 @@ util::plugin::DialogApplication::doAdd(const std::vector<String_t>& items)
     for (size_t i = 0, n = items.size(); i < n; ++i) {
         const String_t& name = items[i];
         try {
-            Plugin* plug = installer.prepareInstall(name);
+            Plugin* plug = installer.prepareInstall(name, tx);
             if (!plug) {
-                m_dialog.showError(afl::string::Format(_("File '%s' cannot be installed as a plugin. "
-                                                         "A plugin is normally specified with a *.c2p or *.c2z file.").c_str(), name),
+                m_dialog.showError(afl::string::Format(tx("File '%s' cannot be installed as a plugin. "
+                                                          "A plugin is normally specified with a *.c2p or *.c2z file.").c_str(), name),
                                    windowTitle());
                 err = true;
             } else {
@@ -91,7 +92,7 @@ util::plugin::DialogApplication::doAdd(const std::vector<String_t>& items)
                     const char* tpl = isUpdate
                         ? N_("Do you want to update plugin \"%s\" (%s)?)")
                         : N_("Do you want to install plugin \"%s\" (%s)?)");
-                    String_t message = afl::string::Format(_(tpl).c_str(), plug->getName(), plug->getId());
+                    String_t message = afl::string::Format(tx(tpl).c_str(), plug->getName(), plug->getId());
                     if (plug->getDescription().size() > 0) {
                         message += "\n\n";
                         message += plug->getDescription();
@@ -103,7 +104,7 @@ util::plugin::DialogApplication::doAdd(const std::vector<String_t>& items)
                             ? N_("Plugin '%s' has been updated.")
                             : N_("Plugin '%s' has been installed.");
                         
-                        m_dialog.showInfo(afl::string::Format(_(tpl).c_str(), plug->getName()), windowTitle());
+                        m_dialog.showInfo(afl::string::Format(tx(tpl).c_str(), plug->getName()), windowTitle());
                     }
                 } else {
                     err = true;

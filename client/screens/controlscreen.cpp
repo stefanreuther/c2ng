@@ -6,10 +6,10 @@
 #include "afl/base/optional.hpp"
 #include "afl/base/refcounted.hpp"
 #include "client/map/scanneroverlay.hpp"
+#include "client/map/waypointoverlay.hpp"
 #include "client/map/widget.hpp"
-#include "client/objectcursorfactory.hpp"
-#include "client/proxy/cursorobserverproxy.hpp"
-#include "client/proxy/objectlistener.hpp"
+#include "game/proxy/cursorobserverproxy.hpp"
+#include "game/proxy/objectlistener.hpp"
 #include "client/si/contextprovider.hpp"
 #include "client/si/contextreceiver.hpp"
 #include "client/si/control.hpp"
@@ -24,7 +24,9 @@
 #include "game/interface/iteratorcontext.hpp"
 #include "game/interface/planetcontext.hpp"
 #include "game/interface/shipcontext.hpp"
+#include "game/interface/taskeditorcontext.hpp"
 #include "game/interface/userinterfacepropertyaccessor.hpp"
+#include "game/map/objectcursorfactory.hpp"
 #include "interpreter/typehint.hpp"
 #include "interpreter/values.hpp"
 #include "ui/group.hpp"
@@ -35,15 +37,13 @@
 #include "ui/spacer.hpp"
 #include "ui/widgets/panel.hpp"
 #include "util/slaveobject.hpp"
-#include "game/interface/taskeditorcontext.hpp"
-#include "client/map/waypointoverlay.hpp"
 
 using interpreter::makeBooleanValue;
 using interpreter::makeIntegerValue;
 using game::map::Point;
 
 namespace {
-    class ScreenCursorFactory : public client::ObjectCursorFactory {
+    class ScreenCursorFactory : public game::map::ObjectCursorFactory {
      public:
         ScreenCursorFactory(afl::base::Ref<client::screens::ControlScreen::State> state)
             : m_state(state)
@@ -143,17 +143,10 @@ class client::screens::ControlScreen::ContextProvider : public client::si::Conte
         { }
     virtual void createContext(game::Session& session, client::si::ContextReceiver& recv)
         {
+            // FIXME: make a function
             game::map::Object* obj = m_state->getObject(session);
-            if (dynamic_cast<game::map::Ship*>(obj) != 0) {
-                if (interpreter::Context* ctx = game::interface::ShipContext::create(obj->getId(), session)) {
-                    recv.addNewContext(ctx);
-                }
-            } else if (dynamic_cast<game::map::Planet*>(obj) != 0) {
-                if (interpreter::Context* ctx = game::interface::PlanetContext::create(obj->getId(), session)) {
-                    recv.addNewContext(ctx);
-                }
-            } else {
-                // FIXME?
+            if (interpreter::Context* ctx = game::interface::createObjectContext(obj, session)) {
+                recv.addNewContext(ctx);
             }
         }
  private:
@@ -165,7 +158,7 @@ class client::screens::ControlScreen::ContextProvider : public client::si::Conte
  *  Updater
  */
 
-class client::screens::ControlScreen::Updater : public client::proxy::ObjectListener {
+class client::screens::ControlScreen::Updater : public game::proxy::ObjectListener {
  public:
     Updater(util::RequestSender<ControlScreen> reply)
         : m_reply(reply),
@@ -174,7 +167,7 @@ class client::screens::ControlScreen::Updater : public client::proxy::ObjectList
         { }
     virtual void handle(game::Session&, game::map::Object* obj)
         {
-            game::map::MapObject* mo = dynamic_cast<game::map::MapObject*>(obj);
+            game::map::Object* mo = obj;
 
             Point pt;
             bool hasPosition = mo != 0 && mo->getPosition(pt);
@@ -210,7 +203,7 @@ class client::screens::ControlScreen::Updater : public client::proxy::ObjectList
         }
  private:
     util::RequestSender<ControlScreen> m_reply;
-    game::map::MapObject* m_lastObject;
+    game::map::Object* m_lastObject;
     Point m_lastPosition;
 };
 
@@ -286,7 +279,7 @@ client::screens::ControlScreen::Proprietor::get(game::interface::UserInterfacePr
      case game::interface::iuiIterator:
         // UI.Iterator: created from state
         if (m_pSession != 0 && m_pSession->getGame().get() != 0) {
-            result.reset(game::interface::makeIteratorValue(m_pSession->getGame(), m_state->screenNumber, false));
+            result.reset(game::interface::makeIteratorValue(*m_pSession, m_state->screenNumber, false));
         } else {
             result.reset();
         }
@@ -316,7 +309,7 @@ client::screens::ControlScreen::Proprietor::get(game::interface::UserInterfacePr
         // Chart.X/Y: object position, provided by game
         result.reset();
         if (m_pSession != 0) {
-            if (game::map::MapObject* obj = dynamic_cast<game::map::MapObject*>(m_state->getObject(*m_pSession))) {
+            if (game::map::Object* obj = m_state->getObject(*m_pSession)) {
                 Point pt;
                 if (obj->getPosition(pt)) {
                     if (prop == game::interface::iuiChartX) {
@@ -418,7 +411,7 @@ client::screens::ControlScreen::run(client::si::InputState& in, client::si::Outp
     ui::SkinColorScheme panelColors(ui::DARK_COLOR_SET, root.colorScheme());
     panel.setColorScheme(panelColors);
     client::widgets::KeymapWidget keys(m_session.gameSender(), root.engine().dispatcher(), *this);
-    client::proxy::CursorObserverProxy oop(m_session.gameSender(), std::auto_ptr<client::ObjectCursorFactory>(new ScreenCursorFactory(m_state)));
+    game::proxy::CursorObserverProxy oop(m_session.gameSender(), std::auto_ptr<game::map::ObjectCursorFactory>(new ScreenCursorFactory(m_state)));
 
     ui::Group tileGroup(ui::layout::VBox::instance5);
     client::tiles::TileFactory(root, m_session.interface(), keys, oop).createLayout(tileGroup, m_definition.layoutName, deleter);

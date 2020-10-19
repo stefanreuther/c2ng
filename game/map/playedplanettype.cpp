@@ -7,7 +7,7 @@
 #include "game/map/universe.hpp"
 
 game::map::PlayedPlanetType::PlayedPlanetType(Universe& univ)
-    : ObjectVectorType<Planet>(univ, univ.planets())
+    : ObjectVectorType<Planet>(univ.planets())
 { }
 
 bool

@@ -25,7 +25,7 @@ namespace client { namespace dialogs {
         void run(util::RequestSender<game::Session> gameSender, afl::string::Translator& tx);
 
      private:
-        void initDialog(afl::string::Translator& tx);
+        void initDialog(util::RequestSender<game::Session> gameSender, afl::string::Translator& tx);
         void initContent(util::RequestSender<game::Session> gameSender);
         void writeBack(util::RequestSender<game::Session> gameSender);
 

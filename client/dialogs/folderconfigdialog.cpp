@@ -10,7 +10,6 @@
 #include "ui/widgets/standarddialogbuttons.hpp"
 #include "ui/widgets/stringlistbox.hpp"
 #include "util/charsetfactory.hpp"
-#include "util/translation.hpp"
 
 namespace {
     struct State {
@@ -187,18 +186,18 @@ Dialog::Dialog(ui::Root& root, State& state, afl::string::Translator& tx)
 {
     // Populate the OptionGrid
     if (m_state.charsetAvailable) {
-        m_grid.addItem(ID_CHARSET, 'c', m_translator.translateString("Character set"))
-            .addPossibleValue(_("yes"))
-            .addPossibleValue(_("no"));
+        m_grid.addItem(ID_CHARSET, 'c', tx("Character set"))
+            .addPossibleValue(tx("yes"))
+            .addPossibleValue(tx("no"));
     }
     if (m_state.finishedAvailable) {
-        m_grid.addItem(ID_FINISHED, 'f', m_translator.translateString("Game is finished"))
-            .addPossibleValue(_("yes"))
-            .addPossibleValue(_("no"));
+        m_grid.addItem(ID_FINISHED, 'f', tx("Game is finished"))
+            .addPossibleValue(tx("yes"))
+            .addPossibleValue(tx("no"));
     }
     if (m_state.readOnlyAvailable) {
-        m_grid.addItem(ID_READONLY, 'r', m_translator.translateString("Open game read-only"))
-            .addPossibleValues(CharsetNames(false, m_translator));
+        m_grid.addItem(ID_READONLY, 'r', tx("Open game read-only"))
+            .addPossibleValues(CharsetNames(false, tx));
     }
 }
 
@@ -207,16 +206,17 @@ Dialog::run()
 {
     afl::base::SignalConnection conn(m_grid.sig_click.add(this, &Dialog::onOptionClick));
     updateData();
-    return doStandardDialog(m_translator.translateString("Folder Configuration"), String_t(), m_grid, false, m_root);
+    return doStandardDialog(m_translator("Folder Configuration"), String_t(), m_grid, false, m_root);
 }
 
 void
 Dialog::updateData()
 {
+    afl::string::Translator& tx = m_translator;
     if (m_state.charsetAvailable) {
         String_t name;
         if (m_state.charsetId.empty()) {
-            name = _("default");
+            name = tx("default");
         } else {
             util::CharsetFactory::Index_t index;
             util::CharsetFactory f;
@@ -229,10 +229,10 @@ Dialog::updateData()
         m_grid.findItem(ID_CHARSET).setValue(name);
     }
     if (m_state.readOnlyAvailable) {
-        m_grid.findItem(ID_READONLY).setValue(m_state.readOnly ? _("yes") : _("no"));
+        m_grid.findItem(ID_READONLY).setValue(m_state.readOnly ? tx("yes") : tx("no"));
     }
     if (m_state.finishedAvailable) {
-        m_grid.findItem(ID_FINISHED).setValue(m_state.finished ? _("yes") : _("no"));
+        m_grid.findItem(ID_FINISHED).setValue(m_state.finished ? tx("yes") : tx("no"));
     }
 }
 
@@ -248,7 +248,7 @@ Dialog::onOptionClick(int id)
 
         // List dialog uses int32_t
         int32_t i = int32_t(index);
-        if (doList(m_root, _("Character Set"), i, CharsetNames(true, m_translator))) {
+        if (doList(m_root, m_translator("Character Set"), i, CharsetNames(true, m_translator))) {
             m_state.charsetId = CharsetFactory().getCharsetKey(CharsetFactory::Index_t(i));
             updateData();
         }

@@ -43,12 +43,10 @@ namespace {
 
 
 game::ref::SortByTransferTarget::SortByTransferTarget(const game::map::Universe& univ,
-                                                      InterpreterInterface& iface,
                                                       game::map::Ship::Transporter transporterId,
                                                       bool checkOther,
                                                       afl::string::Translator& tx)
     : m_universe(univ),
-      m_interface(iface),
       m_transporterId(transporterId),
       m_checkOther(checkOther),
       m_translator(tx)
@@ -81,7 +79,7 @@ game::ref::SortByTransferTarget::getClass(const Reference& a) const
      case Reference::Ship: {
         String_t shipName;
         if (const Ship* pShip = m_universe.ships().get(ta.getId())) {
-            shipName = pShip->getName(PlainName, m_translator, m_interface);
+            shipName = pShip->getName();
         }
         if (shipName.empty()) {
             shipName = Format("#%d", ta.getId());
@@ -95,7 +93,7 @@ game::ref::SortByTransferTarget::getClass(const Reference& a) const
         } else {
             String_t planetName;
             if (const Planet* pPlanet = m_universe.planets().get(ta.getId())) {
-                planetName = pPlanet->getName(PlainName, m_translator, m_interface);
+                planetName = pPlanet->getName(m_translator);
             }
             if (planetName.empty()) {
                 planetName = Format("#%d", ta.getId());

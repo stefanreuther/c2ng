@@ -5,13 +5,13 @@
 #define C2NG_CLIENT_TILES_TILEFACTORY_HPP
 
 #include "ui/root.hpp"
-#include "client/widgets/keymapwidget.hpp"
 #include "afl/base/deleter.hpp"
-#include "client/proxy/objectobserver.hpp"
 #include "afl/string/string.hpp"
+#include "client/si/userside.hpp"
+#include "client/widgets/keymapwidget.hpp"
+#include "game/proxy/objectobserver.hpp"
 #include "ui/layoutablegroup.hpp"
 #include "ui/widget.hpp"
-#include "client/si/userside.hpp"
 
 namespace client { namespace tiles {
 
@@ -20,7 +20,7 @@ namespace client { namespace tiles {
         TileFactory(ui::Root& root,
                     client::si::UserSide& user,
                     client::widgets::KeymapWidget& keys,
-                    client::proxy::ObjectObserver& observer);
+                    game::proxy::ObjectObserver& observer);
         ~TileFactory();
 
         ui::Widget* createTile(String_t name, afl::base::Deleter& deleter) const;
@@ -31,7 +31,7 @@ namespace client { namespace tiles {
         ui::Root& m_root;
         client::si::UserSide& m_userSide;
         client::widgets::KeymapWidget& m_keys;
-        client::proxy::ObjectObserver& m_observer;
+        game::proxy::ObjectObserver& m_observer;
     };
 
 } }

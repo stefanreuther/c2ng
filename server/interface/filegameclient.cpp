@@ -1,5 +1,6 @@
 /**
   *  \file server/interface/filegameclient.cpp
+  *  \brief Class server::interface::FileGameClient
   */
 
 #include <memory>
@@ -57,9 +58,20 @@ server::interface::FileGameClient::getKeyInfo(String_t path, KeyInfo& result)
 }
 
 void
-server::interface::FileGameClient::listKeyInfo(String_t path, afl::container::PtrVector<KeyInfo>& result)
+server::interface::FileGameClient::listKeyInfo(String_t path, const Filter& filter, afl::container::PtrVector<KeyInfo>& result)
 {
-    std::auto_ptr<afl::data::Value> p(m_commandHandler.call(Segment().pushBackString("LSREG").pushBackString(path)));
+    Segment seg;
+    seg.pushBackString("LSREG");
+    seg.pushBackString(path);
+    if (filter.unique) {
+        seg.pushBackString("UNIQ");
+    }
+    if (const String_t* keyId = filter.keyId.get()) {
+        seg.pushBackString("ID");
+        seg.pushBackString(*keyId);
+    }
+
+    std::auto_ptr<afl::data::Value> p(m_commandHandler.call(seg));
     Access a(p);
     for (size_t i = 0, n = a.getArraySize(); i < n; ++i) {
         KeyInfo* ki = result.pushBackNew(new KeyInfo());
@@ -112,4 +124,10 @@ server::interface::FileGameClient::unpackKeyInfo(KeyInfo& result, const afl::dat
     result.isRegistered = safeToInteger(a("reg")) != 0;
     result.label1       = a("key1").toString();
     result.label2       = a("key2").toString();
+    if (const afl::data::Value* pp = a("useCount").getValue()) {
+        result.useCount = safeToInteger(Access(pp));
+    }
+    if (const afl::data::Value* pp = a("id").getValue()) {
+        result.keyId = Access(pp).toString();
+    }
 }

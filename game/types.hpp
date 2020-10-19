@@ -1,5 +1,6 @@
 /**
   *  \file game/types.hpp
+  *  \brief Fundamentyl game types
   */
 #ifndef C2NG_GAME_TYPES_HPP
 #define C2NG_GAME_TYPES_HPP
@@ -11,6 +12,7 @@
 
 namespace game {
 
+    /** Object Id. */
     typedef int32_t Id_t;
 
     /** Native races. */

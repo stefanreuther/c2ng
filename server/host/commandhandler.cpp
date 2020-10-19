@@ -11,7 +11,10 @@
 #include "server/host/hostcron.hpp"
 #include "server/host/hostfile.hpp"
 #include "server/host/hostgame.hpp"
+#include "server/host/hosthistory.hpp"
+#include "server/host/hostkey.hpp"
 #include "server/host/hostplayer.hpp"
+#include "server/host/hostranking.hpp"
 #include "server/host/hostschedule.hpp"
 #include "server/host/hostslot.hpp"
 #include "server/host/hosttool.hpp"
@@ -21,16 +24,15 @@
 #include "server/interface/hostcronserver.hpp"
 #include "server/interface/hostfileserver.hpp"
 #include "server/interface/hostgameserver.hpp"
+#include "server/interface/hosthistoryserver.hpp"
+#include "server/interface/hostkeyserver.hpp"
 #include "server/interface/hostplayerserver.hpp"
+#include "server/interface/hostrankingserver.hpp"
 #include "server/interface/hostscheduleserver.hpp"
 #include "server/interface/hostslotserver.hpp"
 #include "server/interface/hosttoolserver.hpp"
 #include "server/interface/hostturnserver.hpp"
 #include "server/types.hpp"
-#include "server/host/hosthistory.hpp"
-#include "server/interface/hosthistoryserver.hpp"
-#include "server/interface/hostrankingserver.hpp"
-#include "server/host/hostranking.hpp"
 
 
 server::host::CommandHandler::CommandHandler(Root& root, Session& session)
@@ -138,6 +140,11 @@ server::host::CommandHandler::handleCommand(const String_t& upcasedCommand, inte
         ok = server::interface::HostRankingServer(impl).handleCommand(upcasedCommand, args, result);
     }
     if (!ok) {
+        // KEYxxx
+        HostKey impl(m_session, m_root);
+        ok = server::interface::HostKeyServer(impl).handleCommand(upcasedCommand, args, result);
+    }
+    if (!ok) {
         // CRONxxx
         HostCron impl(m_session, m_root);
         ok = server::interface::HostCronServer(impl).handleCommand(upcasedCommand, args, result);
@@ -233,6 +240,10 @@ server::host::CommandHandler::getHelp(String_t topic) const
         return "History Commands:\n"
             " HISTEVENTS [GAME gid] [USER uid] [LIMIT n]\n"
             " HISTTURN gid [LIMIT n] [UNTIL turn] [SCORE name] [STATUS] [PLAYER]\n";
+    } else if (topic == "KEY") {
+        return "Key Commands:\n"
+            " KEYLS\n"
+            " KEYGET id\n";
     } else {
         return "Commands:\n"
             " PING\n"
@@ -243,6 +254,7 @@ server::host::CommandHandler::getHelp(String_t topic) const
             " GAME->\n"
             " HIST->\n"
             " HOST->\n"
+            " KEY->\n"
             " MASTER->\n"
             " PLAYER->\n"
             " SCHEDULE->\n"

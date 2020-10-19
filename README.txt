@@ -18,9 +18,10 @@ WHAT IS PCC2 (c2ng)?
   PCC2. It is intended to be 100% compatible to PCC2. However, it does
   away with many self-imposed limitations of PCC2.
 
-  As of January 2020, c2ng is still incomplete. End-users should
+  As of October 2020, c2ng is still incomplete. End-users should
   remain with PCC2 or PCC1. However, the back-end code is complete
   enough that c2ng now runs behind PlanetsCentral.com exclusively.
+  The game engine nears completion.
 
 
 Project Goals
@@ -43,8 +44,8 @@ Project Goals
   - more scriptability.
 
 
-Milestone Three
-================
+Status
+=======
 
   This version implements some key parts to prove feasibility. It does
   not have a fancy GUI and can not be used for playing.
@@ -67,6 +68,10 @@ Milestone Three
   Scripting engine ............................................. done
     Controls most of the GUI and data displays.
 
+  Multithreaded combat simulation .............................. done
+    We can use multiple threads for simulation and thus (again)
+    offer the fastest and most feature-rich combat simulation ever.
+
   Meaningful test coverage ..................................... done
     PCC2 has a meager test coverage of around 10%. c2ng currently
     achieves >50% in the application, ~90% in the foundation
@@ -75,8 +80,9 @@ Milestone Three
     feature does not break another.
 
   PlanetsCentral / PCC2Web ..................................... done
-    Milestone Three adds all servers except for PCC2 Web, in better
-    quality than before.
+    PlanetsCentral now runs exclusively on servers provided by c2ng,
+    in better quality than before. c2ng serves as an architectural
+    blueprint for PCC2 Web.
 
   SDL2 ......................................................... done
     Milestone four can be built using SDL2.
@@ -128,6 +134,7 @@ Program List
     . c2pluginw: plugin manager (simple GUI)
     . c2rater: game rating computer
     . c2script: scripting engine
+    . c2simtool: battle simulator command-line tool
     . c2sweep: game directory cleaner
     . c2unpack: unpack utility
     . c2untrn: turn file decompiler
@@ -139,11 +146,15 @@ Program List
     . c2file-server: file server
     . c2format-server: format (binary I/O) server
     . c2host-server: host server
+    . c2logger: server control and logging utility
     . c2mailin: incoming mail processor
     . c2mailout-server: mail queue server
     . c2monitor-server: server status monitor
     . c2nntp-server: NNTP server
+    . c2play-server: web-based play backend server
+    . c2router-server: web-based play session manager
     . c2talk-server: PM/forum server
+    . c2user-server: user manager
 
 
 Near Milestones
@@ -166,3 +177,32 @@ Future Milestones
   - can we integrate forums/activities?
   - more operating systems (Android!)
   - C++11, maybe
+
+
+Contributing
+=============
+
+  This package is licensed under a BSD license; see COPYING.txt. You
+  can get sourcecode, build it yourself, and modify if you wish. See
+  <doc/HackingGuide.txt> for instructions.
+
+  As of mid-2020, this project is still in the process of source code
+  conversion from older (PCC1, PCC2) versions; I often rework large
+  parts or add incomplete code. The git repository therefore contains
+  only released versions for now. I plan on switching to a git-based
+  development when the port is complete.
+
+  You can (and should!) still submit bug reports and patches if you
+  wish.
+
+
+Contact
+========
+
+  Web site: <http://phost.de/~stefan/pcc2ng.html>
+
+  Github: <https://github.com/stefanreuther/c2ng>
+
+  PlanetsCentral: <https://planetscentral.com/>
+
+  Email: <streu@gmx.de>

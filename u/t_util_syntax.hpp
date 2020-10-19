@@ -39,6 +39,7 @@ class TestUtilSyntaxIniHighlighter : public CxxTest::TestSuite {
     void testComments();
     void testSections();
     void testAssignment();
+    void testOther();
 };
 
 class TestUtilSyntaxKeywordTable : public CxxTest::TestSuite {
@@ -74,6 +75,7 @@ class TestUtilSyntaxSegment : public CxxTest::TestSuite {
  public:
     void testSet();
     void testStartFinish();
+    void testInit();
 };
 
 #endif

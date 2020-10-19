@@ -1,13 +1,14 @@
 /**
   *  \file util/plugin/manager.cpp
+  *  \brief Class util::plugin::Manager
   */
 
 #include <memory>
 #include "util/plugin/manager.hpp"
-#include "version.hpp"
-#include "afl/io/directoryentry.hpp"
 #include "afl/except/fileproblemexception.hpp"
+#include "afl/io/directoryentry.hpp"
 #include "afl/string/format.hpp"
+#include "version.hpp"
 
 namespace {
     const char LOG_NAME[] = "plugin.mgr";
@@ -17,12 +18,13 @@ namespace {
         return a.getId() < b.getId();
     }
 
-    void initFeatures(util::plugin::Plugin::FeatureSet& features)
+    void initFeatures(util::plugin::Plugin::FeatureSet_t& features)
     {
         features["PCC"] = PCC2_VERSION;
     }
 }
 
+// Constructor.
 util::plugin::Manager::Manager(afl::string::Translator& tx, afl::sys::LogListener& log)
     : m_plugins(),
       m_translator(tx),
@@ -30,9 +32,12 @@ util::plugin::Manager::Manager(afl::string::Translator& tx, afl::sys::LogListene
 {
     // ex PluginManager::PluginManager
 }
+
+// Destructor.
 util::plugin::Manager::~Manager()
 { }
 
+// Find plugins in a directory.
 void
 util::plugin::Manager::findPlugins(afl::io::Directory& dir)
 {
@@ -69,7 +74,7 @@ util::plugin::Manager::findPlugins(afl::io::Directory& dir)
                 }
                 catch (std::exception& e) {
                     m_log.write(afl::sys::LogListener::Error, LOG_NAME,
-                                afl::string::Format(m_translator.translateString("Error loading plugin %s").c_str(), pluginName), e);
+                                afl::string::Format(m_translator("Error loading plugin %s").c_str(), pluginName), e);
                 }
             }
         }
@@ -77,14 +82,15 @@ util::plugin::Manager::findPlugins(afl::io::Directory& dir)
         // Sort for determinism
         m_plugins.sort(comparePlugins);
         m_log.write(afl::sys::LogListener::Trace, LOG_NAME,
-                    afl::string::Format(m_translator.translateString("Found %d plugin%!1{s%}").c_str(), count));
+                    afl::string::Format(m_translator("Found %d plugin%!1{s%}").c_str(), count));
     }
     catch (std::exception& e) {
         m_log.write(afl::sys::LogListener::Error, LOG_NAME,
-                    m_translator.translateString("Cannot load plugins"), e);
+                    m_translator("Cannot load plugins"), e);
     }
 }
 
+// Find plugins in a directory.
 void
 util::plugin::Manager::findPlugins(afl::io::FileSystem& fs, String_t dirName)
 {
@@ -95,6 +101,7 @@ util::plugin::Manager::findPlugins(afl::io::FileSystem& fs, String_t dirName)
     catch (...) { }
 }
 
+// Add new plugin.
 void
 util::plugin::Manager::addNewPlugin(Plugin* p)
 {
@@ -104,13 +111,13 @@ util::plugin::Manager::addNewPlugin(Plugin* p)
     }
 }
 
-// /** Enumerate all plugins in dependency order. */
+// Enumerate plugins.
 void
 util::plugin::Manager::enumPlugins(std::vector<Plugin*>& out, bool ordered) const
 {
     // ex PluginManager::enumPlugins
     // Initial feature set
-    Plugin::FeatureSet features;
+    Plugin::FeatureSet_t features;
     initFeatures(features);
 
     // Marker for all plugins
@@ -121,11 +128,11 @@ util::plugin::Manager::enumPlugins(std::vector<Plugin*>& out, bool ordered) cons
     while (1) {
         bool didOne = false;
         for (size_t i = 0, n = m_plugins.size(); i < n; ++i) {
-            if (!did[i] && (!ordered || m_plugins[i]->isSatisfied(features))) {
+            if (!did[i] && (!ordered || m_plugins[i]->isSatisfiedBy(features))) {
                 didOne = true;
                 did[i] = 1;
                 out.push_back(m_plugins[i]);
-                m_plugins[i]->addProvidedFeaturesTo(features);
+                m_plugins[i]->enumProvidedFeatures(features);
             }
         }
         if (!didOne) {
@@ -137,12 +144,12 @@ util::plugin::Manager::enumPlugins(std::vector<Plugin*>& out, bool ordered) cons
     for (size_t i = 0, n = m_plugins.size(); i < n; ++i) {
         if (!did[i]) {
             m_log.write(afl::sys::LogListener::Error, LOG_NAME,
-                        afl::string::Format(m_translator.translateString("Plugin %s cannot be loaded because of missing preconditions").c_str(), m_plugins[i]->getId()));
+                        afl::string::Format(m_translator("Plugin %s cannot be loaded because of missing preconditions").c_str(), m_plugins[i]->getId()));
         }
     }
 }
 
-// /** Enumerate all plugins that conflict with the given candidate. */
+// Enumerate conflicting plugins.
 void
 util::plugin::Manager::enumConflictingPlugins(const Plugin& candidate, std::vector<Plugin*>& out) const
 {
@@ -157,7 +164,7 @@ util::plugin::Manager::enumConflictingPlugins(const Plugin& candidate, std::vect
     }
 }
 
-// /** Enumerate all plugins that depend on the candidate plugin, i.e.\ prevent its uninstallation. */
+// Enumerate depending plugins.
 void
 util::plugin::Manager::enumDependingPlugins(const Plugin& candidate, std::vector<Plugin*>& out) const
 {
@@ -169,20 +176,18 @@ util::plugin::Manager::enumDependingPlugins(const Plugin& candidate, std::vector
     }
 }
 
-// /** Enumerate all available features. */
+// Enumerate provided features.
 void
-util::plugin::Manager::enumFeatures(Plugin::FeatureSet& fset) const
+util::plugin::Manager::enumProvidedFeatures(Plugin::FeatureSet_t& have) const
 {
     // ex PluginManager::enumFeatures
-    initFeatures(fset);
+    initFeatures(have);
     for (size_t i = 0, n = m_plugins.size(); i < n; ++i) {
-        m_plugins[i]->addProvidedFeaturesTo(fset);
+        m_plugins[i]->enumProvidedFeatures(have);
     }
 }
 
-// /** Extract plugin, given a pointer.
-//     Caller must delete it.
-//     \return pointer on success, otherwise 0 */
+// Extract plugin.
 util::plugin::Plugin*
 util::plugin::Manager::extractPlugin(Plugin* p)
 {
@@ -197,7 +202,7 @@ util::plugin::Manager::extractPlugin(Plugin* p)
     return 0;
 }
 
-// /** Get plugin, given an Id. */
+// Look up plugin.
 util::plugin::Plugin*
 util::plugin::Manager::getPluginById(const String_t& id) const
 {

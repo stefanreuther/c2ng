@@ -457,7 +457,7 @@ interpreter::TaskEditor::save() const
     // Generate new BCO
     BCORef_t bco = *new BytecodeObject();
     bco->setIsProcedure(true);
-    bco->setName(m_process.getName());
+    bco->setSubroutineName(m_process.getName());
     BytecodeObject::PC_t new_pc = 0;
     for (size_t i = 0; i < m_code.size(); ++i) {
         // Is this the new program counter?

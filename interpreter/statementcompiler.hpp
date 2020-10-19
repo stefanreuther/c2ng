@@ -1,13 +1,14 @@
 /**
   *  \file interpreter/statementcompiler.hpp
+  *  \brief Class interpreter::StatementCompiler
   */
 #ifndef C2NG_INTERPRETER_STATEMENTCOMPILER_HPP
 #define C2NG_INTERPRETER_STATEMENTCOMPILER_HPP
 
-#include "interpreter/bytecodeobject.hpp"
-#include "interpreter/opcode.hpp"
 #include "afl/container/ptrvector.hpp"
+#include "interpreter/bytecodeobject.hpp"
 #include "interpreter/expr/node.hpp"
+#include "interpreter/opcode.hpp"
 
 namespace interpreter {
 
@@ -26,8 +27,8 @@ namespace interpreter {
         Errors are reported by throwing Error. */
     class StatementCompiler {
      public:
-        // FIXME: rename to Result
-        enum StatementResult {
+        /** Result of a compilation. */
+        enum Result {
             EndOfInput,              ///< End of input reached. Exit. Only if not WantTerminators.
             Terminator,              ///< Terminator statement left in current token. Only if WantTerminators.
             CompiledStatement,       ///< Successfully compiled a single-line statement.
@@ -49,53 +50,63 @@ namespace interpreter {
             On a multi-line statement, this leaves the input after the end of the terminator.
             \param bco [out] Bytecode object that contains code
             \param scc [in] Statement compilation context */
-        StatementResult compile(BytecodeObject& bco, const StatementCompilationContext& scc);
+        Result compile(BytecodeObject& bco, const StatementCompilationContext& scc);
 
         /** Compile statement list.
             \param bco [out] Bytecode object that contains code
             \param scc [in] Statement compilation context
             \retval EndOfInput We ended the compilation because the input ended (only if !scc.hasFlag(WantTerminators))
             \retval Terminator We ended the compilation because we found a terminator (only if scc.hasFlag(WantTerminators)) */
-        StatementResult compileList(BytecodeObject& bco, const StatementCompilationContext& scc);
+        Result compileList(BytecodeObject& bco, const StatementCompilationContext& scc);
 
+        /** Set optimisation level.
+            Optimisation levels:
+            - -1 (avoid all optimisation in instruction selection, do not linearize)
+            - 0 (some smarter instruction selection)
+            - 1 (default optimisations; see optimize())
+            - 2 (more expensive optimisations; see optimize())
+            \param level Level [MIN_OPTIMISATION_LEVEL,MAX_OPTIMISATION_LEVEL] */
         void setOptimisationLevel(int level);
 
-        /** Finish a BCO. Performs configured optimisations. */
-        void finishBCO(BytecodeObject& bco, const StatementCompilationContext& scc);
+        /** Finish a BCO.
+            Performs configured optimisations.
+            \param bco [in/out] Bytecode object produced by compile/compileList
+            \param scc [in] Statement compilation context */
+        void finishBCO(BytecodeObject& bco, const StatementCompilationContext& scc) const;
 
      private:
-        StatementResult compileAmbiguousStatement(BytecodeObject& bco, const StatementCompilationContext& scc);
-        StatementResult compileAmbiguousSingleWord(const String_t& name, BytecodeObject& bco, const StatementCompilationContext& scc);
-        StatementResult compileAmbiguousRuntimeSwitch(const String_t& name, bool paren, BytecodeObject& bco, const StatementCompilationContext& scc);
-        StatementResult compileAbort(BytecodeObject& bco, const StatementCompilationContext& scc);
-        StatementResult compileBind(BytecodeObject& bco, const StatementCompilationContext& scc);
-        StatementResult compileCall(BytecodeObject& bco, const StatementCompilationContext& scc);
-        StatementResult compileCreateKeymap(BytecodeObject& bco, const StatementCompilationContext& scc);
-        StatementResult compileCreateProperty(BytecodeObject& bco, const StatementCompilationContext& scc, Opcode::Special minor, const char* prefix);
-        StatementResult compileDim(BytecodeObject& bco, const StatementCompilationContext& scc);
-        StatementResult compileDo(BytecodeObject& bco, const StatementCompilationContext& scc);
-        StatementResult compileEval(BytecodeObject& bco, const StatementCompilationContext& scc);
-        StatementResult compileFor(BytecodeObject& bco, const StatementCompilationContext& scc);
-        StatementResult compileForEach(BytecodeObject& bco, const StatementCompilationContext& scc);
-        StatementResult compileIf(BytecodeObject& bco, const StatementCompilationContext& scc);
-        StatementResult compileLoad(BytecodeObject& bco, const StatementCompilationContext& scc, bool mustSucceed);
-        StatementResult compileOn(BytecodeObject& bco, const StatementCompilationContext& scc);
-        StatementResult compileOption(BytecodeObject& bco, const StatementCompilationContext& scc);
-        StatementResult compilePrint(BytecodeObject& bco, const StatementCompilationContext& scc);
-        StatementResult compileReDim(BytecodeObject& bco, const StatementCompilationContext& scc);
-        StatementResult compileReturn(BytecodeObject& bco, const StatementCompilationContext& scc);
-        StatementResult compileRunHook(BytecodeObject& bco, const StatementCompilationContext& scc);
-        StatementResult compileScope(BytecodeObject& bco, const StatementCompilationContext& scc, Opcode::Scope scope);
-        StatementResult compileSelect(BytecodeObject& bco, const StatementCompilationContext& scc);
-        StatementResult compileSelectionExec(BytecodeObject& bco, const StatementCompilationContext& scc);
-        StatementResult compileSub(BytecodeObject& bco, const StatementCompilationContext& scc, bool proc, Opcode::Scope scope);
-        StatementResult compileStruct(BytecodeObject& bco, const StatementCompilationContext& scc, Opcode::Scope scope);
-        StatementResult compileTry(BytecodeObject& bco, const StatementCompilationContext& scc);
-        StatementResult compileUseKeymap(BytecodeObject& bco, const StatementCompilationContext& scc);
-        StatementResult compileWith(BytecodeObject& bco, const StatementCompilationContext& scc);
-        StatementResult compileExpressionStatement(BytecodeObject& bco, const StatementCompilationContext& scc);
-        StatementResult compileProcedureCall(BytecodeObject& bco, const StatementCompilationContext& scc);
-        StatementResult compileLoopBody(BytecodeObject& bco, StatementCompilationContext& subcc);
+        Result compileAmbiguousStatement(BytecodeObject& bco, const StatementCompilationContext& scc);
+        Result compileAmbiguousSingleWord(const String_t& name, BytecodeObject& bco, const StatementCompilationContext& scc);
+        Result compileAmbiguousRuntimeSwitch(const String_t& name, bool paren, BytecodeObject& bco, const StatementCompilationContext& scc);
+        Result compileAbort(BytecodeObject& bco, const StatementCompilationContext& scc);
+        Result compileBind(BytecodeObject& bco, const StatementCompilationContext& scc);
+        Result compileCall(BytecodeObject& bco, const StatementCompilationContext& scc);
+        Result compileCreateKeymap(BytecodeObject& bco, const StatementCompilationContext& scc);
+        Result compileCreateProperty(BytecodeObject& bco, const StatementCompilationContext& scc, Opcode::Special minor, const char* prefix);
+        Result compileDim(BytecodeObject& bco, const StatementCompilationContext& scc);
+        Result compileDo(BytecodeObject& bco, const StatementCompilationContext& scc);
+        Result compileEval(BytecodeObject& bco, const StatementCompilationContext& scc);
+        Result compileFor(BytecodeObject& bco, const StatementCompilationContext& scc);
+        Result compileForEach(BytecodeObject& bco, const StatementCompilationContext& scc);
+        Result compileIf(BytecodeObject& bco, const StatementCompilationContext& scc);
+        Result compileLoad(BytecodeObject& bco, const StatementCompilationContext& scc, bool mustSucceed);
+        Result compileOn(BytecodeObject& bco, const StatementCompilationContext& scc);
+        Result compileOption(BytecodeObject& bco, const StatementCompilationContext& scc);
+        Result compilePrint(BytecodeObject& bco, const StatementCompilationContext& scc);
+        Result compileReDim(BytecodeObject& bco, const StatementCompilationContext& scc);
+        Result compileReturn(BytecodeObject& bco, const StatementCompilationContext& scc);
+        Result compileRunHook(BytecodeObject& bco, const StatementCompilationContext& scc);
+        Result compileScope(BytecodeObject& bco, const StatementCompilationContext& scc, Opcode::Scope scope);
+        Result compileSelect(BytecodeObject& bco, const StatementCompilationContext& scc);
+        Result compileSelectionExec(BytecodeObject& bco, const StatementCompilationContext& scc);
+        Result compileSub(BytecodeObject& bco, const StatementCompilationContext& scc, bool proc, Opcode::Scope scope);
+        Result compileStruct(BytecodeObject& bco, const StatementCompilationContext& scc, Opcode::Scope scope);
+        Result compileTry(BytecodeObject& bco, const StatementCompilationContext& scc);
+        Result compileUseKeymap(BytecodeObject& bco, const StatementCompilationContext& scc);
+        Result compileWith(BytecodeObject& bco, const StatementCompilationContext& scc);
+        Result compileExpressionStatement(BytecodeObject& bco, const StatementCompilationContext& scc);
+        Result compileProcedureCall(BytecodeObject& bco, const StatementCompilationContext& scc);
+        Result compileLoopBody(BytecodeObject& bco, StatementCompilationContext& subcc);
         void compileVariableDefinition(BytecodeObject& bco, const StatementCompilationContext& scc, Opcode::Scope scope);
         bool compileInitializer(BytecodeObject& bco, const StatementCompilationContext& scc);
         bool compileTypeInitializer(BytecodeObject& bco, const StatementCompilationContext& scc, const String_t& typeName);
@@ -114,6 +125,12 @@ namespace interpreter {
         int m_optimisationLevel;
     };
 
+    /** Parse argument list.
+        Parses comma-separated list of expressions.
+        Terminates successfully when finding end of line.
+        Note that this only parses, it does not compile the expressions.
+        \param tok  [in] Tokenizer
+        \param args [out] Arguments expression trees are accumulated here */
     void parseCommandArgumentList(Tokenizer& tok, afl::container::PtrVector<interpreter::expr::Node>& args);
 }
 

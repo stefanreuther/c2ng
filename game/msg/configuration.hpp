@@ -31,7 +31,7 @@ namespace game { namespace msg {
 
         void load(afl::io::Directory& dir, int playerNr);
 
-        void save(afl::io::Directory& dir, int playerNr);
+        void save(afl::io::Directory& dir, int playerNr) const;
 
      private:
         // @change: we use a set<>, not a list<>

@@ -1,6 +1,6 @@
 /**
   *  \file game/extracontainer.hpp
-  *  \brief Template class ExtraContainer
+  *  \brief Template class game::ExtraContainer
   */
 #ifndef C2NG_GAME_EXTRACONTAINER_HPP
 #define C2NG_GAME_EXTRACONTAINER_HPP
@@ -57,6 +57,13 @@ namespace game {
             \return Existing value; null if none. */
         template<typename Value>
         Value* get(const ExtraIdentifier<Container,Value>& id)
+            { return static_cast<Value*>(m_data[&id.base]); }
+
+        /** Get existing value (const).
+            \param id Identifier
+            \return Existing value; null if none. */
+        template<typename Value>
+        const Value* get(const ExtraIdentifier<Container,Value>& id) const
             { return static_cast<Value*>(m_data[&id.base]); }
 
         /** Get existing or create new value.

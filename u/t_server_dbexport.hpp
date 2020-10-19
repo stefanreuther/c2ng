@@ -10,6 +10,7 @@
 class TestServerDbexportDbExporter : public CxxTest::TestSuite {
  public:
     void testTypes();
+    void testStrings();
     void testLargeList();
     void testManyList();
     void testLargeSet();

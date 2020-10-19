@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/process.hpp
+  *  \brief Class interpreter::Process
   */
 #ifndef C2NG_INTERPRETER_PROCESS_HPP
 #define C2NG_INTERPRETER_PROCESS_HPP
@@ -11,11 +12,32 @@
 #include "interpreter/bytecodeobject.hpp"
 #include "interpreter/contextprovider.hpp"
 #include "interpreter/error.hpp"
+#include "afl/string/translator.hpp"
 
 namespace interpreter {
 
     class World;
 
+    /** Process.
+        A process executes script commands.
+        It holds all required state, namely:
+        - identifying information (name, Id, etc.)
+        - active stack frames with their local variables
+        - active contexts
+        - active exception handlers
+
+        Execution of multiple processes is coordinated by ProcessList which also creates Process objects.
+
+        To execute script code, create a Process object (e.g. using ProcessList::create()),
+        push a frame (pushFrame()), and execute it (e.g. using ProcessList::run() or run()).
+
+        Unless the process is executing code that refers to transient state (e.g. GUI objects),
+        it can be suspended to disk (see SaveContext) and later reloaded.
+        This is mainly used for auto-tasks.
+
+        In PCC1, processes (IntExecutionContext) could also be created on-the-fly
+        and executed for a temporary result (runTemporary()).
+        In PCC2, this ability is deprecated and retained for testing only. */
     class Process : public ContextProvider {
         // ex IntExecutionContext
      public:
@@ -23,7 +45,9 @@ namespace interpreter {
         typedef afl::data::Segment Segment_t;
         typedef afl::data::NameMap NameMap_t;
 
-        /** Stack frame of an executing process. */
+        /** Stack frame of an executing process.
+            Each stack frame describes an executing bytecode object.
+            If the process has no more stackframes, it terminates (state Ended). */
         struct Frame {
             BCORef_t bco;           /**< Bytecode object executing in this frame. */
             PC_t pc;                /**< Next instruction to execute. */
@@ -37,13 +61,18 @@ namespace interpreter {
             Frame(BCORef_t bco);
             ~Frame();
         };
-        /** Exception handler. */
+
+        /** Exception handler.
+            An exception handler is activated by discarding values on the stacks
+            to the sizes as described in the handler, and jumping to the given program counter. */
         struct ExceptionHandler {
-            size_t frameSP;
-            size_t contextSP;
-            size_t valueSP;
-            PC_t pc;
+            size_t frameSP;         /**< Size of frame stack. \see getNumActiveFrames() */
+            size_t contextSP;       /**< Size of context stack. \see getContexts() */
+            size_t valueSP;         /**< Size of value stack. \see getStackSize() */
+            PC_t pc;                /**< Program counter of exception handler. */
         };
+
+        /** Process state. */
         enum State {
             Suspended,          ///< Process is not running.
             Frozen,             ///< Process is frozen and must not be modified/run. For example, it's being edited by the auto-task editor.
@@ -54,6 +83,7 @@ namespace interpreter {
             Terminated,         ///< Process terminated using "End" statement. It did not produce a result.
             Failed              ///< Process failed using "Abort" statement or other error. It did not produce a result.
         };
+
         enum ProcessKind {
             pkDefault,
             pkShipTask,
@@ -68,7 +98,11 @@ namespace interpreter {
 
             Finalizers are not persisted in any way,
             their job is to report a status back to someone who started the process on the UI.
-            If the process suspends, the finalizer will be called to report the suspension. */
+            If the process suspends, the finalizer will be called to report the suspension.
+
+            FIXME: we will need an API for observers to be able to watch and interrupt processes
+            (for the user Ctrl+C feature and possibly debugging).
+            That API will probably replace Finalizer. */
         class Finalizer : public afl::base::Deletable {
          public:
             /** Perform finalisation for this process.
@@ -85,91 +119,370 @@ namespace interpreter {
                 { }
         };
 
+
+        /** Create process.
+            Normally, processes are created by ProcessList::create().
+            \param world     World
+            \param name      Process name
+            \param processId Process Id */
         Process(World& world, String_t name, uint32_t processId);
+
+        /** Destructor. */
         ~Process();
 
-        // Frames:
+
+        /*
+         *  Frames
+         */
+
+        /** Push new frame (subroutine call).
+            The frame is initialized with the current process status, representing an initiated call, and need not normally be modified.
+            \param bco         BytecodeObject to execute in the frame
+            \param wantResult  true: frame should produce a result (push onto value stack); false: no result
+            \return Handle to frame. Deserialisation will update it with deserialized values. */
         Frame& pushFrame(BCORef_t bco, bool wantResult);
+
+        /** Pop frame (subroutine return).
+            This will clean up context/exception stacks,
+            and update the value stack depending on the frame's wantResult and the BCO's isProcedure flag
+            (add/keep/discard one value). */
         void popFrame();
+
+        /** Get number of active frames.
+            \return Number of active frames. Process can execute as long as this is nonzero. */
         size_t getNumActiveFrames() const;
+
+        /** Get outermost frame.
+            This frame represents the process's invoking command or script;
+            for an Auto-Task, this is the task's text.
+            \return frame; null if nonexistant */
         Frame* getOutermostFrame();
+
+        /** Get frame by index.
+            For inspection and serialisation.
+            \param nr Frame number [0,getNumActiveFrames()), 0=outermost
+            \return frame; 0 if nr out of range */
         const Frame* getFrame(size_t nr) const;
 
-        // Exceptions:
+        /** Create Context for frame.
+            This is intended for deserialisation.
+            \param nr Frame number [0,getNumActiveFrames()), 0=outermost
+            \return Newly-allocated context; null of nr out of range */
+        Context* makeFrameContext(size_t nr) const;
+
+
+        /*
+         *  Exceptions
+         */
+
+        /** Push exception handler (catch).
+            If an exception occurs, the current stack situation is restored and the program counter set to the given value.
+            \param pc Program Counter of exception handler */
         void pushExceptionHandler(PC_t pc);
+
+        /** Push exception handler (deserialisation).
+            If an exception occurs, the specified situation (stacks, program counter) is assumed.
+            \param pc        Program Counter of exception handler
+            \param frameSP   Number of active frames
+            \param contextSP Number of active contexts
+            \param valueSP   Number of values on value stack */
         void pushExceptionHandler(PC_t pc, size_t frameSP, size_t contextSP, size_t valueSP);
+
+        /** Pop exception handler (uncatch).
+            Undoes the previous pushExceptionHandler().
+            The previous exception handler becomes active again.
+            \throw Error if no exception handler is active */
         void popExceptionHandler();
 
-        // Contexts:
+        /** Access exception handlers.
+            For serialisation.
+            \return Vector of exception handlers */
+        const afl::container::PtrVector<ExceptionHandler>& getExceptionHandlers() const;
+
+
+        /*
+         *  Contexts
+         */
+
+        /** Push a new context.
+            The new context will be placed on top of the stack and be the first
+            to be considered for variable lookups.
+            \param ctx Context. Must not be null. Ownership taken over by Process. */
         void pushNewContext(Context* ctx);
+
+        /** Push new contexts from list.
+            Appends the given contexts to the context stack.
+            The last element of \c ctxs will be the new topmost context.
+            \param ctxs Contexts. Vector will be emptied/nulled; ownership taken over by Process. */
         void pushContextsFrom(afl::container::PtrVector<Context>& ctxs);
+
+        /** Mark top-of-context-stack.
+            Call after setting up the process, before starting it, to define the situation invoking the process.
+            This is used to find the invoking object,
+            even if the process temporarily activates a different object's context.
+            \see getInvokingObject() */
         void markContextTOS();
+
+        /** Set top-of-context-stack.
+            Use for deserialisation.
+            \param n New value
+            \return true on success; false if value out of range
+            \see markContextTOS() */
         bool setContextTOS(size_t n);
+
+        /** Get top-of-context-stack.
+            \return Value
+            \see markContextTOS() */
+        size_t getContextTOS() const;
+
+        /** Pop context.
+            Cancels a previous pushNewContext(). */
         void popContext();
+
+        /** Access list of contexts.
+            For serialisation.
+            \return Vector of contexts */
         const afl::container::PtrVector<Context>& getContexts() const;
-        size_t getContextTOS() const
-            { return m_contextTOS; }
 
-        // Value stack:
+
+        /*
+         *  Value stack
+         */
+
+        /** Push new value.
+            \param v Value. Can be null, ownership taken over by process */
         void pushNewValue(afl::data::Value* v);
+
+        /** Drop topmost value. */
         void dropValue();
-        afl::data::Value* getResult();
+
+        /** Get process result (top of value stack).
+            \return value, can be null, owned by Process */
+        const afl::data::Value* getResult() const;
+
+        /** Get size of stack.
+            \return Number of values on stack. */
         size_t getStackSize() const;
-        const Segment_t& getValueStack() const
-            { return m_valueStack; }
-        Segment_t& getValueStack()
-            { return m_valueStack; }
 
-        // Attributes:
-        void            setState(State ps);
-        State           getState() const;
-        void            setProcessGroupId(uint32_t pgid);
-        uint32_t        getProcessGroupId() const;
-        uint32_t        getProcessId() const;
-        void            setName(String_t name);
-        String_t        getName() const;
-        void            setPriority(int pri);
-        int             getPriority() const;
-        const Error&    getError() const;
-        void            setProcessKind(ProcessKind k);
-        ProcessKind     getProcessKind() const;
+        /** Access value stack.
+            For serialisation.
+            \return Value stack */
+        const Segment_t& getValueStack() const;
 
-        void            freeze(Freezer& p);
-        void            unfreeze();
-        Freezer*        getFreezer() const;
+        /** Access value stack.
+            For deserialisation.
+            \return Value stack */
+        Segment_t& getValueStack();
 
-        // Execution:
-        void addTraceTo(Error& err);
+
+        /*
+         *  Attributes
+         */
+
+        /** Set process status.
+            \param ps New status */
+        void setState(State ps);
+
+        /** Get process status.
+            \return process status */
+        State getState() const;
+
+        /** Set process group Id.
+            See ProcessList for a discussion of process groups.
+            Process does not interpret the process group Id in any way.
+            \param pgid Process group Id */
+        void setProcessGroupId(uint32_t pgid);
+
+        /** Get process group Id.
+            \return Process group Id */
+        uint32_t getProcessGroupId() const;
+
+        /** Get process Id.
+            The process Id is assigned when the process is created,
+            and serves identification purposes.
+            Process does not interpret the process Id in any way.
+            \return Process Id */
+        uint32_t getProcessId() const;
+
+        /** Set process name.
+            The process name serves identification purposes and is not interpreted in any way.
+            The name is normally set during construction, this function is used for deserialisation.
+            \param name New name */
+        void setName(String_t name);
+
+        /** Get process name.
+            \return name */
+        String_t getName() const;
+
+        /** Set priority.
+            The priority is used by ProcessList to order processes for execution.
+            Process does not interpret the priority in any way.
+            \param pri New priority
+            \see ProcessList::handlePriorityChange */
+        void setPriority(int pri);
+
+        /** Get priority.
+            \return priority */
+        int getPriority() const;
+
+        /** Get last error message.
+            If the process produced an error (uncaught exception, state Failed), that can be retrieved here.
+            \return error */
+        const Error& getError() const;
+
+        /** Set process kind.
+            The process kind serves identification purposes and is not interpreted in any way.
+            \param k Kind */
+        void setProcessKind(ProcessKind k);
+
+        /** Get process kind.
+            \return kind */
+        ProcessKind getProcessKind() const;
+
+        /** Freeze process (set state from Suspended to Frozen).
+            A component can freeze a process to manipulate its interior.
+            Only one component can do that to a process.
+            The process is put in state Frozen in which it cannot execute.
+            
+            \param p Freezer. Serves as identification of the invoking component; must live sufficiently long
+
+            \throw Error if process already frozen or cannot currently freeze */
+        void freeze(Freezer& p);
+
+        /** Unfreeze process (set state from Frozen to Suspended). */
+        void unfreeze();
+
+        /** Get freezer.
+            \return component that called freeze(); null if none */
+        Freezer* getFreezer() const;
+
+        /** Access world.
+            \return world */
+        World& world() const;
+
+
+        /*
+         *  Execution
+         */
+
+        /** Add current position to an error trace.
+            \param err [in/out] Trace added here */
+        void addTraceTo(Error& err) const;
+
+        /** Run process (set state to Running).
+            Returns when the process leaves state Running, that is:
+            - Ended
+            - Terminated
+            - Failed
+            - Suspended
+            - Waiting */
         void run();
+
+        /** Run temporary process.
+            Runs the given process, which can be a stack object of the caller
+            (not part of a ProcessList, created with ProcessList::create).
+            The process is not permitted to suspend or wait;
+            trying to do so will cause it to receive an error.
+
+            This function is deprecated for most uses.
+            Processes that execute in runTemporary() will escape the regular process state machine.
+            In c2ng, this means they cannot call UI.
+            In c2web, this means they cannot even fetch server data.
+            This function is retained because it is useful for testing.
+
+            \retval true  The process has run till its end and finished normally.
+                          If it contained an expression, that expression's result
+                          is available on the stack (getResult()).
+            \retval false The process has terminated abnormally.
+                          This happens when the process received an error, but also when it executed an 'End' statement.
+                          In this case, it has not produced a result. */
         bool runTemporary();
+
+        /** Execute a single instruction.
+            Does not catch errors; caller needs to do that. */
         void executeInstruction();
+
+        /** Suspend this process to perform UI operations (set state to Waiting). */
         void suspendForUI();
 
-        // ContextProvider:
-        virtual Context* lookup(const afl::data::NameQuery& q, Context::PropertyIndex_t& index);
+        /** Look up value.
+            This is an interface method of ContextProvider.
+            \param name [in] Name query
+            \param result [out] On success, property index
+            \return non-null context if found, null on failure. */
+        Context* lookup(const afl::data::NameQuery& q, Context::PropertyIndex_t& index);
 
-        // Inspection/Manipulation:
+
+        /*
+         *  Inspection / Manipulation
+         */
+
+        /** Set variable in this process.
+            This function is intended to be used by implementations of commands which set variables by name, e.g. "UI.RESULT".
+            The variable is set in the topmost context that defines it.
+            \param name Name
+            \param value Value; will be cloned
+            \retval true Assignment succeeded
+            \retval false Assignment failed (variable not defined or context refuses to accept value) */
         bool setVariable(String_t name, afl::data::Value* value);
+
+        /** Get variable from this process.
+            The variable is fetched from the topmost context that defines it.
+            \param name Name
+            \return Value, owned by process. Null if variable is not defined. */
         afl::data::Value* getVariable(String_t name);
+
+        /** Get game object this process is working on.
+            Returns the object from the innermost context that has one.
+            Use this for command implementations that implicitly use that object's context.
+            \return Object, can be null. Owned by the Context/World/... */
         game::map::Object* getCurrentObject() const;
+
+        /** Get game object this process was invoked from.
+            Returns the object from an outer context as defined by markContextTOS().
+            Use this for labeling the process for the user.
+            \return Object, can be null. Owned by the Context/World/... */
         game::map::Object* getInvokingObject() const;
+
+        /** Handle user subroutine invocation.
+            This is the implementation of SubroutineValue::call().
+            \param bco Called bytecode object
+            \param args Arguments provided by used
+            \param wantResult True if a result is required */
         void handleFunctionCall(BCORef_t bco, Segment_t& args, bool wantResult);
 
+        /** Handle "Load" command.
+            Loads and compiles the file, and pushes an appropriate frame.
+            \param name   File name given by user
+            \param origin Origin to set to the given code (see BytecodeObject::setOrigin)
+            \retval true File loaded and compiled successfully
+            \retval false File not found
+            \throw Error compilation error */
         bool handleLoad(String_t name, const String_t& origin);
 
-        // bool checkForBreak();
-        // static void setNewGlobalContext(IntContext* p);
-        // static void setBreakHandler(bool check_break());
+        /** Handle exception.
+            Transfers control to the most recently pushed exception handler,
+            if any, and have it process exception e.
+            If there is no active handler, stops the bytecode process.
+            \param e Error text
+            \param trace Trace */
         void handleException(String_t e, String_t trace);
-        const afl::container::PtrVector<ExceptionHandler>& getExceptions() const
-            { return m_exceptions; }
 
-        Context* makeFrameContext(size_t level);
+        /*
+         *  Finalizer
+         */
 
-        // Finalizer
+        /** Set finalizer.
+            \param p Newly-allocated finalizer or null. Will be owned by process. */
         void setNewFinalizer(Finalizer* p);
+
+        /** Call and discard finalizer. */
         void finalize();
 
+
+        /** Signal: invalidate observers.
+            Called before the process starts executing.
+            All pointers obtained previously may become invalid. */
         afl::base::Signal<void()> sig_invalidate;
 
      private:
@@ -212,13 +525,10 @@ namespace interpreter {
         afl::container::PtrVector<Context> m_contexts;
 
         /** All active exception handling contexts. */
-        afl::container::PtrVector<ExceptionHandler> m_exceptions;
+        afl::container::PtrVector<ExceptionHandler> m_exceptionHandlers;
 
         /** Value stack. */
         Segment_t m_valueStack;
-
-        // /** Global context template. \see setNewGlobalContext */
-        // static std::auto_ptr<IntContext> global_context;
 
         /** Process kind. This is used for labelling and finding the process;
             it has no effect upon its execution. Think of this as an extension
@@ -228,14 +538,14 @@ namespace interpreter {
 
         /** Context top-of-stack. Registers the number of contexts that were on the
             process's context stack when it was created. This is used to identify
-            the process it was invoked from. */
+            the object it was invoked from. */
         size_t m_contextTOS;
 
         /** Process group Id. */
         uint32_t m_processGroupId;
 
         /** Process Id. */
-        uint32_t m_processId;
+        const uint32_t m_processId;
 
         /** Freezer.
             If non-null, the task is in state Frozen, and the pointee is responsible for unfreezing it. */
@@ -243,6 +553,12 @@ namespace interpreter {
 
         std::auto_ptr<Finalizer> m_finalizer;
     };
+
+    /** Format Process::State to string.
+        \param st State
+        \param tx Translator
+        \return string representation of st */
+    String_t toString(Process::State st, afl::string::Translator& tx);
 
 }
 

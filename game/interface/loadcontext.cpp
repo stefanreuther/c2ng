@@ -97,7 +97,7 @@ game::interface::LoadContext::loadContext(const interpreter::TagNode& tag, afl::
         return new GlobalContext(m_session);
 
      case TagNode::Tag_Iterator:
-        return makeIteratorValue(m_session.getGame(), tag.value, false);
+        return makeIteratorValue(m_session, tag.value, false);
 
      case TagNode::Tag_Player:
         return PlayerContext::create(tag.value, m_session);

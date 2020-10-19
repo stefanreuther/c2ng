@@ -137,7 +137,8 @@ namespace {
 
 // Construct new planet.
 game::map::Planet::Planet(Id_t id)
-    : m_id(id),
+    : Object(),
+      m_id(id),
       m_name("?"),
       m_position(),
       m_knownToNotExist(false),
@@ -157,7 +158,7 @@ game::map::Planet::Planet(Id_t id)
     m_autobuildGoals[MineBuilding]         = 1000;
     m_autobuildGoals[FactoryBuilding]      = 1000;
     m_autobuildGoals[DefenseBuilding]      = 1000;
-    m_autobuildGoals[BaseDefenseBuilding]  = 1000;
+    m_autobuildGoals[BaseDefenseBuilding]  = 20;
     m_autobuildSpeeds[MineBuilding]        = 5;
     m_autobuildSpeeds[FactoryBuilding]     = 10;
     m_autobuildSpeeds[DefenseBuilding]     = 3;
@@ -169,7 +170,8 @@ game::map::Planet::Planet(Id_t id)
 
 // Copy a planet.
 game::map::Planet::Planet(const Planet& other)
-    : m_id(other.m_id),
+    : Object(),
+      m_id(other.m_id),
       m_name(other.m_name),
       m_position(other.m_position),
       m_knownToNotExist(other.m_knownToNotExist),
@@ -250,6 +252,7 @@ game::map::Planet::addMessageInformation(const game::parser::MessageInformation&
                 // Is it useful to support these for planets?
                 break;
              case gp::mi_Owner:
+                // FIXME: clear number of colonists (and defense?) on ownership change
                 updateField16(m_historyTimestamps[ColonistTime], msg_turn, m_currentPlanetData.owner, iv->getValue());
                 break;
              case gp::mi_PlanetTotalN:

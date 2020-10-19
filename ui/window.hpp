@@ -17,6 +17,7 @@ namespace ui {
     class Window : public LayoutableGroup {
      public:
         Window(String_t title, gfx::ResourceProvider& provider, ColorScheme& uiColorScheme, const WindowStyle& style, ui::layout::Manager& manager);
+        ~Window();
 
         virtual void draw(gfx::Canvas& can);
         virtual void handleStateChange(State st, bool enable);

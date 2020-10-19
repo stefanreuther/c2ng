@@ -276,19 +276,20 @@ namespace {
         }
     }
 
-    void addBaseTax(TagNode& list, const Planet& pl, String_t label, const Root& root, int happyTarget, afl::string::Translator& tx)
+    void addBaseTax(TagNode& list, const Planet& pl, int viewpointPlayer, String_t label, const Root& root, int happyTarget, afl::string::Translator& tx)
     {
         // ex formatBaseTax
         // ex envscan.pas:AddBaseTax
-        int tax, owner, race;
-        int32_t due;
-        if (getNativeBaseTax(pl, root.hostConfiguration(), root.hostVersion(), happyTarget).get(tax)
-            && getNativeDue(pl, root.hostConfiguration(), root.hostVersion(), tax).get(due)
+        int tax, race, gov;
+        int32_t pop;
+        if (getNativeBaseTax(pl, viewpointPlayer, root.hostConfiguration(), root.hostVersion(), happyTarget).get(tax)
             && pl.getNativeRace().get(race)
-            && pl.getOwner(owner))
+            && pl.getNativeGovernment().get(gov)
+            && pl.getNatives().get(pop))
         {
             // How many colonists needed to collect that?
-            int rate = root.hostConfiguration()[HostConfiguration::NativeTaxRate](owner);
+            int32_t due = game::map::getNativeDue(tax, race, gov, pop, viewpointPlayer, root.hostConfiguration(), root.hostVersion());
+            int rate = root.hostConfiguration()[HostConfiguration::NativeTaxRate](viewpointPlayer);
             if (race == game::InsectoidNatives) {
                 rate *= 2;
             }
@@ -723,8 +724,8 @@ game::map::describePlanetNatives(afl::io::xml::Nodes_t& nodes,
         && race != AmorphousNatives)
     {
         // FIXME? If government is not known, PCC1 will assume feudalism. Does this happen?
-        addBaseTax(list, pl, tx("Base Tax Rate"), root,   0, tx);
-        addBaseTax(list, pl, tx("Max Tax Rate"),  root, -30, tx);
+        addBaseTax(list, pl, viewpointPlayer, tx("Base Tax Rate"), root,   0, tx);
+        addBaseTax(list, pl, viewpointPlayer, tx("Max Tax Rate"),  root, -30, tx);
     }
 
     // Attacks

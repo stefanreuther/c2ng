@@ -189,6 +189,84 @@ server::host::HostSchedule::preview(int32_t gameId,
     Game game(m_root, gameId);
     m_session.checkPermission(game, Game::ReadPermission);
 
+#if 1
+    // The following derived from cronimpl.cpp:computeGameHostTimes
+    afl::net::redis::Subtree sroot(game.getSchedule());
+    afl::net::redis::StringListKey scheduleList(sroot.stringListKey("list"));
+    int32_t numSchedules = scheduleList.size();
+    int32_t currentScheduleIndex = 0;
+
+    // Figure out current times
+    int32_t lastHostTime = game.lastHostTime().get();
+    int32_t turn = game.turnNumber().get();
+    if (lastHostTime == 0 || turn == 0) {
+        // Host never ran, so pretend we're hosting now.
+        lastHostTime = m_root.getTime();
+        ++turn;
+        result.push_back(m_root.config().getUserTimeFromTime(lastHostTime));
+    }
+    int32_t currentTime = lastHostTime;
+
+    while ((int32_t(result.size()) < actualTurnLimit
+            && (!timeLimit.isValid() || (*timeLimit.get() > lastHostTime))))
+    {
+        // Start by expiring obsolete schedules
+        server::host::Schedule currentSchedule;
+        bool currentScheduleValid = false;
+        bool haveDroppedSchedule = false;
+        while (!currentScheduleValid && currentScheduleIndex < numSchedules) {
+            String_t currentScheduleId = scheduleList[currentScheduleIndex];
+            currentSchedule.loadFrom(sroot.hashKey(currentScheduleId));
+            if (currentSchedule.isExpired(turn, currentTime)) {
+                // This schedule is expired, drop it
+                ++currentScheduleIndex;
+                currentScheduleValid = false;
+                haveDroppedSchedule = true;
+            } else {
+                // This schedule is valid
+                currentScheduleValid = true;
+            }
+        }
+
+        // Create a schedule expiration event
+        int32_t scheduleChangeTime = 0;
+        if (currentScheduleValid && currentSchedule.getCondition() == HostSchedule::Time) {
+            scheduleChangeTime = currentSchedule.getConditionArg();
+        }
+
+        // If we have dropped a schedule, adjust lastHostTime.
+        // Assuming we're changing from a slow schedule to a "Monday, Thursday" schedule on a Sunday,
+        // the scheduler would otherwise see that the Thursday host is overdue and immediately run it.
+        // Players still expect next host to run on Monday.
+        if (haveDroppedSchedule && lastHostTime > 0 && currentScheduleValid) {
+            server::Time_t virtualTime = currentSchedule.getPreviousVirtualHost(currentTime);
+            if (virtualTime != 0 && virtualTime > lastHostTime) {
+                lastHostTime = virtualTime;
+            }
+        }
+
+        int32_t nextHostTime = currentScheduleValid
+            ? currentSchedule.getNextHost(lastHostTime)
+            : 0;
+
+        // Fix up grace period
+        if (nextHostTime > 0 && nextHostTime < currentTime) {
+            nextHostTime = currentTime;
+        }
+
+        // Generate exactly one event.
+        if (nextHostTime > 0 && (scheduleChangeTime == 0 || nextHostTime <= scheduleChangeTime)) {
+            ++turn;
+            result.push_back(m_root.config().getUserTimeFromTime(nextHostTime));
+            lastHostTime = nextHostTime;
+            currentTime = nextHostTime;
+        } else if (scheduleChangeTime > 0 && (nextHostTime == 0 || scheduleChangeTime < nextHostTime)) {
+            currentTime = scheduleChangeTime;
+        } else {
+            break;
+        }
+    }
+#else
     // Figure out last host date
     int32_t lastHost = game.lastHostTime().get();
     int32_t turn     = game.turnNumber().get();
@@ -212,6 +290,7 @@ server::host::HostSchedule::preview(int32_t gameId,
         // Process one schedule
         // FIXME: this does not seem to handle properly transitions from
         // one DAILY/WEEKLY schedule to another with a time condition.
+        // FIXME: this does not handle the getPreviousVirtualHost() logic
         server::host::Schedule sched;
         sched.loadFrom(sroot.hashKey(schedules[currentSchedule]));
         while ((actualTurnLimit > int32_t(result.size()))
@@ -220,11 +299,21 @@ server::host::HostSchedule::preview(int32_t gameId,
                && !sched.isExpired(turn, lastHost))
         {
             lastHost = sched.getNextHost(lastHost);
-            ++turn;
-            result.push_back(m_root.config().getUserTimeFromTime(lastHost));
+            if (lastHost != 0) {
+                // It's a turn time
+                ++turn;
+                result.push_back(m_root.config().getUserTimeFromTime(lastHost));
+            } else {
+                // Not a turn time, host does not run for this schedule.
+                // Does the schedule expire?
+                if (sched.getCondition() == HostSchedule::Time) {
+                    lastHost = sched.getConditionArg();
+                }
+            }
         }
         ++currentSchedule;
     }
+#endif
 }
 
 /** Common implementation of add() and replace().

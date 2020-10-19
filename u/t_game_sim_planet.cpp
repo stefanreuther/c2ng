@@ -6,6 +6,7 @@
 #include "game/sim/planet.hpp"
 
 #include "t_game_sim.hpp"
+#include "game/sim/configuration.hpp"
 
 /** Test getter/setter. */
 void
@@ -88,14 +89,15 @@ TestGameSimPlanet::testAbility()
     game::config::HostConfiguration config;
     game::spec::ShipList shipList;
     game::sim::Planet t;
+    game::sim::Configuration opts;
 
     // Lizards don't...
     t.setOwner(2);
-    TS_ASSERT(!t.hasAbility(game::sim::TripleBeamKillAbility, shipList, config));
+    TS_ASSERT(!t.hasAbility(game::sim::TripleBeamKillAbility, opts, shipList, config));
 
     // ...but Pirates do have this ability.
     t.setOwner(5);
-    TS_ASSERT(t.hasAbility(game::sim::TripleBeamKillAbility, shipList, config));
+    TS_ASSERT(t.hasAbility(game::sim::TripleBeamKillAbility, opts, shipList, config));
 }
 
 /** Test getNumBaseTorpedoesAsType(). */

@@ -413,7 +413,7 @@ game::v3::TurnFile::setRegistrationKey(const RegistrationKey& key, int turnNr)
     util::RandomNumberGenerator rng(m_turnHeader.playerId + (turnNr << 16));
 
     // Dosplan half (authoritative)
-    afl::bits::packArray<afl::bits::UInt32LE>(afl::base::fromObject(m_dosTrailer.registrationKey), key.getKey());
+    key.packIntoBytes(afl::base::fromObject(m_dosTrailer.registrationKey));
 
     // Winplan half (mostly informative)
     if (m_features.contains(WinplanFeature)) {

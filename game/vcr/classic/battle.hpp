@@ -9,6 +9,7 @@
 #include "game/vcr/classic/types.hpp"
 #include "game/vcr/object.hpp"
 #include "game/vcr/score.hpp"
+#include "afl/base/optional.hpp"
 
 namespace game { namespace vcr { namespace classic {
 
@@ -50,7 +51,7 @@ namespace game { namespace vcr { namespace classic {
          */
 
         virtual size_t getNumObjects() const;
-        virtual Object* getObject(size_t slot, bool after);
+        virtual const Object* getObject(size_t slot, bool after) const;
         virtual int getOutcome(const game::config::HostConfiguration& config,
                                const game::spec::ShipList& shipList,
                                size_t slot);
@@ -61,6 +62,7 @@ namespace game { namespace vcr { namespace classic {
                                    int resultLevel);
         virtual String_t getAlgorithmName(afl::string::Translator& tx) const;
         virtual bool isESBActive(const game::config::HostConfiguration& config) const;
+        virtual bool getPosition(game::map::Point& result) const;
 
         /*
          *  Additional methods
@@ -73,6 +75,10 @@ namespace game { namespace vcr { namespace classic {
 
         /** Get battle type. */
         Type getType() const;
+
+        /** Set position.
+            \param pos Position */
+        void setPosition(game::map::Point pos);
 
         /** Get capabilities. */
         uint16_t getCapabilities() const;
@@ -160,6 +166,8 @@ namespace game { namespace vcr { namespace classic {
         BattleResult_t m_result;
         Type m_type;
         uint16_t m_capabilities;
+
+        afl::base::Optional<game::map::Point> m_position;
     };
 
 } } }

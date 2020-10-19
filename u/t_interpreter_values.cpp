@@ -7,6 +7,7 @@
 #include "interpreter/values.hpp"
 
 #include "t_interpreter.hpp"
+#include "afl/charset/utf8.hpp"
 #include "afl/data/booleanvalue.hpp"
 #include "afl/data/errorvalue.hpp"
 #include "afl/data/floatvalue.hpp"
@@ -17,9 +18,10 @@
 #include "afl/data/vector.hpp"
 #include "afl/data/vectorvalue.hpp"
 #include "afl/data/visitor.hpp"
+#include "game/types.hpp"
 #include "interpreter/basevalue.hpp"
 #include "interpreter/error.hpp"
-#include "game/types.hpp"
+#include "interpreter/tokenizer.hpp"
 
 /** Test toString for strings. */
 void
@@ -271,5 +273,53 @@ TestInterpreterValues::testMake()
 
     p.reset(new afl::data::VectorValue(afl::data::Vector::create()));
     TS_ASSERT_EQUALS(interpreter::getBooleanValue(p.get()), 1);
-    
 }
+
+/** Test some hardcoded quoteString() values. */
+void
+TestInterpreterValues::testQuoteString()
+{
+    // Preference for double-quotes
+    TS_ASSERT_EQUALS(interpreter::quoteString(""), "\"\"");
+    TS_ASSERT_EQUALS(interpreter::quoteString("a"), "\"a\"");
+
+    // Preference for not using backslashes
+    TS_ASSERT_EQUALS(interpreter::quoteString("\""), "'\"'");
+
+    // Backslash if needed
+    TS_ASSERT_EQUALS(interpreter::quoteString("\"a'"), "\"\\\"a'\"");
+}
+
+/** Test quoteString() round-trip compatibility for parsing. */
+void
+TestInterpreterValues::testQuoteStringParse()
+{
+    for (afl::charset::Unichar_t ch = 0; ch < 500; ++ch) {
+        // String with one unicode character
+        String_t s;
+        afl::charset::Utf8().append(s, ch);
+
+        // Format it
+        String_t formatted = interpreter::quoteString(s);
+
+        // Read it again
+        interpreter::Tokenizer tok(formatted);
+        TS_ASSERT_EQUALS(tok.getCurrentToken(), interpreter::Tokenizer::tString);
+        TS_ASSERT_EQUALS(tok.getCurrentString(), s);
+
+        TS_ASSERT_EQUALS(tok.readNextToken(), interpreter::Tokenizer::tEnd);
+    }
+}
+
+/** Test formatFloat(). */
+void
+TestInterpreterValues::testFormatFloat()
+{
+    TS_ASSERT_EQUALS(interpreter::formatFloat(1.0), "1");
+    TS_ASSERT_EQUALS(interpreter::formatFloat(2.5), "2.5");
+    TS_ASSERT_EQUALS(interpreter::formatFloat(1e10), "10000000000");
+
+    TS_ASSERT_EQUALS(interpreter::formatFloat(0.125), "0.125");
+    TS_ASSERT_EQUALS(interpreter::formatFloat(-0.125), "-0.125");
+}
+

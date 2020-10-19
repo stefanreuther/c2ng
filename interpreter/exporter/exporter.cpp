@@ -1,12 +1,13 @@
 /**
   *  \file interpreter/exporter/exporter.cpp
+  *  \brief Base class interpreter::exporter::Exporter
   */
 
 #include "interpreter/exporter/exporter.hpp"
-#include "interpreter/propertyacceptor.hpp"
-#include "interpreter/error.hpp"
 #include "game/map/object.hpp"
+#include "interpreter/error.hpp"
 #include "interpreter/exporter/fieldlist.hpp"
+#include "interpreter/propertyacceptor.hpp"
 
 interpreter::exporter::Exporter::Exporter()
 { }
@@ -14,22 +15,14 @@ interpreter::exporter::Exporter::Exporter()
 interpreter::exporter::Exporter::~Exporter()
 { }
 
-/** Export a field set.
-    \param ctx Context to export. Must have objects.
-    \param filter Output filter. Will be called with the object Id as questionId to
-                  permit/reject export of an object.
-    \param fields List of fields to export.
-
-    \throw IntError on error
-    \throw GError on error
-
-    Modelled after export.pas::DoExport. */
 void
-interpreter::exporter::Exporter::doExport(Context* ctx, util::AnswerProvider& filter, const FieldList& fields)
+interpreter::exporter::Exporter::doExport(Context& ctx, util::AnswerProvider& filter, const FieldList& fields)
 {
     // ex IntExporter::doExport
+    // ex export.pas:DoExport (sans GUI)
 
     // Populate type hints
+    // ex export.pas:CompleteFieldList
     struct TypeHintCollector : public PropertyAcceptor {
         const FieldList& fields;
         std::vector<TypeHint> typeHints;
@@ -51,7 +44,7 @@ interpreter::exporter::Exporter::doExport(Context* ctx, util::AnswerProvider& fi
             }
     };
     TypeHintCollector thc(fields);
-    ctx->enumProperties(thc);
+    ctx.enumProperties(thc);
 
     // Anything missing?
     for (FieldList::Index_t i = 0; i < fields.size(); ++i) {
@@ -64,7 +57,7 @@ interpreter::exporter::Exporter::doExport(Context* ctx, util::AnswerProvider& fi
     startTable(fields, thc.typeHints);
     do {
         // Filter objects as requested
-        game::map::Object* obj = ctx->getObject();
+        game::map::Object* obj = ctx.getObject();
         // FIXME: PCC2/c2ng change: PCC2 would use the object's name in filter.ask.
         bool use;
         if (obj == 0) {
@@ -88,7 +81,7 @@ interpreter::exporter::Exporter::doExport(Context* ctx, util::AnswerProvider& fi
                 std::auto_ptr<afl::data::Value> value;
                 try {
                     Context::PropertyIndex_t adr;
-                    if (Context* foundContext = ctx->lookup(fields.getFieldName(i), adr)) {
+                    if (Context* foundContext = ctx.lookup(fields.getFieldName(i), adr)) {
                         value.reset(foundContext->get(adr));
                     }
                 }
@@ -98,6 +91,6 @@ interpreter::exporter::Exporter::doExport(Context* ctx, util::AnswerProvider& fi
             }
             endRecord();
         }
-    } while (ctx->next());
+    } while (ctx.next());
     endTable();
 }

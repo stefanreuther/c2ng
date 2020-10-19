@@ -1,43 +1,11 @@
 /**
   *  \file game/map/ufo.cpp
-  *
-  *  PCC2 Comment:
-  *
-  *  Ufo loading mechanism: the most important thing Ufos are used for
-  *  wormholes. We handle these specially. Other than that, UFO.HST
-  *  Ufos and PHost's General Objects (GOs) all end up here. We ought
-  *  to identify an object by its Id/Type-Code combination as we
-  *  cannot assume that all add-ons that generate GOs coordinate on an
-  *  Id range. This isn't yet implemented, though, making PCC2 behave
-  *  identical to PCC 1.x. In any case, Ufos with an Id in the range
-  *  of 1..1000 need not have the same type code, and multiple Ufos
-  *  with the same Id/Type are not supported either.
-  *
-  *  For Ufos and GOs, merging is trivial. We assume both data sources
-  *  contain equivalent information; the last seen instance survives.
-  *
-  *  For wormholes, we have three possible sources:
-  *  - the Ufo from KORE.DAT
-  *  - the UTIL.DAT entry
-  *  - the WORMHOLE.TXT file
-  *  Unfortunately, there is no 1:1 mapping between wormhole Ids and
-  *  Ufo Ids (each WH consumes two WH Id slots, but whereas a
-  *  bidirectional WH consumes two Ufo slots, an unidirectional one
-  *  consumes only one). We therefore queue all UTIL.DAT wormholes
-  *  first, and merge them later upon postprocess() time. In the
-  *  single player case, we can simply match the Ufo and wormhole
-  *  sequences: if KORE.DAT contains Ufos 51,53,54, and UTIL.DAT
-  *  contains Ufos 0,6,7, we can therefore derive the mapping. It's a
-  *  little harder if we have multiple players with different
-  *  registration status.
-  *
-  *  Finally, WORMHOLE.TXT can be used to "fill in the blanks", mainly
-  *  intended to be used in games where wormholes are static and known
-  *  to everyone in the game.
+  *  \brief Class game::map::Ufo
   */
 
 #include "game/map/ufo.hpp"
 #include "afl/string/format.hpp"
+#include "game/map/configuration.hpp"
 #include "util/math.hpp"
 
 game::map::Ufo::Ufo(Id_t id)
@@ -99,7 +67,6 @@ game::map::Ufo::getOwner(int& result) const
     return true;
 }
 
-// MapObject:
 bool
 game::map::Ufo::getPosition(Point& result) const
 {
@@ -338,6 +305,7 @@ game::map::Ufo::getLastTurn() const
 void
 game::map::Ufo::setLastTurn(int n)
 {
+    // FIXME: needed?
     if (m_turnLastSeen != n) {
         m_turnLastSeen = n;
         markDirty();
@@ -396,7 +364,7 @@ game::map::Ufo::getOtherEnd() const
 void
 game::map::Ufo::addMessageInformation(const game::parser::MessageInformation& info)
 {
-    // ex GUfo::addHistoryData (sort-of)
+    // ex GUfo::addHistoryData (sort-of), GUfo::addWormholeData, GUfo::addObjectData
     namespace gp = game::parser;
     assert(info.getObjectId() == m_id);
     if (info.getTurnNumber() >= m_turnLastSeen) {
@@ -462,21 +430,32 @@ game::map::Ufo::addMessageInformation(const game::parser::MessageInformation& in
     }
 }
 
-// /** Postprocess after loading. */
 void
-game::map::Ufo::postprocess(int turn)
+game::map::Ufo::postprocess(int turn, const Configuration& mapConfig)
 {
-    // ex GUfo::postprocess
+    // ex GUfo::postprocess, ccmain.pas:UpdateUfoMemory
     if (!isSeenThisTurn() && m_turnLastSeen > 0) {
         // Ufo from database, not seen this turn. Estimate movement.
-        m_position = Point(m_posLastSeen.getX() + m_movementVector.getX() * (turn - m_turnLastSeen),
-                           m_posLastSeen.getY() + m_movementVector.getY() * (turn - m_turnLastSeen));
+        m_position = mapConfig.getCanonicalLocation(Point(m_posLastSeen.getX() + m_movementVector.getX() * (turn - m_turnLastSeen),
+                                                          m_posLastSeen.getY() + m_movementVector.getY() * (turn - m_turnLastSeen)));
     }
     if (isSeenThisTurn() && m_turnLastSeen < turn) {
         // Ufo was seen, and previous sighting was earlier.
         m_turnLastSeen = turn;
         m_posLastSeen = m_position;
     }
+
+    // FIXME: PCC 1.x translates between speed and heading here.
+    // Problem is that the guessed values will get stuck and turn off guessing next turn when we may have better data.
+    // IF (pu^.speed=0) AND (pu^.Heading<0) AND (pu^.movex OR pu^.movey<>0) THEN BEGIN
+    //   { Ufo moves. Fill in speed and heading. }
+    //   pu^.Heading := Round(ArcTan2(pu^.movex, pu^.movey));
+    //   pu^.Speed := Round(Sqrt(Sqr(LONGINT(pu^.movex)) + Sqr(LONGINT(pu^.movey))));
+    // END ELSE
+    // IF (pu^.speed>0) AND (pu^.speed<=22) AND (pu^.Heading>=0) THEN BEGIN
+    //   pu^.movex := Round(Sin(pu^.Heading * (pi/180)) * Sqr(pu^.speed));
+    //   pu^.movey := Round(Cos(pu^.Heading * (pi/180)) * Sqr(pu^.speed));
+    // END;
 }
 
 bool

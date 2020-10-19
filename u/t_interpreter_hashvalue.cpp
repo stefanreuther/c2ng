@@ -51,6 +51,8 @@ TestInterpreterHashValue::testEmpty()
         std::auto_ptr<afl::data::Value> v(testee.get(args));
         TS_ASSERT(v.get() == 0);
     }
+
+    // FIXME: test argument count mismatch
 }
 
 /** Test basic operations on unit (one-element) hash. */

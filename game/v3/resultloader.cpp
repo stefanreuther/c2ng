@@ -11,6 +11,7 @@
 #include "afl/io/filesystem.hpp"
 #include "afl/io/stream.hpp"
 #include "afl/string/format.hpp"
+#include "game/actions/preconditions.hpp"
 #include "game/config/stringoption.hpp"
 #include "game/config/userconfiguration.hpp"
 #include "game/db/fleetloader.hpp"
@@ -72,7 +73,7 @@ namespace {
                 // the rest is a message.
                 return s + text;
             }
-            if (game::v3::Command* cmd = game::v3::Command::parseCommand(now, false)) {
+            if (game::v3::Command* cmd = game::v3::Command::parseCommand(now, false, false)) {
                 game::v3::CommandExtra::create(trn).create(player).addNewCommand(cmd);
             } else {
                 s += now;
@@ -177,7 +178,7 @@ game::v3::ResultLoader::loadCurrentTurn(Turn& turn, Game& game, int player, game
     game::db::FleetLoader(*m_charset).load(root.gameDirectory(), turn.universe(), player);
 
     // Util
-    Parser mp(m_translator, m_log, game, player, root, session);
+    Parser mp(m_translator, m_log, game, player, root, game::actions::mustHaveShipList(session));
     {
         Ptr<Stream> file = root.gameDirectory().openFileNT(Format("util%d.dat", player), afl::io::FileSystem::OpenRead);
         if (file.get() != 0) {
@@ -198,7 +199,7 @@ game::v3::ResultLoader::loadCurrentTurn(Turn& turn, Game& game, int player, game
 }
 
 void
-game::v3::ResultLoader::saveCurrentTurn(Turn& turn, Game& game, int player, Root& root, Session& session)
+game::v3::ResultLoader::saveCurrentTurn(const Turn& turn, const Game& game, int player, const Root& root, Session& session)
 {
     // ex saveTurns
     // FIXME: saveTurns took a PlayerSet
@@ -216,7 +217,7 @@ game::v3::ResultLoader::saveCurrentTurn(Turn& turn, Game& game, int player, Root
         checkAssertion(rev != 0, "Reverter exists", LOCATION);
 
         // Obtain key
-        const RegistrationKey* key = dynamic_cast<RegistrationKey*>(&root.registrationKey());
+        const RegistrationKey* key = dynamic_cast<const RegistrationKey*>(&root.registrationKey());
         checkAssertion(key != 0, "Key exists", LOCATION);
 
         thisTurn.setFeatures(TurnFile::FeatureSet_t(TurnFile::WinplanFeature));
@@ -291,7 +292,7 @@ game::v3::ResultLoader::saveCurrentTurn(Turn& turn, Game& game, int player, Root
                 String_t accum;
                 for (CommandContainer::ConstIterator_t i = cc->begin(); i != cc->end(); ++i) {
                     if (const Command* pc = *i) {
-                        if (pc->getCommand() == Command::phc_TAlliance) {
+                        if (pc->getCommand() == Command::TAlliance) {
                             if (pAllianceShip == 0) {
                                 m_log.write(m_log.Warn, LOG_NAME, Format(m_translator("Player %d has no ship; alliance changes not transmitted"), player));
                             } else {
@@ -546,7 +547,7 @@ game::v3::ResultLoader::loadTurnfile(Turn& trn, Root& root, afl::io::Stream& fil
             }
 
         virtual void addAllianceCommand(String_t text)
-            { CommandExtra::create(m_turn).create(m_player).addCommand(Command::phc_TAlliance, 0, text); }
+            { CommandExtra::create(m_turn).create(m_player).addCommand(Command::TAlliance, 0, text); }
      private:
         Turn& m_turn;
         Root& m_root;

@@ -43,7 +43,7 @@ game::actions::BaseFixRecycle::getValidActions(const game::map::Ship& sh) const
         // Different owner.
         // FIXME: this should have actual host rules.
         // PHost: allows Fix to allies
-        // THost: allows everything to everyone up to a certain version, only to owner from then
+        // THost: allows everything to everyone up to a 3.22.23, only to owner from then
         result += FixShipyardAction;
     }
     return result;

@@ -1,18 +1,16 @@
 /**
   *  \file game/playerbitmatrix.cpp
+  *  \brief Class game::PlayerBitMatrix
   */
 
 #include "game/playerbitmatrix.hpp"
 #include "afl/base/countof.hpp"
 
-/** Constructor. */
+// Constructor.
 game::PlayerBitMatrix::PlayerBitMatrix()
 { }
 
-/** Get one bit.
-    \param subj Subject
-    \param obj  Object
-    \return bit value; false if parameters are out of range. */
+// Get one bit.
 bool
 game::PlayerBitMatrix::get(int subj, int obj) const
 {
@@ -26,10 +24,7 @@ game::PlayerBitMatrix::get(int subj, int obj) const
     return m_data[subj-1].contains(obj);
 }
 
-/** Set one bit.
-    \param subj  Subject
-    \param obj   Object
-    \param value New value */
+// Set one bit.
 void
 game::PlayerBitMatrix::set(int subj, int obj, bool value)
 {
@@ -47,9 +42,7 @@ game::PlayerBitMatrix::set(int subj, int obj, bool value)
     }
 }
 
-/** Get one row.
-    \param subj Subject
-    \return set of all objects for this subject. */
+// Get one row.
 game::PlayerSet_t
 game::PlayerBitMatrix::getRow(int subj) const
 {
@@ -60,7 +53,7 @@ game::PlayerBitMatrix::getRow(int subj) const
     }
 }
 
-/** Clear this set. */
+// Clear this set.
 void
 game::PlayerBitMatrix::clear()
 {

@@ -8,14 +8,14 @@
 #include "client/map/callback.hpp"
 #include "client/map/location.hpp"
 #include "client/map/widget.hpp"
-#include "client/proxy/keymapproxy.hpp"
-#include "client/proxy/maplocationproxy.hpp"
-#include "client/proxy/referencelistproxy.hpp"
-#include "client/proxy/referenceobserverproxy.hpp"
 #include "client/si/control.hpp"
 #include "client/si/inputstate.hpp"
 #include "client/si/outputstate.hpp"
 #include "game/map/point.hpp"
+#include "game/proxy/keymapproxy.hpp"
+#include "game/proxy/maplocationproxy.hpp"
+#include "game/proxy/referencelistproxy.hpp"
+#include "game/proxy/referenceobserverproxy.hpp"
 #include "game/session.hpp"
 #include "ui/group.hpp"
 #include "ui/widget.hpp"
@@ -30,7 +30,7 @@ namespace client { namespace map {
     class Screen : public ui::Widget,
                    public client::si::Control,
                    private Location::Listener,
-                   private client::proxy::KeymapProxy::Listener,
+                   private game::proxy::KeymapProxy::Listener,
                    private gfx::ColorScheme<util::SkinColor::Color>
     {
      public:
@@ -102,10 +102,10 @@ namespace client { namespace map {
         Location m_location;
         int m_locationCycleBreaker;
 
-        client::proxy::MapLocationProxy m_locationProxy;
-        client::proxy::ReferenceListProxy m_refListProxy;
-        client::proxy::KeymapProxy m_keymapProxy;
-        client::proxy::ReferenceObserverProxy m_observerProxy;
+        game::proxy::MapLocationProxy m_locationProxy;
+        game::proxy::ReferenceListProxy m_refListProxy;
+        game::proxy::KeymapProxy m_keymapProxy;
+        game::proxy::ReferenceObserverProxy m_observerProxy;
 
         util::SlaveRequestSender<game::Session, Properties> m_propertyProxy;
 

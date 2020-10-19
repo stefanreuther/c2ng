@@ -158,6 +158,23 @@ class TestServerInterfaceHostHistoryServer : public CxxTest::TestSuite {
     void testRoundtrip();
 };
 
+class TestServerInterfaceHostKey : public CxxTest::TestSuite {
+ public:
+    void testInterface();
+};
+
+class TestServerInterfaceHostKeyClient : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
+class TestServerInterfaceHostKeyServer : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testErrors();
+    void testRoundtrip();
+};
+
 class TestServerInterfaceHostPlayer : public CxxTest::TestSuite {
  public:
     void testInterface();

@@ -35,6 +35,7 @@ namespace server { namespace file {
             bool isRegistered;
             String_t label1;
             String_t label2;
+            String_t keyId;
         };
 
         GameStatus();

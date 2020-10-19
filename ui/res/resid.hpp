@@ -10,6 +10,12 @@
   *  If no resource provider provides this exact identifier, it is generalized by leaving out components,
   *  producing "ship.153" and "ship".
   *
+  *  We allow any number of components.
+  *
+  *  Resource Ids are used only internally.
+  *  A possible "use this URL for this unit" mapping happens in the resource providers.
+  *  This allows creators of resource Ids to create related resource Ids by using different prefixes.
+  *
   *  \change PCC2 makes a class for resource identifiers and hardcodes the structure (string + 2 ints),
   *  making dealing with them a little more cumbersome.
   *  PCC2's print representation looks a little different, too ("ship153_105").
@@ -19,7 +25,8 @@
 
 #include "afl/string/string.hpp"
 
-/** Macro to mark resource Ids for easy searching. */
+/** Macro to mark resource Ids for easy searching.
+    Mark every string or format string that eventually ends up in a resource request with this macro. */
 #define RESOURCE_ID(x) x
 
 namespace ui { namespace res {

@@ -12,12 +12,17 @@ class TestGameAuthCache : public CxxTest::TestSuite {
     void testIt();
     void testMulti();
     void testFail();
+    void testClear();
 };
 
 class TestGameBattleOrderRule : public CxxTest::TestSuite {
  public:
     void testGetShipBattleOrder();
     void testGetPlanetBattleOrder();
+    void testGameShip();
+    void testGamePlanet();
+    void testSimShip();
+    void testSimPlanet();
 };
 
 class TestGameCargoContainer : public CxxTest::TestSuite {
@@ -80,6 +85,12 @@ class TestGameExtraIdentifier : public CxxTest::TestSuite {
 class TestGameGame : public CxxTest::TestSuite {
  public:
     void testRef();
+    void testInit();
+    void testSubobjects();
+    void testViewpointTurn();
+    void testAlliances();
+    void testMessageAlliance();
+    void testMessageConfig();
 };
 
 class TestGameHistoryTurn : public CxxTest::TestSuite {
@@ -93,6 +104,8 @@ class TestGameHistoryTurnList : public CxxTest::TestSuite {
  public:
     void testIt();
     void testGap();
+    void testUnknown();
+    void testInitFromTurnScores();
 };
 
 class TestGameHostVersion : public CxxTest::TestSuite {
@@ -102,6 +115,7 @@ class TestGameHostVersion : public CxxTest::TestSuite {
     void testVersion();
     void testProperties();
     void testSetImpliedHostConfiguration();
+    void testSetImpliedHostConfigurationMine();
 };
 
 class TestGameInterpreterInterface : public CxxTest::TestSuite {
@@ -125,6 +139,8 @@ class TestGamePlayer : public CxxTest::TestSuite {
 class TestGamePlayerArray : public CxxTest::TestSuite {
  public:
     void testArray();
+    void testInit();
+    void testPointer();
 };
 
 class TestGamePlayerBitMatrix : public CxxTest::TestSuite {
@@ -148,6 +164,12 @@ class TestGamePlayerSet : public CxxTest::TestSuite {
     void testFormatPlayerHostSet();
 };
 
+class TestGameReference : public CxxTest::TestSuite {
+ public:
+    void testAccessor();
+    void testToString();
+};
+
 class TestGameRegistrationKey : public CxxTest::TestSuite {
  public:
     void testIt();
@@ -164,6 +186,17 @@ class TestGameSearchQuery : public CxxTest::TestSuite {
     void testErrors();
     void testLocation();
     void testAccessor();
+    void testFormat();
+    void testCompile();
+};
+
+class TestGameSession : public CxxTest::TestSuite {
+ public:
+    void testInit();
+    void testSubobjects();
+    void testReferenceNameEmpty();
+    void testReferenceNameNonempty();
+    void testInterpreterInterface();
 };
 
 class TestGameShipBuildOrder : public CxxTest::TestSuite {
@@ -171,6 +204,12 @@ class TestGameShipBuildOrder : public CxxTest::TestSuite {
     void testIt();
     void testComparison();
     void testCanonicalize();
+};
+
+class TestGameShipQuery : public CxxTest::TestSuite {
+ public:
+    void testInit();
+    void testInitForExistingShip();
 };
 
 class TestGameSpecificationLoader : public CxxTest::TestSuite {
@@ -181,6 +220,7 @@ class TestGameSpecificationLoader : public CxxTest::TestSuite {
 class TestGameStringVerifier : public CxxTest::TestSuite {
  public:
     void testIt();
+    void testDefaultIsValidString();
 };
 
 class TestGameTeamSettings : public CxxTest::TestSuite {

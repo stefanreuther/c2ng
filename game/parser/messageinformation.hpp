@@ -35,6 +35,7 @@ namespace game { namespace parser {
             Minefield,           ///< Target is minefield given by Id.
             IonStorm,            ///< Target is ion storm given by Id.
             Ufo,                 ///< Target is Ufo given by Id.
+            Wormhole,            ///< Target is Wormhole given by Id.
             Explosion,           ///< This message contains an explosion.
             Configuration,       ///< This message contains configuration information.
             PlayerScore,         ///< This message contains player scores. Id is optional and gives the util.dat score Id.

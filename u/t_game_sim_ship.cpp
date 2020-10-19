@@ -9,6 +9,7 @@
 #include "afl/string/nulltranslator.hpp"
 #include "game/spec/shiplist.hpp"
 #include "game/spec/hull.hpp"
+#include "game/sim/configuration.hpp"
 
 /** Test getter/setter. */
 void
@@ -149,6 +150,9 @@ TestGameSimShip::testShipList()
     for (int i = 1; i <= 7; ++i) {
         list.launchers().create(i);
     }
+    for (int i = 1; i <= 7; ++i) {
+        list.engines().create(i);
+    }
 
     // Test
     game::sim::Ship testee;
@@ -186,6 +190,7 @@ TestGameSimShip::testShipList()
     TS_ASSERT(testee.isMatchingShipList(list));
 
     testee.setTorpedoType(0);
+    testee.setNumLaunchers(0);
     testee.setNumBays(1);
     TS_ASSERT(!testee.isMatchingShipList(list));
     testee.setNumBays(0);
@@ -244,6 +249,11 @@ TestGameSimShip::testAbilities()
 
     // Configuration
     game::config::HostConfiguration config;
+    game::sim::Configuration opts;
+
+    game::sim::Configuration nuOpts;
+    game::TeamSettings team;
+    nuOpts.setMode(game::sim::Configuration::VcrNuHost, team, config);
 
     // Test
     game::sim::Ship testee;
@@ -252,37 +262,54 @@ TestGameSimShip::testAbilities()
     // Player 1: FullWeaponry
     testee.setOwner(1);
     TS_ASSERT(!testee.hasAnyNonstandardAbility());
-    TS_ASSERT( testee.hasAbility(game::sim::FullWeaponryAbility,   list, config));
-    TS_ASSERT(!testee.hasAbility(game::sim::PlanetImmunityAbility, list, config));
-    TS_ASSERT(!testee.hasAbility(game::sim::TripleBeamKillAbility, list, config));
-    TS_ASSERT(!testee.hasAbility(game::sim::CommanderAbility,      list, config));
-    TS_ASSERT(!testee.hasAbility(game::sim::ElusiveAbility,        list, config));
+    TS_ASSERT( testee.hasAbility(game::sim::FullWeaponryAbility,   opts, list, config));
+    TS_ASSERT(!testee.hasAbility(game::sim::PlanetImmunityAbility, opts, list, config));
+    TS_ASSERT(!testee.hasAbility(game::sim::TripleBeamKillAbility, opts, list, config));
+    TS_ASSERT(!testee.hasAbility(game::sim::CommanderAbility,      opts, list, config));
+    TS_ASSERT(!testee.hasAbility(game::sim::ElusiveAbility,        opts, list, config));
 
     // Player 4: PlanetImmunity
     testee.setOwner(4);
     TS_ASSERT(!testee.hasAnyNonstandardAbility());
-    TS_ASSERT(!testee.hasAbility(game::sim::FullWeaponryAbility,   list, config));
-    TS_ASSERT( testee.hasAbility(game::sim::PlanetImmunityAbility, list, config));
-    TS_ASSERT(!testee.hasAbility(game::sim::TripleBeamKillAbility, list, config));
-    TS_ASSERT(!testee.hasAbility(game::sim::CommanderAbility,      list, config));
-    TS_ASSERT(!testee.hasAbility(game::sim::ElusiveAbility,        list, config));
+    TS_ASSERT(!testee.hasAbility(game::sim::FullWeaponryAbility,   opts, list, config));
+    TS_ASSERT( testee.hasAbility(game::sim::PlanetImmunityAbility, opts, list, config));
+    TS_ASSERT(!testee.hasAbility(game::sim::TripleBeamKillAbility, opts, list, config));
+    TS_ASSERT(!testee.hasAbility(game::sim::CommanderAbility,      opts, list, config));
+    TS_ASSERT(!testee.hasAbility(game::sim::ElusiveAbility,        opts, list, config));
+
+    TS_ASSERT(!testee.hasAbility(game::sim::DoubleBeamChargeAbility, opts, list, config));
+    TS_ASSERT( testee.hasAbility(game::sim::DoubleBeamChargeAbility, nuOpts, list, config));
 
     // Player 5: TripleBeamKill
     testee.setOwner(5);
     TS_ASSERT(!testee.hasAnyNonstandardAbility());
-    TS_ASSERT(!testee.hasAbility(game::sim::FullWeaponryAbility,   list, config));
-    TS_ASSERT(!testee.hasAbility(game::sim::PlanetImmunityAbility, list, config));
-    TS_ASSERT( testee.hasAbility(game::sim::TripleBeamKillAbility, list, config));
-    TS_ASSERT(!testee.hasAbility(game::sim::CommanderAbility,      list, config));
-    TS_ASSERT(!testee.hasAbility(game::sim::ElusiveAbility,        list, config));
+    TS_ASSERT(!testee.hasAbility(game::sim::FullWeaponryAbility,   opts, list, config));
+    TS_ASSERT(!testee.hasAbility(game::sim::PlanetImmunityAbility, opts, list, config));
+    TS_ASSERT( testee.hasAbility(game::sim::TripleBeamKillAbility, opts, list, config));
+    TS_ASSERT(!testee.hasAbility(game::sim::CommanderAbility,      opts, list, config));
+    TS_ASSERT(!testee.hasAbility(game::sim::ElusiveAbility,        opts, list, config));
 
     // Player 9: Commander
     testee.setOwner(9);
     TS_ASSERT(!testee.hasAnyNonstandardAbility());
-    TS_ASSERT(!testee.hasAbility(game::sim::FullWeaponryAbility,   list, config));
-    TS_ASSERT(!testee.hasAbility(game::sim::PlanetImmunityAbility, list, config));
-    TS_ASSERT(!testee.hasAbility(game::sim::TripleBeamKillAbility, list, config));
-    TS_ASSERT( testee.hasAbility(game::sim::CommanderAbility,      list, config));
-    TS_ASSERT(!testee.hasAbility(game::sim::ElusiveAbility,        list, config));
+    TS_ASSERT(!testee.hasAbility(game::sim::FullWeaponryAbility,   opts, list, config));
+    TS_ASSERT(!testee.hasAbility(game::sim::PlanetImmunityAbility, opts, list, config));
+    TS_ASSERT(!testee.hasAbility(game::sim::TripleBeamKillAbility, opts, list, config));
+    TS_ASSERT( testee.hasAbility(game::sim::CommanderAbility,      opts, list, config));
+    TS_ASSERT(!testee.hasAbility(game::sim::ElusiveAbility,        opts, list, config));
+}
+
+void
+TestGameSimShip::testAggressive()
+{
+    using game::sim::Ship;
+    TS_ASSERT_EQUALS(Ship::isPrimaryEnemy(0), false);
+    TS_ASSERT_EQUALS(Ship::isPrimaryEnemy(Ship::agg_Kill), false);
+    TS_ASSERT_EQUALS(Ship::isPrimaryEnemy(Ship::agg_NoFuel), false);
+    TS_ASSERT_EQUALS(Ship::isPrimaryEnemy(Ship::agg_Passive), false);
+
+    TS_ASSERT_EQUALS(Ship::isPrimaryEnemy(1), true);
+    TS_ASSERT_EQUALS(Ship::isPrimaryEnemy(11), true);
+    TS_ASSERT_EQUALS(Ship::isPrimaryEnemy(12), true);
 }
 

@@ -1,5 +1,6 @@
 /**
   *  \file util/syntax/factory.cpp
+  *  \brief Class util::syntax::Factory
   */
 
 #include "util/syntax/factory.hpp"
@@ -10,11 +11,12 @@
 #include "util/syntax/pascalhighlighter.hpp"
 #include "util/syntax/scripthighlighter.hpp"
 
-util::syntax::Factory::Factory(KeywordTable& tab)
+// Constructor.
+util::syntax::Factory::Factory(const KeywordTable& tab)
     : m_table(tab)
 { }
 
-// /** Create a syntax highlighter, given a language/file name hint. */
+// Create highlighter.
 util::syntax::Highlighter&
 util::syntax::Factory::create(String_t name, afl::base::Deleter& del)
 {

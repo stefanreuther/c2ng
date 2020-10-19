@@ -585,7 +585,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
            If the ship is at a planet, returns that planet's name and Id.
            In deep space, returns an (X,Y) pair. */
         if (sh.isVisible() && sh.getPosition(pt)) {
-            return makeStringValue(turn->universe().getLocationName(pt, 0, root->hostConfiguration(), root->hostVersion(), tx, iface));
+            return makeStringValue(turn->universe().getLocationName(pt, 0, root->hostConfiguration(), root->hostVersion(), tx));
         } else {
             return 0;
         }
@@ -682,7 +682,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
            @assignable
            @see SetName (Ship Command) */
         if (sh.isVisible()) {
-            return makeStringValue(sh.getName(PlainName, tx, iface));
+            return makeStringValue(sh.getName());
         } else {
             return 0;
         }
@@ -690,7 +690,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
         /* @q Orbit$:Int (Ship Property)
            Id of planet this ship is orbiting. 0 if none. */
         if (sh.getPosition(pt)) {
-            return makeIntegerValue(turn->universe().getPlanetAt(pt));
+            return makeIntegerValue(turn->universe().findPlanetAt(pt));
         } else {
             return 0;
         }
@@ -698,9 +698,9 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
         /* @q Orbit:Str (Ship Property)
            Name of planet this ship is orbiting. EMPTY if none. */
         if (sh.getPosition(pt)) {
-            if (const Id_t pid = turn->universe().getPlanetAt(pt)) {
+            if (const Id_t pid = turn->universe().findPlanetAt(pt)) {
                 if (const game::map::Planet* p = turn->universe().planets().get(pid)) {
-                    return makeStringValue(p->getName(PlainName, tx, iface));
+                    return makeStringValue(p->getName(tx));
                 }
             }
         }
@@ -792,7 +792,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
            Name of cargo transfer target ship. */
         if (sh.getTransporterTargetId(sh.TransferTransporter).get(n)) {
             if (const game::map::Ship* otherShip = turn->universe().ships().get(n)) {
-                return makeStringValue(otherShip->getName(PlainName, tx, iface));
+                return makeStringValue(otherShip->getName());
             }
         }
         return 0;
@@ -838,7 +838,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
                 return makeStringValue("Jettison");
             }
             if (const game::map::Planet* pl = turn->universe().planets().get(n)) {
-                return makeStringValue(pl->getName(PlainName, tx, iface));
+                return makeStringValue(pl->getName(tx));
             }
         }
         return 0;
@@ -902,7 +902,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
            Id of planet at waypoint.
            @see PlanetAt() */
         if (sh.getWaypoint().get(pt)) {
-            return makeIntegerValue(turn->universe().getPlanetAt(pt));
+            return makeIntegerValue(turn->universe().findPlanetAt(pt));
         } else {
             return 0;
         }
@@ -930,7 +930,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
             if (sh.getWaypointDX().isSame(0) && sh.getWaypointDY().isSame(0)) {
                 return makeStringValue("(Location)");
             } else {
-                return makeStringValue(turn->universe().getLocationName(pt, 0, root->hostConfiguration(), root->hostVersion(), tx, iface));
+                return makeStringValue(turn->universe().getLocationName(pt, 0, root->hostConfiguration(), root->hostVersion(), tx));
             }
         } else {
             return 0;
@@ -952,7 +952,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
 void
 game::interface::setShipProperty(game::map::Ship& sh, ShipProperty isp, afl::data::Value* value,
                                  Root& root,
-                                 game::spec::ShipList& shipList,
+                                 const game::spec::ShipList& shipList,
                                  Turn& turn)
 {
     // ex int/if/shipif.h:setShipProperty

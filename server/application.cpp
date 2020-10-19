@@ -8,7 +8,7 @@
 #include "afl/io/nulltextwriter.hpp"
 #include "afl/net/resp/client.hpp"
 #include "afl/string/format.hpp"
-#include "afl/sys/longcommandlineparser.hpp"
+#include "afl/sys/standardcommandlineparser.hpp"
 #include "afl/sys/thread.hpp"
 #include "server/configurationhandler.hpp"
 #include "server/interface/baseclient.hpp"
@@ -181,7 +181,7 @@ server::Application::reportError(String_t str)
 void
 server::Application::parseCommandLine(ConfigurationHandler& handler)
 {
-    afl::sys::LongCommandLineParser parser(environment().getCommandLine());
+    afl::sys::StandardCommandLineParser parser(environment().getCommandLine());
     bool option;
     String_t text;
     while (parser.getNext(option, text)) {

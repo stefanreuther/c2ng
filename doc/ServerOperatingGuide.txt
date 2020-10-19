@@ -1,0 +1,227 @@
+PLANETSCENTRAL OPERATING GUIDE (c2ng)
+*************************************
+
+
+Introduction
+============
+
+  This document describes how to set up and operate the PlanetsCentral
+  servers bundled with PCC2ng.
+
+  It is based on mail communication from May 2020.
+
+
+Overview
+========
+
+  PlanetsCentral consists of a series of cooperating microservices as
+  well as a web front-end. The c2ng source tree contains the
+  microservices. These can be used to build
+  - a VGAP host
+  - a forum
+  - a VGAP web client (PCC2 Web)
+  The c2ng source tree does NOT contain any parts of the user-facing
+  web frontend.
+
+  PlanetsCentral uses redis to store data. It is not very picky
+  regarding the version; I am using 2.2.5 which is pretty old by now.
+
+
+General
+-------
+
+  For an overview, see doc/PlanetsCentral_2019.svg (Inkscape SVG).
+  This shows the actual setup of the software behind
+  planetscentral.com. The numbers in the speech bubbles are port
+  numbers. The bold ones are externally visible and should be fixed.
+  The thin ones are internal, can be chosen by you, AND MUST NOT BE
+  VISIBLE TO EXTERNAL UNTRUSTED USERS. Connections between
+  microservices are NOT authenticated or secured in any way.
+
+  These microservices are NOT RESTful (yet). They follow a model of
+  IPC-callable library subroutines, i.e. there is a command to create
+  a game (GAMENEW), a command to get or set its name (GAMEGETNAME,
+  GAMESETNAME), etc. Permission checking is optional, a front-end
+  would have to tell the server to do permission checking.
+
+
+Configuration
+-------------
+
+  The preferred way is to make an ini file (mine is called
+  c2config.txt, see below), and point the environment variable
+  C2CONFIG to it. All programs will use that variable. The description
+  of all the possible values is in the source code (search for "@q"
+  markers). If you build with ENABLE_DOC=1, the build process will
+  spit out a file "pcc2tech.html" containing the documentation nicely
+  rendered and cross-linked. This file will also contain the
+  microservices' commands. For a start, you can take my config file
+  and adapt it.
+
+
+Preconditions
+-------------
+
+  The server software requires a (possibly virtualized) Linux
+  environment; although it will build on Windows, it will not work
+  there yet. Because connections between microservices are not
+  encrypted and authenticated, the system must not allow logins from
+  untrusted users.
+
+  Resource requirements:
+  - single core. The system does not benefit from more than one core.
+  - a few 100 MB RAM.
+  - a few gig disk space.
+  planetscentral.com runs on a VPS with 512 MB RAM, and currently
+  (with 50 games) occupies around 2 GB disk space.
+
+
+Talking to Servers
+------------------
+
+  The protocol format for most services (all but c2router) is RESP
+  (the same as redis). c2console offers a simple way to talk to
+  servers ('c2console <server> <command...>') and also includes a
+  simple whacky scripting language.
+
+  Servers have little resident state. You can almost always modify the
+  underlying storage (c2file, redis) directly. The storage formats are
+  documented in "pcc2tech.html".
+  - to reset c2file-server's internal caches, give it a 'forget <dir>'
+    command.
+  - to restart a game c2host-server considers broken, after fixing the
+    situation in redis/c2file, give it a 'cronkick <game>' command.
+  - to have c2host-server reconsider a game schedule, give it a
+    'schedulemod <game>' command.
+
+
+
+Step-by-Step Setup
+==================
+
+Starting Stuff
+--------------
+
+  You can start servers in any order. You can restart servers at any
+  time.
+
+    Footnote: c2host-server will probably break if you interrupt it in
+    the middle of a host run, c2file-server in CA mode (more on that
+    below) may accumulate garbage when restarted. Fixing both issues
+    is on my to-do list.
+
+  The servers are intended to run within c2logger.
+
+    c2logger $action -pid=c2user.pid -log=c2user.log c2user-server
+
+  So you just write a script with such a line for every server you
+  want, pass $action as nothing (start) '-restart' (stop+start) or
+  '-kill' (stop). Don't forget exporting the C2CONFIG variable first.
+
+
+Your First Server
+-----------------
+
+  To get your hands dirty, I recommend you to start with
+  c2format-server because it has no dependencies. Write a script that
+  just starts c2format-server.
+
+  Start it. Start c2console. Type 'format help'. This should give a
+  help message. Type 'format unpack beamspec </path/to/beamspec.dat'
+  to receive the beamspec file decoded.
+
+
+Redis + User Server
+-------------------
+
+  This one needs redis. When experimenting, it is helpful to have it
+  separate so you can at any time discard the data and start from
+  scratch. redis is pretty straightforward to set up, but of course
+  does not read c2config.txt so you need to write your own config
+  file. That aside, you can run redis-server within c2logger and thus
+  integrate it in your start script.
+
+  Start redis-server and c2user-server. If you set up redis correctly,
+  you can talk to it using c2console ('redis info' to get an info
+  dump). If you set up c2user correctly, you can get a help screen in
+  c2console with 'user help'.
+
+  Do
+      cd /path/to/c2ng-source/server/scripts
+      c2console <init_user.con
+  to fill the user management branch with some initial data.
+
+  Now, you can create your first user: in c2console, enter 'user
+  adduser USERNAME PASSWORD'. It should answer with '1001', which is
+  the user Id. 'user lookup USERNAME' will now return 1001, 'user name
+  1001' will return the user name.
+
+
+File Server
+-----------
+
+  There's two file server instances in my diagram. The first one is
+  started just as 'c2file-server', the second one is 'c2file-server
+  --instance=hostfile'. In theory, you can get away with only one
+  (configure HostFile.Port the same as File.Port, and start just one
+  instance) but I haven't tried that yet. c2file has no dependencies
+  other than it needs a place to store its files.
+
+  There's two modes of operation, content-addressable (CA) mode and
+  normal mode. Normal mode just stores files 1:1 within a directory.
+  If you configured your filer with HostFile.BaseDir=/srv/host, and
+  someone places a file games/0001/data/ship.hst in that filespace,
+  you'll get a file /srv/host/games/0001/data/ship.hst. That's easy to
+  debug and to get started. In CA mode, files are stored in a bare git
+  repository; a small design document is in doc/FileServer.txt.
+  Content-adressable = the content determines where it is stored, so
+  this one has automatic deduplication. You'll want that when you have
+  more data. To use this, configure the root as ca:/path/to/folder.
+
+  Anyway, start your filer(s), play with them using c2console, place
+  initial content in them with
+     c2console <init_userfile.con
+     c2console <init_host.con
+
+
+Host Server
+-----------
+
+  c2host needs access to both file instances and mailout (the
+  connection to talk and router are optional although I haven't tested
+  that very thoroughly). c2mailout-server needs a valid SMTP
+  connection (e.g. to the system's sendmail). If you start it with the
+  parameter '-notx' it will only queue mail internally and not talk to
+  the outside; try that for testing. Emptying the redis storage will
+  drop the queue. Likewise, start c2host-server with '-nocron' to
+  disable the host scheduler.
+
+  If you set up everything correctly, you can talk to your host server
+  using 'c2console host help' or similar.
+
+  FIXME: link to pcc-programs archive
+
+  The c2ng source code comes with two scripts to create games,
+  upload_game.con (upload files to run master on) or make_ns.con (make
+  a 'North Star' game) which need to be run after installing the
+  above.
+
+
+Front-End
+---------
+
+  There is not (yet) any part of a front-end in this source code, you
+  need to build that yourself.
+
+  The minimum possible setup is a mail-only headless setup:
+
+  - set up procmail/fetchmail or any other mail program to receive
+    mail to your host mailbox, and feed that one-by-one into c2mailin.
+
+  - set up users manually using the console
+         user adduser <user> <pass> email <email@address>
+         # --> produces userid
+         redis hset email:<email@address>:status status/<userid> c
+    (if you do not set the email address status, c2mailout will send a
+    confirmation request first that would need a web page to be
+    answered.)

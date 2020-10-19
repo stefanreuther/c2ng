@@ -1,5 +1,6 @@
 /**
   *  \file util/syntax/nullhighlighter.hpp
+  *  \brief Class util::syntax::NullHighlighter
   */
 #ifndef C2NG_UTIL_SYNTAX_NULLHIGHLIGHTER_HPP
 #define C2NG_UTIL_SYNTAX_NULLHIGHLIGHTER_HPP
@@ -8,6 +9,8 @@
 
 namespace util { namespace syntax {
 
+    /** Null highlighter.
+        Returns the entire string as one DefaultFormat chunk. */
     class NullHighlighter : public Highlighter {
      public:
         NullHighlighter();

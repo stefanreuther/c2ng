@@ -143,7 +143,7 @@ namespace game {
         const RegistrationKey& registrationKey() const;
 
         /** Access string verifier. */
-        StringVerifier& stringVerifier();
+        const StringVerifier& stringVerifier() const;
 
         /** Set turn loader. */
         void setTurnLoader(afl::base::Ptr<TurnLoader> turnLoader);

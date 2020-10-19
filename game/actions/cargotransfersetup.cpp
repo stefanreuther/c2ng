@@ -180,7 +180,7 @@ game::actions::CargoTransferSetup::fromShipJettison(const game::map::Universe& u
     }
 
     // Validate position: must be in deep space
-    if (univ.getPlanetAt(shipPos) != 0) {
+    if (univ.findPlanetAt(shipPos) != 0) {
         return CargoTransferSetup();
     }
 
@@ -205,7 +205,7 @@ game::actions::CargoTransferSetup::fromShipBeamUp(const game::Turn& turn, int sh
     }
 
     // Validate position: there must be a planet
-    Id_t planetId = univ.getPlanetAt(shipPos);
+    Id_t planetId = univ.findPlanetAt(shipPos);
     if (planetId == 0) {
         return CargoTransferSetup();
     }
@@ -322,7 +322,6 @@ game::actions::CargoTransferSetup::cancelConflictingTransfer(game::map::Universe
 void
 game::actions::CargoTransferSetup::build(CargoTransfer& action,
                                          Turn& turn,
-                                         InterpreterInterface& iface,
                                          const game::config::HostConfiguration& config,
                                          const game::spec::ShipList& shipList,
                                          const game::HostVersion& version)
@@ -353,31 +352,31 @@ game::actions::CargoTransferSetup::build(CargoTransfer& action,
             throw Exception(Exception::ePerm);
 
          case UsePlanetStorage:
-            action.addNew(new game::map::PlanetStorage(getPlanet(univ, thisId), iface, config));
+            action.addNew(new game::map::PlanetStorage(getPlanet(univ, thisId), config));
             break;
 
          case UseShipStorage:
-            action.addNew(new game::map::ShipStorage(getShip(univ, thisId), iface, shipList));
+            action.addNew(new game::map::ShipStorage(getShip(univ, thisId), shipList));
             break;
 
          case UseOtherUnload:
-            action.addNew(new game::map::ShipTransporter(getShip(univ, otherId), Ship::UnloadTransporter, thisId, iface, univ, version));
+            action.addNew(new game::map::ShipTransporter(getShip(univ, otherId), Ship::UnloadTransporter, thisId, univ, version));
             break;
 
          case UseOtherTransfer:
-            action.addNew(new game::map::ShipTransporter(getShip(univ, otherId), Ship::TransferTransporter, thisId, iface, univ, version));
+            action.addNew(new game::map::ShipTransporter(getShip(univ, otherId), Ship::TransferTransporter, thisId, univ, version));
             break;
 
          case UseProxyTransfer:
-            action.addNew(new game::map::ShipTransporter(getShip(univ, m_ids[Proxy]), Ship::TransferTransporter, thisId, iface, univ, version));
+            action.addNew(new game::map::ShipTransporter(getShip(univ, m_ids[Proxy]), Ship::TransferTransporter, thisId, univ, version));
             break;
 
          case UseBeamUpShip:
-            action.addNew(new game::map::BeamUpShipTransfer(getShip(univ, thisId), iface, shipList, turn, config));
+            action.addNew(new game::map::BeamUpShipTransfer(getShip(univ, thisId), shipList, turn, config));
             break;
 
          case UseBeamUpPlanet:
-            action.addNew(new game::map::BeamUpPlanetTransfer(getPlanet(univ, thisId), getShip(univ, otherId), iface, turn, config));
+            action.addNew(new game::map::BeamUpPlanetTransfer(getPlanet(univ, thisId), getShip(univ, otherId), turn, config));
             break;
         }
     }

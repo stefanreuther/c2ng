@@ -66,6 +66,7 @@ void
 interpreter::exporter::DbfExporter::startTable(const FieldList& fields, afl::base::Memory<const TypeHint> types)
 {
     // ex IntDbfExporter::startTable
+    // ex CDbfExporter.InitOutput
 
     // Initialize and write dummy header
     m_recordSize = 1;   /* for deletion marker */
@@ -147,6 +148,7 @@ void
 interpreter::exporter::DbfExporter::startRecord()
 {
     // ex IntDbfExporter::startRecord
+    // ex CDbfExporter.StartRecord
     m_recordPosition = m_record;
     m_recordPosition.split(1).fill(' ');
     m_fieldNumber = 0;
@@ -156,6 +158,7 @@ void
 interpreter::exporter::DbfExporter::addField(afl::data::Value* value, const String_t& /*name*/, TypeHint type)
 {
     // ex IntDbfExporter::addField
+    // ex CDbfExporter.AddData
     if (type == thBool) {
         int bv = getBooleanValue(value);
         if (bv == 0) {
@@ -211,6 +214,8 @@ void
 interpreter::exporter::DbfExporter::endTable()
 {
     // ex IntDbfExporter::endTable()
+    // ex CDbfExporter.DoneOutput
+
     // Write one additional byte. My specs don't say this is needed,
     // but dbview.exe doesn't show the last record without it. This
     // may as well be a bug in dbview, but it doesn't hurt to have
@@ -220,7 +225,7 @@ interpreter::exporter::DbfExporter::endTable()
     writeFileHeader();
 }
 
-// /** Write dBASE file header. */
+/** Write dBASE file header. */
 void
 interpreter::exporter::DbfExporter::writeFileHeader()
 {

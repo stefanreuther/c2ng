@@ -1,5 +1,6 @@
 /**
   *  \file util/syntax/inihighlighter.hpp
+  *  \brief Class util::syntax::IniHighlighter
   */
 #ifndef C2NG_UTIL_SYNTAX_INIHIGHLIGHTER_HPP
 #define C2NG_UTIL_SYNTAX_INIHIGHLIGHTER_HPP
@@ -14,9 +15,15 @@ namespace util { namespace syntax {
         This highlights files like pconfig.src, explmap.cfg, amaster.src, ... */
     class IniHighlighter : public Highlighter {
      public:
+        /** Constructor.
+            \param tab Keyword table. Must live as long as this highlighter.
+            \param defaultSection Default section name */
         IniHighlighter(const KeywordTable& tab, String_t defaultSection);
+
+        /** Destructor. */
         ~IniHighlighter();
 
+        // Highlighter:
         virtual void init(afl::string::ConstStringMemory_t text);
         virtual bool scan(Segment& result);
 

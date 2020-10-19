@@ -74,3 +74,27 @@ TestGameV3StringVerifier::testMessage()
     TS_ASSERT(testee.isValidCharacter(SV_t::Message, 242));
     TS_ASSERT(!testee.isValidCharacter(SV_t::Message, 243));
 }
+void
+TestGameV3StringVerifier::testClone()
+{
+    game::v3::StringVerifier testee(makeCharset());
+    std::auto_ptr<SV_t> dup(testee.clone());
+
+    TS_ASSERT(dup.get() != 0);
+
+    TS_ASSERT_EQUALS(testee.getMaxStringLength(SV_t::PlayerLongName), 30U);
+    TS_ASSERT_EQUALS(dup->getMaxStringLength(SV_t::PlayerLongName), 30U);
+
+    // ok
+    TS_ASSERT(testee.isValidString(SV_t::PlayerAdjectiveName, "H\xC3\xB6----------"));
+    TS_ASSERT(dup->isValidString(SV_t::PlayerAdjectiveName, "H\xC3\xB6----------"));
+
+    // too long
+    TS_ASSERT(!testee.isValidString(SV_t::PlayerAdjectiveName, "H\xC3\xB6-----------"));
+    TS_ASSERT(!dup->isValidString(SV_t::PlayerAdjectiveName, "H\xC3\xB6-----------"));
+
+    // wrong character
+    TS_ASSERT(!testee.isValidString(SV_t::PlayerAdjectiveName, "H\xE2\x86\x91"));
+    TS_ASSERT(!dup->isValidString(SV_t::PlayerAdjectiveName, "H\xE2\x86\x91"));
+}
+

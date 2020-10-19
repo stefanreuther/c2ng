@@ -1,26 +1,26 @@
 /**
   *  \file interpreter/mutexfunctions.cpp
+  *  \brief Mutex Functions
   */
 
 #include "interpreter/mutexfunctions.hpp"
-#include "interpreter/callablevalue.hpp"
 #include "interpreter/arguments.hpp"
-#include "interpreter/mutexcontext.hpp"
+#include "interpreter/callablevalue.hpp"
 #include "interpreter/error.hpp"
-#include "interpreter/world.hpp"
+#include "interpreter/mutexcontext.hpp"
 #include "interpreter/process.hpp"
-#include "interpreter/indexablevalue.hpp"
-#include "interpreter/values.hpp"
 #include "interpreter/simpleindexablevalue.hpp"
+#include "interpreter/values.hpp"
+#include "interpreter/world.hpp"
 
 namespace interpreter { namespace {
 
-    // /** Implementation of Lock(). This must be implemented separately
-    //     using the full interface (not the simplified one) because it needs
-    //     an execution context. */
+    /** Implementation of Lock().
+        This must be implemented separately using the full interface (not the simplified one)
+        because it needs an execution context. */
     class LockFunction : public CallableValue {
      public:
-        LockFunction(World& world);
+        explicit LockFunction(World& world);
         ~LockFunction();
 
         // CallableValue:
@@ -54,6 +54,7 @@ void
 interpreter::LockFunction::call(Process& proc, afl::data::Segment& args, bool want_result)
 {
     // ex IntLock::call
+    // ex ccexec.pas:op_LOCK_func
     /* @q Lock(name:Str, Optional hint:Str):Any (Function)
        Acquire a lock.
 

@@ -87,6 +87,7 @@ game::spec::FriendlyCode::worksOn(const game::map::Object& o,
     }
 }
 
+// Check whether this friendly code works on a ship.
 bool
 game::spec::FriendlyCode::worksOn(const game::map::Ship& s,
                                   const UnitScoreDefinitionList& scoreDefinitions,
@@ -94,6 +95,9 @@ game::spec::FriendlyCode::worksOn(const game::map::Ship& s,
                                   const game::config::HostConfiguration& config) const
 {
     // ex GFCode::worksOn(const GShip& s)
+    if (m_flags.contains(PrefixCode)) {
+        return false;
+    }
     if (!s.isPlayable(s.ReadOnly)) {
         return false;
     }
@@ -110,7 +114,7 @@ game::spec::FriendlyCode::worksOn(const game::map::Ship& s,
     if (m_flags.contains(CapitalShipCode)
         && s.getNumBeams().orElse(0) == 0
         && s.getNumLaunchers().orElse(0) == 0
-        && s.getNumBeams().orElse(0) == 0)
+        && s.getNumBays().orElse(0) == 0)
     {
         return false;
     }
@@ -130,6 +134,9 @@ game::spec::FriendlyCode::worksOn(const game::map::Planet& p, const game::config
 {
     // ex GFCode::worksOn
     // FIXME: consider moving this out of FriendlyCode. Instead, make separate filter classes. It's only used to build filtered lists.
+    if (m_flags.contains(PrefixCode)) {
+        return false;
+    }
     if (!p.isPlayable(p.ReadOnly)) {
         return false;
     }
@@ -146,6 +153,7 @@ game::spec::FriendlyCode::worksOn(const game::map::Planet& p, const game::config
     return false;
 }
 
+// Check whether this friendly code is allowed according to registration status.
 bool
 game::spec::FriendlyCode::isPermitted(const RegistrationKey& key) const
 {
@@ -162,7 +170,7 @@ game::spec::FriendlyCode::isPermitted(const RegistrationKey& key) const
 bool
 game::spec::FriendlyCode::parseFlags(const String_t& s, const char* data, FlagSet_t& flags, PlayerSet_t& races)
 {
-    // ex util/misc.cc:parseFlags
+    // ex util/misc.cc:parseFlags, ccmain.pas:GetRaces
     // FIXME: rewrite using Memory<>
     String_t::size_type t = 0;
     flags = FlagSet_t();
@@ -198,7 +206,7 @@ game::spec::FriendlyCode::parseFlags(const String_t& s, const char* data, FlagSe
 void
 game::spec::FriendlyCode::initFromString(const String_t& descriptionLine)
 {
-    // ex GFCode::initFromString
+    // ex GFCode::initFromString, ccmain.pas:DefineFriendlyCode
     String_t flagStr;
     if (!afl::string::strSplit(descriptionLine, flagStr, m_description, ",")) {
         // FIXME: exception?
@@ -207,7 +215,7 @@ game::spec::FriendlyCode::initFromString(const String_t& descriptionLine)
     m_description = afl::string::strTrim(m_description);
 
     m_races = PlayerSet_t::allUpTo(MAX_RACES);
-    if (!parseFlags(flagStr, "SPBCARU", m_flags, m_races)) {
+    if (!parseFlags(flagStr, "SPBCARUX", m_flags, m_races)) {
         throw std::range_error(afl::string::Format(_("Malformed flags for friendly code \"%s\"").c_str(), m_code));
     }
 }

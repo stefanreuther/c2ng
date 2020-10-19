@@ -10,10 +10,11 @@
 #include "afl/io/xml/textnode.hpp"
 #include "client/dialogs/grounddefensedialog.hpp"
 #include "client/downlink.hpp"
-#include "client/proxy/planetinfoproxy.hpp"
+#include "client/widgets/helpwidget.hpp"
 #include "client/widgets/planetmineralinfo.hpp"
 #include "game/game.hpp"
 #include "game/map/universe.hpp"
+#include "game/proxy/planetinfoproxy.hpp"
 #include "game/turn.hpp"
 #include "ui/eventloop.hpp"
 #include "ui/group.hpp"
@@ -25,13 +26,13 @@
 #include "ui/widgets/button.hpp"
 #include "ui/widgets/decimalselector.hpp"
 #include "ui/widgets/keydispatcher.hpp"
+#include "ui/widgets/quit.hpp"
 #include "ui/widgets/standarddialogbuttons.hpp"
 #include "ui/widgets/statictext.hpp"
 #include "ui/window.hpp"
-#include "ui/widgets/quit.hpp"
 
 using client::widgets::PlanetMineralInfo;
-using client::proxy::PlanetInfoProxy;
+using game::proxy::PlanetInfoProxy;
 
 namespace {
     void addNodes(afl::io::xml::NodeReader& rdr, const afl::io::xml::Nodes_t& nodes)
@@ -45,9 +46,11 @@ namespace {
     class PlanetInfoDialog {
      public:
         PlanetInfoDialog(ui::Root& root,
+                         util::RequestSender<game::Session> gameSender,
                          afl::string::Translator& tx,
                          PlanetInfoProxy& proxy)
             : m_proxy(proxy),
+              m_gameSender(gameSender),
               m_translator(tx),
               m_root(root),
               m_loop(root),
@@ -94,24 +97,29 @@ namespace {
                     rgroup.add(*m_info[i]);
                 }
 
+                ui::Widget& helper = m_del.addNew(new client::widgets::HelpWidget(m_root, m_gameSender, "pcc2:envscreen"));
+
                 ui::widgets::Button& btnClose = m_del.addNew(new ui::widgets::Button(m_translator("Close"), util::Key_Return, m_root));
                 ui::widgets::Button& btnCombat = m_del.addNew(new ui::widgets::Button("C", 'c', m_root));
-                // bgroup.add(h.add(new UIButton("H", 'h')));
+                ui::widgets::Button& btnHelp = m_del.addNew(new ui::widgets::Button("H", 'h', m_root));
 
                 bgroup.add(btnClose);
                 bgroup.add(btnCombat);
                 bgroup.add(m_del.addNew(new ui::Spacer()));
+                bgroup.add(btnHelp);
 
                 win.add(lgroup);
                 win.add(rgroup);
 
                 ui::widgets::KeyDispatcher& disp = m_del.addNew(new ui::widgets::KeyDispatcher());
                 win.add(disp);
-                // FIXME: add(h.add(new WHelpWidget("pcc2:envscreen")));
+                win.add(helper);
                 win.add(m_del.addNew(new ui::widgets::Quit(m_root, m_loop)));
 
                 btnClose.sig_fire.addNewClosure(m_loop.makeStop(1));
                 btnCombat.sig_fire.add(this, &PlanetInfoDialog::onGroundCombat);
+                btnHelp.dispatchKeyTo(helper);
+
                 disp.addNewClosure(' ', m_loop.makeStop(1));
                 disp.addNewClosure(util::Key_Escape, m_loop.makeStop(1));
                 disp.addNewClosure(util::Key_F5, m_loop.makeStop(1));
@@ -175,6 +183,7 @@ namespace {
             }
 
         PlanetInfoProxy& m_proxy;
+        util::RequestSender<game::Session> m_gameSender;
         afl::string::Translator& m_translator;
         ui::Root& m_root;
         ui::EventLoop m_loop;
@@ -201,7 +210,7 @@ client::dialogs::doPlanetInfoDialog(ui::Root& root,
     // ex doPlanetScan
     // ex envscan.pas:ScanPlanet, DoEnvScan
     PlanetInfoProxy proxy(gameSender, root.engine().dispatcher());
-    PlanetInfoDialog dlg(root, tx, proxy);
+    PlanetInfoDialog dlg(root, gameSender, tx, proxy);
     proxy.setPlanet(planetId);
 
     dlg.run();
@@ -223,7 +232,7 @@ client::dialogs::doPlanetInfoDialog(ui::Root& root,
                 game::Game* g = s.getGame().get();
                 game::Root* r = s.getRoot().get();
                 if (g != 0 && r != 0) {
-                    m_id = g->currentTurn().universe().getPlanetAt(m_pos, true, r->hostConfiguration(), r->hostVersion());
+                    m_id = g->currentTurn().universe().findPlanetAt(m_pos, true, r->hostConfiguration(), r->hostVersion());
                 }
             }
         game::Id_t getId() const

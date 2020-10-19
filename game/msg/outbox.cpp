@@ -1,5 +1,6 @@
 /**
   *  \file game/msg/outbox.cpp
+  *  \brief Class game::msg::Outbox
   */
 
 #include "game/msg/outbox.hpp"
@@ -99,40 +100,37 @@ namespace {
 
 
 struct game::msg::Outbox::Message {
+    Id_t        id;
     int         sender;
     String_t    text;
     PlayerSet_t receivers;
 
-    Message(int sender, const String_t& text, PlayerSet_t receivers)
-        : sender(sender), text(text), receivers(receivers)
+    Message(Id_t id, int sender, const String_t& text, PlayerSet_t receivers)
+        : id(id), sender(sender), text(text), receivers(receivers)
         { }
 };
 
-// /** Construct outbox.
-//     \param sender owner of this outbox: the player
-//                   whom all messages contained in this
-//                   messagebox belong to. */
+// Constructor.
 game::msg::Outbox::Outbox()
     : Mailbox(),
-      m_messages()
-      // format(fWinplan)
+      m_messages(),
+      m_idCounter(0)
 { }
 
+// Destructor.
 game::msg::Outbox::~Outbox()
 { }
 
 // Mailbox:
 size_t
-game::msg::Outbox::getNumMessages()
+game::msg::Outbox::getNumMessages() const
 {
     // ex GOutbox::getCount
     return m_messages.size();
 }
 
-// /** Get text of message /index/ (0-based). The return value will
-//     include headers. */
 String_t
-game::msg::Outbox::getMessageText(size_t index, afl::string::Translator& tx, const PlayerList& players)
+game::msg::Outbox::getMessageText(size_t index, afl::string::Translator& tx, const PlayerList& players) const
 {
     // ex GOutbox::getText
     if (index < m_messages.size()) {
@@ -143,15 +141,14 @@ game::msg::Outbox::getMessageText(size_t index, afl::string::Translator& tx, con
 }
 
 String_t
-game::msg::Outbox::getMessageHeading(size_t index, afl::string::Translator& tx, const PlayerList& players)
+game::msg::Outbox::getMessageHeading(size_t index, afl::string::Translator& tx, const PlayerList& players) const
 {
     // ex GOutbox::getHeading
     if (index < m_messages.size()) {
         if (isUniversalReceiver(m_messages[index]->receivers, players)) {
             return "Universal Message";
         } else {
-            return afl::string::Format(tx.translateString("To: %s").c_str(),
-                                       getReceiverText(m_messages[index]->receivers, tx, players));
+            return afl::string::Format(tx("To: %s"), getReceiverText(m_messages[index]->receivers, tx, players));
         }
     } else {
         return String_t();
@@ -159,15 +156,12 @@ game::msg::Outbox::getMessageHeading(size_t index, afl::string::Translator& tx, 
 }
 
 int
-game::msg::Outbox::getMessageTurnNumber(size_t /*index*/)
+game::msg::Outbox::getMessageTurnNumber(size_t /*index*/) const
 {
     return 0;
 }
 
-// /** Get prefix for message when physically sent. The prefix can be
-//     carelessly concatenated to the message text.
-//     \param index    message number
-//     \param to       addressee of this incarnation of the message. */
+// Get prefix for message when sent.
 String_t
 game::msg::Outbox::getMessageSendPrefix(size_t index, int receiver,
                                         afl::string::Translator& tx,
@@ -191,7 +185,7 @@ game::msg::Outbox::getMessageSendPrefix(size_t index, int receiver,
     return String_t();
 }
 
-// /** Get raw text of a message. */
+// Get raw message text.
 String_t
 game::msg::Outbox::getMessageRawText(size_t index) const
 {
@@ -203,9 +197,9 @@ game::msg::Outbox::getMessageRawText(size_t index) const
     }
 }
 
-// /** Get bitmask of receivers. */
+// Get set of message receivers.
 game::PlayerSet_t
-game::msg::Outbox::getMessageReceiverMask(size_t index) const
+game::msg::Outbox::getMessageReceivers(size_t index) const
 {
     // ex GOutbox::getReceiverMask
     if (index < m_messages.size()) {
@@ -215,6 +209,7 @@ game::msg::Outbox::getMessageReceiverMask(size_t index) const
     }
 }
 
+// Get message sender number.
 int
 game::msg::Outbox::getMessageSender(size_t index) const
 {
@@ -226,6 +221,38 @@ game::msg::Outbox::getMessageSender(size_t index) const
     }
 }
 
+// Get message Id.
+game::Id_t
+game::msg::Outbox::getMessageId(size_t index) const
+{
+    if (index < m_messages.size()) {
+        return m_messages[index]->id;
+    } else {
+        return 0;
+    }
+}
+
+// Set receivers.
+void
+game::msg::Outbox::setMessageReceivers(size_t index, PlayerSet_t receivers)
+{
+    // GOutbox::setReceiverMask
+    if (index < m_messages.size()) {
+        m_messages[index]->receivers = receivers;
+    }
+}
+
+// Set message content.
+void
+game::msg::Outbox::setMessageText(size_t index, String_t text)
+{
+    // GOutbox::setMessage
+    if (index < m_messages.size()) {
+        m_messages[index]->text = text;
+    }
+}
+
+// Delete messages starting at an index.
 void
 game::msg::Outbox::deleteMessagesAfter(size_t index)
 {
@@ -235,18 +262,40 @@ game::msg::Outbox::deleteMessagesAfter(size_t index)
     }
 }
 
-// /** Add message (send).
-//     \param text       message body without headers
-//     \param receivers  receiver set */
+// Delete message by index.
 void
+game::msg::Outbox::deleteMessage(size_t index)
+{
+    // ex GOutbox::deleteMessage
+    if (index < m_messages.size()) {
+        m_messages.erase(m_messages.begin() + index);
+    }
+}
+
+// Find message, given a Id.
+bool
+game::msg::Outbox::findMessageById(Id_t id, size_t& index) const
+{
+    for (size_t i = 0, n = m_messages.size(); i < n; ++i) {
+        if (m_messages[i]->id == id) {
+            index = i;
+            return true;
+        }
+    }
+    return false;
+}
+
+// Add a new message (send).
+game::Id_t
 game::msg::Outbox::addMessage(int sender, String_t text, PlayerSet_t receivers)
 {
     // ex GOutbox::addMessage
-    m_messages.pushBackNew(new Message(sender, afl::string::strRTrim(text), receivers));
+    Id_t id = allocateId();
+    m_messages.pushBackNew(new Message(id, sender, afl::string::strRTrim(text), receivers));
+    return id;
 }
 
-// /** Add message (from file). Unlike addMessage, this one attempts to
-//     merge multicast messages. */
+// Add a new message coming from a message file.
 void
 game::msg::Outbox::addMessageFromFile(int sender, String_t text, PlayerSet_t receivers)
 {
@@ -272,14 +321,18 @@ game::msg::Outbox::addMessageFromFile(int sender, String_t text, PlayerSet_t rec
     }
 }
 
+// Clear this mailbox.
 void
 game::msg::Outbox::clear()
 {
     m_messages.clear();
+
+    // Argument for resetting here: observer needs to revalidate whether their message still exists in any case.
+    // Argument against resetting here: cache invalidation is harder with resetting, clear() is identical to deleteMessagesAfter(0).
+    // m_idCounter = 0;
 }
 
-// /** Get headers to use for a message to /receivers/.
-//     These headers are displayed, but not part of the stored text. */
+// Get message headers for display.
 String_t
 game::msg::Outbox::getHeadersForDisplay(int sender,
                                         PlayerSet_t receivers,
@@ -291,8 +344,7 @@ game::msg::Outbox::getHeadersForDisplay(int sender,
 
     String_t senderName = players.getPlayerName(sender, Player::LongName);
     String_t receiverText = getReceiverText(receivers, tx, players);
-    String_t text = afl::string::Format(tx.translateString("<<< Sub Space Message >>>\nFROM: %s\nTO: %s\n").c_str(),
-                                        senderName, receiverText);
+    String_t text = afl::string::Format(tx("<<< Sub Space Message >>>\nFROM: %s\nTO: %s\n"), senderName, receiverText);
     if (isUniversalReceiver(receivers, players)) {
         text += UNIVERSAL_TEXT;
         text += '\n';
@@ -305,3 +357,11 @@ game::msg::Outbox::getHeadersForDisplay(int sender,
     }
     return text;
 }
+
+game::Id_t
+game::msg::Outbox::allocateId()
+{
+    // FIXME: deal with overflow
+    return ++m_idCounter;
+}
+

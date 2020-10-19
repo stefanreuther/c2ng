@@ -74,7 +74,7 @@ namespace {
                 // Session does not work without scripts, so preload it.
                 {
                     // Create process
-                    interpreter::ProcessList& processList = session.world().processList();
+                    interpreter::ProcessList& processList = session.processList();
                     interpreter::Process& proc = processList.create(session.world(), "Initializer");
 
                     // Create BCO
@@ -98,7 +98,7 @@ namespace {
 
                     // Compile
                     interpreter::StatementCompiler sc(mcs);
-                    interpreter::StatementCompiler::StatementResult result = sc.compileList(*bco, scc);
+                    interpreter::StatementCompiler::Result result = sc.compileList(*bco, scc);
                     sc.finishBCO(*bco, scc);
                     TS_ASSERT_EQUALS(result, interpreter::StatementCompiler::EndOfInput);
 

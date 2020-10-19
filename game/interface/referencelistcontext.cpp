@@ -150,7 +150,7 @@ class game::interface::ReferenceListContext::IterableReferenceContext : public i
  *  Implementation of ReferenceList().Objects(...)
  */
 
-/* @q Objects(index:Int):Reference (Reference List)
+/* @q Objects(index:Int):Reference (Reference List Operation)
    Access objects in the reference list.
    The index starts at 0.
 
@@ -285,8 +285,8 @@ game::interface::ReferenceListContext::store(interpreter::TagNode& /*out*/, afl:
     throw interpreter::Error::notSerializable();
 }
 
-game::ref::List&
-game::interface::ReferenceListContext::getList()
+const game::ref::List&
+game::interface::ReferenceListContext::getList() const
 {
     return m_list->list;
 }
@@ -295,7 +295,7 @@ game::interface::ReferenceListContext::getList()
  *  Interface Functions
  */
 
-/* @q Add ref:Reference, ... (Reference List)
+/* @q Add ref:Reference, ... (Reference List Operation)
    Add one or more references to the reference list.
    @see Reference(), LocationReference()
    @since PCC2 2.40.7 */
@@ -311,7 +311,7 @@ game::interface::IFReferenceList_Add(game::ref::List& list, Session& /*session*/
     }
 }
 
-/* @q AddObjects kind:Str, id:Int, ... (Reference List)
+/* @q AddObjects kind:Str, id:Int, ... (Reference List Operation)
    Add one or more object references to the reference list.
    The %kind parameter specifies the object kinds (see {Reference()}), followed by a set of Ids.
    @since PCC2 2.40.7 */
@@ -337,7 +337,7 @@ game::interface::IFReferenceList_AddObjects(game::ref::List& list, Session& /*se
     }
 }
 
-/* @q AddObjectsAt x:Int, y:Int, Optional flags:Str (Reference List)
+/* @q AddObjectsAt x:Int, y:Int, Optional flags:Str (Reference List Operation)
    Add all ships and planets at a given location to the reference list.
 
    Flags can be a combination of:
@@ -384,7 +384,7 @@ game::interface::IFReferenceList_AddObjectsAt(game::ref::List& list, Session& se
 /* @q ReferenceList():Obj (Function)
    Create a reference list.
    The reference list is initially empty.
-   You can add objects to and iterate it using {@group Reference List|reference list functions}. */
+   You can add objects to and iterate it using {@group Reference List Operation|reference list functions}. */
 afl::data::Value*
 game::interface::IFReferenceList(game::Session& session, interpreter::Arguments& args)
 {

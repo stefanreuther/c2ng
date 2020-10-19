@@ -355,7 +355,7 @@ namespace {
         session.getGame()->setViewpointPlayer(arg_race);
 
         // Execute the process
-        interpreter::ProcessList& processList = session.world().processList();
+        interpreter::ProcessList& processList = session.processList();
         interpreter::Process& proc = processList.create(session.world(), tx.translateString("Console"));
 
         proc.pushFrame(bco, false);

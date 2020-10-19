@@ -12,12 +12,13 @@
 #include "client/dialogs/sellsuppliesdialog.hpp"
 #include "client/dialogs/taxationdialog.hpp"
 #include "client/downlink.hpp"
-#include "client/proxy/buildstructuresproxy.hpp"
-#include "client/proxy/configurationproxy.hpp"
-#include "client/proxy/planetinfoproxy.hpp"
 #include "client/widgets/costdisplay.hpp"
+#include "client/widgets/helpwidget.hpp"
 #include "client/widgets/planetmineralinfo.hpp"
 #include "game/actions/buildstructures.hpp"
+#include "game/proxy/buildstructuresproxy.hpp"
+#include "game/proxy/configurationproxy.hpp"
+#include "game/proxy/planetinfoproxy.hpp"
 #include "gfx/context.hpp"
 #include "ui/cardgroup.hpp"
 #include "ui/eventloop.hpp"
@@ -42,10 +43,10 @@
 #include "util/numberformatter.hpp"
 #include "util/translation.hpp"
 
-using client::proxy::BuildStructuresProxy;
-using client::proxy::PlanetInfoProxy;
 using client::widgets::PlanetMineralInfo;
 using game::actions::BuildStructures;
+using game::proxy::BuildStructuresProxy;
+using game::proxy::PlanetInfoProxy;
 using game::spec::Cost;
 using ui::Group;
 using ui::Spacer;
@@ -86,7 +87,7 @@ namespace {
                 m_btnPrev.sig_fire.add(this, &StructureHeader::onPrevious);
             }
 
-        void addPage(String_t mainTitle, String_t subTitle, ui::Widget& w)
+        void addPage(String_t mainTitle, String_t subTitle, Widget& w)
             {
                 Item it = { mainTitle, subTitle, &w };
                 m_items.push_back(it);
@@ -489,15 +490,17 @@ namespace {
                 ui::CardGroup cards;
                 StructureHeader header(m_root, cards);
 
-                ui::Widget& page1 = buildBuildScreen1();
+                Widget& helpWidget = m_del.addNew(new client::widgets::HelpWidget(m_root, m_gameSender, "pcc2:buildings"));
+
+                Widget& page1 = buildBuildScreen1(helpWidget);
                 header.addPage(m_info.planetName + m_translator(" - Planetary Economy"), m_info.planetInfo, page1);
                 cards.add(page1);
 
-                ui::Widget& page2 = buildBuildScreen2();
+                Widget& page2 = buildBuildScreen2(helpWidget);
                 header.addPage(m_info.planetName + m_translator(" - Mining Industry"), m_info.planetInfo, page2);
                 cards.add(page2);
 
-                ui::Widget& page3 = buildBuildScreen3();
+                Widget& page3 = buildBuildScreen3(helpWidget);
                 header.addPage(m_info.planetName + m_translator(" - Defense"), m_info.planetInfo, page3);
                 cards.add(page3);
 
@@ -505,12 +508,12 @@ namespace {
                 panel.add(cards);
                 panel.add(m_del.addNew(new ui::PrefixArgument(m_root)));
                 panel.add(m_del.addNew(new ui::widgets::Quit(m_root, m_loop)));
+                panel.add(helpWidget);
 
                 panel.setExtent(m_root.getExtent());
                 panel.setState(ui::Widget::ModalState, true);
                 header.setFocusedPage(page);
 
-                // FIXME:     win.add(h.add(new WHelpWidget("pcc2:buildings")));
                 m_dispatcher.add('a', this, &BuildStructuresDialog::onAutobuild);
                 m_dispatcher.add('g', this, &BuildStructuresDialog::onGoalDialog);
                 m_dispatcher.add('s', this, &BuildStructuresDialog::onSellSupplies);
@@ -559,6 +562,13 @@ namespace {
             {
                 Button& btn = m_del.addNew(new Button(text, m_root));
                 btn.dispatchKeyTo(m_dispatcher);
+                return btn;
+            }
+
+        Button& makeHelpButton(String_t label, Widget& helpWidget)
+            {
+                Button& btn = m_del.addNew(new Button(label, 'h', m_root));
+                btn.dispatchKeyTo(helpWidget);
                 return btn;
             }
 
@@ -689,7 +699,7 @@ namespace {
         Widget& wrapFocus(Widget& w)
             { return ui::widgets::FocusableGroup::wrapWidget(m_del, 5, w); }
 
-        Widget& buildBuildScreen1()
+        Widget& buildBuildScreen1(ui::Widget& helpWidget)
             {
                 // ex client/dlg-structure.cc:buildBuildScreen1
                 // Build screen 1:
@@ -734,7 +744,7 @@ namespace {
 
                 group13.add(makeOkButton());
                 group13.add(makeCancelButton());
-                group13.add(makeKeyButton(KeyString("H", 'h')));
+                group13.add(makeHelpButton("H", helpWidget));
                 group13.add(makeKeyButton(KeyString(m_translator("A - Auto"))));
                 group13.add(makeKeyButton(KeyString(m_translator("G - Goals"))));
                 group13.add(m_del.addNew(new Spacer()));
@@ -754,7 +764,7 @@ namespace {
                 return group1;
             }
 
-        Widget& buildBuildScreen2()
+        Widget& buildBuildScreen2(ui::Widget& helpWidget)
             {
                 // ex client/dlg-structure.cc:buildBuildScreen2
                 // Build screen 2:
@@ -789,7 +799,7 @@ namespace {
 
                 group112.add(makeOkButton());
                 group112.add(makeCancelButton());
-                group112.add(makeKeyButton(KeyString("H", 'h')));
+                group112.add(makeHelpButton("H", helpWidget));
                 group112.add(makeKeyButton(KeyString("A", 'a')));
                 group112.add(makeKeyButton(KeyString("G", 'g')));
                 group112.add(m_del.addNew(new Spacer()));
@@ -809,7 +819,7 @@ namespace {
                 return group1;
             }
 
-        Widget& buildBuildScreen3()
+        Widget& buildBuildScreen3(ui::Widget& helpWidget)
             {
                 // ex client/dlg-structure.cc:buildBuildScreen3
                 // Build screen 3:
@@ -861,7 +871,7 @@ namespace {
 
                 group12.add(makeOkButton());
                 group12.add(makeCancelButton());
-                group12.add(makeKeyButton(KeyString("H", 'h')));
+                group12.add(makeHelpButton("H", helpWidget));
                 group12.add(makeKeyButton(KeyString(m_translator("A - Auto"))));
                 group12.add(makeKeyButton(KeyString(m_translator("G - Goals"))));
                 group12.add(btnGroundCombat);
@@ -952,7 +962,7 @@ client::dialogs::doBuildStructuresDialog(ui::Root& root, util::RequestSender<gam
         return;
     }
 
-    NumberFormatter fmt = client::proxy::ConfigurationProxy(gameSender).getNumberFormatter(link);
+    NumberFormatter fmt = game::proxy::ConfigurationProxy(gameSender).getNumberFormatter(link);
 
     PlanetInfoProxy infoProxy(gameSender, root.engine().dispatcher());
     infoProxy.setPlanet(pid);

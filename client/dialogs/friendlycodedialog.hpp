@@ -5,17 +5,17 @@
 #define C2NG_CLIENT_DIALOGS_FRIENDLYCODEDIALOG_HPP
 
 #include "client/widgets/friendlycodelist.hpp"
-#include "game/data/friendlycode.hpp"
 #include "game/session.hpp"
 #include "ui/root.hpp"
 #include "ui/widgets/inputline.hpp"
 #include "util/requestsender.hpp"
+#include "game/spec/friendlycodelist.hpp"
 
 namespace client { namespace dialogs {
 
     class FriendlyCodeDialog {
      public:
-        FriendlyCodeDialog(ui::Root& root, const String_t& title, const game::data::FriendlyCodeList_t& list, util::RequestSender<game::Session> gameSender);
+        FriendlyCodeDialog(ui::Root& root, const String_t& title, const game::spec::FriendlyCodeList::Infos_t& list, util::RequestSender<game::Session> gameSender);
         ~FriendlyCodeDialog();
 
         void setFriendlyCode(const String_t& code);

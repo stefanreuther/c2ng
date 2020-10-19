@@ -9,11 +9,9 @@
 
 game::map::BeamUpPlanetTransfer::BeamUpPlanetTransfer(Planet& pl,
                                                       const Ship& sh,
-                                                      InterpreterInterface& iface,
                                                       Turn& turn,
                                                       const game::config::HostConfiguration& config)
     : m_planet(pl),
-      m_interface(iface),
       m_turn(turn),
       m_config(config),
       m_amount()
@@ -31,7 +29,7 @@ String_t
 game::map::BeamUpPlanetTransfer::getName(afl::string::Translator& tx) const
 {
     // ex GPlanetBumTransfer::getName
-    return afl::string::Format(tx("Beam up from %s"), m_planet.getName(PlainName, tx, m_interface));
+    return afl::string::Format(tx("Beam up from %s"), m_planet.getName(tx));
 }
 
 game::CargoContainer::Flags_t

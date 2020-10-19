@@ -1,12 +1,23 @@
 /**
   *  \file game/map/minefieldtype.cpp
+  *  \brief Class game::map::MinefieldType
   */
 
 #include "game/map/minefieldtype.hpp"
 
-game::map::MinefieldType::MinefieldType(Universe& univ)
+namespace {
+    /* Maximum minefield Id.
+       This code has no intrinsic limit.
+       However, this limit means a rogue message cannot cause us to allocate unbounded memory.
+
+       Host will use up to 500, PHost (optionally) up to 10000.
+       Allowing 20000 means the ObjectVector will be at most 160k (on a 64-bit system). */
+    const int MAX_MINEFIELD_ID = 20000;
+}
+
+game::map::MinefieldType::MinefieldType()
     : ObjectVector<Minefield>(),
-      ObjectVectorType<Minefield>(univ, *this),
+      ObjectVectorType<Minefield>(static_cast<ObjectVector<Minefield>&>(*this)),
       m_allMinefieldsKnown()
 { }
 
@@ -32,10 +43,6 @@ game::map::MinefieldType::erase(Id_t id)
     }
 }
 
-// /** Note that all minefields of a player are known with current data.
-//     This means alternatively that if we have a minefield of this player in the history,
-//     and did not scan it this turn, it is gone. This happens for Winplan result files
-//     (KORE minefields). */
 void
 game::map::MinefieldType::setAllMinefieldsKnown(int player)
 {
@@ -43,9 +50,6 @@ game::map::MinefieldType::setAllMinefieldsKnown(int player)
     m_allMinefieldsKnown += player;
 }
 
-// /** Internal check/postprocess.
-//     Postprocess all minefields and delete those that are gone.
-//     \param turnNr current turn */
 void
 game::map::MinefieldType::internalCheck(int currentTurn, const game::HostVersion& host, const game::config::HostConfiguration& config)
 {
@@ -79,6 +83,11 @@ game::map::MinefieldType::addMessageInformation(const game::parser::MessageInfor
     // ex GMinefieldType::addMinefieldReport
     // ex accessor.pas:LookupMine (part)
     namespace gp = game::parser;
+
+    // Range check
+    if (info.getObjectId() <= 0 || info.getObjectId() > MAX_MINEFIELD_ID) {
+        return;
+    }
     Minefield* existing = get(info.getObjectId());
 
     // Find position

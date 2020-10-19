@@ -1,5 +1,6 @@
 /**
   *  \file game/actions/changeshipfriendlycode.hpp
+  *  \brief Class game::actions::ChangeShipFriendlyCode
   */
 #ifndef C2NG_GAME_ACTIONS_CHANGESHIPFRIENDLYCODE_HPP
 #define C2NG_GAME_ACTIONS_CHANGESHIPFRIENDLYCODE_HPP
@@ -10,16 +11,50 @@
 
 namespace game { namespace actions {
 
+    /** Change ship friendly codes.
+        Used for programmatic friendly code changes (i.e. set a fleet's fcode to "HYP").
+
+        Usage:
+        - construct
+        - call addShip(), addFleet() as required
+        - call setFriendlyCode(), unsetFriendlyCode(), undo() as required
+
+        Changes are immediate, there's no need to commit. */
     class ChangeShipFriendlyCode {
      public:
+        /** Constructor.
+            \param univ Universe */
         explicit ChangeShipFriendlyCode(game::map::Universe& univ);
+
+        /** Destructor. */
         ~ChangeShipFriendlyCode();
 
+        /** Add single ship.
+            \param shipId  Ship Id
+            \param fcl     Friendly Code List (to generate fallback friendly codes)
+            \param rng     Random Number Generator (to generate fallback friendly codes) */
         void addShip(Id_t shipId, game::spec::FriendlyCodeList& fcl, util::RandomNumberGenerator& rng);
+
+        /** Add fleet.
+            \param fleetId Fleet Id (Id of fleet leader or lone ship)
+            \param fcl     Friendly Code List (to generate fallback friendly codes)
+            \param rng     Random Number Generator (to generate fallback friendly codes) */
         void addFleet(Id_t fleetId, game::spec::FriendlyCodeList& fcl, util::RandomNumberGenerator& rng);
 
+        /** Set friendly code.
+            Sets all ships' friendly codes to the given value.
+            \param fc Friendly code */
         void setFriendlyCode(String_t fc);
+
+        /** Unset friendly code.
+            Sets all ships' friendly codes to avoid the given value.
+            The friendly code is reverted to the original friendly code,
+            friendly code at beginning of turn, or random friendly code.
+            \param avoidFC friendly code to avoid */
         void unsetFriendlyCode(String_t avoidFC);
+
+        /** Undo.
+            Set all friendly codes back to the original values. */
         void undo();
 
      private:

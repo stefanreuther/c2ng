@@ -269,25 +269,25 @@ print STDERR "Assigning links...\n";
 foreach my $b (sort keys %byBasename) {
     push @{$byLowercaseBasename{$b}}, @{$byBasename{$b}};
 }
-foreach my $b (sort keys %byLowercaseBasename) {
-    my @items = @{$byLowercaseBasename{$b}};
+foreach my $bb (sort keys %byLowercaseBasename) {
+    my @items = @{$byLowercaseBasename{$bb}};
     if (@items == 1) {
         # Unique
         if (!exists $items[0]{link}) {
-            $items[0]{link} = allocateLink($namespace.':name:'.$b);
+            $items[0]{link} = allocateLink($namespace.':name:'.$bb);
         }
     } else {
         # Not unique
-        foreach (@items) {
+        foreach (sort {packKinds($a) cmp packKinds($b)} @items) {
             if (!exists $_->{link}) {
                 # Find kind
-                my $kind = (sort {length($a)<=>length($b)} keys %{$_->{kinds}})[0];
+                my $kind = (sort {length($a)<=>length($b) || $a cmp $b} keys %{$_->{kinds}})[0];
                 if (!defined($kind)) {
                     $kind = 'unk';
                 } else {
                     $kind .= s|\s+||;
                 }
-                $_->{link} = allocateLink($namespace.':name:'.$b.':'.$kind);
+                $_->{link} = allocateLink($namespace.':name:'.$bb.':'.$kind);
             }
         }
     }
@@ -334,7 +334,7 @@ foreach my $b (sort keys %byLowercaseBasename) {
 print STDERR "Generating...\n";
 print "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n";
 print "<!DOCTYPE help SYSTEM \"pcc2help.dtd\">\n";
-print "<help>\n";
+print "<help priority=\"99\">\n";
 
 generatePages(1, '', ' ');
 generatePages(0, '', ' ');
@@ -732,7 +732,7 @@ sub generateDisambiguation {
     print "   <p>There are multiple items with this name:</p>\n";
     print "   <ul class=\"compact\">\n";
     foreach (@_) {
-        my $kind = join (', ', sort {length($a)<=>length($b)} keys %{$_->{kinds}});
+        my $kind = join (', ', sort {length($a)<=>length($b) || $a cmp $b} keys %{$_->{kinds}});
         if ($kind ne '') {
             print "    <li><a href=\"".escape($_->{link})."\">".escape(properName($_, $n))."</a> (".escape($kind).")</li>\n";
         } else {
@@ -793,10 +793,15 @@ sub generateDocumentation {
     }
 
     # See also
+    my @see;
     if (@{$p->{see}}) {
-        print "   <p><b>See also: </b>",
-          join(', ', map {processLink($p->{locationLabel}, $_)} @{$p->{see}}),
-            "</p>\n";
+        push @see, map {processLink($p->{locationLabel}, $_)} @{$p->{see}};
+    }
+    if (%{$p->{kinds}}) {
+        push @see, map{'<a href="'.escape($byKind{$_}{LINK}).'">'.escape(pluralize($p->{locationLabel}, $_)).'</a>'} sort {lc($a) cmp lc($b)} keys %{$p->{kinds}};
+    }
+    if (@see) {
+        print "   <p><b>See also: </b>", join(', ', @see), "</p>\n";
     }
 
     # Uses
@@ -834,6 +839,7 @@ sub generateTopIndex {
         print "    Note that not all PCC2 1.99.x versions implicitly support all features of the\n";
         print "    lower-numbered 1.x versions, i.e. there can be things an 1.x version can do that\n";
         print "    a 1.99.x version can not.</p>\n";
+        print "   <p>If a version is not listed here, it has no script-related changes to its predecessor.</p>\n";
     }
     print "   <ul class=\"compact\">\n";
     foreach (@_) {
@@ -855,7 +861,7 @@ sub generateIndex {
             print $pfx." <li>".escape($e)."\n";
             print $pfx."  <ul>\n";
             foreach (@elems) {
-                my $kind = join (', ', sort {length($a)<=>length($b)} keys %{$_->{kinds}});
+                my $kind = join (', ', sort {length($a)<=>length($b) || $a cmp $b} keys %{$_->{kinds}});
                 if ($kind ne '') {
                     print $pfx."   <li><a href=\"".escape($_->{link})."\">".escape($e)."</a> (".escape($kind).")</li>\n";
                 } else {
@@ -1230,4 +1236,25 @@ sub properName {
         }
     }
     return $n;
+}
+
+sub pluralize {
+    my $locationLabel = shift;
+    my $x = shift;
+    if ($x =~ /^(.*)Property$/) {
+        "${1}Properties";
+    } elsif ($x =~ /^(.*)(Function|Command|Variable|Context|Keymap|Hook|Service|Operation)$/) {
+        "${1}${2}s";
+    } elsif ($x eq 'Internal' || $x eq 'Database' || $x =~ /API$/ || $x eq 'Config') {
+        $x;
+    } else {
+        warn "$locationLabel: WARNING: cannot pluralize '$x'\n";
+        $x;
+    }
+}
+
+# Pack all kinds of an object into a string.
+# This is used to make link generation deterministic
+sub packKinds {
+    join('/', keys %{$_[0]{kinds}});
 }

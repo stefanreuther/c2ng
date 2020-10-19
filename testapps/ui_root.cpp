@@ -48,6 +48,7 @@
 #include "ui/widgets/simpletable.hpp"
 #include "ui/widgets/tabbar.hpp"
 #include "afl/string/format.hpp"
+#include "ui/widgets/cardtabbar.hpp"
 #ifdef HAVE_SDL
 # include "gfx/sdl/engine.hpp"
 typedef gfx::sdl::Engine Engine_t;
@@ -59,7 +60,7 @@ typedef gfx::sdl2::Engine Engine_t;
 #endif
 
 namespace {
-    void addFrames(ui::Window& win, afl::base::Deleter& del, ui::EventLoop& loop, ui::Root& root, ui::widgets::FrameGroup::Type type)
+    void addFrames(ui::Window& win, afl::base::Deleter& del, ui::EventLoop& loop, ui::Root& root, ui::FrameType type)
     {
         static const int widths[] = { 0, 1, 1, 2, 2, 3, 5, 10 };
         static const int pads[]   = { 0, 0, 3, 0, 3, 1, 1, 1 };
@@ -388,7 +389,7 @@ namespace {
                      afl::base::Deleter del;
                      ui::Group g(ui::layout::VBox::instance5);
                      ui::CardGroup cc;
-                     ui::widgets::TabBar bar(m_root, cc);
+                     ui::widgets::CardTabBar bar(m_root, cc);
                      for (int i = 0; i < 5; ++i) {
                          ui::widgets::Button& btn = del.addNew(new ui::widgets::Button(afl::string::Format("Button %d", i), 'x', m_root));
                          cc.add(btn);
@@ -554,12 +555,12 @@ namespace {
                      afl::base::Deleter del;
                      ui::EventLoop loop(m_root);
                      ui::Window window("Test window", m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5);
-                     addFrames(window, del, loop, m_root, ui::widgets::FrameGroup::NoFrame);
-                     addFrames(window, del, loop, m_root, ui::widgets::FrameGroup::RedFrame);
-                     addFrames(window, del, loop, m_root, ui::widgets::FrameGroup::YellowFrame);
-                     addFrames(window, del, loop, m_root, ui::widgets::FrameGroup::GreenFrame);
-                     addFrames(window, del, loop, m_root, ui::widgets::FrameGroup::RaisedFrame);
-                     addFrames(window, del, loop, m_root, ui::widgets::FrameGroup::LoweredFrame);
+                     addFrames(window, del, loop, m_root, ui::NoFrame);
+                     addFrames(window, del, loop, m_root, ui::RedFrame);
+                     addFrames(window, del, loop, m_root, ui::YellowFrame);
+                     addFrames(window, del, loop, m_root, ui::GreenFrame);
+                     addFrames(window, del, loop, m_root, ui::RaisedFrame);
+                     addFrames(window, del, loop, m_root, ui::LoweredFrame);
                      window.pack();
                      m_root.centerWidget(window);
                      m_root.add(window);

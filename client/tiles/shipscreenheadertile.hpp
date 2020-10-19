@@ -5,7 +5,7 @@
 #define C2NG_CLIENT_TILES_SHIPSCREENHEADERTILE_HPP
 
 #include "client/widgets/controlscreenheader.hpp"
-#include "client/proxy/objectobserver.hpp"
+#include "game/proxy/objectobserver.hpp"
 #include "ui/root.hpp"
 #include "util/requestreceiver.hpp"
 
@@ -20,7 +20,7 @@ namespace client { namespace tiles {
         };
 
         ShipScreenHeaderTile(ui::Root& root, client::widgets::KeymapWidget& kmw, Kind k);
-        void attach(client::proxy::ObjectObserver& oop);
+        void attach(game::proxy::ObjectObserver& oop);
 
      private:
         util::RequestReceiver<ControlScreenHeader> m_receiver;

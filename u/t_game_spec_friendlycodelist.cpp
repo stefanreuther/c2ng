@@ -11,6 +11,7 @@
 #include "afl/sys/log.hpp"
 #include "game/map/planet.hpp"
 #include "game/spec/shiplist.hpp"
+#include "afl/string/nulltranslator.hpp"
 
 /** Test isNumeric(). */
 void
@@ -105,9 +106,9 @@ TestGameSpecFriendlyCodeList::testRandom()
     TS_ASSERT(testee.isAllowedRandomCode("0 1", host));   // allowed, but will not be generated
     TS_ASSERT(testee.isAllowedRandomCode("zxy", host));
     TS_ASSERT(testee.isAllowedRandomCode("0-1", host));   // allowed, but will not be generated
-    TS_ASSERT(testee.isAllowedRandomCode("elo", host));   // allowed, extra-fc is a PHost thing and thus case-sensitive
-    TS_ASSERT(testee.isAllowedRandomCode("Zot", host));   // allowed, extra-fc is a PHost thing and thus case-sensitive
-    TS_ASSERT(testee.isAllowedRandomCode("zoT", host));
+    TS_ASSERT(!testee.isAllowedRandomCode("elo", host));  // no longer allowed, extra-fc now case-insensitive
+    TS_ASSERT(!testee.isAllowedRandomCode("Zot", host));  // no longer allowed, extra-fc now case-insensitive
+    TS_ASSERT(!testee.isAllowedRandomCode("zoT", host));
     TS_ASSERT(testee.isAllowedRandomCode("zo ", host));
 
     TS_ASSERT(!testee.isAllowedRandomCode("mkt", host));  // fails: predefined code
@@ -242,36 +243,37 @@ TestGameSpecFriendlyCodeList::testSpecial()
     afl::io::ConstMemoryStream ms(afl::string::toBytes("ab\n"
                                                        "z\n"
                                                        "pppp\n"
-                                                       "e f\n"));
+                                                       "e f"));
     testee.loadExtraCodes(ms);
 
     // Verify
-    TS_ASSERT(testee.isExtra("ab"));
-    TS_ASSERT(testee.isExtra("abc"));
-    TS_ASSERT(testee.isExtra("z"));
-    TS_ASSERT(!testee.isExtra("ZZ"));
-    TS_ASSERT(!testee.isExtra("ppp"));   // no truncation to 3 characters!
-    TS_ASSERT(testee.isExtra("pppp"));
-    TS_ASSERT(testee.isExtra("e"));
-    TS_ASSERT(testee.isExtra("e11"));
-    TS_ASSERT(testee.isExtra("fff"));
+    TS_ASSERT( testee.isSpecial("ab",   true));
+    TS_ASSERT( testee.isSpecial("abc",  true));
+    TS_ASSERT( testee.isSpecial("z",    true));
+    TS_ASSERT(!testee.isSpecial("ZZ",   false));
+    TS_ASSERT( testee.isSpecial("ZZ",   true));
+    TS_ASSERT(!testee.isSpecial("ppp",  true));   // no truncation to 3 characters!
+    TS_ASSERT( testee.isSpecial("pppp", true));
+    TS_ASSERT( testee.isSpecial("e",    true));
+    TS_ASSERT( testee.isSpecial("e11",  true));
+    TS_ASSERT( testee.isSpecial("fff",  true));
 
     // Check special
-    TS_ASSERT(testee.isSpecial("pfc", false));
-    TS_ASSERT(testee.isSpecial("bfc", false));
+    TS_ASSERT( testee.isSpecial("pfc", false));
+    TS_ASSERT( testee.isSpecial("bfc", false));
     TS_ASSERT(!testee.isSpecial("ufc", false));
     TS_ASSERT(!testee.isSpecial("PFC", false));
     TS_ASSERT(!testee.isSpecial("BFC", false));
     TS_ASSERT(!testee.isSpecial("UFC", false));
-    TS_ASSERT(testee.isSpecial("PFC", true));
-    TS_ASSERT(testee.isSpecial("BFC", true));
+    TS_ASSERT( testee.isSpecial("PFC", true));
+    TS_ASSERT( testee.isSpecial("BFC", true));
     TS_ASSERT(!testee.isSpecial("UFC", true));
 
-    // Clear extra
-    testee.clearExtraCodes();
-    TS_ASSERT(!testee.isExtra("ab"));
-    TS_ASSERT(!testee.isExtra("abc"));
-    TS_ASSERT(!testee.isExtra("z"));
+    // Clear
+    testee.clear();
+    TS_ASSERT(!testee.isSpecial("ab",  true));
+    TS_ASSERT(!testee.isSpecial("abc", true));
+    TS_ASSERT(!testee.isSpecial("z",   true));
 }
 
 /** Test generateRandomCode(). */
@@ -360,10 +362,10 @@ TestGameSpecFriendlyCodeList::testGenerateRandomBlock()
     game::HostVersion host;
     util::RandomNumberGenerator rng(0);
 
-    // Create a friendly code list that blocks all ASCII characters except for Z
+    // Create a friendly code list that blocks all ASCII characters except for 3
     afl::base::GrowableMemory<uint8_t> mem;
     for (uint8_t ch = ' '; ch < 127; ++ch) {
-        if (ch != 'Z') {
+        if (ch != '3') {
             mem.append(ch);
             mem.append('\n');
         }
@@ -372,10 +374,13 @@ TestGameSpecFriendlyCodeList::testGenerateRandomBlock()
     game::spec::FriendlyCodeList testee;
     testee.loadExtraCodes(ms);
 
-    // generateRandomCode() must create a code starting with 'Z'
+    TS_ASSERT( testee.isSpecial("NXY", true));
+    TS_ASSERT(!testee.isSpecial("3XY", true));
+
+    // generateRandomCode() must create a code starting with '3'
     String_t s = testee.generateRandomCode(rng, host);
     TS_ASSERT_EQUALS(s.size(), 3U);
-    TS_ASSERT_EQUALS(s[0], 'Z');
+    TS_ASSERT_EQUALS(s[0], '3');
 }
 
 /** Test load(). */
@@ -397,7 +402,8 @@ TestGameSpecFriendlyCodeList::testLoad()
 
     // Load
     game::spec::FriendlyCodeList testee;
-    testee.load(ms, log);
+    afl::string::NullTranslator tx;
+    testee.load(ms, log, tx);
 
     // Verify
     TS_ASSERT_EQUALS(testee.size(), 3U);
@@ -459,7 +465,8 @@ TestGameSpecFriendlyCodeList::testSyntaxErrors()
         afl::io::ConstMemoryStream ms(afl::string::toBytes("foo\n"));
         CountingLogger log;
         game::spec::FriendlyCodeList list;
-        list.load(ms, log);
+        afl::string::NullTranslator tx;
+        list.load(ms, log, tx);
         TS_ASSERT_EQUALS(log.getNumMessages(), 1U);
         TS_ASSERT_EQUALS(list.size(), 0U);
     }
@@ -467,7 +474,8 @@ TestGameSpecFriendlyCodeList::testSyntaxErrors()
         afl::io::ConstMemoryStream ms(afl::string::toBytes("longcode,,foo\n"));
         CountingLogger log;
         game::spec::FriendlyCodeList list;
-        list.load(ms, log);
+        afl::string::NullTranslator tx;
+        list.load(ms, log, tx);
         TS_ASSERT_EQUALS(log.getNumMessages(), 1U);
         TS_ASSERT_EQUALS(list.size(), 1U);
         TS_ASSERT_EQUALS(list.at(0)->getCode(), "lon");
@@ -492,5 +500,84 @@ TestGameSpecFriendlyCodeList::testPessimistic()
     TS_ASSERT(!testee.isAllowedRandomCode("Mff", HostVersion(HostVersion::Host,  MKVERSION(3, 0, 0))));
     TS_ASSERT(!testee.isAllowedRandomCode("Mff", HostVersion(HostVersion::PHost, MKVERSION(4, 1, 0)))); // not a special friendly code, but isAllowedRandomCode() always is pessimistic
     TS_ASSERT(!testee.isAllowedRandomCode("Mff", testee.Pessimistic));
+}
+
+/** Test pack(). */
+void
+TestGameSpecFriendlyCodeList::testPack()
+{
+    // Friendly code list
+    game::spec::FriendlyCodeList testee;
+    testee.addCode(game::spec::FriendlyCode("pfc", "p,whatever"));
+    testee.addCode(game::spec::FriendlyCode("gs3", "s,give to %3"));
+    testee.addCode(game::spec::FriendlyCode("gs4", "s,give to %4"));
+    afl::io::ConstMemoryStream ms(afl::string::toBytes("ab"));
+    testee.loadExtraCodes(ms);
+
+    // Player list
+    game::PlayerList pl;
+    game::Player* p3 = pl.create(3);
+    TS_ASSERT(p3);
+    p3->setName(game::Player::ShortName, "Threes");
+    p3->setName(game::Player::AdjectiveName, "threeish");
+
+    // Pack
+    game::spec::FriendlyCodeList::Infos_t info;
+    testee.pack(info, pl);
+
+    // Verify
+    TS_ASSERT_EQUALS(info.size(), 3U);
+    TS_ASSERT_EQUALS(info[0].code, "pfc");
+    TS_ASSERT_EQUALS(info[0].description, "whatever");
+    TS_ASSERT_EQUALS(info[1].code, "gs3");
+    TS_ASSERT_EQUALS(info[1].description, "give to Threes");
+    TS_ASSERT_EQUALS(info[2].code, "gs4");
+    TS_ASSERT_EQUALS(info[2].description, "give to 4");
+
+    // Original list has four elements
+    TS_ASSERT_EQUALS(testee.size(), 4U);
+    TS_ASSERT_EQUALS(testee.at(0)->getCode(), "pfc");
+    TS_ASSERT_EQUALS(testee.at(1)->getCode(), "gs3");
+    TS_ASSERT_EQUALS(testee.at(2)->getCode(), "gs4");
+    TS_ASSERT_EQUALS(testee.at(3)->getCode(), "ab");
+}
+
+/** Test loadExtraCodes, load when duplicates are present. */
+void
+TestGameSpecFriendlyCodeList::testLoadExtraDup()
+{
+    game::spec::FriendlyCodeList testee;
+
+    // fcodes.cc
+    {
+        // load() will sort the list, so give it a sorted list in the first place to avoid surprises.
+        static const char FILE[] =
+            "ATT,p,Attack\n"
+            "HYP,s,Hyper\n"
+            "mkt,s,Make\n";
+        afl::io::ConstMemoryStream ms(afl::string::toBytes(FILE));
+        afl::sys::Log log;
+        afl::string::NullTranslator tx;
+        testee.load(ms, log, tx);
+    }
+
+    // xtrafcode.txt
+    {
+        afl::io::ConstMemoryStream ms(afl::string::toBytes("A mkt NUK j"));
+        testee.loadExtraCodes(ms);
+    }
+
+    // Verify. Content must be mkt/ATT/HYP/A/NUK/j
+    TS_ASSERT_EQUALS(testee.size(), 6U);
+    TS_ASSERT_EQUALS(testee.at(0)->getCode(), "ATT");
+    TS_ASSERT_EQUALS(testee.at(1)->getCode(), "HYP");
+    TS_ASSERT_EQUALS(testee.at(2)->getCode(), "mkt");
+    TS_ASSERT_EQUALS(testee.at(3)->getCode(), "A");
+    TS_ASSERT_EQUALS(testee.at(4)->getCode(), "NUK");
+    TS_ASSERT_EQUALS(testee.at(5)->getCode(), "j");
+
+    // Verify specialness
+    TS_ASSERT_EQUALS(testee.isSpecial("ATT", false), true);
+    TS_ASSERT_EQUALS(testee.isSpecial("AXE", false), true);    // due to 'A'
 }
 

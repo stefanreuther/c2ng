@@ -28,7 +28,7 @@ namespace client { namespace widgets {
 
         void addButton(String_t title, util::Key_t key);
         bool setText(util::Key_t key, bool left, const util::rich::Text& text);
-        bool setFrame(util::Key_t key, ui::widgets::FrameGroup::Type type);
+        bool setFrame(util::Key_t key, ui::FrameType type);
 
      private:
         struct Line;

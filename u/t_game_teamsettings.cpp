@@ -117,6 +117,15 @@ TestGameTeamSettings::testViewpoint()
     TS_ASSERT_EQUALS(testee.getPlayerRelation(8), game::TeamSettings::EnemyPlayer);
     TS_ASSERT_EQUALS(testee.getPlayerRelation(9), game::TeamSettings::ThisPlayer);
     TS_ASSERT_EQUALS(testee.getPlayerRelation(10), game::TeamSettings::EnemyPlayer);
+
+    // Colors
+    TS_ASSERT_EQUALS(testee.getPlayerColor(1), util::SkinColor::Yellow);
+    TS_ASSERT_EQUALS(testee.getPlayerColor(2), util::SkinColor::Yellow);
+    TS_ASSERT_EQUALS(testee.getPlayerColor(3), util::SkinColor::Red);
+    TS_ASSERT_EQUALS(testee.getPlayerColor(4), util::SkinColor::Red);
+    TS_ASSERT_EQUALS(testee.getPlayerColor(8), util::SkinColor::Red);
+    TS_ASSERT_EQUALS(testee.getPlayerColor(9), util::SkinColor::Green);
+    TS_ASSERT_EQUALS(testee.getPlayerColor(10), util::SkinColor::Red);
 }
 
 /** Test Load/Save. */

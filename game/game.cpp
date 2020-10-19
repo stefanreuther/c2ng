@@ -1,5 +1,6 @@
 /**
   *  \file game/game.cpp
+  *  \brief Class game::Game
   */
 
 #include "game/game.hpp"
@@ -8,14 +9,14 @@
 
 game::Game::Game()
     : sig_viewpointTurnChange(),
-      m_currentTurn(new Turn()),
+      m_currentTurn(*new Turn()),
       m_planetScores(),
       m_shipScores(),
       m_teamSettings(),
       m_viewpointTurnNumber(0),
       m_scores(),
       m_cursors(),
-      m_markings()
+      m_selections()
 {
     m_cursors.setUniverse(&m_currentTurn->universe());
 }
@@ -78,16 +79,17 @@ game::Game::getViewpointPlayer() const
 }
 
 void
-game::Game::setViewpointPlayer(int pid)
+game::Game::setViewpointPlayer(int playerNr)
 {
-    m_teamSettings.setViewpointPlayer(pid);
+    m_teamSettings.setViewpointPlayer(playerNr);
 }
 
 afl::base::Ptr<game::Turn>
 game::Game::getViewpointTurn() const
 {
+    // FIXME: restrict setViewpointTurnNumber so that this never returns null
     if (m_viewpointTurnNumber == 0 || m_viewpointTurnNumber == currentTurn().getTurnNumber()) {
-        return m_currentTurn;
+        return m_currentTurn.asPtr();
     } else if (HistoryTurn* ht = m_previousTurns.get(m_viewpointTurnNumber)) {
         return ht->getTurn();
     } else {
@@ -122,11 +124,11 @@ game::Game::setViewpointTurnNumber(int nr)
         // effectively doing the equivalent of limitToExistingObjects().
         // Until we can somehow avoid that, keep the limitToExistingObjects().
         if (oldTurn != 0) {
-            m_markings.copyFrom(oldTurn->universe(), m_markings.getCurrentLayer());
+            m_selections.copyFrom(oldTurn->universe(), m_selections.getCurrentLayer());
         }
         if (newTurn != 0) {
-            m_markings.copyTo(newTurn->universe(), m_markings.getCurrentLayer());
-            m_markings.limitToExistingObjects(newTurn->universe(), m_markings.getCurrentLayer());
+            m_selections.copyTo(newTurn->universe(), m_selections.getCurrentLayer());
+            m_selections.limitToExistingObjects(newTurn->universe(), m_selections.getCurrentLayer());
         }
 
         // Change cursor
@@ -165,10 +167,10 @@ game::Game::cursors()
     return m_cursors;
 }
 
-game::map::Markings&
-game::Game::markings()
+game::map::Selections&
+game::Game::selections()
 {
-    return m_markings;
+    return m_selections;
 }
 
 game::msg::Configuration&
@@ -218,16 +220,25 @@ game::Game::addMessageInformation(const game::parser::MessageInformation& info, 
         break;
 
      case MessageInformation::IonStorm:
-        // FIXME: implement ion storms (not implemented in PCC2)
+        // Ion storm: only add current turn's data; last turn's weather forecast is worthless
+        if (info.getTurnNumber() == currentTurn().getTurnNumber()) {
+            if (game::map::IonStorm* pStorm = currentTurn().universe().ionStorms().get(info.getObjectId())) {
+                pStorm->addMessageInformation(info);
+            }
+        }
         break;
 
      case MessageInformation::Ufo:
-        // Ufo: add normally. UfoType will deal with details.
+     case MessageInformation::Wormhole:
+        // Ufo, Wormhole: add normally. UfoType will deal with details.
         currentTurn().universe().ufos().addMessageInformation(info);
         break;
 
      case MessageInformation::Explosion:
-        // FIXME: implement explosion (not implemented in PCC2)
+        // Explosion: only add current turn's data; ExplosionType deals with details.
+        if (info.getTurnNumber() == currentTurn().getTurnNumber()) {
+            currentTurn().universe().explosions().addMessageInformation(info);
+        }
         break;
 
      case MessageInformation::Configuration:
@@ -316,10 +327,8 @@ game::Game::notifyListeners()
     // Thus, notify both.
 
     // Current turn
-    Turn* t1 = m_currentTurn.get();
-    if (t1 != 0) {
-        t1->notifyListeners();
-    }
+    Turn* t1 = &*m_currentTurn;
+    t1->notifyListeners();
 
     // Viewpoint turn
     Turn* t2 = getViewpointTurn().get();

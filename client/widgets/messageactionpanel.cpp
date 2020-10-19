@@ -44,7 +44,7 @@ void
 client::widgets::MessageActionPanel::enableAction(Action a, const String_t& note)
 {
     // ex WMessageActionPanel::showWidget
-    if (a < m_actions.size()) {
+    if (size_t(a) < m_actions.size()) {
         LabeledButton& lb = *m_actions[a];
         if (lb.button.getParent() == 0) {
             addChild(lb.button, 0);
@@ -61,7 +61,7 @@ void
 client::widgets::MessageActionPanel::disableAction(Action a)
 {
     // ex WMessageActionPanel::hideWidget
-    if (a < m_actions.size()) {
+    if (size_t(a) < m_actions.size()) {
         LabeledButton& lb = *m_actions[a];
         if (lb.button.getParent() != 0) {
             removeChild(lb.button);

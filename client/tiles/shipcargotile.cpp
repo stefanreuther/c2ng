@@ -6,7 +6,7 @@
 #include "afl/base/countof.hpp"
 #include "afl/base/staticassert.hpp"
 #include "afl/string/format.hpp"
-#include "client/proxy/objectlistener.hpp"
+#include "game/proxy/objectlistener.hpp"
 #include "game/config/userconfiguration.hpp"
 #include "game/map/ship.hpp"
 #include "game/root.hpp"
@@ -126,9 +126,9 @@ client::tiles::ShipCargoTile::init(ui::Root& root, client::widgets::KeymapWidget
 }
 
 void
-client::tiles::ShipCargoTile::attach(client::proxy::ObjectObserver& oop)
+client::tiles::ShipCargoTile::attach(game::proxy::ObjectObserver& oop)
 {
-    class Listener : public client::proxy::ObjectListener {
+    class Listener : public game::proxy::ObjectListener {
      public:
         Listener(util::RequestSender<ShipCargoTile> reply)
             : m_reply(reply)
@@ -181,7 +181,7 @@ client::tiles::ShipCargoTile::attach(client::proxy::ObjectObserver& oop)
                     // FIXME: support bum
                     //     /* We're observing the ship->planet transporter */
                     //     bool bum = config.AllowBeamUpMultiple()
-                    //         && getDisplayedTurn().getCommands(s->getOwner()).getCommand(GCommand::phc_Beamup, s->getId()) != 0;
+                    //         && getDisplayedTurn().getCommands(s->getOwner()).getCommand(GCommand::BeamUp, s->getId()) != 0;
                     bool bum = false;
                     job->data.unloadReview =
                         (sh->isTransporterActive(sh->UnloadTransporter)
@@ -208,7 +208,7 @@ client::tiles::ShipCargoTile::setData(const Data& data)
 {
     // Update table
     static_assert(countof(data.formattedAmounts) >= 2*NumLines, "countof formattedAmounts");
-    for (size_t i = 0; i < NumLines; ++i) {
+    for (int i = 0; i < NumLines; ++i) {
         m_table.cell(MineralValue, i).setText(data.formattedAmounts[i]);
         m_table.cell(OtherValue,   i).setText(data.formattedAmounts[i+NumLines]);
     }

@@ -1,13 +1,13 @@
 /**
   *  \file game/actions/remotecontrolaction.cpp
+  *  \brief Class game::actions::RemoteControlAction
   */
 
 #include "game/actions/remotecontrolaction.hpp"
+#include "afl/string/char.hpp"
 #include "game/v3/command.hpp"
 #include "game/v3/commandcontainer.hpp"
 #include "game/v3/commandextra.hpp"
-#include "afl/string/char.hpp"
-#include "game/exception.hpp"
 #include "util/translation.hpp"
 
 using game::v3::Command;
@@ -16,7 +16,7 @@ using game::v3::CommandExtra;
 
 namespace {
 
-    // /** Remote-control verbs. Indexed by TRemoteControlVerb. */
+    /* Remote-control verbs. Indexed by Verb. */
     static const char*const RC_VERBS[] = {
         "allow",
         "forbid",
@@ -24,9 +24,8 @@ namespace {
         "control",
     };
 
-    // /** Mapping of TRemoteControlSetting to verb that was used to enter
-    //     this state. In particular, this also means that sending the
-    //     opposite verb leaves the state. */
+    /** Mapping of State to Verb that was used to enter this state.
+        In particular, this also means that sending the opposite verb leaves the state. */
     static const uint8_t RC_VERB_INDEX[] = {
         game::actions::RemoteControlAction::Forbid,   // Forbidden
         game::actions::RemoteControlAction::Allow,    // Normal
@@ -40,20 +39,18 @@ namespace {
 }
 
 
-
+// Constructor.
 game::actions::RemoteControlAction::RemoteControlAction(Turn& turn, Id_t shipId, int playerId)
     : m_turn(turn),
       m_shipId(shipId),
       m_playerId(playerId)
 { }
 
-// /** Get old remote control state (beginning of turn).
-//     Returns the logical state of the specified ship. */
+// Get old remote-control state (beginning of turn).
 game::actions::RemoteControlAction::State
 game::actions::RemoteControlAction::getOldState() const
 {
-    // ex getOldRemoteControlState
-    // phost.pas::GetRCFlag
+    // ex getOldRemoteControlState, phost.pas::GetRCFlag
     const game::map::Ship*const pShip = m_turn.universe().ships().get(m_shipId);
     int shipOwner;
     if (pShip == 0 || !pShip->getOwner(shipOwner)) {
@@ -93,19 +90,17 @@ game::actions::RemoteControlAction::getOldState() const
     }
 }
 
-// /** Get new remote control state (end of turn).
-//     Returns the logical state after commands have been processed. */
+// Get new remote-control state (end of turn, after processing of commands).
 game::actions::RemoteControlAction::State
 game::actions::RemoteControlAction::getNewState() const
 {
-    // ex getNewRemoteControlState
-    // phost.pas::GetNewRCFlag
+    // ex getNewRemoteControlState, phost.pas::GetNewRCFlag
     CommandContainer* cc = CommandExtra::get(m_turn, m_playerId);
     if (cc == 0) {
         return getOldState();
     }
 
-    const Command* cmd = cc->getCommand(Command::phc_RemoteControl, m_shipId);
+    const Command* cmd = cc->getCommand(Command::RemoteControl, m_shipId);
     if (cmd == 0) {
         return getOldState();
     }
@@ -125,14 +120,7 @@ game::actions::RemoteControlAction::getNewState() const
     return getOldState();
 }
 
-// /** Set remote control status to a particular value. This adds or
-//     removes a command as needed, without user interaction.
-
-//     \param sh Ship
-//     \param cmds Command container
-//     \param verb Target state
-//     \retval true A command has been given or removed to obtain the state
-//     \retval false Nothing changed because the state already was correct, or cannot be reached */
+// Set remote control state.
 bool
 game::actions::RemoteControlAction::setState(Verb verb)
 {
@@ -154,10 +142,10 @@ game::actions::RemoteControlAction::setState(Verb verb)
     } else if (RC_VERB_INDEX[oldState] == verb) {
         // I was in the right state at the beginning of the turn
         // This will signal change via CommandContainer::sig_commandChange -> CommandExtra
-        result = cc->removeCommand(Command::phc_RemoteControl, m_shipId);
+        result = cc->removeCommand(Command::RemoteControl, m_shipId);
     } else if ((RC_VERB_INDEX[oldState] ^ 1) == verb) {
         // I can reach the desired state by issuing a command
-        result = (cc->addCommand(Command::phc_RemoteControl, m_shipId, RC_VERBS[verb]) != 0);
+        result = (cc->addCommand(Command::RemoteControl, m_shipId, RC_VERBS[verb]) != 0);
     } else {
         // The state cannot be reached, e.g. "drop" for a ship I own.
         result = false;
@@ -166,21 +154,22 @@ game::actions::RemoteControlAction::setState(Verb verb)
     return result;
 }
 
-void
+// Toggle remote control state.
+bool
 game::actions::RemoteControlAction::toggleState()
 {
-    // ex doRemoteControl
-    CommandContainer* cc = CommandExtra::get(m_turn, m_playerId);
-    if (cc == 0) {
-        throw Exception(Exception::ePerm, _("Not supported by host"));
-    }
+    // ex doRemoteControl (part)
+    if (CommandContainer* cc = CommandExtra::get(m_turn, m_playerId)) {
+        int newVerb = RC_VERB_INDEX[getNewState()] ^ 1;
+        int oldVerb = RC_VERB_INDEX[getOldState()];
 
-    int newVerb = RC_VERB_INDEX[getNewState()] ^ 1;
-    int oldVerb = RC_VERB_INDEX[getOldState()];
-
-    if (newVerb == oldVerb) {
-        cc->removeCommand(Command::phc_RemoteControl, m_shipId);
+        if (newVerb == oldVerb) {
+            cc->removeCommand(Command::RemoteControl, m_shipId);
+        } else {
+            cc->addCommand(Command::RemoteControl, m_shipId, RC_VERBS[newVerb]);
+        }
+        return true;
     } else {
-        cc->addCommand(Command::phc_RemoteControl, m_shipId, RC_VERBS[newVerb]);
+        return false;
     }
 }

@@ -38,7 +38,7 @@ namespace {
                     break;
                  case interpreter::Process::Ended:
                     if (m_showResult) {
-                        afl::data::Value* result = p.getResult();
+                        const afl::data::Value* result = p.getResult();
                         if (result == 0) {
                             log.write(LogListener::Info, "script.empty", "Empty");
                         } else {
@@ -55,7 +55,7 @@ namespace {
                     break;
 
                  case interpreter::Process::Failed:
-                    // Logged by onProcessGroupFinish.
+                    // Logged by ProcessList::run.
                     break;
                 }
             }
@@ -93,7 +93,7 @@ client::si::CommandTask::execute(uint32_t pgid, game::Session& session)
     }
 
     // Create process
-    interpreter::ProcessList& processList = session.world().processList();
+    interpreter::ProcessList& processList = session.processList();
     interpreter::Process& proc = processList.create(session.world(), m_name);
 
     // Create BCO
@@ -116,7 +116,7 @@ client::si::CommandTask::execute(uint32_t pgid, game::Session& session)
     // Compile
     try {
         StatementCompiler sc(mcs);
-        StatementCompiler::StatementResult result = sc.compile(*bco, scc);
+        StatementCompiler::Result result = sc.compile(*bco, scc);
         sc.finishBCO(*bco, scc);
 
         // Build process and add to process group

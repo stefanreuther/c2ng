@@ -80,6 +80,65 @@ Sub CCUI.SelectNextMarked
   Try With UI.Iterator Do CurrentIndex := NextIndex(CurrentIndex, "wm")
 EndSub
 
+% First unit [Home]
+% @since PCC2 2.40.9
+Sub CCUI.SelectFirst
+  Local System.Err
+  Try With UI.Iterator Do CurrentIndex := NextIndex(0)
+EndSub
+
+% Last unit [Home]
+% @since PCC2 2.40.9
+Sub CCUI.SelectLast
+  Local System.Err
+  Try With UI.Iterator Do CurrentIndex := PreviousIndex(0)
+EndSub
+
+% First marked unit [Home]
+% @since PCC2 2.40.9
+Sub CCUI.SelectFirstMarked
+  Local System.Err
+  Try With UI.Iterator Do CurrentIndex := NextIndex(0, "m")
+EndSub
+
+% Last marked unit [Home]
+% @since PCC2 2.40.9
+Sub CCUI.SelectLastMarked
+  Local System.Err
+  Try With UI.Iterator Do CurrentIndex := PreviousIndex(0, "m")
+EndSub
+
+% Previous unit here [Shift-Tab]
+% @since PCC2 2.40.9
+Sub CCUI.SelectPreviousHere
+  Local System.Err
+  Try With UI.Iterator Do CurrentIndex := PreviousIndexAt(CurrentIndex, Loc.X, Loc.Y, "w")
+EndSub
+
+% Next unit here [Tab]
+% @since PCC2 2.40.9
+Sub CCUI.SelectNextHere
+  Local System.Err
+  Try With UI.Iterator Do CurrentIndex := NextIndexAt(CurrentIndex, Loc.X, Loc.Y, "w")
+EndSub
+
+% Previous marked unit here [Ctrl-Shift-Tab]
+% @since PCC2 2.40.9
+Sub CCUI.SelectPreviousMarkedHere
+  Local System.Err
+  Try With UI.Iterator Do CurrentIndex := PreviousIndexAt(CurrentIndex, Loc.X, Loc.Y, "wm")
+EndSub
+
+% Next unit here [Ctrl-Tab]
+% @since PCC2 2.40.9
+Sub CCUI.SelectNextMarkedHere
+  Local System.Err
+  Try With UI.Iterator Do CurrentIndex := NextIndexAt(CurrentIndex, Loc.X, Loc.Y, "wm")
+EndSub
+
+
+
+
 % Go-to-object with "error handling"
 % @since PCC2 2.40.7
 Sub CCUI$GotoObject (Screen, Id)
@@ -113,6 +172,17 @@ EndSub
 Sub CCUI.ListShips (X, Y, flags)
   Local UI.Result
   UI.ListShips X, Y, flags
+  If UI.Result
+    UI.GotoScreen 1, UI.Result
+  EndIf
+EndSub
+
+% Ctrl-N
+% @since PCC2 2.40.9
+Sub CCUI.ListShipPrediction (X, Y, Optional Id)
+  % CC$ListShipPrediction in PCC2
+  Local UI.Result
+  UI.ListShipPrediction X, Y, Id
   If UI.Result
     UI.GotoScreen 1, UI.Result
   EndIf
@@ -383,7 +453,7 @@ Function CCUI$Ship.ChooseOneMissionParameter (title, label, type, flags, value, 
       % PlayerParameter
       Local list = Listbox(title, value)
       ForEach Global.Player As p Do
-        If Not notThis Or Not sid Or Global.Ship(sid).Owner$=p->Race$ Then
+        If Not notThis Or Not sid Or Global.Ship(sid).Owner$<>p->Race$ Then
           Call list->AddItem p->Race$, Format("%X - %s", p->Race$, p->Race.Short)
         EndIf
       Next
@@ -524,6 +594,12 @@ Sub CCUI.Ship.SetMission
   Local UI.Result, System.Err
   Local i := Id
   If Played Then
+    % Warning
+    If GetCommand('beamup ' & i) Then
+      UI.Message _("This ship has an active \"Beam Up Multiple\" order. Its mission will be overridden by PHost.\nContinue anyway?"), _("Ship Mission"), _("Yes No")
+      If UI.Result<>1 Then Return
+    EndIf
+
     % Build listbox
     Local a := Listbox(_("Ship Mission"), Mission$, 340, 12, "pcc2:shipscreen")
     ForEach Global.Mission Do
@@ -576,6 +652,18 @@ Sub CCUI.Ship.SetMission
   EndIf
 EndSub
 
+% Remote control (r)
+% Also see VisualScanDialog::Window::toggleRemoteControl
+% @since PCC2 2.40.9
+Sub CCUI.Ship.ToggleRemote
+  Local UI.Result
+  Local q := CC$RemoteGetQuestion(Id)
+  If q Then
+    UI.Message q, Translate("Remote Control"), Translate("Yes No")
+    If UI.Result=1 Then CC$RemoteToggle Id
+  EndIf
+EndSub
+
 % Mission Selection for a starbase
 % (This dialog is required for regular ships and for Global Actions / Ship Tasks)
 % Returns UI.Result=mission or empty
@@ -608,6 +696,20 @@ Sub CCUI.Base.SetMission
       SetMission UI.Result
     EndIf
   EndIf
+EndSub
+
+% @since PCC 2.40.9
+Sub CCUI.Base.FixShip
+  Local UI.Result
+  UI.ListShips Loc.X, Loc.Y, 'f', Translate("OK"), Translate("Fix Ship")
+  FixShip UI.Result
+EndSub
+
+% @since PCC 2.40.9
+Sub CCUI.Base.RecycleShip
+  Local UI.Result
+  UI.ListShips Loc.X, Loc.Y, '', Translate("OK"), Translate("Recycle Ship")
+  RecycleShip UI.Result
 EndSub
 
 
@@ -779,6 +881,45 @@ EndSub
 
 
 %
+%  Selection Manager
+%
+
+Sub CCUI$SaveSelection(title, flags)
+  % ex WSelectionManager::doSave
+  Local UI.Result, fname, fd
+  UI.FileWindow title, "*.sel", "pcc2:selectionmgr"
+  If UI.Result
+    fname := AppendFileNameExtension(UI.Result, "sel")
+    Try
+      fd := FreeFile()
+      Open fname For Output As #fd
+      SelectionSave #fd, flags
+      Close #fd
+    Else
+      MessageBox Format(Translate("Unable to save %s: %s"), fname, System.Err)
+    EndTry
+  EndIf
+EndSub
+
+Sub CCUI$LoadSelection(title, flags)
+  % ex WSelectionManager::doLoad
+  Local UI.Result, fname, fd
+  UI.FileWindow title, "*.sel", "pcc2:selectionmgr"
+  If UI.Result
+    fname := AppendFileNameExtension(UI.Result, "sel")
+    Try
+      fd := FreeFile()
+      Open fname For Input As #fd
+      SelectionLoad #fd, flags
+      Close #fd
+    Else
+      MessageBox Format(Translate("Unable to load %s: %s"), fname, System.Err)
+    EndTry
+  EndIf
+EndSub
+
+
+%
 %  Auto Tasks
 %
 %  (ex WAutoTaskScreen::handleEvent)
@@ -914,5 +1055,37 @@ Sub CCUI.ShipBaseMenu
     UI.Menu "ShipBaseMenu"
   Else
     MessageBox Translate("We are not at one of our starbases."), Translate("Starbase Commands")
+  EndIf
+EndSub
+
+
+On BaseShipyardMenu Do
+  Local s, canFix, canRecycle
+  % FIXME: we also have this logic in C++
+  ForEach Ship As s Do
+    If s->Orbit$=Id Then
+      canFix:=1
+      If s->Owner$=Owner$ Then
+        canRecycle:=1
+        Break
+      EndIf
+    EndIf
+  Next
+  If canFix Then
+    If canFix                    Then AddItem Atom("CCUI.Base.FixShip"),     Translate("Fix (repair) a ship")
+    If canRecycle                Then AddItem Atom("CCUI.Base.RecycleShip"), Translate("Recycle a ship")
+    If Shipyard.Action='Fix'     Then AddItem Atom("FixShip 0"),             Translate("Cancel \"fix\" order")
+    If Shipyard.Action='Recycle' Then AddItem Atom("FixShip 0"),             Translate("Cancel \"recycle\" order")
+  EndIf
+EndOn
+
+
+% Starbase 'r' menu
+Sub CCUI.BaseShipyardMenu
+  % ex client/act-planet.cc:doBaseFixRecycle
+  If Orbit Then
+    UI.Menu "BaseShipyardMenu"
+  Else
+    MessageBox Translate("There is no ship at this starbase which could be fixed or recycled."), Translate("Shipyard")
   EndIf
 EndSub

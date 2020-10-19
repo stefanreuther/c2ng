@@ -18,6 +18,7 @@
 #include "interpreter/arguments.hpp"
 #include "game/interface/simplefunction.hpp"
 #include "afl/string/nulltranslator.hpp"
+#include "interpreter/subroutinevalue.hpp"
 
 using interpreter::StructureTypeData;
 using interpreter::StructureValueData;
@@ -33,14 +34,26 @@ namespace {
         interpreter::World world(log, fs);
 
         // Compile and run
-        interpreter::Process p(world, "name", 22);
-        p.pushFrame(q.compileExpression(world), true).localValues.pushBackNew(new StructureValue(value));
-        TSM_ASSERT_THROWS_NOTHING(q.getQuery().c_str(), p.run());
-        TSM_ASSERT_EQUALS(q.getQuery().c_str(), interpreter::getBooleanValue(p.getResult()), expect);
+        {
+            interpreter::Process p(world, "name", 22);
+            p.pushFrame(q.compileExpression(world), true).localValues.pushBackNew(new StructureValue(value));
+            TSM_ASSERT_THROWS_NOTHING(q.getQuery().c_str(), p.run());
+            TSM_ASSERT_EQUALS(q.getQuery().c_str(), interpreter::getBooleanValue(p.getResult()), expect);
+        }
+
+        // Same thing, without optimisation, because why not
+        {
+            interpreter::Process p(world, "name2", 22);
+            SearchQuery q2(q);
+            q2.setOptimisationLevel(-1);
+            p.pushFrame(q2.compileExpression(world), true).localValues.pushBackNew(new StructureValue(value));
+            TSM_ASSERT_THROWS_NOTHING(q2.getQuery().c_str(), p.run());
+            TSM_ASSERT_EQUALS(q2.getQuery().c_str(), interpreter::getBooleanValue(p.getResult()), expect);
+        }
     }
 
     /** Mock for OBJECTISAT function.
-        Requires the object to be a struct starting with X,Y members.        
+        Requires the object to be a struct starting with X,Y members.
 
         We re-use the game::interface::SimpleFunction wrapper which is an additional dependency
         SearchQuery normally doesn't need. */
@@ -176,17 +189,88 @@ TestGameSearchQuery::testAccessor()
     TS_ASSERT_EQUALS(t1.getQuery(), "");
     TS_ASSERT_EQUALS(t1.getMatchType(), SearchQuery::MatchName);
     TS_ASSERT_EQUALS(t1.getSearchObjects(), SearchQuery::allObjects());
+    TS_ASSERT_EQUALS(t1.getPlayedOnly(), false);
+    TS_ASSERT_EQUALS(t1.getSearchObjectsAsString(), "spbuo");
 
     SearchQuery t2(SearchQuery::MatchLocation, SearchQuery::SearchObjects_t(), "x");
     TS_ASSERT_EQUALS(t2.getQuery(), "x");
     TS_ASSERT_EQUALS(t2.getMatchType(), SearchQuery::MatchLocation);
     TS_ASSERT_EQUALS(t2.getSearchObjects(), SearchQuery::SearchObjects_t());
+    TS_ASSERT_EQUALS(t2.getPlayedOnly(), false);
 
     t1.setQuery("y");
     t1.setMatchType(SearchQuery::MatchFalse);
     t1.setSearchObjects(SearchQuery::SearchObjects_t(SearchQuery::SearchPlanets));
+    t1.setPlayedOnly(true);
     TS_ASSERT_EQUALS(t1.getQuery(), "y");
     TS_ASSERT_EQUALS(t1.getMatchType(), SearchQuery::MatchFalse);
     TS_ASSERT_EQUALS(t1.getSearchObjects(), SearchQuery::SearchObjects_t(SearchQuery::SearchPlanets));
+    TS_ASSERT_EQUALS(t1.getPlayedOnly(), true);
+    TS_ASSERT_EQUALS(t1.getSearchObjectsAsString(), "pm");
+}
+
+/** Test formatSearchObjects(). */
+void
+TestGameSearchQuery::testFormat()
+{
+    using game::SearchQuery;
+    afl::string::NullTranslator tx;
+
+    // All or nothing
+    TS_ASSERT_EQUALS(SearchQuery::formatSearchObjects(SearchQuery::allObjects(), tx), "all");
+    TS_ASSERT_EQUALS(SearchQuery::formatSearchObjects(SearchQuery::SearchObjects_t(), tx), "none");
+
+    // Singles
+    SearchQuery::SearchObjects_t ss(SearchQuery::SearchShips);
+    SearchQuery::SearchObjects_t pp(SearchQuery::SearchPlanets);
+    SearchQuery::SearchObjects_t bb(SearchQuery::SearchBases);
+    SearchQuery::SearchObjects_t uu(SearchQuery::SearchUfos);
+    SearchQuery::SearchObjects_t oo(SearchQuery::SearchOthers);
+
+    TS_ASSERT_EQUALS(SearchQuery::formatSearchObjects(ss, tx), "ships");
+    TS_ASSERT_EQUALS(SearchQuery::formatSearchObjects(pp, tx), "planets");
+    TS_ASSERT_EQUALS(SearchQuery::formatSearchObjects(bb, tx), "starbases");
+    TS_ASSERT_EQUALS(SearchQuery::formatSearchObjects(uu, tx), "ufos");
+    TS_ASSERT_EQUALS(SearchQuery::formatSearchObjects(oo, tx), "others");
+
+    // Planets+bases shown as planets
+    TS_ASSERT_EQUALS(SearchQuery::formatSearchObjects(pp + bb, tx), "planets");
+
+    // Random combos
+    TS_ASSERT_EQUALS(SearchQuery::formatSearchObjects(pp + ss, tx), "ships, planets");
+    TS_ASSERT_EQUALS(SearchQuery::formatSearchObjects(uu + oo, tx), "ufos, others");
+    TS_ASSERT_EQUALS(SearchQuery::formatSearchObjects(ss + pp + bb + uu, tx), "ships, planets, ufos");
+    TS_ASSERT_EQUALS(SearchQuery::formatSearchObjects(ss + bb + uu, tx), "ships, starbases, ufos");
+}
+
+/** Test compile().
+    compile() will cause CCUI$Search to be invoked and its value returned; test just that. */
+void
+TestGameSearchQuery::testCompile()
+{
+    // Query
+    game::SearchQuery testee(SearchQuery::MatchName, SearchQuery::allObjects(), "#77");
+
+    // Create a world
+    afl::sys::Log log;
+    afl::io::NullFileSystem fs;
+    interpreter::World world(log, fs);
+
+    // Create a binary function CCUI$Search that returns a constant value
+    interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
+    bco->setIsProcedure(false);
+    bco->addArgument("A", false);
+    bco->addArgument("B", false);
+    bco->addInstruction(interpreter::Opcode::maPush, interpreter::Opcode::sInteger, 42);
+    world.setNewGlobalValue("CCUI$SEARCH", new interpreter::SubroutineValue(bco));
+
+    // Compile and run
+    interpreter::Process p(world, "name", 22);
+    p.pushFrame(testee.compile(world), true);
+    TS_ASSERT_THROWS_NOTHING(p.run());
+
+    int32_t iv;
+    TS_ASSERT_EQUALS(interpreter::checkIntegerArg(iv, p.getResult()), true);
+    TS_ASSERT_EQUALS(iv, 42);
 }
 

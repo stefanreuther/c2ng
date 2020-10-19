@@ -7,7 +7,6 @@
 #include "game/cargocontainer.hpp"
 #include "game/config/hostconfiguration.hpp"
 #include "game/element.hpp"
-#include "game/interpreterinterface.hpp"
 #include "game/turn.hpp"
 #include "util/vector.hpp"
 
@@ -20,7 +19,6 @@ namespace game { namespace map {
      public:
         BeamUpPlanetTransfer(Planet& pl,
                              const Ship& sh,
-                             InterpreterInterface& iface,
                              Turn& turn,
                              const game::config::HostConfiguration& config);
 
@@ -36,7 +34,6 @@ namespace game { namespace map {
 
      private:
         Planet& m_planet;
-        InterpreterInterface& m_interface;
         Turn& m_turn;
         const game::config::HostConfiguration& m_config;
 

@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/tokenizer.cpp
+  *  \brief Class interpreter::Tokenizer
   */
 
 #include "interpreter/tokenizer.hpp"
@@ -23,9 +24,7 @@ interpreter::Tokenizer::Tokenizer(const String_t& str)
 interpreter::Tokenizer::~Tokenizer()
 { }
 
-// /** Check for token type, and read next if succeeded.
-//     If the current token is \c t, reads the next token and returns true.
-//     Otherwise, keep the current token and return false. */
+// Check for token type, read next on success.
 bool
 interpreter::Tokenizer::checkAdvance(TokenType t)
 {
@@ -38,9 +37,7 @@ interpreter::Tokenizer::checkAdvance(TokenType t)
     }
 }
 
-// /** Check for identifier, and read next token if succeeded.
-//     If the current token is identifier \c keyword, reads the next token and returns true.
-//     Otherwise, keep the current token and return false. */
+// Check for identifier, and read next token if succeeded.
 bool
 interpreter::Tokenizer::checkAdvance(const char* keyword)
 {
@@ -54,8 +51,8 @@ interpreter::Tokenizer::checkAdvance(const char* keyword)
     }
 }
 
-// /** Read a token. Advances \c m_pos and sets \c m_currentToken to the next token encountered
-//     within the input line. */
+/** Read a token.
+    Advances \c m_pos and sets \c m_currentToken to the next token encountered within the input line. */
 void
 interpreter::Tokenizer::read()
 {
@@ -284,8 +281,9 @@ interpreter::Tokenizer::read()
     }
 }
 
-// /** Read number. Assumes that \c m_pos points to a digit or period. Reads the number
-//     into m_currentFloat / m_currentInteger, and sets m_currentToken appropriately. */
+/** Read number.
+    Assumes that \c m_pos points to a digit or period.
+    Reads the number into m_currentFloat / m_currentInteger, and sets m_currentToken appropriately. */
 void
 interpreter::Tokenizer::readNumber()
 {
@@ -338,6 +336,7 @@ interpreter::Tokenizer::readNumber()
     }
 }
 
+// Test for identifier character.
 bool
 interpreter::Tokenizer::isIdentifierCharacter(char c)
 {
@@ -345,6 +344,7 @@ interpreter::Tokenizer::isIdentifierCharacter(char c)
     return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '$' || c == '_' || (c >= '0' && c <= '9') || c == '.';
 }
 
+// Test for valid uppercase identifier.
 bool
 interpreter::Tokenizer::isValidUppercaseIdentifier(const String_t& candidate)
 {

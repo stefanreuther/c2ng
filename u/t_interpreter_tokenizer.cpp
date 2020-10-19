@@ -6,6 +6,8 @@
 #include "interpreter/tokenizer.hpp"
 
 #include "t_interpreter.hpp"
+#include "afl/base/countof.hpp"
+#include "interpreter/error.hpp"
 
 void
 TestInterpreterTokenizer::testTokenizer()
@@ -162,6 +164,23 @@ TestInterpreterTokenizer::testTokenizer()
 
         TS_ASSERT_EQUALS(tok.readNextToken(), tok.tEnd);
     }
+
+    // Invalid
+    {
+        interpreter::Tokenizer tok("a`b");
+        TS_ASSERT_EQUALS(tok.getCurrentToken(), tok.tIdentifier);
+        TS_ASSERT_EQUALS(tok.getCurrentString(), "A");
+
+        TS_ASSERT_EQUALS(tok.readNextToken(), tok.tInvalid);
+        TS_ASSERT_EQUALS(tok.getCurrentToken(), tok.tInvalid);
+        TS_ASSERT_EQUALS(tok.getCurrentString(), "`");
+
+        TS_ASSERT_EQUALS(tok.readNextToken(), tok.tIdentifier);
+        TS_ASSERT_EQUALS(tok.getCurrentToken(), tok.tIdentifier);
+        TS_ASSERT_EQUALS(tok.getCurrentString(), "B");
+
+        TS_ASSERT_EQUALS(tok.readNextToken(), tok.tEnd);
+    }
 }
 
 void
@@ -304,6 +323,8 @@ TestInterpreterTokenizer::testStrings()
         { "\"fo\\\\o\"", "fo\\o" },
         { "\"hi\\n\"", "hi\n" },
         { "'hi\\n'", "hi\\n" },
+        { "\"hi\\t\"", "hi\t" },
+        { "'hi\\t'", "hi\\t" },
     };
 
     for (size_t i = 0; i < sizeof(strings)/sizeof(strings[0]); ++i) {
@@ -373,5 +394,19 @@ TestInterpreterTokenizer::testIsValidUppercaseIdentifier()
     TS_ASSERT(!interpreter::Tokenizer::isValidUppercaseIdentifier("$X"));
     TS_ASSERT(!interpreter::Tokenizer::isValidUppercaseIdentifier("x"));
     TS_ASSERT(!interpreter::Tokenizer::isValidUppercaseIdentifier("Xx"));
+}
+
+/** Test bad strings. */
+void
+TestInterpreterTokenizer::testBadStrings()
+{
+    const char*const strings[] = {
+        "'foo",
+        "\"foo",
+        "\"foo\\",
+    };
+    for (size_t i = 0; i < countof(strings); ++i) {
+        TS_ASSERT_THROWS((interpreter::Tokenizer(strings[i])), interpreter::Error);
+    }
 }
 

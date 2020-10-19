@@ -6,6 +6,7 @@
 #define C2NG_GAME_SPEC_WEAPON_HPP
 
 #include "game/spec/component.hpp"
+#include "game/hostversion.hpp"
 
 namespace game { namespace spec {
 
@@ -34,6 +35,11 @@ namespace game { namespace spec {
         /** Set damage power.
             \param damagePower damage power */
         void setDamagePower(int damagePower);
+
+        /** Check for death ray.
+            \param config Host Version
+            \return true if this is a death ray */
+        bool isDeathRay(const HostVersion& host) const;
 
      private:
         int m_killPower;

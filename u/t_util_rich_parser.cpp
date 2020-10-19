@@ -6,13 +6,17 @@
 #include "util/rich/parser.hpp"
 
 #include "t_util_rich.hpp"
-#include "util/rich/text.hpp"
-#include "util/rich/visitor.hpp"
-#include "util/rich/styleattribute.hpp"
+#include "afl/charset/defaultcharsetfactory.hpp"
+#include "afl/io/constmemorystream.hpp"
+#include "afl/io/xml/defaultentityhandler.hpp"
+#include "afl/io/xml/reader.hpp"
+#include "afl/string/format.hpp"
+#include "util/rich/alignmentattribute.hpp"
 #include "util/rich/colorattribute.hpp"
 #include "util/rich/linkattribute.hpp"
-#include "util/rich/alignmentattribute.hpp"
-#include "afl/string/format.hpp"
+#include "util/rich/styleattribute.hpp"
+#include "util/rich/text.hpp"
+#include "util/rich/visitor.hpp"
 #include "util/unicodechars.hpp"
 
 namespace {
@@ -120,6 +124,8 @@ TestUtilRichParser::testAll()
 
     // Unknown tag
     TS_ASSERT_EQUALS(transform("a <fancy>b</fancy> c"), "a b c");
+    TS_ASSERT_EQUALS(transform("a <?pi>b c"), "a b c");
+    TS_ASSERT_EQUALS(transform("a <?pi x=y>b c"), "a b c");
 
     // Unknown tag: parseXml does not handle <br>
     TS_ASSERT_EQUALS(transform("a<br />b"), "ab");
@@ -159,5 +165,44 @@ TestUtilRichParser::testAll()
     TS_ASSERT_EQUALS(transform("<align width=42 align='where'>boxy text</align>"), "{ALIGN 42,0:boxy text}");
     TS_ASSERT_EQUALS(transform("<align align=right width=100>boxy text</align>"), "{ALIGN 100,2:boxy text}");
     TS_ASSERT_EQUALS(transform("<align>boxy text</align>"), "{ALIGN 0,0:boxy text}");
+}
+
+/** Test skipTag(). */
+void
+TestUtilRichParser::testSkip()
+{
+    afl::charset::DefaultCharsetFactory csf;
+    afl::io::ConstMemoryStream ms(afl::string::toBytes("<this>tag <is /> skipped</this><b>result</b>"));
+    afl::io::xml::Reader rdr(ms, afl::io::xml::DefaultEntityHandler::getInstance(), csf);
+    util::rich::Parser testee(rdr);
+    testee.readNext();          // start
+    TS_ASSERT_EQUALS(&testee.reader(), &rdr);
+    TS_ASSERT_EQUALS(testee.getCurrentToken(), afl::io::xml::BaseReader::TagStart);
+
+    testee.skipTag();           // function to test
+
+    util::rich::Text result = testee.parseText(true);
+    TS_ASSERT_EQUALS(result.getText(), "result");
+    TS_ASSERT_EQUALS(result.getNumAttributes(), 1U);
+}
+
+/** Test space normalisation. */
+void
+TestUtilRichParser::testSpaceNorm()
+{
+    afl::charset::DefaultCharsetFactory csf;
+    afl::io::ConstMemoryStream ms(afl::string::toBytes("hello   there  <br/>  general\nkenobi"));
+    afl::io::xml::Reader rdr(ms, afl::io::xml::DefaultEntityHandler::getInstance(), csf);
+    util::rich::Parser testee(rdr);
+    testee.readNext();          // start
+
+    String_t result;
+    TestVisitor v(result);
+    testee.parse().visit(v);
+
+    // As of 20200703, this produces a space before the \n\n.
+    // We cannot ignore space before a tag in general because that makes 'foo <b>bar</b>' not work;
+    // for now, it's not worth adding a special case for <br>.
+    TS_ASSERT_EQUALS(result, "hello there \n\ngeneral kenobi");
 }
 

@@ -1,6 +1,6 @@
 /**
   *  \file interpreter/vmio/processloadcontext.cpp
-  *  \brief Class interpreter::vmio::WorldLoadContext
+  *  \brief Class interpreter::vmio::ProcessLoadContext
   */
 
 #include "interpreter/vmio/processloadcontext.hpp"

@@ -48,6 +48,7 @@ void
 game::ref::ListObserver::setConfigurationSelection(const ConfigurationSelection& sel)
 {
     m_pConfigurationSelection = &sel;
+    updateResultList();
 }
 
 game::ref::Configuration

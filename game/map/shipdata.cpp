@@ -1,5 +1,6 @@
 /**
   *  \file game/map/shipdata.cpp
+  *  \brief Structure game::map::ShipData
   */
 
 #include "game/map/shipdata.hpp"

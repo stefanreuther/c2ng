@@ -8,6 +8,8 @@
 
 #include "t_interpreter_exporter.hpp"
 #include "afl/charset/charset.hpp"
+#include "afl/except/fileproblemexception.hpp"
+#include "afl/io/constmemorystream.hpp"
 
 /** Simple test. */
 void
@@ -39,5 +41,54 @@ TestInterpreterExporterConfiguration::testIt()
 
     // Field list initially empty
     TS_ASSERT_EQUALS(testee.fieldList().size(), 0U);
+
+    // Constness (coverage)
+    TS_ASSERT_EQUALS(&testee.fieldList(), &const_cast<const interpreter::exporter::Configuration&>(testee).fieldList());
+
+    // Copying (coverage)
+    interpreter::exporter::Configuration copy(testee);
+    TS_ASSERT_EQUALS(copy.getCharsetIndex(), testee.getCharsetIndex());
+    testee.setCharsetByName("cp437");
+    TS_ASSERT_DIFFERS(copy.getCharsetIndex(), testee.getCharsetIndex());
+
+    copy = testee;
+    TS_ASSERT_EQUALS(copy.getCharsetIndex(), testee.getCharsetIndex());
+}
+
+/** Test load(). */
+void
+TestInterpreterExporterConfiguration::testLoad()
+{
+    // Good case
+    {
+        interpreter::exporter::Configuration testee;
+        afl::io::ConstMemoryStream stream(afl::string::toBytes("# config\n"
+                                                               "fields = a,b,c\n"
+                                                               "format = dbf\n"
+                                                               "ignore = me\n"
+                                                               "charset = koi8-r\n"));
+        testee.load(stream);
+
+        TS_ASSERT_EQUALS(testee.getFormat(), interpreter::exporter::DBaseFormat);
+        TS_ASSERT_EQUALS(testee.fieldList().toString(), "A,B,C");
+
+        std::auto_ptr<afl::charset::Charset> p(testee.createCharset());
+        TS_ASSERT(p.get() != 0);
+        TS_ASSERT_EQUALS(p->decode(afl::string::toBytes("\xc1")), "\xD0\xB0");  // U+0430, cyrillic 'a'
+    }
+
+    // Bad case - syntax error on ConfigurationFileParser
+    {
+        interpreter::exporter::Configuration testee;
+        afl::io::ConstMemoryStream stream(afl::string::toBytes("; syntax error"));
+        TS_ASSERT_THROWS(testee.load(stream), afl::except::FileProblemException);
+    }
+
+    // Bad case - syntax error in fields
+    {
+        interpreter::exporter::Configuration testee;
+        afl::io::ConstMemoryStream stream(afl::string::toBytes("fields = -1@x"));
+        TS_ASSERT_THROWS(testee.load(stream), afl::except::FileProblemException);
+    }
 }
 

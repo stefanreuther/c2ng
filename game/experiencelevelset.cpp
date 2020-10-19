@@ -1,5 +1,6 @@
 /**
   *  \file game/experiencelevelset.cpp
+  *  \brief Typedef game::ExperienceLevelSet_t
   */
 
 #include "game/experiencelevelset.hpp"

@@ -1,5 +1,6 @@
 /**
   *  \file game/vcr/battle.hpp
+  *  \brief Base class game::vcr::Battle
   */
 #ifndef C2NG_GAME_VCR_BATTLE_HPP
 #define C2NG_GAME_VCR_BATTLE_HPP
@@ -7,8 +8,9 @@
 #include "afl/base/deletable.hpp"
 #include "afl/string/translator.hpp"
 #include "game/config/hostconfiguration.hpp"
-#include "game/spec/shiplist.hpp"
+#include "game/map/point.hpp"
 #include "game/playerlist.hpp"
+#include "game/spec/shiplist.hpp"
 
 namespace game { namespace vcr {
 
@@ -34,7 +36,7 @@ namespace game { namespace vcr {
             If the fight cannot be played, but after=true is requested, treat that as after=false.
             \param slot Slot, [0,getNumObjects())
             \param after false to return beginning of fight, true to return after. */
-        virtual Object* getObject(size_t slot, bool after) = 0;
+        virtual const Object* getObject(size_t slot, bool after) const = 0;
 
         /** Get outcome for an object.
             Can be one of:
@@ -67,12 +69,22 @@ namespace game { namespace vcr {
         /** Check whether Engine/Shield Bonus is active in this fight. */
         virtual bool isESBActive(const game::config::HostConfiguration& config) const = 0;
 
+        /** Get position of this battle on the map.
+            \param [out] result Position
+            \return true: position was known, result set; false: result not set */
+        virtual bool getPosition(game::map::Point& result) const = 0;
+
 
         /*
          *  Useful methods
          */
 
-        String_t getDescription(const game::PlayerList& players, afl::string::Translator& tx);
+        /** Describe a battle.
+            The idea is to say "<name> vs <name>" in 1:1 fights, and "<race> vs <race>" in fleet battles with two participating races.
+            \param players Player list
+            \param tx Translator
+            \return description */
+        String_t getDescription(const game::PlayerList& players, afl::string::Translator& tx) const;
     };
 
 } }

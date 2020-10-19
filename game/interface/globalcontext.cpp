@@ -63,7 +63,7 @@ namespace {
         { "SYSTEM.GAMEDIRECTORY",  game::interface::igpGameDirectory,     GlobalPropertyDomain,   interpreter::thString },
         { "SYSTEM.GAMETYPE",       game::interface::igpRegSharewareText,  GlobalPropertyDomain,   interpreter::thString },
         { "SYSTEM.GAMETYPE$",      game::interface::igpRegSharewareFlag,  GlobalPropertyDomain,   interpreter::thInt },
-        // SYSTEM.GUI -> conif, guiif
+        // SYSTEM.GUI -> game::interface::registerConsoleCommands, client::si::registerCommands
         { "SYSTEM.HOST",           game::interface::igpSystemHost,        GlobalPropertyDomain,   interpreter::thString },
         { "SYSTEM.HOST$",          game::interface::igpSystemHostCode,    GlobalPropertyDomain,   interpreter::thInt },
         { "SYSTEM.HOSTVERSION",    game::interface::igpSystemHostVersion, GlobalPropertyDomain,   interpreter::thString },
@@ -123,7 +123,7 @@ namespace {
         // ex int/if/globalif.cc:lookupGlobalProperty
         afl::data::NameMap::Index_t ix = session.world().globalPropertyNames().getIndexByName(name);
         if (ix != afl::data::NameMap::nil) {
-            result = static_cast<interpreter::Context::PropertyIndex_t>(ix + NUM_GLOBAL_PROPERTIES);
+            result = ix + NUM_GLOBAL_PROPERTIES;
             return true;
         }
 

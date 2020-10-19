@@ -54,7 +54,7 @@ game::ref::SortByNewLocation::getLocation(const Reference& a, game::map::Point& 
         return true;
     } else {
         // does not move, or we don't know how it moves.
-        const game::map::MapObject* mo = dynamic_cast<const game::map::MapObject*>(m_universe.getObject(a));
+        const game::map::Object* mo = m_universe.getObject(a);
         if (mo != 0) {
             return mo->getPosition(out);
         } else {

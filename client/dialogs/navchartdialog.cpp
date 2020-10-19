@@ -10,13 +10,14 @@
 #include "client/map/overlay.hpp"
 #include "client/map/scanneroverlay.hpp"
 #include "client/map/widget.hpp"
-#include "client/proxy/chunnelproxy.hpp"
+#include "client/widgets/helpwidget.hpp"
 #include "client/widgets/referencelistbox.hpp"
 #include "client/widgets/scanresult.hpp"
 #include "game/actions/preconditions.hpp"
 #include "game/game.hpp"
 #include "game/map/ship.hpp"
 #include "game/map/universe.hpp"
+#include "game/proxy/chunnelproxy.hpp"
 #include "game/root.hpp"
 #include "game/spec/hullfunction.hpp"
 #include "game/turn.hpp"
@@ -58,14 +59,14 @@ namespace {
 
      private:
         void drawCircles(gfx::Canvas& can, const client::map::Renderer& ren, game::map::Point pt);
-        void onCandidateListUpdate(const client::proxy::ChunnelProxy::CandidateList& data);
+        void onCandidateListUpdate(const game::proxy::ChunnelProxy::CandidateList& data);
 
         NavChartDialog& m_parent;
         afl::base::Optional<game::map::Point> m_altCenter;  ///< Alternative circle center position.
         std::vector<game::map::Point> m_oldCenters;         ///< Old center positions.
 
-        client::proxy::ChunnelProxy m_chunnelProxy;
-        client::proxy::ChunnelProxy::CandidateList m_chunnelData;
+        game::proxy::ChunnelProxy m_chunnelProxy;
+        game::proxy::ChunnelProxy::CandidateList m_chunnelData;
     };
 
     /*
@@ -85,7 +86,6 @@ namespace {
         void updateChunnelButton();
         void onOK();
         void onDoubleClick(game::map::Point pt);
-        void onCancel();
         void onMove(game::map::Point pt);
         void onShipSelect(game::Id_t id, game::map::Point pos);
         game::Id_t chooseChunnelMate();
@@ -114,7 +114,7 @@ namespace {
 
 NavChartOverlay::NavChartOverlay(NavChartDialog& parent)
     : m_parent(parent), m_altCenter(), m_oldCenters(),
-      m_chunnelProxy(parent.m_root.engine().dispatcher(), parent.m_gameSender),
+      m_chunnelProxy(parent.m_gameSender, parent.m_root.engine().dispatcher()),
       m_chunnelData()
 {
     m_chunnelProxy.sig_candidateListUpdate.add(this, &NavChartOverlay::onCandidateListUpdate);
@@ -281,7 +281,7 @@ NavChartOverlay::drawCircles(gfx::Canvas& can, const client::map::Renderer& ren,
 }
 
 void
-NavChartOverlay::onCandidateListUpdate(const client::proxy::ChunnelProxy::CandidateList& data)
+NavChartOverlay::onCandidateListUpdate(const game::proxy::ChunnelProxy::CandidateList& data)
 {
     if (data != m_chunnelData) {
         m_chunnelData = data;
@@ -295,10 +295,10 @@ NavChartOverlay::onCandidateListUpdate(const client::proxy::ChunnelProxy::Candid
  */
 
 NavChartDialog::NavChartDialog(ui::Root& root,
-               util::RequestSender<game::Session> gameSender,
-               afl::string::Translator& tx,
-               NavChartState& state,
-               NavChartResult& result)
+                               util::RequestSender<game::Session> gameSender,
+                               afl::string::Translator& tx,
+                               NavChartState& state,
+                               NavChartResult& result)
     : m_root(root), m_loop(root), m_gameSender(gameSender), m_translator(tx), m_state(state),
       m_result(result),
       m_mapWidget(gameSender, root, gfx::Point(450, 450)),  // FIXME: size
@@ -336,7 +336,7 @@ NavChartDialog::run()
     m_movementOverlay.setMode(client::map::MovementOverlay::AcceptMovementKeys, true);
     m_movementOverlay.setMode(client::map::MovementOverlay::AcceptConfigKeys, true);
     m_movementOverlay.sig_doubleClick.add(this, &NavChartDialog::onDoubleClick);
-    win.add(ui::widgets::FrameGroup::wrapWidget(del, m_root.colorScheme(), ui::widgets::FrameGroup::LoweredFrame, m_mapWidget));
+    win.add(ui::widgets::FrameGroup::wrapWidget(del, m_root.colorScheme(), ui::LoweredFrame, m_mapWidget));
     m_mapWidget.addOverlay(m_movementOverlay);
     m_mapWidget.addOverlay(m_scannerOverlay);
     m_mapWidget.addOverlay(m_navChartOverlay);
@@ -361,6 +361,7 @@ NavChartDialog::run()
     }
     g22.add(g222);
 
+    ui::Widget& helper = del.addNew(new client::widgets::HelpWidget(m_root, m_gameSender, "pcc2:navchart"));
     ui::widgets::Button& btnOK     = del.addNew(new ui::widgets::Button(tx("F10 - OK"), util::Key_F10,    m_root));
     ui::widgets::Button& btnCancel = del.addNew(new ui::widgets::Button(tx("ESC"),      util::Key_Escape, m_root));
     ui::widgets::Button& btnHelp   = del.addNew(new ui::widgets::Button("H",            'h',              m_root));
@@ -369,11 +370,12 @@ NavChartDialog::run()
     g222.add(btnHelp);
     btnOK.sig_fire.add(this, &NavChartDialog::onOK);
     btnCancel.sig_fire.addNewClosure(m_loop.makeStop(0));
+    btnHelp.dispatchKeyTo(helper);
 
     win.add(g2);
-    // win.add(h.add(new WHelpWidget("pcc2:navchart")));
     win.add(del.addNew(new ui::PrefixArgument(m_root)));
     win.add(del.addNew(new ui::widgets::Quit(m_root, m_loop)));
+    win.add(helper);
     win.pack();
 
     setPositions();
@@ -408,11 +410,12 @@ NavChartDialog::setPositions()
 void
 NavChartDialog::doListShips()
 {
+    client::Downlink link(m_root);
     client::dialogs::VisualScanDialog dlg(m_root, m_gameSender, m_translator);
     dlg.setTitle(m_translator("List Ships"));
     dlg.setOkName(m_translator("OK"));
     dlg.setAllowForeignShips(true);
-    if (dlg.loadCurrent(m_state.target, game::ref::List::Options_t(game::ref::List::IncludeForeignShips), 0)) {
+    if (dlg.loadCurrent(link, m_state.target, game::ref::List::Options_t(game::ref::List::IncludeForeignShips), 0)) {
         game::Reference ref = dlg.run();
         if (ref.isSet()) {
             onShipSelect(ref.getId(), m_state.target);
@@ -474,12 +477,6 @@ NavChartDialog::onDoubleClick(game::map::Point /*pt*/)
 }
 
 void
-NavChartDialog::onCancel()
-{
-    m_loop.stop(0);
-}
-
-void
 NavChartDialog::onMove(game::map::Point pt)
 {
     m_state.target = pt;
@@ -513,7 +510,7 @@ NavChartDialog::chooseChunnelMate()
 {
     game::ref::UserList list;
     client::Downlink link(m_root);       // FIXME?
-    client::proxy::ChunnelProxy(m_root.engine().dispatcher(), m_gameSender).getCandidates(link, m_state.shipId, m_state.target, list);
+    game::proxy::ChunnelProxy(m_gameSender, m_root.engine().dispatcher()).getCandidates(link, m_state.shipId, m_state.target, list);
 
     if (list.empty()) {
         ui::dialogs::MessageBox(m_translator("There are no potential chunnel mates at the current position."), m_translator("Chunnel"), m_root).doOkDialog();
@@ -544,6 +541,6 @@ client::dialogs::doNavigationChart(NavChartResult& result,
                                    util::RequestSender<game::Session> gameSender,
                                    afl::string::Translator& tx)
 {
-    // ex doShipNavigationChart
+    // ex doShipNavigationChart, doGenericNavigationChart
     NavChartDialog(root, gameSender, tx, in, result).run();
 }

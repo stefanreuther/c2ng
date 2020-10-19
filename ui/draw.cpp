@@ -393,3 +393,71 @@ ui::prepareColorListItem(gfx::Context<util::SkinColor::Color>& ctx, gfx::Rectang
     }
     drawBackground(ctx, area);
 }
+
+void
+ui::drawFrame(gfx::Context<uint8_t>& ctx, gfx::Rectangle r, FrameType type, int frameWidth)
+{
+    // ex UIFrameGroup::drawContent, WColorFrame::drawContent, ui::widgets::FrameGroup::draw
+    // Determine colors
+    afl::base::Optional<uint8_t> leftOuter, leftInner, rightOuter, rightInner;
+    switch (type) {
+     case NoFrame:
+        // Draw nothing
+        break;
+
+     case RedFrame:
+        leftOuter = rightOuter = Color_Fire + 6;
+        leftInner = rightInner = Color_Fire + 8;
+        break;
+
+     case YellowFrame:
+        leftOuter = rightOuter = Color_DarkYellow;
+        leftInner = rightInner = Color_BrightYellow;
+        break;
+
+     case GreenFrame:
+        leftOuter = rightOuter = Color_GreenScale + 8;
+        leftInner = rightInner = Color_GreenScale + 10;
+        break;
+
+     case RaisedFrame:
+        leftOuter = leftInner = Color_White;
+        rightOuter = rightInner = Color_Black;
+        break;
+
+     case LoweredFrame:
+        leftOuter = leftInner = Color_Black;
+        rightOuter = rightInner = Color_White;
+        break;
+    }
+
+    // Determine widths
+    // These formulas make a 1px frame use the outer color and evenly split a 2px frame.
+    int innerWidth = frameWidth / 2;
+    int outerWidth = frameWidth - innerWidth;
+
+    // Draw
+    if (outerWidth > 0 && outerWidth < r.getWidth() && outerWidth < r.getHeight()) {
+        uint8_t color;
+        if (leftOuter.get(color)) {
+            drawSolidBar(ctx, gfx::Rectangle(r.getLeftX(), r.getTopY(),              r.getWidth() - outerWidth, outerWidth),                 color);
+            drawSolidBar(ctx, gfx::Rectangle(r.getLeftX(), r.getTopY() + outerWidth, outerWidth,                r.getHeight() - outerWidth), color);
+        }
+        if (rightOuter.get(color)) {
+            drawSolidBar(ctx, gfx::Rectangle(r.getRightX() - outerWidth, r.getTopY(),                 outerWidth,                r.getHeight() - outerWidth), color);
+            drawSolidBar(ctx, gfx::Rectangle(r.getLeftX() + outerWidth,  r.getBottomY() - outerWidth, r.getWidth() - outerWidth, outerWidth),                 color);
+        }
+    }
+    r.grow(-outerWidth, -outerWidth);
+    if (innerWidth > 0 && innerWidth < r.getWidth() && innerWidth < r.getHeight()) {
+        uint8_t color;
+        if (leftInner.get(color)) {
+            drawSolidBar(ctx, gfx::Rectangle(r.getLeftX(), r.getTopY(), r.getWidth() - innerWidth, innerWidth), color);
+            drawSolidBar(ctx, gfx::Rectangle(r.getLeftX(), r.getTopY() + innerWidth, innerWidth, r.getHeight() - innerWidth), color);
+        }
+        if (rightInner.get(color)) {
+            drawSolidBar(ctx, gfx::Rectangle(r.getRightX() - innerWidth, r.getTopY(), innerWidth, r.getHeight() - innerWidth), color);
+            drawSolidBar(ctx, gfx::Rectangle(r.getLeftX() + innerWidth,  r.getBottomY() - innerWidth, r.getWidth() - innerWidth, innerWidth), color);
+        }
+    }
+}

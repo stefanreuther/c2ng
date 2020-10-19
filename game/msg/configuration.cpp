@@ -104,6 +104,7 @@ game::msg::Configuration::load(afl::io::Directory& dir, int playerNr)
     loadMessageConfiguration(dir, playerNr, file);
 
     // Process
+    // FIXME: "signature" feature from PCC1 (missing in PCC2)
     clear();
     for (size_t i = 0, n = file.getNumElements(); i < n; ++i) {
         if (const ConfigurationFile::Element* ele = file.getElementByIndex(i)) {
@@ -117,7 +118,7 @@ game::msg::Configuration::load(afl::io::Directory& dir, int playerNr)
 }
 
 void
-game::msg::Configuration::save(afl::io::Directory& dir, int playerNr)
+game::msg::Configuration::save(afl::io::Directory& dir, int playerNr) const
 {
     // ex saveMessageConfig
     ConfigurationFile file;

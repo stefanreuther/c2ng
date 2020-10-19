@@ -54,7 +54,7 @@ namespace client { namespace widgets {
         ControlScreenHeader(ui::Root& root, KeymapWidget& kmw);
         ~ControlScreenHeader();
 
-        void enableButton(Button btn, ui::widgets::FrameGroup::Type type);
+        void enableButton(Button btn, ui::FrameType type);
         void disableButton(Button btn);
 
         void setText(Text which, String_t value);

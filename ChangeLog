@@ -1,3 +1,407 @@
+2020-10-18  Stefan Reuther  <streu@gmx.de>
+
+	* game/parser/messageparser.cpp: fix potential crash if template fails to provide a value for ID
+	* game/map/explosiontype.cpp: implement message info processing (explosions from message/utildata, not kore)
+	* game/map/ionstorm.cpp: implement message info processing (ion storms from message/utildata, not kore)
+
+2020-10-17  Stefan Reuther  <streu@gmx.de>
+
+	* game/sim/runner.hpp: class Job must be publicly visible
+
+2020-10-12  Stefan Reuther  <streu@gmx.de>
+
+	* game/map/objecttype.hpp: remove getUniverseByIndex() interface method and all implementations, removing some cyclic dependencies
+	* game/map/ufotype.cpp: implement Ufo/Wormhole merging
+
+2020-10-11  Stefan Reuther  <streu@gmx.de>
+
+	* game/session.cpp: inline some methods to reduce link dependencies
+	* game/sim/consoleapplication.cpp, game/sim/consoleapplication.hpp: new [ex mergeccb.pas, vastly expanded]
+	* game/sim/ship.cpp (isMatchingShipList): strengthen checks a little
+	* main/c2simtool.cpp: new
+
+2020-10-09  Stefan Reuther  <streu@gmx.de>
+
+	* game/sim/parallelrunner.cpp, game/sim/parallelrunner.hpp: new
+	* game/sim/runner.cpp, game/sim/runner.hpp: new
+	* game/sim/simplerunner.cpp, game/sim/simplerunner.hpp: new
+	* util/stopsignal.hpp: new
+
+2020-10-04  Stefan Reuther  <streu@gmx.de>
+
+	* game/map/planetformula.cpp (getMaxSupportedColonists): fix Tholian case (esp. CrystalSinTempBehavior=Yes)
+
+2020-10-02  Stefan Reuther  <streu@gmx.de>
+
+	* client/si/remotecontrol.cpp: new; used in VisualScanDialog [ex client/remote.cc]
+	* game/proxy/reverterproxy.cpp, game/proxy/reverterproxy.hpp: new
+	* client/dialogs/revertdialog.cpp, client/dialogs/revertdialog.hpp: new [ex client/dialogs/resetdlg.cc]
+
+2020-10-01  Stefan Reuther  <streu@gmx.de>
+
+	* game/v3/reverter.cpp: implement LocationReverter [ex game/reset.cc]
+	* game/map/locationreverter.hpp: new
+
+2020-09-27  Stefan Reuther  <streu@gmx.de>
+
+	* game/actions/cargotransfersetup.cpp: remove InterpreterInterface parameter; all callers and all CargoContainers adapted
+	* game/sim/transfer.cpp, game/sim/transfer.hpp: new [ex game/sim-game.cc]
+
+2020-09-25  Stefan Reuther  <streu@gmx.de>
+
+	* game/sim/run.cpp: clean up friendly code usage
+	* game/sim/run.cpp: fix interaction between 'NT1' and Cloaked Fighter Bays; was losing way too many fighters [#416]
+
+2020-09-22  Stefan Reuther  <streu@gmx.de>
+
+	* game/sim/object.hpp: implement implicit Double-Beam-Charge for Klingons [PCC2 #415]
+
+2020-09-20  Stefan Reuther  <streu@gmx.de>
+
+	* game/sim/run.cpp, game/sim/run.hpp: new [ex game/sim-run.h]
+
+2020-09-19  Stefan Reuther  <streu@gmx.de>
+
+	* game/sim/classresult.cpp, game/sim/classresult.hpp: new [ex game/sim-result.h]
+	* game/sim/result.cpp, game/sim/result.hpp: new [ex game/sim-run.h]
+	* game/sim/resultlist.cpp, game/sim/resultlist.hpp: new [ex game/sim-result.h]
+	* game/sim/unitresult.cpp, game/sim/unitresult.hpp: new [ex game/sim-result.h]
+
+2020-09-13  Stefan Reuther  <streu@gmx.de>
+
+	* game/proxy/hullspecificationproxy.cpp: use PictureNamer; remove dependency on ui/
+
+2020-09-12  Stefan Reuther  <streu@gmx.de>
+
+	* game/hostversion.cpp (isAlchemyRounding): always return false; rule does not apply to any known host version
+
+2020-09-11  Stefan Reuther  <streu@gmx.de>
+
+	* game/map/shippredictor.cpp: port PCC2 2.0.3 changes
+
+2020-09-05  Stefan Reuther  <streu@gmx.de>
+
+	* server/scripts/init_host.con: make it possible to run it from an install tree, not only from a source tree
+
+2020-09-02  Stefan Reuther  <streu@gmx.de>
+
+	* game/session.cpp: moved ProcessList here from interpreter/world.cpp to reduce cyclic dependencies
+	* game/map/minefieldmission.cpp: choose first applicable minefield, not closest one, for PHost (d'ooh!)
+
+2020-08-30  Stefan Reuther  <streu@gmx.de>
+
+	* game/interface/completionlist.cpp: add file-name completion
+
+2020-08-28  Stefan Reuther  <streu@gmx.de>
+
+	* client/dialogs/selectionmanager.cpp: new [ex client/dialogs/selmgr.cc]
+	* game/map/selectionvector.cpp (executeCompiledExpression): fix handling of opCurrent; refers to current, not target selection
+	* game/proxy/selectionproxy.cpp: new
+	* interpreter/filefunctions.cpp (IFAppendFileNameExtension): new
+	* ui/widgets/inputline.cpp: default font is big one (as in PCC1)
+
+2020-08-27  Stefan Reuther  <streu@gmx.de>
+
+	* scripts/doc.pl: sync from PCC2
+	* server/interface/hostgame.hpp: add ability to filter games by host/shiplist/master/tool
+	* server/host/hostgame.cpp: add ability to filter games by host/shiplist/master/tool
+
+2020-08-26  Stefan Reuther  <streu@gmx.de>
+
+	* game/nu/turnloader.cpp: quick&dirty VCR loader
+
+2020-08-25  Stefan Reuther  <streu@gmx.de>
+
+	* game/map/configuration.cpp: fix minor issues with circular wrap
+	* game/v3/registrationkey.cpp (unpackFromBytes): also make key valid; required for HostKey to correctly report database keys
+
+2020-08-21  Stefan Reuther  <streu@gmx.de>
+
+	* server/host/hostkey.cpp, server/host/hostkey.hpp: new, provide key list API
+	* server/interface/hostkey.hpp: new
+	* server/interface/hostkeyclient.cpp, server/interface/hostkeyclient.hpp: new
+	* server/interface/hostkeyserver.cpp, server/interface/hostkeyserver.hpp: new
+
+2020-08-20  Stefan Reuther  <streu@gmx.de>
+
+	* server/file/filegame.cpp: publish key Id, implement filter options on listKeyInfo
+	* server/host/hostturn.cpp: store uploaded keys
+	* server/host/keystore.cpp, server/host/keystore.hpp: new
+	* server/interface/filegame.hpp: publish key Id, implement filter options on listKeyInfo
+
+2020-08-19  Stefan Reuther  <streu@gmx.de>
+
+	* game/v3/registrationkey.cpp: rework interface a little
+	* server/host/exporter.cpp (importLogFiles): import log files (runhost.log, c2host.ini) into filer. Improve logging.
+
+2020-08-17  Stefan Reuther  <streu@gmx.de>
+
+	* game/proxy/lockproxy.cpp: new [moved here from client/proxy/lockproxy.cpp]
+	* game/proxy/maplocationproxy.cpp: new [moved here from client/proxy/maplocationproxy.cpp]
+	* game/proxy/mutexlistproxy.cpp: new [moved here from client/proxy/mutexlistproxy.cpp]
+	* game/proxy/planetinfoproxy.cpp: new [moved here from client/proxy/planetinfoproxy.cpp]
+	* game/proxy/processlistproxy.cpp: new [moved here from client/proxy/processlistproxy.cpp]
+	* game/proxy/searchproxy.cpp: new [moved here from client/proxy/searchproxy.cpp]
+	* game/proxy/specbrowserproxy.cpp: new [moved here from client/proxy/specbrowserproxy.cpp]
+	* game/proxy/taskeditorproxy.cpp: new [moved here from client/proxy/taskeditorproxy.cpp]
+
+2020-08-15  Stefan Reuther  <streu@gmx.de>
+
+	* client/dialogs/helpdialog.cpp: move HelpProxy here
+	* game/map/objectcursorfactory.hpp: new [moved here from client/objectcursorfactory.hpp]
+	* game/proxy/buildqueueproxy.cpp: new [moved here from client/proxy/buildqueueproxy.cpp]
+	* game/proxy/buildstarbaseproxy.cpp: new [moved here from client/proxy/buildstarbaseproxy.cpp]
+	* game/proxy/buildstructuresproxy.cpp: new [moved here from client/proxy/buildstructuresproxy.cpp]
+	* game/proxy/cargotransferproxy.cpp: new [moved here from client/proxy/cargotransferproxy.cpp]
+	* game/proxy/cargotransfersetupproxy.cpp: new [moved here from client/proxy/cargotransfersetupproxy.cpp]
+	* game/proxy/chunnelproxy.cpp: new [moved here from client/proxy/chunnelproxy.cpp]
+	* game/proxy/convertsuppliesproxy.cpp: new [moved here from client/proxy/convertsuppliesproxy.cpp]
+	* game/proxy/cursorobserverproxy.cpp: new [moved here from client/proxy/cursorobserverproxy.cpp]
+	* game/proxy/hullspecificationproxy.cpp: new [moved here from client/proxy/hullspecificationproxy.cpp]
+	* game/proxy/objectlistener.hpp: new [moved here from client/proxy/objectlistener.hpp]
+	* game/proxy/objectobserver.hpp: new [moved here from client/proxy/objectobserver.hpp]
+	* game/proxy/referencelistproxy.cpp: new [moved here from client/proxy/referencelistproxy.cpp]
+	* game/proxy/referenceobserverproxy.cpp: new [moved here from client/proxy/referenceobserverproxy.cpp]
+
+2020-08-11  Stefan Reuther  <streu@gmx.de>
+
+	* game/map/planetformula.cpp (getNativeSafeTax): fix typo causing it to report too high values
+	* game/proxy/friendlycodeproxy.cpp: new [moved here from client/proxy/friendlycodeproxy.cpp]
+	* game/proxy/taxationproxy.cpp: new [moved here from client/proxy/taxationproxy.cpp]
+
+2020-08-09  Stefan Reuther  <streu@gmx.de>
+
+	* game/playerarray.hpp: add constructor
+	* game/proxy/commandlistproxy.cpp: new [moved here from client/proxy/commandlistproxy.cpp]
+	* game/proxy/configurationproxy.cpp: new [moved here from client/proxy/configurationproxy.cpp]
+	* game/proxy/keymapproxy.cpp: new [moved here from client/proxy/keymapproxy.cpp]
+	* game/proxy/playerproxy.hpp: new [moved here from client/proxy/playerproxy.cpp]
+	* game/proxy/shipspeedproxy.cpp: new [moved here from client/proxy/shipspeedproxy.cpp]
+	* game/proxy/waitindicator.cpp: new [split off client/downlink.hpp]
+	* game/test/sessionthread.cpp: new
+	* game/test/waitindicator.cpp: new
+	* util/simplerequestdispatcher.cpp: new
+
+2020-08-08  Stefan Reuther  <streu@gmx.de>
+
+	* server/play/friendlycodepacker.cpp: new
+
+2020-08-07  Stefan Reuther  <streu@gmx.de>
+
+	* game/spec/friendlycodelist.cpp: merge extra codes into main list
+
+2020-08-05  Stefan Reuther  <streu@gmx.de>
+
+	* client/proxy/referencelistproxy.cpp: reduce usage of ui/
+
+2020-08-03  Stefan Reuther  <streu@gmx.de>
+
+	* client/proxy/cargotransferproxy.cpp, client/proxy/referencelistproxy.cpp, client/proxy/searchproxy.cpp: reduce usage of ui/ in client/proxy/
+
+2020-08-02  Stefan Reuther  <streu@gmx.de>
+
+	* client/widgets/helpwidget.cpp, client/widgets/helpwidget.hpp: new [ex client/widgets/helpwidget.h]
+
+2020-08-01  Stefan Reuther  <streu@gmx.de>
+
+	* client/dialogs/commandlistdialog.cpp, client/dialogs/commandlistdialog.hpp: new [ex client/dialogs/commandedit.cc, client/widgets/commandlist.cc, client/widgets/commandinfo.cc]
+	* client/proxy/commandlistproxy.cpp, client/proxy/commandlistproxy.hpp: new
+
+2020-07-26  Stefan Reuther  <streu@gmx.de>
+
+	* client/dialogs/visualscandialog.cpp: implement scan-next-turn
+	* game/hostversion.cpp, game/v3/rootloader.cpp: fix CPEnableRemote, RoundGravityWells being reset for wrong host versions
+	* client/dialogs/consoledialog.cpp: implement property list [Alt-V] [ex client/widgets/propertylist.cc]
+	* gfx/sdl/engine.cpp, gfx/sdl2/engine.cpp, main/c2ng.cpp: implement '-nomousegrab' [ex ui/uiglobal.cc]
+
+2020-07-25  Stefan Reuther  <streu@gmx.de>
+
+	* game/map/mapobject.hpp: remove MapObject; merge into Object
+
+2020-07-24  Stefan Reuther  <streu@gmx.de>
+
+	* share/resource/core_ui.q: implement starbase 'R' menu
+
+2020-07-23  Stefan Reuther  <streu@gmx.de>
+
+	* share/resource/core.q: implement more keys in SelectionDialog [ex client/widgets/objcontrol.cc]
+	* game/interface/iteratorcontext.cpp: implement Object(), NextIndexAt(), PreviousIndexAt()
+
+2020-07-19  Stefan Reuther  <streu@gmx.de>
+
+	* game/v3/command.cpp: sync with PCC1. 'SendFile' can now appear multiple times.
+	* interpreter/processlist.cpp (run): log errors here; this way we need not defer error logging to end-of-process-group or no-more-waits-in-ScriptSide
+
+2020-07-18  Stefan Reuther  <streu@gmx.de>
+
+	* tools/, server/tools/, server/: clean up and move main functions into main/
+	* game/maint/configurationapplication.cpp, game/maint/configurationapplication.hpp: new
+	* game/maint/messagesearchapplication.cpp, game/maint/messagesearchapplication.hpp: new
+
+2020-07-16  Stefan Reuther  <streu@gmx.de>
+
+	* client/dialogs/processlistdialog.cpp, client/dialogs/processlistdialog.hpp: new [ex client/dialogs/processmgr.h, client/widgets/processlist.h]
+	* client/proxy/mutexlistproxy.cpp, client/proxy/mutexlistproxy.hpp: new
+	* client/proxy/processlistproxy.cpp, client/proxy/processlistproxy.hpp: new
+	* game/interface/processlisteditor.cpp, game/interface/processlisteditor.hpp: new
+	* ui/window.cpp: enforce some space to the left/right of window title
+
+2020-06-21  Stefan Reuther  <streu@gmx.de>
+
+	* interpreter/process.cpp: fix some warnings
+	* interpreter/context.hpp: change PropertyIndex_t from uint32_t to size_t; fixes some warnings
+
+2020-06-17  Stefan Reuther  <streu@gmx.de>
+
+	* interpreter/process.cpp: clean up, const correctness. Fix some possible crashes through constructed invalid bytecode.
+
+2020-06-06  Stefan Reuther  <streu@gmx.de>
+
+	* interpreter/bytecodeobject.hpp: cleaned up and renamed some stuff
+
+2020-05-30  Stefan Reuther  <streu@gmx.de>
+
+	* game/map/selections.cpp, game/map/selections.hpp: renamed from markings
+	* game/map/selectionvector.cpp, game/map/selectionvector.hpp: renamed from markingvector
+	* game/interface/selectionfunctions.cpp, game/interface/selectionfunctions.hpp: renamed from markingfunctions
+	* share/resource/core_ui.q (CCUI.Ship.SetMission): show warning if ship is doing Beam Up Multiple
+
+2020-05-29  Stefan Reuther  <streu@gmx.de>
+
+	* server/play/outmessagecommandhandler.cpp, server/play/outmessagecommandhandler.hpp: new
+
+2020-05-28  Stefan Reuther  <streu@gmx.de>
+
+	* game/msg/outbox.cpp: cleanup
+	* server/play/gameaccess.cpp: add "outidx", "outmsgX" objects
+	* server/play/outmessageindexpacker.cpp, server/play/outmessageindexpacker.hpp: new
+	* server/play/outmessagepacker.cpp, server/play/outmessagepacker.hpp: new
+
+2020-05-27  Stefan Reuther  <streu@gmx.de>
+
+	* server/host/hostschedule.cpp (preview): rework; should now handle ASAP schedules
+	* server/play/hullpacker.cpp, server/play/shippacker.cpp: publish hull functions
+
+2020-05-26  Stefan Reuther  <streu@gmx.de>
+
+	* server/play/basichullfunctionpacker.cpp, server/play/basichullfunctionpacker.hpp: new
+
+2020-05-25  Stefan Reuther  <streu@gmx.de>
+
+	* game/spec/info/filter.cpp: no longer require Browser to be constructed, simplifying some code
+
+2020-05-24  Stefan Reuther  <streu@gmx.de>
+
+	* share/resource: import more resources
+	* client/widgets/filterdisplay.cpp, client/widgets/filterdisplay.hpp: new
+
+2020-05-23  Stefan Reuther  <streu@gmx.de>
+
+	* main/c2ng.cpp: make logging configurable
+	* client/dialogs/specbrowserdialog.cpp: fix handling of object selection after filtering
+	* ui/res/generatedengineprovider.cpp, ui/res/generatedengineprovider.hpp: new [ex client/widgets/engineinfo.h, sort-of]
+
+2020-05-22  Stefan Reuther  <streu@gmx.de>
+
+	* game/config/hostconfiguration.cpp (getExperienceLevelName): fix out-of-range behaviour
+	* game/v3/udata/reader.cpp (check): fixed it, didn't work yet
+
+2020-05-19  Stefan Reuther  <streu@gmx.de>
+
+	* game/spec/info/browser.cpp: add String_Name filter; add sorting
+
+2020-05-18  Stefan Reuther  <streu@gmx.de>
+
+	* client/dialogs/specbrowserdialog.cpp: improve filter rendering
+
+2020-05-17  Stefan Reuther  <streu@gmx.de>
+
+	* gfx/sdl2/surface.cpp (presentUpdate): workaround artifacts when upscaling (-fullscreen)
+	* ui/layout/axislayout.cpp: quick & dirty improvement for min < available < pref case
+	* game/spec/info/info.cpp: add Range_IsDeathRay
+	* client/dialogs/specbrowserdialog.cpp: list abilities for players, ships; add player links
+	* game/spec/info/browser.cpp: list abilities for players, ships
+
+2020-05-16  Stefan Reuther  <streu@gmx.de>
+
+	* ui/rich/stylableobject.cpp, ui/rich/stylableobject.hpp: new
+	* ui/draw.cpp (drawFrame): moved here from FrameGroup
+	* server/application.cpp: use StandardCommandLineParser so '-D' can now work as documented
+	* server/configurationhandler.cpp: anticipate StandardCommandLineParser for '-D' handling
+	* client/picturenamer.cpp, client/picturenamer.hpp: new
+	* game/spec/info/nullpicturenamer.cpp, game/spec/info/nullpicturenamer.hpp: new
+	* game/spec/info/picturenamer.hpp: new
+
+2020-05-11  Stefan Reuther  <streu@gmx.de>
+
+	* client/dialogs/specbrowserdialog.cpp: edit filter; cleanup
+	* game/spec/info/browser.cpp: more filters
+
+2020-05-10  Stefan Reuther  <streu@gmx.de>
+
+	* client/dialogs/specbrowserdialog.cpp, client/dialogs/specbrowserdialog.hpp: new [incomplete]
+	* client/proxy/specbrowserproxy.cpp, client/proxy/specbrowserproxy.hpp: new
+	* game/spec/info/browser.cpp, game/spec/info/browser.hpp: new
+	* game/spec/info/filter.cpp, game/spec/info/filter.hpp: new
+	* game/spec/info/info.cpp, game/spec/info/info.hpp: new
+	* game/spec/info/types.cpp, game/spec/info/types.hpp: new
+	* ui/widgets/cardtabbar.cpp, ui/widgets/cardtabbar.hpp: new (separated from ui/widgets/tabbar.cpp)
+
+2020-05-01  Stefan Reuther  <streu@gmx.de>
+
+	* util/range.hpp: new
+
+2020-04-30  Stefan Reuther  <streu@gmx.de>
+
+	* game/spec/racialabilitylist.cpp, game/spec/racialabilitylist.hpp: new
+	* game/spec/basichullfunction.cpp, game/spec/basichullfunction.hpp (getPictureName): new
+	* game/spec/basichullfunctionlist.cpp: handle "p=" assignment in hullfunc.cc
+
+2020-04-29  Stefan Reuther  <streu@gmx.de>
+
+	* game/spec/friendlycodelist.hpp: moved code from game/data/ here
+	* game/data/friendlycode.hpp: removed
+
+2020-04-13  Stefan Reuther  <streu@gmx.de>
+
+	* share/server/mailout: change to https URLs
+
+2020-04-12  Stefan Reuther  <streu@gmx.de>
+
+	* client/tiles/shipmovementtile.cpp: show failure to move due to training
+	* game/map/shippredictor.cpp: show failure to move due to training
+	* share/resource/core_tiles.q: highlight PE if it is ineffective due to training [#394]
+
+2020-04-04  Stefan Reuther  <streu@gmx.de>
+
+	* client/si/commands.cpp: navchart starts up in chunnel mode if appropriate
+	* client/tiles/shipmovementtile.cpp: consistent highlighting for chunnel failures
+
+2020-03-27  Stefan Reuther  <streu@gmx.de>
+
+	* game/map/planetinfo.cpp, game/map/planetformula.cpp: base tax predictions should use viewpoint player, not (possibly unknown) planet owner
+
+2020-03-18  Stefan Reuther  <streu@gmx.de>
+
+	* game/interface/planetproperty.cpp: new properties (TURN.COLONISTS, TURN.NATIVES, etc.)
+
+2020-03-09  Stefan Reuther  <streu@gmx.de>
+
+	* server/play/mainpacker.cpp: publish SYSTEM.VERSION$
+
+2020-03-08  Stefan Reuther  <streu@gmx.de>
+
+	* game/spec/torpedolauncher.cpp, game/spec/beam.cpp: add derived information
+
+2020-03-07  Stefan Reuther  <streu@gmx.de>
+
+	* game/map/planet.cpp: fix default goals
+	* server/play/planetpacker.cpp: fix off-by-one in STORAGE.LAUNCHERS
+
+2020-02-01  Stefan Reuther  <streu@gmx.de>
+
+	-------------------- c2ng_2_40_8
+
 2020-01-26  Stefan Reuther  <streu@gmx.de>
 
 	* client/dialogs/buildqueuedialog.cpp, client/dialogs/buildqueuedialog.hpp: new

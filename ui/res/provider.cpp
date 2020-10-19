@@ -17,7 +17,7 @@ ui::res::Provider::openResourceFile(afl::io::Directory& dir, String_t fileName, 
 {
     // ex resmgr/resmgr.h:openResourceFile
     if (fileName.size() != 0 && fileName[fileName.size()-1] == '.') {
-        // File name has the form "xxx.", which menas: look with suffixes
+        // File name has the form "xxx.", which means: look with suffixes
         while (const char*const* pp = suffixes.eat()) {
             if (const char* p = *pp) {
                 afl::base::Ptr<afl::io::Stream> s = dir.openFileNT(fileName + p, afl::io::FileSystem::OpenRead);

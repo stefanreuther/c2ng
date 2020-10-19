@@ -40,11 +40,6 @@ namespace game { namespace map {
             \return object if it exists, null otherwise */
         virtual Object* getObjectByIndex(Id_t index) = 0;
 
-        /** Get universe, given an index.
-            Note that the universe can be null even for existing objects.
-            \param index */
-        virtual Universe* getUniverseByIndex(Id_t index) = 0;
-
         /** Get next index.
             The returned index need not be valid as per getObjectByIndex(),
             but the implementation must guarantee that repeated calls to getNextIndex()

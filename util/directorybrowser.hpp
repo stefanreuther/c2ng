@@ -33,7 +33,7 @@ namespace util {
         - getErrorText(): if loading the directory fails, this will be the error message. */
     class DirectoryBrowser {
      public:
-        typedef afl::base::InlineOptional<size_t,-1> OptionalIndex_t;
+        typedef afl::base::InlineOptional<size_t,size_t(-1)> OptionalIndex_t;
 
         typedef afl::base::Ptr<afl::io::Directory> DirectoryPtr_t;
         typedef afl::base::Ptr<afl::io::DirectoryEntry> DirectoryEntryPtr_t;

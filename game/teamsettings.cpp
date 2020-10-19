@@ -1,5 +1,6 @@
 /**
   *  \file game/teamsettings.cpp
+  *  \brief Class game::TeamSettings
   */
 
 #include "game/teamsettings.hpp"
@@ -10,10 +11,18 @@
 #include "afl/io/stream.hpp"
 #include "afl/string/format.hpp"
 #include "util/io.hpp"
-#include "util/translation.hpp"
 #include "util/skincolor.hpp"
+#include "util/translation.hpp"
 
 namespace {
+    /*
+     *  Definition of team file format
+     *
+     *  This file is shared between all PCC versions since 1.0.2.
+     *  - TeamHeader
+     *  - 12 team names
+     *  - TransferSettings
+     */
     typedef afl::bits::Value<afl::bits::Int16LE> Int16_t;
 
     const int NUM_HEADER_TEAMS = 12;
@@ -39,19 +48,22 @@ namespace {
 }
 
 
-
+// Constructor.
 game::TeamSettings::TeamSettings()
 {
     clear();
 }
 
+// Destructor.
 game::TeamSettings::~TeamSettings()
 { }
 
+// Reset to default settings.
 void
 game::TeamSettings::clear()
 {
     // ex game/team.cc:doneTeams
+    // ex phost.pas:DefaultTeams (note: default flags in PCC1: tf_AutoSync(1) + tf_XferSync(2)
     m_flags = 0;
     m_viewpointPlayer = 0;
     m_passcode = 0;
@@ -66,7 +78,7 @@ game::TeamSettings::clear()
     sig_teamChange.raise();
 }
 
-// /** Get number of team a player is in. */
+// Get team number for a player.
 int
 game::TeamSettings::getPlayerTeam(int player) const
 {
@@ -74,7 +86,7 @@ game::TeamSettings::getPlayerTeam(int player) const
     return m_playerTeams.get(player);
 }
 
-// /** Change number of team a player is in. */
+// Set team number for a player.
 void
 game::TeamSettings::setPlayerTeam(int player, int team)
 {
@@ -85,7 +97,7 @@ game::TeamSettings::setPlayerTeam(int player, int team)
     }
 }
 
-// /** Remove player from his team. Moves him into a team of his own. */
+// Remove player from their team.
 void
 game::TeamSettings::removePlayerTeam(int player)
 {
@@ -107,11 +119,12 @@ game::TeamSettings::removePlayerTeam(int player)
     }
 }
 
-// /** Get number of team members in a team. */
+// Get number of team members in a team.
 int
 game::TeamSettings::getNumTeamMembers(int team) const
 {
     // ex game/team.h:getNumTeamMembers
+    // ex phost.pas:IsFreeTeam
     int result = 0;
     for (int i = 1; i <= MAX_PLAYERS; ++i) {
         if (m_playerTeams.get(i) == team) {
@@ -121,7 +134,7 @@ game::TeamSettings::getNumTeamMembers(int team) const
     return result;
 }
 
-// /** Get name of a team. */
+// Get name of a team.
 String_t
 game::TeamSettings::getTeamName(int team, afl::string::Translator& tx) const
 {
@@ -133,7 +146,7 @@ game::TeamSettings::getTeamName(int team, afl::string::Translator& tx) const
     return result;
 }
 
-// /** Set name of a team. */
+// Set name of a team.
 void
 game::TeamSettings::setTeamName(int team, const String_t& name)
 {
@@ -144,7 +157,7 @@ game::TeamSettings::setTeamName(int team, const String_t& name)
     }
 }
 
-// /** Check whether team has a name. If it has not, getTeamName() will return a default name. */
+// Check for named team.
 bool
 game::TeamSettings::isNamedTeam(int team) const
 {
@@ -152,11 +165,13 @@ game::TeamSettings::isNamedTeam(int team) const
     return !m_teamNames.get(team).empty();
 }
 
-// /** Check whether there's any team configured. */
+// Check for team configuration.
 bool
 game::TeamSettings::hasAnyTeams() const
 {
     // ex game/team.h:isTeamConfigured
+    // FIXME: this does not consider m_passcode, m_sendConfig, m_receiveConfig.
+    // '!hasAnyTeams()' therefore is not sufficient to determine whether to save team.cc.
     for (int i = 1; i <= MAX_PLAYERS; ++i) {
         if (m_playerTeams.get(i) != i || !m_teamNames.get(i).empty()) {
             return true;
@@ -165,9 +180,7 @@ game::TeamSettings::hasAnyTeams() const
     return false;
 }
 
-// /** Set player Ids.
-//     \param eff   "effective" id. The one in whose name we're giving commands.
-//     \param real  "real" id. The one which was authenticated. */
+// Set viewpoint player.
 void
 game::TeamSettings::setViewpointPlayer(int player)
 {
@@ -178,8 +191,7 @@ game::TeamSettings::setViewpointPlayer(int player)
     }
 }
 
-// /** Get current player. That's the one whose data we're looking at,
-//     0 if none. */
+// Get viewpoint player.
 int
 game::TeamSettings::getViewpointPlayer() const
 {
@@ -187,7 +199,7 @@ game::TeamSettings::getViewpointPlayer() const
     return m_viewpointPlayer;
 }
 
-// /** Get relation to player n. */
+// Get relation from viewpoint to a player.
 game::TeamSettings::Relation
 game::TeamSettings::getPlayerRelation(int player) const
 {
@@ -200,12 +212,15 @@ game::TeamSettings::getPlayerRelation(int player) const
     }
 }
 
+// Get player color.
 util::SkinColor::Color
 game::TeamSettings::getPlayerColor(int player) const
 {
+    // ex game/chart.h:getPlayerColor
     return getRelationColor(getPlayerRelation(player));
 }
 
+// Get color for a relation.
 util::SkinColor::Color
 game::TeamSettings::getRelationColor(Relation relation)
 {
@@ -221,10 +236,12 @@ game::TeamSettings::getRelationColor(Relation relation)
     return util::SkinColor::Static;
 }
 
+// Load from file.
 void
 game::TeamSettings::load(afl::io::Directory& dir, int player, afl::charset::Charset& cs)
 {
     // ex game/team.cc:loadTeams, initTeams
+    // ex phost.pas:LoadTeams
     // Start empty
     clear();
 
@@ -273,9 +290,11 @@ game::TeamSettings::load(afl::io::Directory& dir, int player, afl::charset::Char
     sig_teamChange.raise();    
 }
 
+// Save to file.
 void
 game::TeamSettings::save(afl::io::Directory& dir, int player, afl::charset::Charset& cs) const
 {
+    // ex phost.pas:SaveTeams
     afl::base::Ref<afl::io::Stream> out = dir.openFile(afl::string::Format("team%d.cc", player), afl::io::FileSystem::Create);
 
     // Header

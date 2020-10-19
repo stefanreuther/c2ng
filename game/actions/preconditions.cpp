@@ -1,5 +1,6 @@
 /**
   *  \file game/actions/preconditions.cpp
+  *  \brief Preconditions
   */
 
 #include "game/actions/preconditions.hpp"
@@ -8,9 +9,6 @@
 #include "game/root.hpp"
 #include "game/game.hpp"
 
-// /** Check for a ship that is played.
-//     Throws if it is not.
-//     If this returns normally, the ship is played and has full data. */
 void
 game::actions::mustBePlayed(const game::map::Ship& ship)
 {
@@ -20,9 +18,6 @@ game::actions::mustBePlayed(const game::map::Ship& ship)
     }
 }
 
-// /** Check for a planet that is played.
-//     Throws if it is not.
-//     If this returns normally, the planet is played and has full data. */
 void
 game::actions::mustBePlayed(const game::map::Planet& planet)
 {
@@ -32,9 +27,6 @@ game::actions::mustBePlayed(const game::map::Planet& planet)
     }
 }
 
-// /** Check for a planet that has a base and is played.
-//     Throws if it is not.
-//     If this returns normally, the planet has a base, is played and has full data. */
 void
 game::actions::mustHavePlayedBase(const game::map::Planet& planet)
 {
@@ -62,18 +54,6 @@ game::actions::mustExist(game::map::Ship* ship)
     }
     return *ship;
 }
-
-
-// FIXME: remove
-// /** Check for a turn.
-//     Throws if there is no displayed turn. */
-// void
-// mustHaveTurn()
-// {
-//     if (!haveDisplayedTurn()) {
-//         throw GError(GError::eUser, _("No race loaded"));
-//     }
-// }
 
 game::spec::ShipList&
 game::actions::mustHaveShipList(game::Session& session)

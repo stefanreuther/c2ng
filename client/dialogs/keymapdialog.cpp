@@ -6,7 +6,7 @@
 #include "afl/base/deleter.hpp"
 #include "afl/string/format.hpp"
 #include "client/downlink.hpp"
-#include "client/proxy/keymapproxy.hpp"
+#include "game/proxy/keymapproxy.hpp"
 #include "ui/group.hpp"
 #include "ui/invisiblewidget.hpp"
 #include "ui/layout/grid.hpp"
@@ -19,7 +19,7 @@
 #include "util/keymapinformation.hpp"
 #include "util/translation.hpp"
 
-using client::proxy::KeymapProxy;
+using game::proxy::KeymapProxy;
 using afl::string::Format;
 using util::rich::Text;
 using util::KeymapInformation;
@@ -74,7 +74,7 @@ namespace {
 
 KeymapDialog::KeymapDialog(ui::Root& root, util::RequestSender<game::Session> gameSender)
     : Listener(),
-      m_proxy(root.engine().dispatcher(), gameSender),
+      m_proxy(gameSender, root.engine().dispatcher()),
       m_link(root),
       m_primaryKeymapName(),
       m_alternateKeymapName(),

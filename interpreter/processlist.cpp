@@ -29,6 +29,7 @@
 
 #include "interpreter/processlist.hpp"
 #include "interpreter/process.hpp"
+#include "interpreter/world.hpp"
 
 namespace {
     uint32_t allocateId(uint32_t& var)
@@ -128,14 +129,23 @@ interpreter::ProcessList::joinProcess(Process& proc, uint32_t pgid)
     // If we successfully made it runnable, move it into the target PG.
     // It may bring other processes with it.
     if (rename) {
-        uint32_t oldGroup = proc.getProcessGroupId();
-        for (size_t i = 0; i != m_processes.size(); ++i) {
-            Process& p = *m_processes[i];
-            if (p.getProcessGroupId() == oldGroup) {
-                p.setProcessGroupId(pgid);
-            }
+        joinProcessGroup(proc.getProcessGroupId(), pgid);
+    }
+}
+
+// Join process groups.
+void
+interpreter::ProcessList::joinProcessGroup(uint32_t oldGroup, uint32_t newGroup)
+{
+    for (size_t i = 0; i != m_processes.size(); ++i) {
+        Process& p = *m_processes[i];
+        if (p.getProcessGroupId() == oldGroup) {
+            p.setProcessGroupId(newGroup);
         }
     }
+
+    // oldGroup no longer exists, signal its termination
+    sig_processGroupFinish.raise(oldGroup);
 }
 
 // Resume a process.
@@ -303,9 +313,15 @@ interpreter::ProcessList::run()
 
                  case Process::Ended:
                  case Process::Terminated:
-                 case Process::Failed:
-                    // Process ended in one way or another. Start another one from this process group.
+                    // Process ended. Start another one from this process group.
                     handled = true;
+                    startProcessGroup(proc->getProcessGroupId());
+                    break;
+
+                 case Process::Failed:
+                    // Process failed. Log and Start another one from this process group.
+                    handled = true;
+                    proc->world().logError(afl::sys::LogListener::Error, proc->getError());
                     startProcessGroup(proc->getProcessGroupId());
                     break;
                 }
@@ -388,7 +404,7 @@ interpreter::ProcessList::removeTerminatedProcesses()
 
 // Handle a priority change.
 void
-interpreter::ProcessList::handlePriorityChange(Process& proc)
+interpreter::ProcessList::handlePriorityChange(const Process& proc)
 {
     // ex int/process.h:handlePriorityChange
     // ex ccexec.pas:EnqueueProcess, Reschedule

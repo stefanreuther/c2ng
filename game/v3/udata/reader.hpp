@@ -1,14 +1,15 @@
 /**
   *  \file game/v3/udata/reader.hpp
+  *  \brief Base class game::v3::udata::Reader
   */
 #ifndef C2NG_GAME_V3_UDATA_READER_HPP
 #define C2NG_GAME_V3_UDATA_READER_HPP
 
 #include "afl/base/deletable.hpp"
-#include "afl/io/stream.hpp"
-#include "game/timestamp.hpp"
 #include "afl/base/memory.hpp"
 #include "afl/base/types.hpp"
+#include "afl/io/stream.hpp"
+#include "game/timestamp.hpp"
 
 namespace game { namespace v3 { namespace udata {
 
@@ -16,7 +17,7 @@ namespace game { namespace v3 { namespace udata {
 
         This encapsulates the logic for reading UTILx.DAT.
         Derived classes override handleRecord() to actually process the records. */
-    class Reader {
+    class Reader : public afl::base::Deletable {
      public:
         /** Constructor. */
         Reader();

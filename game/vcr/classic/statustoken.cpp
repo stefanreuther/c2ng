@@ -1,5 +1,6 @@
 /**
   *  \file game/vcr/classic/statustoken.cpp
+  *  \brief Base class game::vcr::classic::StatusToken
   */
 
 #include "game/vcr/classic/statustoken.hpp"

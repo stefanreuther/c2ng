@@ -1,5 +1,6 @@
 /**
   *  \file game/historyturnlist.cpp
+  *  \brief Class game::HistoryTurnList
   */
 
 #include "game/historyturnlist.hpp"
@@ -24,7 +25,7 @@ game::HistoryTurn*
 game::HistoryTurnList::create(int nr)
 {
     HistoryTurn* result = m_turns[nr];
-    if (result == 0) {
+    if (result == 0 && nr > 0) {
         result = new HistoryTurn(nr);
         m_turns.insertNew(nr, result);
     }

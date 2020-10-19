@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/selectionexpression.hpp
+  *  \brief Class interpreter::SelectionExpression
   */
 #ifndef C2NG_INTERPRETER_SELECTIONEXPRESSION_HPP
 #define C2NG_INTERPRETER_SELECTIONEXPRESSION_HPP
@@ -10,6 +11,7 @@ namespace interpreter {
 
     class Tokenizer;
 
+    /** Parser for a selection expression. */
     class SelectionExpression {
      public:
         // These are from GMultiSelection:
@@ -28,9 +30,9 @@ namespace interpreter {
         static const char opZero       = '0';     ///< Zero. Push once: false.
         static const char opOne        = '1';     ///< One. Push once: true.
 
-        enum {
-            NUM_SELECTION_LAYERS = 8
-        };
+        /** Number of selection layers.
+            Layer numbers are [0,NUM_SELECTION_LAYERS). */
+        static const int NUM_SELECTION_LAYERS = 8;
 
         /** Compile selection expression.
             Selection expressions are compiled into a simple RPN string.

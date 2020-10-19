@@ -11,6 +11,7 @@
 #include "interpreter/error.hpp"
 #include "client/si/requestlink2.hpp"
 #include "client/si/outputstate.hpp"
+#include "game/reference.hpp"
 
 namespace client { namespace si {
 
@@ -27,6 +28,7 @@ namespace client { namespace si {
 
         void executeCommandWait(String_t command, bool verbose, String_t name);
         void executeKeyCommandWait(String_t keymapName, util::Key_t key, int prefix);
+        void executeGoToReference(String_t taskName, game::Reference ref);
         void executeTaskWait(std::auto_ptr<ScriptTask> task);
         void continueProcessWait(RequestLink2 link);
         void handleWait(uint32_t id);

@@ -29,6 +29,17 @@ interpreter::MemoryCommandSource::addLine(const String_t& line)
     m_lines.push_back(line);
 }
 
+void
+interpreter::MemoryCommandSource::addLines(afl::string::ConstStringMemory_t mem)
+{
+    while (!mem.empty()) {
+        // Copy line
+        addLine(afl::string::fromMemory(mem.split(mem.find('\n'))));
+
+        // Eat the '\n'
+        mem.eat();
+    }
+}
 
 void
 interpreter::MemoryCommandSource::readNextLine()

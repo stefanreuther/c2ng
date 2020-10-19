@@ -10,6 +10,8 @@
 #include "afl/base/inlineoptional.hpp"
 #include "afl/base/optional.hpp"
 #include "afl/base/types.hpp"
+#include "afl/data/scalarvalue.hpp"
+#include "afl/data/stringvalue.hpp"
 #include "afl/data/value.hpp"
 #include "afl/string/string.hpp"
 
@@ -67,6 +69,18 @@ namespace interpreter {
         \retval +1 Input is True
         \change PCC2 <= 2.0.1 treats non-scalars as empty. We treat non-scalars as true. */
     int getBooleanValue(const afl::data::Value* value);
+
+    /** Get required string value.
+        \param value Value to check
+        \return value from StringValue::getValue()
+        \throw Error if value is not a StringValue */
+    const String_t& mustBeStringValue(const afl::data::Value* value);
+
+    /** Get required scalar (integer, boolean) value.
+        \param value Value to check
+        \return value from ScalarValue::getValue()
+        \throw Error if value is not a ScalarValue */
+    int32_t mustBeScalarValue(const afl::data::Value* value);
 
     /** Convert to string representation.
         This function implements stringification for simple types.

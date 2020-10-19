@@ -10,6 +10,7 @@
   *    Since timestamps are normally ASCII only, this only happens on syntactically-invalid timestamps.
   */
 
+#include <cstring>
 #include "game/timestamp.hpp"
 #include "afl/base/countof.hpp"
 #include "afl/charset/codepagecharset.hpp"
@@ -119,6 +120,7 @@ game::Timestamp::storeRawData(Data_t data) const
     std::memcpy(data, m_data, SIZE);
 }
 
+// Compare for equality.
 bool
 game::Timestamp::operator==(const Timestamp& rhs) const
 {
@@ -131,7 +133,7 @@ game::Timestamp::operator==(ConstData_t rhs) const
     return std::memcmp(m_data, rhs, SIZE) == 0;
 }
 
-/** Compare for inequality. */
+// Compare for inequality.
 bool
 game::Timestamp::operator!=(const Timestamp& rhs) const
 {

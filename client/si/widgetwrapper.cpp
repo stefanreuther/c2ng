@@ -5,7 +5,7 @@
 
 #include "client/si/widgetwrapper.hpp"
 #include "afl/string/format.hpp"
-#include "client/proxy/objectlistener.hpp"
+#include "game/proxy/objectlistener.hpp"
 #include "client/si/genericwidgetvalue.hpp"
 #include "client/si/scriptside.hpp"
 #include "client/si/userside.hpp"
@@ -15,6 +15,7 @@
 #include "game/map/planet.hpp"
 #include "game/map/ship.hpp"
 #include "client/si/widgetreference.hpp"
+#include "game/interface/iteratorcontext.hpp"
 
 namespace {
     // FIXME: if updates happen faster than scripts are executed, this will spam the queue.
@@ -34,7 +35,7 @@ namespace {
             {
                 // FIXME: can we log errors if this process fails?
                 if (client::si::ScriptSide* ss = session.extra().get(client::si::SCRIPTSIDE_ID)) {
-                    session.world().processList().startProcessGroup(m_pgid);
+                    session.processList().startProcessGroup(m_pgid);
                     ss->runProcesses(session);
                 }
             }
@@ -47,7 +48,7 @@ namespace {
      *  Normally, ObjectListener's job is to call back into the UI thread and let that decide what happens.
      *  We can do everything in one callback, though.
      */
-    class Listener : public client::proxy::ObjectListener {
+    class Listener : public game::proxy::ObjectListener {
      public:
         Listener(const client::si::WidgetReference& ref,
                  util::RequestSender<game::Session> gameSender,
@@ -65,20 +66,12 @@ namespace {
                         interpreter::BCORef_t bco = session.world().compileCommand(m_command);
 
                         // Create process
-                        interpreter::ProcessList& processList = session.world().processList();
+                        interpreter::ProcessList& processList = session.processList();
                         interpreter::Process& proc = processList.create(session.world(), "<Update>");
 
                         // - object context
-                        if (dynamic_cast<game::map::Ship*>(obj) != 0) {
-                            if (interpreter::Context* ctx = game::interface::ShipContext::create(obj->getId(), session)) {
-                                proc.pushNewContext(ctx);
-                            }
-                        } else if (dynamic_cast<game::map::Planet*>(obj) != 0) {
-                            if (interpreter::Context* ctx = game::interface::PlanetContext::create(obj->getId(), session)) {
-                                proc.pushNewContext(ctx);
-                            }
-                        } else {
-                            // FIXME?
+                        if (interpreter::Context* ctx = game::interface::createObjectContext(obj, session)) {
+                            proc.pushNewContext(ctx);
                         }
 
                         // - widget context
@@ -200,7 +193,7 @@ client::si::WidgetWrapper::handleMouse(gfx::Point pt, MouseButtons_t pressedButt
 }
 
 void
-client::si::WidgetWrapper::attach(client::proxy::ObjectObserver& oop, String_t command)
+client::si::WidgetWrapper::attach(game::proxy::ObjectObserver& oop, String_t command)
 {
     oop.addNewListener(new Listener(WidgetReference(m_holder, m_slot), m_gameSender, m_properties, command));
 }

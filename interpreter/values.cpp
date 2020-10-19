@@ -131,6 +131,27 @@ interpreter::getBooleanValue(const afl::data::Value* value)
     return visi.get();
 }
 
+const String_t&
+interpreter::mustBeStringValue(const afl::data::Value* value)
+{
+    const afl::data::StringValue* sv = dynamic_cast<const afl::data::StringValue*>(value);
+    if (sv == 0) {
+        throw interpreter::Error::typeError(interpreter::Error::ExpectString);
+    }
+    return sv->getValue();
+}
+
+int32_t
+interpreter::mustBeScalarValue(const afl::data::Value* value)
+{
+    const afl::data::ScalarValue* sv = dynamic_cast<const afl::data::ScalarValue*>(value);
+    if (sv == 0) {
+        throw interpreter::Error::typeError(interpreter::Error::ExpectInteger);
+    }
+    return sv->getValue();
+}
+
+
 // Convert to string representation.
 String_t
 interpreter::toString(const afl::data::Value* value, bool readable)
@@ -214,6 +235,8 @@ interpreter::quoteString(const String_t& value)
 {
     // ex int/value.h:quoteString
     // ex ccexpr.pas:Quote
+    // FIXME: should this handle \t? For now, it's not strictly necessary; console shows it as
+    // replacement character which can be correctly recalled and parsed.
     if (value.find_first_of("\"\\\n") == value.npos) {
         // No meta-characters, use unquoted double-quote string
         return "\"" + value + "\"";

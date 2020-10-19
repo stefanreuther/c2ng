@@ -1,7 +1,0 @@
-/*!
-     \namespace game::data
-     \brief Data excerpts
-
-     This namespace contains classes generate data excerpts.
-     Excerpts are used to transfer "dumb" data out of the "living" game session into a display component.
- */

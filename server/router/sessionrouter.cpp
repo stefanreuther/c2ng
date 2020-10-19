@@ -143,13 +143,11 @@ server::router::SessionRouter::getConfiguration()
                                "Router.Timeout=%d\n"
                                "Router.VirginTimeout=%d\n"
                                "Router.MaxSessions=%d\n"
-                               "Router.NewSessionsWin=%d\n"
-                               "Router.FileNotify=%d\n")
+                               "Router.NewSessionsWin=%d\n")
         << config.normalTimeout
         << config.virginTimeout
         << config.maxSessions
-        << int(config.newSessionsWin)
-        << int(config.enableFileNotify);
+        << int(config.newSessionsWin);
 }
 
 void

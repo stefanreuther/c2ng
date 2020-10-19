@@ -56,8 +56,9 @@ namespace util { namespace plugin {
             It can be installed by calling doInstall().
 
             \param fileName File to install
+            \param tx Translator
             \return proto-plugin or null */
-        Plugin* prepareInstall(String_t fileName);
+        Plugin* prepareInstall(String_t fileName, afl::string::Translator& tx);
 
         /** Check for installation ambiguities.
             Call after successful prepareInstall().

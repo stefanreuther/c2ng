@@ -433,6 +433,11 @@ gfx::sdl2::Surface::presentUpdate(SDL_Texture* tex, SDL_Renderer* renderer)
     if (m_updateRegion.exists()) {
         ensureUnlocked();
 
+        // Workaround: when upscaling, my version of libSDL leaves artifacts due to a texture pixel
+        // affecting more screen pixels. Enlarge the update region a bit.
+        m_updateRegion.grow(1, 1);
+        m_updateRegion.intersect(Rectangle(0, 0, m_surface->w, m_surface->h));
+
         SDL_Rect r;
         r.x = m_updateRegion.getLeftX();
         r.y = m_updateRegion.getTopY();

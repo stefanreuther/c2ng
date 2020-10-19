@@ -1,5 +1,6 @@
 /**
   *  \file game/session.cpp
+  *  \brief Class game::Session
   */
 
 #include "game/session.hpp"
@@ -9,27 +10,35 @@
 #include "game/game.hpp"
 #include "game/interface/beamfunction.hpp"
 #include "game/interface/cargofunctions.hpp"
+#include "game/interface/commandinterface.hpp"
 #include "game/interface/drawingfunction.hpp"
 #include "game/interface/enginefunction.hpp"
+#include "game/interface/explosionfunction.hpp"
 #include "game/interface/friendlycodefunction.hpp"
 #include "game/interface/globalcommands.hpp"
 #include "game/interface/globalcontext.hpp"
 #include "game/interface/globalfunctions.hpp"
 #include "game/interface/hullfunction.hpp"
+#include "game/interface/inboxfunction.hpp"
 #include "game/interface/ionstormfunction.hpp"
 #include "game/interface/iteratorcontext.hpp"
 #include "game/interface/minefieldfunction.hpp"
 #include "game/interface/missionfunction.hpp"
+#include "game/interface/notificationfunctions.hpp"
 #include "game/interface/planetfunction.hpp"
 #include "game/interface/playerfunction.hpp"
 #include "game/interface/pluginfunction.hpp"
+#include "game/interface/referencecontext.hpp"
+#include "game/interface/referencelistcontext.hpp"
 #include "game/interface/richtextfunctions.hpp"
+#include "game/interface/selectionfunctions.hpp"
 #include "game/interface/shipfunction.hpp"
 #include "game/interface/simplefunction.hpp"
 #include "game/interface/simpleprocedure.hpp"
 #include "game/interface/torpedofunction.hpp"
 #include "game/interface/ufofunction.hpp"
 #include "game/interface/vcrfunction.hpp"
+#include "game/map/object.hpp"
 #include "game/root.hpp"
 #include "game/spec/hull.hpp"
 #include "game/spec/shiplist.hpp"
@@ -43,17 +52,9 @@
 #include "interpreter/process.hpp"
 #include "interpreter/processlist.hpp"
 #include "interpreter/statementcompiler.hpp"
+#include "interpreter/taskeditor.hpp"
 #include "interpreter/tokenizer.hpp"
 #include "interpreter/values.hpp"
-#include "game/interface/explosionfunction.hpp"
-#include "game/interface/commandinterface.hpp"
-#include "game/map/object.hpp"
-#include "game/interface/markingfunctions.hpp"
-#include "game/interface/referencecontext.hpp"
-#include "game/interface/referencelistcontext.hpp"
-#include "interpreter/taskeditor.hpp"
-#include "game/interface/notificationfunctions.hpp"
-#include "game/interface/inboxfunction.hpp"
 
 namespace {
     using afl::string::Format;
@@ -65,12 +66,12 @@ namespace {
           (but slot 0 is never returned by FreeFile()) */
     const size_t MAX_SCRIPT_FILES = 101;
 
-    // /** Compile expression, simple interface. Compiles the expression into a byte-code object.
-    //     Returns the byte-code object, null on failure. This is used when an expression is used
-    //     behind a regular UI function, where it doesn't really matter what kind of error, if any,
-    //     we've encountered.
+    /** Compile expression, simple interface. Compiles the expression into a byte-code object.
+        Returns the byte-code object, null on failure. This is used when an expression is used
+        behind a regular UI function, where it doesn't really matter what kind of error, if any,
+        we've encountered.
 
-    //     \todo This would be a nice place to implement caching. */
+        \todo This would be a nice place to implement caching. */
     interpreter::BCOPtr_t compileExpression(const String_t& expr, const interpreter::CompilationContext& cc)
     {
         // ex int/simple.h:compileExpression
@@ -107,11 +108,12 @@ game::Session::Session(afl::string::Translator& tx, afl::io::FileSystem& fs)
       m_uiPropertyStack(),
       m_editableAreas(),
       m_world(m_log, fs),
+      m_processList(),
       m_rng(afl::sys::Time::getTickCounter()),
       m_plugins(tx, m_log),
       m_authCache(),
       m_extra(),
-      m_notifications(m_world.processList()),
+      m_notifications(m_processList),
       conn_hostConfigToMap(),
       conn_userConfigToMap()
 {
@@ -121,30 +123,6 @@ game::Session::Session(afl::string::Translator& tx, afl::io::FileSystem& fs)
 game::Session::~Session()
 { }
 
-afl::sys::Log&
-game::Session::log()
-{
-    return m_log;
-}
-
-void
-game::Session::logError(const interpreter::Error& e)
-{
-    m_world.logError(m_log.Error, e);
-}
-
-afl::string::Translator&
-game::Session::translator()
-{
-    return m_translator;
-}
-
-afl::base::Ptr<game::Root>
-game::Session::getRoot()
-{
-    return m_root;
-}
-
 void
 game::Session::setRoot(afl::base::Ptr<Root> root)
 {
@@ -152,23 +130,11 @@ game::Session::setRoot(afl::base::Ptr<Root> root)
     connectSignals();
 }
 
-afl::base::Ptr<game::spec::ShipList>
-game::Session::getShipList()
-{
-    return m_shipList;
-}
-
 void
 game::Session::setShipList(afl::base::Ptr<game::spec::ShipList> shipList)
 {
     m_shipList = shipList;
     connectSignals();
-}
-
-afl::base::Ptr<game::Game>
-game::Session::getGame()
-{
-    return m_game;
 }
 
 void
@@ -208,12 +174,6 @@ game::Session::setEditableAreas(AreaSet_t set)
     m_editableAreas = set;
 }
 
-game::Session::AreaSet_t
-game::Session::getEditableAreas() const
-{
-    return m_editableAreas;
-}
-
 afl::base::Ptr<interpreter::TaskEditor>
 game::Session::getAutoTaskEditor(Id_t id, interpreter::Process::ProcessKind kind, bool create)
 {
@@ -245,7 +205,7 @@ game::Session::getAutoTaskEditor(Id_t id, interpreter::Process::ProcessKind kind
     }
 
     // Find the process
-    Process* proc = m_world.processList().getProcessByObject(obj, kind);
+    Process* proc = processList().getProcessByObject(obj, kind);
     if (proc == 0 && create) {
         // Create process
         String_t fmt = (kind == Process::pkShipTask
@@ -253,7 +213,7 @@ game::Session::getAutoTaskEditor(Id_t id, interpreter::Process::ProcessKind kind
                         : kind == Process::pkPlanetTask
                         ? m_translator("Auto Task Planet %d")
                         : m_translator("Auto Task Starbase %d"));
-        proc = &m_world.processList().create(m_world, afl::string::Format(fmt, id));
+        proc = &processList().create(m_world, afl::string::Format(fmt, id));
 
         // Place in appropriate context
         // (Note that this fails if the Session is not fully-populated, e.g. has no ship list.)
@@ -303,7 +263,7 @@ game::Session::releaseAutoTaskEditor(afl::base::Ptr<interpreter::TaskEditor>& pt
 
         // Run the process
         if (proc.getFreezer() == 0) {
-            interpreter::ProcessList& pl = world().processList();
+            interpreter::ProcessList& pl = processList();
             uint32_t pgid = pl.allocateProcessGroup();
             pl.resumeProcess(proc, pgid);
             pl.startProcessGroup(pgid);
@@ -312,10 +272,18 @@ game::Session::releaseAutoTaskEditor(afl::base::Ptr<interpreter::TaskEditor>& pt
     }
 }
 
-interpreter::World&
-game::Session::world()
+// Access process list.
+interpreter::ProcessList&
+game::Session::processList()
 {
-    return m_world;
+    return m_processList;
+}
+
+// Access process list (const).
+const interpreter::ProcessList&
+game::Session::processList() const
+{
+    return m_processList;
 }
 
 game::InterpreterInterface&
@@ -347,51 +315,6 @@ game::Session::extra()
 {
     return m_extra;
 }
-
-
-// FIXME: retire
-// // /** Execute a file, simple interface. */
-// bool
-// game::Session::executeFile(afl::io::Stream& file)
-// {
-//     // ex int/simple.cc:executeFile
-//     bool result;
-//     try {
-//         // FIXME: port this
-//         //         // Figure out contexts
-//         //         ptr_vector<IntContext> ctx;
-//         //         IntUserInterfaceBinding::get().enumContexts(ctx);
-
-//         // Create process
-//         interpreter::ProcessList& processList = world().processList();
-//         interpreter::Process& proc = processList.create(world(),
-//                                                         afl::string::Format(translator().translateString("File: %s").c_str(), file.getName()));
-//         //         exec.pushContextsFrom(ctx);
-//         //         exec.markContextTOS();
-
-//         // Run
-//         proc.pushFrame(world().compileFile(file), false);
-//         uint32_t pgid = processList.allocateProcessGroup();
-//         processList.resumeProcess(proc, pgid);
-//         processList.startProcessGroup(pgid);
-//         processList.run();
-//         if (proc.getState() == interpreter::Process::Failed) {
-//             // Log exception
-//             logError(proc.getError());
-//         }
-//         processList.removeTerminatedProcesses();
-//         result = true;
-//     }
-//     catch (interpreter::Error& e) {
-//         // Script error
-//         logError(e);
-//         result = false;
-//     }
-
-//     // Update
-//     notifyListeners();
-//     return result;
-// }
 
 void
 game::Session::notifyListeners()
@@ -451,6 +374,7 @@ game::Session::getReferenceName(Reference ref, ObjectName which, String_t& resul
                         // Special case: report the reference name plus object's name, if any.
                         // This allows a starbase reference to be shown as "Starbase #123: Melmac".
                         result = ref.toString(m_translator);
+                        result += ": ";
                         result += obj->getName(PlainName, m_translator, *this);
                         if (which == DetailedName) {
                             String_t comment = this->getComment(Planet, ref.getId());
@@ -569,7 +493,7 @@ game::Session::hasTask(Scope scope, int id)
     if (const Game* g = m_game.get()) {
         using interpreter::Process;
         const game::map::Universe& univ = g->currentTurn().universe();
-        const interpreter::ProcessList& list = world().processList();
+        const interpreter::ProcessList& list = processList();
         switch (scope) {
          case Ship:
             return list.getProcessByObject(univ.ships().get(id), Process::pkShipTask) != 0;

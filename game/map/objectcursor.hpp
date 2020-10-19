@@ -33,7 +33,6 @@ namespace game { namespace map {
         virtual Id_t getCurrentIndex() const = 0;
 
         Object* getCurrentObject() const;
-        Universe* getCurrentUniverse() const;
 
         // ex sig_current_changed
         afl::base::Signal<void()> sig_indexChange;

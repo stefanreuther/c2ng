@@ -4,12 +4,12 @@
 #ifndef C2NG_CLIENT_TILES_VISUALSCANHEADERTILE_HPP
 #define C2NG_CLIENT_TILES_VISUALSCANHEADERTILE_HPP
 
-#include "ui/simplewidget.hpp"
-#include "client/proxy/objectobserver.hpp"
-#include "util/skincolor.hpp"
-#include "ui/root.hpp"
 #include "afl/string/string.hpp"
+#include "game/proxy/objectobserver.hpp"
+#include "ui/root.hpp"
+#include "ui/simplewidget.hpp"
 #include "util/requestreceiver.hpp"
+#include "util/skincolor.hpp"
 
 namespace client { namespace tiles {
 
@@ -37,7 +37,7 @@ namespace client { namespace tiles {
 
         void setContent(const Content& content);
 
-        void attach(client::proxy::ObjectObserver& oop);
+        void attach(game::proxy::ObjectObserver& oop);
 
      private:
         ui::Root& m_root;

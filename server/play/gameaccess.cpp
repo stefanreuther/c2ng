@@ -8,16 +8,21 @@
 #include "afl/data/vectorvalue.hpp"
 #include "afl/string/format.hpp"
 #include "server/errors.hpp"
+#include "server/play/basichullfunctionpacker.hpp"
 #include "server/play/beampacker.hpp"
 #include "server/play/commandhandler.hpp"
 #include "server/play/configurationpacker.hpp"
 #include "server/play/enginepacker.hpp"
+#include "server/play/friendlycodepacker.hpp"
 #include "server/play/hullpacker.hpp"
 #include "server/play/ionstormpacker.hpp"
 #include "server/play/maincommandhandler.hpp"
 #include "server/play/mainpacker.hpp"
 #include "server/play/messagepacker.hpp"
 #include "server/play/minefieldpacker.hpp"
+#include "server/play/outmessagecommandhandler.hpp"
+#include "server/play/outmessageindexpacker.hpp"
+#include "server/play/outmessagepacker.hpp"
 #include "server/play/packerlist.hpp"
 #include "server/play/planetcommandhandler.hpp"
 #include "server/play/planetfriendlycodepacker.hpp"
@@ -197,6 +202,12 @@ server::play::GameAccess::createPacker(util::StringParser& p)
         return new TruehullPacker(session);
     } else if (p.parseString("zvcr")) {
         return new VcrPacker(session);
+    } else if (p.parseString("zab")) {
+        return new BasicHullFunctionPacker(session);
+    } else if (p.parseString("fcode")) {
+        return new FriendlyCodePacker(session);
+    } else if (p.parseString("outidx")) {
+        return new OutMessageIndexPacker(session);
     } else if (p.parseString("hull") && p.parseInt(n)) {
         return new HullPacker(session, n);
     } else if (p.parseString("ship") && p.parseInt(n)) {
@@ -205,6 +216,8 @@ server::play::GameAccess::createPacker(util::StringParser& p)
         return new PlanetPacker(session, n);
     } else if (p.parseString("msg") && p.parseInt(n)) {
         return new MessagePacker(session, n);
+    } else if (p.parseString("outmsg") && p.parseInt(n)) {
+        return new OutMessagePacker(session, n);
     } else if (p.parseString("cfg") && p.parseInt(n)) {
         return new ConfigurationPacker(session, n);
     } else {
@@ -239,6 +252,8 @@ server::play::GameAccess::createCommandHandler(util::StringParser& p, game::Sess
         return new PlanetCommandHandler(session, n);
     } else if (p.parseString("obj/main")) {
         return new MainCommandHandler(session);
+    } else if (p.parseString("obj/outmsg") && p.parseInt(n)) {
+        return new OutMessageCommandHandler(session, n);
     } else {
         return 0;
     }

@@ -106,9 +106,10 @@ game::actions::TechUpgrade::updateUndoInformation()
         if (const game::map::Reverter* pRev = m_pUniverse->getReverter()) {
             for (size_t i = 0; i < NUM_TECH_AREAS; ++i) {
                 const TechLevel level = TechLevel(i);
-                if (const int* pLevel = pRev->getMinTechLevel(planet().getId(), level).get()) {
-                    if (*pLevel < planet().getBaseTechLevel(level).orElse(1)) {
-                        m_minTechLevels[i] = *pLevel;
+                int value;
+                if (pRev->getMinTechLevel(planet().getId(), level).get(value)) {
+                    if (value < planet().getBaseTechLevel(level).orElse(1)) {
+                        m_minTechLevels[i] = value;
                     }
                     if (m_newTechLevels[i] < m_minTechLevels[i]) {
                         m_newTechLevels[i] = m_minTechLevels[i];

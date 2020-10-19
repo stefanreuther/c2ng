@@ -3,7 +3,11 @@
   *  \brief Class game::spec::Hull
   */
 
+#include <algorithm>
 #include "game/spec/hull.hpp"
+#include "util/math.hpp"
+
+using game::config::HostConfiguration;
 
 // Constructor.
 game::spec::Hull::Hull(int id)
@@ -182,4 +186,40 @@ const game::spec::HullFunctionAssignmentList&
 game::spec::Hull::getHullFunctions(bool assignedToHull) const
 {
     return assignedToHull ? m_hullFunctions : m_shipFunctions;
+}
+
+// Get cloak fuel usage.
+int
+game::spec::Hull::getCloakFuelUsage(int forPlayer, const game::config::HostConfiguration& config) const
+{
+    const int cfb = config[HostConfiguration::CloakFuelBurn](forPlayer);
+    return std::max(getMass() * cfb / 100, cfb);
+}
+
+// Get per-turn fuel usage.
+int
+game::spec::Hull::getTurnFuelUsage(int forPlayer, bool fight, const game::config::HostConfiguration& config) const
+{
+    // ex getTurnFuelUsage (sort-of)
+    return (config[fight
+                   ? HostConfiguration::FuelUsagePerFightFor100KT
+                   : HostConfiguration::FuelUsagePerTurnFor100KT](forPlayer) * getMass() + 99) / 100;
+}
+
+// Get mine hit damage.
+int
+game::spec::Hull::getMineHitDamage(int /*forPlayer*/, bool web, const HostVersion& host, const game::config::HostConfiguration& config) const
+{
+    const int mass = getMass();
+    return (mass <= 0
+            ? 100
+            : host.isPHost()
+            ? 100 * config[web
+                           ? HostConfiguration::WebHitDamageFor100KT
+                           : HostConfiguration::MineHitDamageFor100KT](/*forPlayer*/) / mass
+            : (web
+               // I assume this needs to be divideAndRoundToEven, but don't yet have a testcase to prove it.
+               // For the standard ship list, this produces the same values as divideAndRound (which is used in PCC2/PCC1).
+               ? util::divideAndRoundToEven(1000, mass + 1, 0)
+               : util::divideAndRoundToEven(10000, mass + 1, 0)));
 }

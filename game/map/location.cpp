@@ -1,20 +1,17 @@
 /**
   *  \file game/map/location.cpp
+  *  \brief Class game::map::Location
   */
 
 #include "game/map/location.hpp"
 #include "game/map/universe.hpp"
-#include "game/map/mapobject.hpp"
-#include "util/updater.hpp"
-
-using util::Updater;
 
 namespace {
     bool getPositionFromReference(const game::map::Universe* pUniv, const game::Reference ref, game::map::Point& out)
     {
         // Try to resolve as object
         if (pUniv != 0) {
-            if (const game::map::MapObject* p = dynamic_cast<const game::map::MapObject*>(pUniv->getObject(ref))) {
+            if (const game::map::Object* p = pUniv->getObject(ref)) {
                 return p->getPosition(out);
             }
         }
@@ -48,19 +45,25 @@ game::map::Location::setUniverse(Universe* univ)
 void
 game::map::Location::set(Reference ref)
 {
+    Point lastPos;
+    bool  lastOK = getPosition(lastPos);
+
     m_reference = ref;
+
+    notifyObservers(lastOK, lastPos);
 }
 
 void
 game::map::Location::set(Point pt)
 {
-    bool change = Updater()
-        .set(m_point, pt)
-        .set(m_pointValid, true);
+    Point lastPos;
+    bool  lastOK = getPosition(lastPos);
+
+    m_point = pt;
+    m_pointValid = true;
     m_reference = Reference();
-    if (change) {
-        sig_positionChange.raise(m_point);
-    }
+
+    notifyObservers(lastOK, lastPos);
 }
 
 bool
@@ -83,4 +86,15 @@ game::Reference
 game::map::Location::getReference() const
 {
     return m_reference;
+}
+
+void
+game::map::Location::notifyObservers(bool lastOK, Point lastPos)
+{
+    Point thisPos;
+    bool  thisOK = getPosition(thisPos);
+
+    if (lastOK != thisOK || lastPos != thisPos) {
+        sig_positionChange.raise(thisPos);
+    }
 }

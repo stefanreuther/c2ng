@@ -134,10 +134,10 @@ ExpressionTestHelper::checkFileExpression(const char* expr, int result)
         bool ok = exec.runTemporary();
         TSM_ASSERT(expr, ok);
 
-        afl::data::Value* resv = exec.getResult();
+        const afl::data::Value* resv = exec.getResult();
         TSM_ASSERT(expr, resv != 0);
 
-        interpreter::FileValue* iv = dynamic_cast<interpreter::FileValue*>(resv);
+        const interpreter::FileValue* iv = dynamic_cast<const interpreter::FileValue*>(resv);
         TSM_ASSERT(expr, iv != 0);
         TSM_ASSERT_EQUALS(expr, iv->getFileNumber(), result);
     }
@@ -202,10 +202,10 @@ ExpressionTestHelper::checkStringExpression(const char* expr, const char* result
         bool ok = exec.runTemporary();
         TSM_ASSERT(expr, ok);
 
-        afl::data::Value* resv = exec.getResult();
+        const afl::data::Value* resv = exec.getResult();
         TSM_ASSERT(expr, resv != 0);
 
-        afl::data::StringValue* iv = dynamic_cast<afl::data::StringValue*>(resv);
+        const afl::data::StringValue* iv = dynamic_cast<const afl::data::StringValue*>(resv);
         TSM_ASSERT(expr, iv != 0);
         TSM_ASSERT_EQUALS(expr, iv->getValue(), result);
     }
@@ -239,10 +239,10 @@ ExpressionTestHelper::checkFloatExpression(const char* expr, double result)
         bool ok = exec.runTemporary();
         TSM_ASSERT(expr, ok);
 
-        afl::data::Value* resv = exec.getResult();
+        const afl::data::Value* resv = exec.getResult();
         TSM_ASSERT(expr, resv != 0);
 
-        afl::data::FloatValue* iv = dynamic_cast<afl::data::FloatValue*>(resv);
+        const afl::data::FloatValue* iv = dynamic_cast<const afl::data::FloatValue*>(resv);
         TSM_ASSERT(expr, iv != 0);
         TSM_ASSERT_LESS_THAN_EQUALS(expr, iv->getValue(), result + 0.01);
         TSM_ASSERT_LESS_THAN_EQUALS(expr, result - 0.01, iv->getValue());
@@ -328,14 +328,14 @@ ExpressionTestHelper::checkScalarExpression(const char* expr, int result, bool i
         bool ok = exec.runTemporary();
         TSM_ASSERT(expr, ok);
 
-        afl::data::Value* resv = exec.getResult();
+        const afl::data::Value* resv = exec.getResult();
         TSM_ASSERT(expr, resv != 0);
 
-        afl::data::ScalarValue* iv;
+        const afl::data::ScalarValue* iv;
         if (isBool) {
-            iv = dynamic_cast<afl::data::BooleanValue*>(resv);
+            iv = dynamic_cast<const afl::data::BooleanValue*>(resv);
         } else {
-            iv = dynamic_cast<afl::data::IntegerValue*>(resv);
+            iv = dynamic_cast<const afl::data::IntegerValue*>(resv);
         }
         TSM_ASSERT(expr, iv != 0);
         TSM_ASSERT_EQUALS(expr, iv->getValue(), result);
@@ -357,12 +357,7 @@ ExpressionTestHelper::checkStatement(const char* stmt)
     try {
         // Build a command source
         interpreter::MemoryCommandSource mcs;
-        const char* q = stmt;
-        while (const char* p = strchr(q, '\n')) {
-            mcs.addLine(String_t(q, p - q));
-            q = p+1;
-        }
-        mcs.addLine(q);
+        mcs.addLines(afl::string::toMemory(stmt));
 
         // Build environment
         afl::sys::Log logger;
@@ -379,7 +374,7 @@ ExpressionTestHelper::checkStatement(const char* stmt)
         scc.withFlag(scc.ExpressionsAreStatements);
 
         interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
-        interpreter::StatementCompiler::StatementResult result = interpreter::StatementCompiler(mcs).compileList(*bco, scc);
+        interpreter::StatementCompiler::Result result = interpreter::StatementCompiler(mcs).compileList(*bco, scc);
 
         TSM_ASSERT_DIFFERS(stmt, result, interpreter::StatementCompiler::CompiledExpression);
 
@@ -392,55 +387,5 @@ ExpressionTestHelper::checkStatement(const char* stmt)
     }
     catch (...) {
         TSM_ASSERT(stmt, 0);
-    }
-
-}
-
-/** Test expression statement. Verifies that
-    - the statement compiles into an expression statement
-    - runs correctly
-    - yields the expected value
-    \param expr  Expression statement
-    \param value Expected result value */
-void
-ExpressionTestHelper::checkIntegerExpressionStatement(const char* expr, int value)
-{
-    try {
-        interpreter::MemoryCommandSource mcs(expr);
-
-        // Build environment
-        afl::sys::Log logger;
-        afl::io::NullFileSystem fs;
-        interpreter::World world(logger, fs);
-
-        interpreter::Process exec(world, "testIntExprStatement", 9);
-        exec.pushNewContext(new TestContext(*this));
-
-        interpreter::DefaultStatementCompilationContext scc(world);
-        scc.withContextProvider(&exec);
-        scc.withFlag(scc.RefuseBlocks);
-        scc.withFlag(scc.LinearExecution);
-
-        interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
-        interpreter::StatementCompiler::StatementResult result = interpreter::StatementCompiler(mcs).compile(*bco, scc);
-
-        TSM_ASSERT_EQUALS(expr, result, interpreter::StatementCompiler::CompiledExpression);
-
-        exec.pushFrame(bco, false);
-        bool ok = exec.runTemporary();
-        TSM_ASSERT(expr, ok);
-
-        afl::data::Value* v = exec.getResult();
-        TSM_ASSERT(expr, v);
-
-        afl::data::ScalarValue* iv = dynamic_cast<afl::data::ScalarValue*>(v);
-        TSM_ASSERT(expr, iv);
-        TSM_ASSERT_EQUALS(expr, iv->getValue(), value);
-    }
-    catch (interpreter::Error& /*e*/) {
-        TSM_ASSERT(expr, 0);
-    }
-    catch (...) {
-        TSM_ASSERT(expr, 0);
     }
 }

@@ -341,7 +341,7 @@ game::interface::IFCCSelectionExec(interpreter::Process& /*proc*/, game::Session
 
     int32_t layer;
     String_t code;
-    if (!interpreter::checkIntegerArg(layer, args.getNext(), 0, int(g.markings().getNumLayers()))) {
+    if (!interpreter::checkIntegerArg(layer, args.getNext(), 0, int(g.selections().getNumLayers()))) {
         return;
     }
     if (!interpreter::checkStringArg(code, args.getNext())) {
@@ -349,10 +349,10 @@ game::interface::IFCCSelectionExec(interpreter::Process& /*proc*/, game::Session
     }
 
     size_t effLayer = (layer == 0
-                       ? g.markings().getCurrentLayer()
+                       ? g.selections().getCurrentLayer()
                        : size_t(layer-1));
 
-    g.markings().executeCompiledExpression(code, effLayer, g.currentTurn().universe());
+    g.selections().executeCompiledExpression(code, effLayer, g.currentTurn().universe());
 }
 
 /* @q CreateConfigOption key:Str, type:Str (Global Command)

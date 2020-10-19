@@ -16,7 +16,6 @@ namespace game { namespace map {
     class PlanetStorage : public CargoContainer {
      public:
         PlanetStorage(Planet& pl,
-                      InterpreterInterface& iface,
                       const game::config::HostConfiguration& config);
         ~PlanetStorage();
 
@@ -30,7 +29,6 @@ namespace game { namespace map {
 
      private:
         Planet& m_planet;
-        InterpreterInterface& m_interface;
         const game::config::HostConfiguration& m_hostConfiguration;
         afl::base::SignalConnection m_changeConnection;
     };

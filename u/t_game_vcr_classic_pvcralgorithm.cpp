@@ -8,88 +8,14 @@
 #include "t_game_vcr_classic.hpp"
 #include "afl/base/countof.hpp"
 #include "game/vcr/classic/nullvisualizer.hpp"
+#include "game/test/shiplist.hpp"
+#include "game/vcr/classic/statustoken.hpp"
 
 namespace {
-    struct Cost {
-        int mc, t, d, m;
-    };
-    struct Beam {
-        const char* name;
-        Cost cost;
-        int mass;
-        int techLevel;
-        int killPower;
-        int damagePower;
-    };
-    const Beam beams[] = {
-        {"Laser Cannon",      {1,1,0,1},0,1,1,2},
-        {"Kill-O-Zap",        {5,1,2,0},0,2,10,1},
-        {"Desintegrator",     {10,3,1,2},1,4,7,10},
-        {"Phaser",            {20,5,0,2},1,6,15,25},
-        {"Disruptor",         {45,10,5,5},1,7,40,10},
-        {"Electron Ram",      {50,15,5,10},2,7,20,40},
-        {"Ion Cannon",        {60,5,20,5},1,8,10,45},
-        {"Turbolaser Battery",{90,20,5,10},2,9,30,60},
-        {"Inpotron Cannon",   {110,10,10,10},3,10,70,35},
-        {"Multitraf Spiral",  {130,25,15,10},3,10,40,80}
-    };
-    struct Torpedo {
-        const char* name;
-        Cost torpedoCost;
-        Cost launcherCost;
-        int mass;
-        int techLevel;
-        int killPower;
-        int damagePower;
-    };
-    const Torpedo torpedoes[] = {
-        {"Space Rocket",       {2,1, 1,1},{  5, 1, 0, 0},1,1,3,5},
-        {"Fusion Bomb",        {8,1, 1,1},{ 20, 2, 1, 0},1,3,10,10},
-        {"Paralyso-Matic Bomb",{10,1,1,1},{ 35, 4, 0, 5},0,5,20,1},
-        {"Initial Bomb",       {20,1,1,1},{ 60, 5, 1, 2},2,7,50,15},
-        {"Photon Torp",        {30,1,1,1},{ 70, 7, 1, 3},2,7,25,50},
-        {"Graviton Bomb",      {35,1,1,1},{ 80, 8, 3, 5},3,8,10,60},
-        {"Arkon Bomb",         {50,1,1,1},{100,15,10, 5},4,9,56,55},
-        {"Antimatter Bomb",    {55,1,1,1},{105,10, 3,10},2,9,35,75},
-        {"Katalysator Bomb",   {65,1,1,1},{130, 5, 1,10},4,10,80,50},
-        {"Selphyr-Fataro-Dev.",{80,1,1,1},{150,15, 5,20},7,10,40,99}
-    };
-
-    game::spec::Cost convertCost(const Cost& c)
-    {
-        game::spec::Cost result;
-        result.set(result.Duranium, c.d);
-        result.set(result.Tritanium, c.t);
-        result.set(result.Molybdenum, c.m);
-        result.set(result.Money, c.mc);
-        return result;
-    }
-
     void initShipList(game::spec::ShipList& list)
     {
-        for (int i = 0; i < int(countof(beams)); ++i) {
-            const Beam& in = beams[i];
-            if (game::spec::Beam* out = list.beams().create(i+1)) {
-                out->setKillPower(in.killPower);
-                out->setDamagePower(in.damagePower);
-                out->setMass(in.mass);
-                out->setTechLevel(in.techLevel);
-                out->setName(in.name);
-                out->cost() = convertCost(in.cost);
-            }
-        }
-        for (int i = 0; i < int(countof(torpedoes)); ++i) {
-            const Torpedo& in = torpedoes[i];
-            if (game::spec::TorpedoLauncher* out = list.launchers().create(i+1)) {
-                out->setKillPower(in.killPower);
-                out->setDamagePower(in.damagePower);
-                out->setMass(in.mass);
-                out->setTechLevel(in.techLevel);
-                out->setName(in.name);
-                out->cost() = convertCost(in.launcherCost);
-                out->torpedoCost() = convertCost(in.torpedoCost);
-            }
-        }
+        game::test::initPListBeams(list);
+        game::test::initPListTorpedoes(list);
     }
     
     struct Object {
@@ -407,6 +333,8 @@ TestGameVcrClassicPVCRAlgorithm::testTF()
     TS_ASSERT_EQUALS(right.getNumTorpedoes(), 14);
     TS_ASSERT_EQUALS(left.getNumFighters(), 92);
     TS_ASSERT_EQUALS(right.getNumFighters(), 0);
+    TS_ASSERT_EQUALS(testee.getStatistic(game::vcr::classic::LeftSide).getNumFights(), 1);
+    TS_ASSERT_EQUALS(testee.getStatistic(game::vcr::classic::RightSide).getNumFights(), 1);
 }
 
 void
@@ -512,3 +440,68 @@ TestGameVcrClassicPVCRAlgorithm::testRandomBonus()
     TS_ASSERT_EQUALS(left.getNumFighters(), 20);
     TS_ASSERT_EQUALS(right.getNumFighters(), 61);
 }
+
+/** Test token handling. */
+void
+TestGameVcrClassicPVCRAlgorithm::testToken()
+{
+    // Surroundings
+    game::vcr::classic::NullVisualizer vis;
+    game::config::HostConfiguration config;
+    game::spec::ShipList list;
+    initShipList(list);
+    initConfig(config);
+
+    // Initialize fight (same as testCarriers)
+    game::vcr::classic::PVCRAlgorithm testee(false, vis, config, list.beams(), list.launchers());
+    game::vcr::Object left(convertObject(battles[1].object[0]));
+    game::vcr::Object right(convertObject(battles[1].object[1]));
+    uint16_t seed = battles[1].seed;
+    bool result = testee.checkBattle(left, right, seed);
+    TS_ASSERT(!result);
+
+    // Run 100 ticks and take a token (fight is 245 ticks long)
+    testee.initBattle(left, right, seed);
+    for (int i = 0; i < 100; ++i) {
+        TS_ASSERT(testee.playCycle());
+    }
+    TS_ASSERT_EQUALS(testee.getTime(), 100);
+    std::auto_ptr<game::vcr::classic::StatusToken> tok(testee.createStatusToken());
+    TS_ASSERT(tok.get() != 0);
+    TS_ASSERT_EQUALS(tok->getTime(), 100);
+
+    // Run to end
+    while (testee.playCycle()) {
+        // nix
+    }
+    testee.doneBattle(left, right);
+    TS_ASSERT_EQUALS(testee.getTime(), 245);
+
+    // Rewind to token
+    testee.restoreStatus(*tok);
+    TS_ASSERT_EQUALS(testee.getTime(), 100);
+
+    // Run to end again
+    while (testee.playCycle()) {
+        // nix
+    }
+    testee.doneBattle(left, right);
+    TS_ASSERT_EQUALS(testee.getTime(), 245);
+
+    // Verify result (see testCarriers)
+    TS_ASSERT(!testee.getResult().contains(game::vcr::classic::LeftDestroyed));
+    TS_ASSERT(testee.getResult().contains(game::vcr::classic::RightDestroyed));
+    TS_ASSERT(!testee.getResult().contains(game::vcr::classic::LeftCaptured));
+    TS_ASSERT(!testee.getResult().contains(game::vcr::classic::RightCaptured));
+    TS_ASSERT_EQUALS(left.getDamage(), 0);
+    TS_ASSERT_EQUALS(right.getDamage(), 100);
+    TS_ASSERT_EQUALS(left.getShield(), 100);
+    TS_ASSERT_EQUALS(right.getShield(), 0);
+    TS_ASSERT_EQUALS(left.getCrew(), 1249);
+    TS_ASSERT_EQUALS(right.getCrew(), 0);
+    TS_ASSERT_EQUALS(left.getNumTorpedoes(), 0);
+    TS_ASSERT_EQUALS(right.getNumTorpedoes(), 0);
+    TS_ASSERT_EQUALS(left.getNumFighters(), 127);
+    TS_ASSERT_EQUALS(right.getNumFighters(), 0);
+}
+

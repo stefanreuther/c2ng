@@ -3,12 +3,12 @@
   */
 
 #include "client/tiles/taskeditortile.hpp"
-#include "gfx/context.hpp"
-#include "ui/widgets/abstractlistbox.hpp"
-#include "ui/draw.hpp"
+#include "game/proxy/objectlistener.hpp"
 #include "gfx/complex.hpp"
-#include "client/proxy/objectlistener.hpp"
+#include "gfx/context.hpp"
+#include "ui/draw.hpp"
 #include "ui/skincolorscheme.hpp"
+#include "ui/widgets/abstractlistbox.hpp"
 #include "ui/widgets/framegroup.hpp"
 
 class client::tiles::TaskEditorTile::ListWidget : public ui::widgets::AbstractListbox {
@@ -121,7 +121,7 @@ class client::tiles::TaskEditorTile::ListWidget : public ui::widgets::AbstractLi
         { return defaultHandleKey(key, prefix); }
 
     // ListWidget:
-    void setContent(const client::proxy::TaskEditorProxy::Status& status)
+    void setContent(const game::proxy::TaskEditorProxy::Status& status)
         {
             // ex WAutoTaskEditorList::update
             bool majorChange = (m_status.valid != status.valid
@@ -149,7 +149,7 @@ class client::tiles::TaskEditorTile::ListWidget : public ui::widgets::AbstractLi
         }
 
  private:
-    client::proxy::TaskEditorProxy::Status m_status;
+    game::proxy::TaskEditorProxy::Status m_status;
     gfx::ResourceProvider& m_provider;
     ui::ColorScheme& m_colorScheme;
     ui::SkinColorScheme m_internalColorScheme;
@@ -164,7 +164,7 @@ client::tiles::TaskEditorTile::TaskEditorTile(ui::Root& root,
                                               interpreter::Process::ProcessKind kind)
     : Widget(),
       m_deleter(),
-      m_proxy(root.engine().dispatcher(), userSide.gameSender()),
+      m_proxy(userSide.gameSender(), root.engine().dispatcher()),
       m_receiver(root.engine().dispatcher(), *this),
       m_kind(kind),
       m_listWidget(0),
@@ -172,7 +172,7 @@ client::tiles::TaskEditorTile::TaskEditorTile(ui::Root& root,
 {
     // ex WAutoTaskEditorTile::WAutoTaskEditorTile
     m_listWidget = &m_deleter.addNew(new ListWidget(root.provider(), root.colorScheme()));
-    m_childWidget = &ui::widgets::FrameGroup::wrapWidget(m_deleter, root.colorScheme(), ui::widgets::FrameGroup::LoweredFrame, *m_listWidget);
+    m_childWidget = &ui::widgets::FrameGroup::wrapWidget(m_deleter, root.colorScheme(), ui::LoweredFrame, *m_listWidget);
     addChild(*m_childWidget, 0);
     m_proxy.sig_change.add(this, &TaskEditorTile::onChange);
     m_listWidget->requestFocus();
@@ -245,7 +245,7 @@ client::tiles::TaskEditorTile::setId(game::Id_t id)
 }
 
 void
-client::tiles::TaskEditorTile::attach(client::proxy::ObjectObserver& oop)
+client::tiles::TaskEditorTile::attach(game::proxy::ObjectObserver& oop)
 {
     class Job : public util::Request<TaskEditorTile> {
      public:
@@ -257,7 +257,7 @@ client::tiles::TaskEditorTile::attach(client::proxy::ObjectObserver& oop)
      private:
         game::Id_t m_id;
     };
-    class Listener : public client::proxy::ObjectListener {
+    class Listener : public game::proxy::ObjectListener {
      public:
         Listener(util::RequestSender<TaskEditorTile> reply)
             : m_reply(reply)
@@ -272,7 +272,7 @@ client::tiles::TaskEditorTile::attach(client::proxy::ObjectObserver& oop)
 }
 
 void
-client::tiles::TaskEditorTile::onChange(const client::proxy::TaskEditorProxy::Status& status)
+client::tiles::TaskEditorTile::onChange(const game::proxy::TaskEditorProxy::Status& status)
 {
     m_listWidget->setContent(status);
 }

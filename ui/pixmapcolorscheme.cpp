@@ -8,6 +8,8 @@
 #include "ui/draw.hpp"
 #include "ui/skincolorscheme.hpp"
 
+// PCC2: WImagePanel widget
+
 ui::PixmapColorScheme::PixmapColorScheme(Root& root, afl::base::Ref<gfx::Canvas> pixmap)
     : m_root(root),
       m_pixmap(pixmap)

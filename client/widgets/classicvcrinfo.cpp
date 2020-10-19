@@ -6,6 +6,7 @@
   */
 
 #include "client/widgets/classicvcrinfo.hpp"
+#include "util/string.hpp"
 
 /*
  * Layout:
@@ -80,7 +81,11 @@ client::widgets::ClassicVcrInfo::draw(gfx::Canvas& can)
 
     ctx.useFont(*normalFont);
     ctx.setTextAlign(2, 0);
-    outText(ctx, gfx::Point(x+w, y), m_data.text[Type]);
+    {
+        String_t text = m_data.text[Type];
+        util::addListItem(text, ", ", m_data.text[Position]);
+        outText(ctx, gfx::Point(x+w, y), text);
+    }
     ctx.setTextAlign(0, 0);
 
     y += largeHeight;

@@ -63,6 +63,13 @@ namespace interpreter {
         /** Start a process group.
             If the process still has processes, selects one of them. Call run() to actually run it.
             If the process group has no more processes, declares it finished using sig_processGroupFinish.
+
+            Use for starting freshly-created process groups.
+
+            Call
+            - startProcessGroup()
+            - run()
+
             \param pgid process group Id */
         void startProcessGroup(uint32_t pgid);
 
@@ -70,35 +77,79 @@ namespace interpreter {
             If the process is waiting, moves it into the given process group and marks it for eventual execution.
             If other processes are in the same process group, moves those into the process group as well.
             The given process and all the other processes will run when the leader of the process group finishes execution.
+
+            Use when a recursive process (inner) causes its invoker (outer) to continue, but continues itself.
+            In this case, call
+            - joinProcess(innerProcess, outerPGID) to merge innerProcess into the outer process group
+            - continueProcess(outerProcess) to continue the outer process and therefore the outer process group
+            - run()
+
             \param proc process
             \param pgid process group Id */
         void joinProcess(Process& proc, uint32_t pgid);
 
+        /** Join process groups.
+            Moves all processes from the old group into the new one,
+            signaling termination of the old one.
+
+            \param oldGroup Old process group
+            \param newGroup New process group */
+        void joinProcessGroup(uint32_t oldGroup, uint32_t newGroup);
+
         /** Resume a process.
             Places the process into the given process group and marks it for eventual execution.
-            Call startProcessGroup() to start the process group, run() to actually run it.
+
+            Use for resuming suspended processes on user request.
+
+            Call
+            - resumeProcess() to place the process in the process group
+            - startProcessGroup()
+            - run()
+
             \param proc process
             \param pgid process group Id */
         void resumeProcess(Process& proc, uint32_t pgid);
 
         /** Resume all suspended processes and place them in the given process group.
             Run the process group (startProcessGroup(), run()) to run them.
+
+            Use for resuming suspended processes on user request,
+
             \param pgid process group Id */
         void resumeSuspendedProcesses(uint32_t pgid);
 
         /** Terminate a process.
             Marks the process terminated. Call removeTerminatedProcesses() to actually remove the object.
             If there is another process in this process' process group, selects the next process; call run() to actually run it.
+
+            Use for terminating a process on user request.
+
             \param proc process */
         void terminateProcess(Process& proc);
 
         /** Continue a process.
             If the process is waiting, selects it for execution. Call run() to actually run it.
+
+            Use for continuing a process that voluntarily entered state Waiting if the action that caused it to wait succeeded.
+            That process will already be in a process group, possibly having other processes behind it.
+
+            Call
+            - continueProcess()
+            - run()
+
             \param proc process */
         void continueProcess(Process& proc);
 
         /** Continue a process with an error.
             If the process is waiting, selects it for execution. Call run() to actually run it.
+
+            Use for continuing a process that voluntarily entered state Waiting if the action that caused it to wait failed.
+            That process will already be in a process group, possibly having other processes behind it.
+
+            Call
+            - continueProcessWithFailure()
+            - run()
+
             \param proc process
             \param error Error message */
         void continueProcessWithFailure(Process& proc, String_t error);
@@ -110,17 +161,20 @@ namespace interpreter {
         void run();
 
         /** Terminate all processes.
-            Marks all processes terminated, excluding frozen ones. Call removeTerminatedProcesses() to actually remove the objects. */
+            Marks all processes terminated, excluding frozen ones. Call removeTerminatedProcesses() to actually remove the objects.
+
+            Use for terminating processes on user request. */
         void terminateAllProcesses();
 
-        /** Remove all terminated processes (zombie reaper). */
+        /** Remove all terminated processes (zombie reaper).
+            This will actually cause the Process objects to be destroyed. */
         void removeTerminatedProcesses();
 
         /** Handle a priority change.
             Call this after a change to a process' priority.
             If this causes the process's location in the process list to change, move it accordingly.
             \param proc process */
-        void handlePriorityChange(Process& proc);
+        void handlePriorityChange(const Process& proc);
 
         /** Get process, given an object.
             Locates a process, given a process kind and invoking object.

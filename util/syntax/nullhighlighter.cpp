@@ -1,5 +1,6 @@
 /**
   *  \file util/syntax/nullhighlighter.cpp
+  *  \brief Class util::syntax::NullHighlighter
   */
 
 #include "util/syntax/nullhighlighter.hpp"

@@ -4,13 +4,13 @@
 #ifndef C2NG_GAME_MAP_CIRCULAROBJECT_HPP
 #define C2NG_GAME_MAP_CIRCULAROBJECT_HPP
 
-#include "game/map/mapobject.hpp"
+#include "game/map/object.hpp"
 
 namespace game { namespace map {
 
     /** Circular game object on the map.
         This extends Object to include a radius. */
-    class CircularObject : public MapObject {
+    class CircularObject : public Object {
      public:
         virtual ~CircularObject();
 

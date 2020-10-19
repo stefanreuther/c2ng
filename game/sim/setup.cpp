@@ -162,6 +162,20 @@ game::sim::Setup::getObject(Slot_t slot) const
     return const_cast<Setup*>(this)->getObject(slot);
 }
 
+// Find slot, given an object.
+bool
+game::sim::Setup::findIndex(const Object* obj, Slot_t& result) const
+{
+    if (obj != 0 && obj == m_planet.get()) {
+        result = m_ships.size();
+        return true;
+    } else if (const Ship* ship = dynamic_cast<const Ship*>(obj)) {
+        return findIndex(ship, result);
+    } else {
+        return false;
+    }
+}
+
 // Get object, given a slot number.
 game::sim::Object*
 game::sim::Setup::getObject(Slot_t slot)
@@ -193,7 +207,7 @@ game::sim::Setup::duplicateShip(Slot_t slot, Id_t newId, afl::string::Translator
 void
 game::sim::Setup::swapShips(Slot_t a, Slot_t b)
 {
-    // ex GSimState::swapShips
+    // ex GSimState::swapShips, ccsim.pas:SwapSim (sort-of)
     if (a < m_ships.size() && b < m_ships.size()) {
         m_ships.swapElements(a, b);
         m_structureChanged = true;
@@ -245,15 +259,44 @@ game::sim::Setup::findShipById(Id_t id)
 game::Id_t
 game::sim::Setup::findUnusedShipId(Id_t firstToCheck) const
 {
-    // ex GSimState::getFreeId
+    // ex GSimState::getFreeId, ccsim.pas:NewId
     // \change add firstToCheck to bring the "add N ships" operation down from O(n**3)
     // \change no limit to the maximum setup size
+    // FIXME: PCC 1.x tries to avoid ships used in the game
     Slot_t tmp;
     Id_t i = firstToCheck;
     while (findShipSlotById(i, tmp) != 0) {
         ++i;
     }
     return i;
+}
+
+// Merge from other setup.
+void
+game::sim::Setup::merge(const Setup& other)
+{
+    // ex mergeccb.pas:AddShip, AddPlanet
+    // Merge ships
+    for (size_t i = 0, n = other.getNumShips(); i < n; ++i) {
+        if (const Ship* otherShip = other.getShip(i)) {
+            Ship* myShip = findShipById(otherShip->getId());
+            if (myShip == 0) {
+                myShip = addShip();
+            }
+            if (myShip != 0) {
+                *myShip = *otherShip;
+                myShip->markDirty();
+            }
+        }
+    }
+
+    // Merge planet
+    if (const Planet* otherPlanet = other.getPlanet()) {
+        if (Planet* myPlanet = addPlanet()) {
+            *myPlanet = *otherPlanet;
+            myPlanet->markDirty();
+        }
+    }
 }
 
 // Notify listeners.

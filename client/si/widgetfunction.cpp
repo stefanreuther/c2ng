@@ -391,7 +391,7 @@ client::si::IFWidgetNewFrame(game::Session& session, ScriptSide& ss, const Widge
     class FrameFactory : public Factory {
      public:
         FrameFactory()
-            : m_type(ui::widgets::FrameGroup::NoFrame),
+            : m_type(ui::NoFrame),
               m_width(2),
               m_pad(0)
             { }
@@ -419,7 +419,7 @@ client::si::IFWidgetNewFrame(game::Session& session, ScriptSide& ss, const Widge
             }
 
      private:
-        ui::widgets::FrameGroup::Type m_type;
+        ui::FrameType m_type;
         int m_width;
         int m_pad;
     };

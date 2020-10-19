@@ -19,7 +19,6 @@ namespace game { namespace map {
     class BeamUpShipTransfer : public CargoContainer {
      public:
         BeamUpShipTransfer(Ship& sh,
-                           InterpreterInterface& iface,
                            const game::spec::ShipList& shipList,
                            Turn& turn,
                            const game::config::HostConfiguration& config);
@@ -36,7 +35,6 @@ namespace game { namespace map {
 
      private:
         Ship& m_ship;
-        InterpreterInterface& m_interface;
         const game::spec::ShipList& m_shipList;
         Turn& m_turn;
         const game::config::HostConfiguration& m_config;

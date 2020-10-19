@@ -15,13 +15,13 @@
 #include "server/file/directoryhandlerfactory.hpp"
 #include "server/file/directorypage.hpp"
 #include "server/file/utils.hpp"
-#include "util/translation.hpp"
 #include "version.hpp"
 
 void
 server::file::ClientApplication::appMain()
 {
     // Parse args
+    afl::string::Translator& tx = translator();
     afl::sys::StandardCommandLineParser commandLine(environment().getCommandLine());
     afl::base::Optional<String_t> arg_command;
     String_t p;
@@ -33,7 +33,7 @@ server::file::ClientApplication::appMain()
             } else if (p == "proxy") {
                 m_networkStack.add(commandLine.getRequiredParameter(p));
             } else {
-                errorExit(afl::string::Format(_("invalid option specified. Use '%s -h' for help.").c_str(), environment().getInvocationName()));
+                errorExit(afl::string::Format(tx("invalid option specified. Use '%s -h' for help.").c_str(), environment().getInvocationName()));
             }
         } else {
             arg_command = p;
@@ -44,7 +44,7 @@ server::file::ClientApplication::appMain()
     // Now, the commandLine sits at the first argument for the command. Dispatch on command.
     const String_t* pCommand = arg_command.get();
     if (!pCommand) {
-        errorExit(afl::string::Format(_("no command specified. Use '%s -h' for help.").c_str(), environment().getInvocationName()));
+        errorExit(afl::string::Format(tx("no command specified. Use '%s -h' for help.").c_str(), environment().getInvocationName()));
     }
     if (*pCommand == "help") {
         help();
@@ -59,13 +59,14 @@ server::file::ClientApplication::appMain()
     } else if (*pCommand == "serve") {
         doServe(commandLine);
     } else {
-        errorExit(afl::string::Format(_("invalid command '%s'. Use '%s -h' for help.").c_str(), *pCommand, environment().getInvocationName()));
+        errorExit(afl::string::Format(tx("invalid command '%s'. Use '%s -h' for help.").c_str(), *pCommand, environment().getInvocationName()));
     }
 }
 
 void
 server::file::ClientApplication::doCopy(afl::sys::CommandLineParser& cmdl)
 {
+    afl::string::Translator& tx = translator();
     DirectoryHandlerFactory dhf(fileSystem(), networkStack());
     DirectoryHandler* in = 0;
     DirectoryHandler* out = 0;
@@ -79,7 +80,7 @@ server::file::ClientApplication::doCopy(afl::sys::CommandLineParser& cmdl)
             } else if (p == "x") {
                 flags += CopyExpandTarballs;
             } else {
-                errorExit(afl::string::Format(_("invalid option specified. Use '%s -h' for help.").c_str(), environment().getInvocationName()));
+                errorExit(afl::string::Format(tx("invalid option specified. Use '%s -h' for help.").c_str(), environment().getInvocationName()));
             }
         } else {
             if (in == 0) {
@@ -87,13 +88,13 @@ server::file::ClientApplication::doCopy(afl::sys::CommandLineParser& cmdl)
             } else if (out == 0) {
                 out = &dhf.createDirectoryHandler(p);
             } else {
-                errorExit(afl::string::Format(_("too many directory names specified. Use '%s -h' for help.").c_str(), environment().getInvocationName()));
+                errorExit(afl::string::Format(tx("too many directory names specified. Use '%s -h' for help.").c_str(), environment().getInvocationName()));
             }                
         }
     }
 
     if (out == 0) {
-        errorExit(afl::string::Format(_("need two directory names (source, destination). Use '%s -h' for help.").c_str(), environment().getInvocationName()));
+        errorExit(afl::string::Format(tx("need two directory names (source, destination). Use '%s -h' for help.").c_str(), environment().getInvocationName()));
     }
 
     copyDirectory(*out, *in, flags);
@@ -102,6 +103,7 @@ server::file::ClientApplication::doCopy(afl::sys::CommandLineParser& cmdl)
 void
 server::file::ClientApplication::doSync(afl::sys::CommandLineParser& cmdl)
 {
+    afl::string::Translator& tx = translator();
     DirectoryHandlerFactory dhf(fileSystem(), networkStack());
     DirectoryHandler* in = 0;
     DirectoryHandler* out = 0;
@@ -112,7 +114,7 @@ server::file::ClientApplication::doSync(afl::sys::CommandLineParser& cmdl)
             if (p == "r") {
                 // ignore for symmetry with 'cp'
             } else {
-                errorExit(afl::string::Format(_("invalid option specified. Use '%s -h' for help.").c_str(), environment().getInvocationName()));
+                errorExit(afl::string::Format(tx("invalid option specified. Use '%s -h' for help.").c_str(), environment().getInvocationName()));
             }
         } else {
             if (in == 0) {
@@ -120,13 +122,13 @@ server::file::ClientApplication::doSync(afl::sys::CommandLineParser& cmdl)
             } else if (out == 0) {
                 out = &dhf.createDirectoryHandler(p);
             } else {
-                errorExit(afl::string::Format(_("too many directory names specified. Use '%s -h' for help.").c_str(), environment().getInvocationName()));
+                errorExit(afl::string::Format(tx("too many directory names specified. Use '%s -h' for help.").c_str(), environment().getInvocationName()));
             }                
         }
     }
 
     if (out == 0) {
-        errorExit(afl::string::Format(_("need two directory names (source, destination). Use '%s -h' for help.").c_str(), environment().getInvocationName()));
+        errorExit(afl::string::Format(tx("need two directory names (source, destination). Use '%s -h' for help.").c_str(), environment().getInvocationName()));
     }
 
     synchronizeDirectories(*out, *in);
@@ -135,6 +137,7 @@ server::file::ClientApplication::doSync(afl::sys::CommandLineParser& cmdl)
 void
 server::file::ClientApplication::doList(afl::sys::CommandLineParser& cmdl)
 {
+    afl::string::Translator& tx = translator();
     bool opt_recursive = false;
     bool opt_long = false;
     std::vector<String_t> args;
@@ -147,7 +150,7 @@ server::file::ClientApplication::doList(afl::sys::CommandLineParser& cmdl)
             } else if (p == "l") {
                 opt_long = true;
             } else {
-                errorExit(afl::string::Format(_("invalid option specified. Use '%s -h' for help.").c_str(), environment().getInvocationName()));
+                errorExit(afl::string::Format(tx("invalid option specified. Use '%s -h' for help.").c_str(), environment().getInvocationName()));
             }
         } else {
             args.push_back(p);
@@ -155,7 +158,7 @@ server::file::ClientApplication::doList(afl::sys::CommandLineParser& cmdl)
     }
 
     if (args.empty()) {
-        errorExit(afl::string::Format(_("missing directory name to list. Use '%s -h' for help.").c_str(), environment().getInvocationName()));
+        errorExit(afl::string::Format(tx("missing directory name to list. Use '%s -h' for help.").c_str(), environment().getInvocationName()));
     }
 
     DirectoryHandlerFactory dhf(fileSystem(), networkStack());
@@ -214,6 +217,7 @@ server::file::ClientApplication::doList(DirectoryHandler& in, String_t name, boo
 void
 server::file::ClientApplication::doClear(afl::sys::CommandLineParser& cmdl)
 {
+    afl::string::Translator& tx = translator();
     std::vector<String_t> args;
     String_t p;
     bool opt;
@@ -222,7 +226,7 @@ server::file::ClientApplication::doClear(afl::sys::CommandLineParser& cmdl)
             if (p == "r") {
                 // Ignore for consistency; we are always recursive
             } else {
-                errorExit(afl::string::Format(_("invalid option specified. Use '%s -h' for help.").c_str(), environment().getInvocationName()));
+                errorExit(afl::string::Format(tx("invalid option specified. Use '%s -h' for help.").c_str(), environment().getInvocationName()));
             }
         } else {
             args.push_back(p);
@@ -230,7 +234,7 @@ server::file::ClientApplication::doClear(afl::sys::CommandLineParser& cmdl)
     }
 
     if (args.empty()) {
-        errorExit(afl::string::Format(_("missing directory name to clear. Use '%s -h' for help.").c_str(), environment().getInvocationName()));
+        errorExit(afl::string::Format(tx("missing directory name to clear. Use '%s -h' for help.").c_str(), environment().getInvocationName()));
     }
 
     DirectoryHandlerFactory dhf(fileSystem(), networkStack());
@@ -243,6 +247,7 @@ void
 server::file::ClientApplication::doServe(afl::sys::CommandLineParser& cmdl)
 {
     // Parse parameters
+    afl::string::Translator& tx = translator();
     afl::base::Optional<String_t> source;
     afl::base::Optional<String_t> address;
 
@@ -250,20 +255,20 @@ server::file::ClientApplication::doServe(afl::sys::CommandLineParser& cmdl)
     bool opt;
     while (cmdl.getNext(opt, p)) {
         if (opt) {
-            errorExit(afl::string::Format(_("invalid option specified. Use '%s -h' for help.").c_str(), environment().getInvocationName()));
+            errorExit(afl::string::Format(tx("invalid option specified. Use '%s -h' for help.").c_str(), environment().getInvocationName()));
         } else if (!source.isValid()) {
             source = p;
         } else if (!address.isValid()) {
             address = p;
         } else {
-            errorExit(afl::string::Format(_("too many parameters. Use '%s -h' for help.").c_str(), environment().getInvocationName()));
+            errorExit(afl::string::Format(tx("too many parameters. Use '%s -h' for help.").c_str(), environment().getInvocationName()));
         }
     }
 
     const String_t* pSource = source.get();
     const String_t* pAddress = address.get();
     if (pSource == 0 || pAddress == 0) {
-        errorExit(afl::string::Format(_("too few parameters. Use '%s -h' for help.").c_str(), environment().getInvocationName()));
+        errorExit(afl::string::Format(tx("too few parameters. Use '%s -h' for help.").c_str(), environment().getInvocationName()));
     }
 
     // ProtocolHandlerFactory
@@ -291,40 +296,41 @@ server::file::ClientApplication::doServe(afl::sys::CommandLineParser& cmdl)
 void
 server::file::ClientApplication::help()
 {
+    afl::string::Translator& tx = translator();
     afl::io::TextWriter& out = standardOutput();
-    out.writeLine(afl::string::Format(_("PCC2 File Client v%s - (c) 2017-2020 Stefan Reuther").c_str(), PCC2_VERSION));
+    out.writeLine(afl::string::Format(tx("PCC2 File Client v%s - (c) 2017-2020 Stefan Reuther").c_str(), PCC2_VERSION));
     out.writeLine();
-    out.writeLine(afl::string::Format(_("Usage:\n"
-                                        "  %s [-h]\n"
-                                        "  %$0s [--proxy=URL] COMMAND...\n"
-                                        "\n"
-                                        "Commands:\n"
-                                        "  %$0s cp [-r] [-x] SOURCE DEST\n"
-                                        "                      Copy everything from SOURCE to DEST\n"
-                                        "  %$0s ls [-r] [-l] DIR...\n"
-                                        "                      List content of the DIRs\n"
-                                        "  %$0s sync SOURCE DEST\n"
-                                        "                      Make DEST contain the same content as SOURCE\n"
-                                        "  %$0s clear DIR...\n"
-                                        "                      Remove content of DIRs\n"
-                                        "  %$0s serve SOURCE HOST:PORT\n"
-                                        "                      Serve SOURCE via HTTP for testing\n"
-                                        "\n"
-                                        "Command Options:\n"
-                                        "  -r                  Recursive\n"
-                                        "  -l                  Long format\n"
-                                        "  -x                  Expand *.tgz/*.tar.gz files\n"
-                                        "\n"
-                                        "File specifications:\n"
-                                        "  PATH                Access files within unmanaged file system\n"
-                                        "  [PATH@]ca:SPEC      Access files within unmanaged content-addressable file system\n"
-                                        // "  [PATH@]c2file:SPEC  Access files within managed file system\n"
-                                        // "  [PATH@]ro:SPEC      Prevent write access\n"
-                                        "  [PATH@]int:[UNIQ]   Internal (RAM, not persistent) file space\n"
-                                        "  c2file://[USER@]HOST:PORT/PATH\n"
-                                        "                      Access in a remote managed file system (c2file server)\n"
-                                        "\n"
-                                        "Report bugs to <Streu@gmx.de>\n").c_str(),
+    out.writeLine(afl::string::Format(tx("Usage:\n"
+                                         "  %s [-h]\n"
+                                         "  %$0s [--proxy=URL] COMMAND...\n"
+                                         "\n"
+                                         "Commands:\n"
+                                         "  %$0s cp [-r] [-x] SOURCE DEST\n"
+                                         "                      Copy everything from SOURCE to DEST\n"
+                                         "  %$0s ls [-r] [-l] DIR...\n"
+                                         "                      List content of the DIRs\n"
+                                         "  %$0s sync SOURCE DEST\n"
+                                         "                      Make DEST contain the same content as SOURCE\n"
+                                         "  %$0s clear DIR...\n"
+                                         "                      Remove content of DIRs\n"
+                                         "  %$0s serve SOURCE HOST:PORT\n"
+                                         "                      Serve SOURCE via HTTP for testing\n"
+                                         "\n"
+                                         "Command Options:\n"
+                                         "  -r                  Recursive\n"
+                                         "  -l                  Long format\n"
+                                         "  -x                  Expand *.tgz/*.tar.gz files\n"
+                                         "\n"
+                                         "File specifications:\n"
+                                         "  PATH                Access files within unmanaged file system\n"
+                                         "  [PATH@]ca:SPEC      Access files within unmanaged content-addressable file system\n"
+                                         // "  [PATH@]c2file:SPEC  Access files within managed file system\n"
+                                         // "  [PATH@]ro:SPEC      Prevent write access\n"
+                                         "  [PATH@]int:[UNIQ]   Internal (RAM, not persistent) file space\n"
+                                         "  c2file://[USER@]HOST:PORT/PATH\n"
+                                         "                      Access in a remote managed file system (c2file server)\n"
+                                         "\n"
+                                         "Report bugs to <Streu@gmx.de>\n").c_str(),
                                       environment().getInvocationName()));
     out.flush();
     exit(0);

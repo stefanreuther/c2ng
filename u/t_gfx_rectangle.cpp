@@ -241,3 +241,95 @@ TestGfxRectangle::testFormat()
     TS_ASSERT_EQUALS(os.str(), "30x40+10+20");
 }
 
+/** Test splitBottomY, splitRightX. */
+void
+TestGfxRectangle::testSplit2()
+{
+    {
+        gfx::Rectangle t(0, 0, 100, 100);
+
+        // consumeX
+        t.consumeRightX(10);
+        TS_ASSERT_EQUALS(t, gfx::Rectangle(0, 0, 90, 100));
+
+        // splitX
+        TS_ASSERT_EQUALS(t.splitRightX(20), gfx::Rectangle(70, 0, 20, 100));
+        TS_ASSERT_EQUALS(t, gfx::Rectangle(0, 0, 70, 100));
+
+        // consumeY
+        t.consumeBottomY(40);
+        TS_ASSERT_EQUALS(t, gfx::Rectangle(0, 0, 70, 60));
+    
+        // splitY
+        TS_ASSERT_EQUALS(t.splitBottomY(50), gfx::Rectangle(0, 10, 70, 50));
+        TS_ASSERT_EQUALS(t, gfx::Rectangle(0, 0, 70, 10));
+    }
+    // Underflow
+    {
+        gfx::Rectangle t(0, 0, 100, 100);
+        TS_ASSERT(!t.splitRightX(-10).exists());
+        TS_ASSERT(!t.splitBottomY(-10).exists());
+        t.consumeRightX(-20);
+        t.consumeBottomY(-20);
+        TS_ASSERT_EQUALS(t, gfx::Rectangle(0, 0, 100, 100));
+    }
+
+    // Overflow
+    {
+        gfx::Rectangle t(0, 0, 100, 100);
+        TS_ASSERT_EQUALS(t.splitRightX(200), gfx::Rectangle(0, 0, 100, 100));
+        TS_ASSERT(!t.exists());
+    }
+    {
+        gfx::Rectangle t(0, 0, 100, 100);
+        TS_ASSERT_EQUALS(t.splitBottomY(200), gfx::Rectangle(0, 0, 100, 100));
+        TS_ASSERT(!t.exists());
+    }
+    {
+        gfx::Rectangle t(0, 0, 100, 100);
+        t.consumeRightX(101);
+        TS_ASSERT(!t.exists());
+    }
+    {
+        gfx::Rectangle t(0, 0, 100, 100);
+        t.consumeBottomY(102);
+        TS_ASSERT(!t.exists());
+    }
+}
+
+/** Test include(). */
+void
+TestGfxRectangle::testInclude()
+{
+    // empty + nonempty
+    {
+        gfx::Rectangle a(20, 30, 0, 0);     // empty
+        gfx::Rectangle b(1, 2, 3, 4);
+        a.include(b);
+        TS_ASSERT_EQUALS(a, gfx::Rectangle(1, 2, 3, 4));
+    }
+
+    // nonempty + empty
+    {
+        gfx::Rectangle a(7, 8, 9, 10);
+        gfx::Rectangle b(20, 30, 0, 0);     // empty
+        a.include(b);
+        TS_ASSERT_EQUALS(a, gfx::Rectangle(7, 8, 9, 10));
+    }
+
+    // empty + empty
+    {
+        gfx::Rectangle a(7, 8, 0, 0);       // empty
+        gfx::Rectangle b(20, 30, 0, 0);     // empty
+        a.include(b);
+        TS_ASSERT(!a.exists());
+    }
+
+    // nonempty + nonempty
+    {
+        gfx::Rectangle a(7, 8, 9, 10);
+        gfx::Rectangle b(1, 2, 3, 4);
+        a.include(b);
+        TS_ASSERT_EQUALS(a, gfx::Rectangle(1, 2, 15, 16));
+    }
+}

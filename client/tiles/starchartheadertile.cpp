@@ -3,16 +3,16 @@
   */
 
 #include "client/tiles/starchartheadertile.hpp"
-#include "gfx/context.hpp"
-#include "util/skincolor.hpp"
-#include "client/proxy/objectlistener.hpp"
 #include "afl/string/format.hpp"
 #include "game/map/planet.hpp"
 #include "game/map/ship.hpp"
-#include "game/tables/temperaturename.hpp"
+#include "game/proxy/objectlistener.hpp"
 #include "game/root.hpp"
-#include "game/spec/shiplist.hpp"
 #include "game/spec/hull.hpp"
+#include "game/spec/shiplist.hpp"
+#include "game/tables/temperaturename.hpp"
+#include "gfx/context.hpp"
+#include "util/skincolor.hpp"
 
 using afl::string::Format;
 using game::map::Ship;
@@ -163,7 +163,7 @@ client::tiles::StarchartHeaderTile::setContent(const Content& content)
 }
 
 void
-client::tiles::StarchartHeaderTile::attach(client::proxy::ObjectObserver& oop)
+client::tiles::StarchartHeaderTile::attach(game::proxy::ObjectObserver& oop)
 {
     class Updater : public util::Request<StarchartHeaderTile> {
      public:
@@ -176,7 +176,7 @@ client::tiles::StarchartHeaderTile::attach(client::proxy::ObjectObserver& oop)
         Content m_content;
     };
 
-    class Listener : public client::proxy::ObjectListener {
+    class Listener : public game::proxy::ObjectListener {
      public:
         Listener(util::RequestSender<StarchartHeaderTile> reply)
             : m_reply(reply)

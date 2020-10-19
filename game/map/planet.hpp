@@ -10,7 +10,7 @@
 #include "game/element.hpp"
 #include "game/hostversion.hpp"
 #include "game/map/basedata.hpp"
-#include "game/map/mapobject.hpp"
+#include "game/map/object.hpp"
 #include "game/map/planetdata.hpp"
 #include "game/parser/messageinformation.hpp"
 #include "game/playerset.hpp"
@@ -43,7 +43,7 @@ namespace game { namespace map {
           This has the advantage that we don't have to duplicate and maintain information like X/Y, name, and status.
         - removed orbit flags
         - removed cargo arbiter */
-    class Planet : public MapObject {
+    class Planet : public Object {
      public:
         enum BaseKind {
             UnknownBase,            ///< We do not know whether there is a base.
@@ -152,7 +152,7 @@ namespace game { namespace map {
 
 
         /*
-         *  MapObject interface:
+         *  Object interface:
          */
 
         virtual String_t getName(ObjectName which, afl::string::Translator& tx, InterpreterInterface& iface) const;

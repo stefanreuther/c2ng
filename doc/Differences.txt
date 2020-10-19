@@ -1,0 +1,60 @@
+Known (intentional) differences between PCC2 and PCC2NG
+========================================================
+
+
+Script: rich-text functions are always available.
+
+  PCC2: rich-text functions are only available in GUI mode.
+  In text mode, wrappers are implemented using normal strings.
+
+  PCC2NG: rich-text functions are always available.
+
+  Impact: small; text-mode PCC2 scripts are very rare.
+
+
+Script: contexts treated differently in conditions.
+
+  PCC2 <2.0.2, PCC 2.40: "If IsEmpty(Ship(1))" is executed, although
+  "IsEmpty(Ship(1))" alone reports False. This is fixed in 2.0.2,
+  2.40.1.
+
+  PCC2: out-of-range accesses to contexts produce a RangeError.
+
+  PCC2NG: out-of-range accesses to contexts produce EMPTY.
+
+  Rationale: PCC2NG relies less on fixed array ranges to support
+  different backends. In addition, PCC2NG has more contexts (such as
+  Mission(), FCode()) that are possibly indexed with a user-supplied
+  index, making EMPTY the better choice.
+
+  Impact: Scripts that access properties of an out-of-range unit
+  ("Ship(X).Name") will get EMPTY (like for a non-existant in-range
+  unit or for X=EMPTY); scripts that use "With" statements will get a
+  type error instead of a range error.
+
+
+Script: implementation of character set
+
+  PCC 1.x, up to 1.99.11: Chr(X) interprets just lower 8 bits as
+  character in game character set and ignores the rest.
+
+  PCC 1.99.12+: Chr(X) returns single Unicode character for 0..65535,
+  empty string for out-of-range values.
+
+  PCC 2.40.8+: Chr(X) returns single Unicode character for 0..1114111
+  (entire Unicode range), range error otherwise.
+
+  PCC 2.40 - 2.40.7: same, but returns invalid UTF-8 sequence that
+  behaves inconsistently later on (e.g. Len(Chr(-1)) = 7).
+
+
+Script: expression grammar syntax
+
+  PCC 1.x: "#a:=b" parenthesizes as "#(a:=b)". "-NOT a" is not
+  accepted (fixed in 1.1.20).
+
+  PCC2/PCC2NG: "#a:=b" parenthesizes as "(#a):=b". "-NOT a" is
+  accepted.
+
+
+-eof-

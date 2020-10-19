@@ -7,7 +7,7 @@
 #include "game/map/ship.hpp"
 
 game::map::AnyShipType::AnyShipType(Universe& univ)
-    : ObjectVectorType<Ship>(univ, univ.ships())
+    : ObjectVectorType<Ship>(univ.ships())
 { }
 
 bool

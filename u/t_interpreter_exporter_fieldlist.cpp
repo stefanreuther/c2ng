@@ -38,7 +38,7 @@ TestInterpreterExporterFieldList::testAdd()
     TS_ASSERT_EQUALS(t.getFieldWidth(2), 30);   // FIXME: function is pending-delete
 
     TS_ASSERT(!t.getField(3, name, width));
-    TS_ASSERT(!t.getField(-1, name, width));
+    TS_ASSERT(!t.getField(interpreter::exporter::FieldList::Index_t(-1), name, width));
 
     TS_ASSERT_THROWS(t.add(""), interpreter::Error);
     TS_ASSERT_THROWS(t.add("a@"), interpreter::Error);
@@ -108,5 +108,27 @@ TestInterpreterExporterFieldList::testModify()
     t.setFieldName(1, "D");
     t.setFieldWidth(2, 9);
     TS_ASSERT_EQUALS(t.toString(), "B,D,E@9,X@5,Y");
+
+    t.setFieldName(3, "f");
+    TS_ASSERT_EQUALS(t.toString(), "B,D,E@9,F@5,Y");
+}
+
+/** Test copying. */
+void
+TestInterpreterExporterFieldList::testCopy()
+{
+    // (I admit that this test only serves to fill an ugly red gap in the coverage report :)
+    interpreter::exporter::FieldList a, b;
+    a.addList("a,b@2,x");
+
+    interpreter::exporter::FieldList c(a);
+    b = a;
+
+    TS_ASSERT_EQUALS(a.toString(), "A,B@2,X");
+    TS_ASSERT_EQUALS(b.toString(), "A,B@2,X");
+    TS_ASSERT_EQUALS(c.toString(), "A,B@2,X");
+    TS_ASSERT_EQUALS(a.size(), 3U);
+    TS_ASSERT_EQUALS(b.size(), 3U);
+    TS_ASSERT_EQUALS(c.size(), 3U);
 }
 

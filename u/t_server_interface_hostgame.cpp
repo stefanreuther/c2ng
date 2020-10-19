@@ -27,9 +27,9 @@ TestServerInterfaceHostGame::testInterface()
             { }
         virtual Info getInfo(int32_t /*gameId*/)
             { return Info(); }
-        virtual void getInfos(afl::base::Optional<State> /*requiredState*/, afl::base::Optional<Type> /*requiredType*/, afl::base::Optional<String_t> /*requiredUser*/, bool /*verbose*/, std::vector<Info>& /*result*/)
+        virtual void getInfos(const Filter& /*filter*/, bool /*verbose*/, std::vector<Info>& /*result*/)
             { }
-        virtual void getGames(afl::base::Optional<State> /*requiredState*/, afl::base::Optional<Type> /*requiredType*/, afl::base::Optional<String_t> /*requiredUser*/, std::vector<int32_t>& /*result*/)
+        virtual void getGames(const Filter& /*filter*/, std::vector<int32_t>& /*result*/)
             { }
         virtual void setConfig(int32_t /*gameId*/, const afl::data::StringList_t& /*keyValues*/)
             { }

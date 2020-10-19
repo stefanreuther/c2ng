@@ -293,7 +293,7 @@ game::nu::SpecificationLoader::loadDefaultHullAssignments(game::spec::ShipList& 
 
         // Populate one entry
         for (size_t i = 0, n = hulls.size(); i < n; ++i) {
-            list.hullAssignments().add(playerId, i+1, hulls[i]);
+            list.hullAssignments().add(playerId, int(i+1), hulls[i]);
         }
     }
 }
@@ -303,7 +303,7 @@ game::nu::SpecificationLoader::loadRaceHullAssignments(game::spec::ShipList& lis
 {
     list.hullAssignments().clearPlayer(player);
     for (size_t i = 0, n = racehulls.getArraySize(); i < n; ++i) {
-        list.hullAssignments().add(player, i+1, racehulls[i].toInteger());
+        list.hullAssignments().add(player, int(i+1), racehulls[i].toInteger());
     }
 }
 

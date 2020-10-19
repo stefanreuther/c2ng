@@ -6,9 +6,9 @@
 #include "client/map/waypointoverlay.hpp"
 #include "client/map/callback.hpp"
 #include "client/map/renderer.hpp"
-#include "client/proxy/objectlistener.hpp"
 #include "game/game.hpp"
 #include "game/map/ship.hpp"
+#include "game/proxy/objectlistener.hpp"
 #include "game/session.hpp"
 #include "game/turn.hpp"
 #include "gfx/complex.hpp"
@@ -97,7 +97,7 @@ client::map::WaypointOverlay::handleMouse(gfx::Point /*pt*/, MouseButtons_t /*pr
 }
 
 void
-client::map::WaypointOverlay::attach(client::proxy::ObjectObserver& oop)
+client::map::WaypointOverlay::attach(game::proxy::ObjectObserver& oop)
 {
     class Reply : public util::Request<WaypointOverlay> {
      public:
@@ -122,7 +122,7 @@ client::map::WaypointOverlay::attach(client::proxy::ObjectObserver& oop)
         game::map::ShipMovementInfos_t m_infos;
     };
 
-    class Listener : public client::proxy::ObjectListener {
+    class Listener : public game::proxy::ObjectListener {
      public:
         Listener(util::RequestSender<WaypointOverlay> reply)
             : m_reply(reply)

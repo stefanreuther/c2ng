@@ -139,6 +139,15 @@ class TestServerHostHostGame : public CxxTest::TestSuite {
     void testGetPermissions();
     void testVictoryCondition();
     void testListUserGames();
+    void testFilters();
+};
+
+class TestServerHostHostKey : public CxxTest::TestSuite {
+ public:
+    void testAdmin();
+    void testNormal();
+    void testFileError();
+    void testReg();
 };
 
 class TestServerHostHostPlayer : public CxxTest::TestSuite {
@@ -209,6 +218,15 @@ class TestServerHostHostTurn : public CxxTest::TestSuite {
 class TestServerHostInstaller : public CxxTest::TestSuite {
  public:
     void testPrecious();
+};
+
+class TestServerHostKeyStore : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testListEmpty();
+    void testExpire();
+    void testNoStore();
+    void testNoLimit();
 };
 
 class TestServerHostResultSender : public CxxTest::TestSuite {

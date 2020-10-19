@@ -19,22 +19,23 @@
 
 #include <memory>
 #include "interpreter/filefunctions.hpp"
-#include "interpreter/specialcommand.hpp"
-#include "interpreter/arguments.hpp"
-#include "interpreter/opcode.hpp"
-#include "interpreter/expr/node.hpp"
-#include "interpreter/tokenizer.hpp"
-#include "interpreter/statementcompiler.hpp"
-#include "interpreter/statementcompilationcontext.hpp"
-#include "interpreter/world.hpp"
-#include "interpreter/error.hpp"
-#include "interpreter/expr/parser.hpp"
-#include "interpreter/values.hpp"
-#include "interpreter/simpleindexablevalue.hpp"
-#include "afl/except/fileproblemexception.hpp"
-#include "interpreter/blobvalue.hpp"
 #include "afl/bits/fixedstring.hpp"
+#include "afl/except/fileproblemexception.hpp"
+#include "interpreter/arguments.hpp"
+#include "interpreter/blobvalue.hpp"
+#include "interpreter/error.hpp"
+#include "interpreter/expr/node.hpp"
+#include "interpreter/expr/parser.hpp"
+#include "interpreter/opcode.hpp"
+#include "interpreter/simpleindexablevalue.hpp"
 #include "interpreter/simpleprocedurevalue.hpp"
+#include "interpreter/specialcommand.hpp"
+#include "interpreter/statementcompilationcontext.hpp"
+#include "interpreter/statementcompiler.hpp"
+#include "interpreter/tokenizer.hpp"
+#include "interpreter/values.hpp"
+#include "interpreter/world.hpp"
+#include "util/io.hpp"
 
 using afl::io::TextFile;
 using interpreter::Arguments;
@@ -723,6 +724,26 @@ namespace {
         }
     }
 
+    /* @q AppendFileNameExtension(n:Str, ext:Str, Optional force:Bool):Str (Function)
+       Append a file name extension.
+       The parameter %n is a full file name, possibly including a directory path.
+       If it does not already contain an extension, or %force is specified, extension %ext is appended.
+       For example,
+       |  AppendFileNameExtension("readme", "txt")
+       will produce "readme.txt".
+       @since PCC2 2.40.9 */
+    afl::data::Value* IFAppendFileNameExtension(World& world, Arguments& args)
+    {
+        String_t pathName, ext;
+        args.checkArgumentCount(2, 3);
+        if (!checkStringArg(pathName, args.getNext()) || !checkStringArg(ext, args.getNext())) {
+            return 0;
+        } else {
+            bool force = interpreter::getBooleanValue(args.getNext()) > 0;
+            return makeStringValue(util::appendFileNameExtension(world.fileSystem(), pathName, ext, force));
+        }
+    }
+
     /* @q GetLong(v:Blob, pos:Int):Int (Function)
        Extract long.
        Returns the long (4 bytes, 32 bits) stored at position %pos in the given data block.
@@ -873,6 +894,7 @@ interpreter::registerFileFunctions(World& world)
     world.addNewSpecialCommand("SETSTR",  new SFSetStr());
     world.addNewSpecialCommand("SETWORD", new SFSetInt(2));
 
+    world.setNewGlobalValue("APPENDFILENAMEEXTENSION", new SimpleIndexableValue(world, IFAppendFileNameExtension, 0, 0));
     world.setNewGlobalValue("CC$GET",           new SimpleIndexableValue(world, IFCCGet, 0, 0));
     world.setNewGlobalValue("CC$INPUT",         new SimpleIndexableValue(world, IFCCInput, 0, 0));
     world.setNewGlobalValue("CC$OPEN",          new SimpleIndexableValue(world, IFCCOpen, 0, 0));

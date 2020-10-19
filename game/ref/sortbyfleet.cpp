@@ -5,10 +5,9 @@
 #include "game/ref/sortbyfleet.hpp"
 #include "game/map/fleet.hpp"
 
-game::ref::SortByFleet::SortByFleet(const game::map::Universe& univ, afl::string::Translator& tx, InterpreterInterface& interface)
+game::ref::SortByFleet::SortByFleet(const game::map::Universe& univ, afl::string::Translator& tx)
     : m_universe(univ),
-      m_translator(tx),
-      m_interface(interface)
+      m_translator(tx)
 { }
 
 int
@@ -25,7 +24,7 @@ game::ref::SortByFleet::getClass(const Reference& a) const
     int key = getFleetNumberKey(a) >> 1;
     if (key != 0) {
         if (const game::map::Ship* pLeader = m_universe.ships().get(key)) {
-            return game::map::Fleet::getTitle(*pLeader, m_translator, m_interface);
+            return game::map::Fleet::getTitle(*pLeader, m_translator);
         } else {
             // This is an error: a fleet number that does not exist
             return m_translator.translateString("unknown");

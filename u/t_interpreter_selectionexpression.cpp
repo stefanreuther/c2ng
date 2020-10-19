@@ -80,6 +80,7 @@ TestInterpreterSelectionExpression::testInvalid()
 
     TS_ASSERT_THROWS(compile("@"), interpreter::Error);
     TS_ASSERT_THROWS(compile("i"), interpreter::Error);
+    TS_ASSERT_THROWS(compile("2"), interpreter::Error);
 
     TS_ASSERT_THROWS(compile("a not b"), interpreter::Error);
 

@@ -6,7 +6,7 @@
 #include "game/map/universe.hpp"
 
 game::map::IonStormType::IonStormType(Universe& univ)
-    : ObjectVectorType<IonStorm>(univ, univ.ionStorms())
+    : ObjectVectorType<IonStorm>(univ.ionStorms())
 { }
 
 bool

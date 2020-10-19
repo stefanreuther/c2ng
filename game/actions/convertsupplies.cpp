@@ -27,7 +27,7 @@ game::actions::ConvertSupplies::ConvertSupplies(game::map::Planet& pl)
 
 // Set undo information.
 void
-game::actions::ConvertSupplies::setUndoInformation(game::map::Universe& univ)
+game::actions::ConvertSupplies::setUndoInformation(const game::map::Universe& univ)
 {
     m_pUniverse = &univ;
 }

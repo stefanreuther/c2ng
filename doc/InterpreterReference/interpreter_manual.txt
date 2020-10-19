@@ -1278,7 +1278,7 @@ These commands are the core of the scripting system.
 They allow you structuring your programs, and interacting with the interpreter.
 Many of them have a special syntax.
 
-Most of these commands have little or no knowledge of the Planet game,
+Most of these commands have little or no knowledge of the Planets game,
 for commands to interact with your game, see {int:index:group:globalcommand|Global Commands},
 {int:index:group:shipcommand|Ship Commands}, {int:index:group:planetcommand|Planet Commands},
 and other sections.
@@ -1293,7 +1293,7 @@ These functions are the core of the scripting system.
 They perform elementary computations, much like built-in operators.
 Some of them have a special syntax.
 
-Most of these functions have little or no knowledge of the Planet game,
+Most of these functions have little or no knowledge of the Planets game,
 for commands to interact with your game, see {int:index:group:function|Functions},
 {int:index:group:context|Contexts}, and other sections.
 
@@ -1459,7 +1459,7 @@ These can be accessed using <tt>{System.Plugin}(id).FIELD</tt>.
 @group Reference Property
 This section describes all {@type Reference|reference} properties.
 --------------------------------------------------------------------------------
-@group Reference List
+@group Reference List Operation
 This section describes operations/attributes of reference lists.
 A reference list is created using {ReferenceList()}.
 --------------------------------------------------------------------------------
@@ -1565,6 +1565,8 @@ and {@group Global Command|global commands}.
 ===  Versions
 ===
 
+--------------------------------------------------------------------------------
+@version PCC2 2.40.9
 --------------------------------------------------------------------------------
 @version PCC2 2.40.8
 --------------------------------------------------------------------------------

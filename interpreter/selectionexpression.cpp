@@ -1,11 +1,13 @@
 /**
   *  \file interpreter/selectionexpression.cpp
+  *  \brief Class interpreter::SelectionExpression
   */
 
 #include "interpreter/selectionexpression.hpp"
 #include "interpreter/error.hpp"
 #include "interpreter/tokenizer.hpp"
 
+// Compile selection expression.
 void
 interpreter::SelectionExpression::compile(Tokenizer& tok, String_t& expr)
 {
@@ -37,8 +39,9 @@ interpreter::SelectionExpression::compileOptionalTypeMask(Tokenizer& tok, String
     if (tok.checkAdvance(tok.tLParen)) {
         compile(tok, expr);
         expr += opAnd;
-        if (!tok.checkAdvance(tok.tRParen))
+        if (!tok.checkAdvance(tok.tRParen)) {
             throw Error::expectSymbol(")");
+        }
     }
 }
 

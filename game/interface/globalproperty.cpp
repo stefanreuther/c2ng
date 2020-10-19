@@ -158,7 +158,7 @@ game::interface::getGlobalProperty(GlobalProperty igp, Session& session)
            A number from 0 to 7.
            @assignable */
         if (Game* game = session.getGame().get()) {
-            return makeSizeValue(game->markings().getCurrentLayer());
+            return makeSizeValue(game->selections().getCurrentLayer());
         } else {
             return 0;
         }
@@ -369,8 +369,8 @@ game::interface::setGlobalProperty(GlobalProperty igp, Session& session, afl::da
     switch (igp) {
      case igpSelectionLayer:
         if (Game* game = session.getGame().get()) {
-            if (interpreter::checkIntegerArg(iv, value, 0, int(game->markings().get(game::map::Markings::Ship).size()) - 1)) {
-                game->markings().setCurrentLayer(iv, game->currentTurn().universe());
+            if (interpreter::checkIntegerArg(iv, value, 0, int(game->selections().get(game::map::Selections::Ship).size()) - 1)) {
+                game->selections().setCurrentLayer(iv, game->currentTurn().universe());
             }
         } else {
             throw interpreter::Error::notAssignable();

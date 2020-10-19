@@ -42,6 +42,7 @@ server::play::MainPacker::buildValue() const
     addValue(*hv, ctx, "SYSTEM.REGSTR1", "SYSTEM.REGSTR1");
     addValue(*hv, ctx, "SYSTEM.REGSTR2", "SYSTEM.REGSTR2");
     addValue(*hv, ctx, "SYSTEM.VERSION", "SYSTEM.VERSION");
+    addValue(*hv, ctx, "SYSTEM.VERSION$", "SYSTEM.VERSION$");
     addValue(*hv, ctx, "TURN", "TURN");
     addValue(*hv, ctx, "TURN.DATE", "TURN.DATE");
     addValue(*hv, ctx, "TURN.TIME", "TURN.TIME");

@@ -1,5 +1,6 @@
 /**
   *  \file util/fileparser.cpp
+  *  \brief Class util::FileParser
   */
 
 #include <cstring>

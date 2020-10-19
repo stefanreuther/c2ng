@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/statementcompilationcontext.cpp
+  *  \brief Class interpreter::StatementCompilationContext
   */
 
 #include "interpreter/statementcompilationcontext.hpp"

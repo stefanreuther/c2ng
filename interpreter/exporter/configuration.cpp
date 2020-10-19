@@ -1,11 +1,12 @@
 /**
   *  \file interpreter/exporter/configuration.cpp
+  *  \brief Class interpreter::exporter::Configuration
   */
 
 #include "interpreter/exporter/configuration.hpp"
-#include "util/configurationfileparser.hpp"
 #include "afl/except/fileproblemexception.hpp"
 #include "afl/string/format.hpp"
+#include "util/configurationfileparser.hpp"
 #include "util/translation.hpp"
 
 namespace {
@@ -50,22 +51,25 @@ namespace {
 }
 
 
+// Constructor.
 interpreter::exporter::Configuration::Configuration()
     : m_charsetIndex(util::CharsetFactory::LATIN1_INDEX),
       m_format(TextFormat),
       m_fieldList()
 { }
-      
 
+// Destructor.
 interpreter::exporter::Configuration::~Configuration()
 { }
 
+// Set character set by index.
 void
 interpreter::exporter::Configuration::setCharsetIndex(util::CharsetFactory::Index_t index)
 {
     m_charsetIndex = index;
 }
 
+// Set character set by name.
 void
 interpreter::exporter::Configuration::setCharsetByName(const String_t& name)
 {
@@ -74,24 +78,28 @@ interpreter::exporter::Configuration::setCharsetByName(const String_t& name)
     }
 }
 
+// Get character set index.
 util::CharsetFactory::Index_t
 interpreter::exporter::Configuration::getCharsetIndex() const
 {
     return m_charsetIndex;
 }
 
+// Create configured character set.
 afl::charset::Charset*
 interpreter::exporter::Configuration::createCharset() const
 {
     return util::CharsetFactory().createCharsetByIndex(m_charsetIndex);
 }
 
+// Set format.
 void
 interpreter::exporter::Configuration::setFormat(Format fmt)
 {
     m_format = fmt;
 }
 
+// Set format by name.
 void
 interpreter::exporter::Configuration::setFormatByName(const String_t& name)
 {
@@ -100,24 +108,28 @@ interpreter::exporter::Configuration::setFormatByName(const String_t& name)
     }
 }
 
+// Get format.
 interpreter::exporter::Format
 interpreter::exporter::Configuration::getFormat() const
 {
     return m_format;
 }
 
+// Access field list.
 interpreter::exporter::FieldList&
 interpreter::exporter::Configuration::fieldList()
 {
     return m_fieldList;
 }
 
+// Access field list.
 const interpreter::exporter::FieldList&
 interpreter::exporter::Configuration::fieldList() const
 {
     return m_fieldList;
 }
 
+// Read configuration from stream.
 void
 interpreter::exporter::Configuration::load(afl::io::Stream& in)
 {

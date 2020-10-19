@@ -45,7 +45,7 @@ namespace {
 
 client::map::MovementOverlay::MovementOverlay(util::RequestDispatcher& disp, util::RequestSender<game::Session> gameSender)
     : m_gameSender(gameSender),
-      m_lockProxy(disp, gameSender),
+      m_lockProxy(gameSender, disp),
       m_modes(),
       m_valid(false),
       m_position()
@@ -270,7 +270,7 @@ void
 client::map::MovementOverlay::lockItem(game::map::Point target, bool left, bool markedOnly, bool optimizeWarp, const Renderer& ren)
 {
     // ex WScannerChartWidget::doItemLock (part)
-    using client::proxy::LockProxy;
+    using game::proxy::LockProxy;
 
     LockProxy::Flags_t flags;
     if (left) {

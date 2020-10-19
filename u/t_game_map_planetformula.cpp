@@ -12,6 +12,8 @@
 #include "game/map/planet.hpp"
 #include "game/hostversion.hpp"
 
+using game::HostVersion;
+using game::config::HostConfiguration;
 
 
 /** Test getColonistChange(). */
@@ -36,8 +38,8 @@ TestGameMapPlanetFormula::testGetColonistChange()
     p.setNumBuildings(game::MineBuilding, 20);
     p.setNumBuildings(game::DefenseBuilding, 0);
 
-    game::config::HostConfiguration config;
-    game::HostVersion host(game::HostVersion::PHost, MKVERSION(3,0,0));
+    HostConfiguration config;
+    HostVersion host(HostVersion::PHost, MKVERSION(3,0,0));
 
     // Parameterized and non-parameterized version must agree. We had a typo here.
     TS_ASSERT_EQUALS(getColonistChange(p, config, host, 0,  70).orElse(-777), 8);
@@ -72,9 +74,9 @@ namespace {
         6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 10, 10, 10, 10, 10
     };
 
-    void doTaxSeries(const game::HostVersion host, const int8_t (&expectedHappiness)[50], const int8_t (&expectedIncome)[50])
+    void doTaxSeries(const HostVersion host, const int8_t (&expectedHappiness)[50], const int8_t (&expectedIncome)[50])
     {
-        const game::config::HostConfiguration config;
+        const HostConfiguration config;
         for (int tax = 0; tax < 50; ++tax) {
             game::map::Planet p(66);
             p.setOwner(1);                  // test set is built for Feds
@@ -100,13 +102,13 @@ namespace {
 void
 TestGameMapPlanetFormula::testTaxSeriesTHost()
 {
-    doTaxSeries(game::HostVersion(game::HostVersion::Host, MKVERSION(3, 22, 40)), TAX_SERIES_HAPPINESS, TAX_SERIES_INCOME_THOST);
+    doTaxSeries(HostVersion(HostVersion::Host, MKVERSION(3, 22, 40)), TAX_SERIES_HAPPINESS, TAX_SERIES_INCOME_THOST);
 }
 
 void
 TestGameMapPlanetFormula::testTaxSeriesPHost()
 {
-    doTaxSeries(game::HostVersion(game::HostVersion::PHost, MKVERSION(4, 0, 0)), TAX_SERIES_HAPPINESS, TAX_SERIES_INCOME_PHOST);
+    doTaxSeries(HostVersion(HostVersion::PHost, MKVERSION(4, 0, 0)), TAX_SERIES_HAPPINESS, TAX_SERIES_INCOME_PHOST);
 }
 
 
@@ -145,9 +147,9 @@ namespace {
         87, 87, 87, 87, 87, 87, 87, 87, 87, 87, 87, 87, 87, 87, 87, 87, 87, 87, 87, 87, 87, 87, 87, 87, 87, 87
     };
 
-    void doTemperatureSeries(const game::HostVersion host, const int planetOwner, const int8_t (&expectedHappiness)[101])
+    void doTemperatureSeries(const HostVersion host, const int planetOwner, const int8_t (&expectedHappiness)[101])
     {
-        const game::config::HostConfiguration config;
+        const HostConfiguration config;
         for (int temp = 0; temp <= 100; ++temp) {
             game::map::Planet p(12);
             p.setOwner(planetOwner);
@@ -171,25 +173,25 @@ namespace {
 void
 TestGameMapPlanetFormula::testTemperatureSeriesFedTHost()
 {
-    doTemperatureSeries(game::HostVersion(game::HostVersion::Host, MKVERSION(3,22,40)), 1, TEMP_SERIES_THOST_FED);
+    doTemperatureSeries(HostVersion(HostVersion::Host, MKVERSION(3,22,40)), 1, TEMP_SERIES_THOST_FED);
 }
 
 void
 TestGameMapPlanetFormula::testTemperatureSeriesFedPHost()
 {
-    doTemperatureSeries(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,0)), 1, TEMP_SERIES_PHOST_FED);
+    doTemperatureSeries(HostVersion(HostVersion::PHost, MKVERSION(4,0,0)), 1, TEMP_SERIES_PHOST_FED);
 }
 
 void
 TestGameMapPlanetFormula::testTemperatureSeriesCryTHost()
 {
-    doTemperatureSeries(game::HostVersion(game::HostVersion::Host, MKVERSION(3,22,40)), 7, TEMP_SERIES_THOST_CRY);
+    doTemperatureSeries(HostVersion(HostVersion::Host, MKVERSION(3,22,40)), 7, TEMP_SERIES_THOST_CRY);
 }
 
 void
 TestGameMapPlanetFormula::testTemperatureSeriesCryPHost()
 {
-    doTemperatureSeries(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,0)), 7, TEMP_SERIES_PHOST_CRY);
+    doTemperatureSeries(HostVersion(HostVersion::PHost, MKVERSION(4,0,0)), 7, TEMP_SERIES_PHOST_CRY);
 }
 
 /*
@@ -199,9 +201,9 @@ TestGameMapPlanetFormula::testTemperatureSeriesCryPHost()
  */
 
 namespace {
-    void doBuildingSeries(const game::HostVersion host, const int cutoff)
+    void doBuildingSeries(const HostVersion host, const int cutoff)
     {
-        const game::config::HostConfiguration config;
+        const HostConfiguration config;
         for (int n = 0; n < 400; ++n) {
             game::map::Planet p(99);
             p.setOwner(1);
@@ -230,13 +232,13 @@ namespace {
 void
 TestGameMapPlanetFormula::testBuildingSeriesTHost()
 {
-    doBuildingSeries(game::HostVersion(game::HostVersion::Host, MKVERSION(3,22,40)), 273);
+    doBuildingSeries(HostVersion(HostVersion::Host, MKVERSION(3,22,40)), 273);
 }
 
 void
 TestGameMapPlanetFormula::testBuildingSeriesPHost()
 {
-    doBuildingSeries(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,0)), 269);
+    doBuildingSeries(HostVersion(HostVersion::PHost, MKVERSION(4,0,0)), 269);
 }
 
 /*
@@ -259,9 +261,9 @@ namespace {
         12, 12, 12, 12, 12, 14, 14, 14, 14, 14, 16, 16, 16, 16, 16, 18, 18, 18, 18, 18, 20, 20
     };
 
-    void doNativeTaxSeries(const game::HostVersion host, const int8_t (&expectedHappiness)[50], const int8_t (&expectedIncome)[50])
+    void doNativeTaxSeries(const HostVersion host, const int8_t (&expectedHappiness)[50], const int8_t (&expectedIncome)[50])
     {
-        const game::config::HostConfiguration config;
+        const HostConfiguration config;
         for (int tax = 0; tax < 50; ++tax) {
             game::map::Planet p(66);
             p.setOwner(1);                  // test set is built for Feds
@@ -291,13 +293,13 @@ namespace {
 void
 TestGameMapPlanetFormula::testNativeTaxSeriesTHost()
 {
-    doNativeTaxSeries(game::HostVersion(game::HostVersion::Host, MKVERSION(3,22,40)), NTAX_EXPECT_HAPPY, NTAX_EXPECT_INCOME);
+    doNativeTaxSeries(HostVersion(HostVersion::Host, MKVERSION(3,22,40)), NTAX_EXPECT_HAPPY, NTAX_EXPECT_INCOME);
 }
 
 void
 TestGameMapPlanetFormula::testNativeTaxSeriesPHost()
 {
-    doNativeTaxSeries(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,1,5)), NTAX_EXPECT_HAPPY, NTAX_EXPECT_INCOME);
+    doNativeTaxSeries(HostVersion(HostVersion::PHost, MKVERSION(4,1,5)), NTAX_EXPECT_HAPPY, NTAX_EXPECT_INCOME);
 }
 
 /*
@@ -307,7 +309,7 @@ TestGameMapPlanetFormula::testNativeTaxSeriesPHost()
  */
 
 namespace {
-    void doNativeBuildingSeries(const game::HostVersion host, const int num84, const int num83)
+    void doNativeBuildingSeries(const HostVersion host, const int num84, const int num83)
     {
         for (int n = 0; n < 400; ++n) {
             game::map::Planet p(99);
@@ -342,13 +344,13 @@ namespace {
 void
 TestGameMapPlanetFormula::testNativeTaxBuildingSeriesTHost()
 {
-    doNativeBuildingSeries(game::HostVersion(game::HostVersion::Host, MKVERSION(3,22,40)), 72, 200);
+    doNativeBuildingSeries(HostVersion(HostVersion::Host, MKVERSION(3,22,40)), 72, 200);
 }
 
 void
 TestGameMapPlanetFormula::testNativeTaxBuildingSeriesPHost()
 {
-    doNativeBuildingSeries(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,5)), 71, 200);
+    doNativeBuildingSeries(HostVersion(HostVersion::PHost, MKVERSION(4,0,5)), 71, 200);
 }
 
 /*
@@ -399,7 +401,7 @@ TestGameMapPlanetFormula::testBuildingLimitSeries()
     };
 
     for (int i = 0; i < LIMIT; ++i) {
-        const game::config::HostConfiguration fig;
+        const HostConfiguration fig;
 
         const int clans = i+1;
 
@@ -420,3 +422,216 @@ TestGameMapPlanetFormula::testBuildingLimitSeries()
     }
 }
 
+/*
+ *  Maximum Colonists Series
+ *
+ *  Equivalent to c2hosttest/planet/14_maxpop
+ */
+
+namespace {
+    /* The reference values have been obtained by running host with ClimateDeathRate=100,
+       in the expectation that all excess population dies and only the nominal max population remains.
+       This leads to a systematic error in PHost because it internally uses people, not clans, as unit of computation:
+       PHost since 4.1/3.5 will come up with one more surviving clan because it truncates population loss:
+
+            2006-12-27  Stefan Reuther  <Streu@gmx.de>
+
+                    * planet.c (DoPlanetaryLimitChecks): climate deaths and reports through
+                    message would often differ by one
+
+       For example, if the planet allows 1050 colonists (=10 clans) and has 20 clans,
+       PHost will compute a loss of 950 colonists, but truncate that to 9 clans, leaving 11 remaining.
+
+       We compensate for this in the test by using this offset where needed in this test.
+       As of 20201004, we do not compensate in production code, because
+       (a) the effect can be attributed to CDR which is different in actual games, and
+       (b) affected amounts are large enough such that +/- 1 clan doesn't matter as much as for an ice planet. */
+    const int P = -1;
+
+    void doMaxColonistSeries(HostVersion host, const HostConfiguration& config, int owner, const int32_t (&expect)[101])
+    {
+        for (int temp = 0; temp <= 100; ++temp) {
+            game::map::Planet p(99);
+            p.setOwner(owner);
+            p.setColonistHappiness(100);
+            p.setCargo(game::Element::Colonists, 99999);
+            p.setColonistTax(0);
+            p.setCargo(game::Element::Supplies, 0);
+            p.setCargo(game::Element::Money, 0);
+            p.setTemperature(temp);
+            p.setNatives(0);
+            p.setNativeHappiness(100);
+            p.setNativeRace(0);
+            p.setNativeGovernment(0);
+            p.setNativeTax(0);
+
+            char name[50];
+            std::sprintf(name, "temp=%d", temp);
+
+            TSM_ASSERT_EQUALS(name, getMaxSupportedColonists(p, config, host).orElse(-777), expect[temp]);
+        }
+    }
+}
+
+void
+TestGameMapPlanetFormula::testMaxColonistSeriesNormalTHost()
+{
+    static const int32_t EXPECT[] = {
+            3,      5,      7,      9,     11,     13,     15,     17,     19,     21,     23,     25,     27,     29,     31,
+        45520,  48293,  51018,  53693,  56315,  58882,  61390,  63838,  66223,  68543,  70795,  72977,  75088,  77124,  79085,
+        80967,  82770,  84491,  86128,  87681,  89148,  90526,  91815,  93014,  94121,  95135,  96056,  96881,  97611,  98245,
+        98782,  99222,  99564,  99808,  99953, 100000,  99948,  99798,  99549,  99202,  98758,  98216,  97577,  96842,  96011,
+        95086,  94067,  92955,  91752,  90458,  89075,  87605,  86047,  84405,  82680,  80874,  78987,  77023,  74983,  72869,
+        70683,  68427,  66104,  63715,  61264,  58753,  56183,  53558,  50881,  48153,     31,     29,     27,     25,     23,
+           21,     19,     17,     15,     13,     11,      9,      7,      5,      3,      1
+    };
+    HostConfiguration config;
+    config[HostConfiguration::ClimateLimitsPopulation].set(1);
+
+    doMaxColonistSeries(HostVersion(HostVersion::Host, MKVERSION(3,22,46)), config, 3, EXPECT);
+}
+
+void
+TestGameMapPlanetFormula::testMaxColonistSeriesNormalPHost()
+{
+    static const int32_t EXPECT[] = {
+              3,       13,       23,       33,       43,       53,       63,       73,       83,       93,      103,      113,      123,      133,      143,
+        P+45400,  P+48176,  P+50905,  P+53583,  P+56209,  P+58779,  P+61291,  P+63743,  P+66132,  P+68455,  P+70711,  P+72897,  P+75012,  P+77052,  P+79016,
+        P+80902,  P+82709,  P+84433,  P+86075,  P+87631,  P+89101,  P+90483,  P+91776,  P+92978,  P+94089,  P+95106,  P+96030,  P+96859,  P+97592,  P+98229,
+        P+98769,  P+99212,  P+99557,  P+99803,  P+99951,   100000,  P+99951,  P+99803,  P+99557,  P+99212,  P+98769,  P+98229,  P+97592,  P+96859,  P+96030,
+        P+95106,  P+94089,  P+92978,  P+91776,  P+90483,  P+89101,  P+87631,  P+86075,  P+84433,  P+82709,  P+80902,  P+79016,  P+77052,  P+75012,  P+72897,
+        P+70711,  P+68455,  P+66132,  P+63743,  P+61291,  P+58779,  P+56209,  P+53583,  P+50905,  P+48176,      151,      141,      131,      121,      111,
+            101,       91,       81,       71,       61,       51,       41,       31,       21,       11,        1
+    };
+    HostConfiguration config;
+    config[HostConfiguration::ClimateLimitsPopulation].set(1);
+
+    doMaxColonistSeries(HostVersion(HostVersion::PHost, MKVERSION(4,1,0)), config, 3, EXPECT);
+}
+
+void
+TestGameMapPlanetFormula::testMaxColonistSeriesRebelTHost()
+{
+    static const int32_t EXPECT[] = {
+        90000,  90000,  90000,  90000,  90000,  90000,  90000,  90000,  90000,  90000,  90000,  90000,  90000,  90000,  90000,
+        90000,  90000,  90000,  90000,  90000,  58882,  61390,  63838,  66223,  68543,  70795,  72977,  75088,  77124,  79085,
+        80967,  82770,  84491,  86128,  87681,  89148,  90526,  91815,  93014,  94121,  95135,  96056,  96881,  97611,  98245,
+        98782,  99222,  99564,  99808,  99953, 100000,  99948,  99798,  99549,  99202,  98758,  98216,  97577,  96842,  96011,
+        95086,  94067,  92955,  91752,  90458,  89075,  87605,  86047,  84405,  82680,  80874,  78987,  77023,  74983,  72869,
+        70683,  68427,  66104,  63715,  61264,  58753,  56183,  53558,  50881,  48153,     60,     60,     60,     60,     60,
+           60,     60,     60,     60,     60,     60,     60,     60,     60,     60,     60
+    };
+    HostConfiguration config;
+    config[HostConfiguration::ClimateLimitsPopulation].set(1);
+
+    doMaxColonistSeries(HostVersion(HostVersion::Host, MKVERSION(3,22,46)), config, 10, EXPECT);
+}
+
+void
+TestGameMapPlanetFormula::testMaxColonistSeriesRebelPHost()
+{
+    static const int32_t EXPECT[] = {
+          90000,    90000,    90000,    90000,    90000,    90000,    90000,    90000,    90000,    90000,    90000,    90000,    90000,    90000,    90000,
+          90000,    90000,    90000,    90000,    90000,  P+58779,  P+61291,  P+63743,  P+66132,  P+68455,  P+70711,  P+72897,  P+75012,  P+77052,  P+79016,
+        P+80902,  P+82709,  P+84433,  P+86075,  P+87631,  P+89101,  P+90483,  P+91776,  P+92978,  P+94089,  P+95106,  P+96030,  P+96859,  P+97592,  P+98229,
+        P+98769,  P+99212,  P+99557,  P+99803,  P+99951,   100000,  P+99951,  P+99803,  P+99557,  P+99212,  P+98769,  P+98229,  P+97592,  P+96859,  P+96030,
+        P+95106,  P+94089,  P+92978,  P+91776,  P+90483,  P+89101,  P+87631,  P+86075,  P+84433,  P+82709,  P+80902,  P+79016,  P+77052,  P+75012,  P+72897,
+        P+70711,  P+68455,  P+66132,  P+63743,  P+61291,  P+58779,  P+56209,  P+53583,  P+50905,  P+48176,      151,      141,      131,      121,      111,
+            101,       91,       81,       71,       61,       60,       60,       60,       60,       60,       60
+    };
+    HostConfiguration config;
+    config[HostConfiguration::ClimateLimitsPopulation].set(1);
+
+    doMaxColonistSeries(HostVersion(HostVersion::PHost, MKVERSION(4,1,0)), config, 10, EXPECT);
+}
+
+void
+TestGameMapPlanetFormula::testMaxColonistSeriesKlingonTHost()
+{
+    static const int32_t EXPECT[] = {
+            3,      5,      7,      9,     11,     13,     15,     17,     19,     21,     23,     25,     27,     29,     31,
+        45520,  48293,  51018,  53693,  56315,  58882,  61390,  63838,  66223,  68543,  70795,  72977,  75088,  77124,  79085,
+        80967,  82770,  84491,  86128,  87681,  89148,  90526,  91815,  93014,  94121,  95135,  96056,  96881,  97611,  98245,
+        98782,  99222,  99564,  99808,  99953, 100000,  99948,  99798,  99549,  99202,  98758,  98216,  97577,  96842,  96011,
+        95086,  94067,  92955,  91752,  90458,  89075,  87605,  86047,  84405,  82680,  80874,  78987,  77023,  74983,  72869,
+        70683,  68427,  66104,  63715,  61264,  58753,  56183,  53558,  50881,  48153,     60,     60,     60,     60,     60,
+           60,     60,     60,     60,     60,     60,     60,     60,     60,     60,     60
+    };
+    HostConfiguration config;
+    config[HostConfiguration::ClimateLimitsPopulation].set(1);
+
+    doMaxColonistSeries(HostVersion(HostVersion::Host, MKVERSION(3,22,46)), config, 4, EXPECT);
+}
+
+void
+TestGameMapPlanetFormula::testMaxColonistSeriesKlingonPHost()
+{
+    static const int32_t EXPECT[] = {
+              3,       13,       23,       33,       43,       53,       63,       73,       83,       93,      103,      113,      123,      133,      143,
+        P+45400,  P+48176,  P+50905,  P+53583,  P+56209,  P+58779,  P+61291,  P+63743,  P+66132,  P+68455,  P+70711,  P+72897,  P+75012,  P+77052,  P+79016,
+        P+80902,  P+82709,  P+84433,  P+86075,  P+87631,  P+89101,  P+90483,  P+91776,  P+92978,  P+94089,  P+95106,  P+96030,  P+96859,  P+97592,  P+98229,
+        P+98769,  P+99212,  P+99557,  P+99803,  P+99951,   100000,  P+99951,  P+99803,  P+99557,  P+99212,  P+98769,  P+98229,  P+97592,  P+96859,  P+96030,
+        P+95106,  P+94089,  P+92978,  P+91776,  P+90483,  P+89101,  P+87631,  P+86075,  P+84433,  P+82709,  P+80902,  P+79016,  P+77052,  P+75012,  P+72897,
+        P+70711,  P+68455,  P+66132,  P+63743,  P+61291,  P+58779,  P+56209,  P+53583,  P+50905,  P+48176,      151,      141,      131,      121,      111,
+            101,       91,       81,       71,       61,       60,       60,       60,       60,       60,       60
+    };
+    HostConfiguration config;
+    config[HostConfiguration::ClimateLimitsPopulation].set(1);
+
+    doMaxColonistSeries(HostVersion(HostVersion::PHost, MKVERSION(4,1,0)), config, 4, EXPECT);
+}
+
+void
+TestGameMapPlanetFormula::testMaxColonistSeriesCrystalTHost()
+{
+    static const int32_t EXPECT[] = {
+            0,   1000,   2000,   3000,   4000,   5000,   6000,   7000,   8000,   9000,  10000,  11000,  12000,  13000,  14000,
+        15000,  16000,  17000,  18000,  19000,  20000,  21000,  22000,  23000,  24000,  25000,  26000,  27000,  28000,  29000,
+        30000,  31000,  32000,  33000,  34000,  35000,  36000,  37000,  38000,  39000,  40000,  41000,  42000,  43000,  44000,
+        45000,  46000,  47000,  48000,  49000,  50000,  51000,  52000,  53000,  54000,  55000,  56000,  57000,  58000,  59000,
+        60000,  61000,  62000,  63000,  64000,  65000,  66000,  67000,  68000,  69000,  70000,  71000,  72000,  73000,  74000,
+        75000,  76000,  77000,  78000,  79000,  80000,  81000,  82000,  83000,  84000,  85000,  86000,  87000,  88000,  89000,
+        90000,  91000,  92000,  93000,  94000,  95000,  96000,  97000,  98000,  99000, 100000
+    };
+    HostConfiguration config;
+    config[HostConfiguration::ClimateLimitsPopulation].set(1);
+
+    doMaxColonistSeries(HostVersion(HostVersion::Host, MKVERSION(3,22,46)), config, 7, EXPECT);
+}
+
+void
+TestGameMapPlanetFormula::testMaxColonistSeriesCrystalPHost()
+{
+    static const int32_t EXPECT[] = {
+            1,   1000,   2000,   3000,   4000,   5000,   6000,   7000,   8000,   9000,  10000,  11000,  12000,  13000,  14000,
+        15000,  16000,  17000,  18000,  19000,  20000,  21000,  22000,  23000,  24000,  25000,  26000,  27000,  28000,  29000,
+        30000,  31000,  32000,  33000,  34000,  35000,  36000,  37000,  38000,  39000,  40000,  41000,  42000,  43000,  44000,
+        45000,  46000,  47000,  48000,  49000,  50000,  51000,  52000,  53000,  54000,  55000,  56000,  57000,  58000,  59000,
+        60000,  61000,  62000,  63000,  64000,  65000,  66000,  67000,  68000,  69000,  70000,  71000,  72000,  73000,  74000,
+        75000,  76000,  77000,  78000,  79000,  80000,  81000,  82000,  83000,  84000,  85000,  86000,  87000,  88000,  89000,
+        90000,  91000,  92000,  93000,  94000,  95000,  96000,  97000,  98000,  99000, 100000
+    };
+    HostConfiguration config;
+    config[HostConfiguration::ClimateLimitsPopulation].set(1);
+
+    doMaxColonistSeries(HostVersion(HostVersion::PHost, MKVERSION(4,1,0)), config, 7, EXPECT);
+}
+
+void
+TestGameMapPlanetFormula::testMaxColonistSeriesCrystalSinTemp()
+{
+    static const int32_t EXPECT[] = {
+              3,       13  ,     23,       33,       43,       53,       63,       73,       83,       93,      103,      113,      123,      133,      143,
+        P+23345,  P+24869,  P+26388,  P+27900,  P+29405,  P+30902,  P+32392,  P+33874,  P+35348,  P+36813,  P+38269,  P+39715,  P+41152,  P+42578,  P+43994,
+        P+45400,  P+46793,  P+48176,  P+49546,  P+50905,  P+52250,  P+53583,  P+54903,  P+56209,  P+57501,  P+58779,  P+60043,  P+61291,  P+62525,  P+63743,
+        P+64945,  P+66132,  P+67302,  P+68455,  P+69592,  P+70711,  P+71813,  P+72897,  P+73964,  P+75012,  P+76041,  P+77052,  P+78044,  P+79016,  P+79969,
+        P+80902,  P+81815,  P+82709,  P+83581,  P+84433,  P+85265,  P+86075,  P+86864,  P+87631,  P+88377,  P+89101,  P+89803,  P+90483,  P+91141,  P+91776,
+        P+92388,  P+92978,  P+93545,  P+94089,  P+94609,  P+95106,  P+95580,  P+96030,  P+96456,  P+96859,  P+97237,  P+97592,  P+97923,  P+98229,  P+98511,
+        P+98769,  P+99003,  P+99212,  P+99397,  P+99557,  P+99692,  P+99803,  P+99889,  P+99951,  P+99988,   100000
+    };
+    HostConfiguration config;
+    config[HostConfiguration::ClimateLimitsPopulation].set(1);
+    config[HostConfiguration::CrystalSinTempBehavior].set(1);
+
+    doMaxColonistSeries(HostVersion(HostVersion::PHost, MKVERSION(4,1,0)), config, 7, EXPECT);
+}

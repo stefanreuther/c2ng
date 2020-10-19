@@ -54,6 +54,9 @@ namespace server { namespace host {
         /** Initial suspension time. */
         Time_t initialSuspend;
 
+        /** Number of keys to store per user. */
+        int maxStoredKeys;
+
         /** Convert time.
             On the wire, times are always given in minutes-since-epoch.
             If the system internally runs on a higher rate for testing,

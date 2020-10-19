@@ -62,7 +62,7 @@ namespace {
     }
 }
 
-
+// Constructor.
 server::router::Session::Session(util::process::Factory& factory, afl::base::Memory<const String_t> args, String_t id, afl::sys::LogListener& log, server::interface::FileBase* pFileBase)
     : m_id(id),
       m_log(log),
@@ -79,12 +79,14 @@ server::router::Session::Session(util::process::Factory& factory, afl::base::Mem
     }
 }
 
+// Destructor.
 server::router::Session::~Session()
 {
     // RouterSession::~RouterSession
     stop();
 }
 
+// Get Id.
 String_t
 server::router::Session::getId() const
 {
@@ -92,6 +94,7 @@ server::router::Session::getId() const
     return m_id;
 }
 
+// Get process Id.
 uint32_t
 server::router::Session::getProcessId() const
 {
@@ -99,6 +102,7 @@ server::router::Session::getProcessId() const
     return m_process->getProcessId();
 }
 
+// Check whether session was modified and needs to be saved.
 bool
 server::router::Session::isModified() const
 {
@@ -106,6 +110,7 @@ server::router::Session::isModified() const
     return m_isModified;
 }
 
+// Check whether session was used (normalTimeout applies instead of virginTimeout).
 bool
 server::router::Session::isUsed() const
 {
@@ -113,12 +118,14 @@ server::router::Session::isUsed() const
     return m_isUsed;
 }
 
+// Check whether session is active (process has been started).
 bool
 server::router::Session::isActive() const
 {
     return m_process->isActive();
 }
 
+// Get time of last access.
 afl::sys::Time
 server::router::Session::getLastAccessTime() const
 {
@@ -126,6 +133,7 @@ server::router::Session::getLastAccessTime() const
     return m_lastAccessTime;
 }
 
+// Get command line.
 afl::base::Memory<const String_t>
 server::router::Session::getCommandLine() const
 {
@@ -133,6 +141,7 @@ server::router::Session::getCommandLine() const
     return m_args;
 }
 
+// Check for conflict with another session.
 bool
 server::router::Session::checkConflict(const Session& other) const
 {
@@ -145,9 +154,7 @@ server::router::Session::checkConflict(const Session& other) const
     return false;
 }
 
-// /** Check for conflict.
-//     \param query Keyword ("-Rfoo", "-Wfoo")
-//     \return true iff this session conflicts with this keyword */
+// Check for conflict with a keyword.
 bool
 server::router::Session::checkConflict(const String_t& query, bool queryIsWild) const
 {
@@ -163,6 +170,7 @@ server::router::Session::checkConflict(const String_t& query, bool queryIsWild) 
     return false;
 }
 
+// Start this session.
 bool
 server::router::Session::start(const String_t& serverPath)
 {
@@ -190,6 +198,7 @@ server::router::Session::start(const String_t& serverPath)
     return ok;
 }
 
+// Stop this session.
 void
 server::router::Session::stop()
 {
@@ -203,6 +212,7 @@ server::router::Session::stop()
     }
 }
 
+// Save this session.
 void
 server::router::Session::save(bool notify)
 {
@@ -233,6 +243,7 @@ server::router::Session::save(bool notify)
     }
 }
 
+// Send command to server.
 String_t
 server::router::Session::talk(String_t command)
 {

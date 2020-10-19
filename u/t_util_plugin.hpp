@@ -7,9 +7,27 @@
 
 #include <cxxtest/TestSuite.h>
 
+class TestUtilPluginManager : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testCycle();
+    void testNull();
+};
+
 class TestUtilPluginPlugin : public CxxTest::TestSuite {
  public:
     void testVersion();
+    void testInit();
+    void testInitPlugin();
+    void testInitResource();
+    void testInitScript();
+    void testInitConfig();
+    void testInitScript2();
+    void testInitScript3();
+    void testSelfDepend();
+    void testDepend();
+    void testUpdate();
+    void testUnrelated();
 };
 
 #endif

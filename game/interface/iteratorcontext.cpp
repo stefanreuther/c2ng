@@ -6,8 +6,17 @@
 #include "game/interface/iteratorcontext.hpp"
 #include "afl/string/format.hpp"
 #include "afl/string/string.hpp"
+#include "game/interface/ionstormcontext.hpp"
+#include "game/interface/minefieldcontext.hpp"
+#include "game/interface/planetcontext.hpp"
+#include "game/interface/shipcontext.hpp"
+#include "game/limits.hpp"
+#include "game/map/ionstorm.hpp"
+#include "game/map/minefield.hpp"
 #include "game/map/objectcursor.hpp"
 #include "game/map/objecttype.hpp"
+#include "game/map/planet.hpp"
+#include "game/map/ship.hpp"
 #include "game/session.hpp"
 #include "interpreter/arguments.hpp"
 #include "interpreter/error.hpp"
@@ -28,19 +37,52 @@ namespace {
         iitId,
         iitIndex,
         iitNext,
+        iitNextAt,
         iitObject,
-        iitPrevious
+        iitPrevious,
+        iitPreviousAt
     };
 
     const interpreter::NameTable ITERATOR_MAP[] = {
-        { "COUNT",            iitCount,    0, interpreter::thInt },
-        { "CURRENTINDEX",     iitCurrent,  0, interpreter::thInt },
-        { "ID",               iitId,       0, interpreter::thArray },
-        { "INDEX",            iitIndex,    0, interpreter::thArray },
-        { "NEXTINDEX",        iitNext,     0, interpreter::thArray },
-        { "OBJECT",           iitObject,   0, interpreter::thArray },
-        { "PREVIOUSINDEX",    iitPrevious, 0, interpreter::thArray },
+        { "COUNT",            iitCount,      0, interpreter::thInt },
+        { "CURRENTINDEX",     iitCurrent,    0, interpreter::thInt },
+        { "ID",               iitId,         0, interpreter::thArray },
+        { "INDEX",            iitIndex,      0, interpreter::thArray },
+        { "NEXTINDEX",        iitNext,       0, interpreter::thArray },
+        { "NEXTINDEXAT",      iitNextAt,     0, interpreter::thArray },
+        { "OBJECT",           iitObject,     0, interpreter::thArray },
+        { "PREVIOUSINDEX",    iitPreviousAt, 0, interpreter::thArray },
+        { "PREVIOUSINDEXAT",  iitPreviousAt, 0, interpreter::thArray },
     };
+
+    // FIXME: move into ObjectType, with a 'filter' argument that filters for marked, point, etc.
+    game::Id_t findNextIndexAt(game::map::ObjectType& type, game::Id_t index, const game::map::Point& pt, bool marked)
+    {
+        // ex client/widgets/objcontrol.cc:findSameLocation, sort-of
+        while ((index = type.findNextIndexNoWrap(index, marked)) != 0) {
+            if (const game::map::Object* obj = type.getObjectByIndex(index)) {
+                game::map::Point objPos;
+                if (obj->getPosition(objPos) && objPos == pt) {
+                    break;
+                }
+            }
+        }
+        return index;
+    }
+
+    game::Id_t findPreviousIndexAt(game::map::ObjectType& type, game::Id_t index, const game::map::Point& pt, bool marked)
+    {
+        while ((index = type.findPreviousIndexNoWrap(index, marked)) != 0) {
+            if (const game::map::Object* obj = type.getObjectByIndex(index)) {
+                game::map::Point objPos;
+                if (obj->getPosition(objPos) && objPos == pt) {
+                    break;
+                }
+            }
+        }
+        return index;
+    }
+
 
     class IteratorFunction : public interpreter::IndexableValue {
      public:
@@ -55,7 +97,7 @@ namespace {
         virtual afl::data::Value* get(interpreter::Arguments& args)
             {
                 // ex IntIteratorFunction::get
-                int32_t i;
+                int32_t i, x, y;
                 switch (m_property) {
                  case iitId:
                     // "Id(index)" => get Id of object
@@ -107,14 +149,63 @@ namespace {
                             if (fl & 2) {
                                 return makeIntegerValue(type->findPreviousIndexWrap(i, fl & 1));
                             } else {
-                                return makeIntegerValue(type->findPreviousIndexWrap(i, fl & 1));
+                                return makeIntegerValue(type->findPreviousIndexNoWrap(i, fl & 1));
                             }
                         }
                     }
                     return 0;
 
+                 case iitNextAt:
+                    // "NextIndexAt(index,x,y[,flags])" => find previous index from index
+                    // @since PCC2 2.40.9
+                    args.checkArgumentCount(3, 4);
+                    if (checkIntegerArg(i, args.getNext(), 0, INT_MAX)
+                        && checkIntegerArg(x, args.getNext(), 0, game::MAX_NUMBER)
+                        && checkIntegerArg(y, args.getNext(), 0, game::MAX_NUMBER))
+                    {
+                        int32_t fl = 0;
+                        checkFlagArg(fl, 0, args.getNext(), "MW");
+                        if (game::map::ObjectType* type = m_provider->getType()) {
+                            game::Id_t id = findNextIndexAt(*type, i, game::map::Point(x, y), (fl & 1) != 0);
+                            if (id == 0 && (fl & 2) != 0) {
+                                id = findNextIndexAt(*type, 0, game::map::Point(x, y), (fl & 1) != 0);
+                            }
+                            return makeIntegerValue(id);
+                        }
+                    }
+                    return 0;
+
+                 case iitPreviousAt:
+                    // "PreviousIndexAt(index,x,y[,flags])" => find previous index from index
+                    // @since PCC2 2.40.9
+                    args.checkArgumentCount(3, 4);
+                    if (checkIntegerArg(i, args.getNext(), 0, INT_MAX)
+                        && checkIntegerArg(x, args.getNext(), 0, game::MAX_NUMBER)
+                        && checkIntegerArg(y, args.getNext(), 0, game::MAX_NUMBER))
+                    {
+                        int32_t fl = 0;
+                        checkFlagArg(fl, 0, args.getNext(), "MW");
+                        if (game::map::ObjectType* type = m_provider->getType()) {
+                            game::Id_t id = findPreviousIndexAt(*type, i, game::map::Point(x, y), (fl & 1) != 0);
+                            if (id == 0 && (fl & 2) != 0) {
+                                id = findPreviousIndexAt(*type, 0, game::map::Point(x, y), (fl & 1) != 0);
+                            }
+                            return makeIntegerValue(id);
+                        }
+                    }
+                    return 0;
+
                  case iitObject:
-                    // FIXME: implement this (missing in PCC2)
+                    // "Object(id)" => object
+                    args.checkArgumentCount(1);
+                    if (checkIntegerArg(i, args.getNext(), 0, INT_MAX)) {
+                        if (game::map::ObjectType* type = m_provider->getType()) {
+                            if (game::map::Object* obj = type->getObjectByIndex(i)) {
+                                return game::interface::createObjectContext(obj, m_provider->getSession());
+                            }
+                        }
+                    }
+                    return 0;
 
                  case iitCurrent:
                  case iitCount:
@@ -233,8 +324,10 @@ game::interface::IteratorContext::get(PropertyIndex_t index)
      case iitId:
      case iitIndex:
      case iitNext:
+     case iitNextAt:
      case iitObject:
      case iitPrevious:
+     case iitPreviousAt:
         return new IteratorFunction(m_provider, IteratorProperty(index));
     }
     return 0;
@@ -289,8 +382,10 @@ game::interface::IteratorContext::store(interpreter::TagNode& out, afl::io::Data
 //     - Iterator(n).Count: number of objects
 //     - Iterator(n).Id(x): given an index, return that object's Id
 //     - Iterator(n).Index(id): given an Id, return that object's index; null if none
-//     - Iterator(n).NextIndex(x,fl): get next index after x. 0 if none found. Flags are "w" to permit wrap, "m" to accept only marked.
-//     - Iterator(n).PreviousIndex(x,fl): same like NextIndex, but other direction
+//     - Iterator(n).NextIndex(i,fl): get next index after i. 0 if none found. Flags are "w" to permit wrap, "m" to accept only marked.
+//     - Iterator(n).NextIndexAt(i,x,y,fl): same, but filter for XY as well
+//     - Iterator(n).PreviousIndex(i,fl): same like NextIndex, but other direction
+//     - Iterator(n).PreviousIndexAt(i,x,y,fl): same but filter for XY as well
 //     - Iterator(n).Object(x): object from index. Still undecided.
 
 //     n is:
@@ -310,26 +405,36 @@ game::interface::IFIterator(game::Session& session, interpreter::Arguments& args
         return 0;
     }
 
-    return makeIteratorValue(session.getGame(), v, true);
+    return makeIteratorValue(session, v, true);
 }
 
 interpreter::Context*
-game::interface::makeIteratorValue(afl::base::Ptr<Game> game, int nr, bool reportRangeError)
+game::interface::makeIteratorValue(Session& session, int nr, bool reportRangeError)
 {
     class NumberedIteratorProvider : public IteratorProvider {
      public:
-        NumberedIteratorProvider(afl::base::Ref<Game> game, int nr)
-            : m_game(game),
+        NumberedIteratorProvider(Session& session, int nr)
+            : m_session(session),
               m_number(nr)
             { }
         virtual game::map::ObjectCursor* getCursor()
             {
-                return m_game->cursors().getCursorByNumber(m_number);
+                if (Game* g = m_session.getGame().get()) {
+                    return g->cursors().getCursorByNumber(m_number);
+                } else {
+                    return 0;
+                }
             }
         virtual game::map::ObjectType* getType()
             {
-                return m_game->cursors().getTypeByNumber(m_number);
+                if (Game* g = m_session.getGame().get()) {
+                    return g->cursors().getTypeByNumber(m_number);
+                } else {
+                    return 0;
+                }
             }
+        virtual Session& getSession()
+            { return m_session; }
         virtual void store(interpreter::TagNode& out)
             {
                 out.tag = out.Tag_Iterator;
@@ -340,19 +445,37 @@ game::interface::makeIteratorValue(afl::base::Ptr<Game> game, int nr, bool repor
                 return afl::string::Format("Iterator(%d)", m_number);
             }
      private:
-        afl::base::Ref<game::Game> m_game;
+        Session& m_session;
         int m_number;
     };
 
-    if (game.get() == 0) {
+    Game* g = session.getGame().get();
+    if (g == 0) {
         return 0;
-    } else if (game->cursors().getTypeByNumber(nr) == 0) {
+    } else if (g->cursors().getTypeByNumber(nr) == 0) {
         if (reportRangeError) {
             throw interpreter::Error::rangeError();
         } else {
             return 0;
         }
     } else {
-        return new IteratorContext(*new NumberedIteratorProvider(*game, nr));
+        return new IteratorContext(*new NumberedIteratorProvider(session, nr));
+    }
+}
+
+interpreter::Context*
+game::interface::createObjectContext(game::map::Object* obj, Session& session)
+{
+    if (dynamic_cast<game::map::Ship*>(obj) != 0) {
+        return ShipContext::create(obj->getId(), session);
+    } else if (dynamic_cast<game::map::Planet*>(obj) != 0) {
+        return PlanetContext::create(obj->getId(), session);
+    } else if (dynamic_cast<game::map::IonStorm*>(obj) != 0) {
+        return IonStormContext::create(obj->getId(), session);
+    } else if (dynamic_cast<game::map::Minefield*>(obj) != 0) {
+        return MinefieldContext::create(obj->getId(), session, false);
+    } else {
+        // FIXME? other types
+        return 0;
     }
 }

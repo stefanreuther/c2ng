@@ -9,8 +9,10 @@
 #include "game/v3/registrationkey.hpp"
 #include "afl/base/staticassert.hpp"
 #include "afl/bits/fixedstring.hpp"
+#include "afl/bits/pack.hpp"
 #include "afl/bits/uint32le.hpp"
 #include "afl/bits/value.hpp"
+#include "afl/checksums/sha1.hpp"
 #include "afl/except/fileformatexception.hpp"
 #include "afl/string/format.hpp"
 #include "util/translation.hpp"
@@ -18,7 +20,7 @@
 
 namespace {
     /** Magic numbers signifying an unregistered key. */
-    const uint32_t UNREGISTERED_KEY[game::v3::RegistrationKey::KEY_SIZE] = {
+    const uint32_t UNREGISTERED_KEY[game::v3::RegistrationKey::KEY_SIZE_WORDS] = {
          1118,  1846,  2535,  1664,  5200,  8424,  8827, 11440, 11817, 15080,
         16445,  4992, 19435, 18928, 18915, 23712, 22321, 27846, 23959, 29640,
         27573,  9152,  9568,  9984, 10400,  1040,  1742,  2613,  1664,  4745,
@@ -30,7 +32,7 @@ namespace {
     /** Layout of FIZZ.BIN. */
     struct Fizz {
         uint8_t pad[136];
-        afl::bits::Value<afl::bits::UInt32LE> key[game::v3::RegistrationKey::KEY_SIZE];
+        afl::bits::Value<afl::bits::UInt32LE> key[game::v3::RegistrationKey::KEY_SIZE_WORDS];
     };
     static_assert(sizeof(Fizz) == 340, "sizeof Fizz");
 
@@ -127,6 +129,7 @@ game::v3::RegistrationKey::initUnregistered()
 {
     // ex GRegInfo::initUnregistered
     initFromFizz(UNREGISTERED_KEY);
+    m_isValid = false;
 }
 
 // Make this key "unowned" (name/address not set).
@@ -163,18 +166,48 @@ game::v3::RegistrationKey::initFromDirectory(afl::io::Directory& dir, afl::sys::
     }
 }
 
-// Get registration key in encoded form.
-afl::base::Memory<const uint32_t>
-game::v3::RegistrationKey::getKey() const
+// Save to given stream.
+void
+game::v3::RegistrationKey::saveToStream(afl::io::Stream& file)
 {
-    // ex GRegInfo::getKey
-    return afl::base::Memory<const uint32_t>(m_fizz);
+    Fizz buf;
+    afl::base::Bytes_t(buf.pad).fill(0);
+    packIntoBytes(afl::base::fromObject(buf.key));
+    file.fullWrite(afl::base::fromObject(buf));
+}
+
+// Initialize from a data array.
+void
+game::v3::RegistrationKey::unpackFromBytes(afl::base::ConstBytes_t bytes)
+{
+    afl::bits::unpackArray<afl::bits::UInt32LE>(m_fizz, bytes);
+    m_isValid = true;
+}
+
+// Store into data array.
+void
+game::v3::RegistrationKey::packIntoBytes(afl::base::Bytes_t bytes) const
+{
+    // ex GRegInfo::getKey (sort-of)
+    afl::bits::packArray<afl::bits::UInt32LE>(bytes, m_fizz);
+}
+
+// Get key Id.
+String_t
+game::v3::RegistrationKey::getKeyId() const
+{
+    uint8_t bytes[KEY_SIZE_BYTES];
+    packIntoBytes(bytes);
+
+    afl::checksums::SHA1 hasher;
+    hasher.add(bytes);
+    return hasher.getHashAsHexString();
 }
 
 /** Initialize registration strings from data of a FIZZ.BIN file.
     \param data 51 dwords (offset 136 of a FIZZ.BIN file). */
-void
-game::v3::RegistrationKey::initFromFizz(const uint32_t (&data)[KEY_SIZE])
+inline void
+game::v3::RegistrationKey::initFromFizz(const uint32_t (&data)[KEY_SIZE_WORDS])
 {
     // ex GRegInfo::initFromFizz(const uint32_t* data)
     afl::base::Memory<uint32_t>(m_fizz).copyFrom(data);
@@ -182,24 +215,18 @@ game::v3::RegistrationKey::initFromFizz(const uint32_t (&data)[KEY_SIZE])
 
 /** Initialize from FIZZ.BIN.
     \param s FIZZ.BIN file, file pointer at beginning. */
-void
+inline void
 game::v3::RegistrationKey::parseFizz(afl::io::Stream& s)
 {
     // ex GRegInfo::parseFizz
     Fizz buffer;
-    uint32_t cooked[KEY_SIZE];
     s.fullRead(afl::base::fromObject(buffer));
-    for (size_t i = 0; i < KEY_SIZE; ++i) {
-        cooked[i] = buffer.key[i];
-    }
-
-    m_isValid = true;
-    initFromFizz(cooked);
+    unpackFromBytes(afl::base::fromObject(buffer.key));
 }
 
 /** Initialize from REG.KEY.
     \param s REG.KEY file, file pointer at beginning. */
-void
+inline void
 game::v3::RegistrationKey::parseKey(afl::io::Stream& s)
 {
     // ex GRegInfo::parseKey

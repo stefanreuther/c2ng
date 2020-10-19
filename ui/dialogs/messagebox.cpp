@@ -11,6 +11,7 @@
 #include "util/keystring.hpp"
 #include "util/rich/styleattribute.hpp"
 #include "util/translation.hpp"
+#include "ui/widgets/quit.hpp"
 
 // Constructor.
 ui::dialogs::MessageBox::MessageBox(String_t text, String_t title, Root& root)
@@ -44,6 +45,10 @@ ui::dialogs::MessageBox::MessageBox(util::rich::Text text, String_t title, Root&
     init(text);
 }
 
+// Destructor.
+ui::dialogs::MessageBox::~MessageBox()
+{ }
+
 // Add a button.
 ui::dialogs::MessageBox&
 ui::dialogs::MessageBox::addButton(int id, String_t text, util::Key_t key)
@@ -73,8 +78,7 @@ ui::dialogs::MessageBox::run()
     if (!m_flags.contains(HaveRun)) {
         // Complete the button group
         m_buttonGroup.add(m_deleter.addNew(new Spacer()));
-        // FIXME: port this
-        // group.add(h.add(new UIQuit(last_command)));
+        add(m_deleter.addNew(new ui::widgets::Quit(m_root, m_loop)).withCode(m_lastCommand));
 
         // Complete keys (ESC must be first because we're overwriting m_lastCommand)
         if (!m_flags.contains(HaveEscape)) {

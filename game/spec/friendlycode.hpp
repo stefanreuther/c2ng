@@ -40,7 +40,8 @@ namespace game { namespace spec {
             CapitalShipCode,      ///< Works on capital ships only.
             AlchemyShipCode,      ///< Works on alchemy ships only.
             RegisteredCode,       ///< Works for registered players only.
-            UnspecialCode         ///< Not a special friendly code per se.
+            UnspecialCode,        ///< Not a special friendly code per se.
+            PrefixCode            ///< This is a prefix, not a friendly code.
         };
 
         /** Set of friendly code flags. */

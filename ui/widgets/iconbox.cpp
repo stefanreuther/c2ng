@@ -8,7 +8,7 @@
 #include "gfx/complex.hpp"
 
 namespace {
-    const size_t nil = -1;
+    const size_t nil = size_t(-1);
 }
 
 ui::widgets::IconBox::IconBox(ui::Root& root)

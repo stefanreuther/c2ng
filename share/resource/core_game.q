@@ -132,7 +132,7 @@ EndFunction
 % @see SelectionSave, Selection.Layer
 % @since PCC 1.1.3, PCC2 1.99.13, PCC2 2.40.6
 Sub SelectionLoad (file, Optional flags)
-  % ex SelectionLoadAskUI::ask
+  % ex SelectionLoadAskUI::ask, WSelectionManagerAnswer::ask
   Local state, q, UI.Result, ok, oldPos
   oldPos := FPos(file)
   Try
@@ -149,6 +149,17 @@ Sub SelectionLoad (file, Optional flags)
     Seek file, oldPos
     Abort System.Err
   EndTry
+EndSub
+
+% @q SelectionLayer l:Any (Global Command)
+% Change active selection layer.
+% This is a convenience routine that accepts the parameter in multiple formats, namely
+% a selection layer number (0-7) or name ("A"-"H").
+% @since PCC2 1.99.10, PCC 1.0.15, PCC2 2.40.9
+Sub SelectionLayer (l)
+  If IsEmpty(l) Then Return
+  If IsString(l) Then l:=InStr("abcdefgh", l)-1
+  Selection.Layer := l
 EndSub
 
 % @q EnqueueShip h:Int, e:Int, Optional bt:Int, bc:Int, tt:Int, tc:Int (Planet Command)
@@ -414,6 +425,11 @@ Function CCVP.ShipHasMissionWarning
   Else
     Return False
   EndIf
+EndFunction
+
+% @sunce PCC2 2.40.9
+Function CCVP.ShipHasEnemyWarning
+  Return Enemy And Mission$ = Cfg('ExtMissionsStartAt') + 18
 EndFunction
 
 % @since PCC2 2.40.1

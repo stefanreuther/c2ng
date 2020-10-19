@@ -8,6 +8,7 @@
 #include "afl/string/string.hpp"
 #include "afl/charset/charset.hpp"
 #include "afl/io/datasink.hpp"
+#include "afl/io/filesystem.hpp"
 
 namespace util {
 
@@ -31,7 +32,19 @@ namespace util {
         \retval false String too long, stored truncated */
     bool storePascalStringTruncate(afl::io::DataSink& out, const String_t& str, afl::charset::Charset& charset);
 
+    /** Load Pascal string.
+        \param in Stream
+        \param charset Character set
+        \return loaded string */
     String_t loadPascalString(afl::io::Stream& in, afl::charset::Charset& charset);
+
+    /** Append file name extension.
+        \param fs        File system
+        \param pathName  Path name
+        \param ext       Extension to append, not including leading dot
+        \param force     true: replace an existing extension; false: append extension only if it is missing
+        \return New path name */
+    String_t appendFileNameExtension(afl::io::FileSystem& fs, String_t pathName, String_t ext, bool force);
 
 }
 

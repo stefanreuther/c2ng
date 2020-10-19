@@ -98,6 +98,7 @@ void
 game::interface::IFCCNotify(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args)
 {
     // ex IFCCNotify
+    // ex ccexec.pas:GenerateNotifyMessage (Struc_CC_Notify, Struc_AddNotify)
     // Args: message, associate-with-process flag
     args.checkArgumentCount(2);
 

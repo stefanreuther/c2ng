@@ -8,11 +8,11 @@
 #include "afl/container/ptrvector.hpp"
 #include "afl/io/stream.hpp"
 #include "gfx/canvas.hpp"
+#include "ui/res/provider.hpp"
 
 namespace ui { namespace res {
 
     class ImageLoader;
-    class Provider;
 
     class Manager {
      public:

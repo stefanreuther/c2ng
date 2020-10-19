@@ -4,12 +4,12 @@
 #ifndef C2NG_CLIENT_TILES_TASKEDITORTILE_HPP
 #define C2NG_CLIENT_TILES_TASKEDITORTILE_HPP
 
-#include "client/proxy/taskeditorproxy.hpp"
-#include "ui/widget.hpp"
-#include "ui/root.hpp"
-#include "client/si/userside.hpp"
-#include "client/proxy/objectobserver.hpp"
 #include "afl/base/deleter.hpp"
+#include "client/si/userside.hpp"
+#include "game/proxy/objectobserver.hpp"
+#include "game/proxy/taskeditorproxy.hpp"
+#include "ui/root.hpp"
+#include "ui/widget.hpp"
 
 namespace client { namespace tiles {
 
@@ -32,16 +32,16 @@ namespace client { namespace tiles {
         virtual bool handleMouse(gfx::Point pt, MouseButtons_t pressedButtons);
 
         void setId(game::Id_t id);
-        void attach(client::proxy::ObjectObserver& oop);
+        void attach(game::proxy::ObjectObserver& oop);
         
      private:
-        void onChange(const client::proxy::TaskEditorProxy::Status& status);
+        void onChange(const game::proxy::TaskEditorProxy::Status& status);
         void onListSelectionChange();
 
         class ListWidget;
 
         afl::base::Deleter m_deleter;
-        client::proxy::TaskEditorProxy m_proxy;
+        game::proxy::TaskEditorProxy m_proxy;
         util::RequestReceiver<TaskEditorTile> m_receiver;
         interpreter::Process::ProcessKind m_kind;
         ListWidget* m_listWidget;

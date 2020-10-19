@@ -1,5 +1,6 @@
 /**
   *  \file game/v3/commandcontainer.cpp
+  *  \brief Class game::v3::CommandContainer
   */
 
 #include <algorithm>
@@ -37,13 +38,13 @@ const game::v3::Command*
 game::v3::CommandContainer::getCommand(Command::Type typ, Id_t id) const
 {
     // ex GCommandContainer::getCommand
-    // FIXME: can this be const?
+    // ex phost.pas:GetPHostCmd
     Iterator_t i = const_cast<CommandContainer*>(this)->findCommand(typ, id);
-    if (i != cmds.end())
+    if (i != cmds.end()) {
         return *i;
-    else
+    } else {
         return 0;
-
+    }
 }
 
 // Add a command.
@@ -51,6 +52,7 @@ const game::v3::Command*
 game::v3::CommandContainer::addCommand(Command::Type typ, Id_t id, String_t arg)
 {
     // ex GCommandContainer::setCommand
+    // ex phost.pas:SetPHostCmd
     Iterator_t i = findCommand(typ, id);
     if (i != cmds.end()) {
         if (arg != (*i)->getArg()) {
@@ -104,7 +106,7 @@ game::v3::CommandContainer::removeCommand(Command::Type typ, Id_t id)
 
 // Remove a command.
 void
-game::v3::CommandContainer::removeCommand(Command* cmd)
+game::v3::CommandContainer::removeCommand(const Command* cmd)
 {
     // ex GCommandContainer::removeCommand
     // FIXME: this fails because PtrMultiList::iterator does not have required types (difference_type, iterator_category, etc.)
@@ -116,7 +118,19 @@ game::v3::CommandContainer::removeCommand(Command* cmd)
     if (i != cmds.end()) {
         sig_commandChange.raise(**i, false);
         cmds.erase(i);
-        delete *i;
+    }
+}
+
+// Remove commands by affected unit.
+void
+game::v3::CommandContainer::removeCommandsByReference(Reference ref)
+{
+    // ex GReset::removeCommands (sort-of)
+    for (Iterator_t i = cmds.begin(); i != cmds.end(); ++i) {
+        if ((*i)->getAffectedUnit() == ref) {
+            sig_commandChange.raise(**i, false);
+            cmds.erase(i);
+        }
     }
 }
 
@@ -125,6 +139,7 @@ void
 game::v3::CommandContainer::loadCommandFile(afl::io::Stream& file, const Timestamp& time)
 {
     // ex GCommandContainer::loadCommandFile
+    // ex phost.pas:ParseCmdFileLine (sort-of)
     afl::io::TextFile tf(file);
     // FIXME: tf.setCharacterSet(getGameCharacterSet());
     String_t line;
@@ -143,9 +158,9 @@ game::v3::CommandContainer::loadCommandFile(afl::io::Stream& file, const Timesta
                 }
             } else {
                 // regular command
-                Command* cmd = Command::parseCommand(line, true);
+                Command* cmd = Command::parseCommand(line, true, false);
                 if (!cmd) {
-                    cmd = new Command(Command::phc_Other, 0, line);
+                    cmd = new Command(Command::Other, 0, line);
                 }
                 addNewCommand(cmd);
             }
@@ -158,9 +173,8 @@ game::v3::CommandContainer::Iterator_t
 game::v3::CommandContainer::findCommand(Command::Type typ, Id_t id)
 {
     // ex GCommandContainer::findCommand
-    /* any number of phc_Other can coexist, so we can not find a
-       particular one by just giving a typ/id pair */
-    if (typ == Command::phc_Other) {
+    // ex phost.pas:GetPHostCmd
+    if (!Command::isReplaceableCommand(typ)) {
         return cmds.end();
     }
 
@@ -171,41 +185,16 @@ game::v3::CommandContainer::findCommand(Command::Type typ, Id_t id)
     return i;
 }
 
-// Get value for sorting.
-int
-game::v3::CommandContainer::getValue(Command::Type type)
-{
-    // ex GCommandContainer::getValue
-    /* PCC 1.x has '1' for phc_SendFcodes, although I cannot come up
-       with a reason. */
-    switch (type) {
-     case Command::phc_SendRacenames:
-        // should be after phc_SetRaceName
-        return 2;
-     case Command::phc_SendConfig:
-        // should be after phc_Filter, phc_Language
-        return 1;
-     case Command::phc_ConfigAlly:
-        // should be after phc_AddDropAlly
-        return 1;
-     case Command::phc_RemoteControl:
-        // should be after phc_ConfigAlly
-        return 2;
-     default:
-        return 0;
-    }
-}
-
 // Insert newly-created command at proper position.
 void
 game::v3::CommandContainer::insertNewCommand(Command* cmd)
 {
     // ex GCommandContainer::insertNewCommand
     /* find place to insert new command */
-    const int this_val = getValue(cmd->getCommand());
+    const int this_val = Command::getCommandOrder(cmd->getCommand());
     Iterator_t i = cmds.begin();
 
-    while (i != cmds.end() && getValue((*i)->getCommand()) <= this_val) {
+    while (i != cmds.end() && Command::getCommandOrder((*i)->getCommand()) <= this_val) {
         ++i;
     }
 

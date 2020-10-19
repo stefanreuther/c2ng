@@ -64,7 +64,7 @@ interpreter::vmio::AssemblerSaveContext::addBCO(const interpreter::BytecodeObjec
         virtual void writeBody(AssemblerSaveContext& asc, afl::io::TextWriter& out)
             {
                 // Fetch references
-                const afl::data::NameMap& locals = m_bco.getLocalNames();
+                const afl::data::NameMap& locals = m_bco.localVariables();
 
                 // Prototype
                 String_t keyword = (m_bco.isProcedure() ? "Sub" : "Function");
@@ -105,8 +105,8 @@ interpreter::vmio::AssemblerSaveContext::addBCO(const interpreter::BytecodeObjec
                     out.writeLine(")");
 
                 }
-                if (name != m_bco.getName()) {
-                    out.writeLine(afl::string::Format("  .name %s", quoteName(m_bco.getName())));
+                if (name != m_bco.getSubroutineName()) {
+                    out.writeLine(afl::string::Format("  .name %s", quoteName(m_bco.getSubroutineName())));
                 }
 
                 // Locals
@@ -133,7 +133,7 @@ interpreter::vmio::AssemblerSaveContext::addBCO(const interpreter::BytecodeObjec
                 // If the debug information is well-formed, this will Just Work[tm].
                 // If the debug information is not well-formed (i.e. non-continguous), write out the excess at the end.
                 // If debug information is disabled, just pretend that we already processed everything.
-                const std::vector<uint32_t>& lineNumbers = m_bco.getLineNumbers();
+                const std::vector<uint32_t>& lineNumbers = m_bco.lineNumbers();
                 size_t lineLimit = lineNumbers.size() & ~1;
                 size_t lineIndex = (asc.isDebugInformationEnabled() ? 0 : lineLimit);
 
@@ -194,7 +194,7 @@ interpreter::vmio::AssemblerSaveContext::addBCO(const interpreter::BytecodeObjec
         {
             afl::io::NullStream null;
             afl::charset::Utf8Charset cs;
-            SaveVisitor::save(null, bco.getLiterals(), bco.getLiterals().size(), cs, *this);
+            SaveVisitor::save(null, bco.literals(), bco.literals().size(), cs, *this);
         }
 
         // Sequence it
@@ -202,8 +202,8 @@ interpreter::vmio::AssemblerSaveContext::addBCO(const interpreter::BytecodeObjec
         p->isSequenced = true;
 
         // Assign a name
-        if (Tokenizer::isValidUppercaseIdentifier(bco.getName()) && m_usedNames.find(bco.getName()) == m_usedNames.end()) {
-            p->name = bco.getName();
+        if (Tokenizer::isValidUppercaseIdentifier(bco.getSubroutineName()) && m_usedNames.find(bco.getSubroutineName()) == m_usedNames.end()) {
+            p->name = bco.getSubroutineName();
         } else {
             do {
                 p->name = afl::string::Format("BCO%d", ++m_counter);
@@ -421,8 +421,8 @@ interpreter::vmio::AssemblerSaveContext::formatInstruction(const Opcode& opc, co
                 switch (mode) {
                  case 'n':
                     // Name
-                    if (arg < bco.getNames().getNumNames()) {
-                        result += bco.getNames().getNameByIndex(arg);
+                    if (arg < bco.names().getNumNames()) {
+                        result += bco.names().getNameByIndex(arg);
                         addTab(result);
                         result += "% name ";
                     }
@@ -436,8 +436,8 @@ interpreter::vmio::AssemblerSaveContext::formatInstruction(const Opcode& opc, co
 
                  case 'L':
                     // Local
-                    if (arg < bco.getLocalNames().getNumNames()) {
-                        result += bco.getLocalNames().getNameByIndex(arg);
+                    if (arg < bco.localVariables().getNumNames()) {
+                        result += bco.localVariables().getNameByIndex(arg);
                         addTab(result);
                         result += "% local ";
                     }

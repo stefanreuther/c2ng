@@ -13,6 +13,9 @@
 #include "game/map/ship.hpp"
 #include "afl/string/string.hpp"
 #include "game/timestamp.hpp"
+#include "game/vcr/classic/database.hpp"
+#include "game/vcr/classic/battle.hpp"
+#include "game/vcr/object.hpp"
 
 namespace {
 
@@ -141,6 +144,44 @@ namespace {
             return game::Timestamp();
         }
     }
+
+    game::vcr::Object unpackVcrObject(afl::data::Access p, bool isPlanet)
+    {
+        game::vcr::Object obj;
+
+        obj.setMass(p("mass").toInteger());
+        obj.setShield(p("shield").toInteger());
+        obj.setDamage(p("damage").toInteger());
+        obj.setCrew(p("crew").toInteger());
+        obj.setId(p("objectid").toInteger());
+        obj.setOwner(p("raceid").toInteger());
+        obj.setRace(0);         // use default
+        // obj.setPicture() // FIXME
+        obj.setHull(p("hullid").toInteger());
+        obj.setBeamType(p("beamid").toInteger());
+        obj.setNumBeams(p("beamcount").toInteger());
+        obj.setTorpedoType(p("torpedoid").toInteger());
+        obj.setNumTorpedoes(p("torpedos").toInteger());
+        obj.setNumLaunchers(p("launchercount").toInteger());
+        obj.setNumBays(p("baycount").toInteger());
+        obj.setNumFighters(p("fighters").toInteger());
+        obj.setExperienceLevel(0);
+        obj.setBeamKillRate(p("beamkillbonus").toInteger());
+        obj.setBeamChargeRate(p("beamchargerate").toInteger());
+        obj.setTorpMissRate(p("torpmisspercent").toInteger());
+        obj.setTorpChargeRate(p("torpchargerate").toInteger());
+        obj.setCrewDefenseRate(p("crewdefensepercent").toInteger());
+        obj.setIsPlanet(isPlanet);
+        obj.setName(p("name").toString());
+
+        //   "vcrid": 149,
+        //   "side": 1,
+        //   "temperature": 0,
+        //   "hasstarbase": false,
+        //   "id": 298
+
+        return obj;
+    }
 }
 
 
@@ -192,6 +233,39 @@ game::nu::TurnLoader::loadCurrentTurn(Turn& turn, Game& /*game*/, int player, Ro
         throw std::runtime_error(m_translator.translateString("Unable to download result file"));
     }
 
+    // rst attributes:
+    // - settings
+    // - game
+    // - player
+    // - players
+    // - scores
+    // - maps
+    // - planets
+    // - ships
+    // - ionstorms
+    // - nebulas
+    // - stars
+    // - artifacts
+    // - wormholes
+    // - starbases
+    // - stock
+    // - minefields
+    // - relations
+    // - messages
+    // - mymessages
+    // - cutscenes
+    // - notes
+    // - vcrs
+    // - races
+    // - hulls
+    // - racehulls
+    // - beams
+    // - engines
+    // - torpedos
+    // - advantages
+    // - activebadges
+    // - badgechange
+
     turn.setTurnNumber(rst("rst")("game")("turn").toInteger());
     turn.setTimestamp(convertTime(rst("rst")("settings")("hostcompleted").toString()));
 
@@ -202,10 +276,11 @@ game::nu::TurnLoader::loadCurrentTurn(Turn& turn, Game& /*game*/, int player, Ro
     loadStarbases(turn.universe(), rst("rst")("starbases"), PlayerSet_t(player));
     loadShips(turn.universe(), rst("rst")("ships"), PlayerSet_t(player));
     loadMinefields(turn.universe(), rst("rst")("minefields"));
+    loadVcrs(turn, rst("rst")("vcrs"));
 }
 
 void
-game::nu::TurnLoader::saveCurrentTurn(Turn& turn, Game& game, int player, Root& root, Session& session)
+game::nu::TurnLoader::saveCurrentTurn(const Turn& turn, const Game& game, int player, const Root& root, Session& session)
 {
     // FIXME
     (void) turn;
@@ -443,7 +518,7 @@ game::nu::TurnLoader::loadShips(game::map::Universe& univ, afl::data::Access shi
                            owner,
                            in("mass").toInteger(),
                            players);
-                           
+
         out->setHull(in("hullid").toInteger());
 
         if (players.contains(owner)) {
@@ -544,5 +619,36 @@ game::nu::TurnLoader::loadMinefields(game::map::Universe& univ, afl::data::Acces
         } else {
             m_log.write(m_log.Error, LOG_NAME, afl::string::Format(m_translator.translateString("Invalid minefield Id #%d, minefield has been ignored").c_str(), id));
         }
+    }
+}
+
+void
+game::nu::TurnLoader::loadVcrs(Turn& turn, afl::data::Access p)
+{
+    using game::vcr::classic::Database;
+    using game::vcr::classic::Battle;
+
+    afl::base::Ptr<Database> db = new Database();
+
+    const size_t n = p.getArraySize();
+    for (size_t i = 0; i < n; ++i) {
+        afl::data::Access in = p[i];
+
+        Battle* b = db->addNewBattle(new Battle(unpackVcrObject(in("left"),  false),
+                                                unpackVcrObject(in("right"), in("battletype").toInteger() != 0),
+                                                uint16_t(in("seed").toInteger()),
+                                                0,      /* signature, not relevant */
+                                                uint16_t(in("right")("temperature").toInteger())
+                                         ));
+        // "leftownerid": 7,
+        // "rightownerid": 6,
+        // "turn": 40,
+        // "id": 149,
+        b->setType(game::vcr::classic::NuHost, 0);
+        b->setPosition(game::map::Point(in("x").toInteger(), in("y").toInteger()));
+    }
+    if (db->getNumBattles() != 0) {
+        m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loaded %d combat recording%!1{s%}...").c_str(), db->getNumBattles()));
+        turn.setBattles(db);
     }
 }

@@ -101,6 +101,17 @@ TestUtilSyntaxCHighlighter::testPreproc()
     TS_ASSERT_EQUALS(parseContinuation(testee, r), "<foo>");
     TS_ASSERT(!testee.scan(r));
 
+    // #include "foo"
+    testee.init(afl::string::toMemory("#include \"foo\""));
+    TS_ASSERT(testee.scan(r));
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::SectionFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "#include");
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::DefaultFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), " ");
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::StringFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "\"foo\"");
+    TS_ASSERT(!testee.scan(r));
+
     // #include <foo\nxx -- invalid; newline should not be part of string
     testee.init(afl::string::toMemory("#include <foo\nxx"));
     TS_ASSERT(testee.scan(r));
@@ -260,6 +271,15 @@ TestUtilSyntaxCHighlighter::testComment()
     TS_ASSERT_EQUALS(parseContinuation(testee, r), " baz");
     TS_ASSERT(!testee.scan(r));
 
+    // foo /*bar (unterminated comment)
+    testee.init(afl::string::toMemory("foo /*bar"));
+    TS_ASSERT(testee.scan(r));
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::DefaultFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "foo ");
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::CommentFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "/*bar");
+    TS_ASSERT(!testee.scan(r));
+
     // foo //bar\nbaz
     testee.init(afl::string::toMemory("foo //bar\nbaz"));
     TS_ASSERT(testee.scan(r));
@@ -280,6 +300,15 @@ TestUtilSyntaxCHighlighter::testComment()
     TS_ASSERT_EQUALS(parseContinuation(testee, r), "//bar\\\nbaz");
     TS_ASSERT(!testee.scan(r));
 
+    // foo //bar\nbaz (with CRLF)
+    testee.init(afl::string::toMemory("foo //bar\\\r\nbaz"));
+    TS_ASSERT(testee.scan(r));
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::DefaultFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "foo ");
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::CommentFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "//bar\\\r\nbaz");
+    TS_ASSERT(!testee.scan(r));
+
     // foo /\n/bar
     testee.init(afl::string::toMemory("foo /\\\n/bar"));
     TS_ASSERT(testee.scan(r));
@@ -287,6 +316,15 @@ TestUtilSyntaxCHighlighter::testComment()
     TS_ASSERT_EQUALS(parseContinuation(testee, r), "foo ");
     TS_ASSERT_EQUALS(r.getFormat(), util::syntax::CommentFormat);
     TS_ASSERT_EQUALS(parseContinuation(testee, r), "/\\\n/bar");
+    TS_ASSERT(!testee.scan(r));
+
+    // foo /\r\n/bar (with CRLF)
+    testee.init(afl::string::toMemory("foo /\\\r\n/bar"));
+    TS_ASSERT(testee.scan(r));
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::DefaultFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "foo ");
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::CommentFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "/\\\r\n/bar");
     TS_ASSERT(!testee.scan(r));
 
     // foo /
@@ -395,6 +433,37 @@ TestUtilSyntaxCHighlighter::testJS()
     TS_ASSERT_EQUALS(parseContinuation(testee, r), "/foo[a/b]/");
     TS_ASSERT_EQUALS(r.getFormat(), util::syntax::DefaultFormat);
     TS_ASSERT_EQUALS(parseContinuation(testee, r), ";");
+    TS_ASSERT(!testee.scan(r));
+
+    // Regexps (backslash quote)
+    testee.init(afl::string::toMemory("a = /\\//;"));
+    TS_ASSERT(testee.scan(r));
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::DefaultFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "a = ");
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::StringFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "/\\//");
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::DefaultFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), ";");
+    TS_ASSERT(!testee.scan(r));
+
+    // Regexps syntax error. This is a regexp, followed by a slash.
+    testee.init(afl::string::toMemory("a = /i//i;"));
+    TS_ASSERT(testee.scan(r));
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::DefaultFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "a = ");
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::StringFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "/i/");
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::DefaultFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "/i;");
+    TS_ASSERT(!testee.scan(r));
+
+    // This is a comment, not a regexp.
+    testee.init(afl::string::toMemory("a = //i;"));
+    TS_ASSERT(testee.scan(r));
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::DefaultFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "a = ");
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::CommentFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "//i;");
     TS_ASSERT(!testee.scan(r));
 }
 

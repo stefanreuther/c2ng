@@ -218,7 +218,7 @@ TestServerTalkRenderHTMLRenderer::testText()
         TS_ASSERT_EQUALS(renderHTML(tn, ctx, opts, root), "<p>hi <span style=\"font-family: x&amp;y;\">mom</span>!</p>\n");
     }
 
-    // Same thing, size
+    // Same thing, increased size
     {
         TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
         TextNode& par(*tn.children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal)));
@@ -228,6 +228,18 @@ TestServerTalkRenderHTMLRenderer::testText()
         par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "!"));
 
         TS_ASSERT_EQUALS(renderHTML(tn, ctx, opts, root), "<p>hi <span style=\"font-size: 195%;\">mom</span>!</p>\n");
+    }
+
+    // Same thing, reduced size
+    {
+        TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
+        TextNode& par(*tn.children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal)));
+        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "hi "));
+        par.children.pushBackNew(new TextNode(TextNode::maInlineAttr, TextNode::miIASize, "-1"));
+        par.children.back()->children.pushBackNew(new TextNode(TextNode::maPlain, 0, "mom"));
+        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "!"));
+
+        TS_ASSERT_EQUALS(renderHTML(tn, ctx, opts, root), "<p>hi <span style=\"font-size: 80%;\">mom</span>!</p>\n");
     }
 
     // Same thing, attributeless size
@@ -423,6 +435,148 @@ TestServerTalkRenderHTMLRenderer::testUser()
         tn.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " ]"));
 
         TS_ASSERT_EQUALS(renderHTML(tn, ctx, opts, root), "[ <a class=\"userlink\" href=\"http://base/path/userinfo.cgi/wilma\">Wilma F</a> ]");
+    }
+}
+
+/** Test more links. */
+void
+TestServerTalkRenderHTMLRenderer::testLinks2()
+{
+    using server::talk::render::renderHTML;
+    using server::talk::TextNode;
+    using afl::net::redis::StringKey;
+    using afl::net::redis::HashKey;
+    using afl::net::redis::StringSetKey;
+
+    // Environment
+    const server::talk::render::Context ctx("1000");
+    server::talk::render::Options opts;
+    opts.setBaseUrl("http://base/path/");
+
+    afl::net::NullCommandHandler nch;
+    afl::net::redis::InternalDatabase db;
+    server::talk::Root root(db, nch, server::talk::Configuration());
+
+    // Create environment
+    // - a game
+    StringSetKey(db, "game:all").add("7");
+    StringKey(db, "game:7:state").set("running");
+    StringKey(db, "game:7:type").set("public");
+    StringKey(db, "game:7:name").set("Seven of Nine");
+
+    // - a forum
+    StringSetKey(db, "forum:all").add("3");
+    HashKey(db, "forum:3:header").stringField("name").set("Chat Room");
+
+    // - a thread
+    HashKey(db, "thread:9:header").stringField("subject").set("Hi There");
+    HashKey(db, "thread:9:header").stringField("forum").set("3");
+
+    // - a posting
+    HashKey(db, "msg:12:header").stringField("subject").set("Re: Hi There");
+    HashKey(db, "msg:12:header").stringField("thread").set("9");
+
+    // Forum link
+    {
+        TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
+        TextNode& par(*tn.children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal)));
+        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "[ "));
+        par.children.pushBackNew(new TextNode(TextNode::maLink, TextNode::miLinkForum, "3"));
+        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " ]"));
+
+        TS_ASSERT_EQUALS(renderHTML(tn, ctx, opts, root), "<p>[ <a href=\"http://base/path/talk/forum.cgi/3-Chat-Room\">Chat Room</a> ]</p>\n");
+    }
+
+    // Named forum link
+    {
+        TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
+        TextNode& par(*tn.children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal)));
+        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "[ "));
+        TextNode& link(*par.children.pushBackNew(new TextNode(TextNode::maLink, TextNode::miLinkForum, "3")));
+        link.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "text"));
+        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " ]"));
+
+        TS_ASSERT_EQUALS(renderHTML(tn, ctx, opts, root), "<p>[ <a href=\"http://base/path/talk/forum.cgi/3-Chat-Room\">text</a> ]</p>\n");
+    }
+
+    // Thread link
+    {
+        TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
+        TextNode& par(*tn.children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal)));
+        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "[ "));
+        par.children.pushBackNew(new TextNode(TextNode::maLink, TextNode::miLinkThread, "9"));
+        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " ]"));
+
+        TS_ASSERT_EQUALS(renderHTML(tn, ctx, opts, root), "<p>[ <a href=\"http://base/path/talk/thread.cgi/9-Hi-There\">Hi There</a> ]</p>\n");
+    }
+
+    // Named thread link
+    {
+        TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
+        TextNode& par(*tn.children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal)));
+        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "[ "));
+        TextNode& link(*par.children.pushBackNew(new TextNode(TextNode::maLink, TextNode::miLinkThread, "9")));
+        link.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "label"));
+        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " ]"));
+
+        TS_ASSERT_EQUALS(renderHTML(tn, ctx, opts, root), "<p>[ <a href=\"http://base/path/talk/thread.cgi/9-Hi-There\">label</a> ]</p>\n");
+    }
+
+    // Post link
+    {
+        TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
+        TextNode& par(*tn.children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal)));
+        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "[ "));
+        par.children.pushBackNew(new TextNode(TextNode::maLink, TextNode::miLinkPost, "12"));
+        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " ]"));
+
+        TS_ASSERT_EQUALS(renderHTML(tn, ctx, opts, root), "<p>[ <a href=\"http://base/path/talk/thread.cgi/9-Hi-There#p12\">Re: Hi There</a> ]</p>\n");
+    }
+
+    // Named post link
+    {
+        TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
+        TextNode& par(*tn.children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal)));
+        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "[ "));
+        TextNode& link(*par.children.pushBackNew(new TextNode(TextNode::maLink, TextNode::miLinkPost, "12")));
+        link.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "text"));
+        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " ]"));
+
+        TS_ASSERT_EQUALS(renderHTML(tn, ctx, opts, root), "<p>[ <a href=\"http://base/path/talk/thread.cgi/9-Hi-There#p12\">text</a> ]</p>\n");
+    }
+
+    // Game link
+    {
+        TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
+        TextNode& par(*tn.children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal)));
+        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "[ "));
+        par.children.pushBackNew(new TextNode(TextNode::maLink, TextNode::miLinkGame, "7"));
+        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " ]"));
+
+        TS_ASSERT_EQUALS(renderHTML(tn, ctx, opts, root), "<p>[ <a href=\"http://base/path/host/game.cgi/7-Seven-of-Nine\">Seven of Nine</a> ]</p>\n");
+    }
+
+    // Named game link
+    {
+        TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
+        TextNode& par(*tn.children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal)));
+        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "[ "));
+        TextNode& link(*par.children.pushBackNew(new TextNode(TextNode::maLink, TextNode::miLinkGame, "7")));
+        link.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "play"));
+        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " ]"));
+
+        TS_ASSERT_EQUALS(renderHTML(tn, ctx, opts, root), "<p>[ <a href=\"http://base/path/host/game.cgi/7-Seven-of-Nine\">play</a> ]</p>\n");
+    }
+
+    // Bad game link
+    {
+        TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
+        TextNode& par(*tn.children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal)));
+        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "[ "));
+        par.children.pushBackNew(new TextNode(TextNode::maLink, TextNode::miLinkGame, "17"));
+        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " ]"));
+
+        TS_ASSERT_EQUALS(renderHTML(tn, ctx, opts, root), "<p>[ <span class=\"tfailedlink\">game 17</span> ]</p>\n");
     }
 }
 

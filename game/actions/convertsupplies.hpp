@@ -28,7 +28,7 @@ namespace game { namespace actions {
         /** Set undo information.
             This enables the action to buy supplies.
             \param univ Universe */
-        void setUndoInformation(game::map::Universe& univ);
+        void setUndoInformation(const game::map::Universe& univ);
 
         /** Set reserved supplies.
             This reduces getMaxSuppliesToSell(), reserved supplies cannot be sold.
@@ -62,7 +62,7 @@ namespace game { namespace actions {
 
      private:
         game::map::Planet& m_planet;
-        game::map::Universe* m_pUniverse;
+        const game::map::Universe* m_pUniverse;
         int32_t m_reservedSupplies;
         int32_t m_reservedMoney;
     };

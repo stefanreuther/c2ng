@@ -48,6 +48,15 @@ TestGameSimSetup::testObj()
     TS_ASSERT_EQUALS(testee.getObject(2), p);
     TS_ASSERT(testee.getObject(3) == 0);
 
+    // Find
+    game::sim::Setup::Slot_t slot;
+    TS_ASSERT(testee.findIndex(s1, slot)); TS_ASSERT_EQUALS(slot, 0U);
+    TS_ASSERT(testee.findIndex(s2, slot)); TS_ASSERT_EQUALS(slot, 1U);
+
+    TS_ASSERT(testee.findIndex((game::sim::Object*) s1, slot)); TS_ASSERT_EQUALS(slot, 0U);
+    TS_ASSERT(testee.findIndex((game::sim::Object*) s2, slot)); TS_ASSERT_EQUALS(slot, 1U);
+    TS_ASSERT(testee.findIndex(p, slot)); TS_ASSERT_EQUALS(slot, 2U);
+
     // Copy
     game::sim::Setup a(testee);
     TS_ASSERT(a.hasPlanet());
@@ -103,7 +112,8 @@ TestGameSimSetup::testShip()
     TS_ASSERT(testee.findIndex(s5, slot));
     TS_ASSERT_EQUALS(slot, 3U);
     TS_ASSERT(!testee.findIndex(&other, slot));
-    TS_ASSERT(!testee.findIndex(0, slot));
+    TS_ASSERT(!testee.findIndex((game::sim::Ship*) 0, slot));
+    TS_ASSERT(!testee.findIndex((game::sim::Object*) 0, slot));
 
     TS_ASSERT(testee.findShipSlotById(4, slot));
     TS_ASSERT_EQUALS(slot, 0U);
@@ -179,6 +189,9 @@ TestGameSimSetup::testShipList()
     }
     for (int i = 1; i <= 7; ++i) {
         list.launchers().create(i);
+    }
+    for (int i = 1; i <= 7; ++i) {
+        list.engines().create(i);
     }
 
     // Initial state
@@ -301,3 +314,41 @@ TestGameSimSetup::testListener()
     TS_ASSERT_EQUALS(structChange.get(), 3);
 }
 
+/** Test merging. */
+void
+TestGameSimSetup::testMerge()
+{
+    // Prepare
+    game::sim::Setup a;
+    {
+        game::sim::Ship* a1 = a.addShip();
+        a1->setId(1);
+        a1->setName("a1");
+        game::sim::Ship* a2 = a.addShip();
+        a2->setId(2);
+        a2->setName("a2");
+    }
+
+    game::sim::Setup b;
+    {
+        game::sim::Ship* b2 = b.addShip();
+        b2->setId(2);
+        b2->setName("b2");
+        game::sim::Ship* b3 = b.addShip();
+        b3->setId(3);
+        b3->setName("b3");
+        game::sim::Planet* p = b.addPlanet();
+        p->setId(77);
+    }
+
+    // Do it
+    a.merge(b);
+
+    // Verify
+    TS_ASSERT_EQUALS(a.getNumShips(), 3U);
+    TS_ASSERT_EQUALS(a.hasPlanet(), true);
+    TS_ASSERT_EQUALS(a.getShip(0)->getName(), "a1");
+    TS_ASSERT_EQUALS(a.getShip(1)->getName(), "b2");
+    TS_ASSERT_EQUALS(a.getShip(2)->getName(), "b3");
+    TS_ASSERT_EQUALS(a.getPlanet()->getId(), 77);
+}

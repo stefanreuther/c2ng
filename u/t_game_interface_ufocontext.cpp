@@ -6,11 +6,12 @@
 #include "game/interface/ufocontext.hpp"
 
 #include "t_game_interface.hpp"
-#include "u/helper/contextverifier.hpp"
-#include "game/session.hpp"
-#include "game/game.hpp"
-#include "afl/string/nulltranslator.hpp"
 #include "afl/io/nullfilesystem.hpp"
+#include "afl/string/nulltranslator.hpp"
+#include "game/game.hpp"
+#include "game/map/configuration.hpp"
+#include "game/session.hpp"
+#include "u/helper/contextverifier.hpp"
 
 /** Verify types. */
 void
@@ -32,7 +33,7 @@ TestGameInterfaceUfoContext::testTypes()
     ufo->setShipRange(150);
     ufo->setInfo1("USS Rosswell");
     ufo->setInfo2("New Mexico");
-    ufo->postprocess(42);
+    ufo->postprocess(42, turn.universe().config());
 
     TS_ASSERT_EQUALS(turn.universe().ufos().getObjectByIndex(1), ufo);
 

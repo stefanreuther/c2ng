@@ -73,6 +73,8 @@ namespace {
             { return false; }
         virtual bool getPreviousShipBuildOrder(int /*planetId*/, game::ShipBuildOrder& /*result*/) const
             { return false; }
+        virtual game::map::LocationReverter* createLocationReverter(game::map::Point /*pt*/) const
+            { return 0; }
     };
 
     void prepare(TestHarness& h)

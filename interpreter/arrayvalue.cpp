@@ -83,7 +83,7 @@ interpreter::ArrayValue::store(TagNode& out, afl::io::DataSink& /*aux*/, afl::ch
 
 // Inquiry
 afl::base::Ref<interpreter::ArrayData>
-interpreter::ArrayValue::getData()
+interpreter::ArrayValue::getData() const
 {
     return m_data;
 }

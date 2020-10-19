@@ -7,6 +7,7 @@
 
 #include <vector>
 #include "interpreter/commandsource.hpp"
+#include "afl/string/string.hpp"
 
 namespace interpreter {
 
@@ -26,6 +27,10 @@ namespace interpreter {
         /** Add line to this command source.
             \param line The line */
         void addLine(const String_t& line);
+
+        /** Add lines to this command source.
+            \param mem Memory describing the lines; will be split at "\n" */
+        void addLines(afl::string::ConstStringMemory_t mem);
 
         virtual void readNextLine();
         virtual bool setCharsetNew(afl::charset::Charset* cs);

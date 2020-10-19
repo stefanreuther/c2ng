@@ -69,7 +69,7 @@ TestServerFileFileGame::testEmpty()
     TS_ASSERT_THROWS_CODE(testee.getGameInfo("", gi), "400");
     TS_ASSERT_THROWS_CODE(testee.listGameInfo("", gis), "400");
     TS_ASSERT_THROWS_CODE(testee.getKeyInfo("", ki), "400");
-    TS_ASSERT_THROWS_CODE(testee.listKeyInfo("", kis), "400");
+    TS_ASSERT_THROWS_CODE(testee.listKeyInfo("", FileGame::Filter(), kis), "400");
 
     // Create an empty directory and attempt to read it
     FileBase(tb.session, tb.root).createDirectory("x");
@@ -77,21 +77,21 @@ TestServerFileFileGame::testEmpty()
     TS_ASSERT_THROWS_NOTHING(testee.listGameInfo("x", gis));
     TS_ASSERT_EQUALS(gis.size(), 0U);
     TS_ASSERT_THROWS_CODE(testee.getKeyInfo("x", ki), "404");
-    TS_ASSERT_THROWS_NOTHING(testee.listKeyInfo("x", kis));
+    TS_ASSERT_THROWS_NOTHING(testee.listKeyInfo("x", FileGame::Filter(), kis));
     TS_ASSERT_EQUALS(kis.size(), 0U);
 
     TS_ASSERT_THROWS_CODE(testee.listGameInfo("x/y/z", gis), "404");
-    TS_ASSERT_THROWS_CODE(testee.listKeyInfo("x/y/z", kis), "404");
+    TS_ASSERT_THROWS_CODE(testee.listKeyInfo("x/y/z", FileGame::Filter(), kis), "404");
 
     // Missing permissions
     tb.session.setUser("1001");
     TS_ASSERT_THROWS_CODE(testee.getGameInfo("x", gi), "403");
     TS_ASSERT_THROWS_CODE(testee.listGameInfo("x", gis), "403");
     TS_ASSERT_THROWS_CODE(testee.getKeyInfo("x", ki), "403");
-    TS_ASSERT_THROWS_CODE(testee.listKeyInfo("x", kis), "403");
+    TS_ASSERT_THROWS_CODE(testee.listKeyInfo("x", FileGame::Filter(), kis), "403");
 
     TS_ASSERT_THROWS_CODE(testee.listGameInfo("x/y/z", gis), "403");
-    TS_ASSERT_THROWS_CODE(testee.listKeyInfo("x/y/z", kis), "403");
+    TS_ASSERT_THROWS_CODE(testee.listKeyInfo("x/y/z", FileGame::Filter(), kis), "403");
 }
 
 /** Test operation on directories that contain keys. */
@@ -124,10 +124,40 @@ TestServerFileFileGame::testReg()
     // List
     {
         afl::container::PtrVector<FileGame::KeyInfo> kis;
-        TS_ASSERT_THROWS_NOTHING(testee.listKeyInfo("a/b", kis));
+        TS_ASSERT_THROWS_NOTHING(testee.listKeyInfo("a/b", FileGame::Filter(), kis));
         TS_ASSERT_EQUALS(kis.size(), 2U);
         TS_ASSERT_EQUALS(kis[0]->fileName, "a/b/fizz.bin");
         TS_ASSERT_EQUALS(kis[1]->fileName, "a/b/c/fizz.bin");
+        TS_ASSERT_EQUALS(kis[1]->keyId.orElse(""), "611a7f755848a9605ad15d92266c0fb77161cf69");
+    }
+
+    // List with uniquisation
+    {
+        afl::container::PtrVector<FileGame::KeyInfo> kis;
+        FileGame::Filter f;
+        f.unique = 1;
+        TS_ASSERT_THROWS_NOTHING(testee.listKeyInfo("a/b", f, kis));
+        TS_ASSERT_EQUALS(kis.size(), 1U);
+        TS_ASSERT_EQUALS(kis[0]->fileName, "a/b/fizz.bin");
+        TS_ASSERT_EQUALS(kis[0]->useCount.orElse(-1), 2);
+    }
+
+    // List with filter (mismatch)
+    {
+        afl::container::PtrVector<FileGame::KeyInfo> kis;
+        FileGame::Filter f;
+        f.keyId = "?";
+        TS_ASSERT_THROWS_NOTHING(testee.listKeyInfo("a/b", f, kis));
+        TS_ASSERT_EQUALS(kis.size(), 0U);
+    }
+
+    // List with filter (match)
+    {
+        afl::container::PtrVector<FileGame::KeyInfo> kis;
+        FileGame::Filter f;
+        f.keyId = "611a7f755848a9605ad15d92266c0fb77161cf69";
+        TS_ASSERT_THROWS_NOTHING(testee.listKeyInfo("a/b", f, kis));
+        TS_ASSERT_EQUALS(kis.size(), 2U);
     }
 
     // Stat as user 1001
@@ -145,7 +175,7 @@ TestServerFileFileGame::testReg()
     // List as user 1001 (gets only available content)
     {
         afl::container::PtrVector<FileGame::KeyInfo> kis;
-        TS_ASSERT_THROWS_NOTHING(testee.listKeyInfo("a/b", kis));
+        TS_ASSERT_THROWS_NOTHING(testee.listKeyInfo("a/b", FileGame::Filter(), kis));
         TS_ASSERT_EQUALS(kis.size(), 1U);
         TS_ASSERT_EQUALS(kis[0]->fileName, "a/b/fizz.bin");
     }
@@ -154,12 +184,12 @@ TestServerFileFileGame::testReg()
     tb.session.setUser("1002");
     {
         afl::container::PtrVector<FileGame::KeyInfo> kis;
-        TS_ASSERT_THROWS_CODE(testee.listKeyInfo("a/b", kis), "403");
+        TS_ASSERT_THROWS_CODE(testee.listKeyInfo("a/b", FileGame::Filter(), kis), "403");
         TS_ASSERT_EQUALS(kis.size(), 0U);
     }
     {
         afl::container::PtrVector<FileGame::KeyInfo> kis;
-        TS_ASSERT_THROWS_NOTHING(testee.listKeyInfo("a/b/c", kis));
+        TS_ASSERT_THROWS_NOTHING(testee.listKeyInfo("a/b/c", FileGame::Filter(), kis));
         TS_ASSERT_EQUALS(kis.size(), 1U);
         TS_ASSERT_EQUALS(kis[0]->fileName, "a/b/c/fizz.bin");
     }

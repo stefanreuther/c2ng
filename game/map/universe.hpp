@@ -96,22 +96,21 @@ namespace game { namespace map {
         /*
          *  Location accessors
          */
-        Id_t getPlanetAt(Point pt) const;
-        Id_t getPlanetAt(Point pt,
-                         bool gravityFlag,
-                         const game::config::HostConfiguration& config,
-                         const HostVersion& host) const;
-        Id_t getGravityPlanetAt(Point pt,
-                                const game::config::HostConfiguration& config,
-                                const HostVersion& host) const;
+        Id_t findPlanetAt(Point pt) const;
+        Id_t findPlanetAt(Point pt,
+                          bool gravityFlag,
+                          const game::config::HostConfiguration& config,
+                          const HostVersion& host) const;
+        Id_t findGravityPlanetAt(Point pt,
+                                 const game::config::HostConfiguration& config,
+                                 const HostVersion& host) const;
 
-        Id_t getAnyShipAt(Point pt) const;
+        Id_t findFirstShipAt(Point pt) const;
 
         String_t getLocationName(Point pt, int flags,
                                  const game::config::HostConfiguration& config,
                                  const HostVersion& host,
-                                 afl::string::Translator& tx,
-                                 InterpreterInterface& iface) const;
+                                 afl::string::Translator& tx) const;
 
         Id_t findShipTowing(int sid, int after = 0) const;
 

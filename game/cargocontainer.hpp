@@ -155,8 +155,11 @@ namespace game {
         afl::base::Signal<void()> sig_change;
 
      private:
-        util::Vector<int32_t,Element::Type> m_delta;    ///< Current deltas, indexed by Element::Type. Nonpresent values treated as 0.
-        bool m_overload;                 ///< Overload flag.
+        /** Current deltas, indexed by Element::Type. Nonpresent values treated as 0. */
+        util::Vector<int32_t,Element::Type> m_delta;
+
+        /** Overload flag. */
+        bool m_overload;
     };
 
 }

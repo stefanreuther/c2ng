@@ -1,29 +1,48 @@
 /**
   *  \file game/config/hostconfiguration.hpp
+  *  \brief Class game::config::HostConfiguration
   */
 #ifndef C2NG_GAME_CONFIG_HOSTCONFIGURATION_HPP
 #define C2NG_GAME_CONFIG_HOSTCONFIGURATION_HPP
 
-#include "game/config/configuration.hpp"
+#include "afl/string/translator.hpp"
+#include "game/config/aliasoption.hpp"
 #include "game/config/collapsibleintegerarrayoption.hpp"
-#include "game/limits.hpp"
+#include "game/config/configuration.hpp"
+#include "game/config/costarrayoption.hpp"
 #include "game/config/integerarrayoption.hpp"
 #include "game/config/integeroption.hpp"
 #include "game/config/stringoption.hpp"
-#include "game/config/costarrayoption.hpp"
-#include "game/config/aliasoption.hpp"
+#include "game/limits.hpp"
 #include "game/playerset.hpp"
-#include "afl/string/translator.hpp"
 
 namespace game { namespace config {
 
+    /** Host Configuration.
+        Represents a superset of pconfig.src and HConfig.
+        All options from these sources can be stored.
+        Array options are represented as arrays.
+        Some options that are not originally arrays are represented as arrays here.
+        (From HConfig point-of-view, this applies to all options array-ized in PHost.)
+
+        It is derived from Configuration and can therefore store arbitrary key/value mappings:
+        mappings to known types preserve the types (i.e. PlayerRace is an array of integers, NumMinefields is an integer). */
     class HostConfiguration : public Configuration {
      public:
+        /** Standard option: an option that is indexed by a player number
+            but can be stored as a single scalar if per-player setting is not used. */
         typedef CollapsibleIntegerArrayOption<MAX_PLAYERS> StandardOption_t;
         typedef CollapsibleIntegerArrayOptionDescriptor<MAX_PLAYERS> StandardOptionDescriptor_t;
 
+        /** Experience option: an option that is indexed by an experience level. */
         typedef IntegerArrayOption<MAX_EXPERIENCE_LEVELS> ExperienceOption_t;
         typedef IntegerArrayOptionDescriptor<MAX_EXPERIENCE_LEVELS> ExperienceOptionDescriptor_t;
+
+        /*
+         *  Known Configuration Keys
+         *
+         *  The names correspond to pconfig.src keys, if applicable.
+         */
 
         static const IntegerOptionDescriptor              ConfigLevel;
         static const StandardOptionDescriptor_t           PlayerRace;
@@ -245,7 +264,7 @@ namespace game { namespace config {
         static const IntegerOptionDescriptor              AlternativeMinesDestroyMines;
         static const IntegerOptionDescriptor              NumShips;
         static const IntegerOptionDescriptor              ExtendedSensorSweep;
-        static const IntegerOptionDescriptor              ColonistCombatSurvivalRate;
+        static const StandardOptionDescriptor_t           ColonistCombatSurvivalRate;
         static const IntegerOptionDescriptor              NewNativesPerTurn;
         static const IntegerArrayOptionDescriptor<2>      NewNativesPopulationRange;
         static const IntegerArrayOptionDescriptor<9>      NewNativesRaceRate;
@@ -359,6 +378,8 @@ namespace game { namespace config {
         static const AliasOptionDescriptor                NativeGovFrequencies;
 
 
+        /** Default constructor.
+            Makes a configuration containing all values at defaults (see setDefaultValues()). */
         HostConfiguration();
 
         /** Assign default values to all options.
@@ -398,10 +419,15 @@ namespace game { namespace config {
             \param opt boolean option descriptor */
         PlayerSet_t getPlayersWhereEnabled(const StandardOptionDescriptor_t& opt) const;
 
-        /** Get set of all players where an option has a given value.
+        /** Get set of all players where an option has a given scalar value.
             \param opt descriptor of option to query
             \param value Value to check for */
         PlayerSet_t getPlayersWhere(const StandardOptionDescriptor_t& opt, int value) const;
+
+        /** Get set of all players where an option has a given cost value.
+            \param opt descriptor of option to query
+            \param value Value to check for */
+        PlayerSet_t getPlayersWhere(const CostArrayOptionDescriptor& opt, const game::spec::Cost& value) const;
     };
 
 } }

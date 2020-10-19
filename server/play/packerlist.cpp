@@ -1,5 +1,6 @@
 /**
   *  \file server/play/packerlist.cpp
+  *  \brief Class server::play::PackerList
   */
 
 #include <memory>

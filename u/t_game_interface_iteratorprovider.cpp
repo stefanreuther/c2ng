@@ -19,6 +19,8 @@ TestGameInterfaceIteratorProvider::testIt()
             { return 0; }
         virtual void store(interpreter::TagNode& /*out*/)
             { }
+        virtual game::Session& getSession()
+            { throw "boom"; }
         virtual String_t toString()
             { return String_t(); }
     };

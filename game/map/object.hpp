@@ -10,6 +10,7 @@
 #include "afl/base/types.hpp"
 #include "game/types.hpp"
 #include "game/interpreterinterface.hpp"
+#include "game/map/point.hpp"
 
 namespace game { namespace map {
 
@@ -70,6 +71,9 @@ namespace game { namespace map {
             \param result [out] Result
             \return true if owner is known */
         virtual bool getOwner(int& result) const = 0;
+
+        /** Get position in game universe. */
+        virtual bool getPosition(Point& result) const = 0;
 
 
         /*

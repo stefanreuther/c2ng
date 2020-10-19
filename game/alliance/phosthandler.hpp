@@ -1,5 +1,6 @@
 /**
   *  \file game/alliance/phosthandler.hpp
+  *  \brief Class game::alliance::PHostHandler
   */
 #ifndef C2NG_GAME_ALLIANCE_PHOSTHANDLER_HPP
 #define C2NG_GAME_ALLIANCE_PHOSTHANDLER_HPP
@@ -10,8 +11,19 @@
 
 namespace game { namespace alliance {
 
+    /** Implementation of Handler for Host.
+        Converts between alliances and
+        - game::v3::Command::AddDropAlly
+        - game::v3::Command::ConfigAlly
+        - game::v3::Command::Enemies
+        commands */
     class PHostHandler : public Handler {
      public:
+        /** Constructor.
+            \param version Version (used to determine available levels; see HostVersion::getVersion())
+            \param turn    Turn (used to obtain game::v3::CommandExtra)
+            \param session Session (used for Root > HostConfiguration)
+            \param player  Player */
         PHostHandler(int32_t version, Turn& turn, Session& session, int player);
         ~PHostHandler();
 

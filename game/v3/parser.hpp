@@ -11,7 +11,6 @@
 #include "game/game.hpp"
 #include "game/msg/inbox.hpp"
 #include "game/root.hpp"
-#include "game/session.hpp"
 #include "game/spec/shiplist.hpp"
 
 namespace game { namespace v3 {
@@ -30,9 +29,8 @@ namespace game { namespace v3 {
             \param game Game. Updates will be applied to its currentTurn().
             \param player Player number
             \param root Root (playerList(), hostConfiguration())
-            \param session Session (must have ship list) */
-        Parser(afl::string::Translator& tx, afl::sys::LogListener& log,
-               Game& game, int player, Root& root, Session& session);
+            \param shipList ship list (may update hull functions) */
+        Parser(afl::string::Translator& tx, afl::sys::LogListener& log, Game& game, int player, Root& root, game::spec::ShipList& shipList);
 
         /** Load util.dat file.
             \param in The util.dat file
@@ -42,7 +40,7 @@ namespace game { namespace v3 {
         /** Parse messages.
             \param in The msgparse.ini file
             \param inbox Loaded inbox */
-        void parseMessages(afl::io::Stream& in, game::msg::Inbox& inbox);
+        void parseMessages(afl::io::Stream& in, const game::msg::Inbox& inbox);
 
      private:
         class DataInterface;
@@ -52,7 +50,7 @@ namespace game { namespace v3 {
         Game& m_game;
         int m_player;
         Root& m_root;
-        Session& m_session;
+        game::spec::ShipList& m_shipList;
     };
 
 } }

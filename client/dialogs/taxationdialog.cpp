@@ -7,7 +7,8 @@
 #include "afl/base/deleter.hpp"
 #include "afl/string/format.hpp"
 #include "client/downlink.hpp"
-#include "client/proxy/taxationproxy.hpp"
+#include "client/widgets/helpwidget.hpp"
+#include "game/proxy/taxationproxy.hpp"
 #include "game/tables/happinesschangename.hpp"
 #include "ui/group.hpp"
 #include "ui/invisiblewidget.hpp"
@@ -24,7 +25,7 @@
 #include "ui/window.hpp"
 #include "util/unicodechars.hpp"
 
-using client::proxy::TaxationProxy;
+using game::proxy::TaxationProxy;
 using game::actions::TaxationAction;
 
 namespace {
@@ -75,7 +76,7 @@ namespace {
     class TaxationDialog {
      public:
         TaxationDialog(afl::string::Translator& tx, ui::Root& root, TaxationProxy& proxy);
-        bool run(const TaxationProxy::Status& initialStatus);
+        bool run(const TaxationProxy::Status& initialStatus, util::RequestSender<game::Session> gameSender);
         void update(const TaxationProxy::Status& st);
 
      private:
@@ -249,7 +250,7 @@ TaxationDialog::TaxationDialog(afl::string::Translator& tx, ui::Root& root, Taxa
 { }
 
 bool
-TaxationDialog::run(const TaxationProxy::Status& initialStatus)
+TaxationDialog::run(const TaxationProxy::Status& initialStatus, util::RequestSender<game::Session> gameSender)
 {
     // ex WTaxationDialog::init
     // VBox
@@ -284,11 +285,11 @@ TaxationDialog::run(const TaxationProxy::Status& initialStatus)
     // Buttons
     ui::EventLoop loop(m_root);
     ui::Group& g = del.addNew(new ui::Group(ui::layout::HBox::instance5));
+    ui::Widget& helpWidget = del.addNew(new client::widgets::HelpWidget(m_root, gameSender, "pcc2:taxes"));
     ui::widgets::Button& btnOK     = del.addNew(new ui::widgets::Button(m_translator("OK"),     util::Key_Return, m_root));
     ui::widgets::Button& btnCancel = del.addNew(new ui::widgets::Button(m_translator("Cancel"), util::Key_Escape, m_root));
     ui::widgets::Button& btnAuto   = del.addNew(new ui::widgets::Button(m_translator("Space - Auto Tax"), ' ', m_root));
     ui::widgets::Button& btnHelp   = del.addNew(new ui::widgets::Button(m_translator("Help"), 'h', m_root));
-    // FIXME: add(h.add(new WHelpWidget("pcc2:taxes")));
     // FIXME: port this:
     // if (host.isPHost()) {
     //     p_growth = &h.add(new WPlanetGrowthTile(planet));
@@ -307,11 +308,13 @@ TaxationDialog::run(const TaxationProxy::Status& initialStatus)
     win.add(g);
     win.add(it);
     win.add(del.addNew(new ui::widgets::Quit(m_root, loop)));
+    win.add(helpWidget);
     win.pack();
 
     btnOK.sig_fire.addNewClosure(loop.makeStop(1));
     btnCancel.sig_fire.addNewClosure(loop.makeStop(0));
     btnAuto.dispatchKeyTo(top);
+    btnHelp.dispatchKeyTo(helpWidget);
 
     m_root.centerWidget(win);
 
@@ -360,7 +363,7 @@ client::dialogs::doTaxationDialog(game::Id_t planetId,
 
     // Build dialog
     TaxationDialog dlg(tx, root, proxy);
-    if (dlg.run(st)) {
+    if (dlg.run(st, gameSender)) {
         proxy.commit();
     }
 }

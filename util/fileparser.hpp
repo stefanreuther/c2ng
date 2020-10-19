@@ -1,5 +1,6 @@
 /**
   *  \file util/fileparser.hpp
+  *  \brief Class util::FileParser
   */
 #ifndef C2NG_UTIL_FILEPARSER_HPP
 #define C2NG_UTIL_FILEPARSER_HPP

@@ -1,28 +1,14 @@
 /**
   *  \file game/map/explosion.cpp
-  *
-  *  PCC2 Comment:
-  *
-  *  In PCC2, explosions are a separate type. In PCC 1.x, they were
-  *  markers with a special tag. Implementing them as separate type
-  *  allows to attach regular information in a more meaningful way
-  *  than by recycling and abusing drawings. The disadvantage is that
-  *  we need to process two info sources when iterating over markers
-  *  and explosions. This will mainly become an issue when we want to
-  *  provide a uniform interface for scripts.
-  *
-  *  \todo make GExplosion and GExplosionContainer implement GObject
-  *  and GObjectType, respectively.
+  *  \brief Class game::map::Explosion
   */
 
 #include "game/map/explosion.hpp"
 #include "afl/string/format.hpp"
 
-// /** Create explosion.
-//     \param id  Explosion Id (NOT ship Id!), 0 if not known.
-//     \param pos Explosion position. */
 game::map::Explosion::Explosion(Id_t id, Point pos)
-    : m_id(id),
+    : Object(),
+      m_id(id),
       m_position(pos),
       m_shipName(),
       m_shipId(0)
@@ -31,7 +17,8 @@ game::map::Explosion::Explosion(Id_t id, Point pos)
 }
 
 game::map::Explosion::Explosion(const Explosion& ex)
-    : m_id(ex.m_id),
+    : Object(),
+      m_id(ex.m_id),
       m_position(ex.m_position),
       m_shipName(ex.m_shipName),
       m_shipId(ex.m_shipId)
@@ -39,17 +26,6 @@ game::map::Explosion::Explosion(const Explosion& ex)
 
 game::map::Explosion::~Explosion()
 { }
-
-// MapObject:
-// /** Get explosion position. */
-bool
-game::map::Explosion::getPosition(Point& result) const
-{
-    // ex GExplosion::getPos
-    result = m_position;
-    return true;
-}
-
 
 // Object:
 String_t
@@ -64,8 +40,6 @@ game::map::Explosion::getName(ObjectName /*which*/, afl::string::Translator& tx,
     }
 }
 
-// /** Get explosion Id. This is the sequence number of the explosion
-//     when dealing with Winplan RSTs. */
 game::Id_t
 game::map::Explosion::getId() const
 {
@@ -81,8 +55,14 @@ game::map::Explosion::getOwner(int& result) const
     return true;
 }
 
-// Explosion:
-// /** Get name of ship that exploded here. Empty if unknown. */
+bool
+game::map::Explosion::getPosition(Point& result) const
+{
+    // ex GExplosion::getPos
+    result = m_position;
+    return true;
+}
+
 String_t
 game::map::Explosion::getShipName() const
 {
@@ -90,7 +70,6 @@ game::map::Explosion::getShipName() const
     return m_shipName;
 }
 
-// /** Get Id of ship that exploded here. 0 if unknown. */
 game::Id_t
 game::map::Explosion::getShipId() const
 {
@@ -98,7 +77,6 @@ game::map::Explosion::getShipId() const
     return m_shipId;
 }
 
-// /** Set name of ship that exploded here. */
 void
 game::map::Explosion::setShipName(String_t name)
 {
@@ -109,7 +87,6 @@ game::map::Explosion::setShipName(String_t name)
     }
 }
 
-// /** Set Id of ship that exploded here. */
 void
 game::map::Explosion::setShipId(Id_t id)
 {
@@ -120,11 +97,6 @@ game::map::Explosion::setShipId(Id_t id)
     }
 }
 
-// /** Merge information of other explosion record. This tests whether
-//     these records potentially describe the same explosion and, if yes,
-//     merges them.
-//     \param other other explosion record
-//     \return true if merge successful */
 bool
 game::map::Explosion::merge(const Explosion& other)
 {
@@ -145,14 +117,9 @@ game::map::Explosion::merge(const Explosion& other)
         return false;
     }
 
-    /* If we have a name, the ship Ids must match. */
-    if (other.m_shipName.size()) {
-        if (m_shipId != other.m_shipId) {
-            return false;
-        }
-    } else {
-        if (m_shipId != 0 && other.m_shipId != 0 && m_shipId != other.m_shipId)
-            return false;
+    /* different Ids? */
+    if (m_shipId != 0 && other.m_shipId != 0 && m_shipId != other.m_shipId) {
+        return false;
     }
 
     /* ok, it will work. do it. */

@@ -4,8 +4,9 @@
   */
 
 #include "game/sim/ship.hpp"
-#include "game/spec/hullfunction.hpp"
 #include "afl/string/format.hpp"
+#include "game/sim/configuration.hpp"
+#include "game/spec/hullfunction.hpp"
 
 namespace {
     bool checkHullFunction(const game::sim::Ship& sh, const game::spec::ShipList& shipList, const game::config::HostConfiguration& config, int basicFunctionId)
@@ -80,7 +81,7 @@ game::sim::Ship::getHullType() const
 void
 game::sim::Ship::setHullType(int hullType, const game::spec::ShipList& shipList)
 {
-    // ex GSimShip::setHull
+    // ex GSimShip::setHull, ccsim.pas:MassOf (sort-of), ccsim.pas:SetHull
     if (hullType != m_hullType) {
         m_hullType = hullType;
         if (const game::spec::Hull* hull = shipList.hulls().get(hullType)) {
@@ -100,7 +101,7 @@ game::sim::Ship::setHullType(int hullType, const game::spec::ShipList& shipList)
                 m_ammo         = hull->getMaxCargo();
             } else if (hull->getMaxLaunchers() != 0) {
                 m_numLaunchers = hull->getMaxLaunchers();
-                if (m_numLaunchers != 0) {
+                if (m_torpedoType == 0) {
                     m_torpedoType = shipList.launchers().size();
                 }
                 m_numBays = 0;
@@ -325,8 +326,18 @@ bool
 game::sim::Ship::isMatchingShipList(const game::spec::ShipList& shipList) const
 {
     // ex GSimShip::isMatchingShipList
-    // FIXME: verify beam/torpedo types?
-    /* custom ships have full freedom */
+    /* verify equipment */
+    if (shipList.engines().get(getEngineType()) == 0) {
+        return false;
+    }
+    if (getNumBeams() > 0 && shipList.beams().get(getBeamType()) == 0) {
+        return false;
+    }
+    if (getNumLaunchers() > 0 && shipList.launchers().get(getTorpedoType()) == 0) {
+        return false;
+    }
+
+    /* custom ships have full freedom for hull attributes */
     if (isCustomShip()) {
         return true;
     }
@@ -360,9 +371,9 @@ game::sim::Ship::isMatchingShipList(const game::spec::ShipList& shipList) const
 
 // Check whether this ship has a specific hull function from the configuration.
 bool
-game::sim::Ship::hasImpliedAbility(Ability which, const game::spec::ShipList& shipList, const game::config::HostConfiguration& config) const
+game::sim::Ship::hasImpliedAbility(Ability which, const Configuration& opts, const game::spec::ShipList& shipList, const game::config::HostConfiguration& config) const
 {
-    // ex GSimShip::hasImpliedFunction
+    // ex GSimShip::hasImpliedFunction, ccsim.pas:SimHullDoes
     using game::spec::HullFunction;
     switch (which) {
      case PlanetImmunityAbility:
@@ -381,6 +392,9 @@ game::sim::Ship::hasImpliedAbility(Ability which, const game::spec::ShipList& sh
         return config.getPlayerRaceNumber(getOwner()) == 5;
 
      case DoubleBeamChargeAbility:
+        return opts.getMode() == Configuration::VcrNuHost
+            && config.getPlayerRaceNumber(getOwner()) == 4;
+
      case DoubleTorpedoChargeAbility:
      case ElusiveAbility:
      case SquadronAbility:
@@ -391,3 +405,11 @@ game::sim::Ship::hasImpliedAbility(Ability which, const game::spec::ShipList& sh
     return false;
 }
 
+
+// Check for primary enemy.
+bool
+game::sim::Ship::isPrimaryEnemy(int agg)
+{
+    return agg > 0
+        && agg != agg_NoFuel;
+}

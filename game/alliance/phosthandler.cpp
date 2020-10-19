@@ -1,5 +1,6 @@
 /**
   *  \file game/alliance/phosthandler.cpp
+  *  \brief Class game::alliance::PHostHandler
   */
 
 #include "game/alliance/phosthandler.hpp"
@@ -13,11 +14,11 @@
 #include "util/translation.hpp"
 
 using afl::string::charToLower;
+using game::alliance::Offer;
 using game::config::HostConfiguration;
 using game::v3::Command;
 using game::v3::CommandContainer;
 using game::v3::CommandExtra;
-using game::alliance::Offer;
 
 namespace {
     /* Player limit */
@@ -130,6 +131,7 @@ game::alliance::PHostHandler::init(Container& allies, afl::string::Translator& t
     // ex GPHostAllianceHandler::processVersion (sort-of)
     afl::base::Ptr<Root> root = m_session.getRoot();
     if (root.get() != 0) {
+        // FIXME: if CPEnableAllies is disabled, still show the allies in case they are preconfigured (same as PCC 1.1.21)
         if (root->hostConfiguration()[HostConfiguration::CPEnableAllies]()) {
             // Add the main alliance level
             allies.addLevel(Level(tx("Alliance offer"), MAIN_ID, Level::Flags_t(Level::IsOffer)));
@@ -144,10 +146,9 @@ game::alliance::PHostHandler::init(Container& allies, afl::string::Translator& t
             // Add the enemies, if supported by host
             allies.addLevel(Level(tx("Enemy"), ENEMY_ID, Level::Flags_t(Level::IsEnemy)));
         }
-    }   
+    }
 }
 
-// /** Postprocess after game loading: parse commands into internal state. */
 void
 game::alliance::PHostHandler::postprocess(Container& allies)
 {
@@ -164,14 +165,14 @@ game::alliance::PHostHandler::postprocess(Container& allies)
         for (CommandContainer::ConstIterator_t it = cc->begin(), e = cc->end(); it != e; ++it) {
             if (const Command* cmd = *it) {
                 switch (cmd->getCommand()) {
-                 case Command::phc_AddDropAlly:
+                 case Command::AddDropAlly:
                     // Id = player, Arg = "add" or "drop"
                     if (Offer* pOffer = allies.getMutableOffer(allies.find(MAIN_ID))) {
                         pOffer->newOffer.set(cmd->getId(), convertFromAddDrop(cmd->getArg()));
                     }
                     break;
 
-                 case Command::phc_ConfigAlly: {
+                 case Command::ConfigAlly: {
                     // Id = player, Arg = "+c -s ~m"
                     String_t arg = cmd->getArg();
                     do {
@@ -180,7 +181,7 @@ game::alliance::PHostHandler::postprocess(Container& allies)
                     break;
                  }
 
-                 case Command::phc_Enemies:
+                 case Command::Enemies:
                     // Id = player, Arg = "add" or "drop"
                     if (Offer* pOffer = allies.getMutableOffer(allies.find(ENEMY_ID))) {
                         pOffer->newOffer.set(cmd->getId(), convertFromAddDrop(cmd->getArg()));
@@ -195,7 +196,6 @@ game::alliance::PHostHandler::postprocess(Container& allies)
     }
 }
 
-// /** Process changes to alliance object: generate command messages. */
 void
 game::alliance::PHostHandler::handleChanges(const Container& allies)
 {
@@ -207,10 +207,10 @@ game::alliance::PHostHandler::handleChanges(const Container& allies)
             // Transmit main offer
             bool sendLevels = false;
             if (pMainOffer->oldOffer.get(i) != pMainOffer->newOffer.get(i)) {
-                cc.addCommand(Command::phc_AddDropAlly, i, convertToAddDrop(pMainOffer->newOffer.get(i)));
+                cc.addCommand(Command::AddDropAlly, i, convertToAddDrop(pMainOffer->newOffer.get(i)));
                 sendLevels = true;
             } else {
-                cc.removeCommand(Command::phc_AddDropAlly, i);
+                cc.removeCommand(Command::AddDropAlly, i);
             }
 
             // Transmit levels. We always send a complete level list if anything changes.
@@ -238,9 +238,9 @@ game::alliance::PHostHandler::handleChanges(const Container& allies)
                 }
             }
             if (sendLevels) {
-                cc.addCommand(Command::phc_ConfigAlly, i, levelStr);
+                cc.addCommand(Command::ConfigAlly, i, levelStr);
             } else {
-                cc.removeCommand(Command::phc_ConfigAlly, i);
+                cc.removeCommand(Command::ConfigAlly, i);
             }
         }
     }
@@ -250,9 +250,9 @@ game::alliance::PHostHandler::handleChanges(const Container& allies)
         CommandContainer& cc = CommandExtra::create(m_turn).create(m_player);
         for (int i = 1; i <= NUM_PLAYERS; ++i) {
             if (pEnemies->oldOffer.get(i) != pEnemies->newOffer.get(i)) {
-                cc.addCommand(Command::phc_Enemies, i, convertToAddDrop(pEnemies->newOffer.get(i)));
+                cc.addCommand(Command::Enemies, i, convertToAddDrop(pEnemies->newOffer.get(i)));
             } else {
-                cc.removeCommand(Command::phc_Enemies, i);
+                cc.removeCommand(Command::Enemies, i);
             }
         }
     }

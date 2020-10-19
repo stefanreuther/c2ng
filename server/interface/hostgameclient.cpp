@@ -74,14 +74,10 @@ server::interface::HostGameClient::getInfo(int32_t gameId)
 
 // GAMELIST [STATE state:HostGameState] [TYPE type:HostGameType] [USER user:UID] [VERBOSE|ID]
 void
-server::interface::HostGameClient::getInfos(afl::base::Optional<State> requiredState,
-                                            afl::base::Optional<Type> requiredType,
-                                            afl::base::Optional<String_t> requiredUser,
-                                            bool verbose,
-                                            std::vector<Info>& result)
+server::interface::HostGameClient::getInfos(const Filter& filter, bool verbose, std::vector<Info>& result)
 {
     Segment cmd;
-    buildGameListCommand(cmd, requiredState, requiredType, requiredUser);
+    buildGameListCommand(cmd, filter);
     if (verbose) {
         cmd.pushBackString("VERBOSE");
     }
@@ -93,13 +89,10 @@ server::interface::HostGameClient::getInfos(afl::base::Optional<State> requiredS
 }
 
 void
-server::interface::HostGameClient::getGames(afl::base::Optional<State> requiredState,
-                                            afl::base::Optional<Type> requiredType,
-                                            afl::base::Optional<String_t> requiredUser,
-                                            afl::data::IntegerList_t& result)
+server::interface::HostGameClient::getGames(const Filter& filter, afl::data::IntegerList_t& result)
 {
     Segment cmd;
-    buildGameListCommand(cmd, requiredState, requiredType, requiredUser);
+    buildGameListCommand(cmd, filter);
     cmd.pushBackString("ID");
     std::auto_ptr<Value_t> p(m_commandHandler.call(cmd));
     Access(p).toIntegerList(result);
@@ -405,22 +398,35 @@ server::interface::HostGameClient::unpackInfo(const Value_t* value)
 }
 
 void
-server::interface::HostGameClient::buildGameListCommand(afl::data::Segment& cmd,
-                                                        const afl::base::Optional<State>& requiredState,
-                                                        const afl::base::Optional<Type>& requiredType,
-                                                        const afl::base::Optional<String_t>& requiredUser)
+server::interface::HostGameClient::buildGameListCommand(afl::data::Segment& cmd, const Filter& filter)
 {
     cmd.pushBackString("GAMELIST");
-    if (const State* st = requiredState.get()) {
+    if (const State* st = filter.requiredState.get()) {
         cmd.pushBackString("STATE");
         cmd.pushBackString(formatState(*st));
     }
-    if (const Type* ty = requiredType.get()) {
+    if (const Type* ty = filter.requiredType.get()) {
         cmd.pushBackString("TYPE");
         cmd.pushBackString(formatType(*ty));
     }
-    if (const String_t* u = requiredUser.get()) {
+    if (const String_t* u = filter.requiredUser.get()) {
         cmd.pushBackString("USER");
         cmd.pushBackString(*u);
+    }
+    if (const String_t* s = filter.requiredHost.get()) {
+        cmd.pushBackString("HOST");
+        cmd.pushBackString(*s);
+    }
+    if (const String_t* s = filter.requiredTool.get()) {
+        cmd.pushBackString("TOOL");
+        cmd.pushBackString(*s);
+    }
+    if (const String_t* s = filter.requiredShipList.get()) {
+        cmd.pushBackString("SHIPLIST");
+        cmd.pushBackString(*s);
+    }
+    if (const String_t* s = filter.requiredMaster.get()) {
+        cmd.pushBackString("MASTER");
+        cmd.pushBackString(*s);
     }
 }

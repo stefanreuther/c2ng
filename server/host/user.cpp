@@ -54,3 +54,10 @@ server::host::User::gameReferenceCount(int32_t gameId)
 {
     return gameReferenceCounts().intField(afl::string::Format("%d", gameId));
 }
+
+// Access key store subtree.
+afl::net::redis::Subtree
+server::host::User::keyStore()
+{
+    return tree().subtree("key");
+}

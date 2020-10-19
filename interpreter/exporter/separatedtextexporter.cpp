@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/exporter/separatedtextexporter.cpp
+  *  \brief Class interpreter::exporter::SeparatedTextExporter
   *
   *  PCC2 comment:
   *

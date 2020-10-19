@@ -1,13 +1,14 @@
 /**
   *  \file game/stringverifier.hpp
+  *  \brief Base class game::StringVerifier
   */
 #ifndef C2NG_GAME_STRINGVERIFIER_HPP
 #define C2NG_GAME_STRINGVERIFIER_HPP
 
-#include "afl/base/deletable.hpp"
-#include "afl/string/string.hpp"
-#include "afl/charset/unicode.hpp"
 #include "afl/base/clonable.hpp"
+#include "afl/base/deletable.hpp"
+#include "afl/charset/unicode.hpp"
+#include "afl/string/string.hpp"
 
 namespace game {
 
@@ -53,20 +54,20 @@ namespace game {
         /** Test validity of a string.
             \param ctx Context
             \param text String to test */
-        virtual bool isValidString(Context ctx, const String_t& text) = 0;
+        virtual bool isValidString(Context ctx, const String_t& text) const = 0;
 
         /** Test validity of a character.
             \param ctx Context
             \param ch Character to test */
-        virtual bool isValidCharacter(Context ctx, afl::charset::Unichar_t ch) = 0;
+        virtual bool isValidCharacter(Context ctx, afl::charset::Unichar_t ch) const = 0;
 
         /** Get maximum possible string length.
             \param ctx Context
             \return Number of characters / UTF-8 runes (not bytes!) */
-        virtual size_t getMaxStringLength(Context ctx) = 0;
+        virtual size_t getMaxStringLength(Context ctx) const = 0;
 
      protected:
-        bool defaultIsValidString(Context ctx, const String_t& text);
+        bool defaultIsValidString(Context ctx, const String_t& text) const;
     };
 
 }

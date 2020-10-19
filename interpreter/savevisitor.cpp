@@ -59,7 +59,11 @@ namespace {
         // - convert infinities and overflows to max REAL
         // - convert underflows to 0.0
         // - convert NaNs to EMPTY (!)
-        // If anyone knows how to get rid of the conversion warning (g++ 4.9, glibc 2.19) at this place, go ahead...
+
+        // This line throws a conversion warning with g++ 4.9, glibc 2.19.
+        // Internally, isnan is defined as if-float-then-__isnanf-else__isnan,
+        // which makes the compiler see a double-to-float conversion even if it is not used.
+        // We could get out the big guns (#define __isnanf __isnan), but for now, just live with it.
         if (isnan(value)) {
             sv.tag   = sv.Tag_Empty;
             sv.value = 0;

@@ -158,7 +158,7 @@ game::vcr::classic::Database::load(afl::io::Stream& file,
                                    const game::config::HostConfiguration& config,
                                    afl::charset::Charset& charset)
 {
-    // ex GClassicVcrDatabase::load
+    // ex GClassicVcrDatabase::load, ccmain.pas:LoadVCRs, ccmain.pas:CheckCurrentVCRs
     game::v3::structures::Vcr rawVcr;
     game::v3::structures::Int16_t rawCount;
 
@@ -236,6 +236,8 @@ game::vcr::classic::Database::load(afl::io::Stream& file,
             (*i)->applyClassicLimits();
         }
     }
+
+    // FIXME: PCC1 checks VCR type against availability of pconfig.src, content against PlayerRace settings
 }
 
 game::vcr::classic::Battle*

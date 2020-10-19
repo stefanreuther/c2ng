@@ -19,7 +19,7 @@ namespace interpreter {
     class Context : public BaseValue {
      public:
         /** Index for a property. */
-        typedef uint32_t PropertyIndex_t;
+        typedef size_t PropertyIndex_t;
 
         /** Look up a symbol by its name.
             \param name [in] Name query

@@ -6,7 +6,7 @@
 #include "afl/base/countof.hpp"
 #include "afl/base/staticassert.hpp"
 #include "afl/string/format.hpp"
-#include "client/proxy/objectlistener.hpp"
+#include "game/proxy/objectlistener.hpp"
 #include "game/game.hpp"
 #include "game/map/chunnelmission.hpp"
 #include "game/map/ship.hpp"
@@ -22,6 +22,7 @@ using gfx::Rectangle;
 using ui::widgets::FrameGroup;
 using util::SkinColor;
 using game::spec::HullFunction;
+using game::map::ChunnelMission;
 
 namespace {
     enum {
@@ -39,6 +40,7 @@ namespace {
                          int eta)
     {
         // FIXME: similar function in ShipPredictor.
+        // FIXME: use Hull::getCloakFuelUsage, make separate function
         if (shipList.missions().isMissionCloaking(ship.getMission().orElse(0), ship.getRealOwner().orElse(0), config, host)
             && (ship.hasSpecialFunction(HullFunction::Cloak, scoreDefinitions, shipList, config)
                 || ship.hasSpecialFunction(HullFunction::HardenedCloak, scoreDefinitions, shipList, config))
@@ -69,7 +71,7 @@ namespace {
                         const game::spec::ShipList& shipList,
                         int eta)
     {
-        // FIXME: do we have this elsewhere?
+        // FIXME: use Hull::getTurnFuelUsage
         const game::spec::Hull* hull = shipList.hulls().get(ship.getHull().orElse(0));
         int fuel = (hull != 0
                     ? (int32_t(config[config.FuelUsagePerTurnFor100KT](ship.getRealOwner().orElse(0))) * hull->getMass() + 99) / 100
@@ -98,16 +100,16 @@ client::tiles::ShipMovementTile::ShipMovementTile(ui::Root& root, client::widget
       m_chartButton("A", 'a', root),
       m_queryButton("Q", 'q', root),
       m_fleetButton("F10", util::Key_F10, root),
-      m_fleetFrame(ui::layout::HBox::instance0, root.colorScheme(), FrameGroup::NoFrame),
+      m_fleetFrame(ui::layout::HBox::instance0, root.colorScheme(), ui::NoFrame),
       m_receiver(root.engine().dispatcher(), *this)
 {
     init(kmw);
 }
 
 void
-client::tiles::ShipMovementTile::attach(client::proxy::ObjectObserver& oop)
+client::tiles::ShipMovementTile::attach(game::proxy::ObjectObserver& oop)
 {
-    class Listener : public client::proxy::ObjectListener {
+    class Listener : public game::proxy::ObjectListener {
      public:
         Listener(util::RequestSender<ShipMovementTile> reply)
             : m_reply(reply)
@@ -132,12 +134,13 @@ client::tiles::ShipMovementTile::attach(client::proxy::ObjectObserver& oop)
                                                           root->registrationKey());
                     crystal_ball.computeMovement();
 
-                    game::map::ChunnelMission chd;
+                    ChunnelMission chd;
                     chd.check(*sh, g->currentTurn().universe(), g->shipScores(), *shipList, *root);
                     const bool is_chunnel = chd.getTargetId() != 0
                         && sh->getWaypointDX().orElse(0) == 0
                         && sh->getWaypointDY().orElse(0) == 0;
-                    const bool is_hyper = sh->isHyperdriving(g->shipScores(), *shipList, root->hostConfiguration());
+                    const bool is_training = sh->getMission().orElse(0) == root->hostConfiguration()[game::config::HostConfiguration::ExtMissionsStartAt]() + game::spec::Mission::pmsn_Training;
+                    const bool is_hyper = !is_training && sh->isHyperdriving(g->shipScores(), *shipList, root->hostConfiguration());
 
                     game::map::Point pos;
                     sh->getPosition(pos);
@@ -147,18 +150,21 @@ client::tiles::ShipMovementTile::attach(client::proxy::ObjectObserver& oop)
                                                                                                  game::map::Universe::NameGravity | game::map::Universe::NameVerbose,
                                                                                                  root->hostConfiguration(),
                                                                                                  root->hostVersion(),
-                                                                                                 s.translator(),
-                                                                                                 s.interface());
+                                                                                                 s.translator());
                     job->data.colors[Data::Location] = SkinColor::Green;
 
                     // Waypoint
-                    game::map::Ship* otherShip;
+                    game::map::Ship* otherShip = 0;
                     if (sh->getMission().orElse(0) == game::spec::Mission::msn_Intercept
                         && (otherShip = g->currentTurn().universe().ships().get(sh->getMissionParameter(game::InterceptParameter).orElse(0))) != 0)
                     {
-                        job->data.text[Data::Waypoint] = otherShip->getName(game::PlainName, s.translator(), s.interface());
+                        job->data.text[Data::Waypoint] = otherShip->getName();
+                        job->data.colors[Data::Waypoint] = SkinColor::Green;
                     } else if (is_chunnel && (otherShip = g->currentTurn().universe().ships().get(chd.getTargetId())) != 0) {
-                        job->data.text[Data::Waypoint] = afl::string::Format(tx("chunnel to %s"), otherShip->getName(game::PlainName, s.translator(), s.interface()));
+                        job->data.text[Data::Waypoint] = afl::string::Format(tx("chunnel to %s"), otherShip->getName());
+                        job->data.colors[Data::Waypoint] = (chd.getFailureReasons() & ~(ChunnelMission::chf_Fuel | ChunnelMission::chf_Distance)) != 0
+                            ? SkinColor::Yellow
+                            : SkinColor::Green;
                     } else {
                         game::map::Point wp;
                         sh->getWaypoint().get(wp);
@@ -166,10 +172,9 @@ client::tiles::ShipMovementTile::attach(client::proxy::ObjectObserver& oop)
                                                                                                      game::map::Universe::NameGravity | game::map::Universe::NameVerbose | game::map::Universe::NameShips,
                                                                                                      root->hostConfiguration(),
                                                                                                      root->hostVersion(),
-                                                                                                     s.translator(),
-                                                                                                     s.interface());
+                                                                                                     s.translator());
+                        job->data.colors[Data::Waypoint] = SkinColor::Green;
                     }
-                    job->data.colors[Data::Waypoint] = SkinColor::Green;
 
                     // Distance
                     double dist = util::getDistanceFromDX(sh->getWaypointDX().orElse(0), sh->getWaypointDY().orElse(0));
@@ -220,6 +225,9 @@ client::tiles::ShipMovementTile::attach(client::proxy::ObjectObserver& oop)
                     } else if (sh->getWarpFactor().orElse(0) == 0) {
                         job->data.text[Data::Eta] = tx("not moving");
                         job->data.colors[Data::Eta] = SkinColor::Red;
+                    } else if (is_training) {
+                        job->data.text[Data::Eta] = tx("training, won't move");
+                        job->data.colors[Data::Eta] = SkinColor::Red;
                     } else if (crystal_ball.isAtTurnLimit()) {
                         job->data.text[Data::Eta] = tx("too long");
                         job->data.colors[Data::Eta] = SkinColor::Green;
@@ -253,7 +261,9 @@ client::tiles::ShipMovementTile::attach(client::proxy::ObjectObserver& oop)
                         }
                     }
 
-                    if (move_fuel > have_fuel || (have_fuel == 0 && eta > 0 && !root->hostConfiguration()[game::config::HostConfiguration::AllowNoFuelMovement]())) {
+                    if (is_chunnel) {
+                        job->data.colors[Data::FuelUsage] = (chd.getFailureReasons() & ChunnelMission::chf_Fuel) != 0 ? SkinColor::Red : SkinColor::Green;
+                    } else if (move_fuel > have_fuel || (have_fuel == 0 && eta > 0 && !root->hostConfiguration()[game::config::HostConfiguration::AllowNoFuelMovement]())) {
                         job->data.colors[Data::FuelUsage] = SkinColor::Red;
                     } else if (crystal_ball.isAtTurnLimit() || move_fuel+cloak_fuel+turn_fuel > have_fuel) {
                         job->data.colors[Data::FuelUsage] = SkinColor::Yellow;
@@ -274,11 +284,11 @@ client::tiles::ShipMovementTile::attach(client::proxy::ObjectObserver& oop)
 
                     // Fleet status
                     if (sh->getFleetNumber() == 0) {
-                        job->data.fleetStatus = FrameGroup::NoFrame;
+                        job->data.fleetStatus = ui::NoFrame;
                     } else if (sh->isFleetLeader()) {
-                        job->data.fleetStatus = FrameGroup::GreenFrame;
+                        job->data.fleetStatus = ui::GreenFrame;
                     } else {
-                        job->data.fleetStatus = FrameGroup::RedFrame;
+                        job->data.fleetStatus = ui::RedFrame;
                     }
                 }
                 m_reply.postNewRequest(job.release());

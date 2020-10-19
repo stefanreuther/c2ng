@@ -5,7 +5,7 @@
 #include "client/tiles/shipscreenheadertile.hpp"
 #include "util/translation.hpp"
 #include "game/map/ship.hpp"
-#include "client/proxy/objectlistener.hpp"
+#include "game/proxy/objectlistener.hpp"
 #include "game/game.hpp"
 #include "game/root.hpp"
 #include "afl/string/format.hpp"
@@ -20,25 +20,25 @@ client::tiles::ShipScreenHeaderTile::ShipScreenHeaderTile(ui::Root& root, client
     // ex WShipScreenHeaderTile::WShipScreenHeaderTile
     switch (k) {
      case ShipScreen:
-        enableButton(btnAuto, FrameGroup::NoFrame);
-        enableButton(btnName, FrameGroup::NoFrame);
-        enableButton(btnAdd,  FrameGroup::NoFrame);
-        enableButton(btnTab,  FrameGroup::NoFrame);
+        enableButton(btnAuto, ui::NoFrame);
+        enableButton(btnName, ui::NoFrame);
+        enableButton(btnAdd,  ui::NoFrame);
+        enableButton(btnTab,  ui::NoFrame);
         break;
 
      case HistoryScreen:
-        enableButton(btnAdd,  FrameGroup::NoFrame);
-        enableButton(btnTab,  FrameGroup::NoFrame);
+        enableButton(btnAdd,  ui::NoFrame);
+        enableButton(btnTab,  ui::NoFrame);
         break;
 
      case ShipTaskScreen:
-        enableButton(btnCScr, FrameGroup::NoFrame);
+        enableButton(btnCScr, ui::NoFrame);
         break;
     }
 }
 
 void
-client::tiles::ShipScreenHeaderTile::attach(client::proxy::ObjectObserver& oop)
+client::tiles::ShipScreenHeaderTile::attach(game::proxy::ObjectObserver& oop)
 {
     class Job : public util::Request<ControlScreenHeader> {
      public:
@@ -92,7 +92,7 @@ client::tiles::ShipScreenHeaderTile::attach(client::proxy::ObjectObserver& oop)
             {
                 t.setText(txtHeading, m_name);
                 t.setText(txtSubtitle, m_subtitle);
-                t.enableButton(btnImage, m_marked ? FrameGroup::YellowFrame : FrameGroup::NoFrame);
+                t.enableButton(btnImage, m_marked ? ui::YellowFrame : ui::NoFrame);
                 t.setImage(m_image);
             }
      private:
@@ -101,7 +101,7 @@ client::tiles::ShipScreenHeaderTile::attach(client::proxy::ObjectObserver& oop)
         String_t m_image;
         bool m_marked;
     };
-    class Listener : public client::proxy::ObjectListener {
+    class Listener : public game::proxy::ObjectListener {
      public:
         Listener(util::RequestSender<ControlScreenHeader> reply)
             : m_reply(reply)

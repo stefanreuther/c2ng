@@ -6,7 +6,7 @@
 #include "gfx/context.hpp"
 #include "ui/draw.hpp"
 
-client::widgets::FriendlyCodeList::FriendlyCodeList(ui::Root& root, const game::data::FriendlyCodeList_t& list)
+client::widgets::FriendlyCodeList::FriendlyCodeList(ui::Root& root, const game::spec::FriendlyCodeList::Infos_t& list)
     : AbstractListbox(),
       m_root(root),
       m_list(list)
@@ -24,7 +24,7 @@ client::widgets::FriendlyCodeList::setFriendlyCode(const String_t& code)
     // without this special handling, because scrolling would always reset it to the first one.
     if (code != getFriendlyCode()) {
         for (size_t i = 0, n = m_list.size(); i < n; ++i) {
-            if (m_list[i].getCode() == code) {
+            if (m_list[i].code == code) {
                 setCurrentItem(i);
                 break;
             }
@@ -38,7 +38,7 @@ client::widgets::FriendlyCodeList::getFriendlyCode() const
     // ex WFCodeListbox::getFCode
     size_t i = getCurrentItem();
     if (i < m_list.size()) {
-        return m_list[i].getCode();
+        return m_list[i].code;
     } else {
         return String_t();
     }
@@ -85,8 +85,8 @@ client::widgets::FriendlyCodeList::drawItem(gfx::Canvas& can, gfx::Rectangle are
     ui::prepareColorListItem(ctx, area, state, m_root.colorScheme(), del);
     if (item < m_list.size()) {
         area.consumeX(5);
-        outTextF(ctx, area.splitX(ctx.getFont()->getEmWidth() * 3), m_list[item].getCode());
-        outTextF(ctx, area, m_list[item].getDescription());
+        outTextF(ctx, area.splitX(ctx.getFont()->getEmWidth() * 3), m_list[item].code);
+        outTextF(ctx, area, m_list[item].description);
     }
 }
 

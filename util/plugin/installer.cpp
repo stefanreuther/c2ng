@@ -74,7 +74,7 @@ util::plugin::Installer::~Installer()
 
 // Prepare installation.
 util::plugin::Plugin*
-util::plugin::Installer::prepareInstall(String_t fileName)
+util::plugin::Installer::prepareInstall(String_t fileName, afl::string::Translator& tx)
 {
     // ex PluginInstaller::prepareInstall
     // Reset
@@ -99,13 +99,13 @@ util::plugin::Installer::prepareInstall(String_t fileName)
         // *.res file with synthetic definition
         String_t pluginName = baseName.substr(0, baseName.size() - 4);
         apPlug.reset(new Plugin(afl::string::strUCase(pluginName)));
-        apPlug->initFromResourceFile(dirName, baseName);
+        apPlug->initFromResourceFile(dirName, baseName, tx);
         srcFile = 0;
     } else if (baseName.size() > 2 && afl::string::strCaseCompare(baseName.substr(baseName.size() - 2), ".q") == 0) {
         // *.q file with synthetic definition
         String_t pluginName = baseName.substr(0, baseName.size() - 2);
         apPlug.reset(new Plugin(afl::string::strUCase(pluginName)));
-        apPlug->initFromScriptFile(dirName, baseName, *srcFile);
+        apPlug->initFromScriptFile(dirName, baseName, *srcFile, tx);
         srcFile = 0;
     } else if (baseName.size() > 4
                && (afl::string::strCaseCompare(baseName.substr(baseName.size() - 4), ".zip") == 0
@@ -172,13 +172,13 @@ util::plugin::Installer::checkInstallPreconditions(afl::string::Translator& tx)
     }
 
     // Check for preconditions
-    Plugin::FeatureSet fset;
-    manager.enumFeatures(fset);
-    if (!plug.isSatisfied(fset)) {
+    Plugin::FeatureSet_t fset;
+    manager.enumProvidedFeatures(fset);
+    if (!plug.isSatisfiedBy(fset)) {
         String_t message = Format(tx.translateString("Plugin \"%s\" requires the following features:").c_str(), plug.getId());
-        Plugin::FeatureSet missing;
+        Plugin::FeatureSet_t missing;
         plug.enumMissingFeatures(fset, missing);
-        for (Plugin::FeatureSet::const_iterator it = missing.begin(), e = missing.end(); it != e; ++it) {
+        for (Plugin::FeatureSet_t::const_iterator it = missing.begin(), e = missing.end(); it != e; ++it) {
             message += "\n  ";
             message += it->first;
             if (!it->second.empty()) {
@@ -219,7 +219,7 @@ util::plugin::Installer::doInstall(bool dry)
         afl::base::Ref<afl::io::Directory> dir = dirEntry->openDirectory();
 
         // OK, do it
-        const Plugin::ItemList& items = apPlug->getItems();
+        const Plugin::ItemList_t& items = apPlug->getItems();
         for (size_t i = 0, n = items.size(); i != n; ++i) {
             const Plugin::Item& item = items[i];
             switch (item.type) {
@@ -292,7 +292,7 @@ util::plugin::Installer::doRemove(Plugin* pPlug, bool dry)
     try {
         // Remove the plugin directory content
         afl::base::Ref<afl::io::Directory> dir = m_fileSystem.openDirectory(apPlug->getBaseDirectory());
-        const Plugin::ItemList& items = apPlug->getItems();
+        const Plugin::ItemList_t& items = apPlug->getItems();
         for (size_t ii = 0, nn = items.size(); ii < nn; ++ii) {
             const Plugin::Item& item = items[ii];
             switch (item.type) {

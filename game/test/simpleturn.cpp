@@ -91,3 +91,24 @@ game::test::SimpleTurn::addPlanet(Id_t planetId, int owner, game::map::Object::P
     return *pPlanet;
 }
 
+game::map::Planet&
+game::test::SimpleTurn::addBase(Id_t planetId, int owner, game::map::Object::Playability playability)
+{
+    // Create planet
+    game::map::Planet& pl = addPlanet(planetId, owner, playability);
+
+    // Add base
+    game::map::BaseData d;
+    d.engineStorage.set(9, 0);
+    d.beamStorage.set(10, 0);
+    d.launcherStorage.set(10, 0);
+    d.torpedoStorage.set(10, 0);
+    d.hullStorage.set(20, 0);
+    pl.addCurrentBaseData(d, game::PlayerSet_t(owner));
+
+    // Update m_baseKind
+    afl::string::NullTranslator tx;
+    afl::sys::Log log;
+    pl.internalCheck(game::map::Configuration(), tx, log);
+    return pl;
+}

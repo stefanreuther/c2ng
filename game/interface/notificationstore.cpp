@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/notificationstore.cpp
+  *  \brief Class game::interface::NotificationStore
   *
   *  FIXME: for consideration in c2ng: like in PCC2, NotificationStore implements Mailbox.
   *  This necessitates that it permanently knows a ProcessList, and enlargens the interface.
@@ -9,6 +10,10 @@
   *  Every future call to resumeConfirmedProcesses() will resume that process,
   *  even if it has long proceeded, until the process generates a new message.
   *  This is normally harmless, but unnecessary and unexpected.
+  *  PCC1 tracks that more precisely (ms_Stopped, ms_Continue, ms_Continued, ms_Terminate).
+  *
+  *  FIXME: it seems we don't need the distinction between header and body;
+  *  it could be just a single long string.
   *
   *  Change to PCC2: our notifications live completely outside the interpreter function.
   *  In PCC2, processes have a pointer to their associated message.
@@ -32,26 +37,28 @@ struct game::interface::NotificationStore::Message {
         { }
 };
 
-
-
+// Constructor.
 game::interface::NotificationStore::NotificationStore(interpreter::ProcessList& processList)
     : Mailbox(), m_messages(), m_processList(processList)
 { }
 
+// Destructor.
 game::interface::NotificationStore::~NotificationStore()
 { }
 
+// Find message associated with a process.
 game::interface::NotificationStore::Message*
-game::interface::NotificationStore::findMessageByProcessId(uint32_t pid) const
+game::interface::NotificationStore::findMessageByProcessId(uint32_t processId) const
 {
     size_t index;
-    if (findMessage(ProcessAssociation_t(pid), index)) {
+    if (findMessage(ProcessAssociation_t(processId), index)) {
         return m_messages[index];
     } else {
         return 0;
     }
 }
 
+// Get message by index.
 game::interface::NotificationStore::Message*
 game::interface::NotificationStore::getMessageByIndex(size_t index) const
 {
@@ -63,7 +70,8 @@ game::interface::NotificationStore::getMessageByIndex(size_t index) const
     }
 }
 
-void
+// Add new message.
+game::interface::NotificationStore::Message*
 game::interface::NotificationStore::addMessage(ProcessAssociation_t assoc, String_t header, String_t body)
 {
     // ex IntNotificationMessageStore::addNewMessage (sort-of)
@@ -74,9 +82,10 @@ game::interface::NotificationStore::addMessage(ProcessAssociation_t assoc, Strin
     }
 
     // Add new one
-    m_messages.pushBackNew(new Message(assoc, header, body));
+    return m_messages.pushBackNew(new Message(assoc, header, body));
 }
 
+// Check whether message is confirmed.
 bool
 game::interface::NotificationStore::isMessageConfirmed(Message* msg) const
 {
@@ -85,6 +94,7 @@ game::interface::NotificationStore::isMessageConfirmed(Message* msg) const
         && msg->confirmed;
 }
 
+// Confirm a message.
 void
 game::interface::NotificationStore::confirmMessage(Message* msg, bool flag)
 {
@@ -94,6 +104,7 @@ game::interface::NotificationStore::confirmMessage(Message* msg, bool flag)
     }
 }
 
+// Remove orphaned messages.
 void
 game::interface::NotificationStore::removeOrphanedMessages()
 {
@@ -111,18 +122,21 @@ game::interface::NotificationStore::removeOrphanedMessages()
     m_messages.resize(out);
 }
 
-// /** Make all confirmed processes runnable. Only affects processes that are
-//     actually suspended. In particular, frozen processes are not changed. */
+// Resume processes associated with confirmed messages.
 void
 game::interface::NotificationStore::resumeConfirmedProcesses(uint32_t pgid)
 {
     // ex IntNotificationMessageStore::makeConfirmedProcessesRunnable
+    // ex ccexec.pas:ProcessNotifyMessages (sort-of)
+    // FIXME: PCC1 also allows a notification message to terminate the process (ms_Terminate)
     for (size_t i = 0, n = m_messages.size(); i < n; ++i) {
         uint32_t pid;
-        if (m_messages[i]->assoc.get(pid)) {
-            if (interpreter::Process* proc = m_processList.getProcessById(pid)) {
-                if (proc->getState() == interpreter::Process::Suspended) {
-                    m_processList.resumeProcess(*proc, pgid);
+        if (m_messages[i]->confirmed) {
+            if (m_messages[i]->assoc.get(pid)) {
+                if (interpreter::Process* proc = m_processList.getProcessById(pid)) {
+                    if (proc->getState() == interpreter::Process::Suspended) {
+                        m_processList.resumeProcess(*proc, pgid);
+                    }
                 }
             }
         }
@@ -130,14 +144,14 @@ game::interface::NotificationStore::resumeConfirmedProcesses(uint32_t pgid)
 }
 
 size_t
-game::interface::NotificationStore::getNumMessages()
+game::interface::NotificationStore::getNumMessages() const
 {
     // ex IntNotificationMessageStore::getNumMessages, IntNotificationMessageStore::getCount
     return m_messages.size();
 }
 
 String_t
-game::interface::NotificationStore::getMessageText(size_t index, afl::string::Translator& tx, const PlayerList& /*players*/)
+game::interface::NotificationStore::getMessageText(size_t index, afl::string::Translator& tx, const PlayerList& /*players*/) const
 {
     // ex IntNotificationMessageStore::getText, IntNotificationMessage::getText
     String_t result;
@@ -163,7 +177,7 @@ game::interface::NotificationStore::getMessageText(size_t index, afl::string::Tr
 }
 
 String_t
-game::interface::NotificationStore::getMessageHeading(size_t index, afl::string::Translator& /*tx*/, const PlayerList& /*players*/)
+game::interface::NotificationStore::getMessageHeading(size_t index, afl::string::Translator& /*tx*/, const PlayerList& /*players*/) const
 {
     // ex IntNotificationMessageStore::getHeading, IntNotificationMessage::getHeader
     String_t result;
@@ -182,15 +196,18 @@ game::interface::NotificationStore::getMessageHeading(size_t index, afl::string:
         }
 
         // Remove all angle brackets
-         while ((n = result.find_first_of("<>")) != String_t::npos) {
-             result.erase(n, 1);
-         }
+        while ((n = result.find_first_of("<>")) != String_t::npos) {
+            result.erase(n, 1);
+        }
+
+        // Remove whitespace
+        result = afl::string::strTrim(result);
     }
     return result;
 }
 
 int
-game::interface::NotificationStore::getMessageTurnNumber(size_t /*index*/)
+game::interface::NotificationStore::getMessageTurnNumber(size_t /*index*/) const
 {
     return 0;
 }
@@ -225,46 +242,4 @@ game::interface::NotificationStore::findMessage(ProcessAssociation_t assoc, size
 //         if (messages[i] == msg)
 //             return i;
 //     return nil;
-// }
-
-// FIXME: needed?
-// const string_t&
-// IntNotificationMessage::getBody() const
-// {
-//     return body;
-// }
-
-// FIXME: needed?
-// /** Remove this message. This deletes (invalidates) the
-//     IntNotificationMessage object. */
-// void
-// IntNotificationMessage::remove()
-// {
-//     store.removeMessageByIndex(store.getIndexOfMessage(this));
-// }
-
-// FIXME: needed?
-// /** Remove message, given an index. */
-// void
-// IntNotificationMessageStore::removeMessageByIndex(index_t idx)
-// {
-//     messages.erase(messages.begin() + idx);
-//     if (idx < getCurrent()) {
-//         setCurrent(getCurrent()-1);
-//     }
-//     sig_changed.raise();
-// }
-
-// FIXME: needed?
-// inline void
-// IntNotificationMessage::setAssociatedProcess(IntExecutionContext* process)
-// {
-//     associated_process = process;
-// }
-
-// FIXME: needed?
-// inline IntExecutionContext*
-// IntNotificationMessage::getAssociatedProcess() const
-// {
-//     return associated_process;
 // }

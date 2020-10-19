@@ -1,5 +1,6 @@
 /**
   *  \file util/process/nullfactory.cpp
+  *  \brief Class util::process::NullFactory
   */
 
 #include "util/process/nullfactory.hpp"

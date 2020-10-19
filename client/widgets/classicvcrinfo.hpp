@@ -18,12 +18,13 @@ namespace client { namespace widgets {
         enum Text {
             Heading,
             Type,
-            Result
+            Result,
+            Position
         };
 
         static const size_t NUM_UNITS = 2;
         static const size_t NUM_LINES_PER_UNIT = 4;
-        static const size_t NUM_TEXT_LINES = 3;
+        static const size_t NUM_TEXT_LINES = 4;
 
         struct Data {
             String_t text[NUM_TEXT_LINES];

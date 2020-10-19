@@ -50,14 +50,14 @@ game::msg::Inbox::~Inbox()
 
 // Mailbox:
 size_t
-game::msg::Inbox::getNumMessages()
+game::msg::Inbox::getNumMessages() const
 {
     // ex GInbox::getCount
     return m_messages.size();
 }
 
 String_t
-game::msg::Inbox::getMessageText(size_t index, afl::string::Translator& /*tx*/, const PlayerList& /*players*/)
+game::msg::Inbox::getMessageText(size_t index, afl::string::Translator& /*tx*/, const PlayerList& /*players*/) const
 {
     // ex GInbox::getText
     if (index < m_messages.size()) {
@@ -68,7 +68,7 @@ game::msg::Inbox::getMessageText(size_t index, afl::string::Translator& /*tx*/, 
 }
 
 String_t
-game::msg::Inbox::getMessageHeading(size_t index, afl::string::Translator& tx, const PlayerList& players)
+game::msg::Inbox::getMessageHeading(size_t index, afl::string::Translator& tx, const PlayerList& players) const
 {
     // ex GInbox::getHeading
     // This is the same algorithm as in PCC 1.x.
@@ -138,7 +138,7 @@ game::msg::Inbox::getMessageHeading(size_t index, afl::string::Translator& tx, c
 
 // Inquiry:
 int
-game::msg::Inbox::getMessageTurnNumber(size_t index)
+game::msg::Inbox::getMessageTurnNumber(size_t index) const
 {
     if (index < m_messages.size()) {
         return m_messages[index]->turnNumber;

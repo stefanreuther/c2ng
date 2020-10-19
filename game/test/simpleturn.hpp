@@ -73,6 +73,15 @@ namespace game { namespace test {
             \return Planet object */
         game::map::Planet& addPlanet(Id_t planetId, int owner, game::map::Object::Playability playability);
 
+
+        /** Add a starbase.
+            Same as addPlanet(), but will also add a starbase.
+            \param planetId     Planet Id
+            \param owner        Planet owner
+            \param playability  Desired playability
+            \return Planet object */
+        game::map::Planet& addBase(Id_t planetId, int owner, game::map::Object::Playability playability);
+
         /** Set hull for future ships.
             \param n Hull number */
         void setHull(int n)

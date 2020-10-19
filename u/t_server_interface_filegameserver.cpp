@@ -42,9 +42,9 @@ namespace {
                 checkCall(Format("getKeyInfo(%s)", path));
                 result = consumeReturnValue<KeyInfo>();
             }
-        void listKeyInfo(String_t path, afl::container::PtrVector<KeyInfo>& result)
+        void listKeyInfo(String_t path, const Filter& filter, afl::container::PtrVector<KeyInfo>& result)
             {
-                checkCall(Format("listKeyInfo(%s)", path));
+                checkCall(Format("listKeyInfo(%s,%s,%d)", path, filter.keyId.orElse("-"), int(filter.unique)));
                 size_t n = consumeReturnValue<size_t>();
                 while (n-- > 0) {
                     result.pushBackNew(consumeReturnValue<KeyInfo*>());
@@ -137,7 +137,7 @@ TestServerInterfaceFileGameServer::testIt()
         mock.checkFinish();
     }
 
-    // getKeyInfo
+    // getKeyInfo (classic)
     {
         FileGame::KeyInfo ki;
         ki.pathName = "a/k";
@@ -158,6 +158,37 @@ TestServerInterfaceFileGameServer::testIt()
         TS_ASSERT_EQUALS(a("reg").toInteger(), 1);
         TS_ASSERT_EQUALS(a("key1").toString(), "L1");
         TS_ASSERT_EQUALS(a("key2").toString(), "L2");
+        TS_ASSERT(a("useCount").isNull());
+        TS_ASSERT(a("id").isNull());
+
+        mock.checkFinish();
+    }
+
+    // getKeyInfo (full)
+    {
+        FileGame::KeyInfo ki;
+        ki.pathName = "a/k";
+        ki.fileName = "a/k/keyfile";
+        ki.isRegistered = true;
+        ki.label1 = "L1";
+        ki.label2 = "L2";
+        ki.useCount = 32;
+        ki.keyId = String_t("ididid");
+
+        mock.expectCall("getKeyInfo(a/k)");
+        mock.provideReturnValue<FileGame::KeyInfo>(ki);
+
+        std::auto_ptr<Value> p(testee.call(Segment().pushBackString("STATREG").pushBackString("a/k")));
+        TS_ASSERT(p.get() != 0);
+
+        Access a(p);
+        TS_ASSERT_EQUALS(a("path").toString(), "a/k");
+        TS_ASSERT_EQUALS(a("file").toString(), "a/k/keyfile");
+        TS_ASSERT_EQUALS(a("reg").toInteger(), 1);
+        TS_ASSERT_EQUALS(a("key1").toString(), "L1");
+        TS_ASSERT_EQUALS(a("key2").toString(), "L2");
+        TS_ASSERT_EQUALS(a("useCount").toInteger(), 32);
+        TS_ASSERT_EQUALS(a("id").toString(), "ididid");
 
         mock.checkFinish();
     }
@@ -182,7 +213,7 @@ TestServerInterfaceFileGameServer::testIt()
         ki->isRegistered = false;
         mock.provideReturnValue<FileGame::KeyInfo*>(ki.release());
 
-        mock.expectCall("listKeyInfo(r)");
+        mock.expectCall("listKeyInfo(r,-,0)");
 
         std::auto_ptr<Value> p(testee.call(Segment().pushBackString("LSREG").pushBackString("r")));
         TS_ASSERT(p.get() != 0);
@@ -199,8 +230,28 @@ TestServerInterfaceFileGameServer::testIt()
         mock.checkFinish();
     }
 
+    // listKeyInfo with options
+    {
+        mock.provideReturnValue<size_t>(0);
+        mock.expectCall("listKeyInfo(r,kid,0)");
+
+        std::auto_ptr<Value> p(testee.call(Segment().pushBackString("LSREG").pushBackString("r").pushBackString("ID").pushBackString("kid")));
+        TS_ASSERT(p.get() != 0);
+        mock.checkFinish();
+    }
+
+    // listKeyInfo with options
+    {
+        mock.provideReturnValue<size_t>(0);
+        mock.expectCall("listKeyInfo(r,-,1)");
+
+        std::auto_ptr<Value> p(testee.call(Segment().pushBackString("LSREG").pushBackString("r").pushBackString("UNIQ")));
+        TS_ASSERT(p.get() != 0);
+        mock.checkFinish();
+    }
+
     // Variants
-    mock.expectCall("listKeyInfo(zz)");
+    mock.expectCall("listKeyInfo(zz,-,0)");
     mock.provideReturnValue<size_t>(0);
     testee.callVoid(Segment().pushBackString("lsreg").pushBackString("zz"));
 }
@@ -217,6 +268,7 @@ TestServerInterfaceFileGameServer::testErrors()
     TS_ASSERT_THROWS(testee.callVoid(Segment().pushBackString("BADCMD")), std::exception);
     TS_ASSERT_THROWS(testee.callVoid(Segment().pushBackString("LSREG")), std::exception);
     TS_ASSERT_THROWS(testee.callVoid(Segment().pushBackString("LSREG").pushBackString("a").pushBackString("b")), std::exception);
+    TS_ASSERT_THROWS(testee.callVoid(Segment().pushBackString("LSREG").pushBackString("a").pushBackString("ID")), std::exception);
 
     // ComposableCommandHandler personality
     interpreter::Arguments args(empty, 0, 0);
@@ -292,7 +344,7 @@ TestServerInterfaceFileGameServer::testRoundtrip()
         mock.checkFinish();
     }
 
-    // getKeyInfo
+    // getKeyInfo (classic)
     {
         FileGame::KeyInfo ki;
         ki.pathName = "e/k";
@@ -311,6 +363,35 @@ TestServerInterfaceFileGameServer::testRoundtrip()
         TS_ASSERT_EQUALS(out.isRegistered, true);
         TS_ASSERT_EQUALS(out.label1, "e1");
         TS_ASSERT_EQUALS(out.label2, "e2");
+        TS_ASSERT(!out.useCount.isValid());
+        TS_ASSERT(!out.keyId.isValid());
+
+        mock.checkFinish();
+    }
+
+    // getKeyInfo (full)
+    {
+        FileGame::KeyInfo ki;
+        ki.pathName = "e/k";
+        ki.fileName = "e/k/keyfile";
+        ki.isRegistered = true;
+        ki.label1 = "e1";
+        ki.label2 = "e2";
+        ki.useCount = 44;
+        ki.keyId = "kid";
+
+        mock.expectCall("getKeyInfo(e/k)");
+        mock.provideReturnValue<FileGame::KeyInfo>(ki);
+
+        FileGame::KeyInfo out;
+        TS_ASSERT_THROWS_NOTHING(level4.getKeyInfo("e/k", out));
+        TS_ASSERT_EQUALS(out.pathName, "e/k");
+        TS_ASSERT_EQUALS(out.fileName, "e/k/keyfile");
+        TS_ASSERT_EQUALS(out.isRegistered, true);
+        TS_ASSERT_EQUALS(out.label1, "e1");
+        TS_ASSERT_EQUALS(out.label2, "e2");
+        TS_ASSERT_EQUALS(out.useCount.orElse(-1), 44);
+        TS_ASSERT_EQUALS(out.keyId.orElse(""), "kid");
 
         mock.checkFinish();
     }
@@ -330,10 +411,10 @@ TestServerInterfaceFileGameServer::testRoundtrip()
         ki->isRegistered = false;
         mock.provideReturnValue<FileGame::KeyInfo*>(ki.release());
 
-        mock.expectCall("listKeyInfo(r)");
+        mock.expectCall("listKeyInfo(r,-,0)");
 
         afl::container::PtrVector<FileGame::KeyInfo> out;
-        TS_ASSERT_THROWS_NOTHING(level4.listKeyInfo("r", out));
+        TS_ASSERT_THROWS_NOTHING(level4.listKeyInfo("r", FileGame::Filter(), out));
 
         TS_ASSERT_EQUALS(out.size(), 2U);
         TS_ASSERT(out[0] != 0);
@@ -343,6 +424,21 @@ TestServerInterfaceFileGameServer::testRoundtrip()
         TS_ASSERT_EQUALS(out[1]->pathName, "r/sw");
         TS_ASSERT_EQUALS(out[1]->isRegistered, false);
 
+        mock.checkFinish();
+    }
+
+    // listKeyInfo with options
+    {
+        mock.provideReturnValue<size_t>(0);
+        mock.expectCall("listKeyInfo(r,kkkk,1)");
+
+        FileGame::Filter f;
+        f.keyId = "kkkk";
+        f.unique = true;
+        afl::container::PtrVector<FileGame::KeyInfo> out;
+        TS_ASSERT_THROWS_NOTHING(level4.listKeyInfo("r", f, out));
+
+        TS_ASSERT_EQUALS(out.size(), 0U);
         mock.checkFinish();
     }
 }

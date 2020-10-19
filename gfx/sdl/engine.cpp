@@ -272,6 +272,7 @@ gfx::sdl::Engine::createWindow(const WindowParameters& param)
         throw GraphicsException(afl::string::Format(_("Error setting video mode: %s").c_str(), SDL_GetError()));
     }
     m_window = new Surface(sfc, false);
+    m_disableGrab = param.disableGrab;
 
     // Log it
     char driverName[100];

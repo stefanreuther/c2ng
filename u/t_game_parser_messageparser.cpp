@@ -636,3 +636,52 @@ TestGameParserMessageParser::testTimAllies()
     }
 }
 
+/** Test failure to provide Id. */
+#include <stdio.h>
+void
+TestGameParserMessageParser::testFailId()
+{
+    const char* FILE =
+        "ship,Fail\n"
+        "  check  = Ship Scanner\n"
+        "  parse  = Ship has $ fuel.\n"
+        "  assign = Total.N, Id\n"
+        "explosion,Fail\n"
+        "  check  = Explosion Scanner\n"
+        "  parse  = Name was $\n"
+        "  assign = Name, Id\n";
+    afl::string::NullTranslator tx;
+    afl::sys::Log log;
+    afl::io::ConstMemoryStream ms(afl::string::toBytes(FILE));
+
+    // Load
+    game::parser::MessageParser testee;
+    TS_ASSERT_THROWS_NOTHING(testee.load(ms, tx, log));
+    TS_ASSERT_EQUALS(testee.getNumTemplates(), 2U);
+    MockDataInterface ifc;
+
+    // Parse messages
+    // - Ship (mandatory Id), fails
+    {
+        afl::container::PtrVector<game::parser::MessageInformation> info;
+        TS_ASSERT_THROWS_NOTHING(testee.parseMessage("<<< Ship Scanner >>>\n"
+                                                     "Ship has 500 fuel.",
+                                                     ifc,
+                                                     30, info, tx, log));
+        TS_ASSERT(info.empty());
+    }
+
+    // - Explosion (optional Id), succeeds
+    {
+        afl::container::PtrVector<game::parser::MessageInformation> info;
+        TS_ASSERT_THROWS_NOTHING(testee.parseMessage("<<< Explosion Scanner >>>\n"
+                                                     "Name was FRED",
+                                                     ifc,
+                                                     30, info, tx, log));
+        TS_ASSERT_EQUALS(info.size(), 1U);
+        TS_ASSERT_EQUALS(info[0]->getObjectType(), game::parser::MessageInformation::Explosion);
+        TS_ASSERT_EQUALS(info[0]->getObjectId(), 0);
+        TS_ASSERT_EQUALS(getValue<game::parser::MessageStringValue_t>(*info[0], game::parser::ms_Name, "FRED"), "FRED");
+    }
+}
+

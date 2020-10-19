@@ -44,6 +44,11 @@ namespace game { namespace spec {
             \see setExplanation */
         void addToExplanation(const String_t& explanation);
 
+        /** Set picture name.
+            This is used to build resource names for showing this ability to the user.
+            \param name Name */
+        void setPictureName(const String_t& name);
+
         /** Set implied function Id.
             Each function can imply another one (usually a lesser version of it),
             meaning that a ship having both will perform only the better one, or, in other words,
@@ -67,6 +72,10 @@ namespace game { namespace spec {
             \return explanation, see setExplanation() */
         const String_t& getExplanation() const;
 
+        /** Get picture name.
+            \return picture name, see setPictureName() */
+        const String_t& getPictureName() const;
+
         /** Get implied function Id.
             \return implied function Id, -1 if none; see setImpliedFunctionId(). */
         int getImpliedFunctionId() const;
@@ -76,6 +85,7 @@ namespace game { namespace spec {
         String_t m_name;
         String_t m_description;
         String_t m_explanation;
+        String_t m_pictureName;
         int m_impliedFunctionId;
     };
 

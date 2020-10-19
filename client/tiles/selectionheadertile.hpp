@@ -7,7 +7,7 @@
 #include "ui/widget.hpp"
 #include "ui/root.hpp"
 #include "client/widgets/keymapwidget.hpp"
-#include "client/proxy/objectobserver.hpp"
+#include "game/proxy/objectobserver.hpp"
 #include "ui/widgets/button.hpp"
 
 namespace client { namespace tiles {
@@ -29,7 +29,7 @@ namespace client { namespace tiles {
         virtual bool handleMouse(gfx::Point pt, MouseButtons_t pressedButtons);
 
         void setStatus(String_t name, bool marked);
-        void attach(client::proxy::ObjectObserver& oop);
+        void attach(game::proxy::ObjectObserver& oop);
 
      private:
         ui::Root& m_root;

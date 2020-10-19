@@ -81,7 +81,7 @@ game::ref::List::addObjectsAt(game::map::Universe& univ, game::map::Point pt, Op
 
     // Handle planet
     if (options.contains(IncludePlanet)) {
-        if (Id_t pid = univ.getPlanetAt(pt)) {
+        if (Id_t pid = univ.findPlanetAt(pt)) {
             add(Reference(Reference::Planet, pid));
         }
     }

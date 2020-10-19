@@ -90,6 +90,9 @@ class TestUtilFileNamePattern : public CxxTest::TestSuite {
 class TestUtilFileParser : public CxxTest::TestSuite {
  public:
     void testInterface();
+    void testIt();
+    void testCharset();
+    void testTrimComments();
 };
 
 class TestUtilHelpIndex : public CxxTest::TestSuite {
@@ -109,6 +112,8 @@ class TestUtilIo : public CxxTest::TestSuite {
  public:
     void testStorePascalString();
     void testStorePascalStringTruncate();
+    void testLoadPascalString();
+    void testAppendExt();
 };
 
 class TestUtilKey : public CxxTest::TestSuite {
@@ -128,6 +133,8 @@ class TestUtilKeymap : public CxxTest::TestSuite {
  public:
     void testKeymap();
     void testChange();
+    void testDescribe();
+    void testDescribeMI();
 };
 
 class TestUtilKeymapTable : public CxxTest::TestSuite {
@@ -143,6 +150,7 @@ class TestUtilMath : public CxxTest::TestSuite {
     void testSquareInteger();
     void testRound();
     void testDistance();
+    void testSquareFloat();
 };
 
 class TestUtilMessageCollector : public CxxTest::TestSuite {
@@ -188,6 +196,14 @@ class TestUtilRandomNumberGenerator : public CxxTest::TestSuite {
     void testReset();
 };
 
+class TestUtilRange : public CxxTest::TestSuite {
+ public:
+    void testInit();
+    void testInclude();
+    void testIntersect();
+    void testOp();
+};
+
 class TestUtilRequest : public CxxTest::TestSuite {
  public:
     void testIt();
@@ -220,6 +236,11 @@ class TestUtilRunLengthExpandTransform : public CxxTest::TestSuite {
     void testBad();
 };
 
+class TestUtilSimpleRequestDispatcher : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
 class TestUtilSkinColor : public CxxTest::TestSuite {
  public:
     void testIt();
@@ -241,6 +262,11 @@ class TestUtilSlaveRequestSender : public CxxTest::TestSuite {
     void testCall();
 };
 
+class TestUtilStopSignal : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
 class TestUtilString : public CxxTest::TestSuite {
  public:
     void testStringMatch();
@@ -249,6 +275,9 @@ class TestUtilString : public CxxTest::TestSuite {
     void testFormatOptions();
     void testEncodeMimeHeader();
     void testParseBoolean();
+    void testFormatName();
+    void testEncodeHtml();
+    void testTrailing();
 };
 
 class TestUtilStringInstructionList : public CxxTest::TestSuite {
@@ -285,12 +314,6 @@ class TestUtilVector : public CxxTest::TestSuite {
  public:
     void testIt();
     void test1Based();
-};
-
-class TestUtilstring : public CxxTest::TestSuite {
- public:
-    void testFormatName();
-    void testEncodeHtml();
 };
 
 #endif

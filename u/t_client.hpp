@@ -12,9 +12,14 @@ class TestClientDownlink : public CxxTest::TestSuite {
     void testIt();
 };
 
-class TestClientObjectCursorFactory : public CxxTest::TestSuite {
+class TestClientPictureNamer : public CxxTest::TestSuite {
  public:
-    void testIt();
+    void testHull();
+    void testEngine();
+    void testBeam();
+    void testLauncher();
+    void testPlayer();
+    void testAbility();
 };
 
 #endif

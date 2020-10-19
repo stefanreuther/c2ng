@@ -160,7 +160,7 @@ game::db::FleetLoader::FleetLoader(afl::charset::Charset& cs)
 void
 game::db::FleetLoader::load(afl::io::Directory& dir, game::map::Universe& univ, int playerNumber)
 {
-    // ex game/fleet.cc:loadFleets
+    // ex game/fleet.cc:loadFleets, ccmain.pas:LoadFleets
     // Open file
     afl::base::Ptr<afl::io::Stream> s = dir.openFileNT(Format(FLEETFILE, playerNumber), afl::io::FileSystem::OpenRead);
     if (s.get() == 0) {

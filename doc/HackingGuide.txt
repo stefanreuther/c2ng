@@ -43,7 +43,7 @@ Status
   complete class has full doxygen documentation and a test suite.
 
   Wherever practical, functions contain a "// ex Class::fun" comment
-  referring to the PCC2 implementation of the same functionality.
+  referring to the PCC2/PCC1 implementation of the same functionality.
 
 
 
@@ -51,7 +51,7 @@ Building PCC2ng
 ===============
 
   Prerequisites:
-  - C++ compiler (around g++ 3.3 era)
+  - C++ compiler (post g++ 3.3 era, so anything should work today)
   - Perl
   - SDL 1.2 or SDL 2.0, matching SDL_image library
   - OpenSSL and zlib (OpenSSL not yet strictly required, but zlib is
@@ -63,6 +63,7 @@ Building PCC2ng
   - Windows (starting at 32-bit era, e.g. Win95b or later). Because
     c2ng includes network connectivity, you need to have the Winsock2
     update installed.
+
   These are old operating systems. c2ng (or rather, afl) includes code
   to deal with deficiencies of old systems (mostly, Win95 missing
   Unicode file operations and IPv6 support; old Linux using character
@@ -73,17 +74,39 @@ Building PCC2ng
 Building on Linux
 -----------------
 
+  For now, PCC2ng is using an experimental build system I accidentally
+  wrote when trying to write something else. The disadvantage is that
+  it is something new, the advantage is that it is small and takes the
+  place that was previously (in PCC2) taken by multiple other scripts.
+  Unlike PCC's previous build systems, it supports out-of-tree builds,
+  automatic worry-free dependencies, and generates fast makefiles.
+
+  Make a scratch directory and unpack the `afl`, `c2ng`,
+  `accidental-build`, and `cxxtest` archives next to each other.
+
   Build afl:
 
-    cd /path/to/afl
-    sh config.sh
-    make all test
+    mkdir afl-build
+    cd afl-build
+    /path/to/accidental-build/Make.pl IN=/path/to/afl prefix=result
+    make -r all test install
+
+  This will build afl inside `afl-build`, and produce a ready-made
+  tree (`include`, `lib` folders) in `afl-build/result`. The `-r`
+  option to `make` is optional and speeds up the process a little; add
+  a `-jX` option for parallel build according to your preference as
+  well.
 
   Build c2ng:
 
-    cd /path/to/c2ng
-    sh config.sh --with-afl=/path/to/afl
-    make all test
+    mkdir c2ng-build
+    cd c2ng-build
+    /path/to/accidental-build/Make.pl IN=/path/to/c2ng AFL_DIR=/path/to/afl-build/result prefix=result
+    make -r all test install
+
+  Again, this will build inside the directory and produce a ready-made
+  tree. The tree is fully relocatable; for example, you can copy it to
+  `/opt/c2ng` and it will find its resources from there.
 
   If SDL 1.2 is found, c2ng is built against that, because the SDL 1.x
   port is currently more mature. If you have SDL 1.2 and SDL 2
@@ -94,12 +117,14 @@ Building on Linux
 Building on Windows (mingw)
 ---------------------------
 
-  It's essentially the same as on Linux. Use `make -f Makefile.min`;
-  that Makefile knows you're building *.exe files.
+  The build process is the same as in Linux.
 
   Windows will not normally be able to execute uninstalled binaries,
   because it requires *.dll files in the same directory as the *.exe
-  files.
+  files. There is not yet an installation procedure that packs the
+  *.exe files together with the SDL DLLs.
+
+  As of 20201015, the testsuite will not succeed on Windows.
 
 
 
@@ -144,6 +169,7 @@ Threads
   - optional worker threads (e.g. multi-threaded simulator)
 
 
+
 Communication and Locking
 -------------------------
 
@@ -179,8 +205,24 @@ Communication and Locking
       slave object. Create a SlaveRequestSender and use that to
       communicate with the slave object.
 
+
+
+Communication and GUI
+---------------------
+
+  As mentioned above, PCC2ng uses a separate GUI thread. That one
+  cannot call into the game thread to obtain data which might be doing
+  expensive stuff. Waiting and unavailability of data needs to be
+  explicitly modelled, preferrably by displaying empty/loading
+  widgets, or by showing a "busy" indicator if needed. In particular,
+  - scrolling through a list must never block and should not build up
+    lag
+  - try hard to not swallow keys that were pressed while the GUI
+    thread was waiting for data (looking at you, Confluence!)
+
   A bunch of classes to implement these patterns is implemented in
-  client::proxy.
+  game::proxy.
+
 
 
 Data Structures
@@ -320,6 +362,12 @@ Graphics Primitives
   gfx::Context, which is a gfx::Canvas plus some high-level parameters
   ("line width", "color").
 
+  Because user code no longer sees SDL internals, most of it can (and
+  will) be built and some even unit-tested even if no graphics library
+  is available. In theory, we could even decide at runtime what GUI
+  library to use, but SDL and SDL2 cannot be linked into the same
+  binary at the same time because they export the same symbols.
+
 
 Pitfalls
 --------
@@ -360,6 +408,7 @@ Resources
   font loading just is too cumbersome.
 
 
+
 Source Code Structure
 =====================
 
@@ -370,7 +419,6 @@ Source Code Structure
   client         | guilib  | client source code
     dialogs      |         | dialogs
     map          |         | map renderer
-    proxy        |         | communication with game::Session
     screens      |         | control screens
     si           |         | script integration
     tiles        |         | tiles (=control screen widgets)
@@ -393,6 +441,7 @@ Source Code Structure
     nu           |         | planets.nu integration
     parser       |         | message parsing
     pcc          |         | PlanetsCentral.com integration
+    proxy        |         | communication with game::Session
     ref          |         | operations on game::Reference
     score        |         | score handling
     sim          |         | combat simulator
@@ -410,7 +459,7 @@ Source Code Structure
   ---------------+---------+---------------------------------------
   interpreter    | gamelib | script interpreter
   ---------------+---------+---------------------------------------
-  main           | source  | entry points for GUI applications
+  main           | source  | entry points (main functions)
   ---------------+---------+---------------------------------------
   server         | serverl.| PlanetsCentral microservices
     common       |         | common code
@@ -422,8 +471,6 @@ Source Code Structure
     resource     |         | ex "resource"
     server       |         | resources for servers
     specs        |         | ex "specs"
-  ---------------+---------+---------------------------------------
-  tools          | source  | command-line tool source code
   ---------------+---------+---------------------------------------
   u              | source  | unit tests
   ---------------+---------+---------------------------------------
@@ -440,21 +487,21 @@ Source Code Structure
 
   The source code has been structured such that a console program only
   needs to reference gamelib, but not guilib; gamelib components must
-  not depend on guilib components.
-
+  not depend on guilib components. gamelib should contain everything
+  required to build console programs (or GUIs using other GUI
+  toolkits).
 
 
 Makefiles
 ---------
 
-  The Makefile is generated from the stuff in P9/ by a Perl script. I
-  wrote that script when Makefile generators were not as abundand as
-  they are now. Its main objective is creating hierarchical projects
-  (libraries + executables) and makefiles for multiple toolchains with
-  little reliance on makefile magic.
+  The Makefile was previously generated from the stuff in P9/. It
+  remains there because I have my IDE integration for that, but is now
+  processed by the Rules.pl script; see the "Building PCC2ng" section.
 
-  This script is available from the same place as c2ng; changes to the
-  makefiles should be done in the input files instead.
+  To add or remove a source code file, add or remove it to the
+  corresponding variable in P9/Settings. The Makefiles in your build
+  directories will automatically regenerate.
 
 
 
@@ -479,6 +526,9 @@ Naming
   As per common convention, the directory name matches the namespace
   of a component, and the file name matches the class name, if any.
 
+  PCC2ng probably takes the one-class-per-file rule a little too
+  serious.
+
 
 General Style
 -------------
@@ -496,7 +546,7 @@ General Style
 
   Do not override a virtual method that your parent class already
   implemented. Corollary: do not implement a virtual method with the
-  intend of a descendant overriding it again. This makes it ambiguous
+  intent of a descendant overriding it again. This makes it ambiguous
   whether/when/how the descendant needs to call the inherited method.
   A signal typically is a better way to implement optional callouts.
   Default behaviour can be implemented in a method that the descendant
@@ -506,6 +556,9 @@ General Style
   (such as ui::layout::HBox::instance5), a global config file is not.
   Don't access other modules' globals when initializing yours (static
   initialisation order fiasco).
+
+  Keep names consistent. It's always `numItems`, never `itemCount`.
+  PCC2 was an ugly mess here.
 
   Use C++2003. Namespaces, templates, STL, and multiple inheritance
   are no longer rocket science as they were when PCC2 started. Staying
@@ -527,7 +580,29 @@ General Style
   function hand them to you.
 
   Design for testability. Most of the testability is actually already
-  obtained by following the "no globals" policy.
+  obtained by following the "no globals" policy. The other half is
+  obtained by dependency injection (have that FileSystem interface
+  passed to you instead of obtaining the global one).
+
+
+Testing
+-------
+
+  c2ng includes an extensive test suite and aims for significant
+  coverage. The goal is to have code in game/, interpreter/, server/,
+  util/ fully tested. Even gfx/, client/ and ui/ can be tested, but it
+  will sometimes get very complex.
+
+  The number of tests may seem excessive, but turns out to be useful
+  to validate derivative code. In particular, the JavaScript port
+  (c2web) re-uses large parts of the architecture and test cases of
+  c2ng.
+
+  In addition to the unit tests, there is a system testsuite
+  `c2systest` in a separate source code archive. That testsuite tests
+  complete binaries (microservices and utilities). In particular, it
+  was used to test c2ng implementations against earlier PCC2/PCC1
+  versions.
 
 
 
@@ -608,6 +683,21 @@ Debugging the Scripting Engine
 
   To dump object files or scriptX.cc files in a low-level format, use
   PCC2's 'scripts/c2vmdump.pl'.
+
+
+
+Command Line Options
+====================
+
+  The following command-line options are for debugging:
+
+  --log=<config> (most programs)
+    Configure logging. To show trace messages, use --log=*@Trace=show.
+
+  --debug-request-delay=<n> (c2ng)
+    Add an artifical delay between tasks processed by the game thread.
+    Use this to test whether the GUI remains responsive.
+
 
 
 Character Sets

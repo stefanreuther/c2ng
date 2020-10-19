@@ -40,3 +40,10 @@ game::spec::Weapon::setDamagePower(int damagePower)
     m_damagePower = damagePower;
 }
 
+// Check for death ray.
+bool
+game::spec::Weapon::isDeathRay(const HostVersion& host) const
+{
+    return host.hasDeathRays()
+        && getDamagePower() == 0;
+}

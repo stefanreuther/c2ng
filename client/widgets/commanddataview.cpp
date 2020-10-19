@@ -90,7 +90,7 @@ struct client::widgets::CommandDataView::Line {
     StaticTextPair textPair;
 
     Line(String_t title, util::Key_t key, ui::Root& root)
-        : frame(ui::layout::HBox::instance0, root.colorScheme(), ui::widgets::FrameGroup::NoFrame),
+        : frame(ui::layout::HBox::instance0, root.colorScheme(), ui::NoFrame),
           button(title, key, root),
           textPair(root.provider())
         {
@@ -165,7 +165,7 @@ client::widgets::CommandDataView::setText(util::Key_t key, bool left, const util
 }
 
 bool
-client::widgets::CommandDataView::setFrame(util::Key_t key, ui::widgets::FrameGroup::Type type)
+client::widgets::CommandDataView::setFrame(util::Key_t key, ui::FrameType type)
 {
     if (Line* p = findLine(key)) {
         p->frame.setType(type);

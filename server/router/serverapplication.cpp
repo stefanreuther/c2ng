@@ -78,6 +78,7 @@ server::router::ServerApplication::ServerApplication(afl::sys::Environment& env,
       m_interrupt(intr),
       m_factory(factory),
       m_generator(new server::common::NumericalIdGenerator()),
+      m_enableFileNotify(true),
       m_config()
 { }
 
@@ -87,11 +88,11 @@ server::router::ServerApplication::serverMain()
     // Connect to file server if requested
     server::interface::FileBase* pFileBase = 0;
     afl::base::Deleter del;
-    if (m_config.enableFileNotify && m_fileAddress.getName().empty()) {
+    if (m_enableFileNotify && m_fileAddress.getName().empty()) {
         log().write(afl::sys::LogListener::Warn, LOG_NAME, "FILE.HOST not set, disabling ROUTER.FILENOTIFY");
-        m_config.enableFileNotify = false;
+        m_enableFileNotify = false;
     }
-    if (m_config.enableFileNotify) {
+    if (m_enableFileNotify) {
         afl::net::CommandHandler& hdl = createClient(m_fileAddress, del, true);
         pFileBase = &del.addNew(new server::interface::FileBaseClient(hdl));
     }
@@ -189,7 +190,7 @@ server::router::ServerApplication::handleConfiguration(const String_t& key, cons
     } else if (key == "ROUTER.FILENOTIFY") {
         /* @q Router.FileNotify:Str (Config)
            If "y" or "1", the {SAVE (Router Command)|SAVE} command will notify the {File (Service)|file server}. */
-        if (!util::parseBooleanValue(value, m_config.enableFileNotify)) {
+        if (!util::parseBooleanValue(value, m_enableFileNotify)) {
             throw afl::except::CommandLineException(afl::string::Format("Invalid value for '%s'", key));
         }
         return true;

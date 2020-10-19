@@ -3,13 +3,13 @@
   */
 
 #include "server/file/gamestatus.hpp"
-#include "server/file/directoryitem.hpp"
-#include "game/v3/registrationkey.hpp"
-#include "afl/sys/log.hpp"
-#include "server/file/root.hpp"
 #include "afl/base/countof.hpp"
 #include "afl/string/format.hpp"
+#include "afl/sys/log.hpp"
+#include "game/v3/registrationkey.hpp"
+#include "server/file/directoryitem.hpp"
 #include "server/file/directorywrapper.hpp"
+#include "server/file/root.hpp"
 
 using afl::base::Ref;
 
@@ -57,6 +57,7 @@ server::file::GameStatus::load(Root& root, DirectoryItem& dir)
             k->isRegistered = (key.getStatus() == key.Registered);
             k->label1 = key.getLine(key.Line1);
             k->label2 = key.getLine(key.Line2);
+            k->keyId  = key.getKeyId();
 
             // Commit
             m_key = k;

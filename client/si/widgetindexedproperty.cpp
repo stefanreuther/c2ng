@@ -96,7 +96,7 @@ client::si::setWidgetProperty(WidgetIndexedProperty p, afl::data::Value* index, 
                 }
 
                 // Check value
-                FrameGroup::Type type;
+                ui::FrameType type;
                 if (valueString == "" || strCaseCompare(valueString, "hidden") == 0) {
                     csh->disableButton(btn);
                 } else if (parseFrameType(type, valueString)) {
@@ -120,7 +120,7 @@ client::si::setWidgetProperty(WidgetIndexedProperty p, afl::data::Value* index, 
                     throw interpreter::Error::rangeError();
                 }
 
-                FrameGroup::Type type;
+                ui::FrameType type;
                 bool ok;
                 if (valueString == "" || strCaseCompare(valueString, "hidden") == 0) {
                     ok = dv->disableButton(key);
@@ -145,7 +145,7 @@ client::si::setWidgetProperty(WidgetIndexedProperty p, afl::data::Value* index, 
             String_t valueString;
             if (checkStringArg(indexString, index) && checkStringArg(valueString, value)) {
                 util::Key_t key;
-                FrameGroup::Type type;
+                ui::FrameType type;
 
                 bool ok = util::parseKey(indexString, key)
                     && parseFrameType(type, valueString)

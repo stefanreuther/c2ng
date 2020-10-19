@@ -52,14 +52,12 @@ namespace game { namespace interface {
         \param tx        Translator.
         \param config    Host configuration (needed for limits, build orders)
         \param shipList  Ship list (needed for build orders)
-        \param iface     Interface to other properties.
         \param turn      Turn (needed for related units, namely: ships being repaired)
         \return property value */
     afl::data::Value* getBaseProperty(const game::map::Planet& pl, BaseProperty ibp,
                                       afl::string::Translator& tx,
                                       const game::config::HostConfiguration& config,
                                       afl::base::Ptr<const game::spec::ShipList> shipList,
-                                      InterpreterInterface& iface,
                                       afl::base::Ptr<Turn> turn);
     void              setBaseProperty(game::map::Planet& pl, BaseProperty ibp, afl::data::Value* value);
 

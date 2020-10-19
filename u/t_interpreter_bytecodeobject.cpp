@@ -10,6 +10,11 @@
 #include "afl/string/format.hpp"
 #include "afl/data/integervalue.hpp"
 #include "interpreter/error.hpp"
+#include "afl/io/nullfilesystem.hpp"
+#include "afl/sys/log.hpp"
+#include "interpreter/world.hpp"
+#include "interpreter/values.hpp"
+#include "interpreter/compilationcontext.hpp"
 
 /** Test getter/setters. */
 void
@@ -28,14 +33,27 @@ TestInterpreterBytecodeObject::testGet()
     TS_ASSERT(testee.isVarargs());
 
     // Name: default is empty
-    TS_ASSERT_EQUALS(testee.getName(), "");
-    testee.setName("HI");
-    TS_ASSERT_EQUALS(testee.getName(), "HI");
+    TS_ASSERT_EQUALS(testee.getSubroutineName(), "");
+    testee.setSubroutineName("HI");
+    TS_ASSERT_EQUALS(testee.getSubroutineName(), "HI");
+
+    // Origin: default is empty
+    TS_ASSERT_EQUALS(testee.getOrigin(), "");
+    testee.setOrigin("oh!");
+    TS_ASSERT_EQUALS(testee.getOrigin(), "oh!");
 
     // File name: default is empty
     TS_ASSERT_EQUALS(testee.getFileName(), "");
     testee.setFileName("test.q");
     TS_ASSERT_EQUALS(testee.getFileName(), "test.q");
+
+    // Arguments: default is none
+    TS_ASSERT_EQUALS(testee.getMinArgs(), 0U);
+    TS_ASSERT_EQUALS(testee.getMaxArgs(), 0U);
+    testee.setMinArgs(3);
+    testee.setMaxArgs(9);
+    TS_ASSERT_EQUALS(testee.getMinArgs(), 3U);
+    TS_ASSERT_EQUALS(testee.getMaxArgs(), 9U);
 }
 
 /** Test arguments. */
@@ -99,13 +117,16 @@ TestInterpreterBytecodeObject::testCopyLocalVariablesFrom()
     TS_ASSERT(x.hasLocalVariable("E"));
 
     // This copies! That is, we now have C twice.
-    TS_ASSERT_EQUALS(x.getLocalNames().getNumNames(), size_t(6));
-    TS_ASSERT_EQUALS(x.getLocalNames().getNameByIndex(0), "A");
-    TS_ASSERT_EQUALS(x.getLocalNames().getNameByIndex(1), "B");
-    TS_ASSERT_EQUALS(x.getLocalNames().getNameByIndex(2), "C");
-    TS_ASSERT_EQUALS(x.getLocalNames().getNameByIndex(3), "C");
-    TS_ASSERT_EQUALS(x.getLocalNames().getNameByIndex(4), "D");
-    TS_ASSERT_EQUALS(x.getLocalNames().getNameByIndex(5), "E");
+    TS_ASSERT_EQUALS(x.localVariables().getNumNames(), size_t(6));
+    TS_ASSERT_EQUALS(x.localVariables().getNameByIndex(0), "A");
+    TS_ASSERT_EQUALS(x.localVariables().getNameByIndex(1), "B");
+    TS_ASSERT_EQUALS(x.localVariables().getNameByIndex(2), "C");
+    TS_ASSERT_EQUALS(x.localVariables().getNameByIndex(3), "C");
+    TS_ASSERT_EQUALS(x.localVariables().getNameByIndex(4), "D");
+    TS_ASSERT_EQUALS(x.localVariables().getNameByIndex(5), "E");
+
+    // const vs. mutable
+    TS_ASSERT_EQUALS(&x.localVariables(), &const_cast<interpreter::BytecodeObject&>(x).localVariables());
 }
 
 /** Test labels. */
@@ -163,7 +184,11 @@ TestInterpreterBytecodeObject::testLiteral()
         }
     }
     TS_ASSERT_EQUALS(testee.getNumInstructions(), 1000U);
-    TS_ASSERT_EQUALS(testee.getLiterals().size(), 10U);
+    TS_ASSERT_EQUALS(testee.literals().size(), 10U);
+
+    // Check literals
+    TS_ASSERT(testee.getLiteral(0) != 0);
+    TS_ASSERT(dynamic_cast<afl::data::StringValue*>(testee.getLiteral(0)) != 0);
 }
 
 /** Test addPushLiteral() with integer literals. */
@@ -181,7 +206,7 @@ TestInterpreterBytecodeObject::testIntLiteral()
         }
     }
     TS_ASSERT_EQUALS(testee.getNumInstructions(), 1000U);
-    TS_ASSERT_EQUALS(testee.getLiterals().size(), 10U);
+    TS_ASSERT_EQUALS(testee.literals().size(), 10U);
 
     // Add 1000 small integer literals.
     // These should not affect the literal pool
@@ -190,7 +215,7 @@ TestInterpreterBytecodeObject::testIntLiteral()
         testee.addPushLiteral(&sv);
     }
     TS_ASSERT_EQUALS(testee.getNumInstructions(), 2000U);
-    TS_ASSERT_EQUALS(testee.getLiterals().size(), 10U);
+    TS_ASSERT_EQUALS(testee.literals().size(), 10U);
 }
 
 /** Test overflow in makeLabel(). */
@@ -232,14 +257,14 @@ TestInterpreterBytecodeObject::testAddNameOverflow()
     interpreter::BytecodeObject testee;
 
     // The limit is 65536, because valid name indexes are [0,65535].
-    TS_ASSERT_EQUALS(testee.getNames().getNumNames(), 0U);
+    TS_ASSERT_EQUALS(testee.names().getNumNames(), 0U);
     for (int32_t i = 0; i < 65536; ++i) {
         String_t name = afl::string::Format("NAME%d", i);
         TS_ASSERT(!testee.hasName(name));
         testee.addName(name);
         TS_ASSERT(testee.hasName(name));
     }
-    TS_ASSERT_EQUALS(testee.getNames().getNumNames(), 65536U);
+    TS_ASSERT_EQUALS(testee.names().getNumNames(), 65536U);
     TS_ASSERT_THROWS(testee.addName("FOO"), interpreter::Error);
 }
 
@@ -259,6 +284,9 @@ TestInterpreterBytecodeObject::testNames()
     TS_ASSERT(!testee.hasName("C"));
     TS_ASSERT_EQUALS(testee.getName(a), "A");
     TS_ASSERT_EQUALS(testee.getName(b), "B");
+
+    // const vs. mutable
+    TS_ASSERT_EQUALS(&testee.names(), &const_cast<interpreter::BytecodeObject&>(testee).names());
 }
 
 /** Test line number handling. */
@@ -292,7 +320,7 @@ TestInterpreterBytecodeObject::testLineNumbers()
     TS_ASSERT_EQUALS(testee.getLineNumber(100), 14U);
 
     // Check storage format
-    const std::vector<uint32_t>& rep = testee.getLineNumbers();
+    const std::vector<uint32_t>& rep = testee.lineNumbers();
     TS_ASSERT_EQUALS(rep.size(), 6U);
     TS_ASSERT_EQUALS(rep[0],  0U);
     TS_ASSERT_EQUALS(rep[1], 10U);
@@ -333,7 +361,7 @@ TestInterpreterBytecodeObject::testLineNumbers2()
     TS_ASSERT_EQUALS(testee.getLineNumber(100), 14U);
 
     // Check storage format
-    const std::vector<uint32_t>& rep = testee.getLineNumbers();
+    const std::vector<uint32_t>& rep = testee.lineNumbers();
     TS_ASSERT_EQUALS(rep.size(), 4U);
     TS_ASSERT_EQUALS(rep[0],  2U);
     TS_ASSERT_EQUALS(rep[1], 13U);
@@ -378,8 +406,8 @@ TestInterpreterBytecodeObject::testHasUserCall()
     // Some uncritical instructions
     {
         interpreter::BytecodeObject t;
-        t.addInstruction(Opcode::maSpecial, Opcode::miSpecialNewHash, 0); 
-        t.addInstruction(Opcode::maPush,    Opcode::sInteger, 3); 
+        t.addInstruction(Opcode::maSpecial, Opcode::miSpecialNewHash, 0);
+        t.addInstruction(Opcode::maPush,    Opcode::sInteger, 3);
         t.addInstruction(Opcode::maPop,     Opcode::sLocal, t.addLocalVariable("X"));
         TS_ASSERT(!t.hasUserCall());
     }
@@ -415,20 +443,245 @@ TestInterpreterBytecodeObject::testHasUserCall()
     }
 }
 
-// FIXME: Untested:
-// void     setMinArgs(size_t n);
-// void     setMaxArgs(size_t n);
+/** Test addVariableReferenceInstruction. */
+void
+TestInterpreterBytecodeObject::testVariableReference()
+{
+    using interpreter::CompilationContext;
+    using interpreter::Opcode;
 
-// void     addVariableReferenceInstruction(Opcode::Major major, const String_t& name, const CompilationContext& cc);
-// void     compact();
-// void     append(const BytecodeObject& other);
-// const Opcode& operator()(PC_t index) const;
-// String_t getDisassembly(PC_t index, const World& w) const;
-// afl::data::Value* getLiteral(uint16_t index) const;
-// const afl::data::NameMap& getLocalNames() const;  // FIXME: rename to getLocalVariableNames
-// afl::data::NameMap& getLocalNames()
-//     { return m_localNames; }
-// const afl::data::NameMap& getNames() const
-// afl::data::NameMap& getNames()
-// const afl::data::Segment& getLiterals() const
-// const std::vector<Opcode>& getCode() const
+    // Environment
+    afl::sys::Log log;
+    afl::io::NullFileSystem fs;
+    interpreter::World world(log, fs);
+    world.setNewGlobalValue("G", interpreter::makeIntegerValue(1));
+    world.setNewGlobalValue("S", interpreter::makeIntegerValue(2));
+
+    // Testee
+    interpreter::BytecodeObject testee;
+    testee.addLocalVariable("L");
+    testee.addLocalVariable("S");
+
+    // Add variable with freestanding context. This will generate a 'pushvar'.
+    CompilationContext freeContext(world);
+    testee.addVariableReferenceInstruction(Opcode::maPush, "L", freeContext);
+
+    // Add variable with local context. This will generate a 'pushloc'.
+    CompilationContext localContext(world);
+    localContext.withFlag(CompilationContext::LocalContext);
+    testee.addVariableReferenceInstruction(Opcode::maPush, "L", localContext);
+
+    // Add variable with local and global context. This will still generate a 'pushloc' due to shadowing.
+    CompilationContext globalContext(world);
+    globalContext.withFlag(CompilationContext::LocalContext);
+    globalContext.withFlag(CompilationContext::AlsoGlobalContext);
+    testee.addVariableReferenceInstruction(Opcode::maPush, "S", globalContext);
+
+    // Same thing, but this time we get the global
+    testee.addVariableReferenceInstruction(Opcode::maPush, "G", globalContext);
+
+    // Add variable with just global context. This has no effect, we still get 'pushvar'.
+    CompilationContext onlyGlobalContext(world);
+    onlyGlobalContext.withFlag(CompilationContext::AlsoGlobalContext);
+    testee.addVariableReferenceInstruction(Opcode::maPush, "S", onlyGlobalContext);
+
+    // Verify
+    TS_ASSERT_EQUALS(testee.getNumInstructions(), 5U);
+    TS_ASSERT_EQUALS(testee.code().size(), 5U);
+
+    for (size_t i = 0; i < 5; ++i) {
+        TS_ASSERT_EQUALS(testee(i).major, Opcode::maPush);
+        TS_ASSERT_EQUALS(const_cast<const interpreter::BytecodeObject&>(testee)(i).major, Opcode::maPush);
+    }
+
+    TS_ASSERT_EQUALS(testee(0).minor, Opcode::sNamedVariable);
+    TS_ASSERT_EQUALS(testee(1).minor, Opcode::sLocal);
+    TS_ASSERT_EQUALS(testee(2).minor, Opcode::sLocal);
+    TS_ASSERT_EQUALS(testee(3).minor, Opcode::sShared);
+    TS_ASSERT_EQUALS(testee(4).minor, Opcode::sNamedVariable);
+}
+
+/** Test compact(). */
+void
+TestInterpreterBytecodeObject::testCompact()
+{
+    using interpreter::Opcode;
+    interpreter::BytecodeObject testee;
+
+    // Generate some code
+    //  line 100:  insn
+    //             (dummy)
+    //             insn
+    //  line 200:  insn
+    //             (dummy)
+    //  line 300:  (dummy)
+    //             insn
+    testee.addLineNumber(100);
+    testee.addInstruction(Opcode::maSpecial, Opcode::miSpecialNewHash, 0);
+    testee.addInstruction(Opcode::maJump, Opcode::jLabel, 7);
+    testee.addInstruction(Opcode::maSpecial, Opcode::miSpecialNewHash, 0);
+    testee.addLineNumber(200);
+    testee.addInstruction(Opcode::maSpecial, Opcode::miSpecialNewHash, 0);
+    testee.addInstruction(Opcode::maJump, Opcode::jLabel, 7);
+    testee.addLineNumber(300);
+    testee.addInstruction(Opcode::maJump, Opcode::jLabel, 7);
+    testee.addInstruction(Opcode::maSpecial, Opcode::miSpecialNewHash, 0);
+
+    // Action
+    testee.compact();
+
+    // Verify
+    TS_ASSERT_EQUALS(testee.getNumInstructions(), 4U);
+    TS_ASSERT_EQUALS(testee.code().size(), 4U);
+    TS_ASSERT_EQUALS(testee.getLineNumber(0), 100U);
+    TS_ASSERT_EQUALS(testee.getLineNumber(1), 100U);
+    TS_ASSERT_EQUALS(testee.getLineNumber(2), 200U);
+    TS_ASSERT_EQUALS(testee.getLineNumber(3), 300U);
+    for (size_t i = 0; i < 4; ++i) {
+        TS_ASSERT_EQUALS(testee(i).major, Opcode::maSpecial);
+        TS_ASSERT_EQUALS(testee(i).minor, Opcode::miSpecialNewHash);
+    }
+}
+
+void
+TestInterpreterBytecodeObject::testAppend()
+{
+    using interpreter::Opcode;
+
+    // Set up copy target:
+    //   1 instruction
+    //   2 labels
+    //   1 name
+    //   2 locals
+    interpreter::BytecodeObject a;
+    a.addInstruction(Opcode::maPush, Opcode::sInteger, 1);
+    a.makeLabel(); a.makeLabel();
+    a.addName("HI");
+    a.addLocalVariable("L1");
+    a.addLocalVariable("L2");
+
+    // Set up copy source:
+    interpreter::BytecodeObject b;
+
+    // 1. pushvar (name copied)
+    b.addInstruction(Opcode::maPush, Opcode::sNamedVariable, b.addName("N"));
+
+    // 2. pushloc (local transformed)
+    b.addInstruction(Opcode::maPush, Opcode::sLocal, b.addLocalVariable("L2"));
+
+    // 3. pushlit (literal copied)
+    afl::data::StringValue sv("hi");
+    b.addPushLiteral(&sv);
+
+    // 4. pushint (copied)
+    b.addInstruction(Opcode::maPush, Opcode::sInteger, 444);
+
+    // 5. uzap (copied)
+    b.addInstruction(Opcode::maUnary, interpreter::unZap, 0);
+
+    // 6. symbolic label
+    b.addLabel(b.makeLabel());
+
+    // 7. absolute jump
+    b.addInstruction(Opcode::maJump, Opcode::jIfEmpty, 1);
+
+    // 8. loadmem (name copied)
+    b.addInstruction(Opcode::maMemref, Opcode::miIMLoad, b.addName("HI"));
+
+    // 9. snewhash (copied)
+    b.addInstruction(Opcode::maSpecial, Opcode::miSpecialNewHash, 0);
+
+    // 10. sdefshipp (name copied)
+    b.addInstruction(Opcode::maSpecial, Opcode::miSpecialDefShipProperty, b.addName("HO"));
+
+    // Do it
+    a.append(b);
+
+    // Verify
+    TS_ASSERT_EQUALS(a.getNumInstructions(), 11U);
+    TS_ASSERT_EQUALS(a.getNumLabels(), 3U);
+
+    TS_ASSERT_EQUALS(a(0).major, Opcode::maPush);
+    TS_ASSERT_EQUALS(a(0).minor, Opcode::sInteger);
+
+    TS_ASSERT_EQUALS(a(1).major, Opcode::maPush);
+    TS_ASSERT_EQUALS(a(1).minor, Opcode::sNamedVariable);
+    TS_ASSERT_EQUALS(a.getName(a(1).arg), "N");
+
+    TS_ASSERT_EQUALS(a(2).major, Opcode::maPush);
+    TS_ASSERT_EQUALS(a(2).minor, Opcode::sLocal);
+    TS_ASSERT_EQUALS(a.localVariables().getNameByIndex(a(2).arg), "L2");
+
+    TS_ASSERT_EQUALS(a(3).major, Opcode::maPush);
+    TS_ASSERT_EQUALS(a(3).minor, Opcode::sLiteral);
+    TS_ASSERT_EQUALS(interpreter::toString(a.literals().get(a(3).arg), false), "hi");
+
+    TS_ASSERT_EQUALS(a(4).major, Opcode::maPush);
+    TS_ASSERT_EQUALS(a(4).minor, Opcode::sInteger);
+    TS_ASSERT_EQUALS(a(4).arg, 444);
+
+    TS_ASSERT_EQUALS(a(5).major, Opcode::maUnary);
+    TS_ASSERT_EQUALS(a(5).minor, interpreter::unZap);
+
+    TS_ASSERT_EQUALS(a(6).major, Opcode::maJump);
+    TS_ASSERT_EQUALS(a(6).arg, b(5).arg + 2);         // offset 2 (labels)
+
+    TS_ASSERT_EQUALS(a(7).major, Opcode::maJump);
+    TS_ASSERT_EQUALS(a(7).arg, b(6).arg + 1);         // offset 1 (instructions)
+
+    TS_ASSERT_EQUALS(a(8).major, Opcode::maMemref);
+    TS_ASSERT_EQUALS(a(8).minor, Opcode::miIMLoad);
+    TS_ASSERT_EQUALS(a.getName(a(8).arg), "HI");
+
+    TS_ASSERT_EQUALS(a(9).major, Opcode::maSpecial);
+    TS_ASSERT_EQUALS(a(9).minor, Opcode::miSpecialNewHash);
+
+    TS_ASSERT_EQUALS(a(10).major, Opcode::maSpecial);
+    TS_ASSERT_EQUALS(a(10).minor, Opcode::miSpecialDefShipProperty);
+    TS_ASSERT_EQUALS(a.getName(a(10).arg), "HO");
+}
+
+void
+TestInterpreterBytecodeObject::testDisassembly()
+{
+    using interpreter::Opcode;
+
+    // Environment
+    afl::sys::Log log;
+    afl::io::NullFileSystem fs;
+    interpreter::World world(log, fs);
+    TS_ASSERT_EQUALS(world.globalPropertyNames().getIndexByName("A"), 0U);
+
+    // Set up testee
+    interpreter::BytecodeObject a;
+    TS_ASSERT_EQUALS(a.addLocalVariable("X"), 0U);
+    TS_ASSERT_EQUALS(a.addLocalVariable("Y"), 1U);
+
+    // 0. Literal
+    afl::data::StringValue sv("hi");
+    a.addPushLiteral(&sv);
+
+    // 1. Name
+    a.addInstruction(Opcode::maPush, Opcode::sNamedVariable, a.addName("N"));
+
+    // 2. Shared
+    a.addInstruction(Opcode::maPop, Opcode::sShared, 0);  // global 'A'
+
+    // 3. Local
+    a.addInstruction(Opcode::maPush, Opcode::sLocal, 1);  // local 'Y'
+
+    // 4. Negative integer
+    a.addInstruction(Opcode::maPush, Opcode::sInteger, uint16_t(-5));
+
+    // 5. Unsigned integer
+    a.addInstruction(Opcode::maSpecial, Opcode::miSpecialReturn, 3);
+
+    // Disassemble
+    TS_ASSERT_EQUALS(a.getDisassembly(0, world), "pushlit     0 <\"hi\">");
+    TS_ASSERT_EQUALS(a.getDisassembly(1, world), "pushvar     0 <N>");
+    TS_ASSERT_EQUALS(a.getDisassembly(2, world), "popglob     0 <A>");
+    TS_ASSERT_EQUALS(a.getDisassembly(3, world), "pushloc     1 <Y>");
+    TS_ASSERT_EQUALS(a.getDisassembly(4, world), "pushint     -5");
+    TS_ASSERT_EQUALS(a.getDisassembly(5, world), "sreturn     3");
+}
+

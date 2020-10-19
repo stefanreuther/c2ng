@@ -165,7 +165,7 @@ namespace {
         // Check user-defined properties
         afl::data::NameMap::Index_t ix = world.shipPropertyNames().getIndexByName(q);
         if (ix != afl::data::NameMap::nil) {
-            result = static_cast<interpreter::Context::PropertyIndex_t>(ix + NUM_SHIP_PROPERTIES);
+            result = ix + NUM_SHIP_PROPERTIES;
             return true;
         }
 

@@ -39,7 +39,7 @@ game::vcr::Overview::addBattle(Battle& b,
     b.prepareResult(config, shipList, Battle::NeedQuickOutcome);
 
     // Assimilate first object and obtain a group Id
-    Object* leftObject = b.getObject(0, false);
+    const Object* leftObject = b.getObject(0, false);
     if (leftObject == 0) {
         // Error: battle has no first object. Ignore.
         return;
@@ -58,7 +58,7 @@ game::vcr::Overview::addBattle(Battle& b,
 
     // Assimilate other objects
     for (size_t side = 1, n = b.getNumObjects(); side < n; ++side) {
-        if (Object* rightObject = b.getObject(side, false)) {
+        if (const Object* rightObject = b.getObject(side, false)) {
             std::vector<Item>::const_iterator rptr = findObject(*rightObject);
             if (rptr != lines.end()) {
                 // already known, rename into earlier group

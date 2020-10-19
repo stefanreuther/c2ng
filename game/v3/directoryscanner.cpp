@@ -40,6 +40,7 @@ namespace {
     int32_t parseHostVersion(const String_t& text, bool host)
     {
         // ex game/storage/overview.cc:parseHostVersion, readmsg.pas::ParseHostVersion
+        // FIXME: use util::StringParser?
         String_t::size_type pos = 0;
         while (pos < text.size() && (text[pos] == ' ' || text[pos] == 'v')) {
             ++pos;

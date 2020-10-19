@@ -1,21 +1,17 @@
 /**
   *  \file game/map/explosiontype.cpp
+  *  \brief Class game::map::ExplosionType
   */
 
 #include "game/map/explosiontype.hpp"
 
-game::map::ExplosionType::ExplosionType(Universe& univ)
-    : m_universe(univ),
-      m_explosions()
+game::map::ExplosionType::ExplosionType()
+    : m_explosions()
 { }
 
 game::map::ExplosionType::~ExplosionType()
 { }
 
-// /** Add explosion. If this explosion matches one we already know,
-//     merges the information.
-//     \param x Explosion to add
-//     \return reference to added/modified explosion record */
 void
 game::map::ExplosionType::add(const Explosion& ex)
 {
@@ -28,6 +24,30 @@ game::map::ExplosionType::add(const Explosion& ex)
     m_explosions.pushBackNew(new Explosion(ex));
 }
 
+void
+game::map::ExplosionType::addMessageInformation(const game::parser::MessageInformation& info)
+{
+    namespace gp = game::parser;
+    int32_t x, y;
+    if (info.getValue(gp::mi_X, x) && info.getValue(gp::mi_Y, y)) {
+        // Minimum values are X, Y.
+        Explosion e(info.getObjectId(), Point(x, y));
+
+        // Try to get ship information
+        int32_t shipId;
+        if (info.getValue(gp::mi_ExplodedShipId, shipId)) {
+            e.setShipId(shipId);
+        }
+        String_t shipName;
+        if (info.getValue(gp::ms_Name, shipName)) {
+            e.setShipName(shipName);
+        }
+
+        // Add
+        add(e);
+    }
+}
+
 // ObjectType:
 game::map::Explosion*
 game::map::ExplosionType::getObjectByIndex(Id_t index)
@@ -37,12 +57,6 @@ game::map::ExplosionType::getObjectByIndex(Id_t index)
     } else {
         return 0;
     }
-}
-
-game::map::Universe*
-game::map::ExplosionType::getUniverseByIndex(Id_t /*index*/)
-{
-    return &m_universe;
 }
 
 game::Id_t

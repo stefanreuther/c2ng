@@ -13,7 +13,6 @@
 #include "game/v3/registrationkey.hpp"
 #include "game/v3/structures.hpp"
 #include "util/string.hpp"
-#include "util/translation.hpp"
 
 namespace gt = game::v3::structures;
 
@@ -70,7 +69,8 @@ namespace {
                               const char* baseName,
                               const int player,
                               game::v3::TurnFile& turn,
-                              ObjectInfo& oi)
+                              ObjectInfo& oi,
+                              afl::string::Translator& tx)
     {
         T datBuffer, disBuffer;
 
@@ -84,7 +84,7 @@ namespace {
         disFile->fullRead(disCount.m_bytes);
         const int16_t count = datCount;
         if (count != disCount) {
-            throw afl::except::FileFormatException(*datFile, _("Object count mismatch"));
+            throw afl::except::FileFormatException(*datFile, tx("Object count mismatch"));
         }
 
         // Read and process content
@@ -94,7 +94,7 @@ namespace {
             const int datId = getId(datBuffer);
             const int disId = getId(disBuffer);
             if (datId != disId) {
-                throw afl::except::FileFormatException(*datFile, _("Object Id mismatch"));
+                throw afl::except::FileFormatException(*datFile, tx("Object Id mismatch"));
             }
             makeTurnCommands(turn, disBuffer, datBuffer);
             checkObject(oi, datBuffer);
@@ -134,7 +134,7 @@ namespace {
         \param s     [in] cmdX.txt file
         \param oi    [in] Object information gathered when generating commands, for THost allies
         \param log   [in/out] Logger */
-    void sendCommands(game::v3::TurnFile& turn, Stream& s, const ObjectInfo& oi, afl::sys::LogListener& log)
+    void sendCommands(game::v3::TurnFile& turn, Stream& s, const ObjectInfo& oi, afl::sys::LogListener& log, afl::string::Translator& tx)
     {
         // ex generateCommands
         afl::io::TextFile tf(s);
@@ -150,13 +150,13 @@ namespace {
                 if (util::stringMatch("$TIMEstamp", verb)) {
                     // check timestamp
                     if (afl::string::strNthWord(line, 1) != turn.getTimestamp().getTimestampAsString()) {
-                        log.write(afl::sys::LogListener::Warn, LOG_NAME, Format(_("File '%s' does not match current turn; skipping").c_str(), s.getName()));
+                        log.write(afl::sys::LogListener::Warn, LOG_NAME, Format(tx("File '%s' does not match current turn; skipping").c_str(), s.getName()));
                         break;
                     }
                 } else if (afl::string::strCaseCompare("$THOST-ALLIES", verb) == 0) {
                     // send THost alliances
                     if (oi.shipId == 0) {
-                        log.write(afl::sys::LogListener::Warn, LOG_NAME, Format(_("Player %d has no ship; alliance changes not transmitted").c_str(), turn.getPlayer()));
+                        log.write(afl::sys::LogListener::Warn, LOG_NAME, Format(tx("Player %d has no ship; alliance changes not transmitted").c_str(), turn.getPlayer()));
                     } else {
                         turn.sendTHostAllies(afl::string::strNthWordRest(line, 1), oi.shipId, afl::string::fromBytes(oi.friendlyCode));
                     }
@@ -218,9 +218,9 @@ game::v3::Maketurn::makeTurn(int playerNr, afl::sys::LogListener& log)
 
     // Generate bulk turn commands
     ObjectInfo oi = { 0, {0,0,0} };
-    generateTurnCommands<gt::Ship>  (m_directory, "ship",  playerNr, thisTurn, oi);
-    generateTurnCommands<gt::Planet>(m_directory, "pdata", playerNr, thisTurn, oi);
-    generateTurnCommands<gt::Base>  (m_directory, "bdata", playerNr, thisTurn, oi);
+    generateTurnCommands<gt::Ship>  (m_directory, "ship",  playerNr, thisTurn, oi, m_translator);
+    generateTurnCommands<gt::Planet>(m_directory, "pdata", playerNr, thisTurn, oi, m_translator);
+    generateTurnCommands<gt::Base>  (m_directory, "bdata", playerNr, thisTurn, oi, m_translator);
 
     // Messages
     {
@@ -239,7 +239,7 @@ game::v3::Maketurn::makeTurn(int playerNr, afl::sys::LogListener& log)
     {
         Ptr<Stream> s = m_directory.openFileNT(Format("cmd%d.txt", playerNr), FileSystem::OpenRead);
         if (s.get() != 0) {
-            sendCommands(thisTurn, *s, oi, log);
+            sendCommands(thisTurn, *s, oi, log, m_translator);
         }
     }
 

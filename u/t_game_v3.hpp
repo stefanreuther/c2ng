@@ -11,6 +11,11 @@ class TestGameV3Command : public CxxTest::TestSuite {
     void testCommands();
     void testMessageIntroducer();
     void testProto();
+    void testAffectedShip();
+    void testAffectedPlanet();
+    void testAffectedMinefield();
+    void testOrderConstraints();
+    void testGetCommandInfo();
 };
 
 class TestGameV3CommandContainer : public CxxTest::TestSuite {
@@ -18,11 +23,18 @@ class TestGameV3CommandContainer : public CxxTest::TestSuite {
     void testContainer();
     void testSequence();
     void testReplacePointer();
+    void testNonReplaceable();
+    void testLoadNormal();
+    void testLoadTimeMatch();
+    void testLoadTimeMismatch();
+    void testRemove();
+    void testRemoveByReference();
 };
 
 class TestGameV3CommandExtra : public CxxTest::TestSuite {
  public:
     void testEvents();
+    void testGet();
 };
 
 class TestGameV3ControlFile : public CxxTest::TestSuite {
@@ -37,9 +49,25 @@ class TestGameV3ControlFile : public CxxTest::TestSuite {
     void testRange();
 };
 
+class TestGameV3FizzFile : public CxxTest::TestSuite {
+ public:
+    void testMissing();
+    void testShort();
+    void testNormal();
+};
+
+class TestGameV3GenFile : public CxxTest::TestSuite {
+ public:
+    void testFile();
+    void testPassword();
+    void testResult();
+    void testScore();
+};
+
 class TestGameV3HConfig : public CxxTest::TestSuite {
  public:
     void testPack();
+    void testRoundtrip();
 };
 
 class TestGameV3Loader : public CxxTest::TestSuite {
@@ -71,6 +99,13 @@ class TestGameV3Packer : public CxxTest::TestSuite {
     void testUnpackBase();
 };
 
+class TestGameV3RegistrationKey : public CxxTest::TestSuite {
+ public:
+    void testInit();
+    void testFileRoundtrip();
+    void testBufferRoundtrip();
+};
+
 class TestGameV3ResultFile : public CxxTest::TestSuite {
  public:
     void test30();
@@ -97,6 +132,11 @@ class TestGameV3ResultLoader : public CxxTest::TestSuite {
 class TestGameV3Reverter : public CxxTest::TestSuite {
  public:
     void testGetPreviousFriendlyCode();
+    void testShipMission();
+    void testMinBuildings();
+    void testLocation();
+    void testLocationEmpty();
+    void testLocationHalf();
 };
 
 class TestGameV3StringVerifier : public CxxTest::TestSuite {
@@ -104,6 +144,7 @@ class TestGameV3StringVerifier : public CxxTest::TestSuite {
     void testMain();
     void testFCode();
     void testMessage();
+    void testClone();
 };
 
 class TestGameV3Structures : public CxxTest::TestSuite {

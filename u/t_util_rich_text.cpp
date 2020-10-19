@@ -272,5 +272,14 @@ TestUtilRichText::testStringOps()
     TS_ASSERT_EQUALS(t.getText(), "");
     TS_ASSERT_EQUALS(t.getNumAttributes(), 0U);
     TS_ASSERT(t.empty());
+
+    // Append
+    t += "a";
+    TS_ASSERT_EQUALS(t.getText(), "a");
+    TS_ASSERT_EQUALS(t.getNumAttributes(), 0U);
+
+    t += String_t("b");
+    TS_ASSERT_EQUALS(t.getText(), "ab");
+    TS_ASSERT_EQUALS(t.getNumAttributes(), 0U);
 }
 

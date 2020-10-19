@@ -6,35 +6,23 @@
 #include <algorithm>
 #include "game/spec/cost.hpp"
 #include "game/cargospec.hpp"
+#include "afl/base/countof.hpp"
 
-// static string_t formatCost(GCost c)
-// {
-//     string_t result;
-//     static const GCargoType order[] = { el_Money, el_Supplies, el_Tritanium, el_Duranium, el_Molybdenum };
-//     const char* labels[] = { _("mc"), _("sup"), "T", "D", "M" };
-//     for (size_t i = 0; i < countof(order); ++i) {
-//         int32_t n = c.get(order[i]);
-//         if (n != 0) {
-//             if (!result.empty()) {
-//                 result += ", ";
-//             }
-//             result += numToString(n);
-//             result += " ";
-//             result += labels[i];
-//             for (size_t j = i+1; j < countof(order); ++j) {
-//                 if (c.get(order[j]) == n) {
-//                     c.set(order[j], 0);
-//                     result += "/";
-//                     result += labels[j];
-//                 }
-//             }
-//         }
-//     }
-//     if (result.empty()) {
-//         result = "-";
-//     }
-//     return result;
-// }
+namespace {
+    String_t getLabel(game::spec::Cost::Type ty, afl::string::Translator& tx)
+    {
+        using game::spec::Cost;
+        switch (ty) {
+         case Cost::Money: return tx("mc");
+         case Cost::Supplies: return tx("sup");
+         case Cost::Tritanium: return "T";
+         case Cost::Duranium: return "D";
+         case Cost::Molybdenum: return "M";
+        }
+        return String_t();
+    }
+}
+
 
 // Constructor.
 game::spec::Cost::Cost()
@@ -103,6 +91,25 @@ game::spec::Cost::operator*(int32_t n) const
     return result;
 }
 
+// Divide in-place.
+game::spec::Cost&
+game::spec::Cost::operator/=(int32_t n)
+{
+    for (size_t i = 0; i < LIMIT; ++i) {
+        m_amounts[i] /= n;
+    }
+    return *this;
+}
+
+// Divide.
+game::spec::Cost
+game::spec::Cost::operator/(int32_t n) const
+{
+    Cost result(*this);
+    result /= n;
+    return result;
+}
+
 // Compare for equality.
 bool
 game::spec::Cost::operator==(const Cost& other) const
@@ -136,6 +143,38 @@ String_t
 game::spec::Cost::toCargoSpecString() const
 {
     return CargoSpec(*this).toCargoSpecString();
+}
+
+// Format to friendly human-readable string.
+String_t
+game::spec::Cost::format(afl::string::Translator& tx, util::NumberFormatter& fmt) const
+{
+    // ex formatCost(GCost c)
+    String_t result;
+    static const Type order[] = { Money, Supplies, Tritanium, Duranium, Molybdenum };
+    Cost c(*this);
+    for (size_t i = 0; i < countof(order); ++i) {
+        int32_t n = c.get(order[i]);
+        if (n != 0) {
+            if (!result.empty()) {
+                result += ", ";
+            }
+            result += fmt.formatNumber(n);
+            result += " ";
+            result += getLabel(order[i], tx);
+            for (size_t j = i+1; j < countof(order); ++j) {
+                if (c.get(order[j]) == n) {
+                    c.set(order[j], 0);
+                    result += "/";
+                    result += getLabel(order[j], tx);
+                }
+            }
+        }
+    }
+    if (result.empty()) {
+        result = "-";
+    }
+    return result;
 }
 
 // Limit amount of items to build.

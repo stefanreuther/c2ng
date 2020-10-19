@@ -1,5 +1,6 @@
 /**
   *  \file server/interface/filegameserver.cpp
+  *  \brief Class server::interface::FileGameServer
   */
 
 #include <stdexcept>
@@ -72,15 +73,35 @@ server::interface::FileGameServer::handleCommand(const String_t& upcasedCommand,
         result.reset(packKeyInfo(gi));
         return true;
     } else if (upcasedCommand == "LSREG") {
-        /* @q LSREG dir:FileName (File Command)
+        /* @q LSREG dir:FileName [UNIQ] [ID id:Str] (File Command)
            List registrations, recursively.
+
+           With option UNIQ, list only unique entries (but include use count).
+           With option ID, list only entries matching the given key Id.
+           Both options supported since 2.40.9.
+
            @err 404 Not found (directory does not exist)
            @err 403 Forbidden (insufficient permissions)
            @err 400 Bad request (invalid file name)
            @retval FileRegInfo[] All registrations in this directory and its subdirectories. */
-        args.checkArgumentCount(1);
+        args.checkArgumentCountAtLeast(1);
+
+        FileGame::Filter filter;
+        String_t dirName = toString(args.getNext());
+        while (args.getNumArgs() != 0) {
+            String_t key = afl::string::strUCase(toString(args.getNext()));
+            if (key == "UNIQ") {
+                filter.unique = true;
+            } else if (key == "ID") {
+                args.checkArgumentCountAtLeast(1);
+                filter.keyId = toString(args.getNext());
+            } else {
+                throw std::runtime_error(INVALID_OPTION);
+            }
+        }
+
         afl::container::PtrVector<FileGame::KeyInfo> gis;
-        m_implementation.listKeyInfo(toString(args.getNext()), gis);
+        m_implementation.listKeyInfo(dirName, filter, gis);
 
         Vector::Ref_t vec = Vector::create();
         for (size_t i = 0, n = gis.size(); i < n; ++i) {
@@ -150,12 +171,20 @@ server::interface::FileGameServer::packKeyInfo(const FileGame::KeyInfo& info)
        @key file:FileName  (registration key file name)
        @key reg:Int        (0=unregistered, 1=registered)
        @key key1:Str       (registration key first line)
-       @key key2:Str       (registration key second line) */
+       @key key2:Str       (registration key second line)
+       @key useCount:Int   (optional; number of uses, set with LSREG...UNIQ; since 2.40.9)
+       @key id:Str         (optional; key Id; since 2.40.9) */
     Hash::Ref_t h = Hash::create();
     h->setNew("path", makeStringValue(info.pathName));
     h->setNew("file", makeStringValue(info.fileName));
     h->setNew("reg",  makeIntegerValue(info.isRegistered));
     h->setNew("key1", makeStringValue(info.label1));
     h->setNew("key2", makeStringValue(info.label2));
+    if (const int32_t* p = info.useCount.get()) {
+        h->setNew("useCount", makeIntegerValue(*p));
+    }
+    if (const String_t* p = info.keyId.get()) {
+        h->setNew("id", makeStringValue(*p));
+    }
     return new HashValue(h);
 }

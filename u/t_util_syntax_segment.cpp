@@ -58,3 +58,16 @@ TestUtilSyntaxSegment::testStartFinish()
     TS_ASSERT_EQUALS(testee.getLink(), "");
     TS_ASSERT_EQUALS(testee.getInfo(), "");
 }
+
+/** Test initialisation. */
+void
+TestUtilSyntaxSegment::testInit()
+{
+    // Verify state after construction
+    util::syntax::Segment testee(util::syntax::KeywordFormat, afl::string::toMemory("do"));
+    TS_ASSERT_EQUALS(testee.getFormat(), util::syntax::KeywordFormat);
+    TS_ASSERT_EQUALS(afl::string::fromMemory(testee.getText()), "do");
+    TS_ASSERT_EQUALS(testee.getLink(), "");
+    TS_ASSERT_EQUALS(testee.getInfo(), "");
+}
+

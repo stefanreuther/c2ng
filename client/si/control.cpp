@@ -8,6 +8,7 @@
 #include "afl/string/format.hpp"
 #include "client/si/commandtask.hpp"
 #include "interpreter/values.hpp"
+#include "game/interface/referencecontext.hpp"
 
 using afl::sys::LogListener;
 using afl::string::Format;
@@ -80,6 +81,43 @@ client::si::Control::executeKeyCommandWait(String_t keymapName, util::Key_t key,
     std::auto_ptr<ScriptTask> t(new Task(keymapName, key, prefix, ctxp));
     executeTaskInternal(t, Format("executeKeyCommandWait('%s')", util::formatKey(key)));
 }
+
+void
+client::si::Control::executeGoToReference(String_t taskName, game::Reference ref)
+{
+    class ReferenceTask : public client::si::ScriptTask {
+     public:
+        ReferenceTask(String_t taskName, game::Reference ref)
+            : m_taskName(taskName), m_ref(ref)
+            { }
+        virtual void execute(uint32_t pgid, game::Session& session)
+            {
+                // Create BCO
+                interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
+                game::interface::ReferenceContext ctx(m_ref, session);
+                bco->setSubroutineName(m_taskName);
+                bco->setIsProcedure(true);
+                bco->addPushLiteral(&ctx);
+                bco->addInstruction(interpreter::Opcode::maPush, interpreter::Opcode::sNamedShared, bco->addName("UI.GOTOREFERENCE"));
+                bco->addInstruction(interpreter::Opcode::maIndirect, interpreter::Opcode::miIMCall, 1);
+
+                // Create process
+                interpreter::ProcessList& processList = session.processList();
+                interpreter::Process& proc = processList.create(session.world(), m_taskName);
+                proc.pushFrame(bco, false);
+                processList.resumeProcess(proc, pgid);
+            }
+     private:
+        String_t m_taskName;
+        game::Reference m_ref;
+    };
+
+    if (ref.isSet()) {
+        std::auto_ptr<client::si::ScriptTask> t(new ReferenceTask(taskName, ref));
+        executeTaskWait(t);
+    }
+}
+
 
 void
 client::si::Control::executeTaskWait(std::auto_ptr<ScriptTask> task)

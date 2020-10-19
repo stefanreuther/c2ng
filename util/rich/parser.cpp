@@ -203,7 +203,6 @@ util::rich::Parser::parseTextItem(bool keepFormat)
         return parseText(keepFormat);
     } else {
         /* Completely unknown, skip it */
-        readNext();
         return Text();
     }
 }

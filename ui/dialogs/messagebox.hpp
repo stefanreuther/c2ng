@@ -41,6 +41,9 @@ namespace ui { namespace dialogs {
             \param root UI root */
         MessageBox(util::rich::Text text, String_t title, Root& root);
 
+        /** Destructor. */
+        ~MessageBox();
+
         /** Add a button.
             \param id Result identifier. This will be the return value of run() if this button is chosen.
             \param text Button text

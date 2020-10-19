@@ -1,5 +1,6 @@
 /**
   *  \file game/authcache.cpp
+  *  \brief Class game::AuthCache
   */
 
 #include "game/authcache.hpp"

@@ -1,0 +1,27 @@
+/*!
+     \namespace game::proxy
+     \brief Game proxies
+
+     This namespace contains proxies that bridge the gap between the game thread and a possible UI thread.
+     They are now written without any knowledge of the UI technology.
+
+     We distinguish three types of proxies:
+
+     - synchronous, two-way proxy: you call a method on the proxy. On return, you have a result.
+       Since calls into the game thread may block, this will have to suspend the UI,
+       and requires the caller to provide a WaitIndicator object.
+       Typical uses include configuration inquiries that can affect the UI flow.
+       Synchronous proxies can be short-lived.
+
+     - asynchronous, two-way proxy: calling a method on the proxy will schedule a callback.
+       The callback will be executed in the UI thread.
+       Typical uses include simple game data inquiries (i.e. "we can copy the whole object data out").
+
+     - asynchronous, one-way proxy: calling a method on the proxy will schedule a callback in the game thread.
+       It's the caller's responsibility to bounce that callback back.
+       Typical uses include complex game data inquiries (i.e. "we cannot copy the whole object data out").
+
+     Proxies of any kind must only be used during event dispatch, not during redraw.
+     Operations that involve the user browing through a list, moving through a map, or typing things,
+     must not use synchronous proxies.
+ */

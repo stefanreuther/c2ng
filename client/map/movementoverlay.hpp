@@ -5,12 +5,12 @@
 #define C2NG_CLIENT_MAP_MOVEMENTOVERLAY_HPP
 
 #include "afl/base/signal.hpp"
+#include "afl/bits/smallset.hpp"
 #include "client/map/overlay.hpp"
 #include "game/map/point.hpp"
+#include "game/proxy/lockproxy.hpp"
 #include "game/session.hpp"
 #include "util/requestsender.hpp"
-#include "client/proxy/lockproxy.hpp"
-#include "afl/bits/smallset.hpp"
 
 namespace client { namespace map {
 
@@ -53,7 +53,7 @@ namespace client { namespace map {
 
      private:
         util::RequestSender<game::Session> m_gameSender;
-        client::proxy::LockProxy m_lockProxy;
+        game::proxy::LockProxy m_lockProxy;
         Modes_t m_modes;
 
         bool m_valid;

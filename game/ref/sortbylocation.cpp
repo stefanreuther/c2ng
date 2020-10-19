@@ -40,7 +40,8 @@ game::ref::SortByLocation::getClass(const Reference& a) const
 bool
 game::ref::SortByLocation::getLocation(const Reference& a, game::map::Point& out) const
 {
-    const game::map::MapObject* mo = dynamic_cast<const game::map::MapObject*>(m_universe.getObject(a));
+    // FIXME: handle reference-to-position
+    const game::map::Object* mo = m_universe.getObject(a);
     if (mo != 0) {
         return mo->getPosition(out);
     } else {

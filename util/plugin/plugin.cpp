@@ -1,11 +1,11 @@
 /**
   *  \file util/plugin/plugin.cpp
+  *  \brief Class util::plugin::Plugin
   */
 
 #include "util/plugin/plugin.hpp"
-#include "afl/string/string.hpp"
-#include "util/translation.hpp"
 #include "afl/io/textfile.hpp"
+#include "afl/string/string.hpp"
 #include "util/configurationfileparser.hpp"
 
 namespace {
@@ -26,7 +26,7 @@ namespace {
         return ok;
     }
 
-    void addVersion(util::plugin::Plugin::FeatureSet& out, String_t comp)
+    void addVersion(util::plugin::Plugin::FeatureSet_t& out, String_t comp)
     {
         String_t::size_type n = comp.find_first_of(" \t");
         String_t version;
@@ -35,7 +35,7 @@ namespace {
             comp.erase(n);
         }
         comp = afl::string::strUCase(comp);
-        util::plugin::Plugin::FeatureSet::iterator it = out.find(comp);
+        util::plugin::Plugin::FeatureSet_t::iterator it = out.find(comp);
         if (it != out.end()) {
             // Someone did "required = foo 1.0, foo 2.0". This is stupid.
             // Turn it into "required = foo 2.0".
@@ -47,7 +47,7 @@ namespace {
         }
     }
 
-    void addVersions(util::plugin::Plugin::FeatureSet& out, String_t in)
+    void addVersions(util::plugin::Plugin::FeatureSet_t& out, String_t in)
     {
         String_t::size_type n = 0, p;
         while ((p = in.find(',', n)) != String_t::npos) {
@@ -57,7 +57,7 @@ namespace {
         addVersion(out, afl::string::strTrim(String_t(in, n, in.size()-n)));
     }
 
-    void writeVersion(afl::io::TextFile& tf, const util::plugin::Plugin::FeatureSet::value_type& v)
+    void writeVersion(afl::io::TextFile& tf, const util::plugin::Plugin::FeatureSet_t::value_type& v)
     {
         tf.writeText(v.first);
         if (v.second.empty()) {
@@ -69,24 +69,27 @@ namespace {
     }
 }
 
+// Constructor.
 util::plugin::Plugin::Plugin(String_t id)
-    : id(id),
-      name(id),
-      description(),
-      baseDir(),
-      defFileName(),
-      provides(),
-      requires(),
-      items(),
-      loaded(false)
+    : m_id(id),
+      m_name(id),
+      m_description(),
+      m_baseDir(),
+      m_defFileName(),
+      m_provides(),
+      m_requires(),
+      m_items(),
+      m_isLoaded(false)
 {
     // ex Plugin::Plugin
-    provides.insert(std::make_pair(id, String_t()));
+    m_provides.insert(std::make_pair(id, String_t()));
 }
 
+// Destructor.
 util::plugin::Plugin::~Plugin()
 { }
 
+// Load plugin definition file (.c2p).
 void
 util::plugin::Plugin::initFromPluginFile(String_t baseDir, String_t defFileName, afl::io::Stream& file, afl::sys::LogListener& log)
 {
@@ -101,16 +104,16 @@ util::plugin::Plugin::initFromPluginFile(String_t baseDir, String_t defFileName,
             {
                 using afl::string::strCaseCompare;
                 if (strCaseCompare(name, "name") == 0) {
-                    self.name = value;
+                    self.m_name = value;
                 } else if (strCaseCompare(name, "description") == 0) {
-                    if (!self.description.empty()) {
-                        self.description += "\n";
+                    if (!self.m_description.empty()) {
+                        self.m_description += "\n";
                     }
-                    self.description += value;
+                    self.m_description += value;
                 } else if (strCaseCompare(name, "provides") == 0) {
-                    addVersions(self.provides, value);
+                    addVersions(self.m_provides, value);
                 } else if (strCaseCompare(name, "requires") == 0) {
-                    addVersions(self.requires, value);
+                    addVersions(self.m_requires, value);
                 } else if (strCaseCompare(name, "scriptfile") == 0) {
                     self.addItem(ScriptFile, value);
                 } else if (strCaseCompare(name, "resourcefile") == 0) {
@@ -135,40 +138,35 @@ util::plugin::Plugin::initFromPluginFile(String_t baseDir, String_t defFileName,
         afl::sys::LogListener& m_log;
     };
 
-    this->baseDir = baseDir;
-    this->defFileName = defFileName;
+    m_baseDir = baseDir;
+    m_defFileName = defFileName;
     Parser p(*this, log);
     p.setSection("plugin", true);
     p.parseFile(file);
 }
 
+// Create from resource file.
 void
-util::plugin::Plugin::initFromResourceFile(String_t baseDir, String_t resFileName)
+util::plugin::Plugin::initFromResourceFile(String_t baseDir, String_t resFileName, afl::string::Translator& tx)
 {
     // ex Plugin::initFromResourceFile
-    this->baseDir = baseDir;
-
-    // FIXME: what does this comment mean?
-    // Need not set this->defFileName which is only needed when we start with a .c2p file
-    // this->defFileName = "";
-
-    this->name = afl::string::strLCase(resFileName);
-    this->description = _("Resource file (artwork)");
-    items.push_back(Item(ResourceFile, resFileName));
+    m_baseDir = baseDir;
+    m_defFileName = "";
+    m_name = afl::string::strLCase(resFileName);
+    m_description = tx("Resource file (artwork)");
+    m_items.push_back(Item(ResourceFile, resFileName));
 }
 
+// Create from script file.
 void
-util::plugin::Plugin::initFromScriptFile(String_t baseDir, String_t scriptFileName, afl::io::Stream& file)
+util::plugin::Plugin::initFromScriptFile(String_t baseDir, String_t scriptFileName, afl::io::Stream& file, afl::string::Translator& tx)
 {
     // ex Plugin::initFromScriptFile
-    this->baseDir = baseDir;
-
-    // FIXME: what does this comment mean?
-    // Need not set this->defFileName which is only needed when we start with a .c2p file
-    // this->defFileName = "";
-    this->name = afl::string::strLCase(scriptFileName);
-    this->description = "";
-    items.push_back(Item(ScriptFile, scriptFileName));
+    m_baseDir = baseDir;
+    m_defFileName = "";
+    m_name = afl::string::strLCase(scriptFileName);
+    m_description = "";
+    m_items.push_back(Item(ScriptFile, scriptFileName));
 
     // Parse the script and attempt to extract some information.
     afl::io::TextFile tf(file);
@@ -190,7 +188,7 @@ util::plugin::Plugin::initFromScriptFile(String_t baseDir, String_t scriptFileNa
         switch (state) {
          case FindName:
             if (!line.empty()) {
-                this->name = line;
+                m_name = line;
                 state = FindBlank;
             }
             break;
@@ -199,19 +197,19 @@ util::plugin::Plugin::initFromScriptFile(String_t baseDir, String_t scriptFileNa
             if (!line.empty()) {
                 // We're expecting the blank line after the description,
                 // but got a nonblank line. Make it all the description.
-                this->description = this->name;
-                this->description += " ";
-                this->description += line;
+                m_description = m_name;
+                m_description += " ";
+                m_description += line;
             }
             state = FindDescription;
             break;
 
          case FindDescription:
             if (!line.empty()) {
-                if (!this->description.empty()) {
-                    this->description += " ";
+                if (!m_description.empty()) {
+                    m_description += " ";
                 }
-                this->description += line;
+                m_description += line;
             } else {
                 state = Stop;
             }
@@ -223,20 +221,21 @@ util::plugin::Plugin::initFromScriptFile(String_t baseDir, String_t scriptFileNa
     }
 
     // Trim description to two sentences.
-    String_t::size_type n = description.find(". ");
+    String_t::size_type n = m_description.find(". ");
     if (n != String_t::npos) {
-        n = description.find(". ", n+1);
+        n = m_description.find(". ", n+1);
     }
     if (n != String_t::npos) {
-        description.erase(n+1);
+        m_description.erase(n+1);
     }
-    if (description.empty()) {
-        description = _("Script file");
+    if (m_description.empty()) {
+        m_description = tx("Script file");
     }
 }
 
+// Create from resource configuration file (cc-res.cfg).
 void
-util::plugin::Plugin::initFromConfigFile(String_t baseDir, String_t pluginName, afl::io::Stream& file)
+util::plugin::Plugin::initFromConfigFile(String_t baseDir, String_t pluginName, afl::io::Stream& file, afl::string::Translator& tx)
 {
     // ex resmgr/resmgrcf.cc:loadResourceConfig
     // @change: we accept '#' as comment
@@ -249,15 +248,17 @@ util::plugin::Plugin::initFromConfigFile(String_t baseDir, String_t pluginName, 
         }
         line = afl::string::strTrim(line);
         if (!line.empty()) {
-            items.push_back(Item(ResourceFile, line));
+            m_items.push_back(Item(ResourceFile, line));
         }
     }
 
-    this->name = pluginName;
-    this->description = _("Resource configuration file");
-    this->baseDir = baseDir;
+    m_name = pluginName;
+    m_defFileName = "";
+    m_description = tx("Resource configuration file");
+    m_baseDir = baseDir;
 }
 
+// Save as plugin (.c2p) file.
 void
 util::plugin::Plugin::savePluginFile(afl::io::Stream& file) const
 {
@@ -266,28 +267,28 @@ util::plugin::Plugin::savePluginFile(afl::io::Stream& file) const
     tf.writeLine("# Auto-generated plugin definition file");
 
     tf.writeText("Name = ");
-    tf.writeLine(name);
+    tf.writeLine(m_name);
 
     String_t::size_type n = 0, p;
-    while ((p = description.find('\n', n)) != String_t::npos) {
+    while ((p = m_description.find('\n', n)) != String_t::npos) {
         tf.writeText("Description = ");
-        tf.writeLine(description.substr(n, p-n));
+        tf.writeLine(m_description.substr(n, p-n));
         n = p+1;
     }
     tf.writeText("Description = ");
-    tf.writeLine(description.substr(n));
+    tf.writeLine(m_description.substr(n));
 
-    for (FeatureSet::const_iterator i = provides.begin(); i != provides.end(); ++i) {
-        if (i->first != id) {
+    for (FeatureSet_t::const_iterator i = m_provides.begin(); i != m_provides.end(); ++i) {
+        if (i->first != m_id) {
             tf.writeText("Provides = ");
             writeVersion(tf, *i);
         }
     }
-    for (FeatureSet::const_iterator i = requires.begin(); i != requires.end(); ++i) {
+    for (FeatureSet_t::const_iterator i = m_requires.begin(); i != m_requires.end(); ++i) {
         tf.writeText("Requires = ");
         writeVersion(tf, *i);
     }
-    for (ItemList::const_iterator i = items.begin(); i != items.end(); ++i) {
+    for (ItemList_t::const_iterator i = m_items.begin(); i != m_items.end(); ++i) {
         switch (i->type) {
          case PlainFile:    tf.writeText("File = ");         break;
          case ScriptFile:   tf.writeText("ScriptFile = ");   break;
@@ -300,84 +301,93 @@ util::plugin::Plugin::savePluginFile(afl::io::Stream& file) const
     tf.flush();
 }
 
+// Set base directory.
 void
 util::plugin::Plugin::setBaseDirectory(const String_t& baseDir)
 {
     // ex Plugin::setBaseDirectory
-    this->baseDir = baseDir;
+    m_baseDir = baseDir;
 }
 
+// Add an item to this plugin.
 void
 util::plugin::Plugin::addItem(ItemType type, const String_t& name)
 {
     // ex Plugin::addItem
-    items.push_back(Item(type, name));
+    m_items.push_back(Item(type, name));
 }
 
+// Set "loaded" flag.
 void
 util::plugin::Plugin::setLoaded(bool flag)
 {
     // ex Plugin::setLoaded
-    this->loaded = flag;
+    m_isLoaded = flag;
 }
 
+// Get plugin Id.
 const String_t&
 util::plugin::Plugin::getId() const
 {
     // ex Plugin::getId
-    return id;
+    return m_id;
 }
 
+// Get plugin name.
 const String_t&
 util::plugin::Plugin::getName() const
 {
     // ex Plugin::getName
-    return name;
+    return m_name;
 }
 
+// Get description.
 const String_t&
 util::plugin::Plugin::getDescription() const
 {
     // ex Plugin::getDescription
-    return description;
+    return m_description;
 }
 
+// Get base directory.
 const String_t&
 util::plugin::Plugin::getBaseDirectory() const
 {
     // ex Plugin::getBaseDirectory
-    return baseDir;
+    return m_baseDir;
 }
 
+// Get definition file name.
 const String_t&
 util::plugin::Plugin::getDefinitionFileName() const
 {
     // ex Plugin::getDefinitionFileName
-    return defFileName;
+    return m_defFileName;
 }
 
-const util::plugin::Plugin::ItemList&
+// Get items (files, commands) contained in this plugin.
+const util::plugin::Plugin::ItemList_t&
 util::plugin::Plugin::getItems() const
 {
     // ex Plugin::getItems
-    return items;
+    return m_items;
 }
 
-// /** Check whether this plugin provides a feature. */
+// Check whether this plugin provides a certain feature.
 bool
 util::plugin::Plugin::isProvided(const String_t& feature) const
 {
     // ex Plugin::isProvided
-    return provides.find(feature) != provides.end();
+    return m_provides.find(feature) != m_provides.end();
 }
 
-// /** Check for installation conflict. */
+// Check whether this plugin conflicts with another.
 bool
 util::plugin::Plugin::isConflict(const Plugin& other) const
 {
     // ex Plugin::isConflict
-    for (FeatureSet::const_iterator pi = provides.begin(), pe = provides.end(); pi != pe; ++pi) {
-        if (other.provides.find(pi->first) != other.provides.end()) {
+    for (FeatureSet_t::const_iterator pi = m_provides.begin(), pe = m_provides.end(); pi != pe; ++pi) {
+        if (other.m_provides.find(pi->first) != other.m_provides.end()) {
             // other plugin provides same feature as we -> reject
             return true;
         }
@@ -385,25 +395,23 @@ util::plugin::Plugin::isConflict(const Plugin& other) const
     return false;
 }
 
-// /** Check whether this plugin is a drop-in update for another one.
-//     This means it must have the same or fewer preconditions,
-//     and provide the same or better features. */
+// Check whether this plugin qualifies as an update for another plugin.
 bool
 util::plugin::Plugin::isUpdateFor(const Plugin& other) const
 {
     // ex Plugin::isUpdateFor
     // All of our preconditions must already be required by other
-    for (FeatureSet::const_iterator pi = requires.begin(), pe = requires.end(); pi != pe; ++pi) {
-        FeatureSet::const_iterator oi = other.requires.find(pi->first);
-        if (oi == other.requires.end() || compareVersions(oi->second, pi->second)) {
+    for (FeatureSet_t::const_iterator pi = m_requires.begin(), pe = m_requires.end(); pi != pe; ++pi) {
+        FeatureSet_t::const_iterator oi = other.m_requires.find(pi->first);
+        if (oi == other.m_requires.end() || compareVersions(oi->second, pi->second)) {
             return false;
         }
     }
 
     // All of other's features must be provided by us
-    for (FeatureSet::const_iterator pi = other.provides.begin(), pe = other.provides.end(); pi != pe; ++pi) {
-        FeatureSet::const_iterator oi = provides.find(pi->first);
-        if (oi == provides.end() || compareVersions(oi->second, pi->second)) {
+    for (FeatureSet_t::const_iterator pi = other.m_provides.begin(), pe = other.m_provides.end(); pi != pe; ++pi) {
+        FeatureSet_t::const_iterator oi = m_provides.find(pi->first);
+        if (oi == m_provides.end() || compareVersions(oi->second, pi->second)) {
             return false;
         }
     }
@@ -411,7 +419,7 @@ util::plugin::Plugin::isUpdateFor(const Plugin& other) const
     return true;
 }
 
-// /** Check whether this plugin depends on another one. */
+// Check whether this plugin depends on another one.
 bool
 util::plugin::Plugin::isDependingOn(const Plugin& other) const
 {
@@ -419,22 +427,22 @@ util::plugin::Plugin::isDependingOn(const Plugin& other) const
     // Since only one plugin can provide a feature, this condition is satisfied
     // if one of our required features is provided by %other. There cannot be
     // a different plugin that provides the same feature.
-    for (FeatureSet::const_iterator pi = requires.begin(), pe = requires.end(); pi != pe; ++pi) {
-        if (other.provides.find(pi->first) != other.provides.end()) {
+    for (FeatureSet_t::const_iterator pi = m_requires.begin(), pe = m_requires.end(); pi != pe; ++pi) {
+        if (other.m_provides.find(pi->first) != other.m_provides.end()) {
             return true;
         }
     }
     return false;
 }
 
-// /** Check whether the given feature set satisfies our requirements. */
+// Check whether this plugin depends on another one.
 bool
-util::plugin::Plugin::isSatisfied(const FeatureSet& fset) const
+util::plugin::Plugin::isSatisfiedBy(const FeatureSet_t& have) const
 {
     // ex Plugin::isSatisfied
-    for (FeatureSet::const_iterator pi = requires.begin(), pe = requires.end(); pi != pe; ++pi) {
-        FeatureSet::const_iterator po = fset.find(pi->first);
-        if (po == fset.end() || compareVersions(po->second, pi->second)) {
+    for (FeatureSet_t::const_iterator pi = m_requires.begin(), pe = m_requires.end(); pi != pe; ++pi) {
+        FeatureSet_t::const_iterator po = have.find(pi->first);
+        if (po == have.end() || compareVersions(po->second, pi->second)) {
             // Feature not available or wrong version
             return false;
         }
@@ -442,39 +450,40 @@ util::plugin::Plugin::isSatisfied(const FeatureSet& fset) const
     return true;
 }
 
+// Check whether plugin is loaded.
 bool
 util::plugin::Plugin::isLoaded() const
 {
     // ex Plugin::isLoaded
-    return loaded;
+    return m_isLoaded;
 }
 
+// List missing features.
 void
-util::plugin::Plugin::enumMissingFeatures(const FeatureSet& have, FeatureSet& missing) const
+util::plugin::Plugin::enumMissingFeatures(const FeatureSet_t& have, FeatureSet_t& missing) const
 {
     // ex Plugin::enumMissingFeatures
-    for (FeatureSet::const_iterator pi = requires.begin(), pe = requires.end(); pi != pe; ++pi) {
-        FeatureSet::const_iterator po = have.find(pi->first);
+    for (FeatureSet_t::const_iterator pi = m_requires.begin(), pe = m_requires.end(); pi != pe; ++pi) {
+        FeatureSet_t::const_iterator po = have.find(pi->first);
         if (po == have.end() || compareVersions(po->second, pi->second)) {
             missing.insert(*pi);
         }
     }
 }
 
-// /** Add all features we provide to the given feature set. */
+// List provided features.
 void
-util::plugin::Plugin::addProvidedFeaturesTo(FeatureSet& fset)
+util::plugin::Plugin::enumProvidedFeatures(FeatureSet_t& have) const
 {
     // ex Plugin::addProvidedFeaturesTo
-    for (FeatureSet::const_iterator pi = provides.begin(), pe = provides.end(); pi != pe; ++pi) {
+    for (FeatureSet_t::const_iterator pi = m_provides.begin(), pe = m_provides.end(); pi != pe; ++pi) {
         // No version check required; we are the only one who provides this feature,
         // so there cannot be a previous version to upgrade.
-        fset.insert(*pi);
+        have.insert(*pi);
     }
 }
 
-/** Compare versions.
-    \return true iff a is older than b */
+// Compare versions.
 bool
 util::plugin::compareVersions(const String_t& a, const String_t& b)
 {

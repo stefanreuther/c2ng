@@ -7,6 +7,7 @@
 #include "afl/net/reconnectable.hpp"
 #include "afl/sys/time.hpp"
 #include "server/host/cron.hpp"
+#include "afl/charset/codepage.hpp"
 
 namespace {
     void configure(afl::net::CommandHandler& hdl)
@@ -51,6 +52,7 @@ server::host::Root::Root(afl::net::CommandHandler& db,
     : server::common::Root(db),
       m_log(),
       m_mutex(),
+      m_defaultCharset(afl::charset::g_codepage437),
       m_db(db),
       m_hostFile(hostFile),
       m_userFile(userFile),
@@ -78,6 +80,12 @@ afl::sys::Mutex&
 server::host::Root::mutex()
 {
     return m_mutex;
+}
+
+afl::charset::Charset&
+server::host::Root::defaultCharacterSet()
+{
+    return m_defaultCharset;
 }
 
 void

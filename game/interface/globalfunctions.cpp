@@ -68,7 +68,7 @@ namespace {
                    11   ConfigStdOption, e.g. RaceMiningRate
                    \change c2ng has MAX_PLAYERS instead of 11, but otherwise, the logic remains the same. */
                 game::Game* g = session.getGame().get();
-                if (isHostConfig && bopt->getArray().size() == game::MAX_PLAYERS && g != 0) {
+                if (isHostConfig && bopt->getArray().size() == size_t(game::MAX_PLAYERS) && g != 0) {
                     player = g->getViewpointPlayer();
                 } else {
                     throw interpreter::Error("Too few arguments");
@@ -378,7 +378,7 @@ game::interface::IFIsSpecialFCode(game::Session& session, interpreter::Arguments
     if (str.size() > 3) {
         str.erase(3);
     }
-    return makeBooleanValue(list.isSpecial(str, true) || list.isExtra(str));
+    return makeBooleanValue(list.isSpecial(str, true));
 }
 
 /* @q ObjectIsAt(obj:Any, x:Int, y:Int):Bool (Function)
@@ -418,7 +418,7 @@ game::interface::IFObjectIsAt(game::Session& session, interpreter::Arguments& ar
         throw interpreter::Error::typeError(interpreter::Error::ExpectRecord);
     }
 
-    const game::map::MapObject* mapObj = dynamic_cast<const game::map::MapObject*>(ctx->getObject());
+    const game::map::Object* mapObj = ctx->getObject();
     if (mapObj == 0) {
         throw interpreter::Error::typeError(interpreter::Error::ExpectRecord);
     }
@@ -483,7 +483,7 @@ game::interface::IFPlanetAt(game::Session& session, interpreter::Arguments& args
         return 0;
     }
 
-    return makeIntegerValue(game->currentTurn().universe().getPlanetAt(game::map::Point(x, y), flag, root->hostConfiguration(), root->hostVersion()));
+    return makeIntegerValue(game->currentTurn().universe().findPlanetAt(game::map::Point(x, y), flag, root->hostConfiguration(), root->hostVersion()));
 }
 
 /* @q Pref(key:Str, Optional index:Int):Any (Function)

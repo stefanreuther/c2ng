@@ -50,7 +50,7 @@ TestGameRoot::testIt()
     TS_ASSERT_EQUALS(testee.hostVersion().getKind(), game::HostVersion::PHost);
     TS_ASSERT_EQUALS(testee.hostVersion().getVersion(), MKVERSION(4,0,0));
     TS_ASSERT(dynamic_cast<game::test::RegistrationKey*>(&testee.registrationKey()) != 0);
-    TS_ASSERT(dynamic_cast<game::test::StringVerifier*>(&testee.stringVerifier()) != 0);
+    TS_ASSERT(dynamic_cast<const game::test::StringVerifier*>(&testee.stringVerifier()) != 0);
     TS_ASSERT(dynamic_cast<afl::charset::Utf8Charset*>(&testee.charset()) != 0);
     TS_ASSERT(testee.getTurnLoader().get() == 0);
 
@@ -68,7 +68,7 @@ TestGameRoot::testIt()
             { return PlayerStatusSet_t(); }
         virtual void loadCurrentTurn(game::Turn& /*turn*/, game::Game& /*game*/, int /*player*/, game::Root& /*root*/, game::Session& /*session*/)
             { }
-        virtual void saveCurrentTurn(game::Turn& /*turn*/, game::Game& /*game*/, int /*player*/, game::Root& /*root*/, game::Session& /*session*/)
+        virtual void saveCurrentTurn(const game::Turn& /*turn*/, const game::Game& /*game*/, int /*player*/, const game::Root& /*root*/, game::Session& /*session*/)
             { }
         virtual void getHistoryStatus(int /*player*/, int /*turn*/, afl::base::Memory<HistoryStatus> /*status*/, const game::Root& /*root*/)
             { }

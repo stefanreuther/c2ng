@@ -7,7 +7,7 @@
 client::widgets::KeymapWidget::KeymapWidget(util::RequestSender<game::Session> gameSender,
                                             util::RequestDispatcher& self,
                                             client::si::Control& ctl)
-    : m_proxy(self, gameSender),
+    : m_proxy(gameSender, self),
       m_control(ctl),
       m_keys(),
       m_keymapName()

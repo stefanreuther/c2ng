@@ -43,51 +43,73 @@ namespace game { namespace spec {
         /** Destructor. */
         ~ShipList();
 
-        /** Get beams. */
+        /** Access beams.
+            \return ComponentVector of beams. Index is actual Id (1-based). */
         ComponentVector<Beam>& beams();
         const ComponentVector<Beam>& beams() const;
 
-        /** Get engines. */
+        /** Access engines.
+            \return ComponentVector of engines. Index is actual Id (1-based). */
         ComponentVector<Engine>& engines();
         const ComponentVector<Engine>& engines() const;
 
-        /** Get torpedo launchers. */
+        /** Access torpedo launchers.
+            \return ComponentVector of torpedo launchers. Index is actual Id (1-based). */
         ComponentVector<TorpedoLauncher>& launchers();
         const ComponentVector<TorpedoLauncher>& launchers() const;
 
-        /** Get hulls. */
+        /** Access hulls.
+            \return ComponentVector of hulls. Index is actual Id (1-based). */
         ComponentVector<Hull>& hulls();
         const ComponentVector<Hull>& hulls() const;
 
-        /** Get basic hull function definitions. */
+        /** Access basic hull function definitions.
+            This defines the basic hull functions and is constant per host version (PCC2: loaded from definition file).
+            \return BasicHullFunctionList */
         BasicHullFunctionList& basicHullFunctions();
         const BasicHullFunctionList& basicHullFunctions() const;
 
-        /** Get modified hull function definitions. */
+        /** Access modified hull function definitions.
+            A modified hull function is a basic hull function with a level restriction.
+            This mapping is defined by the ship list; if no level restrictions exist, this is a 1:1 mapping.
+            \return BasicHullFunctionList */
         ModifiedHullFunctionList& modifiedHullFunctions();
         const ModifiedHullFunctionList& modifiedHullFunctions() const;
 
-        /** Get racial abilities. */
+        /** Access racial abilities.
+            A racial ability is a ship ability that a race has on all their ships.
+            This object contains the ready-made assignments, in the form of a
+            (modified hull function Id, players added) mapping;
+            configuration access is no longer needed.
+            \return HullFunctionAssignmentList */
         HullFunctionAssignmentList& racialAbilities();
         const HullFunctionAssignmentList& racialAbilities() const;
 
-        /** Get hull function assignments. */
+        /** Access hull assignments.
+            Stores the list of hulls each player is allowed to build.
+            \return HullAssignmentList */
         HullAssignmentList& hullAssignments();
         const HullAssignmentList& hullAssignments() const;
 
-        /** Get component namer. */
+        /** Access component namer.
+            The component namer provides formatting rules for component (hull, engine, beam, torpedo) names.
+            \return StandardComponentNameProvider */
         StandardComponentNameProvider& componentNamer();
         const StandardComponentNameProvider& componentNamer() const;
 
-        /** Get friendly codes. */
+        /** Access friendly codes.
+            \return FriendlyCodeList */
         FriendlyCodeList& friendlyCodes();
         const FriendlyCodeList& friendlyCodes() const;
 
-        /** Get ship missions. */
+        /** Access ship missions.
+            \return MissionList */
         MissionList& missions();
         const MissionList& missions() const;
 
-        /** Get a component, given a reference. */
+        /** Get a component, given a reference.
+            \param ref Reference
+            \return Component; null if reference does not point at a valid component */
         const Component* getComponent(Reference ref) const;
 
         /** Find racial abilities.

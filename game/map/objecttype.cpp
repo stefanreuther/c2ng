@@ -4,7 +4,7 @@
   */
 
 #include "game/map/objecttype.hpp"
-#include "game/map/mapobject.hpp"
+#include "game/map/object.hpp"
 #include "game/map/circularobject.hpp"
 #include "game/map/configuration.hpp"
 
@@ -59,7 +59,7 @@ game::map::ObjectType::countObjectsAt(const Point pt, PlayerSet_t owners)
     // ex GUniverse::countShips
     int result = 0;
     for (Id_t i = findNextIndex(0); i != 0; i = findNextIndex(i)) {
-        if (MapObject* mo = dynamic_cast<MapObject*>(getObjectByIndex(i))) {
+        if (const Object* mo = getObjectByIndex(i)) {
             Point center;
             int owner;
             if (mo->getPosition(center) && mo->getOwner(owner) && center == pt && owners.contains(owner)) {
@@ -80,7 +80,7 @@ game::map::ObjectType::findNearestIndex(const Point pt, const Configuration& con
     bool inside = false;
 
     for (Id_t i = findNextIndex(0); i != 0; i = findNextIndex(i)) {
-        if (MapObject* mo = dynamic_cast<MapObject*>(getObjectByIndex(i))) {
+        if (const Object* mo = getObjectByIndex(i)) {
             Point center;
             if (mo->getPosition(center)) {
                 // Position is known
@@ -88,7 +88,7 @@ game::map::ObjectType::findNearestIndex(const Point pt, const Configuration& con
 
                 // If it is a circular object, check whether we're inside
                 bool ninside;
-                if (CircularObject* co = dynamic_cast<CircularObject*>(mo)) {
+                if (const CircularObject* co = dynamic_cast<const CircularObject*>(mo)) {
                     int32_t radiusSquared;
                     ninside = (co->getRadiusSquared(radiusSquared) && radiusSquared <= ndist2);
                 } else{
@@ -185,7 +185,7 @@ game::Id_t
 game::map::ObjectType::findNextObjectAt(Point pt, int id)
 {
     for (Id_t i = findNextIndex(id); i != 0; i = findNextIndex(i)) {
-        if (MapObject* mo = dynamic_cast<MapObject*>(getObjectByIndex(i))) {
+        if (const Object* mo = getObjectByIndex(i)) {
             Point center;
             if (mo->getPosition(center)) {
                 if (center == pt) {

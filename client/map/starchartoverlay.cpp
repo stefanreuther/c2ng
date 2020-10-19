@@ -13,7 +13,7 @@
 #include "afl/string/format.hpp"
 #include "util/translation.hpp"
 
-using client::proxy::LockProxy;
+using game::proxy::LockProxy;
 
 namespace {
     int determineDistance(util::Key_t key, int prefix)
@@ -37,7 +37,7 @@ client::map::StarchartOverlay::StarchartOverlay(ui::Root& root, Location& loc, S
     : m_root(root),
       m_location(loc),
       m_screen(scr),
-      m_lockProxy(root.engine().dispatcher(), gameSender),
+      m_lockProxy(gameSender, root.engine().dispatcher()),
       conn_objectChange(loc.sig_objectChange.add(this, &StarchartOverlay::onChange)),
       conn_positionChange(loc.sig_positionChange.add(this, &StarchartOverlay::onChange))
 {

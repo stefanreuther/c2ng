@@ -319,6 +319,13 @@ TestGameHostVersion::testProperties()
     TS_ASSERT(!HostVersion(HostVersion::PHost,   MKVERSION(3, 4,0)).isRoundingMineDecay());
     TS_ASSERT( HostVersion(HostVersion::NuHost,  MKVERSION(3, 0,0)).isRoundingMineDecay());
 
+    // isBeamRequiredForMineScooping: all PHost
+    TS_ASSERT(!HostVersion(HostVersion::Unknown, MKVERSION(3,22,0)).isBeamRequiredForMineScooping());
+    TS_ASSERT(!HostVersion(HostVersion::Host,    MKVERSION(3,22,0)).isBeamRequiredForMineScooping());
+    TS_ASSERT(!HostVersion(HostVersion::SRace,   MKVERSION(3,22,0)).isBeamRequiredForMineScooping());
+    TS_ASSERT( HostVersion(HostVersion::PHost,   MKVERSION(3, 4,0)).isBeamRequiredForMineScooping());
+    TS_ASSERT(!HostVersion(HostVersion::NuHost,  MKVERSION(3, 0,0)).isBeamRequiredForMineScooping());
+
     // isPBPGame: all TimHost, and PHost if configured
     config[config.BuildQueue].set("PAL");
     TS_ASSERT( HostVersion(HostVersion::Unknown, MKVERSION(3,22,0)).isPBPGame(config));
@@ -437,8 +444,8 @@ TestGameHostVersion::testProperties()
 
     // isAlchemyRounding
     TS_ASSERT(!HostVersion(HostVersion::Unknown, MKVERSION(3,22,0)).isAlchemyRounding());
-    TS_ASSERT( HostVersion(HostVersion::Host,    MKVERSION(3,22,0)).isAlchemyRounding());
-    TS_ASSERT( HostVersion(HostVersion::SRace,   MKVERSION(3,22,0)).isAlchemyRounding());
+    TS_ASSERT(!HostVersion(HostVersion::Host,    MKVERSION(3,22,0)).isAlchemyRounding());
+    TS_ASSERT(!HostVersion(HostVersion::SRace,   MKVERSION(3,22,0)).isAlchemyRounding());
     TS_ASSERT(!HostVersion(HostVersion::PHost,   MKVERSION(3, 4,0)).isAlchemyRounding());
     TS_ASSERT(!HostVersion(HostVersion::NuHost,  MKVERSION(3, 0,0)).isAlchemyRounding());
 
@@ -518,6 +525,38 @@ TestGameHostVersion::testSetImpliedHostConfiguration()
         c[HostConfiguration::CPEnableShow].set(false);
         HostVersion(HostVersion::PHost, MKVERSION(4,1,5)).setImpliedHostConfiguration(c);
         TS_ASSERT_EQUALS(c[HostConfiguration::CPEnableShow](), false);
+    }
+}
+
+/** Test setImpliedHostConfiguration(). */
+void
+TestGameHostVersion::testSetImpliedHostConfigurationMine()
+{
+    using game::config::HostConfiguration;
+    using game::HostVersion;
+
+    {
+        HostConfiguration c;
+        c[HostConfiguration::UnitsPerTorpRate].set("1,2,3,4,5,6,7,8,9,10");
+        HostVersion(HostVersion::Host, MKVERSION(3,22,40)).setImpliedHostConfiguration(c);
+        TS_ASSERT_EQUALS(c[HostConfiguration::UnitsPerTorpRate](1), 100);
+        TS_ASSERT_EQUALS(c[HostConfiguration::UnitsPerTorpRate](6), 100);
+        TS_ASSERT_EQUALS(c[HostConfiguration::UnitsPerTorpRate](9), 400);
+        TS_ASSERT_EQUALS(c[HostConfiguration::UnitsPerWebRate](1), 100);
+        TS_ASSERT_EQUALS(c[HostConfiguration::UnitsPerWebRate](6), 100);
+        TS_ASSERT_EQUALS(c[HostConfiguration::UnitsPerWebRate](9), 400);
+    }
+
+    {
+        HostConfiguration c;
+        c[HostConfiguration::UnitsPerTorpRate].set("1,2,3,4,5,6,7,8,9,10");
+        HostVersion(HostVersion::PHost, MKVERSION(3,2,5)).setImpliedHostConfiguration(c);
+        TS_ASSERT_EQUALS(c[HostConfiguration::UnitsPerTorpRate](1), 1);   // set above
+        TS_ASSERT_EQUALS(c[HostConfiguration::UnitsPerTorpRate](6), 6);
+        TS_ASSERT_EQUALS(c[HostConfiguration::UnitsPerTorpRate](9), 9);
+        TS_ASSERT_EQUALS(c[HostConfiguration::UnitsPerWebRate](1), 100);  // default
+        TS_ASSERT_EQUALS(c[HostConfiguration::UnitsPerWebRate](6), 100);
+        TS_ASSERT_EQUALS(c[HostConfiguration::UnitsPerWebRate](9), 400);
     }
 }
 

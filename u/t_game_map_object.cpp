@@ -19,6 +19,8 @@ TestGameMapObject::testIt()
             { return game::Id_t(); }
         virtual bool getOwner(int& /*result*/) const
             { return false; }
+        virtual bool getPosition(game::map::Point& /*result*/) const
+            { return false; }
     };
     Tester t;
 }

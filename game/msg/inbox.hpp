@@ -36,10 +36,10 @@ namespace game { namespace msg {
         ~Inbox();
 
         // Mailbox:
-        virtual size_t getNumMessages();
-        virtual String_t getMessageText(size_t index, afl::string::Translator& tx, const PlayerList& players);
-        virtual String_t getMessageHeading(size_t index, afl::string::Translator& tx, const PlayerList& players);
-        virtual int getMessageTurnNumber(size_t index);
+        virtual size_t getNumMessages() const;
+        virtual String_t getMessageText(size_t index, afl::string::Translator& tx, const PlayerList& players) const;
+        virtual String_t getMessageHeading(size_t index, afl::string::Translator& tx, const PlayerList& players) const;
+        virtual int getMessageTurnNumber(size_t index) const;
 
         // Manipulation
         void addMessage(String_t text, int turnNumber);

@@ -5,13 +5,15 @@
 #ifndef C2NG_GAME_SIM_OBJECT_HPP
 #define C2NG_GAME_SIM_OBJECT_HPP
 
-#include "game/types.hpp"
-#include "afl/string/string.hpp"
 #include "afl/base/deletable.hpp"
+#include "afl/string/string.hpp"
 #include "game/sim/ability.hpp"
 #include "game/spec/shiplist.hpp"
+#include "game/types.hpp"
 
 namespace game { namespace sim {
+
+    class Configuration;
 
     /** Base class for simulator objects.
         Contains the definition and state of an object.
@@ -133,10 +135,11 @@ namespace game { namespace sim {
             Checks whether the ability has been configured by the user (fl_XXXSet flag);
             otherwise, queries hasImpliedAbility().
             \param which Ability to check for
+            \param opts Simulation options
             \param shipList Ship list
             \param config Host configuration
             \return true if ability is available */
-        bool hasAbility(Ability which, const game::spec::ShipList& shipList, const game::config::HostConfiguration& config) const;
+        bool hasAbility(Ability which, const Configuration& opts, const game::spec::ShipList& shipList, const game::config::HostConfiguration& config) const;
 
         /** Check presence of any nonstandard ability.
             \retval true at least one ability has been configured by the user (fl_XXXSet)
@@ -147,10 +150,11 @@ namespace game { namespace sim {
             This function is called to determine the default abilities,
             if the availability of that ability has not been configured explicitly.
             \param which Ability to check for
+            \param opts Simulation options
             \param shipList Ship list
             \param config Host configuration
             \return true if ability is available */
-        virtual bool hasImpliedAbility(Ability which, const game::spec::ShipList& shipList, const game::config::HostConfiguration& config) const = 0;
+        virtual bool hasImpliedAbility(Ability which, const Configuration& opts, const game::spec::ShipList& shipList, const game::config::HostConfiguration& config) const = 0;
 
         /*
          *  Dirtiness
@@ -207,6 +211,27 @@ namespace game { namespace sim {
                                                      | fl_TripleBeamKillSet | fl_DoubleBeamChargeSet | fl_DoubleTorpChargeSet
                                                      | fl_ElusiveSet | fl_SquadronSet | fl_ShieldGeneratorSet | fl_CloakedBaysSet);
 
+
+        /** Description of an ability. */
+        struct AbilityInfo {
+            /** "set" bit.
+                If this flag is clear, the unit has its ability at its default value.
+                If this flag is set, presence of the ability is determined by the activeBit. */
+            int32_t setBit;
+            /** "active" bit.
+                This flag is valid if the "set" bit is set, and determines whether the unit has the ability (ability is active). */
+            int32_t activeBit;
+
+            AbilityInfo(int32_t setBit, int32_t activeBit)
+                : setBit(setBit), activeBit(activeBit)
+                { }
+        };
+
+        /** Get description for a unit's ability.
+            \param a Ability
+            \return Description */
+        static AbilityInfo getAbilityInfo(Ability a);
+
      private:
         // common
         Id_t m_id;                       // id
@@ -222,13 +247,8 @@ namespace game { namespace sim {
 
         bool m_changed;
 
-        // FIXME:
-        // VcrStatItem stats; // game::vcr::Statistic
-
-        // VcrStatItem& getStat()
-        //     { return stats; }
-        // const VcrStatItem& getStat() const
-        //     { return stats; }
+        /* PCC2 included a VcrStatItem / game::vcr::Statistic in GSimObject.
+           We handle these externally. */
     };
 
 } }

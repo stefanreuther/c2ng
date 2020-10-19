@@ -5,7 +5,7 @@
 #include "client/tiles/selectionheadertile.hpp"
 #include "util/unicodechars.hpp"
 #include "client/marker.hpp"
-#include "client/proxy/objectlistener.hpp"
+#include "game/proxy/objectlistener.hpp"
 
 client::tiles::SelectionHeaderTile::SelectionHeaderTile(ui::Root& root, client::widgets::KeymapWidget& keys)
     : m_root(root),
@@ -114,7 +114,7 @@ client::tiles::SelectionHeaderTile::setStatus(String_t name, bool marked)
 }
 
 void
-client::tiles::SelectionHeaderTile::attach(client::proxy::ObjectObserver& oop)
+client::tiles::SelectionHeaderTile::attach(game::proxy::ObjectObserver& oop)
 {
     class Job : public util::Request<SelectionHeaderTile> {
      public:
@@ -127,7 +127,7 @@ client::tiles::SelectionHeaderTile::attach(client::proxy::ObjectObserver& oop)
         String_t m_name;
         bool m_marked;
     };
-    class Listener : public client::proxy::ObjectListener {
+    class Listener : public game::proxy::ObjectListener {
      public:
         Listener(util::RequestSender<SelectionHeaderTile> reply)
             : m_reply(reply)

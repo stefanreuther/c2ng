@@ -125,6 +125,18 @@ namespace game { namespace sim {
             \return mode */
         VcrMode getMode() const;
 
+        /** Access alliance settings.
+            Contains a bit in (a,b) if a offers an alliance to b.
+            \return alliance settings */
+        PlayerBitMatrix& allianceSettings();
+        const PlayerBitMatrix& allianceSettings() const;
+
+        /** Access enemy settings.
+            Contains a bit in (a,b) if a declared b a persistent enemy.
+            \return enemy settings */
+        PlayerBitMatrix& enemySettings();
+        const PlayerBitMatrix& enemySettings() const;
+
      private:
         PlayerBitMatrix m_allianceSettings;             // ex alliance_settings
         PlayerBitMatrix m_enemySettings;                // ex enemy_settings

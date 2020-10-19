@@ -4,7 +4,6 @@
   */
 
 #include "game/v3/parser.hpp"
-#include "game/actions/preconditions.hpp"
 #include "game/parser/datainterface.hpp"
 #include "game/parser/messageparser.hpp"
 #include "game/turn.hpp"
@@ -12,21 +11,16 @@
 
 using afl::string::strTrim;
 using afl::string::strCaseCompare;
-using game::actions::mustHaveShipList;
 
 /*
  *  DataInterface implementation for real game
  */
 class game::v3::Parser::DataInterface : public game::parser::DataInterface {
  public:
-    DataInterface(Parser& parent,
-                  int playerNr,
-                  Game& game,
-                  Root& root,
-                  game::spec::ShipList& shipList)
-        : m_parent(parent),
-          m_playerNumber(playerNr),
-          m_game(game),
+    DataInterface(int playerNr,
+                  const Root& root,
+                  const game::spec::ShipList& shipList)
+        : m_playerNumber(playerNr),
           m_root(root),
           m_shipList(shipList)
         { }
@@ -55,6 +49,9 @@ class game::v3::Parser::DataInterface : public game::parser::DataInterface {
  private:
     int parsePlayerName(Player::Name which, const String_t& name) const
         {
+            // ex readmsg.pas:LazyCompare
+            // FIXME: space in 'name' should match any in 'p->getName'
+            // (host sanitized extended character)
             const PlayerList& pp = m_root.playerList();
             for (Player* p = pp.getFirstPlayer(); p != 0; p = pp.getNextPlayer(p)) {
                 if (strCaseCompare(name, strTrim(p->getName(which))) == 0) {
@@ -75,34 +72,31 @@ class game::v3::Parser::DataInterface : public game::parser::DataInterface {
             return 0;
         }
 
-    Parser& m_parent;
     int m_playerNumber;
-    Game& m_game;
-    Root& m_root;
-    game::spec::ShipList& m_shipList;
+    const Root& m_root;
+    const game::spec::ShipList& m_shipList;
 };
 
 // Constructor.
-game::v3::Parser::Parser(afl::string::Translator& tx, afl::sys::LogListener& log,
-                         Game& game, int player, Root& root, Session& session)
+game::v3::Parser::Parser(afl::string::Translator& tx, afl::sys::LogListener& log, Game& game, int player, Root& root, game::spec::ShipList& shipList)
     : m_translator(tx),
       m_log(log),
       m_game(game),
       m_player(player),
       m_root(root),
-      m_session(session)
+      m_shipList(shipList)
 { }
 
 // Load util.dat file.
 void
 game::v3::Parser::loadUtilData(afl::io::Stream& in, afl::charset::Charset& charset)
 {
-    game::v3::udata::Parser(m_game, m_player, m_root.hostConfiguration(), mustHaveShipList(m_session), charset, m_translator, m_log).read(in);
+    game::v3::udata::Parser(m_game, m_player, m_root.hostConfiguration(), m_shipList, charset, m_translator, m_log).read(in);
 }
 
 // Parse messages.
 void
-game::v3::Parser::parseMessages(afl::io::Stream& in, game::msg::Inbox& inbox)
+game::v3::Parser::parseMessages(afl::io::Stream& in, const game::msg::Inbox& inbox)
 {
     // ex game/msgglobal.cc:parseMessages (remotely related)
 
@@ -116,7 +110,7 @@ game::v3::Parser::parseMessages(afl::io::Stream& in, game::msg::Inbox& inbox)
     p.load(in, m_translator, m_log);
 
     // Parse messages
-    DataInterface gdi(*this, m_player, m_game, m_root, mustHaveShipList(m_session));
+    DataInterface gdi(m_player, m_root, m_shipList);
     for (size_t i = 0, n = inbox.getNumMessages(); i < n; ++i) {
         String_t text = inbox.getMessageText(i, m_translator, m_root.playerList());
 

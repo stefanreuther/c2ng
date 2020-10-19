@@ -16,6 +16,9 @@ class TestGameScoreLoader : public CxxTest::TestSuite {
  public:
     void testSimple();
     void testErrors();
+    void testLoadOld();
+    void testLoadOldErrors();
+    void testSave();
 };
 
 class TestGameScoreTurnScore : public CxxTest::TestSuite {

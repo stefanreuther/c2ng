@@ -57,7 +57,7 @@ namespace game {
         static String_t getUnit(Type t, afl::string::Translator& tx, const game::spec::ShipList& shipList);
 
         /** Get start.
-            Use for iteratio:
+            Use for iteration:
             <pre>for (Element::Type t = Element::begin(), e = Element::end(sl); t != e; ++t)</pre>
             \return start */
         static Type begin();

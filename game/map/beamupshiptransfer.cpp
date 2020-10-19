@@ -34,13 +34,11 @@ namespace {
 }
 
 game::map::BeamUpShipTransfer::BeamUpShipTransfer(Ship& sh,
-                                                  InterpreterInterface& iface,
                                                   const game::spec::ShipList& shipList,
                                                   Turn& turn,
                                                   const game::config::HostConfiguration& config)
     : CargoContainer(),
       m_ship(sh),
-      m_interface(iface),
       m_shipList(shipList),
       m_turn(turn),
       m_config(config),
@@ -57,10 +55,10 @@ game::map::BeamUpShipTransfer::~BeamUpShipTransfer()
 }
 
 String_t
-game::map::BeamUpShipTransfer::getName(afl::string::Translator& tx) const
+game::map::BeamUpShipTransfer::getName(afl::string::Translator& /*tx*/) const
 {
     // ex GShipBumTransfer::getName
-    return m_ship.getName(PlainName, tx, m_interface);
+    return m_ship.getName();
 }
 
 game::CargoContainer::Flags_t
@@ -127,7 +125,7 @@ game::map::BeamUpShipTransfer::commit()
 
     if (cs.isZero()) {
         if (CommandContainer* cc = CommandExtra::get(m_turn, shipOwner)) {
-            cc->removeCommand(Command::phc_Beamup, m_ship.getId());
+            cc->removeCommand(Command::BeamUp, m_ship.getId());
         }
         if (m_ship.getMission().orElse(0) == missionNumber) {
             // Reset to previous mission.
@@ -151,7 +149,7 @@ game::map::BeamUpShipTransfer::commit()
             }
         }
     } else {
-        CommandExtra::create(m_turn).create(shipOwner).addCommand(Command::phc_Beamup, m_ship.getId(), cs.toPHostString());
+        CommandExtra::create(m_turn).create(shipOwner).addCommand(Command::BeamUp, m_ship.getId(), cs.toPHostString());
         FleetMember(m_turn.universe(), m_ship).setMission(missionNumber, 0, 0, m_config, m_shipList);
     }
 
@@ -165,7 +163,7 @@ game::map::parseBeamUpCommand(util::Vector<int32_t,Element::Type>& out, Turn& tu
     int shipOwner = 0;
     ship.getOwner(shipOwner);
     if (const CommandContainer* cc = CommandExtra::get(turn, shipOwner)) {
-        if (const Command* cmd = cc->getCommand(Command::phc_Beamup, ship.getId())) {
+        if (const Command* cmd = cc->getCommand(Command::BeamUp, ship.getId())) {
             CargoSpec cs(cmd->getArg(), true);
             out.set(Element::Neutronium, factor * cs.get(CargoSpec::Neutronium));
             out.set(Element::Tritanium,  factor * cs.get(CargoSpec::Tritanium));

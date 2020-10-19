@@ -6,12 +6,12 @@
 #define C2NG_GAME_V3_REGISTRATIONKEY_HPP
 
 #include <memory>
-#include "game/registrationkey.hpp"
-#include "afl/string/string.hpp"
 #include "afl/charset/charset.hpp"
-#include "afl/io/stream.hpp"
 #include "afl/io/directory.hpp"
+#include "afl/io/stream.hpp"
+#include "afl/string/string.hpp"
 #include "afl/sys/loglistener.hpp"
+#include "game/registrationkey.hpp"
 
 namespace game { namespace v3 {
 
@@ -29,7 +29,11 @@ namespace game { namespace v3 {
     class RegistrationKey : public game::RegistrationKey {
      public:
         /** Size of a key, in words. */
-        static const size_t KEY_SIZE = 51;
+        static const size_t KEY_SIZE_WORDS = 51;
+
+        /** Size of a key, in bytes. */
+        static const size_t KEY_SIZE_BYTES = 4*KEY_SIZE_WORDS;
+
 
         /** Constructor.
             \param charset Game character set */
@@ -55,12 +59,28 @@ namespace game { namespace v3 {
             To get non-verbose output, pass a Log instance with no listeners. */
         void initFromDirectory(afl::io::Directory& dir, afl::sys::LogListener& log);
 
-        /** Get registration key in encoded form.
-            This is used for turn files. */
-        afl::base::Memory<const uint32_t> getKey() const;
+        /** Save to given stream.
+            Used to create a key file from given content.
+            Do NOT use this during regular game save.
+            \param file File */
+        void saveToStream(afl::io::Stream& file);
+
+        /** Initialize from a data array.
+            \param bytes Bytes to read (should be KEY_SIZE_BYTES bytes) */
+        void unpackFromBytes(afl::base::ConstBytes_t bytes);
+
+        /** Store into data array.
+            \param bytes Bytes to write (should be KEY_SIZE_BYTES bytes) */
+        void packIntoBytes(afl::base::Bytes_t bytes) const;
+
+        /** Get key Id.
+            The key Id is a printable hex string derived from the content and uniquely identifies this key
+            without listing its plaintext.
+            \return key Id */
+        String_t getKeyId() const;
 
      private:
-        void initFromFizz(const uint32_t (&data)[KEY_SIZE]);
+        void initFromFizz(const uint32_t (&data)[KEY_SIZE_WORDS]);
         void parseFizz(afl::io::Stream& s);
         void parseKey(afl::io::Stream& s);
 
@@ -68,11 +88,13 @@ namespace game { namespace v3 {
 
         std::auto_ptr<afl::charset::Charset> m_charset;
 
-        uint32_t m_fizz[KEY_SIZE];
+        uint32_t m_fizz[KEY_SIZE_WORDS];
 
         String_t m_winplanString1;
         String_t m_winplanString2;
 
+        /** Validity flag.
+            Invalid means not loaded from a file; content is still initialized. */
         bool m_isValid;
     };
 

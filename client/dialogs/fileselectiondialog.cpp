@@ -325,7 +325,7 @@ client::dialogs::FileSelectionDialog::run()
     win.add(g1);
     
     // FIXME: scrollbar
-    win.add(ui::widgets::FrameGroup::wrapWidget(del, m_root.colorScheme(), ui::widgets::FrameGroup::LoweredFrame, m_fileList));
+    win.add(ui::widgets::FrameGroup::wrapWidget(del, m_root.colorScheme(), ui::LoweredFrame, m_fileList));
     win.add(m_crumbTrail);
 
     ui::widgets::StandardDialogButtons& btns = del.addNew(new ui::widgets::StandardDialogButtons(m_root));

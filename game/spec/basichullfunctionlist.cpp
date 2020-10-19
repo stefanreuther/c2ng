@@ -125,6 +125,9 @@ BasicHullFunctionReader::handleLine(const String_t& fileName, int lineNr, String
         } else if (util::stringMatch("Explanation", name)) {
             // 'e' takes string
             m_lastFunction->addToExplanation(value);
+        } else if (util::stringMatch("Picture", name)) {
+            // 'p' takes string
+            m_lastFunction->setPictureName(value);
         } else if (util::stringMatch("Standard", name)) {
             // 's' takes list of hull numbers
             trimComments(value);
@@ -281,3 +284,20 @@ game::spec::BasicHullFunctionList::performDefaultAssignments(ComponentVector<Hul
     }
 }
 
+// Get number of functions.
+size_t
+game::spec::BasicHullFunctionList::getNumFunctions() const
+{
+    return m_functions.size();
+}
+
+// Get function by index.
+const game::spec::BasicHullFunction*
+game::spec::BasicHullFunctionList::getFunctionByIndex(size_t index) const
+{
+    if (index < m_functions.size()) {
+        return m_functions[index];
+    } else {
+        return 0;
+    }
+}

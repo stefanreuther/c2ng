@@ -75,7 +75,7 @@ TestInterpreterFileTable::testIt()
     // Close non-open files
     TS_ASSERT_THROWS_NOTHING(testee.closeFile(0));
     TS_ASSERT_THROWS_NOTHING(testee.closeFile(2));
-    TS_ASSERT_THROWS_NOTHING(testee.closeFile(-1));
+    TS_ASSERT_THROWS_NOTHING(testee.closeFile(size_t(-1)));
     TS_ASSERT_THROWS_NOTHING(testee.closeFile(6));
 }
 

@@ -72,6 +72,32 @@ TestServerDbexportDbExporter::testTypes()
                      "silent redis rpush e                              x\n");
 }
 
+/** String test. Tests stringification. */
+void
+TestServerDbexportDbExporter::testStrings()
+{
+    afl::net::redis::InternalDatabase db;
+    db.callVoid(Segment().pushBackString("set").pushBackString("a").pushBackString("a'b"));
+    db.callVoid(Segment().pushBackString("set").pushBackString("b").pushBackString("a$b"));
+    db.callVoid(Segment().pushBackString("set").pushBackString("c").pushBackString("a\nb"));
+    db.callVoid(Segment().pushBackString("set").pushBackString("d").pushBackString("a\n\r\tb"));
+    db.callVoid(Segment().pushBackString("set").pushBackString("e").pushBackString("a'\"b"));
+    db.callVoid(Segment().pushBackString("set").pushBackString("f").pushBackString("a\033b"));
+
+    afl::io::InternalTextWriter t;
+    CommandLineParserMock c(DEFAULT_ARGS);
+
+    server::dbexport::exportDatabase(t, db, c);
+
+    TS_ASSERT_EQUALS(afl::string::fromMemory(t.getContent()),
+                     "silent redis set   a                              \"a'b\"\n"
+                     "silent redis set   b                              'a$b'\n"
+                     "silent redis set   c                              \"a\\nb\"\n"
+                     "silent redis set   d                              \"a\\n\\r\\tb\"\n"
+                     "silent redis set   e                              \"a'\\\"b\"\n"
+                     "silent redis set   f                              \"a\\x1B""b\"\n");
+}
+
 /*
  *  The following test "few large" vs. "many small" elements.
  *  We had a typo here causing some combinations to crash.
@@ -164,7 +190,7 @@ TestServerDbexportDbExporter::testLargeHash()
 void
 TestServerDbexportDbExporter::testManyHash()
 {
-    // 1 hashes with 1 key.
+    // 1000 hashes with 1 key.
     afl::net::redis::InternalDatabase db;
     for (int i = 0; i < 1000; ++i) {
         db.callVoid(Segment().pushBackString("hset").pushBackInteger(i).pushBackString("a").pushBackString("x"));

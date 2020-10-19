@@ -18,7 +18,7 @@ TestUtilStringList::testIt()
     // Verify empty
     TS_ASSERT_EQUALS(testee.size(), 0U);
     TS_ASSERT(!testee.get(0, i, s));
-    TS_ASSERT(!testee.get(-1, i, s));
+    TS_ASSERT(!testee.get(size_t(-1), i, s));
     TS_ASSERT(!testee.get(1000000, i, s));
 
     // Populate
@@ -35,7 +35,7 @@ TestUtilStringList::testIt()
     TS_ASSERT_EQUALS(i, 42);
     TS_ASSERT_EQUALS(s, "ho");
 
-    TS_ASSERT(!testee.get(-1, i, s));
+    TS_ASSERT(!testee.get(size_t(-1), i, s));
     TS_ASSERT(!testee.get(1000000, i, s));
 
     // Verify find

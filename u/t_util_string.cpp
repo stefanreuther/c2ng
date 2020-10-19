@@ -211,7 +211,7 @@ TestUtilString::testFormatOptions()
 
 /** Test util::formatName. */
 void
-TestUtilstring::testFormatName()
+TestUtilString::testFormatName()
 {
     TS_ASSERT_EQUALS(util::formatName("FOO"), "Foo");
     TS_ASSERT_EQUALS(util::formatName("FOO.BAR"), "Foo.Bar");
@@ -271,7 +271,7 @@ TestUtilString::testParseBoolean()
 
 /** Test encodeHtml(). */
 void
-TestUtilstring::testEncodeHtml()
+TestUtilString::testEncodeHtml()
 {
     TS_ASSERT_EQUALS(util::encodeHtml("", false), "");
     TS_ASSERT_EQUALS(util::encodeHtml("", true),  "");
@@ -287,5 +287,32 @@ TestUtilstring::testEncodeHtml()
 
     TS_ASSERT_EQUALS(util::encodeHtml("\xc3\xb6\xE2\x9C\x97X", false), "&#246;&#10007;X");
     TS_ASSERT_EQUALS(util::encodeHtml("\xc3\xb6\xE2\x9C\x97X", true),  "\xc3\xb6\xE2\x9C\x97X");
+}
+
+/** Test addTrailingCharacter / removeTrailingCharacter. */
+void
+TestUtilString::testTrailing()
+{
+    // Add
+    String_t s;
+    util::addTrailingCharacter(s, ',');
+    TS_ASSERT_EQUALS(s, ",");
+    util::addTrailingCharacter(s, ',');
+    TS_ASSERT_EQUALS(s, ",");
+    s += 'a';
+    util::addTrailingCharacter(s, ',');
+    TS_ASSERT_EQUALS(s, ",a,");
+
+    // Remove
+    util::removeTrailingCharacter(s, ',');
+    TS_ASSERT_EQUALS(s, ",a");
+    util::removeTrailingCharacter(s, ',');
+    TS_ASSERT_EQUALS(s, ",a");
+
+    s = ",";
+    util::removeTrailingCharacter(s, ',');
+    TS_ASSERT_EQUALS(s, "");
+    util::removeTrailingCharacter(s, ',');
+    TS_ASSERT_EQUALS(s, "");
 }
 

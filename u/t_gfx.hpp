@@ -161,6 +161,8 @@ class TestGfxRectangle : public CxxTest::TestSuite {
     void testAlign();
     void testSplit();
     void testFormat();
+    void testSplit2();
+    void testInclude();
 };
 
 class TestGfxResourceProvider : public CxxTest::TestSuite {
@@ -190,6 +192,7 @@ class TestGfxTimerQueue : public CxxTest::TestSuite {
  public:
     void test1();
     void test2();
+    void test3();
 };
 
 class TestGfxTypes : public CxxTest::TestSuite {

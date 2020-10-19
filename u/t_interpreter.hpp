@@ -36,7 +36,6 @@ class ExpressionTestHelper {
     void checkRejectedExpression(const char* expr);
 
     void checkStatement(const char* stmt);
-    void checkIntegerExpressionStatement(const char* expr, int value);
 
     int32_t a, b, c;
 
@@ -73,6 +72,41 @@ class TestInterpreterBaseValue : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestInterpreterBinaryExecution : public CxxTest::TestSuite {
+ public:
+    void testAnd();
+    void testOr();
+    void testXor();
+    void testAdd();
+    void testSub();
+    void testMult();
+    void testDivide();
+    void testIntegerDivide();
+    void testRemainder();
+    void testPow();
+    void testConcat();
+    void testConcatEmpty();
+    void testCompare();
+    void testMin();
+    void testMax();
+    void testFirstStr();
+    void testRestStr();
+    void testFindStr();
+    void testBitAnd();
+    void testBitOr();
+    void testBitXor();
+    void testStr();
+    void testATan();
+    void testLCut();
+    void testRCut();
+    void testEndCut();
+    void testStrMult();
+    void testKeyAddParent();
+    void testKeyFind();
+    void testArrayDim();
+    void testExecuteComparison();
+};
+
 class TestInterpreterBinaryOperation : public CxxTest::TestSuite {
  public:
     void testName();
@@ -99,6 +133,10 @@ class TestInterpreterBytecodeObject : public CxxTest::TestSuite {
     void testLineNumbers2();
     void testLineNumbers3();
     void testHasUserCall();
+    void testVariableReference();
+    void testCompact();
+    void testAppend();
+    void testDisassembly();
 };
 
 class TestInterpreterCallableValue : public CxxTest::TestSuite {
@@ -201,12 +239,37 @@ class TestInterpreterKeywords : public CxxTest::TestSuite {
 class TestInterpreterMemoryCommandSource : public CxxTest::TestSuite {
  public:
     void testIt();
+    void testOneLine();
+    void testTwoLines();
+    void testCharset();
+    void testError();
+    void testAddLinesEmpty();
+    void testAddLinesOne();
+    void testAddLinesMulti();
 };
 
 class TestInterpreterMutexContext : public CxxTest::TestSuite {
  public:
     void testSave();
     void testBasics();
+};
+
+class TestInterpreterMutexFunctions : public CxxTest::TestSuite {
+ public:
+    void testInit();
+    void testTakeLock();
+    void testTakeLockConflict();
+    void testReleaseLockOnExit();
+    void testGetLockInfo0();
+    void testGetLockInfo1();
+    void testGetLockInfo2();
+    void testGetLockInfoFail0();
+    void testGetLockInfoFail1();
+    void testGetLockInfoFail2();
+    void testFailNull();
+    void testFailIter();
+    void testDim();
+    void testToString();
 };
 
 class TestInterpreterMutexList : public CxxTest::TestSuite {
@@ -347,6 +410,84 @@ class TestInterpreterProcess : public CxxTest::TestSuite {
     void testProperties();
     void testFreeze();
     void testFreeze2();
+    void testFinalize();
+    void testFinalize2();
+    void testContextStack();
+    void testContextStack2();
+    void testVariable();
+    void testExecInvalid();
+    void testExecPushNamed();
+    void testExecPushLocal();
+    void testExecPushStatic();
+    void testExecPushShared();
+    void testExecPushNamedShared();
+    void testExecPushLiteral();
+    void testExecPushInteger();
+    void testExecPushBoolean();
+    void testExecUnary();
+    void testExecBinary();
+    void testExecTernary();
+    void testExecJumpCondTaken();
+    void testExecJumpCondMiss();
+    void testExecJumpAlways();
+    void testExecJumpCatch();
+    void testExecJumpDecZero();
+    void testExecIndirectCall();
+    void testExecIndirectLoad();
+    void testExecIndirectStore();
+    void testExecIndirectPop();
+    void testExecStackDup();
+    void testExecStackDrop();
+    void testExecStackSwap();
+    void testExecStoreNamedVariable();
+    void testExecStoreLocal();
+    void testExecStoreStatic();
+    void testExecStoreShared();
+    void testExecStoreNamedShared();
+    void testExecPopNamedVariable();
+    void testExecPopLocal();
+    void testExecPopStatic();
+    void testExecPopShared();
+    void testExecPopNamedShared();
+    void testExecMemrefLoad();
+    void testExecMemrefCall();
+    void testExecMemrefPop();
+    void testExecMemrefStore();
+    void testExecDimLocal();
+    void testExecDimStatic();
+    void testExecDimShared();
+    void testExecUncatch();
+    void testExecReturn();
+    void testExecWith();
+    void testExecEndWith();
+    void testExecFirstIndex();
+    void testExecNextIndex();
+    void testExecEndIndex();
+    void testExecEvalStatement();
+    void testExecEvalExpression();
+    void testExecDefSub();
+    void testExecDefShipProperty();
+    void testExecDefPlanetProperty();
+    void testExecLoad();
+    void testExecPrint();
+    void testExecAddHook();
+    void testExecRunHook();
+    void testExecThrow();
+    void testExecTerminate();
+    void testExecSuspend();
+    void testExecNewArray();
+    void testExecMakeList();
+    void testExecNewHash();
+    void testExecInstance();
+    void testExecResizeArray();
+    void testExecBind();
+    void testExecFirst();
+    void testExecNext();
+    void testExecFusedUnary();
+    void testExecFusedBinary();
+    void testExecFusedComparison();
+    void testExecFusedComparison2();
+    void testExecInplaceUnary();
 };
 
 class TestInterpreterProcessList : public CxxTest::TestSuite {
@@ -359,6 +500,18 @@ class TestInterpreterProcessList : public CxxTest::TestSuite {
     void testFail();
     void testTerminate();
     void testPriority();
+    void testEndSignal();
+    void testWait();
+    void testWaitError();
+    void testWaitCatch();
+    void testWaitTerminate();
+    void testRemoveKeep();
+    void testResume();
+    void testTerminateAll();
+    void testResumeNone();
+    void testMismatches();
+    void testRunFreeze();
+    void testObject();
 };
 
 class TestInterpreterPropertyAcceptor : public CxxTest::TestSuite {
@@ -387,14 +540,48 @@ class TestInterpreterSpecialCommand : public CxxTest::TestSuite {
     void testInterface();
 };
 
+class TestInterpreterStatementCompilationContext : public CxxTest::TestSuite {
+ public:
+    void testConstructor();
+    void testDefaults();
+    void testOneLineSyntax();
+    void testBlockSyntax();
+};
+
 class TestInterpreterStatementCompiler : public CxxTest::TestSuite {
  public:
     void testExprStatement();
+    void testBreakFailures();
+    void testMisplaced();
     void testIf();
     void testFor();
     void testDo();
     void testSelect();
     void testEval();
+    void testEnd();
+    void testStop();
+    void testAbort();
+    void testSub();
+    void testFunction();
+    void testCreateProperty();
+    void testDimLocal();
+    void testDimStatic();
+    void testDimShared();
+    void testBind();
+    void testCreateKeymap();
+    void testForEach();
+    void testHooks();
+    void testUseKeymap();
+    void testSelectionExec();
+    void testStructWith();
+    void testTry();
+    void testRedim();
+    void testLoad();
+    void testPreexecLoad();
+    void testPrint();
+    void testOption();
+    void testCompileList();
+    void testSpecial();
 };
 
 class TestInterpreterStructureType : public CxxTest::TestSuite {
@@ -417,6 +604,11 @@ class TestInterpreterStructureValueData : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestInterpreterSubroutineValue : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
 class TestInterpreterTagNode : public CxxTest::TestSuite {
  public:
     void testHeader();
@@ -432,6 +624,12 @@ class TestInterpreterTaskEditor : public CxxTest::TestSuite {
     void testIsValidCommand();
 };
 
+class TestInterpreterTernaryExecution : public CxxTest::TestSuite {
+ public:
+    void testKeyAdd();
+    void testInvalid();
+};
+
 class TestInterpreterTernaryOperation : public CxxTest::TestSuite {
  public:
     void testName();
@@ -445,6 +643,7 @@ class TestInterpreterTokenizer : public CxxTest::TestSuite {
     void testStrings();
     void testIsIdentifierCharacter();
     void testIsValidUppercaseIdentifier();
+    void testBadStrings();
 };
 
 class TestInterpreterTypeHint : public CxxTest::TestSuite {
@@ -510,6 +709,9 @@ class TestInterpreterValues : public CxxTest::TestSuite {
     void testFloatToString();
     void testMiscToString();
     void testMake();
+    void testQuoteString();
+    void testQuoteStringParse();
+    void testFormatFloat();
 };
 
 class TestInterpreterWorld : public CxxTest::TestSuite {

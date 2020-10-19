@@ -5,8 +5,8 @@
 #include "client/dialogs/shipspeeddialog.hpp"
 #include "afl/base/deleter.hpp"
 #include "client/downlink.hpp"
-#include "client/proxy/shipspeedproxy.hpp"
 #include "client/widgets/shipspeedwidget.hpp"
+#include "game/proxy/shipspeedproxy.hpp"
 #include "ui/eventloop.hpp"
 #include "ui/group.hpp"
 #include "ui/layout/hbox.hpp"
@@ -19,7 +19,7 @@
 #include "util/translation.hpp"
 
 namespace {
-    using client::proxy::ShipSpeedProxy;
+    using game::proxy::ShipSpeedProxy;
     
     class Window {
      public:
@@ -57,7 +57,7 @@ namespace {
 
                 client::widgets::ShipSpeedWidget& ssw = del.addNew(new client::widgets::ShipSpeedWidget(m_value, m_originalStatus.maxSpeed, m_originalStatus.hyperSpeedMarker, m_root));
                 hg.add(ui::widgets::FrameGroup::wrapWidget(del, m_root.colorScheme(),
-                                                           ui::widgets::FrameGroup::LoweredFrame,
+                                                           ui::LoweredFrame,
                                                            ssw.addButtons(del, m_root)));
                 hg.add(del.addNew(new ui::Spacer()));
 

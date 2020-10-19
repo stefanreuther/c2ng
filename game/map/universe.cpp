@@ -16,7 +16,7 @@
 
 namespace {
     /** Format name of a planet. */
-    String_t formatPlanetName(const game::map::Planet& pl, afl::string::Translator& tx, game::InterpreterInterface& iface, int flags)
+    String_t formatPlanetName(const game::map::Planet& pl, afl::string::Translator& tx, int flags)
     {
         return afl::string::Format(((flags & game::map::Universe::NameOrbit) != 0
                                     ? ((flags & game::map::Universe::NameVerbose) != 0
@@ -25,10 +25,21 @@ namespace {
                                     : ((flags & game::map::Universe::NameVerbose) != 0
                                        ? tx.translateString("%s (Planet #%d)")
                                        : tx.translateString("%s (#%d)"))).c_str(),
-                                   pl.getName(game::PlainName, tx, iface),
+                                   pl.getName(tx),
                                    pl.getId());
     }
 
+    /* Format name of a ship.
+       This is similar to Ship::getName(LongName), but saves the dependency on InterpreterInterface. */
+    String_t formatShipName(const game::map::Ship& sh, afl::string::Translator& tx)
+    {
+        String_t plainName = sh.getName();
+        if (plainName.empty()) {
+            return afl::string::Format(tx("Ship #%d"), sh.getId());
+        } else {
+            return afl::string::Format(tx("Ship #%d: %s"), sh.getId(), plainName);
+        }
+    }
 
     // /** Manipulating: Postprocess a fleet. This will remove all fleet members that do not
     //     exist anymore. It will also synchronize the waypoints. */
@@ -77,9 +88,9 @@ game::map::Universe::Universe()
       m_reverter(0)
 {
     // ex GUniverse::GUniverse
-    m_minefields.reset(new MinefieldType(*this));
-    m_ufos.reset(new UfoType(*this));
-    m_explosions.reset(new ExplosionType(*this));
+    m_minefields.reset(new MinefieldType());
+    m_ufos.reset(new UfoType());
+    m_explosions.reset(new ExplosionType());
     m_playedShips.reset(new PlayedShipType(*this));
     m_playedPlanets.reset(new PlayedPlanetType(*this));
     m_playedBases.reset(new PlayedBaseType(*this));
@@ -369,7 +380,7 @@ game::map::Universe::postprocess(PlayerSet_t playingSet, PlayerSet_t availablePl
     // Internal checks for others
     m_minefields->internalCheck(turnNumber, host, config);
     m_drawings.eraseExpiredDrawings(turnNumber);
-    m_ufos->postprocess(turnNumber);
+    m_ufos->postprocess(turnNumber, m_config, config, tx, log);
 // FIXME: port
 //     setTypePlayability(ty_minefields, playability);
 //     setTypePlayability(ty_ufos, playability);
@@ -413,7 +424,7 @@ game::map::Universe::postprocess(PlayerSet_t playingSet, PlayerSet_t availablePl
 //     \param pt Location, need not be normalized
 //     \return Id of planet, or zero if none */
 game::Id_t
-game::map::Universe::getPlanetAt(Point pt) const
+game::map::Universe::findPlanetAt(Point pt) const
 {
     // ex GUniverse::getPlanetAt
     return AnyPlanetType(const_cast<Universe&>(*this)).findFirstObjectAt(m_config.getCanonicalLocation(pt));
@@ -423,19 +434,19 @@ game::map::Universe::getPlanetAt(Point pt) const
 //     the location, look whether the point is in the warp well of one.
 //     \param pt Location, need not be normalized
 //     \param gravity true to look into warp well. If false, function
-//                    behaves exactly like getPlanetAt(int).
+//                    behaves exactly like findPlanetAt(int).
 //     \return Id of planet, or zero if none */
 game::Id_t
-game::map::Universe::getPlanetAt(Point pt,
-                                 bool gravityFlag,
-                                 const game::config::HostConfiguration& config,
-                                 const HostVersion& host) const
+game::map::Universe::findPlanetAt(Point pt,
+                                  bool gravityFlag,
+                                  const game::config::HostConfiguration& config,
+                                  const HostVersion& host) const
 {
-    // ex GUniverse::getPlanetAt
+    // ex GUniverse::findPlanetAt
     // ex planacc.pas:GravityPlanetAt
-    Id_t rv = getPlanetAt(pt);
+    Id_t rv = findPlanetAt(pt);
     if (rv == 0 && gravityFlag) {
-        rv = getGravityPlanetAt(pt, config, host);
+        rv = findGravityPlanetAt(pt, config, host);
     }
     return rv;
 }
@@ -443,12 +454,12 @@ game::map::Universe::getPlanetAt(Point pt,
 
 // /** Get planet from warp well location.
 //     \param pt Location
-//     \pre getPlanetAt(pt) == 0
+//     \pre findPlanetAt(pt) == 0
 //     \return Id of planet if pt is in its warp wells, 0 otherwise */
 game::Id_t
-game::map::Universe::getGravityPlanetAt(Point pt,
-                                        const game::config::HostConfiguration& config,
-                                        const HostVersion& host) const
+game::map::Universe::findGravityPlanetAt(Point pt,
+                                         const game::config::HostConfiguration& config,
+                                         const HostVersion& host) const
 {
     // ex GUniverse::getGravityPlanetAt
     // ex planacc.pas:GravityPlanet
@@ -508,7 +519,7 @@ game::map::Universe::getGravityPlanetAt(Point pt,
     \param pt position to check
     \returns Id number of a ship at position \c pt, or zero if none. */
 game::Id_t
-game::map::Universe::getAnyShipAt(Point pt) const
+game::map::Universe::findFirstShipAt(Point pt) const
 {
     // ex GUniverse::getAnyShipAt
     // ex shipacc.pas:ShipAt
@@ -526,32 +537,31 @@ String_t
 game::map::Universe::getLocationName(Point pt, int flags,
                                      const game::config::HostConfiguration& config,
                                      const HostVersion& host,
-                                     afl::string::Translator& tx,
-                                     InterpreterInterface& iface) const
+                                     afl::string::Translator& tx) const
 {
     // ex GUniverse::getLocationName
     // ex shipacc.pas:LocationStr
-    if (Id_t pid = getPlanetAt(pt)) {
+    if (Id_t pid = findPlanetAt(pt)) {
         if (const Planet* pl = planets().get(pid)) {
-            return formatPlanetName(*pl, tx, iface, flags);
+            return formatPlanetName(*pl, tx, flags);
         }
     }
 
     if ((flags & NameShips) != 0) {
-        if (Id_t sid = getAnyShipAt(pt)) {
+        if (Id_t sid = findFirstShipAt(pt)) {
             if (const Ship* sh = ships().get(sid)) {
-                return sh->getName(LongName, tx, iface);
+                return formatShipName(*sh, tx);
             }
         }
     }
 
     if ((flags & NameGravity) != 0) {
-        if (Id_t pid = getGravityPlanetAt(pt, config, host)) {
+        if (Id_t pid = findGravityPlanetAt(pt, config, host)) {
             if (const Planet* pl = planets().get(pid)) {
                 return afl::string::Format(((flags & NameVerbose) != 0
                                             ? tx.translateString("near %s (Planet #%d)")
                                             : tx.translateString("near %s (#%d)")).c_str(),
-                                           pl->getName(PlainName, tx, iface),
+                                           pl->getName(tx),
                                            pl->getId());
             }
         }

@@ -147,7 +147,7 @@ game::interface::loadVM(Session& session, int playerNr)
     LoadContext ctx1(session);
 
     // - WorldLoadContext allows loading processes
-    interpreter::vmio::WorldLoadContext ctx2(ctx1, session.world());
+    interpreter::vmio::WorldLoadContext ctx2(ctx1, session.processList(), session.world());
 
     // - do it!
     interpreter::vmio::ObjectLoader(pRoot->charset(), ctx2).load(*file);
@@ -175,7 +175,7 @@ game::interface::saveVM(Session& session, int playerNr)
 
     // Prepare plan
     interpreter::vmio::FileSaveContext ctx(pRoot->charset());
-    const interpreter::ProcessList::Vector_t& list = session.world().processList().getProcessList();
+    const interpreter::ProcessList::Vector_t& list = session.processList().getProcessList();
     for (size_t i = 0, n = list.size(); i < n; ++i) {
         if (list[i] != 0 && wantSaveProcess(*list[i])) {
             ctx.addProcess(*list[i]);

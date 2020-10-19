@@ -24,6 +24,9 @@ namespace gfx {
         /** true to make a fullscreen window. */
         bool fullScreen;
 
+        /** true to disable mouse-grab. */
+        bool disableGrab;
+
         /** Window title (application name). */
         String_t title;
 
@@ -34,6 +37,7 @@ namespace gfx {
             : size(640, 480),
               bitsPerPixel(32),
               fullScreen(false),
+              disableGrab(false),
               title(),
               icon()
             { }

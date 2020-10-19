@@ -38,6 +38,8 @@ namespace ui { namespace rich {
         void handleDocumentUpdate();
         void adjustToDocumentSize();
 
+        void setPreferredSize(gfx::Point prefSize);
+
         Document::LinkId_t getSelectedLink() const;
         void setSelectedLink(Document::LinkId_t link);
 
@@ -72,6 +74,7 @@ namespace ui { namespace rich {
         gfx::ResourceProvider& m_provider;
         Document doc;
         gfx::Point pref_size;
+        gfx::Point m_minSize;
 
         uint16_t key_flags;
         bool mdown;

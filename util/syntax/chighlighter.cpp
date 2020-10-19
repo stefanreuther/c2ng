@@ -1,5 +1,6 @@
 /**
   *  \file util/syntax/chighlighter.cpp
+  *  \brief Class util::syntax::CHighlighter
   */
 
 #include "util/syntax/chighlighter.hpp"
@@ -319,11 +320,11 @@ namespace {
 }
 
 util::syntax::CHighlighter::CHighlighter(int language)
-    : language(language),
+    : m_language(language),
       m_text(),
-      state(sDefault),
-      accept_regexp(false),
-      accept_preproc(true)
+      m_state(sDefault),
+      m_acceptRegexp(false),
+      m_acceptPreprocessor(true)
 {
     // ex SyntaxC::SyntaxC
 }
@@ -336,9 +337,9 @@ util::syntax::CHighlighter::init(afl::string::ConstStringMemory_t text)
 {
     // ex SyntaxC::init
     m_text = text;
-    state = sDefault;
-    accept_regexp = false;
-    accept_preproc = true;
+    m_state = sDefault;
+    m_acceptRegexp = false;
+    m_acceptPreprocessor = true;
 }
 
 bool
@@ -354,22 +355,22 @@ util::syntax::CHighlighter::scan(Segment& result)
     }
 
     // Special states
-    if (state == sMacroName) {
+    if (m_state == sMacroName) {
         if (skip(m_text, cLetter)) {
             skip(m_text, cLetter | cDigit);
             result.finish(NameFormat, m_text);
-            state          = sDefault;
-            accept_regexp  = false;
-            accept_preproc = false;
+            m_state              = sDefault;
+            m_acceptRegexp       = false;
+            m_acceptPreprocessor = false;
             return true;
         } else {
-            state = sDefault;
-            accept_regexp  = false;
-            accept_preproc = false;
+            m_state              = sDefault;
+            m_acceptRegexp       = false;
+            m_acceptPreprocessor = false;
         }
     }
 
-    if (state == sIncludeFileName) {
+    if (m_state == sIncludeFileName) {
         const char* p = m_text.at(0);
         if (p != 0 && *p == '<') {
             while ((p = m_text.at(0)) != 0 && classify(*p) != cNewline && *p != '>') {
@@ -381,14 +382,14 @@ util::syntax::CHighlighter::scan(Segment& result)
                 skipContinuation(m_text);
             }
             result.finish(StringFormat, m_text);
-            state          = sDefault;
-            accept_regexp  = false;
-            accept_preproc = false;
+            m_state              = sDefault;
+            m_acceptRegexp       = false;
+            m_acceptPreprocessor = false;
             return true;
         } else {
-            state = sDefault;
-            accept_regexp  = false;
-            accept_preproc = false;
+            m_state              = sDefault;
+            m_acceptRegexp       = false;
+            m_acceptPreprocessor = false;
         }
     }
 
@@ -396,7 +397,7 @@ util::syntax::CHighlighter::scan(Segment& result)
     if (skip(m_text, cNewline)) {
         // Newline
         result.finish(DefaultFormat, m_text);
-        accept_preproc = true;
+        m_acceptPreprocessor = true;
         return true;
     } else if (skip1(m_text, cSlash)) {
         // Slash. Could be comment or regexp.
@@ -424,21 +425,21 @@ util::syntax::CHighlighter::scan(Segment& result)
             }
             result.finish(CommentFormat, m_text);
             return true;
-        } else if (accept_regexp && (language & LangJavaScript) != 0) {
+        } else if (m_acceptRegexp && (m_language & LangJavaScript) != 0) {
             // Regexp
             skipRegexp(m_text);
             result.finish(StringFormat, m_text);
-            accept_regexp  = false;
-            accept_preproc = false;
+            m_acceptRegexp       = false;
+            m_acceptPreprocessor = false;
             return true;
         } else {
             // Just a slash
             result.finish(DefaultFormat, m_text);
-            accept_regexp = true;
-            accept_preproc = false;
+            m_acceptRegexp       = true;
+            m_acceptPreprocessor = false;
             return true;
         }
-    } else if (accept_preproc && (language & (LangC | LangCXX)) != 0 && skip1(m_text, cHash)) {
+    } else if (m_acceptPreprocessor && (m_language & (LangC | LangCXX)) != 0 && skip1(m_text, cHash)) {
         // Preprocessor
         skipContinuation(m_text);
         skip(m_text, cWhitespace);
@@ -448,55 +449,55 @@ util::syntax::CHighlighter::scan(Segment& result)
         mark.finish(DefaultFormat, m_text);
         String_t ident = getIdentifier(mark.getText());
         if (ident == "ifdef" || ident == "undef" || ident == "define" || ident == "ifndef") {
-            state = sMacroName;
+            m_state = sMacroName;
         } else if (ident == "include" || ident == "import") {
-            state = sIncludeFileName;
+            m_state = sIncludeFileName;
         } else {
             // keep state
         }
         result.finish(SectionFormat, m_text);
-        accept_regexp = false;
-        accept_preproc = false;
+        m_acceptRegexp       = false;
+        m_acceptPreprocessor = false;
         return true;
     } else if (skip1(m_text, cSQuote)) {
         skipString(m_text, '\'');
         result.finish(StringFormat, m_text);
-        accept_regexp  = false;
-        accept_preproc = false;
+        m_acceptRegexp       = false;
+        m_acceptPreprocessor = false;
         return true;
     } else if (skip1(m_text, cDQuote)) {
         skipString(m_text, '"');
         result.finish(StringFormat, m_text);
-        accept_regexp  = false;
-        accept_preproc = false;
+        m_acceptRegexp       = false;
+        m_acceptPreprocessor = false;
         return true;
     } else if (skip(m_text, cDigit)) {
         // Number
         result.finish(DefaultFormat, m_text);
-        accept_regexp  = false;
-        accept_preproc = false;
+        m_acceptRegexp       = false;
+        m_acceptPreprocessor = false;
         return true;
     } else if (skip(m_text, cLetter)) {
         // Identifier
         skip(m_text, cLetter | cDigit);
         result.finish(DefaultFormat, m_text);
-        if ((findKeyword(getIdentifier(result.getText())) & language) != 0) {
+        if ((findKeyword(getIdentifier(result.getText())) & m_language) != 0) {
             result.setFormat(KeywordFormat);
         }
-        accept_regexp  = false;
-        accept_preproc = false;
+        m_acceptRegexp       = false;
+        m_acceptPreprocessor = false;
         return true;
     } else if (skip(m_text, cPunct | cStar)) {
         // Punctuation
         result.finish(DefaultFormat, m_text);
-        accept_regexp  = true;
-        accept_preproc = false;
+        m_acceptRegexp       = true;
+        m_acceptPreprocessor = false;
         return true;
     } else if (skip(m_text, cOther | cHash)) {
         // More punctuation
         result.finish(DefaultFormat, m_text);
-        accept_regexp  = false;
-        accept_preproc = false;
+        m_acceptRegexp       = false;
+        m_acceptPreprocessor = false;
         return true;
     } else {
         return false;

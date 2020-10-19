@@ -56,7 +56,7 @@ TestGfxTimerQueue::test1()
     testee.handleElapsedTime(60);
     TS_ASSERT_EQUALS(testee.getNextTimeout(), 80U);
     TS_ASSERT_EQUALS(acc, "1");
-    
+
     testee.handleElapsedTime(80);
     TS_ASSERT_EQUALS(testee.getNextTimeout(), afl::sys::INFINITE_TIMEOUT);
     TS_ASSERT_EQUALS(acc, "12");
@@ -75,3 +75,25 @@ TestGfxTimerQueue::test2()
         t1 = testee.createTimer().asPtr();
     }
 }
+
+/** Test that a timer dies while active. */
+void
+TestGfxTimerQueue::test3()
+{
+    gfx::TimerQueue testee;
+    afl::base::Ptr<gfx::Timer> t1 = testee.createTimer().asPtr();
+    afl::base::Ptr<gfx::Timer> t2 = testee.createTimer().asPtr();
+
+    // No timer has been set yet, so no timeout yet
+    TS_ASSERT_EQUALS(testee.getNextTimeout(), afl::sys::INFINITE_TIMEOUT);
+
+    // Start two timers
+    t1->setInterval(100);
+    t2->setInterval(200);
+    TS_ASSERT_EQUALS(testee.getNextTimeout(), 100U);
+
+    // Destroy timer 1. Next timeout changes to 200.
+    t1 = 0;
+    TS_ASSERT_EQUALS(testee.getNextTimeout(), 200U);
+}
+

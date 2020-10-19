@@ -1,5 +1,6 @@
 /**
   *  \file game/authcache.hpp
+  *  \brief Class game::AuthCache
   */
 #ifndef C2NG_GAME_AUTHCACHE_HPP
 #define C2NG_GAME_AUTHCACHE_HPP

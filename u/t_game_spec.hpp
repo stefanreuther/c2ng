@@ -31,6 +31,7 @@ class TestGameSpecBasicHullFunctionList : public CxxTest::TestSuite {
 class TestGameSpecBeam : public CxxTest::TestSuite {
  public:
     void testIt();
+    void testDerivedInformation();
 };
 
 class TestGameSpecComponent : public CxxTest::TestSuite {
@@ -59,6 +60,8 @@ class TestGameSpecCost : public CxxTest::TestSuite {
     void testCompare();         // ==, !=
     void testEnough();          // isEnoughFor()
     void testGetMaxAmount();
+    void testDivi();
+    void testFormat();
 };
 
 class TestGameSpecEngine : public CxxTest::TestSuite {
@@ -79,6 +82,8 @@ class TestGameSpecFriendlyCode : public CxxTest::TestSuite {
     void testData();
     void testDescription();
     void testWorksOn();
+    void testWorksOnShip();
+    void testIsPermitted();
 };
 
 class TestGameSpecFriendlyCodeList : public CxxTest::TestSuite {
@@ -95,12 +100,17 @@ class TestGameSpecFriendlyCodeList : public CxxTest::TestSuite {
     void testSort();
     void testSyntaxErrors();
     void testPessimistic();
+    void testPack();
+    void testLoadExtraDup();
 };
 
 class TestGameSpecHull : public CxxTest::TestSuite {
  public:
     void testIt();
     void testHullFunctions();
+    void testFuelUsage();
+    void testCloakFuelUsage();
+    void testMineHitDamage();
 };
 
 class TestGameSpecHullAssignmentList : public CxxTest::TestSuite {
@@ -169,6 +179,15 @@ class TestGameSpecNullComponentNameProvider : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestGameSpecRacialAbilityList : public CxxTest::TestSuite {
+ public:
+    void testConfigAbilities();
+    void testCategories();
+    void testShip();
+    void testFilter();
+    void testOrigin();
+};
+
 class TestGameSpecShipList : public CxxTest::TestSuite {
  public:
     void testIt();
@@ -196,11 +215,13 @@ class TestGameSpecTorpedo : public CxxTest::TestSuite {
 class TestGameSpecTorpedoLauncher : public CxxTest::TestSuite {
  public:
     void testIt();
+    void testDerivedInformation();
 };
 
 class TestGameSpecWeapon : public CxxTest::TestSuite {
  public:
     void testIt();
+    void testDeathRay();
 };
 
 #endif

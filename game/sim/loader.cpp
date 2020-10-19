@@ -63,7 +63,7 @@ game::sim::Loader::Loader(afl::charset::Charset& cs)
 void
 game::sim::Loader::load(afl::io::Stream& in, Setup& setup)
 {
-    // ex GSimState::load
+    // ex GSimState::load, ccsim.pas:LoadBattleSetupFromFile
 
     // Check signature
     size_t version;
@@ -96,6 +96,7 @@ game::sim::Loader::load(afl::io::Stream& in, Setup& setup)
         structures::SimShipData data;
         in.fullRead(afl::base::fromObject(data).trim(recordSize));
 
+        // FIXME: report null as error
         if (Ship* sh = setup.addShip()) {
             sh->setId(data.object.id);
             sh->setName(m_charset.decode(data.object.name));
@@ -151,6 +152,7 @@ game::sim::Loader::load(afl::io::Stream& in, Setup& setup)
         structures::SimPlanetData data;
         in.fullRead(afl::base::fromObject(data).trim(recordSize));
 
+        // FIXME: report null as error
         if (Planet* pl = setup.addPlanet()) {
             pl->setId(data.id);
             pl->setOwner(data.owner);
@@ -200,7 +202,7 @@ game::sim::Loader::load(afl::io::Stream& in, Setup& setup)
 void
 game::sim::Loader::save(afl::io::Stream& out, const Setup& setup)
 {
-    // ex GSimState::save
+    // ex GSimState::save, ccsim.pas:SaveBattleSetupToFile
 
     // Figure out what version to save in
     int version = 3;

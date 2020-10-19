@@ -1,5 +1,6 @@
 /**
   *  \file server/play/configurationpacker.cpp
+  *  \brief Class server::play::ConfigurationPacker
   */
 
 #include "server/play/configurationpacker.hpp"

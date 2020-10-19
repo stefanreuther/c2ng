@@ -1,31 +1,34 @@
 /**
   *  \file interpreter/binaryexecution.cpp
+  *  \brief Execution of Binary Operations
   */
 
 #include <cmath>
 #include "interpreter/binaryexecution.hpp"
-#include "interpreter/error.hpp"
 #include "afl/base/countof.hpp"
-#include "interpreter/values.hpp"
-#include "afl/data/scalarvalue.hpp"
-#include "afl/data/stringvalue.hpp"
-#include "afl/data/floatvalue.hpp"
 #include "afl/charset/utf8.hpp"
 #include "afl/data/booleanvalue.hpp"
-#include "afl/string/format.hpp"
-#include "util/math.hpp"
-#include "interpreter/binaryoperation.hpp"
-#include "interpreter/keymapvalue.hpp"
-#include "util/key.hpp"
-#include "interpreter/callablevalue.hpp"
+#include "afl/data/floatvalue.hpp"
+#include "afl/data/scalarvalue.hpp"
+#include "afl/data/stringvalue.hpp"
 #include "afl/data/visitor.hpp"
+#include "afl/string/format.hpp"
+#include "interpreter/binaryoperation.hpp"
+#include "interpreter/callablevalue.hpp"
+#include "interpreter/error.hpp"
+#include "interpreter/keymapvalue.hpp"
+#include "interpreter/values.hpp"
+#include "util/key.hpp"
+#include "util/math.hpp"
 
+using interpreter::Error;
 using interpreter::getBooleanValue;
 using interpreter::makeBooleanValue;
+using interpreter::makeFloatValue;
 using interpreter::makeIntegerValue;
 using interpreter::makeStringValue;
-using interpreter::makeFloatValue;
-using interpreter::Error;
+using interpreter::mustBeScalarValue;
+using interpreter::mustBeStringValue;
 
 namespace {
     /** Comparison result. */
@@ -196,13 +199,13 @@ namespace {
 #endif
     }
 
-    String_t convertCase(const afl::data::StringValue* sv, bool doit)
+    String_t convertCase(const String_t& sv, bool doit)
     {
         // ex ccexpr.pas:UpProc
         if (doit)
-            return afl::string::strUCase(sv->getValue());
+            return afl::string::strUCase(sv);
         else
-            return sv->getValue();
+            return sv;
     }
 
     /** Perform comparison. Compares two user-supplied parameters and returns
@@ -374,8 +377,8 @@ namespace {
             const afl::data::StringValue* sa = dynamic_cast<const afl::data::StringValue*>(a);
             const afl::data::StringValue* sb = dynamic_cast<const afl::data::StringValue*>(b);
             if (sa != 0 && sb != 0) {
-                String_t ssa = convertCase(sa, caseblind);
-                String_t ssb = convertCase(sb, caseblind);
+                String_t ssa = convertCase(sa->getValue(), caseblind);
+                String_t ssb = convertCase(sb->getValue(), caseblind);
                 return ssa < ssb ? cmpLess : ssa == ssb ? cmpEqual : cmpGreater;
             }
             throw Error::typeError();
@@ -564,9 +567,7 @@ namespace {
             return 0;
 
         /* Second argument must be integer */
-        const afl::data::ScalarValue* bi = dynamic_cast<const afl::data::ScalarValue*>(b);
-        if (!bi)
-            throw Error::typeError(Error::ExpectInteger);
+        const int32_t bi = mustBeScalarValue(b);
 
         /* First argument must be integer or real */
         if (const afl::data::ScalarValue* ai = dynamic_cast<const afl::data::ScalarValue*>(a)) {
@@ -604,7 +605,7 @@ namespace {
             };
 
             int32_t a = ai->getValue();
-            int32_t b = bi->getValue();
+            int32_t b = bi;
             if (b == 0) {
                 // a^0 is 1
                 return makeIntegerValue(1);
@@ -634,7 +635,7 @@ namespace {
                 return makeFloatValue(std::pow(double(a), double(b)));
             }
         } else if (const afl::data::FloatValue* af = dynamic_cast<const afl::data::FloatValue*>(a)) {
-            return makeFloatValue(std::pow(af->getValue(), bi->getValue()));
+            return makeFloatValue(std::pow(af->getValue(), bi));
         } else {
             throw Error::typeError(Error::ExpectNumeric);
         }
@@ -760,18 +761,18 @@ namespace {
     {
         // ex ccexpr.pas:op_FIRST_func
         // Split string at delimiter, return first part
-        if (a == 0 || b == 0)
+        if (a == 0 || b == 0) {
             return 0;
+        }
 
-        const afl::data::StringValue* sa = dynamic_cast<const afl::data::StringValue*>(a);
-        const afl::data::StringValue* sb = dynamic_cast<const afl::data::StringValue*>(b);
-        if (sa == 0 || sb == 0)
-            throw Error::typeError(Error::ExpectString);
+        const String_t& sa = mustBeStringValue(a);
+        const String_t& sb = mustBeStringValue(b);
 
-        String_t ssa = sa->getValue();
+        String_t ssa = sa;
         String_t::size_type apos = convertCase(sa, caseblind).find(convertCase(sb, caseblind));
-        if (apos != String_t::npos)
+        if (apos != String_t::npos) {
             ssa.erase(apos);
+        }
 
         return makeStringValue(ssa);
     }
@@ -783,14 +784,12 @@ namespace {
         if (a == 0 || b == 0)
             return 0;
 
-        const afl::data::StringValue* sa = dynamic_cast<const afl::data::StringValue*>(a);
-        const afl::data::StringValue* sb = dynamic_cast<const afl::data::StringValue*>(b);
-        if (sa == 0 || sb == 0)
-            throw Error::typeError(Error::ExpectString);
+        const String_t& sa = mustBeStringValue(a);
+        const String_t& sb = mustBeStringValue(b);
 
         String_t::size_type apos = convertCase(sa, caseblind).find(convertCase(sb, caseblind));
         if (apos != String_t::npos) {
-            return makeStringValue(sa->getValue().substr(apos + sb->getValue().size()));
+            return makeStringValue(sa.substr(apos + sb.size()));
         } else {
             return 0;
         }
@@ -803,14 +802,12 @@ namespace {
         if (a == 0 || b == 0)
             return 0;
 
-        const afl::data::StringValue* sa = dynamic_cast<const afl::data::StringValue*>(a);
-        const afl::data::StringValue* sb = dynamic_cast<const afl::data::StringValue*>(b);
-        if (sa == 0 || sb == 0)
-            throw Error::typeError(Error::ExpectString);
+        const String_t& sa = mustBeStringValue(a);
+        const String_t& sb = mustBeStringValue(b);
 
         String_t::size_type apos = convertCase(sa, caseblind).find(convertCase(sb, caseblind));
         if (apos != String_t::npos)
-            return makeIntegerValue(static_cast<int32_t>(afl::charset::Utf8().byteToCharPos(sa->getValue(), apos)) + 1);
+            return makeIntegerValue(static_cast<int32_t>(afl::charset::Utf8().byteToCharPos(sa, apos)) + 1);
         else
             return makeIntegerValue(0);
     }
@@ -819,14 +816,10 @@ namespace {
     {
         // ex ccexpr.pas:op_BITAND_func
         // Bitwise and
-        ArithmeticPair p;
-        switch (checkArithmetic(p, a, b)) {
-         case ariNull:
+        if (a == 0 || b == 0) {
             return 0;
-         case ariInt:
-            return makeIntegerValue(p.ia & p.ib);
-         default:
-            throw Error::typeError(Error::ExpectInteger);
+        } else {
+            return makeIntegerValue(mustBeScalarValue(a) & mustBeScalarValue(b));
         }
     }
 
@@ -834,14 +827,10 @@ namespace {
     {
         // ex ccexpr.pas:op_BITOR_func
         // Bitwise or
-        ArithmeticPair p;
-        switch (checkArithmetic(p, a, b)) {
-         case ariNull:
+        if (a == 0 || b == 0) {
             return 0;
-         case ariInt:
-            return makeIntegerValue(p.ia | p.ib);
-         default:
-            throw Error::typeError(Error::ExpectInteger);
+        } else {
+            return makeIntegerValue(mustBeScalarValue(a) | mustBeScalarValue(b));
         }
     }
 
@@ -849,14 +838,10 @@ namespace {
     {
         // ex ccexpr.pas:op_BITXOR_func
         // Bitwise Xor
-        ArithmeticPair p;
-        switch (checkArithmetic(p, a, b)) {
-         case ariNull:
+        if (a == 0 || b == 0) {
             return 0;
-         case ariInt:
-            return makeIntegerValue(p.ia ^ p.ib);
-         default:
-            throw Error::typeError(Error::ExpectInteger);
+        } else {
+            return makeIntegerValue(mustBeScalarValue(a) ^ mustBeScalarValue(b));
         }
     }
 
@@ -868,22 +853,21 @@ namespace {
             return 0;
 
         /* Check second arg */
-        const afl::data::ScalarValue* bi = dynamic_cast<const afl::data::ScalarValue*>(b);
-        if (bi == 0)
-            throw Error::typeError(Error::ExpectInteger);
-        if (bi->getValue() < 0)
+        int32_t bi = mustBeScalarValue(b);
+        if (bi < 0) {
             throw Error::rangeError();
+        }
 
         /* Check first arg */
         if (const afl::data::ScalarValue* ai = dynamic_cast<const afl::data::ScalarValue*>(a)) {
             /* Bool converts as-is, as does integer with precision 0 */
-            if (dynamic_cast<const afl::data::BooleanValue*>(ai) != 0 || bi->getValue() == 0)
+            if (dynamic_cast<const afl::data::BooleanValue*>(ai) != 0 || bi == 0)
                 return makeStringValue(interpreter::toString(ai, false));
             /* Convert integer as floating point */
-            return makeStringValue(afl::string::Format(String_t(afl::string::Format("%%.%df", bi->getValue())).c_str(), double(ai->getValue())));
+            return makeStringValue(afl::string::Format(String_t(afl::string::Format("%%.%df", bi)).c_str(), double(ai->getValue())));
         } else if (const afl::data::FloatValue* af = dynamic_cast<const afl::data::FloatValue*>(a)) {
             /* Convert float */
-            return makeStringValue(afl::string::Format(String_t(afl::string::Format("%%.%df", bi->getValue())).c_str(), double(af->getValue())));
+            return makeStringValue(afl::string::Format(String_t(afl::string::Format("%%.%df", bi)).c_str(), double(af->getValue())));
         } else {
             throw Error::typeError(Error::ExpectNumeric);
         }
@@ -1029,12 +1013,10 @@ namespace {
             throw Error::typeError(Error::ExpectKeymap);
 
         // Key
-        const afl::data::StringValue* keysym = dynamic_cast<const afl::data::StringValue*>(b);
-        if (!keysym)
-            throw Error::typeError(Error::ExpectString);
+        const String_t& keysym = mustBeStringValue(b);
 
         uint32_t keyval = 0;
-        if (!util::parseKey(keysym->getValue(), keyval)) {
+        if (!util::parseKey(keysym, keyval)) {
             throw Error("Invalid key name");
         }
 
@@ -1058,11 +1040,7 @@ namespace {
         }
 
         // Index
-        const afl::data::ScalarValue* iv = dynamic_cast<const afl::data::ScalarValue*>(b);
-        if (iv == 0) {
-            throw Error::typeError(Error::ExpectInteger);
-        }
-        int32_t n = iv->getValue();
+        int32_t n = mustBeScalarValue(b);
         if (n <= 0 || n > av->getDimension(0)) {
             throw Error::rangeError();
         }
@@ -1127,10 +1105,7 @@ namespace {
     };
 }
 
-// /** Execute binary operation.
-//     \param op Operation, IntBinaryOperation
-//     \param a,b User-supplied arguments taken from value stack
-//     \return New value to push on value stack */
+// Execute binary operation.
 afl::data::Value*
 interpreter::executeBinaryOperation(World& world, uint8_t op, const afl::data::Value* a, const afl::data::Value* b)
 {
@@ -1142,10 +1117,7 @@ interpreter::executeBinaryOperation(World& world, uint8_t op, const afl::data::V
     }
 }
 
-// /** Execute a comparison operation.
-//     \param op Operation, IntBinaryOperation
-//     \param a,b User-supplied arguments taken from value stack
-//     \return Comparison result, possible input to makeBooleanValue. */
+// Execute a comparison operation.
 int
 interpreter::executeComparison(uint8_t op, const afl::data::Value* a, const afl::data::Value* b)
 {

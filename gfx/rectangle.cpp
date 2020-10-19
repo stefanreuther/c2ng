@@ -163,7 +163,7 @@ gfx::Rectangle::moveTo(Point where) throw()
 }
 
 // Move this rectangle such that it is contained within \c other.
-void
+gfx::Rectangle&
 gfx::Rectangle::moveIntoRectangle(const Rectangle& other) throw()
 {
     // ex Rectangle::moveInto
@@ -171,17 +171,18 @@ gfx::Rectangle::moveIntoRectangle(const Rectangle& other) throw()
     m_top  = std::min(m_top,  other.m_top  + other.m_height - m_height);
     m_left = std::max(m_left, other.m_left);
     m_top  = std::max(m_top,  other.m_top);
+    return *this;
 }
 
 // Center this rectangle within another.
-void
+gfx::Rectangle&
 gfx::Rectangle::centerWithin(const Rectangle& other) throw()
 {
-    moveToEdge(other, 1, 1, 0);
+    return moveToEdge(other, 1, 1, 0);
 }
 
 // Move this rectangle to edge of another.
-void
+gfx::Rectangle&
 gfx::Rectangle::moveToEdge(const Rectangle& other, int xPos, int yPos, int offset) throw()
 {
     const int virtW = other.m_width  - m_width;
@@ -189,6 +190,7 @@ gfx::Rectangle::moveToEdge(const Rectangle& other, int xPos, int yPos, int offse
 
     m_left = other.m_left + xPos * virtW / 2 - offset * (xPos-1);
     m_top  = other.m_top  + yPos * virtH / 2 - offset * (yPos-1);
+    return *this;
 }
 
 // Reduce this rectangle's width from the left.
@@ -249,6 +251,40 @@ gfx::Rectangle::splitY(int pix)
     m_height -= pix;
     m_top += pix;
     return Rectangle(m_left, resultY, m_width, pix);
+}
+
+// Reduce this rectangle's width from the right.
+void
+gfx::Rectangle::consumeRightX(int pix)
+{
+    const int removeX = std::min(std::max(0, pix), m_width);
+    m_width -= removeX;
+}
+
+// Split rectangle vertically.
+gfx::Rectangle
+gfx::Rectangle::splitRightX(int pix)
+{
+    const int removeX = std::min(std::max(0, pix), m_width);
+    m_width -= removeX;
+    return Rectangle(m_left + m_width, m_top, removeX, m_height);
+}
+
+// Reduce this rectangle's height from the bottom.
+void
+gfx::Rectangle::consumeBottomY(int pix)
+{
+    const int removeY = std::min(std::max(0, pix), m_height);
+    m_height -= removeY;
+}
+
+// Split rectangle horizontally.
+gfx::Rectangle
+gfx::Rectangle::splitBottomY(int pix)
+{
+    const int removeY = std::min(std::max(0, pix), m_height);
+    m_height -= removeY;
+    return Rectangle(m_left, m_top + m_height, m_width, removeY);    
 }
 
 // Output rectangle.

@@ -1,5 +1,6 @@
 /**
   *  \file game/actions/changeshipfriendlycode.cpp
+  *  \brief Class game::actions::ChangeShipFriendlyCode
   */
 
 #include "game/actions/changeshipfriendlycode.hpp"
@@ -41,8 +42,6 @@ game::actions::ChangeShipFriendlyCode::addFleet(Id_t fleetId, game::spec::Friend
     }
 }
 
-// /** Set friendly code on all fleet members to the same value.
-//     \param fcode New fcode */
 void
 game::actions::ChangeShipFriendlyCode::setFriendlyCode(String_t fc)
 {
@@ -54,9 +53,6 @@ game::actions::ChangeShipFriendlyCode::setFriendlyCode(String_t fc)
     }
 }
 
-// /** Set friendly code on all fleet members to avoid a same value.
-//     Attempts to set the fcodes such that no fleet member has the specified code.
-//     \param avoid Code to avoid */
 void
 game::actions::ChangeShipFriendlyCode::unsetFriendlyCode(String_t avoidFC)
 {
@@ -77,8 +73,6 @@ game::actions::ChangeShipFriendlyCode::unsetFriendlyCode(String_t avoidFC)
     }
 }
 
-// /** Undo all friendly code changes.
-//     Restores the fcodes that were set before this object was constructed. */
 void
 game::actions::ChangeShipFriendlyCode::undo()
 {

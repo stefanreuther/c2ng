@@ -1,5 +1,6 @@
 /**
   *  \file game/shipquery.hpp
+  *  \brief Class game::ShipQuery
   */
 #ifndef C2NG_GAME_SHIPQUERY_HPP
 #define C2NG_GAME_SHIPQUERY_HPP
@@ -175,20 +176,20 @@ namespace game {
         void setOwner(int id);
 
      private:
-        int hull_id;                      ///< Hull Id. Zero if not known.
-        int ship_id;                      ///< Ship Id. Zero if not known.
+        int m_hullType;                   ///< Hull Id. Zero if not known. ex hull_id.
+        int m_shipId;                     ///< Ship Id. Zero if not known. ex ship_id.
 
-        ExperienceLevelSet_t filter_level_set;    ///< Experience levels for filtering. Display only those that match this filter.
-        ExperienceLevelSet_t display_level_set;   ///< Experience levels for display. Those matching this filter are shown as active.
+        ExperienceLevelSet_t m_levelFilterSet;    ///< Experience levels for filtering. Display only those that match this filter. ex filter_level_set.
+        ExperienceLevelSet_t m_levelDisplaySet;   ///< Experience levels for display. Those matching this filter are shown as active. ex display_level_set.
 
-        PlayerSet_t filter_player_set;     ///< Owner mask for filtering. Display only those that match this filter.
-        PlayerSet_t display_player_set;    ///< Owner mask for display. Those matching this filter are shown as active.
+        PlayerSet_t m_playerFilterSet;    ///< Owner mask for filtering. Display only those that match this filter. ex filter_player_set.
+        PlayerSet_t m_playerDisplaySet;   ///< Owner mask for display. Those matching this filter are shown as active. ex display_player_set.
 
-        int engine_id;                    ///< Engine number. Zero if not known.
-        int combat_mass;                  ///< Combat mass. Zero if not known.
-        int crew;                         ///< Crew. Zero if not known.
-        int owner;                        ///< Ship owner. Zero if not known.
-        int used_esb;                     ///< Used Engine-Shield bonus. Set if combat_mass includes ESB.
+        int m_engineType;                 ///< Engine number. Zero if not known. ex engine_id.
+        int m_combatMass;                 ///< Combat mass. Zero if not known. ex combat_mass.
+        int m_crew;                       ///< Crew. Zero if not known. ex crew.
+        int m_owner;                      ///< Ship owner. Zero if not known. ex owner.
+        int m_usedESBRate;                ///< Used Engine-Shield bonus. Set if m_combatMass includes ESB. ex used_esb.
     };
     
 }

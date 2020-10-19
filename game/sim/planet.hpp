@@ -75,10 +75,10 @@ namespace game { namespace sim {
         void setNumBaseTorpedoes(int type, int amount);
 
         // // FIXME!!!!!!!!!!!!!!!!!1111
-        // int  getBaseDamage() const
-        //     { return 0; }
-        // void setBaseDamage(int)
-        //     { }
+        int getBaseDamage() const
+            { return 0; }
+        void setBaseDamage(int)
+            { }
 
         /** Check presence of a starbase.
             This is a shortcut to the getBaseBeamTech() call.
@@ -94,7 +94,7 @@ namespace game { namespace sim {
         int32_t getNumBaseTorpedoesAsType(int type, const game::spec::ShipList& shipList) const;
 
         // Object:
-        virtual bool hasImpliedAbility(Ability which, const game::spec::ShipList& shipList, const game::config::HostConfiguration& config) const;
+        virtual bool hasImpliedAbility(Ability which, const Configuration& opts, const game::spec::ShipList& shipList, const game::config::HostConfiguration& config) const;
 
      private:
         int  m_defense;                          // ex defense

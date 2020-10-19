@@ -8,6 +8,7 @@
 #include "t_game_vcr.hpp"
 #include "game/spec/componentvector.hpp"
 #include "game/spec/hull.hpp"
+#include "game/spec/engine.hpp"
 
 /** Test "get/set" methods. */
 void
@@ -250,5 +251,113 @@ TestGameVcrObject::testGuessMismatch()
     TS_ASSERT(!testee.canBeHull(vec, 10));
     TS_ASSERT_EQUALS(testee.getGuessedHull(vec), 1);
     TS_ASSERT_EQUALS(testee.getGuessedShipPicture(vec), 44);
+}
+
+/** Test engine guessing. */
+void
+TestGameVcrObject::testGuessEngine()
+{
+    // Environment
+    game::spec::Hull hull(12);
+    hull.setMass(200);
+
+    game::spec::EngineVector_t engines;
+    game::spec::Engine* en7 = engines.create(7); en7->cost().set(game::spec::Cost::Money, 100);
+    game::spec::Engine* en9 = engines.create(9); en9->cost().set(game::spec::Cost::Money, 200);
+
+    game::config::HostConfiguration config;
+    config[game::config::HostConfiguration::EngineShieldBonusRate].set(15);
+
+    // Success case
+    {
+        game::vcr::Object obj;
+        obj.setMass(230);
+        obj.setIsPlanet(false);
+        obj.setOwner(3);
+        TS_ASSERT_EQUALS(obj.getGuessedEngine(engines, &hull, true, config), 9);
+    }
+
+    // Success case including 360k bonus
+    {
+        game::vcr::Object obj;
+        obj.setMass(230 + 360);
+        obj.setIsPlanet(false);
+        obj.setOwner(3);
+        obj.setNumBays(1);
+        TS_ASSERT_EQUALS(obj.getGuessedEngine(engines, &hull, true, config), 9);
+    }
+
+    // Success case including scotty bonus
+    {
+        game::vcr::Object obj;
+        obj.setMass(230 + 50);
+        obj.setIsPlanet(false);
+        obj.setOwner(1);
+        TS_ASSERT_EQUALS(obj.getGuessedEngine(engines, &hull, true, config), 9);
+    }
+
+    // Success case: disabled ESB but experience enabled
+    {
+        game::config::HostConfiguration localConfig;
+        localConfig[game::config::HostConfiguration::EngineShieldBonusRate].set(0);
+        localConfig[game::config::HostConfiguration::EModEngineShieldBonusRate].set("2,4,6,8");
+        localConfig[game::config::HostConfiguration::NumExperienceLevels].set(4);
+
+        game::vcr::Object obj;
+        obj.setMass(206);
+        obj.setIsPlanet(false);
+        obj.setOwner(3);
+        obj.setExperienceLevel(3);
+        TS_ASSERT_EQUALS(obj.getGuessedEngine(engines, &hull, true, localConfig), 7);
+    }
+
+    // Failure case: planet
+    {
+        game::vcr::Object obj;
+        obj.setMass(230);
+        obj.setIsPlanet(true);
+        obj.setOwner(3);
+        TS_ASSERT_EQUALS(obj.getGuessedEngine(engines, &hull, true, config), 0);
+    }
+
+    // Failure case: no hull
+    {
+        game::vcr::Object obj;
+        obj.setMass(230);
+        obj.setIsPlanet(false);
+        obj.setOwner(3);
+        TS_ASSERT_EQUALS(obj.getGuessedEngine(engines, 0, true, config), 0);
+    }
+
+    // Failure case: ESB disabled
+    {
+        game::vcr::Object obj;
+        obj.setMass(230);
+        obj.setIsPlanet(false);
+        obj.setOwner(3);
+        TS_ASSERT_EQUALS(obj.getGuessedEngine(engines, 0, false, config), 0);
+    }
+
+    // Failure case: no 360k bonus because no fighters
+    {
+        game::vcr::Object obj;
+        obj.setMass(230 + 360);
+        obj.setIsPlanet(false);
+        obj.setOwner(3);
+        TS_ASSERT_EQUALS(obj.getGuessedEngine(engines, &hull, true, config), 0);
+    }
+
+    // Failure case: ambiguous engines
+    {
+        game::spec::EngineVector_t localEngines;
+        game::spec::Engine* en7 = localEngines.create(7); en7->cost().set(game::spec::Cost::Money, 200);
+        game::spec::Engine* en9 = localEngines.create(9); en9->cost().set(game::spec::Cost::Money, 200);
+
+        game::vcr::Object obj;
+        obj.setMass(230);
+        obj.setIsPlanet(false);
+        obj.setOwner(3);
+        TS_ASSERT_EQUALS(obj.getGuessedEngine(localEngines, &hull, true, config), 0);
+    }
 }
 

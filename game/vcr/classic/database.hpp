@@ -4,12 +4,12 @@
 #ifndef C2NG_GAME_VCR_CLASSIC_DATABASE_HPP
 #define C2NG_GAME_VCR_CLASSIC_DATABASE_HPP
 
-#include "game/vcr/database.hpp"
-#include "game/vcr/classic/battle.hpp"
+#include "afl/charset/charset.hpp"
 #include "afl/container/ptrvector.hpp"
 #include "afl/io/stream.hpp"
 #include "game/config/hostconfiguration.hpp"
-#include "afl/charset/charset.hpp"
+#include "game/vcr/classic/battle.hpp"
+#include "game/vcr/database.hpp"
 
 namespace game { namespace vcr { namespace classic {
 

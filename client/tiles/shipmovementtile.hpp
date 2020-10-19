@@ -4,7 +4,7 @@
 #ifndef C2NG_CLIENT_TILES_SHIPMOVEMENTTILE_HPP
 #define C2NG_CLIENT_TILES_SHIPMOVEMENTTILE_HPP
 
-#include "client/proxy/objectobserver.hpp"
+#include "game/proxy/objectobserver.hpp"
 #include "client/widgets/collapsibledataview.hpp"
 #include "client/widgets/keymapwidget.hpp"
 #include "ui/widgets/button.hpp"
@@ -21,17 +21,17 @@ namespace client { namespace tiles {
             enum { Location, Waypoint, Distance, WarpFactor, Eta, FuelUsage, EngineLoad };
             String_t text[7];
             util::SkinColor::Color colors[7];
-            ui::widgets::FrameGroup::Type fleetStatus;
+            ui::FrameType fleetStatus;
 
             Data()
                 {
                     afl::base::Memory<util::SkinColor::Color>(colors).fill(util::SkinColor::Green);
-                    fleetStatus = ui::widgets::FrameGroup::NoFrame;
+                    fleetStatus = ui::NoFrame;
                 }
         };
 
         ShipMovementTile(ui::Root& root, client::widgets::KeymapWidget& kmw);
-        void attach(client::proxy::ObjectObserver& oop);
+        void attach(game::proxy::ObjectObserver& oop);
 
         void setData(const Data& data);
 

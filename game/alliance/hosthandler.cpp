@@ -1,5 +1,6 @@
 /**
   *  \file game/alliance/hosthandler.cpp
+  *  \brief Class game::alliance::HostHandler
   */
 
 #include "game/alliance/hosthandler.hpp"
@@ -61,7 +62,7 @@ game::alliance::HostHandler::postprocess(Container& allies)
 
     // Check the command messages
     if (CommandContainer* cc = CommandExtra::get(m_turn, m_player)) {
-        if (const Command* cmd = cc->getCommand(Command::phc_TAlliance, 0)) {
+        if (const Command* cmd = cc->getCommand(Command::TAlliance, 0)) {
             const String_t& arg = cmd->getArg();
             for (size_t i = 0; i+2 < arg.size(); i += 3) {
                 // Determine race
@@ -94,7 +95,7 @@ game::alliance::HostHandler::handleChanges(const Container& allies)
         bool newAlliance = pAlliance != 0 && Offer::isOffer(pAlliance->newOffer.get(i));
         bool oldStrong   = pStrong   != 0 && Offer::isOffer(pStrong->oldOffer.get(i));
         bool newStrong   = pStrong   != 0 && Offer::isOffer(pStrong->newOffer.get(i));
-        
+
         if (oldAlliance != newAlliance || (newAlliance && oldStrong != newStrong)) {
             char code = (!newAlliance ? 'e' : newStrong ? 'F' : 'f');
             codes += code;
@@ -106,8 +107,8 @@ game::alliance::HostHandler::handleChanges(const Container& allies)
     // Make the command
     CommandContainer& cc = CommandExtra::create(m_turn).create(m_player);
     if (codes.empty()) {
-        cc.removeCommand(Command::phc_TAlliance, 0);
+        cc.removeCommand(Command::TAlliance, 0);
     } else {
-        cc.addCommand(Command::phc_TAlliance, 0, codes);
+        cc.addCommand(Command::TAlliance, 0, codes);
     }
 }

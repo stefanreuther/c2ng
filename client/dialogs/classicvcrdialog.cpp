@@ -211,6 +211,13 @@ namespace {
         out.text[ClassicVcrInfo::Result] = in.formatResult(g ? g->getViewpointPlayer() : 0,
                                                            formatBuildPoints(in, session),
                                                            session.translator());
+
+        game::map::Point pos;
+        if (in.getPosition(pos)) {
+            out.text[ClassicVcrInfo::Position] = Format("(%d,%d)", pos.getX(), pos.getY());
+        } else {
+            out.text[ClassicVcrInfo::Position] = "";
+        }
     }
 }
 

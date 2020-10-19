@@ -116,9 +116,9 @@ game::map::Fleet::hasSpecialFunction(int basicFunction,
 }
 
 String_t
-game::map::Fleet::getTitle(afl::string::Translator& tx, InterpreterInterface& iface) const
+game::map::Fleet::getTitle(afl::string::Translator& tx) const
 {
-    return getTitle(m_ship, tx, iface);
+    return getTitle(m_ship, tx);
 }
 
 // /** Synchronize a fleet member. Synchronizes waypoint of a single fleet member.
@@ -199,11 +199,11 @@ game::map::Fleet::synchronizeFleetMember(Universe& univ, Id_t sid,
 }
 
 String_t
-game::map::Fleet::getTitle(const Ship& ship, afl::string::Translator& tx, InterpreterInterface& iface)
+game::map::Fleet::getTitle(const Ship& ship, afl::string::Translator& tx)
 {
     // ex getFleetTitle
     if (ship.getFleetName().empty()) {
-        return Format(tx.translateString("Fleet %d: led by %s").c_str(), ship.getId(), ship.getName(PlainName, tx, iface));
+        return Format(tx.translateString("Fleet %d: led by %s").c_str(), ship.getId(), ship.getName());
     } else {
         return Format(tx.translateString("Fleet %d: %s").c_str(), ship.getId(), ship.getFleetName());
     }

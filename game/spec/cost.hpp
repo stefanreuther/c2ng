@@ -7,6 +7,8 @@
 
 #include "afl/base/types.hpp"
 #include "afl/string/string.hpp"
+#include "afl/string/translator.hpp"
+#include "util/numberformatter.hpp"
 
 namespace game { namespace spec {
 
@@ -54,6 +56,16 @@ namespace game { namespace spec {
             \return scaled cost */
         Cost  operator*(int32_t n) const;
 
+        /** Divide in-place.
+            \param n Divisor to divide by
+            \return *this */
+        Cost& operator/=(int32_t n);
+
+        /** Divide.
+            \param n Divisor to divide by
+            \return scaled cost */
+        Cost  operator/(int32_t n) const;
+
         /** Compare for equality.
             \param other other value
             \return true iff these two costs are equal */
@@ -75,6 +87,12 @@ namespace game { namespace spec {
             If this cost is valid, the resultant string will be a valid parameter for CCScript cargo operations.
             \return string, possibly blank */
         String_t toCargoSpecString() const;
+
+        /** Format to friendly human-readable string.
+            \param tx Translator
+            \param fmt Number formatter
+            \return string */
+        String_t format(afl::string::Translator& tx, util::NumberFormatter& fmt) const;
 
         /** Limit amount of items to build.
             This object represents the available resources.

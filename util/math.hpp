@@ -99,7 +99,7 @@ util::divideAndRound(int32_t a, int32_t b)
 inline int32_t
 util::divideAndRoundToEven(int32_t a, int b, int plus)
 {
-    // ex game/formula.h:rdivaddl,rdivaddw
+    // ex game/formula.h:rdivaddl,rdivaddw, lowlevel.pas:RDiv
     int32_t x = a / b + plus;
     int r = a % b;
     if (r*2 + (x&1) > b) {

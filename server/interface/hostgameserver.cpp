@@ -137,9 +137,14 @@ server::interface::HostGameServer::handleCommand(const String_t& upcasedCommand,
         result.reset(packInfo(i));
         return true;
     } else if (upcasedCommand == "GAMELIST") {
-        /* @q GAMELIST [STATE state:HostGameState] [TYPE type:HostGameType] [USER user:UID] [VERBOSE|ID] (Host Command)
+        /* @q GAMELIST [STATE state:HostGameState] [TYPE type:HostGameType] [USER user:UID] [...] [VERBOSE|ID] (Host Command)
            List games.
            Optional parameters %state, %type, %user limit output to games of that state, type, or played by that user.
+           Additional filter clauses:
+           - HOST id:Str (only games using this host version, since 2.40.9)
+           - MASTER id:Str (only games using this master version, since 2.40.9)
+           - SHIPLIST id:Str (only games using this ship list, since 2.40.9)
+           - TOOL id:Str (only games using this tool, since 2.40.9)
 
            The command returns a list of {@type HostGameInfo} (normal) by default.
            %VERBOSE returns the verbose variant, %ID returns just a list of {@type GID|game Ids}.
@@ -150,9 +155,7 @@ server::interface::HostGameServer::handleCommand(const String_t& upcasedCommand,
            @rettype IntList
            @rettype GID
            @uses game:state:$STATE, game:pubstate:$STATE, game:all, user:$UID:ownedGames */
-        afl::base::Optional<HostGame::State> requiredState;
-        afl::base::Optional<HostGame::Type> requiredType;
-        afl::base::Optional<String_t> requiredUser;
+        HostGame::Filter filter;
         enum { Normal, Verbose, Ids } mode = Normal;
         while (args.getNumArgs() > 0) {
             String_t keyword = afl::string::strUCase(toString(args.getNext()));
@@ -162,17 +165,29 @@ server::interface::HostGameServer::handleCommand(const String_t& upcasedCommand,
                 if (!HostGame::parseState(toString(args.getNext()), st)) {
                     throw std::runtime_error(INVALID_VALUE);
                 }
-                requiredState = st;
+                filter.requiredState = st;
             } else if (keyword == "TYPE") {
                 HostGame::Type ty;
                 args.checkArgumentCountAtLeast(1);
                 if (!HostGame::parseType(toString(args.getNext()), ty)) {
                     throw std::runtime_error(INVALID_VALUE);
                 }
-                requiredType = ty;
+                filter.requiredType = ty;
             } else if (keyword == "USER") {
                 args.checkArgumentCountAtLeast(1);
-                requiredUser = toString(args.getNext());
+                filter.requiredUser = toString(args.getNext());
+            } else if (keyword == "HOST") {
+                args.checkArgumentCountAtLeast(1);
+                filter.requiredHost = toString(args.getNext());
+            } else if (keyword == "TOOL") {
+                args.checkArgumentCountAtLeast(1);
+                filter.requiredTool = toString(args.getNext());
+            } else if (keyword == "SHIPLIST") {
+                args.checkArgumentCountAtLeast(1);
+                filter.requiredShipList = toString(args.getNext());
+            } else if (keyword == "MASTER") {
+                args.checkArgumentCountAtLeast(1);
+                filter.requiredMaster = toString(args.getNext());
             } else if (keyword == "VERBOSE") {
                 mode = Verbose;
             } else if (keyword == "ID") {
@@ -186,12 +201,12 @@ server::interface::HostGameServer::handleCommand(const String_t& upcasedCommand,
         if (mode == Ids) {
             // GAMELIST...ID
             afl::data::IntegerList_t result;
-            m_implementation.getGames(requiredState, requiredType, requiredUser, result);
+            m_implementation.getGames(filter, result);
             v->pushBackElements(result);
         } else {
             // GAMELIST..., GAMELIST...VERBOSE
             std::vector<HostGame::Info> result;
-            m_implementation.getInfos(requiredState, requiredType, requiredUser, (mode == Verbose), result);
+            m_implementation.getInfos(filter, (mode == Verbose), result);
             for (size_t i = 0, n = result.size(); i < n; ++i) {
                 v->pushBackNew(packInfo(result[i]));
             }

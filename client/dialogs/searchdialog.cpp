@@ -14,12 +14,12 @@
 #include "afl/base/staticassert.hpp"
 #include "afl/string/format.hpp"
 #include "client/downlink.hpp"
-#include "client/proxy/configurationproxy.hpp"
-#include "client/proxy/referencelistproxy.hpp"
-#include "client/proxy/searchproxy.hpp"
 #include "client/si/control.hpp"
 #include "client/widgets/referencelistbox.hpp"
 #include "game/interface/referencecontext.hpp"
+#include "game/proxy/configurationproxy.hpp"
+#include "game/proxy/referencelistproxy.hpp"
+#include "game/proxy/searchproxy.hpp"
 #include "interpreter/bytecodeobject.hpp"
 #include "interpreter/opcode.hpp"
 #include "interpreter/process.hpp"
@@ -182,8 +182,8 @@ namespace {
         client::si::OutputState& m_outputState;
 
         // Proxies
-        client::proxy::ReferenceListProxy m_refListProxy;
-        client::proxy::SearchProxy m_searchProxy;
+        game::proxy::ReferenceListProxy m_refListProxy;
+        game::proxy::SearchProxy m_searchProxy;
 
         // Widgets
         ui::EventLoop m_loop;
@@ -242,8 +242,8 @@ SearchDialog::SearchDialog(const SearchQuery& initialQuery, client::si::UserSide
       m_translator(tx),
       m_format(fmt),
       m_outputState(out),
-      m_refListProxy(root, iface.gameSender(), tx),
-      m_searchProxy(root, iface.gameSender()),
+      m_refListProxy(iface.gameSender(), root.engine().dispatcher()),
+      m_searchProxy(iface.gameSender(), root.engine().dispatcher()),
       m_loop(root),
       m_input(1000, 30, root),
       m_options(0, 0, root),
@@ -299,7 +299,7 @@ SearchDialog::run(bool immediate)
     win.add(m_options);
 
     // Input
-    win.add(FrameGroup::wrapWidget(del, m_root.colorScheme(), FrameGroup::LoweredFrame, m_input));
+    win.add(FrameGroup::wrapWidget(del, m_root.colorScheme(), ui::LoweredFrame, m_input));
     m_input.setFont(gfx::FontRequest().addSize(1));
 
     // "Search!" button
@@ -310,7 +310,7 @@ SearchDialog::run(bool immediate)
     win.add(g2);
 
     // Result list
-    win.add(FrameGroup::wrapWidget(del, m_root.colorScheme(), FrameGroup::LoweredFrame, m_refList));
+    win.add(FrameGroup::wrapWidget(del, m_root.colorScheme(), ui::LoweredFrame, m_refList));
     m_refList.setNumLines(20);
 
     // Lower buttons
@@ -489,37 +489,7 @@ SearchDialog::onOptionClick(int id)
 void
 SearchDialog::onGoto()
 {
-    class ReferenceTask : public client::si::ScriptTask {
-     public:
-        ReferenceTask(game::Reference ref)
-            : m_ref(ref)
-            { }
-        virtual void execute(uint32_t pgid, game::Session& session)
-            {
-                // Create BCO
-                interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
-                game::interface::ReferenceContext ctx(m_ref, session);
-                bco->setName("(Search Result)");
-                bco->setIsProcedure(true);
-                bco->addPushLiteral(&ctx);
-                bco->addInstruction(interpreter::Opcode::maPush, interpreter::Opcode::sNamedShared, bco->addName("UI.GOTOREFERENCE"));
-                bco->addInstruction(interpreter::Opcode::maIndirect, interpreter::Opcode::miIMCall, 1);
-
-                // Create process
-                interpreter::ProcessList& processList = session.world().processList();
-                interpreter::Process& proc = processList.create(session.world(), "(Search Result)");
-                proc.pushFrame(bco, false);
-                processList.resumeProcess(proc, pgid);
-            }
-     private:
-        game::Reference m_ref;
-    };
-
-    game::Reference ref = m_refList.getCurrentReference();
-    if (ref.isSet()) {
-        std::auto_ptr<client::si::ScriptTask> t(new ReferenceTask(ref));
-        executeTaskWait(t);
-    }
+    executeGoToReference("(Search Result)", m_refList.getCurrentReference());
 }
 
 void
@@ -579,7 +549,7 @@ SearchDialog::setValues()
 void
 SearchDialog::setListContent(const game::ref::List& list)
 {
-    class Init : public client::proxy::ReferenceListProxy::Initializer_t {
+    class Init : public game::proxy::ReferenceListProxy::Initializer_t {
      public:
         Init(const game::ref::List& list)
             : m_list(list)
@@ -591,7 +561,7 @@ SearchDialog::setListContent(const game::ref::List& list)
      private:
         game::ref::List m_list;
     };
-    m_refListProxy.setContentNew(std::auto_ptr<client::proxy::ReferenceListProxy::Initializer_t>(new Init(list)));
+    m_refListProxy.setContentNew(std::auto_ptr<game::proxy::ReferenceListProxy::Initializer_t>(new Init(list)));
 }
 
 void
@@ -603,7 +573,7 @@ client::dialogs::doSearchDialog(const game::SearchQuery& initialQuery,
                                 client::si::OutputState& out)
 {
     Downlink link(root);
-    client::proxy::ConfigurationProxy config(iface.gameSender());
+    game::proxy::ConfigurationProxy config(iface.gameSender());
 
     SearchDialog dlg(initialQuery, iface, root, tx, config.getNumberFormatter(link), out);
     dlg.run(immediate);

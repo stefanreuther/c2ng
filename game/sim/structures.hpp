@@ -17,7 +17,7 @@ namespace game { namespace sim { namespace structures {
 
     using game::v3::structures::NUM_TORPEDO_TYPES;
 
-    const int MAX_VERSION = 5;
+    const uint8_t MAX_VERSION = 5;
     const uint8_t TERMINATOR = 26;
     const size_t MAGIC_LENGTH = 6;
 

@@ -1,5 +1,6 @@
 /**
   *  \file game/config/hostconfiguration.cpp
+  *  \brief Class game::config::HostConfiguration
   */
 
 #include "game/config/hostconfiguration.hpp"
@@ -895,7 +896,7 @@ const game::config::IntegerOptionDescriptor game::config::HostConfiguration::Ext
     "ExtendedSensorSweep",
     &BooleanValueParser::instance,
 };
-const game::config::IntegerOptionDescriptor game::config::HostConfiguration::ColonistCombatSurvivalRate = {
+const game::config::HostConfiguration::StandardOptionDescriptor_t game::config::HostConfiguration::ColonistCombatSurvivalRate = {
     "ColonistCombatSurvivalRate",
     &IntegerValueParser::instance,
 };
@@ -1340,6 +1341,7 @@ const game::config::AliasOptionDescriptor game::config::HostConfiguration::Nativ
 
 
 
+// Default constructor.
 game::config::HostConfiguration::HostConfiguration()
 {
     setDefaultValues();
@@ -1753,7 +1755,10 @@ game::config::HostConfiguration::getExperienceLevelName(int level, afl::string::
     // ex pconfig.pas:ExperienceLevelName
     String_t s = (*this)[ExperienceLevelNames]();
     for (int i = 0; i < level; ++i) {
-        afl::string::strRemove(s, ",");
+        if (!afl::string::strRemove(s, ",")) {
+            s.clear();
+            break;
+        }
     }
     s = afl::string::strTrim(afl::string::strFirst(s, ","));
     if (s.size()) {
@@ -1797,11 +1802,25 @@ game::config::HostConfiguration::getPlayersWhereEnabled(const StandardOptionDesc
     return result;
 }
 
-// Get set of all players where an option has a given value.
+// Get set of all players where an option has a given scalar value.
 game::PlayerSet_t
 game::config::HostConfiguration::getPlayersWhere(const StandardOptionDescriptor_t& opt, int value) const
 {
     const StandardOption_t& optionValue = (*this)[opt];
+    PlayerSet_t result;
+    for (int i = 1; i <= MAX_PLAYERS; ++i) {
+        if (optionValue(i) == value) {
+            result += i;
+        }
+    }
+    return result;
+}
+
+// Get set of all players where an option has a given cost value.
+game::PlayerSet_t
+game::config::HostConfiguration::getPlayersWhere(const CostArrayOptionDescriptor& opt, const game::spec::Cost& value) const
+{
+    const CostArrayOption& optionValue = (*this)[opt];
     PlayerSet_t result;
     for (int i = 1; i <= MAX_PLAYERS; ++i) {
         if (optionValue(i) == value) {

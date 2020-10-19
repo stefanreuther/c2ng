@@ -13,9 +13,9 @@ namespace game { namespace test {
         This StringVerifier accepts all strings (up to 1000 characters). */
     class StringVerifier : public game::StringVerifier {
      public:
-        virtual bool isValidString(Context ctx, const String_t& text);
-        virtual bool isValidCharacter(Context ctx, afl::charset::Unichar_t ch);
-        virtual size_t getMaxStringLength(Context ctx);
+        virtual bool isValidString(Context ctx, const String_t& text) const;
+        virtual bool isValidCharacter(Context ctx, afl::charset::Unichar_t ch) const;
+        virtual size_t getMaxStringLength(Context ctx) const;
         virtual StringVerifier* clone() const;
     };
 

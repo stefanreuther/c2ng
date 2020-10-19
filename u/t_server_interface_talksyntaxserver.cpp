@@ -64,7 +64,6 @@ TestServerInterfaceTalkSyntaxServer::testIt()
 
     // SYNTAXMGET
     {
-        String_t q[] = {"qa","qb"};
         mock.expectCall("mget qa qb");
         afl::data::Vector::Ref_t expect = afl::data::Vector::create();
         expect->pushBackString("aa");

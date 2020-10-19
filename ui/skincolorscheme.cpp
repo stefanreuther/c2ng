@@ -15,7 +15,7 @@ ui::SkinColorScheme::SkinColorScheme(const ColorSet& colors, ui::ColorScheme& ui
 gfx::Color_t
 ui::SkinColorScheme::getColor(util::SkinColor::Color index)
 {
-    if (index < SkinColor::NUM_COLORS) {
+    if (size_t(index) < SkinColor::NUM_COLORS) {
         return m_uiColorScheme.getColor(m_colors[index]);
     } else {
         return m_uiColorScheme.getColor(0);

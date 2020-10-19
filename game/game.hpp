@@ -1,16 +1,18 @@
 /**
   *  \file game/game.hpp
+  *  \brief Class game::Game
   */
 #ifndef C2NG_GAME_GAME_HPP
 #define C2NG_GAME_GAME_HPP
 
 #include "afl/base/ptr.hpp"
+#include "afl/base/ref.hpp"
 #include "afl/base/refcounted.hpp"
 #include "afl/base/signal.hpp"
 #include "game/config/hostconfiguration.hpp"
 #include "game/historyturnlist.hpp"
 #include "game/map/cursors.hpp"
-#include "game/map/markings.hpp"
+#include "game/map/selections.hpp"
 #include "game/msg/configuration.hpp"
 #include "game/parser/messageinformation.hpp"
 #include "game/score/turnscorelist.hpp"
@@ -21,39 +23,84 @@ namespace game {
 
     class Turn;
 
+    /** Game.
+        Represents the status of a game, with
+        - current and history turn
+        - score history information
+        - cross-turn configuration and status (messages, teams, selections) */
     class Game : public afl::base::RefCounted {
      public:
+        /** Default constructor.
+            Makes an empty Game. */
         Game();
+
+        /** Destructor. */
         ~Game();
 
+        /** Access current turn.
+            Note that the turn is dynamically allocated, so you can initialize a Ref from it.
+            \return current turn */
         Turn& currentTurn();
         const Turn& currentTurn() const;
 
+        /** Access list of previous turns.
+            \return list of previous turns */
         HistoryTurnList& previousTurns();
         const HistoryTurnList& previousTurns() const;
 
+        /** Access planet score definitions.
+            \return planet score definitions */
         UnitScoreDefinitionList& planetScores();
         const UnitScoreDefinitionList& planetScores() const;
+
+        /** Access ship score definitions.
+            \return ship score definitions */
         UnitScoreDefinitionList& shipScores();
         const UnitScoreDefinitionList& shipScores() const;
 
+        /** Get viewpoint player.
+            \return viewpoint player
+            \see TeamSettings::getViewpointPlayer */
         int getViewpointPlayer() const;
-        void setViewpointPlayer(int pid);
 
+        /** Set viewpoint player.
+            \param playerNr viewpoint player
+            \see TeamSettings::setViewpointPlayer */
+        void setViewpointPlayer(int playerNr);
+
+        /** Get viewpoint turn.
+            \return turn (can be null) */
         afl::base::Ptr<Turn> getViewpointTurn() const;
+
+        /** Get viewpoint turn number.
+            \return turn number */
         int getViewpointTurnNumber() const;
+
+        /** Set viewpoint turn number.
+            If this changes the viewpoint turn, it will emit sig_viewpointTurnChange.
+            \param nr Turn number */
         void setViewpointTurnNumber(int nr);
 
+        /** Access team settings.
+            \return team settings */
         TeamSettings& teamSettings();
         const TeamSettings& teamSettings() const;
 
+        /** Access score history.
+            \return score history */
         game::score::TurnScoreList& scores();
         const game::score::TurnScoreList& scores() const;
 
+        /** Access object cursors.
+            \return object cursors */
         game::map::Cursors& cursors();
 
-        game::map::Markings& markings();
+        /** Access object selections.
+            \return object selections */
+        game::map::Selections& selections();
 
+        /** Access message configuration.
+            \return message configuration */
         game::msg::Configuration& messageConfiguration();
         const game::msg::Configuration& messageConfiguration() const;
 
@@ -70,14 +117,20 @@ namespace game {
             \param config Host configuration (can be updated with message information) */
         void addMessageInformation(const game::parser::MessageInformation& info, game::config::HostConfiguration& config);
 
+        /** Synchronize teams from alliances.
+            If we are allied with a player, adds them to our team;
+            if we are not allied with a player, removes them. */
         void synchronizeTeamsFromAlliances();
 
+        /** Notify listeners.
+            Invokes all listeners on current and viewpoint turn. */
         void notifyListeners();
 
+        /** Signal: viewpoint turn change. */
         afl::base::Signal<void()> sig_viewpointTurnChange;
 
      private:
-        afl::base::Ptr<Turn> m_currentTurn;
+        afl::base::Ref<Turn> m_currentTurn;
         HistoryTurnList m_previousTurns;
 
         UnitScoreDefinitionList m_planetScores;
@@ -89,7 +142,7 @@ namespace game {
         game::score::TurnScoreList m_scores;
 
         game::map::Cursors m_cursors;
-        game::map::Markings m_markings;
+        game::map::Selections m_selections;
 
         game::msg::Configuration m_messageConfiguration;
     };

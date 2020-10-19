@@ -204,8 +204,9 @@ namespace {
          case MessageInformation::Starbase:
          case MessageInformation::IonStorm:
          case MessageInformation::Ufo:
+         case MessageInformation::Wormhole:
             /* Those are identified by a mandatory Id */
-            if (tpl.getVariableSlotByName("ID", skipSlot)) {
+            if (tpl.getVariableSlotByName("ID", skipSlot) && skipSlot < processLimit) {
                 id = parseIntegerValue(values[skipSlot]);
             }
             if (!id) {
@@ -226,8 +227,9 @@ namespace {
             break;
 
          case MessageInformation::PlayerScore:
+         case MessageInformation::Explosion:
             /* These can have an optional Id */
-            if (tpl.getVariableSlotByName("ID", skipSlot)) {
+            if (tpl.getVariableSlotByName("ID", skipSlot) && skipSlot < processLimit) {
                 id = parseIntegerValue(values[skipSlot]);
             }
             mergeable = (id != 0);
@@ -242,7 +244,6 @@ namespace {
             /* This one is special, see below */
             break;
 
-         case MessageInformation::Explosion:
          case MessageInformation::NoObject:
             break;
         }
@@ -424,6 +425,8 @@ game::parser::MessageParser::load(afl::io::Stream& file, afl::string::Translator
                 mo = MessageInformation::Explosion;
             } else if (util::stringMatch("Alliance", kind)) {
                 mo = MessageInformation::Alliance;
+            } else if (util::stringMatch("Wormhole", kind)) {
+                mo = MessageInformation::Wormhole;
             } else {
                 mo = MessageInformation::NoObject;
             }

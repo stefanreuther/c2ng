@@ -31,6 +31,7 @@ namespace {
 bool
 util::stringMatch(const char* pattern, const char* tester)
 {
+    // ex phost.pas:PMatch
     while (*pattern) {
         char p = *pattern++;
         if (!*tester) {
@@ -219,7 +220,7 @@ util::formatName(String_t name)
 {
     // ex int/propenum.h:beautifyName
     bool hadUC = false;
-    for (String_t::size_type i = 0, n = name.size(); i < name.size(); ++i) {
+    for (String_t::size_type i = 0, n = name.size(); i < n; ++i) {
         if (afl::string::charIsUpper(name[i])) {
             if (hadUC) {
                 name[i] = afl::string::charToLower(name[i]);

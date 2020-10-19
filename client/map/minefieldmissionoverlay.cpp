@@ -4,18 +4,18 @@
 
 #include "client/map/minefieldmissionoverlay.hpp"
 #include "afl/string/format.hpp"
-#include "util/translation.hpp"
 #include "client/map/callback.hpp"
-#include "gfx/context.hpp"
-#include "game/map/minefield.hpp"
 #include "client/map/renderer.hpp"
-#include "gfx/complex.hpp"
-#include "game/session.hpp"
-#include "game/map/ship.hpp"
-#include "game/map/minefieldmission.hpp"
 #include "game/game.hpp"
+#include "game/map/minefield.hpp"
+#include "game/map/minefieldmission.hpp"
+#include "game/map/ship.hpp"
+#include "game/proxy/objectlistener.hpp"
+#include "game/session.hpp"
 #include "game/turn.hpp"
-#include "client/proxy/objectlistener.hpp"
+#include "gfx/complex.hpp"
+#include "gfx/context.hpp"
+#include "util/translation.hpp"
 
 using afl::string::Format;
 
@@ -114,7 +114,7 @@ client::map::MinefieldMissionOverlay::handleMouse(gfx::Point /*pt*/, MouseButton
 }
 
 void
-client::map::MinefieldMissionOverlay::attach(client::proxy::ObjectObserver& oop)
+client::map::MinefieldMissionOverlay::attach(game::proxy::ObjectObserver& oop)
 {
     class Reply : public util::Request<MinefieldMissionOverlay> {
      public:
@@ -145,7 +145,7 @@ client::map::MinefieldMissionOverlay::attach(client::proxy::ObjectObserver& oop)
         game::map::MinefieldEffects_t m_data;
     };
 
-    class Listener : public client::proxy::ObjectListener {
+    class Listener : public game::proxy::ObjectListener {
      public:
         Listener(util::RequestSender<MinefieldMissionOverlay> reply)
             : m_reply(reply)

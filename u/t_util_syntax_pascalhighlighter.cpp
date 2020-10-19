@@ -35,7 +35,7 @@ TestUtilSyntaxPascalHighlighter::testIt()
     util::syntax::PascalHighlighter testee;
     util::syntax::Segment r;
 
-    // Simple command
+    // Simple mix
     testee.init(afl::string::toMemory("CONST foo = '17'; { doc }"));
     TS_ASSERT(testee.scan(r));
     TS_ASSERT_EQUALS(r.getFormat(), util::syntax::KeywordFormat);
@@ -50,7 +50,7 @@ TestUtilSyntaxPascalHighlighter::testIt()
     TS_ASSERT_EQUALS(parseContinuation(testee, r), "{ doc }");
     TS_ASSERT(!testee.scan(r));
 
-    // Simple command
+    // Another simple mix
     testee.init(afl::string::toMemory("(*$I foo*) a = 1/2; // end"));
     TS_ASSERT(testee.scan(r));
     TS_ASSERT_EQUALS(r.getFormat(), util::syntax::Comment2Format);
@@ -59,6 +59,41 @@ TestUtilSyntaxPascalHighlighter::testIt()
     TS_ASSERT_EQUALS(parseContinuation(testee, r), " a = 1/2; ");
     TS_ASSERT_EQUALS(r.getFormat(), util::syntax::CommentFormat);
     TS_ASSERT_EQUALS(parseContinuation(testee, r), "// end");
+    TS_ASSERT(!testee.scan(r));
+
+    // Unterminated comment
+    testee.init(afl::string::toMemory("{ foo"));
+    TS_ASSERT(testee.scan(r));
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::CommentFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "{ foo");
+    TS_ASSERT(!testee.scan(r));
+
+    // Unterminated comment
+    testee.init(afl::string::toMemory("(* foo"));
+    TS_ASSERT(testee.scan(r));
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::CommentFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "(* foo");
+    TS_ASSERT(!testee.scan(r));
+
+    // Unterminated comment
+    testee.init(afl::string::toMemory("(* foo *"));
+    TS_ASSERT(testee.scan(r));
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::CommentFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "(* foo *");
+    TS_ASSERT(!testee.scan(r));
+
+    // Paren
+    testee.init(afl::string::toMemory("a:=b*(c+d)"));
+    TS_ASSERT(testee.scan(r));
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::DefaultFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "a:=b*(c+d)");
+    TS_ASSERT(!testee.scan(r));
+
+    // Newline
+    testee.init(afl::string::toMemory("a:=b\n+c;"));
+    TS_ASSERT(testee.scan(r));
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::DefaultFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "a:=b\n+c;");
     TS_ASSERT(!testee.scan(r));
 }
 

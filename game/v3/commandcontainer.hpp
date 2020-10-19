@@ -74,7 +74,11 @@ namespace game { namespace v3 {
 
         /** Remove a command.
             \param cmd Command to remove. Must be a command owned by this CommandContainer. */
-        void removeCommand(Command* cmd);
+        void removeCommand(const Command* cmd);
+
+        /** Remove commands by affected unit.
+            \param ref Affected unit. See Command::getAffectedUnit */
+        void removeCommandsByReference(Reference ref);
 
         // Iterator_t begin()
         //     { return cmds.begin(); }
@@ -105,17 +109,6 @@ namespace game { namespace v3 {
             \param id  Id to search
             \return iterator pointing to command, or end() */
         Iterator_t findCommand(Command::Type typ, Id_t id);
-
-        /** Get value for sorting.
-            Commands are sorted into some sensible order to increase the chance that they're processed correctly.
-            Older PHost versions process commands in whatever order they come in, so a 'remote control'
-            which precedes the enabling 'allies add' will fail.
-            Newer PHost versions do no longer have this problem.
-
-            \param type Command type
-
-            \return sort key. Low values sort before higher values. */
-        static int getValue(Command::Type type);
 
         /** Insert newly-created command at proper position.
             This is the backend of the addCommand() functions.

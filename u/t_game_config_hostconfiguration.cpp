@@ -7,6 +7,8 @@
 
 #include "t_game_config.hpp"
 #include "game/config/aliasoption.hpp"
+#include "afl/string/nulltranslator.hpp"
+#include "game/limits.hpp"
 
 /** Test race number accesses. */
 void
@@ -19,11 +21,22 @@ TestGameConfigHostConfiguration::testRace()
     TS_ASSERT_EQUALS(testee.getPlayerRaceNumber(20), 20);
     TS_ASSERT_EQUALS(testee.getPlayerRaceNumber(1000), 1000);
 
+    TS_ASSERT_EQUALS(testee.getPlayerMissionNumber(1), 1);
+    TS_ASSERT_EQUALS(testee.getPlayerMissionNumber(5), 5);
+    TS_ASSERT_EQUALS(testee.getPlayerMissionNumber(20), 20);
+    TS_ASSERT_EQUALS(testee.getPlayerMissionNumber(1000), 1000);
+
     testee[testee.PlayerRace].set(5, 3);
+    testee[testee.PlayerSpecialMission].set(1, 7);
     TS_ASSERT_EQUALS(testee.getPlayerRaceNumber(1), 1);
     TS_ASSERT_EQUALS(testee.getPlayerRaceNumber(5), 3);
     TS_ASSERT_EQUALS(testee.getPlayerRaceNumber(20), 20);
     TS_ASSERT_EQUALS(testee.getPlayerRaceNumber(1000), 1000);
+
+    TS_ASSERT_EQUALS(testee.getPlayerMissionNumber(1), 7);
+    TS_ASSERT_EQUALS(testee.getPlayerMissionNumber(5), 5);
+    TS_ASSERT_EQUALS(testee.getPlayerMissionNumber(20), 20);
+    TS_ASSERT_EQUALS(testee.getPlayerMissionNumber(1000), 1000);
 }
 
 /** Test configuration of aliases. */
@@ -60,3 +73,67 @@ TestGameConfigHostConfiguration::testAlias()
     TS_ASSERT_LESS_THAN_EQUALS(5, numAliases);
     TS_ASSERT_LESS_THAN_EQUALS(100, numOptions);
 }
+
+/** Test setDependantOptions(), "unset" case.
+    SensorRange propagates to DarkSenseRange. */
+void
+TestGameConfigHostConfiguration::testDependant1()
+{
+    using game::config::HostConfiguration;
+    HostConfiguration testee;
+
+    testee.setOption("sensorrange", "125", game::config::ConfigurationOption::Game);
+    testee.setDependantOptions();
+
+    TS_ASSERT_EQUALS(testee[HostConfiguration::SensorRange](1), 125);
+    TS_ASSERT_EQUALS(testee[HostConfiguration::DarkSenseRange](1), 125);
+}
+
+/** Test setDependantOptions(), "set" case.
+    SensorRange does not propagate to DarkSenseRange if set previously. */
+void
+TestGameConfigHostConfiguration::testDependant2()
+{
+    using game::config::HostConfiguration;
+    HostConfiguration testee;
+
+    testee.setOption("darksenserange", "204", game::config::ConfigurationOption::Game);
+    testee.setOption("sensorrange", "125", game::config::ConfigurationOption::Game);
+    testee.setDependantOptions();
+
+    TS_ASSERT_EQUALS(testee[HostConfiguration::SensorRange](1), 125);
+    TS_ASSERT_EQUALS(testee[HostConfiguration::DarkSenseRange](1), 204);
+}
+
+/** Test getExperienceLevelName(). */
+void
+TestGameConfigHostConfiguration::testExperienceName()
+{
+    afl::string::NullTranslator tx;
+    game::config::HostConfiguration testee;
+
+    testee.setOption("experiencelevelnames", "Erdwurm,Flugwapps, Ladehugo ,Nieswurz,Brotfahrer", game::config::ConfigurationOption::Game);
+
+    TS_ASSERT_EQUALS(testee.getExperienceLevelName(0, tx), "Erdwurm");
+    TS_ASSERT_EQUALS(testee.getExperienceLevelName(2, tx), "Ladehugo");
+    TS_ASSERT_EQUALS(testee.getExperienceLevelName(4, tx), "Brotfahrer");
+    TS_ASSERT_EQUALS(testee.getExperienceLevelName(5, tx), "Level 5");
+}
+
+/** Get getExperienceBonus(). */
+void
+TestGameConfigHostConfiguration::testExperienceBonus()
+{
+    game::config::HostConfiguration testee;
+
+    testee.setOption("emodbayrechargerate", "1,5,8,3", game::config::ConfigurationOption::Game);
+
+    TS_ASSERT_EQUALS(testee.getExperienceBonus(game::config::HostConfiguration::EModBayRechargeRate, 0), 0);
+    TS_ASSERT_EQUALS(testee.getExperienceBonus(game::config::HostConfiguration::EModBayRechargeRate, 1), 1);
+    TS_ASSERT_EQUALS(testee.getExperienceBonus(game::config::HostConfiguration::EModBayRechargeRate, 2), 5);
+    TS_ASSERT_EQUALS(testee.getExperienceBonus(game::config::HostConfiguration::EModBayRechargeRate, 4), 3);
+    TS_ASSERT_EQUALS(testee.getExperienceBonus(game::config::HostConfiguration::EModBayRechargeRate, 5), 3);  // option filled up
+    TS_ASSERT_EQUALS(testee.getExperienceBonus(game::config::HostConfiguration::EModBayRechargeRate, game::MAX_EXPERIENCE_LEVELS), 3);  // option filled up
+    TS_ASSERT_EQUALS(testee.getExperienceBonus(game::config::HostConfiguration::EModBayRechargeRate, 11), 0);  // out of range
+}
+

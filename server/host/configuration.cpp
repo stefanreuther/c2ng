@@ -16,7 +16,8 @@ server::host::Configuration::Configuration()
       usersSeeTemporaryTurns(true),
       numMissedTurnsForKick(0),
       hostFileAddress(DEFAULT_ADDRESS, HOSTFILE_PORT),
-      initialSuspend(0)
+      initialSuspend(0),
+      maxStoredKeys(10)
 { }
 
 // Convert time.

@@ -176,6 +176,7 @@ client::map::Widget::setZoomToInclude(game::map::Point pt)
 void
 client::map::Widget::zoomIn()
 {
+    // ex WChartWidget::zoomIn
     m_renderer.zoomIn();
     maybeRequestNewRange();
     requestRedraw();
@@ -184,6 +185,7 @@ client::map::Widget::zoomIn()
 void
 client::map::Widget::zoomOut()
 {
+    // ex WChartWidget::zoomOut
     m_renderer.zoomOut();
     maybeRequestNewRange();
     requestRedraw();

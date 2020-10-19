@@ -5,7 +5,8 @@
 #include "client/dialogs/buysuppliesdialog.hpp"
 #include "afl/string/format.hpp"
 #include "client/downlink.hpp"
-#include "client/proxy/convertsuppliesproxy.hpp"
+#include "client/widgets/helpwidget.hpp"
+#include "game/proxy/convertsuppliesproxy.hpp"
 #include "ui/dialogs/messagebox.hpp"
 #include "ui/eventloop.hpp"
 #include "ui/group.hpp"
@@ -19,7 +20,7 @@
 #include "ui/widgets/standarddialogbuttons.hpp"
 
 using afl::string::Format;
-using client::proxy::ConvertSuppliesProxy;
+using game::proxy::ConvertSuppliesProxy;
 using ui::Group;
 using ui::widgets::StandardDialogButtons;
 
@@ -34,7 +35,7 @@ namespace {
               m_translator(tx)
             { }
 
-        bool run()
+        bool run(util::RequestSender<game::Session> gameSender)
             {
                 // ex WUndoSellSuppliesDialog::init
                 afl::base::Deleter del;
@@ -48,11 +49,14 @@ namespace {
                                                             m_root.provider())));
                 win.add(m_select);
 
+                ui::Widget& helper = del.addNew(new client::widgets::HelpWidget(m_root, gameSender, "pcc2:sellsup"));
+
                 StandardDialogButtons& btns = del.addNew(new StandardDialogButtons(m_root));
                 btns.addStop(m_loop);
+                btns.addHelp(helper);
                 win.add(btns);
-                // FIXME: add(holder.add(new WHelpWidget("pcc2:sellsup")));
                 win.add(del.addNew(new ui::widgets::Quit(m_root, m_loop)));
+                win.add(helper);
                 win.pack();
 
                 m_root.centerWidget(win);
@@ -88,7 +92,7 @@ client::dialogs::doBuySuppliesDialog(ui::Root& root, util::RequestSender<game::S
                                 root).doOkDialog();
     } else {
         BuySuppliesDialog dlg(root, st.maxSuppliesToBuy, tx);
-        if (dlg.run()) {
+        if (dlg.run(gameSender)) {
             proxy.buySupplies(dlg.getValue());
         }
     }

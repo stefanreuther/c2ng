@@ -241,29 +241,17 @@ game::sim::Object::setRandomFriendlyCodeFlags()
 
 // Check effective availability of an ability.
 bool
-game::sim::Object::hasAbility(Ability which, const game::spec::ShipList& shipList, const game::config::HostConfiguration& config) const
+game::sim::Object::hasAbility(Ability which, const Configuration& opts, const game::spec::ShipList& shipList, const game::config::HostConfiguration& config) const
 {
-    // ex GSimObject::hasFunction
+    // ex GSimObject::hasFunction, ccsim.pas:SimShipDoes
     // Get bits (ex simf_to_value_bit, simf_to_set_bit)
-    int32_t setBit = 0, activeBit = 0;
-    switch (which) {
-     case PlanetImmunityAbility:       setBit = fl_PlanetImmunitySet;   activeBit = fl_PlanetImmunity;   break;
-     case FullWeaponryAbility:         setBit = fl_FullWeaponrySet;     activeBit = fl_FullWeaponry;     break;
-     case CommanderAbility:            setBit = fl_CommanderSet;        activeBit = fl_Commander;        break;
-     case TripleBeamKillAbility:       setBit = fl_TripleBeamKillSet;   activeBit = fl_TripleBeamKill;   break;
-     case DoubleBeamChargeAbility:     setBit = fl_DoubleBeamChargeSet; activeBit = fl_DoubleBeamCharge; break;
-     case DoubleTorpedoChargeAbility:  setBit = fl_DoubleTorpChargeSet; activeBit = fl_DoubleTorpCharge; break;
-     case ElusiveAbility:              setBit = fl_ElusiveSet;          activeBit = fl_Elusive;          break;
-     case SquadronAbility:             setBit = fl_SquadronSet;         activeBit = fl_Squadron;         break;
-     case ShieldGeneratorAbility:      setBit = fl_ShieldGeneratorSet;  activeBit = fl_ShieldGenerator;  break;
-     case CloakedBaysAbility:          setBit = fl_CloakedBaysSet;      activeBit = fl_CloakedBays;      break;
-    }
+    AbilityInfo info = getAbilityInfo(which);
 
     int32_t flags = getFlags();
-    if ((flags & setBit) != 0) {
-        return (flags & activeBit) != 0;
+    if ((flags & info.setBit) != 0) {
+        return (flags & info.activeBit) != 0;
     } else {
-        return hasImpliedAbility(which, shipList, config);
+        return hasImpliedAbility(which, opts, shipList, config);
     }
 }
 
@@ -298,6 +286,24 @@ game::sim::Object::isDirty() const
 {
     // ex GSimObject::isChanged
     return m_changed;
+}
+
+game::sim::Object::AbilityInfo
+game::sim::Object::getAbilityInfo(Ability a)
+{
+    switch (a) {
+     case PlanetImmunityAbility:       return AbilityInfo(fl_PlanetImmunitySet,   fl_PlanetImmunity);
+     case FullWeaponryAbility:         return AbilityInfo(fl_FullWeaponrySet,     fl_FullWeaponry);
+     case CommanderAbility:            return AbilityInfo(fl_CommanderSet,        fl_Commander);
+     case TripleBeamKillAbility:       return AbilityInfo(fl_TripleBeamKillSet,   fl_TripleBeamKill);
+     case DoubleBeamChargeAbility:     return AbilityInfo(fl_DoubleBeamChargeSet, fl_DoubleBeamCharge);
+     case DoubleTorpedoChargeAbility:  return AbilityInfo(fl_DoubleTorpChargeSet, fl_DoubleTorpCharge);
+     case ElusiveAbility:              return AbilityInfo(fl_ElusiveSet,          fl_Elusive);
+     case SquadronAbility:             return AbilityInfo(fl_SquadronSet,         fl_Squadron);
+     case ShieldGeneratorAbility:      return AbilityInfo(fl_ShieldGeneratorSet,  fl_ShieldGenerator);
+     case CloakedBaysAbility:          return AbilityInfo(fl_CloakedBaysSet,      fl_CloakedBays);
+    }
+    return AbilityInfo(0, 0);
 }
 
 // FIXME: do we need these?

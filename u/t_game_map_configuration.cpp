@@ -14,7 +14,7 @@ TestGameMapConfiguration::testFlat()
 {
     // ex GameCoordTestSuite::testFlat
     game::map::Configuration cc;
-        
+
     // Configure map to not-wrapped, standard size
     cc.setConfiguration(cc.Flat, Point(2000, 2000), Point(2000, 2000));
     TS_ASSERT(cc.getMinimumCoordinates() == Point(1000, 1000));
@@ -310,7 +310,7 @@ TestGameMapConfiguration::testWrappedSmall()
     // ex GameCoordTestSuite::testWrappedSmall
 
     game::map::Configuration cc;
-    
+
     // Configure map to wrapped, small size
     cc.setConfiguration(cc.Wrapped, Point(2000, 2000), Point(1000, 1000));
 
@@ -337,5 +337,62 @@ TestGameMapConfiguration::testWrappedSmall()
     TS_ASSERT_EQUALS(cc.getSectorNumber(Point(1500, 1600)), 353);
     TS_ASSERT_EQUALS(cc.getSectorNumber(Point(1500, 1700)), 352);
     TS_ASSERT_EQUALS(cc.getSectorNumber(Point(1500, 1800)), 351);
+}
+
+void
+TestGameMapConfiguration::testCircular()
+{
+    game::map::Configuration cc;
+    cc.setConfiguration(cc.Circular, Point(2000, 2000), Point(1000, 1000));
+
+    // Test isOnMap:
+    TS_ASSERT_EQUALS(cc.isOnMap(Point(2000, 2000)), true);     // clearly inside
+    TS_ASSERT_EQUALS(cc.isOnMap(Point(3000, 2000)), true);     // at edge
+    TS_ASSERT_EQUALS(cc.isOnMap(Point(2000, 3000)), true);     // at edge
+    TS_ASSERT_EQUALS(cc.isOnMap(Point(3000, 3000)), false);    // clearly outside
+    TS_ASSERT_EQUALS(cc.isOnMap(Point(2001, 3000)), false);    // barely outside
+
+    // Test getCanonicalLocation:
+    TS_ASSERT_EQUALS(cc.getCanonicalLocation(Point(2000, 2000)), Point(2000, 2000));
+    TS_ASSERT_EQUALS(cc.getCanonicalLocation(Point(3000, 2000)), Point(3000, 2000));
+    TS_ASSERT_EQUALS(cc.getCanonicalLocation(Point(2000, 3000)), Point(2000, 3000));
+    TS_ASSERT_EQUALS(cc.getCanonicalLocation(Point(3000, 3000)), Point(1586, 1586));
+    TS_ASSERT_EQUALS(cc.getCanonicalLocation(Point(2001, 3000)), Point(1999, 1000));
+
+    // Some more points (cross-checked against pwrap)
+    TS_ASSERT_EQUALS(cc.getCanonicalLocation(Point(2100, 3000)), Point(1901, 1010));
+    TS_ASSERT_EQUALS(cc.getCanonicalLocation(Point(2100, 3100)), Point(1919, 1108));
+    TS_ASSERT_EQUALS(cc.getCanonicalLocation(Point(2102, 3100)), Point(1917, 1109));
+    TS_ASSERT_EQUALS(cc.getCanonicalLocation(Point(1300, 1200)), Point(2617, 2705));
+    TS_ASSERT_EQUALS(cc.getCanonicalLocation(Point(3027, 2286)), Point(1100, 1749));
+
+    // Test getPointAlias:
+    Point result;
+
+    // - Center cannot be mapped outside ("too far inside" case)
+    TS_ASSERT_EQUALS(cc.getPointAlias(Point(2000, 2000), result, 1, true), false);
+
+    // - Edge cannot be mapped outside
+    TS_ASSERT_EQUALS(cc.getPointAlias(Point(3000, 2000), result, 1, true), false);
+
+    // - Barely outside cannot be mapped outside because its inverse is outside again
+    TS_ASSERT_EQUALS(cc.getPointAlias(Point(1999, 1000), result, 1, true), false);
+
+    // - More points that successfully map:
+    TS_ASSERT_EQUALS(cc.getPointAlias(Point(1901, 1010), result, 1, true), true);
+    TS_ASSERT_EQUALS(result, Point(2100, 3000));
+
+    TS_ASSERT_EQUALS(cc.getPointAlias(Point(1919, 1108), result, 1, true), true);
+    TS_ASSERT_EQUALS(result, Point(2100, 3100));
+
+    TS_ASSERT_EQUALS(cc.getPointAlias(Point(1917, 1109), result, 1, true), true);
+    TS_ASSERT_EQUALS(result, Point(2103, 3100));  // note different result than tried in forward mappint above!
+
+    TS_ASSERT_EQUALS(cc.getPointAlias(Point(2617, 2705), result, 1, true), true);
+    TS_ASSERT_EQUALS(result, Point(1300, 1200));
+
+    // This is a point where we need to search for the actual match:
+    TS_ASSERT_EQUALS(cc.getPointAlias(Point(1100, 1749), result, 1, true), true);
+    TS_ASSERT_EQUALS(result, Point(3027, 2286));
 }
 

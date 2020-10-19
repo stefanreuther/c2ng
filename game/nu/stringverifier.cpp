@@ -43,19 +43,19 @@ game::nu::StringVerifier::~StringVerifier()
 { }
 
 bool
-game::nu::StringVerifier::isValidString(Context ctx, const String_t& text)
+game::nu::StringVerifier::isValidString(Context ctx, const String_t& text) const
 {
     return text.find_first_of(getBlacklist(ctx)) == String_t::npos;
 }
 
 bool
-game::nu::StringVerifier::isValidCharacter(Context ctx, afl::charset::Unichar_t ch)
+game::nu::StringVerifier::isValidCharacter(Context ctx, afl::charset::Unichar_t ch) const
 {
     return !(ch > 0 && ch < 127 && std::strchr(getBlacklist(ctx), char(ch)) != 0);
 }
 
 size_t
-game::nu::StringVerifier::getMaxStringLength(Context ctx)
+game::nu::StringVerifier::getMaxStringLength(Context ctx) const
 {
     switch (ctx) {
      case Unknown:

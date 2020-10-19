@@ -1,5 +1,6 @@
 /**
   *  \file util/syntax/keywordtable.cpp
+  *  \brief Class util::syntax::KeywordTable
   */
 
 #include "util/syntax/keywordtable.hpp"

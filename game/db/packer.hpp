@@ -12,12 +12,12 @@ namespace game { namespace db {
 
     class Packer {
      public:
-        Packer(Turn& turn, afl::charset::Charset& cs);
+        explicit Packer(afl::charset::Charset& cs);
 
-        void addUfo(const structures::Ufo& ufo);
-        void addPlanet(const structures::Planet& planet);
-        void addShip(const structures::Ship& ship);
-        void addShipTrack(int id, int turn, const structures::ShipTrackEntry& entry);
+        void addUfo(Turn& turn, const structures::Ufo& ufo);
+        void addPlanet(Turn& turn, const structures::Planet& planet);
+        void addShip(Turn& turn, const structures::Ship& ship);
+        void addShipTrack(Turn& turn, int id, int turnNr, const structures::ShipTrackEntry& entry);
 
         void packUfo(structures::Ufo& out, const game::map::Ufo& in);
         void packPlanet(structures::Planet& out, const game::map::Planet& in);
@@ -25,7 +25,6 @@ namespace game { namespace db {
 
 
      private:
-        Turn& m_turn;
         afl::charset::Charset& m_charset;
     };
 

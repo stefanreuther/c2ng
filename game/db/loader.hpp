@@ -24,7 +24,7 @@ namespace game { namespace db {
 
         void load(afl::io::Stream& in, Turn& turn, Game& game, bool acceptProperties);
 
-        void save(afl::io::Stream& out, Turn& turn, Game& game, const game::spec::ShipList& shipList);
+        void save(afl::io::Stream& out, const Turn& turn, const Game& game, const game::spec::ShipList& shipList);
 
      private:
         enum Scope {

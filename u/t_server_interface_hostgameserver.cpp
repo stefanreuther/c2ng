@@ -49,31 +49,32 @@ namespace {
                 checkCall(Format("getInfo(%d)", gameId));
                 return consumeReturnValue<Info>();
             }
-        virtual void getInfos(afl::base::Optional<State> requiredState,
-                              afl::base::Optional<Type> requiredType,
-                              afl::base::Optional<String_t> requiredUser,
-                              bool verbose,
-                              std::vector<Info>& result)
+        virtual void getInfos(const Filter& filter, bool verbose, std::vector<Info>& result)
             {
-                checkCall(Format("getInfos(%s,%s,%s,%s)",
-                                 requiredState.isValid() ? HostGame::formatState(*requiredState.get()) : String_t("-"),
-                                 requiredType.isValid()  ? HostGame::formatType(*requiredType.get())   : String_t("-"),
-                                 requiredUser.orElse("-"),
-                                 verbose ? "t" : "f"));
+                checkCall(Format("getInfos(%s,%s,%s,%s,%s,%s,%s,%s)")
+                          << (filter.requiredState.isValid() ? HostGame::formatState(*filter.requiredState.get()) : String_t("-"))
+                          << (filter.requiredType.isValid()  ? HostGame::formatType(*filter.requiredType.get())   : String_t("-"))
+                          << filter.requiredUser.orElse("-")
+                          << filter.requiredHost.orElse("-")
+                          << filter.requiredTool.orElse("-")
+                          << filter.requiredShipList.orElse("-")
+                          << filter.requiredMaster.orElse("-")
+                          << (verbose ? "t" : "f"));
                 int n = consumeReturnValue<int>();
                 while (n-- > 0) {
                     result.push_back(consumeReturnValue<Info>());
                 }
             }
-        virtual void getGames(afl::base::Optional<State> requiredState,
-                              afl::base::Optional<Type> requiredType,
-                              afl::base::Optional<String_t> requiredUser,
-                              afl::data::IntegerList_t& result)
+        virtual void getGames(const Filter& filter, afl::data::IntegerList_t& result)
             {
-                checkCall(Format("getGames(%s,%s,%s)",
-                                 requiredState.isValid() ? HostGame::formatState(*requiredState.get()) : String_t("-"),
-                                 requiredType.isValid()  ? HostGame::formatType(*requiredType.get())   : String_t("-"),
-                                 requiredUser.orElse("-")));
+                checkCall(Format("getGames(%s,%s,%s,%s,%s,%s,%s)")
+                          << (filter.requiredState.isValid() ? HostGame::formatState(*filter.requiredState.get()) : String_t("-"))
+                          << (filter.requiredType.isValid()  ? HostGame::formatType(*filter.requiredType.get())   : String_t("-"))
+                          << filter.requiredUser.orElse("-")
+                          << filter.requiredHost.orElse("-")
+                          << filter.requiredTool.orElse("-")
+                          << filter.requiredShipList.orElse("-")
+                          << filter.requiredMaster.orElse("-"));
                 int n = consumeReturnValue<int>();
                 while (n-- > 0) {
                     result.push_back(consumeReturnValue<int>());
@@ -334,7 +335,7 @@ TestServerInterfaceHostGameServer::testIt()
 
     // getInfos
     {
-        mock.expectCall("getInfos(-,-,-,f)");
+        mock.expectCall("getInfos(-,-,-,-,-,-,-,f)");
         mock.provideReturnValue(2);
         mock.provideReturnValue(makeInfo());
         mock.provideReturnValue(HostGame::Info());
@@ -351,28 +352,28 @@ TestServerInterfaceHostGameServer::testIt()
         TS_ASSERT_EQUALS(a[1]("currentSchedule")("weekdays").toInteger(), 0);
     }
     {
-        mock.expectCall("getInfos(running,-,-,t)");
+        mock.expectCall("getInfos(running,-,-,-,-,-,-,t)");
         mock.provideReturnValue(0);
         std::auto_ptr<Value_t> p(testee.call(Segment().pushBackString("GAMELIST").pushBackString("STATE").pushBackString("running").pushBackString("VERBOSE")));
         Access a(p);
         TS_ASSERT_EQUALS(a.getArraySize(), 0U);
     }
     {
-        mock.expectCall("getInfos(-,public,-,f)");
+        mock.expectCall("getInfos(-,public,-,-,-,-,-,f)");
         mock.provideReturnValue(0);
         std::auto_ptr<Value_t> p(testee.call(Segment().pushBackString("GAMELIST").pushBackString("TYPE").pushBackString("public")));
         Access a(p);
         TS_ASSERT_EQUALS(a.getArraySize(), 0U);
     }
     {
-        mock.expectCall("getInfos(-,-,fred,f)");
+        mock.expectCall("getInfos(-,-,fred,-,-,-,-,f)");
         mock.provideReturnValue(0);
         std::auto_ptr<Value_t> p(testee.call(Segment().pushBackString("GAMELIST").pushBackString("USER").pushBackString("fred")));
         Access a(p);
         TS_ASSERT_EQUALS(a.getArraySize(), 0U);
     }
     {
-        mock.expectCall("getInfos(joining,unlisted,wilma,t)");
+        mock.expectCall("getInfos(joining,unlisted,wilma,-,-,-,-,t)");
         mock.provideReturnValue(0);
         std::auto_ptr<Value_t> p(testee.call(Segment().pushBackString("GAMELIST").pushBackString("USER").pushBackString("wilma").pushBackString("VERBOSE").
                                              pushBackString("TYPE").pushBackString("unlisted").pushBackString("STATE").pushBackString("joining")));
@@ -382,7 +383,7 @@ TestServerInterfaceHostGameServer::testIt()
 
     // getGames
     {
-        mock.expectCall("getGames(-,-,-)");
+        mock.expectCall("getGames(-,-,-,-,-,-,-)");
         mock.provideReturnValue(4);
         mock.provideReturnValue(89);
         mock.provideReturnValue(32);
@@ -398,7 +399,7 @@ TestServerInterfaceHostGameServer::testIt()
         TS_ASSERT_EQUALS(a[3].toInteger(), 8);
     }
     {
-        mock.expectCall("getGames(finished,private,1030)");
+        mock.expectCall("getGames(finished,private,1030,-,-,-,-)");
         mock.provideReturnValue(2);
         mock.provideReturnValue(3);
         mock.provideReturnValue(5);
@@ -573,11 +574,11 @@ TestServerInterfaceHostGameServer::testIt()
     mock.provideReturnValue(99);
     TS_ASSERT_EQUALS(testee.callInt(Segment().pushBackString("newGame")), 99);
 
-    mock.expectCall("getInfos(running,-,-,t)");
+    mock.expectCall("getInfos(running,-,-,-,-,-,-,t)");
     mock.provideReturnValue(0);
     TS_ASSERT_THROWS_NOTHING(testee.callVoid(Segment().pushBackString("GAMELIST").pushBackString("state").pushBackString("running").pushBackString("verbose")));
 
-    mock.expectCall("getInfos(running,-,-,t)");
+    mock.expectCall("getInfos(running,-,-,-,-,-,-,t)");
     mock.provideReturnValue(0);
     TS_ASSERT_THROWS_NOTHING(testee.callVoid(Segment().pushBackString("GAMELIST").pushBackString("STATE").pushBackString("running").pushBackString("ID").pushBackString("VERBOSE")));
 
@@ -723,13 +724,13 @@ TestServerInterfaceHostGameServer::testRoundtrip()
 
     // getInfos
     {
-        mock.expectCall("getInfos(-,-,-,f)");
+        mock.expectCall("getInfos(-,-,-,-,-,-,-,f)");
         mock.provideReturnValue(2);
         mock.provideReturnValue(makeInfo());
         mock.provideReturnValue(HostGame::Info());
 
         std::vector<HostGame::Info> a;
-        level4.getInfos(afl::base::Nothing, afl::base::Nothing, afl::base::Nothing, false, a);
+        level4.getInfos(HostGame::Filter(), false, a);
         TS_ASSERT_EQUALS(a.size(), 2U);
 
         TS_ASSERT_EQUALS(a[0].gameId, 42);
@@ -745,28 +746,48 @@ TestServerInterfaceHostGameServer::testRoundtrip()
     {
         std::vector<HostGame::Info> a;
 
-        mock.expectCall("getInfos(running,-,-,t)");
+        mock.expectCall("getInfos(running,-,-,-,-,-,-,t)");
         mock.provideReturnValue(0);
-        TS_ASSERT_THROWS_NOTHING(level4.getInfos(HostGame::Running, afl::base::Nothing, afl::base::Nothing, true, a));
+        HostGame::Filter f1;
+        f1.requiredState = HostGame::Running;
+        TS_ASSERT_THROWS_NOTHING(level4.getInfos(f1, true, a));
 
-        mock.expectCall("getInfos(-,public,-,f)");
+        mock.expectCall("getInfos(-,public,-,-,-,-,-,f)");
         mock.provideReturnValue(0);
-        TS_ASSERT_THROWS_NOTHING(level4.getInfos(afl::base::Nothing, HostGame::PublicGame, afl::base::Nothing, false, a));
+        HostGame::Filter f2;
+        f2.requiredType = HostGame::PublicGame;
+        TS_ASSERT_THROWS_NOTHING(level4.getInfos(f2, false, a));
 
-        mock.expectCall("getInfos(-,-,fred,f)");
+        mock.expectCall("getInfos(-,-,fred,-,-,-,-,f)");
         mock.provideReturnValue(0);
-        TS_ASSERT_THROWS_NOTHING(level4.getInfos(afl::base::Nothing, afl::base::Nothing, String_t("fred"), false, a));
+        HostGame::Filter f3;
+        f3.requiredUser = String_t("fred");
+        TS_ASSERT_THROWS_NOTHING(level4.getInfos(f3, false, a));
 
-        mock.expectCall("getInfos(joining,unlisted,wilma,t)");
+        mock.expectCall("getInfos(joining,unlisted,wilma,-,-,-,-,t)");
         mock.provideReturnValue(0);
-        TS_ASSERT_THROWS_NOTHING(level4.getInfos(HostGame::Joining, HostGame::UnlistedGame, String_t("wilma"), true, a));
+        HostGame::Filter f4;
+        f4.requiredState = HostGame::Joining;
+        f4.requiredType = HostGame::UnlistedGame;
+        f4.requiredUser = String_t("wilma");
+        TS_ASSERT_THROWS_NOTHING(level4.getInfos(f4, true, a));
+
+        mock.expectCall("getInfos(-,-,1003,qhost,multitool,list,pmaster,t)");
+        mock.provideReturnValue(0);
+        HostGame::Filter f5;
+        f5.requiredUser = String_t("1003");
+        f5.requiredHost = String_t("qhost");
+        f5.requiredTool = String_t("multitool");
+        f5.requiredShipList = String_t("list");
+        f5.requiredMaster = String_t("pmaster");
+        TS_ASSERT_THROWS_NOTHING(level4.getInfos(f5, true, a));
 
         TS_ASSERT_EQUALS(a.size(), 0U);
     }
 
     // getGames
     {
-        mock.expectCall("getGames(-,-,-)");
+        mock.expectCall("getGames(-,-,-,-,-,-,-)");
         mock.provideReturnValue(4);
         mock.provideReturnValue(89);
         mock.provideReturnValue(32);
@@ -774,7 +795,7 @@ TestServerInterfaceHostGameServer::testRoundtrip()
         mock.provideReturnValue(8);
 
         afl::data::IntegerList_t a;
-        TS_ASSERT_THROWS_NOTHING(level4.getGames(afl::base::Nothing, afl::base::Nothing, afl::base::Nothing, a));
+        TS_ASSERT_THROWS_NOTHING(level4.getGames(HostGame::Filter(), a));
 
         TS_ASSERT_EQUALS(a.size(), 4U);
         TS_ASSERT_EQUALS(a[0], 89);
@@ -783,13 +804,17 @@ TestServerInterfaceHostGameServer::testRoundtrip()
         TS_ASSERT_EQUALS(a[3], 8);
     }
     {
-        mock.expectCall("getGames(finished,private,1030)");
+        mock.expectCall("getGames(finished,private,1030,-,-,-,-)");
         mock.provideReturnValue(2);
         mock.provideReturnValue(3);
         mock.provideReturnValue(5);
 
         afl::data::IntegerList_t a;
-        TS_ASSERT_THROWS_NOTHING(level4.getGames(HostGame::Finished, HostGame::PrivateGame, String_t("1030"), a));
+        HostGame::Filter filter;
+        filter.requiredState = HostGame::Finished;
+        filter.requiredType = HostGame::PrivateGame;
+        filter.requiredUser = String_t("1030");
+        TS_ASSERT_THROWS_NOTHING(level4.getGames(filter, a));
 
         TS_ASSERT_EQUALS(a.size(), 2U);
         TS_ASSERT_EQUALS(a[0], 3);

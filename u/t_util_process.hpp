@@ -12,6 +12,20 @@ class TestUtilProcessFactory : public CxxTest::TestSuite {
     void testInterface();
 };
 
+class TestUtilProcessNullFactory : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
+class TestUtilProcessPosixFactory : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testPipeStress1();
+    void testPipeStress2();
+    void testExecFail();
+    void testSignal();
+};
+
 class TestUtilProcessSubprocess : public CxxTest::TestSuite {
  public:
     void testInterface();

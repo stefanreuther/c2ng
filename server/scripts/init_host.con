@@ -3,7 +3,15 @@
 #
 
 # We're taking the specs from the "share" folder that drives the main app, not a separate copy like -classic did.
-setenv specs ../../share/specs
+if {file_exists ../../share/specs/race.nm} {
+  # when run from source tree
+  setenv specs ../../share/specs
+} elsif {file_exists ../../specs/race.nm} {
+  # when run from install tree
+  setenv specs ../../specs
+} else {
+  echo "WARNING: unable to locate 'specs' folder"
+}
 
 echo "*** Host files ***"
 

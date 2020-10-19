@@ -55,6 +55,15 @@ namespace {
         afl::base::Ref<game::Game> m_game;
         const game::interface::PlanetProperty m_property;
     };
+
+    afl::data::Value* makeHistoryTimeValue(int n)
+    {
+        if (n != 0) {
+            return makeIntegerValue(n);
+        } else {
+            return 0;
+        }
+    }
 }
 
 PlanetArrayProperty::PlanetArrayProperty(const game::map::Planet& planet, afl::base::Ref<game::Game> game, game::interface::PlanetProperty property)
@@ -183,6 +192,11 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
         } else {
             return makeStringValue("-");
         }
+     case ippCashTime:
+        /* @q Turn.Money:Int (Planet Property)
+           Turn when planet's money was last scanned ({Money}, {Supplies} properties).
+           @since PCC2 2.40.9 */
+        return makeHistoryTimeValue(pl.getHistoryTimestamp(game::map::Planet::CashTime));
      case ippColonistChange:
         /* @q Colonists.Change$:Int (Planet Property)
            Colonist happiness change, numeric value. */
@@ -221,6 +235,12 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
             return 0;
         }
      }
+     case ippColonistTime:
+        /* @q Turn.Colonists:Int (Planet Property)
+           Turn when planet's colony was last scanned ({Colonists} property, {FCode}, and
+           industry-related properties {Mines}, {Defense}, {Factories}, {Base}).
+           @since PCC2 2.40.9 */
+        return makeHistoryTimeValue(pl.getHistoryTimestamp(game::map::Planet::ColonistTime));
      case ippColonists:
         /* @q Colonists:Int (Planet Property)
            Colonist population, number of clans. */
@@ -391,6 +411,11 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
         /* @q Mined.T:Int (Planet Property)
            Mined Tritanium, in kilotons. */
         return makeOptionalIntegerValue(pl.getCargo(Element::Tritanium));
+     case ippMineralTime:
+        /* @q Turn.Minerals:Int (Planet Property)
+           Turn when planet's mineral resources were last scanned ({Mined.T}, {Ground.T}, etc.).
+           @since PCC2 2.40.9 */
+        return makeHistoryTimeValue(pl.getHistoryTimestamp(game::map::Planet::MineralTime));
      case ippMines:
         /* @q Mines:Int (Planet Property)
            Number of mineral mines. */
@@ -411,7 +436,7 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
      case ippName:
         /* @q Name:Str (Planet Property)
            Name of planet. */
-        return makeStringValue(pl.getName(PlainName, tx, iface));
+        return makeStringValue(pl.getName(tx));
      case ippNativeChange:
         /* @q Natives.Change$:Int (Planet Property)
            Native happiness change, numeric value. */
@@ -500,6 +525,11 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
         } else {
             return 0;
         }
+     case ippNativeTime:
+        /* @q Turn.Natives:Int (Planet Property)
+           Turn when planet's natives were last scanned ({Natives} property and related).
+           @since PCC2 2.40.9 */
+        return makeHistoryTimeValue(pl.getHistoryTimestamp(game::map::Planet::NativeTime));
      case ippNatives:
         /* @q Natives:Int (Planet Property)
            Native population size, clans. */

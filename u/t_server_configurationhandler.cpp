@@ -180,29 +180,29 @@ TestServerConfigurationHandler::testCommandLine()
 
     // Handle a "-D" option with a recognized option
     {
-        TestCommandLineParser p("public");
-        TS_ASSERT(testee.handleCommandLineOption("Dg.public", p));
+        TestCommandLineParser p("g.public=public");
+        TS_ASSERT(testee.handleCommandLineOption("D", p));
         TS_ASSERT_EQUALS(log.getNumMessages(), 1U);
     }
 
     // Handle a "-D" option with a recognized secret option
     {
-        TestCommandLineParser p("secret");
-        TS_ASSERT(testee.handleCommandLineOption("Dg.key", p));
+        TestCommandLineParser p("g.key=secret");
+        TS_ASSERT(testee.handleCommandLineOption("D", p));
         TS_ASSERT_EQUALS(log.getNumMessages(), 2U);
     }
 
     // Handle another "-D" option with a recognized secret option
     {
-        TestCommandLineParser p("secret");
-        TS_ASSERT(testee.handleCommandLineOption("DG.OTHER.KEY", p));
+        TestCommandLineParser p("G.OTHER.KEY=secret");
+        TS_ASSERT(testee.handleCommandLineOption("D", p));
         TS_ASSERT_EQUALS(log.getNumMessages(), 3U);
     }
 
     // Handle a "-D" option with a not-recognized option
     {
-        TestCommandLineParser p("x");
-        TS_ASSERT_THROWS(testee.handleCommandLineOption("Dy", p), std::runtime_error);
+        TestCommandLineParser p("y=x");
+        TS_ASSERT_THROWS(testee.handleCommandLineOption("D", p), std::runtime_error);
     }
 
     TS_ASSERT_EQUALS(testee.getTotal(), "G.PUBLIC,G.KEY,G.OTHER.KEY");
@@ -275,8 +275,8 @@ TestServerConfigurationHandler::testNoFile()
 
     // Handle a "-D" option
     {
-        TestCommandLineParser p("value");
-        TS_ASSERT(testee.handleCommandLineOption("Dg.Override", p));
+        TestCommandLineParser p("g.Override=value");
+        TS_ASSERT(testee.handleCommandLineOption("D", p));
         TS_ASSERT_EQUALS(log.getNumMessages(), 1U);
     }
 

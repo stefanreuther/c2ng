@@ -52,6 +52,7 @@ void
 game::sim::Configuration::setMode(VcrMode mode, const TeamSettings& teams, const game::config::HostConfiguration& config)
 {
     // ex GSimOptions::setMode
+    // FIXME: replace TeamSettings -> int viewpointPlayer?
     m_engineShieldBonus = config[config.AllowEngineShieldBonus]() ? config[config.EngineShieldBonusRate](teams.getViewpointPlayer()) : 0;
     m_scottyBonus       = config[config.AllowFedCombatBonus]();
     m_vcrMode           = mode;
@@ -69,14 +70,14 @@ game::sim::Configuration::setMode(VcrMode mode, const TeamSettings& teams, const
         m_randomLeftRight = false;
         m_balancingMode = Balance360k;
         break;
-    }    
+    }
 }
 
 // Check enabled experience.
 bool
 game::sim::Configuration::isExperienceEnabled(const game::config::HostConfiguration& config) const
 {
-    // ex GSimOptions::isExperienceEnabled
+    // ex GSimOptions::isExperienceEnabled, ccsim.pas:IsExpGame
     switch (m_vcrMode) {
      case VcrPHost4:
      case VcrFLAK:
@@ -214,4 +215,28 @@ game::sim::Configuration::VcrMode
 game::sim::Configuration::getMode() const
 {
     return m_vcrMode;
+}
+
+game::PlayerBitMatrix&
+game::sim::Configuration::allianceSettings()
+{
+    return m_allianceSettings;
+}
+
+const game::PlayerBitMatrix&
+game::sim::Configuration::allianceSettings() const
+{
+    return m_allianceSettings;
+}
+
+game::PlayerBitMatrix&
+game::sim::Configuration::enemySettings()
+{
+    return m_enemySettings;
+}
+
+const game::PlayerBitMatrix&
+game::sim::Configuration::enemySettings() const
+{
+    return m_enemySettings;
 }

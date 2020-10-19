@@ -20,6 +20,11 @@ class TestUiResEngineImageLoader : public CxxTest::TestSuite {
     void testFail();
 };
 
+class TestUiResGeneratedEngineProvider : public CxxTest::TestSuite {
+ public:
+    void testRenderEngineDiagram();
+};
+
 class TestUiResImageLoader : public CxxTest::TestSuite {
  public:
     void testIt();

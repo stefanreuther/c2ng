@@ -52,6 +52,17 @@ Overview
   testing "old" (PCC2-based) implementations against the "new"
   c2ng-based implementations.
 
+  A structural overview of the PlanetsCentral installation is given in
+  `PlanetsCentral_2019.svg`. In addition to the services built here,
+  PlanetsCentral consists of:
+  + a web application consisting of CGI, JavaScript/CSS, and assets;
+  + a POP3/POP3S fetcher;
+  + a system-provided mailer;
+  + a web server (lighttpd) and a LetsEncrypt client;
+  + a data store (redis);
+  + configuration and start scripts.
+
+
 
 Structure of a RESP Server
 ==========================

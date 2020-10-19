@@ -90,12 +90,14 @@ server::play::PlanetCommandHandler::processCommand(const String_t& cmd, interpre
     } else if (cmd == "buildfighters") {
         gi::callPlanetMethod(*pPlanet, gi::ipmBuildFighters, args, process, m_session, turn, root);
         objs.addNew(new PlanetPacker(m_session, m_id));
+        // FIXME: command could modify a ship
     } else if (cmd == "buildengines") {
         gi::callPlanetMethod(*pPlanet, gi::ipmBuildEngines, args, process, m_session, turn, root);
         objs.addNew(new PlanetPacker(m_session, m_id));
     } else if (cmd == "buildtorps") {
         gi::callPlanetMethod(*pPlanet, gi::ipmBuildTorps, args, process, m_session, turn, root);
         objs.addNew(new PlanetPacker(m_session, m_id));
+        // FIXME: command could modify a ship
     } else if (cmd == "buildhulls") {
         gi::callPlanetMethod(*pPlanet, gi::ipmBuildHulls, args, process, m_session, turn, root);
         objs.addNew(new PlanetPacker(m_session, m_id));

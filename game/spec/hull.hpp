@@ -7,6 +7,8 @@
 
 #include "game/spec/component.hpp"
 #include "game/spec/hullfunctionassignmentlist.hpp"
+#include "game/config/hostconfiguration.hpp"
+#include "game/hostversion.hpp"
 
 namespace game { namespace spec {
 
@@ -120,6 +122,30 @@ namespace game { namespace spec {
         /** Get hull function assignment list.
             \param assignedToHull true: access functions assigned to hulls; false: to ships */
         const HullFunctionAssignmentList& getHullFunctions(bool assignedToHull) const;
+
+        /** Get cloak fuel usage.
+            This function does NOT honor possible hull functions.
+            In particular, it will return a nonzero value also for advanced cloakers.
+            \param forPlayer Player
+            \param config Host configuration
+            \return fuel usage for cloaking for one turn */
+        int getCloakFuelUsage(int forPlayer, const game::config::HostConfiguration& config) const;
+
+        /** Get per-turn fuel usage.
+            \param forPlayer Player
+            \param fight false: per turn; true: per fight
+            \param config Host configuration
+            \return fuel usage per turn
+            \see HostVersion::isEugeneGame() */
+        int getTurnFuelUsage(int forPlayer, bool fight, const game::config::HostConfiguration& config) const;
+
+        /** Get mine hit damage.
+            \param forPlayer Player
+            \param web false: regular mines; true: web mines
+            \param host Host version
+            \param config Host configuration
+            \return mine hit damage */
+        int getMineHitDamage(int forPlayer, bool web, const HostVersion& host, const game::config::HostConfiguration& config) const;
 
      private:
         int m_externalPictureNumber;

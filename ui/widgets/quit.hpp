@@ -14,11 +14,14 @@ namespace ui { namespace widgets {
      public:
         Quit(Root& root, EventLoop& loop);
 
+        Quit& withCode(int code);
+
         virtual bool handleKey(util::Key_t key, int prefix);
 
      private:
         Root& m_root;
         EventLoop& m_loop;
+        int m_code;
     };
 
 } }

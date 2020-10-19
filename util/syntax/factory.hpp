@@ -1,5 +1,6 @@
 /**
   *  \file util/syntax/factory.hpp
+  *  \brief Class util::syntax::Factory
   */
 #ifndef C2NG_UTIL_SYNTAX_FACTORY_HPP
 #define C2NG_UTIL_SYNTAX_FACTORY_HPP
@@ -12,15 +13,21 @@ namespace util { namespace syntax {
     class KeywordTable;
     class Highlighter;
 
+    /** Highlighter factory. */
     // FIXME: make this a virtual interface?
     class Factory {
      public:
-        Factory(KeywordTable& tab);
+        /** Constructor.
+            \param tab Keyword table. Must live as long as this factory and all highlighters derived from it. */
+        explicit Factory(const KeywordTable& tab);
 
+        /** Create highlighter.
+            \param name File or language name hint
+            \param del  Deleter. Will manage the new highlighter and its depending objects. */
         Highlighter& create(String_t name, afl::base::Deleter& del);
 
      private:
-        KeywordTable& m_table;
+        const KeywordTable& m_table;
     };
 
 } }

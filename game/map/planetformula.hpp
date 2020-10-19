@@ -48,6 +48,7 @@ namespace game { namespace map {
     int32_t            getNativeDue(int tax, int race, int gov, int32_t pop, int owner, const game::config::HostConfiguration& config, const HostVersion& host);
     LongProperty_t     getNativeDueLimited(const Planet& pl, const game::config::HostConfiguration& config, const HostVersion& host, int tax, int32_t rem_inc);
     IntegerProperty_t  getNativeSafeTax(const Planet& pl, const game::config::HostConfiguration& config, const HostVersion& host, int mifa);
+    IntegerProperty_t  getNativeBaseTax(const Planet& pl, int owner, const game::config::HostConfiguration& config, const HostVersion& host, int happyTarget);
     IntegerProperty_t  getNativeBaseTax(const Planet& pl, const game::config::HostConfiguration& config, const HostVersion& host, int happyTarget);
     LongProperty_t     getBovinoidSupplyContribution(const Planet& pl, const game::config::HostConfiguration& config, const HostVersion& host);
     int32_t            getBovinoidSupplyContribution(int32_t pop, int owner, const game::config::HostConfiguration& config, const HostVersion& host);

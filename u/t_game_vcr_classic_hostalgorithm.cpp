@@ -12,92 +12,14 @@
 #include "afl/base/countof.hpp"
 #include "game/vcr/classic/nullvisualizer.hpp"
 #include "game/vcr/classic/statustoken.hpp"
+#include "game/test/shiplist.hpp"
 
 
 namespace {
-    /*
-     *  Hard-wired ship list to avoid dependency to external files
-     */
-    struct Cost {
-        int d, m, mc, t;
-    };
-    struct Beam {
-        Cost cost;
-        int damagePower;
-        int killPower;
-        int mass;
-        const char* name;
-        int techLevel;
-    };
-    const Beam beams[] = {
-        {{0,0,1,1},3,10,1,"Laser",1},
-        {{0,0,2,1},1,15,1,"X-Ray Laser",1},
-        {{2,0,5,1},10,3,2,"Plasma Bolt",2},
-        {{12,1,10,1},25,10,4,"Blaster",3},
-        {{12,5,12,1},29,9,3,"Positron Beam",4},
-        {{12,1,13,1},20,30,4,"Disruptor",5},
-        {{12,14,31,1},40,20,7,"Heavy Blaster",6},
-        {{12,30,35,1},35,30,5,"Phaser",7},
-        {{17,37,36,1},35,50,7,"Heavy Disruptor",8},
-        {{12,55,54,1},45,35,6,"Heavy Phaser",10}
-    };
-    struct Torpedo {
-        const char* name;
-        Cost torpedoCost;
-        Cost launcherCost;
-        int mass;
-        int techLevel;
-        int killPower;
-        int damagePower;
-    };
-    const Torpedo torpedoes[] = {
-        {"Mark 1 Photon", {1,1,1,1},  {1,1,1,0},  2,1,4,5},
-        {"Proton torp",   {2,1,1,1},  {4,1,0,0},  2,2,6,8},
-        {"Mark 2 Photon", {5,1,1,1},  {4,1,4,0},  2,3,3,10},
-        {"Gamma Bomb",    {10,1,1,1}, {6,1, 3,1}, 4,3,15,2},
-        {"Mark 3 Photon", {12,1,1,1}, {5,1,1,5},  2,4,9,15},
-        {"Mark 4 Photon", {13,1,1,1}, {20,1,4,1}, 2,5,13,30},
-        {"Mark 5 Photon", {31,1,1,1}, {57,1,7,14},3,6,17,35},
-        {"Mark 6 Photon", {35,1,1,1}, {100,1,2,7},2,7,23,40},
-        {"Mark 7 Photon", {36,1,1,1}, {120,1,3,8},3,8,25,48},
-        {"Mark 8 Photon", {54,1,1,1}, {190,1,1,9},3,10,35,55}
-    };
-
-    game::spec::Cost convertCost(const Cost& c)
-    {
-        game::spec::Cost result;
-        result.set(result.Duranium, c.d);
-        result.set(result.Tritanium, c.t);
-        result.set(result.Molybdenum, c.m);
-        result.set(result.Money, c.mc);
-        return result;
-    }
-
     void initShipList(game::spec::ShipList& list)
     {
-        for (int i = 0; i < int(countof(beams)); ++i) {
-            const Beam& in = beams[i];
-            if (game::spec::Beam* out = list.beams().create(i+1)) {
-                out->setKillPower(in.killPower);
-                out->setDamagePower(in.damagePower);
-                out->setMass(in.mass);
-                out->setTechLevel(in.techLevel);
-                out->setName(in.name);
-                out->cost() = convertCost(in.cost);
-            }
-        }
-        for (int i = 0; i < int(countof(torpedoes)); ++i) {
-            const Torpedo& in = torpedoes[i];
-            if (game::spec::TorpedoLauncher* out = list.launchers().create(i+1)) {
-                out->setKillPower(in.killPower);
-                out->setDamagePower(in.damagePower);
-                out->setMass(in.mass);
-                out->setTechLevel(in.techLevel);
-                out->setName(in.name);
-                out->cost() = convertCost(in.launcherCost);
-                out->torpedoCost() = convertCost(in.torpedoCost);
-            }
-        }
+        game::test::initStandardBeams(list);
+        game::test::initStandardTorpedoes(list);
     }
 
     /*
@@ -254,6 +176,8 @@ TestGameVcrClassicHostAlgorithm::testFirst()
     TS_ASSERT_EQUALS(right.getDamage(), 0);
     TS_ASSERT_EQUALS(left.getCrew(), 0);
     TS_ASSERT_EQUALS(right.getCrew(), 240);
+    TS_ASSERT_EQUALS(testee.getStatistic(game::vcr::classic::LeftSide).getNumFights(), 1);
+    TS_ASSERT_EQUALS(testee.getStatistic(game::vcr::classic::RightSide).getNumFights(), 1);
 }
 
 /** Test second battle: Torper vs Torper, normal playback.

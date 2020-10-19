@@ -4,7 +4,7 @@
 
 #include "game/map/rangeset.hpp"
 #include "game/map/objecttype.hpp"
-#include "game/map/mapobject.hpp"
+#include "game/map/object.hpp"
 
 game::map::RangeSet::RangeSet()
     : m_points(),
@@ -56,7 +56,7 @@ game::map::RangeSet::addObjectType(ObjectType& type, PlayerSet_t playerLimit, bo
 {
     // ex GRangeSet::addObjectType
     for (int i = type.findNextIndex(0); i != 0; i = type.findNextIndex(i)) {
-        if (MapObject* mo = dynamic_cast<MapObject*>(type.getObjectByIndex(i))) {
+        if (const Object* mo = type.getObjectByIndex(i)) {
             int owner;
             if (mo->getOwner(owner) && playerLimit.contains(owner) && (!markedOnly || mo->isMarked())) {
                 Point pt;

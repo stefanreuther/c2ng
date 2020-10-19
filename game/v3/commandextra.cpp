@@ -1,13 +1,14 @@
 /**
   *  \file game/v3/commandextra.cpp
+  *  \brief Class game::v3::CommandExtra
   */
 
 #include "game/v3/commandextra.hpp"
 #include "game/extraidentifier.hpp"
-#include "game/v3/commandcontainer.hpp"
-#include "game/map/ship.hpp"
-#include "game/map/planet.hpp"
 #include "game/map/minefield.hpp"
+#include "game/map/planet.hpp"
+#include "game/map/ship.hpp"
+#include "game/v3/commandcontainer.hpp"
 
 namespace {
     const game::ExtraIdentifier<game::Turn, game::v3::CommandExtra> ID = {{}};
@@ -57,10 +58,27 @@ game::v3::CommandExtra::get(Turn& parent)
     return parent.extras().get(ID);
 }
 
+const game::v3::CommandExtra*
+game::v3::CommandExtra::get(const Turn& parent)
+{
+    return parent.extras().get(ID);
+}
+
 game::v3::CommandContainer*
 game::v3::CommandExtra::get(Turn& parent, int player)
 {
     CommandExtra* p = get(parent);
+    if (p) {
+        return p->get(player);
+    } else {
+        return 0;
+    }
+}
+
+const game::v3::CommandContainer*
+game::v3::CommandExtra::get(const Turn& parent, int player)
+{
+    const CommandExtra* p = get(parent);
     if (p) {
         return p->get(player);
     } else {

@@ -3,22 +3,24 @@
   */
 
 #include "client/dialogs/friendlycodedialog.hpp"
-#include "ui/window.hpp"
+#include "client/downlink.hpp"
+#include "client/widgets/helpwidget.hpp"
+#include "game/proxy/friendlycodeproxy.hpp"
+#include "ui/eventloop.hpp"
+#include "ui/group.hpp"
 #include "ui/layout/hbox.hpp"
 #include "ui/layout/vbox.hpp"
-#include "ui/group.hpp"
-#include "ui/widgets/framegroup.hpp"
-#include "ui/widgets/statictext.hpp"
-#include "util/translation.hpp"
 #include "ui/spacer.hpp"
-#include "ui/eventloop.hpp"
-#include "ui/widgets/focusiterator.hpp"
 #include "ui/widgets/button.hpp"
-#include "client/downlink.hpp"
-#include "client/proxy/friendlycodeproxy.hpp"
+#include "ui/widgets/focusiterator.hpp"
+#include "ui/widgets/framegroup.hpp"
+#include "ui/widgets/quit.hpp"
 #include "ui/widgets/scrollbar.hpp"
+#include "ui/widgets/statictext.hpp"
+#include "ui/window.hpp"
+#include "util/translation.hpp"
 
-client::dialogs::FriendlyCodeDialog::FriendlyCodeDialog(ui::Root& root, const String_t& title, const game::data::FriendlyCodeList_t& list, util::RequestSender<game::Session> gameSender)
+client::dialogs::FriendlyCodeDialog::FriendlyCodeDialog(ui::Root& root, const String_t& title, const game::spec::FriendlyCodeList::Infos_t& list, util::RequestSender<game::Session> gameSender)
     : m_root(root),
       m_title(title),
       m_gameSender(gameSender),
@@ -69,7 +71,7 @@ client::dialogs::FriendlyCodeDialog::run()
     afl::base::Deleter del;
     ui::Window& win = del.addNew(new ui::Window(m_title, m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
     ui::Group&               g1 = del.addNew(new ui::Group(ui::layout::HBox::instance5));
-    ui::widgets::FrameGroup& g2 = del.addNew(new ui::widgets::FrameGroup(ui::layout::HBox::instance0, m_root.colorScheme(), ui::widgets::FrameGroup::LoweredFrame));
+    ui::widgets::FrameGroup& g2 = del.addNew(new ui::widgets::FrameGroup(ui::layout::HBox::instance0, m_root.colorScheme(), ui::LoweredFrame));
     ui::Group&               g3 = del.addNew(new ui::Group(ui::layout::HBox::instance5));
 
     g1.add(del.addNew(new ui::widgets::StaticText(_("FCode:"), util::SkinColor::Static, gfx::FontRequest().addSize(1), m_root.provider())));
@@ -78,19 +80,23 @@ client::dialogs::FriendlyCodeDialog::run()
     g2.add(m_list);
     g2.add(del.addNew(new ui::widgets::Scrollbar(m_list, m_root)));
 
+    ui::Widget& helper = del.addNew(new client::widgets::HelpWidget(m_root, m_gameSender, "pcc2:fcode"));
+
     ui::widgets::Button& btnOK     = del.addNew(new ui::widgets::Button(_("OK"),             util::Key_Return,       m_root));
     ui::widgets::Button& btnCancel = del.addNew(new ui::widgets::Button(_("Cancel"),         util::Key_Escape,       m_root));
     ui::widgets::Button& btnRandom = del.addNew(new ui::widgets::Button(_("Alt-R - Random"), util::KeyMod_Alt + 'r', m_root));
-    // FIXME: help
+    ui::widgets::Button& btnHelp   = del.addNew(new ui::widgets::Button(_("Help"),           'h',                    m_root));
     g3.add(btnOK);
     g3.add(btnCancel);
     g3.add(btnRandom);
     g3.add(del.addNew(new ui::Spacer()));
+    g3.add(btnHelp);
 
     ui::EventLoop loop(m_root);
     btnOK.sig_fire.addNewClosure(loop.makeStop(1));
     btnCancel.sig_fire.addNewClosure(loop.makeStop(0));
     btnRandom.sig_fire.add(this, &FriendlyCodeDialog::onRandom);
+    btnHelp.dispatchKeyTo(helper);
 
     ui::widgets::FocusIterator& it = del.addNew(new ui::widgets::FocusIterator(ui::widgets::FocusIterator::Tab));
     it.add(m_input);
@@ -100,8 +106,8 @@ client::dialogs::FriendlyCodeDialog::run()
     win.add(g2);
     win.add(g3);
     win.add(it);
-    // FIXME -> add(h.add(new WHelpWidget("pcc2:fcode")));
-    // FIXME -> add(h.add(new UIQuit(cm_Escape)));
+    win.add(helper);
+    win.add(del.addNew(new ui::widgets::Quit(m_root, loop)));
     win.pack();
 
     m_root.centerWidget(win);
@@ -130,7 +136,7 @@ client::dialogs::FriendlyCodeDialog::onRandom()
 {
     // ex WFCodeWindow::onRandom
     Downlink link(m_root);
-    String_t result = client::proxy::FriendlyCodeProxy(m_gameSender).generateRandomCode(link);
+    String_t result = game::proxy::FriendlyCodeProxy(m_gameSender).generateRandomCode(link);
     if (!result.empty()) {
         m_input.setText(result);
         m_input.requestFocus();

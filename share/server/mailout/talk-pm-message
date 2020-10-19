@@ -13,6 +13,6 @@ DO NOT REPLY TO THIS EMAIL.
 
 Subject: $(subject)
 Author:  $(author)
-URL:     <http://planetscentral.com/mail/view.cgi/1/$(id)>
+URL:     <https://planetscentral.com/mail/view.cgi/1/$(id)>
 
 $(message)

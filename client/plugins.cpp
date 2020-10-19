@@ -95,7 +95,7 @@ client::createPluginLoader(const util::plugin::Plugin& plugin)
     interpreter::BCORef_t result(*new interpreter::BytecodeObject());
     interpreter::BytecodeObject& bco = *result;
     bco.setFileName(plugin.getDefinitionFileName());
-    bco.setName(plugin.getId());
+    bco.setSubroutineName(plugin.getId());
     bco.setOrigin(plugin.getId());
 
     // Create plugin context
@@ -112,7 +112,7 @@ client::createPluginLoader(const util::plugin::Plugin& plugin)
     bco.addJump(Opcode::jCatch, catchLabel);
 
     // Compile individual items
-    const Plugin::ItemList& items = plugin.getItems();
+    const Plugin::ItemList_t& items = plugin.getItems();
     for (size_t i = 0, n = items.size(); i < n; ++i) {
         compileItem(bco, items[i]);
     }
@@ -144,11 +144,11 @@ client::createLoaderForUnloadedPlugins(util::plugin::Manager& manager)
     // Create a BCO
     interpreter::BCORef_t result(*new interpreter::BytecodeObject());
     interpreter::BytecodeObject& bco = *result;
-    bco.setName("<PluginLoader>");
+    bco.setSubroutineName("<PluginLoader>");
 
     // List plugins
     std::vector<Plugin*> plugins;
-    manager.enumPlugins(plugins);
+    manager.enumPlugins(plugins, true);
 
     // Call each plugin's initializer
     for (size_t i = 0, n = plugins.size(); i < n; ++i) {
@@ -178,7 +178,7 @@ client::createFileLoader(const String_t& fileName, const String_t& origin)
     // Create a BCO
     interpreter::BCORef_t result(*new interpreter::BytecodeObject());
     interpreter::BytecodeObject& bco = *result;
-    bco.setName(afl::string::Format("<FileLoader:%s>", fileName));
+    bco.setSubroutineName(afl::string::Format("<FileLoader:%s>", fileName));
     bco.setOrigin(origin);
 
     // Wrap in a try/else to be able to log error messages

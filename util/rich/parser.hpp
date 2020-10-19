@@ -54,6 +54,7 @@ namespace util { namespace rich {
             Parses a single text tag.
             Must be called while looking at an opening tag.
             This parses the tags: a, b, em, u, tt, kbd/key, big, small, font, align.
+            Returns with the closing tag as current token; caller needs to call readNext().
             \param keepFormat true to keep format (inside <pre>), false to rewrap (outside <pre>)
             \return parsed content */
         Text parseTextItem(bool keepFormat);

@@ -1,6 +1,15 @@
 PCC2ng NEWS FILE
 ================
 
+
+2.40.9
+------
+
+  Universe Almanac. Battle simulator (command line). Reset Location
+  dialog. List ships next turn. Several internal restructurings and
+  bug fixes. Additions to PlanetsCentral servers.
+
+
 2.40.8
 ------
 

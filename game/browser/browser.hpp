@@ -27,7 +27,7 @@ namespace game { namespace browser {
 
     class Browser {
      public:
-        typedef afl::base::InlineOptional<size_t,-1> OptionalIndex_t;
+        typedef afl::base::InlineOptional<size_t,size_t(-1)> OptionalIndex_t;
 
         Browser(afl::io::FileSystem& fileSystem,
                 afl::string::Translator& tx,

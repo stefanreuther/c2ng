@@ -170,6 +170,9 @@ namespace game {
         /** Check whether mine decay uses rounding. */
         bool isRoundingMineDecay() const;
 
+        /** Check whether mine scooping needs beams. */
+        bool isBeamRequiredForMineScooping() const;
+
         /** Check whether the build system of this host has PBP style. */
         bool isPBPGame(const game::config::HostConfiguration& config) const;
 
@@ -208,7 +211,8 @@ namespace game {
         bool hasAlchemyExclusionFCodes() const;
 
         /** Check for rounding in "alX" alchemy.
-            Even with "alX" friendly code, THost consumes supplies in steps of 9. */
+            It was originally believed that even with "alX" friendly code, THost consumes supplies in steps of 9,
+            but that turns out to not be true. */
         bool isAlchemyRounding() const;
 
         /** Check for valid chunnel distance.

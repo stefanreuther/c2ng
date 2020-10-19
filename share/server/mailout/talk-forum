@@ -6,7 +6,7 @@ Hi,
 the forum
   $(forum)
 has received a message since your last visit. Use
-  <http://planetscentral.com/$(posturl)>
+  <https://planetscentral.com/$(posturl)>
 to read it.
 
 No more mails about this forum will be sent until you visit it.
@@ -20,4 +20,4 @@ PlanetsCentral administration
 
 -- 
 To change your email settings, go to
-<http://planetscentral.com/settings.cgi>.
+<https://planetscentral.com/settings.cgi>.

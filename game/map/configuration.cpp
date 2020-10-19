@@ -83,14 +83,18 @@ namespace {
         It may fail, though.
         This means that an inside point cannot be reached by moving to a particular outside point.
 
+        Note that points where this tracing is needed are rare.
+        One example would be (1100,1749) whose outside equivalent is (3027,2286)
+        on a standard ((2000,2000) R=1000) map.
+        As of 20200824, I cannot produce a test case where a limit>1 is needed.
+
         \param config [in] Map config
         \param pt  [in] Point
-        \param out [in] Initial hypothesis, [out] Result
-
-        Derived from find.pas::CircularMoveOutside. */
+        \param out [in] Initial hypothesis, [out] Result */
     bool findExactOutsideLocation(const game::map::Configuration& config, const game::map::Point pt, game::map::Point& out)
     {
         // ex game/coord.cc:findExactOutsideLocation
+        // ex find.pas:CircularMoveOutside (part)
 
         // Maybe the hypothesis already is exact?
         if (config.getCanonicalLocation(out) == pt) {
@@ -99,8 +103,8 @@ namespace {
 
         // Brute force
         for (int i = 1, limit = config.getCircularPrecision(); i <= limit; ++i) {
-            int dx = 1;
-            int dy = 1;
+            int dx = i;
+            int dy = i;
             enum { MoveDown, MoveLeft, MoveUp, MoveRight } where = MoveDown;
             while (1) {
                 // Check this location
@@ -341,7 +345,7 @@ game::map::Configuration::isOnMap(Point pt) const
         // Check inside of bounding rectangle first, then distance.
         return pt.getX() >= m_min.getX() && pt.getX() <= m_max.getX()
             && pt.getY() >= m_min.getY() && pt.getY() <= m_max.getY()
-            && pt.isCloserThan(m_center, m_size.getX());
+            && pt.getSquaredRawDistance(m_center) <= util::squareInteger(m_size.getX());
     }
     return false;
 }
@@ -392,6 +396,9 @@ game::map::Configuration::getCanonicalLocation(Point pt) const
             double radius = 2*m_size.getX() - std::sqrt(double(dist));
             double angle  = std::atan2(double(m_center.getX() - pt.getX()), double(m_center.getY() - pt.getY()));
 
+            // Note: rounding can cause a point that was previously outside to become outside again!
+            // Example: with center=(2000,2000), radius=1000, point (2001,3000), which is barely outside,
+            // is mapped to (1999,1000), which is also barely outside.
             pt.setX(int(radius * std::sin(angle) + m_center.getX() + 0.5));
             pt.setY(int(radius * std::cos(angle) + m_center.getY() + 0.5));
         }
@@ -632,7 +639,7 @@ game::map::Configuration::computeDerivedInformation()
         m_center.setX(2000);
         m_fromHostConfiguration = false;
     }
-    if (m_center.getY() < 500 || m_center.getX() > 4000) {
+    if (m_center.getY() < 500 || m_center.getY() > 4000) {
         m_center.setY(2000);
         m_fromHostConfiguration = false;
     }

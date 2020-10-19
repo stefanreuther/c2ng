@@ -6,11 +6,12 @@
 #include "game/sim/object.hpp"
 
 #include "t_game_sim.hpp"
+#include "game/sim/configuration.hpp"
 
 namespace {
     class Tester : public game::sim::Object {
      public:
-        virtual bool hasImpliedAbility(game::sim::Ability /*which*/, const game::spec::ShipList& /*shipList*/, const game::config::HostConfiguration& /*config*/) const
+        virtual bool hasImpliedAbility(game::sim::Ability /*which*/, const game::sim::Configuration& /*opts*/, const game::spec::ShipList& /*shipList*/, const game::config::HostConfiguration& /*config*/) const
             { return false; }
     };
 }
@@ -85,7 +86,8 @@ TestGameSimObject::verifyObject(game::sim::Object& t)
     TS_ASSERT(t.hasAnyNonstandardAbility());
     const game::config::HostConfiguration hostConfig;
     const game::spec::ShipList shipList;
-    TS_ASSERT(t.hasAbility(game::sim::CommanderAbility, shipList, hostConfig));
+    const game::sim::Configuration opts;
+    TS_ASSERT(t.hasAbility(game::sim::CommanderAbility, opts, shipList, hostConfig));
 
     t.markClean();
     t.setFlakRatingOverride(1342);

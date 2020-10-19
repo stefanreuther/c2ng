@@ -37,6 +37,14 @@ ui::widgets::StandardDialogButtons::addStop(EventLoop& loop)
 }
 
 void
+ui::widgets::StandardDialogButtons::addHelp(Widget& helper)
+{
+    Button& btn = m_deleter.addNew(new Button(_("Help"), 'h', m_root));
+    addChild(btn, 0);     // add in front
+    btn.dispatchKeyTo(helper);
+}
+
+void
 ui::widgets::StandardDialogButtons::init()
 {
     m_pOK     = &m_deleter.addNew(new Button(_("OK"),     util::Key_Return, m_root));
@@ -63,7 +71,7 @@ ui::widgets::doStandardDialog(String_t title, String_t prompt, Widget& content, 
     // Content
     ui::LayoutableGroup* container = &window;
     if (framed) {
-        container = &del.addNew(new FrameGroup(ui::layout::VBox::instance5, root.colorScheme(), FrameGroup::LoweredFrame));
+        container = &del.addNew(new FrameGroup(ui::layout::VBox::instance5, root.colorScheme(), ui::LoweredFrame));
         window.add(*container);
     }
     container->add(content);

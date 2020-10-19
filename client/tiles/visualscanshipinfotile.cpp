@@ -4,15 +4,15 @@
 
 #include "client/tiles/visualscanshipinfotile.hpp"
 #include "afl/string/format.hpp"
+#include "game/config/userconfiguration.hpp"
+#include "game/game.hpp"
 #include "game/map/ship.hpp"
+#include "game/proxy/objectlistener.hpp"
+#include "game/root.hpp"
 #include "game/session.hpp"
+#include "game/turn.hpp"
 #include "gfx/context.hpp"
 #include "util/skincolor.hpp"
-#include "client/proxy/objectlistener.hpp"
-#include "game/root.hpp"
-#include "game/config/userconfiguration.hpp"
-#include "game/turn.hpp"
-#include "game/game.hpp"
 
 using afl::string::Format;
 using game::map::Ship;
@@ -76,8 +76,7 @@ namespace {
                                                                      game::map::Universe::NameGravity,
                                                                      pRoot->hostConfiguration(),
                                                                      pRoot->hostVersion(),
-                                                                     tx,
-                                                                     session.interface()));
+                                                                     tx));
                     }
                 }
             }
@@ -171,7 +170,7 @@ client::tiles::VisualScanShipInfoTile::setContent(const Content& content)
 }
 
 void
-client::tiles::VisualScanShipInfoTile::attach(client::proxy::ObjectObserver& oop)
+client::tiles::VisualScanShipInfoTile::attach(game::proxy::ObjectObserver& oop)
 {
     class Updater : public util::Request<VisualScanShipInfoTile> {
      public:
@@ -184,7 +183,7 @@ client::tiles::VisualScanShipInfoTile::attach(client::proxy::ObjectObserver& oop
         Content m_content;
     };
 
-    class Listener : public client::proxy::ObjectListener {
+    class Listener : public game::proxy::ObjectListener {
      public:
         Listener(util::RequestSender<VisualScanShipInfoTile> reply)
             : m_reply(reply)

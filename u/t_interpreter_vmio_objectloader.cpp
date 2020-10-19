@@ -51,7 +51,7 @@ TestInterpreterVmioObjectLoader::testLoadBCO()
     afl::base::Ref<interpreter::BytecodeObject> bco(testee.getBCO(1));
 
     TS_ASSERT_EQUALS(bco->getFileName(), "t.q");
-    TS_ASSERT_EQUALS(bco->getName(), "");
+    TS_ASSERT_EQUALS(bco->getSubroutineName(), "");
     TS_ASSERT_EQUALS(bco->getMinArgs(), 0U);
     TS_ASSERT_EQUALS(bco->getMaxArgs(), 0U);
 
@@ -69,10 +69,10 @@ TestInterpreterVmioObjectLoader::testLoadBCO()
     TS_ASSERT_EQUALS((*bco)(5).minor, interpreter::biCompareLE);
     TS_ASSERT_EQUALS((*bco)(5).arg,   0);
 
-    TS_ASSERT_EQUALS(bco->getNames().getNumNames(), 1U);
+    TS_ASSERT_EQUALS(bco->names().getNumNames(), 1U);
     TS_ASSERT_EQUALS(bco->getName(0), "I");
 
-    TS_ASSERT_EQUALS(bco->getLiterals().size(), 1U);
+    TS_ASSERT_EQUALS(bco->literals().size(), 1U);
     TS_ASSERT_EQUALS(interpreter::toString(bco->getLiteral(0), true), "\"hello\"");
 }
 
@@ -167,7 +167,7 @@ TestInterpreterVmioObjectLoader::testLoadHash()
     // Verify BCOs
     {
         afl::base::Ref<interpreter::BytecodeObject> bco(testee.getBCO(2));
-        TS_ASSERT_EQUALS(bco->getName(), "FOO");
+        TS_ASSERT_EQUALS(bco->getSubroutineName(), "FOO");
         TS_ASSERT_EQUALS(bco->getNumInstructions(), 11U);
     }
     {
@@ -284,7 +284,7 @@ TestInterpreterVmioObjectLoader::testLoadArray()
     // Verify BCOs
     {
         afl::base::Ref<interpreter::BytecodeObject> bco(testee.getBCO(2));
-        TS_ASSERT_EQUALS(bco->getName(), "FOO");
+        TS_ASSERT_EQUALS(bco->getSubroutineName(), "FOO");
         TS_ASSERT_EQUALS(bco->getNumInstructions(), 3U);
     }
     {

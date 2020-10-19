@@ -230,3 +230,160 @@ TestGameBattleOrderRule::testGetPlanetBattleOrder()
     TS_ASSERT_EQUALS(pRule.getPlanetBattleOrder("poo", true),  1001);
 }
 
+/** Test get(game::map::Ship). */
+void
+TestGameBattleOrderRule::testGameShip()
+{
+    using game::BattleOrderRule;
+    using game::HostVersion;
+    using game::map::Ship;
+
+    const BattleOrderRule tRule(HostVersion(HostVersion::Host,  MKVERSION(3, 22, 40)));
+    const BattleOrderRule pRule(HostVersion(HostVersion::PHost, MKVERSION(3,  4,  7)));
+
+    // Totally unknown ship
+    {
+        Ship sh(99);
+        TS_ASSERT_EQUALS(tRule.get(sh), BattleOrderRule::UNKNOWN);
+        TS_ASSERT_EQUALS(pRule.get(sh), BattleOrderRule::UNKNOWN);
+    }
+
+    // Friendly code known
+    {
+        Ship sh(99);
+        sh.setFriendlyCode(String_t("-50"));
+        TS_ASSERT_EQUALS(tRule.get(sh), 1015);     // assumes no fuel and not aggressive
+        TS_ASSERT_EQUALS(pRule.get(sh), -50);
+
+        // Test Object& entry point as well
+        const game::map::Object& obj = sh;
+        TS_ASSERT_EQUALS(tRule.get(obj), 1015);
+        TS_ASSERT_EQUALS(pRule.get(obj), -50);
+    }
+
+    // Friendly code and mission known
+    {
+        Ship sh(99);
+        sh.setFriendlyCode(String_t("xyz"));
+        sh.setMission(1, 0, 0);
+        sh.setPrimaryEnemy(7);
+        sh.setCargo(game::Element::Neutronium, 100);
+        TS_ASSERT_EQUALS(tRule.get(sh), 1010);      // not kill, but PE
+        TS_ASSERT_EQUALS(pRule.get(sh), 1004);      // no weapons
+    }
+
+    // Friendly code, weapons and mission known
+    {
+        Ship sh(99);
+        sh.setFriendlyCode(String_t("xyz"));
+        sh.setMission(1, 0, 0);
+        sh.setPrimaryEnemy(7);
+        sh.setCargo(game::Element::Neutronium, 100);
+        sh.setBeamType(1);
+        sh.setNumBeams(7);
+        sh.setTorpedoType(1);
+        sh.setNumLaunchers(2);
+        sh.setNumBays(0);
+        TS_ASSERT_EQUALS(tRule.get(sh), 1010);      // not kill, but PE
+        TS_ASSERT_EQUALS(pRule.get(sh), 1002);      // not kill, but PE + weapons
+    }
+}
+
+/** Test get(game::map::Planet&). */
+void
+TestGameBattleOrderRule::testGamePlanet()
+{
+    using game::BattleOrderRule;
+    using game::HostVersion;
+    using game::map::Planet;
+
+    const BattleOrderRule tRule(HostVersion(HostVersion::Host,  MKVERSION(3, 22, 40)));
+    const BattleOrderRule pRule(HostVersion(HostVersion::PHost, MKVERSION(3,  4,  7)));
+
+    // Totally unknown planet
+    {
+        Planet pl(99);
+        TS_ASSERT_EQUALS(tRule.get(pl), BattleOrderRule::UNKNOWN);
+        TS_ASSERT_EQUALS(pRule.get(pl), BattleOrderRule::UNKNOWN);
+    }
+
+    // Friendly code known
+    {
+        Planet pl(99);
+        pl.setFriendlyCode(String_t("-50"));
+        TS_ASSERT_EQUALS(tRule.get(pl), BattleOrderRule::UNKNOWN);
+        TS_ASSERT_EQUALS(pRule.get(pl), -50);
+
+        // Test Object& entry point as well
+        const game::map::Object& obj = pl;
+        TS_ASSERT_EQUALS(tRule.get(obj), BattleOrderRule::UNKNOWN);
+        TS_ASSERT_EQUALS(pRule.get(obj), -50);
+    }
+
+    // Friendly code and defense known
+    {
+        Planet pl(99);
+        pl.setFriendlyCode(String_t("xyz"));
+        pl.setNumBuildings(game::DefenseBuilding, 1);
+        TS_ASSERT_EQUALS(tRule.get(pl), BattleOrderRule::UNKNOWN);
+        TS_ASSERT_EQUALS(pRule.get(pl), 1001);
+    }
+}
+
+/** Test add(game::sim::Ship&). */
+void
+TestGameBattleOrderRule::testSimShip()
+{
+    using game::BattleOrderRule;
+    using game::HostVersion;
+    using game::sim::Ship;
+
+    const BattleOrderRule tRule(HostVersion(HostVersion::Host,  MKVERSION(3, 22, 40)));
+    const BattleOrderRule pRule(HostVersion(HostVersion::PHost, MKVERSION(3,  4,  7)));
+
+    {
+        Ship sh;
+        sh.setAggressiveness(0);
+        sh.setFriendlyCode("-50");
+        TS_ASSERT_EQUALS(tRule.get(sh), 1015);
+        TS_ASSERT_EQUALS(pRule.get(sh), -50);
+
+        const game::sim::Object& obj = sh;
+        TS_ASSERT_EQUALS(tRule.get(obj), 1015);
+        TS_ASSERT_EQUALS(pRule.get(obj), -50);
+    }
+
+    {
+        Ship sh;
+        sh.setAggressiveness(Ship::agg_Kill);
+        sh.setFriendlyCode("xxx");
+        TS_ASSERT_EQUALS(tRule.get(sh), 1000);
+        TS_ASSERT_EQUALS(pRule.get(sh), 1000);
+    }
+
+}
+
+/** Test add(game::sim::Planet&). */
+void
+TestGameBattleOrderRule::testSimPlanet()
+{
+    using game::BattleOrderRule;
+    using game::HostVersion;
+    using game::sim::Planet;
+
+    const BattleOrderRule tRule(HostVersion(HostVersion::Host,  MKVERSION(3, 22, 40)));
+    const BattleOrderRule pRule(HostVersion(HostVersion::PHost, MKVERSION(3,  4,  7)));
+
+    {
+        Planet pl;
+        pl.setFriendlyCode("200");
+        pl.setDefense(0);
+        TS_ASSERT_EQUALS(tRule.get(pl), BattleOrderRule::UNKNOWN);
+        TS_ASSERT_EQUALS(pRule.get(pl), 200);
+
+        const game::sim::Object& obj = pl;
+        TS_ASSERT_EQUALS(tRule.get(obj), BattleOrderRule::UNKNOWN);
+        TS_ASSERT_EQUALS(pRule.get(obj), 200);
+    }
+}
+

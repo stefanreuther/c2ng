@@ -215,7 +215,7 @@ interpreter::MutexList::disownLocksByProcess(const Process* process)
 
 // Enumerate mutexes.
 void
-interpreter::MutexList::enumMutexes(std::vector<Mutex*>& data, const Process* process)
+interpreter::MutexList::enumMutexes(std::vector<Mutex*>& data, const Process* process) const
 {
     // ex IntMutex::enumMutexes
     for (size_t i = 0, e = m_mutexObjects.size(); i < e; ++i) {

@@ -64,9 +64,8 @@ ui::layout::AxisLayout::doLayout(int space, int outer, int have_size)
         --used_outer;
     have_size -= 2*used_outer;
 
-    if (have_size < total_pref) {
+    if (have_size < total_min || (have_size < total_pref && !num_flex)) {
         /* Total size too small. Scale down relatively using minimum sizes. */
-        /* FIXME: we can probably do better for have_size \in [min_total, pref_total] */
         int total = have_size;
         for (index i = 0; i < min_sizes.size(); ++i) {
             if (ignore_flags[i]) {
@@ -79,6 +78,24 @@ ui::layout::AxisLayout::doLayout(int space, int outer, int have_size)
             }
         }
         assert(total_min == 0);
+        assert(total == 0);
+        return min_sizes;
+    } else if (have_size < total_pref) {
+        /* We have between total and preferred size. Scale up flexible components. */
+        int delta = have_size - total_min;
+        int total = have_size;
+        for (index i = 0; i < min_sizes.size(); ++i) {
+            if (ignore_flags[i]) {
+                min_sizes[i] = 0;
+            } else {
+                if (flex_flags[i]) {
+                    int d = delta / num_flex--;
+                    min_sizes[i] += d;
+                    delta -= d;
+                }
+                total -= min_sizes[i];
+            }
+        }
         assert(total == 0);
         return min_sizes;
     } else if (have_size > total_pref) {

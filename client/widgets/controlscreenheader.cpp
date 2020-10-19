@@ -58,7 +58,7 @@ client::widgets::ControlScreenHeader::~ControlScreenHeader()
 { }
 
 void
-client::widgets::ControlScreenHeader::enableButton(Button btn, ui::widgets::FrameGroup::Type type)
+client::widgets::ControlScreenHeader::enableButton(Button btn, ui::FrameType type)
 {
     if (m_frames[btn] != 0) {
         m_frames[btn]->setType(type);
@@ -164,7 +164,7 @@ client::widgets::ControlScreenHeader::createChildWidgets(ui::Root& root, KeymapW
         ui::Widget* w;
         if (i == btnImage) {
             ui::widgets::ImageButton& btn = m_deleter.addNew(new ui::widgets::ImageButton(String_t(), BUTTONS[i].key, root, gfx::Point(105, 95)));
-            ui::widgets::FrameGroup& innerFrame = m_deleter.addNew(new ui::widgets::FrameGroup(ui::layout::HBox::instance0, root.colorScheme(), ui::widgets::FrameGroup::LoweredFrame));
+            ui::widgets::FrameGroup& innerFrame = m_deleter.addNew(new ui::widgets::FrameGroup(ui::layout::HBox::instance0, root.colorScheme(), ui::LoweredFrame));
             innerFrame.add(btn);
             btn.dispatchKeyTo(kmw);
             w = &innerFrame;
@@ -176,7 +176,7 @@ client::widgets::ControlScreenHeader::createChildWidgets(ui::Root& root, KeymapW
         }
 
         // FrameGroup
-        m_frames[i] = &m_deleter.addNew(new ui::widgets::FrameGroup(ui::layout::HBox::instance0, root.colorScheme(), ui::widgets::FrameGroup::NoFrame));
+        m_frames[i] = &m_deleter.addNew(new ui::widgets::FrameGroup(ui::layout::HBox::instance0, root.colorScheme(), ui::NoFrame));
         m_frames[i]->setFrameWidth(2);
         m_frames[i]->add(*w);
 

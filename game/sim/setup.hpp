@@ -120,6 +120,13 @@ namespace game { namespace sim {
             \return object; null if slot is out of range */
         Object* getObject(Slot_t slot);
 
+        /** Find slot, given an object.
+            \param [in] obj Object, as obtained from a call on this object
+            \param [out] result Slot number such that getObject(result) == obj
+            \retval true Object was found, \c result has been updated
+            \retval false Object not found */
+        bool findIndex(const Object* obj, Slot_t& result) const;
+
         /*
          *  Operations on the list of ships
          */
@@ -162,6 +169,13 @@ namespace game { namespace sim {
                    Otherwise, the allocation loop will have O(n^3).
             \return unused ship Id */
         Id_t findUnusedShipId(Id_t firstToCheck) const;
+
+        /** Merge from other setup.
+            Objects not contained in this setup are added;
+            if the other setup contains an object already in this setup (ship with same Id, planet), it is replaced.
+            Caller must use notifyListeners() to notify changes.
+            \param other Other setup */
+        void merge(const Setup& other);
 
         /*
          *  Global operations

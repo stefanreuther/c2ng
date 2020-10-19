@@ -6,6 +6,7 @@
 
 #include "afl/bits/smallset.hpp"
 #include "afl/string/translator.hpp"
+#include "client/downlink.hpp"
 #include "game/map/point.hpp"
 #include "game/ref/list.hpp"
 #include "game/reference.hpp"
@@ -25,7 +26,8 @@ namespace client { namespace dialogs {
         void setAllowForeignShips(bool flag);
         void setEarlyExit(bool flag);
 
-        bool loadCurrent(game::map::Point pos, game::ref::List::Options_t options, game::Id_t excludeShip);
+        bool loadCurrent(Downlink& link, game::map::Point pos, game::ref::List::Options_t options, game::Id_t excludeShip);
+        bool loadNext(Downlink& link, game::map::Point pos, game::Id_t fromShip, game::ref::List::Options_t options);
 
         game::Reference run();
 

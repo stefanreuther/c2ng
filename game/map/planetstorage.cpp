@@ -8,11 +8,9 @@
 #include "game/limits.hpp"
 
 game::map::PlanetStorage::PlanetStorage(Planet& pl,
-                                        InterpreterInterface& iface,
                                         const game::config::HostConfiguration& config)
     : CargoContainer(),
       m_planet(pl),
-      m_interface(iface),
       m_hostConfiguration(config),
       m_changeConnection(pl.sig_change.add(&sig_change, &afl::base::Signal<void()>::raise))
 {
@@ -31,7 +29,7 @@ game::map::PlanetStorage::getName(afl::string::Translator& tx) const
     // ex GPlanetTransfer::getName
     // FIXME: PCC 1.x says "$NAME starbase" or "planet $NAME" here.
     // should we use same wording?
-    return m_planet.getName(PlainName, tx, m_interface);
+    return m_planet.getName(tx);
 }
 
 game::CargoContainer::Flags_t

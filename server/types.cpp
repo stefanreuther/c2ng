@@ -45,7 +45,7 @@ server::makeStringValue(const String_t& str)
 server::Time_t
 server::packTime(afl::sys::Time t)
 {
-    return t.getUnixTime() / TIME_SCALE;
+    return Time_t(t.getUnixTime() / TIME_SCALE);
 }
 
 afl::sys::Time

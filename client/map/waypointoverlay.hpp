@@ -6,8 +6,8 @@
 #define C2NG_CLIENT_MAP_WAYPOINTOVERLAY_HPP
 
 #include "client/map/overlay.hpp"
-#include "client/proxy/objectobserver.hpp"
 #include "game/map/shipinfo.hpp"
+#include "game/proxy/objectobserver.hpp"
 #include "ui/root.hpp"
 #include "util/requestreceiver.hpp"
 
@@ -26,7 +26,7 @@ namespace client { namespace map {
         virtual bool handleKey(util::Key_t key, int prefix, const Renderer& ren);
         virtual bool handleMouse(gfx::Point pt, MouseButtons_t pressedButtons, const Renderer& ren);
 
-        void attach(client::proxy::ObjectObserver& oop);
+        void attach(game::proxy::ObjectObserver& oop);
 
      private:
         ui::Root& m_root;

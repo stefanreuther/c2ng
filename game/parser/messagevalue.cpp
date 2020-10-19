@@ -32,6 +32,7 @@ namespace {
         { "BAYS",              game::parser::mi_ShipNumBays             },
         { "BEAM",              game::parser::mi_ShipBeamType            },
         { "BEAM.COUNT",        game::parser::mi_ShipNumBeams            },
+        { "BIDIR",             game::parser::mi_WormholeBidirFlag       }, // Not in scripting language
         { "BUILD.PRIORITY",    game::parser::mi_BaseQueuePriority       }, // Not in scripting language
         { "BUILD.QPOS",        game::parser::mi_BaseQueuePos            },
         { "CARGO.COLONISTS",   game::parser::mi_ShipColonists           },
@@ -57,6 +58,7 @@ namespace {
         { "FACTORIES",         game::parser::mi_PlanetFactories         },
         { "HEADING",           game::parser::mi_Heading                 },
         { "HULL",              game::parser::mi_ShipHull                },
+        { "ID.SHIP",           game::parser::mi_ExplodedShipId          },
         { "ID2",               game::parser::mi_UfoRealId               },
         { "INDUSTRY",          game::parser::mi_PlanetActivity          },
         { "MASS",              game::parser::mi_Mass                    },
@@ -81,6 +83,7 @@ namespace {
         { "RADIUS",            game::parser::mi_Radius                  },
         { "REASON",            game::parser::mi_MineScanReason          }, // SCANNED in the scripting language
         { "SPEED",             game::parser::mi_Speed                   },
+        { "STABILITY",         game::parser::mi_WormholeStabilityCode   }, // Not in scripting language
         { "STATUS",            game::parser::mi_IonStatus               },
         { "SUPPLIES",          game::parser::mi_PlanetSupplies          },
         { "TEMP",              game::parser::mi_PlanetTemperature       },
@@ -232,6 +235,13 @@ game::parser::getNameFromIndex(MessageIntegerIndex ii, afl::string::Translator& 
      case mi_UfoColor:          return tx("Color");
      case mi_UfoPlanetRange:    return tx("Visibility Range from Planet");
      case mi_UfoShipRange:      return tx("Visibility Range from Ship");
+
+        /* Wormhole: */
+     case mi_WormholeStabilityCode: return tx("Stability");
+     case mi_WormholeBidirFlag: return tx("Bidirectional");
+
+        /* Explosion: */
+     case mi_ExplodedShipId:    return tx("Exploded Ship Id");
 
      case mi_Max:               return "?";
     }

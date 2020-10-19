@@ -1,5 +1,6 @@
 /**
   *  \file game/v3/udata/reader.cpp
+  *  \brief Base class game::v3::udata::Reader
   */
 
 #include "game/v3/udata/reader.hpp"
@@ -44,11 +45,11 @@ game::v3::udata::Reader::check(afl::io::Stream& in, Timestamp* ts)
     gt::UtilChunkHeader header;
     gt::Util13ControlMinimal data;
 
-    bool ok = (in.read(afl::base::fromObject(header)) != sizeof(header)
-               || header.recordType != gt::UTIL_CONTROL_ID
-               || header.recordSize < sizeof(data)
-               || header.recordSize > 1024 /* arbitrary, but attempt to reject text files */
-               || in.read(afl::base::fromObject(data)) != sizeof(data));
+    bool ok = !(in.read(afl::base::fromObject(header)) != sizeof(header)
+                || header.recordType != gt::UTIL_CONTROL_ID
+                || header.recordSize < sizeof(data)
+                || header.recordSize > 1024 /* arbitrary, but attempt to reject text files */
+                || in.read(afl::base::fromObject(data)) != sizeof(data));
 
     in.setPos(pos);
     if (ok && ts != 0) {

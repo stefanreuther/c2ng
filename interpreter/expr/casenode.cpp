@@ -19,7 +19,7 @@ interpreter::expr::CaseNode::compileValue(BytecodeObject& bco, const Compilation
     // ex IntCaseExprNode::compileValue
     a->compileValue(bco, cc);
     b->compileValue(bco, cc);
-    bco.addInstruction(Opcode::maBinary, cc.hasFlag(CompilationContext::CaseBlind) ? minor+1 : minor, 0);
+    bco.addInstruction(Opcode::maBinary, cc.hasFlag(CompilationContext::CaseBlind) ? uint8_t(minor+1) : minor, 0);
 }
 
 void

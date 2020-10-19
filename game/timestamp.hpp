@@ -1,10 +1,10 @@
 /**
   *  \file game/timestamp.hpp
+  *  \brief Class game::Timestamp
   */
 #ifndef C2NG_GAME_TIMESTAMP_HPP
 #define C2NG_GAME_TIMESTAMP_HPP
 
-#include <cstring>
 #include "afl/base/types.hpp"
 #include "afl/string/string.hpp"
 
@@ -16,10 +16,15 @@ namespace game {
         We use the classic VGAP format everywhere even if the host has a different format. */
     class Timestamp {
      public:
+        /** Size of timestamp representation in bytes. */
         static const size_t SIZE = 18;
 
+        /** Mutable timestamp representation. */
         typedef uint8_t (&Data_t)[SIZE];
+
+        /** Immutable timestamp representation. */
         typedef const uint8_t (&ConstData_t)[SIZE];
+
 
         /** Construct from binary representation.
             Makes a timestamp from an 18-byte ASCII timestamp field. */
@@ -53,18 +58,29 @@ namespace game {
             \param out data goes here */
         void storeRawData(Data_t data) const;
 
+        /** Compare for equality.
+            \param rhs other timestamp
+            \return true if equal */
         bool operator==(const Timestamp& rhs) const;
+
+        /** Compare for equality.
+            \param rhs other timestamp
+            \return true if equal */
         bool operator==(ConstData_t rhs) const;
+
+        /** Compare for inequality.
+            \param rhs other timestamp
+            \return true if different */
         bool operator!=(const Timestamp& rhs) const;
+
+        /** Compare for inequality.
+            \param rhs other timestamp
+            \return true if different */
         bool operator!=(ConstData_t rhs) const;
 
         /** Compare two timestamps.
             \return true if this timestamp is earlier than the other. */
         bool isEarlierThan(const Timestamp& rhs) const;
-
-        // FIXME: remove. Unsafe prototype and doesn't seem to be used in PCC2 (only un-trn).
-        //     void copyFrom(const char* p)
-        //         { std::memcpy(this->data, p, SIZE); }
 
         /** Check validity.
             A timestamp is valid if it is not the null timestamp (default constructor). */

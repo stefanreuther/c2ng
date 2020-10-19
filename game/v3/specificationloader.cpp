@@ -550,21 +550,21 @@ game::v3::SpecificationLoader::loadHullFunctions(game::spec::ShipList& list, afl
 void
 game::v3::SpecificationLoader::loadFriendlyCodes(game::spec::ShipList& list, afl::io::Directory& dir)
 {
+    // ex ccmain.pas:LoadFCodes
     game::spec::FriendlyCodeList& fcs = list.friendlyCodes();
     fcs.clear();
 
     // Regular definitions
     afl::base::Ptr<afl::io::Stream> ps = dir.openFileNT("fcodes.cc", FileSystem::OpenRead);
     if (ps.get()) {
-        fcs.load(*ps, m_log);
+        fcs.load(*ps, m_log, m_translator);
     }
     ps = dir.openFileNT("fcodes.usr", FileSystem::OpenRead);
     if (ps.get()) {
-        fcs.load(*ps, m_log);
+        fcs.load(*ps, m_log, m_translator);
     }
 
     // Extra definitions
-    fcs.clearExtraCodes();
     ps = dir.openFileNT("xtrfcode.txt", FileSystem::OpenRead);
     if (ps.get()) {
         fcs.loadExtraCodes(*ps);

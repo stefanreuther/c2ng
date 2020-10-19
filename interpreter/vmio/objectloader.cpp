@@ -64,6 +64,8 @@ namespace {
 
     class ArrayLoader {
      public:
+        virtual ~ArrayLoader()
+            { }
         virtual void add(uint32_t value) = 0;
         void load(afl::io::Stream& in, uint32_t n)
             {
@@ -658,12 +660,12 @@ interpreter::vmio::ObjectLoader::loadBCO(LoadObject& ldr, uint32_t id)
 
          case 2:
             // "data" (literals for pushlit, data segment)
-            ValueLoader(m_charset, *this).load(obj->getLiterals(), *ps, 0, propCount);
+            ValueLoader(m_charset, *this).load(obj->literals(), *ps, 0, propCount);
             break;
 
          case 3:
             // "names" (names for e.g. pushvar, name list)
-            ValueLoader(m_charset, *this).loadNames(obj->getNames(), *ps, propCount);
+            ValueLoader(m_charset, *this).loadNames(obj->names(), *ps, propCount);
             break;
 
          case 4:
@@ -673,12 +675,12 @@ interpreter::vmio::ObjectLoader::loadBCO(LoadObject& ldr, uint32_t id)
 
          case 5:
             // "local_names" (predeclared locals, name list)
-            ValueLoader(m_charset, *this).loadNames(obj->getLocalNames(), *ps, propCount);
+            ValueLoader(m_charset, *this).loadNames(obj->localVariables(), *ps, propCount);
             break;
 
          case 6:
             // "name" (name hint for loading, string)
-            obj->setName(loadString(*ps));
+            obj->setSubroutineName(loadString(*ps));
             break;
 
          case 7:

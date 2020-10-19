@@ -24,7 +24,7 @@ This is the last result file for this game.
 You have finished $(rank_$(rank)) place.
 
 Game details can be found on
-<http://planetscentral.com/host/game.cgi/$(gameurl)>.
+<https://planetscentral.com/host/game.cgi/$(gameurl)>.
 
 The game has now ended, do not submit a turn file.
 
@@ -32,4 +32,4 @@ Have fun.
 
 -- 
 To change your email settings, go to
-<http://planetscentral.com/settings.cgi>.
+<https://planetscentral.com/settings.cgi>.

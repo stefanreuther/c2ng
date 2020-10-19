@@ -67,6 +67,16 @@ namespace ui {
 
     void prepareHighContrastListItem(gfx::Context<util::SkinColor::Color>& ctx, gfx::Rectangle area, ui::widgets::AbstractListbox::ItemState state);
     void prepareColorListItem(gfx::Context<util::SkinColor::Color>& ctx, gfx::Rectangle area, ui::widgets::AbstractListbox::ItemState state, ColorScheme& uiColors, afl::base::Deleter& h);
+
+    enum FrameType {
+        NoFrame,            ///< Don't draw a frame. ex WColorFrame cf_None, using fw=2
+        RedFrame,           ///< Red frame.          ex WColorFrame cf_Red, using fw=2
+        YellowFrame,        ///< Yellow frame.       ex WColorFrame cf_Yellow, using fw=2
+        GreenFrame,         ///< Green frame.        ex WColorFrame cf_Green, using fw=2
+        RaisedFrame,        ///< Raised 3D frame.
+        LoweredFrame        ///< Lowered 3D frame.   ex UIFrameGroup, using fw=1, pad=frame-1
+    };
+    void drawFrame(gfx::Context<uint8_t>& ctx, gfx::Rectangle r, FrameType type, int frameWidth);
 }
 
 #endif

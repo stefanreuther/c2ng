@@ -4,9 +4,10 @@
 
 #include "client/dialogs/buildstarbasedialog.hpp"
 #include "afl/base/deleter.hpp"
-#include "client/proxy/buildstarbaseproxy.hpp"
-#include "client/proxy/configurationproxy.hpp"
+#include "client/downlink.hpp"
 #include "client/widgets/costdisplay.hpp"
+#include "game/proxy/buildstarbaseproxy.hpp"
+#include "game/proxy/configurationproxy.hpp"
 #include "ui/dialogs/messagebox.hpp"
 #include "ui/layout/hbox.hpp"
 #include "ui/layout/vbox.hpp"
@@ -17,9 +18,9 @@
 #include "ui/window.hpp"
 #include "util/keystring.hpp"
 
-using client::proxy::ConfigurationProxy;
-using client::proxy::BuildStarbaseProxy;
 using client::widgets::CostDisplay;
+using game::proxy::BuildStarbaseProxy;
+using game::proxy::ConfigurationProxy;
 using game::spec::Cost;
 using ui::widgets::Button;
 

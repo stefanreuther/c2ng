@@ -142,7 +142,7 @@ namespace interpreter {
 
             \param data [out] List will be produced here
             \param owner [in] Filter. If non-null, only list mutexes owned by this process. If null, list all mutexes. */
-        void enumMutexes(std::vector<Mutex*>& data, const Process* process);
+        void enumMutexes(std::vector<Mutex*>& data, const Process* process) const;
 
      private:
         /** Create a mutex.

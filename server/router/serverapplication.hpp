@@ -36,6 +36,7 @@ namespace server { namespace router {
         afl::async::Interrupt& m_interrupt;
         util::process::Factory& m_factory;
         std::auto_ptr<server::common::IdGenerator> m_generator;
+        bool m_enableFileNotify;
         Configuration m_config;
     };
 

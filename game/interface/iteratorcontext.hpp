@@ -40,7 +40,9 @@ namespace game { namespace interface {
 
     afl::data::Value* IFIterator(game::Session& session, interpreter::Arguments& args);
 
-    interpreter::Context* makeIteratorValue(afl::base::Ptr<Game> game, int nr, bool reportRangeError);
+    interpreter::Context* makeIteratorValue(Session& session, int nr, bool reportRangeError);
+
+    interpreter::Context* createObjectContext(game::map::Object* obj, Session& session);
 
 } }
 

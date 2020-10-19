@@ -28,7 +28,7 @@ interpreter::lookupName(const afl::data::NameQuery& name, afl::base::Memory<cons
 
     while (const NameTable* ele = tab.eat()) {
         if (name.match(ele->name)) {
-            index = Context::PropertyIndex_t(low);
+            index = low;
             return true;
         }
         ++low;

@@ -50,6 +50,10 @@ namespace server { namespace host {
             \param gameId game to query
             \return game reference count */
         afl::net::redis::IntegerField gameReferenceCount(int32_t gameId);
+
+        /** Access key store.
+            \return keystore subtree */
+        afl::net::redis::Subtree keyStore();
     };
 
 } }

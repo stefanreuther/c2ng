@@ -6,9 +6,9 @@
 
 #include "client/map/overlay.hpp"
 #include "game/map/minefieldformula.hpp"
+#include "game/proxy/objectobserver.hpp"
 #include "ui/root.hpp"
 #include "util/requestreceiver.hpp"
-#include "client/proxy/objectobserver.hpp"
 
 namespace client { namespace map {
 
@@ -25,7 +25,7 @@ namespace client { namespace map {
         virtual bool handleKey(util::Key_t key, int prefix, const Renderer& ren);
         virtual bool handleMouse(gfx::Point pt, MouseButtons_t pressedButtons, const Renderer& ren);
 
-        void attach(client::proxy::ObjectObserver& oop);
+        void attach(game::proxy::ObjectObserver& oop);
 
      private:
         game::map::MinefieldEffects_t m_data;

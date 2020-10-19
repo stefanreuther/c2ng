@@ -1,9 +1,11 @@
 /**
   *  \file util/syntax/segment.cpp
+  *  \brief Class util::syntax::Segment
   */
 
 #include "util/syntax/segment.hpp"
 
+// Default constructor.
 util::syntax::Segment::Segment()
     : m_format(DefaultFormat),
       m_text(),
@@ -11,6 +13,7 @@ util::syntax::Segment::Segment()
       m_info()
 { }
 
+// Make specific segment.
 util::syntax::Segment::Segment(Format fmt, afl::string::ConstStringMemory_t text)
     : m_format(fmt),
       m_text(text),
@@ -18,10 +21,7 @@ util::syntax::Segment::Segment(Format fmt, afl::string::ConstStringMemory_t text
       m_info()
 { }
 
-// /** Initialize this highlighter segment.
-//     \param fmt Format
-//     \param start Start position
-//     \param length Length of segment */
+// Set content.
 void
 util::syntax::Segment::set(Format fmt, afl::string::ConstStringMemory_t text)
 {
@@ -32,6 +32,7 @@ util::syntax::Segment::set(Format fmt, afl::string::ConstStringMemory_t text)
     m_info.clear();
 }
 
+// Start a segment.
 void
 util::syntax::Segment::start(afl::string::ConstStringMemory_t tail)
 {
@@ -39,6 +40,7 @@ util::syntax::Segment::start(afl::string::ConstStringMemory_t tail)
     set(DefaultFormat, tail);
 }
 
+// Finish a segment.
 void
 util::syntax::Segment::finish(Format fmt, afl::string::ConstStringMemory_t tail)
 {
@@ -52,42 +54,49 @@ util::syntax::Segment::finish(Format fmt, afl::string::ConstStringMemory_t tail)
     }
 }
 
+// Set associated link.
 void
 util::syntax::Segment::setLink(const String_t& link)
 {
     m_link = link;
 }
 
+// Set associated information text.
 void
 util::syntax::Segment::setInfo(const String_t& info)
 {
     m_info = info;
 }
 
+// Set format.
 void
 util::syntax::Segment::setFormat(Format fmt)
 {
     m_format = fmt;
 }
 
+// Get format.
 util::syntax::Format
 util::syntax::Segment::getFormat() const
 {
     return m_format;
 }
 
+// Get text content.
 afl::string::ConstStringMemory_t
 util::syntax::Segment::getText() const
 {
     return m_text;
 }
 
+// Get associated link.
 const String_t&
 util::syntax::Segment::getLink() const
 {
     return m_link;
 }
 
+// Get associated information text.
 const String_t&
 util::syntax::Segment::getInfo() const
 {

@@ -1,5 +1,6 @@
 /**
   *  \file util/randomnumbergenerator.cpp
+  *  \brief Class util::RandomNumberGenerator
   */
 
 #include "util/randomnumbergenerator.hpp"
@@ -41,8 +42,7 @@ util::RandomNumberGenerator::getSeed() const
     return m_seed;
 }
 
-/** Advance seed.
-    Simple linear congruential sequence. */
+// Advance seed.
 void
 util::RandomNumberGenerator::advance()
 {

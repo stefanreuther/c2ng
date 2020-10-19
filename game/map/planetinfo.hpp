@@ -89,9 +89,11 @@ namespace game { namespace map {
         bool isPlayable;                          ///< true if this planet is being played.
 
         GroundDefenseInfo()
-            : defender(0),
+            : strength(),
+              name(),
+              defender(0),
               isPlayable(false)
-            { strength.setAll(0); }
+            { }
     };
 
     /** Defense textual information. */

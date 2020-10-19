@@ -33,7 +33,6 @@ TestInterpreterWorld::testIt()
     TS_ASSERT_EQUALS(&w.planetProperties(),    &cw.planetProperties());
     TS_ASSERT_EQUALS(&w.keymaps(),             &cw.keymaps());
     TS_ASSERT_EQUALS(&w.atomTable(),           &cw.atomTable());
-    TS_ASSERT_EQUALS(&w.processList(),         &cw.processList());
     TS_ASSERT_EQUALS(&w.mutexList(),           &cw.mutexList());
     TS_ASSERT_EQUALS(&w.fileTable(),           &cw.fileTable());
 

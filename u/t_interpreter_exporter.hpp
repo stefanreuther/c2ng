@@ -10,6 +10,7 @@
 class TestInterpreterExporterConfiguration : public CxxTest::TestSuite {
  public:
     void testIt();
+    void testLoad();
 };
 
 class TestInterpreterExporterDbfExporter : public CxxTest::TestSuite {
@@ -33,6 +34,7 @@ class TestInterpreterExporterFieldList : public CxxTest::TestSuite {
     void testAdd();
     void testAddList();
     void testModify();
+    void testCopy();
 };
 
 class TestInterpreterExporterFormat : public CxxTest::TestSuite {

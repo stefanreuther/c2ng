@@ -11,11 +11,13 @@
 #include "afl/string/string.hpp"
 #include "client/cargotransfer.hpp"
 #include "client/dialogs/alliancedialog.hpp"
+#include "client/dialogs/buildqueuedialog.hpp"
 #include "client/dialogs/buildstarbasedialog.hpp"
 #include "client/dialogs/buildstructuresdialog.hpp"
 #include "client/dialogs/buysuppliesdialog.hpp"
 #include "client/dialogs/cargohistorydialog.hpp"
 #include "client/dialogs/classicvcrdialog.hpp"
+#include "client/dialogs/commandlistdialog.hpp"
 #include "client/dialogs/fileselectiondialog.hpp"
 #include "client/dialogs/friendlycodedialog.hpp"
 #include "client/dialogs/helpdialog.hpp"
@@ -24,21 +26,24 @@
 #include "client/dialogs/navchartdialog.hpp"
 #include "client/dialogs/objectselectiondialog.hpp"
 #include "client/dialogs/planetinfodialog.hpp"
+#include "client/dialogs/processlistdialog.hpp"
+#include "client/dialogs/revertdialog.hpp"
 #include "client/dialogs/screenhistorydialog.hpp"
 #include "client/dialogs/searchdialog.hpp"
+#include "client/dialogs/selectionmanager.hpp"
 #include "client/dialogs/sellsuppliesdialog.hpp"
 #include "client/dialogs/shipspeeddialog.hpp"
+#include "client/dialogs/specbrowserdialog.hpp"
 #include "client/dialogs/taxationdialog.hpp"
 #include "client/dialogs/techupgradedialog.hpp"
 #include "client/dialogs/turnlistdialog.hpp"
 #include "client/dialogs/visualscandialog.hpp"
 #include "client/help.hpp"
-#include "client/proxy/chunnelproxy.hpp"
 #include "client/proxy/screenhistoryproxy.hpp"
-#include "client/proxy/searchproxy.hpp"
 #include "client/si/control.hpp"
 #include "client/si/dialogfunction.hpp"
 #include "client/si/listboxfunction.hpp"
+#include "client/si/remotecontrol.hpp"
 #include "client/si/requestlink1.hpp"
 #include "client/si/requestlink2.hpp"
 #include "client/si/scriptprocedure.hpp"
@@ -53,10 +58,15 @@
 #include "game/interface/plugincontext.hpp"
 #include "game/interface/richtextfunctions.hpp"
 #include "game/interface/richtextvalue.hpp"
+#include "game/interface/simplefunction.hpp"
+#include "game/interface/simpleprocedure.hpp"
 #include "game/interface/vmfile.hpp"
+#include "game/map/chunnelmission.hpp"
 #include "game/map/fleetmember.hpp"
 #include "game/map/objecttype.hpp"
 #include "game/map/shipinfo.hpp"
+#include "game/proxy/chunnelproxy.hpp"
+#include "game/proxy/searchproxy.hpp"
 #include "game/registrationkey.hpp"
 #include "game/root.hpp"
 #include "game/searchquery.hpp"
@@ -75,7 +85,6 @@
 #include "util/rich/parser.hpp"
 #include "util/rich/text.hpp"
 #include "util/unicodechars.hpp"
-#include "client/dialogs/buildqueuedialog.hpp"
 
 using client::si::UserTask;
 using client::si::UserSide;
@@ -85,6 +94,8 @@ using client::si::RequestLink1;
 using client::si::RequestLink2;
 using client::si::ScriptSide;
 using client::ScreenHistory;
+using game::interface::SimpleFunction;
+using game::interface::SimpleProcedure;
 
 namespace {
     const char*const LOG_NAME = "client.si";
@@ -724,7 +735,7 @@ client::si::IFCCChangeWaypoint(game::Session& session, ScriptSide& si, RequestLi
                     break;
                  }
                  case client::dialogs::NavChartResult::Chunnel: {
-                    client::proxy::ChunnelProxy proxy(ctl.root().engine().dispatcher(), iface.gameSender());
+                    game::proxy::ChunnelProxy proxy(iface.gameSender(), ctl.root().engine().dispatcher());
                     Downlink link(ctl.root());
 
                     afl::data::StringList_t status = proxy.setupChunnel(link, m_state.shipId, result.shipId);
@@ -781,6 +792,18 @@ client::si::IFCCChangeWaypoint(game::Session& session, ScriptSide& si, RequestLi
                 || sh->hasSpecialFunction(game::spec::HullFunction::ChunnelSelf, g.shipScores(), shipList, root.hostConfiguration())
                 || sh->hasSpecialFunction(game::spec::HullFunction::ChunnelOthers, g.shipScores(), shipList, root.hostConfiguration());
 
+            game::map::ChunnelMission chm;
+            game::map::Universe& univ = g.currentTurn().universe(); // FIXME: is this the same where the ship is from?
+            if (chm.check(*sh, univ, g.shipScores(), shipList, root)) {
+                if (game::map::Ship* mate = univ.ships().get(chm.getTargetId())) {
+                    in.chunnelMode = true;
+
+                    game::map::Point matePos;
+                    if (mate->getPosition(matePos)) {
+                        in.target = univ.config().getSimpleNearestAlias(matePos, pos);
+                    }
+                }
+            }
             si.postNewTask(link, new Task(in));
         }
     } else {
@@ -823,9 +846,9 @@ client::si::IFCCChooseInterceptTarget(game::Session& session, ScriptSide& si, Re
     }
 
     session.notifyListeners();
-    game::spec::ShipList& shipList = game::actions::mustHaveShipList(session);
-    game::Root& root = game::actions::mustHaveRoot(session);
-    game::Game& g = game::actions::mustHaveGame(session);
+    game::actions::mustHaveShipList(session);
+    game::actions::mustHaveRoot(session);
+    game::actions::mustHaveGame(session);
 
     // if (exc.checkForBreak())
     //     return;
@@ -848,6 +871,32 @@ client::si::IFCCChooseInterceptTarget(game::Session& session, ScriptSide& si, Re
     } else {
         throw interpreter::Error::contextError();
     }
+}
+
+// @since PCC2 2.40.9
+void
+client::si::IFCCEditCommands(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    class Task : public UserTask {
+     public:
+        virtual void handle(UserSide& iface, Control& ctl, RequestLink2 link)
+            {
+                OutputState out;
+                client::dialogs::editCommands(iface, ctl, out);
+
+                iface.joinProcess(link, out.getProcess());
+                ctl.handleStateChange(iface, link, out.getTarget());
+            }
+     private:
+        bool m_excludeCurrent;
+    };
+
+    args.checkArgumentCount(0);
+    session.notifyListeners();
+    game::actions::mustHaveGame(session);
+
+    si.postNewTask(link, new Task());
+    
 }
 
 // @since PCC2 2.40.6
@@ -943,6 +992,65 @@ client::si::IFCCPopScreenHistory(game::Session& session, ScriptSide& si, Request
     si.postNewTask(link, new Task(isCurrentScreenRegistered(session)));
 }
 
+// @since PCC2 2.40.9
+void
+client::si::IFCCProcessManager(game::Session& /*session*/, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    args.checkArgumentCount(0);
+
+    class Task : public UserTask {
+     public:
+        Task(game::Reference ref)
+            : m_ref(ref)
+            { }
+        virtual void handle(UserSide& iface, Control& ctl, RequestLink2 link)
+            {
+                client::si::OutputState out;
+                client::dialogs::doProcessListDialog(m_ref, iface, ctl, out);
+
+                iface.joinProcess(link, out.getProcess());
+                ctl.handleStateChange(iface, link, out.getTarget());
+            }
+     private:
+        game::Reference m_ref;
+    };
+
+    // FIXME: put a sensible value into game::Reference()
+    si.postNewTask(link, new Task(game::Reference()));
+}
+
+/* @q CC$Reset x:Int, y:Int (Internal)
+   Reset location dialog.
+   @since PCC2 2.40.9 */
+void
+client::si::IFCCReset(game::Session& /*session*/, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    // ex IFCCReset
+    args.checkArgumentCount(2);
+
+    // Fetch location
+    int32_t x, y;
+    if (!interpreter::checkIntegerArg(x, args.getNext()) || !interpreter::checkIntegerArg(y, args.getNext())) {
+        return;
+    }
+
+    // ReverterProxy will validate further preconditions
+    class Task : public UserTask {
+     public:
+        Task(game::map::Point pos)
+            : m_pos(pos)
+            { }
+        virtual void handle(UserSide& iface, Control& ctl, RequestLink2 link)
+            {
+                client::dialogs::doRevertLocation(ctl.root(), iface.gameSender(), ctl.translator(), m_pos);
+                iface.continueProcess(link);
+            }
+     private:
+        game::map::Point m_pos;
+    };
+    si.postNewTask(link, new Task(game::map::Point(x, y)));
+}
+
 // @since PCC2 2.40.8
 void
 client::si::IFCCSellSupplies(game::Session& /*session*/, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
@@ -972,6 +1080,22 @@ client::si::IFCCSellSupplies(game::Session& /*session*/, ScriptSide& si, Request
         game::Id_t m_id;
     };
     si.postNewTask(link, new DialogTask(pPlanet->getId()));
+}
+
+// @since PCC2 2.40.9
+void
+client::si::IFCCSpecBrowser(game::Session& /*session*/, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    args.checkArgumentCount(0);
+    class DialogTask : public UserTask {
+     public:
+        virtual void handle(UserSide& iface, Control& ctl, RequestLink2 link)
+            {
+                client::dialogs::doSpecificationBrowserDialog(ctl.root(), iface.gameSender(), ctl.translator());
+                iface.continueProcess(link);
+            }
+    };
+    si.postNewTask(link, new DialogTask());
 }
 
 // @since PCC2 2.40.6
@@ -1091,7 +1215,7 @@ client::si::IFCCTransferUnload(game::Session& session, ScriptSide& si, RequestLi
 
     // Find planet
     game::map::Universe& univ = game::actions::mustHaveGame(session).currentTurn().universe();
-    game::Id_t pid = univ.getPlanetAt(shipPos);
+    game::Id_t pid = univ.findPlanetAt(shipPos);
     if (pid == 0) {
         throw game::Exception(game::Exception::ePos, session.translator()("Ship is not orbiting a planet."));
     }
@@ -1887,7 +2011,7 @@ client::si::IFUIInputFCode(game::Session& session, ScriptSide& si, RequestLink1 
     }
 
     // Construct a friendly-code list
-    std::auto_ptr<game::data::FriendlyCodeList_t> list(new game::data::FriendlyCodeList_t());
+    std::auto_ptr<game::spec::FriendlyCodeList::Infos_t> list(new game::spec::FriendlyCodeList::Infos_t());
     if ((flags & DefaultFlag) != 0) {
         // Default mode
         game::map::Object* obj = link.getProcess().getCurrentObject();
@@ -1895,10 +2019,8 @@ client::si::IFUIInputFCode(game::Session& session, ScriptSide& si, RequestLink1 
             throw interpreter::Error::contextError();
         }
 
-        FriendlyCodeList f(shipList.friendlyCodes(), *obj, g.shipScores(), shipList, r.hostConfiguration());
-        packFriendlyCodeList(*list,
-                             f,
-                             r.playerList());
+        FriendlyCodeList(shipList.friendlyCodes(), *obj, g.shipScores(), shipList, r.hostConfiguration())
+            .pack(*list, r.playerList());
     } else {
         // Parameterized mode
         // Determine type flags
@@ -1940,13 +2062,13 @@ client::si::IFUIInputFCode(game::Session& session, ScriptSide& si, RequestLink1 
             }
         }
         filteredList.sort();
-        packFriendlyCodeList(*list, filteredList, r.playerList());
+        filteredList.pack(*list, r.playerList());
     }
 
     // Do it.
     class Task : public UserTask {
      public:
-        Task(std::auto_ptr<game::data::FriendlyCodeList_t> list, const String_t& current)
+        Task(std::auto_ptr<game::spec::FriendlyCodeList::Infos_t> list, const String_t& current)
             : m_list(list),
               m_current(current)
             { }
@@ -1965,7 +2087,7 @@ client::si::IFUIInputFCode(game::Session& session, ScriptSide& si, RequestLink1 
                 ui.continueProcess(link);
             }
      private:
-        std::auto_ptr<game::data::FriendlyCodeList_t> m_list;
+        std::auto_ptr<game::spec::FriendlyCodeList::Infos_t> m_list;
         String_t m_current;
     };
     session.notifyListeners();
@@ -2107,6 +2229,128 @@ client::si::IFUIKeymapInfo(game::Session& session, ScriptSide& si, RequestLink1 
     }
 }
 
+/* @q UI.ListShipPrediction x:Int, y:Int, Optional sid:Int, ok:Str, heading:Str (Global Command)
+   List ship prediction (visual scanner).
+
+   Computes future positions of all (known) ships and lists all those that will be at %x,%y
+   using the <a href="pcc2:listship">Visual Scan</a> window.
+   When the %sid parameter is given and refers to a valid ship Id, uses that ship's predicted
+   position instead of %x,%y.
+
+   The last three parameters are optional and modify behaviour details.
+   The %ok string specifies the name of the "OK" button, it defaults to <tt>"OK"</tt>.
+   Likewise, the %heading specifies the window title, it defaults to <tt>"Ship Prediction"</tt>.
+
+   The chosen ship Id (or EMPTY if the user canceled) is returned in {UI.Result}.
+   If no ship matches, a dialog is displayed and EMPTY is returned.
+   This command can't be used in text mode.
+
+   @since PCC2 1.99.26, PCC2 2.40.9
+   @see UI.ChooseObject, UI.ListShips */
+void
+client::si::IFUIListShipPrediction(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    /* UI.ListShipPrediction x, y[, sid, title, okname] */
+    args.checkArgumentCount(2, 5);
+
+    // Read args
+    int32_t x, y;
+    int32_t fromShip = 0;
+    String_t ok = session.translator()("OK");
+    String_t heading = session.translator()("Ship Prediction");
+
+    if (!interpreter::checkIntegerArg(x, args.getNext(), 0, 10000)) {
+        return;
+    }
+    if (!interpreter::checkIntegerArg(y, args.getNext(), 0, 10000)) {
+        return;
+    }
+    interpreter::checkIntegerArg(fromShip, args.getNext(), 0, 10000);
+    interpreter::checkStringArg(ok, args.getNext());
+    interpreter::checkStringArg(heading, args.getNext());
+
+    // Validate
+    game::actions::mustHaveGame(session);
+
+    // Post command
+    class Task : public UserTask {
+     public:
+        Task(game::map::Point pos,
+             game::Id_t fromShip,
+             String_t okName, String_t title)
+            : m_pos(pos), m_fromShip(fromShip), m_okName(okName), m_title(title)
+            { }
+        void handle(UserSide& ui, Control& ctl, RequestLink2 link)
+            {
+                // FIXME: port this: /* Place initial cursor */
+                // /* FIXME: This works in control screens, but not in the starchart. */
+                // GObject* current = 0;
+                // if (univ.ty_any_ships.isValidIndex(from_sid)) {
+                //     current = &univ.getShip(from_sid);
+                // } else {
+                //     current = current_ship_selection.getCurrentObject();
+                // }
+                // if (current != 0) {
+                //     int n = l.getIndexFor(*current);
+                //     if (n) {
+                //         selection.setCurrentIndex(n);
+                //     }
+                // }
+
+                // /* Place scanner */
+                // try {
+                //     IntUserInterfaceBinding& bind = IntUserInterfaceBinding::get();
+                //     std::auto_ptr<IntValue> screen(bind.getProperty(iuiScreenNumber));
+                //     if (IntIntValue* iv = dynamic_cast<IntIntValue*>(screen.get())) {
+                //         if (iv->getValue() != 4) {
+                //             IntIntIntValue xv(pt.x);
+                //             IntIntIntValue yv(pt.y);
+                //             bind.setProperty(iuiScanX, &xv);
+                //             bind.setProperty(iuiScanY, &yv);
+                //         }
+                //     }
+                // }
+                // catch (...) {
+                //     // setProperty may fail; don't deprive user of this functionality then
+                // }
+
+                // Configure dialog
+                client::dialogs::VisualScanDialog dialog(ctl.root(), ui.gameSender(), ctl.translator());
+                dialog.setTitle(m_title);
+                dialog.setOkName(m_okName);
+                dialog.setAllowForeignShips(true);
+                dialog.setEarlyExit(false);
+
+                game::ref::List::Options_t opts;
+                opts += game::ref::List::IncludeForeignShips;
+
+                // Execute dialog
+                client::Downlink downLink(ctl.root());
+                game::Reference resultReference;
+                if (dialog.loadNext(downLink, m_pos, m_fromShip, opts)) {
+                    resultReference = dialog.run();
+                }
+
+                // Process result
+                std::auto_ptr<afl::data::Value> resultValue;
+                if (resultReference.isSet()) {
+                    resultValue.reset(interpreter::makeIntegerValue(resultReference.getId()));
+                }
+                ui.setVariable(link, "UI.RESULT", resultValue);
+                ui.continueProcess(link);
+            }
+
+     private:
+        game::map::Point m_pos;
+        game::Id_t m_fromShip;
+        String_t m_okName;
+        String_t m_title;
+    };
+
+    session.notifyListeners();
+    si.postNewTask(link, new Task(game::map::Point(x, y), fromShip, ok, heading));
+}
+
 /* @q UI.ListShips x:Int, y:Int, Optional flags:Any, ok:Str, heading:Str (Global Command)
    List ships (visual scanner).
 
@@ -2164,15 +2408,8 @@ client::si::IFUIListShips(game::Session& session, ScriptSide& si, RequestLink1 l
     interpreter::checkStringArg(ok, args.getNext());
     interpreter::checkStringArg(heading, args.getNext());
 
-    // /* Validate */
-    // if (except < 0 || except > NUM_SHIPS)
-    //     throw IntError::rangeError();
-    // mustHaveTurn();
-
-    // /* Prepare */
-    // flushUI();
-    // if (exc.checkForBreak())
-    //     return;
+    // Validate
+    game::actions::mustHaveGame(session);
 
     // Post command
     class Task : public UserTask {
@@ -2200,8 +2437,9 @@ client::si::IFUIListShips(game::Session& session, ScriptSide& si, RequestLink1 l
                 }
 
                 // Execute dialog
+                client::Downlink downLink(ctl.root());
                 game::Reference resultReference;
-                if (dialog.loadCurrent(m_pos, opts, m_excludeShip)) {
+                if (dialog.loadCurrent(downLink, m_pos, opts, m_excludeShip)) {
                     resultReference = dialog.run();
                 }
 
@@ -2366,6 +2604,30 @@ client::si::IFUIPopupConsole(game::Session& /*session*/, ScriptSide& si, Request
     si.postNewTask(link, new PopupConsoleTask());
 }
 
+/* @q UI.SelectionManager (Global Command)
+   Open <a href="pcc2:selectionmgr">selection manager</a>.
+   @since PCC2 1.99.10, PCC2 2.40.9 */
+void
+client::si::IFUISelectionManager(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    // ex IFUISelectionManager
+    args.checkArgumentCount(0);
+    game::actions::mustHaveGame(session);
+
+    class Task : public UserTask {
+     public:
+        virtual void handle(UserSide& ui, Control& ctl, RequestLink2 link)
+            {
+                OutputState out;
+                client::dialogs::doSelectionManager(ui, ctl, out);
+                ui.joinProcess(link, out.getProcess());
+                ctl.handleStateChange(ui, link, out.getTarget());
+            }
+    };
+    session.notifyListeners();
+    si.postNewTask(link, new Task());
+}
+
 /* @q UI.Search Optional query:Str, flags:Any (Global Command)
    Search.
 
@@ -2396,7 +2658,7 @@ client::si::IFUISearch(game::Session& session, ScriptSide& si, RequestLink1 link
        flags: PSBUO = planets, ships, bases, ufos, others
               1234  = name, true, false, location */
     using game::SearchQuery;
-    SearchQuery q = client::proxy::SearchProxy::savedQuery(session);
+    SearchQuery q = game::proxy::SearchProxy::savedQuery(session);
 
     bool immediate = false;
     args.checkArgumentCount(0, 2);
@@ -2536,17 +2798,23 @@ client::si::registerCommands(UserSide& ui)
                 s.world().setNewGlobalValue("CC$CHANGEWAYPOINT",     new ScriptProcedure(s, &si, IFCCChangeWaypoint));
                 s.world().setNewGlobalValue("CC$CHOOSEINTERCEPTTARGET", new ScriptProcedure(s, &si, IFCCChooseInterceptTarget));
                 // s.world().setNewGlobalValue("CC$CSBROWSE",           new ScriptProcedure(s, &si, IFCCCSBrowse));
+                s.world().setNewGlobalValue("CC$EDITCOMMANDS",       new ScriptProcedure(s, &si, IFCCEditCommands));
                 // s.world().setNewGlobalValue("CC$GIVE",               new ScriptProcedure(s, &si, IFCCGive));
                 s.world().setNewGlobalValue("CC$LISTSCREENHISTORY",  new ScriptProcedure(s, &si, IFCCListScreenHistory));
                 s.world().setNewGlobalValue("CC$MANAGEBUILDQUEUE",   new ScriptProcedure(s, &si, IFCCManageBuildQueue));
                 s.world().setNewGlobalValue("CC$POPSCREENHISTORY",   new ScriptProcedure(s, &si, IFCCPopScreenHistory));
+                s.world().setNewGlobalValue("CC$PROCESSMANAGER",     new ScriptProcedure(s, &si, IFCCProcessManager));
                 // s.world().setNewGlobalValue("CC$REMOTECONTROL",      new ScriptProcedure(s, &si, IFCCRemoteControl));
-                // s.world().setNewGlobalValue("CC$RESET",              new ScriptProcedure(s, &si, IFCCReset));
+                s.world().setNewGlobalValue("CC$RESET",              new ScriptProcedure(s, &si, IFCCReset));
+                s.world().setNewGlobalValue("CC$REMOTEGETCOLOR",     new SimpleFunction(s, IFCCRemoteGetColor));
+                s.world().setNewGlobalValue("CC$REMOTEGETQUESTION",  new SimpleFunction(s, IFCCRemoteGetQuestion));
+                s.world().setNewGlobalValue("CC$REMOTETOGGLE",       new SimpleProcedure(s, IFCCRemoteToggle));
                 s.world().setNewGlobalValue("CC$SELLSUPPLIES",       new ScriptProcedure(s, &si, IFCCSellSupplies));
                 // s.world().setNewGlobalValue("CC$SENDMESSAGE",        new ScriptProcedure(s, &si, IFCCSendMessage));
                 // s.world().setNewGlobalValue("CC$SETTINGS",           new ScriptProcedure(s, &si, IFCCSettings));
                 // s.world().setNewGlobalValue("CC$SHIPCOSTCALC",       new ScriptProcedure(s, &si, IFCCShipCostCalc),
                 // s.world().setNewGlobalValue("CC$SHIPSPEC",           new ScriptProcedure(s, &si, IFCCShipSpec));
+                s.world().setNewGlobalValue("CC$SPECBROWSER",        new ScriptProcedure(s, &si, IFCCSpecBrowser));
                 // s.world().setNewGlobalValue("CC$TOWFLEETMEMBER",     new ScriptProcedure(s, &si, IFCCTowFleetMember));
                 // s.world().setNewGlobalValue("CC$TRANSFERMULTI",      new ScriptProcedure(s, &si, IFCCTransferMulti));
                 s.world().setNewGlobalValue("CC$TRANSFERPLANET",     new ScriptProcedure(s, &si, IFCCTransferPlanet));
@@ -2576,14 +2844,14 @@ client::si::registerCommands(UserSide& ui)
                 s.world().setNewGlobalValue("UI.INPUTNUMBER",        new ScriptProcedure(s, &si, IFUIInputNumber));
                 s.world().setNewGlobalValue("UI.KEYMAPINFO",         new ScriptProcedure(s, &si, IFUIKeymapInfo));
                 // s.world().setNewGlobalValue("UI.LISTFLEETS",         IFUIListFleets);
-                // s.world().setNewGlobalValue("UI.LISTSHIPPREDICTION", IFUIListShipPrediction);
+                s.world().setNewGlobalValue("UI.LISTSHIPPREDICTION", new ScriptProcedure(s, &si, IFUIListShipPrediction));
                 s.world().setNewGlobalValue("UI.LISTSHIPS",          new ScriptProcedure(s, &si, IFUIListShips));
                 s.world().setNewGlobalValue("UI.MESSAGE",            new ScriptProcedure(s, &si, IFUIMessage));
                 // s.world().setNewGlobalValue("UI.OVERLAYMESSAGE",     IFUIOverlayMessage);
                 s.world().setNewGlobalValue("UI.PLANETINFO",         new ScriptProcedure(s, &si, IFUIPlanetInfo));
                 s.world().setNewGlobalValue("UI.POPUPCONSOLE",       new ScriptProcedure(s, &si, IFUIPopupConsole));
                 s.world().setNewGlobalValue("UI.SEARCH",             new ScriptProcedure(s, &si, IFUISearch));
-                // s.world().setNewGlobalValue("UI.SELECTIONMANAGER",   IFUISelectionManager);
+                s.world().setNewGlobalValue("UI.SELECTIONMANAGER",   new ScriptProcedure(s, &si, IFUISelectionManager));
                 s.world().setNewGlobalValue("UI.UPDATE",             new ScriptProcedure(s, &si, IFUIUpdate));
             }
     };

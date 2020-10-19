@@ -172,7 +172,7 @@ namespace {
 
 
 
-    void doTextExport(interpreter::exporter::Format typ, interpreter::exporter::FieldList& job, interpreter::Context* ctx, afl::io::TextWriter& tf)
+    void doTextExport(interpreter::exporter::Format typ, interpreter::exporter::FieldList& job, interpreter::Context& ctx, afl::io::TextWriter& tf)
     {
         switch (typ) {
          case interpreter::exporter::TextFormat:
@@ -352,7 +352,7 @@ interpreter::exporter::ConsoleApplication::appMain()
                 errorExit(tx("output to DBF file needs an output file name ('-o')"));
             }
             afl::base::Ref<afl::io::Stream> s = fs.openFile(outfile, afl::io::FileSystem::Create);
-            DbfExporter(*s).doExport(array.get(), util::ConstantAnswerProvider::sayYes, config.fieldList());
+            DbfExporter(*s).doExport(*array, util::ConstantAnswerProvider::sayYes, config.fieldList());
         } else {
             String_t outfile;
             if (!arg_outfile.get(outfile)) {
@@ -360,13 +360,13 @@ interpreter::exporter::ConsoleApplication::appMain()
                 if (hadCharsetOption) {
                     log().write(afl::sys::LogListener::Warn, "export", tx("WARNING: Option '-O' has been ignored because standard output is being used."));
                 }
-                doTextExport(config.getFormat(), config.fieldList(), array.get(), standardOutput());
+                doTextExport(config.getFormat(), config.fieldList(), *array, standardOutput());
             } else {
                 // Output to file
                 afl::base::Ref<afl::io::Stream> s = fs.openFile(outfile, afl::io::FileSystem::Create);
                 afl::io::TextFile tf(*s);
                 tf.setCharsetNew(config.createCharset());
-                doTextExport(config.getFormat(), config.fieldList(), array.get(), tf);
+                doTextExport(config.getFormat(), config.fieldList(), *array, tf);
                 tf.flush();
             }
         }

@@ -27,6 +27,7 @@ class TestServerTalkRenderHTMLRenderer : public CxxTest::TestSuite {
     void testLink();
     void testSpecial();
     void testUser();
+    void testLinks2();
 };
 
 class TestServerTalkRenderHtmlRenderer : public CxxTest::TestSuite {

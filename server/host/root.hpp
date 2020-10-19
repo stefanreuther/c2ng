@@ -21,6 +21,7 @@
 #include "afl/net/redis/stringlistkey.hpp"
 #include "server/interface/sessionrouter.hpp"
 #include "server/common/root.hpp"
+#include "afl/charset/codepagecharset.hpp"
 
 namespace server { namespace host {
 
@@ -70,6 +71,10 @@ namespace server { namespace host {
         /** Mutex.
             Acquire before using any of the microservice connections. */
         afl::sys::Mutex& mutex();
+
+        /** Access default character set.
+            \return character set */
+        afl::charset::Charset& defaultCharacterSet();
 
         /** Configure reconnect behaviour.
             Call this before executing a user command.
@@ -147,6 +152,8 @@ namespace server { namespace host {
      private:
         afl::sys::Log m_log;
         afl::sys::Mutex m_mutex;
+
+        afl::charset::CodepageCharset m_defaultCharset;
 
         afl::net::CommandHandler& m_db;
         afl::net::CommandHandler& m_hostFile;

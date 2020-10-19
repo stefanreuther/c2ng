@@ -13,23 +13,19 @@
 
 namespace game { namespace map {
 
-    class Universe;
-
     template<typename T>
     class ObjectVectorType : public ObjectType {
      public:
-        ObjectVectorType(Universe& univ, ObjectVector<T>& vec);
+        ObjectVectorType(ObjectVector<T>& vec);
         ~ObjectVectorType();
 
         virtual T* getObjectByIndex(Id_t index);
-        virtual Universe* getUniverseByIndex(Id_t index);
         virtual int getNextIndex(Id_t index) const;
         virtual int getPreviousIndex(Id_t index) const;
 
         virtual bool isValid(const T& obj) const = 0;
 
      private:
-        Universe& m_universe;
         ObjectVector<T>& m_vector;
     };
 
@@ -37,9 +33,8 @@ namespace game { namespace map {
 
 template<typename T>
 inline
-game::map::ObjectVectorType<T>::ObjectVectorType(Universe& univ, ObjectVector<T>& vec)
-    : m_universe(univ),
-      m_vector(vec)
+game::map::ObjectVectorType<T>::ObjectVectorType(ObjectVector<T>& vec)
+    : m_vector(vec)
 { }
 
 template<typename T>
@@ -60,13 +55,6 @@ game::map::ObjectVectorType<T>::getObjectByIndex(Id_t index)
     } else {
         return 0;
     }
-}
-
-template<typename T>
-game::map::Universe*
-game::map::ObjectVectorType<T>::getUniverseByIndex(Id_t /*index*/)
-{
-    return &m_universe;
 }
 
 template<typename T>

@@ -6,6 +6,7 @@
 #include "game/playerarray.hpp"
 
 #include "t_game.hpp"
+#include "afl/string/string.hpp"
 
 void
 TestGamePlayerArray::testArray()
@@ -73,4 +74,34 @@ TestGamePlayerArray::testArray()
     // check out-of-bounds write
     n.set(999999999, 9);
     n.set(-999999999, 9);
+}
+
+/** Test initialisation. */
+void
+TestGamePlayerArray::testInit()
+{
+    using game::PlayerArray;
+
+    TS_ASSERT_EQUALS(PlayerArray<int>().get(1), 0);
+    TS_ASSERT_EQUALS(PlayerArray<int>(42).get(1), 42);
+
+    TS_ASSERT_EQUALS(PlayerArray<String_t>().get(1), "");
+    TS_ASSERT_EQUALS(PlayerArray<String_t>("x").get(1), "x");
+}
+
+/** Test pointer handling.
+    We want to safely receive null pointers when out of range. */
+void
+TestGamePlayerArray::testPointer()
+{
+    int a = 10, b = 20;
+    game::PlayerArray<int*> n;
+    n.set(3, &a);
+    n.set(4, &b);
+
+    TS_ASSERT(n.get(-1) == 0);
+    TS_ASSERT(n.get(0) == 0);
+    TS_ASSERT(n.get(3) == &a);
+    TS_ASSERT(n.get(4) == &b);
+    TS_ASSERT(n.get(1000) == 0);
 }

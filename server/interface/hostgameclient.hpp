@@ -20,15 +20,8 @@ namespace server { namespace interface {
         virtual void setOwner(int32_t gameId, String_t user);
         virtual void setName(int32_t gameId, String_t name);
         virtual Info getInfo(int32_t gameId);
-        virtual void getInfos(afl::base::Optional<State> requiredState,
-                              afl::base::Optional<Type> requiredType,
-                              afl::base::Optional<String_t> requiredUser,
-                              bool verbose,
-                              std::vector<Info>& result);
-        virtual void getGames(afl::base::Optional<State> requiredState,
-                              afl::base::Optional<Type> requiredType,
-                              afl::base::Optional<String_t> requiredUser,
-                              afl::data::IntegerList_t& result);
+        virtual void getInfos(const Filter& filter, bool verbose, std::vector<Info>& result);
+        virtual void getGames(const Filter& filter, afl::data::IntegerList_t& result);
         virtual void setConfig(int32_t gameId, const afl::data::StringList_t& keyValues);
         virtual String_t getConfig(int32_t gameId, String_t key);
         virtual void getConfig(int32_t gameId, const afl::data::StringList_t& keys, afl::data::StringList_t& values);
@@ -51,10 +44,7 @@ namespace server { namespace interface {
      private:
         afl::net::CommandHandler& m_commandHandler;
 
-        static void buildGameListCommand(afl::data::Segment& cmd,
-                                         const afl::base::Optional<State>& requiredState,
-                                         const afl::base::Optional<Type>& requiredType,
-                                         const afl::base::Optional<String_t>& requiredUser);
+        static void buildGameListCommand(afl::data::Segment& cmd, const Filter& filter);
     };
 
 } }

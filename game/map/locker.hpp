@@ -12,7 +12,7 @@
 namespace game { namespace map {
 
     class Configuration;
-    class MapObject;
+    class Object;
     class Universe;
     class Drawing;
 
@@ -31,34 +31,92 @@ namespace game { namespace map {
     extern const LockOptionDescriptor_t Lock_Left;
     extern const LockOptionDescriptor_t Lock_Right;
 
+    /** Locking on objects on starchart.
+        When users click at/near an object, we want to lock the cursor onto that object.
+        To implement that,
+        - construct a Locker
+        - call setMarkedOnly(), setRangeLimit() to configure parameters
+        - call one or more of the add() functions to add candidates
+        - call getFoundPoint(), getFoundObject() to retrieve the result
 
-    /*
-      c2ng changes, 20180906:
-      - removed setIgnore()/isIgnore().
-        It is needed to ignore drawings, but drawings currently are not MapObject's.
-        Therefore, add special parameter to addDrawings(), addUniverse().
-      - changed GMapObject* -> Reference
-      - changed two constructors -> once ctor + setRangeLimit, setMarkedOnly
-     */
+        c2ng changes, 20180906:
+        - removed setIgnore()/isIgnore().
+          It is needed to ignore drawings, but drawings currently are not Object's.
+          Therefore, add special parameter to addDrawings(), addUniverse().
+        - changed GMapObject* -> Reference
+        - changed two constructors -> once ctor + setRangeLimit, setMarkedOnly */
     class Locker {
      public:
-        explicit Locker(Point target, const Configuration& config);
+        /** Constructor.
+            \param target Clicked point
+            \param config Map configuration. Saved by reference; must live longer than Locker. */
+        Locker(Point target, const Configuration& config);
 
+        /** Set range limit.
+            If set, only points within this range are considered.
+            \param min Minimum (bottom-left) coordinate, inclusive.
+            \param max Maximum (top-right) coordinate, inclusive. */
         void setRangeLimit(Point min, Point max);
+
+        /** Set limitation to marked objects.
+            If set, only marked objects are considered.
+            \param flag Flag */
         void setMarkedOnly(bool flag);
 
+        /** Add single point candidate.
+            \param pt     point
+            \param marked true if that object is marked
+            \param obj    reference to object */
         void addPoint(Point pt, bool marked, Reference obj = Reference());
-        void addObject(const MapObject& obj, Reference::Type type);
 
+        /** Add object candidate.
+            \param obj  object
+            \param type type of object for constructing references */
+        void addObject(const Object& obj, Reference::Type type);
+
+        /** Add planets.
+            Adds all planets from the given universe.
+            \param univ Universe */
         void addPlanets(const Universe& univ);
+
+        /** Add ships.
+            Adds all ships from the given universe.
+            \param univ Universe */
         void addShips(const Universe& univ);
+
+        /** Add Ufos.
+            Adds all Ufos from the given universe.
+            \param univ Universe */
         void addUfos(const Universe& univ);
+
+        /** Add minefields.
+            Adds all minefields from the given universe.
+            \param univ Universe */
         void addMinefields(const Universe& univ);
+
+        /** Add drawings.
+            Adds all drawings and explosions from the given universe.
+            \param univ Universe
+            \param ignore Drawing to ignore. To use when moving a marker to ignore locking that marker onto itself. */
         void addDrawings(const Universe& univ, const Drawing* ignore);
 
+        /** Add universe (main entry point).
+            Adds all objects from the given universe that are selected by the \c items bitfield.
+            \param univ Universe
+            \param items Bitfield of object
+            \param ignoreDrawing Drawing to ignore */
         void addUniverse(const Universe& univ, int32_t items, const Drawing* ignoreDrawing);
 
+        /** Get found point.
+            If the found object is across a map border, this will return the coordinates nearest to the original target.
+            Do not assume that this is equal to one of the points added.
+            In case no object was in range/acceptable, the original target is returned as-is.
+            \return found point */
         Point getFoundPoint() const;
+
+        /** Get found object.
+            May be a null reference if the found point does not correspond to an object.
+            \return reference */
         Reference getFoundObject() const;
 
      private:

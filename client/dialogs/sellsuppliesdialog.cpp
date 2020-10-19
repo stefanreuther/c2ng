@@ -5,7 +5,8 @@
 #include "client/dialogs/sellsuppliesdialog.hpp"
 #include "afl/string/format.hpp"
 #include "client/downlink.hpp"
-#include "client/proxy/convertsuppliesproxy.hpp"
+#include "client/widgets/helpwidget.hpp"
+#include "game/proxy/convertsuppliesproxy.hpp"
 #include "ui/dialogs/messagebox.hpp"
 #include "ui/eventloop.hpp"
 #include "ui/group.hpp"
@@ -18,7 +19,7 @@
 #include "ui/widgets/quit.hpp"
 
 using afl::string::Format;
-using client::proxy::ConvertSuppliesProxy;
+using game::proxy::ConvertSuppliesProxy;
 using ui::Group;
 using ui::widgets::Button;
 
@@ -34,7 +35,7 @@ namespace {
               m_translator(tx)
             { }
 
-        void run()
+        void run(util::RequestSender<game::Session> gameSender)
             {
                 // ex WSellSuppliesDialog::init
                 afl::base::Deleter del;
@@ -48,22 +49,26 @@ namespace {
                                                             m_root.provider())));
                 win.add(m_select);
 
+                ui::Widget& helper = del.addNew(new client::widgets::HelpWidget(m_root, gameSender, "pcc2:sellsup"));
+
                 Button& btnOK     = del.addNew(new Button(m_translator("OK"),         util::Key_Return, m_root));
                 Button& btnAllBut = del.addNew(new Button(m_translator("All but..."), 'a',              m_root));
                 Button& btnCancel = del.addNew(new Button(m_translator("Cancel"),     util::Key_Escape, m_root));
+                Button& btnHelp   = del.addNew(new Button(m_translator("Help"),       'h',              m_root));
                 btnOK.sig_fire.add(this, &SellSuppliesDialog::onOK);
                 btnAllBut.sig_fire.add(this, &SellSuppliesDialog::onAllBut);
                 btnCancel.sig_fire.addNewClosure(m_loop.makeStop(0));
+                btnHelp.dispatchKeyTo(helper);
 
                 Group& g = del.addNew(new Group(ui::layout::HBox::instance5));
-                g.add(btnOK);
-                g.add(btnAllBut);
-                g.add(btnCancel);
+                g.add(btnHelp);
                 g.add(del.addNew(new ui::Spacer()));
-                // FIXME: g.add(holder.add(new UIButton(_("Help"), 'h')));
-                // FIXME: add(holder.add(new WHelpWidget("pcc2:sellsup")));
+                g.add(btnAllBut);
+                g.add(btnOK);
+                g.add(btnCancel);
                 win.add(g);
                 win.add(del.addNew(new ui::widgets::Quit(m_root, m_loop)));
+                win.add(helper);
                 win.pack();
 
                 m_root.centerWidget(win);
@@ -117,7 +122,7 @@ client::dialogs::doSellSuppliesDialog(ui::Root& root, util::RequestSender<game::
                                 tx("Sell Supplies"),
                                 root).doOkDialog();
     } else {
-        SellSuppliesDialog(root, st.maxSuppliesToSell, proxy, tx).run();
+        SellSuppliesDialog(root, st.maxSuppliesToSell, proxy, tx).run(gameSender);
     }
 }
 

@@ -31,10 +31,9 @@ namespace {
 }
 
 
-game::ref::SortByTowGroup::SortByTowGroup(const game::map::Universe& univ, afl::string::Translator& tx, InterpreterInterface& interface)
+game::ref::SortByTowGroup::SortByTowGroup(const game::map::Universe& univ, afl::string::Translator& tx)
     : m_universe(univ),
-      m_translator(tx),
-      m_interface(interface)
+      m_translator(tx)
 { }
 
 int
@@ -49,7 +48,7 @@ game::ref::SortByTowGroup::getClass(const Reference& a) const
     // ex diviTowGroup
     int key = getTowGroupKey(a) >> 1;
     if (const game::map::Ship* pShip = m_universe.ships().get(key)) {
-        return afl::string::Format(m_translator("towing %s"), pShip->getName(PlainName, m_translator, m_interface));
+        return afl::string::Format(m_translator("towing %s"), pShip->getName());
     } else {
         return m_translator("not in a tow group");
     }

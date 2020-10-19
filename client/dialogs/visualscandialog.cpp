@@ -3,19 +3,25 @@
   */
 
 #include "client/dialogs/visualscandialog.hpp"
-#include "client/downlink.hpp"
-#include "client/proxy/hullspecificationproxy.hpp"
-#include "client/proxy/objectlistener.hpp"
-#include "client/proxy/playerproxy.hpp"
-#include "client/proxy/referencelistproxy.hpp"
-#include "client/proxy/referenceobserverproxy.hpp"
+#include "client/dialogs/helpdialog.hpp"
+#include "client/dialogs/referencesortorder.hpp"
+#include "client/picturenamer.hpp"
+#include "client/si/remotecontrol.hpp"
 #include "client/tiles/visualscanheadertile.hpp"
 #include "client/tiles/visualscanhullinfotile.hpp"
 #include "client/tiles/visualscanshipinfotile.hpp"
 #include "client/widgets/hullspecificationsheet.hpp"
 #include "client/widgets/referencelistbox.hpp"
 #include "game/game.hpp"
+#include "game/map/anyshiptype.hpp"
+#include "game/map/movementpredictor.hpp"
 #include "game/map/ship.hpp"
+#include "game/proxy/configurationproxy.hpp"
+#include "game/proxy/hullspecificationproxy.hpp"
+#include "game/proxy/objectlistener.hpp"
+#include "game/proxy/playerproxy.hpp"
+#include "game/proxy/referencelistproxy.hpp"
+#include "game/proxy/referenceobserverproxy.hpp"
 #include "game/turn.hpp"
 #include "ui/dialogs/messagebox.hpp"
 #include "ui/invisiblewidget.hpp"
@@ -28,7 +34,6 @@
 #include "ui/widgets/imagebutton.hpp"
 #include "ui/widgets/quit.hpp"
 #include "util/unicodechars.hpp"
-#include "client/proxy/configurationproxy.hpp"
 
 using ui::widgets::FrameGroup;
 using ui::widgets::AbstractButton;
@@ -37,11 +42,11 @@ using ui::widgets::Button;
 namespace {
     FrameGroup& wrapWidget(afl::base::Deleter& del, ui::Widget& w, ui::Root& root)
     {
-        FrameGroup& frame = FrameGroup::wrapWidget(del, root.colorScheme(), FrameGroup::NoFrame, w);
+        FrameGroup& frame = FrameGroup::wrapWidget(del, root.colorScheme(), ui::NoFrame, w);
         frame.setFrameWidth(2);
         return frame;
     }
-    
+
     class ListBuilder : public util::Request<game::Session> {
      public:
         ListBuilder(game::ref::List& list,
@@ -78,6 +83,68 @@ namespace {
         game::map::Point m_pos;
         game::ref::List::Options_t m_options;
         game::Id_t& m_excludeShip;
+    };
+
+    class NextBuilder : public util::Request<game::Session> {
+     public:
+        NextBuilder(game::ref::List& list,
+                    game::map::Point pos,
+                    game::Id_t fromShip,
+                    game::ref::List::Options_t options)
+            : m_list(list), m_pos(pos), m_fromShip(fromShip), m_options(options)
+            { }
+
+        virtual void handle(game::Session& session)
+            {
+                // ex doListNextShips (part)
+                game::Root* root = session.getRoot().get();
+                game::spec::ShipList* list = session.getShipList().get();
+                game::Game* g = session.getGame().get();
+                if (root != 0 && list != 0 && g != 0) {
+                    if (game::Turn* t = g->getViewpointTurn().get()) {
+                        // Compute movement
+                        const game::map::Universe& univ = t->universe();
+                        game::map::MovementPredictor pred;
+                        pred.computeMovement(univ, *g, *list, *root);
+
+                        // If looking at a ship, resolve its position
+                        bool posOK;
+                        game::map::Point pos;
+                        if (m_fromShip != 0) {
+                            posOK = pred.getShipPosition(m_fromShip, pos);
+                        } else {
+                            posOK = true;
+                            pos = m_pos;
+                        }
+
+                        // Build list
+                        if (posOK) {
+                            pos = univ.config().getCanonicalLocation(pos);
+
+                            game::map::AnyShipType ty(const_cast<game::map::Universe&>(univ));
+                            for (game::Id_t id = ty.findNextIndex(0); id != 0; id = ty.findNextIndex(id)) {
+                                const game::map::Ship* sh = univ.ships().get(id);
+                                game::map::Point shPos;
+
+                                if (sh != 0
+                                    && pred.getShipPosition(id, shPos)
+                                    && univ.config().getCanonicalLocation(shPos) == pos
+                                    && (m_options.contains(game::ref::List::IncludeForeignShips) || sh->isPlayable(game::map::Object::ReadOnly))
+                                    && (!m_options.contains(game::ref::List::SafeShipsOnly) || sh->isReliablyVisible(0)))
+                                {
+                                    m_list.add(game::Reference(game::Reference::Ship, id));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+     private:
+        game::ref::List& m_list;
+        game::map::Point m_pos;
+        game::Id_t m_fromShip;
+        game::ref::List::Options_t m_options;
     };
 
     class Initializer : public afl::base::Closure<void(game::Session&, game::ref::ListObserver&)> {
@@ -117,6 +184,22 @@ namespace {
      private:
         game::Reference m_reference;
     };
+
+    class ToggleRemoteTask : public util::Request<game::Session> {
+     public:
+        ToggleRemoteTask(game::Id_t shipId)
+            : m_shipId(shipId)
+            { }
+
+        virtual void handle(game::Session& session)
+            {
+                client::si::toggleRemoteControl(session, m_shipId);
+                session.notifyListeners();
+            }
+
+     private:
+        game::Id_t m_shipId;
+    };
 }
 
 /*
@@ -125,12 +208,13 @@ namespace {
 
 struct client::dialogs::VisualScanDialog::ShipData {
     String_t image;
-    FrameGroup::Type imageFrame;
-    FrameGroup::Type remoteFrame;
+    ui::FrameType imageFrame;
+    ui::FrameType remoteFrame;
+    afl::base::Optional<String_t> remoteQuestion;
     game::Reference ref;
     bool isPlayable;
     ShipData()
-        : image(), imageFrame(FrameGroup::NoFrame), remoteFrame(FrameGroup::NoFrame), ref(), isPlayable(false)
+        : image(), imageFrame(ui::NoFrame), remoteFrame(ui::NoFrame), remoteQuestion(), ref(), isPlayable(false)
         { }
 };
 
@@ -139,7 +223,7 @@ struct client::dialogs::VisualScanDialog::ShipData {
  *  Listener: ObjectListener to produce ShipData (data not processed by tiles)
  */
 
-class client::dialogs::VisualScanDialog::Listener : public client::proxy::ObjectListener {
+class client::dialogs::VisualScanDialog::Listener : public game::proxy::ObjectListener {
  public:
     Listener(util::RequestSender<Window> reply)
         : m_reply(reply)
@@ -181,6 +265,7 @@ class client::dialogs::VisualScanDialog::ListPeer {
     afl::base::SignalConnection conn_listChange;
     afl::base::SignalConnection conn_referenceChange;
 
+    void onMenu(gfx::Point pt);
     void onSelectionChange();
 };
 
@@ -229,6 +314,7 @@ class client::dialogs::VisualScanDialog::Window {
     void toggleMode(Mode mode);
     void setMode(Mode mode);
     void configurePeer(ui::Widget& w);
+    void toggleRemoteControl();
 
     afl::base::Signal<void(game::Reference)> sig_referenceChange;
 
@@ -236,9 +322,9 @@ class client::dialogs::VisualScanDialog::Window {
     ui::Root& m_root;
     util::RequestSender<game::Session> m_gameSender;
     afl::string::Translator& m_translator;
-    client::proxy::ReferenceListProxy m_listProxy;
-    client::proxy::ReferenceObserverProxy m_observerProxy;
-    client::proxy::HullSpecificationProxy m_specProxy;
+    game::proxy::ReferenceListProxy m_listProxy;
+    game::proxy::ReferenceObserverProxy m_observerProxy;
+    game::proxy::HullSpecificationProxy m_specProxy;
     util::RequestReceiver<Window> m_reply;
     ui::EventLoop m_loop;
 
@@ -257,6 +343,7 @@ class client::dialogs::VisualScanDialog::Window {
     bool m_isPlayable;
 
     bool m_allowRemoteControl;
+    afl::base::Optional<String_t> m_remoteQuestion;
 
     Mode m_mode;
     std::auto_ptr<ListPeer> m_listPeer;
@@ -297,11 +384,12 @@ client::dialogs::VisualScanDialog::Listener::handle(game::Session& session, game
 
         // Image frame
         if (pShip->isMarked()) {
-            data.imageFrame = FrameGroup::YellowFrame;
+            data.imageFrame = ui::YellowFrame;
         }
 
-        // Remote frame
-        // FIXME: missing (getRemoteControlColor, getNewRemoteControlState),
+        // Remote control
+        data.remoteFrame = client::si::getRemoteControlFrameColor(session, pShip->getId());
+        data.remoteQuestion = client::si::getRemoteControlQuestion(session, pShip->getId());
 
         // Reference
         data.ref = game::Reference(game::Reference::Ship, pShip->getId());
@@ -388,12 +476,9 @@ client::dialogs::VisualScanDialog::KeyHandler::handleKey(util::Key_t key, int /*
         m_parent.m_gameSender.postNewRequest(new MarkTask(m_parent.getCurrentReference()));
         return true;
 
-     // FIXME -> case 'r':
-     //    if (GShip* sh = dynamic_cast<GShip*>(getCurrentObject())) {
-     //        doRemoteControl(*sh, getDisplayedTurn().getCommands(getPlayerId()));
-     //        getCurrentUniverse()->doScreenUpdates();
-     //    }
-     //    return true;
+     case 'r':
+        m_parent.toggleRemoteControl();
+        return true;
 
      case 's':
         m_parent.toggleMode(Window::SpecMode);
@@ -413,10 +498,10 @@ client::dialogs::VisualScanDialog::KeyHandler::handleKey(util::Key_t key, int /*
      //    showCargo();
      //    return true;
 
-     // FIXME -> case 'h':
-     // FIXME -> case ss_Alt + 'h':
-     //    doHelp("pcc2:listship");
-     //    return true;
+     case 'h':
+     case util::KeyMod_Alt + 'h':
+        doHelpDialog(m_parent.m_root, m_parent.m_gameSender, "pcc2:listship");
+        return true;
 
      default:
         return false;
@@ -448,13 +533,24 @@ client::dialogs::VisualScanDialog::ListPeer::ListPeer(ui::Root& root, Window& pa
     conn_listChange = m_parent.m_listProxy.sig_listChange.add(&m_list, &client::widgets::ReferenceListbox::setContent);
     conn_referenceChange = m_parent.sig_referenceChange.add(&m_list, &client::widgets::ReferenceListbox::setCurrentReference);
     m_list.setFlag(ui::widgets::AbstractListbox::KeyboardMenu, true);
-    m_list.sig_menuRequest.add(&m_parent.m_listProxy, &client::proxy::ReferenceListProxy::onMenu);
+    m_list.sig_menuRequest.add(this, &ListPeer::onMenu);
 
     // Create it
     m_window.pack();
     parent.configurePeer(m_window);
     root.add(m_window);
 }
+
+void
+client::dialogs::VisualScanDialog::ListPeer::onMenu(gfx::Point pt)
+{
+    Downlink link(m_parent.m_root);
+    game::ref::Configuration order = m_parent.m_listProxy.getConfig(link);
+    if (client::dialogs::doReferenceSortOrderMenu(order, pt, m_parent.m_root, m_parent.m_translator)) {
+        m_parent.m_listProxy.setConfig(order);
+    }
+}
+
 
 void
 client::dialogs::VisualScanDialog::ListPeer::onSelectionChange()
@@ -472,9 +568,9 @@ client::dialogs::VisualScanDialog::SpecPeer::SpecPeer(ui::Root& root, Window& pa
       m_window(parent.m_translator.translateString("Ship Specification"), root.provider(), root.colorScheme(), ui::BLUE_DARK_WINDOW, ui::layout::HBox::instance0),
       m_specSheet(root,
                   false /* FIXME: hasPerTurnCosts */,
-                  client::proxy::PlayerProxy(parent.m_gameSender).getAllPlayers(link),
-                  client::proxy::PlayerProxy(parent.m_gameSender).getPlayerNames(link, game::Player::AdjectiveName),
-                  client::proxy::ConfigurationProxy(parent.m_gameSender).getNumberFormatter(link))
+                  game::proxy::PlayerProxy(parent.m_gameSender).getAllPlayers(link),
+                  game::proxy::PlayerProxy(parent.m_gameSender).getPlayerNames(link, game::Player::AdjectiveName),
+                  game::proxy::ConfigurationProxy(parent.m_gameSender).getNumberFormatter(link))
 {
     m_window.add(m_specSheet);
     m_window.pack();
@@ -493,9 +589,9 @@ client::dialogs::VisualScanDialog::Window::Window(ui::Root& root, util::RequestS
     : m_root(root),
       m_gameSender(gameSender),
       m_translator(tx),
-      m_listProxy(root, gameSender, tx),
+      m_listProxy(gameSender, root.engine().dispatcher()),
       m_observerProxy(gameSender),
-      m_specProxy(gameSender, root.engine().dispatcher()),
+      m_specProxy(gameSender, root.engine().dispatcher(), std::auto_ptr<game::spec::info::PictureNamer>(new client::PictureNamer())),
       m_reply(root.engine().dispatcher(), *this),
       m_loop(root),
       m_currentReference(),
@@ -510,12 +606,13 @@ client::dialogs::VisualScanDialog::Window::Window(ui::Root& root, util::RequestS
       m_playableReference(),
       m_isPlayable(false),
       m_allowRemoteControl(false),
+      m_remoteQuestion(),
       m_mode(NormalMode),
       m_listPeer(),
       m_specPeer()
 {
     m_listProxy.sig_listChange.add(this, &Window::onListChange);
-    m_listProxy.setContentNew(std::auto_ptr<client::proxy::ReferenceListProxy::Initializer_t>(new Initializer(list)));
+    m_listProxy.setContentNew(std::auto_ptr<game::proxy::ReferenceListProxy::Initializer_t>(new Initializer(list)));
 }
 
 client::dialogs::VisualScanDialog::Window::~Window()
@@ -572,7 +669,7 @@ client::dialogs::VisualScanDialog::Window::run(String_t title, String_t okName)
     // Ship image: need to keep image widget and frame
     // Note that the image is wrapped twice.
     ui::widgets::ImageButton& btnImage = h.addNew(new ui::widgets::ImageButton(String_t(), '.', m_root, gfx::Point(105, 95)));
-    FrameGroup& frmImage = wrapWidget(h, FrameGroup::wrapWidget(h, m_root.colorScheme(), FrameGroup::LoweredFrame, btnImage), m_root);
+    FrameGroup& frmImage = wrapWidget(h, FrameGroup::wrapWidget(h, m_root.colorScheme(), ui::LoweredFrame, btnImage), m_root);
     group111.add(frmImage);
     btnImage.dispatchKeyTo(keys);
     m_pImage = &btnImage;
@@ -684,10 +781,12 @@ client::dialogs::VisualScanDialog::Window::setData(const ShipData& data)
     }
     if (m_pRemoteFrame != 0) {
         m_pRemoteFrame->setType(data.remoteFrame);
+        m_pRemoteFrame->setState(ui::Widget::DisabledState, !data.remoteQuestion.isValid());
     }
 
     m_playableReference = data.ref;
     m_isPlayable = data.isPlayable;
+    m_remoteQuestion = data.remoteQuestion;
 
     if (m_playableReference == getCurrentReference()) {
         if (m_pOKButton != 0) {
@@ -787,6 +886,17 @@ client::dialogs::VisualScanDialog::Window::configurePeer(ui::Widget& w)
     }
 }
 
+void
+client::dialogs::VisualScanDialog::Window::toggleRemoteControl()
+{
+    if (m_currentReference.getType() == game::Reference::Ship) {
+        if (const String_t* q = m_remoteQuestion.get()) {
+            if (ui::dialogs::MessageBox(*q, m_translator("Remote Control"), m_root).doYesNoDialog()) {
+                m_gameSender.postNewRequest(new ToggleRemoteTask(m_currentReference.getId()));
+            }
+        }
+    }
+}
 
 void
 client::dialogs::VisualScanDialog::Window::onListChange(const game::ref::UserList& list)
@@ -852,12 +962,9 @@ client::dialogs::VisualScanDialog::setEarlyExit(bool flag)
 }
 
 bool
-client::dialogs::VisualScanDialog::loadCurrent(game::map::Point pos, game::ref::List::Options_t options, game::Id_t excludeShip)
+client::dialogs::VisualScanDialog::loadCurrent(Downlink& link, game::map::Point pos, game::ref::List::Options_t options, game::Id_t excludeShip)
 {
     // Build initial list
-    // FIXME: do NOT construct a Downlink here; instead, have the caller supply one.
-    // We do not want this to happen invisibly behind the scene.
-    Downlink link(m_root);
     game::ref::List list;
     ListBuilder b(list, pos, options, excludeShip);
     link.call(m_gameSender, b);
@@ -868,23 +975,23 @@ client::dialogs::VisualScanDialog::loadCurrent(game::map::Point pos, game::ref::
 
         if (!options.contains(game::ref::List::IncludeForeignShips)) {
             if (excludeShip != 0) {
-                msg = m_translator.translateString("There is no other ship of ours at that position.");
+                msg = m_translator("There is no other ship of ours at that position.");
             } else {
-                msg = m_translator.translateString("There is no ship of ours at that position.");
+                msg = m_translator("There is no ship of ours at that position.");
             }
         } else {
             if (excludeShip != 0) {
-                msg = m_translator.translateString("We can't locate another ship at that position.");
+                msg = m_translator("We can't locate another ship at that position.");
             } else {
-                msg = m_translator.translateString("We can't locate a ship at that position.");
-    // FIXME:      int pid = univ.getPlanetAt(pt);
+                msg = m_translator("We can't locate a ship at that position.");
+    // FIXME:      int pid = univ.findPlanetAt(pt);
     //             if (pid && !univ.getPlanet(pid).isPlayable(GObject::Playable))
     //                 /* this message must start with a space */
     //                 msg += format(_(" The planet %s may be hiding ships from our sensors."),
     //                               univ.getPlanet(pid).getName(GObject::PlainName));
             }
         }
-        ui::dialogs::MessageBox(msg, m_translator.translateString("Scanner"), m_root).doOkDialog();
+        ui::dialogs::MessageBox(msg, m_translator("Scanner"), m_root).doOkDialog();
         return false;
     }
 
@@ -903,12 +1010,32 @@ client::dialogs::VisualScanDialog::loadCurrent(game::map::Point pos, game::ref::
     return true;
 }
 
+bool
+client::dialogs::VisualScanDialog::loadNext(Downlink& link, game::map::Point pos, game::Id_t fromShip, game::ref::List::Options_t options)
+{
+    // ex doListNextShips (part)
+    // Build initial list
+    game::ref::List list;
+    NextBuilder b(list, pos, fromShip, options);
+    link.call(m_gameSender, b);
+
+    // List empty? Show message.
+    if (list.size() == 0) {
+        ui::dialogs::MessageBox(m_translator("We can't find a ship that will be at this position next turn."), m_translator("Scanner"), m_root).doOkDialog();
+        return false;
+    }
+
+    m_list = list;
+    return true;
+}
+
+
 game::Reference
 client::dialogs::VisualScanDialog::run()
 {
     Window w(m_root, m_gameSender, m_translator, m_list);
     w.setAllowRemoteControl(m_allowRemoteControl);
-                
+
     // FIXME: if (config.CPEnableRemote()) {
     //     button_r_cf = &createButton(group12, h, "R", 'r');
     // }

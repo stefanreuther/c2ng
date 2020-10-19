@@ -13,7 +13,7 @@ struct client::widgets::StandardDataView::Button {
           x(x),
           y(y),
           button(btn),
-          frame(ui::layout::HBox::instance0, root.colorScheme(), ui::widgets::FrameGroup::NoFrame)
+          frame(ui::layout::HBox::instance0, root.colorScheme(), ui::NoFrame)
         {
             frame.setFrameWidth(2);
             frame.add(*button);
@@ -105,7 +105,7 @@ client::widgets::StandardDataView::setText(const util::rich::Text& text)
 }
 
 bool
-client::widgets::StandardDataView::enableButton(util::Key_t key, ui::widgets::FrameGroup::Type type)
+client::widgets::StandardDataView::enableButton(util::Key_t key, ui::FrameType type)
 {
     if (Button* p = findButton(key)) {
         p->frame.setType(type);

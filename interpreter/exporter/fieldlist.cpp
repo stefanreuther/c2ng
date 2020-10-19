@@ -1,29 +1,31 @@
 /**
   *  \file interpreter/exporter/fieldlist.cpp
+  *  \brief Class interpreter::exporter::FieldList
   */
 
 #include <algorithm>
 #include "interpreter/exporter/fieldlist.hpp"
+#include "afl/string/char.hpp"
+#include "afl/string/format.hpp"
 #include "afl/string/parse.hpp"
 #include "interpreter/error.hpp"
-#include "afl/string/format.hpp"
 #include "interpreter/tokenizer.hpp"
-#include "afl/string/char.hpp"
 
+// Constructor.
 interpreter::exporter::FieldList::FieldList()
     : m_items()
 { }
 
+// Destructor.
 interpreter::exporter::FieldList::~FieldList()
 { }
 
-/** Add list of fields.
-    \param spec Comma-separated list of field specifications
-    \throw IntError on error */
+// Add list of fields.
 void
 interpreter::exporter::FieldList::addList(String_t spec)
 {
     // ex IntExportFieldList::addList
+    // ex export.pas:StringToFieldList
     String_t::size_type n = 0;
     String_t::size_type i = spec.find(',');
     while (i != spec.npos) {
@@ -34,9 +36,7 @@ interpreter::exporter::FieldList::addList(String_t spec)
     add(afl::string::strTrim(String_t(spec, n)));
 }
 
-/** Add field.
-    \param spec Field definition (field name, optionally with '@' and width)
-    \throw IntError on error */
+// Add field.
 void
 interpreter::exporter::FieldList::add(String_t spec)
 {
@@ -56,18 +56,14 @@ interpreter::exporter::FieldList::add(String_t spec)
     add(m_items.size(), s, width);
 }
 
-/** Add field.
-    \param line Add before this line number
-    \param name Name of field
-    \param width Width of field (0=use default) */
+// Add field.
 void
-interpreter::exporter::FieldList::add(Index_t line, String_t name, int width)
+interpreter::exporter::FieldList::add(Index_t index, String_t name, int width)
 {
-    m_items.insert(m_items.begin() + std::min(m_items.size(), line), Item(afl::string::strUCase(name), width));
+    m_items.insert(m_items.begin() + std::min(m_items.size(), index), Item(afl::string::strUCase(name), width));
 }
 
-/** Swap fields.
-    \param a,b Positions of fields to swap */
+// Swap fields.
 void
 interpreter::exporter::FieldList::swap(Index_t a, Index_t b)
 {
@@ -77,82 +73,81 @@ interpreter::exporter::FieldList::swap(Index_t a, Index_t b)
     }
 }
 
-/** Delete a field.
-    \param line Line to delete. */
+// Delete a field.
 void
-interpreter::exporter::FieldList::remove(Index_t line)
+interpreter::exporter::FieldList::remove(Index_t index)
 {
     // ex IntExportFieldList::remove
-    if (line < m_items.size()) {
-        m_items.erase(m_items.begin()+line);
-    }        
+    if (index < m_items.size()) {
+        m_items.erase(m_items.begin()+index);
+    }
 }
 
-/** Change name of a field.
-    \param line Position of field
-    \param name New name */
+// Change field name.
 void
-interpreter::exporter::FieldList::setFieldName(Index_t line, String_t name)
+interpreter::exporter::FieldList::setFieldName(Index_t index, String_t name)
 {
     // ex IntExportFieldList::setFieldName
-    if (line < m_items.size()) {
-        m_items[line].name = name;
+    if (index < m_items.size()) {
+        m_items[index].name = afl::string::strUCase(name);
     }
 }
 
-/** Change width of a field.
-    \param line Position of field
-    \param width New width (0=use default) */
+// Change width of a field.
 void
-interpreter::exporter::FieldList::setFieldWidth(Index_t line, int width)
+interpreter::exporter::FieldList::setFieldWidth(Index_t index, int width)
 {
     // ex IntExportFieldList::setFieldWidth
-    if (line < m_items.size()) {
-        m_items[line].width = width;
+    if (index < m_items.size()) {
+        m_items[index].width = width;
     }
 }
 
+// Get field by index.
 bool
-interpreter::exporter::FieldList::getField(Index_t line, String_t& name, int& width) const
+interpreter::exporter::FieldList::getField(Index_t index, String_t& name, int& width) const
 {
-    if (line < m_items.size()) {
-        name = m_items[line].name;
-        width = m_items[line].width;
+    if (index < m_items.size()) {
+        name = m_items[index].name;
+        width = m_items[index].width;
         return true;
     } else {
         return false;
     }
 }
 
-/** Get name of a field.
-    \param line Position of field */
-const String_t&
-interpreter::exporter::FieldList::getFieldName(Index_t line) const
+// Get field name.
+String_t
+interpreter::exporter::FieldList::getFieldName(Index_t index) const
 {
     // ex IntExportFieldList::getFieldName
-    // FIXME: rework to "return bool" style
-    return m_items[line].name;
+    if (index < m_items.size()) {
+        return m_items[index].name;
+    } else {
+        return String_t();
+    }
 }
 
-/** Get width of a field.
-    \param line Position of field */
+// Get field width.
 int
-interpreter::exporter::FieldList::getFieldWidth(Index_t line) const
+interpreter::exporter::FieldList::getFieldWidth(Index_t index) const
 {
     // ex IntExportFieldList::getFieldWidth
-    // FIXME: rework to "return bool" style
-    return m_items[line].width;
+    if (index < m_items.size()) {
+        return m_items[index].width;
+    } else {
+        return 0;
+    }
 }
 
-/** Get number of fields. */
+// Get number of fields.
 interpreter::exporter::FieldList::Index_t
 interpreter::exporter::FieldList::size() const
 {
     return m_items.size();
 }
 
-/** Convert field definitions to string. This string can be fed into
-    addList() to restore this field list. */
+// Convert field definitions to string.
 String_t
 interpreter::exporter::FieldList::toString() const
 {

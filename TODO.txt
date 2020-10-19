@@ -2,8 +2,9 @@ Major Concept Verification
 ==========================
 
 MULTITHREADED SIMULATOR.
-- Make a stripped-down copy of ShipList to copy around.
-- Make a simulator-runner with multiple threads.
+- [DONE] Make a stripped-down copy of ShipList to copy around.
+  . implemented for VCR algorithms, but not yet needed
+- [DONE] Make a simulator-runner with multiple threads.
 
 PLANETSCENTRAL API. The existing API commands mostly map to microservice commands.
 We need coarser granularity.
@@ -56,9 +57,9 @@ Features
 HOST PREDICTION. We can do history, doing prediction should be possible.
 
 SPECIFICATION BROWSER. A better version of CCShips.
-- Browse hulls, engines, beams, torpedoes, abilities.
-- Determine abilities such as "2x mining" from config.
-- Allow searching for "who can build heaters" or "what are my cloak ships"
+- [DONE] Browse hulls, engines, beams, torpedoes, abilities.
+- [DONE] Determine abilities such as "2x mining" from config.
+- [DONE] Allow searching for "who can build heaters" or "what are my cloak ships"
 
 MORE HOSTS. Can we do CircusMaximus?
 
@@ -92,7 +93,6 @@ CLEANUP
 ========
 
 - client::widgets::BusyIndicator -> ui::widgets
-- client::Downlink -> ui::Downlink
 - client::dialogs::DirectorySelectionDialog -> ui::dialogs
 - util::RequestSender<T> should have a function RequestSender<U> createRelatedSender(Closure<U&(T&)>)
 - too much code is using _() for translation

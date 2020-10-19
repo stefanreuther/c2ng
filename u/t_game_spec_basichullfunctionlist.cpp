@@ -21,7 +21,7 @@ TestGameSpecBasicHullFunctionList::testIO()
     // Load an example file
     static const char SAMPLE_FILE[] =
         "; Comment\n"
-        "0,a,Alchemy\n"
+        "7,a,Alchemy\n"
         "d = 3-to-1\n"
         "e = does this\n"
         "s = 105\n"
@@ -29,6 +29,7 @@ TestGameSpecBasicHullFunctionList::testIO()
         "1,a,Refinery\n"
         "d = 2-to-1\n"
         "s = 104\n"
+        "p = ref\n"
         "2,a,AdvancedRefinery\n"
         "d = 1-to-1\n"
         " s = 97 \n"
@@ -42,13 +43,14 @@ TestGameSpecBasicHullFunctionList::testIO()
     }
 
     // Verify content
-    const game::spec::BasicHullFunction* p = testee.getFunctionById(0);
+    const game::spec::BasicHullFunction* p = testee.getFunctionById(7);
     TS_ASSERT(p != 0);
-    TS_ASSERT_EQUALS(p->getId(), 0);
+    TS_ASSERT_EQUALS(p->getId(), 7);
     TS_ASSERT_EQUALS(p->getName(), "Alchemy");
     TS_ASSERT_EQUALS(p->getDescription(), "3-to-1");
     TS_ASSERT_EQUALS(p->getImpliedFunctionId(), -1);
     TS_ASSERT_EQUALS(p->getExplanation(), "does this\nand that");
+    TS_ASSERT_EQUALS(p->getPictureName(), "");
 
     p = testee.getFunctionById(1);
     TS_ASSERT(p != 0);
@@ -56,6 +58,7 @@ TestGameSpecBasicHullFunctionList::testIO()
     TS_ASSERT_EQUALS(p->getName(), "Refinery");
     TS_ASSERT_EQUALS(p->getDescription(), "2-to-1");
     TS_ASSERT_EQUALS(p->getImpliedFunctionId(), -1);
+    TS_ASSERT_EQUALS(p->getPictureName(), "ref");
 
     p = testee.getFunctionById(2);
     TS_ASSERT(p != 0);
@@ -63,6 +66,7 @@ TestGameSpecBasicHullFunctionList::testIO()
     TS_ASSERT_EQUALS(p->getName(), "AdvancedRefinery");
     TS_ASSERT_EQUALS(p->getDescription(), "improved!");
     TS_ASSERT_EQUALS(p->getImpliedFunctionId(), 1);
+    TS_ASSERT_EQUALS(p->getPictureName(), "");
 
     TS_ASSERT(testee.getFunctionById(3) == 0);
 
@@ -79,10 +83,18 @@ TestGameSpecBasicHullFunctionList::testIO()
 
     TS_ASSERT(testee.getFunctionByName("2", true) == 0);
 
+    // Access by index
+    TS_ASSERT_EQUALS(testee.getNumFunctions(), 3U);
+    TS_ASSERT_EQUALS(testee.getFunctionByIndex(0)->getName(), "Alchemy");
+    TS_ASSERT_EQUALS(testee.getFunctionByIndex(2)->getName(), "AdvancedRefinery");
+    TS_ASSERT(testee.getFunctionByIndex(3) == 0);
+
     // Clear
     testee.clear();
     TS_ASSERT(testee.getFunctionByName("Alchemy", false) == 0);
     TS_ASSERT(testee.getFunctionById(1) == 0);
+    TS_ASSERT_EQUALS(testee.getNumFunctions(), 0U);
+    TS_ASSERT(testee.getFunctionByIndex(3) == 0);
 }
 
 /** Test matchFunction(). */

@@ -304,7 +304,7 @@ game::vcr::classic::PVCRAlgorithm::initBattle(const Object& left, const Object& 
         Status& st = m_status[side];
         st.f.side = side ? RightSide : LeftSide;
         st.r.obj = side ? rightCopy : leftCopy;
-        st.m_statistic = st.r.obj;
+        st.m_statistic.init(st.r.obj, 1);
 #ifdef PVCR_INTEGER
         if (m_alternativeCombat) {
             st.f.scale = st.r.obj.getMass() + 1;

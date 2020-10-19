@@ -148,3 +148,16 @@ TestUtilMath::testDistance()
     TS_ASSERT_EQUALS(util::getDistanceFromDX(3, 4), 5.0);
 }
 
+void
+TestUtilMath::testSquareFloat()
+{
+    TS_ASSERT_EQUALS(util::squareFloat(20000.0), 400000000.0);
+    TS_ASSERT_EQUALS(util::squareFloat(42.0), 1764.0);
+    TS_ASSERT_EQUALS(util::squareFloat(1.5), 2.25);
+    TS_ASSERT_EQUALS(util::squareFloat(1.0), 1.0);
+    TS_ASSERT_EQUALS(util::squareFloat(0.5), 0.25);
+    TS_ASSERT_EQUALS(util::squareFloat(0.0), 0.0);
+    TS_ASSERT_EQUALS(util::squareFloat(-1.0), 1.0);
+    TS_ASSERT_EQUALS(util::squareFloat(-42.0), 1764.0);
+}
+

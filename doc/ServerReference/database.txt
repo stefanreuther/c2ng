@@ -168,6 +168,22 @@ Set of login tokens owned by this user
 @see token:t:$TOKEN
 ---
 
+@q user:$UID:key:all : StrSet (Database)
+Set of keys.
+Stores the Ids ($KEYID) of all registration keys used by this user with the host.
+---
+
+@q user:$UID:key:id:$KEYID : Hash (Database)
+Information about a registration key.
+
+@key blob:Str            Key content (KEY_SIZE_BYTES bytes)
+@key lastUsed:Int        Time of last usage
+@key lastGame:GID        Game for which used last
+@key useCount:Int        Total usage count
+---
+
+
+
 
 
 Email

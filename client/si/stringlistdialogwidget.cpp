@@ -5,18 +5,20 @@
 
 #include "client/si/stringlistdialogwidget.hpp"
 #include "afl/base/deleter.hpp"
-#include "ui/window.hpp"
-#include "ui/layout/vbox.hpp"
-#include "ui/widgets/framegroup.hpp"
-#include "ui/group.hpp"
+#include "client/widgets/helpwidget.hpp"
 #include "ui/eventloop.hpp"
-#include "util/translation.hpp"
-#include "ui/spacer.hpp"
+#include "ui/group.hpp"
 #include "ui/layout/hbox.hpp"
+#include "ui/layout/vbox.hpp"
+#include "ui/spacer.hpp"
 #include "ui/widgets/button.hpp"
-#include "ui/widgets/standarddialogbuttons.hpp"
-#include "ui/widgets/scrollbar.hpp"
+#include "ui/widgets/framegroup.hpp"
 #include "ui/widgets/menuframe.hpp"
+#include "ui/widgets/quit.hpp"
+#include "ui/widgets/scrollbar.hpp"
+#include "ui/widgets/standarddialogbuttons.hpp"
+#include "ui/window.hpp"
+#include "util/translation.hpp"
 
 namespace {
     ui::widgets::AbstractButton* findKeyButton(ui::Widget& me, util::Key_t key)
@@ -90,7 +92,7 @@ client::si::StringListDialogWidget::StringListDialogWidget(gfx::ResourceProvider
 
 // Execute standard dialog.
 bool
-client::si::StringListDialogWidget::run(ui::Root& root)
+client::si::StringListDialogWidget::run(ui::Root& root, util::RequestSender<game::Session> gameSender)
 {
     // Configure
     setPreferredHeight(m_height <= 0 ? 0 : m_height <= 3 ? 3 : m_height);
@@ -107,7 +109,7 @@ client::si::StringListDialogWidget::run(ui::Root& root)
     afl::base::Deleter h;
 
     ui::Window& w = h.addNew(new ui::Window(m_dialogTitle, root.provider(), root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
-    ui::widgets::FrameGroup& listGroup = h.addNew(new ui::widgets::FrameGroup(ui::layout::HBox::instance0, root.colorScheme(), ui::widgets::FrameGroup::LoweredFrame));
+    ui::widgets::FrameGroup& listGroup = h.addNew(new ui::widgets::FrameGroup(ui::layout::HBox::instance0, root.colorScheme(), ui::LoweredFrame));
     listGroup.add(*this);
     // FIXME: the following assumes we get as many lines from layout as we request.
     if (getLayoutInfo().getPreferredSize().getY() < int(getNumItems()) * getItemHeight(0)) {
@@ -117,14 +119,13 @@ client::si::StringListDialogWidget::run(ui::Root& root)
 
     ui::widgets::StandardDialogButtons& btns = h.addNew(new ui::widgets::StandardDialogButtons(root));
     btns.addStop(loop);
-    // FIXME: help
-    // if (!help.empty()) {
-    //     button_group.add(h.add(new UIButton(_("H"), 'H')));
-    //     w.add(h.add(new WHelpWidget(help)));
-    // }
+    if (!m_help.empty()) {
+        ui::Widget& helper = h.addNew(new client::widgets::HelpWidget(root, gameSender, m_help));
+        w.add(helper);
+        btns.addHelp(helper);
+    }
     w.add(btns);
-    // FIXME:
-    // w.add(h.add(new UIQuit(cm_Escape)));
+    w.add(h.addNew(new ui::widgets::Quit(root, loop)));
 
     w.pack();
     root.centerWidget(w);

@@ -5,17 +5,18 @@
 #define C2NG_CLIENT_SCREENS_BROWSERSCREEN_HPP
 
 #include "afl/base/ptr.hpp"
+#include "afl/base/signal.hpp"
 #include "client/widgets/folderlistbox.hpp"
 #include "game/browser/session.hpp"
+#include "game/session.hpp"
 #include "gfx/timer.hpp"
 #include "ui/eventloop.hpp"
 #include "ui/root.hpp"
+#include "ui/widgets/button.hpp"
 #include "ui/widgets/richlistbox.hpp"
 #include "ui/widgets/simpleiconbox.hpp"
 #include "util/requestreceiver.hpp"
 #include "util/rich/text.hpp"
-#include "afl/base/signal.hpp"
-#include "ui/widgets/button.hpp"
 
 namespace client { namespace screens {
 
@@ -33,8 +34,9 @@ namespace client { namespace screens {
         /** Constructor.
             Prepares a BrowserScreen.
             \param root User interface root
-            \param sender Sender to communicate with the browser session */
-        BrowserScreen(ui::Root& root, util::RequestSender<game::browser::Session> sender);
+            \param sender Sender to communicate with the browser session
+            \param gameSender Sender to communicate with the game session (required for plugins/help) */
+        BrowserScreen(ui::Root& root, util::RequestSender<game::browser::Session> sender, util::RequestSender<game::Session> gameSender);
 
         /** Display this screen.
             Returns when the user cancels the dialog.
@@ -123,6 +125,7 @@ namespace client { namespace screens {
 
         ui::Root& m_root;
         util::RequestSender<game::browser::Session> m_sender;
+        util::RequestSender<game::Session> m_gameSender;
         util::RequestReceiver<BrowserScreen> m_receiver;
 
         client::widgets::FolderListbox m_list;

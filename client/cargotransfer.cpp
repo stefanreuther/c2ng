@@ -6,18 +6,19 @@
 #include "afl/base/signal.hpp"
 #include "afl/string/format.hpp"
 #include "client/dialogs/cargotransferdialog.hpp"
-#include "client/proxy/cargotransferproxy.hpp"
-#include "client/proxy/cargotransfersetupproxy.hpp"
-#include "client/proxy/referencelistproxy.hpp"
+#include "client/downlink.hpp"
 #include "client/widgets/referencelistbox.hpp"
 #include "game/actions/cargotransfersetup.hpp"
 #include "game/game.hpp"
 #include "game/map/anyshiptype.hpp"
 #include "game/map/universe.hpp"
+#include "game/proxy/cargotransferproxy.hpp"
+#include "game/proxy/cargotransfersetupproxy.hpp"
+#include "game/proxy/referencelistproxy.hpp"
 #include "game/root.hpp"
 #include "game/turn.hpp"
-#include "ui/widgets/standarddialogbuttons.hpp"
 #include "ui/dialogs/messagebox.hpp"
+#include "ui/widgets/standarddialogbuttons.hpp"
 
 namespace {
     const int Special_Jettison = 1;
@@ -25,7 +26,7 @@ namespace {
 
     class ObjectSelectionDialog {
      public:
-        ObjectSelectionDialog(ui::Root& root, client::proxy::ReferenceListProxy& proxy)
+        ObjectSelectionDialog(ui::Root& root, game::proxy::ReferenceListProxy& proxy)
             : m_root(root),
               m_list(root),
               m_proxy(proxy),
@@ -55,7 +56,7 @@ namespace {
      private:
         ui::Root& m_root;
         client::widgets::ReferenceListbox m_list;
-        client::proxy::ReferenceListProxy& m_proxy;
+        game::proxy::ReferenceListProxy& m_proxy;
         ui::EventLoop m_loop;
     };
 }
@@ -74,7 +75,7 @@ client::doCargoTransfer(ui::Root& root,
     }
 
     // Prepare
-    client::proxy::CargoTransferProxy proxy(root, gameSender);
+    game::proxy::CargoTransferProxy proxy(gameSender, root.engine().dispatcher());
     proxy.init(setup);
 
     // Build dialog
@@ -92,7 +93,7 @@ client::doShipCargoTransfer(ui::Root& root,
                             game::Id_t shipId)
 {
     // ex doShipCargoTransfer
-    class Initializer : public client::proxy::ReferenceListProxy::Initializer_t {
+    class Initializer : public game::proxy::ReferenceListProxy::Initializer_t {
      public:
         Initializer(game::Id_t shipId)
             : m_shipId(shipId)
@@ -112,7 +113,7 @@ client::doShipCargoTransfer(ui::Root& root,
                     int owner;
                     if (pShip != 0 && pShip->isPlayable(game::map::Object::Playable) && pShip->getOwner(owner) && pShip->getPosition(pt)) {
                         // Add the planet
-                        if (game::Id_t pid = univ.getPlanetAt(pt)) {
+                        if (game::Id_t pid = univ.findPlanetAt(pt)) {
                             if (game::actions::CargoTransferSetup::fromPlanetShip(univ, pid, m_shipId).isValid()) {
                                 objectList.add(game::Reference(game::Reference::Planet, pid));
                             }
@@ -153,10 +154,10 @@ client::doShipCargoTransfer(ui::Root& root,
     };
 
     Downlink link(root);
-    client::proxy::ReferenceListProxy proxy(root, gameSender, tx);
+    game::proxy::ReferenceListProxy proxy(gameSender, root.engine().dispatcher());
     ObjectSelectionDialog dlg(root, proxy);
     proxy.setConfigurationSelection(game::ref::CARGO_TRANSFER);
-    proxy.setContentNew(std::auto_ptr<client::proxy::ReferenceListProxy::Initializer_t>(new Initializer(shipId)));
+    proxy.setContentNew(std::auto_ptr<game::proxy::ReferenceListProxy::Initializer_t>(new Initializer(shipId)));
     proxy.waitIdle(link);
 
     if (dlg.isEmpty()) {
@@ -166,7 +167,7 @@ client::doShipCargoTransfer(ui::Root& root,
     } else {
         // Build a CargoTransferSetup
         game::Reference ref = dlg.run(tx("Transfer cargo to..."));
-        client::proxy::CargoTransferSetupProxy setupProxy(gameSender);
+        game::proxy::CargoTransferSetupProxy setupProxy(gameSender);
         game::actions::CargoTransferSetup setup;
         switch (ref.getType()) {
          case game::Reference::Ship:
@@ -205,7 +206,7 @@ client::doPlanetCargoTransfer(ui::Root& root,
                               bool unload)
 {
     // ex doPlanetTransfer, doPlanetTransferFor
-    class Initializer : public client::proxy::ReferenceListProxy::Initializer_t {
+    class Initializer : public game::proxy::ReferenceListProxy::Initializer_t {
      public:
         Initializer(game::Id_t planetId)
             : m_planetId(planetId)
@@ -236,10 +237,10 @@ client::doPlanetCargoTransfer(ui::Root& root,
     };
 
     Downlink link(root);
-    client::proxy::ReferenceListProxy proxy(root, gameSender, tx);
+    game::proxy::ReferenceListProxy proxy(gameSender, root.engine().dispatcher());
     ObjectSelectionDialog dlg(root, proxy);
     proxy.setConfigurationSelection(game::ref::CARGO_TRANSFER);
-    proxy.setContentNew(std::auto_ptr<client::proxy::ReferenceListProxy::Initializer_t>(new Initializer(planetId)));
+    proxy.setContentNew(std::auto_ptr<game::proxy::ReferenceListProxy::Initializer_t>(new Initializer(planetId)));
     proxy.waitIdle(link);
 
     if (dlg.isEmpty()) {
@@ -249,7 +250,7 @@ client::doPlanetCargoTransfer(ui::Root& root,
     } else {
         // Build a CargoTransferSetup
         game::Reference ref = dlg.run(unload ? tx("Unload ship...") : tx("Transfer cargo to..."));
-        client::proxy::CargoTransferSetupProxy setupProxy(gameSender);
+        game::proxy::CargoTransferSetupProxy setupProxy(gameSender);
         doCargoTransfer(root, gameSender, tx, setupProxy.createPlanetShip(link, planetId, ref.getId()));
     }
 }

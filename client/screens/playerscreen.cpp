@@ -42,7 +42,7 @@ namespace {
     ui::widgets::AbstractButton& createImageButton(afl::base::Deleter& del, ui::Root& root, ui::LayoutableGroup& group, String_t text, util::Key_t key, String_t image)
     {
         // Create container group
-        ui::widgets::FrameGroup& frame = del.addNew(new ui::widgets::FrameGroup(ui::layout::HBox::instance0, root.colorScheme(), ui::widgets::FrameGroup::LoweredFrame));
+        ui::widgets::FrameGroup& frame = del.addNew(new ui::widgets::FrameGroup(ui::layout::HBox::instance0, root.colorScheme(), ui::LoweredFrame));
 
         // Create button
         ui::widgets::ImageButton& result = del.addNew(new ui::widgets::ImageButton(image, key, root, gfx::Point(110, 110)));
@@ -137,6 +137,7 @@ namespace {
                 createActionButton(del, root, researchGroup, tx("Scores"), 's').dispatchKeyTo(keys);
                 createActionButton(del, root, researchGroup, tx("Battle Simulator"), 'b').dispatchKeyTo(keys);
                 createActionButton(del, root, researchGroup, tx("Starship Cost Calculator"), 'd').dispatchKeyTo(keys);
+                createActionButton(del, root, researchGroup, tx("Almanac"), 'A').dispatchKeyTo(keys);
 
                 ui::LayoutableGroup& messagesGroup = createGroup(del, tx("Messages"), menuGroup, root, colorScheme);
                 createActionButton(del, root, messagesGroup, tx("Inbox"), 'm').dispatchKeyTo(keys);
@@ -203,7 +204,7 @@ namespace {
                     virtual void execute(uint32_t pgid, game::Session& session)
                         {
                             // Access
-                            interpreter::ProcessList& list = session.world().processList();
+                            interpreter::ProcessList& list = session.processList();
 
                             // Create a task to run the 'Load' hook
                             interpreter::BCORef_t bco = *new interpreter::BytecodeObject();

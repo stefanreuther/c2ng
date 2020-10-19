@@ -260,8 +260,8 @@ game::vcr::classic::HostAlgorithm::initBattle(const Object& left, const Object& 
     m_status[RightSide].init(rightCopy, RightSide, m_launchers);
     m_status[LeftSide].setBeamPower(m_beams);
     m_status[RightSide].setBeamPower(m_beams);
-    m_statistic[LeftSide] = leftCopy;
-    m_statistic[RightSide] = rightCopy;
+    m_statistic[LeftSide].init(leftCopy, 1);
+    m_statistic[RightSide].init(rightCopy, 1);
 
     m_status[LeftSide].m_objectX = 30;
     if (!m_status[RightSide].m_obj.isPlanet()) {

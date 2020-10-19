@@ -107,7 +107,11 @@ TestServerInterfaceHostGameClient::testIt()
         afl::data::IntegerList_t result;
         mock.expectCall("GAMELIST, ID");
         mock.provideNewResult(new VectorValue(Vector::create(Segment().pushBackInteger(2).pushBackInteger(3).pushBackInteger(5))));
-        testee.getGames(afl::base::Nothing, afl::base::Nothing, afl::base::Nothing, result);
+        HostGame::Filter filter;
+        filter.requiredState = afl::base::Nothing;
+        filter.requiredType = afl::base::Nothing;
+        filter.requiredUser = afl::base::Nothing;
+        TS_ASSERT_THROWS_NOTHING(testee.getGames(HostGame::Filter(), result));
         TS_ASSERT_EQUALS(result.size(), 3U);
         TS_ASSERT_EQUALS(result[0], 2);
         TS_ASSERT_EQUALS(result[1], 3);
@@ -117,28 +121,38 @@ TestServerInterfaceHostGameClient::testIt()
         afl::data::IntegerList_t result;
         mock.expectCall("GAMELIST, STATE, running, ID");
         mock.provideNewResult(new VectorValue(Vector::create()));
-        testee.getGames(HostGame::Running, afl::base::Nothing, afl::base::Nothing, result);
+        HostGame::Filter filter;
+        filter.requiredState = HostGame::Running;
+        TS_ASSERT_THROWS_NOTHING(testee.getGames(filter, result));
         TS_ASSERT_EQUALS(result.size(), 0U);
     }
     {
         afl::data::IntegerList_t result;
         mock.expectCall("GAMELIST, TYPE, public, ID");
         mock.provideNewResult(new VectorValue(Vector::create()));
-        testee.getGames(afl::base::Nothing, HostGame::PublicGame, afl::base::Nothing, result);
+        HostGame::Filter filter;
+        filter.requiredType = HostGame::PublicGame;
+        TS_ASSERT_THROWS_NOTHING(testee.getGames(filter, result));
         TS_ASSERT_EQUALS(result.size(), 0U);
     }
     {
         afl::data::IntegerList_t result;
         mock.expectCall("GAMELIST, USER, 1030, ID");
         mock.provideNewResult(new VectorValue(Vector::create()));
-        testee.getGames(afl::base::Nothing, afl::base::Nothing, String_t("1030"), result);
+        HostGame::Filter filter;
+        filter.requiredUser = String_t("1030");
+        TS_ASSERT_THROWS_NOTHING(testee.getGames(filter, result));
         TS_ASSERT_EQUALS(result.size(), 0U);
     }
     {
         afl::data::IntegerList_t result;
         mock.expectCall("GAMELIST, STATE, joining, TYPE, unlisted, USER, 1015, ID");
         mock.provideNewResult(new VectorValue(Vector::create(Segment().pushBackInteger(42))));
-        testee.getGames(HostGame::Joining, HostGame::UnlistedGame, String_t("1015"), result);
+        HostGame::Filter filter;
+        filter.requiredState = HostGame::Joining;
+        filter.requiredType = HostGame::UnlistedGame;
+        filter.requiredUser = String_t("1015");
+        TS_ASSERT_THROWS_NOTHING(testee.getGames(filter, result));
         TS_ASSERT_EQUALS(result.size(), 1U);
         TS_ASSERT_EQUALS(result[0], 42);
     }
@@ -335,7 +349,7 @@ TestServerInterfaceHostGameClient::testStat()
         mock.expectCall("GAMELIST");
         mock.provideNewResult(new VectorValue(Vector::create(Segment().pushBackNew(makeGameInfo()))));
         std::vector<HostGame::Info> infos;
-        testee.getInfos(afl::base::Nothing, afl::base::Nothing, afl::base::Nothing, false, infos);
+        testee.getInfos(HostGame::Filter(), false, infos);
         TS_ASSERT_EQUALS(infos.size(), 1U);
         TS_ASSERT_EQUALS(infos[0].gameId, 43);
         TS_ASSERT_EQUALS(infos[0].state, HostGame::Joining);
@@ -347,23 +361,43 @@ TestServerInterfaceHostGameClient::testStat()
 
         mock.expectCall("GAMELIST, VERBOSE");
         mock.provideNewResult(0);
-        testee.getInfos(afl::base::Nothing, afl::base::Nothing, afl::base::Nothing, true, infos);
+        testee.getInfos(HostGame::Filter(), true, infos);
 
         mock.expectCall("GAMELIST, STATE, running");
         mock.provideNewResult(0);
-        testee.getInfos(HostGame::Running, afl::base::Nothing, afl::base::Nothing, false, infos);
+        HostGame::Filter f1;
+        f1.requiredState = HostGame::Running;
+        testee.getInfos(f1, false, infos);
 
         mock.expectCall("GAMELIST, TYPE, unlisted");
         mock.provideNewResult(0);
-        testee.getInfos(afl::base::Nothing, HostGame::UnlistedGame, afl::base::Nothing, false, infos);
+        HostGame::Filter f2;
+        f2.requiredType = HostGame::UnlistedGame;
+        testee.getInfos(f2, false, infos);
 
         mock.expectCall("GAMELIST, USER, u32");
         mock.provideNewResult(0);
-        testee.getInfos(afl::base::Nothing, afl::base::Nothing, String_t("u32"), false, infos);
+        HostGame::Filter f3;
+        f3.requiredUser = String_t("u32");
+        testee.getInfos(f3, false, infos);
 
         mock.expectCall("GAMELIST, STATE, joining, TYPE, public, USER, 1003, VERBOSE");
         mock.provideNewResult(0);
-        testee.getInfos(HostGame::Joining, HostGame::PublicGame, String_t("1003"), true, infos);
+        HostGame::Filter f4;
+        f4.requiredState = HostGame::Joining;
+        f4.requiredType = HostGame::PublicGame;
+        f4.requiredUser = String_t("1003");
+        testee.getInfos(f4, true, infos);
+
+        mock.expectCall("GAMELIST, USER, 1003, HOST, qhost, TOOL, multitool, SHIPLIST, list, MASTER, pmaster, VERBOSE");
+        mock.provideNewResult(0);
+        HostGame::Filter f5;
+        f5.requiredUser = String_t("1003");
+        f5.requiredHost = String_t("qhost");
+        f5.requiredTool = String_t("multitool");
+        f5.requiredShipList = String_t("list");
+        f5.requiredMaster = String_t("pmaster");
+        testee.getInfos(f5, true, infos);
 
         TS_ASSERT_EQUALS(infos.size(), 0U);
     }

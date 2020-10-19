@@ -10,7 +10,6 @@
 #include "afl/sys/longcommandlineparser.hpp"
 #include "server/dbexport/dbexporter.hpp"
 #include "server/ports.hpp"
-#include "util/translation.hpp"
 #include "version.hpp"
 
 using afl::string::Format;
@@ -33,6 +32,7 @@ void
 server::dbexport::ExportApplication::appMain()
 {
     // Parse args until we obtain a command
+    afl::string::Translator& tx = translator();
     afl::base::Ref<afl::sys::Environment::CommandLine_t> commandLine(environment().getCommandLine());
     afl::sys::LongCommandLineParser commandLineParser(commandLine);
     String_t p;
@@ -47,7 +47,7 @@ server::dbexport::ExportApplication::appMain()
             } else if (handleCommandLineOption(p, commandLineParser)) {
                 // ok
             } else {
-                errorExit(Format(_("invalid option specified. Use '%s -h' for help.").c_str(), environment().getInvocationName()));
+                errorExit(Format(tx("invalid option specified. Use '%s -h' for help.").c_str(), environment().getInvocationName()));
             }
         } else {
             command = p;
@@ -58,7 +58,7 @@ server::dbexport::ExportApplication::appMain()
     // Did we get a command?
     const String_t* pCommand = command.get();
     if (pCommand == 0) {
-        errorExit(_("no command specified"));
+        errorExit(tx("no command specified"));
     }
 
     // Load/process configuration
@@ -69,7 +69,7 @@ server::dbexport::ExportApplication::appMain()
     if (*pCommand == "db") {
         exportDatabase(standardOutput(), createClient(del, m_dbAddress), commandLineParser);
     } else {
-        errorExit(Format(_("unknown command: \"%s\"").c_str(), *pCommand));
+        errorExit(Format(tx("unknown command: \"%s\"").c_str(), *pCommand));
     }
 }
 
@@ -91,24 +91,25 @@ server::dbexport::ExportApplication::handleConfiguration(const String_t& key, co
 void
 server::dbexport::ExportApplication::help()
 {
+    afl::string::Translator& tx = translator();
     afl::io::TextWriter& out = standardOutput();
-    out.writeLine(Format(_("PCC2 Database Export v%s - (c) 2017-2020 Stefan Reuther").c_str(), PCC2_VERSION));
+    out.writeLine(Format(tx("PCC2 Database Export v%s - (c) 2017-2020 Stefan Reuther").c_str(), PCC2_VERSION));
     out.writeLine();
-    out.writeLine(Format(_("Usage: c2dbexport [--config=FILE] [-DKEY=VALUE] COMMAND [ARGS...]\n"
-                           "\n"
-                           "Options:\n"
-                           "  --config=FILE       Set path to config file\n"
-                           "  --log=CONFIG        Set logger configuration\n"
-                           "  -DKEY=VALUE         Override config file entry\n"
-                           "\n"
-                           "Commands:\n"
-                           "  db [--delete] WILDCARD...     export database keys\n"
-                           "\n"
-                           "This utility creates c2console (*.con) scripts to restore\n"
-                           "a particular situation / set of data in the same or another\n"
-                           "PlanetsCentral database instance.\n"
-                           "\n"
-                           "Report bugs to <Streu@gmx.de>\n").c_str(),
+    out.writeLine(Format(tx("Usage: c2dbexport [--config=FILE] [-DKEY=VALUE] COMMAND [ARGS...]\n"
+                            "\n"
+                            "Options:\n"
+                            "  --config=FILE       Set path to config file\n"
+                            "  --log=CONFIG        Set logger configuration\n"
+                            "  -DKEY=VALUE         Override config file entry\n"
+                            "\n"
+                            "Commands:\n"
+                            "  db [--delete] WILDCARD...     export database keys\n"
+                            "\n"
+                            "This utility creates c2console (*.con) scripts to restore\n"
+                            "a particular situation / set of data in the same or another\n"
+                            "PlanetsCentral database instance.\n"
+                            "\n"
+                            "Report bugs to <Streu@gmx.de>\n").c_str(),
                          environment().getInvocationName()));
     exit(0);
 }

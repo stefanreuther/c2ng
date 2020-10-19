@@ -48,7 +48,7 @@ game::interface::IFAddCommand(interpreter::Process& /*proc*/, game::Session& ses
     CommandContainer& cc = ex->create(g.getViewpointPlayer());
 
     // Parse command
-    Command* cmd = Command::parseCommand(cmdStr, true);
+    Command* cmd = Command::parseCommand(cmdStr, true, false);
     if (cmd == 0) {
         throw interpreter::Error("Invalid command");
     }

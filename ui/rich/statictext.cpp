@@ -19,7 +19,7 @@ ui::rich::StaticText::~StaticText()
 void
 ui::rich::StaticText::setText(const util::rich::Text& text)
 {
-    // ex UIRichStatic::setText
+    // ex UIRichStatic::setText, UIMultilineStatic::setText
     m_document.clear();
     m_document.setPageWidth(std::max(getExtent().getWidth(), m_width));
     m_document.add(text);
@@ -30,7 +30,7 @@ ui::rich::StaticText::setText(const util::rich::Text& text)
 void
 ui::rich::StaticText::draw(gfx::Canvas& can)
 {
-    // ex UIRichStatic::drawContent
+    // ex UIRichStatic::drawContent, UIMultilineStatic::drawContent
     gfx::Context<util::SkinColor::Color> ctx(can, getColorScheme());
     m_document.draw(ctx, getExtent(), 0);
 }

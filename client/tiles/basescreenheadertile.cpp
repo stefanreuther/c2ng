@@ -7,7 +7,7 @@
 #include "game/root.hpp"
 #include "afl/string/format.hpp"
 #include "ui/res/resid.hpp"
-#include "client/proxy/objectlistener.hpp"
+#include "game/proxy/objectlistener.hpp"
 #include "game/types.hpp"
 #include "game/map/planet.hpp"
 
@@ -19,15 +19,15 @@ client::tiles::BaseScreenHeaderTile::BaseScreenHeaderTile(ui::Root& root, client
 {
     // ex WBaseScreenHeaderTile::WBaseScreenHeaderTile
     if (forTask) {
-        enableButton(btnCScr, FrameGroup::NoFrame);
+        enableButton(btnCScr, ui::NoFrame);
     } else {
-        enableButton(btnAuto, FrameGroup::NoFrame);
-        enableButton(btnAdd,  FrameGroup::NoFrame);
+        enableButton(btnAuto, ui::NoFrame);
+        enableButton(btnAdd,  ui::NoFrame);
     }
 }
 
 void
-client::tiles::BaseScreenHeaderTile::attach(client::proxy::ObjectObserver& oop)
+client::tiles::BaseScreenHeaderTile::attach(game::proxy::ObjectObserver& oop)
 {
     class Job : public util::Request<ControlScreenHeader> {
      public:
@@ -64,7 +64,7 @@ client::tiles::BaseScreenHeaderTile::attach(client::proxy::ObjectObserver& oop)
             {
                 t.setText(txtHeading, m_name);
                 t.setText(txtSubtitle, m_subtitle);
-                t.enableButton(btnImage, m_marked ? FrameGroup::YellowFrame : FrameGroup::NoFrame);
+                t.enableButton(btnImage, m_marked ? ui::YellowFrame : ui::NoFrame);
                 t.setImage(m_image);
             }
      private:
@@ -73,7 +73,7 @@ client::tiles::BaseScreenHeaderTile::attach(client::proxy::ObjectObserver& oop)
         String_t m_image;
         bool m_marked;
     };
-    class Listener : public client::proxy::ObjectListener {
+    class Listener : public game::proxy::ObjectListener {
      public:
         Listener(util::RequestSender<ControlScreenHeader> reply)
             : m_reply(reply)

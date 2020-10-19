@@ -18,6 +18,7 @@ TestServerHostConfiguration::testBase()
     TS_ASSERT_EQUALS(testee.useCron, true);
     TS_ASSERT_EQUALS(testee.hostFileAddress.toString(), "127.0.0.1:7776");
     TS_ASSERT_EQUALS(testee.usersSeeTemporaryTurns, true);
+    TS_ASSERT_EQUALS(testee.maxStoredKeys, 10);
 
     // Must be copyable
     server::host::Configuration t = testee;

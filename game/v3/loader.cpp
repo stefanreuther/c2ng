@@ -45,6 +45,7 @@ namespace {
         \todo maybe recognize other client's dummy names? */
     bool isDummyName(const String_t& name, int shipId)
     {
+        // ex ccmain.pas:IsStubName
         return name == String_t(afl::string::Format("Ship %d", shipId));
     }
 
@@ -90,12 +91,13 @@ game::v3::Loader::prepareUniverse(game::map::Universe& univ) const
 void
 game::v3::Loader::prepareTurn(Turn& turn, const Root& root, Session& session, int player) const
 {
+    // ex GGameTurn::postprocess (part)
     // FIXME: design problem? We have one reverter, one set of alliances.
     // This needs revision if we want to load multiple turns into one instance.
     // FIXME: merge with prepareUniverse()?
 
     // Reverter
-    turn.universe().setNewReverter(new Reverter(turn.universe(), session));
+    turn.universe().setNewReverter(new Reverter(turn, session));
 
     // Create CommandExtra. This allows further code to deal with PHost commands.
     CommandExtra::create(turn);
@@ -231,7 +233,7 @@ game::v3::Loader::loadBases(game::map::Universe& univ, afl::io::Stream& file, in
 void
 game::v3::Loader::loadShipXY(game::map::Universe& univ, afl::io::Stream& file, afl::io::Stream::FileSize_t bytes, LoadMode /*mode*/, PlayerSet_t source, PlayerSet_t reject) const
 {
-    // ex game/load.cc:loadShipXY
+    // ex game/load.cc:loadShipXY, ccmain.pas:LoadShipXY
 
     // Compute size of file
     static_assert(structures::NUM_SHIPS == 999, "NUM_SHIPS");
@@ -306,7 +308,7 @@ game::v3::Loader::loadShips(game::map::Universe& univ, afl::io::Stream& file, in
 void
 game::v3::Loader::loadTargets(game::map::Universe& univ, afl::io::Stream& file, int count, TargetFormat fmt, PlayerSet_t source, int turnNumber) const
 {
-    // ex game/load.cc:loadTargets
+    // ex game/load.cc:loadTargets, ccmain.pas:LoadTargets, ccmain.pas:LoadTargetFile
     m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loading %d visual contact%!1{s%}...").c_str(), count));
     while (count > 0) {
         game::v3::structures::ShipTarget target;

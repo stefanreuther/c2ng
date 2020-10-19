@@ -10,6 +10,7 @@
 #include "afl/string/format.hpp"
 #include "client/dialogs/directoryselectiondialog.hpp"
 #include "client/dialogs/folderconfigdialog.hpp"
+#include "client/dialogs/helpdialog.hpp"
 #include "client/downlink.hpp"
 #include "client/imageloader.hpp"
 #include "client/usercallback.hpp"
@@ -711,9 +712,10 @@ class client::screens::BrowserScreen::UpTask : public util::Request<Session> {
 
 /***************************** BrowserScreen *****************************/
 
-client::screens::BrowserScreen::BrowserScreen(ui::Root& root, util::RequestSender<game::browser::Session> sender)
+client::screens::BrowserScreen::BrowserScreen(ui::Root& root, util::RequestSender<game::browser::Session> sender, util::RequestSender<game::Session> gameSender)
     : m_root(root),
       m_sender(sender),
+      m_gameSender(gameSender),
       m_receiver(root.engine().dispatcher(), *this),
       m_list(gfx::Point(20, 20), m_root),
       m_crumbs(root.provider().getFont(gfx::FontRequest())->getCellSize().scaledBy(40, 1), m_root),
@@ -964,8 +966,7 @@ void
 client::screens::BrowserScreen::onKeyHelp(int)
 {
     // ex PCC2GameChooserWindow::handleEvent (part)
-    // FIXME: port
-    //    doHelp("pcc2:gamesel");
+    client::dialogs::doHelpDialog(m_root, m_gameSender, "pcc2:gamesel");
 }
 
 void

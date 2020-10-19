@@ -13,11 +13,9 @@ namespace {
 }
 
 game::map::ShipStorage::ShipStorage(Ship& sh,
-                                    InterpreterInterface& iface,
                                     const game::spec::ShipList& shipList)
     : CargoContainer(),
       m_ship(sh),
-      m_interface(iface),
       m_shipList(shipList),
       m_changeConnection(sh.sig_change.add(&sig_change, &afl::base::Signal<void()>::raise))
 {
@@ -31,10 +29,10 @@ game::map::ShipStorage::~ShipStorage()
 }
 
 String_t
-game::map::ShipStorage::getName(afl::string::Translator& tx) const
+game::map::ShipStorage::getName(afl::string::Translator& /*tx*/) const
 {
     // ex GShipTransfer::getName
-    return m_ship.getName(PlainName, tx, m_interface);
+    return m_ship.getName();
 }
 
 game::CargoContainer::Flags_t

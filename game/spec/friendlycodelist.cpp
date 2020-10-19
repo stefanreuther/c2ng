@@ -7,7 +7,6 @@
 #include "afl/string/char.hpp"
 #include "afl/string/parse.hpp"
 #include "afl/io/textfile.hpp"
-#include "util/translation.hpp"
 
 namespace {
     /** Compare friendly codes.
@@ -32,12 +31,23 @@ namespace {
             return i < 0;
         }
     }
+
+    /** Add extra friendly code, but avoid duplicates.
+        The xtrafcode.txt file usually contains all the codes we already had in fcodes.cc,
+        but with lower-quality meta-information.
+        Thus, if a definition already exists, ignore the extra code. */
+    void addExtraCode(game::spec::FriendlyCodeList& list, const String_t& code)
+    {
+        size_t pos;
+        if (!list.getIndexByName(code, pos)) {
+            list.addCode(game::spec::FriendlyCode(code, "X,"));
+        }
+    }
 }
 
 // Default constructor.
 game::spec::FriendlyCodeList::FriendlyCodeList()
-    : m_data(),
-      m_extraData()
+    : m_data()
 { }
 
 // Make sublist of some other list.
@@ -46,8 +56,7 @@ game::spec::FriendlyCodeList::FriendlyCodeList(const FriendlyCodeList& originalL
                                                const UnitScoreDefinitionList& scoreDefinitions,
                                                const game::spec::ShipList& shipList,
                                                const game::config::HostConfiguration& config)
-    : m_data(),
-      m_extraData()
+    : m_data()
 {
     // ex GFCodeList::GFCodeList(const GFCodeList& l, const GObject& o)
     for (Iterator_t i = originalList.begin(); i != originalList.end(); ++i) {
@@ -143,15 +152,15 @@ game::spec::FriendlyCodeList::sort()
 void
 game::spec::FriendlyCodeList::clear()
 {
-    // ex GFCodeList::clear
+    // ex GFCodeList::clear, GFCode::clearExtraFC
     m_data.clear();
 }
 
 // Load friendly code list from a file.
 void
-game::spec::FriendlyCodeList::load(afl::io::Stream& in, afl::sys::LogListener& log)
+game::spec::FriendlyCodeList::load(afl::io::Stream& in, afl::sys::LogListener& log, afl::string::Translator& tx)
 {
-    // ex GFCodeList::loadFromFile
+    // ex GFCodeList::loadFromFile, ccmain.pas:LoadFCodesFile
     const char LOG_NAME[] = "game.spec.fc";
     afl::io::TextFile tf(in);
     String_t line;
@@ -163,12 +172,12 @@ game::spec::FriendlyCodeList::load(afl::io::Stream& in, afl::sys::LogListener& l
 
         String_t::size_type p = line.find_first_of("=,");
         if (p == String_t::npos) {
-            log.write(log.Error, LOG_NAME, in.getName(), tf.getLineNumber(), _("missing delimiter"));
+            log.write(log.Error, LOG_NAME, in.getName(), tf.getLineNumber(), tx("missing delimiter"));
         } else if (line[p] == ',') {
             String_t fc = afl::string::strTrim(line.substr(0, p));
             line.erase(0, p+1);
             if (fc.length() > 3) {
-                log.write(log.Warn, LOG_NAME, in.getName(), tf.getLineNumber(), _("friendly code too long; truncated"));
+                log.write(log.Warn, LOG_NAME, in.getName(), tf.getLineNumber(), tx("friendly code too long; truncated"));
                 fc.erase(3);
             }
             try {
@@ -185,25 +194,42 @@ game::spec::FriendlyCodeList::load(afl::io::Stream& in, afl::sys::LogListener& l
 }
 
 
-// Clear extra friendly codes list.
-void
-game::spec::FriendlyCodeList::clearExtraCodes()
-{
-    // ex GFCode::clearExtraFC
-    m_extraData.reset();
-}
-
 // Load extra friendly codes list.
 void
 game::spec::FriendlyCodeList::loadExtraCodes(afl::io::Stream& in)
 {
     // ex GFCode::loadExtraFC
-    // FIXME: make this a method of Stream
     uint8_t tmp[4096];
+    String_t code;
     while (size_t n = in.read(tmp)) {
-        m_extraData.append(afl::base::ConstBytes_t(tmp).trim(n));
+        for (size_t i = 0; i < n; ++i) {
+            if (std::isspace(tmp[i])) {
+                if (!code.empty()) {
+                    addExtraCode(*this, code);
+                    code.clear();
+                }
+            } else {
+                code += char(tmp[i]);
+            }
+        }
     }
-    m_extraData.append(' ');
+
+    if (!code.empty()) {
+        addExtraCode(*this, code);
+    }    
+}
+
+// Pack friendly-code list into standalone info object.
+void
+game::spec::FriendlyCodeList::pack(Infos_t& out, const PlayerList& players) const
+{
+    for (Iterator_t it = begin(), e = end(); it != e; ++it) {
+        if (const FriendlyCode* p = *it) {
+            if (!(p->getFlags().contains(FriendlyCode::PrefixCode))) {
+                out.push_back(Info(p->getCode(), p->getDescription(players)));
+            }
+        }
+    }
 }
 
 // Check whether the specified friendly code is numeric.
@@ -249,41 +275,33 @@ game::spec::FriendlyCodeList::isNumeric(const String_t& fc, const HostSelection 
     return true;
 }
 
-// Check whether a friendly code is an extra code.
-bool
-game::spec::FriendlyCodeList::isExtra(const String_t& fc) const
-{
-    // ex GFCode::isExtraFC
-    // ex fcode.pas:IsXtrFcode
-    // FIXME: rewrite using Memory<>
-    const uint8_t* p = m_extraData.begin();
-    const uint8_t* end = m_extraData.end();
-    while (p < end) {
-        while (p < end && std::isspace(*p)) {
-            ++p;
-        }
-
-        const uint8_t* q = p;
-        while (p < end && !std::isspace(*p)) {
-            ++p;
-        }
-        if (p != q && size_t(p-q) <= fc.length() && fc.compare(0, p-q, reinterpret_cast<const char*>(q), p-q)==0) {
-            return true;
-        }
-    }
-    return false;
-}
-
 // Check whether a friendly code is a special code.
 bool
 game::spec::FriendlyCodeList::isSpecial(const String_t& fc, bool ignoreCase) const
 {
-    // ex fcode.pas:IsSpecial
+    // ex fcode.pas:IsSpecial, GFCode::isExtraFC
     for (Iterator_t i = begin(), e = end(); i != e; ++i) {
-        bool match = (ignoreCase
-                      ? afl::string::strCaseCompare(fc, (*i)->getCode()) == 0
-                      : fc == (*i)->getCode());
-        if (match && !(*i)->getFlags().contains(FriendlyCode::UnspecialCode)) {
+        const FriendlyCode& t = **i;
+        bool match;
+        if (t.getFlags().contains(FriendlyCode::UnspecialCode)) {
+            // Never matches
+            match = false;
+        } else {
+            const String_t& tc = t.getCode();
+            if (t.getFlags().contains(FriendlyCode::PrefixCode)) {
+                // Match prefix
+                match = tc.size() <= fc.size()
+                    && (ignoreCase
+                        ? afl::string::strCaseCompare(fc.substr(0, tc.size()), tc) == 0
+                        : fc.compare(0, tc.size(), tc) == 0);
+            } else {
+                // Match entire
+                match = (ignoreCase
+                         ? afl::string::strCaseCompare(fc, tc) == 0
+                         : fc == tc);
+            }
+        }
+        if (match) {
             return true;
         }
     }
@@ -292,7 +310,7 @@ game::spec::FriendlyCodeList::isSpecial(const String_t& fc, bool ignoreCase) con
 
 // Check whether a friendly code is a universal minefield friendly code.
 bool
-game::spec::FriendlyCodeList::isUniversalMinefieldFCode(const String_t& fc, bool tolerant, const HostSelection host) const
+game::spec::FriendlyCodeList::isUniversalMinefieldFCode(const String_t& fc, bool tolerant, const HostSelection host)
 {
     // ex GFCode::isUniversalMinefieldFCode
     if (host.hasCaseInsensitiveUniversalMinefieldFCodes()) {
@@ -329,7 +347,6 @@ game::spec::FriendlyCodeList::isAllowedRandomCode(const String_t& fc, const Host
         && fc[0] != '#' && fc[1] != '#' && fc[2] != '#'
         && fc[0] != '?' && fc[1] != '?' && fc[2] != '?'
         && !isSpecial(fc, true)
-        && !isExtra(fc)
         && !isNumeric(fc, host);
 }
 

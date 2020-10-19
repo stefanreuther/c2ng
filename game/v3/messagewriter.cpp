@@ -12,11 +12,11 @@ game::v3::MessageWriter::sendMessage(int from, int to, const String_t& text, afl
 }
 
 void
-game::v3::MessageWriter::sendOutbox(game::msg::Outbox& outbox, int from, afl::string::Translator& tx, const PlayerList& players, afl::charset::Charset& cs)
+game::v3::MessageWriter::sendOutbox(const game::msg::Outbox& outbox, int from, afl::string::Translator& tx, const PlayerList& players, afl::charset::Charset& cs)
 {
     for (size_t i = 0, n = outbox.getNumMessages(); i < n; ++i) {
         if (outbox.getMessageSender(i) == from) {
-            PlayerSet_t rec = outbox.getMessageReceiverMask(i);
+            PlayerSet_t rec = outbox.getMessageReceivers(i);
             for (int p = 0; p <= game::v3::structures::NUM_PLAYERS; ++p) {
                 if (rec.contains(p)) {
                     sendMessage(from, p, outbox.getMessageSendPrefix(i, p, tx, players) + outbox.getMessageRawText(i), cs);

@@ -6,7 +6,7 @@
 #define C2NG_CLIENT_SI_WIDGETWRAPPER_HPP
 
 #include <memory>
-#include "client/proxy/objectobserver.hpp"
+#include "game/proxy/objectobserver.hpp"
 #include "ui/widget.hpp"
 #include "afl/base/ref.hpp"
 #include "interpreter/nametable.hpp"
@@ -55,7 +55,7 @@ namespace client { namespace si {
             Whenever the underlying object reports a change, the given script command will be executed.
             \param oop ObjectObserver
             \param command Script command */
-        void attach(client::proxy::ObjectObserver& oop, String_t command);
+        void attach(game::proxy::ObjectObserver& oop, String_t command);
 
      private:
         const afl::base::Ref<client::si::WidgetHolder> m_holder;

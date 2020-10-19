@@ -8,9 +8,9 @@
 
 namespace client { namespace si {
 
-    String_t formatFrameType(ui::widgets::FrameGroup::Type type);
+    String_t formatFrameType(ui::FrameType type);
     
-    bool parseFrameType(ui::widgets::FrameGroup::Type& type, String_t value);
+    bool parseFrameType(ui::FrameType& type, String_t value);
 
 } }
 

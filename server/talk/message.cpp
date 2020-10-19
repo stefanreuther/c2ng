@@ -263,7 +263,7 @@ server::talk::Message::getRfcHeader(Root& root)
     // From
     String_t userName(u.getLoginName());
     String_t email;
-    if (u.profile().intField("infoemailflag").get()) { // FIXME: regular profile access?
+    if (u.profile().intField("infoemailflag").get()) {
         email = u.profile().stringField("email").get();
         if (!email.empty()) {
             if (root.emailRoot().subtree(email).hashKey("status").stringField(Format("status/%s", userId)).get() != "c") {

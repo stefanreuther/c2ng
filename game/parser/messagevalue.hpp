@@ -159,17 +159,23 @@ namespace game { namespace parser {
         mi_IonVoltage,
         mi_IonStatus,
 
-        // TODO: TUtil14Wormhole
         // TODO: TUtil34FTP
         // TODO: TUtil42GODestroyed
 
         /* Ufo: */
-        mi_UfoRealId,
+        mi_UfoRealId,               // also as Ufo Id for a wormhole
         mi_UfoSpeedX,
         mi_UfoSpeedY,
         mi_UfoColor,
         mi_UfoPlanetRange,
         mi_UfoShipRange,
+
+        /* Wormhole: */
+        mi_WormholeStabilityCode,
+        mi_WormholeBidirFlag,
+
+        /* Explosion: */
+        mi_ExplodedShipId,
 
         mi_Max
     };

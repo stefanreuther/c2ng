@@ -1,5 +1,6 @@
 /**
   *  \file util/syntax/inihighlighter.cpp
+  *  \brief Class util::syntax::IniHighlighter
   */
 
 #include "util/syntax/inihighlighter.hpp"
@@ -77,9 +78,7 @@ namespace {
     }
 }
 
-// /** Constructor.
-//     \param db Syntax database
-//     \param defaultSection Start interpreting keys in this section */
+// Constructor.
 util::syntax::IniHighlighter::IniHighlighter(const KeywordTable& tab, String_t defaultSection)
     : m_table(tab),
       m_section(defaultSection),
@@ -148,35 +147,29 @@ util::syntax::IniHighlighter::scan(Segment& result)
             m_state = sAfterSection;
         } else if (skip(m_text, cOther | cLBracket | cRBracket)) {
             // Name. Accept [] as well for things like "foo[1] = ...", maybe someone uses that.
-            // FIXME? If a word stands alone on a line, we do not highlight it, but if it has trailing space, we do.
-            // PlanetsCentral does this, do we want to keep it?
-            if (skip1(m_text, cNewline)) {
-                result.finish(DefaultFormat, m_text);
+            result.finish(NameFormat, m_text);
+            m_state = sAfterName;
+
+            // Links
+            String_t key = afl::string::strLTrim(afl::string::fromMemory(result.getText()));
+
+            String_t pfx = "ini.";
+            String_t::size_type dot = key.find('.');
+            if (dot != String_t::npos
+                && (m_section.empty()
+                    || (dot == m_section.size() && afl::string::strCaseCompare(m_section, key.substr(0, dot)) == 0)))
+            {
+                pfx += key;
             } else {
-                result.finish(NameFormat, m_text);
-                m_state = sAfterName;
-
-                // Links
-                String_t key = afl::string::strLTrim(afl::string::fromMemory(result.getText()));
-
-                String_t pfx = "ini.";
-                String_t::size_type dot = key.find('.');
-                if (dot != String_t::npos
-                    && (m_section.empty()
-                        || (dot == m_section.size() && afl::string::strCaseCompare(m_section, key.substr(0, dot)) == 0)))
-                {
-                    pfx += key;
-                } else {
-                    pfx += m_section;
-                    pfx += ".";
-                    pfx += key;
-                }
-                if (const String_t* link = m_table.get(pfx + ".link")) {
-                    result.setLink(*link);
-                }
-                if (const String_t* info = m_table.get(pfx + ".info")) {
-                    result.setInfo(*info);
-                }
+                pfx += m_section;
+                pfx += ".";
+                pfx += key;
+            }
+            if (const String_t* link = m_table.get(pfx + ".link")) {
+                result.setLink(*link);
+            }
+            if (const String_t* info = m_table.get(pfx + ".info")) {
+                result.setInfo(*info);
             }
         } else {
             // Don't know what it is. Skip the whole line.

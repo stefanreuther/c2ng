@@ -5,6 +5,8 @@
 #include "game/spec/cost.hpp"
 
 #include "u/t_game_spec.hpp"
+#include "afl/string/nulltranslator.hpp"
+#include "util/numberformatter.hpp"
 
 /** Tests various cases of GCost::fromString.
 
@@ -497,5 +499,49 @@ TestGameSpecCost::testGetMaxAmount()
     TS_ASSERT_EQUALS(neg.getMaxAmount(9999, Cost()), 0);
     TS_ASSERT_EQUALS(Cost().getMaxAmount(9999, neg), 0);
     TS_ASSERT_EQUALS(Cost().getMaxAmount(-1, Cost()), 0);
+}
+
+/** Test division. */
+void
+TestGameSpecCost::testDivi()
+{
+    {
+        game::spec::Cost a = game::spec::Cost::fromString("3tdm 42$");
+        a /= 2;
+        TS_ASSERT_EQUALS(a.get(a.Tritanium), 1);
+        TS_ASSERT_EQUALS(a.get(a.Duranium), 1);
+        TS_ASSERT_EQUALS(a.get(a.Molybdenum), 1);
+        TS_ASSERT_EQUALS(a.get(a.Supplies), 0);
+        TS_ASSERT_EQUALS(a.get(a.Money), 21);
+    }
+
+    {
+        game::spec::Cost a = game::spec::Cost::fromString("13tdm 42$");
+        game::spec::Cost b = a / 5;
+        TS_ASSERT_EQUALS(a.get(a.Tritanium), 13);
+        TS_ASSERT_EQUALS(a.get(a.Duranium), 13);
+        TS_ASSERT_EQUALS(a.get(a.Molybdenum), 13);
+        TS_ASSERT_EQUALS(a.get(a.Supplies), 0);
+        TS_ASSERT_EQUALS(a.get(a.Money), 42);
+        TS_ASSERT_EQUALS(b.get(b.Tritanium), 2);
+        TS_ASSERT_EQUALS(b.get(b.Duranium), 2);
+        TS_ASSERT_EQUALS(b.get(b.Molybdenum), 2);
+        TS_ASSERT_EQUALS(b.get(b.Supplies), 0);
+        TS_ASSERT_EQUALS(b.get(b.Money), 8);
+    }
+}
+
+/** Test format(). */
+void
+TestGameSpecCost::testFormat()
+{
+    afl::string::NullTranslator tx;
+    util::NumberFormatter fmt(true, false);
+
+    TS_ASSERT_EQUALS(game::spec::Cost::fromString("3t 4d 5m 6s 7$").format(tx, fmt), "7 mc, 6 sup, 3 T, 4 D, 5 M");
+    TS_ASSERT_EQUALS(game::spec::Cost::fromString("3000t 4000d").format(tx, fmt), "3,000 T, 4,000 D");
+    TS_ASSERT_EQUALS(game::spec::Cost::fromString("100$ 50t 50d 50m").format(tx, fmt), "100 mc, 50 T/D/M");
+    TS_ASSERT_EQUALS(game::spec::Cost::fromString("50$ 50t 50d").format(tx, fmt), "50 mc/T/D");
+    TS_ASSERT_EQUALS(game::spec::Cost::fromString("0$").format(tx, fmt), "-");
 }
 

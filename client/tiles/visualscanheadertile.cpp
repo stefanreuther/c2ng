@@ -4,16 +4,16 @@
 
 #include "client/tiles/visualscanheadertile.hpp"
 #include "afl/string/format.hpp"
-#include "client/proxy/objectlistener.hpp"
+#include "game/game.hpp"
 #include "game/map/object.hpp"
 #include "game/map/ship.hpp"
+#include "game/playerlist.hpp"
+#include "game/proxy/objectlistener.hpp"
+#include "game/root.hpp"
 #include "game/session.hpp"
+#include "game/spec/hull.hpp"
 #include "gfx/context.hpp"
 #include "util/translation.hpp"
-#include "game/spec/hull.hpp"
-#include "game/game.hpp"
-#include "game/playerlist.hpp"
-#include "game/root.hpp"
 
 using afl::string::Format;
 using game::map::Ship;
@@ -196,7 +196,7 @@ client::tiles::VisualScanHeaderTile::setContent(const Content& content)
 }
 
 void
-client::tiles::VisualScanHeaderTile::attach(client::proxy::ObjectObserver& oop)
+client::tiles::VisualScanHeaderTile::attach(game::proxy::ObjectObserver& oop)
 {
     class Updater : public util::Request<VisualScanHeaderTile> {
      public:
@@ -209,7 +209,7 @@ client::tiles::VisualScanHeaderTile::attach(client::proxy::ObjectObserver& oop)
         Content m_content;
     };
 
-    class Listener : public client::proxy::ObjectListener {
+    class Listener : public game::proxy::ObjectListener {
      public:
         Listener(util::RequestSender<VisualScanHeaderTile> reply)
             : m_reply(reply)

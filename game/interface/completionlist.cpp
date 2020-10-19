@@ -4,6 +4,8 @@
 
 #include "game/interface/completionlist.hpp"
 #include "afl/charset/utf8reader.hpp"
+#include "afl/io/directory.hpp"
+#include "afl/io/directoryentry.hpp"
 #include "game/config/configuration.hpp"
 #include "game/interface/globalcontext.hpp"
 #include "game/root.hpp"
@@ -133,6 +135,48 @@ namespace {
         bool m_acceptCommands;
         bool m_onlyCommands;
     };
+
+
+    void completeFileNames(game::interface::CompletionList& list,
+                           afl::io::FileSystem& fs,
+                           String_t stem)
+    {
+        using afl::io::DirectoryEntry;
+        using afl::base::Enumerator;
+        using afl::base::Ref;
+        using afl::base::Ptr;
+
+        // Completion requires that the file name is a proper suffix of the completion.
+        String_t fileName = fs.getFileName(stem);
+        if (fileName.size() > stem.size() || stem.compare(stem.size() - fileName.size(), fileName.size(), fileName) != 0) {
+            return;
+        }
+
+        // List content
+        try {
+            // Brute force directory separator
+            const char*const dirSuffix = fs.isPathSeparator('\\') ? "\\" : fs.isPathSeparator('/') ? "/" : "";
+
+            // Read directory content
+            Ref<Enumerator<Ptr<DirectoryEntry> > > entries = fs.openDirectory(fs.getDirectoryName(stem))->getDirectoryEntries();
+            Ptr<DirectoryEntry> entry;
+            while (entries->getNextElement(entry)) {
+                // Build the complete file name without going through FileSystem's normalisation;
+                // this guarantees that we produce a possible suffix.
+                // Note that this requires exact case match even on Windows; addCandidate() would be case-blind but that'd be wrong on Linux.
+                String_t entryName = stem.substr(0, stem.size() - fileName.size()) + entry->getTitle();
+                if (entryName.size() >= stem.size() && entryName.compare(0, stem.size(), stem) == 0) {
+                    if (entry->getFileType() == DirectoryEntry::tDirectory) {
+                        entryName += dirSuffix;
+                    }
+                    list.addCandidate(entryName);
+                }
+            }
+        }
+        catch (...) {
+            // Ignore
+        }
+    }
 }
 
 void
@@ -156,13 +200,16 @@ game::interface::buildCompletionList(CompletionList& out,
         SeenConfigCommand,
         SeenConfigFunction,
         SeenConfigFunctionParen,
-        SeenQuote
+        SeenFileCommand,
+        SeenConfigQuote,
+        SeenFileQuote
     } state = Normal;
 
     while (rdr.hasMore()) {
         // Letters, '$' and '_' can start a word, '0'..'9' and '.' can continue
         afl::charset::Unichar_t ch = rdr.eat();
-        if ((ch >= 'A' && ch <= 'Z')
+        if ((state == SeenFileQuote)
+            || (ch >= 'A' && ch <= 'Z')
             || (ch >= 'a' && ch <= 'z')
             || ch == '_'
             || ch == '$'
@@ -171,7 +218,7 @@ game::interface::buildCompletionList(CompletionList& out,
                     || ch == '.')))
         {
             // Valid word character
-            stem += char(ch); // FIXME: afl::string::charToUpper(ch); needed?
+            stem += char(ch);
         } else {
             // Not a word.
             // Process previous word.
@@ -179,6 +226,11 @@ game::interface::buildCompletionList(CompletionList& out,
                 // FIXME: handle ADDPREF, PREF
                 if (acceptCommands && afl::string::strCaseCompare(stem, "ADDCONFIG") == 0) {
                     state = SeenConfigCommand;
+                } else if (acceptCommands && (afl::string::strCaseCompare(stem, "LOAD") == 0
+                                              || afl::string::strCaseCompare(stem, "TRYLOAD") == 0
+                                              || afl::string::strCaseCompare(stem, "OPEN") == 0))
+                {
+                    state = SeenFileCommand;
                 } else if (afl::string::strCaseCompare(stem, "CFG") == 0) {
                     state = SeenConfigFunction;
                 } else {
@@ -196,7 +248,9 @@ game::interface::buildCompletionList(CompletionList& out,
              case '"':
              case '\'':
                 if (state == SeenConfigFunctionParen || state == SeenConfigCommand) {
-                    state = SeenQuote;
+                    state = SeenConfigQuote;
+                } else if (state == SeenFileCommand) {
+                    state = SeenFileQuote;
                 } else {
                     state = Normal;
                 }
@@ -222,7 +276,7 @@ game::interface::buildCompletionList(CompletionList& out,
     }
 
     // Iterate possible words
-    if (state == SeenQuote) {
+    if (state == SeenConfigQuote) {
         // Options
         if (Root* r = session.getRoot().get()) {
             afl::base::Ref<game::config::Configuration::Enumerator_t> e(r->hostConfiguration().getOptions());
@@ -231,6 +285,9 @@ game::interface::buildCompletionList(CompletionList& out,
                 out.addCandidate(oi.first);
             }
         }
+    } else if (state == SeenFileQuote) {
+        // File
+        completeFileNames(out, session.world().fileSystem(), stem);
     } else {
         // Script things
         CompletionBuilder builder(out, acceptCommands, onlyCommands);

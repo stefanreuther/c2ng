@@ -10,6 +10,7 @@
 #include "afl/except/fileproblemexception.hpp"
 #include "afl/except/filetooshortexception.hpp"
 #include "afl/string/format.hpp"
+#include "game/actions/preconditions.hpp"
 #include "game/v3/commandcontainer.hpp"
 #include "game/v3/commandextra.hpp"
 #include "game/v3/controlfile.hpp"
@@ -78,8 +79,9 @@ namespace {
     /* Send commands.
        This appends commands to be sent through the message file to the specified Outbox object,
        and stores the others into the cmdX.txt file in the given directory. */
-    void saveCommands(Directory& dir, CommandContainer& cc, game::msg::Outbox& out, int player, afl::string::Translator& tx, const game::Timestamp& ts)
+    void saveCommands(Directory& dir, const CommandContainer& cc, game::msg::Outbox& out, int player, afl::string::Translator& tx, const game::Timestamp& ts)
     {
+        // ex phost.pas:MailPHostCommands, SavePHostCommandsI, SavePHostCommands, FreePHostCommands
         String_t fileAccum;
         String_t messageAccum;
         for (CommandContainer::ConstIterator_t i = cc.begin(); i != cc.end(); ++i) {
@@ -285,6 +287,7 @@ game::v3::DirectoryLoader::loadCurrentTurn(Turn& turn, Game& game, int player, R
     }
 
     // Commands
+    // ex phost.pas:LoadPHostCommands
     {
         afl::base::Ptr<Stream> s = dir.openFileNT(Format("cmd%d.txt", player), FileSystem::OpenRead);
         if (s.get() != 0) {
@@ -309,7 +312,7 @@ game::v3::DirectoryLoader::loadCurrentTurn(Turn& turn, Game& game, int player, R
     }
 
     // Util
-    Parser mp(m_translator, m_log, game, player, root, session);
+    Parser mp(m_translator, m_log, game, player, root, game::actions::mustHaveShipList(session));
     {
         afl::base::Ptr<Stream> s = dir.openFileNT(Format("util%d.dat", player), FileSystem::OpenRead);
         if (s.get() != 0) {
@@ -330,7 +333,7 @@ game::v3::DirectoryLoader::loadCurrentTurn(Turn& turn, Game& game, int player, R
 }
 
 void
-game::v3::DirectoryLoader::saveCurrentTurn(Turn& turn, Game& /*game*/, int player, Root& root, Session& /*session*/)
+game::v3::DirectoryLoader::saveCurrentTurn(const Turn& turn, const Game& /*game*/, int player, const Root& root, Session& /*session*/)
 {
     // ex saveDirectory
     // @change: saveDirectory took a PlayerSet_t
@@ -375,11 +378,11 @@ game::v3::DirectoryLoader::saveCurrentTurn(Turn& turn, Game& /*game*/, int playe
 
     // Messages and commands. We add the commands to the message box, save that, and remove them again.
     // FIXME: can we do without this modifying operation?
-    game::msg::Outbox& out = turn.outbox();
+    game::msg::Outbox& out = const_cast<game::msg::Outbox&>(turn.outbox());
     size_t marker = out.getNumMessages();
     try {
         // Commands
-        if (CommandContainer* cc = CommandExtra::get(turn, player)) {
+        if (const CommandContainer* cc = CommandExtra::get(turn, player)) {
             saveCommands(dir, *cc, out, player, m_translator, turn.getTimestamp());
         }
 
@@ -503,7 +506,7 @@ game::v3::DirectoryLoader::getProperty(Property p)
 void
 game::v3::DirectoryLoader::loadKore(afl::io::Stream& file, Turn& turn, int player) const
 {
-    // ex game/load-dir.cc:loadKore
+    // ex game/load-dir.cc:loadKore, ccmain.pas:LoadObjects (part)
     // Header
     gt::KoreHeader header;
     size_t headerSize = file.read(afl::base::fromObject(header));
@@ -551,7 +554,7 @@ game::v3::DirectoryLoader::loadKore(afl::io::Stream& file, Turn& turn, int playe
 void
 game::v3::DirectoryLoader::loadSkore(afl::io::Stream& file, Turn& turn) const
 {
-    // ex game/load-dir.cc:loadSkore
+    // ex game/load-dir.cc:loadSkore, ccmain.pas:LoadObjects (part)
 
     // Read header. It is not fatal if we cannot read it; some programs (Winplan?) generate blank SKORE.DAT files.
     gt::SkoreHeader header;

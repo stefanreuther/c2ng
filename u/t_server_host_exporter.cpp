@@ -285,6 +285,7 @@ TestServerHostExporter::testIt()
     TS_ASSERT_EQUALS(hostFile.getFile("games/0042/in/in2.txt"), "created in");
     TS_ASSERT_EQUALS(hostFile.getFile("games/0042/backup/backup2.txt"), "created backup");
     TS_ASSERT_EQUALS(hostFile.getFile("games/0042/backup/backup.txt"), "backup file");
+    TS_ASSERT_DIFFERS(hostFile.getFile("games/0042/c2host.ini"), "");
 }
 
 /** Test how backups are imported on import. */

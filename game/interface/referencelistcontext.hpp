@@ -39,7 +39,7 @@ namespace game { namespace interface {
         virtual String_t toString(bool readable) const;
         virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& cs, interpreter::SaveContext& ctx) const;
 
-        game::ref::List& getList();
+        const game::ref::List& getList() const;
 
      private:
         class ProcedureValue;

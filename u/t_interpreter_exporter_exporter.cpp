@@ -7,15 +7,15 @@
 #include "interpreter/exporter/exporter.hpp"
 
 #include "t_interpreter_exporter.hpp"
-#include "interpreter/values.hpp"
+#include "afl/data/integervalue.hpp"
 #include "game/map/object.hpp"
 #include "game/map/objectvector.hpp"
 #include "interpreter/error.hpp"
-#include "afl/data/integervalue.hpp"
+#include "interpreter/exporter/fieldlist.hpp"
 #include "interpreter/propertyacceptor.hpp"
+#include "interpreter/values.hpp"
 #include "util/answerprovider.hpp"
 #include "util/constantanswerprovider.hpp"
-#include "interpreter/exporter/fieldlist.hpp"
 
 namespace {
     /** Test implementation of Exporter. Concatenates all values as a text. */
@@ -62,6 +62,8 @@ namespace {
             { return m_id; }
         virtual bool getOwner(int& result) const
             { result = 0; return true; }
+        virtual bool getPosition(game::map::Point& /*result*/) const
+            { return false; }
      private:
         const int m_id;
     };
@@ -155,7 +157,7 @@ TestInterpreterExporterExporter::testIt()
     TestContext ctx(5, vec);
 
     TestExporter t;
-    t.doExport(&ctx, util::ConstantAnswerProvider::sayYes, fields);
+    t.doExport(ctx, util::ConstantAnswerProvider::sayYes, fields);
 
     TS_ASSERT_EQUALS(t.getResult(),
                      "ID=5,A=1\n"
@@ -177,7 +179,7 @@ TestInterpreterExporterExporter::testError()
     TestContext ctx(5, vec);
 
     TestExporter t;
-    TS_ASSERT_THROWS(t.doExport(&ctx, util::ConstantAnswerProvider::sayYes, fields), std::exception);
+    TS_ASSERT_THROWS(t.doExport(ctx, util::ConstantAnswerProvider::sayYes, fields), std::exception);
 }
 
 /** Test doExport() with negative filter but no object. */
@@ -192,7 +194,7 @@ TestInterpreterExporterExporter::testNoObject()
 
     // Export with "No" filter. However, because we don't have an object, that filter is not applied.
     TestExporter t;
-    t.doExport(&ctx, util::ConstantAnswerProvider::sayNo, fields);
+    t.doExport(ctx, util::ConstantAnswerProvider::sayNo, fields);
 
     TS_ASSERT_EQUALS(t.getResult(),
                      "ID=5,A=1\n"
@@ -230,7 +232,7 @@ TestInterpreterExporterExporter::testFilter()
     // Export with filter. This will produce only odd objects.
     // However, the filter is not applied to #6.
     TestExporter t;
-    t.doExport(&ctx, f, fields);
+    t.doExport(ctx, f, fields);
 
     TS_ASSERT_EQUALS(t.getResult(),
                      "ID=1,A=1\n"
@@ -267,7 +269,7 @@ TestInterpreterExporterExporter::testCancel()
     // Export with filter. This will produce only odd objects.
     // However, the filter is not applied to #6.
     TestExporter t;
-    t.doExport(&ctx, f, fields);
+    t.doExport(ctx, f, fields);
 
     TS_ASSERT_EQUALS(t.getResult(),
                      "ID=1,A=1,C=3,B=2\n"

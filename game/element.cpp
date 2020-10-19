@@ -57,7 +57,7 @@ game::operator--(Element::Type& t, int)
 }
 
 
-// /** Get user-visible name of cargo item /type/. */
+// Get name of an element type.
 String_t
 game::Element::getName(Type t, afl::string::Translator& tx, const game::spec::ShipList& shipList)
 {
@@ -90,9 +90,7 @@ game::Element::getName(Type t, afl::string::Translator& tx, const game::spec::Sh
     }
 }
 
-// /** Get unit of cargo type /type/.
-//     \returns name of unit, or empty string if type doesn't have
-//     a unit (i.e. torps) */
+// Get unit of an element type.
 String_t
 game::Element::getUnit(Type t, afl::string::Translator& tx, const game::spec::ShipList& /*shipList*/)
 {
@@ -103,11 +101,11 @@ game::Element::getUnit(Type t, afl::string::Translator& tx, const game::spec::Sh
      case Duranium:
      case Molybdenum:
      case Supplies:
-        return tx.translateString("kt");
+        return tx("kt");
      case Colonists:
-        return tx.translateString("clans");
+        return tx("clans");
      case Money:
-        return tx.translateString("mc");
+        return tx("mc");
      case Fighters:
      default:
         return String_t();

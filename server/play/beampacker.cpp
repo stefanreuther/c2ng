@@ -1,5 +1,6 @@
 /**
   *  \file server/play/beampacker.cpp
+  *  \brief Class server::play::BeamPacker
   */
 
 #include "server/play/beampacker.hpp"

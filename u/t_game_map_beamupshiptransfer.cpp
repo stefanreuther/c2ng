@@ -6,10 +6,11 @@
 #include "game/map/beamupshiptransfer.hpp"
 
 #include "t_game_map.hpp"
+#include "afl/string/nulltranslator.hpp"
 #include "game/test/simpleturn.hpp"
+#include "game/v3/command.hpp"
 #include "game/v3/commandcontainer.hpp"
 #include "game/v3/commandextra.hpp"
-#include "game/v3/command.hpp"
 
 using game::Element;
 using game::map::Object;
@@ -28,8 +29,10 @@ TestGameMapBeamupShipTransfer::testIt()
 
     SimpleTurn h;
     Ship& sh = h.addShip(SHIP_ID, SHIP_OWNER, Object::Playable);
+    sh.setName("Scotty");
+    afl::string::NullTranslator tx;
 
-    game::map::BeamUpShipTransfer testee(sh, h.interface(), h.shipList(), h.turn(), h.config());
+    game::map::BeamUpShipTransfer testee(sh, h.shipList(), h.turn(), h.config());
 
     /*
      *  Ship has a fuel tank of 100 with 10N (=100 max).
@@ -40,6 +43,7 @@ TestGameMapBeamupShipTransfer::testIt()
     TS_ASSERT_EQUALS(testee.getMaxAmount(Element::Tritanium), 60);
     TS_ASSERT_EQUALS(testee.getMaxAmount(Element::Duranium), 60);
     TS_ASSERT_EQUALS(testee.getMaxAmount(Element::Money), 10000);
+    TS_ASSERT_EQUALS(testee.getName(tx), "Scotty");
 
     // Add some cargo
     testee.change(Element::Tritanium, 20);
@@ -64,7 +68,7 @@ TestGameMapBeamupShipTransfer::testIt()
     CommandContainer* cc = CommandExtra::get(h.turn(), SHIP_OWNER);
     TS_ASSERT(cc != 0);
 
-    const Command* cmd = cc->getCommand(Command::phc_Beamup, SHIP_ID);
+    const Command* cmd = cc->getCommand(Command::BeamUp, SHIP_ID);
     TS_ASSERT(cmd != 0);
     TS_ASSERT_EQUALS(cmd->getArg(), "N15 T20");
     
@@ -80,9 +84,9 @@ TestGameMapBeamUpShipTransfer::testParse()
     SimpleTurn h;
     Ship& sh = h.addShip(SHIP_ID, SHIP_OWNER, Object::Playable);
 
-    CommandExtra::create(h.turn()).create(SHIP_OWNER).addCommand(Command::phc_Beamup, SHIP_ID, "C30 M10");
+    CommandExtra::create(h.turn()).create(SHIP_OWNER).addCommand(Command::BeamUp, SHIP_ID, "C30 M10");
 
-    game::map::BeamUpShipTransfer testee(sh, h.interface(), h.shipList(), h.turn(), h.config());
+    game::map::BeamUpShipTransfer testee(sh, h.shipList(), h.turn(), h.config());
 
     // Initial changes still zero
     TS_ASSERT_EQUALS(testee.getChange(Element::Colonists), 0);
@@ -101,5 +105,44 @@ TestGameMapBeamUpShipTransfer::testParse()
     TS_ASSERT_EQUALS(testee.getMaxAmount(Element::Molybdenum), 30);
     TS_ASSERT_EQUALS(testee.getMaxAmount(Element::Colonists), 50);
     TS_ASSERT_EQUALS(testee.getMaxAmount(Element::Money), 10000);
+}
+
+/** Test behaviour or BeamUpShipTransfer with a command present; test removal of command. */
+void
+TestGameMapBeamUpShipTransfer::testCommand()
+{
+    const int SHIP_ID = 10;
+    const int SHIP_OWNER = 6;
+
+    // Environment/Ship
+    SimpleTurn h;
+    Ship& sh = h.addShip(SHIP_ID, SHIP_OWNER, Object::Playable);
+    sh.setName("Scotty");
+    sh.setCargo(Element::Neutronium, 10);
+    sh.setMission(35, 0, 0);                         // default Beam Up Multi
+    afl::string::NullTranslator tx;
+    h.config()[game::config::HostConfiguration::AllowBeamUpClans].set(0);
+
+    // Command
+    CommandContainer& cc = CommandExtra::create(h.turn()).create(SHIP_OWNER);
+    cc.addCommand(Command::BeamUp, SHIP_ID, "n30");
+
+    // Testee
+    game::map::BeamUpShipTransfer testee(sh, h.shipList(), h.turn(), h.config());
+
+    // Verify
+    TS_ASSERT(!testee.getFlags().contains(game::CargoContainer::UnloadTarget));
+    TS_ASSERT_EQUALS(testee.canHaveElement(Element::Neutronium), true);
+    TS_ASSERT_EQUALS(testee.canHaveElement(Element::Colonists), false);
+    TS_ASSERT_EQUALS(testee.getAmount(Element::Neutronium), 40);           // 10 on ship + 30 beaming up
+    TS_ASSERT_EQUALS(testee.getMinAmount(Element::Neutronium), 10);
+
+    // Unload
+    testee.change(Element::Neutronium, -30);
+    testee.commit();
+
+    // Verify
+    TS_ASSERT(cc.getCommand(Command::BeamUp, SHIP_ID) == 0);
+    TS_ASSERT_EQUALS(sh.getMission().orElse(-1), 0);
 }
 

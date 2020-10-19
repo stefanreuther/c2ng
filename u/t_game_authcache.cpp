@@ -79,3 +79,32 @@ TestGameAuthCache::testFail()
     TS_ASSERT_EQUALS(result.size(), 0U);
 }
 
+/** Test clear(). */
+void
+TestGameAuthCache::testClear()
+{
+    // Setup
+    AuthCache testee;
+    AuthCache::Item* p = new AuthCache::Item();
+    p->playerNr = 7;
+    p->password = "xyzzy";
+    testee.addNew(p);
+
+    // Query
+    {
+        AuthCache::Item q;
+        q.playerNr = 7;
+        AuthCache::Items_t result = testee.find(q);
+        TS_ASSERT_EQUALS(result.size(), 1U);
+    }
+
+    // Clear
+    testee.clear();
+    {
+        AuthCache::Item q;
+        q.playerNr = 7;
+        AuthCache::Items_t result = testee.find(q);
+        TS_ASSERT_EQUALS(result.size(), 0U);
+    }
+}
+

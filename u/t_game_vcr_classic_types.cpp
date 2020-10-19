@@ -11,5 +11,9 @@
     This test just verifies that the header file is self-contained. */
 void
 TestGameVcrClassicTypes::testIt()
-{ }
+{
+    namespace c = game::vcr::classic;
+    TS_ASSERT_EQUALS(flipSide(c::LeftSide), c::RightSide);
+    TS_ASSERT_EQUALS(flipSide(c::RightSide), c::LeftSide);
+}
 

@@ -17,7 +17,6 @@
 #include "interpreter/filetable.hpp"
 #include "interpreter/mutexlist.hpp"
 #include "interpreter/objectpropertyvector.hpp"
-#include "interpreter/processlist.hpp"
 #include "util/keymaptable.hpp"
 
 namespace interpreter {
@@ -162,14 +161,6 @@ namespace interpreter {
             \return atom table */
         const util::AtomTable& atomTable() const;
 
-        /** Access process list.
-            \return process list */
-        ProcessList& processList();
-
-        /** Access process list (const).
-            \return process list */
-        const ProcessList& processList() const;
-
         /** Access mutexes.
             \return mutex list */
         MutexList& mutexList();
@@ -303,9 +294,6 @@ namespace interpreter {
         // ex int/mutex.h globals
         // Must be before ProcessList because processes reference it in destructor
         MutexList m_mutexList;
-
-        // ex int/process.cc:process_list
-        ProcessList m_processList;
 
         // ex int/file.h globals
         FileTable m_fileTable;

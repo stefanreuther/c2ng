@@ -40,7 +40,7 @@ namespace interpreter {
             Subroutines without return value have to return null instead.
             \param proc Process
             \param args Data segment containing parameters
-            \param want_result True if a result is required (use exc.pushNewValue()) */
+            \param want_result True if a result is required (use proc.pushNewValue()) */
         virtual void call(Process& proc, afl::data::Segment& args, bool want_result) = 0;
 
         /** Check syntactic form.

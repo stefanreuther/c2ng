@@ -7,6 +7,7 @@
 
 #include "t_game_map.hpp"
 #include "game/test/simpleturn.hpp"
+#include "afl/string/nulltranslator.hpp"
 
 using game::Element;
 using game::map::Object;
@@ -19,8 +20,10 @@ TestGameMapShipStorage::testIt()
 {
     SimpleTurn h;
     Ship& sh = h.addShip(10, 5, Object::Playable);
+    sh.setName("Jason Statham");
+    afl::string::NullTranslator tx;
 
-    game::map::ShipStorage testee(sh, h.interface(), h.shipList());
+    game::map::ShipStorage testee(sh, h.shipList());
 
     /*
      *  Ship has a fuel tank of 100 with 10N (=100 max).
@@ -31,6 +34,7 @@ TestGameMapShipStorage::testIt()
     TS_ASSERT_EQUALS(testee.getMaxAmount(Element::Tritanium), 60);
     TS_ASSERT_EQUALS(testee.getMaxAmount(Element::Duranium), 60);
     TS_ASSERT_EQUALS(testee.getMaxAmount(Element::Money), 10000);
+    TS_ASSERT_EQUALS(testee.getName(tx), "Jason Statham");
 
     // Add some cargo
     testee.change(Element::Tritanium, 10);

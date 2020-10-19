@@ -8,6 +8,7 @@
 #include "t_server_interface.hpp"
 #include "afl/data/hash.hpp"
 #include "afl/data/hashvalue.hpp"
+#include "afl/data/integervalue.hpp"
 #include "afl/data/stringvalue.hpp"
 #include "afl/data/vector.hpp"
 #include "afl/data/vectorvalue.hpp"
@@ -15,6 +16,7 @@
 
 using afl::data::Hash;
 using afl::data::HashValue;
+using afl::data::IntegerValue;
 using afl::data::Segment;
 using afl::data::StringValue;
 using afl::data::Vector;
@@ -43,6 +45,13 @@ namespace {
         h->setNew("reg", new StringValue("1"));
         h->setNew("key1", new StringValue(label1));
         h->setNew("key2", new StringValue(label2));
+        return h;
+    }
+
+    Hash::Ref_t makeFullKeyResponse(Hash::Ref_t h, int useCount, String_t keyId)
+    {
+        h->setNew("useCount", new IntegerValue(useCount));
+        h->setNew("id", new StringValue(keyId));
         return h;
     }
 }
@@ -173,6 +182,8 @@ TestServerInterfaceFileGameClient::testIt()
         TS_ASSERT_EQUALS(result.isRegistered, false);
         TS_ASSERT_EQUALS(result.label1, "");
         TS_ASSERT_EQUALS(result.label2, "");
+        TS_ASSERT(!result.useCount.isValid());
+        TS_ASSERT(!result.keyId.isValid());
     }
 
     // getKeyInfo - real answer
@@ -187,6 +198,24 @@ TestServerInterfaceFileGameClient::testIt()
         TS_ASSERT_EQUALS(result.isRegistered, true);
         TS_ASSERT_EQUALS(result.label1, "Name");
         TS_ASSERT_EQUALS(result.label2, "Address");
+        TS_ASSERT(!result.useCount.isValid());
+        TS_ASSERT(!result.keyId.isValid());
+    }
+
+    // getKeyInfo - full answer
+    {
+        mock.expectCall("STATREG, r2");
+        mock.provideNewResult(new HashValue(makeFullKeyResponse(makeKeyResponse("r2", "Name", "Address"), 17, "a1b2c3d4")));
+
+        FileGame::KeyInfo result;
+        TS_ASSERT_THROWS_NOTHING(testee.getKeyInfo("r2", result));
+        TS_ASSERT_EQUALS(result.pathName, "r2");
+        TS_ASSERT_EQUALS(result.fileName, "r2/fizz.bin");
+        TS_ASSERT_EQUALS(result.isRegistered, true);
+        TS_ASSERT_EQUALS(result.label1, "Name");
+        TS_ASSERT_EQUALS(result.label2, "Address");
+        TS_ASSERT_EQUALS(result.useCount.orElse(-1), 17);
+        TS_ASSERT_EQUALS(result.keyId.orElse("-"), "a1b2c3d4");
     }
 
     // getKeyInfo - answer with bogus value (must not crash)
@@ -211,7 +240,7 @@ TestServerInterfaceFileGameClient::testIt()
         mock.provideNewResult(0);
 
         afl::container::PtrVector<FileGame::KeyInfo> result;
-        TS_ASSERT_THROWS_NOTHING(testee.listKeyInfo("r3", result));
+        TS_ASSERT_THROWS_NOTHING(testee.listKeyInfo("r3", FileGame::Filter(), result));
         TS_ASSERT_EQUALS(result.size(), 0U);
     }
 
@@ -224,7 +253,7 @@ TestServerInterfaceFileGameClient::testIt()
                                                                pushBackNew(new HashValue(makeKeyResponse("z/3/a", "Key Three A", "Adr 3a"))))));
 
         afl::container::PtrVector<FileGame::KeyInfo> result;
-        TS_ASSERT_THROWS_NOTHING(testee.listKeyInfo("z", result));
+        TS_ASSERT_THROWS_NOTHING(testee.listKeyInfo("z", FileGame::Filter(), result));
         TS_ASSERT_EQUALS(result.size(), 3U);
         TS_ASSERT(result[0] != 0);
         TS_ASSERT_EQUALS(result[0]->label1, "Key One");
@@ -235,6 +264,30 @@ TestServerInterfaceFileGameClient::testIt()
         TS_ASSERT(result[2] != 0);
         TS_ASSERT_EQUALS(result[2]->label1, "Key Three A");
         TS_ASSERT_EQUALS(result[2]->pathName, "z/3/a");
+    }
+
+    // listKeyInfo - options
+    {
+        mock.expectCall("LSREG, r3, ID, f5g6h7");
+        mock.provideNewResult(0);
+
+        FileGame::Filter f;
+        f.keyId = "f5g6h7";
+        afl::container::PtrVector<FileGame::KeyInfo> result;
+        TS_ASSERT_THROWS_NOTHING(testee.listKeyInfo("r3", f, result));
+        TS_ASSERT_EQUALS(result.size(), 0U);
+    }
+
+    // listKeyInfo - options
+    {
+        mock.expectCall("LSREG, r3, UNIQ");
+        mock.provideNewResult(0);
+
+        FileGame::Filter f;
+        f.unique = true;
+        afl::container::PtrVector<FileGame::KeyInfo> result;
+        TS_ASSERT_THROWS_NOTHING(testee.listKeyInfo("r3", f, result));
+        TS_ASSERT_EQUALS(result.size(), 0U);
     }
 }
 

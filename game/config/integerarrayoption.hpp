@@ -6,6 +6,7 @@
 #define C2NG_GAME_CONFIG_INTEGERARRAYOPTION_HPP
 
 #include "game/config/genericintegerarrayoption.hpp"
+#include "game/config/valueparser.hpp"
 
 namespace game { namespace config {
 

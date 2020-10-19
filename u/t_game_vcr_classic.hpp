@@ -12,6 +12,18 @@ class TestGameVcrClassicAlgorithm : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestGameVcrClassicDatabase : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testLoadEmpty();
+    void testLoadPHost4();
+    void testLoadPHost3();
+    void testLoadPHost2();
+    void testLoadHost();
+    void testLoadCorr();
+    void testLoadNu();
+};
+
 class TestGameVcrClassicEventListener : public CxxTest::TestSuite {
  public:
     void testInterface();
@@ -47,6 +59,7 @@ class TestGameVcrClassicPVCRAlgorithm : public CxxTest::TestSuite {
     void testTF();
     void testCarriers();
     void testRandomBonus();
+    void testToken();
 };
 
 class TestGameVcrClassicStatusToken : public CxxTest::TestSuite {

@@ -159,7 +159,12 @@ namespace game { namespace sim {
         bool isMatchingShipList(const game::spec::ShipList& shipList) const;
 
         // Object:
-        virtual bool hasImpliedAbility(Ability which, const game::spec::ShipList& shipList, const game::config::HostConfiguration& config) const;
+        virtual bool hasImpliedAbility(Ability which, const Configuration& opts, const game::spec::ShipList& shipList, const game::config::HostConfiguration& config) const;
+
+        /** Check for primary enemy.
+            \param agg Aggressiveness setting
+            \return true if aggressiveness setting corresponds to a primary enemy */
+        static bool isPrimaryEnemy(int agg);
 
      private:
         int m_crew;             // ex crew

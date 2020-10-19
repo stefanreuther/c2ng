@@ -8,14 +8,39 @@
 #include "game/sim/loader.hpp"
 
 #include "t_game_sim.hpp"
-#include "afl/charset/codepagecharset.hpp"
 #include "afl/charset/codepage.hpp"
+#include "afl/charset/codepagecharset.hpp"
+#include "afl/except/fileformatexception.hpp"
 #include "afl/io/constmemorystream.hpp"
+#include "afl/io/internalstream.hpp"
+#include "game/sim/planet.hpp"
 #include "game/sim/setup.hpp"
 #include "game/sim/ship.hpp"
-#include "game/sim/planet.hpp"
-#include "afl/except/fileformatexception.hpp"
 #include "u/files.hpp"
+
+namespace {
+    /* Prepare a setup for the "save" tests */
+    void prepare(game::sim::Setup& setup)
+    {
+        game::sim::Ship* sh = setup.addShip();
+        sh->setName("Boat");
+        sh->setOwner(3);
+        sh->setTorpedoType(7);
+        sh->setNumLaunchers(4);
+        sh->setAmmo(180);
+        sh->setCrew(17);
+        sh->setFriendlyCode("abc");
+        sh->setEngineType(8);
+
+        game::sim::Planet* pl = setup.addPlanet();
+        pl->setOwner(4);
+        pl->setDefense(61);
+        pl->setFriendlyCode("xyz");
+        pl->setBaseBeamTech(6);
+        pl->setBaseTorpedoTech(9);
+        pl->setBaseDefense(12);
+    }
+}
 
 /** Test V0 file format (PCC 0.99.10). */
 void
@@ -526,3 +551,143 @@ TestGameSimLoader::testError()
         TS_ASSERT_THROWS(testee.load(stream, result), afl::except::FileFormatException);
     }
 }
+
+/** Test saving in default format (V3). */
+void
+TestGameSimLoader::testSaveDefault()
+{
+    game::sim::Setup setup;
+    prepare(setup);
+
+    afl::charset::CodepageCharset cs(afl::charset::g_codepage437);
+    game::sim::Loader testee(cs);
+
+    afl::io::InternalStream stream;
+    testee.save(stream, setup);
+
+    static const uint8_t EXPECTED[] = {
+        // Header (10)
+        'C','C','b','s','i','m','2',26,1,0x80,
+
+        // Ship (57)
+        'B','o','a','t',32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,    // 20
+        0,0, 17,0, 1,0, 3,0, 0,0, 0,0, 0,0, 0,0, 7,0, 180,0, 4,0,           // 22
+        8,0, 0,0, 100,0, 'a','b','c', 0,0, 100,0, 0,0,
+
+        // Planet (57)
+        0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0,                   // 20
+        0,0, 0,0, 1,0, 4,0, 0,0, 6,0, 0,0, 0,0, 0,0, 0,0, 9,0,              // 22
+        12,0, 61,0, 100,0, 'x','y','z', 0xFF,0xFF, 0,0, 0,0,
+        // Note::   ^^^^^=shield,       ^^^^^^^^^=aggressiveness; this is not contractual
+    };
+
+    TS_ASSERT_EQUALS(stream.getContent().size(), sizeof(EXPECTED));
+    TS_ASSERT_SAME_DATA(stream.getContent().at(0), EXPECTED, sizeof(EXPECTED));
+}
+
+/** Test saving with rating override (produces V4 format). */
+void
+TestGameSimLoader::testSaveRating()
+{
+    game::sim::Setup setup;
+    prepare(setup);
+    setup.getShip(0)->setFlakRatingOverride(99);
+    setup.getShip(0)->setFlags(game::sim::Ship::fl_RatingOverride);
+
+    afl::charset::CodepageCharset cs(afl::charset::g_codepage437);
+    game::sim::Loader testee(cs);
+
+    afl::io::InternalStream stream;
+    testee.save(stream, setup);
+
+    static const uint8_t EXPECTED[] = {
+        // Header (10)
+        'C','C','b','s','i','m','3',26,1,0x80,
+
+        // Ship (65)
+        'B','o','a','t',32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,    // 20
+        0,0, 17,0, 1,0, 3,0, 0,0, 0,0, 0,0, 0,0, 7,0, 180,0, 4,0,           // 22
+        8,0, 0,0, 100,0, 'a','b','c', 0,0, 100,0, 16,0,
+        99,0,0,0, 0,0, 0,0,
+
+        // Planet (65)
+        0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0,                   // 20
+        0,0, 0,0, 1,0, 4,0, 0,0, 6,0, 0,0, 0,0, 0,0, 0,0, 9,0,              // 22
+        12,0, 61,0, 100,0, 'x','y','z', 0xFF,0xFF, 0,0, 0,0,
+        0,0,0,0, 0,0, 0,0,
+    };
+
+    TS_ASSERT_EQUALS(stream.getContent().size(), sizeof(EXPECTED));
+    TS_ASSERT_SAME_DATA(stream.getContent().at(0), EXPECTED, sizeof(EXPECTED));
+}
+
+/** Test saving with intercept order (produces V4 format). */
+void
+TestGameSimLoader::testSaveIntercept()
+{
+    game::sim::Setup setup;
+    prepare(setup);
+    setup.getShip(0)->setInterceptId(12);
+
+    afl::charset::CodepageCharset cs(afl::charset::g_codepage437);
+    game::sim::Loader testee(cs);
+
+    afl::io::InternalStream stream;
+    testee.save(stream, setup);
+
+    static const uint8_t EXPECTED[] = {
+        // Header (10)
+        'C','C','b','s','i','m','3',26,1,0x80,
+
+        // Ship (65)
+        'B','o','a','t',32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,    // 20
+        0,0, 17,0, 1,0, 3,0, 0,0, 0,0, 0,0, 0,0, 7,0, 180,0, 4,0,           // 22
+        8,0, 0,0, 100,0, 'a','b','c', 0,0, 100,0, 0,0,
+        0,0,0,0, 0,0, 12,0,
+
+        // Planet (65)
+        0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0,                   // 20
+        0,0, 0,0, 1,0, 4,0, 0,0, 6,0, 0,0, 0,0, 0,0, 0,0, 9,0,              // 22
+        12,0, 61,0, 100,0, 'x','y','z', 0xFF,0xFF, 0,0, 0,0,
+        0,0,0,0, 0,0, 0,0,
+    };
+
+    TS_ASSERT_EQUALS(stream.getContent().size(), sizeof(EXPECTED));
+    TS_ASSERT_SAME_DATA(stream.getContent().at(0), EXPECTED, sizeof(EXPECTED));
+}
+
+/** Test saving with long flags (produces V5 format). */
+void
+TestGameSimLoader::testSaveFlags()
+{
+    game::sim::Setup setup;
+    prepare(setup);
+    setup.getPlanet()->setFlags(game::sim::Planet::fl_DoubleBeamChargeSet);
+
+    afl::charset::CodepageCharset cs(afl::charset::g_codepage437);
+    game::sim::Loader testee(cs);
+
+    afl::io::InternalStream stream;
+    testee.save(stream, setup);
+
+    static const uint8_t EXPECTED[] = {
+        // Header (10)
+        'C','C','b','s','i','m','4',26,1,0x80,
+
+        // Ship (67)
+        'B','o','a','t',32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,    // 20
+        0,0, 17,0, 1,0, 3,0, 0,0, 0,0, 0,0, 0,0, 7,0, 180,0, 4,0,           // 22
+        8,0, 0,0, 100,0, 'a','b','c', 0,0, 100,0, 0,0,
+        0,0,0,0, 0,0, 0,0, 0,0,
+
+        // Planet (67)
+        0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0,                   // 20
+        0,0, 0,0, 1,0, 4,0, 0,0, 6,0, 0,0, 0,0, 0,0, 0,0, 9,0,              // 22
+        12,0, 61,0, 100,0, 'x','y','z', 0xFF,0xFF, 0,0, 0,0,
+        0,0,0,0, 0,0, 0,0, 8,0,
+    };
+
+    TS_ASSERT_EQUALS(stream.getContent().size(), sizeof(EXPECTED));
+    TS_ASSERT_SAME_DATA(stream.getContent().at(0), EXPECTED, sizeof(EXPECTED));
+}
+

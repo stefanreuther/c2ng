@@ -1,5 +1,6 @@
 /**
   *  \file ui/widgets/tabbar.cpp
+  *  \brief Class ui::widgets::TabBar
   */
 
 #include "ui/widgets/tabbar.hpp"
@@ -8,22 +9,24 @@
 #include "util/key.hpp"
 
 struct ui::widgets::TabBar::TabInfo {
-    size_t index;
+    size_t id;
     String_t name;
     util::Key_t key;
-    Widget& widget;
 
-    TabInfo(size_t index, const String_t& name, util::Key_t key, Widget& w)
-        : index(index), name(name), key(key), widget(w)
+    TabInfo(size_t id, const String_t& name, util::Key_t key)
+        : id(id), name(name), key(key)
         { }
 };
 
 
-ui::widgets::TabBar::TabBar(Root& root, CardGroup& g)
-    : m_root(root),
-      m_group(g),
+ui::widgets::TabBar::TabBar(Root& root)
+    : Widget(),
+      sig_tabClick(),
+      m_root(root),
       m_tabs(),
-      conn_focusChange(g.sig_handleFocusChange.add(this, (void (TabBar::*)()) &TabBar::requestRedraw))
+      m_currentTabId(0),
+      m_font(gfx::FontRequest().addSize(1)),
+      m_keys(Tab | CtrlTab)
 {
     // ex UICardGroupTab::UICardGroupTab
 }
@@ -31,37 +34,50 @@ ui::widgets::TabBar::TabBar(Root& root, CardGroup& g)
 ui::widgets::TabBar::~TabBar()
 {
     // ex UICardGroupTab::~UICardGroupTab
-    conn_focusChange.disconnect();
 }
 
 void
-ui::widgets::TabBar::addPage(const String_t& name, util::Key_t key, Widget& w)
+ui::widgets::TabBar::addPage(size_t id, const String_t& name, util::Key_t key)
 {
     // ex UICardGroupTab::addTab
-    m_tabs.pushBackNew(new TabInfo(m_tabs.size(), name, key, w));
+    m_tabs.pushBackNew(new TabInfo(id, name, key));
     requestRedraw();
 }
 
 void
-ui::widgets::TabBar::addPage(const util::KeyString& name, Widget& w)
+ui::widgets::TabBar::addPage(size_t id, const util::KeyString& name)
 {
     // ex UICardGroupTab::addTab
-    addPage(name.getString(), name.getKey(), w);
+    addPage(id, name.getString(), name.getKey());
 }
 
 void
-ui::widgets::TabBar::setFocusedPage(size_t index)
+ui::widgets::TabBar::setFocusedTab(size_t id)
 {
-    if (index < m_tabs.size()) {
-        m_tabs[index]->widget.requestFocus();
+    if (id != m_currentTabId) {
+        m_currentTabId = id;
+        requestRedraw();
+        sig_tabClick.raise(m_currentTabId);
     }
+}
+
+void
+ui::widgets::TabBar::setFont(gfx::FontRequest font)
+{
+    m_font = font;
+}
+
+void
+ui::widgets::TabBar::setKeys(int keys)
+{
+    m_keys = keys;
 }
 
 void
 ui::widgets::TabBar::draw(gfx::Canvas& can)
 {
     // ex UICardGroupTab::drawContent
-    afl::base::Ref<gfx::Font> font = m_root.provider().getFont(gfx::FontRequest().addSize(1));
+    afl::base::Ref<gfx::Font> font = m_root.provider().getFont(m_font);
 
     // Straight-forward port, could be more idiomatic
     int x = getExtent().getLeftX();
@@ -78,7 +94,7 @@ ui::widgets::TabBar::draw(gfx::Canvas& can)
     for (std::size_t i = 0, n = m_tabs.size(); i < n; ++i) {
         // Status
         const TabInfo& tab = *m_tabs[i];
-        const bool isCurrent = tab.widget.hasState(FocusedState);
+        const bool isCurrent = (tab.id == m_currentTabId);
 
         // first, draw lines at bottom
         int this_width = font->getTextWidth(tab.name) + 20;
@@ -158,7 +174,7 @@ ui::layout::Info
 ui::widgets::TabBar::getLayoutInfo() const
 {
     // ex UICardGroupTab::getLayoutInfo
-    afl::base::Ref<gfx::Font> font = m_root.provider().getFont(gfx::FontRequest().addSize(1));
+    afl::base::Ref<gfx::Font> font = m_root.provider().getFont(m_font);
 
     int min_x = 0;
     for (size_t i = 0; i < m_tabs.size(); ++i) {
@@ -176,35 +192,44 @@ bool
 ui::widgets::TabBar::handleKey(util::Key_t key, int /*prefix*/)
 {
     // ex UICardGroupTab::handleEvent (part)
+    bool handleTab     = (m_keys & Tab) != 0;
+    bool handleCtrlTab = (m_keys & CtrlTab) != 0;
+    bool handleF6      = (m_keys & F6) != 0;
+    bool handleArrows  = (m_keys & Arrows) != 0;
+
     // Tab: next page
-    if (key == util::Key_Tab) {
-        if (const TabInfo* pTab = getCurrentTab()) {
-            size_t index = pTab->index + 1;
-            if (index >= m_tabs.size()) {
-                index = 0;
-            }
-            setFocusedPage(index);
-            return true;
+    if ((handleTab && key == util::Key_Tab)
+        || (handleCtrlTab && key == util::Key_Tab + util::KeyMod_Ctrl)
+        || (handleF6 && key == util::Key_F6)
+        || (handleArrows && key == util::Key_Right))
+    {
+        size_t index = getCurrentIndex() + 1;
+        if (index >= m_tabs.size()) {
+            index = 0;
         }
+        setCurrentIndex(index);
+        return true;
     }
 
     // Shift-Tab: previous page
-    if (key == util::Key_Tab + util::KeyMod_Shift) {
-        if (const TabInfo* pTab = getCurrentTab()) {
-            size_t index = pTab->index;
-            if (index == 0) {
-                index = m_tabs.size();
-            }
-            setFocusedPage(index - 1);
-            return true;
+    if ((handleTab && key == util::Key_Tab + util::KeyMod_Shift)
+        || (handleCtrlTab && key == util::Key_Tab + util::KeyMod_Ctrl + util::KeyMod_Shift)
+        || (handleF6 && key == util::Key_F6 + util::KeyMod_Shift)
+        || (handleArrows && key == util::Key_Left))
+    {
+        size_t index = getCurrentIndex();
+        if (index == 0) {
+            index = m_tabs.size();
         }
+        setCurrentIndex(index - 1);
+        return true;
     }
 
     // Per-page keys
     for (size_t i = 0, n = m_tabs.size(); i < n; ++i) {
         TabInfo* pTab = m_tabs[i];
         if (pTab->key == key || pTab->key == (key & ~util::KeyMod_Alt)) {
-            setFocusedPage(i);
+            setCurrentIndex(i);
             return true;
         }
     }
@@ -217,7 +242,7 @@ ui::widgets::TabBar::handleMouse(gfx::Point pt, MouseButtons_t pressedButtons)
 {
     // ex UICardGroupTab::handleEvent (part)
     if (getExtent().contains(pt) && !pressedButtons.empty()) {
-        afl::base::Ref<gfx::Font> font = m_root.provider().getFont(gfx::FontRequest().addSize(1));
+        afl::base::Ref<gfx::Font> font = m_root.provider().getFont(m_font);
 
         int x = getExtent().getLeftX();
         for (size_t i = 0; i < m_tabs.size(); ++i) {
@@ -228,8 +253,8 @@ ui::widgets::TabBar::handleMouse(gfx::Point pt, MouseButtons_t pressedButtons)
                 break;
             }
             if (pt.getX() < x + tw) {
-                if (!tab.widget.hasState(FocusedState)) {
-                    tab.widget.requestFocus();
+                if (tab.id != m_currentTabId) {
+                    setFocusedTab(tab.id);
                     return true;
                 }
                 break;
@@ -240,14 +265,22 @@ ui::widgets::TabBar::handleMouse(gfx::Point pt, MouseButtons_t pressedButtons)
     return false;
 }
 
-const ui::widgets::TabBar::TabInfo*
-ui::widgets::TabBar::getCurrentTab() const
+size_t
+ui::widgets::TabBar::getCurrentIndex() const
 {
     for (size_t i = 0, n = m_tabs.size(); i < n; ++i) {
         TabInfo* pTab = m_tabs[i];
-        if (pTab->widget.hasState(FocusedState)) {
-            return pTab;
+        if (pTab->id == m_currentTabId) {
+            return i;
         }
     }
     return 0;
+}
+
+void
+ui::widgets::TabBar::setCurrentIndex(size_t index)
+{
+    if (index < m_tabs.size()) {
+        setFocusedTab(m_tabs[index]->id);
+    }
 }

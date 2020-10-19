@@ -6,6 +6,7 @@
 #include <memory>
 #include <stdexcept>
 #include "server/talk/talkfolder.hpp"
+#include "afl/net/redis/integersetoperation.hpp"
 #include "afl/net/redis/stringfield.hpp"
 #include "server/errors.hpp"
 #include "server/talk/root.hpp"
@@ -41,9 +42,9 @@ server::talk::TalkFolder::getFolders(afl::data::IntegerList_t& result)
     // ex doFolderList
     m_session.checkUser();
 
-    // FIXME: use a redis union operation?
-    UserFolder::defaultFolders(m_root).getAll(result);
-    User(m_root, m_session.getUser()).pmFolders().getAll(result);
+    UserFolder::defaultFolders(m_root).
+        merge(User(m_root, m_session.getUser()).pmFolders()).
+        getAll(result);
 }
 
 server::interface::TalkFolder::Info

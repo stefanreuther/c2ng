@@ -4,6 +4,7 @@
   */
 
 #include "game/sim/planet.hpp"
+#include "game/sim/configuration.hpp"
 
 // Default constructor.
 game::sim::Planet::Planet()
@@ -166,7 +167,7 @@ game::sim::Planet::getNumBaseTorpedoesAsType(int type, const game::spec::ShipLis
 }
 
 bool
-game::sim::Planet::hasImpliedAbility(Ability which, const game::spec::ShipList& /*shipList*/, const game::config::HostConfiguration& config) const
+game::sim::Planet::hasImpliedAbility(Ability which, const Configuration& opts, const game::spec::ShipList& /*shipList*/, const game::config::HostConfiguration& config) const
 {
     // ex GSimPlanet::hasImpliedFunction
     switch (which) {
@@ -179,6 +180,9 @@ game::sim::Planet::hasImpliedAbility(Ability which, const game::spec::ShipList& 
         return config.getPlayerRaceNumber(getOwner()) == 5;
 
      case DoubleBeamChargeAbility:
+        return opts.getMode() == Configuration::VcrNuHost
+            && config.getPlayerRaceNumber(getOwner()) == 4;
+
      case DoubleTorpedoChargeAbility:
      case ElusiveAbility:
      case SquadronAbility:

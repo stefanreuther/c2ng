@@ -6,7 +6,7 @@ Hi,
 the topic
   $(subject)
 has received a reply since your last visit. Use
-  <http://planetscentral.com/$(posturl)>
+  <https://planetscentral.com/$(posturl)>
 to read it.
 
 No more mails about this topic will be sent until you visit
@@ -21,4 +21,4 @@ PlanetsCentral administration
 
 -- 
 To change your email settings, go to
-<http://planetscentral.com/settings.cgi>.
+<https://planetscentral.com/settings.cgi>.

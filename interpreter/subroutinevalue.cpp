@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/subroutinevalue.cpp
+  *  \brief Class interpreter::SubroutineValue
   */
 
 #include "interpreter/subroutinevalue.hpp"
@@ -56,7 +57,7 @@ String_t
 interpreter::SubroutineValue::toString(bool /*readable*/) const
 {
     // ex IntSubroutineValue::toString
-    String_t name = m_bco->getName();
+    String_t name = m_bco->getSubroutineName();
     String_t result = "#<subr";
     if (name.size()) {
         result += ":";

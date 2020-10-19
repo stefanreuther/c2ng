@@ -17,7 +17,7 @@ TestGameTurnLoader::testInterface()
             { return PlayerStatusSet_t(); }
         virtual void loadCurrentTurn(game::Turn& /*turn*/, game::Game& /*game*/, int /*player*/, game::Root& /*root*/, game::Session& /*session*/)
             { }
-        virtual void saveCurrentTurn(game::Turn& /*turn*/, game::Game& /*game*/, int /*player*/, game::Root& /*root*/, game::Session& /*session*/)
+        virtual void saveCurrentTurn(const game::Turn& /*turn*/, const game::Game& /*game*/, int /*player*/, const game::Root& /*root*/, game::Session& /*session*/)
             { }
         virtual void getHistoryStatus(int /*player*/, int /*turn*/, afl::base::Memory<HistoryStatus> /*status*/, const game::Root& /*root*/)
             { }
@@ -49,7 +49,7 @@ TestGameTurnLoader::testDefault()
             }
         virtual void loadCurrentTurn(game::Turn& /*turn*/, game::Game& /*game*/, int /*player*/, game::Root& /*root*/, game::Session& /*session*/)
             { }
-        virtual void saveCurrentTurn(game::Turn& /*turn*/, game::Game& /*game*/, int /*player*/, game::Root& /*root*/, game::Session& /*session*/)
+        virtual void saveCurrentTurn(const game::Turn& /*turn*/, const game::Game& /*game*/, int /*player*/, const game::Root& /*root*/, game::Session& /*session*/)
             { }
         virtual void getHistoryStatus(int /*player*/, int /*turn*/, afl::base::Memory<HistoryStatus> /*status*/, const game::Root& /*root*/)
             { }

@@ -4,15 +4,15 @@
 #ifndef C2NG_CLIENT_WIDGETS_FRIENDLYCODELIST_HPP
 #define C2NG_CLIENT_WIDGETS_FRIENDLYCODELIST_HPP
 
+#include "game/spec/friendlycodelist.hpp"
 #include "ui/widgets/abstractlistbox.hpp"
-#include "game/data/friendlycode.hpp"
 #include "ui/root.hpp"
 
 namespace client { namespace widgets {
 
     class FriendlyCodeList : public ui::widgets::AbstractListbox {
      public:
-        FriendlyCodeList(ui::Root& root, const game::data::FriendlyCodeList_t& list);
+        FriendlyCodeList(ui::Root& root, const game::spec::FriendlyCodeList::Infos_t& list);
         ~FriendlyCodeList();
 
         void setFriendlyCode(const String_t& code);
@@ -33,7 +33,7 @@ namespace client { namespace widgets {
 
      private:
         ui::Root& m_root;
-        const game::data::FriendlyCodeList_t& m_list;
+        const game::spec::FriendlyCodeList::Infos_t& m_list;
     };
 
 } }

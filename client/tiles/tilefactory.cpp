@@ -198,7 +198,7 @@ namespace {
                                        int width, int height,
                                        afl::base::Deleter& deleter,
                                        client::si::UserSide& user,
-                                       client::proxy::ObjectObserver& oop)
+                                       game::proxy::ObjectObserver& oop)
     {
         static const interpreter::NameTable NAMES[] = {
             { "SETCONTENT", client::si::wicRichDocumentSetContent, client::si::WidgetCommandDomain, interpreter::thProcedure }
@@ -216,7 +216,7 @@ namespace {
      public:
         virtual void configure(client::widgets::StandardDataView& dv, ui::Root& root) = 0;
 
-        ui::Widget* run(ui::Root& root, client::widgets::KeymapWidget& keys, int wi, int he, const char* name, afl::base::Deleter& deleter, client::si::UserSide& user, client::proxy::ObjectObserver& oop);
+        ui::Widget* run(ui::Root& root, client::widgets::KeymapWidget& keys, int wi, int he, const char* name, afl::base::Deleter& deleter, client::si::UserSide& user, game::proxy::ObjectObserver& oop);
     };
 
     ui::Widget* DataViewFactory::run(ui::Root& root,
@@ -225,7 +225,7 @@ namespace {
                                      const char* name,
                                      afl::base::Deleter& deleter,
                                      client::si::UserSide& user,
-                                     client::proxy::ObjectObserver& oop)
+                                     game::proxy::ObjectObserver& oop)
     {
         using client::widgets::StandardDataView;
         static const interpreter::NameTable NAMES[] = {
@@ -245,7 +245,7 @@ namespace {
      public:
         virtual void configure(client::widgets::CommandDataView& dv) = 0;
 
-        ui::Widget* run(ui::Root& root, client::widgets::KeymapWidget& keys, client::widgets::CommandDataView::Mode align, const char* name, afl::base::Deleter& deleter, client::si::UserSide& user, client::proxy::ObjectObserver& oop);
+        ui::Widget* run(ui::Root& root, client::widgets::KeymapWidget& keys, client::widgets::CommandDataView::Mode align, const char* name, afl::base::Deleter& deleter, client::si::UserSide& user, game::proxy::ObjectObserver& oop);
     };
 
     ui::Widget* CommandDataViewFactory::run(ui::Root& root,
@@ -254,7 +254,7 @@ namespace {
                                             const char* name,
                                             afl::base::Deleter& deleter,
                                             client::si::UserSide& user,
-                                            client::proxy::ObjectObserver& oop)
+                                            game::proxy::ObjectObserver& oop)
     {
         using client::widgets::CommandDataView;
         static const interpreter::NameTable NAMES[] = {
@@ -277,7 +277,7 @@ namespace {
 client::tiles::TileFactory::TileFactory(ui::Root& root,
                                         client::si::UserSide& user,
                                         client::widgets::KeymapWidget& keys,
-                                        client::proxy::ObjectObserver& observer)
+                                        game::proxy::ObjectObserver& observer)
     : m_root(root),
       m_userSide(user),
       m_keys(keys),

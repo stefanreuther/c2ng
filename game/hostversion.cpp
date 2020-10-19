@@ -300,6 +300,13 @@ game::HostVersion::isRoundingMineDecay() const
     return m_kind != PHost;
 }
 
+// Check whether beams are required for mine scooping.
+bool
+game::HostVersion::isBeamRequiredForMineScooping() const
+{
+    return m_kind == PHost;
+}
+
 // Check whether the build system of this host has PBP style.
 bool
 game::HostVersion::isPBPGame(const game::config::HostConfiguration& config) const
@@ -383,9 +390,9 @@ game::HostVersion::hasAlchemyExclusionFCodes() const
 bool
 game::HostVersion::isAlchemyRounding() const
 {
-    // Don't know about NuHost, but let's assume they don't emulate this.
-    return m_kind == Host
-        || m_kind == SRace;
+    // It was originally believed that THost converts with 9->3 granularity, not 3->1, with "alX" friendly codes.
+    // It turns out that no host version that I can find actually does that.
+    return false;
 }
 
 // Check for valid chunnel distance.
@@ -439,6 +446,17 @@ game::HostVersion::setImpliedHostConfiguration(game::config::HostConfiguration& 
 
         // pconfig.pas:IsShowCommandAvailable
         config[HostConfiguration::CPEnableShow].set(false);
+
+        // WTorpInfo::drawContent
+        for (int i = 1; i <= MAX_PLAYERS; ++i) {
+            int rate = config[HostConfiguration::PlayerSpecialMission](i) == 9 ? 400 : 100;
+            config[HostConfiguration::UnitsPerTorpRate].set(i, rate);
+            config[HostConfiguration::UnitsPerWebRate].set(i, rate);
+        }
+
+        // Tim-Host defaults; ex game/config.cc:initConfig
+        config[HostConfiguration::RoundGravityWells].set(1);
+        config[HostConfiguration::CPEnableRemote].set(0);
         break;
 
      case PHost:

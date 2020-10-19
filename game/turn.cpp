@@ -1,5 +1,6 @@
 /**
   *  \file game/turn.cpp
+  *  \brief Class game::Turn
   */
 
 #include "game/turn.hpp"
@@ -35,6 +36,7 @@ game::Turn::getTurnNumber() const
 void
 game::Turn::setDatabaseTurnNumber(int turnNumber)
 {
+    // FIXME: consider whether we need this
     m_databaseTurnNumber = turnNumber;
 }
 

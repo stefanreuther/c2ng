@@ -226,7 +226,7 @@ Sub Tile.ShipMission
   t := RAdd(t, Translate("Primary Enemy:"), " ")
   If Not IsEmpty(Enemy$) Then
     If Enemy$ Then
-      t := RAdd(t, RStyle("green", Enemy))
+      t := RAdd(t, RStyle(If(CCVP.ShipHasEnemyWarning(), "yellow", "green"), Enemy))
     Else
       t := RAdd(t, RStyle("green", Translate("none")))
     EndIf
@@ -456,8 +456,7 @@ Sub Tile$ShipEquipment.Common(forHistory)
 
     % R button
     If CCVP.AllowRemote() Then
-      % FIXME: missing script commands so far for details!!
-      SetButton "r", If(GetCommand("remote whatever "&Id), "yellow", "none")
+      SetButton "r", CC$RemoteGetColor(Id)
     Else
       SetButton "r", ""
     EndIf

@@ -507,7 +507,8 @@ TestGameMapFleetMember::testIsMissionLockedMutex()
         createShip(h, i, 7, 1000, 1000);
         h.ship(i).setMission(MY_INTERCEPT_MISSION, 7, 0);
     }
-    h.mutexList.create("S3.WAYPOINT", "note", 0);
+    interpreter::MutexList::Mutex* mtx = h.mutexList.create("S3.WAYPOINT", "note", 0);
+    TS_ASSERT(mtx != 0);
 
     // Ship 1: not locked
     TS_ASSERT(!FleetMember(h.univ, h.ship(1)).isMissionLocked(0,                          h.config, h.shipList, h.mutexList));
@@ -516,6 +517,8 @@ TestGameMapFleetMember::testIsMissionLockedMutex()
     // Ship 3: locked waypoint
     TS_ASSERT( FleetMember(h.univ, h.ship(3)).isMissionLocked(0,                          h.config, h.shipList, h.mutexList));
     TS_ASSERT(!FleetMember(h.univ, h.ship(3)).isMissionLocked(FleetMember::OverrideLocks, h.config, h.shipList, h.mutexList));
+
+    mtx->removeReference();
 }
 
 /** Test setFleetNumber(), failure case, foreign ship.

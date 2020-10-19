@@ -8,6 +8,7 @@
 #include "afl/base/growablememory.hpp"
 #include "afl/container/ptrvector.hpp"
 #include "afl/io/stream.hpp"
+#include "afl/string/translator.hpp"
 #include "afl/sys/loglistener.hpp"
 #include "game/hostversion.hpp"
 #include "game/spec/friendlycode.hpp"
@@ -18,8 +19,8 @@ namespace game { namespace spec {
     /** List of friendly codes.
         This manages a list of friendly codes and offers operations on it.
         Lists can be loaded from a file, or created as a subset of another list.
-        In addition to friendly code definitions (which can be visualized),
-        it can also manage a list of reserved prefixes (which are not visualized, "extra").
+
+        As of 20200807, "extra" friendly codes are merged in the main list and can therefore be accessed normally.
 
         Functions to test friendly codes take a HostSelection object that determines how to deal with host specifics.
         Pass a game::HostVersion to use that host's particular rules.
@@ -29,6 +30,17 @@ namespace game { namespace spec {
      public:
         typedef afl::container::PtrVector<FriendlyCode> Container_t;
         typedef Container_t::const_iterator Iterator_t;
+
+
+        struct Info {
+            String_t code;
+            String_t description;
+
+            Info(const String_t& code, const String_t& description)
+                : code(code), description(description)
+                { }
+        };
+        typedef std::vector<Info> Infos_t;
 
         enum Pessimistic_t { Pessimistic };
 
@@ -142,18 +154,21 @@ namespace game { namespace spec {
             Codes are appended to the end.
             Syntax errors are logged.
             \param in Input file
-            \param log Logger */
-        void load(afl::io::Stream& in, afl::sys::LogListener& log);
-
-        /** Clear extra friendly codes list.
-            \post isExtra(x) == false for all codes */
-        void clearExtraCodes();
+            \param log Logger
+            \param tx Translator */
+        void load(afl::io::Stream& in, afl::sys::LogListener& log, afl::string::Translator& tx);
 
         /** Load extra friendly codes list.
-            This will append the specified file to the current list.
-            To replace the list, clear it first (clearExtraCodes()).
+            This will append the specified file to the current list, avoiding duplicates to existing entries.
+            Therefore, you should call this after load().
             \param in Input file */
         void loadExtraCodes(afl::io::Stream& in);
+
+        /** Pack friendly-code list into standalone info object.
+            This will only pack friendly codes, not prefixes (FriendlyCode::PrefixCode).
+            \param out [out] List
+            \param players [in] Players (for formatting descriptions) */
+        void pack(Infos_t& out, const PlayerList& players) const;
 
 
         /*
@@ -167,11 +182,6 @@ namespace game { namespace spec {
             \return true if friendly code is considered numeric */
         static bool isNumeric(const String_t& fc, const HostSelection host);
 
-        /** Check whether a friendly code is an extra code.
-            \param fc Friendly code
-            \return true if this friendly code or a prefix is declared special using the extra list */
-        bool isExtra(const String_t& fc) const;
-
         /** Check whether a friendly code is a special code.
             A friendly code is special if it is contained in this list, and not marked UnspecialCode.
             \param fc Friendly code
@@ -184,7 +194,7 @@ namespace game { namespace spec {
             \param tolerant true to accept upper and lower case; false to use host's rules
             \param host Host version
             \return true if this friendly code is a universal minefield friendly code */
-        bool isUniversalMinefieldFCode(const String_t& fc, bool tolerant, const HostSelection host) const;
+        static bool isUniversalMinefieldFCode(const String_t& fc, bool tolerant, const HostSelection host);
 
         /** Get friendly code's numeric value.
             \param fc Friendly code
@@ -222,13 +232,6 @@ namespace game { namespace spec {
      private:
         /** Special friendly codes. */
         Container_t m_data;
-
-        /** Extra fcodes.
-            \todo Since this is compared against UTF-8 encoded fcodes,
-            it implicitly assumes that xtrafcode.txt is stored in UTF-8 encoding.
-            That's not particularily nice, but on the other hand not much of a problem
-            as fcodes are expected to not contain extended characters. */
-        afl::base::GrowableMemory<uint8_t> m_extraData;
     };
 
 } }

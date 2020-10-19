@@ -30,7 +30,6 @@ interpreter::World::World(afl::sys::LogListener& log, afl::io::FileSystem& fs)
       m_atomTable(),
       m_globalContexts(),
       m_mutexList(),
-      m_processList(),
       m_log(log),
       m_fileSystem(fs),
       m_systemLoadDirectory(),
@@ -204,20 +203,6 @@ interpreter::World::atomTable() const
     return m_atomTable;
 }
 
-// Access process list.
-interpreter::ProcessList&
-interpreter::World::processList()
-{
-    return m_processList;
-}
-
-// Access process list (const).
-const interpreter::ProcessList&
-interpreter::World::processList() const
-{
-    return m_processList;
-}
-
 // Access mutexes.
 interpreter::MutexList&
 interpreter::World::mutexList()
@@ -389,7 +374,7 @@ interpreter::World::compileCommand(String_t command, bool wantResult, bool& hasR
     if (!wantResult) {
         scc.withFlag(scc.ExpressionsAreStatements);
     }
-    StatementCompiler::StatementResult result = sc.compile(*bco, scc);
+    StatementCompiler::Result result = sc.compile(*bco, scc);
     sc.finishBCO(*bco, scc);
     hasResult = (result == StatementCompiler::CompiledExpression);
     return bco;

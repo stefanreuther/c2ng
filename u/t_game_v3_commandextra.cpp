@@ -38,30 +38,30 @@ TestGameV3CommandExtra::testEvents()
     TS_ASSERT(!mf->isDirty());
 
     // Create unrelated commands
-    cc.addCommand(Command::phc_RemoteControl, 23, "control");
-    cc.addCommand(Command::phc_GivePlanet,    42, "9");
-    cc.addCommand(Command::phc_AddDropAlly,   15, "add");
-    cc.addCommand(Command::phc_ShowPlanet,    15, "7");
+    cc.addCommand(Command::RemoteControl, 23, "control");
+    cc.addCommand(Command::GivePlanet,    42, "9");
+    cc.addCommand(Command::AddDropAlly,   15, "add");
+    cc.addCommand(Command::ShowPlanet,    15, "7");
     TS_ASSERT(!sh->isDirty());
     TS_ASSERT(!pl->isDirty());
     TS_ASSERT(!mf->isDirty());
 
     // Ship command
-    cc.addCommand(Command::phc_RemoteControl, 42, "allow");
+    cc.addCommand(Command::RemoteControl, 42, "allow");
     TS_ASSERT(sh->isDirty());
     TS_ASSERT(!pl->isDirty());
     TS_ASSERT(!mf->isDirty());
     sh->markClean();
 
     // Planet command
-    cc.addCommand(Command::phc_GivePlanet, 23, "11");
+    cc.addCommand(Command::GivePlanet, 23, "11");
     TS_ASSERT(!sh->isDirty());
     TS_ASSERT(pl->isDirty());
     TS_ASSERT(!mf->isDirty());
     pl->markClean();
 
     // Minefield command
-    cc.addCommand(Command::phc_ShowMinefield, 15, "1");
+    cc.addCommand(Command::ShowMinefield, 15, "1");
     TS_ASSERT(!sh->isDirty());
     TS_ASSERT(!pl->isDirty());
     TS_ASSERT(mf->isDirty());
@@ -72,5 +72,37 @@ TestGameV3CommandExtra::testEvents()
     TS_ASSERT(sh->isDirty());
     TS_ASSERT(pl->isDirty());
     TS_ASSERT(mf->isDirty());
+}
+
+/** Test access to CommandExtra. */
+void
+TestGameV3CommandExtra::testGet()
+{
+    using game::v3::CommandExtra;
+    using game::v3::CommandContainer;
+
+    game::Turn t;
+    const game::Turn& ct = t;
+
+    // Initially, no CommandExtra present
+    TS_ASSERT(CommandExtra::get(t) == 0);
+    TS_ASSERT(CommandExtra::get(ct) == 0);
+
+    // Create one
+    CommandExtra::create(t);
+
+    // Now it's there
+    CommandExtra* p = CommandExtra::get(t);
+    TS_ASSERT(p != 0);
+    TS_ASSERT_EQUALS(CommandExtra::get(ct), CommandExtra::get(t));
+
+    // Same thing for command containers
+    TS_ASSERT(CommandExtra::get(t, 4) == 0);
+    TS_ASSERT(CommandExtra::get(ct, 4) == 0);
+
+    p->create(4);
+    CommandContainer* cc = CommandExtra::get(t, 4);
+    TS_ASSERT(cc != 0);
+    TS_ASSERT_EQUALS(CommandExtra::get(ct, 4), cc);
 }
 

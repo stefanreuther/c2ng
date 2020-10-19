@@ -1,5 +1,6 @@
 /**
   *  \file game/map/minefield.cpp
+  *  \brief Class game::map::Minefield
   *
   *  FIXME: consider where we have to raise sig_change.
   */
@@ -11,7 +12,8 @@
 
 // Constructor and Destructor:
 game::map::Minefield::Minefield(Id_t id)
-    : m_id(id),
+    : CircularObject(),
+      m_id(id),
       m_position(),
       m_owner(0),
       m_isWeb(false),
@@ -28,7 +30,8 @@ game::map::Minefield::Minefield(Id_t id)
 }
 
 game::map::Minefield::Minefield(const Minefield& other)
-    : m_id(other.m_id),
+    : CircularObject(),
+      m_id(other.m_id),
       m_position(other.m_position),
       m_owner(other.m_owner),
       m_isWeb(other.m_isWeb),
@@ -43,7 +46,8 @@ game::map::Minefield::Minefield(const Minefield& other)
 { }
 
 game::map::Minefield::Minefield(Id_t id, Point center, int owner, bool isWeb, int32_t units)
-    : m_id(id),
+    : CircularObject(),
+      m_id(id),
       m_position(center),
       m_owner(owner),
       m_isWeb(isWeb),
@@ -100,7 +104,6 @@ game::map::Minefield::getOwner(int& result) const
     }
 }
 
-// MapObject:
 bool
 game::map::Minefield::getPosition(Point& result) const
 {
@@ -227,11 +230,10 @@ game::map::Minefield::addReport(const Point pos,
     }
 }
 
-// /** Postprocessing after load. */
 void
 game::map::Minefield::internalCheck(int currentTurn, const game::HostVersion& host, const game::config::HostConfiguration& config)
 {
-    // ex GMinefield::internalCheck
+    // ex GMinefield::internalCheck, ccmain.pas:CalcMineDecay
     int32_t u = m_units;
     for (int i = m_turn; i < currentTurn; ++i) {
         u = getUnitsAfterDecay(u, host, config);
@@ -298,15 +300,12 @@ game::map::Minefield::getReason() const
     return m_reason;
 }
 
-
 int32_t
 game::map::Minefield::getUnits() const
 {
     return m_currentUnits;
 }
 
-
-// /** Compute mine decay for one turn. */
 int32_t
 game::map::Minefield::getUnitsAfterDecay(int32_t origUnits, const game::HostVersion& host, const game::config::HostConfiguration& config) const
 {
@@ -325,8 +324,6 @@ game::map::Minefield::getUnitsAfterDecay(int32_t origUnits, const game::HostVers
     }
 }
 
-// /** Compute units used for laying. In PHost, this is after decay; in
-//     THost it's before. */
 int32_t
 game::map::Minefield::getUnitsForLaying(const game::HostVersion& host, const game::config::HostConfiguration& config) const
 {
@@ -350,22 +347,6 @@ game::map::Minefield::getUnitsLastSeen() const
     return m_units;
 }
 
-
-// /** Compute successful passage rate. This is the inverse of the "hit
-//     rate", for a given distance. Under THost, there is only "the" hit
-//     rate. Under PHost, various options are arrayized, and dynamic by
-//     experience and speed. This function returns the value for an
-//     inexperienced ship owned by the current player, at warp 9 (=the
-//     worst possible case).
-
-//     Note that actually under THost the problem is much more
-//     complicated due to the interesting implementation; see
-//     <http://phost.de/~stefan/minehits.html>. We do not attempt to
-//     emulate that here.
-
-//     \param distance Distance to cover, in ly
-//     \param cloaked  Whether ship is cloaked
-//     \return Passage rate, [0.0, 1.0] */
 double
 game::map::Minefield::getPassRate(double distance, bool cloaked, int player, const game::config::HostConfiguration& config) const
 {
@@ -387,8 +368,6 @@ game::map::Minefield::getPassRate(double distance, bool cloaked, int player, con
     }
 }
 
-
-// /** Compute minefield radius from unit number. */
 int32_t
 game::map::Minefield::getRadiusFromUnits(int32_t units)
 {

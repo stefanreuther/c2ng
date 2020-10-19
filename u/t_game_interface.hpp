@@ -61,6 +61,27 @@ class TestGameInterfaceMissionContext : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestGameInterfaceNotificationStore : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testHeader();
+    void testResume();
+    void testReplace();
+};
+
+class TestGameInterfaceProcessListEditor : public CxxTest::TestSuite {
+ public:
+    void testInit();
+    void testSetOneTerminated();
+    void testSetOneSuspended();
+    void testSetAllRunnable();
+    void testSetAllSuspended();
+    void testCommit();
+    void testSetPriority();
+    void testNotification();
+    void testReadNotification();
+};
+
 class TestGameInterfaceRichTextFunctions : public CxxTest::TestSuite {
  public:
     void testRAdd();

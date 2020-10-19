@@ -36,7 +36,7 @@ namespace {
         // Build cargo transfer from template
         const game::spec::ShipList& shipList = game::actions::mustHaveShipList(session);
         game::actions::CargoTransfer action;
-        setup.build(action, turn, session.interface(), root.hostConfiguration(), shipList, root.hostVersion());
+        setup.build(action, turn, root.hostConfiguration(), shipList, root.hostVersion());
 
         // Configure
         if ((flags & flagOverload) != 0) {
@@ -153,7 +153,7 @@ game::interface::doCargoUnload(game::map::Ship& sh, bool reverse, interpreter::P
 
     // Build action depending on whether this is going to be jettison or not
     game::actions::CargoTransferSetup setup;
-    if (const Id_t planetId = turn.universe().getPlanetAt(shipPos)) {
+    if (const Id_t planetId = turn.universe().findPlanetAt(shipPos)) {
         // Ship/Planet transfer. Note that this produces the wrong order.
         setup = game::actions::CargoTransferSetup::fromPlanetShip(turn.universe(), planetId, sh.getId());
         setup.swapSides();

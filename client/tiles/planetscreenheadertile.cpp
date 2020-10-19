@@ -8,7 +8,7 @@
 #include "game/root.hpp"
 #include "afl/string/format.hpp"
 #include "ui/res/resid.hpp"
-#include "client/proxy/objectlistener.hpp"
+#include "game/proxy/objectlistener.hpp"
 #include "game/map/planet.hpp"
 
 using ui::widgets::FrameGroup;
@@ -19,16 +19,16 @@ client::tiles::PlanetScreenHeaderTile::PlanetScreenHeaderTile(ui::Root& root, cl
 {
     // ex WPlanetScreenHeaderTile::WPlanetScreenHeaderTile
     if (forTask) {
-        enableButton(btnCScr, FrameGroup::NoFrame);
+        enableButton(btnCScr, ui::NoFrame);
     } else {
-        enableButton(btnAuto, FrameGroup::NoFrame);
-        enableButton(btnAdd,  FrameGroup::NoFrame);
-        // enableButton(btnSend, FrameGroup::NoFrame); // FIXME: missing in PCC2!
+        enableButton(btnAuto, ui::NoFrame);
+        enableButton(btnAdd,  ui::NoFrame);
+        // enableButton(btnSend, ui::NoFrame); // FIXME: missing in PCC2!
     }
 }
 
 void
-client::tiles::PlanetScreenHeaderTile::attach(client::proxy::ObjectObserver& oop)
+client::tiles::PlanetScreenHeaderTile::attach(game::proxy::ObjectObserver& oop)
 {
     class Job : public util::Request<ControlScreenHeader> {
      public:
@@ -70,7 +70,7 @@ client::tiles::PlanetScreenHeaderTile::attach(client::proxy::ObjectObserver& oop
             {
                 t.setText(txtHeading, m_name);
                 t.setText(txtSubtitle, m_subtitle);
-                t.enableButton(btnImage, m_marked ? FrameGroup::YellowFrame : FrameGroup::NoFrame);
+                t.enableButton(btnImage, m_marked ? ui::YellowFrame : ui::NoFrame);
                 t.setImage(m_image);
             }
      private:
@@ -79,7 +79,7 @@ client::tiles::PlanetScreenHeaderTile::attach(client::proxy::ObjectObserver& oop
         String_t m_image;
         bool m_marked;
     };
-    class Listener : public client::proxy::ObjectListener {
+    class Listener : public game::proxy::ObjectListener {
      public:
         Listener(util::RequestSender<ControlScreenHeader> reply)
             : m_reply(reply)

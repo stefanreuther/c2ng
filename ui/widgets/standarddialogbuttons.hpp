@@ -16,7 +16,7 @@ namespace ui { namespace widgets {
         Many dialogs have "OK", "Cancel" and (optionally) "Help" buttons.
         This widget simplifies and standardizes this button list.
 
-        Convention for now: "OK", "Cancel" on the right, "Help" on the left (FIXME: help not implemented yet).
+        Convention for now: "OK", "Cancel" on the right, "Help" on the left.
         Rationale: looks best for most widgets.
 
         Having this in a widget allows possible future configurability or adaption to system convention. */
@@ -42,6 +42,10 @@ namespace ui { namespace widgets {
         /** Attach "stop" events.
             \param loop EventLoop to use. "OK" will exit the loop with value 1, "Cancel" will exit with value 0. */
         void addStop(EventLoop& loop);
+
+        /** Create "help" button.
+            \param helper Widget to receive the button's keypress */
+        void addHelp(Widget& helper);
 
      private:
         afl::base::Deleter m_deleter;

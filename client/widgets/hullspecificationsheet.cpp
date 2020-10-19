@@ -17,19 +17,6 @@ using afl::string::Format;
 namespace {
     const int PAD = 5;
 
-    game::PlayerSet_t takePlayers(game::PlayerSet_t& set, int count)
-    {
-        game::PlayerSet_t result;
-        for (int i = 1; i <= game::MAX_PLAYERS && count > 0; ++i) {
-            if (set.contains(i)) {
-                set -= i;
-                result += i;
-                --count;
-            }
-        }
-        return result;
-    }
-
     void initFirstTable(ui::widgets::SimpleTable& tab, int em)
     {
         // ex WSpecBaseInfo::drawContent (part)
@@ -51,7 +38,7 @@ namespace {
         tab.cell(2, 5).setText(_("kt"));
     }
 
-    void setFirstTable(ui::widgets::SimpleTable& tab, const client::proxy::HullSpecificationProxy::HullSpecification& data, const util::NumberFormatter& fmt)
+    void setFirstTable(ui::widgets::SimpleTable& tab, const game::proxy::HullSpecificationProxy::HullSpecification& data, const util::NumberFormatter& fmt)
     {
         // ex WSpecBaseInfo::drawContent (part)
         tab.cell(1, 0).setText(fmt.formatNumber(data.mass));
@@ -74,7 +61,7 @@ namespace {
         // FIXME -> tab.cell(0, 3).setText(_("..."));
     }
 
-    void setSecondTable(ui::widgets::SimpleTable& tab, const client::proxy::HullSpecificationProxy::HullSpecification& data, const util::NumberFormatter& fmt)
+    void setSecondTable(ui::widgets::SimpleTable& tab, const game::proxy::HullSpecificationProxy::HullSpecification& data, const util::NumberFormatter& fmt)
     {
         // ex WSpecMainInfo::drawContent
         String_t w;
@@ -146,7 +133,7 @@ namespace {
         tab.clearColumnWidth(3);
     }
 
-    void setThirdTable(ui::widgets::SimpleTable& tab, const client::proxy::HullSpecificationProxy::HullSpecification& data, const util::NumberFormatter& fmt)
+    void setThirdTable(ui::widgets::SimpleTable& tab, const game::proxy::HullSpecificationProxy::HullSpecification& data, const util::NumberFormatter& fmt)
     {
         // ex WSpecBuildInfo::drawContent (part)
         tab.cell(1, 1).setText(fmt.formatNumber(data.cost.get(game::spec::Cost::Money)));
@@ -218,7 +205,7 @@ client::widgets::HullSpecificationSheet::init()
     initFirstTable(*m_pTables[0], em);
 
     Group& g1 = m_deleter.addNew(new Group(ui::layout::HBox::instance5));
-    g1.add(ui::widgets::FrameGroup::wrapWidget(m_deleter, m_root.colorScheme(), ui::widgets::FrameGroup::LoweredFrame, *m_pImage));
+    g1.add(ui::widgets::FrameGroup::wrapWidget(m_deleter, m_root.colorScheme(), ui::LoweredFrame, *m_pImage));
     g1.add(*m_pTables[0]);
     g1.add(m_deleter.addNew(new ui::Spacer()));
     add(g1);
@@ -255,7 +242,7 @@ client::widgets::HullSpecificationSheet::initPlayerLists(game::PlayerSet_t allPl
 
     Group& inner = m_deleter.addNew(new Group(ui::layout::HBox::instance5));
     for (int i = 0; i < 3; ++i) {
-        m_pPlayerLists[i] = &m_deleter.addNew(new PlayerList(m_root, PlayerList::VerticalLayout, PlayerList::ShowNames, PlayerList::SameColors, 100, takePlayers(allPlayers, numLines)));
+        m_pPlayerLists[i] = &m_deleter.addNew(new PlayerList(m_root, PlayerList::VerticalLayout, PlayerList::ShowNames, PlayerList::SameColors, 100, allPlayers.take(numLines)));
         m_pPlayerLists[i]->setNames(playerNames);
         m_pPlayerLists[i]->sig_playerClick.add(&sig_playerClick, &afl::base::Signal<void(int)>::raise);
         inner.add(*m_pPlayerLists[i]);

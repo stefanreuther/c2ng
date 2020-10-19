@@ -1,5 +1,6 @@
 /**
   *  \file game/spec/nullcomponentnameprovider.cpp
+  *  \brief Class game::spec::NullComponentNameProvider
   */
 
 #include "game/spec/nullcomponentnameprovider.hpp"

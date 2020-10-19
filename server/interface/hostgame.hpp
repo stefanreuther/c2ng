@@ -109,6 +109,21 @@ namespace server { namespace interface {
             ~VictoryCondition();
         };
 
+        struct Filter {
+            afl::base::Optional<State> requiredState;
+            afl::base::Optional<Type> requiredType;
+            afl::base::Optional<String_t> requiredUser;
+
+            afl::base::Optional<String_t> requiredHost;
+            afl::base::Optional<String_t> requiredTool;
+            afl::base::Optional<String_t> requiredShipList;
+            afl::base::Optional<String_t> requiredMaster;
+
+            Filter()
+                : requiredState(), requiredType(), requiredUser(), requiredHost(), requiredTool(), requiredShipList(), requiredMaster()
+                { }
+        };
+
         // NEWGAME
         virtual int32_t createNewGame() = 0;
 
@@ -131,15 +146,8 @@ namespace server { namespace interface {
         virtual Info getInfo(int32_t gameId) = 0;
 
         // GAMELIST [STATE state:HostGameState] [TYPE type:HostGameType] [USER user:UID] [VERBOSE|ID]
-        virtual void getInfos(afl::base::Optional<State> requiredState,
-                              afl::base::Optional<Type> requiredType,
-                              afl::base::Optional<String_t> requiredUser,
-                              bool verbose,
-                              std::vector<Info>& result) = 0;
-        virtual void getGames(afl::base::Optional<State> requiredState,
-                              afl::base::Optional<Type> requiredType,
-                              afl::base::Optional<String_t> requiredUser,
-                              afl::data::IntegerList_t& result) = 0;
+        virtual void getInfos(const Filter& filter, bool verbose, std::vector<Info>& result) = 0;
+        virtual void getGames(const Filter& filter, afl::data::IntegerList_t& result) = 0;
 
         // GAMESET game:GID [key:Str value:Str ...]
         virtual void setConfig(int32_t gameId, const afl::data::StringList_t& keyValues) = 0;

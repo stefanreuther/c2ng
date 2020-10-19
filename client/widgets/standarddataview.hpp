@@ -31,7 +31,7 @@ namespace client { namespace widgets {
 
         void setText(const util::rich::Text& text);
 
-        bool enableButton(util::Key_t key, ui::widgets::FrameGroup::Type type);
+        bool enableButton(util::Key_t key, ui::FrameType type);
         bool disableButton(util::Key_t key);
 
      private:

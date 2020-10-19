@@ -183,8 +183,9 @@ namespace gfx {
         /** Move this rectangle such that it is contained within \c other.
             Does not change our size.
             If this rectangle does not fit within \c other, it is aligned at the left/top border.
-            \param other Other rectangle */
-        void moveIntoRectangle(const Rectangle& other) throw();
+            \param other Other rectangle
+            \return *this */
+        Rectangle& moveIntoRectangle(const Rectangle& other) throw();
 
         /** Move by relative distance.
             The distance is given in the components of a point.
@@ -216,16 +217,18 @@ namespace gfx {
             }
 
         /** Center this rectangle within another.
-            \param other other rectangle */
-        void centerWithin(const Rectangle& other) throw();
+            \param other other rectangle
+            \return *this */
+        Rectangle& centerWithin(const Rectangle& other) throw();
 
         /** Move this rectangle to edge of another.
             \param other  Bounding rectangle
             \param xPos   Relative X position (0: left, 1: center, 2: right)
             \param yPos   Relative Y position (0: top, 1: center, 2: bottom)
             \param offset Distance to edge. When anchored at an edge (0 or 2),
-                          leave that many pixels from that edge. */
-        void moveToEdge(const Rectangle& other, int xPos, int yPos, int offset) throw();
+                          leave that many pixels from that edge.
+            \return *this */
+        Rectangle& moveToEdge(const Rectangle& other, int xPos, int yPos, int offset) throw();
 
         /** Reduce this rectangle's width from the left.
             Removes \c pix pixels from the left (less if the rectangle is narrower).
@@ -250,6 +253,30 @@ namespace gfx {
             \param pix number of pixels to remove
             \return removed rectangle */
         Rectangle splitY(int pix);
+
+        /** Reduce this rectangle's width from the right.
+            Removes \c pix pixels from the right (less if the rectangle is narrower).
+            Same as splitRightX, but does not return a result.
+            \param pix number of pixels to remove */
+        void consumeRightX(int pix);
+
+        /** Split rectangle vertically.
+            Removes \c pix pixels from the right (less if the rectangle is narrower), like consumeRightX(int).
+            \param pix number of pixels to remove
+            \return removed rectangle */
+        Rectangle splitRightX(int pix);
+
+        /** Reduce this rectangle's height from the bottom.
+            Removes \c pix pixels from the bottom (less if the rectangle is shorter).
+            Same as splitBottomY, but does not return a result.
+            \param pix number of pixels to remove */
+        void consumeBottomY(int pix);
+
+        /** Split rectangle horizontally.
+            Removes \c pix pixels from the bottom (less if the rectangle is shorter), like consumeBottomY(int).
+            \param pix number of pixels to remove
+            \return removed rectangle */
+        Rectangle splitBottomY(int pix);
 
      private:
         int m_left;

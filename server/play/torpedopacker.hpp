@@ -1,5 +1,6 @@
 /**
   *  \file server/play/torpedopacker.hpp
+  *  \brief Class server::play::TorpedoPacker
   */
 #ifndef C2NG_SERVER_PLAY_TORPEDOPACKER_HPP
 #define C2NG_SERVER_PLAY_TORPEDOPACKER_HPP
@@ -9,12 +10,16 @@
 
 namespace server { namespace play {
 
+    /** Packer for "obj/torp". */
     class TorpedoPacker : public Packer {
      public:
-        TorpedoPacker(game::Session& session);
+        /** Constructor.
+            \param session Session
+            \see game::interface::TorpedoContext */
+        explicit TorpedoPacker(game::Session& session);
 
-        Value_t* buildValue() const;
-        String_t getName() const;
+        virtual Value_t* buildValue() const;
+        virtual String_t getName() const;
 
      private:
         game::Session& m_session;

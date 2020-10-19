@@ -70,7 +70,7 @@ TestHarness::addDefaultTools()
     StringSetKey(m_db, "prog:host:list").add("H");
     StringSetKey(m_db, "prog:host:list").add("P");
     StringSetKey(m_db, "prog:master:list").add("M");
-    StringSetKey(m_db, "prog:dl:list").add("S");
+    StringSetKey(m_db, "prog:sl:list").add("S");
 }
 
 int32_t
@@ -257,7 +257,7 @@ TestServerHostHostGame::testListGame()
     // - admin
     {
         afl::data::IntegerList_t result;
-        TS_ASSERT_THROWS_NOTHING(testee.getGames(afl::base::Nothing, afl::base::Nothing, afl::base::Nothing, result));
+        TS_ASSERT_THROWS_NOTHING(testee.getGames(HostGame::Filter(), result));
         TS_ASSERT_EQUALS(result.size(), 4U);
         TS_ASSERT_EQUALS(result[0], 1);
         TS_ASSERT_EQUALS(result[1], 2);
@@ -266,32 +266,44 @@ TestServerHostHostGame::testListGame()
     }
     {
         afl::data::IntegerList_t result;
-        TS_ASSERT_THROWS_NOTHING(testee.getGames(afl::base::Nothing, HostGame::PublicGame, afl::base::Nothing, result));
+        HostGame::Filter filter;
+        filter.requiredType = HostGame::PublicGame;
+        TS_ASSERT_THROWS_NOTHING(testee.getGames(filter, result));
         TS_ASSERT_EQUALS(result.size(), 2U);
         TS_ASSERT_EQUALS(result[0], 1);
         TS_ASSERT_EQUALS(result[1], 3);
     }
     {
         afl::data::IntegerList_t result;
-        TS_ASSERT_THROWS_NOTHING(testee.getGames(HostGame::Joining, afl::base::Nothing, afl::base::Nothing, result));
+        HostGame::Filter filter;
+        filter.requiredState = HostGame::Joining;
+        TS_ASSERT_THROWS_NOTHING(testee.getGames(filter, result));
         TS_ASSERT_EQUALS(result.size(), 2U);
         TS_ASSERT_EQUALS(result[0], 1);
         TS_ASSERT_EQUALS(result[1], 2);
     }
     {
         afl::data::IntegerList_t result;
-        TS_ASSERT_THROWS_NOTHING(testee.getGames(HostGame::Joining, HostGame::PublicGame, afl::base::Nothing, result));
+        HostGame::Filter filter;
+        filter.requiredState = HostGame::Joining;
+        filter.requiredType = HostGame::PublicGame;
+        TS_ASSERT_THROWS_NOTHING(testee.getGames(filter, result));
         TS_ASSERT_EQUALS(result.size(), 1U);
         TS_ASSERT_EQUALS(result[0], 1);
     }
     {
         afl::data::IntegerList_t result;
-        TS_ASSERT_THROWS_NOTHING(testee.getGames(HostGame::Running, HostGame::PublicGame, afl::base::Nothing, result));
+        HostGame::Filter filter;
+        filter.requiredState = HostGame::Running;
+        filter.requiredType = HostGame::PublicGame;
+        TS_ASSERT_THROWS_NOTHING(testee.getGames(filter, result));
         TS_ASSERT_EQUALS(result.size(), 0U);
     }
     {
         afl::data::IntegerList_t result;
-        TS_ASSERT_THROWS_NOTHING(testee.getGames(HostGame::Preparing, afl::base::Nothing, afl::base::Nothing, result));
+        HostGame::Filter filter;
+        filter.requiredState = HostGame::Preparing;
+        TS_ASSERT_THROWS_NOTHING(testee.getGames(filter, result));
         TS_ASSERT_EQUALS(result.size(), 2U);
         TS_ASSERT_EQUALS(result[0], 3);
         TS_ASSERT_EQUALS(result[1], 4);
@@ -301,7 +313,9 @@ TestServerHostHostGame::testListGame()
     {
         session.setUser("u");
         afl::data::IntegerList_t result;
-        TS_ASSERT_THROWS_NOTHING(testee.getGames(HostGame::Preparing, afl::base::Nothing, afl::base::Nothing, result));
+        HostGame::Filter filter;
+        filter.requiredState = HostGame::Preparing;
+        TS_ASSERT_THROWS_NOTHING(testee.getGames(filter, result));
         TS_ASSERT_EQUALS(result.size(), 1U);
         TS_ASSERT_EQUALS(result[0], 4);
     }
@@ -310,7 +324,9 @@ TestServerHostHostGame::testListGame()
     {
         session.setUser("z");
         afl::data::IntegerList_t result;
-        TS_ASSERT_THROWS_NOTHING(testee.getGames(HostGame::Preparing, afl::base::Nothing, afl::base::Nothing, result));
+        HostGame::Filter filter;
+        filter.requiredState = HostGame::Preparing;
+        TS_ASSERT_THROWS_NOTHING(testee.getGames(filter, result));
         TS_ASSERT_EQUALS(result.size(), 0U);
     }
 
@@ -368,7 +384,9 @@ TestServerHostHostGame::testGameInfo()
     // Query list
     {
         std::vector<HostGame::Info> result;
-        TS_ASSERT_THROWS_NOTHING(testee.getInfos(HostGame::Joining, afl::base::Nothing, afl::base::Nothing, false, result));
+        HostGame::Filter filter;
+        filter.requiredState = HostGame::Joining;
+        TS_ASSERT_THROWS_NOTHING(testee.getInfos(filter, false, result));
         TS_ASSERT_EQUALS(result.size(), 2U);
         TS_ASSERT_EQUALS(result[0].gameId, 1);
         TS_ASSERT_EQUALS(result[0].name, "One");
@@ -379,7 +397,9 @@ TestServerHostHostGame::testGameInfo()
     // Query list, no match
     {
         std::vector<HostGame::Info> result;
-        TS_ASSERT_THROWS_NOTHING(testee.getInfos(HostGame::Running, afl::base::Nothing, afl::base::Nothing, false, result));
+        HostGame::Filter filter;
+        filter.requiredState = HostGame::Running;
+        TS_ASSERT_THROWS_NOTHING(testee.getInfos(filter, false, result));
         TS_ASSERT_EQUALS(result.size(), 0U);
     }
 
@@ -740,7 +760,9 @@ TestServerHostHostGame::testListUserGames()
     // User a: must list game
     {
         afl::data::IntegerList_t result;
-        testee.getGames(afl::base::Nothing, afl::base::Nothing, String_t("a"), result);
+        HostGame::Filter filter;
+        filter.requiredUser = String_t("a");
+        TS_ASSERT_THROWS_NOTHING(testee.getGames(filter, result));
         TS_ASSERT_EQUALS(result.size(), 1U);
         TS_ASSERT_EQUALS(result[0], gid);
     }
@@ -748,7 +770,9 @@ TestServerHostHostGame::testListUserGames()
     // User b: must list game
     {
         afl::data::IntegerList_t result;
-        testee.getGames(afl::base::Nothing, afl::base::Nothing, String_t("b"), result);
+        HostGame::Filter filter;
+        filter.requiredUser = String_t("b");
+        TS_ASSERT_THROWS_NOTHING(testee.getGames(filter, result));
         TS_ASSERT_EQUALS(result.size(), 1U);
         TS_ASSERT_EQUALS(result[0], gid);
     }
@@ -756,7 +780,9 @@ TestServerHostHostGame::testListUserGames()
     // User c: must list game
     {
         afl::data::IntegerList_t result;
-        testee.getGames(afl::base::Nothing, afl::base::Nothing, String_t("c"), result);
+        HostGame::Filter filter;
+        filter.requiredUser = String_t("c");
+        TS_ASSERT_THROWS_NOTHING(testee.getGames(filter, result));
         TS_ASSERT_EQUALS(result.size(), 1U);
         TS_ASSERT_EQUALS(result[0], gid);
     }
@@ -764,14 +790,20 @@ TestServerHostHostGame::testListUserGames()
     // User z: must NOT list game (owner, but not player)
     {
         afl::data::IntegerList_t result;
-        testee.getGames(afl::base::Nothing, afl::base::Nothing, String_t("z"), result);
+        HostGame::Filter filter;
+        filter.requiredUser = String_t("z");
+        TS_ASSERT_THROWS_NOTHING(testee.getGames(filter, result));
         TS_ASSERT_EQUALS(result.size(), 0U);
     }
 
     // User a with matching filter: must list game
     {
         afl::data::IntegerList_t result;
-        testee.getGames(HostGame::Joining, HostGame::PublicGame, String_t("a"), result);
+        HostGame::Filter filter;
+        filter.requiredState = HostGame::Joining;
+        filter.requiredType = HostGame::PublicGame;
+        filter.requiredUser = String_t("a");
+        TS_ASSERT_THROWS_NOTHING(testee.getGames(filter, result));
         TS_ASSERT_EQUALS(result.size(), 1U);
         TS_ASSERT_EQUALS(result[0], gid);
     }
@@ -779,14 +811,111 @@ TestServerHostHostGame::testListUserGames()
     // User a with mismatching filter: must NOT list game
     {
         afl::data::IntegerList_t result;
-        testee.getGames(HostGame::Running, HostGame::PublicGame, String_t("a"), result);
+        HostGame::Filter filter;
+        filter.requiredState = HostGame::Running;
+        filter.requiredType = HostGame::PublicGame;
+        filter.requiredUser = String_t("a");
+        TS_ASSERT_THROWS_NOTHING(testee.getGames(filter, result));
         TS_ASSERT_EQUALS(result.size(), 0U);
     }
 
     // User a with mismatching filter: must NOT list game
     {
         afl::data::IntegerList_t result;
-        testee.getGames(HostGame::Running, afl::base::Nothing, String_t("a"), result);
+        HostGame::Filter filter;
+        filter.requiredState = HostGame::Running;
+        filter.requiredUser = String_t("a");
+        TS_ASSERT_THROWS_NOTHING(testee.getGames(filter, result));
+        TS_ASSERT_EQUALS(result.size(), 0U);
+    }
+}
+
+/** Test some more filters. */
+void
+TestServerHostHostGame::testFilters()
+{
+    TestHarness h;
+    server::host::Session session;
+    server::host::HostGame testee(session, h.root());
+
+    // Create a game
+    h.addDefaultTools();
+    int32_t gid = h.addGame(testee);
+    TS_ASSERT_EQUALS(gid, 1);
+
+    // Add a tool
+    StringSetKey(h.db(), "prog:tool:list").add("T");
+    testee.addTool(gid, "T");
+
+    // Matching host filter
+    {
+        afl::data::IntegerList_t result;
+        HostGame::Filter filter;
+        filter.requiredHost = String_t("H");
+        TS_ASSERT_THROWS_NOTHING(testee.getGames(filter, result));
+        TS_ASSERT_EQUALS(result.size(), 1U);
+    }
+
+    // Mismatching host filter
+    {
+        afl::data::IntegerList_t result;
+        HostGame::Filter filter;
+        filter.requiredHost = String_t("notH");
+        TS_ASSERT_THROWS_NOTHING(testee.getGames(filter, result));
+        TS_ASSERT_EQUALS(result.size(), 0U);
+    }
+
+    // Matching ship list filter
+    {
+        afl::data::IntegerList_t result;
+        HostGame::Filter filter;
+        filter.requiredShipList = String_t("S");
+        TS_ASSERT_THROWS_NOTHING(testee.getGames(filter, result));
+        TS_ASSERT_EQUALS(result.size(), 1U);
+    }
+
+    // Mismatching ship list filter
+    {
+        afl::data::IntegerList_t result;
+        HostGame::Filter filter;
+        filter.requiredShipList = String_t("notS");
+        TS_ASSERT_THROWS_NOTHING(testee.getGames(filter, result));
+        TS_ASSERT_EQUALS(result.size(), 0U);
+    }
+
+    // Matching master filter
+    {
+        afl::data::IntegerList_t result;
+        HostGame::Filter filter;
+        filter.requiredMaster = String_t("M");
+        TS_ASSERT_THROWS_NOTHING(testee.getGames(filter, result));
+        TS_ASSERT_EQUALS(result.size(), 1U);
+    }
+
+    // Mismatching master filter
+    {
+        afl::data::IntegerList_t result;
+        HostGame::Filter filter;
+        filter.requiredMaster = String_t("notM");
+        TS_ASSERT_THROWS_NOTHING(testee.getGames(filter, result));
+        TS_ASSERT_EQUALS(result.size(), 0U);
+    }
+
+    // Matching tool filter
+    {
+        afl::data::IntegerList_t result;
+        HostGame::Filter filter;
+        filter.requiredTool = String_t("T");
+        TS_ASSERT_THROWS_NOTHING(testee.getGames(filter, result));
+        TS_ASSERT_EQUALS(result.size(), 1U);
+    }
+
+    // Mismatching tool filter
+    {
+        afl::data::IntegerList_t result;
+        HostGame::Filter filter;
+        filter.requiredTool = String_t("notT");
+        TS_ASSERT_THROWS_NOTHING(testee.getGames(filter, result));
         TS_ASSERT_EQUALS(result.size(), 0U);
     }
 }

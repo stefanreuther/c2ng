@@ -35,7 +35,7 @@ my $IN = $V{IN};
 if (get_variable('ENABLE_BUILD')) {
     my @GUI_APPS     = qw(c2ng c2pluginw);
     my @SERVER_APPS  = qw(c2file-server c2format-server c2host-server c2talk-server c2fileclient c2mailin c2console c2dbexport c2nntp-server c2mailout-server c2monitor-server c2play-server c2router-server c2user-server c2logger);
-    my @CONSOLE_APPS = qw(c2check c2configtool c2export c2mgrep c2mkturn c2plugin c2rater c2script c2sweep c2unpack c2untrn c2gfxgen);
+    my @CONSOLE_APPS = qw(c2check c2configtool c2export c2mgrep c2mkturn c2plugin c2rater c2script c2simtool c2sweep c2unpack c2untrn c2gfxgen);
     my @LIBS         = qw(guilib serverlib gamelib);
 
     # Find afl
@@ -51,7 +51,8 @@ if (get_variable('ENABLE_BUILD')) {
     # Find cxxtest
     find_directory('CXXTESTDIR',
                    files =>[qw(cxxtest/TestSuite.h cxxtestgen.pl)],
-                   guess => [glob('../cxxtest* ../../cxxtest* ../../../cxxtest*')]);
+                   guess => [glob('../cxxtest* ../../cxxtest* ../../../cxxtest*')],
+                   allow_missing => 1);
 
     # Find SDLs
     set_variable(WITH_SDL =>
@@ -167,10 +168,11 @@ if (get_variable('ENABLE_BUILD')) {
         rule_add_info($ts_main_src, 'Generating test driver');
 
         # - compile test driver
-        my @ts_main_obj = map {compile_file($_, {CXXFLAGS=>"-I$V{CXXTESTDIR} -I$V{AFL_DIR} -O0"})} $ts_main_src;
+        #   "-g0": mingw fails with "testsuite.o: too many section"; this removes some 40% of the sections
+        my @ts_main_obj = map {compile_file($_, {CXXFLAGS=>"-I$V{CXXTESTDIR} -I$V{AFL_DIR} -g0 -O0"})} $ts_main_src;
 
         # - compile & run
-        my $exe = compile_executable('testsuite', [@ts_obj, @ts_main_obj], [@LIBS, 'afl']);
+        my $exe = compile_executable('testsuite', [@ts_main_obj, @ts_obj], [@LIBS, 'afl']);
         generate('test', ['testsuite', 'resources'], "$V{RUN} ./testsuite");
         rule_add_info('test', 'Running testsuite');
         rule_set_phony('test');
@@ -179,21 +181,23 @@ if (get_variable('ENABLE_BUILD')) {
         if ($V{WITH_COVERAGE}) {
             # Empty coverage (baseline)
             my $base = generate_anonymous('.info', $exe,
-                                          "lcov -c -d $V{TMP} -i -o \$@");
+                                          "lcov -q -c -d $V{TMP} -i -o \$@");
 
             # Test run
             my $result = generate_anonymous('.info', $exe,
-                                            "lcov -z -d $V{TMP}",            # Reset counters (delete all *.gcda)
+                                            "lcov -q -z -d $V{TMP}",            # Reset counters (delete all *.gcda)
                                             "$V{RUN} ./$exe",                # Run testee
-                                            "lcov -c -d $V{TMP} -o \$@");    # Capture coverage (*.gcda -> info)
+                                            "lcov -q -c -d $V{TMP} -o \$@");    # Capture coverage (*.gcda -> info)
 
             # Combine captured and baseline so we can see unreferenced lines
-            my $combined = generate_anonymous('.info', [$base, $result], "lcov -a $base -a $result -o \$@");
+            my $combined = generate_anonymous('.info', [$base, $result], "lcov -q -a $base -a $result -o \$@");
 
             # Filter only source code
             my $abs_in = abs_path($V{IN});
-            my $filtered_source = generate_anonymous('.info', [$combined], "lcov -e \$< '$abs_in/*' -o \$@");
-            my $filtered = generate_anonymous('.info', $filtered_source, "lcov -r \$< '$abs_in/u/*' -o \$@");
+            my $abs_tmp = abs_path($V{TMP});
+            my $filtered_source = generate_anonymous('.info', [$combined], "lcov -q -e \$< '$abs_in/*' -o \$@");
+            my $filtered_source2 = generate_anonymous('.info', [$filtered_source], "lcov -q -r \$< '$abs_tmp/*' -o \$@");
+            my $filtered = generate_anonymous('.info', $filtered_source2, "lcov -q -r \$< '$abs_in/u/*' -o \$@");
 
             # Optimize
             my $script = normalize_filename($V{AFL_DIR}, 'bin/coverage_optimize.pl');
@@ -204,7 +208,7 @@ if (get_variable('ENABLE_BUILD')) {
             my $report = $V{COVERAGE_RESULT};
             generate("$report/index.html", $optimized,
                      "$rm -r $result/*",              # "/*" to keep the .mark file intact which buildsys creates for us
-                     "genhtml -t c2ng -o $report \$<");
+                     "genhtml -q --ignore-errors source -t c2ng -o $report \$<");
             generate("coverage", "$report/index.html");
             rule_set_phony('coverage');
         }

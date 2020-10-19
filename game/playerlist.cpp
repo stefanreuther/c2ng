@@ -99,7 +99,7 @@ game::PlayerList::getCharacterFromPlayer(int id)
 String_t
 game::PlayerList::expandNames(const String_t tpl, bool useOriginalNames) const
 {
-    // ex GRaceNameList::expandNames
+    // ex GRaceNameList::expandNames, ccmain.pas:ReplaceRaces
     String_t result;
     String_t::size_type pos = 0;
     String_t::size_type n;

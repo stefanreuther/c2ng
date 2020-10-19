@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/exporter/separatedtextexporter.hpp
+  *  \brief Class interpreter::exporter::SeparatedTextExporter
   */
 #ifndef C2NG_INTERPRETER_EXPORTER_SEPARATEDTEXTEXPORTER_HPP
 #define C2NG_INTERPRETER_EXPORTER_SEPARATEDTEXTEXPORTER_HPP

@@ -10,6 +10,7 @@
 class TestGameVcrBattle : public CxxTest::TestSuite {
  public:
     void testIt();
+    void testDescription();
 };
 
 class TestGameVcrDatabase : public CxxTest::TestSuite {
@@ -24,10 +25,17 @@ class TestGameVcrObject : public CxxTest::TestSuite {
     void testGuess();
     void testGuessAmbig();
     void testGuessMismatch();
+    void testGuessEngine();
 };
 
 class TestGameVcrScore : public CxxTest::TestSuite {
  public:
+    void testIt();
+};
+
+class TestGameVcrStatistic : public CxxTest::TestSuite {
+ public:
+    void testInit();
     void testIt();
 };
 

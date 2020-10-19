@@ -22,14 +22,14 @@ namespace game { namespace msg {
      public:
 
         /** Get number of messages in this mailbox. */
-        virtual size_t getNumMessages() = 0;
+        virtual size_t getNumMessages() const = 0;
 
         /** Get text of a message.
             \param index message number, [0, getCount()).
             \param tx Translator for internationalizable parts
             \param players Player list for player names
             \return message text */
-        virtual String_t getMessageText(size_t index, afl::string::Translator& tx, const PlayerList& players) = 0;
+        virtual String_t getMessageText(size_t index, afl::string::Translator& tx, const PlayerList& players) const = 0;
 
         /** Get heading of a message.
             The heading is used for subject-sorting and the kill filter.
@@ -37,12 +37,12 @@ namespace game { namespace msg {
             \param tx Translator for internationalizable parts
             \param players Player list for player names
             \return message heading */
-        virtual String_t getMessageHeading(size_t index, afl::string::Translator& tx, const PlayerList& players) = 0;
+        virtual String_t getMessageHeading(size_t index, afl::string::Translator& tx, const PlayerList& players) const = 0;
 
         /** Get turn of a message.
             \param index message number, [0, getCount()).
             \return turn number; can be 0. */
-        virtual int getMessageTurnNumber(size_t index) = 0;
+        virtual int getMessageTurnNumber(size_t index) const = 0;
     };
 
 } }

@@ -56,6 +56,8 @@ namespace game { namespace map {
         Point m_point;
         Reference m_reference;
         bool m_pointValid;
+
+        void notifyObservers(bool lastOK, Point lastPos);
     };
 
 } }

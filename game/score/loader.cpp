@@ -1,19 +1,20 @@
 /**
   *  \file game/score/loader.cpp
+  *  \brief Class game::score::Loader
   */
 
 #include <cstring>
 #include "game/score/loader.hpp"
-#include "game/score/structures.hpp"
-#include "afl/except/fileformatexception.hpp"
-#include "game/score/turnscorelist.hpp"
 #include "afl/base/growablememory.hpp"
+#include "afl/except/fileformatexception.hpp"
+#include "game/score/structures.hpp"
+#include "game/score/turnscorelist.hpp"
 
 namespace st = game::score::structures;
 
 namespace {
-    static const uint8_t SCORE_FILE_SIG[] = { 'C', 'C', 's', 't', 'a', 't', '0', 26 };
-    static const uint8_t STAT_FILE_SIG[]  = { 'C', 'C', '-', 'S', 't', 'a', 't', 26 };
+    const uint8_t SCORE_FILE_SIG[] = { 'C', 'C', 's', 't', 'a', 't', '0', 26 };
+    const uint8_t STAT_FILE_SIG[]  = { 'C', 'C', '-', 'S', 't', 'a', 't', 26 };
 
     void loadRecord(afl::io::Stream& in,
                     game::score::TurnScore& record,
@@ -33,11 +34,13 @@ namespace {
     }
 }
 
+// Constructor.
 game::score::Loader::Loader(afl::string::Translator& tx, afl::charset::Charset& cs)
     : m_translator(tx),
       m_charset(cs)
 { }
 
+// Load PCC2 score file (score.cc).
 void
 game::score::Loader::load(TurnScoreList& list, afl::io::Stream& in)
 {
@@ -108,8 +111,7 @@ game::score::Loader::load(TurnScoreList& list, afl::io::Stream& in)
     }
 }
 
-
-// /** Load old-style (PCC1.x) statistics file. */
+// Load PCC1 score file (stat.cc).
 void
 game::score::Loader::loadOldFile(TurnScoreList& list, afl::io::Stream& in)
 {
@@ -155,15 +157,11 @@ game::score::Loader::loadOldFile(TurnScoreList& list, afl::io::Stream& in)
 }
 
 
-// /** Save file. Writes the complete fileto the specified stream.
-//     This will save the file even if canSaveSafely() returns false; in this
-//     case, the new copy will contain less information than the file this
-//     was loaded from. */
+// Save PCC2 score file (score.cc).
 void
 game::score::Loader::save(const TurnScoreList& list, afl::io::Stream& out)
 {
     // ex GStatFile::save(Stream& s)
-
     const afl::io::Stream::FileSize_t start = out.getPos();
 
     // Write preliminary header

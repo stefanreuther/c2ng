@@ -204,9 +204,9 @@ client::map::Screen::Screen(client::si::UserSide& userSide,
       m_sharedState(*new SharedState()),
       m_location(*this, userSide.mainLog()),
       m_locationCycleBreaker(0),
-      m_locationProxy(root.engine().dispatcher(), gameSender),
-      m_refListProxy(root, gameSender, tx),
-      m_keymapProxy(root.engine().dispatcher(), gameSender),
+      m_locationProxy(gameSender, root.engine().dispatcher()),
+      m_refListProxy(gameSender, root.engine().dispatcher()),
+      m_keymapProxy(gameSender, root.engine().dispatcher()),
       m_observerProxy(gameSender),
       m_propertyProxy(gameSender, new Properties(m_sharedState)),
       m_refList(),
@@ -396,7 +396,7 @@ client::map::Screen::createContextProvider()
 void
 client::map::Screen::updateObjectList()
 {
-    class Initializer : public client::proxy::ReferenceListProxy::Initializer_t {
+    class Initializer : public game::proxy::ReferenceListProxy::Initializer_t {
      public:
         Initializer(game::map::Point pos)
             : m_pos(pos)
@@ -423,7 +423,7 @@ client::map::Screen::updateObjectList()
         game::map::Point m_pos;
     };
 
-    m_refListProxy.setContentNew(std::auto_ptr<client::proxy::ReferenceListProxy::Initializer_t>(new Initializer(m_location.getPosition())));
+    m_refListProxy.setContentNew(std::auto_ptr<game::proxy::ReferenceListProxy::Initializer_t>(new Initializer(m_location.getPosition())));
 }
 
 void
@@ -435,7 +435,7 @@ client::map::Screen::updateKeyList(util::KeySet_t& keys)
 gfx::Color_t
 client::map::Screen::getColor(util::SkinColor::Color index)
 {
-    if (index < util::SkinColor::NUM_COLORS) {
+    if (size_t(index) < util::SkinColor::NUM_COLORS) {
         return m_root.colorScheme().getColor(ui::DARK_COLOR_SET[index]);
     }
     return 0;

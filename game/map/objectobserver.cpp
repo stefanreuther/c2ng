@@ -28,16 +28,6 @@ game::map::ObjectObserver::getCurrentObject()
     return m_cursor.getCurrentObject();
 }
 
-// /** Get universe for current object.
-//     \return pointer to universe, can be null
-//     \see GObjectSelection::getCurrentUniverse() */
-game::map::Universe*
-game::map::ObjectObserver::getCurrentUniverse()
-{
-    // ex GObjectSelectionObserver::getCurrentUniverse
-    return m_cursor.getCurrentUniverse();
-}
-
 // /** Get object selection.
 //     Returns a reference to the GObjectSelection this object was constructed with. */
 game::map::ObjectCursor&

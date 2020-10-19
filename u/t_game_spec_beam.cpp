@@ -38,3 +38,34 @@ TestGameSpecBeam::testIt()
     TS_ASSERT_EQUALS(testee.getShortName(cnp), "bm nm");
 }
 
+/** Test derived information. */
+void
+TestGameSpecBeam::testDerivedInformation()
+{
+    // Heavy Phaser
+    game::spec::Beam b(10);
+    b.setKillPower(35);
+    b.setDamagePower(45);
+
+    // Host configuration using defaults
+    game::config::HostConfiguration config;
+
+    // Independant of host version
+    TS_ASSERT_EQUALS(b.getNumMinesSwept(1, true, config), 300);
+    TS_ASSERT_EQUALS(b.getNumMinesSwept(1, false, config), 400);
+
+    // Host
+    {
+        game::HostVersion h(game::HostVersion::Host, MKVERSION(3, 22, 40));
+        TS_ASSERT_EQUALS(b.getRechargeTime(1, h, config), 100);
+        TS_ASSERT_EQUALS(b.getHitOdds(1, h, config), 100);
+    }
+
+    // PHost
+    {
+        game::HostVersion h(game::HostVersion::PHost, MKVERSION(4, 0, 5));
+        TS_ASSERT_EQUALS(b.getRechargeTime(1, h, config), 150);
+        TS_ASSERT_EQUALS(b.getHitOdds(1, h, config), 100);
+    }
+}
+

@@ -412,32 +412,32 @@ interpreter::vmio::FileSaveContext::saveBCO(afl::io::Stream& out, const Bytecode
     so.endProperty();
 
     // Property 2: "data" (literals for pushlit, data segment)
-    const afl::data::Segment& literals = bco.getLiterals();
+    const afl::data::Segment& literals = bco.literals();
     so.startProperty(uint32_t(literals.size()));
     SaveVisitor::save(out, literals, literals.size(), m_charset, *this);
     so.endProperty();
 
     // Property 3: "names" (names for e.g. pushvar, name list)
-    const afl::data::NameMap& names = bco.getNames();
+    const afl::data::NameMap& names = bco.names();
     so.startProperty(uint32_t(names.getNumNames()));
     SaveVisitor::saveNames(out, names, names.getNumNames(), m_charset);
     so.endProperty();
 
     // Property 4: "code" (count = number of instructions, size = 4x count). 32 bit per instruction.
-    const std::vector<Opcode>& code = bco.getCode();
+    const std::vector<Opcode>& code = bco.code();
     so.startProperty(uint32_t(code.size()));
     writeArray32(out, afl::base::Memory<const Opcode>(code));
     so.endProperty();
 
     // Property 5: "local_names" (predeclared locals, name list)
-    const afl::data::NameMap& localNames = bco.getLocalNames();
+    const afl::data::NameMap& localNames = bco.localVariables();
     so.startProperty(uint32_t(localNames.getNumNames()));
     SaveVisitor::saveNames(out, localNames, localNames.getNumNames(), m_charset);
     so.endProperty();
 
     // Property 6: "name" (name hint for loading, string)
     so.startProperty(0);
-    out.fullWrite(afl::string::toBytes(bco.getName()));
+    out.fullWrite(afl::string::toBytes(bco.getSubroutineName()));
     so.endProperty();
 
     // Property 7: "file name" (debug file name, string)
@@ -448,7 +448,7 @@ interpreter::vmio::FileSaveContext::saveBCO(afl::io::Stream& out, const Bytecode
     so.endProperty();
 
     // Property 8: "line numbers" (count = number of lines, size = 8x count)
-    const std::vector<uint32_t>& lineNumbers = bco.getLineNumbers();
+    const std::vector<uint32_t>& lineNumbers = bco.lineNumbers();
     if (m_debugInformationEnabled) {
         so.startProperty(uint32_t(lineNumbers.size()/2));
         writeArray32(out, afl::base::Memory<const uint32_t>(lineNumbers));
@@ -626,7 +626,7 @@ interpreter::vmio::FileSaveContext::saveProcess(afl::io::Stream& out, const Proc
     so.endProperty();
 
     // Property 5: exceptions (counts = number, size = 16xcount)
-    const afl::container::PtrVector<Process::ExceptionHandler>& exceptions = proc.getExceptions();
+    const afl::container::PtrVector<Process::ExceptionHandler>& exceptions = proc.getExceptionHandlers();
     so.startProperty(uint32_t(exceptions.size()));
     for (size_t i = 0, n = exceptions.size(); i < n; ++i) {
         UInt32_t tmp[4];

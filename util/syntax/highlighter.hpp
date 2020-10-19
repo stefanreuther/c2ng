@@ -1,5 +1,6 @@
 /**
   *  \file util/syntax/highlighter.hpp
+  *  \brief Interface util::syntax::Highlighter
   */
 #ifndef C2NG_UTIL_SYNTAX_HIGHLIGHTER_HPP
 #define C2NG_UTIL_SYNTAX_HIGHLIGHTER_HPP
@@ -18,11 +19,9 @@ namespace util { namespace syntax {
 
         Each scan() produces one segment of text with highlighting information.
 
-    //     Derived classes override init() and scan().
-    //     scan() can use Segment's methods to build the segment,
-    //     either set(), or start()+finish().
-    //     It can also assign the members manually.
-    */
+        The original text is not copied;
+        a Highlighter produces references into the original text with style and meta information.
+        The original text must therefore live as long as any Highlighter or Segment referring to it are active. */
     class Highlighter : public afl::base::Deletable {
      public:
         /** Initialize.

@@ -19,6 +19,7 @@
 #include "game/parser/messagevalue.hpp"
 #include "game/test/root.hpp"
 #include "game/test/specificationloader.hpp"
+#include "game/test/simpleturn.hpp"
 
 using afl::string::Format;
 using afl::string::NullTranslator;
@@ -69,6 +70,40 @@ namespace {
         return pl;
     }
 
+    /** Make a visited unowned planet. */
+    Planet makeUnownedPlanet()
+    {
+        // Planet New Georgia (#459), Manos-3 turn 5
+        game::map::PlanetData pd;
+        pd.owner = 0;
+        pd.densityNeutronium = 70;
+        pd.densityTritanium = 42;
+        pd.densityDuranium = 74;
+        pd.densityMolybdenum = 83;
+        pd.groundNeutronium = 4748;
+        pd.groundTritanium = 349;
+        pd.groundDuranium = 408;
+        pd.groundMolybdenum = 130;
+        pd.minedNeutronium = 84;
+        pd.minedTritanium = 9;
+        pd.minedDuranium = 34;
+        pd.minedMolybdenum = 12;
+        pd.nativeRace = 3;
+        pd.nativeClans = 46336;
+        pd.nativeGovernment = 2;
+        pd.temperature = 4;
+        pd.money = 0;
+        pd.supplies = 0;
+        pd.friendlyCode = "358";
+
+        Planet pl(459);
+        pl.setPosition(game::map::Point(1000, 1000));
+        pl.addCurrentPlanetData(pd, game::PlayerSet_t::allUpTo(11));
+        pl.setPlayability(game::map::Object::Playable);
+
+        return pl;
+    }
+
     /** Make a played planet. */
     Planet makePlayedPlanet()
     {
@@ -106,6 +141,35 @@ namespace {
         Planet p(77);
         p.addCurrentPlanetData(pd, game::PlayerSet_t(PLAYER));
         p.setPlayability(game::map::Object::Playable);
+
+        return p;
+    }
+
+    /** Make a history planet. */
+    Planet makeHistoryPlanet()
+    {
+        Planet p(77);
+
+        // Colonist scan
+        gp::MessageInformation cinfo(gp::MessageInformation::Planet, p.getId(), TURN - 5);
+        cinfo.addValue(gp::mi_Owner, PLAYER);
+        cinfo.addValue(gp::ms_FriendlyCode, "xyz");
+        cinfo.addValue(gp::mi_PlanetMines, 10);
+        cinfo.addValue(gp::mi_PlanetFactories, 20);
+        cinfo.addValue(gp::mi_PlanetDefense, 30);
+        cinfo.addValue(gp::mi_PlanetColonists, 100);
+        cinfo.addValue(gp::mi_PlanetSupplies, 70);
+        cinfo.addValue(gp::mi_PlanetCash, 200);
+        p.addMessageInformation(cinfo);
+
+        // Native scan
+        gp::MessageInformation ninfo(gp::MessageInformation::Planet, p.getId(), TURN - 1);
+        ninfo.addValue(gp::mi_PlanetNativeHappiness, 96);
+        ninfo.addValue(gp::mi_PlanetNativeGov, 6);
+        ninfo.addValue(gp::mi_PlanetNatives, 5000);
+        ninfo.addValue(gp::mi_PlanetNativeRace, game::BovinoidNatives);
+        ninfo.addValue(gp::mi_PlanetTemperature, 50);
+        p.addMessageInformation(ninfo);
 
         return p;
     }
@@ -267,6 +331,23 @@ TestGameMapPlanetInfo::testDescribePlanetClimate()
                      "</ul>");
 }
 
+/** Test describePlanetClimate().
+    Test that format parameters are honored. */
+void
+TestGameMapPlanetInfo::testDescribePlanetClimateFormat()
+{
+    Environment env;
+    env.root.userConfiguration()[game::config::UserConfiguration::Display_ThousandsSep].set(0);
+    env.root.userConfiguration()[game::config::UserConfiguration::Display_Clans].set(1);
+    describePlanetClimate(env.nodes, makePlayedPlanet(), TURN, env.root, PLAYER, env.tx);
+    TS_ASSERT_EQUALS(toString(env.nodes),
+                     "<ul>"
+                     "<li>Climate type: warm</li>"
+                     "<li>Average temperature: 50\xC2\xB0""F</li>"
+                     "<li>Supports 100000c Player 3s</li>"
+                     "</ul>");
+}
+
 /** Test describePlanetClimate(), empty (unknown) planet. */
 void
 TestGameMapPlanetInfo::testDescribePlanetClimateEmpty()
@@ -297,6 +378,48 @@ TestGameMapPlanetInfo::testDescribePlanetClimateDifferent()
                      "</ul>");
 }
 
+/** Test describePlanetClimate(), THost climate deaths. */
+void
+TestGameMapPlanetInfo::testDescribePlanetClimateDeath()
+{
+    Environment env;
+    env.root.hostVersion() = HostVersion(HostVersion::Host, MKVERSION(3, 22, 40));
+    env.root.hostConfiguration()[HostConfiguration::ClimateDeathRate].set(25);
+
+    Planet p = makePlayedPlanet();
+    p.setCargo(Element::Colonists, 200);
+    p.setTemperature(10);
+
+    describePlanetClimate(env.nodes, p, TURN, env.root, PLAYER, env.tx);
+    TS_ASSERT_EQUALS(toString(env.nodes),
+                     "<ul>"
+                     "<li>Climate type: arctic</li>"
+                     "<li>Average temperature: 10\xC2\xB0""F</li>"
+                     "<li>Supports 2,300 Player 3s"
+                     "<ul><li>won\'t die if less than 9,200</li></ul></li>"
+                     "</ul>");
+}
+
+/** Test describePlanetClimate(), scanned planet.
+    This is mostly a regression test. */
+void
+TestGameMapPlanetInfo::testDescribePlanetClimateUnowned()
+{
+    Environment env;
+    env.root.hostVersion() = HostVersion(HostVersion::Host, MKVERSION(3, 22, 40));
+
+    Planet p = makeUnownedPlanet();
+
+    describePlanetClimate(env.nodes, p, TURN, env.root, 6, env.tx);
+    TS_ASSERT_EQUALS(toString(env.nodes),
+                     "<ul>"
+                     "<li>Climate type: arctic</li>"
+                     "<li>Average temperature: 4\xC2\xB0""F</li>"
+                     "<li>Supports 1,100 Player 6s"
+                     "<ul><li>won\'t die if less than 11,000</li></ul></li>"
+                     "</ul>");
+}
+
 /** Test describePlanetNatives(). */
 void
 TestGameMapPlanetInfo::testDescribePlanetNatives()
@@ -323,6 +446,66 @@ TestGameMapPlanetInfo::testDescribePlanetNativesEmpty()
     TS_ASSERT_EQUALS(toString(env.nodes),
                      "<ul>"
                      "<li>No information on natives available.</li>"
+                     "</ul>");
+}
+
+/** Test describePlanetNatives(), aged information. */
+void
+TestGameMapPlanetInfo::testDescribePlanetNativesAged()
+{
+    const int VIEWPOINT = 4;
+    static_assert(PLAYER != VIEWPOINT, "PLAYER");
+
+    Environment env;
+    describePlanetNatives(env.nodes, makeHistoryPlanet(), TURN, env.root, PLAYER, game::map::UnloadInfo(), env.tx);
+    TS_ASSERT_EQUALS(toString(env.nodes),
+                     "<ul>"
+                     "<li>Native race: Bovinoid"
+                     "<ul><li>Pay additional supplies</li>"
+                     "<li>50 kt supplies per turn</li></ul></li>"
+                     "<li>Population: 500,000</li>"
+                     "<li>Government: Monarchy (120%)"
+                     "<ul><li><font>previous turn</font></li></ul></li>"    // <- timestamp
+                     "<li>Base Tax Rate: 9% (54 mc)</li>"
+                     "<li>Max Tax Rate: 44% (264 mc)</li>""</ul>");
+}
+
+/** Test describePlanetNatives(), unowned visited planet. */
+void
+TestGameMapPlanetInfo::testDescribePlanetNativesUnowned()
+{
+    Environment env;
+    env.root.hostVersion() = HostVersion(HostVersion::Host, MKVERSION(3, 22, 40));
+
+    describePlanetNatives(env.nodes, makeUnownedPlanet(), TURN, env.root, 7, game::map::UnloadInfo(), env.tx);
+    TS_ASSERT_EQUALS(toString(env.nodes),
+                     "<ul>"
+                     "<li>Native race: Reptilian"
+                     "<ul><li>Double mining rates</li></ul></li>"
+                     "<li>Population: 4,633,600</li>"
+                     "<li>Government: Pre-Tribal (40%)</li>"
+                     "<li>Base Tax Rate: 5% (93 mc)</li>"
+                     "<li>Max Tax Rate: 40% (741 mc)</li>"
+                     "</ul>");
+}
+
+/** Test describePlanetNatives(), unowned visited planet, visitor is borg. */
+void
+TestGameMapPlanetInfo::testDescribePlanetNativesUnownedBorg()
+{
+    Environment env;
+    env.root.hostVersion() = HostVersion(HostVersion::Host, MKVERSION(3, 22, 40));
+
+    describePlanetNatives(env.nodes, makeUnownedPlanet(), TURN, env.root, 6, game::map::UnloadInfo(), env.tx);
+    TS_ASSERT_EQUALS(toString(env.nodes),
+                     "<ul>"
+                     "<li>Native race: Reptilian"
+                     "<ul><li>Double mining rates</li></ul></li>"
+                     "<li>Population: 4,633,600</li>"
+                     "<li>Government: Pre-Tribal (40%)</li>"
+                     "<li>Base Tax Rate: 5% (93 mc)</li>"
+                     "<li>Max Tax Rate: 20% (371 mc)</li>"              // <- limit applied
+                     "<li>Assimilated in 13 turns by 10 clans</li>"     // <- borg only
                      "</ul>");
 }
 
@@ -374,6 +557,55 @@ TestGameMapPlanetInfo::testDescribePlanetColonyRGA()
                      "</ul>");
 }
 
+/** Test describePlanetColony() with UnloadInfo. */
+void
+TestGameMapPlanetInfo::testDescribePlanetColonyGroundAttack()
+{
+    // Use lizards as attackers for some nontrivial attack factor
+    const int VIEWPOINT = 2;
+    static_assert(PLAYER != VIEWPOINT, "PLAYER");
+
+    game::map::UnloadInfo u;
+    u.hostileUnload = 7;
+    u.hostileUnloadIsAssumed = true;
+
+    Environment env;
+    describePlanetColony(env.nodes, makePlayedPlanet(), TURN, env.root, VIEWPOINT, u, env.tx);
+    TS_ASSERT_EQUALS(toString(env.nodes),
+                     "<ul>"
+                     "<li>Colonists: Player 3</li>"
+                     "<li>Population: 10,000</li>"
+                     "<li>20 factories, 10 mines, 5 DPs</li>"
+                     "<li>200 mc, 70 supplies</li>"
+                     "<li>Friendly code: xyz</li>"
+                     "<li>Assuming, we\'d beam down 7 clans."
+                     "<ul><li><font>Chance to win ground combat: 38%</font><br></br>"
+                     "<font>Up to 3 of our clans survive.</font><br></br>"
+                     "<font>Up to 45 of their clans survive.</font></li></ul></li>"
+                     "</ul>");
+}
+
+/** Test describePlanetColony(), aged information. */
+void
+TestGameMapPlanetInfo::testDescribePlanetColonyAged()
+{
+    const int VIEWPOINT = 4;
+    static_assert(PLAYER != VIEWPOINT, "PLAYER");
+
+    Environment env;
+    describePlanetColony(env.nodes, makeHistoryPlanet(), TURN, env.root, PLAYER, game::map::UnloadInfo(), env.tx);
+    TS_ASSERT_EQUALS(toString(env.nodes),
+                     "<ul>"
+                     "<li>Colonists: Player 3</li>"
+                     "<li>Population: 10,000</li>"
+                     "<li>20 factories, 10 mines, 30 DPs"
+                     "<ul><li><font>5 turns ago</font></li></ul></li>"    // <- timestamp
+                     "<li>200 mc, 70 supplies"
+                     "<ul><li><font>5 turns ago</font></li></ul></li>"    // <- timestamp
+                     "<li>Last known friendly code: xyz</li>"
+                     "</ul>");
+}
+
 /** Test describePlanetBuildingEffects(). */
 void
 TestGameMapPlanetInfo::testDescribePlanetBuildingEffects()
@@ -410,7 +642,7 @@ TestGameMapPlanetInfo::testDescribePlanetDefenseEffects()
     game::spec::ShipList shipList;
     for (int i = 1; i <= 10; ++i) {
         shipList.beams().create(i)->setName(Format("Beam %d", i));
-        shipList.launchers().create(i)->setName(Format("Beam %d", i));
+        shipList.launchers().create(i)->setName(Format("Torp %d", i));
     }
 
     Planet p = makePlayedPlanet();
@@ -431,6 +663,31 @@ TestGameMapPlanetInfo::testDescribePlanetDefenseEffects()
                          "  Beam 2 (+8)\n"
                          "2 fighters (+2)\n"
                          "2 fighter bays (+2)\n"
+                         "3% shield loss from enemy fighter (+1)\n"
+                         "3% damage from enemy fighter (+1)\n");
+    }
+
+    // Retry with PlanetsHaveTubes
+    {
+        game::test::Root root(HostVersion(HostVersion::PHost, MKVERSION(3, 2, 0)));
+        root.hostConfiguration()[HostConfiguration::PlanetsHaveTubes].set(1);
+
+        game::map::DefenseEffectInfos_t result;
+        describePlanetDefenseEffects(result,
+                                     p,
+                                     root,
+                                     shipList,
+                                     game::UnitScoreDefinitionList(),
+                                     tx);
+
+        TS_ASSERT_EQUALS(toString(result),
+                         "1 beam (+2)\n"
+                         "  Beam 2 (+8)\n"
+                         "2 fighters (+2)\n"
+                         "2 fighter bays (+2)\n"
+                         "1 torpedo launcher (+4)\n"
+                         "  Torp 2 (+8)\n"
+                         "3 torpedoes (+4)\n"
                          "3% shield loss from enemy fighter (+1)\n"
                          "3% damage from enemy fighter (+1)\n");
     }
@@ -456,6 +713,56 @@ TestGameMapPlanetInfo::testDescribePlanetDefenseEffects()
                          "2% shield loss from enemy fighter (+213) (unachievable)\n"
                          "2% damage from enemy fighter (+213) (unachievable)\n");
     }
+}
+
+/** Test prepareUnloadInfo(). */
+void
+TestGameMapPlanetInfo::testPrepareUnloadInfo()
+{
+    using game::map::Ship;
+    const int PLANET_ID = 77;
+    const int VIEWPOINT = 4;
+
+    game::config::HostConfiguration config;
+
+    game::test::SimpleTurn t;
+    t.setPosition(game::map::Point(1000, 1000));
+    t.addPlanet(PLANET_ID, 3, Planet::ReadOnly);
+
+    // Affected ships
+    int shipId = 1;
+    {
+        Ship& s = t.addShip(shipId++, VIEWPOINT, Ship::Playable);
+        s.setTransporterTargetId(Ship::UnloadTransporter, PLANET_ID);
+        s.setTransporterCargo(Ship::UnloadTransporter, Element::Colonists, 5);
+    }
+    {
+        Ship& s = t.addShip(shipId++, VIEWPOINT, Ship::Playable);
+        s.setTransporterTargetId(Ship::UnloadTransporter, PLANET_ID);
+        s.setTransporterCargo(Ship::UnloadTransporter, Element::Colonists, 7);
+    }
+
+    // Not affected (foreign)
+    {
+        Ship& s = t.addShip(shipId++, VIEWPOINT+1, Ship::Playable);
+        s.setTransporterTargetId(Ship::UnloadTransporter, PLANET_ID);
+        s.setTransporterCargo(Ship::UnloadTransporter, Element::Colonists, 9);
+    }
+
+    // Not affected (elsewhere)
+    t.setPosition(game::map::Point(1000, 2000));
+    {
+        Ship& s = t.addShip(shipId++, VIEWPOINT, Ship::Playable);
+        s.setTransporterTargetId(Ship::UnloadTransporter, PLANET_ID);
+        s.setTransporterCargo(Ship::UnloadTransporter, Element::Colonists, 11);
+    }
+
+    game::map::UnloadInfo info = game::map::prepareUnloadInfo(t.universe(), PLANET_ID, VIEWPOINT, game::UnitScoreDefinitionList(), t.shipList(), config);
+
+    TS_ASSERT_EQUALS(info.hostileUnload, 12);
+    TS_ASSERT_EQUALS(info.friendlyUnload, 0);
+    TS_ASSERT_EQUALS(info.hostileUnloadIsAssault, false);
+    TS_ASSERT_EQUALS(info.hostileUnloadIsAssumed, false);
 }
 
 /** Test packGroundDefenseInfo(). */

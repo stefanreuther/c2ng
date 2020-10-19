@@ -18,6 +18,15 @@ class TestGameActionsBaseBuildExecutor : public CxxTest::TestSuite {
     void testInterface();
 };
 
+class TestGameActionsBaseFixRecycle : public CxxTest::TestSuite {
+ public:
+    void testNoBase();
+    void testEmpty();
+    void testNormal();
+    void testSet();
+    void testSetFail();
+};
+
 class TestGameActionsBuildAmmo : public CxxTest::TestSuite {
  public:
     void testFail();
@@ -25,6 +34,7 @@ class TestGameActionsBuildAmmo : public CxxTest::TestSuite {
     void testLimitCapacity();
     void testLimitResource();
     void testLimitKey();
+    void testNoLimitKey();
     void testLimitKeyDowngrade();
     void testLimitKeyDowngradeNoListener();
     void testLimitTechCost();
@@ -145,6 +155,21 @@ class TestGameActionsChangeBuildQueue : public CxxTest::TestSuite {
     void testClone();
 };
 
+class TestGameActionsChangeShipFriendlyCode : public CxxTest::TestSuite {
+ public:
+    void testNormal();
+    void testAvoidNew();
+    void testAvoidOld();
+    void testAvoidRevert();
+};
+
+class TestGameActionsConvertSupplies : public CxxTest::TestSuite {
+ public:
+    void testNormal();
+    void testReserved();
+    void testBuy();
+};
+
 class TestGameActionsPreconditions : public CxxTest::TestSuite {
  public:
     void testShip();
@@ -153,12 +178,30 @@ class TestGameActionsPreconditions : public CxxTest::TestSuite {
     void testSession();
 };
 
+class TestGameActionsRemoteControlAction : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testOwn();
+    void testOwnDrop();
+    void testOwnDisabled();
+    void testOwnControlled();
+    void testForeign();
+    void testForeignDisabled();
+    void testForeignThird();
+    void testForeignControlled();
+};
+
 class TestGameActionsTaxationAction : public CxxTest::TestSuite {
  public:
     void testEmpty();
     void testNormal();
     void testNormalTim();
     void testIncomeLimit();
+    void testChangeRevenue();
+    void testModifyRevert();
+    void testSafeTax();
+    void testSetNumBuildings();
+    void testDescribe();
 };
 
 class TestGameActionsTechUpgrade : public CxxTest::TestSuite {

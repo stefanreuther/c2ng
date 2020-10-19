@@ -130,10 +130,15 @@ TestUtilSyntaxKeywordTable::testLoadErrors()
 
     // Badly-placed block closer (missing opener)
     {
+        util::syntax::KeywordTable tab;
         afl::io::ConstMemoryStream ms(afl::string::toBytes("x {\na=b\n}\n}"));
         LogCounter c;
-        util::syntax::KeywordTable().load(ms, c);
+        tab.load(ms, c);
         TS_ASSERT_EQUALS(c.get(), 1);
+
+        const String_t* p = tab.get("x.a");
+        TS_ASSERT(p);
+        TS_ASSERT_EQUALS(*p, "b");
     }
 
     // Bad reference
@@ -193,7 +198,7 @@ TestUtilSyntaxKeywordTable::testLoad()
     TS_ASSERT_EQUALS(*testee.get("d"), "baz");
 
     TS_ASSERT(testee.get("d.x") != 0);
-    TS_ASSERT_EQUALS(*testee.get("d.x"), "iks");  // copied from original value
+    TS_ASSERT_EQUALS(*testee.get("d.x"), "iks");  // copied from original value before it is overwritten
 
     TS_ASSERT(testee.get("e") == 0);
 

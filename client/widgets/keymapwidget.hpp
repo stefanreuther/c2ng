@@ -4,8 +4,8 @@
 #ifndef C2NG_CLIENT_WIDGETS_KEYMAPWIDGET_HPP
 #define C2NG_CLIENT_WIDGETS_KEYMAPWIDGET_HPP
 
-#include "client/proxy/keymapproxy.hpp"
 #include "client/si/control.hpp"
+#include "game/proxy/keymapproxy.hpp"
 #include "game/session.hpp"
 #include "ui/invisiblewidget.hpp"
 #include "util/keymap.hpp"
@@ -27,7 +27,7 @@ namespace client { namespace widgets {
 
         \todo If the game thread hangs, this will make the UI perceived-hang.
         We should set up an emergency keymap in this case. */
-    class KeymapWidget : public ui::InvisibleWidget, private client::proxy::KeymapProxy::Listener {
+    class KeymapWidget : public ui::InvisibleWidget, private game::proxy::KeymapProxy::Listener {
      public:
         /** Constructor.
             \param gameSender Sender to game session
@@ -52,7 +52,7 @@ namespace client { namespace widgets {
         virtual void updateKeyList(util::KeySet_t& keys);
 
         /** Keymap proxy. Allows us to access the keymap. */
-        client::proxy::KeymapProxy m_proxy;
+        game::proxy::KeymapProxy m_proxy;
 
         /** Script controller. */
         client::si::Control& m_control;

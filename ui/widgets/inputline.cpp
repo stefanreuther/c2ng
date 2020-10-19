@@ -25,6 +25,8 @@
 #include "ui/widgets/standarddialogbuttons.hpp"
 
 namespace {
+    const char*const DEFAULT_FONT = "+";
+
     size_t getPreviousWordBoundary(afl::charset::Utf8& u8, const String_t& str, size_t pos)
     {
         while (pos > 0 && u8.charAt(str, pos-1) == ' ')
@@ -62,7 +64,7 @@ ui::widgets::InputLine::InputLine(size_t maxLength, Root& root)
       m_cursorIndex(0),
       m_pixelOffset(0),
       m_text(),
-      m_font(),
+      m_font(DEFAULT_FONT),
       m_preferredLength(maxLength < 40 ? int(maxLength) : 40),
       m_flags(),
       m_mouseDown(false),
@@ -86,7 +88,7 @@ ui::widgets::InputLine::InputLine(size_t maxLength, int preferredLength, Root& r
       m_cursorIndex(0),
       m_pixelOffset(0),
       m_text(),
-      m_font(),
+      m_font(DEFAULT_FONT),
       m_preferredLength(preferredLength),
       m_flags(),
       m_mouseDown(false),

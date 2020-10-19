@@ -5,7 +5,7 @@
 #define C2NG_CLIENT_TILES_VISUALSCANHULLINFOTILE_HPP
 
 #include "afl/string/string.hpp"
-#include "client/proxy/objectobserver.hpp"
+#include "game/proxy/objectobserver.hpp"
 #include "ui/root.hpp"
 #include "ui/simplewidget.hpp"
 #include "util/requestreceiver.hpp"
@@ -39,7 +39,7 @@ namespace client { namespace tiles {
 
         void setContent(const Content& content);
 
-        void attach(client::proxy::ObjectObserver& oop);
+        void attach(game::proxy::ObjectObserver& oop);
 
      private:
         ui::Root& m_root;

@@ -4,22 +4,22 @@
 #ifndef C2NG_CLIENT_WIDGETS_HULLSPECIFICATIONSHEET_HPP
 #define C2NG_CLIENT_WIDGETS_HULLSPECIFICATIONSHEET_HPP
 
+#include "afl/base/signal.hpp"
+#include "client/widgets/playerlist.hpp"
+#include "game/playerarray.hpp"
+#include "game/playerset.hpp"
+#include "game/proxy/hullspecificationproxy.hpp"
 #include "ui/group.hpp"
 #include "ui/widgets/imagebutton.hpp"
-#include "client/widgets/playerlist.hpp"
-#include "ui/widgets/statictext.hpp"
 #include "ui/widgets/simpletable.hpp"
-#include "game/playerset.hpp"
-#include "game/playerarray.hpp"
-#include "client/proxy/hullspecificationproxy.hpp"
-#include "afl/base/signal.hpp"
+#include "ui/widgets/statictext.hpp"
 #include "util/numberformatter.hpp"
 
 namespace client { namespace widgets {
 
     class HullSpecificationSheet : public ui::Group {
      public:
-        typedef client::proxy::HullSpecificationProxy::HullSpecification HullSpecification_t;
+        typedef game::proxy::HullSpecificationProxy::HullSpecification HullSpecification_t;
 
         HullSpecificationSheet(ui::Root& root,
                                bool hasPerTurnCosts,

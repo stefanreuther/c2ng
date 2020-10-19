@@ -219,13 +219,13 @@ gfx::gen::Application::doSpace(afl::base::Ref<afl::sys::Environment::CommandLine
         if (handleCommonOption(opts, text, parser)) {
             // ok
         } else if (text == "s") {
-            int n;
+            int n = 0;
             if (!strToInteger(parser.getRequiredParameter(text), n) || n < 0) {
                 errorExit(Format(tx("parameter for \"-%s\" is invalid"), text));
             }
             config.setNumSuns(n);
         } else if (text == "p") {
-            int p;
+            int p = 0;
             if (!strToInteger(parser.getRequiredParameter(text), p) || p < 0 || p >= 100) {
                 errorExit(Format(tx("parameter for \"-%s\" is invalid"), text));
             }

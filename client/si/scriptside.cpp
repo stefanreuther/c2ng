@@ -34,7 +34,7 @@ client::si::ScriptSide::~ScriptSide()
 void
 client::si::ScriptSide::executeTask(uint32_t waitId, std::auto_ptr<ScriptTask> task, game::Session& session)
 {
-    interpreter::ProcessList& processList = session.world().processList();
+    interpreter::ProcessList& processList = session.processList();
     uint32_t pgid = processList.allocateProcessGroup();
     task->execute(pgid, session);
 
@@ -46,7 +46,7 @@ client::si::ScriptSide::executeTask(uint32_t waitId, std::auto_ptr<ScriptTask> t
 void
 client::si::ScriptSide::continueProcessWait(uint32_t id, game::Session& session, RequestLink2 link)
 {
-    interpreter::ProcessList& list = session.world().processList();
+    interpreter::ProcessList& list = session.processList();
     uint32_t pid;
     if (!link.getProcessId(pid)) {
         handleWait(id);
@@ -175,7 +175,7 @@ client::si::ScriptSide::callAsyncNew(UserCall* t)
 void
 client::si::ScriptSide::continueProcess(game::Session& session, RequestLink2 link)
 {
-    interpreter::ProcessList& list = session.world().processList();
+    interpreter::ProcessList& list = session.processList();
     uint32_t pid;
     if (link.getProcessId(pid)) {
         if (interpreter::Process* p = list.getProcessById(pid)) {
@@ -192,7 +192,7 @@ void
 client::si::ScriptSide::joinProcess(game::Session& session, RequestLink2 link, RequestLink2 other)
 {
     // FIXME: it is an error if link is invalid but other is valid.
-    interpreter::ProcessList& list = session.world().processList();
+    interpreter::ProcessList& list = session.processList();
     uint32_t linkPid, otherPid;
     if (link.getProcessId(linkPid) && other.getProcessId(otherPid)) {
         if (interpreter::Process* p = list.getProcessById(linkPid)) {
@@ -210,7 +210,7 @@ client::si::ScriptSide::joinProcess(game::Session& session, RequestLink2 link, R
 void
 client::si::ScriptSide::continueProcessWithFailure(game::Session& session, RequestLink2 link, String_t error)
 {
-    interpreter::ProcessList& list = session.world().processList();
+    interpreter::ProcessList& list = session.processList();
     uint32_t pid;
     if (link.getProcessId(pid)) {
         if (interpreter::Process* p = list.getProcessById(pid)) {
@@ -223,7 +223,7 @@ client::si::ScriptSide::continueProcessWithFailure(game::Session& session, Reque
 void
 client::si::ScriptSide::detachProcess(game::Session& session, RequestLink2 link)
 {
-    interpreter::ProcessList& list = session.world().processList();
+    interpreter::ProcessList& list = session.processList();
     uint32_t pid;
     if (link.getProcessId(pid)) {
         if (interpreter::Process* p = list.getProcessById(pid)) {
@@ -238,7 +238,7 @@ client::si::ScriptSide::detachProcess(game::Session& session, RequestLink2 link)
 void
 client::si::ScriptSide::setVariable(game::Session& session, RequestLink2 link, String_t name, std::auto_ptr<afl::data::Value> value)
 {
-    interpreter::ProcessList& list = session.world().processList();
+    interpreter::ProcessList& list = session.processList();
     uint32_t pid;
     if (link.getProcessId(pid)) {
         if (interpreter::Process* p = list.getProcessById(pid)) {
@@ -250,18 +250,11 @@ client::si::ScriptSide::setVariable(game::Session& session, RequestLink2 link, S
 void
 client::si::ScriptSide::runProcesses(game::Session& session)
 {
-    interpreter::ProcessList& processList = session.world().processList();
+    interpreter::ProcessList& processList = session.processList();
 
     // Run processes. This will execute onProcessGroupFinish() callbacks that process waits.
     processList.run();
-
-    // Remove terminated processes.
-    // We cannot remove terminated processes as long as we have active waits;
-    // a wait might be interested in a terminated process' state although its process group is not yet finished.
-    // FIXME: this means nested UI processes stay around until the surrounding UI process terminated. Can we be smarter?
-    if (m_waits.empty()) {
-        processList.removeTerminatedProcesses();
-    }
+    processList.removeTerminatedProcesses();
 
     // Clean up messages
     session.notifications().removeOrphanedMessages();
@@ -270,6 +263,7 @@ client::si::ScriptSide::runProcesses(game::Session& session)
 void
 client::si::ScriptSide::init(game::Session& session)
 {
+    // Closure for associating the session with the callback
     class Relay : public afl::base::Closure<void(uint32_t)> {
      public:
         Relay(game::Session& session, ScriptSide& self)
@@ -283,7 +277,7 @@ client::si::ScriptSide::init(game::Session& session)
         game::Session& m_session;
         ScriptSide& m_self;
     };
-    conn_processGroupFinish = session.world().processList().sig_processGroupFinish.addNewClosure(new Relay(session, *this));
+    conn_processGroupFinish = session.processList().sig_processGroupFinish.addNewClosure(new Relay(session, *this));
 
     // IntExecutionContext::setBreakHandler(checkBreak);
 }
@@ -301,18 +295,6 @@ client::si::ScriptSide::onProcessGroupFinish(game::Session& session, uint32_t pg
     Wait w;
     while (extractWait(pgid, w)) {
         handleWait(w.waitId);
-    }
-
-    // Report failed processes
-    // This reports failure for all processes in this process group,
-    // which could have any origin (e.g. loaded from VM) and have long lost their finalizer.
-    const interpreter::ProcessList::Vector_t& processes = session.world().processList().getProcessList();
-    for (size_t i = 0, n = processes.size(); i < n; ++i) {
-        if (interpreter::Process* p = processes[i]) {
-            if (p->getProcessGroupId() == pgid && p->getState() == interpreter::Process::Failed) {
-                session.logError(p->getError());
-            }
-        }
     }
 
     // Notify listeners about changes by the terminated process group

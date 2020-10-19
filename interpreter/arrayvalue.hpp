@@ -38,7 +38,7 @@ namespace interpreter {
 
         /** Access underlying actual array.
             \return array */
-        afl::base::Ref<ArrayData> getData();
+        afl::base::Ref<ArrayData> getData() const;
 
      private:
         afl::base::Ref<ArrayData> m_data;

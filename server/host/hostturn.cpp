@@ -12,22 +12,24 @@
 #include "afl/io/directoryentry.hpp"
 #include "afl/net/redis/stringfield.hpp"
 #include "afl/string/format.hpp"
+#include "game/v3/registrationkey.hpp"
 #include "game/v3/turnfile.hpp"
 #include "server/errors.hpp"
 #include "server/host/exporter.hpp"
 #include "server/host/game.hpp"
 #include "server/host/gamearbiter.hpp"
 #include "server/host/installer.hpp"
+#include "server/host/keystore.hpp"
 #include "server/host/root.hpp"
+#include "server/host/schedule.hpp"
 #include "server/host/session.hpp"
+#include "server/host/user.hpp"
 #include "server/interface/filebaseclient.hpp"
 #include "server/interface/hostgame.hpp"
-#include "server/host/user.hpp"
-#include "server/host/schedule.hpp"
 
 using server::interface::HostGame;
 
-namespace {
+namespace server { namespace host { namespace {
     const char LOG_NAME[] = "host.turn";
 
     // FIXME: duplicated from hostplayer.cpp
@@ -46,7 +48,7 @@ namespace {
        We suggest "allow temporary" if
        - schedule is "run when all turns are in" or "run at fixed schedule, but allow to run earlier"
        - hostDelay is >= 5 minutes (so there's actually time to do it) */
-    bool checkAllowTemp(server::host::Game& g)
+    bool checkAllowTemp(Game& g)
     {
         afl::net::redis::Subtree schedule = g.getSchedule();
         String_t currentSchedule = schedule.stringListKey("list")[0];
@@ -54,14 +56,24 @@ namespace {
             return false;
         }
 
-        server::host::Schedule sch;
+        Schedule sch;
         sch.loadFrom(schedule.hashKey(currentSchedule));
 
         return (sch.getType() == server::interface::HostSchedule::Quick
                 || sch.getHostEarly())
             && sch.getHostDelay() >= 5;
     }
-}
+
+    void rememberKey(Root& root, String_t userId, int32_t gameId, const game::v3::TurnFile& trn)
+    {
+        game::v3::RegistrationKey key(std::auto_ptr<afl::charset::Charset>(new afl::charset::CodepageCharset(afl::charset::g_codepageLatin1)));
+        key.unpackFromBytes(afl::base::fromObject(trn.getDosTrailer().registrationKey));
+
+        KeyStore(User(root, userId).keyStore(), root.config()).
+            addKey(key, root.getTime(), gameId);
+    }
+
+} } }
 
 server::host::HostTurn::HostTurn(Session& session, Root& root)
     : m_session(session),
@@ -162,6 +174,9 @@ server::host::HostTurn::submit(const String_t& blob,
     if (game.getState() != HostGame::Running) {
         throw std::runtime_error(WRONG_GAME_STATE);
     }
+
+    // Remember the used key
+    rememberKey(m_root, user, gameNumber, *trn);
 
     // Build base directory
     afl::base::Ref<afl::io::DirectoryEntry> workdirEntry =

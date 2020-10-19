@@ -9,7 +9,9 @@
 #include "util/syntax/chighlighter.hpp"
 #include "util/syntax/inihighlighter.hpp"
 #include "util/syntax/keywordtable.hpp"
+#include "util/syntax/lisphighlighter.hpp"
 #include "util/syntax/nullhighlighter.hpp"
+#include "util/syntax/pascalhighlighter.hpp"
 #include "util/syntax/scripthighlighter.hpp"
 
 /** Simple test. */
@@ -51,6 +53,8 @@ TestUtilSyntaxFactory::testIt()
     TS_ASSERT(dynamic_cast<util::syntax::CHighlighter*>(&testee.create("foo.as", del)) != 0);
     TS_ASSERT(dynamic_cast<util::syntax::CHighlighter*>(&testee.create("javascript", del)) != 0);
     TS_ASSERT(dynamic_cast<util::syntax::CHighlighter*>(&testee.create("jscript", del)) != 0);
+    TS_ASSERT(dynamic_cast<util::syntax::PascalHighlighter*>(&testee.create("foo.pas", del)) != 0);
+    TS_ASSERT(dynamic_cast<util::syntax::LispHighlighter*>(&testee.create("foo.el", del)) != 0);
     TS_ASSERT(dynamic_cast<util::syntax::NullHighlighter*>(&testee.create("x.bas", del)) != 0);
     TS_ASSERT(dynamic_cast<util::syntax::NullHighlighter*>(&testee.create("x.xls", del)) != 0);
 

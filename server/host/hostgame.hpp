@@ -28,15 +28,8 @@ namespace server { namespace host {
         virtual void setOwner(int32_t gameId, String_t user);
         virtual void setName(int32_t gameId, String_t name);
         virtual Info getInfo(int32_t gameId);
-        virtual void getInfos(afl::base::Optional<State> requiredState,
-                              afl::base::Optional<Type> requiredType,
-                              afl::base::Optional<String_t> requiredUser,
-                              bool verbose,
-                              std::vector<Info>& result);
-        virtual void getGames(afl::base::Optional<State> requiredState,
-                              afl::base::Optional<Type> requiredType,
-                              afl::base::Optional<String_t> requiredUser,
-                              afl::data::IntegerList_t& result);
+        virtual void getInfos(const Filter& filter, bool verbose, std::vector<Info>& result);
+        virtual void getGames(const Filter& filter, afl::data::IntegerList_t& result);
         virtual void setConfig(int32_t gameId, const afl::data::StringList_t& keyValues);
         virtual String_t getConfig(int32_t gameId, String_t key);
         virtual void getConfig(int32_t gameId, const afl::data::StringList_t& keys, afl::data::StringList_t& values);
@@ -58,10 +51,7 @@ namespace server { namespace host {
         Session& m_session;
         Root& m_root;
 
-        void listGames(afl::base::Optional<State> requiredState,
-                       afl::base::Optional<Type> requiredType,
-                       afl::base::Optional<String_t> requiredUser,
-                       afl::data::IntegerList_t& result);
+        void listGames(const Filter& filter, afl::data::IntegerList_t& result);
 
         bool addRemoveTool(int32_t gameId, String_t toolId, bool add);
     };

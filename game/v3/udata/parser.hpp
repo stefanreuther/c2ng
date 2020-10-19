@@ -33,6 +33,8 @@ namespace game { namespace v3 { namespace udata {
                afl::string::Translator& tx,
                afl::sys::LogListener& log);
 
+        virtual ~Parser();
+
         // Reader:
         virtual bool handleRecord(uint16_t recordId, afl::base::ConstBytes_t data);
         virtual void handleError(afl::io::Stream& in);

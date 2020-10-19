@@ -31,6 +31,8 @@ class TestUtilRichParser : public CxxTest::TestSuite {
  public:
     void testParseXml();
     void testAll();
+    void testSkip();
+    void testSpaceNorm();
 };
 
 class TestUtilRichStyleAttribute : public CxxTest::TestSuite {

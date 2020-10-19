@@ -130,7 +130,6 @@ namespace game { namespace actions {
         /** Build CargoTransfer action.
             \param action   [out] Target action. Must be constructed and empty.
             \param turn     [in/out] Turn
-            \param iface    [in] Interface (needed to construct CargoContainer descendants)
             \param config   [in] Host configuration (needed to construct CargoContainer descendants)
             \param shipList [in] Ship list (needed to construct CargoContainer descendants)
             \param version  [in] Host version (needed to construct CargoContainer descendants)
@@ -138,7 +137,6 @@ namespace game { namespace actions {
             \throw Exception if setup is incomplete/impossible (precondition not satisfied) */
         void build(CargoTransfer& action,
                    Turn& turn,
-                   InterpreterInterface& iface,
                    const game::config::HostConfiguration& config,
                    const game::spec::ShipList& shipList,
                    const game::HostVersion& version);

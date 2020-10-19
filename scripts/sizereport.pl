@@ -21,13 +21,20 @@
 #  - "Item Size" lists the size of this leaf. No size is given if the item does not allocate memory (e.g. a namespace).
 #    Both total and leaf shown mean that this element takes size itself (the leaf size), but has children, as in this case,
 #    a function with inner classes.
-#  - "[x3]" means that the compiler created 3 copies of this element (constructors, destructors).
+#  - "[x3]" means that the compiler created 3 copies of this element (constructors, destructors), item size is sum.
 #
 #  Symbol names are broken at namespace/class name/function name boundaries and template parameters,
 #  i.e. you will see how much all namespace members consume, all class members consume, all template instances consume.
 #  The parser is a little whacky.
 #
 #  If the given files share some symbols (e.g. template instances), those will be counted as additional copies, beware!
+#
+#  Options:
+#
+#     --calls            Also list call counts (how often is this function called?). Works by parsing assembler code.
+#     --objects          Also count objects (default: only functions)
+#     --nonweak          Do not count weak symbols (i.e. template instances)
+#     --underscore, -u   Also interpret '_' as namespace/group separator
 #
 use strict;
 
@@ -41,6 +48,7 @@ my $tree = {};
 my $calls = 0;
 my $objs = 0;
 my $weak = 1;
+my $under = 0;
 
 foreach my $f (@ARGV) {
     if ($f eq '--calls') {
@@ -53,6 +61,10 @@ foreach my $f (@ARGV) {
     }
     if ($f eq '--nonweak') {
         $weak = 0;
+        next;
+    }
+    if ($f eq '-u' || $f eq '--underscore') {
+        $under = 1;
         next;
     }
     open PIPE, "readelf -Ws $f | c++filt |" or die "popen($f)";
@@ -127,11 +139,11 @@ sub parseName {
     pos($name) = 0;
     while (1) {
         if ($name =~ /\G([0-9a-z_.]+|\(anonymous namespace\))::/sgci) {
-            push @result, $1, '::';
+            push @result, maybeSplitUnderscores($1), '::';
         } elsif ($name =~ /\G::/sgci) {
             push @result, '::';
         } elsif ($name =~ /\G([0-9a-z_.]+)($|(?=[*&@]))/sgci) {
-            push @result, $1;
+            push @result, maybeSplitUnderscores($1);
         } elsif ($name =~ /\G(vtable|typeinfo name|typeinfo|VTT|guard variable) for (.*)/sgci) {
             my $what = $1;
             push @result, parseName($2), '::', $what;
@@ -270,4 +282,15 @@ sub sumSize {
         }
     }
     $sum;
+}
+
+sub maybeSplitUnderscores {
+    my $x = shift;
+    if ($under) {
+        my @list = split /(_+)/, $x;
+        shift @list if @list && $list[0] eq '';
+        @list;
+    } else {
+        $x;
+    }
 }

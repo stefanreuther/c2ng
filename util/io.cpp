@@ -57,3 +57,25 @@ util::loadPascalString(afl::io::Stream& in, afl::charset::Charset& charset)
 
     return charset.decode(encodedChars);
 }
+
+String_t
+util::appendFileNameExtension(afl::io::FileSystem& fs, String_t pathName, String_t ext, bool force)
+{
+    // ex io/dirs.cc:appendFileNameExtension
+    String_t fileName = fs.getFileName(pathName);
+    String_t dirName  = fs.getDirectoryName(pathName);
+    if (fileName.size() == 0) {
+        // pathological case
+        return fs.makePathName(dirName, "." + ext);
+    } else {
+        // do not accept index 0 to avoid identifying ".emacs" as zero-length basename with extension EMACS
+        String_t::size_type n = fileName.rfind('.');
+        if (n == String_t::npos || n == 0) {
+            return fs.makePathName(dirName, fileName + "." + ext);
+        } else if (force) {
+            return fs.makePathName(dirName, fileName.substr(0, n+1) + ext);
+        } else {
+            return pathName;
+        }
+    }
+}

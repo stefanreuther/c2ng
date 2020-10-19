@@ -78,19 +78,19 @@ namespace {
 
         // Do it
         game::config::HostConfiguration& config = root.hostConfiguration();
-        game::map::PlanetStorage container(planet, session.interface(), config);
+        game::map::PlanetStorage container(planet, config);
         game::actions::BuildStarbase action(planet, container, wantBase, session.translator(), config);
         action.commit();
     }
 
-    void doAutobuild(game::map::Planet& planet, interpreter::Arguments& args, game::Session& session, game::Root& root)
+    void doAutobuild(game::map::Planet& planet, interpreter::Arguments& args, game::Root& root)
     {
         // ex IFPlanetAutoBuild
         // ex planint.pas:Planet_Autobuild
         args.checkArgumentCount(0);
 
         game::config::HostConfiguration& config = root.hostConfiguration();
-        game::map::PlanetStorage container(planet, session.interface(), config);
+        game::map::PlanetStorage container(planet, config);
         game::actions::BuildStructures action(planet, container, config);
         action.doStandardAutoBuild();
         action.commit();
@@ -99,7 +99,6 @@ namespace {
     void doBuildStructures(game::map::Planet& planet,
                            interpreter::Process& process,
                            interpreter::Arguments& args,
-                           game::Session& session,
                            game::Turn& turn,
                            game::Root& root,
                            const game::PlanetaryBuilding type)
@@ -115,7 +114,7 @@ namespace {
         interpreter::checkFlagArg(flag, 0, args.getNext(), "N");
 
         game::config::HostConfiguration& config = root.hostConfiguration();
-        game::map::PlanetStorage container(planet, session.interface(), config);
+        game::map::PlanetStorage container(planet, config);
         game::actions::BuildStructures action(planet, container, config);
         action.setUndoInformation(turn.universe());
 
@@ -193,7 +192,7 @@ namespace {
         game::spec::ShipList& shipList = game::actions::mustHaveShipList(session);
 
         // Create tech upgrade action (checks preconditions)
-        game::map::PlanetStorage container(pl, session.interface(), root.hostConfiguration());
+        game::map::PlanetStorage container(pl, root.hostConfiguration());
         game::actions::TechUpgrade action(pl, container, shipList, root);
         action.setUndoInformation(turn.universe());
 
@@ -221,7 +220,7 @@ namespace {
         game::spec::ShipList& shipList = game::actions::mustHaveShipList(session);
 
         // Create action
-        game::map::PlanetStorage container(pl, session.interface(), root.hostConfiguration());
+        game::map::PlanetStorage container(pl, root.hostConfiguration());
         game::actions::BuildParts action(pl, container, shipList, root);
         action.setUndoInformation(turn.universe());
 
@@ -398,7 +397,7 @@ namespace {
         }
 
         // Make a transaction and fire it
-        game::map::PlanetStorage container(pl, session.interface(), root.hostConfiguration());
+        game::map::PlanetStorage container(pl, root.hostConfiguration());
         game::actions::BuildShip a(pl, container, shipList, root);
         a.setUsePartsFromStorage(true);
         a.setBuildOrder(o);
@@ -434,14 +433,14 @@ namespace {
             }
 
             // ok
-            pReceiver.reset(new game::map::ShipStorage(*pShip, session.interface(), game::actions::mustHaveShipList(session)));
+            pReceiver.reset(new game::map::ShipStorage(*pShip, game::actions::mustHaveShipList(session)));
         } else {
             // No ship; use planet
-            pReceiver.reset(new game::map::PlanetStorage(pl, session.interface(), root.hostConfiguration()));
+            pReceiver.reset(new game::map::PlanetStorage(pl, root.hostConfiguration()));
         }
 
         // Build remainder
-        game::map::PlanetStorage financier(pl, session.interface(), root.hostConfiguration());
+        game::map::PlanetStorage financier(pl, root.hostConfiguration());
         game::actions::BuildAmmo action(pl, financier, *pReceiver, game::actions::mustHaveShipList(session), root);
         action.setUndoInformation(turn.universe());
 
@@ -605,7 +604,7 @@ game::interface::callPlanetMethod(game::map::Planet& pl,
         /* @q AutoBuild (Planet Command)
            Perform a standard auto-build operation.
            @since PCC 1.0.5, PCC2 1.99.9, PCC2 2.40.3 */
-        doAutobuild(pl, args, session, root);
+        doAutobuild(pl, args, root);
         break;
 
      case ipmBuildDefense:
@@ -622,7 +621,7 @@ game::interface::callPlanetMethod(game::map::Planet& pl,
            @since PCC 1.0.5, PCC2 1.99.9, PCC2 2.40.3 */
         // ex IFPlanetBuildDefense
         // ex planint.pas:Planet_BuildDefense
-        doBuildStructures(pl, process, args, session, turn, root, DefenseBuilding);
+        doBuildStructures(pl, process, args, turn, root, DefenseBuilding);
         break;
 
      case ipmBuildFactories:
@@ -639,7 +638,7 @@ game::interface::callPlanetMethod(game::map::Planet& pl,
            @since PCC 1.0.5, PCC2 1.99.9, PCC2 2.40.3 */
         // ex IFPlanetBuildFactories
         // ex planint.pas:Planet_BuildFactories
-        doBuildStructures(pl, process, args, session, turn, root, FactoryBuilding);
+        doBuildStructures(pl, process, args, turn, root, FactoryBuilding);
         break;
 
      case ipmBuildMines:
@@ -656,7 +655,7 @@ game::interface::callPlanetMethod(game::map::Planet& pl,
            @since PCC 1.0.5, PCC2 1.99.9, PCC2 2.40.3 */
         // ex IFPlanetBuildMines
         // ex planint.pas:Planet_BuildMines
-        doBuildStructures(pl, process, args, session, turn, root, MineBuilding);
+        doBuildStructures(pl, process, args, turn, root, MineBuilding);
         break;
 
      case ipmSetColonistTax:
@@ -716,7 +715,7 @@ game::interface::callPlanetMethod(game::map::Planet& pl,
            @since PCC 1.0.5, PCC2 1.99.9, PCC2 2.40.3 */
         // ex IFPlanetBuildBaseDefense
         // ex planint.pas:Planet_BuildBaseDefense
-        doBuildStructures(pl, process, args, session, turn, root, BaseDefenseBuilding);
+        doBuildStructures(pl, process, args, turn, root, BaseDefenseBuilding);
         break;
 
      case ipmSetTech:

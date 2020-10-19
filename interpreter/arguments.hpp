@@ -112,7 +112,7 @@ namespace interpreter {
         \param table [in/out] Atom table
         \return true if value was specified, false if value was null (atomOut not changed)
         \throw Error if value is invalid */
-    bool checkCommandAtomArg(util::Atom_t& atomOut, afl::data::Value* value, util::AtomTable& table);
+    bool checkCommandAtomArg(util::Atom_t& atomOut, const afl::data::Value* value, util::AtomTable& table);
 
 }
 

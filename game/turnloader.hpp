@@ -1,5 +1,6 @@
 /**
   *  \file game/turnloader.hpp
+  *  \brief Base class game::TurnLoader
   */
 #ifndef C2NG_GAME_TURNLOADER_HPP
 #define C2NG_GAME_TURNLOADER_HPP
@@ -18,8 +19,12 @@ namespace game {
     class Root;
     class Session;
 
+    /** Turn loader.
+        Provides an interface to load and save current and historic turns and databases. */
     class TurnLoader : public afl::base::Deletable, public afl::base::RefCounted {
      public:
+        /** Player status.
+            \see getPlayerStatus() */
         enum PlayerStatus {
             /** This player's data is available.
                 This bit must be set for this player to be accessible.
@@ -39,6 +44,8 @@ namespace game {
         typedef afl::bits::SmallSet<PlayerStatus> PlayerStatusSet_t;
 
 
+        /** History status.
+            \see getHistoryStatus() */
         enum HistoryStatus {
             /** History is known to not be available. */
             Negative,
@@ -52,10 +59,11 @@ namespace game {
             StronglyPositive
         };
 
+        /** Property identifier. */
         enum Property {
-            LocalFileFormatProperty,
-            RemoteFileFormatProperty,
-            RootDirectoryProperty
+            LocalFileFormatProperty,           ///< Local file format (System.Local).
+            RemoteFileFormatProperty,          ///< Remote (turn) file format (System.Remote).
+            RootDirectoryProperty              ///< Root directory (System.RootDirectory).
         };
 
         /** Get player status.
@@ -79,7 +87,8 @@ namespace game {
             \param turn [out] Turn to load. Should be completely initialized.
             \param game [in/out] Game object. May be updated with planet/ship score definitions, turn scores.
             \param player [in] Player number.
-            \param root [in/out] Root. May be updated with configuration. */
+            \param root [in/out] Root. May be updated with configuration.
+            \param session [in/out] Session. */
         virtual void loadCurrentTurn(Turn& turn, Game& game, int player, Root& root, Session& session) = 0;
 
         /** Save current turn.
@@ -89,8 +98,9 @@ namespace game {
             \param turn [in] Turn to save.
             \param game [in] Game object.
             \param player [in] Player number.
-            \param root [in] Root. */
-        virtual void saveCurrentTurn(Turn& turn, Game& game, int player, Root& root, Session& session) = 0;
+            \param root [in] Root.
+            \param session [in/out] Session. */
+        virtual void saveCurrentTurn(const Turn& turn, const Game& game, int player, const Root& root, Session& session) = 0;
 
         /** Get history status.
             This function determines whether a number of turns have history information.
@@ -116,6 +126,10 @@ namespace game {
             Caller must deal with that. */
         virtual void loadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root) = 0;
 
+        /** Get property for script interface.
+            These values are published on the script interface (GlobalContext) and are not intended to be used in C++.
+            \param p Property index
+            \return value */
         virtual String_t getProperty(Property p) = 0;
 
 
@@ -135,7 +149,8 @@ namespace game {
             to load the databases that are common to all versions:
             - starchart (chartX.cc)
             - scores (scoreX.cc)
-            FIXME: script VM? probably not here. */
+            - message configuration
+            - teams */
         void loadCurrentDatabases(Turn& turn, Game& game, int player, Root& root, Session& session);
 
         /** Load history turn databases.
@@ -145,7 +160,14 @@ namespace game {
             - scores (scoreX.cc) */
         void loadHistoryDatabases(Turn& turn, Game& game, int player, int turnNumber, Root& root, afl::charset::Charset& charset);
 
-        void saveCurrentDatabases(Turn& turn, Game& game, int player, Root& root, Session& session, afl::charset::Charset& charset);
+        /** Save current turn databases.
+            This method should be called by saveCurrentTurn() method, with the same parameters,
+            to save databases that are common to all versions.
+            - starchart
+            - scores
+            - message configuration
+            - teams */
+        void saveCurrentDatabases(const Turn& turn, const Game& game, int player, const Root& root, Session& session, afl::charset::Charset& charset);
     };
 
 }

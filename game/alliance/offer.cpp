@@ -19,11 +19,11 @@ namespace {
 
 // Constructor.
 game::alliance::Offer::Offer()
+    : theirOffer(Unknown),
+      oldOffer(Unknown),
+      newOffer(Unknown)
 {
     // ex GAllianceOffer::GAllianceOffer
-    theirOffer.setAll(Unknown);
-    oldOffer.setAll(Unknown);
-    newOffer.setAll(Unknown);
 }
 
 // Merge.

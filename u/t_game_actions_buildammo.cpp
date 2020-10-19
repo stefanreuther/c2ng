@@ -55,6 +55,8 @@ namespace {
             { return false; }
         virtual bool getPreviousShipBuildOrder(int /*planetId*/, game::ShipBuildOrder& /*result*/) const
             { return false; }
+        virtual game::map::LocationReverter* createLocationReverter(game::map::Point /*pt*/) const
+            { return 0; }
     };
 
     struct TestHarness {
@@ -162,7 +164,7 @@ TestGameActionsBuildAmmo::testSuccess()
     TestHarness h;
     prepare(h);
 
-    game::map::PlanetStorage container(h.planet, h.session.interface(), h.config);
+    game::map::PlanetStorage container(h.planet, h.config);
     game::actions::BuildAmmo a(h.planet, container, container, *h.shipList, *h.root);
 
     // Add 5 type-1 torps
@@ -209,7 +211,7 @@ TestGameActionsBuildAmmo::testLimitCapacity()
     h.planet.setCargo(Element::Fighters, 5);
 
     // Do it: full add won't work, partial add will
-    game::map::PlanetStorage container(h.planet, h.session.interface(), h.config);
+    game::map::PlanetStorage container(h.planet, h.config);
     game::actions::BuildAmmo a(h.planet, container, container, *h.shipList, *h.root);
     TS_ASSERT_EQUALS(a.add(Element::Fighters, 100, false), 0);
     TS_ASSERT_EQUALS(a.add(Element::Fighters, 100, true), 55);
@@ -228,9 +230,12 @@ TestGameActionsBuildAmmo::testLimitResource()
     h.planet.setCargo(Element::Fighters, 10);
 
     // Attempt to add 1000 fighters: since we have 720$, we must end up with 7 (and 20S remaining).
-    game::map::PlanetStorage container(h.planet, h.session.interface(), h.config);
+    game::map::PlanetStorage container(h.planet, h.config);
     game::actions::BuildAmmo a(h.planet, container, container, *h.shipList, *h.root);
     TS_ASSERT_EQUALS(a.addLimitCash(Element::Fighters, 1000), 7);
+
+    // Try to build 1000 more, must fail
+    TS_ASSERT_EQUALS(a.addLimitCash(Element::Fighters, 1000), 0);
 
     // Verify result
     TS_ASSERT_THROWS_NOTHING(a.commit());
@@ -250,12 +255,32 @@ TestGameActionsBuildAmmo::testLimitKey()
     h.planet.setCargo(Element::Supplies, 100000);
 
     // Attempt to add tech 10 torps, which our key disallows
-    game::map::PlanetStorage container(h.planet, h.session.interface(), h.config);
+    game::map::PlanetStorage container(h.planet, h.config);
     game::actions::BuildAmmo a(h.planet, container, container, *h.shipList, *h.root);
     TS_ASSERT_EQUALS(a.addLimitCash(Element::fromTorpedoType(10), 1000), 0);
     TS_ASSERT_EQUALS(a.add(Element::fromTorpedoType(10), 1, false), 0);
     TS_ASSERT(a.isValid());
     TS_ASSERT(a.costAction().getCost().isZero());
+}
+
+/** Test non-limitation by key limit.
+    addLimitCash/add must work if the planet has sufficient tech, even if the key does not allow. */
+void
+TestGameActionsBuildAmmo::testNoLimitKey()
+{
+    TestHarness h;
+    prepare(h);
+    h.planet.setCargo(Element::Money, 100000);
+    h.planet.setCargo(Element::Supplies, 100000);
+    h.planet.setBaseTechLevel(game::TorpedoTech, 10);
+
+    // Attempt to add tech 10 torps, which our key disallows
+    game::map::PlanetStorage container(h.planet, h.config);
+    game::actions::BuildAmmo a(h.planet, container, container, *h.shipList, *h.root);
+    TS_ASSERT_EQUALS(a.addLimitCash(Element::fromTorpedoType(10), 20), 20);
+    TS_ASSERT_EQUALS(a.add(Element::fromTorpedoType(10), 1, false), 1);
+    TS_ASSERT(a.isValid());
+    TS_ASSERT(!a.costAction().getCost().isZero());
 }
 
 /** Test limitation by resource, key limit.
@@ -270,7 +295,7 @@ TestGameActionsBuildAmmo::testLimitKeyDowngrade()
     h.planet.setBaseTechLevel(game::TorpedoTech, 10);
 
     // Attempt to add tech 10 torps
-    game::map::PlanetStorage container(h.planet, h.session.interface(), h.config);
+    game::map::PlanetStorage container(h.planet, h.config);
     game::actions::BuildAmmo a(h.planet, container, container, *h.shipList, *h.root);
     TS_ASSERT_EQUALS(a.addLimitCash(Element::fromTorpedoType(10), 1), 1);
     TS_ASSERT(a.isValid());
@@ -304,7 +329,7 @@ TestGameActionsBuildAmmo::testLimitKeyDowngradeNoListener()
     h.planet.setBaseTechLevel(game::TorpedoTech, 10);
 
     // Attempt to add tech 10 torps
-    game::map::PlanetStorage container(h.planet, h.session.interface(), h.config);
+    game::map::PlanetStorage container(h.planet, h.config);
     game::actions::BuildAmmo a(h.planet, container, container, *h.shipList, *h.root);
     TS_ASSERT_EQUALS(a.addLimitCash(Element::fromTorpedoType(10), 1), 1);
     TS_ASSERT(a.isValid());
@@ -329,7 +354,7 @@ TestGameActionsBuildAmmo::testLimitTechCost()
     h.planet.setCargo(Element::Supplies, 130);
 
     // Attempt to add tech 3 torps. The upgrade costs 300, but we only have 200.
-    game::map::PlanetStorage container(h.planet, h.session.interface(), h.config);
+    game::map::PlanetStorage container(h.planet, h.config);
     game::actions::BuildAmmo a(h.planet, container, container, *h.shipList, *h.root);
     TS_ASSERT_EQUALS(a.addLimitCash(Element::fromTorpedoType(3), 1000), 0);
     TS_ASSERT(a.isValid());
@@ -355,7 +380,7 @@ TestGameActionsBuildAmmo::testSellNoReverter()
 {
     TestHarness h;
     prepare(h);
-    game::map::PlanetStorage container(h.planet, h.session.interface(), h.config);
+    game::map::PlanetStorage container(h.planet, h.config);
     game::actions::BuildAmmo a(h.planet, container, container, *h.shipList, *h.root);
 
     // Query ranges
@@ -392,7 +417,7 @@ TestGameActionsBuildAmmo::testSellReverter()
     prepare(h);
     h.univ.setNewReverter(new TestReverter());
 
-    game::map::PlanetStorage container(h.planet, h.session.interface(), h.config);
+    game::map::PlanetStorage container(h.planet, h.config);
     game::actions::BuildAmmo a(h.planet, container, container, *h.shipList, *h.root);
 
     // Query ranges (initial)
@@ -427,7 +452,7 @@ TestGameActionsBuildAmmo::testInvalidTypes()
 {
     TestHarness h;
     prepare(h);
-    game::map::PlanetStorage container(h.planet, h.session.interface(), h.config);
+    game::map::PlanetStorage container(h.planet, h.config);
     game::actions::BuildAmmo a(h.planet, container, container, *h.shipList, *h.root);
 
     // We can query ranges
@@ -450,8 +475,8 @@ TestGameActionsBuildAmmo::testDifferentContainers()
     TestHarness h;
     prepare(h);
 
-    game::map::PlanetStorage financier(h.planet, h.session.interface(), h.config);
-    game::map::PlanetStorage receiver(h.planet, h.session.interface(), h.config);
+    game::map::PlanetStorage financier(h.planet, h.config);
+    game::map::PlanetStorage receiver(h.planet, h.config);
     game::actions::BuildAmmo a(h.planet, financier, receiver, *h.shipList, *h.root);
 
     // Add

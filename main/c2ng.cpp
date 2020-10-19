@@ -61,6 +61,7 @@
 #include "ui/res/ccimageloader.hpp"
 #include "ui/res/directoryprovider.hpp"
 #include "ui/res/engineimageloader.hpp"
+#include "ui/res/generatedengineprovider.hpp"
 #include "ui/res/generatedplanetprovider.hpp"
 #include "ui/res/manager.hpp"
 #include "ui/rich/documentview.hpp"
@@ -109,7 +110,7 @@ namespace {
                 t.world().setSystemLoadDirectory(m_resourceDirectory.asPtr());
 
                 // Get process list
-                interpreter::ProcessList& processList = t.world().processList();
+                interpreter::ProcessList& processList = t.processList();
 
                 // Create process to load core.q
                 interpreter::Process& coreProcess = processList.create(t.world(), "<Core>");
@@ -142,7 +143,7 @@ namespace {
                     // Global cc-res.cfg
                     afl::base::Ref<afl::io::Stream> configFile = m_resourceDirectory->openFile("cc-res.cfg", afl::io::FileSystem::OpenRead);
                     std::auto_ptr<util::plugin::Plugin> plug(new util::plugin::Plugin("(GLOBAL CC-RES.CFG)"));
-                    plug->initFromConfigFile(m_profile.open()->getDirectoryName(), session.translator()("Global cc-res.cfg"), *configFile);
+                    plug->initFromConfigFile(m_profile.open()->getDirectoryName(), session.translator()("Global cc-res.cfg"), *configFile, session.translator());
                     session.plugins().addNewPlugin(plug.release());
                 }
                 catch (...) { }
@@ -152,7 +153,7 @@ namespace {
                     afl::base::Ptr<afl::io::Stream> configFile = m_profile.openFileNT("cc-res.cfg");
                     if (configFile.get() != 0) {
                         std::auto_ptr<util::plugin::Plugin> plug(new util::plugin::Plugin("(USER CC-RES.CFG)"));
-                        plug->initFromConfigFile(m_profile.open()->getDirectoryName(), session.translator()("User cc-res.cfg"), *configFile);
+                        plug->initFromConfigFile(m_profile.open()->getDirectoryName(), session.translator()("User cc-res.cfg"), *configFile, session.translator());
                         session.plugins().addNewPlugin(plug.release());
                     }
                 }
@@ -500,7 +501,8 @@ namespace {
                 return m_translator("-fullscreen"     "\tRun fullscreen\n"
                                     "-windowed"       "\tRun in a window\n"
                                     "-bpp=N"          "\tUse color depth of N bits per pixel\n"
-                                    "-size=W[xH]"     "\tUse resolution of WxH pixels\n");
+                                    "-size=W[xH]"     "\tUse resolution of WxH pixels\n"
+                                    "-nomousegrab"    "\tDon't grab (lock into window) mouse pointer\n");
             }
         bool handleOption(const String_t& option, afl::sys::CommandLineParser& parser)
             {
@@ -510,6 +512,9 @@ namespace {
                     return true;
                 } else if (option == "windowed") {
                     m_params.fullScreen = false;
+                    return true;
+                } else if (option == "nomousegrab") {
+                    m_params.disableGrab = true;
                     return true;
                 } else if (option == "bpp") {
                     // ex gfx/init.cc:optSetBpp
@@ -569,6 +574,7 @@ namespace {
             : m_rootOptions(tx),
               m_haveGameDirectory(false),
               m_gameDirectory(),
+              m_traceConfig(),
               m_proxyAddress(),
               m_commandLineResources(),
               m_translator(tx),
@@ -590,6 +596,8 @@ namespace {
                             m_proxyAddress = parser.getRequiredParameter(text);
                         } else if (text == "help") {
                             doHelp(dialog);
+                        } else if (text == "log") {
+                            util::addListItem(m_traceConfig, ":", parser.getRequiredParameter(text));
                         } else if (text == "debug-request-delay") {
                             int value = 0;
                             if (!afl::string::strToInteger(parser.getRequiredParameter(text), value) || value < 0) {
@@ -650,10 +658,14 @@ namespace {
         const afl::base::Optional<String_t>& getProxyAddress() const
             { return m_proxyAddress; }
 
+        const String_t& getTraceConfiguration() const
+            { return m_traceConfig; }
+
      private:
         RootOptions m_rootOptions;
         bool m_haveGameDirectory;
         String_t m_gameDirectory;
+        String_t m_traceConfig;
         afl::base::Optional<String_t> m_proxyAddress;
         std::vector<String_t> m_commandLineResources;
         afl::string::Translator& m_translator;
@@ -794,12 +806,16 @@ namespace {
                 // Starting from here, log messages will be retrievable
                 util::MessageCollector collector;
                 log().addListener(collector);
-                console.setConfiguration("interpreter.process@Trace=hide:client.si@Trace=hide");
-                collector.setConfiguration("interpreter.process@Trace=hide:client.si@Trace=hide");
+                console.setConfiguration("*@Trace=hide");
+                collector.setConfiguration("*@Trace=hide");
 
                 // Parse command line.
                 CommandLineParameters params(translator());
                 params.parse(m_environment.getCommandLine(), dialog());
+                if (!params.getTraceConfiguration().empty()) {
+                    console.setConfiguration(params.getTraceConfiguration());
+                    collector.setConfiguration(params.getTraceConfiguration());
+                }
                 log().write(log().Info, LOG_NAME, afl::string::Format("[%s]", PROGRAM_TITLE));
 
                 // Derived environment
@@ -823,6 +839,7 @@ namespace {
                 ui::DefaultResourceProvider provider(mgr, resourceDirectory, engine.dispatcher(), translator(), log());
                 ui::Root root(engine, provider, windowParams);
                 mgr.setScreenSize(root.getExtent().getSize());
+                mgr.addNewProvider(new ui::res::GeneratedEngineProvider(provider.getFont("-"), translator()), "(MAIN-ENGINES)");
                 root.sig_screenshot.addNewClosure(new ui::ScreenshotListener(fs, log()));
 
                 // Setup network
@@ -891,7 +908,7 @@ namespace {
                     // Helpful information
                     ui::rich::DocumentView docView(root.getExtent().getSize(), 0, root.provider());
                     docView.setExtent(gfx::Rectangle(gfx::Point(0, 0), docView.getLayoutInfo().getPreferredSize()));
-                    docView.getDocument().add(util::rich::Parser::parseXml("<big>PCC2ng Milestone Six</big>"));
+                    docView.getDocument().add(util::rich::Parser::parseXml("<big>PCC2ng</big>"));
                     docView.getDocument().addNewline();
                     docView.getDocument().addNewline();
                     docView.getDocument().add(util::rich::Parser::parseXml("<font color=\"dim\">&#xA9; 2017-2020 Stefan Reuther &lt;streu@gmx.de&gt;</font>"));
@@ -904,7 +921,7 @@ namespace {
                     root.add(docView);
 
                     // Browser
-                    client::screens::BrowserScreen browserScreen(root, browserReceiver.getSender());
+                    client::screens::BrowserScreen browserScreen(root, browserReceiver.getSender(), gameReceiver.getSender());
                     browserScreen.sig_gameSelection.addNewClosure(new BrowserListener(browserScreen, browserReceiver.getSender(), gameReceiver.getSender()));
                     int result = browserScreen.run(docColors);
                     if (result != 0) {

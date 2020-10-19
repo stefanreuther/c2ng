@@ -6,7 +6,7 @@
 
 #include "ui/simplewidget.hpp"
 #include "ui/root.hpp"
-#include "client/proxy/objectobserver.hpp"
+#include "game/proxy/objectobserver.hpp"
 #include "util/requestreceiver.hpp"
 
 namespace client { namespace tiles {
@@ -38,7 +38,7 @@ namespace client { namespace tiles {
 
         void setContent(const Content& content);
 
-        void attach(client::proxy::ObjectObserver& oop);
+        void attach(game::proxy::ObjectObserver& oop);
 
      private:
         ui::Root& m_root;

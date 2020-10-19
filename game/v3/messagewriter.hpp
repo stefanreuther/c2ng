@@ -22,7 +22,7 @@ namespace game { namespace v3 {
 
         void sendMessage(int from, int to, const String_t& text, afl::charset::Charset& cs);
 
-        void sendOutbox(game::msg::Outbox& outbox, int from, afl::string::Translator& tx, const PlayerList& players, afl::charset::Charset& cs);
+        void sendOutbox(const game::msg::Outbox& outbox, int from, afl::string::Translator& tx, const PlayerList& players, afl::charset::Charset& cs);
 
         static afl::base::GrowableBytes_t encodeMessage(const String_t& text, afl::charset::Charset& cs);
     };

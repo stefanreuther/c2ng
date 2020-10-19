@@ -201,7 +201,7 @@ TestServerHostCommandHandler::testHelp()
 
     String_t mainHelp = testee.callString(Segment().pushBackString("HELP"));
 
-    static const char*const SECTIONS[] = { "HOST", "MASTER", "TOOL", "SHIPLIST", "CRON", "FILE", "GAME", "PLAYER", "SCHEDULE", 0 };
+    static const char*const SECTIONS[] = { "HOST", "MASTER", "TOOL", "SHIPLIST", "CRON", "FILE", "GAME", "PLAYER", "SCHEDULE", "SLOT", "HIST", "KEY", 0 };
     for (size_t i = 0; SECTIONS[i] != 0; ++i) {
         // Verify help page
         String_t sectionHelp = testee.callString(Segment().pushBackString("HELP").pushBackString(SECTIONS[i]));

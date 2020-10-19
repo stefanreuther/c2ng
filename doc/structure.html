@@ -216,7 +216,7 @@
           <div class="owned">PlanetScoreDef, ShipScoreDef <em>: game::UnitScoreDefinitionList</em></div>
           <div class="owned">Viewpoint <em>: int</em></div>
           <div class="owned">TurnScores <em>: game::TurnScoreList</em></div>
-          <div class="owned">Markings <em>: game::map::Markings</em></div>
+          <div class="owned">Selections <em>: game::map::Selections</em></div>
           <div class="owned haschange">Teams <em>: game::TeamSettings</em></div>
           <div class="owned">Cursors <em>: game::map::Cursors</em>
             <div class="owned haschange">CurrentShip/Planet/Base, etc... <em>: game::map::SimpleObjectCursor</em></div>
@@ -224,7 +224,7 @@
           </div>
           <div class="owned haschange">HistoryTurnList <em>: game::HistoryTurnList</em></div>
           <div class="owned">MessageConfiguration <em>: game::msg::Configuration</em></div>
-          <div class="ptr hasnotify">Turn <em>: game::Turn</em>
+          <div class="ptr hasnotify">CurrentTurn <em>: game::Turn</em>
             <div class="owned">Inbox <em>: game::msg::Inbox</em></div>
             <div class="owned">Outbox <em>: game::msg::Outbox</em></div>
             <div class="optional ptr virtual">Battles <em>: game::vcr::Database</em>
@@ -295,12 +295,6 @@
             <div class="owned">Keymap <em>: util::Keymap[]</em></div>
           </div>
           <div class="owned">Atoms <em>: util::AtomTable</em></div>
-          <div class="owned">Plugins <em>: util::plugin::Manager</em>
-            <div class="owned">Plugin <em>: util::plugin::Plugin[]</em></div>
-          </div>
-          <div class="owned">ProcessList <em>: interpreter::ProcessList</em>
-            <div class="owned">Process <em>: interpreter::Process[]</em></div>
-          </div>
           <div class="owned virtual">GlobalContexts <em>: interpreter::Context[]</em></div>
           <div class="ref">LogListener <em>: afl::sys::LogListener</em></div>
           <div class="owned">MutexList <em>: interpreter::MutexList</em></div>
@@ -308,6 +302,14 @@
           <div class="ptr owned virtual">SystemLoadDir, LocalLoadDir <em>: afl::io::Directory</em></div>
           <div class="ref">FileSystem <em>: afl::io::FileSystem</em></div>
         </div>
+        <div class="owned">ProcessList <em>: interpreter::ProcessList</em>
+          <div class="owned">Process <em>: interpreter::Process[]</em></div>
+        </div>
+        <div class="owned">Plugins <em>: util::plugin::Manager</em>
+          <div class="owned">Plugin <em>: util::plugin::Plugin[]</em></div>
+        </div>
+        <div class="owned">AuthCache <em>: game::AuthCache</em></div>
+        <div class="owned">Notifications <em>: game::interface::NotificationStore</em></div>
       </div>
     </div>
 

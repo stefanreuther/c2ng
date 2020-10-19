@@ -53,14 +53,14 @@ namespace {
 
     bool isLocalVariableName(const BytecodeObject& bco, uint16_t index, String_t name)
     {
-        const afl::data::NameMap& names = bco.getLocalNames();
+        const afl::data::NameMap& names = bco.localVariables();
         return (index < names.getNumNames()
                 && names.getNameByIndex(index) == name);
     }
 
     bool isName(const BytecodeObject& bco, uint16_t index, String_t name)
     {
-        const afl::data::NameMap& names = bco.getNames();
+        const afl::data::NameMap& names = bco.names();
         return (index < names.getNumNames()
                 && names.getNameByIndex(index) == name);
     }
@@ -97,7 +97,7 @@ namespace {
         bool ok = exec.runTemporary();
         TSM_ASSERT(expr, ok);
 
-        afl::data::ScalarValue* resv = dynamic_cast<afl::data::ScalarValue*>(exec.getResult());
+        const afl::data::ScalarValue* resv = dynamic_cast<const afl::data::ScalarValue*>(exec.getResult());
         TSM_ASSERT(expr, resv != 0);
         TSM_ASSERT_EQUALS(expr, resv->getValue(), expectedValue);
     }

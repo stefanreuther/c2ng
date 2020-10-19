@@ -64,6 +64,10 @@ class TestGameConfigHostConfiguration : public CxxTest::TestSuite {
  public:
     void testRace();
     void testAlias();
+    void testDependant1();
+    void testDependant2();
+    void testExperienceName();
+    void testExperienceBonus();
 };
 
 class TestGameConfigIntegerArrayOption : public CxxTest::TestSuite {

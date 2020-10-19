@@ -6,7 +6,7 @@
 #include "client/dialogs/buildqueuedialog.hpp"
 #include "afl/string/format.hpp"
 #include "client/downlink.hpp"
-#include "client/proxy/buildqueueproxy.hpp"
+#include "game/proxy/buildqueueproxy.hpp"
 #include "gfx/complex.hpp"
 #include "ui/dialogs/messagebox.hpp"
 #include "ui/eventloop.hpp"
@@ -19,7 +19,7 @@
 #include "ui/widgets/statictext.hpp"
 
 namespace {
-    using client::proxy::BuildQueueProxy;
+    using game::proxy::BuildQueueProxy;
 
     /*
      *  BuildQueueList - a list box displaying the build queue
@@ -101,7 +101,7 @@ namespace {
             {
                 afl::base::Deleter del;
                 ui::Window win(m_translator("Manage Build Queue"), m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5);
-                win.add(ui::widgets::FrameGroup::wrapWidget(del, m_root.colorScheme(), ui::widgets::FrameGroup::LoweredFrame, m_list));
+                win.add(ui::widgets::FrameGroup::wrapWidget(del, m_root.colorScheme(), ui::LoweredFrame, m_list));
 
                 ui::Widget& keys = del.addNew(new BuildQueueKeyHandler(m_proxy, m_list));
                 win.add(keys);
@@ -386,7 +386,7 @@ client::dialogs::doBuildQueueDialog(game::Id_t baseId,
     BuildQueueProxy proxy(gameSender, root.engine().dispatcher());
     BuildQueueProxy::Infos_t infos;
     Downlink link(root);
-    proxy.init(link, infos);
+    proxy.getStatus(link, infos);
     if (infos.empty()) {
         ui::dialogs::MessageBox(tx("You have no active ship build orders."),
                                 tx("Manage Build Queue"),

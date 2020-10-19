@@ -16,6 +16,9 @@ class TestGameMsgOutbox : public CxxTest::TestSuite {
  public:
     void testIt();
     void testMerge();
+    void testAddDelete();
+    void testModify();
+    void testOutOfRange();
 };
 
 #endif

@@ -116,12 +116,12 @@ util::plugin::ConsoleApplication::appMain()
     afl::base::Ref<afl::sys::Environment::CommandLine_t> cmdl = environment().getCommandLine();
     String_t command;
     if (!cmdl->getNextElement(command)) {
-        errorExit(_("No command specified. Use 'c2plugin -h' for help."));
+        errorExit(translator()("No command specified. Use 'c2plugin -h' for help."));
     } else if (const Command* cmd = findCommand(command)) {
         (this->*(cmd->func))(*cmdl);
         exit(0);
     } else {
-        errorExit(_("Invalid command specified. Use 'c2plugin -h' for help."));
+        errorExit(translator()("Invalid command specified. Use 'c2plugin -h' for help."));
     }
 }
 
@@ -132,12 +132,13 @@ util::plugin::ConsoleApplication::doList(afl::sys::Environment::CommandLine_t& c
     enum { Default, Long, Short } f = Default;
     bool ordered = false;
 
+    afl::string::Translator& tx = translator();
     afl::sys::StandardCommandLineParser parser(cmdl);
     String_t text;
     bool option;
     while (parser.getNext(option, text)) {
         if (!option) {
-            errorExit(_("This command does not take positional parameters"));
+            errorExit(tx("This command does not take positional parameters"));
         }
         if (text == "l") {
             f = Long;
@@ -146,7 +147,7 @@ util::plugin::ConsoleApplication::doList(afl::sys::Environment::CommandLine_t& c
         } else if (text == "o") {
             ordered = true;
         } else {
-            errorExit(Format(_("Unknown option \"-%s\"").c_str(), text));
+            errorExit(Format(tx("Unknown option \"-%s\"").c_str(), text));
         }
     }
 
@@ -158,7 +159,7 @@ util::plugin::ConsoleApplication::doList(afl::sys::Environment::CommandLine_t& c
     std::vector<Plugin*> them;
     mgr.enumPlugins(them, ordered);
     if (f != Short) {
-        standardOutput().writeLine(Format(_("%d plugin%!1{s%} installed.").c_str(), them.size()));
+        standardOutput().writeLine(Format(tx("%d plugin%!1{s%} installed.").c_str(), them.size()));
     }
     for (size_t i = 0, n = them.size(); i < n; ++i) {
         const Plugin& p = *them[i];
@@ -166,20 +167,20 @@ util::plugin::ConsoleApplication::doList(afl::sys::Environment::CommandLine_t& c
             standardOutput().writeLine(p.getId());
         } else {
             standardOutput().writeLine("--------");
-            standardOutput().writeLine(Format(_("Plugin '%s': %s").c_str(), p.getId(), p.getName()));
+            standardOutput().writeLine(Format(tx("Plugin '%s': %s").c_str(), p.getId(), p.getName()));
             if (!p.getDescription().empty()) {
                 standardOutput().writeLine();
                 standardOutput().writeLine(p.getDescription());
             }
 
             if (f == Long) {
-                const Plugin::ItemList& items = p.getItems();
+                const Plugin::ItemList_t& items = p.getItems();
                 bool did = false;
                 for (size_t ii = 0, nn = items.size(); ii < nn; ++ii) {
                     if (items[ii].type != Plugin::Command) {
                         if (!did) {
                             standardOutput().writeLine();
-                            standardOutput().writeLine(Format(_("Files (in '%s'):").c_str(), p.getBaseDirectory()));
+                            standardOutput().writeLine(Format(tx("Files (in '%s'):").c_str(), p.getBaseDirectory()));
                             did = true;
                         }
                         standardOutput().writeLine("  " + items[ii].name);
@@ -211,6 +212,7 @@ util::plugin::ConsoleApplication::doAdd(afl::sys::Environment::CommandLine_t& cm
     bool did = false;
     bool err = false;
     bool force = false;
+    afl::string::Translator& tx = translator();
     afl::sys::StandardCommandLineParser parser(cmdl);
     String_t text;
     bool option;
@@ -221,20 +223,20 @@ util::plugin::ConsoleApplication::doAdd(afl::sys::Environment::CommandLine_t& cm
             } else if (text == "-f") {
                 force = true;
             } else {
-                errorExit(Format(_("Unknown option \"-%s\"").c_str(), text));
+                errorExit(Format(tx("Unknown option \"-%s\"").c_str(), text));
             }
         } else {
             did = true;
             try {
-                Plugin* plug = installer.prepareInstall(text);
+                Plugin* plug = installer.prepareInstall(text, tx);
                 if (!plug) {
-                    errorOutput().writeLine(Format(_("%s: Unknown file type").c_str(), text));
+                    errorOutput().writeLine(Format(tx("%s: Unknown file type").c_str(), text));
                     err = true;
                 } else {
                     if (mgr.getPluginById(plug->getId())) {
-                        standardOutput().writeLine(Format(_("Updating plugin '%s'...").c_str(), plug->getId()));
+                        standardOutput().writeLine(Format(tx("Updating plugin '%s'...").c_str(), plug->getId()));
                     } else {
-                        standardOutput().writeLine(Format(_("Installing plugin '%s'...").c_str(), plug->getId()));
+                        standardOutput().writeLine(Format(tx("Installing plugin '%s'...").c_str(), plug->getId()));
                     }
                     if (force || checkPreconditions(errorOutput(), installer)) {
                         installer.doInstall(dry);
@@ -254,7 +256,7 @@ util::plugin::ConsoleApplication::doAdd(afl::sys::Environment::CommandLine_t& cm
         }
     }
     if (!did) {
-        errorExit(Format(_("Missing name plugin or file to install. '%s -h' for help.").c_str(), environment().getInvocationName()));
+        errorExit(Format(tx("Missing name plugin or file to install. '%s -h' for help.").c_str(), environment().getInvocationName()));
     }
     if (err) {
         exit(1);
@@ -278,6 +280,7 @@ util::plugin::ConsoleApplication::doRemove(afl::sys::Environment::CommandLine_t&
     bool did = false;
     bool err = false;
     bool force = false;
+    afl::string::Translator& tx = translator();
     afl::sys::StandardCommandLineParser parser(cmdl);
     String_t text;
     bool option;
@@ -288,25 +291,25 @@ util::plugin::ConsoleApplication::doRemove(afl::sys::Environment::CommandLine_t&
             } else if (text == "f") {
                 force = true;
             } else {
-                errorExit(Format(_("Unknown option \"-%s\"").c_str(), text));
+                errorExit(Format(tx("Unknown option \"-%s\"").c_str(), text));
             }
         } else {
             did = true;
             if (Plugin* pPlug = mgr.getPluginById(afl::string::strUCase(text))) {
                 if (force || checkRemovePlugin(errorOutput(), installer, *pPlug)) {
-                    standardOutput().writeLine(Format(_("Removing plugin '%s'...").c_str(), pPlug->getId()));
+                    standardOutput().writeLine(Format(tx("Removing plugin '%s'...").c_str(), pPlug->getId()));
                     installer.doRemove(pPlug, dry);
                 } else {
                     err = true;
                 }
             } else {
-                errorOutput().writeLine(Format(_("Plugin '%s' is not known.").c_str(), text));
+                errorOutput().writeLine(Format(tx("Plugin '%s' is not known.").c_str(), text));
                 err = true;
             }
         }
     }
     if (!did) {
-        errorExit(Format(_("Missing name of plugin to uninstall. '%s -h' for help.").c_str(), environment().getInvocationName()));
+        errorExit(Format(tx("Missing name of plugin to uninstall. '%s -h' for help.").c_str(), environment().getInvocationName()));
     }
     if (err) {
         exit(1);
@@ -323,6 +326,7 @@ util::plugin::ConsoleApplication::doTest(afl::sys::Environment::CommandLine_t& c
     bool did = false;
     bool err = false;
     bool verbose = false;
+    afl::string::Translator& tx = translator();
     afl::sys::StandardCommandLineParser parser(cmdl);
     String_t text;
     bool option;
@@ -331,7 +335,7 @@ util::plugin::ConsoleApplication::doTest(afl::sys::Environment::CommandLine_t& c
             if (text == "v") {
                 verbose = true;
             } else {
-                errorExit(Format(_("Unknown option \"-%s\"").c_str(), text));
+                errorExit(Format(tx("Unknown option \"-%s\"").c_str(), text));
             }
         } else {
             // Create plugin manager and installer separately for each item
@@ -340,14 +344,14 @@ util::plugin::ConsoleApplication::doTest(afl::sys::Environment::CommandLine_t& c
             did = true;
 
             try {
-                Plugin* plug = installer.prepareInstall(text);
+                Plugin* plug = installer.prepareInstall(text, tx);
                 if (!plug) {
-                    errorOutput().writeLine(Format(_("%s: Unknown file type").c_str(), text));
+                    errorOutput().writeLine(Format(tx("%s: Unknown file type").c_str(), text));
                     err = true;
                 } else {
                     installer.doInstall(false);
                     if (verbose) {
-                        standardOutput().writeLine(Format(_("%s: Plugin '%s' (%s) tested successfully.").c_str(), text, plug->getName(), plug->getId()));
+                        standardOutput().writeLine(Format(tx("%s: Plugin '%s' (%s) tested successfully.").c_str(), text, plug->getName(), plug->getId()));
                     }
                 }
             }
@@ -366,7 +370,7 @@ util::plugin::ConsoleApplication::doTest(afl::sys::Environment::CommandLine_t& c
         }
     }
     if (!did) {
-        errorExit(Format(_("Missing name plugin or file to test. '%s -h' for help.").c_str(), environment().getInvocationName()));
+        errorExit(Format(tx("Missing name plugin or file to test. '%s -h' for help.").c_str(), environment().getInvocationName()));
     }
     if (err) {
         exit(1);
@@ -376,30 +380,31 @@ util::plugin::ConsoleApplication::doTest(afl::sys::Environment::CommandLine_t& c
 void
 util::plugin::ConsoleApplication::doHelp(afl::sys::Environment::CommandLine_t& /*cmdl*/)
 {
-    standardOutput().writeText(Format(_("PCC2 Plugin Manager v%s - (c) 2015-2020 Stefan Reuther\n").c_str(), PCC2_VERSION));
-    standardOutput().writeText(Format(_("\n"
-                                        "Usage:\n"
-                                        "  %s -h|help\n"
-                                        "                  This help message\n"
-                                        "  %$0s list|ls [-l|-b] [-o]\n"
-                                        "                  List installed plugins\n"
-                                        "  %$0s add|install [-n] [-f] FILE.c2p...\n"
-                                        "                  Install given plugins\n"
-                                        "  %$0s remove|rm|uninstall [-n] [-f] ID...\n"
-                                        "                  Remove given plugins\n"
-                                        "  %$0s test [-v] FILE.c2p...\n"
-                                        "                  Test given plugins\n"
-                                        "\n"
-                                        "Options:\n"
-                                        "%s\n"
-                                        "Report bugs to <Streu@gmx.de>\n").c_str(),
+    afl::string::Translator& tx = translator();
+    standardOutput().writeText(Format(tx("PCC2 Plugin Manager v%s - (c) 2015-2020 Stefan Reuther\n").c_str(), PCC2_VERSION));
+    standardOutput().writeText(Format(tx("\n"
+                                         "Usage:\n"
+                                         "  %s -h|help\n"
+                                         "                  This help message\n"
+                                         "  %$0s list|ls [-l|-b] [-o]\n"
+                                         "                  List installed plugins\n"
+                                         "  %$0s add|install [-n] [-f] FILE.c2p...\n"
+                                         "                  Install given plugins\n"
+                                         "  %$0s remove|rm|uninstall [-n] [-f] ID...\n"
+                                         "                  Remove given plugins\n"
+                                         "  %$0s test [-v] FILE.c2p...\n"
+                                         "                  Test given plugins\n"
+                                         "\n"
+                                         "Options:\n"
+                                         "%s\n"
+                                         "Report bugs to <Streu@gmx.de>\n").c_str(),
                                       environment().getInvocationName(),
-                                      util::formatOptions(_(" -l\tList more details\n"
-                                                            " -b\tList fewer details\n"
-                                                            " -o\tList in load order (default: alphabetical)\n"
-                                                            " -n\tDry run (don't modify anything, just check)\n"
-                                                            " -f\tIgnore dependencies/requirements\n"
-                                                            " -v\tVerbose\n"))));
+                                      util::formatOptions(tx(" -l\tList more details\n"
+                                                             " -b\tList fewer details\n"
+                                                             " -o\tList in load order (default: alphabetical)\n"
+                                                             " -n\tDry run (don't modify anything, just check)\n"
+                                                             " -f\tIgnore dependencies/requirements\n"
+                                                             " -v\tVerbose\n"))));
     exit(0);
 }
 

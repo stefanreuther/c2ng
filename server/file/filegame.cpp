@@ -30,6 +30,7 @@ namespace {
         out.isRegistered = in.isRegistered;
         out.label1 = in.label1;
         out.label2 = in.label2;
+        out.keyId = in.keyId;
     }
 
     void copyGameInfo(server::interface::FileGame::GameInfo& out,
@@ -45,6 +46,16 @@ namespace {
         out.slots        = in.slots;
         out.missingFiles = in.missingFiles;
         out.conflictSlots.clear();
+    }
+
+    bool matchKey(const server::interface::FileGame::Filter& filter, const server::file::GameStatus::KeyInfo& in)
+    {
+        if (const String_t* p = filter.keyId.get()) {
+            if (in.keyId != *p) {
+                return false;
+            }
+        }
+        return true;
     }
 }
 
@@ -127,13 +138,14 @@ server::file::FileGame::getKeyInfo(const String_t path, KeyInfo& result)
 }
 
 void
-server::file::FileGame::listKeyInfo(const String_t path, afl::container::PtrVector<KeyInfo>& result)
+server::file::FileGame::listKeyInfo(const String_t path, const Filter& filter, afl::container::PtrVector<KeyInfo>& result)
 {
     // ex Connection::doListReg
     PathResolver res(m_root, m_root.rootDirectory(), m_session.getUser());
     DirectoryItem& dir = res.resolveToDirectory(path, DirectoryItem::AllowRead);
 
     // Process recursively
+    std::map<String_t,KeyInfo*> index;
     std::vector<std::pair<String_t, DirectoryItem*> > work;
     work.push_back(std::make_pair(path, &dir));
     while (!work.empty()) {
@@ -148,9 +160,30 @@ server::file::FileGame::listKeyInfo(const String_t path, afl::container::PtrVect
         // Check game information
         GameStatus& status = thisDir.readGameStatus(m_root);
         if (const GameStatus::KeyInfo* info = status.getKeyInfo()) {
-            std::auto_ptr<KeyInfo> p(new KeyInfo());
-            copyKeyInfo(*p, *info, thisName);
-            result.pushBackNew(p.release());
+            if (matchKey(filter, *info)) {
+                if (filter.unique) {
+                    // Uniquisation filter
+                    std::map<String_t,KeyInfo*>::const_iterator it = index.find(info->keyId);
+                    if (it != index.end()) {
+                        // We already have that one. Just bump counter
+                        if (int32_t* counter = it->second->useCount.get()) {
+                            ++*counter;
+                        }
+                    } else {
+                        // Not seen yet; add it
+                        std::auto_ptr<KeyInfo> p(new KeyInfo());
+                        copyKeyInfo(*p, *info, thisName);
+                        index[info->keyId] = p.get();
+                        p->useCount = 1;
+                        result.pushBackNew(p.release());
+                    }
+                } else {
+                    // Just collect
+                    std::auto_ptr<KeyInfo> p(new KeyInfo());
+                    copyKeyInfo(*p, *info, thisName);
+                    result.pushBackNew(p.release());
+                }
+            }
         }
 
         // Gather subdirs

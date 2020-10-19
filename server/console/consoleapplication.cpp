@@ -28,7 +28,6 @@
 #include "server/console/terminal.hpp"
 #include "server/ports.hpp"
 #include "server/types.hpp"
-#include "util/translation.hpp"
 #include "version.hpp"
 #include "util/string.hpp"
 
@@ -171,6 +170,7 @@ server::console::ConsoleApplication::appMain()
 {
     // ex planetscentral/console/console.cc:main (sort-of)
     // Parse args
+    afl::string::Translator& tx = translator();
     afl::base::Ref<afl::sys::Environment::CommandLine_t> commandLine(environment().getCommandLine());
     afl::sys::StandardCommandLineParser commandLineParser(commandLine);
     String_t p;
@@ -185,12 +185,12 @@ server::console::ConsoleApplication::appMain()
             } else if (p == "proxy") {
                 String_t url = commandLineParser.getRequiredParameter(p);
                 if (!m_networkStack.add(url)) {
-                    throw std::runtime_error(Format("Unrecognized proxy URL: \"%s\"", url));
+                    throw std::runtime_error(Format(tx("Unrecognized proxy URL: \"%s\""), url));
                 }
             } else if (handleCommandLineOption(p, commandLineParser)) {
                 // ok
             } else {
-                errorExit(Format(_("invalid option specified. Use '%s -h' for help.").c_str(), environment().getInvocationName()));
+                errorExit(Format(tx("invalid option specified. Use '%s -h' for help.").c_str(), environment().getInvocationName()));
             }
         } else {
             String_t::size_type eq = p.find('=');
@@ -282,23 +282,24 @@ server::console::ConsoleApplication::pushNewContext(Context* ctx)
 void
 server::console::ConsoleApplication::help()
 {
+    afl::string::Translator& tx = translator();
     afl::io::TextWriter& out = standardOutput();
-    out.writeLine(Format(_("PCC2 Console v%s - (c) 2017-2020 Stefan Reuther").c_str(), PCC2_VERSION));
+    out.writeLine(Format(tx("PCC2 Console v%s - (c) 2017-2020 Stefan Reuther").c_str(), PCC2_VERSION));
     out.writeLine();
-    out.writeLine(Format(_("Usage:\n"
-                           "  %s [-h]\n"
-                           "  %$0s [--config=FILE] [-DKEY=VALUE] [ENV=VALUE] [COMMAND...]\n"
-                           "\n"
-                           "Options:\n"
-                           "%s"
-                           "\n"
-                           "Report bugs to <Streu@gmx.de>").c_str(),
+    out.writeLine(Format(tx("Usage:\n"
+                            "  %s [-h]\n"
+                            "  %$0s [--config=FILE] [-DKEY=VALUE] [ENV=VALUE] [COMMAND...]\n"
+                            "\n"
+                            "Options:\n"
+                            "%s"
+                            "\n"
+                            "Report bugs to <Streu@gmx.de>").c_str(),
                          environment().getInvocationName(),
                          util::formatOptions(ConfigurationHandler::getHelp() +
-                                             "--log=CONFIG\tSet logger configuration\n"
-                                             "--proxy=URL\tAdd network proxy\n"
-                                             "ENV=VALUE\tSet script environment variable\n"
-                                             "COMMAND...\tCommand to execute (interactive if none)\n")));
+                                             tx("--log=CONFIG\tSet logger configuration\n"
+                                                "--proxy=URL\tAdd network proxy\n"
+                                                "ENV=VALUE\tSet script environment variable\n"
+                                                "COMMAND...\tCommand to execute (interactive if none)\n"))));
     out.flush();
     exit(0);
 }

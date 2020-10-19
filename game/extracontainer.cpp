@@ -1,6 +1,6 @@
 /**
   *  \file game/extracontainer.cpp
-  *  \brief Template class ExtraContainer
+  *  \brief Template class game::ExtraContainer
   */
 
 #include "game/extracontainer.hpp"

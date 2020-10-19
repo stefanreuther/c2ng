@@ -3,6 +3,7 @@
   */
 
 #include <stdexcept>
+#include "server/play/shippacker.hpp"
 #include "afl/data/hash.hpp"
 #include "afl/data/hashvalue.hpp"
 #include "afl/string/format.hpp"
@@ -12,7 +13,7 @@
 #include "game/map/universe.hpp"
 #include "game/turn.hpp"
 #include "server/errors.hpp"
-#include "server/play/shippacker.hpp"
+#include "server/play/hullpacker.hpp"
 
 server::play::ShipPacker::ShipPacker(game::Session& session, int shipNr)
     : m_session(session),
@@ -70,6 +71,13 @@ server::play::ShipPacker::buildValue() const
     addValue(*cargo, ctx, "CARGO.SUPPLIES", "SUPPLIES");
     addValue(*cargo, ctx, "CARGO.T", "T");
     addValueNew(*hv, new afl::data::HashValue(cargo), "CARGO");
+
+    // Functions
+    {
+        game::spec::HullFunctionList list;
+        pShip->enumerateShipFunctions(list, sl);
+        addValueNew(*hv, packHullFunctionList(list), "FUNC");
+    }
 
     // Transfer
     if (pShip->isTransporterActive(game::map::Ship::TransferTransporter)) {

@@ -4,10 +4,10 @@
 #ifndef C2NG_CLIENT_MAP_STARCHARTOVERLAY_HPP
 #define C2NG_CLIENT_MAP_STARCHARTOVERLAY_HPP
 
-#include "client/map/overlay.hpp"
-#include "ui/root.hpp"
 #include "afl/base/signalconnection.hpp"
-#include "client/proxy/lockproxy.hpp"
+#include "client/map/overlay.hpp"
+#include "game/proxy/lockproxy.hpp"
+#include "ui/root.hpp"
 
 namespace client { namespace map {
 
@@ -34,7 +34,7 @@ namespace client { namespace map {
         ui::Root& m_root;
         Location& m_location;
         Screen& m_screen;
-        client::proxy::LockProxy m_lockProxy;
+        game::proxy::LockProxy m_lockProxy;
 
         afl::base::SignalConnection conn_objectChange;
         afl::base::SignalConnection conn_positionChange;

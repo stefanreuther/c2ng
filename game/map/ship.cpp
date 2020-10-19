@@ -23,7 +23,7 @@ namespace {
 
 
 game::map::Ship::Ship(int id)
-    : MapObject(),
+    : Object(),
       m_id(id),
       m_scannedMass(),
       m_scannedHeading(),
@@ -1588,6 +1588,18 @@ const game::UnitScoreList&
 game::map::Ship::unitScores() const
 {
     return m_unitScores;
+}
+
+game::NegativeProperty_t
+game::map::Ship::getScore(int16_t scoreId, const UnitScoreDefinitionList& scoreDefinitions) const
+{
+    UnitScoreList::Index_t index;
+    int16_t value, turn;
+    if (scoreDefinitions.lookup(scoreId, index) && m_unitScores.get(index, value, turn)) {
+        return value;
+    } else {
+        return afl::base::Nothing;
+    }
 }
 
 game::map::ShipData::Transfer&

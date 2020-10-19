@@ -208,7 +208,7 @@ game::db::Loader::load(afl::io::Stream& in, Turn& turn, Game& game, bool acceptP
                 afl::base::fromObject(planet).fill(0);
                 in.fullRead(afl::base::fromObject(planet).trim(size));
 
-                Packer(turn, m_charset).addPlanet(planet);
+                Packer(m_charset).addPlanet(turn, planet);
             } else {
                 /* no known program writes these files */
             }
@@ -221,7 +221,7 @@ game::db::Loader::load(afl::io::Stream& in, Turn& turn, Game& game, bool acceptP
                 dt::Ship ship;
                 in.fullRead(afl::base::fromObject(ship));
 
-                Packer(turn, m_charset).addShip(ship);
+                Packer(m_charset).addShip(turn, ship);
             }
             break;
          }
@@ -239,7 +239,7 @@ game::db::Loader::load(afl::io::Stream& in, Turn& turn, Game& game, bool acceptP
                 while (size >= sizeof(dt::ShipTrackEntry)) {
                     in.fullRead(afl::base::fromObject(entry));
                     size -= uint32_t(sizeof(dt::ShipTrackEntry));
-                    Packer(turn, m_charset).addShipTrack(id, turnNumber, entry);
+                    Packer(m_charset).addShipTrack(turn, id, turnNumber, entry);
                     --turnNumber;
                 }
             }
@@ -336,7 +336,7 @@ game::db::Loader::load(afl::io::Stream& in, Turn& turn, Game& game, bool acceptP
             if (size >= sizeof(dt::Ufo)) {
                 dt::Ufo ufo;
                 in.fullRead(afl::base::fromObject(ufo));
-                Packer(turn, m_charset).addUfo(ufo);
+                Packer(m_charset).addUfo(turn, ufo);
             }
             break;
          }
@@ -356,7 +356,7 @@ game::db::Loader::load(afl::io::Stream& in, Turn& turn, Game& game, bool acceptP
 //     \param s   Stream to save into
 //     \param trn Turn to save */
 void
-game::db::Loader::save(afl::io::Stream& out, Turn& turn, Game& game, const game::spec::ShipList& shipList)
+game::db::Loader::save(afl::io::Stream& out, const Turn& turn, const Game& game, const game::spec::ShipList& shipList)
 {
     // ex saveChartDatabase
     // Prepare initial header
@@ -445,7 +445,7 @@ game::db::Loader::save(afl::io::Stream& out, Turn& turn, Game& game, const game:
         const gm::Planet* pl = univ.planets().get(id);
         if (pl != 0 && pl->hasAnyPlanetData()) {
             dt::Planet dbp;
-            Packer(turn, m_charset).packPlanet(dbp, *pl);
+            Packer(m_charset).packPlanet(dbp, *pl);
             startRecord(out, dt::rPlanetHistory, rs);
             out.fullWrite(afl::base::fromObject(dbp));
             endRecord(out, rs);
@@ -459,7 +459,7 @@ game::db::Loader::save(afl::io::Stream& out, Turn& turn, Game& game, const game:
         if (sh != 0 && sh->hasAnyShipData()) {
             // History Data
             dt::Ship dbs;
-            Packer(turn, m_charset).packShip(dbs, *sh);
+            Packer(m_charset).packShip(dbs, *sh);
             startRecord(out, dt::rShipHistory, rs);
             out.fullWrite(afl::base::fromObject(dbs));
             endRecord(out, rs);
@@ -507,7 +507,7 @@ game::db::Loader::save(afl::io::Stream& out, Turn& turn, Game& game, const game:
         const gm::Ufo* pUfo = const_cast<gm::UfoType&>(univ.ufos()).getObjectByIndex(id);
         if (pUfo != 0 && pUfo->isStoredInHistory()) {
             dt::Ufo ufo;
-            Packer(turn, m_charset).packUfo(ufo, *pUfo);
+            Packer(m_charset).packUfo(ufo, *pUfo);
 
             startRecord(out, dt::rUfoHistory, rs);
             out.fullWrite(afl::base::fromObject(ufo));

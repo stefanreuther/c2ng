@@ -15,6 +15,6 @@ log in, visit the topic, and use the "Stop watching this topic" button.
 
 Subject: $(subject)
 Author:  $(author)
-URL:     <http://planetscentral.com/$(posturl)>
+URL:     <https://planetscentral.com/$(posturl)>
 
 $(message)

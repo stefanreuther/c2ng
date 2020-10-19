@@ -23,7 +23,7 @@ game #$(gameid), $(gamename).
 $(next_$(next_schedule)_msg)
 
 To submit your turn file, go to
-<http://planetscentral.com/login.cgi?returnto=host/>,
+<https://planetscentral.com/login.cgi?returnto=host/>,
 log in, and upload your turn file using the upload form,
 or reply to this mail with your turn file attached.
 
@@ -40,10 +40,10 @@ NOTE: The game's ending condition has changed.
 
 !endif
 Game details can be found on
-<http://planetscentral.com/host/game.cgi/$(gameurl)>.
+<https://planetscentral.com/host/game.cgi/$(gameurl)>.
 
 Have fun.
 
 -- 
 To change your email settings, go to
-<http://planetscentral.com/settings.cgi>.
+<https://planetscentral.com/settings.cgi>.

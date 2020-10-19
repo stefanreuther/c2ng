@@ -403,7 +403,7 @@ TestGameV3ResultLoader::testAllianceCommand()
     // - last command wins
     TS_ASSERT_EQUALS(h.turn.universe().ships().get(9)->getFriendlyCode().orElse(""), "ghi");
     // - command message
-    const game::v3::Command* cmd = game::v3::CommandExtra::create(h.turn).create(PLAYER).getCommand(game::v3::Command::phc_TAlliance, 0);
+    const game::v3::Command* cmd = game::v3::CommandExtra::create(h.turn).create(PLAYER).getCommand(game::v3::Command::TAlliance, 0);
     TS_ASSERT(cmd != 0);
     TS_ASSERT_EQUALS(cmd->getArg(), "ff3ee4");
 }

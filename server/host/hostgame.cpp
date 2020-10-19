@@ -158,28 +158,21 @@ server::host::HostGame::getInfo(int32_t gameId)
 }
 
 void
-server::host::HostGame::getInfos(afl::base::Optional<State> requiredState,
-                                 afl::base::Optional<Type> requiredType,
-                                 afl::base::Optional<String_t> requiredUser,
-                                 bool verbose,
-                                 std::vector<Info>& result)
+server::host::HostGame::getInfos(const Filter& filter, bool verbose, std::vector<Info>& result)
 {
     // ex planetscentral/host/cmdgame.h:doListGames
     afl::data::IntegerList_t list;
-    listGames(requiredState, requiredType, requiredUser, list);
+    listGames(filter, list);
     for (size_t i = 0, n = list.size(); i < n; ++i) {
         result.push_back(Game(m_root, list[i], Game::NoExistanceCheck).describe(verbose, m_session.getUser(), m_root));
     }
 }
 
 void
-server::host::HostGame::getGames(afl::base::Optional<State> requiredState,
-                                 afl::base::Optional<Type> requiredType,
-                                 afl::base::Optional<String_t> requiredUser,
-                                 afl::data::IntegerList_t& result)
+server::host::HostGame::getGames(const Filter& filter, afl::data::IntegerList_t& result)
 {
     // ex planetscentral/host/cmdgame.h:doListGames
-    listGames(requiredState, requiredType, requiredUser, result);
+    listGames(filter, result);
 }
 
 void
@@ -529,10 +522,7 @@ server::host::HostGame::updateGames(const afl::data::IntegerList_t& gameIds)
 }
 
 void
-server::host::HostGame::listGames(afl::base::Optional<State> requiredState,
-                                  afl::base::Optional<Type> requiredType,
-                                  afl::base::Optional<String_t> requiredUser,
-                                  afl::data::IntegerList_t& result)
+server::host::HostGame::listGames(const Filter& filter, afl::data::IntegerList_t& result)
 {
     // ex planetscentral/host/cmdgame.h:doListGames [part]
 
@@ -542,13 +532,13 @@ server::host::HostGame::listGames(afl::base::Optional<State> requiredState,
     String_t typeLimit;
     String_t forUser;
 
-    if (State* p = requiredState.get()) {
+    if (const State* p = filter.requiredState.get()) {
         stateLimit = formatState(*p);
     }
-    if (Type* p = requiredType.get()) {
+    if (const Type* p = filter.requiredType.get()) {
         typeLimit = formatType(*p);
     }
-    if (String_t* p = requiredUser.get()) {
+    if (const String_t* p = filter.requiredUser.get()) {
         forUser = *p;
     }
 
@@ -601,11 +591,20 @@ server::host::HostGame::listGames(afl::base::Optional<State> requiredState,
         needStateCheck = false;
     }
 
+    const String_t* requiredHost     = filter.requiredHost.get();
+    const String_t* requiredTool     = filter.requiredTool.get();
+    const String_t* requiredShipList = filter.requiredShipList.get();
+    const String_t* requiredMaster   = filter.requiredMaster.get();
+
     for (size_t i = 0; i < games.size(); ++i) {
         Game game(m_root, games[i], Game::NoExistanceCheck);
         if ((!needPermissionCheck || game.hasPermission(m_session.getUser(), Game::ReadPermission))
             && (!needTypeCheck || formatType(game.getType()) == typeLimit)
-            && (!needStateCheck || formatState(game.getState()) == stateLimit))
+            && (!needStateCheck || formatState(game.getState()) == stateLimit)
+            && (!requiredHost || game.settings().stringField("host").get() == *requiredHost)
+            && (!requiredShipList || game.settings().stringField("shiplist").get() == *requiredShipList)
+            && (!requiredMaster || game.settings().stringField("master").get() == *requiredMaster)
+            && (!requiredTool || game.tools().contains(*requiredTool)))
         {
             result.push_back(games[i]);
         }

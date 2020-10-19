@@ -79,13 +79,13 @@ game::ref::createSortPredicate(int config, Session& session, afl::base::Deleter&
 
      case ConfigSortByFleet:
         if (pTurn != 0) {
-            return del.addNew(new SortByFleet(pTurn->universe(), session.translator(), session.interface()));
+            return del.addNew(new SortByFleet(pTurn->universe(), session.translator()));
         }
         break;
 
      case ConfigSortByTowGroup:
         if (pTurn != 0) {
-            return del.addNew(new SortByTowGroup(pTurn->universe(), session.translator(), session.interface()));
+            return del.addNew(new SortByTowGroup(pTurn->universe(), session.translator()));
         }
         break;
 
@@ -125,7 +125,6 @@ game::ref::createSortPredicate(int config, Session& session, afl::base::Deleter&
      case ConfigSortByTransferTarget:
         if (pTurn != 0 && pRoot != 0) {
             return del.addNew(new SortByTransferTarget(pTurn->universe(),
-                                                       session.interface(),
                                                        game::map::Ship::TransferTransporter,
                                                        !pRoot->hostVersion().hasParallelShipTransfers(),
                                                        session.translator()));

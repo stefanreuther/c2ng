@@ -1,14 +1,17 @@
 /**
   *  \file interpreter/statementcompilationcontext.hpp
+  *  \brief Class interpreter::StatementCompilationContext
   */
 #ifndef C2NG_INTERPRETER_STATEMENTCOMPILATIONCONTEXT_HPP
 #define C2NG_INTERPRETER_STATEMENTCOMPILATIONCONTEXT_HPP
 
 #include "interpreter/compilationcontext.hpp"
-#include "interpreter/contextprovider.hpp"
-#include "interpreter/bytecodeobject.hpp"
 
 namespace interpreter {
+
+    class ContextProvider;
+    class BytecodeObject;
+    class World;
 
     /** Statement compilation context.
         In addition to some flags, this also manages an execution context and code generation for Break/Continue/Return.
@@ -28,7 +31,7 @@ namespace interpreter {
         virtual void compileContinue(BytecodeObject& bco) const = 0;
         virtual void compileCleanup(BytecodeObject& bco) const = 0;
 
-        /** Add a flag flags.
+        /** Add a flag.
             \param flag flag to add
             \return *this */
         StatementCompilationContext& withFlag(Flag flag);

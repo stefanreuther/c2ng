@@ -1,5 +1,6 @@
 /**
   *  \file util/syntax/scripthighlighter.cpp
+  *  \brief Class util::syntax::ScriptHighlighter
   */
 
 #include "util/syntax/scripthighlighter.hpp"
@@ -239,10 +240,6 @@ util::syntax::ScriptHighlighter::scan(Segment& result)
                 // For: "To" is a keyword, "Do" ends the statement
                 m_state = sAfterFor;
                 result.setFormat(KeywordFormat);
-            } else if (kw == interpreter::kwDo || kw == interpreter::kwLoop) {
-                // Do/Loop: "Until" is a keyword
-                m_state = sAfterLoop;
-                result.setFormat(KeywordFormat);
             } else if (kw == interpreter::kwIf) {
                 // If: "Then" is a keyword and ends the statement
                 m_state = sAfterIf;
@@ -309,10 +306,6 @@ util::syntax::ScriptHighlighter::scan(Segment& result)
             }
             break;
 
-         case sAfterLoop:
-            result.setFormat(kw == interpreter::kwNone && id != "UNTIL" ? DefaultFormat : KeywordFormat);
-            break;
-
          case sAfterIf:
             result.setFormat(kw == interpreter::kwNone && id != "THEN" ? DefaultFormat : KeywordFormat);
             if (id == "THEN") {
@@ -342,8 +335,8 @@ util::syntax::ScriptHighlighter::scan(Segment& result)
     }
 }
 
-// /** Leave default state. Call whenever a non-whitespace token is consumed.
-//     This will reset the state from sDefaultBOL to sDefault, to turn off statement recognition. */
+/** Leave default state. Call whenever a non-whitespace token is consumed.
+    This will reset the state from sDefaultBOL to sDefault, to turn off statement recognition. */
 void
 util::syntax::ScriptHighlighter::leaveDefault()
 {

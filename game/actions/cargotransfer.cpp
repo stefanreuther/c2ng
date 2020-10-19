@@ -150,6 +150,16 @@ game::actions::CargoTransfer::move(CargoSpec& amount, const game::spec::ShipList
         { CargoSpec::Money,      Element::Money },
     };
 
+    // FIXME: this will fail if the transfer causes a temporary overload.
+    // Some of those cases can be solved rather easily, some need more work:
+    // - a Medium freighter (200 cargo) unloading 200 clans, uploading 200T.
+    //   This will fail because we upload Tritanium first; could be solved by trying multiple orders.
+    // - two Medium freighters, one with 150T, one with 150M, exchanging to 75T+75M on both.
+    //   This requires multiple passes.
+    //   The worst-case number of passes is the size of the cargo room if we have just one unit of free space.
+    //   Be careful to not loop forever if there is no free space.
+    // This affects c2web which currently (20200611) works around this by always enabling Overload.
+
     // Move normal stuff
     for (size_t i = 0; i < sizeof(map)/sizeof(map[0]); ++i) {
         amount.add(map[i].csType, -move(map[i].eleType, amount.get(map[i].csType), from, to, true, sellSupplies));

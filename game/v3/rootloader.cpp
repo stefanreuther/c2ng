@@ -111,7 +111,6 @@ game::v3::RootLoader::loadConfiguration(Root& root, afl::io::Directory& dir, afl
     // ex game/config.cc:initConfig
     game::config::HostConfiguration& config = root.hostConfiguration();
     config.setDefaultValues();
-    root.hostVersion().setImpliedHostConfiguration(config);
 
     // FIXME: PCC1 shows warning if fewer than 70 pconfig keys
     // FIXME: PCC1 shows warning if both PCONFIG.SRC and FRIDAY.DAT
@@ -142,13 +141,7 @@ game::v3::RootLoader::loadConfiguration(Root& root, afl::io::Directory& dir, afl
         }
     }
 
-    // Set Tim-Host defaults
-    // FIXME: this belongs either in HostConfiguration, or in HostVersion
-    HostVersion& host = root.hostVersion();
-    if (host.getKind() != HostVersion::Host) {
-        config[config.RoundGravityWells].set(1);
-        config[config.CPEnableRemote].set(0);
-    }
+    root.hostVersion().setImpliedHostConfiguration(config);
 }
 
 /** Load PCONFIG.SRC.

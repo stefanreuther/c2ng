@@ -49,7 +49,8 @@ game::vcr::classic::Battle::Battle(const Object& left,
       m_planetTemperatureCode(planetTemperatureCode),
       m_result(),
       m_type(Unknown),
-      m_capabilities(0)
+      m_capabilities(0),
+      m_position()
 {
     // ex GClassicVcr::GClassicVcr
     // ex GClassicVcrEntry::GClassicVcrEntry
@@ -68,8 +69,8 @@ game::vcr::classic::Battle::getNumObjects() const
     return 2;
 }
 
-game::vcr::Object*
-game::vcr::classic::Battle::getObject(size_t slot, bool after)
+const game::vcr::Object*
+game::vcr::classic::Battle::getObject(size_t slot, bool after) const
 {
     // ex GClassicVcrEntry::getObject
     if (slot == 0 || slot == 1) {
@@ -209,6 +210,12 @@ game::vcr::classic::Battle::isESBActive(const game::config::HostConfiguration& c
     return true;
 }
 
+bool
+game::vcr::classic::Battle::getPosition(game::map::Point& result) const
+{
+    return m_position.get(result);
+}
+
 /*
  *  Additional methods
  */
@@ -231,6 +238,12 @@ game::vcr::classic::Battle::getType() const
 {
     // ex GClassicVcrEntry::getType
     return m_type;
+}
+
+void
+game::vcr::classic::Battle::setPosition(game::map::Point pos)
+{
+    m_position = pos;
 }
 
 // Get battle type.

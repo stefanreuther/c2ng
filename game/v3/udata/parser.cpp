@@ -166,11 +166,14 @@ game::v3::udata::Parser::Parser(Game& game,
       m_battleResults()
 { }
 
+game::v3::udata::Parser::~Parser()
+{ }
+
 // Reader:
 bool
 game::v3::udata::Parser::handleRecord(uint16_t recordId, afl::base::ConstBytes_t data)
 {
-    // ex GUtilParser::process, GUtilMessageParser::parseRecord
+    // ex GUtilParser::process, GUtilMessageParser::parseRecord, ccmain.pas:LoadUtilDataFor, ccmain.pas:ParseUtilRecord
     switch (recordId) {
      case 0:
      case 46:
@@ -202,6 +205,12 @@ game::v3::udata::Parser::handleRecord(uint16_t recordId, afl::base::ConstBytes_t
         // Variable size: name is optional
         if (data.size() >= 6) {
             // FIXME: This only updates the ship. We must generate a bang marker, too.
+            // PCC1:  PP := BangAt(Words[0], Words[1]);
+            //        IF PP<>NIL THEN BEGIN
+            //          FreeStr(pp^.Info);
+            //          IF size >= 26 THEN pp^.Info := NewStr('Explosion of ' + GetStr(Words[3], 20))
+            //                        ELSE pp^.Info := NewStr('Explosion of ship #' + itoa(Words[2]));
+            //        END;
             gt::Util1Bang bang;
             fromObject(bang).copyFrom(data);
 
@@ -221,6 +230,12 @@ game::v3::udata::Parser::handleRecord(uint16_t recordId, afl::base::ConstBytes_t
         // Mine hit
         // Variable size: ship name is optional
         if (data.size() >= 8) {
+            // FIXME: create explosion
+            // PCC1:  PP := BangAt(Words[1], Words[2]);
+            //        IF PP<>NIL THEN BEGIN
+            //          IF size >= 28 THEN PP^.Info := NewStr(GetStr(Words[4], 20) + ' hit a mine')
+            //                        ELSE PP^.Info := NewStr('Ship #' + itoa(Words[0]) + ' hit a mine');
+            //        END;
             gt::Util2MineHit hit;
             fromObject(hit).copyFrom(data);
 
@@ -390,7 +405,7 @@ game::v3::udata::Parser::handleRecord(uint16_t recordId, afl::base::ConstBytes_t
                 return false;
             }
 
-            // @change PCC2 would figure out the host version here. We don't; we already did that before.
+            // @change PCC2, PCC would figure out the host version here. We don't; we already did that before.
 
             /* Remaining items, not yet checked:
                - spec digests
@@ -401,21 +416,28 @@ game::v3::udata::Parser::handleRecord(uint16_t recordId, afl::base::ConstBytes_t
         }
         break;
 
-    //  FIXME: case 14:
-    //     /* Wormhole. 4.0e adds new fields to the wormhole structure, so we must
-    //        also accept structures where they are missing. */
-    //     // FIXME: it would be cleaner to parse this message into our regular format,
-    //     // and have the Ufo container eat that.
-    //     if (data.size() >= 10) {
-    //         TUtil14Wormhole wh;
-    //         getPartialStructure(data, wh, size);
-    //         if (size < 12)
-    //             wh.ufo_id = -1;
-    //         if (size < 14)
-    //             wh.bidir = -1;
-    //         univ.ty_ufos.addWormholeData(wh);
-    //     }
-    //     break;
+     case 14:
+        // Wormhole
+        // 4.0e adds new fields to the wormhole structure, so we must also accept structures where they are missing.
+        if (data.size() >= 10U) {
+            gt::Util14Wormhole report;
+            fromObject(report).fill(0);
+            fromObject(report).copyFrom(data);
+
+            MessageInformation info(MessageInformation::Wormhole, report.wormholeId, getTurnNumber());
+            info.addValue(gp::mi_X, report.x);
+            info.addValue(gp::mi_Y, report.y);
+            info.addValue(gp::mi_Mass, report.mass);
+            info.addValue(gp::mi_WormholeStabilityCode, report.stabilityCode);
+            if (data.size() >= 12U) {
+                info.addValue(gp::mi_UfoRealId, report.ufoId);
+            }
+            if (data.size() >= 14U) {
+                info.addValue(gp::mi_WormholeBidirFlag, report.bidirFlag);
+            }
+            processMessageInformation(info);
+        }
+        break;
 
      case 15:
         // Wormhole travel */
@@ -472,7 +494,7 @@ game::v3::udata::Parser::handleRecord(uint16_t recordId, afl::base::ConstBytes_t
         }
         break;
 
-        // TODO: TUtil20ShipBuilt. Can we use it?
+        // TODO: TUtil20ShipBuilt. Can we use it? PCC1 uses it to kill previous ship.
 
      case 21:
         // Ship trade

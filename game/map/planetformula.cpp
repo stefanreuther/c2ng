@@ -30,6 +30,7 @@ namespace {
         \param threshold  below threshold, growth is linear; above it's rootic :-) */
     game::LongProperty_t getMaxBuildingsFormula(game::LongProperty_t clansMaybe, int threshold)
     {
+        // ex planacc.pas:Maximum0
         int32_t clans;
         if (clansMaybe.get(clans)) {
             if (clans <= threshold) {
@@ -238,7 +239,7 @@ game::map::getColonistSafeTax(const Planet& pl, const game::config::HostConfigur
 game::LongProperty_t
 game::map::getMaxSupportedColonists(const Planet& pl, const game::config::HostConfiguration& config, const HostVersion& host, int player)
 {
-    // ex game/planetform.h:getMaxSupportedColonists
+    // ex game/planetform.h:getMaxSupportedColonists, planacc.pas:SupportedClans
     int race = config.getPlayerRaceNumber(player);
     bool crystal = (race == 7 && config[config.CrystalsPreferDeserts]());
     int32_t limit;
@@ -253,11 +254,11 @@ game::map::getMaxSupportedColonists(const Planet& pl, const game::config::HostCo
         if (crystal) {
             if (config[config.CrystalSinTempBehavior]())
                 if (temp >= 15)
-                    return (int32_t(100000 * std::sin(temp * util::PI / 100)));
+                    return (int32_t(100000 * std::sin(temp * util::PI / 200)));
                 else
                     return (3 + temp * config[config.MaxColTempSlope]() / 100);
             else
-                return (1000 * temp);
+                return std::max(1, 1000 * temp);
         }
 
         if (temp >= 85)
@@ -276,6 +277,7 @@ game::map::getMaxSupportedColonists(const Planet& pl, const game::config::HostCo
         if (crystal)
             return (1000 * temp);
 
+        // THost before 3.13a probably does not have this
         if (temp >= 85)
             limit = 2 * (100 - temp) + 1;
         else if (temp <= 14)
@@ -284,6 +286,7 @@ game::map::getMaxSupportedColonists(const Planet& pl, const game::config::HostCo
             limit = int32_t(100000 * std::sin((100 - temp) * 0.0314) + 0.5);
     }
 
+    // THost before 3.22 has an additional "&& limit < 200" here, making this apply to temp <= 14 only.
     if (race == 10 && temp <= 19 && limit < 90000)
         limit = 90000;
     if ((race == 4 || race >= 9) && temp >= 84 && limit < 60)
@@ -402,6 +405,7 @@ game::map::getNativeDue(int tax, int race, int gov, int32_t pop, int owner, cons
 game::LongProperty_t
 game::map::getNativeDueLimited(const Planet& pl, const game::config::HostConfiguration& config, const HostVersion& host, int tax, int32_t rem_inc)
 {
+    // ex planacc.pas:LimitCollection
     int race, owner;
     if (pl.getNativeRace().get(race) && pl.getOwner(owner)) {
         /* amorphs don't pay */
@@ -471,7 +475,7 @@ game::map::getNativeSafeTax(const Planet& pl, const game::config::HostConfigurat
             // Figure out maximum tax rate yielding a usable happiness:
             int target = computeHappinessTarget(happy);
             int value;
-            while (tax > 0 && getNativeChange(pl, host, tax, mifa).get(value) < target) {
+            while (tax > 0 && getNativeChange(pl, host, tax, mifa).get(value) && value < target) {
                 --tax;
             }
         }
@@ -518,10 +522,21 @@ game::map::getNativeBaseTax(const Planet& pl, const game::config::HostConfigurat
 {
     // ex game/planetform.h:getNativeBaseTax
     // ex envscan.pas:BaseTax
+    int owner;
+    if (pl.getOwner(owner)) {
+        return getNativeBaseTax(pl, owner, config, host, happyTarget);
+    } else {
+        return afl::base::Nothing;
+    }
+}
+
+game::IntegerProperty_t
+game::map::getNativeBaseTax(const Planet& pl, int owner, const game::config::HostConfiguration& config, const HostVersion& host, int happyTarget)
+{
     // Check preconditions
-    int owner, race, gov;
+    int race, gov;
     int32_t pop;
-    if (pl.getOwner(owner) && pl.getNativeRace().get(race) && pl.getNatives().get(pop) && pl.getNativeGovernment().get(gov)) {
+    if (pl.getNativeRace().get(race) && pl.getNatives().get(pop) && pl.getNativeGovernment().get(gov)) {
         // No taxes if natives wouldn't pay anyway, or there are none
         if (pop == 0 || race == AmorphousNatives) {
             return 0;
@@ -622,7 +637,7 @@ game::map::getBovinoidSupplyContributionLimited(const Planet& pl, const game::co
 int32_t
 game::map::getAmorphousBreakfast(const HostVersion& host, int happy)
 {
-    // ex game/planetform.h:getAmorphousBreakfast
+    // ex game/planetform.h:getAmorphousBreakfast, planacc.pas:AmorphousBreakfast
     if (host.getKind() == HostVersion::PHost) {
         if (happy >= 70)
             return 5;
@@ -649,6 +664,7 @@ game::map::getAmorphousBreakfast(const HostVersion& host, int happy)
 game::IntegerProperty_t
 game::map::getMiningCapacity(const Planet& pl, const game::config::HostConfiguration& config, const HostVersion& host, Element::Type type, int mines)
 {
+    // ex ccmain.pas:MiningCapacity
     int density;
     if (pl.getOreDensity(type).get(density)) {
         // Mining rate

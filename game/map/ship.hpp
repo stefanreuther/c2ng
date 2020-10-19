@@ -6,7 +6,7 @@
 
 #include <vector>
 #include "game/element.hpp"
-#include "game/map/mapobject.hpp"
+#include "game/map/object.hpp"
 #include "game/map/shipdata.hpp"
 #include "game/map/shiphistorydata.hpp"
 #include "game/parser/messageinformation.hpp"
@@ -24,7 +24,7 @@ namespace game { namespace map {
     //     - current ship, i.e. one seen this turn, and possibly played
     //     - guessed ship, i.e. not seen this turn but we guess it's there
     //     - history ship, i.e. not seen this turn */
-    class Ship : public MapObject {
+    class Ship : public Object {
      public:
         /// Transporters.
         enum Transporter {
@@ -63,7 +63,7 @@ namespace game { namespace map {
         void       internalCheck();
         void       combinedCheck1(Universe& univ, PlayerSet_t availablePlayers, int turnNumber);
 
-        // MapObject interface
+        // Object interface
         virtual String_t getName(ObjectName which, afl::string::Translator& tx, InterpreterInterface& iface) const;
         virtual Id_t getId() const;
         virtual bool getOwner(int& result) const;
@@ -189,6 +189,7 @@ namespace game { namespace map {
         // Public members:
         UnitScoreList& unitScores();
         const UnitScoreList& unitScores() const;
+        NegativeProperty_t getScore(int16_t scoreId, const UnitScoreDefinitionList& scoreDefinitions) const;
 
      private:
     //     // Copy protection

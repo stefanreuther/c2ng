@@ -1,5 +1,6 @@
 /**
   *  \file server/play/torpedopacker.cpp
+  *  \brief Class server::play::TorpedoPacker
   */
 
 #include "server/play/torpedopacker.hpp"

@@ -13,6 +13,12 @@ class TestGameSimAbility : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestGameSimClassResult : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testMulti();
+};
+
 class TestGameSimConfiguration : public CxxTest::TestSuite {
  public:
     void testIt();
@@ -28,6 +34,10 @@ class TestGameSimLoader : public CxxTest::TestSuite {
     void testV4();
     void testV5();
     void testError();
+    void testSaveDefault();
+    void testSaveRating();
+    void testSaveIntercept();
+    void testSaveFlags();
 };
 
 class TestGameSimObject : public CxxTest::TestSuite {
@@ -48,6 +58,67 @@ class TestGameSimPlanet : public CxxTest::TestSuite {
     void testCostPartial();
 };
 
+class TestGameSimResult : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
+class TestGameSimResultList : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testIncrease();
+    void testDecrease();
+};
+
+class TestGameSimRun : public CxxTest::TestSuite {
+ public:
+    void testHost();
+    void testHostBig();
+    void testHostNoTorps();
+    void testHostBalance();
+    void testHostMaster();
+    void testHostPlanet();
+    void testHostIntercept();
+    void testHostMulti();
+    void testHostESB();
+    void testPHost();
+    void testPHostBig();
+    void testPHostPlanet();
+    void testPHostPlanetTubes();
+    void testPHostIntercept();
+    void testPHostMulti();
+    void testShipCommander();
+    void testShipDeactivated();
+    void testShipAllied();
+    void testShipPassive();
+    void testShipNotEnemy();
+    void testShipEnemy();
+    void testShipPersistentEnemy();
+    void testShipCloaked();
+    void testShipFriendlyCodeMatch();
+    void testShipNoFuel();
+    void testShipCloakedFighterBays();
+    void testShipCloakedFighterBaysNT();
+    void testShipSquadron();
+    void testPlanetDeactivated();
+    void testPlanetCloaked();
+    void testPlanetFriendlyCodeMatch();
+    void testPlanetAllied();
+    void testPlanetNotAggressive();
+    void testPlanetNotEnemy();
+    void testPlanetImmuneRace();
+    void testPlanetBird();
+    void testPlanetPrimaryEnemy();
+    void testPlanetNuk();
+};
+
+class TestGameSimRunner : public CxxTest::TestSuite {
+ public:
+    void testRegression1();
+    void testRegression2();
+    void testInterrupt();
+};
+
 class TestGameSimSetup : public CxxTest::TestSuite {
  public:
     void testObj();
@@ -55,6 +126,7 @@ class TestGameSimSetup : public CxxTest::TestSuite {
     void testShipList();
     void testRandom();
     void testListener();
+    void testMerge();
 };
 
 class TestGameSimShip : public CxxTest::TestSuite {
@@ -63,11 +135,35 @@ class TestGameSimShip : public CxxTest::TestSuite {
     void testName();
     void testShipList();
     void testAbilities();
+    void testAggressive();
 };
 
 class TestGameSimStructures : public CxxTest::TestSuite {
  public:
     void testHeader();
+};
+
+class TestGameSimTransfer : public CxxTest::TestSuite {
+ public:
+    void testCopyFromEmptyShip();
+    void testCopyFromShip();
+    void testCopyToShip();
+    void testCopyToMismatchingShip();
+    void testCopyToShipWithFighters();
+    void testCopyToShipWithTorps();
+    void testCopyFromEmptyPlanet();
+    void testCopyFromPlanet();
+    void testCopyFromBase();
+    void testCopyToPlanet();
+    void testCopyToMismatchingPlanet();
+};
+
+class TestGameSimUnitResult : public CxxTest::TestSuite {
+ public:
+    void testShip();
+    void testShip2();
+    void testPlanet();
+    void testMulti();
 };
 
 #endif

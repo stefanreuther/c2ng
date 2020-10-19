@@ -15,6 +15,7 @@
 #include "afl/data/stringvalue.hpp"
 #include "afl/data/visitor.hpp"
 #include "afl/sys/loglistener.hpp"
+#include "interpreter/arguments.hpp"
 #include "interpreter/callablevalue.hpp"
 #include "interpreter/error.hpp"
 #include "interpreter/filevalue.hpp"
@@ -22,7 +23,6 @@
 #include "interpreter/values.hpp"
 #include "interpreter/world.hpp"
 #include "util/math.hpp"
-#include "interpreter/arguments.hpp"
 
 using interpreter::Error;
 using interpreter::getBooleanValue;
@@ -31,6 +31,8 @@ using interpreter::makeFloatValue;
 using interpreter::makeIntegerValue;
 using interpreter::makeSizeValue;
 using interpreter::makeStringValue;
+using interpreter::mustBeScalarValue;
+using interpreter::mustBeStringValue;
 
 namespace {
     /** Arithmetic status. */
@@ -272,16 +274,10 @@ namespace {
     {
         // ex ccexpr.pas:op_BITNOT_func
         // Bitwise negation
-        ArithmeticArg a;
-        switch (checkArithmetic(a, arg)) {
-         case ariNull:
+        if (arg == 0) {
             return 0;
-         case ariInt:
-            return makeIntegerValue(~a.ia);
-         case ariFloat:
-         default:
-            throw Error::typeError(Error::ExpectInteger);
         }
+        return makeIntegerValue(~mustBeScalarValue(arg));
     }
 
     afl::data::Value* FIsEmpty(interpreter::World& /*world*/, const afl::data::Value* arg)
@@ -331,16 +327,15 @@ namespace {
         // Get character from ASCII/Unicode code
         if (arg == 0) {
             return 0;
-        } else if (const afl::data::ScalarValue* iv = dynamic_cast<const afl::data::ScalarValue*>(arg)) {
-            if (iv->getValue() < 0 || iv->getValue() > int32_t(afl::charset::UNICODE_MAX)) {
-                throw interpreter::Error::rangeError();
-            }
-            String_t tmp;
-            afl::charset::Utf8().append(tmp, iv->getValue());
-            return makeStringValue(tmp);
-        } else {
-            throw Error::typeError(Error::ExpectInteger);
         }
+
+        int32_t value = mustBeScalarValue(arg);
+        if (value < 0 || value > int32_t(afl::charset::UNICODE_MAX)) {
+            throw interpreter::Error::rangeError();
+        }
+        String_t tmp;
+        afl::charset::Utf8().append(tmp, value);
+        return makeStringValue(tmp);
     }
 
     afl::data::Value* FStr(interpreter::World& /*world*/, const afl::data::Value* arg)
@@ -414,10 +409,7 @@ namespace {
         // Trim left whitespace
         if (arg == 0)
             return 0;
-        else if (const afl::data::StringValue* sv = dynamic_cast<const afl::data::StringValue*>(arg))
-            return makeStringValue(afl::string::strLTrim(sv->getValue()));
-        else
-            throw Error::typeError(Error::ExpectString);
+        return makeStringValue(afl::string::strLTrim(mustBeStringValue(arg)));
     }
 
     afl::data::Value* FRTrim(interpreter::World& /*world*/, const afl::data::Value* arg)
@@ -426,10 +418,7 @@ namespace {
         // Trim right whitespace
         if (arg == 0)
             return 0;
-        else if (const afl::data::StringValue* sv = dynamic_cast<const afl::data::StringValue*>(arg))
-            return makeStringValue(afl::string::strRTrim(sv->getValue()));
-        else
-            throw Error::typeError(Error::ExpectString);
+        return makeStringValue(afl::string::strRTrim(mustBeStringValue(arg)));
     }
 
     afl::data::Value* FLRTrim(interpreter::World& /*world*/, const afl::data::Value* arg)
@@ -438,10 +427,7 @@ namespace {
         // Trim both whitespace
         if (arg == 0)
             return 0;
-        else if (const afl::data::StringValue* sv = dynamic_cast<const afl::data::StringValue*>(arg))
-            return makeStringValue(afl::string::strTrim(sv->getValue()));
-        else
-            throw Error::typeError(Error::ExpectString);
+        return makeStringValue(afl::string::strTrim(mustBeStringValue(arg)));
     }
 
     afl::data::Value* FLength(interpreter::World& /*world*/, const afl::data::Value* arg)
@@ -451,10 +437,7 @@ namespace {
         // @change PCC 1.x stringifies, we don't.
         if (arg == 0)
             return 0;
-        else if (const afl::data::StringValue* sv = dynamic_cast<const afl::data::StringValue*>(arg))
-            return makeSizeValue(afl::charset::Utf8().length(sv->getValue()));
-        else
-            throw Error::typeError(Error::ExpectString);
+        return makeSizeValue(afl::charset::Utf8().length(mustBeStringValue(arg)));
     }
 
     afl::data::Value* FVal(interpreter::World& /*world*/, const afl::data::Value* arg)
@@ -464,28 +447,26 @@ namespace {
         // @change PCC 1.x refuses "Val('999999999')" because that's too large for int, we accept it as float.
         if (arg == 0) {
             return 0;
-        } else if (const afl::data::StringValue* sv = dynamic_cast<const afl::data::StringValue*>(arg)) {
-            String_t ssv = sv->getValue();
-            if (ssv.find_first_not_of(" \t0123456789-+.") != ssv.npos) {
-                // syntax error, i.e. hex
-                return 0;
-            } else {
-                // no illegal characters, so try to convert.
-                // strtod skips initial whitespace, but not trailing whitespace.
-                const char* ssvp = ssv.c_str();
-                char* end;
-                double d = std::strtod(ssvp, &end);
-                if (end == ssvp || end[std::strspn(end, " \t")] != 0)
-                    return 0;
+        }
 
-                // Int or float?
-                if (ssv.find('.') == ssv.npos && std::fabs(d) <= 2147483647.0)
-                    return makeIntegerValue(int32_t(d));
-                else
-                    return makeFloatValue(d);
-            }
+        const String_t& ssv = mustBeStringValue(arg);
+        if (ssv.find_first_not_of(" \t0123456789-+.") != ssv.npos) {
+            // syntax error, i.e. hex
+            return 0;
         } else {
-            throw Error::typeError(Error::ExpectString);
+            // no illegal characters, so try to convert.
+            // strtod skips initial whitespace, but not trailing whitespace.
+            const char* ssvp = ssv.c_str();
+            char* end;
+            double d = std::strtod(ssvp, &end);
+            if (end == ssvp || end[std::strspn(end, " \t")] != 0)
+                return 0;
+
+            // Int or float?
+            if (ssv.find('.') == ssv.npos && std::fabs(d) <= 2147483647.0)
+                return makeIntegerValue(int32_t(d));
+            else
+                return makeFloatValue(d);
         }
     }
 
@@ -518,11 +499,8 @@ namespace {
         if (arg == 0)
             return 0;
 
-        const afl::data::ScalarValue* iv = dynamic_cast<const afl::data::ScalarValue*>(arg);
-        if (!iv)
-            throw Error::typeError(Error::ExpectInteger);
-
-        return makeStringValue(world.atomTable().getStringFromAtom(iv->getValue()));
+        int32_t iv = mustBeScalarValue(arg);
+        return makeStringValue(world.atomTable().getStringFromAtom(iv));
     }
 
     afl::data::Value* FKeyCreate(interpreter::World& world, const afl::data::Value* arg)
@@ -530,11 +508,8 @@ namespace {
         if (arg == 0)
             return 0;
 
-        const afl::data::StringValue* sv = dynamic_cast<const afl::data::StringValue*>(arg);
-        if (!sv)
-            throw Error::typeError(Error::ExpectString);
-
-        util::KeymapRef_t km = world.keymaps().createKeymap(sv->getValue());
+        const String_t& sv = mustBeStringValue(arg);
+        util::KeymapRef_t km = world.keymaps().createKeymap(sv);
         return interpreter::makeKeymapValue(km);
     }
 
@@ -543,11 +518,8 @@ namespace {
         if (arg == 0)
             return 0;
 
-        const afl::data::StringValue* sv = dynamic_cast<const afl::data::StringValue*>(arg);
-        if (!sv)
-            throw Error::typeError(Error::ExpectString);
-
-        util::KeymapRef_t km = world.keymaps().getKeymapByName(sv->getValue());
+        const String_t& sv = mustBeStringValue(arg);
+        util::KeymapRef_t km = world.keymaps().getKeymapByName(sv);
         if (km == 0)
             throw Error("No such keymap");
         return interpreter::makeKeymapValue(km);
@@ -630,10 +602,7 @@ namespace {
         // Convert to upper case
         if (arg == 0)
             return 0;
-        else if (const afl::data::StringValue* sv = dynamic_cast<const afl::data::StringValue*>(arg))
-            return makeStringValue(afl::string::strUCase(sv->getValue()));
-        else
-            throw Error::typeError(Error::ExpectString);
+        return makeStringValue(afl::string::strUCase(mustBeStringValue(arg)));
     }
 
     afl::data::Value* FLCase(interpreter::World& /*world*/, const afl::data::Value* arg)
@@ -641,10 +610,7 @@ namespace {
         // Convert to lower case
         if (arg == 0)
             return 0;
-        else if (const afl::data::StringValue* sv = dynamic_cast<const afl::data::StringValue*>(arg))
-            return makeStringValue(afl::string::strLCase(sv->getValue()));
-        else
-            throw Error::typeError(Error::ExpectString);
+        return makeStringValue(afl::string::strLCase(mustBeStringValue(arg)));
     }
 
     afl::data::Value* (*const unary_ops[])(interpreter::World&, const afl::data::Value*) = {

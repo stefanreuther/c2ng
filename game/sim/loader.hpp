@@ -30,7 +30,9 @@ namespace game { namespace sim {
             \change PCC2 version would access ship list data here */
         void load(afl::io::Stream& in, Setup& setup);
 
-
+        /** Save a setup.
+            \param out Stream
+            \param setup [in] Simulation setup */
         void save(afl::io::Stream& out, const Setup& setup);
 
      private:

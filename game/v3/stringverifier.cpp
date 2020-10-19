@@ -1,5 +1,6 @@
 /**
   *  \file game/v3/stringverifier.cpp
+  *  \brief Class game::v3::StringVerifier
   */
 
 #include "game/v3/stringverifier.hpp"
@@ -13,13 +14,13 @@ game::v3::StringVerifier::~StringVerifier()
 { }
 
 bool
-game::v3::StringVerifier::isValidString(Context ctx, const String_t& text)
+game::v3::StringVerifier::isValidString(Context ctx, const String_t& text) const
 {
     return defaultIsValidString(ctx, text);
 }
 
 bool
-game::v3::StringVerifier::isValidCharacter(Context ctx, afl::charset::Unichar_t ch)
+game::v3::StringVerifier::isValidCharacter(Context ctx, afl::charset::Unichar_t ch) const
 {
     switch (ctx) {
      case Unknown:
@@ -57,7 +58,7 @@ game::v3::StringVerifier::isValidCharacter(Context ctx, afl::charset::Unichar_t 
 }
 
 size_t
-game::v3::StringVerifier::getMaxStringLength(Context ctx)
+game::v3::StringVerifier::getMaxStringLength(Context ctx) const
 {
     switch (ctx) {
      case Unknown:

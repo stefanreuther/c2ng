@@ -15,7 +15,7 @@ ui::Window::WindowColorScheme::WindowColorScheme(Window& parent)
 gfx::Color_t
 ui::Window::WindowColorScheme::getColor(SkinColor::Color index)
 {
-    if (index < SkinColor::NUM_COLORS) {
+    if (size_t(index) < SkinColor::NUM_COLORS) {
         return m_parent.m_uiColorScheme.getColor(m_parent.m_style.colors[index]);
     }
     return 0;
@@ -43,6 +43,9 @@ ui::Window::Window(String_t title, gfx::ResourceProvider& provider, ColorScheme&
     setColorScheme(m_colorScheme);
     setState(ModalState, true);
 }
+
+ui::Window::~Window()
+{ }
 
 void
 ui::Window::draw(gfx::Canvas& can)
@@ -74,7 +77,7 @@ ui::Window::transformSize(gfx::Rectangle size, Transformation kind) const
      case InnerToOuter:
         return gfx::Rectangle(size.getLeftX() - 4 - m_border,
                               size.getTopY() - height - m_border,
-                              std::max(size.getWidth() + 8 + 2*m_border, font->getTextWidth(m_title)),
+                              std::max(size.getWidth() + 8 + 2*m_border, font->getTextWidth(m_title)) + 10,
                               size.getHeight() + height + 4 + 2*m_border);
     }
     return size;

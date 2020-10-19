@@ -172,7 +172,7 @@ game::v3::Writer::saveOutbox35(game::msg::Outbox& outbox, int player, afl::io::S
             }
 
             // Build header
-            PlayerSet_t receivers = outbox.getMessageReceiverMask(i);
+            PlayerSet_t receivers = outbox.getMessageReceivers(i);
             gt::Outbox35MessageHeader msgHeader;
             msgHeader.pad = 0;
             msgHeader.validFlag = '1';

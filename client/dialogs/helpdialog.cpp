@@ -15,7 +15,7 @@
 #include "afl/io/xml/node.hpp"
 #include "afl/io/xml/nodereader.hpp"
 #include "client/downlink.hpp"
-#include "client/proxy/helpproxy.hpp"
+#include "client/help.hpp"
 #include "ui/eventloop.hpp"
 #include "ui/group.hpp"
 #include "ui/layout/hbox.hpp"
@@ -25,21 +25,51 @@
 #include "ui/rich/documentview.hpp"
 #include "ui/spacer.hpp"
 #include "ui/widgets/button.hpp"
-#include "ui/window.hpp"
-#include "util/translation.hpp"
-#include "ui/widgets/quit.hpp"
 #include "ui/widgets/inputline.hpp"
 #include "ui/widgets/keydispatcher.hpp"
+#include "ui/widgets/quit.hpp"
 #include "ui/widgets/scrollbar.hpp"
+#include "ui/window.hpp"
+#include "util/translation.hpp"
 
 using afl::io::xml::Nodes_t;
 
 namespace {
     const char*const TOC_PAGE = "toc";
 
+    class HelpProxy {
+     public:
+        HelpProxy(util::RequestSender<game::Session> gameSender)
+            : m_gameSender(gameSender)
+            { }
+
+        void loadHelpPage(client::Downlink& link, afl::io::xml::Nodes_t& result, String_t pageName)
+            {
+                class Query : public util::Request<game::Session> {
+                 public:
+                    Query(afl::io::xml::Nodes_t& result, String_t pageName)
+                        : m_result(result), m_pageName(pageName)
+                        { }
+                    virtual void handle(game::Session& session)
+                        { client::loadHelpPage(session, m_result, m_pageName); }
+                 private:
+                    afl::io::xml::Nodes_t& m_result;
+                    String_t m_pageName;
+                };
+
+                result.clear();
+
+                Query q(result, pageName);
+                link.call(m_gameSender, q);
+            }
+
+     private:
+        util::RequestSender<game::Session> m_gameSender;
+    };
+
     class HelpDialog {
      public:
-        HelpDialog(ui::Root& root, client::proxy::HelpProxy& proxy);
+        HelpDialog(ui::Root& root, HelpProxy& proxy);
 
         void setPage(String_t pageName, Nodes_t& pageContent);
         void run();
@@ -58,7 +88,7 @@ namespace {
         ui::widgets::Button m_btnContent;
         String_t m_pageName;
         Nodes_t m_pageContent;
-        client::proxy::HelpProxy& m_proxy;
+        HelpProxy& m_proxy;
 
         /* History: this is a ring buffer. historyCount contains the number
            of valid elements, historyHead points to the next usable (that is,
@@ -81,7 +111,7 @@ namespace {
     };
 }
 
-HelpDialog::HelpDialog(ui::Root& root, client::proxy::HelpProxy& proxy)
+HelpDialog::HelpDialog(ui::Root& root, HelpProxy& proxy)
     : m_root(root),
       m_loop(root),
       m_docView(root.provider().getFont(gfx::FontRequest())->getCellSize().scaledBy(40, 20),
@@ -286,7 +316,7 @@ void
 client::dialogs::doHelpDialog(ui::Root& root, util::RequestSender<game::Session> gameSender, String_t pageName)
 {
     // ex doHelp
-    client::proxy::HelpProxy proxy(gameSender);
+    HelpProxy proxy(gameSender);
     Downlink link(root);
 
     afl::io::xml::Nodes_t pageContent;

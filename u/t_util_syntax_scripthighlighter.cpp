@@ -136,6 +136,21 @@ TestUtilSyntaxScriptHighlighter::testDeclarations()
     TS_ASSERT_EQUALS(parseContinuation(testee, r), "i");
     TS_ASSERT(!testee.scan(r));
 
+    // dim a(1),b
+    testee.init(afl::string::toMemory("dim a(1),b"));
+    TS_ASSERT(testee.scan(r));
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::KeywordFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "dim");
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::DefaultFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), " ");
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::NameFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "a");
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::DefaultFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "(1),");
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::NameFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "b");
+    TS_ASSERT(!testee.scan(r));
+
     // sub foo(bar(baz)) - the "baz" is not a name
     testee.init(afl::string::toMemory("sub foo(bar(baz))"));
     TS_ASSERT(testee.scan(r));
@@ -173,6 +188,19 @@ TestUtilSyntaxScriptHighlighter::testCommands()
     TS_ASSERT_EQUALS(parseContinuation(testee, r), "then");
     TS_ASSERT_EQUALS(r.getFormat(), util::syntax::DefaultFormat);
     TS_ASSERT_EQUALS(parseContinuation(testee, r), " that");
+    TS_ASSERT(!testee.scan(r));
+
+    // if this then that
+    testee.init(afl::string::toMemory("if this then\nthat"));
+    TS_ASSERT(testee.scan(r));
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::KeywordFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "if");
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::DefaultFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), " this ");
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::KeywordFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "then");
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::DefaultFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "\nthat");
     TS_ASSERT(!testee.scan(r));
 
     // for i:=a to b do c
@@ -221,5 +249,62 @@ TestUtilSyntaxScriptHighlighter::testCommands()
     TS_ASSERT(testee.scan(r));
     TS_ASSERT_EQUALS(r.getFormat(), util::syntax::DefaultFormat);
     TS_ASSERT_EQUALS(parseContinuation(testee, r), "what is love? baby dont hurt me");
+    TS_ASSERT(!testee.scan(r));
+
+    // a:=true.or (not a keyword)
+    testee.init(afl::string::toMemory("a:=true.or"));
+    TS_ASSERT(testee.scan(r));
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::DefaultFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "a:=true.or");
+    TS_ASSERT(!testee.scan(r));
+
+    // text with newlines
+    testee.init(afl::string::toMemory("a\nb\nc"));
+    TS_ASSERT(testee.scan(r));
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::DefaultFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "a\nb\nc");
+    TS_ASSERT(!testee.scan(r));
+
+    // Loop Until x
+    testee.init(afl::string::toMemory("Loop Until x"));
+    TS_ASSERT(testee.scan(r));
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::KeywordFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "Loop");
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::DefaultFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), " ");
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::KeywordFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "Until");
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::DefaultFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), " x");
+    TS_ASSERT(!testee.scan(r));
+
+    // With a Do b
+    testee.init(afl::string::toMemory("With a Do b"));
+    TS_ASSERT(testee.scan(r));
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::KeywordFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "With");
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::DefaultFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), " a ");
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::KeywordFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "Do");
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::DefaultFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), " b");
+    TS_ASSERT(!testee.scan(r));
+
+    // Dim a As Int
+    testee.init(afl::string::toMemory("Dim a As Int"));
+    TS_ASSERT(testee.scan(r));
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::KeywordFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "Dim");
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::DefaultFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), " ");
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::NameFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "a");
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::DefaultFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), " ");
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::KeywordFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), "As");
+    TS_ASSERT_EQUALS(r.getFormat(), util::syntax::DefaultFormat);
+    TS_ASSERT_EQUALS(parseContinuation(testee, r), " Int");
     TS_ASSERT(!testee.scan(r));
 }

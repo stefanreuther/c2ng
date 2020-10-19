@@ -18,6 +18,7 @@ TestGameSpecBasicHullFunction::testIt()
     TS_ASSERT_EQUALS(testee.getName(), "Exterminate");
     TS_ASSERT_EQUALS(testee.getDescription(), "Exterminate");
     TS_ASSERT_EQUALS(testee.getExplanation(), "");
+    TS_ASSERT_EQUALS(testee.getPictureName(), "");
     TS_ASSERT_EQUALS(testee.getImpliedFunctionId(), -1);
 
     // Change name; description follows as it's not set
@@ -28,12 +29,14 @@ TestGameSpecBasicHullFunction::testIt()
     // Change more stuff
     testee.setDescription("Description");
     testee.setExplanation("Text");
+    testee.setPictureName("boom");
     testee.setImpliedFunctionId(12);
 
     // Verify
     TS_ASSERT_EQUALS(testee.getName(), "Extinguish");
     TS_ASSERT_EQUALS(testee.getDescription(), "Description");
     TS_ASSERT_EQUALS(testee.getExplanation(), "Text");
+    TS_ASSERT_EQUALS(testee.getPictureName(), "boom");
     TS_ASSERT_EQUALS(testee.getImpliedFunctionId(), 12);
 }
 

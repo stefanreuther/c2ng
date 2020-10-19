@@ -1,5 +1,6 @@
 /**
   *  \file game/map/minefieldmission.cpp
+  *  \brief Class game::map::MinefieldMission
   */
 
 #include "game/map/minefieldmission.hpp"
@@ -205,11 +206,14 @@ game::map::MinefieldMission::checkLayMission(const Ship& ship, const Universe& u
                             // Minefield matches type and is close.
                             // We note its Id only when we're inside;
                             // set it to zero if we're outside the field and make a new one
-                            reqid = (dist <= mf->getUnitsForLaying(hostVersion, config) ? i : 0);
+                            reqid = (dist <= mf->getUnitsForLaying(hostVersion, config) ? i : -1);
                             closest = dist;
                         }
                     }
                 }
+            }
+            if (reqid < 0) {
+                reqid = 0;
             }
         } else {
             for (Id_t i = mfc.findNextIndex(0); i != 0; i = mfc.findNextIndex(i)) {
@@ -219,10 +223,11 @@ game::map::MinefieldMission::checkLayMission(const Ship& ship, const Universe& u
                         Point mfPos;
                         mf->getPosition(mfPos);
                         int32_t dist = univ.config().getSquaredDistance(mfPos, shipPos);
-                        if (dist <= mf->getUnitsForLaying(hostVersion, config) && (reqid == 0 || dist < closest)) {
+                        if (dist <= mf->getUnitsForLaying(hostVersion, config)) {
                             // Minefield matches type and is close, and we're inside
                             reqid = i;
                             closest = dist;
+                            break;
                         }
                     }
                 }
@@ -278,9 +283,8 @@ game::map::MinefieldMission::checkScoopMission(const Ship& ship,
     const HostVersion& host = root.hostVersion();
     if (torpedoType <= 0
         || numLaunchers <= 0
-        || (host.isPHost() && (beamType <= 0 || numBeams <= 0)))
+        || (host.isBeamRequiredForMineScooping() && (beamType <= 0 || numBeams <= 0)))
     {
-        // FIXME: why disable scooping for PHost only?
         return false;
     }
 
@@ -311,7 +315,10 @@ game::map::MinefieldMission::checkScoopMission(const Ship& ship,
             // reject
             return false;
         }
-    } else if (host.isPHost() && mission == config[config.ExtMissionsStartAt]() + Mission::pmsn_ScoopTorps) {
+    } else if (host.isPHost()
+               && root.registrationKey().getStatus() == RegistrationKey::Registered
+               && mission == config[config.ExtMissionsStartAt]() + Mission::pmsn_ScoopTorps)
+    {
         // PHost mission
         m_mineId           = towId;
         m_owner            = owner;

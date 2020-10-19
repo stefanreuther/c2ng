@@ -5,6 +5,7 @@
 #include "client/dialogs/alliancedialog.hpp"
 #include "client/downlink.hpp"
 #include "client/widgets/alliancestatuslist.hpp"
+#include "client/widgets/helpwidget.hpp"
 #include "game/alliance/level.hpp"
 #include "game/game.hpp"
 #include "game/playerlist.hpp"
@@ -18,6 +19,7 @@
 #include "ui/widgets/button.hpp"
 #include "ui/widgets/focusiterator.hpp"
 #include "ui/widgets/framegroup.hpp"
+#include "ui/widgets/quit.hpp"
 #include "ui/widgets/statictext.hpp"
 
 using client::widgets::AllianceLevelGrid;
@@ -48,7 +50,7 @@ client::dialogs::AllianceDialog::AllianceDialog(ui::Root& root,
       m_data()
 {
     // ex WAllyWindow::WAllyWindow
-    initDialog(tx);
+    initDialog(gameSender, tx);
     initContent(gameSender);
 }
 
@@ -104,7 +106,7 @@ client::dialogs::AllianceDialog::writeBack(util::RequestSender<game::Session> ga
 }
 
 void
-client::dialogs::AllianceDialog::initDialog(afl::string::Translator& tx)
+client::dialogs::AllianceDialog::initDialog(util::RequestSender<game::Session> gameSender, afl::string::Translator& tx)
 {
     // Build the dialog
     // VBox
@@ -133,7 +135,7 @@ client::dialogs::AllianceDialog::initDialog(afl::string::Translator& tx)
     Group& g1  = m_deleter.addNew(new Group(HBox::instance5));
     Group& g11 = m_deleter.addNew(new Group(VBox::instance5));
     g11.add(m_deleter.addNew(new StaticText(tx("Alliances:"), util::SkinColor::Static, gfx::FontRequest().addSize(1), m_root.provider())));
-    g11.add(ui::widgets::FrameGroup::wrapWidget(m_deleter, m_root.colorScheme(), ui::widgets::FrameGroup::LoweredFrame, *m_pList));
+    g11.add(ui::widgets::FrameGroup::wrapWidget(m_deleter, m_root.colorScheme(), ui::LoweredFrame, *m_pList));
     g11.add(m_deleter.addNew(new Spacer()));
     g1.add(g11);
 
@@ -146,22 +148,25 @@ client::dialogs::AllianceDialog::initDialog(afl::string::Translator& tx)
 
     Group& g2 = m_deleter.addNew(new Group(HBox::instance5));
 
+    ui::Widget& helper = m_deleter.addNew(new client::widgets::HelpWidget(m_root, gameSender, "pcc2:allies"));
     Button& btnOK     = m_deleter.addNew(new Button(tx("OK"),     util::Key_Return, m_root));
     Button& btnCancel = m_deleter.addNew(new Button(tx("Cancel"), util::Key_Escape, m_root));
+    Button& btnHelp   = m_deleter.addNew(new Button(tx("Help"),   'h',             m_root));
     btnOK.sig_fire.addNewClosure(m_loop.makeStop(1));
     btnCancel.sig_fire.addNewClosure(m_loop.makeStop(0));
+    btnHelp.dispatchKeyTo(helper);
     g2.add(btnOK);
     g2.add(btnCancel);
     g2.add(m_deleter.addNew(new Spacer()));
-    // FIXME->g2.add(m_deleter.addNew(new UIButton(tx("Help"), 'h')));
+    g2.add(btnHelp);
     add(g2);
 
     FocusIterator& fi = m_deleter.addNew(new FocusIterator(FocusIterator::Horizontal + FocusIterator::Tab));
     add(fi);
     fi.add(*m_pList);
     fi.add(*m_pGrid);
-    // FIXME->add(m_deleter.addNew(new WHelpWidget("pcc2:allies")));
-    // FIXME->add(m_deleter.addNew(new UIQuit(0)));
+    add(helper);
+    add(m_deleter.addNew(new ui::widgets::Quit(m_root, m_loop)));
 }
 
 void

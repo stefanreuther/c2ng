@@ -5,8 +5,8 @@
 #include "client/dialogs/cargotransferdialog.hpp"
 #include "afl/string/format.hpp"
 #include "client/downlink.hpp"
-#include "client/proxy/configurationproxy.hpp"
 #include "client/widgets/cargotransferheader.hpp"
+#include "game/proxy/configurationproxy.hpp"
 #include "ui/dialogs/messagebox.hpp"
 #include "ui/layout/hbox.hpp"
 #include "ui/layout/vbox.hpp"
@@ -17,7 +17,7 @@
 #include "ui/widgets/focusablegroup.hpp"
 #include "ui/widgets/focusiterator.hpp"
 
-client::dialogs::CargoTransferDialog::CargoTransferDialog(ui::Root& root, client::proxy::CargoTransferProxy& proxy)
+client::dialogs::CargoTransferDialog::CargoTransferDialog(ui::Root& root, game::proxy::CargoTransferProxy& proxy)
     : m_root(root),
       m_proxy(proxy),
       m_loop(root),
@@ -31,14 +31,14 @@ bool
 client::dialogs::CargoTransferDialog::run(afl::string::Translator& tx, util::RequestSender<game::Session> gameSender)
 {
     Downlink link(m_root);
-    client::proxy::CargoTransferProxy::General gen;
+    game::proxy::CargoTransferProxy::General gen;
     m_proxy.getGeneralInformation(link, gen);
 
-    client::proxy::CargoTransferProxy::Participant left, right;
+    game::proxy::CargoTransferProxy::Participant left, right;
     m_proxy.getParticipantInformation(link, 0, left);
     m_proxy.getParticipantInformation(link, 1, right);
 
-    util::NumberFormatter fmt = client::proxy::ConfigurationProxy(gameSender).getNumberFormatter(link);
+    util::NumberFormatter fmt = game::proxy::ConfigurationProxy(gameSender).getNumberFormatter(link);
 
     if (gen.validTypes.empty()) {
         ui::dialogs::MessageBox(afl::string::Format(tx("There is nothing you could transfer to or from %s."), right.name),
@@ -133,7 +133,7 @@ client::dialogs::CargoTransferDialog::onUnload()
 }
 
 void
-client::dialogs::CargoTransferDialog::onChange(size_t side, const client::proxy::CargoTransferProxy::Cargo& cargo)
+client::dialogs::CargoTransferDialog::onChange(size_t side, const game::proxy::CargoTransferProxy::Cargo& cargo)
 {
     if (side == 0 || side == 1) {
         bool right = (side==1);

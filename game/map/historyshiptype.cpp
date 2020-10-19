@@ -7,7 +7,7 @@
 #include "game/map/ship.hpp"
 
 game::map::HistoryShipType::HistoryShipType(Universe& univ)
-    : ObjectVectorType<Ship>(univ, univ.ships())
+    : ObjectVectorType<Ship>(univ.ships())
 { }
 
 bool

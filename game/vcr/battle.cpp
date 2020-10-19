@@ -1,25 +1,23 @@
 /**
   *  \file game/vcr/battle.cpp
+  *  \brief Base class game::vcr::Battle
   */
 
 #include "game/vcr/battle.hpp"
 #include "afl/string/format.hpp"
 #include "game/vcr/object.hpp"
 
-// /** Describe a battle. The idea is to say "<name> vs <name>" in 1:1 fights,
-//     and "<race> vs <race>" in fleet battles with two participating races.
-//     \param e the battle */
 String_t
-game::vcr::Battle::getDescription(const game::PlayerList& players, afl::string::Translator& tx)
+game::vcr::Battle::getDescription(const game::PlayerList& players, afl::string::Translator& tx) const
 {
     // ex client/dialogs/combatdiagram.cc:getBattleName
     int leftRace = 0;
-    Object* leftSlot = 0;
+    const Object* leftSlot = 0;
     int rightRace = 0;
-    Object* rightSlot = 0;
+    const Object* rightSlot = 0;
 
     for (size_t i = 0, n = getNumObjects(); i < n; ++i) {
-        if (Object* p = getObject(i, false)) {
+        if (const Object* p = getObject(i, false)) {
             int pl = p->getOwner();
             if (leftRace == 0) {
                 leftRace = pl;

@@ -29,9 +29,14 @@ server::ConfigurationHandler::~ConfigurationHandler()
 bool
 server::ConfigurationHandler::handleCommandLineOption(const String_t& option, afl::sys::CommandLineParser& parser)
 {
-    if (option.size() > 1 && option[0] == 'D') {
-        String_t key(strUCase(option.substr(1)));
-        String_t value(parser.getRequiredParameter(option));
+    if (option == "D") {
+        String_t keyValue(parser.getRequiredParameter(option));
+        String_t::size_type n = keyValue.find('=');
+        if (n == String_t::npos) {
+            throw std::runtime_error(Format("Option \"-D%s\" is missing its value", keyValue));
+        }
+        String_t key(strUCase(keyValue.substr(0, n)));
+        String_t value(keyValue.substr(n+1));
         if (!handleConfiguration(key, value)) {
             throw std::runtime_error(Format("Unrecognized configuration setting: \"%s\"", key));
         }

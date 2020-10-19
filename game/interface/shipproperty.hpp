@@ -123,7 +123,7 @@ namespace game { namespace interface {
                                       afl::base::Ref<const Turn> turn);
     void setShipProperty(game::map::Ship& sh, ShipProperty isp, afl::data::Value* value,
                          Root& root,
-                         game::spec::ShipList& shipList,
+                         const game::spec::ShipList& shipList,
                          Turn& turn);
 
 } }

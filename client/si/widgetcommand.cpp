@@ -82,7 +82,7 @@ client::si::IFWidgetRun(game::Session& session, ScriptSide& ss, const WidgetRefe
             {
                 uint32_t pid;
                 if (m_link.getProcessId(pid)) {
-                    if (interpreter::Process* parent = session.world().processList().getProcessById(pid)) {
+                    if (interpreter::Process* parent = session.processList().getProcessById(pid)) {
                         recv.addNewContext(interpreter::ProcessObserverContext::create(*parent));
                     }
                 }
@@ -348,7 +348,7 @@ client::si::IFListboxDialogRun(game::Session& session, ScriptSide& ss, const Wid
                 } else {
                     // Do it.
                     std::auto_ptr<afl::data::Value> result;
-                    if (w->run(ctl.root())) {
+                    if (w->run(ctl.root(), us.gameSender())) {
                         int32_t i;
                         if (w->getCurrentKey(i)) {
                             result.reset(interpreter::makeIntegerValue(i));

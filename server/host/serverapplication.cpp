@@ -237,6 +237,16 @@ server::host::ServerApplication::handleConfiguration(const String_t& key, const 
             throw afl::except::CommandLineException(afl::string::Format("Invalid value for '%s'", key));
         }
         return true;
+    } else if (key == "HOST.MAXSTOREDKEYS") {
+        /* @q Host.MaxStoredKeys:Int (Config)
+           Maximum number of registration keys to store per user.
+           Users can later retrieve those keys if necessary.
+
+           @since PCC2 2.40.9 */
+        if (!afl::string::strToInteger(value, m_config.maxStoredKeys)) {
+            throw afl::except::CommandLineException(afl::string::Format("Invalid value for '%s'", key));
+        }
+        return true;
     } else if (key == "BINDIR") {
         /* @q BinDir:Str (Config)
            Pointer to directory containing binary files.

@@ -32,6 +32,7 @@ namespace server { namespace host {
                     ---------------------   ----------         ---------
                     bin                     bin                export only
                     defaults                defaults           export only
+                    games/0000              game               import only
                     games/0000/data         game/data          bidir
                     games/0000/in           game/in            bidir
                     games/0000/out          game/out           bidir
@@ -101,6 +102,12 @@ namespace server { namespace host {
             \param targetBase [in] Output (input) base directory
             \param targetSub  [in] Output (input) directory, relative to \c targetBase */
         void importSubdirectory(const String_t& source, const String_t& targetBase, const String_t& targetSub);
+
+        /** Import logfiles.
+            Logfiles are only imported, stale/outdated logfiles not overwritten.
+            \param source     [in] Source (target) directory in host filer
+            \param targetName [in] Output (input) base directory */
+        void importLogFiles(const String_t& source, const String_t& targetName);
 
         /** Import backups.
             Backups are never exported, only imported.

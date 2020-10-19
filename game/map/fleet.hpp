@@ -7,7 +7,6 @@
 #include "game/spec/shiplist.hpp"
 #include "game/config/hostconfiguration.hpp"
 #include "game/unitscoredefinitionlist.hpp"
-#include "game/interpreterinterface.hpp"
 
 namespace game { namespace map {
 
@@ -28,13 +27,13 @@ namespace game { namespace map {
                                 const game::spec::ShipList& shipList,
                                 const game::config::HostConfiguration& config) const;
 
-        String_t getTitle(afl::string::Translator& tx, InterpreterInterface& iface) const;
+        String_t getTitle(afl::string::Translator& tx) const;
 
         static void synchronizeFleetMember(Universe& univ, Id_t sid,
                                            const game::config::HostConfiguration& config,
                                            const game::spec::ShipList& shipList);
 
-        static String_t getTitle(const Ship& ship, afl::string::Translator& tx, InterpreterInterface& iface);
+        static String_t getTitle(const Ship& ship, afl::string::Translator& tx);
 
      private:
         Universe& m_universe;
