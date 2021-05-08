@@ -351,7 +351,7 @@ server::host::ServerApplication::setupWorkDirectory()
 String_t
 server::host::ServerApplication::getApplicationName() const
 {
-    return afl::string::Format("PCC2 Host Server v%s - (c) 2017-2020 Stefan Reuther", PCC2_VERSION);
+    return afl::string::Format("PCC2 Host Server v%s - (c) 2017-2021 Stefan Reuther", PCC2_VERSION);
 }
 
 String_t

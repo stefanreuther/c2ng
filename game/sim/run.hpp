@@ -35,6 +35,15 @@ namespace game { namespace sim {
                        const game::config::HostConfiguration& config,
                        util::RandomNumberGenerator& rng);
 
+    /** Prepare for simulation.
+        Call once before calling runSimulation() possibly multiple times.
+        This will process random friendly codes for hasRandomizeFCodesOnEveryFight()=off. 
+        
+        \param [in/out]  state     Simulation state. Will be updated to contain the simulation results.
+        \param [in]      opts      Simulator options
+        \param [in/out]  rng       Random number generator; used only of \c opts does not configure a deterministic simulation */
+    void prepareSimulation(Setup& setup, const Configuration& opts, util::RandomNumberGenerator& rng);
+
 } }
 
 #endif

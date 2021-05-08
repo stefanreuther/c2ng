@@ -6,11 +6,13 @@
 #define C2NG_GAME_ACTIONS_BASEBUILDACTION_HPP
 
 #include "afl/base/signal.hpp"
+#include "afl/string/translator.hpp"
 #include "game/actions/cargocostaction.hpp"
 #include "game/cargocontainer.hpp"
 #include "game/map/planet.hpp"
 #include "game/root.hpp"
 #include "game/spec/cost.hpp"
+#include "game/spec/costsummary.hpp"
 #include "game/spec/shiplist.hpp"
 
 namespace game { namespace actions {
@@ -35,21 +37,26 @@ namespace game { namespace actions {
         Cost parameters can be accessed using costAction(). */
     class BaseBuildAction : public afl::base::Deletable {
      public:
+        /** Status of the action. */
         enum Status {
-            Success,
-            MissingResources,
-            DisallowedTech
+            Success,                 ///< Success (no impediments found).
+            MissingResources,        ///< Not enough resources.
+            DisallowedTech,          ///< Disallowed tech level (BaseBuildExecutor::setBaseTechLevel called with tech above allowed by registration).
+            ForeignHull,             ///< Foreign hull required (BaseBuildExecutor::accountHull called).
+            DisabledTech             ///< Tech upgrade required but disabled using setUseTechUpgrade().
         };
 
         /** Constructor.
             \param planet    Planet to work on. Must have a played starbase.
             \param container Container to bill the builds on. Usually a PlanetStorage for the same planet.
             \param shipList  Ship list. Needed to access component costs and hull slots.
-            \param root      Game root. Needed to access host configuration and registration key. */
+            \param root      Game root. Needed to access host configuration and registration key.
+            \param tx        Translator. Needed for error messages during construction. */
         BaseBuildAction(game::map::Planet& planet,
                         CargoContainer& container,
                         game::spec::ShipList& shipList,
-                        Root& root);
+                        Root& root,
+                        afl::string::Translator& tx);
 
         /** Destructor. */
         ~BaseBuildAction();
@@ -72,9 +79,26 @@ namespace game { namespace actions {
             \throw game::Exception if this action is not valid */
         void commit();
 
+        /** Check permission to use tech upgrades.
+            \return permission
+            \see setUseTechUpgrade */
+        bool isUseTechUpgrade() const;
+
+        /** Set permission to use tech upgrades.
+            By default, this is enabled, and tech upgrades are implicitly performed.
+            When this is disabled, and a tech upgrade is required, the request will fail and report status DisabledTech;
+            tech upgrades will not be included in cost.
+            \param b New status */
+        void setUseTechUpgrade(bool b);
+
         /** Access underlying CargoCostAction.
             \return CargoCostAction */
         const CargoCostAction& costAction() const;
+
+        /** Get cost summary.
+            Adds all items for the currently-selected build order to the given CostSummary.
+            \param [out] result Result */
+        void getCostSummary(game::spec::CostSummary& result);
 
         /** Access underlying ship list.
             \return ship list */
@@ -107,7 +131,10 @@ namespace game { namespace actions {
         game::spec::ShipList& m_shipList;
         Root& m_root;
         CargoCostAction m_costAction;
-        bool m_needInaccessibleTech;
+        afl::string::Translator& m_translator;
+        int m_impediments;
+        bool m_useTechUpgrades;
+        bool m_inUpdate;
 
         afl::base::SignalConnection conn_planetChange;
         afl::base::SignalConnection conn_shipListChange;

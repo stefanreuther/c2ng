@@ -103,9 +103,9 @@ namespace {
          case ScreenHistory::Starchart:
             return Format(tx("Starchart (%d,%d)"), ref.getX(), ref.getY());
      // case RaceScreen:
-     //    return _("Race Screen");
+     //    return tx("Race Screen");
      // case HistoryScreen:
-     //    return format(_("Ship History %d: %s"), x, getDisplayedTurn().getCurrentUniverse().getShip(x).getName(GObject::PlainName));
+     //    return Format(tx("Ship History %d: %s"), x, getDisplayedTurn().getCurrentUniverse().getShip(x).getName(GObject::PlainName));
      // case FleetScreen:
      //    return getFleetTitle(getDisplayedTurn().getCurrentUniverse(), x);
         }

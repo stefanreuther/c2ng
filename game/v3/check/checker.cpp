@@ -12,6 +12,7 @@
 #include "afl/io/filesystem.hpp"
 #include "afl/io/stream.hpp"
 #include "afl/string/format.hpp"
+#include "afl/string/nulltranslator.hpp"
 #include "game/exception.hpp"
 #include "game/v3/trn/turnprocessor.hpp"
 #include "game/v3/turnfile.hpp"
@@ -769,9 +770,10 @@ game::v3::check::Checker::loadTurn(const uint8_t (&rst_timestamp)[18])
 {
     // Load turn file
     afl::charset::Utf8Charset cs;
+    afl::string::NullTranslator tx;        // FIXME
     String_t ntrn = Format("player%d.trn", m_player);
     Ref<Stream> trn = openGameFile(ntrn);
-    TurnFile tf(cs, *trn, true);
+    TurnFile tf(cs, tx, *trn, true);
 
     // Validate header info
     if (tf.getPlayer() != m_player) {

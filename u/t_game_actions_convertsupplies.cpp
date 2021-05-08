@@ -14,6 +14,7 @@
 namespace {
     using game::map::Planet;
     using game::Element;
+    using afl::string::NullTranslator;
 
     class TestReverter : public game::map::Reverter {
      public:
@@ -50,7 +51,7 @@ namespace {
         pd.money = 500;
         p.addCurrentPlanetData(pd, game::PlayerSet_t(3));
 
-        afl::string::NullTranslator tx;
+        NullTranslator tx;
         afl::sys::Log log;
         p.internalCheck(game::map::Configuration(), tx, log);
         p.setPlayability(Planet::Playable);
@@ -64,11 +65,12 @@ void
 TestGameActionsConvertSupplies::testNormal()
 {
     // Environment
+    NullTranslator tx;
     Planet p(77);
     prepare(p);
 
     // Testee
-    game::actions::ConvertSupplies testee(p);
+    game::actions::ConvertSupplies testee(p, tx);
     TS_ASSERT_EQUALS(testee.getMaxSuppliesToSell(), 1000);
     TS_ASSERT_EQUALS(testee.getMaxSuppliesToBuy(), 0);
 
@@ -94,11 +96,12 @@ void
 TestGameActionsConvertSupplies::testReserved()
 {
     // Environment
+    NullTranslator tx;
     Planet p(77);
     prepare(p);
 
     // Testee
-    game::actions::ConvertSupplies testee(p);
+    game::actions::ConvertSupplies testee(p, tx);
     testee.setReservedSupplies(300);
     TS_ASSERT_EQUALS(testee.getMaxSuppliesToSell(), 700);
     TS_ASSERT_EQUALS(testee.getMaxSuppliesToBuy(), 0);
@@ -115,6 +118,7 @@ void
 TestGameActionsConvertSupplies::testBuy()
 {
     // Environment
+    afl::string::NullTranslator tx;
     Planet p(77);
     prepare(p);
 
@@ -122,7 +126,7 @@ TestGameActionsConvertSupplies::testBuy()
     univ.setNewReverter(new TestReverter());
 
     // Testee
-    game::actions::ConvertSupplies testee(p);
+    game::actions::ConvertSupplies testee(p, tx);
     testee.setUndoInformation(univ);
     testee.setReservedMoney(100);
     TS_ASSERT_EQUALS(testee.getMaxSuppliesToSell(), 1000);

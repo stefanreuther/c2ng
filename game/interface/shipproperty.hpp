@@ -54,6 +54,7 @@ namespace game { namespace interface {
         ispLoc,
         ispMarked,
         ispMass,
+        ispMessages,
         ispMissionId,
         ispMissionIntercept,
         ispMissionShort,
@@ -121,7 +122,7 @@ namespace game { namespace interface {
                                       afl::base::Ref<const game::spec::ShipList> shipList,
                                       afl::base::Ref<const Game> game,
                                       afl::base::Ref<const Turn> turn);
-    void setShipProperty(game::map::Ship& sh, ShipProperty isp, afl::data::Value* value,
+    void setShipProperty(game::map::Ship& sh, ShipProperty isp, const afl::data::Value* value,
                          Root& root,
                          const game::spec::ShipList& shipList,
                          Turn& turn);

@@ -50,6 +50,19 @@ game::map::setInterceptWaypoint(Universe& univ, Ship& sh)
     }
 }
 
+void
+game::map::cancelAllCloneOrders(Universe& univ, const Planet& pl,
+                                const game::spec::FriendlyCodeList& list,
+                                util::RandomNumberGenerator& rng)
+{
+    // ex cancelAllCloneOrders(GPlanet& planet)
+    for (Id_t id = univ.findShipCloningAt(pl.getId(), 0); id != 0; id = univ.findShipCloningAt(pl.getId(), id)) {
+        if (Ship* sh = univ.ships().get(id)) {
+            sh->setFriendlyCode(list.generateRandomCode(rng, game::spec::FriendlyCodeList::Pessimistic));
+        }
+    }
+}
+
 const game::spec::Hull*
 game::map::getShipHull(const Ship& ship, const game::spec::ShipList& shipList)
 {
@@ -59,6 +72,7 @@ game::map::getShipHull(const Ship& ship, const game::spec::ShipList& shipList)
 int32_t
 game::map::getShipTransferMaxCargo(const CargoContainer& cont, Element::Type type, const Ship& ship, const game::spec::ShipList& shipList)
 {
+    // ex transfer.pas:ComputeMaximum, TShip.Maximum
     switch (type) {
      case Element::Neutronium:
         if (cont.isOverload()) {

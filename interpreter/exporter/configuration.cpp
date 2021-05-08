@@ -7,13 +7,12 @@
 #include "afl/except/fileproblemexception.hpp"
 #include "afl/string/format.hpp"
 #include "util/configurationfileparser.hpp"
-#include "util/translation.hpp"
 
 namespace {
     class ExportConfigurationParser : public util::ConfigurationFileParser {
      public:
-        ExportConfigurationParser(interpreter::exporter::Configuration& parent)
-            : ConfigurationFileParser(),
+        ExportConfigurationParser(interpreter::exporter::Configuration& parent, afl::string::Translator& tx)
+            : ConfigurationFileParser(tx),
               m_parent(parent)
             {
                 setSection("export", true);
@@ -26,21 +25,21 @@ namespace {
                     if (afl::string::strCaseCompare(name, "Fields") == 0) {
                         m_parent.fieldList().addList(value);
                     } else if (afl::string::strCaseCompare(name, "Format") == 0) {
-                        m_parent.setFormatByName(value);
+                        m_parent.setFormatByName(value, translator());
                     } else if (afl::string::strCaseCompare(name, "Charset") == 0) {
-                        m_parent.setCharsetByName(value);
+                        m_parent.setCharsetByName(value, translator());
                     } else {
                         // nix
                     }
                 }
                 catch (std::exception& e) {
-                    throw afl::except::FileProblemException(fileName, afl::string::Format(_("%s (in line %d)").c_str(), e.what(), lineNr));
+                    throw afl::except::FileProblemException(fileName, afl::string::Format(translator()("%s (in line %d)"), e.what(), lineNr));
                 }
             }
 
         virtual void handleError(const String_t& fileName, int lineNr, const String_t& message)
             {
-                throw afl::except::FileProblemException(fileName, afl::string::Format(_("%s (in line %d)").c_str(), message, lineNr));
+                throw afl::except::FileProblemException(fileName, afl::string::Format(translator()("%s (in line %d)"), message, lineNr));
             }
 
         virtual void handleIgnoredLine(const String_t& /*fileName*/, int /*lineNr*/, String_t /*line*/)
@@ -71,10 +70,10 @@ interpreter::exporter::Configuration::setCharsetIndex(util::CharsetFactory::Inde
 
 // Set character set by name.
 void
-interpreter::exporter::Configuration::setCharsetByName(const String_t& name)
+interpreter::exporter::Configuration::setCharsetByName(const String_t& name, afl::string::Translator& tx)
 {
     if (!util::CharsetFactory().findIndexByKey(name, m_charsetIndex)) {
-        throw std::runtime_error(_("the specified character set is not known"));
+        throw std::runtime_error(tx("the specified character set is not known"));
     }
 }
 
@@ -101,10 +100,10 @@ interpreter::exporter::Configuration::setFormat(Format fmt)
 
 // Set format by name.
 void
-interpreter::exporter::Configuration::setFormatByName(const String_t& name)
+interpreter::exporter::Configuration::setFormatByName(const String_t& name, afl::string::Translator& tx)
 {
     if (!parseFormat(name, m_format)) {
-        throw std::runtime_error(_("invalid output format specified"));
+        throw std::runtime_error(tx("invalid output format specified"));
     }
 }
 
@@ -131,7 +130,7 @@ interpreter::exporter::Configuration::fieldList() const
 
 // Read configuration from stream.
 void
-interpreter::exporter::Configuration::load(afl::io::Stream& in)
+interpreter::exporter::Configuration::load(afl::io::Stream& in, afl::string::Translator& tx)
 {
-    ExportConfigurationParser(*this).parseFile(in);
+    ExportConfigurationParser(*this, tx).parseFile(in);
 }

@@ -13,13 +13,14 @@
 
 int32_t
 client::dialogs::doScreenHistoryDialog(ui::Root& root,
+                                       afl::string::Translator& tx,
                                        util::RequestSender<game::Session> gameSender,
                                        ScreenHistory& history,
                                        bool excludeCurrent)
 {
     // ex client/history.cc:doScreenHistoryDialog
     // Environment
-    Downlink link(root);
+    Downlink link(root, tx);
     client::proxy::ScreenHistoryProxy proxy(gameSender);
 
     // Validate references so we display only valid items
@@ -51,7 +52,7 @@ client::dialogs::doScreenHistoryDialog(ui::Root& root,
     for (size_t i = names.size(); i > 0; --i) {
         list.addItem(key++, *names.at(i-1));
     }
-    bool ok = ui::widgets::doStandardDialog(_("Screen History"), String_t(), list, true, root);
+    bool ok = ui::widgets::doStandardDialog(tx("Screen History"), String_t(), list, true, root, tx);
 
     int32_t result;
     if (ok && list.getCurrentKey(result)) {

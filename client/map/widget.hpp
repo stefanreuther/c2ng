@@ -4,12 +4,12 @@
 #ifndef C2NG_CLIENT_MAP_WIDGET_HPP
 #define C2NG_CLIENT_MAP_WIDGET_HPP
 
-#include "ui/simplewidget.hpp"
-#include "client/map/renderer.hpp"
-#include "client/map/proxy.hpp"
-#include "game/map/renderlist.hpp"
-#include "ui/root.hpp"
 #include "client/map/callback.hpp"
+#include "client/map/renderer.hpp"
+#include "game/map/renderlist.hpp"
+#include "game/proxy/maprendererproxy.hpp"
+#include "ui/root.hpp"
+#include "ui/simplewidget.hpp"
 
 namespace client { namespace map {
 
@@ -38,15 +38,21 @@ namespace client { namespace map {
         void setZoomToInclude(game::map::Point pt);
         void zoomIn();
         void zoomOut();
+        void setZoom(int mult, int divi);
+        void toggleOptions(game::map::RenderOptions::Options_t opts);
+        void setDrawingTagFilter(util::Atom_t tag);
+        void clearDrawingTagFilter();
 
         const Renderer& renderer() const;
+
+        ui::Root& root();
         
      private:
         void onUpdate(afl::base::Ptr<game::map::RenderList> renderList);
         void maybeRequestNewRange();
 
         Renderer m_renderer;
-        Proxy m_proxy;
+        game::proxy::MapRendererProxy m_proxy;
         ui::Root& m_root;
         gfx::Point m_preferredSize;
 

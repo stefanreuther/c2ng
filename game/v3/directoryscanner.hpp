@@ -16,20 +16,16 @@
 
 namespace game { namespace v3 {
 
-// /** Game Data Storage: Directory Overview.
+    /** Game Directory Overview.
+        This class scans a directory for usable game files.
 
-//     This class scans a directory for usable game files.
+        For each player, we can find a result file (HaveResult) or an unpacked game directory (HaveUnpacked),
+        or both belonging to the same turn. In addition, there can be a matching TRN (HaveTurn).
 
-//     For each player, we can find a result file (have_RST) or an
-//     unpacked game directory (have_Gamedir), or both belonging to the
-//     same turn. In addition, there can be a matching TRN (have_TRN).
+        In addition, we might find a new RST (HaveNewResult) or another RST (HaveOtherResult).
 
-//     In addition, we might find a new RST (have_NewRST) or another RST
-//     (have_OtherRST).
-
-//     If there is a conflict, the conflicting data is marked
-//     (have_Conflict); essentially, this says one can safely load all
-//     non-conflicting data. */
+        If there is a conflict, the conflicting data is marked (HaveConflict);
+        essentially, this says one can safely load all non-conflicting data. */
     class DirectoryScanner {
      public:
         static const int NUM_PLAYERS = structures::NUM_PLAYERS;
@@ -42,7 +38,7 @@ namespace game { namespace v3 {
             HaveOtherResult     ///< We have a result which is neither current nor new.
         };
         typedef afl::bits::SmallSet<PlayerFlag> PlayerFlags_t;
-        
+
         /** Construct empty overview.
             Call scan() to fill it.
             \param specificationDirectory Specification directory
@@ -103,14 +99,6 @@ namespace game { namespace v3 {
         void checkHostVersion(afl::io::Stream& stream, afl::charset::Charset& charset, game::HostVersion& version);
         void initMessageParser(afl::io::Directory& dir);
     };
-
-
-// /** Get host version for one player. */
-// inline const GHost&
-// GDirectoryOverview::getHostVersion(int pid) const
-// {
-//     return host_versions[pid-1];
-// }
 
 } }
 

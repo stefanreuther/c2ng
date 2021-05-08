@@ -93,6 +93,7 @@ namespace {
         { "MARK",                      game::interface::ismMark,                      ShipMethodDomain,        interpreter::thProcedure },
         { "MARKED",                    game::interface::ispMarked,                    ShipPropertyDomain,      interpreter::thBool },
         { "MASS",                      game::interface::ispMass,                      ShipPropertyDomain,      interpreter::thInt },
+        { "MESSAGES",                  game::interface::ispMessages,                  ShipPropertyDomain,      interpreter::thArray },
         { "MISSION",                   game::interface::ispMissionName,               ShipPropertyDomain,      interpreter::thString },
         { "MISSION$",                  game::interface::ispMissionId,                 ShipPropertyDomain,      interpreter::thInt },
         { "MISSION.INTERCEPT",         game::interface::ispMissionIntercept,          ShipPropertyDomain,      interpreter::thInt },
@@ -250,7 +251,7 @@ game::interface::ShipContext::lookup(const afl::data::NameQuery& name, PropertyI
 }
 
 void
-game::interface::ShipContext::set(PropertyIndex_t index, afl::data::Value* value)
+game::interface::ShipContext::set(PropertyIndex_t index, const afl::data::Value* value)
 {
     // ex IntShipContext::set
     if (game::map::Ship* sh = getObject()) {

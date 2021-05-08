@@ -66,6 +66,13 @@ gfx::NullEngine::handleEvent(EventConsumer& consumer, bool /*relativeMouseMoveme
     }
 }
 
+// Get keyboard modifiers.
+util::Key_t
+gfx::NullEngine::getKeyboardModifierState()
+{
+    return 0;
+}
+
 // Get request dispatcher.
 util::RequestDispatcher&
 gfx::NullEngine::dispatcher()

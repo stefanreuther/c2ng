@@ -719,6 +719,7 @@ game::v3::udata::Parser::handleRecord(uint16_t recordId, afl::base::ConstBytes_t
 
      case 39:
         // Build queue entry
+        // ex phost.pas:AddBuildQueueEntry (but totally different)
         while (Eater<gt::Util39Queue> report = data) {
             MessageInformation info(MessageInformation::Planet, report->baseId, getTurnNumber());
             info.addValue(gp::mi_BaseQueuePos, report->queuePosition);
@@ -920,7 +921,7 @@ game::v3::udata::Parser::handleEnd()
                 }
             }
 
-            // Try to process results. Planets first because these may produce an Id for later.
+            // Try to process results. Planets first because these may produce a position for later.
             processPlanetResult(m_game.currentTurn(), battle->left(), pos);
             processPlanetResult(m_game.currentTurn(), battle->right(), pos);
 
@@ -1027,13 +1028,10 @@ game::v3::udata::Parser::processEnemies(uint16_t enemies)
     processMessageInformation(info);
 }
 
-// /** Load score record.
-//     \param data   Pointer to record content
-//     \param size   Size of record content
-//     \param max_id Maximum permitted unit Id
-//     \param defs   GUnitScoreDefinitions object describing this class's unit scores
-//     \param get    Function to get a unit's scores from a univers object
-//     \param univ   Universe */
+/** Load score record.
+    \param data   Data
+    \param scope  Scope (ships or planets)
+    \param defs   Associated UnitScoreDefinitionList */
 void
 game::v3::udata::Parser::processScoreRecord(afl::base::ConstBytes_t data, Scope scope, UnitScoreDefinitionList& defs)
 {
@@ -1077,5 +1075,5 @@ game::v3::udata::Parser::processScoreRecord(afl::base::ConstBytes_t data, Scope 
 void
 game::v3::udata::Parser::processMessageInformation(const game::parser::MessageInformation& info)
 {
-    m_game.addMessageInformation(info, m_hostConfiguration);
+    m_game.addMessageInformation(info, m_hostConfiguration, afl::base::Nothing);
 }

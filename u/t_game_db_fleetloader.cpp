@@ -6,20 +6,26 @@
 #include "game/db/fleetloader.hpp"
 
 #include "t_game_db.hpp"
-#include "afl/io/internaldirectory.hpp"
-#include "game/map/universe.hpp"
-#include "afl/charset/utf8charset.hpp"
-#include "afl/charset/codepagecharset.hpp"
+#include <stdexcept>
 #include "afl/charset/codepage.hpp"
-#include "afl/string/format.hpp"
-#include "afl/io/constmemorystream.hpp"
+#include "afl/charset/codepagecharset.hpp"
+#include "afl/charset/utf8charset.hpp"
 #include "afl/except/fileformatexception.hpp"
+#include "afl/io/constmemorystream.hpp"
+#include "afl/io/directoryentry.hpp"
+#include "afl/io/internaldirectory.hpp"
+#include "afl/string/format.hpp"
+#include "game/map/universe.hpp"
+
+using afl::base::Ref;
+using afl::io::Directory;
+using afl::io::DirectoryEntry;
 
 namespace {
     void loadFile(game::map::Universe& univ, int playerNr, afl::base::ConstBytes_t data)
     {
         afl::charset::CodepageCharset cs(afl::charset::g_codepage437);
-        afl::base::Ref<afl::io::InternalDirectory> dir = afl::io::InternalDirectory::create("");
+        Ref<afl::io::InternalDirectory> dir = afl::io::InternalDirectory::create("");
         dir->addStream(afl::string::Format("fleet%d.cc", playerNr), *new afl::io::ConstMemoryStream(data));
 
         game::db::FleetLoader(cs).load(*dir, univ, playerNr);
@@ -41,7 +47,7 @@ TestGameDbFleetLoader::testEmpty()
 {
     game::map::Universe univ;
     afl::charset::Utf8Charset cs;
-    afl::base::Ref<afl::io::Directory> dir = afl::io::InternalDirectory::create("");
+    Ref<Directory> dir = afl::io::InternalDirectory::create("");
 
     TS_ASSERT_THROWS_NOTHING(game::db::FleetLoader(cs).load(*dir, univ, 1));
 }
@@ -254,3 +260,112 @@ TestGameDbFleetLoader::testConflict()
     TS_ASSERT_EQUALS(univ.ships().get(2)->getFleetNumber(), 3);
     TS_ASSERT_EQUALS(univ.ships().get(3)->getFleetNumber(), 3);
 }
+
+/** Test saving. */
+void
+TestGameDbFleetLoader::testSave()
+{
+    Ref<Directory> dir = afl::io::InternalDirectory::create("");
+    afl::charset::CodepageCharset cs(afl::charset::g_codepage437);
+
+    // Create a universe and save it
+    {
+        game::map::Universe univ;
+        createShip(univ, 1, 7);
+        createShip(univ, 2, 7);
+        createShip(univ, 3, 7);
+        createShip(univ, 4, 7);
+        univ.ships().get(1)->setFleetNumber(3);
+        univ.ships().get(3)->setFleetNumber(3);
+        univ.ships().get(4)->setFleetNumber(3);
+        univ.ships().get(3)->setFleetName("three");
+        game::db::FleetLoader(cs).save(*dir, univ, 7);
+    }
+
+    // Verify that file was created and has appropriate size
+    Ref<DirectoryEntry> entry = dir->getDirectoryEntryByName("fleet7.cc");
+    TS_ASSERT_EQUALS(entry->getFileType(), DirectoryEntry::tFile);
+    TS_ASSERT_LESS_THAN_EQUALS(1000U, entry->getFileSize());
+
+    // Load into another universe
+    {
+        game::map::Universe univ;
+        createShip(univ, 1, 7);
+        createShip(univ, 2, 7);
+        createShip(univ, 3, 7);
+        createShip(univ, 4, 7);
+        game::db::FleetLoader(cs).load(*dir, univ, 7);
+
+        TS_ASSERT_EQUALS(univ.ships().get(1)->getFleetNumber(), 3);
+        TS_ASSERT_EQUALS(univ.ships().get(2)->getFleetNumber(), 0);
+        TS_ASSERT_EQUALS(univ.ships().get(3)->getFleetNumber(), 3);
+        TS_ASSERT_EQUALS(univ.ships().get(4)->getFleetNumber(), 3);
+        TS_ASSERT_EQUALS(univ.ships().get(3)->getFleetName(), "three");
+    }
+}
+
+/** Test saving when there's nothing to do. */
+void
+TestGameDbFleetLoader::testSaveEmpty()
+{
+    // Create a directory with a file in it
+    Ref<Directory> dir = afl::io::InternalDirectory::create("");
+    afl::charset::CodepageCharset cs(afl::charset::g_codepage437);
+    dir->openFile("fleet7.cc", afl::io::FileSystem::Create);
+
+    // Create a universe and save it
+    game::map::Universe univ;
+    createShip(univ, 1, 7);
+    createShip(univ, 2, 7);
+    createShip(univ, 3, 7);
+    createShip(univ, 4, 7);
+    game::db::FleetLoader(cs).save(*dir, univ, 7);
+
+    // File is gone
+    TS_ASSERT_THROWS(dir->openFile("fleet7.cc", afl::io::FileSystem::OpenRead), std::exception);
+}
+
+/** Test saving with big Ids.
+    Same as testSave, but with Ids exceeding 500 to exercise the extended file format. */
+void
+TestGameDbFleetLoader::testSaveBig()
+{
+    Ref<Directory> dir = afl::io::InternalDirectory::create("");
+    afl::charset::CodepageCharset cs(afl::charset::g_codepage437);
+
+    // Create a universe and save it
+    {
+        game::map::Universe univ;
+        createShip(univ, 801, 7);
+        createShip(univ, 802, 7);
+        createShip(univ, 803, 7);
+        createShip(univ, 804, 7);
+        univ.ships().get(801)->setFleetNumber(803);
+        univ.ships().get(803)->setFleetNumber(803);
+        univ.ships().get(804)->setFleetNumber(803);
+        univ.ships().get(803)->setFleetName("three");
+        game::db::FleetLoader(cs).save(*dir, univ, 7);
+    }
+
+    // Verify that file was created and has appropriate size
+    Ref<DirectoryEntry> entry = dir->getDirectoryEntryByName("fleet7.cc");
+    TS_ASSERT_EQUALS(entry->getFileType(), DirectoryEntry::tFile);
+    TS_ASSERT_LESS_THAN_EQUALS(1000U, entry->getFileSize());
+
+    // Load into another universe
+    {
+        game::map::Universe univ;
+        createShip(univ, 801, 7);
+        createShip(univ, 802, 7);
+        createShip(univ, 803, 7);
+        createShip(univ, 804, 7);
+        game::db::FleetLoader(cs).load(*dir, univ, 7);
+
+        TS_ASSERT_EQUALS(univ.ships().get(801)->getFleetNumber(), 803);
+        TS_ASSERT_EQUALS(univ.ships().get(802)->getFleetNumber(), 0);
+        TS_ASSERT_EQUALS(univ.ships().get(803)->getFleetNumber(), 803);
+        TS_ASSERT_EQUALS(univ.ships().get(804)->getFleetNumber(), 803);
+        TS_ASSERT_EQUALS(univ.ships().get(803)->getFleetName(), "three");
+    }
+}
+

@@ -9,6 +9,7 @@
 #include "afl/base/stoppable.hpp"
 #include "afl/container/ptrvector.hpp"
 #include "afl/string/string.hpp"
+#include "afl/string/translator.hpp"
 #include "afl/sys/loglistener.hpp"
 #include "afl/sys/mutex.hpp"
 #include "afl/sys/semaphore.hpp"
@@ -25,8 +26,9 @@ namespace util {
             This starts the thread.
             \param name Name of the thread
             \param log Logger
+            \param tx Translator
             \param delay Delay (for debugging). Should normally be left off/default to 0. */
-        RequestThread(String_t name, afl::sys::LogListener& log, int delay = 0);
+        RequestThread(String_t name, afl::sys::LogListener& log, afl::string::Translator& tx, int delay = 0);
 
         /** Destructor.
             This stops the thread. */
@@ -59,6 +61,9 @@ namespace util {
 
         /** Logger. */
         afl::sys::LogListener& m_log;
+
+        /** Translator. */
+        afl::string::Translator& m_translator;
 
         /** Stop flag. Protected by m_taskMutex. */
         bool m_stop;

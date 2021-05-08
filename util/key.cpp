@@ -1,5 +1,6 @@
 /**
   *  \file util/key.cpp
+  *  \brief Key Codes
   */
 
 #include <cstring>

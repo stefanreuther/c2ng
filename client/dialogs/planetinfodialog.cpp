@@ -92,12 +92,12 @@ namespace {
                 lgroup.add(*m_docView);
                 lgroup.add(bgroup);
 
-                rgroup.add(m_del.addNew(new ui::widgets::StaticText(m_translator("Minerals"), util::SkinColor::Heading, gfx::FontRequest().addSize(1).addWeight(1), m_root.provider(), 0)));
+                rgroup.add(m_del.addNew(new ui::widgets::StaticText(m_translator("Minerals"), util::SkinColor::Heading, gfx::FontRequest().addSize(1).addWeight(1), m_root.provider(), gfx::LeftAlign)));
                 for (size_t i = 0; i < 4; ++i) {
                     rgroup.add(*m_info[i]);
                 }
 
-                ui::Widget& helper = m_del.addNew(new client::widgets::HelpWidget(m_root, m_gameSender, "pcc2:envscreen"));
+                ui::Widget& helper = m_del.addNew(new client::widgets::HelpWidget(m_root, m_translator, m_gameSender, "pcc2:envscreen"));
 
                 ui::widgets::Button& btnClose = m_del.addNew(new ui::widgets::Button(m_translator("Close"), util::Key_Return, m_root));
                 ui::widgets::Button& btnCombat = m_del.addNew(new ui::widgets::Button("C", 'c', m_root));
@@ -175,8 +175,8 @@ namespace {
                     client::dialogs::doGroundDefenseDialog(m_root, m_proxy.getGroundDefenseInfo(), m_translator);
                 } else {
                     afl::base::Observable<int32_t> value(m_proxy.getUnloadInfo().hostileUnload);
-                    ui::widgets::DecimalSelector sel(m_root, value, 0, 10000, 10);
-                    if (doStandardDialog(m_translator("Ground Combat"), m_translator("Clans to attack with:"), sel, false, m_root)) {
+                    ui::widgets::DecimalSelector sel(m_root, m_translator, value, 0, 10000, 10);
+                    if (doStandardDialog(m_translator("Ground Combat"), m_translator("Clans to attack with:"), sel, false, m_root, m_translator)) {
                         m_proxy.setAttackingClansOverride(value.get());
                     }
                 }
@@ -243,7 +243,7 @@ client::dialogs::doPlanetInfoDialog(ui::Root& root,
     };
 
     Init i(pos);
-    Downlink link(root);
+    Downlink link(root, tx);
     link.call(gameSender, i);
 
     if (game::Id_t id = i.getId()) {

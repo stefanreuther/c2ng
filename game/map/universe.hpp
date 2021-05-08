@@ -80,41 +80,130 @@ namespace game { namespace map {
         Object* getObject(Reference ref);
 
         /** Perform all updates.
-            This will poll all updatable objects, and raise the appropriate signals. */
+            This will poll all updatable objects, and raise the appropriate signals:
+            - sig_preUpdate
+            - all objects' sig_change
+            - sig_universeChange (if needed) */
         void notifyListeners();
 
         /** Mark universe changed. */
         void markChanged();
 
+        /** Postprocess universe.
+            Call this to make structural changes propagate.
+            In particular, this calls
+            - objects' internalCheck methods
+            - objects' combinedCheck methods
+            - set objects' playability
+            - signal sig_setChange on all containes so cursors can adapt
+
+            \param playingSet       Set of players we're playing.
+                                    Those players will be set to the given \c playability;
+                                    others will at best be ReadOnly.
+            \param availablePlayers Available players (set of loaded result files).
+                                    Used for hasFullData().
+            \param playability      Playability to use for players in \c playingSet.
+            \param host             Host version
+            \param config           Host configuration
+            \param turnNumber       Current turn number
+            \param shipList         Ship list
+            \param tx               Translator (for logging)
+            \param log              Logger */
         void postprocess(PlayerSet_t playingSet, PlayerSet_t availablePlayers, Object::Playability playability,
                          const game::HostVersion& host, const game::config::HostConfiguration& config,
                          int turnNumber,
                          const game::spec::ShipList& shipList,
                          afl::string::Translator& tx, afl::sys::LogListener& log);
 
+        /** Check for full data.
+            \param playerNr Player number to check
+            \return true if we have a result file for this player loaded */
+        bool hasFullData(int playerNr) const;
+
 
         /*
          *  Location accessors
          */
+
+        /** Find planet at location.
+            \param pt Location, need not be normalized
+            \return Id of planet, or zero if none */
         Id_t findPlanetAt(Point pt) const;
+
+        /** Find planet at location, with optional warp wells.
+            If there is no planet at the location, look whether the point is in the warp well of one.
+            \param pt           Location, need not be normalized
+            \param gravityFlag  true to look into warp well. If false, function behaves exactly like findPlanetAt(int).
+            \param config       Host configuration
+            \param host         Host version
+            \return Id of planet, or zero if none */
         Id_t findPlanetAt(Point pt,
                           bool gravityFlag,
                           const game::config::HostConfiguration& config,
                           const HostVersion& host) const;
+
+        /** Find planet from warp well location.
+            \param pt Location
+            \param config       Host configuration
+            \param host         Host version
+            \pre findPlanetAt(pt) == 0
+            \return Id of planet if pt is in its warp wells, 0 otherwise */
         Id_t findGravityPlanetAt(Point pt,
                                  const game::config::HostConfiguration& config,
                                  const HostVersion& host) const;
 
+        /** Get ship at position. Any race does.
+            This is mainly used for naming locations, and for things like to tell whether a "L" command would succeed.
+            \param pt position to check
+            \returns Id number of a ship at position \c pt, or zero if none. */
         Id_t findFirstShipAt(Point pt) const;
 
-        String_t getLocationName(Point pt, int flags,
-                                 const game::config::HostConfiguration& config,
-                                 const HostVersion& host,
-                                 afl::string::Translator& tx) const;
+        /** Get name of a location in human-readable form.
+            \param pt      location
+            \param flags   details of requested string (NameShips, NameGravity, NameVerbose, NameNoSpace)
+            \param config  Host configuration
+            \param host    Host version
+            \param tx      Translator
+            \return name */
+        String_t findLocationName(Point pt, int flags,
+                                  const game::config::HostConfiguration& config,
+                                  const HostVersion& host,
+                                  afl::string::Translator& tx) const;
 
-        Id_t findShipTowing(int sid, int after = 0) const;
+        /** Check whether a ship is being towed.
+            \param sid Ship Id
+            \param after Start searching after this Id
+            \return Id, 0 if none */
+        Id_t findShipTowing(Id_t sid, Id_t after = 0) const;
 
+        /** Find ship cloning at a given planet.
+            \param pid Planet Id
+            \param after Start searching after this ship Id
+            \return Id, 0 if none */
+        Id_t findShipCloningAt(Id_t pid, Id_t after = 0) const;
+
+        /** Find planet controlling a minefield.
+            \param mf Minefield
+            \return controlling planet Id; 0 if none */
+        Id_t findControllingPlanetId(const Minefield& mf) const;
+
+        /** Mark objects within a range of coordinates.
+            Coordinates describe a rectangle and can be in any order
+            \param a First coordinates
+            \param b Second (opposite) coordinates
+            \return Number of objects found */
+        int markObjectsInRange(Point a, Point b);
+
+        /** Signal: about to update.
+            Raised before checking to raise any object's sig_change (even if no signal is eventually raised).
+
+            Essentially, this says: if you get a bunch of Object::sig_change events,
+            you can wait for a sig_universeChange to commit the transaction. */
         afl::base::Signal<void()> sig_preUpdate;
+
+        /** Signal: universe changed.
+            Raised after any object's sig_change has been raised, or the universe itself was dirty (markChanged()).
+            Unlike sig_preUpdate, this is only raised when there were any changes. */
         afl::base::Signal<void()> sig_universeChange;
 
      private:
@@ -137,29 +226,7 @@ namespace game { namespace map {
 
         std::auto_ptr<Reverter> m_reverter;
 
-// class GUniverse {
-//  public:
-//     // Initialisation
-//     void recomputeOrbitFlags();
-
-//     // Location accessors
-
-//     // Updates
-
-//     void addMessageInformation(const GMessageInformation& msgi);
-
-
-//     GPlayedShipType    ty_played_ships;
-//     GAnyShipType       ty_any_ships;
-//     GHistoryShipType   ty_history_ships;
-//     GPlayedPlanetType  ty_played_planets;
-//     GAnyPlanetType     ty_any_planets;
-//     GPlayedBaseType    ty_played_bases;
-
-//     GPlayerSet   playing_set, data_set;
-
-
-
+        PlayerSet_t m_availablePlayers;     // ex data_set
     };
 
 } }

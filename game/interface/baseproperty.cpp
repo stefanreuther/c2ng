@@ -76,7 +76,7 @@ namespace {
 
     game::IntegerProperty_t getBaseAmmoStore(const game::map::Planet& p, const game::spec::ShipList& shipList, int n)
     {
-        // ex planint.pas:fetch_storage (part)
+        // ex planint.pas:fetch_storage (part), GPlanet::getBaseAmmoStore
         int numLaunchers = shipList.launchers().size();
         if (n > numLaunchers+1) {
             return afl::base::Nothing;
@@ -196,14 +196,16 @@ BaseArrayProperty::clone() const
     return new BaseArrayProperty(m_planet, m_config, m_shipList, m_property);
 }
 
-// /** Perform array reference. This implements the special abilities of starbase array properties:
-//     - index 0 counts all items
-//     - index 1..limit returns that item's count
-//     - other values yield empty (not an error!)
-//     \param func GPlanet function to access the property in raw form (e.g. getBaseEngineStore)
-//     \param limit Maximum index (e.g. NUM_ENGINES)
-//     \param arg User-specified argument
-//     \return resulting value */
+/** Perform array reference.
+    This implements the special abilities of starbase array properties:
+    - index 0 counts all items
+    - index 1..limit returns that item's count
+    - other values yield empty (not an error!)
+    \param func Function to access the property in raw form
+    \param limit Maximum index
+    \param arg User-specified argument
+    \param hull True for hulls
+    \return resulting value */
 afl::data::Value*
 BaseArrayProperty::performArrayReference(Function_t func, int limit, int32_t arg, bool hull)
 {
@@ -455,7 +457,7 @@ game::interface::getBaseProperty(const game::map::Planet& pl, BaseProperty ibp,
 
 
 void
-game::interface::setBaseProperty(game::map::Planet& pl, BaseProperty ibp, afl::data::Value* value)
+game::interface::setBaseProperty(game::map::Planet& pl, BaseProperty ibp, const afl::data::Value* value)
 {
     // ex int/if/baseif.h:setBaseProperty
     if (!pl.hasBase() || !pl.isPlayable(game::map::Planet::Playable)) {
@@ -465,8 +467,7 @@ game::interface::setBaseProperty(game::map::Planet& pl, BaseProperty ibp, afl::d
     int32_t iv;
     switch (ibp) {
      case ibpMission:
-        // FIXME: we don't have a constant for '6'. Nu goes higher.
-        if (interpreter::checkIntegerArg(iv, value, 0, 6)) {
+        if (interpreter::checkIntegerArg(iv, value, 0, MAX_BASE_MISSION)) {
             pl.setBaseMission(iv);
         }
         break;

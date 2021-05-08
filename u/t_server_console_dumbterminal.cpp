@@ -6,11 +6,11 @@
 #include "server/console/dumbterminal.hpp"
 
 #include "t_server_console.hpp"
-#include "t_server_console_terminal.hpp"
+#include "server/test/terminalverifier.hpp"
 
 /** Simple test. */
 void
 TestServerConsoleDumbTerminal::testIt()
 {
-    verifyInteractiveTerminal<server::console::DumbTerminal>("DumbTerminal");
+    server::test::verifyInteractiveTerminal<server::console::DumbTerminal>("DumbTerminal");
 }

@@ -12,6 +12,13 @@ class TestGameVcrClassicAlgorithm : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestGameVcrClassicBattle : public CxxTest::TestSuite {
+ public:
+    void testSample();
+    void testPosition();
+    void testPoints();
+};
+
 class TestGameVcrClassicDatabase : public CxxTest::TestSuite {
  public:
     void testEmpty();

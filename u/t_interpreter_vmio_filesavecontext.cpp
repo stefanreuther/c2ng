@@ -13,6 +13,7 @@
 #include "afl/data/stringvalue.hpp"
 #include "afl/io/internalstream.hpp"
 #include "afl/io/nullfilesystem.hpp"
+#include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
 #include "interpreter/arraydata.hpp"
 #include "interpreter/arrayvalue.hpp"
@@ -62,8 +63,9 @@ TestInterpreterVmioFileSaveContext::testIt()
 
     // Create a process
     afl::io::NullFileSystem fs;
+    afl::string::NullTranslator tx;
     afl::sys::Log log;
-    interpreter::World world(log, fs);
+    interpreter::World world(log, tx, fs);
     interpreter::Process p(world, "p", 99);
     p.pushFrame(bco, false);
 
@@ -229,8 +231,9 @@ TestInterpreterVmioFileSaveContext::testCycle()
 
     // Create a process
     afl::io::NullFileSystem fs;
+    afl::string::NullTranslator tx;
     afl::sys::Log log;
-    interpreter::World world(log, fs);
+    interpreter::World world(log, tx, fs);
     interpreter::Process p(world, "p", 99);
     p.pushFrame(bco, false);
 

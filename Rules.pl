@@ -158,35 +158,72 @@ if (get_variable('ENABLE_BUILD')) {
 
     # Testsuite
     if ($V{CXXTESTDIR} ne '') {
-        my @ts_src = sort(to_prefix_list($IN, $settings->{FILES_testsuite}));
-        my @ts_obj = map {compile_file($_, {CXXFLAGS=>"-I$V{CXXTESTDIR} -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -O0"})} @ts_src;
+        # Split files into individual testsuites
+        # This originally built one huge all-in-one testsuite binary.
+        # That binary became increasingly difficult to build on MinGW because the driver exceeded COFF file limits.
+        # Building each section's files separately should give us enough room for expansion.
+        # For now, we have
+        #    u/t_foo_bar.hpp           containing class declarations
+        #    u/t_foo_bar_baz.cpp       containing implementations of the tests
+        # We build one testsuite u/t_foo_bar from that header file and all implementations.
+        # (This strange file structure is a remainder of the old PCC2 build system where we needed to get hold of
+        # all *.hpp files using a single wildcard for generating the driver.
+        # It is no longer needed; we no longer use a wildcard.)
+        my %files_by_suite;
+        foreach (split /\s+/, to_list($settings->{FILES_testsuite})) {
+            if (/^(.+)_[^_]+\.cpp$/) {
+                push @{$files_by_suite{$1}{cpp}}, normalize_filename($V{IN}, $_);
+            } elsif (/^(.+)\.hpp$/) {
+                $files_by_suite{$1}{hpp} = normalize_filename($V{IN}, $_);
+            } else {
+                die "Unknown file in testsuite: $_";
+            }
+        }
 
-        # - build test driver
-        my $ts_main_src = normalize_filename($V{TMP}, "testsuite.cpp");
-        my @ts_headers = <$IN/u/t_*.hpp>;
-        generate($ts_main_src, [@ts_headers], "$V{PERL} $V{CXXTESTDIR}/cxxtestgen.pl --gui=TestController --have-eh --error-printer -o $ts_main_src ".join(' ', @ts_headers));
-        rule_add_info($ts_main_src, 'Generating test driver');
+        # Build individual testsuites
+        my @testsuites;
+        foreach (sort keys %files_by_suite) {
+            # Validate
+            die "Testsuite has no header file: $_" unless $files_by_suite{$_}{hpp};
+            die "Testsuite has no implementation: $_" unless $files_by_suite{$_}{cpp};
 
-        # - compile test driver
-        #   "-g0": mingw fails with "testsuite.o: too many section"; this removes some 40% of the sections
-        my @ts_main_obj = map {compile_file($_, {CXXFLAGS=>"-I$V{CXXTESTDIR} -I$V{AFL_DIR} -g0 -O0"})} $ts_main_src;
+            # Test driver
+            my $driver_name = normalize_filename($V{TMP}, "$_.cpp");
+            generate($driver_name, $files_by_suite{$_}{hpp}, "$V{PERL} $V{CXXTESTDIR}/cxxtestgen.pl --gui=TestController --have-eh --error-printer -o $driver_name $files_by_suite{$_}{hpp}");
+            rule_add_info($driver_name, "Generating $driver_name");
 
-        # - compile & run
-        my $exe = compile_executable('testsuite', [@ts_main_obj, @ts_obj], [@LIBS, 'afl']);
-        generate('test', ['testsuite', 'resources'], "$V{RUN} ./testsuite");
+            my $driver_obj = compile_file($driver_name, {CXXFLAGS=>"-I$V{CXXTESTDIR} -I$V{AFL_DIR} -g0 -O0"});
+
+            # Individual tests files
+            my @test_obj = map {compile_file($_, {CXXFLAGS=>"-I$V{CXXTESTDIR} -D_CXXTEST_HAVE_EH -D_CXXTEST_HAVE_STD -g -O0"})} sort @{$files_by_suite{$_}{cpp}};
+
+            # Link
+            my $exe = compile_executable($_, [$driver_obj, @test_obj], [@LIBS, 'afl']);
+            push @testsuites, $exe;
+        }
+        generate('test', [@testsuites, 'resources'], map {"$V{RUN} ./$_"} @testsuites);
         rule_add_info('test', 'Running testsuite');
         rule_set_phony('test');
+
+        # Alternative entry points for parallel/incremental test execution
+        # This runs testsuites in parallel. When modifying a single testsuite, runs only that.
+        # Experimental: this SHOULD have a dependency to 'resources', but since that is a phony rule,
+        # it would run all the testsuites all the time, defeating the purpose.
+        foreach (@testsuites) {
+            generate('validate', generate_anonymous('.ok', [$_], "$V{RUN} ./$_", 'touch $@'));
+        }
+        rule_set_phony('validate');
 
         # Coverage
         if ($V{WITH_COVERAGE}) {
             # Empty coverage (baseline)
-            my $base = generate_anonymous('.info', $exe,
+            my $base = generate_anonymous('.info', [@testsuites],
                                           "lcov -q -c -d $V{TMP} -i -o \$@");
 
             # Test run
-            my $result = generate_anonymous('.info', $exe,
+            my $result = generate_anonymous('.info', [@testsuites],
                                             "lcov -q -z -d $V{TMP}",            # Reset counters (delete all *.gcda)
-                                            "$V{RUN} ./$exe",                # Run testee
+                                            (map {"$V{RUN} ./$_"} @testsuites), # Run testsuites
                                             "lcov -q -c -d $V{TMP} -o \$@");    # Capture coverage (*.gcda -> info)
 
             # Combine captured and baseline so we can see unreferenced lines
@@ -273,7 +310,7 @@ sub generate_copy_tree {
 
 sub generate_copy_strip {
     my ($out, $in) = @_;
-    my $strip = add_variable(STRIP => 'strip');
+    my $strip = add_variable(STRIP => "$V{CROSS_COMPILE}strip");
     generate(generate_copy($out, $in),
              [],
              "$strip \$@");

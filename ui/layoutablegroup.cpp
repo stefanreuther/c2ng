@@ -1,35 +1,14 @@
 /**
   *  \file ui/layoutablegroup.cpp
+  *  \brief Class ui::LayoutableGroup
   */
 
 #include "ui/layoutablegroup.hpp"
 
-// /** Basic layoutable container
-
-//     This widget provides the basis for a layoutable container. It has an UILayoutManager
-//     responsible for actual layout, and implements UIBaseComplexWidget's methods using
-//     the layout manager.
-
-//     The actual child widget layout area is provided by a descendant's adjustSize()
-//     method to allow for additional frames or other decoration by the descendant.
-
-//     UILayoutableWidget provides an add() method to add child widgets. */
-
-// /** Constructor.
-//     \param layout Layout manager. Needs to live at least as long as the widget.
-//     \param id     Widget id */
 ui::LayoutableGroup::LayoutableGroup(ui::layout::Manager& mgr) throw()
     : Widget(),
       m_manager(mgr)
 { }
-
-// void
-// ui::LayoutableGroup::handleStateChange(State st, bool enable)
-// {
-//     // FIXME: what to do?
-//     (void) st;
-//     (void) enable;
-// }
 
 void
 ui::LayoutableGroup::requestChildRedraw(Widget& /*child*/, const gfx::Rectangle& area)
@@ -75,6 +54,8 @@ void
 ui::LayoutableGroup::add(Widget& child)
 {
     // ex UILayoutableWidget::add
+    // This method is in LayoutableGroup to clear that adding as last is the norm for LayoutableGroups,
+    // to avoid using it in other containers where that is rare.
     addChild(child, getLastChild());
 }
 

@@ -3,8 +3,10 @@
   *  \brief Class game::sim::Object
   */
 
-#include <cstdlib>
 #include "game/sim/object.hpp"
+#include "util/updater.hpp"
+
+using util::Updater;
 
 // Default constructor.
 game::sim::Object::Object()
@@ -21,10 +23,41 @@ game::sim::Object::Object()
       m_changed(false)
 { }
 
+// Copy constructor.
+game::sim::Object::Object(const Object& obj)
+    : m_id(obj.m_id),
+      m_name(obj.m_name),
+      m_friendlyCode(obj.m_friendlyCode),
+      m_damage(obj.m_damage),
+      m_shield(obj.m_shield),
+      m_owner(obj.m_owner),
+      m_experienceLevel(obj.m_experienceLevel),
+      m_flags(obj.m_flags),
+      m_flakRatingOverride(obj.m_flakRatingOverride),
+      m_flakCompensationOverride(obj.m_flakCompensationOverride),
+      m_changed(false)
+{ }
+
 // Destructor.
 game::sim::Object::~Object()
 { }
 
+// Assignment operator.
+game::sim::Object&
+game::sim::Object::operator=(const Object& other)
+{
+    setId(other.m_id);
+    setName(other.m_name);
+    setFriendlyCode(other.m_friendlyCode);
+    setDamage(other.m_damage);
+    setShield(other.m_shield);
+    setOwner(other.m_owner);
+    setExperienceLevel(other.m_experienceLevel);
+    setFlags(other.m_flags);
+    setFlakRatingOverride(other.m_flakRatingOverride);
+    setFlakCompensationOverride(other.m_flakCompensationOverride);
+    return *this;
+}
 
 // Get object Id.
 game::Id_t
@@ -39,8 +72,9 @@ void
 game::sim::Object::setId(Id_t id)
 {
     // ex GSimObject::setId
-    m_id = id;
-    markDirty();
+    if (Updater().set(m_id, id)) {
+        markDirty();
+    }
 }
 
 // Get name.
@@ -57,8 +91,9 @@ game::sim::Object::setName(String_t name)
 {
     // ex GSimObject::setName
     // FIXME: can we move this into Ship? Planet does not need it.
-    m_name = name;
-    markDirty();
+    if (Updater().set(m_name, name)) {
+        markDirty();
+    }
 }
 
 // Get friendly code.
@@ -74,8 +109,9 @@ void
 game::sim::Object::setFriendlyCode(String_t fcode)
 {
     // ex GSimObject::setFCode
-    m_friendlyCode = fcode;
-    markDirty();
+    if (Updater().set(m_friendlyCode, fcode)) {
+        markDirty();
+    }
 }
 
 // Get damage.
@@ -91,8 +127,9 @@ void
 game::sim::Object::setDamage(int damage)
 {
     // ex GSimObject::setDamage
-    m_damage = damage;
-    markDirty();
+    if (Updater().set(m_damage, damage)) {
+        markDirty();
+    }
 }
 
 // Get shield level.
@@ -108,8 +145,9 @@ void
 game::sim::Object::setShield(int shield)
 {
     // ex GSimObject::setShield
-    m_shield = shield;
-    markDirty();
+    if (Updater().set(m_shield, shield)) {
+        markDirty();
+    }
 }
 
 // Get owner.
@@ -125,8 +163,9 @@ void
 game::sim::Object::setOwner(int owner)
 {
     // ex GSimObject::setOwner
-    m_owner = owner;
-    markDirty();
+    if (Updater().set(m_owner, owner)) {
+        markDirty();
+    }
 }
 
 // Get experience level.
@@ -142,8 +181,9 @@ void
 game::sim::Object::setExperienceLevel(int experienceLevel)
 {
     // ex GSimObject::setExperienceLevel
-    m_experienceLevel = experienceLevel;
-    markDirty();
+    if (Updater().set(m_experienceLevel, experienceLevel)) {
+        markDirty();
+    }
 }
 
 // Get flags.
@@ -159,8 +199,9 @@ void
 game::sim::Object::setFlags(int32_t flags)
 {
     // ex GSimObject::setFlags
-    m_flags = flags;
-    markDirty();
+    if (Updater().set(m_flags, flags)) {
+        markDirty();
+    }
 }
 
 // Get FLAK rating override.
@@ -176,8 +217,9 @@ void
 game::sim::Object::setFlakRatingOverride(int32_t r)
 {
     // ex GSimObject::setFlakRatingOverride
-    m_flakRatingOverride = r;
-    markDirty();
+    if (Updater().set(m_flakRatingOverride, r)) {
+        markDirty();
+    }
 }
 
 // Get FLAK compensation override.
@@ -193,13 +235,14 @@ void
 game::sim::Object::setFlakCompensationOverride(int r)
 {
     // ex GSimObject::setFlakCompensationOverride
-    m_flakCompensationOverride = r;
-    markDirty();
+    if (Updater().set(m_flakCompensationOverride, r)) {
+        markDirty();
+    }
 }
 
 // Assign random friendly code if requested.
 void
-game::sim::Object::setRandomFriendlyCode()
+game::sim::Object::setRandomFriendlyCode(util::RandomNumberGenerator& rng)
 {
     // ex GSimObject::assignRandomFCode
     if (m_flags & fl_RandomFC) {
@@ -212,7 +255,7 @@ game::sim::Object::setRandomFriendlyCode()
                 m_friendlyCode += ' ';
             }
             if ((which & (fl_RandomFC1 << i)) != 0) {
-                m_friendlyCode[i] = static_cast<char>('0' + (std::rand() % 10));
+                m_friendlyCode[i] = static_cast<char>('0' + rng(10));
             }
         }
         markDirty();
@@ -263,6 +306,19 @@ game::sim::Object::hasAnyNonstandardAbility() const
     return (getFlags() & fl_FunctionSetBits) != 0;
 }
 
+// Get set of all abilities.
+game::sim::Abilities_t
+game::sim::Object::getAbilities(const Configuration& opts, const game::spec::ShipList& shipList, const game::config::HostConfiguration& config) const
+{
+    Abilities_t result;
+    for (int i = FIRST_ABILITY; i <= LAST_ABILITY; ++i) {
+        Ability a = Ability(i);
+        if (hasAbility(a, opts, shipList, config)) {
+            result += a;
+        }
+    }
+    return result;
+}
 
 // Mark dirty.
 void
@@ -305,28 +361,3 @@ game::sim::Object::getAbilityInfo(Ability a)
     }
     return AbilityInfo(0, 0);
 }
-
-// FIXME: do we need these?
-// /** Get maximum permitted damage level. Considers owner race. Intended
-//     for display / editing only, so this may allow more than the host
-//     allows. */
-// int
-// GSimObject::getMaxDamage() const
-// {
-//     if (raceId(getOwner()) == 2)
-//         return 150;
-//     else
-//         return 99;
-// }
-
-// /** Get maximum permitted shield level. Considers owner race and
-//     current damage. Intended for display / editing only, so this may
-//     allow more than the host allows. */
-// int
-// GSimObject::getMaxShield() const
-// {
-//     int limit = getMaxDamage() - getDamage() + 1;
-//     if (limit > 100)
-//         limit = 100;
-//     return limit;
-// }

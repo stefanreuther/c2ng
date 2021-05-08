@@ -6,15 +6,15 @@
 #include "ui/screenshotlistener.hpp"
 #include "afl/string/format.hpp"
 #include "gfx/save.hpp"
-#include "util/translation.hpp"
 
 namespace {
     const char LOG_NAME[] = "ui";
 }
 
-ui::ScreenshotListener::ScreenshotListener(afl::io::FileSystem& fs, afl::sys::LogListener& log)
+ui::ScreenshotListener::ScreenshotListener(afl::io::FileSystem& fs, afl::sys::LogListener& log, afl::string::Translator& tx)
     : m_fileSystem(fs),
-      m_log(log)
+      m_log(log),
+      m_translator(tx)
 { }
 
 // Take a screenshot.
@@ -31,20 +31,13 @@ ui::ScreenshotListener::call(gfx::Canvas& can)
             // OK, save screenshot
             saveCanvas(can, *file);
             file = 0;
-            m_log.write(m_log.Info, LOG_NAME, afl::string::Format(_("Screenshot saved as \"%s\"").c_str(), fileName));
+            m_log.write(m_log.Info, LOG_NAME, afl::string::Format(m_translator("Screenshot saved as \"%s\"").c_str(), fileName));
             break;
         }
         if (index >= 9999) {
             // NOK, directory is full
-            m_log.write(m_log.Error, LOG_NAME, _("Unable to find a free file name for screenshot"));
+            m_log.write(m_log.Error, LOG_NAME, m_translator("Unable to find a free file name for screenshot"));
             break;
         }
     }
-}
-
-// Clone this object.
-ui::ScreenshotListener*
-ui::ScreenshotListener::clone() const
-{
-    return new ScreenshotListener(m_fileSystem, m_log);
 }

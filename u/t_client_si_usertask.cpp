@@ -14,7 +14,7 @@ TestClientSiUserTask::testIt()
 {
     class Tester : public client::si::UserTask {
      public:
-        virtual void handle(client::si::UserSide& /*ui*/, client::si::Control& /*ctl*/, client::si::RequestLink2 /*link*/)
+        virtual void handle(client::si::Control& /*ctl*/, client::si::RequestLink2 /*link*/)
             { }
     };
     Tester t;

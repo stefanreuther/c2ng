@@ -11,6 +11,7 @@ class TestGameDbDrawingAtomMap : public CxxTest::TestSuite {
  public:
     void testIt();
     void testSave();
+    void testLoad();
 };
 
 class TestGameDbFleetLoader : public CxxTest::TestSuite {
@@ -27,6 +28,18 @@ class TestGameDbFleetLoader : public CxxTest::TestSuite {
     void testDeleted();
     void testComments();
     void testConflict();
+    void testSave();
+    void testSaveEmpty();
+    void testSaveBig();
+};
+
+class TestGameDbPacker : public CxxTest::TestSuite {
+ public:
+    void testUfo();
+    void testPlanet();
+    void testFullPlanet();
+    void testShip();
+    void testFullShip();
 };
 
 class TestGameDbStructures : public CxxTest::TestSuite {

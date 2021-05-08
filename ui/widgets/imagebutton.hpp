@@ -5,16 +5,17 @@
 #ifndef C2NG_UI_WIDGETS_IMAGEBUTTON_HPP
 #define C2NG_UI_WIDGETS_IMAGEBUTTON_HPP
 
-#include "ui/widgets/abstractbutton.hpp"
+#include "ui/widgets/basebutton.hpp"
 #include "afl/base/signalconnection.hpp"
 #include "gfx/fontrequest.hpp"
+#include "ui/icons/icon.hpp"
 
 namespace ui { namespace widgets {
 
     /** Image button.
         Displays an image that can be clicked with an optional overlay text.
         (If you just want an image, ignore the "can be clicked" part.) */
-    class ImageButton : public AbstractButton {
+    class ImageButton : public BaseButton {
      public:
         /** Constructor.
             \param image    Image name (for ResourceProvider::getImage)
@@ -26,14 +27,6 @@ namespace ui { namespace widgets {
         /** Destructor. */
         ~ImageButton();
 
-        // AbstractButton/Widget:
-        virtual void draw(gfx::Canvas& can);
-        virtual void handleStateChange(State st, bool enable);
-        virtual void handlePositionChange(gfx::Rectangle& oldPosition);
-        virtual ui::layout::Info getLayoutInfo() const;
-        virtual bool handleKey(util::Key_t key, int prefix);
-        virtual bool handleMouse(gfx::Point pt, MouseButtons_t pressedButtons);
-
         /** Set image.
             Will request the new image and update display.
             \param image New image name.  */
@@ -44,12 +37,22 @@ namespace ui { namespace widgets {
         void setText(String_t text);
 
      private:
-        String_t m_image;
-        gfx::Point m_size;
-        afl::base::SignalConnection conn_imageChange;
+        /* Private Icon implementation. We could probably use Image? */
+        class Icon : public ui::icons::Icon {
+         public:
+            Icon(String_t imageName, Root& root, gfx::Point size);
+            virtual gfx::Point getSize() const;
+            virtual void draw(gfx::Context<SkinColor::Color>& ctx, gfx::Rectangle area, ButtonFlags_t flags) const;
 
-        String_t m_text;
-        gfx::FontRequest m_font;
+            String_t m_imageName;
+            String_t m_text;
+            Root& m_root;
+            gfx::Point m_size;
+            gfx::FontRequest m_font;
+        };
+
+        Icon m_icon;
+        afl::base::SignalConnection conn_imageChange;
 
         void onImageChange();
     };

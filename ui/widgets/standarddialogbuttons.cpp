@@ -9,15 +9,15 @@
 #include "ui/layout/vbox.hpp"
 #include "ui/spacer.hpp"
 #include "ui/widgets/framegroup.hpp"
-#include "ui/window.hpp"
-#include "util/translation.hpp"
 #include "ui/widgets/statictext.hpp"
+#include "ui/window.hpp"
 
 // Constructor.
-ui::widgets::StandardDialogButtons::StandardDialogButtons(ui::Root& root)
+ui::widgets::StandardDialogButtons::StandardDialogButtons(ui::Root& root, afl::string::Translator& tx)
     : Group(ui::layout::HBox::instance5),
       m_deleter(),
       m_root(root),
+      m_translator(tx),
       m_pOK(0),
       m_pCancel(0)
 {
@@ -39,7 +39,7 @@ ui::widgets::StandardDialogButtons::addStop(EventLoop& loop)
 void
 ui::widgets::StandardDialogButtons::addHelp(Widget& helper)
 {
-    Button& btn = m_deleter.addNew(new Button(_("Help"), 'h', m_root));
+    Button& btn = m_deleter.addNew(new Button(m_translator("Help"), 'h', m_root));
     addChild(btn, 0);     // add in front
     btn.dispatchKeyTo(helper);
 }
@@ -47,8 +47,8 @@ ui::widgets::StandardDialogButtons::addHelp(Widget& helper)
 void
 ui::widgets::StandardDialogButtons::init()
 {
-    m_pOK     = &m_deleter.addNew(new Button(_("OK"),     util::Key_Return, m_root));
-    m_pCancel = &m_deleter.addNew(new Button(_("Cancel"), util::Key_Escape, m_root));
+    m_pOK     = &m_deleter.addNew(new Button(m_translator("OK"),     util::Key_Return, m_root));
+    m_pCancel = &m_deleter.addNew(new Button(m_translator("Cancel"), util::Key_Escape, m_root));
     add(m_deleter.addNew(new ui::Spacer()));
     add(*m_pOK);
     add(*m_pCancel);
@@ -56,7 +56,7 @@ ui::widgets::StandardDialogButtons::init()
 
 // Execute dialog with standard dialog buttons.
 bool
-ui::widgets::doStandardDialog(String_t title, String_t prompt, Widget& content, bool framed, Root& root)
+ui::widgets::doStandardDialog(String_t title, String_t prompt, Widget& content, bool framed, Root& root, afl::string::Translator& tx)
 {
     // ex UIInputLine::run, UINumberSelector::doStandardDialog
     // Window
@@ -77,7 +77,7 @@ ui::widgets::doStandardDialog(String_t title, String_t prompt, Widget& content, 
     container->add(content);
 
     // Buttons
-    StandardDialogButtons& buttons = del.addNew(new StandardDialogButtons(root));
+    StandardDialogButtons& buttons = del.addNew(new StandardDialogButtons(root, tx));
     window.add(buttons);
     window.pack();
     content.requestFocus();

@@ -12,7 +12,7 @@
 #include "interpreter/arguments.hpp"
 #include "interpreter/context.hpp"
 #include "interpreter/error.hpp"
-#include "u/helper/contextverifier.hpp"
+#include "interpreter/test/contextverifier.hpp"
 
 /** Test basic operations on empty hash. */
 void
@@ -90,7 +90,7 @@ TestInterpreterHashValue::testUnit()
 
     std::auto_ptr<interpreter::Context> pClone(p->clone());
     TS_ASSERT(pClone.get() != 0);
-    verifyTypes(*pClone);
+    TS_ASSERT_THROWS_NOTHING(interpreter::test::ContextVerifier(*pClone, "testUnit").verifyTypes());
     TS_ASSERT_EQUALS(pClone->toString(false), p->toString(false));
     TS_ASSERT_EQUALS(pClone->toString(true), p->toString(true));
     TS_ASSERT_DIFFERS(pClone->toString(false), "");

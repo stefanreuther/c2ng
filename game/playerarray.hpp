@@ -44,6 +44,16 @@ namespace game {
             \param n New value */
         void setAll(const T& n);
 
+        /** Compare for equality.
+            \param other Other array
+            \return true on equality */
+        bool operator==(const PlayerArray& other) const;
+
+        /** Compare for inequality.
+            \param other Other array
+            \return true on inequality */
+        bool operator!=(const PlayerArray& other) const;
+
      private:
         T m_data[MAX_PLAYERS+1];
     };
@@ -109,6 +119,25 @@ game::PlayerArray<T>::get(int pl) const
     } else {
         return T();
     }
+}
+
+template<typename T>
+bool
+game::PlayerArray<T>::operator==(const PlayerArray& other) const
+{
+    for (int i = 0; i < MAX_PLAYERS+1; ++i) {
+        if (m_data[i] != other.m_data[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+template<typename T>
+inline bool
+game::PlayerArray<T>::operator!=(const PlayerArray& other) const
+{
+    return !operator==(other);
 }
 
 #endif

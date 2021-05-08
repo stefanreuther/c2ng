@@ -6,15 +6,16 @@
 #include "interpreter/vmio/processsavecontext.hpp"
 
 #include "t_interpreter_vmio.hpp"
-#include "interpreter/world.hpp"
-#include "interpreter/process.hpp"
-#include "afl/sys/log.hpp"
-#include "afl/io/nullfilesystem.hpp"
-#include "interpreter/bytecodeobject.hpp"
 #include "afl/data/hash.hpp"
+#include "afl/io/nullfilesystem.hpp"
+#include "afl/string/nulltranslator.hpp"
+#include "afl/sys/log.hpp"
+#include "interpreter/arraydata.hpp"
+#include "interpreter/bytecodeobject.hpp"
+#include "interpreter/process.hpp"
 #include "interpreter/structuretypedata.hpp"
 #include "interpreter/structurevaluedata.hpp"
-#include "interpreter/arraydata.hpp"
+#include "interpreter/world.hpp"
 
 /** Simple test. */
 void
@@ -40,8 +41,9 @@ TestInterpreterVmioProcessSaveContext::testIt()
 
     // Processes
     afl::io::NullFileSystem fs;
+    afl::string::NullTranslator tx;
     afl::sys::Log log;
-    interpreter::World world(log, fs);
+    interpreter::World world(log, tx, fs);
     interpreter::Process a(world, "a", 42);
     interpreter::Process b(world, "b", 43);
 

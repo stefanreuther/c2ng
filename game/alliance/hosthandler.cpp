@@ -35,7 +35,7 @@ game::alliance::HostHandler::~HostHandler()
 void
 game::alliance::HostHandler::init(Container& allies, afl::string::Translator& tx)
 {
-    // ex GTHostAllianceHandler::processVersion
+    // ex GTHostAllianceHandler::processVersion, phost.pas:InitAlliances (part)
     // We pretend all host versions have alliances.
     // This is the same as PCC 1.x.
     allies.addLevel(Level(tx("Standard alliance"), ALLIANCE_ID, Level::Flags_t(Level::IsOffer)));
@@ -47,7 +47,7 @@ game::alliance::HostHandler::init(Container& allies, afl::string::Translator& tx
 void
 game::alliance::HostHandler::postprocess(Container& allies)
 {
-    // ex GTHostAllianceHandler::postprocess
+    // ex GTHostAllianceHandler::postprocess, phost.pas:ReadTAllianceCommands
     // Find offers
     Offer* pAlliance = allies.getMutableOffer(allies.find(ALLIANCE_ID));
     Offer* pStrong   = allies.getMutableOffer(allies.find(STRONG_ID));
@@ -84,7 +84,7 @@ game::alliance::HostHandler::postprocess(Container& allies)
 void
 game::alliance::HostHandler::handleChanges(const Container& allies)
 {
-    // ex GTHostAllianceHandler::handleChanges
+    // ex GTHostAllianceHandler::handleChanges, phost.pas:SendTAllianceCommands
     const Offer* pAlliance = allies.getOffer(allies.find(ALLIANCE_ID));
     const Offer* pStrong   = allies.getOffer(allies.find(STRONG_ID));
 

@@ -25,6 +25,24 @@ namespace {
         }
         return false;
     }
+
+    size_t countZeroes(const String_t& a, size_t& pos)
+    {
+        size_t n = 0;
+        while (pos < a.size() && a[pos] == '0') {
+            ++pos, ++n;
+        }
+        return n;
+    }
+
+    size_t countDigits(const String_t& a, size_t& pos)
+    {
+        size_t n = 0;
+        while (pos < a.size() && a[pos] >= '0' && a[pos] <= '9') {
+            ++pos, ++n;
+        }
+        return n;
+    }
 }
 
 // String Match, PHost way.
@@ -234,6 +252,23 @@ util::formatName(String_t name)
     return name;
 }
 
+// Format age of an information.
+String_t
+util::formatAge(int currentTurn, int historyTurn, afl::string::Translator& tx)
+{
+    // ex formatTurnNumber
+    int age = currentTurn - historyTurn;
+    if (age == 0) {
+        return tx("current turn");
+    } else if (age == 1) {
+        return tx("previous turn");
+    } else if (age < 0) {
+        return afl::string::Format(tx("turn %d"), historyTurn);
+    } else {
+        return afl::string::Format(tx("%d turns ago"), age);
+    }
+}
+
 // Encode MIME header.
 String_t
 util::encodeMimeHeader(String_t input, String_t charsetName)
@@ -334,5 +369,75 @@ util::addListItem(String_t& s, String_t delim, String_t ele)
             s += delim;
         }
         s += ele;
+    }
+}
+
+String_t
+util::sanitizeString(String_t str)
+{
+    String_t result;
+    afl::charset::Utf8Reader rdr(afl::string::toBytes(str), 0);
+    while (rdr.hasMore()) {
+        afl::charset::Unichar_t ch = rdr.eat();
+        if (ch < ' ' || ch >= 0x7F) {
+            result += '?';
+        } else {
+            result += char(ch);
+        }
+    }
+    return result;
+}
+
+int
+util::strCollate(const String_t& a, const String_t& b)
+{
+    size_t posA = 0, posB = 0;
+    while (1) {
+        size_t zeroA = countZeroes(a, posA);
+        size_t zeroB = countZeroes(b, posB);
+        size_t digitsA = countDigits(a, posA);
+        size_t digitsB = countDigits(b, posB);
+
+        // Shorter number is smaller
+        if (digitsA != digitsB) {
+            return digitsA < digitsB ? -1 : +1;
+        }
+
+        // Equal number compares lexically
+        if (digitsA != 0) {
+            if (int n = a.compare(posA - digitsA, digitsA, b, posB - digitsB, digitsB)) {
+                return n;
+            }
+        }
+
+        // More leading zeroes goes in front
+        if (zeroA != zeroB) {
+            return zeroA > zeroB ? -1 : +1;
+        }
+
+        // If string ends, compare as tie-breaker
+        bool endA = (posA == a.size());
+        bool endB = (posB == b.size());
+        if (endA) {
+            if (endB) {
+                // Both end; compare as tie-breakse
+                return a.compare(b);
+            } else {
+                // A ends, B doesn't
+                return -1;
+            }
+        } else {
+            if (endB) {
+                // B ends, A doesn't
+                return +1;
+            } else {
+                // We have one more character
+                uint8_t charA = uint8_t(afl::string::charToUpper(a[posA++]));
+                uint8_t charB = uint8_t(afl::string::charToUpper(b[posB++]));
+                if (charA != charB) {
+                    return charA < charB ? -1 : +1;
+                }
+            }
+        }
     }
 }

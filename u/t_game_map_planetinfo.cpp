@@ -796,3 +796,58 @@ TestGameMapPlanetInfo::testPackGroundDefenseInfo()
     TS_ASSERT_EQUALS(info.strength.get(6), 125);
 }
 
+/** Test preparePlanetEffectors(). */
+void
+TestGameMapPlanetInfo::testPreparePlanetEffectors()
+{
+    using game::map::Object;
+    using game::map::PlanetEffectors;
+    using game::map::Ship;
+
+    const int PLANET_ID = 77;
+
+    // Environment
+    game::test::SimpleTurn t;
+    t.setPosition(game::map::Point(1000, 1000));
+    t.addPlanet(PLANET_ID, 3, Planet::ReadOnly);
+
+    game::UnitScoreDefinitionList shipScores;
+
+    // Hull function Ids
+    const int HEATSTO50 = t.shipList().modifiedHullFunctions().getFunctionIdFromHostId(game::spec::HullFunction::HeatsTo50);
+    const int HEATSTO100 = t.shipList().modifiedHullFunctions().getFunctionIdFromHostId(game::spec::HullFunction::HeatsTo100);
+    const int COOLSTO50 = t.shipList().modifiedHullFunctions().getFunctionIdFromHostId(game::spec::HullFunction::CoolsTo50);
+
+    // Ships
+    game::Id_t shipId = 1;
+
+    // Some feds (unrelated)
+    t.addShip(shipId++, 1, Object::ReadOnly);
+    t.addShip(shipId++, 1, Object::ReadOnly).setMission(9, 0, 0);
+
+    // Some lizards, partly hissing
+    Ship& l1 = t.addShip(shipId++, 2, Object::ReadOnly); l1.setNumBeams(1); l1.setBeamType(1); l1.setMission(9, 0, 0);
+    Ship& l2 = t.addShip(shipId++, 2, Object::ReadOnly); l2.setNumBeams(1); l2.setBeamType(1);
+    Ship& l3 = t.addShip(shipId++, 2, Object::ReadOnly); l3.setNumBeams(1); l3.setBeamType(1); l3.setMission(9, 0, 0);
+
+    // Some terraforming feds
+    t.addShip(shipId++, 1, Object::ReadOnly).addShipSpecialFunction(HEATSTO100);
+    t.addShip(shipId++, 1, Object::ReadOnly).addShipSpecialFunction(HEATSTO100);
+    t.addShip(shipId++, 1, Object::ReadOnly).addShipSpecialFunction(HEATSTO100);
+
+    t.addShip(shipId++, 1, Object::ReadOnly).addShipSpecialFunction(HEATSTO50);
+    t.addShip(shipId++, 1, Object::ReadOnly).addShipSpecialFunction(HEATSTO50);
+
+    // A terraforming bird (via hull function)
+    t.setHull(30);
+    t.addShip(shipId++, 3, Object::ReadOnly);
+    t.shipList().hulls().get(30)->changeHullFunction(COOLSTO50, game::PlayerSet_t(3), game::PlayerSet_t(), true);
+
+    // Verify
+    PlanetEffectors eff = game::map::preparePlanetEffectors(t.universe(), PLANET_ID, shipScores, t.shipList(), t.config());
+    TS_ASSERT_EQUALS(eff.get(PlanetEffectors::Hiss), 2);
+    TS_ASSERT_EQUALS(eff.get(PlanetEffectors::HeatsTo100), 3);
+    TS_ASSERT_EQUALS(eff.get(PlanetEffectors::CoolsTo50), 1);
+    TS_ASSERT_EQUALS(eff.get(PlanetEffectors::HeatsTo50), 2);
+}
+

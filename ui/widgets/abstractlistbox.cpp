@@ -106,10 +106,14 @@ ui::widgets::AbstractListbox::draw(gfx::Canvas& can)
     // ex UIListbox::drawContent (totally different)
     gfx::Rectangle r = getExtent();
 
-    // Draw header
+    // Draw header and footer
     const int headerHeight = getHeaderHeight();
     if (headerHeight != 0) {
         drawHeader(can, r.splitY(headerHeight));
+    }
+    const int footerHeight = getFooterHeight();
+    if (footerHeight != 0) {
+        drawFooter(can, r.splitBottomY(footerHeight));
     }
 
     // Draw content
@@ -257,6 +261,7 @@ ui::widgets::AbstractListbox::handleMouse(gfx::Point pt, MouseButtons_t pressedB
     // FIXME: PCC2 checks with fuzz factor slightly outside in second pass
     gfx::Rectangle r(getExtent());
     r.consumeY(getHeaderHeight());
+    r.consumeBottomY(getFooterHeight());
     if (r.contains(pt)) {
         if (hasFlag(Blocked)) {
             // Widget is blocked. Request activation but do not do anything.
@@ -356,13 +361,13 @@ ui::widgets::AbstractListbox::updateItem(size_t item)
 
     gfx::Rectangle view(getExtent());
     view.consumeY(getHeaderHeight());
+    view.consumeBottomY(getFooterHeight());
     pos.intersect(view);
     if (pos.exists()) {
         requestRedraw(pos);
     }
 }
 
-// /** Redraw the current entry of the list box. */
 void
 ui::widgets::AbstractListbox::updateCurrentItem()
 {
@@ -496,7 +501,7 @@ ui::widgets::AbstractListbox::setCurrentItem(size_t nr, Direction dir)
 
             // If this is the first selectable item, scroll up all the way to the top.
             // This is required to make unselectable headings visible.
-            if (isFirstAccessibleItem(nr) && itemPos.getBottomY() <= getExtent().getHeight() - getHeaderHeight()) {
+            if (isFirstAccessibleItem(nr) && itemPos.getBottomY() <= getExtent().getHeight() - getHeaderHeight() - getFooterHeight()) {
                 itemPos.include(gfx::Point());
             }
 
@@ -546,12 +551,13 @@ ui::widgets::AbstractListbox::isFirstAccessibleItem(size_t nr)
 void
 ui::widgets::AbstractListbox::makeVisible(const gfx::Rectangle& relativeArea)
 {
+    // ex UIScrollable::adjustPosition (totally new)
     const int topY = relativeArea.getTopY();
     const int h    = relativeArea.getHeight();
     const int totalHeight = getTotalSize();
     const int oldTopY = m_topY;
 
-    const int availableHeight = getExtent().getHeight() - getHeaderHeight();
+    const int availableHeight = getExtent().getHeight() - getHeaderHeight() - getFooterHeight();
     if (availableHeight <= 0) {
         // Don't change anything, it's not visible
     } else if (availableHeight >= totalHeight) {

@@ -16,10 +16,10 @@
 #include "game/map/object.hpp"
 #include "game/map/objectcursor.hpp"
 #include "ui/eventloop.hpp"
-#include "util/slaverequestsender.hpp"
 #include "client/screenhistory.hpp"
 #include "client/map/minefieldmissionoverlay.hpp"
 #include "interpreter/process.hpp"
+#include "ui/widgets/panel.hpp"
 
 namespace client { namespace screens {
 
@@ -65,6 +65,7 @@ namespace client { namespace screens {
         class ContextProvider;
         class Updater;
         class Proprietor;
+        class ProprietorFromSession;
 
         Session& m_session;
         int m_number;
@@ -75,17 +76,21 @@ namespace client { namespace screens {
         client::si::OutputState m_outputState;
 
         // Control:
-        virtual void handleStateChange(client::si::UserSide& us, client::si::RequestLink2 link, client::si::OutputState::Target target);
-        virtual void handlePopupConsole(client::si::UserSide& ui, client::si::RequestLink2 link);
-        virtual void handleEndDialog(client::si::UserSide& ui, client::si::RequestLink2 link, int code);
-        virtual void handleSetViewRequest(client::si::UserSide& ui, client::si::RequestLink2 link, String_t name, bool withKeymap);
+        virtual void handleStateChange(client::si::RequestLink2 link, client::si::OutputState::Target target);
+        virtual void handlePopupConsole(client::si::RequestLink2 link);
+        virtual void handleEndDialog(client::si::RequestLink2 link, int code);
+        virtual void handleSetViewRequest(client::si::RequestLink2 link, String_t name, bool withKeymap);
+        virtual void handleUseKeymapRequest(client::si::RequestLink2 link, String_t name, int prefix);
+        virtual void handleOverlayMessageRequest(client::si::RequestLink2 link, String_t text);
         virtual client::si::ContextProvider* createContextProvider();
 
         void setId(game::Id_t id);
         void setPositions(game::map::Point origin, game::map::Point target);
         void clearPositions();
         void onScannerMove(game::map::Point target);
+        void onDoubleClick(game::map::Point target);
 
+        ui::widgets::Panel m_panel;
         client::map::Widget m_mapWidget;
         client::map::ScannerOverlay m_scannerOverlay;
         client::map::MovementOverlay m_movementOverlay;
@@ -95,7 +100,7 @@ namespace client { namespace screens {
 
         // should be last:
         util::RequestReceiver<ControlScreen> m_reply;
-        util::SlaveRequestSender<game::Session, Proprietor> m_proprietor;
+        util::RequestSender<Proprietor> m_proprietor;
     };
 
 } }

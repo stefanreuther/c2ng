@@ -81,7 +81,7 @@ client::map::WaypointOverlay::drawAfter(gfx::Canvas& can, const Renderer& ren)
 bool
 client::map::WaypointOverlay::drawCursor(gfx::Canvas& /*can*/, const Renderer& /*ren*/)
 {
-    return true;
+    return false;
 }
 
 bool

@@ -5,10 +5,11 @@
 #ifndef C2NG_CLIENT_DOWNLINK_HPP
 #define C2NG_CLIENT_DOWNLINK_HPP
 
+#include "afl/string/translator.hpp"
 #include "client/widgets/busyindicator.hpp"
+#include "game/proxy/waitindicator.hpp"
 #include "ui/eventloop.hpp"
 #include "ui/root.hpp"
-#include "game/proxy/waitindicator.hpp"
 
 namespace client {
 
@@ -24,8 +25,9 @@ namespace client {
     class Downlink : public game::proxy::WaitIndicator {
      public:
         /** Constructor.
-            \param root UI Root */
-        explicit Downlink(ui::Root& root);
+            \param root UI Root
+            \param tx Translator */
+        explicit Downlink(ui::Root& root, afl::string::Translator& tx);
 
         ~Downlink();
 

@@ -8,7 +8,6 @@
 #include <set>
 #include "util/key.hpp"
 #include "util/atomtable.hpp"
-#include "afl/base/signal.hpp"
 
 namespace util {
 

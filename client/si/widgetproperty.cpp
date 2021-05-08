@@ -5,6 +5,7 @@
 
 #include "client/si/widgetproperty.hpp"
 #include "client/si/compoundwidget.hpp"
+#include "client/si/control.hpp"
 #include "client/si/scriptside.hpp"
 #include "client/si/usercall.hpp"
 #include "client/si/values.hpp"
@@ -85,7 +86,7 @@ client::si::getWidgetProperty(WidgetProperty p, ui::Widget* w)
 
 // Set property of widget (UI side).
 void
-client::si::setWidgetProperty(WidgetProperty p, afl::data::Value* value, ui::Widget* w)
+client::si::setWidgetProperty(WidgetProperty p, const afl::data::Value* value, ui::Widget* w)
 {
     switch (p) {
      case wipFrameColor:
@@ -177,8 +178,8 @@ client::si::getWidgetProperty(WidgetProperty p, ScriptSide& ss, const WidgetRefe
         Getter(WidgetProperty p, const WidgetReference& ref, std::auto_ptr<afl::data::Value>& result)
             : m_property(p), m_ref(ref), m_result(result)
             { }
-        virtual void handle(UserSide& ui, Control& /*ctl*/)
-            { m_result.reset(getWidgetProperty(m_property, m_ref.get(ui))); }
+        virtual void handle(Control& ctl)
+            { m_result.reset(getWidgetProperty(m_property, m_ref.get(ctl))); }
      private:
         const WidgetProperty m_property;
         const WidgetReference m_ref;
@@ -194,20 +195,20 @@ client::si::getWidgetProperty(WidgetProperty p, ScriptSide& ss, const WidgetRefe
 
 // Set property of widget (script side).
 void
-client::si::setWidgetProperty(WidgetProperty p, afl::data::Value* value, ScriptSide& ss, const WidgetReference& ref)
+client::si::setWidgetProperty(WidgetProperty p, const afl::data::Value* value, ScriptSide& ss, const WidgetReference& ref)
 {
     // UserCall for the thread transition.
     class Setter : public UserCall {
      public:
-        Setter(WidgetProperty p, const WidgetReference& ref, afl::data::Value* value)
+        Setter(WidgetProperty p, const WidgetReference& ref, const afl::data::Value* value)
             : m_property(p), m_ref(ref), m_value(value)
             { }
-        virtual void handle(UserSide& ui, Control& /*ctl*/)
-            { setWidgetProperty(m_property, m_value, m_ref.get(ui)); }
+        virtual void handle(Control& ctl)
+            { setWidgetProperty(m_property, m_value, m_ref.get(ctl)); }
      private:
         const WidgetProperty m_property;
         const WidgetReference m_ref;
-        afl::data::Value* m_value;
+        const afl::data::Value* m_value;
     };
 
     // Call it. call() will proxy possible exceptions.

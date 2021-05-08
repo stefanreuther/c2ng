@@ -196,7 +196,7 @@ ui::drawWindow(gfx::Context<uint8_t>& ctx,
 
     afl::base::Ref<gfx::Font> font(provider.getFont(gfx::FontRequest().addSize(1)));
     ctx.setColor(Color_White);
-    ctx.setTextAlign(1, 0);
+    ctx.setTextAlign(gfx::CenterAlign, gfx::TopAlign);
     ctx.useFont(*font);
     gfx::outTextF(ctx, Point(extent.getLeftX() + extent.getWidth()/2, extent.getTopY() + 2), extent.getWidth(), name);
 }
@@ -270,7 +270,6 @@ void
 ui::drawButton(gfx::Context<uint8_t>& ctx,
                const gfx::Rectangle& extent,
                ButtonFlags_t flags,
-               Widget::States_t state,
                String_t text)
 {
     // Figure out font
@@ -287,7 +286,7 @@ ui::drawButton(gfx::Context<uint8_t>& ctx,
         if (flags.contains(HighlightedButton)) {
             slot += 2;
         }
-        if (flags.contains(ActiveButton) && !state.contains(Widget::DisabledState)) {
+        if (flags.contains(ActiveButton) && !flags.contains(DisabledButton)) {
             slot += 1;
         }
 
@@ -327,7 +326,7 @@ ui::drawButton(gfx::Context<uint8_t>& ctx,
         // draw text
         int x = ex + ctx.getTextAlign().getY()*(ew-16)/2 + delta + 8;
         int y = ey + ctx.getTextAlign().getY()*eh/2 + delta;
-        if (state.contains(ui::Widget::DisabledState)) {
+        if (flags.contains(DisabledButton)) {
             // @change PCC2/PCC1 used Color_Black
             ctx.setColor(ui::Color_Grayscale + 7);
         } else {

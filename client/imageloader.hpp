@@ -7,6 +7,7 @@
 
 #include <vector>
 #include "afl/string/string.hpp"
+#include "afl/string/translator.hpp"
 #include "ui/eventloop.hpp"
 #include "ui/root.hpp"
 
@@ -28,8 +29,9 @@ namespace client {
     class ImageLoader {
      public:
         /** Constructor.
-            \param root Root */
-        explicit ImageLoader(ui::Root& root);
+            \param root Root
+            \param tx Translator */
+        explicit ImageLoader(ui::Root& root, afl::string::Translator& tx);
 
         /** Load an image.
             \param name Resource identifier */
@@ -43,6 +45,7 @@ namespace client {
         void onImageChange();
 
         ui::Root& m_root;
+        afl::string::Translator& m_translator;
         ui::EventLoop m_loop;
 
         // This vector contains all unloaded images.

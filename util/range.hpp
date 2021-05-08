@@ -6,6 +6,10 @@
 #define C2NG_UTIL_RANGE_HPP
 
 #include <algorithm>
+#include "afl/string/format.hpp"
+#include "afl/string/translator.hpp"
+#include "util/numberformatter.hpp"
+#include "util/unicodechars.hpp"
 
 namespace util {
 
@@ -113,7 +117,41 @@ namespace util {
         T m_max;
     };
 
+    /** Format a range.
+
+        Assumes that the given range is a subrange of a well-known maximum range.
+        If a range boundary coincides with the maximum range boundary, that bound is not explicitly stated to reduce clutter.
+
+        \tparam Range type. Must be an integer.
+
+        \param range    Range to format
+        \param maxRange Maximum allowed range
+        \param verbal   true for verbal output ("up to 10"), false for symbolic ("&le; 10")
+        \param fmt      Number formatter
+        \param tx       Translator
+        \return String */
+    template<typename T>
+    String_t toString(Range<T> range, Range<T> maxRange, bool verbal, const NumberFormatter& fmt, afl::string::Translator& tx)
+    {
+        if (range.empty()) {
+            return verbal ? tx("none") : "-";
+        } else if (range.isUnit()) {
+            return afl::string::Format("%d", fmt.formatNumber(range.min()));
+        } else {
+            bool toMin = range.min() <= maxRange.min();
+            bool toMax = range.max() >= maxRange.max();
+            if (toMin && !toMax) {
+                return afl::string::Format(verbal ? tx("up to %d") : UTF_LEQ " %d", fmt.formatNumber(range.max()));
+            } else if (toMax && !toMin) {
+                return afl::string::Format(verbal ? tx("%d or more") : UTF_GEQ " %d", fmt.formatNumber(range.min()));
+            } else {
+                return afl::string::Format(verbal ? tx("%d to %d") : "%d" UTF_EN_DASH "%d", fmt.formatNumber(range.min()), fmt.formatNumber(range.max()));
+            }
+        }
+    }
 }
+
+
 
 
 template<typename T>

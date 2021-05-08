@@ -10,7 +10,6 @@
 #include "afl/io/stream.hpp"
 #include "afl/io/filesystem.hpp"
 #include "afl/base/optional.hpp"
-#include "afl/string/translator.hpp"
 
 namespace util { namespace plugin {
 
@@ -56,9 +55,9 @@ namespace util { namespace plugin {
             It can be installed by calling doInstall().
 
             \param fileName File to install
-            \param tx Translator
+
             \return proto-plugin or null */
-        Plugin* prepareInstall(String_t fileName, afl::string::Translator& tx);
+        Plugin* prepareInstall(String_t fileName);
 
         /** Check for installation ambiguities.
             Call after successful prepareInstall().
@@ -78,9 +77,8 @@ namespace util { namespace plugin {
             It generates a human-readable message if there is a problem.
             The message will have multiple lines and can be written to a console or GUI window.
 
-            \param tx Translator to generate the message
             \return error message; Nothing if there is no problem */
-        afl::base::Optional<String_t> checkInstallPreconditions(afl::string::Translator& tx);
+        afl::base::Optional<String_t> checkInstallPreconditions();
 
         /** Install the prepared plugin.
             Call after successful prepareInstall().
@@ -100,9 +98,10 @@ namespace util { namespace plugin {
             It generates a human-readable message if there is a problem.
             The message will have multiple lines and can be written to a console or GUI window.
 
-            \param tx Translator to generate the message
-            \return error message; Nothing if there is no problem */
-        afl::base::Optional<String_t> checkRemovePreconditions(const Plugin& plug, afl::string::Translator& tx);
+            \param plug Plugin to check
+
+            \return error message (using Manager's translator); Nothing if there is no problem */
+        afl::base::Optional<String_t> checkRemovePreconditions(const Plugin& plug);
 
         /** Remove a plugin.
             Deletes all associated files.

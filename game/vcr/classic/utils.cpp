@@ -20,19 +20,6 @@ game::vcr::classic::getDatabase(Session& s)
     }
 }
 
-// FIXME: this function is badly designed (game/ should not know about resource Ids)
-// String_t
-// game::vcr::classic::getImageResourceId(const Object& object, Side side, const game::spec::ShipList& shipList)
-// {
-//     if (object.isPlanet()) {
-//         return "vcr.planet";
-//     } else {
-//         return afl::string::Format("%s.%d",
-//                                    (side==LeftSide ? "vcr.lship" : "vcr.rship"),
-//                                    object.getGuessedShipPicture(shipList.hulls()));
-//     }
-// }
-
 String_t
 game::vcr::classic::formatBattleResult(BattleResult_t result,
                                        const String_t& leftName, TeamSettings::Relation leftRelation,

@@ -653,15 +653,50 @@ Sub CCUI.Ship.SetMission
 EndSub
 
 % Remote control (r)
-% Also see VisualScanDialog::Window::toggleRemoteControl
 % @since PCC2 2.40.9
 Sub CCUI.Ship.ToggleRemote
+  % ex IFCCRemoteControl (sort-of)
+  % Also see VisualScanDialog::Window::toggleRemoteControl
   Local UI.Result
   Local q := CC$RemoteGetQuestion(Id)
   If q Then
     UI.Message q, Translate("Remote Control"), Translate("Yes No")
     If UI.Result=1 Then CC$RemoteToggle Id
   EndIf
+EndSub
+
+
+% @since PCC2 2.40.10
+Function CCUI$Ship.ValidateShipyard()
+  Local UI.Result
+  Local p = Planet(Orbit$)
+  If p->Shipyard.Action='Fix' Then
+    UI.Message Format(Translate("This starbase is already repairing %s. If you continue, this order will be replaced. Continue?"), p->Shipyard.Name), Translate("Yes No")
+    Return UI.Result=1
+  Else If p->Shipyard.Action='Recycle' Then
+    UI.Message Format(Translate("This starbase is already recycling %s. If you continue, this order will be replaced. Continue?"), p->Shipyard.Name), Translate("Yes No")
+    Return UI.Result=1
+  Else
+    Return True
+  EndIf
+EndFunction
+
+% Fix this ship
+% @since PCC2 2.40.10
+Sub CCUI.Ship.Fix
+  If CCUI$Ship.ValidateShipyard() Then FixShip
+EndSub
+
+% Recycle this ship
+% @since PCC2 2.40.10
+Sub CCUI.Ship.Recycle
+  If CCUI$Ship.ValidateShipyard() Then RecycleShip
+EndSub
+
+% Cancel Fix/Recycle order
+% @since PCC2 2.40.10
+Sub CCUI.Ship.CancelShipyard
+  With Planet(Orbit$) Do FixShip 0
 EndSub
 
 % Mission Selection for a starbase
@@ -714,7 +749,7 @@ EndSub
 
 
 Sub CCUI$Give(title, command, me)
-  % ex client/act-ship.cc:doGive, doGiveShip, doGivePlanet
+  % ex client/act-ship.cc:doGive, doGiveShip, doGivePlanet, phost.pas:NGive
   Local UI.Result, ll, cur
 
   % Figure out current
@@ -821,7 +856,7 @@ Function CCUI$Search(flags, match)
   % If we have no results, check why
   If Dim(result->Objects)=0 Then
     If Not hasObjects Then Return Translate("There are no objects of the requested kind.")
-    % FIXME: deal with runtime errors from e.g. misspelled property names
+    % FIXME: deal with runtime errors from e.g. misspelled property names, and report those to north side
   EndIf
 
   Return result
@@ -855,6 +890,42 @@ Function CCUI$TryGotoChart(x, y)
   EndIf
 EndFunction
 
+% @since PCC2 2.40.10
+Function CCUI$TryGotoMinefield(id)
+  If Minefield(id) Then
+    Iterator(32).CurrentIndex := id
+    CC$MinefieldInfo
+    Return True
+  Else
+    Return False
+  EndIf
+EndFunction
+
+% @since PCC2 2.40.10
+Function CCUI$TryGotoIonStorm(id)
+  If Storm(id) Then
+    Iterator(31).CurrentIndex := id
+    CC$IonStormInfo
+    Return True
+  Else
+    Return False
+  EndIf
+EndFunction
+
+% @since PCC2 2.40.10
+Function CCUI$TryGotoUfo(id)
+  Local x
+  If Ufo(id) Then
+    % For Ufos, Id and Index are not the same
+    x := Iterator(30).Index(Id)
+    If x Then
+      Iterator(30).CurrentIndex := x
+      CC$UfoInfo
+      Return True
+    EndIf
+  EndIf
+EndFunction
+
 
 % @q UI.GotoReference ref:Reference (Global Command)
 % Go to referenced object.
@@ -873,9 +944,12 @@ Sub UI.GotoReference(ref)
       CCUI$TryGotoScreen(3, ref->Id) Or CCUI$TryGotoScreen(2, ref->Id) Or CCUI$TryGotoChart(ref->Object->Loc.X, ref->Object->Loc.Y)
     Case 'location'
       CCUI$TryGotoChart(ref->Loc.X, ref->Loc.Y)
-    Case 'minefield', 'ufo', 'storm'
-      % FIXME: try to show info dialog
-      CCUI$TryGotoChart(ref->Object->Loc.X, ref->Object->Loc.Y)
+    Case 'minefield'
+      CCUI$TryGotoMinefield(ref->Id) Or CCUI$TryGotoChart(ref->Object->Loc.X, ref->Object->Loc.Y)
+    Case 'storm'
+      CCUI$TryGotoIonStorm(ref->Id) Or CCUI$TryGotoChart(ref->Object->Loc.X, ref->Object->Loc.Y)
+    Case 'ufo'
+      CCUI$TryGotoUfo(ref->Id) Or CCUI$TryGotoChart(ref->Object->Loc.X, ref->Object->Loc.Y)
   EndSelect
 EndSub
 
@@ -917,6 +991,57 @@ Sub CCUI$LoadSelection(title, flags)
     EndTry
   EndIf
 EndSub
+
+
+%
+%  Starchart
+%
+
+
+% @since PCC2 2.40.10
+Sub CCUI$Chart.NewCannedMarker
+  Local slot = If(UI.Prefix, UI.Prefix Mod 10, 0)
+  NewCannedMarker UI.X, UI.Y, slot
+EndSub
+
+% @since PCC2 2.40.10
+Sub CCUI$Chart.MinefieldOrMarker
+  If UI.Prefix Then
+    CCUI$Chart.NewCannedMarker
+  Else
+    Local id := Iterator(32).NearestIndex(UI.X, UI.Y)
+    If id Then
+      Iterator(32).CurrentIndex := id
+      CC$MinefieldInfo
+    Else
+      UI.OverlayMessage Translate("No Minefields")
+    EndIf
+  EndIf
+EndSub
+
+% @since PCC2 2.40.10
+Sub CCUI$Chart.IonStormInfo
+  Local id := Iterator(31).NearestIndex(UI.X, UI.Y)
+  If id Then
+    Iterator(31).CurrentIndex := id
+    CC$IonStormInfo
+  Else
+    UI.OverlayMessage Translate("No Ion Storms")
+  EndIf
+EndSub
+
+% @since PCC2 2.40.10
+Sub CCUI$Chart.UfoInfo
+  Local id := Iterator(30).NearestIndex(UI.X, UI.Y)
+  If id Then
+    Iterator(30).CurrentIndex := id
+    CC$UfoInfo
+  Else
+    UI.OverlayMessage Translate("No Ufos")
+  EndIf
+EndSub
+
+
 
 
 %
@@ -1044,9 +1169,24 @@ EndSub
 
 % Starship 'b' menu
 On ShipBaseMenu Do
-  % If Fighter.Bays Then AddItem 0, Translate("Build fighters")
-  % If Torp.LCount  Then AddItem 0, Translate("Build torpedoes")
+  Local currentAction
+  Local p = Planet(Orbit$)
+  % FIXME: If Fighter.Bays Then AddItem 0, Translate("Build fighters")
+  % FIXME: If Torp.LCount  Then AddItem 0, Translate("Build torpedoes")
   AddItem Atom("UI.GotoScreen 3, Orbit$"), Translate("Starbase screen")
+
+  currentAction := If(p->Shipyard.Id = Id, p->Shipyard.Action, '')
+  If currentAction = 'Fix' Then
+    AddItem Atom("CCUI.Ship.CancelShipyard"), Translate("Cancel \"repair\" order")
+  Else
+    AddItem Atom("CCUI.Ship.Fix"), Translate("Fix (repair) this ship")
+  EndIf
+  If currentAction = 'Recycle' Then
+    AddItem Atom("CCUI.Ship.CancelShipyard"), Translate("Cancel \"recycle\" order")
+  Else
+    AddItem Atom("CCUI.Ship.Recycle"), Translate("Recycle this ship")
+  EndIf
+  % FIXME: "Clone this ship"
 EndOn
 
 Sub CCUI.ShipBaseMenu

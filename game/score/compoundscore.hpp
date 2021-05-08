@@ -61,6 +61,17 @@ namespace game { namespace score {
             \param kind Kind of score */
         CompoundScore(const TurnScoreList& list, DefaultScore kind);
 
+        /** Compare for equality.
+            Two scores are equal if they contain the same parts in the same sequence.
+            \param other Other CompoundScore
+            \return true if equal */
+        bool operator==(const CompoundScore& other) const;
+
+        /** Compare for inequality.
+            \param other Other CompoundScore
+            \return true if different */
+        bool operator!=(const CompoundScore& other) const;
+
         /** Add a score component.
             \param list TurnScoreList containing score definitions
             \param id Score Id (NOT slot!)
@@ -92,6 +103,12 @@ namespace game { namespace score {
             \param players Player set
             \return score; unknown if the requested turn does not exist */
         Value_t get(const TurnScoreList& list, int turnNr, PlayerSet_t players) const;
+
+        /** Check validity.
+            If a nonexistant slot was added using add() or the constructor, the CompoundScore() object
+            will be invalid and all get() calls will return failure.
+            \return validity flag */
+        bool isValid() const;
 
      private:
         // FIXME: the origin class, WScore, also managed a name.

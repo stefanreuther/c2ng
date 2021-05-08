@@ -6,10 +6,9 @@
 #include <stdexcept>
 #include "game/config/configurationparser.hpp"
 #include "game/config/configuration.hpp"
-#include "util/translation.hpp"
 
-game::config::ConfigurationParser::ConfigurationParser(afl::sys::LogListener& log, Configuration& config, ConfigurationOption::Source source)
-    : util::ConfigurationFileParser(),
+game::config::ConfigurationParser::ConfigurationParser(afl::sys::LogListener& log, afl::string::Translator& tx, Configuration& config, ConfigurationOption::Source source)
+    : util::ConfigurationFileParser(tx),
       m_log(log),
       m_config(config),
       m_source(source)
@@ -36,7 +35,7 @@ void
 game::config::ConfigurationParser::handleError(const String_t& fileName, int lineNr, const String_t& message)
 {
     // ex ConfigFileParser::error
-    m_log.write(m_log.Warn, "game.config.parser", fileName, lineNr, message + _("; line has been ignored"));
+    m_log.write(m_log.Warn, "game.config.parser", fileName, lineNr, message + translator()("; line has been ignored"));
 }
 
 void

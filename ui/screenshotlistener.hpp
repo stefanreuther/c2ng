@@ -6,9 +6,10 @@
 #define C2NG_UI_SCREENSHOTLISTENER_HPP
 
 #include "afl/base/closure.hpp"
-#include "gfx/canvas.hpp"
 #include "afl/io/filesystem.hpp"
+#include "afl/string/translator.hpp"
 #include "afl/sys/loglistener.hpp"
+#include "gfx/canvas.hpp"
 
 namespace ui {
 
@@ -19,8 +20,9 @@ namespace ui {
      public:
         /** Constructor.
             \param fs File system
-            \param log Log listener */
-        ScreenshotListener(afl::io::FileSystem& fs, afl::sys::LogListener& log);
+            \param log Log listener
+            \param tx Translator */
+        ScreenshotListener(afl::io::FileSystem& fs, afl::sys::LogListener& log, afl::string::Translator& tx);
 
         // Closure:
 
@@ -29,13 +31,10 @@ namespace ui {
             \param can Canvas to save */
         virtual void call(gfx::Canvas& can);
 
-        /** Clone this object.
-            \return Copy of this ScreenshotListener. */
-        virtual ScreenshotListener* clone() const;
-
      private:
         afl::io::FileSystem& m_fileSystem;
         afl::sys::LogListener& m_log;
+        afl::string::Translator& m_translator;
     };
 
 }

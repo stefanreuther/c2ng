@@ -28,7 +28,7 @@ namespace game { namespace interface {
     };
 
     afl::data::Value* getIonStormProperty(const game::map::IonStorm& ion, IonStormProperty iip, afl::string::Translator& tx, InterpreterInterface& iface);
-    void setIonStormProperty(game::map::IonStorm& ion, IonStormProperty iip, afl::data::Value* value);
+    void setIonStormProperty(game::map::IonStorm& ion, IonStormProperty iip, const afl::data::Value* value);
 
 } }
 

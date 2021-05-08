@@ -116,6 +116,10 @@ namespace game { namespace score {
             \return number of turns */
         size_t getNumTurns() const;
 
+        /** Get turn number of first stored turn.
+            \return turn number; 0 if none */
+        int getFirstTurnNumber() const;
+
         /** Get turn by index.
             \param index Index [0,getNumTurns())
             \return TurnScore object; null if index out of range */

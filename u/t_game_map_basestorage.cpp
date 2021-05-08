@@ -38,6 +38,9 @@ TestGameMapBaseStorage::testAccess()
     TS_ASSERT(testee.at(2) != 0);
     TS_ASSERT(testee.at(3) != 0);
     TS_ASSERT(testee.at(4) == 0);
+
+    // Size access: maximum element we set is 3
+    TS_ASSERT_EQUALS(testee.size(), 4);
 }
 
 /** Test isValid(). */

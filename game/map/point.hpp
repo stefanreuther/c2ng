@@ -97,6 +97,10 @@ namespace game { namespace map {
             \retval false Syntax error, object not updated */
         bool parseCoordinates(const String_t& s);
 
+        /** Convert to string.
+            \return "(x,y)" */
+        String_t toString() const;
+
         /** Three-way comparison.
             \param other Other point
             \return -1 if this point is lexically before \c other, 0 if equal, +1 if after */

@@ -57,9 +57,6 @@ game::interface::LoadContext::loadStructureType(uint32_t /*id*/)
     return 0;
 }
 
-// // /** Load context value from stream.
-// //     \param sv Tag node read from header
-// //     \param aux Auxiliary data can be read here */
 interpreter::Context*
 game::interface::LoadContext::loadContext(const interpreter::TagNode& tag, afl::io::Stream& /*aux*/)
 {

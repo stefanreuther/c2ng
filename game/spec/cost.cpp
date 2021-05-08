@@ -31,23 +31,6 @@ game::spec::Cost::Cost()
     clear();
 }
 
-
-// FIXME: delete
-// /** Try to sell supplies to cover a money shortage. */
-// void
-// GCost::trySupplySale()
-// {
-//     if (mc < 0) {
-//         sup += mc;
-//         mc = 0;
-//         if (sup < 0) {
-//             // not enough supplies - leave it a money shortage
-//             mc = sup;
-//             sup = 0;
-//         }
-//     }
-// }
-
 // Add costs.
 game::spec::Cost&
 game::spec::Cost::operator+=(const Cost& other)

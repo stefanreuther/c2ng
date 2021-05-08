@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/vmio/objectloader.cpp
+  *  \brief Class interpreter::vmio::ObjectLoader
   */
 
 #include "interpreter/vmio/objectloader.hpp"
@@ -14,13 +15,15 @@
 #include "interpreter/vmio/processloadcontext.hpp"
 #include "interpreter/vmio/structures.hpp"
 #include "interpreter/vmio/valueloader.hpp"
-#include "util/translation.hpp"
 
 namespace {
     using interpreter::vmio::structures::UInt32_t;
     using interpreter::vmio::structures::Tag;
+    using afl::io::Stream;
 
-    String_t loadString(afl::io::Stream& s)
+    /* Load string, without character translation.
+       Used for process name, BCO name, BCO file name. */
+    String_t loadString(Stream& s)
     {
         String_t result;
         uint8_t buffer[128];
@@ -30,18 +33,17 @@ namespace {
         return result;
     }
 
-    // /** Load context list from stream.
-    //     \param out      [in] Stream to read from
-    //     \param slots    [in] Number of contexts to load
-    //     \param contexts [out] Contexts will be added here
-    //     \throws FileFormatException if an invalid context is encountered
- 
-    //     This is a very stripped-down version of IntDataSegment::load,
-    //     which assumes to find only contexts, no scalars or other values. */
-    void loadContexts(interpreter::Process& proc,
-                      interpreter::vmio::LoadContext& ctx,
-                      afl::io::Stream& in,
-                      uint32_t count)
+    /* Load context list from stream.
+       \param [out] proc   Process (receives contexts)
+       \param [in]  ctx    LoadContext (provides context repertoire)
+       \param [in]  tx     Translator (for error messages)
+       \param [in]  in     Stream to read
+       \param [in]  count  Number of contexts to read
+
+       \throws afl::except::FileFormatException if an invalid context is encountered
+
+       This is a simplified version of ValueLoader::load() that assumes to find only contexts, no scalars or other values. */
+    void loadContexts(interpreter::Process& proc, interpreter::vmio::LoadContext& ctx, afl::string::Translator& tx, Stream& in, uint32_t count)
     {
         // ex int/contextio.h:loadContexts
         afl::base::GrowableMemory<Tag> headers;
@@ -56,51 +58,37 @@ namespace {
             node.value = p->packedValue;
             interpreter::Context* cv = ctx.loadContext(node, in);
             if (!cv) {
-                throw afl::except::FileFormatException(in, _("Invalid value in context list; file probably written by newer version of PCC"));
+                throw afl::except::FileFormatException(in, tx("Invalid value in context list; file probably written by newer version of PCC"));
             }
             proc.pushNewContext(cv);
         }
     }
 
+    /* Loading an array-of-32-bit-values property */
     class ArrayLoader {
      public:
         virtual ~ArrayLoader()
             { }
         virtual void add(uint32_t value) = 0;
-        void load(afl::io::Stream& in, uint32_t n)
-            {
-                // ex int/vmio.cc:loadArray32
-                const size_t CHUNK = 128;
-                while (n > 0) {
-                    // Read into buffer
-                    UInt32_t buffer[CHUNK];
-                    afl::base::Memory<UInt32_t> now(buffer);
-                    now.trim(n);
-                    in.fullRead(now.toBytes());
-
-                    // Process
-                    while (UInt32_t* p = now.eat()) {
-                        add(*p);
-                        --n;
-                    }
-                }
-            }
+        void load(Stream& in, uint32_t n);
     };
 
+    /* Implementation of ArrayLoader to load bytecode */
     class CodeLoader : public ArrayLoader {
      public:
-        CodeLoader(interpreter::BCORef_t bco)
+        CodeLoader(interpreter::BytecodeObject& bco)
             : m_bco(bco)
             { }
         virtual void add(uint32_t value)
-            { m_bco->addInstruction(interpreter::Opcode::Major((value >> 24) & 255), uint8_t((value >> 16) & 255), uint16_t(value & 65535)); }
+            { m_bco.addInstruction(interpreter::Opcode::Major((value >> 24) & 255), uint8_t((value >> 16) & 255), uint16_t(value & 65535)); }
      private:
-        interpreter::BCORef_t m_bco;
+        interpreter::BytecodeObject& m_bco;
     };
 
+    /* Implementation of ArrayLoader to load line-number information */
     class LineLoader : public ArrayLoader {
      public:
-        LineLoader(interpreter::BCORef_t bco)
+        LineLoader(interpreter::BytecodeObject& bco)
             : m_bco(bco),
               m_hasAddress(false),
               m_address()
@@ -108,7 +96,7 @@ namespace {
         virtual void add(uint32_t value)
             {
                 if (m_hasAddress) {
-                    m_bco->addLineNumber(value, m_address);
+                    m_bco.addLineNumber(value, m_address);
                     m_hasAddress = false;
                 } else {
                     m_address = value;
@@ -116,34 +104,61 @@ namespace {
                 }
             }
      private:
-        interpreter::BCORef_t m_bco;
+        interpreter::BytecodeObject& m_bco;
         bool m_hasAddress;
         uint32_t m_address;
     };
 
+    /* Implementation of ArrayLoader to load array dimensions */
     class DimLoader : public ArrayLoader {
      public:
-        DimLoader(interpreter::ArrayData& data, afl::io::Stream& in)
+        DimLoader(interpreter::ArrayData& data, Stream& in, afl::string::Translator& tx)
             : m_data(data),
-              m_stream(in)
+              m_stream(in),
+              m_translator(tx)
             { }
         virtual void add(uint32_t value)
             {
                 if (!m_data.addDimension(value)) {
-                    throw afl::except::FileProblemException(m_stream, _("Invalid array"));
+                    throw afl::except::FileProblemException(m_stream, m_translator("Invalid array"));
                 }
             }
      private:
         interpreter::ArrayData& m_data;
-        afl::io::Stream& m_stream;
+        Stream& m_stream;
+        afl::string::Translator& m_translator;
     };
+
+
+    void ArrayLoader::load(Stream& in, uint32_t n)
+    {
+        // ex int/vmio.cc:loadArray32
+        const size_t CHUNK = 128;
+        while (n > 0) {
+            // Read into buffer
+            UInt32_t buffer[CHUNK];
+            afl::base::Memory<UInt32_t> now(buffer);
+            now.trim(n);
+            in.fullRead(now.toBytes());
+
+            // Process
+            while (UInt32_t* p = now.eat()) {
+                add(*p);
+                --n;
+            }
+        }
+    }
 }
 
+/*
+ *  ChunkLoader: Load an object consisting of property chunks
+ */
 
-class interpreter::vmio::ObjectLoader::LoadObject {
+class interpreter::vmio::ObjectLoader::ChunkLoader {
  public:
-    LoadObject(afl::io::Stream& s)
+    ChunkLoader(Stream& s, afl::string::Translator& tx)
         : m_stream(s),
+          m_translator(tx),
           m_objectSize(0),
           m_propertyStream(),
           m_nextProperty(0),
@@ -151,37 +166,44 @@ class interpreter::vmio::ObjectLoader::LoadObject {
           m_nextObject(s.getPos()),
           m_properties()
         { }
-    bool readObject(uint32_t& type, uint32_t& id);
-    afl::io::Stream* readProperty(uint32_t& id, uint32_t& count);
 
-    afl::io::Stream& getStream()
-        { return m_stream; }
+    /** Read an object.
+        \param [out] type Object type
+        \param [out] id   Object Id
+        \return true on success; false on EOF */
+    bool readObject(uint32_t& type, uint32_t& id);
+
+    /** Read a property.
+        \param [out] id    Property Id
+        \param [out] count Number of elements (property-specific)
+        \return stream (usable with afl::base::Ref) to read property content; null if no more properties */
+    Stream* readProperty(uint32_t& id, uint32_t& count);
 
  private:
-    afl::io::Stream& m_stream;
+    Stream& m_stream;
+    afl::string::Translator& m_translator;
     uint32_t m_objectSize;
-    afl::base::Ptr<afl::io::Stream> m_propertyStream;
-    afl::io::Stream::FileSize_t m_nextProperty;
+    afl::base::Ptr<Stream> m_propertyStream;
+    Stream::FileSize_t m_nextProperty;
     uint32_t m_propertyId;
-    afl::io::Stream::FileSize_t m_nextObject;
-
+    Stream::FileSize_t m_nextObject;
     afl::base::GrowableMemory<UInt32_t> m_properties;
 
     void consumeObjectSize(uint32_t needed);
 };
 
 void
-interpreter::vmio::ObjectLoader::LoadObject::consumeObjectSize(uint32_t needed)
+interpreter::vmio::ObjectLoader::ChunkLoader::consumeObjectSize(uint32_t needed)
 {
     // ex ObjectLoader::checkObjSize
     if (needed > m_objectSize) {
-        throw afl::except::FileFormatException(m_stream, _("Invalid size"));
+        throw afl::except::FileFormatException(m_stream, m_translator("Invalid size"));
     }
     m_objectSize -= needed;
 }
 
 bool
-interpreter::vmio::ObjectLoader::LoadObject::readObject(uint32_t& type, uint32_t& id)
+interpreter::vmio::ObjectLoader::ChunkLoader::readObject(uint32_t& type, uint32_t& id)
 {
     // Read header
     structures::ObjectHeader header;
@@ -220,8 +242,8 @@ interpreter::vmio::ObjectLoader::LoadObject::readObject(uint32_t& type, uint32_t
     return true;
 }
 
-afl::io::Stream*
-interpreter::vmio::ObjectLoader::LoadObject::readProperty(uint32_t& id, uint32_t& count)
+Stream*
+interpreter::vmio::ObjectLoader::ChunkLoader::readProperty(uint32_t& id, uint32_t& count)
 {
     // Do we have another property?
     UInt32_t* pCount = m_properties.at(2 * m_propertyId);
@@ -247,14 +269,27 @@ interpreter::vmio::ObjectLoader::LoadObject::readProperty(uint32_t& id, uint32_t
 }
 
 
-interpreter::vmio::ObjectLoader::ObjectLoader(afl::charset::Charset& cs, LoadContext& ctx)
-    : m_charset(cs),
+/*
+ *  ObjectLoader
+ */
+
+// Constructor.
+interpreter::vmio::ObjectLoader::ObjectLoader(afl::charset::Charset& cs, afl::string::Translator& tx, LoadContext& ctx)
+    : m_BCOsById(),
+      m_HashById(),
+      m_ArrayById(),
+      m_StructureValueById(),
+      m_StructureTypeById(),
+      m_charset(cs),
+      m_translator(tx),
       m_context(ctx)
 { }
 
+// Destructor.
 interpreter::vmio::ObjectLoader::~ObjectLoader()
 { }
 
+// Load object (*.qc) file.
 interpreter::BCORef_t
 interpreter::vmio::ObjectLoader::loadObjectFile(afl::base::Ref<afl::io::Stream> s)
 {
@@ -266,7 +301,7 @@ interpreter::vmio::ObjectLoader::loadObjectFile(afl::base::Ref<afl::io::Stream> 
         || header.zero != 0
         || header.headerSize < structures::OBJECT_FILE_HEADER_SIZE)
     {
-        throw afl::except::FileFormatException(*s, _("Invalid file header"));
+        throw afl::except::FileFormatException(*s, m_translator("Invalid file header"));
     }
 
     // Adjust file pointer
@@ -279,22 +314,19 @@ interpreter::vmio::ObjectLoader::loadObjectFile(afl::base::Ref<afl::io::Stream> 
     return getBCO(header.entry);
 }
 
-// /** Load VM file.
-//     \param s Stream to read from
-//     \param acceptProcesses true to accept saved processes (=VM file),
-//     false to accept only bytecode (=object file) */
+// Load virtual-machine file.
 void
 interpreter::vmio::ObjectLoader::load(afl::base::Ref<afl::io::Stream> s)
 {
     // ex IntVMLoadContext::load
     // FIXME: the parameter must be a Ref<> because the stream will eventually end up in a LimitedStream
     // which requires a Ref<>. However, actually the LimitedStream should be fixed to not need a Ref<>.
-    LoadObject ldr(*s);
+    ChunkLoader ldr(*s, m_translator);
     uint32_t objType, objId;
     while (ldr.readObject(objType, objId)) {
         switch (objType) {
          case structures::otyp_Process:
-            loadProcess(ldr);
+            loadProcess(ldr, *s);
             break;
 
          case structures::otyp_Bytecode:
@@ -318,83 +350,74 @@ interpreter::vmio::ObjectLoader::load(afl::base::Ref<afl::io::Stream> s)
             break;
 
          default:
-            throw afl::except::FileFormatException(*s, _("Unexpected object"));
+            throw afl::except::FileFormatException(*s, m_translator("Unexpected object"));
         }
     }
 }
 
-// /** Get bytecode object by Id
-//     \param id Id to check
-//     \return bytecode object */
+// Get bytecode object by Id.
 interpreter::BCORef_t
 interpreter::vmio::ObjectLoader::getBCO(uint32_t id)
 {
     // ex IntVMLoadContext::getBCO
-    SubroutineValue* sv = bco_map[id];
+    SubroutineValue* sv = m_BCOsById[id];
     if (sv == 0) {
-        sv = bco_map.insertNew(id, new SubroutineValue(*new BytecodeObject()));
+        sv = m_BCOsById.insertNew(id, new SubroutineValue(*new BytecodeObject()));
     }
     return sv->getBytecodeObject();
 }
 
-// /** Get hash object by Id
-//     \param id Id to check
-//     \return hash data */
+// Get hash object by Id.
 afl::data::Hash::Ref_t
 interpreter::vmio::ObjectLoader::getHash(uint32_t id)
 {
     // ex IntVMLoadContext::getHash
-    HashValue* hv = hash_map[id];
+    HashValue* hv = m_HashById[id];
     if (hv == 0) {
-        hv = hash_map.insertNew(id, new HashValue(afl::data::Hash::create()));
+        hv = m_HashById.insertNew(id, new HashValue(afl::data::Hash::create()));
     }
     return hv->getData();
 }
 
-// /** Get array object by Id
-//     \param id Id to check
-//     \return array data */
+// Get array object by Id.
 afl::base::Ref<interpreter::ArrayData>
 interpreter::vmio::ObjectLoader::getArray(uint32_t id)
 {
     // ex IntVMLoadContext::getArray
-    ArrayValue* av = array_map[id];
+    ArrayValue* av = m_ArrayById[id];
     if (av == 0) {
-        av = array_map.insertNew(id, new ArrayValue(*new ArrayData()));
+        av = m_ArrayById.insertNew(id, new ArrayValue(*new ArrayData()));
     }
     return av->getData();
 }
 
-// /** Get structure object by Id
-//     \param id Id to check
-//     \return structure data */
+// Get structure value object by Id.
 afl::base::Ref<interpreter::StructureValueData>
 interpreter::vmio::ObjectLoader::getStructureValue(uint32_t id)
 {
     // ex IntVMLoadContext::getStructureValue
-    StructureValue* sv = struct_value_map[id];
+    StructureValue* sv = m_StructureValueById[id];
     if (sv == 0) {
         // Create structure with a dummy type. This guarantees that all structures
         // actually have a type, even if the VM file is broken and doesn't create one.
-        sv = struct_value_map.insertNew(id, new StructureValue(*new StructureValueData(*new StructureTypeData())));
+        sv = m_StructureValueById.insertNew(id, new StructureValue(*new StructureValueData(*new StructureTypeData())));
     }
     return sv->getValue();
 }
 
-// /** Get structure type object by Id
-//     \param id Id to check
-//     \return structure type data */
+// Get structure type object by Id.
 afl::base::Ref<interpreter::StructureTypeData>
 interpreter::vmio::ObjectLoader::getStructureType(uint32_t id)
 {
     // ex IntVMLoadContext::getStructureType
-    StructureType* sv = struct_type_map[id];
+    StructureType* sv = m_StructureTypeById[id];
     if (sv == 0) {
-        sv = struct_type_map.insertNew(id, new StructureType(*new StructureTypeData()));
+        sv = m_StructureTypeById.insertNew(id, new StructureType(*new StructureTypeData()));
     }
     return sv->getType();
 }
 
+// LoadContext:
 afl::data::Value*
 interpreter::vmio::ObjectLoader::loadBCO(uint32_t id)
 {
@@ -425,179 +448,6 @@ interpreter::vmio::ObjectLoader::loadStructureType(uint32_t id)
     return new StructureType(getStructureType(id));
 }
 
-// /** Load process. The process will be created in runnable state.
-//     \param ldr LoadObject that has just read the object header */
-void
-interpreter::vmio::ObjectLoader::loadProcess(LoadObject& ldr)
-{
-    // ex IntVMLoadContext::loadProcess
-    // Create process
-    Process* proc = createProcess();
-    if (!proc) {
-        throw afl::except::FileFormatException(ldr.getStream(), _("Unexpected object"));
-    }
-
-    // remove contexts created by Process' constructor
-    while (!proc->getContexts().empty()) {
-        proc->popContext();
-    }
-
-    ProcessLoadContext ctx(*this, *proc);
-
-    uint16_t loaded_context_tos = 0;
-    try {
-        uint32_t propId, propCount;
-        while (afl::io::Stream* ps = ldr.readProperty(propId, propCount)) {
-            switch (propId) {
-             case 1: {
-                // header
-                structures::ProcessHeader hdr;
-                size_t n = ps->read(afl::base::fromObject(hdr));
-                if (n >= 1) {
-                    proc->setPriority(hdr.priority);
-                }
-                if (n >= 2) {
-                    proc->setProcessKind(hdr.kind);
-                }
-                if (n >= 4) {
-                    loaded_context_tos = hdr.contextTOS;
-                }
-                break;
-             }
-
-             case 2:
-                // name (string)
-                proc->setName(loadString(*ps));
-                break;
-
-             case 3:
-                // frames (object array)
-                loadFrames(*proc, ctx, *ps, propCount);
-                break;
-
-             case 4:
-                // contexts (data segment)
-                loadContexts(*proc, ctx, *ps, propCount);
-                break;
-
-             case 5:
-                // exceptions (counts = number, size = 16xcount)
-                for (uint32_t i = 0, end = propCount; i < end; ++i) {
-                    UInt32_t frame[4];
-                    ps->fullRead(afl::base::fromObject(frame));
-
-                    proc->pushExceptionHandler(frame[3], frame[0], frame[1], frame[2]);
-                }
-                break;
-
-             case 6:
-                // value stack (data segment)
-                ValueLoader(m_charset, ctx).load(proc->getValueStack(), *ps, 0, propCount);
-                break;
-
-             default:
-                break;
-            }
-        }
-    }
-    catch (...) {
-        /* If loading fails with an exception, make sure that the process will not run */
-        // FIXME: we should probably not throw; just log and proceed.
-        proc->setState(Process::Terminated);
-        throw;
-    }
-
-    /* Since context-TOS cannot be out of range, we do not install it
-       without checking, but we cannot check it before we have loaded
-       the whole process. */
-    if (!proc->setContextTOS(loaded_context_tos)) {
-        // Loaded context TOS was out of range. PCC2 ignores this, and so do we.
-    }
-
-    // Finish the process (put it in its place according to priority)
-    finishProcess(*proc);
-}
-
-// /** Load stack frames.
-//     \param proc  Process to load stack frames into
-//     \param s     Stream to read from
-//     \param count Number of stack frames to read */
-void
-interpreter::vmio::ObjectLoader::loadFrames(Process& proc, LoadContext& ctx, afl::io::Stream& s, uint32_t count)
-{
-    // ex IntVMLoadContext::loadFrames
-    // FIXME: does this need to be a method?
-    LoadObject ldr(s);
-    while (count-- > 0) {
-        // Read frame object
-        uint32_t objType, objId;
-        if (!ldr.readObject(objType, objId)) {
-            throw afl::except::FileFormatException(s, _("Invalid frame"));
-        }
-        if (objType != structures::otyp_Frame) {
-            throw afl::except::FileFormatException(s, _("Invalid frame type"));
-        }
-
-        // Read frame content
-        Process::Frame* frame = 0;
-        uint32_t propId, propCount;
-        while (afl::io::Stream* ps = ldr.readProperty(propId, propCount)) {
-            switch (propId) {
-             case 1: {
-                // header
-                structures::FrameHeader frameHeader;
-                afl::base::fromObject(frameHeader).fill(0);
-                size_t n = ps->read(afl::base::fromObject(frameHeader));
-
-                // bco_id is mandatory
-                if (n < 4) {
-                    throw afl::except::FileFormatException(s, _("Invalid frame"));
-                }
-
-                // Create the frame
-                std::auto_ptr<afl::data::Value> bco(ctx.loadBCO(frameHeader.bcoRef));
-                SubroutineValue* sv = dynamic_cast<SubroutineValue*>(bco.get());
-                if (sv == 0) {
-                    throw afl::except::FileFormatException(s, _("Invalid frame"));
-                }
-                frame = &proc.pushFrame(sv->getBytecodeObject(), (frameHeader.flags & frameHeader.WantResult) != 0);
-
-                // Other values
-                frame->pc = frameHeader.pc;
-                frame->contextSP = frameHeader.contextSP;
-                frame->exceptionSP = frameHeader.exceptionSP;
-
-                // Creating the frame will set up BCO locals.
-                // We load these later.
-                afl::data::NameMap().swap(frame->localNames);
-
-                // Creating the frame will have created a FrameContext.
-                // We will create the FrameContext later when loading contexts, so we do not need it.
-                proc.popContext();
-                break;
-             }
-
-             case 2:
-                // local values (data segment)
-                if (frame == 0) {
-                    throw afl::except::FileFormatException(s, _("Invalid frame"));
-                }
-                ValueLoader(m_charset, ctx).load(frame->localValues, *ps, 0, propCount);
-                break;
-
-             case 3:
-                // local names (name list)
-                if (frame == 0) {
-                    throw afl::except::FileFormatException(s, _("Invalid frame"));
-                }
-                ValueLoader(m_charset, ctx).loadNames(frame->localNames, *ps, propCount);
-                break;
-            }
-        }
-    }
-}
-
-
 interpreter::Context*
 interpreter::vmio::ObjectLoader::loadContext(const TagNode& tag, afl::io::Stream& aux)
 {
@@ -623,11 +473,11 @@ interpreter::vmio::ObjectLoader::finishProcess(Process& proc)
     m_context.finishProcess(proc);
 }
 
-// /** Load bytecode object.
-//     \param ldr Object loader that has just read the object header
-//     \param id Id of object */
+/** Load bytecode object.
+    \param ldr ChunkLoader that has just read the object header
+    \param id Id of object */
 void
-interpreter::vmio::ObjectLoader::loadBCO(LoadObject& ldr, uint32_t id)
+interpreter::vmio::ObjectLoader::loadBCO(ChunkLoader& ldr, uint32_t id)
 {
     // ex IntVMLoadContext::loadBCO
     /* Note: when implementing the merge-loaded-BCO-with-existing-identical
@@ -636,7 +486,7 @@ interpreter::vmio::ObjectLoader::loadBCO(LoadObject& ldr, uint32_t id)
        reference. The simplest way would be to duplicate getBCO here. */
     BCORef_t obj = getBCO(id);
     uint32_t propId, propCount;
-    while (afl::io::Stream* ps = ldr.readProperty(propId, propCount)) {
+    while (Stream* ps = ldr.readProperty(propId, propCount)) {
         switch (propId) {
          case 1: {
             // Header
@@ -670,7 +520,7 @@ interpreter::vmio::ObjectLoader::loadBCO(LoadObject& ldr, uint32_t id)
 
          case 4:
             // "code" (count = number of instructions, size = 4x count). 32 bit per instruction.
-            CodeLoader(obj).load(*ps, propCount);
+            CodeLoader(*obj).load(*ps, propCount);
             break;
 
          case 5:
@@ -690,7 +540,7 @@ interpreter::vmio::ObjectLoader::loadBCO(LoadObject& ldr, uint32_t id)
 
          case 8:
             // "line numbers" (count = number of lines, size = 8x count)
-            LineLoader(obj).load(*ps, propCount*2);
+            LineLoader(*obj).load(*ps, propCount*2);
             break;
 
          default:
@@ -699,18 +549,18 @@ interpreter::vmio::ObjectLoader::loadBCO(LoadObject& ldr, uint32_t id)
     }
 }
 
-// /** Load hash object.
-//     \param ldr Object loader that has just read the object header
-//     \param id Id of object */
+/** Load hash object.
+    \param ldr ChunkLoader that has just read the object header
+    \param id Id of object */
 void
-interpreter::vmio::ObjectLoader::loadHash(LoadObject& ldr, uint32_t id)
+interpreter::vmio::ObjectLoader::loadHash(ChunkLoader& ldr, uint32_t id)
 {
     // ex IntVMLoadContext::loadHash
     // Load
     afl::data::NameMap names;
     afl::data::Segment values;
     uint32_t propId, propCount;
-    while (afl::io::Stream* ps = ldr.readProperty(propId, propCount)) {
+    while (Stream* ps = ldr.readProperty(propId, propCount)) {
         switch (propId) {
          case 1:
             // names
@@ -734,22 +584,22 @@ interpreter::vmio::ObjectLoader::loadHash(LoadObject& ldr, uint32_t id)
     }
 }
 
-// /** Load array object.
-//     \param ldr Object loader that has just read the object header
-//     \param id Id of object */
+/** Load array object.
+    \param ldr ChunkLoader that has just read the object header
+    \param id Id of object */
 void
-interpreter::vmio::ObjectLoader::loadArray(LoadObject& ldr, uint32_t id)
+interpreter::vmio::ObjectLoader::loadArray(ChunkLoader& ldr, uint32_t id)
 {
     // ex IntVMLoadContext::loadArray
     afl::base::Ref<ArrayData> array = getArray(id);
     uint32_t propId, propCount;
-    while (afl::io::Stream* ps = ldr.readProperty(propId, propCount)) {
+    while (Stream* ps = ldr.readProperty(propId, propCount)) {
         switch (propId) {
          case 1:
             // Dimensions. Since these can be used to do evil things, we do not
             // read them directly into the object, but into a temporary buffer
             // where we validate them by using the public API.
-            DimLoader(*array, *ps).load(*ps, propCount);
+            DimLoader(*array, *ps, m_translator).load(*ps, propCount);
             break;
 
          case 2:
@@ -763,16 +613,16 @@ interpreter::vmio::ObjectLoader::loadArray(LoadObject& ldr, uint32_t id)
     }
 }
 
-// /** Load structure value.
-//     \param ldr Object loader that has just read the object header
-//     \param id Id of object */
+/** Load structure value.
+    \param ldr ChunkLoader that has just read the object header
+    \param id Id of object */
 void
-interpreter::vmio::ObjectLoader::loadStructureValue(LoadObject& ldr, uint32_t id)
+interpreter::vmio::ObjectLoader::loadStructureValue(ChunkLoader& ldr, uint32_t id)
 {
     // ex IntVMLoadContext::loadStructureValue
     afl::base::Ref<StructureValueData> value = getStructureValue(id);
     uint32_t propId, propCount;
-    while (afl::io::Stream* ps = ldr.readProperty(propId, propCount)) {
+    while (Stream* ps = ldr.readProperty(propId, propCount)) {
         switch (propId) {
          case 1:
             // Header
@@ -794,16 +644,16 @@ interpreter::vmio::ObjectLoader::loadStructureValue(LoadObject& ldr, uint32_t id
     }
 }
 
-// /** Load structure type.
-//     \param ldr Object loader that has just read the object header
-//     \param id Id of object */
+/** Load structure type.
+    \param ldr ChunkLoader that has just read the object header
+    \param id Id of object */
 void
-interpreter::vmio::ObjectLoader::loadStructureType(LoadObject& ldr, uint32_t id)
+interpreter::vmio::ObjectLoader::loadStructureType(ChunkLoader& ldr, uint32_t id)
 {
     // ex IntVMLoadContext::loadStructureType
     afl::base::Ref<StructureTypeData> type = getStructureType(id);
     uint32_t propId, propCount;
-    while (afl::io::Stream* ps = ldr.readProperty(propId, propCount)) {
+    while (Stream* ps = ldr.readProperty(propId, propCount)) {
         switch (propId) {
          case 1:
             // names
@@ -815,3 +665,182 @@ interpreter::vmio::ObjectLoader::loadStructureType(LoadObject& ldr, uint32_t id)
         }
     }
 }
+
+/** Load process.
+    The process will be created in runnable state on success.
+    \param ldr ChunkLoader that has just read the object header
+    \param outerStream Outer stream (for generating error messages) */
+void
+interpreter::vmio::ObjectLoader::loadProcess(ChunkLoader& ldr, afl::io::Stream& outerStream)
+{
+    // ex IntVMLoadContext::loadProcess
+    // Create process
+    Process* proc = createProcess();
+    if (!proc) {
+        throw afl::except::FileFormatException(outerStream, m_translator("Unexpected object"));
+    }
+
+    // remove contexts created by Process' constructor
+    while (!proc->getContexts().empty()) {
+        proc->popContext();
+    }
+
+    // ProcessLoadContext enables us to create FrameContext's.
+    ProcessLoadContext ctx(*this, *proc);
+
+    uint16_t loaded_context_tos = 0;
+    try {
+        uint32_t propId, propCount;
+        while (Stream* ps = ldr.readProperty(propId, propCount)) {
+            switch (propId) {
+             case 1: {
+                // header
+                structures::ProcessHeader hdr;
+                size_t n = ps->read(afl::base::fromObject(hdr));
+                if (n >= 1) {
+                    proc->setPriority(hdr.priority);
+                }
+                if (n >= 2) {
+                    proc->setProcessKind(hdr.kind);
+                }
+                if (n >= 4) {
+                    loaded_context_tos = hdr.contextTOS;
+                }
+                break;
+             }
+
+             case 2:
+                // name (string)
+                proc->setName(loadString(*ps));
+                break;
+
+             case 3:
+                // frames (object array)
+                loadFrames(*proc, ctx, *ps, propCount);
+                break;
+
+             case 4:
+                // contexts (data segment)
+                loadContexts(*proc, ctx, m_translator, *ps, propCount);
+                break;
+
+             case 5:
+                // exceptions (counts = number, size = 16xcount)
+                for (uint32_t i = 0, end = propCount; i < end; ++i) {
+                    UInt32_t frame[4];
+                    ps->fullRead(afl::base::fromObject(frame));
+
+                    proc->pushExceptionHandler(frame[3], frame[0], frame[1], frame[2]);
+                }
+                break;
+
+             case 6:
+                // value stack (data segment)
+                ValueLoader(m_charset, ctx).load(proc->getValueStack(), *ps, 0, propCount);
+                break;
+
+             default:
+                break;
+            }
+        }
+    }
+    catch (...) {
+        /* If loading fails with an exception, make sure that the process will not run */
+        // FIXME: we should probably not throw; just log and proceed.
+        proc->setState(Process::Terminated);
+        throw;
+    }
+
+    /* Since context-TOS must not be out of range, we do not install it
+       without checking, but we cannot check it before we have loaded
+       the whole process. */
+    if (!proc->setContextTOS(loaded_context_tos)) {
+        // Loaded context TOS was out of range. PCC2 ignores this, and so do we.
+    }
+
+    // Finish the process (put it in its place according to priority)
+    finishProcess(*proc);
+}
+
+/** Load stack frames.
+    \param proc  Process to load stack frames into
+    \param ctx   LoadContext
+    \param s     Stream to read from
+    \param count Number of stack frames to read */
+void
+interpreter::vmio::ObjectLoader::loadFrames(Process& proc, LoadContext& ctx, afl::io::Stream& s, uint32_t count)
+{
+    // ex IntVMLoadContext::loadFrames
+    // FIXME: does this need to be a method?
+    ChunkLoader ldr(s, m_translator);
+    while (count-- > 0) {
+        // Read frame object
+        uint32_t objType, objId;
+        if (!ldr.readObject(objType, objId)) {
+            throw afl::except::FileFormatException(s, m_translator("Invalid frame"));
+        }
+        if (objType != structures::otyp_Frame) {
+            throw afl::except::FileFormatException(s, m_translator("Invalid frame type"));
+        }
+
+        // Read frame content
+        Process::Frame* frame = 0;
+        uint32_t propId, propCount;
+        while (Stream* ps = ldr.readProperty(propId, propCount)) {
+            switch (propId) {
+             case 1: {
+                // header
+                structures::FrameHeader frameHeader;
+                afl::base::fromObject(frameHeader).fill(0);
+                size_t n = ps->read(afl::base::fromObject(frameHeader));
+
+                // bco_id is mandatory
+                if (n < 4) {
+                    throw afl::except::FileFormatException(s, m_translator("Invalid frame"));
+                }
+
+                // Create the frame
+                std::auto_ptr<afl::data::Value> bco(ctx.loadBCO(frameHeader.bcoRef));
+                SubroutineValue* sv = dynamic_cast<SubroutineValue*>(bco.get());
+                if (sv == 0) {
+                    throw afl::except::FileFormatException(s, m_translator("Invalid frame"));
+                }
+                frame = &proc.pushFrame(sv->getBytecodeObject(), (frameHeader.flags & frameHeader.WantResult) != 0);
+
+                // Other values
+                frame->pc = frameHeader.pc;
+                frame->contextSP = frameHeader.contextSP;
+                frame->exceptionSP = frameHeader.exceptionSP;
+
+                // Creating the frame will set up BCO locals.
+                // We load these later.
+                afl::data::NameMap().swap(frame->localNames);
+
+                // Creating the frame will have created a FrameContext.
+                // We will create the FrameContext later when loading contexts, so we do not need it.
+                proc.popContext();
+                break;
+             }
+
+             case 2:
+                // local values (data segment)
+                if (frame == 0) {
+                    throw afl::except::FileFormatException(s, m_translator("Invalid frame"));
+                }
+                ValueLoader(m_charset, ctx).load(frame->localValues, *ps, 0, propCount);
+                break;
+
+             case 3:
+                // local names (name list)
+                if (frame == 0) {
+                    throw afl::except::FileFormatException(s, m_translator("Invalid frame"));
+                }
+                ValueLoader(m_charset, ctx).loadNames(frame->localNames, *ps, propCount);
+                break;
+            }
+        }
+    }
+}
+
+
+

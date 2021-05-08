@@ -6,12 +6,12 @@
 #define C2NG_GAME_CONFIG_CONFIGURATION_HPP
 
 #include <memory>
+#include "afl/base/enumerator.hpp"
+#include "afl/base/ref.hpp"
+#include "afl/base/signal.hpp"
 #include "afl/container/ptrmap.hpp"
 #include "afl/string/string.hpp"
 #include "game/config/configurationoption.hpp"
-#include "afl/base/signal.hpp"
-#include "afl/base/enumerator.hpp"
-#include "afl/base/ref.hpp"
 
 namespace game { namespace config {
 
@@ -121,6 +121,8 @@ namespace game { namespace config {
 
         typedef afl::container::PtrMap<CasePreservingString, ConfigurationOption> Map_t;
         mutable Map_t m_options;
+
+        void insertNewOption(const String_t& name, ConfigurationOption* newOption, const ConfigurationOption* oldOption);
     };
 
 } }
@@ -134,16 +136,8 @@ game::config::Configuration::operator[](const Descriptor& desc)
     ConfigurationOption* option = m_options[desc.m_name];
     OptionType_t* result = dynamic_cast<OptionType_t*>(option);
     if (result == 0) {
-        std::auto_ptr<OptionType_t> newOption(desc.create(*this));
-        if (option != 0) {
-            try {
-                newOption->set(option->toString());
-                newOption->setSource(option->getSource());
-            }
-            catch (...) { }
-        }
-        result = newOption.release();
-        m_options.insertNew(desc.m_name, result);
+        result = desc.create(*this);
+        insertNewOption(desc.m_name, result, option);
     }
     return *result;
 }

@@ -35,7 +35,8 @@ namespace {
     {
         afl::sys::Log log;
         afl::io::ConstMemoryStream ms(afl::string::toBytes(f));
-        p.initFromPluginFile("dir", "name", ms, log);
+        afl::string::NullTranslator tx;
+        p.initFromPluginFile("dir", "name", ms, log, tx);
     }
 }
 
@@ -102,6 +103,7 @@ TestUtilPluginPlugin::testInitPlugin()
     using util::plugin::Plugin;
     Plugin testee("P");
     afl::sys::Log log;
+    afl::string::NullTranslator tx;
     afl::io::ConstMemoryStream ms(afl::string::toBytes(
                                       "# hi, I'm a plugin\n"
                                       "Name = PHost 4 Help\n"
@@ -116,7 +118,7 @@ TestUtilPluginPlugin::testInitPlugin()
                                       "File = readme.txt\n"
                                       "resourceFile = data.res\n"
                                       ));
-    testee.initFromPluginFile("/usr/doc", "phost4help.c2p", ms, log);
+    testee.initFromPluginFile("/usr/doc", "phost4help.c2p", ms, log, tx);
 
     // Verify
     TS_ASSERT_EQUALS(testee.getBaseDirectory(), "/usr/doc");

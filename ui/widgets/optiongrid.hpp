@@ -97,6 +97,11 @@ namespace ui { namespace widgets {
             \return reference */
         Ref findItem(int id);
 
+        /** Get anchor point for drop-down menu for an item.
+            If the item is not visible, anchors the drop-down on the OptionGrid.
+            \return anchor point */
+        gfx::Point getAnchorPointForItem(int id);
+
         // Widget methods:
         virtual void draw(gfx::Canvas& can);
         virtual void handleStateChange(State st, bool enable);

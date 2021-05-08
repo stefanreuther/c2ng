@@ -6,6 +6,7 @@
 #include "util/string.hpp"
 
 #include "t_util.hpp"
+#include "afl/string/nulltranslator.hpp"
 
 /** Test util::stringMatch. */
 void
@@ -314,5 +315,56 @@ TestUtilString::testTrailing()
     TS_ASSERT_EQUALS(s, "");
     util::removeTrailingCharacter(s, ',');
     TS_ASSERT_EQUALS(s, "");
+}
+
+/** Test strCollate. */
+void
+TestUtilString::testCollate()
+{
+    using util::strCollate;
+
+    TS_ASSERT_EQUALS(strCollate("", ""), 0);
+    TS_ASSERT_EQUALS(strCollate("a10b", "a10b"), 0);
+
+    TS_ASSERT(strCollate("1", "2") < 0);
+    TS_ASSERT(strCollate("10", "2") > 0);
+    TS_ASSERT(strCollate("0010", "002") > 0);
+    TS_ASSERT(strCollate("001", "1") < 0);
+    TS_ASSERT(strCollate("0010", "000002") > 0);
+    TS_ASSERT(strCollate("a0070", "a000070") > 0);
+    TS_ASSERT(strCollate("1.5", "1.10") < 0);
+    TS_ASSERT(strCollate("a", "A") > 0);
+    TS_ASSERT(strCollate("a1", "A5") < 0);
+    TS_ASSERT(strCollate("gen1.dat", "gen10.dat") < 0);
+    TS_ASSERT(strCollate("gen2.dat", "gen10.dat") < 0);
+    TS_ASSERT(strCollate("bla", "blah") < 0);
+    TS_ASSERT(strCollate("bar", "baz") < 0);
+
+    TS_ASSERT(strCollate("2", "1") > 0);
+    TS_ASSERT(strCollate("2", "10") < 0);
+    TS_ASSERT(strCollate("002", "0010") < 0);
+    TS_ASSERT(strCollate("1", "001") > 0);
+    TS_ASSERT(strCollate("000002", "0010") < 0);
+    TS_ASSERT(strCollate("a000070", "a0070") < 0);
+    TS_ASSERT(strCollate("1.10", "1.5") > 0);
+    TS_ASSERT(strCollate("A", "a") < 0);
+    TS_ASSERT(strCollate("A5", "a1") > 0);
+    TS_ASSERT(strCollate("gen10.dat", "gen1.dat") > 0);
+    TS_ASSERT(strCollate("gen10.dat", "gen2.dat") > 0);
+    TS_ASSERT(strCollate("blah", "bla") > 0);
+    TS_ASSERT(strCollate("baz", "bar") > 0);
+}
+
+/** Test formatAge. */
+void
+TestUtilString::testFormatAge()
+{
+    using util::formatAge;
+    afl::string::NullTranslator tx;
+
+    TS_ASSERT_EQUALS(formatAge(100, 90, tx), "10 turns ago");
+    TS_ASSERT_EQUALS(formatAge(100, 99, tx), "previous turn");
+    TS_ASSERT_EQUALS(formatAge(100, 100, tx), "current turn");
+    TS_ASSERT_EQUALS(formatAge(100, 777, tx), "turn 777");
 }
 

@@ -1,5 +1,6 @@
 /**
   *  \file util/numberformatter.hpp
+  *  \brief Class util::NumberFormatter
   */
 #ifndef C2NG_UTIL_NUMBERFORMATTER_HPP
 #define C2NG_UTIL_NUMBERFORMATTER_HPP
@@ -9,6 +10,9 @@
 
 namespace util {
 
+    /** Number formatter.
+        Allows formatting numbers according to user configuration.
+        This is a value class that can be passed between components (in particular, from game to UI thread). */
     class NumberFormatter {
      public:
         /** Constructor.
@@ -20,6 +24,12 @@ namespace util {
             \param n Number
             \return Formatted number, using user's settings for Display_ThousandsSep. */
         String_t formatNumber(int32_t n) const;
+
+        /** Format a difference.
+            Like formatNumber(), but always includes a "+" or "-" if the number is nonzero.
+            \param n Number
+            \return Formatted number, using user's settings for Display_ThousandsSep. */
+        String_t formatDifference(int32_t n) const;
 
         /** Format an optional number.
             \param value Number

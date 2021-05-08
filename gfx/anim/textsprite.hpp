@@ -16,7 +16,7 @@ namespace gfx { namespace anim {
 
         void setFont(FontRequest font);
         void setPosition(Point pt);
-        void setTextAlign(int x, int y);
+        void setTextAlign(HorizontalAlignment x, VerticalAlignment y);
         void setText(const String_t& text);
         void setColor(Color_t color);
 

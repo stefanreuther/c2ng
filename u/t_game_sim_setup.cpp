@@ -3,13 +3,23 @@
   *  \brief Test for game::sim::Setup
   */
 
+#include <map>
 #include "game/sim/setup.hpp"
 
 #include "t_game_sim.hpp"
+#include "afl/string/nulltranslator.hpp"
+#include "game/sim/gameinterface.hpp"
 #include "game/sim/planet.hpp"
 #include "game/sim/ship.hpp"
-#include "afl/string/nulltranslator.hpp"
-#include "u/helper/counter.hpp"
+#include "game/test/counter.hpp"
+
+namespace {
+    int compareOwner(const game::sim::Ship& a, const game::sim::Ship& b)
+    {
+        return a.getOwner() - b.getOwner();
+    }
+}
+
 
 /** Test object management. */
 void
@@ -127,10 +137,16 @@ TestGameSimSetup::testShip()
     TS_ASSERT_EQUALS(testee.findShipById(4), s4);
     TS_ASSERT_EQUALS(testee.findShipById(5), s5);
 
+    // Const find
+    const game::sim::Setup& ct = testee;
+    TS_ASSERT_EQUALS(testee.findShipById(1), ct.findShipById(1));
+    TS_ASSERT_EQUALS(testee.findShipById(2), ct.findShipById(2));
+    TS_ASSERT_EQUALS(testee.findShipById(3), ct.findShipById(3));
+
     // Ship Ids
-    TS_ASSERT_EQUALS(testee.findUnusedShipId(1), 3);
-    TS_ASSERT_EQUALS(testee.findUnusedShipId(4), 6);
-    TS_ASSERT_EQUALS(testee.findUnusedShipId(10), 10);
+    TS_ASSERT_EQUALS(testee.findUnusedShipId(1, 0), 3);
+    TS_ASSERT_EQUALS(testee.findUnusedShipId(4, 0), 6);
+    TS_ASSERT_EQUALS(testee.findUnusedShipId(10, 0), 10);
 
     // Swap
     TS_ASSERT_EQUALS(testee.getShip(0), s4);
@@ -232,8 +248,9 @@ TestGameSimSetup::testRandom()
     s2->setFriendlyCode("axc");
 
     // Do it
+    util::RandomNumberGenerator rng(999);
     for (int i = 0; i < 1000; ++i) {
-        testee.setRandomFriendlyCodes();
+        testee.setRandomFriendlyCodes(rng);
 
         String_t s = s1->getFriendlyCode();
         TS_ASSERT_EQUALS(s.size(), 3U);
@@ -262,6 +279,7 @@ TestGameSimSetup::testListener()
     testee.notifyListeners();
 
     // Add listeners
+    using game::test::Counter;
     Counter shipChange;
     Counter planetChange;
     Counter structChange;
@@ -352,3 +370,514 @@ TestGameSimSetup::testMerge()
     TS_ASSERT_EQUALS(a.getShip(2)->getName(), "b3");
     TS_ASSERT_EQUALS(a.getPlanet()->getId(), 77);
 }
+
+/** Test findUnusedShipId with an interface. */
+void
+TestGameSimSetup::testFindUnused()
+{
+    // Mock interface that declares every ship present unless its Id is divisible by 5
+    class MockInterface : public game::sim::GameInterface {
+     public:
+        virtual bool hasGame() const
+            { return true; }
+        virtual bool hasShip(game::Id_t shipId) const
+            { return shipId % 5 != 0; }
+        virtual String_t getPlanetName(game::Id_t /*id*/) const
+            { return String_t(); }
+        virtual game::Id_t getMaxPlanetId() const
+            { return 0; }
+        virtual int getShipOwner(game::Id_t /*id*/) const
+            { return 0; }
+        virtual game::Id_t getMaxShipId() const
+            { return 0; }
+        virtual bool copyShipFromGame(game::sim::Ship& /*out*/) const
+            { return false; }
+        virtual bool copyShipToGame(const game::sim::Ship& /*in*/)
+            { return false; }
+        virtual Relation getShipRelation(const game::sim::Ship& /*in*/) const
+            { return Unknown; }
+        virtual bool copyPlanetFromGame(game::sim::Planet& /*out*/) const
+            { return false; }
+        virtual bool copyPlanetToGame(const game::sim::Planet& /*in*/)
+            { return false; }
+        virtual Relation getPlanetRelation(const game::sim::Planet& /*in*/) const
+            { return Unknown; }
+    };
+
+    game::sim::Setup testee;
+    testee.addShip()->setId(8);
+    testee.addShip()->setId(9);
+    testee.addShip()->setId(10);
+    testee.addShip()->setId(11);
+
+    MockInterface gi;
+
+    // Without interface
+    TS_ASSERT_EQUALS(testee.findUnusedShipId( 1, 0), 1);
+    TS_ASSERT_EQUALS(testee.findUnusedShipId( 4, 0), 4);
+    TS_ASSERT_EQUALS(testee.findUnusedShipId( 5, 0), 5);
+    TS_ASSERT_EQUALS(testee.findUnusedShipId( 9, 0), 12);
+    TS_ASSERT_EQUALS(testee.findUnusedShipId(17, 0), 17);
+
+    // With interface
+    TS_ASSERT_EQUALS(testee.findUnusedShipId( 1, &gi), 5);
+    TS_ASSERT_EQUALS(testee.findUnusedShipId( 4, &gi), 5);
+    TS_ASSERT_EQUALS(testee.findUnusedShipId( 5, &gi), 5);
+    TS_ASSERT_EQUALS(testee.findUnusedShipId( 9, &gi), 15);
+    TS_ASSERT_EQUALS(testee.findUnusedShipId(17, &gi), 20);
+}
+
+/** Test replicateShip(). */
+void
+TestGameSimSetup::testReplicate()
+{
+    afl::string::NullTranslator tx;
+
+    // Prepare a setup [1,4]
+    game::sim::Setup testee;
+    game::sim::Ship* s1 = testee.addShip();
+    s1->setId(1);
+    s1->setName("One");
+    s1->setHullTypeOnly(7);
+
+    game::sim::Ship* s2 = testee.addShip();
+    s2->setId(4);
+    s2->setName("Four");
+    s2->setHullTypeOnly(9);
+
+    // Do it
+    testee.replicateShip(0, 10, 0, tx);
+
+    // Should now be [1, 2,3,5,6,7,8,9,10,11,12, 4]
+    TS_ASSERT_EQUALS(testee.getNumShips(), 12U);
+    TS_ASSERT_EQUALS(testee.getShip(0)->getId(), 1);
+    TS_ASSERT_EQUALS(testee.getShip(1)->getId(), 2);
+    TS_ASSERT_EQUALS(testee.getShip(2)->getId(), 3);
+    TS_ASSERT_EQUALS(testee.getShip(3)->getId(), 5);
+    TS_ASSERT_EQUALS(testee.getShip(4)->getId(), 6);
+    TS_ASSERT_EQUALS(testee.getShip(11)->getId(), 4);
+
+    TS_ASSERT_EQUALS(testee.getShip(0)->getHullType(), 7);
+    TS_ASSERT_EQUALS(testee.getShip(1)->getHullType(), 7);
+    TS_ASSERT_EQUALS(testee.getShip(2)->getHullType(), 7);
+    TS_ASSERT_EQUALS(testee.getShip(3)->getHullType(), 7);
+    TS_ASSERT_EQUALS(testee.getShip(4)->getHullType(), 7);
+    TS_ASSERT_EQUALS(testee.getShip(11)->getHullType(), 9);
+}
+
+void
+TestGameSimSetup::testCopy()
+{
+    using game::sim::GameInterface;
+    using game::sim::Setup;
+
+    class MockInterface : public GameInterface {
+     public:
+        typedef std::map<game::Id_t, String_t> NameMap_t;
+        typedef std::map<game::Id_t, Relation> RelationMap_t;
+
+        virtual bool hasGame() const
+            { return true; }
+        virtual bool hasShip(game::Id_t shipId) const
+            { return shipId % 5 != 0; }
+        virtual String_t getPlanetName(game::Id_t /*id*/) const
+            { return String_t(); }
+        virtual game::Id_t getMaxPlanetId() const
+            { return 0; }
+        virtual int getShipOwner(game::Id_t /*id*/) const
+            { return 0; }
+        virtual game::Id_t getMaxShipId() const
+            { return 0; }
+        virtual bool copyShipFromGame(game::sim::Ship& out) const
+            {
+                NameMap_t::const_iterator it = shipNames.find(out.getId());
+                if (it != shipNames.end()) {
+                    out.setName(it->second);
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        virtual bool copyShipToGame(const game::sim::Ship& in)
+            {
+                NameMap_t::iterator it = shipNames.find(in.getId());
+                if (it != shipNames.end()) {
+                    it->second = in.getName();
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        virtual Relation getShipRelation(const game::sim::Ship& in) const
+            {
+                RelationMap_t::const_iterator it = shipRelations.find(in.getId());
+                return it != shipRelations.end() ? it->second : Unknown;
+            }
+        virtual bool copyPlanetFromGame(game::sim::Planet& out) const
+            {
+                NameMap_t::const_iterator it = planetNames.find(out.getId());
+                if (it != planetNames.end()) {
+                    out.setName(it->second);
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        virtual bool copyPlanetToGame(const game::sim::Planet& in)
+            {
+                NameMap_t::iterator it = planetNames.find(in.getId());
+                if (it != planetNames.end()) {
+                    it->second = in.getName();
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        virtual Relation getPlanetRelation(const game::sim::Planet& in) const
+            {
+                RelationMap_t::const_iterator it = planetRelations.find(in.getId());
+                return it != planetRelations.end() ? it->second : Unknown;
+            }
+
+        NameMap_t planetNames;
+        NameMap_t shipNames;
+        RelationMap_t planetRelations;
+        RelationMap_t shipRelations;
+    };
+
+    // Test failure to copy from game
+    {
+        game::sim::Setup testee;
+        testee.addShip()->setId(4);
+        testee.addShip()->setId(9);
+        testee.addPlanet()->setId(12);
+
+        MockInterface gi;
+        gi.shipRelations[4] = GameInterface::Playable;
+        gi.shipRelations[9] = GameInterface::Playable;
+        gi.planetRelations[12] = GameInterface::Playable;
+
+        Setup::Status st = testee.copyFromGame(gi);
+        TS_ASSERT_EQUALS(st.failed, 3U);
+        TS_ASSERT_EQUALS(st.succeeded, 0U);
+    }
+
+    // Test success to copy from game
+    {
+        game::sim::Setup testee;
+        testee.addShip()->setId(4);
+        testee.addShip()->setId(9);
+        testee.addPlanet()->setId(12);
+
+        MockInterface gi;
+        gi.shipRelations[4] = GameInterface::Playable;
+        gi.shipRelations[9] = GameInterface::Playable;
+        gi.planetRelations[12] = GameInterface::Playable;
+        gi.shipNames[9] = "a";
+        gi.planetNames[12] = "b";
+
+        Setup::Status st = testee.copyFromGame(gi);
+        TS_ASSERT_EQUALS(st.failed, 1U);
+        TS_ASSERT_EQUALS(st.succeeded, 2U);
+        TS_ASSERT_EQUALS(testee.getShip(1)->getName(), "a");
+        TS_ASSERT_EQUALS(testee.getPlanet()->getName(), "b");
+    }
+
+    // Test ranged copy from game
+    {
+        game::sim::Setup testee;
+        testee.addShip()->setId(3);
+        testee.addShip()->setId(5);
+        testee.addShip()->setId(7);
+        testee.getShip(2)->setName("xx");
+
+        MockInterface gi;
+        gi.shipRelations[3] = GameInterface::Playable;
+        gi.shipRelations[5] = GameInterface::Playable;
+        gi.shipRelations[7] = GameInterface::Playable;
+        gi.shipNames[3] = "a";
+        gi.shipNames[5] = "b";
+        gi.shipNames[7] = "c";
+
+        Setup::Status st = testee.copyFromGame(gi, 0, 2);
+        TS_ASSERT_EQUALS(st.failed, 0U);
+        TS_ASSERT_EQUALS(st.succeeded, 2U);
+        TS_ASSERT_EQUALS(testee.getShip(0)->getName(), "a");
+        TS_ASSERT_EQUALS(testee.getShip(1)->getName(), "b");
+        TS_ASSERT_EQUALS(testee.getShip(2)->getName(), "xx");
+    }
+
+    // Test copy from unknown ship
+    {
+        game::sim::Setup testee;
+        testee.addShip()->setId(3);
+        testee.addShip()->setId(5);
+        testee.addShip()->setId(7);
+        testee.getShip(1)->setName("xx");
+
+        MockInterface gi;
+        gi.shipRelations[3] = GameInterface::Playable;
+        gi.shipRelations[7] = GameInterface::Playable;
+        gi.shipNames[3] = "a";
+        gi.shipNames[5] = "b";
+        gi.shipNames[7] = "c";
+
+        Setup::Status st = testee.copyFromGame(gi);
+        TS_ASSERT_EQUALS(st.failed, 0U);
+        TS_ASSERT_EQUALS(st.succeeded, 2U);
+        TS_ASSERT_EQUALS(testee.getShip(0)->getName(), "a");
+        TS_ASSERT_EQUALS(testee.getShip(1)->getName(), "xx");
+        TS_ASSERT_EQUALS(testee.getShip(2)->getName(), "c");
+    }
+
+    // Test failure to copy to game
+    {
+        game::sim::Setup testee;
+        testee.addShip()->setId(4);
+        testee.addShip()->setId(9);
+        testee.addPlanet()->setId(12);
+        testee.getShip(0)->setName("four");
+        testee.getShip(1)->setName("nine");
+        testee.getPlanet()->setName("twelve");
+
+        MockInterface gi;
+        gi.shipRelations[4] = GameInterface::Playable;
+        gi.shipRelations[9] = GameInterface::Playable;
+        gi.planetRelations[12] = GameInterface::Playable;
+
+        Setup::Status st = testee.copyToGame(gi);
+        TS_ASSERT_EQUALS(st.failed, 3U);
+        TS_ASSERT_EQUALS(st.succeeded, 0U);
+    }
+
+    // Test success to copy to game
+    {
+        game::sim::Setup testee;
+        testee.addShip()->setId(4);
+        testee.addShip()->setId(9);
+        testee.addPlanet()->setId(12);
+        testee.getShip(0)->setName("four");
+        testee.getShip(1)->setName("nine");
+        testee.getPlanet()->setName("twelve");
+
+        MockInterface gi;
+        gi.shipRelations[4] = GameInterface::Playable;
+        gi.shipRelations[9] = GameInterface::Playable;
+        gi.planetRelations[12] = GameInterface::Playable;
+        gi.shipNames[9] = "a";
+        gi.planetNames[12] = "b";
+
+        Setup::Status st = testee.copyToGame(gi);
+        TS_ASSERT_EQUALS(st.failed, 1U);
+        TS_ASSERT_EQUALS(st.succeeded, 2U);
+        TS_ASSERT_EQUALS(gi.shipNames[9], "nine");
+        TS_ASSERT_EQUALS(gi.planetNames[12], "twelve");
+    }
+
+    // Test ranged copy to game
+    {
+        game::sim::Setup testee;
+        testee.addShip()->setId(3);
+        testee.addShip()->setId(5);
+        testee.addShip()->setId(7);
+        testee.getShip(0)->setName("three");
+        testee.getShip(1)->setName("five");
+        testee.getShip(2)->setName("seven");
+
+        MockInterface gi;
+        gi.shipRelations[3] = GameInterface::Playable;
+        gi.shipRelations[5] = GameInterface::Playable;
+        gi.shipRelations[7] = GameInterface::Playable;
+        gi.shipNames[3] = "a";
+        gi.shipNames[5] = "b";
+        gi.shipNames[7] = "c";
+
+        Setup::Status st = testee.copyToGame(gi, 0, 2);
+        TS_ASSERT_EQUALS(st.failed, 0U);
+        TS_ASSERT_EQUALS(st.succeeded, 2U);
+        TS_ASSERT_EQUALS(gi.shipNames[3], "three");
+        TS_ASSERT_EQUALS(gi.shipNames[5], "five");
+        TS_ASSERT_EQUALS(gi.shipNames[7], "c");
+    }
+
+    // Test copy to unknown ship
+    {
+        game::sim::Setup testee;
+        testee.addShip()->setId(3);
+        testee.addShip()->setId(5);
+        testee.addShip()->setId(7);
+        testee.getShip(0)->setName("three");
+        testee.getShip(1)->setName("five");
+        testee.getShip(2)->setName("seven");
+
+        MockInterface gi;
+        gi.shipRelations[3] = GameInterface::Playable;
+        gi.shipRelations[7] = GameInterface::Playable;
+        gi.shipNames[3] = "a";
+        gi.shipNames[5] = "b";
+        gi.shipNames[7] = "c";
+
+        Setup::Status st = testee.copyToGame(gi);
+        TS_ASSERT_EQUALS(st.failed, 0U);
+        TS_ASSERT_EQUALS(st.succeeded, 2U);
+        TS_ASSERT_EQUALS(gi.shipNames[3], "three");
+        TS_ASSERT_EQUALS(gi.shipNames[5], "b");
+        TS_ASSERT_EQUALS(gi.shipNames[7], "seven");
+    }
+}
+
+void
+TestGameSimSetup::testSetSequential()
+{
+    // Single ship -> random numeric code
+    {
+        game::sim::Setup t;
+        game::sim::Ship* sh = t.addShip();
+        t.setSequentialFriendlyCode(0);
+
+        TS_ASSERT_EQUALS(sh->getFriendlyCode().size(), 3U);
+        TS_ASSERT(sh->getFriendlyCode()[0] >= '0');
+        TS_ASSERT(sh->getFriendlyCode()[1] >= '0');
+        TS_ASSERT(sh->getFriendlyCode()[2] >= '0');
+        TS_ASSERT(sh->getFriendlyCode()[0] <= '9');
+        TS_ASSERT(sh->getFriendlyCode()[1] <= '9');
+        TS_ASSERT(sh->getFriendlyCode()[2] <= '9');
+    }
+
+    // Single planet -> random numeric code
+    {
+        game::sim::Setup t;
+        game::sim::Planet* pl = t.addPlanet();
+        t.setSequentialFriendlyCode(0);
+
+        TS_ASSERT_EQUALS(pl->getFriendlyCode().size(), 3U);
+        TS_ASSERT(pl->getFriendlyCode()[0] >= '0');
+        TS_ASSERT(pl->getFriendlyCode()[1] >= '0');
+        TS_ASSERT(pl->getFriendlyCode()[2] >= '0');
+        TS_ASSERT(pl->getFriendlyCode()[0] <= '9');
+        TS_ASSERT(pl->getFriendlyCode()[1] <= '9');
+        TS_ASSERT(pl->getFriendlyCode()[2] <= '9');
+    }
+
+    // Normal sequence
+    {
+        game::sim::Setup t;
+        game::sim::Ship* s1 = t.addShip();
+        game::sim::Ship* s2 = t.addShip();
+        game::sim::Ship* s3 = t.addShip();
+        s1->setFriendlyCode("109");
+        s2->setFriendlyCode("abc");
+        s3->setFriendlyCode("110");
+
+        t.setSequentialFriendlyCode(1);
+        TS_ASSERT_EQUALS(s2->getFriendlyCode(), "111");
+
+        t.setSequentialFriendlyCode(2);
+        TS_ASSERT_EQUALS(s3->getFriendlyCode(), "112");
+    }
+
+    // Copying of numerical places: x27 converted to <digit>28, then incremented
+    {
+        game::sim::Setup t;
+        game::sim::Ship* s1 = t.addShip();
+        game::sim::Ship* s2 = t.addShip();
+        s1->setFriendlyCode("x27");
+        s2->setFriendlyCode("abc");
+
+        t.setSequentialFriendlyCode(1);
+        TS_ASSERT_EQUALS(s2->getFriendlyCode().size(), 3U);
+        TS_ASSERT(s2->getFriendlyCode()[0] >= '0');
+        TS_ASSERT(s2->getFriendlyCode()[0] <= '9');
+        TS_ASSERT_EQUALS(s2->getFriendlyCode()[1], '2');
+        TS_ASSERT_EQUALS(s2->getFriendlyCode()[2], '8');
+    }
+
+    // Copying of random places: x<random>7 converted to <digit><digit>8, then incremented
+    {
+        game::sim::Setup t;
+        game::sim::Ship* s1 = t.addShip();
+        game::sim::Ship* s2 = t.addShip();
+        s1->setFriendlyCode("x27");
+        s1->setFlags(game::sim::Ship::fl_RandomFC2);
+        s2->setFriendlyCode("abc");
+        s2->setFlags(game::sim::Ship::fl_RandomFC);
+
+        t.setSequentialFriendlyCode(1);
+        TS_ASSERT_EQUALS(s2->getFriendlyCode().size(), 3U);
+        TS_ASSERT(s2->getFriendlyCode()[0] >= '0');
+        TS_ASSERT(s2->getFriendlyCode()[0] <= '9');
+        TS_ASSERT(s2->getFriendlyCode()[1] >= '0');
+        TS_ASSERT(s2->getFriendlyCode()[1] <= '9');
+        TS_ASSERT_EQUALS(s2->getFriendlyCode()[2], '8');
+        TS_ASSERT_EQUALS(s2->getFlags(), game::sim::Ship::fl_RandomFC + game::sim::Ship::fl_RandomFC2);
+    }
+}
+
+/** Test sort(). */
+void
+TestGameSimSetup::testSort()
+{
+    game::sim::Setup t;
+    game::sim::Ship* s1 = t.addShip(); s1->setOwner(3); s1->setId(1);
+    game::sim::Ship* s2 = t.addShip(); s2->setOwner(1); s2->setId(2);
+    game::sim::Ship* s3 = t.addShip(); s3->setOwner(4); s3->setId(3);
+    game::sim::Ship* s4 = t.addShip(); s4->setOwner(2); s4->setId(4);
+    game::sim::Ship* s5 = t.addShip(); s5->setOwner(1); s5->setId(5);
+    t.sortShips(compareOwner);
+
+    TS_ASSERT_EQUALS(t.getShip(0)->getOwner(), 1);
+    TS_ASSERT_EQUALS(t.getShip(1)->getOwner(), 1);
+    TS_ASSERT_EQUALS(t.getShip(2)->getOwner(), 2);
+    TS_ASSERT_EQUALS(t.getShip(3)->getOwner(), 3);
+    TS_ASSERT_EQUALS(t.getShip(4)->getOwner(), 4);
+
+    TS_ASSERT_EQUALS(t.getShip(0)->getId(), 2);
+    TS_ASSERT_EQUALS(t.getShip(1)->getId(), 5);
+    TS_ASSERT_EQUALS(t.getShip(2)->getId(), 4);
+    TS_ASSERT_EQUALS(t.getShip(3)->getId(), 1);
+    TS_ASSERT_EQUALS(t.getShip(4)->getId(), 3);
+}
+
+/** Test addShip(), addPlanet() with data. */
+void
+TestGameSimSetup::testAddData()
+{
+    // Some objects
+    game::sim::Planet p;
+    p.setId(10);
+    p.setName("Ten");
+
+    game::sim::Ship s1;
+    s1.setId(20);
+    s1.setName("Twenty");
+
+    game::sim::Ship s2;
+    s2.setId(30);
+    s2.setName("Thirty");
+
+    game::sim::Ship s3;
+    s3.setId(20);
+    s3.setName("Twenty too");
+
+    // Add them
+    game::sim::Setup testee;
+    game::sim::Planet* pp = testee.addPlanet(p);
+    game::sim::Ship* ps1 = testee.addShip(s1);
+    game::sim::Ship* ps2 = testee.addShip(s2);
+    game::sim::Ship* ps3 = testee.addShip(s3);
+
+    TS_ASSERT(pp != 0);
+    TS_ASSERT(ps1 != 0);
+    TS_ASSERT(ps2 != 0);
+    TS_ASSERT(ps3 != 0);
+    // Note that we don't make any guarantees about lifetimes, so ps1 may be dead now.
+
+    TS_ASSERT_EQUALS(testee.getPlanet()->getId(), 10);
+    TS_ASSERT_EQUALS(testee.getPlanet()->getName(), "Ten");
+    TS_ASSERT_EQUALS(testee.getNumShips(), 2U);
+    TS_ASSERT_EQUALS(testee.getShip(0)->getId(), 20);
+    TS_ASSERT_EQUALS(testee.getShip(0)->getName(), "Twenty too");
+    TS_ASSERT_EQUALS(testee.getShip(1)->getId(), 30);
+    TS_ASSERT_EQUALS(testee.getShip(1)->getName(), "Thirty");
+}
+

@@ -1,5 +1,6 @@
 /**
   *  \file game/map/circularobject.hpp
+  *  \brief Base class game::map::CircularObject
   */
 #ifndef C2NG_GAME_MAP_CIRCULAROBJECT_HPP
 #define C2NG_GAME_MAP_CIRCULAROBJECT_HPP

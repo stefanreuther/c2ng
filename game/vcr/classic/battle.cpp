@@ -12,6 +12,8 @@
 #include "game/vcr/classic/utils.hpp"
 #include "util/translation.hpp"
 
+using afl::string::Format;
+
 namespace {
     int getBuildPointMass(const game::vcr::Object& obj,
                           const game::config::HostConfiguration& config,
@@ -216,6 +218,51 @@ game::vcr::classic::Battle::getPosition(game::map::Point& result) const
     return m_position.get(result);
 }
 
+String_t
+game::vcr::classic::Battle::getResultSummary(int viewpointPlayer,
+                                             const game::config::HostConfiguration& config, const game::spec::ShipList& shipList,
+                                             util::NumberFormatter fmt, afl::string::Translator& tx) const
+{
+    // ex formatBuildPoints (part)
+    Score pts;
+    BattleResult_t br = getResult();
+    if (br == BattleResult_t(LeftCaptured) || br == BattleResult_t(LeftDestroyed)) {
+        computeScores(pts, RightSide, config, shipList);
+    } else if (br == BattleResult_t(RightCaptured) || br == BattleResult_t(RightDestroyed)) {
+        computeScores(pts, LeftSide, config, shipList);
+    } else {
+        // ambiguous or unknown result
+    }
+
+    String_t text;
+
+    // build points
+    int minBP = pts.getBuildMillipointsMin() / 1000;
+    int maxBP = pts.getBuildMillipointsMax() / 1000;
+    if (minBP > 0) {
+        if (maxBP == minBP) {
+            text += Format("%d BP", fmt.formatNumber(minBP));
+        } else {
+            text += Format("%d ... %d BP", fmt.formatNumber(minBP), fmt.formatNumber(maxBP));
+        }
+    } else {
+        if (maxBP > 0) {
+            text += Format("\xE2\x89\xA4%d BP", fmt.formatNumber(maxBP));
+        }
+    }
+
+    // experience
+    if (pts.getExperience() > 0) {
+        if (text.size()) {
+            text += ", ";
+        }
+        text += Format("%d EP", fmt.formatNumber(pts.getExperience()));
+    }
+
+    // combine
+    return formatResult(viewpointPlayer, text, tx);
+}
+
 /*
  *  Additional methods
  */
@@ -289,17 +336,6 @@ game::vcr::classic::Battle::getResult() const
 {
     return m_result;
 }
-
-
-// /** Store result. Fetches the result from the specified
-//     VCR Player. The player must have called playVcr(), but
-//     not yet doneVcr(). */
-// void
-// GClassicVcrEntry::setResultFromPlayer(VcrPlayer& player)
-// {
-//     player.doneVcr(result);
-//     status = player.getStatusWord();
-// }
 
 // Create a player algorithm that can play this battle.
 game::vcr::classic::Algorithm*
@@ -431,17 +467,3 @@ game::vcr::classic::Battle::applyClassicLimits()
     m_before[0].applyClassicLimits();
     m_before[1].applyClassicLimits();
 }
-
-// FIXME: remove, no longer needed
-// inline void
-// GClassicVcr::setSeed(uint16_t seed)
-// {
-//     this->seed = seed;
-// }
-
-// FIXME: remove, no longer needed
-// inline void
-// GClassicVcr::setSignature(uint16_t signature)
-// {
-//     this->signature = signature;
-// }

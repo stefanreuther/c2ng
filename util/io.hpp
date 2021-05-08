@@ -1,5 +1,6 @@
 /**
   *  \file util/io.hpp
+  *  \brief I/O-related utilities
   */
 #ifndef C2NG_UTIL_IO_HPP
 #define C2NG_UTIL_IO_HPP

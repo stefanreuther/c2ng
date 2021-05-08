@@ -38,7 +38,7 @@ namespace {
         ui::EventLoop loop(root);
 
         // Cost display
-        CostDisplay& dpy = del.addNew(new CostDisplay(root,
+        CostDisplay& dpy = del.addNew(new CostDisplay(root, tx,
                                                       CostDisplay::Types_t() + Cost::Tritanium + Cost::Duranium + Cost::Molybdenum + Cost::Money + Cost::Supplies,
                                                       fmt));
         dpy.setCost(st.cost);
@@ -52,7 +52,7 @@ namespace {
         ui::Group& g = del.addNew(new ui::Group(ui::layout::HBox::instance5));
         g.add(del.addNew(new ui::Spacer()));
         if (success) {
-            win.add(del.addNew(new ui::widgets::StaticText(tx("Build this starbase?"), util::SkinColor::Static, gfx::FontRequest().addSize(1), root.provider(), 1)));
+            win.add(del.addNew(new ui::widgets::StaticText(tx("Build this starbase?"), util::SkinColor::Static, gfx::FontRequest().addSize(1), root.provider(), gfx::CenterAlign)));
 
             util::KeyString yes(tx("Yes")), no(tx("No"));
             Button& btnYes = del.addNew(new Button(yes.getString(), yes.getKey(), root));
@@ -63,7 +63,7 @@ namespace {
             g.add(btnYes);
             g.add(btnNo);
         } else {
-            win.add(del.addNew(new ui::widgets::StaticText(tx("You can't build a starbase here."), util::SkinColor::Static, gfx::FontRequest().addSize(1), root.provider(), 1)));
+            win.add(del.addNew(new ui::widgets::StaticText(tx("You can't build a starbase here."), util::SkinColor::Static, gfx::FontRequest().addSize(1), root.provider(), gfx::CenterAlign)));
 
             Button& btn = del.addNew(new Button(tx("OK"), util::Key_Return, root));
             btn.sig_fire.addNewClosure(loop.makeStop(1));
@@ -94,7 +94,7 @@ client::dialogs::doBuildStarbaseDialog(ui::Root& root, util::RequestSender<game:
     // Proxies
     ConfigurationProxy config(gameSender);
     BuildStarbaseProxy action(gameSender);
-    Downlink link(root);
+    Downlink link(root, tx);
 
     // What to do?
     BuildStarbaseProxy::Status st;
@@ -102,7 +102,7 @@ client::dialogs::doBuildStarbaseDialog(ui::Root& root, util::RequestSender<game:
 
     switch (st.mode) {
      case BuildStarbaseProxy::Error:
-        ui::dialogs::MessageBox(st.errorMessage, tx("Build Starbase"), root).doOkDialog();
+        ui::dialogs::MessageBox(st.errorMessage, tx("Build Starbase"), root).doOkDialog(tx);
         break;
 
      case BuildStarbaseProxy::CanBuild:
@@ -118,7 +118,7 @@ client::dialogs::doBuildStarbaseDialog(ui::Root& root, util::RequestSender<game:
      case BuildStarbaseProxy::CanCancel:
         if (ui::dialogs::MessageBox(tx("You wanted to build a starbase at this planet. "
                                        "Cancel this order?"),
-                                    tx("Build Starbase"), root).doYesNoDialog())
+                                    tx("Build Starbase"), root).doYesNoDialog(tx))
         {
             action.commit(link);
         }

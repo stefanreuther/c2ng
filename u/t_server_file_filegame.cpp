@@ -8,13 +8,12 @@
 
 #include "t_server_file.hpp"
 #include "afl/io/internaldirectory.hpp"
+#include "game/test/files.hpp"
 #include "server/file/directoryitem.hpp"
 #include "server/file/filebase.hpp"
 #include "server/file/internaldirectoryhandler.hpp"
 #include "server/file/root.hpp"
 #include "server/file/session.hpp"
-#include "u/files.hpp"
-
 
 #define TS_ASSERT_THROWS_CODE(call, code)                               \
                               do {                                      \
@@ -106,8 +105,8 @@ TestServerFileFileGame::testReg()
         FileBase b(tb.session, tb.root);
         b.createDirectoryTree("a/b/c");
         b.createDirectoryTree("a/b/d");
-        b.putFile("a/b/c/fizz.bin", afl::string::fromBytes(getDefaultRegKey()));
-        b.putFile("a/b/fizz.bin", afl::string::fromBytes(getDefaultRegKey()));
+        b.putFile("a/b/c/fizz.bin", afl::string::fromBytes(game::test::getDefaultRegKey()));
+        b.putFile("a/b/fizz.bin", afl::string::fromBytes(game::test::getDefaultRegKey()));
         b.setDirectoryPermissions("a/b", "1001", "r");
         b.setDirectoryPermissions("a/b/c", "1002", "r");
     }
@@ -206,9 +205,9 @@ TestServerFileFileGame::testGame()
         FileBase b(tb.session, tb.root);
         b.createDirectoryTree("a/b/c");
         b.createDirectoryTree("a/b/d");
-        b.putFile("a/b/c/player7.rst", afl::string::fromBytes(getResultFile35()));
-        b.putFile("a/b/race.nm", afl::string::fromBytes(getDefaultRaceNames()));
-        b.putFile("a/b/player7.rst", afl::string::fromBytes(getResultFile35()));
+        b.putFile("a/b/c/player7.rst", afl::string::fromBytes(game::test::getResultFile35()));
+        b.putFile("a/b/race.nm", afl::string::fromBytes(game::test::getDefaultRaceNames()));
+        b.putFile("a/b/player7.rst", afl::string::fromBytes(game::test::getResultFile35()));
         b.setDirectoryPermissions("a/b", "1001", "r");
         b.setDirectoryPermissions("a/b/c", "1002", "r");
     }
@@ -282,7 +281,7 @@ TestServerFileFileGame::testGameProps()
     {
         FileBase b(tb.session, tb.root);
         b.createDirectory("a");
-        b.putFile("a/player7.rst", afl::string::fromBytes(getResultFile35()));
+        b.putFile("a/player7.rst", afl::string::fromBytes(game::test::getResultFile35()));
         b.setDirectoryProperty("a", "game", "42");
         b.setDirectoryProperty("a", "finished", "1");
         b.setDirectoryProperty("a", "name", "Forty Two");
@@ -290,7 +289,7 @@ TestServerFileFileGame::testGameProps()
         b.putFile("a/xyplan7.dat", "");
 
         b.createDirectory("b");
-        b.putFile("b/player7.rst", afl::string::fromBytes(getResultFile35()));
+        b.putFile("b/player7.rst", afl::string::fromBytes(game::test::getResultFile35()));
         b.setDirectoryProperty("b", "game", "what?");
         b.setDirectoryProperty("b", "finished", "yep");
     }

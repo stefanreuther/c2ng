@@ -60,7 +60,6 @@ util::Atom_t
 game::db::DrawingAtomMap::get(uint16_t value) const
 {
     // ex GDrawingAtomMap::get
-    // FIXME: we can surely do better
     for (Map_t::const_iterator i = m_atoms.begin(); i != m_atoms.end(); ++i) {
         if (i->second == value) {
             return i->first;

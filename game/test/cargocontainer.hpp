@@ -14,6 +14,8 @@ namespace game { namespace test {
     class CargoContainer : public game::CargoContainer {
      public:
         virtual String_t getName(afl::string::Translator& tx) const;
+        virtual String_t getInfo1(afl::string::Translator& tx) const;
+        virtual String_t getInfo2(afl::string::Translator& tx) const;
         virtual Flags_t getFlags() const;
         virtual bool canHaveElement(game::Element::Type type) const;
         virtual int32_t getMaxAmount(game::Element::Type type) const;

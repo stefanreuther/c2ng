@@ -91,6 +91,7 @@ class TestGameGame : public CxxTest::TestSuite {
     void testAlliances();
     void testMessageAlliance();
     void testMessageConfig();
+    void testMessageLink();
 };
 
 class TestGameHistoryTurn : public CxxTest::TestSuite {
@@ -141,6 +142,7 @@ class TestGamePlayerArray : public CxxTest::TestSuite {
     void testArray();
     void testInit();
     void testPointer();
+    void testComparison();
 };
 
 class TestGamePlayerBitMatrix : public CxxTest::TestSuite {
@@ -197,6 +199,7 @@ class TestGameSession : public CxxTest::TestSuite {
     void testReferenceNameEmpty();
     void testReferenceNameNonempty();
     void testInterpreterInterface();
+    void testTask();
 };
 
 class TestGameShipBuildOrder : public CxxTest::TestSuite {
@@ -204,6 +207,8 @@ class TestGameShipBuildOrder : public CxxTest::TestSuite {
     void testIt();
     void testComparison();
     void testCanonicalize();
+    void testDescribe();
+    void testDescribeCarrier();
 };
 
 class TestGameShipQuery : public CxxTest::TestSuite {
@@ -230,6 +235,7 @@ class TestGameTeamSettings : public CxxTest::TestSuite {
     void testModify();
     void testViewpoint();
     void testLoadSave();
+    void testCopyFrom();
 };
 
 class TestGameTimestamp : public CxxTest::TestSuite {

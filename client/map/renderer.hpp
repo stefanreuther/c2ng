@@ -4,12 +4,14 @@
 #ifndef C2NG_CLIENT_MAP_RENDERER_HPP
 #define C2NG_CLIENT_MAP_RENDERER_HPP
 
-#include "gfx/rectangle.hpp"
+#include "afl/base/ptr.hpp"
+#include "game/map/drawing.hpp"
 #include "game/map/point.hpp"
 #include "game/map/renderlist.hpp"
-#include "afl/base/ptr.hpp"
-#include "ui/colorscheme.hpp"
+#include "gfx/basecontext.hpp"
+#include "gfx/rectangle.hpp"
 #include "gfx/resourceprovider.hpp"
+#include "ui/colorscheme.hpp"
 
 namespace client { namespace map {
 
@@ -25,6 +27,7 @@ namespace client { namespace map {
         const gfx::Rectangle& getExtent() const;
 
         void draw(gfx::Canvas& can, ui::ColorScheme& colorScheme, gfx::ResourceProvider& provider) const;
+        void drawDrawing(gfx::Canvas& can, ui::ColorScheme& colorScheme, gfx::ResourceProvider& provider, const game::map::Drawing& d, uint8_t color) const;
 
         void getPreferredWorldRange(game::map::Point& min, game::map::Point& max) const;
         void getMinimumWorldRange(game::map::Point& min, game::map::Point& max) const;
@@ -40,6 +43,7 @@ namespace client { namespace map {
 
         bool zoomIn();
         bool zoomOut();
+        void setZoom(int mult, int divi);
 
      private:
         class Listener;
@@ -49,7 +53,12 @@ namespace client { namespace map {
         int m_zoomMultiplier;
         int m_zoomDivider;
         game::map::Point m_center;
+
+        void setFont(gfx::BaseContext& ctx, gfx::ResourceProvider& provider) const;
     };
+
+    uint8_t getUserColor(int color);
+    uint8_t getUfoColor(int color);
 
 } }
 

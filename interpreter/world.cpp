@@ -20,7 +20,7 @@ const afl::data::NameMap::Index_t interpreter::World::sp_Comment;
 const afl::data::NameMap::Index_t interpreter::World::pp_Comment;
 
 // Constructor.
-interpreter::World::World(afl::sys::LogListener& log, afl::io::FileSystem& fs)
+interpreter::World::World(afl::sys::LogListener& log, afl::string::Translator& tx, afl::io::FileSystem& fs)
     : m_globalPropertyNames(),
       m_shipPropertyNames(),
       m_planetPropertyNames(),
@@ -31,6 +31,7 @@ interpreter::World::World(afl::sys::LogListener& log, afl::io::FileSystem& fs)
       m_globalContexts(),
       m_mutexList(),
       m_log(log),
+      m_translator(tx),
       m_fileSystem(fs),
       m_systemLoadDirectory(),
       m_localLoadDirectory()
@@ -59,7 +60,7 @@ interpreter::World::setNewGlobalValue(const char* name, afl::data::Value* value)
 }
 
 // Get a global value.
-afl::data::Value*
+const afl::data::Value*
 interpreter::World::getGlobalValue(const char* name) const
 {
     return m_globalValues[m_globalPropertyNames.getIndexByName(name)];
@@ -311,6 +312,13 @@ interpreter::World::logError(afl::sys::LogListener::Level level, const Error& e)
     if (!trace.empty()) {
         m_log.write(m_log.Info, "script.trace", trace);
     }
+}
+
+// Access translator.
+afl::string::Translator&
+interpreter::World::translator() const
+{
+    return m_translator;
 }
 
 // Access file system.

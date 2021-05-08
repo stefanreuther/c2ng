@@ -6,6 +6,7 @@
 #define C2NG_GAME_ACTIONS_CONVERTSUPPLIES_HPP
 
 #include "afl/base/types.hpp"
+#include "afl/string/translator.hpp"
 #include "game/map/planet.hpp"
 #include "game/map/universe.hpp"
 
@@ -23,7 +24,7 @@ namespace game { namespace actions {
     class ConvertSupplies {
      public:
         /** Constructor. */
-        explicit ConvertSupplies(game::map::Planet& pl);
+        ConvertSupplies(game::map::Planet& pl, afl::string::Translator& tx);
 
         /** Set undo information.
             This enables the action to buy supplies.

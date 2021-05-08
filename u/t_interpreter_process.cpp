@@ -14,6 +14,7 @@
 #include "afl/io/constmemorystream.hpp"
 #include "afl/io/internaldirectory.hpp"
 #include "afl/io/nullfilesystem.hpp"
+#include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
 #include "afl/test/translator.hpp"
 #include "interpreter/arguments.hpp"
@@ -77,7 +78,7 @@ namespace {
             { }
         virtual interpreter::Context* lookup(const afl::data::NameQuery& /*name*/, PropertyIndex_t& /*result*/)
             { return 0; }
-        virtual void set(PropertyIndex_t /*index*/, afl::data::Value* /*value*/)
+        virtual void set(PropertyIndex_t /*index*/, const afl::data::Value* /*value*/)
             { TS_FAIL("SingularObjectContext::set unexpected"); }
         virtual afl::data::Value* get(PropertyIndex_t /*index*/)
             { TS_FAIL("SingularObjectContext::get unexpected"); return 0; }
@@ -117,7 +118,7 @@ namespace {
                     return 0;
                 }
             }
-        virtual void set(PropertyIndex_t index, afl::data::Value* value)
+        virtual void set(PropertyIndex_t index, const afl::data::Value* value)
             {
                 TS_ASSERT_EQUALS(index, PropertyIndex_t(77));
                 m_value = interpreter::toString(value, false);
@@ -164,7 +165,7 @@ namespace {
                     return 0;
                 }
             }
-        virtual void set(PropertyIndex_t /*index*/, afl::data::Value* /*value*/)
+        virtual void set(PropertyIndex_t /*index*/, const afl::data::Value* /*value*/)
             { TS_FAIL("CountingContext::set unexpected"); }
         virtual afl::data::Value* get(PropertyIndex_t index)
             {
@@ -284,12 +285,13 @@ namespace {
     /* Common environment for all tests. */
     struct Environment {
         afl::sys::Log log;
+        afl::string::NullTranslator tx;
         afl::io::NullFileSystem fs;
         interpreter::World world;
         Process proc;
 
         Environment()
-            : log(), fs(), world(log, fs), proc(world, "test", 99)
+            : log(), tx(), fs(), world(log, tx, fs), proc(world, "test", 99)
             { }
     };
 

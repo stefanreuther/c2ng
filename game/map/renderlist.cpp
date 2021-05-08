@@ -60,6 +60,14 @@ game::map::RenderList::drawBorderLine(Point a, Point b)
 }
 
 void
+game::map::RenderList::drawBorderCircle(Point c, int radius)
+{
+    addInstruction(riGridBorderCircle);
+    addPointParameter(c);
+    addParameter(radius);
+}
+
+void
 game::map::RenderList::drawSelection(Point p)
 {
     addInstruction(riSelection);
@@ -67,34 +75,35 @@ game::map::RenderList::drawSelection(Point p)
 }
 
 void
-game::map::RenderList::drawPlanet(Point p, int id, int flags)
+game::map::RenderList::drawMessageMarker(Point p)
+{
+    addInstruction(riMessageMarker);
+    addPointParameter(p);
+}
+
+void
+game::map::RenderList::drawPlanet(Point p, int id, int flags, String_t label)
 {
     addInstruction(riPlanet);
     addPointParameter(p);
     addParameter(id);
     addParameter(flags);
+    addStringParameter(label);
 }
 
 void
-game::map::RenderList::drawShip(Point p, int id, Relation_t rel)
+game::map::RenderList::drawShip(Point p, int id, Relation_t rel, int flags, String_t label)
 {
     addInstruction(riShip);
     addPointParameter(p);
     addParameter(id);
     addParameter(rel);
+    addParameter(flags);
+    addStringParameter(label);
 }
 
 void
-game::map::RenderList::drawFleetLeader(Point p, int id, Relation_t rel)
-{
-    addInstruction(riFleetLeader);
-    addPointParameter(p);
-    addParameter(id);
-    addParameter(rel);
-}
-
-void
-game::map::RenderList::drawMinefield(Point p, int id, int r, bool isWeb, Relation_t rel)
+game::map::RenderList::drawMinefield(Point p, int id, int r, bool isWeb, Relation_t rel, bool filled)
 {
     addInstruction(riMinefield);
     addPointParameter(p);
@@ -102,6 +111,41 @@ game::map::RenderList::drawMinefield(Point p, int id, int r, bool isWeb, Relatio
     addParameter(r);
     addParameter(isWeb);
     addParameter(rel);
+    addParameter(filled);
+}
+
+void
+game::map::RenderList::drawUfo(Point p, int id, int r, int colorCode, int speed, int heading, bool filled)
+{
+    addInstruction(riUfo);
+    addPointParameter(p);
+    addParameter(id);
+    addParameter(r);
+    addParameter(colorCode);
+    addParameter(speed);
+    addParameter(heading);
+    addParameter(filled);
+}
+
+void
+game::map::RenderList::drawUfoConnection(Point a, Point b, int colorCode)
+{
+    addInstruction(riUfoConnection);
+    addPointParameter(a);
+    addPointParameter(b);
+    addParameter(colorCode);
+}
+
+void
+game::map::RenderList::drawIonStorm(Point p, int r, int voltage, int speed, int heading, bool filled)
+{
+    addInstruction(riIonStorm);
+    addPointParameter(p);
+    addParameter(r);
+    addParameter(voltage);
+    addParameter(speed);
+    addParameter(heading);
+    addParameter(filled);
 }
 
 void
@@ -142,6 +186,50 @@ game::map::RenderList::drawUserMarker(Point pt, int shape, int color, String_t l
 }
 
 void
+game::map::RenderList::drawExplosion(Point p)
+{
+    addInstruction(riExplosion);
+    addPointParameter(p);
+}
+
+void
+game::map::RenderList::drawShipTrail(Point a, Point b, Relation_t rel, int flags, int age)
+{
+    addInstruction(riShipTrail);
+    addPointParameter(a);
+    addPointParameter(b);
+    addParameter(rel);
+    addParameter(flags);
+    addParameter(age);
+}
+
+void
+game::map::RenderList::drawShipWaypoint(Point a, Point b, Relation_t rel)
+{
+    addInstruction(riShipWaypoint);
+    addPointParameter(a);
+    addPointParameter(b);
+    addParameter(rel);
+}
+
+void
+game::map::RenderList::drawShipVector(Point a, Point b, Relation_t rel)
+{
+    addInstruction(riShipVector);
+    addPointParameter(a);
+    addPointParameter(b);
+    addParameter(rel);
+}
+
+void
+game::map::RenderList::drawWarpWellEdge(Point a, Edge e)
+{
+    addInstruction(riWarpWellEdge);
+    addPointParameter(a);
+    addParameter(e);
+}
+
+void
 game::map::RenderList::addInstruction(Instruction ins)
 {
     StringInstructionList::addInstruction(static_cast<Instruction_t>(ins));
@@ -169,6 +257,15 @@ game::map::RenderList::replay(RendererListener& listener) const
             break;
          }
 
+         case riGridBorderCircle: {
+            Point c;
+            int r;
+            if (it.readPointParameter(c) && it.readParameter(r)) {
+                listener.drawBorderCircle(c, r);
+            }
+            break;
+         }
+
          case riGridLine: {
             Point a, b;
             if (it.readPointParameter(a) && it.readPointParameter(b)) {
@@ -185,41 +282,73 @@ game::map::RenderList::replay(RendererListener& listener) const
             break;
          }
 
+         case riMessageMarker: {
+            Point p;
+            if (it.readPointParameter(p)) {
+                listener.drawMessageMarker(p);
+            }
+            break;
+         }
+
          case riPlanet: {
             Point p;
             int32_t id, flags;
-            if (it.readPointParameter(p) && it.readParameter(id) && it.readParameter(flags)) {
-                listener.drawPlanet(p, id, flags);
+            String_t label;
+            if (it.readPointParameter(p) && it.readParameter(id) && it.readParameter(flags) && it.readStringParameter(label)) {
+                listener.drawPlanet(p, id, flags, label);
             }
             break;
          }
 
          case riShip: {
             Point p;
-            int32_t id, rel;
-            if (it.readPointParameter(p) && it.readParameter(id) && it.readParameter(rel)) {
-                listener.drawShip(p, id, Relation_t(rel));
-            }
-            break;
-         }
-
-         case riFleetLeader: {
-            Point p;
-            int32_t id, rel;
-            if (it.readPointParameter(p) && it.readParameter(id) && it.readParameter(rel)) {
-                listener.drawFleetLeader(p, id, Relation_t(rel));
+            int32_t id, rel, flags;
+            String_t label;
+            if (it.readPointParameter(p) && it.readParameter(id) && it.readParameter(rel) && it.readParameter(flags) && it.readStringParameter(label)) {
+                listener.drawShip(p, id, Relation_t(rel), flags, label);
             }
             break;
          }
 
          case riMinefield: {
             Point p;
-            int32_t id, r, isWeb, rel;
-            if (it.readPointParameter(p) && it.readParameter(id) && it.readParameter(r) && it.readParameter(isWeb) && it.readParameter(rel)) {
-                listener.drawMinefield(p, id, r, bool(isWeb), Relation_t(rel));
+            int32_t id, r, isWeb, rel, filled;
+            if (it.readPointParameter(p) && it.readParameter(id) && it.readParameter(r) && it.readParameter(isWeb) && it.readParameter(rel) && it.readParameter(filled)) {
+                listener.drawMinefield(p, id, r, bool(isWeb), Relation_t(rel), bool(filled));
             }
             break;
          }
+
+         case riUfo: {
+            Point p;
+            int32_t id, r, colorCode, speed, heading, filled;
+            if (it.readPointParameter(p) && it.readParameter(id) && it.readParameter(r)
+                && it.readParameter(colorCode) && it.readParameter(speed) && it.readParameter(heading)
+                && it.readParameter(filled))
+            {
+                listener.drawUfo(p, id, r, colorCode, speed, heading, bool(filled));
+            }
+            break;
+         }
+
+         case riUfoConnection: {
+            Point a, b;
+            int32_t colorCode;
+            if (it.readPointParameter(a) && it.readPointParameter(b) && it.readParameter(colorCode)) {
+                listener.drawUfoConnection(a, b, colorCode);
+            }
+            break;
+         }
+
+         case riIonStorm: {
+            Point p;
+            int32_t r, voltage, speed, heading, filled;
+            if (it.readPointParameter(p) && it.readParameter(r) && it.readParameter(voltage) && it.readParameter(speed) && it.readParameter(heading) && it.readParameter(filled)) {
+                listener.drawIonStorm(p, r, voltage, speed, heading, bool(filled));
+            }
+            break;
+         }
+
          case riUserCircle: {
             Point p;
             int32_t r, color;
@@ -250,6 +379,50 @@ game::map::RenderList::replay(RendererListener& listener) const
             String_t text;
             if (it.readPointParameter(p) && it.readParameter(shape) && it.readParameter(color) && it.readStringParameter(text)) {
                 listener.drawUserMarker(p, shape, color, text);
+            }
+            break;
+         }
+
+         case riExplosion: {
+            Point p;
+            if (it.readPointParameter(p)) {
+                listener.drawExplosion(p);
+            }
+            break;
+         }
+
+         case riShipTrail: {
+            Point a, b;
+            int32_t rel, flags, age;
+            if (it.readPointParameter(a) && it.readPointParameter(b) && it.readParameter(rel) && it.readParameter(flags) && it.readParameter(age)) {
+                listener.drawShipTrail(a, b, Relation_t(rel), flags, age);
+            }
+            break;
+         }
+
+         case riShipWaypoint: {
+            Point a, b;
+            int32_t rel;
+            if (it.readPointParameter(a) && it.readPointParameter(b) && it.readParameter(rel)) {
+                listener.drawShipWaypoint(a, b, Relation_t(rel));
+            }
+            break;
+         }
+
+         case riShipVector: {
+            Point a, b;
+            int32_t rel;
+            if (it.readPointParameter(a) && it.readPointParameter(b) && it.readParameter(rel)) {
+                listener.drawShipVector(a, b, Relation_t(rel));
+            }
+            break;
+         }
+
+         case riWarpWellEdge: {
+            Point a;
+            int32_t edge;
+            if (it.readPointParameter(a) && it.readParameter(edge)) {
+                listener.drawWarpWellEdge(a, Edge(edge));
             }
             break;
          }

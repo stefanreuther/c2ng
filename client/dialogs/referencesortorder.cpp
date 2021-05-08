@@ -153,17 +153,17 @@ ReferenceSortOrderDialog::run(game::ref::Configuration& order, ui::Root& root, a
     ui::Group& g1(del.addNew(new ui::Group(ui::layout::HBox::instance5)));
     ui::Group& g11(del.addNew(new ui::Group(ui::layout::VBox::instance5)));
     ui::Group& g12(del.addNew(new ui::Group(ui::layout::VBox::instance5)));
-    g11.add(del.addNew(new ui::widgets::StaticText(tx.translateString("Sort by..."), util::SkinColor::Static, gfx::FontRequest().addSize(1), root.provider())));
+    g11.add(del.addNew(new ui::widgets::StaticText(tx("Sort by..."), util::SkinColor::Static, gfx::FontRequest().addSize(1), root.provider())));
     g11.add(ui::widgets::FrameGroup::wrapWidget(del, root.colorScheme(), ui::LoweredFrame, m_firstList));
     g1.add(g11);
 
-    g12.add(del.addNew(new ui::widgets::StaticText(tx.translateString("then by..."), util::SkinColor::Static, gfx::FontRequest().addSize(1), root.provider())));
+    g12.add(del.addNew(new ui::widgets::StaticText(tx("then by..."), util::SkinColor::Static, gfx::FontRequest().addSize(1), root.provider())));
     g12.add(ui::widgets::FrameGroup::wrapWidget(del, root.colorScheme(), ui::LoweredFrame, m_secondList));
     g1.add(g12);
 
     win.add(g1);
 
-    ui::widgets::StandardDialogButtons& btn(del.addNew(new ui::widgets::StandardDialogButtons(root)));
+    ui::widgets::StandardDialogButtons& btn(del.addNew(new ui::widgets::StandardDialogButtons(root, tx)));
     win.add(btn);
 
     ui::widgets::FocusIterator& fi(del.addNew(new ui::widgets::FocusIterator(ui::widgets::FocusIterator::Horizontal | ui::widgets::FocusIterator::Tab)));

@@ -11,6 +11,7 @@
 class TestGameSimAbility : public CxxTest::TestSuite {
  public:
     void testIt();
+    void testToString();
 };
 
 class TestGameSimClassResult : public CxxTest::TestSuite {
@@ -23,6 +24,23 @@ class TestGameSimConfiguration : public CxxTest::TestSuite {
  public:
     void testIt();
     void testConfig();
+    void testToString();
+    void testCopyFrom();
+    void testGetNext();
+};
+
+class TestGameSimFleetCost : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testNormal();
+    void testTechCost();
+    void testGetInvolved();
+    void testEnums();
+};
+
+class TestGameSimGameInterface : public CxxTest::TestSuite {
+ public:
+    void testInterface();
 };
 
 class TestGameSimLoader : public CxxTest::TestSuite {
@@ -45,6 +63,7 @@ class TestGameSimObject : public CxxTest::TestSuite {
     void testIt();
     void testSetRandom();
     void testRandom();
+    void testCopy();
 
     static void verifyObject(game::sim::Object& t);
 };
@@ -68,6 +87,10 @@ class TestGameSimResultList : public CxxTest::TestSuite {
     void testIt();
     void testIncrease();
     void testDecrease();
+    void testMultipleClasses();
+    void testDescribe();
+    void testDescribe2();
+    void testToString();
 };
 
 class TestGameSimRun : public CxxTest::TestSuite {
@@ -110,6 +133,8 @@ class TestGameSimRun : public CxxTest::TestSuite {
     void testPlanetBird();
     void testPlanetPrimaryEnemy();
     void testPlanetNuk();
+    void testFLAK();
+    void testFLAKMulti();
 };
 
 class TestGameSimRunner : public CxxTest::TestSuite {
@@ -117,6 +142,16 @@ class TestGameSimRunner : public CxxTest::TestSuite {
     void testRegression1();
     void testRegression2();
     void testInterrupt();
+};
+
+class TestGameSimSession : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
+class TestGameSimSessionExtra : public CxxTest::TestSuite {
+ public:
+    void testIt();
 };
 
 class TestGameSimSetup : public CxxTest::TestSuite {
@@ -127,6 +162,12 @@ class TestGameSimSetup : public CxxTest::TestSuite {
     void testRandom();
     void testListener();
     void testMerge();
+    void testFindUnused();
+    void testReplicate();
+    void testCopy();
+    void testSetSequential();
+    void testSort();
+    void testAddData();
 };
 
 class TestGameSimShip : public CxxTest::TestSuite {
@@ -136,6 +177,11 @@ class TestGameSimShip : public CxxTest::TestSuite {
     void testShipList();
     void testAbilities();
     void testAggressive();
+};
+
+class TestGameSimSort : public CxxTest::TestSuite {
+ public:
+    void testIt();
 };
 
 class TestGameSimStructures : public CxxTest::TestSuite {
@@ -156,6 +202,8 @@ class TestGameSimTransfer : public CxxTest::TestSuite {
     void testCopyFromBase();
     void testCopyToPlanet();
     void testCopyToMismatchingPlanet();
+    void testCopyShipFromBattle();
+    void testCopyPlanetFromBattle();
 };
 
 class TestGameSimUnitResult : public CxxTest::TestSuite {

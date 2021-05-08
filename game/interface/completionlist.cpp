@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/completionlist.cpp
+  *  \brief Class game::interface::CompletionList
   */
 
 #include "game/interface/completionlist.hpp"
@@ -177,6 +178,24 @@ namespace {
             // Ignore
         }
     }
+
+    void completeKeymaps(game::interface::CompletionList& list, const util::KeymapTable& tab)
+    {
+        for (size_t i = 0, n = tab.getNumKeymaps(); i < n; ++i) {
+            if (util::KeymapRef_t p = tab.getKeymapByIndex(i)) {
+                list.addCandidate(util::formatName(p->getName()));
+            }
+        }
+    }
+
+    void completeOptions(game::interface::CompletionList& out, const game::config::Configuration& config)
+    {
+        afl::base::Ref<game::config::Configuration::Enumerator_t> e(config.getOptions());
+        game::config::Configuration::OptionInfo_t oi;
+        while (e->getNextElement(oi)) {
+            out.addCandidate(oi.first);
+        }
+    }
 }
 
 void
@@ -200,9 +219,14 @@ game::interface::buildCompletionList(CompletionList& out,
         SeenConfigCommand,
         SeenConfigFunction,
         SeenConfigFunctionParen,
+        SeenPrefCommand,
+        SeenPrefFunction,
+        SeenPrefFunctionParen,
         SeenFileCommand,
         SeenConfigQuote,
-        SeenFileQuote
+        SeenPrefQuote,
+        SeenFileQuote,
+        SeenKeymapCommand
     } state = Normal;
 
     while (rdr.hasMore()) {
@@ -223,16 +247,21 @@ game::interface::buildCompletionList(CompletionList& out,
             // Not a word.
             // Process previous word.
             if (!stem.empty()) {
-                // FIXME: handle ADDPREF, PREF
                 if (acceptCommands && afl::string::strCaseCompare(stem, "ADDCONFIG") == 0) {
                     state = SeenConfigCommand;
+                } else if (acceptCommands && afl::string::strCaseCompare(stem, "ADDPREF") == 0) {
+                    state = SeenPrefCommand;
                 } else if (acceptCommands && (afl::string::strCaseCompare(stem, "LOAD") == 0
                                               || afl::string::strCaseCompare(stem, "TRYLOAD") == 0
                                               || afl::string::strCaseCompare(stem, "OPEN") == 0))
                 {
                     state = SeenFileCommand;
+                } else if (afl::string::strCaseCompare(stem, "BIND") == 0 || afl::string::strCaseCompare(stem, "USEKEYMAP") == 0) {
+                    state = SeenKeymapCommand;
                 } else if (afl::string::strCaseCompare(stem, "CFG") == 0) {
                     state = SeenConfigFunction;
+                } else if (afl::string::strCaseCompare(stem, "PREF") == 0) {
+                    state = SeenPrefFunction;
                 } else {
                     state = Normal;
                 }
@@ -243,12 +272,14 @@ game::interface::buildCompletionList(CompletionList& out,
              case ' ':
                 break;
              case '(':
-                state = (state == SeenConfigFunction ? SeenConfigFunctionParen : Normal);
+                state = (state == SeenConfigFunction ? SeenConfigFunctionParen : state == SeenPrefFunction   ? SeenPrefFunctionParen : Normal);
                 break;
              case '"':
              case '\'':
                 if (state == SeenConfigFunctionParen || state == SeenConfigCommand) {
                     state = SeenConfigQuote;
+                } else if (state == SeenPrefFunctionParen || state == SeenPrefCommand) {
+                    state = SeenPrefQuote;
                 } else if (state == SeenFileCommand) {
                     state = SeenFileQuote;
                 } else {
@@ -279,15 +310,19 @@ game::interface::buildCompletionList(CompletionList& out,
     if (state == SeenConfigQuote) {
         // Options
         if (Root* r = session.getRoot().get()) {
-            afl::base::Ref<game::config::Configuration::Enumerator_t> e(r->hostConfiguration().getOptions());
-            game::config::Configuration::OptionInfo_t oi;
-            while (e->getNextElement(oi)) {
-                out.addCandidate(oi.first);
-            }
+            completeOptions(out, r->hostConfiguration());
+        }
+    } else if (state == SeenPrefQuote) {
+        // User preferences
+        if (Root* r = session.getRoot().get()) {
+            completeOptions(out, r->userConfiguration());
         }
     } else if (state == SeenFileQuote) {
         // File
         completeFileNames(out, session.world().fileSystem(), stem);
+    } else if (state == SeenKeymapCommand) {
+        // Keymap
+        completeKeymaps(out, session.world().keymaps());
     } else {
         // Script things
         CompletionBuilder builder(out, acceptCommands, onlyCommands);

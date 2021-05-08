@@ -5,20 +5,22 @@
 #ifndef C2NG_GAME_MAP_CONFIGURATION_HPP
 #define C2NG_GAME_MAP_CONFIGURATION_HPP
 
-#include "game/map/point.hpp"
-#include "game/config/hostconfiguration.hpp"
-#include "game/hostversion.hpp"
 #include "afl/string/string.hpp"
+#include "game/config/hostconfiguration.hpp"
 #include "game/config/userconfiguration.hpp"
+#include "game/map/point.hpp"
 
 namespace game { namespace map {
 
+    /** Map configuration (wrap mode).
+        Contains methods to transform coordinates for wrapped maps of all types. */
     class Configuration {
      public:
+        /** Map mode. */
         enum Mode {
-            Flat,
-            Wrapped,
-            Circular
+            Flat,               ///< Flat (regular) map.
+            Wrapped,            ///< Rectangular wrap (Sphere, PWrap, PHost).
+            Circular            ///< Circular wrap (PWrap).
         };
 
         /** Default constructor.
@@ -28,28 +30,55 @@ namespace game { namespace map {
             Use saveToConfiguration() to do that in c2ng. */
         Configuration();
 
-        // Configuration inquiry
+        /** Get wrap mode.
+            \return wrap mode */
         Mode getMode() const;
+
+        /** Get center of map.
+            \return center
+            \see setConfiguration */
         Point getCenter() const;
+
+        /** Get size of map.
+            \return center
+            \see setConfiguration  */
         Point getSize() const;
+
+        /** Get minimum coordinates (south-east).
+            \return minimum coordinates */
         Point getMinimumCoordinates() const;
+
+        /** Get maximum coordinates (south-east).
+            \return maximum coordinates */
         Point getMaximumCoordinates() const;
+
+        /** Get precision for circular wrap.
+            \return precision (search depth for inside-out mapping) */
         int getCircularPrecision() const;
+
+        /** Get circular excess (size of outside area).
+            \return circular excess */
         int getCircularExcess() const;
+
+        /** Set precision for circular wrap.
+            \param n precision (search depth for inside-out mapping) */
+        void setCircularPrecision(int n);
+
+        /** Set circular excess (size of outside area).
+            \param n circular excess */
+        void setCircularExcess(int n);
 
         /*
          *  Configuration
          */
 
         /** Initialize from configuration.
-            \param host Host version
             \param config Host configuration
             \param pref User configuration
 
             Change to PCC2: in PCC2, this function would have updated the user preferences.
             Use saveToConfiguration() to do that in c2ng. */
-        void initFromConfiguration(const HostVersion& host,
-                                   const game::config::HostConfiguration& config,
+        void initFromConfiguration(const game::config::HostConfiguration& config,
                                    const game::config::UserConfiguration& pref);
 
         /** Save to configuration.
@@ -149,9 +178,13 @@ namespace game { namespace map {
         bool getPointAlias(Point pt, Point& out, int image, bool exact) const;
 
         /** Compute outside location for a point inside the map, simple version.
-            This is well-suited to map known map objects in a fail-safe way.
-            It does NOT map circular points to the outside.
+            This is well-suited to map known map objects in a fail-safe way, using pre-verified parameters,
+            in code that is fully aware of the map geometry.
+
+            This function does NOT map circular points to the outside.
             This is an inverse operation to getCanonicalLocation.
+
+            If the given image parameter is invalid, pt is returned unmodified.
 
             \param pt    [in] Point
             \param image [in] Index of map image to produce, [0,getNumRectangularImages()). 0=regular image. */
@@ -171,14 +204,14 @@ namespace game { namespace map {
             \param result [out] result
             \retval true success; result has been updated
             \retval false failure; result was not modified */
-        bool parseSectorNumber(const String_t& s, Point& result);
+        bool parseSectorNumber(const String_t& s, Point& result) const;
 
         /** Parse a sector number.
             \param n [in] user input
             \param result [out] result
             \retval true success; result has been updated
             \retval false failure; result was not modified */
-        bool parseSectorNumber(int n, Point& result);
+        bool parseSectorNumber(int n, Point& result) const;
 
         /** Get sector number.
             The sector number is shown by PCC2 and PCC1.x, and agrees to Trevor Fuson's VGAMAP for a standard-sized map.

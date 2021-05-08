@@ -9,6 +9,7 @@
 #include "afl/io/nullfilesystem.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
+#include "game/interface/processlisteditor.hpp"
 #include "game/playerlist.hpp"
 #include "interpreter/process.hpp"
 #include "interpreter/world.hpp"
@@ -27,7 +28,7 @@ TestGameInterfaceNotificationStore::testIt()
     afl::string::NullTranslator tx;
     afl::sys::Log log;
     game::PlayerList list;
-    interpreter::World world(log, fs);
+    interpreter::World world(log, tx, fs);
 
     // Create empty store
     interpreter::ProcessList procList;
@@ -97,7 +98,7 @@ TestGameInterfaceNotificationStore::testResume()
     afl::string::NullTranslator tx;
     afl::sys::Log log;
     game::PlayerList list;
-    interpreter::World world(log, fs);
+    interpreter::World world(log, tx, fs);
 
     // Message store
     interpreter::ProcessList procList;
@@ -120,7 +121,9 @@ TestGameInterfaceNotificationStore::testResume()
     TS_ASSERT_EQUALS(store.isMessageConfirmed(msg), true);
 
     // Resume
-    store.resumeConfirmedProcesses(procList.allocateProcessGroup());
+    game::interface::ProcessListEditor editor(procList);
+    store.resumeConfirmedProcesses(editor);
+    editor.commit(procList.allocateProcessGroup());
 
     // Verify
     TS_ASSERT_EQUALS(p1.getState(), interpreter::Process::Suspended);

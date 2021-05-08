@@ -61,7 +61,6 @@ namespace {
     };
 }
 
-// /** Get property of an engine. */
 afl::data::Value*
 game::interface::getEngineProperty(const game::spec::Engine& e, EngineProperty iep)
 {
@@ -84,11 +83,10 @@ game::interface::getEngineProperty(const game::spec::Engine& e, EngineProperty i
     return 0;
 }
 
-// /** Set property of an engine. */
 void
 game::interface::setEngineProperty(game::spec::Engine& e,
                                    EngineProperty iep,
-                                   afl::data::Value* value,
+                                   const afl::data::Value* value,
                                    game::spec::ShipList& list)
 {
     // ex int/if/specif.h:setEngineProperty

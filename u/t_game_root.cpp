@@ -12,7 +12,7 @@
 #include "game/registrationkey.hpp"
 #include "game/stringverifier.hpp"
 #include "game/turnloader.hpp"
-#include "helper/counter.hpp"
+#include "game/test/counter.hpp"
 #include "game/test/registrationkey.hpp"
 #include "game/test/stringverifier.hpp"
 #include "game/test/specificationloader.hpp"
@@ -84,6 +84,7 @@ TestGameRoot::testIt()
     // Finally, verify notifications
     testee.notifyListeners();
 
+    using game::test::Counter;
     Counter c;
     testee.hostConfiguration().sig_change.add(&c, &Counter::increment);
     testee.hostConfiguration().setOption("foo", "bar", game::config::ConfigurationOption::User);

@@ -9,7 +9,6 @@
 #include "game/v3/structures.hpp"
 #include "interpreter/values.hpp"
 #include "util/string.hpp"
-#include "util/translation.hpp"
 
 namespace {
     const char LOG_NAME[] = "game.spec.missionlist";
@@ -49,7 +48,6 @@ namespace {
     }
 }
 
-/** Construct empty mission list. */
 game::spec::MissionList::MissionList()
     : m_data(),
       m_usedLetters(0)
@@ -88,10 +86,6 @@ game::spec::MissionList::at(size_t i) const
          : 0;
 }
 
-// /** Add mission to list. This will add a (copy of) /msn/ to the
-//     mission list. If the mission was already defined, the call is
-//     ignored.
-//     \return true iff mission was added, false if call was ignored */
 bool
 game::spec::MissionList::addMission(const Mission& msn)
 {
@@ -139,8 +133,6 @@ game::spec::MissionList::addMission(const Mission& msn)
     return true;
 }
 
-/** Sort mission list. Brings list into numerical mission order, which
-    will then be used on the mission screen. */
 void
 game::spec::MissionList::sort()
 {
@@ -148,7 +140,6 @@ game::spec::MissionList::sort()
     std::sort(m_data.begin(), m_data.end(), compareMissions);
 }
 
-/** Clear this mission list instance. */
 void
 game::spec::MissionList::clear()
 {
@@ -157,9 +148,6 @@ game::spec::MissionList::clear()
     m_data.clear();
 }
 
-/** Get mission by number/player.
-    \param id mission number
-    \param race_mask races (not players!) for which you want the mission. */
 const game::spec::Mission*
 game::spec::MissionList::getMissionByNumber(int id, PlayerSet_t raceMask) const
 {
@@ -186,10 +174,8 @@ game::spec::MissionList::getIndexByNumber(int id, PlayerSet_t raceMask, size_t& 
 }
 
 
-/** Load mission.cc file.
-    \param in      stream */
 void
-game::spec::MissionList::loadFromFile(afl::io::Stream& in, afl::sys::LogListener& log)
+game::spec::MissionList::loadFromFile(afl::io::Stream& in, afl::sys::LogListener& log, afl::string::Translator& tx)
 {
     // ex GMissionList::loadFromFile
     afl::io::TextFile tf(in);
@@ -203,11 +189,11 @@ game::spec::MissionList::loadFromFile(afl::io::Stream& in, afl::sys::LogListener
 
         String_t::size_type p = line.find_first_of("=,");
         if (p == String_t::npos) {
-            log.write(log.Error, LOG_NAME, in.getName(), tf.getLineNumber(), _("missing delimiter"));
+            log.write(log.Error, LOG_NAME, in.getName(), tf.getLineNumber(), tx("missing delimiter"));
         } else if (line[p] == ',') {
             int mnum;
             if (!afl::string::strToInteger(afl::string::strTrim(line.substr(0, p)), mnum) || mnum < 0 || mnum > MAX_NUMBER) {
-                log.write(log.Error, LOG_NAME, in.getName(), tf.getLineNumber(), _("invalid mission number"));
+                log.write(log.Error, LOG_NAME, in.getName(), tf.getLineNumber(), tx("invalid mission number"));
                 have_mission = false;
                 continue;       // with next mission
             }
@@ -253,7 +239,6 @@ game::spec::MissionList::loadFromFile(afl::io::Stream& in, afl::sys::LogListener
     }
 }
 
-/** Load from MISSION.INI file. */
 void
 game::spec::MissionList::loadFromIniFile(afl::io::Stream& in, afl::charset::Charset& cs)
 {
@@ -360,7 +345,6 @@ game::spec::MissionList::loadFromIniFile(afl::io::Stream& in, afl::charset::Char
 }
 
 
-// /** Check whether a mission causes the ship to cloak. */
 bool
 game::spec::MissionList::isMissionCloaking(int mission_id,
                                            int owner,

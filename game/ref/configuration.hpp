@@ -25,8 +25,10 @@ namespace game { namespace ref {
     const int ConfigSortByNewPosition = 11;
     const int ConfigSortByTransferTarget = 12;
 
-    SortPredicate& createSortPredicate(int config, Session& session, afl::base::Deleter& del);
+    struct ConfigurationSelection;
 
+    SortPredicate& createSortPredicate(int config, Session& session, afl::base::Deleter& del);
+    SortPredicate& createSortPredicate(const ConfigurationSelection& sel, Session& session, afl::base::Deleter& del);
 
     struct Configuration {
         typedef std::pair<int, int> Order_t;
@@ -34,8 +36,6 @@ namespace game { namespace ref {
         Order_t order;
         // FIXME: favorites
     };
-
-    struct ConfigurationSelection;
 
     extern const ConfigurationSelection REGULAR;
     extern const ConfigurationSelection CARGO_TRANSFER;

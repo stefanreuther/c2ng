@@ -362,7 +362,7 @@ game::interface::getGlobalProperty(GlobalProperty igp, Session& session)
 }
 
 void
-game::interface::setGlobalProperty(GlobalProperty igp, Session& session, afl::data::Value* value)
+game::interface::setGlobalProperty(GlobalProperty igp, Session& session, const afl::data::Value* value)
 {
     // ex int/if/globalif.h:setGlobalProperty
     int32_t iv;

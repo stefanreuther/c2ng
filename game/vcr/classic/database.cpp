@@ -83,61 +83,6 @@ namespace {
         out.setCrewDefenseRate(0);
         return out;
     }
-
-// FIXME: needed?
-// /** Pack into classic TRawVcr.
-//     \param raw [out] Output will be produced here
-//     \param side [in] Side to pack
-//     \retval true packing successful
-//     \retval false data cannot be packed, %raw left incomplete */
-// bool
-// GVcrObject::pack(TRawVcr& raw, int side)
-// {
-//     TVcrObject& o = raw.objects[side];
-
-//     // Simple fields
-//     storeBasicString(o.name, convertUtf8ToGame(name));
-//     o.damage           = pod.damage;
-//     o.crew             = pod.crew;
-//     o.id               = pod.id;
-//     o.owner            = pod.owner;
-//     o.race_or_zero     = pod.race_or_zero;
-//     o.picture          = pod.picture;
-//     o.hull_or_zero     = pod.hull_or_zero;
-//     o.beam_type        = pod.beam_type;
-//     o.beam_count       = pod.beam_count;
-//     o.experience_level = pod.experience_level;
-//     o.bay_count        = pod.bay_count;
-//     raw.mass[side]     = pod.mass;
-//     raw.shield[side]   = pod.shield;
-
-//     // Secondary weapons
-//     if (pod.torp_lcount != 0) {
-//         // It has torps
-//         o.torp_type = pod.torp_type;
-//         if (pod.is_planet && config.PlanetsHaveTubes()) { // FIXME: als Parameter
-//             // Planet with torps and fighters
-//             if (pod.torp_lcount > 255 || pod.torp_count > 255) {
-//                 return false;
-//             }
-//             o._torp_launcher_count = 256*pod.torp_count + pod.torp_lcount;
-//             o._ammo                = pod.bay_count != 0 ? pod.fighter_count : 0;
-//         } else {
-//             // Normal torps
-//             if (pod.bay_count != 0) {
-//                 return false;
-//             }
-//             o._torp_launcher_count = pod.torp_lcount;
-//             o._ammo                = pod.torp_count;
-//         }
-//     } else {
-//         // No torps
-//         o.torp_type            = 0;
-//         o._torp_launcher_count = 0;
-//         o._ammo                = pod.bay_count != 0 ? pod.fighter_count : 0;
-//     }
-//     return true;
-// }
 }
 
 

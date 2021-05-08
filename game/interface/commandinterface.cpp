@@ -28,7 +28,7 @@ using game::v3::CommandExtra;
 void
 game::interface::IFAddCommand(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
 {
-    // ex int/if/globalif.h:IFAddCommand
+    // ex int/if/globalif.h:IFAddCommand, globint.pas:Global_AddCommand
     args.checkArgumentCount(1);
 
     // Fetch argument

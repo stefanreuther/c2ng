@@ -55,7 +55,7 @@ game::interface::UserInterfacePropertyStack::get(UserInterfaceProperty p) const
 
 // Set property.
 void
-game::interface::UserInterfacePropertyStack::set(UserInterfaceProperty p, afl::data::Value* value)
+game::interface::UserInterfacePropertyStack::set(UserInterfaceProperty p, const afl::data::Value* value)
 {
     size_t i = m_stack.size();
     bool ok = false;

@@ -29,24 +29,20 @@ class game::proxy::CargoTransferProxy::Notifier : public util::Request<CargoTran
 /*
  *  Observer: game-side object
  */
-class game::proxy::CargoTransferProxy::Observer : public util::SlaveObject<Session> {
+class game::proxy::CargoTransferProxy::Observer {
  public:
-    Observer(util::RequestSender<CargoTransferProxy> reply)
-        : transfer(),
+    Observer(Session& session, util::RequestSender<CargoTransferProxy> reply)
+        : session(session),
+          transfer(),
           limit(),
           reply(reply)
-        { transfer.sig_change.add(this, &Observer::onChange); }
-
-    // Glue
-    virtual void init(Session& session)
-        { limit = Element::end(game::actions::mustHaveShipList(session)); }
-    virtual void done(Session& /*session*/)
-        { }
+        {
+            transfer.sig_change.add(this, &Observer::onChange);
+            limit = Element::end(game::actions::mustHaveShipList(session));
+        }
 
     void onChange()
         {
-            // FIXME: as implemented, this notifier is O(n^2): a change to a container immediately notifies,
-            // and each notification notifies all containers.
             for (size_t i = 0, n = transfer.getNumContainers(); i != n; ++i) {
                 if (const CargoContainer* cont = transfer.get(i)) {
                     Cargo c;
@@ -57,9 +53,22 @@ class game::proxy::CargoTransferProxy::Observer : public util::SlaveObject<Sessi
         }
 
     // Data
+    Session& session;
     game::actions::CargoTransfer transfer;
     Element::Type limit;
     util::RequestSender<CargoTransferProxy> reply;
+};
+
+
+class game::proxy::CargoTransferProxy::ObserverFromSession : public afl::base::Closure<Observer*(Session&)> {
+ public:
+    ObserverFromSession(const util::RequestSender<CargoTransferProxy>& proxy)
+        : m_proxy(proxy)
+        { }
+    virtual Observer* call(Session& session)
+        { return new Observer(session, m_proxy); }
+ private:
+    util::RequestSender<CargoTransferProxy> m_proxy;
 };
 
 
@@ -67,29 +76,29 @@ class game::proxy::CargoTransferProxy::Observer : public util::SlaveObject<Sessi
 game::proxy::CargoTransferProxy::CargoTransferProxy(util::RequestSender<Session> gameSender, util::RequestDispatcher& reply)
     : m_gameSender(gameSender),
       m_reply(reply, *this),
-      m_observerSender(gameSender, new Observer(m_reply.getSender()))
+      m_observerSender(gameSender.makeTemporary(new ObserverFromSession(m_reply.getSender())))
 { }
 
 // Initialize for two-unit setup.
 void
 game::proxy::CargoTransferProxy::init(const game::actions::CargoTransferSetup& setup)
 {
-    class Task : public util::SlaveRequest<Session, Observer> {
+    class Task : public util::Request<Observer> {
      public:
         Task(const game::actions::CargoTransferSetup& setup)
             : m_setup(setup)
             { }
-        virtual void handle(Session& session, Observer& obs)
+        virtual void handle(Observer& obs)
             {
-                Turn& turn = game::actions::mustHaveGame(session).currentTurn();
-                Root& root = game::actions::mustHaveRoot(session);
+                Turn& turn = game::actions::mustHaveGame(obs.session).currentTurn();
+                Root& root = game::actions::mustHaveRoot(obs.session);
 
                 m_setup.build(obs.transfer,
                               turn,
                               root.hostConfiguration(),
-                              game::actions::mustHaveShipList(session),
-                              root.hostVersion());
-
+                              game::actions::mustHaveShipList(obs.session),
+                              root.hostVersion(),
+                              obs.session.translator());
             }
      private:
         game::actions::CargoTransferSetup m_setup;
@@ -97,23 +106,64 @@ game::proxy::CargoTransferProxy::init(const game::actions::CargoTransferSetup& s
     m_observerSender.postNewRequest(new Task(setup));
 }
 
+// Initialize for multi-unit setup.
+game::actions::MultiTransferSetup::Result
+game::proxy::CargoTransferProxy::init(WaitIndicator& link, const game::actions::MultiTransferSetup& setup)
+{
+    using game::actions::MultiTransferSetup;
+
+    class Task : public util::Request<Observer> {
+     public:
+        Task(MultiTransferSetup::Result& result, const MultiTransferSetup& setup)
+            : m_result(result), m_setup(setup)
+            { }
+        virtual void handle(Observer& obs)
+            { m_result = m_setup.build(obs.transfer, game::actions::mustHaveGame(obs.session).currentTurn().universe(), obs.session); }
+     private:
+        MultiTransferSetup::Result& m_result;
+        MultiTransferSetup m_setup;
+    };
+
+    MultiTransferSetup::Result result;
+    Task t(result, setup);
+    link.call(m_observerSender, t);
+    return result;
+}
+
+// Add new hold space.
+void
+game::proxy::CargoTransferProxy::addHoldSpace(const String_t& name)
+{
+    class Task : public util::Request<Observer> {
+     public:
+        Task(const String_t& name)
+            : m_name(name)
+            { }
+        virtual void handle(Observer& obs)
+            { obs.transfer.addHoldSpace(m_name); }
+     private:
+        String_t m_name;
+    };
+    m_observerSender.postNewRequest(new Task(name));
+}
+
 // Get general information.
 void
 game::proxy::CargoTransferProxy::getGeneralInformation(WaitIndicator& link, General& info)
 {
-    class Task : public util::SlaveRequest<Session, Observer> {
+    class Task : public util::Request<Observer> {
      public:
         Task(General& info)
             : m_info(info)
             { }
 
-        virtual void handle(Session& session, Observer& obs)
+        virtual void handle(Observer& obs)
             {
                 // Clear in case the following throws
                 m_info = General();
 
-                game::spec::ShipList& shipList = game::actions::mustHaveShipList(session);
-                afl::string::Translator& tx = session.translator();
+                game::spec::ShipList& shipList = game::actions::mustHaveShipList(obs.session);
+                afl::string::Translator& tx = obs.session.translator();
 
                 // Valid types
                 m_info.validTypes = obs.transfer.getElementTypes(shipList);
@@ -127,6 +177,9 @@ game::proxy::CargoTransferProxy::getGeneralInformation(WaitIndicator& link, Gene
                 // Actions
                 m_info.allowUnload = obs.transfer.isUnloadAllowed();
                 m_info.allowSupplySale = obs.transfer.isSupplySaleAllowed();
+
+                // Number of participant
+                m_info.numParticipants = obs.transfer.getNumContainers();
             }
 
      private:
@@ -141,25 +194,33 @@ game::proxy::CargoTransferProxy::getGeneralInformation(WaitIndicator& link, Gene
 void
 game::proxy::CargoTransferProxy::getParticipantInformation(WaitIndicator& link, size_t side, Participant& info)
 {
-    class Task : public util::SlaveRequest<Session, Observer> {
+    class Task : public util::Request<Observer> {
      public:
         Task(size_t side, Participant& info)
             : m_side(side), m_info(info)
             { }
 
-        virtual void handle(Session& session, Observer& obs)
+        virtual void handle(Observer& obs)
             {
                 // Clean up
                 m_info.name.clear();
+                m_info.info1.clear();
+                m_info.info2.clear();
                 m_info.cargo.amount.clear();
                 m_info.cargo.remaining.clear();
                 m_info.isUnloadTarget = false;
+                m_info.isTemporary = false;
 
                 // Populate if possible
                 if (const CargoContainer* c = obs.transfer.get(m_side)) {
-                    m_info.name = c->getName(session.translator());
-                    getCargo(m_info.cargo, *c, Element::end(game::actions::mustHaveShipList(session)));
-                    m_info.isUnloadTarget = c->getFlags().contains(CargoContainer::UnloadTarget);
+                    m_info.name = c->getName(obs.session.translator());
+                    m_info.info1 = c->getInfo1(obs.session.translator());
+                    m_info.info2 = c->getInfo2(obs.session.translator());
+                    getCargo(m_info.cargo, *c, Element::end(game::actions::mustHaveShipList(obs.session)));
+
+                    CargoContainer::Flags_t flags = c->getFlags();
+                    m_info.isUnloadTarget = flags.contains(CargoContainer::UnloadTarget);
+                    m_info.isTemporary = flags.contains(CargoContainer::Temporary);
                 }
             }
 
@@ -172,16 +233,33 @@ game::proxy::CargoTransferProxy::getParticipantInformation(WaitIndicator& link, 
     link.call(m_observerSender, t);
 }
 
+// Set overload permission.
+void
+game::proxy::CargoTransferProxy::setOverload(bool enable)
+{
+    class Task : public util::Request<Observer> {
+     public:
+        Task(bool enable)
+            : m_enable(enable)
+            { }
+        virtual void handle(Observer& obs)
+            { obs.transfer.setOverload(m_enable); }
+     private:
+        bool m_enable;
+    };
+    m_observerSender.postNewRequest(new Task(enable));
+}
+
 // Move cargo.
 void
 game::proxy::CargoTransferProxy::move(Element::Type type, int32_t amount, size_t from, size_t to, bool sellSupplies)
 {
-    class Task : public util::SlaveRequest<Session, Observer> {
+    class Task : public util::Request<Observer> {
      public:
         Task(Element::Type type, int32_t amount, size_t from, size_t to, bool sellSupplies)
             : m_type(type), m_amount(amount), m_from(from), m_to(to), m_sellSupplies(sellSupplies)
             { }
-        virtual void handle(Session& /*session*/, Observer& obs)
+        virtual void handle(Observer& obs)
             { obs.transfer.move(m_type, m_amount, m_from, m_to, true, m_sellSupplies); }
      private:
         Element::Type m_type;
@@ -193,16 +271,78 @@ game::proxy::CargoTransferProxy::move(Element::Type type, int32_t amount, size_t
     m_observerSender.postNewRequest(new Task(type, amount, from, to, sellSupplies));
 }
 
+// Move with extension.
+void
+game::proxy::CargoTransferProxy::moveExt(Element::Type type, int32_t amount, size_t from, size_t to, size_t extension, bool sellSupplies)
+{
+    class Task : public util::Request<Observer> {
+     public:
+        Task(Element::Type type, int32_t amount, size_t from, size_t to, size_t ext, bool sellSupplies)
+            : m_type(type), m_amount(amount), m_from(from), m_to(to), m_extension(ext), m_sellSupplies(sellSupplies)
+            { }
+        virtual void handle(Observer& obs)
+            { obs.transfer.moveExt(m_type, m_amount, m_from, m_to, m_extension, m_sellSupplies); }
+     private:
+        Element::Type m_type;
+        int32_t m_amount;
+        size_t m_from;
+        size_t m_to;
+        size_t m_extension;
+        bool m_sellSupplies;
+    };
+    m_observerSender.postNewRequest(new Task(type, amount, from, to, extension, sellSupplies));
+}
+
+// Move all cargo to a given unit.
+void
+game::proxy::CargoTransferProxy::moveAll(Element::Type type, size_t to, size_t except, bool sellSupplies)
+{
+    class Task : public util::Request<Observer> {
+     public:
+        Task(Element::Type type, size_t to, size_t except, bool sellSupplies)
+            : m_type(type), m_to(to), m_except(except), m_sellSupplies(sellSupplies)
+            { }
+        virtual void handle(Observer& obs)
+            { obs.transfer.moveAll(m_type, m_to, m_except, m_sellSupplies); }
+     private:
+        Element::Type m_type;
+        size_t m_to;
+        size_t m_except;
+        bool m_sellSupplies;
+    };
+    m_observerSender.postNewRequest(new Task(type, to, except, sellSupplies));
+}
+
+// Distribute cargo.
+void
+game::proxy::CargoTransferProxy::distribute(Element::Type type, size_t from, size_t except, game::actions::CargoTransfer::DistributeMode mode)
+{
+    class Task : public util::Request<Observer> {
+     public:
+        Task(Element::Type type, size_t from, size_t except, game::actions::CargoTransfer::DistributeMode mode)
+            : m_type(type), m_from(from), m_except(except), m_mode(mode)
+            { }
+        virtual void handle(Observer& obs)
+            { obs.transfer.distribute(m_type, m_from, m_except, m_mode); }
+     private:
+        Element::Type m_type;
+        size_t m_from;
+        size_t m_except;
+        game::actions::CargoTransfer::DistributeMode m_mode;
+    };
+    m_observerSender.postNewRequest(new Task(type, from, except, mode));
+}
+
 // Unload.
 void
 game::proxy::CargoTransferProxy::unload(bool sellSupplies)
 {
-    class Task : public util::SlaveRequest<Session, Observer> {
+    class Task : public util::Request<Observer> {
      public:
         Task(bool sellSupplies)
             : m_sellSupplies(sellSupplies)
             { }
-        virtual void handle(Session& /*session*/, Observer& obs)
+        virtual void handle(Observer& obs)
             { obs.transfer.unload(m_sellSupplies); }
      private:
         bool m_sellSupplies;
@@ -214,9 +354,9 @@ game::proxy::CargoTransferProxy::unload(bool sellSupplies)
 void
 game::proxy::CargoTransferProxy::commit()
 {
-    class Task : public util::SlaveRequest<Session, Observer> {
+    class Task : public util::Request<Observer> {
      public:
-        virtual void handle(Session& /*session*/, Observer& obs)
+        virtual void handle(Observer& obs)
             { obs.transfer.commit(); }
     };
     m_observerSender.postNewRequest(new Task());

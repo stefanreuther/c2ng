@@ -513,6 +513,21 @@ namespace {
         }
         return fuel;
     }
+
+    int getMovementTurns(const game::map::Universe& univ, game::Id_t shipId,
+                         game::map::Point moveFrom, game::map::Point moveTo,
+                         const game::UnitScoreDefinitionList& scoreDefinitions,
+                         const game::spec::ShipList& shipList,
+                         const game::Root& root,
+                         int warp)
+    {
+        game::map::ShipPredictor pred(univ, shipId, scoreDefinitions, shipList, root.hostConfiguration(), root.hostVersion(), root.registrationKey());
+        pred.setPosition(moveFrom);
+        pred.setWaypoint(moveTo);
+        pred.setWarpFactor(warp);
+        pred.computeMovement();
+        return pred.getNumTurns();
+    }
 }
 
 const int game::map::ShipPredictor::MOVEMENT_TIME_LIMIT;
@@ -1165,7 +1180,7 @@ String_t
 game::map::ShipPredictor::getFriendlyCode() const
 {
     // ex GShipTurnPredictor::getFCode
-    return m_ship.friendlyCode.orElse(0);
+    return m_ship.friendlyCode.orElse(String_t());
 }
 
 // Get the universe used for predicting.
@@ -1189,4 +1204,55 @@ game::map::ShipPredictor::init()
     } else {
         m_valid = false;
     }
+}
+
+int
+game::map::getOptimumWarp(const Universe& univ, Id_t shipId,
+                          Point moveFrom, Point moveTo,
+                          const UnitScoreDefinitionList& scoreDefinitions,
+                          const game::spec::ShipList& shipList,
+                          const Root& root)
+{
+    // ex computeOptimumWarp
+    // Find out how long it takes to get there at this speed
+    const Ship* sh = univ.ships().get(shipId);
+    if (sh == 0) {
+        return 0;
+    }
+    const game::spec::Engine* e = shipList.engines().get(sh->getEngineType().orElse(0));
+    if (e == 0) {
+        return 0;
+    }
+
+    int thisSpeed = e->getMaxEfficientWarp();
+    int thisTime = getMovementTurns(univ, shipId, moveFrom, moveTo, scoreDefinitions, shipList, root, thisSpeed);
+    int result = thisSpeed;
+
+    // Do we make it in finite time? If not, let user resolve it.
+    if (thisTime >= ShipPredictor::MOVEMENT_TIME_LIMIT) {
+        return result;
+    }
+
+    /* Find lowest possible speed.
+       - into deep space: allow all speeds down to warp 1
+       - into warp well: assume they want to reach the planet. Do not go below warp 2.
+       - stay in same warp well: allow all speeds down to warp 1 */
+    Id_t oldPlanet = univ.findPlanetAt(moveFrom, true, root.hostConfiguration(), root.hostVersion());
+    Id_t newPlanet = univ.findPlanetAt(moveTo,   true, root.hostConfiguration(), root.hostVersion());
+    int lowerLimit;
+    if (newPlanet != 0 && oldPlanet != newPlanet) {
+        lowerLimit = 2;
+    } else {
+        lowerLimit = 1;
+    }
+
+    // Find whether we can reach the target with a slower speed
+    while (thisSpeed > lowerLimit) {
+        --thisSpeed;
+        if (getMovementTurns(univ, shipId, moveFrom, moveTo, scoreDefinitions, shipList, root, thisSpeed) > thisTime) {
+            // It's slower, so undo and stop
+            return thisSpeed+1;
+        }
+    }
+    return thisSpeed;
 }

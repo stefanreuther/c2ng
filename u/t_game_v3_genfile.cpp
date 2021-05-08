@@ -7,10 +7,10 @@
 
 #include "t_game_v3.hpp"
 #include "afl/io/constmemorystream.hpp"
-#include "u/files.hpp"
-#include "game/v3/resultfile.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "game/score/turnscorelist.hpp"
+#include "game/test/files.hpp"
+#include "game/v3/resultfile.hpp"
 
 namespace {
     using game::v3::GenFile;
@@ -102,7 +102,7 @@ void
 TestGameV3GenFile::testResult()
 {
     afl::string::NullTranslator tx;
-    afl::io::ConstMemoryStream ms(getResultFile30());
+    afl::io::ConstMemoryStream ms(game::test::getResultFile30());
     game::v3::ResultFile rst(ms, tx);
 
     afl::io::Stream::FileSize_t pos;

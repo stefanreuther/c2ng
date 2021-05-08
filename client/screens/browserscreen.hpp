@@ -6,6 +6,7 @@
 
 #include "afl/base/ptr.hpp"
 #include "afl/base/signal.hpp"
+#include "afl/string/translator.hpp"
 #include "client/widgets/folderlistbox.hpp"
 #include "game/browser/session.hpp"
 #include "game/session.hpp"
@@ -34,9 +35,10 @@ namespace client { namespace screens {
         /** Constructor.
             Prepares a BrowserScreen.
             \param root User interface root
+            \param tx Translator
             \param sender Sender to communicate with the browser session
             \param gameSender Sender to communicate with the game session (required for plugins/help) */
-        BrowserScreen(ui::Root& root, util::RequestSender<game::browser::Session> sender, util::RequestSender<game::Session> gameSender);
+        BrowserScreen(ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::browser::Session> sender, util::RequestSender<game::Session> gameSender);
 
         /** Display this screen.
             Returns when the user cancels the dialog.
@@ -124,6 +126,7 @@ namespace client { namespace screens {
         void buildInfo();
 
         ui::Root& m_root;
+        afl::string::Translator& m_translator;
         util::RequestSender<game::browser::Session> m_sender;
         util::RequestSender<game::Session> m_gameSender;
         util::RequestReceiver<BrowserScreen> m_receiver;

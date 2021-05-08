@@ -43,7 +43,7 @@ namespace game { namespace vcr { namespace classic {
                   const Battle& battle,
                   const game::spec::ShipList& shipList,
                   const PlayerList& players,
-                  const TeamSettings& teams,
+                  const TeamSettings* teams,
                   const game::config::HostConfiguration& config);
 
         /** Play single cycle.
@@ -94,7 +94,7 @@ namespace game { namespace vcr { namespace classic {
                       const Object& obj,
                       const game::spec::ShipList& shipList,
                       const PlayerList& players,
-                      const TeamSettings& teams,
+                      const TeamSettings* teams,
                       const game::config::HostConfiguration& config);
         void updateSide(Side side, Algorithm& algo);
         void refreshSide(Side side, Algorithm& algo);

@@ -17,8 +17,6 @@ namespace game { namespace vcr { namespace classic {
 
     Database* getDatabase(Session& s);
 
-    // String_t getImageResourceId(const Object& object, Side side, const game::spec::ShipList& shipList);
-
     String_t formatBattleResult(BattleResult_t result,
                                 const String_t& leftName, TeamSettings::Relation leftRelation,
                                 const String_t& rightName, TeamSettings::Relation rightRelation,

@@ -10,7 +10,7 @@
 
 namespace game { namespace interface {
 
-    bool checkRichArg(RichTextValue::Ptr_t& out, afl::data::Value* value);
+    bool checkRichArg(RichTextValue::Ptr_t& out, const afl::data::Value* value);
 
     afl::data::Value* IFRAdd(game::Session& session, interpreter::Arguments& args);
     afl::data::Value* IFRAlign(game::Session& session, interpreter::Arguments& args);

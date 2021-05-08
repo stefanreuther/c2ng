@@ -7,21 +7,23 @@
 #include "interpreter/taskeditor.hpp"
 
 #include "t_interpreter.hpp"
-#include "afl/sys/log.hpp"
 #include "afl/io/nullfilesystem.hpp"
-#include "interpreter/world.hpp"
+#include "afl/string/nulltranslator.hpp"
+#include "afl/sys/log.hpp"
 #include "interpreter/error.hpp"
+#include "interpreter/world.hpp"
 
 namespace {
     struct TestHarness {
         afl::sys::Log log;
+        afl::string::NullTranslator tx;
         afl::io::NullFileSystem fs;
         interpreter::World world;
         interpreter::Process proc;
 
         TestHarness()
-            : log(), fs(),
-              world(log, fs),
+            : log(), tx(), fs(),
+              world(log, tx, fs),
               proc(world, "proc", 77)
             { }
     };

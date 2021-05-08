@@ -6,8 +6,6 @@
 #include "game/config/configuration.hpp"
 #include "game/config/stringoption.hpp"
 
-// FIXME: signal for changes
-
 // Constructor.
 game::config::Configuration::Configuration()
 { }
@@ -108,4 +106,17 @@ game::config::Configuration::notifyListeners()
     if (needed) {
         sig_change.raise();
     }
+}
+
+void
+game::config::Configuration::insertNewOption(const String_t& name, ConfigurationOption* newOption, const ConfigurationOption* oldOption)
+{
+    if (oldOption != 0) {
+        try {
+            newOption->set(oldOption->toString());
+            newOption->setSource(oldOption->getSource());
+        }
+        catch (...) { }
+    }
+    m_options.insertNew(name, newOption);
 }

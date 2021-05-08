@@ -161,11 +161,10 @@ namespace ui {
 
         /** Move widget to screen edge.
             \param widget Widget to move
-            \param xPos   Relative X position (0: left, 1: center, 2: right)
-            \param yPos   Relative Y position (0: top, 1: center, 2: bottom)
-            \param offset Distance to edge. When anchored at an edge (0 or 2),
-                          leave that many pixels from that edge. */
-        void moveWidgetToEdge(Widget& widget, int xPos, int yPos, int offset);
+            \param xPos   Relative X position
+            \param yPos   Relative Y position
+            \param offset Distance to edge. When anchored at an edge, leave that many pixels from that edge. */
+        void moveWidgetToEdge(Widget& widget, gfx::HorizontalAlignment xPos, gfx::VerticalAlignment yPos, int offset);
 
         /** Save a screenshot.
             Saves the current canvas by invoking sig_screenshot with the right parameters. */

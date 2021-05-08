@@ -26,7 +26,7 @@ namespace game { namespace interface {
         // Value:
         virtual RichTextValue* clone() const;
 
-        Ref_t get();
+        Ref_t get() const;
 
      private:
         Ref_t m_value;

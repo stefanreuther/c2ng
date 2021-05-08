@@ -112,7 +112,7 @@ namespace {
                 }
 
                 // Create session thread
-                util::RequestThread sessionThread("TestClientDialogsObjectSelectionDialog::testIt", log);
+                util::RequestThread sessionThread("TestClientDialogsObjectSelectionDialog::testIt", log, tx);
                 util::RequestReceiver<game::Session> sessionReceiver(sessionThread, session);
                 session.log().addListener(log);
 
@@ -125,28 +125,37 @@ namespace {
                     TheControl(client::si::UserSide& ui, ui::Root& root, afl::string::Translator& tx)
                         : Control(ui, root, tx)
                         { }
-                    virtual void handleStateChange(client::si::UserSide& ui, client::si::RequestLink2 link, client::si::OutputState::Target target)
+                    virtual void handleStateChange(client::si::RequestLink2 link, client::si::OutputState::Target target)
                         {
                             // We do not expect a state change directed at this control
                             TS_ASSERT(target == client::si::OutputState::NoChange);
-                            ui.continueProcess(link);
+                            interface().continueProcess(link);
                         }
-                    virtual void handleEndDialog(client::si::UserSide& /*ui*/, client::si::RequestLink2 /*link*/, int /*code*/)
+                    virtual void handleEndDialog(client::si::RequestLink2 /*link*/, int /*code*/)
                         {
                             // We do not expect an EndDialog directed at this control
                             TS_ASSERT(0);
                         }
-                    virtual void handlePopupConsole(client::si::UserSide& /*ui*/, client::si::RequestLink2 /*link*/)
+                    virtual void handlePopupConsole(client::si::RequestLink2 /*link*/)
                         {
                             // We do not expect a PopupConsole directed at this control
                             TS_ASSERT(0);
                         }
-                    virtual void handleSetViewRequest(client::si::UserSide& /*ui*/, client::si::RequestLink2 /*link*/, String_t /*name*/, bool /*withKeymap*/)
+                    virtual void handleSetViewRequest(client::si::RequestLink2 /*link*/, String_t /*name*/, bool /*withKeymap*/)
                         {
                             // We do not expect a Chart.SetView directed at this control
                             TS_ASSERT(0);
                         }
-
+                    virtual void handleUseKeymapRequest(client::si::RequestLink2 /*link*/, String_t /*name*/, int /*prefix*/)
+                        {
+                            // We do not expect a UseKeymap directed at this control
+                            TS_ASSERT(0);
+                        }
+                    virtual void handleOverlayMessageRequest(client::si::RequestLink2 /*link*/, String_t /*text*/)
+                        {
+                            // We do not expect a UI.OverlayMessage directed at this control
+                            TS_ASSERT(0);
+                        }
                     virtual client::si::ContextProvider* createContextProvider()
                         {
                             // We do not provide context

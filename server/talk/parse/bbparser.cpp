@@ -1,5 +1,6 @@
 /**
   *  \file server/talk/parse/bbparser.cpp
+  *  \brief Class server::talk::parse::BBParser
   */
 
 #include <cstring>
@@ -263,7 +264,6 @@ server::talk::parse::BBParser::parse()
     return stack.extractLast();
 }
 
-// /** Check for known tag. */
 bool
 server::talk::parse::BBParser::isKnownTag(const String_t& tag)
 {
@@ -277,7 +277,6 @@ server::talk::parse::BBParser::isKnownTag(const String_t& tag)
         || identify(tag) != 0;
 }
 
-// /** Handle a start tag. */
 void
 server::talk::parse::BBParser::handleStart()
 {
@@ -379,7 +378,6 @@ server::talk::parse::BBParser::handleStart()
     }
 }
 
-// /** Handle an end tag. */
 void
 server::talk::parse::BBParser::handleEnd()
 {
@@ -480,7 +478,6 @@ server::talk::parse::BBParser::handleParagraph()
 {
     // ex BBParser::handleParagraph
     closeInline();
-    // FIXME: ASSERT(!stack.empty());
     close();
     open(TextNode::maParagraph, TextNode::miParNormal);
 }
@@ -637,7 +634,6 @@ void
 server::talk::parse::BBParser::close()
 {
     // ex BBParser::close
-    // FIXME: ASSERT(stack.size() > 1);
     std::auto_ptr<TextNode> node(stack.extractLast());
     bool keep = true;
     switch (TextNode::MajorKind(node->major)) {
@@ -686,8 +682,8 @@ server::talk::parse::BBParser::close(depth_t n)
     }
 }
 
-// /** Close all links. If the stack contains a link, closes everything
-//     up to and including it. */
+/** Close all links.
+    If the stack contains a link, closes everything up to and including it. */
 void
 server::talk::parse::BBParser::closeLinks()
 {
@@ -701,7 +697,8 @@ server::talk::parse::BBParser::closeLinks()
     }
 }
 
-// /** Close all inline tags. Upon return, the stack contains a paragraph. */
+/** Close all inline tags.
+    Upon return, the stack contains a paragraph. */
 void
 server::talk::parse::BBParser::closeInline()
 {
@@ -711,10 +708,10 @@ server::talk::parse::BBParser::closeInline()
     }
 }
 
-// /** Close all tags up to a specific one.
-//     \param major,minor Tag to close
-//     \retval true tag found and closed
-//     \retval false tag not found, stack unchanged */
+/** Close all tags up to a specific one.
+    \param major,minor Tag to close
+    \retval true tag found and closed
+    \retval false tag not found, stack unchanged */
 bool
 server::talk::parse::BBParser::closeUntil(uint8_t major, uint8_t minor)
 {
@@ -732,7 +729,7 @@ server::talk::parse::BBParser::closeUntil(uint8_t major, uint8_t minor)
     }
 }
 
-// /** Check for link on stack. */
+/** Check for link on stack. */
 bool
 server::talk::parse::BBParser::inLink() const
 {

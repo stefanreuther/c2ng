@@ -23,7 +23,7 @@ game::actions::BuildStarbase::BuildStarbase(game::map::Planet& planet,
 {
     // ex GPlanetBuildStarbaseAction::GPlanetBuildStarbaseAction
     // ex planint.pas:BuildBase (sort-of)
-    mustBePlayed(planet);
+    mustBePlayed(planet, tx);
 
     if (wantBase == m_planet.isBuildingBase()) {
         // Null operation. It is an error to start with a null action,

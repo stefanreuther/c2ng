@@ -7,6 +7,8 @@
 #include "gfx/context.hpp"
 #include "util/updater.hpp"
 #include "gfx/complex.hpp"
+#include "afl/charset/utf8reader.hpp"
+#include "afl/charset/utf8.hpp"
 
 ui::widgets::SimpleTable::Range&
 ui::widgets::SimpleTable::Range::setText(const String_t& text)
@@ -24,7 +26,7 @@ ui::widgets::SimpleTable::Range::setText(const String_t& text)
 }
 
 ui::widgets::SimpleTable::Range&
-ui::widgets::SimpleTable::Range::setFont(gfx::FontRequest& font)
+ui::widgets::SimpleTable::Range::setFont(const gfx::FontRequest& font)
 {
     util::Updater up;
     for (size_t i = 0, pos = m_start; i < m_count; ++i, pos += m_stride) {
@@ -39,7 +41,7 @@ ui::widgets::SimpleTable::Range::setFont(gfx::FontRequest& font)
 }
 
 ui::widgets::SimpleTable::Range&
-ui::widgets::SimpleTable::Range::setTextAlign(int x, int y)
+ui::widgets::SimpleTable::Range::setTextAlign(gfx::HorizontalAlignment x, gfx::VerticalAlignment y)
 {
     util::Updater up;
     for (size_t i = 0, pos = m_start; i < m_count; ++i, pos += m_stride) {
@@ -60,6 +62,20 @@ ui::widgets::SimpleTable::Range::setColor(uint8_t color)
     for (size_t i = 0, pos = m_start; i < m_count; ++i, pos += m_stride) {
         assert(pos < m_table.m_cells.size());
         up.set(m_table.m_cells[pos].color, color);
+    }
+    if (up) {
+        m_table.requestRedraw();
+    }
+    return *this;
+}
+
+ui::widgets::SimpleTable::Range&
+ui::widgets::SimpleTable::Range::setColorString(const String_t& colorString)
+{
+    util::Updater up;
+    for (size_t i = 0, pos = m_start; i < m_count; ++i, pos += m_stride) {
+        assert(pos < m_table.m_cells.size());
+        up.set(m_table.m_cells[pos].colorString, colorString);
     }
     if (up) {
         m_table.requestRedraw();
@@ -108,6 +124,11 @@ ui::widgets::SimpleTable::Range::subrange(size_t start, size_t count)
     return Range(m_table, m_start + m_stride*effStart, m_stride, effCount);
 }
 
+ui::widgets::SimpleTable::Range
+ui::widgets::SimpleTable::Range::cell(size_t index)
+{
+    return subrange(index, 1);
+}
 
 inline
 ui::widgets::SimpleTable::Range::Range(SimpleTable& table, size_t start, size_t stride, size_t count)
@@ -121,7 +142,8 @@ ui::widgets::SimpleTable::SimpleTable(Root& root, size_t numColumns, size_t numR
       m_rowMetrics(),
       m_columnMetrics(),
       m_numRows(numRows),
-      m_numColumns(numColumns)
+      m_numColumns(numColumns),
+      m_mousePressed(false)
 {
     m_cells.resize(numColumns * numRows);
     m_rowMetrics.resize(numRows);
@@ -266,14 +288,31 @@ ui::widgets::SimpleTable::draw(gfx::Canvas& can)
             padAfter = nextMetric.padAfter;
             ++i;
         }
+
+        // If this is the last column, let it extend to widget size if needed.
+        // But only if it's left-aligned.
+        if (column == m_numColumns && c.alignX == gfx::LeftAlign) {
+            size = std::max(size, rowArea.getWidth() - padAfter);
+        }
         gfx::Rectangle cellArea = rowArea.splitX(size);
         rowArea.consumeX(padAfter);
 
         // Render cell
         ctx.useFont(*m_root.provider().getFont(c.font));
         ctx.setTextAlign(c.alignX, c.alignY);
+
+        gfx::Rectangle textArea = cellArea;
+        size_t colorIndex = 0;
+        afl::charset::Utf8Reader rdr(afl::string::toBytes(c.text), 0);
+        while (colorIndex < c.colorString.size() && rdr.hasMore()) {
+            String_t thisChar;
+            afl::charset::Utf8(0).append(thisChar, rdr.eat());
+            ctx.setColor(uint8_t(c.colorString[colorIndex]));
+            outTextF(ctx, textArea.splitX(ctx.getFont()->getTextWidth(thisChar)), thisChar);
+            ++colorIndex;
+        }
         ctx.setColor(c.color);
-        outTextF(ctx, cellArea, c.text);
+        outTextF(ctx, textArea, afl::string::fromBytes(rdr.getRemainder()));
         if (c.underlined) {
             // This position computation is the combination of the computations in outTextF and ui::rich::Document::draw() for underlining.
             int textHeight = ctx.getFont()->getTextHeight(c.text);
@@ -293,8 +332,12 @@ ui::widgets::SimpleTable::draw(gfx::Canvas& can)
 }
 
 void
-ui::widgets::SimpleTable::handleStateChange(State /*st*/, bool /*enable*/)
-{ }
+ui::widgets::SimpleTable::handleStateChange(State st, bool /*enable*/)
+{
+    if (st == ActiveState) {
+        m_mousePressed = false;
+    }
+}
 
 void
 ui::widgets::SimpleTable::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
@@ -313,9 +356,26 @@ ui::widgets::SimpleTable::handleKey(util::Key_t /*key*/, int /*prefix*/)
 }
 
 bool
-ui::widgets::SimpleTable::handleMouse(gfx::Point /*pt*/, MouseButtons_t /*pressedButtons*/)
+ui::widgets::SimpleTable::handleMouse(gfx::Point pt, MouseButtons_t pressedButtons)
 {
-    return false;
+    if (getExtent().contains(pt)) {
+        if (pressedButtons.empty()) {
+            m_mousePressed = true;
+            return false;
+        } else {
+            if (m_mousePressed) {
+                m_mousePressed = false;
+
+                size_t row, column;
+                if (getCellFromPoint(pt - getExtent().getTopLeft(), column, row)) {
+                    sig_cellClick.raise(column, row);
+                }
+            }
+            return true;
+        }
+    } else {
+        return false;
+    }
 }
 
 void
@@ -403,6 +463,31 @@ ui::widgets::SimpleTable::updateMetrics()
             ++row;
         }
     }
+}
+
+bool
+ui::widgets::SimpleTable::getCellFromPoint(gfx::Point relativePosition, size_t& column, size_t& row) const
+{
+    return getIndexFromCoordinate(relativePosition.getX(), m_columnMetrics, column)
+        && getIndexFromCoordinate(relativePosition.getY(), m_rowMetrics, row);
+}
+
+bool
+ui::widgets::SimpleTable::getIndexFromCoordinate(int pos, const std::vector<Metric>& m, size_t& index)
+{
+    for (size_t i = 0, n = m.size(); i < n; ++i) {
+        // Allocate half of the padAfter to this cell, half of it to the next one (unless there is no next one)
+        int padLimit = m[i].padAfter;
+        if (i != n-1) {
+            padLimit /= 2;
+        }
+        if (pos < m[i].size + padLimit) {
+            index = i;
+            return true;
+        }
+        pos -= m[i].size + m[i].padAfter;
+    }
+    return false;
 }
 
 void

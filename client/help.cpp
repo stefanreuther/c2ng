@@ -83,7 +83,7 @@ client::loadHelpPage(game::Session& session,
 
     // Operate
     util::HelpIndex::NodeVector_t nodes;
-    getHelpIndex(session).find(pageName, nodes, fs, session.log());
+    getHelpIndex(session).find(pageName, nodes, fs, session.log(), tx);
     if (nodes.empty()) {
         // Error page
         result.pushBackNew(makeTextInTag("h1", tx("Error")));

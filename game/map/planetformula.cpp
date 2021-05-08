@@ -295,6 +295,20 @@ game::map::getMaxSupportedColonists(const Planet& pl, const game::config::HostCo
     return limit;
 }
 
+int
+game::map::getHissEffect(int shipOwner, int numShips, const game::config::HostConfiguration& config, const HostVersion& host)
+{
+    // ex client/tiles/planetgrowth.cc:getHissEffect, client/dlg-tax.cc:getHissEffect
+    if (config[HostConfiguration::AllowHiss]()) {
+        if (host.isPHost()) {
+            numShips = std::min(numShips, config[HostConfiguration::MaxShipsHissing]());
+        }
+        return numShips * config[HostConfiguration::HissEffectRate](shipOwner);
+    } else {
+        return 0;
+    }
+}
+
 /** Maximum population on planet.
     \return maximum population in clans. */
 game::LongProperty_t

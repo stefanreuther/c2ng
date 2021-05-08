@@ -6,13 +6,14 @@
 #include "interpreter/mutexfunctions.hpp"
 
 #include "t_interpreter.hpp"
-#include "afl/sys/log.hpp"
-#include "afl/io/nullfilesystem.hpp"
-#include "interpreter/world.hpp"
-#include "interpreter/process.hpp"
-#include "interpreter/opcode.hpp"
-#include "afl/data/stringvalue.hpp"
 #include "afl/data/booleanvalue.hpp"
+#include "afl/data/stringvalue.hpp"
+#include "afl/io/nullfilesystem.hpp"
+#include "afl/string/nulltranslator.hpp"
+#include "afl/sys/log.hpp"
+#include "interpreter/opcode.hpp"
+#include "interpreter/process.hpp"
+#include "interpreter/world.hpp"
 
 namespace {
     using afl::data::BooleanValue;
@@ -24,11 +25,12 @@ namespace {
     /* Common environment for all tests. */
     struct Environment {
         afl::sys::Log log;
+        afl::string::NullTranslator tx;
         afl::io::NullFileSystem fs;
         interpreter::World world;
 
         Environment()
-            : log(), fs(), world(log, fs)
+            : log(), tx(), fs(), world(log, tx, fs)
             { }
     };
 

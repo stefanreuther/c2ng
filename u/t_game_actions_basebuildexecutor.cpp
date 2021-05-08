@@ -19,6 +19,8 @@ TestGameActionsBaseBuildExecutor::testInterface()
             { }
         virtual void accountHull(int /*number*/, int /*count*/, int /*free*/)
             { }
+        virtual void accountFighterBay(int /*count*/)
+            { }
     };
     Tester t;
 }

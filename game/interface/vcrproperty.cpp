@@ -14,9 +14,6 @@ using interpreter::makeIntegerValue;
 using interpreter::makeStringValue;
 using interpreter::makeSizeValue;
 
-// /** Get property of a VCR record.
-//     \param vcr The record
-//     \param ivp Property to get */
 afl::data::Value*
 game::interface::getVcrProperty(size_t battleNumber,
                                 VcrProperty ivp,

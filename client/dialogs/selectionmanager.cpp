@@ -47,8 +47,10 @@ namespace {
         virtual size_t getNumItems();
         virtual bool isItemAccessible(size_t n);
         virtual int getItemHeight(size_t n);
-        virtual int getHeaderHeight();
+        virtual int getHeaderHeight() const;
+        virtual int getFooterHeight() const;
         virtual void drawHeader(gfx::Canvas& can, gfx::Rectangle area);
+        virtual void drawFooter(gfx::Canvas& can, gfx::Rectangle area);
         virtual void drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state);
 
      private:
@@ -80,10 +82,12 @@ namespace {
                          const SelectionProxy::Info& initialInfo,
                          afl::string::Translator& tx);
 
-        virtual void handleStateChange(client::si::UserSide& ui, client::si::RequestLink2 link, client::si::OutputState::Target target);
-        virtual void handleEndDialog(client::si::UserSide& ui, client::si::RequestLink2 link, int code);
-        virtual void handlePopupConsole(client::si::UserSide& ui, client::si::RequestLink2 link);
-        virtual void handleSetViewRequest(client::si::UserSide& ui, client::si::RequestLink2 link, String_t name, bool withKeymap);
+        virtual void handleStateChange(client::si::RequestLink2 link, client::si::OutputState::Target target);
+        virtual void handleEndDialog(client::si::RequestLink2 link, int code);
+        virtual void handlePopupConsole(client::si::RequestLink2 link);
+        virtual void handleSetViewRequest(client::si::RequestLink2 link, String_t name, bool withKeymap);
+        virtual void handleUseKeymapRequest(client::si::RequestLink2 link, String_t name, int prefix);
+        virtual void handleOverlayMessageRequest(client::si::RequestLink2 link, String_t text);
         virtual client::si::ContextProvider* createContextProvider();
 
         void run();
@@ -177,12 +181,23 @@ SelectionList::getItemHeight(size_t /*n*/)
 }
 
 int
-SelectionList::getHeaderHeight()
+SelectionList::getHeaderHeight() const
 {
     return 0;
 }
+
+int
+SelectionList::getFooterHeight() const
+{
+    return 0;
+}
+
 void
 SelectionList::drawHeader(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
+{ }
+
+void
+SelectionList::drawFooter(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
 { }
 
 void
@@ -198,14 +213,14 @@ SelectionList::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, Item
         ctx.useFont(*font);
 
         // Marker
-        ctx.setTextAlign(1, 1);
+        ctx.setTextAlign(gfx::CenterAlign, gfx::MiddleAlign);
         gfx::Rectangle markerArea = area.splitX(font->getEmWidth());
         if (item == m_info.currentLayer) {
             outTextF(ctx, markerArea, UTF_RIGHT_TRIANGLE);
         }
 
         // Name
-        ctx.setTextAlign(0, 1);
+        ctx.setTextAlign(gfx::LeftAlign, gfx::MiddleAlign);
         gfx::Rectangle letterArea = area.splitX(font->getEmWidth() * 3/2);
         outTextF(ctx, letterArea, String_t(1, char('A' + item)) + ':');
 
@@ -254,31 +269,41 @@ SelectionManager::SelectionManager(client::si::UserSide& ui, ui::Root& root, Sel
 }
 
 void
-SelectionManager::handleStateChange(client::si::UserSide& ui, client::si::RequestLink2 link, client::si::OutputState::Target target)
+SelectionManager::handleStateChange(client::si::RequestLink2 link, client::si::OutputState::Target target)
 {
     // We don't expect this to be called, but it doesn't hurt.
-    ui.detachProcess(link);
-    m_outputState.set(link, target);
-    m_loop.stop(0);
+    dialogHandleStateChange(link, target, m_outputState, m_loop, 0);
 }
 
 void
-SelectionManager::handleEndDialog(client::si::UserSide& ui, client::si::RequestLink2 link, int /*code*/)
+SelectionManager::handleEndDialog(client::si::RequestLink2 link, int code)
 {
-    handleStateChange(ui, link, client::si::OutputState::NoChange);
+    dialogHandleEndDialog(link, code, m_outputState, m_loop, 0);
 }
 
 void
-SelectionManager::handlePopupConsole(client::si::UserSide& ui, client::si::RequestLink2 link)
+SelectionManager::handlePopupConsole(client::si::RequestLink2 link)
 {
     // We don't expect this to be called
-    ui.continueProcess(link);
+    interface().continueProcess(link);
 }
 
 void
-SelectionManager::handleSetViewRequest(client::si::UserSide& ui, client::si::RequestLink2 link, String_t name, bool withKeymap)
+SelectionManager::handleSetViewRequest(client::si::RequestLink2 link, String_t name, bool withKeymap)
 {
-    defaultHandleSetViewRequest(ui, link, name, withKeymap);
+    defaultHandleSetViewRequest(link, name, withKeymap);
+}
+
+void
+SelectionManager::handleUseKeymapRequest(client::si::RequestLink2 link, String_t name, int prefix)
+{
+    defaultHandleUseKeymapRequest(link, name, prefix);
+}
+
+void
+SelectionManager::handleOverlayMessageRequest(client::si::RequestLink2 link, String_t text)
+{
+    defaultHandleOverlayMessageRequest(link, text);
 }
 
 client::si::ContextProvider*
@@ -366,7 +391,7 @@ SelectionManager::handleKey(util::Key_t key, int /*prefix*/)
         // Delete
         if (ui::dialogs::MessageBox(m_translator("Do you want to clear this selection layer?"),
                                     m_translator("Selection Manager"),
-                                    m_root).doYesNoDialog())
+                                    m_root).doYesNoDialog(m_translator))
         {
             m_proxy.clearLayer(m_list.getCurrentItem());
         }
@@ -377,7 +402,7 @@ SelectionManager::handleKey(util::Key_t key, int /*prefix*/)
         // Delete all
         if (ui::dialogs::MessageBox(m_translator("Do you want to clear all selection layers?"),
                                     m_translator("Selection Manager"),
-                                    m_root).doYesNoDialog())
+                                    m_root).doYesNoDialog(m_translator))
         {
             m_proxy.clearAllLayers();
         }
@@ -420,7 +445,7 @@ SelectionManager::handleKey(util::Key_t key, int /*prefix*/)
      case 'h':
      case 'h' + util::KeyMod_Alt:
      case util::Key_F1:
-        client::dialogs::doHelpDialog(m_root, m_gameSender, "pcc2:selectionmgr");
+        client::dialogs::doHelpDialog(m_root, m_translator, m_gameSender, "pcc2:selectionmgr");
         return true;
      default:
         return false;
@@ -443,13 +468,13 @@ void
 SelectionManager::doCopy()
 {
     ui::widgets::InputLine input(2000, 25, m_root);
-    if (ui::widgets::doStandardDialog(m_translator("Selection Manager"), m_translator("Enter layer/expression to copy from:"), input, false, m_root)) {
+    if (ui::widgets::doStandardDialog(m_translator("Selection Manager"), m_translator("Enter layer/expression to copy from:"), input, false, m_root, m_translator)) {
         String_t error;
-        client::Downlink link(m_root);
+        client::Downlink link(m_root, m_translator);
         if (!m_proxy.executeExpression(link, input.getText(), m_list.getCurrentItem(), error)) {
             ui::dialogs::MessageBox(afl::string::Format(m_translator("Invalid selection expression: %s"), error),
                                     m_translator("Selection Manager"),
-                                    m_root).doOkDialog();
+                                    m_root).doOkDialog(m_translator);
         }
     }
 }
@@ -529,7 +554,7 @@ client::dialogs::doSelectionManager(client::si::UserSide& iface,
     SelectionProxy proxy(iface.gameSender(), ctl.root().engine().dispatcher());
     SelectionProxy::Info info;
     {
-        Downlink link(ctl.root());
+        Downlink link(ctl.root(), ctl.translator());
         proxy.init(link, info);
     }
 

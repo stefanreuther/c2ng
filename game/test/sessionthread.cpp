@@ -11,14 +11,23 @@ game::test::SessionThread::SessionThread()
       m_fileSystem(),
       m_session(m_translator, m_fileSystem),
       m_log(),
-      m_thread("<SessionThread>", m_log),
+      m_thread("<SessionThread>", m_log, m_translator),
+      m_receiver(m_thread, m_session)
+{ }
+
+game::test::SessionThread::SessionThread(afl::io::FileSystem& fs)
+    : m_translator(),
+      m_fileSystem(),
+      m_session(m_translator, fs),
+      m_log(),
+      m_thread("<SessionThread>", m_log, m_translator),
       m_receiver(m_thread, m_session)
 { }
 
 game::test::SessionThread::~SessionThread()
 {
     // Make sure all tasks posted until now are actually executed.
-    // In particular, this means that shutdown tasks (SlaveObject::done)
+    // In particular, this means that shutdown tasks (RequestSender::makeTemporary)
     // which could otherwise get lost if the thread happens to die before noticing the task.
     sync();
 }

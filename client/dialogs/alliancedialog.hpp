@@ -4,17 +4,17 @@
 #ifndef C2NG_CLIENT_DIALOGS_ALLIANCEDIALOG_HPP
 #define C2NG_CLIENT_DIALOGS_ALLIANCEDIALOG_HPP
 
-#include "ui/window.hpp"
-#include "client/widgets/alliancestatuslist.hpp"
-#include "ui/eventloop.hpp"
 #include "afl/base/deleter.hpp"
-#include "client/session.hpp"
-#include "game/alliance/container.hpp"
-#include "client/widgets/alliancelevelgrid.hpp"
 #include "afl/string/translator.hpp"
-#include "util/requestsender.hpp"
+#include "client/session.hpp"
+#include "client/widgets/alliancelevelgrid.hpp"
+#include "client/widgets/alliancestatuslist.hpp"
+#include "game/alliance/container.hpp"
 #include "game/session.hpp"
+#include "ui/eventloop.hpp"
 #include "ui/root.hpp"
+#include "ui/window.hpp"
+#include "util/requestsender.hpp"
 
 namespace client { namespace dialogs {
 
@@ -33,6 +33,7 @@ namespace client { namespace dialogs {
 
         ui::EventLoop m_loop;
         ui::Root& m_root;
+        afl::string::Translator& m_translator;
 
         client::widgets::AllianceStatusList* m_pList;
         client::widgets::AllianceLevelGrid* m_pGrid;

@@ -23,11 +23,9 @@ namespace {
         if (battle.getPlayability(config, shipList) != game::vcr::Battle::IsPlayable) {
             return makeStringValue("Invalid");
         } else {
-            // /* This originally distinguished between Stalemate, Timeout and Disabled,
-            //    which can be derived from the GClassicVcrEntry interface. Ultimately,
-            //    all three cases are a Stalemate, so we use that. How to detect a
-            //    stalemate? We declare a stalemate if ALL units in a fight survive.
-            //    If anyone dies or gets captured, it is no longer a stalemate. */
+            /* If all units survived, we declare this a Stalemate.
+               This also applies to "Timeout" and "Disabled" results which are not in the generic interface.
+               If this is a regular complete fight that we report as Survived for this guy, someone else will die or get captured. */
             int status = battle.getOutcome(config, shipList, side);
             if (status == 0) {
                 for (size_t i = 0, n = battle.getNumObjects(); i < n; ++i) {
@@ -45,18 +43,6 @@ namespace {
     }
 }
 
-// /** Get property of a VCR side. Note that the outcome is a property of
-//     a VCR side. Therefore, this function may need to invoke the VCR
-//     player. For this reason, the GVcrEntry cannot be const, because it
-//     will be updated with the computed result.
-
-//     There is no longer any protection against this calling the (costly) VCR.
-//     Therefore, the server module must make sure to never call this for
-//     ivsStatus / ivsStatusRaw.
-
-//     \param vcr The record.
-//     \param side Side to query (0=left, 1=right)
-//     \param ivs Property to get */
 afl::data::Value*
 game::interface::getVcrSideProperty(game::vcr::Battle& battle, size_t side, VcrSideProperty ivs,
                                     afl::string::Translator& tx,

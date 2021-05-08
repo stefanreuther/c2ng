@@ -6,20 +6,21 @@
 #include "interpreter/filefunctions.hpp"
 
 #include "t_interpreter.hpp"
-#include "interpreter/world.hpp"
-#include "interpreter/memorycommandsource.hpp"
-#include "interpreter/bytecodeobject.hpp"
-#include "interpreter/statementcompiler.hpp"
-#include "interpreter/statementcompilationcontext.hpp"
-#include "interpreter/process.hpp"
-#include "interpreter/defaultstatementcompilationcontext.hpp"
-#include "afl/sys/log.hpp"
-#include "afl/io/nullfilesystem.hpp"
-#include "interpreter/singlecontext.hpp"
-#include "interpreter/values.hpp"
-#include "interpreter/arguments.hpp"
-#include "afl/io/filemapping.hpp"
 #include "afl/data/floatvalue.hpp"
+#include "afl/io/filemapping.hpp"
+#include "afl/io/nullfilesystem.hpp"
+#include "afl/string/nulltranslator.hpp"
+#include "afl/sys/log.hpp"
+#include "interpreter/arguments.hpp"
+#include "interpreter/bytecodeobject.hpp"
+#include "interpreter/defaultstatementcompilationcontext.hpp"
+#include "interpreter/memorycommandsource.hpp"
+#include "interpreter/process.hpp"
+#include "interpreter/singlecontext.hpp"
+#include "interpreter/statementcompilationcontext.hpp"
+#include "interpreter/statementcompiler.hpp"
+#include "interpreter/values.hpp"
+#include "interpreter/world.hpp"
 
 namespace {
     class GlobalContextMock : public interpreter::SingleContext {
@@ -41,7 +42,7 @@ namespace {
                     return 0;
                 }
             }
-        virtual void set(PropertyIndex_t index, afl::data::Value* value)
+        virtual void set(PropertyIndex_t index, const afl::data::Value* value)
             { m_world.globalValues().set(index, value); }
         virtual afl::data::Value* get(PropertyIndex_t index)
             { return afl::data::Value::cloneOf(m_world.globalValues().get(index)); }
@@ -155,8 +156,9 @@ TestInterpreterFileFunctions::testSet()
 {
     // Environment
     afl::sys::Log logger;
+    afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
-    interpreter::World world(logger, fs);
+    interpreter::World world(logger, tx, fs);
 
     world.addNewGlobalContext(new GlobalContextMock(world));
     registerFileFunctions(world);
@@ -184,8 +186,9 @@ TestInterpreterFileFunctions::testPositionFunctions()
 {
     // Environment
     afl::sys::Log logger;
+    afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
-    interpreter::World world(logger, fs);
+    interpreter::World world(logger, tx, fs);
 
     world.addNewGlobalContext(new GlobalContextMock(world));
     registerFileFunctions(world);

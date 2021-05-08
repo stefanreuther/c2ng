@@ -10,12 +10,12 @@
 #include "game/exception.hpp"
 #include "game/map/object.hpp"
 #include "interpreter/selectionexpression.hpp"
-#include "util/translation.hpp"
 
 namespace {
     void selectionError()
     {
-        throw game::Exception("Invalid selection operation", _("Invalid selection operation"));
+        // This is an internal error that users should never see; no need to translate.
+        throw game::Exception("Invalid selection operation");
     }
 }
 

@@ -16,12 +16,12 @@
 #include "ui/draw.hpp"
 #include "ui/eventloop.hpp"
 #include "ui/group.hpp"
+#include "ui/icons/image.hpp"
+#include "ui/icons/stylableicon.hpp"
 #include "ui/layout/grid.hpp"
 #include "ui/layout/hbox.hpp"
 #include "ui/layout/vbox.hpp"
 #include "ui/rich/documentview.hpp"
-#include "ui/rich/imageobject.hpp"
-#include "ui/rich/stylableobject.hpp"
 #include "ui/skincolorscheme.hpp"
 #include "ui/spacer.hpp"
 #include "ui/widgets/button.hpp"
@@ -32,6 +32,7 @@
 #include "ui/widgets/keydispatcher.hpp"
 #include "ui/widgets/menuframe.hpp"
 #include "ui/widgets/quit.hpp"
+#include "ui/widgets/scrollbarcontainer.hpp"
 #include "ui/widgets/standarddialogbuttons.hpp"
 #include "ui/widgets/statictext.hpp"
 #include "ui/widgets/stringlistbox.hpp"
@@ -68,8 +69,8 @@ namespace {
                 afl::base::Deleter del;
                 ui::Window& win = del.addNew(new ui::Window(title, m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
 
-                ui::Widget& minSel = del.addNew(new ui::widgets::DecimalSelector(m_root, m_minValue, m_maxRange.min(), m_maxRange.max(), 1));
-                ui::Widget& maxSel = del.addNew(new ui::widgets::DecimalSelector(m_root, m_maxValue, m_maxRange.min(), m_maxRange.max(), 1));
+                ui::Widget& minSel = del.addNew(new ui::widgets::DecimalSelector(m_root, tx, m_minValue, m_maxRange.min(), m_maxRange.max(), 1));
+                ui::Widget& maxSel = del.addNew(new ui::widgets::DecimalSelector(m_root, tx, m_maxValue, m_maxRange.min(), m_maxRange.max(), 1));
 
                 ui::Group& g = del.addNew(new ui::Group(del.addNew(new ui::layout::Grid(2))));
                 g.add(del.addNew(new ui::widgets::StaticText(tx("From"), util::SkinColor::Static, "+", m_root.provider())));
@@ -78,7 +79,7 @@ namespace {
                 g.add(maxSel);
                 win.add(g);
 
-                ui::widgets::StandardDialogButtons& btns = del.addNew(new ui::widgets::StandardDialogButtons(m_root));
+                ui::widgets::StandardDialogButtons& btns = del.addNew(new ui::widgets::StandardDialogButtons(m_root, tx));
                 btns.addStop(m_loop);
                 win.add(btns);
 
@@ -139,11 +140,11 @@ namespace {
 
 
 
-    bool editPlayer(ui::Root& root, const String_t& title, int32_t& player, afl::string::Translator& /*tx*/, util::RequestSender<game::Session> gameSender)
+    bool editPlayer(ui::Root& root, const String_t& title, int32_t& player, afl::string::Translator& tx, util::RequestSender<game::Session> gameSender)
     {
         // Fetch player list
         game::proxy::PlayerProxy proxy(gameSender);
-        client::Downlink link(root);
+        client::Downlink link(root, tx);
         game::PlayerArray<String_t> names = proxy.getPlayerNames(link, game::Player::ShortName);
 
         // Build list widget
@@ -156,7 +157,8 @@ namespace {
         list.setCurrentKey(player);
 
         // Dialog
-        if (ui::widgets::doStandardDialog(title, String_t(), list, true, root)) {
+        ui::widgets::ScrollbarContainer cont(list, root);
+        if (ui::widgets::doStandardDialog(title, String_t(), cont, true, root, tx)) {
             list.getCurrentKey(player);
             return true;
         } else {
@@ -168,9 +170,10 @@ namespace {
 
     class EditHullDialog {
      public:
-        EditHullDialog(ui::Root& root, int current, SpecBrowserProxy& proxy)
+        EditHullDialog(ui::Root& root, afl::string::Translator& tx, int current, SpecBrowserProxy& proxy)
             : m_proxy(proxy),
               m_root(root),
+              m_translator(tx),
               m_loop(root),
               m_list(m_root.provider(), m_root.colorScheme()),
               m_current(current)
@@ -184,9 +187,10 @@ namespace {
             {
                 afl::base::Deleter del;
                 ui::Window& win = del.addNew(new ui::Window(title, m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
-                win.add(ui::widgets::FrameGroup::wrapWidget(del, m_root.colorScheme(), ui::LoweredFrame, m_list));
+                win.add(ui::widgets::FrameGroup::wrapWidget(del, m_root.colorScheme(), ui::LoweredFrame,
+                                                            del.addNew(new ui::widgets::ScrollbarContainer(m_list, m_root))));
 
-                ui::widgets::StandardDialogButtons& btn = del.addNew(new ui::widgets::StandardDialogButtons(m_root));
+                ui::widgets::StandardDialogButtons& btn = del.addNew(new ui::widgets::StandardDialogButtons(m_root, m_translator));
                 win.add(btn);
                 btn.addStop(m_loop);
 
@@ -219,6 +223,7 @@ namespace {
      private:
         SpecBrowserProxy& m_proxy;
         ui::Root& m_root;
+        afl::string::Translator& m_translator;
         ui::EventLoop m_loop;
         ui::widgets::StringListbox m_list;
         int m_current;
@@ -226,11 +231,11 @@ namespace {
 
 
 
-    bool editHull(ui::Root& root, const String_t& title, int32_t& hullNr, afl::string::Translator& /*tx*/, util::RequestSender<game::Session> gameSender)
+    bool editHull(ui::Root& root, const String_t& title, int32_t& hullNr, afl::string::Translator& tx, util::RequestSender<game::Session> gameSender)
     {
         SpecBrowserProxy proxy(gameSender, root.engine().dispatcher(), std::auto_ptr<game::spec::info::PictureNamer>(new client::PictureNamer()));
         proxy.setPage(gsi::HullPage);
-        EditHullDialog dlg(root, hullNr, proxy);
+        EditHullDialog dlg(root, tx, hullNr, proxy);
         if (dlg.run(title)) {
             hullNr = dlg.getCurrent();
             return true;
@@ -244,7 +249,7 @@ namespace {
         ui::widgets::InputLine inp(200, root);
         inp.setText(value);
         inp.setFont("+");
-        if (inp.doStandardDialog(tx("Search"), title)) {
+        if (inp.doStandardDialog(tx("Search"), title, tx)) {
             value = inp.getText();
             return true;
         } else {
@@ -252,7 +257,7 @@ namespace {
         }
     }
 
-    class AbilityIconObject : public ui::rich::BlockObject {
+    class AbilityIconObject : public ui::icons::Icon {
      public:
         static const int SIZE = 32 + 2;
         static const int GAP = 1;
@@ -267,7 +272,7 @@ namespace {
         bool empty() const
             { return m_imageNames.empty(); }
 
-        virtual gfx::Point getSize()
+        virtual gfx::Point getSize() const
             {
                 int columns = std::max(1, (m_width + GAP) / (SIZE + GAP));
                 int lines = (int(m_imageNames.size()) + columns-1) / columns;
@@ -275,7 +280,7 @@ namespace {
                 return gfx::Point(m_width, lines * (SIZE+GAP) - GAP);
             }
 
-        virtual void draw(gfx::Context<util::SkinColor::Color>& ctx, gfx::Rectangle area)
+        virtual void draw(gfx::Context<util::SkinColor::Color>& ctx, gfx::Rectangle area, ui::ButtonFlags_t /*flags*/) const
             {
                 gfx::Context<uint8_t> ctx2(ctx.canvas(), m_root.colorScheme());
                 gfx::Rectangle line;
@@ -360,7 +365,7 @@ namespace {
                 btnOK.sig_fire.addNewClosure(m_loop.makeStop(0));
 
                 ui::widgets::FrameGroup& listGroup = m_deleter.addNew(new ui::widgets::FrameGroup(ui::layout::VBox::instance0, m_root.colorScheme(), ui::LoweredFrame));
-                listGroup.add(m_list);
+                listGroup.add(m_deleter.addNew(new ui::widgets::ScrollbarContainer(m_list, m_root)));
                 listGroup.setColorScheme(m_deleter.addNew(new ui::SkinColorScheme(ui::GRAY_COLOR_SET, m_root.colorScheme())));
 
                 g11.add(m_filterDisplay);
@@ -620,7 +625,7 @@ namespace {
         void init()
             {
                 // Player names
-                client::Downlink link(m_root);
+                client::Downlink link(m_root, m_translator);
                 m_playerNames = game::proxy::PlayerProxy(m_gameSender).getPlayerNames(link, game::Player::AdjectiveName);
 
                 // Make the document view flexible
@@ -648,6 +653,7 @@ namespace {
                 m_tabs.addPage(gsi::EnginePage,          m_translator("Engines"),          '5');
                 m_tabs.addPage(gsi::BeamPage,            m_translator("Beams"),            '6');
                 m_tabs.addPage(gsi::TorpedoPage,         m_translator("Torpedoes"),        '7');
+                m_tabs.addPage(gsi::FighterPage,         m_translator("Fighters"),         '8');
                 m_tabs.setFont(gfx::FontRequest());
                 m_tabs.setKeys(ui::widgets::TabBar::CtrlTab | ui::widgets::TabBar::F6);
 
@@ -658,8 +664,6 @@ namespace {
                         { }
                     virtual void call(int)
                         { m_parent.onAddFilterOnPage(m_page); }
-                    virtual PageFilterClosure* clone() const
-                        { return new PageFilterClosure(m_parent, m_page); }
                  private:
                     SpecBrowserDialog& m_parent;
                     gsi::Page m_page;
@@ -685,12 +689,12 @@ namespace {
                     bool final = true;
                     afl::base::Ptr<gfx::Canvas> image = m_root.provider().getImage(m_pageContent.pictureName, &final);
                     if (image.get() != 0) {
-                        std::auto_ptr<ui::rich::StylableObject> obj(new ui::rich::StylableObject(std::auto_ptr<ui::rich::BlockObject>(new ui::rich::ImageObject(image)), m_root.colorScheme()));
-                        obj->setBackgroundColor(m_root.colorScheme().getColor(ui::Color_Black));
-                        obj->setFrameWidth(1);
-                        obj->setFrameType(ui::LoweredFrame);
-                        obj->setMarginBefore(gfx::Point(5, 0));   // Leave some room for text before
-                        doc.addFloatObject(std::auto_ptr<ui::rich::BlockObject>(obj), false /* = right */);
+                        ui::icons::StylableIcon& obj = doc.deleter().addNew(new ui::icons::StylableIcon(doc.deleter().addNew(new ui::icons::Image(*image)), m_root.colorScheme()));
+                        obj.setBackgroundColor(m_root.colorScheme().getColor(ui::Color_Black));
+                        obj.setFrameWidth(1);
+                        obj.setFrameType(ui::LoweredFrame);
+                        obj.setMarginBefore(gfx::Point(5, 0));   // Leave some room for text before
+                        doc.addFloatObject(obj, false /* = right */);
                     } else {
                         if (!final) {
                             m_handleImageChange = true;
@@ -698,32 +702,8 @@ namespace {
                     }
                 }
 
-                for (size_t i = 0, n = m_pageContent.attributes.size(); i < n; ++i) {
-                    const gsi::Attribute& att = m_pageContent.attributes[i];
-                    doc.add(att.name);
-                    if (!att.value.empty()) {
-                        doc.add(": ");
-                        doc.add(util::rich::Text(att.value).withColor(util::SkinColor::Green));
-                    }
-                    doc.addNewline();
-                }
+                client::dialogs::renderHullInformation(doc, m_root, m_pageContent);
 
-                // FIXME: make this configurable
-                const bool FLAG = true;
-
-                std::auto_ptr<AbilityIconObject> obj(new AbilityIconObject(m_root, doc.getPageWidth()));
-                for (size_t i = 0, n = m_pageContent.abilities.size(); i < n; ++i) {
-                    const gsi::Ability& a = m_pageContent.abilities[i];
-                    if (FLAG && !a.pictureName.empty()) {
-                        obj->add(a.pictureName);
-                    } else {
-                        doc.add(a.info);
-                        doc.addNewline();
-                    }
-                }
-                if (!obj->empty()) {
-                    doc.addCenterObject(std::auto_ptr<ui::rich::BlockObject>(obj));
-                }
                 m_docView.handleDocumentUpdate();
                 m_docView.setTopY(0);
             }
@@ -853,4 +833,35 @@ client::dialogs::doSpecificationBrowserDialog(ui::Root& root,
     SpecBrowserProxy proxy(gameSender, root.engine().dispatcher(), std::auto_ptr<game::spec::info::PictureNamer>(new PictureNamer()));
     SpecBrowserDialog dialog(root, tx, proxy, gameSender);
     dialog.run();
+}
+
+void
+client::dialogs::renderHullInformation(ui::rich::Document& doc, ui::Root& root, const game::spec::info::PageContent& content)
+{
+    for (size_t i = 0, n = content.attributes.size(); i < n; ++i) {
+        const gsi::Attribute& att = content.attributes[i];
+        doc.add(att.name);
+        if (!att.value.empty()) {
+            doc.add(": ");
+            doc.add(util::rich::Text(att.value).withColor(util::SkinColor::Green));
+        }
+        doc.addNewline();
+    }
+
+    // FIXME: make this configurable
+    const bool FLAG = true;
+
+    std::auto_ptr<AbilityIconObject> obj(new AbilityIconObject(root, doc.getPageWidth()));
+    for (size_t i = 0, n = content.abilities.size(); i < n; ++i) {
+        const gsi::Ability& a = content.abilities[i];
+        if (FLAG && !a.pictureName.empty()) {
+            obj->add(a.pictureName);
+        } else {
+            doc.add(a.info);
+            doc.addNewline();
+        }
+    }
+    if (!obj->empty()) {
+        doc.addCenterObject(doc.deleter().addNew(obj.release()));
+    }
 }

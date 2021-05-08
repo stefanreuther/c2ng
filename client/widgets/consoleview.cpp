@@ -28,7 +28,7 @@ client::widgets::ConsoleView::draw(gfx::Canvas& can)
         // Fetch content
         gfx::FontRequest fontReq;
         String_t text;
-        int align = 0;
+        gfx::HorizontalAlignment align = gfx::LeftAlign;
         if (size_t(i) < m_lines.size() && m_lines[i] != 0) {
             fontReq.addWeight(m_lines[i]->bold);
             text = m_lines[i]->text;
@@ -48,15 +48,15 @@ client::widgets::ConsoleView::draw(gfx::Canvas& can)
         // Display message with correct alignment
         size_t pos;
         ctx.useFont(*font);
-        if (align == 1 && (pos = text.find('\t')) != String_t::npos) {
+        if (align == gfx::CenterAlign && (pos = text.find('\t')) != String_t::npos) {
             // Centered, and it has a tab. Center at the tab.
-            ctx.setTextAlign(2, 0);
+            ctx.setTextAlign(gfx::RightAlign, gfx::TopAlign);
             outTextF(ctx, lineArea.splitX(lineArea.getWidth() / 2), text.substr(0, pos));
-            ctx.setTextAlign(0, 0);
+            ctx.setTextAlign(gfx::LeftAlign, gfx::TopAlign);
             outTextF(ctx, lineArea,                                 text.substr(pos+1));
         } else {
             // Normal
-            ctx.setTextAlign(align, 0);
+            ctx.setTextAlign(align, gfx::TopAlign);
             outTextF(ctx, lineArea, text);
         }
     }
@@ -72,7 +72,7 @@ client::widgets::ConsoleView::draw(gfx::Canvas& can)
         gfx::Rectangle area(getExtent().getRightX() - width, getExtent().getTopY(), width, height);
         drawSolidBar(ctx, area, util::SkinColor::Red);
         ctx.setColor(util::SkinColor::White);
-        ctx.setTextAlign(0, 0);
+        ctx.setTextAlign(gfx::LeftAlign, gfx::TopAlign);
         outTextF(ctx, area, text);
     }
 }
@@ -109,7 +109,7 @@ client::widgets::ConsoleView::handleMouse(gfx::Point pt, MouseButtons_t pressedB
 }
 
 void
-client::widgets::ConsoleView::addLine(int nr, String_t text, int align, int bold, util::SkinColor::Color color)
+client::widgets::ConsoleView::addLine(int nr, String_t text, gfx::HorizontalAlignment align, int bold, util::SkinColor::Color color)
 {
     if (nr >= 0 && nr < m_sizeCells.getY()) {
         size_t requiredSize = nr + 1;

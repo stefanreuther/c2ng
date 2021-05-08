@@ -4,8 +4,6 @@
 
 #include "server/talk/textnode.hpp"
 
-// /** To be called on list nodes: check for simple list. A simple list is one
-//     where every list item has just one paragraph as content. */
 bool
 server::talk::TextNode::isSimpleList() const
 {
@@ -34,7 +32,6 @@ server::talk::TextNode::isSimpleList() const
     return true;
 }
 
-// /** Remove all quotes from this text. Updates the node in-place. */
 void
 server::talk::TextNode::stripQuotes()
 {
@@ -58,7 +55,6 @@ server::talk::TextNode::stripQuotes()
     }
 }
 
-// /** Get content of this node as raw text. */
 // FIXME: document that/why this limits to 10000
 String_t
 server::talk::TextNode::getTextContent() const

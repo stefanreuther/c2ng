@@ -77,3 +77,11 @@ TestClientPictureNamer::testAbility()
     TS_ASSERT_EQUALS(testee.getAbilityPicture(""), "");
 }
 
+void
+TestClientPictureNamer::testVcrObject()
+{
+    client::PictureNamer testee;
+    TS_ASSERT_EQUALS(testee.getVcrObjectPicture(false, 9), "ship.9");
+    TS_ASSERT_EQUALS(testee.getVcrObjectPicture(true, 200), "planet");
+}
+

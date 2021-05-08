@@ -7,9 +7,6 @@
 game::tables::HeadingName::HeadingName()
 { }
 
-// /** Get name for a heading (direction).
-//     \param heading Heading in degrees
-//     \return statically-allocated, translated string */
 String_t
 game::tables::HeadingName::get(int heading) const
 {

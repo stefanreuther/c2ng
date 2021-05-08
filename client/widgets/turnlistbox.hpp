@@ -4,11 +4,12 @@
 #ifndef C2NG_CLIENT_WIDGETS_TURNLISTBOX_HPP
 #define C2NG_CLIENT_WIDGETS_TURNLISTBOX_HPP
 
-#include "ui/widgets/abstractlistbox.hpp"
 #include "afl/string/string.hpp"
-#include "ui/root.hpp"
-#include "gfx/point.hpp"
+#include "afl/string/translator.hpp"
 #include "gfx/font.hpp"
+#include "gfx/point.hpp"
+#include "ui/root.hpp"
+#include "ui/widgets/abstractlistbox.hpp"
 
 namespace client { namespace widgets {
 
@@ -34,14 +35,16 @@ namespace client { namespace widgets {
         };
         typedef std::vector<Item> Items_t;
 
-        TurnListbox(gfx::Point cells, ui::Root& root);
+        TurnListbox(gfx::Point cells, ui::Root& root, afl::string::Translator& tx);
 
         // AbstractListbox virtuals:
         virtual size_t getNumItems();
         virtual bool isItemAccessible(size_t n);
         virtual int getItemHeight(size_t n);
-        virtual int getHeaderHeight();
+        virtual int getHeaderHeight() const;
+        virtual int getFooterHeight() const;
         virtual void drawHeader(gfx::Canvas& can, gfx::Rectangle area);
+        virtual void drawFooter(gfx::Canvas& can, gfx::Rectangle area);
         virtual void drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state);
 
         // Widget:
@@ -57,6 +60,7 @@ namespace client { namespace widgets {
         Items_t m_items;
         gfx::Point m_cells;
         ui::Root& m_root;
+        afl::string::Translator& m_translator;
         afl::base::Ref<gfx::Font> m_bigFont;
         afl::base::Ref<gfx::Font> m_smallFont;
     };

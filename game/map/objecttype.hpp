@@ -14,7 +14,6 @@
 namespace game { namespace map {
 
     class Object;
-    class Universe;
     class Configuration;
 
     /** Object type descriptor.
@@ -128,16 +127,51 @@ namespace game { namespace map {
             \return found index; 0 if none */
         Id_t findNextIndexNoWrap(Id_t index, bool marked);
 
-        /** Find first object at a given position.
+        /** Find next object at a given position.
+            Can filter marked objects.
+            The returned object is guaranteed to exist.
             \param pt Position
-            \return found index; 0 if none. */
-        Id_t findFirstObjectAt(Point pt);
-        Id_t findNextObjectAt(Point pt, int id);
+            \param index Index to start search at (0=report first matching object)
+            \param marked true to return only marked objects
+            \return found index; 0 if none */
+        Id_t findNextObjectAt(Point pt, int index, bool marked);
 
-        /** Find object, given an Id.
+        /** Find next object at a given position.
+            Can filter marked objects.
+            The returned object is guaranteed to exist.
+            \param pt Position
+            \param index Index to start search at (0=report last matching object)
+            \param marked true to return only marked objects
+            \return found index; 0 if none */
+        Id_t findPreviousObjectAt(Point pt, int index, bool marked);
+
+        /** Find next object at a given position, with wrap.
+            Can filter marked objects.
+            The returned object is guaranteed to exist.
+            \param pt Position
+            \param index Index to start search at (0=report first matching object)
+            \param marked true to return only marked objects
+            \return found index; 0 if none */
+        Id_t findNextObjectAtWrap(Point pt, int index, bool marked);
+
+        /** Find next object at a given position, with wrap.
+            Can filter marked objects.
+            The returned object is guaranteed to exist.
+            \param pt Position
+            \param index Index to start search at (0=report last matching object)
+            \param marked true to return only marked objects
+            \return found index; 0 if none */
+        Id_t findPreviousObjectAtWrap(Point pt, int index, bool marked);
+
+        /** Find object index, given an Id.
             \param id Id
             \return found index; 0 if none. */
         Id_t findIndexForId(Id_t id);
+
+        /** Find object index, given an object.
+            \param obj Object
+            \return found index; 0 if none. */
+        Id_t findIndexForObject(const Object* obj);
 
         /** Notify all object listeners.
             Calls Object::notifyListeners() on all objects that are modified (Object::isDirty()).

@@ -24,6 +24,7 @@ namespace client { namespace tiles {
 
      private:
         util::RequestReceiver<ControlScreenHeader> m_receiver;
+        Kind m_kind;
     };
 
 } }

@@ -93,8 +93,9 @@ class client::tiles::ShipMovementTile::Job : public util::Request<ShipMovementTi
 };
 
 
-client::tiles::ShipMovementTile::ShipMovementTile(ui::Root& root, client::widgets::KeymapWidget& kmw)
+client::tiles::ShipMovementTile::ShipMovementTile(ui::Root& root, afl::string::Translator& tx, client::widgets::KeymapWidget& kmw)
     : CollapsibleDataView(root),
+      m_translator(tx),
       m_table(root, NumColumns, NumLines),
       m_warpButton("W", 'w', root),
       m_chartButton("A", 'a', root),
@@ -146,11 +147,11 @@ client::tiles::ShipMovementTile::attach(game::proxy::ObjectObserver& oop)
                     sh->getPosition(pos);
 
                     // Location
-                    job->data.text[Data::Location] = g->currentTurn().universe().getLocationName(pos,
-                                                                                                 game::map::Universe::NameGravity | game::map::Universe::NameVerbose,
-                                                                                                 root->hostConfiguration(),
-                                                                                                 root->hostVersion(),
-                                                                                                 s.translator());
+                    job->data.text[Data::Location] = g->currentTurn().universe().findLocationName(pos,
+                                                                                                  game::map::Universe::NameGravity | game::map::Universe::NameVerbose,
+                                                                                                  root->hostConfiguration(),
+                                                                                                  root->hostVersion(),
+                                                                                                  s.translator());
                     job->data.colors[Data::Location] = SkinColor::Green;
 
                     // Waypoint
@@ -168,11 +169,11 @@ client::tiles::ShipMovementTile::attach(game::proxy::ObjectObserver& oop)
                     } else {
                         game::map::Point wp;
                         sh->getWaypoint().get(wp);
-                        job->data.text[Data::Waypoint] = g->currentTurn().universe().getLocationName(wp,
-                                                                                                     game::map::Universe::NameGravity | game::map::Universe::NameVerbose | game::map::Universe::NameShips,
-                                                                                                     root->hostConfiguration(),
-                                                                                                     root->hostVersion(),
-                                                                                                     s.translator());
+                        job->data.text[Data::Waypoint] = g->currentTurn().universe().findLocationName(wp,
+                                                                                                      game::map::Universe::NameGravity | game::map::Universe::NameVerbose | game::map::Universe::NameShips,
+                                                                                                      root->hostConfiguration(),
+                                                                                                      root->hostVersion(),
+                                                                                                      s.translator());
                         job->data.colors[Data::Waypoint] = SkinColor::Green;
                     }
 
@@ -351,7 +352,7 @@ client::tiles::ShipMovementTile::init(client::widgets::KeymapWidget& kmw)
     };
     static_assert(countof(LABELS) == NumLines, "countof(LABELS)");
     for (size_t i = 0; i < NumLines; ++i) {
-        m_table.cell(LabelColumn, i).setText(_(LABELS[i]));
+        m_table.cell(LabelColumn, i).setText(m_translator(LABELS[i]));
     }
     m_table.column(LabelColumn).setColor(ui::DARK_COLOR_SET[SkinColor::Static]);
     m_table.setColumnPadding(LabelColumn, 5);

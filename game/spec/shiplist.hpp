@@ -112,6 +112,12 @@ namespace game { namespace spec {
             \return Component; null if reference does not point at a valid component */
         const Component* getComponent(Reference ref) const;
 
+        /** Get a component, given area and Id.
+            \param area Area
+            \param id   Id
+            \return Component; null if component does not exist */
+        const Component* getComponent(TechLevel area, Id_t id) const;
+
         /** Find racial abilities.
             We define a racial ability to be an ability which the given races have one every ship.
             We'll hide these during normal operation, to avoid cluttering up display real-estate with stuff everyone knows.
@@ -138,6 +144,15 @@ namespace game { namespace spec {
                                     ExperienceLevelSet_t levelLimit,
                                     bool includeNewShip,
                                     bool includeRacialAbilities) const;
+
+        /** Get specimen hull for a hull function.
+            If there is a unique hull with that function, returns it.
+            If there are multiple or no hulls, returns null.
+            \param basicFunctionId Function
+            \param config          Host configuration
+            \param playerLimit     Consider only these players
+            \return Hull */
+        const Hull* findSpecimenHullForFunction(int basicFunctionId, const game::config::HostConfiguration& config, PlayerSet_t playerLimit) const;
 
         /** Get player mask for special function.
             \param basicFunctionId [in] basic function, hf_XXX (FIXME)

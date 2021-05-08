@@ -6,11 +6,13 @@
 #define C2NG_GAME_TEAMSETTINGS_HPP
 
 #include "afl/base/signal.hpp"
+#include "afl/base/uncopyable.hpp"
 #include "afl/charset/charset.hpp"
 #include "afl/io/directory.hpp"
 #include "afl/string/string.hpp"
 #include "afl/string/translator.hpp"
 #include "game/playerarray.hpp"
+#include "game/playerset.hpp"
 #include "util/skincolor.hpp"
 
 namespace game {
@@ -23,7 +25,7 @@ namespace game {
         Teams can also be assigned names.
 
         This is an entirely client-side concept. */
-    class TeamSettings {
+    class TeamSettings : private afl::base::Uncopyable {
      public:
         enum Relation {
             ThisPlayer,         // ex is_Me
@@ -77,6 +79,11 @@ namespace game {
             \return true if this team has a nonempty name assigned (getTeamName will not return default) */
         bool isNamedTeam(int team) const;
 
+        /** Get players in a team.
+            \param team Team
+            \return Number of players in this team */
+        PlayerSet_t getTeamPlayers(int team) const;
+
         /** Check for team configuration.
             \return true if any setting differs from the default (team numbers, names) */
         bool hasAnyTeams() const;
@@ -109,14 +116,20 @@ namespace game {
         /** Load from file.
             \param dir Directory
             \param player Player number
-            \param cs Game character set */
-        void load(afl::io::Directory& dir, int player, afl::charset::Charset& cs);
+            \param cs Game character set
+            \param tx Translator (for exception message) */
+        void load(afl::io::Directory& dir, int player, afl::charset::Charset& cs, afl::string::Translator& tx);
 
         /** Save to file.
             \param dir Directory
             \param player Player number
             \param cs Game character set */
         void save(afl::io::Directory& dir, int player, afl::charset::Charset& cs) const;
+
+        /** Copy from other settings object.
+            Use instead of an assignment operator; this will raise signals accordingly.
+            \param other Other object */
+        void copyFrom(const TeamSettings& other);
 
         /** Signal: player/team configuration changed.
             Raised when any configuration in this object changes. */

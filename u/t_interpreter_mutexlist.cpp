@@ -6,11 +6,12 @@
 #include "interpreter/mutexlist.hpp"
 
 #include "t_interpreter.hpp"
-#include "interpreter/mutexcontext.hpp"
-#include "afl/sys/log.hpp"
 #include "afl/io/nullfilesystem.hpp"
-#include "interpreter/world.hpp"
+#include "afl/string/nulltranslator.hpp"
+#include "afl/sys/log.hpp"
+#include "interpreter/mutexcontext.hpp"
 #include "interpreter/process.hpp"
+#include "interpreter/world.hpp"
 
 /** Test destruction order. */
 void
@@ -37,8 +38,9 @@ TestInterpreterMutexList::testIt()
 {
     // Environment
     afl::sys::Log log;
+    afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
-    interpreter::World world(log, fs);
+    interpreter::World world(log, tx, fs);
     interpreter::Process p1(world, "1", 1);
     interpreter::Process p2(world, "2", 2);
 
@@ -113,8 +115,9 @@ TestInterpreterMutexList::testAbandon()
 {
     // Environment
     afl::sys::Log log;
+    afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
-    interpreter::World world(log, fs);
+    interpreter::World world(log, tx, fs);
     interpreter::Process p1(world, "1", 1);
 
     interpreter::MutexList::Mutex* m1 = 0;
@@ -138,8 +141,9 @@ TestInterpreterMutexList::testDisown()
 {
     // Environment
     afl::sys::Log log;
+    afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
-    interpreter::World world(log, fs);
+    interpreter::World world(log, tx, fs);
     interpreter::Process p1(world, "1", 1);
     interpreter::Process p2(world, "2", 2);
 

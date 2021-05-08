@@ -38,12 +38,12 @@ client::widgets::TechBar::draw(gfx::Canvas& can)
     // Name
     gfx::Context<util::SkinColor::Color> ctx(can, getColorScheme());
     ctx.useFont(*font);
-    ctx.setTextAlign(0, 1);
+    ctx.setTextAlign(gfx::LeftAlign, gfx::MiddleAlign);
     ctx.setColor(util::SkinColor::Static);
     outTextF(ctx, x.splitX(textWidth), m_name);
 
     // Value
-    ctx.setTextAlign(2, 1);
+    ctx.setTextAlign(gfx::RightAlign, gfx::MiddleAlign);
     outTextF(ctx, x.splitX(numberWidth), afl::string::Format("%d", getValue()));
 
     // Tech bar

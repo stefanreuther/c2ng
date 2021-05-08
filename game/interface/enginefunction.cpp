@@ -7,18 +7,19 @@
 #include "interpreter/error.hpp"
 #include "interpreter/arguments.hpp"
 
-// /* @q Engine(id:Int):Obj (Function, Context)
-//    Access engine weapon properties.
-//    Use as
-//    | ForEach Engine Do ...
-//    or
-//    | With Engine(n) Do ...
+/* @q Engine(id:Int):Obj (Function, Context)
+   Access engine weapon properties.
+   Use as
+   | ForEach Engine Do ...
+   or
+   | With Engine(n) Do ...
 
-//    @diff This function was available for use in %With under the name %Engines() since PCC 1.0.6.
-//    Do not use the name %Engines in new code, it is not supported by PCC2; use %Engine instead.
+   @diff This function was available for use in %With under the name %Engines() since PCC 1.0.6.
+   Do not use the name %Engines in new code, it is not supported by PCC2; use %Engine instead.
 
-//    @see int:index:group:engineproperty|Engine Properties
-//    @since PCC 1.0.18, PCC2 1.99.8 */
+   @see int:index:group:engineproperty|Engine Properties
+   @since PCC 1.0.18, PCC2 1.99.8, PCC2 2.40 */
+
 game::interface::EngineFunction::EngineFunction(Session& session)
     : m_session(session)
 { }

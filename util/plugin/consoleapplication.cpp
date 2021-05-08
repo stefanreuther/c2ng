@@ -3,17 +3,17 @@
   */
 
 #include "util/plugin/consoleapplication.hpp"
+#include "afl/base/nullenumerator.hpp"
 #include "afl/except/fileproblemexception.hpp"
 #include "afl/io/directoryentry.hpp"
 #include "afl/io/nullstream.hpp"
 #include "afl/string/format.hpp"
+#include "afl/string/messages.hpp"
+#include "afl/sys/standardcommandlineparser.hpp"
 #include "util/plugin/installer.hpp"
 #include "util/plugin/manager.hpp"
-#include "util/translation.hpp"
-#include "version.hpp"
-#include "afl/sys/standardcommandlineparser.hpp"
 #include "util/string.hpp"
-#include "afl/base/nullenumerator.hpp"
+#include "version.hpp"
 
 using afl::string::Format;
 
@@ -51,7 +51,7 @@ namespace {
                     if (mode == afl::io::FileSystem::Create) {
                         return *new afl::io::NullStream();
                     } else {
-                        throw afl::except::FileProblemException(m_name, _("No such file"));
+                        throw afl::except::FileProblemException(m_name, afl::string::Messages::fileNotFound());
                     }
                 }
             virtual afl::base::Ref<afl::io::Directory> openDirectory()
@@ -77,7 +77,7 @@ namespace {
     bool checkRemovePlugin(afl::io::TextWriter& out, util::plugin::Installer& inst, util::plugin::Plugin& plug)
     {
         String_t msg;
-        if (inst.checkRemovePreconditions(plug, afl::string::Translator::getSystemInstance()).get(msg)) {
+        if (inst.checkRemovePreconditions(plug).get(msg)) {
             out.writeLine(msg);
             return false;
         }
@@ -87,7 +87,7 @@ namespace {
     bool checkPreconditions(afl::io::TextWriter& out, util::plugin::Installer& inst)
     {
         String_t msg;
-        if (inst.checkInstallPreconditions(afl::string::Translator::getSystemInstance()).get(msg)) {
+        if (inst.checkInstallPreconditions().get(msg)) {
             out.writeLine(msg);
             return false;
         }
@@ -228,7 +228,7 @@ util::plugin::ConsoleApplication::doAdd(afl::sys::Environment::CommandLine_t& cm
         } else {
             did = true;
             try {
-                Plugin* plug = installer.prepareInstall(text, tx);
+                Plugin* plug = installer.prepareInstall(text);
                 if (!plug) {
                     errorOutput().writeLine(Format(tx("%s: Unknown file type").c_str(), text));
                     err = true;
@@ -344,7 +344,7 @@ util::plugin::ConsoleApplication::doTest(afl::sys::Environment::CommandLine_t& c
             did = true;
 
             try {
-                Plugin* plug = installer.prepareInstall(text, tx);
+                Plugin* plug = installer.prepareInstall(text);
                 if (!plug) {
                     errorOutput().writeLine(Format(tx("%s: Unknown file type").c_str(), text));
                     err = true;
@@ -381,7 +381,7 @@ void
 util::plugin::ConsoleApplication::doHelp(afl::sys::Environment::CommandLine_t& /*cmdl*/)
 {
     afl::string::Translator& tx = translator();
-    standardOutput().writeText(Format(tx("PCC2 Plugin Manager v%s - (c) 2015-2020 Stefan Reuther\n").c_str(), PCC2_VERSION));
+    standardOutput().writeText(Format(tx("PCC2 Plugin Manager v%s - (c) 2015-2021 Stefan Reuther\n").c_str(), PCC2_VERSION));
     standardOutput().writeText(Format(tx("\n"
                                          "Usage:\n"
                                          "  %s -h|help\n"

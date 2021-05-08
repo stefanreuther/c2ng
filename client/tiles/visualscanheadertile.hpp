@@ -20,8 +20,10 @@ namespace client { namespace tiles {
             String_t subtitle;
             String_t type;
             util::SkinColor::Color subtitleColor;
+            bool hasMessages;
             Content()
-                : title(), subtitle(), type(), subtitleColor(util::SkinColor::Static)
+                : title(), subtitle(), type(), subtitleColor(util::SkinColor::Static),
+                  hasMessages(false)
                 { }
         };
 

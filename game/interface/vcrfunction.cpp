@@ -7,13 +7,13 @@
 #include "interpreter/arguments.hpp"
 #include "game/game.hpp"
 
-// /* @q Vcr(uid:Int):Obj (Function, Context)
-//    Access properties of combat recordings.
-//    Use as
-//    | ForEach Vcr Do ...
-//    or
-//    | With Vcr(n) Do ...
-//    @see int:index:group:combatproperty|Combat Properties */
+/* @q Vcr(uid:Int):Obj (Function, Context)
+   Access properties of combat recordings.
+   Use as
+   | ForEach Vcr Do ...
+   or
+   | With Vcr(n) Do ...
+   @see int:index:group:combatproperty|Combat Properties */
 
 game::interface::VcrFunction::VcrFunction(Session& session)
     : m_session(session)

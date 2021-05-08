@@ -6,11 +6,11 @@
 #include "server/console/colorterminal.hpp"
 
 #include "t_server_console.hpp"
-#include "t_server_console_terminal.hpp"
+#include "server/test/terminalverifier.hpp"
 
 /** Simple test. */
 void
 TestServerConsoleColorTerminal::testIt()
 {
-    verifyInteractiveTerminal<server::console::ColorTerminal>("ColorTerminal");
+    server::test::verifyInteractiveTerminal<server::console::ColorTerminal>("ColorTerminal");
 }

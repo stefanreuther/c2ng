@@ -67,7 +67,7 @@ server::dbexport::ExportApplication::appMain()
     // Do it [exception protection provided by caller, Application]
     afl::base::Deleter del;
     if (*pCommand == "db") {
-        exportDatabase(standardOutput(), createClient(del, m_dbAddress), commandLineParser);
+        exportDatabase(standardOutput(), createClient(del, m_dbAddress), commandLineParser, tx);
     } else {
         errorExit(Format(tx("unknown command: \"%s\"").c_str(), *pCommand));
     }
@@ -93,7 +93,7 @@ server::dbexport::ExportApplication::help()
 {
     afl::string::Translator& tx = translator();
     afl::io::TextWriter& out = standardOutput();
-    out.writeLine(Format(tx("PCC2 Database Export v%s - (c) 2017-2020 Stefan Reuther").c_str(), PCC2_VERSION));
+    out.writeLine(Format(tx("PCC2 Database Export v%s - (c) 2017-2021 Stefan Reuther").c_str(), PCC2_VERSION));
     out.writeLine();
     out.writeLine(Format(tx("Usage: c2dbexport [--config=FILE] [-DKEY=VALUE] COMMAND [ARGS...]\n"
                             "\n"

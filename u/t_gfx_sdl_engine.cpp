@@ -10,6 +10,7 @@
 
 #include "t_gfx_sdl.hpp"
 #include "afl/sys/log.hpp"
+#include "afl/string/nulltranslator.hpp"
 
 void
 TestGfxSdlEngine::testInstantiation()
@@ -27,7 +28,8 @@ TestGfxSdlEngine::testInstantiation()
 #if HAVE_SDL
     if (std::getenv("DISPLAY") != 0) {
         afl::sys::Log log;
-        gfx::sdl::Engine testee(log);
+        afl::string::NullTranslator tx;
+        gfx::sdl::Engine testee(log, tx);
     }
 #endif
 }

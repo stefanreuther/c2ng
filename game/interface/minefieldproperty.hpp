@@ -24,7 +24,7 @@ namespace game { namespace interface {
     };
 
     afl::data::Value* getMinefieldProperty(const game::map::Minefield& mf, MinefieldProperty imp);
-    void setMinefieldProperty(game::map::Minefield& mf, MinefieldProperty imp, afl::data::Value* value);
+    void setMinefieldProperty(game::map::Minefield& mf, MinefieldProperty imp, const afl::data::Value* value);
 
 } }
 

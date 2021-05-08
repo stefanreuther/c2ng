@@ -19,7 +19,7 @@ namespace client {
         Therefore, if you anticipate background browser callbacks, create a UserCallback object in the UI thread. */
     class UserCallback : public game::browser::UserCallback {
      public:
-        UserCallback(ui::Root& root, util::RequestSender<game::browser::Session> sender);
+        UserCallback(ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::browser::Session> sender);
         ~UserCallback();
 
         virtual bool askInput(String_t title, const std::vector<Element>& question, afl::data::Segment& values);
@@ -27,6 +27,7 @@ namespace client {
      private:
         util::RequestReceiver<game::browser::UserCallback> m_receiver;
         ui::Root& m_root;
+        afl::string::Translator& m_translator;
         util::RequestSender<game::browser::Session> m_sender;
     };
 

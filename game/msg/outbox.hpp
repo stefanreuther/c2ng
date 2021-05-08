@@ -50,6 +50,10 @@ namespace game { namespace msg {
         virtual String_t getMessageText(size_t index, afl::string::Translator& tx, const PlayerList& players) const;
         virtual String_t getMessageHeading(size_t index, afl::string::Translator& tx, const PlayerList& players) const;
         virtual int getMessageTurnNumber(size_t index) const;
+        virtual bool isMessageFiltered(size_t index, afl::string::Translator& tx, const PlayerList& players, const Configuration& config) const;
+        virtual Flags_t getMessageFlags(size_t index) const;
+        virtual Actions_t getMessageActions(size_t index) const;
+        virtual void performMessageAction(size_t index, Action a);
 
 
         /** Get prefix for message when sent.

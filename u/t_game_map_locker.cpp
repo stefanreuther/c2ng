@@ -17,6 +17,7 @@
 
 namespace {
     using game::Reference;
+    using game::config::HostConfiguration;
     using game::map::Configuration;
     using game::map::Drawing;
     using game::map::Explosion;
@@ -279,5 +280,59 @@ TestGameMapLocker::testCircular()
     TS_ASSERT_EQUALS(t.getFoundPoint(), Point(2000, 950));
     TS_ASSERT_EQUALS(t.getFoundObject(), Reference());
 
+}
+
+/** Test locking at warp well edge.
+    A: test some clicked/origin pairs with and without hyperjumping.
+    E: verify expected results. */
+void
+TestGameMapLocker::testWarpWell()
+{
+    struct TestCase {
+        int clickedX, clickedY;
+        int originX, originY;
+        bool isHyperdriving;
+        int expectX, expectY;
+        const char* info;
+    };
+    static const TestCase TESTS[] = {
+        // clicked      origin      HYP       expect
+        // Some standard cases
+        { 1000, 1000,   1100, 1000, false,    1003, 1000,   "warp well from east" },
+        { 1000, 1000,   1000, 1000, false,    1000, 1000,   "warp well from planet" },
+        { 1000, 1000,   1000, 1002, false,    1000, 1000,   "warp well from inside" },
+        { 1000, 1000,    500,  500, false,     998,  998,   "warp well from south-east" },
+
+        // With HYP, it can be useful to go a farther distance to be in range.
+        { 1000, 1000,   1338, 1000, false,    1003, 1000,   "far normal" },
+        { 1000, 1000,   1338, 1000, true,      998, 1000,   "far hyper" },
+
+        // If we cannot ever get into range, don't use any warp wells.
+        { 1000, 1000,   1138, 1000, false,    1003, 1000,   "near normal" },
+        { 1000, 1000,   1138, 1000, true,     1000, 1000,   "near hyper" },
+    };
+
+    for (size_t i = 0; i < sizeof(TESTS)/sizeof(TESTS[0]); ++i) {
+        const TestCase& c = TESTS[i];
+
+        // Environment
+        HostConfiguration hostConfig;
+        hostConfig[HostConfiguration::RoundGravityWells].set(1);
+        game::HostVersion hostVersion(game::HostVersion::PHost, MKVERSION(4,0,0));
+        Configuration fig;
+
+        // Universe with a single planet
+        Universe u;
+        createPlanet(u, 50, Point(1000, 1000));
+
+        // Test
+        Locker t(Point(c.clickedX, c.clickedY), fig);
+        t.addUniverse(u, -1, 0);
+        const Point pt = t.findWarpWellEdge(Point(c.originX, c.originY), c.isHyperdriving, u, hostConfig, hostVersion);
+
+        // Verify
+        TSM_ASSERT_EQUALS(c.info, pt.getX(), c.expectX);
+        TSM_ASSERT_EQUALS(c.info, pt.getY(), c.expectY);
+    }
 }
 

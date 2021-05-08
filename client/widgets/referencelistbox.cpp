@@ -104,13 +104,23 @@ client::widgets::ReferenceListbox::getItemHeight(size_t /*n*/)
 }
 
 int
-client::widgets::ReferenceListbox::getHeaderHeight()
+client::widgets::ReferenceListbox::getHeaderHeight() const
+{
+    return 0;
+}
+
+int
+client::widgets::ReferenceListbox::getFooterHeight() const
 {
     return 0;
 }
 
 void
 client::widgets::ReferenceListbox::drawHeader(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
+{ }
+
+void
+client::widgets::ReferenceListbox::drawFooter(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
 { }
 
 void
@@ -160,7 +170,7 @@ client::widgets::ReferenceListbox::drawItem(gfx::Context<util::SkinColor::Color>
                                             const Item_t& item,
                                             gfx::ResourceProvider& provider)
 {
-    ctx.setTextAlign(0, 0);
+    ctx.setTextAlign(gfx::LeftAlign, gfx::TopAlign);
     switch (item.type) {
      case UserList::OtherItem:
      case UserList::ReferenceItem:

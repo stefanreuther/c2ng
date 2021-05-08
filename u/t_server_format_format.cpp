@@ -10,7 +10,7 @@
 #include "afl/data/value.hpp"
 #include "afl/data/access.hpp"
 #include "afl/data/stringvalue.hpp"
-#include "u/files.hpp"
+#include "game/test/files.hpp"
 
 /** Test pack(). */
 void
@@ -228,7 +228,7 @@ TestServerFormatFormat::testUnpackAll()
 
     // Simulation
     {
-        afl::data::StringValue sv(afl::string::fromBytes(getSimFileV1()));
+        afl::data::StringValue sv(afl::string::fromBytes(game::test::getSimFileV1()));
         std::auto_ptr<afl::data::Value> p(testee.unpack("sim", &sv, afl::base::Nothing, afl::base::Nothing));
         TS_ASSERT_EQUALS(Access(p)("ships")[0]("NAME").toString(), "Ship 201");
         TS_ASSERT_EQUALS(Access(p)("ships")[0]("HULL").toInteger(), 76);

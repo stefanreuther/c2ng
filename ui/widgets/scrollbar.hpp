@@ -46,7 +46,6 @@ namespace ui { namespace widgets {
         void onChange();
         void onTimer();
 
-        static States_t getStates(LocalButtonFlags_t f);
         static ButtonFlags_t getButtonFlags(LocalButtonFlags_t f);
     };
 

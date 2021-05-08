@@ -7,6 +7,7 @@
 
 #include <vector>
 #include "afl/bits/smallset.hpp"
+#include "afl/string/translator.hpp"
 #include "game/map/planet.hpp"
 #include "game/map/ship.hpp"
 #include "game/map/universe.hpp"
@@ -28,8 +29,9 @@ namespace game { namespace actions {
 
         /** Constructor.
             \param planet Planet with starbase.
+            \param tx Translator (for error message)
             \throw Planet does not fulfil preconditions */
-        explicit BaseFixRecycle(game::map::Planet& planet);
+        BaseFixRecycle(game::map::Planet& planet, afl::string::Translator& tx);
 
         /** Get valid actions for a ship.
             \param ship Ship to check

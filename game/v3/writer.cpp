@@ -37,7 +37,7 @@ namespace {
             {
                 if (gt::OutgoingMessageHeader* pHeader = m_header.eat()) {
                     pHeader->address = static_cast<int32_t>(m_pos);
-                    pHeader->length  = static_cast<int16_t>(data.size());
+                    pHeader->length  = static_cast<uint16_t>(data.size());
                     pHeader->from    = static_cast<int16_t>(from);
                     pHeader->to      = static_cast<int16_t>(to);
                     m_file.fullWrite(data);
@@ -62,8 +62,6 @@ game::v3::Writer::saveOutbox(game::msg::Outbox& outbox, int player, const Player
 {
     // ex saveOutbox
     // Count messages
-    // Ptr<Stream> f = dir.openFile(format("mess%d.dat", player), Stream::C_CREATE);
-
     MessageCounter counter;
     counter.sendOutbox(outbox, player, m_translator, players, m_charset);
 
@@ -117,8 +115,6 @@ void
 game::v3::Writer::saveOutbox35(game::msg::Outbox& outbox, int player, afl::io::Stream& file)
 {
     // ex saveOutbox35
-    // Ptr<Stream> f = dir.openFile(format("mess35%d.dat", player), Stream::C_CREATE);
-
     // Count messages
     int numMessages = 0;
     for (size_t i = 0, n = outbox.getNumMessages(); i < n; ++i) {
@@ -164,11 +160,10 @@ game::v3::Writer::saveOutbox35(game::msg::Outbox& outbox, int player, afl::io::S
             }
 
             // Enforce size
-            const size_t LIMIT = 600;
-            if (text.size() < LIMIT) {
-                text.appendN(32+13, LIMIT - text.size());
+            if (text.size() < gt::MAX_MESSAGE_SIZE_WINPLAN) {
+                text.appendN(32+13, gt::MAX_MESSAGE_SIZE_WINPLAN - text.size());
             } else {
-                text.trim(LIMIT);
+                text.trim(gt::MAX_MESSAGE_SIZE_WINPLAN);
             }
 
             // Build header
@@ -176,7 +171,7 @@ game::v3::Writer::saveOutbox35(game::msg::Outbox& outbox, int player, afl::io::S
             gt::Outbox35MessageHeader msgHeader;
             msgHeader.pad = 0;
             msgHeader.validFlag = '1';
-            msgHeader.messageLength = LIMIT;
+            msgHeader.messageLength = gt::MAX_MESSAGE_SIZE_WINPLAN;
             for (int i = 1; i <= gt::NUM_OWNERS; ++i) {
                 msgHeader.receivers[i-1] = (i == gt::NUM_OWNERS ? receivers.contains(0) : receivers.contains(i)) ? '1' : '0';
             }

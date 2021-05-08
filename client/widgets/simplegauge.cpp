@@ -79,7 +79,7 @@ client::widgets::SimpleGauge::draw(gfx::Canvas& can)
 
     // Draw text
     ctx.useFont(*m_root.provider().getFont(gfx::FontRequest().addSize(-1)));
-    ctx.setTextAlign(1, 1);
+    ctx.setTextAlign(gfx::CenterAlign, gfx::MiddleAlign);
     ctx.setColor(m_textColor);
     outTextF(ctx, area, m_text);
 }

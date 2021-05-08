@@ -264,6 +264,17 @@ game::score::TurnScoreList::getNumTurns() const
     return m_turnScores.size();
 }
 
+// Get turn number of first stored turn.
+int
+game::score::TurnScoreList::getFirstTurnNumber() const
+{
+    if (m_turnScores.empty()) {
+        return 0;
+    } else {
+        return m_turnScores[0]->getTurnNumber();
+    }
+}
+
 // Get turn by index.
 const game::score::TurnScore*
 game::score::TurnScoreList::getTurnByIndex(size_t index) const

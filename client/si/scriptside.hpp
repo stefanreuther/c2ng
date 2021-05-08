@@ -105,6 +105,7 @@ namespace client { namespace si {
 
         void continueProcess(game::Session& session, RequestLink2 link);
         void joinProcess(game::Session& session, RequestLink2 link, RequestLink2 other);
+        void joinProcessGroup(game::Session& session, RequestLink2 link, uint32_t oldGroup);
         void continueProcessWithFailure(game::Session& session, RequestLink2 link, String_t error);
         void detachProcess(game::Session& session, RequestLink2 link);
         void setVariable(game::Session& session, RequestLink2 link, String_t name, std::auto_ptr<afl::data::Value> value);

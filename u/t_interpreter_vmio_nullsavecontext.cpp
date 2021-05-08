@@ -7,6 +7,7 @@
 
 #include "t_interpreter_vmio.hpp"
 #include "afl/io/nullfilesystem.hpp"
+#include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
 #include "interpreter/arrayvalue.hpp"
 #include "interpreter/bytecodeobject.hpp"
@@ -48,8 +49,9 @@ TestInterpreterVmioNullSaveContext::testIt()
     }
     {
         afl::sys::Log log;
+        afl::string::NullTranslator tx;
         afl::io::NullFileSystem fs;
-        interpreter::World w(log, fs);
+        interpreter::World w(log, tx, fs);
         interpreter::Process proc(w, "TestInterpreterVmioNullSaveContext", 1234);
         TS_ASSERT_THROWS(testee.isCurrentProcess(&proc), interpreter::Error);
     }

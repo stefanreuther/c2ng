@@ -118,7 +118,7 @@ game::v3::Parser::parseMessages(afl::io::Stream& in, const game::msg::Inbox& inb
         p.parseMessage(text, gdi, m_game.currentTurn().getTurnNumber(), info, m_translator, m_log);
 
         for (size_t ii = 0, in = info.size(); ii < in; ++ii) {
-            m_game.addMessageInformation(*info[ii], m_root.hostConfiguration());
+            m_game.addMessageInformation(*info[ii], m_root.hostConfiguration(), i);
         }
     }
 }

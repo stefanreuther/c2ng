@@ -5,18 +5,13 @@
 
 #include "game/v3/trn/fileset.hpp"
 #include "afl/string/format.hpp"
-#include "game/config/stringoption.hpp"
+#include "afl/string/nulltranslator.hpp"
 #include "util/backupfile.hpp"
-#include "util/translation.hpp"
+
+using game::config::UserConfiguration;
 
 namespace {
     const char*const LOG_NAME = "game.v3.trn";
-
-    // FIXME: where to define this? ex opt_BackupTurn, opt_MaketurnTarget
-    // ConfigStringOption opt_BackupTurn    (getUserPreferences(), "Backup.Turn");
-    // ConfigStringOption opt_MaketurnTarget(getUserPreferences(), "Maketurn.Target");
-    const game::config::StringOptionDescriptor opt_BackupTurn     = { "Backup.Turn" };
-    const game::config::StringOptionDescriptor opt_MaketurnTarget = { "Maketurn.Target" };
 }
 
 
@@ -57,7 +52,8 @@ game::v3::trn::FileSet::updateTrailers()
             // FIXME: only check files that we will not rewrite?
             try {
                 afl::base::Ref<afl::io::Stream> file = m_directory.openFile(afl::string::Format("player%d.trn", i), afl::io::FileSystem::OpenRead);
-                TurnFile turnFile(m_charset, *file, false);
+                afl::string::NullTranslator tx;
+                TurnFile turnFile(m_charset, tx, *file, false);
                 if (turnFile.getTimestamp() == t) {
                     data = turnFile.getDosTrailer().playerSecret;
                     haveData = true;
@@ -88,13 +84,13 @@ game::v3::trn::FileSet::updateTrailers()
 
 // Save all turn files.
 void
-game::v3::trn::FileSet::saveAll(afl::sys::LogListener& log, const PlayerList& players, afl::io::FileSystem& fs, const game::config::UserConfiguration& config)
+game::v3::trn::FileSet::saveAll(afl::sys::LogListener& log, const PlayerList& players, afl::io::FileSystem& fs, const game::config::UserConfiguration& config, afl::string::Translator& tx)
 {
     for (size_t i = 0, n = m_turnFiles.size(); i < n; ++i) {
         const int player = m_turnFiles[i]->getPlayer();
         afl::base::Ref<afl::io::Stream> file = m_directory.openFile(afl::string::Format("player%d.trn", player), afl::io::FileSystem::Create);
         log.write(afl::sys::LogListener::Info, LOG_NAME,
-                  afl::string::Format(_("Writing %s turn file (%d command%!1{s%})...").c_str(),
+                  afl::string::Format(tx("Writing %s turn file (%d command%!1{s%})..."),
                                       players.getPlayerName(player, Player::AdjectiveName),
                                       m_turnFiles[i]->getNumCommands()));
         m_turnFiles[i]->write(*file);
@@ -106,9 +102,9 @@ game::v3::trn::FileSet::saveAll(afl::sys::LogListener& log, const PlayerList& pl
         tpl.setGameDirectoryName(m_directory.getDirectoryName());
 
         file->setPos(0);
-        tpl.copyFile(fs, config[opt_BackupTurn](), *file);
+        tpl.copyFile(fs, config[UserConfiguration::Backup_Turn](), *file);
         file->setPos(0);
-        tpl.copyFile(fs, config[opt_MaketurnTarget](), *file);
+        tpl.copyFile(fs, config[UserConfiguration::Maketurn_Target](), *file);
     }
 }
 

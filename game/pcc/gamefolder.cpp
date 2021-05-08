@@ -68,7 +68,7 @@ game::pcc::GameFolder::loadGameRoot(const game::config::UserConfiguration& confi
                 
     // Registration key
     std::auto_ptr<game::v3::RegistrationKey> key(new game::v3::RegistrationKey(charset));
-    key->initFromDirectory(*gameDirectory, m_handler.log());
+    key->initFromDirectory(*gameDirectory, m_handler.log(), m_handler.translator());
 
     // Specification loader
     afl::base::Ptr<game::SpecificationLoader> specLoader(new game::v3::SpecificationLoader(spec, charset, m_handler.translator(), m_handler.log()));

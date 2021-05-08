@@ -18,10 +18,10 @@ WHAT IS PCC2 (c2ng)?
   PCC2. It is intended to be 100% compatible to PCC2. However, it does
   away with many self-imposed limitations of PCC2.
 
-  As of October 2020, c2ng is still incomplete. End-users should
-  remain with PCC2 or PCC1. However, the back-end code is complete
-  enough that c2ng now runs behind PlanetsCentral.com exclusively.
-  The game engine nears completion.
+  As of May 2021, c2ng is still incomplete. End-users should remain
+  with PCC2 or PCC1. However, the back-end code is complete enough
+  that c2ng now runs behind PlanetsCentral.com exclusively. The game
+  engine nears completion.
 
 
 Project Goals
@@ -176,7 +176,8 @@ Future Milestones
   - implement help
   - can we integrate forums/activities?
   - more operating systems (Android!)
-  - C++11, maybe
+  - C++11
+  - OpenGL
 
 
 Contributing

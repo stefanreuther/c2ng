@@ -40,3 +40,15 @@ game::spec::info::NullPictureNamer::getPlayerPicture(const Player& /*pl*/) const
 {
     return String_t();
 }
+
+String_t
+game::spec::info::NullPictureNamer::getFighterPicture(int /*raceNr*/, int /*playerNr*/) const
+{
+    return String_t();
+}
+
+String_t
+game::spec::info::NullPictureNamer::getVcrObjectPicture(bool /*isPlanet*/, int /*pictureNumber*/) const
+{
+    return String_t();
+}

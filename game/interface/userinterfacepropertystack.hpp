@@ -29,7 +29,7 @@ namespace game { namespace interface {
 
         A dialog or screen that wants to provide context will instantiate an UserInterfacePropertyAccessor descendant
         and register it with the session's UserInterfacePropertyStack.
-        The easiest way to do that is as a util::SlaveObject<game::Session> descendant.
+        The easiest way to do that is as using util::RequestSender<game::Session>::makeTemporary.
 
         <b>Lifetime</b>
 
@@ -64,7 +64,7 @@ namespace game { namespace interface {
         /** Set property.
             \param p Property to set
             \param value Value to set, may be 0. Owned by caller. */
-        void set(UserInterfaceProperty p, afl::data::Value* value);
+        void set(UserInterfaceProperty p, const afl::data::Value* value);
 
      private:
         std::vector<UserInterfacePropertyAccessor*> m_stack;

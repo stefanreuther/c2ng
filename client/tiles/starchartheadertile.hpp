@@ -4,9 +4,10 @@
 #ifndef C2NG_CLIENT_TILES_STARCHARTHEADERTILE_HPP
 #define C2NG_CLIENT_TILES_STARCHARTHEADERTILE_HPP
 
-#include "ui/simplewidget.hpp"
-#include "ui/root.hpp"
+#include "afl/base/signalconnection.hpp"
 #include "game/proxy/objectobserver.hpp"
+#include "ui/root.hpp"
+#include "ui/simplewidget.hpp"
 #include "util/requestreceiver.hpp"
 
 namespace client { namespace tiles {
@@ -25,6 +26,7 @@ namespace client { namespace tiles {
 
         struct Content {
             String_t text[NUM_LINES];
+            String_t image;
         };
 
         StarchartHeaderTile(ui::Root& root);
@@ -37,6 +39,7 @@ namespace client { namespace tiles {
         virtual bool handleMouse(gfx::Point pt, MouseButtons_t pressedButtons);
 
         void setContent(const Content& content);
+        void onImageChange();
 
         void attach(game::proxy::ObjectObserver& oop);
 
@@ -44,6 +47,8 @@ namespace client { namespace tiles {
         ui::Root& m_root;
         Content m_content;
         util::RequestReceiver<StarchartHeaderTile> m_reply;
+        afl::base::SignalConnection conn_imageChange;
+        bool m_isMissingImage;
     };
 
 } }

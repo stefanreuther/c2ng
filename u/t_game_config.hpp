@@ -54,6 +54,15 @@ class TestGameConfigEnumValueParser : public CxxTest::TestSuite {
     void testIt2();
 };
 
+class TestGameConfigExpressionLists : public CxxTest::TestSuite {
+ public:
+    void testAccess();
+    void testPackComplex();
+    void testLoadRecent();
+    void testLoadPredefined();
+    void testSave();
+};
+
 class TestGameConfigGenericIntegerArrayOption : public CxxTest::TestSuite {
  public:
     void testIt();
@@ -68,6 +77,7 @@ class TestGameConfigHostConfiguration : public CxxTest::TestSuite {
     void testDependant2();
     void testExperienceName();
     void testExperienceBonus();
+    void testGetExperienceLevelFromPoints();
 };
 
 class TestGameConfigIntegerArrayOption : public CxxTest::TestSuite {
@@ -85,6 +95,11 @@ class TestGameConfigIntegerValueParser : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestGameConfigMarkerOption : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
 class TestGameConfigStringOption : public CxxTest::TestSuite {
  public:
     void testIt();
@@ -95,6 +110,7 @@ class TestGameConfigUserConfiguration : public CxxTest::TestSuite {
     void testDefaults();
     void testGameType();
     void testFormat();
+    void testCannedMarker();
 };
 
 class TestGameConfigValueParser : public CxxTest::TestSuite {

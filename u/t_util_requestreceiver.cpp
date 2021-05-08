@@ -8,6 +8,13 @@
 #include "t_util.hpp"
 
 namespace {
+    struct Value {
+        int i;
+        Value(int i)
+            : i(i)
+            { }
+    };
+
     // Simple dispatcher: direct execution (single-thread)
     class SimpleDispatcher : public util::RequestDispatcher {
      public:
@@ -19,13 +26,13 @@ namespace {
     };
 
     // Simple request for testing: add to an integer
-    class SimpleRequest : public util::Request<int> {
+    class SimpleRequest : public util::Request<Value> {
      public:
         SimpleRequest(int n)
             : m_n(n)
             { }
-        virtual void handle(int& n)
-            { n += m_n; }
+        virtual void handle(Value& n)
+            { n.i += m_n; }
      private:
         int m_n;
     };
@@ -39,14 +46,14 @@ TestUtilRequestReceiver::testIt()
     SimpleDispatcher disp;
 
     // Define a receiver with an object variable
-    int var = 0;
-    util::RequestReceiver<int> rx(disp, var);
+    Value var(0);
+    util::RequestReceiver<Value> rx(disp, var);
 
     // Post some requests
     rx.getSender().postNewRequest(new SimpleRequest(10));
-    TS_ASSERT_EQUALS(var, 10);
+    TS_ASSERT_EQUALS(var.i, 10);
     rx.getSender().postNewRequest(new SimpleRequest(20));
-    TS_ASSERT_EQUALS(var, 30);
+    TS_ASSERT_EQUALS(var.i, 30);
 }
 
 /** Test send after receiver dies. */
@@ -56,18 +63,18 @@ TestUtilRequestReceiver::testDie()
     // Define a simple dispatcher (must out-live everything)
     SimpleDispatcher disp;
 
-    util::RequestSender<int> sp;
+    util::RequestSender<Value> sp;
 
     // Define a receiver with an object variable
     {
-        std::auto_ptr<int> pVar(new int(42));
-        util::RequestReceiver<int> rx(disp, *pVar);
+        std::auto_ptr<Value> pVar(new Value(42));
+        util::RequestReceiver<Value> rx(disp, *pVar);
         sp = rx.getSender();
 
         sp.postNewRequest(new SimpleRequest(3));
-        TS_ASSERT_EQUALS(*pVar, 45);
+        TS_ASSERT_EQUALS(pVar->i, 45);
         sp.postNewRequest(new SimpleRequest(2));
-        TS_ASSERT_EQUALS(*pVar, 47);
+        TS_ASSERT_EQUALS(pVar->i, 47);
     }
 
     // Sending will still work, but no execution

@@ -200,7 +200,7 @@ game::v3::DirectoryScanner::scan(afl::io::Directory& dir, afl::charset::Charset&
         try {
             afl::base::Ptr<afl::io::Stream> file = dir.openFileNT(fileName, afl::io::FileSystem::OpenRead);
             if (file.get() != 0) {
-                TurnFile trn(charset, *file, false);
+                TurnFile trn(charset, m_translator, *file, false);
                 if (trn.getPlayer() == i) {
                     // Matching turn found, check whether it makes sense.
                     // We ignore the turn if it is empty or stale.
@@ -210,7 +210,7 @@ game::v3::DirectoryScanner::scan(afl::io::Directory& dir, afl::charset::Charset&
                         m_playerFlags[i-1] += HaveTurn;
                     }
                 } else {
-                    m_log.write(m_log.Warn, LOG_NAME, file->getName(), 0, m_translator.translateString("File exists but is invalid and has been ignored"));
+                    m_log.write(m_log.Warn, LOG_NAME, file->getName(), 0, m_translator("File exists but is invalid and has been ignored"));
                 }
             }
         }
@@ -395,7 +395,7 @@ game::v3::DirectoryScanner::checkHostVersion(afl::io::Stream& stream, afl::chars
     /* Check the file */
     try {
         // Load inbox file header
-        InboxFile file(stream, charset);
+        InboxFile file(stream, charset, m_translator);
 
         // Load the messages, starting with the last one, looking for a match.
         for (size_t i = file.getNumMessages(); i > 0; --i) {

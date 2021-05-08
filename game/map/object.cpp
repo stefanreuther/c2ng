@@ -11,6 +11,12 @@ game::map::Object::Object()
       m_isDirty(false)
 { }
 
+game::map::Object::Object(const Object& other)
+    : m_playability(other.m_playability),
+      m_isMarked(other.m_isMarked),
+      m_isDirty(false)
+{ }
+
 // Destructor.
 game::map::Object::~Object()
 { }

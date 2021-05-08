@@ -5,47 +5,16 @@
 #include <cstdlib>
 #include "client/map/movementoverlay.hpp"
 #include "client/map/renderer.hpp"
+#include "client/map/widget.hpp"
 #include "game/map/renderoptions.hpp"
+#include "game/proxy/drawingproxy.hpp"
 
 using game::map::RenderOptions;
 
-namespace {
-    RenderOptions::Options_t getOptionFromKey(util::Key_t key)
-    {
-        // FIXME: do we need to find a better home for this guy?
-        // ex GChartOptions::toggleOptionKey
-        switch (key) {
-         case 'm':
-            return RenderOptions::Options_t(RenderOptions::ShowMinefields);
-         case 'a':
-            return RenderOptions::Options_t(RenderOptions::ShowShipDots);
-         case 'd':
-            return RenderOptions::Options_t(RenderOptions::ShowLabels);
-         case 'i':
-            return RenderOptions::Options_t(RenderOptions::ShowIonStorms);
-         case 'v':
-            return RenderOptions::Options_t(RenderOptions::ShowTrails);
-         case 't':
-            return RenderOptions::Options_t(RenderOptions::ShowSelection);
-         case 's':
-            return RenderOptions::Options_t(RenderOptions::ShowSectors);
-         case 'b':
-            return RenderOptions::Options_t(RenderOptions::ShowBorders);
-         case 'u':
-            return RenderOptions::Options_t(RenderOptions::ShowUfos);
-         case 'p':
-            return RenderOptions::Options_t(RenderOptions::ShowDrawings);
-         case 'w':
-            return RenderOptions::Options_t(RenderOptions::ShowWarpWells);
-         default:
-            return RenderOptions::Options_t();
-        }
-    }
-}
-
-client::map::MovementOverlay::MovementOverlay(util::RequestDispatcher& disp, util::RequestSender<game::Session> gameSender)
+client::map::MovementOverlay::MovementOverlay(util::RequestDispatcher& disp, util::RequestSender<game::Session> gameSender, Widget& parent)
     : m_gameSender(gameSender),
       m_lockProxy(gameSender, disp),
+      m_parent(parent),
       m_modes(),
       m_valid(false),
       m_position()
@@ -112,14 +81,6 @@ client::map::MovementOverlay::handleKey(util::Key_t key, int prefix, const Rende
          case util::KeyMod_Ctrl + util::Key_Down:
             moveBy(0, -100, ren);
             return true;
-         // FIXME: case '+':
-         //    if (hasState(sc_Zoomable))
-         //        zoomIn();
-         //    return true;
-         // FIXME: case '-':
-         //    if (hasState(sc_Zoomable))
-         //        zoomOut();
-         //    return true;
          case ' ':
          case util::Key_Return:
          case util::KeyMod_Ctrl + ' ':
@@ -139,34 +100,31 @@ client::map::MovementOverlay::handleKey(util::Key_t key, int prefix, const Rende
             moveBy(-5 + std::rand() % 11, -5 + std::rand() % 11, ren);
             return true;
 
-         // FIXME: case 'm':
-         // FIXME: case util::KeyMod_Ctrl + 'm':
-         // {
-         //     // FIXME: this duplicates createCannedMarker(). Can we share it?
-         //     ConfigMarkerOption& opt = ConfigMarkerOption::getCannedMarker(k.arg % ConfigMarkerOption::NUM_CANNED_MARKERS);
+         case 'm':
+         case util::KeyMod_Ctrl + 'm':
+            game::proxy::DrawingProxy(m_gameSender, m_parent.root().engine().dispatcher())
+                .createCannedMarker(m_position, prefix % game::config::UserConfiguration::NUM_CANNED_MARKERS);
+            return true;
 
-         //     // Create marker
-         //     GDrawing marker(getScannerTarget(), MarkerDrawing);
-         //     marker.setMarkerKind(opt.getType());
-         //     marker.setColor(marker.getColorFromUserColor(opt.getColorIndex()));
-         //     getDisplayedTurn().getCurrentUniverse().getDrawings().add(marker);
-
-         //     // FIXME: tell background to redraw - how?
-         // }
-         // drawWidget();
-         // return true;
-
-         // /* z [edit zoom in PCC 1.x] */
+            /* TODO: z [edit zoom in PCC 1.x] */
+        }
+    }
+    if (m_valid && m_modes.contains(AcceptZoomKeys)) {
+        switch (key) {
+         case '+':
+            m_parent.zoomIn();
+            return true;
+         case '-':
+            m_parent.zoomOut();
+            return true;
         }
     }
     if (m_valid && m_modes.contains(AcceptConfigKeys)) {
         // ex WScannerChartWidget::handleOption
         if ((key & util::KeyMod_Alt) != 0) {
-            RenderOptions::Options_t opt = getOptionFromKey(key & ~util::KeyMod_Alt & ~util::KeyMod_Ctrl);
+            RenderOptions::Options_t opt = RenderOptions::getOptionFromKey(key & ~util::KeyMod_Alt & ~util::KeyMod_Ctrl);
             if (!opt.empty()) {
-                // FIXME: as of 20180907, we have RenderOptions and Viewport::Options. Think about this again.
-                // const GChartViewport& vp = getViewport();
-                // getChartOpts(true, vp.mult, vp.divi).toggleOption(opt)
+                m_parent.toggleOptions(opt);
                 return true;
             }
         }
@@ -235,6 +193,12 @@ client::map::MovementOverlay::getPosition(game::map::Point& out) const
 }
 
 void
+client::map::MovementOverlay::setLockOrigin(game::map::Point pt, bool isHyperdriving)
+{
+    m_lockProxy.setOrigin(pt, isHyperdriving);
+}
+
+void
 client::map::MovementOverlay::moveBy(int dx, int dy, const Renderer& ren)
 {
     // ex WScannerChartWidget::moveKey
@@ -280,7 +244,7 @@ client::map::MovementOverlay::lockItem(game::map::Point target, bool left, bool 
         flags += LockProxy::MarkedOnly;
     }
     if (optimizeWarp) {
-        flags += LockProxy::OptimizeWarp;
+        flags += LockProxy::ToggleOptimizeWarp;
     }
 
     // Range limit

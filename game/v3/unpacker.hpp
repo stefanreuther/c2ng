@@ -90,12 +90,6 @@ namespace game { namespace v3 {
             \param flag Value */
         void setVerbose(bool flag);
 
-        /** Set racename unpacking flag.
-            If enabled (default), race names sent by host will be taken over locally.
-            When disabled, a race.nm file sent by the host will be ignored.
-            \param flag Value */
-        void setAcceptRaceNames(bool flag);
-
         /** Get configured file format.
             \return file format
             \see setFormat */
@@ -173,7 +167,6 @@ namespace game { namespace v3 {
         bool m_fixErrors;                ///< true to fix some errors.
         bool m_ignoreErrors;             ///< true to unpack despite checksum errors.
         bool m_verbose;                  ///< true for verbose output.
-        bool m_acceptRaceNames;          ///< true to accept incoming RACE.NM files.
 
         afl::base::GrowableMemory<game::v3::structures::Ship> m_datShips;
         afl::base::GrowableMemory<game::v3::structures::Ship> m_disShips;

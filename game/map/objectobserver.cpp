@@ -1,5 +1,6 @@
 /**
   *  \file game/map/objectobserver.cpp
+  *  \brief Class game::map::ObjectObserver
   */
 
 #include "game/map/objectobserver.hpp"
@@ -18,40 +19,26 @@ game::map::ObjectObserver::ObjectObserver(ObjectCursor& cursor)
 game::map::ObjectObserver::~ObjectObserver()
 { }
 
-// /** Get current object.
-//     \return pointer to object, can be null
-//     \see GObjectSelection::getCurrentObject() */
 game::map::Object*
-game::map::ObjectObserver::getCurrentObject()
+game::map::ObjectObserver::getCurrentObject() const
 {
     // ex GObjectSelectionObserver::getCurrentObject
     return m_cursor.getCurrentObject();
 }
 
-// /** Get object selection.
-//     Returns a reference to the GObjectSelection this object was constructed with. */
 game::map::ObjectCursor&
-game::map::ObjectObserver::cursor()
+game::map::ObjectObserver::cursor() const
 {
     // ex GObjectSelectionObserver::getObjectSelection
     return m_cursor;
 }
 
-// /** Get object type observed by current selection.
-//     \return pointer to GObjectSelection, can be null */
 game::map::ObjectType*
-game::map::ObjectObserver::getObjectType()
+game::map::ObjectObserver::getObjectType() const
 {
     // ex GObjectSelectionObserver::getObjectType
     return m_cursor.getObjectType();
 }
-
-// afl::base::Signal<void()> sig_objectChange;
-
-// private:
-// ObjectCursor& m_cursor;
-// afl::base::SignalConnection conn_cursorChange;
-// afl::base::SignalConnection conn_objectChange;
 
 void
 game::map::ObjectObserver::onCurrentChange()

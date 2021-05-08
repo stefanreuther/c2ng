@@ -88,7 +88,7 @@ namespace {
             { }
         virtual TestContext* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
             { return lookupName(name, TEST_MAP, result) ? this : 0; }
-        virtual void set(PropertyIndex_t /*index*/, afl::data::Value* /*value*/)
+        virtual void set(PropertyIndex_t /*index*/, const afl::data::Value* /*value*/)
             { throw interpreter::Error::notAssignable(); }
         virtual afl::data::Value* get(PropertyIndex_t index)
             {

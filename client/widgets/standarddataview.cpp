@@ -8,7 +8,7 @@
 #include "client/widgets/keymapwidget.hpp"
 
 struct client::widgets::StandardDataView::Button {
-    Button(ButtonAlignment alignment, int x, int y, std::auto_ptr<ui::widgets::AbstractButton> btn, ui::Root& root)
+    Button(ButtonAlignment alignment, int x, int y, std::auto_ptr<ui::widgets::BaseButton> btn, ui::Root& root)
         : alignment(alignment),
           x(x),
           y(y),
@@ -22,7 +22,7 @@ struct client::widgets::StandardDataView::Button {
     ButtonAlignment alignment;
     int x;
     int y;
-    std::auto_ptr<ui::widgets::AbstractButton> button;
+    std::auto_ptr<ui::widgets::BaseButton> button;
     ui::widgets::FrameGroup frame;
 };
 
@@ -89,9 +89,9 @@ client::widgets::StandardDataView::getPreferredChildSize() const
 }
 
 void
-client::widgets::StandardDataView::addNewButton(ButtonAlignment alignment, int x, int y, ui::widgets::AbstractButton* btn)
+client::widgets::StandardDataView::addNewButton(ButtonAlignment alignment, int x, int y, ui::widgets::BaseButton* btn)
 {
-    std::auto_ptr<ui::widgets::AbstractButton> abtn(btn);
+    std::auto_ptr<ui::widgets::BaseButton> abtn(btn);
     Button* p = m_buttons.pushBackNew(new Button(alignment, x, y, abtn, root()));
     addChild(p->frame, getFirstChild());
     p->button->dispatchKeyTo(m_keys);

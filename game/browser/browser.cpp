@@ -117,6 +117,12 @@ game::browser::Browser::handlers()
     return m_handlers;
 }
 
+util::ProfileDirectory&
+game::browser::Browser::profile()
+{
+    return m_profile;
+}
+
 void
 game::browser::Browser::openFolder(String_t name)
 {

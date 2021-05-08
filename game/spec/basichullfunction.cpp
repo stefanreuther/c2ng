@@ -4,6 +4,7 @@
   */
 
 #include "game/spec/basichullfunction.hpp"
+#include "game/spec/hullfunction.hpp"
 
 // Constructor.
 game::spec::BasicHullFunction::BasicHullFunction(int id, String_t name)
@@ -109,4 +110,41 @@ int
 game::spec::BasicHullFunction::getImpliedFunctionId() const
 {
     return m_impliedFunctionId;
+}
+
+// Get damage limit for a function.
+afl::base::Optional<int>
+game::spec::BasicHullFunction::getDamageLimit(int /*forOwner*/, const game::config::HostConfiguration& config) const
+{
+    // ex GBasicHullFunction::getDamageLimit
+    using game::config::HostConfiguration;
+    switch (m_id) {
+     case HullFunction::Cloak:
+     case HullFunction::AdvancedCloak:
+        return config[HostConfiguration::DamageLevelForCloakFail]();
+
+     case HullFunction::LokiAnticloak:
+     case HullFunction::AdvancedAntiCloak:
+        return config[HostConfiguration::DamageLevelForAntiCloakFail]();
+
+     case HullFunction::HeatsTo50:
+     case HullFunction::CoolsTo50:
+     case HullFunction::HeatsTo100:
+        return config[HostConfiguration::DamageLevelForTerraformFail]();
+
+     case HullFunction::Hyperdrive:
+        return config[HostConfiguration::DamageLevelForHyperjumpFail]();
+
+     case HullFunction::ImperialAssault:
+        return 1;
+
+     case HullFunction::FirecloudChunnel:
+     case HullFunction::ChunnelSelf:
+     case HullFunction::ChunnelOthers:
+     case HullFunction::ChunnelTarget:
+        return config[HostConfiguration::DamageLevelForChunnelFail]();
+
+     default:
+        return afl::base::Nothing;
+    }
 }

@@ -137,3 +137,32 @@ TestGameConfigHostConfiguration::testExperienceBonus()
     TS_ASSERT_EQUALS(testee.getExperienceBonus(game::config::HostConfiguration::EModBayRechargeRate, 11), 0);  // out of range
 }
 
+/** Test getExperienceLevelFromPoints(). */
+void
+TestGameConfigHostConfiguration::testGetExperienceLevelFromPoints()
+{
+    // Experience disabled
+    {
+        game::config::HostConfiguration testee;
+        testee.setOption("NumExperienceLevels", "0", game::config::ConfigurationOption::Game);
+
+        TS_ASSERT_EQUALS(testee.getExperienceLevelFromPoints(0), 0);
+        TS_ASSERT_EQUALS(testee.getExperienceLevelFromPoints(5000), 0);
+    }
+
+    // Experience enabled
+    {
+        game::config::HostConfiguration testee;
+        testee.setOption("NumExperienceLevels", "4", game::config::ConfigurationOption::Game);
+        testee.setOption("ExperienceLevels", "750,1500,3000,4500,7000", game::config::ConfigurationOption::Game);
+
+        TS_ASSERT_EQUALS(testee.getExperienceLevelFromPoints(0), 0);
+        TS_ASSERT_EQUALS(testee.getExperienceLevelFromPoints(100), 0);
+        TS_ASSERT_EQUALS(testee.getExperienceLevelFromPoints(750), 1);
+        TS_ASSERT_EQUALS(testee.getExperienceLevelFromPoints(1499), 1);
+        TS_ASSERT_EQUALS(testee.getExperienceLevelFromPoints(1500), 2);
+        TS_ASSERT_EQUALS(testee.getExperienceLevelFromPoints(4500), 4);
+        TS_ASSERT_EQUALS(testee.getExperienceLevelFromPoints(8000), 4);
+    }
+}
+

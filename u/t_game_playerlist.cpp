@@ -8,7 +8,7 @@
 #include "t_game.hpp"
 #include "game/player.hpp"
 #include "afl/charset/utf8reader.hpp"
-#include "helper/counter.hpp"
+#include "game/test/counter.hpp"
 
 /** Test setup and expandNames(). */
 void
@@ -254,9 +254,9 @@ void
 TestGamePlayerList::testNotify()
 {
     // Create a PlayerList with a listener
-    Counter c;
+    game::test::Counter c;
     game::PlayerList testee;
-    testee.sig_change.add(&c, &Counter::increment);
+    testee.sig_change.add(&c, &game::test::Counter::increment);
     TS_ASSERT_EQUALS(c.get(), 0);
 
     // Adding players registers as a change

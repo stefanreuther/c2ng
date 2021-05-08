@@ -10,6 +10,7 @@
 #include "afl/io/nullfilesystem.hpp"
 #include "afl/io/stream.hpp"
 #include "afl/sys/log.hpp"
+#include "afl/string/nulltranslator.hpp"
 
 /** Test scenarios. */
 void
@@ -17,6 +18,7 @@ TestUtilHelpIndex::testMulti()
 {
     afl::io::FileSystem& fs = afl::io::FileSystem::getInstance();
     afl::sys::Log log;
+    afl::string::NullTranslator tx;
 
     // Create files
     const char FILE1[] = "<help><page id=\"toc\"></page><page id=\"f1\"></page></help>";
@@ -35,14 +37,14 @@ TestUtilHelpIndex::testMulti()
     // Not found
     {
         util::HelpIndex::NodeVector_t out;
-        t.find("qq", out, fs, log);
+        t.find("qq", out, fs, log, tx);
         TS_ASSERT_EQUALS(out.size(), 0U);
     }
 
     // Verify toc
     {
         util::HelpIndex::NodeVector_t out;
-        t.find("toc", out, fs, log);
+        t.find("toc", out, fs, log, tx);
         TS_ASSERT_EQUALS(out.size(), 2U);
         TS_ASSERT(out[0] != 0);
         TS_ASSERT_EQUALS(out[0]->file.name, "__tmp2");
@@ -53,7 +55,7 @@ TestUtilHelpIndex::testMulti()
     // Verify f2
     {
         util::HelpIndex::NodeVector_t out;
-        t.find("f2", out, fs, log);
+        t.find("f2", out, fs, log, tx);
         TS_ASSERT_EQUALS(out.size(), 1U);
         TS_ASSERT(out[0] != 0);
         TS_ASSERT_EQUALS(out[0]->file.name, "__tmp2");
@@ -65,7 +67,7 @@ TestUtilHelpIndex::testMulti()
     // Verify toc
     {
         util::HelpIndex::NodeVector_t out;
-        t.find("toc", out, fs, log);
+        t.find("toc", out, fs, log, tx);
         TS_ASSERT_EQUALS(out.size(), 3U);
         TS_ASSERT(out[0] != 0);
         TS_ASSERT_EQUALS(out[0]->file.name, "__tmp3");
@@ -78,7 +80,7 @@ TestUtilHelpIndex::testMulti()
     // Verify f2
     {
         util::HelpIndex::NodeVector_t out;
-        t.find("f2", out, fs, log);
+        t.find("f2", out, fs, log, tx);
         TS_ASSERT_EQUALS(out.size(), 1U);
         TS_ASSERT(out[0] != 0);
         TS_ASSERT_EQUALS(out[0]->file.name, "__tmp3");
@@ -90,7 +92,7 @@ TestUtilHelpIndex::testMulti()
     // Verify toc
     {
         util::HelpIndex::NodeVector_t out;
-        t.find("toc", out, fs, log);
+        t.find("toc", out, fs, log, tx);
         TS_ASSERT_EQUALS(out.size(), 2U);
         TS_ASSERT(out[0] != 0);
         TS_ASSERT_EQUALS(out[0]->file.name, "__tmp3");
@@ -110,12 +112,13 @@ TestUtilHelpIndex::testMissing()
 {
     afl::io::NullFileSystem fs;
     afl::sys::Log log;
+    afl::string::NullTranslator tx;
 
     util::HelpIndex t;
     TS_ASSERT_THROWS_NOTHING(t.addFile("__q2poiwknskdflahuw0e298x", "o1"));
 
     util::HelpIndex::NodeVector_t out;
-    TS_ASSERT_THROWS_NOTHING(t.find("p", out, fs, log));
+    TS_ASSERT_THROWS_NOTHING(t.find("p", out, fs, log, tx));
     TS_ASSERT(out.empty());
 }
 

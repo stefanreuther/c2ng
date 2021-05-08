@@ -12,60 +12,87 @@
 using game::map::Configuration;
 using game::map::Point;
 
-namespace {
-    /* Common code for both setPosition() signatures */
-    template<typename T>
-    class SetQuery : public util::Request<game::Session> {
-     public:
-        SetQuery(const T& t)
-            : m_t(t)
-            { }
-        virtual void handle(game::Session& s)
-            {
-                if (game::Game* pGame = s.getGame().get()) {
-                    pGame->cursors().location().set(m_t);
-                }
-            }
-     private:
-        T m_t;
-    };
-}
-
-class game::proxy::MapLocationProxy::Trampoline : public util::SlaveObject<Session> {
+class game::proxy::MapLocationProxy::Trampoline {
  public:
-    Trampoline(util::RequestSender<MapLocationProxy> reply)
+    Trampoline(Session& session, util::RequestSender<MapLocationProxy> reply)
         : m_reply(reply),
+          m_session(session),
+          m_inhibitPositionChange(false),
           conn_positionChange()
-        { }
-    virtual void init(Session& session)
         {
             if (Game* pGame = session.getGame().get()) {
                 conn_positionChange = pGame->cursors().location().sig_positionChange.add(this, &Trampoline::onPositionChange);
             }
         }
-    virtual void done(Session& /*session*/)
-        {
-            conn_positionChange.disconnect();
-        }
 
     void onPositionChange(game::map::Point pt)
         {
-            class Job : public util::Request<MapLocationProxy> {
+            if (!m_inhibitPositionChange) {
+                sendPositionChange(pt);
+            }
+        }
+
+    void sendPositionChange(game::map::Point pt)
+        { m_reply.postRequest(&MapLocationProxy::emitPositionChange, pt); }
+
+    void sendLocation()
+        {
+            // Response from game to UI thread
+            class Response : public util::Request<MapLocationProxy> {
              public:
-                Job(game::map::Point pt)
-                    : m_point(pt)
+                Response(const Reference& ref, const Point& pt, const Configuration& config)
+                    : m_reference(ref), m_point(pt), m_config(config)
                     { }
-                void handle(MapLocationProxy& p)
-                    { p.sig_positionChange.raise(m_point); }
+                void handle(MapLocationProxy& proxy)
+                    { proxy.sig_locationResult.raise(m_reference, m_point, m_config); }
              private:
-                game::map::Point m_point;
+                Reference m_reference;
+                Point m_point;
+                Configuration m_config;
             };
-            m_reply.postNewRequest(new Job(pt));
+
+            Reference ref;
+            Point pt(2000, 2000);
+            Configuration config;
+            if (Game* pGame = m_session.getGame().get()) {
+                game::map::Location& loc = pGame->cursors().location();
+                loc.getPosition(pt);
+                ref = loc.getReference();
+                config = pGame->currentTurn().universe().config();
+            }
+            m_reply.postNewRequest(new Response(ref, pt, config));
+        }
+
+    template<typename T>
+    void setPosition(T t)
+        {
+            if (game::Game* pGame = m_session.getGame().get()) {
+                m_inhibitPositionChange = true;
+                pGame->cursors().location().set(t);
+                m_inhibitPositionChange = false;
+
+                game::map::Point pt;
+                pGame->cursors().location().getPosition(pt);
+                sendPositionChange(pt);
+            }
         }
 
  private:
     util::RequestSender<MapLocationProxy> m_reply;
+    Session& m_session;
+    bool m_inhibitPositionChange;
     afl::base::SignalConnection conn_positionChange;
+};
+
+class game::proxy::MapLocationProxy::TrampolineFromSession : public afl::base::Closure<Trampoline*(Session&)> {
+ public:
+    TrampolineFromSession(const util::RequestSender<MapLocationProxy>& reply)
+        : m_reply(reply)
+        { }
+    virtual Trampoline* call(Session& session)
+        { return new Trampoline(session, m_reply); }
+ private:
+    util::RequestSender<MapLocationProxy> m_reply;
 };
 
 
@@ -73,9 +100,9 @@ class game::proxy::MapLocationProxy::Trampoline : public util::SlaveObject<Sessi
 game::proxy::MapLocationProxy::MapLocationProxy(util::RequestSender<Session> gameSender, util::RequestDispatcher& reply)
     : sig_locationResult(),
       sig_positionChange(),
-      m_gameSender(gameSender),
       m_reply(reply, *this),
-      m_trampoline(gameSender, new Trampoline(m_reply.getSender()))
+      m_trampoline(gameSender.makeTemporary(new TrampolineFromSession(m_reply.getSender()))),
+      m_numOutstandingRequests(0)
 { }
 
 // Destructor.
@@ -86,56 +113,32 @@ game::proxy::MapLocationProxy::~MapLocationProxy()
 void
 game::proxy::MapLocationProxy::postQueryLocation()
 {
-    // Response from game to UI thread
-    class Response : public util::Request<MapLocationProxy> {
-     public:
-        Response(const Reference& ref, const Point& pt, const Configuration& config)
-            : m_reference(ref), m_point(pt), m_config(config)
-            { }
-        void handle(MapLocationProxy& proxy)
-            { proxy.sig_locationResult.raise(m_reference, m_point, m_config); }
-     private:
-        Reference m_reference;
-        Point m_point;
-        Configuration m_config;
-    };
-
-    // Query from UI to game thread
-    class Query : public util::Request<Session> {
-     public:
-        Query(util::RequestSender<MapLocationProxy> reply)
-            : m_reply(reply)
-            { }
-        void handle(Session& session)
-            {
-                Reference ref;
-                Point pt(2000, 2000);
-                Configuration config;
-                if (Game* pGame = session.getGame().get()) {
-                    game::map::Location& loc = pGame->cursors().location();
-                    loc.getPosition(pt);
-                    ref = loc.getReference();
-                    config = pGame->currentTurn().universe().config();
-                }
-                m_reply.postNewRequest(new Response(ref, pt, config));
-            }
-     private:
-        util::RequestSender<MapLocationProxy> m_reply;
-    };
-
-    m_gameSender.postNewRequest(new Query(m_reply.getSender()));
+    m_trampoline.postRequest(&Trampoline::sendLocation);
 }
 
 // Set location to point.
 void
 game::proxy::MapLocationProxy::setPosition(game::map::Point pt)
 {
-    m_gameSender.postNewRequest(new SetQuery<Point>(pt));
+    ++m_numOutstandingRequests;
+    m_trampoline.postRequest(&Trampoline::setPosition<game::map::Point>, pt);
 }
 
 // Set location to reference.
 void
 game::proxy::MapLocationProxy::setPosition(Reference ref)
 {
-    m_gameSender.postNewRequest(new SetQuery<Reference>(ref));
+    ++m_numOutstandingRequests;
+    m_trampoline.postRequest(&Trampoline::setPosition<Reference>, ref);
+}
+
+void
+game::proxy::MapLocationProxy::emitPositionChange(game::map::Point pt)
+{
+    if (m_numOutstandingRequests > 0) {
+        --m_numOutstandingRequests;
+    }
+    if (m_numOutstandingRequests == 0) {
+        sig_positionChange.raise(pt);
+    }
 }

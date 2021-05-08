@@ -1,16 +1,21 @@
 /**
   *  \file game/interface/inboxcontext.cpp
+  *  \brief Class game::interface::InboxContext
   */
 
 #include "game/interface/inboxcontext.hpp"
+#include "afl/io/textfile.hpp"
 #include "afl/string/format.hpp"
 #include "game/root.hpp"
 #include "game/turn.hpp"
 #include "interpreter/arguments.hpp"
+#include "interpreter/error.hpp"
 #include "interpreter/indexablevalue.hpp"
 #include "interpreter/nametable.hpp"
+#include "interpreter/process.hpp"
 #include "interpreter/propertyacceptor.hpp"
 #include "interpreter/values.hpp"
+#include "interpreter/world.hpp"
 
 using afl::string::Format;
 using interpreter::Error;
@@ -101,12 +106,10 @@ namespace {
         // ex IntMessageWriteProcedure
      public:
         MessageWriteCommand(int turnNumber, size_t messageIndex,
-                            game::Session& session,
                             afl::base::Ptr<game::parser::MessageLines_t> lines)
             : m_lines(lines),
               m_turnNumber(turnNumber),
-              m_messageIndex(messageIndex),
-              m_session(session)
+              m_messageIndex(messageIndex)
             { }
 
         virtual void call(interpreter::Process& proc, afl::data::Segment& args, bool want_result);
@@ -126,13 +129,12 @@ namespace {
         virtual String_t toString(bool /*readable*/) const
             { return "#<procedure>"; }
         virtual CallableValue* clone() const
-            { return new MessageWriteCommand(m_turnNumber, m_messageIndex, m_session, m_lines); }
+            { return new MessageWriteCommand(m_turnNumber, m_messageIndex, m_lines); }
 
      private:
         afl::base::Ptr<game::parser::MessageLines_t> m_lines;
         int m_turnNumber;
         size_t m_messageIndex;
-        game::Session& m_session;
     };
 }
 
@@ -166,8 +168,7 @@ MessageWriteCommand::call(interpreter::Process& proc, afl::data::Segment& args, 
     int32_t flags = 0;
     a.checkArgumentCount(1, 2);
 
-    // FIXME: actually, the process has a World and we don't need to forward it
-    if (!m_session.world().fileTable().checkFileArg(tf, a.getNext())) {
+    if (!proc.world().fileTable().checkFileArg(tf, a.getNext())) {
         return;
     }
 
@@ -185,11 +186,11 @@ MessageWriteCommand::call(interpreter::Process& proc, afl::data::Segment& args, 
 
 
 game::interface::InboxContext::InboxContext(size_t index,
-                                            Session& session,
-                                            afl::base::Ref<Root> root,
-                                            afl::base::Ref<Game> game)
+                                            afl::string::Translator& tx,
+                                            afl::base::Ref<const Root> root,
+                                            afl::base::Ref<const Game> game)
     : m_index(index),
-      m_session(session),
+      m_translator(tx),
       m_root(root),
       m_game(game),
       m_lineCache()
@@ -206,7 +207,7 @@ game::interface::InboxContext::lookup(const afl::data::NameQuery& name, Property
 }
 
 void
-game::interface::InboxContext::set(PropertyIndex_t /*index*/, afl::data::Value* /*value*/)
+game::interface::InboxContext::set(PropertyIndex_t /*index*/, const afl::data::Value* /*value*/)
 {
     // ex IntMessageContext::set
     throw Error::notAssignable();
@@ -234,12 +235,12 @@ game::interface::InboxContext::get(PropertyIndex_t index)
            Group of this message.
            Similar messages are grouped using this string for the message list.
            The message filter also operates based on this string. */
-        return interpreter::makeStringValue(mailbox().getMessageHeading(m_index, m_session.translator(), m_root->playerList()));
+        return interpreter::makeStringValue(mailbox().getMessageHeading(m_index, m_translator, m_root->playerList()));
 
      case impKilled:
         /* @q Killed:Bool (Incoming Message Property)
            True if this message is filtered and skipped by default. */
-        return interpreter::makeBooleanValue(m_game->messageConfiguration().isHeadingFiltered(mailbox().getMessageHeading(m_index, m_session.translator(), m_root->playerList())));
+        return interpreter::makeBooleanValue(m_game->messageConfiguration().isHeadingFiltered(mailbox().getMessageHeading(m_index, m_translator, m_root->playerList())));
 
      case impText:
         /* @q Text:Str() (Incoming Message Property)
@@ -249,10 +250,11 @@ game::interface::InboxContext::get(PropertyIndex_t index)
      case impFullText:
         /* @q FullText:Str (Incoming Message Property)
            Message text, in one big string. */
-        return interpreter::makeStringValue(mailbox().getMessageText(m_index, m_session.translator(), m_root->playerList()));
+        return interpreter::makeStringValue(mailbox().getMessageText(m_index, m_translator, m_root->playerList()));
 
      case immWrite:
-        return new MessageWriteCommand(m_game->currentTurn().getTurnNumber(), m_index, m_session, getLineCache());
+        // @change PCC2 uses the game's turn number; we have a message turn number
+        return new MessageWriteCommand(mailbox().getMessageTurnNumber(m_index), m_index, getLineCache());
     }
     return 0;
 }
@@ -275,7 +277,7 @@ game::interface::InboxContext*
 game::interface::InboxContext::clone() const
 {
     // ex IntMessageContext::clone
-    return new InboxContext(m_index, m_session, m_root, m_game);
+    return new InboxContext(m_index, m_translator, m_root, m_game);
 }
 
 game::map::Object*
@@ -307,7 +309,7 @@ game::interface::InboxContext::store(interpreter::TagNode& /*out*/, afl::io::Dat
     throw Error::notSerializable();
 }
 
-game::msg::Mailbox&
+const game::msg::Mailbox&
 game::interface::InboxContext::mailbox()
 {
     return m_game->currentTurn().inbox();
@@ -325,7 +327,7 @@ game::interface::InboxContext::getLineCache()
     // ex IntMessageContext::createLineCache
     if (m_lineCache.get() == 0) {
         m_lineCache = new game::parser::MessageLines_t();
-        game::parser::splitMessage(*m_lineCache, mailbox().getMessageText(m_index, m_session.translator(), m_root->playerList()));
+        game::parser::splitMessage(*m_lineCache, mailbox().getMessageText(m_index, m_translator, m_root->playerList()));
     }
     return m_lineCache;
 }

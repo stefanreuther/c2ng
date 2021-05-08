@@ -67,7 +67,7 @@ interpreter::StructureValue::lookup(const afl::data::NameQuery& name, PropertyIn
 }
 
 void
-interpreter::StructureValue::set(PropertyIndex_t index, afl::data::Value* value)
+interpreter::StructureValue::set(PropertyIndex_t index, const afl::data::Value* value)
 {
     // ex IntStructureValue::set
     m_value->data.set(index, value);

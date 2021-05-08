@@ -34,6 +34,7 @@ namespace {
     using game::spec::Cost;
     using game::spec::TorpedoLauncher;
     using game::spec::Beam;
+    using util::formatAge;
 
     const int MAX_BAY_LIMIT = 50;
 
@@ -243,21 +244,6 @@ namespace {
                     addDetail(list, UTF_HYPHEN, afl::string::Format(tx("won't die if less than %s"), fmt.formatPopulation(limit)));
                 }
             }
-        }
-    }
-
-    String_t formatAge(int currentTurn, int historyTurn, afl::string::Translator& tx)
-    {
-        // ex formatTurnNumber
-        int age = currentTurn - historyTurn;
-        if (age == 0) {
-            return tx("current turn");
-        } else if (age == 1) {
-            return tx("previous turn");
-        } else if (age < 0) {
-            return afl::string::Format(tx("turn %d"), historyTurn);
-        } else {
-            return afl::string::Format(tx("%d turns ago"), age);
         }
     }
 
@@ -1118,7 +1104,7 @@ game::map::prepareUnloadInfo(const Universe& univ,
         && pl->getOwner(planetOwner))
     {
         PlayedShipType ty(const_cast<Universe&>(univ));
-        for (Id_t sid = ty.findFirstObjectAt(planetPosition); sid != 0; sid = ty.findNextObjectAt(planetPosition, sid)) {
+        for (Id_t sid = ty.findNextObjectAt(planetPosition, 0, false); sid != 0; sid = ty.findNextObjectAt(planetPosition, sid, false)) {
             const Ship* sh = ty.getObjectByIndex(sid);
             int shipOwner;
             if (sh != 0
@@ -1145,6 +1131,60 @@ game::map::prepareUnloadInfo(const Universe& univ,
 
     return result;
 }
+
+game::map::PlanetEffectors
+game::map::preparePlanetEffectors(const Universe& univ,
+                                  Id_t pid,
+                                  const UnitScoreDefinitionList& shipScores,
+                                  const game::spec::ShipList& shipList,
+                                  const game::config::HostConfiguration& config)
+{
+    // ex WTaxationDialog::init (part)
+    PlanetEffectors result;
+
+    const Planet* pl = univ.planets().get(pid);
+    Point planetPosition;
+    int planetOwner;
+    if (pl != 0
+        && pl->getPosition(planetPosition)
+        && pl->getOwner(planetOwner))
+    {
+        PlayedShipType ty(const_cast<Universe&>(univ));
+        for (Id_t sid = ty.findNextObjectAt(planetPosition, 0, false); sid != 0; sid = ty.findNextObjectAt(planetPosition, sid, false)) {
+            const Ship* sh = ty.getObjectByIndex(sid);
+            int shipOwner;
+            if (sh != 0
+                && sh->isPlayable(Object::ReadOnly)
+                && sh->getOwner(shipOwner))
+            {
+                int shipMission;
+                if (config.getPlayerMissionNumber(shipOwner) == 2
+                    && sh->getMission().get(shipMission)
+                    && (shipMission == game::spec::Mission::msn_Special || shipMission == config[HostConfiguration::ExtMissionsStartAt]() + game::spec::Mission::pmsn_Special)
+                    && sh->getNumBeams().orElse(0) > 0)
+                {
+                    // Hiss
+                    result.add(PlanetEffectors::Hiss, 1);
+                }
+                if (sh->getWaypointDX().orElse(0) == 0 && sh->getWaypointDY().orElse(0) == 0) {
+                    // Terraforming is after movement, so only process it if ships have no waypoint.
+                    if (sh->hasSpecialFunction(game::spec::HullFunction::HeatsTo50, shipScores, shipList, config)) {
+                        result.add(PlanetEffectors::HeatsTo50, 1);
+                    }
+                    if (sh->hasSpecialFunction(game::spec::HullFunction::CoolsTo50, shipScores, shipList, config)) {
+                        result.add(PlanetEffectors::CoolsTo50, 1);
+                    }
+                    if (sh->hasSpecialFunction(game::spec::HullFunction::HeatsTo100, shipScores, shipList, config)) {
+                        result.add(PlanetEffectors::HeatsTo100, 1);
+                    }
+                }
+            }
+        }
+    }
+
+    return result;
+}
+
 
 // Retrieve information about ground defense.
 game::map::GroundDefenseInfo

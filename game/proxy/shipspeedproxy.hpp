@@ -55,7 +55,8 @@ namespace game { namespace proxy {
 
      private:
         class Trampoline;
-        util::SlaveRequestSender<Session,Trampoline> m_trampoline;
+        class TrampolineFromSession;
+        util::RequestSender<Trampoline> m_trampoline;
     };
 
 } }

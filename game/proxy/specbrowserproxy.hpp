@@ -12,7 +12,6 @@
 #include "game/spec/info/types.hpp"
 #include "util/requestdispatcher.hpp"
 #include "util/requestreceiver.hpp"
-#include "util/slaverequestsender.hpp"
 
 namespace game { namespace proxy {
 
@@ -48,6 +47,12 @@ namespace game { namespace proxy {
             \param id Id; needs to be taken from the current page's list (sig_listChange). */
         void setId(Id_t id);
 
+        /** Set page and Id.
+            Use if you know the Id beforehand.
+            \param p Page to show
+            \param id Id */
+        void setPageId(game::spec::info::Page p, Id_t id);
+
         /** Erase element from filter.
             \param index Index into filter */
         void eraseFilter(size_t index);
@@ -73,6 +78,10 @@ namespace game { namespace proxy {
             \param sort New sort order */
         void setSortOrder(game::spec::info::FilterAttribute sort);
 
+        /** Configure whether costs are included in reports.
+            \param flag true: costs are reported as textual output (default); false: costs are not reported */
+        void setWithCost(bool flag);
+
         /** Signal: list changed.
             \param list Current list content
             \param index Desired index to select */
@@ -96,8 +105,9 @@ namespace game { namespace proxy {
 
      private:
         class Trampoline;
+        class TrampolineFromSession;
         util::RequestReceiver<SpecBrowserProxy> m_receiver;
-        util::SlaveRequestSender<Session, Trampoline> m_sender;
+        util::RequestSender<Trampoline> m_sender;
     };
 
 } }

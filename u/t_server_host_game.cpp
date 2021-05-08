@@ -24,6 +24,7 @@
 #include "afl/net/redis/stringsetkey.hpp"
 #include "afl/string/format.hpp"
 #include "afl/test/commandhandler.hpp"
+#include "game/test/files.hpp"
 #include "server/file/internalfileserver.hpp"
 #include "server/host/configuration.hpp"
 #include "server/host/root.hpp"
@@ -31,7 +32,6 @@
 #include "server/interface/hostplayer.hpp"
 #include "server/interface/mailqueueclient.hpp"
 #include "server/interface/talkforumclient.hpp"
-#include "u/files.hpp"
 #include "util/processrunner.hpp"
 
 using afl::net::redis::HashKey;
@@ -516,7 +516,7 @@ TestServerHostGame::testDescribeSlot()
     // Race names
     server::common::RaceNames raceNames;
     afl::charset::CodepageCharset cs(afl::charset::g_codepageLatin1);
-    raceNames.load(getDefaultRaceNames(), cs);
+    raceNames.load(game::test::getDefaultRaceNames(), cs);
 
     // Test
     server::host::Game g(h.root(), 61);

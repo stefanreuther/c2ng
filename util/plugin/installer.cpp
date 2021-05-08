@@ -10,7 +10,6 @@
 #include "afl/string/string.hpp"
 #include "util/plugin/manager.hpp"
 #include "util/plugin/plugin.hpp"
-#include "util/translation.hpp"
 
 using afl::string::Format;
 
@@ -74,9 +73,11 @@ util::plugin::Installer::~Installer()
 
 // Prepare installation.
 util::plugin::Plugin*
-util::plugin::Installer::prepareInstall(String_t fileName, afl::string::Translator& tx)
+util::plugin::Installer::prepareInstall(String_t fileName)
 {
     // ex PluginInstaller::prepareInstall
+    afl::string::Translator& tx = manager.translator();
+
     // Reset
     apPlug.reset();
     srcDir = 0;
@@ -93,7 +94,7 @@ util::plugin::Installer::prepareInstall(String_t fileName, afl::string::Translat
         // Regular *.c2p file
         String_t pluginName = baseName.substr(0, baseName.size() - 4);
         apPlug.reset(new Plugin(afl::string::strUCase(pluginName)));
-        apPlug->initFromPluginFile(dirName, baseName, *srcFile, manager.log());
+        apPlug->initFromPluginFile(dirName, baseName, *srcFile, manager.log(), tx);
         srcFile->setPos(0);
     } else if (baseName.size() > 4 && afl::string::strCaseCompare(baseName.substr(baseName.size() - 4), ".res") == 0) {
         // *.res file with synthetic definition
@@ -119,7 +120,7 @@ util::plugin::Installer::prepareInstall(String_t fileName, afl::string::Translat
             afl::base::Ref<afl::io::Stream> file = zip->openFile(pluginFile, afl::io::FileSystem::OpenRead);
             String_t pluginName = pluginFile.substr(0, pluginFile.size() - 4);
             apPlug.reset(new Plugin(afl::string::strUCase(pluginName)));
-            apPlug->initFromPluginFile(fileName, pluginFile, *file, manager.log());
+            apPlug->initFromPluginFile(fileName, pluginFile, *file, manager.log(), tx);
 
             // Set output
             srcFile = zip->openFile(pluginFile, afl::io::FileSystem::OpenRead).asPtr();
@@ -148,9 +149,11 @@ util::plugin::Installer::checkInstallAmbiguity(String_t& out)
 
 // Check preconditions for installation.
 afl::base::Optional<String_t>
-util::plugin::Installer::checkInstallPreconditions(afl::string::Translator& tx)
+util::plugin::Installer::checkInstallPreconditions()
 {
     // ex c2pluginw.cc:checkPreconditions, c2plugin.cc:checkPreconditions, plugindlg.cc:checkPreconditions
+    afl::string::Translator& tx = manager.translator();
+
     // Do we have a plugin?
     if (apPlug.get() == 0) {
         return afl::base::Nothing;
@@ -161,13 +164,13 @@ util::plugin::Installer::checkInstallPreconditions(afl::string::Translator& tx)
     std::vector<Plugin*> plugList;
     manager.enumConflictingPlugins(plug, plugList);
     if (!plugList.empty()) {
-        String_t message = Format(tx.translateString("Plugin \"%s\" conflicts with the following plugins:").c_str(), plug.getId());
+        String_t message = Format(tx("Plugin \"%s\" conflicts with the following plugins:"), plug.getId());
         for (size_t i = 0, n = plugList.size(); i < n; ++i) {
             message += "\n";
             message += Format("  %s (%s)", plugList[i]->getId(), plugList[i]->getName());
         }
         message += "\n";
-        message += tx.translateString("It cannot be installed.");
+        message += tx("It cannot be installed.");
         return message;
     }
 
@@ -175,7 +178,7 @@ util::plugin::Installer::checkInstallPreconditions(afl::string::Translator& tx)
     Plugin::FeatureSet_t fset;
     manager.enumProvidedFeatures(fset);
     if (!plug.isSatisfiedBy(fset)) {
-        String_t message = Format(tx.translateString("Plugin \"%s\" requires the following features:").c_str(), plug.getId());
+        String_t message = Format(tx("Plugin \"%s\" requires the following features:"), plug.getId());
         Plugin::FeatureSet_t missing;
         plug.enumMissingFeatures(fset, missing);
         for (Plugin::FeatureSet_t::const_iterator it = missing.begin(), e = missing.end(); it != e; ++it) {
@@ -187,7 +190,7 @@ util::plugin::Installer::checkInstallPreconditions(afl::string::Translator& tx)
             }
         }
         message += "\n";
-        message += tx.translateString("It cannot be installed.");
+        message += tx("It cannot be installed.");
         return message;
     }
     return afl::base::Nothing;
@@ -257,18 +260,19 @@ util::plugin::Installer::doInstall(bool dry)
 
 // Check preconditions for removal.
 afl::base::Optional<String_t>
-util::plugin::Installer::checkRemovePreconditions(const Plugin& plug, afl::string::Translator& tx)
+util::plugin::Installer::checkRemovePreconditions(const Plugin& plug)
 {
+    afl::string::Translator& tx = manager.translator();
     std::vector<util::plugin::Plugin*> tmp;
     manager.enumDependingPlugins(plug, tmp);
     if (!tmp.empty()) {
-        String_t message = Format(tx.translateString("Plugin \"%s\" is required by the following plugins:").c_str(), plug.getId());
+        String_t message = Format(tx("Plugin \"%s\" is required by the following plugins:"), plug.getId());
         for (size_t i = 0, n = tmp.size(); i < n; ++i) {
             message += "\n";
             message += Format("  %s (%s)", tmp[i]->getId(), tmp[i]->getName());
         }
         message += "\n";
-        message += tx.translateString("It cannot be uninstalled.");
+        message += tx("It cannot be uninstalled.");
         return message;
     }
     return afl::base::Nothing;
@@ -329,7 +333,8 @@ util::plugin::Installer::doRemove(Plugin* pPlug, bool dry)
         err = true;
     }
     if (err) {
-        manager.log().write(afl::sys::LogListener::Warn, LOG_NAME, Format(_("Uninstallation of \"%s\" might be incomplete.").c_str(), apPlug->getId()));
+        afl::string::Translator& tx = manager.translator();
+        manager.log().write(afl::sys::LogListener::Warn, LOG_NAME, Format(tx("Uninstallation of \"%s\" might be incomplete."), apPlug->getId()));
     }
     return !err;
 }

@@ -45,6 +45,22 @@ namespace gfx {
     const LinePattern_t DASHED_LINE = 0xF0;
     const LinePattern_t DOTTED_LINE = 0xAA;
 
+
+    /** Alignments.
+        Note that the numerical values are used in formulas; do not change. */
+    enum HorizontalAlignment {
+        LeftAlign = 0,
+        CenterAlign = 1,
+        RightAlign = 2
+    };
+
+    enum VerticalAlignment {
+        TopAlign = 0,
+        MiddleAlign = 1,
+        BottomAlign = 2
+    };
+
+
     /*
      *  Operations
      */

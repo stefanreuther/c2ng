@@ -4,6 +4,7 @@
 
 #include "client/tiles/visualscanheadertile.hpp"
 #include "afl/string/format.hpp"
+#include "client/marker.hpp"
 #include "game/game.hpp"
 #include "game/map/object.hpp"
 #include "game/map/ship.hpp"
@@ -112,6 +113,9 @@ namespace {
             } else {
                 result.type = tx.translateString("Unknown type");
             }
+
+            // Messages
+            result.hasMessages = !s->messages().empty();
         } else if (obj != 0) {
             // Something else
             result.title = obj->getName(game::PlainName, tx, session.interface());
@@ -145,8 +149,16 @@ client::tiles::VisualScanHeaderTile::draw(gfx::Canvas& can)
     gfx::Rectangle area = getExtent();
 
     // First line
+    gfx::Rectangle firstArea = area.splitY(lineHeight);
+    int firstWidth = ctx.getFont()->getTextWidth(m_content.title);
     ctx.setColor(SkinColor::Static);
-    outTextF(ctx, area.splitY(lineHeight), m_content.title);
+    outTextF(ctx, firstArea.splitX(firstWidth), m_content.title);
+    if (m_content.hasMessages && firstArea.getWidth() >= 10) {
+        ctx.setColor(SkinColor::Blue);
+        drawMessageMarker(ctx, gfx::Point(firstArea.getLeftX() + 5, firstArea.getTopY() + lineHeight*7/10),
+                          5*lineHeight,
+                          3*lineHeight);
+    }
 
     // Second line
     ctx.setColor(m_content.subtitleColor);

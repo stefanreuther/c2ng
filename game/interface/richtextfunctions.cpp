@@ -112,13 +112,13 @@ namespace {
 }
 
 bool
-game::interface::checkRichArg(RichTextValue::Ptr_t& out, afl::data::Value* value)
+game::interface::checkRichArg(RichTextValue::Ptr_t& out, const afl::data::Value* value)
 {
     // ex int/if/richif.h:checkRichArg
     if (value == 0) {
         return false;
     } else {
-        if (RichTextValue* rv = dynamic_cast<RichTextValue*>(value)) {
+        if (const RichTextValue* rv = dynamic_cast<const RichTextValue*>(value)) {
             out = rv->get().asPtr();
         } else {
             out = new util::rich::Text(interpreter::toString(value, false));

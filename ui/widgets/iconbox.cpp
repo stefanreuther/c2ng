@@ -189,8 +189,6 @@ ui::widgets::IconBox::handleMouse(gfx::Point pt, MouseButtons_t pressedButtons)
     }
 }
 
-// /** Set current item. Also adjusts display so that the item is actually visible.
-//     \param n Item index [0,getNumberOfItems()). */
 void
 ui::widgets::IconBox::setCurrentItem(size_t nr)
 {
@@ -232,7 +230,6 @@ ui::widgets::IconBox::setCurrentItem(size_t nr)
     }
 }
 
-// /** Get current item, 0-based index. */
 size_t
 ui::widgets::IconBox::getCurrentItem() const
 {
@@ -247,8 +244,6 @@ ui::widgets::IconBox::setChangeOnClick(bool enable)
     m_changeOnClick = enable;
 }
 
-// /** Handle structure change. Reinitializes this iconbox after a complete
-//     change to the content, and selects a new current item. */
 void
 ui::widgets::IconBox::handleStructureChange(size_t n)
 {
@@ -285,9 +280,9 @@ ui::widgets::IconBox::handleStructureChange(size_t n)
     requestRedraw();
 }
 
-// /** Adjust position so that current item is completely visible.
-//     \retval true if redraw needed
-//     \retval false if no change */
+/** Adjust position so that current item is completely visible.
+    \retval true if redraw needed
+    \retval false if no change */
 bool
 ui::widgets::IconBox::adjustPosition()
 {
@@ -329,11 +324,11 @@ ui::widgets::IconBox::adjustPosition()
         /* set new X */
         m_targetLeftX = new_left_x;
 
-//         /* cancel animation if we're not visible? */
-//         if (!hasState(st_Exposed)) {
-//             left_x = m_targetLeftX;
-//             m_scrollSpeed = 0;
-//         }
+        /* cancel animation if we're not visible? */
+        if (getExtent().getWidth() == 0) {
+            m_leftX = m_targetLeftX;
+            m_scrollSpeed = 0;
+        }
         return true;
     } else {
         return false;

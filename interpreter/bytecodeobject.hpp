@@ -235,7 +235,7 @@ namespace interpreter {
         /** Add push-literal instruction.
             Selects the optimum instruction for creating the given literal.
             \param literal Literal to push */
-        void addPushLiteral(afl::data::Value* literal);
+        void addPushLiteral(const afl::data::Value* literal);
 
         /** Add name (symbol) for later reference.
             Existing names are recycled if possible.

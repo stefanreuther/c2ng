@@ -6,11 +6,13 @@
 
 #include "afl/bits/smallset.hpp"
 #include "afl/string/string.hpp"
+#include "afl/string/translator.hpp"
 #include "ui/eventloop.hpp"
 #include "ui/group.hpp"
 #include "ui/root.hpp"
 #include "ui/widgets/keydispatcher.hpp"
 #include "ui/window.hpp"
+#include "util/keystring.hpp"
 #include "util/rich/text.hpp"
 
 namespace ui { namespace dialogs {
@@ -51,11 +53,24 @@ namespace ui { namespace dialogs {
             \return *this */
         MessageBox& addButton(int id, String_t text, util::Key_t key);
 
+        /** Add a button.
+            \param id Result identifier. This will be the return value of run() if this button is chosen.
+            \param ks KeyString defining both key and string
+            \return *this */
+        MessageBox& addButton(int id, const util::KeyString& ks);
+
         /** Add a key.
             \param id Result identifier. This will be the return value of run() if this button is chosen.
             \param key Key
             \return *this */
         MessageBox& addKey(int id, util::Key_t key);
+
+        /** Ignore a key.
+            By default, MessageBox auto-connects Key_Return and Key_Escape to the first and last button, respectively, unless you map them to a different action.
+            Use this call to disable them entirely without mapping them to any action.
+            \param key Key to ignore
+            \return *this */
+        MessageBox& ignoreKey(util::Key_t key);
 
         /** Operate the dialog.
             Displays the dialog and returns the result identifier of the user's chosen selection.
@@ -67,12 +82,14 @@ namespace ui { namespace dialogs {
 
         /** Build and operate a Yes/No dialog.
             You should not have called addButton(), addKey() on this object yet.
+            \param tx Translator
             \return user's selection (true=yes, false=no) */
-        bool doYesNoDialog();
+        bool doYesNoDialog(afl::string::Translator& tx);
 
         /** Build and operate a simple confirmation dialog (just an OK button).
-            You should not have called addButton(), addKey() on this object yet. */
-        void doOkDialog();
+            You should not have called addButton(), addKey() on this object yet.
+            \param tx Translator */
+        void doOkDialog(afl::string::Translator& tx);
 
      private:
         void init(const util::rich::Text& text);

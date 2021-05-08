@@ -1,0 +1,10 @@
+/*!
+     \namespace server::test
+     \brief Server Test Utilities
+
+     This namespace contains testing support utilities for server components.
+     Mocks/stubs that are needed multiple times should be placed here.
+
+     These classes should not appear in production code.
+     Should production code need these classes, move them.
+ */

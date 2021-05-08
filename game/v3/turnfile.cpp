@@ -7,6 +7,7 @@
 #include <algorithm>
 #include "game/v3/turnfile.hpp"
 #include "afl/base/countof.hpp"
+#include "afl/base/inlinememory.hpp"
 #include "afl/bits/int16le.hpp"
 #include "afl/bits/int32le.hpp"
 #include "afl/bits/pack.hpp"
@@ -15,8 +16,6 @@
 #include "afl/except/filetooshortexception.hpp"
 #include "game/v3/registrationkey.hpp"
 #include "util/randomnumbergenerator.hpp"
-#include "util/translation.hpp"
-#include "afl/base/inlinememory.hpp"
 
 namespace {
     const int CURRENT_VERSION = 1;
@@ -200,7 +199,7 @@ namespace {
     }
 
 
-// //! Turn Command Compare.
+    /** Turn Command Comparator. */
     class CommandComparator {
      public:
         CommandComparator(afl::base::ConstBytes_t turnData)
@@ -212,16 +211,16 @@ namespace {
         afl::base::ConstBytes_t m_turnData;
     };
 
-// /** Returns true iff command at offset a precedes command at offset b.
-//     Canonical command order is:
-//     - for all ships, in sid order, ship commands in command code order;
-//     - for all planets, in pid order, planet commands in command code order;
-//     - for all bases, in bid order, base commands in command code order;
-//     - messages (60);
-//     - change password (61);
-//     - sendback (62).
+    /** Returns true iff command at offset a precedes command at offset b.
+        Canonical command order is:
+        - for all ships, in sid order, ship commands in command code order;
+        - for all planets, in pid order, planet commands in command code order;
+        - for all bases, in bid order, base commands in command code order;
+        - messages (60);
+        - change password (61);
+        - sendback (62).
 
-//     Note that this will sort undefined commands at the beginning. */
+        Note that this will sort undefined commands at the beginning. */
     bool CommandComparator::operator()(int32_t a, int32_t b)
     {
         using game::v3::TurnFile;
@@ -254,11 +253,7 @@ namespace {
             return typa < typb;
         }
     }
-
-
-
 }
-
 
 
 
@@ -282,7 +277,7 @@ game::v3::TurnFile::TurnFile(afl::charset::Charset& charset, int player, Timesta
 }
 
 // Read turn file.
-game::v3::TurnFile::TurnFile(afl::charset::Charset& charset, afl::io::Stream& str, bool fullParse)
+game::v3::TurnFile::TurnFile(afl::charset::Charset& charset, afl::string::Translator& tx, afl::io::Stream& str, bool fullParse)
     : m_charset(charset),
       m_turnHeader(),           // zero-initializes!
       m_taccomHeader(),
@@ -296,7 +291,7 @@ game::v3::TurnFile::TurnFile(afl::charset::Charset& charset, afl::io::Stream& st
       m_isDirty(false)
 {
     // ex GTurnfile::GTurnfile
-    init(str, fullParse);
+    init(str, tx, fullParse);
 }
 
 // Destructor.
@@ -733,10 +728,7 @@ game::v3::TurnFile::deleteCommand(size_t index)
     m_isDirty = true;
 }
 
-// /** Make commands for a ship.
-//     \param id Ship Id
-//     \param old Serialized old ship data (*.dis)
-//     \param neu Serialized new ship data (*.dat) */
+// Make commands for a ship.
 void
 game::v3::TurnFile::makeShipCommands(int id, const structures::Ship& oldShip, const structures::Ship& newShip)
 {
@@ -744,10 +736,7 @@ game::v3::TurnFile::makeShipCommands(int id, const structures::Ship& oldShip, co
     makeCommands(id, tcm_ShipFIRST, tcm_ShipLAST, afl::base::fromObject(oldShip), afl::base::fromObject(newShip));
 }
 
-// /** Make commands for a planet.
-//     \param id Planet Id
-//     \param old Serialized old planet data (*.dis)
-//     \param neu Serialized new planet data (*.dat) */
+// Make commands for a planet.
 void
 game::v3::TurnFile::makePlanetCommands(int id, const structures::Planet& oldPlanet, const structures::Planet& newPlanet)
 {
@@ -758,10 +747,7 @@ game::v3::TurnFile::makePlanetCommands(int id, const structures::Planet& oldPlan
     }
 }
 
-// /** Make commands for a starbase.
-//     \param id Base Id
-//     \param old Serialized old base data (*.dis)
-//     \param neu Serialized new base data (*.dat) */
+// Make commands for a starbase.
 void
 game::v3::TurnFile::makeBaseCommands(int id, const structures::Base& oldBase, const structures::Base& newBase)
 {
@@ -847,12 +833,9 @@ game::v3::TurnFile::update()
 void
 game::v3::TurnFile::updateTrailer()
 {
-//     ASSERT(!dirty);
     if (m_features.contains(TaccomFeature)) {
-//         ASSERT(taccom_header.turn_size > dos_trailer.size);
         m_data.subrange(m_taccomHeader.turnAddress-1 + m_taccomHeader.turnSize - sizeof(m_dosTrailer)).copyFrom(afl::base::fromObject(m_dosTrailer));
     } else {
-//         ASSERT(data.getSize() > dos_trailer.size);
         m_data.subrange(m_data.size() - sizeof(m_dosTrailer)).copyFrom(afl::base::fromObject(m_dosTrailer));
     }
 }
@@ -861,16 +844,12 @@ game::v3::TurnFile::updateTrailer()
 uint32_t
 game::v3::TurnFile::computeTurnChecksum() const
 {
-//     /* This really ought to compute the checksum, not just return the
-//        value from the header, to allow verification of turns. */
-//     ASSERT(!dirty);
-
+    /* This really ought to compute the checksum, not just return the
+       value from the header, to allow verification of turns. */
     afl::base::ConstBytes_t area;
     if (m_features.contains(TaccomFeature)) {
-//         ASSERT(taccom_header.turn_size > dos_trailer.size);
         area = m_data.subrange(m_taccomHeader.turnAddress-1, m_taccomHeader.turnSize - sizeof(m_dosTrailer));
     } else {
-//         ASSERT(data.getSize() > dos_trailer.size);
         area = m_data.subrange(0, m_data.size() - sizeof(m_dosTrailer));
     }
 
@@ -943,7 +922,6 @@ game::v3::TurnFile::getTaccomTurnPlace() const
 void
 game::v3::TurnFile::write(afl::io::Stream& stream) const
 {
-//     ASSERT(!dirty);
     stream.fullWrite(m_data);
 }
 
@@ -963,9 +941,10 @@ game::v3::TurnFile::charset() const
 /** Initialize by loading a stream.
     The stream contains a full turn file (including possible Taccom data).
     \param str Stream to read
+    \param tx Translator (for error messages)
     \param fullParse true to read full turn, false to read only headers */
 void
-game::v3::TurnFile::init(afl::io::Stream& str, bool fullParse)
+game::v3::TurnFile::init(afl::io::Stream& str, afl::string::Translator& tx, bool fullParse)
 {
     // ex GTurnfile::init
     if (fullParse) {
@@ -975,19 +954,19 @@ game::v3::TurnFile::init(afl::io::Stream& str, bool fullParse)
             // Taccom-enhanced TRN
             afl::base::fromObject(m_taccomHeader).copyFrom(m_data);
             m_features += TaccomFeature;
-            parseTurnFile(str, m_taccomHeader.turnAddress - 1, m_taccomHeader.turnSize);
+            parseTurnFile(str, tx, m_taccomHeader.turnAddress - 1, m_taccomHeader.turnSize);
             for (size_t i = 0; i < structures::MAX_TRN_ATTACHMENTS; ++i) {
                 if (!afl::base::ConstBytes_t(m_taccomHeader.attachments[i].name).empty()) {
                     // Attachment present
                     if (m_taccomHeader.turnAddress > m_taccomHeader.attachments[i].address) {
                         m_turnPlacement = i+1;
                     }
-                    checkRange(str, m_taccomHeader.attachments[i].address-1, m_taccomHeader.attachments[i].length);
+                    checkRange(str, tx, m_taccomHeader.attachments[i].address-1, m_taccomHeader.attachments[i].length);
                 }
             }
         } else {
             // Normal TRN
-            parseTurnFile(str, 0, m_data.size());
+            parseTurnFile(str, tx, 0, m_data.size());
         }
     } else {
         // Probe for taccom header
@@ -1008,30 +987,33 @@ game::v3::TurnFile::init(afl::io::Stream& str, bool fullParse)
 /** Check a file position.
     Assumes file already loaded into m_data.
     \param stream stream we're processing (for generating error messages only)
+    \param tx Translator (for error messages)
     \param offset,length position/range to verify, zero-based
     \throw afl::except::FileFormatException on error. */
 void
-game::v3::TurnFile::checkRange(afl::io::Stream& stream, afl::io::Stream::FileSize_t offset, afl::io::Stream::FileSize_t length)
+game::v3::TurnFile::checkRange(afl::io::Stream& stream, afl::string::Translator& tx, afl::io::Stream::FileSize_t offset, afl::io::Stream::FileSize_t length)
 {
     // ex GTurnfile::checkRange
     if (offset > m_data.size() || length > m_data.size() - offset) {
-        throw afl::except::FileFormatException(stream, _("Invalid file format (bad pointer)"));
+        throw afl::except::FileFormatException(stream, tx("Invalid file format (bad pointer)"));
     }
 }
 
 /** Parse Turn File.
     To be called from the constructor only (assumes most things zeroed).
+    \param stream stream we're processing (for generating error messages only)
+    \param tx Translator (for error messages)
     \param offset Starting position into file (nonzero for Taccom).
     \param length Length of turn data.
     \throw afl::except::FileFormatException on error. */
 void
-game::v3::TurnFile::parseTurnFile(afl::io::Stream& stream, afl::io::Stream::FileSize_t offset, afl::io::Stream::FileSize_t length)
+game::v3::TurnFile::parseTurnFile(afl::io::Stream& stream, afl::string::Translator& tx, afl::io::Stream::FileSize_t offset, afl::io::Stream::FileSize_t length)
 {
     // Imports
     using afl::bits::Int32LE;
 
     // ex GTurnfile::parseTurnfile
-    checkRange(stream, offset, length);
+    checkRange(stream, tx, offset, length);
 
     // An estimate of the maximum valid command count.
     // Maximum object commands are 18*999 (ships) + 15*500 (planets) + 15*500 (bases) = 32982, plus messages, password, sendfile and alliances.
@@ -1048,29 +1030,29 @@ game::v3::TurnFile::parseTurnFile(afl::io::Stream& stream, afl::io::Stream::File
     }
     afl::base::fromObject(m_turnHeader).copyFrom(data.subrange(offset));
     if (m_turnHeader.numCommands < 0 || m_turnHeader.numCommands > MAX_COMMANDS) {
-        throw afl::except::FileFormatException(stream, _("Invalid file format (invalid command count)"));
+        throw afl::except::FileFormatException(stream, tx("Invalid file format (invalid command count)"));
     }
     if (length < sizeof(m_turnHeader) + (m_turnHeader.numCommands != 0) + 4*m_turnHeader.numCommands + sizeof(m_dosTrailer)) {
         throw afl::except::FileTooShortException(stream);
     }
 
     // read & populate command array
-    checkRange(stream, sizeof(m_turnHeader)+1, 4*m_turnHeader.numCommands);
+    checkRange(stream, tx, sizeof(m_turnHeader)+1, 4*m_turnHeader.numCommands);
     afl::base::ConstBytes_t offsetTable = data.subrange(offset + sizeof(m_turnHeader) + 1, 4*m_turnHeader.numCommands);
     while (const Int32LE::Bytes_t* p = offsetTable.eatN<4>()) {
         m_offsets.append(static_cast<uint32_t>(offset + Int32LE::unpack(*p) - 1));
     }
     for (size_t i = 0, n = m_offsets.size(); i < n; ++i) {
-        checkRange(stream, *m_offsets.at(i), 4);      // each command is at least 4 bytes
+        checkRange(stream, tx, *m_offsets.at(i), 4);      // each command is at least 4 bytes
 
         CommandCode_t cmd;
         if (getCommandCode(i, cmd) && cmd == tcm_SendBack) {
-            checkRange(stream, *m_offsets.at(i), 8);  // getCommandLength() will refer to offset+6
+            checkRange(stream, tx, *m_offsets.at(i), 8);  // getCommandLength() will refer to offset+6
         }
 
         int length;
         if (getCommandLength(i, length)) {
-            checkRange(stream, *m_offsets.at(i), length + 4);
+            checkRange(stream, tx, *m_offsets.at(i), length + 4);
         }
     }
 
@@ -1183,10 +1165,11 @@ game::v3::TurnFile::updateTurnFile(afl::base::GrowableMemory<uint8_t>& data, afl
     data.append(afl::base::fromObject(m_dosTrailer));
 }
 
-// /** Generate commands for an object. Adds the commands to this turn file.
-//     \param id      Object Id
-//     \param low,up  Command range (e.g. tcm_ShipFIRST,tcm_ShipLAST)
-//     \param old,neu Old and new data */
+/** Generate commands for an object. Adds the commands to this turn file.
+    \param id         Object Id
+    \param low,up     Command range (e.g. tcm_ShipFIRST,tcm_ShipLAST)
+    \param oldObject  Old object data
+    \param newOffsets New object data */
 void
 game::v3::TurnFile::makeCommands(int id, int low, int up, afl::base::ConstBytes_t oldObject, afl::base::ConstBytes_t newObject)
 {

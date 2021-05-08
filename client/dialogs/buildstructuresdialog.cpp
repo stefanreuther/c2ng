@@ -278,10 +278,10 @@ namespace {
                 m_table.cell(0, 2).setText(tx("Maximum:"));
 
                 // FIXME: fine-tune table layout so that all StructureWidget's use same column widths
-                m_table.column(2).subrange(0, 3).setColor(ui::Color_Green).setTextAlign(2, 0);
+                m_table.column(2).subrange(0, 3).setColor(ui::Color_Green).setTextAlign(gfx::RightAlign, gfx::TopAlign);
 
                 m_table.cell(0, 3).setText(tx("Cost:"));
-                m_table.cell(1, 3).setExtraColumns(1).setColor(ui::Color_Green).setText(tx(desc.untranslatedBuildingCost)).setTextAlign(2, 0);
+                m_table.cell(1, 3).setExtraColumns(1).setColor(ui::Color_Green).setText(tx(desc.untranslatedBuildingCost)).setTextAlign(gfx::RightAlign, gfx::TopAlign);
 
                 // Connect keys
                 ui::widgets::KeyDispatcher& disp = m_del.addNew(new ui::widgets::KeyDispatcher());
@@ -342,9 +342,10 @@ namespace {
         StructureCostWidget(ui::Root& root,
                             bool withDuranium,
                             util::NumberFormatter fmt,
-                            afl::string::Translator& /*tx*/,
+                            afl::string::Translator& tx,
                             BuildStructuresProxy& proxy)
             : CostDisplay(root,
+                          tx,
                           withDuranium
                           ? CostDisplay::Types_t() + Cost::Money + Cost::Supplies + Cost::Duranium
                           : CostDisplay::Types_t() + Cost::Money + Cost::Supplies,
@@ -406,7 +407,7 @@ namespace {
 
                 // Colors
                 column(0).setColor(ui::Color_Gray);
-                column(1).setColor(ui::Color_Green).setTextAlign(2, 0);
+                column(1).setColor(ui::Color_Green).setTextAlign(gfx::RightAlign, gfx::TopAlign);
                 column(2).setColor(ui::Color_Green);
 
                 // Fixed text
@@ -490,7 +491,7 @@ namespace {
                 ui::CardGroup cards;
                 StructureHeader header(m_root, cards);
 
-                Widget& helpWidget = m_del.addNew(new client::widgets::HelpWidget(m_root, m_gameSender, "pcc2:buildings"));
+                Widget& helpWidget = m_del.addNew(new client::widgets::HelpWidget(m_root, m_translator, m_gameSender, "pcc2:buildings"));
 
                 Widget& page1 = buildBuildScreen1(helpWidget);
                 header.addPage(m_info.planetName + m_translator(" - Planetary Economy"), m_info.planetInfo, page1);
@@ -587,8 +588,6 @@ namespace {
                           m_name(name),
                           m_mode(mode)
                         { }
-                    virtual Callback* clone() const
-                        { return new Callback(*this); }
                     virtual void call()
                         { m_widget.setContent(m_name, m_proxy.getMineralInfo(m_element), m_mode); }
                  private:
@@ -613,8 +612,6 @@ namespace {
                         : m_widget(widget),
                           m_proxy(proxy)
                         { }
-                    virtual Callback* clone() const
-                        { return new Callback(*this); }
                     virtual void call()
                         {
                             // Set up parser
@@ -650,14 +647,12 @@ namespace {
                           m_proxy(proxy),
                           m_maxStr(maxStr)
                         { }
-                    virtual Callback* clone() const
-                        { return new Callback(*this); }
                     virtual void call()
                         {
                             // ex WPlanetDefenseEffectWidget::showLine (sort-of)
                             // General alignment
-                            m_widget.column(0).setTextAlign(0, 0);
-                            m_widget.column(1).setTextAlign(2, 0);
+                            m_widget.column(0).setTextAlign(gfx::LeftAlign,  gfx::TopAlign);
+                            m_widget.column(1).setTextAlign(gfx::RightAlign, gfx::TopAlign);
 
                             // Content
                             const game::map::DefenseEffectInfos_t& infos = m_proxy.getDefenseEffectsInfo();
@@ -954,7 +949,7 @@ void
 client::dialogs::doBuildStructuresDialog(ui::Root& root, util::RequestSender<game::Session> gameSender, afl::string::Translator& tx, game::Id_t pid, int page)
 {
     // ex doPlanetBuildScreen
-    Downlink link(root);
+    Downlink link(root, tx);
     BuildStructuresProxy proxy(gameSender, root.engine().dispatcher());
     BuildStructuresProxy::HeaderInfo info;
     proxy.init(link, pid, info);

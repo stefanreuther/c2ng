@@ -52,6 +52,10 @@ namespace game { namespace test {
         HostVersion& version()
             { return m_version; }
 
+        /** Access current hull. */
+        game::spec::Hull& hull()
+            { return *m_shipList.hulls().create(m_hullNr); }
+
         /*
          *  Objects
          */

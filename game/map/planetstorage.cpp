@@ -3,19 +3,21 @@
   */
 
 #include "game/map/planetstorage.hpp"
-#include "game/map/planet.hpp"
+#include "afl/string/format.hpp"
 #include "game/actions/preconditions.hpp"
 #include "game/limits.hpp"
+#include "game/map/planet.hpp"
 
 game::map::PlanetStorage::PlanetStorage(Planet& pl,
-                                        const game::config::HostConfiguration& config)
+                                        const game::config::HostConfiguration& config,
+                                        afl::string::Translator& tx)
     : CargoContainer(),
       m_planet(pl),
       m_hostConfiguration(config),
       m_changeConnection(pl.sig_change.add(&sig_change, &afl::base::Signal<void()>::raise))
 {
     // ex GPlanetTransfer::GPlanetTransfer
-    game::actions::mustBePlayed(pl);
+    game::actions::mustBePlayed(pl, tx);
 }
 
 game::map::PlanetStorage::~PlanetStorage()
@@ -32,6 +34,22 @@ game::map::PlanetStorage::getName(afl::string::Translator& tx) const
     return m_planet.getName(tx);
 }
 
+String_t
+game::map::PlanetStorage::getInfo1(afl::string::Translator& tx) const
+{
+    if (m_planet.hasBase()) {
+        return tx("Starbase");
+    } else {
+        return tx("Planet");
+    }
+}
+
+String_t
+game::map::PlanetStorage::getInfo2(afl::string::Translator& tx) const
+{
+    return afl::string::Format(tx("FCode: \"%s\""), m_planet.getFriendlyCode().orElse(String_t()));
+}
+
 game::CargoContainer::Flags_t
 game::map::PlanetStorage::getFlags() const
 {
@@ -41,7 +59,7 @@ game::map::PlanetStorage::getFlags() const
 bool
 game::map::PlanetStorage::canHaveElement(Element::Type type) const
 {
-    // ex GPlanetTransfer::canHaveCargo
+    // ex GPlanetTransfer::canHaveCargo, TPlanet.CanHave
     int torpType;
     if (type == Element::Fighters || Element::isTorpedoType(type, torpType)) {
         return m_planet.hasBase();
@@ -53,7 +71,7 @@ game::map::PlanetStorage::canHaveElement(Element::Type type) const
 int32_t
 game::map::PlanetStorage::getMaxAmount(Element::Type type) const
 {
-    // ex GPlanetTransfer::getMaxCargo
+    // ex GPlanetTransfer::getMaxCargo, TPlanet.Maximum
     // FIXME: Host .31 torp safety
     /* the torp/ore limits are arbitrary, but should match Tim's TRN check. */
     int torpType, planetOwner;

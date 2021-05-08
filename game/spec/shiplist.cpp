@@ -3,7 +3,6 @@
   *  \brief Class game::spec::ShipList
   */
 
-#include <stdio.h>
 #include "game/spec/shiplist.hpp"
 
 // Constructor.
@@ -209,6 +208,23 @@ game::spec::ShipList::getComponent(Reference ref) const
     return 0;
 }
 
+// Get a component, given area and Id.
+const game::spec::Component*
+game::spec::ShipList::getComponent(TechLevel area, Id_t id) const
+{
+    switch (area) {
+     case HullTech:
+        return hulls().get(id);
+     case EngineTech:
+        return engines().get(id);
+     case BeamTech:
+        return beams().get(id);
+     case TorpedoTech:
+        return launchers().get(id);
+    }
+    return 0;
+}
+
 // Find racial abilities.
 void
 game::spec::ShipList::findRacialAbilities(const game::config::HostConfiguration& config)
@@ -297,22 +313,28 @@ game::spec::ShipList::enumerateHullFunctions(HullFunctionList& result,
     }
 }
 
-// FIXME: remove
-// /** Check for special function.
-//     \param basic_function basic function, hf_XXX.
-//     \param player         check one player only
-//     \param hull           true: query hull-specific abilities; Every ship of this
-//                           type <em>owned</em> by the player has the function.
-//                           false: query ship-specific ability. Every ship of this
-//                           type <em>built</em> by the player will have the function.
-//     \param levels         experience level restriction. Check only for a function
-//                           working at specified levels.
-//     \returns true iff player can use the function */
-// bool
-// GHull::canDoSpecial(int basic_function, int player, bool hull, GExpLevelSet levels) const
-// {
-//     return getPlayersThatCan(basic_function, hull, levels).contains(player);
-// }
+// Get specimen hull for a hull function.
+const game::spec::Hull*
+game::spec::ShipList::findSpecimenHullForFunction(int basicFunctionId, const game::config::HostConfiguration& config, PlayerSet_t playerLimit) const
+{
+    // ex client/dlg-tax.cc:findSpecimenHull
+    const Hull* result = 0;
+    for (const Hull* candidate = hulls().findNext(0); candidate != 0; candidate = hulls().findNext(candidate->getId())) {
+        PlayerSet_t set = candidate->getHullFunctions(true)
+            .getPlayersThatCan(basicFunctionId, modifiedHullFunctions(), basicHullFunctions(), config, *candidate, ExperienceLevelSet_t(0), true);
+        if (set.contains(playerLimit)) {
+            if (result == 0) {
+                // First candidate
+                result = candidate;
+            } else {
+                // Ambiguous
+                result = 0;
+                break;
+            }
+        }
+    }
+    return result;
+}
 
 // Get player mask for special function.
 game::PlayerSet_t

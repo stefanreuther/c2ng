@@ -395,7 +395,7 @@ game::v3::Command::getCommandOrder(Type cmd)
 String_t
 game::v3::Command::getCommandInfo(Type cmd, afl::string::Translator& tx)
 {
-    // ex WCommandInfo::drawContent (sort-of)
+    // ex WCommandInfo::drawContent (sort-of), CCommandHelper.Draw
     const char* text = N_("(command not understood by PCC2)");
     switch (cmd) {
      case Language:       text = N_("Change message language");                                       break;

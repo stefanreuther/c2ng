@@ -22,25 +22,21 @@ class game::proxy::ReferenceListProxy::Confirmer : public util::Request<Referenc
         { conn.confirmRequest(); }
 };
 
-class game::proxy::ReferenceListProxy::Observer : public util::SlaveObject<Session> {
+class game::proxy::ReferenceListProxy::Observer {
  public:
-    Observer(util::RequestSender<ReferenceListProxy> reply)
-        : m_reply(reply)
-        { }
-    virtual void init(Session& session)
+    Observer(Session& session, const util::RequestSender<ReferenceListProxy>& reply)
+        : m_reply(reply),
+          m_session(session)
         {
             m_observer.setSession(session);
             conn_listChange = m_observer.sig_listChange.add(this, &Observer::onListChange);
         }
 
-    virtual void done(Session& /*session*/)
-        { conn_listChange.disconnect(); }
-
     void onListChange()
         { m_reply.postNewRequest(new Updater(m_observer.getList())); }
 
-    void updateContent(Session& session, Initializer_t& init)
-        { init.call(session, m_observer); }
+    void updateContent(Initializer_t& init)
+        { init.call(m_session, m_observer); }
 
     void setConfig(const game::ref::Configuration& config)
         { m_observer.setConfig(config); }
@@ -56,8 +52,20 @@ class game::proxy::ReferenceListProxy::Observer : public util::SlaveObject<Sessi
 
  private:
     util::RequestSender<ReferenceListProxy> m_reply;
+    Session& m_session;
     game::ref::ListObserver m_observer;
     afl::base::SignalConnection conn_listChange;
+};
+
+class game::proxy::ReferenceListProxy::ObserverFromSession : public afl::base::Closure<Observer*(Session&)> {
+ public:
+    ObserverFromSession(const util::RequestSender<ReferenceListProxy>& reply)
+        : m_reply(reply)
+        { }
+    virtual Observer* call(Session& session)
+        { return new Observer(session, m_reply); }
+ private:
+    util::RequestSender<ReferenceListProxy> m_reply;
 };
 
 game::proxy::ReferenceListProxy::ReferenceListProxy(util::RequestSender<Session> gameSender, util::RequestDispatcher& disp)
@@ -65,19 +73,19 @@ game::proxy::ReferenceListProxy::ReferenceListProxy(util::RequestSender<Session>
       sig_finish(),
       m_gameSender(gameSender),
       m_receiver(disp, *this),
-      m_observerSender(gameSender, new Observer(m_receiver.getSender())),
+      m_observerSender(gameSender.makeTemporary(new ObserverFromSession(m_receiver.getSender()))),
       m_pendingRequests(0)
 { }
 
 void
 game::proxy::ReferenceListProxy::setConfigurationSelection(const game::ref::ConfigurationSelection& sel)
 {
-    class Request : public util::SlaveRequest<game::Session, Observer> {
+    class Request : public util::Request<Observer> {
      public:
         Request(const game::ref::ConfigurationSelection& sel)
             : m_sel(sel)
             { }
-        virtual void handle(Session& /*session*/, Observer& obs)
+        virtual void handle(Observer& obs)
             {
                 obs.setConfigurationSelection(m_sel);
                 obs.confirmRequest();
@@ -92,14 +100,14 @@ game::proxy::ReferenceListProxy::setConfigurationSelection(const game::ref::Conf
 void
 game::proxy::ReferenceListProxy::setContentNew(std::auto_ptr<Initializer_t> pInit)
 {
-    class Request : public util::SlaveRequest<Session, Observer> {
+    class Request : public util::Request<Observer> {
      public:
         Request(std::auto_ptr<Initializer_t> pInit)
             : m_pInit(pInit)
             { }
-        virtual void handle(Session& session, Observer& obs)
+        virtual void handle(Observer& obs)
             {
-                obs.updateContent(session, *m_pInit);
+                obs.updateContent(*m_pInit);
                 obs.confirmRequest();
             }
      private:
@@ -120,9 +128,9 @@ game::proxy::ReferenceListProxy::isIdle() const
 void
 game::proxy::ReferenceListProxy::waitIdle(WaitIndicator& link)
 {
-    class Request : public util::SlaveRequest<Session, Observer> {
+    class Request : public util::Request<Observer> {
      public:
-        virtual void handle(Session&, Observer&)
+        virtual void handle(Observer&)
             { }
     };
     Request r;
@@ -133,9 +141,9 @@ game::proxy::ReferenceListProxy::waitIdle(WaitIndicator& link)
 game::ref::Configuration
 game::proxy::ReferenceListProxy::getConfig(WaitIndicator& link)
 {
-    class Request : public util::SlaveRequest<Session, Observer> {
+    class Request : public util::Request<Observer> {
      public:
-        virtual void handle(Session& /*session*/, Observer& obs)
+        virtual void handle(Observer& obs)
             { m_config = obs.getConfig(); }
         game::ref::Configuration m_config;
     };
@@ -148,12 +156,12 @@ game::proxy::ReferenceListProxy::getConfig(WaitIndicator& link)
 void
 game::proxy::ReferenceListProxy::setConfig(const game::ref::Configuration& config)
 {
-    class Request : public util::SlaveRequest<Session, Observer> {
+    class Request : public util::Request<Observer> {
      public:
         Request(game::ref::Configuration config)
             : m_config(config)
             { }
-        virtual void handle(Session& /*session*/, Observer& obs)
+        virtual void handle(Observer& obs)
             {
                 obs.setConfig(m_config);
                 obs.confirmRequest();

@@ -45,6 +45,7 @@ game::map::Location::setUniverse(Universe* univ)
 void
 game::map::Location::set(Reference ref)
 {
+    // ex GChartLocation::setCurrentObject
     Point lastPos;
     bool  lastOK = getPosition(lastPos);
 

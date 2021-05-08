@@ -13,12 +13,23 @@ class TestUiColorScheme : public CxxTest::TestSuite {
     void testColor();
 };
 
+class TestUiEventLoop : public CxxTest::TestSuite {
+ public:
+    void testStop();
+    void testTask();
+};
+
 class TestUiGroup : public CxxTest::TestSuite {
  public:
     void testIt();
 };
 
 class TestUiInvisibleWidget : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
+class TestUiLayoutableGroup : public CxxTest::TestSuite {
  public:
     void testIt();
 };

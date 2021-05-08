@@ -34,6 +34,11 @@ namespace game { namespace actions {
             \param count number of hulls to build
             \param free additional number of (previously present) hulls consumed by action at no cost */
         virtual void accountHull(int number, int count, int free) = 0;
+
+        /** Account fighter bays.
+            Just for generating cost summaries.
+            \param count Number of fighter bays */
+        virtual void accountFighterBay(int count) = 0;
     };
 
 } }

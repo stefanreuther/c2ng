@@ -5,11 +5,11 @@
 #ifndef C2NG_UTIL_RICH_TEXT_HPP
 #define C2NG_UTIL_RICH_TEXT_HPP
 
-#include "afl/string/string.hpp"
-#include "afl/container/ptrvector.hpp"
-#include "util/skincolor.hpp"
-#include "util/rich/styleattribute.hpp"
 #include "afl/base/refcounted.hpp"
+#include "afl/container/ptrvector.hpp"
+#include "afl/string/string.hpp"
+#include "util/rich/styleattribute.hpp"
+#include "util/skincolor.hpp"
 
 namespace util { namespace rich {
 

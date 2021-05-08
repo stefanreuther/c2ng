@@ -12,16 +12,14 @@
 #include "game/score/compoundscore.hpp"
 #include "game/turn.hpp"
 
-class game::proxy::BuildQueueProxy::Trampoline : public util::SlaveObject<Session> {
+class game::proxy::BuildQueueProxy::Trampoline {
  public:
     typedef game::actions::ChangeBuildQueue Action_t;
 
-    Trampoline(util::RequestSender<BuildQueueProxy> reply)
-        : m_reply(reply),
+    Trampoline(Session& session, util::RequestSender<BuildQueueProxy> reply)
+        : m_session(session),
+          m_reply(reply),
           m_action()
-        { }
-
-    virtual void init(Session& session)
         {
             Game* g = session.getGame().get();
             Root* r = session.getRoot().get();
@@ -37,13 +35,10 @@ class game::proxy::BuildQueueProxy::Trampoline : public util::SlaveObject<Sessio
             }
         }
 
-    virtual void done(Session& /*session*/)
-        { m_action.reset(); }
-
     Action_t* get() const
         { return m_action.get(); }
 
-    void sendUpdate(Session& session)
+    void sendUpdate()
         {
             class Task : public util::Request<BuildQueueProxy> {
              public:
@@ -57,33 +52,50 @@ class game::proxy::BuildQueueProxy::Trampoline : public util::SlaveObject<Sessio
             };
 
             if (m_action.get() != 0) {
-                m_reply.postNewRequest(new Task(*m_action, session));
+                m_reply.postNewRequest(new Task(*m_action, m_session));
             }
         }
 
+    Session& session()
+        { return m_session; }
+
  private:
+    Session& m_session;
     util::RequestSender<BuildQueueProxy> m_reply;
     std::auto_ptr<Action_t> m_action;
 };
 
 
+class game::proxy::BuildQueueProxy::TrampolineFromSession : public afl::base::Closure<Trampoline*(Session&)> {
+ public:
+    TrampolineFromSession(const util::RequestSender<BuildQueueProxy>& reply)
+        : m_reply(reply)
+        { }
+    virtual Trampoline* call(Session& session)
+        { return new Trampoline(session, m_reply); }
+ private:
+    util::RequestSender<BuildQueueProxy> m_reply;
+};
+
+
+
 game::proxy::BuildQueueProxy::BuildQueueProxy(util::RequestSender<Session> gameSender, util::RequestDispatcher& reply)
     : m_reply(reply, *this),
-      m_request(gameSender, new Trampoline(m_reply.getSender()))
+      m_request(gameSender.makeTemporary(new TrampolineFromSession(m_reply.getSender())))
 { }
 
 void
 game::proxy::BuildQueueProxy::getStatus(WaitIndicator& link, Infos_t& data)
 {
-    class Task : public util::SlaveRequest<Session, Trampoline> {
+    class Task : public util::Request<Trampoline> {
      public:
         Task(Infos_t& data)
             : m_data(data)
             { }
-        virtual void handle(Session& session, Trampoline& tpl)
+        virtual void handle(Trampoline& tpl)
             {
                 if (Trampoline::Action_t* p = tpl.get()) {
-                    p->describe(m_data, session.translator());
+                    p->describe(m_data, tpl.session().translator());
                 }
             }
      private:
@@ -96,16 +108,16 @@ game::proxy::BuildQueueProxy::getStatus(WaitIndicator& link, Infos_t& data)
 void
 game::proxy::BuildQueueProxy::setPriority(size_t slot, int pri)
 {
-    class Task : public util::SlaveRequest<Session, Trampoline> {
+    class Task : public util::Request<Trampoline> {
      public:
         Task(size_t slot, int pri)
             : m_slot(slot), m_pri(pri)
             { }
-        virtual void handle(Session& session, Trampoline& tpl)
+        virtual void handle(Trampoline& tpl)
             {
                 if (Trampoline::Action_t* p = tpl.get()) {
                     p->setPriority(m_slot, m_pri);
-                    tpl.sendUpdate(session);
+                    tpl.sendUpdate();
                 }
             }
      private:
@@ -118,16 +130,16 @@ game::proxy::BuildQueueProxy::setPriority(size_t slot, int pri)
 void
 game::proxy::BuildQueueProxy::increasePriority(size_t slot)
 {
-    class Task : public util::SlaveRequest<Session, Trampoline> {
+    class Task : public util::Request<Trampoline> {
      public:
         Task(size_t slot)
             : m_slot(slot)
             { }
-        virtual void handle(Session& session, Trampoline& tpl)
+        virtual void handle(Trampoline& tpl)
             {
                 if (Trampoline::Action_t* p = tpl.get()) {
                     p->increasePriority(m_slot);
-                    tpl.sendUpdate(session);
+                    tpl.sendUpdate();
                 }
             }
      private:
@@ -139,16 +151,16 @@ game::proxy::BuildQueueProxy::increasePriority(size_t slot)
 void
 game::proxy::BuildQueueProxy::decreasePriority(size_t slot)
 {
-    class Task : public util::SlaveRequest<Session, Trampoline> {
+    class Task : public util::Request<Trampoline> {
      public:
         Task(size_t slot)
             : m_slot(slot)
             { }
-        virtual void handle(Session& session, Trampoline& tpl)
+        virtual void handle(Trampoline& tpl)
             {
                 if (Trampoline::Action_t* p = tpl.get()) {
                     p->decreasePriority(m_slot);
-                    tpl.sendUpdate(session);
+                    tpl.sendUpdate();
                 }
             }
      private:
@@ -160,9 +172,9 @@ game::proxy::BuildQueueProxy::decreasePriority(size_t slot)
 void
 game::proxy::BuildQueueProxy::commit()
 {
-    class Task : public util::SlaveRequest<Session, Trampoline> {
+    class Task : public util::Request<Trampoline> {
      public:
-        virtual void handle(Session& /*session*/, Trampoline& tpl)
+        virtual void handle(Trampoline& tpl)
             {
                 if (Trampoline::Action_t* p = tpl.get()) {
                     p->commit();

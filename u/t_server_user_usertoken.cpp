@@ -7,8 +7,11 @@
 #include "server/user/usertoken.hpp"
 
 #include "t_server_user.hpp"
+#include "afl/io/nullfilesystem.hpp"
 #include "afl/net/redis/internaldatabase.hpp"
+#include "afl/string/format.hpp"
 #include "server/common/numericalidgenerator.hpp"
+#include "server/common/randomidgenerator.hpp"
 #include "server/user/classicencrypter.hpp"
 #include "server/user/root.hpp"
 
@@ -116,3 +119,23 @@ TestServerUserUserToken::testClearToken()
     TS_ASSERT_THROWS_NOTHING(testee.clearToken("x", OTHER));
 }
 
+/** Test that we can create many tokens.
+    This test case used to hang someday. */
+void
+TestServerUserUserToken::testMany()
+{
+    afl::io::NullFileSystem fs;
+    server::common::RandomIdGenerator gen(fs);
+    server::user::ClassicEncrypter enc("foo");
+    afl::net::redis::InternalDatabase db;
+    server::user::Root root(db, gen, enc, server::user::Configuration());
+
+    // Testee
+    server::user::UserToken testee(root);
+
+    // Create 1000 tokens
+    for (size_t i = 0; i < 1000; ++i) {
+        String_t user = afl::string::Format("%d", i);
+        testee.getToken(user, "login");
+    }
+}

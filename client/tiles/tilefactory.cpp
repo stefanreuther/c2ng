@@ -276,10 +276,12 @@ namespace {
 
 client::tiles::TileFactory::TileFactory(ui::Root& root,
                                         client::si::UserSide& user,
+                                        afl::string::Translator& tx,
                                         client::widgets::KeymapWidget& keys,
                                         game::proxy::ObjectObserver& observer)
     : m_root(root),
       m_userSide(user),
+      m_translator(tx),
       m_keys(keys),
       m_observer(observer)
 { }
@@ -442,7 +444,7 @@ client::tiles::TileFactory::createTile(String_t name, afl::base::Deleter& delete
         return Factory().run(m_root, m_keys, 30, 6, "Tile.ShipEquipment", deleter, m_userSide, m_observer);
     }
     if (name == "SHIPCARGO") {
-        ShipCargoTile& tile = deleter.addNew(new ShipCargoTile(m_root, m_keys));
+        ShipCargoTile& tile = deleter.addNew(new ShipCargoTile(m_root, m_translator, m_keys));
         tile.attach(m_observer);
         tile.setState(DisabledState, true); // FIXME: disable so it doesn't get focus - should we have a FocusableState instead?
         return &tile;
@@ -462,7 +464,7 @@ client::tiles::TileFactory::createTile(String_t name, afl::base::Deleter& delete
         return Factory().run(m_root, m_keys, 30, 3, "Tile.ShipMission", deleter, m_userSide, m_observer);
     }
     if (name == "SHIPMOVEMENT") {
-        ShipMovementTile& tile = deleter.addNew(new ShipMovementTile(m_root, m_keys));
+        ShipMovementTile& tile = deleter.addNew(new ShipMovementTile(m_root, m_translator, m_keys));
         tile.attach(m_observer);
         tile.setState(DisabledState, true); // FIXME: disable so it doesn't get focus - should we have a FocusableState instead?
         return &tile;
@@ -577,24 +579,15 @@ client::tiles::TileFactory::createLayout(ui::LayoutableGroup& group, String_t la
 
     const TileConfig* cfg = getTileLayout(layoutName);
     if (!cfg) {
-        group.add(deleter.addNew(new ErrorTile(afl::string::Format(_("Error: unknown layout \"%s\"").c_str(), layoutName), m_root)));
+        group.add(deleter.addNew(new ErrorTile(afl::string::Format(m_translator("Error: unknown layout \"%s\"").c_str(), layoutName), m_root)));
     } else {
         while (cfg->name != 0) {
-            // FIXME: port this: Figure out selection
-            //         GObjectSelection* tileSelection;
-            //         if (cfg->type == 0)
-            //             tileSelection = &selection;
-            //         else
-            //             tileSelection = getObjectSelectionFromIteratorId(cfg->type);
-            //         if (tileSelection == 0) {
-            //             container.addNewTile(new WErrorTile(format(_("Error: unknown selection #%d"), cfg->type)));
-            //         } else {
+            // FIXME: handle 'type' field to select a custom selection. Feature is in PCC2, but not used.
             ui::Widget* p = createTile(cfg->name, deleter);
             if (!p) {
-                group.add(deleter.addNew(new ErrorTile(afl::string::Format(_("Error: unknown tile \"%s\"").c_str(), cfg->name), m_root)));
+                group.add(deleter.addNew(new ErrorTile(afl::string::Format(m_translator("Error: unknown tile \"%s\"").c_str(), cfg->name), m_root)));
             } else {
                 group.add(*p);
-
 
                 // Configure the widget
                 if (client::si::WidgetWrapper* wrap = dynamic_cast<client::si::WidgetWrapper*>(p)) {
@@ -602,14 +595,13 @@ client::tiles::TileFactory::createLayout(ui::LayoutableGroup& group, String_t la
                 }
                 if (client::widgets::CollapsibleDataView* dv = dynamic_cast<client::widgets::CollapsibleDataView*>(p)) {
                     if (cfg->title != 0) {
-                        dv->setTitle(cfg->title);
+                        dv->setTitle(m_translator(cfg->title));
                         dv->setViewState(client::widgets::CollapsibleDataView::Complete);
                     } else {
                         dv->setViewState(client::widgets::CollapsibleDataView::DataOnly);
                     }
                 }
             }
-            //         }
             ++cfg;
         }
     }

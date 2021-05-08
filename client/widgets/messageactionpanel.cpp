@@ -7,7 +7,6 @@
 #include "afl/base/staticassert.hpp"
 #include "gfx/context.hpp"
 #include "ui/draw.hpp"
-#include "util/translation.hpp"
 #include "util/unicodechars.hpp"
 
 namespace {
@@ -24,7 +23,7 @@ client::widgets::MessageActionPanel::LabeledButton::LabeledButton(ui::Root& root
       note()
 { }
 
-client::widgets::MessageActionPanel::MessageActionPanel(ui::Root& root)
+client::widgets::MessageActionPanel::MessageActionPanel(ui::Root& root, afl::string::Translator& tx)
     : m_root(root),
       m_prevButton(UTF_UP_ARROW, util::Key_Up, root),
       m_nextButton(UTF_DOWN_ARROW, util::Key_Down, root),
@@ -34,7 +33,7 @@ client::widgets::MessageActionPanel::MessageActionPanel(ui::Root& root)
       conn_imageChange(root.provider().sig_imageChange.add(this, (void (MessageActionPanel::*)()) &MessageActionPanel::requestRedraw))
 {
     // WMessageActionPanel::WMessageActionPanel
-    init(root);
+    init(root, tx);
 }
 
 client::widgets::MessageActionPanel::~MessageActionPanel()
@@ -112,7 +111,7 @@ client::widgets::MessageActionPanel::draw(gfx::Canvas& can)
     int posX2 = m_nextButton.getExtent().getLeftX();
     gfx::Rectangle pos(posX1,         m_nextButton.getExtent().getTopY(),
                        posX2 - posX1, m_nextButton.getExtent().getHeight());
-    ctx.setTextAlign(1, 1);
+    ctx.setTextAlign(gfx::CenterAlign, gfx::MiddleAlign);
     if (m_positionDimmed) {
         ctx.useFont(*m_root.provider().getFont(gfx::FontRequest()));
         ctx.setColor(ui::Color_Gray);
@@ -132,7 +131,7 @@ client::widgets::MessageActionPanel::draw(gfx::Canvas& can)
                                  labelX2 - labelX1, b.button.getExtent().getHeight());
             ctx.useFont(*m_root.provider().getFont(gfx::FontRequest().addSize(-1)));
             ctx.setColor(ui::Color_Gray);
-            ctx.setTextAlign(0, 1);
+            ctx.setTextAlign(gfx::LeftAlign, gfx::MiddleAlign);
             if (b.note.empty()) {
                 outTextF(ctx, label, b.label);
             } else {
@@ -192,38 +191,38 @@ client::widgets::MessageActionPanel::getLayoutInfo() const
 }
 
 void
-client::widgets::MessageActionPanel::init(ui::Root& root)
+client::widgets::MessageActionPanel::init(ui::Root& root, afl::string::Translator& tx)
 {
     // Create all buttons
     static_assert(GoTo1 == 0, "GoTo1");
-    m_actions.pushBackNew(new LabeledButton(root, 'g', "G", _("Go to")));
+    m_actions.pushBackNew(new LabeledButton(root, 'g', "G", tx("Go to")));
 
     static_assert(GoTo2 == 1, "GoTo2");
-    m_actions.pushBackNew(new LabeledButton(root, 'x', "X", _("Go to")));
+    m_actions.pushBackNew(new LabeledButton(root, 'x', "X", tx("Go to")));
 
     static_assert(Reply == 2, "Reply");
-    m_actions.pushBackNew(new LabeledButton(root, 'r', "R", _("Reply to")));
+    m_actions.pushBackNew(new LabeledButton(root, 'r', "R", tx("Reply to")));
 
     static_assert(Confirm == 3, "Confirm");
-    m_actions.pushBackNew(new LabeledButton(root, 'c', "C", _("Confirm")));
+    m_actions.pushBackNew(new LabeledButton(root, 'c', "C", tx("Confirm")));
 
     static_assert(Edit == 4, "Edit");
-    m_actions.pushBackNew(new LabeledButton(root, 'e', "E", _("Edit...")));
+    m_actions.pushBackNew(new LabeledButton(root, 'e', "E", tx("Edit...")));
 
     static_assert(Redirect == 5, "Redirect");
-    m_actions.pushBackNew(new LabeledButton(root, 'r', "R", _("To...")));
+    m_actions.pushBackNew(new LabeledButton(root, 'r', "R", tx("To...")));
 
     static_assert(Delete == 6, "Delete");
-    m_actions.pushBackNew(new LabeledButton(root, util::Key_Delete, "Del", _("Delete")));
+    m_actions.pushBackNew(new LabeledButton(root, util::Key_Delete, "Del", tx("Delete")));
 
     static_assert(Forward == 7, "Forward");
-    m_actions.pushBackNew(new LabeledButton(root, 'f', "F", _("Forward...")));
+    m_actions.pushBackNew(new LabeledButton(root, 'f', "F", tx("Forward...")));
 
     static_assert(Search == 8, "Search");
-    m_actions.pushBackNew(new LabeledButton(root, 's', "S", _("Search...")));
+    m_actions.pushBackNew(new LabeledButton(root, 's', "S", tx("Search...")));
 
     static_assert(Write == 9, "Write");
-    m_actions.pushBackNew(new LabeledButton(root, 'w', "W", _("Write to file...")));
+    m_actions.pushBackNew(new LabeledButton(root, 'w', "W", tx("Write to file...")));
 
     // Add pager buttons
     addChild(m_prevButton, 0);
@@ -367,6 +366,10 @@ client::widgets::MessageActionPanel::handleBuiltinKey(util::Key_t key, int arg)
         //        doGoToXY();
         //    }
         //    return true;
+
+     case util::Key_Tab:
+        doAction(BrowseSubjects, arg);
+        return true;
 
      default:
         if (!ctrl) {

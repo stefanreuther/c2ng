@@ -132,10 +132,16 @@ TestGameProxyTaxationProxy::testNormal()
     // Derived from TestGameActionsTaxationAction::testNormal()
     game::test::SessionThread h;
     Planet& p = setup(h);
+    p.setColonistHappiness(91);
 
     // Testee
     game::test::WaitIndicator ind;
     TaxationProxy testee(ind, h.gameSender(), PLANET_ID);
+
+    // Effectors
+    game::map::PlanetEffectors eff;
+    eff.set(game::map::PlanetEffectors::Hiss, 1);
+    testee.setEffectors(eff);
 
     // Get status
     TaxationProxy::Status st;
@@ -145,6 +151,7 @@ TestGameProxyTaxationProxy::testNormal()
     TS_ASSERT_EQUALS(st.colonists.tax, 1);
     TS_ASSERT_EQUALS(st.colonists.change, 8);
     TS_ASSERT(st.colonists.changeLabel.find("LOVE") != String_t::npos);
+    TS_ASSERT(st.colonists.description.find("happy (104)") != String_t::npos);
     TS_ASSERT(st.colonists.description.find("pay 1 mc") != String_t::npos);
     TS_ASSERT(st.colonists.title.find("olon") != String_t::npos);  // to anticipate Colony, Colonists, etc.
     TS_ASSERT_EQUALS(st.natives.available, true);

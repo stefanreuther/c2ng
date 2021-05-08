@@ -1,5 +1,6 @@
 /**
   *  \file util/instructionlist.cpp
+  *  \brief Class util::InstructionList
   */
 
 #include "util/instructionlist.hpp"
@@ -9,10 +10,12 @@ namespace {
     {
         return static_cast<uint16_t>(static_cast<uint32_t>(p) >> 16);
     }
+
     inline size_t unpackParameterCount(int32_t p)
     {
         return static_cast<uint32_t>(p) & 0xFFFFU;
     }
+
     inline int32_t packInstruction(uint16_t insn, size_t argc)
     {
         return static_cast<int32_t>((static_cast<uint32_t>(insn) << 16) + argc);

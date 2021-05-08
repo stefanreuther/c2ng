@@ -120,7 +120,7 @@ namespace {
             if (unsignedAddress < minSize || unsignedAddress > total) {
                 return false;
             }
-            if (hdr.length < 0 || hdr.length > gt::MAX_MESSAGE_SIZE) {
+            if (hdr.length > gt::MAX_MESSAGE_SIZE) {
                 return false;
             }
             if (hdr.to <= 0 || hdr.to > gt::NUM_OWNERS) {
@@ -333,7 +333,7 @@ namespace {
 
     void searchInbox(Message& m, afl::io::Stream& s)
     {
-        game::v3::InboxFile inbox(s, m.cs);
+        game::v3::InboxFile inbox(s, m.cs, m.tx);
         for (size_t i = 0, n = inbox.getNumMessages(); i < n; ++i) {
             m.text = inbox.loadMessage(i);
             m.index = int(i+1);
@@ -380,7 +380,7 @@ namespace {
 
     void searchTurn(Message& m, afl::io::Stream& s)
     {
-        game::v3::TurnFile trn(m.cs, s);
+        game::v3::TurnFile trn(m.cs, m.tx, s);
         m.turn = trn.tryGetTurnNr();
         for (size_t i = 0, e = trn.getNumCommands(); i < e; ++i) {
             game::v3::TurnFile::CommandCode_t cc;
@@ -657,7 +657,7 @@ game::maint::MessageSearchApplication::help()
 {
     afl::string::Translator& tx = translator();
     afl::io::TextWriter& out = standardOutput();
-    out.writeLine(Format(tx("PCC2 Message Search v%s - (c) 2011-2020 Stefan Reuther").c_str(), PCC2_VERSION));
+    out.writeLine(Format(tx("PCC2 Message Search v%s - (c) 2011-2021 Stefan Reuther").c_str(), PCC2_VERSION));
     out.writeLine();
     out.writeLine(Format(tx("Usage:\n"
                             "  %s [-h]\n"

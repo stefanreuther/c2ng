@@ -4,21 +4,10 @@
 
 #include "util/configurationfileparser.hpp"
 #include "afl/string/string.hpp"
-#include "util/translation.hpp"
 
-// /** Configuration File Parser (pconfig.src alike)
-
-//     This class encapsulates the logic for parsing PCONFIG.SRC-alike
-//     configuration files. In a nutshell:
-//     - sections separated by `% sectionname'
-//     - comments starting with `\#'
-//     - assignments `key = value' in each section
-
-//     To parse a configuration file, derive a class from this and implement
-//     at least the assign() method. */
-
-util::ConfigurationFileParser::ConfigurationFileParser()
+util::ConfigurationFileParser::ConfigurationFileParser(afl::string::Translator& tx)
     : FileParser("#"),
+      m_translator(tx),
       m_sectionName(),
       m_inSection(true)
 {
@@ -81,29 +70,15 @@ util::ConfigurationFileParser::handleLine(const String_t& fileName, int lineNr, 
     // It's an assignment
     String_t::size_type eqpos = ppline.find('=');
     if (eqpos == String_t::npos) {
-        handleError(fileName, lineNr, _("Syntax error"));
+        handleError(fileName, lineNr, m_translator("Syntax error"));
         return;
     }
 
     String_t key = afl::string::strRTrim(ppline.substr(0, eqpos));
     if (key.empty()) {
-        handleError(fileName, lineNr, _("Syntax error"));
+        handleError(fileName, lineNr, m_translator("Syntax error"));
         return;
     }
 
     handleAssignment(fileName, lineNr, key, afl::string::strLTrim(ppline.substr(eqpos+1)), line);
 }
-
-
-// /** Syntax error. This function is called when the parser encounters
-//     a syntax error.
-
-//     \param line_id line number
-//     \param s       error message
-
-//     \default Throws a FileFormatException. */
-// void
-// ConfigParser::error(int line_id, string_t s)
-// {
-//     throw FileFormatException(getFileName(), itoa(line_id) + ": " + s);
-// }

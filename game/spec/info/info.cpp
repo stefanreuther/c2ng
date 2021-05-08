@@ -6,6 +6,8 @@
 #include "afl/string/format.hpp"
 #include "game/spec/info/picturenamer.hpp"
 #include "util/string.hpp"
+#include "game/spec/fighter.hpp"
+#include "afl/string/nulltranslator.hpp"
 
 namespace {
     using afl::string::Format;
@@ -74,52 +76,63 @@ game::spec::info::describeHull(PageContent& content, Id_t id, const ShipList& sh
                                         true /* includeNewShip */, false /* includeRacialAbilities */);
         hfList.simplify();
         hfList.sortForNewShip(PlayerSet_t(viewpointPlayer));
-
-        for (HullFunctionList::Iterator_t it = hfList.begin(), e = hfList.end(); it != e; ++it) {
-            String_t pictureName;
-            String_t info;
-            if (const BasicHullFunction* hf = shipList.basicHullFunctions().getFunctionById(it->getBasicFunctionId())) {
-                pictureName = picNamer.getAbilityPicture(hf->getPictureName());
-                info = hf->getDescription();
-            } else {
-                info = Format(tx("Hull Function #%d"), it->getBasicFunctionId());
-            }
-
-            // Annotations
-            String_t annot;
-            util::addListItem(annot, "; ", formatPlayerSet(it->getPlayers(), root.playerList(), tx));
-            util::addListItem(annot, "; ", formatExperienceLevelSet(it->getLevels(), root.hostVersion(), root.hostConfiguration(), tx));
-            if (it->getKind() == HullFunction::AssignedToShip) {
-                util::addListItem(annot, "; ", tx("ship"));
-            }
-
-            // Build total
-            if (!annot.empty()) {
-                info += " (";
-                info += annot;
-                info += ")";
-            }
-
-            content.abilities.push_back(Ability(info, pictureName));
-        }
+        describeHullFunctions(content.abilities, hfList, shipList, picNamer, root, tx);
 
         // Players
-        for (int pl = 1; pl <= MAX_PLAYERS; ++pl) {
-            if (shipList.hullAssignments().getIndexFromHull(root.hostConfiguration(), pl, id) != 0) {
-                content.players += pl;
-            }
-        }
+        content.players = shipList.hullAssignments().getPlayersForHull(root.hostConfiguration(), id);
     }
 }
 
 void
-game::spec::info::describeEngine(PageContent& content, Id_t id, const ShipList& shipList, bool withCost, const PictureNamer& picNamer, const Root& root, int /*viewpointPlayer*/, afl::string::Translator& tx)
+game::spec::info::describeHullFunctions(Abilities_t& out, const HullFunctionList& hfList, const ShipList& shipList, const PictureNamer& picNamer, const Root& root, afl::string::Translator& tx)
+{
+    // ex drawHullFunctionList (sort-of)
+    // FIXME: implement have/damaged/will-have/will-not-have annotations
+    for (HullFunctionList::Iterator_t it = hfList.begin(), e = hfList.end(); it != e; ++it) {
+        String_t pictureName;
+        String_t info;
+        if (const BasicHullFunction* hf = shipList.basicHullFunctions().getFunctionById(it->getBasicFunctionId())) {
+            pictureName = picNamer.getAbilityPicture(hf->getPictureName());
+            info = hf->getDescription();
+        } else {
+            info = Format(tx("Hull Function #%d"), it->getBasicFunctionId());
+        }
+
+        // Annotations
+        String_t annot;
+        util::addListItem(annot, "; ", formatPlayerSet(it->getPlayers(), root.playerList(), tx));
+        util::addListItem(annot, "; ", formatExperienceLevelSet(it->getLevels(), root.hostVersion(), root.hostConfiguration(), tx));
+        if (it->getKind() == HullFunction::AssignedToShip) {
+            util::addListItem(annot, "; ", tx("ship"));
+        }
+
+        // Build total
+        if (!annot.empty()) {
+            info += " (";
+            info += annot;
+            info += ")";
+        }
+
+        out.push_back(Ability(info, pictureName));
+    }
+}
+
+void
+game::spec::info::describeEngine(PageContent& content, Id_t id, const ShipList& shipList, bool withCost, const PictureNamer& picNamer, const Root& root, int viewpointPlayer, afl::string::Translator& tx)
 {
     if (const Engine* e = shipList.engines().get(id)) {
         util::NumberFormatter fmt = root.userConfiguration().getNumberFormatter();
         content.title = e->getName(shipList.componentNamer());
         content.pictureName = picNamer.getEnginePicture(*e);
         content.attributes.push_back(Attribute(tx("Max Efficient Warp"), Format("%d", e->getMaxEfficientWarp())));
+
+        int esbRate = root.hostConfiguration()[HostConfiguration::AllowEngineShieldBonus]()
+            ? root.hostConfiguration()[HostConfiguration::EngineShieldBonusRate](viewpointPlayer)
+            : 0;
+        if (esbRate != 0) {
+            content.attributes.push_back(Attribute(tx("Shield Bonus"), Format(tx("%d kt"), fmt.formatNumber(e->cost().get(Cost::Money) * esbRate / 100))));
+        }
+
         if (withCost) {
             content.attributes.push_back(Attribute(tx("Cost"), e->cost().format(tx, fmt)));
             content.attributes.push_back(Attribute(tx("Tech level"), Format("%d", e->getTechLevel())));
@@ -141,7 +154,15 @@ game::spec::info::describeBeam(PageContent& content, Id_t id, const ShipList& sh
         content.attributes.push_back(Attribute(tx("Destroy"),       fmt.formatNumber(b->getDamagePower())));
         content.attributes.push_back(Attribute(tx("Recharge time"), Format("%ds", fmt.formatNumber(b->getRechargeTime(viewpointPlayer, root.hostVersion(), root.hostConfiguration())))));
         content.attributes.push_back(Attribute(tx("Hit"),           Format("%d%%", fmt.formatNumber(b->getHitOdds(viewpointPlayer, root.hostVersion(), root.hostConfiguration())))));
-        // FIXME: mines swept
+
+        int minesSwept = b->getNumMinesSwept(viewpointPlayer, false, root.hostConfiguration());
+        int websSwept  = b->getNumMinesSwept(viewpointPlayer, true,  root.hostConfiguration());
+        if (minesSwept == websSwept) {
+            content.attributes.push_back(Attribute(tx("Sweep"), Format(tx("%d mines"), fmt.formatNumber(minesSwept))));
+        } else {
+            content.attributes.push_back(Attribute(tx("Sweep"), Format(tx("%d mines, %d webs"), fmt.formatNumber(minesSwept), fmt.formatNumber(websSwept))));
+        }
+
         content.attributes.push_back(Attribute(tx("Mass"), Format(tx("%d kt"), fmt.formatNumber(b->getMass()))));
         if (withCost) {
             content.attributes.push_back(Attribute(tx("Cost"), b->cost().format(tx, fmt)));
@@ -166,7 +187,12 @@ game::spec::info::describeTorpedo(PageContent& content, Id_t id, const ShipList&
         content.attributes.push_back(Attribute(tx("Recharge time"), Format("%ds", fmt.formatNumber(p->getRechargeTime(viewpointPlayer, root.hostVersion(), root.hostConfiguration())))));
         content.attributes.push_back(Attribute(tx("Hit"),           Format("%d%%", fmt.formatNumber(p->getHitOdds(viewpointPlayer, root.hostVersion(), root.hostConfiguration())))));
         content.attributes.push_back(Attribute(tx("Torp Cost"),     p->torpedoCost().format(tx, fmt)));
-        // FIXME: 1000 mines cost
+
+        Cost mineCost;
+        if (p->getMinefieldCost(viewpointPlayer, 1000, false, root.hostConfiguration(), mineCost)) {
+            content.attributes.push_back(Attribute(tx("1000 mines"), mineCost.format(tx, fmt)));
+        }
+
         content.attributes.push_back(Attribute(tx("Launcher Mass"), Format(tx("%d kt"), fmt.formatNumber(p->getMass()))));
         if (withCost) {
             content.attributes.push_back(Attribute(tx("Launcher Cost"), p->cost().format(tx, fmt)));
@@ -174,6 +200,39 @@ game::spec::info::describeTorpedo(PageContent& content, Id_t id, const ShipList&
         }
     }
 }
+
+void
+game::spec::info::describeFighter(PageContent& content, int player, const ShipList& shipList, bool withCost, const PictureNamer& picNamer, const Root& root, afl::string::Translator& tx)
+{
+    // ex WFighterInfo::drawContent
+    // Modelled after the torpedo view, because it might overlay it:
+    //   Type:    fighter
+    //   Kill:
+    //   Destroy:
+    //   Recharge: (recharge time in seconds)
+    //   Strikes:
+    //   Fighter Cost:
+
+    if (player != 0) {
+        util::NumberFormatter fmt = root.userConfiguration().getNumberFormatter();
+        Fighter ftr(player, root.hostConfiguration(), root.playerList(), tx);
+
+        content.title = ftr.getName(shipList.componentNamer());
+        content.pictureName = picNamer.getFighterPicture(root.hostConfiguration().getPlayerRaceNumber(player), player);
+        if (root.hostVersion().hasDeathRays()) {
+            // This 'if' is to make it match with the torpedoes
+            content.attributes.push_back(Attribute(tx("Type"),     tx("fighter")));
+        }
+        content.attributes.push_back(Attribute(tx("Kill"),     fmt.formatNumber(ftr.getKillPower())));
+        content.attributes.push_back(Attribute(tx("Destroy"),  fmt.formatNumber(ftr.getDamagePower())));
+        content.attributes.push_back(Attribute(tx("Recharge"), util::toString(ftr.getRechargeTime(root.hostVersion(), root.hostConfiguration()), Fighter::Range_t(0, Fighter::MAX_INTERVAL), false, fmt, tx)));
+        content.attributes.push_back(Attribute(tx("Strikes"),  util::toString(ftr.getNumStrikes  (root.hostVersion(), root.hostConfiguration()), Fighter::Range_t(0, Fighter::MAX_INTERVAL), false, fmt, tx)));
+        if (withCost) {
+            content.attributes.push_back(Attribute(tx("Fighter Cost"), ftr.cost().format(tx, fmt)));
+        }
+    }
+}
+
 
 game::spec::info::OptionalInt_t
 game::spec::info::getHullAttribute(const Hull& h, FilterAttribute att)
@@ -247,7 +306,7 @@ game::spec::info::getBeamAttribute(const Beam& beam, FilterAttribute att, const 
      case Range_HitOdds:       return beam.getHitOdds(viewpointPlayer, root.hostVersion(), root.hostConfiguration());
      case Range_KillPower:     return beam.getKillPower();
      case Range_Mass:          return beam.getMass();
-     case Range_NumMinesSwept: return afl::base::Nothing; // FIXME
+     case Range_NumMinesSwept: return beam.getNumMinesSwept(viewpointPlayer, false, root.hostConfiguration());
      case Range_RechargeTime:  return beam.getRechargeTime(viewpointPlayer, root.hostVersion(), root.hostConfiguration());
      case Range_Id:            return beam.getId();
      case Range_IsDeathRay:    return beam.isDeathRay(root.hostVersion());
@@ -294,4 +353,32 @@ game::spec::info::getTorpedoAttribute(const TorpedoLauncher& torp, FilterAttribu
         break;
     }
     return afl::base::Nothing;
+}
+
+game::spec::info::OptionalInt_t
+game::spec::info::getFighterAttribute(const Fighter& ftr, FilterAttribute att, const Root& root)
+{
+    switch (att) {
+     // Supported values
+     case Range_CostD:        return ftr.cost().get(Cost::Duranium);
+     case Range_CostM:        return ftr.cost().get(Cost::Molybdenum);
+     case Range_CostMC:       return ftr.cost().get(Cost::Money);
+     case Range_CostT:        return ftr.cost().get(Cost::Tritanium);
+     case Range_DamagePower:  return ftr.getDamagePower();
+     case Range_KillPower:    return ftr.getKillPower();
+     case Range_RechargeTime: return ftr.getRechargeTime(root.hostVersion(), root.hostConfiguration()).min();
+
+     // Unsupported values
+     case Range_HitOdds:       case Range_Mass:               case Range_Tech:
+     case Range_TorpCost:      case Range_Id:                 case Range_IsDeathRay:
+     case Range_IsArmed:       case Range_MaxBeams:           case Range_MaxCargo:
+     case Range_MaxCrew:       case Range_MaxEfficientWarp:   case Range_MaxFuel:
+     case Range_MaxLaunchers:  case Range_NumBays:            case Range_NumEngines:
+     case Range_NumMinesSwept: case Value_Hull:               case Value_Player:
+     case Value_Category:      case Value_Origin:             case ValueRange_ShipAbility:
+     case String_Name:
+        break;
+    }
+    return afl::base::Nothing;
+
 }

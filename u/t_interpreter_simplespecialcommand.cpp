@@ -7,6 +7,7 @@
 
 #include "t_interpreter.hpp"
 #include "afl/io/nullfilesystem.hpp"
+#include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
 #include "interpreter/bytecodeobject.hpp"
 #include "interpreter/defaultstatementcompilationcontext.hpp"
@@ -30,10 +31,11 @@ TestInterpreterSimpleSpecialCommand::testIt()
 {
     // Environment
     afl::sys::Log log;
+    afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
     interpreter::BytecodeObject bco;
     interpreter::Tokenizer tok("x");
-    interpreter::World world(log, fs);
+    interpreter::World world(log, tx, fs);
     interpreter::DefaultStatementCompilationContext scc(world);
 
     // Tester

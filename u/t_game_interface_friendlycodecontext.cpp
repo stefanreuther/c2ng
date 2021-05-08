@@ -11,7 +11,7 @@
 #include "game/test/registrationkey.hpp"
 #include "game/test/specificationloader.hpp"
 #include "game/test/stringverifier.hpp"
-#include "u/helper/contextverifier.hpp"
+#include "interpreter/test/contextverifier.hpp"
 #include "afl/charset/utf8charset.hpp"
 
 /** Test FriendlyCodeContext. */
@@ -36,11 +36,12 @@ TestGameInterfaceFriendlyCodeContext::testIt()
 
     // Test
     game::interface::FriendlyCodeContext testee(0, root, shipList);
-    verifyTypes(testee);
+    interpreter::test::ContextVerifier v(testee, "testIt");
+    v.verifyTypes();
 
     // Verify individual properties
-    verifyString(testee, "NAME", "cln");
-    verifyString(testee, "DESCRIPTION", "Clone ship");
-    verifyString(testee, "FLAGS", "sr");
-    verifyInteger(testee, "RACES$", -1 - (1 << 5) - (1 << 7));
+    v.verifyString("NAME", "cln");
+    v.verifyString("DESCRIPTION", "Clone ship");
+    v.verifyString("FLAGS", "sr");
+    v.verifyInteger("RACES$", -1 - (1 << 5) - (1 << 7));
 }

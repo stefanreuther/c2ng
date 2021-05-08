@@ -26,7 +26,7 @@ echo "Log file for '$0 $gamedir $turn' on `date`" >"$logfile"
 # Read Configuration
 . "$gamedir/c2host.ini"
 spec_mandatory="beamspec.dat engspec.dat hullspec.dat pconfig.src planet.nm race.nm torpspec.dat truehull.dat"
-spec_optional="amaster.src pmaster.cfg shiplist.txt hullfunc.txt xyplan.dat mission.ini map.ini"
+spec_optional="amaster.src pmaster.cfg shiplist.txt hullfunc.txt xtrfcode.txt xyplan.dat mission.ini map.ini"
 
 # Check configuration
 if test -x "$game_host_path/$game_host_program"; then
@@ -172,7 +172,7 @@ echo "Creating player packages..." >>$logfile
 for i in $players; do
   files=""
   doit=false
-  for f in player$i.rst util$i.dat xyplan$i.dat; do
+  for f in player$i.rst util$i.dat xyplan$i.dat flak$i.dat; do
     if test -r "$gamedir/data/$f"; then
       files="$files $f"
       doit=true
@@ -195,7 +195,6 @@ for i in $spec_mandatory $spec_optional; do
     use=true
     case $i in
       xyplan.dat)
-        # FIXME: untested
         if test -n "$game_tool_explmap"; then use=false; fi
         ;;
     esac

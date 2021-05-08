@@ -1,5 +1,6 @@
 /**
   *  \file util/stringlist.cpp
+  *  \brief Class util::StringList
   */
 
 #include "util/stringlist.hpp"
@@ -23,8 +24,6 @@ util::StringList::~StringList()
     // ex StringList::~StringList
 }
 
-// Adding
-// /** Add a key/string pair. */
 void
 util::StringList::add(int32_t key, const String_t& s)
 {
@@ -32,8 +31,6 @@ util::StringList::add(int32_t key, const String_t& s)
     m_data.push_back(std::make_pair(key, s));
 }
 
-// Manipulation
-// /** Sort contents alphabetically. */
 void
 util::StringList::sortAlphabetically()
 {
@@ -46,12 +43,24 @@ util::StringList::swap(StringList& other)
     m_data.swap(other.m_data);
 }
 
+void
+util::StringList::clear()
+{
+    m_data.clear();
+}
+
 // Random access
 size_t
 util::StringList::size() const
 {
     // ex StringList::getCount
     return m_data.size();
+}
+
+bool
+util::StringList::empty() const
+{
+    return m_data.empty();
 }
 
 bool
@@ -79,19 +88,3 @@ util::StringList::find(int32_t key, size_t& index) const
     }
     return false;
 }
-
-// FIXME: retire
-// /** Add a key/string pair. */
-// void
-// StringList::add(int key, const char* s)
-// {
-//     add(key, string_t(s));
-// }
-
-// FIXME: retire
-// /** Add a key/string pair at front. */
-// void
-// StringList::addAtFront(int key, const string_t& s)
-// {
-//     data.push_front(std::make_pair(key, s));
-// }

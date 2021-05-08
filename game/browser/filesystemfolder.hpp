@@ -14,7 +14,7 @@ namespace game { namespace browser {
 
     class FileSystemFolder : public Folder {
      public:
-        FileSystemFolder(Browser& parent, afl::base::Ref<afl::io::Directory> dir, String_t title);
+        FileSystemFolder(Browser& parent, afl::base::Ref<afl::io::Directory> dir, String_t title, bool ignoreIndex);
 
         virtual void loadContent(afl::container::PtrVector<Folder>& result);
         virtual bool loadConfiguration(game::config::UserConfiguration& config);
@@ -31,6 +31,7 @@ namespace game { namespace browser {
         Browser& m_parent;
         afl::base::Ref<afl::io::Directory> m_directory;
         String_t m_title;
+        bool m_ignoreIndex;
     };
 
 } }

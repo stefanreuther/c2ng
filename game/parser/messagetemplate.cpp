@@ -23,20 +23,21 @@ namespace {
         return afl::string::Format("%d", i);
     }
 
-// /** Parse integer value according to a type modifier.
-//     \param value Value from message
-//     \param type Type modifier from template
-//     \return transformed string (usually, a stringified integer)
+    /** Parse integer value according to a type modifier.
+        \param value Value from message
+        \param type  Type modifier from template
+        \param iface Data interface
+        \return transformed string (usually, a stringified integer)
 
-//     \todo Implement sloppy compare. Text from messages can have Unicode
-//     characters replaced by spaces by host. It might also have been
-//     truncated. The same goes for hull names.
+        \todo Implement sloppy compare. Text from messages can have Unicode
+        characters replaced by spaces by host. It might also have been
+        truncated. The same goes for hull names.
 
-//     \todo It would make sense to detect when the player's files do not
-//     match host's. However, we must be really sure about this: in a game
-//     with fewer than 11 players, the FreeFighters template will try to
-//     interpret config strings like "max mine radius 150" as name/count
-//     pairs. */
+        \todo It would make sense to detect when the player's files do not
+        match host's. However, we must be really sure about this: in a game
+        with fewer than 11 players, the FreeFighters template will try to
+        interpret config strings like "max mine radius 150" as name/count
+        pairs. */
     String_t prepareValue(String_t value, String_t type, const game::parser::DataInterface& iface)
     {
         if (type.size() > 7 && type.compare(type.size()-7, 7, "+ALLIES", 7) == 0) {
@@ -396,57 +397,6 @@ game::parser::MessageTemplate::match(const MessageLines_t& message, const DataIn
     }
     return true;
 }
-
-// FIXME: remove?
-// /** Dump. For debugging use. */
-// void
-// GMessageTemplate::dump() const
-// {
-//     static const char*const scopes[] = { "any", "rel", "fix" };
-//     for (std::vector<Instruction>::const_iterator i = instructions.begin(); i != instructions.end(); ++i) {
-//         enum { Index = 0, String = 1, NStrings = 2, Pos = 16 };
-//         int arg;
-//         if (i->opcode == iMatchKind) {
-//             console << "matchkind"; arg = Index;
-//         } else if (i->opcode == iMatchSubId) {
-//             console << "matchsubid"; arg = Index;
-//         } else if (i->opcode == iMatchBigId) {
-//             console << "matchbigid"; arg = Index;
-//         } else if (i->opcode == iValue) {
-//             console << "value"; arg = String;
-//         } else if ((i->opcode & iMask) == iCheck) {
-//             console << "check"; arg = String + Pos;
-//         } else if ((i->opcode & iMask) == iFail) {
-//             console << "fail"; arg = String + Pos;
-//         } else if ((i->opcode & iMask) == iFind) {
-//             console << "find"; arg = String + Pos;
-//         } else if ((i->opcode & iMask) == iParse) {
-//             console << "parse"; arg = NStrings + Pos;
-//         } else if ((i->opcode & iMask) == iArray) {
-//             console << "array"; arg = NStrings + Pos;
-//         } else {
-//             console << "bug"; arg = Index;
-//         }
-
-//         if (arg & Pos) {
-//             console << scopes[i->opcode & ~iMask];
-//             arg &= ~Pos;
-//         }
-//         if (arg == Index) {
-//             console << " " << i->index << "\n";
-//         }
-//         if (arg == String) {
-//             console << " '" << strings[i->index] << "'\n";
-//         }
-//         if (arg == NStrings) {
-//             console << " '" << strings[i->index] << "'";
-//             for (uint_t j = 0; j < i->count; ++j)
-//                 console << ",  '" << strings[i->index + j + 1] << "'";
-//             console << "\n";
-//         }
-//     }
-// }
-// #endif
 
 // Check for a string.
 bool

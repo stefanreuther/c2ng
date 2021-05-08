@@ -221,7 +221,7 @@ client::widgets::FilterDisplay::draw(gfx::Canvas& can)
 
         // Icons
         bool active = m_content[i].active;
-        ctx.setTextAlign(1, 1);
+        ctx.setTextAlign(gfx::CenterAlign, gfx::MiddleAlign);
         ctx.setColor(m_highlight == Delete && i == m_highlightIndex ? c.highlight : c.fixed);
         outTextF(ctx, thisArea.splitRightX(CELL_SIZE), UTF_BALLOT_CROSS);
         if (m_content[i].mode != gsi::NotEditable) {
@@ -241,7 +241,7 @@ client::widgets::FilterDisplay::draw(gfx::Canvas& can)
 
         // Pre-text pad
         int d = font->getLineHeight()/4;
-        ctx.setTextAlign(0, 1);
+        ctx.setTextAlign(gfx::LeftAlign, gfx::MiddleAlign);
         thisArea.consumeX(d);
 
         // Text
@@ -266,7 +266,7 @@ client::widgets::FilterDisplay::draw(gfx::Canvas& can)
         drawSolidBar(ctx, filterArea, c.background);
 
         ctx.setColor(!m_filterAvailable ? c.faded : m_highlight == Add ? c.highlight : c.fixed);
-        ctx.setTextAlign(1, 1);
+        ctx.setTextAlign(gfx::CenterAlign, gfx::MiddleAlign);
 
         gfx::Rectangle iconPos = gfx::Rectangle(0, 0, 16, 16).centerWithin(filterArea.splitRightX(CELL_SIZE));
         drawFilterAdd(ctx, iconPos);
@@ -283,7 +283,7 @@ client::widgets::FilterDisplay::draw(gfx::Canvas& can)
         drawSolidBar(ctx, sortArea, c.background);
 
         int d = font->getLineHeight()/4;
-        ctx.setTextAlign(0, 1);
+        ctx.setTextAlign(gfx::LeftAlign, gfx::MiddleAlign);
         sortArea.consumeX(d);
 
         ctx.setColor(m_highlight == Sort ? c.highlight : c.fixed);

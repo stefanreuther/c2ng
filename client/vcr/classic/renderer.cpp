@@ -31,7 +31,6 @@ namespace {
 
     String_t makeUnitResource(gvc::Side side, bool isPlanet, int shipPictureNumber)
     {
-        // FIXME: duplicate?
         if (isPlanet) {
             return "vcr.planet";
         } else {
@@ -177,8 +176,8 @@ client::vcr::classic::Renderer::Renderer(gfx::anim::Controller& ctl, ui::Root& r
     m_distanceSprite->setFont(gfx::FontRequest().setStyle(1));
     m_timeSprite->setFont(gfx::FontRequest().setStyle(1));
 
-    m_distanceSprite->setTextAlign(0, 2);
-    m_timeSprite->setTextAlign(2, 2);
+    m_distanceSprite->setTextAlign(gfx::LeftAlign, gfx::BottomAlign);
+    m_timeSprite->setTextAlign(gfx::RightAlign, gfx::BottomAlign);
 
     m_distanceSprite->setZ(Z_TEXT);
     m_timeSprite->setZ(Z_TEXT);
@@ -450,7 +449,7 @@ client::vcr::classic::Renderer::setResultVisible(bool flag)
             m_controller.addNewSprite(m_resultSprite);
             m_resultSprite->setFont(gfx::FontRequest().addSize(1));
             m_resultSprite->setPosition(gfx::Point(m_extent.getCenter().getX(), m_extent.getTopY() + 10));
-            m_resultSprite->setTextAlign(1, 0);
+            m_resultSprite->setTextAlign(gfx::CenterAlign, gfx::TopAlign);
             m_resultSprite->setColor(m_root.colorScheme().getColor(ui::Color_White));
             m_resultSprite->setText(formatResult());
             m_resultSprite->setZ(Z_TEXT);

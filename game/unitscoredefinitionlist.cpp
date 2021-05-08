@@ -19,7 +19,7 @@ game::UnitScoreDefinitionList::~UnitScoreDefinitionList()
 game::UnitScoreDefinitionList::Index_t
 game::UnitScoreDefinitionList::add(const Definition& def)
 {
-    // ex GUnitScoreDefinitions::addScoreDefinition
+    // ex GUnitScoreDefinitions::addScoreDefinition, phost.pas:AddUnitScore
     Index_t index;
     if (!lookup(def.id, index)) {
         index = m_definitions.size();
@@ -52,7 +52,7 @@ game::UnitScoreDefinitionList::getNumScores() const
 bool
 game::UnitScoreDefinitionList::lookup(int16_t id, Index_t& index) const
 {
-    // ex GUnitScoreDefinitions::lookupScore
+    // ex GUnitScoreDefinitions::lookupScore, phost.pas:GetUnitScore
     for (Index_t i = 0; i < m_definitions.size(); ++i) {
         if (m_definitions[i].id == id) {
             index = i;

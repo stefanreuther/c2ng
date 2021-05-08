@@ -50,7 +50,7 @@ game::interface::InboxFunction::get(interpreter::Arguments& args)
         return 0;
     }
 
-    return new InboxContext(size_t(index-1), m_session, *r, *g);
+    return new InboxContext(size_t(index-1), m_session.translator(), *r, *g);
 }
 
 void
@@ -86,7 +86,7 @@ game::interface::InboxFunction::makeFirstContext()
     } else if (g->currentTurn().inbox().getNumMessages() == 0) {
         return 0;
     } else {
-        return new InboxContext(0, m_session, *r, *g);
+        return new InboxContext(0, m_session.translator(), *r, *g);
     }
 }
 

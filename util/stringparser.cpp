@@ -43,9 +43,25 @@ bool
 util::StringParser::parseDelim(const char* delim, String_t& out)
 {
     const String_t::size_type start = m_pos;
-    while (m_pos < m_string.size() && std::strchr(delim, m_string[m_pos]) == 0) {
-        ++m_pos;
+    String_t::size_type end = m_string.find_first_of(delim, start);
+    if (end == String_t::npos) {
+        end = m_string.size();
     }
+    m_pos = end;
+    out.assign(m_string, start, m_pos - start);
+    return true;
+}
+
+// Check delimited variable string (greedy).
+bool
+util::StringParser::parseDelimGreedy(const char* delim, String_t& out)
+{
+    const String_t::size_type start = m_pos;
+    String_t::size_type end = m_string.find_last_of(delim);
+    if (end == String_t::npos || end < start) {
+        end = m_string.size();
+    }
+    m_pos = end;
     out.assign(m_string, start, m_pos - start);
     return true;
 }

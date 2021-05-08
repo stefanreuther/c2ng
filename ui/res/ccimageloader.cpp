@@ -77,10 +77,10 @@ namespace {
             while (const uint8_t* pin = in.eat()) {
                 uint8_t value = *pin;
                 if (uint8_t* pout = out.eat()) {
-                    *pout = convertColor16((value >> 4) & 15);
+                    *pout = convertColor16(value & 15);
                 }
                 if (uint8_t* pout = out.eat()) {
-                    *pout = convertColor16(value & 15);
+                    *pout = convertColor16((value >> 4) & 15);
                 }
             }
         }

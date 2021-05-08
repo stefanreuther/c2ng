@@ -9,6 +9,7 @@
 #include "afl/base/ref.hpp"
 #include "afl/base/refcounted.hpp"
 #include "afl/base/signal.hpp"
+#include "game/config/expressionlists.hpp"
 #include "game/config/hostconfiguration.hpp"
 #include "game/historyturnlist.hpp"
 #include "game/map/cursors.hpp"
@@ -16,8 +17,10 @@
 #include "game/msg/configuration.hpp"
 #include "game/parser/messageinformation.hpp"
 #include "game/score/turnscorelist.hpp"
+#include "game/spec/componentvector.hpp"
 #include "game/teamsettings.hpp"
 #include "game/unitscoredefinitionlist.hpp"
+#include "game/vcr/object.hpp"
 
 namespace game {
 
@@ -104,6 +107,11 @@ namespace game {
         game::msg::Configuration& messageConfiguration();
         const game::msg::Configuration& messageConfiguration() const;
 
+        /** Access expression lists.
+            \return expression lists */
+        game::config::ExpressionLists& expressionLists();
+        const game::config::ExpressionLists& expressionLists() const;
+
         /** Add message information.
             This is the general "I got some information somewhere" call.
             It will handle all sorts of information and add it to the current turn, treating it as scanner results.
@@ -114,8 +122,11 @@ namespace game {
             - future information will be discarded.
 
             \param info Information
-            \param config Host configuration (can be updated with message information) */
-        void addMessageInformation(const game::parser::MessageInformation& info, game::config::HostConfiguration& config);
+            \param config Host configuration (can be updated with message information)
+            \param msgNr If this information is from a message, its number */
+        void addMessageInformation(const game::parser::MessageInformation& info,
+                                   game::config::HostConfiguration& config,
+                                   afl::base::Optional<size_t> msgNr);
 
         /** Synchronize teams from alliances.
             If we are allied with a player, adds them to our team;
@@ -125,6 +136,12 @@ namespace game {
         /** Notify listeners.
             Invokes all listeners on current and viewpoint turn. */
         void notifyListeners();
+
+        /** Check for presence of a VCR object in game.
+            \param obj VCR object
+            \param hulls Hulls
+            \return true if object corresponds to a game unit */
+        bool isGameObject(const game::vcr::Object& obj, const game::spec::HullVector_t& hulls) const;
 
         /** Signal: viewpoint turn change. */
         afl::base::Signal<void()> sig_viewpointTurnChange;
@@ -145,6 +162,8 @@ namespace game {
         game::map::Selections m_selections;
 
         game::msg::Configuration m_messageConfiguration;
+
+        game::config::ExpressionLists m_expressionLists;
     };
 
 }

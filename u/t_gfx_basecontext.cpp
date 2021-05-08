@@ -41,7 +41,7 @@ TestGfxBaseContext::testIt()
     testee.setFillPattern(gfx::FillPattern::GRAY50);
     testee.setAlpha(120);
     testee.setCursor(gfx::Point(100, 200));
-    testee.setTextAlign(2, 1);
+    testee.setTextAlign(gfx::RightAlign, gfx::MiddleAlign);
     testee.useFont(*f);
     testee.useCanvas(b);
 

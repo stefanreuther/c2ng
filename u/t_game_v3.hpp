@@ -6,6 +6,53 @@
 
 #include <cxxtest/TestSuite.h> 
 
+class TestGameV3AttachmentConfiguration : public CxxTest::TestSuite {
+ public:
+    void testSame();
+    void testDifferent();
+    void testRaceNameDefault();
+    void testRaceNameAccept();
+    void testRaceNameReject();
+    void testEmpty();
+};
+
+class TestGameV3AttachmentUnpacker : public CxxTest::TestSuite {
+ public:
+    void testInit();
+    void testResult();
+    void testResultDisabled();
+    void testResult30();
+    void testResultLeech();
+    void testResultDamagedNames();
+    void testUtilConfig();
+    void testUtilFileGood();
+    void testUtilFileTruncated();
+    void testUtilFileName();
+    void testUtilFileInvalidName();
+    void testUtilFileInvalidName2();
+    void testUtilFileInvalidName3();
+    void testUtilFileBlacklistedName();
+    void testUtilFileBlacklistedName2();
+    void testUtilFileBlacklistedName3();
+    void testUtilFileBlacklistedName4();
+    void testUtilFileNameBorderCase();
+    void testUtilFileNameBorderCase2();
+    void testUtilFileMulti();
+    void testUtilFileOrder();
+    void testUtilFileOrder2();
+    void testSave();
+    void testSaveBlacklist();
+    void testSaveBlacklistEnabled();
+    void testDropUnchanged();
+    void testDropUnchanged2();
+    void testDropUnchanged3();
+    void testDropUnchanged4();
+    void testLoadDirectory();
+    void testLoadDirectoryEmpty();
+    void testToString();
+    void testMultipleTimestamps();
+};
+
 class TestGameV3Command : public CxxTest::TestSuite {
  public:
     void testCommands();

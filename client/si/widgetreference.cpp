@@ -20,9 +20,9 @@ client::si::WidgetReference::~WidgetReference()
 { }
 
 ui::Widget*
-client::si::WidgetReference::get(UserSide& user) const
+client::si::WidgetReference::get(Control& ctl) const
 {
-    return m_holder->get(user, m_slot);
+    return m_holder->get(ctl, m_slot);
 }
 
 client::si::WidgetHolder&

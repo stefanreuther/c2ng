@@ -21,7 +21,6 @@
 # include "gfx/sdl2/surface.hpp"
 # include "gfx/windowparameters.hpp"
 # include "util/key.hpp"
-# include "util/translation.hpp"
 
 namespace {
     const char LOG_NAME[] = "gfx.sdl2";
@@ -46,16 +45,30 @@ namespace {
         return m;
     }
 
-    /** Simplify a text key with modifier. */
-    util::Key_t simplifyKey(util::Key_t key)
+    /** Check printable key that is unaffected by Shift on every layout.
+        This means if we receive it with Shift, we forward it as Shift+X.
+        For normal printable keys, we cannot do that because Shift might be
+        required to produce the character in the first place. */
+    bool isSpecialPrintable(SDL_Keycode sym)
     {
-        switch (key & ~util::KeyMod_Shift) {
-         case ' ':
-            return key;
+        switch (sym) {
+         case SDLK_SPACE:
+         case SDLK_KP_PLUS:
+         case SDLK_KP_MINUS:
+         case SDLK_KP_MULTIPLY:
+         case SDLK_KP_DIVIDE:
+            return true;
 
          default:
-            return key & ~util::KeyMod_Shift;
+            return false;
         }
+    }
+
+    /** Simplify a text key with modifier.
+        For printables not produced by an isSpecialPrintable() key, we disregard a possible Shift. */
+    util::Key_t simplifyKey(util::Key_t key)
+    {
+        return key & ~util::KeyMod_Shift;
     }
 
     /** Convert SDL key modifier to internal key modifier.
@@ -151,6 +164,12 @@ namespace {
          case SDLK_KP_8:      return shifted ? '8' : util::Key_Up;
          case SDLK_KP_9:      return shifted ? '9' : util::Key_PgUp;
          case SDLK_KP_PERIOD: return shifted ? '.' : util::Key_Delete;
+
+         case SDLK_KP_PLUS:   return '+';
+         case SDLK_KP_MINUS:  return '-';
+         case SDLK_KP_MULTIPLY: return '*';
+         case SDLK_KP_DIVIDE: return '/';
+
          case SDLK_F1:        return util::Key_F1;
          case SDLK_F2:        return util::Key_F2;
          case SDLK_F3:        return util::Key_F3;
@@ -232,8 +251,9 @@ namespace {
 }
 
 
-gfx::sdl2::Engine::Engine(afl::sys::LogListener& log)
+gfx::sdl2::Engine::Engine(afl::sys::LogListener& log, afl::string::Translator& tx)
     : m_log(log),
+      m_translator(tx),
       m_window(0),
       m_sdlWindow(0),
       m_sdlTexture(0),
@@ -253,7 +273,7 @@ gfx::sdl2::Engine::Engine(afl::sys::LogListener& log)
       m_taskQueue()
 {
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {
-        throw GraphicsException(afl::string::Format(_("Error initializing SDL: %s").c_str(), SDL_GetError()));
+        throw GraphicsException(afl::string::Format(m_translator("Error initializing SDL: %s").c_str(), SDL_GetError()));
     }
 
     // SDL_SetEventFilter(quitHandler);
@@ -295,7 +315,7 @@ gfx::sdl2::Engine::createWindow(const WindowParameters& param)
 
     SDL_Window* window = SDL_CreateWindow(param.title.empty() ? "gfx::sdl2::Engine Window" : param.title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, sdlFlags);
     if (window == 0) {
-        throw GraphicsException(afl::string::Format(_("Error setting video mode (%s): %s").c_str(), "SDL_CreateWindow", SDL_GetError()));
+        throw GraphicsException(afl::string::Format(m_translator("Error setting video mode (%s): %s").c_str(), "SDL_CreateWindow", SDL_GetError()));
     }
 
     if (param.icon.get() != 0) {
@@ -314,7 +334,7 @@ gfx::sdl2::Engine::createWindow(const WindowParameters& param)
 
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
     if (renderer == 0) {
-        throw GraphicsException(afl::string::Format(_("Error setting video mode (%s): %s").c_str(), "SDL_CreateRenderer", SDL_GetError()));
+        throw GraphicsException(afl::string::Format(m_translator("Error setting video mode (%s): %s").c_str(), "SDL_CreateRenderer", SDL_GetError()));
     }
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");  // make the scaled rendering look smoother.
     SDL_RenderSetLogicalSize(renderer, width, height);
@@ -322,7 +342,7 @@ gfx::sdl2::Engine::createWindow(const WindowParameters& param)
 
     SDL_Texture* tex = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, width, height);
     if (tex == 0) {
-        throw GraphicsException(afl::string::Format(_("Error setting video mode (%s): %s").c_str(), "SDL_CreateTexture", SDL_GetError()));
+        throw GraphicsException(afl::string::Format(m_translator("Error setting video mode (%s): %s").c_str(), "SDL_CreateTexture", SDL_GetError()));
     }
 
     // Log it
@@ -338,12 +358,12 @@ gfx::sdl2::Engine::createWindow(const WindowParameters& param)
         if (info.flags & SDL_RENDERER_TARGETTEXTURE) {
             flags += ", target texture";
         }
-        m_log.write(m_log.Info, LOG_NAME, afl::string::Format(_("Video driver: %s%s").c_str(), info.name, flags));
+        m_log.write(m_log.Info, LOG_NAME, afl::string::Format(m_translator("Video driver: %s%s").c_str(), info.name, flags));
     }
 
     SDL_Surface* sfc = SDL_CreateRGBSurface(0, width, height, 32, 0, 0, 0, 0);
     if (sfc == 0) {
-        throw GraphicsException(afl::string::Format(_("Error setting video mode (%s): %s").c_str(), "SDL_CreateRGBSurface", SDL_GetError()));
+        throw GraphicsException(afl::string::Format(m_translator("Error setting video mode (%s): %s").c_str(), "SDL_CreateRGBSurface", SDL_GetError()));
     }
 
     setWindowStuff(window, tex, renderer);
@@ -436,6 +456,13 @@ gfx::sdl2::Engine::handleEvent(EventConsumer& consumer, bool relativeMouseMoveme
     }
 }
 
+// Get current keyboard modifiers (Shift, Alt, Ctrl, Meta).
+util::Key_t
+gfx::sdl2::Engine::getKeyboardModifierState()
+{
+    return convertModifier(SDL_GetModState());
+}
+
 // Get request dispatcher.
 util::RequestDispatcher&
 gfx::sdl2::Engine::dispatcher()
@@ -523,10 +550,12 @@ gfx::sdl2::Engine::convertEvent(const SDL_Event& se, gfx::EventConsumer& consume
         // Thus, we're going for the following logic:
         //   If a SDL_TEXTINPUT event is in the queue at the time a SDL_KEYDOWN is received, process that.
         //   Otherwise, process the SDL_KEYDOWN as key event.
+        // As an exception, for isSpecialPrintable(), we eat up the SDL_TEXTINPUT, and just process the SDL_KEYDOWN,
+        //   to be able to produce shifted printables (Shift+Space etc.)
         // printf("SDL_KEYDOWN:       scan=%d, sym=%d, mod=%d\n", se.key.keysym.scancode, se.key.keysym.sym, se.key.keysym.mod);
 
         SDL_Event otherEvent;
-        if (fetchNextEventIfType(otherEvent, SDL_TEXTINPUT)) {
+        if (fetchNextEventIfType(otherEvent, SDL_TEXTINPUT) && !isSpecialPrintable(se.key.keysym.sym)) {
             // printf("  SDL_TEXTINPUT:   text='%s'\n", otherEvent.text.text);
             handleTextInput(consumer, otherEvent.text.text, convertModifier(simplifyModifier(se.key.keysym.mod)));
             return true;
@@ -539,7 +568,7 @@ gfx::sdl2::Engine::convertEvent(const SDL_Event& se, gfx::EventConsumer& consume
                 return true;
             } else {
                 if (!isKnownIgnorableKey(se.key.keysym.sym)) {
-                    m_log.write(m_log.Trace, LOG_NAME, afl::string::Format(_("Key not mapped: 0x%x").c_str(), int(se.key.keysym.sym)));
+                    m_log.write(m_log.Trace, LOG_NAME, afl::string::Format(m_translator("Key not mapped: 0x%x").c_str(), int(se.key.keysym.sym)));
                 }
                 return false;
             }

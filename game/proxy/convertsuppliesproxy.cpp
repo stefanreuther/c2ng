@@ -13,15 +13,13 @@
 
 using game::actions::ConvertSupplies;
 
-class game::proxy::ConvertSuppliesProxy::Trampoline : public util::SlaveObject<Session> {
+class game::proxy::ConvertSuppliesProxy::Trampoline {
  public:
-    virtual void init(Session&)
+    Trampoline(Session& session)
+        : m_session(session)
         { }
 
-    virtual void done(Session&)
-        { m_action.reset(); }
-
-    Status init(Session& session, Id_t planetId, int32_t reservedSupplies, int32_t reservedMoney)
+    Status init(Id_t planetId, int32_t reservedSupplies, int32_t reservedMoney)
         {
             // Reset previous state, if any
             m_action.reset();
@@ -29,11 +27,11 @@ class game::proxy::ConvertSuppliesProxy::Trampoline : public util::SlaveObject<S
             // Build new state
             Status st;
             try {
-                Game& g = game::actions::mustHaveGame(session);
+                Game& g = game::actions::mustHaveGame(m_session);
                 game::map::Universe& univ = g.currentTurn().universe();
-                game::map::Planet& pl = game::actions::mustExist(univ.planets().get(planetId));
+                game::map::Planet& pl = game::actions::mustExist(univ.planets().get(planetId), m_session.translator());
 
-                m_action.reset(new ConvertSupplies(pl));
+                m_action.reset(new ConvertSupplies(pl, m_session.translator()));
                 m_action->setUndoInformation(univ);
                 m_action->setReservedSupplies(reservedSupplies);
                 m_action->setReservedMoney(reservedMoney);
@@ -51,18 +49,30 @@ class game::proxy::ConvertSuppliesProxy::Trampoline : public util::SlaveObject<S
     ConvertSupplies* getAction()
         { return m_action.get(); }
 
+    void notifyListeners()
+        { m_session.notifyListeners(); }
+
  private:
+    Session& m_session;
     std::auto_ptr<ConvertSupplies> m_action;
 };
 
+
+class game::proxy::ConvertSuppliesProxy::TrampolineFromSession : public afl::base::Closure<Trampoline*(Session&)> {
+ public:
+    virtual Trampoline* call(Session& session)
+        { return new Trampoline(session); }
+};
+
+
 game::proxy::ConvertSuppliesProxy::ConvertSuppliesProxy(util::RequestSender<Session> gameSender)
-    : m_slave(gameSender, new Trampoline())
+    : m_trampoline(gameSender.makeTemporary(new TrampolineFromSession()))
 { }
 
 game::proxy::ConvertSuppliesProxy::Status
 game::proxy::ConvertSuppliesProxy::init(WaitIndicator& link, Id_t planetId, int32_t reservedSupplies, int32_t reservedMoney)
 {
-    class Task : public util::SlaveRequest<Session, Trampoline> {
+    class Task : public util::Request<Trampoline> {
      public:
         Task(Id_t planetId, int32_t reservedSupplies, int32_t reservedMoney)
             : m_planetId(planetId),
@@ -70,8 +80,8 @@ game::proxy::ConvertSuppliesProxy::init(WaitIndicator& link, Id_t planetId, int3
               m_reservedMoney(reservedMoney),
               m_status()
             { }
-        virtual void handle(Session& session, Trampoline& tpl)
-            { m_status = tpl.init(session, m_planetId, m_reservedSupplies, m_reservedMoney); }
+        virtual void handle(Trampoline& tpl)
+            { m_status = tpl.init(m_planetId, m_reservedSupplies, m_reservedMoney); }
         const Status& get() const
             { return m_status; }
      private:
@@ -81,19 +91,19 @@ game::proxy::ConvertSuppliesProxy::init(WaitIndicator& link, Id_t planetId, int3
         Status m_status;
     };
     Task t(planetId, reservedSupplies, reservedMoney);
-    link.call(m_slave, t);
+    link.call(m_trampoline, t);
     return t.get();
 }
 
 void
 game::proxy::ConvertSuppliesProxy::sellSupplies(int32_t amount)
 {
-    class Task : public util::SlaveRequest<Session, Trampoline> {
+    class Task : public util::Request<Trampoline> {
      public:
         Task(int32_t amount)
             : m_amount(amount)
             { }
-        virtual void handle(Session& session, Trampoline& tpl)
+        virtual void handle(Trampoline& tpl)
             {
                 if (ConvertSupplies* pa = tpl.getAction()) {
                     pa->sellSupplies(m_amount, true);
@@ -103,13 +113,13 @@ game::proxy::ConvertSuppliesProxy::sellSupplies(int32_t amount)
                     // If the sell-supplies dialog is invoked from another dialog,
                     // it does not have a script to drive the notifications,
                     // causing its result not be re-considered from the other dialog's action.
-                    session.notifyListeners();
+                    tpl.notifyListeners();
                 }
             }
      private:
         int32_t m_amount;
     };
-    m_slave.postNewRequest(new Task(amount));
+    m_trampoline.postNewRequest(new Task(amount));
 }
 
 void

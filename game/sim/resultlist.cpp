@@ -7,10 +7,20 @@
 #include "game/sim/setup.hpp"
 #include "game/sim/ship.hpp"
 #include "game/sim/planet.hpp"
+#include "afl/string/format.hpp"
+
+namespace {
+    afl::base::Ptr<game::vcr::Database> pickSample(const game::sim::UnitResult::Item& item, bool max)
+    {
+        return max ? item.maxSpecimen : item.minSpecimen;
+    }
+}
+
+const size_t game::sim::ResultList::UnitInfo::MAX_TYPE;
 
 // Make blank ResultList.
 game::sim::ResultList::ResultList()
-    : m_totalWeight(0), m_cumulativeWeight(0), m_numBattles(0), m_unitResults(), m_classResults()
+    : m_totalWeight(0), m_cumulativeWeight(0), m_numBattles(0), m_lastClassResultIndex(0), m_unitResults(), m_classResults()
 {
     // ex GSimResultSummary
 }
@@ -82,13 +92,13 @@ game::sim::ResultList::addResult(const Setup& oldState, const Setup& newState, a
         if ((*i)->isSameClass(this_class)) {
             (*i)->addSameClassResult(this_class);
             have_this_class = true;
-            updateClassResultSortOrder(i - m_classResults.begin());
+            m_lastClassResultIndex = updateClassResultSortOrder(i - m_classResults.begin());
             break;
         }
     }
     if (!have_this_class) {
         m_classResults.pushBackNew(new ClassResult(this_class));
-        updateClassResultSortOrder(m_classResults.size() - 1);
+        m_lastClassResultIndex = updateClassResultSortOrder(m_classResults.size() - 1);
     }
 
     /* Finally, adjust our counters */
@@ -144,6 +154,92 @@ game::sim::ResultList::getUnitResult(size_t index) const
     return m_unitResults[index];
 }
 
+// Describe class result.
+game::sim::ResultList::ClassInfo
+game::sim::ResultList::describeClassResult(size_t index, const util::NumberFormatter& fmt) const
+{
+    ClassInfo result;
+    if (const ClassResult* p = getClassResult(index)) {
+        // Label
+        double perc = (getCumulativeWeight() == 0 ? 0.0 : 100.0 * p->getWeight() / getCumulativeWeight());
+        if (getTotalWeight() == 1) {
+            result.label = afl::string::Format("%d\xC3\x97 (%.1f%%)", fmt.formatNumber(p->getWeight()), perc);
+        } else {
+            result.label = afl::string::Format("%.1f%%", perc);
+        }
+
+        // Rest
+        result.weight     = p->getWeight();
+        result.ownedUnits = p->getClass();
+        result.hasSample  = p->getSampleBattle().get() != 0;
+    }
+    return result;
+}
+
+// Describe unit result.
+game::sim::ResultList::UnitInfo
+game::sim::ResultList::describeUnitResult(size_t index, const Setup& setup) const
+{
+    UnitInfo result;
+    const Object* obj = setup.getObject(index);
+    const UnitResult* r = getUnitResult(index);
+    if (obj != 0 && r != 0) {
+        // Scalars
+        result.numFightsWon      = r->getNumFightsWon();
+        result.numFights         = r->getNumFights();
+        result.numCaptures       = r->getNumCaptures();
+        result.cumulativeWeight  = getCumulativeWeight();
+        result.hasAbsoluteCounts = getTotalWeight() <= 1;
+
+        // Formatting logic taken from WSimUnitStat::render
+        result.info.push_back(packItem(UnitInfo::Damage, r->getDamage()));
+        result.info.push_back(packItem(UnitInfo::Shield, r->getShield()));
+        if (dynamic_cast<const Planet*>(obj) != 0) {
+            result.info.push_back(packItem(UnitInfo::DefenseLost, r->getCrewLeftOrDefenseLost()));
+            result.info.push_back(packItem(UnitInfo::NumBaseFightersLost, r->getNumFightersLost()));
+            if (r->getNumFights() != 0) {
+                result.info.push_back(packItem(UnitInfo::MinFightersAboard, r->getMinFightersAboard()));
+            }
+        }
+        if (const Ship* sh = dynamic_cast<const Ship*>(obj)) {
+            result.info.push_back(packItem(UnitInfo::Crew, r->getCrewLeftOrDefenseLost()));
+            if (sh->getNumBays() != 0) {
+                result.info.push_back(packItem(UnitInfo::NumFightersLost, r->getNumFightersLost()));
+                result.info.push_back(packItem(UnitInfo::NumFightersRemaining, UnitResult::Item(r->getNumFightersLost(), sh->getAmmo(), getCumulativeWeight())));
+                result.info.push_back(packItem(UnitInfo::MinFightersAboard, r->getMinFightersAboard()));
+            }
+            if (sh->getNumLaunchers() != 0) {
+                result.info.push_back(packItem(UnitInfo::NumTorpedoesFired, r->getNumTorpedoesFired()));
+                result.info.push_back(packItem(UnitInfo::NumTorpedoesRemaining, UnitResult::Item(r->getNumTorpedoesFired(), sh->getAmmo(), getCumulativeWeight())));
+                result.info.push_back(packItem(UnitInfo::NumTorpedoHits, r->getNumTorpedoHits()));
+            }
+        }
+    }
+    return result;
+}
+
+// Get sample battle.
+afl::base::Ptr<game::vcr::Database>
+game::sim::ResultList::getUnitSampleBattle(size_t index, UnitInfo::Type type, bool max) const
+{
+    if (const UnitResult* r = getUnitResult(index)) {
+        switch (type) {
+         case ResultList::UnitInfo::Damage:                return pickSample(r->getDamage(),                max);
+         case ResultList::UnitInfo::Shield:                return pickSample(r->getShield(),                max);
+         case ResultList::UnitInfo::DefenseLost:           return pickSample(r->getCrewLeftOrDefenseLost(), max);
+         case ResultList::UnitInfo::NumBaseFightersLost:   return pickSample(r->getNumFightersLost(),       max);
+         case ResultList::UnitInfo::MinFightersAboard:     return pickSample(r->getMinFightersAboard(),     max);
+         case ResultList::UnitInfo::Crew:                  return pickSample(r->getCrewLeftOrDefenseLost(), max);
+         case ResultList::UnitInfo::NumFightersLost:       return pickSample(r->getNumFightersLost(),       max);
+         case ResultList::UnitInfo::NumFightersRemaining:  return pickSample(r->getNumFightersLost(),      !max);
+         case ResultList::UnitInfo::NumTorpedoesFired:     return pickSample(r->getNumTorpedoesFired(),     max);
+         case ResultList::UnitInfo::NumTorpedoesRemaining: return pickSample(r->getNumTorpedoesFired(),    !max);
+         case ResultList::UnitInfo::NumTorpedoHits:        return pickSample(r->getNumTorpedoHits(),        max);
+        }
+    }
+    return 0;
+}
+
 // Get number of battles fought.
 size_t
 game::sim::ResultList::getNumBattles() const
@@ -152,10 +248,17 @@ game::sim::ResultList::getNumBattles() const
     return m_numBattles;
 }
 
+// Get class result index of last result added.
+size_t
+game::sim::ResultList::getLastClassResultIndex() const
+{
+    return m_lastClassResultIndex;
+}
+
 
 /** Update class result sort order. Assuming value at change_index was
     modified (count increased), sort it into its place. */
-void
+size_t
 game::sim::ResultList::updateClassResultSortOrder(size_t change_index)
 {
     while (change_index > 0) {
@@ -168,4 +271,37 @@ game::sim::ResultList::updateClassResultSortOrder(size_t change_index)
             break;
         }
     }
+    return change_index;
+}
+
+/** Pack UnitResult::Item into UnitInfo::Item. */
+game::sim::ResultList::UnitInfo::Item
+game::sim::ResultList::packItem(UnitInfo::Type type, const UnitResult::Item& item) const
+{
+    return UnitInfo::Item(type,
+                          item.min,
+                          item.max,
+                          double(item.totalScaled) / getCumulativeWeight(),
+                          item.minSpecimen.get() != 0,
+                          item.maxSpecimen.get() != 0);
+}
+
+// Get human-readable string representation of a UnitInfo::Type.
+String_t
+game::sim::toString(ResultList::UnitInfo::Type type, afl::string::Translator& tx)
+{
+    switch (type) {
+     case ResultList::UnitInfo::Damage:                return tx("Damage");
+     case ResultList::UnitInfo::Shield:                return tx("Shield");
+     case ResultList::UnitInfo::DefenseLost:           return tx("Defense Lost");
+     case ResultList::UnitInfo::NumBaseFightersLost:   return tx("SB Ftrs Lost");
+     case ResultList::UnitInfo::MinFightersAboard:     return tx("Min Ftr Aboard");
+     case ResultList::UnitInfo::Crew:                  return tx("Crew Left");
+     case ResultList::UnitInfo::NumFightersLost:       return tx("Fighters Lost");
+     case ResultList::UnitInfo::NumFightersRemaining:  return tx("Fighters Left");
+     case ResultList::UnitInfo::NumTorpedoesFired:     return tx("Torps Fired");
+     case ResultList::UnitInfo::NumTorpedoesRemaining: return tx("Torps Left");
+     case ResultList::UnitInfo::NumTorpedoHits:        return tx("Torps Hit");
+    }
+    return String_t();
 }

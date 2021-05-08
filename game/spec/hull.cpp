@@ -223,3 +223,41 @@ game::spec::Hull::getMineHitDamage(int /*forPlayer*/, bool web, const HostVersio
                ? util::divideAndRoundToEven(1000, mass + 1, 0)
                : util::divideAndRoundToEven(10000, mass + 1, 0)));
 }
+
+int
+game::spec::Hull::getPointsToBuild(int forPlayer, const HostVersion& host, const game::config::HostConfiguration& config) const
+{
+    if (host.isPHost()) {
+        return std::max(getMass() * config[HostConfiguration::PBPCostPer100KT](forPlayer) / 100,
+                        config[HostConfiguration::PBPMinimumCost](forPlayer));
+    } else {
+        /* Build:
+           - Vendetta (100 kt) => 2
+           - Loki (101 kt) => 3 */
+        return (getMass() + 49) / 50;
+    }
+}
+
+int
+game::spec::Hull::getPointsForKilling(int forPlayer, const HostVersion& host, const game::config::HostConfiguration& config) const
+{
+    if (host.isPHost()) {
+        /* Kill, estimation (since there are many ways to destroy it) */
+        return getMass() * (config[HostConfiguration::PALAggressorPointsPer10KT](forPlayer) + config[HostConfiguration::PALAggressorKillPointsPer10KT](forPlayer)) / 10
+            + config[HostConfiguration::PALCombatAggressor](forPlayer);
+    } else {
+        /* Kill:
+           - Dwarfstar (100 kt) => 2 */
+        return (getMass() / 100) + 1;
+    }
+}
+
+int
+game::spec::Hull::getPointsForScrapping(int forPlayer, const HostVersion& host, const game::config::HostConfiguration& config) const
+{
+    if (host.isPHost()) {
+        return getMass() * config[HostConfiguration::PALRecyclingPer10KT](forPlayer) / 10;
+    } else {
+        return 1;
+    }
+}

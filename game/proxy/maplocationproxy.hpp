@@ -12,7 +12,6 @@
 #include "util/requestdispatcher.hpp"
 #include "util/requestreceiver.hpp"
 #include "util/requestsender.hpp"
-#include "util/slaverequestsender.hpp"
 
 namespace game { namespace proxy {
 
@@ -54,9 +53,15 @@ namespace game { namespace proxy {
 
      private:
         class Trampoline;
-        util::RequestSender<Session> m_gameSender;
+        class TrampolineFromSession;
         util::RequestReceiver<MapLocationProxy> m_reply;
-        util::SlaveRequestSender<Session, Trampoline> m_trampoline;
+        util::RequestSender<Trampoline> m_trampoline;
+
+        /* If we send down multiple setPosition() requests, suppress responses.
+           This is to avoid building up lag. */
+        int m_numOutstandingRequests;
+
+        void emitPositionChange(game::map::Point pt);
     };
 
 } }

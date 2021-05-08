@@ -1,5 +1,6 @@
 /**
   *  \file game/parser/messageparser.cpp
+  *  \brief Class game::parser::MessageParser
   */
 
 #include <algorithm>
@@ -366,22 +367,22 @@ namespace {
     }
 }
 
+/*
+ *  Class MessageParser
+ */
 
-
-
-// /** Constructor. Makes a blank message parser. */
+// Default constructor.
 game::parser::MessageParser::MessageParser()
     : m_templates()
 {
     // ex GMessageParser::GMessageParser
 }
 
+// Destructor.
 game::parser::MessageParser::~MessageParser()
 { }
 
-// /** Load message parser information from a file. Builds message templates and adds
-//     them to this parser.
-//     \param in file opened for reading */
+// Load definitions from file.
 void
 game::parser::MessageParser::load(afl::io::Stream& file, afl::string::Translator& tx, afl::sys::LogListener& log)
 {
@@ -485,11 +486,7 @@ game::parser::MessageParser::load(afl::io::Stream& file, afl::string::Translator
     checkTemplate(currentTemplate, tf, currentTemplateLine, tx, log);
 }
 
-// /** Parse a message, main entry point.
-//     \param theMessage [in] Message text
-//     \param player     [in] Player who got the message
-//     \param turn       [in] Current turn number
-//     \param info_out   [out] Information will be appended here */
+// Parse a message, main entry point.
 void
 game::parser::MessageParser::parseMessage(String_t theMessage, const DataInterface& iface, int turnNr, afl::container::PtrVector<MessageInformation>& info,
                                           afl::string::Translator& tx, afl::sys::LogListener& log)
@@ -511,23 +508,3 @@ game::parser::MessageParser::parseMessage(String_t theMessage, const DataInterfa
         }
     }
 }
-
-// FIXME: remove
-// /** Discard all templates. */
-// void
-// GMessageParser::done()
-// {
-//     message_templates.clear();
-// }
-
-
-// FIXME: remove
-// void
-// GMessageParser::dump()
-// {
-//     for (ptr_vector<GMessageTemplate>::iterator i = message_templates.begin(); i != message_templates.end(); ++i) {
-//         console << "---- Template '" << (*i)->getTemplateName() << "' ----\n"
-//                 << "continue_flag = " << ((*i)->getContinueFlag() ? "on" : "off") << "\n\n";
-//         (*i)->dump();
-//     }
-// }

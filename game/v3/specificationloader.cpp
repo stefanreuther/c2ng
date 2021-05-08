@@ -51,7 +51,7 @@ namespace {
                        const game::config::HostConfiguration& config,
                        afl::string::Translator& tx,
                        afl::sys::LogListener& log)
-            : util::ConfigurationFileParser(),
+            : util::ConfigurationFileParser(tx),
               m_basicFunctionId(-1),
               m_assignToHull(true),
               m_levels(game::ExperienceLevelSet_t::allUpTo(game::MAX_EXPERIENCE_LEVELS)),
@@ -59,7 +59,6 @@ namespace {
               m_shipList(shipList),
               m_host(host),
               m_config(config),
-              m_translator(tx),
               m_log(log)
             { }
 
@@ -75,7 +74,6 @@ namespace {
         game::spec::ShipList& m_shipList;
         const game::HostVersion& m_host;
         const game::config::HostConfiguration& m_config;
-        afl::string::Translator& m_translator;
         afl::sys::LogListener& m_log;
 
         void performPlayerAssignment(const String_t& fileName, int lineNr, String_t value, bool byRace);
@@ -95,7 +93,7 @@ HullfuncParser::handleAssignment(const String_t& fileName, int lineNr, const Str
             clearHullFunctions(m_shipList.hulls());
             m_shipList.basicHullFunctions().performDefaultAssignments(m_shipList.hulls());
         } else {
-            handleError(fileName, lineNr, m_translator.translateString("Invalid argument to `Initialize'"));
+            handleError(fileName, lineNr, translator()("Invalid argument to `Initialize'"));
         }
     } else if (util::stringMatch("Hull", name)) {
         // Initialize hull set
@@ -149,7 +147,7 @@ HullfuncParser::handleAssignment(const String_t& fileName, int lineNr, const Str
         } else if (const game::spec::BasicHullFunction* hf = m_shipList.basicHullFunctions().getFunctionByName(value, true)) {
             m_basicFunctionId = hf->getId();
         } else {
-            handleError(fileName, lineNr, m_translator.translateString("Invalid hull function"));
+            handleError(fileName, lineNr, translator()("Invalid hull function"));
         }
     } else if (util::stringMatch("Racesallowed", name)) {
         performPlayerAssignment(fileName, lineNr, value, true);
@@ -169,7 +167,7 @@ HullfuncParser::handleAssignment(const String_t& fileName, int lineNr, const Str
         } else {
             // a number followed by something
             if (!afl::string::strToInteger(value.substr(0, pos), min)) {
-                handleError(fileName, lineNr, m_translator.translateString("Invalid level number"));
+                handleError(fileName, lineNr, translator()("Invalid level number"));
                 return;
             }
 
@@ -185,18 +183,18 @@ HullfuncParser::handleAssignment(const String_t& fileName, int lineNr, const Str
                 } else if (afl::string::strToInteger(rest.substr(1), max)) {
                     // "1-2", ok
                 } else {
-                    handleError(fileName, lineNr, m_translator.translateString("Invalid level range"));
+                    handleError(fileName, lineNr, translator()("Invalid level range"));
                     return;
                 }
             } else {
-                handleError(fileName, lineNr, m_translator.translateString("Invalid level number"));
+                handleError(fileName, lineNr, translator()("Invalid level number"));
                 return;
             }
         }
 
         // We now have a range. Is it valid?
         if (min < 0 || max > game::MAX_EXPERIENCE_LEVELS || min > max) {
-            handleError(fileName, lineNr, m_translator.translateString("Invalid level range"));
+            handleError(fileName, lineNr, translator()("Invalid level range"));
         }
 
         m_levels = game::ExperienceLevelSet_t::allUpTo(max);
@@ -204,7 +202,7 @@ HullfuncParser::handleAssignment(const String_t& fileName, int lineNr, const Str
             m_levels -= game::ExperienceLevelSet_t::allUpTo(min-1);
         }
     } else {
-        handleError(fileName, lineNr, m_translator.translateString("Invalid keyword"));
+        handleError(fileName, lineNr, translator()("Invalid keyword"));
     }
 }
 
@@ -230,11 +228,11 @@ HullfuncParser::performPlayerAssignment(const String_t& fileName, int lineNr, St
     // ex HullfuncParser::assignSpecial
     // Verify status
     if (m_basicFunctionId < 0) {
-        handleError(fileName, lineNr, m_translator.translateString("No function selected for assignment"));
+        handleError(fileName, lineNr, translator()("No function selected for assignment"));
         return;
     }
     if (m_hulls.size() <= 0) {
-        handleError(fileName, lineNr, m_translator.translateString("No hull selected for assignment"));
+        handleError(fileName, lineNr, translator()("No hull selected for assignment"));
         return;
     }
 
@@ -284,7 +282,7 @@ HullfuncParser::performPlayerAssignment(const String_t& fileName, int lineNr, St
                     value.erase(0, pos);
                 } else {
                     // only happens on overflow
-                    handleError(fileName, lineNr, m_translator.translateString("Invalid number"));
+                    handleError(fileName, lineNr, translator()("Invalid number"));
                     return;
                 }
             }
@@ -296,7 +294,7 @@ HullfuncParser::performPlayerAssignment(const String_t& fileName, int lineNr, St
                 if (num > 0 && num <= game::MAX_PLAYERS) {
                     set += num;
                 } else {
-                    handleError(fileName, lineNr, m_translator.translateString("Invalid player number"));
+                    handleError(fileName, lineNr, translator()("Invalid player number"));
                     return;
                 }
             }
@@ -581,11 +579,11 @@ game::v3::SpecificationLoader::loadMissions(game::spec::ShipList& list, afl::io:
     // Regular definitions
     afl::base::Ptr<afl::io::Stream> ps = dir.openFileNT("mission.usr", FileSystem::OpenRead);
     if (ps.get()) {
-        msns.loadFromFile(*ps, m_log);
+        msns.loadFromFile(*ps, m_log, m_translator);
     }
     ps = dir.openFileNT("mission.cc", FileSystem::OpenRead);
     if (ps.get()) {
-        msns.loadFromFile(*ps, m_log);
+        msns.loadFromFile(*ps, m_log, m_translator);
     }
     ps = dir.openFileNT("mission.ini", FileSystem::OpenRead);
     if (ps.get()) {

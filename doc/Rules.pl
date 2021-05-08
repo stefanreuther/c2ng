@@ -37,7 +37,7 @@ my $style = normalize_filename($ROOT, 'scripts/pcc2help.xsl');
 {
     my @int_files;
     push @int_files, sort grep {/\.txt$/} get_directory_content("$IN/InterpreterReference");
-    push @int_files, sort map {normalize_filename($ROOT, $_)} grep {m!^(client/si|game/interface|interpreter)/!} @sources;
+    push @int_files, sort map {normalize_filename($ROOT, $_)} grep {m!^(client/si|game/(interface|proxy)|interpreter)/!} @sources;
     push @int_files, sort grep {m!/core.*\.q$!} get_directory_content("$ROOT/share/resource");
 
     # Build XML

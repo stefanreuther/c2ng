@@ -17,12 +17,6 @@
  *          cellwidths[i] = fonts[FONT_NORMAL]->getTextWidth(player_racenames.getAdjName(i));
  */
 
-// /** Constructor.
-//     \param preferred_width preferred width of widget, in pixels. For FlowLayout: maximum width.
-//                            For VerticalLayout: minimum width. For HorizontalLayout: ignored.
-//     \param flags           Layout flags
-//     \param from            first player to display, [1,NUM_OWNERS]
-//     \param to              last player to display, inclusive, [from,NUM_OWNERS] */
 client::widgets::PlayerList::PlayerList(ui::Root& root, Layout layout, TextMode textMode, ColorMode colorMode, int preferredWidth, game::PlayerSet_t players)
     : SimpleWidget(),
       m_root(root),
@@ -30,6 +24,7 @@ client::widgets::PlayerList::PlayerList(ui::Root& root, Layout layout, TextMode 
       m_textMode(textMode),
       m_colorMode(colorMode),
       m_preferredWidth(preferredWidth),
+      m_minimumLines(0),
       m_players(players),
       m_currentPlayer(0),
       m_positions(),
@@ -54,6 +49,19 @@ client::widgets::PlayerList::setNames(const game::PlayerArray<String_t>& names)
 {
     m_playerNames = names;
     requestRedraw();
+}
+
+void
+client::widgets::PlayerList::setVisiblePlayers(game::PlayerSet_t players)
+{
+    m_players = players;
+    requestRedraw();
+}
+
+void
+client::widgets::PlayerList::setMinimumLines(int numLines)
+{
+    m_minimumLines = numLines;
 }
 
 void
@@ -119,6 +127,9 @@ client::widgets::PlayerList::getLayoutInfo() const
     calcLayout(pos, m_preferredWidth);
 
     gfx::Point br = pos.get(game::MAX_PLAYERS).getBottomRight();
+    if (m_minimumLines != 0) {
+        br.setY(std::max(br.getY(), m_minimumLines * m_root.provider().getFont(gfx::FontRequest())->getLineHeight()));
+    }
 
     switch (m_layout) {
      case FlowLayout:

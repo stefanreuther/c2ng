@@ -3,7 +3,6 @@
   */
 
 #include "game/tables/happinessname.hpp"
-#include "util/translation.hpp"
 
 game::tables::HappinessName::HappinessName(afl::string::Translator& tx)
     : m_translator(tx)

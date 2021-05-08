@@ -140,8 +140,6 @@ ui::widgets::OptionGrid::addItem(int id, util::Key_t key, String_t label)
         Handler(OptionGrid& parent, int id)
             : m_parent(parent), m_id(id)
             { }
-        Handler* clone() const
-            { return new Handler(m_parent, m_id); }
         void call(int)
             {
                 if (Item* i = m_parent.findItem(m_id).m_pItem) {
@@ -182,6 +180,17 @@ ui::widgets::OptionGrid::findItem(int id)
     return Ref();
 }
 
+gfx::Point
+ui::widgets::OptionGrid::getAnchorPointForItem(int id)
+{
+    Ref r = findItem(id);
+    if (r.m_pItem != 0) {
+        return r.m_pItem->button.getExtent().getBottomLeft();
+    } else {
+        return getExtent().getCenter();
+    }
+}
+
 void
 ui::widgets::OptionGrid::draw(gfx::Canvas& can)
 {
@@ -200,7 +209,7 @@ ui::widgets::OptionGrid::draw(gfx::Canvas& can)
 
         // Left side
         ctx.useFont(*m_root.provider().getFont(gfx::FontRequest()));
-        ctx.setTextAlign(0, 1);
+        ctx.setTextAlign(gfx::LeftAlign, gfx::MiddleAlign);
         ctx.setColor(it.button.hasState(DisabledState)
                      ? util::SkinColor::Faded
                      : util::SkinColor::Static);
@@ -209,7 +218,7 @@ ui::widgets::OptionGrid::draw(gfx::Canvas& can)
 
         // Right side
         ctx.useFont(*m_root.provider().getFont(it.font));
-        ctx.setTextAlign(2, 1);
+        ctx.setTextAlign(gfx::RightAlign, gfx::MiddleAlign);
         ctx.setColor(it.button.hasState(DisabledState)
                      ? util::SkinColor::Faded
                      : util::SkinColor::Green);

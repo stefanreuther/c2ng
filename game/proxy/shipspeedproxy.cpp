@@ -41,9 +41,9 @@ namespace {
  *  to control the fleet's friendly codes.
  */
 
-class game::proxy::ShipSpeedProxy::Trampoline : public util::SlaveObject<Session> {
+class game::proxy::ShipSpeedProxy::Trampoline {
  public:
-    Trampoline(Id_t shipId)
+    Trampoline(Session& session, Id_t shipId)
         : m_shipId(shipId),
           m_pTurn(),
           m_pShipList(),
@@ -51,9 +51,6 @@ class game::proxy::ShipSpeedProxy::Trampoline : public util::SlaveObject<Session
           m_pShip(),
           m_pFriendlyCodeChanger(),
           m_status()
-        { }
-
-    void init(Session& session)
         {
             // Default values
             m_status.currentSpeed = 0;
@@ -91,9 +88,6 @@ class game::proxy::ShipSpeedProxy::Trampoline : public util::SlaveObject<Session
             }
         }
 
-    void done(Session& /*session*/)
-        { }
-
     const Status& getStatus() const
         { return m_status; }
 
@@ -129,9 +123,20 @@ class game::proxy::ShipSpeedProxy::Trampoline : public util::SlaveObject<Session
 };
 
 
+class game::proxy::ShipSpeedProxy::TrampolineFromSession : public afl::base::Closure<Trampoline*(Session&)> {
+ public:
+    TrampolineFromSession(Id_t shipId)
+        : m_shipId(shipId)
+        { }
+    virtual Trampoline* call(Session& session)
+        { return new Trampoline(session, m_shipId); }
+ private:
+    Id_t m_shipId;
+};
+
 
 game::proxy::ShipSpeedProxy::ShipSpeedProxy(util::RequestSender<Session> gameSender, Id_t shipId)
-    : m_trampoline(gameSender, new Trampoline(shipId))
+    : m_trampoline(gameSender.makeTemporary(new TrampolineFromSession(shipId)))
 { }
 
 game::proxy::ShipSpeedProxy::~ShipSpeedProxy()
@@ -140,12 +145,12 @@ game::proxy::ShipSpeedProxy::~ShipSpeedProxy()
 game::proxy::ShipSpeedProxy::Status
 game::proxy::ShipSpeedProxy::getStatus(WaitIndicator& link)
 {
-    class InitTask : public util::SlaveRequest<Session, Trampoline> {
+    class InitTask : public util::Request<Trampoline> {
      public:
         InitTask(Status& result)
             : m_result(result)
             { }
-        void handle(Session& /*session*/, Trampoline& t)
+        void handle(Trampoline& t)
             { m_result = t.getStatus(); }
      private:
         Status& m_result;
@@ -160,15 +165,5 @@ game::proxy::ShipSpeedProxy::getStatus(WaitIndicator& link)
 void
 game::proxy::ShipSpeedProxy::setSpeed(int n)
 {
-    class Task : public util::SlaveRequest<Session, Trampoline> {
-     public:
-        Task(int n)
-            : m_n(n)
-            { }
-        void handle(Session& /*session*/, Trampoline& t)
-            { t.setSpeed(m_n); }
-     private:
-        int m_n;
-    };
-    m_trampoline.postNewRequest(new Task(n));
+    m_trampoline.postRequest(&Trampoline::setSpeed, n);
 }

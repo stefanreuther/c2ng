@@ -7,18 +7,18 @@
 
 #include "t_game.hpp"
 #include "afl/io/nullfilesystem.hpp"
+#include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
+#include "game/interface/simplefunction.hpp"
+#include "game/session.hpp"
+#include "interpreter/arguments.hpp"
 #include "interpreter/process.hpp"
 #include "interpreter/structuretypedata.hpp"
 #include "interpreter/structurevalue.hpp"
 #include "interpreter/structurevaluedata.hpp"
+#include "interpreter/subroutinevalue.hpp"
 #include "interpreter/values.hpp"
 #include "interpreter/world.hpp"
-#include "game/session.hpp"
-#include "interpreter/arguments.hpp"
-#include "game/interface/simplefunction.hpp"
-#include "afl/string/nulltranslator.hpp"
-#include "interpreter/subroutinevalue.hpp"
 
 using interpreter::StructureTypeData;
 using interpreter::StructureValueData;
@@ -30,8 +30,9 @@ namespace {
     {
         // Create a world
         afl::sys::Log log;
+        afl::string::NullTranslator tx;
         afl::io::NullFileSystem fs;
-        interpreter::World world(log, fs);
+        interpreter::World world(log, tx, fs);
 
         // Compile and run
         {
@@ -125,8 +126,9 @@ TestGameSearchQuery::testErrors()
 {
     // Create a world
     afl::sys::Log log;
+    afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
-    interpreter::World world(log, fs);
+    interpreter::World world(log, tx, fs);
 
     // Erroneous expressions
     // - compiler exceptions
@@ -158,7 +160,7 @@ TestGameSearchQuery::testLocation()
     afl::sys::Log log;
     afl::io::NullFileSystem fs;
     afl::string::NullTranslator tx;
-    interpreter::World world(log, fs);
+    interpreter::World world(log, tx, fs);
     game::Session session(tx, fs);              // required for SimpleFunction, not otherwise needed
     world.setNewGlobalValue("OBJECTISAT", new game::interface::SimpleFunction(session, IFObjectIsAtMock));
 
@@ -253,8 +255,9 @@ TestGameSearchQuery::testCompile()
 
     // Create a world
     afl::sys::Log log;
+    afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
-    interpreter::World world(log, fs);
+    interpreter::World world(log, tx, fs);
 
     // Create a binary function CCUI$Search that returns a constant value
     interpreter::BCORef_t bco = *new interpreter::BytecodeObject();

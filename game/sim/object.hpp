@@ -10,6 +10,7 @@
 #include "game/sim/ability.hpp"
 #include "game/spec/shiplist.hpp"
 #include "game/types.hpp"
+#include "util/randomnumbergenerator.hpp"
 
 namespace game { namespace sim {
 
@@ -25,8 +26,17 @@ namespace game { namespace sim {
             Initializes all properties to default values. */
         Object();
 
+        /** Copy constructor. */
+        Object(const Object& obj);
+
         /** Destructor. */
         ~Object();
+
+        /** Assignment operator.
+            \param rhs Other object
+            \return this */
+        Object& operator=(const Object& other);
+
 
         /*
          *  Attributes
@@ -119,8 +129,9 @@ namespace game { namespace sim {
          */
 
         /** Assign random friendly code if requested.
-            Considers fl_RandomFC and the fl_RandomDigits flags to assign a new, (partially) numeric friendly code. */
-        void setRandomFriendlyCode();
+            Considers fl_RandomFC and the fl_RandomDigits flags to assign a new, (partially) numeric friendly code.
+            \param rng Random Number Generator */
+        void setRandomFriendlyCode(util::RandomNumberGenerator& rng);
 
         /** Assign random friendly code flags.
             Derives fl_RandomFC and fl_RandomDigits from the actual friendly code selected.
@@ -145,6 +156,14 @@ namespace game { namespace sim {
             \retval true at least one ability has been configured by the user (fl_XXXSet)
             \retval false all abilities are at default values as configured by shiplist/host */
         bool hasAnyNonstandardAbility() const;
+
+        /** Get set of all abilities.
+            Returns all results of hasAbility() in one go.
+            \param opts Simulation options
+            \param shipList Ship list
+            \param config Host configuration
+            \return set of abilities */
+        Abilities_t getAbilities(const Configuration& opts, const game::spec::ShipList& shipList, const game::config::HostConfiguration& config) const;
 
         /** Check availability of an ability according to ship list and host configuration.
             This function is called to determine the default abilities,

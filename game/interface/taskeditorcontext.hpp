@@ -49,7 +49,7 @@ namespace game { namespace interface {
 
         // Context:
         virtual TaskEditorContext* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
-        virtual void set(PropertyIndex_t index, afl::data::Value* value);
+        virtual void set(PropertyIndex_t index, const afl::data::Value* value);
         virtual afl::data::Value* get(PropertyIndex_t index);
         virtual TaskEditorContext* clone() const;
         virtual game::map::Object* getObject();
@@ -79,7 +79,7 @@ namespace game { namespace interface {
         \param prop    Property
         \param value   Value
         \throw interpreter::Error if property cannot be set or value is out of range */
-    void setTaskEditorProperty(const afl::base::Ptr<interpreter::TaskEditor>& edit, TaskEditorProperty prop, afl::data::Value* value);
+    void setTaskEditorProperty(const afl::base::Ptr<interpreter::TaskEditor>& edit, TaskEditorProperty prop, const afl::data::Value* value);
 
 
     void callTaskEditorMethod(interpreter::TaskEditor& edit, TaskEditorMethod m, interpreter::Arguments& args);

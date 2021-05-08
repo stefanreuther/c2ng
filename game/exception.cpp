@@ -35,7 +35,6 @@ game::Exception::Exception(String_t error)
 game::Exception::~Exception() throw()
 { }
 
-// /** Get script-side error message. */
 const String_t&
 game::Exception::getScriptError() const
 {
@@ -43,7 +42,6 @@ game::Exception::getScriptError() const
     return m_scriptError;
 }
 
-// /** Get user error message. */
 const String_t&
 game::Exception::getUserError() const
 {
@@ -51,7 +49,6 @@ game::Exception::getUserError() const
     return m_userError;
 }
 
-// /** Get user error message. */
 const char*
 game::Exception::what() const throw()
 {

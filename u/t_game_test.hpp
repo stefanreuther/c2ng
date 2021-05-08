@@ -20,6 +20,7 @@ class TestGameTestRegistrationKey : public CxxTest::TestSuite {
 class TestGameTestSessionThread : public CxxTest::TestSuite {
  public:
     void testIt();
+    void testFileSystem();
 };
 
 class TestGameTestShipList : public CxxTest::TestSuite {
@@ -30,6 +31,11 @@ class TestGameTestShipList : public CxxTest::TestSuite {
     void testPListTorpedoes();
 };
 
+class TestGameTestSimpleEnvironment : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
 class TestGameTestStringVerifier : public CxxTest::TestSuite {
  public:
     void testIt();
@@ -38,7 +44,6 @@ class TestGameTestStringVerifier : public CxxTest::TestSuite {
 class TestGameTestWaitIndicator : public CxxTest::TestSuite {
  public:
     void testIt();
-    void testSlave();
     void testRequestDispatcher();
 };
 

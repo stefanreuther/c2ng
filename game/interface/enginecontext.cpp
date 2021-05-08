@@ -50,7 +50,7 @@ game::interface::EngineContext::lookup(const afl::data::NameQuery& name, Propert
 }
 
 void
-game::interface::EngineContext::set(PropertyIndex_t index, afl::data::Value* value)
+game::interface::EngineContext::set(PropertyIndex_t index, const afl::data::Value* value)
 {
     if (game::spec::Engine* e = m_shipList->engines().get(m_number)) {
         switch (EngineDomain(ENGINE_MAP[index].domain)) {

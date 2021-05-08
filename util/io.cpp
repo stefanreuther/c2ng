@@ -1,5 +1,6 @@
 /**
   *  \file util/io.cpp
+  *  \brief I/O-related utilities
   */
 
 #include "util/io.hpp"

@@ -53,9 +53,13 @@ namespace {
             { return true; }
         virtual int getItemHeight(size_t /*n*/)
             { return getItemHeight(); }
-        virtual int getHeaderHeight()
+        virtual int getHeaderHeight() const
+            { return 0; }
+        virtual int getFooterHeight() const
             { return 0; }
         virtual void drawHeader(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
+            { }
+        virtual void drawFooter(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
             { }
         virtual void drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state)
             {
@@ -67,7 +71,7 @@ namespace {
                 if (item < m_content.size()) {
                     afl::base::Ref<gfx::Font> normalFont = m_root.provider().getFont(gfx::FontRequest());
                     const game::proxy::CommandListProxy::Info& e = m_content[item];
-                    ctx.setTextAlign(0, 0);
+                    ctx.setTextAlign(gfx::LeftAlign, gfx::TopAlign);
                     ctx.useFont(*normalFont);
                     ctx.setColor(util::SkinColor::Static);
                     area.consumeX(5);
@@ -114,7 +118,7 @@ namespace {
 
         bool init()
             {
-                client::Downlink link(root());
+                client::Downlink link(root(), translator());
                 game::proxy::CommandListProxy::Infos_t list;
                 if (m_proxy.init(link, list)) {
                     m_listbox.setContent(list, 0);
@@ -155,7 +159,7 @@ namespace {
                 g1.add(g11);
                 win.add(g1);
 
-                ui::Widget& helper = del.addNew(new client::widgets::HelpWidget(root(), interface().gameSender(), "pcc2:auxcmds"));
+                ui::Widget& helper = del.addNew(new client::widgets::HelpWidget(root(), tx, interface().gameSender(), "pcc2:auxcmds"));
                 ui::Group& g2 = del.addNew(new ui::Group(ui::layout::HBox::instance5));
                 ui::widgets::Button& btnOK  = del.addNew(new ui::widgets::Button(tx("Close"), util::Key_Escape, root()));
                 ui::widgets::Button& btnAdd = del.addNew(new ui::widgets::Button(tx("Ins"), util::Key_Insert, root()));
@@ -199,8 +203,8 @@ namespace {
                 // ex WCommandList::handleEvent (part), WCommandList::deleteCurrent
                 afl::string::Translator& tx = translator();
                 if (const game::proxy::CommandListProxy::Info* p = m_listbox.getCurrentCommand()) {
-                    if (ui::dialogs::MessageBox(tx("Delete this command?"), tx("Auxiliary Commands"), root()).doYesNoDialog()) {
-                        client::Downlink link(root());
+                    if (ui::dialogs::MessageBox(tx("Delete this command?"), tx("Auxiliary Commands"), root()).doYesNoDialog(tx)) {
+                        client::Downlink link(root(), tx);
                         game::proxy::CommandListProxy::Infos_t newList;
                         m_proxy.removeCommand(link, p->text, newList);
                         m_listbox.setContent(newList, m_listbox.getCurrentItem());
@@ -244,58 +248,38 @@ namespace {
 
         void edit(String_t s)
             {
+                // ex phost.pas:CCommandEditor.EditCommand
                 afl::string::Translator& tx = translator();
                 ui::widgets::InputLine input(30, root());
                 input.setText(s);
                 input.setFlag(ui::widgets::InputLine::GameChars, true);
                 input.setFont("+");
-                if (input.doStandardDialog(tx("Auxiliary Commands"), tx("Edit command:"))) {
-                    client::Downlink link(root());
+                if (input.doStandardDialog(tx("Auxiliary Commands"), tx("Edit command:"), tx)) {
+                    client::Downlink link(root(), tx);
                     game::proxy::CommandListProxy::Infos_t newList;
                     size_t newPos;
                     if (m_proxy.addCommand(link, input.getText(), newList, newPos)) {
                         m_listbox.setContent(newList, newPos);
                     } else {
-                        ui::dialogs::MessageBox(tx("This command was not recognized."), tx("Auxiliary Commands"), root()).doOkDialog();
+                        ui::dialogs::MessageBox(tx("This command was not recognized."), tx("Auxiliary Commands"), root()).doOkDialog(tx);
                     }
                     m_listbox.requestActive();
                 }
             }
 
 
-        virtual void handleStateChange(client::si::UserSide& ui, client::si::RequestLink2 link, client::si::OutputState::Target target)
-            {
-                using client::si::OutputState;
-                switch (target) {
-                 case OutputState::NoChange:
-                    ui.continueProcess(link);
-                    break;
-                 case OutputState::ExitGame:
-                 case OutputState::ExitProgram:
-                 case OutputState::PlayerScreen:
-                 case OutputState::ShipScreen:
-                 case OutputState::PlanetScreen:
-                 case OutputState::BaseScreen:
-                 case OutputState::ShipTaskScreen:
-                 case OutputState::PlanetTaskScreen:
-                 case OutputState::BaseTaskScreen:
-                 case OutputState::Starchart:
-                    ui.detachProcess(link);
-                    m_outputState.set(link, target);
-                    m_loop.stop(0);
-                    break;
-                }
-            }
-        virtual void handlePopupConsole(client::si::UserSide& ui, client::si::RequestLink2 link)
-            { defaultHandlePopupConsole(ui, link); }
-        virtual void handleEndDialog(client::si::UserSide& ui, client::si::RequestLink2 link, int code)
-            {
-                ui.detachProcess(link);
-                m_outputState.set(link, client::si::OutputState::NoChange);
-                m_loop.stop(code);
-            }
-        virtual void handleSetViewRequest(client::si::UserSide& ui, client::si::RequestLink2 link, String_t name, bool withKeymap)
-            { defaultHandleSetViewRequest(ui, link, name, withKeymap); }
+        virtual void handleStateChange(client::si::RequestLink2 link, client::si::OutputState::Target target)
+            { dialogHandleStateChange(link, target, m_outputState, m_loop, 0); }
+        virtual void handlePopupConsole(client::si::RequestLink2 link)
+            { defaultHandlePopupConsole(link); }
+        virtual void handleEndDialog(client::si::RequestLink2 link, int code)
+            { dialogHandleEndDialog(link, code, m_outputState, m_loop, 0); }
+        virtual void handleSetViewRequest(client::si::RequestLink2 link, String_t name, bool withKeymap)
+            { defaultHandleSetViewRequest(link, name, withKeymap); }
+        virtual void handleUseKeymapRequest(client::si::RequestLink2 link, String_t name, int prefix)
+            { defaultHandleUseKeymapRequest(link, name, prefix); }
+        virtual void handleOverlayMessageRequest(client::si::RequestLink2 link, String_t text)
+            { defaultHandleOverlayMessageRequest(link, text); }
         virtual client::si::ContextProvider* createContextProvider()
             { return 0; }
 
@@ -312,17 +296,25 @@ namespace {
 }
 
 void
-client::dialogs::editCommands(client::si::UserSide& iface,
-                              client::si::Control& parentControl,
-                              client::si::OutputState& outputState)
+client::dialogs::editCommands(ui::Root& root,
+                              client::si::UserSide& iface,
+                              client::si::OutputState& outputState,
+                              afl::string::Translator& tx)
 {
-    // ex client/dialogs/commandedit.cc:editCommands
-    afl::string::Translator& tx = parentControl.translator();
-    CommandListDialog dialog(iface, parentControl.root(), tx, outputState);
+    // ex client/dialogs/commandedit.cc:editCommands, phost.pas:EditCommands
+    // FIXME: ObscureFeature warning:
+    // IF NOT ObscureFeature(obs_Commands,
+    //                       'This window will list auxiliary commands. Those are used with '+
+    //                       'the PHost command processor, for example.'#13+
+    //                       'You can review, edit and delete these commands here. Please read '+
+    //                       'the help screen before changing anything here.',
+    //                       hcEditCommands)
+    //   THEN Exit;
+    CommandListDialog dialog(iface, root, tx, outputState);
     if (!dialog.init()) {
         ui::dialogs::MessageBox(tx("Auxiliary commands are not supported for this host."),
                                 tx("Auxiliary Commands"),
-                                parentControl.root()).doOkDialog();
+                                root).doOkDialog(tx);
     } else {
         dialog.run();
     }

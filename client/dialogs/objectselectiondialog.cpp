@@ -150,39 +150,18 @@ namespace {
               m_receiver(root.engine().dispatcher(), *this),
               m_outputState(outputState)
             { }
-        virtual void handleStateChange(client::si::UserSide& ui, client::si::RequestLink2 link, client::si::OutputState::Target target)
-            {
-                using client::si::OutputState;
-                switch (target) {
-                 case OutputState::NoChange:
-                    ui.continueProcess(link);
-                    break;
-                 case OutputState::ExitGame:
-                 case OutputState::ExitProgram:
-                 case OutputState::PlayerScreen:
-                 case OutputState::ShipScreen:
-                 case OutputState::PlanetScreen:
-                 case OutputState::BaseScreen:
-                 case OutputState::ShipTaskScreen:
-                 case OutputState::PlanetTaskScreen:
-                 case OutputState::BaseTaskScreen:
-                 case OutputState::Starchart:
-                    ui.detachProcess(link);
-                    m_outputState.set(link, target);
-                    m_loop.stop(0);
-                    break;
-                }
-            }
-        virtual void handlePopupConsole(client::si::UserSide& ui, client::si::RequestLink2 link)
-            { defaultHandlePopupConsole(ui, link); }
-        virtual void handleEndDialog(client::si::UserSide& ui, client::si::RequestLink2 link, int code)
-            {
-                ui.detachProcess(link);
-                m_outputState.set(link, client::si::OutputState::NoChange);
-                m_loop.stop(code);
-            }
-        virtual void handleSetViewRequest(client::si::UserSide& ui, client::si::RequestLink2 link, String_t name, bool withKeymap)
-            { defaultHandleSetViewRequest(ui, link, name, withKeymap); }
+        virtual void handleStateChange(client::si::RequestLink2 link, client::si::OutputState::Target target)
+            { dialogHandleStateChange(link, target, m_outputState, m_loop, 0); }
+        virtual void handlePopupConsole(client::si::RequestLink2 link)
+            { defaultHandlePopupConsole(link); }
+        virtual void handleEndDialog(client::si::RequestLink2 link, int code)
+            { dialogHandleEndDialog(link, code, m_outputState, m_loop, code); }
+        virtual void handleSetViewRequest(client::si::RequestLink2 link, String_t name, bool withKeymap)
+            { defaultHandleSetViewRequest(link, name, withKeymap); }
+        virtual void handleUseKeymapRequest(client::si::RequestLink2 link, String_t name, int prefix)
+            { defaultHandleUseKeymapRequest(link, name, prefix); }
+        virtual void handleOverlayMessageRequest(client::si::RequestLink2 link, String_t text)
+            { defaultHandleOverlayMessageRequest(link, text); }
         virtual client::si::ContextProvider* createContextProvider()
             { return new DialogContextProvider(m_state); }
 
@@ -245,24 +224,14 @@ namespace {
      *  User Interface Property Accessor.
      *  Provides current UI state to scripts.
      */
-    class DialogUserInterfaceProperties : public util::SlaveObject<game::Session>,
-                                          public game::interface::UserInterfacePropertyAccessor
-    {
+    class DialogUserInterfaceProperties : public game::interface::UserInterfacePropertyAccessor {
      public:
-        DialogUserInterfaceProperties(afl::base::Ref<CommonState> state)
-            : m_state(state),
-              m_pSession(0)
-            { }
-        virtual void init(game::Session& master)
-            {
-                master.uiPropertyStack().add(*this);
-                m_pSession = &master;
-            }
-        virtual void done(game::Session& master)
-            {
-                master.uiPropertyStack().remove(*this);
-                m_pSession = 0;
-            }
+        DialogUserInterfaceProperties(game::Session& session, afl::base::Ref<CommonState> state)
+            : m_session(session),
+              m_state(state)
+            { m_session.uiPropertyStack().add(*this); }
+        ~DialogUserInterfaceProperties()
+            { m_session.uiPropertyStack().remove(*this); }
 
         virtual bool get(game::interface::UserInterfaceProperty prop, std::auto_ptr<afl::data::Value>& result)
             {
@@ -272,11 +241,7 @@ namespace {
                  case game::interface::iuiScreenRegistered:
                     return false;
                  case game::interface::iuiIterator:
-                    if (m_pSession) {
-                        result.reset(new game::interface::IteratorContext(*new DialogIteratorProvider(*m_pSession, m_state)));
-                    } else {
-                        result.reset();
-                    }
+                    result.reset(new game::interface::IteratorContext(*new DialogIteratorProvider(m_session, m_state)));
                     return true;
                  case game::interface::iuiSimFlag:
                     result.reset(interpreter::makeBooleanValue(0));
@@ -294,11 +259,23 @@ namespace {
                 }
                 return false;
             }
-        virtual bool set(game::interface::UserInterfaceProperty /*prop*/, afl::data::Value* /*p*/)
+        virtual bool set(game::interface::UserInterfaceProperty /*prop*/, const afl::data::Value* /*p*/)
             { return false; }
      private:
+        game::Session& m_session;
         afl::base::Ref<CommonState> m_state;
-        game::Session* m_pSession;
+    };
+
+
+    class DialogUIPFromSession : public afl::base::Closure<DialogUserInterfaceProperties*(game::Session&)> {
+     public:
+        DialogUIPFromSession(const afl::base::Ref<CommonState>& state)
+            : m_state(state)
+            { }
+        virtual DialogUserInterfaceProperties* call(game::Session& session)
+            { return new DialogUserInterfaceProperties(session, m_state); }
+     private:
+        afl::base::Ref<CommonState> m_state;
     };
 }
 
@@ -345,7 +322,7 @@ client::dialogs::doObjectSelectionDialog(const ObjectSelectionDialog& def,
     // Set up script controls
     ui::EventLoop loop(root);
     DialogControl ctl(iface, root, tx, loop, state, outputState);
-    util::SlaveRequestSender<game::Session,DialogUserInterfaceProperties> dialogUIP(iface.gameSender(), new DialogUserInterfaceProperties(state));
+    util::RequestSender<DialogUserInterfaceProperties> dialogUIP(iface.gameSender().makeTemporary(new DialogUIPFromSession(state)));
 
     // Set up GUI
     afl::base::Deleter del;
@@ -353,7 +330,7 @@ client::dialogs::doObjectSelectionDialog(const ObjectSelectionDialog& def,
     keys.setKeymapName(def.keymapName);
 
     ui::Window& win = del.addNew(new ui::Window(tx.translateString(def.titleUT), root.provider(), root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
-    client::tiles::TileFactory(root, iface, keys, oop).createLayout(win, def.layoutName, del);
+    client::tiles::TileFactory(root, iface, tx, keys, oop).createLayout(win, def.layoutName, del);
     ctl.attach(oop);
 
     ui::widgets::Button& btnOK     = del.addNew(new ui::widgets::Button(tx.translateString("OK"),     util::Key_Return, root));

@@ -47,7 +47,7 @@ client::dialogs::doGroundDefenseDialog(ui::Root& root, const game::map::GroundDe
     afl::base::Deleter del;
     ui::widgets::SimpleTable& tab = del.addNew(new ui::widgets::SimpleTable(root, 2, numRows));
     tab.all().setColor(ui::Color_Black);
-    tab.column(1).setTextAlign(2, 0);
+    tab.column(1).setTextAlign(gfx::RightAlign, gfx::TopAlign);
     tab.row(0).setUnderline(true);
     tab.cell(0, 0).setText(tx("Attacker"));
     tab.cell(1, 0).setText(tx("Clans needed to win"));

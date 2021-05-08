@@ -1,5 +1,6 @@
 /**
   *  \file util/skincolor.hpp
+  *  \brief Enum util::SkinColor
   */
 #ifndef C2NG_UTIL_SKINCOLOR_HPP
 #define C2NG_UTIL_SKINCOLOR_HPP

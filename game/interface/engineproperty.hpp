@@ -21,7 +21,7 @@ namespace game { namespace interface {
 
     void setEngineProperty(game::spec::Engine& e,
                            EngineProperty iep,
-                           afl::data::Value* value,
+                           const afl::data::Value* value,
                            game::spec::ShipList& list);
 
 } }

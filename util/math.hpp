@@ -36,6 +36,11 @@ namespace util {
         \pre a >= 0, b > 0 */
     int32_t divideAndRound(int32_t a, int32_t b);
 
+    /** Divide a/b, rounding up.
+        Uses integer arithmetic only.
+        \pre a >= 0, b > 0 */
+    int32_t divideAndRoundUp(int32_t a, int32_t b);
+
     /** Compute a/b+plus using IEEE rounding.
         The result is rounded to the nearest integer.
         If the fractional part is exactly 0.5, rounds to the nearest even integer.
@@ -94,6 +99,12 @@ util::divideAndRound(int32_t a, int32_t b)
 {
     // ex game/formula.h:radiv
     return (a + (b/2)) / b;
+}
+
+inline int32_t
+util::divideAndRoundUp(int32_t a, int32_t b)
+{
+    return (a + (b-1)) / b;
 }
 
 inline int32_t

@@ -3,10 +3,9 @@
   */
 
 #include "client/widgets/shipspeedwidget.hpp"
+#include "afl/string/format.hpp"
 #include "gfx/context.hpp"
 #include "util/skincolor.hpp"
-#include "afl/string/format.hpp"
-#include "util/translation.hpp"
 
 client::widgets::ShipSpeedWidget::ShipSpeedWidget(afl::base::Observable<int32_t>& value, int32_t limit, int32_t hyp, ui::Root& root)
     : NumberSelector(value, 0, limit, 1),
@@ -25,9 +24,9 @@ client::widgets::ShipSpeedWidget::draw(gfx::Canvas& can)
 
     String_t text;
     if (getValue() == m_hyp) {
-        text = _("Hyp");
+        text = "Hyp";
     } else {
-        text = afl::string::Format("%d", getValue());  // FIXME: use numToString?
+        text = afl::string::Format("%d", getValue());
     }
 
     outTextF(ctx, getExtent(), text);

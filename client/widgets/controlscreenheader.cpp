@@ -1,14 +1,20 @@
 /**
   *  \file client/widgets/controlscreenheader.cpp
+  *
+  *  FIXME: this uses too many fixed dimensions
   */
 
 #include "client/widgets/controlscreenheader.hpp"
-#include "afl/base/staticassert.hpp"
-#include "util/unicodechars.hpp"
 #include "afl/base/countof.hpp"
+#include "afl/base/staticassert.hpp"
+#include "client/marker.hpp"
 #include "ui/layout/hbox.hpp"
 #include "ui/widgets/button.hpp"
+#include "util/unicodechars.hpp"
+#include "util/updater.hpp"
+#include "gfx/complex.hpp"
 
+using util::Updater;
 
 namespace {
     struct ButtonSpec {
@@ -40,6 +46,120 @@ namespace {
         { "<img>",        true,  '.',              108,  45, 107,  95 },
     };
 }
+
+class client::widgets::ControlScreenHeader::TitleWidget : public ui::SimpleWidget {
+ public:
+    TitleWidget(ui::Root& root);
+
+    void setText(Text which, String_t value);
+    void setHasMessages(bool flag);
+
+    // SimpleWidget:
+    virtual void draw(gfx::Canvas& can);
+    virtual void handleStateChange(State st, bool enable);
+    virtual void handlePositionChange(gfx::Rectangle& oldPosition);
+    virtual ui::layout::Info getLayoutInfo() const;
+    virtual bool handleKey(util::Key_t key, int prefix);
+    virtual bool handleMouse(gfx::Point pt, MouseButtons_t pressedButtons);
+
+ private:
+    ui::Root& m_root;
+    String_t m_text[NUM_TEXTS];
+    bool m_hasMessages;
+};
+
+client::widgets::ControlScreenHeader::TitleWidget::TitleWidget(ui::Root& root)
+    : m_root(root),
+      m_hasMessages(false)
+{ }
+
+void
+client::widgets::ControlScreenHeader::TitleWidget::setText(Text which, String_t value)
+{
+    if (Updater().set(m_text[which], value)) {
+        requestRedraw();
+    }
+}
+
+void
+client::widgets::ControlScreenHeader::TitleWidget::setHasMessages(bool flag)
+{
+    if (Updater().set(m_hasMessages, flag)) {
+        requestRedraw();
+    }
+}
+
+// SimpleWidget:
+void
+client::widgets::ControlScreenHeader::TitleWidget::draw(gfx::Canvas& can)
+{
+    gfx::Rectangle area(getExtent());
+    gfx::Context<util::SkinColor::Color> ctx(can, getColorScheme());
+    ctx.setTextAlign(gfx::LeftAlign, gfx::MiddleAlign);
+    drawBackground(ctx, area);
+
+    // Title
+    gfx::Rectangle titleArea = area.splitY(25);
+    afl::base::Ref<gfx::Font> titleFont = m_root.provider().getFont("+");
+    ctx.useFont(*titleFont);
+    ctx.setColor(util::SkinColor::Heading);
+    int w = titleFont->getTextWidth(m_text[txtHeading]);
+    outTextF(ctx, titleArea.splitX(w), m_text[txtHeading]);
+
+    // Symbol
+    const int SYM_WIDTH = 10;
+    if (m_hasMessages && titleArea.getWidth() >= SYM_WIDTH) {
+        int lineHeight = titleFont->getLineHeight();
+        ctx.setColor(util::SkinColor::Blue);
+        drawMessageMarker(ctx,
+                          gfx::Point(titleArea.getLeftX() + 5,
+                                     titleArea.getTopY() + lineHeight*8/10),
+                          5*lineHeight,
+                          3*lineHeight);
+    }
+
+    // Subtitle
+    ctx.useFont(*m_root.provider().getFont(gfx::FontRequest()));
+    ctx.setColor(util::SkinColor::Yellow);
+    outTextF(ctx, area, m_text[txtSubtitle]);    
+}
+
+void
+client::widgets::ControlScreenHeader::TitleWidget::handleStateChange(State /*st*/, bool /*enable*/)
+{ }
+
+void
+client::widgets::ControlScreenHeader::TitleWidget::handlePositionChange(gfx::Rectangle& /*oldPosition*/)
+{
+    requestRedraw();
+}
+
+ui::layout::Info
+client::widgets::ControlScreenHeader::TitleWidget::getLayoutInfo() const
+{
+    return gfx::Point(293, 25+16);
+}
+
+bool
+client::widgets::ControlScreenHeader::TitleWidget::handleKey(util::Key_t key, int prefix)
+{
+    return defaultHandleKey(key, prefix);
+}
+
+bool
+client::widgets::ControlScreenHeader::TitleWidget::handleMouse(gfx::Point pt, MouseButtons_t pressedButtons)
+{
+    return defaultHandleMouse(pt, pressedButtons);
+}
+
+
+
+
+
+/*
+ *  ControlScreenHeader
+ */
+
 
 client::widgets::ControlScreenHeader::ControlScreenHeader(ui::Root& root, KeymapWidget& kmw)
     : m_deleter(),
@@ -83,8 +203,8 @@ client::widgets::ControlScreenHeader::disableButton(Button btn)
 void
 client::widgets::ControlScreenHeader::setText(Text which, String_t value)
 {
-    if (m_texts[which]) {
-        m_texts[which]->setText(value);
+    if (m_title) {
+        m_title->setText(which, value);
     }
 }
 
@@ -96,6 +216,15 @@ client::widgets::ControlScreenHeader::setImage(String_t name)
     }
 }
 
+void
+client::widgets::ControlScreenHeader::setHasMessages(bool flag)
+{
+    if (m_title) {
+        m_title->setHasMessages(flag);
+    }
+}
+
+
 // Widget:
 void
 client::widgets::ControlScreenHeader::draw(gfx::Canvas& can)
@@ -105,8 +234,7 @@ client::widgets::ControlScreenHeader::draw(gfx::Canvas& can)
 
 void
 client::widgets::ControlScreenHeader::handleStateChange(State /*st*/, bool /*enable*/)
-{
-}
+{ }
 
 void
 client::widgets::ControlScreenHeader::requestChildRedraw(Widget& /*child*/, const gfx::Rectangle& area)
@@ -138,7 +266,6 @@ ui::layout::Info
 client::widgets::ControlScreenHeader::getLayoutInfo() const
 {
     // ex WControlScreenHeaderTile::WControlScreenHeaderTile (part)
-    // FIXME: magic numbers
     return ui::layout::Info(gfx::Point(315, 145));
 }
 
@@ -186,12 +313,9 @@ client::widgets::ControlScreenHeader::createChildWidgets(ui::Root& root, KeymapW
         }
     }
 
-    // Create text
-    static_assert(NUM_TEXTS == 2, "NUM_TEXTS");
-    m_texts[0] = &m_deleter.addNew(new ui::widgets::StaticText("", util::SkinColor::Heading, gfx::FontRequest().addSize(1), root.provider(), 0));
-    m_texts[1] = &m_deleter.addNew(new ui::widgets::StaticText("", util::SkinColor::Yellow,  gfx::FontRequest(),            root.provider(), 0));
-    addChild(*m_texts[0], 0);
-    addChild(*m_texts[1], 0);
+    // Create title
+    m_title = &m_deleter.addNew(new TitleWidget(root));
+    addChild(*m_title, 0);
 }
 
 void
@@ -201,10 +325,7 @@ client::widgets::ControlScreenHeader::setChildWidgetPositions()
     for (size_t i = 0; i < NUM_BUTTONS; ++i) {
         setChildPosition(m_frames[i], BUTTONS[i].x-2, BUTTONS[i].y-2, BUTTONS[i].w+4, BUTTONS[i].h+4);
     }
-
-    static_assert(NUM_TEXTS == 2, "NUM_TEXTS");
-    setChildPosition(m_texts[0], 0,  0, 293, 24);
-    setChildPosition(m_texts[1], 0, 25, 293, 16);
+    setChildPosition(m_title, 0, 0, 293, 25+16);
 }
 
 void
@@ -214,4 +335,18 @@ client::widgets::ControlScreenHeader::setChildPosition(ui::Widget* widget, int x
         gfx::Point origin = getExtent().getTopLeft();
         widget->setExtent(gfx::Rectangle(x + origin.getX(), y + origin.getY(), w, h));
     }
+}
+
+ui::FrameType
+client::widgets::getFrameTypeFromTaskStatus(game::Session::TaskStatus st)
+{
+    // FIXME: where to place this?
+    using game::Session;
+    switch (st) {
+     case Session::NoTask:      return ui::NoFrame;
+     case Session::ActiveTask:  return ui::GreenFrame;
+     case Session::WaitingTask: return ui::RedFrame;
+     case Session::OtherTask:   return ui::YellowFrame;
+    }
+    return ui::NoFrame;
 }

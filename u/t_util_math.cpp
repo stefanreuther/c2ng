@@ -34,6 +34,42 @@ TestUtilMath::testDivideAndRound()
     TS_ASSERT_EQUALS(util::divideAndRound(6, 3), 2);
 }
 
+/** Test divideAndRoundUp. */
+void
+TestUtilMath::testDivideAndRoundUp()
+{
+    // Divide by 1
+    TS_ASSERT_EQUALS(util::divideAndRoundUp(0, 1), 0);
+    TS_ASSERT_EQUALS(util::divideAndRoundUp(1, 1), 1);
+    TS_ASSERT_EQUALS(util::divideAndRoundUp(2, 1), 2);
+    TS_ASSERT_EQUALS(util::divideAndRoundUp(3, 1), 3);
+
+    // Divide by 2
+    TS_ASSERT_EQUALS(util::divideAndRoundUp(0, 2), 0);
+    TS_ASSERT_EQUALS(util::divideAndRoundUp(1, 2), 1);
+    TS_ASSERT_EQUALS(util::divideAndRoundUp(2, 2), 1);
+    TS_ASSERT_EQUALS(util::divideAndRoundUp(3, 2), 2);
+    TS_ASSERT_EQUALS(util::divideAndRoundUp(4, 2), 2);
+
+    // Divide by 3
+    TS_ASSERT_EQUALS(util::divideAndRoundUp(0, 3), 0);
+    TS_ASSERT_EQUALS(util::divideAndRoundUp(1, 3), 1);
+    TS_ASSERT_EQUALS(util::divideAndRoundUp(2, 3), 1);
+    TS_ASSERT_EQUALS(util::divideAndRoundUp(3, 3), 1);
+    TS_ASSERT_EQUALS(util::divideAndRoundUp(4, 3), 2);
+    TS_ASSERT_EQUALS(util::divideAndRoundUp(5, 3), 2);
+    TS_ASSERT_EQUALS(util::divideAndRoundUp(6, 3), 2);
+
+    // Divide by 10
+    TS_ASSERT_EQUALS(util::divideAndRoundUp(0,  10), 0);
+    TS_ASSERT_EQUALS(util::divideAndRoundUp(1,  10), 1);
+    TS_ASSERT_EQUALS(util::divideAndRoundUp(2,  10), 1);
+    TS_ASSERT_EQUALS(util::divideAndRoundUp(3,  10), 1);
+    TS_ASSERT_EQUALS(util::divideAndRoundUp(9,  10), 1);
+    TS_ASSERT_EQUALS(util::divideAndRoundUp(10, 10), 1);
+    TS_ASSERT_EQUALS(util::divideAndRoundUp(11, 10), 2);
+}
+
 /** Test divideAndRoundToEven. */
 void
 TestUtilMath::testDivideAndRoundToEven()

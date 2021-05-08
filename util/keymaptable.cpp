@@ -45,6 +45,22 @@ util::KeymapTable::createKeymap(String_t name)
     return m_keymaps.pushBackNew(new Keymap(name));
 }
 
+size_t
+util::KeymapTable::getNumKeymaps() const
+{
+    return m_keymaps.size();
+}
+
+util::KeymapRef_t
+util::KeymapTable::getKeymapByIndex(size_t index) const
+{
+    if (index < m_keymaps.size()) {
+        return m_keymaps[index];
+    } else {
+        return 0;
+    }
+}
+
 void
 util::KeymapTable::notifyListeners()
 {

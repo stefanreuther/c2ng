@@ -1358,6 +1358,10 @@ subroutines you call use the local version instead of the global one.
 Global variables can optionally be prefixed with <tt>Global.</tt>
 when their name would otherwise be shadowed by another variable.
 --------------------------------------------------------------------------------
+@group Internal Variable
+Internal variables.
+Those are subject to change at any time.
+--------------------------------------------------------------------------------
 @group Hash Element Property
 You can iterate through the elements of a {int:index:type:hash|Hash} using {ForEach}:
 | Dim hh As Hash
@@ -1566,6 +1570,8 @@ and {@group Global Command|global commands}.
 ===
 
 --------------------------------------------------------------------------------
+@version PCC2 2.40.10
+--------------------------------------------------------------------------------
 @version PCC2 2.40.9
 --------------------------------------------------------------------------------
 @version PCC2 2.40.8
@@ -1576,6 +1582,8 @@ and {@group Global Command|global commands}.
 @version PCC2 2.40.6
 --------------------------------------------------------------------------------
 @version PCC2 2.40.5
+--------------------------------------------------------------------------------
+@version PCC2 2.40.4
 --------------------------------------------------------------------------------
 @version PCC2 2.40.3
 --------------------------------------------------------------------------------

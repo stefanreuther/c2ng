@@ -45,10 +45,29 @@ namespace {
         afl::sys::Log log;
     };
 
+    void preparePlanet(TestHarness& h)
+    {
+        // Define planet with base
+        h.planet.setPosition(game::map::Point(1111, 2222));
+        h.planet.addCurrentPlanetData(game::map::PlanetData(), game::PlayerSet_t(7));
+        h.planet.addCurrentBaseData(game::map::BaseData(), game::PlayerSet_t(7));
+        h.planet.setOwner(7);
+        h.planet.setBaseTechLevel(game::HullTech, 1);
+        h.planet.setBaseTechLevel(game::EngineTech, 1);
+        h.planet.setBaseTechLevel(game::BeamTech, 1);
+        h.planet.setBaseTechLevel(game::TorpedoTech, 1);
+        h.planet.internalCheck(game::map::Configuration(), h.tx, h.log);
+        h.planet.combinedCheck2(h.univ, game::PlayerSet_t(7), 12);
+        h.planet.setPlayability(game::map::Object::Playable);
+
+        // This must have produced a base
+        TS_ASSERT(h.planet.hasBase());
+    }
+    
     class TestAction : public game::actions::BaseBuildAction {
      public:
         explicit TestAction(TestHarness& h)
-            : BaseBuildAction(h.planet, h.container, h.shipList, h.root),
+            : BaseBuildAction(h.planet, h.container, h.shipList, h.root, h.tx),
               m_tech(1)
             { }
 
@@ -86,22 +105,7 @@ void
 TestGameActionsBaseBuildAction::testSuccess()
 {
     TestHarness h;
-
-    // Define planet with base
-    h.planet.setPosition(game::map::Point(1111, 2222));
-    h.planet.addCurrentPlanetData(game::map::PlanetData(), game::PlayerSet_t(7));
-    h.planet.addCurrentBaseData(game::map::BaseData(), game::PlayerSet_t(7));
-    h.planet.setOwner(7);
-    h.planet.setBaseTechLevel(game::HullTech, 1);
-    h.planet.setBaseTechLevel(game::EngineTech, 1);
-    h.planet.setBaseTechLevel(game::BeamTech, 1);
-    h.planet.setBaseTechLevel(game::TorpedoTech, 1);
-    h.planet.internalCheck(game::map::Configuration(), h.tx, h.log);
-    h.planet.combinedCheck2(h.univ, game::PlayerSet_t(7), 12);
-    h.planet.setPlayability(game::map::Object::Playable);
-
-    // This must have produced a base
-    TS_ASSERT(h.planet.hasBase());
+    preparePlanet(h);
 
     // Make an action.
     TestAction a(h);
@@ -152,3 +156,54 @@ TestGameActionsBaseBuildAction::testSuccess()
     TS_ASSERT_THROWS_NOTHING(a.commit());
     TS_ASSERT_EQUALS(h.planet.getBaseTechLevel(game::BeamTech).orElse(0), 4);
 }
+
+/** Test getCostSummary().
+    A: create action. Call getCostSummary().
+    E: correct summary produced */
+void
+TestGameActionsBaseBuildAction::testCostSummary()
+{
+    TestHarness h;
+    preparePlanet(h);
+    TestAction a(h);
+
+    // Set valid tech level
+    a.setTechLevel(4);
+    a.update();
+    TS_ASSERT(a.isValid());
+    TS_ASSERT(!a.costAction().getCost().isZero());
+
+    // Retrieve and verify CostSummary
+    {
+        game::spec::CostSummary result;
+        a.getCostSummary(result);
+
+        TS_ASSERT_EQUALS(result.getNumItems(), 1U);
+        const game::spec::CostSummary::Item* p = result.get(0);
+        TS_ASSERT(p != 0);
+        TS_ASSERT_EQUALS(p->multiplier, 3);
+        TS_ASSERT_EQUALS(p->name, "Beam tech upgrade");
+        TS_ASSERT_EQUALS(p->cost.get(game::spec::Cost::Money), 600);
+    }
+
+    // Disable tech upgrades; summary must be empty (but action must be invalid)
+    a.setUseTechUpgrade(false);
+    TS_ASSERT_EQUALS(a.isUseTechUpgrade(), false);
+    {
+        game::spec::CostSummary result;
+        a.getCostSummary(result);
+        TS_ASSERT_EQUALS(result.getNumItems(), 0U);
+    }
+    TS_ASSERT(!a.isValid());
+
+    // Reduce tech level; summary still empty, but action valid
+    a.setTechLevel(1);
+    a.update();
+    {
+        game::spec::CostSummary result;
+        a.getCostSummary(result);
+        TS_ASSERT_EQUALS(result.getNumItems(), 0U);
+    }
+    TS_ASSERT(a.isValid());
+}
+

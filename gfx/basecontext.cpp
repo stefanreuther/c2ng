@@ -96,7 +96,7 @@ gfx::BaseContext::setCursor(Point pt)
 
 // Set text alignment.
 gfx::BaseContext&
-gfx::BaseContext::setTextAlign(int x, int y)
+gfx::BaseContext::setTextAlign(HorizontalAlignment x, VerticalAlignment y)
 {
     // ex GfxContext::setTextAlign
     m_textAlign = Point(x, y);

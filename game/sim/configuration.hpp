@@ -8,6 +8,8 @@
 #include "game/playerbitmatrix.hpp"
 #include "game/teamsettings.hpp"
 #include "game/config/hostconfiguration.hpp"
+#include "afl/string/translator.hpp"
+#include "afl/bits/smallset.hpp"
 
 namespace game { namespace sim {
 
@@ -21,6 +23,7 @@ namespace game { namespace sim {
             Balance360k,            ///< 360kt bonus (HOST).
             BalanceMasterAtArms     ///< Master at Arms proposal.
         };
+
         /** VCR mode.
             Which VCR is used to run the simulation. */
         enum VcrMode {
@@ -32,11 +35,14 @@ namespace game { namespace sim {
             VcrNuHost               ///< NuHost.
         };
 
-        // FIXME: needed?
-        // enum {
-        //     BalanceMAX = BalanceMasterAtArms,
-        //     VcrMAX = VcrNuHost
-        // };
+        /** Area. \see copyFrom() */
+        enum Area {
+            MainArea,               ///< Most options.
+            AllianceArea,           ///< Alliances (allianceSettings()).
+            EnemyArea               ///< Enemies (enemySettings()).
+        };
+        typedef afl::bits::SmallSet<Area> Areas_t;
+
 
         /** Default constructor. */
         Configuration();
@@ -44,6 +50,12 @@ namespace game { namespace sim {
         /** Load defaults.
             \param teams Teams (to initialize alliances from) */
         void loadDefaults(const TeamSettings& teams);
+
+        /** Copy (parts) from another configuration.
+            To copy everything, just assign.
+            \param other Other configuration
+            \param areas Areas to copy */
+        void copyFrom(const Configuration& other, Areas_t areas);
 
         /** Set mode (host version).
             Sets other parameters (ES-Bonus, Scotty bonus, left/right, balancing) to mode/configuration dependant defaults.
@@ -125,6 +137,11 @@ namespace game { namespace sim {
             \return mode */
         VcrMode getMode() const;
 
+        /** Check whether host version honors Alternative Combat settings
+            (PlanetsHaveTubes, AllowAlternativeCombat).
+            \return true for PHost-likes */
+        bool hasAlternativeCombat() const;
+
         /** Access alliance settings.
             Contains a bit in (a,b) if a offers an alliance to b.
             \return alliance settings */
@@ -138,8 +155,6 @@ namespace game { namespace sim {
         const PlayerBitMatrix& enemySettings() const;
 
      private:
-        PlayerBitMatrix m_allianceSettings;             // ex alliance_settings
-        PlayerBitMatrix m_enemySettings;                // ex enemy_settings
         int            m_engineShieldBonus;             // ex engine_shield_bonus;
         bool           m_scottyBonus;                   // ex scotty_bonus;
         bool           m_randomLeftRight;               // ex random_left_right;
@@ -147,10 +162,36 @@ namespace game { namespace sim {
         bool           m_onlyOneSimulation;             // ex only_one_simulation;
         bool           m_seedControl;                   // ex seed_control;
         bool           m_randomizeFCodesOnEveryFight;   // ex randomize_fcodes_on_every_fight;
-        BalancingMode  m_balancingMode;                 // ex balancing_mode;
-        VcrMode        m_vcrMode;                       // ex vcr_mode;
-        // int            m_seed; // FIXME: needed?
+        BalancingMode  m_balancingMode : 8;             // ex balancing_mode;
+        VcrMode        m_vcrMode : 8;                   // ex vcr_mode;
+        PlayerBitMatrix m_allianceSettings;             // ex alliance_settings
+        PlayerBitMatrix m_enemySettings;                // ex enemy_settings
     };
+
+    /** Format a BalancingMode.
+        \param mode Value
+        \param tx   Translator
+        \return human-readable string */
+    String_t toString(Configuration::BalancingMode mode, afl::string::Translator& tx);
+
+    /** Format a VcrMode.
+        \param mode Value
+        \param tx   Translator
+        \return human-readable string */
+    String_t toString(Configuration::VcrMode mode, afl::string::Translator& tx);
+
+
+    /** Get next BalancingMode.
+        If the last value has been reached, restarts at the first.
+        \param mode Mode
+        \return next mode */
+    Configuration::BalancingMode getNext(Configuration::BalancingMode mode);
+
+    /** Get next VcrMode.
+        If the last value has been reached, restarts at the first.
+        \param mode Mode
+        \return next mode */
+    Configuration::VcrMode getNext(Configuration::VcrMode mode);
 
 } }
 

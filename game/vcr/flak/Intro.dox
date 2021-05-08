@@ -1,0 +1,7 @@
+/*!
+     \namespace game::vcr::flak
+     \brief Combat Recordings
+
+     This namespace contains Fleet Action Kombat, a multi-ship combat
+     system jointly developed by the Planetsserver / Vagabond / PHost crew.
+ */

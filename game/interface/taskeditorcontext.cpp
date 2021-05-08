@@ -35,7 +35,7 @@ namespace {
         }
     }
 
-    bool checkIndexArg(size_t& out, afl::data::Value* v, size_t limit)
+    bool checkIndexArg(size_t& out, const afl::data::Value* v, size_t limit)
     {
         // Parse value
         int32_t i;
@@ -357,7 +357,7 @@ game::interface::TaskEditorContext::lookup(const afl::data::NameQuery& name, Pro
 }
 
 void
-game::interface::TaskEditorContext::set(PropertyIndex_t index, afl::data::Value* value)
+game::interface::TaskEditorContext::set(PropertyIndex_t index, const afl::data::Value* value)
 {
     switch (TaskEditorDomain(TASKEDITOR_MAP[index].domain)) {
      case TaskEditorPropertyDomain:
@@ -472,7 +472,7 @@ game::interface::getTaskEditorProperty(const afl::base::Ptr<interpreter::TaskEdi
 }
 
 void
-game::interface::setTaskEditorProperty(const afl::base::Ptr<interpreter::TaskEditor>& edit, TaskEditorProperty prop, afl::data::Value* value)
+game::interface::setTaskEditorProperty(const afl::base::Ptr<interpreter::TaskEditor>& edit, TaskEditorProperty prop, const afl::data::Value* value)
 {
     size_t n;
     switch (prop) {

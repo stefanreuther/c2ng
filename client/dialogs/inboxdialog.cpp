@@ -4,275 +4,50 @@
 
 #include "client/dialogs/inboxdialog.hpp"
 #include "afl/string/format.hpp"
-#include "game/game.hpp"
-#include "game/msg/inbox.hpp"
-#include "game/root.hpp"
-#include "game/turn.hpp"
-#include "interpreter/arguments.hpp"
-#include "interpreter/values.hpp"
+#include "client/dialogs/subjectlist.hpp"
+#include "client/widgets/decayingmessage.hpp"
+#include "client/widgets/helpwidget.hpp"
+#include "game/actions/preconditions.hpp"
 #include "ui/group.hpp"
 #include "ui/layout/hbox.hpp"
 #include "ui/layout/vbox.hpp"
 #include "ui/prefixargument.hpp"
 #include "ui/spacer.hpp"
+#include "ui/widgets/quit.hpp"
 #include "ui/window.hpp"
-#include "game/parser/format.hpp"
 
-namespace {
-    using client::widgets::MessageActionPanel;
-
-    /* @q CCUI$CurrentInMsg (Internal Variable)
-       Zero-based index of current inbox message.
-       @since PCC2 2.40.4 */
-    const char*const INDEX_VAR_NAME = "CCUI$CURRENTINMSG";
-
-    game::msg::Inbox* getInbox(game::Session& session)
-    {
-        if (game::Game* g = session.getGame().get()) {
-            if (game::Turn* t = g->getViewpointTurn().get()) {
-                return &t->inbox();
-            }
-        }
-        return 0;
-    }
-
-    bool isFiltered(game::Session& /*session*/, game::msg::Inbox& /*inbox*/, size_t /*index*/)
-    {
-        // FIXME: implement me (isFiltered)
-        return false;
-    }
-
-    size_t findFirstMessage(game::Session& session, game::msg::Inbox& inbox)
-    {
-        size_t numMessages = inbox.getNumMessages();
-        size_t i = 0;
-        while (i < numMessages && isFiltered(session, inbox, i)) {
-            ++i;
-        }
-        if (i >= numMessages) {
-            i = 0;
-        }
-        return i;
-    }
-
-    size_t findLastMessage(game::Session& session, game::msg::Inbox& inbox)
-    {
-        size_t numMessages = inbox.getNumMessages();
-        size_t i = numMessages;
-        while (i > 0 && isFiltered(session, inbox, i-1)) {
-            --i;
-        }
-        if (i == 0) {
-            i = numMessages;
-        }
-        return i-1;
-    }
-}
-
-void
-client::dialogs::InboxDialog::State::load(game::Session& session, size_t index)
-{
-    game::msg::Inbox* inbox = getInbox(session);
-    game::Root* root = session.getRoot().get();
-    if (!inbox || !root) {
-        return;
-    }
-
-    game::parser::Format fmt;
-    formatMessage(fmt,
-                  inbox->getMessageText(index, session.translator(), root->playerList()),
-                  root->playerList());
-
-    this->limit = inbox->getNumMessages();
-    this->current = index;
-    this->dim = isFiltered(session, *inbox, index);
-    // goto1, goto1name
-    this->goto2 = fmt.firstLink;
-    session.getReferenceName(fmt.firstLink, game::LongName, this->goto2Name);
-    this->reply = fmt.reply;
-    this->replyAll = fmt.replyAll;
-    if (!fmt.reply.empty()) {
-        this->replyName = formatPlayerHostSet(fmt.reply, root->playerList(), session.translator());
-    }
-    this->text = fmt.text.withStyle(util::rich::StyleAttribute::Fixed);
-
-    // Remember that we're here
-    session.world().setNewGlobalValue(INDEX_VAR_NAME, interpreter::makeIntegerValue(int32_t(index)));
-}
-
-/*
- *  Base class for queries
- *
- *  Most operations we perform eventually load a new message for display.
- *  This implements the boilerplate for doing that: do
- *     MyClass(..).call(theInboxDialog)
- *  to switch theInboxDialog to a new message.
- */
-
-class client::dialogs::InboxDialog::Query : public util::Request<game::Session> {
- public:
-    virtual void handle(game::Session& s, game::msg::Inbox& inbox, State& out) = 0;
-
-    virtual void handle(game::Session& s)
-        {
-            if (game::msg::Inbox* p = getInbox(s)) {
-                handle(s, *p, m_state);
-            }
-        }
-    void call(InboxDialog& parent)
-        {
-            parent.m_link.call(parent.interface().gameSender(), *this);
-            parent.setState(m_state);
-        }
- private:
-    State m_state;
-};
-
-/*
- *  InitQuery: find message to show first
- *
- *  Like all queries, this also provides the total message count and thus serves
- *  as the decision whether to show the messenger dialog at all.
- */
-
-class client::dialogs::InboxDialog::InitQuery : public Query {
- public:
-    virtual void handle(game::Session& s, game::msg::Inbox& inbox, State& state)
-        {
-            size_t numMessages = 0;
-            size_t currentMessage = 0;
-            bool haveCurrentMessage = false;
-
-            // Get number of messages
-            numMessages = inbox.getNumMessages();
-
-            // Get cursor
-            try {
-                int32_t i;
-                if (interpreter::checkIntegerArg(i, s.world().getGlobalValue(INDEX_VAR_NAME))) {
-                    currentMessage = static_cast<size_t>(i);
-                    if (currentMessage < numMessages) {
-                        haveCurrentMessage = true;
-                    }
-                }
-            }
-            catch (...)
-            { }
-
-            // Postprocess
-            if (!haveCurrentMessage) {
-                currentMessage = findFirstMessage(s, inbox);
-            }
-
-            // Finish
-            state.load(s, currentMessage);
-        }
-};
-
-/*
- *  BrowseQuery: browse to next/previous message
- */
-
-class client::dialogs::InboxDialog::BrowseQuery : public Query {
- public:
-    BrowseQuery(size_t current, bool forward, bool acceptFiltered, int amount)
-        : m_current(current), m_forward(forward), m_acceptFiltered(acceptFiltered), m_amount(amount)
-        { }
-    void handle(game::Session& s, game::msg::Inbox& inbox, State& state)
-        {
-            bool filtered = m_acceptFiltered || isFiltered(s, inbox, m_current);
-            int amount = std::max(1, m_amount);
-            bool found = false;
-            size_t current = m_current;
-            if (m_forward) {
-                // ex WMessageDisplay::doNext
-                while (!found && ++current < inbox.getNumMessages()) {
-                    if (filtered || !isFiltered(s, inbox, current)) {
-                        if (--amount == 0) {
-                            found = true;
-                        }
-                    }
-                }
-            } else {
-                // ex WMessageDisplay::doPrev
-                while (!found && current > 0) {
-                    --current;
-                    if (filtered || !isFiltered(s, inbox, current)) {
-                        if (--amount == 0) {
-                            found = true;
-                        }
-                    }
-                }
-            }
-
-            // Load message
-            state.load(s, found ? current : m_current);
-        }
- private:
-    const size_t m_current;
-    const bool m_forward;
-    const bool m_acceptFiltered;
-    const int m_amount;
-};
-
-/*
- *  FirstQuery: go to first unfiltered message
- */
-
-class client::dialogs::InboxDialog::FirstQuery : public Query {
- public:
-    void handle(game::Session& s, game::msg::Inbox& inbox, State& state)
-        { state.load(s, findFirstMessage(s, inbox)); }
-};
-
-/*
- *  FirstQuery: go to last unfiltered message
- */
-
-class client::dialogs::InboxDialog::LastQuery : public Query {
- public:
-    void handle(game::Session& s, game::msg::Inbox& inbox, State& state)
-        { state.load(s, findLastMessage(s, inbox)); }
-};
-
-/*
- *  LoadQuery: load a message by (0-based) index
- */
-
-class client::dialogs::InboxDialog::LoadQuery : public Query {
- public:
-    LoadQuery(size_t index)
-        : m_index(index)
-        { }
-    void handle(game::Session& s, game::msg::Inbox& inbox, State& state)
-        { state.load(s, std::min(m_index, inbox.getNumMessages()-1)); }
- private:
-    size_t m_index;
-};
+using client::widgets::MessageActionPanel;
 
 /****************************** InboxDialog ******************************/
 
-client::dialogs::InboxDialog::InboxDialog(client::si::UserSide& iface, ui::Root& root, afl::string::Translator& tx)
+client::dialogs::InboxDialog::InboxDialog(String_t title, util::RequestSender<game::proxy::MailboxAdaptor> sender, client::si::UserSide& iface, ui::Root& root, afl::string::Translator& tx)
     : Control(iface, root, tx),
-      m_root(root),
-      m_link(root),
+      m_link(root, tx),
+      m_title(title),
       m_state(),
+      m_data(),
       m_outputState(),
       m_loop(root),
-      m_actionPanel(root),
-      m_content(root.provider().getFont(gfx::FontRequest().setStyle(1))->getCellSize().scaledBy(41, 22), 0, root.provider())
-{ }
+      m_actionPanel(root, tx),
+      m_content(root.provider().getFont(gfx::FontRequest().setStyle(1))->getCellSize().scaledBy(41, 22), 0, root.provider()),
+      m_proxy(sender, root.engine().dispatcher())
+{
+    m_proxy.sig_update.add(this, &InboxDialog::onUpdate);
+}
 
 client::dialogs::InboxDialog::~InboxDialog()
 { }
 
-void
-client::dialogs::InboxDialog::run(client::si::OutputState& out)
+bool
+client::dialogs::InboxDialog::run(client::si::OutputState& out,
+                                  String_t helpPage,
+                                  String_t noMessageAdvice)
 {
     // Initialize messenger
-    InitQuery().call(*this);
-    if (m_state.limit == 0) {
-        return;
+    m_proxy.getStatus(m_link, m_state);
+    if (m_state.numMessages == 0) {
+        client::widgets::showDecayingMessage(root(), noMessageAdvice);
+        return false;
     }
 
     // Window
@@ -284,36 +59,45 @@ client::dialogs::InboxDialog::run(client::si::OutputState& out)
     //         Spacer
     //   Content
 
-    ui::Window win("!Messages", m_root.provider(), m_root.colorScheme(), ui::BLUE_BLACK_WINDOW, ui::layout::HBox::instance5);
+    ui::Window win(m_title, root().provider(), root().colorScheme(), ui::BLUE_BLACK_WINDOW, ui::layout::HBox::instance5);
     ui::Group g1(ui::layout::VBox::instance5);
     g1.add(m_actionPanel);
 
+    client::widgets::HelpWidget help(root(), translator(), interface().gameSender(), helpPage);
+
     ui::Group g12(ui::layout::HBox::instance5);
-    ui::widgets::Button btnOK("!OK", util::Key_Escape, m_root);
+    ui::widgets::Button btnOK(translator()("OK"), util::Key_Escape, root());
+    ui::widgets::Button btnHelp(translator()("Help"), 'h', root());
     ui::Spacer spc;
-    ui::PrefixArgument prefix(m_root);
+    ui::PrefixArgument prefix(root());
+    ui::widgets::Quit quit(root(), m_loop);
     g12.add(btnOK);
     g12.add(spc);
+    g12.add(btnHelp);
     g1.add(g12);
     win.add(g1);
     win.add(m_content);
     win.add(prefix);
+    win.add(help);
+    win.add(quit);
 
     btnOK.sig_fire.addNewClosure(m_loop.makeStop(0));
+    btnHelp.dispatchKeyTo(help);
     m_actionPanel.sig_action.add(this, &InboxDialog::onAction);
 
     win.pack();
 
-    // Reload state after pack() to format content with correct width
-    setState(m_state);
+    // Request current data
+    m_proxy.setCurrentMessage(m_state.currentMessage);
 
-    m_root.centerWidget(win);
-    m_root.add(win);
+    root().centerWidget(win);
+    root().add(win);
 
     // Run (this will immediately exit if one of the above scripts requested a context change.)
-    m_loop.run();
+    bool stateChanged = (m_loop.run() != 0);
 
     out = m_outputState;
+    return stateChanged;
 }
 
 /*
@@ -321,49 +105,39 @@ client::dialogs::InboxDialog::run(client::si::OutputState& out)
  */
 
 void
-client::dialogs::InboxDialog::handleStateChange(client::si::UserSide& us, client::si::RequestLink2 link, client::si::OutputState::Target target)
+client::dialogs::InboxDialog::handleStateChange(client::si::RequestLink2 link, client::si::OutputState::Target target)
 {
-    using client::si::OutputState;
-    switch (target) {
-     case OutputState::NoChange:
-        us.continueProcess(link);
-        break;
-
-     case OutputState::PlayerScreen:
-     case OutputState::ExitProgram:
-     case OutputState::ExitGame:
-     case OutputState::ShipScreen:
-     case OutputState::PlanetScreen:
-     case OutputState::BaseScreen:
-     case OutputState::ShipTaskScreen:
-     case OutputState::PlanetTaskScreen:
-     case OutputState::BaseTaskScreen:
-     case OutputState::Starchart:
-        us.detachProcess(link);
-        m_outputState.set(link, target);
-        m_loop.stop(0);
-        break;
-    }
+    dialogHandleStateChange(link, target, m_outputState, m_loop, 1);
 }
 
 void
-client::dialogs::InboxDialog::handleEndDialog(client::si::UserSide& us, client::si::RequestLink2 link, int /*code*/)
+client::dialogs::InboxDialog::handleEndDialog(client::si::RequestLink2 link, int code)
 {
-    us.detachProcess(link);
-    m_outputState.set(link, client::si::OutputState::NoChange);
-    m_loop.stop(0);
+    dialogHandleEndDialog(link, code, m_outputState, m_loop, 1);
 }
 
 void
-client::dialogs::InboxDialog::handlePopupConsole(client::si::UserSide& us, client::si::RequestLink2 link)
+client::dialogs::InboxDialog::handlePopupConsole(client::si::RequestLink2 link)
 {
-    defaultHandlePopupConsole(us, link);
+    defaultHandlePopupConsole(link);
 }
 
 void
-client::dialogs::InboxDialog::handleSetViewRequest(client::si::UserSide& ui, client::si::RequestLink2 link, String_t name, bool withKeymap)
+client::dialogs::InboxDialog::handleSetViewRequest(client::si::RequestLink2 link, String_t name, bool withKeymap)
 {
-    defaultHandleSetViewRequest(ui, link, name, withKeymap);
+    defaultHandleSetViewRequest(link, name, withKeymap);
+}
+
+void
+client::dialogs::InboxDialog::handleUseKeymapRequest(client::si::RequestLink2 link, String_t name, int prefix)
+{
+    defaultHandleUseKeymapRequest(link, name, prefix);
+}
+
+void
+client::dialogs::InboxDialog::handleOverlayMessageRequest(client::si::RequestLink2 link, String_t text)
+{
+    defaultHandleOverlayMessageRequest(link, text);
 }
 
 client::si::ContextProvider*
@@ -372,32 +146,35 @@ client::dialogs::InboxDialog::createContextProvider()
     return 0;
 }
 
+
 /*
  *  InboxDialog Methods
  */
 
 void
-client::dialogs::InboxDialog::setState(const State& state)
+client::dialogs::InboxDialog::onUpdate(size_t index, const game::proxy::MailboxProxy::Message& msg)
 {
     // ex WMessageActionPanel::onBrowse (sort-of)
-    m_state = state;
+    m_data = msg;
 
     // Position
-    if (m_state.limit > 0) {
-        m_actionPanel.setPosition(afl::string::Format("%d/%d", m_state.current+1, m_state.limit), m_state.dim);
-    } else {
-        m_actionPanel.setPosition(String_t(), false);
-    }
+    m_actionPanel.setPosition(afl::string::Format("%d/%d", index+1, m_state.numMessages), msg.isFiltered);
 
     // Buttons
-    updateButton(MessageActionPanel::GoTo1, m_state.goto1Name);
-    updateButton(MessageActionPanel::GoTo2, m_state.goto2Name);
-    updateButton(MessageActionPanel::Reply, m_state.replyName);
+    updateButton(MessageActionPanel::GoTo1, msg.goto1Name);
+    updateButton(MessageActionPanel::GoTo2, msg.goto2Name);
+    updateButton(MessageActionPanel::Reply, msg.replyName);
+
+    if (msg.actions.contains(game::msg::Mailbox::ToggleConfirmed)) {
+        m_actionPanel.enableAction(MessageActionPanel::Confirm, String_t());
+    } else {
+        m_actionPanel.disableAction(MessageActionPanel::Confirm);
+    }
 
     // Content
     ui::rich::Document& doc = m_content.getDocument();
     doc.clear();
-    doc.add(m_state.text);
+    doc.add(msg.text);
     doc.finish();
     m_content.handleDocumentUpdate();
 }
@@ -417,9 +194,24 @@ client::dialogs::InboxDialog::onAction(client::widgets::MessageActionPanel::Acti
 {
     switch (a) {
      case MessageActionPanel::GoTo1:
+        if (m_data.goto1.isSet()) {
+            executeGoToReference("(Message)", m_data.goto1);
+        }
+        break;
+
      case MessageActionPanel::GoTo2:
+        if (m_data.goto2.isSet()) {
+            executeGoToReference("(Message)", m_data.goto2);
+        }
+        break;
+
      case MessageActionPanel::Reply:
+        break;
+
      case MessageActionPanel::Confirm:
+        m_proxy.performMessageAction(game::msg::Mailbox::ToggleConfirmed);
+        break;
+
      case MessageActionPanel::Edit:
      case MessageActionPanel::Redirect:
      case MessageActionPanel::Delete:
@@ -429,46 +221,50 @@ client::dialogs::InboxDialog::onAction(client::widgets::MessageActionPanel::Acti
         break;
 
      case MessageActionPanel::BrowsePrevious:
-        BrowseQuery(m_state.current, false, false, arg).call(*this);
+        m_proxy.browse(game::msg::Browser::Previous, arg, false);
         break;
 
      case MessageActionPanel::BrowsePreviousAll:
-        BrowseQuery(m_state.current, false, true, arg).call(*this);
+        m_proxy.browse(game::msg::Browser::Previous, arg, true);
         break;
 
      case MessageActionPanel::BrowseNext:
-        BrowseQuery(m_state.current, true, true, arg).call(*this);
+        m_proxy.browse(game::msg::Browser::Next, arg, false);
         break;
 
      case MessageActionPanel::BrowseNextAll:
-        BrowseQuery(m_state.current, true, true, arg).call(*this);
+        m_proxy.browse(game::msg::Browser::Next, arg, true);
         break;
 
      case MessageActionPanel::BrowseFirst:
-        FirstQuery().call(*this);
+        m_proxy.browse(game::msg::Browser::First, arg, false);
         break;
 
      case MessageActionPanel::BrowseFirstAll:
-        LoadQuery(0).call(*this);
+        m_proxy.browse(game::msg::Browser::First, arg, true);
         break;
 
      case MessageActionPanel::BrowseLast:
-        LastQuery().call(*this);
+        m_proxy.browse(game::msg::Browser::Last, arg, false);
         break;
 
      case MessageActionPanel::BrowseLastAll:
-        LoadQuery(m_state.current-1).call(*this);
+        m_proxy.browse(game::msg::Browser::Last, arg, true);
         break;
 
      case MessageActionPanel::BrowseNth:
         if (arg > 0) {
-            LoadQuery(arg-1).call(*this);
+            m_proxy.setCurrentMessage(arg-1);
         }
         break;
 
      case MessageActionPanel::SearchNext:
      case MessageActionPanel::WriteAll:
      case MessageActionPanel::ReplyAll:
+        break;
+
+     case MessageActionPanel::BrowseSubjects:
+        doSubjectListDialog(m_proxy, root(), interface().gameSender(), translator());
         break;
     }
 }

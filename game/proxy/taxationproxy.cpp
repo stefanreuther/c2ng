@@ -13,7 +13,6 @@
 #include "game/tables/happinesschangename.hpp"
 #include "game/tables/nativeracename.hpp"
 #include "game/turn.hpp"
-#include "util/slaveobject.hpp"
 
 using game::actions::TaxationAction;
 
@@ -21,21 +20,15 @@ using game::actions::TaxationAction;
  *  Trampoline: contains the transaction and event responder
  */
 
-class game::proxy::TaxationProxy::Trampoline : public util::SlaveObject<Session> {
+class game::proxy::TaxationProxy::Trampoline {
  public:
-    Trampoline(Id_t planetId, util::RequestSender<TaxationProxy> reply)
+    Trampoline(Session& session, Id_t planetId, const util::RequestSender<TaxationProxy>& reply)
         : m_planetId(planetId),
           m_reply(reply),
-          m_pSession(),
+          m_session(session),
           m_action(),
           conn_change()
-        { }
-
-    void init(Session& session)
         {
-            // Remember the session
-            m_pSession = &session;
-
             // Create an action
             Game* g = session.getGame().get();
             Root* r = session.getRoot().get();
@@ -53,13 +46,6 @@ class game::proxy::TaxationProxy::Trampoline : public util::SlaveObject<Session>
             if (m_action.get() != 0) {
                 conn_change = m_action->sig_change.add(this, &Trampoline::onChange);
             }
-        }
-
-    void done(Session& /*session*/)
-        {
-            conn_change.disconnect();
-            m_action.reset();
-            m_pSession = 0;
         }
 
     void onChange()
@@ -97,14 +83,14 @@ class game::proxy::TaxationProxy::Trampoline : public util::SlaveObject<Session>
  private:
     const Id_t m_planetId;
     util::RequestSender<TaxationProxy> m_reply;
-    Session* m_pSession;
+    Session& m_session;
     std::auto_ptr<TaxationAction> m_action;
     afl::base::SignalConnection conn_change;
 
     void describe(AreaStatus& out, const TaxationAction& in, Area_t a)
         {
-            afl::string::Translator& tx = m_pSession->translator();
-            Root& root = game::actions::mustHaveRoot(*m_pSession);
+            afl::string::Translator& tx = m_session.translator();
+            Root& root = game::actions::mustHaveRoot(m_session);
 
             out.available = in.isAvailable(a);
             out.tax = in.getTax(a);
@@ -121,6 +107,18 @@ class game::proxy::TaxationProxy::Trampoline : public util::SlaveObject<Session>
         }
 };
 
+class game::proxy::TaxationProxy::TrampolineFromSession : public afl::base::Closure<Trampoline*(Session&)> {
+ public:
+    TrampolineFromSession(Id_t planetId, const util::RequestSender<TaxationProxy>& reply)
+        : m_planetId(planetId), m_reply(reply)
+        { }
+    virtual Trampoline* call(Session& session)
+        { return new Trampoline(session, m_planetId, m_reply); }
+ private:
+    Id_t m_planetId;
+    util::RequestSender<TaxationProxy> m_reply;
+};
+
 
 /*
  *  TaxationProxy
@@ -128,10 +126,10 @@ class game::proxy::TaxationProxy::Trampoline : public util::SlaveObject<Session>
 
 // Constructor.
 game::proxy::TaxationProxy::TaxationProxy(util::RequestDispatcher& reply,
-                                            util::RequestSender<Session> gameSender,
-                                            Id_t planetId)
+                                          util::RequestSender<Session> gameSender,
+                                          Id_t planetId)
     : m_reply(reply, *this),
-      m_trampoline(gameSender, new Trampoline(planetId, m_reply.getSender()))
+      m_trampoline(gameSender.makeTemporary(new TrampolineFromSession(planetId, m_reply.getSender())))
 { }
 
 // Destructor.
@@ -143,12 +141,12 @@ game::proxy::TaxationProxy::~TaxationProxy()
 void
 game::proxy::TaxationProxy::getStatus(WaitIndicator& link, Status& out)
 {
-    class Task : public util::SlaveRequest<Session, Trampoline> {
+    class Task : public util::Request<Trampoline> {
      public:
         Task(Status& out)
             : m_out(out)
             { }
-        void handle(Session&, Trampoline& tr)
+        void handle(Trampoline& tr)
             { tr.describe(m_out); }
      private:
         Status& m_out;
@@ -163,12 +161,12 @@ game::proxy::TaxationProxy::getStatus(WaitIndicator& link, Status& out)
 void
 game::proxy::TaxationProxy::setNumBuildings(int n)
 {
-    class Task : public util::SlaveRequest<Session, Trampoline> {
+    class Task : public util::Request<Trampoline> {
      public:
         Task(int n)
             : m_numBuildings(n)
             { }
-        void handle(Session&, Trampoline& tr)
+        void handle(Trampoline& tr)
             {
                 if (TaxationAction* ta = tr.action()) {
                     ta->setNumBuildings(m_numBuildings);
@@ -180,16 +178,37 @@ game::proxy::TaxationProxy::setNumBuildings(int n)
     m_trampoline.postNewRequest(new Task(n));
 }
 
+// Set planet effectors.
+void
+game::proxy::TaxationProxy::setEffectors(const game::map::PlanetEffectors& eff)
+{
+    class Task : public util::Request<Trampoline> {
+     public:
+        Task(const game::map::PlanetEffectors& eff)
+            : m_effectors(eff)
+            { }
+        void handle(Trampoline& tr)
+            {
+                if (TaxationAction* ta = tr.action()) {
+                    ta->setEffectors(m_effectors);
+                }
+            }
+     private:
+        game::map::PlanetEffectors m_effectors;
+    };
+    m_trampoline.postNewRequest(new Task(eff));
+}
+
 // Set tax rate, limit to valid range.
 void
 game::proxy::TaxationProxy::setTaxLimited(Area_t a, int value)
 {
-    class Task : public util::SlaveRequest<Session, Trampoline> {
+    class Task : public util::Request<Trampoline> {
      public:
         Task(Area_t a, int value)
             : m_area(a), m_value(value)
             { }
-        void handle(Session&, Trampoline& tr)
+        void handle(Trampoline& tr)
             {
                 if (TaxationAction* ta = tr.action()) {
                     ta->setTaxLimited(m_area, m_value);
@@ -206,12 +225,12 @@ game::proxy::TaxationProxy::setTaxLimited(Area_t a, int value)
 void
 game::proxy::TaxationProxy::changeRevenue(Area_t a, Direction_t d)
 {
-    class Task : public util::SlaveRequest<Session, Trampoline> {
+    class Task : public util::Request<Trampoline> {
      public:
         Task(Area_t a, Direction_t d)
             : m_area(a), m_direction(d)
             { }
-        void handle(Session&, Trampoline& tr)
+        void handle(Trampoline& tr)
             {
                 if (TaxationAction* ta = tr.action()) {
                     ta->changeRevenue(m_area, m_direction);
@@ -228,12 +247,12 @@ game::proxy::TaxationProxy::changeRevenue(Area_t a, Direction_t d)
 void
 game::proxy::TaxationProxy::changeTax(Area_t a, int delta)
 {
-    class Task : public util::SlaveRequest<Session, Trampoline> {
+    class Task : public util::Request<Trampoline> {
      public:
         Task(Area_t a, int delta)
             : m_area(a), m_delta(delta)
             { }
-        void handle(Session&, Trampoline& tr)
+        void handle(Trampoline& tr)
             {
                 if (TaxationAction* ta = tr.action()) {
                     ta->changeTax(m_area, m_delta);
@@ -250,12 +269,12 @@ game::proxy::TaxationProxy::changeTax(Area_t a, int delta)
 void
 game::proxy::TaxationProxy::setSafeTax(Areas_t as)
 {
-    class Task : public util::SlaveRequest<Session, Trampoline> {
+    class Task : public util::Request<Trampoline> {
      public:
         Task(Areas_t as)
             : m_areas(as)
             { }
-        void handle(Session&, Trampoline& tr)
+        void handle(Trampoline& tr)
             {
                 if (TaxationAction* ta = tr.action()) {
                     ta->setSafeTax(m_areas);
@@ -271,12 +290,12 @@ game::proxy::TaxationProxy::setSafeTax(Areas_t as)
 void
 game::proxy::TaxationProxy::revert(Areas_t as)
 {
-    class Task : public util::SlaveRequest<Session, Trampoline> {
+    class Task : public util::Request<Trampoline> {
      public:
         Task(Areas_t as)
             : m_areas(as)
             { }
-        void handle(Session&, Trampoline& tr)
+        void handle(Trampoline& tr)
             {
                 if (TaxationAction* ta = tr.action()) {
                     ta->revert(m_areas);
@@ -292,9 +311,9 @@ game::proxy::TaxationProxy::revert(Areas_t as)
 void
 game::proxy::TaxationProxy::commit()
 {
-    class Task : public util::SlaveRequest<Session, Trampoline> {
+    class Task : public util::Request<Trampoline> {
      public:
-        void handle(Session&, Trampoline& tr)
+        void handle(Trampoline& tr)
             {
                 if (TaxationAction* ta = tr.action()) {
                     ta->commit();

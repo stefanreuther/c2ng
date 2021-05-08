@@ -41,6 +41,19 @@ util::FileParser::parseFile(afl::io::Stream& s)
     }
 }
 
+// Parse an optional file.
+bool
+util::FileParser::parseOptionalFile(afl::io::Directory& dir, String_t fileName)
+{
+    afl::base::Ptr<afl::io::Stream> s = dir.openFileNT(fileName, afl::io::FileSystem::OpenRead);
+    if (s.get() != 0) {
+        parseFile(*s);
+        return true;
+    } else {
+        return false;
+    }
+}
+
 // Trim comments.
 void
 util::FileParser::trimComments(String_t& line)

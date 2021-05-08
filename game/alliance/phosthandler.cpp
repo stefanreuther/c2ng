@@ -128,7 +128,7 @@ game::alliance::PHostHandler::~PHostHandler()
 void
 game::alliance::PHostHandler::init(Container& allies, afl::string::Translator& tx)
 {
-    // ex GPHostAllianceHandler::processVersion (sort-of)
+    // ex GPHostAllianceHandler::processVersion (sort-of), phost.pas:InitAlliances (part)
     afl::base::Ptr<Root> root = m_session.getRoot();
     if (root.get() != 0) {
         // FIXME: if CPEnableAllies is disabled, still show the allies in case they are preconfigured (same as PCC 1.1.21)
@@ -152,7 +152,7 @@ game::alliance::PHostHandler::init(Container& allies, afl::string::Translator& t
 void
 game::alliance::PHostHandler::postprocess(Container& allies)
 {
-    // ex GPHostAllianceHandler::postprocess
+    // ex GPHostAllianceHandler::postprocess, phost.pas:ReadAllianceCommands
     // Clear everything
     clearAll(allies, MAIN_ID);
     for (size_t i = 0; i < NUM_LEVELS; ++i) {
@@ -199,7 +199,7 @@ game::alliance::PHostHandler::postprocess(Container& allies)
 void
 game::alliance::PHostHandler::handleChanges(const Container& allies)
 {
-    // ex GPHostAllianceHandler::handleChanges
+    // ex GPHostAllianceHandler::handleChanges, phost.pas:SendAllianceCommands, phost.pas:GenAllianceString
     if (const Offer* pMainOffer = allies.getOffer(allies.find(MAIN_ID))) {
         // Allies
         CommandContainer& cc = CommandExtra::create(m_turn).create(m_player);

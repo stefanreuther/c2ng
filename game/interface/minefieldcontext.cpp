@@ -81,7 +81,7 @@ game::interface::MinefieldContext::lookup(const afl::data::NameQuery& name, Prop
 }
 
 void
-game::interface::MinefieldContext::set(PropertyIndex_t index, afl::data::Value* value)
+game::interface::MinefieldContext::set(PropertyIndex_t index, const afl::data::Value* value)
 {
     // ex IntMinefieldContext::set
     if (game::map::Minefield* mf = getObject()) {

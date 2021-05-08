@@ -14,6 +14,7 @@
 #include "afl/io/internaldirectory.hpp"
 #include "afl/io/nullfilesystem.hpp"
 #include "afl/io/stream.hpp"
+#include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
 #include "interpreter/arrayvalue.hpp"
 #include "interpreter/defaultstatementcompilationcontext.hpp"
@@ -21,10 +22,10 @@
 #include "interpreter/memorycommandsource.hpp"
 #include "interpreter/process.hpp"
 #include "interpreter/singlecontext.hpp"
+#include "interpreter/specialcommand.hpp"
 #include "interpreter/structurevalue.hpp"
 #include "interpreter/subroutinevalue.hpp"
 #include "interpreter/world.hpp"
-#include "interpreter/specialcommand.hpp"
 
 // #define DEBUG_DISASSEMBLY
 #ifdef DEBUG_DISASSEMBLY
@@ -92,7 +93,7 @@ namespace {
                     return 0;
                 }
             }
-        virtual void set(PropertyIndex_t index, afl::data::Value* value)
+        virtual void set(PropertyIndex_t index, const afl::data::Value* value)
             { m_world.globalValues().set(index, value); }
         virtual afl::data::Value* get(PropertyIndex_t index)
             { return afl::data::Value::cloneOf(m_world.globalValues().get(index)); }
@@ -134,8 +135,9 @@ namespace {
      public:
         TestHarness()
             : m_log(),
+              m_translator(),
               m_fileSystem(),
-              m_world(m_log, m_fileSystem),
+              m_world(m_log, m_translator, m_fileSystem),
               m_pProcess()
             {
                 setGlobalInt("A", 0);
@@ -217,6 +219,7 @@ namespace {
 
      private:
         afl::sys::Log m_log;
+        afl::string::NullTranslator m_translator;
         afl::io::NullFileSystem m_fileSystem;
         interpreter::World m_world;
         std::auto_ptr<Process> m_pProcess;
@@ -2386,8 +2389,9 @@ void
 TestInterpreterStatementCompiler::testPreexecLoad()
 {
     afl::sys::Log log;
+    afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
-    interpreter::World world(log, fs);
+    interpreter::World world(log, tx, fs);
 
     // Set load directory
     Ref<InternalDirectory> dir = InternalDirectory::create("dir");
@@ -2646,8 +2650,9 @@ void
 TestInterpreterStatementCompiler::testCompileList()
 {
     afl::sys::Log log;
+    afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
-    interpreter::World world(log, fs);
+    interpreter::World world(log, tx, fs);
 
     // Build a command source
     interpreter::MemoryCommandSource mcs;

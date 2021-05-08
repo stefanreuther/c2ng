@@ -49,7 +49,7 @@ game::interface::PlayerContext::lookup(const afl::data::NameQuery& name, Propert
 }
 
 void
-game::interface::PlayerContext::set(PropertyIndex_t /*index*/, afl::data::Value* /*value*/)
+game::interface::PlayerContext::set(PropertyIndex_t /*index*/, const afl::data::Value* /*value*/)
 {
     // ex IntPlayerContext::set
     throw interpreter::Error::notAssignable();

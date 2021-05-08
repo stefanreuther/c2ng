@@ -5,6 +5,7 @@
 #include "game/msg/inbox.hpp"
 #include "afl/string/char.hpp"
 #include "game/player.hpp"
+#include "game/msg/configuration.hpp"
 
 namespace {
     /** Simplify message header.
@@ -88,7 +89,7 @@ game::msg::Inbox::getMessageHeading(size_t index, afl::string::Translator& tx, c
     /* It is a message in our preferred format */
     String_t pre = "(";
     pre += line[2];
-    pre += ')';
+    pre += ") ";
     switch (afl::string::charToUpper(line[2])) {
      case 'R':
         if (line.size() > 3) {
@@ -147,10 +148,31 @@ game::msg::Inbox::getMessageTurnNumber(size_t index) const
     }
 }
 
+bool
+game::msg::Inbox::isMessageFiltered(size_t index, afl::string::Translator& tx, const PlayerList& players, const Configuration& config) const
+{
+    return config.isHeadingFiltered(getMessageHeading(index, tx, players));
+}
+
+game::msg::Mailbox::Flags_t
+game::msg::Inbox::getMessageFlags(size_t /*index*/) const
+{
+    return Flags_t();
+}
+
+game::msg::Mailbox::Actions_t
+game::msg::Inbox::getMessageActions(size_t /*index*/) const
+{
+    return Actions_t();
+}
+
+void
+game::msg::Inbox::performMessageAction(size_t /*index*/, Action /*a*/)
+{
+    // No actions for now.
+}
+
 // Manipulation
-// /** Add a single message.
-//     \param str Complete text of message
-//     \param receiver Receiver of this message */
 void
 game::msg::Inbox::addMessage(String_t text, int turnNumber)
 {
@@ -158,11 +180,8 @@ game::msg::Inbox::addMessage(String_t text, int turnNumber)
     m_messages.pushBackNew(new Message(text, turnNumber));
 }
 
-// /** Sort messages. This will group messages of equal subjects
-//     together, but preserves the overall order (i.e. messages from
-//     other races will remain first). */
 void
-game::msg::Inbox::sort(afl::string::Translator& tx, PlayerList& players)
+game::msg::Inbox::sort(afl::string::Translator& tx, const PlayerList& players)
 {
     // ex GInbox::sort
     afl::container::PtrVector<Message> newData;

@@ -13,6 +13,7 @@
 #include "afl/io/filemapping.hpp"
 #include "afl/io/internaldirectory.hpp"
 #include "afl/string/nulltranslator.hpp"
+#include "game/test/counter.hpp"
 
 /** Test initialisation.
     Object must report virgin state. */
@@ -22,6 +23,7 @@ TestGameTeamSettings::testInit()
     game::TeamSettings testee;
     TS_ASSERT(!testee.hasAnyTeams());
     TS_ASSERT(!testee.isNamedTeam(9));
+    TS_ASSERT_EQUALS(testee.getTeamPlayers(9), game::PlayerSet_t(9));
 }
 
 /** Test setters and getters. */
@@ -47,6 +49,9 @@ TestGameTeamSettings::testSet()
     TS_ASSERT_EQUALS(testee.getNumTeamMembers(2), 3);     // 1, 2, 9
     TS_ASSERT_EQUALS(testee.getNumTeamMembers(1), 0);
     TS_ASSERT_EQUALS(testee.getNumTeamMembers(4), 2);     // 4, 8
+    TS_ASSERT_EQUALS(testee.getTeamPlayers(2), game::PlayerSet_t() + 1 + 2 + 9);
+    TS_ASSERT_EQUALS(testee.getTeamPlayers(1), game::PlayerSet_t());
+    TS_ASSERT_EQUALS(testee.getTeamPlayers(4), game::PlayerSet_t() + 4 + 8);
 
     // Some names
     testee.setTeamName(1, "One");
@@ -148,7 +153,7 @@ TestGameTeamSettings::testLoadSave()
 
     // Test
     game::TeamSettings testee;
-    TS_ASSERT_THROWS_NOTHING(testee.load(*dir, 9, cs));
+    TS_ASSERT_THROWS_NOTHING(testee.load(*dir, 9, cs, tx));
     TS_ASSERT_EQUALS(testee.getTeamName(1, tx), "human");
     TS_ASSERT_EQUALS(testee.getTeamName(9, tx), "icke");
 
@@ -162,5 +167,28 @@ TestGameTeamSettings::testLoadSave()
     // Verify file has been recreated with identical content
     afl::base::Ref<afl::io::Stream> file = dir->openFile("team9.cc", afl::io::FileSystem::OpenRead);
     TS_ASSERT_EQUALS(file->createVirtualMapping()->get().equalContent(DATA), true);
+}
+
+/** Test copyFrom(). */
+void
+TestGameTeamSettings::testCopyFrom()
+{
+    afl::string::NullTranslator tx;
+    game::test::Counter counter;
+    game::TeamSettings a;
+    a.sig_teamChange.add(&counter, &game::test::Counter::increment);
+    
+    game::TeamSettings b;
+    b.copyFrom(a);
+    TS_ASSERT_EQUALS(counter.get(), 0);
+
+    b.setTeamName(3, "three");
+    b.setPlayerTeam(7, 3);
+    TS_ASSERT_EQUALS(counter.get(), 0);
+
+    a.copyFrom(b);
+    TS_ASSERT_EQUALS(counter.get(), 1);
+    TS_ASSERT_EQUALS(a.getPlayerTeam(7), 3);
+    TS_ASSERT_EQUALS(a.getTeamName(3, tx), "three");
 }
 

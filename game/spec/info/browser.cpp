@@ -150,17 +150,18 @@ game::spec::info::Browser::Browser(const PictureNamer& picNamer, const Root& roo
 }
 
 std::auto_ptr<game::spec::info::PageContent>
-game::spec::info::Browser::describeItem(Page p, Id_t id) const
+game::spec::info::Browser::describeItem(Page p, Id_t id, bool withCost) const
 {
     std::auto_ptr<PageContent> result(new PageContent());
     switch (p) {
-     case PlayerPage:          describePlayer       (*result, id);                                                                        break;
-     case HullPage:            describeHull         (*result, id, m_shipList, true, m_picNamer, m_root, m_viewpointPlayer, m_translator); break;
-     case RacialAbilitiesPage: describeRacialAbility(*result, id);                                                                        break;
-     case ShipAbilitiesPage:   describeShipAbility  (*result, id);                                                                        break;
-     case EnginePage:          describeEngine       (*result, id, m_shipList, true, m_picNamer, m_root, m_viewpointPlayer, m_translator); break;
-     case BeamPage:            describeBeam         (*result, id, m_shipList, true, m_picNamer, m_root, m_viewpointPlayer, m_translator); break;
-     case TorpedoPage:         describeTorpedo      (*result, id, m_shipList, true, m_picNamer, m_root, m_viewpointPlayer, m_translator); break;
+     case PlayerPage:          describePlayer       (*result, id);                                                                            break;
+     case HullPage:            describeHull         (*result, id, m_shipList, withCost, m_picNamer, m_root, m_viewpointPlayer, m_translator); break;
+     case RacialAbilitiesPage: describeRacialAbility(*result, id);                                                                            break;
+     case ShipAbilitiesPage:   describeShipAbility  (*result, id);                                                                            break;
+     case EnginePage:          describeEngine       (*result, id, m_shipList, withCost, m_picNamer, m_root, m_viewpointPlayer, m_translator); break;
+     case BeamPage:            describeBeam         (*result, id, m_shipList, withCost, m_picNamer, m_root, m_viewpointPlayer, m_translator); break;
+     case TorpedoPage:         describeTorpedo      (*result, id, m_shipList, withCost, m_picNamer, m_root, m_viewpointPlayer, m_translator); break;
+     case FighterPage:         describeFighter      (*result, id, m_shipList, withCost, m_picNamer, m_root,                    m_translator); break;
     }
     return result;
 }
@@ -177,6 +178,7 @@ game::spec::info::Browser::listItems(Page p, const Filter& f, FilterAttribute so
      case EnginePage:          listEngines(*result, f);         break;
      case BeamPage:            listBeams(*result, f);           break;
      case TorpedoPage:         listTorpedoes(*result, f);       break;
+     case FighterPage:         listFighters(*result, f);        break;
     }
 
     if (sort == Range_Id) {
@@ -312,6 +314,10 @@ game::spec::info::Browser::getAvailableFilterAttributes(Page p) const
             result += Range_IsDeathRay;
         }
         break;
+     case FighterPage:
+        result = FilterAttributes_t() + Range_CostD + Range_CostM + Range_CostMC + Range_CostT
+            + Range_DamagePower + Range_KillPower + Range_RechargeTime + Value_Player;
+        break;
     }
     return result;
 }
@@ -359,6 +365,7 @@ game::spec::info::Browser::addItemFilter(Filter& f, Page p, Id_t id) const
      case EnginePage:
      case BeamPage:
      case TorpedoPage:
+     case FighterPage:
         // No filter
         break;
     }
@@ -405,6 +412,9 @@ game::spec::info::Browser::getAttribute(Page p, Id_t id, FilterAttribute att) co
             return getTorpedoAttribute(*tl, att, m_root, m_viewpointPlayer);
         }
         break;
+
+     case FighterPage:
+        return getFighterAttribute(Fighter(id, m_root.hostConfiguration(), m_root.playerList(), m_translator), att, m_root);
     }
     return OptionalInt_t();
 }
@@ -910,6 +920,71 @@ game::spec::info::Browser::matchComponentName(const Component& comp, const Strin
     return m.ok()
         || m(comp.getName(m_shipList.componentNamer()))
         || m(comp.getShortName(m_shipList.componentNamer()));
+}
+
+void
+game::spec::info::Browser::listFighters(ListContent& content, const Filter& f) const
+{
+    for (Player* pl = m_root.playerList().getFirstPlayer(); pl != 0; pl = m_root.playerList().getNextPlayer(pl)) {
+        Fighter ftr(pl->getId(), m_root.hostConfiguration(), m_root.playerList(), m_translator);
+        if (matchFighter(ftr, f)) {
+            content.content.push_back(ListEntry(ftr.getName(m_shipList.componentNamer()), ftr.getId()));
+        }
+    }
+}
+
+inline bool
+game::spec::info::Browser::matchFighter(const Fighter& ftr, const Filter& f) const
+{
+    if (!matchComponentName(ftr, f.getNameFilter())) {
+        return false;
+    }
+    for (Filter::Iterator_t it = f.begin(); it != f.end(); ++it) {
+        if (!matchFighter(ftr, *it)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+inline bool
+game::spec::info::Browser::matchFighter(const Fighter& ftr, const FilterElement& e) const
+{
+    switch (e.att) {
+     case Range_CostD:
+     case Range_CostM:
+     case Range_CostMC:
+     case Range_CostT:
+     case Range_DamagePower:
+     case Range_HitOdds:
+     case Range_IsArmed:
+     case Range_IsDeathRay:
+     case Range_KillPower:
+     case Range_Mass:
+     case Range_MaxBeams:
+     case Range_MaxCargo:
+     case Range_MaxCrew:
+     case Range_MaxEfficientWarp:
+     case Range_MaxFuel:
+     case Range_MaxLaunchers:
+     case Range_NumBays:
+     case Range_NumEngines:
+     case Range_NumMinesSwept:
+     case Range_RechargeTime:
+     case Range_Tech:
+     case Range_TorpCost:
+     case Range_Id:
+        return matchAttribute(getFighterAttribute(ftr, e.att, m_root), e.range);
+     case Value_Player:
+        return e.value == ftr.getId();
+     case Value_Hull:
+     case Value_Category:
+     case Value_Origin:
+     case ValueRange_ShipAbility:
+     case String_Name:
+        break;
+    }
+    return true;
 }
 
 void

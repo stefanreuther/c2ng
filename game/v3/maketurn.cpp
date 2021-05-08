@@ -210,7 +210,7 @@ game::v3::Maketurn::makeTurn(int playerNr, afl::sys::LogListener& log)
     // Load key
     std::auto_ptr<afl::charset::Charset> keyCS(m_charset.clone());
     RegistrationKey key(keyCS);
-    key.initFromDirectory(m_directory, log);
+    key.initFromDirectory(m_directory, log, m_translator);
 
     // Configure
     thisTurn.setFeatures(TurnFile::FeatureSet_t() + TurnFile::WinplanFeature);
@@ -261,7 +261,7 @@ game::v3::Maketurn::saveAll(afl::sys::LogListener& log, afl::io::FileSystem& fs,
 {
     // ex GMaketurn::writeTurns
     m_turns.updateTrailers();
-    m_turns.saveAll(log, m_playerList, fs, config);
+    m_turns.saveAll(log, m_playerList, fs, config, m_translator);
 }
 
 // Get number of prepared turns in this object.

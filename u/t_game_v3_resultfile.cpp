@@ -9,13 +9,13 @@
 #include "afl/except/fileproblemexception.hpp"
 #include "afl/io/constmemorystream.hpp"
 #include "afl/string/nulltranslator.hpp"
-#include "u/files.hpp"
+#include "game/test/files.hpp"
 
 /** Test v3.0 result file. */
 void
 TestGameV3ResultFile::test30()
 {
-    afl::io::ConstMemoryStream file(getResultFile30());
+    afl::io::ConstMemoryStream file(game::test::getResultFile30());
     afl::string::NullTranslator tx;
     game::v3::ResultFile result(file, tx);
 
@@ -66,7 +66,7 @@ TestGameV3ResultFile::test30()
 void
 TestGameV3ResultFile::test35()
 {
-    afl::io::ConstMemoryStream file(getResultFile35());
+    afl::io::ConstMemoryStream file(game::test::getResultFile35());
     afl::string::NullTranslator tx;
     game::v3::ResultFile result(file, tx);
 

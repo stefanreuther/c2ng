@@ -113,6 +113,7 @@ game::interface::IFCCNotify(interpreter::Process& proc, game::Session& session, 
     afl::string::Translator& tx = session.translator();
     String_t header;
 
+    // FIXME: should this really be getInvokingObject()?
     game::map::Object* obj = proc.getInvokingObject();
     if (dynamic_cast<game::map::Planet*>(obj) != 0) {
         header = Format(tx("(-p%04d)<<< Planet >>>\n\n"), obj->getId());
@@ -127,4 +128,15 @@ game::interface::IFCCNotify(interpreter::Process& proc, game::Session& session, 
     session.notifications().addMessage(assoc ? NotificationStore::ProcessAssociation_t(proc.getProcessId()) : NotificationStore::ProcessAssociation_t(),
                                        header,
                                        text);
+}
+
+/* @q CC$NumNotifications():Int (Internal)
+   Get number of notifications.
+   This is a temporary stop-gap measure before notifications are published entirely.
+   @since PCC2 2.40.10 */
+afl::data::Value*
+game::interface::IFCCNumNotifications(game::Session& session, interpreter::Arguments& args)
+{
+    args.checkArgumentCount(0);
+    return interpreter::makeIntegerValue(int(session.notifications().getNumMessages()));
 }

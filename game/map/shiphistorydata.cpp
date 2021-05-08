@@ -13,8 +13,6 @@ game::map::clearShipHistory(ShipHistoryData& d)
     }
 }
 
-// /** Adjust ship track info to start no later than turn.
-//     \post turn <= info.track_turn */
 game::map::ShipHistoryData::Track*
 game::map::adjustShipHistory(ShipHistoryData& d, int turn)
 {

@@ -11,26 +11,37 @@
 #include "ui/layout/hbox.hpp"
 #include "ui/layout/vbox.hpp"
 #include "ui/prefixargument.hpp"
+#include "ui/res/resid.hpp"
 #include "ui/spacer.hpp"
 #include "ui/widgets/button.hpp"
 #include "ui/widgets/checkbox.hpp"
 #include "ui/widgets/focusablegroup.hpp"
 #include "ui/widgets/focusiterator.hpp"
+#include "util/rich/parser.hpp"
 
-client::dialogs::CargoTransferDialog::CargoTransferDialog(ui::Root& root, game::proxy::CargoTransferProxy& proxy)
+client::dialogs::CargoTransferDialog::CargoTransferDialog(ui::Root& root, afl::string::Translator& tx, game::proxy::CargoTransferProxy& proxy)
     : m_root(root),
+      m_translator(tx),
       m_proxy(proxy),
       m_loop(root),
       m_lines(),
-      m_sellSupplies(false)
+      m_sellSupplies(false),
+      m_overloadCheckbox(root, 'o', tx("Overload mode"), gfx::Point(20, 20)),
+      m_overload(false)
 {
     proxy.sig_change.add(this, &CargoTransferDialog::onChange);
+    m_overloadCheckbox.setImage(RESOURCE_ID("ui.cb0"));
+    m_overloadCheckbox.sig_fire.add(this, &CargoTransferDialog::onEnableOverload);
+    m_overloadCheckbox.setIsFocusable(false);
 }
 
 bool
-client::dialogs::CargoTransferDialog::run(afl::string::Translator& tx, util::RequestSender<game::Session> gameSender)
+client::dialogs::CargoTransferDialog::run(util::RequestSender<game::Session> gameSender)
 {
-    Downlink link(m_root);
+    // ex transfer.pas:CargoTransfer
+    afl::string::Translator& tx = m_translator;
+
+    Downlink link(m_root, tx);
     game::proxy::CargoTransferProxy::General gen;
     m_proxy.getGeneralInformation(link, gen);
 
@@ -42,13 +53,13 @@ client::dialogs::CargoTransferDialog::run(afl::string::Translator& tx, util::Req
 
     if (gen.validTypes.empty()) {
         ui::dialogs::MessageBox(afl::string::Format(tx("There is nothing you could transfer to or from %s."), right.name),
-                                tx("Cargo Transfer"), m_root).doOkDialog();
+                                tx("Cargo Transfer"), m_root).doOkDialog(tx);
         return false;
     }
 
     afl::base::Deleter del;
     ui::Window& win(del.addNew(new ui::Window(tx("Cargo Transfer"), m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5)));
-    win.add(del.addNew(new client::widgets::CargoTransferHeader(m_root, left.name, right.name)));
+    win.add(del.addNew(new client::widgets::CargoTransferHeader(m_root, tx, left.name, right.name)));
 
     ui::Group& lineGroup = del.addNew(new ui::Group(ui::layout::VBox::instance0));
     ui::widgets::FocusIterator& iter = del.addNew(new ui::widgets::FocusIterator(ui::widgets::FocusIterator::Vertical + ui::widgets::FocusIterator::Wrap));
@@ -66,7 +77,7 @@ client::dialogs::CargoTransferDialog::run(afl::string::Translator& tx, util::Req
                 name += unit;
                 name += "]";
             }
-            client::widgets::CargoTransferLine& line = del.addNew(new client::widgets::CargoTransferLine(m_root, name, int(type), fmt));
+            client::widgets::CargoTransferLine& line = del.addNew(new client::widgets::CargoTransferLine(m_root, tx, name, int(type), fmt));
             line.setAmounts(false, left.cargo.amount.get(type), left.cargo.remaining.get(type));
             line.setAmounts(true, right.cargo.amount.get(type), right.cargo.remaining.get(type));
             line.sig_move.add(this, &CargoTransferDialog::onMove);
@@ -94,12 +105,12 @@ client::dialogs::CargoTransferDialog::run(afl::string::Translator& tx, util::Req
         g.add(btnUnload);
     }
     if (gen.allowSupplySale) {
-        // FIXME: Using a checkbox will capture keyboard focus. Can we avoid this?
         ui::widgets::Checkbox& cb = del.addNew(new ui::widgets::Checkbox(m_root, 's', tx("Sell supplies"), m_sellSupplies));
         cb.addDefaultImages();
+        cb.setIsFocusable(false);
         g.add(cb);
-        iter.add(cb);
     }
+    g.add(m_overloadCheckbox);
 
     g.add(del.addNew(new ui::Spacer()));
     g.add(btnOK);
@@ -110,7 +121,7 @@ client::dialogs::CargoTransferDialog::run(afl::string::Translator& tx, util::Req
     btnCancel.sig_fire.addNewClosure(m_loop.makeStop(0));
 
     win.pack();
-    m_root.moveWidgetToEdge(win, 1, 0, 10);
+    m_root.moveWidgetToEdge(win, gfx::CenterAlign, gfx::TopAlign, 10);
     m_root.add(win);
 
     bool result = m_loop.run() != 0;
@@ -143,4 +154,28 @@ client::dialogs::CargoTransferDialog::onChange(size_t side, const game::proxy::C
             }
         }
     }
+}
+
+void
+client::dialogs::CargoTransferDialog::onEnableOverload()
+{
+    if (m_overload) {
+        return;
+    }
+
+    ui::dialogs::MessageBox box(util::rich::Parser::parseXml(m_translator(
+                                                                 "<small>Overload Mode allows you to load more cargo onto ships than PCC usually permits. "
+                                                                 "This is useful in some situations when you exactly know what you're doing; "
+                                                                 "you need to clean up manually to stay within limits.\n"
+                                                                 "Ending the turn with an overloaded ship is a rule violation; "
+                                                                 "Host will usually detect that and destroy excess cargo.</small>\n"
+                                                                 "Turn on Overload Mode?")),
+                                m_translator("Cargo Transfer"),
+                                m_root);
+    if (box.doYesNoDialog(m_translator)) {
+        m_overload = true;
+        m_overloadCheckbox.setImage(RESOURCE_ID("ui.cb1"));
+        m_overloadCheckbox.setState(ui::Widget::DisabledState, true);
+        m_proxy.setOverload(true);
+    }    
 }

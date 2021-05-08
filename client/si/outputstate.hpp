@@ -32,6 +32,8 @@ namespace client { namespace si {
         RequestLink2 getProcess() const;
         Target getTarget() const;
 
+        bool isValid() const;
+
         static String_t toString(OutputState::Target target);
 
      private:

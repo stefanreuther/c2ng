@@ -32,8 +32,6 @@ game::interface::ObjectCommand::clone() const
     return new ObjectCommand(m_session, m_object, m_function);
 }
 
-// /** Implementation of the "Mark" command.
-//     Syntax: 'Mark [flag]' */
 void
 game::interface::IFObjMark(game::Session& /*session*/, game::map::Object& obj, interpreter::Process& /*proc*/, interpreter::Arguments& args)
 {
@@ -61,8 +59,6 @@ game::interface::IFObjMark(game::map::Object& obj, interpreter::Arguments& args)
     obj.setIsMarked(state);
 }
 
-// /** Implementation of the "Unmark" command.
-//     Syntax: 'Unmark' */
 void
 game::interface::IFObjUnmark(game::Session& /*session*/, game::map::Object& obj, interpreter::Process& /*proc*/, interpreter::Arguments& args)
 {

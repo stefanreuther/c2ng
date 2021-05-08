@@ -7,14 +7,15 @@
 #include "interpreter/procedurevalue.hpp"
 
 #include "t_interpreter.hpp"
-#include "interpreter/error.hpp"
-#include "afl/io/internalsink.hpp"
-#include "interpreter/vmio/nullsavecontext.hpp"
 #include "afl/charset/utf8charset.hpp"
-#include "afl/sys/log.hpp"
+#include "afl/io/internalsink.hpp"
 #include "afl/io/nullfilesystem.hpp"
-#include "interpreter/world.hpp"
+#include "afl/string/nulltranslator.hpp"
+#include "afl/sys/log.hpp"
+#include "interpreter/error.hpp"
 #include "interpreter/process.hpp"
+#include "interpreter/vmio/nullsavecontext.hpp"
+#include "interpreter/world.hpp"
 
 /** Interface test. */
 void
@@ -71,13 +72,14 @@ TestInterpreterProcedureValue::testIt()
     // Test invocation
     {
         afl::sys::Log log;
+        afl::string::NullTranslator tx;
         afl::io::NullFileSystem fs;
         afl::data::Segment seg;
         seg.pushBackNew(0);
         seg.pushBackNew(0);
         seg.pushBackNew(0);
 
-        interpreter::World world(log, fs);
+        interpreter::World world(log, tx, fs);
         interpreter::Process proc(world, "TestInterpreterProcedureValue::testIt", 999);
 
         TS_ASSERT_EQUALS(proc.getStackSize(), 0U);

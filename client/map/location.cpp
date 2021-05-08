@@ -232,6 +232,7 @@ client::map::Location::setConfiguration(const game::map::Configuration& config)
 void
 client::map::Location::setPosition(game::map::Point pt)
 {
+    // ex GChartLocation::setLocation, GChartLocation::updateLocation (sort-of)
     // Take over new position
     bool change = (pt != m_cursorPosition);
     if (change) {
@@ -241,6 +242,7 @@ client::map::Location::setPosition(game::map::Point pt)
     }
 
     // State transition
+    m_log.write(afl::sys::Log::Trace, LOG_NAME, afl::string::Format("Trigger: setPosition(%s,%s)", m_cursorPosition.toString(), change ? "true" : "false"));
     m_pState->onPositionChange(*this, change);
 
     // Report change
@@ -269,6 +271,7 @@ client::map::Location::setFocusedObject(game::Reference ref)
 void
 client::map::Location::cycleFocusedObject(bool forward, bool markedOnly)
 {
+    // ex GChartLocation::doScroll
     using game::ref::UserList;
 
     // Implementing this using the public methods means that those methods to the state check and we don't have to.
@@ -301,6 +304,7 @@ client::map::Location::cycleFocusedObject(bool forward, bool markedOnly)
 game::Reference
 client::map::Location::getFocusedObject() const
 {
+    // ex GChartLocation::getCurrentObject, (GChartLocation::getCurrentShipId)
     return m_focusedObject;
 }
 

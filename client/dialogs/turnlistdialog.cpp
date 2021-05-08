@@ -239,7 +239,7 @@ client::dialogs::TurnListDialog::TurnListDialog(ui::Root& root,
       m_sender(sender),
       m_receiver(root.engine().dispatcher(), *this),
       m_list(gfx::Point(12, 15), // FIXME: magic numbers
-             root),
+             root, tx),
       m_loop(root),
       m_activationTimer(root.engine().createTimer()),
       m_pendingActivation(false)
@@ -395,19 +395,19 @@ client::dialogs::TurnListDialog::handleSelect()
 
          case TurnListbox::Unavailable:
             // Failed
-            ui::dialogs::MessageBox(util::rich::Parser::parseXml(m_translator.translateString("This turn is not available.\n\n"
-                                                                                              "<small>Enable the backup functionality in <b>Options</b> to make PCC2 save copies of old result files.</small>")),
-                                    m_translator.translateString("Turn History"),
+            ui::dialogs::MessageBox(util::rich::Parser::parseXml(m_translator("This turn is not available.\n\n"
+                                                                              "<small>Enable the backup functionality in <b>Options</b> to make PCC2 save copies of old result files.</small>")),
+                                    m_translator("Turn History"),
                                     m_root)
-                .doOkDialog();
+                .doOkDialog(m_translator);
             return true;
 
          case TurnListbox::Failed:
             // Failed already
-            ui::dialogs::MessageBox(m_translator.translateString("There was an error loading this turn."),
-                                    m_translator.translateString("Turn History"),
+            ui::dialogs::MessageBox(m_translator("There was an error loading this turn."),
+                                    m_translator("Turn History"),
                                     m_root)
-                .doOkDialog();
+                .doOkDialog(m_translator);
             return true;
 
          case TurnListbox::Loaded:

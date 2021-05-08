@@ -191,8 +191,40 @@ client::map::Widget::zoomOut()
     requestRedraw();
 }
 
+void
+client::map::Widget::setZoom(int mult, int divi)
+{
+    m_renderer.setZoom(mult, divi);
+    maybeRequestNewRange();
+    requestRedraw();
+}
+
+void
+client::map::Widget::toggleOptions(game::map::RenderOptions::Options_t opts)
+{
+    m_proxy.toggleOptions(opts);
+}
+
+void
+client::map::Widget::setDrawingTagFilter(util::Atom_t tag)
+{
+    m_proxy.setDrawingTagFilter(tag);
+}
+
+void
+client::map::Widget::clearDrawingTagFilter()
+{
+    m_proxy.clearDrawingTagFilter();
+}
+
 const client::map::Renderer&
 client::map::Widget::renderer() const
 {
     return m_renderer;
+}
+
+ui::Root&
+client::map::Widget::root()
+{
+    return m_root;
 }

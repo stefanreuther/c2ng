@@ -8,7 +8,7 @@
 #include "t_game_interface.hpp"
 #include "game/session.hpp"
 #include "game/game.hpp"
-#include "u/helper/contextverifier.hpp"
+#include "interpreter/test/contextverifier.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "afl/io/nullfilesystem.hpp"
 
@@ -29,16 +29,17 @@ TestGameInterfaceExplosionContext::testIt()
 
     // Test it
     game::interface::ExplosionContext testee(1, session, session.getGame()->currentTurn());
-    verifyTypes(testee);
+    interpreter::test::ContextVerifier v(testee, "testIt");
+    v.verifyTypes();
 
     // Verify some values
-    verifyInteger(testee, "ID", 1);
-    verifyInteger(testee, "ID.SHIP", 23);
-    verifyInteger(testee, "LOC.X", 1000);
-    verifyInteger(testee, "LOC.Y", 1020);
-    verifyString(testee, "TYPE", "Explosion");
-    verifyString(testee, "TYPE.SHORT", "E");
-    verifyString(testee, "NAME.SHIP", "Excalibur");
-    verifyString(testee, "NAME", "Explosion of Excalibur (#23)");
+    v.verifyInteger("ID", 1);
+    v.verifyInteger("ID.SHIP", 23);
+    v.verifyInteger("LOC.X", 1000);
+    v.verifyInteger("LOC.Y", 1020);
+    v.verifyString("TYPE", "Explosion");
+    v.verifyString("TYPE.SHORT", "E");
+    v.verifyString("NAME.SHIP", "Excalibur");
+    v.verifyString("NAME", "Explosion of Excalibur (#23)");
 }
 

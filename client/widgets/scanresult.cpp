@@ -142,7 +142,7 @@ client::widgets::ScanResult::setPositions(game::map::Point origin, game::map::Po
                 if (pGame != 0 && pRoot != 0) {
                     afl::base::Ptr<game::Turn> pTurn = pGame->getViewpointTurn();
                     if (pTurn.get() != 0) {
-                        resultText = pTurn->universe().getLocationName(m_target, NAME_FLAGS, pRoot->hostConfiguration(), pRoot->hostVersion(), tx);
+                        resultText = pTurn->universe().findLocationName(m_target, NAME_FLAGS, pRoot->hostConfiguration(), pRoot->hostVersion(), tx);
                     }
                 }
 
@@ -206,30 +206,3 @@ client::widgets::ScanResult::setScanResult(game::map::Point origin, game::map::P
         m_table.cell(1, 1).setText(distanceText);
     }
 }
-
-// FIXME: delete these:
-//       button_l("L", 'l'),
-//       button_y("Y", 'y')
-// {
-//     if (with_buttons) {
-//         addChildWidget(button_l, 0);
-//         addChildWidget(button_y, 0);
-//     }
-// }
-// /** Get scanned planet Id.
-//     \param exact=true    get Id of planet scanned exactly
-//     \param exact=false   get Id of planet whose gravity is scanned
-//     \return planet Id, 0 if none */
-// inline int
-// WScanResult::getScannedPlanetId(bool exact) const
-// {
-//     return exact ? xpid : gpid;
-// }
-
-// /** Get scanned ship Id.
-//     \return ship Id, 0 if none */
-// inline int
-// WScanResult::getScannedShipId() const
-// {
-//     return sid;
-// }

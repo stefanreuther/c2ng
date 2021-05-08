@@ -11,8 +11,6 @@
 
 namespace game { namespace map {
 
-    class Universe;
-
     /** Minefield.
         Minefields can be scanned anew or known from history.
         For this, the Minefield class allows consumption of reports.
@@ -101,8 +99,9 @@ namespace game { namespace map {
         void internalCheck(int currentTurn, const game::HostVersion& host, const game::config::HostConfiguration& config);
 
         /** Erase this minefield by making it not valid.
-            As per the rule that objects that are part of a Universe never disappear, the object remains existant. */
-        void erase();
+            As per the rule that objects that are part of a Universe never disappear, the object remains existant.
+            \param sig sig_setChange signal to raise in the process */
+        void erase(afl::base::Signal<void(Id_t)>* sig);
 
         /** Set number of mine units.
             This method is intended to be used on temporary Minefield objects only, not on those in the universe.

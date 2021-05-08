@@ -59,7 +59,7 @@ TestGameSpecInfoFilter::testDescribeElement()
     {
         gsi::FilterInfo i = testee.describe(gsi::FilterElement(gsi::Range_Mass, 42, gsi::IntRange_t(4, 10)), h.browser);
         TS_ASSERT_EQUALS(i.name, "Mass");
-        TS_ASSERT_EQUALS(i.value, "4...10");
+        TS_ASSERT_EQUALS(i.value, "4 to 10");
         TS_ASSERT_EQUALS(i.mode, gsi::EditRange);
         TS_ASSERT_EQUALS(i.maxRange.min(), 0);
         TS_ASSERT_EQUALS(i.maxRange.max(), 20000);
@@ -208,7 +208,7 @@ TestGameSpecInfoFilter::testModify()
         TS_ASSERT_EQUALS(result[0].name, "Player");
         TS_ASSERT_EQUALS(result[0].value, "The Q");
         TS_ASSERT_EQUALS(result[1].name, "Fighter Bays");
-        TS_ASSERT_EQUALS(result[1].value, "2...4");
+        TS_ASSERT_EQUALS(result[1].value, "2 to 4");
     }
 
     // Add name filter -> not shown in size(), but in describe()
@@ -221,7 +221,7 @@ TestGameSpecInfoFilter::testModify()
         TS_ASSERT_EQUALS(result[0].name, "Player");
         TS_ASSERT_EQUALS(result[0].value, "The Q");
         TS_ASSERT_EQUALS(result[1].name, "Fighter Bays");
-        TS_ASSERT_EQUALS(result[1].value, "2...4");
+        TS_ASSERT_EQUALS(result[1].value, "2 to 4");
         TS_ASSERT_EQUALS(result[2].name, "Name");
         TS_ASSERT_EQUALS(result[2].value, "dread");
         TS_ASSERT_EQUALS(result[2].mode, gsi::EditString);

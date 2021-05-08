@@ -122,7 +122,7 @@ ui::DefaultResourceProvider::addFont(afl::io::Directory& dir, const char* name, 
 {
     afl::base::Ref<afl::io::Stream> file = dir.openFile(name, afl::io::FileSystem::OpenRead);
     afl::base::Ptr<gfx::BitmapFont> font = new gfx::BitmapFont();
-    font->load(*file, 0);
+    font->load(*file, 0, m_translator);
     m_fontList.addFont(defn, font);
 }
 

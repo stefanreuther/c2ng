@@ -5,10 +5,11 @@
 #ifndef C2NG_GAME_SPEC_FIGHTER_HPP
 #define C2NG_GAME_SPEC_FIGHTER_HPP
 
-#include "game/spec/weapon.hpp"
-#include "game/config/hostconfiguration.hpp"
 #include "afl/string/translator.hpp"
+#include "game/config/hostconfiguration.hpp"
 #include "game/playerlist.hpp"
+#include "game/spec/weapon.hpp"
+#include "util/range.hpp"
 
 namespace game { namespace spec {
 
@@ -23,6 +24,11 @@ namespace game { namespace spec {
         If that is desired, it's up to the user. */
     class Fighter : public Weapon {
      public:
+        typedef util::Range<int32_t> Range_t;
+
+        /** Upper limit for intervals we return, for formatting. */
+        static const int32_t MAX_INTERVAL = 10000;
+
         /** Constructor.
             \param fighter Id (=player number)
             \param config Host configuration
@@ -32,6 +38,22 @@ namespace game { namespace spec {
                          const game::config::HostConfiguration& config,
                          const PlayerList& players,
                          afl::string::Translator& tx);
+
+        /** Get average recharge time.
+            This is an estimation for spec displays.
+            Combat algorithms will implement this internally.
+            \param host Host version
+            \param config Host configuration
+            \return average time between firing twice range */
+        Range_t getRechargeTime(const HostVersion& host, const game::config::HostConfiguration& config) const;
+
+        /** Get average number of strikes.
+            This is an estimation for spec displays.
+            Combat algorithms will implement this internally.
+            \param host Host version
+            \param config Host configuration
+            \return number of strikes range */
+        Range_t getNumStrikes(const HostVersion& host, const game::config::HostConfiguration& config) const;
     };
 
 } }

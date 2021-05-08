@@ -10,6 +10,18 @@ game::test::CargoContainer::getName(afl::string::Translator& /*tx*/) const
     return "<Test>";
 }
 
+String_t
+game::test::CargoContainer::getInfo1(afl::string::Translator& /*tx*/) const
+{
+    return String_t();
+}
+
+String_t
+game::test::CargoContainer::getInfo2(afl::string::Translator& /*tx*/) const
+{
+    return String_t();
+}
+
 game::CargoContainer::Flags_t
 game::test::CargoContainer::getFlags() const
 {

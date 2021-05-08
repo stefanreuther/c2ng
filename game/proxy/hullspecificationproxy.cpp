@@ -6,6 +6,7 @@
 #include "game/proxy/hullspecificationproxy.hpp"
 #include "game/game.hpp"
 #include "game/root.hpp"
+#include "game/spec/info/info.hpp"
 #include "game/spec/shiplist.hpp"
 #include "game/turn.hpp"
 #include "util/math.hpp"
@@ -41,7 +42,7 @@ game::proxy::HullSpecificationProxy::setExistingShipId(Id_t id)
                     if (pTurn != 0) {
                         q.initForExistingShip(pTurn->universe(), m_id, *pShipList, pRoot->hostConfiguration(), pGame->shipScores());
                     }
-                    sendReply(q, *pShipList, *pRoot, pGame->getViewpointPlayer(), *m_picNamer, m_reply);
+                    sendReply(q, *pShipList, *pRoot, pTurn ? &pTurn->universe() : 0, pGame->getViewpointPlayer(), *m_picNamer, s.translator(), m_reply);
                 }
                 // FIXME: should we handle the "no session" case?
             }
@@ -57,8 +58,10 @@ void
 game::proxy::HullSpecificationProxy::sendReply(ShipQuery& q,
                                                const game::spec::ShipList& shipList,
                                                const Root& root,
+                                               const game::map::Universe* pUniv,
                                                int player,
                                                game::spec::info::PictureNamer& picNamer,
+                                               afl::string::Translator& tx,
                                                util::RequestSender<HullSpecificationProxy> reply)
 {
     HullSpecification result = HullSpecification();
@@ -96,40 +99,22 @@ game::proxy::HullSpecificationProxy::sendReply(ShipQuery& q,
 
         // FIXME: add as functions of Hull
         if (root.hostVersion().isPBPGame(config)) {
-            // int build, kill, scrap;
-            int32_t mass = pHull->getMass();
-            if (root.hostVersion().isPHost()) {
-                /* Build */
-                result.pointsToBuild = std::max(mass * config[HostConfiguration::PBPCostPer100KT](player) / 100,
-                                                config[HostConfiguration::PBPMinimumCost](player));
-
-                /* Kill, estimation (since there are many ways to destroy it) */
-                result.pointsForKilling = mass * (config[HostConfiguration::PALAggressorPointsPer10KT](player) + config[HostConfiguration::PALAggressorKillPointsPer10KT](player)) / 10
-                    + config[HostConfiguration::PALCombatAggressor](player);
-
-                /* Scrap */
-                result.pointsForScrapping = mass * config[HostConfiguration::PALRecyclingPer10KT](player) / 10;
-            } else {
-                /* Build:
-                   - Vendetta (100 kt) => 2
-                   - Loki (101 kt) => 3 */
-                result.pointsToBuild = (mass + 49) / 50;
-
-                /* Kill:
-                   - Dwarfstar (100 kt) => 2 */
-                result.pointsForKilling = (mass / 100) + 1;
-
-                /* Scrap */
-                result.pointsForScrapping = 1;
-            }
+            result.pointsToBuild = pHull->getPointsToBuild(player, root.hostVersion(), config);
+            result.pointsForKilling = pHull->getPointsForKilling(player, root.hostVersion(), config);
+            result.pointsForScrapping = pHull->getPointsForScrapping(player, root.hostVersion(), config);
         }
 
         // Players
-        for (int i = 1; i <= MAX_PLAYERS; ++i) {
-            // FIXME: as function of HullAssignmentList?
-            if (shipList.hullAssignments().getIndexFromHull(root.hostConfiguration(), i, pHull->getId()) != 0) {
-                result.players += i;
-            }
+        result.players = shipList.hullAssignments().getPlayersForHull(root.hostConfiguration(), pHull->getId());
+
+        // Abilities
+        if (pUniv != 0) {
+            game::spec::HullFunctionList hfList;
+            q.enumerateShipFunctions(hfList, *pUniv, shipList, root.hostConfiguration(), false);
+            hfList.simplify();
+            hfList.sortForNewShip(q.getPlayerDisplaySet());
+
+            game::spec::info::describeHullFunctions(result.abilities, hfList, shipList, picNamer, root, tx);
         }
     }
 

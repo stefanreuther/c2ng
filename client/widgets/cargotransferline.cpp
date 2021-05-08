@@ -4,12 +4,12 @@
 
 #include "client/widgets/cargotransferline.hpp"
 #include "gfx/context.hpp"
-#include "util/translation.hpp"
 #include "util/unicodechars.hpp"
 #include "util/updater.hpp"
 
-client::widgets::CargoTransferLine::CargoTransferLine(ui::Root& root, String_t name, int id, util::NumberFormatter fmt)
+client::widgets::CargoTransferLine::CargoTransferLine(ui::Root& root, afl::string::Translator& tx, String_t name, int id, util::NumberFormatter fmt)
     : m_root(root),
+      m_translator(tx),
       m_name(name),
       m_id(id),
       m_numberFormatter(fmt),
@@ -60,7 +60,7 @@ client::widgets::CargoTransferLine::draw(gfx::Canvas& can)
     gfx::Context<util::SkinColor::Color> ctx(can, getColorScheme());
     ctx.useFont(*m_root.provider().getFont(gfx::FontRequest()));
     ctx.setColor(util::SkinColor::Static);
-    ctx.setTextAlign(0, 1);
+    ctx.setTextAlign(gfx::LeftAlign, gfx::MiddleAlign);
     outTextF(ctx, midArea, m_name);
 
     drawAmounts(can, true, area);
@@ -118,7 +118,7 @@ client::widgets::CargoTransferLine::getLayoutInfo() const
 bool
 client::widgets::CargoTransferLine::handleKey(util::Key_t key, int prefix)
 {
-    // ex WCargoLine::handleEvent
+    // ex WCargoLine::handleEvent, CCargoLine.Handle
     if (hasState(FocusedState)) {
         bool target = (key & util::Key_Mask) == util::Key_Left ? false : true;
         switch (key) {
@@ -165,16 +165,16 @@ client::widgets::CargoTransferLine::handleMouse(gfx::Point pt, MouseButtons_t pr
 void
 client::widgets::CargoTransferLine::drawAmounts(gfx::Canvas& can, bool right, gfx::Rectangle area)
 {
-    // ex WCargoLine::showText
+    // ex WCargoLine::showText, transfer.pas:ShowStatus
     gfx::Context<util::SkinColor::Color> ctx(can, getColorScheme());
     ctx.useFont(*m_root.provider().getFont(gfx::FontRequest()));
     ctx.setColor(util::SkinColor::Green);
-    ctx.setTextAlign(2, 1);
+    ctx.setTextAlign(gfx::RightAlign, gfx::MiddleAlign);
     area.grow(-10, 0);
 
     outTextF(ctx, area.splitX(area.getWidth()/2), m_numberFormatter.formatNumber(m_available[right]));
     if (m_remaining[right] > 20000) {
-        outTextF(ctx, area, _("(unl)"));
+        outTextF(ctx, area, m_translator("(unl)"));
     } else {
         outTextF(ctx, area, m_numberFormatter.formatNumber(m_remaining[right]));
     }

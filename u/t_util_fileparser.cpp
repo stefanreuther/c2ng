@@ -7,12 +7,13 @@
 #include "util/fileparser.hpp"
 
 #include "t_util.hpp"
-#include "afl/string/format.hpp"
-#include "afl/test/callreceiver.hpp"
-#include "afl/io/constmemorystream.hpp"
-#include "afl/test/assert.hpp"
-#include "afl/charset/codepagecharset.hpp"
 #include "afl/charset/codepage.hpp"
+#include "afl/charset/codepagecharset.hpp"
+#include "afl/io/constmemorystream.hpp"
+#include "afl/io/internaldirectory.hpp"
+#include "afl/string/format.hpp"
+#include "afl/test/assert.hpp"
+#include "afl/test/callreceiver.hpp"
 
 namespace {
     using afl::string::Format;
@@ -106,3 +107,27 @@ TestUtilFileParser::testTrimComments()
         TS_ASSERT_EQUALS(s, "");
     }
 }
+
+/** Test parseOptionalFile(). */
+void
+TestUtilFileParser::testParseOptional()
+{
+    afl::base::Ref<afl::io::InternalDirectory> dir = afl::io::InternalDirectory::create("dir");
+    dir->addStream("a", *new afl::io::ConstMemoryStream(afl::string::toBytes("first\n")));
+
+    {
+        TesterMock a("testParseOptional #1");
+        a.expectCall("handleLine(<memory>,1,first)");
+        bool ok = a.parseOptionalFile(*dir, "a");
+        TS_ASSERT(ok);
+        a.checkFinish();
+    }
+
+    {
+        TesterMock a("testParseOptional #2");
+        bool ok = a.parseOptionalFile(*dir, "b");
+        TS_ASSERT(!ok);
+        a.checkFinish();
+    }
+}
+

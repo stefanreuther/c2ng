@@ -9,6 +9,41 @@
 #include "afl/io/constmemorystream.hpp"
 #include "gfx/types.hpp"
 
+namespace {
+    String_t decodePixels(afl::base::Memory<gfx::ColorQuad_t> cs)
+    {
+        String_t result;
+        while (gfx::ColorQuad_t* c = cs.eat()) {
+            if (ALPHA_FROM_COLORQUAD(*c) == 0) {
+                result += ' ';
+            } else {
+                switch (*c) {
+                 case COLORQUAD_FROM_RGB(0, 0, 0):       result += 'b'; break;
+                 case COLORQUAD_FROM_RGB(255, 255, 255): result += 'W'; break;
+                 case COLORQUAD_FROM_RGB(64, 129, 64):   result += '~'; break;
+                 case COLORQUAD_FROM_RGB(194, 194, 194): result += '.'; break;
+                 case COLORQUAD_FROM_RGB(222, 222, 222): result += ':'; break;
+                 case COLORQUAD_FROM_RGB(97, 97, 97):    result += '+'; break;
+                 case COLORQUAD_FROM_RGB(125, 125, 125): result += '*'; break;
+                 case COLORQUAD_FROM_RGB(141, 141, 141): result += '#'; break;
+                 case COLORQUAD_FROM_RGB(238, 238, 238): result += '$'; break;
+                 default:                                result += '?'; break;
+                }
+            }
+        }
+        return result;
+    }
+
+    String_t decodeRow(gfx::Canvas& can, int width, int row)
+    {
+        std::vector<gfx::Color_t> color(width);
+        std::vector<gfx::ColorQuad_t> quad(width);
+        can.getPixels(gfx::Point(0, row), color);
+        can.decodeColors(color, quad);
+        return decodePixels(quad);
+    }
+}
+
 /** Load a compressed ".cd" image. */
 void
 TestUiResCCImageLoader::testCompressedCD()
@@ -34,24 +69,23 @@ TestUiResCCImageLoader::testCompressedCD()
     TS_ASSERT_EQUALS(can->getSize().getX(), 16);
     TS_ASSERT_EQUALS(can->getSize().getY(), 16);
 
-    // Verify some pixels
-    gfx::Color_t color[1];
-    gfx::ColorQuad_t quad[1];
-    can->getPixels(gfx::Point(0, 0), color);
-    can->decodeColors(color, quad);
-    TS_ASSERT_EQUALS(quad[0], COLORQUAD_FROM_RGB(125, 125, 125));
-
-    can->getPixels(gfx::Point(1, 0), color);
-    can->decodeColors(color, quad);
-    TS_ASSERT_EQUALS(quad[0], COLORQUAD_FROM_RGB(0, 0, 0));
-
-    can->getPixels(gfx::Point(1, 1), color);
-    can->decodeColors(color, quad);
-    TS_ASSERT_EQUALS(quad[0], COLORQUAD_FROM_RGB(222, 222, 222));
-
-    can->getPixels(gfx::Point(10, 10), color);
-    can->decodeColors(color, quad);
-    TS_ASSERT_EQUALS(quad[0], COLORQUAD_FROM_RGB(222, 222, 222));
+    // Verify pixels
+    TS_ASSERT_EQUALS(decodeRow(*can, 16,  0), "*bbbbbbbbbbbbbb*");
+    TS_ASSERT_EQUALS(decodeRow(*can, 16,  1), "b::::::::::::::W");
+    TS_ASSERT_EQUALS(decodeRow(*can, 16,  2), "b::::::::::::::W");
+    TS_ASSERT_EQUALS(decodeRow(*can, 16,  3), "b::::::::::::::W");
+    TS_ASSERT_EQUALS(decodeRow(*can, 16,  4), "b::::::::::::::W");
+    TS_ASSERT_EQUALS(decodeRow(*can, 16,  5), "b::::::::::::::W");
+    TS_ASSERT_EQUALS(decodeRow(*can, 16,  6), "b::::::::::::::W");
+    TS_ASSERT_EQUALS(decodeRow(*can, 16,  7), "b::::::::::::::W");
+    TS_ASSERT_EQUALS(decodeRow(*can, 16,  8), "b::::::::::::::W");
+    TS_ASSERT_EQUALS(decodeRow(*can, 16,  9), "b::::::::::::::W");
+    TS_ASSERT_EQUALS(decodeRow(*can, 16, 10), "b::::::::::::::W");
+    TS_ASSERT_EQUALS(decodeRow(*can, 16, 11), "b::::::::::::::W");
+    TS_ASSERT_EQUALS(decodeRow(*can, 16, 12), "b::::::::::::::W");
+    TS_ASSERT_EQUALS(decodeRow(*can, 16, 13), "b::::::::::::::W");
+    TS_ASSERT_EQUALS(decodeRow(*can, 16, 14), "b::::::::::::::W");
+    TS_ASSERT_EQUALS(decodeRow(*can, 16, 15), "*WWWWWWWWWWWWWW$");
 }
 
 /** Test an uncompressed ".gfx" image. */
@@ -105,20 +139,27 @@ TestUiResCCImageLoader::testUncompressedGFX()
     TS_ASSERT_EQUALS(can->getSize().getX(), 20);
     TS_ASSERT_EQUALS(can->getSize().getY(), 20);
 
-    // Verify some pixels
-    gfx::Color_t color[1];
-    gfx::ColorQuad_t quad[1];
-    can->getPixels(gfx::Point(0, 0), color);
-    can->decodeColors(color, quad);
-    TS_ASSERT_EQUALS(ALPHA_FROM_COLORQUAD(quad[0]), 0U);
-
-    can->getPixels(gfx::Point(10, 10), color);
-    can->decodeColors(color, quad);
-    TS_ASSERT_EQUALS(quad[0], COLORQUAD_FROM_RGB(222, 222, 222));
-
-    can->getPixels(gfx::Point(10, 18), color);
-    can->decodeColors(color, quad);
-    TS_ASSERT_EQUALS(quad[0], COLORQUAD_FROM_RGB(255, 255, 255));
+    // Verify pixels
+    TS_ASSERT_EQUALS(decodeRow(*can, 20,  0), "                    ");
+    TS_ASSERT_EQUALS(decodeRow(*can, 20,  1), "       bbbbbb       ");
+    TS_ASSERT_EQUALS(decodeRow(*can, 20,  2), "     bb#::::*bb     ");
+    TS_ASSERT_EQUALS(decodeRow(*can, 20,  3), "   *b*::::::::b+*   ");
+    TS_ASSERT_EQUALS(decodeRow(*can, 20,  4), "   b::::::::::::+   ");
+    TS_ASSERT_EQUALS(decodeRow(*can, 20,  5), "  b*::::::::::::WW  ");
+    TS_ASSERT_EQUALS(decodeRow(*can, 20,  6), "  b::::::::::::::W  ");
+    TS_ASSERT_EQUALS(decodeRow(*can, 20,  7), " b#:::::::::::::::W ");
+    TS_ASSERT_EQUALS(decodeRow(*can, 20,  8), " b::::::::::::::::W ");
+    TS_ASSERT_EQUALS(decodeRow(*can, 20,  9), " b::::::::::::::::W ");
+    TS_ASSERT_EQUALS(decodeRow(*can, 20, 10), " b::::::::::::::::W ");
+    TS_ASSERT_EQUALS(decodeRow(*can, 20, 11), " b::::::::::::::::W ");
+    TS_ASSERT_EQUALS(decodeRow(*can, 20, 12), " b#:::::::::::::::W ");
+    TS_ASSERT_EQUALS(decodeRow(*can, 20, 13), "  b::::::::::::::W  ");
+    TS_ASSERT_EQUALS(decodeRow(*can, 20, 14), "  b*:::::::::::::W  ");
+    TS_ASSERT_EQUALS(decodeRow(*can, 20, 15), "   b::::::::::::W   ");
+    TS_ASSERT_EQUALS(decodeRow(*can, 20, 16), "   *b+:::::::::W:   ");
+    TS_ASSERT_EQUALS(decodeRow(*can, 20, 17), "     *+::::::WW     ");
+    TS_ASSERT_EQUALS(decodeRow(*can, 20, 18), "       WWWWWW       ");
+    TS_ASSERT_EQUALS(decodeRow(*can, 20, 19), "                    ");
 }
 
 /** Test a compressed ".cc" file. */
@@ -148,19 +189,21 @@ TestUiResCCImageLoader::testCompressedCC()
     TS_ASSERT_EQUALS(can->getSize().getX(), 16);
     TS_ASSERT_EQUALS(can->getSize().getY(), 16);
 
-    // Verify some pixels
-    gfx::Color_t color[1];
-    gfx::ColorQuad_t quad[1];
-    can->getPixels(gfx::Point(0, 0), color);
-    can->decodeColors(color, quad);
-    TS_ASSERT_EQUALS(quad[0], COLORQUAD_FROM_RGB(0, 0, 0));
-
-    can->getPixels(gfx::Point(15, 15), color);
-    can->decodeColors(color, quad);
-    TS_ASSERT_EQUALS(quad[0], COLORQUAD_FROM_RGB(255, 255, 255));
-
-    can->getPixels(gfx::Point(6, 3), color);
-    can->decodeColors(color, quad);
-    TS_ASSERT_EQUALS(quad[0], COLORQUAD_FROM_RGB(64, 129, 64));
+    // Verify pixels
+    TS_ASSERT_EQUALS(decodeRow(*can, 16,  0), "bbbbbbbbbbbbbbbb");
+    TS_ASSERT_EQUALS(decodeRow(*can, 16,  1), "b..............W");
+    TS_ASSERT_EQUALS(decodeRow(*can, 16,  2), "b..............W");
+    TS_ASSERT_EQUALS(decodeRow(*can, 16,  3), "b.....~~~~~....W");
+    TS_ASSERT_EQUALS(decodeRow(*can, 16,  4), "b....~~~~~~~...W");
+    TS_ASSERT_EQUALS(decodeRow(*can, 16,  5), "b...~~~...~~~..W");
+    TS_ASSERT_EQUALS(decodeRow(*can, 16,  6), "b...~~.....~...W");
+    TS_ASSERT_EQUALS(decodeRow(*can, 16,  7), "b...~~.........W");
+    TS_ASSERT_EQUALS(decodeRow(*can, 16,  8), "b...~~.........W");
+    TS_ASSERT_EQUALS(decodeRow(*can, 16,  9), "b...~~.....~...W");
+    TS_ASSERT_EQUALS(decodeRow(*can, 16, 10), "b...~~~...~~~..W");
+    TS_ASSERT_EQUALS(decodeRow(*can, 16, 11), "b....~~~~~~~...W");
+    TS_ASSERT_EQUALS(decodeRow(*can, 16, 12), "b.....~~~~~....W");
+    TS_ASSERT_EQUALS(decodeRow(*can, 16, 13), "b..............W");
+    TS_ASSERT_EQUALS(decodeRow(*can, 16, 14), "b..............W");
+    TS_ASSERT_EQUALS(decodeRow(*can, 16, 15), "bWWWWWWWWWWWWWWW");
 }
-

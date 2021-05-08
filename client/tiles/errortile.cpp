@@ -26,7 +26,7 @@ client::tiles::ErrorTile::draw(gfx::Canvas& can)
     drawRectangle(ctx, in);
 
     // Text
-    ctx.setTextAlign(1, 1);
+    ctx.setTextAlign(gfx::CenterAlign, gfx::MiddleAlign);
     outTextF(ctx, in, m_text);
 }
 

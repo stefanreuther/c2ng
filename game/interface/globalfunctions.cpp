@@ -96,15 +96,13 @@ namespace {
                 }
             }
             return makeStringValue((*costopt)(player).toCargoSpecString());
-        } else if (const game::config::StringOption* stropt = dynamic_cast<const game::config::StringOption*>(opt)) {
-            // single string. FIXME: PCC 1.x splits ExperienceLevelNames
+        } else {
+            // Anything else (including StringOption): just return the value.
+            // FIXME: PCC 1.x splits ExperienceLevelNames
             if (player != 0) {
                 throw interpreter::Error("Too many arguments");
             }
-            return makeStringValue((*stropt)());
-        } else {
-            // what?
-            return 0;
+            return makeStringValue(opt->toString());
         }
     }
 }

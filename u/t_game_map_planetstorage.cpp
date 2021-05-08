@@ -21,9 +21,10 @@ TestGameMapPlanetStorage::testPlanet()
     SimpleTurn h;
     Planet& pl = h.addPlanet(99, 5, Object::Playable);
     pl.setName("Cardassia Prime");
+    pl.setFriendlyCode(String_t("fgh"));
     afl::string::NullTranslator tx;
 
-    game::map::PlanetStorage testee(pl, h.config());
+    game::map::PlanetStorage testee(pl, h.config(), tx);
 
     /*
      *  Planet has 1000 of each mineral.
@@ -38,6 +39,8 @@ TestGameMapPlanetStorage::testPlanet()
     TS_ASSERT_EQUALS(testee.getAmount(Element::Neutronium), 1000);
     TS_ASSERT_EQUALS(testee.getAmount(Element::Tritanium), 1000);
     TS_ASSERT_EQUALS(testee.getName(tx), "Cardassia Prime");
+    TS_ASSERT_EQUALS(testee.getInfo1(tx), "Planet");
+    TS_ASSERT_EQUALS(testee.getInfo2(tx), "FCode: \"fgh\"");
 
     // Add some cargo
     testee.change(Element::Tritanium, 10);

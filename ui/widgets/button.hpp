@@ -1,33 +1,40 @@
 /**
   *  \file ui/widgets/button.hpp
+  *  \brief Class ui::widgets::Button
   */
 #ifndef C2NG_UI_WIDGETS_BUTTON_HPP
 #define C2NG_UI_WIDGETS_BUTTON_HPP
 
-#include "ui/widgets/abstractbutton.hpp"
-#include "ui/colorscheme.hpp"
+#include "ui/widgets/basebutton.hpp"
+#include "ui/icons/button.hpp"
 #include "util/keystring.hpp"
 
 namespace ui { namespace widgets {
 
-    class Button : public AbstractButton {
+    /** Push button
+        This class provides the look and feel of a standard push-button.
+        \see ui::icons::Button */
+    class Button : public BaseButton {
      public:
+        /** Constructor.
+            \param text Text
+            \param key  Key
+            \param root Root (for skin colors, fonts, prefix argument) */
         Button(String_t text, util::Key_t key, ui::Root& root);
+
+        /** Constructor.
+            \param ks   Text and key
+            \param root Root (for skin colors, fonts, prefix argument) */
         Button(const util::KeyString& ks, ui::Root& root);
         ~Button();
 
-        virtual void draw(gfx::Canvas& can);
-        virtual void handleStateChange(State st, bool enable);
-        virtual void handlePositionChange(gfx::Rectangle& oldPosition);
-        virtual ui::layout::Info getLayoutInfo() const;
-        virtual bool handleKey(util::Key_t key, int prefix);
-        virtual bool handleMouse(gfx::Point pt, MouseButtons_t pressedButtons);
-
+        /** Set font.
+            For use during setup; font should not change during lifetime (as that would require re-layout).
+            \param font New font request */
         void setFont(gfx::FontRequest font);
 
      private:
-        String_t m_text;
-        gfx::FontRequest m_font;
+        ui::icons::Button m_icon;
     };
 
 } }

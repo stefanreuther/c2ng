@@ -60,22 +60,17 @@ namespace game { namespace v3 { namespace structures {
 
     const size_t MAX_TRN_ATTACHMENTS = 10;                      ///< Maximum attachments in a turn file.
 
-    /** Maximum size of a message (file format limit).
+    /** Maximum size of a message (hard file format limit).
         This is actually a totally arbitrary limit.
         It defines our cutoff point when our file parsers reject a file as invalid.
         Host's limits are much lower. */
-    const int MAX_MESSAGE_SIZE = 16000;
+    const size_t MAX_MESSAGE_SIZE = 16000;
+
+    /** Maximum size of a message (soft limit).
+        This is the limit imposed by Winplan file formats. */
+    const size_t MAX_MESSAGE_SIZE_WINPLAN = 600;
 
     // make a constant for 600 = default message size
-
-//     MAX_HULLS   = NUM_PLAYERS*NUM_HULLS_PER_PLAYER, ///< Maximum number of hulls.
-
-//     /* Manifest Constants for VCRs */
-//     MAX_FIGHTER_LIMIT = 50,         ///< Maximum number of fighters active in a VCR.
-//     MAX_BEAM_LIMIT    = 20,         ///< Maximum number of beams in a VCR.
-//     MAX_TORP_LIMIT    = 20,         ///< Maximum number of torpedo launchers in a VCR.
-//     MAX_BAY_LIMIT     = 20          ///< Maximum number of fighter bays in a VCR.
-// };
 
     /** File section.
         The values and order of this enum are fixed and are used in file formats. */
@@ -242,7 +237,7 @@ namespace game { namespace v3 { namespace structures {
     /** Outgoing message header. MESS contains these (DOS format messages). */
     struct OutgoingMessageHeader {
         Int32_t     address;                                    ///< Position of message text. Starts with 1, not 0.
-        Int16_t     length;                                     ///< Length of message in bytes.
+        UInt16_t    length;                                     ///< Length of message in bytes.
         Int16_t     from;                                       ///< Sender race.
         Int16_t     to;                                         ///< Receiver race.
     };
@@ -263,7 +258,7 @@ namespace game { namespace v3 { namespace structures {
         uint8_t pad;                                            ///< Padding; indeterminate.
         uint8_t validFlag;                                      ///< Validity flag, '1' for valid.
         uint8_t receivers[NUM_OWNERS];                          ///< Receivers (player 1..11, host). '1' to send to that receiver.
-        Int16_t messageLength;                                  ///< Length of the message. Defaults to 600.
+        UInt16_t messageLength;                                 ///< Length of the message. Defaults to 600.
     };
     static_assert(sizeof(Outbox35MessageHeader) == 16, "sizeof Outbox35MessageHeader");
 

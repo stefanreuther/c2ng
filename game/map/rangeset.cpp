@@ -1,5 +1,6 @@
 /**
   *  \file game/map/rangeset.cpp
+  *  \brief Class game::map::RangeSet
   */
 
 #include "game/map/rangeset.hpp"
@@ -15,9 +16,6 @@ game::map::RangeSet::RangeSet()
 game::map::RangeSet::~RangeSet()
 { }
 
-// /** Add a single range.
-//     \param pt Center
-//     \param r Radius */
 void
 game::map::RangeSet::add(Point pt, int r)
 {
@@ -46,11 +44,6 @@ game::map::RangeSet::add(Point pt, int r)
     }
 }
 
-// /** Add object type.
-//     \param type Type to iterate through
-//     \param playerLimit Only include these players
-//     \param markedOnly true to only include marked objects
-//     \param r Radius */
 void
 game::map::RangeSet::addObjectType(ObjectType& type, PlayerSet_t playerLimit, bool markedOnly, int r)
 {
@@ -68,7 +61,6 @@ game::map::RangeSet::addObjectType(ObjectType& type, PlayerSet_t playerLimit, bo
     }
 }
 
-// /** Clear. */
 void
 game::map::RangeSet::clear()
 {
@@ -77,7 +69,6 @@ game::map::RangeSet::clear()
     m_min = m_max = Point(0, 0);
 }
 
-// /** Check for emptiness. */
 bool
 game::map::RangeSet::isEmpty() const
 {
@@ -85,7 +76,6 @@ game::map::RangeSet::isEmpty() const
     return m_points.empty();
 }
 
-// /** Get minimum point of bounding box. */
 game::map::Point
 game::map::RangeSet::getMin() const
 {
@@ -93,7 +83,6 @@ game::map::RangeSet::getMin() const
     return m_min;
 }
 
-// /** Get maximum point of bounding box. */
 game::map::Point
 game::map::RangeSet::getMax() const
 {
@@ -101,7 +90,6 @@ game::map::RangeSet::getMax() const
     return m_max;
 }
 
-// /** Get begin iterator. */
 game::map::RangeSet::Iterator_t
 game::map::RangeSet::begin() const
 {
@@ -109,7 +97,6 @@ game::map::RangeSet::begin() const
     return m_points.begin();
 }
 
-// /** Get end iterator. */
 game::map::RangeSet::Iterator_t
 game::map::RangeSet::end() const
 {

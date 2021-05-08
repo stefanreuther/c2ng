@@ -12,6 +12,7 @@
 #include "afl/io/directoryentry.hpp"
 #include "afl/net/redis/stringfield.hpp"
 #include "afl/string/format.hpp"
+#include "afl/string/nulltranslator.hpp"
 #include "game/v3/registrationkey.hpp"
 #include "game/v3/turnfile.hpp"
 #include "server/errors.hpp"
@@ -91,10 +92,11 @@ server::host::HostTurn::submit(const String_t& blob,
 
     // Parse the turn file and complete the parameters
     std::auto_ptr<game::v3::TurnFile> trn;
+    afl::charset::CodepageCharset charset(afl::charset::g_codepageLatin1);
     try {
         afl::io::ConstMemoryStream ms(afl::string::toBytes(blob));
-        afl::charset::CodepageCharset charset(afl::charset::g_codepageLatin1);
-        trn.reset(new game::v3::TurnFile(charset, ms, false));
+        afl::string::NullTranslator tx;
+        trn.reset(new game::v3::TurnFile(charset, tx, ms, false));
     }
     catch (std::exception& e) {
         m_root.log().write(afl::sys::LogListener::Warn, LOG_NAME, afl::string::Format("Turn fails to parse: %s", e.what()));
@@ -317,6 +319,12 @@ server::host::HostTurn::setTemporary(int32_t gameId, int32_t slotNr, bool flag)
             turnState |= Game::TurnIsTemporary;
         }
         slot.turnStatus().set(turnState);
+
+        // Update last-turn-submitted time so host doesn't immediately run
+        if (!flag) {
+            game.lastTurnSubmissionTime().set(m_root.getTime());
+        }
+
         m_root.handleGameChange(gameId);
     } else {
         // bad turn state (no turn submitted, bad turn, ...)

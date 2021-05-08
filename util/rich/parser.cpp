@@ -4,19 +4,19 @@
   */
 
 #include "util/rich/parser.hpp"
-#include "util/rich/text.hpp"
+#include "afl/base/countof.hpp"
+#include "afl/base/optional.hpp"
+#include "afl/io/constmemorystream.hpp"
+#include "afl/io/xml/defaultentityhandler.hpp"
+#include "afl/io/xml/reader.hpp"
+#include "afl/string/parse.hpp"
+#include "util/charsetfactory.hpp"
+#include "util/rich/alignmentattribute.hpp"
 #include "util/rich/linkattribute.hpp"
 #include "util/rich/styleattribute.hpp"
+#include "util/rich/text.hpp"
 #include "util/skincolor.hpp"
 #include "util/unicodechars.hpp"
-#include "afl/io/constmemorystream.hpp"
-#include "afl/io/xml/reader.hpp"
-#include "afl/io/xml/defaultentityhandler.hpp"
-#include "afl/base/countof.hpp"
-#include "util/rich/alignmentattribute.hpp"
-#include "afl/string/parse.hpp"
-#include "afl/base/optional.hpp"
-#include "util/charsetfactory.hpp"
 
 namespace {
     struct ColorMap {

@@ -4,9 +4,10 @@
 #ifndef C2NG_GAME_MAP_SHIPSTORAGE_HPP
 #define C2NG_GAME_MAP_SHIPSTORAGE_HPP
 
+#include "afl/base/signalconnection.hpp"
+#include "afl/string/translator.hpp"
 #include "game/cargocontainer.hpp"
 #include "game/config/hostconfiguration.hpp"
-#include "afl/base/signalconnection.hpp"
 #include "game/spec/shiplist.hpp"
 
 namespace game { namespace map {
@@ -16,10 +17,13 @@ namespace game { namespace map {
     class ShipStorage : public CargoContainer {
      public:
         ShipStorage(Ship& sh,
-                    const game::spec::ShipList& shipList);
+                    const game::spec::ShipList& shipList,
+                    afl::string::Translator& tx);
         ~ShipStorage();
 
         virtual String_t getName(afl::string::Translator& tx) const;
+        virtual String_t getInfo1(afl::string::Translator& tx) const;
+        virtual String_t getInfo2(afl::string::Translator& tx) const;
         virtual Flags_t getFlags() const;
         virtual bool canHaveElement(Element::Type type) const;
         virtual int32_t getMaxAmount(Element::Type type) const;

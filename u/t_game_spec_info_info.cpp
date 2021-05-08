@@ -242,6 +242,7 @@ TestGameSpecInfoInfo::testDescribeBeam()
                      "Destroy:25\n"
                      "Recharge time:150s\n"
                      "Hit:100%\n"
+                     "Sweep:64 mines, 48 webs\n"
                      "Mass:4 kt\n"
                      "Cost:10 mc, 1 T/M, 12 D\n"
                      "Tech level:3\n");
@@ -271,9 +272,34 @@ TestGameSpecInfoInfo::testDescribeTorp()
                      "Recharge time:44s\n"
                      "Hit:65%\n"
                      "Torp Cost:36 mc, 1 T/D/M\n"
+                     "1000 mines:444 mc, 12 T/D/M\n"
                      "Launcher Mass:3 kt\n"
                      "Launcher Cost:120 mc, 1 T, 3 D, 8 M\n"
                      "Tech level:8\n");
+    TS_ASSERT_EQUALS(c.pageLinks, gsi::Pages_t());
+    TS_ASSERT_EQUALS(c.abilities.size(), 0U);
+    TS_ASSERT_EQUALS(c.players, game::PlayerSet_t());
+}
+
+/** Test describeFighter().
+    This is mainly a regression test for ports. */
+void
+TestGameSpecInfoInfo::testDescribeFighter()
+{
+    TestHarness h;
+
+    gsi::PageContent c;
+    gsi::describeFighter(c, 7, h.shipList, true, h.picNamer, h.root, h.tx);
+
+    TS_ASSERT_EQUALS(c.title, "Player 7 fighter");
+    TS_ASSERT_EQUALS(c.pictureName, "");                // would be set by PictureNamer
+    TS_ASSERT_EQUALS(toString(c.attributes),
+                     "Type:fighter\n"
+                     "Kill:2\n"
+                     "Destroy:2\n"
+                     "Recharge:21\xE2\x80\x93""36\n"
+                     "Strikes:7\n"
+                     "Fighter Cost:100 mc, 3 T, 2 M\n");
     TS_ASSERT_EQUALS(c.pageLinks, gsi::Pages_t());
     TS_ASSERT_EQUALS(c.abilities.size(), 0U);
     TS_ASSERT_EQUALS(c.players, game::PlayerSet_t());
@@ -374,5 +400,23 @@ TestGameSpecInfoInfo::testGetTorpAttribute()
     TS_ASSERT_EQUALS(getTorpedoAttribute(tl, gsi::Range_TorpCost,     h.root, VIEWPOINT).orElse(-1), 36);
 
     TS_ASSERT_EQUALS(getTorpedoAttribute(tl, gsi::Range_MaxCrew,      h.root, VIEWPOINT).isValid(), false);
+}
+
+/** Test getFighterAttribute(). */
+void
+TestGameSpecInfoInfo::testGetFighterAttribute()
+{
+    TestHarness h;
+    game::spec::Fighter ftr(3, h.root.hostConfiguration(), h.root.playerList(), h.tx);
+
+    TS_ASSERT_EQUALS(getFighterAttribute(ftr, gsi::Range_CostD,        h.root).orElse(-1), 0);
+    TS_ASSERT_EQUALS(getFighterAttribute(ftr, gsi::Range_CostM,        h.root).orElse(-1), 2);
+    TS_ASSERT_EQUALS(getFighterAttribute(ftr, gsi::Range_CostMC,       h.root).orElse(-1), 100);
+    TS_ASSERT_EQUALS(getFighterAttribute(ftr, gsi::Range_CostT,        h.root).orElse(-1), 3);
+    TS_ASSERT_EQUALS(getFighterAttribute(ftr, gsi::Range_DamagePower,  h.root).orElse(-1), 2);
+    TS_ASSERT_EQUALS(getFighterAttribute(ftr, gsi::Range_KillPower,    h.root).orElse(-1), 2);
+    TS_ASSERT_EQUALS(getFighterAttribute(ftr, gsi::Range_RechargeTime, h.root).orElse(-1), 21);
+
+    TS_ASSERT_EQUALS(getFighterAttribute(ftr, gsi::Range_MaxCrew,      h.root).isValid(), false);
 }
 

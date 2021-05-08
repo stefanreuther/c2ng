@@ -29,6 +29,13 @@ namespace game { namespace map {
 
         String_t getTitle(afl::string::Translator& tx) const;
 
+        /** Synchronize a fleet member.
+            Synchronizes waypoint of a single fleet member with its leader, if any.
+            Does nothing if the ship is not a fleet member.
+            \param univ Universe to work on
+            \param sid  Ship Id
+            \param config Host configuration (for missions)
+            \param shipList Ship list (for missions) */
         static void synchronizeFleetMember(Universe& univ, Id_t sid,
                                            const game::config::HostConfiguration& config,
                                            const game::spec::ShipList& shipList);

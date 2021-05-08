@@ -1,34 +1,31 @@
 /**
   *  \file game/map/drawing.cpp
+  *  \brief Class game::map::Drawing
   */
 
 #include <cmath>
 #include <algorithm>
 #include "game/map/drawing.hpp"
 #include "game/map/configuration.hpp"
+#include "util/math.hpp"
 
 namespace {
-    /** Check whether value approximately lies in range.
-        \param testee [in] Value to test
-        \param a,b    [in] Range
-        \return true iff \c testee can be considered close to or between \c a and \c b */
-    bool isInRangeApprox(int testee, int a, int b)
+    bool isInRange(int t, int a, int b)
     {
         if (a > b) {
             std::swap(a, b);
         }
 
-        return testee >= a - 20
-            && testee <= b + 20;
+        return t >= a && t <= b;
     }
 }
 
-// /** Constructor. Make a new drawing.
-//     \param pos Position or center point.
-//     \param type Type of drawing.
+const int game::map::Drawing::NUM_USER_COLORS;
+const int game::map::Drawing::NUM_USER_MARKERS;
+const int game::map::Drawing::MAX_CIRCLE_RADIUS;
 
-//     All other fields are set to defaults and should be set using the
-//     setXXX functions. */
+
+// Constructor.
 game::map::Drawing::Drawing(Point pos, Type type)
     : m_pos(pos),
       m_type(type),
@@ -40,10 +37,23 @@ game::map::Drawing::Drawing(Point pos, Type type)
       m_comment()
 {
     // ex GDrawing::GDrawing
+    // @change Sensible defaults (previously in doDraw):
+    switch (type) {
+     case LineDrawing:
+     case RectangleDrawing:
+        setPos2(pos);
+        break;
+
+     case CircleDrawing:
+        setCircleRadius(10);
+        break;
+
+     case MarkerDrawing:
+        break;
+    }
 }
 
-// /** Set position.
-//     \param pos Position or center point. */
+// Set position.
 void
 game::map::Drawing::setPos(Point pos)
 {
@@ -51,19 +61,16 @@ game::map::Drawing::setPos(Point pos)
     m_pos = pos;
 }
 
-// /** Set other position. Valid only for RectangleDrawing and LineDrawing.
-//     \param pos Position of bottom/right corner. */
+// Set other position.
 void
 game::map::Drawing::setPos2(Point pos)
 {
     // ex GDrawing::setPos2
-    // ASSERT(type == RectangleDrawing || type == LineDrawing);
     m_x2 = pos.getX();
     m_y2 = pos.getY();
 }
 
-// /** Set circle radius. Valid only for CircleDrawing.
-//     \param r New radius */
+// Set radius.
 void
 game::map::Drawing::setCircleRadius(int r)
 {
@@ -72,8 +79,7 @@ game::map::Drawing::setCircleRadius(int r)
     m_x2 = r;
 }
 
-// /** Set marker kind (shape). Valid only for MarkerDrawing.
-//     \param k New kind (see getUserMarker()) */
+// Set marker kind (shape).
 void
 game::map::Drawing::setMarkerKind(int k)
 {
@@ -82,9 +88,7 @@ game::map::Drawing::setMarkerKind(int k)
     m_x2 = k;
 }
 
-// /** Set marker tag. This is a general-purpose numeric value, conventionally
-//     an atom.
-//     \param tag New tag */
+// Set marker tag.
 void
 game::map::Drawing::setTag(Atom_t tag)
 {
@@ -92,10 +96,7 @@ game::map::Drawing::setTag(Atom_t tag)
     m_tag = tag;
 }
 
-// /** Set color. By convention, markers allow colors 0-9 and 15, as well
-//     as 97-116. 0 means invisible.
-//     \param color Color index (COLOR_xxx, see gfx/palette.h) */
-// FIXME: we use a different color interpretation, namely: 1-30 user colors
+// Set color.
 void
 game::map::Drawing::setColor(uint8_t color)
 {
@@ -103,8 +104,7 @@ game::map::Drawing::setColor(uint8_t color)
     m_color = color;
 }
 
-// /** Set comment. The comment is limited to 255 characters for storage.
-//     \param comment New comment. */
+// Set comment.
 void
 game::map::Drawing::setComment(String_t comment)
 {
@@ -112,9 +112,7 @@ game::map::Drawing::setComment(String_t comment)
     m_comment = comment;
 }
 
-// /** Set time of expiry. Specifies a turn number. When a turn after that
-//     is seen, the marker is deleted (not loaded).
-//     \param expire Turn of expiry, -1 for never */
+// Set time of expiry.
 void
 game::map::Drawing::setExpire(int expire)
 {
@@ -122,69 +120,83 @@ game::map::Drawing::setExpire(int expire)
     m_expire = expire;
 }
 
-// /** Compute distance of this drawing to a given point in the game
-//     universe. This is used to select a drawing for editing. This is an
-//     almost straightforward port of the same code in PCC 1.x. It does,
-//     however, <em>not</em> special-case locked-on markers or check
-//     visibility / editability; that must be done by the caller. */
+// Compute distance of this drawing to a given point in the game universe.
 double
-game::map::Drawing::getDistanceTo(Point pt, const Configuration& config) const
+game::map::Drawing::getDistanceTo(Point pt) const
 {
     // ex GDrawing::getDistanceTo
     switch (m_type) {
      case LineDrawing:
-        if (isInRangeApprox(pt.getX(), m_pos.getX(), m_x2) && isInRangeApprox(pt.getY(), m_pos.getY(), m_y2)) {
+        if (isInRange(pt.getX(), m_pos.getX(), m_x2) && isInRange(pt.getY(), m_pos.getY(), m_y2)) {
             /* position is approximately within bounding rectangle of line */
-            long d0 = config.getSquaredDistance(m_pos, Point(m_x2, m_y2));
+            const long d0 = m_pos.getSquaredRawDistance(Point(m_x2, m_y2));
             if (d0 == 0) {
                 /* degenerate case: line has length 0 */
-                return std::sqrt(double(config.getSquaredDistance(m_pos, pt)));
+                return std::sqrt(double(m_pos.getSquaredRawDistance(pt)));
             } else {
                 /* regular case: compute distance between point and line */
-                int32_t det = int32_t(pt.getY() - m_pos.getY()) * int32_t(m_x2 - m_pos.getX())
-                            - int32_t(pt.getX() - m_pos.getX()) * int32_t(m_y2 - m_pos.getY());
+                const int32_t det = int32_t(pt.getY() - m_pos.getY()) * int32_t(m_x2 - m_pos.getX())
+                                  - int32_t(pt.getX() - m_pos.getX()) * int32_t(m_y2 - m_pos.getY());
                 return std::abs(det / std::sqrt(double(d0)));
             }
         } else {
-            /* position is outside bounding rectangle, don't bother looking further */
-            /* FIXME: only the Line case still has this hardwired restriction */
-            return 1e6;
+            /* position is outside bounding rectangle, estimate using endpoints */
+            return std::sqrt(double(std::min(m_pos.getSquaredRawDistance(pt),
+                                             m_pos.getSquaredRawDistance(Point(m_x2, m_y2)))));
         }
 
-     case RectangleDrawing:
-        // /* for rectangles, simply the distance to either edge */
-        // /* FIXME: what about wrap? */
-        if (isInRangeApprox(pt.getX(), m_pos.getX(), m_x2) && isInRangeApprox(pt.getY(), m_pos.getY(), m_y2)) {
-            return std::min(std::min(std::abs(pt.getX() - m_pos.getX()),
-                                     std::abs(pt.getX() - m_x2)),
-                            std::min(std::abs(pt.getY() - m_pos.getY()),
-                                     std::abs(pt.getY() - m_y2)));
+     case RectangleDrawing: {
+        /* Rectangle. We have 9 cases:
+
+                 1   2   3
+                   +---+
+                 4 | 5 | 6
+                   +---+
+                 7   8   9
+        */
+        const int distX = std::min(std::abs(pt.getX() - m_pos.getX()),
+                                   std::abs(pt.getX() - m_x2));
+        const int distY = std::min(std::abs(pt.getY() - m_pos.getY()),
+                                   std::abs(pt.getY() - m_y2));
+        const bool inRangeX = isInRange(pt.getX(), m_pos.getX(), m_x2);
+        const bool inRangeY = isInRange(pt.getY(), m_pos.getY(), m_y2);
+
+        if (inRangeX && inRangeY) {
+            // Inside the rectangle (case 5). Distance is minimum to either edge.
+            return std::min(distX, distY);
+        } else if (inRangeX) {
+            // Outside, case 2 or 8. Distance is minimum to horizontal edge.
+            return distY;
+        } else if (inRangeY) {
+            // Outside, case 4 or 6. Distance is minimum to vertical edge.
+            return distX;
         } else {
-            return 1e6;
+            // Outside the rectangle (cases 1, 3, 7, 9). Distance to corner, which is hypot-of-distance-to-edge.
+            return util::getDistanceFromDX(distX, distY);
         }
+     }
 
      case CircleDrawing:
-        return std::abs(std::sqrt(double(config.getSquaredDistance(m_pos, pt))) - m_x2);
+        return std::abs(std::sqrt(double(m_pos.getSquaredRawDistance(pt))) - m_x2);
 
      case MarkerDrawing:
-        return std::sqrt(double(config.getSquaredDistance(m_pos, pt)));
+        return std::sqrt(double(m_pos.getSquaredRawDistance(pt)));
 
      default:
         return 1e6;
     }
 }
 
-// /** Compute distance of this drawing to a given point in the game
-//     universe. Same as getDistanceTo, but honors wrapping. */
+// Compute distance of this drawing to a given point in the game universe, honoring wrap.
 double
 game::map::Drawing::getDistanceToWrap(Point pt, const Configuration& config) const
 {
     // ex GDrawing::getDistanceToWrap
-    double dist = getDistanceTo(pt, config);
+    double dist = getDistanceTo(pt);
     for (int i = 1, n = config.getNumRectangularImages(); i < n; ++i) {
         Point tmp;
         if (config.getPointAlias(pt, tmp, i, false)) {
-            double ndist = getDistanceTo(tmp, config);
+            double ndist = getDistanceTo(tmp);
             if (ndist < dist) {
                 dist = ndist;
             }

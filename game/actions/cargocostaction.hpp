@@ -7,9 +7,9 @@
 
 #include "afl/base/signal.hpp"
 #include "afl/base/signalconnection.hpp"
+#include "afl/base/uncopyable.hpp"
 #include "game/cargocontainer.hpp"
 #include "game/spec/cost.hpp"
-#include "afl/base/uncopyable.hpp"
 
 namespace game { namespace actions {
 
@@ -70,7 +70,8 @@ namespace game { namespace actions {
             \return validity */
         bool isValid() const;
 
-        /** Commit transaction. */
+        /** Commit transaction.
+            This commits the cargo container. */
         void commit();
 
         /** Signal: change.

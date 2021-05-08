@@ -7,6 +7,22 @@
 
 #include <cxxtest/TestSuite.h>
 
+class TestGameProxyBaseStorageProxy : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testGetParts();
+    void testUpdate();
+};
+
+class TestGameProxyBuildPartsProxy : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testNormal();
+    void testSignal();
+    void testError();
+    void testErrorResources();
+};
+
 class TestGameProxyBuildQueueProxy : public CxxTest::TestSuite {
  public:
     void testInit();
@@ -16,6 +32,14 @@ class TestGameProxyBuildQueueProxy : public CxxTest::TestSuite {
     void testSignal();
     void testCommit();
     void testEmpty();
+};
+
+class TestGameProxyBuildShipProxy : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testNormal();
+    void testPreexisting();
+    void testClone();
 };
 
 class TestGameProxyBuildStarbaseProxy : public CxxTest::TestSuite {
@@ -38,11 +62,18 @@ class TestGameProxyCargoTransferProxy : public CxxTest::TestSuite {
  public:
     void testEmpty();
     void testNormal();
+    void testOverload();
+    void testMulti();
+    void testMultiMoveExt();
+    void testMultiMoveAll();
+    void testDistribute();
+    void testAddHoldSpace();
 };
 
 class TestGameProxyCargoTransferSetupProxy : public CxxTest::TestSuite {
  public:
     void testIt();
+    void testConflict();
 };
 
 class TestGameProxyChunnelProxy : public CxxTest::TestSuite {
@@ -51,6 +82,11 @@ class TestGameProxyChunnelProxy : public CxxTest::TestSuite {
     void testGetCandidates();
     void testSetupChunnel();
     void testSetupChunnelError();
+};
+
+class TestGameProxyClassicVcrPlayerProxy : public CxxTest::TestSuite {
+ public:
+    void testIt();
 };
 
 class TestGameProxyCommandListProxy : public CxxTest::TestSuite {
@@ -64,7 +100,9 @@ class TestGameProxyCommandListProxy : public CxxTest::TestSuite {
 
 class TestGameProxyConfigurationProxy : public CxxTest::TestSuite {
  public:
-    void testIt();
+    void testNumberFormatter();
+    void testIntAccess();
+    void testStringAccess();
 };
 
 class TestGameProxyConvertSuppliesProxy : public CxxTest::TestSuite {
@@ -79,14 +117,72 @@ class TestGameProxyCursorObserverProxy : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestGameProxyDrawingProxy : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testCreateMarker();
+    void testCreateLines();
+    void testCreateRectangle();
+    void testCreateCircle();
+    void testFindNearest();
+    void testErase();
+    void testColorAdjacent();
+    void testTagAdjacent();
+    void testEraseAdjacent();
+    void testParallel();
+    void testSelectMarker();
+    void testSetTagName();
+    void testPackTagList();
+    void testPackTagListEmpty();
+    void testCreateCannedMarker();
+    void testQueueing();
+};
+
+class TestGameProxyExpressionListProxy : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testNormal();
+};
+
+class TestGameProxyFleetCostProxy : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testEmpty();
+};
+
 class TestGameProxyFriendlyCodeProxy : public CxxTest::TestSuite {
  public:
     void testIt();
 };
 
+class TestGameProxyHistoryShipListProxy : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testNormal();
+};
+
 class TestGameProxyHullSpecificationProxy : public CxxTest::TestSuite {
  public:
     void testIt();
+};
+
+class TestGameProxyInboxAdaptor : public CxxTest::TestSuite {
+ public:
+    void testInboxAdaptor();
+    void testPlanet();
+    void testShip();
+    void testIndex();
+    void testFilter();
+};
+
+class TestGameProxyIonStormProxy : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testNoStorms();
+    void testNormal();
+    void testUninit();
+    void testBrowse();
+    void testObjectListener();
 };
 
 class TestGameProxyKeymapProxy : public CxxTest::TestSuite {
@@ -102,6 +198,20 @@ class TestGameProxyLockProxy : public CxxTest::TestSuite {
     void testRepeat();
     void testMarked();
     void testRange();
+    void testSetOrigin();
+};
+
+class TestGameProxyMailboxAdaptor : public CxxTest::TestSuite {
+ public:
+    void testInterface();
+};
+
+class TestGameProxyMailboxProxy : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testSummary();
+    void testToggleFiltered();
+    void testAction();
 };
 
 class TestGameProxyMapLocationProxy : public CxxTest::TestSuite {
@@ -109,6 +219,31 @@ class TestGameProxyMapLocationProxy : public CxxTest::TestSuite {
     void testEmpty();
     void testPoint();
     void testReference();
+};
+
+class TestGameProxyMapRendererProxy : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testNormal();
+    void testTagFilter();
+    void testToggleOptions();
+    void testSetConfiguration();
+};
+
+class TestGameProxyMinefieldProxy : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testNoMine();
+    void testNormal();
+    void testPlanetOwn();
+    void testPlanetSeen();
+    void testPlanetOther();
+    void testPassageRate();
+    void testSweepInfo();
+    void testObjectListener();
+    void testBrowse();
+    void testBrowseUnmarked();
+    void testErase();
 };
 
 class TestGameProxyMutexListProxy : public CxxTest::TestSuite {
@@ -132,6 +267,14 @@ class TestGameProxyPlanetInfoProxy : public CxxTest::TestSuite {
     void testOverride();
 };
 
+class TestGameProxyPlanetPredictorProxy : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testNormal();
+    void testUpdate();
+    void testEffectors();
+};
+
 class TestGameProxyPlayerProxy : public CxxTest::TestSuite {
  public:
     void testEmpty();
@@ -141,6 +284,7 @@ class TestGameProxyPlayerProxy : public CxxTest::TestSuite {
 class TestGameProxyProcessListProxy : public CxxTest::TestSuite {
  public:
     void testIt();
+    void testResumeConfirmed();
 };
 
 class TestGameProxyReferenceListProxy : public CxxTest::TestSuite {
@@ -158,6 +302,15 @@ class TestGameProxyReverterProxy : public CxxTest::TestSuite {
  public:
     void testEmpty();
     void testNormal();
+};
+
+class TestGameProxyScoreProxy : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testChart();
+    void testTable();
+    void testTurns();
+    void testOverview();
 };
 
 class TestGameProxySearchProxy : public CxxTest::TestSuite {
@@ -183,6 +336,9 @@ class TestGameProxySelectionProxy : public CxxTest::TestSuite {
     void testInvertAllLayers();
     void testExecute();
     void testExecuteFail();
+    void testMarkList();
+    void testMarkRange();
+    void testMarkRangeWrap();
 };
 
 class TestGameProxyShipSpeedProxy : public CxxTest::TestSuite {
@@ -192,11 +348,110 @@ class TestGameProxyShipSpeedProxy : public CxxTest::TestSuite {
     void testHyper();
 };
 
+class TestGameProxySimulationRunProxy : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testNormal();
+    void testSeries();
+    void testInfinite();
+    void testNoFight();
+    void testClassResultBattleAdaptor();
+    void testUnitResultBattleAdaptor();
+};
+
+class TestGameProxySimulationSetupProxy : public CxxTest::TestSuite {
+ public:
+    void testUninit();
+    void testEmpty();
+    void testAddShip();
+    void testAddPlanet();
+    void testSwapShips();
+    void testRemoveObject();
+    void testClear();
+    void testGetObject();
+    void testIsDuplicateId();
+    void testGetNumBaseTorpedoes();
+    void testSetFlags();
+    void testToggleDisabled();
+    void testToggleCloak();
+    void testToggleRandomFriendlyCode();
+    void testSetAbilities();
+    void testSetSequentialFriendlyCode();
+    void testSetId();
+    void testSetName();
+    void testSetFriendlyCode();
+    void testSetDamage();
+    void testSetShield();
+    void testSetOwner();
+    void testSetExperienceLevel();
+    void testSetFlakRatingOverride();
+    void testSetFlakCompensationOverride();
+    void testSetCrew();
+    void testSetHullType();
+    void testSetHullTypeAfterAdd();
+    void testSetHullTypeAfterAddCloak();
+    void testSetHullTypeAfterAddDamage();
+    void testSetHullTypeAfterAddSelfAggression();
+    void testSetMass();
+    void testSetBeams();
+    void testSetTorpedoes();
+    void testSetFighters();
+    void testSetEngineType();
+    void testSetAggressiveness();
+    void testSetAggressivenessInteraction();
+    void testSetInterceptId();
+    void testSetDefense();
+    void testSetPopulation();
+    void testSetBaseDefense();
+    void testSetBaseBeamTech();
+    void testSetBaseTorpedoTech();
+    void testSetNumBaseFighters();
+    void testSetNumBaseTorpedoes();
+    void testGetAbilityChoices();
+    void testGetAbilityChoicesPlanet();
+    void testGetFriendlyCodeChoices();
+    void testGetOwnerChoices();
+    void testGetExperienceLevelChoices();
+    void testGetHullTypeChoices();
+    void testGetPrimaryChoices();
+    void testGetSecondaryChoices();
+    void testGetEngineTypeChoices();
+    void testGetAggressivenessChoices();
+    void testGetBaseBeamLevelChoices();
+    void testGetBaseTorpedoLevelChoices();
+    void testGetPlanetNameChoices();
+    void testGetPopulationChoices();
+    void testGetIdRange();
+    void testGetDamageRange();
+    void testGetShieldRange();
+    void testGetCrewRange();
+    void testGetInterceptIdRange();
+    void testGetBaseDefenseRange();
+    void testGetNumBaseFightersRange();
+    void testSetSlot();
+    void testConfig();
+    void testSort();
+    void testSortByBattleOrder();
+    void testCopy();
+    void testLoad();
+    void testLoadFail();
+};
+
+class TestGameProxySimulationTransferProxy : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testShip();
+    void testPlanet();
+    void testList();
+    void testInteraction();
+};
+
 class TestGameProxySpecBrowserProxy : public CxxTest::TestSuite {
  public:
     void testIt();
     void testFilter();
     void testSort();
+    void testSetPageId();
 };
 
 class TestGameProxyTaskEditorProxy : public CxxTest::TestSuite {
@@ -214,6 +469,42 @@ class TestGameProxyTaxationProxy : public CxxTest::TestSuite {
     void testSafeTax();
     void testSetNumBuildings();
     void testSignal();
+};
+
+class TestGameProxyTeamProxy : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testNormal();
+};
+
+class TestGameProxyTechUpgradeProxy : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testNormal();
+    void testSignal();
+    void testUpgrade();
+};
+
+class TestGameProxyUfoProxy : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testNoUfos();
+    void testNormal();
+    void testUnknown();
+    void testBrowse();
+    void testObjectListener();
+    void testToggle();
+    void testBrowseOtherEnd();
+};
+
+class TestGameProxyVcrDatabaseAdaptor : public CxxTest::TestSuite {
+ public:
+    void testInterface();
+};
+
+class TestGameProxyVcrDatabaseProxy : public CxxTest::TestSuite {
+ public:
+    void testIt();
 };
 
 #endif

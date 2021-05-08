@@ -51,7 +51,7 @@ game::interface::MissionContext::lookup(const afl::data::NameQuery& name, Proper
 }
 
 void
-game::interface::MissionContext::set(PropertyIndex_t /*index*/, afl::data::Value* /*value*/)
+game::interface::MissionContext::set(PropertyIndex_t /*index*/, const afl::data::Value* /*value*/)
 {
     throw interpreter::Error::notAssignable();
 }

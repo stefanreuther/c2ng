@@ -9,6 +9,7 @@
 #include "afl/io/stream.hpp"
 #include "afl/charset/charset.hpp"
 #include "afl/io/textfile.hpp"
+#include "afl/io/directory.hpp"
 
 namespace util {
 
@@ -31,6 +32,13 @@ namespace util {
         /** Parse a file.
             \param in stream to read from */
         void parseFile(afl::io::Stream& s);
+
+        /** Parse an optional file.
+            \param dir Directory
+            \param fileName File name
+            \retval true File was found and parsed
+            \retval false File did not exist */
+        bool parseOptionalFile(afl::io::Directory& dir, String_t fileName);
 
         /** Callback: parse a text line.
             This function is called for each line which is neither empty nor a comment.

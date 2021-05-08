@@ -6,11 +6,12 @@
 #include "interpreter/defaultstatementcompilationcontext.hpp"
 
 #include "t_interpreter.hpp"
-#include "afl/sys/log.hpp"
 #include "afl/io/nullfilesystem.hpp"
-#include "interpreter/world.hpp"
+#include "afl/string/nulltranslator.hpp"
+#include "afl/sys/log.hpp"
 #include "interpreter/bytecodeobject.hpp"
 #include "interpreter/error.hpp"
+#include "interpreter/world.hpp"
 
 /** Test standalone DefaultStatementCompilationContext. */
 void
@@ -18,8 +19,9 @@ TestInterpreterDefaultStatementCompilationContext::testStandalone()
 {
     // Environment
     afl::sys::Log log;
+    afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
-    interpreter::World world(log, fs);
+    interpreter::World world(log, tx, fs);
     interpreter::BytecodeObject bco;
 
     // Create
@@ -43,8 +45,9 @@ TestInterpreterDefaultStatementCompilationContext::testParented()
 {
     // Environment
     afl::sys::Log log;
+    afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
-    interpreter::World world(log, fs);
+    interpreter::World world(log, tx, fs);
 
     // Parent SCC
     class ParentSCC : public interpreter::StatementCompilationContext {

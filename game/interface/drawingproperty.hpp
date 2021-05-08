@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/drawingproperty.hpp
+  *  \brief Drawing Properties
   */
 #ifndef C2NG_GAME_INTERFACE_DRAWINGPROPERTY_HPP
 #define C2NG_GAME_INTERFACE_DRAWINGPROPERTY_HPP
@@ -25,8 +26,17 @@ namespace game { namespace interface {
         idpTypeCode
     };
 
+    /** Get property of a drawing.
+        \param d Drawing
+        \param idp Property
+        \return newly-allocated property value */
     afl::data::Value* getDrawingProperty(const game::map::Drawing& d, DrawingProperty idp);
-    void setDrawingProperty(game::map::Drawing& d, DrawingProperty idp, afl::data::Value* value);
+
+    /** Set property of a drawing.
+        \param d Drawing
+        \param idp Property
+        \param value property value, owned by caller */
+    void setDrawingProperty(game::map::Drawing& d, DrawingProperty idp, const afl::data::Value* value);
 
 } }
 

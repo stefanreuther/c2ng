@@ -9,16 +9,18 @@
 #include "t_server_console.hpp"
 #include "afl/data/access.hpp"
 #include "afl/data/segment.hpp"
+#include "afl/io/internaltextwriter.hpp"
 #include "afl/io/nullfilesystem.hpp"
 #include "server/console/environment.hpp"
 #include "server/console/nullterminal.hpp"
 #include "server/console/parser.hpp"
 #include "server/console/pipeterminal.hpp"
+#include "server/test/consolecommandhandlermock.hpp"
 #include "server/types.hpp"
-#include "u/helper/consolecommandhandlermock.hpp"
-#include "afl/io/internaltextwriter.hpp"
 
 namespace {
+    using server::test::ConsoleCommandHandlerMock;
+
     class TestHarness {
      public:
         TestHarness()

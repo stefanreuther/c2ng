@@ -4,17 +4,18 @@
 #ifndef C2NG_CLIENT_WIDGETS_CARGOTRANSFERLINE_HPP
 #define C2NG_CLIENT_WIDGETS_CARGOTRANSFERLINE_HPP
 
-#include "util/numberformatter.hpp"
-#include "ui/widget.hpp"
 #include "afl/string/string.hpp"
-#include "ui/widgets/button.hpp"
+#include "afl/string/translator.hpp"
 #include "ui/root.hpp"
+#include "ui/widget.hpp"
+#include "ui/widgets/button.hpp"
+#include "util/numberformatter.hpp"
 
 namespace client { namespace widgets {
 
     class CargoTransferLine : public ui::Widget {
      public:
-        CargoTransferLine(ui::Root& root, String_t name, int id, util::NumberFormatter fmt);
+        CargoTransferLine(ui::Root& root, afl::string::Translator& tx, String_t name, int id, util::NumberFormatter fmt);
 
         void setAmounts(bool right, int32_t available, int32_t remaining);
 
@@ -35,6 +36,7 @@ namespace client { namespace widgets {
 
      private:
         ui::Root& m_root;
+        afl::string::Translator& m_translator;
         String_t m_name;
         int m_id;
         util::NumberFormatter m_numberFormatter;

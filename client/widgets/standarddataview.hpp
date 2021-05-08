@@ -6,7 +6,7 @@
 
 #include "client/widgets/collapsibledataview.hpp"
 #include "ui/rich/documentview.hpp"
-#include "ui/widgets/abstractbutton.hpp"
+#include "ui/widgets/basebutton.hpp"
 #include "afl/container/ptrvector.hpp"
 #include "ui/widgets/framegroup.hpp"
 
@@ -27,7 +27,7 @@ namespace client { namespace widgets {
         virtual void setChildPositions();
         virtual gfx::Point getPreferredChildSize() const;
 
-        void addNewButton(ButtonAlignment alignment, int x, int y, ui::widgets::AbstractButton* btn);
+        void addNewButton(ButtonAlignment alignment, int x, int y, ui::widgets::BaseButton* btn);
 
         void setText(const util::rich::Text& text);
 

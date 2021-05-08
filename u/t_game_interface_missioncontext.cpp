@@ -6,7 +6,7 @@
 #include "game/interface/missioncontext.hpp"
 
 #include "t_game_interface.hpp"
-#include "u/helper/contextverifier.hpp"
+#include "interpreter/test/contextverifier.hpp"
 
 void
 TestGameInterfaceMissionContext::testIt()
@@ -20,6 +20,6 @@ TestGameInterfaceMissionContext::testIt()
 
     // Test
     game::interface::MissionContext testee(0, shipList);
-    verifyTypes(testee);
+    interpreter::test::ContextVerifier(testee, "testIt").verifyTypes();
 }
 

@@ -34,14 +34,14 @@ namespace {
     };
 
 
-    void setState(State& out, const DirectoryBrowser& in)
+    void setState(State& out, const DirectoryBrowser& in, afl::string::Translator& tx)
     {
         // Directory name
         out.thisDirectoryName = in.getCurrentDirectory()->getDirectoryName();
 
         // Content
         if (!out.thisDirectoryName.empty()) {
-            out.contentItems.push_back(FolderListbox::Item(_("[Choose this directory]"), 0, true, FolderListbox::iNone));
+            out.contentItems.push_back(FolderListbox::Item(tx("[Choose this directory]"), 0, true, FolderListbox::iNone));
             out.contentOffset = 1;
         } else {
             out.contentOffset = 0;
@@ -55,7 +55,7 @@ namespace {
         out.selectedItem = in.getSelectedChild();
 
         // Crumb list
-        out.crumbItems.push_back(SimpleIconBox::Item(_("[Places]")));
+        out.crumbItems.push_back(SimpleIconBox::Item(tx("[Places]")));
         const std::vector<DirectoryBrowser::DirectoryPtr_t>& path = in.path();
         for (size_t i = 0, n = path.size(); i < n; ++i) {
             if (path[i].get() != 0) {
@@ -88,7 +88,7 @@ namespace {
                     } else {
                         m_result->openRoot();
                     }
-                    setState(m_state, *m_result);
+                    setState(m_state, *m_result, session.translator());
                 }
             }
      private:
@@ -104,13 +104,13 @@ namespace {
               m_count(n),
               m_state(state)
             { }
-        virtual void handle(game::browser::Session& /*session*/)
+        virtual void handle(game::browser::Session& session)
             {
                 if (DirectoryBrowser* b = m_browser.get()) {
                     for (size_t i = 0; i < m_count; ++i) {
                         b->openParent();
                     }
-                    setState(m_state, *b);
+                    setState(m_state, *b, session.translator());
                 }
             }
      private:
@@ -126,11 +126,11 @@ namespace {
               m_index(index),
               m_state(state)
             { }
-        virtual void handle(game::browser::Session& /*session*/)
+        virtual void handle(game::browser::Session& session)
             {
                 if (DirectoryBrowser* b = m_browser.get()) {
                     b->openChild(m_index);
-                    setState(m_state, *b);
+                    setState(m_state, *b, session.translator());
                 }
             }
      private:
@@ -146,11 +146,11 @@ namespace {
               m_name(name),
               m_state(state)
             { }
-        virtual void handle(game::browser::Session& /*session*/)
+        virtual void handle(game::browser::Session& session)
             {
                 if (DirectoryBrowser* b = m_browser.get()) {
                     m_result = b->createDirectory(m_name);
-                    setState(m_state, *b);
+                    setState(m_state, *b, session.translator());
                 }
             }
         const String_t& getResult() const
@@ -165,14 +165,15 @@ namespace {
 
     class Dialog {
      public:
-        Dialog(ui::Root& root, util::RequestSender<game::browser::Session> session)
+        Dialog(ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::browser::Session> session)
             : m_root(root),
+              m_translator(tx),
               m_sender(session),
-              m_link(root),
+              m_link(root, tx),
               m_list(gfx::Point(20, 15), root),
               m_crumbs(root.provider().getFont(gfx::FontRequest())->getCellSize().scaledBy(30, 1), root),
-              m_buttons(root),
-              m_insButton(_("Ins - New directory..."), util::Key_Insert, root),
+              m_buttons(root, tx),
+              m_insButton(tx("Ins - New directory..."), util::Key_Insert, root),
               m_loop(root),
               m_browser(),
               m_thisDirectoryName(),
@@ -208,7 +209,7 @@ namespace {
         bool run()
             {
                 afl::base::Deleter del;
-                ui::Window& window = del.addNew(new ui::Window(_("Choose directory"), m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
+                ui::Window& window = del.addNew(new ui::Window(m_translator("Choose directory"), m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
                 window.add(m_crumbs);
                 window.add(m_list);
 
@@ -261,7 +262,7 @@ namespace {
         void onNewDirectory()
             {
                 ui::widgets::InputLine input(1000, 40, m_root);
-                if (!input.doStandardDialog(_("New directory"), _("Directory name"))) {
+                if (!input.doStandardDialog(m_translator("New directory"), m_translator("Directory name"), m_translator)) {
                     return;
                 }
 
@@ -269,10 +270,10 @@ namespace {
                 NewTask t(m_browser, input.getText(), state);
                 m_link.call(m_sender, t);
                 if (!t.getResult().empty()) {
-                    ui::dialogs::MessageBox(afl::string::Format(_("Creation of directory \"%s\" failed: %s").c_str(),
+                    ui::dialogs::MessageBox(afl::string::Format(m_translator("Creation of directory \"%s\" failed: %s").c_str(),
                                                                 input.getText(), t.getResult()),
-                                            _("New directory"),
-                                            m_root).doOkDialog();
+                                            m_translator("New directory"),
+                                            m_root).doOkDialog(m_translator);
                     return;
                 }
 
@@ -295,6 +296,7 @@ namespace {
 
      private:
         ui::Root& m_root;
+        afl::string::Translator& m_translator;
         util::RequestSender<game::browser::Session> m_sender;
         client::Downlink m_link;
         client::widgets::FolderListbox m_list;
@@ -312,9 +314,9 @@ namespace {
 
 // FIXME: this is currently tied to the browser session due to lack of ideas how to make it more general
 bool
-client::dialogs::doDirectorySelectionDialog(ui::Root& root, util::RequestSender<game::browser::Session> session, String_t& folderName)
+client::dialogs::doDirectorySelectionDialog(ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::browser::Session> session, String_t& folderName)
 {
-    Dialog dlg(root, session);
+    Dialog dlg(root, tx, session);
     if (!dlg.init(folderName)) {
         return false;
     }

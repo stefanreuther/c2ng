@@ -8,41 +8,6 @@
 #include <cxxtest/TestSuite.h>
 #include "afl/base/types.hpp"
 
-class ExpressionTestHelper {
- public:
-    class TestContext;
-    friend class TestContext;
-
-    ExpressionTestHelper();
-
-    void checkIntegerExpression(const char* expr, int result);
-    void checkBooleanExpression(const char* expr, int result);
-    void checkFileExpression(const char* expr, int result);
-    void checkNullExpression(const char* expr);
-    void checkStringExpression(const char* expr, const char* result);
-    void checkFloatExpression(const char* expr, double result);
-
-    /** Check expression for execution error.
-        The expression must compile, but may not execute.
-        \param expr Expression */
-    void checkFailureExpression(const char* expr);
-
-    /** Check expression that parses, but does not compile.
-        \param expr Expression */
-    void checkBadExpression(const char* expr);
-
-    /** Check expression that does not parse.
-        \param expr Expression */
-    void checkRejectedExpression(const char* expr);
-
-    void checkStatement(const char* stmt);
-
-    int32_t a, b, c;
-
- private:
-    void checkScalarExpression(const char* expr, int result, bool isBool);
-};
-
 class TestInterpreterArguments : public CxxTest::TestSuite {
  public:
     void testIt();

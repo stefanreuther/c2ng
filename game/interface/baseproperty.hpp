@@ -59,7 +59,7 @@ namespace game { namespace interface {
                                       const game::config::HostConfiguration& config,
                                       afl::base::Ptr<const game::spec::ShipList> shipList,
                                       afl::base::Ptr<Turn> turn);
-    void              setBaseProperty(game::map::Planet& pl, BaseProperty ibp, afl::data::Value* value);
+    void              setBaseProperty(game::map::Planet& pl, BaseProperty ibp, const afl::data::Value* value);
 
 } }
 

@@ -19,6 +19,7 @@ namespace client { namespace tiles {
      public:
         TileFactory(ui::Root& root,
                     client::si::UserSide& user,
+                    afl::string::Translator& tx,
                     client::widgets::KeymapWidget& keys,
                     game::proxy::ObjectObserver& observer);
         ~TileFactory();
@@ -30,6 +31,7 @@ namespace client { namespace tiles {
      private:
         ui::Root& m_root;
         client::si::UserSide& m_userSide;
+        afl::string::Translator& m_translator;
         client::widgets::KeymapWidget& m_keys;
         game::proxy::ObjectObserver& m_observer;
     };

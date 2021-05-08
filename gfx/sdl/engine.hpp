@@ -9,6 +9,7 @@
 #include <SDL_events.h>
 #include "afl/base/types.hpp"
 #include "afl/container/ptrqueue.hpp"
+#include "afl/string/translator.hpp"
 #include "afl/sys/loglistener.hpp"
 #include "afl/sys/mutex.hpp"
 #include "afl/sys/semaphore.hpp"
@@ -26,7 +27,7 @@ namespace gfx { namespace sdl {
         /** Constructor.
             This will initialize SDL.
             \param log Logger */
-        explicit Engine(afl::sys::LogListener& log);
+        Engine(afl::sys::LogListener& log, afl::string::Translator& tx);
 
         /** Destructor.
             This will shut down SDL. */
@@ -36,12 +37,14 @@ namespace gfx { namespace sdl {
         virtual afl::base::Ref<Canvas> createWindow(const WindowParameters& param);
         virtual afl::base::Ref<Canvas> loadImage(afl::io::Stream& file);
         virtual void handleEvent(EventConsumer& consumer, bool relativeMouseMovement);
+        virtual util::Key_t getKeyboardModifierState();
         virtual util::RequestDispatcher& dispatcher();
         virtual afl::base::Ref<Timer> createTimer();
 
      private:
         // Integration
         afl::sys::LogListener& m_log;
+        afl::string::Translator& m_translator;
 
         // Current window
         afl::base::Ptr<Surface> m_window;

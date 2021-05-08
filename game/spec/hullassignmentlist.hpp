@@ -7,6 +7,7 @@
 
 #include <vector>
 #include "game/config/hostconfiguration.hpp"
+#include "game/playerset.hpp"
 
 namespace game { namespace spec {
 
@@ -78,6 +79,12 @@ namespace game { namespace spec {
             \param player Player number (>0)
             \return Maximum index (inclusive) */
         int getMaxIndex(const game::config::HostConfiguration& config, int player) const;
+
+        /** Get set of players that can build a hull.
+            \param config Configuration
+            \param hullNr Hull number
+            \return Set of players such that for each set player, getIndexFromHull() is nonzero. */
+        PlayerSet_t getPlayersForHull(const game::config::HostConfiguration& config, int hullNr) const;
 
      private:
         /** Access mode. */

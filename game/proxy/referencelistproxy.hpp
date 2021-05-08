@@ -15,7 +15,6 @@
 #include "util/requestdispatcher.hpp"
 #include "util/requestreceiver.hpp"
 #include "util/requestsender.hpp"
-#include "util/slaverequestsender.hpp"
 
 namespace game { namespace proxy {
 
@@ -92,12 +91,13 @@ namespace game { namespace proxy {
 
      private:
         class Observer;
+        class ObserverFromSession;
         class Updater;
         class Confirmer;
 
         util::RequestSender<Session> m_gameSender;
         util::RequestReceiver<ReferenceListProxy> m_receiver;
-        util::SlaveRequestSender<Session, Observer> m_observerSender;
+        util::RequestSender<Observer> m_observerSender;
 
         int m_pendingRequests;
 

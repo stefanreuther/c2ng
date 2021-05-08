@@ -2,6 +2,7 @@
   *  \file game/map/shiptransporter.cpp
   *
   *  FIXME: missing feature: jettison/undo jettison money, ammo. PCC1 does it, PCC2 doesn't.
+  *  FIXME: missing feature: PCC1 can limit a proxy transfer to not overload the proxy ship
   */
 
 #include "game/map/shiptransporter.hpp"
@@ -17,7 +18,8 @@ game::map::ShipTransporter::ShipTransporter(Ship& sh,
                                             Ship::Transporter type,
                                             Id_t targetId,
                                             const Universe& univ,
-                                            HostVersion hostVersion)
+                                            HostVersion hostVersion,
+                                            afl::string::Translator& tx)
     : CargoContainer(),
       m_ship(sh),
       m_type(type),
@@ -27,7 +29,7 @@ game::map::ShipTransporter::ShipTransporter(Ship& sh,
       m_changeConnection(sh.sig_change.add(&sig_change, &afl::base::Signal<void()>::raise))
 {
     // ex GShipTransporterTransfer::GShipTransporterTransfer
-    game::actions::mustBePlayed(sh);
+    game::actions::mustBePlayed(sh, tx);
 }
 
 String_t
@@ -51,6 +53,18 @@ game::map::ShipTransporter::getName(afl::string::Translator& tx) const
     }
 }
 
+String_t
+game::map::ShipTransporter::getInfo1(afl::string::Translator& /*tx*/) const
+{
+    return String_t();
+}
+
+String_t
+game::map::ShipTransporter::getInfo2(afl::string::Translator& /*tx*/) const
+{
+    return String_t();
+}
+
 game::CargoContainer::Flags_t
 game::map::ShipTransporter::getFlags() const
 {
@@ -69,7 +83,7 @@ game::map::ShipTransporter::getFlags() const
 bool
 game::map::ShipTransporter::canHaveElement(Element::Type type) const
 {
-    // ex GShipTransporterTransfer::canHaveCargo
+    // ex GShipTransporterTransfer::canHaveCargo, TTransporter.CanHave
     switch (type) {
      case Element::Neutronium:
      case Element::Tritanium:

@@ -7,6 +7,7 @@
 
 #include "afl/charset/charset.hpp"
 #include "afl/io/stream.hpp"
+#include "afl/string/translator.hpp"
 
 namespace game { namespace sim {
 
@@ -16,8 +17,9 @@ namespace game { namespace sim {
     class Loader {
      public:
         /** Constructor.
-            \param cs Character set */
-        explicit Loader(afl::charset::Charset& cs);
+            \param cs Character set
+            \param tx Translator */
+        explicit Loader(afl::charset::Charset& cs, afl::string::Translator& tx);
 
         /** Load a setup.
             \param in Stream
@@ -37,6 +39,7 @@ namespace game { namespace sim {
 
      private:
         afl::charset::Charset& m_charset;
+        afl::string::Translator& m_translator;
     };
 
 } }

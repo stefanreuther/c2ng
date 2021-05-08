@@ -26,7 +26,7 @@ namespace game { namespace interface {
     };
     
     afl::data::Value* getHullProperty(const game::spec::Hull& h, HullProperty isp, const game::spec::ShipList& list, const game::config::HostConfiguration& config);
-    void setHullProperty(game::spec::Hull& h, HullProperty isp, afl::data::Value* value, game::spec::ShipList& list);
+    void setHullProperty(game::spec::Hull& h, HullProperty isp, const afl::data::Value* value, game::spec::ShipList& list);
 
 } }
 

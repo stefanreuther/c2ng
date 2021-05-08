@@ -7,11 +7,12 @@
 #include "interpreter/vmio/processloadcontext.hpp"
 
 #include "t_interpreter_vmio.hpp"
-#include "interpreter/singlecontext.hpp"
-#include "interpreter/process.hpp"
-#include "afl/sys/log.hpp"
-#include "afl/io/nullfilesystem.hpp"
 #include "afl/io/constmemorystream.hpp"
+#include "afl/io/nullfilesystem.hpp"
+#include "afl/string/nulltranslator.hpp"
+#include "afl/sys/log.hpp"
+#include "interpreter/process.hpp"
+#include "interpreter/singlecontext.hpp"
 #include "interpreter/world.hpp"
 
 /** Test deserialisation for loadMutex().
@@ -27,7 +28,7 @@ TestInterpreterVmioProcessLoadContext::testLoadMutex()
             { }
         virtual TestContext* lookup(const afl::data::NameQuery& /*name*/, PropertyIndex_t& /*result*/)
             { return 0; }
-        virtual void set(PropertyIndex_t /*index*/, afl::data::Value* /*value*/)
+        virtual void set(PropertyIndex_t /*index*/, const afl::data::Value* /*value*/)
             { }
         virtual afl::data::Value* get(PropertyIndex_t /*index*/)
             { return 0; }
@@ -74,8 +75,9 @@ TestInterpreterVmioProcessLoadContext::testLoadMutex()
     // Environment
     TestParent parent;
     afl::sys::Log log;
+    afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
-    interpreter::World world(log, fs);
+    interpreter::World world(log, tx, fs);
     interpreter::Process proc(world, "testLoadMutex", 99);
 
     // Test

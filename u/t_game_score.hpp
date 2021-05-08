@@ -7,9 +7,18 @@
 
 #include <cxxtest/TestSuite.h>
 
+class TestGameScoreChartBuilder : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testTeam();
+    void testCumulative();
+    void testSparse();
+};
+
 class TestGameScoreCompoundScore : public CxxTest::TestSuite {
  public:
     void testIt();
+    void testCompare();
 };
 
 class TestGameScoreLoader : public CxxTest::TestSuite {
@@ -19,6 +28,17 @@ class TestGameScoreLoader : public CxxTest::TestSuite {
     void testLoadOld();
     void testLoadOldErrors();
     void testSave();
+};
+
+class TestGameScoreScoreBuilderBase : public CxxTest::TestSuite {
+ public:
+    void testSpecials();
+};
+
+class TestGameScoreTableBuilder : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testTeams();
 };
 
 class TestGameScoreTurnScore : public CxxTest::TestSuite {

@@ -12,6 +12,7 @@
 #include "afl/io/constmemorystream.hpp"
 #include "afl/io/internaldirectory.hpp"
 #include "afl/io/internalstream.hpp"
+#include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
 
 namespace {
@@ -76,7 +77,8 @@ TestGameV3RegistrationKey::testFileRoundtrip()
     // Test
     game::v3::RegistrationKey testee(makeCharset());
     afl::sys::Log log;
-    testee.initFromDirectory(*dir, log);
+    afl::string::NullTranslator tx;
+    testee.initFromDirectory(*dir, log, tx);
 
     afl::io::InternalStream out;
     testee.saveToStream(out);

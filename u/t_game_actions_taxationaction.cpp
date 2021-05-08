@@ -424,3 +424,38 @@ TestGameActionsTaxationAction::testDescribe()
         TS_ASSERT_EQUALS(testee.describe(TaxationAction::Natives, tx, fmt), "They need to pay 40 mc.\nAmorphous worms don't pay taxes. They eat 5 colonist clans.\nNew happiness: happy (104)");
     }
 }
+
+/** Test describe() and setEffectors().
+    A: prepare planet. Call setEffectors().
+    E: verify text returned by describe(). */
+void
+TestGameActionsTaxationAction::testDescribeHiss()
+{
+    // Environment
+    afl::string::NullTranslator tx;
+    NumberFormatter fmt(false, false);
+
+    // Configure
+    game::test::SimpleTurn t;
+    Planet& pl = makePlanet(t);
+    pl.setColonistHappiness(91);
+
+    // Testee
+    HostConfiguration config;
+    config[HostConfiguration::HissEffectRate].set(5);
+    TaxationAction testee(pl, config, HostVersion(HostVersion::PHost, MKVERSION(3,4,0)));
+
+    // Check initial state
+    TS_ASSERT_EQUALS(testee.getHappinessChange(TaxationAction::Colonists), 8);
+    TS_ASSERT_EQUALS(testee.getHappinessChange(TaxationAction::Natives), 4);
+    TS_ASSERT_EQUALS(testee.getBovinoidSupplyContribution(), 0);
+    TS_ASSERT_EQUALS(testee.describe(TaxationAction::Colonists, tx, fmt), "Colonists pay 1 mc.\nNew happiness: happy (99)");
+
+    // Change
+    game::map::PlanetEffectors eff;
+    eff.set(game::map::PlanetEffectors::Hiss, 3);
+    testee.setEffectors(eff);
+
+    // Verify
+    TS_ASSERT_EQUALS(testee.describe(TaxationAction::Colonists, tx, fmt), "Colonists pay 1 mc.\nNew happiness: happy (108)");
+}

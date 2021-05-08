@@ -10,7 +10,6 @@
 #include "game/proxy/waitindicator.hpp"
 #include "game/session.hpp"
 #include "util/requestsender.hpp"
-#include "util/slaverequestsender.hpp"
 
 namespace game { namespace proxy {
 
@@ -91,6 +90,12 @@ namespace game { namespace proxy {
             \see game::actions::TaxationAction::setNumBuildings() */
         void setNumBuildings(int n);
 
+        /** Set planet effectors.
+            This affects happiness changes.
+            \param eff Effectors
+            \see game::actions::TaxationAction::setEffectors */
+        void setEffectors(const game::map::PlanetEffectors& eff);
+
         /** Set tax rate, limit to valid range.
             Resulting changes are reported via sig_change.
             \param a area
@@ -137,8 +142,9 @@ namespace game { namespace proxy {
 
      private:
         class Trampoline;
+        class TrampolineFromSession;
         util::RequestReceiver<TaxationProxy> m_reply;
-        util::SlaveRequestSender<Session, Trampoline> m_trampoline;
+        util::RequestSender<Trampoline> m_trampoline;
     };
 
 } }

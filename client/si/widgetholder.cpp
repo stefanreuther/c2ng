@@ -82,6 +82,12 @@ client::si::WidgetHolder::addNewWidget(UserSide& /*user*/, ui::Widget* w)
     return m_impl->addNewWidget(w);
 }
 
+size_t
+client::si::WidgetHolder::addNewWidget(Control& /*ctl*/, ui::Widget* w)
+{
+    return m_impl->addNewWidget(w);
+}
+
 // Get widget.
 ui::Widget*
 client::si::WidgetHolder::get(UserSide& /*user*/, size_t n) const
@@ -89,23 +95,29 @@ client::si::WidgetHolder::get(UserSide& /*user*/, size_t n) const
     return m_impl->get(n);
 }
 
+ui::Widget*
+client::si::WidgetHolder::get(Control& /*ctl*/, size_t n) const
+{
+    return m_impl->get(n);
+}
+
 // Get deleter.
 afl::base::Deleter&
-client::si::WidgetHolder::deleter(UserSide& /*user*/)
+client::si::WidgetHolder::deleter(Control& /*ctl*/)
 {
     return m_impl->deleter();
 }
 
 // Create integer value.
 afl::base::Observable<int>&
-client::si::WidgetHolder::createInteger(UserSide& user)
+client::si::WidgetHolder::createInteger(Control& ctl)
 {
-    return deleter(user).addNew(new Integer());
+    return deleter(ctl).addNew(new Integer());
 }
 
 // Attach Control.
 bool
-client::si::WidgetHolder::attachControl(UserSide& /*user*/, Control& ctl)
+client::si::WidgetHolder::attachControl(Control& ctl)
 {
     if (m_pControl != 0) {
         return false;
@@ -117,7 +129,7 @@ client::si::WidgetHolder::attachControl(UserSide& /*user*/, Control& ctl)
 
 // Detach Control.
 void
-client::si::WidgetHolder::detachControl(UserSide& /*user*/, Control& ctl)
+client::si::WidgetHolder::detachControl(Control& ctl)
 {
     if (m_pControl == &ctl) {
         m_pControl = 0;
@@ -151,8 +163,6 @@ client::si::WidgetHolder::makeCommand(util::Atom_t cmd)
                     }
                 }
             }
-        Command* clone() const
-            { return new Command(*this); }
      private:
         // The resulting command will be part of the WidgetHolder.
         // We therefore cannot use a Ref here which would prevent the WidgetHolder from being deleted.

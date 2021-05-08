@@ -21,7 +21,9 @@ namespace game { namespace map {
         SimpleObjectCursor& currentShip();
         SimpleObjectCursor& currentPlanet();
         SimpleObjectCursor& currentBase();
+        SimpleObjectCursor& currentUfo();
         SimpleObjectCursor& currentIonStorm();
+        SimpleObjectCursor& currentMinefield();
         Location& location();
 
         ObjectCursor* getCursorByNumber(int nr);
@@ -30,14 +32,18 @@ namespace game { namespace map {
         static const int ShipScreen = 1;
         static const int PlanetScreen = 2;
         static const int BaseScreen = 3;
+        static const int Ufos = 30;
         static const int IonStorms = 31;
+        static const int Minefields = 32;
 
      private:
         Universe* m_pUniverse;
         SimpleObjectCursor m_currentShip;
         SimpleObjectCursor m_currentPlanet;
         SimpleObjectCursor m_currentBase;
+        SimpleObjectCursor m_currentUfo;
         SimpleObjectCursor m_currentIonStorm;
+        SimpleObjectCursor m_currentMinefield;
         Location m_location;
     };
 

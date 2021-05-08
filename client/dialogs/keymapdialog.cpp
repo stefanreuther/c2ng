@@ -5,6 +5,7 @@
 #include "client/dialogs/keymapdialog.hpp"
 #include "afl/base/deleter.hpp"
 #include "afl/string/format.hpp"
+#include "client/dialogs/helpdialog.hpp"
 #include "client/downlink.hpp"
 #include "game/proxy/keymapproxy.hpp"
 #include "ui/group.hpp"
@@ -17,7 +18,6 @@
 #include "ui/widgets/button.hpp"
 #include "ui/window.hpp"
 #include "util/keymapinformation.hpp"
-#include "util/translation.hpp"
 
 using game::proxy::KeymapProxy;
 using afl::string::Format;
@@ -27,12 +27,13 @@ using util::KeymapInformation;
 namespace {
     class KeymapDialog : private KeymapProxy::Listener {
      public:
-        KeymapDialog(ui::Root& root, util::RequestSender<game::Session> gameSender);
+        KeymapDialog(ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::Session> gameSender);
         ~KeymapDialog();
 
         void setKeymapName(String_t name);
         void run(ui::Root& root);
         bool handleKey(util::Key_t key);
+        void onHelp();
 
      private:
         void requestUpdate();
@@ -40,6 +41,10 @@ namespace {
         virtual void updateKeyList(util::KeySet_t& keys);
 
         void renderInformation();
+
+        ui::Root& m_root;
+        afl::string::Translator& m_translator;
+        util::RequestSender<game::Session> m_gameSender;
 
         KeymapProxy m_proxy;
         client::Downlink m_link;
@@ -72,10 +77,13 @@ namespace {
     };
 }
 
-KeymapDialog::KeymapDialog(ui::Root& root, util::RequestSender<game::Session> gameSender)
+KeymapDialog::KeymapDialog(ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::Session> gameSender)
     : Listener(),
+      m_root(root),
+      m_translator(tx),
+      m_gameSender(gameSender),
       m_proxy(gameSender, root.engine().dispatcher()),
-      m_link(root),
+      m_link(root, tx),
       m_primaryKeymapName(),
       m_alternateKeymapName(),
       m_currentKeymapName(),
@@ -121,7 +129,7 @@ KeymapDialog::run(ui::Root& root)
     gfx::Point textSize = cellSize.scaledBy(20, 12);
 
     afl::base::Deleter h;
-    ui::Window& win(h.addNew(new ui::Window("!Keymap Debugger", root.provider(), root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5)));
+    ui::Window& win(h.addNew(new ui::Window(m_translator("Keymap Debugger"), root.provider(), root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5)));
     win.add(h.addNew(new KeyWidget(*this)));
 
     // Text
@@ -132,16 +140,19 @@ KeymapDialog::run(ui::Root& root)
     g1.add(m_responseText);
     win.add(g1);
 
-    ui::widgets::Button& btnClose = h.addNew(new ui::widgets::Button("!Close", 0, root));
+    ui::widgets::Button& btnClose = h.addNew(new ui::widgets::Button(m_translator("Close"), 0, root));
     ui::Group& g2 = h.addNew(new ui::Group(ui::layout::HBox::instance5));
     g2.add(h.addNew(new ui::Spacer()));
     g2.add(btnClose);
-    // FIXME g2.add(h.add(new UIButton(_("Help"), 0)).addCall(this, &WKeymapDebugger::onHelp));
+
+    ui::widgets::Button& btnHelp = h.addNew(new ui::widgets::Button(m_translator("Help"), 0, root));
+    btnHelp.sig_fire.add(this, &KeymapDialog::onHelp);
+    g2.add(btnHelp);
     win.add(g2);
     win.pack();
     btnClose.sig_fire.addNewClosure(m_loop.makeStop(0));
 
-    m_responseText.setText("!Press the key for which you want information.");
+    m_responseText.setText(m_translator("Press the key for which you want information."));
     renderInformation();
 
     // Do it
@@ -169,29 +180,29 @@ KeymapDialog::handleKey(util::Key_t key)
     KeymapProxy::Info info;
     m_proxy.getKey(m_link, key, info);
 
-    Text message = Text(Format(_("Key %s:\n"), util::formatKey(key))).withStyle(util::rich::StyleAttribute::Bold);
+    Text message = Text(Format(m_translator("Key %s:\n"), util::formatKey(key))).withStyle(util::rich::StyleAttribute::Bold);
     bool used;
     switch (info.result) {
      case KeymapProxy::Unassigned:
         // Not bound at all
-        message += _("This key is not bound.\n");
+        message += m_translator("This key is not bound.\n");
         break;
 
      case KeymapProxy::Cancelled:
         // Key is bound to 0 in a keymap
-        message += Format(_("This key is unbound by %s.\n"), info.keymapName);
+        message += Format(m_translator("This key is unbound by %s.\n"), info.keymapName);
         break;
 
      case KeymapProxy::Internal:
         // Internal
-        message += Format(_("Bound in keymap %s.\n"), info.keymapName);
-        message += _("This key is handled internally.\n");
+        message += Format(m_translator("Bound in keymap %s.\n"), info.keymapName);
+        message += m_translator("This key is handled internally.\n");
         break;
 
      case KeymapProxy::Normal:
         // Normal binding
-        message += Format(_("Bound in keymap %s.\n"), info.keymapName);
-        message += Format(_("Command:\n  %s\n"), info.command);
+        message += Format(m_translator("Bound in keymap %s.\n"), info.keymapName);
+        message += Format(m_translator("Command:\n  %s\n"), info.command);
         break;
     }
 
@@ -204,14 +215,14 @@ KeymapDialog::handleKey(util::Key_t key)
     }
 
     if (!info.origin.empty()) {
-        message += Format(_("Command provided by %s\n"), info.origin);
+        message += Format(m_translator("Command provided by %s\n"), info.origin);
     }
 
     // Process result
     if (key == util::Key_Escape) {
         if (used) {
             // ESC handled by keymap; give users advice how to proceed
-            message += _("Press Shift-ESC to close this window.\n");
+            message += m_translator("Press Shift-ESC to close this window.\n");
         } else if (!m_alternateKeymapName.empty()) {
             // Pretend key was used to cancel secondary keymap
             used = true;
@@ -221,7 +232,7 @@ KeymapDialog::handleKey(util::Key_t key)
     }
 
     if (key == util::Key_Quit) {
-        message += _("Press Shift-ESC to close this window.\n");
+        message += m_translator("Press Shift-ESC to close this window.\n");
     }
 
     // If key was used, switch to alternate keymap.
@@ -235,6 +246,13 @@ KeymapDialog::handleKey(util::Key_t key)
     m_responseText.requestRedraw();
     renderInformation();
     return true;
+}
+
+void
+KeymapDialog::onHelp()
+{
+    // ex WKeymapDebugger::onHelp
+    client::dialogs::doHelpDialog(m_root, m_translator, m_gameSender, "pcc2:keymap");
 }
 
 void
@@ -284,9 +302,9 @@ KeymapDialog::renderInformation()
 
 
 void
-client::dialogs::doKeymapDialog(ui::Root& root, util::RequestSender<game::Session> gameSender, String_t keymapName)
+client::dialogs::doKeymapDialog(ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::Session> gameSender, String_t keymapName)
 {
-    KeymapDialog dlg(root, gameSender);
+    KeymapDialog dlg(root, tx, gameSender);
     dlg.setKeymapName(keymapName);
     dlg.run(root);
 }

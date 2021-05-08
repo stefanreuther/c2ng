@@ -5,6 +5,7 @@
 #include "server/file/gamestatus.hpp"
 #include "afl/base/countof.hpp"
 #include "afl/string/format.hpp"
+#include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
 #include "game/v3/registrationkey.hpp"
 #include "server/file/directoryitem.hpp"
@@ -50,7 +51,8 @@ server::file::GameStatus::load(Root& root, DirectoryItem& dir)
         // FIXME: this uses a-priori knowledge that the key parser will use the file KEYFILE_NAME.
         if (/*FileItem* it =*/ dir.findFile(KEYFILE_NAME)) {
             game::v3::RegistrationKey key(std::auto_ptr<afl::charset::Charset>(root.defaultCharacterSet().clone()));
-            key.initFromDirectory(*dirWrapper, root.log());
+            afl::string::NullTranslator tx;
+            key.initFromDirectory(*dirWrapper, root.log(), tx);
 
             std::auto_ptr<KeyInfo> k(new KeyInfo());
             k->fileName = KEYFILE_NAME;

@@ -50,37 +50,37 @@ namespace client { namespace si {
             \param w Newly-allocated widget.
             \return index such that get(user,index) == w */
         size_t addNewWidget(UserSide& user, ui::Widget* w);
+        size_t addNewWidget(Control& ctl, ui::Widget* w);
 
         /** Get widget.
             \param user User Side to prove you're the correct thread.
             \param n Index
             \return widget; null if n is out-of-range or the widget was destroyed for some reason */
         ui::Widget* get(UserSide& user, size_t n) const;
+        ui::Widget* get(Control& user, size_t n) const;
 
         /** Get deleter.
             Use the deleter if you have anything to store which is not a widget.
-            \param user User Side to prove you're the correct thread.
+            \param ctl Control to prove you're the correct thread.
             \return deleter */
-        afl::base::Deleter& deleter(UserSide& user);
+        afl::base::Deleter& deleter(Control& ctl);
 
         /** Create integer value.
-            \param user User Side to prove you're the correct thread.
+            \param ctl Control to prove you're the correct thread.
             \return newly-created integer value. */
-        afl::base::Observable<int>& createInteger(UserSide& user);
+        afl::base::Observable<int>& createInteger(Control& ctl);
 
         /** Attach Control.
             Only one Control can be attached at a time; see class description.
-            \param user User Side to prove you're the correct thread.
             \param ctl Control to attach
             \retval true Control attached successfully
             \retval false Control not attached because another one is active */
-        bool attachControl(UserSide& user, Control& ctl);
+        bool attachControl(Control& ctl);
 
         /** Detach Control.
             Undoes a previous successful attachControl().
-            \param user User Side to prove you're the correct thread.
             \param ctl Control to detach */
-        void detachControl(UserSide& user, Control& ctl);
+        void detachControl(Control& ctl);
 
         /** Get attached Control.
             \return attached control; null if none */

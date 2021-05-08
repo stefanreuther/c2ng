@@ -3,12 +3,14 @@
   */
 
 #include "client/si/control.hpp"
-#include "client/si/userside.hpp"
-#include "client/dialogs/consoledialog.hpp"
 #include "afl/string/format.hpp"
+#include "client/dialogs/consoledialog.hpp"
 #include "client/si/commandtask.hpp"
-#include "interpreter/values.hpp"
+#include "client/si/keymaphandler.hpp"
+#include "client/si/userside.hpp"
+#include "client/widgets/decayingmessage.hpp"
 #include "game/interface/referencecontext.hpp"
+#include "interpreter/values.hpp"
 
 using afl::sys::LogListener;
 using afl::string::Format;
@@ -31,7 +33,7 @@ client::si::Control::Control(UserSide& iface, ui::Root& root, afl::string::Trans
 {
     m_interface.mainLog().write(LogListener::Trace, LOG_NAME, Format("<%p> create", this));
     m_blocker.setExtent(gfx::Rectangle(gfx::Point(), m_blocker.getLayoutInfo().getPreferredSize()));
-    m_root.moveWidgetToEdge(m_blocker, 1, 2, 10);
+    m_root.moveWidgetToEdge(m_blocker, gfx::CenterAlign, gfx::BottomAlign, 10);
     m_interface.addControl(*this);
 }
 
@@ -129,13 +131,25 @@ void
 client::si::Control::continueProcessWait(RequestLink2 link)
 {
     if (link.isValid()) {
-        m_waiting = true;
         m_interacting = false;
-        m_id = m_interface.allocateWaitId();
-        m_interface.mainLog().write(LogListener::Trace, LOG_NAME, Format("<%p> continueProcessWait => %d", this, m_id));
-        m_interface.continueProcessWait(m_id, link);
-        updateBlocker();
-        m_loop.run();
+        if (m_waiting) {
+            // If I am already waiting, re-use the wait Id, and do NOT re-enter m_loop.run().
+            // This happens when someone does continueProcessWait from a Control virtual,
+            // e.g. KeymapHandler::handleUseKeymapRequest when a process does two UseKeymap in a row.
+            // Failure to do this will cause KeymapHandler::run() to hang.
+            // This means continueProcessWait will not actually wait for recursive waits.
+            // (quick fix, not 100% sure about it)
+            m_interface.mainLog().write(LogListener::Trace, LOG_NAME, Format("<%p> continueProcessWait => %d (nested)", this, m_id));
+            m_interface.continueProcessWait(m_id, link);
+            updateBlocker();
+        } else {
+            m_waiting = true;
+            m_id = m_interface.allocateWaitId();
+            m_interface.mainLog().write(LogListener::Trace, LOG_NAME, Format("<%p> continueProcessWait => %d", this, m_id));
+            m_interface.continueProcessWait(m_id, link);
+            updateBlocker();
+            m_loop.run();
+        }
     }
 }
 
@@ -159,23 +173,72 @@ client::si::Control::setInteracting(bool state)
 }
 
 void
-client::si::Control::defaultHandlePopupConsole(UserSide& ui, RequestLink2 link)
+client::si::Control::defaultHandlePopupConsole(RequestLink2 link)
 {
-    ui.detachProcess(link);
+    m_interface.detachProcess(link);
 
     InputState input;
     input.setProcess(link);
 
     OutputState output;
-    client::dialogs::doConsoleDialog(ui, *this, input, output);
-    handleStateChange(ui, output.getProcess(), output.getTarget());
+    client::dialogs::doConsoleDialog(m_interface, *this, input, output);
+    handleStateChange(output.getProcess(), output.getTarget());
 }
 
 void
-client::si::Control::defaultHandleSetViewRequest(UserSide& ui, RequestLink2 link, String_t /*name*/, bool /*withKeymap*/)
+client::si::Control::defaultHandleSetViewRequest(RequestLink2 link, String_t /*name*/, bool /*withKeymap*/)
 {
     // Default behaviour for Chart.SetView is to reject it
-    ui.continueProcessWithFailure(link, "Context error");
+    interface().continueProcessWithFailure(link, "Context error");
+}
+
+void
+client::si::Control::defaultHandleUseKeymapRequest(RequestLink2 link, String_t name, int prefix)
+{
+    KeymapHandler::Result r = KeymapHandler(*this, name, prefix).run(link);
+    switch (r.action) {
+     case KeymapHandler::NoAction:
+        break;
+     case KeymapHandler::KeyCommand:
+        executeKeyCommandWait(r.keymapName, r.key, prefix);
+        break;
+     case KeymapHandler::StateChange:
+        handleStateChange(r.link, r.target);
+        break;
+     case KeymapHandler::EndDialog:
+        handleEndDialog(r.link, r.code);
+        break;
+     case KeymapHandler::PopupConsole:
+        handlePopupConsole(r.link);
+        break;
+    }
+}
+
+void
+client::si::Control::defaultHandleOverlayMessageRequest(RequestLink2 link, String_t text)
+{
+    client::widgets::showDecayingMessage(root(), text);
+    interface().continueProcess(link);
+}
+
+void
+client::si::Control::dialogHandleStateChange(RequestLink2 link, OutputState::Target target, OutputState& out, ui::EventLoop& loop, int n)
+{
+    if (target == OutputState::NoChange) {
+        m_interface.continueProcess(link);
+    } else {
+        m_interface.detachProcess(link);
+        out.set(link, target);
+        loop.stop(n);
+    }
+}
+
+void
+client::si::Control::dialogHandleEndDialog(RequestLink2 link, int /*code*/, OutputState& out, ui::EventLoop& loop, int n)
+{
+    m_interface.detachProcess(link);
+    out.set(link, OutputState::NoChange);
+    loop.stop(n);
 }
 
 void

@@ -24,5 +24,6 @@ TestGameSpecInfoNullPictureNamer::testIt()
     TS_ASSERT_EQUALS(testee.getLauncherPicture(game::spec::TorpedoLauncher(5)), "");
     TS_ASSERT_EQUALS(testee.getAbilityPicture("cloak"), "");
     TS_ASSERT_EQUALS(testee.getPlayerPicture(game::Player(7)), "");
+    TS_ASSERT_EQUALS(testee.getVcrObjectPicture(false, 7), "");
 }
 

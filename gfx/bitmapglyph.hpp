@@ -23,9 +23,6 @@ namespace gfx {
         If the width is not divisible by 8, the lower-valued bits of the final byte are unused. */
     class BitmapGlyph {
      public:
-        /** Construct an empty glyph of zero size. */
-        BitmapGlyph();
-
         /** Construct a blank glyph of a given size.
             \param width  [in] Width in pixels
             \param height [in] Height in pixels */
@@ -35,7 +32,7 @@ namespace gfx {
             \param width  [in] Width in pixels
             \param height [in] Height in pixels
             \param data   [in] Refers to getBytesForSize(width,height) bytes containing bitmap data. See class description. */
-        BitmapGlyph(uint16_t width, uint16_t height, const uint8_t* data);
+        BitmapGlyph(uint16_t width, uint16_t height, afl::base::ConstBytes_t data);
 
         /** Destructor. */
         ~BitmapGlyph();

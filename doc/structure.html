@@ -209,21 +209,24 @@
           </div>
           <div class="owned">Missions <em>: game::spec::MissionList</em>
             <div class="owned">Mission <em>: game::spec::Mission[]</em></div></div>
-          <div class="owned missing">Torpedoes</div>
-          <div class="owned missing">Fighters</div>
+          <!--<div class="owned missing">Torpedoes</div>-->
+          <!--<div class="owned missing">Fighters</div>-->
         </div>
         <div class="optional ptr hasnotify">Game <em>: game::Game</em>
           <div class="owned">PlanetScoreDef, ShipScoreDef <em>: game::UnitScoreDefinitionList</em></div>
-          <div class="owned">Viewpoint <em>: int</em></div>
           <div class="owned">TurnScores <em>: game::TurnScoreList</em></div>
           <div class="owned">Selections <em>: game::map::Selections</em></div>
-          <div class="owned haschange">Teams <em>: game::TeamSettings</em></div>
+          <div class="owned haschange">Teams <em>: game::TeamSettings</em>
+            <div class="owned">Viewpoint <em>: int</em></div></div>
           <div class="owned">Cursors <em>: game::map::Cursors</em>
             <div class="owned haschange">CurrentShip/Planet/Base, etc... <em>: game::map::SimpleObjectCursor</em></div>
             <div class="owned">Location<em>: game::map::Location</em></div>
           </div>
           <div class="owned haschange">HistoryTurnList <em>: game::HistoryTurnList</em></div>
-          <div class="owned">MessageConfiguration <em>: game::msg::Configuration</em></div>
+          <div class="owned">MessageConfiguration <em>: game::msg::Configuration</em>
+            <strong>Message filters</strong></div>
+          <div class="owned">ExpressionLists <em>: game::config::ExpressionLists</em>
+            <strong>LRU and predefined expressions</strong></div>
           <div class="ptr hasnotify">CurrentTurn <em>: game::Turn</em>
             <div class="owned">Inbox <em>: game::msg::Inbox</em></div>
             <div class="owned">Outbox <em>: game::msg::Outbox</em></div>
@@ -270,8 +273,9 @@
           </div>
         </div>
         <div class="owned">Extra
-          <div class="owned optional">ScriptSide <em>: client::si::ScriptSide</em></div>
-          <div class="owned optional missing">SimState
+          <div class="owned optional">ScriptSide <em>: client::si::ScriptSide</em>
+            <strong>Communication to UserSide for scripts</strong></div>
+          <div class="owned optional">SimState <em>: game::sim::Session</em>
             <div class="owned hasnotify">Setup <em>: game::sim::Setup</em>
               <div class="owned haschange">Ship <em>: game::sim::Ship[]</em></div>
               <div class="owned haschange">Planet <em>: game::sim::Planet</em></div>
@@ -284,7 +288,6 @@
         <div class="owned">InterpreterInterface <em>: game::InterpreterInterface</em></div>
         <div class="owned virtual">UserInterfacePropertyAccessor <em>: game::interface::UserInterfacePropertyAccessor[]</em></div>
         <div class="owned">EditableAreas <em>: AreaSet_t</em><strong>Read-only/read-write status for database and turn data</strong></div>
-        <div class="ref">Translator <em>: afl::string::Translator</em></div>
         <div class="owned hasnotify">World <em>: interpreterinterface::World</em>
           <strong>Interpreter core with little VGAP interdependencies</strong>
           <div class="owned">GlobalPropertyNames, ShipPropertyNames, PlanetPropertyNames <em>: afl::data::NameMap</em></div>
@@ -297,6 +300,7 @@
           <div class="owned">Atoms <em>: util::AtomTable</em></div>
           <div class="owned virtual">GlobalContexts <em>: interpreter::Context[]</em></div>
           <div class="ref">LogListener <em>: afl::sys::LogListener</em></div>
+          <div class="ref">Translator <em>: afl::string::Translator</em></div>
           <div class="owned">MutexList <em>: interpreter::MutexList</em></div>
           <div class="owned">FileTable <em>: interpreter::FileTable</em></div>
           <div class="ptr owned virtual">SystemLoadDir, LocalLoadDir <em>: afl::io::Directory</em></div>

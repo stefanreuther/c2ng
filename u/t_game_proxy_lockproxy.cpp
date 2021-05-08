@@ -9,6 +9,7 @@
 #include "t_game_proxy.hpp"
 #include "game/test/sessionthread.hpp"
 #include "util/simplerequestdispatcher.hpp"
+#include "game/map/planet.hpp"
 #include "game/map/ship.hpp"
 #include "game/map/universe.hpp"
 #include "game/turn.hpp"
@@ -19,6 +20,7 @@ namespace {
     using afl::base::Ptr;
     using game::Game;
     using game::HostVersion;
+    using game::map::Planet;
     using game::map::Point;
     using game::map::Ship;
     using game::map::Universe;
@@ -52,6 +54,16 @@ namespace {
             }
         }
         h.session().setGame(g);
+    }
+
+    void addPlanet(SessionThread& h)
+    {
+        Ptr<Game> g = h.session().getGame();
+        Universe& univ = g->currentTurn().universe();
+
+        Planet& p = *univ.planets().create(333);
+        p.setPosition(Point(2000, 2000));
+        p.internalCheck(univ.config(), h.session().translator(), h.session().log());
     }
 }
 
@@ -185,5 +197,33 @@ TestGameProxyLockProxy::testRange()
     }
     TS_ASSERT_EQUALS(recv.results.size(), 1U);
     TS_ASSERT_EQUALS(recv.results[0], Point(1000, 1140));
+}
+
+/** Set setOrigin.
+    A: create session with some objects including a planet.
+    E: call setOrigin(); then call postQuery(). Must produce correct result. */
+void
+TestGameProxyLockProxy::testSetOrigin()
+{
+    // Environment
+    CxxTest::setAbortTestOnFail(true);
+    SessionThread h;
+    prepare(h);        // Ships at positions (1000,1110), (1000,1120), ... (1000,1200)
+    addPlanet(h);      // Planet at position 2000,2000
+    SimpleRequestDispatcher disp;
+    LockProxy t(h.gameSender(), disp);
+
+    // Testee
+    ResultReceiver recv;
+    t.sig_result.add(&recv, &ResultReceiver::onResult);
+    t.setOrigin(Point(2100, 2000), false);
+    t.postQuery(Point(2010, 2010), LockProxy::Flags_t() + LockProxy::ToggleOptimizeWarp + LockProxy::Left);
+
+    // Wait for result
+    while (recv.results.empty()) {
+        TS_ASSERT(disp.wait(1000));
+    }
+    TS_ASSERT_EQUALS(recv.results.size(), 1U);
+    TS_ASSERT_EQUALS(recv.results[0], Point(2003, 2000));
 }
 

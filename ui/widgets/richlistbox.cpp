@@ -5,10 +5,10 @@
 #include <algorithm>
 #include <climits>
 #include "ui/widgets/richlistbox.hpp"
-#include "ui/draw.hpp"
-#include "ui/rich/imageobject.hpp"
-#include "ui/skincolorscheme.hpp"
 #include "gfx/dimcolorscheme.hpp"
+#include "ui/draw.hpp"
+#include "ui/icons/image.hpp"
+#include "ui/skincolorscheme.hpp"
 
 namespace {
     using util::SkinColor;
@@ -134,13 +134,23 @@ ui::widgets::RichListbox::getItemHeight(size_t n)
 }
 
 int
-ui::widgets::RichListbox::getHeaderHeight()
+ui::widgets::RichListbox::getHeaderHeight() const
+{
+    return 0;
+}
+
+int
+ui::widgets::RichListbox::getFooterHeight() const
 {
     return 0;
 }
 
 void
 ui::widgets::RichListbox::drawHeader(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
+{ }
+
+void
+ui::widgets::RichListbox::drawFooter(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
 { }
 
 void
@@ -187,7 +197,7 @@ ui::widgets::RichListbox::getLayoutInfo() const
         ui::rich::Document doc(m_provider);
         doc.setPageWidth(hasRenderFlag(DisableWrap) ? INT_MAX : m_preferredWidth);
         if (it.image.get() != 0) {
-            doc.addFloatObject(std::auto_ptr<ui::rich::BlockObject>(new ui::rich::ImageObject(it.image)), true);
+            doc.addFloatObject(doc.deleter().addNew(new ui::icons::Image(*it.image)), true);
         }
         doc.add(it.text);
         doc.finish();
@@ -212,7 +222,7 @@ ui::widgets::RichListbox::render(size_t pos, size_t n)
         it.doc.clear();
         it.doc.setPageWidth(hasRenderFlag(DisableWrap) ? INT_MAX : std::max(10, getExtent().getWidth() - 4));
         if (it.image.get() != 0) {
-            it.doc.addFloatObject(std::auto_ptr<ui::rich::BlockObject>(new ui::rich::ImageObject(it.image)), true);
+            it.doc.addFloatObject(it.doc.deleter().addNew(new ui::icons::Image(*it.image)), true);
         }
         it.doc.add(it.text);
         it.doc.finish();

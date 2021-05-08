@@ -16,6 +16,7 @@ class TestGameSpecInfoBrowser : public CxxTest::TestSuite {
     void testDescribeEngine();
     void testDescribeBeam();
     void testDescribeTorpedo();
+    void testDescribeFighter();
     void testListPlayer();
     void testListHull();
     void testListRacial();
@@ -23,6 +24,7 @@ class TestGameSpecInfoBrowser : public CxxTest::TestSuite {
     void testListEngine();
     void testListBeam();
     void testListTorpedo();
+    void testListFighter();
     void testDescribeFilter();
 };
 
@@ -40,10 +42,12 @@ class TestGameSpecInfoInfo : public CxxTest::TestSuite {
     void testDescribeEngine();
     void testDescribeBeam();
     void testDescribeTorp();
+    void testDescribeFighter();
     void testGetHullAttribute();
     void testGetEngineAttribute();
     void testGetBeamAttribute();
     void testGetTorpAttribute();
+    void testGetFighterAttribute();
 };
 
 class TestGameSpecInfoNullPictureNamer : public CxxTest::TestSuite {

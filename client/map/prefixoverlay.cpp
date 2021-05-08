@@ -14,8 +14,6 @@
 #include "ui/colorscheme.hpp"
 #include "ui/draw.hpp"
 
-const afl::sys::Timeout_t BLINK_INTERVAL = 400;
-
 client::map::PrefixOverlay::PrefixOverlay(Screen& screen, int initialValue)
     : m_screen(screen),
       m_value(initialValue),
@@ -24,7 +22,7 @@ client::map::PrefixOverlay::PrefixOverlay(Screen& screen, int initialValue)
 {
     // ex WPrefixChartMode::WPrefixChartMode
     m_timer->sig_fire.add(this, &PrefixOverlay::onTimer);
-    m_timer->setInterval(BLINK_INTERVAL);
+    m_timer->setInterval(ui::CURSOR_BLINK_INTERVAL);
 }
 
 client::map::PrefixOverlay::~PrefixOverlay()
@@ -74,7 +72,7 @@ client::map::PrefixOverlay::drawAfter(gfx::Canvas& can, const Renderer& ren)
 bool
 client::map::PrefixOverlay::drawCursor(gfx::Canvas& /*can*/, const Renderer& /*ren*/)
 {
-    return true;
+    return false;
 }
 
 bool
@@ -120,7 +118,7 @@ client::map::PrefixOverlay::onTimer()
 {
     m_blink = !m_blink;
     requestRedraw();
-    m_timer->setInterval(BLINK_INTERVAL);
+    m_timer->setInterval(ui::CURSOR_BLINK_INTERVAL);
 }
 
 void

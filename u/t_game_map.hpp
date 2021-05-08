@@ -31,6 +31,16 @@ class TestGameMapBeamupShipTransfer : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestGameMapBoundingBox : public CxxTest::TestSuite {
+ public:
+    void testInit();
+    void testAddPoint();
+    void testAddCircle();
+    void testAddDrawing();
+    void testAddUniverse();
+    void testAddWrappedUfo();
+};
+
 class TestGameMapChunnelMission : public CxxTest::TestSuite {
  public:
     void testRangesPHost();
@@ -47,11 +57,41 @@ class TestGameMapCircularObject : public CxxTest::TestSuite {
 class TestGameMapConfiguration : public CxxTest::TestSuite {
  public:
     void testFlat();
+    void testFlatImage();
     void testFlatSmall();
     void testFlatOffset();
+    void testFlatOffsetImage();
     void testWrapped();
+    void testWrappedImage();
     void testWrappedSmall();
     void testCircular();
+    void testCircularImage();
+    void testInitFromConfig();
+    void testInitFromConfigWrap();
+    void testInitFromBadConfig();
+    void testSaveToConfig();
+    void testSaveToConfigWrap();
+    void testSaveToConfigFull();
+    void testSaveToConfigUser();
+};
+
+class TestGameMapDrawing : public CxxTest::TestSuite {
+ public:
+    void testInit();
+    void testDistance();
+    void testDistanceWrap();
+};
+
+class TestGameMapDrawingContainer : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testErase();
+    void testEraseExpired();
+    void testFindNearest();
+    void testEraseAdjacent();
+    void testColorAdjacent();
+    void testTagAdjacent();
+    void testFindMarker();
 };
 
 class TestGameMapExplosion : public CxxTest::TestSuite {
@@ -97,6 +137,8 @@ class TestGameMapIonStorm : public CxxTest::TestSuite {
     void testMessageInfoMin();
     void testMessageInfoMax();
     void testMessageInfoMissing();
+    void testForecastEmpty();
+    void testForecastNormal();
 };
 
 class TestGameMapLocation : public CxxTest::TestSuite {
@@ -125,6 +167,12 @@ class TestGameMapLocker : public CxxTest::TestSuite {
     void testExplosions();
     void testWrap();
     void testCircular();
+    void testWarpWell();
+};
+
+class TestGameMapMessageLink : public CxxTest::TestSuite {
+ public:
+    void testIt();
 };
 
 class TestGameMapMinefield : public CxxTest::TestSuite {
@@ -202,6 +250,9 @@ class TestGameMapObject : public CxxTest::TestSuite {
 class TestGameMapObjectCursor : public CxxTest::TestSuite {
  public:
     void testIt();
+    void testBrowse();
+    void testBrowseUnmarked();
+    void testBrowseHere();
 };
 
 class TestGameMapObjectCursorFactory : public CxxTest::TestSuite {
@@ -209,9 +260,22 @@ class TestGameMapObjectCursorFactory : public CxxTest::TestSuite {
     void testInterface();
 };
 
+class TestGameMapObjectObserver : public CxxTest::TestSuite {
+ public:
+    void testNull();
+    void testNormal();
+};
+
 class TestGameMapPlanet : public CxxTest::TestSuite {
  public:
     void testAutobuildSettings();
+    void testCopy();
+};
+
+class TestGameMapPlanetEffectors : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testDescribe();
 };
 
 class TestGameMapPlanetFormula : public CxxTest::TestSuite {
@@ -267,6 +331,7 @@ class TestGameMapPlanetInfo : public CxxTest::TestSuite {
     void testDescribePlanetDefenseEffects();
     void testPrepareUnloadInfo();
     void testPackGroundDefenseInfo();
+    void testPreparePlanetEffectors();
 };
 
 class TestGameMapPlanetPredictor : public CxxTest::TestSuite {
@@ -275,6 +340,9 @@ class TestGameMapPlanetPredictor : public CxxTest::TestSuite {
     void testHost();
     void testGrowthPHostTholian();
     void testGrowthHostTholian();
+    void testGrowthMaxHost();
+    void testGrowthRebelHost();
+    void testGrowthHumanoidHost();
 };
 
 class TestGameMapPlanetStorage : public CxxTest::TestSuite {
@@ -293,12 +361,31 @@ class TestGameMapPoint : public CxxTest::TestSuite {
     void testDistance();
 };
 
+class TestGameMapRangeSet : public CxxTest::TestSuite {
+ public:
+    void testInit();
+    void testAdd();
+    void testAddConcentric();
+    void testAddMultiple();
+    void testAddObjectType();
+    void testClear();
+};
+
 class TestGameMapRenderList : public CxxTest::TestSuite {
  public:
     void testRead();
     void testReadInsnOnly();
     void testReplay();
     void testReplayAgain();
+};
+
+class TestGameMapRenderOptions : public CxxTest::TestSuite {
+ public:
+    void testSet();
+    void testTransfer();
+    void testTranslation();
+    void testCopy();
+    void testKey();
 };
 
 class TestGameMapReverter : public CxxTest::TestSuite {
@@ -315,6 +402,9 @@ class TestGameMapSelections : public CxxTest::TestSuite {
     void testCurrent();
     void testExecuteAll();
     void testExecuteAllShip();
+    void testMarkListCurrent();
+    void testMarkListOther();
+    void testSetRelative();
 };
 
 class TestGameMapSelectionVector : public CxxTest::TestSuite {
@@ -358,6 +448,8 @@ class TestGameMapShipPredictor : public CxxTest::TestSuite {
     void testMovement2();
     void testDamage();
     void testTorpedoes();
+    void testGetOptimumWarp();
+    void testGetOptimumWarpErrorCases();
 };
 
 class TestGameMapShipStorage : public CxxTest::TestSuite {

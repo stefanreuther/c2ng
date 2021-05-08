@@ -5,16 +5,16 @@
 
 #include "util/requestthread.hpp"
 #include "afl/sys/mutexguard.hpp"
-#include "util/translation.hpp"
 
 // Constructor.
-util::RequestThread::RequestThread(String_t name, afl::sys::LogListener& log, int delay)
+util::RequestThread::RequestThread(String_t name, afl::sys::LogListener& log, afl::string::Translator& tx, int delay)
     : m_thread(),
       m_taskMutex(),
       m_taskSemaphore(0),
       m_taskQueue(),
       m_name(name),
       m_log(log),
+      m_translator(tx),
       m_stop(false),
       m_delay(delay)
 {
@@ -46,7 +46,7 @@ util::RequestThread::postNewRunnable(afl::base::Runnable* p)
 void
 util::RequestThread::run()
 {
-    m_log.write(m_log.Trace, m_name, _("Thread started"));
+    m_log.write(m_log.Trace, m_name, m_translator("Thread started"));
     while (1) {
         m_taskSemaphore.wait();
 
@@ -71,11 +71,11 @@ util::RequestThread::run()
                 tasks[i]->run();
             }
             catch (std::exception& e) {
-                m_log.write(m_log.Error, m_name, _("Exception in background thread"), e);
+                m_log.write(m_log.Error, m_name, m_translator("Exception in background thread"), e);
             }
         }
     }
-    m_log.write(m_log.Trace, m_name, _("Thread terminates"));
+    m_log.write(m_log.Trace, m_name, m_translator("Thread terminates"));
 }
 
 void

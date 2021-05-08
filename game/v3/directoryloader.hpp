@@ -37,7 +37,8 @@ namespace game { namespace v3 {
                         afl::string::Translator& tx,
                         afl::sys::LogListener& log,
                         const DirectoryScanner& scanner,
-                        afl::io::FileSystem& fs);
+                        afl::io::FileSystem& fs,
+                        util::ProfileDirectory& profile);
 
         virtual PlayerStatusSet_t getPlayerStatus(int player, String_t& extra, afl::string::Translator& tx) const;
         virtual void loadCurrentTurn(Turn& turn, Game& game, int player, Root& root, Session& session);
@@ -56,6 +57,7 @@ namespace game { namespace v3 {
         afl::string::Translator& m_translator;
         afl::sys::LogListener& m_log;
         afl::io::FileSystem& m_fileSystem;
+        util::ProfileDirectory& m_profile;
 
         /*
          *  State

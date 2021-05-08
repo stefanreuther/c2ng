@@ -5,6 +5,7 @@
 #ifndef C2NG_GAME_MAP_IONSTORM_HPP
 #define C2NG_GAME_MAP_IONSTORM_HPP
 
+#include <vector>
 #include "game/map/circularobject.hpp"
 #include "game/map/point.hpp"
 #include "game/parser/messageinformation.hpp"
@@ -19,6 +20,18 @@ namespace game { namespace map {
         At this point, it should also have a position and radius. */
     class IonStorm : public CircularObject {
      public:
+        struct Forecast {
+            Point center;
+            int radius;
+            int uncertainity;
+
+            Forecast(Point center, int radius, int uncertainity)
+                : center(center), radius(radius), uncertainity(uncertainity)
+                { }
+        };
+        typedef std::vector<Forecast> Forecast_t;
+        static const int UNCERTAINITY_LIMIT = 5;
+
         /** Constructor.
             \param id Id */
         explicit IonStorm(int id);
@@ -94,6 +107,10 @@ namespace game { namespace map {
             This will update internal members as required.
             \param info Message information */
         void addMessageInformation(const game::parser::MessageInformation& info);
+
+        /** Compute forecast.
+            \param [out] result Forecast, sorted by descending uncertainity (most certain/lowest value last) */
+        void getForecast(Forecast_t& result) const;
 
      private:
         const int m_id;

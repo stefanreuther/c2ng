@@ -32,6 +32,8 @@ TestGameVcrBattle::testIt()
             { return false; }
         virtual bool getPosition(game::map::Point&) const
             { return false; }
+        virtual String_t getResultSummary(int, const game::config::HostConfiguration&, const game::spec::ShipList&, util::NumberFormatter, afl::string::Translator&) const
+            { return String_t(); }
     };
     Tester t;
 }
@@ -65,6 +67,8 @@ TestGameVcrBattle::testDescription()
             { return false; }
         virtual bool getPosition(game::map::Point& /*result*/) const
             { return false; }
+        virtual String_t getResultSummary(int, const game::config::HostConfiguration&, const game::spec::ShipList&, util::NumberFormatter, afl::string::Translator&) const
+            { return String_t(); }
 
         void addObject(int owner, String_t name)
             {

@@ -124,9 +124,9 @@ client::si::ListboxFunction::get(interpreter::Arguments& args)
                 interpreter::checkStringArg(m_help, args.getNext());
                 return true;
             }
-        void handle(UserSide& ui, Control& ctl)
+        void handle(Control& ctl)
             {
-                m_result = m_wh->addNewWidget(ui,
+                m_result = m_wh->addNewWidget(ctl,
                                               new StringListDialogWidget(ctl.root().provider(), ctl.root().colorScheme(),
                                                                          m_dialogTitle, m_current, m_width, m_height, m_help));
             }

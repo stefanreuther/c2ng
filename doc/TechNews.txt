@@ -7,6 +7,25 @@ PCC2ng NEWS FILE - Technical Version
   manual.
 
 
+2.40.10
+-------
+
+
+### all programs: testsuite
+
+  Restructured the testsuite into a number of smaller programs instead
+  of a single big one to work around toolchains that cannot handle the
+  big one (namely: MinGW).
+
+  An incremental build from a previous version to 2.40.10 may fail with
+
+    make: *** No rule to make target '../c2ng/u/t_interpreter.cpp', needed by 'tmp/u/t_interpreter.o'.  Stop.
+
+  If this happens, just retry the build; the error (stale dependency
+  file) fixes itself.
+
+
+
 2.40.9
 ------
 

@@ -8,6 +8,64 @@
 #include "game/exception.hpp"
 
 namespace {
+    /*
+     *  HoldSpace: extension for multi-ship transfer
+     */
+
+    class HoldSpace : public game::CargoContainer {
+     public:
+        /** Constructor.
+            \param name Name */
+        explicit HoldSpace(const String_t& name)
+            : CargoContainer(),
+              m_name(name)
+            {
+                // ex GHoldSpace::GHoldSpace
+            }
+
+        ~HoldSpace()
+            { }
+
+        // CargoContainer:
+        virtual String_t getName(afl::string::Translator& /*tx*/) const
+            {
+                // ex GHoldSpace::getName
+                return m_name;
+            }
+        virtual String_t getInfo1(afl::string::Translator& /*tx*/) const
+            { return String_t(); }
+        virtual String_t getInfo2(afl::string::Translator& /*tx*/) const
+            { return String_t(); }
+        virtual Flags_t getFlags() const
+            { return Flags_t() + Temporary; }
+        virtual bool canHaveElement(game::Element::Type /*type*/) const
+            {
+                // ex GHoldSpace::canHaveCargo
+                // Hold space can hold anything
+                return true;
+            }
+        virtual int32_t getMaxAmount(game::Element::Type /*type*/) const
+            {
+                // ex GHoldSpace::getMaxCargo
+                // Hold space can hold ANYTHING
+                return 1000000000;
+            }
+        virtual int32_t getMinAmount(game::Element::Type /*type*/) const
+            { return 0; }
+        virtual int32_t getAmount(game::Element::Type /*type*/) const
+            {
+                // ex GHoldSpace::getCargoOnObject
+                // Hold space always is empty.
+                return 0;
+            }
+        virtual void commit()
+            { }
+
+     private:
+        String_t m_name;
+    };
+
+
     int32_t doMove(int32_t amount,
                    game::Element::Type fromType,
                    game::CargoContainer& fromContainer,
@@ -37,11 +95,35 @@ namespace {
     }
 }
 
+class game::actions::CargoTransfer::Deferrer {
+ public:
+    Deferrer(CargoTransfer& parent)
+        : m_parent(parent)
+        {
+            ++m_parent.m_notificationSuppressed;
+        }
+
+    ~Deferrer()
+        {
+            if (--m_parent.m_notificationSuppressed == 0) {
+                m_parent.notify();
+            }
+        }
+
+ private:
+    CargoTransfer& m_parent;
+};
+
+
+
+
 
 // Constructor.
 game::actions::CargoTransfer::CargoTransfer()
     : m_units(),
-      m_overload(false)
+      m_overload(false),
+      m_notificationSuppressed(0),
+      m_notificationPending(false)
 { }
 
 // Destructor.
@@ -55,9 +137,15 @@ game::actions::CargoTransfer::addNew(CargoContainer* container)
     // ex GCargoTransfer::addNewContainer
     if (container != 0) {
         m_units.pushBackNew(container);
-        container->sig_change.add(&sig_change, &afl::base::Signal<void()>::raise);
+        container->sig_change.add(this, &CargoTransfer::notify);
         container->setOverload(m_overload);
     }
+}
+
+void
+game::actions::CargoTransfer::addHoldSpace(const String_t& name)
+{
+    addNew(new HoldSpace(name));
 }
 
 // Get participant by index.
@@ -85,7 +173,7 @@ game::actions::CargoTransfer::setOverload(bool enable)
     m_overload = enable;
     for (size_t i = 0, n = m_units.size(); i < n; ++i) {
         m_units[i]->setOverload(enable);
-    }    
+    }
 }
 
 // Check overload mode.
@@ -124,6 +212,7 @@ game::actions::CargoTransfer::move(Element::Type type, int32_t amount, size_t fr
     }
 
     // Move
+    Deferrer d(*this);
     if (amount < 0) {
         return -doMove(-amount, toType, toContainer, fromType, fromContainer, partial);
     } else {
@@ -160,6 +249,8 @@ game::actions::CargoTransfer::move(CargoSpec& amount, const game::spec::ShipList
     //   Be careful to not loop forever if there is no free space.
     // This affects c2web which currently (20200611) works around this by always enabling Overload.
 
+    Deferrer d(*this);
+
     // Move normal stuff
     for (size_t i = 0; i < sizeof(map)/sizeof(map[0]); ++i) {
         amount.add(map[i].csType, -move(map[i].eleType, amount.get(map[i].csType), from, to, true, sellSupplies));
@@ -171,6 +262,138 @@ game::actions::CargoTransfer::move(CargoSpec& amount, const game::spec::ShipList
     // Only one of them will work (or none if the units are incompatible).
     for (int i = 1; i < shipList.launchers().size(); ++i) {
         amount.add(CargoSpec::Torpedoes, -move(Element::fromTorpedoType(i), amount.get(CargoSpec::Torpedoes), from, to, true, sellSupplies));
+    }
+}
+
+// Move with extension
+void
+game::actions::CargoTransfer::moveExt(Element::Type type, int32_t amount, size_t from, size_t to, size_t extension, bool sellSupplies)
+{
+    // ex WMultiTransferList::move
+    Deferrer d(*this);
+    if (move(type, amount, from, to, true, sellSupplies) == 0) {
+        if (extension != from && extension != to && amount > 0) {
+            move(type, amount, extension, to, true, sellSupplies);
+        }
+    }
+}
+
+// Move all cargo to a given unit.
+void
+game::actions::CargoTransfer::moveAll(Element::Type type, size_t to, size_t except, bool sellSupplies)
+{
+    // ex WMultiTransferList::unload
+    Deferrer d(*this);
+    for (size_t i = 0, n = m_units.size(); i < n; ++i) {
+        if (i != to && i != except) {
+            move(type, m_units[i]->getEffectiveAmount(type), i, to, true, sellSupplies);
+        }
+    }
+}
+
+// Distribute cargo.
+void
+game::actions::CargoTransfer::distribute(Element::Type type, size_t from, size_t except, DistributeMode mode)
+{
+    // ex WMultiTransferList::distribute, CCargoDistroWindow.Distribute
+    // Bounds check
+    if (from >= m_units.size()) {
+        return;
+    }
+
+    Deferrer d(*this);
+    const int32_t MAX_UNIT_CARGO = 20000;
+    int paranoiaCounter = 100;
+    while (paranoiaCounter > 0) {
+        // Check main parameters
+        --paranoiaCounter;
+
+        int32_t holdAmount = m_units[from]->getEffectiveAmount(type);
+        if (holdAmount == 0) {
+            break;
+        }
+
+        // Count units
+        int nUnitsWithRoom = 0;
+        int32_t totalFree = 0;
+        int32_t totalRoom = 0;
+        for (size_t i = 0, n = m_units.size(); i < n; ++i) {
+            CargoContainer& cnt = *m_units[i];
+            if (i != from && i != except && !cnt.getFlags().contains(CargoContainer::Temporary)) {
+                int32_t max = std::min(cnt.getMaxAmount(type), MAX_UNIT_CARGO);
+                int32_t have = cnt.getEffectiveAmount(type);
+                if (have < max) {
+                    ++nUnitsWithRoom;
+                    totalFree += max - have;
+                    totalRoom += max;
+                }
+            }
+        }
+        if (nUnitsWithRoom == 0) {
+            break;
+        }
+
+        // Distribute
+        int32_t each, total;
+        switch (mode) {
+         case DistributeEqually:
+            // Distribute equally. Try to load ceil(holdAmount/nUnitsWithRoom) to each.
+            // Always use the respective current holdAmount, and update nUnitsWithRoom
+            // appropriately, so roundoff errors aren't spent too generously.
+            for (size_t i = 0, n = m_units.size(); i < n; ++i) {
+                CargoContainer& cnt = *m_units[i];
+                if (i != from && i != except && !cnt.getFlags().contains(CargoContainer::Temporary) && nUnitsWithRoom != 0) {
+                    int32_t now = (m_units[from]->getEffectiveAmount(type) + nUnitsWithRoom-1) / nUnitsWithRoom;
+                    move(type, now, from, i, true, false);
+                    --nUnitsWithRoom;
+                }
+            }
+            break;
+
+         case DistributeFreeSpace:
+            // Distribute free space. Try to make each unit have
+            // (totalFree-holdAmount)/nUnitsWithRoom free space.
+            if (holdAmount > totalFree) {
+                each = 0;
+            } else {
+                each = (totalFree - holdAmount) / nUnitsWithRoom;
+            }
+            for (size_t i = 0, n = m_units.size(); i < n; ++i) {
+                CargoContainer& cnt = *m_units[i];
+                if (i != from && i != except && !cnt.getFlags().contains(CargoContainer::Temporary)) {
+                    int32_t free = cnt.getMaxAmount(type) - cnt.getEffectiveAmount(type);
+                    if (free > each) {
+                        move(type, free - each, from, i, true, false);
+                    }
+                }
+            }
+            break;
+
+         case DistributeProportionally:
+            // Distribute proportional. We want each ship to have
+            // cargo proportional to its total capacity, i.e. it
+            // should have capacity*totalCargo/totalRoom. Some units
+            // max already have more than that, so they don't receive
+            // anything here; we'll need multiple iterations to sort
+            // this out.
+            total = totalRoom - totalFree + holdAmount;
+            for (size_t i = 0, n = m_units.size(); i < n; ++i) {
+                CargoContainer& cnt = *m_units[i];
+                if (i != from && i != except && !cnt.getFlags().contains(CargoContainer::Temporary)) {
+                    int32_t max = std::min(cnt.getMaxAmount(type), MAX_UNIT_CARGO);
+                    int32_t want = (total * max + (totalRoom-1)) / totalRoom;
+                    int32_t have = cnt.getEffectiveAmount(type);
+                    if (want > have) {
+                        move(type, want - have, from, i, true, false);
+                    }
+                }
+            }
+            break;
+
+         default:
+            paranoiaCounter = 0;
+            break;
+        }
     }
 }
 
@@ -201,6 +424,7 @@ game::actions::CargoTransfer::unload(bool sellSupplies)
     }
 
     // Now, perform the transfer
+    Deferrer d(*this);
     bool ok = false;
     for (size_t i = 0, n = m_units.size(); i < n; ++i) {
         if (i != receiverIndex && m_units[i]->getFlags().contains(CargoContainer::UnloadSource)) {
@@ -311,7 +535,20 @@ game::actions::CargoTransfer::commit()
     if (!isValid()) {
         throw Exception(Exception::ePerm);
     }
+
+    Deferrer d(*this);
     for (size_t i = 0, n = m_units.size(); i < n; ++i) {
         m_units[i]->commit();
+    }
+}
+
+void
+game::actions::CargoTransfer::notify()
+{
+    if (m_notificationSuppressed != 0) {
+        m_notificationPending = true;
+    } else {
+        m_notificationPending = false;
+        sig_change.raise();
     }
 }

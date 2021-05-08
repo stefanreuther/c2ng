@@ -16,6 +16,7 @@ void
 TestGameSimShip::testIt()
 {
     game::sim::Ship t;
+    game::spec::ShipList sl;
 
     // Initial state
     TS_ASSERT_EQUALS(t.getCrew(), 10);
@@ -32,6 +33,12 @@ TestGameSimShip::testIt()
     TS_ASSERT_EQUALS(t.getInterceptId(), 0);
 
     TS_ASSERT(t.isCustomShip());
+    TS_ASSERT_EQUALS(t.getNumBeamsRange(sl).min(), 0);
+    TS_ASSERT_LESS_THAN_EQUALS(20, t.getNumBeamsRange(sl).max());
+    TS_ASSERT_EQUALS(t.getNumLaunchersRange(sl).min(), 0);
+    TS_ASSERT_LESS_THAN_EQUALS(20, t.getNumLaunchersRange(sl).max());
+    TS_ASSERT_EQUALS(t.getNumBaysRange(sl).min(), 0);
+    TS_ASSERT_LESS_THAN_EQUALS(20, t.getNumBaysRange(sl).max());
 
     // Set/get
     t.markClean();
@@ -166,6 +173,12 @@ TestGameSimShip::testShipList()
     TS_ASSERT_EQUALS(testee.getBeamType(), 5);
     TS_ASSERT_EQUALS(testee.getMass(), 3000);
     TS_ASSERT(testee.isMatchingShipList(list));
+    TS_ASSERT_EQUALS(testee.getNumBeamsRange(list).min(), 0);
+    TS_ASSERT_EQUALS(testee.getNumBeamsRange(list).max(), 5);
+    TS_ASSERT_EQUALS(testee.getNumLaunchersRange(list).min(), 0);
+    TS_ASSERT_EQUALS(testee.getNumLaunchersRange(list).max(), 10);
+    TS_ASSERT_EQUALS(testee.getNumBaysRange(list).min(), 0);
+    TS_ASSERT_EQUALS(testee.getNumBaysRange(list).max(), 0);
 
     // Vary attributes
     testee.setNumBeams(3);
@@ -207,6 +220,12 @@ TestGameSimShip::testShipList()
     TS_ASSERT_EQUALS(testee.getBeamType(), 5);
     TS_ASSERT_EQUALS(testee.getMass(), 2000);
     TS_ASSERT(testee.isMatchingShipList(list));
+    TS_ASSERT_EQUALS(testee.getNumBeamsRange(list).min(), 0);
+    TS_ASSERT_EQUALS(testee.getNumBeamsRange(list).max(), 15);
+    TS_ASSERT_EQUALS(testee.getNumLaunchersRange(list).min(), 0);
+    TS_ASSERT_EQUALS(testee.getNumLaunchersRange(list).max(), 0);
+    TS_ASSERT_EQUALS(testee.getNumBaysRange(list).min(), 5);
+    TS_ASSERT_EQUALS(testee.getNumBaysRange(list).max(), 5);
 
     // Vary attributes
     testee.setNumBays(10);
@@ -226,6 +245,12 @@ TestGameSimShip::testShipList()
     testee.setHullType(3, list);
     TS_ASSERT_EQUALS(testee.getHullType(), 3);
     TS_ASSERT(!testee.isMatchingShipList(list));
+    TS_ASSERT_EQUALS(testee.getNumBeamsRange(list).min(), 0);
+    TS_ASSERT_EQUALS(testee.getNumBeamsRange(list).max(), 0);
+    TS_ASSERT_EQUALS(testee.getNumLaunchersRange(list).min(), 0);
+    TS_ASSERT_EQUALS(testee.getNumLaunchersRange(list).max(), 0);
+    TS_ASSERT_EQUALS(testee.getNumBaysRange(list).min(), 0);
+    TS_ASSERT_EQUALS(testee.getNumBaysRange(list).max(), 0);
 
     // Change to custom ship
     testee.setHullType(0, list);
@@ -268,6 +293,8 @@ TestGameSimShip::testAbilities()
     TS_ASSERT(!testee.hasAbility(game::sim::CommanderAbility,      opts, list, config));
     TS_ASSERT(!testee.hasAbility(game::sim::ElusiveAbility,        opts, list, config));
 
+    TS_ASSERT_EQUALS(testee.getAbilities(opts, list, config), game::sim::Abilities_t() + game::sim::FullWeaponryAbility);
+
     // Player 4: PlanetImmunity
     testee.setOwner(4);
     TS_ASSERT(!testee.hasAnyNonstandardAbility());
@@ -280,6 +307,9 @@ TestGameSimShip::testAbilities()
     TS_ASSERT(!testee.hasAbility(game::sim::DoubleBeamChargeAbility, opts, list, config));
     TS_ASSERT( testee.hasAbility(game::sim::DoubleBeamChargeAbility, nuOpts, list, config));
 
+    TS_ASSERT_EQUALS(testee.getAbilities(opts,   list, config), game::sim::Abilities_t() + game::sim::PlanetImmunityAbility);
+    TS_ASSERT_EQUALS(testee.getAbilities(nuOpts, list, config), game::sim::Abilities_t() + game::sim::PlanetImmunityAbility + game::sim::DoubleBeamChargeAbility);
+
     // Player 5: TripleBeamKill
     testee.setOwner(5);
     TS_ASSERT(!testee.hasAnyNonstandardAbility());
@@ -289,6 +319,8 @@ TestGameSimShip::testAbilities()
     TS_ASSERT(!testee.hasAbility(game::sim::CommanderAbility,      opts, list, config));
     TS_ASSERT(!testee.hasAbility(game::sim::ElusiveAbility,        opts, list, config));
 
+    TS_ASSERT_EQUALS(testee.getAbilities(opts, list, config), game::sim::Abilities_t() + game::sim::TripleBeamKillAbility);
+
     // Player 9: Commander
     testee.setOwner(9);
     TS_ASSERT(!testee.hasAnyNonstandardAbility());
@@ -297,6 +329,8 @@ TestGameSimShip::testAbilities()
     TS_ASSERT(!testee.hasAbility(game::sim::TripleBeamKillAbility, opts, list, config));
     TS_ASSERT( testee.hasAbility(game::sim::CommanderAbility,      opts, list, config));
     TS_ASSERT(!testee.hasAbility(game::sim::ElusiveAbility,        opts, list, config));
+
+    TS_ASSERT_EQUALS(testee.getAbilities(opts, list, config), game::sim::Abilities_t() + game::sim::CommanderAbility);
 }
 
 void

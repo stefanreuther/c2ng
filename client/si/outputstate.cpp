@@ -28,6 +28,13 @@ client::si::OutputState::getTarget() const
     return m_target;
 }
 
+bool
+client::si::OutputState::isValid() const
+{
+    return m_target != NoChange
+        || m_process.isValid();
+}
+
 String_t
 client::si::OutputState::toString(OutputState::Target target)
 {

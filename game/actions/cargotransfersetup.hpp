@@ -133,13 +133,15 @@ namespace game { namespace actions {
             \param config   [in] Host configuration (needed to construct CargoContainer descendants)
             \param shipList [in] Ship list (needed to construct CargoContainer descendants)
             \param version  [in] Host version (needed to construct CargoContainer descendants)
+            \param tx       [in] Translator (for error messages)
             \pre isValid()
             \throw Exception if setup is incomplete/impossible (precondition not satisfied) */
         void build(CargoTransfer& action,
                    Turn& turn,
                    const game::config::HostConfiguration& config,
                    const game::spec::ShipList& shipList,
-                   const game::HostVersion& version);
+                   const game::HostVersion& version,
+                   afl::string::Translator& tx);
 
      private:
         enum Action {

@@ -4,6 +4,7 @@
 #ifndef C2NG_GAME_MAP_BEAMUPSHIPTRANSFER_HPP
 #define C2NG_GAME_MAP_BEAMUPSHIPTRANSFER_HPP
 
+#include "afl/string/translator.hpp"
 #include "game/cargocontainer.hpp"
 #include "game/config/hostconfiguration.hpp"
 #include "game/interpreterinterface.hpp"
@@ -21,11 +22,14 @@ namespace game { namespace map {
         BeamUpShipTransfer(Ship& sh,
                            const game::spec::ShipList& shipList,
                            Turn& turn,
-                           const game::config::HostConfiguration& config);
+                           const game::config::HostConfiguration& config,
+                           afl::string::Translator& tx);
 
         ~BeamUpShipTransfer();
 
         virtual String_t getName(afl::string::Translator& tx) const;
+        virtual String_t getInfo1(afl::string::Translator& tx) const;
+        virtual String_t getInfo2(afl::string::Translator& tx) const;
         virtual Flags_t getFlags() const;
         virtual bool canHaveElement(Element::Type type) const;
         virtual int32_t getMaxAmount(Element::Type type) const;

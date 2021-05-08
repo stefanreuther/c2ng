@@ -7,6 +7,7 @@
 #include "game/actions/preconditions.hpp"
 #include "game/exception.hpp"
 #include "game/actions/basebuildexecutor.hpp"
+#include "afl/except/assertionfailedexception.hpp"
 
 namespace {
 
@@ -27,10 +28,10 @@ namespace {
     int findBestEngine(const game::spec::ShipList& shipList,
                        const game::map::Planet& pl)
     {
-        int e = 1;
+        int e = 0;
         int maxTech = pl.getBaseTechLevel(game::EngineTech).orElse(1);
         while (const game::spec::Engine* p = shipList.engines().findNext(e)) {
-            if (p->getTechLevel() <= maxTech) {
+            if (e == 0 || p->getTechLevel() <= maxTech) {
                 e = p->getId();
             } else {
                 break;
@@ -42,10 +43,10 @@ namespace {
     int findBestBeam(const game::spec::ShipList& shipList,
                      const game::map::Planet& pl)
     {
-        int b = 1;
+        int b = 0;
         int maxTech = pl.getBaseTechLevel(game::BeamTech).orElse(1);
         while (const game::spec::Beam* p = shipList.beams().findNext(b)) {
-            if (p->getTechLevel() <= maxTech) {
+            if (b == 0 || p->getTechLevel() <= maxTech) {
                 b = p->getId();
             } else {
                 break;
@@ -57,10 +58,10 @@ namespace {
     int findBestLauncher(const game::spec::ShipList& shipList,
                          const game::map::Planet& pl)
     {
-        int t = 1;
+        int t = 0;
         int maxTech = pl.getBaseTechLevel(game::TorpedoTech).orElse(1);
         while (const game::spec::TorpedoLauncher* p = shipList.launchers().findNext(t)) {
-            if (p->getTechLevel() <= maxTech) {
+            if (t == 0 || p->getTechLevel() <= maxTech) {
                 t = p->getId();
             } else {
                 break;
@@ -74,14 +75,15 @@ namespace {
 game::actions::BuildShip::BuildShip(game::map::Planet& planet,
                                     CargoContainer& container,
                                     game::spec::ShipList& shipList,
-                                    Root& root)
-    : BaseBuildAction(planet, container, shipList, root),
+                                    Root& root,
+                                    afl::string::Translator& tx)
+    : BaseBuildAction(planet, container, shipList, root, tx),
       m_order(),
       m_usePartsFromStorage(true)
 {
     // ex GStarbaseBuildShipAction::GStarbaseBuildShipAction
     // Must have a base (redundant, BaseBuildAction also checks it).
-    mustHavePlayedBase(planet);
+    mustHavePlayedBase(planet, tx);
 
     // Fetch build order from planet.
     // The planet will have a ship INDEX, not TYPE.
@@ -112,17 +114,6 @@ game::actions::BuildShip::setUsePartsFromStorage(bool flag)
     }
 }
 
-// /** Choose whether tech level upgrades are allowed. If not, we'll
-//     refuse to build any ship that needs an upgrade. */
-// void
-// GStarbaseBuildShipAction::setUseTechUpgrade(bool b)
-// {
-//     if (b != use_tech_upgrade) {
-//         use_tech_upgrade = b;
-//         sig_changed.raise();
-//     }
-// }
-
 // Check whether usage of stored parts is enabled.
 bool
 game::actions::BuildShip::isUsePartsFromStorage() const
@@ -148,6 +139,68 @@ game::actions::BuildShip::setBuildOrder(const ShipBuildOrder& o)
     update();
 }
 
+void
+game::actions::BuildShip::setPart(TechLevel area, int id)
+{
+    // Refuse setting a component that would fail otherwise.
+    afl::except::checkAssertion(shipList().getComponent(area, id) != 0, "<BuildShip::setPart>");
+    switch (area) {
+     case HullTech:
+        m_order.setHullIndex(id);
+        if (const game::spec::Hull* h = shipList().hulls().get(id)) {
+            m_order.setNumBeams(h->getMaxBeams());
+            m_order.setNumLaunchers(h->getMaxLaunchers());
+        }
+        break;
+     case EngineTech:
+        m_order.setEngineType(id);
+        break;
+     case BeamTech:
+        m_order.setBeamType(id);
+        break;
+     case TorpedoTech:
+        m_order.setLauncherType(id);
+        break;
+    }
+    update();
+}
+
+void
+game::actions::BuildShip::setNumParts(Weapon area, int amount)
+{
+    const game::spec::Hull* h = shipList().hulls().get(m_order.getHullIndex());
+    switch (area) {
+     case BeamWeapon:
+        if (h != 0) {
+            amount = std::min(amount, h->getMaxBeams());
+        }
+        m_order.setNumBeams(std::max(0, amount));
+        break;
+
+     case TorpedoWeapon:
+        if (h != 0) {
+            amount = std::min(amount, h->getMaxLaunchers());
+        }
+        m_order.setNumLaunchers(std::max(0, amount));
+        break;
+    }
+    update();
+}
+
+void
+game::actions::BuildShip::addParts(Weapon area, int amount)
+{
+    switch (area) {
+     case BeamWeapon:
+        setNumParts(area, m_order.getNumBeams() + amount);
+        break;
+
+     case TorpedoWeapon:
+        setNumParts(area, m_order.getNumLaunchers() + amount);
+        break;
+    }
+}
+
 // Check whether this action is a change to an existing build order.
 bool
 game::actions::BuildShip::isChange() const
@@ -159,7 +212,7 @@ game::actions::BuildShip::isChange() const
     if (oldOrder.getHullIndex() == 0) {
         return false;
     }
-    
+
     // Get new order. If that one is not obtainable, this is a change.
     ShipBuildOrder newOrder;
     if (!getNewOrder(newOrder)) {
@@ -189,6 +242,8 @@ void
 game::actions::BuildShip::perform(BaseBuildExecutor& exec)
 {
     // ex GStarbaseBuildShipAction::perform
+    // @change This performs the tech upgrades before the actual parts.
+    // Tech upgrades therefore appear before the parts in Detailed Bill (like PCC2, unlike PCC1).
     int owner;
     planet().getOwner(owner);
 
@@ -205,7 +260,6 @@ game::actions::BuildShip::perform(BaseBuildExecutor& exec)
         exec.setBaseStorage(HullTech, slot, available + n, 1 - n);
     } else {
         // We can not build it.
-        // FIXME: is_ok = false;
         doTechUpgrade(HullTech, exec, pHull);
         exec.accountHull(m_order.getHullIndex(), 1, 0);
     }
@@ -242,13 +296,14 @@ game::actions::BuildShip::perform(BaseBuildExecutor& exec)
         }
         exec.setBaseStorage(TorpedoTech, torpType, availableLaunchers + buildLaunchers, numLaunchers - buildLaunchers);
     }
+
+    const int numBays = (pHull != 0 ? pHull->getNumBays() : 0);
+    exec.accountFighterBay(numBays);
 }
 
-// /** Prepare a build order.
-//     \param o [in/out] The build order
-//     \param p [in] Planet
-//     \retval true we're re-using the base's build order
-//     \retval false this is a new build order */
+/** Prepare a build order.
+    \retval true we're re-using the base's build order
+    \retval false this is a new build order */
 bool
 game::actions::BuildShip::prepareBuildOrder(ShipBuildOrder& o,
                                             const game::map::Planet& pl,
@@ -273,11 +328,18 @@ game::actions::BuildShip::prepareBuildOrder(ShipBuildOrder& o,
         return false;
     } else {
         // Use existing build order
-        if (o.getNumBeams() == 0) {
-            o.setBeamType(findBestBeam(shipList, pl));
+        // If a field refers to a nonexistant component, update() will throw (assertion in CountingExecutor).
+        // We therefore try to fix those here.
+        if (shipList.engines().get(o.getEngineType()) == 0) {
+            o.setEngineType(findBestEngine(shipList, pl));
         }
-        if (o.getNumLaunchers() == 0) {
+        if (o.getNumBeams() == 0 || shipList.beams().get(o.getBeamType()) == 0) {
+            o.setBeamType(findBestBeam(shipList, pl));
+            o.setNumBeams(0);
+        }
+        if (o.getNumLaunchers() == 0 || shipList.launchers().get(o.getLauncherType()) == 0) {
             o.setLauncherType(findBestLauncher(shipList, pl));
+            o.setNumLaunchers(0);
         }
         return true;
     }
@@ -312,14 +374,7 @@ game::actions::BuildShip::doTechUpgrade(game::TechLevel area, BaseBuildExecutor&
         return;
     }
 
-    // FIXME: move this to BaseBuildAction.
-    // /* we need a tech upgrade but do not want to. In particular, do
-    //    not include upgrades in the calculation. */
-    // if (!use_tech_upgrade) {
-    //     is_ok = false;
-    //     return;
-    // }
-
+    // Executor will handle that we need a tech level but may not be allowed to use it
     exec.setBaseTechLevel(area, need);
 }
 

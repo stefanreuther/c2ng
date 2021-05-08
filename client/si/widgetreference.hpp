@@ -12,7 +12,7 @@
 namespace client { namespace si {
 
     class WidgetHolder;
-    class UserSide;
+    class Control;
 
     /** Reference to a widget created by/for scripts.
         Widgets accessible from scripts are represented as an index into a WidgetHolder.
@@ -32,10 +32,10 @@ namespace client { namespace si {
         ~WidgetReference();
 
         /** Get the contained widget.
-            \param user User Side to prove you're the correct thread.
+            \param ctl Control to prove you're the correct thread.
             \return widget; null if the slot number is out-of-range or the widget was destroyed for some reason
             \see WidgetHolder::get() */
-        ui::Widget* get(UserSide& user) const;
+        ui::Widget* get(Control& ctl) const;
 
         /** Get contained WidgetHolder.
             \return WidgetHolder */

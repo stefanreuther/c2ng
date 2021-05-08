@@ -25,6 +25,8 @@ namespace game { namespace map {
         ~BeamUpPlanetTransfer();
 
         virtual String_t getName(afl::string::Translator& tx) const;
+        virtual String_t getInfo1(afl::string::Translator& tx) const;
+        virtual String_t getInfo2(afl::string::Translator& tx) const;
         virtual Flags_t getFlags() const;
         virtual bool canHaveElement(Element::Type type) const;
         virtual int32_t getMaxAmount(Element::Type type) const;

@@ -74,18 +74,22 @@ template<typename T>
 afl::base::Memory<T>
 gfx::Pixmap<T>::row(int y)
 {
-    return (y >= 0 && y < m_height)
-        ? m_pixels.subrange(y * m_width, m_width)
-        : afl::base::Memory<T>();
+    if (y >= 0 && y < m_height) {
+        return m_pixels.subrange(y * m_width, m_width);
+    } else {
+        return afl::base::Nothing;
+    }
 }
 
 template<typename T>
 afl::base::Memory<const T>
 gfx::Pixmap<T>::row(int y) const
 {
-    return (y >= 0 && y < m_height)
-        ? m_pixels.subrange(y * m_width, m_width)
-        : afl::base::Memory<const T>();
+    if (y >= 0 && y < m_height) {
+        return m_pixels.subrange(y * m_width, m_width);
+    } else {
+        return afl::base::Nothing;
+    }
 }
 
 template<typename T>

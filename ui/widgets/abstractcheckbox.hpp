@@ -5,8 +5,12 @@
 #ifndef C2NG_UI_WIDGETS_ABSTRACTCHECKBOX_HPP
 #define C2NG_UI_WIDGETS_ABSTRACTCHECKBOX_HPP
 
-#include "ui/widgets/abstractbutton.hpp"
 #include "afl/base/signalconnection.hpp"
+#include "ui/icons/focusframe.hpp"
+#include "ui/icons/hbox.hpp"
+#include "ui/icons/image.hpp"
+#include "ui/icons/skintext.hpp"
+#include "ui/widgets/basebutton.hpp"
 
 namespace ui { namespace widgets {
 
@@ -21,7 +25,7 @@ namespace ui { namespace widgets {
         - configure and update the checkbox pixmap (setImage()).
           These images must all be the same size.
         - hook sig_fire and do something meaningful like changing a value and updating the pixmap. */
-    class AbstractCheckbox : public AbstractButton {
+    class AbstractCheckbox : public BaseButton {
      public:
         /** Constructor.
             \param root UI root
@@ -32,14 +36,6 @@ namespace ui { namespace widgets {
 
         /** Destructor. */
         ~AbstractCheckbox();
-
-        // AbstractButton/Widget:
-        virtual void draw(gfx::Canvas& can);
-        virtual void handleStateChange(State st, bool enable);
-        virtual void handlePositionChange(gfx::Rectangle& oldPosition);
-        virtual ui::layout::Info getLayoutInfo() const;
-        virtual bool handleKey(util::Key_t key, int prefix);
-        virtual bool handleMouse(gfx::Point pt, MouseButtons_t pressedButtons);
 
         /** Set font.
             Should be called during setup of the widget.
@@ -52,12 +48,16 @@ namespace ui { namespace widgets {
         void setImage(String_t imageName);        
 
      private:
-        const String_t m_text;
-        const gfx::Point m_imageSize;
+        ui::icons::Image m_image;
+        ui::icons::FocusFrame m_focus;
+        ui::icons::SkinText m_text;
+        ui::icons::HBox m_hbox;
+
         String_t m_imageName;
-        gfx::FontRequest m_font;
 
         afl::base::SignalConnection conn_imageChange;
+
+        void updateImage();
     };
 
 } }

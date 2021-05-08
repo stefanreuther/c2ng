@@ -1768,6 +1768,17 @@ game::config::HostConfiguration::getExperienceLevelName(int level, afl::string::
     }
 }
 
+// Get experience level, given a number of experience points.
+int
+game::config::HostConfiguration::getExperienceLevelFromPoints(int32_t points) const
+{
+    int level = 0;
+    while (level < (*this)[NumExperienceLevels]() && points >= (*this)[ExperienceLevels](level+1)) {
+        ++level;
+    }
+    return level;
+}
+
 // Get experience bonus.
 int32_t
 game::config::HostConfiguration::getExperienceBonus(const ExperienceOptionDescriptor_t& option, int level) const

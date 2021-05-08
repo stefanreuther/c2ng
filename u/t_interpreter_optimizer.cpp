@@ -14,19 +14,20 @@
 #include "interpreter/optimizer.hpp"
 
 #include "t_interpreter.hpp"
-#include "afl/sys/log.hpp"
-#include "afl/io/nullfilesystem.hpp"
-#include "interpreter/world.hpp"
-#include "interpreter/bytecodeobject.hpp"
-#include "interpreter/unaryoperation.hpp"
-#include "interpreter/binaryoperation.hpp"
-#include "afl/data/stringvalue.hpp"
 #include "afl/data/floatvalue.hpp"
-#include "interpreter/tokenizer.hpp"
+#include "afl/data/scalarvalue.hpp"
+#include "afl/data/stringvalue.hpp"
+#include "afl/io/nullfilesystem.hpp"
+#include "afl/string/nulltranslator.hpp"
+#include "afl/sys/log.hpp"
+#include "interpreter/binaryoperation.hpp"
+#include "interpreter/bytecodeobject.hpp"
 #include "interpreter/expr/node.hpp"
 #include "interpreter/expr/parser.hpp"
 #include "interpreter/process.hpp"
-#include "afl/data/scalarvalue.hpp"
+#include "interpreter/tokenizer.hpp"
+#include "interpreter/unaryoperation.hpp"
+#include "interpreter/world.hpp"
 
 using interpreter::Opcode;
 using interpreter::BytecodeObject;
@@ -34,12 +35,13 @@ using interpreter::BytecodeObject;
 namespace {
     struct Stuff {
         afl::sys::Log log;
+        afl::string::NullTranslator tx;
         afl::io::NullFileSystem fs;
         interpreter::World world;
         BytecodeObject bco;
 
         Stuff()
-            : log(), fs(), world(log, fs), bco()
+            : log(), tx(), fs(), world(log, tx, fs), bco()
             { }
 
         // Utility function for debugging this beast
@@ -80,8 +82,9 @@ namespace {
     void checkExpression(const char* expr, int32_t expectedValue, int level)
     {
         afl::sys::Log logger;
+        afl::string::NullTranslator tx;
         afl::io::NullFileSystem fs;
-        interpreter::World world(logger, fs);
+        interpreter::World world(logger, tx, fs);
 
         interpreter::Tokenizer tok(expr);
         std::auto_ptr<interpreter::expr::Node> node(interpreter::expr::Parser(tok).parse());

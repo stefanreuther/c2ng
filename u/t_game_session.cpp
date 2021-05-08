@@ -17,6 +17,7 @@
 #include "game/map/universe.hpp"
 #include "game/test/root.hpp"
 #include "game/turn.hpp"
+#include "interpreter/subroutinevalue.hpp"
 
 /** Test initialisation.
     A: create a session
@@ -143,7 +144,7 @@ TestGameSession::testReferenceNameNonempty()
     TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Storm, 4),         game::PlainName, s), true);
     TS_ASSERT_EQUALS(s, "Kathrina");
     TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Minefield, 150),   game::PlainName, s), true);
-    TS_ASSERT_EQUALS(s, "Mine Field #150 (unowned)");
+    TS_ASSERT_EQUALS(s, "Deleted Mine Field #150");
     TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Ufo, 42),          game::PlainName, s), true);
     TS_ASSERT_EQUALS(s, "Hui");
     TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Hull, 15),         game::PlainName, s), true);
@@ -170,7 +171,7 @@ TestGameSession::testReferenceNameNonempty()
     TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Storm, 4),         game::DetailedName, s), true);
     TS_ASSERT_EQUALS(s, "Ion storm #4: Kathrina");
     TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Minefield, 150),   game::DetailedName, s), true);
-    TS_ASSERT_EQUALS(s, "Mine Field #150 (unowned)");
+    TS_ASSERT_EQUALS(s, "Deleted Mine Field #150");
     TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Ufo, 42),          game::DetailedName, s), true);
     TS_ASSERT_EQUALS(s, "Ufo #42: Hui");
     TS_ASSERT_EQUALS(testee.getReferenceName(Reference(Reference::Hull, 15),         game::DetailedName, s), true);
@@ -249,5 +250,50 @@ TestGameSession::testInterpreterInterface()
     TS_ASSERT_EQUALS(s, "Pirate");
 
     TS_ASSERT_EQUALS(iface.getPlayerAdjective(10, s), false);
+}
+
+/** Test task handling/inquiry. */
+void
+TestGameSession::testTask()
+{
+    afl::io::NullFileSystem fs;
+    afl::string::NullTranslator tx;
+    game::Session testee(tx, fs);
+
+    // Populate root
+    afl::base::Ptr<game::Root> root = new game::test::Root(game::HostVersion());
+    testee.setRoot(root);
+
+    // Populate game
+    afl::base::Ptr<game::Game> g = new game::Game();
+    game::map::Planet* p = g->currentTurn().universe().planets().create(17);
+    testee.setGame(g);
+
+    // Initial inquiry
+    TS_ASSERT_EQUALS(testee.getTaskStatus(p, interpreter::Process::pkPlanetTask, false), game::Session::NoTask);
+    TS_ASSERT_EQUALS(testee.getTaskStatus(p, interpreter::Process::pkBaseTask, false),   game::Session::NoTask);
+    TS_ASSERT_EQUALS(testee.getTaskStatus(p, interpreter::Process::pkPlanetTask, true),  game::Session::NoTask);
+    TS_ASSERT_EQUALS(testee.getTaskStatus(p, interpreter::Process::pkBaseTask, true),    game::Session::NoTask);
+
+    // Create CC$AUTOEXEC mock (we only want the process to suspend)
+    interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
+    bco->setIsProcedure(true);
+    bco->addArgument("A", false);
+    bco->addInstruction(interpreter::Opcode::maSpecial, interpreter::Opcode::miSpecialSuspend, 0);
+    testee.world().setNewGlobalValue("CC$AUTOEXEC", new interpreter::SubroutineValue(bco));
+
+    // Create auto task (content doesn't matter; it's all given to CC$AUTOEXEC)
+    afl::base::Ptr<interpreter::TaskEditor> editor = testee.getAutoTaskEditor(17, interpreter::Process::pkPlanetTask, true);
+    TS_ASSERT(editor.get() != 0);
+    String_t command[] = { "whatever" };
+    editor->addAtEnd(command);
+    editor->setPC(0);
+    testee.releaseAutoTaskEditor(editor);
+
+    // Inquiry
+    TS_ASSERT_EQUALS(testee.getTaskStatus(p, interpreter::Process::pkPlanetTask, false), game::Session::ActiveTask);
+    TS_ASSERT_EQUALS(testee.getTaskStatus(p, interpreter::Process::pkBaseTask, false),   game::Session::OtherTask);
+    TS_ASSERT_EQUALS(testee.getTaskStatus(p, interpreter::Process::pkPlanetTask, true),  game::Session::NoTask);
+    TS_ASSERT_EQUALS(testee.getTaskStatus(p, interpreter::Process::pkBaseTask, true),    game::Session::NoTask);
 }
 

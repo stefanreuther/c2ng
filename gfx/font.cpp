@@ -31,6 +31,7 @@ gfx::Font::getCellSize()
 int
 gfx::Font::getMaxTextWidth(const afl::functional::Mapping<int,String_t>& tab)
 {
+    // ex getTextWidth(GfxFont& font, const StringTable& table)
     int result = 0;
     int i;
     for (bool ok = tab.getFirstKey(i); ok; ok = tab.getNextKey(i)) {

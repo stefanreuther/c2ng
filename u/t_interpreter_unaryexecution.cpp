@@ -12,6 +12,7 @@
 #include "afl/data/integervalue.hpp"
 #include "afl/data/stringvalue.hpp"
 #include "afl/io/nullfilesystem.hpp"
+#include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
 #include "interpreter/arraydata.hpp"
 #include "interpreter/arrayvalue.hpp"
@@ -38,11 +39,12 @@ using interpreter::executeUnaryOperation;
 namespace {
     struct TestHarness {
         afl::sys::Log log;
+        afl::string::NullTranslator tx;
         afl::io::NullFileSystem fileSystem;
         interpreter::World world;
 
         TestHarness()
-            : log(), fileSystem(), world(log, fileSystem)
+            : log(), tx(), fileSystem(), world(log, tx, fileSystem)
             { }
     };
 

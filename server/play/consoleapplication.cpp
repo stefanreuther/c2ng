@@ -207,7 +207,7 @@ server::play::ConsoleApplication::help()
                                "-Dkey=value\tDefine a property\n"));
 
     afl::io::TextWriter& out = standardOutput();
-    out.writeLine(Format(tx("PCC2 Play Server v%s - (c) 2019-2020 Stefan Reuther").c_str(), PCC2_VERSION));
+    out.writeLine(Format(tx("PCC2 Play Server v%s - (c) 2019-2021 Stefan Reuther").c_str(), PCC2_VERSION));
     out.writeLine();
     out.writeLine(Format(tx("Usage:\n"
                             "  %s [-h]\n"

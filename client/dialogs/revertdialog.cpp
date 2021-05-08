@@ -78,7 +78,7 @@ namespace {
                                                             30 * m_root.provider().getFont("")->getEmWidth(),
                                                             m_root.provider())));
 
-                ui::Widget& help = del.addNew(new client::widgets::HelpWidget(m_root, gameSender, "pcc2:reset"));
+                ui::Widget& help = del.addNew(new client::widgets::HelpWidget(m_root, m_translator, gameSender, "pcc2:reset"));
                 ui::Group& g = del.addNew(new ui::Group(ui::layout::HBox::instance5));
                 Button& btnHelp   = del.addNew(new Button(m_translator("Help"), 'h', m_root));
                 Button& btnList   = del.addNew(new Button(m_translator("List units..."), 'l', m_root));
@@ -172,7 +172,8 @@ RevertDialog::onList()
                                   m_translator("Affected units:"),
                                   box,
                                   true,
-                                  m_root);
+                                  m_root,
+                                  m_translator);
 }
 
 
@@ -182,7 +183,7 @@ client::dialogs::doRevertLocation(ui::Root& root, util::RequestSender<game::Sess
     // ex doResetDialog(GReset& reset) (sort-of)
 
     // Set up
-    Downlink link(root);
+    Downlink link(root, tx);
     ReverterProxy proxy(gameSender);
     ReverterProxy::Status status;
     proxy.init(link, pos, status);
@@ -191,7 +192,7 @@ client::dialogs::doRevertLocation(ui::Root& root, util::RequestSender<game::Sess
     if (status.modes.empty() || status.list.empty()) {
         ui::dialogs::MessageBox(tx("There is nothing that can be reset at this location."),
                                 tx("Reset Location"),
-                                root).doOkDialog();
+                                root).doOkDialog(tx);
     } else {
         RevertDialog dlg(root, status, tx);
         if (dlg.run(gameSender)) {

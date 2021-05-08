@@ -24,10 +24,9 @@ namespace client { namespace si {
             - ui.continueProcessWithFailure()
             - ui.detachProcess(), plus a call to ui.continueProcessWait() at a later time
 
-            \param ui UserSide of script interface
             \param ctl Active screen's Control
             \param link Identification of the requesting process */
-        virtual void handle(UserSide& ui, Control& ctl, RequestLink2 link) = 0;
+        virtual void handle(Control& ctl, RequestLink2 link) = 0;
     };
 
 } }

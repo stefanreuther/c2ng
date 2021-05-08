@@ -50,15 +50,15 @@ TestGfxFont::testIt()
     ctx.useFont(t);
 
     ctx.setRawColor(1);
-    ctx.setTextAlign(0, 0);
+    ctx.setTextAlign(gfx::LeftAlign, gfx::TopAlign);
     outText(ctx, gfx::Point(2, 1), "abc");
 
     ctx.setRawColor(2);
-    ctx.setTextAlign(1, 0);
+    ctx.setTextAlign(gfx::CenterAlign, gfx::TopAlign);
     outText(ctx, gfx::Point(5, 2), "mnopq");
 
     ctx.setRawColor(3);
-    ctx.setTextAlign(2, 2);
+    ctx.setTextAlign(gfx::RightAlign, gfx::BottomAlign);
     outText(ctx, gfx::Point(10, 5), String_t("xyz"));
 
     static const uint8_t EXPECTED[] = {
@@ -87,22 +87,22 @@ TestGfxFont::testFitWidth()
 
     ctx.setSolidBackground();
     ctx.setColor(1);
-    ctx.setTextAlign(0, 0);
+    ctx.setTextAlign(gfx::LeftAlign, gfx::TopAlign);
     outTextF(ctx, gfx::Point(2, 1), 5, "abc");
     TS_ASSERT_EQUALS(ctx.getCursor(), gfx::Point(5, 1));
 
     ctx.setColor(2);
-    ctx.setTextAlign(1, 0);
+    ctx.setTextAlign(gfx::CenterAlign, gfx::TopAlign);
     outTextF(ctx, gfx::Point(5, 2), 8, "mnopq");
     TS_ASSERT_EQUALS(ctx.getCursor(), gfx::Point(5, 2));
 
     ctx.setColor(3);
-    ctx.setTextAlign(2, 2);
+    ctx.setTextAlign(gfx::RightAlign, gfx::BottomAlign);
     outTextF(ctx, gfx::Point(10, 5), 4, String_t("xyz"));
     TS_ASSERT_EQUALS(ctx.getCursor(), gfx::Point(7, 5));
 
     ctx.setColor(4);
-    ctx.setTextAlign(0, 0);
+    ctx.setTextAlign(gfx::LeftAlign, gfx::TopAlign);
     outTextF(ctx, gfx::Point(0, 4), 2, "xyzzy");
     TS_ASSERT_EQUALS(ctx.getCursor(), gfx::Point(2, 4));
 
@@ -132,17 +132,17 @@ TestGfxFont::testFitArea()
 
     ctx.setSolidBackground();
     ctx.setColor(1);
-    ctx.setTextAlign(0, 0);
+    ctx.setTextAlign(gfx::LeftAlign, gfx::TopAlign);
     outTextF(ctx, gfx::Rectangle(2, 1, 4, 2), "abc");
     TS_ASSERT_EQUALS(ctx.getCursor(), gfx::Point(5, 1));
 
     ctx.setColor(2);
-    ctx.setTextAlign(1, 1);
+    ctx.setTextAlign(gfx::CenterAlign, gfx::MiddleAlign);
     outTextF(ctx, gfx::Rectangle(1, 3, 8, 3), "mnopq");
     TS_ASSERT_EQUALS(ctx.getCursor(), gfx::Point(5, 4));
 
     ctx.setColor(3);
-    ctx.setTextAlign(2, 2);
+    ctx.setTextAlign(gfx::RightAlign, gfx::BottomAlign);
     outTextF(ctx, gfx::Rectangle(5, 7, 5, 2), String_t("xyz"));
     TS_ASSERT_EQUALS(ctx.getCursor(), gfx::Point(7, 9));
 

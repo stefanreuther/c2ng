@@ -59,7 +59,7 @@ interpreter::ProcessObserverContext::lookup(const afl::data::NameQuery& name, Pr
 }
 
 void
-interpreter::ProcessObserverContext::set(PropertyIndex_t /*index*/, afl::data::Value* /*value*/)
+interpreter::ProcessObserverContext::set(PropertyIndex_t /*index*/, const afl::data::Value* /*value*/)
 {
     // Should not be called
 }

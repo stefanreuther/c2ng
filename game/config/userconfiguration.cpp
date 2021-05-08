@@ -3,17 +3,39 @@
   */
 
 #include "game/config/userconfiguration.hpp"
-#include "game/config/configurationparser.hpp"
+#include "afl/base/countof.hpp"
+#include "afl/base/staticassert.hpp"
 #include "afl/charset/utf8charset.hpp"
-#include "afl/string/format.hpp"
-#include "game/config/booleanvalueparser.hpp"
 #include "afl/io/textfile.hpp"
+#include "afl/string/format.hpp"
+#include "game/config/bitsetvalueparser.hpp"
+#include "game/config/booleanvalueparser.hpp"
+#include "game/config/configurationparser.hpp"
+#include "game/config/enumvalueparser.hpp"
+#include "game/config/integervalueparser.hpp"
+#include "game/config/markeroption.hpp"
+#include "game/map/renderoptions.hpp"
+
+using game::map::RenderOptions;
 
 namespace {
     const char PCC2_INI[] = "pcc2.ini";
     const char LOG_NAME[] = "game.config.user";
 
     typedef afl::bits::SmallSet<game::config::ConfigurationOption::Source> Sources_t;
+
+    const game::config::MarkerOptionDescriptor MARKER_CONFIG[] = {
+        { "Chart.Marker0", 2,  9, },
+        { "Chart.Marker1", 0,  9, },
+        { "Chart.Marker2", 1,  9, },
+        { "Chart.Marker3", 2,  9, },
+        { "Chart.Marker4", 3,  9, },
+        { "Chart.Marker5", 4,  9, },
+        { "Chart.Marker6", 5,  9, },
+        { "Chart.Marker7", 6,  9, },
+        { "Chart.Marker8", 2, 10, },
+        { "Chart.Marker9", 0, 10, },
+    };
 
     void saveConfiguration(afl::io::Stream& out, const game::config::Configuration& in, Sources_t sources)
     {
@@ -37,63 +59,87 @@ namespace {
 
         // Finish
         tf.flush();
-    }    
+    }
 }
 
-const game::config::StringOptionDescriptor  game::config::UserConfiguration::Game_Charset = {
-    "Game.Charset"
-};
-const game::config::StringOptionDescriptor  game::config::UserConfiguration::Game_Type = {
-    "Game.Type"
-};
-const game::config::StringOptionDescriptor  game::config::UserConfiguration::Game_User = {
-    "Game.User"
-};
-const game::config::StringOptionDescriptor  game::config::UserConfiguration::Game_Host = {
-    "Game.Host"
-};
-const game::config::StringOptionDescriptor  game::config::UserConfiguration::Game_Id = {
-    "Game.Id"
-};
-const game::config::IntegerOptionDescriptor game::config::UserConfiguration::Game_Finished = {
-    "Game.Finished",
-    &BooleanValueParser::instance
-};
-const game::config::IntegerOptionDescriptor game::config::UserConfiguration::Game_ReadOnly = {
-    "Game.ReadOnly",
-    &BooleanValueParser::instance
-};
-const game::config::IntegerOptionDescriptor game::config::UserConfiguration::Game_AccessHostFiles = {
-    "Game.AccessHostFiles",
-    &BooleanValueParser::instance
-};
+namespace game { namespace config {
 
-const game::config::IntegerOptionDescriptor game::config::UserConfiguration::Display_ThousandsSep = {
-    "Display.ThousandsSep",
-    &BooleanValueParser::instance
-};
-const game::config::IntegerOptionDescriptor game::config::UserConfiguration::Display_Clans = {
-    "Display.Clans",
-    &BooleanValueParser::instance
-};
-const game::config::StringOptionDescriptor game::config::UserConfiguration::Backup_Result = {
-    // ex opt_BackupResult
-    "Backup.Result",
-};
-const game::config::IntegerOptionDescriptor game::config::UserConfiguration::Team_AutoSync = {
-    "Team.AutoSync",
-    &BooleanValueParser::instance
-};
+    const int UserConfiguration::NUM_CANNED_MARKERS;
+
+    // Game
+    const StringOptionDescriptor  UserConfiguration::Game_Charset         = { "Game.Charset" };
+    const StringOptionDescriptor  UserConfiguration::Game_Type            = { "Game.Type" };
+    const StringOptionDescriptor  UserConfiguration::Game_User            = { "Game.User" };
+    const StringOptionDescriptor  UserConfiguration::Game_Host            = { "Game.Host" };
+    const StringOptionDescriptor  UserConfiguration::Game_Id              = { "Game.Id" };
+    const IntegerOptionDescriptor UserConfiguration::Game_Finished        = { "Game.Finished", &BooleanValueParser::instance };
+    const IntegerOptionDescriptor UserConfiguration::Game_ReadOnly        = { "Game.ReadOnly", &BooleanValueParser::instance };
+    const IntegerOptionDescriptor UserConfiguration::Game_AccessHostFiles = { "Game.AccessHostFiles", &BooleanValueParser::instance };
+
+    // Display
+    const IntegerOptionDescriptor UserConfiguration::Display_ThousandsSep = { "Display.ThousandsSep", &BooleanValueParser::instance };
+    const IntegerOptionDescriptor UserConfiguration::Display_Clans        = { "Display.Clans", &BooleanValueParser::instance };
+    const IntegerOptionDescriptor UserConfiguration::Tax_PredictRelative  = { "Tax.PredictRelative", &BooleanValueParser::instance };
+
+    // Chart
+    // Order of bits must agree with enum RenderOptions::Option.
+    // Order of options must agree with RenderOptions::Area.
+    namespace { BitsetValueParser parse_chartopts("ion,mine,ufos,sectors,borders,drawings,selection,labels,trails,shipdots,warpwells,messages"); }
+    const IntegerOptionDescriptor UserConfiguration::ChartScannerWarpWells = { "Chart.Scanner.WarpWells", &BooleanValueParser::instance };
+    const IntegerOptionDescriptor UserConfiguration::ChartRenderOptions[3][2] = {
+        // Small
+        { { "Chart.Small.Show", &parse_chartopts, },
+          { "Chart.Small.Fill", &parse_chartopts } },
+        // Normal
+        { { "Chart.Normal.Show", &parse_chartopts },
+          { "Chart.Normal.Fill", &parse_chartopts } },
+        // Scanner
+        { { "Chart.Scanner.Show", &parse_chartopts },
+          { "Chart.Scanner.Fill", &parse_chartopts } }
+    };
+
+    // Lock
+    // Note that the order of bits must agree with the definitions of MatchPlanets etc. in game/map/locker.hpp.
+    namespace { BitsetValueParser LockOptionParser("planet,ship,ufo,marker,minefield"); }
+    const IntegerOptionDescriptor UserConfiguration::Lock_Left   = { "Lock.Left", &LockOptionParser };
+    const IntegerOptionDescriptor UserConfiguration::Lock_Right  = { "Lock.Right", &LockOptionParser };
+
+    // Backup etc.
+    // ex opt_BackupResult, opt_BackupTurn, opt_MaketurnTarget
+    const StringOptionDescriptor UserConfiguration::Backup_Chart    = { "Backup.Chart" };
+    const StringOptionDescriptor UserConfiguration::Backup_Result   = { "Backup.Result" };
+    const StringOptionDescriptor UserConfiguration::Backup_Script   = { "Backup.Script" };
+    const StringOptionDescriptor UserConfiguration::Backup_Turn     = { "Backup.Turn" };
+    const StringOptionDescriptor UserConfiguration::Backup_Util     = { "Backup.Util" };
+    const StringOptionDescriptor UserConfiguration::Maketurn_Target = { "Maketurn.Target" };
+
+    // Team
+    const IntegerOptionDescriptor UserConfiguration::Team_AutoSync = { "Team.AutoSync", &BooleanValueParser::instance };
+
+    // Unpack
+    namespace { EnumValueParser Unpack_Parser("ask,accept,reject"); }
+    const IntegerOptionDescriptor UserConfiguration::Unpack_AcceptRaceNames = { "Unpack.RaceNames", &Unpack_Parser };
+    const StringOptionDescriptor UserConfiguration::Unpack_AttachmentTimestamp = { "Unpack.AttachmentTimestamp" };
+
+    // Export
+    const StringOptionDescriptor UserConfiguration::ExportShipFields   = { "Export.ShipFields" };
+    const StringOptionDescriptor UserConfiguration::ExportPlanetFields = { "Export.PlanetFields" };
+
+    // Sorting
+    const IntegerOptionDescriptor UserConfiguration::Sort_History          = { "Sort.History",          &IntegerValueParser::instance };
+    const IntegerOptionDescriptor UserConfiguration::Sort_Ship             = { "Sort.Ship",             &IntegerValueParser::instance };
+    const IntegerOptionDescriptor UserConfiguration::Sort_Ship_Secondary   = { "Sort.Ship.Secondary",   &IntegerValueParser::instance };
+    const IntegerOptionDescriptor UserConfiguration::Sort_Cargo            = { "Sort.Cargo",            &IntegerValueParser::instance };
+    const IntegerOptionDescriptor UserConfiguration::Sort_Cargo_Secondary  = { "Sort.Cargo.Secondary",  &IntegerValueParser::instance };
+    const IntegerOptionDescriptor UserConfiguration::Sort_Search           = { "Sort.Search",           &IntegerValueParser::instance };
+    const IntegerOptionDescriptor UserConfiguration::Sort_Search_Secondary = { "Sort.Search.Secondary", &IntegerValueParser::instance };
+
+} }
 
 
-// FIXME: port these...
-// ConfigStringOption opt_BackupTurn    (getUserPreferences(), "Backup.Turn");
-// ConfigStringOption opt_BackupResult  (getUserPreferences(), "Backup.Result");
-// ConfigStringOption opt_BackupUtil    (getUserPreferences(), "Backup.Util");
-// ConfigStringOption opt_BackupChart   (getUserPreferences(), "Backup.Chart");
-// ConfigStringOption opt_BackupScript  (getUserPreferences(), "Backup.Script");
-// ConfigStringOption opt_UnpackSource  (getUserPreferences(), "Unpack.Source");    // FIXME: not implemented!
-// ConfigStringOption opt_MaketurnTarget(getUserPreferences(), "Maketurn.Target");
+/*
+ *  UserConfiguration
+ */
 
 game::config::UserConfiguration::UserConfiguration()
     : Configuration()
@@ -109,44 +155,95 @@ game::config::UserConfiguration::setDefaultValues()
 {
     // ex GUserPreferences::assignDefaults
     UserConfiguration& me = *this;
-//     : CollapseOldMessages(*this, "Messages.CollapseOld", ValueBoolParser::instance),
-//       RewrapMessages(*this, "Messages.RewrapInbox", ValueBoolParser::instance),
-//       InstantBattleResult(*this, "VCR.InstantResult", ValueBoolParser::instance),
 
-//       Sound16Bits(*this, "Sound.16Bits", ValueBoolParser::instance),
-//       SoundEnabled(*this, "Sound.Enabled", ValueBoolParser::instance),
-//       SoundFrequency(*this, "Sound.Frequency", ValueIntParser::instance),
-//       SoundHeadphone(*this, "Sound.Headphone", ValueBoolParser::instance),
-//       SoundReverse(*this, "Sound.Reverse", ValueBoolParser::instance),
-//       SoundStereo(*this, "Sound.Stereo", ValueBoolParser::instance),
-//       ChartAnimThreshold(*this, "Chart.AnimThreshold", ValueIntParser::instance),
-//       ChartMouseStickiness(*this, "Chart.MouseStickiness", ValueIntParser::instance),
-//       ChartScannerWarpWells(*this, "Chart.Scanner.WarpWells", ValueBoolParser::instance),
-//       ExportShipFields(*this, "Export.ShipFields"),
-//       ExportPlanetFields(*this, "Export.PlanetFields")
+    // Unimplemented for now:
+    //     : CollapseOldMessages(*this, "Messages.CollapseOld", ValueBoolParser::instance),
+    //       RewrapMessages(*this, "Messages.RewrapInbox", ValueBoolParser::instance),
+    //       InstantBattleResult(*this, "VCR.InstantResult", ValueBoolParser::instance),
 
-//     CollapseOldMessages.set(false);
-//     RewrapMessages.set(true);
-//     InstantBattleResult.set(true);
+    //       Sound16Bits(*this, "Sound.16Bits", ValueBoolParser::instance),
+    //       SoundEnabled(*this, "Sound.Enabled", ValueBoolParser::instance),
+    //       SoundFrequency(*this, "Sound.Frequency", ValueIntParser::instance),
+    //       SoundHeadphone(*this, "Sound.Headphone", ValueBoolParser::instance),
+    //       SoundReverse(*this, "Sound.Reverse", ValueBoolParser::instance),
+    //       SoundStereo(*this, "Sound.Stereo", ValueBoolParser::instance),
 
-//     Sound16Bits.set(true);
-//     SoundEnabled.set(true);
-//     SoundFrequency.set(22050);
-//     SoundHeadphone.set(false);
-//     SoundReverse.set(false);
-//     SoundStereo.set(true);
+    //       ChartAnimThreshold(*this, "Chart.AnimThreshold", ValueIntParser::instance),
+    //       ChartMouseStickiness(*this, "Chart.MouseStickiness", ValueIntParser::instance),
 
-//     ChartAnimThreshold.set(11);
-//     ChartMouseStickiness.set(5);
-//     ChartScannerWarpWells.set(0);
+    // ConfigStringOption opt_UnpackSource  (getUserPreferences(), "Unpack.Source");    // FIXME: not implemented in PCC2
 
-    me[Team_AutoSync].set(1);
+    //     CollapseOldMessages.set(false);
+    //     RewrapMessages.set(true);
+    //     InstantBattleResult.set(true);
 
+    //     Sound16Bits.set(true);
+    //     SoundEnabled.set(true);
+    //     SoundFrequency.set(22050);
+    //     SoundHeadphone.set(false);
+    //     SoundReverse.set(false);
+    //     SoundStereo.set(true);
+
+    //     ChartAnimThreshold.set(11);
+    //     ChartMouseStickiness.set(5);
+
+    // Game options are not for editing by user
+
+    // Display
     me[Display_ThousandsSep].set(1);
     me[Display_Clans].set(0);
+    me[Tax_PredictRelative].set(0);
 
-//     ExportShipFields.set("Id@5,Name@20");
-//     ExportPlanetFields.set("Id@5,Name@20");
+    // Starchart
+    me[ChartScannerWarpWells].set(0);
+    me[ChartRenderOptions[RenderOptions::Small  ][0]].set(static_cast<int32_t>(RenderOptions::defaults().toInteger()));
+    me[ChartRenderOptions[RenderOptions::Small  ][1]].set(static_cast<int32_t>((RenderOptions::defaults() & RenderOptions::tristate()).toInteger()));
+    me[ChartRenderOptions[RenderOptions::Normal ][0]].set(static_cast<int32_t>(RenderOptions::defaults().toInteger()));
+    me[ChartRenderOptions[RenderOptions::Normal ][1]].set(static_cast<int32_t>((RenderOptions::defaults() & RenderOptions::tristate()).toInteger()));
+    me[ChartRenderOptions[RenderOptions::Scanner][0]].set(static_cast<int32_t>(RenderOptions::defaults().toInteger()));
+    me[ChartRenderOptions[RenderOptions::Scanner][1]].set(static_cast<int32_t>((RenderOptions::defaults() & RenderOptions::tristate()).toInteger()));
+
+    // Lock
+    me[Lock_Left].set("planet,minefield,ufo");
+    me[Lock_Right].set("ship,marker");
+
+    // Backup
+    me[Backup_Chart].set(String_t());
+    me[Backup_Result].set(String_t());
+    me[Backup_Script].set(String_t());
+    me[Backup_Turn].set(String_t());
+    me[Backup_Util].set(String_t());
+    me[Maketurn_Target].set(String_t());
+
+    // Team
+    me[Team_AutoSync].set(1);
+
+    // Unpack
+    me[Unpack_AcceptRaceNames].set(1);
+    // Unpack_AttachmentTimestamp is not for editing by user
+
+    // Export
+    me[ExportShipFields].set("Id@5,Name@20");
+    me[ExportPlanetFields].set("Id@5,Name@20");
+
+    // Sorting
+    me[Sort_History].set(0);
+    me[Sort_Ship].set(0);
+    me[Sort_Ship_Secondary].set(0);
+    me[Sort_Cargo].set(12);               /* SortByTransferTarget */
+    me[Sort_Cargo_Secondary].set(0);
+    me[Sort_Search].set(0);
+    me[Sort_Search_Secondary].set(0);
+
+    // Marker
+    for (size_t i = 0; i < countof(MARKER_CONFIG); ++i) {
+        const MarkerOptionDescriptor& desc = MARKER_CONFIG[i];
+        MarkerOption& opt = me[desc];
+        opt.setColor(desc.m_color);
+        opt.setMarkerKind(desc.m_markerKind);
+        opt.setNote(String_t());
+    }
+
     markAllOptionsUnset();
 }
 
@@ -157,35 +254,28 @@ game::config::UserConfiguration::loadUserConfiguration(util::ProfileDirectory& d
     afl::base::Ptr<afl::io::Stream> stream = dir.openFileNT(PCC2_INI);
     if (stream.get() != 0) {
         // Parse the file
-        log.write(log.Debug, LOG_NAME, afl::string::Format(tx.translateString("Reading configuration from %s...").c_str(), stream->getName()));
-        ConfigurationParser parser(log, *this, ConfigurationOption::User);
+        log.write(log.Debug, LOG_NAME, afl::string::Format(tx("Reading configuration from %s..."), stream->getName()));
+        ConfigurationParser parser(log, tx, *this, ConfigurationOption::User);
         parser.setCharsetNew(new afl::charset::Utf8Charset());
         parser.parseFile(*stream);
 
         // Set all options to srcUser, no matter where they come from.
         // This will make sure the main config file always contains all options.
         // FIXME: port this
-//         for (Config::iterator i = getUserPreferences().begin(); i != getUserPreferences().end(); ++i) {
-//             i->setSource(ConfigOption::srcUser);
-//         }
-
-//         // Remember preferences version to write the file in the same place
-//         loaded_pref_version = version;
-    } else {
-//         // No file found, so create it with the new version.
-//         loaded_pref_version = 1;
+        //         for (Config::iterator i = getUserPreferences().begin(); i != getUserPreferences().end(); ++i) {
+        //             i->setSource(ConfigOption::srcUser);
+        //         }
     }
 }
 
-// /** Load directory preferences file on top of user preferences. */
 void
 game::config::UserConfiguration::loadGameConfiguration(afl::io::Directory& dir, afl::sys::LogListener& log, afl::string::Translator& tx)
 {
     // ex game/pref.h:loadDirectoryPreferences
     afl::base::Ptr<afl::io::Stream> stream = dir.openFileNT(PCC2_INI, afl::io::FileSystem::OpenRead);
     if (stream.get() != 0) {
-        log.write(log.Debug, LOG_NAME, afl::string::Format(tx.translateString("Reading configuration from %s...").c_str(), stream->getName()));
-        ConfigurationParser parser(log, *this, ConfigurationOption::Game);
+        log.write(log.Debug, LOG_NAME, afl::string::Format(tx("Reading configuration from %s..."), stream->getName()));
+        ConfigurationParser parser(log, tx, *this, ConfigurationOption::Game);
         parser.setCharsetNew(new afl::charset::Utf8Charset());
         parser.parseFile(*stream);
     }
@@ -228,4 +318,16 @@ String_t
 game::config::UserConfiguration::formatPopulation(int32_t n) const
 {
     return getNumberFormatter().formatPopulation(n);
+}
+
+game::config::MarkerOption*
+game::config::UserConfiguration::getCannedMarker(int slot)
+{
+    // ex ConfigMarkerOption::getCannedMarker
+    static_assert(countof(MARKER_CONFIG) == NUM_CANNED_MARKERS, "NUM_CANNED_MARKERS");
+    if (slot >= 0 && slot < static_cast<int>(countof(MARKER_CONFIG))) {
+        return &(*this)[MARKER_CONFIG[slot]];
+    } else {
+        return 0;
+    }
 }

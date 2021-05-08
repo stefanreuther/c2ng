@@ -3,15 +3,15 @@
   */
 
 #include "client/widgets/cargotransferheader.hpp"
-#include "gfx/font.hpp"
-#include "ui/layout/info.hpp"
-#include "gfx/context.hpp"
-#include "ui/draw.hpp"
 #include "gfx/complex.hpp"
-#include "util/translation.hpp"
+#include "gfx/context.hpp"
+#include "gfx/font.hpp"
+#include "ui/draw.hpp"
+#include "ui/layout/info.hpp"
 
-client::widgets::CargoTransferHeader::CargoTransferHeader(ui::Root& root, String_t leftName, String_t rightName)
+client::widgets::CargoTransferHeader::CargoTransferHeader(ui::Root& root, afl::string::Translator& tx, String_t leftName, String_t rightName)
     : m_root(root),
+      m_translator(tx),
       m_leftName(leftName),
       m_rightName(rightName)
       // FIXME: header(requestPixmap("greentile"))
@@ -65,7 +65,7 @@ client::widgets::CargoTransferHeader::handleMouse(gfx::Point /*pt*/, MouseButton
 void
 client::widgets::CargoTransferHeader::drawHeader(gfx::Canvas& can, gfx::Rectangle area, const String_t& name)
 {
-    // ex WCargoHeader::showTitle
+    // ex WCargoHeader::showTitle, transfer.pas:ShowTitle
 
     // Frame and content
     afl::base::Ref<gfx::Font> font(m_root.provider().getFont(gfx::FontRequest()));
@@ -82,13 +82,13 @@ client::widgets::CargoTransferHeader::drawHeader(gfx::Canvas& can, gfx::Rectangl
     // Top half
     gfx::Rectangle top(area.splitY(area.getHeight()/2));
     ctx.setColor(ui::Color_White);
-    ctx.setTextAlign(0, 2);
+    ctx.setTextAlign(gfx::LeftAlign, gfx::BottomAlign);
     top.grow(0, -font->getLineHeight() / 4);
     outTextF(ctx, top, name);
     drawHLine(ctx, top.getLeftX(), top.getBottomY(), top.getRightX());
 
     // Bottom half
-    ctx.setTextAlign(2, 0);
-    outTextF(ctx, area.splitX(area.getWidth() / 2), _("has"));
-    outTextF(ctx, area,                             _("space left"));
+    ctx.setTextAlign(gfx::RightAlign, gfx::TopAlign);
+    outTextF(ctx, area.splitX(area.getWidth() / 2), m_translator("has"));
+    outTextF(ctx, area,                             m_translator("space left"));
 }

@@ -5,6 +5,7 @@
 #define C2NG_UI_WIDGETS_SIMPLETABLE_HPP
 
 #include <vector>
+#include "afl/base/signal.hpp"
 #include "gfx/fontrequest.hpp"
 #include "ui/root.hpp"
 #include "ui/simplewidget.hpp"
@@ -29,18 +30,26 @@ namespace ui { namespace widgets {
             /** Set font of all cells in range.
                 \param font New font
                 \return *this */
-            Range& setFont(gfx::FontRequest& font);
+            Range& setFont(const gfx::FontRequest& font);
 
             /** Set text alignment of all cells in range.
-                \param x X alignment (0=left, 1=center, 2=right)
-                \param y Y alignment (0=top, 1=middle, 2=bottom)
+                \param x X alignment
+                \param y Y alignment
                 \return *this */
-            Range& setTextAlign(int x, int y);
+            Range& setTextAlign(gfx::HorizontalAlignment x, gfx::VerticalAlignment y);
 
             /** Set color of all cells in range.
                 \param color Color (ui::Color_xxx)
                 \return *this */
             Range& setColor(uint8_t color);
+
+            /** Set color string for all cells in range.
+                This is an ad-hoc mechanism for multi-colored cells; use sparingly.
+                \param colorString Color string. First (byte) character corresponds to first (UTF-8) character of text, etc.
+                                   If color string has fewer characters than text, the remainder uses the color set with setColor().
+                                   In particular, if colorString is empty (default), setColor() applies to whole cell.
+                \return *this */
+            Range& setColorString(const String_t& colorString);
 
             /** Set number of extra columns to allocate for this cell value.
                 Zero means just this cell, one means this cell and the next one, and so on.
@@ -61,6 +70,11 @@ namespace ui { namespace widgets {
                 \param count Number of cells
                 \return new range. If the parameters are out of range, a reduced range will be returned. */
             Range subrange(size_t start, size_t count);
+
+            /** Get single cell.
+                \param index 0-based index
+                \return new range. If the parameters are out of range, a reduced range will be returned. */
+            Range cell(size_t index);
 
          private:
             friend class SimpleTable;
@@ -149,17 +163,23 @@ namespace ui { namespace widgets {
         virtual bool handleKey(util::Key_t key, int prefix);
         virtual bool handleMouse(gfx::Point pt, MouseButtons_t pressedButtons);
 
+        /** Signal: cell clicked.
+            \param column 0-based column
+            \param row    0-based row */
+        afl::base::Signal<void(size_t,size_t)> sig_cellClick;
+
      private:
         struct Cell {
             String_t text;
+            String_t colorString;
             gfx::FontRequest font;
-            int alignX;
-            int alignY;
+            gfx::HorizontalAlignment alignX;
+            gfx::VerticalAlignment alignY;
             int extraColumns;
             uint8_t color;
             bool underlined;
             Cell()
-                : text(), font(), alignX(0), alignY(0), extraColumns(0), color(ui::Color_White), underlined(false)
+                : text(), colorString(), font(), alignX(gfx::LeftAlign), alignY(gfx::TopAlign), extraColumns(0), color(ui::Color_White), underlined(false)
                 { }
         };
         struct Metric {
@@ -178,9 +198,13 @@ namespace ui { namespace widgets {
         std::vector<Metric> m_columnMetrics;
         size_t m_numRows;
         size_t m_numColumns;
+        bool m_mousePressed;
 
         void requestUpdateMetrics();
         void updateMetrics();
+
+        bool getCellFromPoint(gfx::Point relativePosition, size_t& column, size_t& row) const;
+        static bool getIndexFromCoordinate(int pos, const std::vector<Metric>& m, size_t& index);
 
         static void resetMetric(std::vector<Metric>& m);
         static void updateAutoMetric(std::vector<Metric>& m, size_t index, int value);

@@ -11,7 +11,6 @@
 #include "util/requestdispatcher.hpp"
 #include "util/requestreceiver.hpp"
 #include "util/requestsender.hpp"
-#include "util/slaverequestsender.hpp"
 #include "client/si/requestlink2.hpp"
 #include "game/extraidentifier.hpp"
 #include "util/messagecollector.hpp"
@@ -39,6 +38,11 @@ namespace client { namespace si {
         - Listener Functions: these manage a (stack of) listeners. */
     class UserSide {
      public:
+        class ScriptRequest : public afl::base::Deletable {
+         public:
+            virtual void handle(game::Session& s, ScriptSide& si) = 0;
+        };
+
         /** Constructor.
             \param gameSender RequestSender to execute stuff on a game::Session
             \param self RequestDispatcher used to execute stuff on this object (UI thread) */
@@ -52,7 +56,7 @@ namespace client { namespace si {
 
         /** Post a request to execute on the ScriptSide.
             \param request Newly-allocated request */
-        void postNewRequest(util::SlaveRequest<game::Session, ScriptSide>* request);
+        void postNewRequest(ScriptRequest* request);
 
         util::RequestSender<game::Session> gameSender()
             { return m_gameSender; }
@@ -87,6 +91,8 @@ namespace client { namespace si {
         void continueProcess(RequestLink2 link);
 
         void joinProcess(RequestLink2 link, RequestLink2 other);
+
+        void joinProcessGroup(RequestLink2 link, uint32_t oldGroup);
 
         /** Continue a process after UI callout with error.
             Call this after executing a user interface request to produce an error.

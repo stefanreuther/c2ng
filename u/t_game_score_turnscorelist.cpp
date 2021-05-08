@@ -107,6 +107,7 @@ TestGameScoreTurnScoreList::testTurn()
     }
     TS_ASSERT_EQUALS(testee.getNumTurns(), 0U);
     TS_ASSERT(testee.getTurnByIndex(0) == 0);
+    TS_ASSERT_EQUALS(testee.getFirstTurnNumber(), 0);
 
     // Add some turns
     testee.addTurn(1, game::Timestamp(2000, 1, 1, 1, 1, 1));
@@ -167,6 +168,7 @@ TestGameScoreTurnScoreList::testTurn()
     TS_ASSERT_EQUALS(testee.getTurnByIndex(5)->getTurnNumber(), 6);
     TS_ASSERT_EQUALS(testee.getTurnByIndex(6)->getTurnNumber(), 7);
     TS_ASSERT_EQUALS(testee.getTurnByIndex(7)->getTurnNumber(), 8);
+    TS_ASSERT_EQUALS(testee.getFirstTurnNumber(), 1);
 
     // Set some scores
     {

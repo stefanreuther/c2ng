@@ -6,10 +6,11 @@
 #include "client/si/requestlink2.hpp"
 
 #include "t_client_si.hpp"
+#include "afl/io/nullfilesystem.hpp"
+#include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
 #include "interpreter/process.hpp"
 #include "interpreter/world.hpp"
-#include "afl/io/nullfilesystem.hpp"
 
 /** Test basic behaviour. */
 void
@@ -41,8 +42,9 @@ void
 TestClientSiRequestLink2::testConvert()
 {
     afl::sys::Log log;
+    afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
-    interpreter::World w(log, fs);
+    interpreter::World w(log, tx, fs);
     interpreter::Process p(w, "TestClientSiRequestLink2", 99);
     client::si::RequestLink1 t(p, true);
 

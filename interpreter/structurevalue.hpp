@@ -40,7 +40,7 @@ namespace interpreter {
 
         // Context:
         virtual StructureValue* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
-        virtual void set(PropertyIndex_t index, afl::data::Value* value);
+        virtual void set(PropertyIndex_t index, const afl::data::Value* value);
         virtual afl::data::Value* get(PropertyIndex_t index);
         virtual game::map::Object* getObject();
         virtual void enumProperties(PropertyAcceptor& acceptor);

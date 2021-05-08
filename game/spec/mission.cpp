@@ -1,5 +1,6 @@
 /**
   *  \file game/spec/mission.cpp
+  *  \brief Class game::spec::Mission
   */
 
 #include "game/spec/mission.hpp"
@@ -34,35 +35,33 @@ namespace {
     }
 }
 
-// /** Construct blank mission definition. */
 game::spec::Mission::Mission()
     : m_number(0),
-      m_raceMask(),              // FIXME?
+      m_raceMask(),
       m_flags(),
-      name(),
-      short_name(),
-      exp_condition(),
-      exp_warning(),
-      exp_label(),
-      cmd_onset(),
-      hotkey(0)
+      m_name(),
+      m_shortName(),
+      m_conditionExpression(),
+      m_warningExpression(),
+      m_labelExpression(),
+      m_setCommand(),
+      m_hotkey(0)
 {
     // ex GMission::GMission()
     m_parameterTypes[InterceptParameter] = m_parameterTypes[TowParameter] = NoParameter;
 }
 
-// /** Construct mission definition from mission.cc line. */
 game::spec::Mission::Mission(int number, String_t descriptionLine)
     : m_number(number),
       m_raceMask(PlayerSet_t::allUpTo(MAX_RACES)),
       m_flags(),
-      name(),
-      short_name(),
-      exp_condition(),
-      exp_warning(),
-      exp_label(),
-      cmd_onset(),
-      hotkey(0)
+      m_name(),
+      m_shortName(),
+      m_conditionExpression(),
+      m_warningExpression(),
+      m_labelExpression(),
+      m_setCommand(),
+      m_hotkey(0)
 {
     // ex GMission::GMission(int number, string_t desc_line)
     m_parameterTypes[InterceptParameter] = m_parameterTypes[TowParameter] = NoParameter;
@@ -72,7 +71,6 @@ game::spec::Mission::Mission(int number, String_t descriptionLine)
 game::spec::Mission::~Mission()
 { }
 
-/** Get mission number. */
 int
 game::spec::Mission::getNumber() const
 {
@@ -80,9 +78,6 @@ game::spec::Mission::getNumber() const
     return m_number;
 }
 
-/** Get races which can do this mission.
-    (This is indeed races, not players!).
-    \return set of race numbers */
 game::PlayerSet_t
 game::spec::Mission::getRaceMask() const
 {
@@ -90,7 +85,6 @@ game::spec::Mission::getRaceMask() const
     return m_raceMask;
 }
 
-/** Set races which can do this mission. */
 void
 game::spec::Mission::setRaceMask(PlayerSet_t mask)
 {
@@ -98,7 +92,6 @@ game::spec::Mission::setRaceMask(PlayerSet_t mask)
     m_raceMask = mask;
 }
 
-/** Get mission flags. \return mf_XXX */
 game::spec::Mission::FlagSet_t
 game::spec::Mission::getFlags() const
 {
@@ -106,8 +99,6 @@ game::spec::Mission::getFlags() const
     return m_flags;
 }
 
-/** Check mission flag.
-    \param i mf_XXX */
 bool
 game::spec::Mission::hasFlag(Flag flag) const
 {
@@ -115,8 +106,6 @@ game::spec::Mission::hasFlag(Flag flag) const
     return m_flags.contains(flag);
 }
 
-/** Set mission flags.
-    \param fl Set of mf_XXX */
 void
 game::spec::Mission::setFlags(FlagSet_t flags)
 {
@@ -124,59 +113,53 @@ game::spec::Mission::setFlags(FlagSet_t flags)
     m_flags = flags;
 }
 
-/** Get mission name. This name should be displayed in selection lists. */
 String_t
 game::spec::Mission::getName() const
 {
     // ex GMission::getName
-    return name;
+    return m_name;
 }
 
-/** Set mission name. This name is displayed in selection lists. */
 void
 game::spec::Mission::setName(String_t name)
 {
     // ex GMission::setName
-    this->name = name;
+    m_name = name;
 }
 
-/** Get short mission name. This name is used when space is tight. */
 String_t
 game::spec::Mission::getShortName() const
 {
     // ex GMission::getShortName
-    return short_name;
+    return m_shortName;
 }
 
-/** Set short mission name. This name is used when space is tight. */
 void
-game::spec::Mission::setShortName(String_t short_name)
+game::spec::Mission::setShortName(String_t shortName)
 {
     // ex GMission::setShortName
-    this->short_name = short_name;
+    this->m_shortName = shortName;
 }
 
-/** Get assigned hot-key.
-    The hot-key is an ASCII code (7-bit) for a key to select this mission. */
 char
 game::spec::Mission::getHotkey() const
 {
     // ex GMission::getHotkey
-    return hotkey;
+    return m_hotkey;
 }
 
-/** Assign hot-key.
-    The hot-key is an ASCII code (7-bit) for a key to select this mission. */
 void
 game::spec::Mission::setHotkey(char c)
 {
     // ex GMission::setHotkey
-    hotkey = c;
+    m_hotkey = c;
 }
 
-/** Get parameter definition.
-    \param id which parameter you want to know about
-    \return ma_XXX, mat_XXX. Zero if parameter is not required. */
+
+/*
+ *  Parameter accessors)
+ */
+
 game::spec::Mission::ParameterType
 game::spec::Mission::getParameterType(MissionParameter p) const
 {
@@ -184,9 +167,6 @@ game::spec::Mission::getParameterType(MissionParameter p) const
     return m_parameterTypes[p];
 }
 
-/** Set parameter type.
-    \param id which parameter
-    \param spec parameter type, combination of ma_XXX, mat_XXX */
 void
 game::spec::Mission::setParameterType(MissionParameter p, ParameterType type)
 {
@@ -206,116 +186,107 @@ game::spec::Mission::setParameterFlags(MissionParameter p, ParameterFlagSet_t fl
     m_parameterFlags[p] = flags;
 }
 
-/** Get name for parameter. */
 String_t
-game::spec::Mission::getParameterName(MissionParameter id) const
+game::spec::Mission::getParameterName(MissionParameter p) const
 {
     // ex GMission::getParameterName
     // Note that PCC2 does not translate these words, so neither do we.
-    if (arg_names[id].empty()) {
-        if (id == TowParameter) {
+    if (m_parameterNames[p].empty()) {
+        if (p == TowParameter) {
             return "Tow";
         } else {
             return "Intercept";
         }
     } else {
-        return arg_names[id];
+        return m_parameterNames[p];
     }
 }
 
-/** Set parameter name.
-    This name is used when PCC2 prompts for a name.
-    It can be blank to invoke the default. */
 void
 game::spec::Mission::setParameterName(MissionParameter id, String_t name)
 {
     // ex GMission::setParameterName
-    arg_names[id] = name;
+    m_parameterNames[id] = name;
 }
 
-/** Get condition. */
+
+/*
+ *  Script accessors
+ */
+
 String_t
 game::spec::Mission::getConditionExpression() const
 {
     // ex GMission::getConditionExpression
-    return exp_condition;
+    return m_conditionExpression;
 }
 
-/** Set condition.
-    This condition verifies whether the mission is allowed to be set (hard condition).
-    \see worksOn(GShip&) */
 void
 game::spec::Mission::setConditionExpression(String_t cond)
 {
     // ex GMission::setConditionExpression
-    exp_condition = cond;
+    m_conditionExpression = cond;
 }
 
-/** Get warning condition. */
 String_t
 game::spec::Mission::getWarningExpression() const
 {
     // ex GMission::getWarningExpression
-    return exp_warning;
+    return m_warningExpression;
 }
 
-/** Set warning condition.
-    This condition verifies whether the mission will work (soft condition).
-    \see isWarning(GShip&) */
 void
 game::spec::Mission::setWarningExpression(String_t warning)
 {
     // ex GMission::setWarningExpression
-    exp_warning = warning;
+    m_warningExpression = warning;
 }
 
-/** Get label expression. */
 String_t
 game::spec::Mission::getLabelExpression() const
 {
     // ex GMission::getLabelExpression
-    return exp_label;
+    return m_labelExpression;
 }
 
-/** Set label expression.
-    This expression produces a string to display when the mission is set on a ship.
-    \see getLabel(GShip&) */
 void
 game::spec::Mission::setLabelExpression(String_t label)
 {
     // ex GMission::setLabelExpression
-    exp_label = label;
+    m_labelExpression = label;
 }
 
-/** Get "on set" command. */
 String_t
 game::spec::Mission::getSetCommand() const
 {
     // ex GMission::getSetCommand
-    return cmd_onset;
+    return m_setCommand;
 }
 
-/** Set "on set" command. */
 void
 game::spec::Mission::setSetCommand(String_t cmd)
 {
     // ex GMission::setSetCommand
-    cmd_onset = cmd;
+    m_setCommand = cmd;
 }
 
-// /** True iff mission (might) work on the specified ship. Actually,
-//     this should return true if we want the user to be able to set the
-//     mission on the specified ship. */
+
+/*
+ *  Inquiry
+ */
+
 bool
 game::spec::Mission::worksOn(const game::map::Ship& ship, const game::config::HostConfiguration& config, const HostVersion& host, const RegistrationKey& key) const
 {
     // ex GMission::worksOn
+    // @change We do not check the condition; that is done in script code.
+    // FIXME: Consider retiring this function.
     // Ship owner needs to be known and valid.
     const int shipOwner = ship.getRealOwner().orElse(0);
     if (shipOwner == 0) {
         return false;
     }
-    
+
     // Don't allow mission 1 for SRace
     if (!host.isMissionAllowed(m_number)) {
         return false;
@@ -335,25 +306,6 @@ game::spec::Mission::worksOn(const game::map::Ship& ship, const game::config::Ho
     if (m_flags.contains(WaypointMission) && ship.isFleetMember()) {
         return false;
     }
-
-    // FIXME/@change: we do not check the expression condition
-    // // Check mission.cc condition
-    // IntBCORef bco = compileExpression(exp_condition, IntCompilationContext());
-    // if (bco) {
-    //     // Run it
-    //     IntExecutionContext exec("Temporary: Mission");
-    //     exec.pushNewContext(new IntShipContext(ship.getId()));
-    //     exec.pushNewFrame(new IntExecutionFrame(bco));
-    //     if (runTemporaryProcess(exec)) {
-    //         // Evaluated successfully
-    //         if (getBoolValue(exec.getResult()) <= 0) {
-    //             return false;
-    //         }
-    //     } else {
-    //         // Mission is not permitted if expression fails (same as in PCC 1.x)
-    //         return false;
-    //     }
-    // }
 
     return true;
 }
@@ -395,20 +347,20 @@ game::spec::Mission::parseDescription(const String_t& descriptionLine)
         }
     }
     if (n < descriptionLine.length()) {
-        name = descriptionLine.substr(n+1);
+        m_name = descriptionLine.substr(n+1);
 
         /* assign hot-key if so desired */
-        String_t::size_type p = name.find('~');
-        if (p != name.npos && p+1 < name.length()) {
+        String_t::size_type p = m_name.find('~');
+        if (p != m_name.npos && p+1 < m_name.length()) {
             /* "~x" assigns a hot-key. Only standard keys so far. */
-            char key = afl::string::charToLower(name[p+1]);
+            char key = afl::string::charToLower(m_name[p+1]);
             if (key > ' ' && key < 127) {
-                hotkey = key;
+                m_hotkey = key;
             }
-            name.erase(p, 1);
+            m_name.erase(p, 1);
         }
 
         /* assign standard short-name */
-        short_name.assign(name, 0, 7);
+        m_shortName.assign(m_name, 0, 7);
     }
 }

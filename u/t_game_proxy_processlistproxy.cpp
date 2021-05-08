@@ -112,3 +112,34 @@ TestGameProxyProcessListProxy::testIt()
     TS_ASSERT_EQUALS(p3.getProcessGroupId(), pgid);
 }
 
+/** Test resumeConfirmedProcesses().
+    A: set up a process list and a confirmed notification. Invoke resumeConfirmedProcesses().
+    E: process status updated correctly. */
+void
+TestGameProxyProcessListProxy::testResumeConfirmed()
+{
+    // Session thread with some processes
+    CxxTest::setAbortTestOnFail(true);
+    game::test::SessionThread s;
+    interpreter::World& w = s.session().world();
+    interpreter::Process& p1 = s.session().processList().create(w, "p1");
+    interpreter::Process& p2 = s.session().processList().create(w, "p2");
+    interpreter::Process& p3 = s.session().processList().create(w, "p3");
+
+    // Messages
+    game::interface::NotificationStore::Message* msg = s.session().notifications().addMessage(p2.getProcessId(), "header", "body");
+    s.session().notifications().confirmMessage(msg, true);
+
+    // Testee
+    game::test::WaitIndicator ind;
+    ProcessListProxy testee(s.gameSender(), ind);
+    testee.resumeConfirmedProcesses();
+
+    // Commit; verify
+    uint32_t pgid = testee.commit(ind);
+    TS_ASSERT_EQUALS(p1.getState(), Process::Suspended);
+    TS_ASSERT_EQUALS(p2.getState(), Process::Runnable);
+    TS_ASSERT_EQUALS(p3.getState(), Process::Suspended);
+    TS_ASSERT_EQUALS(p2.getProcessGroupId(), pgid);
+}
+

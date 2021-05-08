@@ -1,5 +1,6 @@
 /**
   *  \file game/interface/pluginproperty.cpp
+  *  \brief Plugin Properties
   */
 
 #include "game/interface/pluginproperty.hpp"
@@ -15,26 +16,26 @@ game::interface::getPluginProperty(const util::plugin::Plugin& plugin, PluginPro
      case ipiId:
         /* @q Id:Str (Plugin Property)
            Id of the plugin.
-           @since PCC2 1.99.25 */
+           @since PCC2 1.99.25, PCC2 2.40.1 */
         return makeStringValue(plugin.getId());
 
      case ipiName:
         /* @q Name:Str (Plugin Property)
            Human-readable name of the plugin.
-           @since PCC2 1.99.25 */
+           @since PCC2 1.99.25, PCC2 2.40.1 */
         return makeStringValue(plugin.getName());
 
      case ipiDescription:
         /* @q Description:Str (Plugin Property)
            Description of the plugin. This can possibly be multiple paragraphs of text.
-           @since PCC2 1.99.25 */
+           @since PCC2 1.99.25, PCC2 2.40.1 */
         return makeStringValue(plugin.getDescription());
 
      case ipiBaseDirectory:
         /* @q Directory:Str (Plugin Property)
            Base directory of the plugin.
            This directory contains files installed with the plugin.
-           @since PCC2 1.99.25 */
+           @since PCC2 1.99.25, PCC2 2.40.1 */
         return makeStringValue(plugin.getBaseDirectory());
     }
     return 0;

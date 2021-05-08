@@ -33,26 +33,6 @@ gfx::Rectangle::Rectangle(Point origin, Point extent) throw()
       m_height(extent.getY())
 { }
 
-// FIXME: delete
-// /** Clip at size. Modify this rectangle so that it lies entirely
-//     within \c Rectangle(0, 0, cw, ch). This is slightly more efficient
-//     than clipRect(). */
-// void
-// Rectangle::clipSize(int cw, int ch) throw()
-// {
-//     register long sw = w, sh = h;
-//     if (x < 0)
-//         sw += x, x = 0;
-//     if (y < 0)
-//         sh += y, y = 0;
-//     if (x + sw > cw)
-//         sw = cw - x;
-//     if (y + sh > ch)
-//         sh = ch - y;
-//     w = (sw < 0) ? 0 : sw;
-//     h = (sh < 0) ? 0 : sh;
-// }
-
 // Intersect (clip) at rectangle.
 void
 gfx::Rectangle::intersect(const Rectangle& r) throw()
@@ -178,12 +158,12 @@ gfx::Rectangle::moveIntoRectangle(const Rectangle& other) throw()
 gfx::Rectangle&
 gfx::Rectangle::centerWithin(const Rectangle& other) throw()
 {
-    return moveToEdge(other, 1, 1, 0);
+    return moveToEdge(other, CenterAlign, MiddleAlign, 0);
 }
 
 // Move this rectangle to edge of another.
 gfx::Rectangle&
-gfx::Rectangle::moveToEdge(const Rectangle& other, int xPos, int yPos, int offset) throw()
+gfx::Rectangle::moveToEdge(const Rectangle& other, HorizontalAlignment xPos, VerticalAlignment yPos, int offset) throw()
 {
     const int virtW = other.m_width  - m_width;
     const int virtH = other.m_height - m_height;

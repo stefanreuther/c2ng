@@ -32,6 +32,18 @@ game::map::BeamUpPlanetTransfer::getName(afl::string::Translator& tx) const
     return afl::string::Format(tx("Beam up from %s"), m_planet.getName(tx));
 }
 
+String_t
+game::map::BeamUpPlanetTransfer::getInfo1(afl::string::Translator& /*tx*/) const
+{
+    return String_t();
+}
+
+String_t
+game::map::BeamUpPlanetTransfer::getInfo2(afl::string::Translator& /*tx*/) const
+{
+    return String_t();
+}
+
 game::CargoContainer::Flags_t
 game::map::BeamUpPlanetTransfer::getFlags() const
 {

@@ -21,6 +21,7 @@ class TestServerCommonRaceNames : public CxxTest::TestSuite {
 class TestServerCommonRandomIdGenerator : public CxxTest::TestSuite {
  public:
     void testIt();
+    void testLoop();
 };
 
 class TestServerCommonRoot : public CxxTest::TestSuite {

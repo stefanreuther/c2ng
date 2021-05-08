@@ -28,6 +28,8 @@ TestGameMapPoint::testBasics()
     TS_ASSERT_EQUALS(b.getY(), 30);
     TS_ASSERT_EQUALS(c.getX(), 10);
     TS_ASSERT_EQUALS(c.getY(), 20);
+
+    TS_ASSERT_EQUALS(a.toString(), "(10,20)");
 }
 
 /** Test modification functions. */

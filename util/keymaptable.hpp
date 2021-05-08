@@ -18,6 +18,9 @@ namespace util {
         KeymapRef_t getKeymapByName(String_t name) const;
         KeymapRef_t createKeymap(String_t name);
 
+        size_t getNumKeymaps() const;
+        KeymapRef_t getKeymapByIndex(size_t index) const;
+
         void notifyListeners();
 
         afl::base::Signal<void()> sig_keymapChange;

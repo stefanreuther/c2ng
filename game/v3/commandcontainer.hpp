@@ -80,16 +80,15 @@ namespace game { namespace v3 {
             \param ref Affected unit. See Command::getAffectedUnit */
         void removeCommandsByReference(Reference ref);
 
-        // Iterator_t begin()
-        //     { return cmds.begin(); }
+        /** Get iterator to first command.
+            \return iterator */
         ConstIterator_t begin() const
             { return cmds.begin(); }
-        // Iterator_t end()
-        //     { return cmds.end(); }
+
+        /** Get iterator to one-past-last command.
+            \return iterator */
         ConstIterator_t end() const
             { return cmds.end(); }
-        // void erase(Iterator_t it) // \change: previously returned iterator
-        //     { return cmds.erase(it); }
 
         /** Load command file (cmdX.txt).
             \param file File

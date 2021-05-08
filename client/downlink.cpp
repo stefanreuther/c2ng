@@ -4,12 +4,11 @@
   */
 
 #include "client/downlink.hpp"
-#include "util/translation.hpp"
 
-client::Downlink::Downlink(ui::Root& root)
+client::Downlink::Downlink(ui::Root& root, afl::string::Translator& tx)
     : WaitIndicator(root.engine().dispatcher()),
       m_root(root),
-      m_indicator(root, _("!Working")),
+      m_indicator(root, tx("Working...")),
       m_busy(false),
       m_loop(root)
 { }
@@ -39,7 +38,7 @@ client::Downlink::setBusy(bool flag)
         m_busy = flag;
         if (m_busy) {
             m_indicator.setExtent(gfx::Rectangle(gfx::Point(), m_indicator.getLayoutInfo().getPreferredSize()));
-            m_root.moveWidgetToEdge(m_indicator, 1, 2, 10);
+            m_root.moveWidgetToEdge(m_indicator, gfx::CenterAlign, gfx::BottomAlign, 10);
             m_root.add(m_indicator);
         } else {
             m_root.remove(m_indicator);

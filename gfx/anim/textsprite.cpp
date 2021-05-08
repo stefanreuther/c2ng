@@ -37,7 +37,7 @@ gfx::anim::TextSprite::setPosition(Point pt)
 }
 
 void
-gfx::anim::TextSprite::setTextAlign(int x, int y)
+gfx::anim::TextSprite::setTextAlign(HorizontalAlignment x, VerticalAlignment y)
 {
     if (Point(x, y) != m_textAlign) {
         m_textAlign = Point(x, y);

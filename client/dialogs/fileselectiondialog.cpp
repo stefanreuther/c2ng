@@ -1,10 +1,12 @@
 /**
   *  \file client/dialogs/fileselectiondialog.cpp
+  *  \brief Class client::dialogs::FileSelectionDialog
   */
 
 #include "client/dialogs/fileselectiondialog.hpp"
 #include "afl/base/deleter.hpp"
 #include "afl/base/optional.hpp"
+#include "ui/dialogs/messagebox.hpp"
 #include "ui/layout/hbox.hpp"
 #include "ui/layout/vbox.hpp"
 #include "ui/widgets/focusiterator.hpp"
@@ -16,6 +18,7 @@
 #include "ui/window.hpp"
 #include "util/filenamepattern.hpp"
 #include "util/translation.hpp"
+#include "util/io.hpp"
 
 using client::widgets::FileListbox;
 using client::dialogs::FileSelectionDialog;
@@ -36,23 +39,24 @@ struct client::dialogs::FileSelectionDialog::State {
 
 struct client::dialogs::FileSelectionDialog::Result {
     bool hasNewContent;
+    afl::base::Optional<String_t> error;
     afl::base::Optional<String_t> newWildcard;
     afl::base::Optional<String_t> result;
 
     Result()
-        : hasNewContent(false), newWildcard(), result()
+        : hasNewContent(false), error(), newWildcard(), result()
         { }
 };
 
 namespace {
-    void setState(FileSelectionDialog::State& out, const DirectoryBrowser& in)
+    void setState(FileSelectionDialog::State& out, afl::string::Translator& tx, const DirectoryBrowser& in)
     {
         // Directory name
         out.thisDirectoryName = in.getCurrentDirectory()->getDirectoryName();
 
         // Content
         if (!in.path().empty()) {
-            out.contentItems.push_back(FileListbox::Item(_("[Go up one level]"), 0, true, FileListbox::iUp));
+            out.contentItems.push_back(FileListbox::Item(tx("[Go up one level]"), 0, true, FileListbox::iUp));
         }
         out.contentOffset = out.contentItems.size();
 
@@ -70,7 +74,7 @@ namespace {
         out.selectedItem = in.getSelectedChild();
 
         // Crumb list
-        out.crumbItems.push_back(SimpleIconBox::Item(_("[Places]")));
+        out.crumbItems.push_back(SimpleIconBox::Item(tx("[Places]")));
         const std::vector<DirectoryBrowser::DirectoryPtr_t>& path = in.path();
         for (size_t i = 0, n = path.size(); i < n; ++i) {
             if (path[i].get() != 0) {
@@ -87,11 +91,12 @@ namespace {
 
     class InitTask : public util::Request<afl::io::FileSystem> {
      public:
-        InitTask(std::auto_ptr<DirectoryBrowser>& result, String_t folderName, String_t pattern, FileSelectionDialog::State& state)
+        InitTask(std::auto_ptr<DirectoryBrowser>& result, String_t folderName, String_t pattern, FileSelectionDialog::State& state, afl::string::Translator& tx)
             : m_result(result),
               m_folderName(folderName),
               m_pattern(pattern),
-              m_state(state)
+              m_state(state),
+              m_translator(tx)
             { }
         virtual void handle(afl::io::FileSystem& fs)
             {
@@ -106,21 +111,23 @@ namespace {
                 } else {
                     m_result->openDirectory(m_folderName);
                 }
-                setState(m_state, *m_result);
+                setState(m_state, m_translator, *m_result);
             }
      private:
         std::auto_ptr<DirectoryBrowser>& m_result;
         String_t m_folderName;
         String_t m_pattern;
         FileSelectionDialog::State& m_state;
+        afl::string::Translator& m_translator;
     };
 
     class UpTask : public util::Request<afl::io::FileSystem> {
      public:
-        UpTask(std::auto_ptr<DirectoryBrowser>& browser, size_t n, FileSelectionDialog::State& state)
+        UpTask(std::auto_ptr<DirectoryBrowser>& browser, size_t n, FileSelectionDialog::State& state, afl::string::Translator& tx)
             : m_browser(browser),
               m_count(n),
-              m_state(state)
+              m_state(state),
+              m_translator(tx)
             { }
         virtual void handle(afl::io::FileSystem& /*fs*/)
             {
@@ -128,46 +135,53 @@ namespace {
                     for (size_t i = 0; i < m_count; ++i) {
                         b->openParent();
                     }
-                    setState(m_state, *b);
+                    setState(m_state, m_translator, *b);
                 }
             }
      private:
         std::auto_ptr<DirectoryBrowser>& m_browser;
         size_t m_count;
         FileSelectionDialog::State& m_state;
+        afl::string::Translator& m_translator;
     };
 
     class DownTask : public util::Request<afl::io::FileSystem> {
      public:
-        DownTask(std::auto_ptr<DirectoryBrowser>& browser, size_t index, FileSelectionDialog::State& state)
+        DownTask(std::auto_ptr<DirectoryBrowser>& browser, size_t index, FileSelectionDialog::State& state, afl::string::Translator& tx)
             : m_browser(browser),
               m_index(index),
-              m_state(state)
+              m_state(state),
+              m_translator(tx)
             { }
         virtual void handle(afl::io::FileSystem& /*fs*/)
             {
                 if (DirectoryBrowser* b = m_browser.get()) {
                     b->openChild(m_index);
-                    setState(m_state, *b);
+                    setState(m_state, m_translator, *b);
                 }
             }
      private:
         std::auto_ptr<DirectoryBrowser>& m_browser;
         size_t m_index;
         FileSelectionDialog::State& m_state;
+        afl::string::Translator& m_translator;
     };
 
     class InputTask : public util::Request<afl::io::FileSystem> {
      public:
         InputTask(std::auto_ptr<DirectoryBrowser>& browser,
                   const String_t& input, bool allowPattern,
+                  const String_t& defaultExtension,
                   FileSelectionDialog::State& state,
-                  FileSelectionDialog::Result& result)
+                  FileSelectionDialog::Result& result,
+                  afl::string::Translator& tx)
             : m_browser(browser),
               m_input(input),
               m_allowPattern(allowPattern),
+              m_defaultExtension(defaultExtension),
               m_state(state),
-              m_result(result)
+              m_result(result),
+              m_translator(tx)
             { }
         virtual void handle(afl::io::FileSystem& fs)
             {
@@ -181,7 +195,7 @@ namespace {
                     // Empty file name? Do nothing. Happens when users press Enter
                     // on the input line.
                     if (file.empty()) {
-                        setState(m_state, *b);
+                        setState(m_state, m_translator, *b);
                         m_result.hasNewContent = true;
                         return;
                     }
@@ -192,7 +206,7 @@ namespace {
                         b->clearFileNamePatterns();
                         b->addFileNamePattern(npat);
                         b->loadContent();
-                        setState(m_state, *b);
+                        setState(m_state, m_translator, *b);
                         m_result.hasNewContent = true;
                         m_result.newWildcard = file;
                         return;
@@ -203,12 +217,10 @@ namespace {
                         // Relative file names cannot be used in the "roots" view
                         afl::base::Ref<afl::io::Directory> current = b->getCurrentDirectory();
                         if (current->getDirectoryName().empty()) {
-                            // FIXME: handle error
-                            //         messageBox(_("You cannot create files here. Please choose a place (drive, partition) first."),
-                            //                    _("File Selection"));
-                        } else {
-                            dir = fs.makePathName(current->getDirectoryName(), dir);
+                            m_result.error = m_translator("You cannot create files here. Please choose a place (drive, partition) first.");
+                            return;
                         }
+                        dir = fs.makePathName(current->getDirectoryName(), dir);
                     }
 
                     // Remove ".." (getAbsoluteName is required to expand paths like "c:foo")
@@ -219,7 +231,7 @@ namespace {
                     afl::base::Ref<afl::io::Directory> ndir = fs.openDirectory(dir);
                     // FIXME:
                     //     ndir->getEntries();
-                    //     messageBox(format(_("Unable to read directory %s: %s"), e.getFileName(), e.what()),
+                    //     messageBox(format(m_translator("Unable to read directory %s: %s"), e.getFileName(), e.what()),
 
                     // Now, examine the file part
                     if (m_allowPattern && npat.hasWildcard()) {
@@ -227,7 +239,7 @@ namespace {
                         b->clearFileNamePatterns();
                         b->addFileNamePattern(npat);
                         b->openDirectory(dir);
-                        setState(m_state, *b);
+                        setState(m_state, m_translator, *b);
                         m_result.hasNewContent = true;
                         m_result.newWildcard = file;
                     } else {
@@ -236,11 +248,15 @@ namespace {
                         if (e->getFileType() == afl::io::DirectoryEntry::tDirectory) {
                             // It's a directory
                             b->openDirectory(e->getPathName());
-                            setState(m_state, *b);
+                            setState(m_state, m_translator, *b);
                             m_result.hasNewContent = true;
                         } else {
                             // Assume it's a file
-                            m_result.result = e->getPathName();
+                            if (!m_defaultExtension.empty()) {
+                                m_result.result = util::appendFileNameExtension(fs, e->getPathName(), m_defaultExtension, false);
+                            } else {
+                                m_result.result = e->getPathName();
+                            }
                         }
                     }
                 }
@@ -249,26 +265,34 @@ namespace {
         std::auto_ptr<DirectoryBrowser>& m_browser;
         String_t m_input;
         bool m_allowPattern;
+        String_t m_defaultExtension;
         FileSelectionDialog::State& m_state;
         FileSelectionDialog::Result& m_result;
+        afl::string::Translator& m_translator;
     };
 }
 
 
-client::dialogs::FileSelectionDialog::FileSelectionDialog(ui::Root& root, util::RequestSender<afl::io::FileSystem> fs, String_t title)
+client::dialogs::FileSelectionDialog::FileSelectionDialog(ui::Root& root, afl::string::Translator& tx, util::RequestSender<afl::io::FileSystem> fs, String_t title)
     : m_root(root),
+      m_translator(tx),
       m_fileSystem(fs),
       m_title(title),
       m_folderName(),
       m_pattern(util::FileNamePattern::getAllFilesPattern()),
+      m_defaultExtension(),
       m_contentOffset(0),
+      m_pHelpWidget(0),
       m_input(500, 20, root),
       m_crumbTrail(root.provider().getFont(gfx::FontRequest())->getCellSize().scaledBy(20, 1), root),
       m_fileList(2, 15, root),
       m_loop(root),
-      m_link(root),
+      m_link(root, tx),
       m_result(),
       m_browser()
+{ }
+
+client::dialogs::FileSelectionDialog::~FileSelectionDialog()
 { }
 
 void
@@ -288,6 +312,18 @@ void
 client::dialogs::FileSelectionDialog::setPattern(const String_t& pat)
 {
     m_pattern = pat;
+}
+
+void
+client::dialogs::FileSelectionDialog::setDefaultExtension(const String_t& defaultExtension)
+{
+    m_defaultExtension = defaultExtension;
+}
+
+void
+client::dialogs::FileSelectionDialog::setHelpWidget(ui::Widget& helpWidget)
+{
+    m_pHelpWidget = &helpWidget;
 }
 
 String_t
@@ -313,11 +349,8 @@ client::dialogs::FileSelectionDialog::run()
     afl::base::Deleter del;
     ui::Window& win = del.addNew(new ui::Window(m_title, m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
 
-    // FIXME: hotkey Alt-F for input line
-    // FIXME: hotkey backspace to go up
-
     ui::Group& g1 = del.addNew(new ui::Group(ui::layout::HBox::instance5));
-    g1.add(del.addNew(new ui::widgets::StaticText(_("File:"),
+    g1.add(del.addNew(new ui::widgets::StaticText(m_translator("File:"),
                                                   util::SkinColor::Static,
                                                   gfx::FontRequest().addSize(1),
                                                   m_root.provider())));
@@ -328,7 +361,10 @@ client::dialogs::FileSelectionDialog::run()
     win.add(ui::widgets::FrameGroup::wrapWidget(del, m_root.colorScheme(), ui::LoweredFrame, m_fileList));
     win.add(m_crumbTrail);
 
-    ui::widgets::StandardDialogButtons& btns = del.addNew(new ui::widgets::StandardDialogButtons(m_root));
+    ui::widgets::StandardDialogButtons& btns = del.addNew(new ui::widgets::StandardDialogButtons(m_root, m_translator));
+    if (m_pHelpWidget != 0) {
+        btns.addHelp(*m_pHelpWidget);
+    }
     win.add(btns);
 
     // Focus
@@ -368,7 +404,7 @@ void
 client::dialogs::FileSelectionDialog::init()
 {
     State state;
-    InitTask t(m_browser, m_folderName, m_pattern, state);
+    InitTask t(m_browser, m_folderName, m_pattern, state, m_translator);
     m_link.call(m_fileSystem, t);
     loadState(state);
 }
@@ -440,8 +476,11 @@ client::dialogs::FileSelectionDialog::handleUserInput(String_t name, bool allowP
 {
     State state;
     Result result;
-    InputTask t(m_browser, name, allowPattern, state, result);
+    InputTask t(m_browser, name, allowPattern, m_defaultExtension, state, result, m_translator);
     m_link.call(m_fileSystem, t);
+    if (const String_t* err = result.error.get()) {
+        ui::dialogs::MessageBox(*err, m_title, m_root).doOkDialog(m_translator);
+    }
     if (result.hasNewContent) {
         loadState(state);
     }
@@ -456,7 +495,7 @@ void
 client::dialogs::FileSelectionDialog::handleUp(size_t levels)
 {
     State state;
-    UpTask t(m_browser, levels, state);
+    UpTask t(m_browser, levels, state, m_translator);
     m_link.call(m_fileSystem, t);
     loadState(state);
 }
@@ -465,7 +504,7 @@ void
 client::dialogs::FileSelectionDialog::handleChangeDirectory(size_t index)
 {
     State state;
-    DownTask t(m_browser, index, state);
+    DownTask t(m_browser, index, state, m_translator);
     m_link.call(m_fileSystem, t);
     loadState(state);
 }

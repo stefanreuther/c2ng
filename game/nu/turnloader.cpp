@@ -187,10 +187,14 @@ namespace {
 
 game::nu::TurnLoader::TurnLoader(afl::base::Ref<GameState> gameState,
                                  afl::string::Translator& tx,
-                                 afl::sys::LogListener& log)
+                                 afl::sys::LogListener& log,
+                                 util::ProfileDirectory& profile,
+                                 afl::base::Ref<afl::io::Directory> defaultSpecificationDirectory)
     : m_gameState(gameState),
       m_translator(tx),
-      m_log(log)
+      m_log(log),
+      m_profile(profile),
+      m_defaultSpecificationDirectory(defaultSpecificationDirectory)
 { }
 
 game::nu::TurnLoader::~TurnLoader()
@@ -223,7 +227,7 @@ game::nu::TurnLoader::getPlayerStatus(int player, String_t& extra, afl::string::
 }
 
 void
-game::nu::TurnLoader::loadCurrentTurn(Turn& turn, Game& /*game*/, int player, Root& /*root*/, Session& /*session*/)
+game::nu::TurnLoader::loadCurrentTurn(Turn& turn, Game& game, int player, Root& /*root*/, Session& /*session*/)
 {
     // FIXME: validate player
 
@@ -272,6 +276,10 @@ game::nu::TurnLoader::loadCurrentTurn(Turn& turn, Game& /*game*/, int player, Ro
     // FIXME: loadCurrentDatabases()
     // must create all planets/ships before.
 
+    // expression lists
+    game.expressionLists().loadRecentFiles(m_profile, m_log, m_translator);
+    game.expressionLists().loadPredefinedFiles(m_profile, *m_defaultSpecificationDirectory, m_log, m_translator);
+
     loadPlanets(turn.universe(), rst("rst")("planets"), PlayerSet_t(player));
     loadStarbases(turn.universe(), rst("rst")("starbases"), PlayerSet_t(player));
     loadShips(turn.universe(), rst("rst")("ships"), PlayerSet_t(player));
@@ -284,10 +292,11 @@ game::nu::TurnLoader::saveCurrentTurn(const Turn& turn, const Game& game, int pl
 {
     // FIXME
     (void) turn;
-    (void) game;
     (void) player;
     (void) root;
     (void) session;
+
+    game.expressionLists().saveRecentFiles(m_profile, m_log, m_translator);
 }
 
 void

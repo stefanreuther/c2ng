@@ -33,8 +33,8 @@ namespace {
     struct TestHarness {
         game::config::HostConfiguration config;
         game::map::Planet planet;
-        game::map::PlanetStorage container;
         afl::string::NullTranslator tx;
+        game::map::PlanetStorage container;
 
         TestHarness();
     };
@@ -42,8 +42,8 @@ namespace {
     TestHarness::TestHarness()
         : config(),
           planet(99),
-          container(preparePlanet(planet), config),
-          tx()
+          tx(),
+          container(preparePlanet(planet), config, tx)
     {
         config.setDefaultValues();
     }

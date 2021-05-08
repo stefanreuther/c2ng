@@ -37,8 +37,7 @@ game::map::MinefieldType::erase(Id_t id)
     // ex accessor.pas:DeleteMinefield, sort-of
     if (Minefield* p = get(id)) {
         if (p->isValid()) {
-            p->erase();
-            sig_setChange.raise(0);
+            p->erase(&sig_setChange);
         }
     }
 }
@@ -64,14 +63,17 @@ game::map::MinefieldType::internalCheck(int currentTurn, const game::HostVersion
             // Erase it if
             // - it reports gone anyway (clean up if it has an inconsistent state)
             // - it has no units remaining
-            // - it was not seen this turn although we think it should
+            // - it was not scanned this turn although we think it should
+            //   (a minefield may be laid but immediately be swept; in this case, it's gone.)
             int owner;
             if (!mf->getOwner(owner)
                 || !mf->isValid()
                 || mf->getUnits() == 0
-                || (mf->getTurnLastSeen() < currentTurn && m_allMinefieldsKnown.contains(owner)))
+                || (m_allMinefieldsKnown.contains(owner)
+                    && (mf->getTurnLastSeen() < currentTurn
+                        || mf->getReason() < Minefield::MinefieldScanned)))
             {
-                mf->erase();
+                mf->erase(0);
             }
         }
     }

@@ -6,15 +6,16 @@
 #include "interpreter/bytecodeobject.hpp"
 
 #include "t_interpreter.hpp"
-#include "afl/data/stringvalue.hpp"
-#include "afl/string/format.hpp"
 #include "afl/data/integervalue.hpp"
-#include "interpreter/error.hpp"
+#include "afl/data/stringvalue.hpp"
 #include "afl/io/nullfilesystem.hpp"
+#include "afl/string/format.hpp"
+#include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
-#include "interpreter/world.hpp"
-#include "interpreter/values.hpp"
 #include "interpreter/compilationcontext.hpp"
+#include "interpreter/error.hpp"
+#include "interpreter/values.hpp"
+#include "interpreter/world.hpp"
 
 /** Test getter/setters. */
 void
@@ -452,8 +453,9 @@ TestInterpreterBytecodeObject::testVariableReference()
 
     // Environment
     afl::sys::Log log;
+    afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
-    interpreter::World world(log, fs);
+    interpreter::World world(log, tx, fs);
     world.setNewGlobalValue("G", interpreter::makeIntegerValue(1));
     world.setNewGlobalValue("S", interpreter::makeIntegerValue(2));
 
@@ -648,8 +650,9 @@ TestInterpreterBytecodeObject::testDisassembly()
 
     // Environment
     afl::sys::Log log;
+    afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
-    interpreter::World world(log, fs);
+    interpreter::World world(log, tx, fs);
     TS_ASSERT_EQUALS(world.globalPropertyNames().getIndexByName("A"), 0U);
 
     // Set up testee

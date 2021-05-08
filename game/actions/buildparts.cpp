@@ -12,8 +12,9 @@
 game::actions::BuildParts::BuildParts(game::map::Planet& planet,
                                       CargoContainer& container,
                                       game::spec::ShipList& shipList,
-                                      Root& root)
-    : BaseBuildAction(planet, container, shipList, root),
+                                      Root& root,
+                                      afl::string::Translator& tx)
+    : BaseBuildAction(planet, container, shipList, root, tx),
       m_elements(),
       m_pUniverse(0),
       conn_universeChange()
@@ -86,7 +87,7 @@ game::actions::BuildParts::getNumExistingParts(TechLevel area, int slot) const
 
 // Get current target number of parts.
 int
-game::actions::BuildParts::getParts(TechLevel area, int slot) const
+game::actions::BuildParts::getNumParts(TechLevel area, int slot) const
 {
     // ex GStarbaseBuildPartsAction::getTotalParts
     int numParts;

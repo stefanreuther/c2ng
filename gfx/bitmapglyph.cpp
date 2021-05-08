@@ -7,17 +7,6 @@
 #include "gfx/context.hpp"
 #include "gfx/canvas.hpp"
 
-// Construct an empty glyph of zero size.
-gfx::BitmapGlyph::BitmapGlyph()
-    : m_width(0),
-      m_height(0),
-      m_data(),
-      m_aaData()
-{
-    // ex GfxBitmapGlyph::GfxBitmapGlyph
-    // FIXME: do we need this signature?
-}
-
 // Construct a blank glyph of a given size.
 gfx::BitmapGlyph::BitmapGlyph(uint16_t width, uint16_t height)
     : m_width(width),
@@ -27,13 +16,14 @@ gfx::BitmapGlyph::BitmapGlyph(uint16_t width, uint16_t height)
 { }
 
 // Construct glyph from bitmap data.
-// FIXME: convert to ConstBytes_t
-gfx::BitmapGlyph::BitmapGlyph(uint16_t width, uint16_t height, const uint8_t* data)
+gfx::BitmapGlyph::BitmapGlyph(uint16_t width, uint16_t height, afl::base::ConstBytes_t data)
     : m_width(width),
       m_height(height),
-      m_data(data, data + getBytesForSize(width, height)),
+      m_data(getBytesForSize(width, height)),
       m_aaData()
-{ }
+{
+    afl::base::Bytes_t(m_data).copyFrom(data);
+}
 
 // Destructor.
 gfx::BitmapGlyph::~BitmapGlyph()

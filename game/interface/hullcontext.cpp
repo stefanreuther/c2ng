@@ -66,7 +66,7 @@ game::interface::HullContext::lookup(const afl::data::NameQuery& name, PropertyI
 }
 
 void
-game::interface::HullContext::set(PropertyIndex_t index, afl::data::Value* value)
+game::interface::HullContext::set(PropertyIndex_t index, const afl::data::Value* value)
 {
     if (game::spec::Hull* hull = m_shipList->hulls().get(m_number)) {
         switch (HullDomain(HULL_MAPPING[index].domain)) {

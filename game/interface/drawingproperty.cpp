@@ -3,9 +3,10 @@
   */
 
 #include "game/interface/drawingproperty.hpp"
-#include "interpreter/values.hpp"
+#include "afl/base/staticassert.hpp"
 #include "interpreter/arguments.hpp"
 #include "interpreter/error.hpp"
+#include "interpreter/values.hpp"
 
 using interpreter::makeIntegerValue;
 using interpreter::makeStringValue;
@@ -114,16 +115,18 @@ game::interface::getDrawingProperty(const game::map::Drawing& d, DrawingProperty
             <tr><tn>2</tn>              <td>Circle</td></tr>
             <tr><tn>3</tn>              <td>Marker</td></tr>
            </table> */
-        // GDrawingType intentionally matches the chartX.cc type tag,
-        // which is what PCC 1.x exposes to the script side, and so do we.
-        // FIXME: isolate representation
+        static_assert(Drawing::LineDrawing      == 0, "LineDrawing");
+        static_assert(Drawing::RectangleDrawing == 1, "RectangleDrawing");
+        static_assert(Drawing::CircleDrawing    == 2, "CircleDrawing");
+        static_assert(Drawing::MarkerDrawing    == 3, "MarkerDrawing");
+
         return makeIntegerValue(d.getType());
     }
     return 0;
 }
 
 void
-game::interface::setDrawingProperty(game::map::Drawing& d, DrawingProperty idp, afl::data::Value* value)
+game::interface::setDrawingProperty(game::map::Drawing& d, DrawingProperty idp, const afl::data::Value* value)
 {
     // ex setDrawingProperty
     int32_t i;
@@ -152,7 +155,7 @@ game::interface::setDrawingProperty(game::map::Drawing& d, DrawingProperty idp, 
         // case idpLocX: - FIXME: could be assignable 
         // case idpLocY: - FIXME: could be assignable
      case idpRadius:
-        if (checkIntegerArg(i, value, 1, 5000)) {
+        if (checkIntegerArg(i, value, 1, Drawing::MAX_CIRCLE_RADIUS)) {
             if (d.getType() != Drawing::CircleDrawing) {
                 throw interpreter::Error::notAssignable();
             }
@@ -161,7 +164,7 @@ game::interface::setDrawingProperty(game::map::Drawing& d, DrawingProperty idp, 
         }
         break;
      case idpShape:
-        if (checkIntegerArg(i, value, 0, 7 /*FIXME: NUM_USER_MARKERS-1*/)) {
+        if (checkIntegerArg(i, value, 0, Drawing::NUM_USER_MARKERS-1)) {
             if (d.getType() != Drawing::MarkerDrawing) {
                 throw interpreter::Error::notAssignable();
             }

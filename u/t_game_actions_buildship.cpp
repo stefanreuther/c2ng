@@ -30,6 +30,9 @@ namespace {
     const int TURN_NR = 12;
     const int PLANET_ID = 363;
 
+    const int HULL_TYPE = 9;
+    const int HULL_SLOT = 12;
+
     struct TestHarness {
         game::map::Universe univ;
         game::map::Planet& planet;
@@ -86,10 +89,6 @@ namespace {
         h.planet.addCurrentPlanetData(game::map::PlanetData(), game::PlayerSet_t(OWNER));
         h.planet.addCurrentBaseData(bd, game::PlayerSet_t(OWNER));
         h.planet.setOwner(OWNER);
-        h.planet.setBaseTechLevel(game::HullTech, 1);
-        h.planet.setBaseTechLevel(game::EngineTech, 1);
-        h.planet.setBaseTechLevel(game::BeamTech, 1);
-        h.planet.setBaseTechLevel(game::TorpedoTech, 1);
         h.planet.internalCheck(game::map::Configuration(), tx, log);
         h.planet.combinedCheck2(h.univ, game::PlayerSet_t(OWNER), TURN_NR);
         h.planet.setPlayability(game::map::Object::Playable);
@@ -97,39 +96,58 @@ namespace {
         // Define a number of components
         // - Hull #9
         {
-            game::spec::Hull* hh = h.shipList->hulls().create(9);
+            game::spec::Hull* hh = h.shipList->hulls().create(HULL_TYPE);
             hh->setTechLevel(2);
             hh->setNumEngines(3);
             hh->setMaxBeams(4);
             hh->setMaxLaunchers(5);
+            hh->setName("HH");
             hh->cost() = game::spec::Cost::fromString("10T 15$");
         }
         // - Engine #1-#9
         for (int i = 1; i <= 9; ++i) {
             game::spec::Engine* e = h.shipList->engines().create(i);
             e->setTechLevel(i);
+            e->setName("E");
             e->cost() = game::spec::Cost::fromString("1TDM 1$") * i;
         }
         // - Beam #1-#10
         for (int i = 1; i <= 10; ++i) {
             game::spec::Beam* b = h.shipList->beams().create(i);
             b->setTechLevel(i);
+            b->setName("B");
             b->cost() = game::spec::Cost::fromString("1M") * i;
         }
         // - Launcher #1-#10
         for (int i = 1; i <= 10; ++i) {
             game::spec::TorpedoLauncher* tl = h.shipList->launchers().create(i);
             tl->setTechLevel(i);
+            tl->setName("L");
             tl->cost() = game::spec::Cost::fromString("1M 10S") * i;
         }
         // - Hull association
-        h.shipList->hullAssignments().add(OWNER, 12, 9);
+        h.shipList->hullAssignments().add(OWNER, HULL_SLOT, HULL_TYPE);
+    }
+
+    void addExtraHull(TestHarness& h)
+    {
+        // - Hull #11
+        {
+            game::spec::Hull* hh = h.shipList->hulls().create(11);
+            hh->setTechLevel(5);
+            hh->setNumEngines(2);
+            hh->setMaxBeams(3);
+            hh->setMaxLaunchers(10);
+            hh->cost() = game::spec::Cost::fromString("20T");
+        }
+        h.shipList->hullAssignments().add(OWNER, 13, 11);
     }
 }
 
 
 /** Test failure.
-    If the planet has no base, constructing the action must fail. */
+    A: create planet with no base.
+    E: creation of BuildShip action fails with exception. */
 void
 TestGameActionsBuildShip::testError()
 {
@@ -141,14 +159,16 @@ TestGameActionsBuildShip::testError()
     h.planet.addCurrentPlanetData(game::map::PlanetData(), game::PlayerSet_t(7));
     h.planet.setOwner(7);
     h.planet.internalCheck(game::map::Configuration(), h.tx, log);
-    h.planet.combinedCheck2(h.univ, game::PlayerSet_t(7), 12);
+    h.planet.combinedCheck2(h.univ, game::PlayerSet_t(7), TURN_NR);
     h.planet.setPlayability(game::map::Object::Playable);
 
     game::test::CargoContainer container;
-    TS_ASSERT_THROWS((game::actions::BuildShip(h.planet, container, *h.shipList, *h.root)), game::Exception);
+    TS_ASSERT_THROWS((game::actions::BuildShip(h.planet, container, *h.shipList, *h.root, h.tx)), game::Exception);
 }
 
-/** Test success, simple case. */
+/** Test success, simple case.
+    A: create action.
+    E: correct initial build order chosen; can be committed correctly. */
 void
 TestGameActionsBuildShip::testSuccess()
 {
@@ -156,11 +176,11 @@ TestGameActionsBuildShip::testSuccess()
     prepare(h);
 
     game::test::CargoContainer container;
-    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root);
+    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root, h.tx);
 
     // Check initial build order selected by BuildShip:
     // Must have tech 1 components, hull #9 (slot #12).
-    TS_ASSERT_EQUALS(a.getBuildOrder().getHullIndex(), 9);
+    TS_ASSERT_EQUALS(a.getBuildOrder().getHullIndex(), HULL_TYPE);
     TS_ASSERT_EQUALS(a.getBuildOrder().getEngineType(), 1);
     TS_ASSERT_EQUALS(a.getBuildOrder().getBeamType(), 1);
     TS_ASSERT_EQUALS(a.getBuildOrder().getNumBeams(), 4);
@@ -178,14 +198,14 @@ TestGameActionsBuildShip::testSuccess()
 
     // Commit and verify result
     a.commit();
-    TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getHullIndex(), 12);
+    TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getHullIndex(), HULL_SLOT);
     TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getEngineType(), 1);
     TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getBeamType(), 1);
     TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getNumBeams(), 4);
     TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getLauncherType(), 1);
     TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getNumLaunchers(), 5);
 
-    TS_ASSERT_EQUALS(h.planet.getBaseStorage(game::HullTech,   12).orElse(0), 1);
+    TS_ASSERT_EQUALS(h.planet.getBaseStorage(game::HullTech, HULL_SLOT).orElse(0), 1);
     TS_ASSERT_EQUALS(h.planet.getBaseStorage(game::EngineTech,  1).orElse(0), 3);
     TS_ASSERT_EQUALS(h.planet.getBaseStorage(game::BeamTech,    1).orElse(0), 4);
     TS_ASSERT_EQUALS(h.planet.getBaseStorage(game::TorpedoTech, 1).orElse(0), 5);
@@ -193,7 +213,9 @@ TestGameActionsBuildShip::testSuccess()
     TS_ASSERT_EQUALS(h.planet.getBaseTechLevel(game::HullTech).orElse(0), 2);
 }
 
-/** Test building a ship with no beams. */
+/** Test building a ship with no beams.
+    A: create action. Set number of beams to zero. Commit.
+    E: beam type set to zero as well. */
 void
 TestGameActionsBuildShip::testNoBeams()
 {
@@ -201,7 +223,7 @@ TestGameActionsBuildShip::testNoBeams()
     prepare(h);
 
     game::test::CargoContainer container;
-    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root);
+    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root, h.tx);
 
     // Set number of beams to zero
     game::ShipBuildOrder sbo = a.getBuildOrder();
@@ -213,7 +235,7 @@ TestGameActionsBuildShip::testNoBeams()
 
     // Commit and verify result
     a.commit();
-    TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getHullIndex(), 12);
+    TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getHullIndex(), HULL_SLOT);
     TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getEngineType(), 1);
     TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getBeamType(), 0);      // <- also set to 0 by normalisation
     TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getNumBeams(), 0);
@@ -222,7 +244,8 @@ TestGameActionsBuildShip::testNoBeams()
 }
 
 /** Test building with initial tech levels.
-    This must select parts other than tech 1. */
+    A: create action on planet with tech levels other than 1.
+    E: initial build order chooses higher-tech components. */
 void
 TestGameActionsBuildShip::testInitialTech()
 {
@@ -237,11 +260,11 @@ TestGameActionsBuildShip::testInitialTech()
 
     // Make action
     game::test::CargoContainer container;
-    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root);
+    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root, h.tx);
 
     // Check initial build order selected by BuildShip:
     // Must have selected components according to tech levels
-    TS_ASSERT_EQUALS(a.getBuildOrder().getHullIndex(), 9);
+    TS_ASSERT_EQUALS(a.getBuildOrder().getHullIndex(), HULL_TYPE);
     TS_ASSERT_EQUALS(a.getBuildOrder().getEngineType(), 3);
     TS_ASSERT_EQUALS(a.getBuildOrder().getBeamType(), 4);
     TS_ASSERT_EQUALS(a.getBuildOrder().getNumBeams(), 4);
@@ -257,7 +280,9 @@ TestGameActionsBuildShip::testInitialTech()
     TS_ASSERT_EQUALS(a.costAction().getCost().toCargoSpecString(), "19T 9D 50M 250S 24$");
 }
 
-/** Test building with included tech upgrade. */
+/** Test building with included tech upgrade.
+    A: select components with tech levels higher than base has.
+    E: tech levels included in cost. Committing increases tech. */
 void
 TestGameActionsBuildShip::testTechUpgrade()
 {
@@ -265,7 +290,7 @@ TestGameActionsBuildShip::testTechUpgrade()
     prepare(h);
 
     game::test::CargoContainer container;
-    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root);
+    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root, h.tx);
 
     // Set component types
     game::ShipBuildOrder sbo = a.getBuildOrder();
@@ -288,14 +313,14 @@ TestGameActionsBuildShip::testTechUpgrade()
 
     // Commit and verify result
     a.commit();
-    TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getHullIndex(), 12);
+    TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getHullIndex(), HULL_SLOT);
     TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getEngineType(), 2);
     TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getBeamType(), 3);
     TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getNumBeams(), 4);
     TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getLauncherType(), 4);
     TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getNumLaunchers(), 5);
 
-    TS_ASSERT_EQUALS(h.planet.getBaseStorage(game::HullTech,   12).orElse(0), 1);
+    TS_ASSERT_EQUALS(h.planet.getBaseStorage(game::HullTech, HULL_SLOT).orElse(0), 1);
     TS_ASSERT_EQUALS(h.planet.getBaseStorage(game::EngineTech,  2).orElse(0), 3);
     TS_ASSERT_EQUALS(h.planet.getBaseStorage(game::BeamTech,    3).orElse(0), 4);
     TS_ASSERT_EQUALS(h.planet.getBaseStorage(game::TorpedoTech, 4).orElse(0), 5);
@@ -307,7 +332,8 @@ TestGameActionsBuildShip::testTechUpgrade()
 }
 
 /** Test tech upgrade failure.
-    If we attempt to build a component with a disallowed tech level, commit must fail. */
+    A: select component that requires disallowed tech level.
+    E: status reported as failure. Commit fails with exception. */
 void
 TestGameActionsBuildShip::testTechUpgradeFail()
 {
@@ -315,7 +341,7 @@ TestGameActionsBuildShip::testTechUpgradeFail()
     prepare(h);
 
     game::test::CargoContainer container;
-    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root);
+    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root, h.tx);
 
     // Set component types: try tech 9, but our key only allows tech 5.
     game::ShipBuildOrder sbo = a.getBuildOrder();
@@ -332,7 +358,8 @@ TestGameActionsBuildShip::testTechUpgradeFail()
 }
 
 /** Test using parts from storage.
-    If we have plenty parts, cost must be computed as zero. */
+    A: place parts in storage. Enable isUsePartsFromStorage.
+    E: cost reported as zero. */
 void
 TestGameActionsBuildShip::testUseParts()
 {
@@ -340,13 +367,13 @@ TestGameActionsBuildShip::testUseParts()
     prepare(h);
 
     // Put some components into storage
-    h.planet.setBaseStorage(game::HullTech,   12, 10);
+    h.planet.setBaseStorage(game::HullTech, HULL_SLOT, 10);
     h.planet.setBaseStorage(game::EngineTech,  1, 10);
     h.planet.setBaseStorage(game::BeamTech,    1, 10);
     h.planet.setBaseStorage(game::TorpedoTech, 1, 10);
 
     game::test::CargoContainer container;
-    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root);
+    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root, h.tx);
 
     // Initial state: do not use parts from storage
     TS_ASSERT_EQUALS(a.isUsePartsFromStorage(), false);
@@ -358,7 +385,8 @@ TestGameActionsBuildShip::testUseParts()
 }
 
 /** Test using parts from storage.
-    If we have some parts, only the missing ones are built. */
+    A: place some parts in storage. Enable isUsePartsFromStorage.
+    E: cost reports only the missing parts. */
 void
 TestGameActionsBuildShip::testUsePartsPartial()
 {
@@ -366,13 +394,13 @@ TestGameActionsBuildShip::testUsePartsPartial()
     prepare(h);
 
     // Put some components into storage
-    h.planet.setBaseStorage(game::HullTech,   12, 1);
+    h.planet.setBaseStorage(game::HullTech, HULL_SLOT, 1);
     h.planet.setBaseStorage(game::EngineTech,  1, 1);
     h.planet.setBaseStorage(game::BeamTech,    1, 1);
     h.planet.setBaseStorage(game::TorpedoTech, 1, 1);
 
     game::test::CargoContainer container;
-    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root);
+    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root, h.tx);
 
     // Initial state: do not use parts from storage
     TS_ASSERT_EQUALS(a.isUsePartsFromStorage(), false);
@@ -388,14 +416,14 @@ TestGameActionsBuildShip::testUsePartsPartial()
 
     // Commit and verify result
     a.commit();
-    TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getHullIndex(), 12);
+    TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getHullIndex(), HULL_SLOT);
     TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getEngineType(), 1);
     TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getBeamType(), 1);
     TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getNumBeams(), 4);
     TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getLauncherType(), 1);
     TS_ASSERT_EQUALS(h.planet.getBaseBuildOrder().getNumLaunchers(), 5);
 
-    TS_ASSERT_EQUALS(h.planet.getBaseStorage(game::HullTech,   12).orElse(0), 1);
+    TS_ASSERT_EQUALS(h.planet.getBaseStorage(game::HullTech, HULL_SLOT).orElse(0), 1);
     TS_ASSERT_EQUALS(h.planet.getBaseStorage(game::EngineTech,  1).orElse(0), 3);
     TS_ASSERT_EQUALS(h.planet.getBaseStorage(game::BeamTech,    1).orElse(0), 4);
     TS_ASSERT_EQUALS(h.planet.getBaseStorage(game::TorpedoTech, 1).orElse(0), 5);
@@ -405,7 +433,8 @@ TestGameActionsBuildShip::testUsePartsPartial()
 }
 
 /** Test pre-existing build order.
-    That one must be re-used and completed. */
+    A: create BuildShip action on planet with pre-existing build order.
+    E: build order correctly loaded as default; unused components correctly selected */
 void
 TestGameActionsBuildShip::testPreexistingOrder()
 {
@@ -413,7 +442,7 @@ TestGameActionsBuildShip::testPreexistingOrder()
     prepare(h);
 
     // Put some components into storage
-    h.planet.setBaseStorage(game::HullTech,   12, 10);
+    h.planet.setBaseStorage(game::HullTech, HULL_SLOT, 10);
     h.planet.setBaseStorage(game::EngineTech,  2, 10);
     h.planet.setBaseStorage(game::BeamTech,    4, 10);
 
@@ -423,7 +452,7 @@ TestGameActionsBuildShip::testPreexistingOrder()
     // Set build order
     {
         game::ShipBuildOrder sbo;
-        sbo.setHullIndex(12);
+        sbo.setHullIndex(HULL_SLOT);
         sbo.setEngineType(2);
         sbo.setBeamType(4);
         sbo.setNumBeams(1);
@@ -434,15 +463,375 @@ TestGameActionsBuildShip::testPreexistingOrder()
 
     // Create action
     game::test::CargoContainer container;
-    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root);
+    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root, h.tx);
 
     // Verify initial order
-    TS_ASSERT_EQUALS(a.getBuildOrder().getHullIndex(), 9);
+    TS_ASSERT_EQUALS(a.getBuildOrder().getHullIndex(), HULL_TYPE);
     TS_ASSERT_EQUALS(a.getBuildOrder().getEngineType(), 2);
     TS_ASSERT_EQUALS(a.getBuildOrder().getBeamType(), 4);
     TS_ASSERT_EQUALS(a.getBuildOrder().getNumBeams(), 1);
     TS_ASSERT_EQUALS(a.getBuildOrder().getLauncherType(), 7);
     TS_ASSERT_EQUALS(a.getBuildOrder().getNumLaunchers(), 0);
     TS_ASSERT(a.isUsePartsFromStorage());
+    TS_ASSERT(!a.isChange());
+
+    // Change must be registered as such
+    a.setPart(game::BeamTech, 2);
+    TS_ASSERT(a.isChange());
 }
 
+/** Test foreign ship.
+    A: attempt to build a ship we cannot build.
+    E: building must not succeed. */
+void
+TestGameActionsBuildShip::testForeignShip()
+{
+    TestHarness h;
+    prepare(h);
+
+    // Create another hull that is not linked in hullAssignments
+    game::spec::Hull* hh = h.shipList->hulls().create(10);
+    hh->setName("EX");
+    hh->setTechLevel(2);
+    hh->setNumEngines(3);
+    hh->setMaxBeams(4);
+    hh->setMaxLaunchers(5);
+    hh->cost() = game::spec::Cost::fromString("100T 150$");
+
+    game::test::CargoContainer container;
+    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root, h.tx);
+
+    // Check initial build order selected by BuildShip: must have hull 9
+    game::ShipBuildOrder order = a.getBuildOrder();
+    TS_ASSERT_EQUALS(order.getHullIndex(), HULL_TYPE);
+
+    // Change to hull 10
+    order.setHullIndex(10);
+    a.setBuildOrder(order);
+
+    // Verify cost:
+    //  Hull           100T         150$
+    //  Tech upgrade:               100$
+    //  Engines (3):     3T  3D  3M   3$
+    //  Beams (4):               4M
+    //  Launchers (5):           5M      50S
+    // Total:          103T  3D 12M 253$ 50S
+    TS_ASSERT_EQUALS(a.costAction().getCost().toCargoSpecString(), "103T 3D 12M 50S 253$");
+
+    // Verify cost summary
+    game::spec::CostSummary summary;
+    a.getCostSummary(summary);
+
+    TS_ASSERT_EQUALS(summary.getNumItems(), 5U);
+    const game::spec::CostSummary::Item* p;
+
+    p = summary.get(0);
+    TS_ASSERT(p != 0);
+    TS_ASSERT_EQUALS(p->multiplier, 1);
+    TS_ASSERT_EQUALS(p->name, "Hull tech upgrade");
+    TS_ASSERT_EQUALS(p->cost.toCargoSpecString(), "100$");
+
+    p = summary.get(1);
+    TS_ASSERT(p != 0);
+    TS_ASSERT_EQUALS(p->multiplier, 1);
+    TS_ASSERT_EQUALS(p->name, "EX");
+    TS_ASSERT_EQUALS(p->cost.toCargoSpecString(), "100T 150$");
+
+    // Commit must fail
+    TS_ASSERT_EQUALS(a.getStatus(), game::actions::BaseBuildAction::ForeignHull);
+    TS_ASSERT_THROWS(a.commit(), game::Exception);
+}
+
+/** Test tech upgrade disabled.
+    A: select build order that requires tech upgrade. Disable tech upgrades.
+    E: building must not succeed. */
+void
+TestGameActionsBuildShip::testTechDisabled()
+{
+    TestHarness h;
+    prepare(h);
+
+    game::test::CargoContainer container;
+    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root, h.tx);
+
+    // Set component types (same as testTechUpgrade)
+    game::ShipBuildOrder sbo = a.getBuildOrder();
+    sbo.setEngineType(2);
+    sbo.setBeamType(3);
+    sbo.setLauncherType(4);
+    a.setBuildOrder(sbo);
+
+    // Verify cost:
+    //  Hull            10T           15$
+    //    Upgrade:                   100$
+    //  Engines (3):     6T  6D  6M    6$
+    //    Upgrade:                   100$
+    //  Beams (4):              12M
+    //    Upgrade:                   300$
+    //  Launchers (5):          20M      200S
+    //    Upgrade:                   600$
+    // Total:           16T  6D 38M 1121$ 200S
+    TS_ASSERT_EQUALS(a.costAction().getCost().toCargoSpecString(), "16T 6D 38M 200S 1121$");
+    TS_ASSERT_EQUALS(a.getStatus(), game::actions::BaseBuildAction::Success);
+
+    // Disable
+    a.setUseTechUpgrade(false);
+    TS_ASSERT_EQUALS(a.costAction().getCost().toCargoSpecString(), "16T 6D 38M 200S 21$");
+    TS_ASSERT_EQUALS(a.getStatus(), game::actions::BaseBuildAction::DisabledTech);
+
+    // Commit must fail
+    TS_ASSERT_THROWS(a.commit(), game::Exception);
+}
+
+/** Test modification of build order.
+    A: create BuildShip action. Use partial modifiers (setPart etc.).
+    E: modifications correctly executed */
+void
+TestGameActionsBuildShip::testModify()
+{
+    TestHarness h;
+    prepare(h);
+    addExtraHull(h);
+
+    // Make action
+    game::test::CargoContainer container;
+    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root, h.tx);
+
+    // Check initial build order selected by BuildShip:
+    // Must have tech 1 components, hull #9 (slot #12).
+    // [same as testSuccess]
+    TS_ASSERT_EQUALS(a.getBuildOrder().getHullIndex(), HULL_TYPE);
+    TS_ASSERT_EQUALS(a.getBuildOrder().getEngineType(), 1);
+    TS_ASSERT_EQUALS(a.getBuildOrder().getBeamType(), 1);
+    TS_ASSERT_EQUALS(a.getBuildOrder().getNumBeams(), 4);
+    TS_ASSERT_EQUALS(a.getBuildOrder().getLauncherType(), 1);
+    TS_ASSERT_EQUALS(a.getBuildOrder().getNumLaunchers(), 5);
+
+    // Modify components
+    a.setPart(game::BeamTech, 4);
+    a.setPart(game::TorpedoTech, 5);
+    a.setNumParts(game::actions::BuildShip::BeamWeapon, 2);
+    a.setNumParts(game::actions::BuildShip::TorpedoWeapon, 1);
+    a.setPart(game::EngineTech, 6);
+
+    // Verify
+    TS_ASSERT_EQUALS(a.getBuildOrder().getHullIndex(), HULL_TYPE);
+    TS_ASSERT_EQUALS(a.getBuildOrder().getEngineType(), 6);
+    TS_ASSERT_EQUALS(a.getBuildOrder().getBeamType(), 4);
+    TS_ASSERT_EQUALS(a.getBuildOrder().getNumBeams(), 2);
+    TS_ASSERT_EQUALS(a.getBuildOrder().getLauncherType(), 5);
+    TS_ASSERT_EQUALS(a.getBuildOrder().getNumLaunchers(), 1);
+
+    // Maximize counts
+    a.addParts(game::actions::BuildShip::BeamWeapon, 100);
+    a.addParts(game::actions::BuildShip::TorpedoWeapon, 100);
+    TS_ASSERT_EQUALS(a.getBuildOrder().getNumBeams(), 4);
+    TS_ASSERT_EQUALS(a.getBuildOrder().getNumLaunchers(), 5);
+
+    // Change hull
+    a.setPart(game::HullTech, 11);
+    TS_ASSERT_EQUALS(a.getBuildOrder().getHullIndex(), 11);
+    TS_ASSERT_EQUALS(a.getBuildOrder().getEngineType(), 6);   // unchanged
+    TS_ASSERT_EQUALS(a.getBuildOrder().getBeamType(), 4);     // unchanged
+    TS_ASSERT_EQUALS(a.getBuildOrder().getNumBeams(), 3);
+    TS_ASSERT_EQUALS(a.getBuildOrder().getLauncherType(), 5); // unchanged
+    TS_ASSERT_EQUALS(a.getBuildOrder().getNumLaunchers(), 10);
+}
+
+/** Test use of invalid Ids.
+    A: set invalid Id using setPart().
+    E: must throw when trying to set an invalid component; must NOT throw when later accessing something unrelated */
+void
+TestGameActionsBuildShip::testBadId()
+{
+    TestHarness h;
+    prepare(h);
+    game::test::CargoContainer container;
+
+    {
+        game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root, h.tx);
+        TS_ASSERT_THROWS(a.setPart(game::HullTech, 77), std::exception);
+        TS_ASSERT_THROWS_NOTHING(a.setPart(game::BeamTech, 9));
+    }
+
+    {
+        game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root, h.tx);
+        TS_ASSERT_THROWS(a.setPart(game::EngineTech, 77), std::exception);
+        TS_ASSERT_THROWS_NOTHING(a.setPart(game::BeamTech, 9));
+    }
+
+    {
+        game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root, h.tx);
+        TS_ASSERT_THROWS(a.setPart(game::BeamTech, 77), std::exception);
+        TS_ASSERT_THROWS_NOTHING(a.setPart(game::EngineTech, 9));
+    }
+
+    {
+        game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root, h.tx);
+        TS_ASSERT_THROWS(a.setPart(game::TorpedoTech, 77), std::exception);
+        TS_ASSERT_THROWS_NOTHING(a.setPart(game::EngineTech, 9));
+    }
+}
+
+/** Test bad precondition: hull.
+    A: create planet with invalid hull slot in its build order. Create BuildShip action.
+    E: action created successfully, valid hull chosen */
+void
+TestGameActionsBuildShip::testBadHull()
+{
+    TestHarness h;
+    prepare(h);
+    game::test::CargoContainer container;
+
+    game::ShipBuildOrder o;
+    o.setHullIndex(30);          // Invalid index
+    o.setEngineType(9);
+    h.planet.setBaseBuildOrder(o);
+    
+    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root, h.tx);
+
+    TS_ASSERT_EQUALS(a.getBuildOrder().getHullIndex(), HULL_TYPE);
+}
+
+/** Test bad precondition: engine.
+    A: create planet with invalid engine in its build order. Create BuildShip action.
+    E: action created successfully, valid engine chosen */
+void
+TestGameActionsBuildShip::testBadEngine()
+{
+    TestHarness h;
+    prepare(h);
+    game::test::CargoContainer container;
+
+    game::ShipBuildOrder o;
+    o.setHullIndex(HULL_SLOT);
+    o.setEngineType(19);       // Invalid type
+    h.planet.setBaseBuildOrder(o);
+    
+    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root, h.tx);
+
+    TS_ASSERT_EQUALS(a.getBuildOrder().getEngineType(), 1);
+}
+
+/** Test bad precondition: beam.
+    A: create planet with invalid beam in its build order. Create BuildShip action.
+    E: action created successfully, valid beam chosen */
+void
+TestGameActionsBuildShip::testBadBeam()
+{
+    TestHarness h;
+    prepare(h);
+    game::test::CargoContainer container;
+
+    game::ShipBuildOrder o;
+    o.setHullIndex(HULL_SLOT);
+    o.setEngineType(9);
+    o.setNumBeams(1);
+    o.setBeamType(20);        // Invalid type
+    h.planet.setBaseBuildOrder(o);
+    
+    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root, h.tx);
+
+    TS_ASSERT_EQUALS(a.getBuildOrder().getBeamType(), 1);
+}
+
+/** Test bad precondition: torpedo launcher.
+    A: create planet with invalid torpedo launcherin its build order. Create BuildShip action.
+    E: action created successfully, valid launcher chosen */
+void
+TestGameActionsBuildShip::testBadLauncher()
+{
+    TestHarness h;
+    prepare(h);
+    game::test::CargoContainer container;
+
+    game::ShipBuildOrder o;
+    o.setHullIndex(HULL_SLOT);
+    o.setEngineType(9);
+    o.setNumLaunchers(1);
+    o.setLauncherType(20);        // Invalid type
+    h.planet.setBaseBuildOrder(o);
+    
+    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root, h.tx);
+
+    TS_ASSERT_EQUALS(a.getBuildOrder().getLauncherType(), 1);
+}
+
+/** Test cost summary.
+    A: create an interesting build order (same as testUsePartsPartial).
+    E: verify correct details generated */
+void
+TestGameActionsBuildShip::testCostSummary()
+{
+    TestHarness h;
+    prepare(h);
+
+    // Put some components into storage
+    h.planet.setBaseStorage(game::HullTech, HULL_SLOT, 1);
+    h.planet.setBaseStorage(game::EngineTech,  1, 1);
+    h.planet.setBaseStorage(game::BeamTech,    1, 1);
+    h.planet.setBaseStorage(game::TorpedoTech, 1, 1);
+
+    game::test::CargoContainer container;
+    game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root, h.tx);
+
+    // Initial state: do not use parts from storage
+    a.setUsePartsFromStorage(true);
+    TS_ASSERT_EQUALS(a.costAction().getCost().toCargoSpecString(), "2T 2D 9M 40S 2$");
+
+    // Verify cost summary
+    //   1x From storage: hull
+    //   2x Engine
+    //   1x From storage: engine
+    //   3x Beam
+    //   1x From storage: beam
+    //   4x Launcher
+    //   1x From storage: launcher
+    game::spec::CostSummary summary;
+    a.getCostSummary(summary);
+
+    TS_ASSERT_EQUALS(summary.getNumItems(), 7U);
+
+    const game::spec::CostSummary::Item* p;
+    p = summary.get(0);
+    TS_ASSERT(p != 0);
+    TS_ASSERT_EQUALS(p->multiplier, 1);
+    TS_ASSERT_EQUALS(p->name, "From storage: HH");
+    TS_ASSERT_EQUALS(p->cost.isZero(), true);
+
+    p = summary.get(1);
+    TS_ASSERT(p != 0);
+    TS_ASSERT_EQUALS(p->multiplier, 2);
+    TS_ASSERT_EQUALS(p->name, "E");
+    TS_ASSERT_EQUALS(p->cost.toCargoSpecString(), "2TDM 2$");
+
+    p = summary.get(2);
+    TS_ASSERT(p != 0);
+    TS_ASSERT_EQUALS(p->multiplier, 1);
+    TS_ASSERT_EQUALS(p->name, "From storage: E");
+    TS_ASSERT_EQUALS(p->cost.isZero(), true);
+
+    p = summary.get(3);
+    TS_ASSERT(p != 0);
+    TS_ASSERT_EQUALS(p->multiplier, 3);
+    TS_ASSERT_EQUALS(p->name, "B");
+    TS_ASSERT_EQUALS(p->cost.toCargoSpecString(), "3M");
+
+    p = summary.get(4);
+    TS_ASSERT(p != 0);
+    TS_ASSERT_EQUALS(p->multiplier, 1);
+    TS_ASSERT_EQUALS(p->name, "From storage: B");
+    TS_ASSERT_EQUALS(p->cost.isZero(), true);
+
+    p = summary.get(5);
+    TS_ASSERT(p != 0);
+    TS_ASSERT_EQUALS(p->multiplier, 4);
+    TS_ASSERT_EQUALS(p->name, "L");
+    TS_ASSERT_EQUALS(p->cost.toCargoSpecString(), "4M 40S");
+
+    p = summary.get(6);
+    TS_ASSERT(p != 0);
+    TS_ASSERT_EQUALS(p->multiplier, 1);
+    TS_ASSERT_EQUALS(p->name, "From storage: L");
+    TS_ASSERT_EQUALS(p->cost.isZero(), true);
+}

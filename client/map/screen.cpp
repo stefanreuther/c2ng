@@ -6,6 +6,8 @@
 #include "client/map/screen.hpp"
 #include "afl/string/format.hpp"
 #include "afl/sys/mutexguard.hpp"
+#include "client/map/keymapoverlay.hpp"
+#include "client/map/messageoverlay.hpp"
 #include "client/map/prefixoverlay.hpp"
 #include "client/map/starchartoverlay.hpp"
 #include "client/si/contextprovider.hpp"
@@ -103,23 +105,17 @@ class client::map::Screen::SharedState : public afl::base::RefCounted {
 };
 
 
-class client::map::Screen::Properties : public util::SlaveObject<game::Session>,
-                                        public game::interface::UserInterfacePropertyAccessor
-{
+class client::map::Screen::Properties : public game::interface::UserInterfacePropertyAccessor {
  public:
-    Properties(afl::base::Ref<SharedState> sharedState)
+    Properties(game::Session& session, afl::base::Ref<SharedState> sharedState)
         : m_sharedState(sharedState),
-          m_pSession(0)
-        { }
-    virtual void init(game::Session& master)
+          m_session(session)
         {
-            m_pSession = &master;
-            master.uiPropertyStack().add(*this);
+            m_session.uiPropertyStack().add(*this);
         }
-    virtual void done(game::Session& master)
+    virtual ~Properties()
         {
-            m_pSession = 0;
-            master.uiPropertyStack().remove(*this);
+            m_session.uiPropertyStack().remove(*this);
         }
 
     virtual bool get(game::interface::UserInterfaceProperty prop, std::auto_ptr<afl::data::Value>& result)
@@ -153,7 +149,7 @@ class client::map::Screen::Properties : public util::SlaveObject<game::Session>,
             }
             return false;
         }
-    virtual bool set(game::interface::UserInterfaceProperty prop, afl::data::Value* p)
+    virtual bool set(game::interface::UserInterfaceProperty prop, const afl::data::Value* p)
         {
             // ex StarchartWidget::setProperty
             int32_t iv;
@@ -177,16 +173,27 @@ class client::map::Screen::Properties : public util::SlaveObject<game::Session>,
     void setPosition(game::map::Point pt)
         {
             m_sharedState->setPosition(pt);
-            if (m_pSession != 0) {
-                if (game::Game* pGame = m_pSession->getGame().get()) {
-                    pGame->cursors().location().set(pt);
-                }
+            if (game::Game* pGame = m_session.getGame().get()) {
+                pGame->cursors().location().set(pt);
             }
         }
  private:
     afl::base::Ref<SharedState> m_sharedState;
-    game::Session* m_pSession;
+    game::Session& m_session;
 };
+
+
+class client::map::Screen::PropertiesFromSession : public afl::base::Closure<Properties*(game::Session&)> {
+ public:
+    PropertiesFromSession(const afl::base::Ref<SharedState>& sharedState)
+        : m_sharedState(sharedState)
+        { }
+    virtual Properties* call(game::Session& session)
+        { return new Properties(session, m_sharedState); }
+ private:
+    afl::base::Ref<SharedState> m_sharedState;
+};
+
 
 
 client::map::Screen::Screen(client::si::UserSide& userSide,
@@ -208,7 +215,8 @@ client::map::Screen::Screen(client::si::UserSide& userSide,
       m_refListProxy(gameSender, root.engine().dispatcher()),
       m_keymapProxy(gameSender, root.engine().dispatcher()),
       m_observerProxy(gameSender),
-      m_propertyProxy(gameSender, new Properties(m_sharedState)),
+      m_drawingProxy(gameSender, root.engine().dispatcher()),
+      m_propertyProxy(gameSender.makeTemporary(new PropertiesFromSession(m_sharedState))),
       m_refList(),
       m_currentObject(),
       m_viewName(),
@@ -233,7 +241,7 @@ client::map::Screen::Screen(client::si::UserSide& userSide,
 
     // Initialize
     setContextFromObject();
-    setNewOverlay(BaseLayer, new StarchartOverlay(m_root, m_location, *this, gameSender));
+    setNewOverlay(BaseLayer, new StarchartOverlay(m_root, tx, m_location, *this, gameSender));
 }
 
 client::map::Screen::~Screen()
@@ -322,6 +330,16 @@ client::map::Screen::handleMouse(gfx::Point /*pt*/, MouseButtons_t /*pressedButt
 bool
 client::map::Screen::handleMouseRelative(gfx::Point pt, MouseButtons_t pressedButtons)
 {
+    // Clicking closes message (UI.Overlay) and prefix (prefix, UseKeymap) overlays
+    if (!pressedButtons.empty()) {
+        if (m_overlays[PrefixLayer].get() != 0) {
+            setNewOverlay(PrefixLayer, 0);
+        }
+        if (m_overlays[MessageLayer].get() != 0) {
+            setNewOverlay(MessageLayer, 0);
+        }
+    }
+
     m_location.moveRelative(m_widget.renderer().unscale(pt.getX()), -m_widget.renderer().unscale(pt.getY()));
     if (pressedButtons.contains(LeftButton)) {
         // ...
@@ -333,13 +351,13 @@ client::map::Screen::handleMouseRelative(gfx::Point pt, MouseButtons_t pressedBu
 }
 
 void
-client::map::Screen::handleStateChange(client::si::UserSide& ui, client::si::RequestLink2 link, client::si::OutputState::Target target)
+client::map::Screen::handleStateChange(client::si::RequestLink2 link, client::si::OutputState::Target target)
 {
     using client::si::OutputState;
     switch (target) {
      case OutputState::NoChange:
      case OutputState::Starchart:
-        ui.continueProcess(link);
+        interface().continueProcess(link);
         break;
 
      case OutputState::ShipScreen:
@@ -351,7 +369,7 @@ client::map::Screen::handleStateChange(client::si::UserSide& ui, client::si::Req
      case OutputState::ExitProgram:
      case OutputState::ExitGame:
      case OutputState::PlayerScreen:
-        ui.detachProcess(link);
+        interface().detachProcess(link);
         m_outputState.set(link, target);
         m_stopped = true;
         break;
@@ -359,20 +377,20 @@ client::map::Screen::handleStateChange(client::si::UserSide& ui, client::si::Req
 }
 
 void
-client::map::Screen::handleEndDialog(client::si::UserSide& ui, client::si::RequestLink2 link, int /*code*/)
+client::map::Screen::handleEndDialog(client::si::RequestLink2 link, int /*code*/)
 {
     // This is not a dialog, just proceed the process
-    ui.continueProcess(link);
+    interface().continueProcess(link);
 }
 
 void
-client::map::Screen::handlePopupConsole(client::si::UserSide& ui, client::si::RequestLink2 link)
+client::map::Screen::handlePopupConsole(client::si::RequestLink2 link)
 {
-    defaultHandlePopupConsole(ui, link);
+    defaultHandlePopupConsole(link);
 }
 
 void
-client::map::Screen::handleSetViewRequest(client::si::UserSide& ui, client::si::RequestLink2 link, String_t name, bool withKeymap)
+client::map::Screen::handleSetViewRequest(client::si::RequestLink2 link, String_t name, bool withKeymap)
 {
     setViewName(name);
     if (name.empty()) {
@@ -383,7 +401,23 @@ client::map::Screen::handleSetViewRequest(client::si::UserSide& ui, client::si::
             setKeymapName(name);
         }
     }
-    ui.continueProcess(link);
+    interface().continueProcess(link);
+}
+
+void
+client::map::Screen::handleUseKeymapRequest(client::si::RequestLink2 link, String_t name, int prefix)
+{
+    // ex WKeymapChartMode::startKeymapMode (sort-of)
+    setNewOverlay(PrefixLayer, new KeymapOverlay(*this, name, prefix));
+    interface().continueProcess(link);
+}
+
+void
+client::map::Screen::handleOverlayMessageRequest(client::si::RequestLink2 link, String_t text)
+{
+    // ex WMessageChartMode::showMessage (sort-of)
+    setNewOverlay(MessageLayer, new MessageOverlay(*this, text));
+    interface().continueProcess(link);
 }
 
 client::si::ContextProvider*
@@ -417,8 +451,6 @@ client::map::Screen::updateObjectList()
                 }
                 obs.setList(list);
             }
-        virtual Initializer* clone() const
-            { return new Initializer(*this); }
      private:
         game::map::Point m_pos;
     };
@@ -536,7 +568,7 @@ client::map::Screen::drawObjectList(gfx::Canvas& can)
                 int annotationWidth = std::min(area.getWidth(), font->getTextWidth(annotation) + 5);
                 ctx.useFont(*font);
                 ctx.setColor(util::SkinColor::Static);
-                ctx.setTextAlign(2, 0);
+                ctx.setTextAlign(gfx::RightAlign, gfx::TopAlign);
                 outText(ctx, gfx::Point(area.getRightX(), area.getTopY()), annotation);
                 area.setWidth(area.getWidth() - annotationWidth);
             }
@@ -581,6 +613,17 @@ client::map::Screen::setNewOverlay(Layer layer, Overlay* pOverlay)
         }
     }
     requestRedraw();
+}
+
+void
+client::map::Screen::removeOverlay(Overlay* pOverlay)
+{
+    for (size_t i = 0; i < NUM_LAYERS; ++i) {
+        if (m_overlays[i].get() == pOverlay) {
+            setNewOverlay(Layer(i), 0);
+            break;
+        }
+    }
 }
 
 void
@@ -743,7 +786,7 @@ client::map::Screen::setViewName(const String_t& name)
         client::widgets::KeymapWidget& keys = m_tileHolder.addNew(new client::widgets::KeymapWidget(m_gameSender, m_root.engine().dispatcher(), *this));
 
         // Build tiles
-        client::tiles::TileFactory(m_root, interface(), keys, m_observerProxy)
+        client::tiles::TileFactory(m_root, interface(), translator(), keys, m_observerProxy)
             .createLayout(m_tileContainer, m_viewName, m_tileHolder);
 
         // Place it

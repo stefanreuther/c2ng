@@ -41,30 +41,77 @@ namespace {
         }
     }
 
-    // /** Manipulating: Postprocess a fleet. This will remove all fleet members that do not
-    //     exist anymore. It will also synchronize the waypoints. */
+    /* Postprocess a fleet. */
     void postprocessFleet(game::map::Universe& univ, game::map::Ship& leader,
                           const game::config::HostConfiguration& config,
                           const game::spec::ShipList& shipList)
     {
-        // FIXME: do we need this code? As of 20180722, FleetLoader only produces valid, existing fleets.
-        // If we need it, the isPlayable() check should check ReadOnly.
-        // // Check leader
-        // if (!univ.isValidShipId(fid) || !univ.getShip(fid).isPlayable(GObject::Playable)) {
-        //     fid = removeFleetMember(univ, fid);
-        // }
-
-        // // Check members
-        // if (fid != 0) {
-        //     for (int i = 1; i <= NUM_SHIPS; ++i) {
-        //         if (univ.getShip(i).getFleetNumber() == fid && !univ.getShip(i).isPlayable(GObject::Playable)) {
-        //             removeFleetMember(univ, i);
-        //         }
-        //     }
-        // }
-
-        // Synchronize
+        // @change PCC2 did more here; in particular, dissolve fleets with invalid Ids.
+        // For c2ng, FleetLoader only produces valid, existing fleets.
+        // So all that remains is to synchronize missions/waypoints.
         game::map::Fleet(univ, leader).synchronize(config, shipList);
+    }
+
+    /* Mark object if it is within a range of coordinates (inclusive). */
+    int markObjectIfInRange(game::map::Object& obj, game::map::Point a, game::map::Point b, const game::map::Configuration& config)
+    {
+        // ex WSelectChartMode::checkObject
+        game::map::Point pt;
+        if (!obj.getPosition(pt)) {
+            return 0;
+        }
+
+        // Bounding rectangle in correct size
+        const int ax = std::min(a.getX(), b.getX());
+        const int bx = std::max(a.getX(), b.getX());
+        const int ay = std::min(a.getY(), b.getY());
+        const int by = std::max(a.getY(), b.getY());
+
+        // Location. Try to move into bounding rectangle if it's outside.
+        if (config.getMode() == game::map::Configuration::Wrapped) {
+            if (pt.getX() < ax) {
+                pt.addX(config.getSize().getX());
+            }
+            if (pt.getX() > bx) {
+                pt.addX(-config.getSize().getX());
+            }
+            if (pt.getY() < ay) {
+                pt.addY(config.getSize().getY());
+            }
+            if (pt.getY() > by) {
+                pt.addY(-config.getSize().getY());
+            }
+        }
+
+        // Inside?
+        if (pt.getX() >= ax && pt.getX() <= bx && pt.getY() >= ay && pt.getY() <= by) {
+            obj.setIsMarked(true);
+            return 1;
+        } else {
+            // Might be circular wrap
+            game::map::Point pt1;
+            if (config.getMode() == game::map::Configuration::Circular
+                && config.getPointAlias(pt, pt1, 1, true)
+                && pt1.getX() >= ax && pt1.getX() <= bx && pt1.getY() >= ay && pt1.getY() <= by)
+            {
+                obj.setIsMarked(true);
+                return 1;
+            } else {
+                return 0;
+            }
+        }
+    }
+
+    /* Mark all objects from an ObjectType if they are in a range of coordinates (inclusive). */
+    int markTypeObjectsInRange(game::map::ObjectType& ty, game::map::Point a, game::map::Point b, const game::map::Configuration& config)
+    {
+        int count = 0;
+        for (game::Id_t id = ty.findNextIndex(0); id != 0; id = ty.findNextIndex(id)) {
+            if (game::map::Object* obj = ty.getObjectByIndex(id)) {
+                count += markObjectIfInRange(*obj, a, b, config);
+            }
+        }
+        return count;
     }
 }
 
@@ -85,7 +132,8 @@ game::map::Universe::Universe()
       m_playedBases(),
       m_fleets(),
       m_ionStormType(),
-      m_reverter(0)
+      m_reverter(0),
+      m_availablePlayers()
 {
     // ex GUniverse::GUniverse
     m_minefields.reset(new MinefieldType());
@@ -328,10 +376,6 @@ game::map::Universe::markChanged()
     m_universeChanged = true;
 }
 
-// /** Postprocess universe. Call this to make sure structural changes propagate.
-//     \param playingSet Set of players we play
-//     \param dataSet Set of players we have data for
-//     \param playability Playability to set for things we "play" */
 void
 game::map::Universe::postprocess(PlayerSet_t playingSet, PlayerSet_t availablePlayers, Object::Playability playability,
                                  const game::HostVersion& host, const game::config::HostConfiguration& config,
@@ -339,8 +383,7 @@ game::map::Universe::postprocess(PlayerSet_t playingSet, PlayerSet_t availablePl
                                  const game::spec::ShipList& shipList,
                                  afl::string::Translator& tx, afl::sys::LogListener& log)
 {
-//     this->playing_set = playing_set;
-//     this->data_set = data_set;
+    m_availablePlayers = availablePlayers;
 
     // Internal check for ships and planets
     for (Id_t i = 1, n = m_planets.size(); i <= n; ++i) {
@@ -381,9 +424,8 @@ game::map::Universe::postprocess(PlayerSet_t playingSet, PlayerSet_t availablePl
     m_minefields->internalCheck(turnNumber, host, config);
     m_drawings.eraseExpiredDrawings(turnNumber);
     m_ufos->postprocess(turnNumber, m_config, config, tx, log);
-// FIXME: port
-//     setTypePlayability(ty_minefields, playability);
-//     setTypePlayability(ty_ufos, playability);
+    // FIXME: port: setTypePlayability(ty_minefields, playability);
+    // FIXME: port: setTypePlayability(ty_ufos, playability);
 
     // Signal sets
     m_playedShips->sig_setChange.raise(0);
@@ -419,23 +461,25 @@ game::map::Universe::postprocess(PlayerSet_t playingSet, PlayerSet_t availablePl
     // FIXME: synthesize scores if a score blanker is used
 }
 
+bool
+game::map::Universe::hasFullData(int playerNr) const
+{
+    // ex GUniverse::isData
+    return m_availablePlayers.contains(playerNr);
+}
 
-// /** Get planet at location.
-//     \param pt Location, need not be normalized
-//     \return Id of planet, or zero if none */
+
+/*
+ *  Location accessors
+ */
+
 game::Id_t
 game::map::Universe::findPlanetAt(Point pt) const
 {
     // ex GUniverse::getPlanetAt
-    return AnyPlanetType(const_cast<Universe&>(*this)).findFirstObjectAt(m_config.getCanonicalLocation(pt));
+    return AnyPlanetType(const_cast<Universe&>(*this)).findNextObjectAt(m_config.getCanonicalLocation(pt), 0, false);
 }
 
-// /** Get planet at location, with warp wells. If there is no planet at
-//     the location, look whether the point is in the warp well of one.
-//     \param pt Location, need not be normalized
-//     \param gravity true to look into warp well. If false, function
-//                    behaves exactly like findPlanetAt(int).
-//     \return Id of planet, or zero if none */
 game::Id_t
 game::map::Universe::findPlanetAt(Point pt,
                                   bool gravityFlag,
@@ -451,11 +495,6 @@ game::map::Universe::findPlanetAt(Point pt,
     return rv;
 }
 
-
-// /** Get planet from warp well location.
-//     \param pt Location
-//     \pre findPlanetAt(pt) == 0
-//     \return Id of planet if pt is in its warp wells, 0 otherwise */
 game::Id_t
 game::map::Universe::findGravityPlanetAt(Point pt,
                                          const game::config::HostConfiguration& config,
@@ -514,30 +553,19 @@ game::map::Universe::findGravityPlanetAt(Point pt,
     return 0;
 }
 
-/** Get ship at position. Any race does. This is mainly used for naming
-    locations, and for things like to tell whether a "L" command would succeed.
-    \param pt position to check
-    \returns Id number of a ship at position \c pt, or zero if none. */
 game::Id_t
 game::map::Universe::findFirstShipAt(Point pt) const
 {
     // ex GUniverse::getAnyShipAt
     // ex shipacc.pas:ShipAt
-    return AnyShipType(const_cast<Universe&>(*this)).findFirstObjectAt(m_config.getCanonicalLocation(pt));
+    return AnyShipType(const_cast<Universe&>(*this)).findNextObjectAt(m_config.getCanonicalLocation(pt), 0, false);
 }
 
-// /** Get name of a location in human-readable form.
-//     \param pt     location
-//     \param flags  details of requested string
-//     - locs_Ships: also use ship names as location names, not just planets
-//     - locs_WW: return "near PLANETNAME" if applicable
-//     - locs_Orbit: say "Orbit of PLANET" if applicable
-//     - locs_Verbose: be more verbose */
 String_t
-game::map::Universe::getLocationName(Point pt, int flags,
-                                     const game::config::HostConfiguration& config,
-                                     const HostVersion& host,
-                                     afl::string::Translator& tx) const
+game::map::Universe::findLocationName(Point pt, int flags,
+                                      const game::config::HostConfiguration& config,
+                                      const HostVersion& host,
+                                      afl::string::Translator& tx) const
 {
     // ex GUniverse::getLocationName
     // ex shipacc.pas:LocationStr
@@ -571,18 +599,16 @@ game::map::Universe::getLocationName(Point pt, int flags,
         return String_t();
     }
 
-    return afl::string::Format((flags & NameVerbose) != 0 ? tx.translateString("Deep Space (%d,%d)").c_str() : "(%d,%d)", pt.getX(), pt.getY());
+    return afl::string::Format((flags & NameVerbose) != 0 ? tx("Deep Space %s") : "%s", pt.toString());
 }
 
-// /** Check whether a ship is being towed.
-//     \param sid Ship Id */
 game::Id_t
-game::map::Universe::findShipTowing(int sid, int after) const
+game::map::Universe::findShipTowing(Id_t sid, Id_t after) const
 {
     // ex GUniverse::isShipTowed
     AnyShipType ty(const_cast<Universe&>(*this));
 
-    int i = after;
+    Id_t i = after;
     while ((i = ty.findNextIndex(i)) != 0) {
         const Ship* sh = ty.getObjectByIndex(i);
         if (sh != 0
@@ -594,5 +620,78 @@ game::map::Universe::findShipTowing(int sid, int after) const
         }
     }
     return 0;
+}
+
+game::Id_t
+game::map::Universe::findShipCloningAt(Id_t pid, Id_t after) const
+{
+    // ex GPlanet::findShipCloningHere, GShip::isCloningAt
+    const Planet* p = planets().get(pid);
+    Point pt;
+    if (p == 0 || !p->getPosition(pt)) {
+        return 0;
+    }
+    
+    PlayedShipType& ships = *m_playedShips;
+    for (Id_t i = ships.findNextObjectAt(pt, after, false); i != 0; i = ships.findNextObjectAt(pt, i, false)) {
+        String_t shipFC;
+        const Ship* pShip = ships.getObjectByIndex(i);
+        if (pShip != 0 && pShip->getFriendlyCode().get(shipFC) && shipFC == "cln") {
+            return i;
+        }
+    }
+    return 0;
+}
+
+game::Id_t
+game::map::Universe::findControllingPlanetId(const Minefield& mf) const
+{
+    // ex getAssociatedPlanet, chartdlg.pas:CMinefieldView.SetMinefield
+    Id_t pid  = 0;
+    int32_t dist = 0;
+
+    Point minePos;
+    int mineOwner;
+    if (mf.getPosition(minePos) && mf.getOwner(mineOwner)) {
+        AnyPlanetType ty(const_cast<Universe&>(*this));
+        for (Id_t i = ty.findNextIndex(0); i != 0; i = ty.findNextIndex(i)) {
+            if (const Planet* p = m_planets.get(i)) {
+                int planetOwner;
+                Point planetPos;
+                if (p->getPosition(planetPos)) {
+                    /* The planet is a possible controlling planet if...
+                       - we know it has the same owner as the minefield
+                       - we don't know the planet's owner, and don't have full data for the minefield owner's race */
+                    bool maybe = (p->getOwner(planetOwner)
+                                  ? planetOwner == mineOwner
+                                  : !hasFullData(mineOwner));
+
+                    /* Choose closest planet */
+                    if (maybe) {
+                        int32_t ndist = config().getSquaredDistance(planetPos, minePos);
+                        if (pid == 0 || ndist < dist) {
+                            pid  = i;
+                            dist = ndist;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return pid;
+}
+
+int
+game::map::Universe::markObjectsInRange(Point a, Point b)
+{
+    // ex WSelectChartMode::rebuildSelection, part
+    AnyShipType ships(*this);
+    int numShips = markTypeObjectsInRange(ships, a, b, m_config);
+
+    AnyPlanetType planets(*this);
+    int numPlanets = markTypeObjectsInRange(planets, a, b, m_config);
+
+    return numShips + numPlanets;
 }
 

@@ -34,7 +34,7 @@ game::UnitScoreList::set(Index_t index, int16_t value, int16_t turn)
 void
 game::UnitScoreList::merge(Index_t index, int16_t value, int16_t turn)
 {
-    // ex GUnitScores::mergeScore
+    // ex GUnitScores::mergeScore, phost.pas:AddUnitScoreEntry
     int16_t origValue = 0, origTurn = 0;
     if (!get(index, origValue, origTurn) || origTurn <= turn) {
         set(index, value, turn);
@@ -45,7 +45,7 @@ game::UnitScoreList::merge(Index_t index, int16_t value, int16_t turn)
 bool
 game::UnitScoreList::get(Index_t index, int16_t& value, int16_t& turn) const
 {
-    // ex GUnitScores::getTurn, GUnitScores::getScore
+    // ex GUnitScores::getTurn, GUnitScores::getScore, phost.pas:GetUnitScoreEntry
     if (index < m_items.size() && m_items[index].turn != 0) {
         value = m_items[index].value;
         turn  = m_items[index].turn;

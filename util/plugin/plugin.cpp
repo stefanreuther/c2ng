@@ -91,13 +91,14 @@ util::plugin::Plugin::~Plugin()
 
 // Load plugin definition file (.c2p).
 void
-util::plugin::Plugin::initFromPluginFile(String_t baseDir, String_t defFileName, afl::io::Stream& file, afl::sys::LogListener& log)
+util::plugin::Plugin::initFromPluginFile(String_t baseDir, String_t defFileName, afl::io::Stream& file, afl::sys::LogListener& log, afl::string::Translator& tx)
 {
     // ex Plugin::initFromPluginFile
     class Parser : public ConfigurationFileParser {
      public:
-        Parser(Plugin& self, afl::sys::LogListener& log)
-            : self(self),
+        Parser(Plugin& self, afl::sys::LogListener& log, afl::string::Translator& tx)
+            : ConfigurationFileParser(tx),
+              self(self),
               m_log(log)
             { }
         virtual void handleAssignment(const String_t& /*fileName*/, int /*lineNr*/, const String_t& name, const String_t& value, const String_t& /*line*/)
@@ -140,7 +141,7 @@ util::plugin::Plugin::initFromPluginFile(String_t baseDir, String_t defFileName,
 
     m_baseDir = baseDir;
     m_defFileName = defFileName;
-    Parser p(*this, log);
+    Parser p(*this, log, tx);
     p.setSection("plugin", true);
     p.parseFile(file);
 }

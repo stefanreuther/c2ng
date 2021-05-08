@@ -11,6 +11,8 @@ build_test_app('dirbrowser',    ['gamelib', 'afl']);
 build_test_app('overview',      ['gamelib', 'afl']);
 build_test_app('processrunner', ['gamelib', 'afl']);
 build_test_app('testvcr',       ['gamelib', 'afl']);
+build_test_app('testflak',      ['gamelib', 'afl']);
+build_test_app('msgparse',      ['gamelib', 'afl']);
 build_test_app('ui_root',       ['guilib', 'gamelib', 'afl']);
 
 rule_set_phony($target);

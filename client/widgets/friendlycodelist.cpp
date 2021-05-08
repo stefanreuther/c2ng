@@ -64,13 +64,23 @@ client::widgets::FriendlyCodeList::getItemHeight(size_t /*n*/)
 }
 
 int
-client::widgets::FriendlyCodeList::getHeaderHeight()
+client::widgets::FriendlyCodeList::getHeaderHeight() const
+{
+    return 0;
+}
+
+int
+client::widgets::FriendlyCodeList::getFooterHeight() const
 {
     return 0;
 }
 
 void
 client::widgets::FriendlyCodeList::drawHeader(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
+{ }
+
+void
+client::widgets::FriendlyCodeList::drawFooter(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
 { }
 
 void

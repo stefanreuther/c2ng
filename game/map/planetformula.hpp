@@ -37,6 +37,8 @@ namespace game { namespace map {
     LongProperty_t getMaxSupportedColonists(const Planet& pl, const game::config::HostConfiguration& config, const HostVersion& host, int player);
     LongProperty_t getMaxSupportedColonists(const Planet& pl, const game::config::HostConfiguration& config, const HostVersion& host);
 
+    int getHissEffect(int shipOwner, int numShips, const game::config::HostConfiguration& config, const HostVersion& host);
+
 
     /*
      *  Native formulas

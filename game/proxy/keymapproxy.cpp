@@ -12,10 +12,41 @@ namespace {
     const size_t MAX_DEPTH = 5;
 }
 
+
+class game::proxy::KeymapProxy::Trampoline {
+ public:
+    Trampoline(Session& session, util::RequestSender<KeymapProxy> reply);
+    void init(Session& session);
+    void setKeymapName(String_t keymapName);
+    util::KeymapRef_t getKeymap();
+    void update();
+    Session& session()
+        { return m_session; }
+ private:
+    Session& m_session;
+    afl::base::SignalConnection conn_keymapChange;
+    util::RequestSender<KeymapProxy> m_reply;
+    String_t m_keymapName;
+};
+
+
+class game::proxy::KeymapProxy::TrampolineFromSession : public afl::base::Closure<Trampoline*(Session&)> {
+ public:
+    TrampolineFromSession(const util::RequestSender<KeymapProxy>& reply)
+        : m_reply(reply)
+        { }
+    virtual Trampoline* call(Session& session)
+        { return new Trampoline(session, m_reply); }
+ private:
+    util::RequestSender<KeymapProxy> m_reply;
+};
+
+
+
 // Constructor.
 game::proxy::KeymapProxy::KeymapProxy(util::RequestSender<Session> gameSender, util::RequestDispatcher& reply)
     : m_reply(reply, *this),
-      m_slave(gameSender, new Trampoline(m_reply.getSender())),
+      m_sender(gameSender.makeTemporary(new TrampolineFromSession(m_reply.getSender()))),
       m_pListener(0)
 { }
 
@@ -34,33 +65,33 @@ game::proxy::KeymapProxy::setListener(Listener& listener)
 void
 game::proxy::KeymapProxy::setKeymapName(String_t keymap)
 {
-    class Task : public util::SlaveRequest<Session, Trampoline> {
+    class Task : public util::Request<Trampoline> {
      public:
         Task(String_t name)
             : m_name(name)
             { }
-        void handle(Session& s, Trampoline& t)
-            { t.setKeymapName(s, m_name); }
+        void handle(Trampoline& t)
+            { t.setKeymapName(m_name); }
      private:
         String_t m_name;
     };
 
-    m_slave.postNewRequest(new Task(keymap));
+    m_sender.postNewRequest(new Task(keymap));
 }
 
 // Get description of the current keymap.
 void
 game::proxy::KeymapProxy::getDescription(WaitIndicator& link, util::KeymapInformation& out)
 {
-    class Task : public util::SlaveRequest<Session, Trampoline> {
+    class Task : public util::Request<Trampoline> {
      public:
         Task(util::KeymapInformation& out)
             : m_out(out)
             { }
-        void handle(Session& s, Trampoline& t)
+        void handle(Trampoline& t)
             {
                 m_out.clear();
-                if (util::KeymapRef_t p = t.getKeymap(s)) {
+                if (util::KeymapRef_t p = t.getKeymap()) {
                     p->describe(m_out, MAX_DEPTH);
                 }
             }
@@ -69,20 +100,20 @@ game::proxy::KeymapProxy::getDescription(WaitIndicator& link, util::KeymapInform
     };
 
     Task t(out);
-    link.call(m_slave, t);
+    link.call(m_sender, t);
 }
 
 // Get description of a key.
 void
 game::proxy::KeymapProxy::getKey(WaitIndicator& link, util::Key_t key, Info& result)
 {
-    class Task : public util::SlaveRequest<Session, Trampoline> {
+    class Task : public util::Request<Trampoline> {
      public:
         Task(util::Key_t key, Info& result)
             : m_key(key),
               m_result(result)
             { }
-        void handle(Session& s, Trampoline& t)
+        void handle(Trampoline& t)
             {
                 // Start unassigned
                 m_result.result = Unassigned;
@@ -91,11 +122,11 @@ game::proxy::KeymapProxy::getKey(WaitIndicator& link, util::Key_t key, Info& res
                 m_result.origin.clear();
 
                 // Look up
-                if (util::KeymapRef_t p = t.getKeymap(s)) {
+                if (util::KeymapRef_t p = t.getKeymap()) {
                     util::KeymapRef_t keymap = 0;
                     util::Atom_t a = p->lookupCommand(m_key, keymap);
                     if (keymap != 0) {
-                        m_result.command = s.world().atomTable().getStringFromAtom(a);
+                        m_result.command = t.session().world().atomTable().getStringFromAtom(a);
                         m_result.keymapName = keymap->getName();
                         m_result.result = (m_result.command.empty() ? a == 0 ? Cancelled : Internal : Normal);
 
@@ -104,7 +135,7 @@ game::proxy::KeymapProxy::getKey(WaitIndicator& link, util::Key_t key, Info& res
                             const String_t verb = tok.getCurrentString();
 
                             // Subroutine
-                            if (interpreter::SubroutineValue* sv = dynamic_cast<interpreter::SubroutineValue*>(s.world().getGlobalValue(verb.c_str()))) {
+                            if (const interpreter::SubroutineValue* sv = dynamic_cast<const interpreter::SubroutineValue*>(t.session().world().getGlobalValue(verb.c_str()))) {
                                 m_result.origin = sv->getBytecodeObject()->getOrigin();
                             }
 
@@ -123,56 +154,49 @@ game::proxy::KeymapProxy::getKey(WaitIndicator& link, util::Key_t key, Info& res
         Info& m_result;
     };
     Task t(key, result);
-    link.call(m_slave, t);
+    link.call(m_sender, t);
 }
 
 /*
  *  Trampoline
  */
 
-void
-game::proxy::KeymapProxy::Trampoline::init(Session& s)
+game::proxy::KeymapProxy::Trampoline::Trampoline(Session& session, util::RequestSender<KeymapProxy> reply)
+    : m_session(session),
+      conn_keymapChange(),
+      m_reply(reply),
+      m_keymapName()
 {
     // Attach to keymap changes.
     // If a script modifies the keymap, we must update our view to make the new key usable.
     class Handler : public afl::base::Closure<void()> {
      public:
-        Handler(Session& s, Trampoline& t)
-            : m_session(s),
-              m_trampoline(t)
+        Handler(Trampoline& t)
+            : m_trampoline(t)
             { }
         void call()
-            { m_trampoline.update(m_session); }
-        Handler* clone() const
-            { return new Handler(*this); }
+            { m_trampoline.update(); }
      private:
-        Session& m_session;
         Trampoline& m_trampoline;
     };
-    conn_keymapChange = s.world().keymaps().sig_keymapChange.addNewClosure(new Handler(s, *this));
+    conn_keymapChange = session.world().keymaps().sig_keymapChange.addNewClosure(new Handler(*this));
 }
 
 void
-game::proxy::KeymapProxy::Trampoline::done(Session& /*s*/)
-{
-    conn_keymapChange.disconnect();
-}
-
-void
-game::proxy::KeymapProxy::Trampoline::setKeymapName(Session& s, String_t keymapName)
+game::proxy::KeymapProxy::Trampoline::setKeymapName(String_t keymapName)
 {
     m_keymapName = keymapName;
-    update(s);
+    update();
 }
 
 util::KeymapRef_t
-game::proxy::KeymapProxy::Trampoline::getKeymap(Session& s)
+game::proxy::KeymapProxy::Trampoline::getKeymap()
 {
-    return s.world().keymaps().getKeymapByName(m_keymapName);
+    return m_session.world().keymaps().getKeymapByName(m_keymapName);
 }
 
 void
-game::proxy::KeymapProxy::Trampoline::update(Session& s)
+game::proxy::KeymapProxy::Trampoline::update()
 {
     class UpdateKeySetTask : public util::Request<KeymapProxy> {
      public:
@@ -192,5 +216,5 @@ game::proxy::KeymapProxy::Trampoline::update(Session& s)
      private:
         util::KeySet_t m_set;
     };
-    m_reply.postNewRequest(new UpdateKeySetTask(s.world().keymaps().getKeymapByName(m_keymapName)));
+    m_reply.postNewRequest(new UpdateKeySetTask(m_session.world().keymaps().getKeymapByName(m_keymapName)));
 }

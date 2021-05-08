@@ -29,17 +29,6 @@ class TestUtilBackupFile : public CxxTest::TestSuite {
     void testExpand();
 };
 
-class TestUtilBaseSlaveRequest : public CxxTest::TestSuite {
- public:
-    void testIt();
-};
-
-class TestUtilBaseSlaveRequestSender : public CxxTest::TestSuite {
- public:
-    void testIt();
-    void testCall();
-};
-
 class TestUtilCharsetFactory : public CxxTest::TestSuite {
  public:
     void testIteration();
@@ -71,11 +60,28 @@ class TestUtilConstantAnswerProvider : public CxxTest::TestSuite {
     void testNo();
 };
 
+class TestUtilDataTable : public CxxTest::TestSuite {
+ public:
+    void testBasics();
+    void testNames();
+    void testIteration();
+    void testStack();
+    void testAppend();
+    void testAdd();
+    void testSort();
+};
+
 class TestUtilDigest : public CxxTest::TestSuite {
  public:
     void testIt();
     void testStaticInstance();
     void testDynamicType();
+};
+
+class TestUtilExpressionList : public CxxTest::TestSuite {
+ public:
+    void testAccess();
+    void testLRU();
 };
 
 class TestUtilFileNamePattern : public CxxTest::TestSuite {
@@ -93,6 +99,7 @@ class TestUtilFileParser : public CxxTest::TestSuite {
     void testIt();
     void testCharset();
     void testTrimComments();
+    void testParseOptional();
 };
 
 class TestUtilHelpIndex : public CxxTest::TestSuite {
@@ -142,9 +149,15 @@ class TestUtilKeymapTable : public CxxTest::TestSuite {
     void testKeymapTable();
 };
 
+class TestUtilLayout : public CxxTest::TestSuite {
+ public:
+    void testLabelPos();
+};
+
 class TestUtilMath : public CxxTest::TestSuite {
  public:
     void testDivideAndRound();
+    void testDivideAndRoundUp();
     void testDivideAndRoundToEven();
     void testGetHeading();
     void testSquareInteger();
@@ -202,6 +215,7 @@ class TestUtilRange : public CxxTest::TestSuite {
     void testInclude();
     void testIntersect();
     void testOp();
+    void testFormat();
 };
 
 class TestUtilRequest : public CxxTest::TestSuite {
@@ -223,6 +237,10 @@ class TestUtilRequestReceiver : public CxxTest::TestSuite {
 class TestUtilRequestSender : public CxxTest::TestSuite {
  public:
     void testConvert();
+    void testMakeTemporary();
+    void testPostRequest();
+    void testConvertFail();
+    void testMakeTemporaryFail();
 };
 
 class TestUtilRequestThread : public CxxTest::TestSuite {
@@ -246,22 +264,6 @@ class TestUtilSkinColor : public CxxTest::TestSuite {
     void testIt();
 };
 
-class TestUtilSlaveObject : public CxxTest::TestSuite {
- public:
-    void testIt();
-};
-
-class TestUtilSlaveRequest : public CxxTest::TestSuite {
- public:
-    void testIt();
-};
-
-class TestUtilSlaveRequestSender : public CxxTest::TestSuite {
- public:
-    void testIt();
-    void testCall();
-};
-
 class TestUtilStopSignal : public CxxTest::TestSuite {
  public:
     void testIt();
@@ -278,6 +280,8 @@ class TestUtilString : public CxxTest::TestSuite {
     void testFormatName();
     void testEncodeHtml();
     void testTrailing();
+    void testCollate();
+    void testFormatAge();
 };
 
 class TestUtilStringInstructionList : public CxxTest::TestSuite {

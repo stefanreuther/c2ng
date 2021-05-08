@@ -1,5 +1,6 @@
 /**
   *  \file game/msg/configuration.cpp
+  *  \brief Class game::msg::Configuration
   */
 
 #include "game/msg/configuration.hpp"
@@ -14,9 +15,9 @@ namespace {
     using afl::io::Stream;
     using afl::io::FileSystem;
 
-    const char* MESSAGE_CONFIG_TEMPLATE = "msg%d.ini";
+    const char*const MESSAGE_CONFIG_TEMPLATE = "msg%d.ini";
 
-    const char* FILTER_KEY = "FILTER";
+    const char*const FILTER_KEY = "FILTER";
 
     void loadMessageConfiguration(afl::io::Directory& dir, int playerNr, ConfigurationFile& file)
     {
@@ -43,9 +44,6 @@ game::msg::Configuration::Configuration()
 game::msg::Configuration::~Configuration()
 { }
 
-// /** Check whether a subject is filtered.
-//     \param header Subject line to search for
-//     \return true iff filtered */
 bool
 game::msg::Configuration::isHeadingFiltered(const String_t& heading) const
 {
@@ -53,10 +51,6 @@ game::msg::Configuration::isHeadingFiltered(const String_t& heading) const
     return m_filteredHeadings.find(heading) != m_filteredHeadings.end();
 }
 
-// /** Toggle whether a subject is filtered. Adds line to filter if it is not
-//     yet there, removes it otherwise.
-//     \param header Subject line to search for
-//     \return true if item is now filtered, false if not. */
 void
 game::msg::Configuration::toggleHeadingFiltered(const String_t& heading)
 {
@@ -87,7 +81,6 @@ game::msg::Configuration::setHeadingFiltered(const String_t& heading, bool flag)
     }
 }
 
-// /** Clear message filter. */
 void
 game::msg::Configuration::clear()
 {

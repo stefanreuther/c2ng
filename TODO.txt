@@ -42,7 +42,7 @@ FILER NG.
 - [DONE] Use SHA-1 addressing (like git) for implicit deduplication.
 - Add transaction support: upload many files at once and commit at the end; fork dataspace for backup.
 - Add support for symlinks so that user:u/user/path/player9.rst can actually be a link to host:games/0001/out/9/player9.rst.
-  . alternative: store user and host data in same filer, so we get internal deduplication
+  . [DONE] alternative: store user and host data in same filer, so we get internal deduplication
 - [DONE] Requires export/import for host runs!
 - fsck/garbage collection
 
@@ -69,7 +69,7 @@ PCC1 FEATURES MISSING IN PCC2.
 - data transmissions (VPA, Informer)
 - data transmission settings
 - [DONE] turn checker
-- *.ccb management (ccbmerge)
+- [DONE] *.ccb management (ccbmerge)
 - history management
 
 
@@ -94,5 +94,4 @@ CLEANUP
 
 - client::widgets::BusyIndicator -> ui::widgets
 - client::dialogs::DirectorySelectionDialog -> ui::dialogs
-- util::RequestSender<T> should have a function RequestSender<U> createRelatedSender(Closure<U&(T&)>)
 - too much code is using _() for translation

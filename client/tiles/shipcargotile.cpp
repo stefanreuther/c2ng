@@ -10,7 +10,6 @@
 #include "game/config/userconfiguration.hpp"
 #include "game/map/ship.hpp"
 #include "game/root.hpp"
-#include "util/translation.hpp"
 #include "util/unicodechars.hpp"
 
 namespace {
@@ -41,7 +40,7 @@ namespace {
         button.setColor(ui::Color_Yellow);
         button.setHoverColor(ui::Color_Fire+28);
         button.setFont(gfx::FontRequest().addSize(-1));
-        button.setTextAlign(2, 0);
+        button.setTextAlign(gfx::RightAlign, gfx::TopAlign);
     }
 }
 
@@ -55,8 +54,9 @@ class client::tiles::ShipCargoTile::Job : public util::Request<ShipCargoTile> {
 
 
 
-client::tiles::ShipCargoTile::ShipCargoTile(ui::Root& root, client::widgets::KeymapWidget& kmw)
+client::tiles::ShipCargoTile::ShipCargoTile(ui::Root& root, afl::string::Translator& tx, client::widgets::KeymapWidget& kmw)
     : CollapsibleDataView(root),
+      m_translator(tx),
       m_table(root, NumColumns, NumLines),
       m_fuelGauge(root, GAUGE_WIDTH),
       m_cargoGauge(root, GAUGE_WIDTH),
@@ -76,10 +76,10 @@ client::tiles::ShipCargoTile::init(ui::Root& root, client::widgets::KeymapWidget
     // FIXME: use skin colors
     int numberWidth = root.provider().getFont(gfx::FontRequest())->getTextWidth("999,999");
     m_table.column(MineralLabel).setColor(ui::Color_Gray);
-    m_table.column(MineralValue).setColor(ui::Color_Green).setTextAlign(2, 0);
+    m_table.column(MineralValue).setColor(ui::Color_Green).setTextAlign(gfx::RightAlign, gfx::TopAlign);
     m_table.column(MineralUnit).setColor(ui::Color_Green);
     m_table.column(OtherLabel).setColor(ui::Color_Gray);
-    m_table.column(OtherValue).setColor(ui::Color_Green).setTextAlign(2, 0);
+    m_table.column(OtherValue).setColor(ui::Color_Green).setTextAlign(gfx::RightAlign, gfx::TopAlign);
     m_table.column(OtherUnit).setColor(ui::Color_Green);
     m_table.setColumnWidth(MineralValue, numberWidth);
     m_table.setColumnPadding(MineralValue, HORIZONTAL_PAD);
@@ -87,19 +87,19 @@ client::tiles::ShipCargoTile::init(ui::Root& root, client::widgets::KeymapWidget
     m_table.setColumnWidth(OtherValue, numberWidth);
     m_table.setColumnPadding(OtherValue, HORIZONTAL_PAD);
 
-    m_table.cell(MineralLabel, 0).setText(_("Neu:"));
-    m_table.cell(MineralLabel, 1).setText(_("Tri:"));
-    m_table.cell(MineralLabel, 2).setText(_("Dur:"));
-    m_table.cell(MineralLabel, 3).setText(_("Mol:"));
-    m_table.column(MineralUnit).setText(_("kt"));
+    m_table.cell(MineralLabel, 0).setText(m_translator("Neu:"));
+    m_table.cell(MineralLabel, 1).setText(m_translator("Tri:"));
+    m_table.cell(MineralLabel, 2).setText(m_translator("Dur:"));
+    m_table.cell(MineralLabel, 3).setText(m_translator("Mol:"));
+    m_table.column(MineralUnit).setText(m_translator("kt"));
 
-    m_table.cell(OtherLabel, 0).setText(_("Colonists:"));
-    m_table.cell(OtherLabel, 1).setText(_("Supplies:"));
-    m_table.cell(OtherLabel, 2).setText(_("Money:"));
-    m_table.cell(OtherLabel, 3).setText(_("Total Mass:"));
-    m_table.cell(OtherUnit, 1).setText(_("kt"));
-    m_table.cell(OtherUnit, 2).setText(_("mc"));
-    m_table.cell(OtherUnit, 3).setText(_("kt"));
+    m_table.cell(OtherLabel, 0).setText(m_translator("Colonists:"));
+    m_table.cell(OtherLabel, 1).setText(m_translator("Supplies:"));
+    m_table.cell(OtherLabel, 2).setText(m_translator("Money:"));
+    m_table.cell(OtherLabel, 3).setText(m_translator("Total Mass:"));
+    m_table.cell(OtherUnit, 1).setText(m_translator("kt"));
+    m_table.cell(OtherUnit, 2).setText(m_translator("mc"));
+    m_table.cell(OtherUnit, 3).setText(m_translator("kt"));
 
     // Configure gauges
     m_fuelGauge.setBarColor(ui::Color_GreenBlack);
@@ -157,12 +157,13 @@ client::tiles::ShipCargoTile::attach(game::proxy::ObjectObserver& oop)
 
                     // Gauges
                     if (game::spec::Hull* pHull = shipList->hulls().get(sh->getHull().orElse(0))) {
+                        afl::string::Translator& tx = s.translator();
                         int have;
                         if (sh->getCargo(game::Element::Neutronium).get(have)) {
                             int total = pHull->getMaxFuel();
                             job->data.gaugeHave[Data::FuelGauge] = have;
                             job->data.gaugeTotal[Data::FuelGauge] = total;
-                            job->data.gaugeLabels[Data::FuelGauge] = afl::string::Format(_("Fuel: %d free").c_str(), total - have);
+                            job->data.gaugeLabels[Data::FuelGauge] = afl::string::Format(tx("Fuel: %d free").c_str(), total - have);
                         }
 
                         int32_t free;
@@ -170,7 +171,7 @@ client::tiles::ShipCargoTile::attach(game::proxy::ObjectObserver& oop)
                             int total = pHull->getMaxCargo();
                             job->data.gaugeHave[Data::CargoGauge] = total - free;
                             job->data.gaugeTotal[Data::CargoGauge] = total;
-                            job->data.gaugeLabels[Data::CargoGauge] = afl::string::Format(_("Cargo: %d free").c_str(), free);
+                            job->data.gaugeLabels[Data::CargoGauge] = afl::string::Format(tx("Cargo: %d free").c_str(), free);
                         }
                     }
 

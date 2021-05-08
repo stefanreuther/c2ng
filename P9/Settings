@@ -12,7 +12,73 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/sim/consoleapplication.cpp \
+FILES_gamelib = game/vcr/flak/database.cpp game/vcr/flak/database.hpp \
+    game/vcr/flak/object.cpp game/vcr/flak/object.hpp \
+    game/vcr/flak/setup.cpp game/vcr/flak/setup.hpp \
+    game/vcr/flak/algorithm.cpp game/vcr/flak/algorithm.hpp \
+    game/vcr/flak/nullvisualizer.cpp game/vcr/flak/nullvisualizer.hpp \
+    game/vcr/flak/gameenvironment.cpp game/vcr/flak/gameenvironment.hpp \
+    game/vcr/flak/visualizer.hpp game/vcr/flak/battle.cpp \
+    game/vcr/flak/battle.hpp game/vcr/flak/environment.hpp \
+    game/vcr/flak/position.cpp game/vcr/flak/position.hpp \
+    game/vcr/flak/configuration.cpp game/vcr/flak/configuration.hpp \
+    game/vcr/flak/definitions.hpp game/vcr/flak/structures.hpp \
+    game/proxy/historyshiplistproxy.cpp game/proxy/historyshiplistproxy.hpp \
+    game/ref/historyshipselection.cpp game/ref/historyshipselection.hpp \
+    game/ref/historyshiplist.cpp game/ref/historyshiplist.hpp \
+    game/actions/multitransfersetup.cpp game/actions/multitransfersetup.hpp \
+    game/test/simpleenvironment.cpp game/test/simpleenvironment.hpp \
+    game/proxy/expressionlistproxy.cpp game/proxy/expressionlistproxy.hpp \
+    game/config/expressionlists.cpp game/config/expressionlists.hpp \
+    util/expressionlist.cpp util/expressionlist.hpp \
+    game/proxy/inboxadaptor.cpp game/proxy/inboxadaptor.hpp \
+    game/msg/browser.cpp game/msg/browser.hpp game/proxy/mailboxproxy.cpp \
+    game/proxy/mailboxproxy.hpp game/proxy/mailboxadaptor.hpp \
+    game/interface/inboxsubsetvalue.cpp game/interface/inboxsubsetvalue.hpp \
+    game/msg/subsetmailbox.cpp game/msg/subsetmailbox.hpp \
+    game/map/messagelink.cpp game/map/messagelink.hpp \
+    game/proxy/vcrdatabaseadaptor.hpp game/proxy/classicvcrplayerproxy.cpp \
+    game/proxy/classicvcrplayerproxy.hpp game/vcr/info.hpp \
+    game/vcr/nulldatabase.cpp game/vcr/nulldatabase.hpp \
+    game/proxy/vcrdatabaseproxy.cpp game/proxy/vcrdatabaseproxy.hpp \
+    game/interface/shiptaskpredictor.cpp \
+    game/interface/shiptaskpredictor.hpp \
+    game/interface/basetaskpredictor.cpp \
+    game/interface/basetaskpredictor.hpp game/proxy/buildpartsproxy.cpp \
+    game/proxy/buildpartsproxy.hpp game/proxy/techupgradeproxy.cpp \
+    game/proxy/techupgradeproxy.hpp game/proxy/basestorageproxy.cpp \
+    game/proxy/basestorageproxy.hpp game/proxy/buildshipproxy.cpp \
+    game/proxy/buildshipproxy.hpp game/proxy/simulationrunproxy.cpp \
+    game/proxy/simulationrunproxy.hpp game/proxy/ufoproxy.cpp \
+    game/proxy/ufoproxy.hpp game/proxy/ionstormproxy.cpp \
+    game/proxy/ionstormproxy.hpp game/proxy/maprendererproxy.cpp \
+    game/proxy/maprendererproxy.hpp game/proxy/drawingproxy.cpp \
+    game/proxy/drawingproxy.hpp game/config/markeroption.cpp \
+    game/config/markeroption.hpp game/proxy/minefieldproxy.cpp \
+    game/proxy/minefieldproxy.hpp util/layout.cpp util/layout.hpp \
+    game/score/tablebuilder.cpp game/score/scorebuilderbase.cpp \
+    game/score/scorebuilderbase.hpp game/score/tablebuilder.hpp \
+    game/proxy/scoreproxy.cpp game/proxy/scoreproxy.hpp \
+    game/score/chartbuilder.cpp game/score/chartbuilder.hpp \
+    util/datatable.cpp util/datatable.hpp \
+    game/proxy/planetpredictorproxy.cpp game/proxy/planetpredictorproxy.hpp \
+    game/proxy/simulationtransferproxy.cpp \
+    game/proxy/simulationtransferproxy.hpp game/vcr/objectinfo.cpp \
+    game/vcr/objectinfo.hpp game/sim/sort.cpp game/sim/sort.hpp \
+    game/proxy/fleetcostproxy.cpp game/proxy/fleetcostproxy.hpp \
+    game/sim/fleetcost.cpp game/sim/fleetcost.hpp game/spec/costsummary.cpp \
+    game/spec/costsummary.hpp game/sim/ability.cpp \
+    game/proxy/simulationsetupproxy.cpp game/sim/gameinterface.hpp \
+    game/proxy/simulationsetupproxy.hpp game/sim/sessionextra.cpp \
+    game/sim/sessionextra.hpp game/sim/session.cpp game/sim/session.hpp \
+    game/proxy/teamproxy.cpp game/proxy/teamproxy.hpp \
+    game/v3/attachmentconfiguration.cpp game/v3/attachmentconfiguration.hpp \
+    game/v3/attachmentunpacker.cpp game/v3/attachmentunpacker.hpp \
+    interpreter/test/expressionverifier.cpp \
+    interpreter/test/expressionverifier.hpp \
+    interpreter/test/contextverifier.cpp \
+    interpreter/test/contextverifier.hpp game/test/counter.hpp \
+    game/test/files.cpp game/test/files.hpp game/sim/consoleapplication.cpp \
     game/sim/consoleapplication.hpp game/sim/parallelrunner.cpp \
     game/sim/parallelrunner.hpp util/stopsignal.hpp game/sim/runner.cpp \
     game/sim/runner.hpp game/sim/simplerunner.cpp game/sim/simplerunner.hpp \
@@ -396,9 +462,7 @@ FILES_gamelib = game/sim/consoleapplication.cpp \
     game/spec/basecomponentvector.hpp game/interface/shipfunction.cpp \
     game/interface/shipfunction.hpp game/interface/shipcontext.cpp \
     game/interface/shipcontext.hpp game/interface/shipproperty.cpp \
-    game/interface/shipproperty.hpp util/slaverequestsender.hpp \
-    util/baseslaverequestsender.hpp util/baseslaverequest.hpp \
-    util/slaveobject.hpp util/slaverequest.hpp game/browser/handlerlist.cpp \
+    game/interface/shipproperty.hpp game/browser/handlerlist.cpp \
     game/browser/handlerlist.hpp game/msg/inbox.cpp game/msg/inbox.hpp \
     game/msg/mailbox.hpp game/exception.cpp game/exception.hpp \
     game/browser/session.cpp game/browser/session.hpp \
@@ -502,23 +566,22 @@ FILES_gamelib = game/sim/consoleapplication.cpp \
     interpreter/commandsource.cpp interpreter/commandsource.hpp \
     interpreter/statementcompilationcontext.cpp \
     interpreter/statementcompilationcontext.hpp \
-    interpreter/contextprovider.hpp interpreter/context.cpp \
-    interpreter/propertyacceptor.hpp interpreter/context.hpp \
-    game/parser/messageparser.cpp game/parser/messageparser.hpp \
-    game/parser/datainterface.hpp game/parser/messagetemplate.cpp \
-    game/parser/messagetemplate.hpp game/map/rangeset.cpp \
-    game/map/rangeset.hpp game/v3/inboxfile.cpp game/v3/inboxfile.hpp \
-    game/parser/messageinformation.cpp game/parser/messageinformation.hpp \
-    game/parser/messagevalue.cpp game/parser/messagevalue.hpp \
-    game/turnloader.cpp game/v3/loader.cpp game/v3/loader.hpp \
-    game/playerbitmatrix.cpp game/playerbitmatrix.hpp game/playerarray.hpp \
-    game/v3/resultloader.cpp game/v3/resultloader.hpp game/turnloader.hpp \
-    game/turn.cpp game/turn.hpp game/interpreterinterface.hpp \
-    interpreter/optimizer.cpp interpreter/optimizer.hpp \
-    interpreter/fusion.cpp interpreter/fusion.hpp interpreter/world.cpp \
-    interpreter/world.hpp interpreter/values.cpp interpreter/values.hpp \
-    interpreter/expr/parser.cpp interpreter/expr/parser.hpp \
-    interpreter/expr/builtinfunction.cpp \
+    interpreter/contextprovider.hpp interpreter/propertyacceptor.hpp \
+    interpreter/context.hpp game/parser/messageparser.cpp \
+    game/parser/messageparser.hpp game/parser/datainterface.hpp \
+    game/parser/messagetemplate.cpp game/parser/messagetemplate.hpp \
+    game/map/rangeset.cpp game/map/rangeset.hpp game/v3/inboxfile.cpp \
+    game/v3/inboxfile.hpp game/parser/messageinformation.cpp \
+    game/parser/messageinformation.hpp game/parser/messagevalue.cpp \
+    game/parser/messagevalue.hpp game/turnloader.cpp game/v3/loader.cpp \
+    game/v3/loader.hpp game/playerbitmatrix.cpp game/playerbitmatrix.hpp \
+    game/playerarray.hpp game/v3/resultloader.cpp game/v3/resultloader.hpp \
+    game/turnloader.hpp game/turn.cpp game/turn.hpp \
+    game/interpreterinterface.hpp interpreter/optimizer.cpp \
+    interpreter/optimizer.hpp interpreter/fusion.cpp interpreter/fusion.hpp \
+    interpreter/world.cpp interpreter/world.hpp interpreter/values.cpp \
+    interpreter/values.hpp interpreter/expr/parser.cpp \
+    interpreter/expr/parser.hpp interpreter/expr/builtinfunction.cpp \
     interpreter/expr/builtinfunction.hpp interpreter/ternaryoperation.cpp \
     interpreter/ternaryoperation.hpp interpreter/unaryoperation.cpp \
     interpreter/unaryoperation.hpp interpreter/binaryoperation.cpp \
@@ -625,17 +688,91 @@ PROJ_AUTO += \
     gamelib:game/*.cpp,game/*.hpp,util/*.cpp,util/*.hpp,interpreter/*.cpp,interpreter/*.hpp
 
 TARGETS += guilib
-FILES_guilib = client/si/remotecontrol.cpp client/si/remotecontrol.hpp \
-    client/dialogs/revertdialog.cpp client/dialogs/revertdialog.hpp \
-    client/dialogs/selectionmanager.cpp client/dialogs/selectionmanager.hpp \
-    client/widgets/helpwidget.cpp client/widgets/helpwidget.hpp \
-    client/dialogs/commandlistdialog.cpp \
+FILES_guilib = client/map/distanceoverlay.cpp client/map/distanceoverlay.hpp \
+    client/map/messageoverlay.cpp client/map/messageoverlay.hpp \
+    client/map/keymapoverlay.cpp client/map/keymapoverlay.hpp \
+    client/si/keymaphandler.cpp client/si/keymaphandler.hpp \
+    client/dialogs/entercoordinates.cpp client/dialogs/entercoordinates.hpp \
+    ui/widgets/alignedcontainer.cpp ui/widgets/alignedcontainer.hpp \
+    ui/widgets/treelistbox.cpp ui/widgets/treelistbox.hpp \
+    client/dialogs/historyship.cpp client/dialogs/historyship.hpp \
+    client/widgets/historyshiplistbox.cpp \
+    client/widgets/historyshiplistbox.hpp client/dialogs/multitransfer.cpp \
+    client/dialogs/multitransfer.hpp client/widgets/expressionlist.cpp \
+    client/widgets/expressionlist.hpp client/dialogs/notifications.cpp \
+    client/dialogs/notifications.hpp client/dialogs/subjectlist.cpp \
+    client/dialogs/subjectlist.hpp client/dialogs/classicvcrobject.cpp \
+    client/dialogs/classicvcrobject.hpp client/widgets/vcrobjectinfo.cpp \
+    client/widgets/vcrobjectinfo.hpp client/dialogs/buildparts.cpp \
+    client/dialogs/buildparts.hpp client/widgets/itemcostdisplay.cpp \
+    client/widgets/itemcostdisplay.hpp client/dialogs/buildship.cpp \
+    client/dialogs/buildship.hpp client/widgets/componentlist.cpp \
+    client/widgets/componentlist.hpp client/widgets/simulationresultlist.cpp \
+    client/widgets/simulationresultlist.hpp \
+    client/dialogs/simulationresult.cpp client/dialogs/simulationresult.hpp \
+    client/widgets/stoppablebusyindicator.cpp \
+    client/widgets/stoppablebusyindicator.hpp client/dialogs/ufoinfo.cpp \
+    client/dialogs/ufoinfo.hpp client/map/ionstormforecastoverlay.cpp \
+    client/map/ionstormforecastoverlay.hpp \
+    client/dialogs/ionstormforecast.hpp client/dialogs/ionstormforecast.cpp \
+    client/dialogs/ionstorminfo.cpp client/dialogs/ionstorminfo.hpp \
+    client/map/markrangeoverlay.cpp client/map/markrangeoverlay.hpp \
+    client/dialogs/newdrawingtag.cpp client/dialogs/newdrawingtag.hpp \
+    client/map/deletedrawingoverlay.cpp client/map/deletedrawingoverlay.hpp \
+    client/widgets/markerkindselector.cpp \
+    client/widgets/markerkindselector.hpp client/map/drawlineoverlay.cpp \
+    client/map/drawlineoverlay.hpp client/map/drawcircleoverlay.cpp \
+    client/map/drawcircleoverlay.hpp client/dialogs/newdrawing.cpp \
+    client/dialogs/newdrawing.hpp client/map/movemarkeroverlay.cpp \
+    client/map/movemarkeroverlay.hpp client/map/markeroverlaybase.cpp \
+    client/map/markeroverlaybase.hpp client/widgets/markercolorselector.cpp \
+    client/widgets/markercolorselector.hpp client/map/circleoverlay.cpp \
+    client/map/circleoverlay.hpp client/dialogs/minefieldinfo.cpp \
+    client/dialogs/minefieldinfo.hpp ui/widgets/scrollbarcontainer.cpp \
+    ui/widgets/scrollbarcontainer.hpp ui/tooltip.cpp ui/tooltip.hpp \
+    ui/widgets/chart.cpp ui/widgets/chart.hpp client/dialogs/scores.cpp \
+    client/dialogs/scores.hpp ui/widgets/listlikedecimalselector.cpp \
+    ui/widgets/listlikedecimalselector.hpp \
+    ui/widgets/basedecimalselector.cpp ui/widgets/basedecimalselector.hpp \
+    client/dialogs/sessionfileselectiondialog.cpp \
+    client/dialogs/sessionfileselectiondialog.hpp \
+    client/dialogs/simulationtransfer.cpp \
+    client/dialogs/simulationtransfer.hpp client/widgets/decayingmessage.cpp \
+    client/widgets/decayingmessage.hpp \
+    client/dialogs/simulationfleetcostoptions.cpp \
+    client/dialogs/simulationfleetcostoptions.hpp \
+    client/widgets/costsummarylist.cpp client/widgets/costsummarylist.hpp \
+    client/dialogs/simulationfleetcost.cpp \
+    client/dialogs/simulationfleetcost.hpp \
+    client/dialogs/simulationbasetorpedoes.cpp \
+    client/dialogs/simulationbasetorpedoes.hpp \
+    client/dialogs/simulationconfiguration.cpp \
+    client/dialogs/simulationconfiguration.hpp \
+    client/dialogs/simulationabilities.cpp \
+    client/dialogs/simulationabilities.hpp ui/widgets/combobox.cpp \
+    ui/widgets/combobox.hpp client/widgets/simulationobjectinfo.hpp \
+    client/widgets/simulationobjectinfo.cpp \
+    client/widgets/simulationlist.cpp client/widgets/simulationlist.hpp \
+    client/dialogs/simulator.cpp client/dialogs/simulator.hpp \
+    client/dialogs/teamsettings.cpp client/dialogs/teamsettings.hpp \
+    ui/widgets/icongrid.cpp ui/widgets/icongrid.hpp \
+    ui/icons/stylableicon.cpp ui/icons/stylableicon.hpp \
+    ui/icons/colortile.cpp ui/icons/colortile.hpp ui/icons/colortext.cpp \
+    ui/icons/colortext.hpp ui/widgets/basebutton.cpp \
+    ui/widgets/basebutton.hpp ui/icons/skintext.cpp ui/icons/skintext.hpp \
+    ui/icons/image.cpp ui/icons/image.hpp ui/icons/focusframe.cpp \
+    ui/icons/focusframe.hpp ui/icons/spacer.cpp ui/icons/spacer.hpp \
+    ui/icons/hbox.cpp ui/icons/hbox.hpp ui/icons/button.cpp \
+    ui/icons/button.hpp ui/icons/icon.hpp client/si/remotecontrol.cpp \
+    client/si/remotecontrol.hpp client/dialogs/revertdialog.cpp \
+    client/dialogs/revertdialog.hpp client/dialogs/selectionmanager.cpp \
+    client/dialogs/selectionmanager.hpp client/widgets/helpwidget.cpp \
+    client/widgets/helpwidget.hpp client/dialogs/commandlistdialog.cpp \
     client/dialogs/commandlistdialog.hpp \
     client/dialogs/processlistdialog.cpp \
     client/dialogs/processlistdialog.hpp client/widgets/filterdisplay.cpp \
     client/widgets/filterdisplay.hpp ui/res/generatedengineprovider.cpp \
-    ui/res/generatedengineprovider.hpp ui/rich/stylableobject.cpp \
-    ui/rich/stylableobject.hpp client/picturenamer.cpp \
+    ui/res/generatedengineprovider.hpp client/picturenamer.cpp \
     client/picturenamer.hpp ui/widgets/cardtabbar.cpp \
     ui/widgets/cardtabbar.hpp client/dialogs/specbrowserdialog.cpp \
     client/dialogs/specbrowserdialog.hpp client/dialogs/buildqueuedialog.cpp \
@@ -734,8 +871,7 @@ FILES_guilib = client/si/remotecontrol.cpp client/si/remotecontrol.hpp \
     client/vcr/classic/traditionalscheduler.hpp \
     client/vcr/classic/scheduler.hpp client/vcr/classic/eventconsumer.hpp \
     client/vcr/classic/event.hpp client/vcr/classic/renderer.cpp \
-    client/vcr/classic/renderer.hpp client/vcr/classic/player.cpp \
-    client/vcr/classic/player.hpp gfx/gen/texture.cpp gfx/gen/texture.hpp \
+    client/vcr/classic/renderer.hpp gfx/gen/texture.cpp gfx/gen/texture.hpp \
     gfx/gen/colorrange.cpp gfx/gen/colorrange.hpp \
     client/vcr/playbackcontrolwidget.cpp \
     client/vcr/playbackcontrolwidget.hpp client/vcr/unitstatuswidget.cpp \
@@ -778,9 +914,8 @@ FILES_guilib = client/si/remotecontrol.cpp client/si/remotecontrol.hpp \
     client/widgets/standarddataview.hpp \
     client/widgets/collapsibledataview.cpp \
     client/widgets/collapsibledataview.hpp ui/layout/grid.cpp \
-    ui/layout/grid.hpp client/widgets/comment.cpp client/widgets/comment.hpp \
-    ui/layout/flow.cpp ui/layout/flow.hpp ui/widgets/quit.cpp \
-    ui/widgets/quit.hpp ui/widgets/radiobutton.cpp \
+    ui/layout/grid.hpp ui/layout/flow.cpp ui/layout/flow.hpp \
+    ui/widgets/quit.cpp ui/widgets/quit.hpp ui/widgets/radiobutton.cpp \
     ui/widgets/radiobutton.hpp ui/widgets/checkbox.cpp \
     ui/widgets/checkbox.hpp ui/screenshotlistener.cpp \
     ui/screenshotlistener.hpp gfx/save.cpp gfx/save.hpp \
@@ -831,8 +966,7 @@ FILES_guilib = client/si/remotecontrol.cpp client/si/remotecontrol.hpp \
     ui/widgets/focusiterator.hpp client/screens/playerscreen.cpp \
     client/screens/playerscreen.hpp client/screens/controlscreen.cpp \
     client/screens/controlscreen.hpp client/map/widget.cpp \
-    client/map/widget.hpp client/map/proxy.cpp client/map/proxy.hpp \
-    client/map/renderer.cpp client/map/renderer.hpp \
+    client/map/widget.hpp client/map/renderer.cpp client/map/renderer.hpp \
     client/dialogs/consoledialog.cpp client/dialogs/consoledialog.hpp \
     client/si/outputstate.cpp client/si/outputstate.hpp \
     client/si/inputstate.cpp client/si/inputstate.hpp \
@@ -855,10 +989,9 @@ FILES_guilib = client/si/remotecontrol.cpp client/si/remotecontrol.hpp \
     ui/invisiblewidget.cpp ui/invisiblewidget.hpp client/usercallback.cpp \
     client/usercallback.hpp client/screens/browserscreen.cpp \
     client/screens/browserscreen.hpp ui/widgets/richlistbox.cpp \
-    ui/rich/imageobject.cpp ui/rich/imageobject.hpp \
     ui/widgets/richlistbox.hpp ui/rich/documentview.cpp \
-    ui/rich/documentview.hpp ui/rich/document.cpp ui/rich/blockobject.hpp \
-    ui/rich/document.hpp ui/widgets/statictext.cpp ui/widgets/statictext.hpp \
+    ui/rich/documentview.hpp ui/rich/document.cpp ui/rich/document.hpp \
+    ui/widgets/statictext.cpp ui/widgets/statictext.hpp \
     ui/widgets/inputline.cpp ui/widgets/inputline.hpp \
     ui/widgets/simpleiconbox.cpp ui/widgets/simpleiconbox.hpp \
     ui/widgets/iconbox.cpp ui/widgets/iconbox.hpp ui/group.cpp ui/group.hpp \
@@ -876,8 +1009,7 @@ FILES_guilib = client/si/remotecontrol.cpp client/si/remotecontrol.hpp \
     gfx/palettizedpixmap.cpp gfx/palettizedpixmap.hpp \
     gfx/pixmapcanvasimpl.hpp gfx/types.cpp gfx/pixmap.hpp gfx/canvas.cpp \
     gfx/primitives.hpp gfx/point.cpp ui/widgets/button.cpp \
-    ui/widgets/button.hpp ui/widgets/abstractbutton.cpp \
-    ui/widgets/abstractbutton.hpp ui/window.cpp ui/window.hpp ui/draw.cpp \
+    ui/widgets/button.hpp ui/window.cpp ui/window.hpp ui/draw.cpp \
     ui/draw.hpp ui/defaultresourceprovider.cpp \
     ui/defaultresourceprovider.hpp gfx/resourceprovider.hpp gfx/fontlist.cpp \
     gfx/fontlist.hpp gfx/fontrequest.cpp gfx/fontrequest.hpp ui/spacer.cpp \
@@ -904,12 +1036,14 @@ DEPEND_guilib = afl
 PROJ_AUTO += guilib:gfx/*.cpp,gfx/*.hpp,ui/*.cpp,ui/*.hpp,client/*.cpp,client/*.hpp
 
 TARGETS += serverlib
-FILES_serverlib = server/host/hostkey.cpp server/host/hostkey.hpp \
-    server/interface/hostkeyserver.cpp server/interface/hostkeyserver.hpp \
-    server/interface/hostkeyclient.cpp server/interface/hostkeyclient.hpp \
-    server/interface/hostkey.hpp server/host/keystore.cpp \
-    server/host/keystore.hpp server/play/friendlycodepacker.cpp \
-    server/play/friendlycodepacker.hpp \
+FILES_serverlib = server/test/terminalverifier.hpp \
+    server/test/consolecommandhandlermock.cpp \
+    server/test/consolecommandhandlermock.hpp server/host/hostkey.cpp \
+    server/host/hostkey.hpp server/interface/hostkeyserver.cpp \
+    server/interface/hostkeyserver.hpp server/interface/hostkeyclient.cpp \
+    server/interface/hostkeyclient.hpp server/interface/hostkey.hpp \
+    server/host/keystore.cpp server/host/keystore.hpp \
+    server/play/friendlycodepacker.cpp server/play/friendlycodepacker.hpp \
     server/play/outmessagecommandhandler.cpp \
     server/play/outmessagecommandhandler.hpp \
     server/play/outmessageindexpacker.cpp \
@@ -1421,7 +1555,59 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_game_map_minefieldtype.cpp u/t_game_v3_fizzfile.cpp \
+FILES_testsuite = u/t_game_vcr_flak_object.cpp \
+    u/t_game_vcr_flak_database.cpp u/t_game_vcr_flak_setup.cpp \
+    u/t_game_vcr_flak_algorithm.cpp u/t_game_vcr_flak_battle.cpp \
+    u/t_game_vcr_flak_gameenvironment.cpp u/t_game_vcr_flak_environment.cpp \
+    u/t_game_vcr_flak_configuration.cpp u/t_game_vcr_flak_position.cpp \
+    u/t_game_vcr_flak_structures.cpp u/t_game_vcr_flak.hpp \
+    u/t_ui_widgets_alignedcontainer.cpp u/t_ui_widgets_treelistbox.cpp \
+    u/t_game_proxy_historyshiplistproxy.cpp u/t_game_ref_historyshiplist.cpp \
+    u/t_game_ref_historyshipselection.cpp \
+    u/t_game_actions_multitransfersetup.cpp \
+    u/t_game_test_simpleenvironment.cpp \
+    u/t_game_proxy_expressionlistproxy.cpp \
+    u/t_game_config_expressionlists.cpp u/t_util_expressionlist.cpp \
+    u/t_game_proxy_inboxadaptor.cpp u/t_game_proxy_mailboxproxy.cpp \
+    u/t_game_proxy_mailboxadaptor.cpp u/t_game_msg_configuration.cpp \
+    u/t_game_msg_browser.cpp u/t_game_interface_inboxsubsetvalue.cpp \
+    u/t_game_msg_subsetmailbox.cpp u/t_game_msg_inbox.cpp \
+    u/t_game_interface_inboxcontext.cpp u/t_game_map_messagelink.cpp \
+    u/t_game_proxy_classicvcrplayerproxy.cpp \
+    u/t_game_proxy_vcrdatabaseadaptor.cpp u/t_game_vcr_info.cpp \
+    u/t_game_proxy_vcrdatabaseproxy.cpp u/t_game_vcr_nulldatabase.cpp \
+    u/t_game_vcr_classic_battle.cpp u/t_game_interface_shiptaskpredictor.cpp \
+    u/t_game_interface_basetaskpredictor.cpp \
+    u/t_game_proxy_buildpartsproxy.cpp u/t_game_proxy_techupgradeproxy.cpp \
+    u/t_game_proxy_buildshipproxy.cpp u/t_game_proxy_basestorageproxy.cpp \
+    u/t_game_map_rangeset.cpp u/t_game_map_objectobserver.cpp \
+    u/t_ui_eventloop.cpp u/t_ui_layoutablegroup.cpp u/t_client_marker.cpp \
+    u/t_game_proxy_simulationrunproxy.cpp u/t_game_proxy_ufoproxy.cpp \
+    u/t_game_proxy_ionstormproxy.cpp u/t_game_proxy_maprendererproxy.cpp \
+    u/t_game_proxy_drawingproxy.cpp u/t_game_map_renderoptions.cpp \
+    u/t_game_config_markeroption.cpp u/t_game_proxy_minefieldproxy.cpp \
+    u/t_util_layout.cpp u/t_game_score_scorebuilderbase.cpp \
+    u/t_ui_widgets_chart.cpp u/t_game_score_tablebuilder.cpp \
+    u/t_game_proxy_scoreproxy.cpp u/t_game_score_chartbuilder.cpp \
+    u/t_util_datatable.cpp u/t_game_proxy_planetpredictorproxy.cpp \
+    u/t_game_map_planeteffectors.cpp \
+    u/t_game_proxy_simulationtransferproxy.cpp u/t_game_vcr_objectinfo.cpp \
+    u/t_game_sim_sort.cpp u/t_game_proxy_fleetcostproxy.cpp \
+    u/t_game_sim_fleetcost.cpp u/t_game_spec_costsummary.cpp \
+    u/t_game_sim_sessionextra.cpp u/t_game_sim_session.cpp \
+    u/t_game_proxy_simulationsetupproxy.cpp u/t_game_sim_gameinterface.cpp \
+    u/t_game_proxy_teamproxy.cpp u/t_ui_widgets_icongrid.cpp \
+    u/t_ui_icons_hbox.cpp u/t_ui_icons_colortile.cpp u/t_ui_icons_spacer.cpp \
+    u/t_ui_icons_icon.cpp u/t_ui_icons.hpp u/t_ui_widgets_basebutton.cpp \
+    u/t_game_v3_attachmentconfiguration.cpp \
+    u/t_game_v3_attachmentunpacker.cpp u/t_game_interface_pluginproperty.cpp \
+    u/t_interpreter_test_expressionverifier.cpp \
+    u/t_server_test_consolecommandhandlermock.cpp u/t_server_test.hpp \
+    u/t_interpreter_test_contextverifier.cpp u/t_interpreter_test.hpp \
+    u/t_game_interface_completionlist.cpp u/t_game_db_packer.cpp \
+    u/t_game_interface_drawingproperty.cpp u/t_game_map_drawingcontainer.cpp \
+    u/t_game_map_drawing.cpp u/t_game_map_boundingbox.cpp \
+    u/t_game_map_minefieldtype.cpp u/t_game_v3_fizzfile.cpp \
     u/t_game_map_explosiontype.cpp \
     u/t_game_actions_changeshipfriendlycode.cpp u/t_game_shipquery.cpp \
     u/t_game_session.cpp u/t_game_map_ufotype.cpp u/t_game_map_ufo.cpp \
@@ -1589,10 +1775,8 @@ FILES_testsuite = u/t_game_map_minefieldtype.cpp u/t_game_v3_fizzfile.cpp \
     u/t_server_nntp_root.cpp u/t_server_nntp.hpp \
     u/t_server_console_routercontextfactory.cpp \
     u/t_server_console_fundamentalcommandhandler.cpp \
-    u/helper/consolecommandhandlermock.cpp \
-    u/helper/consolecommandhandlermock.hpp \
     u/t_server_console_pipeterminal.cpp u/t_server_console_dumbterminal.cpp \
-    u/t_server_console_terminal.hpp u/t_server_console_colorterminal.cpp \
+    u/t_server_console_colorterminal.cpp \
     u/t_server_console_integercommandhandler.cpp \
     u/t_server_console_stringcommandhandler.cpp \
     u/t_server_console_nullterminal.cpp u/t_server_console_parser.cpp \
@@ -1677,9 +1861,8 @@ FILES_testsuite = u/t_game_map_minefieldtype.cpp u/t_game_v3_fizzfile.cpp \
     u/t_interpreter_exporter_htmlexporter.cpp \
     u/t_interpreter_filefunctions.cpp u/t_game_parser_messageparser.cpp \
     u/t_game_parser_messageinformation.cpp u/t_game_parser_messagevalue.cpp \
-    u/t_game_root.cpp u/helper/counter.hpp u/t_game_turn.cpp \
-    u/t_game_playerset.cpp u/t_game_shipbuildorder.cpp \
-    u/t_game_spec_shiplist.cpp \
+    u/t_game_root.cpp u/t_game_turn.cpp u/t_game_playerset.cpp \
+    u/t_game_shipbuildorder.cpp u/t_game_spec_shiplist.cpp \
     u/t_game_spec_standardcomponentnameprovider.cpp u/t_game_spec_hull.cpp \
     u/t_game_spec_hullfunctionassignmentlist.cpp \
     u/t_game_spec_modifiedhullfunctionlist.cpp \
@@ -1719,8 +1902,7 @@ FILES_testsuite = u/t_game_map_minefieldtype.cpp u/t_game_v3_fizzfile.cpp \
     u/t_server_file_ca_directoryentry.cpp u/t_server_file_ca_objectid.cpp \
     u/t_server_file_ca_objectstore.cpp u/t_server_file_ca.hpp \
     u/t_server_file_filegame.cpp u/t_server_file_racenames.cpp \
-    u/t_server_file_gamestatus.cpp u/files.cpp u/files.hpp \
-    u/t_server_interface_filegameserver.cpp \
+    u/t_server_file_gamestatus.cpp u/t_server_interface_filegameserver.cpp \
     u/t_server_interface_filegameclient.cpp \
     u/t_server_interface_filegame.cpp u/t_server_file_commandhandler.cpp \
     u/t_server_file_item.cpp u/t_server_file_directoryhandler.cpp \
@@ -1797,14 +1979,13 @@ FILES_testsuite = u/t_game_map_minefieldtype.cpp u/t_game_v3_fizzfile.cpp \
     u/t_ui_layout_grid.cpp u/t_ui_layout.hpp u/t_ui_root.cpp \
     u/t_ui_widgets_radiobutton.cpp u/t_ui_widgets_checkbox.cpp \
     u/t_interpreter_error.cpp u/t_gfx_save.cpp \
-    u/t_gfx_nullresourceprovider.cpp u/t_ui_widgets_abstractbutton.cpp \
-    u/t_ui_prefixargument.cpp u/t_util_prefixargument.cpp \
-    u/t_game_v3_controlfile.cpp u/t_util_stringlist.cpp \
-    u/t_util_fileparser.cpp u/t_util_configurationfileparser.cpp \
-    u/t_gfx_defaultfont.cpp u/t_util_messagenotifier.cpp \
-    u/t_util_messagecollector.cpp u/t_util_messagematcher.cpp \
-    u/t_util_filenamepattern.cpp u/t_gfx_types.cpp \
-    u/t_gfx_gen_perlinnoise.cpp u/t_gfx_gen.hpp \
+    u/t_gfx_nullresourceprovider.cpp u/t_ui_prefixargument.cpp \
+    u/t_util_prefixargument.cpp u/t_game_v3_controlfile.cpp \
+    u/t_util_stringlist.cpp u/t_util_fileparser.cpp \
+    u/t_util_configurationfileparser.cpp u/t_gfx_defaultfont.cpp \
+    u/t_util_messagenotifier.cpp u/t_util_messagecollector.cpp \
+    u/t_util_messagematcher.cpp u/t_util_filenamepattern.cpp \
+    u/t_gfx_types.cpp u/t_gfx_gen_perlinnoise.cpp u/t_gfx_gen.hpp \
     u/t_client_si_scriptprocedure.cpp u/t_client_si_usercall.cpp \
     u/t_game_sim_loader.cpp u/t_game_sim_planet.cpp u/t_game_sim_ship.cpp \
     u/t_game_sim_object.cpp u/t_game_sim.hpp \
@@ -1819,8 +2000,7 @@ FILES_testsuite = u/t_game_map_minefieldtype.cpp u/t_game_v3_fizzfile.cpp \
     u/t_interpreter_blobvalue.cpp u/t_game_interface_ufocontext.cpp \
     u/t_game_interface_enginecontext.cpp \
     u/t_game_interface_friendlycodecontext.cpp \
-    u/t_game_interface_missioncontext.cpp u/helper/contextverifier.cpp \
-    u/helper/contextverifier.hpp u/t_interpreter_context.cpp \
+    u/t_game_interface_missioncontext.cpp u/t_interpreter_context.cpp \
     u/t_game_config_genericintegerarrayoption.cpp \
     u/t_game_config_integeroption.cpp u/t_game_config_aliasoption.cpp \
     u/t_game_hostversion.cpp u/t_game_experiencelevelset.cpp \
@@ -1863,28 +2043,25 @@ FILES_testsuite = u/t_game_map_minefieldtype.cpp u/t_game_v3_fizzfile.cpp \
     u/t_game_spec_componentvector.cpp u/t_game_spec_component.cpp \
     u/t_util_keystring.cpp u/t_interpreter_process.cpp \
     u/t_interpreter_processlist.cpp u/t_interpreter_bytecodeobject.cpp \
-    u/t_util_slaverequestsender.cpp u/t_util_slaverequest.cpp \
-    u/t_util_baseslaverequestsender.cpp u/t_util_baseslaverequest.cpp \
-    u/t_util_slaveobject.cpp u/t_game_browser_handlerlist.cpp \
-    u/t_game_player.cpp u/t_game_config_configurationoption.cpp \
+    u/t_game_browser_handlerlist.cpp u/t_game_player.cpp \
+    u/t_game_config_configurationoption.cpp \
     u/t_game_config_costarrayoption.cpp u/t_game_msg_mailbox.cpp \
     u/t_game_msg.hpp u/t_game_browser_unsupportedaccountfolder.cpp \
     u/t_ui_invisiblewidget.cpp u/t_game_exception.cpp \
-    u/t_gfx_resourceprovider.cpp u/t_ui_rich_imageobject.cpp \
-    u/t_util_rich_parser.cpp u/t_ui_rich_blockobject.cpp u/t_ui_rich.hpp \
-    u/t_gfx_canvas.cpp u/t_game_browser_account.cpp \
-    u/t_util_unicodechars.cpp u/t_util_rich_visitor.cpp \
-    u/t_util_rich_attribute.cpp u/t_util_rich_styleattribute.cpp \
-    u/t_util_rich_linkattribute.cpp u/t_util_rich_colorattribute.cpp \
-    u/t_util_rich_text.cpp u/t_util_rich.hpp u/t_gfx_engine.cpp \
-    u/t_util_requestthread.cpp u/t_ui_group.cpp u/t_ui.hpp \
-    u/t_game_browser_handler.cpp u/t_game_browser_folder.cpp \
-    u/t_game_browser.hpp u/t_ui_res_provider.cpp u/t_ui_res.hpp \
-    u/t_gfx_timerqueue.cpp u/t_gfx_timer.cpp u/t_gfx_sdl_engine.cpp \
-    u/t_gfx_sdl.hpp u/t_util_requestreceiver.cpp u/t_util_request.cpp \
-    u/t_util_requestdispatcher.cpp u/t_gfx_nullcanvas.cpp \
-    u/t_interpreter_nametable.cpp u/t_game_tables_happinesschangename.cpp \
-    u/t_game_spec_missionlist.cpp u/t_game_tables_mineralmassclassname.cpp \
+    u/t_gfx_resourceprovider.cpp u/t_util_rich_parser.cpp u/t_gfx_canvas.cpp \
+    u/t_game_browser_account.cpp u/t_util_unicodechars.cpp \
+    u/t_util_rich_visitor.cpp u/t_util_rich_attribute.cpp \
+    u/t_util_rich_styleattribute.cpp u/t_util_rich_linkattribute.cpp \
+    u/t_util_rich_colorattribute.cpp u/t_util_rich_text.cpp \
+    u/t_util_rich.hpp u/t_gfx_engine.cpp u/t_util_requestthread.cpp \
+    u/t_ui_group.cpp u/t_ui.hpp u/t_game_browser_handler.cpp \
+    u/t_game_browser_folder.cpp u/t_game_browser.hpp u/t_ui_res_provider.cpp \
+    u/t_ui_res.hpp u/t_gfx_timerqueue.cpp u/t_gfx_timer.cpp \
+    u/t_gfx_sdl_engine.cpp u/t_gfx_sdl.hpp u/t_util_requestreceiver.cpp \
+    u/t_util_request.cpp u/t_util_requestdispatcher.cpp \
+    u/t_gfx_nullcanvas.cpp u/t_interpreter_nametable.cpp \
+    u/t_game_tables_happinesschangename.cpp u/t_game_spec_missionlist.cpp \
+    u/t_game_tables_mineralmassclassname.cpp \
     u/t_game_tables_happinessname.cpp u/t_game_tables_temperaturename.cpp \
     u/t_game_tables_nativeracename.cpp \
     u/t_game_tables_nativegovernmentname.cpp \
@@ -1893,13 +2070,13 @@ FILES_testsuite = u/t_game_map_minefieldtype.cpp u/t_game_v3_fizzfile.cpp \
     u/t_game_unitscoredefinitionlist.cpp u/t_game_unitscorelist.cpp \
     u/t_interpreter_statementcompiler.cpp \
     u/t_interpreter_expr_builtinfunction.cpp u/t_interpreter_expr_parser.cpp \
-    u/t_interpreter_expr.hpp u/t_interpreter.cpp u/t_util_keymaptable.cpp \
-    u/t_util_keymap.cpp u/t_util_atomtable.cpp u/t_util_key.cpp \
-    u/t_game_parser.hpp u/t_game_parser_messagetemplate.cpp \
-    u/t_game_playerbitmatrix.cpp u/t_game.hpp u/t_game_playerarray.cpp \
-    u/t_interpreter_tokenizer.cpp u/t_interpreter.hpp \
-    u/t_game_spec_friendlycodelist.cpp u/t_game_spec_friendlycode.cpp \
-    u/t_game_map_configuration.cpp u/t_game_map_point.cpp u/t_game_map.hpp \
+    u/t_interpreter_expr.hpp u/t_util_keymaptable.cpp u/t_util_keymap.cpp \
+    u/t_util_atomtable.cpp u/t_util_key.cpp u/t_game_parser.hpp \
+    u/t_game_parser_messagetemplate.cpp u/t_game_playerbitmatrix.cpp \
+    u/t_game.hpp u/t_game_playerarray.cpp u/t_interpreter_tokenizer.cpp \
+    u/t_interpreter.hpp u/t_game_spec_friendlycodelist.cpp \
+    u/t_game_spec_friendlycode.cpp u/t_game_map_configuration.cpp \
+    u/t_game_map_point.cpp u/t_game_map.hpp \
     u/t_game_vcr_classic_pvcralgorithm.cpp u/t_game_vcr_classic.hpp \
     u/t_game_vcr_classic_hostalgorithm.cpp u/t_gfx_rectangle.cpp \
     u/t_gfx_point.cpp u/t_gfx.hpp u/t_gfx_fillpattern.cpp \

@@ -82,9 +82,6 @@ game::map::SimpleObjectCursor::setObjectType(ObjectType* type)
     }
 }
 
-// /** Handle changes in the underlying set. This function is called on the
-//     current type's conn_set_changed signal. It changes the current index
-//     if it got invalid. */
 void
 game::map::SimpleObjectCursor::onSetChange(Id_t hint)
 {

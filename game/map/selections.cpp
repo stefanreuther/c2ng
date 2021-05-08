@@ -10,6 +10,29 @@
 #include "game/map/objectvector.hpp"
 #include "game/map/universe.hpp"
 
+
+
+size_t
+game::map::Selections::LayerReference::resolve(const Selections& sel) const
+{
+    switch (m_relation) {
+     case NamedLayer:
+        return m_layer;
+
+     case CurrentLayer:
+        return sel.getCurrentLayer();
+
+     case NextLayer:
+        return (sel.getCurrentLayer() + 1) % sel.getNumLayers();
+
+     case PreviousLayer:
+        return (sel.getCurrentLayer() + sel.getNumLayers() - 1) % sel.getNumLayers();
+    }
+    return 0;
+}
+
+
+
 // Constructor.
 game::map::Selections::Selections()
     : sig_selectionChange(),
@@ -80,23 +103,25 @@ game::map::Selections::limitToExistingObjects(Universe& u, size_t layer)
 
 // Execute compiled expression.
 void
-game::map::Selections::executeCompiledExpression(const String_t& compiledExpression, size_t targetLayer, Universe& u)
+game::map::Selections::executeCompiledExpression(const String_t& compiledExpression, LayerReference targetLayer, Universe& u)
 {
     // ex GMultiSelection::executeSelectionExpression
+    const size_t effTarget = targetLayer.resolve(*this);
+
     // Save current state
     copyFrom(u, m_currentLayer);
 
     // Perform operation
-    if (SelectionVector* p = get(Planet, targetLayer)) {
+    if (SelectionVector* p = get(Planet, effTarget)) {
         p->executeCompiledExpression(compiledExpression, m_currentLayer, m_planets, u.planets().size(), true);
     }
-    if (SelectionVector* p = get(Ship, targetLayer)) {
+    if (SelectionVector* p = get(Ship, effTarget)) {
         p->executeCompiledExpression(compiledExpression, m_currentLayer, m_ships, u.ships().size(), false);
     }
 
     // Postprocess
-    limitToExistingObjects(u, targetLayer);
-    if (targetLayer == m_currentLayer) {
+    limitToExistingObjects(u, effTarget);
+    if (effTarget == m_currentLayer) {
         copyTo(u, m_currentLayer);
     }
     sig_selectionChange.raise();
@@ -121,6 +146,46 @@ game::map::Selections::executeCompiledExpressionAll(const String_t& compiledExpr
     sig_selectionChange.raise();
 }
 
+// Mark objects given as list.
+void
+game::map::Selections::markList(LayerReference targetLayer, const game::ref::List& list, bool mark, Universe& u)
+{
+    // ex WSearchDialog::doMarkResult (sort-of)
+    const size_t effTarget = targetLayer.resolve(*this);
+
+    // Save current state
+    copyFrom(u, m_currentLayer);
+
+    // Perform operation
+    // @change We work on the Selections, so we cannot mark minefields etc. (like PCC1, unlike PCC2).
+    for (size_t i = 0, n = list.size(); i < n; ++i) {
+        Reference ref = list[i];
+        switch (ref.getType()) {
+         case Reference::Ship:
+            if (u.ships().get(ref.getId()) != 0) {
+                if (SelectionVector* p = get(Ship, effTarget)) {
+                    p->set(ref.getId(), mark);
+                }
+            }
+            break;
+         case Reference::Planet:
+         case Reference::Starbase:
+            if (u.planets().get(ref.getId()) != 0) {
+                if (SelectionVector* p = get(Planet, effTarget)) {
+                    p->set(ref.getId(), mark);
+                }
+            }
+            break;
+         default:
+            break;
+        }
+    }
+
+    // Postprocess
+    copyTo(u, m_currentLayer);
+    sig_selectionChange.raise();
+}
+
 // Get current layer number.
 size_t
 game::map::Selections::getCurrentLayer() const
@@ -131,13 +196,14 @@ game::map::Selections::getCurrentLayer() const
 
 // Set current layer number.
 void
-game::map::Selections::setCurrentLayer(size_t newLayer, Universe& u)
+game::map::Selections::setCurrentLayer(LayerReference newLayer, Universe& u)
 {
     // ex GMultiSelection::setCurrentSelectionLayer
     // FIXME: PCC2 would have a way to accept this call even when no turn loaded
-    if (newLayer != m_currentLayer) {
+    size_t effLayer = newLayer.resolve(*this);
+    if (effLayer != m_currentLayer) {
         copyFrom(u, m_currentLayer);
-        m_currentLayer = newLayer;
+        m_currentLayer = effLayer;
         copyTo(u, m_currentLayer);
         limitToExistingObjects(u, m_currentLayer);
         sig_selectionChange.raise();

@@ -18,3 +18,14 @@ TestGameMapPlanet::testAutobuildSettings()
     TS_ASSERT_EQUALS(t.speed[0].isValid(), false);
 }
 
+/** Test copying. */
+void
+TestGameMapPlanet::testCopy()
+{
+    game::map::Planet t(19);
+    t.setPlayability(game::map::Planet::Playable);
+
+    game::map::Planet t2(t);
+    TS_ASSERT_EQUALS(t2.getPlayability(), game::map::Planet::Playable);
+}
+

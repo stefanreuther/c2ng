@@ -10,11 +10,13 @@
 #include "game/element.hpp"
 #include "game/hostversion.hpp"
 #include "game/map/basedata.hpp"
+#include "game/map/messagelink.hpp"
 #include "game/map/object.hpp"
 #include "game/map/planetdata.hpp"
 #include "game/parser/messageinformation.hpp"
 #include "game/playerset.hpp"
 #include "game/spec/hullassignmentlist.hpp"
+#include "game/unitscoredefinitionlist.hpp"
 #include "game/unitscorelist.hpp"
 
 namespace game { namespace map {
@@ -165,43 +167,114 @@ namespace game { namespace map {
          *  Planet status accessors:
          */
 
-        bool        isVisible() const;
+        /** Check whether planet is visible.
+            \return true if planet is visible */
+        bool isVisible() const;
+
+        /** Get planet source flags.
+            This is the set of players whose PDATA file contains a copy of this planet
+            (usually a unit set, but may be larger for unowned planets).
+            \return set */
         PlayerSet_t getPlanetSource() const;
-        void        addPlanetSource(PlayerSet_t p);
-        bool        hasAnyPlanetData() const;
-        bool        hasFullPlanetData() const;
-        int         getHistoryTimestamp(Timestamp kind) const;
+
+        /** Add planet source.
+            Normally, those are set using addCurrentPlanetData();
+            use this function if you cannot use that.
+            \param p Set to add */
+        void addPlanetSource(PlayerSet_t p);
+
+        /** Check whether we have any information about this planet.
+            Note that the planet may not be visible and therefore treated as nonexistant
+            even if it has information (HiddenPlanet).
+            \return true iff we have any information, full or partial */
+        bool hasAnyPlanetData() const;
+
+        /** Check whether we have full planet data.
+            \return flag */
+        bool hasFullPlanetData() const;
+
+        /** Get history timestamp.
+            \param kind Timestamp to query
+            \return turn number */
+        int getHistoryTimestamp(Timestamp kind) const;
 
 
         /*
          *  Base status accessors:
          */
 
+        /** Get base source flags.
+            This is the set of players whose BDATA file contains a copy of this base (usually a unit set).
+            \return set */
         PlayerSet_t getBaseSource() const;
-        void        addBaseSource(PlayerSet_t p);
-        bool        hasBase() const;
-        bool        hasFullBaseData() const;
+
+        /** Add base source.
+            Normally, those are set using addCurrentBaseData();
+            use this function if you cannot use that.
+            \param p Set to add */
+        void addBaseSource(PlayerSet_t p);
+
+        /** Check for starbase.
+            \retval true this planet has a starbase
+            \retval false this planet has no starbase, or we don't know */
+        bool hasBase() const;
+
+        /** Check for full starbase information.
+            \return true iff we have full, playable data. If yes, all base accessors will work. */
+        bool hasFullBaseData() const;
 
         /*
          *  Owner accessors:
          */
-        void               setOwner(IntegerProperty_t owner);
+        /** Set owner.
+            \param owner new owner */
+        void setOwner(IntegerProperty_t owner);
 
-        // Structure accessors:
-        IntegerProperty_t  getNumBuildings(PlanetaryBuilding kind) const;
-        void               setNumBuildings(PlanetaryBuilding kind, IntegerProperty_t n);
+        /*
+         *  Structure accessors:
+         */
 
+        /** Get number of buildings.
+            \param kind Structure kind
+            \return number */
+        IntegerProperty_t getNumBuildings(PlanetaryBuilding kind) const;
+
+        /** Set number of buildings.
+            \param kind Structure kind
+            \param n    New amount */
+        void setNumBuildings(PlanetaryBuilding kind, IntegerProperty_t n);
+
+        /** Get industry level of this planet.
+            Reports the industry level from known structure counts if available, otherwise from sensor scans.
+            \param host Host version (for interpretation of levels)
+            \return level */
         IntegerProperty_t  getIndustryLevel(const HostVersion& host) const;
-        static int         getIndustryLevel(int mifa, const HostVersion& host);
-        void               setIndustryLevel(IntegerProperty_t level, const HostVersion& host);
 
-        // Colonist accessors:
+        /** Get industry level for a given structure count.
+            \param mifa Mines+Factories
+            \param host Host version (for interpretation of levels)
+            \return level */
+        static int getIndustryLevel(int mifa, const HostVersion& host);
+
+        /** Set industry level for this planet.
+            This routine only makes sense for planets we do not play.
+            \param level New level
+            \param host  Host version (for interpretation of levels) */
+        void setIndustryLevel(IntegerProperty_t level, const HostVersion& host);
+
+        /*
+         *  Colonist accessors:
+         */
+
         NegativeProperty_t getColonistHappiness() const;
         void               setColonistHappiness(NegativeProperty_t happiness);
         IntegerProperty_t  getColonistTax() const;
         void               setColonistTax(IntegerProperty_t tax);
 
-        // Native accessors:
+        /*
+         *  Native accessors:
+         */
+
         IntegerProperty_t  getNativeGovernment() const;
         void               setNativeGovernment(IntegerProperty_t gov);
         NegativeProperty_t getNativeHappiness() const;
@@ -216,15 +289,24 @@ namespace game { namespace map {
         bool               isKnownToHaveNatives() const;
         void               setKnownToHaveNatives(bool known);
 
-        // FCode accessors:
+        /*
+         *  FCode accessors:
+         */
+
         StringProperty_t   getFriendlyCode() const;
         void               setFriendlyCode(StringProperty_t fc);
 
-        // Starbase building accessors:
+        /*
+         *  Starbase building accessors:
+         */
+
         bool               isBuildingBase() const;
         void               setBuildBaseFlag(bool b);
 
-        // Environment accessors:
+        /*
+         *  Environment accessors:
+         */
+
         IntegerProperty_t  getOreDensity(Element::Type type) const;
         void               setOreDensity(Element::Type type, IntegerProperty_t amount);
         LongProperty_t     getOreGround(Element::Type type) const;
@@ -232,11 +314,25 @@ namespace game { namespace map {
         IntegerProperty_t  getTemperature() const;
         void               setTemperature(IntegerProperty_t value);
 
-        // Cargo accessors:
-        LongProperty_t     getCargo(Element::Type type) const;
-        void               setCargo(Element::Type type, LongProperty_t amount);
+        /*
+         *  Cargo accessors:
+         */
 
-        // Simple base accessors:
+        /** Get available cargo amount.
+            Use to access colonists, supplies, cash, mined ore, starbase ammo storage.
+            \param type Cargo type
+            \return amount (kt, clans, mc, torpedoes/fighters) */
+        LongProperty_t getCargo(Element::Type type) const;
+
+        /** Set cargo amount.
+            \param type   Cargo type
+            \param amount Amount */
+        void setCargo(Element::Type type, LongProperty_t amount);
+
+        /*
+         *  Simple base accessors:
+         */
+
         IntegerProperty_t  getBaseDamage() const;
         void               setBaseDamage(IntegerProperty_t n);
         IntegerProperty_t  getBaseMission() const;
@@ -244,37 +340,114 @@ namespace game { namespace map {
         IntegerProperty_t  getBaseTechLevel(TechLevel level) const;
         void               setBaseTechLevel(TechLevel level, IntegerProperty_t value);
 
-        // Shipyard accessors:
+        /*
+         *  Shipyard accessors:
+         */
         IntegerProperty_t  getBaseShipyardAction() const;
         IntegerProperty_t  getBaseShipyardId() const;
         void               setBaseShipyardOrder(IntegerProperty_t action, IntegerProperty_t id);
 
-        // Component storage accessors:
-        // for hulls, this is a TRUEHULL SLOT, not a HULL NUMBER.
-        IntegerProperty_t  getBaseStorage(TechLevel area, int slot) const;
-        void               setBaseStorage(TechLevel area, int slot, IntegerProperty_t amount);
+        /*
+         *  Component storage accessors:
+         */
 
-        // Build order accessors:
-        IntegerProperty_t  getBaseBuildHull(const game::config::HostConfiguration& config, const game::spec::HullAssignmentList& map) const;
-        ShipBuildOrder     getBaseBuildOrder() const;
-        void               setBaseBuildOrder(const ShipBuildOrder& order);
-        IntegerProperty_t  getBaseBuildOrderHullIndex() const;
+        /** Get starbase component storage.
+            \param area Area to query
+            \param slot Slot number (for hulls, truehull slot, NOT hull number)
+            \return amount */
+        IntegerProperty_t getBaseStorage(TechLevel area, int slot) const;
 
-        // Build queue accessors:
+        /** Get starbase component storage maximum index.
+            All values at this slot or higher are unknown.
+            Therefore, use `for (i = 0; i < getBaseStorage(L); ++i)` for iterating over a storage.
+            \param area Area to query */
+        int getBaseStorageLimit(TechLevel area) const;
+
+        /** Set starbase component storage.
+
+            Note that this function will NOT create base component storage slots, accesses to an invalid slot are ignored.
+            Slots can be created only using addCurrentBaseData().
+
+            \param area Area to query
+            \param slot Slot number (for hulls, truehull slot, NOT hull number)
+            \param amount New amount */
+        void setBaseStorage(TechLevel area, int slot, IntegerProperty_t amount);
+
+        /*
+         *  Build order accessors:
+         */
+
+        /** Get ship being built.
+            \param config Host configuration (for resolution of truehull slots to hull numbers)
+            \param map    HullAssignmentList (for resolution of truehull slots to hull numbers)
+            \return Hull number; Nothing if no ship being built */
+        IntegerProperty_t getBaseBuildHull(const game::config::HostConfiguration& config, const game::spec::HullAssignmentList& map) const;
+
+        /** Get ship build order.
+            \return order (using truehull slot) */
+        ShipBuildOrder getBaseBuildOrder() const;
+
+        /** Set ship build order.
+            \param order New order (using truehull slot) */
+        void setBaseBuildOrder(const ShipBuildOrder& order);
+
+        /** Get truehull slot for ship being built.
+            \return slot */
+        IntegerProperty_t getBaseBuildOrderHullIndex() const;
+
+        /*
+         *  Build queue accessors:
+         */
+
         IntegerProperty_t  getBaseQueuePosition() const;
         void               setBaseQueuePosition(IntegerProperty_t pos);
         LongProperty_t     getBaseQueuePriority() const;
         void               setBaseQueuePriority(LongProperty_t pri);
 
-        // Auto build accessors:
-        int         getAutobuildGoal(PlanetaryBuilding ps) const;
-        void        setAutobuildGoal(PlanetaryBuilding ps, int value);
-        int         getAutobuildSpeed(PlanetaryBuilding ps) const;
-        void        setAutobuildSpeed(PlanetaryBuilding ps, int value);
-        void        applyAutobuildSettings(const AutobuildSettings& settings);
+        /*
+         *  Auto build accessors:
+         */
+
+        /** Get autobuild goal for a structure.
+            Known for all planets.
+            \param ps Structure type */
+        int getAutobuildGoal(PlanetaryBuilding ps) const;
+
+        /** Set autobuild goal for a structure.
+            \param ps Structure type
+            \param value New goal */
+        void setAutobuildGoal(PlanetaryBuilding ps, int value);
+
+        /** Get autobuild speed for a structure.
+            Known for all planets.
+            \param ps Structure type */
+        int getAutobuildSpeed(PlanetaryBuilding ps) const;
+
+        /** Set autobuild speed for a structure.
+            \param ps Structure type
+            \param value New speed */
+        void setAutobuildSpeed(PlanetaryBuilding ps, int value);
+
+        /** Apply auto-build settings.
+            Updates all goals and speeds from the values that are set in \c settings.
+            \param settings New settings */
+        void applyAutobuildSettings(const AutobuildSettings& settings);
+
+
+        /*
+         *  Unit score accessors:
+         */
 
         UnitScoreList& unitScores();
         const UnitScoreList& unitScores() const;
+        NegativeProperty_t getScore(int16_t scoreId, const UnitScoreDefinitionList& scoreDefinitions) const;
+
+
+        /*
+         *  Message link
+         */
+        MessageLink& messages();
+        const MessageLink& messages() const;
 
      private:
         Id_t m_id;              // ID, always known
@@ -311,6 +484,7 @@ namespace game { namespace map {
         LongProperty_t m_queuePriority;
 
         UnitScoreList m_unitScores;
+        MessageLink m_messages;
     };
 
 } }

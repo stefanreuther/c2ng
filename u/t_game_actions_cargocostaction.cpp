@@ -15,6 +15,10 @@ namespace {
      public:
         virtual String_t getName(afl::string::Translator& /*tx*/) const
             { return String_t(); }
+        virtual String_t getInfo1(afl::string::Translator& /*tx*/) const
+            { return String_t(); }
+        virtual String_t getInfo2(afl::string::Translator& /*tx*/) const
+            { return String_t(); }
         virtual Flags_t getFlags() const
             { return Flags_t(SupplySale); }
         virtual bool canHaveElement(Element::Type /*type*/) const
@@ -226,6 +230,10 @@ TestGameActionsCargoCostAction::testUnderlayingChange()
             : m_amount(50)
             { }
         virtual String_t getName(afl::string::Translator& /*tx*/) const
+            { return String_t(); }
+        virtual String_t getInfo1(afl::string::Translator& /*tx*/) const
+            { return String_t(); }
+        virtual String_t getInfo2(afl::string::Translator& /*tx*/) const
             { return String_t(); }
         virtual Flags_t getFlags() const
             { return Flags_t(); }

@@ -7,6 +7,7 @@
 
 #include "afl/io/textwriter.hpp"
 #include "afl/net/commandhandler.hpp"
+#include "afl/string/translator.hpp"
 #include "afl/sys/commandlineparser.hpp"
 
 namespace server { namespace dbexport {
@@ -14,10 +15,12 @@ namespace server { namespace dbexport {
     /** Export database.
         \param out          Output receiver
         \param dbConnection Database connection
-        \param commandLine  Command line, parsed for options and values to export. */
+        \param commandLine  Command line, parsed for options and values to export.
+        \param tx           Translator (for error messages/exceptions) */
     void exportDatabase(afl::io::TextWriter& out,
                         afl::net::CommandHandler& dbConnection,
-                        afl::sys::CommandLineParser& commandLine);
+                        afl::sys::CommandLineParser& commandLine,
+                        afl::string::Translator& tx);
 
 } }
 

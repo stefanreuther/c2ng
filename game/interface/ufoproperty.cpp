@@ -159,7 +159,7 @@ game::interface::getUfoProperty(const game::map::Ufo& ufo, UfoProperty iup,
 }
 
 void
-game::interface::setUfoProperty(game::map::Ufo& ufo, UfoProperty iup, afl::data::Value* value)
+game::interface::setUfoProperty(game::map::Ufo& ufo, UfoProperty iup, const afl::data::Value* value)
 {
     // ex int/if/ufoif.h:setUfoProperty
     int32_t iv;

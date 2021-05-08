@@ -6,6 +6,7 @@
 #include "util/range.hpp"
 
 #include "t_util.hpp"
+#include "afl/string/nulltranslator.hpp"
 
 void
 TestUtilRange::testInit()
@@ -103,5 +104,25 @@ TestUtilRange::testOp()
     util::Range<int> c(5, 10);
     c += util::Range<int>();
     TS_ASSERT(c.empty());
+}
+
+void
+TestUtilRange::testFormat()
+{
+    util::Range<int> max(1, 10000);
+    util::NumberFormatter fmt(true, true);
+    afl::string::NullTranslator tx;
+
+    TS_ASSERT_EQUALS(toString(util::Range<int>(5, 9000),     max, true, fmt, tx), "5 to 9,000");
+    TS_ASSERT_EQUALS(toString(util::Range<int>(1, 1000),     max, true, fmt, tx), "up to 1,000");
+    TS_ASSERT_EQUALS(toString(util::Range<int>(5000, 10000), max, true, fmt, tx), "5,000 or more");
+    TS_ASSERT_EQUALS(toString(util::Range<int>(7777, 7777),  max, true, fmt, tx), "7,777");
+    TS_ASSERT_EQUALS(toString(util::Range<int>(),            max, true, fmt, tx), "none");
+
+    TS_ASSERT_EQUALS(toString(util::Range<int>(5, 9000),     max, false, fmt, tx), "5" UTF_EN_DASH "9,000");
+    TS_ASSERT_EQUALS(toString(util::Range<int>(1, 1000),     max, false, fmt, tx), UTF_LEQ " 1,000");
+    TS_ASSERT_EQUALS(toString(util::Range<int>(5000, 10000), max, false, fmt, tx), UTF_GEQ " 5,000");
+    TS_ASSERT_EQUALS(toString(util::Range<int>(7777, 7777),  max, false, fmt, tx), "7,777");
+    TS_ASSERT_EQUALS(toString(util::Range<int>(),            max, false, fmt, tx), "-");
 }
 

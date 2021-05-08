@@ -7,35 +7,36 @@
 #include "client/widgets/playerlist.hpp"
 #include "ui/layout/hbox.hpp"
 #include "ui/layout/vbox.hpp"
+#include "ui/res/resid.hpp"
 #include "ui/spacer.hpp"
 #include "ui/widgets/framegroup.hpp"
-#include "util/translation.hpp"
-#include "ui/res/resid.hpp"
 
 using afl::string::Format;
 
 namespace {
     const int PAD = 5;
 
-    void initFirstTable(ui::widgets::SimpleTable& tab, int em)
+    const size_t NUM_HULLFUNC_LINES = 4;
+
+    void initFirstTable(ui::widgets::SimpleTable& tab, int em, afl::string::Translator& tx)
     {
         // ex WSpecBaseInfo::drawContent (part)
         tab.column(0).setColor(ui::Color_Gray);
-        tab.column(1).setColor(ui::Color_Green).setTextAlign(2, 0);
+        tab.column(1).setColor(ui::Color_Green).setTextAlign(gfx::RightAlign, gfx::TopAlign);
         tab.column(2).setColor(ui::Color_Green);
         tab.setColumnPadding(1, PAD);
         tab.setColumnPadding(2, PAD);
         tab.setColumnWidth(1, 5*em);
-        tab.cell(0, 0).setText(_("Mass:"));
-        tab.cell(0, 1).setText(_("Engines:"));
-        tab.cell(0, 2).setText(_("Tech:"));
-        tab.cell(0, 3).setText(_("Crew:"));
-        tab.cell(0, 4).setText(_("Cargo:"));
-        tab.cell(0, 5).setText(_("Fuel:"));
+        tab.cell(0, 0).setText(tx("Mass:"));
+        tab.cell(0, 1).setText(tx("Engines:"));
+        tab.cell(0, 2).setText(tx("Tech:"));
+        tab.cell(0, 3).setText(tx("Crew:"));
+        tab.cell(0, 4).setText(tx("Cargo:"));
+        tab.cell(0, 5).setText(tx("Fuel:"));
 
-        tab.cell(2, 0).setText(_("kt"));
-        tab.cell(2, 4).setText(_("kt"));
-        tab.cell(2, 5).setText(_("kt"));
+        tab.cell(2, 0).setText(tx("kt"));
+        tab.cell(2, 4).setText(tx("kt"));
+        tab.cell(2, 5).setText(tx("kt"));
     }
 
     void setFirstTable(ui::widgets::SimpleTable& tab, const game::proxy::HullSpecificationProxy::HullSpecification& data, const util::NumberFormatter& fmt)
@@ -49,55 +50,55 @@ namespace {
         tab.cell(1, 5).setText(fmt.formatNumber(data.maxFuel));
     }
 
-    void initSecondTable(ui::widgets::SimpleTable& tab)
+    void initSecondTable(ui::widgets::SimpleTable& tab, afl::string::Translator& tx)
     {
         // ex WSpecMainInfo::drawContent (part)
         tab.column(0).setColor(ui::Color_Gray);
         tab.column(1).setColor(ui::Color_Green);
         tab.setColumnPadding(0, PAD);
-        tab.cell(0, 0).setText(_("Weapons:"));
-        tab.cell(0, 1).setText(_("Mine Hit:"));
-        tab.cell(0, 2).setText(_("Hull Id:"));
-        // FIXME -> tab.cell(0, 3).setText(_("..."));
+        tab.cell(0, 0).setText(tx("Weapons:"));
+        tab.cell(0, 1).setText(tx("Mine Hit:"));
+        tab.cell(0, 2).setText(tx("Hull Id:"));
+        // FIXME -> tab.cell(0, 3).setText(tx("..."));
     }
 
-    void setSecondTable(ui::widgets::SimpleTable& tab, const game::proxy::HullSpecificationProxy::HullSpecification& data, const util::NumberFormatter& fmt)
+    void setSecondTable(ui::widgets::SimpleTable& tab, const game::proxy::HullSpecificationProxy::HullSpecification& data, const util::NumberFormatter& fmt, afl::string::Translator& tx)
     {
         // ex WSpecMainInfo::drawContent
         String_t w;
         if (data.maxBeams > 0) {
-            w += Format(_("%d beam%!1{s%}").c_str(), data.maxBeams);
+            w += Format(tx("%d beam%!1{s%}"), data.maxBeams);
         }
         if (data.maxLaunchers > 0) {
             if (!w.empty()) {
                 w += ", ";
             }
-            w += Format(_("%d torpedo launcher%!1{s%}").c_str(), data.maxLaunchers);
+            w += Format(tx("%d torpedo launcher%!1{s%}"), data.maxLaunchers);
         }
         if (data.numBays > 0) {
             if (!w.empty()) {
                 w += ", ";
             }
-            w += Format(_("%d fighter bay%!1{s%}").c_str(), data.numBays);
+            w += Format(tx("%d fighter bay%!1{s%}"), data.numBays);
         }
         if (w.empty()) {
-            w = _("none");
+            w = tx("none");
         }
         tab.cell(1, 0).setText(w);
-        tab.cell(1, 1).setText(Format(_("%d%% damage").c_str(), data.mineHitDamage));
+        tab.cell(1, 1).setText(Format(tx("%d%% damage"), data.mineHitDamage));
         tab.cell(1, 2).setText(fmt.formatNumber(data.hullId));
 
         // FIXME: hullfuncs
     }
 
-    void initThirdTable(ui::widgets::SimpleTable& tab, int em)
+    void initThirdTable(ui::widgets::SimpleTable& tab, int em, afl::string::Translator& tx)
     {
         // WSpecBuildInfo::drawContent (part)
         tab.column(0).setColor(ui::Color_Gray);
-        tab.column(1).setColor(ui::Color_Green).setTextAlign(2, 0);
+        tab.column(1).setColor(ui::Color_Green).setTextAlign(gfx::RightAlign, gfx::TopAlign);
         tab.column(2).setColor(ui::Color_Green);
         tab.column(3).setColor(ui::Color_Gray);
-        tab.column(4).setColor(ui::Color_Green).setTextAlign(2, 0);
+        tab.column(4).setColor(ui::Color_Green).setTextAlign(gfx::RightAlign, gfx::TopAlign);
 
         tab.row(0).setColor(ui::Color_White);
 
@@ -109,22 +110,22 @@ namespace {
         tab.setColumnWidth(1, 4*em);
         tab.setColumnWidth(4, 4*em);
 
-        tab.cell(0, 0).setText(_("Resources Needed")).setExtraColumns(2);
-        tab.cell(0, 1).setText(_("Money:"));
-        tab.cell(0, 2).setText(_("Tritanium:"));
-        tab.cell(0, 3).setText(_("Duranium:"));
-        tab.cell(0, 4).setText(_("Molybdenum:"));
+        tab.cell(0, 0).setText(tx("Resources Needed")).setExtraColumns(2);
+        tab.cell(0, 1).setText(tx("Money:"));
+        tab.cell(0, 2).setText(tx("Tritanium:"));
+        tab.cell(0, 3).setText(tx("Duranium:"));
+        tab.cell(0, 4).setText(tx("Molybdenum:"));
 
-        tab.cell(2, 1).setText(_("mc"));
-        tab.cell(2, 2).setText(_("kt"));
-        tab.cell(2, 3).setText(_("kt"));
-        tab.cell(2, 4).setText(_("kt"));
+        tab.cell(2, 1).setText(tx("mc"));
+        tab.cell(2, 2).setText(tx("kt"));
+        tab.cell(2, 3).setText(tx("kt"));
+        tab.cell(2, 4).setText(tx("kt"));
 
-        tab.cell(3, 0).setText(_("Build Points")).setExtraColumns(1);      // <- FIXME: conditional
-        tab.cell(3, 1).setText(_("Build:"));
-        tab.cell(3, 2).setText(_("Kill:"));
-        tab.cell(3, 3).setText(_("Scrap:"));
-        tab.cell(3, 4).setText(_("You have:"));
+        tab.cell(3, 0).setText(tx("Build Points")).setExtraColumns(1);      // <- FIXME: conditional
+        tab.cell(3, 1).setText(tx("Build:"));
+        tab.cell(3, 2).setText(tx("Kill:"));
+        tab.cell(3, 3).setText(tx("Scrap:"));
+        tab.cell(3, 4).setText(tx("You have:"));
 
         // Reset column widths to force recomputation.
         // Required as of 20180831 because each action causes an immediate re-layout, and auto-columns never shrink.
@@ -145,10 +146,32 @@ namespace {
         tab.cell(4, 2).setText(fmt.formatNumber(data.pointsForKilling));
         tab.cell(4, 3).setText(fmt.formatNumber(data.pointsForScrapping));
     }
+
+    void setHullFunctions(ui::rich::DocumentView& docView, const game::proxy::HullSpecificationProxy::HullSpecification& data, afl::string::Translator& tx)
+    {
+        // FIXME: implement ability icons
+        ui::rich::Document& doc = docView.getDocument();
+        const game::spec::info::Abilities_t& ab = data.abilities;
+
+        doc.clear();
+        size_t numLines = ab.size();
+        size_t limit = (numLines > NUM_HULLFUNC_LINES ? NUM_HULLFUNC_LINES-1 : numLines);
+        for (size_t i = 0; i < limit; ++i) {
+            doc.add(ab[i].info);
+            doc.addNewline();
+        }
+        if (limit != numLines) {
+            doc.add(afl::string::Format(tx("(+%d more)"), numLines - limit));
+            doc.addNewline();
+        }
+        doc.finish();
+        docView.handleDocumentUpdate();
+    }
 }
 
 
 client::widgets::HullSpecificationSheet::HullSpecificationSheet(ui::Root& root,
+                                                                afl::string::Translator& tx,
                                                                 bool hasPerTurnCosts,
                                                                 game::PlayerSet_t allPlayers,
                                                                 const game::PlayerArray<String_t>& playerNames,
@@ -156,6 +179,7 @@ client::widgets::HullSpecificationSheet::HullSpecificationSheet(ui::Root& root,
     : Group(ui::layout::VBox::instance5),
       m_deleter(),
       m_root(root),
+      m_translator(tx),
       m_hasPerTurnCosts(hasPerTurnCosts),
       m_formatter(fmt)
 {
@@ -176,10 +200,13 @@ client::widgets::HullSpecificationSheet::setContent(const HullSpecification_t& d
         setFirstTable(*m_pTables[0], data, m_formatter);
     }
     if (m_pTables[1] != 0) {
-        setSecondTable(*m_pTables[1], data, m_formatter);
+        setSecondTable(*m_pTables[1], data, m_formatter, m_translator);
     }
     if (m_pTables[2] != 0) {
         setThirdTable(*m_pTables[2], data, m_formatter);
+    }
+    if (m_pHullFunctions != 0) {
+        setHullFunctions(*m_pHullFunctions, data, m_translator);
     }
     for (int i = 0; i < 3; ++i) {
         if (m_pPlayerLists[i] != 0) {
@@ -192,7 +219,8 @@ void
 client::widgets::HullSpecificationSheet::init()
 {
     // ex WSpecView::init
-    const int em = m_root.provider().getFont(gfx::FontRequest())->getCellSize().getX();
+    const gfx::Point cellSize = m_root.provider().getFont(gfx::FontRequest())->getCellSize();
+    const int em = cellSize.getX();
 
     // Title
     m_pTitle = &m_deleter.addNew(new ui::widgets::StaticText(String_t(), util::SkinColor::Heading, gfx::FontRequest().addSize(1), m_root.provider()));
@@ -202,7 +230,7 @@ client::widgets::HullSpecificationSheet::init()
     // Image || First Table
     m_pImage = &m_deleter.addNew(new ui::widgets::ImageButton(String_t(), 0, m_root, gfx::Point(105, 95)));
     m_pTables[0] = &m_deleter.addNew(new ui::widgets::SimpleTable(m_root, 3, 6));
-    initFirstTable(*m_pTables[0], em);
+    initFirstTable(*m_pTables[0], em, m_translator);
 
     Group& g1 = m_deleter.addNew(new Group(ui::layout::HBox::instance5));
     g1.add(ui::widgets::FrameGroup::wrapWidget(m_deleter, m_root.colorScheme(), ui::LoweredFrame, *m_pImage));
@@ -210,15 +238,21 @@ client::widgets::HullSpecificationSheet::init()
     g1.add(m_deleter.addNew(new ui::Spacer()));
     add(g1);
 
-    // Second Table
-    m_pTables[1] = &m_deleter.addNew(new ui::widgets::SimpleTable(m_root, 2, 7));
-    add(*m_pTables[1]);
-    initSecondTable(*m_pTables[1]);
+    // Second Table + hull functions without gap
+    Group& g2 = m_deleter.addNew(new ui::Group(ui::layout::VBox::instance0));
+    m_pTables[1] = &m_deleter.addNew(new ui::widgets::SimpleTable(m_root, 2, 3));
+    g2.add(*m_pTables[1]);
+    initSecondTable(*m_pTables[1], m_translator);
+
+    // Hull functions
+    m_pHullFunctions = &m_deleter.addNew(new ui::rich::DocumentView(cellSize.scaledBy(30, int(NUM_HULLFUNC_LINES)), 0, m_root.provider()));
+    g2.add(*m_pHullFunctions);
+    add(g2);
 
     // Third Table
     m_pTables[2] = &m_deleter.addNew(new ui::widgets::SimpleTable(m_root, 5, 5));
     add(*m_pTables[2]);
-    initThirdTable(*m_pTables[2], em);
+    initThirdTable(*m_pTables[2], em, m_translator);
 
     // FIXME: make it possible for a table to contain multi-column text
 }
@@ -229,7 +263,7 @@ client::widgets::HullSpecificationSheet::initPlayerLists(game::PlayerSet_t allPl
     Group& outer = m_deleter.addNew(new Group(ui::layout::VBox::instance0));
 
     // Player lists
-    outer.add(m_deleter.addNew(new ui::widgets::StaticText(_("Players"), util::SkinColor::Heading, gfx::FontRequest(), m_root.provider())));
+    outer.add(m_deleter.addNew(new ui::widgets::StaticText(m_translator("Players"), util::SkinColor::Heading, gfx::FontRequest(), m_root.provider())));
 
     // - Count the players
     int numPlayers = 0;

@@ -129,8 +129,7 @@ client::widgets::AllianceLevelGrid::draw(gfx::Canvas& can)
     // Checkboxes and Labels
     const Ref<Font> itemFont = m_root.provider().getFont(gfx::FontRequest().addSize(+1));
     ctx.useFont(*itemFont);
-    ctx.setTextAlign(0, 1);
-    // const GAllianceLevels& levels = editAllies.getLevels();
+    ctx.setTextAlign(gfx::LeftAlign, gfx::MiddleAlign);
     bool focus = getFocusState() != NoFocus;
     for (int i = 0, n = int(m_items.size()); i < n; ++i) {
         const int thisY = y + metric.labelHeight*NUM_LABELS + i*metric.gridSize;

@@ -8,11 +8,6 @@
 #include "ui/layout/hbox.hpp"
 #include "ui/widgets/button.hpp"
 
-// /** Constructor.
-//     \param id Widget Id
-//     \param low Lower limit
-//     \param high Upper limit
-//     \param set Default step size */
 ui::widgets::NumberSelector::NumberSelector(afl::base::Observable<int32_t>& value, int32_t min, int32_t max, int32_t step)
     : SimpleWidget(),
       m_value(value),
@@ -27,7 +22,6 @@ ui::widgets::NumberSelector::NumberSelector(afl::base::Observable<int32_t>& valu
 ui::widgets::NumberSelector::~NumberSelector()
 { }
 
-// /** Set value. Checks ranges and clips the value into range. */
 void
 ui::widgets::NumberSelector::setValue(int32_t value)
 {

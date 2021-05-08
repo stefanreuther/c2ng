@@ -7,6 +7,7 @@
 
 #include "t_game_interface.hpp"
 #include "afl/io/nullfilesystem.hpp"
+#include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
 #include "afl/test/translator.hpp"
 #include "game/interface/notificationstore.hpp"
@@ -21,6 +22,7 @@ using game::interface::ProcessListEditor;
 namespace {
     struct TestHarness {
         afl::sys::Log log;
+        afl::string::NullTranslator tx;
         afl::io::NullFileSystem fs;
         interpreter::World world;
         interpreter::ProcessList list;
@@ -29,8 +31,8 @@ namespace {
         game::interface::NotificationStore notif;
 
         TestHarness()
-            : log(), fs(),
-              world(log, fs),
+            : log(), tx(), fs(),
+              world(log, tx, fs),
               list(),
               p1(list.create(world, "p1")),
               p2(list.create(world, "p2")),

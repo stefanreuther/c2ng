@@ -70,7 +70,7 @@ game::interface::IonStormContext::lookup(const afl::data::NameQuery& name, Prope
 }
 
 void
-game::interface::IonStormContext::set(PropertyIndex_t index, afl::data::Value* value)
+game::interface::IonStormContext::set(PropertyIndex_t index, const afl::data::Value* value)
 {
     // ex IntIonContext::set
     switch (IonStormDomain(ion_storm_mapping[index].domain)) {

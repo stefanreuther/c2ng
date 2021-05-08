@@ -1,16 +1,22 @@
 /**
   *  \file game/map/renderoptions.cpp
+  *  \brief Class game::map::RenderOptions
   */
 
 #include "game/map/renderoptions.hpp"
 
+using game::config::UserConfiguration;
+
 game::map::RenderOptions::RenderOptions()
     : m_show(defaults()),
-      m_fill(defaults() - tristate())
+      m_fill(defaults() & tristate())
 { }
 
-// /** Toggle an option (or set of options).
-//     \param which_ones options to toggle, set of co_XXX */
+game::map::RenderOptions::RenderOptions(Options_t show, Options_t fill)
+    : m_show(show),
+      m_fill(fill)
+{ }
+
 void
 game::map::RenderOptions::toggleOptions(Options_t which)
 {
@@ -27,81 +33,153 @@ game::map::RenderOptions::toggleOptions(Options_t which)
     Options_t empty_tristate  = shown_tristate - m_fill;       /* shown filled */
     Options_t filled_tristate = shown_tristate & m_fill;       /* shown empty */
 
-    m_show |= hidden_tristate;                             /* show hidden */
+    m_show |= hidden_tristate;                                 /* show hidden */
     m_fill -= hidden_tristate;
 
-    m_fill |= empty_tristate;                              /* fill empty */
+    m_fill |= empty_tristate;                                  /* fill empty */
 
-    m_show -= filled_tristate;                            /* hide filled */
+    m_show -= filled_tristate;                                 /* hide filled */
     m_fill -= filled_tristate;
 
     // Then, normal options
     Options_t boolean_opts = which - tristate();
     m_show ^= boolean_opts;
-
-    sig_change.raise();
 }
 
-// /** Copy from another option set. */
 void
-game::map::RenderOptions::copyFrom(const RenderOptions& opts)
-{
-    // ex copyFrom
-    if (m_fill != opts.m_fill || m_show != opts.m_show) {
-        m_fill = opts.m_fill;
-        m_show = opts.m_show;
-        sig_change.raise();
-    }
-}
-
-// /** Copy values from another option set.
-//     \param opts Option set to copy from
-//     \param mask Mask describing options to copy */
-void
-game::map::RenderOptions::copyValues(const RenderOptions& opts, Options_t mask)
+game::map::RenderOptions::copyOptions(const RenderOptions& opts, Options_t which)
 {
     // ex GChartOptions::copyValues
-    const Options_t newShow =  (opts.m_show & mask) | (m_show - mask);
-    const Options_t newFill = ((opts.m_fill & mask) | (m_fill - mask)) & tristate();
-    if (m_show != newShow || m_fill != newFill) {
-        m_show = newShow;
-        m_fill = newFill;
-        sig_change.raise();
-    }
+    m_show =  (opts.m_show & which) | (m_show - which);
+    m_fill = ((opts.m_fill & which) | (m_fill - which)) & tristate();
 }
 
-// /** Set option. Set all options in \c mask to "enabled, not filled".
-//     This is a state all options allow.
-//     \param mask Options to set */
 void
-game::map::RenderOptions::setOption(Options_t which)
+game::map::RenderOptions::setOptions(Options_t which)
 {
     // ex GChartOptions::setOption
-    const Options_t newShow = (m_show | which);
-    const Options_t newFill = (m_fill - which);
-    if (m_show != newShow || m_fill != newFill) {
-        m_show = newShow;
-        m_fill = newFill;
-        sig_change.raise();
+    m_show = (m_show | which);
+    m_fill = (m_fill - which);
+}
+
+game::map::RenderOptions::Value
+game::map::RenderOptions::getOption(Option which) const
+{
+    if (m_show.contains(which)) {
+        if ((m_fill & tristate()).contains(which)) {
+            return Filled;
+        } else {
+            return Enabled;
+        }
+    } else {
+        return Disabled;
     }
 }
 
-inline game::map::RenderOptions::Options_t
-game::map::RenderOptions::all()
+game::map::Viewport::Options_t
+game::map::RenderOptions::getViewportOptions() const
 {
-    return Options_t::allUpTo(ShowWarpWells);
+    Viewport::Options_t result;
+
+    // Show
+    if (m_show.contains(ShowIonStorms)) {
+        result += Viewport::ShowIonStorms;
+    }
+    if (m_show.contains(ShowMinefields)) {
+        result += Viewport::ShowMinefields;
+    }
+    if (m_show.contains(ShowUfos)) {
+        result += Viewport::ShowUfos;
+    }
+    if (m_show.contains(ShowGrid)) {
+        result += Viewport::ShowGrid;
+    }
+    if (m_show.contains(ShowBorders)) {
+        result += Viewport::ShowBorders;
+    }
+    if (m_show.contains(ShowDrawings)) {
+        result += Viewport::ShowDrawings;
+    }
+    if (m_show.contains(ShowSelection)) {
+        result += Viewport::ShowSelection;
+    }
+    if (m_show.contains(ShowLabels)) {
+        result += Viewport::ShowLabels;
+    }
+    if (m_show.contains(ShowTrails)) {
+        result += Viewport::ShowTrails;
+    }
+    if (m_show.contains(ShowShipDots)) {
+        result += Viewport::ShowShipDots;
+    }
+    if (m_show.contains(ShowWarpWells)) {
+        result += Viewport::ShowWarpWells;
+    }
+    if (m_show.contains(ShowMessages)) {
+        result += Viewport::ShowMessages;
+    }
+
+    // Fill
+    if (!m_fill.contains(ShowGrid)) {
+        result += Viewport::ShowOutsideGrid;
+    }
+    if (m_fill.contains(ShowIonStorms)) {
+        result += Viewport::FillIonStorms;
+    }
+    if (m_fill.contains(ShowMinefields)) {
+        result += Viewport::FillMinefields;
+    }
+    if (m_fill.contains(ShowUfos)) {
+        result += Viewport::FillUfos;
+    }
+
+    return result;
 }
 
-inline game::map::RenderOptions::Options_t
-game::map::RenderOptions::tristate()
+void
+game::map::RenderOptions::storeToConfiguration(game::config::UserConfiguration& config, Area area) const
 {
-    // ex co_Tristate
-    return Options_t() + ShowIonStorms + ShowMinefields + ShowUfos + ShowSectors;
+    config[UserConfiguration::ChartRenderOptions[area][0]].set(m_show.toInteger());
+    config[UserConfiguration::ChartRenderOptions[area][1]].set(m_fill.toInteger());
 }
 
-inline game::map::RenderOptions::Options_t
-game::map::RenderOptions::defaults()
+game::map::RenderOptions
+game::map::RenderOptions::fromConfiguration(const game::config::UserConfiguration& config, Area area)
 {
-    // ex co_Default
-    return all() - ShowTrails - ShowWarpWells;
+    return RenderOptions(Options_t::fromInteger(config[UserConfiguration::ChartRenderOptions[area][0]]()),
+                         Options_t::fromInteger(config[UserConfiguration::ChartRenderOptions[area][1]]()));
+}
+
+game::map::RenderOptions::Options_t
+game::map::RenderOptions::getOptionFromKey(util::Key_t key)
+{
+    // ex GChartOptions::toggleOptionKey
+    switch (key) {
+     case 'm':
+        return Options_t(ShowMinefields);
+     case 'a':
+        return Options_t(ShowShipDots);
+     case 'd':
+        return Options_t(ShowLabels);
+     case 'i':
+        return Options_t(ShowIonStorms);
+     case 'v':
+        return Options_t(ShowTrails);
+     case 't':
+        return Options_t(ShowSelection);
+     case 's':
+        return Options_t(ShowGrid);
+     case 'b':
+        return Options_t(ShowBorders);
+     case 'u':
+        return Options_t(ShowUfos);
+     case 'p':
+        return Options_t(ShowDrawings);
+     case 'w':
+        return Options_t(ShowWarpWells);
+     case 'n':
+        return Options_t(ShowMessages);
+     default:
+        return Options_t();
+    }
 }

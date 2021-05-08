@@ -152,7 +152,8 @@ game::map::Planet::Planet(Id_t id)
       m_industryLevel(),
       m_queuePosition(),
       m_queuePriority(),
-      m_unitScores()
+      m_unitScores(),
+      m_messages()
 {
     // ex GPlanet::MapInfo::MapInfo etc.
     m_autobuildGoals[MineBuilding]         = 1000;
@@ -170,7 +171,7 @@ game::map::Planet::Planet(Id_t id)
 
 // Copy a planet.
 game::map::Planet::Planet(const Planet& other)
-    : Object(),
+    : Object(other),
       m_id(other.m_id),
       m_name(other.m_name),
       m_position(other.m_position),
@@ -200,9 +201,9 @@ game::map::Planet::addCurrentPlanetData(const PlanetData& data, PlayerSet_t sour
     // FIXME: older PHost versions clear the following fields of a
     // planet when sending a pdata planet target for exploration of an
     // unowned planet (owned planets never generate a target):
-    // colonists, supplies, credits, mines, factories, defense,
-    // coltax, nattax. We may want to merge that information somehow,
-    // or detect and/or merge it.
+    //   colonists, supplies, credits, mines, factories, defense,
+    //   coltax, nattax
+    // We may want to merge that information somehow, or detect and/or merge it.
     m_currentPlanetData = data;
     m_planetSource += source;
 }
@@ -589,11 +590,10 @@ game::map::Planet::getPosition(Point& result) const
 }
 
 
-// /*
-//  *  Planet Status Accessors:
-//  */
-//
-// /** Check whether planet is visible. */
+/*
+ *  Planet Status Accessors:
+ */
+
 bool
 game::map::Planet::isVisible() const
 {
@@ -602,9 +602,6 @@ game::map::Planet::isVisible() const
         && m_planetKind != HiddenPlanet;
 }
 
-// /** Get planet source flags. This is the set of players whose PDATA
-//     file contains a copy of this planet (usually a unit set, but may
-//     be larger for unowned planets). */
 game::PlayerSet_t
 game::map::Planet::getPlanetSource() const
 {
@@ -619,9 +616,6 @@ game::map::Planet::addPlanetSource(PlayerSet_t p)
 }
 
 
-// /** Check whether we have any information about this planet.
-//     Note that the planet may not exist even if it has information (HiddenPlanet).
-//     \return true iff we have any information, full or partial */
 bool
 game::map::Planet::hasAnyPlanetData() const
 {
@@ -631,7 +625,6 @@ game::map::Planet::hasAnyPlanetData() const
         && m_planetKind != UnknownPlanet;
 }
 
-// /** Check whether we have full planet data. */
 bool
 game::map::Planet::hasFullPlanetData() const
 {
@@ -639,16 +632,12 @@ game::map::Planet::hasFullPlanetData() const
     return !m_planetSource.empty();
 }
 
-// /** Get history timestamp. */
 int
 game::map::Planet::getHistoryTimestamp(Timestamp kind) const
 {
     return m_historyTimestamps[kind];
 }
 
-
-// /** Get base source flags. This is the set of players whose BDATA file
-//     contains a copy of this base (usually a unit set). */
 game::PlayerSet_t
 game::map::Planet::getBaseSource() const
 {
@@ -662,9 +651,6 @@ game::map::Planet::addBaseSource(PlayerSet_t p)
     m_baseSource += p;
 }
 
-// /** Check for starbase.
-//     \retval true this planet has a starbase
-//     \retval false this planet has no starbase, or we don't know */
 bool
 game::map::Planet::hasBase() const
 {
@@ -673,8 +659,6 @@ game::map::Planet::hasBase() const
         && m_baseKind != NoBase;
 }
 
-// /** True iff we have full starbase information.
-//     \return true iff we have full, playable data. If yes, all base accessors will work. */
 bool
 game::map::Planet::hasFullBaseData() const
 {
@@ -683,9 +667,10 @@ game::map::Planet::hasFullBaseData() const
 }
 
 
+/*
+ *  Owner accessors:
+ */
 
-// /** Set owner.
-//     \param owner new owner */
 void
 game::map::Planet::setOwner(IntegerProperty_t owner)
 {
@@ -693,6 +678,11 @@ game::map::Planet::setOwner(IntegerProperty_t owner)
     m_currentPlanetData.owner = owner;
     markDirty();
 }
+
+
+/*
+ *  Structure accessors:
+ */
 
 game::IntegerProperty_t
 game::map::Planet::getNumBuildings(PlanetaryBuilding kind) const
@@ -733,8 +723,6 @@ game::map::Planet::setNumBuildings(PlanetaryBuilding kind, IntegerProperty_t n)
     markDirty();
 }
 
-// /** Get industry level of this planet. Reports the industry level from
-//     known structure counts if available, otherwise from sensor scans. */
 game::IntegerProperty_t
 game::map::Planet::getIndustryLevel(const HostVersion& host) const
 {
@@ -747,9 +735,6 @@ game::map::Planet::getIndustryLevel(const HostVersion& host) const
     }
 }
 
-// /** Get industry level for a given structure count.
-//     \param mifa Mines+Factories
-//     \return level (ind_XXX) */
 int
 game::map::Planet::getIndustryLevel(int mifa, const HostVersion& host)
 {
@@ -775,8 +760,6 @@ game::map::Planet::getIndustryLevel(int mifa, const HostVersion& host)
     return HeavyIndustry;
 }
 
-// /** Set industry level for this planet. This routine only makes sense
-//     for planets we do not play. */
 void
 game::map::Planet::setIndustryLevel(IntegerProperty_t level, const HostVersion& host)
 {
@@ -823,6 +806,10 @@ game::map::Planet::setIndustryLevel(IntegerProperty_t level, const HostVersion& 
 }
 
 
+/*
+ *  Colonist accessors:
+ */
+
 game::NegativeProperty_t
 game::map::Planet::getColonistHappiness() const
 {
@@ -852,6 +839,11 @@ game::map::Planet::setColonistTax(IntegerProperty_t tax)
     m_currentPlanetData.colonistTax = tax;
     markDirty();
 }
+
+
+/*
+ *  Native accessors:
+ */
 
 game::IntegerProperty_t
 game::map::Planet::getNativeGovernment() const
@@ -952,6 +944,11 @@ game::map::Planet::setKnownToHaveNatives(bool known)
     m_isPlanetKnownToHaveNatives = known;
 }
 
+
+/*
+ *  FCode accessors:
+ */
+
 game::StringProperty_t
 game::map::Planet::getFriendlyCode() const
 {
@@ -976,6 +973,11 @@ game::map::Planet::isBuildingBase() const
         && m_currentPlanetData.baseFlag.get(value)
         && value != 0;
 }
+
+
+/*
+ *  Starbase building accessors:
+ */
 
 void
 game::map::Planet::setBuildBaseFlag(bool b)
@@ -1027,6 +1029,11 @@ game::map::Planet::setOreDensity(Element::Type type, IntegerProperty_t amount)
     }
     markDirty();
 }
+
+
+/*
+ *  Environment accessors:
+ */
 
 game::LongProperty_t
 game::map::Planet::getOreGround(Element::Type type) const
@@ -1082,7 +1089,11 @@ game::map::Planet::setTemperature(IntegerProperty_t value)
     markDirty();
 }
 
-// /** Get cargo, as it is in underlying data structure. */
+
+/*
+ *  Cargo accessors:
+ */
+
 game::LongProperty_t
 game::map::Planet::getCargo(Element::Type type) const
 {
@@ -1174,6 +1185,10 @@ game::map::Planet::setCargo(Element::Type type, LongProperty_t amount)
 }
 
 
+/*
+ *  Simple base accessors:
+ */
+
 game::IntegerProperty_t
 game::map::Planet::getBaseDamage() const
 {
@@ -1219,6 +1234,11 @@ game::map::Planet::setBaseTechLevel(TechLevel level, IntegerProperty_t value)
     markDirty();
 }
 
+
+/*
+ *  Shipyard accessors:
+ */
+
 game::IntegerProperty_t
 game::map::Planet::getBaseShipyardAction() const
 {
@@ -1242,6 +1262,11 @@ game::map::Planet::setBaseShipyardOrder(IntegerProperty_t action, IntegerPropert
     markDirty();
 }
 
+
+/*
+ *  Component storage accessors:
+ */
+
 game::IntegerProperty_t
 game::map::Planet::getBaseStorage(TechLevel area, int slot) const
 {
@@ -1250,6 +1275,16 @@ game::map::Planet::getBaseStorage(TechLevel area, int slot) const
         return p->get(slot);
     } else {
         return afl::base::Nothing;
+    }
+}
+
+int
+game::map::Planet::getBaseStorageLimit(TechLevel area) const
+{
+    if (const BaseStorage* p = game::map::getBaseStorage(m_currentBaseData, area)) {
+        return p->size();
+    } else {
+        return 0;
     }
 }
 
@@ -1264,6 +1299,11 @@ game::map::Planet::setBaseStorage(TechLevel area, int slot, IntegerProperty_t am
         }
     }
 }
+
+
+/*
+ *  Build order accessors:
+ */
 
 game::IntegerProperty_t
 game::map::Planet::getBaseBuildHull(const game::config::HostConfiguration& config, const game::spec::HullAssignmentList& map) const
@@ -1299,15 +1339,17 @@ game::map::Planet::setBaseBuildOrder(const ShipBuildOrder& order)
     }
 }
 
-// /** Get hull slot used for ship being built. Whereas the above functions deal
-//     with real hull numbers, this one returns a slot; this simplifies things
-//     every once in a while. */
 game::IntegerProperty_t
 game::map::Planet::getBaseBuildOrderHullIndex() const
 {
     // ex GPlanet::getBaseBuildOrderHullSlot
     return m_currentBaseData.shipBuildOrder.getHullIndex();
 }
+
+
+/*
+ *  Build queue accessors:
+ */
 
 game::IntegerProperty_t
 game::map::Planet::getBaseQueuePosition() const
@@ -1339,7 +1381,11 @@ game::map::Planet::setBaseQueuePriority(LongProperty_t pri)
     markDirty();
 }
 
-// /** Get autobuild goal for a structure. Known for all planets. */
+
+/*
+ *  Auto build accessors:
+ */
+
 int
 game::map::Planet::getAutobuildGoal(PlanetaryBuilding ps) const
 {
@@ -1347,7 +1393,6 @@ game::map::Planet::getAutobuildGoal(PlanetaryBuilding ps) const
     return m_autobuildGoals[ps];
 }
 
-// /** Set autobuild goal for a structure. */
 void
 game::map::Planet::setAutobuildGoal(PlanetaryBuilding ps, int value)
 {
@@ -1358,7 +1403,6 @@ game::map::Planet::setAutobuildGoal(PlanetaryBuilding ps, int value)
     }
 }
 
-// /** Get autobuild speed for a structure. Known for all planets. */
 int
 game::map::Planet::getAutobuildSpeed(PlanetaryBuilding ps) const
 {
@@ -1366,7 +1410,6 @@ game::map::Planet::getAutobuildSpeed(PlanetaryBuilding ps) const
     return m_autobuildSpeeds[ps];
 }
 
-// /** Set autobuild speed for a structure. */
 void
 game::map::Planet::setAutobuildSpeed(PlanetaryBuilding ps, int value)
 {
@@ -1392,6 +1435,11 @@ game::map::Planet::applyAutobuildSettings(const AutobuildSettings& settings)
     }
 }
 
+
+/*
+ *  Unit score accessors:
+ */
+
 game::UnitScoreList&
 game::map::Planet::unitScores()
 {
@@ -1404,168 +1452,34 @@ game::map::Planet::unitScores() const
     return m_unitScores;
 }
 
+game::NegativeProperty_t
+game::map::Planet::getScore(int16_t scoreId, const UnitScoreDefinitionList& scoreDefinitions) const
+{
+    // ex phost.pas:GetExperienceLevel (sort-of)
+    // FIXME: copied from Ship - can we share?
+    UnitScoreList::Index_t index;
+    int16_t value, turn;
+    if (scoreDefinitions.lookup(scoreId, index) && m_unitScores.get(index, value, turn)) {
+        return value;
+    } else {
+        return afl::base::Nothing;
+    }
+}
 
-// /** Get planet data record for storage in data files.
-//     \param dat [out] planet data */
-// void
-// GPlanet::getPlanetData(TPlanet& dat) const
-// {
-//     dat = getDisplayedPlanet();
-// }
-//
-// /** Get starbase data record for storage in data files.
-//     \param bdat [out] base data */
-// void
-// GPlanet::getBaseData(TStarbase& bdat) const
-// {
-//     bdat = getDisplayedBase();
-// }
-//
-//
-// /** Get planet history record for storage in database file.
-//     \param data [out] History record */
-// void
-// GPlanet::getHistoryData(TDbPlanet& data) const
-// {
-//     if (planet_info != 0) {
-//         data.planet             = planet_info->data;
-//         data.time[ts_Minerals]  = planet_info->time[ts_Minerals];
-//         data.time[ts_Colonists] = planet_info->time[ts_Colonists];
-//         data.time[ts_Natives]   = planet_info->time[ts_Natives];
-//         data.time[ts_Cash]      = planet_info->time[ts_Cash];
-//         data.known_to_have_natives = planet_info->known_to_have_natives;
-//         if (planet_info->industry_level.isKnown() && mp16_t(planet_info->data.factories).isKnown()) {
-//             data.planet.factories = planet_info->industry_level + 30000;
-//         }
-//         if (base_info) {
-//             data.planet.build_base = 1;
-//         }
-//     } else {
-//         data.planet                = blank_planet;
-//         data.time[ts_Minerals]     = data.time[ts_Colonists] = data.time[ts_Natives] = data.time[ts_Cash] = 0;
-//         data.known_to_have_natives = 0;
-//     }
-// }
-//
-//
-//
-// /** Notify planet of ship in orbit. This will compute the planet markings. */
-// void
-// GPlanet::setShipInOrbit(const GShip& s)
-// {
-//     switch (getPlayerRelation(s.getOwner())) {
-//      case is_Me:
-//         map_info.orbit_flags |= FlagOwnShipsInOrbit;
-//         break;
-//      case is_Enemy:
-//         if (s.isReliablyVisible(0))
-//             map_info.orbit_flags |= FlagEnemyShipsInOrbit;
-//         else
-//             map_info.orbit_flags |= FlagGuessedEnemyInOrbit;
-//         break;
-//      case is_Ally:
-//         if (s.isReliablyVisible(0))
-//             map_info.orbit_flags |= FlagAlliedShipsInOrbit;
-//         else
-//             map_info.orbit_flags |= FlagGuessedAllyInOrbit;
-//         break;
-//     }
-// }
-//
-// /** Get planet kind. This determines that available information on the planet. */
-// GPlanet::PlanetKind
-// GPlanet::getPlanetKind() const
-// {
-//     return map_info.planet_kind;
-// }
-//
-// /** Get starbase kind. This determines that available information on the starbase. */
-// GPlanet::BaseKind
-// GPlanet::getBaseKind() const
-// {
-//     return m_baseKind;
-// }
-//
-// /*
-//  *  Cargo Accessors
-//  */
-//
-// void
-// GPlanet::changeCargoRaw(GCargoType type, int32 amount)
-// {
-//     if (!amount)
-//         return;
-//
-//     // FIXME
-//     ASSERT(hasFullPlanetData());
-//     markDirty();
-//
-//     switch(type) {
-//      case el_Neutronium:
-//      case el_Tritanium:
-//      case el_Duranium:
-//      case el_Molybdenum:
-//         planet_info->data.ore_mined[type] += amount;
-//         return;
-//      case el_Supplies:
-//         planet_info->data.supplies += amount;
-//         return;
-//      case el_Money:
-//         planet_info->data.money += amount;
-//         return;
-//      case el_Fighters:
-//         ASSERT(base_info);
-//         base_info->data.ammo_store[10] += amount;
-//         return;
-//      case el_Colonists:
-//         planet_info->data.colonists += amount;
-//         return;
-//      default:
-//         ASSERT(base_info);
-//         ASSERT(type >= el_Torps && type < el_Torps + NUM_TORPS);
-//         base_info->data.ammo_store[type - el_Torps] += amount;
-//         return;
-//     }
-// }
-//
-//
-// /** Get amount of ammunition. This is a convenience function to simplify implementation
-//     of the script interface.
-//     \param slot [1,11], where [1,10] are the torps, 11 is fighters */
-// mp16_t
-// GPlanet::getBaseAmmoStore(int slot) const
-// {
-//     ASSERT(slot > 0 && slot <= NUM_TORPS+1);
-//     mn32_t tmp;
-//     if (slot > 0 && slot <= NUM_TORPS) {
-//         tmp = getCargo(getCargoTypeFromTorpType(slot));
-//     } else {
-//         tmp = getCargo(el_Fighters);
-//     }
-//     if (tmp.isKnown() && tmp >= 0) {
-//         return mp16_t(int32_t(tmp));
-//     } else {
-//         return mp16_t();
-//     }
-// }
-//
-//
-//
-//
-//
-// /** Get ship which is trying to clone at this planet. This runs
-//     through the ship list, so use with care.
-//     \param univ universe which contains the ships */
-// int
-// GPlanet::findShipCloningHere(const GUniverse& univ) const
-// {
-//     // FIXME: check whether 'cln' works
-//     if (!config.AllowShipCloning())
-//         return 0;
-//     for (int i = univ.ty_any_ships.findNextIndex(0); i != 0; i = univ.ty_any_ships.findNextIndex(i)) {
-//         if (univ.getShip(i).isCloningAt(*this)) {
-//             return i;
-//         }
-//     }
-//     return 0;
-// }
+
+/*
+ *  MessageLink
+ */
+
+game::map::MessageLink&
+game::map::Planet::messages()
+{
+    // ex GPlanet::getAssociatedMessages
+    return m_messages;
+}
+
+const game::map::MessageLink&
+game::map::Planet::messages() const
+{
+    return m_messages;
+}

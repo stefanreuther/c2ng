@@ -3,7 +3,6 @@
   */
 
 #include "game/tables/temperaturename.hpp"
-#include "util/translation.hpp"
 
 game::tables::TemperatureName::TemperatureName(afl::string::Translator& tx)
     : m_translator(tx)

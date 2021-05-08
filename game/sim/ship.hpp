@@ -5,9 +5,10 @@
 #ifndef C2NG_GAME_SIM_SHIP_HPP
 #define C2NG_GAME_SIM_SHIP_HPP
 
+#include "afl/string/translator.hpp"
 #include "game/sim/object.hpp"
 #include "game/spec/shiplist.hpp"
-#include "afl/string/translator.hpp"
+#include "util/range.hpp"
 
 namespace game { namespace sim {
 
@@ -151,12 +152,35 @@ namespace game { namespace sim {
             \return true for custom ships */
         bool isCustomShip() const;
 
+        /** Get range of number of beams.
+            \param shipList Ship List
+            \return Range */
+        util::Range<int> getNumBeamsRange(const game::spec::ShipList& shipList) const;
+
+        /** Get range of number of torpedo launchers.
+            \param shipList Ship List
+            \return Range */
+        util::Range<int> getNumLaunchersRange(const game::spec::ShipList& shipList) const;
+
+        /** Get range of fighter bays.
+            \param shipList Ship List
+            \return Range */
+        util::Range<int> getNumBaysRange(const game::spec::ShipList& shipList) const;
+
         /** Check whether this ship matches a ship list.
             \param shipList ship list
             \return true if the ship is legal according to the ship list, that is,
             its properties match the ship list's limits.
             A custom ship is always legal. */
         bool isMatchingShipList(const game::spec::ShipList& shipList) const;
+
+        /** Check for implied hull function.
+            This function check any basic function, not just those mapped to simulator abilities.
+            \param basicFunctionId Function to check
+            \param shipList        Ship list
+            \param config          Host configuration
+            \return true if this ship's hull has this implied function */
+        bool hasImpliedFunction(int basicFunctionId, const game::spec::ShipList& shipList, const game::config::HostConfiguration& config) const;
 
         // Object:
         virtual bool hasImpliedAbility(Ability which, const Configuration& opts, const game::spec::ShipList& shipList, const game::config::HostConfiguration& config) const;

@@ -31,7 +31,6 @@
 #include "util/messagenotifier.hpp"
 #include "util/string.hpp"
 #include "util/stringparser.hpp"
-#include "util/translation.hpp"
 
 namespace {
     const int NLINES = 15;
@@ -97,9 +96,13 @@ namespace {
             { return true; }
         virtual int getItemHeight(size_t /*n*/)
             { return getItemHeight(); }
-        virtual int getHeaderHeight()
+        virtual int getHeaderHeight() const
+            { return 0; }
+        virtual int getFooterHeight() const
             { return 0; }
         virtual void drawHeader(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
+            { }
+        virtual void drawFooter(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
             { }
         virtual void drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state)
             {
@@ -111,7 +114,7 @@ namespace {
                 if (item < m_content.infos.size()) {
                     afl::base::Ref<gfx::Font> normalFont = m_root.provider().getFont(gfx::FontRequest());
                     const PropertyList::Info& e = m_content.infos[item];
-                    ctx.setTextAlign(0, 0);
+                    ctx.setTextAlign(gfx::LeftAlign, gfx::TopAlign);
                     ctx.useFont(*normalFont);
                     ctx.setColor(util::SkinColor::Static);
                     area.consumeX(5);
@@ -148,12 +151,14 @@ namespace {
         ConsoleController(client::widgets::ConsoleView& view,
                           ui::widgets::InputLine& input,
                           client::si::UserSide& user,
-                          ui::Root& root)
+                          ui::Root& root,
+                          afl::string::Translator& tx)
             : m_scrollback(0),
               m_view(view),
               m_input(input),
               m_user(user),
               m_root(root),
+              m_translator(tx),
               m_collector(user.console()),
               m_notifier(root.engine().dispatcher()),
               m_format()
@@ -189,7 +194,7 @@ namespace {
                 while (n > 0 && m_collector.readOlderMessage(nr, &msg, nr)) {
                     --n;
 
-                    int align = 0;
+                    gfx::HorizontalAlignment align = gfx::LeftAlign;
                     int bold = 0;
                     util::SkinColor::Color color = util::SkinColor::Static;
                     String_t result;
@@ -199,11 +204,11 @@ namespace {
                         while (!p.parseEnd()) {
                             p.parseDelim(",", s);
                             if (s == "left") {
-                                align = 0;
+                                align = gfx::LeftAlign;
                             } else if (s == "right") {
-                                align = 2;
+                                align = gfx::RightAlign;
                             } else if (s == "center") {
-                                align = 1;
+                                align = gfx::CenterAlign;
                             } else if (s == "bold") {
                                 ++bold;
                             } else if (s == "static") {
@@ -284,7 +289,7 @@ namespace {
                     return true;
                  case util::Key_F1:
                  case util::KeyMod_Alt + 'h':
-                    client::dialogs::doHelpDialog(m_root, m_user.gameSender(), "pcc2:console");
+                    client::dialogs::doHelpDialog(m_root, m_translator, m_user.gameSender(), "pcc2:console");
                     return true;
                  default:
                     return defaultHandleKey(key, prefix);
@@ -301,7 +306,7 @@ namespace {
 
         void doCompletion()
             {
-                client::Downlink link(m_root);
+                client::Downlink link(m_root, m_translator);
                 game::interface::CompletionList result;
 
                 class Query : public util::Request<game::Session> {
@@ -349,7 +354,7 @@ namespace {
                         ++i;
                     }
                     list.sortItemsAlphabetically();
-                    if (ui::widgets::doStandardDialog(_("Completions"), String_t(), list, true, m_root)
+                    if (ui::widgets::doStandardDialog(m_translator("Completions"), String_t(), list, true, m_root, m_translator)
                         && list.getCurrentKey(i))
                     {
                         game::interface::CompletionList::Iterator_t it = result.begin(), e = result.end();
@@ -428,7 +433,7 @@ namespace {
         void doListVariables()
             {
                 // ex WConsoleDialog::doListVariables
-                client::Downlink link(m_root);
+                client::Downlink link(m_root, m_translator);
                 PropertyList result;
 
                 class Query : public util::Request<game::Session> {
@@ -470,7 +475,7 @@ namespace {
 
                 if (!result.infos.empty()) {
                     PropertyListbox box(m_root, result);
-                    if (ui::widgets::doStandardDialog(result.title, String_t(), box, true, m_root)) {
+                    if (ui::widgets::doStandardDialog(result.title, String_t(), box, true, m_root, m_translator)) {
                         size_t index = box.getCurrentItem();
                         if (index < result.infos.size()) {
                             // Must manually reset TypeErase which gets set by the focus change
@@ -494,6 +499,7 @@ namespace {
         ui::widgets::InputLine& m_input;
         client::si::UserSide& m_user;
         ui::Root& m_root;
+        afl::string::Translator& m_translator;
         util::MessageCollector& m_collector;
         util::MessageNotifier m_notifier;
         util::MessageMatcher m_format;
@@ -509,14 +515,14 @@ namespace {
             : Control(iface, parentControl.root(), parentControl.translator()),
               m_parentControl(parentControl),
               m_loop(parentControl.root()),
-              m_window(translator().translateString("Console"), parentControl.root().provider(), parentControl.root().colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5),
+              m_window(translator()("Console"), parentControl.root().provider(), parentControl.root().colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5),
               m_input(1000, 30, parentControl.root()),
               m_group(ui::layout::HBox::instance5),
               m_spacer(),
-              m_okButton(translator().translateString("OK"), util::Key_Return, parentControl.root()),
-              m_cancelButton(translator().translateString("Cancel"), util::Key_Escape, parentControl.root()),
+              m_okButton(translator()("OK"), util::Key_Return, parentControl.root()),
+              m_cancelButton(translator()("Cancel"), util::Key_Escape, parentControl.root()),
               m_consoleView(parentControl.root().provider(), gfx::Point(35, 15)),
-              m_consoleController(m_consoleView, m_input, iface, parentControl.root()),
+              m_consoleController(m_consoleView, m_input, iface, parentControl.root(), parentControl.translator()),
               m_outputState(outputState)
             {
                 m_input.setFont(gfx::FontRequest().addSize(1));
@@ -533,7 +539,7 @@ namespace {
 
                 // Greeting
                 // FIXME: this is in WConsoleDialog::processPreIdle and thus should not appear if we are blocked by a script that just did UI.PopupConsole
-                String_t greeting = translator().translateString("Enter command or expression:");
+                String_t greeting = translator()("Enter command or expression:");
                 afl::sys::LogListener::Message msg;
                 util::MessageCollector::MessageNumber_t nr = iface.console().getNewestPosition();
                 if (!iface.console().readOlderMessage(nr, &msg, nr) || msg.m_message != greeting) {
@@ -550,7 +556,7 @@ namespace {
                 // Logging happens in CommandTask (verbose=true)
                 String_t command = afl::string::strTrim(m_input.getText());
                 if (!command.empty()) {
-                    executeCommandWait(command, true, afl::string::Format(translator().translateString("Console: %s").c_str(), command));
+                    executeCommandWait(command, true, afl::string::Format(translator()("Console: %s").c_str(), command));
                 }
                 m_input.setText(String_t());
             }
@@ -566,41 +572,25 @@ namespace {
 
 
         // Control virtuals:
-        virtual void handleStateChange(client::si::UserSide& us, client::si::RequestLink2 link, client::si::OutputState::Target target)
+        virtual void handleStateChange(client::si::RequestLink2 link, client::si::OutputState::Target target)
             {
                 // ex WConsoleDialog::processEvent
-                switch (target) {
-                 case client::si::OutputState::NoChange:
-                    // No change
-                    us.continueProcess(link);
-                    break;
-                 case client::si::OutputState::ExitProgram:
-                 case client::si::OutputState::ExitGame:
-                 case client::si::OutputState::PlayerScreen:
-                 case client::si::OutputState::ShipScreen:
-                 case client::si::OutputState::PlanetScreen:
-                 case client::si::OutputState::BaseScreen:
-                 case client::si::OutputState::ShipTaskScreen:
-                 case client::si::OutputState::PlanetTaskScreen:
-                 case client::si::OutputState::BaseTaskScreen:
-                 case client::si::OutputState::Starchart:
-                    // Dispatch to parent
-                    us.detachProcess(link);
-                    m_outputState.set(link, target);
-                    m_loop.stop(1);
-                    break;
-                }
+                dialogHandleStateChange(link, target, m_outputState, m_loop, 1);
             }
-        virtual void handlePopupConsole(client::si::UserSide& us, client::si::RequestLink2 link)
-            { us.continueProcess(link); }
-        virtual void handleEndDialog(client::si::UserSide& ui, client::si::RequestLink2 link, int /*code*/)
+        virtual void handlePopupConsole(client::si::RequestLink2 link)
+            { interface().continueProcess(link); }
+        virtual void handleEndDialog(client::si::RequestLink2 link, int /*code*/)
             {
-                // FIXME: keep this?
-                ui.continueProcess(link);
+                // Console does not count as a dialog
+                interface().continueProcess(link);
             }
 
-        virtual void handleSetViewRequest(client::si::UserSide& ui, client::si::RequestLink2 link, String_t name, bool withKeymap)
-            { m_parentControl.handleSetViewRequest(ui, link, name, withKeymap); }
+        virtual void handleSetViewRequest(client::si::RequestLink2 link, String_t name, bool withKeymap)
+            { m_parentControl.handleSetViewRequest(link, name, withKeymap); }
+        virtual void handleUseKeymapRequest(client::si::RequestLink2 link, String_t name, int prefix)
+            { defaultHandleUseKeymapRequest(link, name, prefix); }
+        virtual void handleOverlayMessageRequest(client::si::RequestLink2 link, String_t text)
+            { defaultHandleOverlayMessageRequest(link, text); }
         virtual client::si::ContextProvider* createContextProvider()
             {
                 return m_parentControl.createContextProvider();

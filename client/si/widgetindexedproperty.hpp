@@ -29,7 +29,7 @@ namespace client { namespace si {
         \param value New value
         \param w Widget to access
         \throw interpreter::Error on errors (widget or value type mismatch) */
-    void setWidgetProperty(WidgetIndexedProperty p, afl::data::Value* index, afl::data::Value* value, ui::Widget* w);
+    void setWidgetProperty(WidgetIndexedProperty p, const afl::data::Value* index, const afl::data::Value* value, ui::Widget* w);
 
     /** Set property of widget (script side).
         \param p Property to get
@@ -38,7 +38,7 @@ namespace client { namespace si {
         \param ss ScriptSide
         \param ref WidgetReference
         \throw interpreter::Error on errors (widget or value type mismatch) */
-    void setWidgetProperty(WidgetIndexedProperty p, afl::data::Value* index, afl::data::Value* value, ScriptSide& ss, const WidgetReference& ref);
+    void setWidgetProperty(WidgetIndexedProperty p, const afl::data::Value* index, const afl::data::Value* value, ScriptSide& ss, const WidgetReference& ref);
 
 } }
 

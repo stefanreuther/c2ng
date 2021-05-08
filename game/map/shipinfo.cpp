@@ -8,26 +8,12 @@
 #include "game/map/chunnelmission.hpp"
 #include "game/map/ship.hpp"
 #include "game/map/universe.hpp"
+#include "util/string.hpp"
 
 namespace {
     using game::Element;
     using afl::string::Format;
-
-    // FIXME: code duplication: planetinfo.cpp
-    String_t formatAge(int currentTurn, int historyTurn, afl::string::Translator& tx)
-    {
-        // ex formatTurnNumber
-        int age = currentTurn - historyTurn;
-        if (age == 0) {
-            return tx("current turn");
-        } else if (age == 1) {
-            return tx("previous turn");
-        } else if (age < 0) {
-            return Format(tx("turn %d"), historyTurn);
-        } else {
-            return Format(tx("%d turns ago"), age);
-        }
-    }
+    using util::formatAge;
 
     void addHeading(game::map::ShipCargoInfos_t& result, String_t heading)
     {

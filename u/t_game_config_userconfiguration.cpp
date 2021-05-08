@@ -7,6 +7,7 @@
 
 #include "t_game_config.hpp"
 #include "game/types.hpp"
+#include "game/config/markeroption.hpp"
 
 /** Test defaults.
     This tests initialisation. */
@@ -85,3 +86,19 @@ TestGameConfigUserConfiguration::testFormat()
     }
 }
 
+/** Test getCannedMarker().
+    A: create UserConfiguration. Call getCannedMarker() with valid and invalid index.
+    E: invalid index returns null; valid index returns expected value */
+void
+TestGameConfigUserConfiguration::testCannedMarker()
+{
+    game::config::UserConfiguration testee;
+    TS_ASSERT(testee.getCannedMarker(-1) == 0);
+    TS_ASSERT(testee.getCannedMarker(1000) == 0);
+
+    game::config::MarkerOption* opt = testee.getCannedMarker(2);
+    TS_ASSERT(opt != 0);
+    TS_ASSERT_EQUALS(opt->getColor(), 9);
+    TS_ASSERT_EQUALS(opt->getMarkerKind(), 1);
+    TS_ASSERT_EQUALS(opt->getNote(), "");
+}

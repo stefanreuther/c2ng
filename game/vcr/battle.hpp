@@ -74,6 +74,18 @@ namespace game { namespace vcr {
             \return true: position was known, result set; false: result not set */
         virtual bool getPosition(game::map::Point& result) const = 0;
 
+        /** Get result summary in human-readable form.
+            For classic fights, this produces a line such as "We won (100 EP)".
+            \param viewpointPlayer Viewpoint player; to be able to use "we" in the result
+            \param config          Host configuration (for score computation)
+            \param shipList        Ship list (for score computation)
+            \param fmt             Number formatter
+            \param tx              Translator
+            \return text */
+        virtual String_t getResultSummary(int viewpointPlayer,
+                                          const game::config::HostConfiguration& config, const game::spec::ShipList& shipList,
+                                          util::NumberFormatter fmt, afl::string::Translator& tx) const = 0;
+
 
         /*
          *  Useful methods

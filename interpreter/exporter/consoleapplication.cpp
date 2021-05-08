@@ -51,7 +51,7 @@ namespace {
 
         // Context:
         virtual MetaContext* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
-        virtual void set(PropertyIndex_t index, afl::data::Value* value);
+        virtual void set(PropertyIndex_t index, const afl::data::Value* value);
         virtual afl::data::Value* get(PropertyIndex_t index);
         virtual bool next();
         virtual MetaContext* clone() const;
@@ -89,7 +89,7 @@ namespace {
         return lookupName(name, meta_mapping, result) ? this : 0;
     }
 
-    void MetaContext::set(PropertyIndex_t /*index*/, afl::data::Value* /*value*/)
+    void MetaContext::set(PropertyIndex_t /*index*/, const afl::data::Value* /*value*/)
     {
         throw interpreter::Error::notAssignable();
     }
@@ -250,16 +250,16 @@ interpreter::exporter::ConsoleApplication::appMain()
             } else if (p == "A") {
                 arg_array = commandLine.getRequiredParameter(p);
             } else if (p == "t") {
-                config.setFormatByName(commandLine.getRequiredParameter(p));
+                config.setFormatByName(commandLine.getRequiredParameter(p), tx);
             } else if (p == "o") {
                 arg_outfile = commandLine.getRequiredParameter(p);
             } else if (p == "O") {
-                config.setCharsetByName(commandLine.getRequiredParameter(p));
+                config.setCharsetByName(commandLine.getRequiredParameter(p), tx);
                 hadCharsetOption = true;
             } else if (p == "c") {
                 afl::base::Ref<afl::io::Stream> file = fileSystem().openFile(commandLine.getRequiredParameter(p), afl::io::FileSystem::OpenRead);
                 Configuration tmpConfig(config);
-                tmpConfig.load(*file);
+                tmpConfig.load(*file, tx);
                 config = tmpConfig;
             } else if (p == "h" || p == "help") {
                 help();
@@ -382,7 +382,7 @@ interpreter::exporter::ConsoleApplication::help()
 {
     afl::io::TextWriter& out = standardOutput();
     afl::string::Translator& tx = translator();
-    out.writeLine(afl::string::Format(tx("PCC2 Export v%s - (c) 2017-2020 Stefan Reuther"), PCC2_VERSION));
+    out.writeLine(afl::string::Format(tx("PCC2 Export v%s - (c) 2017-2021 Stefan Reuther"), PCC2_VERSION));
     out.writeLine();
     out.writeLine(afl::string::Format(tx("Usage:\n"
                                          "  %s [-h]\n"

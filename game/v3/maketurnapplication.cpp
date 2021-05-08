@@ -117,13 +117,13 @@ game::v3::MaketurnApplication::appMain()
             // @change PCC2 would write some entertaining message here; we have that in saveAll()
             // size_t numCommands =
             theMaketurn.makeTurn(pl, log());
-            // standardOutput().writeLine(afl::string::Format(_("%s: %d command%!1{s%}").c_str(), players.getPlayerName(pl, Player::ShortName), numCommands));
+            // standardOutput().writeLine(afl::string::Format(tx("%s: %d command%!1{s%}"), players.getPlayerName(pl, Player::ShortName), numCommands));
         }
     }
 
     // Write them out
     // @change PCC2 would write some entertaining message here; we have that in saveAll()
-    // standardOutput().writeLine(afl::string::Format(_("Writing %d turn file%!1{s%}...").c_str(), theMaketurn.getNumFiles()));
+    // standardOutput().writeLine(afl::string::Format(tx("Writing %d turn file%!1{s%}..."), theMaketurn.getNumFiles()));
     theMaketurn.saveAll(log(), fileSystem(), config);
 }
 
@@ -132,7 +132,7 @@ game::v3::MaketurnApplication::help()
 {
     afl::io::TextWriter& out = standardOutput();
     afl::string::Translator& tx = translator();
-    out.writeLine(afl::string::Format(tx("PCC2 Turn File Compiler v%s - (c) 2010-2020 Stefan Reuther"), PCC2_VERSION));
+    out.writeLine(afl::string::Format(tx("PCC2 Turn File Compiler v%s - (c) 2010-2021 Stefan Reuther"), PCC2_VERSION));
     out.writeLine();
     out.writeLine(afl::string::Format(tx("Usage:\n"
                                          "  %s [-h]\n"

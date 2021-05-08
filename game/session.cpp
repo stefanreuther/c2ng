@@ -101,13 +101,12 @@ namespace {
 
 game::Session::Session(afl::string::Translator& tx, afl::io::FileSystem& fs)
     : m_log(),
-      m_translator(tx),
       m_root(),
       m_shipList(),
       m_game(),
       m_uiPropertyStack(),
       m_editableAreas(),
-      m_world(m_log, fs),
+      m_world(m_log, tx, fs),
       m_processList(),
       m_rng(afl::sys::Time::getTickCounter()),
       m_plugins(tx, m_log),
@@ -209,10 +208,10 @@ game::Session::getAutoTaskEditor(Id_t id, interpreter::Process::ProcessKind kind
     if (proc == 0 && create) {
         // Create process
         String_t fmt = (kind == Process::pkShipTask
-                        ? m_translator("Auto Task Ship %d")
+                        ? translator()("Auto Task Ship %d")
                         : kind == Process::pkPlanetTask
-                        ? m_translator("Auto Task Planet %d")
-                        : m_translator("Auto Task Starbase %d"));
+                        ? translator()("Auto Task Planet %d")
+                        : translator()("Auto Task Starbase %d"));
         proc = &processList().create(m_world, afl::string::Format(fmt, id));
 
         // Place in appropriate context
@@ -268,6 +267,57 @@ game::Session::releaseAutoTaskEditor(afl::base::Ptr<interpreter::TaskEditor>& pt
             pl.resumeProcess(proc, pgid);
             pl.startProcessGroup(pgid);
             pl.run();
+        }
+    }
+}
+
+game::Session::TaskStatus
+game::Session::getTaskStatus(const game::map::Object* obj, interpreter::Process::ProcessKind kind, bool waitOnly) const
+{
+    // ex getControlScreenFrameColor (waitOnly=false), getAutoTaskFrameColor (waitOnly=true)
+    using interpreter::Process;
+    using game::interface::NotificationStore;
+    if (waitOnly) {
+        if (const Process* proc = m_processList.getProcessByObject(obj, kind)) {
+            if (m_notifications.isMessageConfirmed(m_notifications.findMessageByProcessId(proc->getProcessId()))) {
+                return WaitingTask;
+            } else {
+                return NoTask;
+            }
+        } else {
+            return NoTask;
+        }
+    } else {
+        const interpreter::ProcessList::Vector_t& pl = m_processList.getProcessList();
+        bool any = false;
+        for (size_t i = 0, n = pl.size(); i != n; ++i) {
+            if (const Process* proc = pl[i]) {
+                // Check for a process which is started from this object, and
+                // which is currently runnable/suspended/frozen. Those are the
+                // states usually assumed by auto tasks or long-running scripts.
+                // Running scripts do not count here, as they are usually (but
+                // not always!) temporary UI processes.
+                if ((proc->getState() == Process::Runnable
+                     || proc->getState() == Process::Suspended
+                     || proc->getState() == Process::Frozen)
+                    && proc->getInvokingObject() == obj)
+                {
+                    any = true;
+                    if (proc->getProcessKind() == kind) {
+                        // Found the auto task
+                        if (m_notifications.isMessageConfirmed(m_notifications.findMessageByProcessId(proc->getProcessId()))) {
+                            return WaitingTask;
+                        } else {
+                            return ActiveTask;
+                        }
+                    }
+                }
+            }
+        }
+        if (any) {
+            return OtherTask;
+        } else {
+            return NoTask;
         }
     }
 }
@@ -346,7 +396,7 @@ game::Session::getReferenceName(Reference ref, ObjectName which, String_t& resul
                 if (which == PlainName) {
                     result = p->getName(Player::ShortName);
                 } else {
-                    result = ref.toString(m_translator);
+                    result = ref.toString(translator());
                     result += ": ";
                     result += p->getName(Player::ShortName);
                 }
@@ -357,7 +407,7 @@ game::Session::getReferenceName(Reference ref, ObjectName which, String_t& resul
 
      case Reference::MapLocation:
         // Reference name is good enough.
-        result = ref.toString(m_translator);
+        result = ref.toString(translator());
         return true;
 
      case Reference::Ship:
@@ -373,9 +423,9 @@ game::Session::getReferenceName(Reference ref, ObjectName which, String_t& resul
                     if (ref.getType() == Reference::Starbase && which != PlainName) {
                         // Special case: report the reference name plus object's name, if any.
                         // This allows a starbase reference to be shown as "Starbase #123: Melmac".
-                        result = ref.toString(m_translator);
+                        result = ref.toString(translator());
                         result += ": ";
-                        result += obj->getName(PlainName, m_translator, *this);
+                        result += obj->getName(PlainName, translator(), *this);
                         if (which == DetailedName) {
                             String_t comment = this->getComment(Planet, ref.getId());
                             if (!comment.empty()) {
@@ -385,7 +435,7 @@ game::Session::getReferenceName(Reference ref, ObjectName which, String_t& resul
                         }
                         return true;
                     } else {
-                        result = obj->getName(which, m_translator, *this);
+                        result = obj->getName(which, translator(), *this);
                         return !result.empty();
                     }
                 }
@@ -403,7 +453,7 @@ game::Session::getReferenceName(Reference ref, ObjectName which, String_t& resul
                 if (which == PlainName) {
                     result = p->getName(shipList->componentNamer());
                 } else {
-                    result = ref.toString(m_translator);
+                    result = ref.toString(translator());
                     result += ": ";
                     result += p->getName(shipList->componentNamer());
                 }
@@ -599,10 +649,12 @@ game::Session::initWorld()
     m_world.setNewGlobalValue("ADDPREF",          new game::interface::SimpleProcedure(*this, game::interface::IFAddPref));
     m_world.setNewGlobalValue("AUTHPLAYER",       new game::interface::SimpleProcedure(*this, game::interface::IFAuthPlayer));
     m_world.setNewGlobalValue("CC$NOTIFY",        new game::interface::SimpleProcedure(*this, game::interface::IFCCNotify));
+    m_world.setNewGlobalValue("CC$NUMNOTIFICATIONS", new game::interface::SimpleFunction(*this, game::interface::IFCCNumNotifications));
     m_world.setNewGlobalValue("CC$SELECTIONEXEC", new game::interface::SimpleProcedure(*this, game::interface::IFCCSelectionExec));
     m_world.setNewGlobalValue("CREATECONFIGOPTION", new game::interface::SimpleProcedure(*this, game::interface::IFCreateConfigOption));
     m_world.setNewGlobalValue("CREATEPREFOPTION", new game::interface::SimpleProcedure(*this, game::interface::IFCreatePrefOption));
     m_world.setNewGlobalValue("DELETECOMMAND",    new game::interface::SimpleProcedure(*this, game::interface::IFDeleteCommand));
+    m_world.setNewGlobalValue("NEWCANNEDMARKER",  new game::interface::SimpleProcedure(*this, game::interface::IFNewCannedMarker));
     m_world.setNewGlobalValue("NEWCIRCLE",        new game::interface::SimpleProcedure(*this, game::interface::IFNewCircle));
     m_world.setNewGlobalValue("NEWLINE",          new game::interface::SimpleProcedure(*this, game::interface::IFNewLine));
     m_world.setNewGlobalValue("NEWLINERAW",       new game::interface::SimpleProcedure(*this, game::interface::IFNewLineRaw));
@@ -643,6 +695,6 @@ void
 game::Session::updateMap()
 {
     if (m_root.get() != 0 && m_game.get() != 0) {
-        m_game->currentTurn().universe().config().initFromConfiguration(m_root->hostVersion(), m_root->hostConfiguration(), m_root->userConfiguration());
+        m_game->currentTurn().universe().config().initFromConfiguration(m_root->hostConfiguration(), m_root->userConfiguration());
     }
 }

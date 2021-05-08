@@ -42,13 +42,13 @@ namespace client { namespace widgets { namespace {
                 {
                     gfx::ClipFilter filter(can, leftArea);
                     gfx::Context<util::SkinColor::Color> ctx(filter, getColorScheme());
-                    ctx.setTextAlign(0, 1);
+                    ctx.setTextAlign(gfx::LeftAlign, gfx::MiddleAlign);
                     ui::rich::outText(ctx, gfx::Point(leftArea.getLeftX(), centerY), m_left, m_provider);
                 }
                 {
                     gfx::ClipFilter filter(can, r);
                     gfx::Context<util::SkinColor::Color> ctx(filter, getColorScheme());
-                    ctx.setTextAlign(0, 1);
+                    ctx.setTextAlign(gfx::LeftAlign, gfx::MiddleAlign);
                     ui::rich::outText(ctx, gfx::Point(r.getLeftX(), centerY), m_right, m_provider);
                 }
             }

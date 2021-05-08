@@ -9,10 +9,13 @@
   */
 
 #include "game/spec/standardcomponentnameprovider.hpp"
+#include "afl/base/countof.hpp"
+#include "afl/base/staticassert.hpp"
+#include "afl/string/format.hpp"
 #include "afl/string/string.hpp"
 #include "util/fileparser.hpp"
-#include "afl/base/staticassert.hpp"
-#include "afl/base/countof.hpp"
+
+using afl::string::Format;
 
 namespace {
     static const char*const NAMES[] = {
@@ -146,17 +149,18 @@ game::spec::StandardComponentNameProvider::load(afl::io::Directory& dir, afl::st
     NameFileParser parser(*this, tx, log);
     afl::base::Ptr<afl::io::Stream> file;
 
-    // FIXME: language specific not yet implemented
     // Load user files. Language-specific file first
-    //     string_t code = Platform::getLanguageCode();
-    //     string_t::size_type n = code.find_first_of("_:-/.\\");
-    //     if (n != code.npos) {
-    //         code.erase(n);
-    //     }
-    //     if (!code.empty()) {
-    //         parser.parseGameFile(format("names_%s.usr", code));
-    //         parser.parseGameFile(format("names_%s.cc", code));
-    //     }
+    String_t code = tx("{languageCode}");
+    if (!code.empty() && code[0] != '{') {
+        file = dir.openFileNT(Format("names_%s.usr", code), afl::io::FileSystem::OpenRead);
+        if (file.get() != 0) {
+            parser.parseFile(*file);
+        }
+        file = dir.openFileNT(Format("names_%s.cc", code), afl::io::FileSystem::OpenRead);
+        if (file.get() != 0) {
+            parser.parseFile(*file);
+        }
+    }
 
     // System file
     file = dir.openFileNT("names.usr", afl::io::FileSystem::OpenRead);

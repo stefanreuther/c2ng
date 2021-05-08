@@ -72,10 +72,10 @@ namespace gfx {
 
         /** Set text alignment.
             Text drawing operations will use this to align the given position and the text.
-            \param x horizontal alignment (0=left, 1=center, 2=right)
-            \param y vertical alignment (0=top, 1=middle, 2=bottom)
+            \param x horizontal alignment
+            \param y vertical alignment
             \return *this */
-        BaseContext& setTextAlign(int x, int y);
+        BaseContext& setTextAlign(HorizontalAlignment x, VerticalAlignment y);
 
         /** Use a font.
             \param font Font

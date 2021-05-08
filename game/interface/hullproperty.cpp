@@ -59,9 +59,6 @@ namespace {
      }
 }
 
-// /** Get hull property.
-//     \param h Hull to query
-//     \param isp Hull property to query */
 afl::data::Value*
 game::interface::getHullProperty(const game::spec::Hull& h, HullProperty isp, const game::spec::ShipList& list, const game::config::HostConfiguration& config)
 {
@@ -120,12 +117,8 @@ game::interface::getHullProperty(const game::spec::Hull& h, HullProperty isp, co
     return 0;
 }
 
-// /** Set hull property.
-//     \param h Hull to modify
-//     \param isp Property to modify
-//     \param value Value to assign */
 void
-game::interface::setHullProperty(game::spec::Hull& h, HullProperty isp, afl::data::Value* value, game::spec::ShipList& list)
+game::interface::setHullProperty(game::spec::Hull& h, HullProperty isp, const afl::data::Value* value, game::spec::ShipList& list)
 {
     // ex int/if/hullif.h:setHullProperty
     int32_t i;

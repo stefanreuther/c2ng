@@ -10,6 +10,7 @@
 #include "game/interpreterinterface.hpp"
 #include "game/map/planet.hpp"
 #include "game/map/universe.hpp"
+#include "game/root.hpp"
 
 namespace game { namespace interface {
 
@@ -50,6 +51,7 @@ namespace game { namespace interface {
         ippLocX,
         ippLocY,
         ippMarked,
+        ippMessages,
         ippMinedD,
         ippMinedM,
         ippMinedN,
@@ -91,11 +93,10 @@ namespace game { namespace interface {
 
     afl::data::Value* getPlanetProperty(const game::map::Planet& pl, PlanetProperty ipp,
                                         afl::string::Translator& tx,
-                                        const game::HostVersion& host,
-                                        const game::config::HostConfiguration& config,
                                         InterpreterInterface& iface,
+                                        afl::base::Ref<Root> root,
                                         afl::base::Ref<Game> game);
-    void setPlanetProperty(game::map::Planet& pl, PlanetProperty ipp, afl::data::Value* value, Root& root);
+    void setPlanetProperty(game::map::Planet& pl, PlanetProperty ipp, const afl::data::Value* value, Root& root);
 
 } }
 

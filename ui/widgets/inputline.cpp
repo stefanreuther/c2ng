@@ -20,7 +20,6 @@
 #include "ui/widgets/quit.hpp"
 #include "ui/widgets/statictext.hpp"
 #include "ui/window.hpp"
-#include "util/translation.hpp"
 #include "util/unicodechars.hpp"
 #include "ui/widgets/standarddialogbuttons.hpp"
 
@@ -52,11 +51,6 @@ namespace {
     }
 }
 
-// /** Input line.
-//     \param maxLength   maximum length of input (a hard limit)
-//     \param hotkey    hot-key that brings focus to this widget
-//     \param aflags  options
-//     \param id     widget Id */
 ui::widgets::InputLine::InputLine(size_t maxLength, Root& root)
     : SimpleWidget(),
       m_hotkey(0),
@@ -75,12 +69,6 @@ ui::widgets::InputLine::InputLine(size_t maxLength, Root& root)
     setFlag(TypeErase, true);
 }
 
-// /** Input line.
-//     \param maxLength   maximum length of input (a hard limit)
-//     \param preferredLength preferred width of input, in "em" widths
-//     \param hotkey    hot-key that brings focus to this widget
-//     \param aflags  options
-//     \param id     widget Id */
 ui::widgets::InputLine::InputLine(size_t maxLength, int preferredLength, Root& root)
     : SimpleWidget(),
       m_hotkey(0),
@@ -98,7 +86,6 @@ ui::widgets::InputLine::InputLine(size_t maxLength, int preferredLength, Root& r
     setFlag(TypeErase, true);
 }
 
-// /** Set contents of input line. */
 ui::widgets::InputLine&
 ui::widgets::InputLine::setText(String_t s)
 {
@@ -110,6 +97,9 @@ ui::widgets::InputLine::setText(String_t s)
     sig_change.raise();
     return *this;
 }
+
+ui::widgets::InputLine::~InputLine()
+{ }
 
 String_t
 ui::widgets::InputLine::getText() const
@@ -154,9 +144,6 @@ ui::widgets::InputLine::setFont(const gfx::FontRequest& font)
     return *this;
 }
 
-// /** Insert text at current cursor position. Respects flags
-//     ilf_NonEditable (=request is ignored) and ilf_TypeErase (=replace
-//     current text). */
 void
 ui::widgets::InputLine::insertText(String_t s)
 {
@@ -187,8 +174,6 @@ ui::widgets::InputLine::insertText(String_t s)
     sig_change.raise();
 }
 
-// /** Move cursor to position pos.
-//     \param pos cursor position, [0, lengthUtf8()] */
 void
 ui::widgets::InputLine::setCursorIndex(size_t pos)
 {
@@ -205,24 +190,17 @@ ui::widgets::InputLine::setCursorIndex(size_t pos)
     }
 }
 
-// /** Get cursor position. Note that this position is in runes, not bytes! */
 size_t
 ui::widgets::InputLine::getCursorIndex() const
 {
     return m_cursorIndex;
 }
 
-// /** Do a standard input line dialog.
-//     \param str     string to enter/modify
-//     \param maxlen  maximum length for string
-//     \param title,req  title and prompt of dialog window
-//     \param width   width of input field in "em" widths
-//     \param flags   flags for input field */
 bool
-ui::widgets::InputLine::doStandardDialog(String_t title, String_t prompt)
+ui::widgets::InputLine::doStandardDialog(String_t title, String_t prompt, afl::string::Translator& tx)
 {
     // ex UIInputLine::run (totally modified)
-    return ui::widgets::doStandardDialog(title, prompt, *this, false, m_root);
+    return ui::widgets::doStandardDialog(title, prompt, *this, false, m_root, tx);
 }
 
 // EventConsumer:
@@ -396,6 +374,8 @@ bool
 ui::widgets::InputLine::handleMouse(gfx::Point pt, MouseButtons_t pressedButtons)
 {
     if (pressedButtons.nonempty() && getExtent().contains(pt) && !hasState(DisabledState)) {
+        // Mouse pressed in widget: activate and place cursor.
+        // Cursor follows mouse while button is pressed.
         requestActive();
         requestFocus();
 
@@ -419,6 +399,9 @@ ui::widgets::InputLine::handleMouse(gfx::Point pt, MouseButtons_t pressedButtons
         requestRedraw();
         return true;
     } else {
+        // Mouse not pressed in widget.
+        // If it previously was pressed, and the widget is still focused, it was clicked.
+        // (Otherwise, it was dragged into another widget.)
         bool down = m_mouseDown;
         m_mouseDown = false;
         if (pressedButtons.empty() && down && hasState(FocusedState) && hasState(ActiveState)) {
@@ -505,7 +488,7 @@ ui::widgets::InputLine::getLayoutInfo() const
                             ui::layout::Info::GrowHorizontal);
 }
 
-// /** Adjust display so that cursor is visible. */
+/** Adjust display so that cursor is visible. */
 void
 ui::widgets::InputLine::scroll()
 {
@@ -527,7 +510,7 @@ ui::widgets::InputLine::scroll()
     }
 }
 
-// /** Check whether an Unicode character should be accepted. */
+/** Check whether an Unicode character should be accepted. */
 bool
 ui::widgets::InputLine::acceptUnicode(uint32_t uni) const
 {
@@ -544,11 +527,7 @@ ui::widgets::InputLine::acceptUnicode(uint32_t uni) const
         // Refuse non-ASCII if requested
         return false;
     }
-    // FIXME: missing
-    // if (hasState(ilf_GameChars) && !isReliableGameCharacter(uni)) {
-    //     // Refuse non-game characters if requested
-    //     return false;
-    // }
+    // FIXME: handle GameChars
     return true;
 }
 

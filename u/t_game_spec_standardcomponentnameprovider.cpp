@@ -78,3 +78,35 @@ TestGameSpecStandardComponentNameProvider::testIt()
     TS_ASSERT_EQUALS(testee.getShortName(game::spec::ComponentNameProvider::Engine, 3, "warp drive", ""), "warp drive");
 }
 
+/** Test language specific. */
+void
+TestGameSpecStandardComponentNameProvider::testLanguage()
+{
+    // Environment
+    afl::base::Ref<afl::io::InternalDirectory> dir = afl::io::InternalDirectory::create("dir");
+    static const char FILE1[] =
+        "[hulls.short]\n"
+        "small deep space freighter = Kleiner Frachter\n";
+    dir->addStream("names_de.cc", *new afl::io::ConstMemoryStream(afl::string::toBytes(FILE1)));
+
+    class Translator : public afl::string::Translator {
+        virtual String_t translate(afl::string::ConstStringMemory_t in) const
+            {
+                String_t result = afl::string::fromMemory(in);
+                if (result == "{languageCode}") {
+                    result = "de";
+                }
+                return result;
+            }
+    };
+    Translator tx;
+    afl::sys::Log log;
+
+    // Test it
+    game::spec::StandardComponentNameProvider testee;
+    testee.load(*dir, tx, log);
+
+    // Verify result
+    TS_ASSERT_EQUALS(testee.getShortName(game::spec::ComponentNameProvider::Hull, 7, "Small Deep Space Freighter", ""), "Kleiner Frachter");
+}
+

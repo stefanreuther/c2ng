@@ -42,6 +42,31 @@ game::score::CompoundScore::CompoundScore(const TurnScoreList& list, DefaultScor
     }
 }
 
+// Compare for equality.
+bool
+game::score::CompoundScore::operator==(const CompoundScore& other) const
+{
+    if (m_valid != other.m_valid) {
+        return false;
+    }
+    if (m_numParts != other.m_numParts) {
+        return false;
+    }
+    for (size_t i = 0; i < m_numParts; ++i) {
+        if (m_slot[i] != other.m_slot[i] || m_factor[i] != other.m_factor[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+// Compare for inequality.
+bool
+game::score::CompoundScore::operator!=(const CompoundScore& other) const
+{
+    return !operator==(other);
+}
+
 // Add a score component.
 void
 game::score::CompoundScore::add(const TurnScoreList& list, ScoreId_t id, int factor)
@@ -118,4 +143,11 @@ game::score::CompoundScore::get(const TurnScoreList& list, int turnNr, PlayerSet
             return afl::base::Nothing;
         }
     }
+}
+
+// Check validity.
+bool
+game::score::CompoundScore::isValid() const
+{
+    return m_valid;
 }

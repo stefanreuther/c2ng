@@ -8,8 +8,6 @@
 #include "client/map/scanneroverlay.hpp"
 #include "client/map/waypointoverlay.hpp"
 #include "client/map/widget.hpp"
-#include "game/proxy/cursorobserverproxy.hpp"
-#include "game/proxy/objectlistener.hpp"
 #include "client/si/contextprovider.hpp"
 #include "client/si/contextreceiver.hpp"
 #include "client/si/control.hpp"
@@ -27,16 +25,16 @@
 #include "game/interface/taskeditorcontext.hpp"
 #include "game/interface/userinterfacepropertyaccessor.hpp"
 #include "game/map/objectcursorfactory.hpp"
+#include "game/proxy/cursorobserverproxy.hpp"
+#include "game/proxy/objectlistener.hpp"
+#include "gfx/complex.hpp"
 #include "interpreter/typehint.hpp"
 #include "interpreter/values.hpp"
 #include "ui/group.hpp"
 #include "ui/layout/hbox.hpp"
 #include "ui/layout/vbox.hpp"
 #include "ui/prefixargument.hpp"
-#include "ui/skincolorscheme.hpp"
 #include "ui/spacer.hpp"
-#include "ui/widgets/panel.hpp"
-#include "util/slaveobject.hpp"
 
 using interpreter::makeBooleanValue;
 using interpreter::makeIntegerValue;
@@ -60,7 +58,121 @@ namespace {
         afl::base::Ptr<game::Game> m_game;
         afl::base::Ref<client::screens::ControlScreen::State> m_state;
     };
+
+
+    /*
+     *  Color Scheme to draw that awesome shade on control screens
+     */
+
+    class ControlScreenColorScheme : public gfx::ColorScheme<util::SkinColor::Color> {
+     public:
+        ControlScreenColorScheme(gfx::ResourceProvider& provider, String_t imageName, ui::Widget& owningWidget, const ui::ColorSet& colors, ui::ColorScheme& uiColorScheme);
+
+        virtual gfx::Color_t getColor(util::SkinColor::Color index);
+        virtual void drawBackground(gfx::Canvas& can, const gfx::Rectangle& area);
+
+     private:
+        gfx::ResourceProvider& m_provider;
+        String_t m_imageName;
+        ui::Widget& m_owningWidget;
+        const ui::ColorSet& m_colors;
+        ui::ColorScheme& m_uiColorScheme;
+
+        afl::base::Ptr<gfx::Canvas> m_image;
+        bool m_imageFinal;
+        afl::base::SignalConnection conn_imageChange;
+
+        void onImageChange();
+        void requestImage();
+    };
 }
+
+/*
+ *  ControlScreenColorScheme
+ */
+
+ControlScreenColorScheme::ControlScreenColorScheme(gfx::ResourceProvider& provider,
+                                                   String_t imageName,
+                                                   ui::Widget& owningWidget,
+                                                   const ui::ColorSet& colors,
+                                                   ui::ColorScheme& uiColorScheme)
+    : m_provider(provider),
+      m_imageName(imageName),
+      m_owningWidget(owningWidget),
+      m_colors(colors),
+      m_uiColorScheme(uiColorScheme),
+      m_image(),
+      m_imageFinal(false),
+      conn_imageChange()
+{
+    requestImage();
+}
+
+gfx::Color_t
+ControlScreenColorScheme::getColor(util::SkinColor::Color index)
+{
+    if (size_t(index) < util::SkinColor::NUM_COLORS) {
+        return m_uiColorScheme.getColor(m_colors[index]);
+    } else {
+        return m_uiColorScheme.getColor(0);
+    }
+}
+
+void
+ControlScreenColorScheme::drawBackground(gfx::Canvas& can, const gfx::Rectangle& area)
+{
+    // ex WControlScreen::Skin::drawBackground
+    // Draw solid
+    gfx::Context<uint8_t> ctx(can, m_uiColorScheme);
+    drawSolidBar(ctx, area, ui::Color_Grayscale+5);
+
+    // Draw image
+    if (m_image.get() != 0) {
+        // Widget size defines anchor point
+        gfx::Rectangle widgetSize = m_owningWidget.getExtent();
+
+        // Area the image can fill, in screen coordinates
+        gfx::Rectangle pixArea(widgetSize.getTopLeft(), m_image->getSize());
+
+        // Area we want to fill with image
+        gfx::Rectangle fillArea(area);
+        fillArea.intersect(pixArea);
+        fillArea.moveBy(gfx::Point() - widgetSize.getTopLeft());
+
+        // Draw pixmap
+        if (fillArea.exists()) {
+            can.blit(widgetSize.getTopLeft(), *m_image, fillArea);
+        }
+    }
+}
+
+void
+ControlScreenColorScheme::onImageChange()
+{
+    requestImage();
+    if (m_imageFinal) {
+        m_owningWidget.requestRedraw();
+    }
+}
+
+void
+ControlScreenColorScheme::requestImage()
+{
+    // Try to obtain image
+    m_image = m_provider.getImage(m_imageName, &m_imageFinal);
+    if (m_imageFinal) {
+        conn_imageChange.disconnect();
+    } else {
+        if (!conn_imageChange.isConnected()) {
+            conn_imageChange = m_provider.sig_imageChange.add(this, &ControlScreenColorScheme::onImageChange);
+        }
+    }
+}
+
+
+/*
+ *  Control Screen Definitions
+ */
 
 const client::screens::ControlScreen::Definition client::screens::ControlScreen::ShipScreen = {
     client::si::OutputState::ShipScreen,
@@ -213,38 +325,29 @@ class client::screens::ControlScreen::Updater : public game::proxy::ObjectListen
  *  (A proprietor is someone who has properties, right?)
  *
  *  This class provides user interface properties to scripts.
- *  It lives on the script side (-> SlaveObject).
+ *  It lives on the script side.
  */
 
-class client::screens::ControlScreen::Proprietor : public util::SlaveObject<game::Session>,
-                                                   public game::interface::UserInterfacePropertyAccessor
+class client::screens::ControlScreen::Proprietor : public game::interface::UserInterfacePropertyAccessor
 {
  public:
-    Proprietor(afl::base::Ref<State> state, util::RequestSender<ControlScreen> reply)
-        : m_pSession(0),
+    Proprietor(game::Session& session, afl::base::Ref<State> state, util::RequestSender<ControlScreen> reply)
+        : m_session(session),
           m_state(state),
           m_reply(reply),
           m_scanPosition()
-        { }
-    virtual void init(game::Session& master)
-        {
-            master.uiPropertyStack().add(*this);
-            m_pSession = &master;
-        }
-    virtual void done(game::Session& master)
-        {
-            master.uiPropertyStack().remove(*this);
-            m_pSession = 0;
-        }
+        { m_session.uiPropertyStack().add(*this); }
+    ~Proprietor()
+        { m_session.uiPropertyStack().remove(*this); }
 
     virtual bool get(game::interface::UserInterfaceProperty prop, std::auto_ptr<afl::data::Value>& result);
-    virtual bool set(game::interface::UserInterfaceProperty prop, afl::data::Value* p);
+    virtual bool set(game::interface::UserInterfaceProperty prop, const afl::data::Value* p);
 
     void setScannerPosition(afl::base::Optional<Point> p)
         { m_scanPosition = p; }
 
  private:
-    game::Session* m_pSession;
+    game::Session& m_session;
     afl::base::Ref<State> m_state;
     util::RequestSender<ControlScreen> m_reply;
 
@@ -269,17 +372,15 @@ client::screens::ControlScreen::Proprietor::get(game::interface::UserInterfacePr
      case game::interface::iuiAutoTask:
         // UI.AutoTask
         result.reset();
-        if (m_pSession != 0) {
-            if (game::map::Object* obj = m_state->getObject(*m_pSession)) {
-                result.reset(game::interface::TaskEditorContext::create(*m_pSession, m_state->taskType, obj->getId()));
-            }
+        if (game::map::Object* obj = m_state->getObject(m_session)) {
+            result.reset(game::interface::TaskEditorContext::create(m_session, m_state->taskType, obj->getId()));
         }
         return true;
 
      case game::interface::iuiIterator:
         // UI.Iterator: created from state
-        if (m_pSession != 0 && m_pSession->getGame().get() != 0) {
-            result.reset(game::interface::makeIteratorValue(*m_pSession, m_state->screenNumber, false));
+        if (m_session.getGame().get() != 0) {
+            result.reset(game::interface::makeIteratorValue(m_session, m_state->screenNumber, false));
         } else {
             result.reset();
         }
@@ -308,15 +409,13 @@ client::screens::ControlScreen::Proprietor::get(game::interface::UserInterfacePr
      case game::interface::iuiChartY:
         // Chart.X/Y: object position, provided by game
         result.reset();
-        if (m_pSession != 0) {
-            if (game::map::Object* obj = m_state->getObject(*m_pSession)) {
-                Point pt;
-                if (obj->getPosition(pt)) {
-                    if (prop == game::interface::iuiChartX) {
-                        result.reset(makeIntegerValue(pt.getX()));
-                    } else {
-                        result.reset(makeIntegerValue(pt.getY()));
-                    }
+        if (game::map::Object* obj = m_state->getObject(m_session)) {
+            Point pt;
+            if (obj->getPosition(pt)) {
+                if (prop == game::interface::iuiChartX) {
+                    result.reset(makeIntegerValue(pt.getX()));
+                } else {
+                    result.reset(makeIntegerValue(pt.getY()));
                 }
             }
         }
@@ -332,7 +431,7 @@ client::screens::ControlScreen::Proprietor::get(game::interface::UserInterfacePr
 }
 
 bool
-client::screens::ControlScreen::Proprietor::set(game::interface::UserInterfaceProperty prop, afl::data::Value* p)
+client::screens::ControlScreen::Proprietor::set(game::interface::UserInterfaceProperty prop, const afl::data::Value* p)
 {
     // ex WControlScreen::setProperty
     class Updater : public util::Request<ControlScreen> {
@@ -376,6 +475,19 @@ client::screens::ControlScreen::Proprietor::set(game::interface::UserInterfacePr
 }
 
 
+class client::screens::ControlScreen::ProprietorFromSession : public afl::base::Closure<Proprietor*(game::Session&)> {
+ public:
+    ProprietorFromSession(const afl::base::Ref<State>& state, const util::RequestSender<ControlScreen>& reply)
+        : m_state(state), m_reply(reply)
+        { }
+    virtual Proprietor* call(game::Session& session)
+        { return new Proprietor(session, m_state, m_reply); }
+ private:
+    afl::base::Ref<State> m_state;
+    util::RequestSender<ControlScreen> m_reply;
+};
+
+
 /*
  *  Control Screen
  */
@@ -389,14 +501,15 @@ client::screens::ControlScreen::ControlScreen(Session& session, int nr, const De
       m_deleter(),
       m_loop(m_session.root()),
       m_outputState(),
+      m_panel(ui::layout::HBox::instance5, 2),
       m_mapWidget(interface().gameSender(), root(), gfx::Point(300, 300)),
       m_scannerOverlay(root().colorScheme()),
-      m_movementOverlay(root().engine().dispatcher(), interface().gameSender()),
-      m_minefieldOverlay(root()),
+      m_movementOverlay(root().engine().dispatcher(), interface().gameSender(), m_mapWidget),
+      m_minefieldOverlay(root(), session.translator()),
       m_scanResult(root(), interface().gameSender(), translator()),
       m_center(),
       m_reply(m_session.root().engine().dispatcher(), *this),
-      m_proprietor(m_session.gameSender(), new Proprietor(m_state, m_reply.getSender()))
+      m_proprietor(m_session.gameSender().makeTemporary(new ProprietorFromSession(m_state, m_reply.getSender())))
 { }
 
 void
@@ -407,16 +520,15 @@ client::screens::ControlScreen::run(client::si::InputState& in, client::si::Outp
     ui::Root& root = m_session.root();
 
     // Build it
-    ui::widgets::Panel panel(ui::layout::HBox::instance5, 2);
-    ui::SkinColorScheme panelColors(ui::DARK_COLOR_SET, root.colorScheme());
-    panel.setColorScheme(panelColors);
+    ControlScreenColorScheme panelColors(root.provider(), "bg.cscreen", m_panel, ui::DARK_COLOR_SET, root.colorScheme());
+    m_panel.setColorScheme(panelColors);
     client::widgets::KeymapWidget keys(m_session.gameSender(), root.engine().dispatcher(), *this);
     game::proxy::CursorObserverProxy oop(m_session.gameSender(), std::auto_ptr<game::map::ObjectCursorFactory>(new ScreenCursorFactory(m_state)));
 
     ui::Group tileGroup(ui::layout::VBox::instance5);
-    client::tiles::TileFactory(root, m_session.interface(), keys, oop).createLayout(tileGroup, m_definition.layoutName, deleter);
+    client::tiles::TileFactory(root, m_session.interface(), m_session.translator(), keys, oop).createLayout(tileGroup, m_definition.layoutName, deleter);
     tileGroup.add(deleter.addNew(new ui::Spacer()));
-    panel.add(tileGroup);
+    m_panel.add(tileGroup);
 
     m_minefieldOverlay.attach(oop);
 
@@ -428,12 +540,12 @@ client::screens::ControlScreen::run(client::si::InputState& in, client::si::Outp
 
     ui::PrefixArgument prefix(root);
 
-    panel.add(keys);
-    panel.add(prefix);
-    panel.add(mapGroup);
-    panel.setExtent(root.getExtent());
-    panel.setState(ui::Widget::ModalState, true);
-    root.add(panel);
+    m_panel.add(keys);
+    m_panel.add(prefix);
+    m_panel.add(mapGroup);
+    m_panel.setExtent(root.getExtent());
+    m_panel.setState(ui::Widget::ModalState, true);
+    root.add(m_panel);
 
     oop.addNewListener(new Updater(m_reply.getSender()));
 
@@ -448,6 +560,7 @@ client::screens::ControlScreen::run(client::si::InputState& in, client::si::Outp
     }
 
     m_movementOverlay.sig_move.add(this, &ControlScreen::onScannerMove);
+    m_movementOverlay.sig_doubleClick.add(this, &ControlScreen::onDoubleClick);
 
     continueProcessWait(in.getProcess());
     m_loop.run();
@@ -456,12 +569,13 @@ client::screens::ControlScreen::run(client::si::InputState& in, client::si::Outp
 }
 
 void
-client::screens::ControlScreen::handleStateChange(client::si::UserSide& us, client::si::RequestLink2 link, client::si::OutputState::Target target)
+client::screens::ControlScreen::handleStateChange(client::si::RequestLink2 link, client::si::OutputState::Target target)
 {
+    // ex WControlScreen::processEvent
     using client::si::OutputState;
     switch (target) {
      case OutputState::NoChange:
-        us.continueProcess(link);
+        interface().continueProcess(link);
         break;
 
      case OutputState::ShipScreen:
@@ -471,9 +585,9 @@ client::screens::ControlScreen::handleStateChange(client::si::UserSide& us, clie
      case OutputState::PlanetTaskScreen:
      case OutputState::BaseTaskScreen:
         if (target == m_state->ownTarget) {
-            us.continueProcess(link);
+            interface().continueProcess(link);
         } else {
-            us.detachProcess(link);
+            interface().detachProcess(link);
             m_outputState.set(link, target);
             m_loop.stop(0);
         }
@@ -483,7 +597,7 @@ client::screens::ControlScreen::handleStateChange(client::si::UserSide& us, clie
      case OutputState::ExitGame:
      case OutputState::PlayerScreen:
      case OutputState::Starchart:
-        us.detachProcess(link);
+        interface().detachProcess(link);
         m_outputState.set(link, target);
         m_loop.stop(0);
         break;
@@ -491,22 +605,34 @@ client::screens::ControlScreen::handleStateChange(client::si::UserSide& us, clie
 }
 
 void
-client::screens::ControlScreen::handlePopupConsole(client::si::UserSide& ui, client::si::RequestLink2 link)
+client::screens::ControlScreen::handlePopupConsole(client::si::RequestLink2 link)
 {
-    defaultHandlePopupConsole(ui, link);
+    defaultHandlePopupConsole(link);
 }
 
 void
-client::screens::ControlScreen::handleEndDialog(client::si::UserSide& ui, client::si::RequestLink2 link, int /*code*/)
+client::screens::ControlScreen::handleEndDialog(client::si::RequestLink2 link, int /*code*/)
 {
     // This is not a dialog.
-    ui.continueProcess(link);
+    interface().continueProcess(link);
 }
 
 void
-client::screens::ControlScreen::handleSetViewRequest(client::si::UserSide& ui, client::si::RequestLink2 link, String_t name, bool withKeymap)
+client::screens::ControlScreen::handleSetViewRequest(client::si::RequestLink2 link, String_t name, bool withKeymap)
 {
-    defaultHandleSetViewRequest(ui, link, name, withKeymap);
+    defaultHandleSetViewRequest(link, name, withKeymap);
+}
+
+void
+client::screens::ControlScreen::handleUseKeymapRequest(client::si::RequestLink2 link, String_t name, int prefix)
+{
+    defaultHandleUseKeymapRequest(link, name, prefix);
+}
+
+void
+client::screens::ControlScreen::handleOverlayMessageRequest(client::si::RequestLink2 link, String_t text)
+{
+    defaultHandleOverlayMessageRequest(link, text);
 }
 
 client::si::ContextProvider*
@@ -518,18 +644,19 @@ client::screens::ControlScreen::createContextProvider()
 void
 client::screens::ControlScreen::setId(game::Id_t id)
 {
+    // ex WControlScreen::onCurrentChanged (sort-of)
     m_session.interface().history().push(ScreenHistory::Reference(m_definition.historyType, id, 0));
 }
 
 void
 client::screens::ControlScreen::setPositions(game::map::Point origin, game::map::Point target)
 {
-    class SetProperties : public util::SlaveRequest<game::Session, Proprietor> {
+    class SetProperties : public util::Request<Proprietor> {
      public:
         SetProperties(Point pt)
             : m_point(pt)
             { }
-        virtual void handle(game::Session& /*session*/, Proprietor& prop)
+        virtual void handle(Proprietor& prop)
             { prop.setScannerPosition(m_point); }
      private:
         Point m_point;
@@ -540,6 +667,7 @@ client::screens::ControlScreen::setPositions(game::map::Point origin, game::map:
     m_scanResult.setPositions(origin, target);
     m_scannerOverlay.setPositions(origin, target);
     m_movementOverlay.setPosition(target);
+    m_movementOverlay.setLockOrigin(origin, false /* FIXME: handle HYP */);
     m_proprietor.postNewRequest(new SetProperties(target));
 }
 
@@ -557,4 +685,21 @@ client::screens::ControlScreen::onScannerMove(game::map::Point target)
 {
     // FIXME: this is a little whacky. We should normally only update the targets.
     setPositions(m_center, target);
+}
+
+void
+client::screens::ControlScreen::onDoubleClick(game::map::Point /*target*/)
+{
+    // ex WControlScreen::onChartDblclick
+    /* Check with current modifiers. If none found, check again
+       without shift, then without all modifiers.
+
+       For regular events, we automatically discount shift
+       (xref ui/window.cc:simplifyEvent). */
+    util::Key_t mods = m_session.root().engine().getKeyboardModifierState();
+    if (!m_panel.handleKey(util::Key_DoubleClick | mods, 0)) {
+        if (!m_panel.handleKey(util::Key_DoubleClick | (mods & ~util::KeyMod_Shift), 0)) {
+            m_panel.handleKey(util::Key_DoubleClick, 0);
+        }
+    }
 }

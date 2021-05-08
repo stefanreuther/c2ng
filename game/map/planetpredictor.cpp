@@ -1,5 +1,6 @@
 /**
   *  \file game/map/planetpredictor.cpp
+  *  \brief Class game::map::PlanetPredictor
   */
 
 #include <cmath>
@@ -10,6 +11,7 @@
 #include "util/math.hpp"
 
 using game::Element;
+using game::config::HostConfiguration;
 using game::map::Planet;
 using util::PI;
 
@@ -120,6 +122,7 @@ game::map::PlanetPredictor::PlanetPredictor(const Planet& planet)
 
 void
 game::map::PlanetPredictor::computeTurn(const PlanetEffectors& eff,
+                                        const UnitScoreDefinitionList& planetScores,
                                         const game::config::HostConfiguration& config,
                                         const HostVersion& host)
 {
@@ -330,88 +333,107 @@ game::map::PlanetPredictor::computeTurn(const PlanetEffectors& eff,
 
             /* FIXME: Supply eat */
         } else {
-            /* The following is a straight port of the PCC 1.x version.
-               Like that, it's incomplete and sucks. Original comment follows:
-
-               This code sucks dead hamsters through nanotubes.
-               This is almost a bootleg of Tim's code.
-               It should be rewritten in a cleaner way. */
+            /* THost */
             int32_t growth = 0;
+            const int planetTemp = m_planet.getTemperature().orElse(0);
+            const int ownerRace = config.getPlayerRaceNumber(planetOwner);
             if (m_planet.getColonistHappiness().orElse(0) >= 70) {
-                if (config.getPlayerRaceNumber(planetOwner) == 7 && config[config.CrystalsPreferDeserts]()) {
-                    if (m_planet.getTemperature().orElse(0) > 14) {
-                        growth = util::divideAndRound(m_planet.getTemperature().orElse(0) * m_planet.getCargo(Element::Colonists).orElse(0), 400 * (m_planet.getColonistTax().orElse(0)+5));
-                    }
+                // These formulas have the form
+                //     (temperature term) * colonists/20 * 5/(5+tax)
+                // which simplifies to
+                //     (temperature term) * colonists / (4 * (5+tax))
+                // FIXME: should we check for CrystalsPreferDeserts here?
+                if (ownerRace == 7) {
+                    growth = util::divideAndRound(planetTemp * m_planet.getCargo(Element::Colonists).orElse(0), 400 * (m_planet.getColonistTax().orElse(0)+5));
                 } else {
-                    growth = util::roundToInt(std::sin((100 - m_planet.getTemperature().orElse(0)) * 0.0314) * m_planet.getCargo(Element::Colonists).orElse(0) / 4 / (m_planet.getColonistTax().orElse(0) + 5.0));
+                    growth = util::roundToInt(std::sin((100 - planetTemp) * 0.0314) * m_planet.getCargo(Element::Colonists).orElse(0) / 4 / (m_planet.getColonistTax().orElse(0) + 5.0));
                 }
             }
 
-            int32_t maxPop, realMaxPop;
-            if (!config[config.ClimateLimitsPopulation]()) {
-                maxPop     = 100000;
-                realMaxPop = 100000;
-            } else if (config.getPlayerRaceNumber(planetOwner) == 7 && config[config.CrystalsPreferDeserts]()) {
-                maxPop     = 1000 * m_planet.getTemperature().orElse(0);
-                realMaxPop = maxPop;
-            } else {
-                maxPop     = util::roundToInt(100000 * std::sin((100 - m_planet.getTemperature().orElse(0)) * 0.0314));
-                realMaxPop = maxPop;
-                if (m_planet.getTemperature().orElse(0) > 84 || m_planet.getTemperature().orElse(0) <= 14) {
-                    realMaxPop = 1;
+            int32_t maxPop = util::roundToInt(std::sin((100 - planetTemp) * 0.0314) * 100000);
+            if (planetTemp <= 14 || planetTemp > 84) {
+                if (ownerRace != 7 || !config[config.CrystalsPreferDeserts]()) {
                     growth = 0;
-                    maxPop = m_planet.getCargo(Element::Colonists).orElse(0) * (100 - config[config.ClimateDeathRate](planetOwner)) / 100;
-                    if (maxPop < 1) {
-                        maxPop = 1;
-                    }
-                    if (m_planet.getTemperature().orElse(0) > 50) {
-                        maxPop += 2*(100 - m_planet.getTemperature().orElse(0));
-                        realMaxPop += 2*(100 - m_planet.getTemperature().orElse(0));
-                    } else {
-                        maxPop += 2*(1 + m_planet.getTemperature().orElse(0));
-                        realMaxPop += 2*(1 + m_planet.getTemperature().orElse(0));
-                    }
+                    maxPop = std::max(1, m_planet.getCargo(Element::Colonists).orElse(0) - (m_planet.getCargo(Element::Colonists).orElse(0) * config[config.ClimateDeathRate](planetOwner) / 100));
                 }
-                if (m_planet.getTemperature().orElse(0) > 80 && (config.getPlayerRaceNumber(planetOwner) >= 9 || config.getPlayerRaceNumber(planetOwner) == 4)) {
-                    if (maxPop < 60) {
-                        maxPop = realMaxPop = 60;
-                    }
-                }
-                if (m_planet.getTemperature().orElse(0) < 20 && config.getPlayerRaceNumber(planetOwner) == 10) {
-                    if (maxPop < 200) {
-                        maxPop = realMaxPop = 90000;
-                    }
+                if (planetTemp > 50) {
+                    maxPop += (100-planetTemp) * 2;
+                } else {
+                    maxPop += (1+planetTemp)*2;
                 }
             }
+            if (ownerRace == 7 && config[config.CrystalsPreferDeserts]()) {
+                maxPop = planetTemp * 1000;
+            }
+            if (planetTemp > 80 && (ownerRace >= 9 || ownerRace == 4)) {
+                maxPop = std::max(maxPop, 60);
+            }
+            if (planetTemp < 20 && ownerRace == 10) {
+                maxPop = 90000;
+            }
+            if (!config[config.ClimateLimitsPopulation]()) {
+                maxPop = 100000;
+            }
 
-            if (m_planet.getCargo(Element::Colonists).orElse(0) > maxPop && config[config.AllowEatingSupplies](planetOwner) && m_planet.getCargo(Element::Supplies).orElse(0) > 0) {
-                int32_t eaten = 1 + (m_planet.getCargo(Element::Colonists).orElse(0) - maxPop) / 40;
+            if (config[config.AllowEatingSupplies](planetOwner) && m_planet.getCargo(Element::Colonists).orElse(0) > maxPop) {
+                int32_t eaten = util::divideAndRoundToEven(m_planet.getCargo(Element::Colonists).orElse(0) - maxPop, 40, 1);
                 int32_t maxEaten = m_planet.getCargo(Element::Supplies).orElse(0);
                 if (eaten > maxEaten) {
                     eaten = maxEaten;
                 }
                 m_planet.setCargo(Element::Supplies, m_planet.getCargo(Element::Supplies).orElse(0) - eaten);
-                maxPop += 40*m_planet.getCargo(Element::Supplies).orElse(0);
+                maxPop = util::divideAndRoundToEven(m_planet.getCargo(Element::Supplies).orElse(0), 40, maxPop);
             }
 
-            /* FIXME: this is not a universal rule. Check it. */
-            if (m_planet.getCargo(Element::Colonists).orElse(0) > 50000) {
-                growth /= 2;
+            if (m_planet.getCargo(Element::Colonists).orElse(0) > 66000) {
+                growth = util::divideAndRoundToEven(growth, 2, 0);
             }
 
-            // This is not a 1:1 conversion from PCC 1.x.
-            if (config.getPlayerRaceNumber(planetOwner) != 7 && (m_planet.getTemperature().orElse(0) > 84 || m_planet.getTemperature().orElse(0) < 14)) {
+            if ((planetTemp > 84 || planetTemp <= 14) && !(ownerRace == 7 && planetTemp > 50)) {
                 growth = 0;
             }
-            if (maxPop > 250000) {
-                maxPop = 250000;
-            }
 
-            int32_t newPop = m_planet.getCargo(Element::Colonists).orElse(0) + growth;
+            int32_t newPop = m_planet.getCargo(Element::Colonists).orElse(0);
+            if (newPop < maxPop) {
+                newPop += growth;
+            }
             if (newPop > maxPop) {
                 newPop = maxPop;
             }
+            if (newPop > 250000) {
+                newPop = 250000;
+            }
             m_planet.setCargo(Element::Colonists, newPop);
+
+            // Native Growth
+            const int nativeRace = m_planet.getNativeRace().orElse(0);
+            if (nativeRace != 0) {
+                const bool siliconoid = (nativeRace == SiliconoidNatives);
+                const int nativeHappiness = m_planet.getNativeHappiness().orElse(0);
+                const int32_t nativePopulation = m_planet.getNatives().orElse(0);
+                const int nativeTax = m_planet.getNativeTax().orElse(0);
+                if (nativeHappiness < 70) {
+                    growth = 0;
+                } else if (siliconoid) {
+                    growth = util::divideAndRoundToEven(planetTemp * nativePopulation * 5, 100 * 25 * (nativeTax + 5), 0);
+                } else {
+                    growth = util::roundToInt(std::sin((100-planetTemp) * 0.0314) * nativePopulation * 5
+                                              / (25 * (nativeTax + 5)));
+                }
+
+                if (siliconoid) {
+                    maxPop = 1000 * planetTemp;
+                } else {
+                    maxPop = util::roundToInt(std::sin((100-planetTemp) * 0.0314) * 150000);
+                }
+
+                if (nativePopulation > 66000) {
+                    growth = util::divideAndRoundToEven(growth, 2, 0);
+                }
+                if (nativePopulation < maxPop) {
+                    m_planet.setNatives(nativePopulation + growth);
+                }
+            }
         }
 
         // Structure decay
@@ -472,6 +494,27 @@ game::map::PlanetPredictor::computeTurn(const PlanetEffectors& eff,
         if (!host.isPHost()) {
             doAssimilation(m_planet, config);
         }
+    }
+
+    // Experience
+    // ex WPlanetGrowthTile::drawData (part)
+    UnitScoreDefinitionList::Index_t expIndex;
+    int16_t expPoints, expTurn;
+    if (config[HostConfiguration::NumExperienceLevels]() > 0
+        && planetScores.lookup(ScoreId_ExpPoints, expIndex)
+        && m_planet.unitScores().get(expIndex, expPoints, expTurn))
+    {
+        int32_t newExpPoints = expPoints;
+        newExpPoints += config[HostConfiguration::EPPlanetAging]();
+
+        int happy = m_planet.getColonistHappiness().orElse(0);
+        if (m_planet.getNatives().orElse(0) > 0) {
+            happy = std::min(happy, m_planet.getNativeHappiness().orElse(0));
+        }
+        if (happy > 0) {
+            newExpPoints += config[HostConfiguration::EPPlanetGovernment]() * happy / 100;
+        }
+        m_planet.unitScores().set(expIndex, int16_t(std::min(newExpPoints, 0x7FFF)), expTurn);
     }
 
     // Clean up

@@ -101,6 +101,10 @@ game::sim::UnitResult::changeWeight(int32_t oldWeight, int32_t newWeight)
     changeWeight(m_crewLeftOrDefenseLost, oldWeight, newWeight);
     changeWeight(m_numTorpedoHits,        oldWeight, newWeight);
     changeWeight(m_minFightersAboard,     oldWeight, newWeight);
+
+    m_numFights    = m_numFights    * newWeight / oldWeight;
+    m_numFightsWon = m_numFightsWon * newWeight / oldWeight;
+    m_numCaptures  = m_numCaptures  * newWeight / oldWeight;
 }
 
 // Add unit result from ship.
@@ -110,13 +114,13 @@ game::sim::UnitResult::addResult(const Ship& oldShip, const Ship& newShip, const
     // ex GSimResultSummary::UnitResult::addResult
     /* Overall result */
     if (stat.getNumFights() != 0) {
-        ++m_numFights;
+        m_numFights += res.this_battle_weight;
     }
     if (newShip.getOwner() != 0) {
         if (newShip.getOwner() == oldShip.getOwner()) {
-            ++m_numFightsWon;
+            m_numFightsWon += res.this_battle_weight;
         } else {
-            ++m_numCaptures;
+            m_numCaptures += res.this_battle_weight;
         }
     }
 

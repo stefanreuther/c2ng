@@ -1,5 +1,14 @@
 /**
   *  \file util/key.hpp
+  *  \brief Key Codes
+  *
+  *  This is our own keymap table, independant of whatever the GUI library is using.
+  *  (PCC2 was using SDL keys, causing the SDL headers to leak into everything.)
+  *
+  *  Keys do not have any particularily stable format other than that printable
+  *  keys have their Unicode codepoint as code.
+  *
+  *  Some other "one-shot" input events are also mapped to keys (mouse wheel, close request).
   */
 #ifndef C2NG_UTIL_KEY_HPP
 #define C2NG_UTIL_KEY_HPP
@@ -9,6 +18,7 @@
 
 namespace util {
 
+    /** Typedef for a key code (Key_XXX) with modifiers (KeyMod_XXX). */
     typedef uint32_t Key_t;
 
     // Value below Key_FirstSpecial: Unicode
@@ -128,11 +138,17 @@ namespace util {
     String_t formatKey(Key_t key);
 
 
+    /** Class of a key.
+        Distringuishes "real" keypresses from modifiers and virtual keys. */
     enum KeyClass {
         NormalKey,    //< A normal key which is perceived as a "key press" by normal users. Includes printing keys and function keys.
         ModifierKey,  //< A key which is perceived as a "modifier key". Those are usually used as parts of a key combination (Alt, Ctrl, ...).
         VirtualKey    //< A virtual key (event mapped to key).
     };
+
+    /** Classify a key.
+        \param key Keycode
+        \return class */
     KeyClass classifyKey(Key_t key);
 
 }

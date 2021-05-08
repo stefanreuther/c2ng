@@ -10,18 +10,18 @@
 #include "interpreter/arguments.hpp"
 #include "interpreter/values.hpp"
 
-// /* @q Storm(id:Int):Obj (Function, Context)
-//    Access ion storm properties.
-//    Use as
-//    | ForEach Storm Do ...
-//    or
-//    | With Storm(n) Do ...
+/* @q Storm(id:Int):Obj (Function, Context)
+   Access ion storm properties.
+   Use as
+   | ForEach Storm Do ...
+   or
+   | With Storm(n) Do ...
 
-//    @diff This function was available for use in %With under the name %Storms() since PCC 1.0.11.
-//    Do not use the name %Storms in new code, it is not supported by PCC2; use %Storm instead.
+   @diff This function was available for use in %With under the name %Storms() since PCC 1.0.11.
+   Do not use the name %Storms in new code, it is not supported by PCC2; use %Storm instead.
 
-//    @see int:index:group:stormproperty|Storm Properties, int:index:group:stormcommand|Storm Commands
-//    @since PCC 1.0.18, PCC2 1.99.8 */
+   @see int:index:group:stormproperty|Storm Properties, int:index:group:stormcommand|Storm Commands
+   @since PCC 1.0.18, PCC2 1.99.8, PCC2 2.40 */
 
 game::interface::IonStormFunction::IonStormFunction(Session& session)
     : m_session(session)

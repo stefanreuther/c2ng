@@ -9,6 +9,7 @@
 #include "ui/layout/manager.hpp"
 #include "ui/layoutablegroup.hpp"
 #include "ui/root.hpp"
+#include "ui/skincolorscheme.hpp"
 
 namespace ui { namespace widgets {
 
@@ -57,6 +58,7 @@ namespace ui { namespace widgets {
         Root& m_root;
         EventLoop& m_loop;
         afl::base::Ref<gfx::Timer> m_timer;
+        SkinColorScheme m_colorScheme;
 
         void onTick();
         void onMenuItemClick();

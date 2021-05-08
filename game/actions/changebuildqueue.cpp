@@ -54,24 +54,10 @@ namespace {
         return String_t("PB") + char('0' + pri);
     }
 
-
-    game::Id_t findCloningShipAt(game::map::Universe& univ, game::map::Point pt)
-    {
-        game::map::PlayedShipType& ships = univ.playedShips();
-        for (game::Id_t i = ships.findFirstObjectAt(pt); i != 0; i = ships.findNextObjectAt(pt, i)) {
-            String_t shipFC;
-            const Ship* pShip = ships.getObjectByIndex(i);
-            if (pShip != 0 && pShip->getFriendlyCode().get(shipFC) && shipFC == "cln") {
-                return i;
-            }
-        }
-        return 0;
-    }
-
     game::Id_t findPreviouslyCloningShipAt(game::map::Universe& univ, game::map::Point pt)
     {
         game::map::PlayedShipType& ships = univ.playedShips();
-        for (game::Id_t i = ships.findFirstObjectAt(pt); i != 0; i = ships.findNextObjectAt(pt, i)) {
+        for (game::Id_t i = ships.findNextObjectAt(pt, 0, false); i != 0; i = ships.findNextObjectAt(pt, i, false)) {
             String_t shipFC;
             game::map::Reverter* rev = univ.getReverter();
             if (rev != 0 && rev->getPreviousShipFriendlyCode(i).get(shipFC) && shipFC == "cln") {
@@ -172,7 +158,7 @@ game::actions::ChangeBuildQueue::describe(Infos_t& result, afl::string::Translat
     for (size_t i = 0, n = m_info.size(); i < n; ++i) {
         // Input
         const LocalInfo& in = m_info[i];
-        const Planet& pl = mustExist(m_universe.planets().get(in.planetId));
+        const Planet& pl = mustExist(m_universe.planets().get(in.planetId), tx);
         int player = 0;
         pl.getOwner(player);
 
@@ -190,15 +176,14 @@ game::actions::ChangeBuildQueue::describe(Infos_t& result, afl::string::Translat
         out.playable = in.playable;
 
         // Ship being built
-        int hullMass = 0;
-        bool isClone = false;
+        int pointsRequired = 0;
         if (in.cloningShipId == 0) {
             if (const game::spec::Hull* pHull = m_shipList.hulls().get(pl.getBaseBuildHull(m_config, m_shipList.hullAssignments()).orElse(0))) {
                 out.actionName = Format(tx("Build %s"), pHull->getName(m_shipList.componentNamer()));
-                hullMass = pHull->getMass();
+                pointsRequired = pHull->getPointsToBuild(player, m_host, m_config);
             }
         } else {
-            const Ship& sh = mustExist(m_universe.ships().get(in.cloningShipId));
+            const Ship& sh = mustExist(m_universe.ships().get(in.cloningShipId), tx);
             String_t shipName = sh.getName();
             if (shipName.empty()) {
                 shipName = Format(tx("Ship #%d"), sh.getId());
@@ -206,26 +191,14 @@ game::actions::ChangeBuildQueue::describe(Infos_t& result, afl::string::Translat
             out.actionName = Format(tx("Clone %s"), shipName);
 
             if (const game::spec::Hull* pHull = m_shipList.hulls().get(sh.getHull().orElse(0))) {
-                hullMass = pHull->getMass();
+                pointsRequired = pHull->getPointsToBuild(player, m_host, m_config)
+                    * m_config[HostConfiguration::PBPCloneCostRate](player) / 100;
             }
-            isClone = true;
         }
 
         // Points
-        if (m_host.isPBPGame(m_config) && hullMass != 0) {
-            // FIXME: formula doubled in HullSpecificationProxy
-            int32_t pointsRequired;
-            if (m_host.isPHost()) {
-                pointsRequired = std::max(hullMass * m_config[HostConfiguration::PBPCostPer100KT](player) / 100,
-                                          m_config[HostConfiguration::PBPMinimumCost](player));
-                if (isClone) {
-                    pointsRequired = pointsRequired * m_config[HostConfiguration::PBPCloneCostRate](player) / 100;
-                }
-            } else {
-                pointsRequired = (hullMass + 49) / 50;
-            }
+        if (m_host.isPBPGame(m_config)) {
             out.pointsRequired = pointsRequired;
-
             if (pointsOK) {
                 out.pointsAvailable = points;
                 points = std::max(int32_t(0), points - pointsRequired);
@@ -340,7 +313,7 @@ game::actions::ChangeBuildQueue::init(util::RandomNumberGenerator& rng, int view
             Id_t cloningShipId = 0;
             Id_t previouslyCloningShipId = 0;
             if (m_host.isPHost() && m_config[HostConfiguration::AllowShipCloning]()) {
-                cloningShipId = findCloningShipAt(m_universe, pt);
+                cloningShipId = m_universe.findShipCloningAt(i);
                 previouslyCloningShipId = findPreviouslyCloningShipAt(m_universe, pt);
             }
 

@@ -98,13 +98,15 @@ game::v3::ResultLoader::ResultLoader(afl::base::Ref<afl::io::Directory> specific
                                      afl::string::Translator& tx,
                                      afl::sys::LogListener& log,
                                      const DirectoryScanner& scanner,
-                                     afl::io::FileSystem& fs)
+                                     afl::io::FileSystem& fs,
+                                     util::ProfileDirectory& profile)
     : m_specificationDirectory(specificationDirectory),
       m_defaultSpecificationDirectory(defaultSpecificationDirectory),
       m_charset(charset),
       m_translator(tx),
       m_log(log),
-      m_fileSystem(fs)
+      m_fileSystem(fs),
+      m_profile(profile)
 {
     for (int i = 1; i <= DirectoryScanner::NUM_PLAYERS; ++i) {
         m_playerFlags.set(i, scanner.getPlayerFlags(i));
@@ -145,6 +147,10 @@ game::v3::ResultLoader::loadCurrentTurn(Turn& turn, Game& game, int player, game
 
     // load database
     loadCurrentDatabases(turn, game, player, root, session);
+
+    // expression lists
+    game.expressionLists().loadRecentFiles(m_profile, m_log, m_translator);
+    game.expressionLists().loadPredefinedFiles(m_profile, *m_specificationDirectory, m_log, m_translator);
 
     // ex GGameResultStorage::load(GGameTurn& trn)
     {
@@ -194,8 +200,8 @@ game::v3::ResultLoader::loadCurrentTurn(Turn& turn, Game& game, int player, game
         }
     }
 
-    // FIXME -> /* FLAK */
-    // maybeLoadFlakVcrs(trn, *game_file_dir, player);
+    // FLAK
+    ldr.loadFlakBattles(turn, root.gameDirectory(), player);
 }
 
 void
@@ -317,7 +323,7 @@ game::v3::ResultLoader::saveCurrentTurn(const Turn& turn, const Game& game, int 
             }
         }
 
-        // FIXME: port /* password */
+        // FIXME: load password
         // char new_password[10];
         // if (gen.getNewPasswordData(new_password)) {
         //     trns[pid-1]->addCommand(tcm_ChangePassword, 0, new_password, sizeof(new_password));
@@ -326,7 +332,7 @@ game::v3::ResultLoader::saveCurrentTurn(const Turn& turn, const Game& game, int 
         // Generate turn
         thisTurn.update();        // FIXME: in FileSet?
         turns.updateTrailers();
-        turns.saveAll(m_log, root.playerList(), m_fileSystem, root.userConfiguration());
+        turns.saveAll(m_log, root.playerList(), m_fileSystem, root.userConfiguration(), m_translator);
     }
 
     if (session.getEditableAreas().contains(Session::LocalDataArea)) {
@@ -336,6 +342,8 @@ game::v3::ResultLoader::saveCurrentTurn(const Turn& turn, const Game& game, int 
         // Fleets
         game::db::FleetLoader(*m_charset).save(root.gameDirectory(), turn.universe(), player);
     }
+
+    game.expressionLists().saveRecentFiles(m_profile, m_log, m_translator);
 }
 
 void
@@ -382,14 +390,14 @@ game::v3::ResultLoader::loadHistoryTurn(Turn& turn, Game& game, int player, int 
         ldr.loadResult(turn, root, game, *file, player);
     }
 
+    // FIXME: load turn
     // if (have_trn) {
     //     Ptr<Stream> trnfile = game_file_dir->openFile(format("player%d.trn", player), Stream::C_READ);
     //     loadTurn(trn, *trnfile, player);
     // }
 
-    // // // // // loadFleets(trn, *game_file_dir, player);
-
     // FIXME: history fleets not loaded here
+    // loadFleets(trn, *game_file_dir, player);
     // FIXME: alliances not loaded until here; would need message/util.dat parsing
     // FIXME: load FLAK
 }
@@ -421,7 +429,7 @@ game::v3::ResultLoader::loadTurnfile(Turn& trn, Root& root, afl::io::Stream& fil
     m_log.write(m_log.Info, LOG_NAME, Format(m_translator("Loading %s TRN file..."), root.playerList().getPlayerName(player, Player::AdjectiveName)));
 
     // Load, validate, and log.
-    TurnFile f(*m_charset, file);
+    TurnFile f(*m_charset, m_translator, file);
     if (f.getPlayer() != player) {
         throw FileFormatException(file, Format(m_translator("Turn file belongs to player %d"), f.getPlayer()));
     }
@@ -561,19 +569,19 @@ game::v3::ResultLoader::loadTurnfile(Turn& trn, Root& root, afl::io::Stream& fil
     LocalTurnProcessor(trn, root, file, player, remapExplore, *this).handleTurnFile(f, *m_charset);
 }
 
-// /** Add message from message file. This decides whether the message is
-//     a command message or a normal message, and places it in the appropriate
-//     part of the game turn object (outbox, command list).
-//     \param trn    Game turn object
-//     \param text   Message text
-//     \param sender Sender of message
-//     \param recv   Receivers of message
-//     \note This only recognizes messages to one receiver as command
-//     messages. It is possible (but unlikely) that someone sends a
-//     message to theirselves and somone else. Our Maketurn will make
-//     sure that the message comes out as a real text message. However,
-//     with Winplan's maketurn, the message will be interpreted by
-//     PHost.  */
+/** Add message from message file.
+    This decides whether the message is a command message or a normal message,
+    and places it in the appropriate part of the game turn object (outbox, command list).
+
+    \param trn         Turn
+    \param text        Message text (decoded)
+    \param sender      Sender of message
+    \param receivers   Receivers of message
+
+    \note This only recognizes messages to one receiver as command messages.
+    It is possible (but unlikely) that someone sends a message to theirselves and somone else.
+    Our Maketurn will make sure that the message comes out as a real text message.
+    However, with Winplan's maketurn, the message will be interpreted by PHost.  */
 void
 game::v3::ResultLoader::addMessage(Turn& trn, String_t text, int sender, PlayerSet_t receiver) const
 {

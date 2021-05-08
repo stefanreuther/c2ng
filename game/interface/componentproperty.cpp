@@ -11,9 +11,6 @@ using interpreter::makeIntegerValue;
 using interpreter::makeStringValue;
 using interpreter::checkStringArg;
 
-// /** Get property of a component.
-//     \param comp Component to query
-//     \param icp  Property to query */
 afl::data::Value*
 game::interface::getComponentProperty(const game::spec::Component& comp,
                                       ComponentProperty icp,
@@ -84,7 +81,7 @@ game::interface::getComponentProperty(const game::spec::Component& comp,
 void
 game::interface::setComponentProperty(game::spec::Component& comp,
                                       ComponentProperty icp,
-                                      afl::data::Value* value,
+                                      const afl::data::Value* value,
                                       game::spec::ShipList& list)
 {
     String_t n;

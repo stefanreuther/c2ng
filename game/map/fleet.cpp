@@ -121,9 +121,6 @@ game::map::Fleet::getTitle(afl::string::Translator& tx) const
     return getTitle(m_ship, tx);
 }
 
-// /** Synchronize a fleet member. Synchronizes waypoint of a single fleet member.
-//     \param univ Universe to work on
-//     \param sid Ship Id */
 // FIXME: I'm not entirely happy with the placement of this function.
 // It would make sense to put this into FleetMember, but then we'd have a call chain FleetMember -> Fleet -> FleetMember.
 void

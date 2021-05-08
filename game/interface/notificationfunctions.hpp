@@ -32,6 +32,7 @@ namespace game { namespace interface {
     };
 
     void IFCCNotify(interpreter::Process& proc, game::Session& session, interpreter::Arguments& args);
+    afl::data::Value* IFCCNumNotifications(game::Session& session, interpreter::Arguments& args);
 
 } }
 

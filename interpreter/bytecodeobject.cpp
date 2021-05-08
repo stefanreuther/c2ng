@@ -295,7 +295,7 @@ interpreter::BytecodeObject::addJump(uint8_t flags, Label_t label)
 
 // Add push-literal instruction.
 void
-interpreter::BytecodeObject::addPushLiteral(afl::data::Value* literal)
+interpreter::BytecodeObject::addPushLiteral(const afl::data::Value* literal)
 {
     // ex IntBytecodeObject::addPushLiteral
     // FIXME: can we use visit() instead of dynamic_cast here?
@@ -307,13 +307,13 @@ interpreter::BytecodeObject::addPushLiteral(afl::data::Value* literal)
     }
 
     // Is it a small integer literal?
-    if (afl::data::ScalarValue* sv = dynamic_cast<afl::data::ScalarValue*>(literal)) {
+    if (const afl::data::ScalarValue* sv = dynamic_cast<const afl::data::ScalarValue*>(literal)) {
         if (sv->getValue() >= -int32_t(0x7FFF) && sv->getValue() <= int32_t(0x7FFF)) {
-            if (dynamic_cast<afl::data::BooleanValue*>(sv) != 0) {
+            if (dynamic_cast<const afl::data::BooleanValue*>(sv) != 0) {
                 addInstruction(Opcode::maPush, Opcode::sBoolean, uint16_t(sv->getValue()));
                 return;
             }
-            if (dynamic_cast<afl::data::IntegerValue*>(sv) != 0) {
+            if (dynamic_cast<const afl::data::IntegerValue*>(sv) != 0) {
                 addInstruction(Opcode::maPush, Opcode::sInteger, uint16_t(sv->getValue()));
                 return;
             }

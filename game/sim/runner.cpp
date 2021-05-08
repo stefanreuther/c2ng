@@ -36,10 +36,15 @@ game::sim::Runner::Job::run()
     runSimulation(m_newState, m_stats, m_result, m_options, m_shipList, m_config, m_rng);
 }
 
-inline void
+inline bool
 game::sim::Runner::Job::writeBack(ResultList& list) const
 {
-    list.addResult(m_setup, m_newState, m_stats, m_result);
+    if (m_result.battles.get() != 0 && m_result.battles->getNumBattles() == 0) {
+        return false;
+    } else {
+        list.addResult(m_setup, m_newState, m_stats, m_result);
+        return true;
+    }
 }
 
 inline size_t
@@ -70,18 +75,26 @@ game::sim::Runner::Runner(const Setup& setup,
       m_resultList()
 { }
 
-void
+bool
 game::sim::Runner::init()
 {
     // ex WSimResultWindow::runFirstSimulation (sort-of)
+    bool ok;
     if (m_count == 0) {
         Job j(m_setup, m_options, m_shipList, m_config, m_rng, 0);
         j.run();
-        j.writeBack(m_resultList);
-        m_count = 1;
-        m_seriesLength = j.getSeriesLength();
-        m_lastUpdate = afl::sys::Time::getTickCounter();
+        if (j.writeBack(m_resultList)) {
+            m_count = 1;
+            m_seriesLength = j.getSeriesLength();
+            m_lastUpdate = afl::sys::Time::getTickCounter();
+            ok = true;
+        } else {
+            ok = false;
+        }
+    } else {
+        ok = true;
     }
+    return ok;
 }
 
 const game::sim::ResultList&

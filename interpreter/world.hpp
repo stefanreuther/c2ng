@@ -12,6 +12,7 @@
 #include "afl/io/directory.hpp"
 #include "afl/io/filesystem.hpp"
 #include "afl/io/stream.hpp"
+#include "afl/string/translator.hpp"
 #include "afl/sys/loglistener.hpp"
 #include "interpreter/bytecodeobject.hpp"
 #include "interpreter/filetable.hpp"
@@ -61,8 +62,9 @@ namespace interpreter {
 
         /** Constructor.
             \param log Logger (used to log interpreter messages and Print output)
+            \param tx Translator (for error messages)
             \param fs File system (used to access files) */
-        World(afl::sys::LogListener& log, afl::io::FileSystem& fs);
+        World(afl::sys::LogListener& log, afl::string::Translator& tx, afl::io::FileSystem& fs);
 
         /** Destructor. */
         ~World();
@@ -82,7 +84,7 @@ namespace interpreter {
         /** Get a global value.
             \param name Name of value
             \return Value */
-        afl::data::Value* getGlobalValue(const char* name) const;
+        const afl::data::Value* getGlobalValue(const char* name) const;
 
         /** Access global property names.
             \return global property names */
@@ -223,6 +225,10 @@ namespace interpreter {
             \param e Error */
         void logError(afl::sys::LogListener::Level level, const Error& e);
 
+        /** Access translator.
+            \return translator */
+        afl::string::Translator& translator() const;
+
         /** Access file system.
             \return file system */
         afl::io::FileSystem& fileSystem();
@@ -300,6 +306,9 @@ namespace interpreter {
 
         // replacement for console
         afl::sys::LogListener& m_log;
+
+        // translator
+        afl::string::Translator& m_translator;
 
         // replacement for global file system
         afl::io::FileSystem& m_fileSystem;

@@ -86,8 +86,9 @@ MailRenderer::MailRenderer(const server::talk::render::Context& ctx,
     // ex MailRenderer::MailRenderer
 }
 
-// /** Render a user name. Renders the user's real name or screen name.
-//     Used for rendering attributions. */
+/** Render a user name.
+    Renders the user's real name or screen name.
+    Used for rendering attributions. */
 void
 MailRenderer::renderUserName(const String_t& name)
 {
@@ -106,9 +107,9 @@ MailRenderer::renderUserName(const String_t& name)
     }
 }
 
-// /** Render a message Id.
-//     For NNTP, render as the RFC message Id.
-//     Otherwise, render a <post:XXX> pseudo-link. */
+/** Render a message Id.
+    For NNTP, render as the RFC message Id.
+    Otherwise, render a <post:XXX> pseudo-link. */
 String_t
 MailRenderer::formatMessageId(const String_t& name)
 {
@@ -125,11 +126,10 @@ MailRenderer::formatMessageId(const String_t& name)
     }
 }
 
-// /** Render a thread Id.
-//     For NNTP, render it as the RFC message Id of the first posting.
-//     If it has no message Id (or we're not rendering for NNTP),
-//     returns false, causing the caller to produce a <thread:XXX>
-//     pseudo-link. */
+/** Render a thread Id.
+    For NNTP, render it as the RFC message Id of the first posting.
+    If it has no message Id (or we're not rendering for NNTP),
+    returns false, causing the caller to produce a <thread:XXX> pseudo-link. */
 bool
 MailRenderer::renderThreadId(const String_t& name)
 {
@@ -152,8 +152,8 @@ MailRenderer::renderThreadId(const String_t& name)
     return true;
 }
 
-// /** Render a game link.
-//     Always renders the complete link. */
+/** Render a game link.
+    Always renders the complete link. */
 bool
 MailRenderer::renderGameLink(const String_t& text)
 {

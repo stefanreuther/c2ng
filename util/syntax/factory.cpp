@@ -53,7 +53,7 @@ util::syntax::Factory::create(String_t name, afl::base::Deleter& del)
     if (dot != name.npos) {
         name.erase(0, dot+1);
     }
-    if (name == "ini" || name == "cfg") {
+    if (name == "ini" || name == "cfg" || name == "src") {
         return del.addNew(new IniHighlighter(m_table, String_t()));
     }
     if (name == "q" || name == "ccscript") {

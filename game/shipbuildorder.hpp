@@ -5,6 +5,10 @@
 #ifndef C2NG_GAME_SHIPBUILDORDER_HPP
 #define C2NG_GAME_SHIPBUILDORDER_HPP
 
+#include "afl/data/stringlist.hpp"
+#include "afl/string/translator.hpp"
+#include "game/spec/shiplist.hpp"
+
 namespace game {
 
     /** Data container for a ship build order. */
@@ -70,6 +74,14 @@ namespace game {
             \param n number */
         void setNumLaunchers(int n);
 
+
+        /** Describe this build order in textual form.
+            Produces a list of lines, each listing one component of the ship, in the form "2 x Impulse Drive".
+            Note that this only works if the build order uses a hull Id, not a truehull index.
+            \param [out] result   Result produced here
+            \param [in]  shipList Ship list
+            \param [in]  tx       Translator */
+        void describe(afl::data::StringList_t& result, const game::spec::ShipList& shipList, afl::string::Translator& tx) const;
 
         /** Canonicalize build order.
             If a weapon count is zero, its type does not matter and is thus set to zero,

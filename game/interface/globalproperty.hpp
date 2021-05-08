@@ -37,7 +37,7 @@ namespace game { namespace interface {
     };
 
     afl::data::Value* getGlobalProperty(GlobalProperty igp, Session& session);
-    void setGlobalProperty(GlobalProperty igp, Session& session, afl::data::Value* value);
+    void setGlobalProperty(GlobalProperty igp, Session& session, const afl::data::Value* value);
 
 } }
 

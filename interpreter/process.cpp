@@ -42,7 +42,6 @@
 #include "interpreter/values.hpp"
 #include "interpreter/world.hpp"
 #include "util/translation.hpp"
-#include "afl/string/nulltranslator.hpp"
 
 namespace {
 
@@ -102,7 +101,7 @@ class interpreter::Process::FrameContext : public interpreter::SingleContext {
                 return 0;
             }
         }
-    virtual void set(PropertyIndex_t index, afl::data::Value* value)
+    virtual void set(PropertyIndex_t index, const afl::data::Value* value)
         {
             // ex IntExecutionFrameContext::set
             m_frame.localValues.set(index, value);
@@ -570,6 +569,7 @@ interpreter::Process::addTraceTo(Error& err) const
     };
 
     const char*const* formats = firstformats;
+    afl::string::Translator& tx = m_world.translator();
 
     size_t contextSP = m_contexts.size();
 
@@ -594,9 +594,9 @@ interpreter::Process::addTraceTo(Error& err) const
             /* No procedure name known. If we know file and or line, list those */
             if (fileName.size()) {
                 if (lineNr) {
-                    err.addTrace(afl::string::Format(_(formats[0]).c_str(), fileName, lineNr));
+                    err.addTrace(afl::string::Format(tx(formats[0]).c_str(), fileName, lineNr));
                 } else {
-                    err.addTrace(afl::string::Format(_(formats[1]).c_str(), fileName));
+                    err.addTrace(afl::string::Format(tx(formats[1]).c_str(), fileName));
                 }
                 formats = secondformats;
             }
@@ -610,9 +610,9 @@ interpreter::Process::addTraceTo(Error& err) const
             }
 
             if (fileName.size() != 0 && lineNr != 0) {
-                err.addTrace(afl::string::Format(_(formats[2]).c_str(), bcoName, fileName, lineNr));
+                err.addTrace(afl::string::Format(tx(formats[2]).c_str(), bcoName, fileName, lineNr));
             } else {
-                err.addTrace(afl::string::Format(_(formats[3]).c_str(), bcoName));
+                err.addTrace(afl::string::Format(tx(formats[3]).c_str(), bcoName));
             }
             formats = secondformats;
         }
@@ -623,7 +623,7 @@ interpreter::Process::addTraceTo(Error& err) const
             --contextSP;
             String_t n = m_contexts[contextSP]->toString(true);
             if (n.size() && n[0] != '#') {
-                err.addTrace(afl::string::Format(_("at %s").c_str(), n));
+                err.addTrace(afl::string::Format(tx("at %s").c_str(), n));
                 break;
             }
         }
@@ -1991,12 +1991,10 @@ interpreter::Process::getReferencedValue(const Opcode& op)
 void
 interpreter::Process::logProcessState(const char* why)
 {
-    afl::string::NullTranslator tx;
-
     // Write a brief message:
     //   run 17@33 Running 'UI.Foo'
     m_world.logListener().write(afl::sys::LogListener::Trace, LOG_NAME,
-                                afl::string::Format("%s %d@%d %s, '%s'") << why << m_processId << m_processGroupId << toString(m_state, tx) << m_processName);
+                                afl::string::Format("%s %d@%d %s, '%s'") << why << m_processId << m_processGroupId << toString(m_state, m_world.translator()) << m_processName);
 }
 
 String_t

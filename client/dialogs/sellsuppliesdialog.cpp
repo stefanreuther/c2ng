@@ -30,7 +30,7 @@ namespace {
             : m_root(root),
               m_loop(root),
               m_value(0),
-              m_select(root, m_value, 0, maxSuppliesToSell, 10),
+              m_select(root, tx, m_value, 0, maxSuppliesToSell, 10),
               m_proxy(proxy),
               m_translator(tx)
             { }
@@ -40,16 +40,16 @@ namespace {
                 // ex WSellSuppliesDialog::init
                 afl::base::Deleter del;
                 ui::Window& win = del.addNew(new ui::Window(m_translator("Sell Supplies"), m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
-                win.add(del.addNew(new ui::rich::StaticText(m_translator(Format("You have %d kt supplies. You'll get 1 mc per kiloton. "
-                                                                                "Remember that PCC automatically sells supplies when needed.\n"
-                                                                                "Enter amount to sell:",
-                                                                                // FIXME: use formatNumber()
-                                                                                m_select.getMax())),
+                win.add(del.addNew(new ui::rich::StaticText(String_t(Format(m_translator("You have %d kt supplies. You'll get 1 mc per kiloton. "
+                                                                                         "Remember that PCC automatically sells supplies when needed.\n"
+                                                                                         "Enter amount to sell:"),
+                                                                            // FIXME: use formatNumber()
+                                                                            m_select.getMax())),
                                                             400,
                                                             m_root.provider())));
                 win.add(m_select);
 
-                ui::Widget& helper = del.addNew(new client::widgets::HelpWidget(m_root, gameSender, "pcc2:sellsup"));
+                ui::Widget& helper = del.addNew(new client::widgets::HelpWidget(m_root, m_translator, gameSender, "pcc2:sellsup"));
 
                 Button& btnOK     = del.addNew(new Button(m_translator("OK"),         util::Key_Return, m_root));
                 Button& btnAllBut = del.addNew(new Button(m_translator("All but..."), 'a',              m_root));
@@ -89,7 +89,7 @@ namespace {
                 if (m_value.get() == 0 && m_select.getMax() != 0) {
                     if (!ui::dialogs::MessageBox(m_translator("Do you really want to sell all supplies?"),
                                                  m_translator("Sell Supplies"),
-                                                 m_root).doYesNoDialog())
+                                                 m_root).doYesNoDialog(m_translator))
                     {
                         return;
                     }
@@ -114,13 +114,13 @@ client::dialogs::doSellSuppliesDialog(ui::Root& root, util::RequestSender<game::
 {
     // ex WSellSuppliesDialog::doDialog
     ConvertSuppliesProxy proxy(gameSender);
-    Downlink link(root);
+    Downlink link(root, tx);
 
     ConvertSuppliesProxy::Status st = proxy.init(link, planetId, reservedSupplies, reservedMoney);
     if (st.maxSuppliesToSell == 0) {
         ui::dialogs::MessageBox(tx("You do not have any supplies on this planet."),
                                 tx("Sell Supplies"),
-                                root).doOkDialog();
+                                root).doOkDialog(tx);
     } else {
         SellSuppliesDialog(root, st.maxSuppliesToSell, proxy, tx).run(gameSender);
     }

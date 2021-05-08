@@ -26,8 +26,9 @@ namespace {
 
     class ObjectSelectionDialog {
      public:
-        ObjectSelectionDialog(ui::Root& root, game::proxy::ReferenceListProxy& proxy)
+        ObjectSelectionDialog(ui::Root& root, afl::string::Translator& tx, game::proxy::ReferenceListProxy& proxy)
             : m_root(root),
+              m_translator(tx),
               m_list(root),
               m_proxy(proxy),
               m_loop(root)
@@ -44,7 +45,7 @@ namespace {
             {
                 // ex WObjectList::doStandardDialog2, sort-of
                 game::Reference result;
-                if (ui::widgets::doStandardDialog(title, String_t(), m_list, false, m_root)) {
+                if (ui::widgets::doStandardDialog(title, String_t(), m_list, false, m_root, m_translator)) {
                     result = m_list.getCurrentReference();
                 }
                 return result;
@@ -55,10 +56,30 @@ namespace {
 
      private:
         ui::Root& m_root;
+        afl::string::Translator& m_translator;
         client::widgets::ReferenceListbox m_list;
         game::proxy::ReferenceListProxy& m_proxy;
         ui::EventLoop m_loop;
     };
+
+    bool solveConflicts(game::proxy::WaitIndicator& ind, ui::Root& root, afl::string::Translator& tx, game::proxy::CargoTransferSetupProxy& setupProxy)
+    {
+        while (const game::proxy::CargoTransferSetupProxy::ConflictInfo* info = setupProxy.getConflictInfo()) {
+            if (!ui::dialogs::MessageBox(afl::string::Format(tx("Ship %s (#%d) is currently transferring to %s (#%d). "
+                                                                "You can only transfer to one ship at a time.\n"
+                                                                "Cancel existing transfer to proceed?"),
+                                                             info->fromName,
+                                                             info->fromId,
+                                                             info->toName,
+                                                             info->toId),
+                                         tx("Cargo Transfer"), root).doYesNoDialog(tx))
+            {
+                return false;
+            }
+            setupProxy.cancelConflictingTransfer(ind);
+        }
+        return true;
+    }
 }
 
 void
@@ -79,8 +100,8 @@ client::doCargoTransfer(ui::Root& root,
     proxy.init(setup);
 
     // Build dialog
-    client::dialogs::CargoTransferDialog dlg(root, proxy);
-    if (dlg.run(tx, gameSender)) {
+    client::dialogs::CargoTransferDialog dlg(root, tx, proxy);
+    if (dlg.run(gameSender)) {
         proxy.commit();
     }
 }
@@ -92,7 +113,7 @@ client::doShipCargoTransfer(ui::Root& root,
                             afl::string::Translator& tx,
                             game::Id_t shipId)
 {
-    // ex doShipCargoTransfer
+    // ex doShipCargoTransfer, doShipTransferFor
     class Initializer : public game::proxy::ReferenceListProxy::Initializer_t {
      public:
         Initializer(game::Id_t shipId)
@@ -122,6 +143,7 @@ client::doShipCargoTransfer(ui::Root& root,
                                               session.translator()("Beam up multiple"),
                                               game::Reference(game::Reference::Special, Special_BeamUpMultiple),
                                               false,
+                                              game::map::Object::Playable,
                                               util::SkinColor::Static);
                             }
                         } else {
@@ -130,6 +152,7 @@ client::doShipCargoTransfer(ui::Root& root,
                                               session.translator()("Jettison into space"),
                                               game::Reference(game::Reference::Special, Special_Jettison),
                                               false,
+                                              game::map::Object::Playable,
                                               util::SkinColor::Static);
                             }
                         }
@@ -147,15 +170,13 @@ client::doShipCargoTransfer(ui::Root& root,
                     obs.setExtra(otherList);
                 }
             }
-        virtual Initializer* clone() const
-            { return new Initializer(m_shipId); }
      private:
         game::Id_t m_shipId;
     };
 
-    Downlink link(root);
+    Downlink link(root, tx);
     game::proxy::ReferenceListProxy proxy(gameSender, root.engine().dispatcher());
-    ObjectSelectionDialog dlg(root, proxy);
+    ObjectSelectionDialog dlg(root, tx, proxy);
     proxy.setConfigurationSelection(game::ref::CARGO_TRANSFER);
     proxy.setContentNew(std::auto_ptr<game::proxy::ReferenceListProxy::Initializer_t>(new Initializer(shipId)));
     proxy.waitIdle(link);
@@ -163,30 +184,29 @@ client::doShipCargoTransfer(ui::Root& root,
     if (dlg.isEmpty()) {
         ui::dialogs::MessageBox(tx("There's no other unit here we could transfer to or from."),
                                 tx("Cargo Transfer"),
-                                root).doOkDialog();
+                                root).doOkDialog(tx);
     } else {
         // Build a CargoTransferSetup
         game::Reference ref = dlg.run(tx("Transfer cargo to..."));
         game::proxy::CargoTransferSetupProxy setupProxy(gameSender);
-        game::actions::CargoTransferSetup setup;
         switch (ref.getType()) {
          case game::Reference::Ship:
-            setup = setupProxy.createShipShip(link, shipId, ref.getId());
+            setupProxy.createShipShip(link, shipId, ref.getId());
             break;
 
          case game::Reference::Planet:
-            setup = setupProxy.createPlanetShip(link, ref.getId(), shipId);
-            setup.swapSides();
+            setupProxy.createPlanetShip(link, ref.getId(), shipId);
+            setupProxy.swapSides();
             break;
 
          case game::Reference::Special:
             switch (ref.getId()){
              case Special_Jettison:
-                setup = setupProxy.createShipJettison(link, shipId);
+                setupProxy.createShipJettison(link, shipId);
                 break;
 
              case Special_BeamUpMultiple:
-                setup = setupProxy.createShipBeamUp(link, shipId);
+                setupProxy.createShipBeamUp(link, shipId);
                 break;
             }
 
@@ -194,7 +214,11 @@ client::doShipCargoTransfer(ui::Root& root,
             break;
         }
 
-        doCargoTransfer(root, gameSender, tx, setup);
+        if (!solveConflicts(link, root, tx, setupProxy)) {
+            return;
+        }
+
+        doCargoTransfer(root, gameSender, tx, setupProxy.get());
     }
 }
 
@@ -230,15 +254,13 @@ client::doPlanetCargoTransfer(ui::Root& root,
                     obs.setList(objectList);
                 }
             }
-        virtual Initializer* clone() const
-            { return new Initializer(m_planetId); }
      private:
         game::Id_t m_planetId;
     };
 
-    Downlink link(root);
+    Downlink link(root, tx);
     game::proxy::ReferenceListProxy proxy(gameSender, root.engine().dispatcher());
-    ObjectSelectionDialog dlg(root, proxy);
+    ObjectSelectionDialog dlg(root, tx, proxy);
     proxy.setConfigurationSelection(game::ref::CARGO_TRANSFER);
     proxy.setContentNew(std::auto_ptr<game::proxy::ReferenceListProxy::Initializer_t>(new Initializer(planetId)));
     proxy.waitIdle(link);
@@ -246,11 +268,12 @@ client::doPlanetCargoTransfer(ui::Root& root,
     if (dlg.isEmpty()) {
         ui::dialogs::MessageBox(tx("There's none of our ships orbiting this planet."),
                                 tx("Cargo Transfer"),
-                                root).doOkDialog();
+                                root).doOkDialog(tx);
     } else {
         // Build a CargoTransferSetup
         game::Reference ref = dlg.run(unload ? tx("Unload ship...") : tx("Transfer cargo to..."));
         game::proxy::CargoTransferSetupProxy setupProxy(gameSender);
-        doCargoTransfer(root, gameSender, tx, setupProxy.createPlanetShip(link, planetId, ref.getId()));
+        setupProxy.createPlanetShip(link, planetId, ref.getId());
+        doCargoTransfer(root, gameSender, tx, setupProxy.get());
     }
 }

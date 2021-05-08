@@ -32,7 +32,7 @@ int
 gfx::Application::run()
 {
     try {
-        Engine_t engine(m_log);
+        Engine_t engine(m_log, m_translator);
         appMain(engine);
     }
     catch (afl::except::CommandLineException& cx) {

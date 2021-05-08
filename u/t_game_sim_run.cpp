@@ -1683,3 +1683,119 @@ TestGameSimRun::testPlanetNuk()
     TS_ASSERT_EQUALS(h.result.battles->getNumBattles(), 1U);
 }
 
+/** Test basic FLAK simulation.
+    A: prepare two ships, FLAK simulation.
+    E: expected results and metadata produced. This is a regression test to ensure constant behaviour. */
+void
+TestGameSimRun::testFLAK()
+{
+    // Environment
+    TestHarness h;
+    setDeterministicConfig(h.opts, h.config, game::sim::Configuration::VcrFLAK, game::sim::Configuration::BalanceNone);
+
+    // Setup
+    Ship* s1 = addOutrider(h.setup, 1, 12, h.list);
+    Ship* s2 = addOutrider(h.setup, 2, 11, h.list);
+    h.result.init(h.opts, 0);
+
+    // Do it
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.rng);
+
+    // Verify result
+    // FIXME? Other alogs verify that rng has not been touched because we use seed control, but FLAK does touch it.
+
+    // - a battle has been created
+    TS_ASSERT(h.result.battles.get() != 0);
+    TS_ASSERT_EQUALS(h.result.battles->getNumBattles(), 1U);
+    TS_ASSERT_EQUALS(h.result.this_battle_weight, 1);
+    TS_ASSERT_EQUALS(h.result.total_battle_weight, 1);
+    TS_ASSERT_EQUALS(h.result.series_length, 110);
+    TS_ASSERT_EQUALS(h.result.this_battle_index, 0);
+
+    // - statistics
+    TS_ASSERT_EQUALS(h.stats.size(), 2U);
+
+    // - ship 1
+    TS_ASSERT_EQUALS(s1->getDamage(), 71);
+    TS_ASSERT_EQUALS(s1->getShield(), 0);
+    TS_ASSERT_EQUALS(s1->getCrew(), 131);
+    TS_ASSERT_EQUALS(s1->getOwner(), 12);
+
+    // - ship 2
+    TS_ASSERT_EQUALS(s2->getDamage(), 103);
+    TS_ASSERT_EQUALS(s2->getShield(), 0);
+    TS_ASSERT_EQUALS(s2->getCrew(), 109);
+    TS_ASSERT_EQUALS(s2->getOwner(), 0);
+}
+
+/** Test multi-ship FLAK simulation.
+    A: prepare multiple ships, FLAK simulation.
+    E: expected results and metadata produced. This is a regression test to ensure constant behaviour. */
+void
+TestGameSimRun::testFLAKMulti()
+{
+    // Environment
+    TestHarness h;
+    game::TeamSettings team;
+    h.opts.setMode(game::sim::Configuration::VcrFLAK, team, h.config);
+
+    // Setup
+    Ship* s1 = addOutrider(h.setup, 1, 1, h.list);
+    Ship* s2 = addOutrider(h.setup, 2, 2, h.list);
+    Ship* s3 = addOutrider(h.setup, 3, 2, h.list);
+    Ship* s4 = addOutrider(h.setup, 4, 2, h.list);
+    Planet* p = addPlanet(h.setup, 17, 1);
+    s1->setFriendlyCode("-20");
+    s2->setFriendlyCode("100");
+    s3->setFriendlyCode("300");
+    s4->setFriendlyCode("200");
+    p->setFriendlyCode("ATT");
+    p->setNumBaseFighters(60);
+
+    h.result.init(h.opts, 0);
+
+    // Do it
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.rng);
+
+    // Verify result
+    // - battles have been created; series length unchanged
+    TS_ASSERT(h.result.battles.get() != 0);
+    TS_ASSERT_EQUALS(h.result.battles->getNumBattles(), 1U);
+    TS_ASSERT_EQUALS(h.result.this_battle_weight, 1);
+    TS_ASSERT_EQUALS(h.result.total_battle_weight, 1);
+    TS_ASSERT_EQUALS(h.result.series_length, 110);
+    TS_ASSERT_EQUALS(h.result.this_battle_index, 0);
+
+    // - statistics
+    TS_ASSERT_EQUALS(h.stats.size(), 5U);
+    TS_ASSERT_EQUALS(h.stats.at(4).getMinFightersAboard(), 39);
+
+    // - ship 1
+    TS_ASSERT_EQUALS(s1->getDamage(), 0);
+    TS_ASSERT_EQUALS(s1->getShield(), 52);
+    TS_ASSERT_EQUALS(s1->getCrew(), 180);
+    TS_ASSERT_EQUALS(s1->getOwner(), 1);
+
+    // - ship 2
+    TS_ASSERT_EQUALS(s2->getDamage(), 159);
+    TS_ASSERT_EQUALS(s2->getShield(), 0);
+    TS_ASSERT_EQUALS(s2->getCrew(), 101);
+    TS_ASSERT_EQUALS(s2->getOwner(), 0);
+
+    // - ship 3
+    TS_ASSERT_EQUALS(s3->getDamage(), 151);
+    TS_ASSERT_EQUALS(s3->getShield(), 0);
+    TS_ASSERT_EQUALS(s3->getCrew(), 105);
+    TS_ASSERT_EQUALS(s3->getOwner(), 0);
+
+    // - ship 4
+    TS_ASSERT_EQUALS(s4->getDamage(), 155);
+    TS_ASSERT_EQUALS(s4->getShield(), 0);
+    TS_ASSERT_EQUALS(s4->getCrew(), 97);
+    TS_ASSERT_EQUALS(s4->getOwner(), 0);
+
+    // - planet
+    TS_ASSERT_EQUALS(p->getDamage(), 0);
+    TS_ASSERT_EQUALS(p->getShield(), 100);
+    TS_ASSERT_EQUALS(p->getOwner(), 1);
+}

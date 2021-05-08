@@ -30,7 +30,7 @@ namespace game { namespace sim {
         - optional: hook sig_update, configure setUpdateInterval()
         - call init() to run the first simulation
         - call run() (implemented by derived class) to run more simulations */
-        class Runner : public afl::base::Deletable {
+    class Runner : public afl::base::Deletable {
      public:
         /** Opaque class to represent a simulation job. */
         struct Job;
@@ -52,7 +52,7 @@ namespace game { namespace sim {
 
         /** Initialize.
             This computes the first simulation. */
-        void init();
+        bool init();
 
         /** Run more simulations.
             Computes more simulations until the specified count limit has been reached,
@@ -107,7 +107,7 @@ namespace game { namespace sim {
         Limit_t makeFiniteLimit(size_t n) const;
 
         /** Signal: update.
-            Called whenever */
+            Called whenever new simulations have been produced and the configured update interval has elapsed */
         afl::base::Signal<void()> sig_update;
 
      protected:
@@ -175,7 +175,7 @@ class game::sim::Runner::Job {
 
     inline Job(const Setup& setup, const Configuration& opts, const game::spec::ShipList& list, const game::config::HostConfiguration& config, util::RandomNumberGenerator& rng, size_t serial);
     inline void run();
-    inline void writeBack(ResultList& list) const;
+    inline bool writeBack(ResultList& list) const;
     inline size_t getSeriesLength() const;
 
     const Setup& m_setup;

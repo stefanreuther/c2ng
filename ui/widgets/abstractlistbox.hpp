@@ -43,8 +43,10 @@ namespace ui { namespace widgets {
         virtual size_t getNumItems() = 0;
         virtual bool isItemAccessible(size_t n) = 0;
         virtual int getItemHeight(size_t n) = 0;
-        virtual int getHeaderHeight() = 0;
+        virtual int getHeaderHeight() const = 0;
+        virtual int getFooterHeight() const = 0;
         virtual void drawHeader(gfx::Canvas& can, gfx::Rectangle area) = 0;
+        virtual void drawFooter(gfx::Canvas& can, gfx::Rectangle area) = 0;
         virtual void drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state) = 0;
 
         // ScrollableWidget virtuals:

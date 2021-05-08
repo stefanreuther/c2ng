@@ -22,9 +22,3 @@ server::file::Item::getName() const
     // ex UserItem::getName
     return m_name;
 }
-
-// UserDirectory*
-// UserItem::getParent() const
-// {
-//     return parent;
-// }

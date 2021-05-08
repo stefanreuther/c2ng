@@ -10,10 +10,6 @@ using interpreter::makeIntegerValue;
 using interpreter::makeBooleanValue;
 using interpreter::makeStringValue;
 
-// /** Get minefield property.
-//     \param mf Minefield to query
-//     \param imp Property to query
-//     \return property value, newly allocated */
 afl::data::Value*
 game::interface::getMinefieldProperty(const game::map::Minefield& mf, MinefieldProperty imp)
 {
@@ -90,9 +86,8 @@ game::interface::getMinefieldProperty(const game::map::Minefield& mf, MinefieldP
     return 0;
 }
 
-// /** Set minefield property. */
 void
-game::interface::setMinefieldProperty(game::map::Minefield& /*mf*/, MinefieldProperty /*imp*/, afl::data::Value* /*value*/)
+game::interface::setMinefieldProperty(game::map::Minefield& /*mf*/, MinefieldProperty /*imp*/, const afl::data::Value* /*value*/)
 {
     // ex int/if/mineif.h:setMinefieldProperty
     throw interpreter::Error::notAssignable();

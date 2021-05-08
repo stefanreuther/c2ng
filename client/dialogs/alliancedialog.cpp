@@ -45,11 +45,12 @@ client::dialogs::AllianceDialog::AllianceDialog(ui::Root& root,
       m_deleter(),
       m_loop(root),
       m_root(root),
+      m_translator(tx),
       m_pList(),
       m_pGrid(),
       m_data()
 {
-    // ex WAllyWindow::WAllyWindow
+    // ex WAllyWindow::WAllyWindow, phost.pas:CAllyWindow
     initDialog(gameSender, tx);
     initContent(gameSender);
 }
@@ -63,7 +64,7 @@ client::dialogs::AllianceDialog::run(util::RequestSender<game::Session> gameSend
     if (m_data.alliances.getLevels().size() == 0) {
         ui::dialogs::MessageBox(tx("Your host does not support alliances, or PCC2 does not know how to configure them."),
                                 tx("Edit Alliances"),
-                                m_root).doOkDialog();
+                                m_root).doOkDialog(tx);
     } else {
         pack();
 
@@ -100,7 +101,7 @@ client::dialogs::AllianceDialog::writeBack(util::RequestSender<game::Session> ga
      private:
         const Data& m_data;
     };
-    Downlink link(m_root);
+    Downlink link(m_root, m_translator);
     Query q(m_data);
     link.call(gameSender, q);
 }
@@ -148,10 +149,11 @@ client::dialogs::AllianceDialog::initDialog(util::RequestSender<game::Session> g
 
     Group& g2 = m_deleter.addNew(new Group(HBox::instance5));
 
-    ui::Widget& helper = m_deleter.addNew(new client::widgets::HelpWidget(m_root, gameSender, "pcc2:allies"));
+    ui::Widget& helper = m_deleter.addNew(new client::widgets::HelpWidget(m_root, tx, gameSender, "pcc2:allies"));
     Button& btnOK     = m_deleter.addNew(new Button(tx("OK"),     util::Key_Return, m_root));
     Button& btnCancel = m_deleter.addNew(new Button(tx("Cancel"), util::Key_Escape, m_root));
     Button& btnHelp   = m_deleter.addNew(new Button(tx("Help"),   'h',             m_root));
+    // FIXME: change to Teams editor
     btnOK.sig_fire.addNewClosure(m_loop.makeStop(1));
     btnCancel.sig_fire.addNewClosure(m_loop.makeStop(0));
     btnHelp.dispatchKeyTo(helper);
@@ -202,7 +204,7 @@ client::dialogs::AllianceDialog::initContent(util::RequestSender<game::Session> 
      private:
         Data& m_data;
     };
-    Downlink link(m_root);
+    Downlink link(m_root, m_translator);
     Query q(m_data);
     link.call(gameSender, q);
 

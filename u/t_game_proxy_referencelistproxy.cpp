@@ -52,8 +52,6 @@ namespace {
                 }
                 obs.setList(list);
             }
-        Initializer* clone() const
-            { return new Initializer(); }
     };
 
     struct UpdateReceiver {

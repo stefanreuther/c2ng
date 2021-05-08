@@ -19,7 +19,7 @@ client::dialogs::doCargoHistory(const game::map::ShipCargoInfos_t& info, ui::Roo
     // ex showCargoHistory
     if (info.empty()) {
         // Nothing known
-        ui::dialogs::MessageBox(tx("Nothing is known about this ship's cargo."), tx("Ship History"), root).doOkDialog();
+        ui::dialogs::MessageBox(tx("Nothing is known about this ship's cargo."), tx("Ship History"), root).doOkDialog(tx);
     } else {
         afl::base::Deleter del;
 

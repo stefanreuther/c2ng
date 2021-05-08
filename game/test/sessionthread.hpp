@@ -25,6 +25,10 @@ namespace game { namespace test {
         /** Constructor. This will start the thread. */
         SessionThread();
 
+        /** Constructor with file system. This will start the thread.
+         \param fs File System to use */
+        SessionThread(afl::io::FileSystem& fs);
+
         /** Destructor. */
         ~SessionThread();
 

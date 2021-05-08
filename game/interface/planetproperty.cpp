@@ -3,22 +3,23 @@
   */
 
 #include "game/interface/planetproperty.hpp"
-#include "interpreter/values.hpp"
-#include "interpreter/error.hpp"
-#include "interpreter/arguments.hpp"
-#include "game/tables/nativeracename.hpp"
-#include "game/tables/nativegovernmentname.hpp"
-#include "game/tables/industrylevel.hpp"
-#include "game/tables/temperaturename.hpp"
-#include "game/tables/happinessname.hpp"
 #include "game/cargospec.hpp"
-#include "game/map/planetformula.hpp"
-#include "game/tables/happinesschangename.hpp"
+#include "game/interface/inboxsubsetvalue.hpp"
 #include "game/map/anyshiptype.hpp"
-#include "game/turn.hpp"
-#include "interpreter/indexablevalue.hpp"
+#include "game/map/planetformula.hpp"
 #include "game/root.hpp"
 #include "game/stringverifier.hpp"
+#include "game/tables/happinesschangename.hpp"
+#include "game/tables/happinessname.hpp"
+#include "game/tables/industrylevel.hpp"
+#include "game/tables/nativegovernmentname.hpp"
+#include "game/tables/nativeracename.hpp"
+#include "game/tables/temperaturename.hpp"
+#include "game/turn.hpp"
+#include "interpreter/arguments.hpp"
+#include "interpreter/error.hpp"
+#include "interpreter/indexablevalue.hpp"
+#include "interpreter/values.hpp"
 
 using interpreter::makeIntegerValue;
 using interpreter::makeBooleanValue;
@@ -152,9 +153,8 @@ PlanetArrayProperty::clone() const
 afl::data::Value*
 game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty ipp,
                                    afl::string::Translator& tx,
-                                   const game::HostVersion& host,
-                                   const game::config::HostConfiguration& config,
                                    InterpreterInterface& iface,
+                                   afl::base::Ref<Root> root,
                                    afl::base::Ref<Game> game)
 {
     // ex int/if/planetif.h:getPlanetProperty
@@ -200,11 +200,11 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
      case ippColonistChange:
         /* @q Colonists.Change$:Int (Planet Property)
            Colonist happiness change, numeric value. */
-        return makeOptionalIntegerValue(getColonistChange(pl, config, host));
+        return makeOptionalIntegerValue(getColonistChange(pl, root->hostConfiguration(), root->hostVersion()));
      case ippColonistChangeStr:
         /* @q Colonists.Change:Str (Planet Property)
            Colonist happiness change, text. */
-        return makeOptionalStringValue(game::tables::HappinessChangeName(tx)(getColonistChange(pl, config, host)));
+        return makeOptionalStringValue(game::tables::HappinessChangeName(tx)(getColonistChange(pl, root->hostConfiguration(), root->hostVersion())));
      case ippColonistHappy:
         /* @q Colonists.Happy$:Int (Planet Property)
            Colonist happiness, numeric value. */
@@ -217,7 +217,7 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
         /* @q Colonists.Supported:Int (Planet Property)
            Maximum colonist clans supported by planet's climate.
            @since PCC 1.1.16, PCC2 1.99.8 */
-        return makeOptionalIntegerValue(getMaxSupportedColonists(pl, config, host));
+        return makeOptionalIntegerValue(getMaxSupportedColonists(pl, root->hostConfiguration(), root->hostVersion()));
      case ippColonistTax:
         /* @q Colonists.Tax:Int (Planet Property)
            Colonist tax.
@@ -230,7 +230,7 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
            @since PCC2 1.99.15 */
         int tax;
         if (pl.getColonistTax().get(tax)) {
-            return makeOptionalIntegerValue(getColonistDue(pl, config, host, tax));
+            return makeOptionalIntegerValue(getColonistDue(pl, root->hostConfiguration(), root->hostVersion(), tax));
         } else {
             return 0;
         }
@@ -252,7 +252,7 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
      case ippDefenseMax:
         /* @q Defense.Max:Int (Planet Property)
            Maximum number of planetary defense posts. */
-        return makeOptionalIntegerValue(getMaxBuildings(pl, DefenseBuilding, config));
+        return makeOptionalIntegerValue(getMaxBuildings(pl, DefenseBuilding, root->hostConfiguration()));
      case ippDefenseWanted:
         /* @q Defense.Want:Int (Planet Property)
            Auto-build goal for defense posts.
@@ -287,7 +287,7 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
      case ippFactoriesMax:
         /* @q Factories.Max:Int (Planet Property)
            Maximum number of factories on planet. */
-        return makeOptionalIntegerValue(getMaxBuildings(pl, FactoryBuilding, config));
+        return makeOptionalIntegerValue(getMaxBuildings(pl, FactoryBuilding, root->hostConfiguration()));
      case ippFactoriesWanted:
         /* @q Factories.Want:Int (Planet Property)
            Auto-build goal for factories.
@@ -317,7 +317,7 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
         /* @q Industry:Str (Planet Property)
            Planetary industry level, human-readable.
            @see Industry$ (Planet Property) */
-        return makeOptionalStringValue(game::tables::IndustryLevel(tx)(pl.getIndustryLevel(host)));
+        return makeOptionalStringValue(game::tables::IndustryLevel(tx)(pl.getIndustryLevel(root->hostVersion())));
      case ippIndustryCode:
         /* @q Industry$:Int (Planet Property)
            Planetary industry level code.
@@ -329,7 +329,7 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
             <tr><td>3</td><td>Substantial</td></tr>
             <tr><td>4</td><td>Heavy</td></tr>
            </table> */
-        return makeOptionalIntegerValue(pl.getIndustryLevel(host));
+        return makeOptionalIntegerValue(pl.getIndustryLevel(root->hostVersion()));
      case ippLevel: {
         /* @q Level:Int (Planet Property)
            Planet's experience level.
@@ -366,6 +366,13 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
         /* @q Marked:Bool (Planet Property)
            True if planet is marked. */
         return makeBooleanValue(pl.isMarked());
+     case ippMessages:
+        /* @q Messages:Obj() (Planet Property)
+           If this planet has any messages, this property is non-null and contains an array of messages.
+           Individual messages have the same form as the inbox messages (InMsg()).
+           @see int:index:group:incomingmessageproperty|Incoming Message Properties
+           @since PCC2 2.0.3, PCC2 2.40.10 */
+        return InboxSubsetValue::create(pl.messages().get(), tx, root, game);
      case ippMinedD:
         /* @q Mined.D:Int (Planet Property)
            Mined Duranium, in kilotons. */
@@ -423,7 +430,7 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
      case ippMinesMax:
         /* @q Mines.Max:Int (Planet Property)
            Maximum number of mineral mines. */
-        return makeOptionalIntegerValue(getMaxBuildings(pl, MineBuilding, config));
+        return makeOptionalIntegerValue(getMaxBuildings(pl, MineBuilding, root->hostConfiguration()));
      case ippMinesWanted:
         /* @q Mines.Want:Int (Planet Property)
            Auto-build goal for mineral mines.
@@ -440,11 +447,11 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
      case ippNativeChange:
         /* @q Natives.Change$:Int (Planet Property)
            Native happiness change, numeric value. */
-        return makeOptionalIntegerValue(getNativeChange(pl, host));
+        return makeOptionalIntegerValue(getNativeChange(pl, root->hostVersion()));
      case ippNativeChangeStr:
         /* @q Natives.Change:Str (Planet Property)
            Native happiness change, text. */
-        return makeOptionalStringValue(game::tables::HappinessChangeName(tx)(getNativeChange(pl, host)));
+        return makeOptionalStringValue(game::tables::HappinessChangeName(tx)(getNativeChange(pl, root->hostVersion())));
      case ippNativeGov:
         /* @q Natives.Gov:Str (Planet Property)
            Native government name. */
@@ -508,20 +515,20 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
            Natives base tax level.
            This is the tax level at which happiness does not change.
            @since PCC2 1.99.15 */
-        return makeOptionalIntegerValue(getNativeBaseTax(pl, config, host, 0));
+        return makeOptionalIntegerValue(getNativeBaseTax(pl, root->hostConfiguration(), root->hostVersion(), 0));
      case ippNativeTaxMax:
         /* @q Natives.Tax.Max:Int (Planet Property)
            Natives maximum tax level.
            This is the tax level at which happiness changes by -30.
            @since PCC2 1.99.15 */
-        return makeOptionalIntegerValue(getNativeBaseTax(pl, config, host, -30));
+        return makeOptionalIntegerValue(getNativeBaseTax(pl, root->hostConfiguration(), root->hostVersion(), -30));
      case ippNativeTaxIncome:
         /* @q Natives.Tax.Income:Int (Planet Property)
            Tax income from natives, megacredits.
            @since PCC2 1.99.15 */
         if (pl.getNativeTax().get(n)) {
             // FIXME: PCC2 returns null when there are no natives, this return 0.
-            return makeOptionalIntegerValue(getNativeDue(pl, config, host, n));
+            return makeOptionalIntegerValue(getNativeDue(pl, root->hostConfiguration(), root->hostVersion(), n));
         } else {
             return 0;
         }
@@ -609,7 +616,7 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
 }
 
 void
-game::interface::setPlanetProperty(game::map::Planet& pl, PlanetProperty ipp, afl::data::Value* value, Root& root)
+game::interface::setPlanetProperty(game::map::Planet& pl, PlanetProperty ipp, const afl::data::Value* value, Root& root)
 {
     // ex int/if/planetif.h:setPlanetProperty
     // We cannot assign to anything other than auto-build goals on non-played planets

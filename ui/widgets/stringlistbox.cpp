@@ -40,13 +40,23 @@ ui::widgets::StringListbox::getItemHeight(size_t /*n*/)
 }
 
 int
-ui::widgets::StringListbox::getHeaderHeight()
+ui::widgets::StringListbox::getHeaderHeight() const
+{
+    return 0;
+}
+
+int
+ui::widgets::StringListbox::getFooterHeight() const
 {
     return 0;
 }
 
 void
 ui::widgets::StringListbox::drawHeader(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
+{ }
+
+void
+ui::widgets::StringListbox::drawFooter(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
 { }
 
 void
@@ -181,6 +191,20 @@ ui::widgets::StringListbox::swapItems(util::StringList& other)
     // FIXME: preserve current key
     m_content.swap(other);
     handleModelChange();
+}
+
+void
+ui::widgets::StringListbox::setItems(const util::StringList& other)
+{
+    // FIXME: preserve current key
+    m_content = other;
+    handleModelChange();
+}
+
+const util::StringList&
+ui::widgets::StringListbox::getStringList() const
+{
+    return m_content;
 }
 
 bool

@@ -12,6 +12,12 @@ class TestClientDownlink : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestClientMarker : public CxxTest::TestSuite {
+ public:
+    void testUserAccess();
+    void testShip();
+};
+
 class TestClientPictureNamer : public CxxTest::TestSuite {
  public:
     void testHull();
@@ -20,6 +26,7 @@ class TestClientPictureNamer : public CxxTest::TestSuite {
     void testLauncher();
     void testPlayer();
     void testAbility();
+    void testVcrObject();
 };
 
 #endif

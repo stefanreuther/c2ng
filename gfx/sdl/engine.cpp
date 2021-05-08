@@ -20,7 +20,6 @@
 # include "gfx/sdl/streaminterface.hpp"
 # include "gfx/sdl/surface.hpp"
 # include "gfx/windowparameters.hpp"
-# include "util/translation.hpp"
 
 namespace {
     const char LOG_NAME[] = "gfx.sdl";
@@ -194,8 +193,9 @@ namespace {
 }
 
 // Constructor.
-gfx::sdl::Engine::Engine(afl::sys::LogListener& log)
+gfx::sdl::Engine::Engine(afl::sys::LogListener& log, afl::string::Translator& tx)
     : m_log(log),
+      m_translator(tx),
       m_window(),
       m_disableGrab(false),
       m_grabEnabled(false),
@@ -213,7 +213,7 @@ gfx::sdl::Engine::Engine(afl::sys::LogListener& log)
 {
     // ex gfx/init.cc:initGraphics, ui/event.cc:initEvents
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {
-        throw GraphicsException(afl::string::Format(_("Error initializing SDL: %s").c_str(), SDL_GetError()));
+        throw GraphicsException(afl::string::Format(m_translator("Error initializing SDL: %s").c_str(), SDL_GetError()));
     }
 
     SDL_SetEventFilter(quitHandler);
@@ -269,7 +269,7 @@ gfx::sdl::Engine::createWindow(const WindowParameters& param)
 
     SDL_Surface* sfc = SDL_SetVideoMode(param.size.getX(), param.size.getY(), param.bitsPerPixel, sdlFlags);
     if (!sfc) {
-        throw GraphicsException(afl::string::Format(_("Error setting video mode: %s").c_str(), SDL_GetError()));
+        throw GraphicsException(afl::string::Format(m_translator("Error setting video mode: %s").c_str(), SDL_GetError()));
     }
     m_window = new Surface(sfc, false);
     m_disableGrab = param.disableGrab;
@@ -294,7 +294,7 @@ gfx::sdl::Engine::createWindow(const WindowParameters& param)
             if (vi->blit_fill) {
                 flags += ", fill";
             }
-            m_log.write(m_log.Info, LOG_NAME, afl::string::Format(_("Video driver: %s (%dk%s)").c_str(), driverName, vi->video_mem, flags));
+            m_log.write(m_log.Info, LOG_NAME, afl::string::Format(m_translator("Video driver: %s (%dk%s)").c_str(), driverName, vi->video_mem, flags));
         }
     }
 
@@ -383,6 +383,13 @@ gfx::sdl::Engine::handleEvent(EventConsumer& consumer, bool relativeMouseMovemen
     }
 }
 
+// Get current keyboard modifiers (Shift, Alt, Ctrl, Meta).
+util::Key_t
+gfx::sdl::Engine::getKeyboardModifierState()
+{
+    return convertModifier(SDL_GetModState());
+}
+
 // Get request dispatcher.
 util::RequestDispatcher&
 gfx::sdl::Engine::dispatcher()
@@ -462,7 +469,7 @@ gfx::sdl::Engine::convertEvent(const SDL_Event& se, gfx::EventConsumer& consumer
             return true;
         } else {
             if (!isKnownIgnorableKey(se.key.keysym.sym)) {
-                m_log.write(m_log.Trace, LOG_NAME, afl::string::Format(_("Key not mapped: 0x%x").c_str(), int(se.key.keysym.sym)));
+                m_log.write(m_log.Trace, LOG_NAME, afl::string::Format(m_translator("Key not mapped: 0x%x").c_str(), int(se.key.keysym.sym)));
             }
             return false;
         }

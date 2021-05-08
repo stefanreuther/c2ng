@@ -87,7 +87,7 @@ TestGameSpecInfoBrowser::testDescribePlayer()
 
     // Get it
     gsi::Browser testee(h.picNamer, h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
-    std::auto_ptr<gsi::PageContent> c(testee.describeItem(gsi::PlayerPage, 7));
+    std::auto_ptr<gsi::PageContent> c(testee.describeItem(gsi::PlayerPage, 7, true));
 
     // Verify
     TS_ASSERT(c.get());
@@ -116,7 +116,7 @@ TestGameSpecInfoBrowser::testDescribeHull()
 
     // Get it
     gsi::Browser testee(h.picNamer, h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
-    std::auto_ptr<gsi::PageContent> c(testee.describeItem(gsi::HullPage, HULL_NR));
+    std::auto_ptr<gsi::PageContent> c(testee.describeItem(gsi::HullPage, HULL_NR, true));
 
     // Verify
     TS_ASSERT(c.get());
@@ -139,7 +139,7 @@ TestGameSpecInfoBrowser::testDescribeRacial()
     h.root.playerList().create(1);
     h.root.playerList().create(2);
     gsi::Browser testee(h.picNamer, h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
-    std::auto_ptr<gsi::PageContent> c(testee.describeItem(gsi::RacialAbilitiesPage, 0));
+    std::auto_ptr<gsi::PageContent> c(testee.describeItem(gsi::RacialAbilitiesPage, 0, true));
 
     // Verify
     TS_ASSERT(c.get());
@@ -172,7 +172,7 @@ TestGameSpecInfoBrowser::testDescribeShip()
     // Get it
     // This is index-based access, 1=second (hf2)
     gsi::Browser testee(h.picNamer, h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
-    std::auto_ptr<gsi::PageContent> c(testee.describeItem(gsi::ShipAbilitiesPage, 1));
+    std::auto_ptr<gsi::PageContent> c(testee.describeItem(gsi::ShipAbilitiesPage, 1, true));
 
     // Verify
     TS_ASSERT(c.get());
@@ -198,7 +198,7 @@ TestGameSpecInfoBrowser::testDescribeEngine()
 
     // Get it
     gsi::Browser testee(h.picNamer, h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
-    std::auto_ptr<gsi::PageContent> c(testee.describeItem(gsi::EnginePage, 8));
+    std::auto_ptr<gsi::PageContent> c(testee.describeItem(gsi::EnginePage, 8, true));
 
     // Verify
     TS_ASSERT(c.get());
@@ -220,7 +220,7 @@ TestGameSpecInfoBrowser::testDescribeBeam()
 
     // Get it
     gsi::Browser testee(h.picNamer, h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
-    std::auto_ptr<gsi::PageContent> c(testee.describeItem(gsi::BeamPage, 2));
+    std::auto_ptr<gsi::PageContent> c(testee.describeItem(gsi::BeamPage, 2, true));
 
     // Verify
     TS_ASSERT(c.get());
@@ -242,7 +242,7 @@ TestGameSpecInfoBrowser::testDescribeTorpedo()
 
     // Get it
     gsi::Browser testee(h.picNamer, h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
-    std::auto_ptr<gsi::PageContent> c(testee.describeItem(gsi::TorpedoPage, 7));
+    std::auto_ptr<gsi::PageContent> c(testee.describeItem(gsi::TorpedoPage, 7, true));
 
     // Verify
     TS_ASSERT(c.get());
@@ -252,6 +252,31 @@ TestGameSpecInfoBrowser::testDescribeTorpedo()
     const gsi::Attribute* a = findAttribute(*c, "Kill");
     TS_ASSERT(a);
     TS_ASSERT_EQUALS(a->value, "34");  // note: doubled!
+}
+
+/** Test describe(FighterPage). */
+void
+TestGameSpecInfoBrowser::testDescribeFighter()
+{
+    // Create a beam
+    TestHarness h;
+    Player* pl3 = h.root.playerList().create(3);
+    pl3->setName(Player::LongName, "The Birds");
+    pl3->setName(Player::ShortName, "Birds");
+    pl3->setName(Player::AdjectiveName, "Bird");
+
+    // Get it
+    gsi::Browser testee(h.picNamer, h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
+    std::auto_ptr<gsi::PageContent> c(testee.describeItem(gsi::FighterPage, 3, true));
+
+    // Verify
+    TS_ASSERT(c.get());
+    TS_ASSERT_EQUALS(c->title, "Bird fighter");
+    TS_ASSERT_EQUALS(c->players, PlayerSet_t());
+
+    const gsi::Attribute* a = findAttribute(*c, "Kill");
+    TS_ASSERT(a);
+    TS_ASSERT_EQUALS(a->value, "2");
 }
 
 /** Test listItems(PlayerPage). */
@@ -488,6 +513,53 @@ TestGameSpecInfoBrowser::testListTorpedo()
     TS_ASSERT_EQUALS(c->content[1].id, 6);
 }
 
+/** Test listItems(FighterPage). */
+void
+TestGameSpecInfoBrowser::testListFighter()
+{
+    TestHarness h;
+    Player* pl1 = h.root.playerList().create(1);
+    pl1->setName(Player::LongName, "The Federation");
+    pl1->setName(Player::ShortName, "Federation");
+    pl1->setName(Player::AdjectiveName, "Fed");
+
+    Player* pl2 = h.root.playerList().create(2);
+    pl2->setName(Player::LongName, "The Lizards");
+    pl2->setName(Player::ShortName, "Lizard");
+    pl2->setName(Player::AdjectiveName, "Liz");
+
+    h.root.hostConfiguration().setOption("FighterBeamKill", "5,3,2,2,2", game::config::ConfigurationOption::Game);
+
+    gsi::Browser testee(h.picNamer, h.root, h.shipList, VIEWPOINT_PLAYER, h.tx);
+
+    // Check 1:
+    std::auto_ptr<gsi::ListContent> c(testee.listItems(gsi::FighterPage, gsi::Filter(), gsi::Range_Id));
+    TS_ASSERT(c.get());
+    TS_ASSERT_EQUALS(c->content.size(), 2U);
+    TS_ASSERT_EQUALS(c->content[0].name, "Fed fighter");
+    TS_ASSERT_EQUALS(c->content[0].id, 1);
+    TS_ASSERT_EQUALS(c->content[1].name, "Liz fighter");
+    TS_ASSERT_EQUALS(c->content[1].id, 2);
+
+    // Check 2: filter by name
+    gsi::Filter f;
+    f.setNameFilter("z"); // Liz
+    c = testee.listItems(gsi::FighterPage, f, gsi::Range_Id);
+    TS_ASSERT(c.get());
+    TS_ASSERT_EQUALS(c->content.size(), 1U);
+    TS_ASSERT_EQUALS(c->content[0].name, "Liz fighter");
+    TS_ASSERT_EQUALS(c->content[0].id, 2);
+
+    // Check 3: filter by property
+    gsi::Filter f2;
+    f2.add(gsi::FilterElement(gsi::Range_KillPower, 0, gsi::IntRange_t(4, 6)));
+    c = testee.listItems(gsi::FighterPage, f2, gsi::Range_Id);
+    TS_ASSERT(c.get());
+    TS_ASSERT_EQUALS(c->content.size(), 1U);
+    TS_ASSERT_EQUALS(c->content[0].name, "Fed fighter");
+    TS_ASSERT_EQUALS(c->content[0].id, 1);
+}
+
 /** Test describeFilters. */
 void
 TestGameSpecInfoBrowser::testDescribeFilter()
@@ -514,7 +586,7 @@ TestGameSpecInfoBrowser::testDescribeFilter()
     TS_ASSERT_EQUALS(result->at(0).active, false);
 
     TS_ASSERT_EQUALS(result->at(1).name, "Tech level");
-    TS_ASSERT_EQUALS(result->at(1).value, "2...5");
+    TS_ASSERT_EQUALS(result->at(1).value, "2 to 5");
     TS_ASSERT_EQUALS(result->at(1).active, true);
 
     TS_ASSERT_EQUALS(result->at(2).name, "Damage power");

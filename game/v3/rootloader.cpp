@@ -57,7 +57,7 @@ game::v3::RootLoader::load(afl::base::Ref<afl::io::Directory> gameDirectory,
 
         // Registration key
         std::auto_ptr<RegistrationKey> key(new RegistrationKey(std::auto_ptr<afl::charset::Charset>(charset.clone())));
-        key->initFromDirectory(*gameDirectory, m_log);
+        key->initFromDirectory(*gameDirectory, m_log, m_translator);
 
         // Specification loader
         afl::base::Ref<SpecificationLoader> specLoader(*new SpecificationLoader(spec, std::auto_ptr<afl::charset::Charset>(charset.clone()), m_translator, m_log));
@@ -95,9 +95,9 @@ game::v3::RootLoader::load(afl::base::Ref<afl::io::Directory> gameDirectory,
 
         // Turn loader
         if (m_scanner.getDirectoryFlags().contains(DirectoryScanner::HaveUnpacked)) {
-            result->setTurnLoader(new DirectoryLoader(spec, m_defaultSpecificationDirectory, std::auto_ptr<afl::charset::Charset>(charset.clone()), m_translator, m_log, m_scanner, m_fileSystem));
+            result->setTurnLoader(new DirectoryLoader(spec, m_defaultSpecificationDirectory, std::auto_ptr<afl::charset::Charset>(charset.clone()), m_translator, m_log, m_scanner, m_fileSystem, m_profile));
         } else if (m_scanner.getDirectoryFlags().contains(DirectoryScanner::HaveResult)) {
-            result->setTurnLoader(new ResultLoader(spec, m_defaultSpecificationDirectory, std::auto_ptr<afl::charset::Charset>(charset.clone()), m_translator, m_log, m_scanner, m_fileSystem));
+            result->setTurnLoader(new ResultLoader(spec, m_defaultSpecificationDirectory, std::auto_ptr<afl::charset::Charset>(charset.clone()), m_translator, m_log, m_scanner, m_fileSystem, m_profile));
         } else {
             // nothing loadable
         }
@@ -156,17 +156,17 @@ game::v3::RootLoader::loadPConfig(Root& root,
 {
     // ex game/config.cc:loadPConfig
     // Configure parser
-    game::config::ConfigurationParser parser(m_log, root.hostConfiguration(), source);
+    game::config::ConfigurationParser parser(m_log, m_translator, root.hostConfiguration(), source);
     parser.setCharsetNew(charset.clone());
 
     // Load pconfig.src (mandatory)
-    m_log.write(m_log.Info, LOG_NAME, afl::string::Format(m_translator.translateString("Reading configuration from %s...").c_str(), pconfig->getName()));
+    m_log.write(m_log.Info, LOG_NAME, afl::string::Format(m_translator("Reading configuration from %s..."), pconfig->getName()));
     parser.setSection("phost", true);
     parser.parseFile(*pconfig);
 
     // Load shiplist.txt (optional)
     if (shiplist.get() != 0) {
-        m_log.write(m_log.Info, LOG_NAME, afl::string::Format(m_translator.translateString("Reading configuration from %s...").c_str(), shiplist->getName()));
+        m_log.write(m_log.Info, LOG_NAME, afl::string::Format(m_translator("Reading configuration from %s..."), shiplist->getName()));
         parser.setSection("phost", false);
         parser.parseFile(*shiplist);
     }
@@ -178,7 +178,7 @@ game::v3::RootLoader::loadPConfig(Root& root,
     HostVersion& host = root.hostVersion();
     if (host.getKind() == HostVersion::Unknown) {
         host.set(HostVersion::PHost, DEFAULT_PHOST_VERSION);
-        m_log.write(m_log.Info, LOG_NAME, afl::string::Format(m_translator.translateString("Host version not known, assuming %s").c_str(), host.toString(m_translator)));
+        m_log.write(m_log.Info, LOG_NAME, afl::string::Format(m_translator("Host version not known, assuming %s"), host.toString(m_translator)));
     }
 }
 
@@ -234,17 +234,3 @@ game::v3::RootLoader::loadRaceMapping(Root& root, afl::io::Stream& file, game::c
         }
     }
 }
-
-// FIXME: delete?
-// /** Save race names to specified 'race.nm' file. */
-// void
-// GRaceNameList::save(Stream& s) const
-// {
-//     char buffer[RN_FILE_SIZE];
-//     for(int i = 1; i <= 11; ++i) {
-//         storeBasicStringN(&buffer[RN_FULL_ORIG  + 30*(i-1)], 30, convertUtf8ToGame(full_names[i]));
-//         storeBasicStringN(&buffer[RN_SHORT_ORIG + 20*(i-1)], 20, convertUtf8ToGame(short_names[i]));
-//         storeBasicStringN(&buffer[RN_ADJ_ORIG   + 12*(i-1)], 12, convertUtf8ToGame(adjectives[i]));
-//     }
-//     s.writeT(buffer, sizeof(buffer));
-// }

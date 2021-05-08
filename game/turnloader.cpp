@@ -52,6 +52,8 @@ void
 game::TurnLoader::loadCurrentDatabases(Turn& turn, Game& game, int player, Root& root, Session& session)
 {
     afl::charset::Charset& charset = root.charset();
+    afl::string::Translator& tx = session.translator();
+    afl::sys::LogListener& log = session.log();
 
     // Starchart DB
     afl::base::Ptr<afl::io::Stream> file = root.gameDirectory().openFileNT(afl::string::Format("chart%d.cc", player), afl::io::FileSystem::OpenRead);
@@ -74,14 +76,14 @@ game::TurnLoader::loadCurrentDatabases(Turn& turn, Game& game, int player, Root&
         }
     }
     catch (afl::except::FileProblemException& e) {
-        // FIXME: port this: console.write(LOG_ERROR, format(_("%s: %s, file has been ignored"), e.getFileName(), e.what()));
+        log.write(afl::sys::LogListener::Error, LOG_NAME, tx("File has been ignored"), e);
     }
 
     // Message configuration
     game.messageConfiguration().load(root.gameDirectory(), player);
 
     // Teams
-    game.teamSettings().load(root.gameDirectory(), player, charset);
+    game.teamSettings().load(root.gameDirectory(), player, charset, tx);
 }
 
 void

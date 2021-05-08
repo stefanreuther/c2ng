@@ -89,7 +89,7 @@ game::interface::ReferenceContext::lookup(const afl::data::NameQuery& name, Prop
 }
 
 void
-game::interface::ReferenceContext::set(PropertyIndex_t /*index*/, afl::data::Value* /*value*/)
+game::interface::ReferenceContext::set(PropertyIndex_t /*index*/, const afl::data::Value* /*value*/)
 {
     throw interpreter::Error::notAssignable();
 }
@@ -160,7 +160,7 @@ game::interface::getReferenceProperty(Reference ref, ReferenceProperty prop, Ses
            @since PCC2 2.40.7 */
         game::map::Point pt;
         if (ref.getPos(pt)) {
-            return makeIntegerValue(pt.getX());
+            return makeIntegerValue(pt.getY());
         } else {
             return 0;
         }

@@ -7,16 +7,6 @@
   *  escapes for easier readability. Note that they should not be used
   *  in strings intended for translation, because xgettext will not
   *  handle that.
-  *
-  *  (c) 2001-2020 Stefan Reuther <Streu@gmx.de>
-  *
-  *  This program is free software; you can redistribute it and/or
-  *  modify it under the terms of file `COPYING' that comes with the
-  *  source code.
-  *
-  *  This program is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   */
 #ifndef C2NG_UTIL_UNICODECHARS_HPP
 #define C2NG_UTIL_UNICODECHARS_HPP

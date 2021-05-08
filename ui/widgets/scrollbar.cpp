@@ -7,7 +7,6 @@
   *  It would also make sense to allow a horizontal mode.
   */
 
-#include <stdio.h>
 #include "ui/widgets/scrollbar.hpp"
 #include "gfx/complex.hpp"
 #include "gfx/context.hpp"
@@ -42,7 +41,7 @@ ui::widgets::Scrollbar::draw(gfx::Canvas& can)
     // Prepare
     gfx::Context<uint8_t> ctx(can, m_root.colorScheme());
     ctx.useFont(*m_root.provider().getFont(gfx::FontRequest().addSize(1)));
-    ctx.setTextAlign(1, 1);
+    ctx.setTextAlign(gfx::CenterAlign, gfx::MiddleAlign);
     gfx::Rectangle r = getExtent();
 
     // Buttons
@@ -50,8 +49,8 @@ ui::widgets::Scrollbar::draw(gfx::Canvas& can)
         gfx::Rectangle top = r.splitY(20);
         gfx::Rectangle mid = r.splitY(r.getHeight()-20);
         gfx::Rectangle bot = r;
-        drawButton(ctx, top, getButtonFlags(m_up),   getStates(m_up),   UTF_UP_ARROW);
-        drawButton(ctx, bot, getButtonFlags(m_down), getStates(m_down), UTF_DOWN_ARROW);
+        drawButton(ctx, top, getButtonFlags(m_up),   UTF_UP_ARROW);
+        drawButton(ctx, bot, getButtonFlags(m_down), UTF_DOWN_ARROW);
         r = mid;
     }
 
@@ -193,16 +192,6 @@ ui::widgets::Scrollbar::onTimer()
     m_timer->setInterval(FIRE_INTERVAL_MS);
 }
 
-ui::Widget::States_t
-ui::widgets::Scrollbar::getStates(LocalButtonFlags_t f)
-{
-    States_t result;
-    if (f.contains(Disabled)) {
-        result += DisabledState;
-    }
-    return result;
-}
-
 ui::ButtonFlags_t
 ui::widgets::Scrollbar::getButtonFlags(LocalButtonFlags_t f)
 {
@@ -212,6 +201,9 @@ ui::widgets::Scrollbar::getButtonFlags(LocalButtonFlags_t f)
     }
     if (f.contains(Active)) {
         result += ActiveButton;
+    }
+    if (f.contains(Disabled)) {
+        result += DisabledButton;
     }
     return result;
 }

@@ -8,25 +8,26 @@
 #include "afl/sys/loglistener.hpp"
 #include "client/vcr/classic/event.hpp"
 #include "client/vcr/classic/eventconsumer.hpp"
-#include "client/vcr/classic/player.hpp"
 #include "client/vcr/classic/renderer.hpp"
 #include "client/vcr/classic/scheduler.hpp"
 #include "client/vcr/playbackcontrolwidget.hpp"
 #include "client/vcr/unitstatuswidget.hpp"
+#include "game/proxy/classicvcrplayerproxy.hpp"
 #include "game/session.hpp"
 #include "game/vcr/classic/types.hpp"
 #include "ui/root.hpp"
 #include "ui/widgets/spritewidget.hpp"
 #include "util/requestreceiver.hpp"
 #include "util/requestsender.hpp"
-#include "util/slaverequestsender.hpp"
 #include "util/stringinstructionlist.hpp"
 
 namespace client { namespace vcr { namespace classic {
 
-    class PlaybackScreen : private PlayerListener, private EventConsumer {
+    class PlaybackScreen : private EventConsumer {
      public:
-        PlaybackScreen(ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::Session> gameSender, size_t index, afl::sys::LogListener& log);
+        PlaybackScreen(ui::Root& root, afl::string::Translator& tx,
+                       util::RequestSender<game::proxy::VcrDatabaseAdaptor> adaptorSender,
+                       size_t index, afl::sys::LogListener& log);
         ~PlaybackScreen();
 
         int run();
@@ -34,14 +35,12 @@ namespace client { namespace vcr { namespace classic {
      private:
         ui::Root& m_root;
         afl::string::Translator& m_translator;
-        util::RequestSender<game::Session> m_gameSender;
-        util::RequestReceiver<PlayerListener> m_reply;
-        util::SlaveRequestSender<game::Session, Player> m_playerSender;
+        util::RequestSender<game::proxy::VcrDatabaseAdaptor> m_adaptorSender;
+        game::proxy::ClassicVcrPlayerProxy m_proxy;
         size_t m_index;
         afl::sys::LogListener& m_log;
 
-        // PlayerListener:
-        virtual void handleEvents(util::StringInstructionList& list, bool finish);
+        void handleEvents(util::StringInstructionList& list, bool finish);
 
         void preloadImages();
         void requestEvents();

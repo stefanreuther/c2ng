@@ -12,6 +12,7 @@
 #include "afl/charset/codepage.hpp"
 #include "afl/sys/log.hpp"
 #include "game/limits.hpp"
+#include "afl/string/nulltranslator.hpp"
 
 /** Test mission.ini parsing. */
 void
@@ -210,10 +211,11 @@ TestGameSpecMissionList::testLoad()
         " = Bad3\n";
     afl::io::ConstMemoryStream ms(afl::string::toBytes(file));
     afl::sys::Log log;
+    afl::string::NullTranslator tx;
 
     // Load
     game::spec::MissionList testee;
-    testee.loadFromFile(ms, log);
+    testee.loadFromFile(ms, log, tx);
 
     // Verify
     TS_ASSERT_EQUALS(testee.size(), 3U);

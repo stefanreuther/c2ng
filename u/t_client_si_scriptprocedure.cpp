@@ -6,14 +6,14 @@
 #include "client/si/scriptprocedure.hpp"
 
 #include "t_client_si.hpp"
-#include "game/session.hpp"
-#include "client/si/scriptside.hpp"
-#include "afl/string/nulltranslator.hpp"
+#include "afl/data/stringvalue.hpp"
 #include "afl/io/nullfilesystem.hpp"
+#include "afl/string/format.hpp"
+#include "afl/string/nulltranslator.hpp"
+#include "client/si/scriptside.hpp"
+#include "game/session.hpp"
 #include "interpreter/error.hpp"
 #include "interpreter/values.hpp"
-#include "afl/string/format.hpp"
-#include "afl/data/stringvalue.hpp"
 
 namespace {
     String_t theString;
@@ -50,7 +50,7 @@ TestClientSiScriptProcedure::testIt()
 
     // Make a process
     afl::sys::Log log;
-    interpreter::World world(log, fs);
+    interpreter::World world(log, tx, fs);
     interpreter::Process proc(world, "testIt", 12345);
 
     // Call it
@@ -83,7 +83,7 @@ TestClientSiScriptProcedure::testNull()
 
     // Make a process
     afl::sys::Log log;
-    interpreter::World world(log, fs);
+    interpreter::World world(log, tx, fs);
     interpreter::Process proc(world, "testIt", 12345);
 
     // Call it

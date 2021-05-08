@@ -6,6 +6,7 @@
 #define C2NG_UI_WIDGETS_STANDARDDIALOGBUTTONS_HPP
 
 #include "afl/base/deleter.hpp"
+#include "afl/string/translator.hpp"
 #include "ui/eventloop.hpp"
 #include "ui/group.hpp"
 #include "ui/widgets/button.hpp"
@@ -25,8 +26,9 @@ namespace ui { namespace widgets {
         /** Constructor.
             Creates just the widgets.
             Connect events manually, or use addStop().
-            \param root Root */
-        explicit StandardDialogButtons(ui::Root& root);
+            \param root Root
+            \param tx Translator */
+        StandardDialogButtons(ui::Root& root, afl::string::Translator& tx);
 
         /** Destructor. */
         ~StandardDialogButtons();
@@ -50,6 +52,7 @@ namespace ui { namespace widgets {
      private:
         afl::base::Deleter m_deleter;
         ui::Root& m_root;
+        afl::string::Translator& m_translator;
         ui::widgets::Button* m_pOK;
         ui::widgets::Button* m_pCancel;
 
@@ -63,8 +66,9 @@ namespace ui { namespace widgets {
         \param content Content of dialog
         \param framed  true to add a lowered frame around the content
         \param root    Root
+        \param tx      Translator (for buttons)
         \return true if dialog was confirmed, false on cancel */
-    bool doStandardDialog(String_t title, String_t prompt, Widget& content, bool framed, Root& root);
+    bool doStandardDialog(String_t title, String_t prompt, Widget& content, bool framed, Root& root, afl::string::Translator& tx);
 
 } }
 

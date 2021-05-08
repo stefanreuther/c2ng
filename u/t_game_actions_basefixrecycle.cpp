@@ -11,6 +11,7 @@
 #include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
 
+using afl::string::NullTranslator;
 using game::actions::BaseFixRecycle;
 using game::map::Object;
 using game::map::Planet;
@@ -26,7 +27,7 @@ namespace {
         p.addCurrentBaseData(game::map::BaseData(), game::PlayerSet_t(owner));
 
         // Update m_baseKind
-        afl::string::NullTranslator tx;
+        NullTranslator tx;
         afl::sys::Log log;
         p.internalCheck(game::map::Configuration(), tx, log);
         return p;
@@ -40,11 +41,12 @@ void
 TestGameActionsBaseFixRecycle::testNoBase()
 {
     // Environment
+    NullTranslator tx;
     SimpleTurn t;
     Planet& p = t.addPlanet(99, 5, Object::Playable);
 
     // Creation fails
-    TS_ASSERT_THROWS((game::actions::BaseFixRecycle(p)), std::exception);
+    TS_ASSERT_THROWS((game::actions::BaseFixRecycle(p, tx)), std::exception);
 }
 
 /** Test behaviour with no ships.
@@ -54,13 +56,14 @@ void
 TestGameActionsBaseFixRecycle::testEmpty()
 {
     // Environment
+    NullTranslator tx;
     SimpleTurn t;
     Planet& p = addBase(t.addPlanet(99, 5, Object::Playable));
     Ship* sh = t.universe().ships().create(77);
     TS_ASSERT(sh);
 
     // No actions reported for ship
-    BaseFixRecycle testee(p);
+    BaseFixRecycle testee(p, tx);
     TS_ASSERT(testee.getValidActions(*sh).empty());
     TS_ASSERT(testee.getValidActions(t.universe()).empty());
     TS_ASSERT(testee.getValidShipIds(t.universe(), game::FixShipyardAction).empty());
@@ -73,6 +76,7 @@ void
 TestGameActionsBaseFixRecycle::testNormal()
 {
     // Environment
+    NullTranslator tx;
     SimpleTurn t;
 
     t.setPosition(game::map::Point(1000, 1000));
@@ -85,7 +89,7 @@ TestGameActionsBaseFixRecycle::testNormal()
     Ship& s4 = t.addShip(300, 5, Object::Playable);
 
     // Check actions reported for ship
-    BaseFixRecycle testee(p);
+    BaseFixRecycle testee(p, tx);
     TS_ASSERT(!testee.getValidActions(s1).contains(game::RecycleShipyardAction));
     TS_ASSERT( testee.getValidActions(s2).contains(game::RecycleShipyardAction));
     TS_ASSERT( testee.getValidActions(s3).contains(game::RecycleShipyardAction));
@@ -114,12 +118,13 @@ void
 TestGameActionsBaseFixRecycle::testSet()
 {
     // Environment
+    NullTranslator tx;
     SimpleTurn t;
     Planet& p = addBase(t.addPlanet(99, 5, Object::Playable));
     Ship& sh = t.addShip(100, 1, Object::Playable);
 
     // Set
-    BaseFixRecycle testee(p);
+    BaseFixRecycle testee(p, tx);
     TS_ASSERT_EQUALS(testee.set(game::FixShipyardAction, t.universe(), &sh), true);
 
     // Verify status after
@@ -139,6 +144,7 @@ void
 TestGameActionsBaseFixRecycle::testSetFail()
 {
     // Environment
+    NullTranslator tx;
     SimpleTurn t;
 
     t.setPosition(game::map::Point(1000, 1000));
@@ -150,7 +156,7 @@ TestGameActionsBaseFixRecycle::testSetFail()
     p.setBaseShipyardOrder(game::NoShipyardAction, 0);
 
     // Set -> fails
-    BaseFixRecycle testee(p);
+    BaseFixRecycle testee(p, tx);
     TS_ASSERT_EQUALS(testee.set(game::FixShipyardAction, t.universe(), &sh), false);
 
     // Verify status after: unchanged

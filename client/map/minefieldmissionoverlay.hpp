@@ -4,6 +4,7 @@
 #ifndef C2NG_CLIENT_MAP_MINEFIELDMISSIONOVERLAY_HPP
 #define C2NG_CLIENT_MAP_MINEFIELDMISSIONOVERLAY_HPP
 
+#include "afl/string/translator.hpp"
 #include "client/map/overlay.hpp"
 #include "game/map/minefieldformula.hpp"
 #include "game/proxy/objectobserver.hpp"
@@ -14,7 +15,7 @@ namespace client { namespace map {
 
     class MinefieldMissionOverlay : public Overlay {
      public:
-        MinefieldMissionOverlay(ui::Root& root);
+        MinefieldMissionOverlay(ui::Root& root, afl::string::Translator& tx);
         ~MinefieldMissionOverlay();
 
         void setEffects(game::map::MinefieldEffects_t data);
@@ -30,6 +31,7 @@ namespace client { namespace map {
      private:
         game::map::MinefieldEffects_t m_data;
         ui::Root& m_root;
+        afl::string::Translator& m_translator;
         util::RequestReceiver<MinefieldMissionOverlay> m_reply;
     };
 

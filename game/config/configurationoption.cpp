@@ -82,15 +82,6 @@ game::config::ConfigurationOption::isChanged() const
     return m_changed;
 }
 
-// FIXME: remove
-// /** Get name of this option. */
-// inline const char*
-// ConfigOption::getName() const
-// {
-//     return name;
-// }
-
-
 // Remove comment from an option value.
 void
 game::config::ConfigurationOption::removeComment(String_t& str)

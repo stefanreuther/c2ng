@@ -163,14 +163,14 @@ namespace {
     //     \param tab [in] String table
     //     \retval true User selected a new item; current was updated
     //     \retval false User canceled */
-    bool doList(ui::Root& root, const String_t title, int32_t& current, const afl::functional::StringTable_t& tab)
+    bool doList(ui::Root& root, afl::string::Translator& tx, const String_t title, int32_t& current, const afl::functional::StringTable_t& tab)
     {
         // ex client/widgets/expformat.cc:doList
         ui::widgets::StringListbox box(root.provider(), root.colorScheme());
         box.addItems(tab);
         box.setCurrentKey(current);
 
-        if (doStandardDialog(title, String_t(), box, true, root)) {
+        if (doStandardDialog(title, String_t(), box, true, root, tx)) {
             return box.getCurrentKey(current);
         } else {
             return false;
@@ -206,7 +206,7 @@ Dialog::run()
 {
     afl::base::SignalConnection conn(m_grid.sig_click.add(this, &Dialog::onOptionClick));
     updateData();
-    return doStandardDialog(m_translator("Folder Configuration"), String_t(), m_grid, false, m_root);
+    return doStandardDialog(m_translator("Folder Configuration"), String_t(), m_grid, false, m_root, m_translator);
 }
 
 void
@@ -248,7 +248,7 @@ Dialog::onOptionClick(int id)
 
         // List dialog uses int32_t
         int32_t i = int32_t(index);
-        if (doList(m_root, m_translator("Character Set"), i, CharsetNames(true, m_translator))) {
+        if (doList(m_root, m_translator, m_translator("Character Set"), i, CharsetNames(true, m_translator))) {
             m_state.charsetId = CharsetFactory().getCharsetKey(CharsetFactory::Index_t(i));
             updateData();
         }
@@ -273,7 +273,7 @@ client::dialogs::doFolderConfigDialog(ui::Root& root,
                                       afl::string::Translator& tx)
 {
     // Initialize
-    Downlink link(root);
+    Downlink link(root, tx);
     State state;
     {
         InitializeRequest rq(state);

@@ -9,9 +9,9 @@
 #include "afl/io/internaldirectory.hpp"
 #include "afl/charset/codepagecharset.hpp"
 #include "afl/charset/codepage.hpp"
-#include "u/files.hpp"
 #include "afl/except/filetooshortexception.hpp"
 #include "afl/io/constmemorystream.hpp"
+#include "game/test/files.hpp"
 
 /** Various tests. */
 void
@@ -23,7 +23,7 @@ TestServerFileRaceNames::testIt()
     // Standard case for buffer version
     {
         server::file::RaceNames_t result;
-        server::file::loadRaceNames(result, getDefaultRaceNames(), cs);
+        server::file::loadRaceNames(result, game::test::getDefaultRaceNames(), cs);
         TS_ASSERT_EQUALS(result.get(1), "The Solar Federation");
         TS_ASSERT_EQUALS(result.get(7), "The Crystal Confederation");
         TS_ASSERT_EQUALS(result.get(11), "The Missing Colonies of Man");
@@ -39,7 +39,7 @@ TestServerFileRaceNames::testIt()
     {
         server::file::RaceNames_t result;
         afl::base::Ref<afl::io::InternalDirectory> dir = afl::io::InternalDirectory::create("x");
-        dir->addStream("race.nm", *new afl::io::ConstMemoryStream(getDefaultRaceNames()));
+        dir->addStream("race.nm", *new afl::io::ConstMemoryStream(game::test::getDefaultRaceNames()));
         server::file::loadRaceNames(result, *dir, cs);
         TS_ASSERT_EQUALS(result.get(1), "The Solar Federation");
         TS_ASSERT_EQUALS(result.get(7), "The Crystal Confederation");

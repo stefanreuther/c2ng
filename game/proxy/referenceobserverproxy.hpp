@@ -9,7 +9,6 @@
 #include "game/reference.hpp"
 #include "game/session.hpp"
 #include "util/requestreceiver.hpp"
-#include "util/slaverequestsender.hpp"
 
 namespace game { namespace proxy {
 
@@ -25,9 +24,10 @@ namespace game { namespace proxy {
         void removeAllListeners();
 
      private:
-        class Slave;
+        class Trampoline;
+        class TrampolineFromSession;
 
-        util::SlaveRequestSender<Session, Slave> m_slave;
+        util::RequestSender<Trampoline> m_trampoline;
     };
 
 } }

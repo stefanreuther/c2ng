@@ -8,6 +8,7 @@
 #include "game/config/integeroption.hpp"
 #include "game/map/point.hpp"
 #include "game/reference.hpp"
+#include "game/hostversion.hpp"
 
 namespace game { namespace map {
 
@@ -27,9 +28,7 @@ namespace game { namespace map {
     const int32_t MatchMinefields = 16;    // ex li_Minefield
 
     // ex lock_config, setLockMode, getLockMode, getLockModeConfigOption, lm_Left, lm_Right: just access pref[Lock_Left] etc.
-    typedef game::config::IntegerOptionDescriptorWithDefault LockOptionDescriptor_t;
-    extern const LockOptionDescriptor_t Lock_Left;
-    extern const LockOptionDescriptor_t Lock_Right;
+    typedef game::config::IntegerOptionDescriptor LockOptionDescriptor_t;
 
     /** Locking on objects on starchart.
         When users click at/near an object, we want to lock the cursor onto that object.
@@ -107,6 +106,15 @@ namespace game { namespace map {
             \param ignoreDrawing Drawing to ignore */
         void addUniverse(const Universe& univ, int32_t items, const Drawing* ignoreDrawing);
 
+        /** Find warp-well edge.
+            Call instead of getFoundObject() to find a point that minimizes the movement distance to reach the found point.
+            \param origin         Origin of movement (minimize movement starting here)
+            \param isHyperdriving true for hyperdrive, false for normal movement
+            \param config         Host configuration (for warp well parameters)
+            \param host           Host version (for warp well rules/shape)
+            \return point in warp well if applicable, otherwise, same as getFoundPoint(). */
+        Point findWarpWellEdge(Point origin, bool isHyperdriving, const Universe& univ, const game::config::HostConfiguration& config, const HostVersion& host) const;
+
         /** Get found point.
             If the found object is across a map border, this will return the coordinates nearest to the original target.
             Do not assume that this is equal to one of the points added.
@@ -130,6 +138,7 @@ namespace game { namespace map {
         const Configuration& m_config;
 
         void addPointRaw(Point pt, Reference obj);
+        int32_t getWarpWellDistanceMetric(Point origin, Point pt, bool isHyperdriving, const HostVersion& host) const;
     };
 
 } }

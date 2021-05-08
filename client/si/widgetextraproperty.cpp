@@ -16,7 +16,7 @@
 
 // Set property of widget (UI side).
 void
-client::si::setWidgetProperty(WidgetExtraProperty p, afl::data::Value* value, ui::Widget* w)
+client::si::setWidgetProperty(WidgetExtraProperty p, const afl::data::Value* value, ui::Widget* w)
 {
     using client::widgets::ControlScreenHeader;
     switch (p) {
@@ -86,20 +86,20 @@ client::si::setWidgetProperty(WidgetExtraProperty p, afl::data::Value* value, ui
 
 // Set property of widget (script side).
 void
-client::si::setWidgetProperty(WidgetExtraProperty p, afl::data::Value* value, ScriptSide& ss, const WidgetReference& ref)
+client::si::setWidgetProperty(WidgetExtraProperty p, const afl::data::Value* value, ScriptSide& ss, const WidgetReference& ref)
 {
     // UserCall for the thread transition.
     class Setter : public UserCall {
      public:
-        Setter(WidgetExtraProperty p, const WidgetReference& ref, afl::data::Value* value)
+        Setter(WidgetExtraProperty p, const WidgetReference& ref, const afl::data::Value* value)
             : m_property(p), m_ref(ref), m_value(value)
             { }
-        virtual void handle(UserSide& ui, Control& /*ctl*/)
-            { setWidgetProperty(m_property, m_value, m_ref.get(ui)); }
+        virtual void handle(Control& ctl)
+            { setWidgetProperty(m_property, m_value, m_ref.get(ctl)); }
      private:
         const WidgetExtraProperty m_property;
         const WidgetReference m_ref;
-        afl::data::Value*const m_value;
+        const afl::data::Value*const m_value;
     };
 
     // Call it. call() will proxy possible exceptions.

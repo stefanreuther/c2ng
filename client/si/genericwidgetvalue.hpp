@@ -24,7 +24,7 @@ namespace client { namespace si {
         GenericWidgetValue(afl::base::Memory<const interpreter::NameTable> names, game::Session& session, ScriptSide* ss, const WidgetReference& ref);
 
         virtual Context* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
-        virtual void set(PropertyIndex_t index, afl::data::Value* value);
+        virtual void set(PropertyIndex_t index, const afl::data::Value* value);
         virtual afl::data::Value* get(PropertyIndex_t index);
         virtual GenericWidgetValue* clone() const;
         virtual void enumProperties(interpreter::PropertyAcceptor& acceptor);

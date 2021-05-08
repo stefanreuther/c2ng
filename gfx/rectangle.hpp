@@ -7,6 +7,7 @@
 
 #include <iosfwd>
 #include "gfx/point.hpp"
+#include "gfx/types.hpp"
 
 namespace gfx {
 
@@ -223,12 +224,11 @@ namespace gfx {
 
         /** Move this rectangle to edge of another.
             \param other  Bounding rectangle
-            \param xPos   Relative X position (0: left, 1: center, 2: right)
-            \param yPos   Relative Y position (0: top, 1: center, 2: bottom)
-            \param offset Distance to edge. When anchored at an edge (0 or 2),
-                          leave that many pixels from that edge.
+            \param xPos   Relative X position
+            \param yPos   Relative Y position
+            \param offset Distance to edge. When anchored at an edge, leave that many pixels from that edge.
             \return *this */
-        Rectangle& moveToEdge(const Rectangle& other, int xPos, int yPos, int offset) throw();
+        Rectangle& moveToEdge(const Rectangle& other, HorizontalAlignment xPos, VerticalAlignment yPos, int offset) throw();
 
         /** Reduce this rectangle's width from the left.
             Removes \c pix pixels from the left (less if the rectangle is narrower).

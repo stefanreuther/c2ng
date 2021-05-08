@@ -48,8 +48,9 @@ namespace util { namespace plugin {
             \param baseDir      Base directory (see getBaseDirectory())
             \param defFileName  Name of file (see getDefinitionFileName())
             \param file         Stream for reading the file
-            \param log          Logger (for error messages) */
-        void initFromPluginFile(String_t baseDir, String_t defFileName, afl::io::Stream& file, afl::sys::LogListener& log);
+            \param log          Logger (for error messages)
+            \param tx           Translator (for error messages) */
+        void initFromPluginFile(String_t baseDir, String_t defFileName, afl::io::Stream& file, afl::sys::LogListener& log, afl::string::Translator& tx);
 
         /** Create from resource file.
             Call on a fresh Plugin instance to create a virtual plugin that loads a single resource file.

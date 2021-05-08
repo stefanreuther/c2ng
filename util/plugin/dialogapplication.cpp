@@ -48,7 +48,7 @@ bool
 util::plugin::DialogApplication::checkPreconditions(Installer& inst)
 {
     String_t msg;
-    if (inst.checkInstallPreconditions(translator()).get(msg)) {
+    if (inst.checkInstallPreconditions().get(msg)) {
         m_dialog.showError(msg, windowTitle());
         return false;
     }
@@ -80,7 +80,7 @@ util::plugin::DialogApplication::doAdd(const std::vector<String_t>& items)
     for (size_t i = 0, n = items.size(); i < n; ++i) {
         const String_t& name = items[i];
         try {
-            Plugin* plug = installer.prepareInstall(name, tx);
+            Plugin* plug = installer.prepareInstall(name);
             if (!plug) {
                 m_dialog.showError(afl::string::Format(tx("File '%s' cannot be installed as a plugin. "
                                                           "A plugin is normally specified with a *.c2p or *.c2z file.").c_str(), name),

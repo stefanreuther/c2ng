@@ -6,15 +6,19 @@
 #include "game/proxy/configurationproxy.hpp"
 
 #include "t_game_proxy.hpp"
-#include "game/test/sessionthread.hpp"
-#include "game/test/root.hpp"
+#include "game/config/integeroption.hpp"
+#include "game/config/integervalueparser.hpp"
+#include "game/config/stringoption.hpp"
 #include "game/config/userconfiguration.hpp"
+#include "game/test/root.hpp"
+#include "game/test/sessionthread.hpp"
 #include "game/test/waitindicator.hpp"
 
 using game::config::UserConfiguration;
 
+/** Test accessing NumberFormatter. */
 void
-TestGameProxyConfigurationProxy::testIt()
+TestGameProxyConfigurationProxy::testNumberFormatter()
 {
     // Setup
     // - session thread
@@ -36,5 +40,49 @@ TestGameProxyConfigurationProxy::testIt()
     // Verify
     TS_ASSERT_EQUALS(fmt.formatNumber(10000), "10000");
     TS_ASSERT_EQUALS(fmt.formatPopulation(500), "500c");
+}
+
+/** Test accessing integer options. */
+void
+TestGameProxyConfigurationProxy::testIntAccess()
+{
+    static const game::config::IntegerOptionDescriptor desc = { "name", &game::config::IntegerValueParser::instance };
+
+    // Setup
+    game::test::SessionThread h;
+    h.session().setRoot(new game::test::Root(game::HostVersion()));
+    UserConfiguration& config = h.session().getRoot()->userConfiguration();
+    config[desc].set(7);
+
+    // Proxy access
+    game::test::WaitIndicator ind;
+    game::proxy::ConfigurationProxy testee(h.gameSender());
+    TS_ASSERT_EQUALS(testee.getOption(ind, desc), 7);
+
+    // Modify and read back
+    testee.setOption(desc, 12);
+    TS_ASSERT_EQUALS(testee.getOption(ind, desc), 12);
+}
+
+/** Test accessing string options. */
+void
+TestGameProxyConfigurationProxy::testStringAccess()
+{
+    static const game::config::StringOptionDescriptor desc = { "name" };
+
+    // Setup
+    game::test::SessionThread h;
+    h.session().setRoot(new game::test::Root(game::HostVersion()));
+    UserConfiguration& config = h.session().getRoot()->userConfiguration();
+    config[desc].set("hi");
+
+    // Proxy access
+    game::test::WaitIndicator ind;
+    game::proxy::ConfigurationProxy testee(h.gameSender());
+    TS_ASSERT_EQUALS(testee.getOption(ind, desc), "hi");
+
+    // Modify and read back
+    testee.setOption(desc, "ho");
+    TS_ASSERT_EQUALS(testee.getOption(ind, desc), "ho");
 }
 

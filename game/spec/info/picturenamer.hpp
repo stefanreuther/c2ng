@@ -52,6 +52,19 @@ namespace game { namespace spec { namespace info {
             \param pl Player
             \return picture name */
         virtual String_t getPlayerPicture(const Player& pl) const = 0;
+
+        /** Get name of picture for a player's fighter.
+            \param raceNr Race number (PlayerRace)
+            \param playerNr Player number
+            \return picture name */
+        virtual String_t getFighterPicture(int raceNr, int playerNr) const = 0;
+
+        /** Get name of picture to represent VCR unit.
+            Note that if the unit has already been resolved to a hull, getHullPicture is used instead.
+            \param isPlanet true if this is a planet
+            \param pictureNumber Picture number provided by host
+            \return picture name */
+        virtual String_t getVcrObjectPicture(bool isPlanet, int pictureNumber) const = 0;
     };
 
 } } }

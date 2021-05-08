@@ -20,6 +20,7 @@ game::actions::TaxationAction::TaxationAction(game::map::Planet& planet,
       m_config(config),
       m_hostVersion(host),
       m_numBuildings(),
+      m_effectors(),
       conn_planetChange(m_planet.sig_change.add(this, &TaxationAction::onChange)),
       conn_configChange(m_config.sig_change.add(this, &TaxationAction::onChange))
 { }
@@ -33,6 +34,14 @@ void
 game::actions::TaxationAction::setNumBuildings(int mifa)
 {
     m_numBuildings = mifa;
+    update();
+}
+
+// Set planet effectors.
+void
+game::actions::TaxationAction::setEffectors(const game::map::PlanetEffectors& eff)
+{
+    m_effectors = eff;
     update();
 }
 
@@ -146,16 +155,21 @@ game::actions::TaxationAction::describe(Area a, afl::string::Translator& tx, con
 {
     String_t result;
 
+    int planetOwner = 0;
+    m_planet.getOwner(planetOwner);
+
     const int happyChange = getHappinessChange(a);
     const int32_t due = getDue(a);
     const int32_t pay = getDueLimited(a);
+    const int hissEffect = game::map::getHissEffect(planetOwner, m_effectors.get(game::map::PlanetEffectors::Hiss), m_config, m_hostVersion);
+
     int newHappy = 0;
 
     switch (a) {
      case Colonists: {
         // ex WColonistTaxSelector::drawContent (part)
         int oldHappy = m_planet.getColonistHappiness().orElse(0);
-        newHappy = oldHappy + happyChange;
+        newHappy = std::min(100, oldHappy + hissEffect) + happyChange;
         if (oldHappy < 30 || newHappy < m_hostVersion.getPostTaxationHappinessLimit()) {
             result += Format(tx("Riots \xE2\x80\x94 Colonists do not pay %d mc."), fmt.formatNumber(due));
         } else if (due != pay) {
@@ -168,7 +182,7 @@ game::actions::TaxationAction::describe(Area a, afl::string::Translator& tx, con
      case Natives: {
         // ex WNativeTaxSelector::drawContent (part)
         int oldHappy = m_planet.getNativeHappiness().orElse(0);
-        newHappy = oldHappy + happyChange;
+        newHappy = std::min(100, oldHappy + hissEffect) + happyChange;
 
         int sdue = getBovinoidSupplyContribution();
         int spay = getBovinoidSupplyContributionLimited();

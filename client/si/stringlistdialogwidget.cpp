@@ -18,28 +18,27 @@
 #include "ui/widgets/scrollbar.hpp"
 #include "ui/widgets/standarddialogbuttons.hpp"
 #include "ui/window.hpp"
-#include "util/translation.hpp"
 
 namespace {
-    ui::widgets::AbstractButton* findKeyButton(ui::Widget& me, util::Key_t key)
+    ui::widgets::BaseButton* findKeyButton(ui::Widget& me, util::Key_t key)
     {
         // This mirrors the logic of defaultHandleKey() to emulate key dispatch.
         // In particular, if multiple sub-widgets define the same key, the one that has focus will be picked.
         // ex UIBaseComplexWidget::handleEvent, sort-of
-        ui::widgets::AbstractButton* btn = dynamic_cast<ui::widgets::AbstractButton*>(&me);
+        ui::widgets::BaseButton* btn = dynamic_cast<ui::widgets::BaseButton*>(&me);
         if (btn != 0 && btn->getKey() == key) {
             return btn;
         }
         
         if (ui::Widget* w = me.getFocusedChild()) {
-            if (ui::widgets::AbstractButton* btn = findKeyButton(*w, key)) {
+            if (ui::widgets::BaseButton* btn = findKeyButton(*w, key)) {
                 return btn;
             }
         }
         for (ui::Widget* w = me.getFirstChild(); w != 0; w = w->getNextSibling()) {
             // Focused child has already been processed above; do not process it again.
             if (w != me.getFocusedChild()) {
-                if (ui::widgets::AbstractButton* btn = findKeyButton(*w, key)) {
+                if (ui::widgets::BaseButton* btn = findKeyButton(*w, key)) {
                     return btn;
                 }
             }
@@ -55,7 +54,7 @@ namespace {
         // Is it a key?
         util::Key_t key;
         if (util::parseKey(anchor, key)) {
-            if (ui::widgets::AbstractButton* btn = findKeyButton(root, key)) {
+            if (ui::widgets::BaseButton* btn = findKeyButton(root, key)) {
                 return btn->getExtent().getBottomLeft();
             }
         }
@@ -92,7 +91,7 @@ client::si::StringListDialogWidget::StringListDialogWidget(gfx::ResourceProvider
 
 // Execute standard dialog.
 bool
-client::si::StringListDialogWidget::run(ui::Root& root, util::RequestSender<game::Session> gameSender)
+client::si::StringListDialogWidget::run(ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::Session> gameSender)
 {
     // Configure
     setPreferredHeight(m_height <= 0 ? 0 : m_height <= 3 ? 3 : m_height);
@@ -117,10 +116,10 @@ client::si::StringListDialogWidget::run(ui::Root& root, util::RequestSender<game
     }
     w.add(listGroup);
 
-    ui::widgets::StandardDialogButtons& btns = h.addNew(new ui::widgets::StandardDialogButtons(root));
+    ui::widgets::StandardDialogButtons& btns = h.addNew(new ui::widgets::StandardDialogButtons(root, tx));
     btns.addStop(loop);
     if (!m_help.empty()) {
-        ui::Widget& helper = h.addNew(new client::widgets::HelpWidget(root, gameSender, m_help));
+        ui::Widget& helper = h.addNew(new client::widgets::HelpWidget(root, tx, gameSender, m_help));
         w.add(helper);
         btns.addHelp(helper);
     }

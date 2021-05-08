@@ -3,21 +3,21 @@
   */
 
 #include "client/widgets/turnlistbox.hpp"
-#include "ui/draw.hpp"
-#include "util/translation.hpp"
+#include "afl/base/optional.hpp"
 #include "afl/string/format.hpp"
 #include "gfx/complex.hpp"
-#include "afl/base/optional.hpp"
+#include "ui/draw.hpp"
 
 namespace {
     const int OUTLINE_SIZE = 3;
 }
 
-client::widgets::TurnListbox::TurnListbox(gfx::Point cells, ui::Root& root)
+client::widgets::TurnListbox::TurnListbox(gfx::Point cells, ui::Root& root, afl::string::Translator& tx)
     : AbstractListbox(),
       m_items(),
       m_cells(cells),
       m_root(root),
+      m_translator(tx),
       m_bigFont(root.provider().getFont(gfx::FontRequest().addSize(+1))),
       m_smallFont(root.provider().getFont(gfx::FontRequest().addSize(-1)))
 { }
@@ -44,13 +44,23 @@ client::widgets::TurnListbox::getItemHeight(size_t /*n*/)
 }
 
 int
-client::widgets::TurnListbox::getHeaderHeight()
+client::widgets::TurnListbox::getHeaderHeight() const
+{
+    return 0;
+}
+
+int
+client::widgets::TurnListbox::getFooterHeight() const
 {
     return 0;
 }
 
 void
 client::widgets::TurnListbox::drawHeader(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
+{ }
+
+void
+client::widgets::TurnListbox::drawFooter(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
 { }
 
 void
@@ -70,7 +80,7 @@ client::widgets::TurnListbox::drawItem(gfx::Canvas& can, gfx::Rectangle area, si
         afl::base::Optional<uint8_t> boxColor;
         afl::base::Optional<uint8_t> stateColor;
         String_t stateText;
-        String_t turnText = afl::string::Format(_("Turn %d").c_str(), pItem->turnNumber);
+        String_t turnText = afl::string::Format(m_translator("Turn %d").c_str(), pItem->turnNumber);
         switch (pItem->status) {
          case Unknown:
             boxColor = ui::Color_Grayscale + 2;
@@ -79,39 +89,39 @@ client::widgets::TurnListbox::drawItem(gfx::Canvas& can, gfx::Rectangle area, si
             textColor = SkinColor::Faded;
             boxColor = ui::Color_Grayscale + 2;
             stateColor = ui::Color_White;
-            stateText = _("not available");
+            stateText = m_translator("not available");
             break;
          case StronglyAvailable:
             boxColor = ui::Color_GreenScale + 4;
             stateColor = ui::Color_GreenScale + 15;
-            stateText = _("available");
+            stateText = m_translator("available");
             break;
          case WeaklyAvailable:
             boxColor = ui::Color_GreenScale + 4;
             stateColor = ui::Color_GreenScale + 15;
-            stateText = _("available?");
+            stateText = m_translator("available?");
             break;
          case Loaded:
             boxColor = ui::Color_GreenScale + 6;
             stateColor = ui::Color_GreenScale + 15;
-            stateText = _("loaded");
+            stateText = m_translator("loaded");
             break;
          case Failed:
             textColor = SkinColor::Faded;
             boxColor = ui::Color_Fire + 2;
             stateColor = ui::Color_Fire + 20;
-            stateText = _("error");
+            stateText = m_translator("error");
             break;
          case Current:
             boxColor = ui::Color_GreenScale + 6;
             stateColor = ui::Color_GreenScale + 15;
-            stateText = _("loaded");
-            turnText = _("Current");
+            stateText = m_translator("loaded");
+            turnText = m_translator("Current");
             break;
          case Active:
             boxColor = ui::Color_GreenScale + 6;
             stateColor = ui::Color_GreenScale + 15;
-            stateText = _("active");
+            stateText = m_translator("active");
             break;
         }
 
@@ -129,7 +139,7 @@ client::widgets::TurnListbox::drawItem(gfx::Canvas& can, gfx::Rectangle area, si
         if (boxColor.get(c)) {
             gfx::Context<uint8_t> ctx(can, m_root.colorScheme());
             drawSolidBar(ctx, area, c);
-            ctx.setTextAlign(1, 1);
+            ctx.setTextAlign(gfx::CenterAlign, gfx::MiddleAlign);
 
             if (stateColor.get(c)) {
                 ctx.useFont(*m_smallFont);

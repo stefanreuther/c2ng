@@ -23,9 +23,10 @@ namespace {
     
     class Window {
      public:
-        Window(ShipSpeedProxy& proxy, ui::Root& root, const ShipSpeedProxy::Status& st)
+        Window(ShipSpeedProxy& proxy, ui::Root& root, afl::string::Translator& tx, const ShipSpeedProxy::Status& st)
             : m_proxy(proxy),
               m_root(root),
+              m_translator(tx),
               m_loop(root),
               m_value(st.currentSpeed),
               m_originalStatus(st)
@@ -36,6 +37,8 @@ namespace {
         bool run()
             {
                 // ex WShipSpeedSelector::doStandardDialog
+                afl::string::Translator& tx = m_translator;
+
                 // Window [VBox]
                 //   MultilineStatic
                 // HBox
@@ -44,12 +47,12 @@ namespace {
                 //   Button "OK"
                 //   Button "Cancel"
                 afl::base::Deleter del;
-                ui::Window& win = del.addNew(new ui::Window(_("Set Speed"),
+                ui::Window& win = del.addNew(new ui::Window(tx("Set Speed"),
                                                             m_root.provider(),
                                                             m_root.colorScheme(),
                                                             ui::BLUE_WINDOW,
                                                             ui::layout::VBox::instance5));
-                win.add(del.addNew(new ui::rich::StaticText(_("Enter new warp factor and confirm with ENTER:"),
+                win.add(del.addNew(new ui::rich::StaticText(tx("Enter new warp factor and confirm with ENTER:"),
                                                             280,    // FIXME?
                                                             m_root.provider())));
 
@@ -61,8 +64,8 @@ namespace {
                                                            ssw.addButtons(del, m_root)));
                 hg.add(del.addNew(new ui::Spacer()));
 
-                ui::widgets::Button& btnOK     = del.addNew(new ui::widgets::Button(_("OK"),     util::Key_Return, m_root));
-                ui::widgets::Button& btnCancel = del.addNew(new ui::widgets::Button(_("Cancel"), util::Key_Escape, m_root));
+                ui::widgets::Button& btnOK     = del.addNew(new ui::widgets::Button(tx("OK"),     util::Key_Return, m_root));
+                ui::widgets::Button& btnCancel = del.addNew(new ui::widgets::Button(tx("Cancel"), util::Key_Escape, m_root));
                 hg.add(btnOK);
                 hg.add(btnCancel);
                 win.add(hg);
@@ -74,7 +77,7 @@ namespace {
                 win.pack();
 
                 // @change/FIXME: lower right, not lower left
-                m_root.moveWidgetToEdge(win, 2, 2, 10);
+                m_root.moveWidgetToEdge(win, gfx::RightAlign, gfx::BottomAlign, 10);
                 m_root.add(win);
                 return m_loop.run() != 0;
             }
@@ -93,6 +96,7 @@ namespace {
      private:
         ShipSpeedProxy& m_proxy;
         ui::Root& m_root;
+        afl::string::Translator& m_translator;
         ui::EventLoop m_loop;
         afl::base::Observable<int32_t> m_value;
         ShipSpeedProxy::Status m_originalStatus;
@@ -101,10 +105,10 @@ namespace {
 
 
 void
-client::dialogs::doShipSpeedDialog(game::Id_t shipId, ui::Root& root, util::RequestSender<game::Session> gameSender)
+client::dialogs::doShipSpeedDialog(game::Id_t shipId, ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::Session> gameSender)
 {
     ShipSpeedProxy proxy(gameSender, shipId);
-    Downlink link(root);
+    Downlink link(root, tx);
 
     // Initialize
     ShipSpeedProxy::Status st = proxy.getStatus(link);
@@ -115,6 +119,6 @@ client::dialogs::doShipSpeedDialog(game::Id_t shipId, ui::Root& root, util::Requ
     }
 
     // Dialog
-    Window dlg(proxy, root, st);
+    Window dlg(proxy, root, tx, st);
     dlg.run();
 }

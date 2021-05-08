@@ -101,32 +101,21 @@ client::si::IFWidgetRun(game::Session& session, ScriptSide& ss, const WidgetRefe
               m_outputState(),
               m_result(0)
             { }
-        virtual void handleStateChange(UserSide& us, RequestLink2 link, OutputState::Target target)
-            {
-                // FIXME: use a switch()?
-                if (target != OutputState::NoChange) {
-                    us.detachProcess(link);
-                    m_outputState.set(link, target);
-                    m_loop.stop(0);
-                } else {
-                    us.continueProcess(link);
-                }
-            }
-        virtual void handleEndDialog(UserSide& us, RequestLink2 link, int code)
-            {
-                us.detachProcess(link);
-                m_outputState.set(link, OutputState::NoChange);
-                m_loop.stop(code);
-            }
-        virtual void handlePopupConsole(UserSide& us, RequestLink2 link)
+        virtual void handleStateChange(RequestLink2 link, OutputState::Target target)
+            { dialogHandleStateChange(link, target, m_outputState, m_loop, 0); }
+        virtual void handleEndDialog(RequestLink2 link, int code)
+            { dialogHandleEndDialog(link, code, m_outputState, m_loop, code); }
+        virtual void handlePopupConsole(RequestLink2 link)
             {
                 // FIXME
-                us.continueProcess(link);
+                interface().continueProcess(link);
             }
-        virtual void handleSetViewRequest(UserSide& ui, RequestLink2 link, String_t name, bool withKeymap)
-            {
-                defaultHandleSetViewRequest(ui, link, name, withKeymap);
-            }
+        virtual void handleSetViewRequest(RequestLink2 link, String_t name, bool withKeymap)
+            { defaultHandleSetViewRequest(link, name, withKeymap); }
+        virtual void handleUseKeymapRequest(client::si::RequestLink2 link, String_t name, int prefix)
+            { defaultHandleUseKeymapRequest(link, name, prefix); }
+        virtual void handleOverlayMessageRequest(RequestLink2 link, String_t text)
+            { defaultHandleOverlayMessageRequest(link, text); }
         virtual ContextProvider* createContextProvider()
             {
                 return new RunContextProvider(m_link);
@@ -157,9 +146,10 @@ client::si::IFWidgetRun(game::Session& session, ScriptSide& ss, const WidgetRefe
         RunTask(const WidgetReference& ref)
             : m_ref(ref)
             { }
-        void handle(UserSide& us, Control& ctl, RequestLink2 link)
+        void handle(Control& ctl, RequestLink2 link)
             {
-                ui::Widget* theWidget = m_ref.get(us);
+                UserSide& us = ctl.interface();
+                ui::Widget* theWidget = m_ref.get(ctl);
                 if (theWidget == 0) {
                     us.continueProcessWithFailure(link, "Internal error: no widget");
                 } else {
@@ -168,13 +158,13 @@ client::si::IFWidgetRun(game::Session& session, ScriptSide& ss, const WidgetRefe
                     }
 
                     RunControl dlg(us, ctl.root(), ctl.translator(), link);
-                    if (m_ref.getHolder().attachControl(us, dlg)) {
+                    if (m_ref.getHolder().attachControl(dlg)) {
                         dlg.run(ctl.root(), *theWidget);
-                        m_ref.getHolder().detachControl(us, dlg);
+                        m_ref.getHolder().detachControl(dlg);
                         std::auto_ptr<afl::data::Value> result(interpreter::makeIntegerValue(dlg.getResult()));
                         us.setVariable(link, "UI.RESULT", result);
                         us.joinProcess(link, dlg.output().getProcess());
-                        ctl.handleStateChange(us, link, dlg.output().getTarget());
+                        ctl.handleStateChange(link, dlg.output().getTarget());
                     } else {
                         us.continueProcessWithFailure(link, "Already active");
                     }
@@ -199,9 +189,9 @@ client::si::IFWidgetFocus(ScriptSide& ss, const WidgetReference& ref, interprete
         Focuser(const WidgetReference& ref)
             : m_ref(ref)
             { }
-        virtual void handle(UserSide& us, Control& /*ctl*/)
+        virtual void handle(Control& ctl)
             {
-                if (ui::Widget* w = m_ref.get(us)) {
+                if (ui::Widget* w = m_ref.get(ctl)) {
                     w->requestFocus();
                 }
             }
@@ -224,12 +214,12 @@ client::si::IFKeyboardFocusAdd(ScriptSide& ss, const WidgetReference& ref, inter
         Adder(const WidgetReference& ref)
             : m_ref(ref), m_widgets()
             { }
-        virtual void handle(UserSide& us, Control& /*ctl*/)
+        virtual void handle(Control& ctl)
             {
                 using ui::widgets::FocusIterator;
-                if (FocusIterator* w = dynamic_cast<FocusIterator*>(m_ref.get(us))) {
+                if (FocusIterator* w = dynamic_cast<FocusIterator*>(m_ref.get(ctl))) {
                     for (size_t i = 0, n = m_widgets.size(); i < n; ++i) {
-                        if (ui::Widget* target = m_ref.getHolder().get(us, m_widgets[i])) {
+                        if (ui::Widget* target = m_ref.getHolder().get(ctl, m_widgets[i])) {
                             w->add(*target);
                         }
                     }
@@ -303,10 +293,10 @@ client::si::IFListboxAddItem(ScriptSide& ss, const WidgetReference& ref, interpr
         Adder(const WidgetReference& ref, int32_t id, const String_t& text)
             : m_ref(ref), m_id(id), m_text(text)
             { }
-        virtual void handle(UserSide& us, Control& /*ctl*/)
+        virtual void handle(Control& ctl)
             {
                 using ui::widgets::StringListbox;
-                if (StringListbox* w = dynamic_cast<StringListbox*>(m_ref.get(us))) {
+                if (StringListbox* w = dynamic_cast<StringListbox*>(m_ref.get(ctl))) {
                     w->addItem(m_id, m_text);
                 }
             }
@@ -339,16 +329,17 @@ client::si::IFListboxDialogRun(game::Session& session, ScriptSide& ss, const Wid
         RunTask(const WidgetReference& ref)
             : m_ref(ref)
             { }
-        void handle(UserSide& us, Control& ctl, RequestLink2 link)
+        void handle(Control& ctl, RequestLink2 link)
             {
-                StringListDialogWidget* w = dynamic_cast<StringListDialogWidget*>(m_ref.get(us));
+                UserSide& us = ctl.interface();
+                StringListDialogWidget* w = dynamic_cast<StringListDialogWidget*>(m_ref.get(ctl));
                 if (w == 0 || w->getParent() != 0) {
                     // Cannot-happen events which would make the universe collapse if they happen
                     us.continueProcessWithFailure(link, "Internal error: wrong widget");
                 } else {
                     // Do it.
                     std::auto_ptr<afl::data::Value> result;
-                    if (w->run(ctl.root(), us.gameSender())) {
+                    if (w->run(ctl.root(), ctl.translator(), us.gameSender())) {
                         int32_t i;
                         if (w->getCurrentKey(i)) {
                             result.reset(interpreter::makeIntegerValue(i));
@@ -377,9 +368,10 @@ client::si::IFListboxDialogRunMenu(game::Session& session, ScriptSide& ss, const
         RunTask(const WidgetReference& ref, const String_t& anchor)
             : m_ref(ref), m_anchor(anchor)
             { }
-        void handle(UserSide& us, Control& ctl, RequestLink2 link)
+        void handle(Control& ctl, RequestLink2 link)
             {
-                StringListDialogWidget* w = dynamic_cast<StringListDialogWidget*>(m_ref.get(us));
+                UserSide& us = ctl.interface();
+                StringListDialogWidget* w = dynamic_cast<StringListDialogWidget*>(m_ref.get(ctl));
                 if (w == 0 || w->getParent() != 0) {
                     // Cannot-happen events which would make the universe collapse if they happen
                     us.continueProcessWithFailure(link, "Internal error: wrong widget");

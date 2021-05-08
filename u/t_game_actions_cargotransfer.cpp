@@ -6,6 +6,7 @@
 #include "game/actions/cargotransfer.hpp"
 
 #include "t_game_actions.hpp"
+#include "afl/string/nulltranslator.hpp"
 #include "game/cargospec.hpp"
 #include "game/exception.hpp"
 #include "game/spec/shiplist.hpp"
@@ -28,6 +29,10 @@ namespace {
 
         virtual String_t getName(afl::string::Translator& /*tx*/) const
             { return "<Test>"; }
+        virtual String_t getInfo1(afl::string::Translator& /*tx*/) const
+            { return String_t(); }
+        virtual String_t getInfo2(afl::string::Translator& /*tx*/) const
+            { return String_t(); }
         virtual Flags_t getFlags() const
             { return m_flags; }
         virtual bool canHaveElement(Element::Type type) const
@@ -434,5 +439,208 @@ TestGameActionsCargoTransfer::testCargoSpecSupplySale()
     testee.commit();
     TS_ASSERT_EQUALS(a.toCargoSpecString(), "100TDM 30S 20$");
     TS_ASSERT_EQUALS(b.toCargoSpecString(), "100T 50$");
+}
+
+/** Test addHoldSpace(). */
+void
+TestGameActionsCargoTransfer::testHoldSpace()
+{
+    afl::string::NullTranslator tx;
+    CargoSpec a("100TDM 50S 50$", true);
+
+    game::actions::CargoTransfer testee;
+    testee.addNew(new TestContainer(a, CargoContainer::Flags_t()));
+    testee.addHoldSpace("Ho ho ho");
+
+    // Examine
+    TS_ASSERT_EQUALS(testee.get(0)->getName(tx), "<Test>");
+    TS_ASSERT_EQUALS(testee.get(0)->canHaveElement(game::Element::Fighters), false);
+    TS_ASSERT_EQUALS(testee.get(1)->getName(tx), "Ho ho ho");
+    TS_ASSERT_EQUALS(testee.get(1)->canHaveElement(game::Element::Fighters), true);
+    TS_ASSERT_EQUALS(testee.isUnloadAllowed(), false);
+    TS_ASSERT_EQUALS(testee.isSupplySaleAllowed(), false);
+    TS_ASSERT_EQUALS(testee.isValid(), true);
+
+    // Move stuff into hold space. This makes the transaction invalid.
+    TS_ASSERT_EQUALS(testee.move(game::Element::Tritanium, 50, 0, 1, false, false), 50);
+    TS_ASSERT_EQUALS(testee.isValid(), false);
+
+    // Move stuff back
+    TS_ASSERT_EQUALS(testee.move(game::Element::Tritanium, 10000, 1, 0, true, false), 50);
+    TS_ASSERT_EQUALS(testee.isValid(), true);
+
+    // Commit
+    TS_ASSERT_THROWS_NOTHING(testee.commit());
+    TS_ASSERT_EQUALS(a.toCargoSpecString(), "100TDM 50S 50$");
+}
+
+/** Test moveExt(). */
+void
+TestGameActionsCargoTransfer::testMoveExt()
+{
+    CargoSpec a("100T", true);
+    CargoSpec b("100T", true);
+    CargoSpec c("100T", true);
+
+    game::actions::CargoTransfer testee;
+    testee.addNew(new TestContainer(a));
+    testee.addNew(new TestContainer(b));
+    testee.addNew(new TestContainer(c));
+
+    // Move a->b
+    testee.moveExt(Element::Tritanium, 555, 0, 1, 2, false);
+    TS_ASSERT_EQUALS(testee.get(0)->getEffectiveAmount(Element::Tritanium), 0);
+    TS_ASSERT_EQUALS(testee.get(1)->getEffectiveAmount(Element::Tritanium), 200);
+    TS_ASSERT_EQUALS(testee.get(2)->getEffectiveAmount(Element::Tritanium), 100);
+
+    // Move a->b again, but now a is empty, so it takes from c
+    testee.moveExt(Element::Tritanium, 555, 0, 1, 2, false);
+    TS_ASSERT_EQUALS(testee.get(0)->getEffectiveAmount(Element::Tritanium), 0);
+    TS_ASSERT_EQUALS(testee.get(1)->getEffectiveAmount(Element::Tritanium), 300);
+    TS_ASSERT_EQUALS(testee.get(2)->getEffectiveAmount(Element::Tritanium), 0);
+}
+
+/** Test moveExt(), reverse (negative) move. */
+void
+TestGameActionsCargoTransfer::testMoveExtReverse()
+{
+    CargoSpec a("100T", true);
+    CargoSpec b("100T", true);
+    CargoSpec c("100T", true);
+
+    game::actions::CargoTransfer testee;
+    testee.addNew(new TestContainer(a));
+    testee.addNew(new TestContainer(b));
+    testee.addNew(new TestContainer(c));
+
+    // Move a->b reversed
+    testee.moveExt(Element::Tritanium, -555, 0, 1, 2, false);
+    TS_ASSERT_EQUALS(testee.get(0)->getEffectiveAmount(Element::Tritanium), 200);
+    TS_ASSERT_EQUALS(testee.get(1)->getEffectiveAmount(Element::Tritanium), 0);
+    TS_ASSERT_EQUALS(testee.get(2)->getEffectiveAmount(Element::Tritanium), 100);
+
+    // Move a->b reversed again; c is not touched because reverse move.
+    testee.moveExt(Element::Tritanium, -555, 0, 1, 2, false);
+    TS_ASSERT_EQUALS(testee.get(0)->getEffectiveAmount(Element::Tritanium), 200);
+    TS_ASSERT_EQUALS(testee.get(1)->getEffectiveAmount(Element::Tritanium), 0);
+    TS_ASSERT_EQUALS(testee.get(2)->getEffectiveAmount(Element::Tritanium), 100);
+}
+
+/** Test distribute(DistributeEqually). */
+void
+TestGameActionsCargoTransfer::testDistributeEqually()
+{
+    CargoSpec a("100T", true);
+
+    game::actions::CargoTransfer testee;
+    testee.addNew(new TestContainer(a));
+    testee.addNew(new TestContainer(a));    // from
+    testee.addNew(new TestContainer(a, CargoContainer::Flags_t(CargoContainer::Temporary)));  // implicitly except
+    testee.addNew(new TestContainer(a));    // explicitly excepted
+    testee.addNew(new TestContainer(a));
+
+    testee.distribute(Element::Tritanium, 1, 3, game::actions::CargoTransfer::DistributeEqually);
+
+    TS_ASSERT_EQUALS(testee.get(0)->getEffectiveAmount(Element::Tritanium), 150);
+    TS_ASSERT_EQUALS(testee.get(1)->getEffectiveAmount(Element::Tritanium), 0);
+    TS_ASSERT_EQUALS(testee.get(2)->getEffectiveAmount(Element::Tritanium), 100);
+    TS_ASSERT_EQUALS(testee.get(3)->getEffectiveAmount(Element::Tritanium), 100);
+    TS_ASSERT_EQUALS(testee.get(4)->getEffectiveAmount(Element::Tritanium), 150);
+}
+
+/** Test distribute(DistributeFreeSpace). */
+void
+TestGameActionsCargoTransfer::testDistributeFreeSpace()
+{
+    CargoSpec a("100T", true);
+
+    game::actions::CargoTransfer testee;
+
+    TestContainer* c1 = new TestContainer(a);   // 100 free
+    c1->setMax(200);
+    testee.addNew(c1);
+
+    TestContainer* c2 = new TestContainer(a);   // from
+    c2->setMax(200);
+    testee.addNew(c2);
+
+    TestContainer* c3 = new TestContainer(a, CargoContainer::Flags_t(CargoContainer::Temporary));
+    c3->setMax(200);
+    testee.addNew(c3);
+
+    TestContainer* c4 = new TestContainer(a);   // implicitly excepted
+    c4->setMax(200);
+    testee.addNew(c4);
+
+    TestContainer* c5 = new TestContainer(a);   // 160 free
+    c5->setMax(260);
+    testee.addNew(c5);
+
+    testee.distribute(Element::Tritanium, 1, 3, game::actions::CargoTransfer::DistributeFreeSpace);
+
+    TS_ASSERT_EQUALS(testee.get(0)->getEffectiveAmount(Element::Tritanium), 120);
+    TS_ASSERT_EQUALS(testee.get(1)->getEffectiveAmount(Element::Tritanium), 0);
+    TS_ASSERT_EQUALS(testee.get(2)->getEffectiveAmount(Element::Tritanium), 100);
+    TS_ASSERT_EQUALS(testee.get(3)->getEffectiveAmount(Element::Tritanium), 100);
+    TS_ASSERT_EQUALS(testee.get(4)->getEffectiveAmount(Element::Tritanium), 180);
+}
+
+/** Test distribute(DistributeProportionally). */
+void
+TestGameActionsCargoTransfer::testDistributeProportionally()
+{
+    CargoSpec a("100T", true);
+
+    game::actions::CargoTransfer testee;
+
+    TestContainer* c1 = new TestContainer(a);   // 180/400 cargo room, should get 135/300 cargo
+    c1->setMax(180);
+    testee.addNew(c1);
+
+    TestContainer* c2 = new TestContainer(a);   // from
+    c2->setMax(200);
+    testee.addNew(c2);
+
+    TestContainer* c3 = new TestContainer(a, CargoContainer::Flags_t(CargoContainer::Temporary));
+    c3->setMax(200);
+    testee.addNew(c3);
+
+    TestContainer* c4 = new TestContainer(a);   // implicitly excepted
+    c4->setMax(200);
+    testee.addNew(c4);
+
+    TestContainer* c5 = new TestContainer(a);   // 220/400 cargo room, should get 165/300 cargo
+    c5->setMax(220);
+    testee.addNew(c5);
+
+    testee.distribute(Element::Tritanium, 1, 3, game::actions::CargoTransfer::DistributeProportionally);
+
+    TS_ASSERT_EQUALS(testee.get(0)->getEffectiveAmount(Element::Tritanium), 135);
+    TS_ASSERT_EQUALS(testee.get(1)->getEffectiveAmount(Element::Tritanium), 0);
+    TS_ASSERT_EQUALS(testee.get(2)->getEffectiveAmount(Element::Tritanium), 100);
+    TS_ASSERT_EQUALS(testee.get(3)->getEffectiveAmount(Element::Tritanium), 100);
+    TS_ASSERT_EQUALS(testee.get(4)->getEffectiveAmount(Element::Tritanium), 165);
+}
+
+/** Test moveAll(). */
+void
+TestGameActionsCargoTransfer::testMoveAll()
+{
+    CargoSpec a("100T", true);
+
+    game::actions::CargoTransfer testee;
+    testee.addNew(new TestContainer(a));
+    testee.addNew(new TestContainer(a));    // to
+    testee.addNew(new TestContainer(a));
+    testee.addNew(new TestContainer(a));    // explicitly excepted
+    testee.addNew(new TestContainer(a));
+
+    testee.moveAll(Element::Tritanium, 1, 3, false);
+
+    TS_ASSERT_EQUALS(testee.get(0)->getEffectiveAmount(Element::Tritanium), 0);
+    TS_ASSERT_EQUALS(testee.get(1)->getEffectiveAmount(Element::Tritanium), 400);
+    TS_ASSERT_EQUALS(testee.get(2)->getEffectiveAmount(Element::Tritanium), 0);
+    TS_ASSERT_EQUALS(testee.get(3)->getEffectiveAmount(Element::Tritanium), 100);
+    TS_ASSERT_EQUALS(testee.get(4)->getEffectiveAmount(Element::Tritanium), 0);
 }
 

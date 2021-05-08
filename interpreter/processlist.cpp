@@ -2,34 +2,29 @@
   *  \file interpreter/processlist.cpp
   *  \brief Class interpreter::ProcessList
   *
-  *  Original PCC2 comment:
+  *  In c2ng, all processes eventually appear in a process list,
+  *  where they are scheduled according to their priority, and can wait for various conditions.
+  *  In particular, processes can wait for UI, where the UI calls new processes (scripted dialog).
+  *  To control execution, processes are grouped into process groups.
+  *  This architecture serves as a blueprint for the JavaScript version that may need to wait more often,
+  *  and where the runtime just doesn't allow waiting within the interpreter's execution stream.
   *
-  *  We distinguish between two kinds of processes, regular processes
-  *  and temporary processes.
+  *  PCC2 had temporary processes that were used whenever the PCC2 core
+  *  needs to evaluate an expression and wishes immediate feedback.
+  *  Such processes were not allowed to suspend (miSpecialSuspend).
+  *  They could still call UI because that stops the entire execution.
+  *  We don't want that anymore; all potential expression feedback needs to be coded as a script
+  *  (e.g. filtering a mission-list for valid missions).
   *
-  *  Regular processes are added to the process list normally, and can
-  *  do everything they might want to do, including suspending. Such
-  *  processes are created using createProcess. The user then sets up
-  *  the process and runs it using runRunnableProcesses,
-  *  killTerminatedProcesses
-  *
-  *  Temporary processes are used whenever the PCC2 core needs to
-  *  evaluate an expression, and wishes immediate feedback. Such
-  *  processes are not allowed to suspend; when they try to, they
-  *  receive a (catchable) error. Such processes are created by simply
-  *  creating a IntExecutionContext object on the stack, setting it
-  *  up, and and giving it to runTemporaryProcess. If that returns
-  *  true, the process has produced its result as requested, otherwise
-  *  it didn't. The process never appears in the process list, and is
-  *  killed automatically when the IntExecutionContext object goes out
-  *  of scope. This is the equivalent to PCC 1.x's simple process-less
-  *  expression evaluation. PCC2 doesn't support process-less
-  *  evaluation because it supports user-defined functions.
+  *  For the same purpose as temporary processes, PCC1 had process-less expression evaluation.
+  *  This does not support user-defined functions; we therefore do not support that either.
   */
 
 #include "interpreter/processlist.hpp"
 #include "interpreter/process.hpp"
 #include "interpreter/world.hpp"
+
+using interpreter::Process;
 
 namespace {
     uint32_t allocateId(uint32_t& var)
@@ -39,6 +34,26 @@ namespace {
             ++var;
         }
         return var;
+    }
+
+    bool isTerminatedState(Process::State st)
+    {
+        bool result = false;
+        switch (st) {
+         case Process::Ended:
+         case Process::Terminated:
+         case Process::Failed:
+            result = true;
+            break;
+         case Process::Suspended:
+         case Process::Frozen:
+         case Process::Runnable:
+         case Process::Running:
+         case Process::Waiting:
+            result = false;
+            break;
+        }
+        return result;
     }
 }
 
@@ -281,6 +296,11 @@ interpreter::ProcessList::run()
             while (Process* proc = findRunningProcess()) {
                 proc->run();
 
+                // Process may be in a state that causes the "process here" marker to change
+                if (game::map::Object* obj = proc->getInvokingObject()) {
+                    obj->markDirty();
+                }
+
                 bool handled = false;
                 switch (proc->getState()) {
                  case Process::Suspended:
@@ -359,48 +379,36 @@ interpreter::ProcessList::removeTerminatedProcesses()
 {
     // ex int/process.h:killTerminatedProcesses
     // ex ccexec.pas:KillTerminatedProcesses
-    size_t i = 0, o = 0;
-    while (i < m_processes.size()) {
-        switch (m_processes[i]->getState()) {
-         case Process::Ended:
-         case Process::Terminated:
-         case Process::Failed:
-            // Killing a process invoked from an object marks that object dirty,
-            // in order to remove the "there's a process here" marker.
-            if (game::map::Object* obj = m_processes[i]->getInvokingObject()) {
-                obj->markDirty();
+
+    // Select processes and remove them one-by-one.
+    // Efficiency-wise, this is the same as run(), i.e. a O(n**2) algorithm.
+    // We originally ran through this list once, moving the terminated processes to the end, deleting them all at once in O(n).
+    // That fails if a terminating process causes other processes to terminate, and this function being entered recursively.
+    // This happens when a process dies that has a TaskEditorContext on stack, e.g. user entering 'AutoTask(1,Id)' at a console.
+    // (The alternative would have been to make this function reentrancy-save in a similar way as run().)
+    while (1) {
+        bool found = false;
+        for (Vector_t::iterator i = m_processes.begin(); i != m_processes.end(); ++i) {
+            Process* p = *i;
+            if (isTerminatedState(p->getState())) {
+                // Killing a process invoked from an object marks that object dirty,
+                // in order to remove the "there's a process here" marker.
+                if (game::map::Object* obj = p->getInvokingObject()) {
+                    obj->markDirty();
+                }
+
+                // Remove it
+                m_processes.erase(i);
+
+                found = true;
+                break;
             }
-            ++i;
-            break;
-         case Process::Suspended:
-         case Process::Frozen:
-         case Process::Runnable:
-         case Process::Running:
-         case Process::Waiting:
-            m_processes.swapElements(i, o);
-            ++i;
-            ++o;
+        }
+        if (!found) {
             break;
         }
     }
-    while (o < m_processes.size()) {
-        m_processes.popBack();
-    }
 }
-
-// FIXME: retire
-// // /** Check whether there's any runnable process. */
-// bool
-// interpreter::ProcessList::hasAnyRunnableProcess() const
-// {
-//     // ex int/process.h:hasAnyRunnableProcess
-//     for (Vector_t::const_iterator i = m_processes.begin(); i != m_processes.end(); ++i) {
-//         if ((*i)->getState() == Process::psRunnable) {
-//             return true;
-//         }
-//     }
-//     return false;
-// }
 
 // Handle a priority change.
 void

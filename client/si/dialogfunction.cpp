@@ -66,8 +66,8 @@ client::si::DialogFunction::get(interpreter::Arguments& args)
                   m_title(title),
                   m_result(result)
                 { }
-            void handle(UserSide& ui, Control& ctl)
-                { m_result = m_wh->addNewWidget(ui, new ui::Window(m_title, ctl.root().provider(), ctl.root().colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5)); }
+            void handle(Control& ctl)
+                { m_result = m_wh->addNewWidget(ctl, new ui::Window(m_title, ctl.root().provider(), ctl.root().colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5)); }
          private:
             afl::base::Ref<WidgetHolder> m_wh;
             String_t m_title;

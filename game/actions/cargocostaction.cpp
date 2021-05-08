@@ -110,11 +110,11 @@ game::actions::CargoCostAction::isValid() const
     return m_container.isValid();
 }
 
-// /** Commit transaction. Caller must commit the GCargoContainer to actually
-//     use the minerals (and do the thing this cost is for, of course). */
+// Commit transaction.
 void
 game::actions::CargoCostAction::commit()
 {
+    // In c2ng, this commits the container; in PCC2 this would have to be done by caller.
     m_container.commit();
 }
 
@@ -155,67 +155,3 @@ game::actions::CargoCostAction::onChange()
     update();
     sig_change.raise();
 }
-
-// /** Change the cost.
-//     \param type type of resource to modify
-//     \param amount amount to add (negative to subtract)
-//     \see setCost() */
-// void
-// GCargoCostTransaction::changeCost(GCargoType type, int32_t amount)
-// {
-//     ASSERT(GCost::isValidType(type));
-//     cost.add(type, amount);
-//     update();
-//     sig_cost_changed.raise();
-// }
-
-// /** Change the cost.
-//     \param cost cost to add/remove
-//     \see setCost() */
-// void
-// GCargoCostTransaction::changeCost(const GCost& cost)
-// {
-//     this->cost += cost;
-//     update();
-//     sig_cost_changed.raise();
-// }
-
-// /** Set cost. This does actual re-allocation.
-//     \post getCost(type) == amount */
-// void
-// GCargoCostTransaction::setCost(GCargoType type, int32_t amount)
-// {
-//     ASSERT(GCost::isValidType(type));
-//     cost.set(type, amount);
-//     update();
-//     sig_cost_changed.raise();
-// }
-
-
-
-// /** Get reserved amounts of a given type.
-//     If the transaction is successful, this value is equal to the
-//     actual cost of the transaction, but in case of supplies sold for
-//     money, it yields the actual amounts used. */
-// int32_t
-// GCargoCostTransaction::getReservedCargo(GCargoType type) const
-// {
-//     ASSERT(GCost::isValidType(type));
-//     return reserved.get(type);
-// }
-
-// /** Cancel transaction. Caller must cancel the GCargoContainer, too. */
-// void
-// GCargoCostTransaction::cancel()
-// {
-//     container.mustCancel();
-// }
-
-// /** Get error message. */
-// GError
-// GCargoCostTransaction::getError()
-// {
-//     if (!isValidCost())a
-//         return GError(GError::eNoResource, _("Not enough resources to perform this action"));
-//     return GError();
-// }

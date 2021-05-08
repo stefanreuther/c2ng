@@ -46,6 +46,11 @@ namespace gfx {
             \param relativeMouseMovement Ignored by NullEngine */
         virtual void handleEvent(EventConsumer& consumer, bool relativeMouseMovement);
 
+        /** Get keyboard modifiers.
+            NullEngine never has any modifiers.
+            \return 0 */
+        virtual util::Key_t getKeyboardModifierState();
+
         /** Get request dispatcher.
             Actions posted into the request dispatcher will be executed in the GUI thread,
             and cause handleEvent() to return.

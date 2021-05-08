@@ -105,7 +105,7 @@ void
 game::maint::RaterApplication::help(afl::io::TextWriter& out)
 {
     afl::string::Translator& tx = translator();
-    out.writeLine(Format(tx("PCC2 Game Difficulty Rater v%s - (c) 2012-2020 Stefan Reuther"), PCC2_VERSION));
+    out.writeLine(Format(tx("PCC2 Game Difficulty Rater v%s - (c) 2012-2021 Stefan Reuther"), PCC2_VERSION));
     out.writeLine();
     out.writeLine(Format(tx("Usage:\n"
                             "  %s [-options...] [gamedir]\n\n"

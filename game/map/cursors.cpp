@@ -10,7 +10,9 @@ game::map::Cursors::Cursors()
       m_currentShip(),
       m_currentPlanet(),
       m_currentBase(),
+      m_currentUfo(),
       m_currentIonStorm(),
+      m_currentMinefield(),
       m_location()
 { }
 
@@ -25,12 +27,16 @@ game::map::Cursors::setUniverse(Universe* univ)
         m_currentShip.setObjectType(&univ->playedShips());
         m_currentPlanet.setObjectType(&univ->playedPlanets());
         m_currentBase.setObjectType(&univ->playedBases());
+        m_currentUfo.setObjectType(&univ->ufos());
         m_currentIonStorm.setObjectType(&univ->ionStormType());
+        m_currentMinefield.setObjectType(&univ->minefields());
     } else {
         m_currentShip.setObjectType(0);
         m_currentPlanet.setObjectType(0);
         m_currentBase.setObjectType(0);
+        m_currentUfo.setObjectType(0);
         m_currentIonStorm.setObjectType(0);
+        m_currentMinefield.setObjectType(0);
     }
     m_location.setUniverse(univ);
 }
@@ -54,9 +60,21 @@ game::map::Cursors::currentBase()
 }
 
 game::map::SimpleObjectCursor&
+game::map::Cursors::currentUfo()
+{
+    return m_currentUfo;
+}
+
+game::map::SimpleObjectCursor&
 game::map::Cursors::currentIonStorm()
 {
     return m_currentIonStorm;
+}
+
+game::map::SimpleObjectCursor&
+game::map::Cursors::currentMinefield()
+{
+    return m_currentMinefield;
 }
 
 game::map::Location&
@@ -70,13 +88,13 @@ game::map::Cursors::getCursorByNumber(int nr)
 {
     // ex int/if/iterif.h:getObjectSelectionFromIteratorId
     switch (nr) {
-     case ShipScreen:   return &m_currentShip;   break;
-     case PlanetScreen: return &m_currentPlanet; break;
-     case BaseScreen:   return &m_currentBase;   break;
+     case ShipScreen:   return &m_currentShip;
+     case PlanetScreen: return &m_currentPlanet;
+     case BaseScreen:   return &m_currentBase;
      // case 10: return &current_fleet_selection;
-     // case 30: return &current_ufo_selection;
-     case IonStorms:    return &m_currentIonStorm; break;
-     // case 32: return &current_minefield_selection;
+     case Ufos:         return &m_currentUfo;
+     case IonStorms:    return &m_currentIonStorm;
+     case Minefields:   return &m_currentMinefield;
     }
     return 0;
 }
@@ -94,9 +112,9 @@ game::map::Cursors::getTypeByNumber(int nr)
             // case 10: return &current_fleet_type;
             // case 21: return &current_anyship_type;
             // case 22: return &current_anyplanet_type;
-            // case 30: return &current_ufo_type;
+         case Ufos:          return &m_pUniverse->ufos();
          case IonStorms:     return &m_pUniverse->ionStormType();
-            // case 32: return &current_minefield_type;
+         case Minefields:    return &m_pUniverse->minefields();
         }
     }
     return 0;

@@ -22,6 +22,9 @@ namespace game { namespace map {
 
         int trackTurn;
         Track track[NUM_SHIP_TRACK_ENTRIES];
+        ShipHistoryData()
+            : trackTurn(0)
+        { }
     };
 
     void clearShipHistory(ShipHistoryData& d);

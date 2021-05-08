@@ -6,21 +6,13 @@
 #include "game/test/waitindicator.hpp"
 
 #include "t_game_test.hpp"
+#include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
 #include "util/requestthread.hpp"
 
 namespace {
     struct TestObject {
         int n;
-    };
-
-    struct TestSlave : public util::SlaveObject<TestObject> {
-        int m;
-
-        void init(TestObject& obj)
-            { m = obj.n; }
-        void done(TestObject&)
-            { }
     };
 }
 
@@ -33,7 +25,8 @@ TestGameTestWaitIndicator::testIt()
     obj.n = 1;
 
     afl::sys::Log log;
-    util::RequestThread thread("TestGameTestWaitIndicator::testIt", log, 0);
+    afl::string::NullTranslator tx;
+    util::RequestThread thread("TestGameTestWaitIndicator::testIt", log, tx, 0);
     util::RequestReceiver<TestObject> recv(thread, obj);
 
     // Call into that thread
@@ -48,37 +41,6 @@ TestGameTestWaitIndicator::testIt()
     };
     Task t;
     testee.call(recv.getSender(), t);
-
-    // Verify result
-    TS_ASSERT_EQUALS(obj.n, 2);
-}
-
-/** Test posting request to a slave object. */
-void
-TestGameTestWaitIndicator::testSlave()
-{
-    // Create test object and thread to work on it
-    TestObject obj;
-    obj.n = 1;
-
-    afl::sys::Log log;
-    util::RequestThread thread("TestGameTestWaitIndicator::testSlave", log, 0);
-    util::RequestReceiver<TestObject> recv(thread, obj);
-    util::SlaveRequestSender<TestObject,TestSlave> slave(recv.getSender(), new TestSlave());
-
-    // Call into that thread
-    game::test::WaitIndicator testee;
-    class Task : public util::SlaveRequest<TestObject,TestSlave> {
-     public:
-        virtual void handle(TestObject& obj, TestSlave& slave)
-            {
-                TS_ASSERT_EQUALS(obj.n, 1);
-                TS_ASSERT_EQUALS(slave.m, 1);
-                obj.n = 2;
-            }
-    };
-    Task t;
-    testee.call(slave, t);
 
     // Verify result
     TS_ASSERT_EQUALS(obj.n, 2);

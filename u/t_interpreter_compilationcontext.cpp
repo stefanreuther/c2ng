@@ -6,8 +6,9 @@
 #include "interpreter/compilationcontext.hpp"
 
 #include "t_interpreter.hpp"
-#include "afl/sys/log.hpp"
 #include "afl/io/nullfilesystem.hpp"
+#include "afl/string/nulltranslator.hpp"
+#include "afl/sys/log.hpp"
 #include "interpreter/world.hpp"
 
 /** Simple test. */
@@ -16,8 +17,9 @@ TestInterpreterCompilationContext::testIt()
 {
     // Environment
     afl::sys::Log log;
+    afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
-    interpreter::World world(log, fs);
+    interpreter::World world(log, tx, fs);
 
     // Testee
     interpreter::CompilationContext testee(world);

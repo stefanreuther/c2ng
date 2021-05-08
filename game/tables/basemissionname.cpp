@@ -8,9 +8,6 @@ game::tables::BaseMissionName::BaseMissionName(afl::string::Translator& tx)
     : m_translator(tx)
 { }
 
-// /** Get starbase mission name.
-//     \param mission mission number
-//     \return statically-allocated, translated string. */
 String_t
 game::tables::BaseMissionName::get(int mission) const
 {

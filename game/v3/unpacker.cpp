@@ -152,7 +152,6 @@ game::v3::Unpacker::Unpacker(afl::string::Translator& tx, afl::io::Directory& sp
       m_fixErrors(true),
       m_ignoreErrors(false),
       m_verbose(false),
-      m_acceptRaceNames(true),
       m_datShips(), m_disShips(),
       m_datPlanets(), m_disPlanets(),
       m_datBases(), m_disBases(),
@@ -215,13 +214,6 @@ void
 game::v3::Unpacker::setVerbose(bool flag)
 {
     m_verbose = flag;
-}
-
-// Set racename unpacking flag.
-void
-game::v3::Unpacker::setAcceptRaceNames(bool flag)
-{
-    m_acceptRaceNames = flag;
 }
 
 // Get configured format.
@@ -820,22 +812,9 @@ game::v3::Unpacker::unpackKore(afl::io::Directory& dir, ResultFile& result, Targ
     // Copy minefields, ion storms, bangs
     dat->copyFrom(s, 500*8 + 50*12 + 50*4);
 
-    // Deal with race names.
-    // It seems this file is sometimes sent as blank, so avoid damaging the user's file.
+    // Skip race names. Those are now unpacked by AttachmentUnpacker.
     uint8_t rstRaceNameBuffer[sizeof(gt::RaceNames)];
-    bool validRaceNames = false;
     s.fullRead(rstRaceNameBuffer);
-    for (size_t i = 0; i < sizeof(rstRaceNameBuffer); ++i) {
-        if (rstRaceNameBuffer[i] > 32) {
-            validRaceNames = true;
-            break;
-        }
-    }
-    if (validRaceNames && m_acceptRaceNames) {
-        // FIXME: PCC2 would ask if race names differ. We operate non-interactively.
-        dir.openFile("race.nm", FileSystem::Create)->fullWrite(rstRaceNameBuffer);
-        m_log.write(afl::sys::Log::Info, LOG_NAME, m_translator("Unpacked race name file."));
-    }
 
     // Ufos
     dat->copyFrom(s, 78*100);

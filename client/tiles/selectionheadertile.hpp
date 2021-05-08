@@ -4,17 +4,17 @@
 #ifndef C2NG_CLIENT_TILES_SELECTIONHEADERTILE_HPP
 #define C2NG_CLIENT_TILES_SELECTIONHEADERTILE_HPP
 
-#include "ui/widget.hpp"
-#include "ui/root.hpp"
-#include "client/widgets/keymapwidget.hpp"
 #include "game/proxy/objectobserver.hpp"
+#include "ui/root.hpp"
+#include "ui/widget.hpp"
 #include "ui/widgets/button.hpp"
+#include "util/requestreceiver.hpp"
 
 namespace client { namespace tiles {
 
     class SelectionHeaderTile : public ui::Widget {
      public:
-        SelectionHeaderTile(ui::Root& root, client::widgets::KeymapWidget& keys);
+        SelectionHeaderTile(ui::Root& root, ui::Widget& keys);
         ~SelectionHeaderTile();
 
         virtual void draw(gfx::Canvas& can);

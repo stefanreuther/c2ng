@@ -30,7 +30,7 @@ namespace interpreter {
         /** Set value by its index.
             \param index Property index
             \param value New value. The parameter is owned by the caller; this function must copy it if needed. */
-        virtual void set(PropertyIndex_t index, afl::data::Value* value) = 0;
+        virtual void set(PropertyIndex_t index, const afl::data::Value* value) = 0;
 
         /** Get value by its index.
             The returned value must be newly allocated, caller assumes responsibility. */

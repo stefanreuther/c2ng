@@ -5,10 +5,11 @@
 #ifndef C2NG_GAME_V3_INBOXFILE_HPP
 #define C2NG_GAME_V3_INBOXFILE_HPP
 
-#include "afl/io/stream.hpp"
-#include "afl/charset/charset.hpp"
-#include "afl/string/string.hpp"
 #include "afl/base/growablememory.hpp"
+#include "afl/charset/charset.hpp"
+#include "afl/io/stream.hpp"
+#include "afl/string/string.hpp"
+#include "afl/string/translator.hpp"
 #include "game/v3/structures.hpp"
 
 namespace game { namespace v3 {
@@ -26,8 +27,9 @@ namespace game { namespace v3 {
                         Object must live at least as long as the InboxFile.
             \param charset Game character set.
                         Object must live at least as long as the InboxFile.
+            \param tx Translator
             \throw afl::except::FileFormatException on error */
-        InboxFile(afl::io::Stream& file, afl::charset::Charset& charset);
+        InboxFile(afl::io::Stream& file, afl::charset::Charset& charset, afl::string::Translator& tx);
 
         /** Destructor. */
         ~InboxFile();
@@ -45,7 +47,7 @@ namespace game { namespace v3 {
 
      private:
         /** Initialize. This loads the message directory. */
-        void init();
+        void init(afl::string::Translator& tx);
 
         afl::io::Stream& m_file;
         afl::charset::Charset& m_charset;

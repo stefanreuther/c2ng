@@ -6,7 +6,7 @@
 #include "game/interface/enginecontext.hpp"
 
 #include "t_game_interface.hpp"
-#include "u/helper/contextverifier.hpp"
+#include "interpreter/test/contextverifier.hpp"
 
 /** Test engine. */
 void
@@ -25,11 +25,12 @@ TestGameInterfaceEngineContext::testIt()
 
     // Verify
     game::interface::EngineContext ctx(NR, shipList);
-    verifyTypes(ctx);
+    interpreter::test::ContextVerifier v(ctx, "testIt");
+    v.verifyTypes();
 
     // Verify individual properties
-    verifyInteger(ctx, "ID", NR);
-    verifyInteger(ctx, "TECH", 3);
-    verifyString(ctx, "NAME", "The Kettle");
+    v.verifyInteger("ID", NR);
+    v.verifyInteger("TECH", 3);
+    v.verifyString("NAME", "The Kettle");
 }
 

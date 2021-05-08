@@ -8,20 +8,10 @@
 #include "game/sim/configuration.hpp"
 #include "game/spec/hullfunction.hpp"
 
+using game::spec::Hull;
+
 namespace {
-    bool checkHullFunction(const game::sim::Ship& sh, const game::spec::ShipList& shipList, const game::config::HostConfiguration& config, int basicFunctionId)
-    {
-        /* FIXME: PCC 1.1.17 decides upon host version here, and checks ImperialAssault
-           on older hosts instead of PlanetImmunity. Ideally, the hull function module
-           would isolate us from these differences. */
-        // If getPlayersThatCan() receives an unknown hull type (e.g. 0), it will return an empty set.
-        // This conveniently makes this function return false, as intended.
-        return shipList.getPlayersThatCan(basicFunctionId,
-                                          sh.getHullType(),
-                                          config,
-                                          game::ExperienceLevelSet_t(sh.getExperienceLevel()))
-            .contains(sh.getOwner());
-    }
+    const int MAX_WEAPONS = 20;
 }
 
 const int game::sim::Ship::agg_Kill;
@@ -84,7 +74,7 @@ game::sim::Ship::setHullType(int hullType, const game::spec::ShipList& shipList)
     // ex GSimShip::setHull, ccsim.pas:MassOf (sort-of), ccsim.pas:SetHull
     if (hullType != m_hullType) {
         m_hullType = hullType;
-        if (const game::spec::Hull* hull = shipList.hulls().get(hullType)) {
+        if (const Hull* hull = shipList.hulls().get(hullType)) {
             // beams
             m_numBeams = hull->getMaxBeams();
             if (m_numBeams != 0) {
@@ -321,6 +311,51 @@ game::sim::Ship::isCustomShip() const
     return getHullType() == 0;
 }
 
+// Get range of number of beams.
+util::Range<int>
+game::sim::Ship::getNumBeamsRange(const game::spec::ShipList& shipList) const
+{
+    if (isCustomShip()) {
+        return util::Range<int>(0, MAX_WEAPONS);
+    } else {
+        if (const Hull* p = shipList.hulls().get(getHullType())) {
+            return util::Range<int>(0, p->getMaxBeams());
+        } else {
+            return util::Range<int>::fromValue(0);
+        }
+    }
+}
+
+// Get range of number of torpedo launchers.
+util::Range<int>
+game::sim::Ship::getNumLaunchersRange(const game::spec::ShipList& shipList) const
+{
+    if (isCustomShip()) {
+        return util::Range<int>(0, MAX_WEAPONS);
+    } else {
+        if (const Hull* p = shipList.hulls().get(getHullType())) {
+            return util::Range<int>(0, p->getMaxLaunchers());
+        } else {
+            return util::Range<int>::fromValue(0);
+        }
+    }
+}
+
+// Get range of fighter bays.
+util::Range<int>
+game::sim::Ship::getNumBaysRange(const game::spec::ShipList& shipList) const
+{
+    if (isCustomShip()) {
+        return util::Range<int>(0, MAX_WEAPONS);
+    } else {
+        if (const Hull* p = shipList.hulls().get(getHullType())) {
+            return util::Range<int>::fromValue(p->getNumBays());
+        } else {
+            return util::Range<int>::fromValue(0);
+        }
+    }
+}
+
 // Check whether this ship matches a ship list.
 bool
 game::sim::Ship::isMatchingShipList(const game::spec::ShipList& shipList) const
@@ -345,7 +380,7 @@ game::sim::Ship::isMatchingShipList(const game::spec::ShipList& shipList) const
     /* valid hull? */
     /* FIXME: we cannot handle these during simulation so we should
        avoid even loading them. */
-    const game::spec::Hull* hull = shipList.hulls().get(getHullType());
+    const Hull* hull = shipList.hulls().get(getHullType());
     if (hull == 0) {
         return false;
     }
@@ -369,6 +404,19 @@ game::sim::Ship::isMatchingShipList(const game::spec::ShipList& shipList) const
     return true;
 }
 
+// Check for implied hull function.
+bool
+game::sim::Ship::hasImpliedFunction(int basicFunctionId, const game::spec::ShipList& shipList, const game::config::HostConfiguration& config) const
+{
+    /* FIXME: PCC 1.1.17 decides upon host version here, and checks ImperialAssault
+       on older hosts instead of PlanetImmunity. Ideally, the hull function module
+       would isolate us from these differences. */
+    // If getPlayersThatCan() receives an unknown hull type (e.g. 0), it will return an empty set.
+    // This conveniently makes this function return false, as intended.
+    return shipList.getPlayersThatCan(basicFunctionId, getHullType(), config, ExperienceLevelSet_t(getExperienceLevel()))
+        .contains(getOwner());
+}
+
 // Check whether this ship has a specific hull function from the configuration.
 bool
 game::sim::Ship::hasImpliedAbility(Ability which, const Configuration& opts, const game::spec::ShipList& shipList, const game::config::HostConfiguration& config) const
@@ -378,15 +426,15 @@ game::sim::Ship::hasImpliedAbility(Ability which, const Configuration& opts, con
     switch (which) {
      case PlanetImmunityAbility:
         // FIXME: do we need the "|| getPlayerRaceNumber()" part? Should normally be done by the hullfunc engine.
-        return checkHullFunction(*this, shipList, config, HullFunction::PlanetImmunity)
+        return hasImpliedFunction(HullFunction::PlanetImmunity, shipList, config)
             || (config.getPlayerRaceNumber(getOwner()) == 4 && !config[config.PlanetsAttackKlingons]())
             || (config.getPlayerRaceNumber(getOwner()) == 10 && !config[config.PlanetsAttackRebels]());
 
      case FullWeaponryAbility:
-        return checkHullFunction(*this, shipList, config, HullFunction::FullWeaponry);
+        return hasImpliedFunction(HullFunction::FullWeaponry, shipList, config);
 
      case CommanderAbility:
-        return checkHullFunction(*this, shipList, config, HullFunction::Commander);
+        return hasImpliedFunction(HullFunction::Commander, shipList, config);
 
      case TripleBeamKillAbility:
         return config.getPlayerRaceNumber(getOwner()) == 5;

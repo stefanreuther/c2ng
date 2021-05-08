@@ -23,7 +23,7 @@ namespace client { namespace widgets {
         virtual bool handleKey(util::Key_t key, int prefix);
         virtual bool handleMouse(gfx::Point pt, MouseButtons_t pressedButtons);
 
-        void addLine(int nr, String_t text, int align, int bold, util::SkinColor::Color color);
+        void addLine(int nr, String_t text, gfx::HorizontalAlignment align, int bold, util::SkinColor::Color color);
         void clear();
         void setScrollbackIndicator(int n);
 
@@ -33,7 +33,7 @@ namespace client { namespace widgets {
 
         struct Line {
             String_t text;
-            int align;
+            gfx::HorizontalAlignment align;
             int bold;
             util::SkinColor::Color color;
         };

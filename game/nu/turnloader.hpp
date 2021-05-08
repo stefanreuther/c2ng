@@ -4,13 +4,14 @@
 #ifndef C2NG_GAME_NU_TURNLOADER_HPP
 #define C2NG_GAME_NU_TURNLOADER_HPP
 
-#include "game/turnloader.hpp"
-#include "game/nu/gamestate.hpp"
 #include "afl/base/ptr.hpp"
-#include "game/map/universe.hpp"
 #include "afl/data/access.hpp"
 #include "afl/string/translator.hpp"
 #include "afl/sys/loglistener.hpp"
+#include "game/map/universe.hpp"
+#include "game/nu/gamestate.hpp"
+#include "game/turnloader.hpp"
+#include "util/profiledirectory.hpp"
 
 namespace game { namespace nu {
 
@@ -18,7 +19,9 @@ namespace game { namespace nu {
      public:
         TurnLoader(afl::base::Ref<GameState> gameState,
                    afl::string::Translator& tx,
-                   afl::sys::LogListener& log);
+                   afl::sys::LogListener& log,
+                   util::ProfileDirectory& profile,
+                   afl::base::Ref<afl::io::Directory> defaultSpecificationDirectory);
         ~TurnLoader();
 
         virtual PlayerStatusSet_t getPlayerStatus(int player, String_t& extra, afl::string::Translator& tx) const;
@@ -32,6 +35,8 @@ namespace game { namespace nu {
         afl::base::Ref<GameState> m_gameState;
         afl::string::Translator& m_translator;
         afl::sys::LogListener& m_log;
+        util::ProfileDirectory& m_profile;
+        afl::base::Ref<afl::io::Directory> m_defaultSpecificationDirectory;
 
         void loadPlanets(game::map::Universe& univ, afl::data::Access planets, PlayerSet_t players);
         void loadStarbases(game::map::Universe& univ, afl::data::Access bases, PlayerSet_t players);

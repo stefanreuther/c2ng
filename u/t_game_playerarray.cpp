@@ -105,3 +105,28 @@ TestGamePlayerArray::testPointer()
     TS_ASSERT(n.get(4) == &b);
     TS_ASSERT(n.get(1000) == 0);
 }
+
+/** Test comparison. */
+void
+TestGamePlayerArray::testComparison()
+{
+    game::PlayerArray<int> a, b, c;
+    a.setAll(10);
+    b.setAll(10);
+    c.setAll(20);
+
+    TS_ASSERT_EQUALS(a == b, true);
+    TS_ASSERT_EQUALS(a != b, false);
+
+    TS_ASSERT_EQUALS(a == c, false);
+    TS_ASSERT_EQUALS(a != c, true);
+
+    a.set(4, 5);
+    TS_ASSERT_EQUALS(a == b, false);
+    TS_ASSERT_EQUALS(a != b, true);
+
+    a.set(4, 10);
+    TS_ASSERT_EQUALS(a == b, true);
+    TS_ASSERT_EQUALS(a != b, false);
+}
+

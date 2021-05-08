@@ -13,11 +13,11 @@
 #include "game/map/planeteffectors.hpp"
 
 namespace {
-    void testGrowth(int owner, int temp, int32_t expect, const game::HostVersion& host, String_t name)
+    game::map::Planet makePlanet()
     {
         game::map::Planet p(39);
-        p.setOwner(owner);
-        p.setTemperature(temp);
+        p.setOwner(1);
+        p.setTemperature(50);
         p.setCargo(game::Element::Colonists, 10000);
         p.setColonistHappiness(100);
         p.setColonistTax(0);
@@ -26,14 +26,33 @@ namespace {
         p.setNativeRace(0);
         p.setNatives(0);
         p.setNativeGovernment(0);
-
+        return p;
+    }
+    
+    void testGrowth(const game::map::Planet& tpl, int32_t expect, const game::HostVersion& host, String_t name)
+    {
+        game::map::Planet p(tpl);
+ 
         game::config::HostConfiguration config;
         config.setDefaultValues();
         config[config.ClimateDeathRate].set(0);
 
         game::map::PlanetPredictor pp(p);
-        TSM_ASSERT_THROWS_NOTHING(name.c_str(), pp.computeTurn(game::map::PlanetEffectors(), config, host));
+        TSM_ASSERT_THROWS_NOTHING(name.c_str(), pp.computeTurn(game::map::PlanetEffectors(), game::UnitScoreDefinitionList(), config, host));
         TSM_ASSERT_EQUALS(name.c_str(), pp.planet().getCargo(game::Element::Colonists).orElse(0), expect);
+    }
+
+    void testGrowthNatives(const game::map::Planet& tpl, int32_t expect, const game::HostVersion& host, String_t name)
+    {
+        game::map::Planet p(tpl);
+ 
+        game::config::HostConfiguration config;
+        config.setDefaultValues();
+        config[config.ClimateDeathRate].set(0);
+
+        game::map::PlanetPredictor pp(p);
+        TSM_ASSERT_THROWS_NOTHING(name.c_str(), pp.computeTurn(game::map::PlanetEffectors(), game::UnitScoreDefinitionList(), config, host));
+        TSM_ASSERT_EQUALS(name.c_str(), pp.planet().getNatives().orElse(0), expect);
     }
 }
 
@@ -51,7 +70,10 @@ TestGameMapPlanetPredictor::testPHost()
         10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000
     };
     for (int i = 0; i <= 100; ++i) {
-        testGrowth(1, i, expect[i], game::HostVersion(game::HostVersion::PHost, MKVERSION(3, 4, 5)), afl::string::Format("PHost temp %d", i));
+        game::map::Planet pl(makePlanet());
+        pl.setOwner(1);
+        pl.setTemperature(i);
+        testGrowth(pl, expect[i], game::HostVersion(game::HostVersion::PHost, MKVERSION(3, 4, 5)), afl::string::Format("PHost temp %d", i));
     }
 }
 
@@ -69,7 +91,10 @@ TestGameMapPlanetPredictor::testHost()
         10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000
     };
     for (int i = 0; i <= 100; ++i) {
-        testGrowth(1, i, expect[i], game::HostVersion(game::HostVersion::Host, MKVERSION(3, 22, 40)), afl::string::Format("Host temp %d", i));
+        game::map::Planet pl(makePlanet());
+        pl.setOwner(1);
+        pl.setTemperature(i);
+        testGrowth(pl, expect[i], game::HostVersion(game::HostVersion::Host, MKVERSION(3, 22, 40)), afl::string::Format("Host temp %d", i));
     }
 }
 
@@ -90,7 +115,10 @@ TestGameMapPlanetPredictor::testGrowthPHostTholian()
         10495, 10500
     };
     for (int i = 0; i <= 100; ++i) {
-        testGrowth(7, i, expect[i], game::HostVersion(game::HostVersion::PHost, MKVERSION(3, 4, 5)), afl::string::Format("PHost Tholian temp %d", i));
+        game::map::Planet pl(makePlanet());
+        pl.setOwner(7);
+        pl.setTemperature(i);
+        testGrowth(pl, expect[i], game::HostVersion(game::HostVersion::PHost, MKVERSION(3, 4, 5)), afl::string::Format("PHost Tholian temp %d", i));
     }
 }
 
@@ -98,6 +126,7 @@ TestGameMapPlanetPredictor::testGrowthPHostTholian()
 void
 TestGameMapPlanetPredictor::testGrowthHostTholian()
 {
+    // ex GamePlanetPredTestSuite::testGrowthTholianTim()
     static const int32_t expect[] = {
         0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 10000, 10000, 10000, 10000,
         10075, 10080, 10085, 10090, 10095, 10100, 10105, 10110, 10115, 10120, 10125, 
@@ -110,7 +139,83 @@ TestGameMapPlanetPredictor::testGrowthHostTholian()
         10460, 10465, 10470, 10475, 10480, 10485, 10490, 10495, 10500
     };
     for (int i = 0; i <= 100; ++i) {
-        testGrowth(7, i, expect[i], game::HostVersion(game::HostVersion::Host, MKVERSION(3, 22, 40)), afl::string::Format("Host Tholian temp %d", i));
+        game::map::Planet pl(makePlanet());
+        pl.setOwner(7);
+        pl.setTemperature(i);
+        testGrowth(pl, expect[i], game::HostVersion(game::HostVersion::Host, MKVERSION(3, 22, 40)), afl::string::Format("Host Tholian temp %d", i));
+    }
+}
+
+/** Test growth, Host version, close to maximum population. */
+void
+TestGameMapPlanetPredictor::testGrowthMaxHost()
+{
+    // ex GamePlanetPredTestSuite::testGrowthMaxTim()
+    static const int32_t expect[101] = {
+        99999, 99999, 99999, 99999, 99999, 99999, 99999, 99999, 99999, 99999, 99999, 99999, 99999, 99999, 99999,
+        45520, 48293, 51018, 53693, 56315, 58882, 61390, 63838, 66223, 68543, 70795, 72977, 75088, 77124, 79085,
+        80967, 82770, 84491, 86128, 87681, 89148, 90526, 91815, 93014, 94121, 95135, 96056, 96881, 97611, 98245,
+        98782, 99222, 99564, 99808, 99953,
+        100000,
+        99948, 99798, 99549, 99202, 98758,
+        98216, 97577, 96842, 96011, 95086, 94067, 92955, 91752, 90458, 89075, 87605, 86047, 84405, 82680, 80874,
+        78987, 77023, 74983, 72869, 70683, 68427, 66104, 63715, 61264, 58753, 56183, 53558, 50881, 48153, 99999,
+        99999, 99999, 99999, 99999, 99999, 99999, 99999, 99999, 99999, 99999, 99999, 99999, 99999, 99999, 99999
+    };
+    for (int i = 0; i <= 100; ++i) {
+        game::map::Planet pl(makePlanet());
+        pl.setOwner(1);
+        pl.setTemperature(i);
+        pl.setCargo(game::Element::Colonists, 99999);
+        testGrowth(pl, expect[i], game::HostVersion(game::HostVersion::Host, MKVERSION(3, 22, 40)), afl::string::Format("Host Tholian Max temp %d", i));
+    }
+}
+
+void
+TestGameMapPlanetPredictor::testGrowthRebelHost()
+{
+    // ex GamePlanetPredTestSuite::testGrowthRebelTim()
+    static const int32_t expect[101] = {
+        90000, 90000, 90000, 90000, 90000, 90000, 90000, 90000, 90000, 90000, 90000, 90000, 90000, 90000, 90000,
+        90000, 90000, 90000, 90000, 90000, 58882, 61390, 63838, 66223, 68543, 70795, 72977, 75088, 77124, 79085,
+        80967, 82770, 84491, 86128, 87681, 89148, 90526, 91815, 93014, 94121, 95135, 96056, 96881, 97318, 97334,
+        97346, 97356, 97364, 97370, 97374, 97375, 97374, 97370, 97364, 97356, 97346, 97332, 97318, 96842, 96011,
+        95086, 94067, 92955, 91752, 90458, 89075, 87605, 86047, 84405, 82680, 80874, 78987, 77023, 74983, 72869,
+        70683, 68427, 66104, 63715, 61264, 58753, 56183, 53558, 50881, 48153, 95000, 95000, 95000, 95000, 95000,
+        95000, 95000, 95000, 95000, 95000, 95000, 95000, 95000, 95000, 95000, 95000
+    };
+    for (int i = 0; i <= 100; ++i) {
+        game::map::Planet pl(makePlanet());
+        pl.setOwner(10);
+        pl.setTemperature(i);
+        pl.setCargo(game::Element::Colonists, 95000);
+        testGrowth(pl, expect[i], game::HostVersion(game::HostVersion::Host, MKVERSION(3, 22, 40)), afl::string::Format("Host Rebel temp %d", i));
+    }
+}
+
+
+void
+TestGameMapPlanetPredictor::testGrowthHumanoidHost()
+{
+    // ex GamePlanetPredTestSuite::testGrowthHumanoidTim()
+    static const int32_t expect[101] = {
+        10000, 10000, 10000, 10038, 10051, 10063, 10076, 10088, 10100, 10112, 10124, 10136, 10148, 10159, 10171,
+        10182, 10193, 10204, 10215, 10225, 10236, 10246, 10255, 10265, 10274, 10283, 10292, 10300, 10308, 10316,
+        10324, 10331, 10338, 10345, 10351, 10357, 10362, 10367, 10372, 10376, 10381, 10384, 10388, 10390, 10393,
+        10395, 10397, 10398, 10399, 10400, 10400, 10400, 10399, 10398, 10397, 10395, 10393, 10390, 10387, 10384,
+        10380, 10376, 10372, 10367, 10362, 10356, 10350, 10344, 10338, 10331, 10323, 10316, 10308, 10300, 10291,
+        10283, 10274, 10264, 10255, 10245, 10235, 10225, 10214, 10204, 10193, 10182, 10170, 10159, 10147, 10135,
+        10124, 10112, 10099, 10087, 10075, 10063, 10050, 10038, 10000, 10000, 10000
+    };
+
+    for (int i = 0; i <= 100; ++i) {
+        game::map::Planet pl(makePlanet());
+        pl.setTemperature(i);
+        pl.setNativeGovernment(5);
+        pl.setNativeRace(1);
+        pl.setNativeHappiness(100);
+        pl.setNatives(10000);
+        testGrowthNatives(pl, expect[i], game::HostVersion(game::HostVersion::Host, MKVERSION(3, 22, 40)), afl::string::Format("Host Humanoid temp %d", i));
     }
 }
 

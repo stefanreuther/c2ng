@@ -29,6 +29,14 @@ namespace game { namespace actions {
         An additional validitity criterion is that all temporary containers must be empty at the end of a transaction. */
     class CargoTransfer {
      public:
+        /** Mode for distribute(). */
+        enum DistributeMode {
+            DistributeEqually,                 ///< Try to add the same amount to each unit.
+            DistributeFreeSpace,               ///< Try to make each unit have the same amount of free space.
+            DistributeProportionally           ///< Try to make each unit have an amount proportional to their capacity.
+        };
+
+
         /** Default constructor.
             Makes an empty CargoTransfer. */
         CargoTransfer();
@@ -40,6 +48,12 @@ namespace game { namespace actions {
         /** Add new participant.
             \param container New participant. Will become owned by CargoTransfer. Null is ignored. */
         void addNew(CargoContainer* container);
+
+        /** Add new hold space.
+            Hold space is a temporary container that can temporarily hold cargo.
+            However, the transaction cannot be committed while it is nonempty.
+            \param name Name */
+        void addHoldSpace(const String_t& name);
 
         /** Get participant by index.
             \param index Index [0,getNumContainers())
@@ -83,6 +97,41 @@ namespace game { namespace actions {
             \param to           [in] Index of target unit
             \param sellSupplies [in] If enabled, convert supplies to mc */
         void move(CargoSpec& amount, const game::spec::ShipList& shipList, size_t from, size_t to, bool sellSupplies);
+
+        /** Move with extension.
+            Move cargo from source unit to target unit; if source unit is empty, move from extension instead.
+            Partial moves are always accepted.
+            A negative amount will not exhibit special behaviour.
+
+            \param type       Element type to move
+            \param amount     Amount to move (kt, clans, mc, units)
+            \param from       Index of source unit
+            \param to         Index of target unit
+            \param extension  Index of extension unit
+            \param sellSupplies If enabled, convert supplies to mc */
+        void moveExt(Element::Type type, int32_t amount, size_t from, size_t to, size_t extension, bool sellSupplies);
+
+        /** Move all cargo to a given unit.
+            Take cargo from all units and put it on the target unit.
+
+            \param type       Element type to move
+            \param to         Index of target unit
+            \param except     Exception; this unit's cargo is not removed (use same as to to not except any unit)
+            \param sellSupplies If enabled, convert supplies to mc */
+        void moveAll(Element::Type type, size_t to, size_t except, bool sellSupplies);
+
+        /** Distribute cargo.
+            Take cargo from the source unit and distribute it to all other units according to the given mode.
+
+            The following units do not receive cargo:
+            - temporary (CargoContainer::Temporary)
+            - the unit specified as except
+
+            \param type       Element type to move
+            \param from       Index of source unit
+            \param except     Index of exception unit (use same as from to not except any unit)
+            \param mode       Distribution mode */
+        void distribute(Element::Type type, size_t from, size_t except, DistributeMode mode);
 
         /** Unload operation.
             This is a shortcut to transfer all industry resources (T/D/M/$/S/Clans), corresponding to the user interface "U" function.
@@ -130,6 +179,12 @@ namespace game { namespace actions {
      private:
         afl::container::PtrVector<CargoContainer> m_units;
         bool m_overload;
+
+        int m_notificationSuppressed;
+        bool m_notificationPending;
+        class Deferrer;
+
+        void notify();
     };
 
 } }

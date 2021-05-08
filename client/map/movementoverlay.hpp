@@ -14,13 +14,15 @@
 
 namespace client { namespace map {
 
+    class Widget;
+
     class MovementOverlay : public Overlay {
      public:
         /* PCC2 flag mappings is bonkers.
            sc_KeyboardMode:     Movement, Config - never used
            sc_Keyboard:         Movement
            sc_StyleChange:      Config
-           sc_Zoomable:         tbd
+           sc_Zoomable:         Zoom
            sc_ShipsOnly:        not implemented */
 
         enum Mode {
@@ -28,11 +30,14 @@ namespace client { namespace map {
             AcceptMovementKeys,
 
             /** Accept configuration keys. */
-            AcceptConfigKeys
+            AcceptConfigKeys,
+
+            /** Accept zoom keys. */
+            AcceptZoomKeys
         };
         typedef afl::bits::SmallSet<Mode> Modes_t;
 
-        MovementOverlay(util::RequestDispatcher& disp, util::RequestSender<game::Session> gameSender);
+        MovementOverlay(util::RequestDispatcher& disp, util::RequestSender<game::Session> gameSender, Widget& parent);
         ~MovementOverlay();
 
         virtual void drawBefore(gfx::Canvas& can, const Renderer& ren);
@@ -48,12 +53,15 @@ namespace client { namespace map {
         void clearPosition();
         bool getPosition(game::map::Point& out) const;
 
+        void setLockOrigin(game::map::Point pt, bool isHyperdriving);
+
         afl::base::Signal<void(game::map::Point)> sig_move;
         afl::base::Signal<void(game::map::Point)> sig_doubleClick;
 
      private:
         util::RequestSender<game::Session> m_gameSender;
         game::proxy::LockProxy m_lockProxy;
+        Widget& m_parent;
         Modes_t m_modes;
 
         bool m_valid;

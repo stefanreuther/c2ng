@@ -3,100 +3,100 @@
   *  \brief Class game::proxy::ProcessListProxy
   */
 
-#include <memory>
 #include "game/proxy/processlistproxy.hpp"
-#include "util/slaveobject.hpp"
 
 using game::interface::ProcessListEditor;
 
-class game::proxy::ProcessListProxy::Trampoline : public util::SlaveObject<Session> {
+class game::proxy::ProcessListProxy::Trampoline {
  public:
-    Trampoline(util::RequestSender<ProcessListProxy> reply)
-        : m_reply(reply),
-          m_editor()
+    Trampoline(Session& session, util::RequestSender<ProcessListProxy> reply)
+        : m_session(session),
+          m_reply(reply),
+          m_editor(session.processList())
         { }
 
     ~Trampoline()
         { }
 
-    virtual void init(Session& session)
+    void buildResult(Infos_t& out)
         {
-            m_editor.reset(new ProcessListEditor(session.processList()));
-        }
-
-    virtual void done(Session& /*session*/)
-        { }
-
-    void buildResult(Session& session, Infos_t& out)
-        {
-            if (m_editor.get() != 0) {
-                for (size_t i = 0, n = m_editor->getNumProcesses(); i < n; ++i) {
-                    Info_t info;
-                    if (m_editor->describe(i, info, session.notifications(), session.translator())) {
-                        out.push_back(info);
-                    }
+            for (size_t i = 0, n = m_editor.getNumProcesses(); i < n; ++i) {
+                Info_t info;
+                if (m_editor.describe(i, info, m_session.notifications(), m_session.translator())) {
+                    out.push_back(info);
                 }
             }
         }
 
-    void sendUpdate(Session& session)
+    void sendUpdate()
         {
             class Update : public util::Request<ProcessListProxy> {
              public:
-                Update(Session& session, Trampoline& tpl)
+                Update(Trampoline& tpl)
                     : m_infos()
-                    { tpl.buildResult(session, m_infos); }
+                    { tpl.buildResult(m_infos); }
                 virtual void handle(ProcessListProxy& proxy)
                     { proxy.sig_listChange.raise(m_infos); }
              private:
                 Infos_t m_infos;
             };
-            m_reply.postNewRequest(new Update(session, *this));
+            m_reply.postNewRequest(new Update(*this));
         }
 
-    void setProcessState(Session& session, uint32_t pid, State_t state)
+    void setProcessState(uint32_t pid, State_t state)
         {
-            if (m_editor.get() != 0) {
-                m_editor->setProcessState(pid, state);
-                sendUpdate(session);
-            }
+            m_editor.setProcessState(pid, state);
+            sendUpdate();
         }
 
-    void setAllProcessState(Session& session, State_t state)
+    void setAllProcessState(State_t state)
         {
-            if (m_editor.get() != 0) {
-                m_editor->setAllProcessState(state);
-                sendUpdate(session);
-            }
+            m_editor.setAllProcessState(state);
+            sendUpdate();
         }
 
-    void setProcessPriority(Session& session, uint32_t pid, int pri)
+    void setProcessPriority(uint32_t pid, int pri)
         {
-            if (m_editor.get() != 0) {
-                m_editor->setProcessPriority(pid, pri);
-                sendUpdate(session);
-            }
+            m_editor.setProcessPriority(pid, pri);
+            sendUpdate();
         }
 
-    uint32_t commit(Session& session)
+    void resumeConfirmedProcesses()
         {
-            uint32_t pgid = session.processList().allocateProcessGroup();
-            if (m_editor.get() != 0) {
-                m_editor->commit(pgid);
-            }
+            m_session.notifications().resumeConfirmedProcesses(m_editor);
+            sendUpdate();
+        }
+
+    uint32_t commit()
+        {
+            uint32_t pgid = m_session.processList().allocateProcessGroup();
+            m_editor.commit(pgid);
             return pgid;
         }
 
  private:
+    Session& m_session;
     util::RequestSender<ProcessListProxy> m_reply;
-    std::auto_ptr<ProcessListEditor> m_editor;
+    ProcessListEditor m_editor;
+};
+
+
+class game::proxy::ProcessListProxy::TrampolineFromSession : public afl::base::Closure<Trampoline*(Session&)> {
+ public:
+    TrampolineFromSession(const util::RequestSender<ProcessListProxy>& reply)
+        : m_reply(reply)
+        { }
+    virtual Trampoline* call(Session& session)
+        { return new Trampoline(session, m_reply); }
+ private:
+    util::RequestSender<ProcessListProxy> m_reply;
 };
 
 
 // Constructor.
 game::proxy::ProcessListProxy::ProcessListProxy(util::RequestSender<Session> gameSender, util::RequestDispatcher& reply)
     : m_reply(reply, *this),
-      m_request(gameSender, new Trampoline(m_reply.getSender()))
+      m_request(gameSender.makeTemporary(new TrampolineFromSession(m_reply.getSender())))
 { }
 
 // Destructor.
@@ -107,13 +107,13 @@ game::proxy::ProcessListProxy::~ProcessListProxy()
 void
 game::proxy::ProcessListProxy::init(WaitIndicator& link, Infos_t& result)
 {
-    class Request : public util::SlaveRequest<Session, Trampoline> {
+    class Request : public util::Request<Trampoline> {
      public:
         Request(Infos_t& result)
             : m_result(result)
             { }
-        virtual void handle(Session& session, Trampoline& tpl)
-            { tpl.buildResult(session, m_result); }
+        virtual void handle(Trampoline& tpl)
+            { tpl.buildResult(m_result); }
      private:
         Infos_t& m_result;
     };
@@ -125,66 +125,41 @@ game::proxy::ProcessListProxy::init(WaitIndicator& link, Infos_t& result)
 void
 game::proxy::ProcessListProxy::setProcessState(uint32_t pid, State_t state)
 {
-    class Request : public util::SlaveRequest<Session, Trampoline> {
-     public:
-        Request(uint32_t pid, State_t state)
-            : m_pid(pid), m_state(state)
-            { }
-        virtual void handle(Session& session, Trampoline& tpl)
-            { tpl.setProcessState(session, m_pid, m_state); }
-     private:
-        uint32_t m_pid;
-        State_t m_state;
-    };
-    m_request.postNewRequest(new Request(pid, state));
+    m_request.postRequest(&Trampoline::setProcessState, pid, state);
 }
 
 // Prepare a state change for all processes.
 void
 game::proxy::ProcessListProxy::setAllProcessState(State_t state)
 {
-    class Request : public util::SlaveRequest<Session, Trampoline> {
-     public:
-        Request(State_t state)
-            : m_state(state)
-            { }
-        virtual void handle(Session& session, Trampoline& tpl)
-            { tpl.setAllProcessState(session, m_state); }
-     private:
-        State_t m_state;
-    };
-    m_request.postNewRequest(new Request(state));
+    m_request.postRequest(&Trampoline::setAllProcessState, state);
 }
 
 // Set process priority.
 void
 game::proxy::ProcessListProxy::setProcessPriority(uint32_t pid, int pri)
 {
-    class Request : public util::SlaveRequest<Session, Trampoline> {
-     public:
-        Request(uint32_t pid, int pri)
-            : m_pid(pid), m_pri(pri)
-            { }
-        virtual void handle(Session& session, Trampoline& tpl)
-            { tpl.setProcessPriority(session, m_pid, m_pri); }
-     private:
-        uint32_t m_pid;
-        int m_pri;
-    };
-    m_request.postNewRequest(new Request(pid, pri));
+    m_request.postRequest(&Trampoline::setProcessPriority, pid, pri);
+}
+
+// Resume confirmed processes.
+void
+game::proxy::ProcessListProxy::resumeConfirmedProcesses()
+{
+    m_request.postRequest(&Trampoline::resumeConfirmedProcesses);
 }
 
 // Perform all prepared state changes.
 uint32_t
 game::proxy::ProcessListProxy::commit(WaitIndicator& link)
 {
-    class Request : public util::SlaveRequest<Session, Trampoline> {
+    class Request : public util::Request<Trampoline> {
      public:
         Request()
             : m_result()
             { }
-        virtual void handle(Session& session, Trampoline& tpl)
-            { m_result = tpl.commit(session); }
+        virtual void handle(Trampoline& tpl)
+            { m_result = tpl.commit(); }
         uint32_t get() const
             { return m_result; }
      private:

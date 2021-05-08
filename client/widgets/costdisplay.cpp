@@ -44,8 +44,9 @@ namespace {
     };
 }
 
-client::widgets::CostDisplay::CostDisplay(ui::Root& root, Types_t types, util::NumberFormatter fmt)
+client::widgets::CostDisplay::CostDisplay(ui::Root& root, afl::string::Translator& tx, Types_t types, util::NumberFormatter fmt)
     : SimpleTable(root, 4, 1),
+      m_translator(tx),
       m_types(types),
       m_formatter(fmt)
 {
@@ -100,8 +101,8 @@ client::widgets::CostDisplay::init(ui::Root& root)
     setNumRows(numRows);
 
     row(0).setColor(ui::Color_Black);
-    cell(0, 0).setText(_("You need:")).setExtraColumns(1).setUnderline(true);
-    cell(2, 0).setText(_("You have:")).setExtraColumns(1).setUnderline(true);
+    cell(0, 0).setText(m_translator("You need:")).setExtraColumns(1).setUnderline(true);
+    cell(2, 0).setText(m_translator("You have:")).setExtraColumns(1).setUnderline(true);
     setRowPadding(0, 5);
 
     afl::base::Ref<gfx::Font> font = root.provider().getFont(gfx::FontRequest());
@@ -116,9 +117,9 @@ client::widgets::CostDisplay::init(ui::Root& root)
     for (size_t i = 0; i < countof(TYPES); ++i) {
         if (m_types.contains(TYPES[i])) {
             row(r).setColor(ui::Color_Black);
-            cell(0, r).setText(String_t(_(NAMES[i])) + ":");
-            cell(1, r).setTextAlign(2, 0);
-            cell(2, r).setTextAlign(2, 0);
+            cell(0, r).setText(String_t(m_translator(NAMES[i])) + ":");
+            cell(1, r).setTextAlign(gfx::RightAlign, gfx::TopAlign);
+            cell(2, r).setTextAlign(gfx::RightAlign, gfx::TopAlign);
             ++r;
         }
     }
@@ -126,7 +127,7 @@ client::widgets::CostDisplay::init(ui::Root& root)
     // Width of rightmost column
     int detailWidth = 0;
     for (size_t i = 0; i < countof(TEXTS); ++i) {
-        detailWidth = std::max(detailWidth, font->getTextWidth(Format(_(TEXTS[i]), m_formatter.formatNumber(999999))));
+        detailWidth = std::max(detailWidth, font->getTextWidth(Format(m_translator(TEXTS[i]), m_formatter.formatNumber(999999))));
     }
     setColumnWidth(3, detailWidth);
 }
@@ -145,11 +146,11 @@ client::widgets::CostDisplay::render()
             if (ty == Cost::Money && !needSupplies) {
                 // It's the Money line.
                 if (int32_t missing = m_missingAmount.get(Cost::Money) + m_missingAmount.get(Cost::Supplies)) {
-                    cell(3, r  ).setText(Format(_(TEXTS[NeedFunds1]), m_formatter.formatNumber(missing))).setColor(ui::Color_Red);
-                    cell(3, r+1).setText(Format(_(TEXTS[NeedFunds2]), m_formatter.formatNumber(missing))).setColor(ui::Color_Red);;
+                    cell(3, r  ).setText(Format(m_translator(TEXTS[NeedFunds1]), m_formatter.formatNumber(missing))).setColor(ui::Color_Red);
+                    cell(3, r+1).setText(Format(m_translator(TEXTS[NeedFunds2]), m_formatter.formatNumber(missing))).setColor(ui::Color_Red);;
                 } else {
-                    cell(3, r  ).setText(Format(_(TEXTS[RemainingCash]),  m_formatter.formatNumber(m_remainingAmount.get(Cost::Money)))).setColor(ui::Color_GreenBlack);
-                    cell(3, r+1).setText(Format(_(TEXTS[RemainingTons]), m_formatter.formatNumber(m_remainingAmount.get(Cost::Supplies)))).setColor(ui::Color_GreenBlack);
+                    cell(3, r  ).setText(Format(m_translator(TEXTS[RemainingCash]),  m_formatter.formatNumber(m_remainingAmount.get(Cost::Money)))).setColor(ui::Color_GreenBlack);
+                    cell(3, r+1).setText(Format(m_translator(TEXTS[RemainingTons]), m_formatter.formatNumber(m_remainingAmount.get(Cost::Supplies)))).setColor(ui::Color_GreenBlack);
                 }
             } else if (ty == Cost::Supplies && !needSupplies) {
                 // It's the Supplies line, but has already been accounted for by the Money line.
@@ -157,10 +158,10 @@ client::widgets::CostDisplay::render()
                 // Minerals (or: cost includes supplies)
                 if (int32_t missing = m_missingAmount.get(ty)) {
                     size_t index = (ty == Cost::Money ? MissingCash : MissingTons);
-                    cell(3, r).setText(Format(_(TEXTS[index]), m_formatter.formatNumber(missing))).setColor(ui::Color_Red);
+                    cell(3, r).setText(Format(m_translator(TEXTS[index]), m_formatter.formatNumber(missing))).setColor(ui::Color_Red);
                 } else {
                     size_t index = (ty == Cost::Money ? RemainingCash : RemainingTons);
-                    cell(3, r).setText(Format(_(TEXTS[index]), m_formatter.formatNumber(m_remainingAmount.get(ty)))).setColor(ui::Color_GreenBlack);
+                    cell(3, r).setText(Format(m_translator(TEXTS[index]), m_formatter.formatNumber(m_remainingAmount.get(ty)))).setColor(ui::Color_GreenBlack);
                 }
             }
             ++r;

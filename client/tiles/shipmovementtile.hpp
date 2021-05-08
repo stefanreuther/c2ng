@@ -4,9 +4,10 @@
 #ifndef C2NG_CLIENT_TILES_SHIPMOVEMENTTILE_HPP
 #define C2NG_CLIENT_TILES_SHIPMOVEMENTTILE_HPP
 
-#include "game/proxy/objectobserver.hpp"
+#include "afl/string/translator.hpp"
 #include "client/widgets/collapsibledataview.hpp"
 #include "client/widgets/keymapwidget.hpp"
+#include "game/proxy/objectobserver.hpp"
 #include "ui/widgets/button.hpp"
 #include "ui/widgets/framegroup.hpp"
 #include "ui/widgets/simpletable.hpp"
@@ -30,7 +31,7 @@ namespace client { namespace tiles {
                 }
         };
 
-        ShipMovementTile(ui::Root& root, client::widgets::KeymapWidget& kmw);
+        ShipMovementTile(ui::Root& root, afl::string::Translator& tx, client::widgets::KeymapWidget& kmw);
         void attach(game::proxy::ObjectObserver& oop);
 
         void setData(const Data& data);
@@ -41,6 +42,7 @@ namespace client { namespace tiles {
      private:
         class Job;
 
+        afl::string::Translator& m_translator;
         ui::widgets::SimpleTable m_table;
         ui::widgets::Button m_warpButton;
         ui::widgets::Button m_chartButton;

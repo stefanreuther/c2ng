@@ -198,7 +198,7 @@ namespace {
                 afl::base::Ref<afl::io::Stream> stream(fs.openFile(params.job[i], FileSystem::OpenRead));
                 if (ext == "qc") {
                     game::interface::LoadContext lc(session);
-                    interpreter::vmio::ObjectLoader loader(*params.gameCharset, lc);
+                    interpreter::vmio::ObjectLoader loader(*params.gameCharset, session.translator(), lc);
                     result.push_back(loader.loadObjectFile(stream).asPtr());
                 } else {
                     BCORef_t bco = *new interpreter::BytecodeObject();
@@ -638,7 +638,7 @@ interpreter::ConsoleApplication::help()
                                "-f preexec-load\tPre-execute \"Load\" statements\n"));
 
     afl::io::TextWriter& out = standardOutput();
-    out.writeLine(Format(tx("PCC2 Script Engine v%s - (c) 2017-2020 Stefan Reuther").c_str(), PCC2_VERSION));
+    out.writeLine(Format(tx("PCC2 Script Engine v%s - (c) 2017-2021 Stefan Reuther").c_str(), PCC2_VERSION));
     out.writeLine();
     out.writeLine(Format(tx("Usage:\n"
                             "  %s [-h]\n"

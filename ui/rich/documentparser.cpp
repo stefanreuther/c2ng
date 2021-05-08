@@ -32,8 +32,7 @@
 #include "util/syntax/keywordtable.hpp"
 #include "util/syntax/segment.hpp"
 #include "util/unicodechars.hpp"
-#include "ui/rich/blockobject.hpp"
-#include "ui/rich/imageobject.hpp"
+#include "ui/icons/image.hpp"
 
 using afl::io::xml::BaseReader;
 
@@ -472,7 +471,7 @@ ui::rich::DocumentParser::parseImage()
     bool isFinal = false;
     afl::base::Ptr<gfx::Canvas> pix = m_document.provider().getImage(img, &isFinal);
     if (pix.get() != 0) {
-        std::auto_ptr<BlockObject> obj(new ImageObject(pix));
+        ui::icons::Icon& obj = m_document.deleter().addNew(new ui::icons::Image(*pix));
         if (align == "left") {
             m_document.addFloatObject(obj, true);
         } else if (align == "right") {

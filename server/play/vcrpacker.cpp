@@ -13,8 +13,50 @@
 #include "game/interface/vcrsideproperty.hpp"
 #include "game/playerlist.hpp"
 #include "game/root.hpp"
+#include "game/vcr/flak/battle.hpp"
+#include "game/vcr/flak/object.hpp"
+#include "interpreter/values.hpp"
 
 namespace gi = game::interface;
+using server::play::Packer;
+using interpreter::makeIntegerValue;
+using afl::data::Hash;
+using afl::data::HashValue;
+using afl::data::Vector;
+using afl::data::VectorValue;
+using afl::base::Ref;
+
+namespace {
+    /* Pack fleets from a FLAK setup */
+    afl::data::Value* packFleets(const game::vcr::flak::Setup& setup)
+    {
+        Ref<Vector> fleets(Vector::create());
+        for (size_t i = 0, n = setup.getNumFleets(); i < n; ++i) {
+            const game::vcr::flak::Setup::Fleet& in = setup.getFleetByIndex(i);
+            Ref<Hash> out(Hash::create());
+
+            // Scalar attributes
+            Packer::addValueNew(*out, makeIntegerValue(in.player), "PLAYER");
+            Packer::addValueNew(*out, makeIntegerValue(in.speed),  "SPEED");
+            Packer::addValueNew(*out, makeIntegerValue(in.x), "X");
+            Packer::addValueNew(*out, makeIntegerValue(in.y), "Y");
+            Packer::addValueNew(*out, makeIntegerValue(static_cast<int>(in.firstShipIndex)), "FIRSTSHIP");
+            Packer::addValueNew(*out, makeIntegerValue(static_cast<int>(in.numShips)), "NUMSHIPS");
+
+            // Attack list
+            Ref<Vector> attList(Vector::create());
+            for (size_t i = 0; i < 2*in.numAttackListEntries; ++i) {
+                attList->pushBackNew(makeIntegerValue(setup.getAttackList()[2*in.firstAttackListIndex + i]));
+            }
+            Packer::addValueNew(*out, new VectorValue(attList), "ATTLIST");
+
+            // Finish
+            fleets->pushBackNew(new HashValue(out));
+        }
+        return new VectorValue(fleets);
+    }
+}
+
 
 server::play::VcrPacker::VcrPacker(game::Session& session)
     : m_session(session)
@@ -32,21 +74,21 @@ server::play::VcrPacker::buildValue() const
     const game::config::HostConfiguration& config = r.hostConfiguration();
     const game::PlayerList& pl = r.playerList();
 
-    afl::base::Ref<afl::data::Vector> vv(afl::data::Vector::create());
+    Ref<Vector> vv(Vector::create());
     afl::base::Ptr<game::vcr::Database> db = t.getBattles();
     if (db.get() != 0) {
         for (size_t i = 0, n = db->getNumBattles(); i < n; ++i) {
-            afl::base::Ref<afl::data::Hash> hv(afl::data::Hash::create());
+            Ref<Hash> hv(Hash::create());
             addValueNew(*hv, gi::getVcrProperty(i, gi::ivpMagic,     m_session, r, t, sl), "MAGIC");
             addValueNew(*hv, gi::getVcrProperty(i, gi::ivpSeed,      m_session, r, t, sl), "SEED");
             addValueNew(*hv, gi::getVcrProperty(i, gi::ivpFlags,     m_session, r, t, sl), "CAPABILITIES");
             addValueNew(*hv, gi::getVcrProperty(i, gi::ivpAlgorithm, m_session, r, t, sl), "ALGORITHM");
 
-            afl::base::Ref<afl::data::Vector> units(afl::data::Vector::create());
+            Ref<Vector> units(Vector::create());
             game::vcr::Battle* battle = db->getBattle(i);
             if (battle != 0) {
                 for (size_t side = 0, nsides = battle->getNumObjects(); side < nsides; ++side) {
-                    afl::base::Ref<afl::data::Hash> u(afl::data::Hash::create());
+                    Ref<Hash> u(Hash::create());
 
                     addValueNew(*u, gi::getVcrSideProperty(*battle, side, gi::ivsBeamId,          tx, sl, config, pl), "BEAM");
                     addValueNew(*u, gi::getVcrSideProperty(*battle, side, gi::ivsBeamCount,       tx, sl, config, pl), "BEAM.COUNT");
@@ -72,14 +114,31 @@ server::play::VcrPacker::buildValue() const
                     addValueNew(*u, gi::getVcrSideProperty(*battle, side, gi::ivsTorpChargeRate,  tx, sl, config, pl), "CONFIG.TORPCHARGERATE");
                     addValueNew(*u, gi::getVcrSideProperty(*battle, side, gi::ivsCrewDefenseRate, tx, sl, config, pl), "CONFIG.CREWDEFENSERATE");
 
-                    units->pushBackNew(new afl::data::HashValue(u));
+                    /* Additional properties for FLAK */
+                    if (const game::vcr::flak::Object* obj = dynamic_cast<const game::vcr::flak::Object*>(battle->getObject(side, false))) {
+                        addValueNew(*u, makeIntegerValue(obj->getMaxFightersLaunched()), "FLAKMAXFL");
+                        addValueNew(*u, makeIntegerValue(obj->getRating()),              "FLAKRATING");
+                        addValueNew(*u, makeIntegerValue(obj->getCompensation()),        "FLAKCOMPENSATION");
+                        addValueNew(*u, makeIntegerValue(obj->getEndingStatus()),        "FLAKENDING");
+                    }
+
+                    units->pushBackNew(new HashValue(u));
                 }
             }
-            addValueNew(*hv, new afl::data::VectorValue(units), "UNIT");
-            vv->pushBackNew(new afl::data::HashValue(hv));
+            addValueNew(*hv, new VectorValue(units), "UNIT");
+
+            /* Additional properties for FLAK */
+            if (const game::vcr::flak::Battle* flakBattle = dynamic_cast<const game::vcr::flak::Battle*>(battle)) {
+                const game::vcr::flak::Setup& setup = flakBattle->setup();
+                addValueNew(*hv, packFleets(setup), "FLEET");
+                addValueNew(*hv, makeIntegerValue(setup.getSeed()), "FLAKSEED");
+                addValueNew(*hv, makeIntegerValue(setup.getAmbientFlags()), "FLAKAMBIENT");
+            }
+
+            vv->pushBackNew(new HashValue(hv));
         }
     }
-    return new afl::data::VectorValue(vv);
+    return new VectorValue(vv);
 }
 
 String_t

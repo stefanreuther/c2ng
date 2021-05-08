@@ -14,21 +14,6 @@
 #include <cmath>
 #include "gfx/blit.hpp"
 
-// /** Back-end for stretching/shearing/rotating.
-//     See doStretchRotateBlit() for a description of the parameters.
-//     \param T framebuffer traits
-
-//     Implementation note: this uses the trick of computing the reverse
-//     transformation. That is, for each point in target_clip, we
-//     compute the corresponding original point. */
-// template<typename T>
-// inline void
-// doBlitInternal(SDL_Surface* src, SDL_Surface* target,
-//                const GfxRect& src_clip, const GfxRect& target_clip,
-//                int x, int y, int x1, int y1, int x2, int y2)
-// {
-// }
-
 void
 gfx::blitStretchRotate(Canvas& src, Canvas& target, Rectangle src_clip, Rectangle target_clip, int x, int y, int x1, int y1, int x2, int y2)
 {

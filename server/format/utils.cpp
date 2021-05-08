@@ -1,5 +1,6 @@
 /**
   *  \file server/format/utils.cpp
+  *  \brief Format Server Utilities
   */
 
 #include "server/format/utils.hpp"
@@ -7,9 +8,6 @@
 #include "afl/data/hash.hpp"
 #include "server/types.hpp"
 
-// /** Unpack a TCost.
-//     \param cost [in] Data
-//     \return Hash containing the cost */
 afl::data::Value*
 server::format::unpackCost(const game::v3::structures::Cost& c)
 {
@@ -22,9 +20,6 @@ server::format::unpackCost(const game::v3::structures::Cost& c)
     return new afl::data::HashValue(hash);
 }
 
-// /** Pack a TCost.
-//     \param cost [out] Data
-//     \param pc [in] Hash provided by user */
 void
 server::format::packCost(game::v3::structures::Cost& c, afl::data::Access a)
 {

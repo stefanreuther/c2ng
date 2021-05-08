@@ -4,8 +4,33 @@
   */
 
 #include "game/sim/setup.hpp"
-#include "game/sim/ship.hpp"
+#include "game/sim/gameinterface.hpp"
 #include "game/sim/planet.hpp"
+#include "game/sim/ship.hpp"
+
+namespace {
+    typedef int CompareFunction_t(const game::sim::Ship&, const game::sim::Ship&);
+
+    class CompareShips {
+     public:
+        CompareShips(CompareFunction_t* compare)
+            : m_compare(compare)
+            { }
+
+        bool operator()(const game::sim::Ship& a, const game::sim::Ship& b) const
+            {
+                int c = m_compare(a, b);
+                if (c != 0) {
+                    return c < 0;
+                } else {
+                    return a.getId() < b.getId();
+                }
+            }
+
+     private:
+        CompareFunction_t* m_compare;
+    };
+}
 
 // Construct empty list.
 game::sim::Setup::Setup()
@@ -62,6 +87,17 @@ game::sim::Setup::addPlanet()
     return m_planet.get();
 }
 
+// Add planet from data.
+game::sim::Planet*
+game::sim::Setup::addPlanet(const Planet& data)
+{
+    Planet* pl = addPlanet();
+    if (pl != 0) {
+        *pl = data;
+    }
+    return pl;
+}
+
 // Check presence of planet.
 bool
 game::sim::Setup::hasPlanet() const
@@ -104,6 +140,20 @@ game::sim::Setup::addShip()
     Ship* result = m_ships.pushBackNew(new Ship());
     m_structureChanged = true;
     return result;
+}
+
+// Add a ship from data.
+game::sim::Ship*
+game::sim::Setup::addShip(const Ship& data)
+{
+    Ship* sh = findShipById(data.getId());
+    if (sh == 0) {
+        sh = addShip();
+    }
+    if (sh != 0) {
+        *sh = data;
+    }
+    return sh;
 }
 
 // Get number of ships.
@@ -194,12 +244,34 @@ game::sim::Setup::getObject(Slot_t slot)
 void
 game::sim::Setup::duplicateShip(Slot_t slot, Id_t newId, afl::string::Translator& tx)
 {
-    // ex GSimState::duplicateShip
+    // ex GSimState::duplicateShip, WSimListWithHandler::addShip (part)
     if (slot < m_ships.size()) {
         Ship* sh = m_ships.insertNew(m_ships.begin() + slot + 1, new Ship(*m_ships[slot]));
         sh->setId(newId);
         sh->setDefaultName(tx);
+
+        // Duplicate never is initially deactivated
+        // (applies when a ship is created using [Ins] in the GUI, which duplicates the current ship)
+        sh->setFlags(sh->getFlags() & ~Object::fl_Deactivated);
+
         m_structureChanged = true;
+    }
+}
+
+// Replicate a ship.
+void
+game::sim::Setup::replicateShip(Slot_t slot, int count, const GameInterface* gi, afl::string::Translator& tx)
+{
+    // ex WSimListWithHandler::replicateCurrentShip
+    // The most naive implementation of this algorithm is O(n^3) which is definitely too slow.,
+    // This implementation is an O(n^2) operation. PCC2 uses a bitset to do it in O(n),
+    // but since O(n^2) is good enough for the JavaScript version even in prehistoric browsers,
+    // let's keep it simple.
+    Id_t id = 0;
+    for (int i = 0; i < count; ++i) {
+        id = findUnusedShipId(id+1, gi);
+        duplicateShip(slot, id, tx);
+        ++slot;
     }
 }
 
@@ -255,17 +327,23 @@ game::sim::Setup::findShipById(Id_t id)
     }
 }
 
+// Find ship, given an Id (const version).
+const game::sim::Ship*
+game::sim::Setup::findShipById(Id_t id) const
+{
+    return const_cast<Setup&>(*this).findShipById(id);
+}
+
 // Find unused ship Id.
 game::Id_t
-game::sim::Setup::findUnusedShipId(Id_t firstToCheck) const
+game::sim::Setup::findUnusedShipId(Id_t firstToCheck, const GameInterface* gi) const
 {
     // ex GSimState::getFreeId, ccsim.pas:NewId
     // \change add firstToCheck to bring the "add N ships" operation down from O(n**3)
     // \change no limit to the maximum setup size
-    // FIXME: PCC 1.x tries to avoid ships used in the game
     Slot_t tmp;
     Id_t i = firstToCheck;
-    while (findShipSlotById(i, tmp) != 0) {
+    while ((gi != 0 && gi->hasShip(i)) || findShipSlotById(i, tmp)) {
         ++i;
     }
     return i;
@@ -299,6 +377,14 @@ game::sim::Setup::merge(const Setup& other)
     }
 }
 
+// Sort ships.
+void
+game::sim::Setup::sortShips(int compare(const Ship&, const Ship&))
+{
+    m_ships.sort(CompareShips(compare));
+    m_structureChanged = true;
+}
+
 // Notify listeners.
 void
 game::sim::Setup::notifyListeners()
@@ -326,13 +412,81 @@ game::sim::Setup::notifyListeners()
 
 // Set random friendly codes.
 void
-game::sim::Setup::setRandomFriendlyCodes()
+game::sim::Setup::setRandomFriendlyCodes(util::RandomNumberGenerator& rng)
 {
     // ex GSimState::assignRandomFCodes
     for (size_t i = 0, n = getNumObjects(); i < n; ++i) {
         if (Object* p = getObject(i)) {
-            p->setRandomFriendlyCode();
+            p->setRandomFriendlyCode(rng);
         }
+    }
+}
+
+// Set a sequential friendly code.
+void
+game::sim::Setup::setSequentialFriendlyCode(Slot_t slot)
+{
+    // ex WSimListWithHandler::incrFCode, ccsim.pas:IncrFCode
+    // FIXME: pass a RNG!
+    // FIXME: the handling of fl_RandomDigits is strange? (but same as in PCC2 and PCC1)
+    if (Object* p = getObject(slot)) {
+        // Determine previous friendly code
+        String_t friendlyCode;
+        int32_t previousFlags = 0;
+        if (const Object* prev = getObject(slot-1)) {
+            friendlyCode = prev->getFriendlyCode();
+            previousFlags = prev->getFlags();
+        }
+
+        // Copy "random digits" flags
+        const int32_t newFlags = ((previousFlags & Object::fl_RandomDigits)
+                                  | (p->getFlags() & ~Object::fl_RandomDigits));
+
+        // Initialize by making friendly code 3 digits
+        if (friendlyCode.size() < 3) {
+            friendlyCode.append(3 - friendlyCode.size(), ' ');
+        }
+
+        // Make it numeric by randomizing random digits (if any) and non-numerics
+        for (int i = 0; i < 3; ++i) {
+            if (((newFlags & Object::fl_RandomFC) != 0
+                 && (newFlags & (Object::fl_RandomFC1 << i)) != 0)
+                || (friendlyCode[i] < '0' || friendlyCode[i] > '9'))
+            {
+                friendlyCode[i] = static_cast<char>('0' + (std::rand() % 10));
+            }
+        }
+
+        // Increase to find new code.
+        // Attempt to make it unique, but don't crash if that's not possible.
+        // The code is completely numeric, so this might time-out if someone makes a .ccb file with >1000 entries).
+        for (int tries = 0; tries < 1000; ++tries) {
+            // Increase fcode
+            for (int i = 3; i > 0; --i) {
+                ++friendlyCode[i-1];
+                if (friendlyCode[i-1] <= '9') {
+                    break;
+                }
+                friendlyCode[i-1] = '0';
+            }
+
+            // Check for uniqueness
+            bool ok = true;
+            for (Slot_t i = 0, n = getNumObjects(); i < n && ok; ++i) {
+                if (const Object* obj = getObject(i)) {
+                    if (i != slot && obj->getFriendlyCode() == friendlyCode) {
+                        ok = false;
+                    }
+                }
+            }
+            if (ok) {
+                break;
+            }
+        }
+
+        // Assign new fcode
+        p->setFriendlyCode(friendlyCode);
+        p->setFlags(newFlags);
     }
 }
 
@@ -349,4 +503,83 @@ game::sim::Setup::isMatchingShipList(const game::spec::ShipList& shipList) const
         }
     }
     return true;
+}
+
+// Copy to game using a GameInterface, all units.
+game::sim::Setup::Status
+game::sim::Setup::copyToGame(GameInterface& gi) const
+{
+    return copyToGame(gi, 0, getNumObjects());
+}
+
+// Copy to game using a GameInterface, range.
+game::sim::Setup::Status
+game::sim::Setup::copyToGame(GameInterface& gi, size_t from, size_t to) const
+{
+    // ex WSimScreen::writeToGame (part), ccsim.pas:Writeback
+    // FIXME: PCC1 does multiple passes to resolve dependencies;
+    // its copyShipToGame (DoWriteback) can therefore return "partial" in addition to "ok" and "fail".
+    Status st(0, 0);
+    for (size_t i = from; i < to; ++i) {
+        const Object* obj = getObject(i);
+        if (const Ship* sh = dynamic_cast<const Ship*>(obj)) {
+            if (gi.getShipRelation(*sh) == GameInterface::Playable) {
+                if (gi.copyShipToGame(*sh)) {
+                    ++st.succeeded;
+                } else {
+                    ++st.failed;
+                }
+            }
+        } else if (const Planet* pl = dynamic_cast<const Planet*>(obj)) {
+            if (gi.getPlanetRelation(*pl) == GameInterface::Playable) {
+                if (gi.copyPlanetToGame(*pl)) {
+                    ++st.succeeded;
+                } else {
+                    ++st.failed;
+                }
+            }
+        } else {
+            // what?
+        }
+    }
+    return st;
+}
+
+// Copy from game using a GameInterface, all units.
+game::sim::Setup::Status
+game::sim::Setup::copyFromGame(const GameInterface& gi)
+{
+    return copyFromGame(gi, 0, getNumObjects());
+}
+
+// Copy from game using a GameInterface, range.
+game::sim::Setup::Status
+game::sim::Setup::copyFromGame(const GameInterface& gi, size_t from, size_t to)
+{
+    // ex WSimScreen::updateFromGame (part), ccsim.pas:UpdateFromGame
+    // @change PCC1 works entirely different here: nonexistant units are deleted or given to aliens
+    Status st(0, 0);
+    for (size_t i = from; i < to; ++i) {
+        Object* obj = getObject(i);
+        if (Ship* sh = dynamic_cast<Ship*>(obj)) {
+            if (gi.getShipRelation(*sh) != GameInterface::Unknown) {
+                if (gi.copyShipFromGame(*sh)) {
+                    ++st.succeeded;
+                } else {
+                    ++st.failed;
+                }
+            }
+        } else if (Planet* pl = dynamic_cast<Planet*>(obj)) {
+            if (gi.getPlanetRelation(*pl) != GameInterface::Unknown) {
+                if (gi.copyPlanetFromGame(*pl)) {
+                    ++st.succeeded;
+                } else {
+                    ++st.failed;
+                }
+            }
+        } else {
+            // what?
+        }
+    }
+    return st;
 }

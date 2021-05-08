@@ -26,8 +26,9 @@
 #include "game/v3/resultfile.hpp"
 #include "game/v3/reverter.hpp"
 #include "game/v3/structures.hpp"
-#include "game/vcr/classic/database.hpp"
 #include "game/v3/utils.hpp"
+#include "game/vcr/classic/database.hpp"
+#include "game/vcr/flak/database.hpp"
 
 using afl::base::Ref;
 using afl::except::FileFormatException;
@@ -444,9 +445,9 @@ game::v3::Loader::loadKoreExplosions(game::map::Universe& univ, afl::io::Stream&
 void
 game::v3::Loader::loadInbox(game::msg::Inbox& inbox, afl::io::Stream& file, int turn) const
 {
-    InboxFile parser(file, m_charset);
+    InboxFile parser(file, m_charset, m_translator);
     const size_t n = parser.getNumMessages();
-    m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loading %d incoming message%!1{s%}...").c_str(), n));
+    m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator("Loading %d incoming message%!1{s%}...").c_str(), n));
     for (size_t i = 0; i < n; ++i) {
         String_t msgText(parser.loadMessage(i));
         int msgTurn = turn;
@@ -465,6 +466,39 @@ game::v3::Loader::loadBattles(game::Turn& turn, afl::io::Stream& file, const gam
     if (db->getNumBattles() != 0) {
         m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loaded %d combat recording%!1{s%}...").c_str(), db->getNumBattles()));
         turn.setBattles(db);
+    }
+}
+
+void
+game::v3::Loader::loadFlakBattles(game::Turn& turn, afl::io::Directory& gameDir, int playerNr)
+{
+    // ex maybeLoadFlakVcrs
+    if (turn.getBattles().get() != 0) {
+        // We already have regular combat, no need to look for FLAK
+        return;
+    }
+
+    String_t fileName = afl::string::Format("flak%d.dat", playerNr);
+    afl::base::Ptr<afl::io::Stream> s = gameDir.openFileNT(fileName, afl::io::FileSystem::OpenRead);
+    if (s.get() == 0) {
+        // No FLAK combat
+        return;
+    }
+
+    afl::base::Ptr<game::vcr::flak::Database> db(new game::vcr::flak::Database());
+    try {
+        db->load(*s, m_charset, m_translator);
+        if (db->getTimestamp() != turn.getTimestamp()) {
+            m_log.write(afl::sys::LogListener::Error, LOG_NAME, afl::string::Format("%s is from a different turn. File will be ignored.", fileName));
+            return;
+        }
+        if (db->getNumBattles() != 0) {
+            m_log.write(afl::sys::LogListener::Debug, LOG_NAME, afl::string::Format(m_translator("Loaded %d combat recording%!1{s%} (FLAK)..."), db->getNumBattles()));
+            turn.setBattles(db);
+        }
+    }
+    catch (std::exception& e) {
+        m_log.write(afl::sys::LogListener::Error, LOG_NAME, m_translator("Error loading FLAK combat"), e);
     }
 }
 

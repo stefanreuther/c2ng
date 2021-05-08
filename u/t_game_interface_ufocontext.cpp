@@ -11,7 +11,7 @@
 #include "game/game.hpp"
 #include "game/map/configuration.hpp"
 #include "game/session.hpp"
-#include "u/helper/contextverifier.hpp"
+#include "interpreter/test/contextverifier.hpp"
 
 /** Verify types. */
 void
@@ -39,14 +39,15 @@ TestGameInterfaceUfoContext::testTypes()
 
     // Create a context
     game::interface::UfoContext testee(1, turn, session);
-    verifyTypes(testee);
+    interpreter::test::ContextVerifier v(testee, "testTypes");
+    v.verifyTypes();
 
     // Verify some values
-    verifyInteger(testee, "ID", 51);
-    verifyInteger(testee, "HEADING$", 135);
-    verifyString(testee, "HEADING", "SE");
-    verifyString(testee, "INFO1", "USS Rosswell");
-    verifyInteger(testee, "COLOR.EGA", 2);
-    verifyInteger(testee, "COLOR", 12);
+    v.verifyInteger("ID", 51);
+    v.verifyInteger("HEADING$", 135);
+    v.verifyString("HEADING", "SE");
+    v.verifyString("INFO1", "USS Rosswell");
+    v.verifyInteger("COLOR.EGA", 2);
+    v.verifyInteger("COLOR", 12);
 }
 

@@ -206,3 +206,37 @@ TestGameMapIonStorm::testMessageInfoMissing()
     TS_ASSERT_EQUALS(i.isActive(), true);
 }
 
+/** Test getForecast(), empty data case.
+    A: create empty ion storm. Call getForecast().
+    E: empty forecast returned. */
+void
+TestGameMapIonStorm::testForecastEmpty()
+{
+    game::map::IonStorm i(3);
+    game::map::IonStorm::Forecast_t fs;
+    i.getForecast(fs);
+    TS_ASSERT_EQUALS(fs.size(), 0U);
+}
+
+/** Test getForecast(), normal data case.
+    A: create empty ion storm. Call getForecast().
+    E: empty forecast returned. */
+void
+TestGameMapIonStorm::testForecastNormal()
+{
+    game::map::IonStorm i(3);
+    configureIonStorm(i);
+
+    game::map::IonStorm::Forecast_t fs;
+    i.getForecast(fs);
+    TS_ASSERT_DIFFERS(fs.size(), 0U);
+
+    // Start with some uncertain value
+    TS_ASSERT_DIFFERS(fs.front().uncertainity, 0);
+
+    // End with certain value, matching current position
+    TS_ASSERT_EQUALS(fs.back().uncertainity, 0);
+    TS_ASSERT_EQUALS(fs.back().center.getX(), 2001);
+    TS_ASSERT_EQUALS(fs.back().center.getY(), 3014);
+}
+

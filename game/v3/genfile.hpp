@@ -123,9 +123,6 @@ namespace game { namespace v3 {
             \param value Checksum, sum of all bytes (including count and signature) in the respective file pair. */
         void setSectionChecksum(Section_t sec, uint32_t value);
 
-    // bool isValidTimestampChecksum() const;
-    // void setTimestampChecksum();
-
         /** Copy scores to TurnScoreList object.
             Updates the given TurnScoreList with the scores contained in this file.
             \param scores [out] Scores */

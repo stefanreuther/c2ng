@@ -1,25 +1,24 @@
 /**
   *  \file ui/prefixargument.cpp
+  *  \brief Class ui::PrefixArgument
   *
-  *  PCC2 Comment:
+  *  A prefix argument is directly associated with keypresses (parameter to handleKey).
   *
-  *  How the prefix argument is handled:
-  *  - it is associated with key events (UIEvent::key.arg)
-  *  - it is associated with user commands (UICommand::arg)
-  *  - mouse event handlers have to poll it itself
-  *  - UIRoot::run cancels the prefix argument when it is not
-  *    consumed after a mouse release.
+  *  For mouse events, the prefix argument is temporarily stored in ui::Root.
+  *  Mouse handlers must poll the it themselves because after the initiating event (press),
+  *  there can be many more mouse events (move) until an action is triggered (release).
   */
 
 #include "ui/prefixargument.hpp"
+#include "gfx/complex.hpp"
+#include "gfx/context.hpp"
+#include "gfx/font.hpp"
+#include "ui/colorscheme.hpp"
+#include "ui/draw.hpp"
+#include "ui/eventloop.hpp"
+#include "ui/root.hpp"
 #include "ui/simplewidget.hpp"
 #include "util/prefixargument.hpp"
-#include "ui/eventloop.hpp"
-#include "gfx/font.hpp"
-#include "ui/root.hpp"
-#include "gfx/context.hpp"
-#include "ui/colorscheme.hpp"
-#include "gfx/complex.hpp"
 
 namespace ui { namespace {
     class PrefixPopup : public ui::SimpleWidget {
@@ -34,8 +33,6 @@ namespace ui { namespace {
         virtual bool handleKey(util::Key_t key, int prefix);
         virtual bool handleMouse(gfx::Point pt, MouseButtons_t pressedButtons);
      private:
-        // /** Update position on screen. Computes the new position, moves the
-        //     widget if needed, and requests redraw. */
         void update();
         void onTick();
 
@@ -59,7 +56,7 @@ ui::PrefixPopup::PrefixPopup(int initialValue, Root& root, EventLoop& loop)
 {
     update();
     m_blinkTimer->sig_fire.add(this, &PrefixPopup::onTick);
-    m_blinkTimer->setInterval(400);
+    m_blinkTimer->setInterval(CURSOR_BLINK_INTERVAL);
 }
 
 void
@@ -68,7 +65,7 @@ ui::PrefixPopup::draw(gfx::Canvas& can)
     // ex UIPrefixPopup::drawContent
     const gfx::Rectangle& r = getExtent();
     gfx::Context<uint8_t> ctx(can, m_root.colorScheme());
-                
+
     // FIXME: define this color elsewhere? It's the same as used
     // in PCC 1.x, a rather bright yellow.
     drawSolidBar(ctx, r, Color_Fire + 29);
@@ -81,7 +78,7 @@ ui::PrefixPopup::draw(gfx::Canvas& can)
     drawHLine(ctx, r.getLeftX()+1, r.getTopY(), r.getRightX()-1);
     drawVLine(ctx, r.getLeftX(), r.getTopY(), r.getBottomY()-2);
 
-    const afl::base::Ref<gfx::Font> font = m_root.provider().getFont(gfx::FontRequest().setStyle(1/*FIXME:symbolic*/));
+    const afl::base::Ref<gfx::Font> font = m_root.provider().getFont(gfx::FontRequest().setStyle(FixedFont));
     ctx.setColor(Color_Black);
     ctx.useFont(*font);
     outText(ctx, gfx::Point(r.getLeftX() + 3, r.getTopY() + 1), m_logic.getText(afl::string::Translator::getSystemInstance()));
@@ -145,16 +142,16 @@ ui::PrefixPopup::handleMouse(gfx::Point /*pt*/, MouseButtons_t pressedButtons)
     return true;
 }
 
-// /** Update position on screen. Computes the new position, moves the
-//     widget if needed, and requests redraw. */
+/** Update position on screen.
+    Computes the new position, moves the widget if needed, and requests redraw. */
 void
 ui::PrefixPopup::update()
 {
     // ex UIPrefixPopup::update
     const String_t text = m_logic.getText(afl::string::Translator::getSystemInstance());
-    const afl::base::Ref<gfx::Font> font = m_root.provider().getFont(gfx::FontRequest().setStyle(1/*FIXME:symbolic*/));
+    const afl::base::Ref<gfx::Font> font = m_root.provider().getFont(gfx::FontRequest().setStyle(FixedFont));
     gfx::Rectangle area(0, 0, font->getTextWidth(text) + 14, font->getTextHeight(text) + 2);
-    area.moveToEdge(m_root.getExtent(), 1, 1, 0);
+    area.moveToEdge(m_root.getExtent(), gfx::CenterAlign, gfx::MiddleAlign, 0);
     setExtent(area);
     requestRedraw();
 }
@@ -164,7 +161,7 @@ ui::PrefixPopup::onTick()
 {
     m_blink = !m_blink;
     requestRedraw();
-    m_blinkTimer->setInterval(400);
+    m_blinkTimer->setInterval(CURSOR_BLINK_INTERVAL);
 }
 
 
@@ -193,11 +190,6 @@ ui::PrefixArgument::handleKey(util::Key_t key, int /*prefix*/)
     }
 }
 
-// /** Start entering a prefix argument. Opens the popup and lets the
-//     user enter the argument. When this function returns, the argument
-//     will have been handed to setPrefixArg() or posted to the event
-//     queue, if the user wanted one.
-//     \param n Initial value, should be nonzero */
 void
 ui::PrefixArgument::showPopup(int initialValue)
 {

@@ -12,6 +12,7 @@
 #include "afl/data/integervalue.hpp"
 #include "afl/data/stringvalue.hpp"
 #include "afl/io/nullfilesystem.hpp"
+#include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
 #include "interpreter/arraydata.hpp"
 #include "interpreter/arrayvalue.hpp"
@@ -38,12 +39,13 @@ using interpreter::executeBinaryOperation;
 namespace {
     struct TestHarness {
         afl::sys::Log log;
+        afl::string::NullTranslator tx;
         afl::io::NullFileSystem fileSystem;
         interpreter::World world;
         std::auto_ptr<afl::data::Value> p;
 
         TestHarness()
-            : log(), fileSystem(), world(log, fileSystem)
+            : log(), fileSystem(), world(log, tx, fileSystem)
             { }
 
         void exec(uint8_t op, const afl::data::Value* a, const afl::data::Value* b)

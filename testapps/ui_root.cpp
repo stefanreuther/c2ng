@@ -7,9 +7,11 @@
 #include "config.h"
 #include "afl/except/fileproblemexception.hpp"
 #include "afl/io/directory.hpp"
+#include "afl/string/format.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "afl/sys/environment.hpp"
 #include "client/widgets/alliancestatuslist.hpp"
+#include "client/widgets/filelistbox.hpp"
 #include "client/widgets/playerlist.hpp"
 #include "client/widgets/referencelistbox.hpp"
 #include "client/widgets/standarddataview.hpp"
@@ -18,6 +20,7 @@
 #include "ui/draw.hpp"
 #include "ui/eventloop.hpp"
 #include "ui/group.hpp"
+#include "ui/icons/colortile.hpp"
 #include "ui/layout/flow.hpp"
 #include "ui/layout/grid.hpp"
 #include "ui/layout/hbox.hpp"
@@ -31,24 +34,25 @@
 #include "ui/widgets/abstractcheckbox.hpp"
 #include "ui/widgets/abstractlistbox.hpp"
 #include "ui/widgets/button.hpp"
+#include "ui/widgets/cardtabbar.hpp"
 #include "ui/widgets/checkbox.hpp"
 #include "ui/widgets/framegroup.hpp"
+#include "ui/widgets/icongrid.hpp"
 #include "ui/widgets/inputline.hpp"
 #include "ui/widgets/optiongrid.hpp"
 #include "ui/widgets/radiobutton.hpp"
 #include "ui/widgets/richlistbox.hpp"
+#include "ui/widgets/simpletable.hpp"
 #include "ui/widgets/stringlistbox.hpp"
+#include "ui/widgets/tabbar.hpp"
+#include "ui/widgets/treelistbox.hpp"
 #include "ui/window.hpp"
 #include "util/consolelogger.hpp"
 #include "util/rich/colorattribute.hpp"
 #include "util/rich/linkattribute.hpp"
 #include "util/rich/parser.hpp"
 #include "util/rich/styleattribute.hpp"
-#include "client/widgets/filelistbox.hpp"
-#include "ui/widgets/simpletable.hpp"
-#include "ui/widgets/tabbar.hpp"
-#include "afl/string/format.hpp"
-#include "ui/widgets/cardtabbar.hpp"
+#include "ui/widgets/scrollbarcontainer.hpp"
 #ifdef HAVE_SDL
 # include "gfx/sdl/engine.hpp"
 typedef gfx::sdl::Engine Engine_t;
@@ -100,8 +104,10 @@ namespace {
             { return true; }
         virtual int getItemHeight(size_t /*n*/)
             { return 16; }
-        virtual int getHeaderHeight()
+        virtual int getHeaderHeight() const
             { return 5; }
+        virtual int getFooterHeight() const
+            { return 0; }
         virtual void drawHeader(gfx::Canvas& can, gfx::Rectangle area)
             {
                 gfx::ColorQuad_t cq[1] = {COLORQUAD_FROM_RGBA(128,0,0,0)};
@@ -109,6 +115,8 @@ namespace {
                 can.encodeColors(cq, c);
                 can.drawBar(area, c[0], gfx::TRANSPARENT_COLOR, gfx::FillPattern::SOLID, gfx::OPAQUE_ALPHA);
             }
+        virtual void drawFooter(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
+            { }
         virtual void drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state)
             {
                 gfx::ColorQuad_t cq[2] = {COLORQUAD_FROM_RGBA(0,16*item+20,0,0), COLORQUAD_FROM_RGBA(255,255,255,0)};
@@ -248,10 +256,24 @@ namespace {
 
                  case 'i':
                  {
+                     afl::string::NullTranslator tx;
                      ui::widgets::InputLine(10, m_root).
                          setFont(gfx::FontRequest().addSize(1)).
                          setText("hello").
-                         doStandardDialog("Input", "Type here:");
+                         doStandardDialog("Input", "Type here:", tx);
+                     return true;
+                 }
+
+                 case 'I':
+                 {
+                     afl::base::Deleter del;
+                     gfx::Point size(24, 24);
+                     ui::widgets::IconGrid g(m_root.engine(), size, 10, 10);
+                     for (int i = 0; i < 256; ++i) {
+                         g.addIcon(&del.addNew(new ui::icons::ColorTile(m_root, size, uint8_t(i))));
+                     }
+                     g.setPadding(1);
+                     testWidget(g);
                      return true;
                  }
 
@@ -364,6 +386,44 @@ namespace {
                      return true;
                  }
 
+                 case 'L':
+                 {
+                     ui::icons::ColorTile blackTile(m_root, gfx::Point(20, 30), ui::Color_Black);
+                     ui::icons::ColorTile whiteTile(m_root, gfx::Point(20, 30), ui::Color_White);
+                     ui::widgets::TreeListbox tree(m_root, 6, 100);
+                     tree.addNode(0, 0, "Configuration", !false);
+                     tree.addNode(1, 1, "Size", false);
+                     tree.addNode(2, 1, "Color", false);
+                     tree.addNode(3, 2, "Black", false);
+                     tree.addNode(4, 2, "White", false);
+                     tree.addNode(5, 1, "Weight", false);
+                     tree.addNode(6, 1, "Speed", false);
+                     tree.addNode(7, 0, "Action", false);
+                     tree.addNode(8, 1, "Eat", false);
+                     tree.addNode(9, 1, "Drink", false);
+                     tree.addNode(10, 1, "Sleep", false);
+                     tree.addNode(10, 1, "Repeat", false);
+                     tree.setIcon(tree.findNodeById(3), &blackTile);
+                     tree.setIcon(tree.findNodeById(4), &whiteTile);
+
+                     class Handler : public afl::base::Closure<void(int32_t)> {
+                      public:
+                         Handler(ui::widgets::TreeListbox& tree)
+                             : m_tree(tree)
+                             { }
+                         virtual void call(int32_t i)
+                             { m_tree.setIcon(m_tree.findNodeById(i), 0); }
+                      private:
+                         ui::widgets::TreeListbox& m_tree;
+                     };
+                     tree.sig_iconClick.addNewClosure(new Handler(tree));
+
+                     ui::widgets::ScrollbarContainer cont(tree, m_root);
+
+                     testWidget(cont);
+                     return true;
+                 }
+
                  case 't':
                  {
                      ui::widgets::SimpleTable t(m_root, 3, 4);
@@ -372,13 +432,13 @@ namespace {
                      t.cell(0, 1).setText("Auto-B. Goal:");
                      t.cell(0, 2).setText("Maximum:");
 
-                     t.column(2).subrange(0, 3).setColor(ui::Color_Green).setTextAlign(2, 0);
+                     t.column(2).subrange(0, 3).setColor(ui::Color_Green).setTextAlign(gfx::RightAlign, gfx::TopAlign);
                      t.cell(2, 0).setText("12");
                      t.cell(2, 1).setText("[max]");
                      t.cell(2, 2).setText("213");
-                     
+
                      t.cell(0, 3).setText("Cost:");
-                     t.cell(1, 3).setExtraColumns(1).setColor(ui::Color_Green).setText("4 mc + 1 supply").setTextAlign(2, 0);
+                     t.cell(1, 3).setExtraColumns(1).setColor(ui::Color_Green).setText("4 mc + 1 supply").setTextAlign(gfx::RightAlign, gfx::TopAlign);
 
                      testWidget(t);
                      return true;
@@ -497,14 +557,14 @@ namespace {
                  case 'e':
                  {
                      game::ref::UserList ul;
-                     ul.add(ul.DividerItem, "SMALL DEEP SPACE FREIGHTER", game::Reference(), false, util::SkinColor::Static);
-                     ul.add(ul.SubdividerItem, "The Lizards", game::Reference(), false, util::SkinColor::Static);
-                     ul.add(ul.ReferenceItem, "Listiger Lurch", game::Reference(), false, util::SkinColor::Green);
-                     ul.add(ul.ReferenceItem, "Crocodile Dundee", game::Reference(), true, util::SkinColor::Green);
-                     ul.add(ul.SubdividerItem, "The Bird Men", game::Reference(), false, util::SkinColor::Static);
-                     ul.add(ul.ReferenceItem, "Starling", game::Reference(), false, util::SkinColor::Red);
-                     ul.add(ul.ReferenceItem, "Eagle", game::Reference(), false, util::SkinColor::Red);
-                     ul.add(ul.OtherItem, "Some Link", game::Reference(), false, util::SkinColor::Static);
+                     ul.add(ul.DividerItem, "SMALL DEEP SPACE FREIGHTER", game::Reference(), false, game::map::Object::Playable, util::SkinColor::Static);
+                     ul.add(ul.SubdividerItem, "The Lizards", game::Reference(), false, game::map::Object::Playable, util::SkinColor::Static);
+                     ul.add(ul.ReferenceItem, "Listiger Lurch", game::Reference(), false, game::map::Object::Playable, util::SkinColor::Green);
+                     ul.add(ul.ReferenceItem, "Crocodile Dundee", game::Reference(), true, game::map::Object::Playable, util::SkinColor::Green);
+                     ul.add(ul.SubdividerItem, "The Bird Men", game::Reference(), false, game::map::Object::Playable, util::SkinColor::Static);
+                     ul.add(ul.ReferenceItem, "Starling", game::Reference(), false, game::map::Object::Playable, util::SkinColor::Red);
+                     ul.add(ul.ReferenceItem, "Eagle", game::Reference(), false, game::map::Object::Playable, util::SkinColor::Red);
+                     ul.add(ul.OtherItem, "Some Link", game::Reference(), false, game::map::Object::Playable, util::SkinColor::Static);
 
                      client::widgets::ReferenceListbox list(m_root);
                      list.setContent(ul);
@@ -663,7 +723,7 @@ int main(int, char** argv)
         bool stop = false;
         afl::string::NullTranslator tx;
         util::ConsoleLogger log;
-        Engine_t engine(log);
+        Engine_t engine(log, tx);
 
         // Configure manager
         ui::res::Manager mgr;
@@ -671,7 +731,7 @@ int main(int, char** argv)
         mgr.addNewImageLoader(new ui::res::CCImageLoader());
 
         afl::base::Ref<afl::io::Directory> f = fs.openDirectory(fs.makePathName(fs.makePathName(env.getInstallationDirectoryName(), "share"), "resource"));
-        mgr.addNewProvider(new ui::res::DirectoryProvider(f), "key");
+        mgr.addNewProvider(new ui::res::DirectoryProvider(f, fs, log, tx), "key");
 
         ui::DefaultResourceProvider provider(mgr, f, engine.dispatcher(), tx, log);
 

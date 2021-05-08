@@ -4,15 +4,16 @@
 #ifndef C2NG_GAME_MAP_SHIPPREDICTOR_HPP
 #define C2NG_GAME_MAP_SHIPPREDICTOR_HPP
 
-#include "game/types.hpp"
-#include "game/map/shipdata.hpp"
-#include "game/unitscoredefinitionlist.hpp"
-#include "game/spec/shiplist.hpp"
-#include "game/config/hostconfiguration.hpp"
-#include "game/hostversion.hpp"
-#include "game/registrationkey.hpp"
-#include "game/element.hpp"
 #include "afl/bits/smallset.hpp"
+#include "game/config/hostconfiguration.hpp"
+#include "game/element.hpp"
+#include "game/hostversion.hpp"
+#include "game/map/shipdata.hpp"
+#include "game/registrationkey.hpp"
+#include "game/root.hpp"
+#include "game/spec/shiplist.hpp"
+#include "game/types.hpp"
+#include "game/unitscoredefinitionlist.hpp"
 
 namespace game { namespace map {
 
@@ -198,6 +199,21 @@ namespace game { namespace map {
         int                  m_numTurns;
         UsedProperties_t     m_usedProperties;
     };
+
+
+    /** Compute optimum warp factor.
+        \param univ              Universe
+        \param id                Ship Id
+        \param moveFrom          Starting point of movement (ship position)
+        \param moveTo            Target of movement (waypoint)
+        \param scoreDefinitions  Unit score definitions (required for experience levels)
+        \param shipList          Ship list (required for hull/beam/torp/engine specs)
+        \param root              Root (provides host configuration, version, key) */
+    int getOptimumWarp(const Universe& univ, Id_t shipId,
+                       Point moveFrom, Point moveTo,
+                       const UnitScoreDefinitionList& scoreDefinitions,
+                       const game::spec::ShipList& shipList,
+                       const Root& root);
 
 } }
 

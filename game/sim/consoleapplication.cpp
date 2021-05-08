@@ -20,6 +20,7 @@
 #include "game/sim/parallelrunner.hpp"
 #include "game/sim/planet.hpp"
 #include "game/sim/resultlist.hpp"
+#include "game/sim/run.hpp"
 #include "game/sim/setup.hpp"
 #include "game/sim/ship.hpp"
 #include "game/sim/simplerunner.hpp"
@@ -343,7 +344,7 @@ game::sim::ConsoleApplication::help()
 {
     afl::string::Translator& tx = translator();
     afl::io::TextWriter& out = standardOutput();
-    out.writeLine(Format(tx("PCC2 Battle Simulation Utility v%s - (c) 2020 Stefan Reuther").c_str(), PCC2_VERSION));
+    out.writeLine(Format(tx("PCC2 Battle Simulation Utility v%s - (c) 2020-2021 Stefan Reuther").c_str(), PCC2_VERSION));
     out.writeLine();
     out.writeLine(Format(tx("Usage:\n"
                             "  %s [-h]\n"
@@ -392,7 +393,7 @@ game::sim::ConsoleApplication::loadSetup(Setup& setup, afl::charset::Charset& ch
 
         // Load into temporary setup
         Setup fileSetup;
-        game::sim::Loader(charset).load(*file, fileSetup);
+        game::sim::Loader(charset, translator()).load(*file, fileSetup);
         if (m_verbose) {
             standardOutput().writeLine(Format(translator()("Loaded %s (%d unit%!1{s%})"), loadFileNames[i], fileSetup.getNumObjects()));
         }
@@ -407,7 +408,7 @@ game::sim::ConsoleApplication::saveSetup(const Setup& setup, afl::charset::Chars
 {
     // ex mergeccb.pas:SaveFile
     Ref<Stream> file = fileSystem().openFile(saveFileName, FileSystem::Create);
-    game::sim::Loader(charset).save(*file, setup);
+    game::sim::Loader(charset, translator()).save(*file, setup);
     if (m_verbose) {
         standardOutput().writeLine(Format(translator()("Saved %s (%d unit%!1{s%})"), saveFileName, setup.getNumObjects()));
     }
@@ -498,7 +499,7 @@ game::sim::ConsoleApplication::showSetup(const Setup& setup, const Session& sess
 }
 
 void
-game::sim::ConsoleApplication::runSimulation(const Setup& setup, const Session& session, const Parameters& params)
+game::sim::ConsoleApplication::runSimulation(Setup& setup, const Session& session, const Parameters& params)
 {
     // Build configuration
     Configuration opts;
@@ -533,6 +534,7 @@ game::sim::ConsoleApplication::runSimulation(const Setup& setup, const Session& 
 
     // Build RNG
     util::RandomNumberGenerator rng(params.seed.orElse(afl::sys::Time::getTickCounter()));
+    game::sim::prepareSimulation(setup, opts, rng);
 
     // Build runner
     std::auto_ptr<Runner> runner;
@@ -543,7 +545,12 @@ game::sim::ConsoleApplication::runSimulation(const Setup& setup, const Session& 
     }
 
     // Run first sim
-    runner->init();
+    afl::string::Translator& tx = translator();
+    afl::io::TextWriter& out = standardOutput();
+    if (!runner->init()) {
+        out.writeLine(tx("Simulation did not produce any battles."));
+        return;
+    }
 
     // Run more sims
     util::StopSignal sig;
@@ -557,8 +564,6 @@ game::sim::ConsoleApplication::runSimulation(const Setup& setup, const Session& 
     }
 
     // Show results
-    afl::string::Translator& tx = translator();
-    afl::io::TextWriter& out = standardOutput();
     out.writeLine(Format(tx("Results after %d simulation%!1{s%}"), runner->resultList().getNumBattles()));
     out.writeLine();
     showClassResults(setup, session, runner->resultList());
@@ -615,6 +620,7 @@ game::sim::ConsoleApplication::showUnitResults(const Setup& setup, const Session
             writeScalar(out, tx("Captured"), r->getNumCaptures());
 
             // Formatting logic taken from WSimUnitStat::render
+            // FIXME: use ResultList::describeUnitResult
             writeItem(out, tx("Damage taken"), r->getDamage(), resultList);
             writeItem(out, tx("Shields"), r->getShield(), resultList);
             if (/**const Planet* pl =*/ dynamic_cast<const Planet*>(obj)) {

@@ -142,7 +142,7 @@ TestGameMapMinefield::testInit()
     TS_ASSERT_EQUALS(u.isValid(), true);
 
     // Erase
-    t.erase();
+    t.erase(0);
     TS_ASSERT_EQUALS(t.isValid(), false);
 }
 

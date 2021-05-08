@@ -7,6 +7,7 @@
 
 #include "t_game_test.hpp"
 #include "afl/sys/semaphore.hpp"
+#include "afl/io/nullfilesystem.hpp"
 
 /** Test SessionThread.
     A: prepare a SessionThread. Fetch session pointer.
@@ -40,5 +41,16 @@ TestGameTestSessionThread::testIt()
     // Wait for completion and check result
     semDone.wait();
     TS_ASSERT_EQUALS(&testee.session(), result);
+}
+
+/** Test file system passing.
+    A: prepare a SessionThread with a custom FileSystem instance.
+    E: file system is published in session */
+void
+TestGameTestSessionThread::testFileSystem()
+{
+    afl::io::NullFileSystem fs;
+    game::test::SessionThread testee(fs);
+    TS_ASSERT_EQUALS(&testee.session().world().fileSystem(), &fs);
 }
 

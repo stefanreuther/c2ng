@@ -14,6 +14,8 @@
 
 namespace game { namespace interface {
 
+    class ProcessListEditor;
+
     /** Storage for notification messages.
 
         Notification messages provide a way for background scripts (in particular, auto tasks) to inform the user.
@@ -43,6 +45,12 @@ namespace game { namespace interface {
             \return Message if any, null if none */
         Message* findMessageByProcessId(uint32_t processId) const;
 
+        /** Find message index by process Id.
+            \param [in]  processId Process ID
+            \param [out] index Index, if any
+            \return true on success */
+        bool findIndexByProcessId(uint32_t processId, size_t& index) const;
+
         /** Get message by index.
             \param index Index [0,getNumMessages())
             \return Message; null if index out of range */
@@ -57,7 +65,7 @@ namespace game { namespace interface {
         /** Check whether message is confirmed.
             \param msg Message to check
             \return true if confirmed */
-        bool isMessageConfirmed(Message* msg) const;
+        bool isMessageConfirmed(const Message* msg) const;
 
         /** Confirm a message.
             \param msg Message
@@ -69,14 +77,18 @@ namespace game { namespace interface {
         void removeOrphanedMessages();
 
         /** Resume processes associated with confirmed messages.
-            \param pgid Process group Id */
-        void resumeConfirmedProcesses(uint32_t pgid);
+            \param editor Mark processes resumed in this ProcessListEditor */
+        void resumeConfirmedProcesses(ProcessListEditor& editor);
 
         // Mailbox interface:
         virtual size_t getNumMessages() const;
         virtual String_t getMessageText(size_t index, afl::string::Translator& tx, const PlayerList& players) const;
         virtual String_t getMessageHeading(size_t index, afl::string::Translator& tx, const PlayerList& players) const;
         virtual int getMessageTurnNumber(size_t index) const;
+        virtual bool isMessageFiltered(size_t index, afl::string::Translator& tx, const PlayerList& players, const game::msg::Configuration& config) const;
+        virtual Flags_t getMessageFlags(size_t index) const;
+        virtual Actions_t getMessageActions(size_t index) const;
+        virtual void performMessageAction(size_t index, Action a);
 
      private:
         bool findMessage(ProcessAssociation_t assoc, size_t& index) const;

@@ -309,16 +309,16 @@ game::maint::DifficultyRater::getTotalRating() const
         * getRating(ProductionRating);
 }
 
-// /** This computes the average amount of minerals on planets. A game is easier
-//     when it has many minerals.
+/** This computes the average amount of minerals on planets. A game is easier
+    when it has many minerals.
 
-//     AMASTER distinguishes between usual and alternate minerals. We assume that
-//     less frequent of the two is the bigger value. AMASTER's selection frequency
-//     is shifted 3/4 towards the 0%/100% point, to avoid that the exceptional high
-//     value dominates the regular value (reading: the exceptional high value needs
-//     extra logistics to use).
+    AMASTER distinguishes between usual and alternate minerals. We assume that
+    less frequent of the two is the bigger value. AMASTER's selection frequency
+    is shifted 3/4 towards the 0%/100% point, to avoid that the exceptional high
+    value dominates the regular value (reading: the exceptional high value needs
+    extra logistics to use).
 
-//     In addition, we add average surface minerals. */
+    In addition, we add average surface minerals. */
 double
 game::maint::DifficultyRater::getAverageMinerals() const
 {
@@ -352,13 +352,13 @@ game::maint::DifficultyRater::getAverageMinerals() const
     return averageMinerals;
 }
 
-// /** Computes the average number of natives on a planet, and that's about it.
-//     The idea is to get an average income, which happens to scale linearly
-//     with the number of natives.
+/** Computes the average number of natives on a planet, and that's about it.
+    The idea is to get an average income, which happens to scale linearly
+    with the number of natives.
 
-//     This assumes that all natives are equally valuable, i.e. the added
-//     benefit of Ins/Rep/Bov cancels out Amo, and governments are equally
-//     distributed. If desired, we could check those, too. */
+    This assumes that all natives are equally valuable, i.e. the added
+    benefit of Ins/Rep/Bov cancels out Amo, and governments are equally
+    distributed. If desired, we could check those, too. */
 double
 game::maint::DifficultyRater::getAverageNatives() const
 {

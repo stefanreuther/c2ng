@@ -105,11 +105,6 @@ namespace {
 }
 
 
-// /** Load VM file.
-//     \param dir Directory to load from
-//     \param fn File name
-//     \param player Player number. Pass 0 to not validate the player number.
-//     \throw FileProblemException when there is a problem */
 void
 game::interface::loadVM(Session& session, int playerNr)
 {
@@ -150,17 +145,12 @@ game::interface::loadVM(Session& session, int playerNr)
     interpreter::vmio::WorldLoadContext ctx2(ctx1, session.processList(), session.world());
 
     // - do it!
-    interpreter::vmio::ObjectLoader(pRoot->charset(), ctx2).load(*file);
+    interpreter::vmio::ObjectLoader(pRoot->charset(), session.translator(), ctx2).load(*file);
 
     // FIXME-> runRunnableProcesses();
     // FIXME-> killTerminatedProcesses();
 }
 
-// /** Save VM file. When the file would be empty, it is erased.
-//     \param dir Directory to save to
-//     \param fn File name
-//     \param player Player number
-//     \throw FileProblemException when there is a problem */
 void
 game::interface::saveVM(Session& session, int playerNr)
 {

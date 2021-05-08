@@ -15,11 +15,14 @@
 #include "afl/string/format.hpp"
 #include "client/downlink.hpp"
 #include "client/si/control.hpp"
+#include "client/widgets/expressionlist.hpp"
 #include "client/widgets/referencelistbox.hpp"
 #include "game/interface/referencecontext.hpp"
 #include "game/proxy/configurationproxy.hpp"
+#include "game/proxy/expressionlistproxy.hpp"
 #include "game/proxy/referencelistproxy.hpp"
 #include "game/proxy/searchproxy.hpp"
+#include "game/proxy/selectionproxy.hpp"
 #include "interpreter/bytecodeobject.hpp"
 #include "interpreter/opcode.hpp"
 #include "interpreter/process.hpp"
@@ -34,17 +37,21 @@
 #include "ui/widgets/framegroup.hpp"
 #include "ui/widgets/inputline.hpp"
 #include "ui/widgets/keydispatcher.hpp"
+#include "ui/widgets/menuframe.hpp"
 #include "ui/widgets/optiongrid.hpp"
 #include "ui/widgets/quit.hpp"
+#include "ui/widgets/scrollbarcontainer.hpp"
 #include "ui/widgets/standarddialogbuttons.hpp"
 #include "ui/widgets/statictext.hpp"
 #include "ui/widgets/stringlistbox.hpp"
 #include "ui/window.hpp"
 #include "util/numberformatter.hpp"
 #include "util/translation.hpp"
+#include "util/unicodechars.hpp"
 
-using game::SearchQuery;
 using afl::functional::createStringTable;
+using game::SearchQuery;
+using game::proxy::SelectionProxy;
 using ui::widgets::FrameGroup;
 
 namespace {
@@ -87,6 +94,17 @@ namespace {
     const size_t NUM_SEARCH_OBJECT = countof(SEARCH_OBJECTS);
 
 
+    /* Locate current object in list.
+       IFUISearch will only provide a Ship or Planet references.
+       However, a search result may contain Starbase references which we want to treat identically to Planet. */
+    bool findObject(const game::ref::UserList& list, game::Reference currentObject, size_t& newPos)
+    {
+        return list.find(currentObject, newPos)
+            || (currentObject.getType() == game::Reference::Planet
+                && list.find(game::Reference(game::Reference::Starbase, currentObject.getId()), newPos));
+    }
+
+
     /*
      *  Search Object Selection Dialog
      */
@@ -97,7 +115,7 @@ namespace {
         SearchObjectDialog(ui::Root& root, afl::string::Translator& tx)
             : m_root(root),
               m_translator(tx),
-              m_buttons(root)
+              m_buttons(root, tx)
             { }
 
         void run(SearchQuery::SearchObjects_t& objs)
@@ -158,14 +176,16 @@ namespace {
 
     class SearchDialog : public client::si::Control {
      public:
-        SearchDialog(const SearchQuery& initialQuery, client::si::UserSide& iface, ui::Root& root, afl::string::Translator& tx, util::NumberFormatter fmt, client::si::OutputState& out);
+        SearchDialog(const SearchQuery& initialQuery, game::Reference currentObject, client::si::UserSide& iface, ui::Root& root, afl::string::Translator& tx, util::NumberFormatter fmt, client::si::OutputState& out);
 
         void run(bool immediate);
 
-        virtual void handleStateChange(client::si::UserSide& ui, client::si::RequestLink2 link, client::si::OutputState::Target target);
-        virtual void handleEndDialog(client::si::UserSide& ui, client::si::RequestLink2 link, int code);
-        virtual void handlePopupConsole(client::si::UserSide& ui, client::si::RequestLink2 link);
-        virtual void handleSetViewRequest(client::si::UserSide& ui, client::si::RequestLink2 link, String_t name, bool withKeymap);
+        virtual void handleStateChange(client::si::RequestLink2 link, client::si::OutputState::Target target);
+        virtual void handleEndDialog(client::si::RequestLink2 link, int code);
+        virtual void handlePopupConsole(client::si::RequestLink2 link);
+        virtual void handleSetViewRequest(client::si::RequestLink2 link, String_t name, bool withKeymap);
+        virtual void handleUseKeymapRequest(client::si::RequestLink2 link, String_t name, int prefix);
+        virtual void handleOverlayMessageRequest(client::si::RequestLink2 link, String_t text);
         virtual client::si::ContextProvider* createContextProvider();
 
      private:
@@ -184,6 +204,7 @@ namespace {
         // Proxies
         game::proxy::ReferenceListProxy m_refListProxy;
         game::proxy::SearchProxy m_searchProxy;
+        game::proxy::ExpressionListProxy m_exProxy;
 
         // Widgets
         ui::EventLoop m_loop;
@@ -196,10 +217,15 @@ namespace {
         ui::widgets::Button m_btnMark;
         ui::widgets::Button m_btnGlobal;
         ui::widgets::Button m_btnHelp;
+        ui::widgets::Button m_btnHistory;
         client::widgets::ReferenceListbox m_refList;
 
         // Status
         SearchQuery m_query;
+        game::ref::List m_result;
+
+        // Current object
+        const game::Reference m_currentObject;
 
         void onSearch();
         void onSuccess(const game::ref::List& list);
@@ -207,9 +233,15 @@ namespace {
         void onListChange(const game::ref::UserList& list);
         void onOptionClick(int id);
         void onGoto();
+        void onMark();
 
         void onReturn();
         void onDown();
+        void onHistory();
+
+        void onSelectionManager();
+        void onPreviousSelectionLayer();
+        void onNextSelectionLayer();
 
         void editSearchObjects();
         void editMatchType();
@@ -236,7 +268,7 @@ namespace {
 
 
 inline
-SearchDialog::SearchDialog(const SearchQuery& initialQuery, client::si::UserSide& iface, ui::Root& root, afl::string::Translator& tx, util::NumberFormatter fmt, client::si::OutputState& out)
+SearchDialog::SearchDialog(const SearchQuery& initialQuery, game::Reference currentObject, client::si::UserSide& iface, ui::Root& root, afl::string::Translator& tx, util::NumberFormatter fmt, client::si::OutputState& out)
     : Control(iface, root, tx),
       m_root(root),
       m_translator(tx),
@@ -244,18 +276,22 @@ SearchDialog::SearchDialog(const SearchQuery& initialQuery, client::si::UserSide
       m_outputState(out),
       m_refListProxy(iface.gameSender(), root.engine().dispatcher()),
       m_searchProxy(iface.gameSender(), root.engine().dispatcher()),
+      m_exProxy(iface.gameSender(), game::config::ExpressionLists::Search),
       m_loop(root),
       m_input(1000, 30, root),
       m_options(0, 0, root),
-      m_resultStatus(String_t(), util::SkinColor::Static, gfx::FontRequest().addSize(1), root.provider(), 0),
+      m_resultStatus(String_t(), util::SkinColor::Static, gfx::FontRequest().addSize(1), root.provider(), gfx::LeftAlign),
       m_btnSearch(tx("Search!"), 0, root),
       m_btnGoto(tx("Go to"), 0, root),
       m_btnClose(tx("Close"), util::Key_Escape, root),
       m_btnMark(tx("Mark..."), 'm', root),
       m_btnGlobal(tx("Global..."), 'g', root),
       m_btnHelp(tx("Help"), 'h', root),
+      m_btnHistory(UTF_DOWN_ARROW, 0, root),
       m_refList(root),
-      m_query(initialQuery)
+      m_query(initialQuery),
+      m_result(),
+      m_currentObject(currentObject)
 {
     // ex WSearchDialog::WSearchDialog
     m_searchProxy.sig_success.add(this, &SearchDialog::onSuccess);
@@ -264,6 +300,7 @@ SearchDialog::SearchDialog(const SearchQuery& initialQuery, client::si::UserSide
     m_refListProxy.setConfigurationSelection(game::ref::SEARCH);
     m_options.sig_click.add(this, &SearchDialog::onOptionClick);
     m_btnSearch.sig_fire.add(this, &SearchDialog::onSearch);
+    m_btnHistory.sig_fire.add(this, &SearchDialog::onHistory);
 }
 
 void
@@ -272,7 +309,10 @@ SearchDialog::run(bool immediate)
     // ex WSearchDialog::init (sort-of)
     // VBox
     //   OptionGrid
-    //   FrameGroup > InputLine          // tbd: history drop-down
+    //   HBox
+    //   HBox g1
+    //     FrameGroup > InputLine
+    //     Button (history dropdown)
     //   HBox g2
     //     StaticText m_resultStatus
     //     Button "Search!"
@@ -289,7 +329,6 @@ SearchDialog::run(bool immediate)
     ui::Window& win = del.addNew(new ui::Window(m_translator("Search Object"), m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
 
     // Options
-    // FIXME: addPossibleValues for objects
     m_options.addItem(Option_SearchObjects, 'o', m_translator("Objects"))
         .addPossibleValues(SearchObjectLabel(m_translator));
     m_options.addItem(Option_MatchType,     't', m_translator("Search type"))
@@ -299,7 +338,10 @@ SearchDialog::run(bool immediate)
     win.add(m_options);
 
     // Input
-    win.add(FrameGroup::wrapWidget(del, m_root.colorScheme(), ui::LoweredFrame, m_input));
+    ui::Group& g1 = del.addNew(new ui::Group(ui::layout::HBox::instance0));
+    g1.add(FrameGroup::wrapWidget(del, m_root.colorScheme(), ui::LoweredFrame, m_input));
+    g1.add(m_btnHistory);
+    win.add(g1);
     m_input.setFont(gfx::FontRequest().addSize(1));
 
     // "Search!" button
@@ -310,26 +352,31 @@ SearchDialog::run(bool immediate)
     win.add(g2);
 
     // Result list
-    win.add(FrameGroup::wrapWidget(del, m_root.colorScheme(), ui::LoweredFrame, m_refList));
+    win.add(FrameGroup::wrapWidget(del, m_root.colorScheme(), ui::LoweredFrame,
+                                   del.addNew(new ui::widgets::ScrollbarContainer(m_refList, m_root))));
     m_refList.setNumLines(20);
 
     // Lower buttons
     ui::Group& g4 = del.addNew(new ui::Group(ui::layout::HBox::instance5));
     g4.add(m_btnGoto);
     g4.add(m_btnClose);
-    // FIXME: g4.add(m_btnMark);
+    g4.add(m_btnMark);
     // FIXME: g4.add(m_btnGlobal);
     g4.add(del.addNew(new ui::Spacer()));
     g4.add(m_btnHelp);
     win.add(g4);
     m_btnGoto.sig_fire.add(this, &SearchDialog::onGoto);
     m_btnClose.sig_fire.addNewClosure(m_loop.makeStop(0));
+    m_btnMark.sig_fire.add(this, &SearchDialog::onMark);
 
     // Admin
     ui::widgets::KeyDispatcher& disp = del.addNew(new ui::widgets::KeyDispatcher());
     disp.add(util::Key_Return, this, &SearchDialog::onReturn);
     disp.add(util::Key_Down,   this, &SearchDialog::onDown);
     disp.add(util::Key_F7,     &m_input, &ui::widgets::InputLine::requestFocus);
+    disp.add(util::KeyMod_Alt + '.', this, &SearchDialog::onSelectionManager);
+    disp.add(util::KeyMod_Alt + util::Key_Left, this, &SearchDialog::onPreviousSelectionLayer);
+    disp.add(util::KeyMod_Alt + util::Key_Right, this, &SearchDialog::onNextSelectionLayer);
     win.add(disp);
 
     ui::widgets::FocusIterator& it = del.addNew(new ui::widgets::FocusIterator(ui::widgets::FocusIterator::Tab));
@@ -356,49 +403,39 @@ SearchDialog::run(bool immediate)
 }
 
 void
-SearchDialog::handleStateChange(client::si::UserSide& ui, client::si::RequestLink2 link, client::si::OutputState::Target target)
+SearchDialog::handleStateChange(client::si::RequestLink2 link, client::si::OutputState::Target target)
 {
-    using client::si::OutputState;
-    switch (target) {
-     case OutputState::NoChange:
-        ui.continueProcess(link);
-        break;
-
-     case OutputState::PlayerScreen:
-     case OutputState::ExitProgram:
-     case OutputState::ExitGame:
-     case OutputState::ShipScreen:
-     case OutputState::PlanetScreen:
-     case OutputState::BaseScreen:
-     case OutputState::ShipTaskScreen:
-     case OutputState::PlanetTaskScreen:
-     case OutputState::BaseTaskScreen:
-     case OutputState::Starchart:
-        ui.detachProcess(link);
-        m_outputState.set(link, target);
-        m_loop.stop(0);
-        break;
-    }
+    dialogHandleStateChange(link, target, m_outputState, m_loop, 0);
 }
 
 void
-SearchDialog::handleEndDialog(client::si::UserSide& ui, client::si::RequestLink2 link, int /*code*/)
+SearchDialog::handleEndDialog(client::si::RequestLink2 link, int code)
 {
-    ui.detachProcess(link);
-    m_outputState.set(link, client::si::OutputState::NoChange);
-    m_loop.stop(0);
+    dialogHandleEndDialog(link, code, m_outputState, m_loop, 0);
 }
 
 void
-SearchDialog::handlePopupConsole(client::si::UserSide& ui, client::si::RequestLink2 link)
+SearchDialog::handlePopupConsole(client::si::RequestLink2 link)
 {
-    defaultHandlePopupConsole(ui, link);
+    defaultHandlePopupConsole(link);
 }
 
 void
-SearchDialog::handleSetViewRequest(client::si::UserSide& ui, client::si::RequestLink2 link, String_t name, bool withKeymap)
+SearchDialog::handleSetViewRequest(client::si::RequestLink2 link, String_t name, bool withKeymap)
 {
-    defaultHandleSetViewRequest(ui, link, name, withKeymap);
+    defaultHandleSetViewRequest(link, name, withKeymap);
+}
+
+void
+SearchDialog::handleUseKeymapRequest(client::si::RequestLink2 link, String_t name, int prefix)
+{
+    defaultHandleUseKeymapRequest(link, name, prefix);
+}
+
+void
+SearchDialog::handleOverlayMessageRequest(client::si::RequestLink2 link, String_t text)
+{
+    defaultHandleOverlayMessageRequest(link, text);
 }
 
 client::si::ContextProvider*
@@ -429,23 +466,33 @@ SearchDialog::onSuccess(const game::ref::List& list)
     // ex WSearchDialog::onResultChange (part)
     m_resultStatus.setText(afl::string::Format(m_translator("%d result%!1{s%}"),
                                                m_format.formatNumber(static_cast<int32_t>(list.size()))));
+    m_result = list;
 
     if (list.size() == 0) {
         // Nothing found
-        // FIXME: give advice
         ui::dialogs::MessageBox(m_translator("Your query didn't match any object."),
                                 m_translator("Search Object"),
-                                m_root).doOkDialog();
+                                m_root).doOkDialog(m_translator);
     } else {
         // Set list content. This will answer with onListChange.
         setListContent(list);
+    }
+
+    if (afl::string::strTrim(m_query.getQuery()).empty()) {
+        // empty query (match all); ignore
+    } else if (m_query.getMatchType() == SearchQuery::MatchTrue) {
+        m_exProxy.pushRecent("[]", m_query.getQuery());
+    } else if (m_query.getMatchType() == SearchQuery::MatchFalse) {
+        m_exProxy.pushRecent("[!]", m_query.getQuery());
+    } else {
+        // query for name/position does not go on LRU list
     }
 }
 
 void
 SearchDialog::onError(String_t err)
 {
-    ui::dialogs::MessageBox(err, m_translator("Search Object"), m_root).doOkDialog();
+    ui::dialogs::MessageBox(err, m_translator("Search Object"), m_root).doOkDialog(m_translator);
     m_input.requestFocus();
 }
 
@@ -463,9 +510,16 @@ SearchDialog::onListChange(const game::ref::UserList& list)
     m_btnMark.setState(ui::Widget::DisabledState, newEmpty);
     m_btnGlobal.setState(ui::Widget::DisabledState, newEmpty);
 
-    // Update keyboard focus
+    // Update keyboard focus and position
+    // List transitions to empty > nonempty when a search result applies.
+    // Do not change anything on a nonempty > nonempty transition, e.g. data change.
     if (oldEmpty && !newEmpty) {
         m_refList.requestFocus();
+
+        size_t newPos = 0;
+        if (findObject(list, m_currentObject, newPos)) {
+            m_refList.setCurrentItem(newPos);
+        }
     }
 }
 
@@ -493,6 +547,42 @@ SearchDialog::onGoto()
 }
 
 void
+SearchDialog::onMark()
+{
+    // ex WSearchDialog::doSelectionCommands
+    enum { Mark, MarkOnly, Unmark };
+
+    ui::widgets::StringListbox list(m_root.provider(), m_root.colorScheme());
+    list.addItem(Mark,     m_translator("Mark found objects"));
+    list.addItem(MarkOnly, m_translator("Mark only found objects"));
+    list.addItem(Unmark,   m_translator("Unmark found objects"));
+
+    ui::EventLoop loop(m_root);
+    if (!ui::widgets::MenuFrame(ui::layout::VBox::instance0, m_root, loop).doMenu(list, m_btnMark.getExtent().getBottomLeft())) {
+        return;
+    }
+
+    // Create a short-lived SelectionProxy; we don't need any callbacks that would necessitate a long-lived one.
+    SelectionProxy proxy(interface().gameSender(), m_root.engine().dispatcher());
+
+    // Commands
+    int32_t key = 0;
+    list.getCurrentKey(key);
+    switch (key) {
+     case Mark:
+        proxy.markList(game::map::Selections::CurrentLayer, m_result, true);
+        break;
+     case MarkOnly:
+        proxy.clearLayer(game::map::Selections::CurrentLayer);
+        proxy.markList(game::map::Selections::CurrentLayer, m_result, true);
+        break;
+     case Unmark:
+        proxy.markList(game::map::Selections::CurrentLayer, m_result, false);
+        break;
+    }
+}
+
+void
 SearchDialog::onReturn()
 {
     if (m_refList.hasState(ui::Widget::FocusedState)) {
@@ -505,10 +595,73 @@ SearchDialog::onReturn()
 void
 SearchDialog::onDown()
 {
-    // if (event.key.code == SDLK_DOWN && query_input->hasState(st_Focused)) {
-    //     onQueryDropdown();
-    //     return true;
-    // }
+    if (m_input.hasState(ui::Widget::FocusedState)) {
+        onHistory();
+    }
+}
+
+void
+SearchDialog::onHistory()
+{
+    // ex WSearchDialog::onQueryDropdown
+    m_input.requestFocus();
+
+    String_t value = m_input.getText();
+    String_t flags;
+    if (client::widgets::doExpressionListPopup(m_root, m_exProxy, m_btnHistory.getExtent().getBottomLeft(), value, flags, m_translator)) {
+        // User has selected an item. Parse it.
+        SearchQuery::SearchObjects_t obj;
+        SearchQuery::MatchType type = SearchQuery::MatchTrue;
+
+        for (size_t i = 0; i < flags.size(); ++i) {
+            switch (flags[i]) {
+             case 'S': case 's':
+                obj += SearchQuery::SearchShips;
+                break;
+             case 'P': case 'p':
+                obj += SearchQuery::SearchPlanets;
+                break;
+             case 'B': case 'b':
+                obj += SearchQuery::SearchBases;
+                break;
+             case '!':
+                type = SearchQuery::MatchFalse;
+                break;
+            }
+        }
+
+        // If it specifies an object type, set that
+        if (!obj.empty()) {
+            m_query.setSearchObjects(obj);
+        }
+
+        // Set type and query
+        m_query.setMatchType(type);
+        m_input.setText(value);
+        setValues();
+    }
+}
+
+void
+SearchDialog::onSelectionManager()
+{
+    executeCommandWait("UI.SelectionManager", false, "(Search)");
+}
+
+void
+SearchDialog::onPreviousSelectionLayer()
+{
+    SelectionProxy(interface().gameSender(), m_root.engine().dispatcher())
+        .setCurrentLayer(game::map::Selections::PreviousLayer);
+    // FIXME: show updated layer
+}
+
+void
+SearchDialog::onNextSelectionLayer()
+{
+    SelectionProxy(interface().gameSender(), m_root.engine().dispatcher())
+        .setCurrentLayer(game::map::Selections::NextLayer);
+    // FIXME: show updated layer
 }
 
 void
@@ -527,7 +680,7 @@ SearchDialog::editMatchType()
         box.addItem(int32_t(i), afl::string::Format("%d - %s", i+1, m_translator(MATCH_TYPES[i])));
     }
     box.setCurrentKey(m_query.getMatchType());
-    if (ui::widgets::doStandardDialog(m_translator("Search Object"), m_translator("Search type"), box, true, m_root)) {
+    if (ui::widgets::doStandardDialog(m_translator("Search Object"), m_translator("Search type"), box, true, m_root, m_translator)) {
         int32_t k;
         if (box.getCurrentKey(k)) {
             m_query.setMatchType(SearchQuery::MatchType(k));
@@ -556,8 +709,6 @@ SearchDialog::setListContent(const game::ref::List& list)
             { }
         void call(game::Session& /*session*/, game::ref::ListObserver& obs)
             { obs.setList(m_list); }
-        Init* clone() const
-            { return new Init(m_list); }
      private:
         game::ref::List m_list;
     };
@@ -566,15 +717,16 @@ SearchDialog::setListContent(const game::ref::List& list)
 
 void
 client::dialogs::doSearchDialog(const game::SearchQuery& initialQuery,
+                                game::Reference currentObject,
                                 bool immediate,
                                 client::si::UserSide& iface,
                                 ui::Root& root,
                                 afl::string::Translator& tx,
                                 client::si::OutputState& out)
 {
-    Downlink link(root);
+    Downlink link(root, tx);
     game::proxy::ConfigurationProxy config(iface.gameSender());
 
-    SearchDialog dlg(initialQuery, iface, root, tx, config.getNumberFormatter(link), out);
+    SearchDialog dlg(initialQuery, currentObject, iface, root, tx, config.getNumberFormatter(link), out);
     dlg.run(immediate);
 }

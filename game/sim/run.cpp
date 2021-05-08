@@ -25,6 +25,12 @@
 #include "game/vcr/classic/database.hpp"
 #include "game/vcr/classic/nullvisualizer.hpp"
 #include "game/vcr/classic/types.hpp"
+#include "game/vcr/flak/algorithm.hpp"
+#include "game/vcr/flak/configuration.hpp"
+#include "game/vcr/flak/database.hpp"
+#include "game/vcr/flak/gameenvironment.hpp"
+#include "game/vcr/flak/nullvisualizer.hpp"
+#include "game/vcr/flak/setup.hpp"
 #include "game/vcr/object.hpp"
 #include "game/vcr/statistic.hpp"
 #include "util/math.hpp"
@@ -530,28 +536,28 @@ namespace {
             || (planet_wants_attack && !isImmune(left, opts, list, config));
     }
 
-    // /** Check whether any two objects attack each other. Unlike that
-    //     isAttacking() functions, this one can take any object combination
-    //     in any order. */
-    // bool isAttackingAny(const Object& a, const Object& b, const Configuration& opts, const ShipList& list, const HostConfiguration& config)
-    // {
-    //     // isAttackingAny(const GSimObject& a, const GSimObject& b, const GSimOptions& opts)
-    //     const Ship* as   = dynamic_cast<const Ship*>(&a);
-    //     const Ship* bs   = dynamic_cast<const Ship*>(&b);
-    //     const Planet* ap = dynamic_cast<const Planet*>(&a);
-    //     const Planet* bp = dynamic_cast<const Planet*>(&b);
+    /** Check whether any two objects attack each other. Unlike that
+        isAttacking() functions, this one can take any object combination
+        in any order. */
+    bool isAttackingAny(const Object& a, const Object& b, const Configuration& opts, const ShipList& list, const HostConfiguration& config)
+    {
+        // isAttackingAny(const GSimObject& a, const GSimObject& b, const GSimOptions& opts)
+        const Ship* as   = dynamic_cast<const Ship*>(&a);
+        const Ship* bs   = dynamic_cast<const Ship*>(&b);
+        const Planet* ap = dynamic_cast<const Planet*>(&a);
+        const Planet* bp = dynamic_cast<const Planet*>(&b);
 
-    //     if (as && bs) {
-    //         return isAttacking(*as, *bs, opts, config) || isAttacking(*bs, *as, opts, config);
-    //     }
-    //     if (as && bp) {
-    //         return isAttacking(*as, *bp, opts, list, config);
-    //     }
-    //     if (ap && bs) {
-    //         return isAttacking(*bs, *ap, opts, list, config);
-    //     }
-    //     return false;
-    // }
+        if (as && bs) {
+            return isAttacking(*as, *bs, opts, list, config) || isAttacking(*bs, *as, opts, list, config);
+        }
+        if (as && bp) {
+            return isAttacking(*as, *bp, opts, list, config);
+        }
+        if (ap && bs) {
+            return isAttacking(*bs, *ap, opts, list, config);
+        }
+        return false;
+    }
 
     /* Check whether ship is armed. */
     bool isArmed(const Ship& sh)
@@ -1597,7 +1603,7 @@ namespace {
             if (Ship* iship = dynamic_cast<Ship*>(battle_order[interceptor])) {
                 Ship* target;
                 if (iship->getInterceptId() != 0 &&
-                    (target = const_cast<Ship*>(setup.findShipById(iship->getInterceptId()))) != 0
+                    (target = setup.findShipById(iship->getInterceptId())) != 0
                     && target != iship)
                 {
                     bool loop = true;
@@ -1784,579 +1790,620 @@ namespace {
         }
     }
 
-// #ifdef CONF_FLAK_SUPPORT
-// /********************************** FLAK *********************************/
+    // FIXME: ShipInfo and PermutedSorter as well as the following functions
+    // are almost copied verbatim from pdk-host.cc!
+    // FIXME: merge with regular packing?
 
-// // FIXME: ShipInfo and PermutedSorter as well as the following functions
-// // are almost copied verbatim from pdk-host.cc!
+    /** Get damage-restricted tech level for a base. */
+    int getBaseDamageTech(const Planet& pl, int have_tech)
+    {
+        return std::min(int((100 - pl.getBaseDamage()) / 10),
+                        int(have_tech));
+    }
 
-// /** Get damage-restricted tech level for a base. */
-// static int
-// getBaseDamageTech(const GSimPlanet& pl, int have_tech)
-// {
-//     return std::min(int((100 - pl.getBaseDamage()) / 10),
-//                     int(have_tech));
-// }
+    /** Compute number of beams on a planet. */
+    int getNumPlanetBeams(const Planet& pl, const HostConfiguration& config)
+    {
+        // ex getPlanetBeamCount
+        int defense = pl.getDefense();
+        if (pl.hasBase()) {
+            defense += pl.getBaseDefense();
+        }
+        defense = util::roundToInt(std::sqrt(defense / 3.0));
+        return std::min(defense, int(config[HostConfiguration::AllowAlternativeCombat]() ? game::vcr::flak::FLAK_MAX_BEAMS : 10));
+    }
 
-// /** Compute number of beams on a planet. */
-// static int
-// getPlanetBeamCount(const GSimPlanet& pl)
-// {
-//     int defense = pl.getDefense();
-//     if (pl.hasBase())
-//         defense += pl.getBaseDefense();
-//     defense = roundToInt(std::sqrt(defense / 3.0));
-//     return std::min(defense, int(config.AllowAlternativeCombat() ? FLAK_MAX_BEAMS : 10));
-// }
+    /** Compute beam type on a planet. */
+    int getPlanetBeamType(const Planet& pl)
+    {
+        // ex getPlanetBeamTech
+        int tech = util::roundToInt(std::sqrt(pl.getDefense() / 2.0));
+        if (tech > 10) {
+            return 10;
+        } else if (pl.hasBase() && getBaseDamageTech(pl, pl.getBaseBeamTech()) > tech) {
+            return getBaseDamageTech(pl, pl.getBaseBeamTech());
+        } else {
+            return tech;
+        }
+    }
 
-// /** Compute beam type on a planet. */
-// static int
-// getPlanetBeamTech(const GSimPlanet& pl)
-// {
-//     int tech = roundToInt(std::sqrt(pl.getDefense() / 2.0));
-//     if (tech > 10)
-//         return 10;
-//     else if (pl.hasBase() && getBaseDamageTech(pl, pl.getBaseBeamTech()) > tech)
-//         return getBaseDamageTech(pl, pl.getBaseBeamTech());
-//     else
-//         return tech;
-// }
+    /** Compute number of planetary tubes. */
+    int getNumPlanetLaunchers(const Planet& pl, const HostConfiguration& config)
+    {
+        // ex getPlanetTubeCount
+        if (!config[HostConfiguration::PlanetsHaveTubes]()) {
+            return 0;
+        }
+        int defense = pl.getDefense();
+        if (pl.hasBase()) {
+            defense += pl.getBaseDefense();
+        }
+        defense = util::roundToInt(std::sqrt(defense / 4.0));
+        return std::min(defense, int(game::vcr::flak::FLAK_MAX_TORPS));
+    }
 
-// /** Compute number of planetary tubes. */
-// static int
-// getPlanetTubeCount(const GSimPlanet& pl)
-// {
-//     if (!config.PlanetsHaveTubes())
-//         return 0;
-//     int defense = pl.getDefense();
-//     if (pl.hasBase())
-//         defense += pl.getBaseDefense();
-//     defense = roundToInt(std::sqrt(defense / 4.0));
-//     return std::min(defense, int(FLAK_MAX_TORPS));
-// }
+    /** Compute torpedo type of a planet. */
+    int getPlanetTorpedoType(const Planet& pl, const ShipList& shipList)
+    {
+        // ex getPlanetTorpType
+        int tech = util::roundToInt(std::sqrt(pl.getDefense() / 2.0));
+        if (tech > shipList.launchers().size()) {
+            tech = shipList.launchers().size();
+        }
+        if (pl.hasBase() && getBaseDamageTech(pl, pl.getBaseTorpedoTech()) > tech) {
+            return getBaseDamageTech(pl, pl.getBaseTorpedoTech());
+        } else {
+            return tech;
+        }
+    }
 
-// /** Compute torpedo type of a planet. */
-// static int
-// getPlanetTorpType(const GSimPlanet& pl)
-// {
-//     int tech = roundToInt(std::sqrt(pl.getDefense() / 2.0));
-//     if (tech > list.launchers().size())
-//         return list.launchers().size();
-//     else if (pl.hasBase() && getBaseDamageTech(pl, pl.getBaseTorpedoTech()) > tech)
-//         return getBaseDamageTech(pl, pl.getBaseTorpedoTech());
-//     else
-//         return tech;
-// }
+    /** Compute number of torpedoes on a planet. */
+    int getNumPlanetTorpedoes(const Planet& pl, const ShipList& shipList, const HostConfiguration& config)
+    {
+        // ex getPlanetTorpCount
+        int torps = getNumPlanetLaunchers(pl, config) * config[HostConfiguration::PlanetaryTorpsPerTube](pl.getOwner());
+        if (pl.hasBase()) {
+            torps += pl.getNumBaseTorpedoesAsType(getPlanetTorpedoType(pl, shipList), shipList);
+        }
+        return torps;
+    }
 
-// /** Compute number of torpedoes on a planet. */
-// static int
-// getPlanetTorpCount(const GSimPlanet& pl)
-// {
-//     int torps = getPlanetTubeCount(pl) * config.PlanetaryTorpsPerTube(pl.getOwner());
-//     if (pl.hasBase())
-//         torps += pl.getNumBaseTorpedoesAsType(getPlanetTorpType(pl));
-//     return torps;
-// }
+    /** Compute number of fighter bays on a planet. */
+    int getNumPlanetBays(const Planet& pl)
+    {
+        // ex getPlanetBayCount
+        int bays = util::roundToInt(std::sqrt((double) pl.getDefense()));
+        if (pl.hasBase()) {
+            bays += 5;
+        }
+        return bays;
+    }
 
-// /** Compute number of fighter bays on a planet. */
-// static int
-// getPlanetBayCount(const GSimPlanet& pl)
-// {
-//     int bays = roundToInt(std::sqrt((double) pl.getDefense()));
-//     if (pl.hasBase())
-//         bays += 5;
-//     return bays;
-// }
+    /** Compute number of fighters on a planet. */
+    int getNumPlanetFighters(const Planet& pl)
+    {
+        // ex getPlanetFighterCount
+        int fighters = util::roundToInt(std::sqrt((double) pl.getDefense()));
+        if (pl.hasBase()) {
+            fighters += pl.getNumBaseFighters();
+        }
+        return fighters;
+    }
 
-// /** Compute number of fighters on a planet. */
-// static int
-// getPlanetFighterCount(const GSimPlanet& pl)
-// {
-//     int fighters = roundToInt(std::sqrt((double) pl.getDefense()));
-//     if (pl.hasBase())
-//         fighters += pl.getNumBaseFighters();
-//     return fighters;
-// }
-
-// /** Compute combat mass of a planet. */
-// static int
-// getPlanetCombatMass(const GSimPlanet& pl)
-// {
-//     int mass = 100 + pl.getDefense();
-//     if (pl.hasBase())
-//         mass += pl.getBaseDefense();
-//     return mass;
-// }
-
-
-// namespace {
-//     struct ShipInfo {
-//         /** FCBO value, plus 100. */
-//         int fcbo_plus_100;
-//         /** Ship data. */
-//         TFlakShip data;
-//         /** Link to original unit. */
-//         GSimObject* orig;
-
-//         ShipInfo& initFromShip(GSimShip& sh);
-//         ShipInfo& initFromPlanet(GSimPlanet& pl);
-
-//         /** True iff this is a planet. */
-//         bool  isPlanet() const
-//             { return data.flags & flak_IsPlanet; }
-//     };
-// }
-
-// /** Initialize data for a ship. */
-// ShipInfo&
-// ShipInfo::initFromShip(GSimShip& sh)
-// {
-//     orig = &sh;
-
-//     const int level = sh.getExperienceLevel();
-
-//     storeBasicString(data.name, convertUtf8ToGame(sh.getName()));
-//     data.damage_init   = sh.getDamage();
-//     data.crew_init     = sh.getCrew();
-//     data.id            = sh.getId();
-//     data.player        = sh.getOwner();
-//     data.hull          = sh.getHull();
-//     data.level         = level;
-//     data.beam_count    = sh.getNumBeams();
-//     data.beam_type     = sh.getBeamType();
-//     data.torp_lcount   = sh.getTorpLauncherCount();
-//     data.torp_count    = sh.getTorpLauncherCount() ? sh.getAmmo() : 0;
-//     data.torp_type     = sh.getTorpedoType();
-//     data.bay_count     = sh.getNumBays();
-//     data.fighter_count = sh.getTorpLauncherCount() ? 0 : sh.getAmmo();
-//     data.mass          = sh.getMass();
-//     data.shield_init   = sh.getShield();
-
-//     /* NTP */
-//     if (sh.getFCode() == "NTP")
-//         data.fighter_count = data.torp_count = 0;
-
-//     /* ESB */
-//     int esb = 0;
-//     if (config.AllowEngineShieldBonus())
-//         esb += config.EngineShieldBonusRate(data.player);
-//     if (level)
-//         esb += config.EModEngineShieldBonusRate(level);
-//     if (esb)
-//         data.mass += getEngine(sh.getEngineType()).getCost().get(el_Money) * esb / 100;
-
-//     /* Fed crew bonus */
-//     if (config.AllowFedCombatBonus() && config.getPlayerRaceNumber(data.player) == 1)
-//         data.mass += 50;
-
-//     /* extra bays */
-//     if (data.bay_count) {
-//         data.bay_count += config.ExtraFighterBays(data.player);
-//         data.bay_count += getExperienceBonus(config.EModExtraFighterBays, level);
-//         if (data.bay_count > FLAK_MAX_BAYS)
-//             data.bay_count = FLAK_MAX_BAYS;
-//     }
-
-//     data.flags = 0;  // not a planet
-//     fcbo_plus_100 = std::min(getFCodeValuePHost(sh) + 100, 1099);
-
-//     FlakBattle::initShip(data);
-
-//     /* rating overrides */
-//     if (sh.getFlags() & sh.fl_RatingOverride) {
-//         data.rating = sh.getFlakRatingOverride();
-//         data.compensation_rating = sh.getFlakCompensationOverride();
-//     }
-
-//     return *this;
-// }
-
-// /** Initialize data from planet. */
-// ShipInfo&
-// ShipInfo::initFromPlanet(GSimPlanet& pl)
-// {
-//     orig = &pl;
-
-//     const int level = pl.getExperienceLevel();
-
-//     storeBasicString(data.name, convertUtf8ToGame(pl.getName()));
-//     data.damage_init   = 0; /* planet starts with 0 damage in every turn */
-//     data.crew_init     = 0;
-//     data.id            = pl.getId();
-//     data.player        = pl.getOwner();
-//     data.hull          = 0;
-//     data.level         = level;
-//     data.beam_count    = getPlanetBeamCount(pl);
-//     data.beam_type     = getPlanetBeamTech(pl);
-//     data.torp_lcount   = getPlanetTubeCount(pl);
-//     data.torp_count    = getPlanetTorpCount(pl);
-//     data.torp_type     = getPlanetTorpType(pl);
-//     data.bay_count     = getPlanetBayCount(pl);
-//     data.fighter_count = getPlanetFighterCount(pl);
-//     data.mass          = getPlanetCombatMass(pl);
-//     data.shield_init   = 100; /* planet starts with 100 shield in every turn */
-
-//     /* extra bays */
-//     if (data.bay_count) {
-//         if (level)
-//             data.bay_count += config.EModExtraFighterBays(level);
-//         if (data.bay_count > FLAK_MAX_BAYS)
-//             data.bay_count = FLAK_MAX_BAYS;
-//     }
-
-//     data.flags = flak_IsPlanet;
-//     fcbo_plus_100 = std::min(getFCodeValuePHost(pl) + 100, 1099);
-//     FlakBattle::initShip(data);
-
-//     return *this;
-// }
-
-// /** Check whether any ship from me can attack any ship from them. */
-// static bool
-// canAttackThisFleet(const FlakBattle& battle, const FlakFleet& me, const FlakFleet& them,
-//                    const std::vector<ShipInfo>& info,
-//                    const GSimOptions& opts)
-// {
-//     // shortcut
-//     if (&me == &them)
-//         return false;
-
-//     // check it
-//     for (int my_index = 0; my_index < me.data.num_ships; ++my_index) {
-//         for (int their_index = 0; their_index < them.data.num_ships; ++their_index) {
-//             const FlakShip& my_ship = battle.getShipByNumber(me.data.first_ship + my_index);
-//             const FlakShip& their_ship = battle.getShipByNumber(them.data.first_ship + their_index);
-//             if (isAttackingAny(*info[me.data.first_ship + my_index].orig, *info[them.data.first_ship + their_index].orig, opts))
-//                 if (my_ship.isArmed() || their_ship.isArmed())
-//                     return true;
-//         }
-//     }
-//     return false;
-// }
-
-// /** Compute attack list for one fleet. */
-// static void
-// computeAttackList(FlakBattle& battle, FlakFleet& fleet, const std::vector<ShipInfo>& info,
-//                   const GSimOptions& opts)
-// {
-//     int32 first_entry = battle.getAttackListNumber();
-
-//     /* only the FLAK_ALGORITHM >= 20060531 case */
-//     /* Fleet/fleet attack relations must be symmetrical. If any ship
-//        from a fleet can attack/be attacked by us, we must be allowed
-//        to attack all ships from that fleet. Otherwise, it could happen
-//        that the other fleet is still aggressive to us, but we do no
-//        longer have someone to attack. */
-//     /* FIXME: this code is really ugly. And it is almost a duplicate
-//        of the same thing in pdk-host.cc */
-//     for (int other_fleet_nr = 0; other_fleet_nr < battle.getNumFleets(); ++other_fleet_nr) {
-//         const FlakFleet& other_fleet = battle.getFleetByNumber(other_fleet_nr);
-//         if (canAttackThisFleet(battle, fleet, other_fleet, info, opts)) {
-//             for (int other_index = 0; other_index < other_fleet.data.num_ships; ++other_index) {
-//                 const int other_member = other_index + other_fleet.data.first_ship;
-//                 const FlakShip& them = battle.getShipByNumber(other_member);
-//                 bool can_attack = false, match_pe = false, match_fc = false;
-//                 // for each fleet member
-//                 for (int fleet_index = 0; fleet_index < fleet.data.num_ships; ++fleet_index) {
-//                     const int fleet_member = fleet_index + fleet.data.first_ship;
-//                     const FlakShip& me = battle.getShipByNumber(fleet_member);
-//                     if (isAttackingAny(*info[fleet_member].orig, *info[other_member].orig, opts)) {
-//                         if (me.isArmed() || them.isArmed()) {
-//                             can_attack = true;
-//                             if (GSimShip* sh = dynamic_cast<GSimShip*>(info[fleet_member].orig))
-//                                 if (sh->getAggressiveness() == them.data.player)
-//                                     match_pe = true;
-//                         }
-//                     } else {
-//                         match_fc = true;
-//                     }
-//                 }
-//                 if (can_attack) {
-//                     // we can attack it regularily
-//                     int bonus = myRandom(flak_config.RatingRandomBonus);
-//                     if (match_pe)
-//                         bonus += flak_config.RatingPEBonus;
-//                     if (!match_fc)
-//                         bonus += flak_config.RatingFullAttackBonus;
-//                     if (!bonus)
-//                         bonus = 1;
-//                     battle.addAttackListEntry(other_member, bonus);
-//                 } else {
-//                     // we cannot attack it, so give it priority 0
-//                     battle.addAttackListEntry(other_member, 0);
-//                 }
-//             }
-//         }
-//     }
-//     fleet.data.att_list_pointer = first_entry;
-//     fleet.data.att_list_size    = battle.getAttackListNumber() - first_entry;
-// }
+    /** Compute combat mass of a planet. */
+    int getPlanetCombatMass(const Planet& pl)
+    {
+        int mass = 100 + pl.getDefense();
+        if (pl.hasBase()) {
+            mass += pl.getBaseDefense();
+        }
+        return mass;
+    }
 
 
-// namespace {
-//     /** Predicate for sort: sort a list of ShipInfo into their combat
-//         order. Groups players together, randomly permuted. Upon
-//         construction, this computes a permutation and uses it later
-//         on. */
-//     class PermutedSorter {
-//         int player_map[NUM_OWNERS];
-//         int frob(int pid)
-//             {
-//                 if (pid > 0 && pid <= NUM_OWNERS)
-//                     return player_map[pid-1];
-//                 return pid;
-//             }
-//      public:
-//         PermutedSorter();
-//         bool operator()(const ShipInfo& l, const ShipInfo& r)
-//             {
-//                 int dif = frob(l.data.player) - frob(r.data.player);
-//                 if (dif)
-//                     return dif < 0;
-//                 dif = l.fcbo_plus_100 - r.fcbo_plus_100;
-//                 if (dif)
-//                     return dif < 0;
-//                 dif = l.data.id - r.data.id;
-//                 if (dif)
-//                     return dif < 0;
-//                 return (r.data.flags & flak_IsPlanet) == 0;
-//             }
-//     };
-// }
+    struct ShipInfo {
+        /** FCBO value, plus 100. */
+        int fcbo_plus_100;
+        /** Ship data. */
+        game::vcr::flak::Object data;
+        /** Link to original unit. */
+        const game::sim::Object* orig;
 
-// /** Constructor. Generates a permutation. */
-// PermutedSorter::PermutedSorter()
-// {
-//     for (int i = 1; i <= NUM_OWNERS; ++i)
-//         player_map[i-1] = i;
-//     for (int i = 1; i < NUM_OWNERS; ++i) {
-//         int j = myRandom(i+1);
-//         std::swap(player_map[i], player_map[j]);
-//     }
-// }
+        ShipInfo& initFromShip(const Ship& sh, const ShipList& shipList,
+                               const HostConfiguration& config,
+                               const game::vcr::flak::Configuration& flakConfig);
+        ShipInfo& initFromPlanet(const Planet& pl, const ShipList& shipList,
+                                 const HostConfiguration& config,
+                                 const game::vcr::flak::Configuration& flakConfig);
 
-// /** Update statistics counters from FLAK fight.
-//     \param fsh [in] Result of FLAK fight
-//     \param obj [in/out] Unit from simulation setup to update */
-// static void
-// unpackFlakStat(const FlakShip& fsh, GSimObject& obj)
-// {
-//     VcrStatItem& stat = obj.getStat();
-//     stat.torps_hit += fsh.status.torps_hit;
-//     if (stat.min_fighters_aboard > fsh.status.min_fighters_aboard)
-//         stat.min_fighters_aboard = fsh.status.min_fighters_aboard;
-//     stat.num_fights++;
-// }
+        /** True iff this is a planet. */
+        bool  isPlanet() const
+            { return data.isPlanet(); }
+    };
 
-// /** Update simulation from FLAK ship.
-//     \param fsh [in] Result of FLAK fight for a ship
-//     \param ssh [in/out] Ship from simulation setup to update */
-// static void
-// unpackFlakShip(const FlakShip& fsh, GSimShip& ssh)
-// {
-//     ssh.setShield(roundToInt(fsh.status.shield));
-//     ssh.setDamage(roundToInt(fsh.status.damage));
-//     ssh.setCrew(roundToInt(fsh.status.crew));
-//     if (fsh.data.torp_lcount)
-//         ssh.setAmmo(fsh.status.torp_count);
-//     else
-//         ssh.setAmmo(fsh.status.fighter_count);
-//     if (fsh.data.ending_status < 0) {
-//         // died
-//         ssh.setAggressiveness(ssh.agg_Passive);
-//         ssh.setOwner(0);
-//     } else if (fsh.data.ending_status != 0 && fsh.data.ending_status != fsh.data.player) {
-//         // captured
-//         ssh.setOwner(fsh.data.ending_status);
-//         ssh.setCrew(10);
-//         ssh.setAggressiveness(0);
-//     }
-//     unpackFlakStat(fsh, ssh);
-// }
 
-// /** Update simulation from FLAK planet.
-//     \param fsh [in] Result of FLAK fight for a planet
-//     \param spl [in/out] Planet from simulation setup to update */
-// static void
-// unpackFlakPlanet(const FlakShip& fsh, GSimPlanet& spl)
-// {
-//     spl.setDamage(roundToInt(fsh.status.damage));
-//     spl.setShield(roundToInt(fsh.status.shield));
-//     if (spl.hasBase() && spl.getDamage() >= 100)
-//         spl.setBaseBeamTech(0); /* remove the base */
+    /** Initialize data for a ship. */
+    ShipInfo& ShipInfo::initFromShip(const Ship& sh, const ShipList& shipList,
+                                     const HostConfiguration& config,
+                                     const game::vcr::flak::Configuration& flakConfig)
+    {
+        orig = &sh;
 
-//     if (spl.hasBase()) {
-//         /* base fighters */
-//         int fighters_lost = fsh.data.fighter_count - fsh.status.fighter_count;
-//         int new_sbf = spl.getNumBaseFighters() - fighters_lost;
-//         if (new_sbf < 0)
-//             spl.setBaseFighters(0);
-//         else
-//             spl.setBaseFighters(new_sbf);
+        const int level = sh.getExperienceLevel();
 
-//         /* reduce tech */
-//         int max_tech = (100 - spl.getDamage()) / 10;
-//         if (max_tech <= 0)
-//             max_tech = 1;
-//         if (spl.getBaseBeamTech() > max_tech)
-//             spl.setBaseBeamTech(max_tech);
-//         if (spl.getBaseTorpedoTech() > max_tech)
-//             spl.setBaseTorpTech(max_tech);
-//     }
+        data.setName(sh.getName());
+        data.setDamage(sh.getDamage());
+        data.setCrew(sh.getCrew());
+        data.setId(sh.getId());
+        data.setOwner(sh.getOwner());
+        data.setHull(sh.getHullType());
+        data.setExperienceLevel(sh.getExperienceLevel());
+        data.setNumBeams(sh.getNumBeams());
+        data.setBeamType(sh.getBeamType());
+        data.setNumLaunchers(sh.getNumLaunchers());
+        data.setNumTorpedoes(sh.getNumLaunchers() != 0 ? sh.getAmmo() : 0);
+        data.setTorpedoType(sh.getTorpedoType());
+        data.setNumBays(sh.getNumBays());
+        data.setNumFighters(sh.getNumLaunchers() == 0 ? 0 : sh.getAmmo());
+        data.setMass(sh.getMass());
+        data.setShield(sh.getShield());
 
-//     int torps_lost = fsh.data.torp_count - fsh.status.torp_count;
-//     // Inc(PlanetaryTorpsFired, lost);
-//     if (torps_lost > 0 && spl.hasBase()) {
-//         long total_cost = torps_lost * getTorp(fsh.data.torp_type).getTorpCost();
-//         while (total_cost > 0) {
-//             bool did = 0;
-//             for (int i = 1; i <= list.launchers().size(); ++i) {
-//                 if (spl.getNumBaseTorpedoes(i) > 0 && getTorp(i).getTorpCost() <= total_cost) {
-//                     spl.setBaseTorps(i, spl.getNumBaseTorpedoes(i) - 1);
-//                     total_cost -= getTorp(i).getTorpCost();
-//                     did = true;
-//                 }
-//             }
-//             if (!did)
-//                 total_cost = 0;
-//         }
-//     }
+        /* NTP */
+        if (sh.getFriendlyCode() == "NTP") {
+            data.setNumFighters(0);
+            data.setNumTorpedoes(0);
+        }
 
-//     if (fsh.data.ending_status != 0 && fsh.data.ending_status != fsh.data.player) {
-//         if (fsh.data.ending_status < 0)
-//             spl.setOwner(0);
-//         else
-//             spl.setOwner(fsh.data.ending_status);
-//         // spl.setAggressiveness(spl.agg_Passive);
-//         spl.setDefense(0);
-//         spl.setBaseBeamTech(0);
-//         spl.setFCode("???");
-//         spl.setShield(0);
-//     }
+        /* ESB */
+        int esb = 0;
+        if (config[HostConfiguration::AllowEngineShieldBonus]() != 0) {
+            esb += config[HostConfiguration::EngineShieldBonusRate](data.getOwner());
+        }
+        if (level != 0) {
+            esb += config[HostConfiguration::EModEngineShieldBonusRate](level);
+        }
+        if (esb) {
+            if (const game::spec::Engine* e = shipList.engines().get(sh.getEngineType())) {
+                data.addMass(e->cost().get(Cost::Money) * esb / 100);
+            }
+        }
 
-//     unpackFlakStat(fsh, spl);
-// }
+        /* Fed crew bonus */
+        if (config[HostConfiguration::AllowFedCombatBonus]() && config.getPlayerRaceNumber(data.getOwner()) == 1) {
+            data.addMass(50);
+        }
 
-// static void
-// simulateFLAK(GSimState& setup, const GSimOptions& opts, GSimBattleResult& result, ProgressMonitor& monitor)
-// {
-//     Ptr<GFlakVcrDatabase> db = new GFlakVcrDatabase();
-//     result.battles = db;
+        /* extra bays */
+        if (data.getNumBays() != 0) {
+            data.addBays(config[HostConfiguration::ExtraFighterBays](data.getOwner()));
+            data.addBays(config.getExperienceBonus(HostConfiguration::EModExtraFighterBays, level));
+            if (data.getNumBays() > game::vcr::flak::FLAK_MAX_BAYS) {
+                data.setNumBays(game::vcr::flak::FLAK_MAX_BAYS);
+            }
+        }
 
-//     /* compute list of ships */
-//     std::vector<ShipInfo> ships;
-//     for (GSimState::ship_index_t i = 0; i < setup.getNumShips(); ++i)
-//         ships.push_back(ShipInfo().initFromShip(setup.getShip(i)));
-//     if (setup.hasPlanet())
-//         ships.push_back(ShipInfo().initFromPlanet(setup.getPlanet()));
+        data.setIsPlanet(false);
 
-//     if (ships.size() < 2)
-//         return;
+        fcbo_plus_100 = std::min(getFCodeValuePHost(sh) + 100, 1099);
 
-//     /* group by owner, using a random permutation of owners */
-//     std::sort(ships.begin(), ships.end(), PermutedSorter());
+        data.init(flakConfig);
 
-//     /* count players */
-//     GPlayerSet players;
-//     int player_count = 0;
-//     for (size_t i = 0; i < ships.size(); ++i) {
-//         if (!players.contains(ships[i].data.player)) {
-//             players |= ships[i].data.player;
-//             ++player_count;
-//         }
-//     }
+        // Rating overrides
+        if ((sh.getFlags() & Ship::fl_RatingOverride) != 0) {
+            data.setRating(sh.getFlakRatingOverride());
+            data.setCompensation(sh.getFlakCompensationOverride());
+        }
+        return *this;
+    }
 
-//     if (player_count < 2)
-//         return;
+    /** Initialize data from planet. */
+    ShipInfo& ShipInfo::initFromPlanet(const Planet& pl,
+                                       const ShipList& shipList,
+                                       const HostConfiguration& config,
+                                       const game::vcr::flak::Configuration& flakConfig)
+    {
+        orig = &pl;
 
-//     /* Now build fleets. */
-//     FlakBattle battle;
-//     int  cur_player = 0;
-//     int  cur_fcbo   = 0;
-//     bool cur_planet = false;
-//     int  cur_fleet_size = 0;
-//     for (FlakBattle::ship_t i = 0; i < ships.size(); ++i) {
-//         if (i == 0 || cur_player != ships[i].data.player
-//             || cur_fcbo != ships[i].fcbo_plus_100 / 100
-//             || cur_planet != ships[i].isPlanet()
-//             || cur_fleet_size >= flak_config.MaximumFleetSize)
-//         {
-//             battle.addFleet(ships[i].data.player);
-//             cur_fcbo       = ships[i].fcbo_plus_100 / 100;
-//             cur_planet     = ships[i].isPlanet();
-//             cur_player     = ships[i].data.player;
-//             cur_fleet_size = 0;
-//         }
-//         FlakBattle::ship_t sid = battle.addShip(ships[i].data);
-//         ASSERT(sid == i);
-//         ++cur_fleet_size;
-//     }
+        const int level = pl.getExperienceLevel();
 
-//     /* Now we have all the fleets, compute attack lists */
-//     for (int i = 0; i < battle.getNumFleets(); ++i)
-//         computeAttackList(battle, battle.getFleetByNumber(i), ships, opts);
+        data.setName(pl.getName());
+        data.setDamage(0); /* planet starts with 0 damage in every turn */
+        data.setCrew(0);
+        data.setId(pl.getId());
+        data.setOwner(pl.getOwner());
+        data.setHull(0);
+        data.setExperienceLevel(level);
+        data.setNumBeams(getNumPlanetBeams(pl, config));
+        data.setBeamType(getPlanetBeamType(pl));
+        data.setNumLaunchers(getNumPlanetLaunchers(pl, config));
+        data.setNumTorpedoes(getNumPlanetTorpedoes(pl, shipList, config));
+        data.setTorpedoType(getPlanetTorpedoType(pl, shipList));
+        data.setNumBays(getNumPlanetBays(pl));
+        data.setNumFighters(getNumPlanetFighters(pl));
+        data.setMass(getPlanetCombatMass(pl));
+        data.setShield(100); /* planet starts with 100 shield in every turn */
 
-//     /* Compute speeds, etc. */
-//     battle.initAfterSetup();
+        // Extra bays
+        if (data.getNumBays() != 0) {
+            if (level != 0) {
+                data.addBays(config[HostConfiguration::EModExtraFighterBays](level));
+            }
+            if (data.getNumBays() > game::vcr::flak::FLAK_MAX_BAYS) {
+                data.setNumBays(game::vcr::flak::FLAK_MAX_BAYS);
+            }
+        }
 
-//     /* Set random seed */
-//     battle.setInitialSeed(myRandom());
+        data.setIsPlanet(true);
+        fcbo_plus_100 = std::min(getFCodeValuePHost(pl) + 100, 1099);
 
-//     if (battle.getNumFleets() == 0)
-//         return;
+        data.init(flakConfig);
 
-//     /* run it... */
-//     monitor.tick();
-//     FlakNullVisualizer nv(battle);
-//     battle.init();
-//     while (!battle.playOneTick())
-//         ;
+        return *this;
+    }
 
-//     /* evaluate */
-//     // ASSERT(ships.size() == battle.getNumShips()); no longer holds!!!
-//     for (FlakBattle::ship_t i = 0; i < setup.getNumShips(); ++i) {
-//         FlakShip* pfsh = battle.getShipById(setup.getShip(i).getId(), false);
-//         if (pfsh) {
-//             if (pfsh->isAlive()) {
-//                 /* survived */
-//                 pfsh->data.ending_status = 0;
-//             } else {
-//                 /* captured or died */
-//                 const FlakShip* captor = battle.findCaptor(*pfsh);
-//                 int limit = (config.getPlayerRaceNumber(pfsh->data.player) == 2
-//                              && captor != 0
-//                              && config.getPlayerRaceNumber(captor->data.player) == 2) ? 150 : 99;
-//                 if (captor && pfsh->status.crew < 0.5 && roundToInt(pfsh->status.damage) <= limit)
-//                     pfsh->data.ending_status = captor->data.player;
-//                 else
-//                     pfsh->data.ending_status = -1;
-//             }
-//             unpackFlakShip(*pfsh, setup.getShip(i));
-//         }
-//     }
+    bool isArmed(const game::vcr::Object& obj)
+    {
+        // ex FlakShip::isArmed
+        return obj.getNumBeams() != 0
+            || (obj.getNumLaunchers() != 0 && obj.getNumTorpedoes() != 0)
+            || (obj.getNumBays() != 0 && obj.getNumFighters() != 0);
+    }
 
-//     if (setup.hasPlanet()) {
-//         FlakShip* pfsh = battle.getShipById(setup.getPlanet().getId(), true);
-//         if (pfsh) {
-//             if (pfsh->isAlive()) {
-//                 /* survived */
-//                 pfsh->data.ending_status = 0;
-//             } else {
-//                 /* captured or died */
-//                 const FlakShip* captor = battle.findCaptor(*pfsh);
-//                 if (captor)
-//                     pfsh->data.ending_status = captor->data.player;
-//                 else
-//                     pfsh->data.ending_status = -1;
-//             }
-//             unpackFlakPlanet(*pfsh, setup.getPlanet());
-//         }
-//     }
+    /** Check whether any ship from me can attack any ship from them. */
+    bool canAttackThisFleet(const game::vcr::flak::Setup& battle, const game::vcr::flak::Setup::Fleet& me, const game::vcr::flak::Setup::Fleet& them,
+                            const std::vector<ShipInfo>& info,
+                            const Configuration& opts,
+                            const ShipList& shipList, const HostConfiguration& config)
+    {
+        // shortcut
+        if (&me == &them) {
+            return false;
+        }
 
-//     /* add battle to VCR db */
-//     db->addBattle(battle);
-// }
-// #endif
+        // check it
+        for (size_t my_index = 0; my_index < me.numShips; ++my_index) {
+            for (size_t their_index = 0; their_index < them.numShips; ++their_index) {
+                const game::vcr::flak::Object& my_ship = battle.getShipByIndex(me.firstShipIndex + my_index);
+                const game::vcr::flak::Object& their_ship = battle.getShipByIndex(them.firstShipIndex + their_index);
+                if (isAttackingAny(*info[me.firstShipIndex + my_index].orig, *info[them.firstShipIndex + their_index].orig, opts, shipList, config)) {
+                    if (isArmed(my_ship) || isArmed(their_ship)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /** Compute attack list for one fleet. */
+    void computeAttackList(game::vcr::flak::Setup& battle, game::vcr::flak::Setup::Fleet& fleet, const std::vector<ShipInfo>& info, const Configuration& opts, const ShipList& shipList, const HostConfiguration& config,
+                           const game::vcr::flak::Configuration& flakConfig,
+                           util::RandomNumberGenerator& rng)
+    {
+        /* Fleet/fleet attack relations must be symmetrical. If any ship
+           from a fleet can attack/be attacked by us, we must be allowed
+           to attack all ships from that fleet. Otherwise, it could happen
+           that the other fleet is still aggressive to us, but we do no
+           longer have someone to attack. */
+        /* FIXME: this code is really ugly. And it is almost a duplicate
+           of the same thing in pdk-host.cc */
+        for (size_t other_fleet_nr = 0; other_fleet_nr < battle.getNumFleets(); ++other_fleet_nr) {
+            const game::vcr::flak::Setup::Fleet& other_fleet = battle.getFleetByIndex(other_fleet_nr);
+            if (canAttackThisFleet(battle, fleet, other_fleet, info, opts, shipList, config)) {
+                for (size_t other_index = 0; other_index < other_fleet.numShips; ++other_index) {
+                    const size_t other_member = other_index + other_fleet.firstShipIndex;
+                    const game::vcr::flak::Object& them = battle.getShipByIndex(other_member);
+                    bool can_attack = false, match_pe = false, match_fc = false;
+                    // for each fleet member
+                    for (size_t fleet_index = 0; fleet_index < fleet.numShips; ++fleet_index) {
+                        const size_t fleet_member = fleet_index + fleet.firstShipIndex;
+                        const game::vcr::flak::Object& me = battle.getShipByIndex(fleet_member);
+                        if (isAttackingAny(*info[fleet_member].orig, *info[other_member].orig, opts, shipList, config)) {
+                            if (isArmed(me) || isArmed(them)) {
+                                can_attack = true;
+                                if (const Ship* sh = dynamic_cast<const Ship*>(info[fleet_member].orig)) {
+                                    if (sh->getAggressiveness() == them.getOwner()) {
+                                        match_pe = true;
+                                    }
+                                }
+                            }
+                        } else {
+                            match_fc = true;
+                        }
+                    }
+                    if (can_attack) {
+                        // we can attack it regularily
+                        int bonus = rng(static_cast<uint16_t>(flakConfig.RatingRandomBonus));
+                        if (match_pe) {
+                            bonus += flakConfig.RatingPEBonus;
+                        }
+                        if (!match_fc) {
+                            bonus += flakConfig.RatingFullAttackBonus;
+                        }
+                        if (!bonus) {
+                            bonus = 1;
+                        }
+                        battle.addAttackListEntry(other_member, static_cast<int16_t>(bonus));
+                    } else {
+                        // we cannot attack it, so give it priority 0
+                        battle.addAttackListEntry(other_member, 0);
+                    }
+                }
+            }
+        }
+    }
+
+
+    /** Predicate for sort: sort a list of ShipInfo into their combat
+        order. Groups players together, randomly permuted. Upon
+        construction, this computes a permutation and uses it later
+        on. */
+    class PermutedSorter {
+        int player_map[game::MAX_PLAYERS];
+        int frob(int pid)
+            {
+                if (pid > 0 && pid <= game::MAX_PLAYERS) {
+                    return player_map[pid-1];
+                }
+                return pid;
+            }
+     public:
+        PermutedSorter(util::RandomNumberGenerator& rng);
+        bool operator()(const ShipInfo& l, const ShipInfo& r)
+            {
+                int dif = frob(l.data.getOwner()) - frob(r.data.getOwner());
+                if (dif) {
+                    return dif < 0;
+                }
+                dif = l.fcbo_plus_100 - r.fcbo_plus_100;
+                if (dif) {
+                    return dif < 0;
+                }
+                dif = l.data.getId() - r.data.getId();
+                if (dif) {
+                    return dif < 0;
+                }
+                return !r.isPlanet();
+            }
+    };
+
+    /** Constructor. Generates a permutation. */
+    PermutedSorter::PermutedSorter(util::RandomNumberGenerator& rng)
+    {
+        for (int i = 1; i <= game::MAX_PLAYERS; ++i) {
+            player_map[i-1] = i;
+        }
+        for (int i = 1; i < game::MAX_PLAYERS; ++i) {
+            int j = rng(static_cast<int16_t>(i+1));
+            std::swap(player_map[i], player_map[j]);
+        }
+    }
+
+    /** Update simulation from FLAK ship.
+        \param fsh [in] Result of FLAK fight for a ship
+        \param ssh [in/out] Ship from simulation setup to update */
+    void unpackFlakShip(const game::vcr::flak::Object& fsh, Ship& ssh)
+    {
+        ssh.setShield(fsh.getShield());
+        ssh.setDamage(fsh.getDamage());
+        ssh.setCrew(fsh.getCrew());
+        if (fsh.getNumLaunchers() != 0) {
+            ssh.setAmmo(fsh.getNumTorpedoes());
+        } else {
+            ssh.setAmmo(fsh.getNumFighters());
+        }
+        if (fsh.getEndingStatus() < 0) {
+            // died
+            ssh.setAggressiveness(Ship::agg_Passive);
+            ssh.setOwner(0);
+        } else if (fsh.getEndingStatus() != 0 && fsh.getEndingStatus() != fsh.getOwner()) {
+            // captured
+            ssh.setOwner(fsh.getEndingStatus());
+            ssh.setCrew(10);
+            ssh.setAggressiveness(0);
+        }
+    }
+
+    /** Update simulation from FLAK planet.
+        \param [in]     fsh       Result of FLAK fight for a planet
+        \param [in]     oldObj    Original planet
+        \param [in/out] spl       Planet from simulation setup to update
+        \param [in]     shipList  Ship list */
+    void unpackFlakPlanet(const game::vcr::flak::Object& fsh, const game::vcr::flak::Object& oldObj, Planet& spl, const ShipList& shipList)
+    {
+        spl.setDamage(fsh.getDamage());
+        spl.setShield(fsh.getShield());
+        if (spl.hasBase() && spl.getDamage() >= 100) {
+            spl.setBaseBeamTech(0); /* remove the base */
+        }
+
+        if (spl.hasBase()) {
+            // Base fighters
+            int fighters_lost = oldObj.getNumFighters() - fsh.getNumFighters();
+            int new_sbf = spl.getNumBaseFighters() - fighters_lost;
+            if (new_sbf < 0) {
+                spl.setNumBaseFighters(0);
+            } else {
+                spl.setNumBaseFighters(new_sbf);
+            }
+
+            // Reduce tech
+            int max_tech = (100 - spl.getDamage()) / 10;
+            if (max_tech <= 0) {
+                max_tech = 1;
+            }
+            if (spl.getBaseBeamTech() > max_tech) {
+                spl.setBaseBeamTech(max_tech);
+            }
+            if (spl.getBaseTorpedoTech() > max_tech) {
+                spl.setBaseTorpedoTech(max_tech);
+            }
+        }
+
+        int torps_lost = oldObj.getNumTorpedoes() - fsh.getNumTorpedoes();
+        // Inc(PlanetaryTorpsFired, lost); <- FIXME?
+        if (torps_lost > 0 && spl.hasBase()) {
+            int32_t total_cost = torps_lost;
+            if (const game::spec::TorpedoLauncher* tl = shipList.launchers().get(fsh.getTorpedoType())) {
+                total_cost *= tl->torpedoCost().get(Cost::Money);
+            }
+            while (total_cost > 0) {
+                bool did = 0;
+                for (int i = 1; i <= shipList.launchers().size(); ++i) {
+                    const game::spec::TorpedoLauncher* tl = shipList.launchers().get(i);
+                    if (spl.getNumBaseTorpedoes(i) > 0 && tl != 0 && tl->torpedoCost().get(Cost::Money) <= total_cost) {
+                        spl.setNumBaseTorpedoes(i, spl.getNumBaseTorpedoes(i) - 1);
+                        total_cost -= tl->torpedoCost().get(Cost::Money);
+                        did = true;
+                    }
+                }
+                if (!did) {
+                    total_cost = 0;
+                }
+            }
+        }
+
+        if (fsh.getEndingStatus() != 0 && fsh.getEndingStatus() != fsh.getOwner()) {
+            if (fsh.getEndingStatus() < 0) {
+                spl.setOwner(0);
+            } else {
+                spl.setOwner(fsh.getEndingStatus());
+            }
+            // spl.setAggressiveness(spl.agg_Passive);
+            spl.setDefense(0);
+            spl.setBaseBeamTech(0);
+            spl.setFriendlyCode("\?\?\?");
+            spl.setShield(0);
+        }
+    }
+
+    void simulateFLAK(Setup& setup,
+                      const Configuration& opts,
+                      Result& result,
+                      afl::base::Memory<Statistic> stats,
+                      const ShipList& shipList,
+                      const HostConfiguration& config,
+                      const game::vcr::flak::Configuration& flakConfig,
+                      util::RandomNumberGenerator& rng)
+    {
+        afl::base::Ptr<game::vcr::flak::Database> db(new game::vcr::flak::Database());
+        result.battles = db;
+
+        // Build list of ships
+        std::vector<ShipInfo> ships;
+        for (size_t i = 0, n = setup.getNumShips(); i < n; ++i) {
+            ships.push_back(ShipInfo().initFromShip(*setup.getShip(i), shipList, config, flakConfig));
+        }
+        if (const Planet* pl = setup.getPlanet()) {
+            ships.push_back(ShipInfo().initFromPlanet(*pl, shipList, config, flakConfig));
+        }
+
+        if (ships.size() < 2) {
+            return;
+        }
+
+        // Group by owner, using a random permutation of owners
+        std::sort(ships.begin(), ships.end(), PermutedSorter(rng));
+
+        // Count players
+        game::PlayerSet_t players;
+        int player_count = 0;
+        for (size_t i = 0; i < ships.size(); ++i) {
+            if (!players.contains(ships[i].data.getOwner())) {
+                players |= ships[i].data.getOwner();
+                ++player_count;
+            }
+        }
+
+        if (player_count < 2) {
+            return;
+        }
+
+        // Now build fleets.
+        std::auto_ptr<game::vcr::flak::Setup> flakSetup(new game::vcr::flak::Setup());
+        int  cur_player = 0;
+        int  cur_fcbo   = 0;
+        bool cur_planet = false;
+        int  cur_fleet_size = 0;
+        for (size_t i = 0; i < ships.size(); ++i) {
+            if (i == 0 || cur_player != ships[i].data.getOwner()
+                || cur_fcbo != ships[i].fcbo_plus_100 / 100
+                || cur_planet != ships[i].isPlanet()
+                || cur_fleet_size >= flakConfig.MaximumFleetSize)
+            {
+                flakSetup->addFleet(ships[i].data.getOwner());
+                cur_fcbo       = ships[i].fcbo_plus_100 / 100;
+                cur_planet     = ships[i].isPlanet();
+                cur_player     = ships[i].data.getOwner();
+                cur_fleet_size = 0;
+            }
+            flakSetup->addShip(ships[i].data);
+            ++cur_fleet_size;
+        }
+
+        // Now we have all the fleets, compute attack lists
+        for (size_t i = 0; i < flakSetup->getNumFleets(); ++i) {
+            flakSetup->startAttackList(i);
+            computeAttackList(*flakSetup, flakSetup->getFleetByIndex(i), ships, opts, shipList, config, flakConfig, rng);
+            flakSetup->endAttackList(i);
+        }
+
+        // Compute speeds, etc.
+        game::vcr::flak::GameEnvironment env(config, shipList.beams(), shipList.launchers());
+        flakSetup->initAfterSetup(flakConfig, env, rng);
+        if (flakSetup->getNumFleets() == 0) {
+            return;
+        }
+
+        // Set random seed */
+        flakSetup->setSeed(rng());
+
+        // Run it...
+        game::vcr::flak::NullVisualizer vis;
+        game::vcr::flak::Algorithm algo(vis, *flakSetup, env);
+        algo.init(env);
+        while (algo.playCycle(env))
+            ;
+
+        // Evaluate
+        // Setting the ending status is host-side logic, not algorithm logic.
+        algo.setEndingStatus(*flakSetup, env, rng);
+
+        // Note that initAfterSetup() may have removed ships from the fight,
+        // so we can no longer assume a 1:1 mapping between setup and flakSetup
+        // (but setup<=>ships and flakSetup<=>algo).
+        // Therefore iterate through the ships in the flakSetup and update the appropriate setup ships.
+        // @change PCC2 did this the other way around.
+        for (size_t i = 0; i < flakSetup->getNumShips(); ++i) {
+            // Get old and new object
+            const game::vcr::flak::Object& oldObj = flakSetup->getShipByIndex(i);
+            game::vcr::flak::Object newObj(oldObj);
+            algo.copyResult(i, newObj);
+
+            // Write back to sim setup
+            if (oldObj.isPlanet()) {
+                if (Planet* pl = setup.getPlanet()) {
+                    unpackFlakPlanet(newObj, oldObj, *pl, shipList);
+                }
+                if (Statistic* st = stats.at(setup.getNumShips())) {
+                    st->merge(algo.getStatistic(i));
+                }
+            } else {
+                Setup::Slot_t slot = 0;
+                if (setup.findShipSlotById(oldObj.getId(), slot)) {
+                    if (Ship* sh = setup.getShip(slot)) {
+                        unpackFlakShip(newObj, *sh);
+                    }
+                    if (Statistic* st = stats.at(slot)) {
+                        st->merge(algo.getStatistic(i));
+                    }
+                }
+            }
+        }
+
+        // Add battle to VCR DB
+        db->addNewBattle(new game::vcr::flak::Battle(flakSetup));
+    }
 }
 
 /*
@@ -2375,7 +2422,7 @@ game::sim::runSimulation(Setup& setup,
 {
     // runSimulation(GSimState& state, const GSimOptions& opts, GSimBattleResult& result, ProgressMonitor& monitor)
     if (opts.hasRandomizeFCodesOnEveryFight()) {
-        setup.setRandomFriendlyCodes();
+        setup.setRandomFriendlyCodes(rng);
     }
 
     initializeStats(stats, setup);
@@ -2397,9 +2444,17 @@ game::sim::runSimulation(Setup& setup,
         simulatePHost(setup, opts, result, stats, list, config, rng, game::vcr::classic::PHost4);
         break;
      case Configuration::VcrFLAK:
-// #ifdef CONF_FLAK_SUPPORT
-//         simulateFLAK(setup, opts, result, monitor);
-// #endif
+        simulateFLAK(setup, opts, result, stats, list, config, game::vcr::flak::Configuration(/*FIXME*/), rng);
         break;
+    }
+}
+
+void
+game::sim::prepareSimulation(Setup& setup,
+                             const Configuration& opts,
+                             util::RandomNumberGenerator& rng)
+{
+    if (!opts.hasRandomizeFCodesOnEveryFight()) {
+        setup.setRandomFriendlyCodes(rng);
     }
 }

@@ -64,6 +64,26 @@ namespace {
             { this->content = content; }
     };
 
+    class NamedPageReceiver {
+     public:
+        NamedPageReceiver(String_t expectedName)
+            : m_expectedName(expectedName), m_count(0)
+            { }
+
+        void onPageChange(const gsi::PageContent& content)
+            {
+                TS_ASSERT_EQUALS(content.title, m_expectedName);
+                ++m_count;
+            }
+
+        int getCount() const
+            { return m_count; }
+
+     private:
+        String_t m_expectedName;
+        int m_count;
+    };
+
     struct FilterReceiver {
         gsi::FilterInfos_t existing;
         gsi::FilterInfos_t available;
@@ -137,7 +157,7 @@ TestGameProxySpecBrowserProxy::testIt()
 
     // Verify filters
     TS_ASSERT_EQUALS(filter.existing[0].name, "Tech level");
-    TS_ASSERT_EQUALS(filter.existing[0].value, "3...5");
+    TS_ASSERT_EQUALS(filter.existing[0].value, "3 to 5");
     TS_ASSERT_EQUALS(filter.existing[1].name, "Name");        // Name is always last
     TS_ASSERT_EQUALS(filter.existing[1].value, "ree");
 
@@ -174,7 +194,7 @@ TestGameProxySpecBrowserProxy::testFilter()
     // Verify filter
     TS_ASSERT_EQUALS(filter.existing.size(), 1U);
     TS_ASSERT_EQUALS(filter.existing[0].name, "Tech level");
-    TS_ASSERT_EQUALS(filter.existing[0].value, "3...5");
+    TS_ASSERT_EQUALS(filter.existing[0].value, "3 to 5");
 
     // Modify filter
     testee.setFilter(0, gsi::FilterElement(gsi::Range_Tech, 0, gsi::IntRange_t(4, 4)));
@@ -218,6 +238,28 @@ TestGameProxySpecBrowserProxy::testSort()
     // Sort
     testee.setSortOrder(gsi::Range_Tech);
     while (sort.active != gsi::Range_Tech) {
+        TS_ASSERT(disp.wait(1000));
+    }
+}
+
+/** Test setPageId.
+    A: use setPageId.
+    E: only one update received for that page. */
+void
+TestGameProxySpecBrowserProxy::testSetPageId()
+{
+    // Environment
+    CxxTest::setAbortTestOnFail(true);
+    util::SimpleRequestDispatcher disp;
+    SessionThread s;
+    prepare(s);
+
+    // Testee
+    game::proxy::SpecBrowserProxy testee(s.gameSender(), disp, std::auto_ptr<gsi::PictureNamer>(new gsi::NullPictureNamer()));
+    NamedPageReceiver recv("Four-speed");
+    testee.sig_pageChange.add(&recv, &NamedPageReceiver::onPageChange);
+    testee.setPageId(gsi::EnginePage, 4);
+    while (recv.getCount() == 0) {
         TS_ASSERT(disp.wait(1000));
     }
 }

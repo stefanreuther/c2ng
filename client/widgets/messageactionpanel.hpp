@@ -8,6 +8,7 @@
 #include "afl/base/signal.hpp"
 #include "afl/base/signalconnection.hpp"
 #include "afl/container/ptrvector.hpp"
+#include "afl/string/translator.hpp"
 #include "ui/root.hpp"
 #include "ui/widget.hpp"
 #include "ui/widgets/button.hpp"
@@ -64,10 +65,11 @@ namespace client { namespace widgets {
             BrowseNth,          ///< "=" (n-th message). Argument is message number.
             SearchNext,         ///< "N", Shift-F7 (search next message).
             WriteAll,           ///< Ctrl-W (save all).
-            ReplyAll            ///< Ctrl-R (reply all).
+            ReplyAll,           ///< Ctrl-R (reply all).
+            BrowseSubjects      ///< Tab.
         };
 
-        MessageActionPanel(ui::Root& root);
+        MessageActionPanel(ui::Root& root, afl::string::Translator& tx);
         ~MessageActionPanel();
 
         void enableAction(Action a, const String_t& note);
@@ -105,7 +107,7 @@ namespace client { namespace widgets {
 
         afl::base::SignalConnection conn_imageChange;
 
-        void init(ui::Root& root);
+        void init(ui::Root& root, afl::string::Translator& tx);
         void updatePositions();
 
         void onKey(int arg, util::Key_t key);

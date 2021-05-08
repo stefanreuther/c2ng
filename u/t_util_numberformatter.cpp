@@ -25,6 +25,9 @@ TestUtilNumberFormatter::testFormat()
         TS_ASSERT_EQUALS(testee.formatNumber(game::IntegerProperty_t()), "");
         TS_ASSERT_EQUALS(testee.formatPopulation(game::IntegerProperty_t(2000)), "200,000");
         TS_ASSERT_EQUALS(testee.formatPopulation(game::IntegerProperty_t()), "");
+        TS_ASSERT_EQUALS(testee.formatDifference(0), "0");
+        TS_ASSERT_EQUALS(testee.formatDifference(1000), "+1,000");
+        TS_ASSERT_EQUALS(testee.formatDifference(-1000), "-1,000");
     }
 
     // No thousands separators

@@ -118,7 +118,7 @@ interpreter::checkIntegerArg(int32_t& out, const afl::data::Value* value, int32_
 
 // Check boolean argument.
 bool
-interpreter::checkBooleanArg(bool& out, afl::data::Value* value)
+interpreter::checkBooleanArg(bool& out, const afl::data::Value* value)
 {
     // ex int/if/ifutil.h:checkBoolArg
     int n = getBooleanValue(value);
@@ -131,7 +131,7 @@ interpreter::checkBooleanArg(bool& out, afl::data::Value* value)
 
 // Check string argument.
 bool
-interpreter::checkStringArg(String_t& out, afl::data::Value* value)
+interpreter::checkStringArg(String_t& out, const afl::data::Value* value)
 {
     // ex int/if/ifutil.h:checkStringArg
     if (value == 0) {
@@ -144,14 +144,14 @@ interpreter::checkStringArg(String_t& out, afl::data::Value* value)
 
 // Check flag argument.
 bool
-interpreter::checkFlagArg(int32_t& flagOut, int32_t* valueOut, afl::data::Value* value, const char* tpl)
+interpreter::checkFlagArg(int32_t& flagOut, int32_t* valueOut, const afl::data::Value* value, const char* tpl)
 {
     // ex int/if/ifutil.h:checkFlagArg
     if (value == 0) {
         return false;
     }
 
-    if (afl::data::ScalarValue* iv = dynamic_cast<afl::data::ScalarValue*>(value)) {
+    if (const afl::data::ScalarValue* iv = dynamic_cast<const afl::data::ScalarValue*>(value)) {
         // An integer fills the valueOut, and specifies no flags
         if (!valueOut) {
             throw Error::typeError();
@@ -159,7 +159,7 @@ interpreter::checkFlagArg(int32_t& flagOut, int32_t* valueOut, afl::data::Value*
         *valueOut = iv->getValue();
         flagOut = 0;
         return true;
-    } else if (afl::data::StringValue* sv = dynamic_cast<afl::data::StringValue*>(value)) {
+    } else if (const afl::data::StringValue* sv = dynamic_cast<const afl::data::StringValue*>(value)) {
         // Parse string
         // FIXME: reset flagOut to 0 here?
         const String_t& s = sv->getValue();

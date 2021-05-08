@@ -11,7 +11,6 @@
 #include "game/session.hpp"
 #include "game/spec/cost.hpp"
 #include "util/requestsender.hpp"
-#include "util/slaverequestsender.hpp"
 
 namespace game { namespace proxy {
 
@@ -100,8 +99,9 @@ namespace game { namespace proxy {
 
      private:
         struct Trampoline;
+        class TrampolineFromSession;
         util::RequestReceiver<BuildStructuresProxy> m_receiver;
-        util::SlaveRequestSender<Session, Trampoline> m_sender;
+        util::RequestSender<Trampoline> m_sender;
     };
 
 } }

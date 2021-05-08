@@ -37,7 +37,7 @@ namespace client { namespace tiles {
                 }
         };
 
-        ShipCargoTile(ui::Root& root, client::widgets::KeymapWidget& kmw);
+        ShipCargoTile(ui::Root& root, afl::string::Translator& tx, client::widgets::KeymapWidget& kmw);
         void attach(game::proxy::ObjectObserver& oop);
 
         void setData(const Data& data);
@@ -48,6 +48,7 @@ namespace client { namespace tiles {
      private:
         class Job;
 
+        afl::string::Translator& m_translator;
         ui::widgets::SimpleTable m_table;
         client::widgets::SimpleGauge m_fuelGauge;
         client::widgets::SimpleGauge m_cargoGauge;

@@ -12,7 +12,7 @@ namespace util {
         This class helps implementing this pattern:
         - create an Updater
         - call set(target, source) for all variables to update
-        - use the Updater as a boolern predicate to test whether to call a listener.
+        - use the Updater as a boolean predicate to test whether to call a listener.
 
         Calls can be chained, so we can write, for example,
         <tt>if (Updater().set(m_a, a).set(m_b, b)) {</tt> */

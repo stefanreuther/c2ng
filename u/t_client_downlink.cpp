@@ -6,11 +6,18 @@
 #include "client/downlink.hpp"
 
 #include "t_client.hpp"
+#include "afl/string/nulltranslator.hpp"
+#include "afl/sys/log.hpp"
 #include "gfx/nullengine.hpp"
 #include "gfx/nullresourceprovider.hpp"
 #include "ui/root.hpp"
-#include "afl/sys/log.hpp"
 #include "util/requestthread.hpp"
+
+namespace {
+    struct T {
+        int i;
+    };
+}
 
 void
 TestClientDownlink::testIt()
@@ -22,21 +29,22 @@ TestClientDownlink::testIt()
 
     // Worker side
     afl::sys::Log log;
-    util::RequestThread thread("TestClientDownlink", log);
-    int object = 42;
-    util::RequestReceiver<int> receiver(thread, object);
+    afl::string::NullTranslator tx;
+    util::RequestThread thread("TestClientDownlink", log, tx);
+    T object = {42};
+    util::RequestReceiver<T> receiver(thread, object);
 
     // Test
-    class Task : public util::Request<int> {
+    class Task : public util::Request<T> {
      public:
-        void handle(int& i)
-            { ++i; }
+        void handle(T& i)
+            { ++i.i; }
     };
-    client::Downlink testee(root);
+    client::Downlink testee(root, tx);
     Task t;
     bool ok = testee.call(receiver.getSender(), t);
 
     TS_ASSERT(ok);
-    TS_ASSERT_EQUALS(object, 43);
+    TS_ASSERT_EQUALS(object.i, 43);
 }
 

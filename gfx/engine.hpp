@@ -10,6 +10,7 @@
 #include "afl/io/stream.hpp"
 #include "util/requestdispatcher.hpp"
 #include "gfx/timer.hpp"
+#include "util/key.hpp"
 
 namespace gfx {
 
@@ -65,6 +66,15 @@ namespace gfx {
             \param consumer Event consumer
             \param relativeMouseMovement Receive relative mouse movement if enabled (default: absolute) */
         virtual void handleEvent(EventConsumer& consumer, bool relativeMouseMovement) = 0;
+
+        /** Get current keyboard modifiers (Shift, Alt, Ctrl, Meta).
+            This function should be used sparingly;
+            most use-cases can be handled by observing the flags reported with key and mouse events.
+
+            <b>Multithreading:</b> Call this method from the GUI thread only.
+
+            \return Modifiers, as combination of KeyMod_Xxx constants */
+        virtual util::Key_t getKeyboardModifierState() = 0;
 
         /** Get request dispatcher.
             Actions posted into the request dispatcher will be executed in the GUI thread,

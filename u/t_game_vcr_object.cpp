@@ -6,9 +6,12 @@
 #include "game/vcr/object.hpp"
 
 #include "t_game_vcr.hpp"
+#include "afl/string/nulltranslator.hpp"
 #include "game/spec/componentvector.hpp"
-#include "game/spec/hull.hpp"
 #include "game/spec/engine.hpp"
+#include "game/spec/hull.hpp"
+#include "game/test/root.hpp"
+#include "game/test/shiplist.hpp"
 
 /** Test "get/set" methods. */
 void
@@ -358,6 +361,370 @@ TestGameVcrObject::testGuessEngine()
         obj.setIsPlanet(false);
         obj.setOwner(3);
         TS_ASSERT_EQUALS(obj.getGuessedEngine(localEngines, &hull, true, config), 0);
+    }
+}
+
+/** Test describe(). */
+void
+TestGameVcrObject::testDescribe()
+{
+    // TeamSettings
+    game::TeamSettings teamSettings;
+    teamSettings.setPlayerTeam(2, 1);
+    teamSettings.setViewpointPlayer(1);
+
+    // Root
+    game::test::Root root(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,0)));
+
+    // ShipList
+    game::spec::ShipList shipList;
+    game::test::addOutrider(shipList);
+    game::test::addGorbie(shipList);
+    game::test::addAnnihilation(shipList);
+    game::test::initStandardBeams(shipList);
+    game::test::initStandardTorpedoes(shipList);
+    game::test::addTranswarp(shipList);
+
+    // Translator
+    afl::string::NullTranslator tx;
+
+    // Lo-fi case
+    {
+        game::vcr::Object obj;
+        obj.setOwner(1);
+        obj.setName("N1");
+        obj.setId(77);
+        game::vcr::ObjectInfo info = obj.describe(0, 0, 0, tx);
+
+        TS_ASSERT_EQUALS(info.text[0], "N1");
+    }
+
+    // Standard case, no team settings
+    {
+        game::vcr::Object obj;
+        obj.setOwner(1);
+        obj.setName("N2");
+        obj.setId(77);
+        obj.setPicture(9);
+        obj.setMass(75);
+        obj.setCrew(10);
+        game::vcr::ObjectInfo info = obj.describe(0, &root, &shipList, tx);
+
+        TS_ASSERT_EQUALS(info.text[0], "N2 (Id #77, a Player 1 OUTRIDER CLASS SCOUT)");
+        TS_ASSERT_EQUALS(info.text[1], "0% shield (75 kt), 0% damaged, 10 crewmen");
+        TS_ASSERT_EQUALS(info.color[0], util::SkinColor::Static);
+    }
+
+    // Standard case, with team settings, own ship
+    {
+        game::vcr::Object obj;
+        obj.setOwner(1);
+        obj.setName("N3");
+        obj.setId(77);
+        obj.setPicture(9);
+        obj.setMass(75);
+        obj.setCrew(10);
+        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &root, &shipList, tx);
+
+        TS_ASSERT_EQUALS(info.text[0], "N3 (Id #77, our OUTRIDER CLASS SCOUT)");
+        TS_ASSERT_EQUALS(info.color[0], util::SkinColor::Green);
+    }
+
+    // Standard case, with team settings, team ship
+    {
+        game::vcr::Object obj;
+        obj.setOwner(2);
+        obj.setName("N4");
+        obj.setId(77);
+        obj.setPicture(9);
+        obj.setMass(75);
+        obj.setCrew(10);
+        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &root, &shipList, tx);
+
+        TS_ASSERT_EQUALS(info.text[0], "N4 (Id #77, a Player 2 OUTRIDER CLASS SCOUT)");
+        TS_ASSERT_EQUALS(info.color[0], util::SkinColor::Yellow);
+    }
+
+    // Standard case, with team settings, enemy ship
+    {
+        game::vcr::Object obj;
+        obj.setOwner(3);
+        obj.setName("N5");
+        obj.setId(77);
+        obj.setPicture(9);
+        obj.setMass(75);
+        obj.setCrew(10);
+        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &root, &shipList, tx);
+
+        TS_ASSERT_EQUALS(info.text[0], "N5 (Id #77, a Player 3 OUTRIDER CLASS SCOUT)");
+        TS_ASSERT_EQUALS(info.color[0], util::SkinColor::Red);
+    }
+
+    // Standard case, unguessable ship
+    {
+        game::vcr::Object obj;
+        obj.setOwner(3);
+        obj.setName("N6");
+        obj.setId(77);
+        obj.setPicture(99);
+        obj.setMass(75);
+        obj.setCrew(10);
+        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &root, &shipList, tx);
+
+        TS_ASSERT_EQUALS(info.text[0], "N6 (Id #77, a Player 3 starship)");
+    }
+
+    // Standard case, planet
+    {
+        game::vcr::Object obj;
+        obj.setOwner(1);
+        obj.setName("N7");
+        obj.setId(77);
+        obj.setPicture(200);
+        obj.setMass(175);
+        obj.setIsPlanet(true);
+        obj.setShield(50);
+        obj.setDamage(3);
+        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &root, &shipList, tx);
+
+        TS_ASSERT_EQUALS(info.text[0], "N7 (Id #77, our planet)");
+        TS_ASSERT_EQUALS(info.text[1], "50% shield (175 kt), 3% damaged");
+    }
+
+    // Beams
+    {
+        game::vcr::Object obj;
+        obj.setOwner(1);
+        obj.setName("N8");
+        obj.setId(77);
+        obj.setPicture(99);
+        obj.setMass(75);
+        obj.setCrew(10);
+        obj.setNumBeams(3);
+        obj.setBeamType(10);
+        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &root, &shipList, tx);
+
+        TS_ASSERT_EQUALS(info.text[0], "N8 (Id #77, our starship)");
+        TS_ASSERT_EQUALS(info.text[1], "0% shield (75 kt), 0% damaged, 10 crewmen");
+        TS_ASSERT_EQUALS(info.text[2], "3 \xC3\x97 Heavy Phaser");
+    }
+
+    // Beams, unknown type
+    {
+        game::vcr::Object obj;
+        obj.setOwner(1);
+        obj.setName("N8");
+        obj.setId(77);
+        obj.setPicture(99);
+        obj.setMass(75);
+        obj.setCrew(10);
+        obj.setNumBeams(3);
+        obj.setBeamType(0);
+        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &root, &shipList, tx);
+
+        TS_ASSERT_EQUALS(info.text[0], "N8 (Id #77, our starship)");
+        TS_ASSERT_EQUALS(info.text[1], "0% shield (75 kt), 0% damaged, 10 crewmen");
+        TS_ASSERT_EQUALS(info.text[2], "3 beam weapons");
+    }
+
+    // Torpedoes
+    {
+        game::vcr::Object obj;
+        obj.setOwner(1);
+        obj.setName("N9");
+        obj.setId(77);
+        obj.setPicture(99);
+        obj.setMass(75);
+        obj.setCrew(10);
+        obj.setNumLaunchers(1);
+        obj.setTorpedoType(3);
+        obj.setNumTorpedoes(10);
+        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &root, &shipList, tx);
+
+        TS_ASSERT_EQUALS(info.text[0], "N9 (Id #77, our starship)");
+        TS_ASSERT_EQUALS(info.text[1], "0% shield (75 kt), 0% damaged, 10 crewmen");
+        TS_ASSERT_EQUALS(info.text[2], "1 \xC3\x97 Mark 2 Photon launcher with 10 torpedoes");
+    }
+
+    // Torpedoes (plural forms)
+    {
+        game::vcr::Object obj;
+        obj.setOwner(1);
+        obj.setName("N10");
+        obj.setId(77);
+        obj.setPicture(99);
+        obj.setMass(75);
+        obj.setCrew(10);
+        obj.setNumLaunchers(10);
+        obj.setTorpedoType(3);
+        obj.setNumTorpedoes(1);
+        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &root, &shipList, tx);
+
+        TS_ASSERT_EQUALS(info.text[0], "N10 (Id #77, our starship)");
+        TS_ASSERT_EQUALS(info.text[1], "0% shield (75 kt), 0% damaged, 10 crewmen");
+        TS_ASSERT_EQUALS(info.text[2], "10 \xC3\x97 Mark 2 Photon launchers with 1 torpedo");
+    }
+
+    // Torpedoes (unknown type)
+    {
+        game::vcr::Object obj;
+        obj.setOwner(1);
+        obj.setName("N11");
+        obj.setId(77);
+        obj.setPicture(99);
+        obj.setMass(75);
+        obj.setCrew(10);
+        obj.setNumLaunchers(1);
+        obj.setTorpedoType(0);
+        obj.setNumTorpedoes(10);
+        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &root, &shipList, tx);
+
+        TS_ASSERT_EQUALS(info.text[0], "N11 (Id #77, our starship)");
+        TS_ASSERT_EQUALS(info.text[1], "0% shield (75 kt), 0% damaged, 10 crewmen");
+        TS_ASSERT_EQUALS(info.text[2], "1 \xC3\x97 torpedo launcher with 10 torpedoes");
+    }
+
+    // Fighters
+    {
+        game::vcr::Object obj;
+        obj.setOwner(1);
+        obj.setName("N12");
+        obj.setId(77);
+        obj.setPicture(99);
+        obj.setMass(75);
+        obj.setCrew(10);
+        obj.setNumBays(4);
+        obj.setNumFighters(30);
+        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &root, &shipList, tx);
+
+        TS_ASSERT_EQUALS(info.text[0], "N12 (Id #77, our starship)");
+        TS_ASSERT_EQUALS(info.text[1], "0% shield (75 kt), 0% damaged, 10 crewmen");
+        TS_ASSERT_EQUALS(info.text[2], "4 fighter bays with 30 fighters");
+    }
+
+    // Torpedoes and fighters
+    {
+        game::vcr::Object obj;
+        obj.setOwner(1);
+        obj.setName("N13");
+        obj.setId(77);
+        obj.setPicture(99);
+        obj.setMass(200);
+        obj.setIsPlanet(true);
+        obj.setNumBays(4);
+        obj.setNumFighters(30);
+        obj.setTorpedoType(10);
+        obj.setNumTorpedoes(20);
+        obj.setNumLaunchers(2);
+        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &root, &shipList, tx);
+
+        TS_ASSERT_EQUALS(info.text[0], "N13 (Id #77, our planet)");
+        TS_ASSERT_EQUALS(info.text[1], "0% shield (200 kt), 0% damaged");
+        TS_ASSERT_EQUALS(info.text[2], "20 Mark 8 Photons and 30 fighters");
+    }
+
+    // Torpedoes with unknown type, and fighters
+    {
+        game::vcr::Object obj;
+        obj.setOwner(1);
+        obj.setName("N14");
+        obj.setId(77);
+        obj.setPicture(99);
+        obj.setMass(200);
+        obj.setIsPlanet(true);
+        obj.setNumBays(4);
+        obj.setNumFighters(30);
+        obj.setTorpedoType(0);
+        obj.setNumTorpedoes(20);
+        obj.setNumLaunchers(2);
+        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &root, &shipList, tx);
+
+        TS_ASSERT_EQUALS(info.text[0], "N14 (Id #77, our planet)");
+        TS_ASSERT_EQUALS(info.text[1], "0% shield (200 kt), 0% damaged");
+        TS_ASSERT_EQUALS(info.text[2], "20 torpedoes and 30 fighters");
+    }
+
+    // Unused bays (THost NTP)
+    {
+        game::vcr::Object obj;
+        obj.setOwner(1);
+        obj.setName("N15");
+        obj.setId(77);
+        obj.setPicture(107);      // Picture for GORBIE
+        obj.setMass(980);
+        obj.setNumBeams(4);
+        obj.setBeamType(7);
+        obj.setCrew(10);
+        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &root, &shipList, tx);
+
+        TS_ASSERT_EQUALS(info.text[0], "N15 (Id #77, our GORBIE CLASS BATTLECARRIER)");
+        TS_ASSERT_EQUALS(info.text[1], "0% shield (980 kt), 0% damaged, 10 crewmen");
+        TS_ASSERT_EQUALS(info.text[2], "4 \xC3\x97 Heavy Blaster");
+        TS_ASSERT_EQUALS(info.text[3], "(10 fighter bays not used)");
+        TS_ASSERT_EQUALS(info.color[3], util::SkinColor::Faded);
+    }
+
+    // Unused bays (THost NTP), fighters known
+    {
+        game::vcr::Object obj;
+        obj.setOwner(1);
+        obj.setName("N16");
+        obj.setId(77);
+        obj.setPicture(107);      // Picture for GORBIE
+        obj.setMass(980);
+        obj.setNumBeams(4);
+        obj.setBeamType(7);
+        obj.setCrew(10);
+        obj.setNumFighters(66);
+        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &root, &shipList, tx);
+
+        TS_ASSERT_EQUALS(info.text[0], "N16 (Id #77, our GORBIE CLASS BATTLECARRIER)");
+        TS_ASSERT_EQUALS(info.text[1], "0% shield (980 kt), 0% damaged, 10 crewmen");
+        TS_ASSERT_EQUALS(info.text[2], "4 \xC3\x97 Heavy Blaster");
+        TS_ASSERT_EQUALS(info.text[3], "(10 fighter bays with 66 fighters not used)");
+        TS_ASSERT_EQUALS(info.color[3], util::SkinColor::Faded);
+    }
+
+    // Unused torpedo launchers
+    {
+        game::vcr::Object obj;
+        obj.setOwner(1);
+        obj.setName("N17");
+        obj.setId(77);
+        obj.setPicture(84);      // Picture for ANNIHILATION
+        obj.setMass(960);
+        obj.setNumBeams(4);
+        obj.setBeamType(7);
+        obj.setCrew(10);
+        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &root, &shipList, tx);
+
+        TS_ASSERT_EQUALS(info.text[0], "N17 (Id #77, our ANNIHILATION CLASS BATTLESHIP)");
+        TS_ASSERT_EQUALS(info.text[1], "0% shield (960 kt), 0% damaged, 10 crewmen");
+        TS_ASSERT_EQUALS(info.text[2], "4 \xC3\x97 Heavy Blaster");
+        TS_ASSERT_EQUALS(info.text[3], "(up to 10 torpedo launchers not used)");
+        TS_ASSERT_EQUALS(info.color[3], util::SkinColor::Faded);
+    }
+
+    // Unused torpedo launchers, type/count known
+    {
+        game::vcr::Object obj;
+        obj.setOwner(1);
+        obj.setName("N18");
+        obj.setId(77);
+        obj.setPicture(84);      // Picture for ANNIHILATION
+        obj.setMass(960);
+        obj.setNumBeams(4);
+        obj.setBeamType(7);
+        obj.setCrew(10);
+        obj.setTorpedoType(5);
+        obj.setNumTorpedoes(33);
+        game::vcr::ObjectInfo info = obj.describe(&teamSettings, &root, &shipList, tx);
+
+        TS_ASSERT_EQUALS(info.text[0], "N18 (Id #77, our ANNIHILATION CLASS BATTLESHIP)");
+        TS_ASSERT_EQUALS(info.text[1], "0% shield (960 kt), 0% damaged, 10 crewmen");
+        TS_ASSERT_EQUALS(info.text[2], "4 \xC3\x97 Heavy Blaster");
+        TS_ASSERT_EQUALS(info.text[3], "(up to 10 Mark 3 Photons with 33 torps not used)");
+        TS_ASSERT_EQUALS(info.color[3], util::SkinColor::Faded);
     }
 }
 

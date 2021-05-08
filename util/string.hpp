@@ -6,6 +6,7 @@
 #define C2NG_UTIL_STRING_HPP
 
 #include "afl/string/string.hpp"
+#include "afl/string/translator.hpp"
 
 namespace util {
 
@@ -93,6 +94,13 @@ namespace util {
         \return formatted name */
     String_t formatName(String_t name);
 
+    /** Format age of an information.
+        \param currentTurn Current turn
+        \param historyTurn Turn of information
+        \param tx Translator
+        \return formatted age */
+    String_t formatAge(int currentTurn, int historyTurn, afl::string::Translator& tx);
+
     /** Encode MIME header.
         \param input text to encode
         \param charset character set */
@@ -125,6 +133,20 @@ namespace util {
         \param delim Delimiter
         \param ele Element */
     void addListItem(String_t& s, String_t delim, String_t ele);
+
+    /** Sanitize string for logging.
+        Replaces non-ASCII, non-printable characters with '?'.
+        \param s String
+        \return Sanitized string */
+    String_t sanitizeString(String_t str);
+
+    /** Comare strings for human-readable sorting.
+        In a first pass,
+        - compares strings without considering case (ASCII only)
+        - compares embedded numbers numerically
+        If that does not produce a difference, compares normally.
+        \return negative value if a sorts before b, positive value if a sorts after b, zero if a equals b. */
+    int strCollate(const String_t& a, const String_t& b);
 
 }
 

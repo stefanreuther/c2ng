@@ -55,12 +55,12 @@ ui::res::renderEngineDiagram(const std::vector<int>& fuelUsage, gfx::Point size,
     gfx::BaseContext ctx(*can);
 
     // Legend (bottom)
-    ctx.setTextAlign(1, 0);
+    ctx.setTextAlign(gfx::CenterAlign, gfx::TopAlign);
     ctx.useFont(font);
     ctx.setRawColor(ui::Color_White);
     outText(ctx, gfx::Point(size.getX()/2, diagHeight + 1), tx("Warp \xE2\x86\x92"));
 
-    ctx.setTextAlign(0, 0);
+    ctx.setTextAlign(gfx::LeftAlign, gfx::TopAlign);
     outText(ctx, gfx::Point(), tx("Fuel used per ly"));
 
     // Diagram

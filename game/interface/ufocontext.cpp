@@ -90,7 +90,7 @@ game::interface::UfoContext::lookup(const afl::data::NameQuery& name, PropertyIn
 }
 
 void
-game::interface::UfoContext::set(PropertyIndex_t index, afl::data::Value* value)
+game::interface::UfoContext::set(PropertyIndex_t index, const afl::data::Value* value)
 {
     // ex IntUfoContext::set
     if (game::map::Ufo* ufo = getObject()) {

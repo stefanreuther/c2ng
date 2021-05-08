@@ -9,7 +9,6 @@
 #include "game/session.hpp"
 #include "util/requestreceiver.hpp"
 #include "util/requestsender.hpp"
-#include "util/slaverequestsender.hpp"
 
 namespace game { namespace proxy {
 
@@ -112,8 +111,10 @@ namespace game { namespace proxy {
 
         class Response;
         class Trampoline;
+        class TrampolineFromSession;
+
         util::RequestReceiver<PlanetInfoProxy> m_receiver;
-        util::SlaveRequestSender<Session, Trampoline> m_sender;
+        util::RequestSender<Trampoline> m_sender;
     };
 
 } }

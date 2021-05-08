@@ -6,6 +6,7 @@
 #include "game/sim/configuration.hpp"
 
 #include "t_game_sim.hpp"
+#include "afl/string/nulltranslator.hpp"
 
 /** Setter/getter test. */
 void
@@ -23,6 +24,7 @@ TestGameSimConfiguration::testIt()
     TS_ASSERT(!t.hasRandomizeFCodesOnEveryFight());
     TS_ASSERT_EQUALS(t.getBalancingMode(), t.BalanceNone);
     TS_ASSERT_EQUALS(t.getMode(), t.VcrPHost4);
+    TS_ASSERT(t.hasAlternativeCombat());
 
     // Accessors
     const game::sim::Configuration& ct = t;
@@ -40,6 +42,7 @@ TestGameSimConfiguration::testIt()
     TS_ASSERT(!t.hasRandomizeFCodesOnEveryFight());
     TS_ASSERT(!t.hasRandomLeftRight());
     TS_ASSERT_EQUALS(t.getBalancingMode(), t.Balance360k);
+    TS_ASSERT(!t.hasAlternativeCombat());
 
     t.setEngineShieldBonus(10);
     TS_ASSERT_EQUALS(t.getEngineShieldBonus(), 10);
@@ -149,3 +152,85 @@ TestGameSimConfiguration::testConfig()
     }
 }
 
+/** Test toString(). */
+void
+TestGameSimConfiguration::testToString()
+{
+    using game::sim::Configuration;
+    afl::string::NullTranslator tx;
+    TS_ASSERT(!toString(Configuration::VcrHost, tx).empty());
+    TS_ASSERT(!toString(Configuration::VcrPHost2, tx).empty());
+    TS_ASSERT(!toString(Configuration::VcrPHost3, tx).empty());
+    TS_ASSERT(!toString(Configuration::VcrPHost4, tx).empty());
+    TS_ASSERT(!toString(Configuration::VcrNuHost, tx).empty());
+    TS_ASSERT(!toString(Configuration::VcrFLAK, tx).empty());
+
+    TS_ASSERT(!toString(Configuration::BalanceNone, tx).empty());
+    TS_ASSERT(!toString(Configuration::Balance360k, tx).empty());
+    TS_ASSERT(!toString(Configuration::BalanceMasterAtArms, tx).empty());
+}
+
+/** Test copyFrom(). */
+void
+TestGameSimConfiguration::testCopyFrom()
+{
+    using game::sim::Configuration;
+
+    Configuration orig;
+    orig.setEngineShieldBonus(77);
+    orig.allianceSettings().set(4, 5, true);
+    orig.enemySettings().set(8, 2, true);
+
+    Configuration copyAll;
+    copyAll = orig;
+    TS_ASSERT_EQUALS(copyAll.getEngineShieldBonus(), 77);
+    TS_ASSERT_EQUALS(copyAll.allianceSettings().get(4, 5), true);
+    TS_ASSERT_EQUALS(copyAll.enemySettings().get(8, 2), true);
+
+    Configuration copyMain;
+    copyMain.copyFrom(orig, Configuration::Areas_t(Configuration::MainArea));
+    TS_ASSERT_EQUALS(copyMain.getEngineShieldBonus(), 77);
+    TS_ASSERT_EQUALS(copyMain.allianceSettings().get(4, 5), false);
+    TS_ASSERT_EQUALS(copyMain.enemySettings().get(8, 2), false);
+
+    Configuration copyAlliance;
+    copyAlliance.copyFrom(orig, Configuration::Areas_t(Configuration::AllianceArea));
+    TS_ASSERT_EQUALS(copyAlliance.getEngineShieldBonus(), 0);
+    TS_ASSERT_EQUALS(copyAlliance.allianceSettings().get(4, 5), true);
+    TS_ASSERT_EQUALS(copyAlliance.enemySettings().get(8, 2), false);
+
+    Configuration copyEnemy;
+    copyEnemy.copyFrom(orig, Configuration::Areas_t(Configuration::EnemyArea));
+    TS_ASSERT_EQUALS(copyEnemy.getEngineShieldBonus(), 0);
+    TS_ASSERT_EQUALS(copyEnemy.allianceSettings().get(4, 5), false);
+    TS_ASSERT_EQUALS(copyEnemy.enemySettings().get(8, 2), true);
+}
+
+/** Test getNext(). */
+void
+TestGameSimConfiguration::testGetNext()
+{
+    using game::sim::Configuration;
+
+    // BalancingMode
+    {
+        Configuration::BalancingMode mode = Configuration::BalanceNone;
+        int n = 0;
+        do {
+            ++n;
+            mode = getNext(mode);
+            TS_ASSERT(n < 100);
+        } while (mode != Configuration::BalanceNone);
+    }
+
+    // VcrMode
+    {
+        Configuration::VcrMode mode = Configuration::VcrPHost4;
+        int n = 0;
+        do {
+            ++n;
+            mode = getNext(mode);
+            TS_ASSERT(n < 100);
+        } while (mode != Configuration::VcrPHost4);
+    }
+}

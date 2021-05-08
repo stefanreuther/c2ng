@@ -405,6 +405,11 @@ namespace game { namespace config {
             \param level level number (normally [0,NUM_EXPERIENCE_LEVELS], but out-of-range values are handled) */
         String_t getExperienceLevelName(int level, afl::string::Translator& tx) const;
 
+        /** Get experience level, given a number of experience points.
+            \param points Points
+            \return level [0,NUM_EXPERIENCE_LEVELS] */
+        int getExperienceLevelFromPoints(int32_t points) const;
+
         /** Get experience bonus.
             \param param descriptor of option to test
             \param level experience level (normally [0,MAX_EXPERIENCE_LEVELS], but out-of-range values are handled)

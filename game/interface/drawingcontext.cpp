@@ -73,7 +73,7 @@ game::interface::DrawingContext::lookup(const afl::data::NameQuery& name, Proper
 }
 
 void
-game::interface::DrawingContext::set(PropertyIndex_t index, afl::data::Value* value)
+game::interface::DrawingContext::set(PropertyIndex_t index, const afl::data::Value* value)
 {
     // ex IntDrawingContext::set
     if (game::map::Drawing* d = *m_iterator) {

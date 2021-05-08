@@ -33,6 +33,7 @@ client::widgets::AllianceStatusList::AllianceStatusList(ui::Root& root, afl::str
       m_translator(tx),
       m_items()
 {
+    // ex phost.pas:CAlliancePanel
     sig_itemClickAt.add(this, &AllianceStatusList::onItemClickAt);
     sig_change.add(this, &AllianceStatusList::onChange);
 }
@@ -88,13 +89,23 @@ client::widgets::AllianceStatusList::getItemHeight(size_t /*n*/)
 }
 
 int
-client::widgets::AllianceStatusList::getHeaderHeight()
+client::widgets::AllianceStatusList::getHeaderHeight() const
+{
+    return 0;
+}
+
+int
+client::widgets::AllianceStatusList::getFooterHeight() const
 {
     return 0;
 }
 
 void
 client::widgets::AllianceStatusList::drawHeader(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
+{ }
+
+void
+client::widgets::AllianceStatusList::drawFooter(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
 { }
 
 void
@@ -173,7 +184,7 @@ client::widgets::AllianceStatusList::drawItem(gfx::Canvas& can, gfx::Rectangle a
         }
 
         rightContext.setColor(textColor);
-        rightContext.setTextAlign(1, 0);
+        rightContext.setTextAlign(gfx::CenterAlign, gfx::TopAlign);
         outTextF(rightContext, area, text);
         ui::drawFrameUp(rightContext, area);
     } else {

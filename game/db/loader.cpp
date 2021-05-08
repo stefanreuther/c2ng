@@ -1,11 +1,13 @@
 /**
   *  \file game/db/loader.cpp
+  *  \brief Class game::db::Loader
   */
 
 #include <cstring>
 #include <algorithm>
 #include "game/db/loader.hpp"
 #include "afl/base/countof.hpp"
+#include "afl/base/staticassert.hpp"
 #include "afl/data/namemap.hpp"
 #include "afl/except/fileformatexception.hpp"
 #include "afl/io/limitedstream.hpp"
@@ -19,7 +21,6 @@
 #include "interpreter/vmio/valueloader.hpp"
 #include "util/atomtable.hpp"
 #include "util/io.hpp"
-#include "util/translation.hpp"
 
 namespace {
     namespace gm = game::map;
@@ -27,6 +28,13 @@ namespace {
     namespace dt = game::db::structures;
 
     const char LOG_NAME[] = "game.db";
+
+    /*
+     *  Drawing colors
+     *
+     *  The external format is PCC1 palette entries (which differs from the PCC2/c2ng palette).
+     *  Internally, we store 0..30.
+     */
 
     const uint8_t colors[] = {
         0,
@@ -53,6 +61,10 @@ namespace {
             return 15;
         }
     }
+
+    /*
+     *  Unit scores
+     */
 
     bool readUnitScoreHeader(afl::io::Stream& s, game::db::structures::UnitScoreHeader& ush)
     {
@@ -99,6 +111,10 @@ namespace {
         }
     }
 
+    /*
+     *  chartX.cc records
+     */
+
     struct RecordState {
         game::db::structures::BlockHeader header;
         afl::io::Stream::FileSize_t headerPos;
@@ -125,10 +141,7 @@ namespace {
         out.setPos(endPos);
     }
 
-    // /** Compute atom map. Populates a GDrawingAtomMap object, used for
-    //     chart file I/O and filtering.
-    //     \param map   [out] Object to populate
-    //     \param flags [in] Options, bitfield of IncludeNumeric, IncludeInvisible. */
+    /* Compute atom map. */
     void computeAtomMap(game::db::DrawingAtomMap& out,
                         const game::map::DrawingContainer& drawings,
                         const util::AtomTable& atoms)
@@ -145,19 +158,14 @@ namespace {
     }
 }
 
+// Constructor.
 game::db::Loader::Loader(afl::charset::Charset& cs, interpreter::World& world, afl::string::Translator& tx)
     : m_charset(cs),
       m_world(world),
       m_translator(tx)
 { }
 
-// /** Load starchart database.
-//     \param s   Stream to read from
-//     \param trn Turn to populate with information
-//     \param acceptProperties true to accept properties, false to skip them.
-//                Properties are not stored in the trn proper, so this offers
-//                to ignore properties from the file, avoiding overwriting
-//                global properties. */
+// Load starchart database file.
 void
 game::db::Loader::load(afl::io::Stream& in, Turn& turn, Game& game, bool acceptProperties)
 {
@@ -169,9 +177,9 @@ game::db::Loader::load(afl::io::Stream& in, Turn& turn, Game& game, bool acceptP
     structures::Header header;
     in.fullRead(afl::base::fromObject(header));
     if (std::memcmp(header.signature, structures::SIGNATURE, sizeof(structures::SIGNATURE)) != 0) {
-        throw afl::except::FileFormatException(in, _("File is missing required signature"));
+        throw afl::except::FileFormatException(in, m_translator("File is missing required signature"));
     }
-    log().write(afl::sys::LogListener::Debug, LOG_NAME, _("Loading starchart database..."));
+    log().write(afl::sys::LogListener::Debug, LOG_NAME, m_translator("Loading starchart database..."));
 
     // A ValueLoader
     interpreter::vmio::NullLoadContext loadContext;
@@ -291,7 +299,7 @@ game::db::Loader::load(afl::io::Stream& in, Turn& turn, Game& game, bool acceptP
                 }
             }
             if (size != 0) {
-                log().write(afl::sys::LogListener::Warn, LOG_NAME, _("Autobuild record has unexpected size"));
+                log().write(afl::sys::LogListener::Warn, LOG_NAME, m_translator("Autobuild record has unexpected size"));
             }
             break;
          }
@@ -324,7 +332,7 @@ game::db::Loader::load(afl::io::Stream& in, Turn& turn, Game& game, bool acceptP
 
          case dt::rPaintingTags: {
             if (!atom_translation.isEmpty()) {
-                log().write(afl::sys::LogListener::Warn, LOG_NAME, _("Text record appears at unexpected place"));
+                log().write(afl::sys::LogListener::Warn, LOG_NAME, m_translator("Text record appears at unexpected place"));
             }
             afl::io::LimitedStream ss(in.createChild(), startPos, size);
             atom_translation.clear();
@@ -348,13 +356,11 @@ game::db::Loader::load(afl::io::Stream& in, Turn& turn, Game& game, bool acceptP
         in.setPos(endPos);
     }
     if (ignored_entries != 0) {
-        log().write(afl::sys::LogListener::Info, LOG_NAME, afl::string::Format(_("%d database record%!1{s have%| has%} been ignored").c_str(), ignored_entries));
+        log().write(afl::sys::LogListener::Info, LOG_NAME, afl::string::Format(m_translator("%d database record%!1{s have%| has%} been ignored").c_str(), ignored_entries));
     }
 }
 
-// /** Save starchart database.
-//     \param s   Stream to save into
-//     \param trn Turn to save */
+// Save starchart database file.
 void
 game::db::Loader::save(afl::io::Stream& out, const Turn& turn, const Game& game, const game::spec::ShipList& shipList)
 {
@@ -455,43 +461,46 @@ game::db::Loader::save(afl::io::Stream& out, const Turn& turn, const Game& game,
 
     // Write ships
     for (Id_t id = 1, n = univ.ships().size(); id <= n; ++id) {
-        const gm::Ship* sh = univ.ships().get(id);
-        if (sh != 0 && sh->hasAnyShipData()) {
-            // History Data
-            dt::Ship dbs;
-            Packer(m_charset).packShip(dbs, *sh);
-            startRecord(out, dt::rShipHistory, rs);
-            out.fullWrite(afl::base::fromObject(dbs));
-            endRecord(out, rs);
-        }
-
-        // Track data
-        int turnNr = sh->getHistoryNewestLocationTurn();
-        if (turnNr > 0) {
-            dt::ShipTrackHeader th;
-            th.id   = static_cast<int16_t>(sh->getId());
-            th.turn = static_cast<int16_t>(turnNr);
-            startRecord(out, dt::rShipTrack, rs);
-            out.fullWrite(afl::base::fromObject(th));
-
-            while (const gm::ShipHistoryData::Track* p = sh->getHistoryLocation(turnNr)) {
-                dt::ShipTrackEntry te;
-                te.x       = static_cast<int16_t>(p->x.orElse(-1));
-                te.y       = static_cast<int16_t>(p->y.orElse(-1));
-                if (turnNr == turn.getTurnNumber()) {
-                    // FIXME: this distinction should be done by Ship
-                    te.speed   = static_cast<int8_t>(sh->getWarpFactor().orElse(-1));
-                    te.heading = static_cast<int16_t>(sh->getHeading().orElse(-1));
-                    te.mass    = static_cast<int16_t>(sh->getMass(shipList).orElse(-1));
-                } else {
-                    te.speed   = static_cast<int8_t>(p->speed.orElse(-1));
-                    te.heading = static_cast<int16_t>(p->heading.orElse(-1));
-                    te.mass    = static_cast<int16_t>(p->mass.orElse(-1));
-                }
-                out.fullWrite(afl::base::fromObject(te));
-                --turnNr;
+        if (const gm::Ship* sh = univ.ships().get(id)) {
+            if (sh->hasAnyShipData()) {
+                // History Data
+                // ex GShip::getShipHistoryData
+                dt::Ship dbs;
+                Packer(m_charset).packShip(dbs, *sh);
+                startRecord(out, dt::rShipHistory, rs);
+                out.fullWrite(afl::base::fromObject(dbs));
+                endRecord(out, rs);
             }
-            endRecord(out, rs);
+
+            // Track data
+            int turnNr = sh->getHistoryNewestLocationTurn();
+            if (turnNr > 0) {
+                dt::ShipTrackHeader th;
+                th.id   = static_cast<int16_t>(sh->getId());
+                th.turn = static_cast<int16_t>(turnNr);
+                startRecord(out, dt::rShipTrack, rs);
+                out.fullWrite(afl::base::fromObject(th));
+
+                while (const gm::ShipHistoryData::Track* p = sh->getHistoryLocation(turnNr)) {
+                    // ex GShip::getShipTrackHeader, GShip::getShipTrackEntry
+                    dt::ShipTrackEntry te;
+                    te.x       = static_cast<int16_t>(p->x.orElse(-1));
+                    te.y       = static_cast<int16_t>(p->y.orElse(-1));
+                    if (turnNr == turn.getTurnNumber()) {
+                        // FIXME: this distinction should be done by Ship
+                        te.speed   = static_cast<int8_t>(sh->getWarpFactor().orElse(-1));
+                        te.heading = static_cast<int16_t>(sh->getHeading().orElse(-1));
+                        te.mass    = static_cast<int16_t>(sh->getMass(shipList).orElse(-1));
+                    } else {
+                        te.speed   = static_cast<int8_t>(p->speed.orElse(-1));
+                        te.heading = static_cast<int16_t>(p->heading.orElse(-1));
+                        te.mass    = static_cast<int16_t>(p->mass.orElse(-1));
+                    }
+                    out.fullWrite(afl::base::fromObject(te));
+                    --turnNr;
+                }
+                endRecord(out, rs);
+            }
         }
 
         // Property data
@@ -527,14 +536,19 @@ game::db::Loader::log()
 }
 
 
-// /** Load drawings from file.
-//     \param in     [in] Stream to read from (must yield EOF at end of data)
-//     \param map    [in] Maps external tags to internal
-//     \param expire [in] Current turn for expiration; -1 to not expire anything */
+/** Load drawings from file.
+    \param [in]  in        Stream to read from (must yield EOF at end of data)
+    \param [out] container DrawingContainer to populate
+    \param [in]  map       Maps external tags to internal */
 void
 game::db::Loader::loadDrawings(afl::io::Stream& in, game::map::DrawingContainer& container, const DrawingAtomMap& map)
 {
     // ex GDrawingContainer::load
+    static_assert(gm::Drawing::LineDrawing      == 0, "LineDrawing");
+    static_assert(gm::Drawing::RectangleDrawing == 1, "RectangleDrawing");
+    static_assert(gm::Drawing::CircleDrawing    == 2, "CircleDrawing");
+    static_assert(gm::Drawing::MarkerDrawing    == 3, "MarkerDrawing");
+
     dt::Drawing d;
     while (in.read(afl::base::fromObject(d)) == sizeof(d)) {
         /* Parse what we have so far: */
@@ -548,7 +562,6 @@ game::db::Loader::loadDrawings(afl::io::Stream& in, game::map::DrawingContainer&
         }
 
         /* Check type */
-        // FIXME: isolate internal/external representation
         if (kind < 0 || kind > gm::Drawing::MarkerDrawing) {
             continue;
         }
@@ -575,15 +588,22 @@ game::db::Loader::loadDrawings(afl::io::Stream& in, game::map::DrawingContainer&
     }
 }
 
+/** Load record containing user-defined properties.
+    \param [in]     in          Stream to read from
+    \param [in]     scope       Whether to read ship or planet properties
+    \param [in]     univ        Universe (used to verify object Ids)
+    \param [in]     dbNames     Name mapping that represents the database file's order of properties
+    \param [in,out] liveNames   Name mapping for live data (updated as needed)
+    \param [in]     valueLoader Value loader */
 void
-game::db::Loader::loadPropertyRecord(afl::io::Stream& in, Scope scope, game::map::Universe& univ, const afl::data::NameMap& dbNames, afl::data::NameMap& liveNames, interpreter::vmio::ValueLoader& valueLoader)
+game::db::Loader::loadPropertyRecord(afl::io::Stream& in, Scope scope, const game::map::Universe& univ, const afl::data::NameMap& dbNames, afl::data::NameMap& liveNames, interpreter::vmio::ValueLoader& valueLoader)
 {
     // ex game/db.cc:loadPropertyRecord
 
     // Header: Id + count
     dt::PropertyHeader header;
     if (in.read(afl::base::fromObject(header)) != sizeof(header)) {
-        log().write(afl::sys::LogListener::Warn, LOG_NAME, _("Property record has unexpected size and has been ignored"));
+        log().write(afl::sys::LogListener::Warn, LOG_NAME, m_translator("Property record has unexpected size and has been ignored"));
         return;
     }
 
@@ -604,7 +624,7 @@ game::db::Loader::loadPropertyRecord(afl::io::Stream& in, Scope scope, game::map
         break;
     }
     if (liveProperties == 0) {
-        log().write(afl::sys::LogListener::Warn, LOG_NAME, afl::string::Format(_("Property record has invalid Id (%d) and has been ignored").c_str(), id));
+        log().write(afl::sys::LogListener::Warn, LOG_NAME, afl::string::Format(m_translator("Property record has invalid Id (%d) and has been ignored").c_str(), id));
         return;
     }
 
@@ -613,8 +633,7 @@ game::db::Loader::loadPropertyRecord(afl::io::Stream& in, Scope scope, game::map
     valueLoader.load(dbValues, in, 0, header.numProperties);
 
     // Copy to game object
-    // FIXME: why is NameMap::Index_t a uint32_t?
-    size_t limit = std::min(dbValues.size(), size_t(dbNames.getNumNames()));
+    size_t limit = std::min(dbValues.size(), dbNames.getNumNames());
     for (size_t i = 0, n = limit; i < n; ++i) {
         afl::data::Value* dbValue = dbValues[i];
         const String_t&   dbName  = dbNames.getNameByIndex(i);
@@ -632,6 +651,11 @@ game::db::Loader::loadPropertyRecord(afl::io::Stream& in, Scope scope, game::map
     }
 }
 
+/** Load unit-score record.
+    \param [in]     in          Stream to read from
+    \param [in]     scope       Whether to read ship or planet scores
+    \param [in,out] univ        Universe to receive scores
+    \param [in,out] defs        Score definitions */
 void
 game::db::Loader::loadUnitScoreRecord(afl::io::Stream& in, Scope scope, game::map::Universe& univ, UnitScoreDefinitionList& defs)
 {
@@ -666,17 +690,23 @@ game::db::Loader::loadUnitScoreRecord(afl::io::Stream& in, Scope scope, game::ma
             }
         }
     } else {
-        log().write(afl::sys::LogListener::Warn, LOG_NAME, _("Unit score record is invalid"));
+        log().write(afl::sys::LogListener::Warn, LOG_NAME, m_translator("Unit score record is invalid"));
     }
 }
 
-// /** Save drawings in file
-//     \param out [in] Stream to write to
-//     \param map [in] Maps internal tags to external */
+/** Save drawings into file.
+    \param out       File to save into
+    \param container Drawing container
+    \param map       DrawingAtomMap to map internal tag values to external */
 void
 game::db::Loader::saveDrawings(afl::io::Stream& out, const game::map::DrawingContainer& container, const DrawingAtomMap& map)
 {
     // ex GDrawingContainer::save
+    static_assert(gm::Drawing::LineDrawing      == 0, "LineDrawing");
+    static_assert(gm::Drawing::RectangleDrawing == 1, "RectangleDrawing");
+    static_assert(gm::Drawing::CircleDrawing    == 2, "CircleDrawing");
+    static_assert(gm::Drawing::MarkerDrawing    == 3, "MarkerDrawing");
+
     for (game::map::DrawingContainer::Iterator_t i = container.begin(), end = container.end(); i != end; ++i) {
         if (game::map::Drawing* p = *i) {
             dt::Drawing d;
@@ -701,6 +731,11 @@ game::db::Loader::saveDrawings(afl::io::Stream& out, const game::map::DrawingCon
     }
 }
 
+/** Save user-defined property record.
+    \param out   Stream to write to
+    \param type  Record type
+    \param id    Object Id
+    \param pData Pointer to property data, can be null */
 void
 game::db::Loader::savePropertyRecord(afl::io::Stream& out, uint16_t type, game::Id_t id, const afl::data::Segment* pData)
 {
@@ -723,12 +758,18 @@ game::db::Loader::savePropertyRecord(afl::io::Stream& out, uint16_t type, game::
     }
 }
 
+/** Save unit-scores for all units.
+    \param out   Stream to write to
+    \param type  Record type
+    \param scope Whether to write ship or unit scores
+    \param defs  Unit score definitions
+    \param univ  Universe */
 void
 game::db::Loader::saveUnitScores(afl::io::Stream& out, uint16_t type, Scope scope, const UnitScoreDefinitionList& defs, const game::map::Universe& univ)
 {
-    // ex writeUnitScores
-    // // FIXME: it would make sense to drop empty records. This implementation will
-    // // write them out, keeping outdated score definitions around for ages.
+    // ex writeUnitScores, phost.pas:SaveUnitScores (sort-of)
+    // Note: this implementation will write out all score definitions, even if they (no longer) have any scores.
+    // This matches the PCC2 behaviour and so far has no disadvantage other than possibly wasting a few bytes.
     for (UnitScoreDefinitionList::Index_t index = 0, maxIndex = defs.getNumScores(); index < maxIndex; ++index) {
         if (const UnitScoreDefinitionList::Definition* pDef = defs.get(index)) {
             // Record control

@@ -284,8 +284,8 @@ game::actions::CargoTransferSetup::getConflictingTransferShipId(const game::map:
     // We don't need to handle UseOtherUnload, because there's no choice where you unload, so there cannot legally be a conflicting unload.
     // FIXME: actually, we need to do something about UseOtherUnload for NuHost (!hasParallelShipTransfers()).
     for (size_t i = 0; i < 2; ++i) {
-        int thisId = m_ids[i];
-        int otherId = m_ids[i^1];
+        const Id_t thisId = m_ids[i];
+        const Id_t otherId = m_ids[i^1];
         switch (m_actions[i]) {
          case Invalid:
          case UsePlanetStorage:
@@ -324,7 +324,8 @@ game::actions::CargoTransferSetup::build(CargoTransfer& action,
                                          Turn& turn,
                                          const game::config::HostConfiguration& config,
                                          const game::spec::ShipList& shipList,
-                                         const game::HostVersion& version)
+                                         const game::HostVersion& version,
+                                         afl::string::Translator& tx)
 {
     game::map::Universe& univ = turn.universe();
 
@@ -352,27 +353,27 @@ game::actions::CargoTransferSetup::build(CargoTransfer& action,
             throw Exception(Exception::ePerm);
 
          case UsePlanetStorage:
-            action.addNew(new game::map::PlanetStorage(getPlanet(univ, thisId), config));
+            action.addNew(new game::map::PlanetStorage(getPlanet(univ, thisId), config, tx));
             break;
 
          case UseShipStorage:
-            action.addNew(new game::map::ShipStorage(getShip(univ, thisId), shipList));
+            action.addNew(new game::map::ShipStorage(getShip(univ, thisId), shipList, tx));
             break;
 
          case UseOtherUnload:
-            action.addNew(new game::map::ShipTransporter(getShip(univ, otherId), Ship::UnloadTransporter, thisId, univ, version));
+            action.addNew(new game::map::ShipTransporter(getShip(univ, otherId), Ship::UnloadTransporter, thisId, univ, version, tx));
             break;
 
          case UseOtherTransfer:
-            action.addNew(new game::map::ShipTransporter(getShip(univ, otherId), Ship::TransferTransporter, thisId, univ, version));
+            action.addNew(new game::map::ShipTransporter(getShip(univ, otherId), Ship::TransferTransporter, thisId, univ, version, tx));
             break;
 
          case UseProxyTransfer:
-            action.addNew(new game::map::ShipTransporter(getShip(univ, m_ids[Proxy]), Ship::TransferTransporter, thisId, univ, version));
+            action.addNew(new game::map::ShipTransporter(getShip(univ, m_ids[Proxy]), Ship::TransferTransporter, thisId, univ, version, tx));
             break;
 
          case UseBeamUpShip:
-            action.addNew(new game::map::BeamUpShipTransfer(getShip(univ, thisId), shipList, turn, config));
+            action.addNew(new game::map::BeamUpShipTransfer(getShip(univ, thisId), shipList, turn, config, tx));
             break;
 
          case UseBeamUpPlanet:

@@ -5,16 +5,15 @@
 
 #include <memory>
 #include "gfx/bitmapfont.hpp"
-#include "gfx/bitmapglyph.hpp"
-#include "afl/charset/utf8reader.hpp"
-#include "afl/except/fileformatexception.hpp"
-#include "util/translation.hpp"
-#include "afl/bits/value.hpp"
+#include "afl/base/growablememory.hpp"
+#include "afl/base/staticassert.hpp"
 #include "afl/bits/int16le.hpp"
 #include "afl/bits/uint16le.hpp"
 #include "afl/bits/uint32le.hpp"
-#include "afl/base/staticassert.hpp"
-#include "afl/base/growablememory.hpp"
+#include "afl/bits/value.hpp"
+#include "afl/charset/utf8reader.hpp"
+#include "afl/except/fileformatexception.hpp"
+#include "gfx/bitmapglyph.hpp"
 
 namespace {
     uint16_t mapCharacterId(int /*encoding*/, uint16_t chid)
@@ -163,7 +162,7 @@ namespace {
 
 // Load bitmap font from "FN" file.
 void
-gfx::BitmapFont::load(afl::io::Stream& s, int index)
+gfx::BitmapFont::load(afl::io::Stream& s, int index, afl::string::Translator& tx)
 {
     afl::io::Stream::FileSize_t base = s.getPos();
 
@@ -171,12 +170,12 @@ gfx::BitmapFont::load(afl::io::Stream& s, int index)
     FileHeader header;
     s.fullRead(afl::base::fromObject(header));
     if (header.signature[0] != 'F' || header.signature[1] != 'N') {
-        throw afl::except::FileFormatException(s, _("File is missing required signature"));
+        throw afl::except::FileFormatException(s, tx("File is missing required signature"));
     }
 
     const int numFonts = header.numFonts;
     if (numFonts <= 0 || index >= numFonts) {
-        throw afl::except::FileFormatException(s, _("File does not contain required font"));
+        throw afl::except::FileFormatException(s, tx("File does not contain required font"));
     }
 
     // Read font index
@@ -213,7 +212,7 @@ gfx::BitmapFont::load(afl::io::Stream& s, int index)
 
             s.setPos(base + chpos);
             s.fullRead(bits);
-            std::auto_ptr<BitmapGlyph> glyph(new BitmapGlyph(chwidth, height, bits.unsafeData()));
+            std::auto_ptr<BitmapGlyph> glyph(new BitmapGlyph(chwidth, height, bits));
 
             // Read anti-aliasing hints
             if (type == 3) {

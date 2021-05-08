@@ -142,7 +142,7 @@ game::interface::GlobalContext::~GlobalContext()
 game::interface::GlobalContext*
 game::interface::GlobalContext::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
 {
-    // ex IntGlobalContext::lookup
+    // ex IntGlobalContext::lookup, CGlobalContext.ResolveValue (sort-of)
     if (name.startsWith("GLOBAL.")) {
         return lookupGlobalProperty(afl::data::NameQuery(name, 7), result, m_session) ? this : 0;
     } else {
@@ -151,7 +151,7 @@ game::interface::GlobalContext::lookup(const afl::data::NameQuery& name, Propert
 }
 
 void
-game::interface::GlobalContext::set(PropertyIndex_t index, afl::data::Value* value)
+game::interface::GlobalContext::set(PropertyIndex_t index, const afl::data::Value* value)
 {
     // ex IntGlobalContext::set
     if (index >= NUM_GLOBAL_PROPERTIES) {

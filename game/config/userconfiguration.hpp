@@ -14,8 +14,12 @@
 
 namespace game { namespace config {
 
+    class MarkerOption;
+
     class UserConfiguration : public Configuration {
      public:
+        static const int NUM_CANNED_MARKERS = 10;
+
         UserConfiguration();
         ~UserConfiguration();
 
@@ -24,28 +28,6 @@ namespace game { namespace config {
         void loadUserConfiguration(util::ProfileDirectory& dir, afl::sys::LogListener& log, afl::string::Translator& tx);
         void loadGameConfiguration(afl::io::Directory& dir, afl::sys::LogListener& log, afl::string::Translator& tx);
         void saveGameConfiguration(afl::io::Directory& dir, afl::sys::LogListener& log, afl::string::Translator& tx) const;
-
-//     // Game-related options:
-//     ConfigIntOption CollapseOldMessages;
-//     ConfigIntOption RewrapMessages;
-//     ConfigIntOption InstantBattleResult;
-
-//     // Sound options
-//     ConfigIntOption Sound16Bits;
-//     ConfigIntOption SoundEnabled;
-//     ConfigIntOption SoundFrequency;
-//     ConfigIntOption SoundHeadphone;
-//     ConfigIntOption SoundReverse;
-//     ConfigIntOption SoundStereo;
-
-//     // Starchart options
-//     ConfigIntOption ChartAnimThreshold;
-//     ConfigIntOption ChartMouseStickiness;
-//     ConfigIntOption ChartScannerWarpWells;
-
-//     // Export
-//     ConfigStringOption ExportShipFields;
-//     ConfigStringOption ExportPlanetFields;
 
         /** Get game type.
             This returns the same value as UserConfiguration[Game_Type](), but does not create an empty option value if non exists.
@@ -79,6 +61,22 @@ namespace game { namespace config {
         template<class StorageType, StorageType NullValue, class UserType>
         String_t formatPopulation(afl::base::InlineOptional<StorageType,NullValue,UserType> value) const;
 
+        /** Get canned marker configuration.
+            \param int Slot number, starting at 0
+            \return Configuration option; null if slot number out of range */
+        MarkerOption* getCannedMarker(int slot);
+
+
+        /*
+         *  Definition of options
+         *
+         *  Although it's possible to define options at the place of use, defining them here is preferred.
+         *  This makes them appear in the list of known options (e.g. in configuration, "Pref" function, etc.),
+         *  even when they have not yet been used in the current session.
+         *  Defaults are set in setDefaultValues(), so there's no need to use IntegerOptionDescriptorWithDefault.
+         */
+
+        // Game options
         static const StringOptionDescriptor  Game_Charset;
         static const StringOptionDescriptor  Game_Type;
         static const StringOptionDescriptor  Game_User;
@@ -88,12 +86,48 @@ namespace game { namespace config {
         static const IntegerOptionDescriptor Game_ReadOnly;
         static const IntegerOptionDescriptor Game_AccessHostFiles;
 
+        // Display
         static const IntegerOptionDescriptor Display_ThousandsSep;
         static const IntegerOptionDescriptor Display_Clans;
+        static const IntegerOptionDescriptor Tax_PredictRelative;
 
-        static const StringOptionDescriptor Backup_Result;
+        // Starchart
+        // More chart options in game::map::Configuration, those are maintained by session setup and need not be here
+        static const IntegerOptionDescriptor ChartScannerWarpWells;
+        static const IntegerOptionDescriptor ChartRenderOptions[3][2];
 
+        // Locking
+        static const IntegerOptionDescriptor Lock_Left;
+        static const IntegerOptionDescriptor Lock_Right;
+
+        // Backup etc.
+        static const StringOptionDescriptor  Backup_Chart;
+        static const StringOptionDescriptor  Backup_Result;
+        static const StringOptionDescriptor  Backup_Script;
+        static const StringOptionDescriptor  Backup_Turn;
+        static const StringOptionDescriptor  Backup_Util;
+        static const StringOptionDescriptor  Maketurn_Target;
+
+        // Team
         static const IntegerOptionDescriptor Team_AutoSync;
+
+        // Unpack
+        static const IntegerOptionDescriptor Unpack_AcceptRaceNames;
+        static const StringOptionDescriptor  Unpack_AttachmentTimestamp;
+        static const int Unpack_Ask = 0, Unpack_Accept = 1, Unpack_Reject = 2;
+
+        // Export
+        static const StringOptionDescriptor  ExportShipFields;
+        static const StringOptionDescriptor  ExportPlanetFields;
+
+        // Sorting
+        static const IntegerOptionDescriptor Sort_History;
+        static const IntegerOptionDescriptor Sort_Ship;
+        static const IntegerOptionDescriptor Sort_Ship_Secondary;
+        static const IntegerOptionDescriptor Sort_Cargo;
+        static const IntegerOptionDescriptor Sort_Cargo_Secondary;
+        static const IntegerOptionDescriptor Sort_Search;
+        static const IntegerOptionDescriptor Sort_Search_Secondary;
     };
 
 } }

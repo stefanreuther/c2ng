@@ -13,6 +13,7 @@
 #include "game/config/hostconfiguration.hpp"
 #include "game/hostversion.hpp"
 #include "game/map/planet.hpp"
+#include "game/map/planeteffectors.hpp"
 #include "util/numberformatter.hpp"
 
 namespace game { namespace actions {
@@ -62,6 +63,11 @@ namespace game { namespace actions {
             If not set, TaxationAction uses the number of buildings on the planet.
             \param mifa Buildings */
         void setNumBuildings(int mifa);
+
+        /** Set planet effectors.
+            This affects happiness changes.
+            \param eff Effectors */
+        void setEffectors(const game::map::PlanetEffectors& eff);
 
         /** Get tax rate for an area.
             \param a area
@@ -191,6 +197,8 @@ namespace game { namespace actions {
 
         afl::base::Optional<int> m_numBuildings;        // Number of buildings for happiness change computation. Nothing to use planet's current value.
         afl::base::Optional<int> m_tax[2];              // Current tax. Nothing to use planet's current value.
+
+        game::map::PlanetEffectors m_effectors;         // Effectors; for hiss (and possibly RGA etc.)
 
         afl::base::SignalConnection conn_planetChange;  // Planet::sig_change
         afl::base::SignalConnection conn_configChange;  // HostConfiguration::sig_change

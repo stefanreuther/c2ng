@@ -20,10 +20,12 @@ ui::widgets::MenuFrame::MenuFrame(ui::layout::Manager& mgr, Root& root, EventLoo
     : LayoutableGroup(mgr),
       m_root(root),
       m_loop(loop),
-      m_timer(root.engine().createTimer())
+      m_timer(root.engine().createTimer()),
+      m_colorScheme(ui::GRAY_COLOR_SET, root.colorScheme())
 {
     // ex MenuFrame::MenuFrame
     setState(ModalState, true);
+    setColorScheme(m_colorScheme);
     m_timer->sig_fire.add(this, &MenuFrame::onTick);
 }
 

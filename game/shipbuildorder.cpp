@@ -4,6 +4,13 @@
   */
 
 #include "game/shipbuildorder.hpp"
+#include "game/spec/hull.hpp"
+#include "game/spec/engine.hpp"
+#include "game/spec/beam.hpp"
+#include "game/spec/torpedolauncher.hpp"
+#include "afl/string/format.hpp"
+
+using afl::string::Format;
 
 game::ShipBuildOrder::ShipBuildOrder()
     : m_hullIndex(0),
@@ -95,6 +102,41 @@ game::ShipBuildOrder::canonicalize()
     }
     if (m_numBeams == 0) {
         m_beamType = 0;
+    }
+}
+
+void
+game::ShipBuildOrder::describe(afl::data::StringList_t& result, const game::spec::ShipList& shipList, afl::string::Translator& tx) const
+{
+    // ex formatBuildOrder
+    const game::spec::Hull* pHull = shipList.hulls().get(m_hullIndex);
+    if (pHull != 0) {
+        // Hull
+        const game::spec::ComponentNameProvider& namer = shipList.componentNamer();
+        result.push_back(pHull->getName(namer));
+
+        // Components
+        // This format strings turn into "Transwarp Drive" when there's one, "7 x Transwarp Drive" when there are many.
+        String_t fmt = tx("%!d%!1{%0$d \xC3\x97 %}%1$s");
+        if (const game::spec::Engine* pEngine = shipList.engines().get(m_engineType)) {
+            result.push_back(Format(fmt, pHull->getNumEngines(), pEngine->getName(namer)));
+        }
+
+        if (m_numBeams != 0) {
+            if (const game::spec::Beam* pBeam = shipList.beams().get(m_beamType)) {
+                result.push_back(Format(fmt, m_numBeams, pBeam->getName(namer)));
+            }
+        }
+
+        if (m_numLaunchers != 0) {
+            if (const game::spec::TorpedoLauncher* pTL = shipList.launchers().get(m_launcherType)) {
+                result.push_back(Format(fmt, m_numLaunchers, pTL->getName(namer)));
+            }
+        }
+
+        if (pHull->getNumBays() != 0) {
+            result.push_back(Format(tx("%d fighter bay%!1{s%}"), pHull->getNumBays()));
+        }
     }
 }
 

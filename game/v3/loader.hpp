@@ -160,6 +160,12 @@ namespace game { namespace v3 {
             \param file File to read from */
         void loadBattles(game::Turn& turn, afl::io::Stream& file, const game::config::HostConfiguration& config) const;
 
+        /** Load FLAK battles.
+            \param turn Target turn
+            \param gameDir Game directory
+            \param playerNr Player number */
+        void loadFlakBattles(game::Turn& turn, afl::io::Directory& gameDir, int playerNr);
+
         /** Load Ufos.
             \param univ Target universe
             \param file File to read from

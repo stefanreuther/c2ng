@@ -79,14 +79,14 @@ namespace interpreter {
         \param value [in] Value given by user
         \return true if value was specified, false if value was null (out not changed)
         \throw Error if value is invalid (can currently not happen) */
-    bool checkBooleanArg(bool& out, afl::data::Value* value);
+    bool checkBooleanArg(bool& out, const afl::data::Value* value);
 
     /** Check string argument.
         \param out   [out] Result will be placed here
         \param value [in] Value given by user
         \return true if value was specified, false if value was null (out not changed)
         \throw Error if value is invalid (can currently not happen) */
-    bool checkStringArg(String_t& out, afl::data::Value* value);
+    bool checkStringArg(String_t& out, const afl::data::Value* value);
 
     /** Check flag argument.
         Users specify flags as a string containing latin letters.
@@ -103,7 +103,7 @@ namespace interpreter {
         \param tpl      [in] Template used to parse user's input
         \return true if value was specified, false if value was null (flagOut, valueOut not changed)
         \throw Error if value is invalid */
-    bool checkFlagArg(int32_t& flagOut, int32_t* valueOut, afl::data::Value* value, const char* tpl);
+    bool checkFlagArg(int32_t& flagOut, int32_t* valueOut, const afl::data::Value* value, const char* tpl);
 
     /** Check command atom argument.
         Users either specify the command as a string, or an atom.

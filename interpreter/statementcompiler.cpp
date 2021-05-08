@@ -758,7 +758,7 @@ interpreter::StatementCompiler::compileAbort(BytecodeObject& bco, const Statemen
 interpreter::StatementCompiler::Result
 interpreter::StatementCompiler::compileBind(BytecodeObject& bco, const StatementCompilationContext& scc)
 {
-    // ex IntStatementCompiler::compileBind
+    // ex IntStatementCompiler::compileBind, globint.pas:Global_Bind
     /* @q Bind keymap:Keymap key:Str := action:Any... (Elementary Command)
        Assign keys.
        This command arranges that %action is invoked when the %key is pressed while %keymap is active.
@@ -931,7 +931,7 @@ interpreter::StatementCompiler::compileCall(BytecodeObject& bco, const Statement
 interpreter::StatementCompiler::Result
 interpreter::StatementCompiler::compileCreateKeymap(BytecodeObject& bco, const StatementCompilationContext& scc)
 {
-    // ex IntStatementCompiler::compileCreateKeymap
+    // ex IntStatementCompiler::compileCreateKeymap, globint.pas:Global_CreateKeymap
     /* @q CreateKeymap name(parent:Keymap...),... (Elementary Command)
        Create a keymap.
        A keymap contains a set of keystrokes and commands active in a particular context.
@@ -2862,7 +2862,7 @@ interpreter::StatementCompiler::compileTry(BytecodeObject& bco, const StatementC
 interpreter::StatementCompiler::Result
 interpreter::StatementCompiler::compileUseKeymap(BytecodeObject& bco, const StatementCompilationContext& scc)
 {
-    // ex IntStatementCompiler::compileUseKeymap
+    // ex IntStatementCompiler::compileUseKeymap, globint.pas:Global_UseKeymap
     /* @q UseKeymap name:Keymap (Global Command)
        Temporarily enable a secondary keymap.
        The next keypress will be processed according to the specified keymap

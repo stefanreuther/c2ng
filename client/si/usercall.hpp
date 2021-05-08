@@ -8,7 +8,6 @@ namespace client { namespace si {
 
     class Control;
     class RequestLink2;
-    class UserSide;
 
     /** Script-triggered User-Interface Call.
         Unlike a UserTask, the UserCall executes synchronously.
@@ -20,9 +19,8 @@ namespace client { namespace si {
             { }
 
         /** Execute the call.
-            \param ui UserSide of script interface
             \param ctl Active screen's Control */
-        virtual void handle(UserSide& ui, Control& ctl) = 0;
+        virtual void handle(Control& ctl) = 0;
     };
 
 } }

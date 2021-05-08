@@ -39,7 +39,7 @@
 namespace {
     const char*const KEYMAP_NAME = "RACESCREEN";
 
-    ui::widgets::AbstractButton& createImageButton(afl::base::Deleter& del, ui::Root& root, ui::LayoutableGroup& group, String_t text, util::Key_t key, String_t image)
+    ui::widgets::BaseButton& createImageButton(afl::base::Deleter& del, ui::Root& root, ui::LayoutableGroup& group, String_t text, util::Key_t key, String_t image)
     {
         // Create container group
         ui::widgets::FrameGroup& frame = del.addNew(new ui::widgets::FrameGroup(ui::layout::HBox::instance0, root.colorScheme(), ui::LoweredFrame));
@@ -67,7 +67,7 @@ namespace {
         return content;
     }
 
-    ui::widgets::AbstractButton& createActionButton(afl::base::Deleter& del, ui::Root& root, ui::LayoutableGroup& group, String_t text, util::Key_t key)
+    ui::widgets::BaseButton& createActionButton(afl::base::Deleter& del, ui::Root& root, ui::LayoutableGroup& group, String_t text, util::Key_t key)
     {
         ui::widgets::Button& btn = del.addNew(new ui::widgets::Button(text, key, root));
         group.add(btn);
@@ -82,7 +82,7 @@ namespace {
               m_loop(session.root()),
               m_docView(gfx::Point(200, 200), 0, session.root().provider()),
               m_receiver(session.dispatcher(), *this),
-              m_slave(session.gameSender(), new Trampoline(m_receiver.getSender())),
+              m_updateTrampoline(session.gameSender().makeTemporary(new TrampolineFromSession(m_receiver.getSender()))),
               m_outputState()
             { }
 
@@ -91,6 +91,7 @@ namespace {
 
         void run(client::si::InputState& in, client::si::OutputState& out, gfx::ColorScheme<util::SkinColor::Color>& colorScheme, bool first)
             {
+                // ex WPlayerScreen::init
                 // Player screen
                 //   HBox
                 //     VBox
@@ -182,7 +183,7 @@ namespace {
                 panel.add(rightGroup);
 
                 // Publish UI properties
-                util::SlaveRequestSender<game::Session,Proprietor> prop(m_session.gameSender(), new Proprietor());
+                util::RequestSender<Proprietor> prop(m_session.gameSender().makeTemporary(new ProprietorFromSession()));
 
                 // Finish and display it
                 keys.setKeymapName(KEYMAP_NAME);
@@ -206,21 +207,38 @@ namespace {
                             // Access
                             interpreter::ProcessList& list = session.processList();
 
-                            // Create a task to run the 'Load' hook
-                            interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
-                            bco->addInstruction(interpreter::Opcode::maPush,
-                                                interpreter::Opcode::sNamedShared,
-                                                bco->addName("C2$RUNLOADHOOK"));
-                            bco->addInstruction(interpreter::Opcode::maIndirect,
-                                                interpreter::Opcode::miIMCall, 0);
-                            interpreter::Process& proc = list.create(session.world(), "Turn Initialisation");
-                            proc.pushFrame(bco, false);
-                            proc.setPriority(0);
-                            list.handlePriorityChange(proc);
-                            list.resumeProcess(proc, pgid);
+                            // Create a task to run the 'Load' and 'NewTurn' hooks, with high priority
+                            {
+                                interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
+                                bco->addInstruction(interpreter::Opcode::maPush,
+                                                    interpreter::Opcode::sNamedShared,
+                                                    bco->addName("C2$RUNLOADHOOK"));
+                                bco->addInstruction(interpreter::Opcode::maIndirect,
+                                                    interpreter::Opcode::miIMCall, 0);
+                                interpreter::Process& proc = list.create(session.world(), "Turn Initialisation");
+                                proc.pushFrame(bco, false);
+                                proc.setPriority(0);
+                                list.handlePriorityChange(proc);
+                                list.resumeProcess(proc, pgid);
+                            }
 
                             // Revive all auto-tasks
                             list.resumeSuspendedProcesses(pgid);
+
+                            // Create task to show notifications, with low priority
+                            {
+                                interpreter::BCORef_t bco = *new interpreter::BytecodeObject();
+                                bco->addInstruction(interpreter::Opcode::maPush,
+                                                    interpreter::Opcode::sNamedShared,
+                                                    bco->addName("C2$SHOWINITIALNOTIFICATIONS"));
+                                bco->addInstruction(interpreter::Opcode::maIndirect,
+                                                    interpreter::Opcode::miIMCall, 0);
+                                interpreter::Process& proc = list.create(session.world(), "Turn Initialisation (2)");
+                                proc.pushFrame(bco, false);
+                                proc.setPriority(99);
+                                list.handlePriorityChange(proc);
+                                list.resumeProcess(proc, pgid);
+                            }
                         }
                 };
 
@@ -243,13 +261,14 @@ namespace {
                 m_docView.handleDocumentUpdate();
             }
 
-        virtual void handleStateChange(client::si::UserSide& us, client::si::RequestLink2 link, client::si::OutputState::Target target)
+        virtual void handleStateChange(client::si::RequestLink2 link, client::si::OutputState::Target target)
             {
+                // ex WPlayerScreen::processEvent
                 using client::si::OutputState;
                 switch (target) {
                  case OutputState::NoChange:
                  case OutputState::PlayerScreen:
-                    us.continueProcess(link);
+                    interface().continueProcess(link);
                     break;
 
                  case OutputState::ExitProgram:
@@ -261,18 +280,22 @@ namespace {
                  case OutputState::PlanetTaskScreen:
                  case OutputState::BaseTaskScreen:
                  case OutputState::Starchart:
-                    us.detachProcess(link);
+                    interface().detachProcess(link);
                     m_outputState.set(link, target);
                     m_loop.stop(0);
                     break;
                 }
             }
-        virtual void handlePopupConsole(client::si::UserSide& ui, client::si::RequestLink2 link)
-            { defaultHandlePopupConsole(ui, link); }
-        virtual void handleEndDialog(client::si::UserSide& ui, client::si::RequestLink2 link, int /*code*/)
-            { ui.continueProcess(link); }
-        virtual void handleSetViewRequest(client::si::UserSide& ui, client::si::RequestLink2 link, String_t name, bool withKeymap)
-            { defaultHandleSetViewRequest(ui, link, name, withKeymap); }
+        virtual void handlePopupConsole(client::si::RequestLink2 link)
+            { defaultHandlePopupConsole(link); }
+        virtual void handleEndDialog(client::si::RequestLink2 link, int /*code*/)
+            { interface().continueProcess(link); }
+        virtual void handleSetViewRequest(client::si::RequestLink2 link, String_t name, bool withKeymap)
+            { defaultHandleSetViewRequest(link, name, withKeymap); }
+        virtual void handleUseKeymapRequest(client::si::RequestLink2 link, String_t name, int prefix)
+            { defaultHandleUseKeymapRequest(link, name, prefix); }
+        virtual void handleOverlayMessageRequest(client::si::RequestLink2 link, String_t text)
+            { defaultHandleOverlayMessageRequest(link, text); }
         virtual client::si::ContextProvider* createContextProvider()
             { return 0; }
 
@@ -282,23 +305,13 @@ namespace {
         ui::rich::DocumentView m_docView;
         util::RequestReceiver<PlayerScreen> m_receiver;
 
-        class Proprietor : public util::SlaveObject<game::Session>,
-                           public game::interface::UserInterfacePropertyAccessor
-        {
+        class Proprietor : public game::interface::UserInterfacePropertyAccessor {
          public:
-            Proprietor()
-                : m_pSession()
-                { }
-            virtual void init(game::Session& master)
-                {
-                    m_pSession = &master;
-                    master.uiPropertyStack().add(*this);
-                }
-            virtual void done(game::Session& master)
-                {
-                    master.uiPropertyStack().remove(*this);
-                    m_pSession = 0;
-                }
+            Proprietor(game::Session& session)
+                : m_session(session)
+                { m_session.uiPropertyStack().add(*this); }
+            ~Proprietor()
+                { m_session.uiPropertyStack().remove(*this); }
 
             virtual bool get(game::interface::UserInterfaceProperty prop, std::auto_ptr<afl::data::Value>& result)
                 {
@@ -330,7 +343,7 @@ namespace {
                     }
                     return false;
                 }
-            virtual bool set(game::interface::UserInterfaceProperty prop, afl::data::Value* p)
+            virtual bool set(game::interface::UserInterfaceProperty prop, const afl::data::Value* p)
                 {
                     // ex WPlayerScreen::setProperty
                     switch (prop) {
@@ -356,12 +369,7 @@ namespace {
          private:
             void getCursorLocation(game::map::Point::Component c, std::auto_ptr<afl::data::Value>& result)
                 {
-                    if (m_pSession == 0) {
-                        result.reset();
-                        return;
-                    }
-
-                    game::Game* pGame = m_pSession->getGame().get();
+                    game::Game* pGame = m_session.getGame().get();
                     if (pGame == 0) {
                         result.reset();
                         return;
@@ -376,19 +384,14 @@ namespace {
                     result.reset(interpreter::makeIntegerValue(pt.get(c)));
                 }
 
-            void setCursorLocation(game::map::Point::Component c, afl::data::Value* p)
+            void setCursorLocation(game::map::Point::Component c, const afl::data::Value* p)
                 {
                     int32_t value;
                     if (!interpreter::checkIntegerArg(value, p, 0, game::MAX_NUMBER)) {
                         return;
                     }
 
-                    if (m_pSession == 0) {
-                        // Cannot happen
-                        throw interpreter::Error::notAssignable();
-                    }
-
-                    game::Game* pGame = m_pSession->getGame().get();
+                    game::Game* pGame = m_session.getGame().get();
                     if (pGame == 0) {
                         // Cannot happen
                         throw interpreter::Error::notAssignable();
@@ -406,49 +409,46 @@ namespace {
                     }
                 }
 
-            game::Session* m_pSession;
+            game::Session& m_session;
         };
 
-        class Trampoline : public util::SlaveObject<game::Session> {
+        class ProprietorFromSession : public afl::base::Closure<Proprietor*(game::Session&)> {
          public:
-            Trampoline(util::RequestSender<PlayerScreen> sender)
-                : m_sender(sender),
-                  conn_root(),
-                  m_pSession(0)
-                { }
-            void init(game::Session& session)
+            virtual Proprietor* call(game::Session& session)
+                { return new Proprietor(session); }
+        };
+
+        class Trampoline {
+         public:
+            Trampoline(game::Session& session, util::RequestSender<PlayerScreen> sender)
+                : m_session(session),
+                  m_sender(sender),
+                  conn_root()
                 {
                     if (game::Root* root = session.getRoot().get()) {
                         conn_root = root->playerList().sig_change.add(this, &Trampoline::onChange);
                     }
-                    m_pSession = &session; // FIXME: this is a hack
                     onChange();
-                }
-            void done(game::Session& /*session*/)
-                {
-                    conn_root.disconnect();
                 }
             void onChange()
                 {
                     String_t info;
-                    if (m_pSession != 0) {
-                        game::Root* root = m_pSession->getRoot().get();
-                        game::Game* game = m_pSession->getGame().get();
-                        if (root != 0 && game != 0) {
-                            afl::string::Translator& tx = m_pSession->translator();
-                            if (game::Player* p = root->playerList().get(game->getViewpointPlayer())) {
-                                info = p->getName(game::Player::LongName);
-                                if (!p->getName(game::Player::UserName).empty()) {
-                                    info += "\n";
-                                    info += p->getName(game::Player::UserName);
-                                }
-                            } else {
-                                info = afl::string::Format(tx("Player %d"), game->getViewpointPlayer());
+                    game::Root* root = m_session.getRoot().get();
+                    game::Game* game = m_session.getGame().get();
+                    if (root != 0 && game != 0) {
+                        afl::string::Translator& tx = m_session.translator();
+                        if (game::Player* p = root->playerList().get(game->getViewpointPlayer())) {
+                            info = p->getName(game::Player::LongName);
+                            if (!p->getName(game::Player::UserName).empty()) {
+                                info += "\n";
+                                info += p->getName(game::Player::UserName);
                             }
-                            info += "\n";
-                            info += afl::string::Format(tx("%d message%!1{s%}"), game->currentTurn().inbox().getNumMessages());
-                            info += "\n";
+                        } else {
+                            info = afl::string::Format(tx("Player %d"), game->getViewpointPlayer());
                         }
+                        info += "\n";
+                        info += afl::string::Format(tx("%d message%!1{s%}"), game->currentTurn().inbox().getNumMessages());
+                        info += "\n";
                     }
                     m_sender.postNewRequest(new UpdateTask(info));
                 }
@@ -463,11 +463,23 @@ namespace {
              private:
                 String_t m_string;
             };
+            game::Session& m_session;
             util::RequestSender<PlayerScreen> m_sender;
             afl::base::SignalConnection conn_root;
-            game::Session* m_pSession;
         };
-        util::SlaveRequestSender<game::Session,Trampoline> m_slave;
+
+        class TrampolineFromSession : public afl::base::Closure<Trampoline*(game::Session&)> {
+         public:
+            TrampolineFromSession(const util::RequestSender<PlayerScreen>& sender)
+                : m_sender(sender)
+                { }
+            virtual Trampoline* call(game::Session& session)
+                { return new Trampoline(session, m_sender); }
+         private:
+            util::RequestSender<PlayerScreen> m_sender;
+        };
+
+        util::RequestSender<Trampoline> m_updateTrampoline;
         client::si::OutputState m_outputState;
     };
 }

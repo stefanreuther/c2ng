@@ -7,6 +7,17 @@
 
 #include <cxxtest/TestSuite.h>
 
+class TestGameInterfaceBaseTaskPredictor : public CxxTest::TestSuite {
+ public:
+    void testBuild();
+    void testRecycle();
+    void testShipyard();
+    void testBuildShipCommand();
+    void testSetFCodeCommand();
+    void testSetMissionCommand();
+    void testFixShipCommand();
+};
+
 class TestGameInterfaceCargoFunctions : public CxxTest::TestSuite {
  public:
     void testCheckCargoSpecArg();
@@ -17,6 +28,25 @@ class TestGameInterfaceCargoFunctions : public CxxTest::TestSuite {
     void testCMul();
     void testCRemove();
     void testCSub();
+};
+
+class TestGameInterfaceCompletionList : public CxxTest::TestSuite {
+ public:
+    void testInit();
+    void testAddCandidate();
+    void testAddCandidateDollar();
+    void testAddCandidateMixedCase();
+    void testAddBuildCompletionList();
+};
+
+class TestGameInterfaceDrawingProperty : public CxxTest::TestSuite {
+ public:
+    void testGetLine();
+    void testGetCircle();
+    void testGetMarker();
+    void testSetLine();
+    void testSetCircle();
+    void testSetMarker();
 };
 
 class TestGameInterfaceEngineContext : public CxxTest::TestSuite {
@@ -51,6 +81,21 @@ class TestGameInterfaceGlobalCommands : public CxxTest::TestSuite {
     void testCheckPlayerArgVector();
 };
 
+class TestGameInterfaceInboxContext : public CxxTest::TestSuite {
+ public:
+    void testProperties();
+    void testWrite();
+    void testText();
+    void testIteration();
+};
+
+class TestGameInterfaceInboxSubsetValue : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testIteration();
+    void testIndexing();
+};
+
 class TestGameInterfaceIteratorProvider : public CxxTest::TestSuite {
  public:
     void testIt();
@@ -67,6 +112,11 @@ class TestGameInterfaceNotificationStore : public CxxTest::TestSuite {
     void testHeader();
     void testResume();
     void testReplace();
+};
+
+class TestGameInterfacePluginProperty : public CxxTest::TestSuite {
+ public:
+    void testGet();
 };
 
 class TestGameInterfaceProcessListEditor : public CxxTest::TestSuite {
@@ -91,6 +141,17 @@ class TestGameInterfaceRichTextFunctions : public CxxTest::TestSuite {
     void testRStyle();
     void testRLink();
     void testRXml();
+};
+
+class TestGameInterfaceShipTaskPredictor : public CxxTest::TestSuite {
+ public:
+    void testMovement();
+    void testMoveToCommand();
+    void testSetWaypointCommand();
+    void testMoveTowardsCommand();
+    void testSetSpeedCommand();
+    void testSetFCodeCommand();
+    void testSetMissionCommand();
 };
 
 class TestGameInterfaceUfoContext : public CxxTest::TestSuite {

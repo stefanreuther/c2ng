@@ -637,7 +637,6 @@ TestGameParserMessageParser::testTimAllies()
 }
 
 /** Test failure to provide Id. */
-#include <stdio.h>
 void
 TestGameParserMessageParser::testFailId()
 {

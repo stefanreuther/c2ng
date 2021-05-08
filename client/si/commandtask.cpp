@@ -101,6 +101,7 @@ client::si::CommandTask::execute(uint32_t pgid, game::Session& session)
     if (m_contextProvider.get() != 0) {
         ProcessContextReceiver recv(proc);
         m_contextProvider->createContext(session, recv);
+        proc.markContextTOS();
     }
 
     // Create compilation context

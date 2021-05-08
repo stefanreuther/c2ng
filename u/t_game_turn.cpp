@@ -8,7 +8,7 @@
 #include "t_game.hpp"
 #include "game/vcr/database.hpp"
 #include "game/map/ionstorm.hpp"
-#include "helper/counter.hpp"
+#include "game/test/counter.hpp"
 
 /** Test setters/getters. */
 void
@@ -54,7 +54,7 @@ void
 TestGameTurn::testNotify()
 {
     // Set up a universe
-    Counter c;
+    game::test::Counter c;
     game::Turn testee;
 
     // Create an object and make it visible.
@@ -64,7 +64,7 @@ TestGameTurn::testNotify()
     obj->setPosition(game::map::Point(2000, 2000));
     obj->setVoltage(100);
     
-    obj->sig_change.add(&c, &Counter::increment);
+    obj->sig_change.add(&c, &game::test::Counter::increment);
     TS_ASSERT_EQUALS(c.get(), 0);
 
     // Perform a change to the universe. Turn::notifyListeners must call listeners.

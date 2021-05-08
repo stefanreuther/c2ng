@@ -70,17 +70,21 @@ game::map::Minefield::getName(ObjectName /*which*/, afl::string::Translator& tx,
 {
     // ex GMinefield::getName
     String_t result;
-    if (m_isWeb) {
-        result = afl::string::Format(tx.translateString("Web Mine Field #%d").c_str(), m_id);
+    if (!isValid()) {
+        result = afl::string::Format(tx("Deleted Mine Field #%d"), m_id);
     } else {
-        result = afl::string::Format(tx.translateString("Mine Field #%d").c_str(), m_id);
-    }
+        if (m_isWeb) {
+            result = afl::string::Format(tx("Web Mine Field #%d"), m_id);
+        } else {
+            result = afl::string::Format(tx("Mine Field #%d"), m_id);
+        }
 
-    String_t adj;
-    if (iface.getPlayerAdjective(m_owner, adj)) {
-        result += " (";
-        result += adj;
-        result += ")";
+        String_t adj;
+        if (iface.getPlayerAdjective(m_owner, adj)) {
+            result += " (";
+            result += adj;
+            result += ")";
+        }
     }
     return result;
 }
@@ -167,6 +171,14 @@ game::map::Minefield::addReport(const Point pos,
     // Is this the same field we already saw?
     const bool isSameField = (m_owner == owner && m_position == pos);
 
+    // If we saw the minefield already with better reason, ignore this report.
+    // For example, when laying and scooping a minefield in the same turn,
+    // we get a Lay(size=X) report followed by a Sweep/Scoop(size=0) in util.dat.
+    // Further Lay(size=X) reports, e.g. from messages, shall not override that.
+    if (isSameField && turn == m_turn && reason < m_reason) {
+        return;
+    }
+
     // Turn change: move previous values into archive.
     if (turn > m_turn) {
         if (isSameField) {
@@ -244,7 +256,7 @@ game::map::Minefield::internalCheck(int currentTurn, const game::HostVersion& ho
 }
 
 void
-game::map::Minefield::erase()
+game::map::Minefield::erase(afl::base::Signal<void(Id_t)>* sig)
 {
     m_position = Point();
     m_owner = 0;
@@ -257,6 +269,14 @@ game::map::Minefield::erase()
     m_currentTurn = 0;
     m_currentRadius = 0;
     m_currentUnits = 0;
+
+    // We must raise the "set change" signal before the "object change" signal,
+    // to give observers a chance to take their hands off this object.
+    // Otherwise, they would briefly see a deleted object, which they do not expect
+    // (cursors try to show only valid objects).
+    if (sig != 0) {
+        sig->raise(0);
+    }
     sig_change.raise(getId());
 }
 

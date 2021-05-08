@@ -13,6 +13,7 @@
 namespace client { namespace dialogs {
 
     void doSearchDialog(const game::SearchQuery& initialQuery,
+                        game::Reference currentObject,
                         bool immediate,
                         client::si::UserSide& iface,
                         ui::Root& root,

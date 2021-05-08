@@ -425,11 +425,75 @@ TestGameSpecShipList::testFindRacialAbilitiesMany()
     }
 }
 
-/** Test racial abilities, many abilities.
-    Tests many hulls, many abilities, but some don't have the ability. */
+/** Test findSpecimenHullForFunction(). */
 void
-TestGameSpecShipList::testFindRacialAbilitiesHoley()
+TestGameSpecShipList::testSpecimen()
 {
     game::spec::ShipList testee;
+
+    const ModifiedHullFunctionList::Function_t f1 = testee.modifiedHullFunctions().getFunctionIdFromHostId(1);
+    const ModifiedHullFunctionList::Function_t f2 = testee.modifiedHullFunctions().getFunctionIdFromHostId(2);
+    const ModifiedHullFunctionList::Function_t f3 = testee.modifiedHullFunctions().getFunctionIdFromHostId(3);
+
+    game::spec::Hull* nullh = 0;
+
+    // Hull 1 has f1 for all players
+    game::spec::Hull* h1 = testee.hulls().create(1);
+    h1->changeHullFunction(f1, game::PlayerSet_t::allUpTo(10), game::PlayerSet_t(), true);
+
+    // Hull 2 has f2 for all players
+    game::spec::Hull* h2 = testee.hulls().create(2);
+    h2->changeHullFunction(f2, game::PlayerSet_t::allUpTo(10), game::PlayerSet_t(), true);
+
+    // Hull 3 has f3 for player 4 only
+    game::spec::Hull* h3 = testee.hulls().create(3);
+    h3->changeHullFunction(f3, game::PlayerSet_t(4), game::PlayerSet_t(), true);
+
+    // Hull 4 has f2 for player 5 only
+    game::spec::Hull* h4 = testee.hulls().create(4);
+    h4->changeHullFunction(f2, game::PlayerSet_t(5), game::PlayerSet_t(), true);
+
+    // Tests follow:
+    game::config::HostConfiguration hostConfig;
+
+    // f1 -> hull 1 when searched for all or single player
+    TS_ASSERT_EQUALS(testee.findSpecimenHullForFunction(1, hostConfig, game::PlayerSet_t::allUpTo(10)), h1);
+    TS_ASSERT_EQUALS(testee.findSpecimenHullForFunction(1, hostConfig, game::PlayerSet_t(3)), h1);
+
+    // f2 -> hull 2 when searched for all or single player except for player 5 (ambiguous)
+    TS_ASSERT_EQUALS(testee.findSpecimenHullForFunction(2, hostConfig, game::PlayerSet_t::allUpTo(10)), h2);
+    TS_ASSERT_EQUALS(testee.findSpecimenHullForFunction(2, hostConfig, game::PlayerSet_t(3)), h2);
+    TS_ASSERT_EQUALS(testee.findSpecimenHullForFunction(2, hostConfig, game::PlayerSet_t(5)), nullh);
+
+    // f3 -> hull 2 only for player 4
+    TS_ASSERT_EQUALS(testee.findSpecimenHullForFunction(3, hostConfig, game::PlayerSet_t::allUpTo(10)), nullh);
+    TS_ASSERT_EQUALS(testee.findSpecimenHullForFunction(3, hostConfig, game::PlayerSet_t(3)), nullh);
+    TS_ASSERT_EQUALS(testee.findSpecimenHullForFunction(3, hostConfig, game::PlayerSet_t(4)), h3);
+
+    // f4 for nobody
+    TS_ASSERT_EQUALS(testee.findSpecimenHullForFunction(4, hostConfig, game::PlayerSet_t::allUpTo(10)), nullh);
+    TS_ASSERT_EQUALS(testee.findSpecimenHullForFunction(4, hostConfig, game::PlayerSet_t(3)), nullh);
+    TS_ASSERT_EQUALS(testee.findSpecimenHullForFunction(4, hostConfig, game::PlayerSet_t(4)), nullh);
+}
+
+/** Test getComponent(). */
+void
+TestGameSpecShipList::testGetComponent()
+{
+    game::spec::ShipList testee;
+    game::spec::Hull* h            = testee.hulls().create(66);
+    game::spec::Engine* e          = testee.engines().create(77);
+    game::spec::Beam* b            = testee.beams().create(88);
+    game::spec::TorpedoLauncher* t = testee.launchers().create(99);
+
+    TS_ASSERT_EQUALS(testee.getComponent(game::HullTech,    66), h);
+    TS_ASSERT_EQUALS(testee.getComponent(game::EngineTech,  77), e);
+    TS_ASSERT_EQUALS(testee.getComponent(game::BeamTech,    88), b);
+    TS_ASSERT_EQUALS(testee.getComponent(game::TorpedoTech, 99), t);
+
+    TS_ASSERT(testee.getComponent(game::HullTech, 55)    == 0);
+    TS_ASSERT(testee.getComponent(game::EngineTech, 55)  == 0);
+    TS_ASSERT(testee.getComponent(game::BeamTech, 55)    == 0);
+    TS_ASSERT(testee.getComponent(game::TorpedoTech, 55) == 0);
 }
 

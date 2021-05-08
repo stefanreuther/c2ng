@@ -42,7 +42,8 @@ namespace game { namespace spec { namespace info {
         ShipAbilitiesPage,         ///< Ship ability. Id is basic function Id (BasicHullFunction::getId()).
         EnginePage,                ///< Engine. Id is engine Id (Engine::getId()).
         BeamPage,                  ///< Beam. Id is beam Id (Beam::getId()).
-        TorpedoPage                ///< Torpedo launcher. Id is torpedo Id (TorpedoLauncher::getId()).
+        TorpedoPage,               ///< Torpedo launcher. Id is torpedo Id (TorpedoLauncher::getId()).
+        FighterPage                ///< Fighter. Id is player number.
     };
 
     /** Set of pages. */

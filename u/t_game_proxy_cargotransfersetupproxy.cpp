@@ -130,6 +130,7 @@ namespace {
     }
 }
 
+/** Test normal behaviour. */
 void
 TestGameProxyCargoTransferSetupProxy::testIt()
 {
@@ -147,41 +148,97 @@ TestGameProxyCargoTransferSetupProxy::testIt()
 
     // Planet/Ship
     // - good case
-    TS_ASSERT_EQUALS(testee.createPlanetShip(ind, 55, 1).getStatus(), CargoTransferSetup::Ready);
+    testee.createPlanetShip(ind, 55, 1);
+    TS_ASSERT_EQUALS(testee.get().getStatus(), CargoTransferSetup::Ready);
 
     // - bad case (wrong position)
-    TS_ASSERT_EQUALS(testee.createPlanetShip(ind, 55, 3).getStatus(), CargoTransferSetup::Impossible);
+    testee.createPlanetShip(ind, 55, 3);
+    TS_ASSERT_EQUALS(testee.get().getStatus(), CargoTransferSetup::Impossible);
 
     // - bad case (wrong Id)
-    TS_ASSERT_EQUALS(testee.createPlanetShip(ind, 55, 99).getStatus(), CargoTransferSetup::Impossible);
+    testee.createPlanetShip(ind, 55, 99);
+    TS_ASSERT_EQUALS(testee.get().getStatus(), CargoTransferSetup::Impossible);
 
     // Ship/Ship
     // - good case
-    TS_ASSERT_EQUALS(testee.createShipShip(ind, 1, 2).getStatus(), CargoTransferSetup::Ready);
+    testee.createShipShip(ind, 1, 2);
+    TS_ASSERT_EQUALS(testee.get().getStatus(), CargoTransferSetup::Ready);
 
     // - bad case (wrong position)
-    TS_ASSERT_EQUALS(testee.createShipShip(ind, 1, 3).getStatus(), CargoTransferSetup::Impossible);
+    testee.createShipShip(ind, 1, 3);
+    TS_ASSERT_EQUALS(testee.get().getStatus(), CargoTransferSetup::Impossible);
 
     // - bad case (wrong Id)
-    TS_ASSERT_EQUALS(testee.createShipShip(ind, 1, 99).getStatus(), CargoTransferSetup::Impossible);
+    testee.createShipShip(ind, 1, 99);
+    TS_ASSERT_EQUALS(testee.get().getStatus(), CargoTransferSetup::Impossible);
 
     // Jettison
     // - good case
-    TS_ASSERT_EQUALS(testee.createShipJettison(ind, 3).getStatus(), CargoTransferSetup::Ready);
+    testee.createShipJettison(ind, 3);
+    TS_ASSERT_EQUALS(testee.get().getStatus(), CargoTransferSetup::Ready);
 
     // - bad case (at planet)
-    TS_ASSERT_EQUALS(testee.createShipJettison(ind, 1).getStatus(), CargoTransferSetup::Impossible);
+    testee.createShipJettison(ind, 1);
+    TS_ASSERT_EQUALS(testee.get().getStatus(), CargoTransferSetup::Impossible);
 
     // - bad case (wrong Id)
-    TS_ASSERT_EQUALS(testee.createShipJettison(ind, 99).getStatus(), CargoTransferSetup::Impossible);
+    testee.createShipJettison(ind, 99);
+    TS_ASSERT_EQUALS(testee.get().getStatus(), CargoTransferSetup::Impossible);
 
     // Beam-up-multiple
     // - good case
-    TS_ASSERT_EQUALS(testee.createShipBeamUp(ind, 1).getStatus(), CargoTransferSetup::Ready);
+    testee.createShipBeamUp(ind, 1);
+    TS_ASSERT_EQUALS(testee.get().getStatus(), CargoTransferSetup::Ready);
 
     // - bad case (wrong position)
-    TS_ASSERT_EQUALS(testee.createShipBeamUp(ind, 3).getStatus(), CargoTransferSetup::Impossible);
+    testee.createShipBeamUp(ind, 3);
+    TS_ASSERT_EQUALS(testee.get().getStatus(), CargoTransferSetup::Impossible);
 
     // - bad case (wrong Id)
-    TS_ASSERT_EQUALS(testee.createShipBeamUp(ind, 99).getStatus(), CargoTransferSetup::Impossible);
+    testee.createShipBeamUp(ind, 99);
+    TS_ASSERT_EQUALS(testee.get().getStatus(), CargoTransferSetup::Impossible);
 }
+
+/** Test conflict resolution. */
+void
+TestGameProxyCargoTransferSetupProxy::testConflict()
+{
+    // Preconditions
+    SessionThread h;
+    prepare(h);
+    Ship& s1 = addShip(h, 1);
+    s1.setName(String_t("One"));
+    s1.setOwner(OWNER+1);
+    s1.setTransporterTargetId(Ship::TransferTransporter, 2);
+    s1.setTransporterCargo(Ship::TransferTransporter, Element::Neutronium, 20);
+
+    Ship& s2 = addShip(h, 2);
+    s2.setName(String_t("Two"));
+    s2.setPlayability(game::map::Object::ReadOnly);
+
+    Ship& s3 = addShip(h, 3);
+    s3.setName(String_t("Three"));
+    s3.setPlayability(game::map::Object::ReadOnly);
+
+    // Setup
+    WaitIndicator ind;
+    CargoTransferSetupProxy testee(h.gameSender());
+    testee.createShipShip(ind, 1, 3);
+
+    // Check conflict
+    const CargoTransferSetupProxy::ConflictInfo* info = testee.getConflictInfo();
+    TS_ASSERT(info != 0);
+    TS_ASSERT_EQUALS(info->fromId, 1);
+    TS_ASSERT_EQUALS(info->fromName, "One");
+    TS_ASSERT_EQUALS(info->toId, 2);
+    TS_ASSERT_EQUALS(info->toName, "Two");
+
+    // Solve conflict
+    testee.cancelConflictingTransfer(ind);
+
+    // Verify
+    TS_ASSERT(testee.getConflictInfo() == 0);
+    TS_ASSERT_EQUALS(s1.isTransporterActive(Ship::TransferTransporter), false);
+    TS_ASSERT_EQUALS(s1.getCargo(Element::Neutronium).orElse(0), 30);
+}
+

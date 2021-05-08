@@ -52,17 +52,20 @@ using afl::container::PtrVector;
 using game::browser::Session;
 using util::rich::StyleAttribute;
 using util::rich::Text;
+using afl::string::Format;
+using ui::dialogs::MessageBox;
 
 namespace {
     class NewAccountDialog {
      public:
-        NewAccountDialog(ui::Root& root)
+        NewAccountDialog(ui::Root& root, afl::string::Translator& tx)
             : m_typeValue(0),
               m_userInput(1000, 30, root),
               m_typePlanetsCentral(root, 'p', "PlanetsCentral", m_typeValue, 0),
               m_typeNu            (root, 'n', "planets.nu",     m_typeValue, 1),
               m_hostInput(1000, 30, root),
               m_root(root),
+              m_translator(tx),
               m_loop(root)
             {
                 m_hostInput.setText("");
@@ -70,14 +73,15 @@ namespace {
 
         bool run()
             {
+                afl::string::Translator& tx = m_translator;
                 afl::base::Deleter h;
-                ui::Window win(_("Add Account"), m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5);
-                win.add(h.addNew(new ui::widgets::StaticText(_("User name:"), util::SkinColor::Static, gfx::FontRequest(), m_root.provider())));
+                ui::Window win(tx("Add Account"), m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5);
+                win.add(h.addNew(new ui::widgets::StaticText(tx("User name:"), util::SkinColor::Static, gfx::FontRequest(), m_root.provider())));
                 win.add(m_userInput);
-                win.add(h.addNew(new ui::widgets::StaticText(_("Type:"), util::SkinColor::Static, gfx::FontRequest(), m_root.provider())));
+                win.add(h.addNew(new ui::widgets::StaticText(tx("Type:"), util::SkinColor::Static, gfx::FontRequest(), m_root.provider())));
                 win.add(m_typePlanetsCentral);
                 win.add(m_typeNu);
-                win.add(h.addNew(new ui::widgets::StaticText(_("Address (empty for default):"), util::SkinColor::Static, gfx::FontRequest(), m_root.provider())));
+                win.add(h.addNew(new ui::widgets::StaticText(tx("Address (empty for default):"), util::SkinColor::Static, gfx::FontRequest(), m_root.provider())));
                 win.add(m_hostInput);
 
                 ui::widgets::FocusIterator& it = h.addNew(new ui::widgets::FocusIterator(ui::widgets::FocusIterator::Vertical | ui::widgets::FocusIterator::Tab));
@@ -87,8 +91,8 @@ namespace {
                 it.add(m_hostInput);
                 win.add(it);
 
-                ui::widgets::Button& btnOK     = h.addNew(new ui::widgets::Button(_("OK"), util::Key_Return, m_root));
-                ui::widgets::Button& btnCancel = h.addNew(new ui::widgets::Button(_("Cancel"), util::Key_Escape, m_root));
+                ui::widgets::Button& btnOK     = h.addNew(new ui::widgets::Button(tx("OK"), util::Key_Return, m_root));
+                ui::widgets::Button& btnCancel = h.addNew(new ui::widgets::Button(tx("Cancel"), util::Key_Escape, m_root));
                 btnOK.sig_fire.add(this, &NewAccountDialog::onOK);
                 btnCancel.sig_fire.addNewClosure(m_loop.makeStop(0));
 
@@ -139,7 +143,7 @@ namespace {
                                 } else {
                                     // New account
                                     std::auto_ptr<game::browser::Account> acc(new game::browser::Account());
-                                    acc->setName(afl::string::Format("%s @ %s", m_user, m_host));
+                                    acc->setName(Format("%s @ %s", m_user, m_host));
                                     acc->setUser(m_user);
                                     acc->setType(m_type);
                                     acc->setHost(m_host);
@@ -165,6 +169,7 @@ namespace {
         ui::widgets::RadioButton m_typeNu;
         ui::widgets::InputLine m_hostInput;
         ui::Root& m_root;
+        afl::string::Translator& m_translator;
         ui::EventLoop m_loop;
     };
 
@@ -213,28 +218,7 @@ namespace {
         return result;
     }
 
-    game::Root::Actions_t getPossibleActions(ui::Root& root, util::RequestSender<game::browser::Session> sender)
-    {
-        struct Querier : public util::Request<game::browser::Session> {
-         public:
-            virtual void handle(game::browser::Session& s)
-                {
-                    if (game::browser::Browser* b = s.browser().get()) {
-                        afl::base::Ptr<game::Root> root = b->getSelectedRoot();
-                        if (root.get() != 0) {
-                            m_actions = root->getPossibleActions();
-                        }
-                    }
-                }
-            game::Root::Actions_t m_actions;
-        };
-        client::Downlink link(root);
-        Querier q;
-        link.call(sender, q);
-        return q.m_actions;
-    }
-
-    bool checkLocalSetup(ui::Root& root, util::RequestSender<game::browser::Session> sender)
+    bool checkLocalSetup(ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::browser::Session> sender)
     {
         struct Querier : public util::Request<game::browser::Session> {
          public:
@@ -259,13 +243,13 @@ namespace {
                 }
             bool m_result;
         };
-        client::Downlink link(root);
+        client::Downlink link(root, tx);
         Querier q;
         link.call(sender, q);
         return q.m_result;
     }
 
-    void setLocalDirectoryAutomatically(ui::Root& root, util::RequestSender<game::browser::Session> sender)
+    void setLocalDirectoryAutomatically(ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::browser::Session> sender)
     {
         class Setter : public util::Request<game::browser::Session> {
          public:
@@ -281,12 +265,12 @@ namespace {
                     }
                 }
         };
-        client::Downlink link(root);
+        client::Downlink link(root, tx);
         Setter q;
         link.call(sender, q);
     }
 
-    void setLocalDirectory(ui::Root& root, util::RequestSender<game::browser::Session> sender, const String_t& dirName)
+    void setLocalDirectory(ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::browser::Session> sender, const String_t& dirName)
     {
         class Setter : public util::Request<game::browser::Session> {
          public:
@@ -307,12 +291,12 @@ namespace {
          private:
             String_t m_dirName;
         };
-        client::Downlink link(root);
+        client::Downlink link(root, tx);
         Setter q(dirName);
         link.call(sender, q);
     }
 
-    void setLocalDirectoryNone(ui::Root& root, util::RequestSender<game::browser::Session> sender)
+    void setLocalDirectoryNone(ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::browser::Session> sender)
     {
         class Setter : public util::Request<game::browser::Session> {
          public:
@@ -327,12 +311,12 @@ namespace {
                     }
                 }
         };
-        client::Downlink link(root);
+        client::Downlink link(root, tx);
         Setter q;
         link.call(sender, q);
     }
 
-    bool verifyLocalDirectory(ui::Root& root, util::RequestSender<game::browser::Session> sender, const String_t& dirName)
+    bool verifyLocalDirectory(ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::browser::Session> sender, const String_t& dirName)
     {
         enum Result {
             Missing,
@@ -356,7 +340,7 @@ namespace {
                             // Try creating files
                             bool ok = false;
                             for (int i = 0; i < 1000; ++i) {
-                                String_t fileName = afl::string::Format("_%d.tmp", i);
+                                String_t fileName = Format("_%d.tmp", i);
                                 if (dir->openFileNT(fileName, afl::io::FileSystem::CreateNew).get() != 0) {
                                     dir->eraseNT(fileName);
                                     ok = true;
@@ -390,15 +374,15 @@ namespace {
             Result m_result;
         };
 
-        client::Downlink link(root);
+        client::Downlink link(root, tx);
         Verifier v(dirName);
         link.call(sender, v);
 
         bool ok = false;
         switch (v.getResult()) {
          case Missing:
-            ui::dialogs::MessageBox(afl::string::Format(_("The directory \"%s\" is not accessible and cannot be used.").c_str(), dirName),
-                                    _("Game Directory Setup"), root).doOkDialog();
+            MessageBox(Format(tx("The directory \"%s\" is not accessible and cannot be used.").c_str(), dirName),
+                       tx("Game Directory Setup"), root).doOkDialog(tx);
             break;
 
          case Success:
@@ -406,13 +390,13 @@ namespace {
             break;
 
          case NotWritable:
-            ui::dialogs::MessageBox(afl::string::Format(_("The directory \"%s\" is not writable and cannot be used.").c_str(), dirName),
-                                    _("Game Directory Setup"), root).doOkDialog();
+            MessageBox(Format(tx("The directory \"%s\" is not writable and cannot be used.").c_str(), dirName),
+                       tx("Game Directory Setup"), root).doOkDialog(tx);
             break;
 
          case NotEmpty:
-            ok = ui::dialogs::MessageBox(afl::string::Format(_("The directory \"%s\" is not empty. Use anyway?").c_str(), dirName),
-                                         _("Game Directory Setup"), root).doYesNoDialog();
+            ok = MessageBox(Format(tx("The directory \"%s\" is not empty. Use anyway?").c_str(), dirName),
+                            tx("Game Directory Setup"), root).doYesNoDialog(tx);
             break;
         }
         return ok;
@@ -495,13 +479,12 @@ class client::screens::BrowserScreen::LoadTask : public util::Request<Session> {
                             info.pushBackNew(new InfoItem(Text(name.wasSet() ? name() : f->getName()).withStyle(StyleAttribute::Big).withStyle(StyleAttribute::Bold),
                                                           String_t(),
                                                           NoAction, 0));
-                            info.pushBackNew(new InfoItem(Text(afl::string::Format(t.translator().translateString("A %s game").c_str(),
-                                                                                   root->hostVersion().toString(t.translator()))),
+                            info.pushBackNew(new InfoItem(Text(Format(t.translator()("A %s game").c_str(), root->hostVersion().toString(t.translator()))),
                                                           String_t(),
                                                           NoAction, 0));
                             buildPlayerList(*root, *loader, info, t.translator());
                             if (f->canEnter()) {
-                                info.pushBackNew(new InfoItem(t.translator().translateString("Change into this folder"), String_t(), FolderAction, 0));
+                                info.pushBackNew(new InfoItem(t.translator()("Change into this folder"), String_t(), FolderAction, 0));
                             }
                             buildActionInfo(*root, info, t.translator());
                         } else {
@@ -535,9 +518,7 @@ class client::screens::BrowserScreen::LoadTask : public util::Request<Session> {
                 String_t extra;
                 game::TurnLoader::PlayerStatusSet_t st = loader.getPlayerStatus(p->getId(), extra, tx);
                 if (!st.empty()) {
-                    Text text = String_t(afl::string::Format("%c - %s",
-                                                             pl.getCharacterFromPlayer(p->getId()),
-                                                             p->getName(game::Player::ShortName)));
+                    Text text = String_t(Format("%c - %s", pl.getCharacterFromPlayer(p->getId()), p->getName(game::Player::ShortName)));
                     if (!extra.empty()) {
                         text += Text("\n" + extra).withColor(util::SkinColor::Faded);
                     }
@@ -712,15 +693,16 @@ class client::screens::BrowserScreen::UpTask : public util::Request<Session> {
 
 /***************************** BrowserScreen *****************************/
 
-client::screens::BrowserScreen::BrowserScreen(ui::Root& root, util::RequestSender<game::browser::Session> sender, util::RequestSender<game::Session> gameSender)
+client::screens::BrowserScreen::BrowserScreen(ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::browser::Session> sender, util::RequestSender<game::Session> gameSender)
     : m_root(root),
+      m_translator(tx),
       m_sender(sender),
       m_gameSender(gameSender),
       m_receiver(root.engine().dispatcher(), *this),
       m_list(gfx::Point(20, 20), m_root),
       m_crumbs(root.provider().getFont(gfx::FontRequest())->getCellSize().scaledBy(40, 1), m_root),
       m_info(root.provider(), root.colorScheme()),
-      m_optionButton(_("Ins - Add Account"), util::Key_Insert, root),
+      m_optionButton(tx("Ins - Add Account"), util::Key_Insert, root),
       m_infoItems(),
       m_infoIndex(0),
       m_loop(root),
@@ -745,7 +727,7 @@ client::screens::BrowserScreen::run(gfx::ColorScheme<util::SkinColor::Color>& pa
     ui::widgets::TransparentWindow window(parentColors, ui::layout::VBox::instance5);
 
     ui::Group buttons(ui::layout::HBox::instance5);
-    ui::widgets::Button btnExit(_("Exit"), util::Key_Escape, m_root);
+    ui::widgets::Button btnExit(m_translator("Exit"), util::Key_Escape, m_root);
     ui::Spacer btnSpacer;
     buttons.add(btnExit);
     buttons.add(btnSpacer);
@@ -775,7 +757,7 @@ client::screens::BrowserScreen::run(gfx::ColorScheme<util::SkinColor::Color>& pa
     m_root.add(window);
     m_list.requestFocus();
 
-    UserCallback cb(m_root, m_sender);
+    UserCallback cb(m_root, m_translator, m_sender);
 
     m_sender.postNewRequest(new InitTask(m_receiver.getSender()));
     setState(Blocked);
@@ -966,7 +948,8 @@ void
 client::screens::BrowserScreen::onKeyHelp(int)
 {
     // ex PCC2GameChooserWindow::handleEvent (part)
-    client::dialogs::doHelpDialog(m_root, m_gameSender, "pcc2:gamesel");
+    afl::string::Translator& tx = afl::string::Translator::getSystemInstance();  // FIXME
+    client::dialogs::doHelpDialog(m_root, tx, m_gameSender, "pcc2:gamesel");
 }
 
 void
@@ -982,7 +965,7 @@ void
 client::screens::BrowserScreen::onAddAccount(int)
 {
     if (m_state == Working) {
-        NewAccountDialog dlg(m_root);
+        NewAccountDialog dlg(m_root, m_translator);
         if (dlg.run()) {
             dlg.submit(m_sender);
 
@@ -1010,14 +993,14 @@ client::screens::BrowserScreen::onRootAction(size_t index)
             }
         Actions_t m_actions;
     };
-    Downlink link(m_root);
+    Downlink link(m_root, m_translator);
     Querier q;
     link.call(m_sender, q);
 
     ui::widgets::StringListbox list(m_root.provider(), m_root.colorScheme());
     for (size_t i = 0; i < countof(ACTION_INFO); ++i) {
         if (q.m_actions.contains(ACTION_INFO[i].action)) {
-            list.addItem(ACTION_INFO[i].action, _(ACTION_INFO[i].name) + String_t("..."));
+            list.addItem(ACTION_INFO[i].action, m_translator(ACTION_INFO[i].name) + String_t("..."));
         }
     }
     list.setPreferredHeight(int(list.getNumItems()));
@@ -1050,8 +1033,9 @@ client::screens::BrowserScreen::onRootAction(size_t index)
 bool
 client::screens::BrowserScreen::preparePlayAction(size_t /*index*/)
 {
-    if (checkLocalSetup(m_root, m_sender)) {
-        ImageLoader loader(m_root);
+    afl::string::Translator& tx = m_translator;
+    if (checkLocalSetup(m_root, tx, m_sender)) {
+        ImageLoader loader(m_root, m_translator);
         loader.loadImage("gamedirsetup");
         loader.wait();
 
@@ -1061,23 +1045,23 @@ client::screens::BrowserScreen::preparePlayAction(size_t /*index*/)
         ui::widgets::RichListbox box(m_root.provider(), m_root.colorScheme());
         box.setPreferredWidth(WIDTH);
         box.setRenderFlag(box.UseBackgroundColorScheme, true);
-        box.addItem(util::rich::Parser::parseXml(_("<big>Automatic</big>\n"
-                                                   "PCC2 will automatically assign a directory within your profile directory. "
-                                                   "If unsure, choose this.")), makeSubImage(pix, 0, 0, 72, 64), true);
-        box.addItem(util::rich::Parser::parseXml(_("<big>Manual</big>\n"
-                                                   "Manually assign a directory. Use if you want to have full control.")), makeSubImage(pix, 0, 64, 72, 64), true);
-        box.addItem(util::rich::Parser::parseXml(_("<big>None</big>\n"
-                                                   "Do not assign a directory. The game will be opened for viewing only, and no changes can be saved.")), makeSubImage(pix, 0, 128, 72, 64), true);
+        box.addItem(util::rich::Parser::parseXml(tx("<big>Automatic</big>\n"
+                                                    "PCC2 will automatically assign a directory within your profile directory. "
+                                                    "If unsure, choose this.")), makeSubImage(pix, 0, 0, 72, 64), true);
+        box.addItem(util::rich::Parser::parseXml(tx("<big>Manual</big>\n"
+                                                    "Manually assign a directory. Use if you want to have full control.")), makeSubImage(pix, 0, 64, 72, 64), true);
+        box.addItem(util::rich::Parser::parseXml(tx("<big>None</big>\n"
+                                                    "Do not assign a directory. The game will be opened for viewing only, and no changes can be saved.")), makeSubImage(pix, 0, 128, 72, 64), true);
 
-        ui::Window window(_("Game Directory Setup"), m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5);
-        ui::rich::StaticText intro(util::rich::Parser::parseXml(_("<font color=\"static\">This game does not yet have an associated game directory. "
-                                                                  "PCC2 needs a directory on your computer to store configuration and history data. "
-                                                                  "Please choose how the directory should be assigned.</font>")),
+        ui::Window window(tx("Game Directory Setup"), m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5);
+        ui::rich::StaticText intro(util::rich::Parser::parseXml(tx("<font color=\"static\">This game does not yet have an associated game directory. "
+                                                                   "PCC2 needs a directory on your computer to store configuration and history data. "
+                                                                   "Please choose how the directory should be assigned.</font>")),
                                    WIDTH, m_root.provider());
         window.add(intro);
         window.add(box);
 
-        ui::widgets::StandardDialogButtons btns(m_root);
+        ui::widgets::StandardDialogButtons btns(m_root, tx);
         window.add(btns);
         window.pack();
 
@@ -1094,26 +1078,26 @@ client::screens::BrowserScreen::preparePlayAction(size_t /*index*/)
         switch (box.getCurrentItem()) {
          case 0:
             // Auto
-            setLocalDirectoryAutomatically(m_root, m_sender);
+            setLocalDirectoryAutomatically(m_root, m_translator, m_sender);
             break;
 
          case 1: {
             // Manual - FIXME
             String_t s;
             while (1) {
-                if (!client::dialogs::doDirectorySelectionDialog(m_root, m_sender, s)) {
+                if (!client::dialogs::doDirectorySelectionDialog(m_root, m_translator, m_sender, s)) {
                     return false;
                 }
-                if (verifyLocalDirectory(m_root, m_sender, s)) {
+                if (verifyLocalDirectory(m_root, m_translator, m_sender, s)) {
                     break;
                 }
             }
-            setLocalDirectory(m_root, m_sender, s);
+            setLocalDirectory(m_root, m_translator, m_sender, s);
             break;
          }
          case 2:
             // None
-            setLocalDirectoryNone(m_root, m_sender);
+            setLocalDirectoryNone(m_root, m_translator, m_sender);
             break;
         }
     }

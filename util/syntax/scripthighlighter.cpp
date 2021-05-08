@@ -78,15 +78,6 @@ namespace {
         return result;
     }
 
-    // size_t skip(afl::string::ConstStringMemory_t& str, size_t pos, int c)
-    // {
-    //     const char* p;
-    //     while ((p = str.at(start)) != 0 && (classify(*p) & c) != 0) {
-    //         ++pos;
-    //     }
-    //     return pos;
-    // }
-
     bool skip1(afl::string::ConstStringMemory_t& str, int c)
     {
         bool result = false;

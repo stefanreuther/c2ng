@@ -2,13 +2,16 @@
   *  \file client/map/renderer.cpp
   */
 
+#include <cmath>
 #include "client/map/renderer.hpp"
+#include "afl/base/countof.hpp"
+#include "afl/base/staticassert.hpp"
+#include "afl/bits/rotate.hpp"
 #include "client/marker.hpp"
+#include "game/map/drawing.hpp"
 #include "gfx/complex.hpp"
 #include "gfx/context.hpp"
-#include "afl/base/staticassert.hpp"
-#include "afl/base/countof.hpp"
-#include "game/map/drawing.hpp"
+#include "util/math.hpp"
 
 namespace {
     const int SCRingRadius           = 3;      ///< Radius of planet ring, in ly.
@@ -25,6 +28,13 @@ namespace {
 
     const int MAX_ZOOM = 10;
 
+    const uint8_t IONSTORM_FILL[] = { 0x88, 0x00, 0x22, 0x00,
+                                      0x88, 0x00, 0x22, 0x00 };
+    // const uint8_t IONSTORM_DENSE_FILL[] = { 0x88, 0x44, 0x22, 0x44,
+    //                                         0x88, 0x44, 0x22, 0x44 };
+    const uint8_t UFO_FILL[] = { 0x88, 0x55, 0x22, 0x55,
+                                 0x88, 0x55, 0x22, 0x55 };
+
     void drawCross(gfx::BaseContext& ctx, gfx::Point pt, int size)
     {
         // ex GChartViewport::drawCross (part)
@@ -38,6 +48,17 @@ namespace {
          case game::TeamSettings::ThisPlayer:   return ui::Color_Green;
          case game::TeamSettings::AlliedPlayer: return ui::Color_Yellow;
          case game::TeamSettings::EnemyPlayer:  return ui::Color_Red;
+        }
+        return ui::Color_Pink;
+    }
+
+    uint8_t getShipTrailColor(game::TeamSettings::Relation rel, int age)
+    {
+        int delta = 7 - std::min(7, age >> 1);
+        switch (rel) {
+         case game::TeamSettings::ThisPlayer:   return static_cast<uint8_t>(ui::Color_GreenScale + delta);
+         case game::TeamSettings::AlliedPlayer: return static_cast<uint8_t>(ui::Color_DarkYellowScale + delta);
+         case game::TeamSettings::EnemyPlayer:  return static_cast<uint8_t>(ui::Color_Fire + delta);
         }
         return ui::Color_Pink;
     }
@@ -65,29 +86,23 @@ namespace {
     };
     static_assert(countof(user_colors) == game::map::Drawing::NUM_USER_COLORS + 1, "countof user_colors");
 
-    // /** Convert color into user color index.
-    //     \param color Color number
-    //     \return User color number (0..NUM_USER_COLORS); -1 if color does not match
-    //     any user color */
-    // int
-    // GDrawing::getUserColorFromColor(uint8 color)
-    // {
-    //     for (int i = 0; i < int(countof(user_colors)); ++i)
-    //         if (user_colors[i] == color)
-    //             return i;
-    //     return -1;
-    // }
+    static const uint8_t ufo_colors[] = {
+        ui::Color_Black,     ui::Color_DarkBlue,      ui::Color_DarkGreen,    ui::Color_DarkCyan,
+        ui::Color_DarkRed,   ui::Color_DarkMagenta,   ui::Color_DarkYellow,   ui::Color_Gray,
+        ui::Color_Dark,      ui::Color_BrightBlue,    ui::Color_BrightGreen,  ui::Color_BrightCyan,
+        ui::Color_BrightRed, ui::Color_BrightMagenta, ui::Color_BrightYellow, ui::Color_White
+    };
 
-    // /** Convert user color index into color number.
-    //     \param user_color User color number (0..NUM_USER_COLORS)
-    //     \return color number */
-    uint8_t getUserColor(int color)
+    uint8_t getIonStormColor(int voltage)
     {
-        // ex GDrawing::getColorFromUserColor
-        if (color >= 0 && color < int(countof(user_colors))) {
-            return user_colors[color];
-        } else {
+        if (voltage < 50) {
+            return ui::Color_Blue;
+        } else if (voltage < 100) {
+            return ui::Color_Gray;
+        } else if (voltage < 150) {
             return ui::Color_White;
+        } else {
+            return ui::Color_Red;
         }
     }
 }
@@ -98,13 +113,66 @@ class client::map::Renderer::Listener : public game::map::RendererListener {
         : m_context(ctx),
           m_parent(parent)
         { }
+
+    void drawObject(gfx::Point center, int scaledRadius, bool filled)
+        {
+            if (filled) {
+                drawFilledCircle(m_context, center, scaledRadius);
+            } else {
+                drawCircle(m_context, center, scaledRadius);
+            }
+        }
+
+    void drawMovingObject(gfx::Point center, int scaledRadius, int speed, int heading, bool filled)
+        {
+            // ex GChartViewport::drawMovingObject
+            drawObject(center, scaledRadius, filled);
+            if (speed > 0 && speed <= 20 && heading >= 0) {
+                double h = heading * util::PI / 180.0;
+
+                center.addX( util::roundToInt(scaledRadius * std::sin(h)));
+                center.addY(-util::roundToInt(scaledRadius * std::cos(h)));
+
+                int way = m_parent.scale(speed * speed);
+                int dx = util::roundToInt(way * std::sin(h));
+                int dy = util::roundToInt(way * std::cos(h));
+
+                drawArrow(m_context, center, center + gfx::Point(dx, -dy), m_parent.scale(10) < 5 ? 3 : 5);
+            }
+        }
+
+    void setMineFillStyle(gfx::Point pt, bool isWeb, Relation_t rel)
+        {
+            // Adjust pattern position to avoid that own and foreing minefields hide each other
+            if (rel == game::TeamSettings::ThisPlayer) {
+                pt.addY(1);
+            }
+
+            if (isWeb) {
+                m_context.setFillPattern(gfx::FillPattern(gfx::FillPattern::GRAY50).shiftUp((pt.getX() + pt.getY()) & 1));
+            } else {
+                m_context.setFillPattern(gfx::FillPattern(gfx::FillPattern::GRAY25).shiftUp((15 + 2*(pt.getX() & 1) - pt.getY()) & 3));
+            }
+        }
+
+    int getLinePatternAligner(game::map::Point a, game::map::Point b) const
+        {
+            const int dx = std::abs(a.getX() - b.getX());
+            const int dy = std::abs(a.getY() - b.getY());
+            gfx::Point zero = m_parent.scale(game::map::Point());
+            if (dx > dy) {
+                return zero.getX();
+            } else {
+                return zero.getY();
+            }
+        }
+
     virtual void drawGridLine(game::map::Point a, game::map::Point b)
         {
             gfx::Point ax = m_parent.scale(a);
             gfx::Point bx = m_parent.scale(b);
 
-            // FIXME: align the pattern!
-            m_context.setLinePattern(0x55);
+            m_context.setLinePattern(afl::bits::rotateRight8(0xAA, getLinePatternAligner(a, b) & 1));
             m_context.setColor(ui::Color_Dark);
             drawLine(m_context, ax, bx);
         }
@@ -114,10 +182,19 @@ class client::map::Renderer::Listener : public game::map::RendererListener {
             gfx::Point ax = m_parent.scale(a);
             gfx::Point bx = m_parent.scale(b);
 
-            // FIXME: align the pattern!
-            m_context.setLinePattern(0x27);
+            m_context.setLinePattern(afl::bits::rotateRight8(0x27, getLinePatternAligner(a, b) & 7));
             m_context.setColor(ui::Color_Dark);
             drawLine(m_context, ax, bx);
+        }
+
+    virtual void drawBorderCircle(game::map::Point c, int r)
+        {
+            gfx::Point cx = m_parent.scale(c);
+            int rx = m_parent.scale(r);
+
+            m_context.setLinePattern(0x27);
+            m_context.setColor(ui::Color_Dark);
+            drawCircle(m_context, cx, rx);
         }
 
     virtual void drawSelection(game::map::Point p)
@@ -126,10 +203,16 @@ class client::map::Renderer::Listener : public game::map::RendererListener {
             client::drawSelection(m_context, m_parent.scale(p), m_parent.m_zoomMultiplier, m_parent.m_zoomDivider);
         }
 
-    virtual void drawPlanet(game::map::Point p, int /*id*/, int flags)
+    virtual void drawMessageMarker(game::map::Point p)
+        {
+            m_context.setColor(ui::Color_BrightMagenta);
+            client::drawMessageMarker(m_context, m_parent.scale(p), m_parent.m_zoomMultiplier, m_parent.m_zoomDivider);
+        }
+
+    virtual void drawPlanet(game::map::Point p, int /*id*/, int flags, String_t label)
         {
             // ex GChartViewport::drawPlanetMarker
-            gfx::Point ptx = m_parent.scale(p);
+            const gfx::Point ptx = m_parent.scale(p);
 
             // Determine ship ring color
             bool shipGuessed;
@@ -236,47 +319,83 @@ class client::map::Renderer::Listener : public game::map::RendererListener {
                 textIncrement = r+1;
             }
 
-            // ctx.setColor(COLOR_GRAY);
-            // if ((show & GChartOptions::co_Labels) != 0) {
-            //     outText(ctx, pt.x, pt.y + incy, getLabel(PlanetLabel, pl.getId()));
-            (void) textIncrement;
-            // }
+            // Label
+            if (!label.empty()) {
+                m_context.setColor(ui::Color_Gray);
+                m_context.setTextAlign(gfx::CenterAlign, gfx::TopAlign);
+                outText(m_context, ptx + gfx::Point(0, textIncrement), label);
+            }
         }
 
-    virtual void drawShip(game::map::Point p, int /*id*/, Relation_t rel)
+    virtual void drawShip(game::map::Point p, int /*id*/, Relation_t rel, int flags, String_t label)
         {
-            gfx::Point pt = m_parent.scale(p);
+            const gfx::Point pt = m_parent.scale(p);
             m_context.setColor(getShipColor(rel));
-//     if ((show & GChartOptions::co_ShipDots) != 0 && sh.getOrbitPlanetId() == 0) {
-            drawPixel(m_context, pt);
-//         can.drawPixel(pt, ctx.getRawColor(), GFX_ALPHA_OPAQUE);
-//     } else {
-//         drawShipIcon(...); FIXME
-//     }
+            if ((flags & risShowDot) != 0) {
+                drawPixel(m_context, pt);
+            }
+            if ((flags & risShowIcon) != 0) {
+                drawShipIcon(m_context, pt, rel == game::TeamSettings::ThisPlayer, m_parent.scale(10) > 5);
+            }
+            if ((flags & risFleetLeader) != 0) {
+                drawPixel(m_context, pt + gfx::Point(-1, -1));
+                drawPixel(m_context, pt + gfx::Point(+1, -1));
+                drawPixel(m_context, pt + gfx::Point(-1, +1));
+                drawPixel(m_context, pt + gfx::Point(+1, +1));
+            }
+            if (!label.empty()) {
+                int textIncrement = 0;
+                if ((flags & risAtPlanet) != 0) {
+                    textIncrement += 4;
+                }
+                if ((flags & risShowDot) == 0) {
+                    textIncrement += 1;
+                }
+                m_context.setTextAlign(gfx::CenterAlign, gfx::TopAlign);
+                outText(m_context, pt + gfx::Point(0, textIncrement), label);
+            }
         }
 
-    virtual void drawFleetLeader(game::map::Point p, int /*id*/, Relation_t rel)
-        {
-            gfx::Point pt = m_parent.scale(p);
-            m_context.setColor(getShipColor(rel));
-            drawPixel(m_context, pt + gfx::Point(-1, -1));
-            drawPixel(m_context, pt + gfx::Point(+1, -1));
-            drawPixel(m_context, pt + gfx::Point(-1, +1));
-            drawPixel(m_context, pt + gfx::Point(+1, +1));
-        }
-
-    virtual void drawMinefield(game::map::Point p, int /*id*/, int r, bool /*isWeb*/, Relation_t rel)
+    virtual void drawMinefield(game::map::Point p, int /*id*/, int r, bool isWeb, Relation_t rel, bool filled)
         {
             // Determine style
             m_context.setLinePattern(0xFF);
             m_context.setColor(getMinefieldColor(rel));
 
             // Draw
-            // FIXME: handle filled/hollow status
-            // drawObject(ctx, pt, scale(pmf.getRadius()), fill & GChartOptions::co_Mine);
             gfx::Point pt = m_parent.scale(p);
-            drawCircle(m_context, pt, m_parent.scale(r));
+            setMineFillStyle(m_parent.scale(game::map::Point(0, 0)), isWeb, rel);
+            drawObject(pt, m_parent.scale(r), filled);
             drawCross(m_context, pt, m_parent.getCrossSize());
+        }
+
+    virtual void drawUfo(game::map::Point p, int /*id*/, int r, int colorCode, int speed, int heading, bool filled)
+        {
+            // ex GChartViewport::drawUfos (part)
+            const gfx::Point center = m_parent.scale(p);
+
+            m_context.setLinePattern(0xFF);
+            m_context.setColor(getUfoColor(colorCode));
+            m_context.setFillPattern(gfx::FillPattern(UFO_FILL).shiftDown(center.getY() & 3).shiftRight(center.getX() & 3));
+
+            drawMovingObject(center, m_parent.scale(r), speed, heading, filled);
+            drawCross(m_context, center, m_parent.getCrossSize());
+        }
+    virtual void drawUfoConnection(game::map::Point a, game::map::Point b, int colorCode)
+        {
+            // ex GChartViewport::drawUfos (part)
+            m_context.setLinePattern(0xFF);
+            m_context.setColor(getUfoColor(colorCode));
+            drawLine(m_context, m_parent.scale(a), m_parent.scale(b));
+        }
+    virtual void drawIonStorm(game::map::Point p, int r, int voltage, int speed, int heading, bool filled)
+        {
+            // ex GChartViewport::drawIons
+            m_context.setLinePattern(0xFF);
+            m_context.setFillPattern(IONSTORM_FILL);
+            m_context.setColor(getIonStormColor(voltage));
+
+            drawMovingObject(m_parent.scale(p), m_parent.scale(r), speed, heading, filled);
         }
     virtual void drawUserCircle(game::map::Point pt, int r, int color)
         {
@@ -310,7 +429,7 @@ class client::map::Renderer::Listener : public game::map::RendererListener {
             // ex GChartViewport::drawDrawing
             m_context.setLinePattern(0xFF);
             m_context.setColor(getUserColor(color));
-            m_context.setTextAlign(1, 0);
+            m_context.setTextAlign(gfx::CenterAlign, gfx::TopAlign);
             gfx::Point origin = m_parent.scale(pt);
             if (m_parent.m_zoomDivider < 2*m_parent.m_zoomMultiplier) {
                 /* draw marker */
@@ -326,6 +445,78 @@ class client::map::Renderer::Listener : public game::map::RendererListener {
                 if (const Marker* marker = getUserMarker(shape, false)) {
                     drawMarker(m_context, *marker, origin);
                 }
+            }
+        }
+
+    virtual void drawExplosion(game::map::Point p)
+        {
+            // bool big = divi < 2*mult;
+            bool big = m_parent.scale(10) > 5;
+            gfx::Point pp = m_parent.scale(p);
+
+            // Red '+'
+            m_context.setColor(ui::Color_Red);
+            drawMarker(m_context, *getUserMarker(0, big), pp);
+
+            // Yellow 'x'
+            m_context.setColor(ui::Color_Yellow);
+            drawMarker(m_context, *getUserMarker(2, big), pp);
+        }
+
+    virtual void drawShipTrail(game::map::Point a, game::map::Point b, Relation_t rel, int flags, int age)
+        {
+            m_context.setColor(getShipTrailColor(rel, age));
+            m_context.setLinePattern(0xFF);
+
+            gfx::Point ax = m_parent.scale(a);
+            gfx::Point bx = m_parent.scale(b);
+
+            // If we are coming from a real position, draw a knob.
+            // (No need to special-case going to a position; in that case, the next trail or the ship will be at that place.)
+            if ((flags & TrailFromPosition) != 0) {
+                drawPixel(m_context, ax + gfx::Point(0, -1));
+                drawPixel(m_context, ax + gfx::Point(0, +1));
+                drawPixel(m_context, ax + gfx::Point(-1, 0));
+                drawPixel(m_context, ax + gfx::Point(+1, 0));
+            }
+
+            // Draw line
+            drawLine(m_context, ax, bx);
+        }
+
+    virtual void drawShipWaypoint(game::map::Point a, game::map::Point b, Relation_t /*rel*/)
+        {
+            int waypointCrossSize = std::min(SCMaxWPCrossRadius, m_parent.scale(SCWPCrossRadius));
+            m_context.setColor(ui::Color_Dark);
+            m_context.setLinePattern(0xFF);
+
+            gfx::Point ax = m_parent.scale(a);
+            gfx::Point bx = m_parent.scale(b);
+            drawLine(m_context, ax, bx);
+            drawHLine(m_context, bx.getX()-waypointCrossSize, bx.getY(), bx.getX()+waypointCrossSize);
+            drawVLine(m_context, bx.getX(), bx.getY()-waypointCrossSize, bx.getY()+waypointCrossSize);
+        }
+
+    virtual void drawShipVector(game::map::Point a, game::map::Point b, Relation_t /*rel*/)
+        {
+            int arrowHeadSize = m_parent.scale(10) >= 5 ? 5 : 3;
+            m_context.setColor(ui::Color_Gray);
+            m_context.setLinePattern(0xFF);
+            drawArrow(m_context, m_parent.scale(a), m_parent.scale(b), arrowHeadSize);
+        }
+
+    virtual void drawWarpWellEdge(game::map::Point a, Edge e)
+        {
+            m_context.setColor(ui::Color_Shield+4);
+            m_context.setLinePattern(0xFF);
+
+            gfx::Point p = m_parent.scale(a);
+            int half = m_parent.scale(1)/2;
+            switch (e) {
+             case North: drawHLine(m_context, p.getX()-half, p.getY()-half, p.getX()+half); break;
+             case South: drawHLine(m_context, p.getX()-half, p.getY()+half, p.getX()+half); break;
+             case East:  drawVLine(m_context, p.getX()+half, p.getY()-half, p.getY()+half); break;
+             case West:  drawVLine(m_context, p.getX()-half, p.getY()-half, p.getY()+half); break;
             }
         }
 
@@ -375,33 +566,34 @@ void
 client::map::Renderer::draw(gfx::Canvas& can, ui::ColorScheme& colorScheme, gfx::ResourceProvider& provider) const
 {
     gfx::Context<uint8_t> ctx(can, colorScheme);
-
-    // Font
-    // ex GChartViewport::getFont
-    int16_t fontSize;
-    if (m_zoomMultiplier > m_zoomDivider) {
-        if (m_zoomMultiplier > 2*m_zoomDivider) {
-            /* more then 2:1: 22 pt */
-            fontSize = +1;
-        } else {
-            /* 1:1 up to 2:1: 16 pt */
-            fontSize = 0;
-        }
-    } else {
-        if (2*m_zoomMultiplier < m_zoomDivider) {
-            /* smaller than 1:2 */
-            // FIXME: should be 6 or 8 pt font, as in PCC 1.x */
-            fontSize = -2;
-        } else {
-            /* 1:2 up to 1:1: 12 pt */
-            fontSize = -1;
-        }
-    }
-    ctx.useFont(*provider.getFont(gfx::FontRequest().setSize(fontSize)));
+    setFont(ctx, provider);
 
     if (m_renderList.get() != 0) {
         Listener painter(ctx, *this);
         m_renderList->replay(painter);
+    }
+}
+
+void
+client::map::Renderer::drawDrawing(gfx::Canvas& can, ui::ColorScheme& colorScheme, gfx::ResourceProvider& provider, const game::map::Drawing& d, uint8_t color) const
+{
+    gfx::Context<uint8_t> ctx(can, colorScheme);
+    setFont(ctx, provider);
+
+    Listener painter(ctx, *this);
+    switch (d.getType()) {
+     case game::map::Drawing::LineDrawing:
+        painter.drawUserLine(d.getPos(), d.getPos2(), color);
+        break;
+     case game::map::Drawing::RectangleDrawing:
+        painter.drawUserRectangle(d.getPos(), d.getPos2(), color);
+        break;
+     case game::map::Drawing::CircleDrawing:
+        painter.drawUserCircle(d.getPos(), d.getCircleRadius(), color);
+        break;
+     case game::map::Drawing::MarkerDrawing:
+        painter.drawUserMarker(d.getPos(), d.getMarkerKind(), color, afl::string::strFirst(d.getComment(), "|"));
+        break;
     }
 }
 
@@ -510,5 +702,64 @@ client::map::Renderer::zoomOut()
         return true;
     } else {
         return false;
+    }
+}
+
+void
+client::map::Renderer::setZoom(int mult, int divi)
+{
+    m_zoomMultiplier = std::max(1, std::min(MAX_ZOOM, mult));
+    m_zoomDivider    = std::max(1, divi);
+}
+
+void
+client::map::Renderer::setFont(gfx::BaseContext& ctx, gfx::ResourceProvider& provider) const
+{
+    // Font
+    // ex GChartViewport::getFont
+    int16_t fontSize;
+    if (m_zoomMultiplier > m_zoomDivider) {
+        if (m_zoomMultiplier > 2*m_zoomDivider) {
+            /* more then 2:1: 22 pt */
+            fontSize = +1;
+        } else {
+            /* 1:1 up to 2:1: 16 pt */
+            fontSize = 0;
+        }
+    } else {
+        if (2*m_zoomMultiplier < m_zoomDivider) {
+            /* smaller than 1:2 */
+            // FIXME: should be 6 or 8 pt font, as in PCC 1.x */
+            fontSize = -2;
+        } else {
+            /* 1:2 up to 1:1: 12 pt */
+            fontSize = -1;
+        }
+    }
+    ctx.useFont(*provider.getFont(gfx::FontRequest().setSize(fontSize)));
+}
+
+// /** Convert user color index into color number.
+//     \param user_color User color number (0..NUM_USER_COLORS)
+//     \return color number */
+uint8_t
+client::map::getUserColor(int color)
+{
+    // ex GDrawing::getColorFromUserColor
+    if (color >= 0 && color < int(countof(user_colors))) {
+        return user_colors[color];
+    } else {
+        return ui::Color_White;
+    }
+}
+
+uint8_t
+client::map::getUfoColor(int color)
+{
+    // ex GUfo::getColor
+    if (color >= 0 && color < int(countof(ufo_colors))) {
+        return ufo_colors[color];
+    } else {
+        return ui::Color_White;
     }
 }

@@ -9,6 +9,7 @@
 #include "ui/root.hpp"
 #include "util/requestsender.hpp"
 #include "game/session.hpp"
+#include "afl/string/translator.hpp"
 
 namespace client { namespace si {
 
@@ -21,7 +22,7 @@ namespace client { namespace si {
         StringListDialogWidget(gfx::ResourceProvider& provider, ui::ColorScheme& scheme,
                                String_t dialogTitle, int32_t current, int32_t width, int32_t height, String_t help);
 
-        bool run(ui::Root& root, util::RequestSender<game::Session> gameSender);
+        bool run(ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::Session> gameSender);
         bool runMenu(ui::Root& root, const String_t& anchor);
 
      private:

@@ -17,6 +17,7 @@
 #include "game/test/registrationkey.hpp"
 #include "game/test/shiplist.hpp"
 #include "game/unitscoredefinitionlist.hpp"
+#include "game/test/root.hpp"
 
 namespace {
     using game::HostVersion;
@@ -810,6 +811,97 @@ TestGameMapShipPredictor::testTorpedoes()
         TS_ASSERT_EQUALS(p.getCargo(Element::fromTorpedoType(6)), 10);  // 10 laid
         TS_ASSERT_EQUALS(p.getUsedProperties().contains(ShipPredictor::UsedFCode), true);
         TS_ASSERT_EQUALS(p.getUsedProperties().contains(ShipPredictor::UsedMission), true);
+    }
+}
+
+/** Test getOptimumWarp(). */
+void
+TestGameMapShipPredictor::testGetOptimumWarp()
+{
+    const int SHIP_ID = 77;
+    const int PLANET_X = 1300;
+    const int PLANET_Y = 2400;
+
+    TestHarness h;
+
+    // Ship for testing: we don't care about the actual type,
+    // but it needs to have a fully-specified engine.
+    game::map::Ship& sh = addEmerald(h, SHIP_ID);
+    sh.setEngineType(9);
+    game::test::addTranswarp(h.shipList);
+
+    // Add a planet for gravity tests
+    h.univ.planets().create(100)->setPosition(Point(PLANET_X, PLANET_Y));
+    finish(h);
+
+    // Root.
+    game::test::Root root((game::HostVersion()));
+
+    // Test cases
+    struct TestCase {
+        int fromX, fromY;
+        int toX, toY;
+        int expect;
+        const char* desc;
+    };
+    static const TestCase TESTS[] = {
+        // Regular
+        { 5000, 5000,             5000, 5080,             9,   "standard 1x warp 9 case" },
+        { 5000, 5000,             5000, 5030,             6,   "standard 1x warp 6 case" },
+        { 5000, 5000,             5000, 5090,             7,   "standard 2x warp 7 case" },
+
+        // Starting in warp well
+        { PLANET_X, PLANET_Y,     PLANET_X+10, PLANET_Y,  4,   "out of warp well" },
+        { PLANET_X, PLANET_Y,     PLANET_X+1,  PLANET_Y,  1,   "inside warp well warp 1" },
+        { PLANET_X, PLANET_Y,     PLANET_X+2,  PLANET_Y,  2,   "inside warp well warp 2" },
+
+        // Starting outside warp well
+        { PLANET_X+4, PLANET_Y,   PLANET_X+3, PLANET_Y,   2,   "into warp well" },
+    };
+
+    for (size_t i = 0; i < sizeof(TESTS)/sizeof(TESTS[0]); ++i) {
+        const TestCase& c = TESTS[i];
+        int result = getOptimumWarp(h.univ, SHIP_ID, Point(c.fromX, c.fromY), Point(c.toX, c.toY), h.shipScores, h.shipList, root);
+        TSM_ASSERT_EQUALS(c.desc, result, c.expect);
+    }
+}
+
+/** Test getOptimumWarp(), error cases. */
+void
+TestGameMapShipPredictor::testGetOptimumWarpErrorCases()
+{
+    const int SHIP_ID = 77;
+    game::test::Root root((game::HostVersion()));
+
+    // Nonexistant ship
+    {
+        TestHarness h;
+        finish(h);
+        int result = getOptimumWarp(h.univ, SHIP_ID, Point(1000, 1000), Point(1010, 1000), h.shipScores, h.shipList, root);
+        TS_ASSERT_EQUALS(result, 0);
+    }
+
+    // Nonexistant engine
+    {
+        TestHarness h;
+        game::map::Ship& sh = addEmerald(h, SHIP_ID);
+        sh.setEngineType(9);
+        finish(h);
+        
+        int result = getOptimumWarp(h.univ, SHIP_ID, Point(1000, 1000), Point(1010, 1000), h.shipScores, h.shipList, root);
+        TS_ASSERT_EQUALS(result, 0);
+    }
+
+    // Too far
+    {
+        TestHarness h;
+        game::map::Ship& sh = addEmerald(h, SHIP_ID);
+        game::test::addNovaDrive(h.shipList);
+        sh.setEngineType(game::test::NOVA_ENGINE_ID);
+        finish(h);
+
+        int result = getOptimumWarp(h.univ, SHIP_ID, Point(1000, 1000), Point(1000 + 30*80, 1000), h.shipScores, h.shipList, root);
+        TS_ASSERT_EQUALS(result, 5);
     }
 }
 

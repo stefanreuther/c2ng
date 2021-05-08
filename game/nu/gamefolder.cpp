@@ -13,6 +13,7 @@
 #include "game/nu/stringverifier.hpp"
 #include "game/nu/turnloader.hpp"
 #include "afl/charset/utf8charset.hpp"
+#include "util/translation.hpp"
 
 namespace {
     using afl::string::Format;
@@ -97,7 +98,7 @@ game::nu::GameFolder::loadGameRoot(const game::config::UserConfiguration& config
             actions += Root::aLoadEditable;
         }
         catch (std::exception& e) {
-            m_handler.log().write(afl::sys::Log::Warn, LOG_NAME, "!Game directory lost", e);
+            m_handler.log().write(afl::sys::Log::Warn, LOG_NAME, _("Game directory lost"), e);
             m_account.removeGameFolderName(getGameIdAsString());
         }
     }
@@ -145,7 +146,7 @@ game::nu::GameFolder::loadGameRoot(const game::config::UserConfiguration& config
     }
 
     // Turn loader
-    root->setTurnLoader(new TurnLoader(m_state, m_handler.translator(), m_handler.log()));
+    root->setTurnLoader(new TurnLoader(m_state, m_handler.translator(), m_handler.log(), m_handler.browser().profile(), m_handler.getDefaultSpecificationDirectory()));
     
     // + playerList
     return root;

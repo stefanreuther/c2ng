@@ -6,6 +6,8 @@
 #include "game/game.hpp"
 #include "game/turn.hpp"
 #include "game/alliance/container.hpp"
+#include "game/map/anyshiptype.hpp"
+#include "game/map/anyplanettype.hpp"
 
 game::Game::Game()
     : sig_viewpointTurnChange(),
@@ -16,7 +18,9 @@ game::Game::Game()
       m_viewpointTurnNumber(0),
       m_scores(),
       m_cursors(),
-      m_selections()
+      m_selections(),
+      m_messageConfiguration(),
+      m_expressionLists()
 {
     m_cursors.setUniverse(&m_currentTurn->universe());
 }
@@ -185,8 +189,20 @@ game::Game::messageConfiguration() const
     return m_messageConfiguration;
 }
 
+game::config::ExpressionLists&
+game::Game::expressionLists()
+{
+    return m_expressionLists;
+}
+
+const game::config::ExpressionLists&
+game::Game::expressionLists() const
+{
+    return m_expressionLists;
+}
+
 void
-game::Game::addMessageInformation(const game::parser::MessageInformation& info, game::config::HostConfiguration& config)
+game::Game::addMessageInformation(const game::parser::MessageInformation& info, game::config::HostConfiguration& config, afl::base::Optional<size_t> msgNr)
 {
     // ex GUniverse::addMessageInformation
     using game::parser::MessageInformation;
@@ -203,6 +219,9 @@ game::Game::addMessageInformation(const game::parser::MessageInformation& info, 
         // To add information to be treated as reliable (e.g. target.dat file), add it to the ship directly.
         if (game::map::Ship* pShip = currentTurn().universe().ships().get(info.getObjectId())) {
             pShip->addMessageInformation(info, PlayerSet_t());
+            if (const size_t* pNr = msgNr.get()) {
+                pShip->messages().add(*pNr);
+            }
         }
         break;
 
@@ -211,6 +230,9 @@ game::Game::addMessageInformation(const game::parser::MessageInformation& info, 
         // Planet: add normally
         if (game::map::Planet* pPlanet = currentTurn().universe().planets().get(info.getObjectId())) {
             pPlanet->addMessageInformation(info);
+            if (const size_t* pNr = msgNr.get()) {
+                pPlanet->messages().add(*pNr);
+            }
         }
         break;
 
@@ -335,4 +357,24 @@ game::Game::notifyListeners()
     if (t2 != 0 && t2 != t1) {
         t2->notifyListeners();
     }
+}
+
+bool
+game::Game::isGameObject(const game::vcr::Object& obj, const game::spec::HullVector_t& hulls) const
+{
+    // ex WVcrSelectorWindowRealGameInterface::isGameObject
+    // FIXME: 20210417 Is this a nice place for this function?
+    if (Turn* t = getViewpointTurn().get()) {
+        if (!obj.isPlanet()) {
+            const game::map::Ship* sh = game::map::AnyShipType(t->universe()).getObjectByIndex(obj.getId());
+            int hullId;
+            return sh != 0
+                && sh->getHull().get(hullId)
+                && obj.canBeHull(hulls, hullId);
+        } else {
+            const game::map::Planet* pl = game::map::AnyPlanetType(t->universe()).getObjectByIndex(obj.getId());
+            return pl != 0;
+        }
+    }
+    return false;
 }

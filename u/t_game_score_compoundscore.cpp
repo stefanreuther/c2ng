@@ -8,19 +8,20 @@
 #include "t_game_score.hpp"
 #include "game/score/turnscorelist.hpp"
 
+using game::PlayerSet_t;
+using game::score::CompoundScore;
+using game::score::TurnScoreList;
+
 /** Simple tests. */
 void
 TestGameScoreCompoundScore::testIt()
 {
-    using game::score::CompoundScore;
-    using game::PlayerSet_t;
-
     // Prepare a score file
-    game::score::TurnScoreList list;
-    game::score::TurnScoreList::Slot_t freighterSlot = list.addSlot(game::score::ScoreId_Freighters);
-    game::score::TurnScoreList::Slot_t capitalSlot = list.addSlot(game::score::ScoreId_Capital);
-    game::score::TurnScoreList::Slot_t planetSlot = list.addSlot(game::score::ScoreId_Planets);
-    game::score::TurnScoreList::Slot_t baseSlot = list.addSlot(game::score::ScoreId_Bases);
+    TurnScoreList list;
+    TurnScoreList::Slot_t freighterSlot = list.addSlot(game::score::ScoreId_Freighters);
+    TurnScoreList::Slot_t capitalSlot = list.addSlot(game::score::ScoreId_Capital);
+    TurnScoreList::Slot_t planetSlot = list.addSlot(game::score::ScoreId_Planets);
+    TurnScoreList::Slot_t baseSlot = list.addSlot(game::score::ScoreId_Bases);
     list.addSlot(game::score::ScoreId_Score);
 
     game::score::TurnScore& t5 = list.addTurn(5, game::Timestamp());
@@ -76,6 +77,7 @@ TestGameScoreCompoundScore::testIt()
     TS_ASSERT_EQUALS(CompoundScore(list, 1000, 1).get(t5, PlayerSet_t()+1+2).isValid(), false);
     TS_ASSERT_EQUALS(CompoundScore(list, 1000, 1).get(list, 5, 1).isValid(), false);
     TS_ASSERT_EQUALS(CompoundScore(list, 1000, 1).get(list, 5, PlayerSet_t()+1+2).isValid(), false);
+    TS_ASSERT_EQUALS(CompoundScore(list, 1000, 1).isValid(), false);
 
     // Query overlong score
     {
@@ -89,6 +91,27 @@ TestGameScoreCompoundScore::testIt()
         TS_ASSERT_EQUALS(longScore.get(t5, PlayerSet_t(1)).isValid(), false);
         TS_ASSERT_EQUALS(longScore.get(list, 5, 1).isValid(), false);
         TS_ASSERT_EQUALS(longScore.get(list, 5, PlayerSet_t(1)).isValid(), false);
+        TS_ASSERT_EQUALS(longScore.isValid(), false);
     }
+}
+
+void
+TestGameScoreCompoundScore::testCompare()
+{
+    // Prepare a score file
+    TurnScoreList list;
+    list.addSlot(game::score::ScoreId_Freighters);
+    list.addSlot(game::score::ScoreId_Capital);
+    list.addSlot(game::score::ScoreId_Planets);
+    list.addSlot(game::score::ScoreId_Bases);
+
+    CompoundScore s(list, game::score::ScoreId_Freighters, 1);
+    TS_ASSERT_EQUALS(s == s, true);
+    TS_ASSERT_EQUALS(s != s, false);
+
+    TS_ASSERT_EQUALS(s == CompoundScore(list, game::score::ScoreId_Freighters, 2), false);
+    TS_ASSERT_EQUALS(s == CompoundScore(list, game::score::ScoreId_Capital, 2), false);
+    TS_ASSERT_EQUALS(s == CompoundScore(list, CompoundScore::TotalShips), false);
+    TS_ASSERT_EQUALS(s == CompoundScore(list, 1000, 1), false);
 }
 

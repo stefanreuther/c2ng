@@ -46,15 +46,46 @@ namespace client { namespace si {
         // UI.GotoScreen command:
         //    - either call ui.continueProcess()
         //    - or call ui.detachProcess() [this ends the wait] and arrange for caller to eventually call continueProcessWait() [on a new instance]
-        virtual void handleStateChange(UserSide& ui, RequestLink2 link, OutputState::Target target) = 0;
-        virtual void handleEndDialog(UserSide& ui, RequestLink2 link, int code) = 0;
-        virtual void handlePopupConsole(UserSide& ui, RequestLink2 link) = 0;
-        virtual void handleSetViewRequest(UserSide& ui, RequestLink2 link, String_t name, bool withKeymap) = 0;
+        virtual void handleStateChange(RequestLink2 link, OutputState::Target target) = 0;
+        virtual void handleEndDialog(RequestLink2 link, int code) = 0;
+        virtual void handlePopupConsole(RequestLink2 link) = 0;
+        virtual void handleSetViewRequest(RequestLink2 link, String_t name, bool withKeymap) = 0;
+        virtual void handleUseKeymapRequest(RequestLink2 link, String_t name, int prefix) = 0;
+        virtual void handleOverlayMessageRequest(RequestLink2 link, String_t text) = 0;
         virtual ContextProvider* createContextProvider() = 0;
 
      protected:
-        void defaultHandlePopupConsole(UserSide& ui, RequestLink2 link);
-        void defaultHandleSetViewRequest(UserSide& ui, RequestLink2 link, String_t name, bool withKeymap);
+        void defaultHandlePopupConsole(RequestLink2 link);
+        void defaultHandleSetViewRequest(RequestLink2 link, String_t name, bool withKeymap);
+
+        void defaultHandleUseKeymapRequest(RequestLink2 link, String_t name, int prefix);
+        void defaultHandleOverlayMessageRequest(RequestLink2 link, String_t text);
+
+        /** Implementation of handleStateChange() for dialogs.
+            Use if this Control represents a dialog.
+            That dialog is active in an EventLoop.
+            This function will, if needed, set the OutputState object and cause the EventLoop to exit
+            signalling the dialog to report that OutputState to its caller.
+
+            \param link     Process (link parameter for handleStateChange)
+            \param target   Target state (target parameter for handleStateChange)
+            \param out      OutputState you're going to return
+            \param loop     EventLoop
+            \param n        EventLoop exit code to use */
+        void dialogHandleStateChange(RequestLink2 link, OutputState::Target target, OutputState& out, ui::EventLoop& loop, int n);
+
+        /** Implementation of handleEndDialog() for dialogs.
+            Use if this Control represents a dialog.
+            That dialog is active in an EventLoop.
+            This function will, if needed, set the OutputState object and cause the EventLoop to exit
+            signalling the dialog to report that OutputState to its caller.
+
+            \param link     Process (link parameter for handleEndDialog)
+            \param code     Code provided by script (code parameter for handleEndDialog); ignored but eats up the "unused parameter" warning
+            \param out      OutputState you're going to return
+            \param loop     EventLoop
+            \param n        EventLoop exit code to use */
+        void dialogHandleEndDialog(RequestLink2 link, int code, OutputState& out, ui::EventLoop& loop, int n);
 
      private:
         void executeTaskInternal(std::auto_ptr<ScriptTask> task, String_t name);

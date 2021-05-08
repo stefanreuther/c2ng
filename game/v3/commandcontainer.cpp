@@ -93,7 +93,7 @@ game::v3::CommandContainer::addNewCommand(Command* cmd)
 bool
 game::v3::CommandContainer::removeCommand(Command::Type typ, Id_t id)
 {
-    // ex GCommandContainer::removeCommand
+    // ex GCommandContainer::removeCommand, phost.pas:RemovePHostCmd
     Iterator_t i = findCommand(typ, id);
     if (i != cmds.end()) {
         sig_commandChange.raise(**i, false);
@@ -108,7 +108,7 @@ game::v3::CommandContainer::removeCommand(Command::Type typ, Id_t id)
 void
 game::v3::CommandContainer::removeCommand(const Command* cmd)
 {
-    // ex GCommandContainer::removeCommand
+    // ex GCommandContainer::removeCommand, phost.pas:RemovePHostCmdByPtr
     // FIXME: this fails because PtrMultiList::iterator does not have required types (difference_type, iterator_category, etc.)
     // Iterator_t i = std::find(cmds.begin(), cmds.end(), cmd);
     Iterator_t i = cmds.begin();

@@ -43,7 +43,7 @@ TestGameInterfaceUserInterfacePropertyStack::testMulti()
                     return false;
                 }
             }
-        virtual bool set(game::interface::UserInterfaceProperty prop, afl::data::Value* p)
+        virtual bool set(game::interface::UserInterfaceProperty prop, const afl::data::Value* p)
             {
                 if (m_property == prop) {
                     int32_t tmp;

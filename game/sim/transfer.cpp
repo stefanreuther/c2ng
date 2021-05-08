@@ -16,21 +16,43 @@
 #include "game/spec/hull.hpp"
 #include "game/spec/hullfunction.hpp"
 #include "game/spec/mission.hpp"
+#include "game/vcr/objectinfo.hpp"
 
 using game::Element;
 using game::spec::HullFunction;
 using game::spec::Mission;
 
-game::sim::Transfer::Transfer(const UnitScoreDefinitionList& scoreDefinitions,
+const char*const NULL_FCODE = "?""?""?";
+
+game::sim::BaseTransfer::BaseTransfer(const game::spec::ShipList& shipList,
+                                      const game::config::HostConfiguration& config,
+                                      afl::string::Translator& tx)
+    : m_shipList(shipList),
+      m_config(config),
+      m_translator(tx)
+{ }
+
+void
+game::sim::BaseTransfer::setName(Ship& out, String_t name) const
+{
+    if (!name.empty()) {
+        out.setName(name);
+    }
+    if (out.getName().empty()) {
+        out.setDefaultName(m_translator);
+    }
+}
+
+game::sim::Transfer::Transfer(const UnitScoreDefinitionList& shipScores,
+                              const UnitScoreDefinitionList& planetScores,
                               const game::spec::ShipList& shipList,
                               const game::config::HostConfiguration& config,
                               HostVersion hostVersion,
                               afl::string::Translator& tx)
-    : m_scoreDefinitions(scoreDefinitions),
-      m_shipList(shipList),
-      m_config(config),
-      m_hostVersion(hostVersion),
-      m_translator(tx)
+    : BaseTransfer(shipList, config, tx),
+      m_shipScores(shipScores),
+      m_planetScores(planetScores),
+      m_hostVersion(hostVersion)
 { }
 
 bool
@@ -51,18 +73,10 @@ game::sim::Transfer::copyShipFromGame(Ship& out, const game::map::Ship& in) cons
     out.setId(in.getId());
 
     // Name
-    {
-        String_t name = in.getName();
-        if (!name.empty()) {
-            out.setName(name);
-        }
-        if (out.getName().empty()) {
-            out.setDefaultName(m_translator);
-        }
-    }
+    setName(out, in.getName());
 
     // FCode
-    out.setFriendlyCode(in.getFriendlyCode().orElse("???"));
+    out.setFriendlyCode(in.getFriendlyCode().orElse(NULL_FCODE));
 
     // Damage
     out.setDamage(std::max(0, in.getDamage().orElse(0) - in.getCargo(Element::Supplies).orElse(0) / 5));
@@ -74,7 +88,7 @@ game::sim::Transfer::copyShipFromGame(Ship& out, const game::map::Ship& in) cons
     out.setOwner(in.getRealOwner().orElse(owner));
 
     // Experience
-    out.setExperienceLevel(in.getScore(ScoreId_ExpLevel, m_scoreDefinitions).orElse(0));
+    out.setExperienceLevel(in.getScore(ScoreId_ExpLevel, m_shipScores).orElse(0));
 
     // Crew
     out.setCrew(in.getCrew().orElse(pHull->getMaxCrew()));
@@ -137,7 +151,7 @@ game::sim::Transfer::copyShipFromGame(Ship& out, const game::map::Ship& in) cons
     }
 
     // Intercept
-    const bool cloakable = in.hasSpecialFunction(HullFunction::Cloak, m_scoreDefinitions, m_shipList, m_config);
+    const bool cloakable = in.hasSpecialFunction(HullFunction::Cloak, m_shipScores, m_shipList, m_config);
     if (mission == Mission::msn_Intercept && cloakable) {
         out.setInterceptId(in.getMissionParameter(InterceptParameter).orElse(0));
     } else {
@@ -159,7 +173,7 @@ game::sim::Transfer::copyShipFromGame(Ship& out, const game::map::Ship& in) cons
 bool
 game::sim::Transfer::copyShipToGame(game::map::Ship& out, const Ship& in, game::map::Universe& univ) const
 {
-    // ex GSimulatorRealGameInterface::updateToGame
+    // ex GSimulatorRealGameInterface::updateToGame, ccsim.pas:DoWriteback
     int owner, hullNr;
     if (!out.getOwner(owner) || !out.getHull().get(hullNr)) {
         return false;
@@ -179,7 +193,7 @@ game::sim::Transfer::copyShipToGame(game::map::Ship& out, const Ship& in, game::
         } else {
             const int oldMission = out.getMission().orElse(0);
             const bool isCloaking = m_shipList.missions().isMissionCloaking(oldMission, realOwner, m_config, m_hostVersion);
-            if (out.hasSpecialFunction(HullFunction::Cloak, m_scoreDefinitions, m_shipList, m_config) && (in.getFlags() & Ship::fl_Cloaked) != 0) {
+            if (out.hasSpecialFunction(HullFunction::Cloak, m_shipScores, m_shipList, m_config) && (in.getFlags() & Ship::fl_Cloaked) != 0) {
                 // Ship can cloak -> set a cloak mission unless it already has one
                 if (!isCloaking) {
                     mem.setMission(Mission::msn_Cloak, 0, 0, m_config, m_shipList);
@@ -230,8 +244,8 @@ game::sim::Transfer::copyShipToGame(game::map::Ship& out, const Ship& in, game::
         // Otherwise, we build the transfer manually because CargoTransferSetup has larger dependencies than we offer.
         try {
             game::actions::CargoTransfer tr;
-            tr.addNew(new game::map::PlanetStorage(*planet, m_config));
-            tr.addNew(new game::map::ShipStorage(out, m_shipList));
+            tr.addNew(new game::map::PlanetStorage(*planet, m_config, m_translator));
+            tr.addNew(new game::map::ShipStorage(out, m_shipList, m_translator));
 
             if (out.getNumBays().orElse(0) != 0) {
                 tr.move(Element::Fighters, simAmmo - shipAmmo, 0, 1, true, false);
@@ -265,7 +279,7 @@ game::sim::Transfer::copyPlanetFromGame(Planet& out, const game::map::Planet& in
     out.setName(in.getName(m_translator));
 
     // Friendly Code
-    out.setFriendlyCode(in.getFriendlyCode().orElse("???"));
+    out.setFriendlyCode(in.getFriendlyCode().orElse(NULL_FCODE));
 
     // Damage/Shield
     // FIXME: can we do better?
@@ -276,7 +290,7 @@ game::sim::Transfer::copyPlanetFromGame(Planet& out, const game::map::Planet& in
     out.setOwner(owner);
 
     // Experience
-    out.setExperienceLevel(0);      // FIXME: need to access planet (same problem in PCC2)
+    out.setExperienceLevel(in.getScore(ScoreId_ExpLevel, m_planetScores).orElse(0));
 
     // Flags: there are no flags relevant for planets so far
     out.setFlags(0);
@@ -339,6 +353,91 @@ game::sim::Transfer::copyPlanetToGame(game::map::Planet& out, const Planet& in) 
     return true;
 }
 
+bool
+game::sim::BaseTransfer::copyShipFromBattle(Ship& out, const game::vcr::Object& in, int assumedHull, bool withESB) const
+{
+    // ex client/widgets/vcrinfomain.cc:addShipToSim (part)
+    out.setId(in.getId());
+    setName(out, in.getName());
+    out.setFriendlyCode(NULL_FCODE);
+    out.setDamage(in.getDamage());
+    out.setShield(in.getShield());
+    out.setOwner(in.getOwner());
+    out.setExperienceLevel(in.getExperienceLevel());
+    out.setFlags(0);
+    out.setFlakRatingOverride(0);
+    out.setFlakCompensationOverride(0);
+    out.setHullType(assumedHull, m_shipList);    // Must be before crew, mass, and weapons; will set those to defaults
+    out.setCrew(in.getCrew());
+    out.setMass(in.getMass());
+    out.setBeamType(in.getBeamType());
+    out.setNumBeams(in.getNumBeams());
+    out.setTorpedoType(in.getTorpedoType());
+    out.setNumLaunchers(in.getNumLaunchers());
+    out.setNumBays(in.getNumBays());
+    out.setAmmo(in.getNumLaunchers() > 0
+                ? in.getNumTorpedoes()
+                : in.getNumFighters());
+
+    int engineType = in.getGuessedEngine(m_shipList.engines(), m_shipList.hulls().get(assumedHull), withESB, m_config);
+    if (engineType == 0) {
+        engineType = 1;
+    }
+    out.setEngineType(engineType);
+    out.setAggressiveness(Ship::agg_Kill);
+    out.setInterceptId(0);
+    return true;
+}
+
+bool
+game::sim::BaseTransfer::copyPlanetFromBattle(Planet& out, const game::vcr::Object& in) const
+{
+    // ex client/widgets/vcrinfomain.cc:addPlanetToSim
+    game::vcr::PlanetInfo pi;
+    describePlanet(pi, in, m_config);
+    if (!pi.isValid) {
+        return false;
+    }
+
+    out.setId(in.getId());
+    out.setName(in.getName());
+    out.setFriendlyCode("ATT");
+    out.setDamage(in.getDamage());
+    out.setShield(in.getShield());
+    out.setOwner(in.getOwner());
+    out.setExperienceLevel(in.getExperienceLevel());
+    out.setFlags(0);
+    out.setFlakRatingOverride(0);
+    out.setFlakCompensationOverride(0);
+
+    // Clear all base torps
+    for (int i = 1; i <= Planet::NUM_TORPEDO_TYPES; ++i) {
+        out.setNumBaseTorpedoes(i, 0);
+    }
+
+    // We use the maximum possible planet defense, and the minimum
+    // possible starbase defense. The rest follows from that.
+    out.setDefense(pi.defense.empty() ? 0 : pi.defense.max());
+    if (pi.hasBase) {
+        // Defense, beams
+        out.setBaseDefense(pi.baseDefense.empty() ? 0 : pi.baseDefense.min());
+        out.setBaseBeamTech(pi.baseBeamTech.empty() ? 1 : pi.baseBeamTech.min());
+
+        // FIXME: starbase torps!
+        out.setBaseTorpedoTech(1);
+
+        // Fighters
+        out.setNumBaseFighters(pi.numBaseFighters.min());
+    } else {
+        out.setBaseDefense(0);
+        out.setBaseBeamTech(0);
+        out.setBaseTorpedoTech(1);
+        out.setNumBaseFighters(0);
+    }
+
+    return true;
+}
+
 void
 game::sim::Transfer::setHullFunction(int32_t& flags, const Ship& out, const game::map::Ship& in, Ability a, int basicHullFunction) const
 {
@@ -346,7 +445,7 @@ game::sim::Transfer::setHullFunction(int32_t& flags, const Ship& out, const game
     // FIXME: we pass a blank Configuration() to hasImpliedFunction. For now, this configuration does not affect anything.
     // If it starts affecting things, we should pass one that matches version/config, because we probably want to sim
     // "this game's host" when we add "this game's ship".
-    const bool shipCanDo = in.hasSpecialFunction(basicHullFunction, m_scoreDefinitions, m_shipList, m_config);
+    const bool shipCanDo = in.hasSpecialFunction(basicHullFunction, m_shipScores, m_shipList, m_config);
     const bool simCanDo = out.hasImpliedAbility(a, Configuration(), m_shipList, m_config);
     if (shipCanDo != simCanDo) {
         const Object::AbilityInfo info = Object::getAbilityInfo(a);
@@ -356,3 +455,4 @@ game::sim::Transfer::setHullFunction(int32_t& flags, const Ship& out, const game
         }
     }
 }
+

@@ -14,21 +14,7 @@ namespace gsi = game::spec::info;
 namespace {
     String_t toString(IntRange_t range, IntRange_t maxRange, afl::string::Translator& tx)
     {
-        if (range.empty()) {
-            return tx("none");
-        } else if (range.isUnit()) {
-            return Format("%d", range.min());
-        } else {
-            bool toMin = range.min() <= maxRange.min();
-            bool toMax = range.max() >= maxRange.max();
-            if (toMin && !toMax) {
-                return Format(tx("up to %d"), range.max());
-            } else if (toMax && !toMin) {
-                return Format(tx("%d or more"), range.min());
-            } else {
-                return Format(tx("%d...%d"), range.min(), range.max());
-            }
-        }
+        return util::toString(range, maxRange, true, util::NumberFormatter(false, false), tx);
     }
 
     gsi::FilterInfo makeDefaultAttribute(String_t name, const gsi::FilterElement& elem, const gsi::Browser& browser)

@@ -5,29 +5,13 @@
 
 #include <climits>
 #include "game/map/locker.hpp"
-#include "game/config/bitsetvalueparser.hpp"
 #include "game/map/anyplanettype.hpp"
 #include "game/map/anyshiptype.hpp"
 #include "game/map/configuration.hpp"
 #include "game/map/object.hpp"
 #include "game/map/universe.hpp"
 
-namespace {
-    game::config::BitsetValueParser g_lockOptionParser("planet,ship,ufo,marker,minefield");
-}
-
-const game::map::LockOptionDescriptor_t game::map::Lock_Left = {
-    "Lock.Left",
-    &g_lockOptionParser,
-    MatchPlanets | MatchMinefields | MatchUfos
-};
-
-const game::map::LockOptionDescriptor_t game::map::Lock_Right = {
-    "Lock.Right",
-    &g_lockOptionParser,
-    MatchShips | MatchDrawings
-};
-
+using game::config::HostConfiguration;
 
 game::map::Locker::Locker(Point target, const Configuration& config)
     : m_target(target),
@@ -198,6 +182,65 @@ game::map::Locker::addUniverse(const Universe& univ, int32_t items, const Drawin
     }
 }
 
+// Find warp-well edge.
+game::map::Point
+game::map::Locker::findWarpWellEdge(Point origin, bool isHyperdriving,
+                                    const Universe& univ,
+                                    const game::config::HostConfiguration& config,
+                                    const HostVersion& host) const
+{
+    // ex WScannerChartWidget::doItemLock (part)
+    // Query current position
+    Id_t originPlanetId = univ.findGravityPlanetAt(origin, config, host);
+
+    // Can we optimize warp wells?
+    Id_t foundPlanetId = univ.findPlanetAt(m_foundPoint);
+    if (foundPlanetId != 0
+        && config[HostConfiguration::AllowGravityWells]()
+        && (!isHyperdriving || !host.isPHost() || config[HostConfiguration::AllowHyperjumpGravWells]())
+        && foundPlanetId != originPlanetId)
+    {
+        /* We try to find the edge of a gravity well unless
+           - we're heading for deep space, i.e. no planet found
+           - gravity wells are disabled
+           - we're starting inside the same gravity well we clicked in,
+             in this case we assume we want to move to the planet */
+        // FIXME: check whether this still matches actual rules!
+        const int wwrange = (host.isPHost() ? config[HostConfiguration::GravityWellRange]() :
+                             isHyperdriving ? 2 : 3);
+
+        // Start with the assumption that moving directly is the best choice.
+        // Then try all points in warp well range.
+        int32_t bestDistance = getWarpWellDistanceMetric(origin, m_foundPoint, isHyperdriving, host);
+        Point bestPoint  = m_foundPoint;
+        for (int dx = -wwrange; dx <= wwrange; ++dx) {
+            for (int dy = -wwrange; dy <= wwrange; ++dy) {
+                Point newPoint(m_foundPoint.getX() + dx, m_foundPoint.getY() + dy);
+                int32_t newDistance = getWarpWellDistanceMetric(origin, newPoint, isHyperdriving, host);
+                if (newDistance >= 0
+                    && (bestDistance < 0 || newDistance < bestDistance)
+                    && univ.findGravityPlanetAt(newPoint, config, host) == foundPlanetId)
+                {
+                    // Accept new point if it is valid, has a better metric than
+                    // the previous one, and it is in the same warp well.
+                    bestDistance = newDistance;
+                    bestPoint = newPoint;
+                }
+            }
+        }
+
+        // Move to found point, if any
+        if (bestDistance >= 0) {
+            return bestPoint;
+        } else {
+            return m_foundPoint;
+        }
+    } else {
+        // No warp wells, so just return found point
+        return m_foundPoint;
+    }
+}
+
 // Get found point.
 game::map::Point
 game::map::Locker::getFoundPoint() const
@@ -224,5 +267,18 @@ game::map::Locker::addPointRaw(Point pt, Reference obj)
             m_foundObject = obj;
             m_minDistance = dist;
         }
+    }
+}
+
+/* Get warp well distance metric: refuse non-exact hyperjump targets */
+int32_t
+game::map::Locker::getWarpWellDistanceMetric(Point origin, Point pt, bool isHyperdriving, const HostVersion& host) const
+{
+    // ex WShipScannerChartWidget::lockQueryDistance
+    int32_t dist2 = m_config.getSquaredDistance(origin, pt);
+    if (isHyperdriving && !host.isExactHyperjumpDistance2(dist2)) {
+        return -1;
+    } else {
+        return dist2;
     }
 }

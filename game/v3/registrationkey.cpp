@@ -15,7 +15,6 @@
 #include "afl/checksums/sha1.hpp"
 #include "afl/except/fileformatexception.hpp"
 #include "afl/string/format.hpp"
-#include "util/translation.hpp"
 #include "version.hpp"
 
 namespace {
@@ -143,7 +142,7 @@ game::v3::RegistrationKey::initUnowned()
 
 // Initialize by loading files from a directory.
 void
-game::v3::RegistrationKey::initFromDirectory(afl::io::Directory& dir, afl::sys::LogListener& log)
+game::v3::RegistrationKey::initFromDirectory(afl::io::Directory& dir, afl::sys::LogListener& log, afl::string::Translator& tx)
 {
     // ex GRegInfo::initFromDirectory
     try {
@@ -151,18 +150,23 @@ game::v3::RegistrationKey::initFromDirectory(afl::io::Directory& dir, afl::sys::
 
         afl::base::Ref<afl::io::Stream> s = dir.openFile("fizz.bin", afl::io::FileSystem::OpenRead);
         parseFizz(*s);
-// FIXME: reg.key parsing
-//         if (winplan_dir) {
-//             s = winplan_dir->openFileNT("reg.key", Stream::C_READ);
-//             if (s)
-//                 parseKey(*s);
-//         }
+
+        // Check for reg.key in parent directory.
+        // (PCC2 also checks for presence of winplan.exe, but otherwise has the same restriction.
+        // PCC1 has a freely-configurable Winplan path and therefore always finds the key.)
+        afl::base::Ptr<afl::io::Directory> parent = dir.getParentDirectory();
+        if (parent.get() != 0) {
+            afl::base::Ptr<afl::io::Stream> s = parent->openFileNT("reg.key", afl::io::FileSystem::OpenRead);
+            if (s.get() != 0) {
+                parseKey(*s, tx);
+            }
+        }
     }
     catch (afl::except::FileProblemException& e) {
         initUnregistered();
         initUnowned();
         log.write(log.Warn, "game.v3.reg", e.getFileName(), 0, e.what());
-        log.write(log.Warn, "game.v3.reg", _("No usable registration key found, assuming unregistered player"));
+        log.write(log.Warn, "game.v3.reg", tx("No usable registration key found, assuming unregistered player"));
     }
 }
 
@@ -227,7 +231,7 @@ game::v3::RegistrationKey::parseFizz(afl::io::Stream& s)
 /** Initialize from REG.KEY.
     \param s REG.KEY file, file pointer at beginning. */
 inline void
-game::v3::RegistrationKey::parseKey(afl::io::Stream& s)
+game::v3::RegistrationKey::parseKey(afl::io::Stream& s, afl::string::Translator& tx)
 {
     // ex GRegInfo::parseKey
     Key buffer;
@@ -248,7 +252,7 @@ game::v3::RegistrationKey::parseKey(afl::io::Stream& s)
         initUnowned();
     } else {
         /* reject */
-        throw afl::except::FileFormatException(s, _("File is invalid"));
+        throw afl::except::FileFormatException(s, tx("File is invalid"));
     }
 }
 

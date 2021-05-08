@@ -1,6 +1,17 @@
 PCC2ng NEWS FILE
 ================
 
+2.40.10
+-------
+
+  Battle simulator (GUI). FLAK (but no viewer yet). Team settings.
+  Cargo Overload Mode and conflict resolution; multi-ship transfer.
+  Winplan gamestat.dat handling in browser. Result attachment
+  unpacking. Scores. Several starchart modes and information dialogs.
+  Notifications, per-unit messages.
+
+  Internal restructurings.
+
 
 2.40.9
 ------

@@ -60,8 +60,9 @@ namespace game { namespace v3 { namespace trn {
             \param log Logger
             \param players Player list (for logging)
             \param fs File system (for backups)
-            \param config User configuration file (for backups) */
-        void saveAll(afl::sys::LogListener& log, const PlayerList& players, afl::io::FileSystem& fs, const game::config::UserConfiguration& config);
+            \param config User configuration file (for backups)
+            \param tx Translator (for logging) */
+        void saveAll(afl::sys::LogListener& log, const PlayerList& players, afl::io::FileSystem& fs, const game::config::UserConfiguration& config, afl::string::Translator& tx);
 
         /** Get number of turn files.
             \return number of turn files */

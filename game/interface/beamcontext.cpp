@@ -54,7 +54,7 @@ game::interface::BeamContext::lookup(const afl::data::NameQuery& name, PropertyI
 }
 
 void
-game::interface::BeamContext::set(PropertyIndex_t index, afl::data::Value* value)
+game::interface::BeamContext::set(PropertyIndex_t index, const afl::data::Value* value)
 {
     if (game::spec::Beam* b = m_shipList->beams().get(m_number)) {
         switch (BeamDomain(BEAM_MAP[index].domain)) {

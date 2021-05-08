@@ -76,7 +76,7 @@ namespace {
      public:
         friend class NavChartOverlay;  // FIXME: merge? Give them a NavChartState only?
 
-        NavChartDialog(ui::Root& root, util::RequestSender<game::Session> gameSender, afl::string::Translator& tx, NavChartState& state, NavChartResult& result);
+        NavChartDialog(ui::Root& root, client::si::UserSide& us, afl::string::Translator& tx, NavChartState& state, NavChartResult& result);
 
         void run();
         void setInitialZoom();
@@ -92,8 +92,8 @@ namespace {
 
      private:
         ui::Root& m_root;
+        client::si::UserSide& m_userSide;
         ui::EventLoop m_loop;
-        util::RequestSender<game::Session> m_gameSender;
         afl::string::Translator& m_translator;
         NavChartState& m_state;
         NavChartResult& m_result;
@@ -114,7 +114,7 @@ namespace {
 
 NavChartOverlay::NavChartOverlay(NavChartDialog& parent)
     : m_parent(parent), m_altCenter(), m_oldCenters(),
-      m_chunnelProxy(parent.m_gameSender, parent.m_root.engine().dispatcher()),
+      m_chunnelProxy(parent.m_userSide.gameSender(), parent.m_root.engine().dispatcher()),
       m_chunnelData()
 {
     m_chunnelProxy.sig_candidateListUpdate.add(this, &NavChartOverlay::onCandidateListUpdate);
@@ -170,7 +170,7 @@ NavChartOverlay::drawAfter(gfx::Canvas& /*can*/, const client::map::Renderer& /*
 bool
 NavChartOverlay::drawCursor(gfx::Canvas& /*can*/, const client::map::Renderer& /*ren*/)
 {
-    return true;
+    return false;
 }
 
 bool
@@ -179,16 +179,6 @@ NavChartOverlay::handleKey(util::Key_t key, int /*prefix*/, const client::map::R
     // ex WShipNavigationChart::handleEvent(const UIEvent& event, bool second_pass)
     NavChartState& st = m_parent.m_state;
     switch (key) {
-     case '+':
-        // FIXME: zoom handled here, not in MovementOverlay as in PCC2. Can we change that?
-        m_parent.m_mapWidget.zoomIn();
-        return true;
-
-     case '-':
-        // FIXME: zoom handled here, not in MovementOverlay as in PCC2. Can we change that?
-        m_parent.m_mapWidget.zoomOut();
-        return true;
-
      case util::Key_Tab:
         if (st.target != st.center) {
             // Remember old position
@@ -239,12 +229,12 @@ NavChartOverlay::handleKey(util::Key_t key, int /*prefix*/, const client::map::R
      case util::Key_F5:
      case util::Key_F5 + util::KeyMod_Ctrl:
         // Planet info
-        client::dialogs::doPlanetInfoDialog(m_parent.m_root, m_parent.m_gameSender, st.target, m_parent.m_translator);
+        client::dialogs::doPlanetInfoDialog(m_parent.m_root, m_parent.m_userSide.gameSender(), st.target, m_parent.m_translator);
         return true;
 
      case util::Key_F5 + util::KeyMod_Shift:
         // Planet info here
-        client::dialogs::doPlanetInfoDialog(m_parent.m_root, m_parent.m_gameSender, st.origin, m_parent.m_translator);
+        client::dialogs::doPlanetInfoDialog(m_parent.m_root, m_parent.m_userSide.gameSender(), st.origin, m_parent.m_translator);
         return true;
 
      default:
@@ -295,16 +285,16 @@ NavChartOverlay::onCandidateListUpdate(const game::proxy::ChunnelProxy::Candidat
  */
 
 NavChartDialog::NavChartDialog(ui::Root& root,
-                               util::RequestSender<game::Session> gameSender,
+                               client::si::UserSide& us,
                                afl::string::Translator& tx,
                                NavChartState& state,
                                NavChartResult& result)
-    : m_root(root), m_loop(root), m_gameSender(gameSender), m_translator(tx), m_state(state),
+    : m_root(root), m_userSide(us), m_loop(root), m_translator(tx), m_state(state),
       m_result(result),
-      m_mapWidget(gameSender, root, gfx::Point(450, 450)),  // FIXME: size
+      m_mapWidget(us.gameSender(), root, gfx::Point(450, 450)),  // FIXME: size
       m_scannerOverlay(root.colorScheme()),
-      m_movementOverlay(root.engine().dispatcher(), gameSender),
-      m_scanResult(root, gameSender, tx),
+      m_movementOverlay(root.engine().dispatcher(), us.gameSender(), m_mapWidget),
+      m_scanResult(root, us.gameSender(), tx),
       m_navChartOverlay(*this),
       m_chunnelButton(0)
 { }
@@ -335,6 +325,7 @@ NavChartDialog::run()
 
     m_movementOverlay.setMode(client::map::MovementOverlay::AcceptMovementKeys, true);
     m_movementOverlay.setMode(client::map::MovementOverlay::AcceptConfigKeys, true);
+    m_movementOverlay.setMode(client::map::MovementOverlay::AcceptZoomKeys, true);
     m_movementOverlay.sig_doubleClick.add(this, &NavChartDialog::onDoubleClick);
     win.add(ui::widgets::FrameGroup::wrapWidget(del, m_root.colorScheme(), ui::LoweredFrame, m_mapWidget));
     m_mapWidget.addOverlay(m_movementOverlay);
@@ -361,7 +352,7 @@ NavChartDialog::run()
     }
     g22.add(g222);
 
-    ui::Widget& helper = del.addNew(new client::widgets::HelpWidget(m_root, m_gameSender, "pcc2:navchart"));
+    ui::Widget& helper = del.addNew(new client::widgets::HelpWidget(m_root, tx, m_userSide.gameSender(), "pcc2:navchart"));
     ui::widgets::Button& btnOK     = del.addNew(new ui::widgets::Button(tx("F10 - OK"), util::Key_F10,    m_root));
     ui::widgets::Button& btnCancel = del.addNew(new ui::widgets::Button(tx("ESC"),      util::Key_Escape, m_root));
     ui::widgets::Button& btnHelp   = del.addNew(new ui::widgets::Button("H",            'h',              m_root));
@@ -403,6 +394,7 @@ NavChartDialog::setPositions()
 {
     m_mapWidget.setCenter(m_state.center);
     m_movementOverlay.setPosition(m_state.target);
+    m_movementOverlay.setLockOrigin(m_state.origin, m_state.hyperjumping);
     m_scannerOverlay.setPositions(m_state.origin, m_state.target);
     m_scanResult.setPositions(m_state.origin, m_state.target);
 }
@@ -410,15 +402,21 @@ NavChartDialog::setPositions()
 void
 NavChartDialog::doListShips()
 {
-    client::Downlink link(m_root);
-    client::dialogs::VisualScanDialog dlg(m_root, m_gameSender, m_translator);
+    client::Downlink link(m_root, m_translator);
+    client::dialogs::VisualScanDialog dlg(m_userSide, m_root, m_translator);
     dlg.setTitle(m_translator("List Ships"));
     dlg.setOkName(m_translator("OK"));
     dlg.setAllowForeignShips(true);
     if (dlg.loadCurrent(link, m_state.target, game::ref::List::Options_t(game::ref::List::IncludeForeignShips), 0)) {
         game::Reference ref = dlg.run();
+        m_result.outputState = dlg.outputState();
         if (ref.isSet()) {
             onShipSelect(ref.getId(), m_state.target);
+        }
+
+        // If the dialog caused a script-side context change, but the above didn't yet confirm the dialog, cancel it.
+        if (m_result.result == NavChartResult::Canceled && m_result.outputState.isValid()) {
+            m_loop.stop(0);
         }
     }
 }
@@ -509,11 +507,11 @@ game::Id_t
 NavChartDialog::chooseChunnelMate()
 {
     game::ref::UserList list;
-    client::Downlink link(m_root);       // FIXME?
-    game::proxy::ChunnelProxy(m_gameSender, m_root.engine().dispatcher()).getCandidates(link, m_state.shipId, m_state.target, list);
+    client::Downlink link(m_root, m_translator);
+    game::proxy::ChunnelProxy(m_userSide.gameSender(), m_root.engine().dispatcher()).getCandidates(link, m_state.shipId, m_state.target, list);
 
     if (list.empty()) {
-        ui::dialogs::MessageBox(m_translator("There are no potential chunnel mates at the current position."), m_translator("Chunnel"), m_root).doOkDialog();
+        ui::dialogs::MessageBox(m_translator("There are no potential chunnel mates at the current position."), m_translator("Chunnel"), m_root).doOkDialog(m_translator);
         return 0;
     } else if (list.size() == 1) {
         return list.get(0)->reference.getId();
@@ -522,7 +520,7 @@ NavChartDialog::chooseChunnelMate()
         box.setContent(list);
         box.setNumLines(10);
         box.setWidth(m_root.provider().getFont(gfx::FontRequest())->getEmWidth() * 20);
-        if (ui::widgets::doStandardDialog(m_translator("Chunnel"), String_t(), box, false, m_root)) {
+        if (ui::widgets::doStandardDialog(m_translator("Chunnel"), String_t(), box, false, m_root, m_translator)) {
             return box.getCurrentReference().getId();
         } else {
             return 0;
@@ -537,10 +535,10 @@ NavChartDialog::chooseChunnelMate()
 void
 client::dialogs::doNavigationChart(NavChartResult& result,
                                    NavChartState& in,
+                                   client::si::UserSide& us,
                                    ui::Root& root,
-                                   util::RequestSender<game::Session> gameSender,
                                    afl::string::Translator& tx)
 {
     // ex doShipNavigationChart, doGenericNavigationChart
-    NavChartDialog(root, gameSender, tx, in, result).run();
+    NavChartDialog(root, us, tx, in, result).run();
 }

@@ -7,8 +7,12 @@
 
 #include "afl/base/deletable.hpp"
 #include "afl/string/string.hpp"
-#include "game/spec/componentvector.hpp"
 #include "game/config/hostconfiguration.hpp"
+#include "game/root.hpp"
+#include "game/spec/componentvector.hpp"
+#include "game/spec/shiplist.hpp"
+#include "game/teamsettings.hpp"
+#include "game/vcr/info.hpp"
 
 namespace game { namespace vcr {
 
@@ -287,6 +291,18 @@ namespace game { namespace vcr {
         /** Apply classic shield limits.
             Freighters do not have shields. */
         void applyClassicLimits();
+
+        /** Format this object into human-readable form.
+            Note that if root, shipList are passed as null, this produces an absolute lo-fi implementation;
+            this is mainly for implementation convenience saving the null checks on the caller side.
+            \param [in]  teamSettings   Team settings (optional, for viewpoint player)
+            \param [in]  root           Root (host configuration, preferences, player names)
+            \param [in]  shipList       Unit names
+            \param [in]  tx             Translator
+            \return result */
+        ObjectInfo describe(const TeamSettings* teamSettings, const Root* root, const game::spec::ShipList* shipList, afl::string::Translator& tx) const;
+
+        String_t getSubtitle(const TeamSettings* teamSettings, const Root& root, const game::spec::ShipList& shipList, afl::string::Translator& tx) const;
 
      private:
         typedef int Value_t;

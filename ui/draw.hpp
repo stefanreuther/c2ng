@@ -19,6 +19,8 @@ namespace ui {
     const int DefaultFont = 0;
     const int FixedFont = 1;
 
+    const uint32_t CURSOR_BLINK_INTERVAL = 400;
+
     class ColorScheme;
 
     using util::SkinColor;
@@ -38,7 +40,9 @@ namespace ui {
     enum ButtonFlag {
         ActiveButton,           ///< Active (ex st_Selected)
         PressedButton,          ///< Pressed (ex bf_Pressed)
-        HighlightedButton       ///< Highlighted (ex bf_Highlight)
+        HighlightedButton,      ///< Highlighted (ex bf_Highlight)
+        FocusedButton,          ///< Forwarding of FocusedState
+        DisabledButton          ///< Forwarding of DisabledState
     };
     typedef afl::bits::SmallSet<ButtonFlag> ButtonFlags_t;
 
@@ -62,7 +66,6 @@ namespace ui {
     void drawButton(gfx::Context<uint8_t>& ctx,
                     const gfx::Rectangle& extent,
                     ButtonFlags_t flags,
-                    Widget::States_t state,
                     String_t text);
 
     void prepareHighContrastListItem(gfx::Context<util::SkinColor::Color>& ctx, gfx::Rectangle area, ui::widgets::AbstractListbox::ItemState state);

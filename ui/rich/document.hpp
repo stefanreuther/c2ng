@@ -4,13 +4,13 @@
 #ifndef C2NG_UI_RICH_DOCUMENT_HPP
 #define C2NG_UI_RICH_DOCUMENT_HPP
 
-#include <memory>
-#include "ui/rich/blockobject.hpp"
-#include "util/skincolor.hpp"
-#include "afl/string/string.hpp"
-#include "util/rich/text.hpp"
 #include "afl/container/ptrvector.hpp"
+#include "afl/string/string.hpp"
 #include "gfx/resourceprovider.hpp"
+#include "ui/icons/icon.hpp"
+#include "util/rich/text.hpp"
+#include "util/skincolor.hpp"
+#include "afl/base/deleter.hpp"
 
 namespace ui { namespace rich {
 
@@ -69,9 +69,9 @@ namespace ui { namespace rich {
             };
             Kind kind;
             gfx::Rectangle pos;
-            std::auto_ptr<BlockObject> obj;
+            ui::icons::Icon& obj;
 
-            BlockItem(Kind k, std::auto_ptr<BlockObject> obj);
+            BlockItem(Kind k, ui::icons::Icon& obj);
         };
 
         /** Link id. To users, this is an opaque value which uniquely identifies a link.
@@ -83,6 +83,7 @@ namespace ui { namespace rich {
         ~Document();
 
         gfx::ResourceProvider& provider();
+        afl::base::Deleter& deleter();
 
         void clear();
         void setPageWidth(int width);
@@ -102,8 +103,8 @@ namespace ui { namespace rich {
         void addRight(int x, const util::rich::Text& text);
         void addCentered(int x, const util::rich::Text& text);
         void addPreformatted(const util::rich::Text& text);
-        void addFloatObject(std::auto_ptr<BlockObject> obj, bool left);
-        void addCenterObject(std::auto_ptr<BlockObject> obj);
+        void addFloatObject(ui::icons::Icon& obj, bool left);
+        void addCenterObject(ui::icons::Icon& obj);
         void tabTo(int x);
         void finish();
         int getDocumentHeight() const;
@@ -135,6 +136,8 @@ namespace ui { namespace rich {
         friend class Splitter;
 
         gfx::ResourceProvider& m_provider;
+
+        afl::base::Deleter m_deleter;
 
         /* Up to first_this_line: completely rendered content.
            After first_this_line: x positions have been assigned, y positions have not been assigned yet */

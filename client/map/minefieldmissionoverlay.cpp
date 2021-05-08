@@ -15,14 +15,14 @@
 #include "game/turn.hpp"
 #include "gfx/complex.hpp"
 #include "gfx/context.hpp"
-#include "util/translation.hpp"
 
 using afl::string::Format;
 
-client::map::MinefieldMissionOverlay::MinefieldMissionOverlay(ui::Root& root)
+client::map::MinefieldMissionOverlay::MinefieldMissionOverlay(ui::Root& root, afl::string::Translator& tx)
     : Overlay(),
       m_data(),
       m_root(root),
+      m_translator(tx),
       m_reply(root.engine().dispatcher(), *this)
 { }
 
@@ -58,17 +58,17 @@ client::map::MinefieldMissionOverlay::drawAfter(gfx::Canvas& can, const Renderer
         String_t label;
         if (eff.newUnits == 0) {
             // Scoop it, gone
-            label = Format(_("gone (%d torp%!1{s%})"), eff.numTorps);
+            label = Format(m_translator("gone (%d torp%!1{s%})"), eff.numTorps);
         } else if (eff.id == 0 || eff.radiusChange == 0) {
             // Lay, new minefield (otherwise, Id would be known)
             // -or- Action does not change size
-            label = Format(_("%d ly"), radius);
+            label = Format(m_translator("%d ly"), radius);
         } else if (eff.radiusChange > 0) {
             // Lay
-            label = Format(_("%d ly (+%d)"), radius, eff.radiusChange);
+            label = Format(m_translator("%d ly (+%d)"), radius, eff.radiusChange);
         } else {
             // Scoop
-            label = Format(_("%d ly (%d torp%!1{s%})"), radius, eff.numTorps);
+            label = Format(m_translator("%d ly (%d torp%!1{s%})"), radius, eff.numTorps);
         }
 
         // Circle
@@ -79,7 +79,7 @@ client::map::MinefieldMissionOverlay::drawAfter(gfx::Canvas& can, const Renderer
         }
 
         // Label
-        ctx.setTextAlign(1, 0);
+        ctx.setTextAlign(gfx::CenterAlign, gfx::TopAlign);
         outText(ctx, center + gfx::Point(0, 10), label);
 
         // FIXME: missing feature: limit check for laying
@@ -90,7 +90,7 @@ client::map::MinefieldMissionOverlay::drawAfter(gfx::Canvas& can, const Renderer
         //     if (radius > limit) {
         //         drawCircle(ctx, p, vp.scale(limit));
         //         ctx.setColor(COLOR_DARK);
-        //         outText(ctx, p.x, p.y + 10 + font_heights[FONT_SMALL], _("<over limit>"));
+        //         outText(ctx, p.x, p.y + 10 + font_heights[FONT_SMALL], m_translator("<over limit>"));
         //     }
     }
 }
@@ -98,7 +98,7 @@ client::map::MinefieldMissionOverlay::drawAfter(gfx::Canvas& can, const Renderer
 bool
 client::map::MinefieldMissionOverlay::drawCursor(gfx::Canvas& /*can*/, const Renderer& /*ren*/)
 {
-    return true;
+    return false;
 }
 
 bool

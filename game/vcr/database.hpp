@@ -1,5 +1,6 @@
 /**
   *  \file game/vcr/database.hpp
+  *  \brief Base class game::vcr::Database
   */
 #ifndef C2NG_GAME_VCR_DATABASE_HPP
 #define C2NG_GAME_VCR_DATABASE_HPP
@@ -11,10 +12,10 @@ namespace game { namespace vcr {
 
     class Battle;
 
-    /** Basic VCR database. */
+    /** Basic VCR database.
+        A VCR database contains (owns) a list of battles. */
     class Database : public afl::base::Deletable {
      public:
-
         /** Get number of battles in this database. */
         virtual size_t getNumBattles() const = 0;
 

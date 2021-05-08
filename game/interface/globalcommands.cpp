@@ -17,6 +17,7 @@
 #include "interpreter/indexablevalue.hpp"
 #include "afl/data/vector.hpp"
 #include "afl/data/vectorvalue.hpp"
+#include "game/config/markeroption.hpp"
 
 using interpreter::checkIntegerArg;
 using interpreter::checkStringArg;
@@ -28,7 +29,7 @@ namespace {
                              game::map::Drawing::Type drawingType,
                              bool normalizeCoords)
     {
-        // ex int/if/globalif.cc:doLineRectangle
+        // ex int/if/globalif.cc:doLineRectangle, globint.pas:LineOrRectangle
         // <command> x1,y1,x2,y2[,color,tag,expire]
         using game::map::Drawing;
 
@@ -187,7 +188,7 @@ game::interface::checkPlayerSetArg(PlayerSet_t& result, afl::data::Value* value)
 void
 game::interface::IFAddConfig(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
 {
-    // ex int/if/globalif.h:IFAddConfig
+    // ex int/if/globalif.h:IFAddConfig, globint.pas:Global_AddConfig
     // Parse args
     args.checkArgumentCount(1);
     String_t text;
@@ -227,7 +228,7 @@ game::interface::IFAddConfig(interpreter::Process& /*proc*/, game::Session& sess
 void
 game::interface::IFAddFCode(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
 {
-    // ex int/if/globalif.h:IFAddFCode
+    // ex int/if/globalif.h:IFAddFCode, globint.pas:Global_AddFCode
 
     // Parse args
     args.checkArgumentCount(1);
@@ -304,14 +305,15 @@ game::interface::IFAddPref(interpreter::Process& /*proc*/, game::Session& sessio
    Passwords are forgotten whenever you leave the <a href="pcc2:racescreen">race screen</a>,
    so you should regenerate it in the {BeforeLoad} hook.
 
-   @change In PCC2NG (2.40+), {AuthPlayer} commands stack.
+   @change In PCC2NG (2.40+) and PCC 1.x, {AuthPlayer} commands stack.
    Providing multiple passwords will check all of them.
+   In PCC2, only the last {AuthPlayer} command for a player will be effective.
 
    @since PCC 1.1.1, PCC2 1.99.25, PCC2 2.40.8 */
 void
 game::interface::IFAuthPlayer(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
 {
-    // ex int/if/globalif.cc:IFAuthPlayer
+    // ex int/if/globalif.cc:IFAuthPlayer, globint.pas:Global_AuthPlayer
     // Parse args
     args.checkArgumentCount(2);
     int32_t playerNr;
@@ -399,6 +401,61 @@ game::interface::IFCreatePrefOption(interpreter::Process& /*proc*/, game::Sessio
     createConfigOption(game::actions::mustHaveRoot(session).userConfiguration(), args);
 }
 
+/* @q NewCannedMarker x:Int, y:Int, slot:Int, Optional tag:Int, expire:Int (Global Command)
+   Create a new canned marker drawing.
+   Users can predefine a number of marker shapes/colors.
+   The %slot parameter selects which type to create.
+
+   The %tag is a value between 0 and 32767 you can use to identify your drawings,
+   usually this value is created using {Atom}.
+
+   %expire defines the time-of-expiry for the game as a turn number:
+   if the current turn number is larger than this value, the drawing is automatically deleted.
+   Thus, set %expire=0 to make drawings only visible for the current session.
+   %expire=-1 is the default, drawings with this value never expire.
+   @see NewMarker
+   @since PCC2 2.40.10 */
+void
+game::interface::IFNewCannedMarker(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
+{
+    // ex createCannedMarker (sort-of)
+    using game::map::Drawing;
+
+    args.checkArgumentCount(3, 5);
+
+    // Parse args
+    int32_t x, y, shape;
+    int32_t tag = 0;
+    int32_t expire = -1;
+    if (!checkIntegerArg(x, args.getNext(), 0, MAX_NUMBER)
+        || !checkIntegerArg(y, args.getNext(), 0, MAX_NUMBER)
+        || !checkIntegerArg(shape, args.getNext(), 0, MAX_NUMBER))
+    {
+        return;
+    }
+    checkIntegerArg(tag, args.getNext(), 0, 0xFFFF);
+    checkIntegerArg(expire, args.getNext(), -1, 0x7FFF);
+
+    // Context check
+    Root& r = game::actions::mustHaveRoot(session);
+    Game& g = game::actions::mustHaveGame(session);
+
+    // Obtain configuration
+    const game::config::MarkerOption* opt = r.userConfiguration().getCannedMarker(shape);
+    if (opt == 0) {
+        throw interpreter::Error::rangeError();
+    }
+
+    // Draw it
+    std::auto_ptr<Drawing> drawing(new Drawing(game::map::Point(x, y), Drawing::MarkerDrawing));
+    drawing->setMarkerKind(opt->getMarkerKind());
+    drawing->setColor(opt->getColor());
+    drawing->setTag(tag);
+    drawing->setExpire(expire);
+
+    g.currentTurn().universe().drawings().addNew(drawing.release());
+}
+
 /* @q NewCircle x:Int, y:Int, radius:Int, Optional color:Int, tag:Int, expire:Int (Global Command)
    Create new circle drawing.
    The circle will be centered at %x,%y, and have the specified %radius.
@@ -416,7 +473,7 @@ game::interface::IFCreatePrefOption(interpreter::Process& /*proc*/, game::Sessio
 void
 game::interface::IFNewCircle(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
 {
-    // ex int/if/globalif.h:IFNewCircle
+    // ex int/if/globalif.h:IFNewCircle, globint.pas:Global_NewCircle
     // NewCircle x,y,radius,[color,tag,expire]
     using game::map::Drawing;
 
@@ -465,7 +522,7 @@ game::interface::IFNewCircle(interpreter::Process& /*proc*/, game::Session& sess
 void
 game::interface::IFNewRectangle(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
 {
-    // ex int/if/globalif.h:IFNewRectangle
+    // ex int/if/globalif.h:IFNewRectangle, globint.pas:Global_NewRectangle
     drawLineOrRectangle(session, args, game::map::Drawing::RectangleDrawing, true);
 }
 
@@ -486,7 +543,7 @@ game::interface::IFNewRectangle(interpreter::Process& /*proc*/, game::Session& s
 void
 game::interface::IFNewRectangleRaw(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
 {
-    // ex int/if/globalif.h:IFNewRectangleRaw
+    // ex int/if/globalif.h:IFNewRectangleRaw, globint.pas:Global_NewRectangleRaw
     drawLineOrRectangle(session, args, game::map::Drawing::RectangleDrawing, false);
 }
 
@@ -508,7 +565,7 @@ game::interface::IFNewRectangleRaw(interpreter::Process& /*proc*/, game::Session
 void
 game::interface::IFNewLine(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
 {
-    // ex int/if/globalif.h:IFNewLine
+    // ex int/if/globalif.h:IFNewLine, globint.pas:Global_NewLine
     drawLineOrRectangle(session, args, game::map::Drawing::LineDrawing, true);
 }
 
@@ -529,7 +586,7 @@ game::interface::IFNewLine(interpreter::Process& /*proc*/, game::Session& sessio
 void
 game::interface::IFNewLineRaw(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
 {
-    // ex int/if/globalif.h:IFNewLineRaw
+    // ex int/if/globalif.h:IFNewLineRaw, globint.pas:Global_NewLineRaw
     drawLineOrRectangle(session, args, game::map::Drawing::LineDrawing, false);
 }
 
@@ -545,12 +602,12 @@ game::interface::IFNewLineRaw(interpreter::Process& /*proc*/, game::Session& ses
    if the current turn number is larger than this value, the drawing is automatically deleted.
    Thus, set %expire=0 to make drawings only visible for the current session.
    %expire=-1 is the default, drawings with this value never expire.
-   @see NewCircle, NewLineRaw, NewRectangle, NewMarker
+   @see NewCircle, NewLineRaw, NewRectangle, NewMarker, NewCannedMarker
    @since PCC2 1.99.9, PCC 1.0.5, PCC2 2.40.1 */
 void
 game::interface::IFNewMarker(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
 {
-    // ex int/if/globalif.h:IFNewMarker
+    // ex int/if/globalif.h:IFNewMarker, globint.pas:Global_NewMarker
     // NewMarker x,y,typ[,color,text,tag,expire]
     using game::map::Drawing;
 
@@ -563,7 +620,7 @@ game::interface::IFNewMarker(interpreter::Process& /*proc*/, game::Session& sess
     String_t text;
     if (!checkIntegerArg(x, args.getNext(), 0, MAX_NUMBER)
         || !checkIntegerArg(y, args.getNext(), 0, MAX_NUMBER)
-        || !checkIntegerArg(type, args.getNext(), 0, 7 /*FIXME: NUM_USER_MARKERS-1*/)) {
+        || !checkIntegerArg(type, args.getNext(), 0, Drawing::NUM_USER_MARKERS-1)) {
         return;
     }
     checkIntegerArg(color, args.getNext(), 0, Drawing::NUM_USER_COLORS);
@@ -666,7 +723,7 @@ game::interface::IFHistoryShowTurn(interpreter::Process& /*proc*/, game::Session
 void
 game::interface::IFSaveGame(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
 {
-    // ex int/if/globalif.cc:IFSaveGame
+    // ex int/if/globalif.cc:IFSaveGame, globint.pas:Global_SaveGame
     args.checkArgumentCount(0);
     if (!session.save()) {
         throw interpreter::Error("No game loaded");
@@ -686,6 +743,7 @@ game::interface::IFSaveGame(interpreter::Process& /*proc*/, game::Session& sessi
 void
 game::interface::IFSendMessage(interpreter::Process& /*proc*/, game::Session& session, interpreter::Arguments& args)
 {
+    // ex globint.pas:Global_SendMessage (sort-of; only a stub in PCC1)
     args.checkArgumentCountAtLeast(2);
 
     game::PlayerSet_t receivers;

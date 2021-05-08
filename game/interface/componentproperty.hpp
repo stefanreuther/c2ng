@@ -25,13 +25,18 @@ namespace game { namespace interface {
         icpId
     };
 
+    /** Get property of a component.
+        \param comp Component to query
+        \param icp  Property to query
+        \param list Ship list
+        \return Value */
     afl::data::Value* getComponentProperty(const game::spec::Component& comp,
                                            ComponentProperty icp,
                                            const game::spec::ShipList& list);
 
     void setComponentProperty(game::spec::Component& comp,
                               ComponentProperty icp,
-                              afl::data::Value* value,
+                              const afl::data::Value* value,
                               game::spec::ShipList& list);
     
 } }

@@ -4,24 +4,25 @@
 
 #include <cmath>
 #include "game/interface/shipproperty.hpp"
-#include "interpreter/values.hpp"
-#include "game/turn.hpp"
-#include "game/cargospec.hpp"
-#include "util/math.hpp"
-#include "game/tables/headingname.hpp"
 #include "afl/string/format.hpp"
-#include "interpreter/error.hpp"
-#include "interpreter/arguments.hpp"
-#include "interpreter/indexablevalue.hpp"
 #include "afl/string/parse.hpp"
-#include "game/root.hpp"
-#include "game/spec/mission.hpp"
+#include "game/cargospec.hpp"
+#include "game/exception.hpp"
+#include "game/interface/inboxsubsetvalue.hpp"
 #include "game/map/fleet.hpp"
 #include "game/map/fleetmember.hpp"
-#include "game/spec/engine.hpp"
-#include "game/exception.hpp"
-#include "game/stringverifier.hpp"
 #include "game/map/shippredictor.hpp"
+#include "game/root.hpp"
+#include "game/spec/engine.hpp"
+#include "game/spec/mission.hpp"
+#include "game/stringverifier.hpp"
+#include "game/tables/headingname.hpp"
+#include "game/turn.hpp"
+#include "interpreter/arguments.hpp"
+#include "interpreter/error.hpp"
+#include "interpreter/indexablevalue.hpp"
+#include "interpreter/values.hpp"
+#include "util/math.hpp"
 
 using interpreter::makeStringValue;
 using interpreter::makeIntegerValue;
@@ -129,7 +130,7 @@ namespace {
         }
         return result;
     }
-    
+
     const game::spec::Mission* getShipMission(const game::map::Ship& ship,
                                               const game::Root& root,
                                               const game::spec::ShipList& shipList)
@@ -266,14 +267,6 @@ ShipArrayProperty::store(interpreter::TagNode& /*out*/, afl::io::DataSink& /*aux
     throw interpreter::Error::notSerializable();
 }
 
-
-
-
-
-
-// /** Get ship property.
-//     \param sh Ship to query
-//     \param isp Property to query */
 afl::data::Value*
 game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
                                  afl::string::Translator& tx,                          // needed for names
@@ -585,7 +578,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
            If the ship is at a planet, returns that planet's name and Id.
            In deep space, returns an (X,Y) pair. */
         if (sh.isVisible() && sh.getPosition(pt)) {
-            return makeStringValue(turn->universe().getLocationName(pt, 0, root->hostConfiguration(), root->hostVersion(), tx));
+            return makeStringValue(turn->universe().findLocationName(pt, 0, root->hostConfiguration(), root->hostVersion(), tx));
         } else {
             return 0;
         }
@@ -597,6 +590,13 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
         /* @q Mass:Int (Ship Property)
            Mass of ship (hull, components, and cargo). */
         return makeOptionalIntegerValue(sh.getMass(*shipList));
+     case ispMessages:
+        /* @q Messages:Obj() (Ship Property)
+           If this ship has any messages, this property is non-null and contains an array of messages.
+           Individual messages have the same form as the inbox messages (InMsg()).
+           @see int:index:group:incomingmessageproperty|Incoming Message Properties
+           @since PCC2 2.0.3, PCC2 2.40.10 */
+        return InboxSubsetValue::create(sh.messages().get(), tx, root, game);
      case ispMissionId:
         /* @q Mission$:Int (Ship Property)
            Mission number.
@@ -930,7 +930,7 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
             if (sh.getWaypointDX().isSame(0) && sh.getWaypointDY().isSame(0)) {
                 return makeStringValue("(Location)");
             } else {
-                return makeStringValue(turn->universe().getLocationName(pt, 0, root->hostConfiguration(), root->hostVersion(), tx));
+                return makeStringValue(turn->universe().findLocationName(pt, 0, root->hostConfiguration(), root->hostVersion(), tx));
             }
         } else {
             return 0;
@@ -945,12 +945,8 @@ game::interface::getShipProperty(const game::map::Ship& sh, ShipProperty isp,
     return 0;
 }
 
-// /** Modify ship property.
-//     \param sh Ship to modify
-//     \param isp Property to modify
-//     \param value New value */
 void
-game::interface::setShipProperty(game::map::Ship& sh, ShipProperty isp, afl::data::Value* value,
+game::interface::setShipProperty(game::map::Ship& sh, ShipProperty isp, const afl::data::Value* value,
                                  Root& root,
                                  const game::spec::ShipList& shipList,
                                  Turn& turn)

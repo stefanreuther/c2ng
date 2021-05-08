@@ -6,22 +6,22 @@
 #include "game/actions/preconditions.hpp"
 
 #include "t_game_actions.hpp"
-#include "game/map/ship.hpp"
-#include "game/map/planet.hpp"
-#include "game/exception.hpp"
-#include "game/map/configuration.hpp"
-#include "afl/string/nulltranslator.hpp"
-#include "afl/io/nullfilesystem.hpp"
+#include "afl/charset/utf8charset.hpp"
 #include "afl/io/internaldirectory.hpp"
-#include "game/specificationloader.hpp"
-#include "game/stringverifier.hpp"
+#include "afl/io/nullfilesystem.hpp"
+#include "afl/string/nulltranslator.hpp"
+#include "game/exception.hpp"
+#include "game/game.hpp"
+#include "game/map/configuration.hpp"
+#include "game/map/planet.hpp"
+#include "game/map/ship.hpp"
 #include "game/registrationkey.hpp"
 #include "game/root.hpp"
-#include "game/game.hpp"
+#include "game/specificationloader.hpp"
+#include "game/stringverifier.hpp"
 #include "game/test/registrationkey.hpp"
-#include "game/test/stringverifier.hpp"
 #include "game/test/specificationloader.hpp"
-#include "afl/charset/utf8charset.hpp"
+#include "game/test/stringverifier.hpp"
 
 namespace {
     void addBase(game::map::Planet& planet)
@@ -44,67 +44,72 @@ namespace {
 void
 TestGameActionsPreconditions::testShip()
 {
+    afl::string::NullTranslator tx;
+
     // Uninitialized object throws
     game::map::Ship ship(42);
-    TS_ASSERT_THROWS(game::actions::mustBePlayed(ship), game::Exception);
+    TS_ASSERT_THROWS(game::actions::mustBePlayed(ship, tx), game::Exception);
 
     // ReadOnly is not sufficient
     ship.setPlayability(ship.ReadOnly);
-    TS_ASSERT_THROWS(game::actions::mustBePlayed(ship), game::Exception);
+    TS_ASSERT_THROWS(game::actions::mustBePlayed(ship, tx), game::Exception);
 
     // Playable is sufficient
     ship.setPlayability(ship.Playable);
-    TS_ASSERT_THROWS_NOTHING(game::actions::mustBePlayed(ship));
+    TS_ASSERT_THROWS_NOTHING(game::actions::mustBePlayed(ship, tx));
 }
 
 /** Test planet. */
 void
 TestGameActionsPreconditions::testPlanet()
 {
+    afl::string::NullTranslator tx;
+
     // Uninitialized object throws
     game::map::Planet planet(42);
-    TS_ASSERT_THROWS(game::actions::mustBePlayed(planet), game::Exception);
+    TS_ASSERT_THROWS(game::actions::mustBePlayed(planet, tx), game::Exception);
 
     // ReadOnly is not sufficient
     planet.setPlayability(planet.ReadOnly);
-    TS_ASSERT_THROWS(game::actions::mustBePlayed(planet), game::Exception);
+    TS_ASSERT_THROWS(game::actions::mustBePlayed(planet, tx), game::Exception);
 
     // Playable is sufficient
     planet.setPlayability(planet.Playable);
-    TS_ASSERT_THROWS_NOTHING(game::actions::mustBePlayed(planet));
+    TS_ASSERT_THROWS_NOTHING(game::actions::mustBePlayed(planet, tx));
 }
 
 /** Test base. */
 void
 TestGameActionsPreconditions::testBase()
 {
+    afl::string::NullTranslator tx;
     {
         // Uninitialized object throws
         game::map::Planet planet(42);
-        TS_ASSERT_THROWS(game::actions::mustHavePlayedBase(planet), game::Exception);
+        TS_ASSERT_THROWS(game::actions::mustHavePlayedBase(planet, tx), game::Exception);
 
         // Give it a base. Still not sufficient
         addBase(planet);
-        TS_ASSERT_THROWS(game::actions::mustHavePlayedBase(planet), game::Exception);
+        TS_ASSERT_THROWS(game::actions::mustHavePlayedBase(planet, tx), game::Exception);
 
         // ReadOnly is not sufficient
         planet.setPlayability(planet.ReadOnly);
-        TS_ASSERT_THROWS(game::actions::mustHavePlayedBase(planet), game::Exception);
+        TS_ASSERT_THROWS(game::actions::mustHavePlayedBase(planet, tx), game::Exception);
 
         // Playable is sufficient
         planet.setPlayability(planet.Playable);
-        TS_ASSERT_THROWS_NOTHING(game::actions::mustHavePlayedBase(planet));
+        TS_ASSERT_THROWS_NOTHING(game::actions::mustHavePlayedBase(planet, tx));
     }
 
     {
         // Playable planet throws if it has no base
         game::map::Planet planet(42);
         planet.setPlayability(planet.Playable);
-        TS_ASSERT_THROWS(game::actions::mustHavePlayedBase(planet), game::Exception);
+        TS_ASSERT_THROWS(game::actions::mustHavePlayedBase(planet, tx), game::Exception);
 
         // Add base
         addBase(planet);
-        TS_ASSERT_THROWS_NOTHING(game::actions::mustHavePlayedBase(planet));
+        TS_ASSERT_THROWS_NOTHING(game::actions::mustHavePlayedBase(planet, tx));
     }
 }
 

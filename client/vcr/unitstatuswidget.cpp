@@ -10,19 +10,19 @@
 
 #include <algorithm>
 #include "client/vcr/unitstatuswidget.hpp"
+#include "afl/string/format.hpp"
+#include "gfx/complex.hpp"
 #include "gfx/context.hpp"
 #include "ui/colorscheme.hpp"
-#include "util/translation.hpp"
-#include "gfx/complex.hpp"
-#include "afl/string/format.hpp"
 
 namespace {
     const int GAP = 5;
 }
 
 
-client::vcr::UnitStatusWidget::UnitStatusWidget(ui::Root& root)
+client::vcr::UnitStatusWidget::UnitStatusWidget(ui::Root& root, afl::string::Translator& tx)
     : m_root(root),
+      m_translator(tx),
       m_data(),
       m_status(),
       conn_imageChange()
@@ -107,7 +107,7 @@ client::vcr::UnitStatusWidget::draw(gfx::Canvas& can)
     // Title
     gfx::Context<uint8_t> ctx(can, m_root.colorScheme());
     ctx.setColor(ui::Color_White);
-    ctx.setTextAlign(0, 0);
+    ctx.setTextAlign(gfx::LeftAlign, gfx::TopAlign);
     ctx.setTransparentBackground();
     ctx.useFont(*m_root.provider().getFont(gfx::FontRequest().addSize(1)));
     outTextF(ctx, area.splitY(ctx.getFont()->getCellSize().getY()), m_data.unitName);
@@ -199,18 +199,18 @@ client::vcr::UnitStatusWidget::drawMainColumn(gfx::Canvas& can, gfx::Rectangle r
     drawSolidBar(ctx, gfx::Rectangle(shieldArea.getTopLeft(), gfx::Point(shieldWidth, shieldArea.getHeight())), uint8_t(shieldColor));
 
     ctx.setColor(shield > 50 ? ui::Color_White : shield > 0 ? ui::Color_Gray : ui::Color_Dark);
-    ctx.setTextAlign(1, 1);
-    outText(ctx, shieldArea.getCenter(), afl::string::Format(_("Shields: %d%%").c_str(), shield));
+    ctx.setTextAlign(gfx::CenterAlign, gfx::MiddleAlign);
+    outText(ctx, shieldArea.getCenter(), afl::string::Format(m_translator("Shields: %d%%").c_str(), shield));
     r.consumeY(GAP);
 
     // Damage/Crew
     // ex WVcrDamageWidget::drawContent
     ctx.setColor(ui::Color_White);
-    ctx.setTextAlign(0, 0);
+    ctx.setTextAlign(gfx::LeftAlign, gfx::TopAlign);
     ctx.setTransparentBackground();
-    outTextF(ctx, r.splitY(lineHeight), afl::string::Format(_("Damage: %d%%").c_str(), m_status.damage));
+    outTextF(ctx, r.splitY(lineHeight), afl::string::Format(m_translator("Damage: %d%%").c_str(), m_status.damage));
     if (!m_data.isPlanet) {
-        outTextF(ctx, r.splitY(lineHeight), afl::string::Format(_("Crew: %d").c_str(), m_status.crew));
+        outTextF(ctx, r.splitY(lineHeight), afl::string::Format(m_translator("Crew: %d").c_str(), m_status.crew));
     }
     r.consumeY(GAP);
 }
@@ -223,7 +223,7 @@ client::vcr::UnitStatusWidget::drawWeaponColumn(gfx::Canvas& can, gfx::Rectangle
     afl::base::Ref<gfx::Font> font = m_root.provider().getFont(gfx::FontRequest().addSize(-1));
     ctx.setColor(ui::Color_White);
     ctx.useFont(*font);
-    ctx.setTextAlign(0, 0);
+    ctx.setTextAlign(gfx::LeftAlign, gfx::TopAlign);
     ctx.setTransparentBackground();
     const int lineHeight = font->getCellSize().getY();
 
@@ -270,15 +270,15 @@ client::vcr::UnitStatusWidget::drawWeaponColumn(gfx::Canvas& can, gfx::Rectangle
             drawWeaponBar(ctx, r.splitY(barHeight), m_status.launcherStatus[i].displayed);
         }
         // FIXME: PCC2 uses numToString
-        outTextF(ctx, r.splitY(lineHeight), afl::string::Format(_("Torpedoes: %d").c_str(), m_status.numTorpedoes));
+        outTextF(ctx, r.splitY(lineHeight), afl::string::Format(m_translator("Torpedoes: %d").c_str(), m_status.numTorpedoes));
         r.consumeY(GAP);
     }
 
     // Draw fighters
     // ex WVcrFighterDisplay::drawContent
     if (m_data.numBays > 0) {
-        outTextF(ctx, r.splitY(lineHeight), afl::string::Format(_("%d fighter bay%!1{s%}").c_str(), m_data.numBays));
-        outTextF(ctx, r.splitY(lineHeight), afl::string::Format(_("Fighters: %d").c_str(), m_status.numFighters));
+        outTextF(ctx, r.splitY(lineHeight), afl::string::Format(m_translator("%d fighter bay%!1{s%}").c_str(), m_data.numBays));
+        outTextF(ctx, r.splitY(lineHeight), afl::string::Format(m_translator("Fighters: %d").c_str(), m_status.numFighters));
     }
 }
 

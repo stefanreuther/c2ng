@@ -8,22 +8,24 @@
 #include "afl/charset/codepage.hpp"
 #include "afl/charset/codepagecharset.hpp"
 #include "afl/except/fileproblemexception.hpp"
+#include "afl/io/multidirectory.hpp"
 #include "afl/string/format.hpp"
 #include "afl/string/parse.hpp"
 #include "afl/sys/standardcommandlineparser.hpp"
 #include "game/playerset.hpp"
+#include "game/v3/attachmentunpacker.hpp"
 #include "game/v3/genfile.hpp"
 #include "game/v3/resultfile.hpp"
 #include "game/v3/turnfile.hpp"
 #include "game/v3/unpacker.hpp"
 #include "util/string.hpp"
 #include "version.hpp"
-#include "afl/io/multidirectory.hpp"
 
 using afl::base::Ref;
 using afl::base::Optional;
 using afl::io::Directory;
 using afl::io::FileSystem;
+using afl::string::Format;
 
 namespace {
     const char*const LOG_NAME = "game.v3.unpack";
@@ -48,10 +50,13 @@ game::v3::UnpackApplication::appMain()
     Unpacker theUnpacker(translator(), *specDir);
     theUnpacker.log().addListener(log());
 
+    AttachmentUnpacker detacher;
+
     Optional<String_t> gameDirName;
     Optional<String_t> rootDirName;
     bool playerSetUsed = false;
     bool uncompileTurns = false;
+    bool receiveAttachments = true;
     PlayerSet_t players;
 
     afl::sys::StandardCommandLineParser parser(environment().getCommandLine());
@@ -75,7 +80,11 @@ game::v3::UnpackApplication::appMain()
             } else if (text == "x" || text == "v") {
                 theUnpacker.setVerbose(true);
             } else if (text == "R") {
-                theUnpacker.setAcceptRaceNames(false);
+                detacher.setAcceptableKind(AttachmentUnpacker::RaceNameFile, false);
+            } else if (text == "K") {
+                detacher.setAcceptableKind(AttachmentUnpacker::ConfigurationFile, false);
+            } else if (text == "A") {
+                receiveAttachments = false;
             } else if (text == "u") {
                 uncompileTurns = true;
             } else if (text == "log") {
@@ -83,7 +92,7 @@ game::v3::UnpackApplication::appMain()
             } else if (text == "h" || text == "help") {
                 help();
             } else {
-                errorExit(afl::string::Format(tx("invalid option specified. Use \"%s -h\" for help"), environment().getInvocationName()));
+                errorExit(Format(tx("invalid option specified. Use \"%s -h\" for help"), environment().getInvocationName()));
             }
         } else {
             int n;
@@ -112,7 +121,7 @@ game::v3::UnpackApplication::appMain()
     for (int i = 1; i <= game::v3::structures::NUM_PLAYERS; ++i) {
         if (!playerSetUsed || players.contains(i)) {
             bool opened = false;
-            String_t fileName = afl::string::Format("player%d.rst", i);
+            String_t fileName = Format("player%d.rst", i);
 
             try {
                 // Open and unpack the file
@@ -120,18 +129,18 @@ game::v3::UnpackApplication::appMain()
                 opened = true;
 
                 ResultFile rstFile(*rst, translator());
-                log().write(afl::sys::Log::Info, LOG_NAME, afl::string::Format(tx("=== Unpacking player %d... ==="), i));
+                log().write(afl::sys::Log::Info, LOG_NAME, Format(tx("=== Unpacking player %d... ==="), i));
 
                 theUnpacker.prepare(rstFile, i);
 
                 // Check turn file
                 if (uncompileTurns) {
-                    String_t trnName = afl::string::Format("player%d.trn", i);
+                    String_t trnName = Format("player%d.trn", i);
                     afl::base::Ptr<afl::io::Stream> trn = gameDir->openFileNT(trnName, FileSystem::OpenRead);
                     if (trn.get() != 0) {
-                        TurnFile trnFile(theUnpacker.charset(), *trn);
+                        TurnFile trnFile(theUnpacker.charset(), tx, *trn);
                         if (validateTurn(i, rstFile, trnFile)) {
-                            log().write(afl::sys::Log::Info, LOG_NAME, afl::string::Format(tx("Using turn file %s."), trnName));
+                            log().write(afl::sys::Log::Info, LOG_NAME, Format(tx("Using turn file %s."), trnName));
                             theUnpacker.turnProcessor().handleTurnFile(trnFile, theUnpacker.charset());
                         }
                     }
@@ -139,6 +148,11 @@ game::v3::UnpackApplication::appMain()
 
                 theUnpacker.finish(*gameDir, rstFile);
                 ++count;
+
+                // Load attachments
+                if (receiveAttachments) {
+                    detacher.loadDirectory(*gameDir, i, log(), tx);
+                }
             }
             catch (afl::except::FileProblemException& e) {
                 // If no player set was given, and the exception occurs during opening the RST, it is not fatal.
@@ -154,10 +168,16 @@ game::v3::UnpackApplication::appMain()
         }
     }
 
-    if (!count) {
-        errorExit(afl::string::Format(tx("no result files found. Use \"%s -h\" for help"), environment().getInvocationName()));
+    detacher.dropUnselectedAttachments();
+    detacher.dropUnchangedFiles(*gameDir, log(), tx);
+    if (detacher.getNumAttachments() != 0) {
+        detacher.saveFiles(*gameDir, log(), tx);
+        log().write(afl::sys::Log::Info, LOG_NAME, Format(tx("Unpacked %d new attachment%!1{s%}."), detacher.getNumAttachments()));
     }
 
+    if (!count) {
+        errorExit(Format(tx("no result files found. Use \"%s -h\" for help"), environment().getInvocationName()));
+    }
     exit(retval);
 }
 
@@ -185,24 +205,26 @@ game::v3::UnpackApplication::help()
 {
     afl::io::TextWriter& out = standardOutput();
     afl::string::Translator& tx = translator();
-    out.writeLine(afl::string::Format(tx("PCC2 Result File Unpacker v%s - (c) 2010-2020 Stefan Reuther"), PCC2_VERSION));
+    out.writeLine(Format(tx("PCC2 Result File Unpacker v%s - (c) 2010-2021 Stefan Reuther"), PCC2_VERSION));
     out.writeLine();
-    out.writeLine(afl::string::Format(tx("Usage:\n"
-                                         "  %s [-h]\n"
-                                         "  %$0s [-wdatnfdx] [PLAYER] [GAMEDIR]\n\n"
-                                         "%s\n"
-                                         "Report bugs to <Streu@gmx.de>"),
-                                      environment().getInvocationName(),
-                                      util::formatOptions(tx("Options:\n"
-                                                             "-w\tCreate Windows (3.5) format [default]\n"
-                                                             "-d\tCreate DOS (3.0) format\n"
-                                                             "-a\tIgnore version 3.5 part of RST\n"
-                                                             "-t\tCreate TARGETx.EXT files\n"
-                                                             "-n\tDo not attempt to fix host-side errors\n"
-                                                             "-f\tForce unpack of files with failing checksums\n"
-                                                             "-x\tIncrease verbosity\n"
-                                                             "-R\tRefuse race name updates\n"
-                                                             "-u\tUnpack turn files as well\n"
-                                                             "--log=CONFIG\tSet logger configuration\n"))));
+    out.writeLine(Format(tx("Usage:\n"
+                            "  %s [-h]\n"
+                            "  %$0s [-OPTIONS] [PLAYER] [GAMEDIR]\n\n"
+                            "%s\n"
+                            "Report bugs to <Streu@gmx.de>"),
+                         environment().getInvocationName(),
+                         util::formatOptions(tx("Options:\n"
+                                                "-w\tCreate Windows (3.5) format [default]\n"
+                                                "-d\tCreate DOS (3.0) format\n"
+                                                "-a\tIgnore version 3.5 part of RST\n"
+                                                "-t\tCreate TARGETx.EXT files\n"
+                                                "-n\tDo not attempt to fix host-side errors\n"
+                                                "-f\tForce unpack of files with failing checksums\n"
+                                                "-x\tIncrease verbosity\n"
+                                                "-R\tRefuse race name updates\n"
+                                                "-K\tRefuse configuration file updates\n"
+                                                "-A\tDo not receive any attachments\n"
+                                                "-u\tUnpack turn files as well\n"
+                                                "--log=CONFIG\tSet logger configuration\n"))));
     exit(0);
 }

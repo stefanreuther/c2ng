@@ -9,10 +9,17 @@
 
 namespace ui { namespace widgets {
 
-// /** Icon box. Provides a horizontally-scrolling box of variable-width, same-height
-//     icons. Users must derive from this class and implement the methods that provide
-//     icon metrics and appearance. This class manages draw arbitration and mouse event
-//     handling: one of the icons will be selected, and one may be hovered by the mouse. */
+    /** Icon box.
+        Provides a horizontally-scrolling box of variable-width, same-height icons.
+        Users must derive from this class and implement the methods that provide icon metrics and appearance.
+        This class manages draw arbitration and mouse event handling: one of the icons will be selected, and one may be hovered by the mouse.
+        If a new icon is selected, the widget will scroll with an animation.
+
+        There are two policies for selection; see setChangeOnClick():
+        - default: pressing a mouse button on an item immediately selects the new icon
+        - change-on-click: only clicking (pressing+releasing) the mouse button changes
+
+        Note that as of 20210220, despite its name, this class does not use the ui::icons::Icon abstraction which it predates. */
     class IconBox : public SimpleWidget {
      public:
         /** State of an item. */
@@ -31,11 +38,20 @@ namespace ui { namespace widgets {
         // virtual ui::layout::Info getLayoutInfo() const; --> child
         virtual bool handleKey(util::Key_t key, int prefix);
         virtual bool handleMouse(gfx::Point pt, MouseButtons_t pressedButtons);
-        
+
         // IconBox:
+
+        /** Set current item.
+            Also adjusts display so that the item is actually visible.
+            \param nr Item index [0,getNumberOfItems()). */
         void setCurrentItem(size_t nr);
+
+        /** Get current item, 0-based index.
+            \return index */
         size_t getCurrentItem() const;
 
+        /** Set change-on-click feature.
+            \param enable Flag */
         void setChangeOnClick(bool enable);
 
         /** Signal: selection changed.
@@ -58,6 +74,9 @@ namespace ui { namespace widgets {
             \param state Item state */
         virtual void drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state) = 0;
 
+        /** Handle structure change.
+            Reinitializes this iconbox after a complete change to the content, and selects a new current item.
+            \param n New index */
         void handleStructureChange(size_t n);
 
      private:

@@ -35,7 +35,7 @@ game::interface::RichTextValue::clone() const
 }
 
 game::interface::RichTextValue::Ref_t
-game::interface::RichTextValue::get()
+game::interface::RichTextValue::get() const
 {
     return m_value;
 }

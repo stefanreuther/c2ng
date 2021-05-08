@@ -1,15 +1,17 @@
 /**
   *  \file util/helpindex.hpp
+  *  \brief Class util::HelpIndex
   */
 #ifndef C2NG_UTIL_HELPINDEX_HPP
 #define C2NG_UTIL_HELPINDEX_HPP
 
 #include <vector>
 #include <map>
-#include "afl/string/string.hpp"
-#include "afl/io/stream.hpp"
 #include "afl/container/ptrvector.hpp"
 #include "afl/io/filesystem.hpp"
+#include "afl/io/stream.hpp"
+#include "afl/string/string.hpp"
+#include "afl/string/translator.hpp"
 #include "afl/sys/loglistener.hpp"
 
 namespace util {
@@ -28,9 +30,9 @@ namespace util {
 
         Users can then obtain a list of file positions to combine into a help page:
         - if multiple pages are provided with different priorities, those are concatenated in increasing priority order.
-          Pages that have no priority is given are treated as priority 100.
+          Pages that have no priority are treated as priority 100.
         - if multiple pages are provided with the same priority, the one from the file added last is used
-          (this is the case that the help file is replaced (overlaid) by a different file). */
+          (this is the case that the help file is replaced by a different file, e.g. in a new language). */
     class HelpIndex {
      public:
         /** Type alias: file position. */
@@ -89,8 +91,9 @@ namespace util {
             \param page [in] Name of help page to find
             \param out  [out] Result goes here
             \param fs   Handle to file system
-            \param log  Logger */
-        void find(String_t page, NodeVector_t& out, afl::io::FileSystem& fs, afl::sys::LogListener& log);
+            \param log  Logger
+            \param tx   Translator */
+        void find(String_t page, NodeVector_t& out, afl::io::FileSystem& fs, afl::sys::LogListener& log, afl::string::Translator& tx);
 
      private:
         struct Page {
@@ -100,7 +103,7 @@ namespace util {
         std::multimap<String_t, Node> m_nodes;
         int m_counter;
 
-        void scanNewFiles(afl::io::FileSystem& fs, afl::sys::LogListener& log);
+        void scanNewFiles(afl::io::FileSystem& fs, afl::sys::LogListener& log, afl::string::Translator& tx);
         void scanFile(const File& file, afl::io::FileSystem& fs);
     };
 

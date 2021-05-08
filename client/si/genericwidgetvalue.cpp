@@ -26,7 +26,7 @@ client::si::GenericWidgetValue::lookup(const afl::data::NameQuery& name, Propert
 }
 
 void
-client::si::GenericWidgetValue::set(PropertyIndex_t index, afl::data::Value* value)
+client::si::GenericWidgetValue::set(PropertyIndex_t index, const afl::data::Value* value)
 {
     if (const interpreter::NameTable* pe = m_names.at(index)) {
         switch (GenericWidgetDomain(pe->domain)) {

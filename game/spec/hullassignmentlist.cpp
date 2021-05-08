@@ -34,7 +34,7 @@ void
 game::spec::HullAssignmentList::add(int player, int position, int hullNr)
 {
     // FIXME: do we need the ability to set a hullNr to 0?
-    if (player > 0 && position > 0 && hullNr > 0) {
+    if (player > 0 && player <= MAX_PLAYERS && position > 0 && hullNr > 0) {
         if (int(m_mapping.size()) <= player) {
             m_mapping.resize(player+1);
         }
@@ -104,6 +104,19 @@ game::spec::HullAssignmentList::getMaxIndex(const game::config::HostConfiguratio
     } else {
         return int(m_mapping[mappedPlayer].size() - 1);
     }
+}
+
+// Get set of players that can build a hull.
+game::PlayerSet_t
+game::spec::HullAssignmentList::getPlayersForHull(const game::config::HostConfiguration& config, int hullNr) const
+{
+    PlayerSet_t result;
+    for (int i = 1, n = int(m_mapping.size()); i < n; ++i) {
+        if (getIndexFromHull(config, i, hullNr) != 0) {
+            result += i;
+        }
+    }
+    return result;
 }
 
 int

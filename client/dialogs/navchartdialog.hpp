@@ -4,10 +4,12 @@
 #ifndef C2NG_CLIENT_DIALOGS_NAVCHARTDIALOG_HPP
 #define C2NG_CLIENT_DIALOGS_NAVCHARTDIALOG_HPP
 
+#include "client/si/outputstate.hpp"
+#include "client/si/userside.hpp"
+#include "game/session.hpp"
 #include "game/types.hpp"
 #include "ui/root.hpp"
 #include "util/requestsender.hpp"
-#include "game/session.hpp"
 
 namespace client { namespace dialogs {
 
@@ -40,6 +42,7 @@ namespace client { namespace dialogs {
     /** Result of navigation chart dialog.
         The dialog produces one such structure as output. */
     struct NavChartResult {
+        // Dialog result
         enum Result {
             Canceled,                ///< Dialog was cancelled.
             Location,                ///< User selected a map location.
@@ -50,8 +53,11 @@ namespace client { namespace dialogs {
         game::map::Point position;   ///< Location (always set unless result is Canceled).
         game::Id_t shipId;           ///< Ship Id (set for Ship, Chunnel).
 
+        // Script-side result
+        client::si::OutputState outputState;
+
         NavChartResult()
-            : result(Canceled), position(), shipId(0)
+            : result(Canceled), position(), shipId(0), outputState()
             { }
     };
 
@@ -59,14 +65,14 @@ namespace client { namespace dialogs {
     /** Show navigation chart widget.
         \param result     [out] dialog result placed here
         \param in         [in/out] initial/updated dialog state
+        \param us         [in] UserSide
         \param root       [in] UI root
-        \param gameSender [in] Game sender
         \param tx         [in] Translator
         \see NavChartState, NavChartResult */
     void doNavigationChart(NavChartResult& result,
                            NavChartState& in,
+                           client::si::UserSide& us,
                            ui::Root& root,
-                           util::RequestSender<game::Session> gameSender,
                            afl::string::Translator& tx);
 
 } }

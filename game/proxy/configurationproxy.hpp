@@ -25,8 +25,36 @@ namespace game { namespace proxy {
             \param link Synchronisation */
         util::NumberFormatter getNumberFormatter(WaitIndicator& link);
 
+        /** Get integer option.
+            \param link Synchronisation
+            \param desc Option descriptor
+            \return option value */
+        int32_t getOption(WaitIndicator& link, const game::config::IntegerOptionDescriptor& desc);
+
+        /** Get string option.
+            \param link Synchronisation
+            \param desc Option descriptor
+            \return option value */
+        String_t getOption(WaitIndicator& link, const game::config::StringOptionDescriptor& desc);
+
+        /** Set integer option.
+            \param desc Option descriptor
+            \param value New value */
+        void setOption(const game::config::IntegerOptionDescriptor& desc, int32_t value);
+
+        /** Set string option.
+            \param desc Option descriptor
+            \param value New value */
+        void setOption(const game::config::StringOptionDescriptor& desc, String_t value);
+
      private:
         util::RequestSender<Session> m_gameSender;
+
+        template<typename Desc, typename Value>
+        void getOptionTemplate(WaitIndicator& link, const Desc& desc, Value& result);
+
+        template<typename Desc, typename Value>
+        void setOptionTemplate(const Desc& desc, const Value& value);
     };
 
 } }

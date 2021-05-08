@@ -14,7 +14,6 @@
 #include "afl/net/redis/stringlistkey.hpp"
 #include "afl/net/redis/stringsetkey.hpp"
 #include "afl/string/format.hpp"
-#include "util/translation.hpp"
 
 using afl::net::redis::HashKey;
 using afl::net::redis::Key;
@@ -172,7 +171,8 @@ namespace {
 void
 server::dbexport::exportDatabase(afl::io::TextWriter& out,
                                  afl::net::CommandHandler& dbConnection,
-                                 afl::sys::CommandLineParser& commandLine)
+                                 afl::sys::CommandLineParser& commandLine,
+                                 afl::string::Translator& tx)
 {
     // ex planetscentral/dbexport/exdb.cc:doDatabaseExport
     bool withDelete = false;
@@ -183,7 +183,7 @@ server::dbexport::exportDatabase(afl::io::TextWriter& out,
             if (p == "delete") {
                 withDelete = true;
             } else {
-                throw std::runtime_error(_("invalid option specified"));
+                throw std::runtime_error(tx("invalid option specified"));
             }
         } else {
             if (withDelete) {

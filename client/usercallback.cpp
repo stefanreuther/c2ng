@@ -3,19 +3,18 @@
   */
 
 #include "client/usercallback.hpp"
-#include "ui/widgets/inputline.hpp"
-#include "afl/data/stringvalue.hpp"
 #include "afl/base/deleter.hpp"
-#include "ui/window.hpp"
-#include "ui/widgets/statictext.hpp"
 #include "afl/data/access.hpp"
-#include "ui/layout/vbox.hpp"
-#include "ui/group.hpp"
-#include "ui/widgets/button.hpp"
-#include "ui/layout/hbox.hpp"
-#include "ui/spacer.hpp"
+#include "afl/data/stringvalue.hpp"
 #include "ui/eventloop.hpp"
-#include "util/translation.hpp"
+#include "ui/group.hpp"
+#include "ui/layout/hbox.hpp"
+#include "ui/layout/vbox.hpp"
+#include "ui/spacer.hpp"
+#include "ui/widgets/inputline.hpp"
+#include "ui/widgets/standarddialogbuttons.hpp"
+#include "ui/widgets/statictext.hpp"
+#include "ui/window.hpp"
 
 namespace {
     class RegisterTask : public util::Request<game::browser::Session> {
@@ -49,9 +48,10 @@ namespace {
 }
 
 
-client::UserCallback::UserCallback(ui::Root& root, util::RequestSender<game::browser::Session> sender)
+client::UserCallback::UserCallback(ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::browser::Session> sender)
     : m_receiver(root.engine().dispatcher(), *this),
       m_root(root),
+      m_translator(tx),
       m_sender(sender)
 {
     m_sender.postNewRequest(new RegisterTask(m_receiver.getSender()));
@@ -109,18 +109,11 @@ client::UserCallback::askInput(String_t title,
     }
 
     // OK/Cancel buttons
-    ui::Group& g(del.addNew(new ui::Group(ui::layout::HBox::instance5)));
-    g.add(del.addNew(new ui::Spacer()));
-
-    ui::widgets::Button& okButton(del.addNew(new ui::widgets::Button(_("OK"), util::Key_Return, m_root)));
-    ui::widgets::Button& cancelButton(del.addNew(new ui::widgets::Button(_("Cancel"), util::Key_Escape, m_root)));
-    g.add(okButton);
-    g.add(cancelButton);
-    window.add(g);
+    ui::widgets::StandardDialogButtons& btn = del.addNew(new ui::widgets::StandardDialogButtons(m_root, m_translator));
+    window.add(btn);
 
     ui::EventLoop loop(m_root);
-    okButton.sig_fire.addNewClosure(loop.makeStop(1));
-    cancelButton.sig_fire.addNewClosure(loop.makeStop(0));
+    btn.addStop(loop);
 
     window.pack();
     m_root.centerWidget(window);

@@ -7,6 +7,7 @@
 
 #include "afl/charset/charset.hpp"
 #include "afl/io/stream.hpp"
+#include "afl/string/translator.hpp"
 #include "interpreter/exporter/fieldlist.hpp"
 #include "interpreter/exporter/format.hpp"
 #include "util/charsetfactory.hpp"
@@ -28,8 +29,9 @@ namespace interpreter { namespace exporter {
 
         /** Set character set by name.
             \param name Name
+            \param tx Translator (for exception message)
             \throw std::runtime_error Name is not a known charset */
-        void setCharsetByName(const String_t& name);
+        void setCharsetByName(const String_t& name, afl::string::Translator& tx);
 
         /** Get character set index.
             \return index */
@@ -45,8 +47,9 @@ namespace interpreter { namespace exporter {
 
         /** Set format by name.
             \param name Name
+            \param tx Translator (for exception message)
             \throw std::runtime_error Name is not a known format */
-        void setFormatByName(const String_t& name);
+        void setFormatByName(const String_t& name, afl::string::Translator& tx);
 
         /** Get format.
             \return format */
@@ -59,8 +62,9 @@ namespace interpreter { namespace exporter {
 
         /** Read configuration from stream.
             \param in Stream
+            \param tx Translator (for exception message)
             \throw afl::except::FileProblemException Syntax or I/O error */
-        void load(afl::io::Stream& in);
+        void load(afl::io::Stream& in, afl::string::Translator& tx);
 
      private:
         util::CharsetFactory::Index_t m_charsetIndex;

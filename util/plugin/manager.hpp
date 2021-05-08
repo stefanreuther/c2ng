@@ -83,6 +83,11 @@ namespace util { namespace plugin {
         afl::sys::LogListener& log()
             { return m_log; }
 
+        /** Access translator.
+            \return translator */
+        afl::string::Translator& translator()
+            { return m_translator; }
+
      private:
         afl::container::PtrVector<Plugin> m_plugins;
         afl::string::Translator& m_translator;

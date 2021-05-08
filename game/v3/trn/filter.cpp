@@ -15,7 +15,6 @@
 #include "game/v3/trn/parseexception.hpp"
 #include "game/v3/trn/stringfilter.hpp"
 #include "util/stringparser.hpp"
-#include "util/translation.hpp"
 
 namespace game { namespace v3 { namespace trn { namespace {
 
@@ -76,30 +75,30 @@ namespace game { namespace v3 { namespace trn { namespace {
      *  Parser
      */
 
-    const Filter& parseFilter1(util::StringParser& p, afl::base::Deleter& h);
+    const Filter& parseFilter1(util::StringParser& p, afl::base::Deleter& h, afl::string::Translator& tx);
 
     /** Parse string.
         Consumes everything up to and including the delimiter \c ch. */
-    const Filter& parseString(util::StringParser& p, afl::base::Deleter& h, char ch)
+    const Filter& parseString(util::StringParser& p, afl::base::Deleter& h, afl::string::Translator& tx, char ch)
     {
         const char ntbs[] = { ch, '\0' };
         String_t value;
         p.parseDelim(ntbs, value);
         if (!p.parseCharacter(ch)) {
-            throw ParseException(_("unterminated string constant"));
+            throw ParseException(tx("Unterminated string constant"));
         }
         return h.addNew(new StringFilter(value));
     }
 
     /** Parse upper bound.
         If there's a "-", parse the upper bound and update \c high. */
-    void parseUpperBound(util::StringParser& p, int& low, int& high)
+    void parseUpperBound(util::StringParser& p, afl::string::Translator& tx, int& low, int& high)
     {
         if (p.parseCharacter('-')) {
             int i;
             parseWhitespace(p);
             if (!p.parseInt(i) || i < low) {
-                throw ParseException(_("Invalid upper bound after \"#\""));
+                throw ParseException(tx("Invalid upper bound after \"-\""));
             }
             high = i;
         }
@@ -107,40 +106,40 @@ namespace game { namespace v3 { namespace trn { namespace {
 
     /** Parse elementary expression.
         <pre>parseSingle := '(' parseFilter1 ')' | string | '#'? number ('-' number)? | identifier '*'?</pre> */
-    const Filter& parseSingle(util::StringParser& p, afl::base::Deleter& h)
+    const Filter& parseSingle(util::StringParser& p, afl::base::Deleter& h, afl::string::Translator& tx)
     {
         // ex game/un-trnflt.cc:parseSingle
         int i;
         parseWhitespace(p);
         if (p.parseCharacter('(')) {
             // parenized expression
-            const Filter& result = parseFilter1(p, h);
+            const Filter& result = parseFilter1(p, h, tx);
             parseWhitespace(p);
             if (!p.parseCharacter(')')) {
-                throw ParseException(_("\")\" expected"));
+                throw ParseException(tx("Expected \")\""));
             }
             return result;
         } else if (p.parseCharacter('\'')) {
             // single-quoted string
-            return parseString(p, h, '\'');
+            return parseString(p, h, tx, '\'');
         } else if (p.parseCharacter('"')) {
             // double-quoted string
-            return parseString(p, h, '"');
+            return parseString(p, h, tx, '"');
         } else if (p.parseCharacter('#')) {
             // index / index range
             parseWhitespace(p);
             if (!p.parseInt(i) || i <= 0) {
-                throw ParseException(_("Command index expected after \"#\""));
+                throw ParseException(tx("Expected command index after \"#\""));
             }
             parseWhitespace(p);
             int low = i, high = i;
-            parseUpperBound(p, low, high);
+            parseUpperBound(p, tx, low, high);
             return h.addNew(new IndexFilter(low, high));
         } else if (p.parseInt(i)) {
             // Id / Id range
             parseWhitespace(p);
             int low = i, high = i;
-            parseUpperBound(p, low, high);
+            parseUpperBound(p, tx, low, high);
             return h.addNew(new IdFilter(low, high));
         } else {
             String_t text;
@@ -155,7 +154,7 @@ namespace game { namespace v3 { namespace trn { namespace {
                     return h.addNew(new NameFilter(text, wild));
                 }
             } else {
-                throw ParseException(_("Invalid expression"));
+                throw ParseException(tx("Invalid expression"));
             }
         }
     }
@@ -163,78 +162,77 @@ namespace game { namespace v3 { namespace trn { namespace {
 
     /** Parse almost-elementary expression.
         <pre>parseEx ::= parseSingle+</pre> */
-    const Filter& parseEx(util::StringParser& p, afl::base::Deleter& h)
+    const Filter& parseEx(util::StringParser& p, afl::base::Deleter& h, afl::string::Translator& tx)
     {
-        const Filter* result = &parseSingle(p, h);
+        const Filter* result = &parseSingle(p, h, tx);
         while (1) {
             parseWhitespace(p);
             if (!isSingle(p)) {
                 break;
             }
-            result = &h.addNew(new AndFilter(*result, parseSingle(p, h)));
+            result = &h.addNew(new AndFilter(*result, parseSingle(p, h, tx)));
         }
         return *result;
     }
 
     /** Parse "and" expression.
         <pre>parseAnd ::= '!'? parseEx</pre> */
-    const Filter& parseAnd(util::StringParser& p, afl::base::Deleter& h)
+    const Filter& parseAnd(util::StringParser& p, afl::base::Deleter& h, afl::string::Translator& tx)
     {
         // ex game/un-trnflt.cc:parseAnd
         parseWhitespace(p);
         if (p.parseCharacter('!')) {
-            return h.addNew(new NegateFilter(parseAnd(p, h)));
+            return h.addNew(new NegateFilter(parseAnd(p, h, tx)));
         } else {
-            return parseEx(p, h);
+            return parseEx(p, h, tx);
         }
     }
 
     /** Parse "or" expression.
         <pre>parseOr ::= parseAnd ('&' parseAnd)*</pre> */
-    const Filter& parseOr(util::StringParser& p, afl::base::Deleter& h)
+    const Filter& parseOr(util::StringParser& p, afl::base::Deleter& h, afl::string::Translator& tx)
     {
         // ex game/un-trnflt.cc:parseOr
-        const Filter* result = &parseAnd(p, h);
+        const Filter* result = &parseAnd(p, h, tx);
         while (1) {
             parseWhitespace(p);
             if (!p.parseCharacter('&')) {
                 break;
             }
-            result = &h.addNew(new AndFilter(*result, parseAnd(p, h)));
+            result = &h.addNew(new AndFilter(*result, parseAnd(p, h, tx)));
         }
         return *result;
     }
 
     /** Parse filter expression, back-end.
         <pre>parseFilter1 ::= parseOr ('|' parseOr)*</pre> */
-    const Filter& parseFilter1(util::StringParser& p, afl::base::Deleter& h)
+    const Filter& parseFilter1(util::StringParser& p, afl::base::Deleter& h, afl::string::Translator& tx)
     {
         // ex game/un-trnflt.cc:parseFilter1
-        const Filter* result = &parseOr(p, h);
+        const Filter* result = &parseOr(p, h, tx);
         while (1) {
             parseWhitespace(p);
             if (!p.parseCharacter('|')) {
                 break;
             }
-            result = &h.addNew(new OrFilter(*result, parseOr(p, h)));
+            result = &h.addNew(new OrFilter(*result, parseOr(p, h, tx)));
         }
         return *result;
     }
-
 
 } } } }
 
 
 // Parse filter expression.
 const game::v3::trn::Filter&
-game::v3::trn::Filter::parse(String_t text, afl::base::Deleter& deleter)
+game::v3::trn::Filter::parse(String_t text, afl::base::Deleter& deleter, afl::string::Translator& tx)
 {
     // ex game/un-trnflt.cc:parseFilter
     util::StringParser p(text);
-    const Filter& result = parseFilter1(p, deleter);
+    const Filter& result = parseFilter1(p, deleter, tx);
     parseWhitespace(p);
     if (!p.parseEnd()) {
-        throw ParseException(_("Expression incorrectly terminated"));
+        throw ParseException(tx("Expression incorrectly terminated"));
     }
     return result;
 }

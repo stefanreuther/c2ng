@@ -32,7 +32,7 @@ TestGameMapBeamupShipTransfer::testIt()
     sh.setName("Scotty");
     afl::string::NullTranslator tx;
 
-    game::map::BeamUpShipTransfer testee(sh, h.shipList(), h.turn(), h.config());
+    game::map::BeamUpShipTransfer testee(sh, h.shipList(), h.turn(), h.config(), tx);
 
     /*
      *  Ship has a fuel tank of 100 with 10N (=100 max).
@@ -44,6 +44,8 @@ TestGameMapBeamupShipTransfer::testIt()
     TS_ASSERT_EQUALS(testee.getMaxAmount(Element::Duranium), 60);
     TS_ASSERT_EQUALS(testee.getMaxAmount(Element::Money), 10000);
     TS_ASSERT_EQUALS(testee.getName(tx), "Scotty");
+    TS_ASSERT_EQUALS(testee.getInfo1(tx), "");
+    TS_ASSERT_EQUALS(testee.getInfo2(tx), "");
 
     // Add some cargo
     testee.change(Element::Tritanium, 20);
@@ -81,12 +83,13 @@ TestGameMapBeamUpShipTransfer::testParse()
     const int SHIP_ID = 10;
     const int SHIP_OWNER = 6;
 
+    afl::string::NullTranslator tx;
     SimpleTurn h;
     Ship& sh = h.addShip(SHIP_ID, SHIP_OWNER, Object::Playable);
 
     CommandExtra::create(h.turn()).create(SHIP_OWNER).addCommand(Command::BeamUp, SHIP_ID, "C30 M10");
 
-    game::map::BeamUpShipTransfer testee(sh, h.shipList(), h.turn(), h.config());
+    game::map::BeamUpShipTransfer testee(sh, h.shipList(), h.turn(), h.config(), tx);
 
     // Initial changes still zero
     TS_ASSERT_EQUALS(testee.getChange(Element::Colonists), 0);
@@ -115,12 +118,12 @@ TestGameMapBeamUpShipTransfer::testCommand()
     const int SHIP_OWNER = 6;
 
     // Environment/Ship
+    afl::string::NullTranslator tx;
     SimpleTurn h;
     Ship& sh = h.addShip(SHIP_ID, SHIP_OWNER, Object::Playable);
     sh.setName("Scotty");
     sh.setCargo(Element::Neutronium, 10);
     sh.setMission(35, 0, 0);                         // default Beam Up Multi
-    afl::string::NullTranslator tx;
     h.config()[game::config::HostConfiguration::AllowBeamUpClans].set(0);
 
     // Command
@@ -128,7 +131,7 @@ TestGameMapBeamUpShipTransfer::testCommand()
     cc.addCommand(Command::BeamUp, SHIP_ID, "n30");
 
     // Testee
-    game::map::BeamUpShipTransfer testee(sh, h.shipList(), h.turn(), h.config());
+    game::map::BeamUpShipTransfer testee(sh, h.shipList(), h.turn(), h.config(), tx);
 
     // Verify
     TS_ASSERT(!testee.getFlags().contains(game::CargoContainer::UnloadTarget));

@@ -5,8 +5,9 @@
 #ifndef C2NG_GAME_MAP_SELECTIONS_HPP
 #define C2NG_GAME_MAP_SELECTIONS_HPP
 
-#include "game/map/selectionvector.hpp"
 #include "afl/base/signal.hpp"
+#include "game/map/selectionvector.hpp"
+#include "game/ref/list.hpp"
 
 namespace game { namespace map {
 
@@ -24,7 +25,11 @@ namespace game { namespace map {
         Whenever an operation is attempted on the whole selection layer,
         it is synchronized both ways.
 
-        Layers are numbered starting from 0, see getNumLayers(). */
+        Layers are numbered starting from 0, see getNumLayers().
+
+        Some functions allow addressing a layer by reference, that is, you can pass
+        - an absolute layer number [0,getNumLayers())
+        - a relation (CurrentLayer, NextLayer, PreviousLayer) */
     class Selections {
      public:
         /** Object type for a query. */
@@ -32,6 +37,37 @@ namespace game { namespace map {
             Ship,               ///< Marked ships.
             Planet              ///< Marked planets.
         };
+
+        /** Layer relation. Used to create relative layer references. */
+        enum LayerRelation {
+            NamedLayer,         ///< Layer given by number.
+            CurrentLayer,       ///< Current layer.
+            NextLayer,          ///< Next layer.
+            PreviousLayer       ///< Previous layer.
+        };
+
+        /** Layer reference, absolute or relative. */
+        class LayerReference {
+         public:
+            /** Make absolute reference. */
+            LayerReference(size_t layer)
+                : m_relation(NamedLayer), m_layer(layer)
+                { }
+
+            /** Make relative reference. */
+            LayerReference(LayerRelation relation)
+                : m_relation(relation), m_layer(0)
+                { }
+
+            /** Resolve reference to absolute index.
+                \param sel Selections object (parent) */
+            size_t resolve(const Selections& sel) const;
+
+         private:
+            LayerRelation m_relation;
+            size_t m_layer;
+        };
+
 
         /** Constructor.
             Makes a blank object where everything is unmarked. */
@@ -72,16 +108,23 @@ namespace game { namespace map {
             Replaces \c targetLayer's content with the result of the given expression.
             In the expression, opCurrent refers to the current layer (getCurrentLayer()).
             \param compiledExpression Compiled expression (see interpreter::SelectionExpression)
-            \param targetLayer        Target layer (accessible as opCurrent in expression,  [0, getNumLayers()))
-            \param u                  Universe */
-        void executeCompiledExpression(const String_t& compiledExpression, size_t targetLayer, Universe& u);
+            \param targetLayer        Target layer
+            \param u                  Universe (to update when targetLayer is the current layer) */
+        void executeCompiledExpression(const String_t& compiledExpression, LayerReference targetLayer, Universe& u);
 
         /** Execute compiled expression on all layers.
             Replaces all layers' content with the result of the given expression.
             In the expression, opCurrent refers to the respective layer.
             \param compiledExpression Compiled expression (see interpreter::SelectionExpression)
-            \param u                  Universe */
+            \param u                  Universe (to update when targetLayer is the current layer) */
         void executeCompiledExpressionAll(const String_t& compiledExpression, Universe& u);
+
+        /** Mark objects given as list.
+            \param targetLayer Target layer
+            \param list        List of objects to process
+            \param mark        true to mark, false to unmark
+            \param u           Universe (to update when targetLayer is the current layer) */
+        void markList(LayerReference targetLayer, const game::ref::List& list, bool mark, Universe& u);
 
         /** Get current layer number.
             \return layer [0, getNumLayers()) */
@@ -90,9 +133,9 @@ namespace game { namespace map {
         /** Set current layer number.
             Stores the current selections from the in the original layer,
             and updates the universe with the new ones.
-            \param newLayer New layer [0, getNumLayers())
+            \param newLayer New layer
             \param u        Universe */
-        void setCurrentLayer(size_t newLayer, Universe& u);
+        void setCurrentLayer(LayerReference newLayer, Universe& u);
 
         /** Get SelectionVector for one area.
             \param k     Object type

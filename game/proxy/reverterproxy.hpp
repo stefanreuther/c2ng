@@ -11,7 +11,6 @@
 #include "game/ref/userlist.hpp"
 #include "game/session.hpp"
 #include "util//requestsender.hpp"
-#include "util/slaverequestsender.hpp"
 
 namespace game { namespace proxy {
 
@@ -52,7 +51,8 @@ namespace game { namespace proxy {
 
      private:
         struct Trampoline;
-        util::SlaveRequestSender<Session, Trampoline> m_sender;
+        class TrampolineFromSession;
+        util::RequestSender<Trampoline> m_sender;
     };
 
 } }

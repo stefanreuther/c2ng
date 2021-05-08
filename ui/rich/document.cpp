@@ -3,8 +3,8 @@
   */
 
 #include <climits>
+#include <memory>
 #include "ui/rich/document.hpp"
-#include "ui/rich/blockobject.hpp"
 #include "afl/base/staticassert.hpp"
 #include "util/skincolor.hpp"
 #include "gfx/complex.hpp"
@@ -51,9 +51,9 @@ namespace {
 }
 
 
-ui::rich::Document::BlockItem::BlockItem(Kind k, std::auto_ptr<BlockObject> obj)
+ui::rich::Document::BlockItem::BlockItem(Kind k, ui::icons::Icon& obj)
     : kind(k),
-      pos(gfx::Point(), obj->getSize()),
+      pos(gfx::Point(), obj.getSize()),
       obj(obj)
 { }
 
@@ -224,6 +224,7 @@ const ui::rich::Document::LinkId_t ui::rich::Document::nil;
 // /** Default constructor. Makes a blank document. */
 ui::rich::Document::Document(gfx::ResourceProvider& provider)
     : m_provider(provider),
+      m_deleter(),
       content(),
       last_chunk(),
       block_objs(),
@@ -250,6 +251,12 @@ ui::rich::Document::provider()
     return m_provider;
 }
 
+afl::base::Deleter&
+ui::rich::Document::deleter()
+{
+    return m_deleter;
+}
+
 // /** Clear this document. Resets everything except for the page width. */
 void
 ui::rich::Document::clear()
@@ -264,6 +271,7 @@ ui::rich::Document::clear()
     bo_index[0] = bo_index[1] = 0;
     bo_width[0] = bo_width[1] = 0;
     bo_height[0] = bo_height[1] = 0;
+    m_deleter.clear();
 }
 
 // /** Set this document's page width.
@@ -502,7 +510,7 @@ ui::rich::Document::addPreformatted(const util::rich::Text& text)
 // /** Add floating object. The object will be placed at the left or
 //     right border. Text flows around it. */
 void
-ui::rich::Document::addFloatObject(std::auto_ptr<BlockObject> obj, bool left)
+ui::rich::Document::addFloatObject(ui::icons::Icon& obj, bool left)
 {
     // ex RichDocument::addFloatObject
     static_assert(int(true)  == int(BlockItem::Left), "left");
@@ -522,7 +530,7 @@ ui::rich::Document::addFloatObject(std::auto_ptr<BlockObject> obj, bool left)
 // /** Add centered object. The object will be placed in the center of
 //     the page. It will interrupt the text flow. */
 void
-ui::rich::Document::addCenterObject(std::auto_ptr<BlockObject> obj)
+ui::rich::Document::addCenterObject(ui::icons::Icon& obj)
 {
     // ex RichDocument::addCenterObject
     /* Finish current line */
@@ -657,7 +665,7 @@ ui::rich::Document::draw(gfx::Context<util::SkinColor::Color>& ctx, gfx::Rectang
         gfx::Rectangle pos(obj.pos);
         pos.moveBy(gfx::Point(area.getLeftX(), area.getTopY() - skipY));
         if (pos.isIntersecting(area)) {
-            obj.obj->draw(ctx, pos);
+            obj.obj.draw(ctx, pos, ButtonFlags_t());
         }
     }
 }

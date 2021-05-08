@@ -1,5 +1,6 @@
 /**
   *  \file server/talk/render/render.cpp
+  *  \brief Rendering
   */
 
 #include <memory>
@@ -8,14 +9,14 @@
 #include "server/talk/message.hpp"
 #include "server/talk/parse/bblexer.hpp"
 #include "server/talk/parse/bbparser.hpp"
+#include "server/talk/render/bbrenderer.hpp"
 #include "server/talk/render/context.hpp"
 #include "server/talk/render/htmlrenderer.hpp"
+#include "server/talk/render/mailrenderer.hpp"
 #include "server/talk/render/options.hpp"
 #include "server/talk/render/textrenderer.hpp"
 #include "server/talk/textnode.hpp"
 #include "server/talk/user.hpp"
-#include "server/talk/render/mailrenderer.hpp"
-#include "server/talk/render/bbrenderer.hpp"
 
 namespace server { namespace talk { namespace render { namespace {
 

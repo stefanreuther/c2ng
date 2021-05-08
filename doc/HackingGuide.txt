@@ -201,9 +201,8 @@ Communication and Locking
       so they can post a callback.
 
   (b) To execute something stateful, such as "register for an event
-      signal and give me information", create the event listener as a
-      slave object. Create a SlaveRequestSender and use that to
-      communicate with the slave object.
+      signal and give me information", you can use makeTemporary()
+      to make a temporary trampoline object to keep your state.
 
 
 
@@ -521,7 +520,7 @@ Naming
 
   m_fooBar         member
 
-  fooBar()         function; sometimes also used for locals
+  fooBar()         function
 
   As per common convention, the directory name matches the namespace
   of a component, and the file name matches the class name, if any.

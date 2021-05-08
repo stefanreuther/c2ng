@@ -26,9 +26,9 @@ game::Player*
 game::PlayerList::create(int id)
 {
     if (id >= 0) {
-        // FIXME: give PtrVector a resize()?
-        while (id >= static_cast<int>(m_players.size())) {
-            m_players.pushBackNew(0);
+        size_t requiredSize = static_cast<size_t>(id)+1;
+        if (m_players.size() < requiredSize) {
+            m_players.resize(requiredSize);
         }
         if (m_players[id] == 0) {
             m_players.replaceElementNew(id, new Player(id));

@@ -8,6 +8,12 @@
 #include "client/widgets/classicvcrinfo.hpp"
 #include "util/string.hpp"
 
+namespace {
+    const size_t NUM_UNITS = 2;
+    const size_t NUM_LINES_PER_UNIT = game::vcr::NUM_LINES_PER_UNIT;
+}
+
+
 /*
  * Layout:
  *     [large]      Heading    [normal] type
@@ -25,15 +31,6 @@
  *     [normal]     Result             'Tab'
  */
 
-client::widgets::ClassicVcrInfo::Data::Data()
-{
-    for (size_t i = 0; i < NUM_UNITS; ++i) {
-        for (size_t j = 0; j < NUM_LINES_PER_UNIT; ++j) {
-            color[i][j] = util::SkinColor::Static;
-        }
-    }
-}
-
 client::widgets::ClassicVcrInfo::ClassicVcrInfo(ui::Root& root)
     : Widget(),
       m_root(root),
@@ -45,6 +42,10 @@ client::widgets::ClassicVcrInfo::ClassicVcrInfo(ui::Root& root)
     addChild(m_leftButton, 0);
     addChild(m_rightButton, 0);
     addChild(m_tabButton, 0);
+
+    m_leftButton.sig_fire.add(&sig_left, &afl::base::Signal<void(int)>::raise);
+    m_rightButton.sig_fire.add(&sig_right, &afl::base::Signal<void(int)>::raise);
+    m_tabButton.sig_fire.add(&sig_tab, &afl::base::Signal<void(int)>::raise);
 }
 
 client::widgets::ClassicVcrInfo::~ClassicVcrInfo()
@@ -76,32 +77,34 @@ client::widgets::ClassicVcrInfo::draw(gfx::Canvas& can)
 
     // First line
     ctx.useFont(*largeFont);
-    ctx.setTextAlign(0, 0);
-    outTextF(ctx, gfx::Point(x, y), w, m_data.text[Heading]);
+    ctx.setTextAlign(gfx::LeftAlign, gfx::TopAlign);
+    outTextF(ctx, gfx::Point(x, y), w, m_data.heading);
 
     ctx.useFont(*normalFont);
-    ctx.setTextAlign(2, 0);
+    ctx.setTextAlign(gfx::RightAlign, gfx::TopAlign);
     {
-        String_t text = m_data.text[Type];
-        util::addListItem(text, ", ", m_data.text[Position]);
+        String_t text = m_data.algorithmName;
+        util::addListItem(text, ", ", m_data.position);
         outText(ctx, gfx::Point(x+w, y), text);
     }
-    ctx.setTextAlign(0, 0);
+    ctx.setTextAlign(gfx::LeftAlign, gfx::TopAlign);
 
     y += largeHeight;
     y += normalHeight/2;
 
     // Two warriors
-    for (size_t i = 0; i < NUM_UNITS; ++i) {
+    for (size_t i = 0; i < NUM_UNITS && i < m_data.units.size(); ++i) {
+        const game::vcr::ObjectInfo& info = m_data.units[i];
+
         ctx.useFont(*boldFont);
-        ctx.setColor(m_data.color[i][0]);
-        outTextF(ctx, gfx::Point(x, y), w, m_data.info[i][0]);
+        ctx.setColor(info.color[0]);
+        outTextF(ctx, gfx::Point(x, y), w, info.text[0]);
         y += boldHeight;
 
         for (size_t j = 1; j < NUM_LINES_PER_UNIT; ++j) {
             ctx.useFont(*normalFont);
-            ctx.setColor(m_data.color[i][j]);
-            outTextF(ctx, gfx::Point(x + indent, y), w - indent, m_data.info[i][j]);
+            ctx.setColor(info.color[j]);
+            outTextF(ctx, gfx::Point(x + indent, y), w - indent, info.text[j]);
             y += normalHeight;
         }
 
@@ -111,7 +114,7 @@ client::widgets::ClassicVcrInfo::draw(gfx::Canvas& can)
     // Result
     ctx.useFont(*normalFont);
     ctx.setColor(util::SkinColor::Static);
-    outTextF(ctx, gfx::Point(x, y), w, m_data.text[Result]);
+    outTextF(ctx, gfx::Point(x, y), w, m_data.resultSummary);
 
     defaultDrawChildren(can);
 }
@@ -173,7 +176,7 @@ client::widgets::ClassicVcrInfo::handleMouse(gfx::Point pt, MouseButtons_t press
 }
 
 void
-client::widgets::ClassicVcrInfo::setData(const Data& data)
+client::widgets::ClassicVcrInfo::setData(const Data_t& data)
 {
     m_data = data;
     requestRedraw();

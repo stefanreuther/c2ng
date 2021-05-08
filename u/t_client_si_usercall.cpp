@@ -13,7 +13,7 @@ TestClientSiUserCall::testIt()
 {
     class Tester : public client::si::UserCall {
      public:
-        virtual void handle(client::si::UserSide& /*ui*/, client::si::Control& /*ctl*/)
+        virtual void handle(client::si::Control& /*ctl*/)
             { }
     };
     Tester t;

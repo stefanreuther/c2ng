@@ -4,9 +4,10 @@
 #ifndef C2NG_GAME_REF_USERLIST_HPP
 #define C2NG_GAME_REF_USERLIST_HPP
 
-#include "util/skincolor.hpp"
+#include "game/map/object.hpp"
 #include "game/reference.hpp"
 #include "game/session.hpp"
+#include "util/skincolor.hpp"
 
 namespace game { namespace ref {
 
@@ -27,14 +28,15 @@ namespace game { namespace ref {
             String_t name;
             Reference reference;
             bool marked;
-            util::SkinColor::Color color;
+            game::map::Object::Playability playability : 8;
+            util::SkinColor::Color color : 8;
 
-            Item(Type type, String_t name, Reference ref, bool marked, util::SkinColor::Color color)
-                : type(type), name(name), reference(ref), marked(marked), color(color)
+            Item(Type type, String_t name, Reference ref, bool marked, game::map::Object::Playability playability, util::SkinColor::Color color)
+                : type(type), name(name), reference(ref), marked(marked), playability(playability), color(color)
                 { }
 
             bool operator==(const Item& other) const
-                { return type == other.type && name == other.name && reference == other.reference && marked == other.marked && color == other.color; }
+                { return type == other.type && name == other.name && reference == other.reference && marked == other.marked && playability == other.playability && color == other.color; }
             bool operator!=(const Item& other) const
                 { return !operator==(other); }
         };
@@ -45,7 +47,7 @@ namespace game { namespace ref {
 
         void clear();
 
-        void add(Type type, String_t name, Reference ref, bool marked, util::SkinColor::Color color);
+        void add(Type type, String_t name, Reference ref, bool marked, game::map::Object::Playability playability, util::SkinColor::Color color);
 
         void add(const List& list, Session& session, const SortPredicate& divi, const SortPredicate& subdivi);
 
@@ -63,6 +65,8 @@ namespace game { namespace ref {
         bool operator!=(const UserList& other) const;
 
         // FIXME: some synchronizing primitives
+
+        static Item makeReferenceItem(Reference r, Session& session);
 
      private:
         std::vector<Item> m_items;

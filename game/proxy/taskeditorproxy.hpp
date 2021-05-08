@@ -13,7 +13,6 @@
 #include "util/requestdispatcher.hpp"
 #include "util/requestreceiver.hpp"
 #include "util/requestsender.hpp"
-#include "util/slaverequestsender.hpp"
 
 namespace game { namespace proxy {
 
@@ -55,8 +54,9 @@ namespace game { namespace proxy {
 
      private:
         class Trampoline;
+        class TrampolineFromSession;
         util::RequestReceiver<TaskEditorProxy> m_reply;
-        util::SlaveRequestSender<Session, Trampoline> m_trampoline;
+        util::RequestSender<Trampoline> m_trampoline;
     };
 
 } }

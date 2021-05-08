@@ -85,7 +85,7 @@ ui::widgets::FocusIterator::handleKey(util::Key_t key, int /*prefix*/)
         // Regular keys will have to do one step.
         // Page/Home keys go to end, and only do steps if the end widget is not accessible.
         bool mustGo = true;
-        if ((m_flags & (Page | Home)) != 0) {
+        if ((type & (Page | Home)) != 0) {
             // Direction has been set for the following walk already (Forward=go to top and then forward).
             if (direction == Forward) {
                 index = 0;

@@ -14,6 +14,7 @@
 #include "afl/base/deleter.hpp"
 #include "afl/io/xml/node.hpp"
 #include "afl/io/xml/nodereader.hpp"
+#include "afl/string/translator.hpp"
 #include "client/downlink.hpp"
 #include "client/help.hpp"
 #include "ui/eventloop.hpp"
@@ -30,9 +31,9 @@
 #include "ui/widgets/quit.hpp"
 #include "ui/widgets/scrollbar.hpp"
 #include "ui/window.hpp"
-#include "util/translation.hpp"
 
 using afl::io::xml::Nodes_t;
+using game::proxy::WaitIndicator;
 
 namespace {
     const char*const TOC_PAGE = "toc";
@@ -43,17 +44,17 @@ namespace {
             : m_gameSender(gameSender)
             { }
 
-        void loadHelpPage(client::Downlink& link, afl::io::xml::Nodes_t& result, String_t pageName)
+        void loadHelpPage(WaitIndicator& link, Nodes_t& result, String_t pageName)
             {
                 class Query : public util::Request<game::Session> {
                  public:
-                    Query(afl::io::xml::Nodes_t& result, String_t pageName)
+                    Query(Nodes_t& result, String_t pageName)
                         : m_result(result), m_pageName(pageName)
                         { }
                     virtual void handle(game::Session& session)
                         { client::loadHelpPage(session, m_result, m_pageName); }
                  private:
-                    afl::io::xml::Nodes_t& m_result;
+                    Nodes_t& m_result;
                     String_t m_pageName;
                 };
 
@@ -69,7 +70,7 @@ namespace {
 
     class HelpDialog {
      public:
-        HelpDialog(ui::Root& root, HelpProxy& proxy);
+        HelpDialog(ui::Root& root, afl::string::Translator& tx, HelpProxy& proxy);
 
         void setPage(String_t pageName, Nodes_t& pageContent);
         void run();
@@ -86,6 +87,7 @@ namespace {
         ui::rich::DocumentView m_docView;
         ui::widgets::Button m_btnBack;
         ui::widgets::Button m_btnContent;
+        afl::string::Translator& m_translator;
         String_t m_pageName;
         Nodes_t m_pageContent;
         HelpProxy& m_proxy;
@@ -111,14 +113,15 @@ namespace {
     };
 }
 
-HelpDialog::HelpDialog(ui::Root& root, HelpProxy& proxy)
+HelpDialog::HelpDialog(ui::Root& root, afl::string::Translator& tx, HelpProxy& proxy)
     : m_root(root),
       m_loop(root),
       m_docView(root.provider().getFont(gfx::FontRequest())->getCellSize().scaledBy(40, 20),
                 ui::rich::DocumentView::fl_Help,
                 root.provider()),
-      m_btnBack(_("Back"), util::Key_Backspace, m_root),
-      m_btnContent(_("T - Content"), 't', m_root),
+      m_btnBack(tx("Back"), util::Key_Backspace, m_root),
+      m_btnContent(tx("T - Content"), 't', m_root),
+      m_translator(tx),
       m_pageName(),
       m_pageContent(),
       m_proxy(proxy),
@@ -148,7 +151,7 @@ HelpDialog::run()
     //   HBox
     //     UIButton...
     afl::base::Deleter del;
-    ui::Window& win = del.addNew(new ui::Window(_("Help"), m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
+    ui::Window& win = del.addNew(new ui::Window(m_translator("Help"), m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
 
     /* We use instance5 for g1 to have a little room between the document and the scrollbar.
        Normally, we don't have room between scrollee and scrollbar, but here it serves as
@@ -160,7 +163,7 @@ HelpDialog::run()
     g1.add(del.addNew(new ui::widgets::Scrollbar(m_docView, m_root)));
     m_docView.sig_linkClick.add(this, &HelpDialog::onLinkClick);
 
-    ui::widgets::Button& btnClose = del.addNew(new ui::widgets::Button(_("Close"), util::Key_Escape, m_root));
+    ui::widgets::Button& btnClose = del.addNew(new ui::widgets::Button(m_translator("Close"), util::Key_Escape, m_root));
     btnClose.sig_fire.addNewClosure(m_loop.makeStop(0));
 
     g2.add(m_btnBack);
@@ -223,7 +226,7 @@ HelpDialog::onGoTo()
     // ex WHelpDialog::onGoTo
     ui::widgets::InputLine input(4096, 20, m_root);
     input.setText(m_pageName);
-    if (input.doStandardDialog(_("Go to"), _("Enter page name:"))) {
+    if (input.doStandardDialog(m_translator("Go to"), m_translator("Enter page name:"), m_translator)) {
         if (m_pageName != input.getText()) {
             onLinkClick(input.getText());
         }
@@ -300,8 +303,8 @@ HelpDialog::pushHistory()
 void
 HelpDialog::loadPage(String_t pageName)
 {
-    client::Downlink link(m_root);
-    afl::io::xml::Nodes_t pageContent;
+    client::Downlink link(m_root, m_translator);
+    Nodes_t pageContent;
     m_proxy.loadHelpPage(link, pageContent, pageName);
     setPage(pageName, pageContent);
     renderContent();
@@ -313,16 +316,16 @@ HelpDialog::loadPage(String_t pageName)
  */
 
 void
-client::dialogs::doHelpDialog(ui::Root& root, util::RequestSender<game::Session> gameSender, String_t pageName)
+client::dialogs::doHelpDialog(ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::Session> gameSender, String_t pageName)
 {
     // ex doHelp
     HelpProxy proxy(gameSender);
-    Downlink link(root);
+    Downlink link(root, tx);
 
-    afl::io::xml::Nodes_t pageContent;
+    Nodes_t pageContent;
     proxy.loadHelpPage(link, pageContent, pageName);
 
-    HelpDialog dlg(root, proxy);
+    HelpDialog dlg(root, tx, proxy);
     dlg.setPage(pageName, pageContent);
     dlg.run();
 }

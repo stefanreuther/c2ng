@@ -89,6 +89,8 @@ namespace game {
     const int MAX_AUTOBUILD_SPEED = 100;      ///< Maximum speed for autobuild.
     const int MAX_AUTOBUILD_GOAL  = 1000;     ///< Maximum goal for autobuild. Displayed as "Max".
 
+    // FIXME: do we need to go fully dynamic here for Nu?
+    const int MAX_BASE_MISSION = 6;
 }
 
 #endif

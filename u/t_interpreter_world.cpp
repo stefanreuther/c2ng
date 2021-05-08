@@ -6,22 +6,24 @@
 #include "interpreter/world.hpp"
 
 #include "t_interpreter.hpp"
-#include "afl/io/nullfilesystem.hpp"
-#include "afl/sys/log.hpp"
-#include "interpreter/values.hpp"
-#include "interpreter/specialcommand.hpp"
-#include "afl/io/internaldirectory.hpp"
 #include "afl/io/constmemorystream.hpp"
+#include "afl/io/internaldirectory.hpp"
+#include "afl/io/nullfilesystem.hpp"
+#include "afl/string/nulltranslator.hpp"
+#include "afl/sys/log.hpp"
+#include "interpreter/specialcommand.hpp"
+#include "interpreter/values.hpp"
 
 /** Simple tests. */
 void
 TestInterpreterWorld::testIt()
 {
     afl::io::NullFileSystem fs;
+    afl::string::NullTranslator tx;
     afl::sys::Log log;
 
     // Create world
-    interpreter::World w(log, fs);
+    interpreter::World w(log, tx, fs);
     const interpreter::World& cw = w;
 
     // Verify sub-object accessors
@@ -43,6 +45,8 @@ TestInterpreterWorld::testIt()
 
     TS_ASSERT_EQUALS(&w.fileSystem(),  &fs);
     TS_ASSERT_EQUALS(&w.logListener(), &log);
+    TS_ASSERT_EQUALS(&w.translator(),  &tx);
+    TS_ASSERT_EQUALS(&cw.translator(), &tx);
 
     // Global values
     afl::data::NameMap::Index_t ix = w.globalPropertyNames().getIndexByName("A");
@@ -79,8 +83,9 @@ TestInterpreterWorld::testSpecial()
 
     // Create world
     afl::io::NullFileSystem fs;
+    afl::string::NullTranslator tx;
     afl::sys::Log log;
-    interpreter::World w(log, fs);
+    interpreter::World w(log, tx, fs);
 
     // Initial state
     TS_ASSERT(w.lookupSpecialCommand("SC") == 0);
@@ -114,8 +119,9 @@ void
 TestInterpreterWorld::testLoad()
 {
     afl::io::NullFileSystem fs;
+    afl::string::NullTranslator tx;
     afl::sys::Log log;
-    interpreter::World w(log, fs);
+    interpreter::World w(log, tx, fs);
 
     // Verify
     TS_ASSERT_EQUALS(&w.fileSystem(), &fs);

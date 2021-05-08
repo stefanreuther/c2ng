@@ -8,6 +8,7 @@
 #include "t_game_map.hpp"
 #include "game/test/simpleturn.hpp"
 #include "afl/string/nulltranslator.hpp"
+#include "game/test/shiplist.hpp"
 
 using game::Element;
 using game::map::Object;
@@ -19,11 +20,21 @@ void
 TestGameMapShipStorage::testIt()
 {
     SimpleTurn h;
+    game::test::initPListBeams(h.shipList());
+    game::test::initPListTorpedoes(h.shipList());
+
     Ship& sh = h.addShip(10, 5, Object::Playable);
     sh.setName("Jason Statham");
+    sh.setFriendlyCode(String_t("abc"));
+    sh.setDamage(5);
+    sh.setBeamType(3);
+    sh.setNumBeams(4);
+    sh.setTorpedoType(5);
+    sh.setNumLaunchers(6);
+    h.hull().setName("REMMLER");
     afl::string::NullTranslator tx;
 
-    game::map::ShipStorage testee(sh, h.shipList());
+    game::map::ShipStorage testee(sh, h.shipList(), tx);
 
     /*
      *  Ship has a fuel tank of 100 with 10N (=100 max).
@@ -35,6 +46,8 @@ TestGameMapShipStorage::testIt()
     TS_ASSERT_EQUALS(testee.getMaxAmount(Element::Duranium), 60);
     TS_ASSERT_EQUALS(testee.getMaxAmount(Element::Money), 10000);
     TS_ASSERT_EQUALS(testee.getName(tx), "Jason Statham");
+    TS_ASSERT_EQUALS(testee.getInfo1(tx), "REMMLER, 4\xC3\x97""Desintegrator, 6\xC3\x97""Photon Torp");
+    TS_ASSERT_EQUALS(testee.getInfo2(tx), "FCode: \"abc\", Damage: 5%");
 
     // Add some cargo
     testee.change(Element::Tritanium, 10);

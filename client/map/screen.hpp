@@ -20,6 +20,7 @@
 #include "ui/group.hpp"
 #include "ui/widget.hpp"
 #include "util/requestsender.hpp"
+#include "game/proxy/drawingproxy.hpp"
 
 namespace client { namespace map {
 
@@ -63,10 +64,12 @@ namespace client { namespace map {
         bool handleMouseRelative(gfx::Point pt, MouseButtons_t pressedButtons);
 
         // Control:
-        virtual void handleStateChange(client::si::UserSide& ui, client::si::RequestLink2 link, client::si::OutputState::Target /*target*/);
-        virtual void handleEndDialog(client::si::UserSide& ui, client::si::RequestLink2 link, int /*code*/);
-        virtual void handlePopupConsole(client::si::UserSide& ui, client::si::RequestLink2 link);
-        virtual void handleSetViewRequest(client::si::UserSide& ui, client::si::RequestLink2 link, String_t name, bool withKeymap);
+        virtual void handleStateChange(client::si::RequestLink2 link, client::si::OutputState::Target target);
+        virtual void handleEndDialog(client::si::RequestLink2 link, int code);
+        virtual void handlePopupConsole(client::si::RequestLink2 link);
+        virtual void handleSetViewRequest(client::si::RequestLink2 link, String_t name, bool withKeymap);
+        virtual void handleUseKeymapRequest(client::si::RequestLink2 link, String_t name, int prefix);
+        virtual void handleOverlayMessageRequest(client::si::RequestLink2 link, String_t text);
         virtual client::si::ContextProvider* createContextProvider();
 
         // Location::Listener:
@@ -84,12 +87,22 @@ namespace client { namespace map {
         void drawObjectList(gfx::Canvas& can);
 
         void setNewOverlay(Layer layer, Overlay* pOverlay);
+        void removeOverlay(Overlay* pOverlay);
 
         void run(client::si::InputState& in, client::si::OutputState& out);
+
+        // FIXME: should this be here?
+        game::proxy::DrawingProxy& drawingProxy()
+            { return m_drawingProxy; }
+        util::RequestSender<game::Session> gameSender()
+            { return m_gameSender; }
+        client::map::Widget& mapWidget()
+            { return m_widget; }
 
      private:
         class SharedState;
         class Properties;
+        class PropertiesFromSession;
 
         ui::Root& m_root;
         util::RequestSender<game::Session> m_gameSender;
@@ -106,8 +119,9 @@ namespace client { namespace map {
         game::proxy::ReferenceListProxy m_refListProxy;
         game::proxy::KeymapProxy m_keymapProxy;
         game::proxy::ReferenceObserverProxy m_observerProxy;
+        game::proxy::DrawingProxy m_drawingProxy;
 
-        util::SlaveRequestSender<game::Session, Properties> m_propertyProxy;
+        util::RequestSender<Properties> m_propertyProxy;
 
         game::ref::UserList m_refList;
         game::Reference m_currentObject;

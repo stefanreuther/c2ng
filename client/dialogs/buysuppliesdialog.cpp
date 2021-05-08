@@ -31,7 +31,7 @@ namespace {
             : m_root(root),
               m_loop(root),
               m_value(0),
-              m_select(root, m_value, 0, maxSuppliesToBuy, 10),
+              m_select(root, tx, m_value, 0, maxSuppliesToBuy, 10),
               m_translator(tx)
             { }
 
@@ -40,18 +40,18 @@ namespace {
                 // ex WUndoSellSuppliesDialog::init
                 afl::base::Deleter del;
                 ui::Window& win = del.addNew(new ui::Window(m_translator("Undo Supply Sale"), m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
-                win.add(del.addNew(new ui::rich::StaticText(m_translator(Format("You can buy up to %d supplies. (This is the amount of supplies "
-                                                                                "you already sold this turn but have not used otherwise.)\n"
-                                                                                "Enter amount to buy:",
-                                                                                // FIXME: use formatNumber()
-                                                                                m_select.getMax())),
+                win.add(del.addNew(new ui::rich::StaticText(String_t(Format(m_translator("You can buy up to %d supplies. (This is the amount of supplies "
+                                                                                         "you already sold this turn but have not used otherwise.)\n"
+                                                                                         "Enter amount to buy:"),
+                                                                            // FIXME: use formatNumber()
+                                                                            m_select.getMax())),
                                                             400,
                                                             m_root.provider())));
                 win.add(m_select);
 
-                ui::Widget& helper = del.addNew(new client::widgets::HelpWidget(m_root, gameSender, "pcc2:sellsup"));
+                ui::Widget& helper = del.addNew(new client::widgets::HelpWidget(m_root, m_translator, gameSender, "pcc2:sellsup"));
 
-                StandardDialogButtons& btns = del.addNew(new StandardDialogButtons(m_root));
+                StandardDialogButtons& btns = del.addNew(new StandardDialogButtons(m_root, m_translator));
                 btns.addStop(m_loop);
                 btns.addHelp(helper);
                 win.add(btns);
@@ -82,14 +82,14 @@ client::dialogs::doBuySuppliesDialog(ui::Root& root, util::RequestSender<game::S
 {
     // ex WUndoSellSuppliesDialog::doDialog
     ConvertSuppliesProxy proxy(gameSender);
-    Downlink link(root);
+    Downlink link(root, tx);
 
     ConvertSuppliesProxy::Status st = proxy.init(link, planetId, reservedMoney, reservedSupplies);
     if (st.maxSuppliesToBuy == 0) {
         ui::dialogs::MessageBox(tx("You cannot buy supplies. Either you have not yet sold any this turn, "
                                    "or you have already spent the money."),
                                 tx("Undo Supply Sale"),
-                                root).doOkDialog();
+                                root).doOkDialog(tx);
     } else {
         BuySuppliesDialog dlg(root, st.maxSuppliesToBuy, tx);
         if (dlg.run(gameSender)) {

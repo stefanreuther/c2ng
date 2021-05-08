@@ -23,7 +23,7 @@ TestGfxContext::testIt()
 
     // Base test
     testee.setLineThickness(3);
-    testee.setTextAlign(2, 1);
+    testee.setTextAlign(gfx::RightAlign, gfx::MiddleAlign);
     TS_ASSERT_EQUALS(testee.getLineThickness(), 3);
     TS_ASSERT_EQUALS(testee.getTextAlign(), gfx::Point(2, 1));
     TS_ASSERT_EQUALS(&testee.canvas(), &*can);

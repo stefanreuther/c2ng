@@ -10,6 +10,7 @@
 #include "afl/io/directory.hpp"
 #include "afl/io/stream.hpp"
 #include "afl/string/string.hpp"
+#include "afl/string/translator.hpp"
 #include "afl/sys/loglistener.hpp"
 #include "game/registrationkey.hpp"
 
@@ -54,10 +55,11 @@ namespace game { namespace v3 {
         /** Initialize by loading files from a directory.
             \param dir Directory to read.
             \param log Logger.
+            \param tx Translator
 
             Change to PCC2: the "verbose" parameter has been replaced by a "log" parameter.
             To get non-verbose output, pass a Log instance with no listeners. */
-        void initFromDirectory(afl::io::Directory& dir, afl::sys::LogListener& log);
+        void initFromDirectory(afl::io::Directory& dir, afl::sys::LogListener& log, afl::string::Translator& tx);
 
         /** Save to given stream.
             Used to create a key file from given content.
@@ -82,7 +84,7 @@ namespace game { namespace v3 {
      private:
         void initFromFizz(const uint32_t (&data)[KEY_SIZE_WORDS]);
         void parseFizz(afl::io::Stream& s);
-        void parseKey(afl::io::Stream& s);
+        void parseKey(afl::io::Stream& s, afl::string::Translator& tx);
 
         String_t decode(size_t start) const;
 

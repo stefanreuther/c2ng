@@ -51,8 +51,10 @@ namespace {
         virtual size_t getNumItems();
         virtual bool isItemAccessible(size_t n);
         virtual int getItemHeight(size_t n);
-        virtual int getHeaderHeight();
+        virtual int getHeaderHeight() const;
+        virtual int getFooterHeight() const;
         virtual void drawHeader(gfx::Canvas& can, gfx::Rectangle area);
+        virtual void drawFooter(gfx::Canvas& can, gfx::Rectangle area);
         virtual void drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state);
         virtual void handlePositionChange(gfx::Rectangle& oldPosition);
         virtual ui::layout::Info getLayoutInfo() const;
@@ -120,7 +122,7 @@ namespace {
 
                 win.add(g);
 
-                ui::widgets::StandardDialogButtons& btns = del.addNew(new ui::widgets::StandardDialogButtons(m_root));
+                ui::widgets::StandardDialogButtons& btns = del.addNew(new ui::widgets::StandardDialogButtons(m_root, m_translator));
                 btns.addStop(m_loop);
                 win.add(btns);
 
@@ -206,9 +208,15 @@ BuildQueueList::getItemHeight(size_t /*n*/)
 }
 
 int
-BuildQueueList::getHeaderHeight()
+BuildQueueList::getHeaderHeight() const
 {
     return m_root.provider().getFont(gfx::FontRequest())->getLineHeight();
+}
+
+int
+BuildQueueList::getFooterHeight() const
+{
+    return 0;
 }
 
 void
@@ -235,6 +243,10 @@ BuildQueueList::drawHeader(gfx::Canvas& can, gfx::Rectangle area)
 }
 
 void
+BuildQueueList::drawFooter(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
+{ }
+
+void
 BuildQueueList::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state)
 {
     // Prepare
@@ -255,7 +267,7 @@ BuildQueueList::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, Ite
 
         // Name
         gfx::Rectangle nameArea = area.splitX(ACTION_EMS * em);
-        ctx.setTextAlign(0, 0);
+        ctx.setTextAlign(gfx::LeftAlign, gfx::TopAlign);
         ctx.useFont(*normalFont);
         ctx.setColor(util::SkinColor::Static);
         outTextF(ctx, nameArea.splitY(normalFont->getLineHeight()), e.actionName);
@@ -276,7 +288,7 @@ BuildQueueList::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, Ite
             if (e.queuePosition != 0) {
                 ctx.useFont(*normalFont);
                 ctx.setColor(util::SkinColor::Static);
-                ctx.setTextAlign(2, 0);
+                ctx.setTextAlign(gfx::RightAlign, gfx::TopAlign);
                 outTextF(ctx, queueArea, afl::string::Format("%d", e.queuePosition));
             }
             area.consumeX(GAP_PX);
@@ -294,14 +306,14 @@ BuildQueueList::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, Ite
                 ctx.useFont(*normalFont);
                 if (e.pointsAvailable.get(avail)) {
                     ctx.setColor(util::SkinColor::Static);
-                    ctx.setTextAlign(0, 0);
+                    ctx.setTextAlign(gfx::LeftAlign, gfx::TopAlign);
                     outTextF(ctx, haveArea, afl::string::Format(" / %d", avail));
 
                     ctx.setColor(e.hasPriority ? reqd > avail ? util::SkinColor::Red : util::SkinColor::Static : util::SkinColor::Faded);
                 } else {
                     ctx.setColor(util::SkinColor::Static);
                 }
-                ctx.setTextAlign(2, 0);
+                ctx.setTextAlign(gfx::RightAlign, gfx::TopAlign);
                 outTextF(ctx, needArea, afl::string::Format("%d", reqd));
             }
         }
@@ -385,12 +397,12 @@ client::dialogs::doBuildQueueDialog(game::Id_t baseId,
     // Set up proxy
     BuildQueueProxy proxy(gameSender, root.engine().dispatcher());
     BuildQueueProxy::Infos_t infos;
-    Downlink link(root);
+    Downlink link(root, tx);
     proxy.getStatus(link, infos);
     if (infos.empty()) {
         ui::dialogs::MessageBox(tx("You have no active ship build orders."),
                                 tx("Manage Build Queue"),
-                                root).doOkDialog();
+                                root).doOkDialog(tx);
         return;
     }
 

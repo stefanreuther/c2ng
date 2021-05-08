@@ -12,31 +12,27 @@
 #include "game/root.hpp"
 #include "game/turn.hpp"
 
-class game::proxy::BuildStarbaseProxy::Trampoline : public util::SlaveObject<Session> {
+class game::proxy::BuildStarbaseProxy::Trampoline {
  public:
-    virtual void init(Session&)
+    Trampoline(Session& session)
+        : m_session(session)
         { }
 
-    virtual void done(Session&)
+    void init(Id_t id, Status& status)
         {
-            m_action.reset();
-            m_container.reset();
-        }
-
-    void init(Session& session, Id_t id, Status& status)
-        {
+            afl::string::Translator& tx = m_session.translator();
             try {
                 // Preconditions
-                Root& root = game::actions::mustHaveRoot(session);
-                Game& game = game::actions::mustHaveGame(session);
+                Root& root = game::actions::mustHaveRoot(m_session);
+                Game& game = game::actions::mustHaveGame(m_session);
 
                 // Fetch planet
-                game::map::Planet& planet = game::actions::mustExist(game.currentTurn().universe().planets().get(id));
+                game::map::Planet& planet = game::actions::mustExist(game.currentTurn().universe().planets().get(id), tx);
 
                 // Construct stuff
                 bool wantBase = !planet.isBuildingBase();
-                m_container.reset(new game::map::PlanetStorage(planet, root.hostConfiguration()));
-                m_action.reset(new game::actions::BuildStarbase(planet, *m_container, wantBase, session.translator(), root.hostConfiguration()));
+                m_container.reset(new game::map::PlanetStorage(planet, root.hostConfiguration(), tx));
+                m_action.reset(new game::actions::BuildStarbase(planet, *m_container, wantBase, tx, root.hostConfiguration()));
 
                 // Produce result
                 if (wantBase) {
@@ -59,7 +55,7 @@ class game::proxy::BuildStarbaseProxy::Trampoline : public util::SlaveObject<Ses
             }
         }
 
-    void commit(Session& session)
+    void commit()
         {
             try {
                 if (m_action.get() != 0) {
@@ -69,17 +65,25 @@ class game::proxy::BuildStarbaseProxy::Trampoline : public util::SlaveObject<Ses
             catch (std::exception& e) {
                 // FIXME: log it
                 (void) e;
-                (void) session;
             }
         }
 
  private:
+    Session& m_session;
     std::auto_ptr<CargoContainer> m_container;
     std::auto_ptr<game::actions::BuildStarbase> m_action;
 };
 
+class game::proxy::BuildStarbaseProxy::TrampolineFromSession : public afl::base::Closure<Trampoline*(Session&)> {
+ public:
+    virtual Trampoline* call(Session& session)
+        { return new Trampoline(session); }
+};
+
+
+
 game::proxy::BuildStarbaseProxy::BuildStarbaseProxy(util::RequestSender<Session> gameSender)
-    : m_sender(gameSender, new Trampoline())
+    : m_sender(gameSender.makeTemporary(new TrampolineFromSession()))
 { }
 
 game::proxy::BuildStarbaseProxy::~BuildStarbaseProxy()
@@ -88,13 +92,13 @@ game::proxy::BuildStarbaseProxy::~BuildStarbaseProxy()
 void
 game::proxy::BuildStarbaseProxy::init(WaitIndicator& link, Id_t id, Status& status)
 {
-    class Task : public util::SlaveRequest<Session, Trampoline> {
+    class Task : public util::Request<Trampoline> {
      public:
         Task(Id_t id, Status& status)
             : m_id(id), m_status(status)
             { }
-        virtual void handle(Session& session, Trampoline& tpl)
-            { tpl.init(session, m_id, m_status); }
+        virtual void handle(Trampoline& tpl)
+            { tpl.init(m_id, m_status); }
      private:
         Id_t m_id;
         Status& m_status;
@@ -106,10 +110,10 @@ game::proxy::BuildStarbaseProxy::init(WaitIndicator& link, Id_t id, Status& stat
 void
 game::proxy::BuildStarbaseProxy::commit(WaitIndicator& link)
 {
-    class Task : public util::SlaveRequest<Session, Trampoline> {
+    class Task : public util::Request<Trampoline> {
      public:
-        virtual void handle(Session& session, Trampoline& tpl)
-            { tpl.commit(session); }
+        virtual void handle(Trampoline& tpl)
+            { tpl.commit(); }
     };
     Task t;
     link.call(m_sender, t);

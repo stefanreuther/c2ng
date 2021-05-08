@@ -52,6 +52,11 @@ TestGameSpecHullAssignmentList::testIt()
     TS_ASSERT_EQUALS(testee.getIndexFromHull(config, 1, 201), 0);
     TS_ASSERT_EQUALS(testee.getIndexFromHull(config, 2, 201), 1);
 
+    TS_ASSERT_EQUALS(testee.getPlayersForHull(config, 107), game::PlayerSet_t(1));
+    TS_ASSERT_EQUALS(testee.getPlayersForHull(config, 201), game::PlayerSet_t(2));
+    TS_ASSERT_EQUALS(testee.getPlayersForHull(config, 501), game::PlayerSet_t(5));
+    TS_ASSERT_EQUALS(testee.getPlayersForHull(config, 999), game::PlayerSet_t());
+
     // Selective clear
     TS_ASSERT_EQUALS(testee.getHullFromIndex(config, 3, 5), 305);
     TS_ASSERT_EQUALS(testee.getIndexFromHull(config, 3, 305), 5);

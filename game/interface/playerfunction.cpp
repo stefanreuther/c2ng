@@ -8,18 +8,18 @@
 #include "game/game.hpp"
 #include "game/interface/playercontext.hpp"
 
-// /* @q Player(uid:Int):Obj (Function, Context)
-//    Access player properties such as other players' race names and scores.
-//    Use as
-//    | ForEach Player Do ...
-//    or
-//    | With Player(n) Do ...
+/* @q Player(uid:Int):Obj (Function, Context)
+   Access player properties such as other players' race names and scores.
+   Use as
+   | ForEach Player Do ...
+   or
+   | With Player(n) Do ...
 
-//    @diff This function was available for use in %With under the name %Players() since PCC 1.0.8.
-//    Do not use the name %Players in new code, it is not supported by PCC2; use %Player instead.
+   @diff This function was available for use in %With under the name %Players() since PCC 1.0.8.
+   Do not use the name %Players in new code, it is not supported by PCC2; use %Player instead.
 
-//    @see int:index:group:playerproperty|Player Properties
-//    @since PCC 1.0.18, PCC2 1.99.8 */
+   @see int:index:group:playerproperty|Player Properties
+   @since PCC 1.0.18, PCC2 1.99.8, PCC2 2.40 */
 
 game::interface::PlayerFunction::PlayerFunction(Session& session)
     : m_session(session)

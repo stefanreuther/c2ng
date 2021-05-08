@@ -12,7 +12,7 @@
 #include "server/file/root.hpp"
 #include "server/file/session.hpp"
 #include "afl/io/internaldirectory.hpp"
-#include "u/files.hpp"
+#include "game/test/files.hpp"
 
 using server::file::InternalDirectoryHandler;
 
@@ -53,7 +53,7 @@ void
 TestServerFileGameStatus::testReg()
 {
     Testbench tb;
-    tb.item.createFile("fizz.bin", getDefaultRegKey());
+    tb.item.createFile("fizz.bin", game::test::getDefaultRegKey());
 
     // Do it
     server::file::GameStatus testee;
@@ -77,7 +77,7 @@ void
 TestServerFileGameStatus::testGame()
 {
     Testbench tb;
-    tb.item.createFile("player7.rst", getResultFile35());
+    tb.item.createFile("player7.rst", game::test::getResultFile35());
 
     // Do it
     server::file::GameStatus testee;
@@ -101,9 +101,9 @@ void
 TestServerFileGameStatus::testBoth()
 {
     Testbench tb;
-    tb.item.createFile("fizz.bin", getDefaultRegKey());
-    tb.item.createFile("player7.rst", getResultFile35());
-    tb.item.createFile("race.nm", getDefaultRaceNames());
+    tb.item.createFile("fizz.bin", game::test::getDefaultRegKey());
+    tb.item.createFile("player7.rst", game::test::getResultFile35());
+    tb.item.createFile("race.nm", game::test::getDefaultRaceNames());
     tb.item.createFile("xyplan7.dat", afl::base::Nothing);
 
     // Do it
@@ -135,7 +135,7 @@ TestServerFileGameStatus::testInvalidResult()
     // Misattributed file will not be recognized
     {
         Testbench tb;
-        tb.item.createFile("player3.rst", getResultFile35());
+        tb.item.createFile("player3.rst", game::test::getResultFile35());
 
         server::file::GameStatus testee;
         testee.load(tb.root, tb.item);
@@ -147,7 +147,7 @@ TestServerFileGameStatus::testInvalidResult()
     // Truncated file will not be recognized
     {
         Testbench tb;
-        tb.item.createFile("player7.rst", getResultFile35().subrange(0, 1000));
+        tb.item.createFile("player7.rst", game::test::getResultFile35().subrange(0, 1000));
 
         server::file::GameStatus testee;
         testee.load(tb.root, tb.item);

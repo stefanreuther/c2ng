@@ -147,6 +147,27 @@ namespace game { namespace spec {
             \return mine hit damage */
         int getMineHitDamage(int forPlayer, bool web, const HostVersion& host, const game::config::HostConfiguration& config) const;
 
+        /** Get number of build points required to build this hull.
+            \param forPlayer Player
+            \param host Host version
+            \param config Host configuration
+            \return number of build points */
+        int getPointsToBuild(int forPlayer, const HostVersion& host, const game::config::HostConfiguration& config) const;
+
+        /** Get number of build points awarded for killing a ship of this type.
+            \param forPlayer Player
+            \param host Host version
+            \param config Host configuration
+            \return number of build points */
+        int getPointsForKilling(int forPlayer, const HostVersion& host, const game::config::HostConfiguration& config) const;
+
+        /** Get number of build points awarded for scrapping a ship of this type.
+            \param forPlayer Player
+            \param host Host version
+            \param config Host configuration
+            \return number of build points */
+        int getPointsForScrapping(int forPlayer, const HostVersion& host, const game::config::HostConfiguration& config) const;
+
      private:
         int m_externalPictureNumber;
         int m_internalPictureNumber;

@@ -15,6 +15,10 @@ TestGameCargoContainer::testInterface()
      public:
         virtual String_t getName(afl::string::Translator& /*tx*/) const
             { return String_t(); }
+        virtual String_t getInfo1(afl::string::Translator& /*tx*/) const
+            { return String_t(); }
+        virtual String_t getInfo2(afl::string::Translator& /*tx*/) const
+            { return String_t(); }
         virtual Flags_t getFlags() const
             { return Flags_t(); }
         virtual bool canHaveElement(game::Element::Type /*type*/) const
@@ -39,6 +43,10 @@ TestGameCargoContainer::testValidImpossible()
     class Tester : public game::CargoContainer {
      public:
         virtual String_t getName(afl::string::Translator& /*tx*/) const
+            { return String_t(); }
+        virtual String_t getInfo1(afl::string::Translator& /*tx*/) const
+            { return String_t(); }
+        virtual String_t getInfo2(afl::string::Translator& /*tx*/) const
             { return String_t(); }
         virtual Flags_t getFlags() const
             { return Flags_t(); }
@@ -102,6 +110,10 @@ TestGameCargoContainer::testInitial()
      public:
         virtual String_t getName(afl::string::Translator& /*tx*/) const
             { return String_t(); }
+        virtual String_t getInfo1(afl::string::Translator& /*tx*/) const
+            { return String_t(); }
+        virtual String_t getInfo2(afl::string::Translator& /*tx*/) const
+            { return String_t(); }
         virtual Flags_t getFlags() const
             { return Flags_t(); }
         virtual bool canHaveElement(game::Element::Type /*type*/) const
@@ -133,6 +145,10 @@ TestGameCargoContainer::testOverload()
     class Tester : public game::CargoContainer {
      public:
         virtual String_t getName(afl::string::Translator& /*tx*/) const
+            { return String_t(); }
+        virtual String_t getInfo1(afl::string::Translator& /*tx*/) const
+            { return String_t(); }
+        virtual String_t getInfo2(afl::string::Translator& /*tx*/) const
             { return String_t(); }
         virtual Flags_t getFlags() const
             { return Flags_t(); }

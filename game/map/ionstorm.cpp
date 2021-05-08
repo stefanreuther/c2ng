@@ -7,9 +7,42 @@
   *  is not comparable.
   */
 
+#include <cmath>
 #include "game/map/ionstorm.hpp"
 #include "afl/string/format.hpp"
 #include "util/math.hpp"
+
+namespace {
+    using game::map::IonStorm;
+    using game::map::Point;
+
+    void getSingleForecast(IonStorm::Forecast_t& result, const IonStorm& ion, int dh, int warp, int uncertainity)
+    {
+        // ex drawPrediction, chartdlg.pas::DrawStormPrediction
+        int radius, voltage, heading;
+        Point center;
+        if (!ion.getRadius(radius) || !ion.getVoltage().get(voltage) || !ion.getHeading().get(heading) || !ion.getPosition(center)) {
+            return;
+        }
+
+        // Storm size may enforce different speed
+        if (radius < 200) {
+            warp = 6;
+        }
+        if (voltage > 250) {
+            warp = 8;
+        }
+
+        for (int j = 0; j < 5; ++j) {
+            heading += dh;
+            center += Point(util::roundToInt(util::squareInteger(warp) * std::sin(heading * (util::PI/180.0))),
+                            util::roundToInt(util::squareInteger(warp) * std::cos(heading * (util::PI/180.0))));
+            result.push_back(IonStorm::Forecast(center, radius, uncertainity));
+        }
+    }
+}
+
+const int game::map::IonStorm::UNCERTAINITY_LIMIT;
 
 game::map::IonStorm::IonStorm(int id)
     : CircularObject(),
@@ -229,6 +262,29 @@ game::map::IonStorm::addMessageInformation(const game::parser::MessageInformatio
                 info.getValue(gp::ms_Name, m_name);
             }
         }
+    }
+}
+
+void
+game::map::IonStorm::getForecast(Forecast_t& result) const
+{
+    // ex WIonForecastChart::drawPre (part)
+    for (int it = 0; it <= UNCERTAINITY_LIMIT; ++it) {
+        // Storm changes direction by [-10, +10] degrees. Plot all even changes.
+        // Storm goes warp 2..4. Plot slow speed outside (for tightest turns), fast speed inside (for farthest reach).
+        // We do not plot voltage or radius changes.
+        int uncertainity = UNCERTAINITY_LIMIT - it;
+        getSingleForecast(result, *this, -10 + 2*it, 2 + it/2, uncertainity);
+        if (it != 5) {
+            getSingleForecast(result, *this, +10 - 2*it, 2 + it/2, uncertainity);
+        }
+    }
+
+    // Add current position as very certain
+    Point center;
+    int radius;
+    if (getPosition(center) && getRadius(radius)) {
+        result.push_back(IonStorm::Forecast(center, radius, 0));
     }
 }
 

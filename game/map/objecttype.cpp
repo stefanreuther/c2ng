@@ -90,11 +90,11 @@ game::map::ObjectType::findNearestIndex(const Point pt, const Configuration& con
                 bool ninside;
                 if (const CircularObject* co = dynamic_cast<const CircularObject*>(mo)) {
                     int32_t radiusSquared;
-                    ninside = (co->getRadiusSquared(radiusSquared) && radiusSquared <= ndist2);
+                    ninside = (co->getRadiusSquared(radiusSquared) && ndist2 <= radiusSquared);
                 } else{
                     ninside = false;
                 }
-                
+
                 // Pick this object, if
                 // - it's the first one
                 // - it's closer than our previous choice
@@ -176,25 +176,59 @@ game::map::ObjectType::findNextIndexNoWrap(Id_t index, bool marked)
 }
 
 game::Id_t
-game::map::ObjectType::findFirstObjectAt(Point pt)
+game::map::ObjectType::findNextObjectAt(Point pt, int index, bool marked)
 {
-    return findNextObjectAt(pt, 0);
-}
-
-game::Id_t
-game::map::ObjectType::findNextObjectAt(Point pt, int id)
-{
-    for (Id_t i = findNextIndex(id); i != 0; i = findNextIndex(i)) {
+    for (Id_t i = findNextIndex(index); i != 0; i = findNextIndex(i)) {
         if (const Object* mo = getObjectByIndex(i)) {
             Point center;
             if (mo->getPosition(center)) {
                 if (center == pt) {
-                    return i;
+                    if (!marked || mo->isMarked()) {
+                        return i;
+                    }
                 }
             }
         }
     }
     return 0;
+}
+
+game::Id_t
+game::map::ObjectType::findPreviousObjectAt(Point pt, int index, bool marked)
+{
+    for (Id_t i = getPreviousIndex(index); i != 0; i = getPreviousIndex(i)) {
+        if (const Object* mo = getObjectByIndex(i)) {
+            Point center;
+            if (mo->getPosition(center)) {
+                if (center == pt) {
+                    if (!marked || mo->isMarked()) {
+                        return i;
+                    }
+                }
+            }
+        }
+    }
+    return 0;
+}
+
+game::Id_t
+game::map::ObjectType::findNextObjectAtWrap(Point pt, int index, bool marked)
+{
+    Id_t n = findNextObjectAt(pt, index, marked);
+    if (n == 0) {
+        n = findNextObjectAt(pt, 0, marked);
+    }
+    return n;
+}
+
+game::Id_t
+game::map::ObjectType::findPreviousObjectAtWrap(Point pt, int index, bool marked)
+{
+    Id_t n = findPreviousObjectAt(pt, index, marked);
+    if (n == 0) {
+        n = findPreviousObjectAt(pt, 0, marked);
+    }
+    return n;
 }
 
 game::Id_t
@@ -210,21 +244,18 @@ game::map::ObjectType::findIndexForId(Id_t id)
     return 0;
 }
 
-// FIXME: do we need this guy? findIndex
-// /** Given an object, find its index.
-//     \param type Object type
-//     \param obj Object to find
-//     \return index if found, otherwise 0 */
-// static int
-// findIndex(GObjectType& type, GObject* obj)
-// {
-//     for (int i = type.findNextIndex(0); i != 0; i = type.findNextIndex(i)) {
-//         if (type.isValidIndex(i) && &type.getObjectByIndex(i) == obj) {
-//             return i;
-//         }
-//     }
-//     return 0;
-// }
+game::Id_t
+game::map::ObjectType::findIndexForObject(const Object* obj)
+{
+    if (obj != 0) {
+        for (Id_t i = findNextIndex(0); i != 0; i = findNextIndex(i)) {
+            if (getObjectByIndex(i) == obj) {
+                return i;
+            }
+        }
+    }
+    return 0;
+}
 
 bool
 game::map::ObjectType::notifyObjectListeners()

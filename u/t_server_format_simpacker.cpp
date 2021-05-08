@@ -13,7 +13,7 @@
 #include "afl/charset/codepagecharset.hpp"
 #include "afl/charset/codepage.hpp"
 #include "afl/data/access.hpp"
-#include "u/files.hpp"
+#include "game/test/files.hpp"
 
 /** Test unpacking a V0 file. */
 void
@@ -22,7 +22,7 @@ TestServerFormatSimPacker::testV0()
     // xref TestGameSimLoader::testV0
     afl::charset::CodepageCharset cs(afl::charset::g_codepage437);
     server::format::SimPacker testee;
-    std::auto_ptr<afl::data::Value> p(testee.unpack(afl::string::fromBytes(getSimFileV0()), cs));
+    std::auto_ptr<afl::data::Value> p(testee.unpack(afl::string::fromBytes(game::test::getSimFileV0()), cs));
     afl::data::Access a(p);
 
     // Basic properties
@@ -87,7 +87,7 @@ TestServerFormatSimPacker::testV1()
     // xref TestGameSimLoader::testV1
     afl::charset::CodepageCharset cs(afl::charset::g_codepage437);
     server::format::SimPacker testee;
-    std::auto_ptr<afl::data::Value> p(testee.unpack(afl::string::fromBytes(getSimFileV1()), cs));
+    std::auto_ptr<afl::data::Value> p(testee.unpack(afl::string::fromBytes(game::test::getSimFileV1()), cs));
     afl::data::Access a(p);
 
     // Basic properties
@@ -135,7 +135,7 @@ TestServerFormatSimPacker::testV2()
     // xref TestGameSimLoader::testV2
     afl::charset::CodepageCharset cs(afl::charset::g_codepage437);
     server::format::SimPacker testee;
-    std::auto_ptr<afl::data::Value> p(testee.unpack(afl::string::fromBytes(getSimFileV2()), cs));
+    std::auto_ptr<afl::data::Value> p(testee.unpack(afl::string::fromBytes(game::test::getSimFileV2()), cs));
     afl::data::Access a(p);
 
     // Basic properties
@@ -202,7 +202,7 @@ TestServerFormatSimPacker::testV3()
     // xref TestGameSimLoader::testV3
     afl::charset::CodepageCharset cs(afl::charset::g_codepage437);
     server::format::SimPacker testee;
-    std::auto_ptr<afl::data::Value> p(testee.unpack(afl::string::fromBytes(getSimFileV3()), cs));
+    std::auto_ptr<afl::data::Value> p(testee.unpack(afl::string::fromBytes(game::test::getSimFileV3()), cs));
     afl::data::Access a(p);
 
     // Basic properties
@@ -280,7 +280,7 @@ TestServerFormatSimPacker::testV3()
 
     // Re-pack
     String_t repacked = testee.pack(p.get(), cs);
-    TS_ASSERT_EQUALS(repacked, afl::string::fromBytes(getSimFileV3()));
+    TS_ASSERT_EQUALS(repacked, afl::string::fromBytes(game::test::getSimFileV3()));
 }
 
 /** Test unpacking a V4 file. */
@@ -290,7 +290,7 @@ TestServerFormatSimPacker::testV4()
     // xref TestGameSimLoader::testV4
     afl::charset::CodepageCharset cs(afl::charset::g_codepage437);
     server::format::SimPacker testee;
-    std::auto_ptr<afl::data::Value> p(testee.unpack(afl::string::fromBytes(getSimFileV4()), cs));
+    std::auto_ptr<afl::data::Value> p(testee.unpack(afl::string::fromBytes(game::test::getSimFileV4()), cs));
     afl::data::Access a(p);
 
     // Basic properties
@@ -321,7 +321,7 @@ TestServerFormatSimPacker::testV4()
 
     // Re-pack
     String_t repacked = testee.pack(p.get(), cs);
-    TS_ASSERT_EQUALS(repacked, afl::string::fromBytes(getSimFileV4()));
+    TS_ASSERT_EQUALS(repacked, afl::string::fromBytes(game::test::getSimFileV4()));
 }
 
 /** Test unpacking a V5 file. */
@@ -331,7 +331,7 @@ TestServerFormatSimPacker::testV5()
     // xref TestGameSimLoader::testV5
     afl::charset::CodepageCharset cs(afl::charset::g_codepage437);
     server::format::SimPacker testee;
-    std::auto_ptr<afl::data::Value> p(testee.unpack(afl::string::fromBytes(getSimFileV5()), cs));
+    std::auto_ptr<afl::data::Value> p(testee.unpack(afl::string::fromBytes(game::test::getSimFileV5()), cs));
     afl::data::Access a(p);
 
     // Basic properties
@@ -380,7 +380,7 @@ TestServerFormatSimPacker::testV5()
 
     // Re-pack
     String_t repacked = testee.pack(p.get(), cs);
-    TS_ASSERT_EQUALS(repacked, afl::string::fromBytes(getSimFileV5()));
+    TS_ASSERT_EQUALS(repacked, afl::string::fromBytes(game::test::getSimFileV5()));
 }
 
 /** Test error behaviour. */

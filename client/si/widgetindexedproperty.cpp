@@ -58,7 +58,7 @@ namespace {
         }
     }
 
-    void setCommandViewText(bool left, afl::data::Value* index, afl::data::Value* value, ui::Widget* w)
+    void setCommandViewText(bool left, const afl::data::Value* index, const afl::data::Value* value, ui::Widget* w)
     {
         if (CommandDataView* dv = dynamic_cast<CommandDataView*>(w)) {
             String_t indexString;
@@ -81,7 +81,7 @@ namespace {
 
 // Set property of widget (UI side).
 void
-client::si::setWidgetProperty(WidgetIndexedProperty p, afl::data::Value* index, afl::data::Value* value, ui::Widget* w)
+client::si::setWidgetProperty(WidgetIndexedProperty p, const afl::data::Value* index, const afl::data::Value* value, ui::Widget* w)
 {
     switch (p) {
      case wipControlScreenHeaderButton:
@@ -173,21 +173,21 @@ client::si::setWidgetProperty(WidgetIndexedProperty p, afl::data::Value* index, 
 
 // Set property of widget (script side).
 void
-client::si::setWidgetProperty(WidgetIndexedProperty p, afl::data::Value* index, afl::data::Value* value, ScriptSide& ss, const WidgetReference& ref)
+client::si::setWidgetProperty(WidgetIndexedProperty p, const afl::data::Value* index, const afl::data::Value* value, ScriptSide& ss, const WidgetReference& ref)
 {
     // UserCall for the thread transition.
     class Setter : public UserCall {
      public:
-        Setter(WidgetIndexedProperty p, const WidgetReference& ref, afl::data::Value* index, afl::data::Value* value)
+        Setter(WidgetIndexedProperty p, const WidgetReference& ref, const afl::data::Value* index, const afl::data::Value* value)
             : m_property(p), m_ref(ref), m_index(index), m_value(value)
             { }
-        virtual void handle(UserSide& ui, Control& /*ctl*/)
-            { setWidgetProperty(m_property, m_index, m_value, m_ref.get(ui)); }
+        virtual void handle(Control& ctl)
+            { setWidgetProperty(m_property, m_index, m_value, m_ref.get(ctl)); }
      private:
         const WidgetIndexedProperty m_property;
         const WidgetReference m_ref;
-        afl::data::Value*const m_index;
-        afl::data::Value*const m_value;
+        const afl::data::Value*const m_index;
+        const afl::data::Value*const m_value;
     };
 
     // Call it. call() will proxy possible exceptions.

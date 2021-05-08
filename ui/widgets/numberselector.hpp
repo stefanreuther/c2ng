@@ -4,19 +4,27 @@
 #ifndef C2NG_UI_WIDGETS_NUMBERSELECTOR_HPP
 #define C2NG_UI_WIDGETS_NUMBERSELECTOR_HPP
 
-#include "afl/base/observable.hpp"
-#include "ui/simplewidget.hpp"
-#include "afl/base/signalconnection.hpp"
 #include "afl/base/deleter.hpp"
+#include "afl/base/observable.hpp"
+#include "afl/base/signalconnection.hpp"
 #include "ui/root.hpp"
+#include "ui/simplewidget.hpp"
 
 namespace ui { namespace widgets {
 
     class NumberSelector : public SimpleWidget {
      public:
+        /** Constructor.
+            \param value Value
+            \param min   Lower limit
+            \param max   Upper limit
+            \param step  Step size */
         NumberSelector(afl::base::Observable<int32_t>& value, int32_t min, int32_t max, int32_t step);
         ~NumberSelector();
 
+        /** Set value.
+            Checks ranges and forces the value into range.
+            \param value Value */
         void setValue(int32_t value);
         int32_t getValue() const;
 

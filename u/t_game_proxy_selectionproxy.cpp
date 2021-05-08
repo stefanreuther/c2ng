@@ -75,6 +75,16 @@ namespace {
         void onSelectionChange(const SelectionProxy::Info& info)
             { infos.push_back(info); }
     };
+
+    struct CountReceiver {
+        int n;
+
+        CountReceiver()
+            : n(0)
+            { }
+        void onNumObjectsInRange(int n)
+            { this->n = n; }
+    };
 }
 
 /** Test use on empty session.
@@ -139,8 +149,13 @@ TestGameProxySelectionProxy::testSignalExternal()
     ChangeReceiver recv;
     t.sig_selectionChange.add(&recv, &ChangeReceiver::onSelectionChange);
 
-    // Produce changes through proxy
-    t.setCurrentLayer(4);
+    // Produce changes behind our back
+    class Task : public util::Request<game::Session> {
+     public:
+        virtual void handle(game::Session& session)
+            { session.getGame()->selections().setCurrentLayer(4, session.getGame()->currentTurn().universe()); }
+    };
+    h.gameSender().postNewRequest(new Task());
 
     // Wait for update
     while (recv.infos.empty()) {
@@ -166,13 +181,8 @@ TestGameProxySelectionProxy::testSignalInternal()
     ChangeReceiver recv;
     t.sig_selectionChange.add(&recv, &ChangeReceiver::onSelectionChange);
 
-    // Produce changes behind our back
-    class Task : public util::Request<game::Session> {
-     public:
-        virtual void handle(game::Session& session)
-            { session.getGame()->selections().setCurrentLayer(4, session.getGame()->currentTurn().universe()); }
-    };
-    h.gameSender().postNewRequest(new Task());
+    // Produce changes through proxy
+    t.setCurrentLayer(4);
 
     // Wait for update
     while (recv.infos.empty()) {
@@ -196,7 +206,7 @@ TestGameProxySelectionProxy::testClearLayer()
 
     // Call method-under-test, then read back result.
     t.clearLayer(3);
-    
+
     SelectionProxy::Info info;
     TS_ASSERT_THROWS_NOTHING(t.init(ind, info));
     TS_ASSERT_EQUALS(info.currentLayer, 0U);
@@ -221,7 +231,7 @@ TestGameProxySelectionProxy::testClearAllLayers()
 
     // Call method-under-test, then read back result.
     t.clearAllLayers();
-    
+
     SelectionProxy::Info info;
     TS_ASSERT_THROWS_NOTHING(t.init(ind, info));
     TS_ASSERT_EQUALS(info.currentLayer, 0U);
@@ -246,7 +256,7 @@ TestGameProxySelectionProxy::testInvertLayer()
 
     // Call method-under-test, then read back result.
     t.invertLayer(0);
-    
+
     SelectionProxy::Info info;
     TS_ASSERT_THROWS_NOTHING(t.init(ind, info));
     TS_ASSERT_EQUALS(info.currentLayer, 0U);
@@ -271,7 +281,7 @@ TestGameProxySelectionProxy::testInvertAllLayers()
 
     // Call method-under-test, then read back result.
     t.invertAllLayers();
-    
+
     SelectionProxy::Info info;
     TS_ASSERT_THROWS_NOTHING(t.init(ind, info));
     TS_ASSERT_EQUALS(info.currentLayer, 0U);
@@ -298,7 +308,7 @@ TestGameProxySelectionProxy::testExecute()
     String_t error;
     bool ok = t.executeExpression(ind, "current + d", 2, error);
     TS_ASSERT(ok);
-    
+
     SelectionProxy::Info info;
     TS_ASSERT_THROWS_NOTHING(t.init(ind, info));
     TS_ASSERT_EQUALS(info.currentLayer, 0U);
@@ -338,5 +348,153 @@ TestGameProxySelectionProxy::testExecuteFail()
         TS_ASSERT(!ok);
         TS_ASSERT(!error.empty());
     }
+}
+
+/** Test markList().
+    A: create session with some objects. Call markList().
+    E: objects must be marked correctly. */
+void
+TestGameProxySelectionProxy::testMarkList()
+{
+    using game::Reference;
+
+    // Environment
+    SessionThread h;
+    prepare(h);
+    WaitIndicator ind;
+    SelectionProxy t(h.gameSender(), ind);
+
+    // Execute
+    game::ref::List list;
+    list.add(Reference(Reference::Ship, 13));
+    list.add(Reference(Reference::Planet, 20));
+    t.markList(0, list, true);
+
+    // Verify
+    h.sync();
+
+    game::map::Universe& univ = h.session().getGame()->currentTurn().universe();
+    TS_ASSERT_EQUALS(univ.ships().get(13)->isMarked(), true);
+    TS_ASSERT_EQUALS(univ.planets().get(20)->isMarked(), true);
+}
+
+/** Test markObjectsInRange().
+    A: create session with some objects. Call markObjectsInRange().
+    E: verify correct result reported and object status. */
+void
+TestGameProxySelectionProxy::testMarkRange()
+{
+    // Environment
+    SessionThread h;
+    prepare(h);
+    WaitIndicator ind;
+    SelectionProxy t(h.gameSender(), ind);
+    CountReceiver recv;
+    t.sig_numObjectsInRange.add(&recv, &CountReceiver::onNumObjectsInRange);
+
+    // Initial state has all objects at X=1000, Y=1000+id.
+    // Planets: 10 (marked), 20, 30
+    // Ships:   11, 12 (marked); 13, 14 (marked), 15
+    game::map::Universe& univ = h.session().getGame()->currentTurn().universe();
+    TS_ASSERT_EQUALS(univ.planets().get(10)->isMarked(), true);
+    TS_ASSERT_EQUALS(univ.planets().get(20)->isMarked(), false);
+    TS_ASSERT_EQUALS(univ.planets().get(30)->isMarked(), false);
+    TS_ASSERT_EQUALS(univ.ships().get(11)->isMarked(), false);
+    TS_ASSERT_EQUALS(univ.ships().get(12)->isMarked(), true);
+    TS_ASSERT_EQUALS(univ.ships().get(13)->isMarked(), false);
+    TS_ASSERT_EQUALS(univ.ships().get(14)->isMarked(), true);
+    TS_ASSERT_EQUALS(univ.ships().get(15)->isMarked(), false);
+
+    // Mark range (1000,1015) - (1000,1030); this will mark the remaining two planets and one ship
+    t.markObjectsInRange(game::map::Point(1000, 1015), game::map::Point(1000, 1030), true);
+    h.sync();
+    ind.processQueue();
+
+    TS_ASSERT_EQUALS(univ.planets().get(10)->isMarked(), true);
+    TS_ASSERT_EQUALS(univ.planets().get(20)->isMarked(), true); // changed
+    TS_ASSERT_EQUALS(univ.planets().get(30)->isMarked(), true); // changed
+    TS_ASSERT_EQUALS(univ.ships().get(11)->isMarked(), false);
+    TS_ASSERT_EQUALS(univ.ships().get(12)->isMarked(), true);
+    TS_ASSERT_EQUALS(univ.ships().get(13)->isMarked(), false);
+    TS_ASSERT_EQUALS(univ.ships().get(14)->isMarked(), true);
+    TS_ASSERT_EQUALS(univ.ships().get(15)->isMarked(), true);  // changed
+    TS_ASSERT_EQUALS(recv.n, 3);
+
+    // Mark range (1000,1019) - (1000,1021) without revert; this will not change anything
+    t.markObjectsInRange(game::map::Point(1000, 1019), game::map::Point(1000, 1021), false);
+    h.sync();
+    ind.processQueue();
+
+    TS_ASSERT_EQUALS(univ.planets().get(10)->isMarked(), true);
+    TS_ASSERT_EQUALS(univ.planets().get(20)->isMarked(), true);
+    TS_ASSERT_EQUALS(univ.planets().get(30)->isMarked(), true);
+    TS_ASSERT_EQUALS(univ.ships().get(11)->isMarked(), false);
+    TS_ASSERT_EQUALS(univ.ships().get(12)->isMarked(), true);
+    TS_ASSERT_EQUALS(univ.ships().get(13)->isMarked(), false);
+    TS_ASSERT_EQUALS(univ.ships().get(14)->isMarked(), true);
+    TS_ASSERT_EQUALS(univ.ships().get(15)->isMarked(), true);
+    TS_ASSERT_EQUALS(recv.n, 1);
+
+    // Now with revert
+    t.markObjectsInRange(game::map::Point(1000, 1019), game::map::Point(1000, 1021), true);
+    h.sync();
+    ind.processQueue();
+
+    TS_ASSERT_EQUALS(univ.planets().get(10)->isMarked(), true);
+    TS_ASSERT_EQUALS(univ.planets().get(20)->isMarked(), true);
+    TS_ASSERT_EQUALS(univ.planets().get(30)->isMarked(), false); // reverted
+    TS_ASSERT_EQUALS(univ.ships().get(11)->isMarked(), false);
+    TS_ASSERT_EQUALS(univ.ships().get(12)->isMarked(), true);
+    TS_ASSERT_EQUALS(univ.ships().get(13)->isMarked(), false);
+    TS_ASSERT_EQUALS(univ.ships().get(14)->isMarked(), true);
+    TS_ASSERT_EQUALS(univ.ships().get(15)->isMarked(), false); // reverted
+    TS_ASSERT_EQUALS(recv.n, 1);
+
+    // Revert everything
+    t.revertCurrentLayer();
+    h.sync();
+    ind.processQueue();
+
+    TS_ASSERT_EQUALS(univ.planets().get(10)->isMarked(), true);
+    TS_ASSERT_EQUALS(univ.planets().get(20)->isMarked(), false); // also reverted
+    TS_ASSERT_EQUALS(univ.planets().get(30)->isMarked(), false);
+    TS_ASSERT_EQUALS(univ.ships().get(11)->isMarked(), false);
+    TS_ASSERT_EQUALS(univ.ships().get(12)->isMarked(), true);
+    TS_ASSERT_EQUALS(univ.ships().get(13)->isMarked(), false);
+    TS_ASSERT_EQUALS(univ.ships().get(14)->isMarked(), true);
+    TS_ASSERT_EQUALS(univ.ships().get(15)->isMarked(), false);
+    TS_ASSERT_EQUALS(recv.n, 1); // no callback, value remains unchanged
+}
+
+/** Test markObjectsInRange(), wrapped-map case. Modified version of testMarkRange().
+    A: create session with some objects. Call markObjectsInRange() with wrap.
+    E: verify correct result reported and object status. */
+void
+TestGameProxySelectionProxy::testMarkRangeWrap()
+{
+    // Environment
+    SessionThread h;
+    prepare(h);
+    h.session().getGame()->currentTurn().universe().config().setConfiguration(game::map::Configuration::Wrapped, game::map::Point(2000, 2000), game::map::Point(2000, 2000));
+    WaitIndicator ind;
+    SelectionProxy t(h.gameSender(), ind);
+
+    // Initial state has all objects at X=1000, Y=1000+id.
+    // Use range from X=[2900, 3100] to cover X=1000.
+    // Use range from Y=[2900, 3011] to cover Y=[1000,1011]
+    game::map::Universe& univ = h.session().getGame()->currentTurn().universe();
+
+    t.markObjectsInRange(game::map::Point(3100, 2900), game::map::Point(2900, 3011), true);
+    h.sync();
+    ind.processQueue();
+
+    TS_ASSERT_EQUALS(univ.planets().get(10)->isMarked(), true);
+    TS_ASSERT_EQUALS(univ.planets().get(20)->isMarked(), false);
+    TS_ASSERT_EQUALS(univ.planets().get(30)->isMarked(), false);
+    TS_ASSERT_EQUALS(univ.ships().get(11)->isMarked(), true); // changed
+    TS_ASSERT_EQUALS(univ.ships().get(12)->isMarked(), true);
+    TS_ASSERT_EQUALS(univ.ships().get(13)->isMarked(), false);
+    TS_ASSERT_EQUALS(univ.ships().get(14)->isMarked(), true);
+    TS_ASSERT_EQUALS(univ.ships().get(15)->isMarked(), false);
 }
 

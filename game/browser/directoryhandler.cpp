@@ -44,7 +44,10 @@ game::browser::DirectoryHandler::handleFolderName(String_t name, afl::container:
         afl::base::Ptr<afl::io::Directory> dir = m_browser.fileSystem().openDirectory(m_browser.fileSystem().getAbsolutePathName(name)).asPtr();
         while (dir.get() != 0) {
             // Create this folder.
-            std::auto_ptr<FileSystemFolder> f(new FileSystemFolder(m_browser, *dir, dir->getTitle()));
+            // This produces "Winplan > vpwork3" and "Winplan > bmp" instead of "Winplan > Game 3" and "Winplan > [Directory Contents] > bmp", respectively.
+            // Producing the latter would require some backtracking (i.e. pass false, look whether we find it, etc.),
+            // which I don't consider worthwhile for now.
+            std::auto_ptr<FileSystemFolder> f(new FileSystemFolder(m_browser, *dir, dir->getTitle(), true));
 
             // Match against roots.
             // We prefer using a root because that has the nicer title than the implicitly created parent.

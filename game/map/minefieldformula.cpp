@@ -2,13 +2,12 @@
   *  \file game/map/minefieldformula.cpp
   */
 
-#include <stdio.h>
 #include "game/map/minefieldformula.hpp"
-#include "game/map/universe.hpp"
-#include "game/map/ship.hpp"
-#include "game/map/planet.hpp"
-#include "util/math.hpp"
 #include "game/map/minefieldmission.hpp"
+#include "game/map/planet.hpp"
+#include "game/map/ship.hpp"
+#include "game/map/universe.hpp"
+#include "util/math.hpp"
 
 using game::config::HostConfiguration;
 

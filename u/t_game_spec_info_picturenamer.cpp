@@ -25,6 +25,10 @@ TestGameSpecInfoPictureNamer::testInterface()
             { return String_t(); }
         virtual String_t getPlayerPicture(const game::Player& /*pl*/) const
             { return String_t(); }
+        virtual String_t getFighterPicture(int /*raceNr*/, int /*playerNr*/) const
+            { return String_t(); }
+        virtual String_t getVcrObjectPicture(bool /*isPlanet*/, int /*pictureNumber*/) const
+            { return String_t(); }
     };
     Tester t;
 }

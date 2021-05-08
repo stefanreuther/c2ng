@@ -93,6 +93,11 @@ namespace {
         bco.addInstruction(Opcode::maUnary, interpreter::unNot, 0);
         bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialReturn, 1);
         endTry(bco, catchLabel);
+
+        // Return true if we do not have an Owner attribute.
+        // This applies to Ufos and Ion Storms.
+        bco.addInstruction(Opcode::maPush, Opcode::sBoolean, 1);
+        bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialReturn, 1);
     }
 
     /** Compile a "match name" query.

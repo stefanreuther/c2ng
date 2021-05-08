@@ -8,10 +8,9 @@
 #include "ui/rich/statictext.hpp"
 #include "ui/spacer.hpp"
 #include "ui/widgets/button.hpp"
+#include "ui/widgets/quit.hpp"
 #include "util/keystring.hpp"
 #include "util/rich/styleattribute.hpp"
-#include "util/translation.hpp"
-#include "ui/widgets/quit.hpp"
 
 // Constructor.
 ui::dialogs::MessageBox::MessageBox(String_t text, String_t title, Root& root)
@@ -61,6 +60,13 @@ ui::dialogs::MessageBox::addButton(int id, String_t text, util::Key_t key)
     return *this;
 }
 
+// Add a button.
+ui::dialogs::MessageBox&
+ui::dialogs::MessageBox::addButton(int id, const util::KeyString& ks)
+{
+    return addButton(id, ks.getString(), ks.getKey());
+}
+
 // Add a key.
 ui::dialogs::MessageBox&
 ui::dialogs::MessageBox::addKey(int id, util::Key_t key)
@@ -68,6 +74,14 @@ ui::dialogs::MessageBox::addKey(int id, util::Key_t key)
     // ex UIMessageBox::addKey
     m_keyDispatcher.addNewClosure(key, m_loop.makeStop(id));
     checkKey(id, key, false);
+    return *this;
+}
+
+// Ignore a key.
+ui::dialogs::MessageBox&
+ui::dialogs::MessageBox::ignoreKey(util::Key_t key)
+{
+    checkKey(0, key, false);
     return *this;
 }
 
@@ -102,10 +116,10 @@ ui::dialogs::MessageBox::run()
 
 // Build and operate a Yes/No dialog.
 bool
-ui::dialogs::MessageBox::doYesNoDialog()
+ui::dialogs::MessageBox::doYesNoDialog(afl::string::Translator& tx)
 {
     // ex UIMessageBox::doYesNoDialog
-    util::KeyString y(_("Yes")), n(_("No"));
+    util::KeyString y(tx("Yes")), n(tx("No"));
     addButton(1, y.getString(), y.getKey());
     addButton(0, n.getString(), n.getKey());
     addKey(1, ' ');
@@ -115,10 +129,10 @@ ui::dialogs::MessageBox::doYesNoDialog()
 
 // Build and operate a simple confirmation dialog (just an OK button).
 void
-ui::dialogs::MessageBox::doOkDialog()
+ui::dialogs::MessageBox::doOkDialog(afl::string::Translator& tx)
 {
     // ex UIMessageBox::doOkDialog
-    addButton(1, _("OK"), ' ');
+    addButton(1, tx("OK"), ' ');
     run();
 }
 

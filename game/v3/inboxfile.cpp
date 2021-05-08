@@ -5,7 +5,6 @@
 
 #include "game/v3/inboxfile.hpp"
 #include "afl/except/fileformatexception.hpp"
-#include "util/translation.hpp"
 
 namespace {
     /** Remove a line, and return it.
@@ -174,12 +173,12 @@ game::v3::decodeMessage(afl::base::ConstBytes_t data, afl::charset::Charset& cha
 /********************************* Inbox *********************************/
 
 // Constructor.
-game::v3::InboxFile::InboxFile(afl::io::Stream& file, afl::charset::Charset& charset)
+game::v3::InboxFile::InboxFile(afl::io::Stream& file, afl::charset::Charset& charset, afl::string::Translator& tx)
     : m_file(file),
       m_charset(charset),
       m_directory()
 {
-    init();
+    init(tx);
 }
 
 // Destructor.
@@ -211,7 +210,7 @@ game::v3::InboxFile::loadMessage(size_t index) const
 
 // Initialize.
 void
-game::v3::InboxFile::init()
+game::v3::InboxFile::init(afl::string::Translator& tx)
 {
     // ex GInbox::loadInbox (part)
 
@@ -222,7 +221,7 @@ game::v3::InboxFile::init()
     // Validate
     int count = rawCount;
     if (count < 0) {
-        throw afl::except::FileFormatException(m_file, _("File is invalid"));
+        throw afl::except::FileFormatException(m_file, tx("File is invalid"));
     }
     if (count == 0) {
         return;
@@ -236,7 +235,7 @@ game::v3::InboxFile::init()
     for (int i = 0; i < count; ++i) {
         structures::IncomingMessageHeader* mh = m_directory.at(i);
         if (mh->address <= 0 || mh->length <= 0) {
-            throw afl::except::FileFormatException(m_file, _("File is invalid"));
+            throw afl::except::FileFormatException(m_file, tx("File is invalid"));
         }
     }
 }

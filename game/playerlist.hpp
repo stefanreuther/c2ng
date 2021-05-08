@@ -5,10 +5,10 @@
 #ifndef C2NG_GAME_PLAYERLIST_HPP
 #define C2NG_GAME_PLAYERLIST_HPP
 
-#include "game/player.hpp"
-#include "afl/container/ptrvector.hpp"
-#include "game/playerset.hpp"
 #include "afl/base/signal.hpp"
+#include "afl/container/ptrvector.hpp"
+#include "game/player.hpp"
+#include "game/playerset.hpp"
 
 namespace game {
 

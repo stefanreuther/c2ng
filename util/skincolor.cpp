@@ -1,5 +1,6 @@
 /**
   *  \file util/skincolor.cpp
+  *  \brief Enum util::SkinColor
   */
 
 #include "util/skincolor.hpp"

@@ -6,15 +6,17 @@
 #include "util/requestthread.hpp"
 
 #include "t_util.hpp"
-#include "afl/sys/semaphore.hpp"
+#include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
+#include "afl/sys/semaphore.hpp"
 
 /** Simple test. */
 void
 TestUtilRequestThread::testIt()
 {
     afl::sys::Log log;
-    util::RequestThread testee("TestUtilRequestThread", log);
+    afl::string::NullTranslator tx;
+    util::RequestThread testee("TestUtilRequestThread", log, tx);
 
     // Test load
     afl::sys::Semaphore sem(0);

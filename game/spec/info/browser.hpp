@@ -7,6 +7,7 @@
 
 #include "afl/string/translator.hpp"
 #include "game/root.hpp"
+#include "game/spec/fighter.hpp"
 #include "game/spec/info/types.hpp"
 #include "game/spec/racialabilitylist.hpp"
 #include "game/spec/shiplist.hpp"
@@ -37,8 +38,9 @@ namespace game { namespace spec { namespace info {
         /** Describe an item.
             \param p Page (object type)
             \param id Id (obtained from listItems())
+            \param withCost true to include cost and tech level in textual output
             \return newly-allocated information */
-        std::auto_ptr<PageContent> describeItem(Page p, Id_t id) const;
+        std::auto_ptr<PageContent> describeItem(Page p, Id_t id, bool withCost) const;
 
         /** List items.
             \param p Page (object type)
@@ -142,6 +144,10 @@ namespace game { namespace spec { namespace info {
         bool matchTorpedo(const TorpedoLauncher& torp, const FilterElement& e) const;
 
         bool matchComponentName(const Component& comp, const String_t& name) const;
+
+        void listFighters(ListContent& content, const Filter& f) const;
+        bool matchFighter(const Fighter& ftr, const Filter& f) const;
+        bool matchFighter(const Fighter& ftr, const FilterElement& e) const;
 
         void addFilterInfo(FilterInfos_t& result, FilterAttributes_t set, FilterAttribute att) const;
 

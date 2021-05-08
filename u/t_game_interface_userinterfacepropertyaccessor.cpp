@@ -15,7 +15,7 @@ TestGameInterfaceUserInterfacePropertyAccessor::testIt()
      public:
         virtual bool get(game::interface::UserInterfaceProperty /*prop*/, std::auto_ptr<afl::data::Value>& /*result*/)
             { return false; }
-        virtual bool set(game::interface::UserInterfaceProperty /*prop*/, afl::data::Value* /*p*/)
+        virtual bool set(game::interface::UserInterfaceProperty /*prop*/, const afl::data::Value* /*p*/)
             { return false; }
     };
     Tester t;

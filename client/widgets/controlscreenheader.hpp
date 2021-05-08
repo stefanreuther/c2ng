@@ -4,14 +4,15 @@
 #ifndef C2NG_CLIENT_WIDGETS_CONTROLSCREENHEADER_HPP
 #define C2NG_CLIENT_WIDGETS_CONTROLSCREENHEADER_HPP
 
-#include "afl/bits/smallset.hpp"
-#include "ui/colorscheme.hpp"
-#include "gfx/resourceprovider.hpp"
-#include "client/widgets/keymapwidget.hpp"
-#include "ui/widgets/framegroup.hpp"
 #include "afl/base/deleter.hpp"
-#include "ui/widgets/statictext.hpp"
+#include "afl/bits/smallset.hpp"
+#include "client/widgets/keymapwidget.hpp"
+#include "game/session.hpp"
+#include "gfx/resourceprovider.hpp"
+#include "ui/colorscheme.hpp"
+#include "ui/widgets/framegroup.hpp"
 #include "ui/widgets/imagebutton.hpp"
+#include "ui/widgets/statictext.hpp"
 
 namespace client { namespace widgets {
 
@@ -59,6 +60,7 @@ namespace client { namespace widgets {
 
         void setText(Text which, String_t value);
         void setImage(String_t name);
+        void setHasMessages(bool flag);
 
         // Widget:
         virtual void draw(gfx::Canvas& can);
@@ -73,9 +75,12 @@ namespace client { namespace widgets {
         virtual bool handleMouse(gfx::Point pt, MouseButtons_t pressedButtons);
 
      private:
+        class TitleWidget;
+
         afl::base::Deleter m_deleter;
         ui::widgets::FrameGroup* m_frames[NUM_BUTTONS];
-        ui::widgets::StaticText* m_texts[NUM_TEXTS];
+        // ui::widgets::StaticText* m_texts[NUM_TEXTS];
+        TitleWidget* m_title;
         ui::widgets::ImageButton* m_image;
         Buttons_t m_visibleButtons;
 
@@ -84,6 +89,11 @@ namespace client { namespace widgets {
         void setChildPosition(ui::Widget* widget, int x, int y, int w, int h);
     };
 
+    /** Convert game::Session::TaskStatus to ui::FrameType.
+        This is used to highlight the CScr/Auto buttons.
+        \param st TaskStatus
+        \return FrameType */
+    ui::FrameType getFrameTypeFromTaskStatus(game::Session::TaskStatus st);
 
 } }
 

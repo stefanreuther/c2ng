@@ -60,6 +60,18 @@ namespace game {
             \return Name */
         virtual String_t getName(afl::string::Translator& tx) const = 0;
 
+        /** Get subtitle line 1.
+            Typical content: unit type details.
+            \param tx Translator
+            \return string */
+        virtual String_t getInfo1(afl::string::Translator& tx) const = 0;
+
+        /** Get subtitle line 2.
+            Typical content: friendly code, damage.
+            \param tx Translator
+            \return string */
+        virtual String_t getInfo2(afl::string::Translator& tx) const = 0;
+
         /** Get flags decribing this unit.
             \return flags */
         virtual Flags_t getFlags() const = 0;

@@ -61,7 +61,7 @@ game::operator--(Element::Type& t, int)
 String_t
 game::Element::getName(Type t, afl::string::Translator& tx, const game::spec::ShipList& shipList)
 {
-    // ex getCargoName
+    // ex getCargoName, transfer.pas:GoodName
     switch (t) {
      case Neutronium:
         return tx("Neutronium");
@@ -94,7 +94,7 @@ game::Element::getName(Type t, afl::string::Translator& tx, const game::spec::Sh
 String_t
 game::Element::getUnit(Type t, afl::string::Translator& tx, const game::spec::ShipList& /*shipList*/)
 {
-    // ex getCargoUnit
+    // ex getCargoUnit, transfer.pas:GoodUnit
     switch(t) {
      case Neutronium:
      case Tritanium:

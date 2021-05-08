@@ -7,15 +7,16 @@
 #include "interpreter/closure.hpp"
 
 #include "t_interpreter.hpp"
-#include "interpreter/values.hpp"
-#include "interpreter/error.hpp"
-#include "interpreter/process.hpp"
-#include "util/consolelogger.hpp"
-#include "interpreter/world.hpp"
-#include "afl/io/nullfilesystem.hpp"
-#include "interpreter/vmio/nullsavecontext.hpp"
 #include "afl/charset/utf8charset.hpp"
 #include "afl/io/internalsink.hpp"
+#include "afl/io/nullfilesystem.hpp"
+#include "afl/string/nulltranslator.hpp"
+#include "interpreter/error.hpp"
+#include "interpreter/process.hpp"
+#include "interpreter/values.hpp"
+#include "interpreter/vmio/nullsavecontext.hpp"
+#include "interpreter/world.hpp"
+#include "util/consolelogger.hpp"
 
 namespace {
     class MyCallable : public interpreter::CallableValue {
@@ -121,8 +122,9 @@ TestInterpreterClosure::testClosure()
 
     // Test call
     util::ConsoleLogger log;
+    afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
-    interpreter::World world(log, fs);
+    interpreter::World world(log, tx, fs);
     interpreter::Process proc(world, "dummy", 9);
     {
         afl::data::Segment dseg;

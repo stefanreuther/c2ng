@@ -22,6 +22,10 @@ namespace {
 }
 
 
+/*
+ *  Construction
+ */
+
 game::map::Ship::Ship(int id)
     : Object(),
       m_id(id),
@@ -37,7 +41,8 @@ game::map::Ship::Ship(int id)
       m_shipSource(),
       m_targetSource(),
       m_xySource(),
-      m_unitScores()
+      m_unitScores(),
+      m_messages()
 {
     m_historyTimestamps[0] = 0;
     m_historyTimestamps[1] = 0;
@@ -46,64 +51,21 @@ game::map::Ship::Ship(int id)
 game::map::Ship::~Ship()
 { }
 
+
+/*
+ *  Load and Save
+ */
+
 void
 game::map::Ship::addCurrentShipData(const ShipData& data, PlayerSet_t source)
 {
+    // Set hull through regular setter to update history
+    setHull(data.hullType);
+
+    // Take over everything
     m_currentData = data;
     m_shipSource += source;
-// FIXME: missing behaviours
-// /** Add SHIP.DAT entry. This assumes that if we see a ship through
-//     several .dat files, we get the same one each time.
-//     \param data [in] Parsed .dat file entry
-//     \param source [in] Source flags, i.e. bitfield of which file this record is from */
-// void
-// GShip::addShipData(const TShip& data, GPlayerSet source)
-// {
-//     // Set hull through regular setter to get reset behaviour
-//     setHullId(mp16_t(data.hull));
-// }
 }
-
-// FIXME: retire
-// void
-// game::map::Ship::addPreviousShipData(const ShipData& data) REVERTER
-// {
-//     m_previousData = data;
-// }
-
-// /** Add TARGET.DAT entry. This assumes that if we see a ship through
-//     several .dat files, we get the same one each time. This does, however,
-//     handle the case that one record is seen through PHost's ship name filter
-//     and the other one isn't, and uses the better ship name.
-//     \param target [in] Parsed TARGET.DAT file entry
-//     \param source [in] Source flags, i.e. bitfield of which file this record is from */
-// void
-// GShip::addTargetData(const TShipTarget& target, GPlayerSet source)
-// {
-//     // Record that we know it
-//     target_source |= source;
-
-//     // Update ship unless we already saw it this turn
-//     if (ship_source.empty()) {
-//         // Set hull through regular setter to get reset behaviour
-//         setHullId(mp16_t(target.hull));
-
-//         // Set remainder
-//         ShipInfo& info = createShipInfo();
-//         info.data.owner       = target.owner;
-//         info.data.warp        = target.warp;
-//         info.data.x           = target.x;
-//         info.data.y           = target.y;
-//         info.data.waypoint_dx = mn16_t().getRawValue();
-//         info.data.waypoint_dy = mn16_t().getRawValue();
-//         info.heading          = target.heading;
-
-//         // If the new target is better than the one we have, use that
-//         if (isDummyName(info.data.name, map_info.id) && !isDummyName(target.name, map_info.id)) {
-//             std::memcpy(info.data.name, target.name, sizeof(target.name));
-//         }
-//     }
-// }
 
 void
 game::map::Ship::addShipXYData(Point pt, int owner, int mass, PlayerSet_t source)
@@ -113,7 +75,6 @@ game::map::Ship::addShipXYData(Point pt, int owner, int mass, PlayerSet_t source
     m_xySource += source;
 
     // Update ship.
-    // FIXME: if m_shipSource.empty() but existing values are invalid, initialize them anyway for order independence
     if (m_shipSource.empty()) {
         m_currentData.x          = pt.getX();
         m_currentData.y          = pt.getY();
@@ -135,7 +96,7 @@ game::map::Ship::addMessageInformation(const game::parser::MessageInformation& i
     const int turn = info.getTurnNumber();
 
     for (gp::MessageInformation::Iterator_t i = info.begin(); i != info.end(); ++i) {
-        if (gp::MessageIntegerValue_t* iv = dynamic_cast<gp::MessageIntegerValue_t*>(*i)) {
+        if (const gp::MessageIntegerValue_t* iv = dynamic_cast<gp::MessageIntegerValue_t*>(*i)) {
             switch (iv->getIndex()) {
              case gp::mi_Owner:
                 // Update RestTime with owner.
@@ -302,7 +263,7 @@ game::map::Ship::addMessageInformation(const game::parser::MessageInformation& i
              default:
                 break;
             }
-        } else if (gp::MessageStringValue_t* sv = dynamic_cast<gp::MessageStringValue_t*>(*i)) {
+        } else if (const gp::MessageStringValue_t* sv = dynamic_cast<gp::MessageStringValue_t*>(*i)) {
             switch (sv->getIndex()) {
              case gp::ms_FriendlyCode:
                 updateField(m_historyTimestamps[RestTime], turn, !isCurrent, m_currentData.friendlyCode, sv->getValue());
@@ -333,11 +294,6 @@ game::map::Ship::getCurrentShipData(ShipData& out) const
     out = m_currentData;
 }
 
-
-// /** Do internal checks for this ship.
-//     Internal checks do not require a partner to interact with.
-//     This will fix the problems, and display appropriate messages.
-//     It will also fill in the ship kind. */
 void
 game::map::Ship::internalCheck()
 {
@@ -360,8 +316,7 @@ game::map::Ship::internalCheck()
         m_kind = NoShip;
     }
 
-    // Make sure owner is known, nonzero for everything but NoShip
-    // FIXME: check whether this can still happen in c2ng
+    // Database sanitisation: make sure owner is known, nonzero for everything but NoShip.
     if (m_currentData.owner.isSame(0)) {
         // Ships without owner are generated from explosion records (Util1Bang).
         // If anything else reports an unowned ship, that's an error in the data files.
@@ -376,23 +331,31 @@ game::map::Ship::internalCheck()
     }
 }
 
-// /** Combined checks, phase 1.
-//     This will do all post-processing which needs a partner to interact with.
-//     It requires the playability to be filled in. */
 void
 game::map::Ship::combinedCheck1(Universe& univ, PlayerSet_t availablePlayers, int turnNumber)
 {
-    // FIXME: remove parameter?
-    (void) univ;
     // ex GShip::combinedCheck1
+    // FIXME: the univ parameter is a relic from PCC2. Remove it and merge with internalCheck?
+    (void) univ;
+
     // Update ages
     if (hasFullShipData()) {
         m_historyTimestamps[MilitaryTime] = m_historyTimestamps[RestTime] = turnNumber;
     }
 
+    // If we see the ship, it must exist even if history data says otherwise.
+    // The next condition might otherwise delete it.
+    if (!m_shipSource.empty() || !m_targetSource.empty() || !m_xySource.empty()) {
+        if (m_currentData.damage.orElse(0) > 150) {
+            m_currentData.damage = 0;
+        }
+    }
+
     // If ship claims to exists, but we don't have current data, it's destroyed. Remove it.
     int owner;
-    if (getOwner(owner) && availablePlayers.contains(owner) && m_shipSource.empty()) {
+    if ((getOwner(owner) && availablePlayers.contains(owner) && m_shipSource.empty())
+        || m_currentData.damage.orElse(0) > 150)
+    {
         // Clear current data
         m_currentData.x = IntegerProperty_t();
         m_currentData.y = IntegerProperty_t();
@@ -511,8 +474,11 @@ game::map::Ship::getPosition(Point& result) const
     }
 }
 
-// /** Check whether this ship is visible.
-//     If it is visible, it is displayed on the map. */
+
+/*
+ *  Status inquiry
+ */
+
 bool
 game::map::Ship::isVisible() const
 {
@@ -523,13 +489,6 @@ game::map::Ship::isVisible() const
         || m_kind == GuessedShip;
 }
 
-// /** Check whether this ship is reliably visible (to a player).
-//     A ship can be unreliably visible if it guessed.
-//     It can also be reliably visible to one player but not another one if they are not allied.
-
-//     \param forPlayer Player to ask question for: is this ship known to that player,
-//     and will host accept orders relating to it?
-//     If zero, check whether ship is seen reliably by anyone. */
 bool
 game::map::Ship::isReliablyVisible(const int forPlayer) const
 {
@@ -542,8 +501,6 @@ game::map::Ship::isReliablyVisible(const int forPlayer) const
     }
 }
 
-// /** Get ship source flags.
-//     This is the set of players whose SHIP file contains a copy of this ship (usually a unit set). */
 game::PlayerSet_t
 game::map::Ship::getShipSource() const
 {
@@ -557,8 +514,6 @@ game::map::Ship::addShipSource(PlayerSet_t p)
     m_shipSource += p;
 }
 
-// /** Get kind of this ship.
-//     The kind determines how complete and reliable this ship's data is. */
 game::map::Ship::Kind
 game::map::Ship::getShipKind() const
 {
@@ -566,7 +521,6 @@ game::map::Ship::getShipKind() const
     return m_kind;
 }
 
-// /** Check whether we have any data about this ship. */
 bool
 game::map::Ship::hasAnyShipData() const
 {
@@ -577,7 +531,6 @@ game::map::Ship::hasAnyShipData() const
     return m_currentData.owner.isValid();
 }
 
-// /** Check whether we have full, playable data. */
 bool
 game::map::Ship::hasFullShipData() const
 {
@@ -585,16 +538,17 @@ game::map::Ship::hasFullShipData() const
     return !m_shipSource.empty();
 }
 
-// /** Get history timestamp. 0 means not set. */
+
+/*
+ *  History accessors
+ */
+
 int
 game::map::Ship::getHistoryTimestamp(Timestamp kind) const
 {
     return m_historyTimestamps[kind];
 }
 
-// /** Get newest history turn. This is the newest turn for which we
-//     (may) have information. Iteration can use
-//     "for (t = getHistoryNewestTurn(); t > getHistoryOldestTurn(); --t)". */
 int
 game::map::Ship::getHistoryNewestLocationTurn() const
 {
@@ -602,8 +556,6 @@ game::map::Ship::getHistoryNewestLocationTurn() const
     return m_historyData.trackTurn;
 }
 
-// /** Get ship history entry for a turn.
-//     \param turn Turn number */
 game::map::ShipHistoryData::Track*
 game::map::Ship::getHistoryLocation(int turnNr) const
 {
@@ -612,23 +564,10 @@ game::map::Ship::getHistoryLocation(int turnNr) const
     return getShipHistory(const_cast<ShipHistoryData&>(m_historyData), turnNr);
 }
 
-// FIXME: port
-// /** Get oldest history turn. This is the turn before the oldest one
-//     for which we may have information.
 
-//     Note that this may return zero or a negative number if the history
-//     buffer reaches back to before the game start.
-
-//     \see getHistoryNewestTurn() */
-// int
-// GShip::getHistoryOldestTurn() const
-// {
-//     if (ship_info != 0) {
-//         return ship_info->track_turn - NUM_SHIP_TRACK_ENTRIES;
-//     } else {
-//         return 0;
-//     }
-// }
+/*
+ *  Test access
+ */
 
 void
 game::map::Ship::setOwner(int owner)
@@ -646,13 +585,10 @@ game::map::Ship::setPosition(Point pos)
 }
 
 
+/*
+ *  Type Accessors
+ */
 
-// 
-// /*
-//  *  Type Accessors
-//  */
-
-// /** Get ship mass. */
 game::IntegerProperty_t
 game::map::Ship::getMass(const game::spec::ShipList& shipList) const
 {
@@ -664,7 +600,6 @@ game::map::Ship::getMass(const game::spec::ShipList& shipList) const
     }
 }
 
-// /** Get hull Id. */
 game::IntegerProperty_t
 game::map::Ship::getHull() const
 {
@@ -672,7 +607,6 @@ game::map::Ship::getHull() const
     return m_currentData.hullType;
 }
 
-// /** Set hull Id. */
 void
 game::map::Ship::setHull(IntegerProperty_t h)
 {
@@ -691,41 +625,17 @@ game::map::Ship::setHull(IntegerProperty_t h)
         m_historyTimestamps[RestTime] = 0;
         m_scannedHeading = NegativeProperty_t();
         m_currentData = ShipData();
+        m_unitScores = UnitScoreList();
     }
     m_currentData.hullType = h;
     markDirty();
 }
 
-// 
-// /*
-//  *  Location accessors
-//  */
 
-// /** Get Id of planet we're orbiting.
-//     \return planet id, 0 if none. */
-// int
-// GShip::getOrbitPlanetId() const
-// {
-//     return map_info.orbit;
-// }
+/*
+ *  Owner accessors
+ */
 
-// /** Check whether ship wants to be cloned.
-//     This does not whether cloning actually is permitted (registeredness,
-//     hull restrictions, player restrictions). */
-// bool
-// GShip::isCloningAt(const GPlanet& planet) const
-// {
-//     return ship_info != 0
-//         && planet.getPos() == getPos()
-//         && (ship_info->data.fcode[0] == 'c' && ship_info->data.fcode[1] == 'l' && ship_info->data.fcode[2] == 'n');
-// }
-
-// 
-// /*
-//  *  Owner accessors
-//  */
-
-// /** Get real owner of ship. */
 game::IntegerProperty_t
 game::map::Ship::getRealOwner() const
 {
@@ -741,7 +651,6 @@ game::map::Ship::getRealOwner() const
     }
 }
 
-// /** Get ship's remote control flag. */
 int
 game::map::Ship::getRemoteControlFlag() const
 {
@@ -749,8 +658,11 @@ game::map::Ship::getRemoteControlFlag() const
     return m_remoteControlFlag;
 }
 
-// /** Get waypoint.
-//     If the waypoint is not known, the GPoint's components will be unknown if interpreted as mp16_t. */
+
+/*
+ *  Course accessors
+ */
+
 afl::base::Optional<game::map::Point>
 game::map::Ship::getWaypoint() const
 {
@@ -763,9 +675,6 @@ game::map::Ship::getWaypoint() const
     }
 }
 
-// /** Set waypoint.
-//     We can set a waypoint only if the ship is visible, i.e. has coordinates.
-//     If the ship is not visible, the call is ignored. */
 void
 game::map::Ship::setWaypoint(afl::base::Optional<Point> pt)
 {
@@ -791,8 +700,6 @@ game::map::Ship::clearWaypoint()
     }
 }
 
-
-// /** Get waypoint X displacement. */
 game::NegativeProperty_t
 game::map::Ship::getWaypointDX() const
 {
@@ -800,7 +707,6 @@ game::map::Ship::getWaypointDX() const
     return m_currentData.waypointDX;
 }
 
-// /** Get waypoint Y displacement. */
 game::NegativeProperty_t
 game::map::Ship::getWaypointDY() const
 {
@@ -808,9 +714,6 @@ game::map::Ship::getWaypointDY() const
     return m_currentData.waypointDY;
 }
 
-// /** Get ship's heading vector.
-//     \return value from [0,360), corresponding to VGAP's heading angles.
-//     Returns unknown value if ship doesn't move or heading not known */
 game::IntegerProperty_t
 game::map::Ship::getHeading() const
 {
@@ -826,8 +729,6 @@ game::map::Ship::getHeading() const
     }
 }
 
-// /** Get warp factor.
-//     \return warp factor or unknown */
 game::IntegerProperty_t
 game::map::Ship::getWarpFactor() const
 {
@@ -835,7 +736,6 @@ game::map::Ship::getWarpFactor() const
     return m_currentData.warpFactor;
 }
 
-// /** Set warp factor. */
 void
 game::map::Ship::setWarpFactor(IntegerProperty_t warp)
 {
@@ -846,8 +746,6 @@ game::map::Ship::setWarpFactor(IntegerProperty_t warp)
     }
 }
 
-// /** Check whether ship is hyperdriving.
-//     \return true iff ship has hyperdrive and tries to activate it */
 bool
 game::map::Ship::isHyperdriving(const UnitScoreDefinitionList& scoreDefinitions,
                                 const game::spec::ShipList& shipList,
@@ -864,13 +762,11 @@ game::map::Ship::isHyperdriving(const UnitScoreDefinitionList& scoreDefinitions,
         && fc == "HYP";
 }
 
-
+
 /*
  *  Equipment accessors
  */
 
-// /** Get engine type.
-//     \return engine type [1,NUM_ENGINES], or unknown */
 game::IntegerProperty_t
 game::map::Ship::getEngineType() const
 {
@@ -878,8 +774,6 @@ game::map::Ship::getEngineType() const
     return m_currentData.engineType;
 }
 
-// /** Set engine type (for history).
-//     \param engine engine type [1,NUM_ENGINES], or unknown */
 void
 game::map::Ship::setEngineType(IntegerProperty_t engineType)
 {
@@ -888,8 +782,6 @@ game::map::Ship::setEngineType(IntegerProperty_t engineType)
     markDirty();
 }
 
-// /** Get beam type.
-//     \return beam type [1,NUM_BEAMS], or unknown */
 game::IntegerProperty_t
 game::map::Ship::getBeamType() const
 {
@@ -897,8 +789,6 @@ game::map::Ship::getBeamType() const
     return m_currentData.beamType;
 }
 
-// /** Set beam type (for history).
-//     \param type beam type [1,NUM_BEAMS], or unknown */
 void
 game::map::Ship::setBeamType(IntegerProperty_t type)
 {
@@ -907,8 +797,6 @@ game::map::Ship::setBeamType(IntegerProperty_t type)
     markDirty();
 }
 
-// /** Get number of beams.
-//     \return beam count, or unknown */
 game::IntegerProperty_t
 game::map::Ship::getNumBeams() const
 {
@@ -920,8 +808,6 @@ game::map::Ship::getNumBeams() const
     }
 }
 
-// /** Set number of beams (for history).
-//     \param count beam count, or unknown */
 void
 game::map::Ship::setNumBeams(IntegerProperty_t count)
 {
@@ -930,8 +816,6 @@ game::map::Ship::setNumBeams(IntegerProperty_t count)
     markDirty();
 }
 
-// /** Get bay count.
-//     \return bay count, or unknown */
 game::IntegerProperty_t
 game::map::Ship::getNumBays() const
 {
@@ -939,8 +823,6 @@ game::map::Ship::getNumBays() const
     return m_currentData.numBays;
 }
 
-// /** Set bay count (for history).
-//     \param count bay count, or unknown */
 void
 game::map::Ship::setNumBays(IntegerProperty_t count)
 {
@@ -949,8 +831,6 @@ game::map::Ship::setNumBays(IntegerProperty_t count)
     markDirty();
 }
 
-// /** Get torpedo type.
-//     \return torpedo type [1,NUM_TORPS], or unknown */
 game::IntegerProperty_t
 game::map::Ship::getTorpedoType() const
 {
@@ -958,8 +838,6 @@ game::map::Ship::getTorpedoType() const
     return m_currentData.launcherType;
 }
 
-// /** Set torpedo type (for history).
-//     \param type beam type [1,NUM_TORPS], or unknown */
 void
 game::map::Ship::setTorpedoType(IntegerProperty_t type)
 {
@@ -968,8 +846,6 @@ game::map::Ship::setTorpedoType(IntegerProperty_t type)
     markDirty();
 }
 
-// /** Get torpedo launcher count.
-//     \return torpedo launcher count, or unknown */
 game::IntegerProperty_t
 game::map::Ship::getNumLaunchers() const
 {
@@ -981,8 +857,6 @@ game::map::Ship::getNumLaunchers() const
     }
 }
 
-// /** Set torpedo launcher count (for history).
-//     \param count torpedo launcher count, or unknown */
 void
 game::map::Ship::setNumLaunchers(IntegerProperty_t count)
 {
@@ -992,10 +866,9 @@ game::map::Ship::setNumLaunchers(IntegerProperty_t count)
 }
 
 
-// 
-// /*
-//  *  Mission accessors
-//  */
+/*
+ *  Mission accessors
+ */
 
 String_t
 game::map::Ship::getName() const
@@ -1005,8 +878,6 @@ game::map::Ship::getName() const
     return plainName;
 }
 
-// /** Set ship name.
-//     \param str New name */
 void
 game::map::Ship::setName(const String_t& str)
 {
@@ -1015,9 +886,6 @@ game::map::Ship::setName(const String_t& str)
     markDirty();
 }
 
-
-// /** Get ship mission.
-//     \return mission number, or unknown */
 game::IntegerProperty_t
 game::map::Ship::getMission() const
 {
@@ -1025,12 +893,6 @@ game::map::Ship::getMission() const
     return m_currentData.mission;
 }
 
-// /** Set ship mission.
-//     \param m Mission number
-//     \param i Intercept number
-//     \param t Tow number
-
-//     FIXME: should this take a TMissionData object? */
 void
 game::map::Ship::setMission(IntegerProperty_t m, IntegerProperty_t i, IntegerProperty_t t)
 {
@@ -1043,8 +905,6 @@ game::map::Ship::setMission(IntegerProperty_t m, IntegerProperty_t i, IntegerPro
     }
 }
 
-// /** Get tow number. */
-// /** Get intercept number. */
 game::IntegerProperty_t
 game::map::Ship::getMissionParameter(MissionParameter which) const
 {
@@ -1054,7 +914,6 @@ game::map::Ship::getMissionParameter(MissionParameter which) const
         : m_currentData.missionTowParameter;
 }
 
-// /** Get primary enemy. */
 game::IntegerProperty_t
 game::map::Ship::getPrimaryEnemy() const
 {
@@ -1062,8 +921,6 @@ game::map::Ship::getPrimaryEnemy() const
     return m_currentData.primaryEnemy;
 }
 
-// /** Set primary enemy.
-//     \param pe New primary enemy, [0,NUM_PLAYERS] */
 void
 game::map::Ship::setPrimaryEnemy(IntegerProperty_t pe)
 {
@@ -1072,8 +929,6 @@ game::map::Ship::setPrimaryEnemy(IntegerProperty_t pe)
     markDirty();
 }
 
-// /** Get ship damage.
-//     \return damage level, or unknown */
 game::IntegerProperty_t
 game::map::Ship::getDamage() const
 {
@@ -1081,8 +936,6 @@ game::map::Ship::getDamage() const
     return m_currentData.damage;
 }
 
-// /** Set ship damage.
-//     \param damage damage level, or unknown */
 void
 game::map::Ship::setDamage(IntegerProperty_t damage)
 {
@@ -1091,8 +944,6 @@ game::map::Ship::setDamage(IntegerProperty_t damage)
     markDirty();
 }
 
-// /** Get ship crew.
-//     \return number of crewmen, or unknown */
 game::IntegerProperty_t
 game::map::Ship::getCrew() const
 {
@@ -1100,8 +951,6 @@ game::map::Ship::getCrew() const
     return m_currentData.crew;
 }
 
-// /** Set ship crew.
-//     \param crew number of crewmen, or unknown */
 void
 game::map::Ship::setCrew(IntegerProperty_t crew)
 {
@@ -1110,7 +959,6 @@ game::map::Ship::setCrew(IntegerProperty_t crew)
     markDirty();
 }
 
-// /** Get friendly code. */
 game::StringProperty_t
 game::map::Ship::getFriendlyCode() const
 {
@@ -1118,7 +966,6 @@ game::map::Ship::getFriendlyCode() const
     return m_currentData.friendlyCode;
 }
 
-// /** Set friendly code. */
 void
 game::map::Ship::setFriendlyCode(StringProperty_t fc)
 {
@@ -1127,13 +974,11 @@ game::map::Ship::setFriendlyCode(StringProperty_t fc)
     markDirty();
 }
 
-// 
-// /*
-//  *  Cargo accessors
-//  */
 
-// /** Get ammunition on ship, raw version. This does not honor reservations.
-//     It returns the amount of torpedoes/fighters, regardless of their type. */
+/*
+ *  Cargo accessors
+ */
+
 game::IntegerProperty_t
 game::map::Ship::getAmmo() const
 {
@@ -1148,7 +993,6 @@ game::map::Ship::setAmmo(IntegerProperty_t amount)
     markDirty();
 }
 
-// /** Get cargo amount on ship, raw version. This does not honor reservations. */
 game::IntegerProperty_t
 game::map::Ship::getCargo(Element::Type type) const
 {
@@ -1269,8 +1113,10 @@ game::map::Ship::getFreeCargo(const game::spec::ShipList& list) const
 }
 
 
-// /** Check whether a transporter is active. An active transporter has a
-//     full transfer order. */
+/*
+ *  Transporter accesssors
+ */
+
 bool
 game::map::Ship::isTransporterActive(Transporter which) const
 {
@@ -1333,30 +1179,6 @@ game::map::Ship::setTransporterCargo(Transporter which, Element::Type type, Inte
     markDirty();
 }
 
-
-// /** Check whether a transporter is cancellable. A transporter is
-//     cancellable if its content can be moved back into main cargo room
-//     without overloading the ship. */
-// bool
-// GShip::isTransporterCancellable(Transporter which_one) const throw()
-// {
-//     // FIXME: this does not guarantee correctness in all cases: Take a
-//     // ship with 10 cargo room left, and 10 kt in the transporter. A
-//     // pending transaction adds 10 to the ship (i.e. it got the
-//     // guarantee that it'll be able to add this). When we now do
-//     // cancelTranporter() and commit that transaction, the ship is
-//     // overloaded.
-//     if (hasFullShipData()) {
-//         const TShipTransfer& t = getTransporter(which_one);
-//         long sum = (long) t.ore[0] + t.ore[1] + t.ore[2] + t.ore[3] + t.supplies + t.colonists;
-//         return sum == 0 || sum <= getFreeCargo();
-//     } else {
-//         return false;
-//     }
-// }
-
-// /** Cancel a transporter. Moves its contents back to main cargo room.
-//     \pre isTransporterCancellable(which_one) */
 void
 game::map::Ship::cancelTransporter(Transporter which)
 {
@@ -1381,15 +1203,11 @@ game::map::Ship::cancelTransporter(Transporter which)
     markDirty();
 }
 
-// 
-// /*
-//  *  Fleet accessors
-//  */
 
-// /** Set number of the fleet this ship is in.
-//     This function just sets the internal flag.
-//     Do not use this function directly; use ::setFleetNumber(GUniverse&,int,int) instead.
-//     That function will update all dependant information. */
+/*
+ *  Fleet accessors
+ */
+
 void
 game::map::Ship::setFleetNumber(int fno)
 {
@@ -1398,8 +1216,6 @@ game::map::Ship::setFleetNumber(int fno)
     markDirty();
 }
 
-// /** Get number of the fleet this ship is in.
-//     \return fleet number (a ship Id), or 0 */
 int
 game::map::Ship::getFleetNumber() const
 {
@@ -1407,7 +1223,6 @@ game::map::Ship::getFleetNumber() const
     return m_fleetNumber;
 }
 
-// /** Set name of the fleet led by this ship. */
 void
 game::map::Ship::setFleetName(String_t name)
 {
@@ -1416,7 +1231,6 @@ game::map::Ship::setFleetName(String_t name)
     markDirty();
 }
 
-// /** Get name of the fleet led by this ship (if any). */
 const String_t&
 game::map::Ship::getFleetName() const
 {
@@ -1424,7 +1238,6 @@ game::map::Ship::getFleetName() const
     return m_fleetName;
 }
 
-// /** Check for fleet leader. */
 bool
 game::map::Ship::isFleetLeader() const
 {
@@ -1432,8 +1245,6 @@ game::map::Ship::isFleetLeader() const
     return m_fleetNumber == m_id;
 }
 
-// /** Check for fleet member.
-//     \return true if this is a fleet member (but not a leader) */
 bool
 game::map::Ship::isFleetMember() const
 {
@@ -1442,24 +1253,9 @@ game::map::Ship::isFleetMember() const
 }
 
 
-
-
-// void
-// GShip::setPredictedPos(GPoint pt)
-// {
-//     map_info.predicted_pos = pt;
-// }
-
-// GPoint
-// GShip::getPredictedPos() const
-// {
-//     return map_info.predicted_pos;
-// }
-
-// 
-// /*
-//  *  Function accessors
-//  */
+/*
+ *  Function accessors
+ */
 
 void
 game::map::Ship::addShipSpecialFunction(game::spec::ModifiedHullFunctionList::Function_t function)
@@ -1469,8 +1265,6 @@ game::map::Ship::addShipSpecialFunction(game::spec::ModifiedHullFunctionList::Fu
     markDirty();
 }
 
-// /** Check whether this ship can do special function.
-//     \param basic_function A basic ship function, e.g. hf_Cloak. */
 bool
 game::map::Ship::hasSpecialFunction(int basicFunction,
                                     const UnitScoreDefinitionList& scoreDefinitions,
@@ -1528,8 +1322,6 @@ game::map::Ship::hasSpecialFunction(int basicFunction,
     return false;
 }
 
-// /** Enumerate this ship's special functions (only functions assigned to this
-//     ship, not including class functions). */
 void
 game::map::Ship::enumerateShipFunctions(game::spec::HullFunctionList& list,
                                         const game::spec::ShipList& shipList) const
@@ -1544,39 +1336,12 @@ game::map::Ship::enumerateShipFunctions(game::spec::HullFunctionList& list,
     }
 }
 
-// /** Check whether this ship has any ship-specific functions. */
 bool
 game::map::Ship::hasAnyShipSpecialFunctions() const
 {
     // ex GShip::hasAnyShipSpecificSpecials
     return !m_specialFunctions.empty();
 }
-
-// 
-// /*
-//  *  Data access
-//  */
-
-// /** Create ShipInfo if it doesn't exist yet. Returns reference to it. */
-// GShip::ShipInfo&
-// GShip::createShipInfo()
-// {
-//     if (!ship_info) {
-//         ship_info = new ShipInfo(map_info.id);
-//         if (map_info.kind == NoShip) {
-//             map_info.kind = HistoryShip;
-//         }
-//     }
-//     return *ship_info;
-// }
-
-// /** Get read-only ship data. */
-// const TShip&
-// GShip::getDisplayedShip() const
-// {
-//     return ship_info != 0 ? ship_info->data : blank_ship;
-// }
-
 
 game::UnitScoreList&
 game::map::Ship::unitScores()
@@ -1593,6 +1358,7 @@ game::map::Ship::unitScores() const
 game::NegativeProperty_t
 game::map::Ship::getScore(int16_t scoreId, const UnitScoreDefinitionList& scoreDefinitions) const
 {
+    // ex phost.pas:GetExperienceLevel (sort-of)
     UnitScoreList::Index_t index;
     int16_t value, turn;
     if (scoreDefinitions.lookup(scoreId, index) && m_unitScores.get(index, value, turn)) {
@@ -1600,6 +1366,24 @@ game::map::Ship::getScore(int16_t scoreId, const UnitScoreDefinitionList& scoreD
     } else {
         return afl::base::Nothing;
     }
+}
+
+
+/*
+ *  MessageLink
+ */
+
+game::map::MessageLink&
+game::map::Ship::messages()
+{
+    // ex GShip::getAssociatedMessages
+    return m_messages;
+}
+
+const game::map::MessageLink&
+game::map::Ship::messages() const
+{
+    return m_messages;
 }
 
 game::map::ShipData::Transfer&

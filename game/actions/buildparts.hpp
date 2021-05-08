@@ -22,11 +22,13 @@ namespace game { namespace actions {
             \param planet    Planet to work on. Must have a played starbase.
             \param container Container to bill the builds on. Usually a PlanetStorage for the same planet.
             \param shipList  Ship list. Needed to access component costs and hull slots.
-            \param root      Game root. Needed to access host configuration and registration key. */
+            \param root      Game root. Needed to access host configuration and registration key.
+            \param tx        Translator. Needed for error messages during construction. */
         BuildParts(game::map::Planet& planet,
                    CargoContainer& container,
                    game::spec::ShipList& shipList,
-                   Root& root);
+                   Root& root,
+                   afl::string::Translator& tx);
 
         /** Destructor. */
         ~BuildParts();
@@ -57,7 +59,7 @@ namespace game { namespace actions {
             \param area Area containing part
             \param slot Slot of part
             \return amount */
-        int getParts(TechLevel area, int slot) const;
+        int getNumParts(TechLevel area, int slot) const;
 
         /** Add parts.
             Note that this does not check how much we can pay for, only whether we can hold/sell that much.

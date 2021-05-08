@@ -1,5 +1,6 @@
 /**
   *  \file server/talk/parse/bbparser.hpp
+  *  \brief Class server::talk::parse::BBParser
   */
 #ifndef C2NG_SERVER_TALK_PARSE_BBPARSER_HPP
 #define C2NG_SERVER_TALK_PARSE_BBPARSER_HPP
@@ -11,16 +12,29 @@
 
 namespace server { namespace talk { namespace parse {
 
+    /** BBCode parser.
+        Uses a BBLexer to parse a BBCode document.
+
+        Because a BBParser parses the entire content of a BBLexer,
+        it can be used once only. */
     class BBParser {
      public:
+        /** Constructor.
+            \param lex     Lexer
+            \param recog   InlineRecognizer instance
+            \param options Items to recognize by InlineRecognizer */
         BBParser(BBLexer& lex, InlineRecognizer& recog, InlineRecognizer::Kinds_t options);
 
+        /** Parse document.
+            \return newly-allocated document */
         TextNode* parse();
 
+        /** Check for known tag.
+            \param tag Tag name
+            \return true if this tag is known to BBParser */
         static bool isKnownTag(const String_t& tag);
 
      private:
-        //typedef ptr_vector<TextNode>::size_type depth_t;
         typedef size_t depth_t;
 
         BBLexer& lex;

@@ -68,7 +68,7 @@ util::plugin::Manager::findPlugins(afl::io::Directory& dir)
                 try {
                     std::auto_ptr<Plugin> plugin(new Plugin(afl::string::strUCase(pluginName)));
                     afl::base::Ref<afl::io::Stream> file = elem->openFile(afl::io::FileSystem::OpenRead);
-                    plugin->initFromPluginFile(dir.getDirectoryEntryByName(pluginName)->getPathName(), name, *file, m_log);
+                    plugin->initFromPluginFile(dir.getDirectoryEntryByName(pluginName)->getPathName(), name, *file, m_log, m_translator);
                     m_plugins.pushBackNew(plugin.release());
                     ++count;
                 }

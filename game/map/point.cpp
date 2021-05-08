@@ -4,6 +4,7 @@
   */
 
 #include "game/map/point.hpp"
+#include "afl/string/format.hpp"
 #include "afl/string/parse.hpp"
 #include "util/math.hpp"
 
@@ -46,6 +47,12 @@ game::map::Point::parseCoordinates(const String_t& str)
     m_x = x;
     m_y = y;
     return true;
+}
+
+String_t
+game::map::Point::toString() const
+{
+    return afl::string::Format("(%d,%d)", m_x, m_y);
 }
 
 // Three-way comparison.

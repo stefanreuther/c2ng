@@ -17,6 +17,7 @@ TestUtilStringList::testIt()
 
     // Verify empty
     TS_ASSERT_EQUALS(testee.size(), 0U);
+    TS_ASSERT(testee.empty());
     TS_ASSERT(!testee.get(0, i, s));
     TS_ASSERT(!testee.get(size_t(-1), i, s));
     TS_ASSERT(!testee.get(1000000, i, s));
@@ -25,6 +26,7 @@ TestUtilStringList::testIt()
     testee.add(23, "hi");
     testee.add(42, "ho");
     TS_ASSERT_EQUALS(testee.size(), 2U);
+    TS_ASSERT(!testee.empty());
 
     // Verify populated
     TS_ASSERT(testee.get(0, i, s));
@@ -87,7 +89,7 @@ TestUtilStringList::testSort()
     TS_ASSERT_EQUALS(value, "qux");
 }
 
-/** Test copy, swap. */
+/** Test copy, swap, clear. */
 void
 TestUtilStringList::testCopy()
 {
@@ -109,4 +111,7 @@ TestUtilStringList::testCopy()
     a = c;
     TS_ASSERT_EQUALS(c.size(), 2U);
     TS_ASSERT_EQUALS(a.size(), 2U);
+
+    a.clear();
+    TS_ASSERT_EQUALS(a.size(), 0U);
 }

@@ -4,11 +4,12 @@
 #ifndef C2NG_CLIENT_VCR_UNITSTATUSWIDGET_HPP
 #define C2NG_CLIENT_VCR_UNITSTATUSWIDGET_HPP
 
-#include "ui/simplewidget.hpp"
-#include "ui/root.hpp"
+#include "afl/base/signalconnection.hpp"
+#include "afl/string/translator.hpp"
 #include "game/teamsettings.hpp"
 #include "gfx/context.hpp"
-#include "afl/base/signalconnection.hpp"
+#include "ui/root.hpp"
+#include "ui/simplewidget.hpp"
 
 namespace client { namespace vcr {
 
@@ -66,7 +67,7 @@ namespace client { namespace vcr {
             Beam
         };
 
-        UnitStatusWidget(ui::Root& root);
+        UnitStatusWidget(ui::Root& root, afl::string::Translator& tx);
 
         void setData(const Data& data);
         void setProperty(Property p, int value);
@@ -86,6 +87,7 @@ namespace client { namespace vcr {
 
      private:
         ui::Root& m_root;
+        afl::string::Translator& m_translator;
         Data m_data;
         Status m_status;
         afl::base::Ptr<gfx::Canvas> m_image;

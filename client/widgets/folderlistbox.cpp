@@ -37,13 +37,23 @@ client::widgets::FolderListbox::getItemHeight(size_t /*n*/)
 }
 
 int
-client::widgets::FolderListbox::getHeaderHeight()
+client::widgets::FolderListbox::getHeaderHeight() const
+{
+    return 0;
+}
+
+int
+client::widgets::FolderListbox::getFooterHeight() const
 {
     return 0;
 }
 
 void
 client::widgets::FolderListbox::drawHeader(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
+{ }
+
+void
+client::widgets::FolderListbox::drawFooter(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
 { }
 
 void

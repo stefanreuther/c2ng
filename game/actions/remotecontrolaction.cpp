@@ -8,7 +8,6 @@
 #include "game/v3/command.hpp"
 #include "game/v3/commandcontainer.hpp"
 #include "game/v3/commandextra.hpp"
-#include "util/translation.hpp"
 
 using game::v3::Command;
 using game::v3::CommandContainer;
@@ -124,9 +123,7 @@ game::actions::RemoteControlAction::getNewState() const
 bool
 game::actions::RemoteControlAction::setState(Verb verb)
 {
-    // ex setRemoteControl
-    // phost.pas::BringShipIntoRCState
-
+    // ex setRemoteControl, phost.pas::BringShipIntoRCState
     State oldState = getOldState();
     State newState = getNewState();
 

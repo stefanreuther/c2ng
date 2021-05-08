@@ -6,6 +6,8 @@
 #define C2NG_GAME_SPEC_BASICHULLFUNCTION_HPP
 
 #include "afl/string/string.hpp"
+#include "afl/base/optional.hpp"
+#include "game/config/hostconfiguration.hpp"
 
 namespace game { namespace spec {
 
@@ -79,6 +81,15 @@ namespace game { namespace spec {
         /** Get implied function Id.
             \return implied function Id, -1 if none; see setImpliedFunctionId(). */
         int getImpliedFunctionId() const;
+
+        /** Get damage limit for a function.
+            If the return value is valid, the function ceases to work when the ship has
+            at least this much damage (that is, 0 means it never works!).
+            An unset return value (Nothing) means it never fails.
+            \param forOwner Owner
+            \param config Host configuration
+            \return damage limit */
+        afl::base::Optional<int> getDamageLimit(int forOwner, const game::config::HostConfiguration& config) const;
 
      private:
         const int m_id;

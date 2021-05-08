@@ -10,9 +10,10 @@
 
 namespace client { namespace dialogs {
 
-    void editCommands(client::si::UserSide& iface,
-                      client::si::Control& parentControl,
-                      client::si::OutputState& outputState);
+    void editCommands(ui::Root& root,
+                      client::si::UserSide& iface,
+                      client::si::OutputState& outputState,
+                      afl::string::Translator& tx);
 
 } }
 

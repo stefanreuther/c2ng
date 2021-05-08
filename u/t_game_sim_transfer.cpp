@@ -21,6 +21,7 @@ using game::HostVersion;
 using game::map::Object;
 using game::map::Planet;
 using game::map::Ship;
+using game::sim::BaseTransfer;
 using game::sim::Transfer;
 using game::test::SimpleTurn;
 using game::UnitScoreDefinitionList;
@@ -30,14 +31,15 @@ void
 TestGameSimTransfer::testCopyFromEmptyShip()
 {
     // Environment
-    UnitScoreDefinitionList scoreDefinitions;
+    UnitScoreDefinitionList shipScores;
+    UnitScoreDefinitionList planetScores;
     NullTranslator tx;
     HostVersion h(HostVersion::Host, MKVERSION(3,22,0));
     SimpleTurn t;
     Ship* in = t.universe().ships().create(77);
 
     // Test
-    Transfer tr(scoreDefinitions, t.shipList(), t.config(), h, tx);
+    Transfer tr(shipScores, planetScores, t.shipList(), t.config(), h, tx);
     game::sim::Ship out;
     TS_ASSERT_EQUALS(tr.copyShipFromGame(out, *in), false);
 }
@@ -47,7 +49,8 @@ void
 TestGameSimTransfer::testCopyFromShip()
 {
     // Environment
-    UnitScoreDefinitionList scoreDefinitions;
+    UnitScoreDefinitionList shipScores;
+    UnitScoreDefinitionList planetScores;
     NullTranslator tx;
     HostVersion h(HostVersion::Host, MKVERSION(3,22,0));
     SimpleTurn t;
@@ -70,7 +73,7 @@ TestGameSimTransfer::testCopyFromShip()
     in.addShipSpecialFunction(t.shipList().modifiedHullFunctions().getFunctionIdFromHostId(game::spec::HullFunction::Commander));
 
     // Transfer
-    Transfer tr(scoreDefinitions, t.shipList(), t.config(), h, tx);
+    Transfer tr(shipScores, planetScores, t.shipList(), t.config(), h, tx);
     game::sim::Ship out;
     TS_ASSERT_EQUALS(tr.copyShipFromGame(out, in), true);
 
@@ -96,7 +99,8 @@ void
 TestGameSimTransfer::testCopyToShip()
 {
     // Environment
-    UnitScoreDefinitionList scoreDefinitions;
+    UnitScoreDefinitionList shipScores;
+    UnitScoreDefinitionList planetScores;
     NullTranslator tx;
     HostVersion h(HostVersion::Host, MKVERSION(3,22,0));
     SimpleTurn t;
@@ -122,7 +126,7 @@ TestGameSimTransfer::testCopyToShip()
     in.setAggressiveness(game::sim::Ship::agg_Kill);
 
     // Transfer
-    Transfer tr(scoreDefinitions, t.shipList(), t.config(), h, tx);
+    Transfer tr(shipScores, planetScores, t.shipList(), t.config(), h, tx);
     TS_ASSERT_EQUALS(tr.copyShipToGame(out, in, t.universe()), true);
 
     // Verify changes
@@ -136,7 +140,8 @@ void
 TestGameSimTransfer::testCopyToMismatchingShip()
 {
     // Environment
-    UnitScoreDefinitionList scoreDefinitions;
+    UnitScoreDefinitionList shipScores;
+    UnitScoreDefinitionList planetScores;
     NullTranslator tx;
     HostVersion h(HostVersion::Host, MKVERSION(3,22,0));
     SimpleTurn t;
@@ -154,7 +159,7 @@ TestGameSimTransfer::testCopyToMismatchingShip()
     in.setHullTypeOnly(HULL_NR);
 
     // Test
-    Transfer tr(scoreDefinitions, t.shipList(), t.config(), h, tx);
+    Transfer tr(shipScores, planetScores, t.shipList(), t.config(), h, tx);
     TS_ASSERT_EQUALS(tr.copyShipToGame(out, in, t.universe()), false);
 }
 
@@ -163,7 +168,8 @@ void
 TestGameSimTransfer::testCopyToShipWithFighters()
 {
     // Environment
-    UnitScoreDefinitionList scoreDefinitions;
+    UnitScoreDefinitionList shipScores;
+    UnitScoreDefinitionList planetScores;
     NullTranslator tx;
     HostVersion h(HostVersion::Host, MKVERSION(3,22,0));
     SimpleTurn t;
@@ -191,7 +197,7 @@ TestGameSimTransfer::testCopyToShipWithFighters()
     in.setAmmo(60);             // 10 more than in universe
 
     // Transfer
-    Transfer tr(scoreDefinitions, t.shipList(), t.config(), h, tx);
+    Transfer tr(shipScores, planetScores, t.shipList(), t.config(), h, tx);
     TS_ASSERT_EQUALS(tr.copyShipToGame(out, in, t.universe()), true);
 
     // Verify
@@ -204,7 +210,8 @@ void
 TestGameSimTransfer::testCopyToShipWithTorps()
 {
     // Environment
-    UnitScoreDefinitionList scoreDefinitions;
+    UnitScoreDefinitionList shipScores;
+    UnitScoreDefinitionList planetScores;
     NullTranslator tx;
     HostVersion h(HostVersion::Host, MKVERSION(3,22,0));
     SimpleTurn t;
@@ -235,7 +242,7 @@ TestGameSimTransfer::testCopyToShipWithTorps()
     in.setAmmo(40);             // 10 less than in universe
 
     // Transfer
-    Transfer tr(scoreDefinitions, t.shipList(), t.config(), h, tx);
+    Transfer tr(shipScores, planetScores, t.shipList(), t.config(), h, tx);
     TS_ASSERT_EQUALS(tr.copyShipToGame(out, in, t.universe()), true);
 
     // Verify
@@ -248,14 +255,15 @@ void
 TestGameSimTransfer::testCopyFromEmptyPlanet()
 {
     // Environment
-    UnitScoreDefinitionList scoreDefinitions;
+    UnitScoreDefinitionList shipScores;
+    UnitScoreDefinitionList planetScores;
     NullTranslator tx;
     HostVersion h(HostVersion::Host, MKVERSION(3,22,0));
     SimpleTurn t;
     Planet* in = t.universe().planets().create(77);
 
     // Test
-    Transfer tr(scoreDefinitions, t.shipList(), t.config(), h, tx);
+    Transfer tr(shipScores, planetScores, t.shipList(), t.config(), h, tx);
     game::sim::Planet out;
     TS_ASSERT_EQUALS(tr.copyPlanetFromGame(out, *in), false);
 }
@@ -265,7 +273,8 @@ void
 TestGameSimTransfer::testCopyFromPlanet()
 {
     // Environment
-    UnitScoreDefinitionList scoreDefinitions;
+    UnitScoreDefinitionList shipScores;
+    UnitScoreDefinitionList planetScores;
     NullTranslator tx;
     HostVersion h(HostVersion::Host, MKVERSION(3,22,0));
     SimpleTurn t;
@@ -279,7 +288,7 @@ TestGameSimTransfer::testCopyFromPlanet()
     in.setCargo(Element::Colonists, 171);
 
     // Transfer
-    Transfer tr(scoreDefinitions, t.shipList(), t.config(), h, tx);
+    Transfer tr(shipScores, planetScores, t.shipList(), t.config(), h, tx);
     game::sim::Planet out;
     TS_ASSERT_EQUALS(tr.copyPlanetFromGame(out, in), true);
 
@@ -299,7 +308,8 @@ void
 TestGameSimTransfer::testCopyFromBase()
 {
     // Environment
-    UnitScoreDefinitionList scoreDefinitions;
+    UnitScoreDefinitionList shipScores;
+    UnitScoreDefinitionList planetScores;
     NullTranslator tx;
     HostVersion h(HostVersion::Host, MKVERSION(3,22,0));
     SimpleTurn t;
@@ -318,7 +328,7 @@ TestGameSimTransfer::testCopyFromBase()
     in.setBaseTechLevel(game::TorpedoTech, 7);
 
     // Transfer
-    Transfer tr(scoreDefinitions, t.shipList(), t.config(), h, tx);
+    Transfer tr(shipScores, planetScores, t.shipList(), t.config(), h, tx);
     game::sim::Planet out;
     TS_ASSERT_EQUALS(tr.copyPlanetFromGame(out, in), true);
 
@@ -339,7 +349,8 @@ void
 TestGameSimTransfer::testCopyToPlanet()
 {
     // Environment
-    UnitScoreDefinitionList scoreDefinitions;
+    UnitScoreDefinitionList shipScores;
+    UnitScoreDefinitionList planetScores;
     NullTranslator tx;
     HostVersion h(HostVersion::Host, MKVERSION(3,22,0));
     SimpleTurn t;
@@ -352,7 +363,7 @@ TestGameSimTransfer::testCopyToPlanet()
     out.setName(String_t("Florida"));
 
     // Transfer
-    Transfer tr(scoreDefinitions, t.shipList(), t.config(), h, tx);
+    Transfer tr(shipScores, planetScores, t.shipList(), t.config(), h, tx);
     game::sim::Planet in;
     in.setId(PLANET_ID);
     in.setOwner(PLAYER_NR);
@@ -368,7 +379,8 @@ void
 TestGameSimTransfer::testCopyToMismatchingPlanet()
 {
     // Environment
-    UnitScoreDefinitionList scoreDefinitions;
+    UnitScoreDefinitionList shipScores;
+    UnitScoreDefinitionList planetScores;
     NullTranslator tx;
     HostVersion h(HostVersion::Host, MKVERSION(3,22,0));
     SimpleTurn t;
@@ -381,7 +393,7 @@ TestGameSimTransfer::testCopyToMismatchingPlanet()
     out.setName(String_t("Florida"));
 
     // Transfer
-    Transfer tr(scoreDefinitions, t.shipList(), t.config(), h, tx);
+    Transfer tr(shipScores, planetScores, t.shipList(), t.config(), h, tx);
     game::sim::Planet in;
     in.setId(PLANET_ID);
     in.setOwner(PLAYER_NR+1);
@@ -391,3 +403,88 @@ TestGameSimTransfer::testCopyToMismatchingPlanet()
     // Verify
     TS_ASSERT_EQUALS(out.getFriendlyCode().orElse(""), "efg");
 }
+
+/** Test copy from battle ship. */
+void
+TestGameSimTransfer::testCopyShipFromBattle()
+{
+    // Environment
+    NullTranslator tx;
+    SimpleTurn t;
+
+    // Define a hull (inspired by TestGameVcrObject::testGuess)
+    const int HULL_NR = 12;
+    game::spec::Hull* p = t.shipList().hulls().create(HULL_NR);
+    p->setMass(300);
+    p->setMaxBeams(12);
+    p->setNumBays(1);
+    p->setExternalPictureNumber(3);
+    p->setInternalPictureNumber(77);
+
+    // Define VCR object
+    const int SHIP_ID = 111;
+    const int PLAYER_NR = 9;
+    game::vcr::Object obj;
+    obj.setId(SHIP_ID);
+    obj.setOwner(PLAYER_NR);
+    obj.setPicture(3);
+    obj.setMass(200);
+    obj.setNumBeams(12);
+    obj.setNumBays(3);
+    obj.setIsPlanet(false);
+    obj.setName("Oneoneone");
+    TS_ASSERT_EQUALS(obj.getGuessedHull(t.shipList().hulls()), HULL_NR);
+
+    // Perform the copy
+    game::sim::Ship ship;
+    BaseTransfer tr(t.shipList(), t.config(), tx);
+    bool ok = tr.copyShipFromBattle(ship, obj, HULL_NR, false);
+    TS_ASSERT(ok);
+
+    // Verify
+    TS_ASSERT_EQUALS(ship.getHullType(), HULL_NR);
+    TS_ASSERT_EQUALS(ship.getId(), SHIP_ID);
+    TS_ASSERT_EQUALS(ship.getOwner(), PLAYER_NR);
+    TS_ASSERT_EQUALS(ship.getNumBeams(), 12);
+}
+
+/** Test copy from battle planet. */
+void
+TestGameSimTransfer::testCopyPlanetFromBattle()
+{
+    // Environment
+    NullTranslator tx;
+    SimpleTurn t;
+
+    // Define VCR object (derived from TestGameVcrObjectInfo::testPlanet3)
+    game::vcr::Object o;
+    o.setMass(281);
+    o.setShield(100);
+    o.setDamage(0);
+    o.setCrew(0);
+    o.setId(446);
+    o.setOwner(8);
+    o.setBeamType(10);
+    o.setNumBeams(8);
+    o.setTorpedoType(0);
+    o.setNumLaunchers(0);
+    o.setNumBays(14);
+    o.setNumFighters(29);
+    o.setExperienceLevel(0);
+    o.setIsPlanet(true);
+
+    // Perform the copy
+    game::sim::Planet planet;
+    BaseTransfer tr(t.shipList(), t.config(), tx);
+    bool ok = tr.copyPlanetFromBattle(planet, o);
+    TS_ASSERT(ok);
+
+    // Verify
+    TS_ASSERT_EQUALS(planet.getId(), 446);
+    TS_ASSERT_EQUALS(planet.getOwner(), 8);
+    TS_ASSERT_EQUALS(planet.getDefense(), 90);
+    TS_ASSERT_EQUALS(planet.getBaseDefense(), 91);
+    TS_ASSERT_EQUALS(planet.getBaseBeamTech(), 10);
+    TS_ASSERT_EQUALS(planet.getNumBaseFighters(), 20);
+}
+

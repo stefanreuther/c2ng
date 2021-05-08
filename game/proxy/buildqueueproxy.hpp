@@ -10,7 +10,6 @@
 #include "game/session.hpp"
 #include "util/requestdispatcher.hpp"
 #include "util/requestsender.hpp"
-#include "util/slaverequestsender.hpp"
 
 namespace game { namespace proxy {
 
@@ -71,8 +70,9 @@ namespace game { namespace proxy {
 
      private:
         class Trampoline;
+        class TrampolineFromSession;
         util::RequestReceiver<BuildQueueProxy> m_reply;
-        util::SlaveRequestSender<Session, Trampoline> m_request;
+        util::RequestSender<Trampoline> m_request;
     };
 
 } }

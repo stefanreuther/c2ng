@@ -33,7 +33,7 @@ game::vcr::Overview::addBattle(Battle& b,
                                const game::config::HostConfiguration& config,
                                const game::spec::ShipList& shipList)
 {
-    // ex WCombatDiagram::init
+    // ex WCombatDiagram::init, vcrplay.pas:InitializeTacticalDiagram (approx)
 
     // Compute result
     b.prepareResult(config, shipList, Battle::NeedQuickOutcome);

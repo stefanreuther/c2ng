@@ -14,8 +14,9 @@ namespace ui { namespace widgets {
 
     class StaticText : public SimpleWidget {
      public:
-        StaticText(const String_t& text, util::SkinColor::Color color, gfx::FontRequest font, gfx::ResourceProvider& provider, int align = 0);
-        StaticText(const char* text, util::SkinColor::Color color, gfx::FontRequest font, gfx::ResourceProvider& provider, int align = 0);
+        StaticText(const String_t& text, util::SkinColor::Color color, gfx::FontRequest font, gfx::ResourceProvider& provider, gfx::HorizontalAlignment align = gfx::LeftAlign);
+        StaticText(const char* text, util::SkinColor::Color color, gfx::FontRequest font, gfx::ResourceProvider& provider, gfx::HorizontalAlignment align = gfx::LeftAlign);
+        ~StaticText();
 
         StaticText& setText(const String_t& text);
         StaticText& setIsFlexible(bool flex);
@@ -36,7 +37,7 @@ namespace ui { namespace widgets {
         gfx::FontRequest m_font;
         gfx::ResourceProvider& m_provider;
         afl::base::Optional<int> m_forcedWidth;
-        int m_align;
+        gfx::HorizontalAlignment m_align;
         bool m_isFlexible;
     };
 

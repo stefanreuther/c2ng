@@ -98,7 +98,7 @@ game::ref::ListObserver::updateResultList()
             && m_extraList.size() != 0
             && m_extraList.get(0)->type != UserList::DividerItem)
         {
-            newList.add(UserList::DividerItem, m_pSession->translator().translateString("Other"), Reference(), false, util::SkinColor::Static);
+            newList.add(UserList::DividerItem, m_pSession->translator().translateString("Other"), Reference(), false, game::map::Object::NotPlayable, util::SkinColor::Static);
         }
         newList.add(m_extraList);
     }

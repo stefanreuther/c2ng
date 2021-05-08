@@ -46,18 +46,18 @@ namespace {
         //   Mass: unknown     Not moving
         int mass;
         if (pShip->getMass(*pShipList).get(mass)) {
-            result.text[VisualScanShipInfoTile::ShipMass] = Format(tx.translateString("Mass: %d kt").c_str(), pref.formatNumber(mass));
+            result.text[VisualScanShipInfoTile::ShipMass] = Format(tx("Mass: %d kt"), pref.formatNumber(mass));
         } else {
-            result.text[VisualScanShipInfoTile::ShipMass] = tx.translateString("Mass: unknown");
+            result.text[VisualScanShipInfoTile::ShipMass] = tx("Mass: unknown");
         }
 
         // Line 1a:
         int warp;
         if (pShip->getWarpFactor().get(warp)) {
             if (warp == 0) {
-                result.text[VisualScanShipInfoTile::Speed] = tx.translateString("Not moving");
+                result.text[VisualScanShipInfoTile::Speed] = tx("Not moving");
             } else {
-                result.text[VisualScanShipInfoTile::Speed] = Format(tx.translateString("Speed: warp %d").c_str(), warp);
+                result.text[VisualScanShipInfoTile::Speed] = Format(tx("Speed: warp %d"), warp);
             }
         } else {
             // Leave empty
@@ -71,12 +71,7 @@ namespace {
                 if (game::Game* pGame = session.getGame().get()) {
                     if (game::Turn* pTurn = pGame->getViewpointTurn().get()) {
                         result.text[VisualScanShipInfoTile::Waypoint] =
-                            Format(tx.translateString("Waypoint: %s").c_str(),
-                                   pTurn->universe().getLocationName(pt,
-                                                                     game::map::Universe::NameGravity,
-                                                                     pRoot->hostConfiguration(),
-                                                                     pRoot->hostVersion(),
-                                                                     tx));
+                            Format(tx("Waypoint: %s"), pTurn->universe().findLocationName(pt, game::map::Universe::NameGravity, pRoot->hostConfiguration(), pRoot->hostVersion(), tx));
                     }
                 }
             }
@@ -88,9 +83,9 @@ namespace {
         // GPoint pt = s->getPredictedPos();
         // if (s->getShipKind() == GShip::CurrentShip && (pt.x != 0 || pt.y != 0)) {
         //     if (pt == s->getWaypoint()) {
-        //         text = _("Next turn: not moved");
+        //         text = tx("Next turn: not moved");
         //     } else {
-        //         text = format(_("Next turn: %s"),
+        //         text = format(tx("Next turn: %s"),
         //                       getCurrentUniverse()->getLocationName(pt, locs_WW));
         //     }
         // }
@@ -99,7 +94,7 @@ namespace {
         //   Damage: %d%%
         int damage;
         if (pShip->getDamage().get(damage)) {
-            result.text[VisualScanShipInfoTile::Damage] = Format(tx.translateString("Damage: %d%%").c_str(), damage);
+            result.text[VisualScanShipInfoTile::Damage] = Format(tx("Damage: %d%%").c_str(), damage);
         }
     }
 }

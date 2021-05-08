@@ -24,10 +24,10 @@ namespace {
 }
 
 ui::res::Provider*
-ui::res::createProvider(String_t name, String_t baseDirectory, afl::io::FileSystem& fs)
+ui::res::createProvider(String_t name, String_t baseDirectory, afl::io::FileSystem& fs, afl::sys::LogListener& log, afl::string::Translator& tx)
 {
     if (hasPrefix(name, "dir")) {
-        return new DirectoryProvider(fs.openDirectory(fs.makePathName(baseDirectory, name)));
+        return new DirectoryProvider(fs.openDirectory(fs.makePathName(baseDirectory, name)), fs, log, tx);
     } else if (hasPrefix(name, "wp")) {
         return new WinplanBitmapProvider(fs.openDirectory(fs.makePathName(baseDirectory, name)));
     } else if (hasPrefix(name, "wpvcr")) {

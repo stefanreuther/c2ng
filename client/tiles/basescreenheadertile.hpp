@@ -18,6 +18,7 @@ namespace client { namespace tiles {
 
      private:
         util::RequestReceiver<ControlScreenHeader> m_receiver;
+        bool m_forTask;
     };
 
 } }

@@ -67,3 +67,22 @@ client::PictureNamer::getPlayerPicture(const game::Player& /*pl*/) const
     // As of 20200516, no player pictures
     return String_t();
 }
+
+String_t
+client::PictureNamer::getFighterPicture(int raceNr, int playerNr) const
+{
+    return ui::res::makeResourceId(RESOURCE_ID("fighter"), raceNr, playerNr);
+}
+
+String_t
+client::PictureNamer::getVcrObjectPicture(bool isPlanet, int pictureNumber) const
+{
+    if (isPlanet) {
+        // Planet: 'planet'
+        return ui::res::PLANET;
+    } else {
+        // Ship: 'ship.<pic>'
+        // Rationale: same as getHullPicture()
+        return ui::res::makeResourceId(ui::res::SHIP, pictureNumber);
+    }
+}

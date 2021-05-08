@@ -185,11 +185,6 @@ server::talk::Root::rfcMessageIdRoot()
     return afl::net::redis::Subtree(m_db, RFC_MSGID_ROOT);
 }
 
-
-// /** Privilege check.
-//     \param privString privilege string to check against
-//     \param user user to check */
-// FIXME: here?
 bool
 server::talk::Root::checkUserPermission(String_t privString, String_t user)
 {

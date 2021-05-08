@@ -56,6 +56,22 @@ namespace game { namespace interface {
         ivsCrewDefenseRate
     };
 
+    /** Get property of a VCR side.
+        Note that the outcome is a property of a VCR side.
+        Therefore, this function may need to invoke the VCR player.
+        For this reason, the Battle cannot be const, because it will be updated with the computed result.
+
+        There is no protection against this calling the (costly) VCR.
+        Therefore, the server module must make sure to never call this for ivsStatus / ivsStatusRaw.
+
+        \param battle   The battle
+        \param side     Side to query (0=left, 1=right)
+        \param ivs      Property to get
+        \param tx       Translator (for names)
+        \param shipList Ship list (for component names, result computation)
+        \param config   Host configuration (for result computation)
+        \param players  Player list (for names)
+        \return value */
     afl::data::Value* getVcrSideProperty(game::vcr::Battle& battle, size_t side, VcrSideProperty ivs,
                                          afl::string::Translator& tx,
                                          const game::spec::ShipList& shipList,

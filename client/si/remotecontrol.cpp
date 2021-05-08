@@ -92,6 +92,7 @@ client::si::getRemoteControlFrameColor(game::Session& session, game::Id_t shipId
 afl::base::Optional<String_t>
 client::si::getRemoteControlQuestion(game::Session& session, game::Id_t shipId)
 {
+    // ex phost.pas:NRemoteControl (part)
     std::auto_ptr<RemoteControlAction> action(createAction(session, shipId));
     if (action.get()) {
         afl::string::Translator& tx = session.translator();

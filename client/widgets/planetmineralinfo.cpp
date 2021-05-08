@@ -63,7 +63,7 @@ namespace {
                         String_t unit)
     {
         // Label
-        skinContext.setTextAlign(0, 0);
+        skinContext.setTextAlign(gfx::LeftAlign, gfx::TopAlign);
         skinContext.setColor(util::SkinColor::Static);
         outTextF(skinContext, area.splitX(m.labelWidth), label);
 
@@ -79,11 +79,11 @@ namespace {
         drawSolidBar(paletteContext, barArea,               ui::Color_Shield+3);
  
         // Value
-        skinContext.setTextAlign(2, 0);
+        skinContext.setTextAlign(gfx::RightAlign, gfx::TopAlign);
         outTextF(skinContext, area.splitX(m.amountWidth), afl::string::Format("%d", rawValue)); // FIXME: numToString
 
         // Unit
-        skinContext.setTextAlign(0, 0);
+        skinContext.setTextAlign(gfx::LeftAlign, gfx::TopAlign);
         area.consumeX(5);
         outTextF(skinContext, area, unit);
     }
@@ -231,17 +231,11 @@ client::widgets::PlanetMineralInfo::drawBars(gfx::Canvas& can, NoteType type)
     area.grow(-(FRAME_SIZE + HORIZ_PADDING), -FRAME_SIZE);
 
     // Geometry
-    // const GfxRect in = getInnerSize(5, 5);
     Metrics m;
     m.labelWidth = font->getMaxTextWidth(afl::functional::createStringTable(labels).map(m_translator));
     m.unitWidth  = font->getMaxTextWidth(afl::functional::createStringTable(units) .map(m_translator)) + 5;
     m.amountWidth = font->getTextWidth("0") * 5 + 5;
-    // const int barWidth = std::max(int(in.w - labelWidth - unitWidth - amountWidth), 0);
-    // const int labelX = in.x;
-    // const int barX = labelX + labelWidth;
-    // const int uaX = barX + barWidth + amountWidth;
     const int he = font->getCellSize().getY();
-    // int y = in.y + 3;
 
     // Prepare canvas
     gfx::Context<util::SkinColor::Color> skinContext(can, getColorScheme());
@@ -255,7 +249,7 @@ client::widgets::PlanetMineralInfo::drawBars(gfx::Canvas& can, NoteType type)
     // - left: mineral type
     gfx::Rectangle line = area.splitY(he);
     skinContext.setColor(util::SkinColor::Heading);
-    skinContext.setTextAlign(0, 0);
+    skinContext.setTextAlign(gfx::LeftAlign, gfx::TopAlign);
     outTextF(skinContext, line, m_name);
 
     // - right: age or mining
@@ -266,7 +260,7 @@ client::widgets::PlanetMineralInfo::drawBars(gfx::Canvas& can, NoteType type)
      case ShowAge: {
         int age;
         if (m_info.age.get(age)) {
-            skinContext.setTextAlign(2, 0);
+            skinContext.setTextAlign(gfx::RightAlign, gfx::TopAlign);
             skinContext.setColor(age < 0
                                  ? util::SkinColor::Green
                                  : age >= 3
@@ -283,7 +277,7 @@ client::widgets::PlanetMineralInfo::drawBars(gfx::Canvas& can, NoteType type)
             if (m_info.groundAmount.get(groundAmount) && miningRate > groundAmount) {
                 miningColor = util::SkinColor::Yellow;
             }
-            skinContext.setTextAlign(2, 0);
+            skinContext.setTextAlign(gfx::RightAlign, gfx::TopAlign);
             skinContext.setColor(miningColor);
             // FIXME: use number formatter
             outTextF(skinContext, line, afl::string::Format(m_translator("%d kt/turn"), miningRate));
@@ -295,7 +289,7 @@ client::widgets::PlanetMineralInfo::drawBars(gfx::Canvas& can, NoteType type)
     // Second line
     // - left: summary
     line = area.splitY(he);
-    skinContext.setTextAlign(0, 0);
+    skinContext.setTextAlign(gfx::LeftAlign, gfx::TopAlign);
     skinContext.setColor(util::SkinColor::Static);
     if (!m_info.groundSummary.empty()) {
         if (!m_info.densitySummary.empty()) {
@@ -316,7 +310,7 @@ client::widgets::PlanetMineralInfo::drawBars(gfx::Canvas& can, NoteType type)
      case ShowMining: {
         int duration;
         if (m_info.miningDuration.get(duration)) {
-            skinContext.setTextAlign(2, 0);
+            skinContext.setTextAlign(gfx::RightAlign, gfx::TopAlign);
             skinContext.setColor(miningColor);
             // FIXME: use number formatter
             outTextF(skinContext, line, afl::string::Format(duration >= game::map::MAX_MINING_DURATION

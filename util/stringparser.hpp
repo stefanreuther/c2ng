@@ -35,6 +35,14 @@ namespace util {
             \return true (always succeeds) */
         bool parseDelim(const char* delim, String_t& out);
 
+        /** Check delimited variable string (greedy).
+            Accumulates all characters in \c out, until a delimiter or the end of the string is found.
+            If multiple delimiters exist in the string, picks the last one.
+            \param delim List of delimiters
+            \param out [out] Result
+            \return true (always succeeds) */
+        bool parseDelimGreedy(const char* delim, String_t& out);
+
         /** Check variable integer.
             \param out [out] Integer
             \return true on match, false on mismatch */

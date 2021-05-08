@@ -6,7 +6,7 @@
 #include "gfx/context.hpp"
 #include "gfx/complex.hpp"
 
-ui::widgets::StaticText::StaticText(const String_t& text, util::SkinColor::Color color, gfx::FontRequest font, gfx::ResourceProvider& provider, int align)
+ui::widgets::StaticText::StaticText(const String_t& text, util::SkinColor::Color color, gfx::FontRequest font, gfx::ResourceProvider& provider, gfx::HorizontalAlignment align)
     : SimpleWidget(),
       m_text(text),
       m_color(color),
@@ -19,7 +19,7 @@ ui::widgets::StaticText::StaticText(const String_t& text, util::SkinColor::Color
     setState(DisabledState, true);
 }
 
-ui::widgets::StaticText::StaticText(const char* text, util::SkinColor::Color color, gfx::FontRequest font, gfx::ResourceProvider& provider, int align)
+ui::widgets::StaticText::StaticText(const char* text, util::SkinColor::Color color, gfx::FontRequest font, gfx::ResourceProvider& provider, gfx::HorizontalAlignment align)
     : SimpleWidget(),
       m_text(text),
       m_color(color),
@@ -30,6 +30,9 @@ ui::widgets::StaticText::StaticText(const char* text, util::SkinColor::Color col
 {
     setState(DisabledState, true);
 }
+
+ui::widgets::StaticText::~StaticText()
+{ }
 
 ui::widgets::StaticText&
 ui::widgets::StaticText::setText(const String_t& text)
@@ -74,7 +77,7 @@ ui::widgets::StaticText::draw(gfx::Canvas& can)
     gfx::Context<util::SkinColor::Color> ctx(can, getColorScheme());
     ctx.setColor(m_color);
     ctx.useFont(*font);
-    ctx.setTextAlign(m_align, 1);
+    ctx.setTextAlign(m_align, gfx::MiddleAlign);
     drawBackground(ctx, getExtent());
     outTextF(ctx, getExtent(), m_text);
 }

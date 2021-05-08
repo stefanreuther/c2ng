@@ -6,6 +6,7 @@
 #include "client/dialogs/processlistdialog.hpp"
 #include "afl/base/observable.hpp"
 #include "afl/string/format.hpp"
+#include "client/dialogs/notifications.hpp"
 #include "client/downlink.hpp"
 #include "client/si/control.hpp"
 #include "client/si/stringlistdialogwidget.hpp"
@@ -92,8 +93,10 @@ namespace {
         virtual size_t getNumItems();
         virtual bool isItemAccessible(size_t n);
         virtual int getItemHeight(size_t n);
-        virtual int getHeaderHeight();
+        virtual int getHeaderHeight() const;
+        virtual int getFooterHeight() const;
         virtual void drawHeader(gfx::Canvas& can, gfx::Rectangle area);
+        virtual void drawFooter(gfx::Canvas& can, gfx::Rectangle area);
         virtual void drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state);
         virtual void handlePositionChange(gfx::Rectangle& oldPosition);
         virtual ui::layout::Info getLayoutInfo() const;
@@ -119,7 +122,7 @@ namespace {
 
     class ProcessListKeyHandler : public ui::InvisibleWidget {
      public:
-        ProcessListKeyHandler(ui::Root& root, util::RequestSender<game::Session> gameSender, afl::string::Translator& tx, ProcessListProxy& proxy, MutexListProxy& mProxy, ProcessListWidget& list);
+        ProcessListKeyHandler(ui::Root& root, util::RequestSender<game::Session> gameSender, afl::string::Translator& tx, ProcessListProxy& proxy, MutexListProxy& mProxy, ProcessListWidget& list, client::si::Control& parent);
 
         virtual bool handleKey(util::Key_t key, int prefix);
 
@@ -130,11 +133,13 @@ namespace {
         ProcessListProxy& m_proxy;
         MutexListProxy& m_mutexProxy;
         ProcessListWidget& m_list;
+        client::si::Control& m_parent;
 
         void setAllProcessState(ProcessListEditor::State st);
         void setCurrentProcessState(ProcessListEditor::State st);
         void changePriority();
         void listMutexes(bool all);
+        void showNotifications();
     };
 
 
@@ -151,10 +156,12 @@ namespace {
                           afl::string::Translator& tx,
                           client::si::OutputState& out);
 
-        virtual void handleStateChange(client::si::UserSide& ui, client::si::RequestLink2 link, client::si::OutputState::Target target);
-        virtual void handleEndDialog(client::si::UserSide& ui, client::si::RequestLink2 link, int code);
-        virtual void handlePopupConsole(client::si::UserSide& ui, client::si::RequestLink2 link);
-        virtual void handleSetViewRequest(client::si::UserSide& ui, client::si::RequestLink2 link, String_t name, bool withKeymap);
+        virtual void handleStateChange(client::si::RequestLink2 link, client::si::OutputState::Target target);
+        virtual void handleEndDialog(client::si::RequestLink2 link, int code);
+        virtual void handlePopupConsole(client::si::RequestLink2 link);
+        virtual void handleSetViewRequest(client::si::RequestLink2 link, String_t name, bool withKeymap);
+        virtual void handleUseKeymapRequest(client::si::RequestLink2 link, String_t name, int prefix);
+        virtual void handleOverlayMessageRequest(client::si::RequestLink2 link, String_t text);
         virtual client::si::ContextProvider* createContextProvider();
 
         void onListChange(const ProcessListProxy::Infos_t& content);
@@ -178,6 +185,8 @@ namespace {
         ProcessListWidget m_list;
         ui::widgets::Button m_gotoButton;
 
+        afl::base::SignalConnection conn_listChange;
+
         void postGoToScreen(int screen, int id);
     };
 
@@ -194,30 +203,32 @@ namespace {
               m_loop(root)
             { }
 
-        virtual void handleStateChange(client::si::UserSide& ui, client::si::RequestLink2 link, client::si::OutputState::Target target)
+        virtual void handleStateChange(client::si::RequestLink2 link, client::si::OutputState::Target target)
+            { dialogHandleStateChange(link, target, m_outputState, m_loop, 0); }
+
+        virtual void handleEndDialog(client::si::RequestLink2 link, int /*code*/)
             {
-                ui.detachProcess(link);
-                m_outputState.set(link, target);
-                m_loop.stop(0);
+                // We have just closed the dialog, nothing more to do.
+                interface().continueProcess(link);
             }
 
-        virtual void handleEndDialog(client::si::UserSide& ui, client::si::RequestLink2 link, int /*code*/)
-            { ui.continueProcess(link); }
-
-        virtual void handlePopupConsole(client::si::UserSide& ui, client::si::RequestLink2 link)
+        virtual void handlePopupConsole(client::si::RequestLink2 link)
             {
                 // FIXME
-                ui.continueProcess(link);
+                interface().continueProcess(link);
             }
 
-        virtual void handleSetViewRequest(client::si::UserSide& ui, client::si::RequestLink2 link, String_t name, bool withKeymap)
-            { defaultHandleSetViewRequest(ui, link, name, withKeymap); }
+        virtual void handleSetViewRequest(client::si::RequestLink2 link, String_t name, bool withKeymap)
+            { defaultHandleSetViewRequest(link, name, withKeymap); }
+
+        virtual void handleUseKeymapRequest(client::si::RequestLink2 link, String_t name, int prefix)
+            { defaultHandleUseKeymapRequest(link, name, prefix); }
+
+        virtual void handleOverlayMessageRequest(client::si::RequestLink2 link, String_t text)
+            { defaultHandleOverlayMessageRequest(link, text); }
 
         virtual client::si::ContextProvider* createContextProvider()
             { return 0; }
-
-        void run()
-            { m_loop.run(); }
 
      private:
         // References
@@ -258,9 +269,15 @@ ProcessListWidget::getItemHeight(size_t /*n*/)
 }
 
 int
-ProcessListWidget::getHeaderHeight()
+ProcessListWidget::getHeaderHeight() const
 {
     return getFont()->getLineHeight();
+}
+
+int
+ProcessListWidget::getFooterHeight() const
+{
+    return 0;
 }
 
 void
@@ -279,6 +296,10 @@ ProcessListWidget::drawHeader(gfx::Canvas& can, gfx::Rectangle area)
     outTextF(ctx, area.splitX(PriWidth*em),    m_translator("Pri"));
     outTextF(ctx, area.splitX(StatusWidth*em), m_translator("Status"));
 }
+
+void
+ProcessListWidget::drawFooter(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
+{ }
 
 void
 ProcessListWidget::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state)
@@ -414,13 +435,14 @@ ProcessListWidget::getFont() const
  */
 
 inline
-ProcessListKeyHandler::ProcessListKeyHandler(ui::Root& root, util::RequestSender<game::Session> gameSender, afl::string::Translator& tx, ProcessListProxy& proxy, MutexListProxy& mProxy, ProcessListWidget& list)
+ProcessListKeyHandler::ProcessListKeyHandler(ui::Root& root, util::RequestSender<game::Session> gameSender, afl::string::Translator& tx, ProcessListProxy& proxy, MutexListProxy& mProxy, ProcessListWidget& list, client::si::Control& parent)
     : m_root(root),
       m_gameSender(gameSender),
       m_translator(tx),
       m_proxy(proxy),
       m_mutexProxy(mProxy),
-      m_list(list)
+      m_list(list),
+      m_parent(parent)
 { }
 
 bool
@@ -449,21 +471,9 @@ ProcessListKeyHandler::handleKey(util::Key_t key, int /*prefix*/)
      case 'p':
         changePriority();
         return true;
-        // FIXME: case 'n':
-        //    if (IntExecutionContext* proc = process_list->getSelectedProcess()) {
-        //        if (IntNotificationMessage* msg = proc->getNotificationMessage()) {
-        //            // Move to that message
-        //            IntNotificationMessageStore& inms = IntNotificationMessageStore::instance;
-        //            inms.setCurrent(inms.getIndexOfMessage(msg));
-
-        //            // Suspend the process, so that the message does not die in our hands
-        //            setProcessState(IntExecutionContext::psSuspended, false);
-
-        //            // Tell caller to show messages
-        //            stop(1001);
-        //        }
-        //    }
-        //    return true;
+     case 'n':
+        showNotifications();
+        return true;
      case 'l':
         listMutexes(false);
         return true;
@@ -500,9 +510,9 @@ ProcessListKeyHandler::changePriority()
         afl::base::Observable<int32_t> priority(p->priority);
 
         afl::base::Deleter del;
-        ui::widgets::DecimalSelector& sel = del.addNew(new ui::widgets::DecimalSelector(m_root, priority, 0, 99, 10));
+        ui::widgets::DecimalSelector& sel = del.addNew(new ui::widgets::DecimalSelector(m_root, m_translator, priority, 0, 99, 10));
         ui::Widget& w = sel.addButtons(del, m_root);
-        if (ui::widgets::doStandardDialog(m_translator("Process Manager"), m_translator("Enter new process priority:"), w, true, m_root)) {
+        if (ui::widgets::doStandardDialog(m_translator("Process Manager"), m_translator("Enter new process priority:"), w, true, m_root, m_translator)) {
             // FIXME: help: "pcc2:processmgr"
             m_proxy.setProcessPriority(processId, priority.get());
         }
@@ -515,11 +525,11 @@ ProcessListKeyHandler::listMutexes(bool all)
     // WProcessManagerDialog::listLocks, hooks.pas:NListLocks
     // Fetch list; handle errors
     MutexListProxy::Infos_t list;
-    client::Downlink link(m_root);
+    client::Downlink link(m_root, m_translator);
     if (all) {
         m_mutexProxy.enumMutexes(link, list);
         if (list.empty()) {
-            MessageBox(m_translator("No locks active in system."), m_translator("Locks"), m_root).doOkDialog();
+            MessageBox(m_translator("No locks active in system."), m_translator("Locks"), m_root).doOkDialog(m_translator);
             return;
         }
     } else {
@@ -529,7 +539,7 @@ ProcessListKeyHandler::listMutexes(bool all)
         }
         m_mutexProxy.enumMutexes(link, list, processId);
         if (list.empty()) {
-            MessageBox(m_translator("This process does not own any locks."), m_translator("Locks"), m_root).doOkDialog();
+            MessageBox(m_translator("This process does not own any locks."), m_translator("Locks"), m_root).doOkDialog(m_translator);
             return;
         }
     }
@@ -543,7 +553,7 @@ ProcessListKeyHandler::listMutexes(bool all)
     box.sortItemsAlphabetically();
 
     // Do it
-    if (box.run(m_root, m_gameSender)) {
+    if (box.run(m_root, m_translator, m_gameSender)) {
         if (all) {
             int32_t key;
             if (box.getCurrentKey(key)) {
@@ -552,6 +562,18 @@ ProcessListKeyHandler::listMutexes(bool all)
         }
     }
 }
+
+void
+ProcessListKeyHandler::showNotifications()
+{
+    uint32_t pid = 0;
+    if (m_list.getSelectedProcessId(pid)) {
+        client::si::OutputState out;
+        client::dialogs::showNotifications(pid, m_proxy, m_parent.interface(), m_parent.root(), m_parent.translator(), out);
+        m_parent.handleStateChange(out.getProcess(), out.getTarget());
+    }
+}
+
 
 /*
  *  ProcessListDialog
@@ -570,57 +592,47 @@ ProcessListDialog::ProcessListDialog(client::si::UserSide& iface,
       m_mutexProxy(mProxy),
       m_loop(root),
       m_list(root, tx),
-      m_gotoButton(tx("G - Go To"), 'g', root)
+      m_gotoButton(tx("G - Go To"), 'g', root),
+      conn_listChange(m_proxy.sig_listChange.add(this, &ProcessListDialog::onListChange))
 {
-    m_proxy.sig_listChange.add(this, &ProcessListDialog::onListChange);
     m_gotoButton.sig_fire.add(this, &ProcessListDialog::onGoTo);
 }
 
 void
-ProcessListDialog::handleStateChange(client::si::UserSide& ui, client::si::RequestLink2 link, client::si::OutputState::Target target)
+ProcessListDialog::handleStateChange(client::si::RequestLink2 link, client::si::OutputState::Target target)
 {
-    using client::si::OutputState;
-    switch (target) {
-     case OutputState::NoChange:
-        ui.continueProcess(link);
-        break;
-
-     case OutputState::PlayerScreen:
-     case OutputState::ExitProgram:
-     case OutputState::ExitGame:
-     case OutputState::ShipScreen:
-     case OutputState::PlanetScreen:
-     case OutputState::BaseScreen:
-     case OutputState::ShipTaskScreen:
-     case OutputState::PlanetTaskScreen:
-     case OutputState::BaseTaskScreen:
-     case OutputState::Starchart:
-        ui.detachProcess(link);
-        m_outputState.set(link, target);
-        m_loop.stop(0);
-        break;
-    }
+    dialogHandleStateChange(link, target, m_outputState, m_loop, 0);
 }
 
 void
-ProcessListDialog::handleEndDialog(client::si::UserSide& ui, client::si::RequestLink2 link, int /*code*/)
+ProcessListDialog::handleEndDialog(client::si::RequestLink2 link, int code)
 {
-    ui.detachProcess(link);
-    m_outputState.set(link, client::si::OutputState::NoChange);
-    m_loop.stop(0);
+    dialogHandleEndDialog(link, code, m_outputState, m_loop, 0);
 }
 
 void
-ProcessListDialog::handlePopupConsole(client::si::UserSide& ui, client::si::RequestLink2 link)
+ProcessListDialog::handlePopupConsole(client::si::RequestLink2 link)
 {
     // FIXME
-    ui.continueProcess(link);
+    interface().continueProcess(link);
 }
 
 void
-ProcessListDialog::handleSetViewRequest(client::si::UserSide& ui, client::si::RequestLink2 link, String_t name, bool withKeymap)
+ProcessListDialog::handleSetViewRequest(client::si::RequestLink2 link, String_t name, bool withKeymap)
 {
-    defaultHandleSetViewRequest(ui, link, name, withKeymap);
+    defaultHandleSetViewRequest(link, name, withKeymap);
+}
+
+void
+ProcessListDialog::handleUseKeymapRequest(client::si::RequestLink2 link, String_t name, int prefix)
+{
+    defaultHandleUseKeymapRequest(link, name, prefix);
+}
+
+void
+ProcessListDialog::handleOverlayMessageRequest(client::si::RequestLink2 link, String_t text)
+{
+    defaultHandleOverlayMessageRequest(link, text);
 }
 
 client::si::ContextProvider*
@@ -660,7 +672,7 @@ ProcessListDialog::run()
     afl::string::Translator& tx = translator();
     afl::base::Deleter del;
 
-    ui::Widget& keyHandler = del.addNew(new ProcessListKeyHandler(m_root, interface().gameSender(), tx, m_proxy, m_mutexProxy, m_list));
+    ui::Widget& keyHandler = del.addNew(new ProcessListKeyHandler(m_root, interface().gameSender(), tx, m_proxy, m_mutexProxy, m_list, *this));
 
     ui::Window& win = del.addNew(new ui::Window(tx("Process Manager"), m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
     win.add(m_list);
@@ -673,15 +685,15 @@ ProcessListDialog::run()
     addButton(m_root, del, g1, keyHandler, "S", 's');
     addText(m_root, del, g1, tx("Suspend"));
     g1.add(del.addNew(new ui::Spacer()));
-    // FIXME: addButton(m_root, del, g1, keyHandler, "N", 'n');
-    // FIXME: addText(m_root, del, g1, tx("Notification"));
+    addButton(m_root, del, g1, keyHandler, "N", 'n');
+    addText(m_root, del, g1, tx("Notification"));
     addButton(m_root, del, g1, keyHandler, "L", 'l');
     addText(m_root, del, g1, tx("Locks"));
     addButton(m_root, del, g1, keyHandler, "P", 'p');
     addText(m_root, del, g1, tx("Priority"));
     win.add(g1);
 
-    ui::Widget& helper = del.addNew(new client::widgets::HelpWidget(m_root, interface().gameSender(), "pcc2:processmgr"));
+    ui::Widget& helper = del.addNew(new client::widgets::HelpWidget(m_root, tx, interface().gameSender(), "pcc2:processmgr"));
     
     ui::Group& g2 = del.addNew(new ui::Group(ui::layout::HBox::instance5));
     ui::widgets::Button& btnExec = del.addNew(new ui::widgets::Button(tx("X - Execute"), 'x', m_root));
@@ -734,7 +746,7 @@ void
 ProcessListDialog::onExecute()
 {
     // Commit
-    client::Downlink link(m_root);
+    client::Downlink link(m_root, translator());
     performChanges(link, m_proxy, *this);
 
     // Reload if needed
@@ -758,7 +770,7 @@ client::dialogs::doProcessListDialog(game::Reference invokingObject,
                                      client::si::OutputState& out)
 {
     client::si::OutputState out1, out2;
-    Downlink link(ctl.root());
+    Downlink link(ctl.root(), ctl.translator());
     ProcessListProxy proxy(iface.gameSender(), ctl.root().engine().dispatcher());
     MutexListProxy mProxy(iface.gameSender());
 

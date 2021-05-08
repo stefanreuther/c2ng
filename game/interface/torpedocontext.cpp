@@ -52,7 +52,7 @@ game::interface::TorpedoContext::lookup(const afl::data::NameQuery& name, Proper
     return lookupName(name, torpedo_map, result) ? this : 0;
 }
 void
-game::interface::TorpedoContext::set(PropertyIndex_t index, afl::data::Value* value)
+game::interface::TorpedoContext::set(PropertyIndex_t index, const afl::data::Value* value)
 {
     // ex IntTorpedoContext::set, IntLauncherContext::set
     // Assigments always go to the launcher, being the long-lived object.

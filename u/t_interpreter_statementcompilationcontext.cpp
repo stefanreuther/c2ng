@@ -7,6 +7,7 @@
 
 #include "t_interpreter.hpp"
 #include "afl/io/nullfilesystem.hpp"
+#include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
 #include "interpreter/error.hpp"
 #include "interpreter/world.hpp"
@@ -16,11 +17,12 @@ namespace {
 
     struct TestHarness {
         afl::io::NullFileSystem fs;
+        afl::string::NullTranslator tx;
         afl::sys::Log log;
         interpreter::World world;
 
         TestHarness()
-            : fs(), log(), world(log, fs)
+            : fs(), tx(), log(), world(log, tx, fs)
             { }
     };
 

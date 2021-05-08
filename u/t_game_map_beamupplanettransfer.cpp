@@ -40,6 +40,8 @@ TestGameMapBeamUpPlanetTransfer::testIt()
      */
 
     TS_ASSERT_EQUALS(testee.getName(tx), "Beam up from World");
+    TS_ASSERT_EQUALS(testee.getInfo1(tx), "");
+    TS_ASSERT_EQUALS(testee.getInfo2(tx), "");
     TS_ASSERT_EQUALS(testee.canHaveElement(Element::Neutronium), true);
     TS_ASSERT_EQUALS(testee.canHaveElement(Element::Colonists), false);
     TS_ASSERT_EQUALS(testee.canHaveElement(Element::Fighters), false);

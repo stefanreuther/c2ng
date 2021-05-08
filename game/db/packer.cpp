@@ -1,13 +1,14 @@
 /**
   *  \file game/db/packer.cpp
+  *  \brief Class game::db::Packer
   */
 
 #include "game/db/packer.hpp"
 #include "game/map/planet.hpp"
+#include "game/map/ship.hpp"
 #include "game/map/ufo.hpp"
 #include "game/map/universe.hpp"
 #include "game/parser/messageinformation.hpp"
-#include "game/map/ship.hpp"
 #include "game/v3/packer.hpp"
 
 namespace gp = game::parser;
@@ -40,11 +41,11 @@ void
 game::db::Packer::addUfo(Turn& turn, const structures::Ufo& ufo)
 {
     // Add Ufo through message interface instead of directly setting properties.
-    // This allows it to reject obsolete data.
+    // This allows the Ufo to reject obsolete data.
     gp::MessageInformation info(gp::MessageInformation::Ufo, ufo.id, ufo.turnLastSeen);
 
     // Scalars
-    // FIXME: deal with -1 values?
+    // FIXME: do we need to deal with -1 values here?
     info.addValue(gp::mi_UfoColor,       ufo.ufo.color);
     info.addValue(gp::mi_UfoRealId,      ufo.realId);
     info.addValue(gp::mi_Speed,          ufo.ufo.warpFactor);
@@ -241,6 +242,8 @@ game::db::Packer::addShipTrack(Turn& turn, int id, int turnNr, const structures:
     addValueMaybe(info, gp::mi_Speed,    entry.speed,   -1);
     addValueMaybe(info, gp::mi_Heading,  entry.heading, -1);
     addValueMaybe(info, gp::mi_Mass,     entry.mass,    -1);
+
+    // Note that player set needs to be empty to create ship-track records
     sh->addMessageInformation(info, PlayerSet_t());
 }
 
@@ -295,8 +298,7 @@ game::db::Packer::packPlanet(structures::Planet& out, const game::map::Planet& i
     }
 
     // Known-to-have-natives flag
-    // FIXME: reconsider? This differes from PCC2. PCC writes the raw "isKnownToHaveNatives" flag,
-    // we write the processed value.
+    // FIXME: reconsider? This differs from PCC2. PCC writes the raw "isKnownToHaveNatives" flag, we write the processed value.
     out.knownToHaveNatives = in.isKnownToHaveNatives();
 
     // Base flag

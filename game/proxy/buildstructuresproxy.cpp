@@ -16,34 +16,25 @@
 using game::actions::BuildStructures;
 using game::map::Planet;
 
-class game::proxy::BuildStructuresProxy::Trampoline : public util::SlaveObject<Session> {
+class game::proxy::BuildStructuresProxy::Trampoline {
  public:
-    Trampoline(util::RequestSender<BuildStructuresProxy> reply)
-        : m_reply(reply)
+    Trampoline(Session& session, util::RequestSender<BuildStructuresProxy> reply)
+        : m_session(session),
+          m_reply(reply)
         { }
 
-    virtual void init(Session&)
-        { }
-
-    virtual void done(Session&)
+     void init(Id_t id, HeaderInfo& info, Status& status)
         {
-            m_action.reset();
-            m_container.reset();
-            conn_change.disconnect();
-        }
-
-     void init(Session& session, Id_t id, HeaderInfo& info, Status& status)
-        {
-            afl::string::Translator& tx = session.translator();
+            afl::string::Translator& tx = m_session.translator();
             try {
                 // Preconditions
-                Root& root = game::actions::mustHaveRoot(session);
-                Game& game = game::actions::mustHaveGame(session);
+                Root& root = game::actions::mustHaveRoot(m_session);
+                Game& game = game::actions::mustHaveGame(m_session);
 
                 // Fetch planet
-                Planet& planet = game::actions::mustExist(game.currentTurn().universe().planets().get(id));
-                m_container.reset(new game::map::PlanetStorage(planet, root.hostConfiguration()));
-                m_action.reset(new BuildStructures(planet, *m_container, root.hostConfiguration()));
+                Planet& planet = game::actions::mustExist(game.currentTurn().universe().planets().get(id), tx);
+                m_container.reset(new game::map::PlanetStorage(planet, root.hostConfiguration(), tx));
+                m_action.reset(new BuildStructures(planet, *m_container, root.hostConfiguration(), tx));
                 m_action->setUndoInformation(game.currentTurn().universe());
 
                 // Produce output
@@ -98,16 +89,33 @@ class game::proxy::BuildStructuresProxy::Trampoline : public util::SlaveObject<S
     BuildStructures* get()
         { return m_action.get(); }
 
+    void notifyListeners()
+        { m_session.notifyListeners(); }
+
  private:
+    Session& m_session;
     util::RequestSender<BuildStructuresProxy> m_reply;
     std::auto_ptr<CargoContainer> m_container;
     std::auto_ptr<BuildStructures> m_action;
     afl::base::SignalConnection conn_change;
 };
 
+class game::proxy::BuildStructuresProxy::TrampolineFromSession : public afl::base::Closure<Trampoline*(Session&)> {
+ public:
+    TrampolineFromSession(const util::RequestSender<BuildStructuresProxy>& reply)
+        : m_reply(reply)
+        { }
+    virtual Trampoline* call(Session& session)
+        { return new Trampoline(session, m_reply); }
+ private:
+    util::RequestSender<BuildStructuresProxy> m_reply;
+};
+
+
+
 game::proxy::BuildStructuresProxy::BuildStructuresProxy(util::RequestSender<Session> gameSender, util::RequestDispatcher& receiver)
     : m_receiver(receiver, *this),
-      m_sender(gameSender, new Trampoline(m_receiver.getSender()))
+      m_sender(gameSender.makeTemporary(new TrampolineFromSession(m_receiver.getSender())))
 { }
 
 game::proxy::BuildStructuresProxy::~BuildStructuresProxy()
@@ -116,13 +124,13 @@ game::proxy::BuildStructuresProxy::~BuildStructuresProxy()
 void
 game::proxy::BuildStructuresProxy::init(WaitIndicator& link, Id_t id, HeaderInfo& info)
 {
-    class Task : public util::SlaveRequest<Session, Trampoline> {
+    class Task : public util::Request<Trampoline> {
      public:
         Task(Id_t id, HeaderInfo& info)
             : m_id(id), m_info(info), m_status()
             { }
-        virtual void handle(Session& session, Trampoline& tpl)
-            { tpl.init(session, m_id, m_info, m_status); }
+        virtual void handle(Trampoline& tpl)
+            { tpl.init(m_id, m_info, m_status); }
         const Status& status() const
             { return m_status; }
      private:
@@ -142,9 +150,9 @@ game::proxy::BuildStructuresProxy::init(WaitIndicator& link, Id_t id, HeaderInfo
 void
 game::proxy::BuildStructuresProxy::update()
 {
-    class Task : public util::SlaveRequest<Session, Trampoline> {
+    class Task : public util::Request<Trampoline> {
      public:
-        virtual void handle(Session&, Trampoline& tpl)
+        virtual void handle(Trampoline& tpl)
             { tpl.onChange(); }
     };
     m_sender.postNewRequest(new Task());
@@ -153,12 +161,12 @@ game::proxy::BuildStructuresProxy::update()
 void
 game::proxy::BuildStructuresProxy::addLimitCash(PlanetaryBuilding type, int count)
 {
-    class Task : public util::SlaveRequest<Session, Trampoline> {
+    class Task : public util::Request<Trampoline> {
      public:
         Task(PlanetaryBuilding type, int count)
             : m_type(type), m_count(count)
             { }
-        virtual void handle(Session&, Trampoline& tpl)
+        virtual void handle(Trampoline& tpl)
             {
                 if (BuildStructures* a = tpl.get()) {
                     a->addLimitCash(m_type, m_count);
@@ -174,9 +182,9 @@ game::proxy::BuildStructuresProxy::addLimitCash(PlanetaryBuilding type, int coun
 void
 game::proxy::BuildStructuresProxy::doStandardAutoBuild()
 {
-    class Task : public util::SlaveRequest<Session, Trampoline> {
+    class Task : public util::Request<Trampoline> {
      public:
-        virtual void handle(Session&, Trampoline& tpl)
+        virtual void handle(Trampoline& tpl)
             {
                 if (BuildStructures* a = tpl.get()) {
                     a->doStandardAutoBuild();
@@ -189,16 +197,16 @@ game::proxy::BuildStructuresProxy::doStandardAutoBuild()
 void
 game::proxy::BuildStructuresProxy::applyAutobuildSettings(const game::map::Planet::AutobuildSettings& settings)
 {
-    class Task : public util::SlaveRequest<Session, Trampoline> {
+    class Task : public util::Request<Trampoline> {
      public:
         Task(const Planet::AutobuildSettings& settings)
             : m_settings(settings)
             { }
-        virtual void handle(Session& s, Trampoline& tpl)
+        virtual void handle(Trampoline& tpl)
             {
                 if (BuildStructures* a = tpl.get()) {
                     const_cast<Planet&>(a->planet()).applyAutobuildSettings(m_settings);
-                    s.notifyListeners();
+                    tpl.notifyListeners();
                 }
             }
      private:
@@ -210,9 +218,9 @@ game::proxy::BuildStructuresProxy::applyAutobuildSettings(const game::map::Plane
 void
 game::proxy::BuildStructuresProxy::commit()
 {
-    class Task : public util::SlaveRequest<Session, Trampoline> {
+    class Task : public util::Request<Trampoline> {
      public:
-        virtual void handle(Session&, Trampoline& tpl)
+        virtual void handle(Trampoline& tpl)
             {
                 if (BuildStructures* a = tpl.get()) {
                     a->commit();

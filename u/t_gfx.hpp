@@ -52,7 +52,8 @@ class TestGfxContext : public CxxTest::TestSuite {
 
 class TestGfxDefaultFont : public CxxTest::TestSuite {
  public:
-    void testIt();
+    void testMetrics();
+    void testDrawing();
 };
 
 class TestGfxEngine : public CxxTest::TestSuite {

@@ -8,6 +8,7 @@
 #include "game/root.hpp"
 #include "game/spec/beam.hpp"
 #include "game/spec/engine.hpp"
+#include "game/spec/fighter.hpp"
 #include "game/spec/info/types.hpp"
 #include "game/spec/shiplist.hpp"
 #include "game/spec/torpedolauncher.hpp"
@@ -27,6 +28,15 @@ namespace game { namespace spec { namespace info {
         \param [in]  viewpointPlayer  Viewpoint player (used for configuration)
         \param [in]  tx               Translator */
     void describeHull(PageContent& content, Id_t id, const ShipList& shipList, bool withCost, const PictureNamer& picNamer, const Root& root, int viewpointPlayer, afl::string::Translator& tx);
+
+    /** Describe a list of hull functions.
+        \param [out] out              Result produced here
+        \param [in]  hfList           Hull functions to describe
+        \param [in]  shipList         Ship list (for hull functions)
+        \param [in]  picNamer         Picture namer
+        \param [in]  root             Root (used for configuration, host version)
+        \param [in]  tx               Translator */
+    void describeHullFunctions(Abilities_t& out, const HullFunctionList& hfList, const ShipList& shipList, const PictureNamer& picNamer, const Root& root, afl::string::Translator& tx);
 
     /** Describe an engine.
         Output is intended to be human-readable.
@@ -64,6 +74,17 @@ namespace game { namespace spec { namespace info {
         \param [in]  tx               Translator */
     void describeTorpedo(PageContent& content, Id_t id, const ShipList& shipList, bool withCost, const PictureNamer& picNamer, const Root& root, int viewpointPlayer, afl::string::Translator& tx);
 
+    /** Describe a fighter launcher.
+        Output is intended to be human-readable.
+        \param [out] content          Result produced here
+        \param [in]  player           Player number.
+        \param [in]  shipList         Ship list (required for naming)
+        \param [in]  withCost         Include cost in formatted output
+        \param [in]  picNamer         Picture namer
+        \param [in]  root             Root (used for configuration, host version)
+        \param [in]  tx               Translator */
+    void describeFighter(PageContent& content, int player, const ShipList& shipList, bool withCost, const PictureNamer& picNamer, const Root& root, afl::string::Translator& tx);
+
 
     /** Get hull attribute.
         The attribute is identified by a FilterAttribute value; if an invalid/unknown value is requested, the function returns Nothing.
@@ -96,6 +117,14 @@ namespace game { namespace spec { namespace info {
         \param viewpointPlayer Viewpoint player (used for configuration)
         \return Attribute if att corresponds to a valid attribute */
     OptionalInt_t getTorpedoAttribute(const TorpedoLauncher& torp, FilterAttribute att, const Root& root, int viewpointPlayer);
+
+    /** Get fighter attribute.
+        The attribute is identified by a FilterAttribute value; if an invalid/unknown value is requested, the function returns Nothing.
+        \param ftr Fighter
+        \param att Attribute to retrieve
+        \param root Root (used for configuration, host version)
+        \return Attribute if att corresponds to a valid attribute */
+    OptionalInt_t getFighterAttribute(const Fighter& ftr, FilterAttribute att, const Root& root);
 
 } } }
 

@@ -40,7 +40,7 @@ game::ref::SortByNewLocation::getClass(const Reference& a) const
     // FIXME: duplicate to SortByLocation::getClass
     game::map::Point pt;
     if (getLocation(a, pt)) {
-        return afl::string::Format("(%d,%d)", pt.getX(), pt.getY());
+        return pt.toString();
     } else {
         return m_translator.translateString("not on map");
     }

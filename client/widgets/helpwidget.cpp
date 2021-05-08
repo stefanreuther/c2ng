@@ -6,9 +6,10 @@
 #include "client/widgets/helpwidget.hpp"
 #include "client/dialogs/helpdialog.hpp"
 
-client::widgets::HelpWidget::HelpWidget(ui::Root& root, util::RequestSender<game::Session> gameSender, String_t pageName)
+client::widgets::HelpWidget::HelpWidget(ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::Session> gameSender, String_t pageName)
     : InvisibleWidget(),
       m_root(root),
+      m_translator(tx),
       m_gameSender(gameSender),
       m_pageName(pageName),
       m_flags()
@@ -39,7 +40,7 @@ client::widgets::HelpWidget::handleKey(util::Key_t key, int prefix)
         || (m_flags.contains(AcceptF1)
             && key == util::Key_F1))
     {
-        client::dialogs::doHelpDialog(m_root, m_gameSender, m_pageName);
+        client::dialogs::doHelpDialog(m_root, m_translator, m_gameSender, m_pageName);
         return true;
     } else {
         return defaultHandleKey(key, prefix);

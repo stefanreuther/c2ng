@@ -6,6 +6,7 @@
 #define C2NG_CLIENT_WIDGETS_HELPWIDGET_HPP
 
 #include "afl/bits/smallset.hpp"
+#include "afl/string/translator.hpp"
 #include "game/session.hpp"
 #include "ui/invisiblewidget.hpp"
 #include "ui/root.hpp"
@@ -32,9 +33,10 @@ namespace client { namespace widgets {
 
         /** Constructor.
             \param root       Root (required by doHelpDialog)
+            \param tx         Translator
             \param gameSender Game sender (required by doHelpDialog)
             \param pageName   Help page name */
-        HelpWidget(ui::Root& root, util::RequestSender<game::Session> gameSender, String_t pageName);
+        HelpWidget(ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::Session> gameSender, String_t pageName);
 
         /** Destructor. */
         ~HelpWidget();
@@ -50,6 +52,7 @@ namespace client { namespace widgets {
 
      private:
         ui::Root& m_root;
+        afl::string::Translator& m_translator;
         util::RequestSender<game::Session> m_gameSender;
         String_t m_pageName;
         Flags_t m_flags;

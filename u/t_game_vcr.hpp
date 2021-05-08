@@ -18,6 +18,16 @@ class TestGameVcrDatabase : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestGameVcrInfo : public CxxTest::TestSuite {
+ public:
+    void testInit();
+};
+
+class TestGameVcrNullDatabase : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
 class TestGameVcrObject : public CxxTest::TestSuite {
  public:
     void testGetSet();
@@ -26,6 +36,20 @@ class TestGameVcrObject : public CxxTest::TestSuite {
     void testGuessAmbig();
     void testGuessMismatch();
     void testGuessEngine();
+    void testDescribe();
+};
+
+class TestGameVcrObjectInfo : public CxxTest::TestSuite {
+ public:
+    void testPlanet1();
+    void testPlanet2();
+    void testPlanet3();
+    void testPlanet4();
+    void testFailPlanet1();
+    void testFailPlanet2();
+    void testFailNotPlanet();
+    void testShip();
+    void testShip2();
 };
 
 class TestGameVcrScore : public CxxTest::TestSuite {

@@ -8,32 +8,22 @@
 #include "t_interpreter.hpp"
 #include "afl/data/integervalue.hpp"
 #include "afl/io/nullfilesystem.hpp"
+#include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
+#include "game/map/object.hpp"
+#include "game/test/counter.hpp"
 #include "interpreter/bytecodeobject.hpp"
 #include "interpreter/callablevalue.hpp"
 #include "interpreter/opcode.hpp"
 #include "interpreter/process.hpp"
 #include "interpreter/world.hpp"
-#include "game/map/object.hpp"
 
 namespace {
     using afl::data::IntegerValue;
     using interpreter::Process;
     using interpreter::BCORef_t;
     using interpreter::Opcode;
-
-    class Counter {
-     public:
-        Counter()
-            : m_value(0)
-            { }
-        void increment()
-            { ++m_value; }
-        int get()
-            { return m_value; }
-     private:
-        int m_value;
-    };
+    using game::test::Counter;
 
     void addStateSetter(interpreter::BytecodeObject& bco, Process::State st)
     {
@@ -158,8 +148,9 @@ TestInterpreterProcessList::testAllocateProcessGroup()
 
     // Process Ids
     afl::sys::Log log;
+    afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
-    interpreter::World world(log, fs);
+    interpreter::World world(log, tx, fs);
     Process& pa = testee.create(world, "a");
     Process& pb = testee.create(world, "b");
     Process& pc = testee.create(world, "c");
@@ -177,8 +168,9 @@ TestInterpreterProcessList::testSuspend()
 
     // Add a process that will suspend
     afl::sys::Log log;
+    afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
-    interpreter::World world(log, fs);
+    interpreter::World world(log, tx, fs);
     Process& p = testee.create(world, "testSuspend");
 
     p.pushFrame(makeSuspendBCO(), false);
@@ -216,8 +208,9 @@ TestInterpreterProcessList::testJoin()
 {
     // Environment
     afl::sys::Log log;
+    afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
-    interpreter::World world(log, fs);
+    interpreter::World world(log, tx, fs);
 
     interpreter::ProcessList testee;
 
@@ -260,8 +253,9 @@ TestInterpreterProcessList::testFail()
 {
     // Environment
     afl::sys::Log log;
+    afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
-    interpreter::World world(log, fs);
+    interpreter::World world(log, tx, fs);
 
     interpreter::ProcessList testee;
 
@@ -300,8 +294,9 @@ TestInterpreterProcessList::testTerminate()
 {
     // Environment
     afl::sys::Log log;
+    afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
-    interpreter::World world(log, fs);
+    interpreter::World world(log, tx, fs);
 
     interpreter::ProcessList testee;
 
@@ -344,8 +339,9 @@ TestInterpreterProcessList::testPriority()
 {
     // Environment
     afl::sys::Log log;
+    afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
-    interpreter::World world(log, fs);
+    interpreter::World world(log, tx, fs);
 
     interpreter::ProcessList testee;
 
@@ -414,8 +410,9 @@ TestInterpreterProcessList::testEndSignal()
 
     // Environment
     afl::sys::Log log;
+    afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
-    interpreter::World world(log, fs);
+    interpreter::World world(log, tx, fs);
 
     interpreter::ProcessList testee;
 
@@ -450,8 +447,9 @@ TestInterpreterProcessList::testWait()
 {
     // Environment
     afl::sys::Log log;
+    afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
-    interpreter::World world(log, fs);
+    interpreter::World world(log, tx, fs);
 
     interpreter::ProcessList testee;
 
@@ -486,8 +484,9 @@ TestInterpreterProcessList::testWaitError()
 {
     // Environment
     afl::sys::Log log;
+    afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
-    interpreter::World world(log, fs);
+    interpreter::World world(log, tx, fs);
 
     interpreter::ProcessList testee;
 
@@ -522,8 +521,9 @@ TestInterpreterProcessList::testWaitCatch()
 {
     // Environment
     afl::sys::Log log;
+    afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
-    interpreter::World world(log, fs);
+    interpreter::World world(log, tx, fs);
 
     interpreter::ProcessList testee;
 
@@ -565,8 +565,9 @@ TestInterpreterProcessList::testWaitTerminate()
 {
     // Environment
     afl::sys::Log log;
+    afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
-    interpreter::World world(log, fs);
+    interpreter::World world(log, tx, fs);
 
     interpreter::ProcessList testee;
 
@@ -601,8 +602,9 @@ void
 TestInterpreterProcessList::testRemoveKeep()
 {
     afl::sys::Log log;
+    afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
-    interpreter::World world(log, fs);
+    interpreter::World world(log, tx, fs);
 
     interpreter::ProcessList testee;
 
@@ -632,8 +634,9 @@ void
 TestInterpreterProcessList::testResume()
 {
     afl::sys::Log log;
+    afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
-    interpreter::World world(log, fs);
+    interpreter::World world(log, tx, fs);
 
     interpreter::ProcessList testee;
 
@@ -663,8 +666,9 @@ void
 TestInterpreterProcessList::testTerminateAll()
 {
     afl::sys::Log log;
+    afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
-    interpreter::World world(log, fs);
+    interpreter::World world(log, tx, fs);
 
     interpreter::ProcessList testee;
 
@@ -705,8 +709,9 @@ void
 TestInterpreterProcessList::testMismatches()
 {
     afl::sys::Log log;
+    afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
-    interpreter::World world(log, fs);
+    interpreter::World world(log, tx, fs);
 
     // join: process cannot be Suspended (or Frozen)
     {
@@ -769,8 +774,9 @@ TestInterpreterProcessList::testRunFreeze()
 {
     // Environment
     afl::sys::Log log;
+    afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
-    interpreter::World world(log, fs);
+    interpreter::World world(log, tx, fs);
 
     interpreter::ProcessList testee;
 
@@ -820,7 +826,7 @@ TestInterpreterProcessList::testObject()
             { }
         virtual interpreter::Context* lookup(const afl::data::NameQuery& /*name*/, PropertyIndex_t& /*result*/)
             { return 0; }
-        virtual void set(PropertyIndex_t /*index*/, afl::data::Value* /*value*/)
+        virtual void set(PropertyIndex_t /*index*/, const afl::data::Value* /*value*/)
             { }
         virtual afl::data::Value* get(PropertyIndex_t /*index*/)
             { return 0; }
@@ -839,11 +845,12 @@ TestInterpreterProcessList::testObject()
      private:
         MyObject& m_obj;
     };
-    
+
     // Environment
     afl::sys::Log log;
+    afl::string::NullTranslator tx;
     afl::io::NullFileSystem fs;
-    interpreter::World world(log, fs);
+    interpreter::World world(log, tx, fs);
 
     interpreter::ProcessList testee;
     MyObject obj;

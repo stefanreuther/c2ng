@@ -29,6 +29,7 @@ server::common::RandomIdGenerator::createId()
         if (*p != 0) {
             break;
         }
+        ++i;
     }
 
     // Compute hash

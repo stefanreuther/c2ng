@@ -292,3 +292,124 @@ TestGameMapSelections::testExecuteAllShip()
     TS_ASSERT_EQUALS(s.isMarked(), true);
 }
 
+/** Test markList(), current layer.
+    A: populate universe. Call markList() for current layer.
+    E: verify that objects have been marked, layer has been changed. */
+void
+TestGameMapSelections::testMarkListCurrent()
+{
+    using game::Reference;
+
+    // Setup
+    game::map::Universe u;
+    game::map::Planet& p1  = createPlanet(u, 1);
+    game::map::Planet& p2  = createPlanet(u, 2);
+    game::map::Planet& p3  = createPlanet(u, 3);
+    game::map::Ship& s1  = createShip(u, 1);
+    game::map::Ship& s2  = createShip(u, 2);
+
+    // List
+    game::ref::List list;
+    list.add(Reference(Reference::Planet, 1));
+    list.add(Reference(Reference::Starbase, 3));
+    list.add(Reference(Reference::Planet, 99));
+    list.add(Reference(Reference::Ship, 2));
+    list.add(Reference(Reference::Player, 7));
+
+    // Prepare
+    game::map::Selections testee;
+    
+    // Execute
+    testee.markList(0, list, true, u);
+
+    // Verify
+    // - content of layers
+    TS_ASSERT_EQUALS(testee.get(game::map::Selections::Planet, 0)->get(1), true);
+    TS_ASSERT_EQUALS(testee.get(game::map::Selections::Planet, 0)->get(2), false);
+    TS_ASSERT_EQUALS(testee.get(game::map::Selections::Planet, 0)->get(3), true);
+    TS_ASSERT_EQUALS(testee.get(game::map::Selections::Planet, 0)->get(99), false);  // because it does not exist
+    TS_ASSERT_EQUALS(testee.get(game::map::Selections::Ship,   0)->get(1), false);
+    TS_ASSERT_EQUALS(testee.get(game::map::Selections::Ship,   0)->get(2), true);
+
+    // - units in universe
+    TS_ASSERT_EQUALS(p1.isMarked(), true);
+    TS_ASSERT_EQUALS(s2.isMarked(), true);
+}
+
+/** Test markList(), other layer.
+    A: populate universe. Call markList() for other layer.
+    E: verify that objects have not been marked, but layer has been changed. */
+void
+TestGameMapSelections::testMarkListOther()
+{
+    using game::Reference;
+
+    // Setup
+    game::map::Universe u;
+    game::map::Planet& p1  = createPlanet(u, 1);
+    game::map::Planet& p2  = createPlanet(u, 2);
+    game::map::Planet& p3  = createPlanet(u, 3);
+    game::map::Ship& s1  = createShip(u, 1);
+    game::map::Ship& s2  = createShip(u, 2);
+
+    // List
+    game::ref::List list;
+    list.add(Reference(Reference::Planet, 1));
+    list.add(Reference(Reference::Starbase, 3));
+    list.add(Reference(Reference::Planet, 99));
+    list.add(Reference(Reference::Ship, 2));
+    list.add(Reference(Reference::Player, 7));
+
+    // Prepare
+    game::map::Selections testee;
+    
+    // Execute
+    testee.markList(3, list, true, u);
+
+    // Verify
+    // - content of layers
+    TS_ASSERT_EQUALS(testee.get(game::map::Selections::Planet, 3)->get(1), true);
+    TS_ASSERT_EQUALS(testee.get(game::map::Selections::Planet, 3)->get(2), false);
+    TS_ASSERT_EQUALS(testee.get(game::map::Selections::Planet, 3)->get(3), true);
+    TS_ASSERT_EQUALS(testee.get(game::map::Selections::Planet, 3)->get(99), false);  // because it does not exist
+    TS_ASSERT_EQUALS(testee.get(game::map::Selections::Ship,   3)->get(1), false);
+    TS_ASSERT_EQUALS(testee.get(game::map::Selections::Ship,   3)->get(2), true);
+
+    // - units in universe
+    TS_ASSERT_EQUALS(p1.isMarked(), false);
+    TS_ASSERT_EQUALS(s2.isMarked(), false);
+}
+
+/** Test setCurrentLayer() with relative expressions.
+    A: call setCurrentLayer() with all sorts of layer references.
+    E: verify correct result */
+void
+TestGameMapSelections::testSetRelative()
+{
+    game::map::Selections testee;
+    game::map::Universe u;
+    TS_ASSERT_EQUALS(testee.getCurrentLayer(), 0U);
+
+    // Previous
+    testee.setCurrentLayer(game::map::Selections::PreviousLayer, u);
+    TS_ASSERT_EQUALS(testee.getCurrentLayer(), testee.getNumLayers()-1);
+
+    // Next
+    testee.setCurrentLayer(game::map::Selections::NextLayer, u);
+    TS_ASSERT_EQUALS(testee.getCurrentLayer(), 0U);
+    testee.setCurrentLayer(game::map::Selections::NextLayer, u);
+    TS_ASSERT_EQUALS(testee.getCurrentLayer(), 1U);
+
+    // Current
+    testee.setCurrentLayer(game::map::Selections::CurrentLayer, u);
+    TS_ASSERT_EQUALS(testee.getCurrentLayer(), 1U);
+
+    // Absolute
+    testee.setCurrentLayer(3, u);
+    TS_ASSERT_EQUALS(testee.getCurrentLayer(), 3U);
+
+    // Previous
+    testee.setCurrentLayer(game::map::Selections::PreviousLayer, u);
+    TS_ASSERT_EQUALS(testee.getCurrentLayer(), 2U);
+}
+

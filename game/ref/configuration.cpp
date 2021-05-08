@@ -4,7 +4,6 @@
 
 #include "game/ref/configuration.hpp"
 #include "game/config/integeroption.hpp"
-#include "game/config/integervalueparser.hpp"
 #include "game/config/userconfiguration.hpp"
 #include "game/game.hpp"
 #include "game/ref/nullpredicate.hpp"
@@ -23,27 +22,27 @@
 #include "game/turn.hpp"
 #include "game/ref/sortbytransfertarget.hpp"
 
+using game::config::UserConfiguration;
+
 struct game::ref::ConfigurationSelection {
-    game::config::IntegerOptionDescriptorWithDefault primary;
-    game::config::IntegerOptionDescriptorWithDefault secondary;
+    const game::config::IntegerOptionDescriptor* primary;
+    const game::config::IntegerOptionDescriptor* secondary;
 };
 
+// ex opt_sort_ship
 const game::ref::ConfigurationSelection game::ref::REGULAR = {
-    // ex opt_sort_ship
-    // FIXME: getSortOrderConfig
-    // FIXME: setSortOrderConfig
-    { "Sort.Ship",           &game::config::IntegerValueParser::instance, game::ref::ConfigSortById },
-    { "Sort.Ship.Secondary", &game::config::IntegerValueParser::instance, game::ref::ConfigSortById },
+    &UserConfiguration::Sort_Ship,
+    &UserConfiguration::Sort_Ship_Secondary
 };
 
 const game::ref::ConfigurationSelection game::ref::CARGO_TRANSFER = {
-    { "Sort.Cargo",           &game::config::IntegerValueParser::instance, game::ref::ConfigSortByTransferTarget },
-    { "Sort.Cargo.Secondary", &game::config::IntegerValueParser::instance, game::ref::ConfigSortById },
+    &UserConfiguration::Sort_Cargo,
+    &UserConfiguration::Sort_Cargo_Secondary
 };
 
 const game::ref::ConfigurationSelection game::ref::SEARCH = {
-    { "Sort.Search",           &game::config::IntegerValueParser::instance, game::ref::ConfigSortById },
-    { "Sort.Search.Secondary", &game::config::IntegerValueParser::instance, game::ref::ConfigSortById },
+    &UserConfiguration::Sort_Search,
+    &UserConfiguration::Sort_Search_Secondary
 };
 
 game::ref::SortPredicate&
@@ -135,14 +134,24 @@ game::ref::createSortPredicate(int config, Session& session, afl::base::Deleter&
     return del.addNew(new NullPredicate());
 }
 
-
+game::ref::SortPredicate&
+game::ref::createSortPredicate(const ConfigurationSelection& sel, Session& session, afl::base::Deleter& del)
+{
+    if (Root* pRoot = session.getRoot().get()) {
+        SortPredicate& first  = createSortPredicate(pRoot->userConfiguration()[*sel.primary](), session, del);
+        SortPredicate& second = createSortPredicate(pRoot->userConfiguration()[*sel.secondary](), session, del);
+        return del.addNew(new SortPredicate::CombinedPredicate(first, second));
+    } else {
+        return createSortPredicate(ConfigSortById, session, del);
+    }
+}
 
 void
 game::ref::fetchConfiguration(Session& session, const ConfigurationSelection& sel, Configuration& config)
 {
     if (Root* pRoot = session.getRoot().get()) {
-        config.order.first  = pRoot->userConfiguration()[sel.primary]();
-        config.order.second = pRoot->userConfiguration()[sel.secondary]();
+        config.order.first  = pRoot->userConfiguration()[*sel.primary]();
+        config.order.second = pRoot->userConfiguration()[*sel.secondary]();
     }
 }
 
@@ -150,7 +159,7 @@ void
 game::ref::storeConfiguration(Session& session, const ConfigurationSelection& sel, const Configuration& config)
 {
     if (Root* pRoot = session.getRoot().get()) {
-        pRoot->userConfiguration()[sel.primary].set(config.order.first);
-        pRoot->userConfiguration()[sel.secondary].set(config.order.second);
+        pRoot->userConfiguration()[*sel.primary].set(config.order.first);
+        pRoot->userConfiguration()[*sel.secondary].set(config.order.second);
     }
 }

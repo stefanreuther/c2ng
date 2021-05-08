@@ -11,6 +11,7 @@ class TestGameActionsBaseBuildAction : public CxxTest::TestSuite {
  public:
     void testError();
     void testSuccess();
+    void testCostSummary();
 };
 
 class TestGameActionsBaseBuildExecutor : public CxxTest::TestSuite {
@@ -67,6 +68,15 @@ class TestGameActionsBuildShip : public CxxTest::TestSuite {
     void testUseParts();
     void testUsePartsPartial();
     void testPreexistingOrder();
+    void testForeignShip();
+    void testTechDisabled();
+    void testModify();
+    void testBadId();
+    void testBadHull();
+    void testBadEngine();
+    void testBadBeam();
+    void testBadLauncher();
+    void testCostSummary();
 };
 
 class TestGameActionsBuildStarbase : public CxxTest::TestSuite {
@@ -121,6 +131,13 @@ class TestGameActionsCargoTransfer : public CxxTest::TestSuite {
     void testTemporary();
     void testCargoSpec();
     void testCargoSpecSupplySale();
+    void testHoldSpace();
+    void testMoveExt();
+    void testMoveExtReverse();
+    void testDistributeEqually();
+    void testDistributeFreeSpace();
+    void testDistributeProportionally();
+    void testMoveAll();
 };
 
 class TestGameActionsCargoTransferSetup : public CxxTest::TestSuite {
@@ -170,6 +187,17 @@ class TestGameActionsConvertSupplies : public CxxTest::TestSuite {
     void testBuy();
 };
 
+class TestGameActionsMultiTransferSetup : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testError();
+    void testNormal();
+    void testNoCargo();
+    void testNoPeer();
+    void testFleet();
+    void testTypeMismatch();
+};
+
 class TestGameActionsPreconditions : public CxxTest::TestSuite {
  public:
     void testShip();
@@ -202,6 +230,7 @@ class TestGameActionsTaxationAction : public CxxTest::TestSuite {
     void testSafeTax();
     void testSetNumBuildings();
     void testDescribe();
+    void testDescribeHiss();
 };
 
 class TestGameActionsTechUpgrade : public CxxTest::TestSuite {
@@ -212,6 +241,11 @@ class TestGameActionsTechUpgrade : public CxxTest::TestSuite {
     void testRevertableChange();
     void testRevertableShip();
     void testRevertableNoSignal();
+};
+
+class TestGameActionsbuildParts : public CxxTest::TestSuite {
+ public:
+    void testBuildMultiCommit();
 };
 
 #endif

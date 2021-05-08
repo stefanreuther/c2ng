@@ -184,7 +184,7 @@ TestGameActionsTechUpgrade::testFail()
     h.planet.setPlayability(game::map::Object::Playable);
 
     game::test::CargoContainer container;
-    TS_ASSERT_THROWS((game::actions::TechUpgrade(h.planet, container, *h.shipList, *h.root)), game::Exception);
+    TS_ASSERT_THROWS((game::actions::TechUpgrade(h.planet, container, *h.shipList, *h.root, h.tx)), game::Exception);
 }
 
 /** Test simple success case.
@@ -214,7 +214,7 @@ TestGameActionsTechUpgrade::testSimple()
 
     // Make an action
     game::test::CargoContainer container;
-    game::actions::TechUpgrade a(h.planet, container, *h.shipList, *h.root);
+    game::actions::TechUpgrade a(h.planet, container, *h.shipList, *h.root, h.tx);
     TS_ASSERT(a.isValid());
     TS_ASSERT(a.costAction().getCost().isZero());
     TS_ASSERT_EQUALS(a.getStatus(), game::actions::BaseBuildAction::Success);
@@ -232,6 +232,19 @@ TestGameActionsTechUpgrade::testSimple()
     TS_ASSERT_EQUALS(a.costAction().getCost().get(game::spec::Cost::Money), 600);
     TS_ASSERT_EQUALS(container.getChange(game::Element::Money), -600);
     TS_ASSERT_EQUALS(a.getStatus(), game::actions::BaseBuildAction::Success);
+
+    // Test upgrade
+    // - 5 is ok
+    TS_ASSERT(a.upgradeTechLevel(game::HullTech, 5));
+    TS_ASSERT_EQUALS(a.getTechLevel(game::HullTech), 5);
+    // - 6 fails, remains at 5
+    TS_ASSERT(!a.upgradeTechLevel(game::HullTech, 6));
+    TS_ASSERT_EQUALS(a.getTechLevel(game::HullTech), 5);
+    // - 3 succeeds, but still 5
+    TS_ASSERT(a.upgradeTechLevel(game::HullTech, 3));
+    TS_ASSERT_EQUALS(a.getTechLevel(game::HullTech), 5);
+    // - revert
+    TS_ASSERT(a.setTechLevel(game::HullTech, 4));
 
     // Chance price configuration. This automatically updates.
     h.root->hostConfiguration()[game::config::HostConfiguration::BaseTechCost].set(150);
@@ -266,7 +279,7 @@ TestGameActionsTechUpgrade::testRevertable()
 
     // Test
     game::test::CargoContainer container;
-    game::actions::TechUpgrade a(h.planet, container, *h.shipList, *h.root);
+    game::actions::TechUpgrade a(h.planet, container, *h.shipList, *h.root, h.tx);
     a.setUndoInformation(h.univ);
 
     TS_ASSERT_EQUALS(a.getMinTechLevel(game::HullTech), 1);
@@ -297,7 +310,7 @@ TestGameActionsTechUpgrade::testRevertableChange()
 
     // Test
     game::test::CargoContainer container;
-    game::actions::TechUpgrade a(h.planet, container, *h.shipList, *h.root);
+    game::actions::TechUpgrade a(h.planet, container, *h.shipList, *h.root, h.tx);
     a.setUndoInformation(h.univ);
     TS_ASSERT_EQUALS(a.getMinTechLevel(game::BeamTech), 1);
 
@@ -329,7 +342,7 @@ TestGameActionsTechUpgrade::testRevertableShip()
 
     // Test
     game::test::CargoContainer container;
-    game::actions::TechUpgrade a(h.planet, container, *h.shipList, *h.root);
+    game::actions::TechUpgrade a(h.planet, container, *h.shipList, *h.root, h.tx);
     a.setUndoInformation(h.univ);
     TS_ASSERT_EQUALS(a.getMinTechLevel(game::TorpedoTech), 1);
 
@@ -361,7 +374,7 @@ TestGameActionsTechUpgrade::testRevertableNoSignal()
 
     // Test
     game::test::CargoContainer container;
-    game::actions::TechUpgrade a(h.planet, container, *h.shipList, *h.root);
+    game::actions::TechUpgrade a(h.planet, container, *h.shipList, *h.root, h.tx);
     a.setUndoInformation(h.univ);
 
     // Request tech downgrade
@@ -375,6 +388,8 @@ TestGameActionsTechUpgrade::testRevertableNoSignal()
     // Commit. Because minimum tech level is 3, this must only go to 3, with a 700$ refund.
     TS_ASSERT_THROWS_NOTHING(a.commit());
     TS_ASSERT_EQUALS(h.planet.getBaseTechLevel(game::TorpedoTech).orElse(0), 3);
-    TS_ASSERT_EQUALS(container.getChange(game::Element::Money), 700);
+    // Since BaseBuildAction::commit now recomputes costs,
+    // we end up with 0 here and cannot test the 700$ refund.
+    // TS_ASSERT_EQUALS(container.getChange(game::Element::Money), 700);
 }
 

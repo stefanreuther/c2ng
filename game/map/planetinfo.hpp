@@ -11,11 +11,12 @@
 #include "game/config/hostconfiguration.hpp"
 #include "game/element.hpp"
 #include "game/hostversion.hpp"
+#include "game/map/planeteffectors.hpp"
+#include "game/playerarray.hpp"
 #include "game/root.hpp"
 #include "game/spec/shiplist.hpp"
 #include "game/types.hpp"
 #include "game/unitscoredefinitionlist.hpp"
-#include "game/playerarray.hpp"
 
 namespace game { namespace map {
 
@@ -236,6 +237,19 @@ namespace game { namespace map {
                                  const UnitScoreDefinitionList& scoreDefinitions,
                                  const game::spec::ShipList& shipList,
                                  const game::config::HostConfiguration& config);
+
+    /** Prepare events affecting a planet.
+        \param univ              Universe
+        \param pid               Planet Id
+        \param shipScores        Ship score definitions (required for hull functions)
+        \param shipList          Ship list (required for hull functions)
+        \param config            Host configuration (required for hull functions)
+        \return PlanetEffectors */
+    PlanetEffectors preparePlanetEffectors(const Universe& univ,
+                                           Id_t pid,
+                                           const UnitScoreDefinitionList& shipScores,
+                                           const game::spec::ShipList& shipList,
+                                           const game::config::HostConfiguration& config);
 
     /** Retrieve information about ground defense.
         This function describes the current ground defense situation.

@@ -206,6 +206,19 @@ client::si::ScriptSide::joinProcess(game::Session& session, RequestLink2 link, R
     }
 }
 
+void
+client::si::ScriptSide::joinProcessGroup(game::Session& session, RequestLink2 link, uint32_t oldGroup)
+{
+    // It is an error if link is invalid
+    interpreter::ProcessList& list = session.processList();
+    uint32_t linkPid;
+    if (link.getProcessId(linkPid)) {
+        if (interpreter::Process* p = list.getProcessById(linkPid)) {
+            list.joinProcessGroup(oldGroup, p->getProcessGroupId());
+        }
+    }
+}
+
 
 void
 client::si::ScriptSide::continueProcessWithFailure(game::Session& session, RequestLink2 link, String_t error)
@@ -271,8 +284,6 @@ client::si::ScriptSide::init(game::Session& session)
             { }
         void call(uint32_t n)
             { m_self.onProcessGroupFinish(m_session, n); }
-        Relay* clone() const
-            { return new Relay(*this); }
      private:
         game::Session& m_session;
         ScriptSide& m_self;

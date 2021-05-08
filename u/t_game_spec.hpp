@@ -16,6 +16,7 @@ class TestGameSpecBasicHullFunction : public CxxTest::TestSuite {
  public:
     void testIt();
     void testExplain();
+    void testGetDamageLimit();
 };
 
 class TestGameSpecBasicHullFunctionList : public CxxTest::TestSuite {
@@ -62,6 +63,11 @@ class TestGameSpecCost : public CxxTest::TestSuite {
     void testGetMaxAmount();
     void testDivi();
     void testFormat();
+};
+
+class TestGameSpecCostSummary : public CxxTest::TestSuite {
+ public:
+    void testIt();
 };
 
 class TestGameSpecEngine : public CxxTest::TestSuite {
@@ -111,6 +117,7 @@ class TestGameSpecHull : public CxxTest::TestSuite {
     void testFuelUsage();
     void testCloakFuelUsage();
     void testMineHitDamage();
+    void testPoints();
 };
 
 class TestGameSpecHullAssignmentList : public CxxTest::TestSuite {
@@ -199,12 +206,14 @@ class TestGameSpecShipList : public CxxTest::TestSuite {
     void testRacialAbilitiesFail();
     void testGetHullFunctions();
     void testFindRacialAbilitiesMany();
-    void testFindRacialAbilitiesHoley();
+    void testSpecimen();
+    void testGetComponent();
 };
 
 class TestGameSpecStandardComponentNameProvider : public CxxTest::TestSuite {
  public:
     void testIt();
+    void testLanguage();
 };
 
 class TestGameSpecTorpedo : public CxxTest::TestSuite {

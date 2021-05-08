@@ -84,8 +84,16 @@ namespace server { namespace talk {
         afl::container::PtrVector<TextNode> children;
         String_t text;
 
+        /** To be called on list nodes: check for simple list.
+            A simple list is one where every list item has just one paragraph as content. */
         bool isSimpleList() const;
+
+        /** Remove all quotes from this text.
+            Updates the node in-place. */
         void stripQuotes();
+
+        /** Get content of this node as raw text.
+            \return text */
         String_t getTextContent() const;
     };
 

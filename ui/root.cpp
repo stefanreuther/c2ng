@@ -284,7 +284,7 @@ ui::Root::centerWidget(Widget& widget)
 
 // Move widget to screen edge.
 void
-ui::Root::moveWidgetToEdge(Widget& widget, int xPos, int yPos, int offset)
+ui::Root::moveWidgetToEdge(Widget& widget, gfx::HorizontalAlignment xPos, gfx::VerticalAlignment yPos, int offset)
 {
     // ex UIRoot::moveWidgetToEdge
     // FIXME: could be member of Widget

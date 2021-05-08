@@ -6,37 +6,24 @@
 #include "game/proxy/planetinfoproxy.hpp"
 
 #include "t_game_proxy.hpp"
-#include "game/test/sessionthread.hpp"
-#include "game/test/root.hpp"
-#include "game/parser/messageinformation.hpp"
-#include "game/map/planet.hpp"
-#include "game/game.hpp"
-#include "game/root.hpp"
-#include "game/map/universe.hpp"
-#include "game/turn.hpp"
-#include "util/simplerequestdispatcher.hpp"
-#include "afl/io/xml/visitor.hpp"
 #include "afl/io/xml/tagnode.hpp"
 #include "afl/io/xml/textnode.hpp"
+#include "afl/io/xml/visitor.hpp"
+#include "game/game.hpp"
+#include "game/map/planet.hpp"
+#include "game/map/universe.hpp"
+#include "game/parser/messageinformation.hpp"
+#include "game/root.hpp"
+#include "game/test/counter.hpp"
+#include "game/test/root.hpp"
+#include "game/test/sessionthread.hpp"
+#include "game/turn.hpp"
+#include "util/simplerequestdispatcher.hpp"
 
 namespace gp = game::parser;
+using game::test::Counter;
 
 namespace {
-    class Counter {
-     public:
-        Counter()
-            : m_value(0)
-            { }
-
-        void onEvent()
-            { ++m_value; }
-
-        int get() const
-            { return m_value; }
-     private:
-        int m_value;
-    };
-
     void makeScannedPlanet(game::map::Planet& pl)
     {
         pl.setPosition(game::map::Point(1000, 1000));
@@ -119,7 +106,7 @@ TestGameProxyPlanetInfoProxy::testIt()
     game::proxy::PlanetInfoProxy testee(s.gameSender(), disp);
 
     Counter c;
-    testee.sig_change.add(&c, &Counter::onEvent);
+    testee.sig_change.add(&c, &Counter::increment);
 
     // Select planet
     testee.setPlanet(ID);
@@ -211,7 +198,7 @@ TestGameProxyPlanetInfoProxy::testOverride()
     game::proxy::PlanetInfoProxy testee(s.gameSender(), disp);
 
     Counter c;
-    testee.sig_change.add(&c, &Counter::onEvent);
+    testee.sig_change.add(&c, &Counter::increment);
 
     // Set building override; setting this one before setting the planet will not yet produce a callback
     testee.setBuildingOverride(game::MineBuilding, 100);

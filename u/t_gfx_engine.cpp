@@ -20,6 +20,8 @@ TestGfxEngine::testIt()
             { throw "nix"; }
         virtual void handleEvent(gfx::EventConsumer& /*consumer*/, bool /*relativeMouseMovement*/)
             { }
+        virtual util::Key_t getKeyboardModifierState()
+            { return 0; }
         virtual util::RequestDispatcher& dispatcher()
             { return *this; }
         virtual afl::base::Ref<gfx::Timer> createTimer()

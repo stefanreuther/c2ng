@@ -37,12 +37,14 @@ game::actions::BuildAmmo::BuildAmmo(game::map::Planet& planet,
                                     CargoContainer& financier,
                                     CargoContainer& receiver,
                                     game::spec::ShipList& shipList,
-                                    Root& root)
+                                    Root& root,
+                                    afl::string::Translator& tx)
     : m_planet(planet),
       m_costAction(financier),
       m_receiver(receiver),
       m_shipList(shipList),
       m_root(root),
+      m_translator(tx),
       m_mustCommitReceiver(&financier != &receiver),
       m_costActionChangeConnection(m_costAction.sig_change.add(this, &BuildAmmo::update)),
       m_receiverChangeConnection(m_receiver.sig_change.add(this, &BuildAmmo::update)),
@@ -51,7 +53,7 @@ game::actions::BuildAmmo::BuildAmmo(game::map::Planet& planet,
       m_universeChangeConnection(),
       m_pUniverse(0)
 {
-    mustHavePlayedBase(planet);
+    mustHavePlayedBase(planet, tx);
     update();
 }
 
@@ -214,13 +216,13 @@ game::actions::BuildAmmo::commit()
 {
     switch (getStatus()) {
      case MissingResources:
-        throw Exception(Exception::eNoResource, _("Not enough resources to perform this action"));
+        throw Exception(Exception::eNoResource, m_translator("Not enough resources to perform this action"));
 
      case DisallowedTech:
-        throw Exception(Exception::ePerm, _("Tech level not accessible"));
+        throw Exception(Exception::ePerm, m_translator("Tech level not accessible"));
 
      case MissingRoom:
-        throw Exception(Exception::ePerm, _("Target unit overloaded"));
+        throw Exception(Exception::ePerm, m_translator("Target unit overloaded"));
 
      case Success:
         break;

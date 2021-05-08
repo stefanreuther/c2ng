@@ -22,10 +22,10 @@
 #include "game/reference.hpp"
 #include "game/spec/shiplist.hpp"
 #include "interpreter/error.hpp"
+#include "interpreter/processlist.hpp"
 #include "interpreter/taskeditor.hpp"
 #include "interpreter/world.hpp"
 #include "util/plugin/manager.hpp"
-#include "interpreter/processlist.hpp"
 
 namespace game {
 
@@ -65,6 +65,16 @@ namespace game {
 
         /** Set of editable areas. */
         typedef afl::bits::SmallSet<Area> AreaSet_t;
+
+
+        /** Task status.
+            \see getTaskStatus() */
+        enum TaskStatus {
+            NoTask,             ///< No auto-task active.
+            ActiveTask,         ///< Task active and operable (green).
+            WaitingTask,        ///< Task waiting for user interaction (red).
+            OtherTask           ///< No auto-task, but another task active on this unit (yellow).
+        };
 
 
         /** Constructor.
@@ -151,6 +161,13 @@ namespace game {
             \param [in,out] ptr Task editor. Will be set to null. */
         void releaseAutoTaskEditor(afl::base::Ptr<interpreter::TaskEditor>& ptr);
 
+        /** Get task status for an object.
+            \param obj       Invoking object
+            \param kind      Process kind
+            \param waitOnly  Only produce information about waiting notification (i.e. for auto-task editor)
+            \return status */
+        TaskStatus getTaskStatus(const game::map::Object* obj, interpreter::Process::ProcessKind kind, bool waitOnly) const;
+
         /** Access interpreter world.
             \return world */
         interpreter::World& world();
@@ -198,7 +215,6 @@ namespace game {
 
      private:
         afl::sys::Log m_log;
-        afl::string::Translator& m_translator;
         afl::base::Ptr<Root> m_root;
         afl::base::Ptr<game::spec::ShipList> m_shipList;
         afl::base::Ptr<Game> m_game;
@@ -258,7 +274,7 @@ game::Session::logError(const interpreter::Error& e)
 inline afl::string::Translator&
 game::Session::translator()
 {
-    return m_translator;
+    return m_world.translator();
 }
 
 inline const afl::base::Ptr<game::Root>&

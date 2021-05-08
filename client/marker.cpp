@@ -1,5 +1,6 @@
 /**
   *  \file client/marker.cpp
+  *  \brief Marker drawing
   */
 
 #include <algorithm>
@@ -18,7 +19,6 @@ struct client::Marker {
 /*
  *  Marker definitions
  */
-
 
 namespace {
     /* Let's simplify definition of markers a little. We must put these
@@ -114,6 +114,17 @@ namespace {
         0, 0, -1, -1, -1, 1, 1, 1, 1, -1, -1, 0, 1, 0, END
     };
 
+    /* Pointy flags */
+    DEFINE_MARKER(pointyflag_1, 1) = {
+        0, 0, 0, -1, 0, -2, 0, -3, 0,-4, 0, -5, 0, -6,
+        1, -6, 2, -5, 3, -5, 4, -4, 3, -3, 2, -3, 1, -2, END
+    };
+
+    DEFINE_MARKER(pointyflag_2, 1) = {
+        0, 0, 0, -1, 0, -2, 0, -3,
+        1, -3, 2, -2, 1, -1, END
+    };
+
     /* Selection markers ("Andreas cross") */
 
     DEFINE_MARKER(selection_1, 2) = {
@@ -189,10 +200,6 @@ namespace {
     };
 }
 
-// /** Draw a Marker.
-//     \param ctx     graphics context
-//     \param marker  marker definition
-//     \param x,y     center  */
 void
 client::drawMarker(gfx::BaseContext& ctx, const Marker& marker, gfx::Point pt)
 {
@@ -204,10 +211,6 @@ client::drawMarker(gfx::BaseContext& ctx, const Marker& marker, gfx::Point pt)
     }
 }
 
-// /** Draw a dotted circle.
-//     \param can graphics context
-//     \param x,y center
-//     \param r   radius, in range [0, 7]. */
 void
 client::drawDottedCircle(gfx::BaseContext& ctx, gfx::Point pt, int r)
 {
@@ -223,11 +226,6 @@ client::drawDottedCircle(gfx::BaseContext& ctx, gfx::Point pt, int r)
     }
 }
 
-// /** Draw Selection Marker.
-//     \param ctx        graphics context
-//     \param pt         center position
-//     \param mult,divi  Zoom settings. 1:1 = standard size for big font,
-//                       1:2 = size for normal font, others = starchart zoom. */
 void
 client::drawSelection(gfx::BaseContext& ctx, gfx::Point pt, int mult, int divi)
 {
@@ -253,31 +251,43 @@ client::drawSelection(gfx::BaseContext& ctx, gfx::Point pt, int mult, int divi)
     }
 }
 
+void
+client::drawMessageMarker(gfx::BaseContext& ctx, const gfx::Point pt, int mult, int divi)
+{
+    // ex drawFlag
+    if (mult > divi) {
+        int h = 6 * mult/divi;
+        int w = 4 * mult/divi;
+        int m = h-w;
+        ctx.setLinePattern(gfx::SOLID_LINE);
+        ctx.setLineThickness(1);
+        drawLine(ctx, pt, pt + gfx::Point(0, -h));
+        drawLine(ctx, pt + gfx::Point(0, -h), pt + gfx::Point(w, -w));
+        drawLine(ctx, pt + gfx::Point(0, -m), pt + gfx::Point(w, -w));
+    } else if (divi > mult*2) {
+        /* Zoom < 1/2 */
+        drawMarker(ctx, pointyflag_2, pt);
+    } else {
+        /* Zoom between 1 and 1/2 */
+        drawMarker(ctx, pointyflag_1, pt);
+    }
+}
 
-// void drawShipIcon(gfx::Context& ctx, GPlayerRelation relation, bool big, const GfxPoint pt);
-// /** Draw ship icon. This is used in ships-are-triangles mode.
-//     \param ctx       graphics context
-//     \param relation  our relation to that ship (chooses the marker)
-//     \param big       big or small version
-//     \param x,y       center position */
-// void
-// drawShipIcon(GfxContext& ctx, GPlayerRelation relation, bool big, const GfxPoint pt)
-// {
-//     const TMarkerImage* i;
-//     if (relation == is_Me)
-//         i = big ? &ship_own : &ship_small_own;
-//     else
-//         i = big ? &ship_enemy : &ship_small_enemy;
 
-//     drawMarker(ctx, *i, pt);
-// }
+void
+client::drawShipIcon(gfx::BaseContext& ctx, const gfx::Point pt, bool isMe, bool big)
+{
+    const Marker* p;
+    if (isMe) {
+        p = big ? &ship_own : &ship_small_own;
+    } else {
+        p = big ? &ship_enemy : &ship_small_enemy;
+    }
+    drawMarker(ctx, *p, pt);
+}
 
-
-
-// /** Get user marker. Returns marker data. Use as
-//     drawMarker(can, parm, getUserMarker(id, big), pt). */
 const client::Marker*
-client::getUserMarker(int id, bool big)
+client::getUserMarker(int kind, bool big)
 {
     // ex getUserMarker
     static const Marker*const user_markers[][2] = {
@@ -291,8 +301,8 @@ client::getUserMarker(int id, bool big)
         { &um_cactus,    &um_cactus }
     };
     static_assert(countof(user_markers) == size_t(NUM_USER_MARKERS), "user_markers definitions");
-    if (id >= 0 && id < NUM_USER_MARKERS) {
-        return user_markers[id][!big];
+    if (kind >= 0 && kind < NUM_USER_MARKERS) {
+        return user_markers[kind][!big];
     } else {
         return 0;
     }

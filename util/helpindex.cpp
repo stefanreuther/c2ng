@@ -1,5 +1,6 @@
 /**
   *  \file util/helpindex.cpp
+  *  \brief Class util::HelpIndex
   */
 
 #include <stdexcept>
@@ -10,7 +11,6 @@
 #include "afl/string/format.hpp"
 #include "afl/string/parse.hpp"
 #include "util/charsetfactory.hpp"
-#include "util/translation.hpp"
 
 namespace {
     const char*const LOG_NAME = "help";
@@ -73,10 +73,10 @@ util::HelpIndex::removeFilesByOrigin(String_t origin)
 }
 
 void
-util::HelpIndex::find(String_t page, NodeVector_t& out, afl::io::FileSystem& fs, afl::sys::LogListener& log)
+util::HelpIndex::find(String_t page, NodeVector_t& out, afl::io::FileSystem& fs, afl::sys::LogListener& log, afl::string::Translator& tx)
 {
     // Make sure index is up-to-date
-    scanNewFiles(fs, log);
+    scanNewFiles(fs, log, tx);
 
     // Build list of possible nodes
     std::multimap<String_t, Node>::const_iterator it = m_nodes.lower_bound(page);
@@ -105,17 +105,17 @@ util::HelpIndex::find(String_t page, NodeVector_t& out, afl::io::FileSystem& fs,
 }
 
 void
-util::HelpIndex::scanNewFiles(afl::io::FileSystem& fs, afl::sys::LogListener& log)
+util::HelpIndex::scanNewFiles(afl::io::FileSystem& fs, afl::sys::LogListener& log, afl::string::Translator& tx)
 {
     for (size_t i = 0, n = m_files.size(); i < n; ++i) {
         if (!m_files[i]->scanned) {
             m_files[i]->scanned = true;
             try {
                 scanFile(*m_files[i], fs);
-                log.write(log.Info, LOG_NAME, afl::string::Format(_("Scanned help file %s.").c_str(), m_files[i]->name));
+                log.write(log.Info, LOG_NAME, afl::string::Format(tx("Scanned help file %s.").c_str(), m_files[i]->name));
             }
             catch (std::exception& e) {
-                log.write(log.Error, LOG_NAME, _("Error scanning help file"), e);
+                log.write(log.Error, LOG_NAME, tx("Error scanning help file"), e);
             }
         }
     }

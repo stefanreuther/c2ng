@@ -23,7 +23,6 @@
 #include "ui/widgets/button.hpp"
 #include "ui/widgets/panel.hpp"
 #include "ui/widgets/spritewidget.hpp"
-#include "util/translation.hpp"
 #include "client/vcr/classic/standardscheduler.hpp"
 #include "client/vcr/classic/interleavedscheduler.hpp"
 #include "game/root.hpp"
@@ -44,11 +43,6 @@ namespace {
        Playback will not start before this value is reached (to avoid immediately blocking on empty buffer again).
        More events will be requested if the buffer level drops below this value. */
     const int BUFFER_TIME = 50;
-
-    /* Number of battle ticks to render per request.
-       Each battle tick can generate roundabout 2 sides x 40 weapons x 10 events = 800 events;
-       At 6 words/event, that is 19200 bytes/tick, leading to around 2 MB buffer for TIME_PER_REQUEST=100. */
-    const int TIME_PER_REQUEST = 100;
 
     const int32_t MAX_TIME = 0x7FFFFFFF;
 
@@ -71,17 +65,15 @@ namespace {
      *  FIXME: this assumes a lot of knowledge that the Renderer and EventVisualizer have.
      *  Can we reorganize that a bit?
      */
-    class ImageQuery : public util::Request<game::Session> {
+    class ImageQuery : public util::Request<game::proxy::VcrDatabaseAdaptor> {
      public:
-        virtual void handle(game::Session& session)
+        virtual void handle(game::proxy::VcrDatabaseAdaptor& adaptor)
             {
-                gvc::Database* db = gvc::getDatabase(session);
-                game::Root* root = session.getRoot().get();
-                game::spec::ShipList* sl = session.getShipList().get();
-                if (db != 0 && root != 0 && sl != 0) {
+                gvc::Database* db = dynamic_cast<gvc::Database*>(&adaptor.battles());
+                if (db != 0) {
                     for (size_t i = 0, n = db->getNumBattles(); i < n; ++i) {
                         if (gvc::Battle* b = db->getBattle(i)) {
-                            handleBattle(*b, *sl, root->hostConfiguration());
+                            handleBattle(*b, adaptor.shipList(), adaptor.root().hostConfiguration());
                         }
                     }
                 }
@@ -182,13 +174,13 @@ namespace {
                 {
                     ui::layout::Info leftInfo = m_leftStatus.getLayoutInfo();
                     gfx::Rectangle leftArea(gfx::Point(), leftInfo.getPreferredSize());
-                    leftArea.moveToEdge(area, 0, 0, 10);
+                    leftArea.moveToEdge(area, gfx::LeftAlign, gfx::TopAlign, 10);
                     m_leftStatus.setExtent(leftArea);
                 }
                 {
                     ui::layout::Info rightInfo = m_rightStatus.getLayoutInfo();
                     gfx::Rectangle rightArea(gfx::Point(), rightInfo.getPreferredSize());
-                    rightArea.moveToEdge(area, 2, 0, 10);
+                    rightArea.moveToEdge(area, gfx::RightAlign, gfx::TopAlign, 10);
                     m_rightStatus.setExtent(rightArea);
                 }
 
@@ -196,7 +188,7 @@ namespace {
                 {
                     ui::layout::Info controlInfo = m_control.getLayoutInfo();
                     gfx::Rectangle controlArea(gfx::Point(), controlInfo.getPreferredSize());
-                    controlArea.moveToEdge(area, 1, 2, 10);
+                    controlArea.moveToEdge(area, gfx::CenterAlign, gfx::BottomAlign, 10);
                     m_control.setExtent(controlArea);
                 }
             }
@@ -210,17 +202,23 @@ namespace {
     };
 }
 
-client::vcr::classic::PlaybackScreen::PlaybackScreen(ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::Session> gameSender, size_t index, afl::sys::LogListener& log)
+
+/*
+ *  PlaybackScreen
+ */
+
+client::vcr::classic::PlaybackScreen::PlaybackScreen(ui::Root& root, afl::string::Translator& tx,
+                                                     util::RequestSender<game::proxy::VcrDatabaseAdaptor> adaptorSender,
+                                                     size_t index, afl::sys::LogListener& log)
     : m_root(root),
       m_translator(tx),
-      m_gameSender(gameSender),
-      m_reply(root.engine().dispatcher(), *this),
-      m_playerSender(gameSender, new Player(m_reply.getSender())),
+      m_adaptorSender(adaptorSender),
+      m_proxy(adaptorSender, root.engine().dispatcher()),
       m_index(index),
       m_log(log),
       m_spriteWidget(),
-      m_leftStatus(root),
-      m_rightStatus(root),
+      m_leftStatus(root, tx),
+      m_rightStatus(root, tx),
       m_playbackControl(root),
       m_renderer(),
       m_state(Initializing),
@@ -236,7 +234,9 @@ client::vcr::classic::PlaybackScreen::PlaybackScreen(ui::Root& root, afl::string
       m_events(),
       m_currentTime(0),
       m_queuedTime(0)
-{ }
+{
+    m_proxy.sig_event.add(this, &PlaybackScreen::handleEvents);
+}
 
 client::vcr::classic::PlaybackScreen::~PlaybackScreen()
 {
@@ -276,7 +276,7 @@ client::vcr::classic::PlaybackScreen::run()
 
     m_root.add(panel);
 
-    Player::sendInitRequest(m_playerSender, m_index);
+    m_proxy.initRequest(m_index);
     m_spriteWidget.tick();
 
     loop.run();
@@ -291,7 +291,7 @@ client::vcr::classic::PlaybackScreen::handleEvents(util::StringInstructionList& 
 {
     gvc::EventRecorder r;
     r.swapContent(list);
-    // m_log.write(afl::sys::LogListener::Trace, LOG_NAME, Format("-> %d events", r.size()));
+    m_log.write(afl::sys::LogListener::Trace, LOG_NAME, Format("-> %d events", r.size()));
     r.replay(*m_scheduler);
 
     switch (m_state) {
@@ -336,11 +336,11 @@ client::vcr::classic::PlaybackScreen::preloadImages()
 {
     // Query images
     ImageQuery q;
-    Downlink link(m_root);
-    link.call(m_gameSender, q);
+    Downlink link(m_root, m_translator);
+    link.call(m_adaptorSender, q);
 
     // Load images
-    ImageLoader loader(m_root);
+    ImageLoader loader(m_root, m_translator);
     const std::vector<String_t>& images = q.getResult();
     for (size_t i = 0, n = images.size(); i < n; ++i) {
         loader.loadImage(images[i]);
@@ -351,13 +351,13 @@ client::vcr::classic::PlaybackScreen::preloadImages()
 void
 client::vcr::classic::PlaybackScreen::requestEvents()
 {
-    Player::sendEventRequest(m_playerSender);
+    m_proxy.eventRequest();
 }
 
 void
 client::vcr::classic::PlaybackScreen::requestJump(int32_t time)
 {
-    Player::sendJumpRequest(m_playerSender, time);
+    m_proxy.jumpRequest(time);
 }
 
 void

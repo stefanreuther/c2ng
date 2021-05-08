@@ -6,18 +6,18 @@
 #include "interpreter/arguments.hpp"
 #include "game/interface/hullcontext.hpp"
 
-// /* @q Hull(id:Int):Obj (Function, Context)
-//    Access hull properties.
-//    Use as
-//    | ForEach Hull Do ...
-//    or
-//    | With Hull(n) Do ...
+/* @q Hull(id:Int):Obj (Function, Context)
+   Access hull properties.
+   Use as
+   | ForEach Hull Do ...
+   or
+   | With Hull(n) Do ...
 
-//    @diff This function was available for use in %With under the name %Hulls() since PCC 1.0.6.
-//    Do not use the name %Hulls in new code, it is not supported by PCC2; use %Hull instead.
+   @diff This function was available for use in %With under the name %Hulls() since PCC 1.0.6.
+   Do not use the name %Hulls in new code, it is not supported by PCC2; use %Hull instead.
 
-//    @see int:index:group:hullproperty|Hull Properties
-//    @since PCC 1.0.18, PCC2 1.99.8 */
+   @see int:index:group:hullproperty|Hull Properties
+   @since PCC 1.0.18, PCC2 1.99.8, PCC2 2.40 */
 
 game::interface::HullFunction::HullFunction(Session& session)
     : m_session(session)

@@ -15,13 +15,13 @@
 #include "ui/widgets/focusiterator.hpp"
 #include "ui/widgets/framegroup.hpp"
 #include "ui/widgets/quit.hpp"
-#include "ui/widgets/scrollbar.hpp"
+#include "ui/widgets/scrollbarcontainer.hpp"
 #include "ui/widgets/statictext.hpp"
 #include "ui/window.hpp"
-#include "util/translation.hpp"
 
-client::dialogs::FriendlyCodeDialog::FriendlyCodeDialog(ui::Root& root, const String_t& title, const game::spec::FriendlyCodeList::Infos_t& list, util::RequestSender<game::Session> gameSender)
+client::dialogs::FriendlyCodeDialog::FriendlyCodeDialog(ui::Root& root, afl::string::Translator& tx, const String_t& title, const game::spec::FriendlyCodeList::Infos_t& list, util::RequestSender<game::Session> gameSender)
     : m_root(root),
+      m_translator(tx),
       m_title(title),
       m_gameSender(gameSender),
       m_input(3, 10, root),
@@ -74,18 +74,17 @@ client::dialogs::FriendlyCodeDialog::run()
     ui::widgets::FrameGroup& g2 = del.addNew(new ui::widgets::FrameGroup(ui::layout::HBox::instance0, m_root.colorScheme(), ui::LoweredFrame));
     ui::Group&               g3 = del.addNew(new ui::Group(ui::layout::HBox::instance5));
 
-    g1.add(del.addNew(new ui::widgets::StaticText(_("FCode:"), util::SkinColor::Static, gfx::FontRequest().addSize(1), m_root.provider())));
+    g1.add(del.addNew(new ui::widgets::StaticText(m_translator("FCode:"), util::SkinColor::Static, gfx::FontRequest().addSize(1), m_root.provider())));
     g1.add(m_input);
 
-    g2.add(m_list);
-    g2.add(del.addNew(new ui::widgets::Scrollbar(m_list, m_root)));
+    g2.add(del.addNew(new ui::widgets::ScrollbarContainer(m_list, m_root)));
 
-    ui::Widget& helper = del.addNew(new client::widgets::HelpWidget(m_root, m_gameSender, "pcc2:fcode"));
+    ui::Widget& helper = del.addNew(new client::widgets::HelpWidget(m_root, afl::string::Translator::getSystemInstance(), m_gameSender, "pcc2:fcode")); // FIXME: translator
 
-    ui::widgets::Button& btnOK     = del.addNew(new ui::widgets::Button(_("OK"),             util::Key_Return,       m_root));
-    ui::widgets::Button& btnCancel = del.addNew(new ui::widgets::Button(_("Cancel"),         util::Key_Escape,       m_root));
-    ui::widgets::Button& btnRandom = del.addNew(new ui::widgets::Button(_("Alt-R - Random"), util::KeyMod_Alt + 'r', m_root));
-    ui::widgets::Button& btnHelp   = del.addNew(new ui::widgets::Button(_("Help"),           'h',                    m_root));
+    ui::widgets::Button& btnOK     = del.addNew(new ui::widgets::Button(m_translator("OK"),             util::Key_Return,       m_root));
+    ui::widgets::Button& btnCancel = del.addNew(new ui::widgets::Button(m_translator("Cancel"),         util::Key_Escape,       m_root));
+    ui::widgets::Button& btnRandom = del.addNew(new ui::widgets::Button(m_translator("Alt-R - Random"), util::KeyMod_Alt + 'r', m_root));
+    ui::widgets::Button& btnHelp   = del.addNew(new ui::widgets::Button(m_translator("Help"),           'h',                    m_root));
     g3.add(btnOK);
     g3.add(btnCancel);
     g3.add(btnRandom);
@@ -135,7 +134,7 @@ void
 client::dialogs::FriendlyCodeDialog::onRandom()
 {
     // ex WFCodeWindow::onRandom
-    Downlink link(m_root);
+    Downlink link(m_root, m_translator);
     String_t result = game::proxy::FriendlyCodeProxy(m_gameSender).generateRandomCode(link);
     if (!result.empty()) {
         m_input.setText(result);

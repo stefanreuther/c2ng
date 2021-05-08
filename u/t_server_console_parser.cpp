@@ -15,8 +15,10 @@
 #include "server/console/environment.hpp"
 #include "server/console/nullterminal.hpp"
 #include "server/console/terminal.hpp"
+#include "server/test/consolecommandhandlermock.hpp"
 #include "server/types.hpp"
-#include "u/helper/consolecommandhandlermock.hpp"
+
+using server::test::ConsoleCommandHandlerMock;
 
 /** Test basic evaluation. */
 void

@@ -42,7 +42,8 @@ class game::actions::BuildStructures::Deferer : public afl::base::Uncopyable {
 
 // Constructor.
 game::actions::BuildStructures::BuildStructures(game::map::Planet& planet, CargoContainer& container,
-                                                const game::config::HostConfiguration& config)
+                                                const game::config::HostConfiguration& config,
+                                                afl::string::Translator& tx)
     : sig_change(),
       m_planet(planet),
       m_costAction(container),
@@ -53,7 +54,7 @@ game::actions::BuildStructures::BuildStructures(game::map::Planet& planet, Cargo
       m_notificationNeeded(false)
 {
     // ex GPlanetBuildStructuresAction::GPlanetBuildStructuresAction
-    mustBePlayed(m_planet);
+    mustBePlayed(m_planet, tx);
 
     // Initialize everything to "unmodifieable"
     for (size_t i = 0; i < NUM_PLANETARY_BUILDING_TYPES; ++i) {

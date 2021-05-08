@@ -7,6 +7,7 @@
 
 #include "afl/base/deletable.hpp"
 #include "afl/base/deleter.hpp"
+#include "afl/string/translator.hpp"
 #include "game/v3/turnfile.hpp"
 
 namespace game { namespace v3 { namespace trn {
@@ -23,9 +24,10 @@ namespace game { namespace v3 { namespace trn {
         /** Parse filter expression.
             \param text Filter expression
             \param deleter Deleter to manage lifetime of result structur
+            \param tx Translator (for error messages)
             \return Filter instance that lives at least as long as the deleter
             \throw ParseException on error */
-        static const Filter& parse(String_t text, afl::base::Deleter& deleter);
+        static const Filter& parse(String_t text, afl::base::Deleter& deleter, afl::string::Translator& tx);
     };
 
 } } }

@@ -12,7 +12,7 @@ namespace {
     const char FORUM_BASE_URL[] = "talk/forum.cgi/";
     const char THREAD_BASE_URL[] = "talk/thread.cgi/";
 
-    // /** Simplify a topic name for inclusion in an URL. */
+    /** Simplify a topic name for inclusion in an URL. */
     String_t simplifyTopic(String_t s)
     {
         // ex planetscentral/talk/url.h:simplifyTopic

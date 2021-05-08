@@ -34,7 +34,7 @@ game::browser::FileSystemRootFolder::loadContent(afl::container::PtrVector<Folde
     Ptr<DirectoryEntry> elem;
     while (content->getNextElement(elem)) {
         if (elem.get() != 0 && (elem->getFileType() == DirectoryEntry::tDirectory || elem->getFileType() == DirectoryEntry::tRoot)) {
-            result.pushBackNew(new FileSystemFolder(m_parent, elem->openDirectory(), elem->getTitle()));
+            result.pushBackNew(new FileSystemFolder(m_parent, elem->openDirectory(), elem->getTitle(), false));
         }
     }
 }

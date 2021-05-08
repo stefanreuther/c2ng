@@ -6,13 +6,13 @@
 #include "interpreter/error.hpp"
 #include "interpreter/arguments.hpp"
 
-// /* @q Ufo(uid:Int):Obj (Function, Context)
-//    Access Ufo properties.
-//    Use as
-//    | ForEach Ufo Do ...
-//    or
-//    | With Ufo(n) Do ...
-//    @see int:index:group:ufoproperty|Ufo Properties, int:index:group:ufocommand|Ufo Commands */
+/* @q Ufo(uid:Int):Obj (Function, Context)
+   Access Ufo properties.
+   Use as
+   | ForEach Ufo Do ...
+   or
+   | With Ufo(n) Do ...
+   @see int:index:group:ufoproperty|Ufo Properties, int:index:group:ufocommand|Ufo Commands */
 
 game::interface::UfoFunction::UfoFunction(Session& session)
     : m_session(session)

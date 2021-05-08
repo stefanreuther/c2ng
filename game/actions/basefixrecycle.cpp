@@ -7,11 +7,11 @@
 #include "game/actions/preconditions.hpp"
 #include "game/exception.hpp"
 
-game::actions::BaseFixRecycle::BaseFixRecycle(game::map::Planet& planet)
+game::actions::BaseFixRecycle::BaseFixRecycle(game::map::Planet& planet, afl::string::Translator& tx)
     : m_planet(planet)
 {
     // ex GStarbaseFixRecycleAction::GStarbaseFixRecycleAction
-    mustHavePlayedBase(planet);
+    mustHavePlayedBase(planet, tx);
 }
 
 game::actions::BaseFixRecycle::ShipyardActionSet_t

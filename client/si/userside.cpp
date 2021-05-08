@@ -66,11 +66,11 @@ client::si::UserSide::~UserSide()
 
 // Post a request to execute on the ScriptSide.
 void
-client::si::UserSide::postNewRequest(util::SlaveRequest<game::Session, ScriptSide>* request)
+client::si::UserSide::postNewRequest(ScriptRequest* request)
 {
     class Task : public util::Request<game::Session> {
      public:
-        Task(std::auto_ptr<util::SlaveRequest<game::Session, ScriptSide> > p)
+        Task(std::auto_ptr<ScriptRequest>& p)
             : m_p(p)
             { }
         virtual void handle(game::Session& session)
@@ -82,9 +82,9 @@ client::si::UserSide::postNewRequest(util::SlaveRequest<game::Session, ScriptSid
                 }
             }
      private:
-        std::auto_ptr<util::SlaveRequest<game::Session, ScriptSide> > m_p;
+        std::auto_ptr<ScriptRequest> m_p;
     };
-    std::auto_ptr<util::SlaveRequest<game::Session, ScriptSide> > p(request);
+    std::auto_ptr<ScriptRequest> p(request);
     m_gameSender.postNewRequest(new Task(p));
 }
 
@@ -106,7 +106,7 @@ client::si::UserSide::reset()
 void
 client::si::UserSide::continueProcess(RequestLink2 link)
 {
-    class Task : public util::SlaveRequest<game::Session,ScriptSide> {
+    class Task : public ScriptRequest {
      public:
         Task(RequestLink2 link)
             : m_link(link)
@@ -122,7 +122,7 @@ client::si::UserSide::continueProcess(RequestLink2 link)
 void
 client::si::UserSide::joinProcess(RequestLink2 link, RequestLink2 other)
 {
-    class Task : public util::SlaveRequest<game::Session,ScriptSide> {
+    class Task : public ScriptRequest {
      public:
         Task(RequestLink2 link, RequestLink2 other)
             : m_link(link),
@@ -139,12 +139,30 @@ client::si::UserSide::joinProcess(RequestLink2 link, RequestLink2 other)
     }
 }
 
+void
+client::si::UserSide::joinProcessGroup(RequestLink2 link, uint32_t oldGroup)
+{
+    class Task : public ScriptRequest {
+     public:
+        Task(RequestLink2 link, uint32_t oldGroup)
+            : m_link(link),
+              m_oldGroup(oldGroup)
+            { }
+        void handle(game::Session& session, ScriptSide& t)
+            { t.joinProcessGroup(session, m_link, m_oldGroup); }
+     private:
+        RequestLink2 m_link;
+        uint32_t m_oldGroup;
+    };
+    postNewRequest(new Task(link, oldGroup));
+}
+
 
 // Continue a process after UI callout with error.
 void
 client::si::UserSide::continueProcessWithFailure(RequestLink2 link, String_t error)
 {
-    class Task : public util::SlaveRequest<game::Session,ScriptSide> {
+    class Task : public ScriptRequest {
      public:
         Task(RequestLink2 link, String_t error)
             : m_link(link),
@@ -163,7 +181,7 @@ client::si::UserSide::continueProcessWithFailure(RequestLink2 link, String_t err
 void
 client::si::UserSide::detachProcess(RequestLink2 link)
 {
-    class Task : public util::SlaveRequest<game::Session, ScriptSide> {
+    class Task : public ScriptRequest {
      public:
         Task(RequestLink2 link)
             : m_link(link)
@@ -186,7 +204,7 @@ client::si::UserSide::processTask(UserTask& t, RequestLink2 link)
         Control& ctl = *m_controls.back();
         ctl.setInteracting(true);
         try {
-            t.handle(*this, ctl, link);
+            t.handle(ctl, link);
         }
         catch (std::exception& e) {
             continueProcessWithFailure(link, e.what());
@@ -199,7 +217,7 @@ void
 client::si::UserSide::processCall(UserCall& t)
 {
     if (!m_controls.empty()) {
-        t.handle(*this, *m_controls.back());
+        t.handle(*m_controls.back());
     }
 }
 
@@ -207,7 +225,7 @@ client::si::UserSide::processCall(UserCall& t)
 void
 client::si::UserSide::setVariable(RequestLink2 link, String_t name, std::auto_ptr<afl::data::Value> value)
 {
-    class Task : public util::SlaveRequest<game::Session,ScriptSide> {
+    class Task : public ScriptRequest {
      public:
         Task(RequestLink2 link, String_t name, std::auto_ptr<afl::data::Value> value)
             : m_link(link),
@@ -235,7 +253,7 @@ client::si::UserSide::allocateWaitId()
 void
 client::si::UserSide::continueProcessWait(uint32_t id, RequestLink2 link)
 {
-    class ContinueTask : public util::SlaveRequest<game::Session, ScriptSide> {
+    class ContinueTask : public ScriptRequest {
      public:
         ContinueTask(uint32_t id, RequestLink2 link)
             : m_id(id),
@@ -253,7 +271,7 @@ client::si::UserSide::continueProcessWait(uint32_t id, RequestLink2 link)
 void
 client::si::UserSide::executeTaskWait(uint32_t id, std::auto_ptr<ScriptTask> task)
 {
-    class StartTask : public util::SlaveRequest<game::Session, ScriptSide> {
+    class StartTask : public ScriptRequest {
      public:
         StartTask(uint32_t id, std::auto_ptr<ScriptTask> task)
             : m_id(id), m_task(task)

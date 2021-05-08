@@ -11,20 +11,20 @@
 #include "client/map/renderer.hpp"
 
 namespace {
-    void drawScannerEnd(gfx::BaseContext& ctx, gfx::Point pt)
+    void drawScannerEnd(gfx::BaseContext& ctx, gfx::Point pt, int size)
     {
         // ex GChartViewport::drawScannerEnd
-        // FIXME: if (mult >= divi) {
-        drawVLine(ctx, pt.getX()-3, pt.getY()-2, pt.getY()+2);
-        drawVLine(ctx, pt.getX()+3, pt.getY()-2, pt.getY()+2);
-        drawHLine(ctx, pt.getX()-2, pt.getY()-3, pt.getX()+2);
-        drawHLine(ctx, pt.getX()-2, pt.getY()+3, pt.getX()+2);
-        // } else {
-        // drawPixel(ctx, GfxPoint(pt.x+1, pt.y));
-        // drawPixel(ctx, GfxPoint(pt.x-1, pt.y));
-        // drawPixel(ctx, GfxPoint(pt.x, pt.y+1));
-        // drawPixel(ctx, GfxPoint(pt.x, pt.y-1));
-        // }
+        if (size >= 1) {
+            drawVLine(ctx, pt.getX()-3, pt.getY()-2, pt.getY()+2);
+            drawVLine(ctx, pt.getX()+3, pt.getY()-2, pt.getY()+2);
+            drawHLine(ctx, pt.getX()-2, pt.getY()-3, pt.getX()+2);
+            drawHLine(ctx, pt.getX()-2, pt.getY()+3, pt.getX()+2);
+        } else {
+            drawPixel(ctx, pt + gfx::Point(+1,  0));
+            drawPixel(ctx, pt + gfx::Point(-1,  0));
+            drawPixel(ctx, pt + gfx::Point( 0, +1));
+            drawPixel(ctx, pt + gfx::Point( 0, -1));
+        }
     }
 }
 
@@ -59,10 +59,11 @@ client::map::ScannerOverlay::drawAfter(gfx::Canvas& can, const Renderer& ren)
         gfx::Point aa = ren.scale(m_origin);
         gfx::Point bb = ren.scale(m_target);
 
-        drawScannerEnd(ctx, aa);
+        int size = ren.scale(1);
+        drawScannerEnd(ctx, aa, size);
         if (aa != bb) {
             drawLine(ctx, aa, bb);
-            drawScannerEnd(ctx, bb);
+            drawScannerEnd(ctx, bb, size);
         }
     }
 }

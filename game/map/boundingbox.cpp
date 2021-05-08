@@ -1,17 +1,18 @@
 /**
   *  \file game/map/boundingbox.cpp
+  *  \brief Class game::map::BoundingBox
   */
 
 #include <algorithm>
 #include "game/map/boundingbox.hpp"
-#include "game/map/universe.hpp"
-#include "game/map/drawing.hpp"
-#include "game/map/planet.hpp"
-#include "game/map/objecttype.hpp"
-#include "game/map/circularobject.hpp"
 #include "game/map/anyplanettype.hpp"
 #include "game/map/anyshiptype.hpp"
+#include "game/map/circularobject.hpp"
+#include "game/map/drawing.hpp"
 #include "game/map/drawingcontainer.hpp"
+#include "game/map/objecttype.hpp"
+#include "game/map/planet.hpp"
+#include "game/map/universe.hpp"
 
 game::map::BoundingBox::BoundingBox()
     : m_min(), m_max()
@@ -36,6 +37,7 @@ game::map::BoundingBox::addUniverse(const Universe& univ)
     }
     addType(const_cast<Universe&>(univ).ionStormType());
     addType(const_cast<Universe&>(univ).minefields());
+    addType(const_cast<Universe&>(univ).explosions());
 
     // Add drawings
     for (DrawingContainer::Iterator_t it = univ.drawings().begin(), end = univ.drawings().end(); it != end; ++it) {
@@ -45,9 +47,11 @@ game::map::BoundingBox::addUniverse(const Universe& univ)
     }
 
     // Add Ufos
+    // These are special because the connectors may pass a wrap seam.
+    // FIXME: check whether we need this: if both Ufos draw the connector, we may not need it
     UfoType& ufos = const_cast<Universe&>(univ).ufos();
     for (Id_t i = ufos.findNextIndex(0); i != 0; i = ufos.findNextIndex(i)) {
-        Ufo* ufo = ufos.getObjectByIndex(i);
+        const Ufo* ufo = ufos.getObjectByIndex(i);
         Point pt;
         int radius;
         if (ufo != 0 && ufo->getPosition(pt) && ufo->getRadius(radius)) {
@@ -55,7 +59,7 @@ game::map::BoundingBox::addUniverse(const Universe& univ)
             addCircle(pt, radius);
 
             // If it has another end, add the connector
-            Ufo* otherEnd = ufo->getOtherEnd();
+            const Ufo* otherEnd = ufo->getOtherEnd();
             Point otherPos;
             int otherRadius;
             if (otherEnd != 0 && otherEnd->getPosition(otherPos) && otherEnd->getRadius(otherRadius)) {
@@ -63,10 +67,6 @@ game::map::BoundingBox::addUniverse(const Universe& univ)
             }
         }
     }
-
-    // FIXME
-    // initMinZoom();
-    // initMaxZoom();
 }
 
 void
@@ -122,14 +122,14 @@ game::map::BoundingBox::addDrawing(const Drawing& d)
 }
 
 game::map::Point
-game::map::BoundingBox::getMinimumCoordinates()
+game::map::BoundingBox::getMinimumCoordinates() const
 {
     // ex GChartBBox::getMinimumXY
     return m_min;
 }
 
 game::map::Point
-game::map::BoundingBox::getMaximumCoordinates()
+game::map::BoundingBox::getMaximumCoordinates() const
 {
     // ex GChartBBox::getMaximumXY
     return m_max;
@@ -154,50 +154,3 @@ game::map::BoundingBox::addType(const ObjectType& ty)
         }
     }
 }
-
-// FIXME: port? initMinZoom, initMaxZoom
-// // enum {
-// //     MAX_ZOOM = 10
-// // };
-// /** Compute minimum zoom level. The minimum zoom is a soft limit;
-//     below the limit, the scrolling map is replaced by a fixed one. */
-// void
-// GChartBBox::initMinZoom()
-// {
-//     /* Minimum zoom. At zoom smaller 1:N, switch to overview chart */
-//     min_zoom = 2;
-//     // FIXME: dummy
-//     // CheckMinZoom(SCREEN_WIDTH DIV 2, ChartBX1-ChartConf.CenterX);
-//     // CheckMinZoom(SCREEN_WIDTH DIV 2, ChartConf.CenterX-ChartBX0);
-//     // CheckMinZoom((SCREEN_HEIGHT-80) DIV 2, ChartBY1-ChartConf.CenterY);
-//     // CheckMinZoom((SCREEN_HEIGHT-80) DIV 2, ChartConf.CenterY-ChartBY0);
-//     if (min_zoom > MAX_ZOOM)
-//         min_zoom = MAX_ZOOM;
-// }
-
-// /** Compute maximum zoom level. The maximum zoom level is a hard
-//     limit; under no conditions the hard limit may be exceeded to avoid
-//     integer overflow. */
-// void
-// GChartBBox::initMaxZoom()
-// {
-//     max_zoom = INT_MAX / std::max(max.x, max.y);
-//     if (max_zoom > MAX_ZOOM)
-//         max_zoom = MAX_ZOOM;
-// }
-
-// /** Get minimum allowed zoom level. This is a soft limit, and decides at what
-//     point we switch from a scrollable starchart to a fixed one. */
-// inline int
-// GChartBBox::getMinZoom() const
-// {
-//     return min_zoom;
-// }
-
-// /** Get maximum allowed zoom level. This is the maximum zoom level at which
-//     there is no overflow in coordinates. */
-// inline int
-// GChartBBox::getMaxZoom() const
-// {
-//     return max_zoom;
-// }

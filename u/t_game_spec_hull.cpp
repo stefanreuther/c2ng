@@ -156,3 +156,28 @@ TestGameSpecHull::testMineHitDamage()
     TS_ASSERT_EQUALS(t.getMineHitDamage(1, true, p, config), 31);
 }
 
+/** Test point computations. */
+void
+TestGameSpecHull::testPoints()
+{
+    game::config::HostConfiguration config;
+    game::HostVersion h(game::HostVersion::Host, MKVERSION(3,22,40));
+    game::HostVersion p(game::HostVersion::PHost, MKVERSION(4,0,0));
+
+    game::spec::Hull t(77);
+
+    // Vendetta/Dwarfstar (100 kt)
+    t.setMass(100);
+    TS_ASSERT_EQUALS(t.getPointsToBuild(1, h, config), 2);
+    TS_ASSERT_EQUALS(t.getPointsToBuild(1, p, config), 400); // minimum cost
+    TS_ASSERT_EQUALS(t.getPointsForKilling(1, h, config), 2);
+    TS_ASSERT_EQUALS(t.getPointsForKilling(1, p, config), 120);
+    TS_ASSERT_EQUALS(t.getPointsForScrapping(1, h, config), 1);
+    TS_ASSERT_EQUALS(t.getPointsForScrapping(1, p, config), 40);
+
+    // Loki (101 kt)
+    t.setMass(101);
+    TS_ASSERT_EQUALS(t.getPointsToBuild(1, h, config), 3);
+    TS_ASSERT_EQUALS(t.getPointsToBuild(1, p, config), 400); // minimum cost
+}
+

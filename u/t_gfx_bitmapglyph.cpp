@@ -171,15 +171,6 @@ TestGfxBitmapGlyph::testConstruct()
         TS_ASSERT_SAME(pix->pixels(), EXPECTED);
     }
 
-    // Default-init
-    {
-        gfx::BitmapGlyph d;
-        TS_ASSERT_EQUALS(d.getWidth(), 0);
-        TS_ASSERT_EQUALS(d.getHeight(), 0);
-        TS_ASSERT_EQUALS(d.getData().size(), 0U);
-        TS_ASSERT_EQUALS(d.getAAData().size(), 0U);
-    }
-
     // Size
     TS_ASSERT_EQUALS(gfx::BitmapGlyph::getBytesForSize(0, 0), 0U);
     TS_ASSERT_EQUALS(gfx::BitmapGlyph::getBytesForSize(5, 0), 0U);

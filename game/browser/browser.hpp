@@ -43,6 +43,7 @@ namespace game { namespace browser {
         AccountManager& accounts();
         UserCallback& callback();
         HandlerList& handlers();
+        util::ProfileDirectory& profile();
 
         void openFolder(String_t name);
         void openChild(size_t n);

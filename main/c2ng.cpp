@@ -87,14 +87,18 @@ namespace {
         NullControl(client::Session& session)
             : Control(session.interface(), session.root(), session.translator())
             { }
-        virtual void handleStateChange(client::si::UserSide& ui, client::si::RequestLink2 link, client::si::OutputState::Target /*target*/)
-            { ui.continueProcessWithFailure(link, "Context error"); }
-        virtual void handleEndDialog(client::si::UserSide& ui, client::si::RequestLink2 link, int /*code*/)
-            { ui.continueProcessWithFailure(link, "Context error"); }
-        virtual void handlePopupConsole(client::si::UserSide& ui, client::si::RequestLink2 link)
-            { ui.continueProcessWithFailure(link, "Context error"); }
-        virtual void handleSetViewRequest(client::si::UserSide& ui, client::si::RequestLink2 link, String_t /*name*/, bool /*withKeymap*/)
-            { ui.continueProcessWithFailure(link, "Context error"); }
+        virtual void handleStateChange(client::si::RequestLink2 link, client::si::OutputState::Target /*target*/)
+            { interface().continueProcessWithFailure(link, "Context error"); }
+        virtual void handleEndDialog(client::si::RequestLink2 link, int /*code*/)
+            { interface().continueProcessWithFailure(link, "Context error"); }
+        virtual void handlePopupConsole(client::si::RequestLink2 link)
+            { interface().continueProcessWithFailure(link, "Context error"); }
+        virtual void handleSetViewRequest(client::si::RequestLink2 link, String_t /*name*/, bool /*withKeymap*/)
+            { interface().continueProcessWithFailure(link, "Context error"); }
+        virtual void handleUseKeymapRequest(client::si::RequestLink2 link, String_t /*name*/, int /*prefix*/)
+            { interface().continueProcessWithFailure(link, "Context error"); }
+        virtual void handleOverlayMessageRequest(client::si::RequestLink2 link, String_t /*text*/)
+            { interface().continueProcessWithFailure(link, "Context error"); }
         virtual client::si::ContextProvider* createContextProvider()
             { return 0; }
     };
@@ -244,9 +248,6 @@ namespace {
                 m_browserSender.postNewRequest(new LoadRequest(player, m_uiSender, m_gameSender));
             }
 
-        BrowserListener* clone() const
-            { return new BrowserListener(*this); }
-
      private:
         class LoadRequest : public util::Request<game::browser::Session> {
          public:
@@ -333,7 +334,7 @@ namespace {
                                 catch (std::exception& e) {
                                     session.log().write(afl::sys::LogListener::Error, LOG_NAME, session.translator()("Unable to scripts and auto-tasks"), e);
                                 }
-                                
+
                                 ok = true;
                             }
                             catch (std::exception& e) {
@@ -643,7 +644,7 @@ namespace {
                                                          "-proxy=URL\tSet network proxy\n")
                                             + m_rootOptions.getHelp());
                 help += "\n";
-                help += m_translator("(c) copyright 2017-2020 Stefan Reuther <streu@gmx.de>");
+                help += m_translator("(c) copyright 2017-2021 Stefan Reuther <streu@gmx.de>");
                 help += "\n";
                 dialog.showInfo(help, PROGRAM_TITLE);
                 std::exit(0);
@@ -712,6 +713,7 @@ namespace {
              case OutputState::ExitGame:
                 // FIXME: at this point, we may have a process in InputState. That one must be terminated.
                 // FIXME: save the game of course...
+                // FIXME: run EXIT hook
                 running = false;
                 break;
 
@@ -828,7 +830,7 @@ namespace {
                 ui::res::Manager mgr;
                 mgr.addNewImageLoader(new ui::res::EngineImageLoader(engine));
                 mgr.addNewImageLoader(new ui::res::CCImageLoader());
-                mgr.addNewProvider(new ui::res::DirectoryProvider(resourceDirectory), "(MAIN)");
+                mgr.addNewProvider(new ui::res::DirectoryProvider(resourceDirectory, fs, log(), translator()), "(MAIN)");
                 mgr.addNewProvider(new ui::res::GeneratedPlanetProvider(), "(MAIN-PLANETS)");
 
                 // - window parameters
@@ -840,7 +842,7 @@ namespace {
                 ui::Root root(engine, provider, windowParams);
                 mgr.setScreenSize(root.getExtent().getSize());
                 mgr.addNewProvider(new ui::res::GeneratedEngineProvider(provider.getFont("-"), translator()), "(MAIN-ENGINES)");
-                root.sig_screenshot.addNewClosure(new ui::ScreenshotListener(fs, log()));
+                root.sig_screenshot.addNewClosure(new ui::ScreenshotListener(fs, log(), translator()));
 
                 // Setup network
                 afl::net::tunnel::TunnelableNetworkStack net(afl::net::NetworkStack::getInstance());
@@ -871,7 +873,7 @@ namespace {
 
                 // Set up background thread and request receivers.
                 // These must be after the session objects so that they die before them, allowing final requests to finish.
-                util::RequestThread backgroundThread("game.background", log(), params.getRequestThreadDelay());
+                util::RequestThread backgroundThread("game.background", log(), translator(), params.getRequestThreadDelay());
                 util::RequestReceiver<game::browser::Session> browserReceiver(backgroundThread, browserSession);
                 util::RequestReceiver<game::Session> gameReceiver(backgroundThread, gameSession);
 
@@ -911,7 +913,7 @@ namespace {
                     docView.getDocument().add(util::rich::Parser::parseXml("<big>PCC2ng</big>"));
                     docView.getDocument().addNewline();
                     docView.getDocument().addNewline();
-                    docView.getDocument().add(util::rich::Parser::parseXml("<font color=\"dim\">&#xA9; 2017-2020 Stefan Reuther &lt;streu@gmx.de&gt;</font>"));
+                    docView.getDocument().add(util::rich::Parser::parseXml("<font color=\"dim\">&#xA9; 2017-2021 Stefan Reuther &lt;streu@gmx.de&gt;</font>"));
                     docView.getDocument().addNewline();
                     docView.getDocument().finish();
                     docView.handleDocumentUpdate();
@@ -921,7 +923,7 @@ namespace {
                     root.add(docView);
 
                     // Browser
-                    client::screens::BrowserScreen browserScreen(root, browserReceiver.getSender(), gameReceiver.getSender());
+                    client::screens::BrowserScreen browserScreen(root, translator(), browserReceiver.getSender(), gameReceiver.getSender());
                     browserScreen.sig_gameSelection.addNewClosure(new BrowserListener(browserScreen, browserReceiver.getSender(), gameReceiver.getSender()));
                     int result = browserScreen.run(docColors);
                     if (result != 0) {

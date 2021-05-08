@@ -5,8 +5,8 @@
 
 #include "util/rich/text.hpp"
 #include "util/rich/attribute.hpp"
-#include "util/rich/visitor.hpp"
 #include "util/rich/colorattribute.hpp"
+#include "util/rich/visitor.hpp"
 
 // Construct blank object.
 util::rich::Text::Text()

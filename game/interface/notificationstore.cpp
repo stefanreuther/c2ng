@@ -21,6 +21,7 @@
   */
 
 #include "game/interface/notificationstore.hpp"
+#include "game/interface/processlisteditor.hpp"
 #include "interpreter/process.hpp"
 
 struct game::interface::NotificationStore::Message {
@@ -58,6 +59,13 @@ game::interface::NotificationStore::findMessageByProcessId(uint32_t processId) c
     }
 }
 
+// Find message index by process Id.
+bool
+game::interface::NotificationStore::findIndexByProcessId(uint32_t processId, size_t& index) const
+{
+    return findMessage(ProcessAssociation_t(processId), index);
+}
+
 // Get message by index.
 game::interface::NotificationStore::Message*
 game::interface::NotificationStore::getMessageByIndex(size_t index) const
@@ -87,7 +95,7 @@ game::interface::NotificationStore::addMessage(ProcessAssociation_t assoc, Strin
 
 // Check whether message is confirmed.
 bool
-game::interface::NotificationStore::isMessageConfirmed(Message* msg) const
+game::interface::NotificationStore::isMessageConfirmed(const Message* msg) const
 {
     // ex IntNotificationMessage::isConfirmed
     return msg != 0
@@ -124,7 +132,7 @@ game::interface::NotificationStore::removeOrphanedMessages()
 
 // Resume processes associated with confirmed messages.
 void
-game::interface::NotificationStore::resumeConfirmedProcesses(uint32_t pgid)
+game::interface::NotificationStore::resumeConfirmedProcesses(ProcessListEditor& editor)
 {
     // ex IntNotificationMessageStore::makeConfirmedProcessesRunnable
     // ex ccexec.pas:ProcessNotifyMessages (sort-of)
@@ -133,11 +141,7 @@ game::interface::NotificationStore::resumeConfirmedProcesses(uint32_t pgid)
         uint32_t pid;
         if (m_messages[i]->confirmed) {
             if (m_messages[i]->assoc.get(pid)) {
-                if (interpreter::Process* proc = m_processList.getProcessById(pid)) {
-                    if (proc->getState() == interpreter::Process::Suspended) {
-                        m_processList.resumeProcess(*proc, pgid);
-                    }
-                }
+                editor.setProcessState(pid, ProcessListEditor::Runnable);
             }
         }
     }
@@ -213,6 +217,45 @@ game::interface::NotificationStore::getMessageTurnNumber(size_t /*index*/) const
 }
 
 bool
+game::interface::NotificationStore::isMessageFiltered(size_t /*index*/, afl::string::Translator& /*tx*/, const PlayerList& /*players*/, const game::msg::Configuration& /*config*/) const
+{
+    return false;
+}
+
+game::msg::Mailbox::Flags_t
+game::interface::NotificationStore::getMessageFlags(size_t index) const
+{
+    Flags_t result;
+    const Message* msg = getMessageByIndex(index);
+    if (isMessageConfirmed(msg)) {
+        result += Confirmed;
+    }
+    return result;
+}
+
+game::msg::Mailbox::Actions_t
+game::interface::NotificationStore::getMessageActions(size_t index) const
+{
+    Actions_t result;
+    const Message* msg = getMessageByIndex(index);
+    if (!isMessageConfirmed(msg)) {
+        result += ToggleConfirmed;
+    }
+    return result;
+}
+
+void
+game::interface::NotificationStore::performMessageAction(size_t index, Action a)
+{
+    Message* msg = getMessageByIndex(index);
+    switch (a) {
+     case ToggleConfirmed:
+        confirmMessage(msg, !isMessageConfirmed(msg));
+        break;
+    }
+}
+
+bool
 game::interface::NotificationStore::findMessage(ProcessAssociation_t assoc, size_t& index) const
 {
     bool found = false;
@@ -231,15 +274,3 @@ game::interface::NotificationStore::findMessage(ProcessAssociation_t assoc, size
     }
     return found;
 }
-
-// FIXME: needed?
-// /** Get index of a message, given the IntNotificationMessage object.
-//     \return index, nil if message not contained in this store. */
-// IntNotificationMessageStore::index_t
-// IntNotificationMessageStore::getIndexOfMessage(IntNotificationMessage* msg)
-// {
-//     for (index_t i = 0; i < messages.size(); ++i)
-//         if (messages[i] == msg)
-//             return i;
-//     return nil;
-// }

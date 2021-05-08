@@ -94,7 +94,7 @@ game::interface::VcrSideContext::lookup(const afl::data::NameQuery& name, Proper
     return lookupName(name, side_mapping, result) ? this : 0;
 }
 void
-game::interface::VcrSideContext::set(PropertyIndex_t /*index*/, afl::data::Value* /*value*/)
+game::interface::VcrSideContext::set(PropertyIndex_t /*index*/, const afl::data::Value* /*value*/)
 {
     // ex IntVcrSideContext::set
     throw interpreter::Error::notAssignable();

@@ -11,7 +11,6 @@
 #include "game/session.hpp"
 #include "util/requestdispatcher.hpp"
 #include "util/requestsender.hpp"
-#include "util/slaverequestsender.hpp"
 
 namespace game { namespace proxy {
 
@@ -69,6 +68,11 @@ namespace game { namespace proxy {
             \param pri   Priority */
         void setProcessPriority(uint32_t pid, int pri);
 
+        /** Resume confirmed processes.
+            Processes all notification messages and marks processes to execute.
+            \see game::interface::NotificationStore::resumeConfirmedProcesses */
+        void resumeConfirmedProcesses();
+
         /** Perform all prepared state changes.
             This will create a process group and place processes in it.
             Caller needs to run that process group.
@@ -81,9 +85,10 @@ namespace game { namespace proxy {
 
      private:
         class Trampoline;
+        class TrampolineFromSession;
 
         util::RequestReceiver<ProcessListProxy> m_reply;
-        util::SlaveRequestSender<Session, Trampoline> m_request;
+        util::RequestSender<Trampoline> m_request;
     };
 
 } }

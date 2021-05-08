@@ -224,10 +224,7 @@ namespace {
         if ((flags & 4) != 0) {
             widget.setFlag(widget.Hidden, true);
         }
-        // FIXME: flag 'F' (framed) must be implemented differently
-        // if ((flags & 8) != 0) {
-        //     widget.setFlag(widget.Framed, true);
-        // }
+        // FIXME: flag 'F' (framed) is missing here: if ((flags & 8) != 0)
         if ((flags & 16) != 0) {
             widget.setFlag(widget.GameChars, true);
         }
@@ -254,11 +251,10 @@ namespace client { namespace si { namespace {
 
         /** Create the widget.
             This function is executed within the GUI thread.
-            \param user UserSide, for example, to authenticate against WidgetReference
-            \param ctl Control, for example, to obtain a ui::Root (Control::root())
+            \param ctl Control, for example, to obtain a ui::Root (Control::root()) and to authenticate against WidgetReference
             \param holder Dialog's WidgetHolder, for example, to access the Deleter (WidgetHolder::deleter())
             \return newly-allocated widget */
-        virtual ui::Widget* makeWidget(UserSide& user, Control& ctl, WidgetHolder& holder) = 0;
+        virtual ui::Widget* makeWidget(Control& ctl, WidgetHolder& holder) = 0;
 
         WidgetValue* run(game::Session& session, ScriptSide& ss, const WidgetReference& ref, interpreter::Arguments& args, afl::base::Memory<const interpreter::NameTable> names);
     };
@@ -281,11 +277,11 @@ client::si::Factory::run(game::Session& session, ScriptSide& ss, const WidgetRef
               m_parent(parent),
               m_result(result)
             { }
-        virtual void handle(UserSide& user, Control& ctl)
+        virtual void handle(Control& ctl)
             {
-                ui::Widget* p = m_parent.makeWidget(user, ctl, m_container.getHolder());
-                m_result = m_container.getHolder().addNewWidget(user, p);
-                if (ui::LayoutableGroup* g = dynamic_cast<ui::LayoutableGroup*>(m_container.get(user))) {
+                ui::Widget* p = m_parent.makeWidget(ctl, m_container.getHolder());
+                m_result = m_container.getHolder().addNewWidget(ctl, p);
+                if (ui::LayoutableGroup* g = dynamic_cast<ui::LayoutableGroup*>(m_container.get(ctl))) {
                     g->add(*p);
                 }
             }
@@ -346,7 +342,7 @@ client::si::IFWidgetNewButton(game::Session& session, ScriptSide& ss, const Widg
                 interpreter::checkCommandAtomArg(m_commandAtom, args.getNext(), session.world().atomTable());
                 return true;
             }
-        virtual ui::Widget* makeWidget(UserSide& /*user*/, Control& ctl, WidgetHolder& holder)
+        virtual ui::Widget* makeWidget(Control& ctl, WidgetHolder& holder)
             {
                 std::auto_ptr<ui::widgets::Button> p(new ui::widgets::Button(m_title, m_keyValue, ctl.root()));
                 if (m_commandAtom != 0) {
@@ -410,7 +406,7 @@ client::si::IFWidgetNewFrame(game::Session& session, ScriptSide& ss, const Widge
                 checkIntegerArg(m_pad, args.getNext(), 0, 1000);
                 return true;
             }
-        virtual ui::Widget* makeWidget(UserSide& /*user*/, Control& ctl, WidgetHolder& /*holder*/)
+        virtual ui::Widget* makeWidget(Control& ctl, WidgetHolder& /*holder*/)
             {
                 std::auto_ptr<ui::widgets::FrameGroup> p(new ui::widgets::FrameGroup(ui::layout::VBox::instance0, ctl.root().colorScheme(), m_type));
                 p->setFrameWidth(m_width);
@@ -454,13 +450,13 @@ client::si::IFWidgetNewHVBox(game::Session& session, ScriptSide& ss, const Widge
                 checkIntegerArg(m_outer, args.getNext(), 0, 1000);
                 return true;
             }
-        virtual ui::Widget* makeWidget(UserSide& user, Control& /*ctl*/, WidgetHolder& holder)
+        virtual ui::Widget* makeWidget(Control& ctl, WidgetHolder& holder)
             {
                 ui::layout::Manager* mgr;
                 if (m_horizontal) {
-                    mgr = &holder.deleter(user).addNew(new ui::layout::HBox(m_space, m_outer));
+                    mgr = &holder.deleter(ctl).addNew(new ui::layout::HBox(m_space, m_outer));
                 } else {
-                    mgr = &holder.deleter(user).addNew(new ui::layout::VBox(m_space, m_outer));
+                    mgr = &holder.deleter(ctl).addNew(new ui::layout::VBox(m_space, m_outer));
                 }
                 return new ui::Group(*mgr);
             }
@@ -514,7 +510,7 @@ client::si::IFWidgetNewKeyboardFocus(game::Session& session, ScriptSide& ss, con
                 }
                 return true;
             }
-        virtual ui::Widget* makeWidget(UserSide& /*user*/, Control& /*ctl*/, WidgetHolder& /*holder*/)
+        virtual ui::Widget* makeWidget(Control& /*ctl*/, WidgetHolder& /*holder*/)
             {
                 return new FocusIterator(m_flags);
             }
@@ -562,7 +558,7 @@ client::si::IFWidgetNewInput(game::Session& session, ScriptSide& ss, const Widge
                 checkOptionalKeyArg(m_key, args.getNext());
                 return true;
             }
-        virtual ui::Widget* makeWidget(UserSide& /*user*/, Control& ctl, WidgetHolder& /*holder*/)
+        virtual ui::Widget* makeWidget(Control& ctl, WidgetHolder& /*holder*/)
             {
                 // Font
                 gfx::FontRequest font;
@@ -639,7 +635,7 @@ client::si::IFWidgetNewSpacer(game::Session& session, ScriptSide& ss, const Widg
                 }
                 return true;
             }
-        virtual ui::Widget* makeWidget(UserSide& /*user*/, Control& /*ctl*/, WidgetHolder& /*holder*/)
+        virtual ui::Widget* makeWidget(Control& /*ctl*/, WidgetHolder& /*holder*/)
             {
                 return new ui::Spacer(m_info);
             }
@@ -678,9 +674,9 @@ client::si::IFWidgetNewCheckbox(game::Session& session, ScriptSide& ss, const Wi
                 }
                 return true;
             }
-        virtual ui::Widget* makeWidget(UserSide& user, Control& ctl, WidgetHolder& holder)
+        virtual ui::Widget* makeWidget(Control& ctl, WidgetHolder& holder)
             {
-                std::auto_ptr<ui::widgets::Checkbox> p(new ui::widgets::Checkbox(ctl.root(), m_key, m_text, holder.createInteger(user)));
+                std::auto_ptr<ui::widgets::Checkbox> p(new ui::widgets::Checkbox(ctl.root(), m_key, m_text, holder.createInteger(ctl)));
                 p->addDefaultImages();
                 return p.release();
             }
@@ -743,19 +739,19 @@ client::si::IFWidgetNewRadiobutton(game::Session& session, ScriptSide& ss, const
                 }
                 return true;
             }
-        virtual ui::Widget* makeWidget(UserSide& user, Control& ctl, WidgetHolder& holder)
+        virtual ui::Widget* makeWidget(Control& ctl, WidgetHolder& holder)
             {
                 // Obtain the value
                 afl::base::Observable<int>* pValue;
                 size_t master;
                 if (m_masterSlot.get(master)) {
-                    ui::widgets::RadioButton* p = dynamic_cast<ui::widgets::RadioButton*>(holder.get(user, master));
+                    ui::widgets::RadioButton* p = dynamic_cast<ui::widgets::RadioButton*>(holder.get(ctl, master));
                     if (p == 0) {
                         throw interpreter::Error("Type error, expecting radio button widget");
                     }
                     pValue = &p->value();
                 } else {
-                    pValue = &holder.createInteger(user);
+                    pValue = &holder.createInteger(ctl);
                 }
 
                 // Create widget
@@ -806,9 +802,9 @@ client::si::IFWidgetNewFlowBox(game::Session& session, ScriptSide& ss, const Wid
                     return true;
                 }
             }
-        virtual ui::Widget* makeWidget(UserSide& user, Control& /*ctl*/, WidgetHolder& holder)
+        virtual ui::Widget* makeWidget(Control& ctl, WidgetHolder& holder)
             {
-                ui::layout::Manager& mgr = holder.deleter(user).addNew(new ui::layout::Flow(m_numLines, m_rightJustified, m_horizontalGap, m_verticalGap));
+                ui::layout::Manager& mgr = holder.deleter(ctl).addNew(new ui::layout::Flow(m_numLines, m_rightJustified, m_horizontalGap, m_verticalGap));
                 return new ui::Group(mgr);
             }
      private:
@@ -848,9 +844,9 @@ client::si::IFWidgetNewGridBox(game::Session& session, ScriptSide& ss, const Wid
                     return true;
                 }
             }
-        virtual ui::Widget* makeWidget(UserSide& user, Control& /*ctl*/, WidgetHolder& holder)
+        virtual ui::Widget* makeWidget(Control& ctl, WidgetHolder& holder)
             {
-                ui::layout::Manager& mgr = holder.deleter(user).addNew(new ui::layout::Grid(m_numColumns, m_space, m_outer));
+                ui::layout::Manager& mgr = holder.deleter(ctl).addNew(new ui::layout::Grid(m_numColumns, m_space, m_outer));
                 return new ui::Group(mgr);
             }
      private:
@@ -888,7 +884,7 @@ client::si::IFWidgetNewLabel(game::Session& session, ScriptSide& ss, const Widge
                 }
                 return true;
             }
-        virtual ui::Widget* makeWidget(UserSide& /*user*/, Control& ctl, WidgetHolder& /*holder*/)
+        virtual ui::Widget* makeWidget(Control& ctl, WidgetHolder& /*holder*/)
             {
                 return new ui::widgets::StaticText(m_text, util::SkinColor::Static, m_font, ctl.root().provider());
             }
@@ -926,11 +922,11 @@ client::si::IFWidgetNewNumberInput(game::Session& session, ScriptSide& ss, const
                 }
                 return true;
             }
-        virtual ui::Widget* makeWidget(UserSide& user, Control& ctl, WidgetHolder& holder)
+        virtual ui::Widget* makeWidget(Control& ctl, WidgetHolder& holder)
             {
-                ui::widgets::DecimalSelector& inner = holder.deleter(user)
-                    .addNew(new ui::widgets::DecimalSelector(ctl.root(), holder.createInteger(user), m_min, m_max, m_step));
-                ui::Widget& outer = inner.addButtons(holder.deleter(user), ctl.root());
+                ui::widgets::DecimalSelector& inner = holder.deleter(ctl)
+                    .addNew(new ui::widgets::DecimalSelector(ctl.root(), ctl.translator(), holder.createInteger(ctl), m_min, m_max, m_step));
+                ui::Widget& outer = inner.addButtons(holder.deleter(ctl), ctl.root());
                 return new CompoundWidget<ui::widgets::DecimalSelector>(inner, outer);
             }
      private:
@@ -956,8 +952,6 @@ client::si::IFWidgetNewPseudoInput(game::Session& session, ScriptSide& ss, const
         CommandWrap(afl::base::Closure<void(int)>* c)
             : m_closure(c)
             { }
-        virtual CommandWrap* clone() const
-            { return new CommandWrap(m_closure->clone()); }
         virtual void call()
             { m_closure->call(0); }
      private:
@@ -982,7 +976,7 @@ client::si::IFWidgetNewPseudoInput(game::Session& session, ScriptSide& ss, const
                 checkFlagArg(m_flags, &m_width, args.getNext(), "NHPFGM");
                 return true;
             }
-        virtual ui::Widget* makeWidget(UserSide& /*user*/, Control& ctl, WidgetHolder& holder)
+        virtual ui::Widget* makeWidget(Control& ctl, WidgetHolder& holder)
             {
                 // Font
                 gfx::FontRequest font;

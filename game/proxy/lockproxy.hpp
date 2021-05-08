@@ -30,7 +30,7 @@ namespace game { namespace proxy {
         enum Flag {
             Left,                     /**< Use Lock_Left (default: Lock_Right). */
             MarkedOnly,               /**< Consider only marked objects. \see game::map::Locker::setMarkedOnly */
-            OptimizeWarp              /**< Optimize for movement. */
+            ToggleOptimizeWarp        /**< Optimize for movement different from global config. */
         };
 
         /** Option flags. */
@@ -50,6 +50,11 @@ namespace game { namespace proxy {
             \param max Maximum (top-right) coordinate, inclusive.
             \see game::map::Locker::setRangeLimit */
         void setRangeLimit(Point_t min, Point_t max);
+
+        /** Set origin for movement-aware locking to warp-well edges.
+            \param pos Position
+            \param isHyperdriving true if hyperdriving */
+        void setOrigin(Point_t pos, bool isHyperdriving);
 
         /** Post query.
             Schedules a sig_result callback with the result point.
@@ -73,10 +78,17 @@ namespace game { namespace proxy {
             Point_t max;
         };
 
+        struct Origin {
+            bool active;
+            bool isHyperdriving;
+            Point_t pos;
+        };
+
         util::RequestSender<Session> m_gameSender;
         util::RequestReceiver<LockProxy> m_reply;
 
         Limit m_limit;
+        Origin m_origin;
 
         Point_t m_lastTarget;
         Flags_t m_lastFlags;

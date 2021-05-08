@@ -17,7 +17,6 @@
 #include "ui/widgets/focusiterator.hpp"
 #include "ui/widgets/statictext.hpp"
 #include "ui/window.hpp"
-#include "util/translation.hpp"
 
 /*
  *  Input Component
@@ -40,8 +39,8 @@ class client::dialogs::GoalDialog::InputComponent : public ui::widgets::DecimalS
         { }
 
     // DecimalSelector::Peer:
-    virtual String_t toString(ui::widgets::DecimalSelector& sel, int32_t value);
-    virtual bool handleKey(ui::widgets::DecimalSelector& sel, util::Key_t key, int prefix);
+    virtual String_t toString(const ui::widgets::BaseDecimalSelector& sel, int32_t value);
+    virtual bool handleKey(const ui::widgets::BaseDecimalSelector& sel, util::Key_t key, int prefix);
 
     void setValue(int32_t n)
         { m_value.set(n); }
@@ -61,7 +60,7 @@ class client::dialogs::GoalDialog::InputComponent : public ui::widgets::DecimalS
 };
 
 String_t
-client::dialogs::GoalDialog::InputComponent::toString(ui::widgets::DecimalSelector& /*sel*/, int32_t value)
+client::dialogs::GoalDialog::InputComponent::toString(const ui::widgets::BaseDecimalSelector& /*sel*/, int32_t value)
 {
     // ex WGoalInput::getStringValue
     // ex pdata.pas:CBuildGoalInput.StrFunc
@@ -75,7 +74,7 @@ client::dialogs::GoalDialog::InputComponent::toString(ui::widgets::DecimalSelect
 }
 
 bool
-client::dialogs::GoalDialog::InputComponent::handleKey(ui::widgets::DecimalSelector& /*sel*/, util::Key_t key, int /*prefix*/)
+client::dialogs::GoalDialog::InputComponent::handleKey(const ui::widgets::BaseDecimalSelector& /*sel*/, util::Key_t key, int /*prefix*/)
 {
     // ex WGoalInput::handleEvent
     if (m_parent.m_allowUnchanged && (key & ~util::KeyMod_Alt) == 'd') {
@@ -101,7 +100,7 @@ client::dialogs::GoalDialog::InputComponent::init(bool isGoal)
 
     ui::widgets::Button& btnPlus  = del.addNew(new ui::widgets::Button("+", '+', root));
     ui::widgets::Button& btnMinus = del.addNew(new ui::widgets::Button("-", '-', root));
-    ui::widgets::DecimalSelector& sel = del.addNew(new ui::widgets::DecimalSelector(root, m_value, lowerBound, upperBound, 10));
+    ui::widgets::DecimalSelector& sel = del.addNew(new ui::widgets::DecimalSelector(root, m_parent.m_translator, m_value, lowerBound, upperBound, 10));
     m_widget.add(btnMinus);
     m_widget.add(sel);
     m_widget.add(btnPlus);

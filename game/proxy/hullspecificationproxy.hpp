@@ -14,6 +14,7 @@
 #include "game/types.hpp"
 #include "util/requestreceiver.hpp"
 #include "util/requestsender.hpp"
+#include "game/spec/info/types.hpp"
 
 namespace game { namespace proxy {
 
@@ -49,13 +50,15 @@ namespace game { namespace proxy {
 
             PlayerSet_t players;
 
-            // Missing: points we have, hull functions
+            game::spec::info::Abilities_t abilities;
+
+            // Missing: points we have
 
             HullSpecification()
                 : name(), image(), hullId(0), mass(0), numEngines(0), techLevel(0), maxCrew(0),
                   maxCargo(0), maxFuel(0), maxBeams(0), maxLaunchers(0), numBays(0), mineHitDamage(0),
                   fuelBurnPerTurn(0), fuelBurnPerFight(0), cost(), pointsToBuild(), pointsForKilling(),
-                  pointsForScrapping(), players()
+                  pointsForScrapping(), players(), abilities()
                 { }
         };
 
@@ -84,8 +87,10 @@ namespace game { namespace proxy {
         static void sendReply(ShipQuery& q,
                               const game::spec::ShipList& shipList,
                               const Root& root,
+                              const game::map::Universe* pUniv,
                               int player,
                               game::spec::info::PictureNamer& picNamer,
+                              afl::string::Translator& tx,
                               util::RequestSender<HullSpecificationProxy> reply);
         static void sendReply(const HullSpecification& result,
                               util::RequestSender<HullSpecificationProxy> reply);

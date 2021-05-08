@@ -24,9 +24,9 @@ game::ref::UserList::clear()
 }
 
 void
-game::ref::UserList::add(Type type, String_t name, Reference ref, bool marked, util::SkinColor::Color color)
+game::ref::UserList::add(Type type, String_t name, Reference ref, bool marked, game::map::Object::Playability playability, util::SkinColor::Color color)
 {
-    m_items.push_back(Item(type, name, ref, marked, color));
+    m_items.push_back(Item(type, name, ref, marked, playability, color));
 }
 
 void
@@ -41,7 +41,7 @@ game::ref::UserList::add(const List& list, Session& session, const SortPredicate
         const String_t newClass = divi.getClass(r);
         if (newClass != thisClass) {
             if (!newClass.empty()) {
-                add(DividerItem, newClass, Reference(), false, util::SkinColor::Static);
+                add(DividerItem, newClass, Reference(), false, game::map::Object::NotPlayable, util::SkinColor::Static);
             }
             thisClass = newClass;
             thisSubclass.clear();
@@ -49,39 +49,13 @@ game::ref::UserList::add(const List& list, Session& session, const SortPredicate
         const String_t newSubclass = subdivi.getClass(r);
         if (newSubclass != thisSubclass) {
             if (!newSubclass.empty()) {
-                add(SubdividerItem, newSubclass, Reference(), false, util::SkinColor::Static);
+                add(SubdividerItem, newSubclass, Reference(), false, game::map::Object::NotPlayable, util::SkinColor::Static);
             }
             thisSubclass = newSubclass;
         }
 
         // Actual item
-        // - name
-        String_t name;
-        if (!session.getReferenceName(r, DetailedName, name)) {
-            name = r.toString(session.translator());
-        }
-
-        // - marked, color
-        bool marked = false;
-        util::SkinColor::Color color = util::SkinColor::Static;
-        if (const Game* g = session.getGame().get()) {
-            if (const Turn* t = g->getViewpointTurn().get()) {
-                if (const game::map::Object* p = t->universe().getObject(r)) {
-                    marked = p->isMarked();
-
-                    int owner = 0;
-                    if (p->getOwner(owner) && owner != 0) {
-                        switch (g->teamSettings().getPlayerRelation(owner)) {
-                         case TeamSettings::ThisPlayer:    color = util::SkinColor::Green;  break;
-                         case TeamSettings::AlliedPlayer:  color = util::SkinColor::Yellow; break;
-                         case TeamSettings::EnemyPlayer:   color = util::SkinColor::Red;    break;
-                        }
-                    }
-                }
-            }
-        }
-
-        add(ReferenceItem, name, r, marked, color);
+        m_items.push_back(makeReferenceItem(r, session));
     }
 }
 
@@ -133,4 +107,38 @@ bool
 game::ref::UserList::operator!=(const UserList& other) const
 {
     return !operator==(other);
+}
+
+game::ref::UserList::Item
+game::ref::UserList::makeReferenceItem(Reference r, Session& session)
+{
+    // - name
+    String_t name;
+    if (!session.getReferenceName(r, DetailedName, name)) {
+        name = r.toString(session.translator());
+    }
+
+    // - marked, color
+    bool marked = false;
+    game::map::Object::Playability playability = game::map::Object::NotPlayable;
+    util::SkinColor::Color color = util::SkinColor::Static;
+    if (const Game* g = session.getGame().get()) {
+        if (const Turn* t = g->getViewpointTurn().get()) {
+            if (const game::map::Object* p = t->universe().getObject(r)) {
+                marked = p->isMarked();
+                playability = p->getPlayability();
+
+                int owner = 0;
+                if (p->getOwner(owner) && owner != 0) {
+                    switch (g->teamSettings().getPlayerRelation(owner)) {
+                     case TeamSettings::ThisPlayer:    color = util::SkinColor::Green;  break;
+                     case TeamSettings::AlliedPlayer:  color = util::SkinColor::Yellow; break;
+                     case TeamSettings::EnemyPlayer:   color = util::SkinColor::Red;    break;
+                    }
+                }
+            }
+        }
+    }
+
+    return Item(ReferenceItem, name, r, marked, playability, color);
 }

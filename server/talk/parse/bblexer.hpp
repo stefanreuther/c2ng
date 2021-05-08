@@ -1,5 +1,6 @@
 /**
   *  \file server/talk/parse/bblexer.hpp
+  *  \brief Class server::talk::parse::BBLexer
   */
 #ifndef C2NG_SERVER_TALK_PARSE_BBLEXER_HPP
 #define C2NG_SERVER_TALK_PARSE_BBLEXER_HPP
@@ -36,28 +37,45 @@ namespace server { namespace talk { namespace parse {
             Text                    ///< anything else
         };
 
+        /** Constructor.
+            \param text Text to parse */
         BBLexer(const String_t& text);
 
+        /** Read a token.
+            \return token type. */
         Token read();
 
-        Token    getTokenType() const;
+        /** Get current token.
+            \return current token type, i.e. last value returned by read() */
+        Token getTokenType() const;
+
+        /** Get current token string.
+            \return complete token text */
         String_t getTokenString() const;
+
+        /** Get current tag. For TagStart and TagEnd only.
+            \return tag, in lower-case */
         String_t getTag() const;
+
+        /** Get current attribute. For TagStart only.
+            \return attribute */
         String_t getAttribute() const;
 
+        /** Skip blanks.
+            Advances cursor until it sits at the end or a non-blank. */
         void skipBlanks();
 
      private:
         bool findNewline();
 
-        String_t text;
-        String_t::size_type cursor;
-        String_t::size_type token_start;
-        String_t::size_type token_length;
-        String_t::size_type attr_start;
-        String_t::size_type attr_length;
-        String_t tag;
-        Token token;
+        String_t m_text;
+        String_t::size_type m_cursor;
+        String_t::size_type m_tokenStart;
+        String_t::size_type m_tokenLength;
+        String_t::size_type m_attributeStart;
+        String_t::size_type m_attributeLength;
+        String_t m_tag;
+        Token m_token;
     };
 
 } } }

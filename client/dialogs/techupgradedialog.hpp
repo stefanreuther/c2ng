@@ -11,7 +11,7 @@
 
 namespace client { namespace dialogs {
 
-    void doTechUpgradeDialog(ui::Root& root, util::RequestSender<game::Session> gameSender, game::Id_t pid);
+    void doTechUpgradeDialog(ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::Session> gameSender, game::Id_t pid);
 
 } }
 

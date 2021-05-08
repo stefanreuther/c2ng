@@ -6,9 +6,10 @@
 #define C2NG_GFX_BITMAPFONT_HPP
 
 #include "afl/charset/unicode.hpp"
-#include "gfx/font.hpp"
 #include "afl/container/ptrvector.hpp"
 #include "afl/io/stream.hpp"
+#include "afl/string/translator.hpp"
+#include "gfx/font.hpp"
 
 namespace gfx {
 
@@ -53,8 +54,9 @@ namespace gfx {
         /** Load bitmap font from "FN" file.
             This is a custom font file format, used by PCC 1.x as well as PCC2.
             \param s Stream
-            \param index Font index (typically 0) */
-        void load(afl::io::Stream& s, int index);
+            \param index Font index (typically 0)
+            \param tx Translator (for error message exceptions) */
+        void load(afl::io::Stream& s, int index, afl::string::Translator& tx);
 
         // Font virtuals:
         virtual void outText(BaseContext& ctx, Point pt, String_t text);

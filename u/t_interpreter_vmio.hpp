@@ -33,6 +33,12 @@ class TestInterpreterVmioObjectLoader : public CxxTest::TestSuite {
     void testLoadBCO();
     void testLoadHash();
     void testLoadArray();
+    void testLoadStruct();
+    void testLoadStructureValue();
+    void testLoadStructureValueReversed();
+    void testLoadObjectFile();
+    void testLoadObjectFileErrors();
+    void testLoadProcess();
 };
 
 class TestInterpreterVmioProcessLoadContext : public CxxTest::TestSuite {

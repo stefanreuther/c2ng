@@ -7,13 +7,14 @@
 #include "client/marker.hpp"
 #include "game/proxy/objectlistener.hpp"
 
-client::tiles::SelectionHeaderTile::SelectionHeaderTile(ui::Root& root, client::widgets::KeymapWidget& keys)
+client::tiles::SelectionHeaderTile::SelectionHeaderTile(ui::Root& root, ui::Widget& keys)
     : m_root(root),
       m_name(),
       m_marked(),
       m_receiver(root.engine().dispatcher(), *this),
-      m_prev(UTF_UP_ARROW, '-', root),
-      m_next(UTF_DOWN_ARROW, '+', root)
+      // These need to be Key_Up, Key_Down; this widget appears together with +/- buttons on the Minefield Info dialog
+      m_prev(UTF_UP_ARROW,   util::Key_Up,   root),
+      m_next(UTF_DOWN_ARROW, util::Key_Down, root)
 {
     // ex WObjectSelectionHeaderTile::WObjectSelectionHeaderTile
     // ex WObjectSelectionHeaderTile::init

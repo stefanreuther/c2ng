@@ -162,7 +162,7 @@ TestGameGame::testMessageAlliance()
         info.addAllianceValue("other", o);
     }
     HostConfiguration config;
-    testee.addMessageInformation(info, config);
+    testee.addMessageInformation(info, config, afl::base::Nothing);
 
     // Verify
     TS_ASSERT_EQUALS(allies.getOffer(0)->theirOffer.get(4), Offer::Conditional);
@@ -190,7 +190,7 @@ TestGameGame::testMessageConfig()
     info.addConfigurationValue("MaxColTempSlope", "?");            // Integer, bogus value
     info.addConfigurationValue("MaxPlanetaryIncome", "777");       // Integer
 
-    TS_ASSERT_THROWS_NOTHING(testee.addMessageInformation(info, config));
+    TS_ASSERT_THROWS_NOTHING(testee.addMessageInformation(info, config, afl::base::Nothing));
 
     TS_ASSERT_EQUALS(config[HostConfiguration::RaceMiningRate](1), 5);
     TS_ASSERT_EQUALS(config[HostConfiguration::RaceMiningRate](4), 8);
@@ -199,5 +199,39 @@ TestGameGame::testMessageConfig()
     TS_ASSERT_EQUALS(config[HostConfiguration::CrystalSinTempBehavior](), 1);
     TS_ASSERT_EQUALS(config[HostConfiguration::MaxColTempSlope](), 1000);     // unchanged default
     TS_ASSERT_EQUALS(config[HostConfiguration::MaxPlanetaryIncome](1), 777);
+}
+
+/** Test message linking.
+    A: create Game, add ships and planets. Call addMessageInformation() with message numbers.
+    E: message numbers added to units */
+void
+TestGameGame::testMessageLink()
+{
+    HostConfiguration config;
+
+    game::Game testee;
+    testee.currentTurn().setTurnNumber(42);
+
+    game::map::Planet* pl = testee.currentTurn().universe().planets().create(99);
+    game::map::Ship* sh = testee.currentTurn().universe().ships().create(77);
+
+    // Add planet information
+    game::parser::MessageInformation i1(game::parser::MessageInformation::Planet, 99, 42);
+    i1.addValue(game::parser::ms_FriendlyCode, "ppp");
+    TS_ASSERT_THROWS_NOTHING(testee.addMessageInformation(i1, config, 3));
+
+    // Add ship information
+    game::parser::MessageInformation i2(game::parser::MessageInformation::Ship, 77, 42);
+    i2.addValue(game::parser::ms_FriendlyCode, "sss");
+    TS_ASSERT_THROWS_NOTHING(testee.addMessageInformation(i2, config, 4));
+
+    // Verify
+    TS_ASSERT_EQUALS(pl->getFriendlyCode().orElse(""), "ppp");
+    TS_ASSERT_EQUALS(pl->messages().get().size(), 1U);
+    TS_ASSERT_EQUALS(pl->messages().get()[0], 3U);
+
+    TS_ASSERT_EQUALS(sh->getFriendlyCode().orElse(""), "sss");
+    TS_ASSERT_EQUALS(sh->messages().get().size(), 1U);
+    TS_ASSERT_EQUALS(sh->messages().get()[0], 4U);
 }
 

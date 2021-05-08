@@ -67,6 +67,48 @@ TestUtilStringParser::testIt()
         TS_ASSERT(p.parseEnd());
     }
 
+    // parseDelimGreedy behaves like parseDelim
+    {
+        String_t tmp;
+        util::StringParser p("abc:xyz");
+        TS_ASSERT(p.parseDelimGreedy(":", tmp));
+        TS_ASSERT_EQUALS(tmp, "abc");
+
+        TS_ASSERT(p.parseDelimGreedy(":", tmp));   // we did not skip the ':' yet
+        TS_ASSERT_EQUALS(tmp, "");
+        TS_ASSERT_EQUALS(p.getRemainder(), ":xyz");
+
+        TS_ASSERT(p.parseCharacter(':'));
+
+        TS_ASSERT(p.parseDelimGreedy(":", tmp));
+        TS_ASSERT_EQUALS(tmp, "xyz");
+        TS_ASSERT(p.parseEnd());
+    }
+
+    // parseDelim with multiple delimiters
+    {
+        String_t tmp;
+        util::StringParser p("a.b:c:d.e");
+        TS_ASSERT(p.parseDelim(":.", tmp));
+        TS_ASSERT_EQUALS(tmp, "a");
+
+        TS_ASSERT(p.parseDelim(":.", tmp));   // we did not skip the '.' yet
+        TS_ASSERT_EQUALS(tmp, "");
+        TS_ASSERT_EQUALS(p.getRemainder(), ".b:c:d.e");
+    }
+
+    // parseDelimGreedy with multiple delimiters
+    {
+        String_t tmp;
+        util::StringParser p("a.b:c:d.e");
+        TS_ASSERT(p.parseDelimGreedy(":.", tmp));
+        TS_ASSERT_EQUALS(tmp, "a.b:c:d");
+
+        TS_ASSERT(p.parseDelimGreedy(":.", tmp));   // we did not skip the '.' yet
+        TS_ASSERT_EQUALS(tmp, "");
+        TS_ASSERT_EQUALS(p.getRemainder(), ".e");
+    }
+
     // Numbers
     {
         util::StringParser p("1 -1 +1 99 -99 +99");

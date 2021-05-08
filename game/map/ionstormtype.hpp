@@ -9,6 +9,8 @@
 
 namespace game { namespace map {
 
+    class Universe;
+
     class IonStormType : public ObjectVectorType<IonStorm> {
      public:
         IonStormType(Universe& univ);

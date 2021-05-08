@@ -43,7 +43,7 @@ namespace {
                 }
             }
 
-        virtual void set(PropertyIndex_t index, afl::data::Value* value)
+        virtual void set(PropertyIndex_t index, const afl::data::Value* value)
             {
                 // ex IntHashContext::set
                 if (index == 1) {

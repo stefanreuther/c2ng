@@ -14,14 +14,15 @@
 game::actions::TechUpgrade::TechUpgrade(game::map::Planet& planet,
                                         CargoContainer& container,
                                         game::spec::ShipList& shipList,
-                                        Root& root)
-    : BaseBuildAction(planet, container, shipList, root),
+                                        Root& root,
+                                        afl::string::Translator& tx)
+    : BaseBuildAction(planet, container, shipList, root, tx),
       conn_undoChange(),
       m_pUniverse(0)
 {
     // ex GStarbaseTechUpgradeAction::GStarbaseTechUpgradeAction
     // Preconditions (redundant, actually)
-    mustHavePlayedBase(planet);
+    mustHavePlayedBase(planet, tx);
 
     for (size_t i = 0; i < NUM_TECH_AREAS; ++i) {
         m_newTechLevels[i] = m_minTechLevels[i] = planet.getBaseTechLevel(TechLevel(i)).orElse(1);
@@ -79,6 +80,17 @@ game::actions::TechUpgrade::setTechLevel(TechLevel area, int level)
     } else {
         // Invalid change
         return false;
+    }
+}
+
+// Upgrade to new target tech level.
+bool
+game::actions::TechUpgrade::upgradeTechLevel(TechLevel area, int level)
+{
+    if (level <= m_newTechLevels[area]) {
+        return true;
+    } else {
+        return setTechLevel(area, level);
     }
 }
 

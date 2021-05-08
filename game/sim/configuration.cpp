@@ -8,9 +8,7 @@
 
 // Default constructor.
 game::sim::Configuration::Configuration()
-    : m_allianceSettings(),
-      m_enemySettings(),
-      m_engineShieldBonus(0),
+    : m_engineShieldBonus(0),
       m_scottyBonus(true),
       m_randomLeftRight(false),
       m_honorAlliances(true),
@@ -18,7 +16,9 @@ game::sim::Configuration::Configuration()
       m_seedControl(false),
       m_randomizeFCodesOnEveryFight(false),
       m_balancingMode(BalanceNone),
-      m_vcrMode(VcrPHost4)
+      m_vcrMode(VcrPHost4),
+      m_allianceSettings(),
+      m_enemySettings()
 {
     // ex GSimOptions::GSimOptions
 }
@@ -29,13 +29,13 @@ game::sim::Configuration::loadDefaults(const TeamSettings& teams)
 {
     // FIXME: this function has interesting semantics - do we need it?
     // ex GSimOptions::loadDefaults (sort-of). Original loadDefaults also implies setMode()
+    // ex ccsim.pas:InitSimConfig (part)
     m_allianceSettings.clear();
     m_enemySettings.clear();
     m_honorAlliances = true;
     m_onlyOneSimulation = false;
     m_seedControl = false;
     m_randomizeFCodesOnEveryFight = false;
-    // m_seed = 0;
 
     // Initialize alliances from teams:
     for (int a = 1; a <= MAX_PLAYERS; ++a) {
@@ -47,11 +47,34 @@ game::sim::Configuration::loadDefaults(const TeamSettings& teams)
     }
 }
 
+// Copy (parts) from another configuration.
+void
+game::sim::Configuration::copyFrom(const Configuration& other, Areas_t areas)
+{
+    if (areas.contains(MainArea)) {
+        m_engineShieldBonus           = other.m_engineShieldBonus;
+        m_scottyBonus                 = other.m_scottyBonus;
+        m_randomLeftRight             = other.m_randomLeftRight;
+        m_honorAlliances              = other.m_honorAlliances;
+        m_onlyOneSimulation           = other.m_onlyOneSimulation;
+        m_seedControl                 = other.m_seedControl;
+        m_randomizeFCodesOnEveryFight = other.m_randomizeFCodesOnEveryFight;
+        m_balancingMode               = other.m_balancingMode;
+        m_vcrMode                     = other.m_vcrMode;
+    }
+    if (areas.contains(AllianceArea)) {
+        m_allianceSettings            = other.m_allianceSettings;
+    }
+    if (areas.contains(EnemyArea)) {
+        m_enemySettings               = other.m_enemySettings;
+    }
+}
+
 // Set mode (host version).
 void
 game::sim::Configuration::setMode(VcrMode mode, const TeamSettings& teams, const game::config::HostConfiguration& config)
 {
-    // ex GSimOptions::setMode
+    // ex GSimOptions::setMode, ccsim.pas:InitSimConfig (part)
     // FIXME: replace TeamSettings -> int viewpointPlayer?
     m_engineShieldBonus = config[config.AllowEngineShieldBonus]() ? config[config.EngineShieldBonusRate](teams.getViewpointPlayer()) : 0;
     m_scottyBonus       = config[config.AllowFedCombatBonus]();
@@ -217,6 +240,24 @@ game::sim::Configuration::getMode() const
     return m_vcrMode;
 }
 
+// Check whether host version honors Alternative Combat settings.
+bool
+game::sim::Configuration::hasAlternativeCombat() const
+{
+    switch (getMode()) {
+     case VcrHost:
+        return false;
+     case VcrPHost2:
+     case VcrPHost3:
+     case VcrPHost4:
+     case VcrFLAK:
+        return true;
+     case VcrNuHost:
+        return false;
+    }
+    return false;
+}
+
 game::PlayerBitMatrix&
 game::sim::Configuration::allianceSettings()
 {
@@ -239,4 +280,58 @@ const game::PlayerBitMatrix&
 game::sim::Configuration::enemySettings() const
 {
     return m_enemySettings;
+}
+
+String_t
+game::sim::toString(Configuration::BalancingMode mode, afl::string::Translator& tx)
+{
+    switch (mode) {
+     case Configuration::BalanceNone:         return tx("none");
+     case Configuration::Balance360k:         return tx("360 kt (Host)");
+     case Configuration::BalanceMasterAtArms: return tx("Master at Arms");
+    }
+    return String_t();
+}
+
+String_t
+game::sim::toString(Configuration::VcrMode mode, afl::string::Translator& tx)
+{
+    switch (mode) {
+     case Configuration::VcrHost:   return tx("Host");
+     case Configuration::VcrPHost2: return tx("PHost 2");
+     case Configuration::VcrPHost3: return tx("PHost 3");
+     case Configuration::VcrPHost4: return tx("PHost 4");
+     case Configuration::VcrFLAK:   return tx("FLAK");
+     case Configuration::VcrNuHost: return tx("NuHost");
+    }
+    return String_t();
+}
+
+game::sim::Configuration::BalancingMode
+game::sim::getNext(Configuration::BalancingMode mode)
+{
+    switch (mode) {
+     case Configuration::BalanceNone:
+     case Configuration::Balance360k:
+        return static_cast<Configuration::BalancingMode>(mode + 1);
+     case Configuration::BalanceMasterAtArms:
+        return Configuration::BalanceNone;
+    }
+    return Configuration::BalanceNone;
+}
+
+game::sim::Configuration::VcrMode
+game::sim::getNext(Configuration::VcrMode mode)
+{
+    switch (mode) {
+     case Configuration::VcrHost:
+     case Configuration::VcrPHost2:
+     case Configuration::VcrPHost3:
+     case Configuration::VcrPHost4:
+     case Configuration::VcrFLAK:
+        return static_cast<Configuration::VcrMode>(mode + 1);
+     case Configuration::VcrNuHost:
+        return Configuration::VcrHost;
+    }
+    return Configuration::VcrHost;
 }

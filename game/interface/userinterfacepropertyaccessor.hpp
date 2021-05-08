@@ -14,7 +14,7 @@ namespace game { namespace interface {
     class UserInterfacePropertyAccessor : public afl::base::Deletable {
      public:
         virtual bool get(UserInterfaceProperty prop, std::auto_ptr<afl::data::Value>& result) = 0;
-        virtual bool set(UserInterfaceProperty prop, afl::data::Value* p) = 0;
+        virtual bool set(UserInterfaceProperty prop, const afl::data::Value* p) = 0;
     };
 
 } }

@@ -14,6 +14,7 @@
 #include "afl/bits/uint16le.hpp"
 #include "afl/sys/log.hpp"
 #include "afl/string/nulltranslator.hpp"
+#include "afl/io/constmemorystream.hpp"
 
 namespace {
     // Image of the file for testSave().
@@ -26,6 +27,15 @@ namespace {
         char charB;
     };
     static_assert(sizeof(Image) == 10, "sizeof Image");
+
+    void fillAtomTable(util::AtomTable& tab)
+    {
+        // Occupy some slots in atom table so external and internal disagree
+        // and mismatches are detected.
+        tab.getAtomFromString("1");
+        tab.getAtomFromString("2");
+        tab.getAtomFromString("3");
+    }
 }
 
 /** Simple accessors. */
@@ -49,6 +59,7 @@ TestGameDbDrawingAtomMap::testSave()
     // Prepare
     game::db::DrawingAtomMap testee;
     util::AtomTable tab;
+    fillAtomTable(tab);
     testee.add(tab.getAtomFromString("a"));
     testee.add(tab.getAtomFromString("b"));
 
@@ -76,13 +87,57 @@ TestGameDbDrawingAtomMap::testSave()
 
     // Verify atom names
     if (image.charA == 'a') {
-        TS_ASSERT_EQUALS(util::Atom_t(image.atomA), tab.getAtomFromString("a"));
-        TS_ASSERT_EQUALS(util::Atom_t(image.atomB), tab.getAtomFromString("b"));
+        TS_ASSERT_EQUALS(testee.get(image.atomA), tab.getAtomFromString("a"));
+        TS_ASSERT_EQUALS(testee.get(image.atomB), tab.getAtomFromString("b"));
+        TS_ASSERT_EQUALS(image.atomA, testee.getExternalValue(tab.getAtomFromString("a")));
+        TS_ASSERT_EQUALS(image.atomB, testee.getExternalValue(tab.getAtomFromString("b")));
         TS_ASSERT_EQUALS(image.charB, 'b');
     } else {
-        TS_ASSERT_EQUALS(util::Atom_t(image.atomB), tab.getAtomFromString("a"));
-        TS_ASSERT_EQUALS(util::Atom_t(image.atomA), tab.getAtomFromString("b"));
-        TS_ASSERT_EQUALS(image.charA, 'b');
+        TS_ASSERT_EQUALS(testee.get(image.atomB), tab.getAtomFromString("a"));
+        TS_ASSERT_EQUALS(testee.get(image.atomA), tab.getAtomFromString("b"));
+        TS_ASSERT_EQUALS(image.atomB, testee.getExternalValue(tab.getAtomFromString("a")));
+        TS_ASSERT_EQUALS(image.atomA, testee.getExternalValue(tab.getAtomFromString("b")));
         TS_ASSERT_EQUALS(image.charB, 'a');
+        TS_ASSERT_EQUALS(image.charA, 'b');
     }
 }
+
+/** Test loading. */
+void
+TestGameDbDrawingAtomMap::testLoad()
+{
+    // Create image
+    Image image;
+    image.count = 2;
+    image.atomA = 99;
+    image.atomB = 77;
+    image.lengthA = 1;
+    image.charA = 'x';
+    image.lengthB = 1;
+    image.charB = 'y';
+
+    // Load
+    util::AtomTable tab;
+    afl::charset::Utf8Charset cs;
+    afl::io::ConstMemoryStream ms(afl::base::fromObject(image));
+    fillAtomTable(tab);
+
+    game::db::DrawingAtomMap testee;
+    testee.load(ms, cs, tab);
+
+    // Verify
+    TS_ASSERT_EQUALS(tab.getStringFromAtom(testee.get(99)), "x");
+    TS_ASSERT_EQUALS(tab.getStringFromAtom(testee.get(77)), "y");
+
+    TS_ASSERT_EQUALS(testee.getExternalValue(tab.getAtomFromString("x")), 99U);
+    TS_ASSERT_EQUALS(testee.getExternalValue(tab.getAtomFromString("y")), 77U);
+
+    TS_ASSERT_DIFFERS(testee.get(99), 0U);
+    TS_ASSERT_DIFFERS(testee.get(77), 0U);
+    TS_ASSERT_EQUALS(testee.get(0), 0U);
+    TS_ASSERT_EQUALS(testee.get(1000), 1000U);  // unmapped value is passed through
+
+    TS_ASSERT_EQUALS(testee.getExternalValue(0), 0U);
+    TS_ASSERT_EQUALS(testee.getExternalValue(1000), 1000U);  // unmapped value is passed through
+}
+

@@ -12,6 +12,7 @@
 #include "gfx/palettizedpixmap.hpp"
 #include "gfx/bitmapglyph.hpp"
 #include "afl/except/fileproblemexception.hpp"
+#include "afl/string/nulltranslator.hpp"
 
 #define TS_ASSERT_SAME(got, expected) \
     TS_ASSERT_EQUALS(got.size(), sizeof(expected)); \
@@ -39,8 +40,9 @@ TestGfxBitmapFont::testFile()
 {
     // Load from file
     gfx::BitmapFont testee;
+    afl::string::NullTranslator tx;
     afl::io::ConstMemoryStream ms(MIN_FONT_FILE);
-    testee.load(ms, 0);
+    testee.load(ms, 0, tx);
 
     // Verify
     TS_ASSERT_EQUALS(testee.getHeight(), 4);
@@ -134,23 +136,24 @@ void
 TestGfxBitmapFont::testFileErrors()
 {
     gfx::BitmapFont testee;
+    afl::string::NullTranslator tx;
 
     // File too short
     {
         afl::io::ConstMemoryStream ms(afl::string::toBytes(""));
-        TS_ASSERT_THROWS(testee.load(ms, 0), afl::except::FileProblemException);
+        TS_ASSERT_THROWS(testee.load(ms, 0, tx), afl::except::FileProblemException);
     }
 
     // Bad magic
     {
         afl::io::ConstMemoryStream ms(afl::string::toBytes("abcxyz"));
-        TS_ASSERT_THROWS(testee.load(ms, 0), afl::except::FileProblemException);
+        TS_ASSERT_THROWS(testee.load(ms, 0, tx), afl::except::FileProblemException);
     }
 
     // Font not found
     {
         afl::io::ConstMemoryStream ms(MIN_FONT_FILE);
-        TS_ASSERT_THROWS(testee.load(ms, 1), afl::except::FileProblemException);
+        TS_ASSERT_THROWS(testee.load(ms, 1, tx), afl::except::FileProblemException);
     }
 
     // File too short
@@ -158,7 +161,7 @@ TestGfxBitmapFont::testFileErrors()
         afl::base::ConstBytes_t bytes(MIN_FONT_FILE);
         bytes.trim(bytes.size()-1);
         afl::io::ConstMemoryStream ms(bytes);
-        TS_ASSERT_THROWS(testee.load(ms, 0), afl::except::FileProblemException);
+        TS_ASSERT_THROWS(testee.load(ms, 0, tx), afl::except::FileProblemException);
     }
 }
 

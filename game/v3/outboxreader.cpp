@@ -34,12 +34,12 @@ game::v3::OutboxReader::loadOutbox(afl::io::Stream& s, afl::charset::Charset& cs
     afl::base::Memory<const structures::OutgoingMessageHeader> headerReader(headerBuffer);
     while (const structures::OutgoingMessageHeader* p = headerReader.eat()) {
         const int32_t address = p->address;
-        const int16_t length = p->length;
+        const uint16_t length = p->length;
         const int to = p->to;
         if (address <= 0) {
             throw afl::except::FileFormatException(s, tx.translateString("Invalid message directory"));
         }
-        if (length < 0 || length > structures::MAX_MESSAGE_SIZE) {
+        if (length > structures::MAX_MESSAGE_SIZE) {
             throw afl::except::FileFormatException(s, tx.translateString("Message too big"));
         }
 
@@ -85,10 +85,10 @@ game::v3::OutboxReader::loadOutbox35(afl::io::Stream& s, afl::charset::Charset& 
         if (s.read(afl::base::fromObject(hdr)) < sizeof(hdr)) {
             break;
         }
-        const int size = hdr.messageLength;
+        const uint16_t size = hdr.messageLength;
 
         // Verify
-        if (size < 0 || size > structures::MAX_MESSAGE_SIZE) {
+        if (size > structures::MAX_MESSAGE_SIZE) {
             throw afl::except::FileFormatException(s, tx.translateString("Message too big"));
         }
 

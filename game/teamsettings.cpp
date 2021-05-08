@@ -12,7 +12,7 @@
 #include "afl/string/format.hpp"
 #include "util/io.hpp"
 #include "util/skincolor.hpp"
-#include "util/translation.hpp"
+#include "util/updater.hpp"
 
 namespace {
     /*
@@ -141,7 +141,7 @@ game::TeamSettings::getTeamName(int team, afl::string::Translator& tx) const
     // ex game/team.h:getTeamName
     String_t result = m_teamNames.get(team);
     if (result.empty()) {
-        result = afl::string::Format(tx.translateString("Team %d").c_str(), team);
+        result = afl::string::Format(tx("Team %d"), team);
     }
     return result;
 }
@@ -163,6 +163,19 @@ game::TeamSettings::isNamedTeam(int team) const
 {
     // ex game/team.h:isNamedTeam
     return !m_teamNames.get(team).empty();
+}
+
+// Get players in a team.
+game::PlayerSet_t
+game::TeamSettings::getTeamPlayers(int team) const
+{
+    PlayerSet_t result;
+    for (int i = 1; i <= MAX_PLAYERS; ++i) {
+        if (m_playerTeams.get(i) == team) {
+            result += i;
+        }
+    }
+    return result;
 }
 
 // Check for team configuration.
@@ -238,7 +251,7 @@ game::TeamSettings::getRelationColor(Relation relation)
 
 // Load from file.
 void
-game::TeamSettings::load(afl::io::Directory& dir, int player, afl::charset::Charset& cs)
+game::TeamSettings::load(afl::io::Directory& dir, int player, afl::charset::Charset& cs, afl::string::Translator& tx)
 {
     // ex game/team.cc:loadTeams, initTeams
     // ex phost.pas:LoadTeams
@@ -254,7 +267,7 @@ game::TeamSettings::load(afl::io::Directory& dir, int player, afl::charset::Char
     TeamHeader header;
     in->fullRead(afl::base::fromObject(header));
     if (std::memcmp(header.signature, TEAM_MAGIC, sizeof(TEAM_MAGIC)) != 0) {
-        throw afl::except::FileFormatException(*in, _("File is missing required signature"));
+        throw afl::except::FileFormatException(*in, tx("File is missing required signature"));
     }
 
     // Remember header data
@@ -287,7 +300,7 @@ game::TeamSettings::load(afl::io::Directory& dir, int player, afl::charset::Char
     }
     in.reset();
 
-    sig_teamChange.raise();    
+    sig_teamChange.raise();
 }
 
 // Save to file.
@@ -322,4 +335,21 @@ game::TeamSettings::save(afl::io::Directory& dir, int player, afl::charset::Char
     }
     settings.passcode = static_cast<int16_t>(m_passcode);
     out->fullWrite(afl::base::fromObject(settings));
+}
+
+// Copy from other settings object.
+void
+game::TeamSettings::copyFrom(const TeamSettings& other)
+{
+    util::Updater u;
+    u.set(m_flags,           other.m_flags);
+    u.set(m_viewpointPlayer, other.m_viewpointPlayer);
+    u.set(m_passcode,        other.m_passcode);
+    u.set(m_playerTeams,     other.m_playerTeams);
+    u.set(m_teamNames,       other.m_teamNames);
+    u.set(m_sendConfig,      other.m_sendConfig);
+    u.set(m_receiveConfig,   other.m_receiveConfig);
+    if (u) {
+        sig_teamChange.raise();
+    }
 }

@@ -18,6 +18,7 @@
 #include "game/map/planet.hpp"
 #include "game/map/ship.hpp"
 #include "game/session.hpp"
+#include "game/turn.hpp"
 #include "interpreter/arguments.hpp"
 #include "interpreter/error.hpp"
 #include "interpreter/indexablevalue.hpp"
@@ -36,6 +37,7 @@ namespace {
         iitCurrent,
         iitId,
         iitIndex,
+        iitNearestIndex,
         iitNext,
         iitNextAt,
         iitObject,
@@ -48,6 +50,7 @@ namespace {
         { "CURRENTINDEX",     iitCurrent,    0, interpreter::thInt },
         { "ID",               iitId,         0, interpreter::thArray },
         { "INDEX",            iitIndex,      0, interpreter::thArray },
+        { "NEARESTINDEX",     iitNearestIndex, 0, interpreter::thArray },
         { "NEXTINDEX",        iitNext,       0, interpreter::thArray },
         { "NEXTINDEXAT",      iitNextAt,     0, interpreter::thArray },
         { "OBJECT",           iitObject,     0, interpreter::thArray },
@@ -118,6 +121,22 @@ namespace {
                         if (game::map::ObjectType* type = m_provider->getType()) {
                             if (game::Id_t id = type->findIndexForId(i)) {
                                 return makeIntegerValue(id);
+                            }
+                        }
+                    }
+                    return 0;
+
+                 case iitNearestIndex:
+                    // "NearestIndex(x,y)" => find nearest object
+                    // @since PCC2 2.40.10
+                    args.checkArgumentCount(2);
+                    if (checkIntegerArg(x, args.getNext(), 0, game::MAX_NUMBER) && checkIntegerArg(y, args.getNext(), 0, game::MAX_NUMBER)) {
+                        if (game::map::ObjectType* type = m_provider->getType()) {
+                            if (game::Game* g = m_provider->getSession().getGame().get()) {
+                                // FIXME: this uses currentTurn's map configuration; should use the one belonging to the provider/type?
+                                if (game::Id_t id = type->findNearestIndex(game::map::Point(x, y), g->currentTurn().universe().config())) {
+                                    return makeIntegerValue(id);
+                                }
                             }
                         }
                     }
@@ -279,7 +298,7 @@ game::interface::IteratorContext::lookup(const afl::data::NameQuery& name, Prope
 }
 
 void
-game::interface::IteratorContext::set(PropertyIndex_t index, afl::data::Value* value)
+game::interface::IteratorContext::set(PropertyIndex_t index, const afl::data::Value* value)
 {
     // ex IntIteratorContext::set
     int32_t v;
@@ -323,6 +342,7 @@ game::interface::IteratorContext::get(PropertyIndex_t index)
         }
      case iitId:
      case iitIndex:
+     case iitNearestIndex:
      case iitNext:
      case iitNextAt:
      case iitObject:
@@ -374,27 +394,27 @@ game::interface::IteratorContext::store(interpreter::TagNode& out, afl::io::Data
 }
 
 
-// /** Implementation of the "Iterator" function. Iterators implement
-//     access to a GObjectSelection. Scripts can use this to access a selection's
-//     current object, and to iterate through the objects. This interface
-//     is still preliminary.
-//     - Iterator(n).CurrentIndex: currently active index
-//     - Iterator(n).Count: number of objects
-//     - Iterator(n).Id(x): given an index, return that object's Id
-//     - Iterator(n).Index(id): given an Id, return that object's index; null if none
-//     - Iterator(n).NextIndex(i,fl): get next index after i. 0 if none found. Flags are "w" to permit wrap, "m" to accept only marked.
-//     - Iterator(n).NextIndexAt(i,x,y,fl): same, but filter for XY as well
-//     - Iterator(n).PreviousIndex(i,fl): same like NextIndex, but other direction
-//     - Iterator(n).PreviousIndexAt(i,x,y,fl): same but filter for XY as well
-//     - Iterator(n).Object(x): object from index. Still undecided.
+/** Implementation of the "Iterator" function. Iterators implement
+    access to a GObjectSelection. Scripts can use this to access a selection's
+    current object, and to iterate through the objects. This interface
+    is still preliminary.
+    - Iterator(n).CurrentIndex: currently active index
+    - Iterator(n).Count: number of objects
+    - Iterator(n).Id(x): given an index, return that object's Id
+    - Iterator(n).Index(id): given an Id, return that object's index; null if none
+    - Iterator(n).NextIndex(i,fl): get next index after i. 0 if none found. Flags are "w" to permit wrap, "m" to accept only marked.
+    - Iterator(n).NextIndexAt(i,x,y,fl): same, but filter for XY as well
+    - Iterator(n).PreviousIndex(i,fl): same like NextIndex, but other direction
+    - Iterator(n).PreviousIndexAt(i,x,y,fl): same but filter for XY as well
+    - Iterator(n).Object(x): object from index. Still undecided.
 
-//     n is:
-//     - 1,2,3: played ships, planets, bases
-//     - 10: fleets
-//     - 21, 22: all ships, planets
-//     - 30: ufos
-//     - 31: ion storms
-//     - 32: minefields */
+    n is:
+    - 1,2,3: played ships, planets, bases
+    - 10: fleets
+    - 21, 22: all ships, planets
+    - 30: ufos
+    - 31: ion storms
+    - 32: minefields */
 afl::data::Value*
 game::interface::IFIterator(game::Session& session, interpreter::Arguments& args)
 {

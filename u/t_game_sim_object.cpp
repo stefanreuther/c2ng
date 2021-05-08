@@ -77,17 +77,20 @@ TestGameSimObject::verifyObject(game::sim::Object& t)
     TS_ASSERT_EQUALS(t.getExperienceLevel(), 10);
     TS_ASSERT(t.isDirty());
 
+    const game::config::HostConfiguration hostConfig;
+    const game::spec::ShipList shipList;
+    const game::sim::Configuration opts;
+
     t.markClean();
     t.setFlags(game::sim::Object::fl_Commander);
     TS_ASSERT_EQUALS(t.getFlags(), game::sim::Object::fl_Commander);
     TS_ASSERT(!t.hasAnyNonstandardAbility());     // Commander bit alone is not effective
+    TS_ASSERT(t.getAbilities(opts, shipList, hostConfig).empty());
     TS_ASSERT(t.isDirty());
     t.setFlags(game::sim::Object::fl_Commander | game::sim::Object::fl_CommanderSet);
     TS_ASSERT(t.hasAnyNonstandardAbility());
-    const game::config::HostConfiguration hostConfig;
-    const game::spec::ShipList shipList;
-    const game::sim::Configuration opts;
     TS_ASSERT(t.hasAbility(game::sim::CommanderAbility, opts, shipList, hostConfig));
+    TS_ASSERT_EQUALS(t.getAbilities(opts, shipList, hostConfig), game::sim::Abilities_t(game::sim::CommanderAbility));
 
     t.markClean();
     t.setFlakRatingOverride(1342);
@@ -135,17 +138,18 @@ void
 TestGameSimObject::testRandom()
 {
     Tester t;
+    util::RandomNumberGenerator rng(666);
 
     // Initial state: random disabled
     TS_ASSERT_EQUALS(t.getFlags(), 0);
     t.setFriendlyCode("aaa");
-    t.setRandomFriendlyCode();
+    t.setRandomFriendlyCode(rng);
     TS_ASSERT_EQUALS(t.getFriendlyCode(), "aaa");
 
     // Enable randomness but don't specify digits
     t.setFlags(game::sim::Object::fl_RandomFC);
     for (int i = 0; i < 1000; ++i) {
-        t.setRandomFriendlyCode();
+        t.setRandomFriendlyCode(rng);
         String_t s = t.getFriendlyCode();
         TS_ASSERT_EQUALS(s.size(), 3U);
         TS_ASSERT_LESS_THAN_EQUALS('0', s[0]);
@@ -160,7 +164,7 @@ TestGameSimObject::testRandom()
     t.setFlags(game::sim::Object::fl_RandomFC + game::sim::Object::fl_RandomFC2);
     t.setFriendlyCode("axc");
     for (int i = 0; i < 1000; ++i) {
-        t.setRandomFriendlyCode();
+        t.setRandomFriendlyCode(rng);
         String_t s = t.getFriendlyCode();
         TS_ASSERT_EQUALS(s.size(), 3U);
         TS_ASSERT_EQUALS(s[0], 'a');
@@ -173,7 +177,7 @@ TestGameSimObject::testRandom()
     t.setFlags(game::sim::Object::fl_RandomFC + game::sim::Object::fl_RandomFC2);
     t.setFriendlyCode("a");
     for (int i = 0; i < 1000; ++i) {
-        t.setRandomFriendlyCode();
+        t.setRandomFriendlyCode(rng);
         String_t s = t.getFriendlyCode();
         TS_ASSERT_EQUALS(s.size(), 3U);
         TS_ASSERT_EQUALS(s[0], 'a');
@@ -181,5 +185,30 @@ TestGameSimObject::testRandom()
         TS_ASSERT_LESS_THAN_EQUALS(s[1], '9');
         TS_ASSERT_EQUALS(s[2], ' ');
     }
+}
+
+/** Test copying. */
+void
+TestGameSimObject::testCopy()
+{
+    Tester a;
+    a.setId(100);
+    a.markClean();
+
+    Tester b;
+    b.setId(200);
+    b.markClean();
+
+    // Assignment makes object dirty
+    b = a;
+    TS_ASSERT(b.isDirty());
+
+    // Copy of a dirty object is not dirty
+    Tester c(b);
+    TS_ASSERT(!c.isDirty());
+
+    // Self-assignment is not dirty
+    c = c;
+    TS_ASSERT(!c.isDirty());
 }
 

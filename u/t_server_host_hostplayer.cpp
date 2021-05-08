@@ -14,6 +14,7 @@
 #include "afl/net/redis/stringsetkey.hpp"
 #include "afl/string/format.hpp"
 #include "afl/test/callreceiver.hpp"
+#include "game/test/files.hpp"
 #include "server/file/internalfileserver.hpp"
 #include "server/host/cron.hpp"
 #include "server/host/game.hpp"
@@ -22,7 +23,6 @@
 #include "server/host/session.hpp"
 #include "server/interface/filebaseclient.hpp"
 #include "server/interface/mailqueueclient.hpp"
-#include "u/files.hpp"
 #include "util/processrunner.hpp"
 
 using server::interface::HostGame;
@@ -113,7 +113,7 @@ TestHarness::addDefaultRaceNames()
 {
     server::interface::FileBaseClient hostFile(m_hostFile);
     hostFile.createDirectoryTree("defaults");
-    hostFile.putFile("defaults/race.nm", afl::string::fromBytes(getDefaultRaceNames()));
+    hostFile.putFile("defaults/race.nm", afl::string::fromBytes(game::test::getDefaultRaceNames()));
 }
 
 void

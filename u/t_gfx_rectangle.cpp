@@ -160,10 +160,10 @@ TestGfxRectangle::testAlign()
     TS_ASSERT_EQUALS(t, gfx::Rectangle(10, 25, 50, 20));
 
     // moveToEdge
-    t.moveToEdge(gfx::Rectangle(0, 0, 640, 480), 0, 0, 10);
+    t.moveToEdge(gfx::Rectangle(0, 0, 640, 480), gfx::LeftAlign, gfx::TopAlign, 10);
     TS_ASSERT_EQUALS(t, gfx::Rectangle(10, 10, 50, 20));
 
-    t.moveToEdge(gfx::Rectangle(0, 0, 640, 480), 2, 1, 20);
+    t.moveToEdge(gfx::Rectangle(0, 0, 640, 480), gfx::RightAlign, gfx::MiddleAlign, 20);
     TS_ASSERT_EQUALS(t, gfx::Rectangle(570, 230, 50, 20));
 
     // moveIntoRectangle

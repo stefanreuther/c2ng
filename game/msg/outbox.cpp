@@ -161,6 +161,30 @@ game::msg::Outbox::getMessageTurnNumber(size_t /*index*/) const
     return 0;
 }
 
+bool
+game::msg::Outbox::isMessageFiltered(size_t /*index*/, afl::string::Translator& /*tx*/, const PlayerList& /*players*/, const Configuration& /*config*/) const
+{
+    return false;
+}
+
+game::msg::Mailbox::Flags_t
+game::msg::Outbox::getMessageFlags(size_t /*index*/) const
+{
+    return Flags_t();
+}
+
+game::msg::Mailbox::Actions_t
+game::msg::Outbox::getMessageActions(size_t /*index*/) const
+{
+    return Actions_t();
+}
+
+void
+game::msg::Outbox::performMessageAction(size_t /*index*/, Action /*a*/)
+{
+    // No actions for now
+}
+
 // Get prefix for message when sent.
 String_t
 game::msg::Outbox::getMessageSendPrefix(size_t index, int receiver,

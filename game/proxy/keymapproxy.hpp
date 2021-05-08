@@ -11,7 +11,6 @@
 #include "util/keymap.hpp"
 #include "util/requestreceiver.hpp"
 #include "util/requestsender.hpp"
-#include "util/slaverequestsender.hpp"
 
 namespace game { namespace proxy {
 
@@ -91,24 +90,9 @@ namespace game { namespace proxy {
          *  Trampoline:
          *  We need a persistent trampoline to manage asynchronous updates.
          */
-        class Trampoline : public util::SlaveObject<Session> {
-         public:
-            Trampoline(util::RequestSender<KeymapProxy> reply)
-                : conn_keymapChange(),
-                  m_reply(reply),
-                  m_keymapName()
-                { }
-            void init(Session&);
-            void done(Session&);
-            void setKeymapName(Session& s, String_t keymapName);
-            util::KeymapRef_t getKeymap(Session& s);
-            void update(Session& s);
-         private:
-            afl::base::SignalConnection conn_keymapChange;
-            util::RequestSender<KeymapProxy> m_reply;
-            String_t m_keymapName;
-        };
-        util::SlaveRequestSender<Session, Trampoline> m_slave;
+        class Trampoline;
+        class TrampolineFromSession;
+        util::RequestSender<Trampoline> m_sender;
 
         Listener* m_pListener;
     };

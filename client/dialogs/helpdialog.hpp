@@ -11,7 +11,7 @@
 
 namespace client { namespace dialogs {
 
-    void doHelpDialog(ui::Root& root, util::RequestSender<game::Session> gameSender, String_t pageName);
+    void doHelpDialog(ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::Session> gameSender, String_t pageName);
 
 } }
 

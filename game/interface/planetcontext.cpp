@@ -94,6 +94,7 @@ namespace {
         { "LOC.Y",                     game::interface::ippLocY,              PlanetPropertyDomain, interpreter::thInt },
         { "MARK",                      game::interface::ipmMark,              PlanetMethodDomain,   interpreter::thProcedure },
         { "MARKED",                    game::interface::ippMarked,            PlanetPropertyDomain, interpreter::thBool },
+        { "MESSAGES",                  game::interface::ippMessages,          PlanetPropertyDomain, interpreter::thArray },
         { "MINED.D",                   game::interface::ippMinedD,            PlanetPropertyDomain, interpreter::thInt },
         { "MINED.M",                   game::interface::ippMinedM,            PlanetPropertyDomain, interpreter::thInt },
         { "MINED.N",                   game::interface::ippMinedN,            PlanetPropertyDomain, interpreter::thInt },
@@ -240,7 +241,7 @@ game::interface::PlanetContext::lookup(const afl::data::NameQuery& name, Propert
 }
 
 void
-game::interface::PlanetContext::set(PropertyIndex_t index, afl::data::Value* value)
+game::interface::PlanetContext::set(PropertyIndex_t index, const afl::data::Value* value)
 {
     // ex IntPlanetContext::set
     if (game::map::Planet* pl = getObject()) {
@@ -282,9 +283,8 @@ game::interface::PlanetContext::get(PropertyIndex_t index)
              case PlanetPropertyDomain:
                 return getPlanetProperty(*pl, PlanetProperty(planet_mapping[index].index),
                                          m_session.translator(),
-                                         m_root->hostVersion(),
-                                         m_root->hostConfiguration(),
                                          m_session.interface(),
+                                         m_root,
                                          m_game);
              case BasePropertyDomain:
                 return getBaseProperty(*pl, BaseProperty(planet_mapping[index].index),

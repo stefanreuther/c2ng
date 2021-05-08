@@ -13,10 +13,11 @@
 #include "afl/except/fileformatexception.hpp"
 #include "afl/io/constmemorystream.hpp"
 #include "afl/io/internalstream.hpp"
+#include "afl/string/nulltranslator.hpp"
 #include "game/sim/planet.hpp"
 #include "game/sim/setup.hpp"
 #include "game/sim/ship.hpp"
-#include "u/files.hpp"
+#include "game/test/files.hpp"
 
 namespace {
     /* Prepare a setup for the "save" tests */
@@ -47,8 +48,9 @@ void
 TestGameSimLoader::testV0()
 {
     afl::charset::CodepageCharset cs(afl::charset::g_codepage437);
-    game::sim::Loader testee(cs);
-    afl::io::ConstMemoryStream stream(getSimFileV0());
+    afl::string::NullTranslator tx;
+    game::sim::Loader testee(cs, tx);
+    afl::io::ConstMemoryStream stream(game::test::getSimFileV0());
 
     game::sim::Setup result;
     testee.load(stream, result);
@@ -123,8 +125,9 @@ void
 TestGameSimLoader::testV1()
 {
     afl::charset::CodepageCharset cs(afl::charset::g_codepage437);
-    game::sim::Loader testee(cs);
-    afl::io::ConstMemoryStream stream(getSimFileV1());
+    afl::string::NullTranslator tx;
+    game::sim::Loader testee(cs, tx);
+    afl::io::ConstMemoryStream stream(game::test::getSimFileV1());
 
     game::sim::Setup result;
     testee.load(stream, result);
@@ -177,8 +180,9 @@ void
 TestGameSimLoader::testV2()
 {
     afl::charset::CodepageCharset cs(afl::charset::g_codepage437);
-    game::sim::Loader testee(cs);
-    afl::io::ConstMemoryStream stream(getSimFileV2());
+    afl::string::NullTranslator tx;
+    game::sim::Loader testee(cs, tx);
+    afl::io::ConstMemoryStream stream(game::test::getSimFileV2());
 
     game::sim::Setup result;
     testee.load(stream, result);
@@ -253,8 +257,9 @@ void
 TestGameSimLoader::testV3()
 {
     afl::charset::CodepageCharset cs(afl::charset::g_codepage437);
-    game::sim::Loader testee(cs);
-    afl::io::ConstMemoryStream stream(getSimFileV3());
+    afl::string::NullTranslator tx;
+    game::sim::Loader testee(cs, tx);
+    afl::io::ConstMemoryStream stream(game::test::getSimFileV3());
 
     game::sim::Setup result;
     testee.load(stream, result);
@@ -349,8 +354,9 @@ void
 TestGameSimLoader::testV4()
 {
     afl::charset::CodepageCharset cs(afl::charset::g_codepage437);
-    game::sim::Loader testee(cs);
-    afl::io::ConstMemoryStream stream(getSimFileV4());
+    afl::string::NullTranslator tx;
+    game::sim::Loader testee(cs, tx);
+    afl::io::ConstMemoryStream stream(game::test::getSimFileV4());
 
     game::sim::Setup result;
     testee.load(stream, result);
@@ -391,8 +397,9 @@ void
 TestGameSimLoader::testV5()
 {
     afl::charset::CodepageCharset cs(afl::charset::g_codepage437);
-    game::sim::Loader testee(cs);
-    afl::io::ConstMemoryStream stream(getSimFileV5());
+    afl::string::NullTranslator tx;
+    game::sim::Loader testee(cs, tx);
+    afl::io::ConstMemoryStream stream(game::test::getSimFileV5());
 
     game::sim::Setup result;
     testee.load(stream, result);
@@ -452,7 +459,8 @@ void
 TestGameSimLoader::testError()
 {
     afl::charset::CodepageCharset cs(afl::charset::g_codepage437);
-    game::sim::Loader testee(cs);
+    afl::string::NullTranslator tx;
+    game::sim::Loader testee(cs, tx);
     game::sim::Setup result;
 
     // v0
@@ -560,7 +568,8 @@ TestGameSimLoader::testSaveDefault()
     prepare(setup);
 
     afl::charset::CodepageCharset cs(afl::charset::g_codepage437);
-    game::sim::Loader testee(cs);
+    afl::string::NullTranslator tx;
+    game::sim::Loader testee(cs, tx);
 
     afl::io::InternalStream stream;
     testee.save(stream, setup);
@@ -595,7 +604,8 @@ TestGameSimLoader::testSaveRating()
     setup.getShip(0)->setFlags(game::sim::Ship::fl_RatingOverride);
 
     afl::charset::CodepageCharset cs(afl::charset::g_codepage437);
-    game::sim::Loader testee(cs);
+    afl::string::NullTranslator tx;
+    game::sim::Loader testee(cs, tx);
 
     afl::io::InternalStream stream;
     testee.save(stream, setup);
@@ -630,7 +640,8 @@ TestGameSimLoader::testSaveIntercept()
     setup.getShip(0)->setInterceptId(12);
 
     afl::charset::CodepageCharset cs(afl::charset::g_codepage437);
-    game::sim::Loader testee(cs);
+    afl::string::NullTranslator tx;
+    game::sim::Loader testee(cs, tx);
 
     afl::io::InternalStream stream;
     testee.save(stream, setup);
@@ -665,7 +676,8 @@ TestGameSimLoader::testSaveFlags()
     setup.getPlanet()->setFlags(game::sim::Planet::fl_DoubleBeamChargeSet);
 
     afl::charset::CodepageCharset cs(afl::charset::g_codepage437);
-    game::sim::Loader testee(cs);
+    afl::string::NullTranslator tx;
+    game::sim::Loader testee(cs, tx);
 
     afl::io::InternalStream stream;
     testee.save(stream, setup);

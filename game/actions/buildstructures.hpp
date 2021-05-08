@@ -43,8 +43,9 @@ namespace game { namespace actions {
             \param container Container that will be billed the cost.
                              Lifetime must exceed that of the BuildStructures action, the BuildStructures will commit the container.
             \param config    Host configuration.
-                             Lifetime must exceed that of the BuildStructures action. */
-        BuildStructures(game::map::Planet& planet, CargoContainer& container, const game::config::HostConfiguration& config);
+                             Lifetime must exceed that of the BuildStructures action.
+            \param tx        Translator (used during construction for error messages) */
+        BuildStructures(game::map::Planet& planet, CargoContainer& container, const game::config::HostConfiguration& config, afl::string::Translator& tx);
 
         /** Destructor. */
         ~BuildStructures();

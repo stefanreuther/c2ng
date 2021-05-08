@@ -6,10 +6,10 @@
 #include "server/common/racenames.hpp"
 
 #include "t_server_common.hpp"
-#include "u/files.hpp"
 #include "afl/charset/codepagecharset.hpp"
 #include "afl/charset/codepage.hpp"
 #include "afl/except/fileproblemexception.hpp"
+#include "game/test/files.hpp"
 
 /** Test success case.
     Load the default race name file and see that it arrives correctly. */
@@ -25,7 +25,7 @@ TestServerCommonRaceNames::testSuccess()
     TS_ASSERT_EQUALS(testee.adjectiveNames().get(3), "");
 
     // Load
-    TS_ASSERT_THROWS_NOTHING(testee.load(getDefaultRaceNames(), cs));
+    TS_ASSERT_THROWS_NOTHING(testee.load(game::test::getDefaultRaceNames(), cs));
 
     // Verify
     TS_ASSERT_EQUALS(testee.longNames().get(1), "The Solar Federation");

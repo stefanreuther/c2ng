@@ -40,8 +40,10 @@ namespace ui { namespace widgets {
         virtual size_t getNumItems();
         virtual bool isItemAccessible(size_t n);
         virtual int getItemHeight(size_t n);
-        virtual int getHeaderHeight();
+        virtual int getHeaderHeight() const;
+        virtual int getFooterHeight() const;
         virtual void drawHeader(gfx::Canvas& can, gfx::Rectangle area);
+        virtual void drawFooter(gfx::Canvas& can, gfx::Rectangle area);
         virtual void drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state);
 
         virtual void handlePositionChange(gfx::Rectangle& /*oldPosition*/);

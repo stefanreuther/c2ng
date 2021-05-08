@@ -22,7 +22,6 @@
 #include "game/sim/setup.hpp"
 #include "game/sim/ship.hpp"
 #include "game/sim/structures.hpp"
-#include "util/translation.hpp"
 
 namespace st = game::sim::structures;
 
@@ -55,8 +54,9 @@ namespace {
 
 
 // Constructor.
-game::sim::Loader::Loader(afl::charset::Charset& cs)
-    : m_charset(cs)
+game::sim::Loader::Loader(afl::charset::Charset& cs, afl::string::Translator& tx)
+    : m_charset(cs),
+      m_translator(tx)
 { }
 
 // Load a setup.
@@ -76,10 +76,10 @@ game::sim::Loader::load(afl::io::Stream& in, Setup& setup)
         in.fullRead(magic);
         version = magic[0] - '0' + 1;
         if (magic[0] < '0' || magic[1] != structures::TERMINATOR || version > structures::MAX_VERSION) {
-            throw afl::except::FileFormatException(in, _("Unsupported file format version"));
+            throw afl::except::FileFormatException(in, m_translator("Unsupported file format version"));
         }
     } else {
-        throw afl::except::FileFormatException(in, _("File is missing required signature"));
+        throw afl::except::FileFormatException(in, m_translator("File is missing required signature"));
     }
 
     // Check object count

@@ -9,18 +9,18 @@
 #include "afl/bits/smallset.hpp"
 #include "afl/charset/charset.hpp"
 #include "afl/io/stream.hpp"
+#include "afl/string/translator.hpp"
 #include "game/timestamp.hpp"
-#include "game/v3/structures.hpp"
 #include "game/v3/messagewriter.hpp"
+#include "game/v3/structures.hpp"
 
 namespace game { namespace v3 {
 
     class RegistrationKey;
 
-// /** TRN Command codes. The names are the same as in UN-TRN, the file
-//     format list, and some utilities inspired by the above.
-//     Those marked "<-" have been renamed, which does not mean the list
-//     would be consistent now.*/
+    /** TRN Command codes.
+        The names are the same as in UN-TRN, the file format list, and some utilities inspired by the above.
+        Those marked "<-" have been renamed, which does not mean the list would be consistent now.*/
     // FIXME: can we define these command codes in a better way than an enum?
     enum {
         /* Ship commands */
@@ -156,12 +156,13 @@ namespace game { namespace v3 {
         /** Read turn file.
             Construct a TurnFile from parsing a file.
             \param charset character set. Lifetime must exceed that of TurnFile.
+            \param tx Translator (for error messages during parse)
             \param stream Stream
             \param fullParse true to read full turn. false to read only the turn header (this will remove all attachments and commands)
             \pre File pointer for \c str points to beginning of TRN
             \post fullParse => !dirty
             \throws FileFormatException on error. */
-        TurnFile(afl::charset::Charset& charset, afl::io::Stream& stream, bool fullParse = true);
+        TurnFile(afl::charset::Charset& charset, afl::string::Translator& tx, afl::io::Stream& stream, bool fullParse = true);
 
         /** Destructor. */
         ~TurnFile();
@@ -411,8 +412,22 @@ namespace game { namespace v3 {
             \param index [in] Command index, [0,getNumCommands()). Out-of-range values are ignored. */
         void deleteCommand(size_t index);
 
+        /** Make commands for a ship.
+            \param id      Ship Id
+            \param oldShip Serialized old ship data (*.dis)
+            \param newShip Serialized new ship data (*.dat) */
         void makeShipCommands(int id, const structures::Ship& oldShip, const structures::Ship& newShip);
+
+        /** Make commands for a planet.
+            \param id        Planet Id
+            \param oldPlanet Serialized old planet data (*.dis)
+            \param newPlanet Serialized new planet data (*.dat) */
         void makePlanetCommands(int id, const structures::Planet& oldPlanet, const structures::Planet& newPlanet);
+
+        /** Make commands for a starbase.
+            \param id      Base Id
+            \param oldBase Serialized old base data (*.dis)
+            \param newBase Serialized new base data (*.dat) */
         void makeBaseCommands(int id, const structures::Base& oldBase, const structures::Base& newBase);
 
         /*
@@ -498,9 +513,9 @@ namespace game { namespace v3 {
         bool m_isDirty;                                  ///< True if data is dirty. If false, data is a valid turn file.
 
         // FIXME: reconsider using FileSize_t here. size_t or uint32_t should be enough.
-        void init(afl::io::Stream& str, bool fullParse);
-        void checkRange(afl::io::Stream& stream, afl::io::Stream::FileSize_t offset, afl::io::Stream::FileSize_t length);
-        void parseTurnFile(afl::io::Stream& stream, afl::io::Stream::FileSize_t offset, afl::io::Stream::FileSize_t length);
+        void init(afl::io::Stream& str, afl::string::Translator& tx, bool fullParse);
+        void checkRange(afl::io::Stream& stream, afl::string::Translator& tx, afl::io::Stream::FileSize_t offset, afl::io::Stream::FileSize_t length);
+        void parseTurnFile(afl::io::Stream& stream, afl::string::Translator& tx, afl::io::Stream::FileSize_t offset, afl::io::Stream::FileSize_t length);
         void parseTurnFileHeader(afl::io::Stream& stream, afl::io::Stream::FileSize_t offset, afl::io::Stream::FileSize_t length);
 
         void updateTurnFile(afl::base::GrowableMemory<uint8_t>& data, afl::base::GrowableMemory<uint32_t>& offsets);

@@ -14,10 +14,6 @@ using interpreter::makeOptionalStringValue;
 using interpreter::makeBooleanValue;
 using interpreter::makeStringValue;
 
-// /** Get Ion Storm property.
-//     \param ion Storm to query
-//     \param iip Property to query
-//     \return property value */
 afl::data::Value*
 game::interface::getIonStormProperty(const game::map::IonStorm& ion, IonStormProperty iip, afl::string::Translator& tx, InterpreterInterface& iface)
 {
@@ -108,9 +104,8 @@ game::interface::getIonStormProperty(const game::map::IonStorm& ion, IonStormPro
     return 0;
 }
 
-// /** Set Ion Storm property. */
 void
-game::interface::setIonStormProperty(game::map::IonStorm& /*ion*/, IonStormProperty /*iip*/, afl::data::Value* /*value*/)
+game::interface::setIonStormProperty(game::map::IonStorm& /*ion*/, IonStormProperty /*iip*/, const afl::data::Value* /*value*/)
 {
     // ex int/if/ionif.h:setIonProperty
     throw interpreter::Error::notAssignable();

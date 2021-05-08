@@ -14,31 +14,27 @@
 
 namespace game { namespace map {
 
-// /** Game object base class.
-//     A game object has the following basic properties:
-//     - a name (coming in three flavours, plain/long/detailed)
-//     - an owner
-//     - an Id
+    /** Game object base class.
+        A game object has the following basic properties:
+        - a name (coming in three flavours, plain/long/detailed)
+        - an owner
+        - an Id
+        - a position
 
-//     GObject no longer deals with existence.
-//     Instead, object types describe sets of objects, and thus existance of the
-//     object means presence in such a set.
+        An object can represent an item that may or may not be currently visible.
+        Visibility is decided by an ObjectType instance and can be different for different views.
 
-//     Each object has a playability attribute:
-//     - NotPlayable means the object cannot be played. Examples include foreign
-//       ships. Those may not have full data.
-//     - ReadOnly means the unit has full data, but still cannot be played.
-//       Examples include objects in history.
-//     - Playable means the unit can be played. It has full data and can be
-//       manipulated according to rules.
-//     - Editable means the unit can be edited. It has full data and can be
-//       manipulated even outside the rules.
+        Each object has a playability attribute:
+        - NotPlayable means the object cannot be played. Examples include foreign ships. Those may not have full data.
+        - ReadOnly means the unit has full data, but still cannot be played. Examples include objects in history.
+        - Playable means the unit can be played. It has full data and can be manipulated according to rules.
+        - Editable means the unit can be edited. It has full data and can be manipulated even outside the rules.
 
-//     Each object has a "marked" flag to represent the user selection.
+        Each object has a "marked" flag to represent the user selection.
 
-//     Finally, objects have a "dirty" flag used to track changes,
-//     and a sig_change signal to allow others to hook into these changes.
-//     Actual change notification is done by GUniverse. */
+        Finally, objects have a "dirty" flag used to track changes,
+        and a sig_change signal to allow others to hook into these changes.
+        Actual change notification is done by GUniverse. */
     class Object : public afl::base::Deletable {
      public:
         /** Playability level. */
@@ -51,6 +47,7 @@ namespace game { namespace map {
 
         // Constructor and Destructor:
         Object();
+        Object(const Object& other);
         virtual ~Object();
 
         /*
@@ -105,10 +102,8 @@ namespace game { namespace map {
         bool m_isMarked;
         bool m_isDirty;
 
-//     GObject(const GObject&);
-//     GObject& operator=(const GObject&);
+        Object& operator=(const Object&);
     };
-    
 
 } }
 

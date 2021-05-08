@@ -47,8 +47,9 @@ namespace {
        1 2 3
        4 0 5
        6 7 8 */
-    static const int8_t image_dx[] = {  0, -1,  0, +1, -1, +1, -1,  0, +1 };
-    static const int8_t image_dy[] = {  0, -1, -1, -1,  0,  0, +1, +1, +1 };
+    const int NUM_WRAP_IMAGES = 9;
+    const int8_t IMAGE_DX[NUM_WRAP_IMAGES] = {  0, -1,  0, +1, -1, +1, -1,  0, +1 };
+    const int8_t IMAGE_DY[NUM_WRAP_IMAGES] = {  0, -1, -1, -1,  0,  0, +1, +1, +1 };
 
 
     /** Get exact mapping for a point with circular wrap.
@@ -130,6 +131,15 @@ namespace {
         // Cannot find a mapping
         return false;
     }
+
+    void limitSize(game::map::Point::Component comp, game::map::Point& pt, int maxSize, bool& flag)
+    {
+        int size = pt.get(comp);
+        if (size < 500 || size > maxSize) {
+            pt.set(comp, std::min(maxSize, 2000));
+            flag = false;
+        }
+    }
 }
 
 game::map::Configuration::Configuration()
@@ -193,10 +203,21 @@ game::map::Configuration::getCircularExcess() const
     return m_circularExcess;
 }
 
+void
+game::map::Configuration::setCircularPrecision(int n)
+{
+    m_circularPrecision = n;
+}
+
+void
+game::map::Configuration::setCircularExcess(int n)
+{
+    m_circularExcess = n;
+}
+
 // Initialize from configuration.
 void
-game::map::Configuration::initFromConfiguration(const HostVersion& host,
-                                                const game::config::HostConfiguration& config,
+game::map::Configuration::initFromConfiguration(const game::config::HostConfiguration& config,
                                                 const game::config::UserConfiguration& pref)
 {
     // ex GChartConfiguration::initFromConfig
@@ -222,22 +243,20 @@ game::map::Configuration::initFromConfiguration(const HostVersion& host,
     m_circularExcess = pref[opt_circular_excess]();
 
     // Check host config
-    if (host.getKind() == HostVersion::PHost
-        && config[config.AllowWraparoundMap].getSource() != game::config::ConfigurationOption::Default
-        && config[config.AllowWraparoundMap]() != 0)
-    {
-        // It's a PHost game, and the AllowWraparoundMap option is set.
-        // Copy the settings from pconfig.
+    if (config[config.AllowWraparoundMap]() != 0) {
+        // AllowWraparoundMap option is set. Copy the settings from pconfig.
+        // @change: PCC2 was accepting this only in PHost games, only when option is not at default.
+        // Since the default is "off", that test is redundant.
         m_fromHostConfiguration = true;
         m_mode = Wrapped;
 
         const game::config::IntegerArrayOption<4>& wrap = config[config.WraparoundRectangle];
         m_center.setX((wrap(3) + wrap(1)) / 2);
         m_center.setY((wrap(4) + wrap(2)) / 2);
-        m_size.setX(wrap(3) + wrap(1));
-        m_size.setY(wrap(4) + wrap(2));
+        m_size.setX(wrap(3) - wrap(1));
+        m_size.setY(wrap(4) - wrap(2));
     } else {
-        // Not a PHost game, or AllowWraparoundMap not set or disabled.
+        // AllowWraparoundMap not set or disabled.
         // It could use external wrap, so don't change anything.
         m_fromHostConfiguration = false;
     }
@@ -250,11 +269,11 @@ game::map::Configuration::saveToConfiguration(game::config::UserConfiguration& p
 {
     // ex GChartConfiguration::computeDerivedInformation (part)
 
-    // Save to main config. loadUserPreferences() has set all options to srcUser.
-    // This is wrong for map options which must always be srcGame.
+    // Save to main config. loadUserPreferences() has set all options to source=User (file in profile directory).
+    // This is wrong for map options which must always be source=Game (file in game directory)
     // However, to avoid creating game configuration files if users never even touched the settings,
-    // we downgrade an option to srcDefault (which means it is not stored in a config file) if all of the following holds:
-    //   - it is srcUser (=user did not set it to srcGame)
+    // we downgrade an option to source=Default (which means it is not stored in a config file) if all of the following holds:
+    //   - it is source=User (=user did not set it to source=Game)
     //   - it has the default value
     //   - it is being set to the default value
     game::config::IntegerOption& map_kind = pref[opt_map_kind];
@@ -374,6 +393,9 @@ game::map::Configuration::getCanonicalLocation(Point pt) const
 
      case Wrapped:
         // Wrap into range
+        // Use half-open intervals; this agrees with PHost since 3.3c.
+        // Older PHost and pwrap used '<', '>' at all places, which could cause ships to appear at the same position
+        // although being on different sides of the seam.
         if (pt.getX() < m_min.getX()) {
             pt.addX(m_size.getX());
         }
@@ -399,6 +421,8 @@ game::map::Configuration::getCanonicalLocation(Point pt) const
             // Note: rounding can cause a point that was previously outside to become outside again!
             // Example: with center=(2000,2000), radius=1000, point (2001,3000), which is barely outside,
             // is mapped to (1999,1000), which is also barely outside.
+            // This is consistent with pwrap behaviour; given that nobody currently intends changing pwrap,
+            // let's just leave it as it is.
             pt.setX(int(radius * std::sin(angle) + m_center.getX() + 0.5));
             pt.setY(int(radius * std::cos(angle) + m_center.getY() + 0.5));
         }
@@ -453,7 +477,7 @@ game::map::Configuration::getNumRectangularImages() const
      case Circular:
         return 1;
      case Wrapped:
-        return 9;
+        return NUM_WRAP_IMAGES;
     }
     return 0;
 }
@@ -469,7 +493,7 @@ game::map::Configuration::getNumPointImages() const
      case Circular:
         return 2;
      case Wrapped:
-        return 9;
+        return NUM_WRAP_IMAGES;
     }
     return 0;
 }
@@ -491,11 +515,11 @@ game::map::Configuration::getPointAlias(Point pt, Point& out, int image, bool ex
 
      case Wrapped:
         // Point must be inside, and a supported image.
-        if (!isOnMap(pt) || image < 0 || image >= 9) {
+        if (!isOnMap(pt) || image < 0 || image >= NUM_WRAP_IMAGES) {
             return false;
         } else {
-            out.setX(pt.getX() + m_size.getX() * image_dx[image]);
-            out.setY(pt.getY() + m_size.getY() * image_dy[image]);
+            out.setX(pt.getX() + m_size.getX() * IMAGE_DX[image]);
+            out.setY(pt.getY() + m_size.getY() * IMAGE_DY[image]);
             return true;
         }
 
@@ -547,8 +571,10 @@ game::map::Configuration::getSimplePointAlias(Point pt, int image) const
 
      case Wrapped:
         // Regular remapping
-        pt.addX(m_size.getX() * image_dx[image]);
-        pt.addY(m_size.getY() * image_dy[image]);
+        if (image >= 0 && image < NUM_WRAP_IMAGES) {
+            pt.addX(m_size.getX() * IMAGE_DX[image]);
+            pt.addY(m_size.getY() * IMAGE_DY[image]);
+        }
         break;
     }
     return pt;
@@ -564,7 +590,7 @@ game::map::Configuration::getSquaredDistance(Point a, Point b) const
 
 // Parse a sector number.
 bool
-game::map::Configuration::parseSectorNumber(const String_t& s, Point& result)
+game::map::Configuration::parseSectorNumber(const String_t& s, Point& result) const
 {
     // ex GPoint::parseSectorNumber
     int sec;
@@ -573,7 +599,7 @@ game::map::Configuration::parseSectorNumber(const String_t& s, Point& result)
 
 // Parse a sector number.
 bool
-game::map::Configuration::parseSectorNumber(int n, Point& result)
+game::map::Configuration::parseSectorNumber(int n, Point& result) const
 {
     // ex GPoint::parseSectorNumber
     // Valid range is 100 .. 499
@@ -643,25 +669,20 @@ game::map::Configuration::computeDerivedInformation()
         m_center.setY(2000);
         m_fromHostConfiguration = false;
     }
-    if (m_size.getX() < 500 || m_size.getX() > m_center.getX()) {
-        m_size.setX(std::min(m_center.getX(), 2000));
-        m_fromHostConfiguration = false;
-    }
-    if (m_size.getY() < 500 || m_size.getY() > m_center.getY()) {
-        m_size.setY(std::min(m_center.getY(), 2000));
-        m_fromHostConfiguration = false;
-    }
 
     // Compute derived information
     switch (m_mode) {
      case Flat:
      case Wrapped:
+        limitSize(Point::X, m_size, m_center.getX()*2, m_fromHostConfiguration);
+        limitSize(Point::Y, m_size, m_center.getY()*2, m_fromHostConfiguration);
         m_min.setX(m_center.getX() - m_size.getX() / 2);
         m_min.setY(m_center.getY() - m_size.getY() / 2);
         m_max = m_min + m_size;
         break;
 
      case Circular:
+        limitSize(Point::X, m_size, std::min(m_center.getX(), m_center.getY()), m_fromHostConfiguration);
         m_size.setY(m_size.getX());
         m_min = m_center - m_size;
         m_max = m_center + m_size;

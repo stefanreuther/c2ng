@@ -18,6 +18,8 @@ namespace {
             { throw std::runtime_error("not implemented"); }
         virtual void handleEvent(gfx::EventConsumer& /*consumer*/, bool /*relativeMouseMovement*/)
             { throw std::runtime_error("not implemented"); }
+        virtual util::Key_t getKeyboardModifierState()
+            { return 0; }
         virtual util::RequestDispatcher& dispatcher()
             { throw std::runtime_error("not implemented"); }
         virtual afl::base::Ref<gfx::Timer> createTimer()

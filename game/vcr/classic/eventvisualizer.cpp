@@ -31,7 +31,7 @@ game::vcr::classic::EventVisualizer::init(Algorithm& algo,
                                           const Battle& battle,
                                           const game::spec::ShipList& shipList,
                                           const PlayerList& players,
-                                          const TeamSettings& teams,
+                                          const TeamSettings* teams,
                                           const game::config::HostConfiguration& config)
 {
     // Start up the algorithm
@@ -142,7 +142,7 @@ game::vcr::classic::EventVisualizer::initSide(Side side, Algorithm& algo,
                                               const Object& obj,
                                               const game::spec::ShipList& shipList,
                                               const PlayerList& players,
-                                              const TeamSettings& teams,
+                                              const TeamSettings* teams,
                                               const game::config::HostConfiguration& config)
 {
     // Initialize UnitInfo.
@@ -150,7 +150,7 @@ game::vcr::classic::EventVisualizer::initSide(Side side, Algorithm& algo,
     ui.object          = obj;
     ui.position        = algo.getObjectX(side);
     ui.ownerName       = players.getPlayerName(obj.getOwner(), Player::ShortName);
-    ui.relation        = teams.getPlayerRelation(obj.getOwner());
+    ui.relation        = teams != 0 ? teams->getPlayerRelation(obj.getOwner()) : TeamSettings::EnemyPlayer;
     if (const game::spec::Component* beam = shipList.beams().get(obj.getBeamType())) {
         ui.beamName = beam->getName(shipList.componentNamer());
     }

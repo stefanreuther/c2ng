@@ -37,7 +37,7 @@ namespace game { namespace interface {
     afl::data::Value* getUfoProperty(const game::map::Ufo& ufo, UfoProperty iup,
                                      afl::string::Translator& tx,
                                      InterpreterInterface& iface);
-    void setUfoProperty(game::map::Ufo& ufo, UfoProperty iup, afl::data::Value* value);
+    void setUfoProperty(game::map::Ufo& ufo, UfoProperty iup, const afl::data::Value* value);
 
 } }
 

@@ -25,14 +25,18 @@ namespace {
         Tester(client::si::UserSide& iface, ui::Root& root, afl::string::Translator& tx)
             : Control(iface, root, tx)
             { }
-        virtual void handleStateChange(client::si::UserSide& ui, client::si::RequestLink2 link, client::si::OutputState::Target /*target*/)
-            { ui.continueProcessWithFailure(link, "doesn't work"); }
-        virtual void handleEndDialog(client::si::UserSide& ui, client::si::RequestLink2 link, int /*code*/)
-            { ui.continueProcess(link); }
-        virtual void handlePopupConsole(client::si::UserSide& ui, client::si::RequestLink2 link)
-            { ui.continueProcess(link); }
-        virtual void handleSetViewRequest(client::si::UserSide& ui, client::si::RequestLink2 link, String_t /*name*/, bool /*withKeymap*/)
-            { ui.continueProcessWithFailure(link, "Context error"); }
+        virtual void handleStateChange(client::si::RequestLink2 link, client::si::OutputState::Target /*target*/)
+            { interface().continueProcessWithFailure(link, "doesn't work"); }
+        virtual void handleEndDialog(client::si::RequestLink2 link, int /*code*/)
+            { interface().continueProcess(link); }
+        virtual void handlePopupConsole(client::si::RequestLink2 link)
+            { interface().continueProcess(link); }
+        virtual void handleSetViewRequest(client::si::RequestLink2 link, String_t /*name*/, bool /*withKeymap*/)
+            { interface().continueProcessWithFailure(link, "Context error"); }
+        virtual void handleUseKeymapRequest(client::si::RequestLink2 link, String_t /*name*/, int /*prefix*/)
+            { interface().continueProcessWithFailure(link, "Context error"); }
+        virtual void handleOverlayMessageRequest(client::si::RequestLink2 link, String_t /*text*/)
+            { interface().continueProcessWithFailure(link, "Context error"); }
         virtual client::si::ContextProvider* createContextProvider()
             { return 0; }
     };
@@ -54,7 +58,7 @@ TestClientSiControl::testMulti()
     afl::io::NullFileSystem fs;
     util::MessageCollector collector;
     game::Session session(tx, fs);
-    util::RequestThread thread("TestClientSiControl::testIt", log);
+    util::RequestThread thread("TestClientSiControl::testIt", log, tx);
     util::RequestReceiver<game::Session> sessionReceiver(thread, session);
     client::si::UserSide iface(sessionReceiver.getSender(), engine.dispatcher(), collector, log);
 

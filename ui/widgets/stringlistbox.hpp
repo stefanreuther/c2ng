@@ -12,14 +12,13 @@
 
 namespace ui { namespace widgets {
 
-    // /** Standard List Box Widget
+    /** Standard String List Box Widget.
 
-    //     This class provides the standard list box widget used for most cases.
-    //     It displays a UIStringList, and provides handy functions to access
-    //     the UIStringList's keys.
+        This class provides the standard list box widget used for most cases.
+        It displays a util::StringList, and provides handy functions to access
+        the StringList's keys.
 
-    //     In a UIStandardListbox, users can type the first letter of an entry
-    //     for "quick search". */
+        In a StringListbox, users can type the first letter of an entry for quick search. */
     class StringListbox : public AbstractListbox {
      public:
         StringListbox(gfx::ResourceProvider& provider, ui::ColorScheme& scheme);
@@ -29,8 +28,10 @@ namespace ui { namespace widgets {
         virtual size_t getNumItems();
         virtual bool isItemAccessible(size_t n);
         virtual int getItemHeight(size_t n);
-        virtual int getHeaderHeight();
+        virtual int getHeaderHeight() const;
+        virtual int getFooterHeight() const;
         virtual void drawHeader(gfx::Canvas& can, gfx::Rectangle area);
+        virtual void drawFooter(gfx::Canvas& can, gfx::Rectangle area);
         virtual void drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state);
 
         // Widget:
@@ -43,6 +44,8 @@ namespace ui { namespace widgets {
         void addItems(const afl::functional::StringTable_t& tab);
         void sortItemsAlphabetically();
         void swapItems(util::StringList& other);
+        void setItems(const util::StringList& other);
+        const util::StringList& getStringList() const;
 
         bool getCurrentKey(int32_t& key) const;
         void setCurrentKey(int32_t key);

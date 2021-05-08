@@ -3,7 +3,6 @@
   */
 
 #include "client/tiles/shipscreenheadertile.hpp"
-#include "util/translation.hpp"
 #include "game/map/ship.hpp"
 #include "game/proxy/objectlistener.hpp"
 #include "game/game.hpp"
@@ -12,10 +11,12 @@
 #include "ui/res/resid.hpp"
 
 using ui::widgets::FrameGroup;
+using client::widgets::getFrameTypeFromTaskStatus;
 
 client::tiles::ShipScreenHeaderTile::ShipScreenHeaderTile(ui::Root& root, client::widgets::KeymapWidget& kmw, Kind k)
     : ControlScreenHeader(root, kmw),
-      m_receiver(root.engine().dispatcher(), *this)
+      m_receiver(root.engine().dispatcher(), *this),
+      m_kind(k)
 {
     // ex WShipScreenHeaderTile::WShipScreenHeaderTile
     switch (k) {
@@ -42,11 +43,18 @@ client::tiles::ShipScreenHeaderTile::attach(game::proxy::ObjectObserver& oop)
 {
     class Job : public util::Request<ControlScreenHeader> {
      public:
-        Job(game::Session& session, game::map::Object* obj)
+        Job(game::Session& session, game::map::Object* obj, Kind kind)
             : m_name(obj != 0 ? obj->getName(game::PlainName, session.translator(), session.interface()) : String_t()),
               m_subtitle(),
-              m_marked(obj != 0 && obj->isMarked())
+              m_marked(obj != 0 && obj->isMarked()),
+              m_hasMessages(false),
+              m_kind(kind),
+              m_taskStatus(kind == ShipScreen     ? session.getTaskStatus(obj, interpreter::Process::pkShipTask, false) :
+                           kind == ShipTaskScreen ? session.getTaskStatus(obj, interpreter::Process::pkShipTask,  true) :
+                           game::Session::NoTask)
             {
+                afl::string::Translator& tx = session.translator();
+
                 // ex WShipScreenHeaderTile::getSubtitle
                 game::map::Ship* sh = dynamic_cast<game::map::Ship*>(obj);
                 game::Game* g = session.getGame().get();
@@ -67,18 +75,18 @@ client::tiles::ShipScreenHeaderTile::attach(game::proxy::ObjectObserver& oop)
                     int owner = sh->getRealOwner().orElse(0);
                     String_t fmt = (owner != g->getViewpointPlayer()
                                     ? (levelKnown
-                                       ? _("(Id #%d, %s %s %s)")
-                                       : _("(Id #%d, %s %!s%s)"))
+                                       ? tx("(Id #%d, %s %s %s)")
+                                       : tx("(Id #%d, %s %!s%s)"))
                                     : (levelKnown
-                                       ? _("(Id #%d, %!s%s %s)")
-                                       : _("(Id #%d, %!s%!s%s)")));
+                                       ? tx("(Id #%d, %!s%s %s)")
+                                       : tx("(Id #%d, %!s%!s%s)")));
                     int hullNumber;
                     game::spec::Hull* hull = sh->getHull().get(hullNumber) ? sl->hulls().get(hullNumber) : 0;
                     m_subtitle = afl::string::Format(fmt.c_str(),
                                                      sh->getId(),
                                                      r->playerList().getPlayerName(owner, game::Player::AdjectiveName),
                                                      r->hostConfiguration().getExperienceLevelName(level, session.translator()),
-                                                     (hull ? hull->getName(sl->componentNamer()) : _("ship")));
+                                                     (hull ? hull->getName(sl->componentNamer()) : tx("ship")));
 
                     if (hull) {
                         m_image = ui::res::makeResourceId(ui::res::SHIP, hull->getInternalPictureNumber(), hull->getId());
@@ -86,31 +94,43 @@ client::tiles::ShipScreenHeaderTile::attach(game::proxy::ObjectObserver& oop)
                         // Unknown or out-of-range. In any case, it's not known, so it's a nonvisual contact.
                         m_image = RESOURCE_ID("nvc");
                     }
+                    m_hasMessages = (m_kind == ShipScreen && !sh->messages().empty());
                 }
             }
         void handle(ControlScreenHeader& t)
             {
                 t.setText(txtHeading, m_name);
                 t.setText(txtSubtitle, m_subtitle);
+                t.setHasMessages(m_hasMessages);
                 t.enableButton(btnImage, m_marked ? ui::YellowFrame : ui::NoFrame);
                 t.setImage(m_image);
+                if (m_kind == ShipScreen) {
+                    t.enableButton(btnAuto, getFrameTypeFromTaskStatus(m_taskStatus));
+                }
+                if (m_kind == ShipTaskScreen) {
+                    t.enableButton(btnCScr, getFrameTypeFromTaskStatus(m_taskStatus));
+                }
             }
      private:
         String_t m_name;
         String_t m_subtitle;
         String_t m_image;
         bool m_marked;
+        bool m_hasMessages;
+        Kind m_kind;
+        game::Session::TaskStatus m_taskStatus;
     };
     class Listener : public game::proxy::ObjectListener {
      public:
-        Listener(util::RequestSender<ControlScreenHeader> reply)
-            : m_reply(reply)
+        Listener(util::RequestSender<ControlScreenHeader> reply, Kind kind)
+            : m_reply(reply), m_kind(kind)
             { }
         virtual void handle(game::Session& s, game::map::Object* obj)
-            { m_reply.postNewRequest(new Job(s, obj)); }
+            { m_reply.postNewRequest(new Job(s, obj, m_kind)); }
      private:
         util::RequestSender<ControlScreenHeader> m_reply;
+        Kind m_kind;
     };
 
-    oop.addNewListener(new Listener(m_receiver.getSender()));
+    oop.addNewListener(new Listener(m_receiver.getSender(), m_kind));
 }

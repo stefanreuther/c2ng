@@ -11,8 +11,12 @@
 #include "game/spec/hull.hpp"
 #include "game/spec/shiplist.hpp"
 #include "game/tables/temperaturename.hpp"
+#include "gfx/complex.hpp"
 #include "gfx/context.hpp"
+#include "ui/draw.hpp"
+#include "ui/res/resid.hpp"
 #include "util/skincolor.hpp"
+#include "game/game.hpp"
 
 using afl::string::Format;
 using game::map::Ship;
@@ -27,9 +31,11 @@ namespace {
         using client::tiles::StarchartHeaderTile;
         afl::string::Translator& tx = session.translator();
         game::Root* pRoot = session.getRoot().get();
+        game::Game* g = session.getGame().get();
         game::spec::ShipList* pShipList = session.getShipList().get();
 
-        // FIXME-> ResId image;
+        game::NegativeProperty_t level;
+
         if (obj != 0) {
             result.text[StarchartHeaderTile::Name] = obj->getName(game::PlainName, tx, session.interface());
             result.text[StarchartHeaderTile::Id]   = Format(tx("(Id #%d)"), obj->getId());
@@ -49,11 +55,14 @@ namespace {
             if (pl->getTemperature().get(temp)) {
                 // Note: xgettext will parse the following thing wrong:
                 result.text[StarchartHeaderTile::Type] = Format(tx("%d" "\xC2\xB0" "F, %s"), temp, game::tables::TemperatureName(tx).get(temp));
-                // FIXME: image = ResId(res::planet, pl->getTemperature(), pl->getId());
+                result.image = ui::res::makeResourceId(ui::res::PLANET, temp, pl->getId());
             } else {
-                // FIXME: image = ResId(res::planet);
+                result.image = ui::res::PLANET;
             }
-            //     level = pl->unit_scores.getScore(planet_score_definitions.lookupScore(ScoreId_ExpLevel));
+
+            if (g != 0) {
+                level = pl->getScore(game::ScoreId_ExpLevel, g->planetScores());
+            }
         } else if (Ship* sh = dynamic_cast<Ship*>(obj)) {
             int hullNr;
             game::spec::Hull* pHull = 0;
@@ -62,31 +71,28 @@ namespace {
             }
             if (pHull != 0) {
                 result.text[StarchartHeaderTile::Type] = pHull->getName(pShipList->componentNamer());
-                // FIXME: image = ResId(res::ship, getHull(h).getInternalPictureNumber(), h);
+                result.image = ui::res::makeResourceId(ui::res::SHIP, pHull->getInternalPictureNumber(), hullNr);
             } else {
                 result.text[StarchartHeaderTile::Type] = tx("Unknown type");
-                // FIXME: image = ResId("nvc");
+                result.image = RESOURCE_ID("nvc");
             }
-            // FIXME: guessed position, controller!!!!!!!
-            // FIXME: level = sh->unit_scores.getScore(ship_score_definitions.lookupScore(ScoreId_ExpLevel));
+
+            if (g != 0) {
+                level = sh->getScore(game::ScoreId_ExpLevel, g->shipScores());
+            }
 
             int mass;
             if (pShipList != 0 && pRoot != 0 && sh->getMass(*pShipList).get(mass)) {
                 result.text[StarchartHeaderTile::Mass] = Format(tx("%d kt"), pRoot->userConfiguration().formatNumber(mass));
             }
         } else {
-            //     return;
+            // Whatever; leave it blank
         }
 
-        // if (owner == 0)
-        //     outTextF(ctx, x, y, w, _("unowned"));
-        // else if (owner > 0)
-        //     outTextF(ctx, x, y, w, player_racenames.getShortName(owner));
-        // y += dy;
-
-        // if (level >= 0)
-        //     outTextF(ctx, x, y, w, getExperienceLevelName(level));
-        // y += dy;
+        int levelValue;
+        if (level.get(levelValue) && pRoot != 0) {
+            result.text[StarchartHeaderTile::Level] = pRoot->hostConfiguration().getExperienceLevelName(levelValue, session.translator());
+        }
     }
 }
 
@@ -94,7 +100,9 @@ namespace {
 client::tiles::StarchartHeaderTile::StarchartHeaderTile(ui::Root& root)
     : m_root(root),
       m_content(),
-      m_reply(root.engine().dispatcher(), *this)
+      m_reply(root.engine().dispatcher(), *this),
+      conn_imageChange(root.provider().sig_imageChange.add(this, &StarchartHeaderTile::onImageChange)),
+      m_isMissingImage(false)
 { }
 
 void
@@ -104,18 +112,26 @@ client::tiles::StarchartHeaderTile::draw(gfx::Canvas& can)
     int lineHeight = font->getLineHeight();
 
     gfx::Context<SkinColor::Color> ctx(can, getColorScheme());
+    gfx::Context<uint8_t> ctx8(can, m_root.colorScheme());
     ctx.useFont(*font);
 
-    // FIXME: image
     gfx::Rectangle area = getExtent();
 
-    // drawFrameDown(can, GfxRect(in.x + 2, in.y + 2, 107, 95));
-
-    // Ptr<GfxPixmap> pix = ResManager::getInstance().getPixmap(image);
-    // if (pix)
-    //     pix->blitSized(can, in.x + 3, in.y + 3, 105, 93);
-    // else
-    //     drawSolidBar(can, GfxRect(in.x + 3, in.y + 3, 105, 93), standard_colors[COLOR_BLACK]);
+    gfx::Rectangle picArea = area.splitX(111);
+    picArea.grow(-2, -2);
+    ui::drawFrameDown(ctx8, picArea);
+    picArea.grow(-1, -1);
+    afl::base::Ptr<gfx::Canvas> pix = m_root.provider().getImage(m_content.image);
+    if (pix.get() != 0) {
+        ctx8.setColor(ui::Color_Black); // blitSized will use the color to fill excess (?)
+        drawBackground(ctx8, picArea);
+        blitSized(ctx8, picArea, *pix);
+        // do NOT reset m_isMissingImage here.
+        // This draw might be clipped and not actually cause the image to become visible.
+    } else {
+        drawSolidBar(ctx8, picArea, 0);
+        m_isMissingImage = true;
+    }
 
     ctx.setColor(SkinColor::White);
     outTextF(ctx, area.splitY(lineHeight), m_content.text[Name]);
@@ -160,6 +176,15 @@ client::tiles::StarchartHeaderTile::setContent(const Content& content)
 {
     m_content = content;
     requestRedraw();
+}
+
+void
+client::tiles::StarchartHeaderTile::onImageChange()
+{
+    if (m_isMissingImage) {
+        requestRedraw();
+        m_isMissingImage = false;
+    }
 }
 
 void
