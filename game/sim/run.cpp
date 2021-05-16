@@ -1862,7 +1862,7 @@ namespace {
     {
         // ex getPlanetTorpCount
         int torps = getNumPlanetLaunchers(pl, config) * config[HostConfiguration::PlanetaryTorpsPerTube](pl.getOwner());
-        if (pl.hasBase()) {
+        if (pl.hasBase() && config[HostConfiguration::UseBaseTorpsInCombat](pl.getOwner())) {
             torps += pl.getNumBaseTorpedoesAsType(getPlanetTorpedoType(pl, shipList), shipList);
         }
         return torps;
@@ -2208,8 +2208,9 @@ namespace {
         \param [in]     fsh       Result of FLAK fight for a planet
         \param [in]     oldObj    Original planet
         \param [in/out] spl       Planet from simulation setup to update
-        \param [in]     shipList  Ship list */
-    void unpackFlakPlanet(const game::vcr::flak::Object& fsh, const game::vcr::flak::Object& oldObj, Planet& spl, const ShipList& shipList)
+        \param [in]     shipList  Ship list
+        \param [in]     config    Host configuration */
+    void unpackFlakPlanet(const game::vcr::flak::Object& fsh, const game::vcr::flak::Object& oldObj, Planet& spl, const ShipList& shipList, const game::config::HostConfiguration& config)
     {
         spl.setDamage(fsh.getDamage());
         spl.setShield(fsh.getShield());
@@ -2241,8 +2242,7 @@ namespace {
         }
 
         int torps_lost = oldObj.getNumTorpedoes() - fsh.getNumTorpedoes();
-        // Inc(PlanetaryTorpsFired, lost); <- FIXME?
-        if (torps_lost > 0 && spl.hasBase()) {
+        if (torps_lost > 0 && spl.hasBase() && config[HostConfiguration::PlanetsHaveTubes]() && config[HostConfiguration::UseBaseTorpsInCombat](spl.getOwner())) {
             int32_t total_cost = torps_lost;
             if (const game::spec::TorpedoLauncher* tl = shipList.launchers().get(fsh.getTorpedoType())) {
                 total_cost *= tl->torpedoCost().get(Cost::Money);
@@ -2383,7 +2383,7 @@ namespace {
             // Write back to sim setup
             if (oldObj.isPlanet()) {
                 if (Planet* pl = setup.getPlanet()) {
-                    unpackFlakPlanet(newObj, oldObj, *pl, shipList);
+                    unpackFlakPlanet(newObj, oldObj, *pl, shipList, config);
                 }
                 if (Statistic* st = stats.at(setup.getNumShips())) {
                     st->merge(algo.getStatistic(i));
