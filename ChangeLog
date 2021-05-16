@@ -1,3 +1,7 @@
+2021-05-08  Stefan Reuther  <streu@gmx.de>
+
+	-------------------- c2ng_2_40_10
+
 2021-05-02  Stefan Reuther  <streu@gmx.de>
 
 	* server/scripts/init/bin/runhost.sh: FLAK support
