@@ -52,6 +52,10 @@ namespace interpreter {
             \param editor editor
             \param pc instruction to interpret */
         void predictStatement(const TaskEditor& editor, size_t pc);
+
+        /** Predict single statement.
+            \param statement Statement */
+        void predictStatement(const String_t& statement);
     };
 
 }

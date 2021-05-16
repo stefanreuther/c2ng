@@ -6,8 +6,13 @@
 #include "game/actions/changebuildqueue.hpp"
 
 #include "t_game_actions.hpp"
+#include "afl/io/nullfilesystem.hpp"
 #include "afl/string/format.hpp"
 #include "afl/string/nulltranslator.hpp"
+#include "game/game.hpp"
+#include "game/session.hpp"
+#include "game/test/root.hpp"
+#include "game/turn.hpp"
 
 namespace {
     using afl::string::Format;
@@ -30,23 +35,33 @@ namespace {
             { }
     };
 
-    void init(Environment& env)
+    void init(game::spec::ShipList& shipList)
     {
         // 10 hulls
         for (int i = 1; i <= 10; ++i) {
-            game::spec::Hull* pHull = env.shipList.hulls().create(i);
+            game::spec::Hull* pHull = shipList.hulls().create(i);
             TS_ASSERT(pHull != 0);
             pHull->setName(Format("Hull %d", i));
             pHull->setMass(100);
             pHull->setNumEngines(1);
 
-            env.shipList.hullAssignments().add(PLAYER, i, i);
+            shipList.hullAssignments().add(PLAYER, i, i);
+        }
+
+        // 9 engines
+        for (int i = 1; i <= 9; ++i) {
+            shipList.engines().create(i);
         }
     }
 
-    Planet& addPlanet(Environment& env, game::Id_t planetId, int player, String_t fc)
+    void init(Environment& env)
     {
-        Planet* p = env.univ.planets().create(planetId);
+        init(env.shipList);
+    }
+
+    Planet& addPlanet(game::map::Universe& univ, game::Id_t planetId, int player, String_t fc)
+    {
+        Planet* p = univ.planets().create(planetId);
         TS_ASSERT(p != 0);
 
         game::map::PlanetData pd;
@@ -65,6 +80,11 @@ namespace {
         p->addCurrentBaseData(bd, game::PlayerSet_t(player));
 
         return *p;
+    }
+
+    Planet& addPlanet(Environment& env, game::Id_t planetId, int player, String_t fc)
+    {
+        return addPlanet(env.univ, planetId, player, fc);
     }
 
     void addDefaultPlanets(Environment& env)
@@ -295,5 +315,58 @@ TestGameActionsChangeBuildQueue::testClone()
     TS_ASSERT_EQUALS(infos[0].actionName, "Build Hull 1");
     TS_ASSERT_EQUALS(infos[1].actionName, "Clone NSEA Protector");
     TS_ASSERT_EQUALS(infos[2].actionName, "Build Hull 1");
+}
+
+/** Test planned build.
+    Set up a situation with normal and planned builds (auto tasks).
+    Verify correct result. */
+void
+TestGameActionsChangeBuildQueue::testPlannedBuild()
+{
+    // This needs a Session to be able to set up an auto-task!
+    // Therefore, set up by hand.
+    afl::io::NullFileSystem fs;
+    afl::string::NullTranslator tx;
+    game::Session session(tx, fs);
+
+    session.setRoot(new game::test::Root(game::HostVersion()));
+    session.setShipList(new game::spec::ShipList());
+    init(*session.getShipList());
+
+    session.setGame(new game::Game());
+    game::map::Universe& univ = session.getGame()->currentTurn().universe();
+    addPlanet(univ,  6, PLAYER, "xyz");
+    addPlanet(univ, 10, PLAYER, "abc");
+    addPlanet(univ, 20, PLAYER, "xyz");
+    univ.postprocess(game::PlayerSet_t(PLAYER), game::PlayerSet_t(PLAYER), game::map::Object::Playable,
+                     session.getRoot()->hostVersion(), session.getRoot()->hostConfiguration(),
+                     77, *session.getShipList(), session.translator(), session.log());
+
+    // Cancel planet 10's build order and give him an auto-task instead
+    univ.planets().get(10)->setBaseBuildOrder(game::ShipBuildOrder());
+    afl::base::Ptr<interpreter::TaskEditor> ed(session.getAutoTaskEditor(10, interpreter::Process::pkBaseTask, true));
+    TS_ASSERT(ed.get() != 0);
+    String_t commands[] = {
+        "enqueueship 3,8",
+        "enqueueship 4,7",
+        "enqueueship 5,6",
+    };
+    ed->addAtEnd(commands);
+    ed->setPC(1);
+
+    // Test
+    game::actions::ChangeBuildQueue testee(univ, *session.getShipList(), session.getRoot()->hostVersion(), session.getRoot()->hostConfiguration(), session.rng(), PLAYER);
+    testee.addPlannedBuilds(session.processList());
+    game::actions::ChangeBuildQueue::Infos_t infos;
+    testee.describe(infos, tx);
+
+    // Verify
+    TS_ASSERT_EQUALS(infos.size(), 3U);
+    TS_ASSERT_EQUALS(infos[0].actionName, "Build Hull 1");
+    TS_ASSERT_EQUALS(infos[1].actionName, "Build Hull 1");
+    TS_ASSERT_EQUALS(infos[2].actionName, "Plan Hull 4");
+    TS_ASSERT_EQUALS(infos[0].planetId, 6);
+    TS_ASSERT_EQUALS(infos[1].planetId, 20);
+    TS_ASSERT_EQUALS(infos[2].planetId, 10);
 }
 

@@ -17,6 +17,7 @@
 #include "ui/widgets/framegroup.hpp"
 #include "ui/widgets/standarddialogbuttons.hpp"
 #include "ui/widgets/statictext.hpp"
+#include "util/unicodechars.hpp"
 
 namespace {
     using game::proxy::BuildQueueProxy;
@@ -25,6 +26,7 @@ namespace {
      *  BuildQueueList - a list box displaying the build queue
      */
 
+    const int ICON_HEMS = 3;       // half ems
     const int ACTION_EMS = 25;
     const int FCODE_EMS = 5;
     const int QPOS_EMS = 5;
@@ -231,7 +233,7 @@ BuildQueueList::drawHeader(gfx::Canvas& can, gfx::Rectangle area)
 
     drawHLine(ctx, area.getLeftX(), area.getBottomY()-1, area.getRightX()-1);
 
-    area.consumeX(GAP_PX);
+    area.consumeX(GAP_PX + ICON_HEMS*em/2);
     outTextF(ctx, area.splitX(ACTION_EMS * em + GAP_PX), m_translator("Build Order"));
     outTextF(ctx, area.splitX(FCODE_EMS * em + GAP_PX), m_translator("FCode"));
     if (m_columns.contains(QueuePositionColumn)) {
@@ -262,14 +264,25 @@ BuildQueueList::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, Ite
         const BuildQueueProxy::Info_t& e = m_data[item];
         const int em = normalFont->getEmWidth();
 
-        area.consumeX(GAP_PX);
         area.consumeY(PAD_PX);
+        ctx.useFont(*normalFont);
+
+        // Icon
+        gfx::Rectangle iconArea = area.splitX(GAP_PX + ICON_HEMS*em/2);
+        ctx.setTextAlign(gfx::CenterAlign, gfx::TopAlign);
+        if (e.planned) {
+            ctx.setColor(util::SkinColor::Faded);
+            outTextF(ctx, iconArea, UTF_STOPWATCH);
+        } else {
+            ctx.setColor(util::SkinColor::Green);
+            outTextF(ctx, iconArea, UTF_CHECK_MARK);
+        }
 
         // Name
+        util::SkinColor::Color defColor = e.planned ? util::SkinColor::Faded : util::SkinColor::Static;
         gfx::Rectangle nameArea = area.splitX(ACTION_EMS * em);
         ctx.setTextAlign(gfx::LeftAlign, gfx::TopAlign);
-        ctx.useFont(*normalFont);
-        ctx.setColor(util::SkinColor::Static);
+        ctx.setColor(defColor);
         outTextF(ctx, nameArea.splitY(normalFont->getLineHeight()), e.actionName);
         ctx.useFont(*smallFont);
         ctx.setColor(util::SkinColor::Faded);
@@ -278,7 +291,7 @@ BuildQueueList::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, Ite
 
         // Friendly code
         ctx.useFont(e.hasPriority ? *boldFont : *normalFont);
-        ctx.setColor(e.conflict ? util::SkinColor::Red : util::SkinColor::Static);
+        ctx.setColor(e.conflict ? util::SkinColor::Red : defColor);
         outTextF(ctx, area.splitX(FCODE_EMS * em), e.friendlyCode);
         area.consumeX(GAP_PX);
 
@@ -287,7 +300,7 @@ BuildQueueList::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, Ite
             gfx::Rectangle queueArea = area.splitX(QPOS_EMS * em);
             if (e.queuePosition != 0) {
                 ctx.useFont(*normalFont);
-                ctx.setColor(util::SkinColor::Static);
+                ctx.setColor(defColor);
                 ctx.setTextAlign(gfx::RightAlign, gfx::TopAlign);
                 outTextF(ctx, queueArea, afl::string::Format("%d", e.queuePosition));
             }
@@ -305,13 +318,13 @@ BuildQueueList::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, Ite
             if (e.pointsRequired.get(reqd)) {
                 ctx.useFont(*normalFont);
                 if (e.pointsAvailable.get(avail)) {
-                    ctx.setColor(util::SkinColor::Static);
+                    ctx.setColor(defColor);
                     ctx.setTextAlign(gfx::LeftAlign, gfx::TopAlign);
                     outTextF(ctx, haveArea, afl::string::Format(" / %d", avail));
 
-                    ctx.setColor(e.hasPriority ? reqd > avail ? util::SkinColor::Red : util::SkinColor::Static : util::SkinColor::Faded);
+                    ctx.setColor(e.hasPriority ? reqd > avail ? util::SkinColor::Red : defColor : util::SkinColor::Faded);
                 } else {
-                    ctx.setColor(util::SkinColor::Static);
+                    ctx.setColor(defColor);
                 }
                 ctx.setTextAlign(gfx::RightAlign, gfx::TopAlign);
                 outTextF(ctx, needArea, afl::string::Format("%d", reqd));

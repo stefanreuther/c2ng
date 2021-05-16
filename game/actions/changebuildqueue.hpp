@@ -7,6 +7,7 @@
 
 #include "game/map/universe.hpp"
 #include "game/types.hpp"
+#include "interpreter/processlist.hpp"
 #include "util/randomnumbergenerator.hpp"
 
 namespace game { namespace actions {
@@ -33,11 +34,12 @@ namespace game { namespace actions {
             bool hasPriority;                   ///< true if this build order has a priority FC.
             bool conflict;                      ///< true if this priority order conflicts with others (same FC).
             bool playable;                      ///< true if this slot can be modified.
+            bool planned;                       ///< true if this is a planned build.
 
             Info()
                 : planetId(), planetName(), actionName(),
                   friendlyCode(), queuePosition(), pointsRequired(), pointsAvailable(),
-                  hasPriority(), conflict(), playable()
+                  hasPriority(), conflict(), playable(), planned()
                 { }
         };
 
@@ -61,6 +63,10 @@ namespace game { namespace actions {
 
         /** Destructor. */
         ~ChangeBuildQueue();
+
+        /** Add planned build orders from a process list.
+            \param list Process list */
+        void addPlannedBuilds(const interpreter::ProcessList& list);
 
         /** Set available build points.
             Call this to populate the "pointsAvailable" field.
@@ -97,19 +103,21 @@ namespace game { namespace actions {
 
         void init(util::RandomNumberGenerator& rng, int viewpointPlayer);
 
+        bool hasPlanet(int id) const;
         void sort();
         void avoid(int setThis, int toThis, size_t slot);
 
         struct LocalInfo {
             Id_t planetId;              ///< Planet Id.
             Id_t cloningShipId;         ///< Cloning ship Id.
+            int plannedHullId;          ///< Planned hull Id (for auto task).
             String_t friendlyCode;      ///< Current friendly code.
             String_t oldFriendlyCode;   ///< Friendly code to revert to (old or random).
             int queuePosition;          ///< Current queue position if known. 0 for new orders.
             bool playable;
 
-            LocalInfo(Id_t planetId, Id_t cloningShipId, String_t friendlyCode, String_t oldFriendlyCode, int queuePosition, bool playable)
-                : planetId(planetId), cloningShipId(cloningShipId), friendlyCode(friendlyCode), oldFriendlyCode(oldFriendlyCode), queuePosition(queuePosition), playable(playable)
+            LocalInfo(Id_t planetId, Id_t cloningShipId, int plannedHullId, String_t friendlyCode, String_t oldFriendlyCode, int queuePosition, bool playable)
+                : planetId(planetId), cloningShipId(cloningShipId), plannedHullId(plannedHullId), friendlyCode(friendlyCode), oldFriendlyCode(oldFriendlyCode), queuePosition(queuePosition), playable(playable)
                 { }
         };
         class Sorter;

@@ -142,23 +142,28 @@ interpreter::TaskPredictor::predictStatement(const TaskEditor& editor, size_t pc
 {
     // ex IntAutoTaskPredictor::predictStatement
     if (pc < editor.getNumInstructions()) {
-        try {
-            // Parse one line
-            Tokenizer tok(editor[pc]);
-
-            if (tok.getCurrentToken() != tok.tIdentifier) {
-                return;
-            }
-            String_t command = tok.getCurrentString();
-            tok.readNextToken();
-
-            // Build arguments and call predictor
-            afl::data::Segment args;
-            if (readArgs(tok, args) && command != "RESTART") {
-                Arguments block(args, 0, args.size());
-                predictInstruction(command, block);
-            }
-        }
-        catch (Error&) { }
+        predictStatement(editor[pc]);
     }
+}
+
+void
+interpreter::TaskPredictor::predictStatement(const String_t& statement)
+{
+    try {
+        // Parse statement. Must start with an identifier; otherwise, it's not a statement.
+        Tokenizer tok(statement);
+        if (tok.getCurrentToken() != tok.tIdentifier) {
+            return;
+        }
+        String_t command = tok.getCurrentString();
+        tok.readNextToken();
+
+        // Build arguments and call predictor
+        afl::data::Segment args;
+        if (readArgs(tok, args) && command != "RESTART") {
+            Arguments block(args, 0, args.size());
+            predictInstruction(command, block);
+        }
+    }
+    catch (Error&) { }
 }

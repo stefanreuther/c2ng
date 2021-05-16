@@ -12,9 +12,10 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/vcr/flak/database.cpp game/vcr/flak/database.hpp \
-    game/vcr/flak/object.cpp game/vcr/flak/object.hpp \
-    game/vcr/flak/setup.cpp game/vcr/flak/setup.hpp \
+FILES_gamelib = game/interface/basetaskbuildcommandparser.cpp \
+    game/interface/basetaskbuildcommandparser.hpp game/vcr/flak/database.cpp \
+    game/vcr/flak/database.hpp game/vcr/flak/object.cpp \
+    game/vcr/flak/object.hpp game/vcr/flak/setup.cpp game/vcr/flak/setup.hpp \
     game/vcr/flak/algorithm.cpp game/vcr/flak/algorithm.hpp \
     game/vcr/flak/nullvisualizer.cpp game/vcr/flak/nullvisualizer.hpp \
     game/vcr/flak/gameenvironment.cpp game/vcr/flak/gameenvironment.hpp \

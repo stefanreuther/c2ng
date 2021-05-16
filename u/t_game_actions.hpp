@@ -170,6 +170,7 @@ class TestGameActionsChangeBuildQueue : public CxxTest::TestSuite {
     void testDecrease();
     void testPBPs();
     void testClone();
+    void testPlannedBuild();
 };
 
 class TestGameActionsChangeShipFriendlyCode : public CxxTest::TestSuite {

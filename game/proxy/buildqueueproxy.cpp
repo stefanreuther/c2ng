@@ -31,6 +31,7 @@ class game::proxy::BuildQueueProxy::Trampoline {
                                             r->hostConfiguration(),
                                             session.rng(),
                                             g->getViewpointPlayer()));
+                m_action->addPlannedBuilds(session.processList());
                 m_action->setAvailableBuildPoints(game::score::CompoundScore(g->scores(), game::score::ScoreId_BuildPoints, 1).get(g->scores(), g->currentTurn().getTurnNumber(), g->getViewpointPlayer()));
             }
         }

@@ -26,6 +26,7 @@
 #include "game/actions/preconditions.hpp"
 #include "game/hostversion.hpp"
 #include "game/map/reverter.hpp"
+#include "game/interface/basetaskbuildcommandparser.hpp"
 
 using afl::string::Format;
 using game::map::Planet;
@@ -87,31 +88,41 @@ class game::actions::ChangeBuildQueue::Sorter {
         { }
     bool operator()(const LocalInfo& a, const LocalInfo& b) const
         {
-            // Parse friendly codes
-            int valA = checkPriorityCode(a.friendlyCode, m_parent.m_host);
-            int valB = checkPriorityCode(b.friendlyCode, m_parent.m_host);
-
-            // Prioritized goes before unprioritized
-            bool priA = (valA != 0);
-            bool priB = (valB != 0);
-            if (priA != priB) {
-                return priA > priB;
+            // Planned goes last
+            bool planA = (a.plannedHullId != 0);
+            bool planB = (b.plannedHullId != 0);
+            if (planA != planB) {
+                return planA < planB;
             }
 
-            if (priA) {
-                // Two priorized orders: lower values go first
-                if (valA != valB) {
-                    return valA < valB;
+            // Check priorities only for not planned
+            if (!planA) {
+                // Parse friendly codes
+                int valA = checkPriorityCode(a.friendlyCode, m_parent.m_host);
+                int valB = checkPriorityCode(b.friendlyCode, m_parent.m_host);
+
+                // Prioritized goes before unprioritized
+                bool priA = (valA != 0);
+                bool priB = (valB != 0);
+                if (priA != priB) {
+                    return priA > priB;
                 }
-            } else {
-                // Unpriorized: use queue order if known
-                int knownA = a.queuePosition != 0;
-                int knownB = b.queuePosition != 0;
-                if (knownA != knownB) {
-                    return knownA > knownB;
-                }
-                if (a.queuePosition != b.queuePosition) {
-                    return a.queuePosition < b.queuePosition;
+
+                if (priA) {
+                    // Two priorized orders: lower values go first
+                    if (valA != valB) {
+                        return valA < valB;
+                    }
+                } else {
+                    // Unpriorized: use queue order if known
+                    int knownA = a.queuePosition != 0;
+                    int knownB = b.queuePosition != 0;
+                    if (knownA != knownB) {
+                        return knownA > knownB;
+                    }
+                    if (a.queuePosition != b.queuePosition) {
+                        return a.queuePosition < b.queuePosition;
+                    }
                 }
             }
 
@@ -141,6 +152,51 @@ game::actions::ChangeBuildQueue::ChangeBuildQueue(game::map::Universe& univ,
 // Destructor.
 game::actions::ChangeBuildQueue::~ChangeBuildQueue()
 { }
+
+void
+game::actions::ChangeBuildQueue::addPlannedBuilds(const interpreter::ProcessList& list)
+{
+    const interpreter::ProcessList::Vector_t& vec = list.getProcessList();
+    for (size_t i = 0, n = vec.size(); i < n; ++i) {
+        // Check process state: only suspended processes.
+        interpreter::Process& p = *vec[i];
+        if (p.getProcessKind() == interpreter::Process::pkBaseTask) {
+            if (const game::map::Planet* pl = dynamic_cast<const game::map::Planet*>(p.getInvokingObject())) {
+                if (pl->isPlayable(game::map::Object::Playable) && !hasPlanet(pl->getId())) {
+                    // Load from process. We don't plan on ever saving.
+                    afl::data::StringList_t statements;
+                    size_t pc = 0;
+                    try {
+                        if (interpreter::TaskEditor* ed = dynamic_cast<interpreter::TaskEditor*>(p.getFreezer())) {
+                            ed->getAll(statements);
+                            pc = ed->getPC();
+                        } else {
+                            interpreter::TaskEditor tmpEd(p);
+                            tmpEd.getAll(statements);
+                            pc = tmpEd.getPC();
+                        }
+                    }
+                    catch (interpreter::Error&)
+                    { }
+
+                    // Parse
+                    if (pc < statements.size()) {
+                        game::interface::BaseTaskBuildCommandParser cmd(m_shipList);
+                        cmd.predictStatement(statements[pc]);
+
+                        // Build command?
+                        int hullType = cmd.getOrder().getHullIndex();
+                        if (m_shipList.hulls().get(hullType) != 0) {
+                            String_t fc = pl->getFriendlyCode().orElse("");
+                            m_info.push_back(LocalInfo(pl->getId(), 0, hullType, fc, fc, 0, true));
+                        }
+                    }
+                }
+            }
+        }
+    }
+    sort();
+}
 
 // Set available build points.
 void
@@ -174,10 +230,16 @@ game::actions::ChangeBuildQueue::describe(Infos_t& result, afl::string::Translat
         out.conflict = (i > 0 && m_info[i-1].friendlyCode == out.friendlyCode && checkPriorityCode(out.friendlyCode, m_host) != 0);
         out.hasPriority = checkPriorityCode(in.friendlyCode, m_host);
         out.playable = in.playable;
+        out.planned = (in.plannedHullId != 0);
 
         // Ship being built
         int pointsRequired = 0;
-        if (in.cloningShipId == 0) {
+        if (in.plannedHullId != 0) {
+            if (const game::spec::Hull* pHull = m_shipList.hulls().get(in.plannedHullId)) {
+                out.actionName = Format(tx("Plan %s"), pHull->getName(m_shipList.componentNamer()));
+                pointsRequired = pHull->getPointsToBuild(player, m_host, m_config);
+            }
+        } else if (in.cloningShipId == 0) {
             if (const game::spec::Hull* pHull = m_shipList.hulls().get(pl.getBaseBuildHull(m_config, m_shipList.hullAssignments()).orElse(0))) {
                 out.actionName = Format(tx("Build %s"), pHull->getName(m_shipList.componentNamer()));
                 pointsRequired = pHull->getPointsToBuild(player, m_host, m_config);
@@ -213,7 +275,7 @@ game::actions::ChangeBuildQueue::setPriority(size_t slot, int pri)
 {
     if (slot < m_info.size()) {
         LocalInfo& info = m_info[slot];
-        if (info.playable) {
+        if (info.playable && info.plannedHullId == 0) {
             if (pri >= 1 && pri <= MAX_PRIORITY_VALUE) {
                 info.friendlyCode = makePriorityCode(pri);
             } else {
@@ -231,7 +293,7 @@ game::actions::ChangeBuildQueue::increasePriority(size_t slot)
     const size_t n = m_info.size();
     if (slot < n) {
         LocalInfo& info = m_info[slot];
-        if (info.playable) {
+        if (info.playable && info.plannedHullId == 0) {
             const int current = checkPriorityCode(info.friendlyCode, m_host);
             if (current == 0) {
                 // Unpriorized to lowest priority: set to one-plus-highest used value
@@ -262,7 +324,7 @@ game::actions::ChangeBuildQueue::decreasePriority(size_t slot)
     const size_t n = m_info.size();
     if (slot < n) {
         LocalInfo& info = m_info[slot];
-        if (info.playable) {
+        if (info.playable && info.plannedHullId == 0) {
             const int current = checkPriorityCode(info.friendlyCode, m_host);
             if (current == 0) {
                 // Cannot go any lower
@@ -285,7 +347,7 @@ game::actions::ChangeBuildQueue::commit()
 {
     for (size_t i = 0, n = m_info.size(); i < n; ++i) {
         if (Planet* pl = m_universe.planets().get(m_info[i].planetId)) {
-            if (pl->isPlayable(game::map::Object::Playable)) {
+            if (pl->isPlayable(game::map::Object::Playable) && m_info[i].plannedHullId == 0) {
                 pl->setFriendlyCode(m_info[i].friendlyCode);
             }
         }
@@ -348,12 +410,24 @@ game::actions::ChangeBuildQueue::init(util::RandomNumberGenerator& rng, int view
                 bool playable = p->isPlayable(game::map::Object::Playable);
 
                 // Remember it
-                m_info.push_back(LocalInfo(i, cloningShipId, friendlyCode, oldFriendlyCode, queuePosition, playable));
+                m_info.push_back(LocalInfo(i, cloningShipId, 0, friendlyCode, oldFriendlyCode, queuePosition, playable));
             }
         }
     }
     sort();
 }
+
+bool
+game::actions::ChangeBuildQueue::hasPlanet(int id) const
+{
+    for (size_t i = 0, n = m_info.size(); i < n; ++i) {
+        if (m_info[i].planetId == id) {
+            return true;
+        }
+    }
+    return false;
+}
+
 
 void
 game::actions::ChangeBuildQueue::sort()
