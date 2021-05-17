@@ -27,3 +27,10 @@ ui::widgets::Button::setFont(gfx::FontRequest font)
 {
     m_icon.setFont(font);
 }
+
+void
+ui::widgets::Button::setTextAlign(gfx::HorizontalAlignment x, gfx::VerticalAlignment y)
+{
+    m_icon.setTextAlign(x, y);
+    requestRedraw();
+}

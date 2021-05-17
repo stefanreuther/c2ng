@@ -33,6 +33,11 @@ namespace ui { namespace widgets {
             \param font New font request */
         void setFont(gfx::FontRequest font);
 
+        /** Set alignment.
+            \param x horizontal alignment
+            \param y vertical alignment */
+        void setTextAlign(gfx::HorizontalAlignment x, gfx::VerticalAlignment y);
+
      private:
         ui::icons::Button m_icon;
     };

@@ -63,10 +63,13 @@ namespace ui {
                     const WindowStyle& style,
                     String_t name);
 
-    void drawButton(gfx::Context<uint8_t>& ctx,
-                    const gfx::Rectangle& extent,
-                    ButtonFlags_t flags,
-                    String_t text);
+    /** Draw a button.
+        Exported to be callable from non-button widgets that contain button-lookalikes, such as scrollbars.
+        \param ctx     Context, with appropriate font, ui::ColorScheme, and text alignment set
+        \param extent  Dimensions of the button
+        \param flags   Button flags
+        \param text    Label */
+    void drawButton(gfx::Context<uint8_t>& ctx, const gfx::Rectangle& extent, ButtonFlags_t flags, String_t text);
 
     void prepareHighContrastListItem(gfx::Context<util::SkinColor::Color>& ctx, gfx::Rectangle area, ui::widgets::AbstractListbox::ItemState state);
     void prepareColorListItem(gfx::Context<util::SkinColor::Color>& ctx, gfx::Rectangle area, ui::widgets::AbstractListbox::ItemState state, ColorScheme& uiColors, afl::base::Deleter& h);

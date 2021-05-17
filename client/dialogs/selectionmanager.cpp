@@ -110,7 +110,7 @@ namespace {
         void doCopy();
         void doSave(String_t title, String_t flags);
         void doLoad(String_t title, String_t flags);
-        void addButton(afl::base::Deleter& del, ui::Group& group, String_t name, util::Key_t key);
+        void addButton(afl::base::Deleter& del, ui::Group& group, String_t name, util::Key_t key, bool left);
         void executeScriptOperationWait(String_t funcName, String_t title, String_t flags);
     };
 }
@@ -341,20 +341,19 @@ SelectionManager::run()
     group1.add(m_list);
     group1.add(group12);
 
-    // FIXME: these buttons should be left-justified
-    addButton(del, group12, m_translator("D - Clear"),  'd');
-    addButton(del, group12, m_translator("I - Invert"), 'i');
-    addButton(del, group12, m_translator("C - Copy"),   'c');
-    addButton(del, group12, m_translator("S - Save"),   's');
-    addButton(del, group12, m_translator("L - Load"),   'l');
-    addButton(del, group12, m_translator("M - Merge"),  'm');
+    addButton(del, group12, m_translator("D - Clear"),  'd', true);
+    addButton(del, group12, m_translator("I - Invert"), 'i', true);
+    addButton(del, group12, m_translator("C - Copy"),   'c', true);
+    addButton(del, group12, m_translator("S - Save"),   's', true);
+    addButton(del, group12, m_translator("L - Load"),   'l', true);
+    addButton(del, group12, m_translator("M - Merge"),  'm', true);
     group12.add(del.addNew(new ui::Spacer()));
     win.add(group1);
 
-    addButton(del, group2, m_translator("Help"), 'h');
+    addButton(del, group2, m_translator("Help"), 'h', false);
     group2.add(del.addNew(new ui::Spacer()));
-    addButton(del, group2, m_translator("Enter - Select"), util::Key_Return);
-    addButton(del, group2, m_translator("ESC - Close"), util::Key_Escape);
+    addButton(del, group2, m_translator("Enter - Select"), util::Key_Return, false);
+    addButton(del, group2, m_translator("ESC - Close"), util::Key_Escape, false);
     win.add(group2);
     win.add(m_keyDispatcher);
     win.add(del.addNew(new ui::widgets::Quit(m_root, m_loop)));
@@ -492,10 +491,13 @@ SelectionManager::doLoad(String_t title, String_t flags)
 }
 
 void
-SelectionManager::addButton(afl::base::Deleter& del, ui::Group& group, String_t name, util::Key_t key)
+SelectionManager::addButton(afl::base::Deleter& del, ui::Group& group, String_t name, util::Key_t key, bool left)
 {
     ui::widgets::Button& btn = del.addNew(new ui::widgets::Button(name, key, m_root));
     btn.dispatchKeyTo(m_keyDispatcher);
+    if (left) {
+        btn.setTextAlign(gfx::LeftAlign, gfx::MiddleAlign);
+    }
     group.add(btn);
 }
 

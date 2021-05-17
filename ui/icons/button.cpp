@@ -10,6 +10,8 @@ ui::icons::Button::Button(String_t text, gfx::FontRequest font, Root& root)
     : Icon(),
       m_text(text),
       m_font(font),
+      m_xAlign(gfx::CenterAlign),
+      m_yAlign(gfx::MiddleAlign),
       m_root(root)
 { }
 
@@ -35,7 +37,7 @@ ui::icons::Button::draw(gfx::Context<SkinColor::Color>& ctx, gfx::Rectangle area
     afl::base::Ref<gfx::Font> font = m_root.provider().getFont(m_font);
     gfx::Context<uint8_t> ctx2(ctx.canvas(), m_root.colorScheme());
     ctx2.useFont(*font);
-    ctx2.setTextAlign(gfx::CenterAlign, gfx::MiddleAlign);
+    ctx2.setTextAlign(m_xAlign, m_yAlign);
     drawButton(ctx2, area, flags, m_text);
 }
 
@@ -43,4 +45,11 @@ void
 ui::icons::Button::setFont(gfx::FontRequest font)
 {
     m_font = font;
+}
+
+void
+ui::icons::Button::setTextAlign(gfx::HorizontalAlignment x, gfx::VerticalAlignment y)
+{
+    m_xAlign = x;
+    m_yAlign = y;
 }

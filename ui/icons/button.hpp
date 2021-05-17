@@ -28,9 +28,16 @@ namespace ui { namespace icons {
             \param font New font request */
         void setFont(gfx::FontRequest font);
 
+        /** Set alignment.
+            \param x horizontal alignment
+            \param y vertical alignment */
+        void setTextAlign(gfx::HorizontalAlignment x, gfx::VerticalAlignment y);
+
      private:
         String_t m_text;
         gfx::FontRequest m_font;
+        gfx::HorizontalAlignment m_xAlign;
+        gfx::VerticalAlignment m_yAlign;
         Root& m_root;
     };
 
