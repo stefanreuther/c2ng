@@ -158,3 +158,23 @@ game::vcr::flak::loadConfiguration(Configuration& config, afl::io::Stream& file,
     fp.setSection("flak", inSection);
     fp.parseFile(file);
 }
+
+void
+game::vcr::flak::loadConfiguration(Configuration& config, afl::io::Directory& dir, afl::sys::LogListener& log, afl::string::Translator& tx)
+{
+    // ex loadFlakConfig, loadPDKFlakConfig
+    // Start with empty configuration
+    initConfiguration(config);
+
+    // Load from flak.src or pconfig.src
+    afl::base::Ptr<afl::io::Stream> f = dir.openFileNT("flak.src", afl::io::FileSystem::OpenRead);
+    bool inSection = true;
+    if (f.get() == 0) {
+        f = dir.openFileNT("pconfig.src", afl::io::FileSystem::OpenRead);
+        inSection = false;
+    }
+    if (f.get() != 0) {
+        log.write(log.Info, LOG_NAME, afl::string::Format(tx("Reading FLAK configuration from %s..."), f->getName()));
+        loadConfiguration(config, *f, inSection, log, tx);
+    }
+}

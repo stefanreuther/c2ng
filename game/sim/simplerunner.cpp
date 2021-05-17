@@ -12,8 +12,9 @@ game::sim::SimpleRunner::SimpleRunner(const Setup& setup,
                                       const Configuration& opts,
                                       const game::spec::ShipList& list,
                                       const game::config::HostConfiguration& config,
+                                      const game::vcr::flak::Configuration& flakConfig,
                                       util::RandomNumberGenerator& rng)
-    : Runner(setup, opts, list, config, rng)
+    : Runner(setup, opts, list, config, flakConfig, rng)
 { }
 
 void

@@ -21,6 +21,7 @@ game::Root::Root(afl::base::Ref<afl::io::Directory> gameDirectory,
       m_specificationLoader(specLoader),
       m_hostVersion(hostVersion),
       m_hostConfiguration(),
+      m_flakConfiguration(),
       m_userConfiguration(),
       m_playerList(),
       m_registrationKey(registrationKey),
@@ -80,6 +81,19 @@ const game::config::HostConfiguration&
 game::Root::hostConfiguration() const
 {
     return m_hostConfiguration;
+}
+
+// Access FLAK configuration.
+game::vcr::flak::Configuration&
+game::Root::flakConfiguration()
+{
+    return m_flakConfiguration;
+}
+
+const game::vcr::flak::Configuration&
+game::Root::flakConfiguration() const
+{
+    return m_flakConfiguration;
 }
 
 // Access user configuration (preferences).

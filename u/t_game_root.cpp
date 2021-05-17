@@ -57,6 +57,7 @@ TestGameRoot::testIt()
     // Verify accessors
     TS_ASSERT_EQUALS(&testee.hostVersion(), &croot.hostVersion());
     TS_ASSERT_EQUALS(&testee.hostConfiguration(), &croot.hostConfiguration());
+    TS_ASSERT_EQUALS(&testee.flakConfiguration(), &croot.flakConfiguration());
     TS_ASSERT_EQUALS(&testee.userConfiguration(), &croot.userConfiguration());
     TS_ASSERT(dynamic_cast<afl::charset::Utf8Charset*>(&croot.charset()) != 0);
     TS_ASSERT_EQUALS(&testee.playerList(), &croot.playerList());

@@ -142,6 +142,9 @@ game::v3::RootLoader::loadConfiguration(Root& root, afl::io::Directory& dir, afl
     }
 
     root.hostVersion().setImpliedHostConfiguration(config);
+
+    // FLAK
+    game::vcr::flak::loadConfiguration(root.flakConfiguration(), dir, m_log, m_translator);
 }
 
 /** Load PCONFIG.SRC.

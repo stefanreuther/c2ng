@@ -7,6 +7,7 @@
 
 #include "game/config/hostconfiguration.hpp"
 #include "game/spec/shiplist.hpp"
+#include "game/vcr/flak/configuration.hpp"
 #include "game/vcr/statistic.hpp"
 #include "util/randomnumbergenerator.hpp"
 
@@ -26,6 +27,7 @@ namespace game { namespace sim {
         \param [in]      opts      Simulator options
         \param [in]      list      Ship list (requires hulls, beams, engines, torpedo launchers, friendly codes, hull functions)
         \param [in]      config    Host configuration
+        \param [in]      flakConfig FLAK configuration
         \param [in/out]  rng       Random number generator; used only of \c opts does not configure a deterministic simulation */
     void runSimulation(Setup& state,
                        std::vector<game::vcr::Statistic>& stats,
@@ -33,6 +35,7 @@ namespace game { namespace sim {
                        const Configuration& opts,
                        const game::spec::ShipList& list,
                        const game::config::HostConfiguration& config,
+                       const game::vcr::flak::Configuration& flakConfig,
                        util::RandomNumberGenerator& rng);
 
     /** Prepare for simulation.

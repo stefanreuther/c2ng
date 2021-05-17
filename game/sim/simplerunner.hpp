@@ -17,6 +17,7 @@ namespace game { namespace sim {
                      const Configuration& opts,
                      const game::spec::ShipList& list,
                      const game::config::HostConfiguration& config,
+                     const game::vcr::flak::Configuration& flakConfig,
                      util::RandomNumberGenerator& rng);
 
         void run(Limit_t limit, util::StopSignal& stopper);

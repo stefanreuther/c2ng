@@ -15,6 +15,7 @@
 #include "game/config/userconfiguration.hpp"
 #include "game/hostversion.hpp"
 #include "game/playerlist.hpp"
+#include "game/vcr/flak/configuration.hpp"
 
 namespace game {
 
@@ -127,6 +128,11 @@ namespace game {
         game::config::HostConfiguration& hostConfiguration();
         const game::config::HostConfiguration& hostConfiguration() const;
 
+        /** Access FLAK configuration.
+            See m_flakConfiguration. */
+        game::vcr::flak::Configuration& flakConfiguration();
+        const game::vcr::flak::Configuration& flakConfiguration() const;
+
         /** Access user configuration (preferences).
             See m_userConfiguration. */
         game::config::UserConfiguration& userConfiguration();
@@ -180,6 +186,10 @@ namespace game {
             Must be initialized by the creator of the Root object.
             Downstream code can modify this as more information becomes available. */
         game::config::HostConfiguration m_hostConfiguration;
+
+        /** FLAK configuration.
+            Must be initialized by the creator of the Root object. */
+        game::vcr::flak::Configuration m_flakConfiguration;
 
         /** User configuration (preferences).
             Must be initialized by the creator of the Root object for now.

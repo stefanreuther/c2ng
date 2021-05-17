@@ -2418,6 +2418,7 @@ game::sim::runSimulation(Setup& setup,
                          const Configuration& opts,
                          const game::spec::ShipList& list,
                          const game::config::HostConfiguration& config,
+                         const game::vcr::flak::Configuration& flakConfig,
                          util::RandomNumberGenerator& rng)
 {
     // runSimulation(GSimState& state, const GSimOptions& opts, GSimBattleResult& result, ProgressMonitor& monitor)
@@ -2444,7 +2445,7 @@ game::sim::runSimulation(Setup& setup,
         simulatePHost(setup, opts, result, stats, list, config, rng, game::vcr::classic::PHost4);
         break;
      case Configuration::VcrFLAK:
-        simulateFLAK(setup, opts, result, stats, list, config, game::vcr::flak::Configuration(/*FIXME*/), rng);
+        simulateFLAK(setup, opts, result, stats, list, config, flakConfig, rng);
         break;
     }
 }

@@ -35,12 +35,14 @@ namespace game { namespace sim {
             \param [in]     opts    Simulation options (see Runner)
             \param [in]     list    Ship list (see Runner)
             \param [in]     config  Host configuration (see Runner)
+            \param [in]     flakConfig FLAK configuration (see Runner)
             \param [in/out] rng     Random number generator (see Runner)
             \param [in]     numThreads Number of threads to start*/
         ParallelRunner(const Setup& setup,
                        const Configuration& opts,
                        const game::spec::ShipList& list,
                        const game::config::HostConfiguration& config,
+                       const game::vcr::flak::Configuration& flakConfig,
                        util::RandomNumberGenerator& rng,
                        size_t numThreads);
 

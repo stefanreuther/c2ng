@@ -123,7 +123,7 @@ game::proxy::SimulationRunProxy::Trampoline::Trampoline(util::RequestSender<Simu
 
         // Build runner
         // FIXME: configure number of threads
-        m_runner.reset(new game::sim::SimpleRunner(m_sim->setup(), m_sim->configuration(), *m_shipList, m_root->hostConfiguration(), m_rng));
+        m_runner.reset(new game::sim::SimpleRunner(m_sim->setup(), m_sim->configuration(), *m_shipList, m_root->hostConfiguration(), m_root->flakConfiguration(), m_rng));
         m_runner->sig_update.add(this, &Trampoline::reportUpdate);
     }
 }

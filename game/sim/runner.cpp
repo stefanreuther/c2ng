@@ -16,12 +16,19 @@ game::sim::Runner::Job::~Job()
 { }
 
 inline
-game::sim::Runner::Job::Job(const Setup& setup, const Configuration& opts, const game::spec::ShipList& list, const game::config::HostConfiguration& config, util::RandomNumberGenerator& rng, size_t serial)
+game::sim::Runner::Job::Job(const Setup& setup,
+                            const Configuration& opts,
+                            const game::spec::ShipList& list,
+                            const game::config::HostConfiguration& config,
+                            const game::vcr::flak::Configuration& flakConfig,
+                            util::RandomNumberGenerator& rng,
+                            size_t serial)
     : m_setup(setup),
       m_newState(setup),
       m_options(opts),
       m_shipList(list),
       m_config(config),
+      m_flakConfiguration(flakConfig),
       m_rng(rng.getSeed() ^ uint32_t(serial)),
       m_result(),
       m_stats()
@@ -33,7 +40,7 @@ game::sim::Runner::Job::Job(const Setup& setup, const Configuration& opts, const
 inline void
 game::sim::Runner::Job::run()
 {
-    runSimulation(m_newState, m_stats, m_result, m_options, m_shipList, m_config, m_rng);
+    runSimulation(m_newState, m_stats, m_result, m_options, m_shipList, m_config, m_flakConfiguration, m_rng);
 }
 
 inline bool
@@ -62,11 +69,13 @@ game::sim::Runner::Runner(const Setup& setup,
                           const Configuration& opts,
                           const game::spec::ShipList& list,
                           const game::config::HostConfiguration& config,
+                          const game::vcr::flak::Configuration& flakConfig,
                           util::RandomNumberGenerator& rng)
     : m_setup(setup),
       m_options(opts),
       m_shipList(list),
       m_config(config),
+      m_flakConfiguration(flakConfig),
       m_rng(rng),
       m_count(0),
       m_seriesLength(0),
@@ -81,7 +90,7 @@ game::sim::Runner::init()
     // ex WSimResultWindow::runFirstSimulation (sort-of)
     bool ok;
     if (m_count == 0) {
-        Job j(m_setup, m_options, m_shipList, m_config, m_rng, 0);
+        Job j(m_setup, m_options, m_shipList, m_config, m_flakConfiguration, m_rng, 0);
         j.run();
         if (j.writeBack(m_resultList)) {
             m_count = 1;
@@ -135,7 +144,7 @@ game::sim::Runner::Job*
 game::sim::Runner::makeJob(Limit_t& limit, util::StopSignal& stopper)
 {
     if (!stopper.get() && (limit == 0 || m_count < limit)) {
-        return new Job(m_setup, m_options, m_shipList, m_config, m_rng, m_count++);
+        return new Job(m_setup, m_options, m_shipList, m_config, m_flakConfiguration, m_rng, m_count++);
     } else {
         return 0;
     }

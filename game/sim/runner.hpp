@@ -11,6 +11,7 @@
 #include "game/sim/resultlist.hpp"
 #include "game/sim/setup.hpp"
 #include "game/spec/shiplist.hpp"
+#include "game/vcr/flak/configuration.hpp"
 #include "util/randomnumbergenerator.hpp"
 #include "util/stopsignal.hpp"
 
@@ -43,11 +44,13 @@ namespace game { namespace sim {
             \param [in]     opts    Simulation options
             \param [in]     list    Ship list
             \param [in]     config  Host configuration
+            \param [in]     flakConfig FLAK configuration
             \param [in/out] rng     Random number generator */
         Runner(const Setup& setup,
                const Configuration& opts,
                const game::spec::ShipList& list,
                const game::config::HostConfiguration& config,
+               const game::vcr::flak::Configuration& flakConfig,
                util::RandomNumberGenerator& rng);
 
         /** Initialize.
@@ -133,6 +136,7 @@ namespace game { namespace sim {
         const Configuration& m_options;
         const game::spec::ShipList& m_shipList;
         const game::config::HostConfiguration& m_config;
+        const game::vcr::flak::Configuration& m_flakConfiguration;
         util::RandomNumberGenerator& m_rng;
 
         /** Number of started simulations (=number of Job objects created).
@@ -173,7 +177,8 @@ class game::sim::Runner::Job {
  private:
     friend class Runner;
 
-    inline Job(const Setup& setup, const Configuration& opts, const game::spec::ShipList& list, const game::config::HostConfiguration& config, util::RandomNumberGenerator& rng, size_t serial);
+    inline Job(const Setup& setup, const Configuration& opts, const game::spec::ShipList& list, const game::config::HostConfiguration& config,
+               const game::vcr::flak::Configuration& flakConfig, util::RandomNumberGenerator& rng, size_t serial);
     inline void run();
     inline bool writeBack(ResultList& list) const;
     inline size_t getSeriesLength() const;
@@ -183,6 +188,7 @@ class game::sim::Runner::Job {
     const Configuration& m_options;
     const game::spec::ShipList& m_shipList;
     const game::config::HostConfiguration& m_config;
+    const game::vcr::flak::Configuration& m_flakConfiguration;
     util::RandomNumberGenerator m_rng;
     Result m_result;
     std::vector<game::vcr::Statistic> m_stats;

@@ -5,6 +5,7 @@
 #ifndef C2NG_GAME_VCR_FLAK_CONFIGURATION_HPP
 #define C2NG_GAME_VCR_FLAK_CONFIGURATION_HPP
 
+#include "afl/io/directory.hpp"
 #include "afl/io/stream.hpp"
 #include "afl/string/translator.hpp"
 #include "afl/sys/loglistener.hpp"
@@ -60,6 +61,13 @@ namespace game { namespace vcr { namespace flak {
         \param [in]  log        LogListener (for warnings)
         \param [in]  tx         Translator (for warnings) */
     void loadConfiguration(Configuration& config, afl::io::Stream& file, bool inSection, afl::sys::LogListener& log, afl::string::Translator& tx);
+
+    /** Load FLAK configuration from a directory.
+        \param [out] config     Configuration
+        \param [in]  dir        Directory
+        \param [in]  log        LogListener (for warnings)
+        \param [in]  tx         Translator (for warnings) */
+    void loadConfiguration(Configuration& config, afl::io::Directory& dir, afl::sys::LogListener& log, afl::string::Translator& tx);
 
 } } }
 
