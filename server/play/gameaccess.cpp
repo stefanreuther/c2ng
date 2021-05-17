@@ -13,6 +13,7 @@
 #include "server/play/commandhandler.hpp"
 #include "server/play/configurationpacker.hpp"
 #include "server/play/enginepacker.hpp"
+#include "server/play/flakconfigurationpacker.hpp"
 #include "server/play/friendlycodepacker.hpp"
 #include "server/play/hullpacker.hpp"
 #include "server/play/ionstormpacker.hpp"
@@ -220,6 +221,8 @@ server::play::GameAccess::createPacker(util::StringParser& p)
         return new OutMessagePacker(session, n);
     } else if (p.parseString("cfg") && p.parseInt(n)) {
         return new ConfigurationPacker(session, n);
+    } else if (p.parseString("flakconfig")) {
+        return new FlakConfigurationPacker(session);
     } else {
         return 0;
     }

@@ -28,6 +28,11 @@ class TestServerPlayConfigurationPacker : public CxxTest::TestSuite {
     void testSlices();
 };
 
+class TestServerPlayFlakConfigurationPacker : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
 class TestServerPlayFriendlyCodePacker : public CxxTest::TestSuite {
  public:
     void testIt();

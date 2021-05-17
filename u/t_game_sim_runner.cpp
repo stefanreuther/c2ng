@@ -175,6 +175,7 @@ TestGameSimRunner::testRegression1()
 
     // Host configuration
     game::config::HostConfiguration config;
+    game::vcr::flak::Configuration flakConfiguration;
 
     // Configuration
     game::sim::Configuration opts;
@@ -186,7 +187,7 @@ TestGameSimRunner::testRegression1()
 
     // SimpleRunner
     util::RandomNumberGenerator simpleRNG(42);
-    game::sim::SimpleRunner simpleRunner(setup, opts, shipList, config, simpleRNG);
+    game::sim::SimpleRunner simpleRunner(setup, opts, shipList, config, flakConfiguration, simpleRNG);
     simpleRunner.init();
     TS_ASSERT_EQUALS(simpleRunner.resultList().getNumBattles(), 1U);
 
@@ -195,7 +196,7 @@ TestGameSimRunner::testRegression1()
 
     // ParallelRunner
     util::RandomNumberGenerator parallelRNG(42);
-    game::sim::ParallelRunner parallelRunner(setup, opts, shipList, config, parallelRNG, 1);
+    game::sim::ParallelRunner parallelRunner(setup, opts, shipList, config, flakConfiguration, parallelRNG, 1);
     parallelRunner.init();
     TS_ASSERT_EQUALS(parallelRunner.resultList().getNumBattles(), 1U);
 
@@ -228,6 +229,7 @@ TestGameSimRunner::testRegression2()
 
     // Host configuration
     game::config::HostConfiguration config;
+    game::vcr::flak::Configuration flakConfiguration;
 
     // Configuration
     game::sim::Configuration opts;
@@ -239,7 +241,7 @@ TestGameSimRunner::testRegression2()
 
     // SimpleRunner
     util::RandomNumberGenerator simpleRNG(77);
-    game::sim::SimpleRunner simpleRunner(setup, opts, shipList, config, simpleRNG);
+    game::sim::SimpleRunner simpleRunner(setup, opts, shipList, config, flakConfiguration, simpleRNG);
     simpleRunner.init();
     TS_ASSERT_EQUALS(simpleRunner.resultList().getNumBattles(), 1U);
 
@@ -248,7 +250,7 @@ TestGameSimRunner::testRegression2()
 
     // ParallelRunner
     util::RandomNumberGenerator parallelRNG(77);
-    game::sim::ParallelRunner parallelRunner(setup, opts, shipList, config, parallelRNG, 5);
+    game::sim::ParallelRunner parallelRunner(setup, opts, shipList, config, flakConfiguration, parallelRNG, 5);
     parallelRunner.init();
     TS_ASSERT_EQUALS(parallelRunner.resultList().getNumBattles(), 1U);
 
@@ -278,6 +280,7 @@ TestGameSimRunner::testInterrupt()
 
     // Host configuration
     game::config::HostConfiguration config;
+    game::vcr::flak::Configuration flakConfiguration;
 
     // Configuration
     game::sim::Configuration opts;
@@ -286,12 +289,12 @@ TestGameSimRunner::testInterrupt()
 
     // SimpleRunner
     util::RandomNumberGenerator simpleRNG(77);
-    game::sim::SimpleRunner simpleRunner(setup, opts, shipList, config, simpleRNG);
+    game::sim::SimpleRunner simpleRunner(setup, opts, shipList, config, flakConfiguration, simpleRNG);
     checkInterrupt("SimpleRunner", simpleRunner);
 
     // ParallelRunner
     util::RandomNumberGenerator parallelRNG(77);
-    game::sim::ParallelRunner parallelRunner(setup, opts, shipList, config, parallelRNG, 5);
+    game::sim::ParallelRunner parallelRunner(setup, opts, shipList, config, flakConfiguration, parallelRNG, 5);
     parallelRunner.init();
     checkInterrupt("SimpleRunner", parallelRunner);
 }

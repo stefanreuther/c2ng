@@ -110,6 +110,7 @@ namespace {
     struct TestHarness {
         game::spec::ShipList list;
         game::config::HostConfiguration config;
+        game::vcr::flak::Configuration flakConfiguration;
         util::RandomNumberGenerator rng;
         std::vector<game::vcr::Statistic> stats;
         game::sim::Configuration opts;
@@ -117,7 +118,7 @@ namespace {
         game::sim::Result result;
 
         TestHarness()
-            : list(), config(), rng(42)
+            : list(), config(), flakConfiguration(), rng(42)
             { initShipList(list); }
     };
 }
@@ -138,7 +139,7 @@ TestGameSimRun::testHost()
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
@@ -184,7 +185,7 @@ TestGameSimRun::testHostBig()
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
@@ -235,7 +236,7 @@ TestGameSimRun::testHostNoTorps()
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
@@ -289,7 +290,7 @@ TestGameSimRun::testHostBalance()
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
@@ -335,7 +336,7 @@ TestGameSimRun::testHostMaster()
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
@@ -387,7 +388,7 @@ TestGameSimRun::testHostPlanet()
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
@@ -441,7 +442,7 @@ TestGameSimRun::testHostIntercept()
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
@@ -499,7 +500,7 @@ TestGameSimRun::testHostMulti()
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has been used
@@ -581,7 +582,7 @@ TestGameSimRun::testHostESB()
     s2->setEngineType(9);          // Transwarp Drive, 60 kt bonus
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
@@ -632,7 +633,7 @@ TestGameSimRun::testPHost()
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
@@ -681,7 +682,7 @@ TestGameSimRun::testPHostBig()
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
@@ -732,7 +733,7 @@ TestGameSimRun::testPHostPlanet()
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
@@ -790,7 +791,7 @@ TestGameSimRun::testPHostPlanetTubes()
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
@@ -860,7 +861,7 @@ TestGameSimRun::testPHostIntercept()
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
@@ -922,7 +923,7 @@ TestGameSimRun::testPHostMulti()
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has been used
@@ -1009,7 +1010,7 @@ TestGameSimRun::testShipCommander()
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been used
@@ -1063,7 +1064,7 @@ TestGameSimRun::testShipDeactivated()
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
     TS_ASSERT(h.result.battles.get() != 0);
@@ -1088,7 +1089,7 @@ TestGameSimRun::testShipAllied()
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
     TS_ASSERT(h.result.battles.get() != 0);
@@ -1111,7 +1112,7 @@ TestGameSimRun::testShipPassive()
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
     TS_ASSERT(h.result.battles.get() != 0);
@@ -1134,7 +1135,7 @@ TestGameSimRun::testShipNotEnemy()
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
     TS_ASSERT(h.result.battles.get() != 0);
@@ -1157,7 +1158,7 @@ TestGameSimRun::testShipEnemy()
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
     TS_ASSERT(h.result.battles.get() != 0);
@@ -1181,7 +1182,7 @@ TestGameSimRun::testShipPersistentEnemy()
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
     TS_ASSERT(h.result.battles.get() != 0);
@@ -1205,7 +1206,7 @@ TestGameSimRun::testShipCloaked()
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
     TS_ASSERT(h.result.battles.get() != 0);
@@ -1228,7 +1229,7 @@ TestGameSimRun::testShipFriendlyCodeMatch()
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
     TS_ASSERT(h.result.battles.get() != 0);
@@ -1251,7 +1252,7 @@ TestGameSimRun::testShipNoFuel()
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
     TS_ASSERT(h.result.battles.get() != 0);
@@ -1279,7 +1280,7 @@ TestGameSimRun::testShipCloakedFighterBays()
     // s2->setFlags(Ship::fl_DoubleBeamCharge | Ship::fl_DoubleBeamChargeSet);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
@@ -1347,7 +1348,7 @@ TestGameSimRun::testShipCloakedFighterBaysNT()
     s3->setFlags(Ship::fl_Cloaked | Ship::fl_CloakedBays | Ship::fl_CloakedBaysSet);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
@@ -1414,7 +1415,7 @@ TestGameSimRun::testShipSquadron()
     s1->setFlags(Ship::fl_Squadron | Ship::fl_SquadronSet);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
@@ -1466,7 +1467,7 @@ TestGameSimRun::testPlanetDeactivated()
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
     TS_ASSERT(h.result.battles.get() != 0);
@@ -1490,7 +1491,7 @@ TestGameSimRun::testPlanetCloaked()
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
     TS_ASSERT(h.result.battles.get() != 0);
@@ -1513,7 +1514,7 @@ TestGameSimRun::testPlanetFriendlyCodeMatch()
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
     TS_ASSERT(h.result.battles.get() != 0);
@@ -1538,7 +1539,7 @@ TestGameSimRun::testPlanetAllied()
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
     TS_ASSERT(h.result.battles.get() != 0);
@@ -1561,7 +1562,7 @@ TestGameSimRun::testPlanetNotAggressive()
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
     TS_ASSERT(h.result.battles.get() != 0);
@@ -1584,7 +1585,7 @@ TestGameSimRun::testPlanetNotEnemy()
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
     TS_ASSERT(h.result.battles.get() != 0);
@@ -1607,7 +1608,7 @@ TestGameSimRun::testPlanetImmuneRace()
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
     TS_ASSERT(h.result.battles.get() != 0);
@@ -1630,7 +1631,7 @@ TestGameSimRun::testPlanetBird()
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
     TS_ASSERT(h.result.battles.get() != 0);
@@ -1653,7 +1654,7 @@ TestGameSimRun::testPlanetPrimaryEnemy()
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
     TS_ASSERT(h.result.battles.get() != 0);
@@ -1676,7 +1677,7 @@ TestGameSimRun::testPlanetNuk()
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
     TS_ASSERT(h.result.battles.get() != 0);
@@ -1699,7 +1700,7 @@ TestGameSimRun::testFLAK()
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // FIXME? Other alogs verify that rng has not been touched because we use seed control, but FLAK does touch it.
@@ -1755,7 +1756,7 @@ TestGameSimRun::testFLAKMulti()
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - battles have been created; series length unchanged
