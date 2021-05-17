@@ -32,6 +32,8 @@ TestGameVcrBattle::testIt()
             { return false; }
         virtual bool getPosition(game::map::Point&) const
             { return false; }
+        virtual afl::base::Optional<int32_t> getAuxiliaryInformation(AuxInfo /*info*/) const
+            { return afl::base::Nothing; }
         virtual String_t getResultSummary(int, const game::config::HostConfiguration&, const game::spec::ShipList&, util::NumberFormatter, afl::string::Translator&) const
             { return String_t(); }
     };
@@ -67,6 +69,8 @@ TestGameVcrBattle::testDescription()
             { return false; }
         virtual bool getPosition(game::map::Point& /*result*/) const
             { return false; }
+        virtual afl::base::Optional<int32_t> getAuxiliaryInformation(AuxInfo /*info*/) const
+            { return afl::base::Nothing; }
         virtual String_t getResultSummary(int, const game::config::HostConfiguration&, const game::spec::ShipList&, util::NumberFormatter, afl::string::Translator&) const
             { return String_t(); }
 

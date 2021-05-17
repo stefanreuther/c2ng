@@ -109,6 +109,19 @@ game::vcr::flak::Battle::getPosition(game::map::Point& result) const
     return m_setup->getPosition(result);
 }
 
+afl::base::Optional<int32_t>
+game::vcr::flak::Battle::getAuxiliaryInformation(AuxInfo info) const
+{
+    switch (info) {
+     case aiSeed:     return static_cast<int32_t>(m_setup->getSeed());
+     case aiMagic:    break;  // only for classic
+     case aiType:     break;  // only for classic
+     case aiFlags:    break;  // only for classic
+     case aiAmbient:  return m_setup->getAmbientFlags();
+    }
+    return afl::base::Nothing;
+}
+
 String_t
 game::vcr::flak::Battle::getResultSummary(int viewpointPlayer,
                                           const game::config::HostConfiguration& config, const game::spec::ShipList& shipList,

@@ -218,6 +218,19 @@ game::vcr::classic::Battle::getPosition(game::map::Point& result) const
     return m_position.get(result);
 }
 
+afl::base::Optional<int32_t>
+game::vcr::classic::Battle::getAuxiliaryInformation(AuxInfo info) const
+{
+    switch (info) {
+     case aiSeed:    return getSeed();
+     case aiMagic:   return getSignature();
+     case aiType:    return right().isPlanet();
+     case aiFlags:   return getCapabilities();
+     case aiAmbient: break; /* Not for this type */
+    }
+    return afl::base::Nothing;
+}
+
 String_t
 game::vcr::classic::Battle::getResultSummary(int viewpointPlayer,
                                              const game::config::HostConfiguration& config, const game::spec::ShipList& shipList,

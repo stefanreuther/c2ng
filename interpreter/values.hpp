@@ -56,6 +56,9 @@ namespace interpreter {
     template<class StorageType, StorageType NullValue, class UserType>
     afl::data::Value* makeOptionalIntegerValue(afl::base::InlineOptional<StorageType,NullValue,UserType> value);
 
+    template<class UserType>
+    afl::data::Value* makeOptionalIntegerValue(const afl::base::Optional<UserType>& value);
+
     /** Make optional string value.
         Creates a string value if the parameter is present; otherwise, returns null.
         \param value Value
@@ -112,6 +115,17 @@ interpreter::makeOptionalIntegerValue(afl::base::InlineOptional<StorageType,Null
     UserType i;
     if (value.get(i)) {
         return makeIntegerValue(i);
+    } else {
+        return 0;
+    }
+}
+
+template<class UserType>
+afl::data::Value*
+interpreter::makeOptionalIntegerValue(const afl::base::Optional<UserType>& value)
+{
+    if (const UserType* p = value.get()) {
+        return makeIntegerValue(*p);
     } else {
         return 0;
     }

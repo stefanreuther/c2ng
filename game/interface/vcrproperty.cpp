@@ -6,13 +6,14 @@
 #include "afl/string/nulltranslator.hpp"
 #include "game/interface/vcrsidefunction.hpp"
 #include "game/turn.hpp"
-#include "game/vcr/classic/battle.hpp"
 #include "game/vcr/database.hpp"
 #include "interpreter/values.hpp"
 
 using interpreter::makeIntegerValue;
+using interpreter::makeOptionalIntegerValue;
 using interpreter::makeStringValue;
 using interpreter::makeSizeValue;
+using game::vcr::Battle;
 
 afl::data::Value*
 game::interface::getVcrProperty(size_t battleNumber,
@@ -23,33 +24,30 @@ game::interface::getVcrProperty(size_t battleNumber,
                                 afl::base::Ref<game::spec::ShipList> shipList)
 {
     // ex int/if/vcrif.h:getVcrProperty
-    game::vcr::Battle* battle;
+    Battle* battle;
     if (game::vcr::Database* db = turn->getBattles().get()) {
         battle = db->getBattle(battleNumber);
     } else {
         battle = 0;
     }
-    game::vcr::classic::Battle* classic = dynamic_cast<game::vcr::classic::Battle*>(battle);
+    if (battle == 0) {
+        return 0;
+    }
 
     switch (ivp) {
      case ivpSeed:
         /* @q Seed:Int (Combat Property)
            Random number seed.
-           Valid only for classic combat, EMPTY for others. */
-        if (classic != 0) {
-            return makeIntegerValue(classic->getSeed());
-        } else {
-            return 0;
-        }
+           Valid only for classic combat, EMPTY for others.
+           Since PCC2 2.40.11, also valid for FLAK. */
+        return makeOptionalIntegerValue(battle->getAuxiliaryInformation(Battle::aiSeed));
+
      case ivpMagic:
         /* @q Magic:Int (Combat Property)
            VCR algorithm identification value.
            Valid only for classic combat, EMPTY for others. */
-        if (classic != 0) {
-            return makeIntegerValue(classic->getSignature());
-        } else {
-            return 0;
-        }
+        return makeOptionalIntegerValue(battle->getAuxiliaryInformation(Battle::aiMagic));
+
      case ivpType:
         /* @q Type$:Int (Combat Property)
            Unit type identification value.
@@ -57,39 +55,27 @@ game::interface::getVcrProperty(size_t battleNumber,
            - 1: this is a ship/planet fight, {Right (Combat Property)|Right} resp.
                 {Unit (Combat Property)|Unit(1)} is a planet.
            Valid only for classic combat, EMPTY for others. */
-        if (classic != 0) {
-            return makeIntegerValue(classic->right().isPlanet());
-        } else {
-            return 0;
-        }
-     case ivpAlgorithm:
+        return makeOptionalIntegerValue(battle->getAuxiliaryInformation(Battle::aiType));
+
+     case ivpAlgorithm: {
         /* @q Algorithm:Str (Combat Property)
            Name of VCR algorithm. */
-        if (battle != 0) {
-            afl::string::NullTranslator tx;
-            return makeStringValue(battle->getAlgorithmName(tx));
-        } else {
-            return 0;
-        }
+        afl::string::NullTranslator tx;
+        return makeStringValue(battle->getAlgorithmName(tx));
+     }
      case ivpFlags:
         /* @q Capabilities:Int (Combat Property)
            VCR feature identification value.
            Valid only for classic combat, EMPTY for others. */
-        if (classic != 0) {
-            return makeIntegerValue(classic->getCapabilities());
-        } else {
-            return 0;
-        }
+        return makeOptionalIntegerValue(battle->getAuxiliaryInformation(Battle::aiFlags));
+
      case ivpNumUnits:
         /* @q NumUnits:Int (Combat Property)
            Number of units participating in this fight.
            This is the number of elements in the {Unit (Combat Property)|Unit} array.
            @since PCC2 1.99.19 */
-        if (battle != 0) {
-            return makeSizeValue(battle->getNumObjects());
-        } else {
-            return 0;
-        }
+        return makeSizeValue(battle->getNumObjects());
+
      case ivpUnits:
         /* @q Unit:Obj() (Combat Property)
            Information about all participating units.
@@ -100,11 +86,26 @@ game::interface::getVcrProperty(size_t battleNumber,
            %Left.XXX and %Right.XXX, mainly for classic 1:1 combat.
 
            @since PCC2 1.99.19 */
-        if (battle != 0) {
-            return new VcrSideFunction(battleNumber, session, root, turn, shipList);
-        } else {
-            return 0;
+        return new VcrSideFunction(battleNumber, session, root, turn, shipList);
+
+     case ivpLocX:
+     case ivpLocY: {
+        /* @q Loc.X:Int (Combat Property), Loc.Y:Int (Combat Property)
+           Location of the battle in the universe, if known.
+           @since PCC2 2.40.11 */
+        game::map::Point pt;
+        if (battle->getPosition(pt)) {
+            return makeIntegerValue(ivp == ivpLocX ? pt.getX() : pt.getY());
         }
+        return 0;
+     }
+
+     case ivpAmbient:
+        /* @q Ambient:Int (Combat Property)
+           Ambient flags for combat.
+           Valid for FLAK combat, although as of PCC2 2.40.10, not in use by the FLAK server.
+           @since PCC2 2.40.11 */
+        return makeOptionalIntegerValue(battle->getAuxiliaryInformation(Battle::aiAmbient));
     }
     return 0;
 }

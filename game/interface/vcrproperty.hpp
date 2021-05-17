@@ -20,7 +20,10 @@ namespace game { namespace interface {
         ivpAlgorithm,
         ivpFlags,
         ivpNumUnits,
-        ivpUnits
+        ivpUnits,
+        ivpLocX,
+        ivpLocY,
+        ivpAmbient
     };
 
     afl::data::Value* getVcrProperty(size_t battleNumber,

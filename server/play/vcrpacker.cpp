@@ -83,6 +83,9 @@ server::play::VcrPacker::buildValue() const
             addValueNew(*hv, gi::getVcrProperty(i, gi::ivpSeed,      m_session, r, t, sl), "SEED");
             addValueNew(*hv, gi::getVcrProperty(i, gi::ivpFlags,     m_session, r, t, sl), "CAPABILITIES");
             addValueNew(*hv, gi::getVcrProperty(i, gi::ivpAlgorithm, m_session, r, t, sl), "ALGORITHM");
+            addValueNew(*hv, gi::getVcrProperty(i, gi::ivpLocX,      m_session, r, t, sl), "X");
+            addValueNew(*hv, gi::getVcrProperty(i, gi::ivpLocY,      m_session, r, t, sl), "Y");
+            addValueNew(*hv, gi::getVcrProperty(i, gi::ivpAmbient,   m_session, r, t, sl), "AMBIENT");
 
             Ref<Vector> units(Vector::create());
             game::vcr::Battle* battle = db->getBattle(i);
@@ -131,8 +134,6 @@ server::play::VcrPacker::buildValue() const
             if (const game::vcr::flak::Battle* flakBattle = dynamic_cast<const game::vcr::flak::Battle*>(battle)) {
                 const game::vcr::flak::Setup& setup = flakBattle->setup();
                 addValueNew(*hv, packFleets(setup), "FLEET");
-                addValueNew(*hv, makeIntegerValue(setup.getSeed()), "FLAKSEED");
-                addValueNew(*hv, makeIntegerValue(setup.getAmbientFlags()), "FLAKAMBIENT");
             }
 
             vv->pushBackNew(new HashValue(hv));

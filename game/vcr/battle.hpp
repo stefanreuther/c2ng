@@ -6,6 +6,7 @@
 #define C2NG_GAME_VCR_BATTLE_HPP
 
 #include "afl/base/deletable.hpp"
+#include "afl/base/optional.hpp"
 #include "afl/string/translator.hpp"
 #include "game/config/hostconfiguration.hpp"
 #include "game/map/point.hpp"
@@ -27,6 +28,17 @@ namespace game { namespace vcr {
             IsNotSupported,                    ///< We cannot play it and know why.
             IsDamaged                          ///< We cannot play it and don't know why. Might be host error.
         };
+
+        /** Type of auxiliary information.
+            See getAuxiliaryInformation(). */
+        enum AuxInfo {
+            aiSeed,                 ///< Seed. Internal clients will use a stronger-typed derived class functions. */
+            aiMagic,                ///< Magic. Relevant for classic combat.
+            aiType,                 ///< Type. Relevant for classic combat.
+            aiFlags,                ///< Flags. Relevant for classic combat.
+            aiAmbient               ///< Ambient. Relevant for FLAK.
+        };
+
 
         /** Get number of objects. */
         virtual size_t getNumObjects() const = 0;
@@ -73,6 +85,12 @@ namespace game { namespace vcr {
             \param [out] result Position
             \return true: position was known, result set; false: result not set */
         virtual bool getPosition(game::map::Point& result) const = 0;
+
+        /** Get auxiliary information.
+            This information is intended for external clients (=scripts, c2play-server).
+            \param info Value to query
+            \return Value if known */
+        virtual afl::base::Optional<int32_t> getAuxiliaryInformation(AuxInfo info) const = 0;
 
         /** Get result summary in human-readable form.
             For classic fights, this produces a line such as "We won (100 EP)".
