@@ -992,6 +992,21 @@ Sub CCUI$LoadSelection(title, flags)
   EndIf
 EndSub
 
+% Alt-Left/Alt-Right
+Sub CC$SwitchSelection (delta)
+  Selection.Layer := (Selection.Layer + 8 + delta) Mod 8
+  UI.OverlayMessage Format(Translate("Selection %c"), Chr(Selection.Layer + 65))
+EndSub
+
+Sub CC$NextSelection
+  CC$SwitchSelection 1
+EndSub
+
+Sub CC$PreviousSelection
+  Call CC$SwitchSelection, -1
+EndSub
+
+
 
 %
 %  Starchart

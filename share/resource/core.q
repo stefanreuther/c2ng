@@ -382,6 +382,8 @@ Bind Global           "a-down" := "CCUI.History.NextTurn"
 Bind Global           "bs"     := "CC$PopScreenHistory"
 Bind Global           "a-bs"   := "CC$ListScreenHistory"
 Bind Global           "a-."    := "UI.SelectionManager"
+Bind Global           "a-left" := "CC$PreviousSelection"
+Bind Global           "a-right" := "CC$NextSelection"
 
 % Control Screen Bindings
 Bind ControlScreen    "."      := "CCUI.ToggleSelection"

@@ -651,17 +651,13 @@ SearchDialog::onSelectionManager()
 void
 SearchDialog::onPreviousSelectionLayer()
 {
-    SelectionProxy(interface().gameSender(), m_root.engine().dispatcher())
-        .setCurrentLayer(game::map::Selections::PreviousLayer);
-    // FIXME: show updated layer
+    executeCommandWait("CC$PreviousSelection", false, "(Search)");
 }
 
 void
 SearchDialog::onNextSelectionLayer()
 {
-    SelectionProxy(interface().gameSender(), m_root.engine().dispatcher())
-        .setCurrentLayer(game::map::Selections::NextLayer);
-    // FIXME: show updated layer
+    executeCommandWait("CC$NextSelection", false, "(Search)");
 }
 
 void
