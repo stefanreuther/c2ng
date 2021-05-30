@@ -142,6 +142,11 @@ namespace {
         return false;
     }
 
+    String_t canonicalizeFileName(String_t name)
+    {
+        return afl::string::strTrim(afl::string::strLCase(name));
+    }
+
     /* Check whether file has given content. */
     bool hasSameContent(afl::io::Directory& dir, const String_t& name, afl::base::ConstBytes_t content)
     {
@@ -202,7 +207,7 @@ struct game::v3::AttachmentUnpacker::Attachment {
 class game::v3::AttachmentUnpacker::Reader : public game::v3::udata::Reader {
  public:
     Reader(AttachmentUnpacker& parent, afl::sys::LogListener& log, afl::string::Translator& tx)
-        : m_parent(parent), m_log(log), m_translator(tx)
+        : m_parent(parent), m_log(log), m_translator(tx), m_openAttachment(0)
         { }
     virtual bool handleRecord(uint16_t recordId, afl::base::ConstBytes_t data)
         {
@@ -229,18 +234,68 @@ class game::v3::AttachmentUnpacker::Reader : public game::v3::udata::Reader {
                     }
                 }
                 break;
+
+             case 59:
+                // Long file
+                if (data.size() >= sizeof(gt::Util59FTP)) {
+                    // Fetch header and file name
+                    gt::Util59FTP header;
+                    afl::base::fromObject(header).copyFrom(data.split(sizeof(header)));
+                    if (header.fileNameLength > data.size()) {
+                        m_log.write(LogListener::Debug, LOG_NAME, m_translator("Attachment record is truncated"));
+                        break;
+                    }
+
+                    const String_t fileName = Utf8Charset().decode(data.split(header.fileNameLength));
+
+                    // Sort it to its place
+                    if ((header.flags & gt::FTP_NOTFIRST) != 0) {
+                        // It's not the first one, so there needs to be a matching open attachment
+                        if (m_openAttachment == 0 || m_openAttachment->name != canonicalizeFileName(fileName)) {
+                            m_log.write(LogListener::Debug, LOG_NAME, Format(m_translator("Attachment \"%s\" is missing parts."), fileName));
+                            break;
+                        }
+                    } else {
+                        // It is the first one, so there shouldn't be an open one
+                        closeAttachment();
+                        if (Attachment* a = m_parent.createAttachment(fileName, m_log, m_translator)) {
+                            a->content.clear();
+                            m_openAttachment = a;
+                        }
+                    }
+
+                    // Append
+                    if (m_openAttachment != 0) {
+                        m_openAttachment->content.append(data);
+                    }
+
+                    // Finish attachment
+                    if ((header.flags & gt::FTP_NOTLAST) == 0) {
+                        m_openAttachment = 0;
+                    }
+                }
+                break;
             }
             return true;
         }
     virtual void handleError(afl::io::Stream& /*in*/)
         { }
     virtual void handleEnd()
-        { }
+        { closeAttachment(); }
 
  private:
+    void closeAttachment()
+        {
+            if (m_openAttachment != 0) {
+                m_log.write(LogListener::Debug, LOG_NAME, Format(m_translator("Attachment \"%s\" is missing parts."), m_openAttachment->name));
+                m_openAttachment = 0;
+            }
+        }
+
     AttachmentUnpacker& m_parent;
     afl::sys::LogListener& m_log;
     afl::string::Translator& m_translator;
+    Attachment* m_openAttachment;
 };
 
 
@@ -512,7 +567,7 @@ game::v3::AttachmentUnpacker::Attachment*
 game::v3::AttachmentUnpacker::createAttachment(String_t name, afl::sys::LogListener& log, afl::string::Translator& tx)
 {
     // Canonicalize name
-    name = afl::string::strTrim(afl::string::strLCase(name));
+    name = canonicalizeFileName(name);
 
     // Refuse invalid names
     if (name.empty() || name[0] == '.' || hasInvalidCharacter(name)) {

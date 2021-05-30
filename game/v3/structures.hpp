@@ -1209,6 +1209,17 @@ namespace game { namespace v3 { namespace structures {
     };
     static_assert(sizeof(Util58Explosion) == 4, "sizeof Util58Explosion");
 
+    /** Record type 59: Long File. */
+    struct Util59FTP {
+        uint8_t     flags;                                      ///< File type information (flags). Bit 0: binary flag.
+        uint8_t     fileNameLength;                             ///< File name length.
+    };
+    static_assert(sizeof(Util59FTP) == 2, "sizeof Util59FTP");
+
+    const uint8_t FTP_TEXT     = 1;                             ///< This is a text file (Util34FTP, Util59FTP).
+    const uint8_t FTP_NOTFIRST = 2;                             ///< This is not the first block (Util59FTP).
+    const uint8_t FTP_NOTLAST  = 4;                             ///< This is not the last block (Util59FTP).
+
 } } }
 
 #endif

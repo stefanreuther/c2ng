@@ -1687,3 +1687,161 @@ TestGameV3AttachmentUnpacker::testMultipleTimestamps()
     TS_ASSERT(testee.getAttachmentByName("f4") != 0);
     TS_ASSERT_EQUALS(testee.getTimestamp().getTimestampAsString(), "01-01-202012:00:01");
 }
+
+/** Test loading long file from util.dat.
+    A: create AttachmentUnpacker. Load a util.dat file containing a split file.
+    E: reports file found with correct content. */
+void
+TestGameV3AttachmentUnpacker::testUtilLong()
+{
+    // Create AttachmentUnpacker
+    AttachmentUnpacker testee;
+    afl::sys::Log log;
+    afl::string::NullTranslator tx;
+
+    // Load util.dat file
+    static const uint8_t FILE[] = {
+        UTILDAT_PREFIX,
+        59,0, 8,0,  4,5, 'a','.','t','x','t', 'P',
+        59,0, 8,0,  6,5, 'a','.','t','x','t', 'Q',
+        59,0, 8,0,  6,5, 'a','.','t','x','t', 'R',
+        59,0, 8,0,  2,5, 'a','.','t','x','t', 'S',
+    };
+    ConstMemoryStream ms(FILE);
+    TS_ASSERT_THROWS_NOTHING(testee.loadUtilData(ms, 1, log, tx));
+
+    TS_ASSERT_EQUALS(testee.getNumAttachments(), 1U);
+    AttachmentUnpacker::Attachment* a = testee.getAttachmentByName("a.txt");
+    TS_ASSERT(a != 0);
+    TS_ASSERT_EQUALS(testee.getAttachmentSize(a), 4U);
+
+    // Save it
+    Ref<InternalDirectory> dir = InternalDirectory::create("testUtilLong");
+    testee.saveFiles(*dir, log, tx);
+
+    Ref<Stream> s = dir->openFile("a.txt", FileSystem::OpenRead);
+    uint8_t buf[100];
+    size_t n = s->read(buf);
+    TS_ASSERT_EQUALS(n, 4U);
+    TS_ASSERT_SAME_DATA(buf, "PQRS", 4);
+}
+
+/** Test loading short files using long-file format from util.dat.
+    A: create AttachmentUnpacker. Load a util.dat file containing unsplit files.
+    E: reports file found with correct content. */
+void
+TestGameV3AttachmentUnpacker::testUtilLongShort()
+{
+    // Create AttachmentUnpacker
+    AttachmentUnpacker testee;
+    afl::sys::Log log;
+    afl::string::NullTranslator tx;
+
+    // Load util.dat file
+    static const uint8_t FILE[] = {
+        UTILDAT_PREFIX,
+        59,0, 8,0,  0,5, 'a','.','t','x','t', 'P',
+        59,0, 8,0,  0,5, 'a','.','t','x','t', 'Q',
+    };
+    ConstMemoryStream ms(FILE);
+    TS_ASSERT_THROWS_NOTHING(testee.loadUtilData(ms, 1, log, tx));
+
+    TS_ASSERT_EQUALS(testee.getNumAttachments(), 1U);
+    AttachmentUnpacker::Attachment* a = testee.getAttachmentByName("a.txt");
+    TS_ASSERT(a != 0);
+    TS_ASSERT_EQUALS(testee.getAttachmentSize(a), 1U);
+
+    // Save it
+    Ref<InternalDirectory> dir = InternalDirectory::create("testUtilLongShort");
+    testee.saveFiles(*dir, log, tx);
+
+    Ref<Stream> s = dir->openFile("a.txt", FileSystem::OpenRead);
+    uint8_t buf[100];
+    size_t n = s->read(buf);
+    TS_ASSERT_EQUALS(n, 1U);
+    TS_ASSERT_SAME_DATA(buf, "Q", 1);
+}
+
+/** Test loading files with bad linkage from util.dat.
+    A: create AttachmentUnpacker. Load a util.dat file containing file without first block.
+    E: reports no file found. */
+void
+TestGameV3AttachmentUnpacker::testUtilLongBadLink()
+{
+    // Create AttachmentUnpacker
+    AttachmentUnpacker testee;
+    afl::sys::Log log;
+    afl::string::NullTranslator tx;
+
+    // Load util.dat file
+    static const uint8_t FILE[] = {
+        UTILDAT_PREFIX,
+        59,0, 8,0,  6,5, 'a','.','t','x','t', 'Q',
+        59,0, 8,0,  6,5, 'a','.','t','x','t', 'R',
+    };
+    ConstMemoryStream ms(FILE);
+    TS_ASSERT_THROWS_NOTHING(testee.loadUtilData(ms, 1, log, tx));
+    TS_ASSERT_EQUALS(testee.getNumAttachments(), 0U);
+}
+
+/** Test loading files with bad linkage from util.dat.
+    A: create AttachmentUnpacker. Load a util.dat file containing file fragments with differing names.
+    E: reports no file found. */
+void
+TestGameV3AttachmentUnpacker::testUtilLongBadLink2()
+{
+    // Create AttachmentUnpacker
+    AttachmentUnpacker testee;
+    afl::sys::Log log;
+    afl::string::NullTranslator tx;
+
+    // Load util.dat file
+    static const uint8_t FILE[] = {
+        UTILDAT_PREFIX,
+        59,0, 8,0,  4,5, 'a','.','t','x','t', 'P',
+        59,0, 8,0,  6,5, 'a','.','t','x','t', 'Q',
+        59,0, 8,0,  6,5, 'b','.','t','x','t', 'R',
+        59,0, 8,0,  2,5, 'b','.','t','x','t', 'S',
+    };
+    ConstMemoryStream ms(FILE);
+    TS_ASSERT_THROWS_NOTHING(testee.loadUtilData(ms, 1, log, tx));
+
+    TS_ASSERT_EQUALS(testee.getNumAttachments(), 1U);
+    AttachmentUnpacker::Attachment* a = testee.getAttachmentByName("a.txt");
+    AttachmentUnpacker::Attachment* b = testee.getAttachmentByName("b.txt");
+    TS_ASSERT(a != 0);
+    TS_ASSERT(b == 0);
+    TS_ASSERT_EQUALS(testee.getAttachmentSize(a), 2U);
+
+    // Save it
+    Ref<InternalDirectory> dir = InternalDirectory::create("testUtilLongBadLink2");
+    testee.saveFiles(*dir, log, tx);
+
+    Ref<Stream> s = dir->openFile("a.txt", FileSystem::OpenRead);
+    uint8_t buf[100];
+    size_t n = s->read(buf);
+    TS_ASSERT_EQUALS(n, 2U);
+    TS_ASSERT_SAME_DATA(buf, "PQ", 2);
+}
+
+/** Test loading files with bad content from util.dat: file name too long for record.
+    A: create AttachmentUnpacker. Load a util.dat file containing bad header.
+    E: reports no file found. */
+void
+TestGameV3AttachmentUnpacker::testUtilLongBadContent()
+{
+    // Create AttachmentUnpacker
+    AttachmentUnpacker testee;
+    afl::sys::Log log;
+    afl::string::NullTranslator tx;
+
+    // Load util.dat file
+    static const uint8_t FILE[] = {
+        UTILDAT_PREFIX,
+        59,0, 6,0,  0,5, 'a','.','t','x'
+    };
+    ConstMemoryStream ms(FILE);
+    TS_ASSERT_THROWS_NOTHING(testee.loadUtilData(ms, 1, log, tx));
+    TS_ASSERT_EQUALS(testee.getNumAttachments(), 0U);
+}
+

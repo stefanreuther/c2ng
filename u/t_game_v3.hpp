@@ -51,6 +51,11 @@ class TestGameV3AttachmentUnpacker : public CxxTest::TestSuite {
     void testLoadDirectoryEmpty();
     void testToString();
     void testMultipleTimestamps();
+    void testUtilLong();
+    void testUtilLongShort();
+    void testUtilLongBadLink();
+    void testUtilLongBadLink2();
+    void testUtilLongBadContent();
 };
 
 class TestGameV3Command : public CxxTest::TestSuite {
