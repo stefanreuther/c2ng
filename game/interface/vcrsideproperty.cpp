@@ -434,6 +434,19 @@ game::interface::getVcrSideProperty(game::vcr::Battle& battle, size_t side, VcrS
            computed from PConfig (a CrewDefenseRate of 100 reduces the CrewKillScaling to 0).
            @since PCC2 1.99.23 */
         return makeIntegerValue(obj->getCrewDefenseRate());
+
+     case ivsRole:
+        /* @q Role:Str (Combat Participant Property)
+           Role.
+           One of "aggressor", "opponent".
+           This value is typically not known for host-generated battles.
+           @since PCC2 2.0.12, PCC2 2.40.11 */
+        switch (obj->getRole()) {
+         case game::vcr::Object::NoRole:        break;
+         case game::vcr::Object::AggressorRole: return makeStringValue("aggressor");
+         case game::vcr::Object::OpponentRole:  return makeStringValue("opponent");
+        }
+        return 0;
     }
     return 0;
 }

@@ -116,6 +116,7 @@ server::play::VcrPacker::buildValue() const
                     addValueNew(*u, gi::getVcrSideProperty(*battle, side, gi::ivsTorpMissRate,    tx, sl, config, pl), "CONFIG.TORPMISSRATE");
                     addValueNew(*u, gi::getVcrSideProperty(*battle, side, gi::ivsTorpChargeRate,  tx, sl, config, pl), "CONFIG.TORPCHARGERATE");
                     addValueNew(*u, gi::getVcrSideProperty(*battle, side, gi::ivsCrewDefenseRate, tx, sl, config, pl), "CONFIG.CREWDEFENSERATE");
+                    addValueNew(*u, gi::getVcrSideProperty(*battle, side, gi::ivsRole,            tx, sl, config, pl), "ROLE");
 
                     /* Additional properties for FLAK */
                     if (const game::vcr::flak::Object* obj = dynamic_cast<const game::vcr::flak::Object*>(battle->getObject(side, false))) {

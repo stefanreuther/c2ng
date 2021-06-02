@@ -90,6 +90,10 @@ TestGameVcrObject::testGetSet()
     t.setCrewDefenseRate(10);
     TS_ASSERT_EQUALS(t.getCrewDefenseRate(), 10);
 
+    TS_ASSERT_EQUALS(t.getRole(), t.NoRole);
+    t.setRole(game::vcr::Object::AggressorRole);
+    TS_ASSERT_EQUALS(t.getRole(), game::vcr::Object::AggressorRole);
+
     t.setIsPlanet(true);
     TS_ASSERT(t.isPlanet());
     t.setIsPlanet(false);
@@ -725,6 +729,23 @@ TestGameVcrObject::testDescribe()
         TS_ASSERT_EQUALS(info.text[2], "4 \xC3\x97 Heavy Blaster");
         TS_ASSERT_EQUALS(info.text[3], "(up to 10 Mark 3 Photons with 33 torps not used)");
         TS_ASSERT_EQUALS(info.color[3], util::SkinColor::Faded);
+    }
+
+    // Standard case, with role
+    {
+        game::vcr::Object obj;
+        obj.setOwner(1);
+        obj.setName("N19");
+        obj.setId(77);
+        obj.setPicture(9);
+        obj.setMass(75);
+        obj.setCrew(10);
+        obj.setRole(game::vcr::Object::AggressorRole);
+        game::vcr::ObjectInfo info = obj.describe(0, &root, &shipList, tx);
+
+        TS_ASSERT_EQUALS(info.text[0], "N19 (Id #77, a Player 1 OUTRIDER CLASS SCOUT)");
+        TS_ASSERT_EQUALS(info.text[1], "0% shield (75 kt), 0% damaged, 10 crewmen, aggressor");
+        TS_ASSERT_EQUALS(info.color[0], util::SkinColor::Static);
     }
 }
 

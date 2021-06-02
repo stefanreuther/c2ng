@@ -155,6 +155,14 @@ namespace {
         return tech;
     }
 
+    void setRoles(game::vcr::Object& left, game::vcr::Object& right, game::vcr::classic::Type type, game::vcr::classic::Side aggressorSide)
+    {
+        if (isPHost(type)) {
+            left.setRole(aggressorSide  == game::vcr::classic::LeftSide  ? game::vcr::Object::AggressorRole : game::vcr::Object::OpponentRole);
+            right.setRole(aggressorSide == game::vcr::classic::RightSide ? game::vcr::Object::AggressorRole : game::vcr::Object::OpponentRole);
+        }
+    }
+
     /** Bonus fighter table for Master at Arms compensation.
         First index is 0 for carrier/carrier, 1 for planet/carrier.
         Second index is number of effective bays of right carrier, plus 1.
@@ -1225,6 +1233,7 @@ namespace {
        \param [in/out]  leftStat  Out-of-band statistic for left ship
        \param [in/out]  rightShip Right ship
        \param [in/out]  rightStat Out-of-band statistic for right ship
+       \param [in]      aggressorSide Side of the unit to be treated as aggressor
        \param [in]      opts      Simulation options
        \param [in]      list      Ship list
        \param [in]      config    Host configuration
@@ -1239,6 +1248,7 @@ namespace {
                          game::vcr::Statistic* leftStat,
                          Ship& rightShip,
                          game::vcr::Statistic* rightStat,
+                         game::vcr::classic::Side aggressorSide,
                          const Configuration& opts,
                          const game::vcr::classic::Type type,
                          const ShipList& list,
@@ -1271,6 +1281,7 @@ namespace {
         if (swap_them) {
             one = &rightShip, two = &leftShip;
             oneStat = rightStat, twoStat = leftStat;
+            aggressorSide = flipSide(aggressorSide);
         } else {
             one = &leftShip, two = &rightShip;
             oneStat = leftStat, twoStat = rightStat;
@@ -1283,6 +1294,7 @@ namespace {
         uint16_t seed = uint16_t(getSeed(opts, result, rng));
         packShip(left,  *one, opts, list, config);
         packShip(right, *two, opts, list, config);
+        setRoles(left, right, type, aggressorSide);
         applyShipModificators(left,  false, *one, opts, list, config, mods, first);
         applyShipModificators(right, false, *two, opts, list, config, mods, first);
         applyOpponentModificators(left,  *two, opts, list, config);
@@ -1398,6 +1410,7 @@ namespace {
        \param [in/out]  leftStat  Out-of-band statistic for left ship
        \param [in/out]  rightPlanet Right planet
        \param [in/out]  rightStat Out-of-band statistic for right planet
+       \param [in]      aggressorSide Side of the unit to be treated as aggressor
        \param [in]      opts      Simulation options
        \param [in]      list      Ship list
        \param [in]      config    Host configuration
@@ -1412,6 +1425,7 @@ namespace {
                            game::vcr::Statistic* leftStat,
                            Planet& rightPlanet,
                            game::vcr::Statistic* rightStat,
+                           game::vcr::classic::Side aggressorSide,
                            const Configuration& opts,
                            const game::vcr::classic::Type type,
                            const ShipList& list,
@@ -1442,6 +1456,7 @@ namespace {
         }
 
         applyPlanetModificators(right, rightPlanet, opts, list, config, mods);
+        setRoles(left, right, type, aggressorSide);
 
         /* run it */
         game::vcr::Object origPlanet = right;
@@ -1609,8 +1624,10 @@ namespace {
                     bool loop = true;
                     while (loop) {
                         computeHelpers(mods, battle_order, target, iship, opts, list, config);
-                        loop = makeShipShipVcr(db, *target, getStatistic(stats, setup, target),
+                        loop = makeShipShipVcr(db,
+                                               *target, getStatistic(stats, setup, target),
                                                *iship, getStatistic(stats, setup, iship),
+                                               game::vcr::classic::RightSide,
                                                opts, type, list, config, mods, result, rng);
                         if (db.getNumBattles() != 0 && opts.hasOnlyOneSimulation()) {
                             return true;
@@ -1644,18 +1661,24 @@ namespace {
                         computeHelpers(mods, battle_order, battle_order[left], battle_order[right], opts, list, config);
                         if (Ship* lship = dynamic_cast<Ship*>(battle_order[left])) {
                             if (Ship* rship = dynamic_cast<Ship*>(battle_order[right])) {
-                                loop = makeShipShipVcr(db, *lship, getStatistic(stats, setup, lship),
+                                loop = makeShipShipVcr(db,
+                                                       *lship, getStatistic(stats, setup, lship),
                                                        *rship, getStatistic(stats, setup, rship),
+                                                       game::vcr::classic::RightSide,
                                                        opts, type, list, config, mods, result, rng);
                             } else if (Planet* rplan = dynamic_cast<Planet*>(battle_order[right])) {
-                                loop = makeShipPlanetVcr(db, *lship, getStatistic(stats, setup, lship),
+                                loop = makeShipPlanetVcr(db,
+                                                         *lship, getStatistic(stats, setup, lship),
                                                          *rplan, getStatistic(stats, setup, rplan),
+                                                         game::vcr::classic::RightSide,
                                                          opts, type, list, config, mods, result, rng);
                             }
                         } else if (Planet* lplan = dynamic_cast<Planet*>(battle_order[left])) {
                             if (Ship* rship = dynamic_cast<Ship*>(battle_order[right])) {
-                                loop = makeShipPlanetVcr(db, *rship, getStatistic(stats, setup, rship),
+                                loop = makeShipPlanetVcr(db,
+                                                         *rship, getStatistic(stats, setup, rship),
                                                          *lplan, getStatistic(stats, setup, lplan),
+                                                         game::vcr::classic::LeftSide,
                                                          opts, type, list, config, mods, result, rng);
                             }
                         }
@@ -1715,8 +1738,10 @@ namespace {
                     bool loop = true;
                     while (loop) {
                         computeHelpers(mods, battle_order, leftShip, setup.getPlanet(), opts, list, config);
-                        loop = makeShipPlanetVcr(*db, *leftShip, getStatistic(stats, setup, leftShip),
+                        loop = makeShipPlanetVcr(*db,
+                                                 *leftShip, getStatistic(stats, setup, leftShip),
                                                  *setup.getPlanet(), getStatistic(stats, setup, setup.getPlanet()),
+                                                 game::vcr::classic::LeftSide /* not relevant for Host */,
                                                  opts, type, list, config, mods, result, rng);
                         if (db->getNumBattles() != 0 && opts.hasOnlyOneSimulation()) {
                             return;

@@ -25,6 +25,16 @@ namespace game { namespace vcr {
         Otherwise this is a data container that does not restrict or interpret the data it contains. */
     class Object : public afl::base::Deletable {
      public:
+        /** Role of a unit.
+            The role has no effect on the battle outcome, but can affect scoring.
+            It is normally not known for fights from the game, but interesting to know for simulation. */
+        enum Role {
+            NoRole,             ///< No particular role/not known.
+            AggressorRole,      ///< This unit is the aggressor.
+            OpponentRole        ///< This unit is the opponent.
+        };
+
+
         /** Constructor.
             Makes default-initialized object. */
         Object();
@@ -129,6 +139,10 @@ namespace game { namespace vcr {
             \return name */
         const String_t& getName() const;
 
+        /** Get role.
+            \return role */
+        Role getRole() const;
+
         /** Set mass.
             \param mass mass */
         void setMass(int mass);
@@ -224,6 +238,10 @@ namespace game { namespace vcr {
         /** Set name.
             \param name name */
         void setName(const String_t& name);
+
+        /** Set role.
+            \param role role */
+        void setRole(Role role);
 
         /** Add fighters.
             This is a shortcut for getNumFighters/setNumFighters.
@@ -333,6 +351,9 @@ namespace game { namespace vcr {
             Value_t  torpMissRate;
             Value_t  torpChargeRate;
             Value_t  crewDefenseRate;
+
+            // c2ng extensions:
+            Role     role;
         } m_data;
         String_t m_name;
     };
@@ -486,6 +507,12 @@ game::vcr::Object::getName() const
     return m_name;
 }
 
+inline game::vcr::Object::Role
+game::vcr::Object::getRole() const
+{
+    return m_data.role;
+}
+
 inline void
 game::vcr::Object::setMass(int mass)
 {
@@ -628,6 +655,12 @@ inline void
 game::vcr::Object::setName(const String_t& name)
 {
     m_name = name;
+}
+
+inline void
+game::vcr::Object::setRole(Role role)
+{
+    m_data.role = role;
 }
 
 inline void

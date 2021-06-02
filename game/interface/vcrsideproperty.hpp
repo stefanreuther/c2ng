@@ -53,7 +53,8 @@ namespace game { namespace interface {
         ivsBeamChargeRate,
         ivsTorpMissRate,
         ivsTorpChargeRate,
-        ivsCrewDefenseRate
+        ivsCrewDefenseRate,
+        ivsRole
     };
 
     /** Get property of a VCR side.

@@ -54,6 +54,7 @@ namespace {
         { "OWNER",                  game::interface::ivsOwnerShort,      SidePropertyDomain,  interpreter::thString },
         { "OWNER$",                 game::interface::ivsOwnerId,         SidePropertyDomain,  interpreter::thInt },
         { "OWNER.ADJ",              game::interface::ivsOwnerAdj,        SidePropertyDomain,  interpreter::thString },
+        { "ROLE",                   game::interface::ivsRole,            SidePropertyDomain,  interpreter::thString },
         { "SHIELD",                 game::interface::ivsShield,          SidePropertyDomain,  interpreter::thInt },
         { "STATUS",                 game::interface::ivsStatus,          SidePropertyDomain,  interpreter::thString },
         { "STATUS$",                game::interface::ivsStatusRaw,       SidePropertyDomain,  interpreter::thString },

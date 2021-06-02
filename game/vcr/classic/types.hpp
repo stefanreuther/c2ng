@@ -22,6 +22,9 @@ namespace game { namespace vcr { namespace classic {
         NuHost              ///< NuHost.
     };
 
+    /** Check for PHost-type battle. */
+    bool isPHost(Type t);
+
     /** Status values (battle outcome). */
     enum BattleResult {
         LeftDestroyed,      ///< Left object has been destroyed.
@@ -67,6 +70,20 @@ namespace game { namespace vcr { namespace classic {
 
 } } }
 
+inline bool
+game::vcr::classic::isPHost(Type t)
+{
+    switch (t) {
+     case Unknown:      break;
+     case Host:         break;
+     case UnknownPHost: return true;
+     case PHost2:       return true;
+     case PHost3:       return true;
+     case PHost4:       return true;
+     case NuHost:       break;
+    }
+    return false;
+}
 
 inline game::vcr::classic::Side
 game::vcr::classic::flipSide(Side s)

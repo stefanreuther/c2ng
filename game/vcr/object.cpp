@@ -7,6 +7,7 @@
 #include "afl/string/format.hpp"
 #include "game/spec/engine.hpp"
 #include "game/spec/hull.hpp"
+#include "util/string.hpp"
 #include "util/unicodechars.hpp"
 
 using afl::string::Format;
@@ -232,7 +233,12 @@ game::vcr::Object::describe(const TeamSettings* teamSettings, const Root* root, 
     int shield = std::max(0, getShield());
     result.text[line] = Format(tx("%d%% shield (%d kt), %d%% damaged"), shield, getMass(), getDamage());
     if (!isPlanet()) {
-        result.text[line] += Format(tx(", %d %1{crewman%|crewmen%}"), root->userConfiguration().formatNumber(getCrew()));
+        util::addListItem(result.text[line], ", ", Format(tx("%d %1{crewman%|crewmen%}"), root->userConfiguration().formatNumber(getCrew())));
+    }
+    switch (getRole()) {
+     case NoRole:                                                               break;
+     case AggressorRole: util::addListItem(result.text[line], ", ", tx("aggressor")); break;
+     case OpponentRole:  util::addListItem(result.text[line], ", ", tx("opponent"));  break;
     }
     ++line;
 
