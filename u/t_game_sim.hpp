@@ -135,6 +135,10 @@ class TestGameSimRun : public CxxTest::TestSuite {
     void testPlanetNuk();
     void testFLAK();
     void testFLAKMulti();
+    void testOrderHostShip();
+    void testOrderHostPlanet();
+    void testOrderPHostShip();
+    void testOrderPHostPlanet();
 };
 
 class TestGameSimRunner : public CxxTest::TestSuite {
@@ -168,6 +172,7 @@ class TestGameSimSetup : public CxxTest::TestSuite {
     void testSetSequential();
     void testSort();
     void testAddData();
+    void testSetFlags();
 };
 
 class TestGameSimShip : public CxxTest::TestSuite {

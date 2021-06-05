@@ -20,6 +20,9 @@ namespace {
     }
 }
 
+using game::sim::Object;
+using game::sim::Planet;
+using game::sim::Ship;
 
 /** Test object management. */
 void
@@ -35,7 +38,7 @@ TestGameSimSetup::testObj()
     TS_ASSERT_EQUALS(testee.getNumObjects(), 0U);
 
     // Add a planet
-    game::sim::Planet* p = testee.addPlanet();
+    Planet* p = testee.addPlanet();
     TS_ASSERT(p != 0);
     TS_ASSERT(testee.hasPlanet());
     TS_ASSERT_EQUALS(testee.getPlanet(), p);
@@ -45,8 +48,8 @@ TestGameSimSetup::testObj()
     TS_ASSERT(cs.hasPlanet());
 
     // Add two ships
-    game::sim::Ship* s1 = testee.addShip();
-    game::sim::Ship* s2 = testee.addShip();
+    Ship* s1 = testee.addShip();
+    Ship* s2 = testee.addShip();
     TS_ASSERT(s1 != 0);
     TS_ASSERT(s2 != 0);
     TS_ASSERT_EQUALS(testee.getNumShips(), 2U);
@@ -63,8 +66,8 @@ TestGameSimSetup::testObj()
     TS_ASSERT(testee.findIndex(s1, slot)); TS_ASSERT_EQUALS(slot, 0U);
     TS_ASSERT(testee.findIndex(s2, slot)); TS_ASSERT_EQUALS(slot, 1U);
 
-    TS_ASSERT(testee.findIndex((game::sim::Object*) s1, slot)); TS_ASSERT_EQUALS(slot, 0U);
-    TS_ASSERT(testee.findIndex((game::sim::Object*) s2, slot)); TS_ASSERT_EQUALS(slot, 1U);
+    TS_ASSERT(testee.findIndex((Object*) s1, slot)); TS_ASSERT_EQUALS(slot, 0U);
+    TS_ASSERT(testee.findIndex((Object*) s2, slot)); TS_ASSERT_EQUALS(slot, 1U);
     TS_ASSERT(testee.findIndex(p, slot)); TS_ASSERT_EQUALS(slot, 2U);
 
     // Copy
@@ -106,24 +109,24 @@ TestGameSimSetup::testShip()
 {
     // 4 ships
     game::sim::Setup testee;
-    game::sim::Ship* s4 = testee.addShip();
-    game::sim::Ship* s1 = testee.addShip();
-    game::sim::Ship* s2 = testee.addShip();
-    game::sim::Ship* s5 = testee.addShip();
+    Ship* s4 = testee.addShip();
+    Ship* s1 = testee.addShip();
+    Ship* s2 = testee.addShip();
+    Ship* s5 = testee.addShip();
     s1->setId(1);
     s2->setId(2);
     s4->setId(4);
     s5->setId(5);
 
-    game::sim::Ship other;
+    Ship other;
 
     // Find
     game::sim::Setup::Slot_t slot = 0;
     TS_ASSERT(testee.findIndex(s5, slot));
     TS_ASSERT_EQUALS(slot, 3U);
     TS_ASSERT(!testee.findIndex(&other, slot));
-    TS_ASSERT(!testee.findIndex((game::sim::Ship*) 0, slot));
-    TS_ASSERT(!testee.findIndex((game::sim::Object*) 0, slot));
+    TS_ASSERT(!testee.findIndex((Ship*) 0, slot));
+    TS_ASSERT(!testee.findIndex((Object*) 0, slot));
 
     TS_ASSERT(testee.findShipSlotById(4, slot));
     TS_ASSERT_EQUALS(slot, 0U);
@@ -215,13 +218,13 @@ TestGameSimSetup::testShipList()
     TS_ASSERT(testee.isMatchingShipList(list));
 
     // Add a ship
-    game::sim::Ship* s1 = testee.addShip();
+    Ship* s1 = testee.addShip();
     s1->setId(1);
     s1->setHullType(2, list);
     TS_ASSERT(testee.isMatchingShipList(list));
 
     // Add another ship
-    game::sim::Ship* s2 = testee.addShip();
+    Ship* s2 = testee.addShip();
     s2->setId(2);
     s2->setHullType(1, list);
     TS_ASSERT(testee.isMatchingShipList(list));
@@ -238,13 +241,13 @@ TestGameSimSetup::testRandom()
     game::sim::Setup testee;
 
     // Ship 1
-    game::sim::Ship* s1 = testee.addShip();
-    s1->setFlags(game::sim::Object::fl_RandomFC);
+    Ship* s1 = testee.addShip();
+    s1->setFlags(Object::fl_RandomFC);
     s1->setFriendlyCode("aaa");
 
     // Ship 2
-    game::sim::Ship* s2 = testee.addShip();
-    s2->setFlags(game::sim::Object::fl_RandomFC + game::sim::Object::fl_RandomFC2);
+    Ship* s2 = testee.addShip();
+    s2->setFlags(Object::fl_RandomFC + Object::fl_RandomFC2);
     s2->setFriendlyCode("axc");
 
     // Do it
@@ -288,15 +291,15 @@ TestGameSimSetup::testListener()
     testee.sig_structureChange.add(&structChange, &Counter::increment);
 
     // Create a planet
-    game::sim::Planet* p = testee.addPlanet();
+    Planet* p = testee.addPlanet();
     testee.notifyListeners();
     TS_ASSERT_EQUALS(shipChange.get(), 0);
     TS_ASSERT_EQUALS(planetChange.get(), 0);
     TS_ASSERT_EQUALS(structChange.get(), 1);
 
     // Create ships
-    game::sim::Ship* s1 = testee.addShip();
-    game::sim::Ship* s2 = testee.addShip();
+    Ship* s1 = testee.addShip();
+    Ship* s2 = testee.addShip();
     testee.notifyListeners();
     TS_ASSERT_EQUALS(shipChange.get(), 0);
     TS_ASSERT_EQUALS(planetChange.get(), 0);
@@ -339,23 +342,23 @@ TestGameSimSetup::testMerge()
     // Prepare
     game::sim::Setup a;
     {
-        game::sim::Ship* a1 = a.addShip();
+        Ship* a1 = a.addShip();
         a1->setId(1);
         a1->setName("a1");
-        game::sim::Ship* a2 = a.addShip();
+        Ship* a2 = a.addShip();
         a2->setId(2);
         a2->setName("a2");
     }
 
     game::sim::Setup b;
     {
-        game::sim::Ship* b2 = b.addShip();
+        Ship* b2 = b.addShip();
         b2->setId(2);
         b2->setName("b2");
-        game::sim::Ship* b3 = b.addShip();
+        Ship* b3 = b.addShip();
         b3->setId(3);
         b3->setName("b3");
-        game::sim::Planet* p = b.addPlanet();
+        Planet* p = b.addPlanet();
         p->setId(77);
     }
 
@@ -390,17 +393,17 @@ TestGameSimSetup::testFindUnused()
             { return 0; }
         virtual game::Id_t getMaxShipId() const
             { return 0; }
-        virtual bool copyShipFromGame(game::sim::Ship& /*out*/) const
+        virtual bool copyShipFromGame(Ship& /*out*/) const
             { return false; }
-        virtual bool copyShipToGame(const game::sim::Ship& /*in*/)
+        virtual bool copyShipToGame(const Ship& /*in*/)
             { return false; }
-        virtual Relation getShipRelation(const game::sim::Ship& /*in*/) const
+        virtual Relation getShipRelation(const Ship& /*in*/) const
             { return Unknown; }
-        virtual bool copyPlanetFromGame(game::sim::Planet& /*out*/) const
+        virtual bool copyPlanetFromGame(Planet& /*out*/) const
             { return false; }
-        virtual bool copyPlanetToGame(const game::sim::Planet& /*in*/)
+        virtual bool copyPlanetToGame(const Planet& /*in*/)
             { return false; }
-        virtual Relation getPlanetRelation(const game::sim::Planet& /*in*/) const
+        virtual Relation getPlanetRelation(const Planet& /*in*/) const
             { return Unknown; }
     };
 
@@ -435,12 +438,12 @@ TestGameSimSetup::testReplicate()
 
     // Prepare a setup [1,4]
     game::sim::Setup testee;
-    game::sim::Ship* s1 = testee.addShip();
+    Ship* s1 = testee.addShip();
     s1->setId(1);
     s1->setName("One");
     s1->setHullTypeOnly(7);
 
-    game::sim::Ship* s2 = testee.addShip();
+    Ship* s2 = testee.addShip();
     s2->setId(4);
     s2->setName("Four");
     s2->setHullTypeOnly(9);
@@ -488,7 +491,7 @@ TestGameSimSetup::testCopy()
             { return 0; }
         virtual game::Id_t getMaxShipId() const
             { return 0; }
-        virtual bool copyShipFromGame(game::sim::Ship& out) const
+        virtual bool copyShipFromGame(Ship& out) const
             {
                 NameMap_t::const_iterator it = shipNames.find(out.getId());
                 if (it != shipNames.end()) {
@@ -498,7 +501,7 @@ TestGameSimSetup::testCopy()
                     return false;
                 }
             }
-        virtual bool copyShipToGame(const game::sim::Ship& in)
+        virtual bool copyShipToGame(const Ship& in)
             {
                 NameMap_t::iterator it = shipNames.find(in.getId());
                 if (it != shipNames.end()) {
@@ -508,12 +511,12 @@ TestGameSimSetup::testCopy()
                     return false;
                 }
             }
-        virtual Relation getShipRelation(const game::sim::Ship& in) const
+        virtual Relation getShipRelation(const Ship& in) const
             {
                 RelationMap_t::const_iterator it = shipRelations.find(in.getId());
                 return it != shipRelations.end() ? it->second : Unknown;
             }
-        virtual bool copyPlanetFromGame(game::sim::Planet& out) const
+        virtual bool copyPlanetFromGame(Planet& out) const
             {
                 NameMap_t::const_iterator it = planetNames.find(out.getId());
                 if (it != planetNames.end()) {
@@ -523,7 +526,7 @@ TestGameSimSetup::testCopy()
                     return false;
                 }
             }
-        virtual bool copyPlanetToGame(const game::sim::Planet& in)
+        virtual bool copyPlanetToGame(const Planet& in)
             {
                 NameMap_t::iterator it = planetNames.find(in.getId());
                 if (it != planetNames.end()) {
@@ -533,7 +536,7 @@ TestGameSimSetup::testCopy()
                     return false;
                 }
             }
-        virtual Relation getPlanetRelation(const game::sim::Planet& in) const
+        virtual Relation getPlanetRelation(const Planet& in) const
             {
                 RelationMap_t::const_iterator it = planetRelations.find(in.getId());
                 return it != planetRelations.end() ? it->second : Unknown;
@@ -732,7 +735,7 @@ TestGameSimSetup::testSetSequential()
     // Single ship -> random numeric code
     {
         game::sim::Setup t;
-        game::sim::Ship* sh = t.addShip();
+        Ship* sh = t.addShip();
         t.setSequentialFriendlyCode(0);
 
         TS_ASSERT_EQUALS(sh->getFriendlyCode().size(), 3U);
@@ -747,7 +750,7 @@ TestGameSimSetup::testSetSequential()
     // Single planet -> random numeric code
     {
         game::sim::Setup t;
-        game::sim::Planet* pl = t.addPlanet();
+        Planet* pl = t.addPlanet();
         t.setSequentialFriendlyCode(0);
 
         TS_ASSERT_EQUALS(pl->getFriendlyCode().size(), 3U);
@@ -762,9 +765,9 @@ TestGameSimSetup::testSetSequential()
     // Normal sequence
     {
         game::sim::Setup t;
-        game::sim::Ship* s1 = t.addShip();
-        game::sim::Ship* s2 = t.addShip();
-        game::sim::Ship* s3 = t.addShip();
+        Ship* s1 = t.addShip();
+        Ship* s2 = t.addShip();
+        Ship* s3 = t.addShip();
         s1->setFriendlyCode("109");
         s2->setFriendlyCode("abc");
         s3->setFriendlyCode("110");
@@ -779,8 +782,8 @@ TestGameSimSetup::testSetSequential()
     // Copying of numerical places: x27 converted to <digit>28, then incremented
     {
         game::sim::Setup t;
-        game::sim::Ship* s1 = t.addShip();
-        game::sim::Ship* s2 = t.addShip();
+        Ship* s1 = t.addShip();
+        Ship* s2 = t.addShip();
         s1->setFriendlyCode("x27");
         s2->setFriendlyCode("abc");
 
@@ -795,12 +798,12 @@ TestGameSimSetup::testSetSequential()
     // Copying of random places: x<random>7 converted to <digit><digit>8, then incremented
     {
         game::sim::Setup t;
-        game::sim::Ship* s1 = t.addShip();
-        game::sim::Ship* s2 = t.addShip();
+        Ship* s1 = t.addShip();
+        Ship* s2 = t.addShip();
         s1->setFriendlyCode("x27");
-        s1->setFlags(game::sim::Ship::fl_RandomFC2);
+        s1->setFlags(Ship::fl_RandomFC2);
         s2->setFriendlyCode("abc");
-        s2->setFlags(game::sim::Ship::fl_RandomFC);
+        s2->setFlags(Ship::fl_RandomFC);
 
         t.setSequentialFriendlyCode(1);
         TS_ASSERT_EQUALS(s2->getFriendlyCode().size(), 3U);
@@ -809,7 +812,7 @@ TestGameSimSetup::testSetSequential()
         TS_ASSERT(s2->getFriendlyCode()[1] >= '0');
         TS_ASSERT(s2->getFriendlyCode()[1] <= '9');
         TS_ASSERT_EQUALS(s2->getFriendlyCode()[2], '8');
-        TS_ASSERT_EQUALS(s2->getFlags(), game::sim::Ship::fl_RandomFC + game::sim::Ship::fl_RandomFC2);
+        TS_ASSERT_EQUALS(s2->getFlags(), Ship::fl_RandomFC + Ship::fl_RandomFC2);
     }
 }
 
@@ -818,11 +821,11 @@ void
 TestGameSimSetup::testSort()
 {
     game::sim::Setup t;
-    game::sim::Ship* s1 = t.addShip(); s1->setOwner(3); s1->setId(1);
-    game::sim::Ship* s2 = t.addShip(); s2->setOwner(1); s2->setId(2);
-    game::sim::Ship* s3 = t.addShip(); s3->setOwner(4); s3->setId(3);
-    game::sim::Ship* s4 = t.addShip(); s4->setOwner(2); s4->setId(4);
-    game::sim::Ship* s5 = t.addShip(); s5->setOwner(1); s5->setId(5);
+    Ship* s1 = t.addShip(); s1->setOwner(3); s1->setId(1);
+    Ship* s2 = t.addShip(); s2->setOwner(1); s2->setId(2);
+    Ship* s3 = t.addShip(); s3->setOwner(4); s3->setId(3);
+    Ship* s4 = t.addShip(); s4->setOwner(2); s4->setId(4);
+    Ship* s5 = t.addShip(); s5->setOwner(1); s5->setId(5);
     t.sortShips(compareOwner);
 
     TS_ASSERT_EQUALS(t.getShip(0)->getOwner(), 1);
@@ -843,28 +846,28 @@ void
 TestGameSimSetup::testAddData()
 {
     // Some objects
-    game::sim::Planet p;
+    Planet p;
     p.setId(10);
     p.setName("Ten");
 
-    game::sim::Ship s1;
+    Ship s1;
     s1.setId(20);
     s1.setName("Twenty");
 
-    game::sim::Ship s2;
+    Ship s2;
     s2.setId(30);
     s2.setName("Thirty");
 
-    game::sim::Ship s3;
+    Ship s3;
     s3.setId(20);
     s3.setName("Twenty too");
 
     // Add them
     game::sim::Setup testee;
-    game::sim::Planet* pp = testee.addPlanet(p);
-    game::sim::Ship* ps1 = testee.addShip(s1);
-    game::sim::Ship* ps2 = testee.addShip(s2);
-    game::sim::Ship* ps3 = testee.addShip(s3);
+    Planet* pp = testee.addPlanet(p);
+    Ship* ps1 = testee.addShip(s1);
+    Ship* ps2 = testee.addShip(s2);
+    Ship* ps3 = testee.addShip(s3);
 
     TS_ASSERT(pp != 0);
     TS_ASSERT(ps1 != 0);
@@ -879,5 +882,28 @@ TestGameSimSetup::testAddData()
     TS_ASSERT_EQUALS(testee.getShip(0)->getName(), "Twenty too");
     TS_ASSERT_EQUALS(testee.getShip(1)->getId(), 30);
     TS_ASSERT_EQUALS(testee.getShip(1)->getName(), "Thirty");
+}
+
+/** Test setFlags(). */
+void
+TestGameSimSetup::testSetFlags()
+{
+    game::sim::Setup testee;
+    Planet* pp = testee.addPlanet();
+    Ship* ps1 = testee.addShip();
+    Ship* ps2 = testee.addShip();
+    Ship* ps3 = testee.addShip();
+    pp->setFlags(Object::fl_Deactivated);
+    ps2->setFlags(Object::fl_Cloaked);
+
+    // Test:        set RandomFC,         clear Cloaked,      toggle Deactivated
+    testee.setFlags(Object::fl_RandomFC | Object::fl_Cloaked,
+                    Object::fl_RandomFC                      | Object::fl_Deactivated);
+
+    // Verify
+    TS_ASSERT_EQUALS(pp->getFlags(),  Object::fl_RandomFC);
+    TS_ASSERT_EQUALS(ps1->getFlags(), Object::fl_RandomFC | Object::fl_Deactivated);
+    TS_ASSERT_EQUALS(ps2->getFlags(), Object::fl_RandomFC | Object::fl_Deactivated);
+    TS_ASSERT_EQUALS(ps3->getFlags(), Object::fl_RandomFC | Object::fl_Deactivated);
 }
 

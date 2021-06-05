@@ -339,14 +339,16 @@ namespace {
            no fight if either ship is fuelless                          (7)
            no fight if neither ship has beams nor bays                  (8)
            no fight if fcode match and fcode not lfm,NTP,mkt            (9)
-           no fight if either ship has mission 0 and 10 crew            (10)
+           no fight if opponent has mission 0 and 10 crew               (10)
+             It is a typo in host code that this only checks opponent;
+             it intends to check both but gets that wrong ('youship' vs 'you').
 
            otherwise, fight happens if there's a PE match or mission 4  (11)
 
            Deviations: (2) is handled symmetrically; should probably test
            it and if it's relevant, implement it. (8) is implemented as
-           real freighter test. It remains to test whether (10) is
-           relevant.
+           real freighter test. Rule (10) is implemented using the
+           fl_WasCaptured flag on the caller side.
 
            Note that (5) implicitly follows from (11), so we don't check
            that explicitly. */
@@ -403,7 +405,7 @@ namespace {
         }
         /* check whether enemy is cloaked */
         /* FIXME: PHost has silly exception here: you *can* attack a cloaked
-           ship if they have you as their enemy */
+           ship if they have you as their enemy and AllowCloakedShipsAttack is set */
         if ((op.getFlags() & Ship::fl_Cloaked) != 0) {
             return false;
         }
@@ -449,8 +451,16 @@ namespace {
     }
 
     /* Check whether a ship/planet attack each other.
-       Unlike the version which takes two GSimShip, this one tests both directions of aggression. */
-    bool isAttacking(const Ship& left, const Planet& right, const Configuration& opts, const ShipList& list, const HostConfiguration& config)
+       Unlike the version which takes two ships, this one tests both directions of aggression.
+
+       PHost distinguishes between aggressor and opponent depending on the position in the battle order.
+       You therefore need to define one unit as aggressor.
+
+       Host's battle order treats both units as aggressive in the planet phase,
+       therefore, mark both as aggressive at the same time. */
+    bool isAttacking(const Ship& left, bool leftIsAggressor,
+                     const Planet& right, bool rightIsAggressor,
+                     const Configuration& opts, const ShipList& list, const HostConfiguration& config)
     {
         // isAttacking(const GSimShip& left, const GSimPlanet& right, const GSimOptions& opts)
         /* Host 3.22.40:
@@ -467,8 +477,8 @@ namespace {
            fight if planet is aggressive:
              no alliance offer                                   (6)
              and ship not immune                                 (7)
-             and "ATT", AllowPlanetAttacks, ship has fuel        (8)
-                 or "NUK", AllowPlanetAttacks, planet has defense */
+             and "ATT", AllowPlanetAttacks, ship has fuel        (8a)
+                or "NUK", AllowPlanetAttacks, planet has defense (8b) */
 
         /* PHost differentiates between aggressor and opponent:
 
@@ -493,7 +503,7 @@ namespace {
         if (((left.getFlags() | right.getFlags()) & Object::fl_Deactivated) != 0) {
             return false;
         }
-        /* same owner does not fight */
+        /* same owner does not fight (p7) */
         if (left.getOwner() == right.getOwner()) {
             return false;
         }
@@ -501,11 +511,11 @@ namespace {
         if (left.getOwner() == 0 || right.getOwner() == 0) {
             return false;
         }
-        /* cloaked ships do not fight */
+        /* cloaked ships do not fight (p9) */
         if ((left.getFlags() & Object::fl_Cloaked) != 0) {
             return false;
         }
-        /* same FCode does not fight */
+        /* same FCode does not fight (p10) */
         String_t fc = left.getFriendlyCode();
         if (fc == right.getFriendlyCode()) {
             if (fc != "ATT" && fc != "NUK" && fc != "???" && !isFriendlyCodeExemptFromMatch(fc, opts, list)) {
@@ -540,8 +550,8 @@ namespace {
             planet_wants_attack = false;
         }
 
-        return ship_wants_attack
-            || (planet_wants_attack && !isImmune(left, opts, list, config));
+        return (leftIsAggressor && ship_wants_attack)
+            || (rightIsAggressor && planet_wants_attack && !isImmune(left, opts, list, config));
     }
 
     /** Check whether any two objects attack each other. Unlike that
@@ -559,10 +569,10 @@ namespace {
             return isAttacking(*as, *bs, opts, list, config) || isAttacking(*bs, *as, opts, list, config);
         }
         if (as && bp) {
-            return isAttacking(*as, *bp, opts, list, config);
+            return isAttacking(*as, true, *bp, true, opts, list, config);
         }
         if (ap && bs) {
-            return isAttacking(*bs, *ap, opts, list, config);
+            return isAttacking(*bs, true, *ap, true, opts, list, config);
         }
         return false;
     }
@@ -1260,7 +1270,14 @@ namespace {
         // ex ccsim.pas:MakeVCR
 
         /* fight? */
-        if (!isAttacking(leftShip, rightShip, opts, list, config) && !isAttacking(rightShip, leftShip, opts, list, config)) {
+        bool leftIsAggressive = (!isPHost(type) || aggressorSide == game::vcr::classic::LeftSide)
+            && isAttacking(leftShip, rightShip, opts, list, config);
+        bool rightIsAggressive = (!isPHost(type) || aggressorSide == game::vcr::classic::RightSide)
+            && isAttacking(rightShip, leftShip, opts, list, config);
+        if (!leftIsAggressive && !rightIsAggressive) {
+            return false;
+        }
+        if (!isPHost(type) && (leftShip.getFlags() & Object::fl_WasCaptured) != 0) {
             return false;
         }
         if (!(isArmed(leftShip) || isArmed(rightShip))) {
@@ -1380,11 +1397,13 @@ namespace {
             one->setOwner(two->getOwner());
             one->setCrew(10);
             one->setAggressiveness(Ship::agg_Passive);
+            one->setFlags(one->getFlags() | Object::fl_WasCaptured);
         } else if (status == game::vcr::classic::RightCaptured) {
             // Right ship captured
             two->setOwner(one->getOwner());
             two->setCrew(10);
             two->setAggressiveness(Ship::agg_Passive);
+            two->setFlags(two->getFlags() | Object::fl_WasCaptured);
         } else if (status == game::vcr::classic::Timeout) {
             // Timeout with both ships still operable
         } else {
@@ -1437,7 +1456,9 @@ namespace {
         // ex makeShipPlanetVcr, ccsim.pas:MakePlanetVCR
 
         /* fight? */
-        if (!isAttacking(leftShip, rightPlanet, opts, list, config)) {
+        bool shipIsAggressor   = !isPHost(type) || aggressorSide == game::vcr::classic::LeftSide;
+        bool planetIsAggressor = !isPHost(type) || aggressorSide == game::vcr::classic::RightSide;
+        if (!isAttacking(leftShip, shipIsAggressor, rightPlanet, planetIsAggressor, opts, list, config)) {
             return false;
         }
 
@@ -1494,6 +1515,7 @@ namespace {
             leftShip.setOwner(rightPlanet.getOwner());
             leftShip.setCrew(10);
             leftShip.setAggressiveness(Ship::agg_Passive);
+            leftShip.setFlags(leftShip.getFlags() | Object::fl_WasCaptured);
         } else if (status == game::vcr::classic::RightCaptured) {
             // Planet captured
             rightPlanet.setOwner(leftShip.getOwner());
@@ -2450,6 +2472,7 @@ game::sim::runSimulation(Setup& setup,
     if (opts.hasRandomizeFCodesOnEveryFight()) {
         setup.setRandomFriendlyCodes(rng);
     }
+    setup.setFlags(Object::fl_WasCaptured, 0);
 
     initializeStats(stats, setup);
 

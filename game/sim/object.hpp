@@ -210,6 +210,8 @@ namespace game { namespace sim {
         static const int32_t fl_Commander         = 2048; ///< Ship is Commander.
         static const int32_t fl_CommanderSet      = 4096; ///< Commander bit is effective.
 
+        static const int32_t fl_WasCaptured       = 8192; ///< (Runtime only) Set if ship was captured.
+
         static const int32_t fl_TripleBeamKill      = 1*65536;     ///< Ship has 3x beam kill.
         static const int32_t fl_TripleBeamKillSet   = 2*65536;     ///< TripleBeamKill bit is effective.
         static const int32_t fl_DoubleBeamCharge    = 4*65536;     ///< Ship has 2x beam recharge.

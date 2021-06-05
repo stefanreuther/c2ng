@@ -237,6 +237,11 @@ namespace game { namespace sim {
             \param slot Slot */
         void setSequentialFriendlyCode(Slot_t slot);
 
+        /** Modify flags globally for all units.
+            \param clear   Flags to clear
+            \param toggle  Flags to toggle */
+        void setFlags(int32_t clear, int toggle);
+
         /** Check whether this setup matches a ship list.
             \param shipList ship list
             \retval true all ships are valid according to the ship list

@@ -490,6 +490,17 @@ game::sim::Setup::setSequentialFriendlyCode(Slot_t slot)
     }
 }
 
+void
+game::sim::Setup::setFlags(int32_t clear, int toggle)
+{
+    for (size_t i = 0, n = getNumObjects(); i < n; ++i) {
+        if (Object* p = getObject(i)) {
+            p->setFlags((p->getFlags() & ~clear) ^ toggle);
+        }
+    }
+}
+
+
 // Check whether this setup matches a ship list.
 bool
 game::sim::Setup::isMatchingShipList(const game::spec::ShipList& shipList) const
