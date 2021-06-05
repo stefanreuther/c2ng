@@ -407,10 +407,10 @@ game::vcr::classic::Battle::computeScores(Score& score,
                              ? (!m_result.contains(RightDestroyed) && !m_result.contains(RightCaptured))
                              : (!m_result.contains(LeftDestroyed)  && !m_result.contains(LeftCaptured)));
 
-    const int opp = !side;
+    const Side opp = flipSide(side);
     const int myRace = m_before[side].getOwner();
 
-    if (m_type == PHost2 || m_type == PHost3 || m_type == PHost4 || m_type == UnknownPHost) {
+    if (isPHost(m_type)) {
         const int32_t damageDone = m_after[opp].getDamage() - m_before[opp].getDamage();
         const int32_t theirMass = std::max(getBuildPointMass(m_before[opp], config, shipList, true), 1);
         const int32_t myMass = std::max(getBuildPointMass(m_before[side], config, shipList, true), 1);
@@ -428,6 +428,16 @@ game::vcr::classic::Battle::computeScores(Score& score,
             int32_t pts = crewKilled * config[config.PALShipCapturePer10Crew](myRace) * 100;
             aggMP += pts;
             oppMP += pts;
+        }
+
+        // Flat bonus for being aggressor
+        aggMP += 1000 * config[config.PALCombatAggressor](myRace);
+
+        // If we know the role, we can fix the value
+        switch (m_before[side].getRole()) {
+         case Object::AggressorRole:  oppMP = aggMP; break;
+         case Object::OpponentRole:   aggMP = oppMP; break;
+         case Object::NoRole:                        break;
         }
 
         // Swap, so that aggMP is the bigger value

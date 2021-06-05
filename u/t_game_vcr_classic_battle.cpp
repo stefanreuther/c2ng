@@ -125,3 +125,48 @@ TestGameVcrClassicBattle::testPoints()
     TS_ASSERT_EQUALS(t.getResultSummary(3, config, shipList, util::NumberFormatter(false, false), tx), "We captured their ship (2 BP, 5 EP).");
 }
 
+void
+TestGameVcrClassicBattle::testPointsRange()
+{
+    game::spec::ShipList shipList;
+    game::test::initStandardBeams(shipList);
+    game::test::initStandardTorpedoes(shipList);
+
+    game::config::HostConfiguration config;
+    config[config.NumExperienceLevels].set(3);
+    config[config.PALCombatAggressor].set(12);
+    config[config.PALOpponentPointsPer10KT].set(5);
+    config[config.PALAggressorPointsPer10KT].set(10);
+
+    afl::string::NullTranslator tx;
+    util::NumberFormatter fmt(false, false);
+
+    // Standard / role not known
+    {
+        game::vcr::classic::Battle t(makeLeftShip(), makeRightShip(), 42, 0, 0);
+        t.setType(game::vcr::classic::PHost4, 0);
+        t.prepareResult(config, shipList, game::vcr::Battle::NeedCompleteResult);
+        TS_ASSERT_EQUALS(t.getResultSummary(3, config, shipList, fmt, tx), "We captured their ship (4 ... 19 BP, 5 EP).");
+    }
+
+    // We know that captor is aggressor
+    {
+        game::vcr::Object obj(makeRightShip());
+        obj.setRole(game::vcr::Object::AggressorRole);
+        game::vcr::classic::Battle t(makeLeftShip(), obj, 42, 0, 0);
+        t.setType(game::vcr::classic::PHost4, 0);
+        t.prepareResult(config, shipList, game::vcr::Battle::NeedCompleteResult);
+        TS_ASSERT_EQUALS(t.getResultSummary(3, config, shipList, fmt, tx), "We captured their ship (19 BP, 5 EP).");
+    }
+
+    // We know that captor is opponent
+    {
+        game::vcr::Object obj(makeRightShip());
+        obj.setRole(game::vcr::Object::OpponentRole);
+        game::vcr::classic::Battle t(makeLeftShip(), obj, 42, 0, 0);
+        t.setType(game::vcr::classic::PHost4, 0);
+        t.prepareResult(config, shipList, game::vcr::Battle::NeedCompleteResult);
+        TS_ASSERT_EQUALS(t.getResultSummary(3, config, shipList, fmt, tx), "We captured their ship (4 BP, 5 EP).");
+    }
+}
+

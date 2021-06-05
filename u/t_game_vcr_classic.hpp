@@ -17,6 +17,7 @@ class TestGameVcrClassicBattle : public CxxTest::TestSuite {
     void testSample();
     void testPosition();
     void testPoints();
+    void testPointsRange();
 };
 
 class TestGameVcrClassicDatabase : public CxxTest::TestSuite {
