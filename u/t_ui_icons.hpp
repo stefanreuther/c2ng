@@ -33,4 +33,10 @@ class TestUiIconsSpacer : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestUiIconsVBox : public CxxTest::TestSuite {
+ public:
+    void testDefault();
+    void testParam();
+};
+
 #endif
