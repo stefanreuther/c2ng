@@ -37,6 +37,7 @@ namespace {
             {
                 m_root.add(*this);
                 m_loop.run();
+                m_root.postMouseEvent();
             }
 
         virtual void draw(gfx::Canvas& can)
