@@ -30,6 +30,7 @@ namespace client { namespace dialogs {
         ui::Root& m_root;
         afl::string::Translator& m_translator;
         game::proxy::VcrDatabaseProxy m_proxy;
+        util::RequestSender<game::proxy::VcrDatabaseAdaptor> m_vcrSender;
         util::RequestSender<game::Session> m_gameSender;
         client::widgets::ClassicVcrInfo m_info;
         ui::EventLoop m_loop;
@@ -50,6 +51,7 @@ namespace client { namespace dialogs {
         void onLeftInfo();
         void onRightInfo();
         void onSideInfo(size_t side);
+        void onTab();
     };
 
 } }

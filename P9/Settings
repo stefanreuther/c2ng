@@ -12,7 +12,9 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/interface/basetaskbuildcommandparser.cpp \
+FILES_gamelib = game/proxy/vcroverviewproxy.cpp \
+    game/proxy/vcroverviewproxy.hpp \
+    game/interface/basetaskbuildcommandparser.cpp \
     game/interface/basetaskbuildcommandparser.hpp game/vcr/flak/database.cpp \
     game/vcr/flak/database.hpp game/vcr/flak/object.cpp \
     game/vcr/flak/object.hpp game/vcr/flak/setup.cpp game/vcr/flak/setup.hpp \
@@ -690,6 +692,8 @@ PROJ_AUTO += \
 
 TARGETS += guilib
 FILES_guilib = ui/icons/vbox.cpp ui/icons/vbox.hpp \
+    client/widgets/combatdiagram.cpp client/widgets/combatdiagram.hpp \
+    client/dialogs/combatoverview.cpp client/dialogs/combatoverview.hpp \
     client/map/distanceoverlay.cpp client/map/distanceoverlay.hpp \
     client/map/messageoverlay.cpp client/map/messageoverlay.hpp \
     client/map/keymapoverlay.cpp client/map/keymapoverlay.hpp \
@@ -1558,7 +1562,8 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_ui_icons_vbox.cpp \
+FILES_testsuite = u/t_game_proxy_vcroverviewproxy.cpp \
+    u/t_game_vcr_overview.cpp u/t_ui_icons_vbox.cpp \
     u/t_server_play_flakconfigurationpacker.cpp u/t_game_vcr_flak_object.cpp \
     u/t_game_vcr_flak_database.cpp u/t_game_vcr_flak_setup.cpp \
     u/t_game_vcr_flak_algorithm.cpp u/t_game_vcr_flak_battle.cpp \

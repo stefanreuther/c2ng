@@ -52,6 +52,13 @@ class TestGameVcrObjectInfo : public CxxTest::TestSuite {
     void testShip2();
 };
 
+class TestGameVcrOverview : public CxxTest::TestSuite {
+ public:
+    void testDiagram();
+    void testDiagramKill();
+    void testDiagramStalemate();
+};
+
 class TestGameVcrScore : public CxxTest::TestSuite {
  public:
     void testIt();

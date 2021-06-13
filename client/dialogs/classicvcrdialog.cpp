@@ -4,6 +4,7 @@
 
 #include "client/dialogs/classicvcrdialog.hpp"
 #include "client/dialogs/classicvcrobject.hpp"
+#include "client/dialogs/combatoverview.hpp"
 #include "client/downlink.hpp"
 #include "client/picturenamer.hpp"
 #include "ui/group.hpp"
@@ -20,6 +21,7 @@ client::dialogs::ClassicVcrDialog::ClassicVcrDialog(ui::Root& root, afl::string:
     : m_root(root),
       m_translator(tx),
       m_proxy(vcrSender, root.engine().dispatcher(), tx, std::auto_ptr<game::spec::info::PictureNamer>(new client::PictureNamer())),
+      m_vcrSender(vcrSender),
       m_gameSender(gameSender),
       m_info(root),
       m_loop(root),
@@ -30,6 +32,7 @@ client::dialogs::ClassicVcrDialog::ClassicVcrDialog(ui::Root& root, afl::string:
     m_proxy.sig_update.add(this, &ClassicVcrDialog::onUpdate);
     m_info.sig_left.add(this, &ClassicVcrDialog::onLeftInfo);
     m_info.sig_right.add(this, &ClassicVcrDialog::onRightInfo);
+    m_info.sig_tab.add(this, &ClassicVcrDialog::onTab);
 }
 
 client::dialogs::ClassicVcrDialog::~ClassicVcrDialog()
@@ -157,5 +160,15 @@ client::dialogs::ClassicVcrDialog::onSideInfo(size_t side)
     m_result = doClassicVcrObjectInfoDialog(m_root, m_translator, m_gameSender, m_proxy, side);
     if (m_result.isSet()) {
         m_loop.stop(1);
+    }
+}
+
+void
+client::dialogs::ClassicVcrDialog::onTab()
+{
+    size_t pos = 0;
+    bool ok = showCombatOverview(m_root, m_translator, m_vcrSender, m_gameSender, pos);
+    if (ok) {
+        setCurrentIndex(pos);
     }
 }

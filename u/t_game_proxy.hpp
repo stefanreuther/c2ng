@@ -507,4 +507,10 @@ class TestGameProxyVcrDatabaseProxy : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestGameProxyVcrOverviewProxy : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testBuildDiagram();
+};
+
 #endif
