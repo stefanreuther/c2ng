@@ -302,6 +302,17 @@ namespace game { namespace vcr {
                              bool withESB,
                              const game::config::HostConfiguration& config) const;
 
+        /** Get mass for build point computation.
+            If the combat mass does NOT include ESB, and hull type is known, replace it by the hull mass.
+            Otherwise, returns the combat mass unchanged.
+            \param config   Host configuration
+            \param shipList Ship list
+            \param isPHost  Active ruleset. Can be different from HostVersion in simulation.
+            \return mass */
+        int getBuildPointMass(const game::config::HostConfiguration& config,
+                              const game::spec::ShipList& shipList,
+                              bool isPHost) const;
+
         /** Check for freighter.
             \return true if ship has no weapons. */
         bool isFreighter() const;
@@ -320,6 +331,13 @@ namespace game { namespace vcr {
             \return result */
         ObjectInfo describe(const TeamSettings* teamSettings, const Root* root, const game::spec::ShipList* shipList, afl::string::Translator& tx) const;
 
+        /** Build a subtitle line for this object.
+            The subtitle will include ownership info, type, experience level.
+            \param [in]  teamSettings   Team settings (optional, for viewpoint player)
+            \param [in]  root           Root (host configuration, preferences, player names)
+            \param [in]  shipList       Unit names
+            \param [in]  tx             Translator
+            \return subtitle */
         String_t getSubtitle(const TeamSettings* teamSettings, const Root& root, const game::spec::ShipList& shipList, afl::string::Translator& tx) const;
 
      private:

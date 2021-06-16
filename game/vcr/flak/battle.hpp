@@ -40,6 +40,9 @@ namespace game { namespace vcr { namespace flak {
         virtual String_t getResultSummary(int viewpointPlayer,
                                           const game::config::HostConfiguration& config, const game::spec::ShipList& shipList,
                                           util::NumberFormatter fmt, afl::string::Translator& tx) const;
+        virtual bool computeScores(Score& score, size_t slot,
+                                   const game::config::HostConfiguration& config,
+                                   const game::spec::ShipList& shipList) const;
 
         const Setup& setup() const;
 

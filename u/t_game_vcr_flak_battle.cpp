@@ -3,22 +3,22 @@
   *  \brief Test for game::vcr::flak::Battle
   */
 
-#include <stdio.h>
 #include "game/vcr/flak/battle.hpp"
 
 #include "t_game_vcr_flak.hpp"
+#include "afl/base/countof.hpp"
+#include "afl/charset/utf8charset.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "game/config/hostconfiguration.hpp"
-#include "game/spec/componentvector.hpp"
-#include "game/vcr/flak/gameenvironment.hpp"
-#include "afl/base/countof.hpp"
 #include "game/spec/beam.hpp"
+#include "game/spec/componentvector.hpp"
 #include "game/spec/torpedolauncher.hpp"
-#include "game/vcr/flak/nullvisualizer.hpp"
-#include "game/vcr/flak/configuration.hpp"
 #include "game/vcr/flak/algorithm.hpp"
+#include "game/vcr/flak/configuration.hpp"
+#include "game/vcr/flak/gameenvironment.hpp"
+#include "game/vcr/flak/nullvisualizer.hpp"
 #include "game/vcr/flak/setup.hpp"
-#include "afl/charset/utf8charset.hpp"
+#include "game/vcr/score.hpp"
 
 namespace {
     uint8_t FILE_CONTENT[] = {
@@ -233,4 +233,38 @@ TestGameVcrFlakBattle::testIt()
     TS_ASSERT_EQUALS(testee.getObject(7, true)->getShield(),   0);
 
     TS_ASSERT(testee.getObject(8, true) == 0); // out of range
+
+    // - computeScores
+    // We're destroying 2*665 = 1330 kt using 6 ships, 5 surviving. That's 266 kt destroyed per ship.
+    // Using PALAggressorPointsPer10KT=2, PALAggressorKillPointsPer10KT=10, that's 1.2*1330 = 1596 kt, or 319.2 points per ship.
+    // We're attacking with 120+367+482+130+801+851 = 2751
+    // Using EPCombatKillScaling=800, EPCombatDamageScaling=200, we get 1330000/2751 = 483 EP.
+    // Check for first two units.
+    {
+        game::vcr::Score s;
+        TS_ASSERT_EQUALS(testee.computeScores(s, 0, config, shipList), true);
+        TS_ASSERT_EQUALS(s.getBuildMillipoints().min(), 319200);
+        TS_ASSERT_EQUALS(s.getBuildMillipoints().max(), 319200);
+        TS_ASSERT_EQUALS(s.getExperience().min(), 483);
+        TS_ASSERT_EQUALS(s.getExperience().max(), 483);
+        TS_ASSERT_EQUALS(s.getTonsDestroyed().min(), 266);
+        TS_ASSERT_EQUALS(s.getTonsDestroyed().max(), 266);
+    }
+    {
+        game::vcr::Score s;
+        TS_ASSERT_EQUALS(testee.computeScores(s, 1, config, shipList), true);
+        TS_ASSERT_EQUALS(s.getBuildMillipoints().min(), 319200);
+        TS_ASSERT_EQUALS(s.getBuildMillipoints().max(), 319200);
+        TS_ASSERT_EQUALS(s.getExperience().min(), 483);
+        TS_ASSERT_EQUALS(s.getExperience().max(), 483);
+        TS_ASSERT_EQUALS(s.getTonsDestroyed().min(), 266);
+        TS_ASSERT_EQUALS(s.getTonsDestroyed().max(), 266);
+    }
+
+    // Units #2, #7 didn't survive and therefore doesn't get any points
+    {
+        game::vcr::Score s;
+        TS_ASSERT_EQUALS(testee.computeScores(s, 2, config, shipList), false);
+        TS_ASSERT_EQUALS(testee.computeScores(s, 7, config, shipList), false);
+    }
 }

@@ -36,6 +36,8 @@ TestGameVcrBattle::testIt()
             { return afl::base::Nothing; }
         virtual String_t getResultSummary(int, const game::config::HostConfiguration&, const game::spec::ShipList&, util::NumberFormatter, afl::string::Translator&) const
             { return String_t(); }
+        virtual bool computeScores(game::vcr::Score& /*score*/, size_t /*slot*/, const game::config::HostConfiguration& /*config*/, const game::spec::ShipList& /*shipList*/) const
+            { return false; }
     };
     Tester t;
 }
@@ -73,6 +75,8 @@ TestGameVcrBattle::testDescription()
             { return afl::base::Nothing; }
         virtual String_t getResultSummary(int, const game::config::HostConfiguration&, const game::spec::ShipList&, util::NumberFormatter, afl::string::Translator&) const
             { return String_t(); }
+        virtual bool computeScores(game::vcr::Score& /*score*/, size_t /*slot*/, const game::config::HostConfiguration& /*config*/, const game::spec::ShipList& /*shipList*/) const
+            { return false; }
 
         void addObject(int owner, String_t name)
             {

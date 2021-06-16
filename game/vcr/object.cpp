@@ -180,6 +180,30 @@ game::vcr::Object::getGuessedEngine(const game::spec::EngineVector_t& engines,
     return result;
 }
 
+// Get mass for build point computation.
+int
+game::vcr::Object::getBuildPointMass(const game::config::HostConfiguration& config,
+                                     const game::spec::ShipList& shipList,
+                                     bool isPHost) const
+{
+    // vcrplay.pas::PALMass, game/classicvcr.cc:getBuildPointMass
+    int guessedHull = getGuessedHull(shipList.hulls());
+    if (isPlanet()) {
+        // planet
+        return getMass() - 100;
+    } else if ((!isPHost || !config[config.PALIncludesESB](getOwner())) && guessedHull != 0) {
+        // ship, type known, and we have HOST or PHost where PAL does not include ESB
+        if (const game::spec::Hull* hull = shipList.hulls().get(guessedHull)) {
+            return hull->getMass();
+        } else {
+            return getMass();
+        }
+    } else {
+        // ship, type unknown, or build points include ESB
+        return getMass();
+    }
+}
+
 // Check for freighter.
 bool
 game::vcr::Object::isFreighter() const

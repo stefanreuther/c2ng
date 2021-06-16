@@ -16,6 +16,7 @@
 namespace game { namespace vcr {
 
     class Object;
+    class Score;
 
     /** Entry in a VCR database. */
     class Battle : public afl::base::Deletable {
@@ -103,6 +104,18 @@ namespace game { namespace vcr {
         virtual String_t getResultSummary(int viewpointPlayer,
                                           const game::config::HostConfiguration& config, const game::spec::ShipList& shipList,
                                           util::NumberFormatter fmt, afl::string::Translator& tx) const = 0;
+
+        /** Compute scores for one unit.
+            Requires the result to be prepared at NeedCompleteResult level (will honor damage taken in computation).
+            Accumulates the resulting scores in the given Score object.
+            \param [in/out] score    Scores are added here
+            \param [in]     side     Compute scores for this side
+            \param [in]     config   Configuration to use
+            \param [in]     shipList Ship list to use
+            \return true on success; false if scores cannot be computed, slot is invalid, or result is not prepared */
+        virtual bool computeScores(Score& score, size_t slot,
+                                   const game::config::HostConfiguration& config,
+                                   const game::spec::ShipList& shipList) const = 0;
 
 
         /*

@@ -14,31 +14,6 @@
 
 using afl::string::Format;
 
-namespace {
-    int getBuildPointMass(const game::vcr::Object& obj,
-                          const game::config::HostConfiguration& config,
-                          const game::spec::ShipList& shipList,
-                          bool isPHost)
-    {
-        // vcrplay.pas::PALMass, game/classicvcr.cc:getBuildPointMass
-        int guessedHull = obj.getGuessedHull(shipList.hulls());
-        if (obj.isPlanet()) {
-            // planet
-            return obj.getMass() - 100;
-        } else if ((!isPHost || !config[config.PALIncludesESB](obj.getOwner())) && guessedHull != 0) {
-            // ship, type known, and we have HOST or PHost where PAL does not include ESB
-            if (const game::spec::Hull* hull = shipList.hulls().get(guessedHull)) {
-                return hull->getMass();
-            } else {
-                return obj.getMass();
-            }
-        } else {
-            // ship, type unknown, or build points include ESB
-            return obj.getMass();
-        }
-    }
-}
-
 
 // Constructor.
 game::vcr::classic::Battle::Battle(const Object& left,
@@ -276,6 +251,24 @@ game::vcr::classic::Battle::getResultSummary(int viewpointPlayer,
     return formatResult(viewpointPlayer, text, tx);
 }
 
+bool
+game::vcr::classic::Battle::computeScores(Score& score, size_t slot,
+                                          const game::config::HostConfiguration& config,
+                                          const game::spec::ShipList& shipList) const
+{
+    switch (slot) {
+     case 0:
+        computeScores(score, LeftSide, config, shipList);
+        return true;
+     case 1:
+        computeScores(score, RightSide, config, shipList);
+        return true;
+     default:
+        return false;
+    }
+}
+
+
 /*
  *  Additional methods
  */
@@ -412,8 +405,8 @@ game::vcr::classic::Battle::computeScores(Score& score,
 
     if (isPHost(m_type)) {
         const int32_t damageDone = m_after[opp].getDamage() - m_before[opp].getDamage();
-        const int32_t theirMass = std::max(getBuildPointMass(m_before[opp], config, shipList, true), 1);
-        const int32_t myMass = std::max(getBuildPointMass(m_before[side], config, shipList, true), 1);
+        const int32_t theirMass = std::max(m_before[opp].getBuildPointMass(config, shipList, true), 1);
+        const int32_t myMass = std::max(m_before[side].getBuildPointMass(config, shipList, true), 1);
 
         // Build points. PHost gives different points for aggressor and opponent
         int32_t aggMP = damageDone * theirMass * config[config.PALAggressorPointsPer10KT](myRace);
@@ -468,7 +461,7 @@ game::vcr::classic::Battle::computeScores(Score& score,
     } else {
         // Build points only for destruction of other side, and only for ship/ship fight.
         if (isVictor && !m_before[RightSide].isPlanet()) {
-            const int32_t bmp = 1000 * ((getBuildPointMass(m_before[opp], config, shipList, false) / 100) + 1);
+            const int32_t bmp = 1000 * ((m_before[opp].getBuildPointMass(config, shipList, false) / 100) + 1);
             score.addBuildMillipoints(Score::Range_t::fromValue(bmp));
         }
 

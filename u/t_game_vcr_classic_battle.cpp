@@ -123,6 +123,28 @@ TestGameVcrClassicBattle::testPoints()
     t.prepareResult(config, shipList, game::vcr::Battle::NeedCompleteResult);
     TS_ASSERT_EQUALS(t.getResultSummary(2, config, shipList, util::NumberFormatter(false, false), tx), "They have captured our ship (2 BP, 5 EP).");
     TS_ASSERT_EQUALS(t.getResultSummary(3, config, shipList, util::NumberFormatter(false, false), tx), "We captured their ship (2 BP, 5 EP).");
+
+    // Points for each side
+    {
+        game::vcr::Score s;
+        TS_ASSERT_EQUALS(t.computeScores(s, 0, config, shipList), true);
+        TS_ASSERT_EQUALS(s.getBuildMillipoints().min(), 0);
+        TS_ASSERT_EQUALS(s.getBuildMillipoints().max(), 0);
+        TS_ASSERT_EQUALS(s.getExperience().min(), 0);
+        TS_ASSERT_EQUALS(s.getExperience().max(), 0);
+        TS_ASSERT_EQUALS(s.getTonsDestroyed().min(), 0);
+        TS_ASSERT_EQUALS(s.getTonsDestroyed().max(), 0);
+    }
+    {
+        game::vcr::Score s;
+        TS_ASSERT_EQUALS(t.computeScores(s, 1, config, shipList), true);
+        TS_ASSERT_EQUALS(s.getBuildMillipoints().min(), 2200);
+        TS_ASSERT_EQUALS(s.getBuildMillipoints().max(), 2200);
+        TS_ASSERT_EQUALS(s.getExperience().min(), 5);
+        TS_ASSERT_EQUALS(s.getExperience().max(), 5);
+        TS_ASSERT_EQUALS(s.getTonsDestroyed().min(), 0);
+        TS_ASSERT_EQUALS(s.getTonsDestroyed().max(), 0);
+    }
 }
 
 void

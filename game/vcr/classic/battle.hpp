@@ -67,6 +67,9 @@ namespace game { namespace vcr { namespace classic {
         virtual String_t getResultSummary(int viewpointPlayer,
                                           const game::config::HostConfiguration& config, const game::spec::ShipList& shipList,
                                           util::NumberFormatter fmt, afl::string::Translator& tx) const;
+        virtual bool computeScores(Score& score, size_t slot,
+                                   const game::config::HostConfiguration& config,
+                                   const game::spec::ShipList& shipList) const;
 
         /*
          *  Additional methods
@@ -136,6 +139,7 @@ namespace game { namespace vcr { namespace classic {
                                                  const game::spec::ShipList& shipList);
 
         /** Compute scores.
+            This is a safely-typed version of the identically-named interface method.
             \param score [in/out] Scores are added here
             \param side [in] Compute scores for this side
             \param config Configuration to use
