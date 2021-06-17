@@ -6,6 +6,7 @@
 #define C2NG_GAME_VCR_SCORE_HPP
 
 #include "afl/base/types.hpp"
+#include "util/range.hpp"
 
 namespace game { namespace vcr {
 
@@ -14,6 +15,8 @@ namespace game { namespace vcr {
         This object can be used to track these scores for a unit. */
     class Score {
      public:
+        typedef util::Range<int32_t> Range_t;
+
         /** Constructor.
             Make a blank object. */
         Score();
@@ -21,39 +24,33 @@ namespace game { namespace vcr {
         /** Add build point range.
             Build points can differ for aggressor and opponent, so we may only be able to give a range.
             Build points are scaled by factor 1000 to eliminate rounding errors.
-            \param min Minimum build points x 1000
-            \param max Maximum build points x 1000 */
-        void addBuildMillipoints(int32_t min, int32_t max);
+            \param r Range of points x 1000, should not be empty */
+        void addBuildMillipoints(Range_t r);
 
         /** Add experience points.
             \param points Experience points */
-        void addExperience(int32_t points);
+        void addExperience(Range_t points);
 
         /** Add destroyed tons.
             \param tons Destroyed tons (=weight of opponent) */
-        void addTonsDestroyed(int32_t tons);
+        void addTonsDestroyed(Range_t tons);
 
-        /** Get minimum build points.
-            \return Minimum build points x 1000 */
-        int getBuildMillipointsMin() const;
-
-        /** Get maximum build points.
-            \return Maximum build points x 1000 */
-        int getBuildMillipointsMax() const;
+        /** Get build points.
+            \return Build points range x 1000 */
+        Range_t getBuildMillipoints() const;
 
         /** Get experience points.
-            \return Experience points */
-        int getExperience() const;
+            \return Experience points range */
+        Range_t getExperience() const;
 
         /** Get destroyed tons.
-            \return Destroyed tons */
-        int getTonsDestroyed() const;
+            \return Destroyed tons range */
+        Range_t getTonsDestroyed() const;
 
      private:
-        int32_t m_buildMillipointsMin;
-        int32_t m_buildMillipointsMax;
-        int32_t m_experience;
-        int32_t m_tonsDestroyed;
+        Range_t m_buildMillipoints;
+        Range_t m_experience;
+        Range_t m_tonsDestroyed;
     };
 
 } }

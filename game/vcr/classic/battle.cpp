@@ -250,8 +250,8 @@ game::vcr::classic::Battle::getResultSummary(int viewpointPlayer,
     String_t text;
 
     // build points
-    int minBP = pts.getBuildMillipointsMin() / 1000;
-    int maxBP = pts.getBuildMillipointsMax() / 1000;
+    int minBP = pts.getBuildMillipoints().min() / 1000;
+    int maxBP = pts.getBuildMillipoints().max() / 1000;
     if (minBP > 0) {
         if (maxBP == minBP) {
             text += Format("%d BP", fmt.formatNumber(minBP));
@@ -265,11 +265,11 @@ game::vcr::classic::Battle::getResultSummary(int viewpointPlayer,
     }
 
     // experience
-    if (pts.getExperience() > 0) {
+    if (pts.getExperience().max() > 0) {
         if (text.size()) {
             text += ", ";
         }
-        text += Format("%d EP", fmt.formatNumber(pts.getExperience()));
+        text += Format("%s EP", toString(pts.getExperience(), Score::Range_t(0, INT32_MAX), false, fmt, tx));
     }
 
     // combine
@@ -455,21 +455,21 @@ game::vcr::classic::Battle::computeScores(Score& score,
             oppMP = (oppMP * scale1) / 100;
             aggMP = (aggMP * scale2) / 100;
         }
-        score.addBuildMillipoints(oppMP, aggMP);
+        score.addBuildMillipoints(Score::Range_t(oppMP, aggMP));
 
         // Experience
         if (didSurvive && config[config.NumExperienceLevels]() > 0) {
             // FIXME: EPCombatBoostLevel / EPCombatBoostRate
-            score.addExperience((damageDone * theirMass * config[config.EPCombatDamageScaling]()) / (100 * myMass));
+            score.addExperience(Score::Range_t::fromValue((damageDone * theirMass * config[config.EPCombatDamageScaling]()) / (100 * myMass)));
             if (isVictor) {
-                score.addExperience(theirMass * config[config.EPCombatKillScaling]() / myMass);
+                score.addExperience(Score::Range_t::fromValue(theirMass * config[config.EPCombatKillScaling]() / myMass));
             }
         }
     } else {
         // Build points only for destruction of other side, and only for ship/ship fight.
         if (isVictor && !m_before[RightSide].isPlanet()) {
             const int32_t bmp = 1000 * ((getBuildPointMass(m_before[opp], config, shipList, false) / 100) + 1);
-            score.addBuildMillipoints(bmp, bmp);
+            score.addBuildMillipoints(Score::Range_t::fromValue(bmp));
         }
 
         // Experience.
@@ -479,7 +479,7 @@ game::vcr::classic::Battle::computeScores(Score& score,
 
     // Tons are common for all hosts
     if (isVictor) {
-        score.addTonsDestroyed(m_before[opp].getMass());
+        score.addTonsDestroyed(Score::Range_t::fromValue(m_before[opp].getMass()));
     }
 }
 
