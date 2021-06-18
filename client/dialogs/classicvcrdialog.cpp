@@ -1,5 +1,6 @@
 /**
   *  \file client/dialogs/classicvcrdialog.cpp
+  *  \brief Class client::dialogs::ClassicVcrDialog
   */
 
 #include "client/dialogs/classicvcrdialog.hpp"
@@ -12,6 +13,7 @@
 #include "ui/layout/hbox.hpp"
 #include "ui/layout/vbox.hpp"
 #include "ui/spacer.hpp"
+#include "ui/widgets/keydispatcher.hpp"
 #include "ui/widgets/quit.hpp"
 #include "ui/widgets/standarddialogbuttons.hpp"
 #include "ui/window.hpp"
@@ -75,6 +77,22 @@ client::dialogs::ClassicVcrDialog::run()
     btnCancel.sig_fire.addNewClosure(m_loop.makeStop(0));
     btnPlay.sig_fire.add(this, &ClassicVcrDialog::onPlay);
 
+    // Extra keys
+    ui::widgets::KeyDispatcher disp;
+    window.add(disp);
+    disp.add('-',                                this, &ClassicVcrDialog::onPrevious);
+    disp.add(util::Key_WheelUp,                  this, &ClassicVcrDialog::onPrevious);
+    disp.add(util::Key_PgUp,                     this, &ClassicVcrDialog::onPrevious);
+    disp.add('+',                                this, &ClassicVcrDialog::onNext);
+    disp.add(util::Key_WheelDown,                this, &ClassicVcrDialog::onNext);
+    disp.add(util::Key_PgDn,                     this, &ClassicVcrDialog::onNext);
+    disp.add(util::Key_Home,                     this, &ClassicVcrDialog::onFirst);
+    disp.add(util::Key_Home + util::KeyMod_Ctrl, this, &ClassicVcrDialog::onFirst);
+    disp.add(util::Key_PgUp + util::KeyMod_Ctrl, this, &ClassicVcrDialog::onFirst);
+    disp.add(util::Key_End,                      this, &ClassicVcrDialog::onLast);
+    disp.add(util::Key_End + util::KeyMod_Ctrl,  this, &ClassicVcrDialog::onLast);
+    disp.add(util::Key_PgDn + util::KeyMod_Ctrl, this, &ClassicVcrDialog::onLast);
+
     postLoad();
 
     window.pack();
@@ -116,6 +134,22 @@ client::dialogs::ClassicVcrDialog::onNext()
     // ex WVcrSelector::prev
     if (m_numBattles - m_currentIndex > 1) {
         setCurrentIndex(m_currentIndex+1);
+    }
+}
+
+void
+client::dialogs::ClassicVcrDialog::onFirst()
+{
+    if (m_currentIndex != 0) {
+        setCurrentIndex(0);
+    }
+}
+
+void
+client::dialogs::ClassicVcrDialog::onLast()
+{
+    if (m_currentIndex != m_numBattles-1) {
+        setCurrentIndex(m_numBattles-1);
     }
 }
 
