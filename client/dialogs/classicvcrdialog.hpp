@@ -52,6 +52,7 @@ namespace client { namespace dialogs {
         void onRightInfo();
         void onSideInfo(size_t side);
         void onTab();
+        void onScore();
     };
 
 } }

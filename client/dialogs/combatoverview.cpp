@@ -5,6 +5,7 @@
 
 #include "client/dialogs/combatoverview.hpp"
 #include "afl/base/deleter.hpp"
+#include "client/dialogs/combatscoresummary.hpp"
 #include "client/downlink.hpp"
 #include "client/widgets/combatdiagram.hpp"
 #include "client/widgets/playerlist.hpp"
@@ -28,9 +29,11 @@ using client::widgets::CombatDiagram;
 namespace {
     class CombatOverviewDialog {
      public:
-        CombatOverviewDialog(ui::Root& root, afl::string::Translator& tx)
+        CombatOverviewDialog(ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::proxy::VcrDatabaseAdaptor> vcrSender, util::RequestSender<game::Session> gameSender)
             : m_root(root),
               m_translator(tx),
+              m_vcrSender(vcrSender),
+              m_gameSender(gameSender),
               m_loop(root),
               m_diagram(root, tx),
               m_playerList(root, PlayerList::FlowLayout, PlayerList::ShowNames, PlayerList::PlayerColors,
@@ -54,16 +57,13 @@ namespace {
 
                 ui::Group& g = del.addNew(new ui::Group(ui::layout::HBox::instance5));
 
+                ui::widgets::Button& btnScores = del.addNew(new ui::widgets::Button(tx("Scores"), 's', m_root));
+                btnScores.sig_fire.add(this, &CombatOverviewDialog::onScore);
+                g.add(btnScores);
+
                 ui::widgets::Checkbox& colorCheckbox = del.addNew(new ui::widgets::Checkbox(m_root, 't', tx("Team colors"), m_useTeamColors));
                 colorCheckbox.addDefaultImages();
                 g.add(colorCheckbox);
-
-                // FIXME: port scores
-                // if (dynamic_cast<GClassicVcrDatabase*>(&db)) {
-                //     g.add(h.add(new UIButton(2, _("Scores"), 's')).addCall(this, &WCombatDiagramDialog::onScore));
-                //     g.add(*colorCheckbox);
-                // }
-
                 g.add(del.addNew(new ui::Spacer()));
 
                 ui::widgets::Button& btnClose = del.addNew(new ui::widgets::Button(tx("Close"), util::Key_Return, m_root));
@@ -121,9 +121,18 @@ namespace {
                 return m_chosenBattle;
             }
 
+        void onScore()
+            {
+                // ex WCombatDiagramDialog::onScore
+                client::dialogs::showCombatScoreSummary(m_root, m_translator, m_vcrSender, m_gameSender);
+            }
+
      private:
         ui::Root& m_root;
         afl::string::Translator& m_translator;
+        util::RequestSender<game::proxy::VcrDatabaseAdaptor> m_vcrSender;
+        util::RequestSender<game::Session> m_gameSender;
+
         ui::EventLoop m_loop;
         CombatDiagram m_diagram;
         PlayerList m_playerList;
@@ -171,7 +180,7 @@ client::dialogs::showCombatOverview(ui::Root& root,
     }
 
     // Display the dialog
-    CombatOverviewDialog dlg(root, tx);
+    CombatOverviewDialog dlg(root, tx, vcrSender, gameSender);
     dlg.setDiagram(diag);
     initDialog(link, dlg, gameSender);
     bool ok = dlg.run();

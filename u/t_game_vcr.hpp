@@ -57,6 +57,7 @@ class TestGameVcrOverview : public CxxTest::TestSuite {
     void testDiagram();
     void testDiagramKill();
     void testDiagramStalemate();
+    void testPointsKill();
 };
 
 class TestGameVcrScore : public CxxTest::TestSuite {

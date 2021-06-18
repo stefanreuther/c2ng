@@ -6,9 +6,11 @@
 #define C2NG_GAME_VCR_OVERVIEW_HPP
 
 #include "game/config/hostconfiguration.hpp"
+#include "game/playerarray.hpp"
 #include "game/spec/shiplist.hpp"
 #include "game/vcr/battle.hpp"
 #include "game/vcr/database.hpp"
+#include "game/vcr/score.hpp"
 
 namespace game { namespace vcr {
 
@@ -89,6 +91,16 @@ namespace game { namespace vcr {
             std::vector<Battle> battles;  ///< Result for all battles.
         };
 
+        /** Score summary. */
+        struct ScoreSummary {
+            PlayerSet_t players;          ///< Set of active players.
+            PlayerArray<Score> scores;    ///< Scores for each player.
+            size_t numBattles;            ///< Number of battles covered.
+            ScoreSummary()
+                : players(), scores(), numBattles(0)
+                { }
+        };
+
         /** Internal representation. */
         struct Item {
             bool planet;             ///< true iff this item describes a planet.
@@ -115,6 +127,10 @@ namespace game { namespace vcr {
             \param [in]  players  Player list (used for labeling battles)
             \param [in]  tx       Translator (used for labeling units, battles) */
         void buildDiagram(Diagram& out, const PlayerList& players, afl::string::Translator& tx) const;
+
+        /** Build score summary.
+            \param [out] out      Summary */
+        void buildScoreSummary(ScoreSummary& out);
 
      private:
         // Environment:

@@ -691,18 +691,19 @@ PROJ_AUTO += \
     gamelib:game/*.cpp,game/*.hpp,util/*.cpp,util/*.hpp,interpreter/*.cpp,interpreter/*.hpp
 
 TARGETS += guilib
-FILES_guilib = ui/icons/vbox.cpp ui/icons/vbox.hpp \
-    client/widgets/combatdiagram.cpp client/widgets/combatdiagram.hpp \
-    client/dialogs/combatoverview.cpp client/dialogs/combatoverview.hpp \
-    client/map/distanceoverlay.cpp client/map/distanceoverlay.hpp \
-    client/map/messageoverlay.cpp client/map/messageoverlay.hpp \
-    client/map/keymapoverlay.cpp client/map/keymapoverlay.hpp \
-    client/si/keymaphandler.cpp client/si/keymaphandler.hpp \
-    client/dialogs/entercoordinates.cpp client/dialogs/entercoordinates.hpp \
-    ui/widgets/alignedcontainer.cpp ui/widgets/alignedcontainer.hpp \
-    ui/widgets/treelistbox.cpp ui/widgets/treelistbox.hpp \
-    client/dialogs/historyship.cpp client/dialogs/historyship.hpp \
-    client/widgets/historyshiplistbox.cpp \
+FILES_guilib = client/dialogs/combatscoresummary.cpp \
+    client/dialogs/combatscoresummary.hpp ui/icons/vbox.cpp \
+    ui/icons/vbox.hpp client/widgets/combatdiagram.cpp \
+    client/widgets/combatdiagram.hpp client/dialogs/combatoverview.cpp \
+    client/dialogs/combatoverview.hpp client/map/distanceoverlay.cpp \
+    client/map/distanceoverlay.hpp client/map/messageoverlay.cpp \
+    client/map/messageoverlay.hpp client/map/keymapoverlay.cpp \
+    client/map/keymapoverlay.hpp client/si/keymaphandler.cpp \
+    client/si/keymaphandler.hpp client/dialogs/entercoordinates.cpp \
+    client/dialogs/entercoordinates.hpp ui/widgets/alignedcontainer.cpp \
+    ui/widgets/alignedcontainer.hpp ui/widgets/treelistbox.cpp \
+    ui/widgets/treelistbox.hpp client/dialogs/historyship.cpp \
+    client/dialogs/historyship.hpp client/widgets/historyshiplistbox.cpp \
     client/widgets/historyshiplistbox.hpp client/dialogs/multitransfer.cpp \
     client/dialogs/multitransfer.hpp client/widgets/expressionlist.cpp \
     client/widgets/expressionlist.hpp client/dialogs/notifications.cpp \

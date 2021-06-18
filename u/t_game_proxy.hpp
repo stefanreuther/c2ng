@@ -511,6 +511,7 @@ class TestGameProxyVcrOverviewProxy : public CxxTest::TestSuite {
  public:
     void testEmpty();
     void testBuildDiagram();
+    void testBuildScores();
 };
 
 #endif

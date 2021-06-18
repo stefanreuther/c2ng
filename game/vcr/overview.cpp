@@ -63,6 +63,30 @@ game::vcr::Overview::buildDiagram(Diagram& out, const PlayerList& players, afl::
 }
 
 void
+game::vcr::Overview::buildScoreSummary(ScoreSummary& out)
+{
+    const size_t numBattles = m_battles.getNumBattles();
+    out.players.clear();
+    out.scores.setAll(Score());
+    out.numBattles = numBattles;
+    for (size_t battleNr = 0; battleNr < numBattles; ++battleNr) {
+        if (Battle* b = m_battles.getBattle(battleNr)) {
+            b->prepareResult(m_config, m_shipList, Battle::NeedCompleteResult);
+            for (size_t i = 0, numObjects = b->getNumObjects(); i < numObjects; ++i) {
+                if (const Object* obj = b->getObject(i, false)) {
+                    int playerNr = obj->getOwner();
+                    if (Score* thisScore = out.scores.at(playerNr)) {
+                        if (b->computeScores(*thisScore, i, m_config, m_shipList)) {
+                            out.players += playerNr;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+void
 game::vcr::Overview::packUnits(std::vector<Diagram::Unit>& units, afl::string::Translator& tx) const
 {
     const size_t n = m_units.size();

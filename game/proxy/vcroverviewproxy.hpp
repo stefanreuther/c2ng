@@ -30,6 +30,12 @@ namespace game { namespace proxy {
             \see game::vcr::Overview::buildDiagram */
         void buildDiagram(WaitIndicator& ind, game::vcr::Overview::Diagram& out);
 
+        /** Build score summary.
+            \param [in]  ind  UI synchronisation
+            \param [out] out  Summary
+            \see game::vcr::Overview::buildScoreSummary */
+        void buildScoreSummary(WaitIndicator& ind, game::vcr::Overview::ScoreSummary& out);
+
      private:
         class Trampoline;
         class TrampolineFromAdaptor;

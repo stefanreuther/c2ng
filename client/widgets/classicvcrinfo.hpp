@@ -34,12 +34,14 @@ namespace client { namespace widgets {
         afl::base::Signal<void(int)> sig_left;
         afl::base::Signal<void(int)> sig_right;
         afl::base::Signal<void(int)> sig_tab;
+        afl::base::Signal<void(int)> sig_score;
 
      private:
         ui::Root& m_root;
         ui::widgets::Button m_leftButton;
         ui::widgets::Button m_rightButton;
         ui::widgets::Button m_tabButton;
+        ui::widgets::Button m_scoreButton;
         Data_t m_data;
 
         afl::base::Ref<gfx::Font> getLargeFont() const;

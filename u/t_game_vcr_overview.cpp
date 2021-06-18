@@ -259,3 +259,47 @@ TestGameVcrOverview::testDiagramStalemate()
     TS_ASSERT_EQUALS(toString(diag.battles[0].participants), "0:0 1:0");
 }
 
+/** Test score summary building, kill.
+    A: set up a fight where a ship is killed (captor vs probe).
+    E: verify correct results being built */
+void
+TestGameVcrOverview::testPointsKill()
+{
+    // Environment
+    game::config::HostConfiguration config;
+    game::spec::ShipList shipList;
+    game::test::initStandardBeams(shipList);
+    game::test::initStandardTorpedoes(shipList);
+
+    // Database
+    game::vcr::classic::Database db;
+    // 30 destroys 31
+    db.addNewBattle(new game::vcr::classic::Battle(makeCaptor(30, 5), makeProbe(31, 6), 1, 0, 0))
+        ->setType(game::vcr::classic::Host, 0);
+
+    // Testee
+    game::vcr::Overview ov(db, config, shipList);
+
+    game::vcr::Overview::ScoreSummary sum;
+    ov.buildScoreSummary(sum);
+
+    // Verify
+    TS_ASSERT_EQUALS(sum.players.toInteger(), (1U << 5) | (1U << 6));
+
+    TS_ASSERT_EQUALS(sum.scores.at(5)->getBuildMillipoints().min(), 1000); /* Host: 1 PBP */
+    TS_ASSERT_EQUALS(sum.scores.at(5)->getBuildMillipoints().max(), 1000);
+    TS_ASSERT_EQUALS(sum.scores.at(5)->getExperience().min(), 0);
+    TS_ASSERT_EQUALS(sum.scores.at(5)->getExperience().max(), 0);
+    TS_ASSERT_EQUALS(sum.scores.at(5)->getTonsDestroyed().min(), 30);
+    TS_ASSERT_EQUALS(sum.scores.at(5)->getTonsDestroyed().max(), 30);
+
+    TS_ASSERT_EQUALS(sum.scores.at(6)->getBuildMillipoints().min(), 0);
+    TS_ASSERT_EQUALS(sum.scores.at(6)->getBuildMillipoints().max(), 0);
+    TS_ASSERT_EQUALS(sum.scores.at(6)->getExperience().min(), 0);
+    TS_ASSERT_EQUALS(sum.scores.at(6)->getExperience().max(), 0);
+    TS_ASSERT_EQUALS(sum.scores.at(6)->getTonsDestroyed().min(), 0);
+    TS_ASSERT_EQUALS(sum.scores.at(6)->getTonsDestroyed().max(), 0);
+
+    TS_ASSERT_EQUALS(sum.numBattles, 1);
+}
+

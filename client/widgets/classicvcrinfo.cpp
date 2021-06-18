@@ -36,16 +36,19 @@ client::widgets::ClassicVcrInfo::ClassicVcrInfo(ui::Root& root)
       m_root(root),
       m_leftButton("L", 'l', root),
       m_rightButton("R", 'r', root),
-      m_tabButton("Tab", util::Key_Tab, root)
+      m_tabButton("Tab", util::Key_Tab, root),
+      m_scoreButton("S", 's', root)
 {
     // ex WVcrSelector::WVcrSelector [part]
     addChild(m_leftButton, 0);
     addChild(m_rightButton, 0);
     addChild(m_tabButton, 0);
+    addChild(m_scoreButton, 0);
 
     m_leftButton.sig_fire.add(&sig_left, &afl::base::Signal<void(int)>::raise);
     m_rightButton.sig_fire.add(&sig_right, &afl::base::Signal<void(int)>::raise);
     m_tabButton.sig_fire.add(&sig_tab, &afl::base::Signal<void(int)>::raise);
+    m_scoreButton.sig_fire.add(&sig_score, &afl::base::Signal<void(int)>::raise);
 }
 
 client::widgets::ClassicVcrInfo::~ClassicVcrInfo()
@@ -219,5 +222,9 @@ client::widgets::ClassicVcrInfo::setChildPositions()
 
     const int bottomY = getExtent().getBottomY();
     const int tabSize = buttonSize * 8/5;
-    m_tabButton.setExtent(gfx::Rectangle(rightX - tabSize, bottomY - buttonSize, tabSize, buttonSize));
+    const int tabX = rightX - tabSize;
+    m_tabButton.setExtent(gfx::Rectangle(tabX, bottomY - buttonSize, tabSize, buttonSize));
+
+    const int scoreX = tabX - buttonSize - 5;
+    m_scoreButton.setExtent(gfx::Rectangle(scoreX, bottomY - buttonSize, buttonSize, buttonSize));
 }

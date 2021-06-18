@@ -86,15 +86,22 @@ TestGameProxyVcrOverviewProxy::testEmpty()
     // Null sender
     util::RequestSender<game::proxy::VcrDatabaseAdaptor> nullSender;
     game::proxy::VcrOverviewProxy testee(nullSender);
-
-    // Build diagram
     game::test::WaitIndicator ind;
-    game::vcr::Overview::Diagram diag;
-    testee.buildDiagram(ind, diag);
 
-    // Verify
-    TS_ASSERT_EQUALS(diag.units.size(), 0U);
-    TS_ASSERT_EQUALS(diag.battles.size(), 0U);
+    // Verify empty diagram
+    {
+        game::vcr::Overview::Diagram diag;
+        testee.buildDiagram(ind, diag);
+        TS_ASSERT_EQUALS(diag.units.size(), 0U);
+        TS_ASSERT_EQUALS(diag.battles.size(), 0U);
+    }
+
+    // Verify empty scores
+    {
+        game::vcr::Overview::ScoreSummary sum;
+        testee.buildScoreSummary(ind, sum);
+        TS_ASSERT_EQUALS(sum.players.toInteger(), 0U);
+    }
 }
 
 void
@@ -122,11 +129,37 @@ TestGameProxyVcrOverviewProxy::testBuildDiagram()
     // Verify
     game::vcr::Overview::Diagram diag;
     testee.buildDiagram(ind, diag);
-
-    // Verify
     TS_ASSERT_EQUALS(diag.units.size(), 2U);
     TS_ASSERT_EQUALS(diag.units[0].name, "F110 (ship #110)");
     TS_ASSERT_EQUALS(diag.units[1].name, "C120 (ship #120)");
     TS_ASSERT_EQUALS(diag.battles.size(), 1U);
+}
+
+void
+TestGameProxyVcrOverviewProxy::testBuildScores()
+{
+    // Environment
+    game::test::Root root((game::HostVersion()));
+    game::spec::ShipList shipList;
+    game::test::initStandardBeams(shipList);
+    game::test::initStandardTorpedoes(shipList);
+
+    // Battles
+    game::vcr::classic::Database db;
+    db.addNewBattle(new game::vcr::classic::Battle(makeFreighter(110, 1), makeCaptor(120, 2), 1, 0, 0))
+        ->setType(game::vcr::classic::Host, 0);
+
+    // Adaptor in a (mock) thread
+    TestAdaptor ad(root, shipList, db);
+    game::test::WaitIndicator ind;
+    util::RequestReceiver<game::proxy::VcrDatabaseAdaptor> recv(ind, ad);
+
+    // Proxy under test
+    game::proxy::VcrOverviewProxy testee(recv.getSender());
+
+    // Verify
+    game::vcr::Overview::ScoreSummary sum;
+    testee.buildScoreSummary(ind, sum);
+    TS_ASSERT_EQUALS(sum.players.toInteger(), (1U << 1) | (1U << 2));
 }
 

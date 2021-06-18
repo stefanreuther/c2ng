@@ -5,6 +5,7 @@
 #include "client/dialogs/classicvcrdialog.hpp"
 #include "client/dialogs/classicvcrobject.hpp"
 #include "client/dialogs/combatoverview.hpp"
+#include "client/dialogs/combatscoresummary.hpp"
 #include "client/downlink.hpp"
 #include "client/picturenamer.hpp"
 #include "ui/group.hpp"
@@ -33,6 +34,7 @@ client::dialogs::ClassicVcrDialog::ClassicVcrDialog(ui::Root& root, afl::string:
     m_info.sig_left.add(this, &ClassicVcrDialog::onLeftInfo);
     m_info.sig_right.add(this, &ClassicVcrDialog::onRightInfo);
     m_info.sig_tab.add(this, &ClassicVcrDialog::onTab);
+    m_info.sig_score.add(this, &ClassicVcrDialog::onScore);
 }
 
 client::dialogs::ClassicVcrDialog::~ClassicVcrDialog()
@@ -171,4 +173,10 @@ client::dialogs::ClassicVcrDialog::onTab()
     if (ok) {
         setCurrentIndex(pos);
     }
+}
+
+void
+client::dialogs::ClassicVcrDialog::onScore()
+{
+    showCombatScoreSummary(m_root, m_translator, m_vcrSender, m_gameSender);
 }

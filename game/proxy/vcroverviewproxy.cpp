@@ -73,3 +73,20 @@ game::proxy::VcrOverviewProxy::buildDiagram(WaitIndicator& ind, game::vcr::Overv
     Task t(out);
     ind.call(m_request, t);
 }
+
+void
+game::proxy::VcrOverviewProxy::buildScoreSummary(WaitIndicator& ind, game::vcr::Overview::ScoreSummary& out)
+{
+    class Task : public util::Request<Trampoline> {
+     public:
+        Task(Overview::ScoreSummary& out)
+            : m_out(out)
+            { }
+        virtual void handle(Trampoline& tpl)
+            { tpl.overview().buildScoreSummary(m_out); }
+     private:
+        Overview::ScoreSummary& m_out;
+    };
+    Task t(out);
+    ind.call(m_request, t);
+}
