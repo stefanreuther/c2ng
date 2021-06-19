@@ -6,19 +6,14 @@
 #include "client/dialogs/combatscoresummary.hpp"
 #include "afl/bits/smallset.hpp"
 #include "client/downlink.hpp"
+#include "game/proxy/configurationproxy.hpp"
 #include "game/proxy/playerproxy.hpp"
 #include "game/proxy/vcroverviewproxy.hpp"
+#include "ui/dialogs/messagebox.hpp"
 #include "ui/group.hpp"
-#include "ui/layout/hbox.hpp"
 #include "ui/layout/vbox.hpp"
-#include "ui/spacer.hpp"
-#include "ui/widgets/button.hpp"
-#include "ui/widgets/keydispatcher.hpp"
-#include "ui/widgets/quit.hpp"
 #include "ui/widgets/simpletable.hpp"
 #include "ui/widgets/statictext.hpp"
-#include "ui/window.hpp"
-#include "game/proxy/configurationproxy.hpp"
 
 using game::vcr::Score;
 
@@ -155,32 +150,13 @@ client::dialogs::showCombatScoreSummary(ui::Root& root,
 
     // Display it
     afl::base::Deleter del;
-    ui::Window win(tx("Combat Score Overview"), root.provider(), root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5);
-    win.add(tab);
-
+    ui::Group& g = del.addNew(new ui::Group(ui::layout::VBox::instance5));
+    g.add(tab);
     if (scores.numBattles != 1) {
-        win.add(del.addNew(new ui::widgets::StaticText(afl::string::Format(tx("This overview covers all %d fights."), scores.numBattles),
-                                                       util::SkinColor::Static, gfx::FontRequest(), root.provider())));
+        g.add(del.addNew(new ui::widgets::StaticText(afl::string::Format(tx("This overview covers all %d fights."), scores.numBattles),
+                                                     util::SkinColor::Static, gfx::FontRequest(), root.provider())));
     }
 
-    ui::Group& group = del.addNew(new ui::Group(ui::layout::HBox::instance5));
-    ui::widgets::Button& btnOK = del.addNew(new ui::widgets::Button(tx("OK"), util::Key_Return, root));
-    group.add(del.addNew(new ui::Spacer()));
-    group.add(btnOK);
-    group.add(del.addNew(new ui::Spacer()));
-    win.add(group);
-
-    ui::EventLoop loop(root);
-    ui::widgets::KeyDispatcher& disp = del.addNew(new ui::widgets::KeyDispatcher());
-    disp.addNewClosure(' ', loop.makeStop(0));
-    disp.addNewClosure(util::Key_Escape, loop.makeStop(0));
-    btnOK.sig_fire.addNewClosure(loop.makeStop(0));
-
-    win.add(disp);
-    win.add(del.addNew(new ui::widgets::Quit(root, loop)));
-
-    win.pack();
-    root.centerWidget(win);
-    root.add(win);
-    loop.run();
+    ui::dialogs::MessageBox(g, tx("Combat Score Overview"), root)
+        .doOkDialog(tx);
 }

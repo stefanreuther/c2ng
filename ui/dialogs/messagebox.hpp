@@ -31,17 +31,23 @@ namespace ui { namespace dialogs {
         As a shortcut, doYesNoDialog() and doOkDialog() perform a standard sequence of addButton() and run(). */
     class MessageBox : public Window {
      public:
-        /** Constructor.
+        /** Constructor (plain-text content).
             \param text Message box content
             \param title Message box window title
             \param root UI root */
         MessageBox(String_t text, String_t title, Root& root);
 
-        /** Constructor.
+        /** Constructor (rich-text content).
             \param text Message box content
             \param title Message box window title
             \param root UI root */
         MessageBox(util::rich::Text text, String_t title, Root& root);
+
+        /** Constructor (arbitrary widget content).
+            \param content Arbitrary widget. Must out-live the MessageBox.
+            \param title Message box window title
+            \param root UI root */
+        MessageBox(Widget& content, String_t title, Root& root);
 
         /** Destructor. */
         ~MessageBox();
@@ -93,6 +99,7 @@ namespace ui { namespace dialogs {
 
      private:
         void init(const util::rich::Text& text);
+        void init(Widget& content);
         void checkKey(int id, util::Key_t key, bool isButton);
 
         afl::base::Deleter m_deleter;

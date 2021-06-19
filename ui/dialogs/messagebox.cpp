@@ -44,6 +44,21 @@ ui::dialogs::MessageBox::MessageBox(util::rich::Text text, String_t title, Root&
     init(text);
 }
 
+// Constructor (arbitrary widget content).
+ui::dialogs::MessageBox::MessageBox(Widget& content, String_t title, Root& root)
+    : Window(title, root.provider(), root.colorScheme(), BLUE_WINDOW, ui::layout::VBox::instance5),
+      m_deleter(),
+      m_buttonGroup(m_deleter.addNew(new Group(ui::layout::HBox::instance5))),
+      m_keyDispatcher(m_deleter.addNew(new ui::widgets::KeyDispatcher())),
+      m_root(root),
+      m_loop(root),
+      m_flags(),
+      m_firstCommand(0),
+      m_lastCommand(0)
+{
+    init(content);
+}
+
 // Destructor.
 ui::dialogs::MessageBox::~MessageBox()
 { }
@@ -159,8 +174,14 @@ ui::dialogs::MessageBox::init(const util::rich::Text& text)
         width = 200;
     }
 
+    init(m_deleter.addNew(new ui::rich::StaticText(bigText, width, m_root.provider())));
+}
+
+void
+ui::dialogs::MessageBox::init(Widget& content)
+{
     // Build widgets
-    add(m_deleter.addNew(new ui::rich::StaticText(bigText, width, m_root.provider())));
+    add(content);
     add(m_buttonGroup);
     add(m_keyDispatcher);
 

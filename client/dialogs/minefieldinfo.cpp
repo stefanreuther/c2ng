@@ -496,9 +496,8 @@ MinefieldInfoDialog::showSweepInfo()
     util::NumberFormatter fmt(game::proxy::ConfigurationProxy(m_userSide.gameSender()).getNumberFormatter(link));
 
     // Build document
-    afl::base::Deleter del;
     const int em = m_root.provider().getFont(gfx::FontRequest())->getEmWidth();
-    ui::rich::DocumentView& docView = del.addNew(new ui::rich::DocumentView(gfx::Point(20*em, 1), 0, m_root.provider()));
+    ui::rich::DocumentView docView(gfx::Point(20*em, 1), 0, m_root.provider());
     ui::rich::Document& doc = docView.getDocument();
     doc.setPageWidth(20 * em);
     doc.add(String_t(afl::string::Format(info.isWeb ? m_translator("To sweep %d web mines, use...") : m_translator("To sweep %d mines, use..."), fmt.formatNumber(info.units))));
@@ -511,34 +510,9 @@ MinefieldInfoDialog::showSweepInfo()
     doc.finish();
     docView.adjustToDocumentSize();
 
-    // Build window
-    // VBox
-    //   UIRichDocument
-    //   HBox
-    //     Spacer, "OK", Spacer
-    ui::Window& win = del.addNew(new ui::Window(m_translator("Minefield Information"), m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
-    win.add(docView);
-
-    ui::widgets::Button& btnOK = del.addNew(new ui::widgets::Button(m_translator("OK"), util::Key_Return, m_root));
-    ui::Group& g = del.addNew(new ui::Group(ui::layout::HBox::instance5));
-    g.add(del.addNew(new ui::Spacer()));
-    g.add(btnOK);
-    g.add(del.addNew(new ui::Spacer()));
-    win.add(g);
-
-    ui::EventLoop loop(m_root);
-    btnOK.sig_fire.addNewClosure(loop.makeStop(0));
-
-    ui::widgets::KeyDispatcher& disp = del.addNew(new ui::widgets::KeyDispatcher());
-    disp.addNewClosure(' ', loop.makeStop(0));
-    disp.addNewClosure(util::Key_Escape, loop.makeStop(0));
-    win.add(disp);
-    win.add(del.addNew(new ui::widgets::Quit(m_root, m_loop)));
-
-    win.pack();
-    m_root.centerWidget(win);
-    m_root.add(win);
-    loop.run();
+    // Show window
+    ui::dialogs::MessageBox(docView, m_translator("Minefield Information"), m_root)
+        .doOkDialog(m_translator);
 }
 
 
