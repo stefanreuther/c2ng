@@ -300,6 +300,6 @@ TestGameVcrOverview::testPointsKill()
     TS_ASSERT_EQUALS(sum.scores.at(6)->getTonsDestroyed().min(), 0);
     TS_ASSERT_EQUALS(sum.scores.at(6)->getTonsDestroyed().max(), 0);
 
-    TS_ASSERT_EQUALS(sum.numBattles, 1);
+    TS_ASSERT_EQUALS(sum.numBattles, 1U);
 }
 
