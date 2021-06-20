@@ -18,36 +18,35 @@
 #include "ui/spacer.hpp"
 #include "ui/widgets/button.hpp"
 #include "ui/widgets/quit.hpp"
+#include "ui/widgets/standarddialogbuttons.hpp"
 #include "ui/widgets/statictext.hpp"
 #include "ui/window.hpp"
+#include "util/editor/command.hpp"
 #include "util/unicodechars.hpp"
-#include "ui/widgets/standarddialogbuttons.hpp"
+
+namespace ed = util::editor;
 
 namespace {
     const char*const DEFAULT_FONT = "+";
 
-    size_t getPreviousWordBoundary(afl::charset::Utf8& u8, const String_t& str, size_t pos)
-    {
-        while (pos > 0 && u8.charAt(str, pos-1) == ' ')
-            --pos;
-        while (pos > 0 && u8.charAt(str, pos-1) != ' ')
-            --pos;
-        return pos;
-    }
-
-    size_t getNextWordBoundary(afl::charset::Utf8& u8, const String_t& str, size_t pos)
-    {
-        const size_t max = u8.length(str);
-        while (pos < max && u8.charAt(str, pos) == ' ')
-            ++pos;
-        while (pos < max && u8.charAt(str, pos) != ' ')
-            ++pos;
-        return pos;
-    }
-
     int getCursorWidth(gfx::Font& font)
     {
         return font.getEmWidth() / 2;
+    }
+
+    ed::Flags_t getEditorFlags(const ui::widgets::InputLine& in)
+    {
+        using ui::widgets::InputLine;
+
+        ed::Flags_t flags;
+        InputLine::Flags_t inFlags = in.getFlags();
+        if (inFlags.contains(InputLine::TypeErase)) {
+            flags += ed::TypeErase;
+        }
+        if (inFlags.contains(InputLine::NonEditable)) {
+            flags += ed::NonEditable;
+        }
+        return flags;
     }
 }
 
@@ -148,27 +147,8 @@ void
 ui::widgets::InputLine::insertText(String_t s)
 {
     // ex UIInputLine::insert
-    if (m_flags.contains(NonEditable)) {
-        return;
-    }
-    if (m_flags.contains(TypeErase)) {
-        // Replace
-        m_text = m_utf8.substr(s, 0, m_maxLength);
-        m_cursorIndex = m_utf8.length(m_text);
-        setFlag(TypeErase, false);
-    } else {
-        // Can we insert?
-        size_t textLength = m_utf8.length(m_text);
-        if (textLength >= m_maxLength)
-            return;
-
-        // Limit inserted text
-        s = m_utf8.substr(s, 0, m_maxLength - textLength);
-
-        // Compute new text
-        m_text = m_utf8.substr(m_text, 0, m_cursorIndex) + s + m_utf8.substr(m_text, m_cursorIndex, String_t::npos);
-        m_cursorIndex += m_utf8.length(s);
-    }
+    handleInsert(m_text, m_cursorIndex, 0, getEditorFlags(*this), s, m_maxLength);
+    setFlag(TypeErase, false);
     scroll();
     requestRedraw();
     sig_change.raise();
@@ -217,154 +197,26 @@ ui::widgets::InputLine::handleKey(util::Key_t key, int /*prefix*/)
             return true;
         }
     } else {
-        size_t pos;
-        switch(key) {
-         case util::Key_Left:
-            /* Move cursor left */
+        ed::Command cmd;
+        if (lookupKey(key, cmd) && handleCommand(m_text, m_cursorIndex, 0, getEditorFlags(*this), cmd, m_maxLength)) {
+            /* Handled by generic editor */
             requestActive();
             setFlag(TypeErase, false);
-            if (m_cursorIndex > 0) {
-                setCursorIndex(m_cursorIndex - 1);
-            }
+            scroll();
+            requestRedraw();
             return true;
-         case util::Key_Right:
-            /* Move cursor right */
+        } else if (m_flags.contains(NonEditable) && key == ' ') {
+            /* Trigger activation */
             requestActive();
-            setFlag(TypeErase, false);
-            if (m_cursorIndex < m_utf8.length(m_text)) {
-                setCursorIndex(m_cursorIndex + 1);
-            }
+            sig_activate.raise();
             return true;
-         case util::KeyMod_Ctrl + util::Key_Left:
-            /* Move cursor left one word */
+        } else if ((key & util::KeyMod_Mask) == 0 && (key < util::Key_FirstSpecial) && acceptUnicode(key)) {
+            /* Self-insert */
+            String_t n;
+            m_utf8.append(n, key);
             requestActive();
-            setFlag(TypeErase, false);
-            setCursorIndex(getPreviousWordBoundary(m_utf8, m_text, m_cursorIndex));
+            insertText(n);
             return true;
-         case util::KeyMod_Ctrl + util::Key_Right:
-            /* Move cursor right one word */
-            requestActive();
-            setFlag(TypeErase, false);
-            setCursorIndex(getNextWordBoundary(m_utf8, m_text, m_cursorIndex));
-            return true;
-         case util::Key_Backspace:
-            /* Delete character backward */
-            requestActive();
-            setFlag(TypeErase, false);
-            if (m_cursorIndex > 0) {
-                --m_cursorIndex;
-                if (!m_flags.contains(NonEditable)) {
-                    m_text = m_utf8.substr(m_text, 0, m_cursorIndex) + m_utf8.substr(m_text, m_cursorIndex+1, String_t::npos);
-                    sig_change.raise();
-                }
-                requestRedraw();
-            }
-            return true;
-         case util::Key_Delete:
-         case util::KeyMod_Ctrl + 'd':
-            /* Delete character forward, or delete whole text */
-            /* Note that in PCC 1.x, Ctrl-D is delete word forward */
-            requestActive();
-            if (!m_flags.contains(NonEditable)) {
-                if (m_flags.contains(TypeErase)) {
-                    m_text.erase();
-                    setFlag(TypeErase, false);
-                } else {
-                    if (m_cursorIndex < m_utf8.length(m_text)) {
-                        m_text = m_utf8.substr(m_text, 0, m_cursorIndex) + m_utf8.substr(m_text, m_cursorIndex+1, String_t::npos);
-                    }
-                }
-                scroll();
-                requestRedraw();
-                sig_change.raise();
-            }
-            return true;
-         case util::Key_Home:
-            /* Go to beginning */
-            requestActive();
-            setFlag(TypeErase, false);
-            setCursorIndex(0);
-            return true;
-         case util::Key_End:
-            /* Go to end */
-            requestActive();
-            setFlag(TypeErase, false);
-            setCursorIndex(m_utf8.length(m_text));
-            return true;
-         case util::KeyMod_Ctrl + 'y':
-            /* Delete whole line */
-            requestActive();
-            setFlag(TypeErase, false);
-            if (!m_flags.contains(NonEditable)) {
-                m_text.erase();
-                requestRedraw();
-                sig_change.raise();
-            }
-            setCursorIndex(0);
-            return true;
-         case util::KeyMod_Ctrl + 'k':
-            /* Delete till end of line */
-            requestActive();
-            setFlag(TypeErase, false);
-            if (!m_flags.contains(NonEditable)) {
-                m_text = m_utf8.substr(m_text, 0, m_cursorIndex);
-                requestRedraw();
-                sig_change.raise();
-            }
-            return true;
-         case util::KeyMod_Ctrl + util::Key_Backspace:
-            /* Delete word backward */
-            requestActive();
-            setFlag(TypeErase, false);
-            if (!m_flags.contains(NonEditable)) {
-                pos = getPreviousWordBoundary(m_utf8, m_text, m_cursorIndex);
-                m_text = m_utf8.substr(m_text, 0, pos) + m_utf8.substr(m_text, m_cursorIndex, String_t::npos);
-                setCursorIndex(pos);
-                requestRedraw();
-                sig_change.raise();
-            }
-            return true;
-         case util::KeyMod_Ctrl + 'u':
-            /* No-op, just clear type-erase */
-            requestActive();
-            setFlag(TypeErase, false);
-            return true;
-         case util::KeyMod_Ctrl + 't': {
-            /* Transpose characters */
-            size_t n = m_utf8.length(m_text);
-            requestActive();
-            setFlag(TypeErase, false);
-            if (n >= 2 && !m_flags.contains(NonEditable)) {
-                pos = m_cursorIndex;
-                if (pos >= n) {
-                    pos = n - 1;
-                }
-                m_text = m_utf8.substr(m_text, 0, pos-1) + m_utf8.substr(m_text, pos, 1) + m_utf8.substr(m_text, pos-1, 1) + m_utf8.substr(m_text, pos+1, String_t::npos);
-                setCursorIndex(pos+1);
-                requestRedraw();
-                sig_change.raise();
-            }
-            return true;
-         }
-
-         default:
-            if (m_flags.contains(NonEditable)) {
-                if (key == ' ') {
-                    requestActive();
-                    sig_activate.raise();
-                    return true;
-                }
-            } else {
-                if ((key & util::KeyMod_Mask) == 0 && (key < util::Key_FirstSpecial) && acceptUnicode(key)) {
-                    /* Self-insert */
-                    String_t n;
-                    m_utf8.append(n, key);
-                    requestActive();
-                    insertText(n);
-                    return true;
-                }
-            }
-            break;
         }
     }
     return false;

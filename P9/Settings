@@ -12,8 +12,8 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/proxy/vcroverviewproxy.cpp \
-    game/proxy/vcroverviewproxy.hpp \
+FILES_gamelib = util/editor/command.cpp util/editor/command.hpp \
+    game/proxy/vcroverviewproxy.cpp game/proxy/vcroverviewproxy.hpp \
     game/interface/basetaskbuildcommandparser.cpp \
     game/interface/basetaskbuildcommandparser.hpp game/vcr/flak/database.cpp \
     game/vcr/flak/database.hpp game/vcr/flak/object.cpp \
@@ -1563,17 +1563,17 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_game_proxy_vcroverviewproxy.cpp \
-    u/t_game_vcr_overview.cpp u/t_ui_icons_vbox.cpp \
-    u/t_server_play_flakconfigurationpacker.cpp u/t_game_vcr_flak_object.cpp \
-    u/t_game_vcr_flak_database.cpp u/t_game_vcr_flak_setup.cpp \
-    u/t_game_vcr_flak_algorithm.cpp u/t_game_vcr_flak_battle.cpp \
-    u/t_game_vcr_flak_gameenvironment.cpp u/t_game_vcr_flak_environment.cpp \
-    u/t_game_vcr_flak_configuration.cpp u/t_game_vcr_flak_position.cpp \
-    u/t_game_vcr_flak_structures.cpp u/t_game_vcr_flak.hpp \
-    u/t_ui_widgets_alignedcontainer.cpp u/t_ui_widgets_treelistbox.cpp \
-    u/t_game_proxy_historyshiplistproxy.cpp u/t_game_ref_historyshiplist.cpp \
-    u/t_game_ref_historyshipselection.cpp \
+FILES_testsuite = u/t_util_editor_command.cpp u/t_util_editor.hpp \
+    u/t_game_proxy_vcroverviewproxy.cpp u/t_game_vcr_overview.cpp \
+    u/t_ui_icons_vbox.cpp u/t_server_play_flakconfigurationpacker.cpp \
+    u/t_game_vcr_flak_object.cpp u/t_game_vcr_flak_database.cpp \
+    u/t_game_vcr_flak_setup.cpp u/t_game_vcr_flak_algorithm.cpp \
+    u/t_game_vcr_flak_battle.cpp u/t_game_vcr_flak_gameenvironment.cpp \
+    u/t_game_vcr_flak_environment.cpp u/t_game_vcr_flak_configuration.cpp \
+    u/t_game_vcr_flak_position.cpp u/t_game_vcr_flak_structures.cpp \
+    u/t_game_vcr_flak.hpp u/t_ui_widgets_alignedcontainer.cpp \
+    u/t_ui_widgets_treelistbox.cpp u/t_game_proxy_historyshiplistproxy.cpp \
+    u/t_game_ref_historyshiplist.cpp u/t_game_ref_historyshipselection.cpp \
     u/t_game_actions_multitransfersetup.cpp \
     u/t_game_test_simpleenvironment.cpp \
     u/t_game_proxy_expressionlistproxy.cpp \
