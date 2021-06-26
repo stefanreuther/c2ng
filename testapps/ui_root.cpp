@@ -36,23 +36,25 @@
 #include "ui/widgets/button.hpp"
 #include "ui/widgets/cardtabbar.hpp"
 #include "ui/widgets/checkbox.hpp"
+#include "ui/widgets/editor.hpp"
 #include "ui/widgets/framegroup.hpp"
 #include "ui/widgets/icongrid.hpp"
 #include "ui/widgets/inputline.hpp"
 #include "ui/widgets/optiongrid.hpp"
 #include "ui/widgets/radiobutton.hpp"
 #include "ui/widgets/richlistbox.hpp"
+#include "ui/widgets/scrollbarcontainer.hpp"
 #include "ui/widgets/simpletable.hpp"
 #include "ui/widgets/stringlistbox.hpp"
 #include "ui/widgets/tabbar.hpp"
 #include "ui/widgets/treelistbox.hpp"
 #include "ui/window.hpp"
 #include "util/consolelogger.hpp"
+#include "util/editor/editor.hpp"
 #include "util/rich/colorattribute.hpp"
 #include "util/rich/linkattribute.hpp"
 #include "util/rich/parser.hpp"
 #include "util/rich/styleattribute.hpp"
-#include "ui/widgets/scrollbarcontainer.hpp"
 #ifdef HAVE_SDL
 # include "gfx/sdl/engine.hpp"
 typedef gfx::sdl::Engine Engine_t;
@@ -569,6 +571,17 @@ namespace {
                      client::widgets::ReferenceListbox list(m_root);
                      list.setContent(ul);
                      testWidget(list);
+                     return true;
+                 }
+
+                 case 'E':
+                 {
+                     util::editor::Editor ed;
+                     ui::widgets::Editor edWidget(ed, m_root);
+                     ed.setLengthLimit(40);
+                     edWidget.setPreferredSizeInCells(40, 20);
+                     edWidget.setFlag(util::editor::AllowCursorAfterEnd, true);
+                     testWidget(edWidget);
                      return true;
                  }
 

@@ -692,7 +692,8 @@ PROJ_AUTO += \
     gamelib:game/*.cpp,game/*.hpp,util/*.cpp,util/*.hpp,interpreter/*.cpp,interpreter/*.hpp
 
 TARGETS += guilib
-FILES_guilib = client/dialogs/combatscoresummary.cpp \
+FILES_guilib = ui/widgets/editor.cpp ui/widgets/editor.hpp \
+    client/dialogs/combatscoresummary.cpp \
     client/dialogs/combatscoresummary.hpp ui/icons/vbox.cpp \
     ui/icons/vbox.hpp client/widgets/combatdiagram.cpp \
     client/widgets/combatdiagram.hpp client/dialogs/combatoverview.cpp \
