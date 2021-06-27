@@ -6,6 +6,7 @@
 #include "game/proxy/mailboxproxy.hpp"
 #include "game/actions/preconditions.hpp"
 #include "game/msg/configuration.hpp"
+#include "game/msg/outbox.hpp"
 #include "game/parser/format.hpp"
 #include "game/playerset.hpp"
 #include "game/proxy/waitindicator.hpp"
@@ -139,6 +140,10 @@ game::proxy::MailboxProxy::Trampoline::sendResponse(bool requested)
 
     m.actions = mbox.getMessageActions(m_currentMessage);
     m.flags = mbox.getMessageFlags(m_currentMessage);
+
+    if (const game::msg::Outbox* out = dynamic_cast<game::msg::Outbox*>(&mbox)) {
+        m.id = out->getMessageId(m_currentMessage);
+    }
 
     m_reply.postRequest(&MailboxProxy::updateCurrentMessage, index, m, requested);
 }

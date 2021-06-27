@@ -56,9 +56,10 @@ namespace game { namespace proxy {
             String_t replyName;                      ///< Name of player to send reply to, if any.
             game::msg::Mailbox::Flags_t flags;       ///< Flags.
             game::msg::Mailbox::Actions_t actions;   ///< Actions.
+            Id_t id;                                 ///< Message Id (for outgoing messages).
 
             Message()
-                : text(), isFiltered(false), goto1(), goto1Name(), goto2(), goto2Name(), reply(), replyAll(), replyName(), flags(), actions()
+                : text(), isFiltered(false), goto1(), goto1Name(), goto2(), goto2Name(), reply(), replyAll(), replyName(), flags(), actions(), id()
                 { }
         };
 

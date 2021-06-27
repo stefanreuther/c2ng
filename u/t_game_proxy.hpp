@@ -261,6 +261,14 @@ class TestGameProxyObjectObserver : public CxxTest::TestSuite {
     void testInterface();
 };
 
+class TestGameProxyOutboxProxy : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testNormal();
+    void testAdaptor();
+    void testMailboxProxy();
+};
+
 class TestGameProxyPlanetInfoProxy : public CxxTest::TestSuite {
  public:
     void testIt();
