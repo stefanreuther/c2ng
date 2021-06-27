@@ -565,6 +565,7 @@ Bind RaceScreen       "alt-q"  := "CC$ProcessManager"
 Bind RaceScreen       "s"      := "UI.ShowScores"
 Bind RaceScreen       "t"      := "UI.EditTeams"
 Bind RaceScreen       "v"      := "CC$ViewCombat"
+Bind RaceScreen       "w"      := "CC$SendMessage"
 
 % Selection Dialog Bindings
 % ex WObjectSelectionControl::handleEvent

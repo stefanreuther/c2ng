@@ -36,6 +36,7 @@
 #include "ui/widgets/button.hpp"
 #include "ui/widgets/cardtabbar.hpp"
 #include "ui/widgets/checkbox.hpp"
+#include "ui/widgets/checkboxlistbox.hpp"
 #include "ui/widgets/editor.hpp"
 #include "ui/widgets/framegroup.hpp"
 #include "ui/widgets/icongrid.hpp"
@@ -202,6 +203,17 @@ namespace {
                     items.push_back(FileListbox::Item("file", 1, false, FileListbox::iFile));
                 }
                 box.swapItems(items);
+
+                testWidget(box);
+            }
+
+        void testCheckboxList(ui::widgets::CheckboxListbox::Layout lay)
+            {
+                ui::widgets::CheckboxListbox box(m_root, lay);
+                box.setItemImageName(box.setItemInfo(box.addItem(1, "label one"), "info one"), "ui.cb0");
+                box.setItemImageName(box.setItemInfo(box.addItem(2, "label two"), "info two"), "ui.cb1");
+                box.setItemAccessible(box.setItemImageName(box.setItemInfo(box.addItem(3, "label three"), "info three"), "ui.cb0"), false);
+                box.setItemImageName(box.setItemInfo(box.addItem(4, "label four"), "info four"), "ui.cb0");
 
                 testWidget(box);
             }
@@ -597,6 +609,14 @@ namespace {
                      testWidget(edWidget);
                      return true;
                  }
+
+                 case 'k':
+                    testCheckboxList(ui::widgets::CheckboxListbox::SingleLine);
+                    return true;
+
+                 case 'K':
+                    testCheckboxList(ui::widgets::CheckboxListbox::MultiLine);
+                    return true;
 
                  case 'x':
                  {

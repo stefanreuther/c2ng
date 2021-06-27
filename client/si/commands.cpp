@@ -27,6 +27,7 @@
 #include "client/dialogs/inboxdialog.hpp"
 #include "client/dialogs/ionstorminfo.hpp"
 #include "client/dialogs/keymapdialog.hpp"
+#include "client/dialogs/messagereceiver.hpp"
 #include "client/dialogs/minefieldinfo.hpp"
 #include "client/dialogs/multitransfer.hpp"
 #include "client/dialogs/navchartdialog.hpp"
@@ -66,6 +67,7 @@
 #include "client/si/usertask.hpp"
 #include "client/vcr/classic/playbackscreen.hpp"
 #include "client/widgets/helpwidget.hpp"
+#include "client/widgets/playersetselector.hpp"
 #include "game/actions/multitransfersetup.hpp"
 #include "game/actions/preconditions.hpp"
 #include "game/exception.hpp"
@@ -84,6 +86,7 @@
 #include "game/proxy/chunnelproxy.hpp"
 #include "game/proxy/inboxadaptor.hpp"
 #include "game/proxy/maplocationproxy.hpp"
+#include "game/proxy/playerproxy.hpp"
 #include "game/proxy/searchproxy.hpp"
 #include "game/registrationkey.hpp"
 #include "game/root.hpp"
@@ -1410,6 +1413,43 @@ client::si::IFCCSellSupplies(game::Session& session, ScriptSide& si, RequestLink
         game::Id_t m_id;
     };
     si.postNewTask(link, new DialogTask(pPlanet->getId()));
+}
+
+// @since PCC2 2.40.11
+void
+client::si::IFCCSendMessage(game::Session& /*session*/, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    args.checkArgumentCount(0);
+    class DialogTask : public UserTask {
+     public:
+        virtual void handle(Control& ctl, RequestLink2 link)
+            {
+                // ex chooseNewMessageReceiver (sort-of)
+                afl::string::Translator& tx = ctl.translator();
+                ui::Root& root = ctl.root();
+
+                // Initialize data (this could have already been done on the script side?)
+                game::proxy::PlayerProxy proxy(ctl.interface().gameSender());
+                Downlink ind(root, tx);
+
+                game::PlayerArray<String_t> names = proxy.getPlayerNames(ind, game::Player::ShortName);
+                game::PlayerSet_t players = proxy.getAllPlayers(ind);
+
+                // Widget
+                client::widgets::HelpWidget help(root, tx, ctl.interface().gameSender(), "pcc2:msgout");
+                client::widgets::PlayerSetSelector setSelect(ctl.root(), names, players + 0, tx);
+                client::dialogs::MessageReceiver dlg(tx("Send Message"), setSelect, ctl.root(), tx);
+                dlg.addUniversalToggle(players);
+                dlg.addHelp(help);
+                // FIXME: revise
+                dlg.pack();
+                ctl.root().centerWidget(dlg);
+                dlg.run();
+
+                ctl.interface().continueProcess(link);
+            }
+    };
+    si.postNewTask(link, new DialogTask());
 }
 
 // @since PCC2 2.40.9
@@ -3478,7 +3518,7 @@ client::si::registerCommands(UserSide& ui)
                 s.world().setNewGlobalValue("CC$REMOTEGETQUESTION",  new SimpleFunction(s, IFCCRemoteGetQuestion));
                 s.world().setNewGlobalValue("CC$REMOTETOGGLE",       new SimpleProcedure(s, IFCCRemoteToggle));
                 s.world().setNewGlobalValue("CC$SELLSUPPLIES",       new ScriptProcedure(s, &si, IFCCSellSupplies));
-                // s.world().setNewGlobalValue("CC$SENDMESSAGE",        new ScriptProcedure(s, &si, IFCCSendMessage));
+                s.world().setNewGlobalValue("CC$SENDMESSAGE",        new ScriptProcedure(s, &si, IFCCSendMessage));
                 // s.world().setNewGlobalValue("CC$SETTINGS",           new ScriptProcedure(s, &si, IFCCSettings));
                 // s.world().setNewGlobalValue("CC$SHIPCOSTCALC",       new ScriptProcedure(s, &si, IFCCShipCostCalc),
                 // s.world().setNewGlobalValue("CC$SHIPSPEC",           new ScriptProcedure(s, &si, IFCCShipSpec));
