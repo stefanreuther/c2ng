@@ -9,6 +9,8 @@
 #include "gfx/complex.hpp"
 #include "ui/draw.hpp"
 #include "util/math.hpp"
+#include "util/syntax/nullhighlighter.hpp"
+#include "util/syntax/segment.hpp"
 #include "util/updater.hpp"
 
 using util::Updater;
@@ -18,8 +20,23 @@ namespace {
      *  Color Configuration
      */
     const uint8_t Color_Background = ui::Color_Black;
-    const uint8_t Color_Text = ui::Color_White;
     const uint8_t Color_Cursor = ui::Color_Yellow;
+
+    uint8_t getColor(util::syntax::Format fmt)
+    {
+        switch (fmt) {
+         case util::syntax::DefaultFormat:  return ui::Color_Gray;
+         case util::syntax::KeywordFormat:  return ui::Color_White;
+         case util::syntax::NameFormat:     return ui::Color_BlueGray;
+         case util::syntax::StringFormat:   return ui::Color_Green;
+         case util::syntax::CommentFormat:  return ui::Color_Red;
+         case util::syntax::Comment2Format: return ui::Color_Red;
+         case util::syntax::SectionFormat:  return ui::Color_White;
+         case util::syntax::QuoteFormat:    return ui::Color_BrightCyan;
+         case util::syntax::ErrorFormat:    return ui::Color_Gray;
+        }
+        return ui::Color_Gray;
+    }
 }
 
 
@@ -31,6 +48,7 @@ ui::widgets::Editor::Editor(util::editor::Editor& ed, Root& root)
       m_firstColumn(0),
       m_firstLine(0),
       m_allowScrolling(true),
+      m_pHighlighter(),
       conn_editorChange(ed.sig_change.add(this, &Editor::onEditorChange))
 { }
 
@@ -88,6 +106,13 @@ ui::widgets::Editor::toggleFlag(util::editor::Flag flag)
 }
 
 void
+ui::widgets::Editor::setHighlighter(util::syntax::Highlighter* p)
+{
+    m_pHighlighter = p;
+    requestRedraw();
+}
+
+void
 ui::widgets::Editor::draw(gfx::Canvas& can)
 {
     gfx::Rectangle area = getExtent();
@@ -101,6 +126,10 @@ ui::widgets::Editor::draw(gfx::Canvas& can)
 
     const afl::charset::Utf8 u8(0);
 
+    // Highlighter
+    util::syntax::NullHighlighter nullH;
+    util::syntax::Highlighter* pHighlighter = m_pHighlighter ? m_pHighlighter : &nullH;
+
     ctx.useFont(*font);
     const size_t numLines = util::divideAndRoundUp(area.getHeight(), cellSize.getY());
     for (size_t i = 0; i < numLines; ++i) {
@@ -110,10 +139,31 @@ ui::widgets::Editor::draw(gfx::Canvas& can)
             drawSolidBar(ctx, lineArea, Color_Background);
 
             // Text
-            ctx.setColor(Color_Text);
             String_t text = m_editor.getLineText(m_firstLine + i);
-            text.erase(0, u8.charToBytePos(text, m_firstColumn));
-            outText(ctx, lineArea.getTopLeft(), text);
+            size_t columnsToSkip = m_firstColumn;
+            gfx::Rectangle chunkArea = lineArea;
+
+            util::syntax::Segment seg;
+            pHighlighter->init(afl::string::toMemory(text));
+            while (pHighlighter->scan(seg) && chunkArea.exists()) {
+                // Draw segment
+                String_t segText = afl::string::fromMemory(seg.getText());
+                size_t segLen = u8.length(segText);
+                if (segLen <= columnsToSkip) {
+                    // Entire segment scrolled out
+                    columnsToSkip -= segLen;
+                } else {
+                    // Segment is (partially) visible
+                    segText.erase(0, u8.charToBytePos(text, columnsToSkip));
+                    segLen -= columnsToSkip;
+                    columnsToSkip = 0;
+
+                    ctx.setColor(getColor(seg.getFormat()));
+                    outText(ctx, chunkArea.getTopLeft(), segText);
+
+                    chunkArea.consumeX(cellSize.getX() * int(segLen));
+                }
+            }
 
             // Cursor
             if (m_firstLine + i == m_editor.getCurrentLine()) {

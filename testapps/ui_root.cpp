@@ -55,6 +55,8 @@
 #include "util/rich/linkattribute.hpp"
 #include "util/rich/parser.hpp"
 #include "util/rich/styleattribute.hpp"
+#include "util/syntax/keywordtable.hpp"
+#include "util/syntax/scripthighlighter.hpp"
 #ifdef HAVE_SDL
 # include "gfx/sdl/engine.hpp"
 typedef gfx::sdl::Engine Engine_t;
@@ -577,10 +579,13 @@ namespace {
                  case 'E':
                  {
                      util::editor::Editor ed;
+                     util::syntax::KeywordTable tab;
+                     util::syntax::ScriptHighlighter sh(tab);
                      ui::widgets::Editor edWidget(ed, m_root);
                      ed.setLengthLimit(40);
                      edWidget.setPreferredSizeInCells(40, 20);
                      edWidget.setFlag(util::editor::AllowCursorAfterEnd, true);
+                     edWidget.setHighlighter(&sh);
                      testWidget(edWidget);
                      return true;
                  }

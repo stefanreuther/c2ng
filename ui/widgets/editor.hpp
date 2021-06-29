@@ -9,6 +9,7 @@
 #include "ui/root.hpp"
 #include "ui/simplewidget.hpp"
 #include "util/editor/editor.hpp"
+#include "util/syntax/highlighter.hpp"
 
 namespace ui { namespace widgets {
 
@@ -55,6 +56,17 @@ namespace ui { namespace widgets {
             \param flag   Flag */
         void toggleFlag(util::editor::Flag flag);
 
+        /** Set highlighter to use.
+            This enables syntax-coloring.
+
+            Text is highlighted on by-line basis.
+            The highlighter therefore must not carry over state from one line to another,
+            but be able to colorize each line individually.
+            This means, things like C comments or line continuations are not supported.
+
+            \param p Highlighter. Can be null to disable; otherwise, lifetime must exceed that of the editor. */
+        void setHighlighter(util::syntax::Highlighter* p);
+
         // Widget:
         virtual void draw(gfx::Canvas& can);
         virtual void handleStateChange(State st, bool enable);
@@ -74,6 +86,8 @@ namespace ui { namespace widgets {
         size_t m_firstColumn;
         size_t m_firstLine;
         bool m_allowScrolling;
+
+        util::syntax::Highlighter* m_pHighlighter;
 
         afl::base::SignalConnection conn_editorChange;
     };
