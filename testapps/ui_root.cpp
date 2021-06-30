@@ -578,6 +578,13 @@ namespace {
 
                  case 'E':
                  {
+                     class Filter : public ui::widgets::Editor::CharacterFilter_t {
+                      public:
+                         bool call(afl::charset::Unichar_t ch)
+                             { return (ch >= 32 && ch < 127); }
+                     };
+
+                     Filter f;
                      util::editor::Editor ed;
                      util::syntax::KeywordTable tab;
                      util::syntax::ScriptHighlighter sh(tab);
@@ -586,6 +593,7 @@ namespace {
                      edWidget.setPreferredSizeInCells(40, 20);
                      edWidget.setFlag(util::editor::AllowCursorAfterEnd, true);
                      edWidget.setHighlighter(&sh);
+                     edWidget.setCharacterFilter(&f);
                      testWidget(edWidget);
                      return true;
                  }

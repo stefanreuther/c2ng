@@ -6,6 +6,8 @@
 #define C2NG_UI_WIDGETS_EDITOR_HPP
 
 #include "afl/base/signalconnection.hpp"
+#include "afl/base/closure.hpp"
+#include "afl/charset/unicode.hpp"
 #include "ui/root.hpp"
 #include "ui/simplewidget.hpp"
 #include "util/editor/editor.hpp"
@@ -14,9 +16,20 @@
 namespace ui { namespace widgets {
 
     /** Editor widget.
-        Allows control of a multi-line util::editor::Editor. */
+        Allows control of a multi-line util::editor::Editor.
+        Changes to the underlying Editor will be displayed.
+
+        Additional features:
+        - allows scrolling if the editor size exceeds that of the widget
+        - line-based syntax highlighting
+        - filtering of typed characters */
     class Editor : public SimpleWidget {
      public:
+        /** Character filter.
+            \see setCharacterFilter */
+        typedef afl::base::Closure<bool(afl::charset::Unichar_t)> CharacterFilter_t;
+
+
         /** Constructor.
             \param ed   Editor. Must outlive this widget.
             \param root UI root (for color scheme, font) */
@@ -67,6 +80,13 @@ namespace ui { namespace widgets {
             \param p Highlighter. Can be null to disable; otherwise, lifetime must exceed that of the editor. */
         void setHighlighter(util::syntax::Highlighter* p);
 
+        /** Set character filter.
+            When set, only characters accepted by it are accepted.
+            When no character filter is set (default), all Unicode characters are accepted.
+
+            \param p Character filter. Can be null to disable; otherwise, lifetime must exceed that of the editor. */
+        void setCharacterFilter(CharacterFilter_t* p);
+
         // Widget:
         virtual void draw(gfx::Canvas& can);
         virtual void handleStateChange(State st, bool enable);
@@ -77,6 +97,7 @@ namespace ui { namespace widgets {
 
      private:
         void onEditorChange(size_t firstLine, size_t lastLine);
+        bool acceptUnicode(afl::charset::Unichar_t ch) const;
         afl::base::Ref<gfx::Font> getFont();
 
         util::editor::Editor& m_editor;
@@ -88,6 +109,7 @@ namespace ui { namespace widgets {
         bool m_allowScrolling;
 
         util::syntax::Highlighter* m_pHighlighter;
+        CharacterFilter_t* m_pCharacterFilter;
 
         afl::base::SignalConnection conn_editorChange;
     };

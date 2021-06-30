@@ -49,6 +49,7 @@ ui::widgets::Editor::Editor(util::editor::Editor& ed, Root& root)
       m_firstLine(0),
       m_allowScrolling(true),
       m_pHighlighter(),
+      m_pCharacterFilter(),
       conn_editorChange(ed.sig_change.add(this, &Editor::onEditorChange))
 { }
 
@@ -110,6 +111,12 @@ ui::widgets::Editor::setHighlighter(util::syntax::Highlighter* p)
 {
     m_pHighlighter = p;
     requestRedraw();
+}
+
+void
+ui::widgets::Editor::setCharacterFilter(CharacterFilter_t* p)
+{
+    m_pCharacterFilter = p;
 }
 
 void
@@ -229,7 +236,7 @@ ui::widgets::Editor::handleKey(util::Key_t key, int prefix)
         }
     }
 
-    if ((key & util::KeyMod_Mask) == 0 && (key < util::Key_FirstSpecial) /*&& acceptUnicode(key)*/) {
+    if ((key & util::KeyMod_Mask) == 0 && (key < util::Key_FirstSpecial) && acceptUnicode(key)) {
         /* Self-insert */
         String_t n;
         afl::charset::Utf8(0).append(n, key);
@@ -295,6 +302,13 @@ ui::widgets::Editor::onEditorChange(size_t firstLine, size_t lastLine)
             requestRedraw(area);
         }
     }
+}
+
+bool
+ui::widgets::Editor::acceptUnicode(afl::charset::Unichar_t ch) const
+{
+    return m_pCharacterFilter == 0
+        || m_pCharacterFilter->call(ch);
 }
 
 afl::base::Ref<gfx::Font>
