@@ -690,6 +690,7 @@ ui::rich::DocumentParser::parsePre()
              case util::syntax::KeywordFormat:
              case util::syntax::NameFormat:
              case util::syntax::SectionFormat:
+             case util::syntax::QuoteFormat:
              case util::syntax::ErrorFormat:
                 out.append(afl::string::fromMemory(seg.getText()));
                 break;

@@ -121,6 +121,7 @@ namespace {
          case util::syntax::CommentFormat:  return "syn-com";
          case util::syntax::Comment2Format: return "syn-com2";
          case util::syntax::SectionFormat:  return "syn-sec";
+         case util::syntax::QuoteFormat:    return "syn-quote";
          case util::syntax::ErrorFormat:    return "syn-err";
         }
         return 0;

@@ -16,6 +16,7 @@ namespace util { namespace syntax {
         CommentFormat,          ///< A comment.
         Comment2Format,         ///< A special comment, e.g. "### foo" in ini files.
         SectionFormat,          ///< A section divider, e.g. "%PHOST".
+        QuoteFormat,            ///< Quoted text, e.g. "> foo" in a message.
         ErrorFormat             ///< Unparseable.
     };
 
