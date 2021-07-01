@@ -693,7 +693,8 @@ PROJ_AUTO += \
     gamelib:game/*.cpp,game/*.hpp,util/*.cpp,util/*.hpp,interpreter/*.cpp,interpreter/*.hpp
 
 TARGETS += guilib
-FILES_guilib = client/dialogs/messagereceiver.cpp \
+FILES_guilib = client/dialogs/messageeditor.cpp \
+    client/dialogs/messageeditor.hpp client/dialogs/messagereceiver.cpp \
     client/dialogs/messagereceiver.hpp client/widgets/playersetselector.cpp \
     ui/widgets/checkboxlistbox.cpp ui/widgets/checkboxlistbox.hpp \
     client/widgets/playersetselector.hpp ui/widgets/editor.cpp \

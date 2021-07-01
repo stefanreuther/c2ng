@@ -109,6 +109,8 @@
 #include "util/rich/parser.hpp"
 #include "util/rich/text.hpp"
 #include "util/unicodechars.hpp"
+#include "client/dialogs/messageeditor.hpp"
+#include "game/proxy/outboxproxy.hpp"
 
 using client::si::UserTask;
 using client::si::UserSide;
@@ -1417,11 +1419,14 @@ client::si::IFCCSellSupplies(game::Session& session, ScriptSide& si, RequestLink
 
 // @since PCC2 2.40.11
 void
-client::si::IFCCSendMessage(game::Session& /*session*/, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+client::si::IFCCSendMessage(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
 {
     args.checkArgumentCount(0);
     class DialogTask : public UserTask {
      public:
+        DialogTask(int viewpointPlayer)
+            : m_viewpointPlayer(viewpointPlayer)
+            { }
         virtual void handle(Control& ctl, RequestLink2 link)
             {
                 // ex chooseNewMessageReceiver (sort-of)
@@ -1444,12 +1449,30 @@ client::si::IFCCSendMessage(game::Session& /*session*/, ScriptSide& si, RequestL
                 // FIXME: revise
                 dlg.pack();
                 ctl.root().centerWidget(dlg);
-                dlg.run();
+                switch (dlg.run()) {
+                 case 1: {
+                    game::proxy::OutboxProxy outProxy(ctl.interface().gameSender());
+                    client::dialogs::MessageEditor ed(root, outProxy, ctl.interface().gameSender(), tx);
+                    ed.setSender(m_viewpointPlayer);
+                    ed.setReceivers(setSelect.getSelectedPlayers());
+                    if (ed.run()) {
+                        outProxy.addMessage(ed.getSender(), ed.getText(), ed.getReceivers());
+                    }
+                    break;
+                 }
+
+                 default:
+                    // Cancel etc.
+                    break;
+                }
 
                 ctl.interface().continueProcess(link);
             }
+     private:
+        int m_viewpointPlayer;
     };
-    si.postNewTask(link, new DialogTask());
+    game::Game& g = game::actions::mustHaveGame(session);
+    si.postNewTask(link, new DialogTask(g.getViewpointPlayer()));
 }
 
 // @since PCC2 2.40.9
