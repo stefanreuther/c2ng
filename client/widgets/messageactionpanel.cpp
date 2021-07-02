@@ -210,7 +210,7 @@ client::widgets::MessageActionPanel::init(ui::Root& root, afl::string::Translato
     m_actions.pushBackNew(new LabeledButton(root, 'e', "E", tx("Edit...")));
 
     static_assert(Redirect == 5, "Redirect");
-    m_actions.pushBackNew(new LabeledButton(root, 'r', "R", tx("To...")));
+    m_actions.pushBackNew(new LabeledButton(root, 't', "T", tx("To...")));
 
     static_assert(Delete == 6, "Delete");
     m_actions.pushBackNew(new LabeledButton(root, util::Key_Delete, "Del", tx("Delete")));

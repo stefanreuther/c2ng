@@ -27,12 +27,14 @@
 #include "client/dialogs/inboxdialog.hpp"
 #include "client/dialogs/ionstorminfo.hpp"
 #include "client/dialogs/keymapdialog.hpp"
+#include "client/dialogs/messageeditor.hpp"
 #include "client/dialogs/messagereceiver.hpp"
 #include "client/dialogs/minefieldinfo.hpp"
 #include "client/dialogs/multitransfer.hpp"
 #include "client/dialogs/navchartdialog.hpp"
 #include "client/dialogs/notifications.hpp"
 #include "client/dialogs/objectselectiondialog.hpp"
+#include "client/dialogs/outboxdialog.hpp"
 #include "client/dialogs/planetinfodialog.hpp"
 #include "client/dialogs/processlistdialog.hpp"
 #include "client/dialogs/revertdialog.hpp"
@@ -86,6 +88,7 @@
 #include "game/proxy/chunnelproxy.hpp"
 #include "game/proxy/inboxadaptor.hpp"
 #include "game/proxy/maplocationproxy.hpp"
+#include "game/proxy/outboxproxy.hpp"
 #include "game/proxy/playerproxy.hpp"
 #include "game/proxy/searchproxy.hpp"
 #include "game/registrationkey.hpp"
@@ -109,8 +112,6 @@
 #include "util/rich/parser.hpp"
 #include "util/rich/text.hpp"
 #include "util/unicodechars.hpp"
-#include "client/dialogs/messageeditor.hpp"
-#include "game/proxy/outboxproxy.hpp"
 
 using client::si::UserTask;
 using client::si::UserSide;
@@ -1424,8 +1425,8 @@ client::si::IFCCSendMessage(game::Session& session, ScriptSide& si, RequestLink1
     args.checkArgumentCount(0);
     class DialogTask : public UserTask {
      public:
-        DialogTask(int viewpointPlayer)
-            : m_viewpointPlayer(viewpointPlayer)
+        DialogTask(int viewpointPlayer, bool hasMessages)
+            : m_viewpointPlayer(viewpointPlayer), m_hasMessages(hasMessages)
             { }
         virtual void handle(Control& ctl, RequestLink2 link)
             {
@@ -1446,11 +1447,14 @@ client::si::IFCCSendMessage(game::Session& session, ScriptSide& si, RequestLink1
                 client::dialogs::MessageReceiver dlg(tx("Send Message"), setSelect, ctl.root(), tx);
                 dlg.addUniversalToggle(players);
                 dlg.addHelp(help);
-                // FIXME: revise
+                if (m_hasMessages) {
+                    dlg.addExtra(util::KeyString(tx("Revise...")), 2);
+                }
                 dlg.pack();
                 ctl.root().centerWidget(dlg);
                 switch (dlg.run()) {
                  case 1: {
+                    // Send
                     game::proxy::OutboxProxy outProxy(ctl.interface().gameSender());
                     client::dialogs::MessageEditor ed(root, outProxy, ctl.interface().gameSender(), tx);
                     ed.setSender(m_viewpointPlayer);
@@ -1458,21 +1462,33 @@ client::si::IFCCSendMessage(game::Session& session, ScriptSide& si, RequestLink1
                     if (ed.run()) {
                         outProxy.addMessage(ed.getSender(), ed.getText(), ed.getReceivers());
                     }
+                    ctl.interface().continueProcess(link);
+                    break;
+                 }
+
+                 case 2: {
+                    // Revise
+                    client::dialogs::OutboxDialog dlg(tx("Revise Messages"), ctl.interface(), root, "pcc2:revise", tx);
+                    OutputState out;
+                    dlg.run(out, tx("No messages sent so far"));
+                    ctl.interface().joinProcess(link, out.getProcess());
+                    ctl.handleStateChange(link, out.getTarget());
                     break;
                  }
 
                  default:
                     // Cancel etc.
+                    ctl.interface().continueProcess(link);
                     break;
                 }
 
-                ctl.interface().continueProcess(link);
             }
      private:
         int m_viewpointPlayer;
+        bool m_hasMessages;
     };
     game::Game& g = game::actions::mustHaveGame(session);
-    si.postNewTask(link, new DialogTask(g.getViewpointPlayer()));
+    si.postNewTask(link, new DialogTask(g.getViewpointPlayer(), g.currentTurn().outbox().getNumMessages() != 0));
 }
 
 // @since PCC2 2.40.9
