@@ -693,7 +693,7 @@ PROJ_AUTO += \
     gamelib:game/*.cpp,game/*.hpp,util/*.cpp,util/*.hpp,interpreter/*.cpp,interpreter/*.hpp
 
 TARGETS += guilib
-FILES_guilib = client/dialogs/outboxdialog.cpp \
+FILES_guilib = gfx/threed/vecmath.hpp client/dialogs/outboxdialog.cpp \
     client/dialogs/outboxdialog.hpp client/dialogs/messageeditor.cpp \
     client/dialogs/messageeditor.hpp client/dialogs/messagereceiver.cpp \
     client/dialogs/messagereceiver.hpp client/widgets/playersetselector.cpp \
@@ -1571,7 +1571,8 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_gfx_complex.cpp u/t_game_proxy_outboxproxy.cpp \
+FILES_testsuite = u/t_gfx_threed_vecmath.cpp u/t_gfx_threed.hpp \
+    u/t_gfx_complex.cpp u/t_game_proxy_outboxproxy.cpp \
     u/t_util_editor_editor.cpp u/t_util_editor_command.cpp \
     u/t_util_editor.hpp u/t_game_proxy_vcroverviewproxy.cpp \
     u/t_game_vcr_overview.cpp u/t_ui_icons_vbox.cpp \
