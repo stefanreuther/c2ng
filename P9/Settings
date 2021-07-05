@@ -693,13 +693,18 @@ PROJ_AUTO += \
     gamelib:game/*.cpp,game/*.hpp,util/*.cpp,util/*.hpp,interpreter/*.cpp,interpreter/*.hpp
 
 TARGETS += guilib
-FILES_guilib = gfx/threed/vecmath.hpp client/dialogs/outboxdialog.cpp \
-    client/dialogs/outboxdialog.hpp client/dialogs/messageeditor.cpp \
-    client/dialogs/messageeditor.hpp client/dialogs/messagereceiver.cpp \
-    client/dialogs/messagereceiver.hpp client/widgets/playersetselector.cpp \
-    ui/widgets/checkboxlistbox.cpp ui/widgets/checkboxlistbox.hpp \
-    client/widgets/playersetselector.hpp ui/widgets/editor.cpp \
-    ui/widgets/editor.hpp client/dialogs/combatscoresummary.cpp \
+FILES_guilib = gfx/threed/particlerenderer.hpp \
+    gfx/threed/trianglerenderer.cpp gfx/threed/trianglerenderer.hpp \
+    gfx/threed/softwarecontext.cpp gfx/threed/softwarecontext.hpp \
+    gfx/threed/linerenderer.cpp gfx/threed/linerenderer.hpp \
+    gfx/threed/context.hpp gfx/threed/vecmath.hpp \
+    client/dialogs/outboxdialog.cpp client/dialogs/outboxdialog.hpp \
+    client/dialogs/messageeditor.cpp client/dialogs/messageeditor.hpp \
+    client/dialogs/messagereceiver.cpp client/dialogs/messagereceiver.hpp \
+    client/widgets/playersetselector.cpp ui/widgets/checkboxlistbox.cpp \
+    ui/widgets/checkboxlistbox.hpp client/widgets/playersetselector.hpp \
+    ui/widgets/editor.cpp ui/widgets/editor.hpp \
+    client/dialogs/combatscoresummary.cpp \
     client/dialogs/combatscoresummary.hpp ui/icons/vbox.cpp \
     ui/icons/vbox.hpp client/widgets/combatdiagram.cpp \
     client/widgets/combatdiagram.hpp client/dialogs/combatoverview.cpp \
