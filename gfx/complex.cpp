@@ -1,14 +1,15 @@
 /**
   *  \file gfx/complex.cpp
+  *  \brief Complex Graphics Primitives
   */
 
 #include <algorithm>
 #include <cmath>
 #include "gfx/complex.hpp"
-#include "gfx/context.hpp"
-#include "gfx/fillpattern.hpp"
 #include "gfx/canvas.hpp"
 #include "gfx/colorscheme.hpp"
+#include "gfx/context.hpp"
+#include "gfx/fillpattern.hpp"
 #include "util/math.hpp"
 
 namespace {
@@ -32,14 +33,16 @@ namespace {
         c.canvas().drawVLine(gfx::Point(x1, y1), c.getLineThickness(), c.getRawColor(), gfx::SOLID_LINE, c.getAlpha());
     }
 
+    /// Compute add+a/b with rounding.
+    inline int32_t divideAndRound(int32_t add, int32_t a, int32_t b)
+    {
+        a += add*b;             // for correct rounding if a/b is negative but add+a/b is positive
+        a += b/2;               // rounding...
+        return a / b;
+    }
+
 }
 
-// /** Draw Horizontal Line. Draw a horizontal line from (x1,y1) to (x2,y1),
-//     inclusive. There are no restrictions regarding the relations between
-//     the ending points.
-//     \param ctx parameters
-//     \param x1,y1 starting coordinates
-//     \param x2 ending X. */
 void
 gfx::drawHLine(const BaseContext& ctx, int x1, int y1, int x2)
 {
@@ -60,12 +63,6 @@ gfx::drawHLine(const BaseContext& ctx, int x1, int y1, int x2)
     }
 }
 
-// /** Draw Vertical Line. Draw a vertical line from (x1,y1) to (x1,y2),
-//     inclusive. There are no restrictions regarding the relations between
-//     the ending points.
-//     \param ctx parameters
-//     \param x1,y1 starting coordinates
-//     \param y2 ending Y */
 void
 gfx::drawVLine(const BaseContext& ctx, int x1, int y1, int y2)
 {
@@ -92,13 +89,6 @@ gfx::drawVLine(const BaseContext& ctx, int x1, int y1, int y2)
     }
 }
 
-// /** Draw Line. Draws a general line from (x1,y1) to (x2,y2), inclusive.
-//     This is a standard Bresenham algorithm, with shortcuts for
-//     horizontal and vertical lines. There are no restrictions
-//     regarding the relations between the endpoints.
-//     \param ctx parameters
-//     \param p1 starting coordinates
-//     \param p2 ending coordinates */
 void
 gfx::drawLine(const BaseContext& ctx, const Point p1, const Point p2)
 {
@@ -186,12 +176,6 @@ gfx::drawLine(const BaseContext& ctx, const Point p1, const Point p2)
     }
 }
 
-// /** Draw Line to. Draws a line between the current graphics cursor in
-//     \c parm to the specified (x,y) coordinates. Otherwise like drawLine(),
-//     i.e. endpoints are inclusive.
-//     \param ctx parameters. All line styles and the graphics cursor are used,
-//                the cursor is updated.
-//     \param x,y endpoint*/
 void
 gfx::drawLineTo(BaseContext& ctx, const Point pt)
 {
@@ -200,12 +184,6 @@ gfx::drawLineTo(BaseContext& ctx, const Point pt)
     ctx.setCursor(pt);
 }
 
-// /** Draw Relative Line. Draws a line from the current graphics cursor in
-//     \c parm to the point offset by (dx,dy) from it. Otherwise like
-//     drawLine().
-//     \param ctx parameters. All line styles and the graphics cursor are used,
-//                the cursor is updated.
-//     \param dx,dy offset of endpoint relative to cursor. */
 void
 gfx::drawLineRel(BaseContext& ctx, int dx, int dy)
 {
@@ -213,17 +191,6 @@ gfx::drawLineRel(BaseContext& ctx, int dx, int dy)
     drawLineTo(ctx, ctx.getCursor() + Point(dx, dy));
 }
 
-// /** Circle. Draws a circle around (x0,y0), with the specified radius.
-
-//     The algorithm variation used here draws pixels that are less than
-//     r+1 from center.
-
-//     \todo some pixels in the diagonals are painted twice which is a
-//     Bad Thing(tm) for alpha circles
-
-//     \param ctx parameters. All line styles are used.
-//     \param pt center point
-//     \param r radius */
 void
 gfx::drawCircle(const BaseContext& ctx, const Point pt, int r)
 {
@@ -304,11 +271,6 @@ gfx::drawCircle(const BaseContext& ctx, const Point pt, int r)
 #endif
 }
 
-// /** Draw filled circle. The circle is filled with the current fill settings.
-
-//     \param ctx parameters
-//     \param pt center point
-//     \param r radius */
 void
 gfx::drawFilledCircle(const BaseContext& ctx, const Point pt, int r)
 {
@@ -339,12 +301,6 @@ gfx::drawFilledCircle(const BaseContext& ctx, const Point pt, int r)
     }
 }
 
-// /** Draw Filled Bar. Draws a filled bar between the corners (x1,y1)
-//     and (x2,y2), inclusive. The given points can be any two opposing
-//     corners of the rectangle.
-//     \param ctx parameters. All fill styles are used.
-//     \param x1,y1 one corner
-//     \param x2,y2 other corner */
 void
 gfx::drawBar(const BaseContext& ctx, int x1, int y1, int x2, int y2)
 {
@@ -362,11 +318,6 @@ gfx::drawBar(const BaseContext& ctx, int x1, int y1, int x2, int y2)
                          ctx.getAlpha());
 }
 
-// /** Draw Filled Bar. Fills rectangle r with color and fill pattern
-//     from \c parm. Note that when you know alpha and color, you can
-//     also call drawBar() directly.
-//     \param ctx parameters. All fill styles are used.
-//     \param r rectangle to fill */
 void
 gfx::drawBar(const BaseContext& ctx, const Rectangle& r)
 {
@@ -377,25 +328,6 @@ gfx::drawBar(const BaseContext& ctx, const Rectangle& r)
                          ctx.getAlpha());
 }
 
-// // /** Draw Solid Bar. Draws a solid rectangle with the given color. This
-// //     one does not use a graphics parameter set.
-// //     \param can canvas
-// //     \param r rectangle to fill
-// //     \param color color to fill the rectangle with */
-// void
-// gfx::drawSolidBar(const Context& ctx, const Rectangle& r, Color_t color)
-// {
-//     ctx.canvas().drawBar(r,
-//                          ctx.colorScheme().getColor(color),
-//                          TRANSPARENT_COLOR,
-//                          FillPattern::SOLID,
-//                          ctx.getAlpha());
-// }
-
-// /** Draw rectangle. Draw the borders of a rectangle, but does not fill
-//     the object. Degenerate rectangles (size 0 or 1) are supported.
-//     \param ctx parameters. All line styles are used.
-//     \param r rectangle to draw */
 void
 gfx::drawRectangle(const BaseContext& ctx, const Rectangle& r)
 {
@@ -415,11 +347,6 @@ gfx::drawRectangle(const BaseContext& ctx, const Rectangle& r)
     }
 }
 
-// /** Draw an arrow.
-//     \param ctx       drawing parameters
-//     \param p1        starting coordinates
-//     \param p2        ending coordinates (the pointer is added here)
-//     \param ptsize    length of pointer in pixels, approximately */
 void
 gfx::drawArrow(const BaseContext& ctx, const Point p1, const Point p2, int ptsize)
 {
@@ -434,26 +361,59 @@ gfx::drawArrow(const BaseContext& ctx, const Point p1, const Point p2, int ptsiz
     }
 }
 
-// /** Draw pixel.
-//     \param ctx graphics context
-//     \param pt point */
 void
 gfx::drawPixel(const BaseContext& ctx, const Point pt)
 {
     ctx.canvas().drawPixel(pt, ctx.getRawColor(), ctx.getAlpha());
 }
 
-// // /** Draw background.
-// //     \param ctx graphics context
-// //     \param pt area */
-// void
-// gfx::drawBackground(Context& ctx, const Rectangle& r)
-// {
-//     ctx.colorScheme().drawBackground(ctx, r);
-// }
+void
+gfx::drawFilledPolygon(const BaseContext& ctx, afl::base::Memory<const Point> pts)
+{
+    // Determine number of points
+    size_t n = pts.size();
+    if (n < 3) {
+        return;
+    }
 
-// /** Blit Pixmap on Canvas. Displays this pixmap on the specified
-//     canvas, at the specified position. */
+    // Determine minimum Y
+    int y = pts.at(0)->getY();
+    for (size_t i = 1; i < n; ++i) {
+        y = std::min(y, pts.at(i)->getY());
+    }
+
+    // Storage for X's
+    std::vector<int> xs;
+    xs.reserve(n);
+
+    // Draw starting at y
+    while (1) {
+        // Determine list of X's intersected by this Y
+        xs.clear();
+        const Point* p = pts.at(n-1);
+        for (size_t i = 0; i < n; ++i) {
+            const Point* q = pts.at(i);
+            int py = p->getY(), qy = q->getY();
+            if ((py <= y && qy > y) || (qy <= y && py > y)) {
+                int px = p->getX(), qx = q->getX();
+                xs.push_back(divideAndRound(px, (y-py) * (qx-px), (qy-py)));
+            }
+            p = q;
+        }
+        if (xs.empty()) {
+            break;
+        }
+        std::sort(xs.begin(), xs.end());
+
+        // Draw horizontal lines
+        const LinePattern_t pat = ctx.fillPattern()[y];
+        for (size_t i = 0; i+1 < xs.size(); i += 2) {
+            ctx.canvas().drawHLine(Point(xs[i], y), xs[i+1] - xs[i], ctx.getRawColor(), pat, ctx.getAlpha());
+        }
+        ++y;
+    }
+}
+
 void
 gfx::blitPixmap(const BaseContext& ctx, Point pt, Canvas& pixmap)
 {
@@ -461,16 +421,6 @@ gfx::blitPixmap(const BaseContext& ctx, Point pt, Canvas& pixmap)
     ctx.canvas().blit(pt, pixmap, Rectangle(Point(), pixmap.getSize()));
 }
 
-// /** Blit Pixmap on Canvas. Displays a sub-area of this pixmap on
-//     the specified canvas.
-//     \param can  Canvas
-//     \param x,y  Coordinates on canvas
-//     \param subr Area of this pixmap to use, in pixmap coordinates.
-
-//     \note The /x/ and /y/ parameters specify the coordinates of the
-//     upper-left point after clipping the pixmap at /subr/. For
-//     GfxCanvas::blitSurface(), they specify the coordinates before
-//     clipping. */
 void
 gfx::blitPixmap(const BaseContext& ctx, Point pt, Canvas& pixmap, Rectangle area)
 {
@@ -480,8 +430,6 @@ gfx::blitPixmap(const BaseContext& ctx, Point pt, Canvas& pixmap, Rectangle area
     ctx.canvas().blit(pt, pixmap, area);
 }
 
-// /** Blit Pixmap on canvas. Ensures that the area x+wi/y+he is covered,
-//     filling with color 0. */
 void
 gfx::blitSized(const BaseContext& ctx, Rectangle area, Canvas& pixmap)
 {
@@ -527,11 +475,6 @@ gfx::blitSized(const BaseContext& ctx, Rectangle area, Canvas& pixmap)
     ctx.canvas().blit(Point(x - pix_rect_x, y - pix_rect_y), pixmap, Rectangle(pix_rect_x, pix_rect_y, pix_rect_w, pix_rect_h));
 }
 
-// /** Tile area with pixmap.
-//     \param can    Target canvas
-//     \param area   Area to tile
-//     \param alt    Alteration of X coordinate
-//     \see tileAnchored() */
 void
 gfx::blitTiled(const BaseContext& ctx, const Rectangle& area, Canvas& pixmap, int alt)
 {
@@ -539,20 +482,6 @@ gfx::blitTiled(const BaseContext& ctx, const Rectangle& area, Canvas& pixmap, in
     blitTiledAnchored(ctx, area, pixmap, area.getTopLeft(), alt);
 }
 
-// /** Tile area with pixmap, anchored.
-//     \param can    Target canvas
-//     \param area   Area to tile
-//     \param ax,ay  Anchor point
-//     \param alt    Alteration of X coordinate
-
-//     To have multiple tiled regions fit to each other nicely, use the same
-//     anchor point. Using tile() instead will anchor the tiles at the top-left
-//     point of the area; this way, the join points will be visible.
-
-//     The alteration specifies how the X anchor point is alterated on each
-//     line. With alt=0, you'll get a "chequered" pattern; alt=16 starts the
-//     first line at ax, the second at ax-16, the third at ax again, etc. This
-//     makes large tiled regions look much nicer. */
 void
 gfx::blitTiledAnchored(const BaseContext& ctx, const Rectangle& area, Canvas& pixmap, Point anchor, int alt)
 {

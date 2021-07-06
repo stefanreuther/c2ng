@@ -45,6 +45,17 @@ class TestGfxColorScheme : public CxxTest::TestSuite {
     void testInterface();
 };
 
+class TestGfxComplex : public CxxTest::TestSuite {
+ public:
+    void testFillPolyTriangle1();
+    void testFillPolyTriangle2();
+    void testFillPolyTrianglePattern();
+    void testFillPolyPentagram();
+    void testFillPolyPolygon();
+    void testFillPolySquare();
+    void testFillPolyRhombe();
+};
+
 class TestGfxContext : public CxxTest::TestSuite {
  public:
     void testIt();
