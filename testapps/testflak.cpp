@@ -35,9 +35,10 @@ namespace {
 
     void play(game::vcr::flak::Algorithm& b, const game::vcr::flak::Setup& s, const game::vcr::flak::Environment& env)
     {
+        game::vcr::flak::NullVisualizer vis;
         std::printf("  Time according to header: %7d\n", int(s.getTotalTime()));
-        b.init(env);
-        while (b.playCycle(env))
+        b.init(env, vis);
+        while (b.playCycle(env, vis))
             ;
         std::printf("  Real time taken:          %7d\n", b.getTime());
         for (size_t i = 0; i < b.getNumShips(); ++i) {
@@ -153,9 +154,8 @@ int main(int /*argc*/, char** argv)
 
             /* play it */
             std::printf("Battle %d...\n", i+1);
-            game::vcr::flak::NullVisualizer vis;
             for (int iter = 0; iter < repeat; ++iter) {
-                game::vcr::flak::Algorithm algo(vis, b, env);
+                game::vcr::flak::Algorithm algo(b, env);
                 play(algo, b, env);
             }
         }

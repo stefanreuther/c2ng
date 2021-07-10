@@ -109,6 +109,7 @@ struct game::vcr::flak::Algorithm::Ship {
         int maxFightersLaunched;
         int compensation;
         int id;
+        String_t name;
         Data(size_t shipIndex, const game::vcr::flak::Object& d);
     };
     const Data data;
@@ -125,6 +126,9 @@ struct game::vcr::flak::Algorithm::Ship {
     bool isPlanet() const
         { return data.isPlanet; }
     Position getPos() const;
+
+    static Visualizer::Ship_t getShipNumber(const Ship* p)
+        { return p != 0 ? p->data.shipIndex : Visualizer::NO_ENEMY; }
 };
 
 struct game::vcr::flak::Algorithm::Fleet {
@@ -373,7 +377,7 @@ game::vcr::flak::Algorithm::Ship::Data::Data(size_t shipIndex, const game::vcr::
       numFighters(d.getNumFighters()), isPlanet(d.isPlanet()), torpedoType(d.getTorpedoType()), beamType(d.getBeamType()),
       initialShield(d.getShield()), initialDamage(d.getDamage()), initialCrew(d.getCrew()), mass(d.getMass()),
       player(d.getOwner()), rating(d.getRating()), maxFightersLaunched(d.getMaxFightersLaunched()),
-      compensation(d.getCompensation()), id(d.getId())
+      compensation(d.getCompensation()), id(d.getId()), name(d.getName())
 { }
 
 game::vcr::flak::Algorithm::Ship::Ship(size_t shipIndex, const Fleet& fleetLink, const game::vcr::flak::Object& data, const Environment& env)
@@ -582,12 +586,12 @@ game::vcr::flak::Algorithm::StatusTokenImpl::storeTo(Algorithm& battle) const
  *  game::vcr::flak::Algorithm
  */
 
-game::vcr::flak::Algorithm::Algorithm(Visualizer& vis, const Setup& b, const Environment& env)
+game::vcr::flak::Algorithm::Algorithm(const Setup& b, const Environment& env)
     : m_playerIndex(),
       m_alternativeCombat(env.getConfiguration(Environment::AllowAlternativeCombat)),
       m_fireOnAttackFighters(env.getConfiguration(Environment::FireOnAttackFighters)),
       m_unusedObjects(), m_objectId(),
-      m_seed(b.getSeed()), m_originalSeed(b.getSeed()), m_time(0), m_isTerminated(false), m_pVisualizer(&vis)
+      m_seed(b.getSeed()), m_originalSeed(b.getSeed()), m_time(0), m_isTerminated(false)
 {
     // ex FlakBattle::FlakBattle
     /* copy fleets */
@@ -616,7 +620,7 @@ game::vcr::flak::Algorithm::~Algorithm()
 
 // Initialize player.
 void
-game::vcr::flak::Algorithm::init(const Environment& env)
+game::vcr::flak::Algorithm::init(const Environment& env, Visualizer& vis)
 {
     // ex FlakBattle::init, flak.pas:FlakBattleInit
 
@@ -661,14 +665,15 @@ game::vcr::flak::Algorithm::init(const Environment& env)
         }
     }
 
+    renderAll(vis);
     for (size_t i = 0; i < m_fleets.size(); ++i) {
-        chooseEnemy(*m_fleets[i], env);
+        chooseEnemy(*m_fleets[i], env, vis, i);
     }
 }
 
 // Play one cycle.
 bool
-game::vcr::flak::Algorithm::playCycle(const Environment& env)
+game::vcr::flak::Algorithm::playCycle(const Environment& env, Visualizer& vis)
 {
     // ex FlakBattle::playOneTick, flak.pas:FlakPlayOneTick
     // @change The return value differs from the PCC1/PCC2 implementation.
@@ -684,28 +689,28 @@ game::vcr::flak::Algorithm::playCycle(const Environment& env)
     // choose enemy
     if (m_time != 0 && m_time % FLAK_CHOOSE_ENEMY_TIME == 0) {
         for (size_t i = 0; i < m_fleets.size(); ++i) {
-            chooseEnemy(*m_fleets[i], env);
+            chooseEnemy(*m_fleets[i], env, vis, i);
         }
     }
 
     // launch fighters
     for (size_t i = 0; i < m_fleets.size(); ++i) {
-        launchFighters(*m_fleets[i]);
+        launchFighters(*m_fleets[i], vis);
     }
 
     // fire torps
     for (size_t i = 0; i < m_fleets.size(); ++i) {
-        fireTorps(*m_fleets[i], env);
+        fireTorps(*m_fleets[i], env, vis);
     }
 
     // fire beams. We choose a random fleet to fire first to achieve
     // random distribution of hits.
     size_t fleet_off = random(int(m_fleets.size()));
     for (size_t i = fleet_off; i < m_fleets.size(); ++i) {
-        fireBeams(*m_fleets[i], env);
+        fireBeams(*m_fleets[i], env, vis);
     }
     for (size_t i = 0; i < fleet_off; ++i) {
-        fireBeams(*m_fleets[i], env);
+        fireBeams(*m_fleets[i], env, vis);
     }
 
     // fighters fire. We choose a random player to fire first to
@@ -715,10 +720,10 @@ game::vcr::flak::Algorithm::playCycle(const Environment& env)
     const size_t numPlayers = m_playerIndex.size();
     const size_t pivot = random(int(numPlayers));
     for (size_t i = pivot; i < numPlayers; ++i) {
-        fightersFire(*m_playerIndex[i]);
+        fightersFire(*m_playerIndex[i], vis);
     }
     for (size_t i = 0; i < pivot; ++i) {
-        fightersFire(*m_playerIndex[i]);
+        fightersFire(*m_playerIndex[i], vis);
     }
 
     // fighter intercept
@@ -731,9 +736,9 @@ game::vcr::flak::Algorithm::playCycle(const Environment& env)
                     // one. Since no way is known to fix that, we randomly
                     // swap the players' roles.
                     if (random(2) == 0) {
-                        fighterIntercept(*m_playerIndex[i], *m_playerIndex[j]);
+                        fighterIntercept(*m_playerIndex[i], *m_playerIndex[j], vis);
                     } else {
-                        fighterIntercept(*m_playerIndex[j], *m_playerIndex[i]);
+                        fighterIntercept(*m_playerIndex[j], *m_playerIndex[i], vis);
                     }
                 }
             }
@@ -742,15 +747,15 @@ game::vcr::flak::Algorithm::playCycle(const Environment& env)
 
     // move stuff
     for (size_t i = pivot; i < numPlayers; ++i) {
-        moveStuff(*m_playerIndex[i]);
+        moveStuff(*m_playerIndex[i], vis);
     }
     for (size_t i = 0; i < pivot; ++i) {
-        moveStuff(*m_playerIndex[i]);
+        moveStuff(*m_playerIndex[i], vis);
     }
 
     // gc
     for (size_t i = 0; i < m_fleets.size(); ++i) {
-        doFleetGC(*m_fleets[i], env);
+        doFleetGC(*m_fleets[i], env, vis, i);
     }
 
     // playergc
@@ -760,10 +765,21 @@ game::vcr::flak::Algorithm::playCycle(const Environment& env)
 
     // move units
     for (size_t i = 0; i < m_fleets.size(); ++i) {
-        computeNewPosition(*m_fleets[i], env);
+        computeNewPosition(*m_fleets[i], env, vis, i);
     }
     for (size_t i = 0; i < m_fleets.size(); ++i) {
-        m_fleets[i]->status.position = m_fleets[i]->newPosition;
+        Fleet& fleet = *m_fleets[i];
+        if (fleet.status.position != fleet.newPosition) {
+            fleet.status.position = fleet.newPosition;
+            vis.moveFleet(i, fleet.status.position.x, fleet.status.position.y);
+            for (size_t j = 0; j < fleet.data.numShips; ++j) {
+                const size_t shipIndex = fleet.data.firstShipIndex + j;
+                const Ship& sh = *m_ships[shipIndex];
+                if (sh.isAlive()) {
+                    vis.moveShip(shipIndex, sh.getPos());
+                }
+            }
+        }
     }
 
 #if FLAK_CHECKPOINT
@@ -771,6 +787,7 @@ game::vcr::flak::Algorithm::playCycle(const Environment& env)
 #endif
 
     ++m_time;
+    vis.updateTime(m_time);
 
     // end check
     m_isTerminated = endCheck();
@@ -915,7 +932,7 @@ game::vcr::flak::Algorithm::findCaptor(size_t shipIndex, util::RandomNumberGener
         return false;
     }
     const Ship& victim = *m_ships[shipIndex];
-    
+
     /* captor still alive? */
     if (victim.status.lastHitBy == 0) {
         return false;
@@ -1238,7 +1255,6 @@ game::vcr::flak::Algorithm::hitShipWith(Ship& sh, const Ship& firing_ship, int e
     }
 
  vis:
-    m_pVisualizer->hitShip(sh.data.shipIndex, expl, kill, death_flag);
     if (sh.isAlive()) {
         sh.status.lastHitBy = &firing_ship;
     }
@@ -1306,7 +1322,7 @@ game::vcr::flak::Algorithm::doPlayerGC(Player& p)
 
 /* Pick a new enemy for a fleet. Updates the fleet in-place. */
 void
-game::vcr::flak::Algorithm::chooseEnemy(Fleet& fleet, const Environment& env)
+game::vcr::flak::Algorithm::chooseEnemy(Fleet& fleet, const Environment& env, Visualizer& vis, size_t fleetNr)
 {
     // ex FlakBattle::chooseEnemy, flak.pas:ChooseEnemy
     if (!fleet.isAlive()) {
@@ -1378,8 +1394,11 @@ game::vcr::flak::Algorithm::chooseEnemy(Fleet& fleet, const Environment& env)
         }
     }
 
-    if (best_choice != fleet.status.enemy_ptr && best_choice != 0 && fleet.status.enemy_ptr != 0) {
-        addFlakLog("Target change in flight");
+    if (best_choice != fleet.status.enemy_ptr) {
+        vis.setEnemy(fleetNr, Ship::getShipNumber(best_choice));
+        if (best_choice != 0 && fleet.status.enemy_ptr != 0) {
+            addFlakLog("Target change in flight");
+        }
     }
 
     fleet.status.enemy_ptr = best_choice;
@@ -1401,7 +1420,7 @@ game::vcr::flak::Algorithm::chooseEnemy(Fleet& fleet, const Environment& env)
 
 /* Launch fighters for given fleet. */
 void
-game::vcr::flak::Algorithm::launchFighters(const Fleet& fleet)
+game::vcr::flak::Algorithm::launchFighters(const Fleet& fleet, Visualizer& vis)
 {
     // ex FlakBattle::launchFighters, flask.pas:LaunchFighters
     if (!fleet.isAlive() || !fleet.status.enemy_ptr || !fleet.status.enemy_ptr->isAlive()) {
@@ -1439,7 +1458,7 @@ game::vcr::flak::Algorithm::launchFighters(const Fleet& fleet)
                 sh.status.stat.handleFightersAboard(sh.status.numFighters);
 
                 m_playerStatus[sh.data.player-1]->have_any_fighters = true;
-                m_pVisualizer->createObject(p, i);
+                vis.createFighter(p.visId, p.position, sh.data.player, Ship::getShipNumber(p.enemy_ptr));
                 goto next_ship;
             }
         }
@@ -1449,7 +1468,7 @@ game::vcr::flak::Algorithm::launchFighters(const Fleet& fleet)
 
 /** Fire torps from a fleet. */
 void
-game::vcr::flak::Algorithm::fireTorps(const Fleet& fleet, const Environment& env)
+game::vcr::flak::Algorithm::fireTorps(const Fleet& fleet, const Environment& env, Visualizer& vis)
 {
     // ex FlakBattle::fireTorps, flak.pas:FireTorps
     if (!fleet.isAlive() || !fleet.status.enemy_ptr || !fleet.status.enemy_ptr->isAlive()) {
@@ -1495,7 +1514,7 @@ game::vcr::flak::Algorithm::fireTorps(const Fleet& fleet, const Environment& env
             sh.status.torpedoCharge[tl] = 0;
             sh.status.numTorpedoes--;
 
-            m_pVisualizer->createObject(p, i);
+            vis.createTorpedo(p.visId, p.position, sh.data.player, Ship::getShipNumber(p.enemy_ptr));
             goto next_ship;
         }
      next_ship:;
@@ -1504,7 +1523,7 @@ game::vcr::flak::Algorithm::fireTorps(const Fleet& fleet, const Environment& env
 
 /* Fire all beams from fleet. */
 void
-game::vcr::flak::Algorithm::fireBeams(const Fleet& fleet, const Environment& env)
+game::vcr::flak::Algorithm::fireBeams(const Fleet& fleet, const Environment& env, Visualizer& vis)
 {
     // ex FlakBattle::fireBeams, flak.pas:FireBeams
     if (!fleet.isAlive()) {
@@ -1561,14 +1580,14 @@ game::vcr::flak::Algorithm::fireBeams(const Fleet& fleet, const Environment& env
                 /* got a fighter? */
                 if (min_ftr) {
                     if (random(100) < ship.config.BeamHitOdds) {
-                        m_pVisualizer->fireBeam(sh, *min_ftr, true);
-                        m_pVisualizer->destroyObject(*min_ftr, true);
+                        vis.fireBeamShipFighter(sh, bm, min_ftr->visId, true);
+                        vis.killFighter(min_ftr->visId);
                         min_ftr->kind = oDeleteMe;
                         if (min_ftr->owner_ptr) {
                             --min_ftr->owner_ptr->status.numFightersLaunched;
                         }
                     } else {
-                        m_pVisualizer->fireBeam(sh, *min_ftr, false);
+                        vis.fireBeamShipFighter(sh, bm, min_ftr->visId, false);
                     }
                     ship.status.beamCharge[bm] = 0;
                     goto next_ship;
@@ -1587,13 +1606,13 @@ game::vcr::flak::Algorithm::fireBeams(const Fleet& fleet, const Environment& env
                         kill *= 3;
                     }
                     if (random(100) < ship.config.BeamHitOdds) {
-                        m_pVisualizer->fireBeam(sh, fleet.status.enemy_ptr->data.shipIndex, true);
+                        vis.fireBeamShipShip(sh, bm, Ship::getShipNumber(fleet.status.enemy_ptr), true);
                         hitShipWith(*fleet.status.enemy_ptr, ship,
                                     damage * int32_t(ship.status.beamCharge[bm]) / 1000,
                                     kill * int32_t(ship.status.beamCharge[bm]) / 1000,
                                     damage /* death flag */);
                     } else {
-                        m_pVisualizer->fireBeam(sh, fleet.status.enemy_ptr->data.shipIndex, false);
+                        vis.fireBeamShipShip(sh, bm, Ship::getShipNumber(fleet.status.enemy_ptr), false);
                     }
                     ship.status.beamCharge[bm] = 0;
                     goto next_ship;
@@ -1628,7 +1647,7 @@ game::vcr::flak::Algorithm::endCheck() const
     Modifies the fleet in-place.
     This computes the newPosition field, it does not actually move the fleet yet. */
 void
-game::vcr::flak::Algorithm::computeNewPosition(Fleet& fleet, const Environment& env)
+game::vcr::flak::Algorithm::computeNewPosition(Fleet& fleet, const Environment& env, Visualizer& vis, size_t fleetNr)
 {
     // ex FlakBattle::computeNewPosition, flak.pas:ComputeNewPosition
     fleet.newPosition = fleet.status.position;
@@ -1639,7 +1658,7 @@ game::vcr::flak::Algorithm::computeNewPosition(Fleet& fleet, const Environment& 
 
     /* if our enemy died, pick a new one */
     if (fleet.status.enemy_ptr && !fleet.status.enemy_ptr->isAlive()) {
-        chooseEnemy(fleet, env);
+        chooseEnemy(fleet, env, vis, fleetNr);
     }
 
     /* FIXME: this is not quite clean because it gets the StandoffDistance
@@ -1694,7 +1713,7 @@ game::vcr::flak::Algorithm::computeNewPosition(Fleet& fleet, const Environment& 
 /** Fleet GC.
     Deletes all ships killed this tick, and marks the fleet dead if it happens. */
 void
-game::vcr::flak::Algorithm::doFleetGC(Fleet& fleet, const Environment& env)
+game::vcr::flak::Algorithm::doFleetGC(Fleet& fleet, const Environment& env, Visualizer& vis, size_t fleetNr)
 {
     // ex FlakBattle::doFleetGC, flak.pas:FleetGC
     if (!fleet.isAlive()) {
@@ -1710,7 +1729,7 @@ game::vcr::flak::Algorithm::doFleetGC(Fleet& fleet, const Environment& env)
         Ship& sh = *m_ships[i + fleet.data.firstShipIndex];
         if (sh.isAlive()) {
             if (sh.status.damage > limit || (!sh.isPlanet() && sh.status.crew < 0.5)) {
-                m_pVisualizer->destroyShip(i + fleet.data.firstShipIndex);
+                vis.killShip(i + fleet.data.firstShipIndex);
                 sh.status.isAlive = false;
                 --m_playerStatus[sh.data.player-1]->num_live_ships;
                 m_playerStatus[sh.data.player-1]->sum_strength -= sh.data.compensation;
@@ -1728,6 +1747,9 @@ game::vcr::flak::Algorithm::doFleetGC(Fleet& fleet, const Environment& env)
             }
         }
     }
+    if (!alive) {
+        vis.killFleet(fleetNr);
+    }
     fleet.status.alive = alive;
     if (alive && any_torps) {
         for (size_t i = 0; i < fleet.data.numShips; ++i) {
@@ -1741,7 +1763,7 @@ game::vcr::flak::Algorithm::doFleetGC(Fleet& fleet, const Environment& env)
 
 /* Do fighter-intercept phase for two players. */
 void
-game::vcr::flak::Algorithm::fighterIntercept(Player& a, Player& b)
+game::vcr::flak::Algorithm::fighterIntercept(Player& a, Player& b, Visualizer& vis)
 {
     // ex FlakBattle::fighterIntercept, flak.pas:FighterIntercept
     if (a.FighterKillOdds == 0 && b.FighterKillOdds == 0) {
@@ -1759,7 +1781,7 @@ game::vcr::flak::Algorithm::fighterIntercept(Player& a, Player& b)
                         (pa->enemy_ptr == pb->owner_ptr
                          || pb->enemy_ptr == pa->owner_ptr))
                     {
-                        if (tryIntercept(*pa, *pb)) {
+                        if (tryIntercept(*pa, *pb, vis)) {
                             return;
                         }
                         if (pa->kind != oFighter) {
@@ -1776,7 +1798,7 @@ game::vcr::flak::Algorithm::fighterIntercept(Player& a, Player& b)
    \param pa,pb  two fighters
    \return true if successful, false if no fighter intercept here */
 bool
-game::vcr::flak::Algorithm::tryIntercept(Object& pa, Object& pb)
+game::vcr::flak::Algorithm::tryIntercept(Object& pa, Object& pb, Visualizer& vis)
 {
     // ex FlakBattle::tryIntercept, flak.pas:FighterIntercept.TryIntercept
     /* FIXME: I'm not sure that the probabilities are correct. This
@@ -1801,8 +1823,8 @@ game::vcr::flak::Algorithm::tryIntercept(Object& pa, Object& pb)
 
     if (random(100) < right_probab) {
         /* a killed */
-        m_pVisualizer->fireBeam(pb, pa);
-        m_pVisualizer->destroyObject(pa, true);
+        vis.fireBeamFighterFighter(pb.visId, pa.visId, true);
+        vis.killFighter(pa.visId);
         pa.kind = oDeleteMe;
         if (pa.owner_ptr) {
             pa.owner_ptr->status.numFightersLaunched--;
@@ -1810,8 +1832,8 @@ game::vcr::flak::Algorithm::tryIntercept(Object& pa, Object& pb)
         addFlakLog("Fighter Intercept A Killed");
     } else {
         /* b killed */
-        m_pVisualizer->fireBeam(pa, pb);
-        m_pVisualizer->destroyObject(pb, true);
+        vis.fireBeamFighterFighter(pa.visId, pb.visId, true);
+        vis.killFighter(pb.visId);
         pb.kind = oDeleteMe;
         if (pb.owner_ptr) {
             pb.owner_ptr->status.numFightersLaunched--;
@@ -1823,7 +1845,7 @@ game::vcr::flak::Algorithm::tryIntercept(Object& pa, Object& pb)
 
 /* Fighters of a player fire. */
 void
-game::vcr::flak::Algorithm::fightersFire(const Player& player) const
+game::vcr::flak::Algorithm::fightersFire(const Player& player, Visualizer& vis) const
 {
     // ex FlakBattle::fightersFire, flak.pas:FightersFire
     for (size_t ip = player.stuff.size(); ip > 0; --ip) {
@@ -1832,7 +1854,7 @@ game::vcr::flak::Algorithm::fightersFire(const Player& player) const
             if (p->position.isDistanceLERadius(p->enemy_ptr->fleetLink.status.position,
                                                p->owner_ptr->config.FighterFiringRange))
             {
-                m_pVisualizer->fireBeam(*p, p->enemy_ptr->data.shipIndex);
+                vis.fireBeamFighterShip(p->visId, Ship::getShipNumber(p->enemy_ptr), true);
                 hitShipWith(*p->enemy_ptr, *p->owner_ptr, p->kill, p->expl, p->death_flag);
                 p->strikes--;
                 p->canChangeEnemy = false;
@@ -1879,7 +1901,7 @@ game::vcr::flak::Algorithm::findNewBase(const Player& player, Object& fighter) c
 
 /* Move all objects belonging to a player. */
 void
-game::vcr::flak::Algorithm::moveStuff(Player& player)
+game::vcr::flak::Algorithm::moveStuff(Player& player, Visualizer& vis)
 {
     // ex FlakBattle::moveStuff, flak.pas:MoveStuff
     for (size_t ip = player.stuff.size(); ip > 0; --ip) {
@@ -1894,20 +1916,22 @@ game::vcr::flak::Algorithm::moveStuff(Player& player)
                     }
                     if (ene->isAlive()) {
                         p.enemy_ptr = ene;
-                        m_pVisualizer->destroyObject(p, p.strikes);
+                        vis.hitTorpedo(p.visId, Ship::getShipNumber(ene));
                         hitShipWith(*ene, *p.owner_ptr, p.expl, p.kill, p.death_flag);
                         p.owner_ptr->status.stat.handleTorpedoHit();
                         addFlakLog("Torp hitting unit");
                     } else {
                         p.enemy_ptr = 0;
-                        m_pVisualizer->destroyObject(p, p.strikes);
+                        vis.missTorpedo(p.visId);
                         addFlakLog("Torp hitting void");
                     }
                 } else {
                     addFlakLog("Torp missing");
-                    m_pVisualizer->destroyObject(p, p.strikes);
+                    vis.missTorpedo(p.visId);
                 }
                 p.kind = oDeleteMe;
+            } else {
+                vis.moveTorpedo(p.visId, p.position);
             }
         } else if (p.kind == oFighter) {
             if (p.strikes != 0 && !p.enemy_ptr->isAlive()) {
@@ -1950,23 +1974,62 @@ game::vcr::flak::Algorithm::moveStuff(Player& player)
                 }
 
                 if (!p.owner_ptr) {
-                    // FIXME: I'm unsure whether to consider this 'violent' or not.
-                    m_pVisualizer->destroyObject(p, true);
+                    vis.landFighter(p.visId);
                     p.kind = oDeleteMe;
                 } else {
                     if (moveObjectTowards(p, p.owner_ptr->getPos()) == 0) {
                         /* reached base */
-                        m_pVisualizer->destroyObject(p, false);
+                        vis.landFighter(p.visId);
                         p.kind = oDeleteMe;
                         p.owner_ptr->status.numFighters++;
                         p.owner_ptr->status.numFightersLaunched--;
+                    } else {
+                        vis.moveFighter(p.visId, p.position, Ship::getShipNumber(p.owner_ptr));
                     }
                 }
             } else {
                 /* move towards enemy */
                 moveObjectTowards(p, p.enemy_ptr->getPos());
+                vis.moveFighter(p.visId, p.position, Ship::getShipNumber(p.enemy_ptr));
             }
         }
+    }
+}
+
+
+/*
+ *  Misc
+ */
+
+void
+game::vcr::flak::Algorithm::renderAll(Visualizer& vis) const
+{
+    // Render all fleets
+    for (size_t i = 0; i < m_fleets.size(); ++i) {
+        const Fleet& f = *m_fleets[i];
+        vis.createFleet(i, f.status.position.x, f.status.position.y, f.data.player, f.data.firstShipIndex, f.data.numShips);
+    }
+
+    // Render all ships
+    for (size_t i = 0; i < m_ships.size(); ++i) {
+        const Ship& sh = *m_ships[i];
+        Visualizer::ShipInfo info;
+        info.name         = sh.data.name;
+        info.isPlanet     = sh.isPlanet();
+        info.player       = sh.data.player;
+        info.shield       = getShield(i);     // use public method for rounding
+        info.damage       = getDamage(i);
+        info.crew         = getCrew(i);
+        info.numBeams     = sh.data.numBeams;
+        info.numLaunchers = sh.data.numLaunchers;
+        info.numTorpedoes = sh.status.numTorpedoes;
+        info.numBays      = sh.data.numBays;
+        info.numFighters  = sh.status.numFighters;
+        info.torpedoType  = sh.data.torpedoType;
+        info.beamType     = sh.data.beamType;
+        info.mass         = sh.data.mass;
+        info.id           = sh.data.id;
+        vis.createShip(i, sh.getPos(), info);
     }
 }
 

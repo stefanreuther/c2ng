@@ -15,7 +15,7 @@ namespace game { namespace vcr { namespace flak {
     struct Position {
         // ex FlakPos
         int32_t x, y, z;
-        
+
         Position()
             : x(0), y(0), z(0)
             { }
@@ -34,6 +34,15 @@ namespace game { namespace vcr { namespace flak {
             \param radius Distance to check
             \return true if distance is less or equal */
         bool isDistanceLERadius(const Position& other, int32_t radius) const;
+
+        /** Compare for equality.
+            \param pos Other position */
+        bool operator==(const Position& pos) const;
+
+        /** Compare for inequality.
+            \param pos Other position */
+        bool operator!=(const Position& pos) const
+            { return !operator==(pos); }
     };
 
 } } }

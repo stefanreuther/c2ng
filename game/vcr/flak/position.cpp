@@ -29,3 +29,11 @@ game::vcr::flak::Position::isDistanceLERadius(const Position& other, int32_t rad
         && dist_y <= radius
         && dist_x*dist_x + dist_y*dist_y <= radius*radius;
 }
+
+bool
+game::vcr::flak::Position::operator==(const Position& pos) const
+{
+    return x == pos.x
+        && y == pos.y
+        && z == pos.z;
+}

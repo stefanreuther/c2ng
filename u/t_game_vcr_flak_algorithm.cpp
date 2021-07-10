@@ -209,13 +209,12 @@ TestGameVcrFlakAlgorithm::testPlay()
     testee.load("testPlay", FILE_CONTENT, cs, tx);
 
     game::vcr::flak::NullVisualizer vis;
-    game::vcr::flak::Algorithm algo(vis, testee, env.env);
-    algo.init(env.env);
-    TS_ASSERT_EQUALS(&algo.visualizer(), &vis);
+    game::vcr::flak::Algorithm algo(testee, env.env);
+    algo.init(env.env, vis);
 
     // Play to time 100
     while (algo.getTime() < 100) {
-        TS_ASSERT(algo.playCycle(env.env));
+        TS_ASSERT(algo.playCycle(env.env, vis));
     }
 
     // Verify intermediate state
@@ -296,7 +295,7 @@ TestGameVcrFlakAlgorithm::testPlay()
     TS_ASSERT_EQUALS(algo.getNumTorpedoes(7),         100);
 
     // Play to end
-    while (algo.playCycle(env.env))
+    while (algo.playCycle(env.env, vis))
         ;
 
     // Verify end state
@@ -379,12 +378,12 @@ TestGameVcrFlakAlgorithm::testPlayNonAC()
     testee.load("testPlayNonAC", FILE_CONTENT, cs, tx);
 
     game::vcr::flak::NullVisualizer vis;
-    game::vcr::flak::Algorithm algo(vis, testee, env.env);
-    algo.init(env.env);
+    game::vcr::flak::Algorithm algo(testee, env.env);
+    algo.init(env.env, vis);
 
     // Play to time 100
     while (algo.getTime() < 100) {
-        TS_ASSERT(algo.playCycle(env.env));
+        TS_ASSERT(algo.playCycle(env.env, vis));
     }
 
     // Verify intermediate state
@@ -465,7 +464,7 @@ TestGameVcrFlakAlgorithm::testPlayNonAC()
     TS_ASSERT_EQUALS(algo.getNumTorpedoes(7),         100);
 
     // Play to end
-    while (algo.playCycle(env.env))
+    while (algo.playCycle(env.env, vis))
         ;
 
     // Verify end state
@@ -623,10 +622,10 @@ TestGameVcrFlakAlgorithm::testSetup()
     testee.setSeed(12345);
 
     game::vcr::flak::NullVisualizer vis;
-    game::vcr::flak::Algorithm algo(vis, testee, env.env);
-    algo.init(env.env);
+    game::vcr::flak::Algorithm algo(testee, env.env);
+    algo.init(env.env, vis);
 
-    while (algo.playCycle(env.env))
+    while (algo.playCycle(env.env, vis))
         ;
 
     TS_ASSERT_EQUALS(algo.getTime(), 234);
@@ -756,10 +755,10 @@ TestGameVcrFlakAlgorithm::testSetupFighters()
     testee.setSeed(12345);
 
     game::vcr::flak::NullVisualizer vis;
-    game::vcr::flak::Algorithm algo(vis, testee, env.env);
-    algo.init(env.env);
+    game::vcr::flak::Algorithm algo(testee, env.env);
+    algo.init(env.env, vis);
 
-    while (algo.playCycle(env.env))
+    while (algo.playCycle(env.env, vis))
         ;
 
     TS_ASSERT_EQUALS(algo.getTime(), 285);
@@ -815,11 +814,11 @@ TestGameVcrFlakAlgorithm::testCloneStatus()
 
     // Play to time 100 -- up to here, same as testPlay()
     game::vcr::flak::NullVisualizer vis;
-    game::vcr::flak::Algorithm algo(vis, testee, env.env);
-    algo.init(env.env);
+    game::vcr::flak::Algorithm algo(testee, env.env);
+    algo.init(env.env, vis);
 
     while (algo.getTime() < 100) {
-        TS_ASSERT(algo.playCycle(env.env));
+        TS_ASSERT(algo.playCycle(env.env, vis));
     }
 
     // Create a status token
@@ -829,7 +828,7 @@ TestGameVcrFlakAlgorithm::testCloneStatus()
     // std::auto_ptr<game::vcr::flak::Algorithm::StatusToken> tok2(new game::vcr::flak::Algorithm::StatusToken(*tok));
 
     // Complete the original
-    while (algo.playCycle(env.env))
+    while (algo.playCycle(env.env, vis))
         ;
     TS_ASSERT_EQUALS(algo.getTime(), 352);
     TS_ASSERT_EQUALS(algo.getDamage(6),   103);
@@ -837,9 +836,9 @@ TestGameVcrFlakAlgorithm::testCloneStatus()
 
     // Complete the copy
     game::vcr::flak::NullVisualizer copyVis;
-    game::vcr::flak::Algorithm copyAlgo(copyVis, copy, env.env);
-    copyAlgo.init(env.env);
-    while (copyAlgo.playCycle(env.env))
+    game::vcr::flak::Algorithm copyAlgo(copy, env.env);
+    copyAlgo.init(env.env, copyVis);
+    while (copyAlgo.playCycle(env.env, copyVis))
         ;
     TS_ASSERT_EQUALS(copyAlgo.getTime(), 352);
     TS_ASSERT_EQUALS(copyAlgo.getDamage(6),      103);
@@ -847,7 +846,7 @@ TestGameVcrFlakAlgorithm::testCloneStatus()
 
     // Rewind to status token and complete
     tok->storeTo(algo);
-    while (algo.playCycle(env.env))
+    while (algo.playCycle(env.env, vis))
         ;
     TS_ASSERT_EQUALS(algo.getTime(), 352);
     TS_ASSERT_EQUALS(algo.getDamage(6),      103);
@@ -855,7 +854,7 @@ TestGameVcrFlakAlgorithm::testCloneStatus()
 
     // Rewind to second status token and complete
     // tok2->storeTo(algo);
-    // while (algo.playCycle(env.env))
+    // while (algo.playCycle(env.env, vis))
     //     ;
     // TS_ASSERT_EQUALS(algo.getTime(), 352);
     // TS_ASSERT_EQUALS(algo.getDamage(6),   103);
@@ -955,10 +954,10 @@ TestGameVcrFlakAlgorithm::testSetupCapture()
     testee.setSeed(12345);
 
     game::vcr::flak::NullVisualizer vis;
-    game::vcr::flak::Algorithm algo(vis, testee, env.env);
-    algo.init(env.env);
+    game::vcr::flak::Algorithm algo(testee, env.env);
+    algo.init(env.env, vis);
 
-    while (algo.playCycle(env.env))
+    while (algo.playCycle(env.env, vis))
         ;
 
     TS_ASSERT_EQUALS(algo.getTime(), 358);
@@ -1057,10 +1056,10 @@ TestGameVcrFlakAlgorithm::testSetupCaptureDeathRay()
     testee.setSeed(77777);
 
     game::vcr::flak::NullVisualizer vis;
-    game::vcr::flak::Algorithm algo(vis, testee, env.env);
-    algo.init(env.env);
+    game::vcr::flak::Algorithm algo(testee, env.env);
+    algo.init(env.env, vis);
 
-    while (algo.playCycle(env.env))
+    while (algo.playCycle(env.env, vis))
         ;
 
     TS_ASSERT_EQUALS(algo.getTime(), 510);
@@ -1119,11 +1118,11 @@ TestGameVcrFlakAlgorithm::testPair()
             testee.getFleetByIndex(1).player = right;
 
             game::vcr::flak::NullVisualizer vis;
-            game::vcr::flak::Algorithm algo(vis, testee, env);
-            algo.init(env);
+            game::vcr::flak::Algorithm algo(testee, env);
+            algo.init(env, vis);
 
             // Play to end
-            while (algo.playCycle(env))
+            while (algo.playCycle(env, vis))
                 ;
 
             // Verify end state
