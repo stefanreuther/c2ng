@@ -8,6 +8,8 @@
 #include "game/proxy/waitindicator.hpp"
 #include "game/sim/transfer.hpp"
 #include "game/vcr/battle.hpp"
+#include "game/vcr/classic/database.hpp"
+#include "game/vcr/flak/database.hpp"
 #include "game/vcr/object.hpp"
 
 using afl::string::Format;
@@ -231,6 +233,15 @@ game::proxy::VcrDatabaseProxy::Trampoline::packStatus(Status& st)
 {
     st.numBattles = getNumBattles();
     st.currentBattle = m_adaptor.getCurrentBattle();
+
+    const game::vcr::Database& db = m_adaptor.battles();
+    if (dynamic_cast<const game::vcr::classic::Database*>(&db) != 0) {
+        st.kind = ClassicCombat;
+    } else if (dynamic_cast<const game::vcr::flak::Database*>(&db) != 0) {
+        st.kind = FlakCombat;
+    } else {
+        st.kind = UnknownCombat;
+    }
 }
 
 

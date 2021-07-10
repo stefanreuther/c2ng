@@ -171,6 +171,7 @@ TestGameProxyVcrDatabaseProxy::testIt()
     proxy.getStatus(ind, st);
     TS_ASSERT_EQUALS(st.numBattles, 2U);
     TS_ASSERT_EQUALS(st.currentBattle, 0U);
+    TS_ASSERT_EQUALS(st.kind, game::proxy::VcrDatabaseProxy::ClassicCombat);
 
     // setCurrentBattle
     UpdateReceiver u;

@@ -51,12 +51,20 @@ namespace game { namespace proxy {
         - call setHullType() to select a hull; this will respond with sig_hullUpdate. */
     class VcrDatabaseProxy {
      public:
+        /** Kind of battles. */
+        enum Kind {
+            UnknownCombat,
+            ClassicCombat,
+            FlakCombat
+        };
+
         /** Status. */
         struct Status {
             size_t numBattles;                           ///< Number of battles in database. \see game::vcr::Database::getNumBattles().
             size_t currentBattle;                        ///< Current battle. \see VcrDatabaseAdaptor::getCurrentBattle().
+            Kind kind;                                   ///< Kind of battles.
             Status()
-                : numBattles(0), currentBattle(0)
+                : numBattles(0), currentBattle(0), kind(UnknownCombat)
                 { }
         };
 
@@ -93,7 +101,8 @@ namespace game { namespace proxy {
         /** Constructor.
             \param sender     Sender
             \param receiver   RequestDispatcher to receive updates in this thread
-            \param tx         Translator */
+            \param tx         Translator
+            \param picNamer   Picture Namer. Can be null, then you won't get picture names. */
         VcrDatabaseProxy(util::RequestSender<VcrDatabaseAdaptor> sender, util::RequestDispatcher& recv, afl::string::Translator& tx, std::auto_ptr<game::spec::info::PictureNamer> picNamer);
 
         /** Destructor. */
