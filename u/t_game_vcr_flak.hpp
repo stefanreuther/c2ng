@@ -40,6 +40,12 @@ class TestGameVcrFlakEnvironment : public CxxTest::TestSuite {
     void testInterface();
 };
 
+class TestGameVcrFlakEventRecorder : public CxxTest::TestSuite {
+ public:
+    void testIt();
+    void testSwap();
+};
+
 class TestGameVcrFlakGameEnvironment : public CxxTest::TestSuite {
  public:
     void testConfig();
