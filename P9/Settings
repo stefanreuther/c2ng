@@ -12,10 +12,11 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/proxy/outboxproxy.cpp game/proxy/outboxproxy.hpp \
-    util/editor/editor.cpp util/editor/editor.hpp util/editor/command.cpp \
-    util/editor/command.hpp game/proxy/vcroverviewproxy.cpp \
-    game/proxy/vcroverviewproxy.hpp \
+FILES_gamelib = game/vcr/flak/eventrecorder.cpp \
+    game/vcr/flak/eventrecorder.hpp game/proxy/outboxproxy.cpp \
+    game/proxy/outboxproxy.hpp util/editor/editor.cpp util/editor/editor.hpp \
+    util/editor/command.cpp util/editor/command.hpp \
+    game/proxy/vcroverviewproxy.cpp game/proxy/vcroverviewproxy.hpp \
     game/interface/basetaskbuildcommandparser.cpp \
     game/interface/basetaskbuildcommandparser.hpp game/vcr/flak/database.cpp \
     game/vcr/flak/database.hpp game/vcr/flak/object.cpp \
@@ -1577,7 +1578,8 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_gfx_keyeventconsumer.cpp u/t_gfx_threed_vecmath.cpp \
+FILES_testsuite = u/t_game_vcr_flak_eventrecorder.cpp \
+    u/t_gfx_keyeventconsumer.cpp u/t_gfx_threed_vecmath.cpp \
     u/t_gfx_threed.hpp u/t_gfx_complex.cpp u/t_game_proxy_outboxproxy.cpp \
     u/t_util_editor_editor.cpp u/t_util_editor_command.cpp \
     u/t_util_editor.hpp u/t_game_proxy_vcroverviewproxy.cpp \
