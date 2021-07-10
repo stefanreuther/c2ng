@@ -144,6 +144,11 @@ class TestGameProxyExpressionListProxy : public CxxTest::TestSuite {
     void testNormal();
 };
 
+class TestGameProxyFlakVcrPlayerProxy : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
 class TestGameProxyFleetCostProxy : public CxxTest::TestSuite {
  public:
     void testIt();
