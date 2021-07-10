@@ -185,9 +185,9 @@ game::vcr::flak::Battle::prepareResult(const game::config::HostConfiguration& co
         if (m_setup->getNumFleets() != 0) {
             NullVisualizer vis;
             GameEnvironment env(config, shipList.beams(), shipList.launchers());
-            Algorithm algo(vis, *m_setup, env);
-            algo.init(env);
-            while (algo.playCycle(env))
+            Algorithm algo(*m_setup, env);
+            algo.init(env, vis);
+            while (algo.playCycle(env, vis))
                 ;
 
             // Build the result

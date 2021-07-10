@@ -27,5 +27,10 @@ TestGameVcrFlakPosition::testIt()
     TS_ASSERT_EQUALS(b.isDistanceLERadius(c, 499), false);
     TS_ASSERT_EQUALS(b.isDistanceLERadius(d, 4242), false);
     TS_ASSERT_EQUALS(b.isDistanceLERadius(d, 4243), true);
+
+    TS_ASSERT_EQUALS(a == a, true);
+    TS_ASSERT_EQUALS(a != a, false);
+    TS_ASSERT_EQUALS(a == b, false);
+    TS_ASSERT_EQUALS(a != b, true);
 }
 

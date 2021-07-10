@@ -21,8 +21,10 @@ namespace game { namespace vcr { namespace flak {
 
     /** FLAK Battle Player.
         This contains the playback engine.
-        It takes as input a Setup and a HostConfiguration.
+        It takes as input a Setup and a HostConfiguration, as well as an Environment.
         It does NOT require a FLAK Configuration, that is only used by Setup.
+
+        Playback calls take a Visualizer to receive visualisation callbacks.
 
         General conventions:
         - public methods have been modeled after game::vcr::classic::Algorithm.
@@ -55,21 +57,23 @@ namespace game { namespace vcr { namespace flak {
          */
 
         /** Constructor.
-            \param vis     Visualizer. Can be changed later on using setVisualizer().
             \param battle  Battle setup. Will be copied as far as needed.
             \param env     Environment. */
-        Algorithm(Visualizer& vis, const Setup& battle, const Environment& env);
+        Algorithm(const Setup& battle, const Environment& env);
         ~Algorithm();
 
         /** Initialize player.
             If battle was already advanced a bit, rewinds back to the beginning.
-            \param env Environment */
-        void init(const Environment& env);
+            \param env Environment
+            \param vis Visualizer */
+        void init(const Environment& env, Visualizer& vis);
 
         /** Play one cycle.
             Either does nothing and returns false (last cycle),
-            or advances time, does something and returns true. */
-        bool playCycle(const Environment& env);
+            or advances time, does something and returns true.
+            \param env Environment
+            \param vis Visualizer */
+        bool playCycle(const Environment& env, Visualizer& vis);
 
         /** Create a status token.
             The token can be used to rewind the battle to the current place.
@@ -80,13 +84,6 @@ namespace game { namespace vcr { namespace flak {
         /** Get current time.
          \return number of elapsed battle ticks */
         int32_t getTime() const;
-
-        /** Set visualizer.
-            \param vis Visualizer */
-        void setVisualizer(Visualizer& vis);
-
-        /** Get visualizer. */
-        Visualizer& visualizer() const;
 
 
         /*
@@ -186,9 +183,6 @@ namespace game { namespace vcr { namespace flak {
         int32_t m_time;
         bool m_isTerminated;
 
-        /* Visualizer */
-        Visualizer* m_pVisualizer;
-
 
         /* Random number generator */
         int random(int max);
@@ -207,35 +201,26 @@ namespace game { namespace vcr { namespace flak {
         void doPlayerGC(Player& p);
 
         /* Combat phases */
-        void chooseEnemy(Fleet& fleet, const Environment& env);
-        void launchFighters(const Fleet& fleet);
-        void fireTorps(const Fleet& fleet, const Environment& env);
-        void fireBeams(const Fleet& fleet, const Environment& env);
+        void chooseEnemy(Fleet& fleet, const Environment& env, Visualizer& vis, size_t fleetNr);
+        void launchFighters(const Fleet& fleet, Visualizer& vis);
+        void fireTorps(const Fleet& fleet, const Environment& env, Visualizer& vis);
+        void fireBeams(const Fleet& fleet, const Environment& env, Visualizer& vis);
         bool endCheck() const;
-        void computeNewPosition(Fleet& fleet, const Environment& env);
-        void doFleetGC(Fleet& fleet, const Environment& env);
-        void fighterIntercept(Player& a, Player& b);
-        bool tryIntercept(Object& pa, Object& pb);
-        void fightersFire(const Player& player) const;
+        void computeNewPosition(Fleet& fleet, const Environment& env, Visualizer& vis, size_t fleetNr);
+        void doFleetGC(Fleet& fleet, const Environment& env, Visualizer& vis, size_t fleetNr);
+        void fighterIntercept(Player& a, Player& b, Visualizer& vis);
+        bool tryIntercept(Object& pa, Object& pb, Visualizer& vis);
+        void fightersFire(const Player& player, Visualizer& vis) const;
         void findNewBase(const Player& player, Object& fighter) const;
-        void moveStuff(Player& player);
+        void moveStuff(Player& player, Visualizer& vis);
+
+        /* Misc */
+        void renderAll(Visualizer& vis) const;
 
         /* Debugging */
         void printCheckpoint(std::ostream& os);
     };
 
 } } }
-
-inline void
-game::vcr::flak::Algorithm::setVisualizer(Visualizer& vis)
-{
-    m_pVisualizer = &vis;
-}
-
-inline game::vcr::flak::Visualizer&
-game::vcr::flak::Algorithm::visualizer() const
-{
-    return *m_pVisualizer;
-}
 
 #endif

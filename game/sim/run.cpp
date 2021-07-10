@@ -2407,9 +2407,9 @@ namespace {
 
         // Run it...
         game::vcr::flak::NullVisualizer vis;
-        game::vcr::flak::Algorithm algo(vis, *flakSetup, env);
-        algo.init(env);
-        while (algo.playCycle(env))
+        game::vcr::flak::Algorithm algo(*flakSetup, env);
+        algo.init(env, vis);
+        while (algo.playCycle(env, vis))
             ;
 
         // Evaluate
