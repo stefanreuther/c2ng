@@ -8,9 +8,8 @@
 #include "afl/base/deleter.hpp"
 #include "afl/string/format.hpp"
 #include "afl/sys/log.hpp"
-#include "client/dialogs/classicvcrdialog.hpp"
+#include "client/dialogs/vcrplayer.hpp"
 #include "client/downlink.hpp"
-#include "client/vcr/classic/playbackscreen.hpp"
 #include "client/widgets/helpwidget.hpp"
 #include "client/widgets/simulationlist.hpp"
 #include "client/widgets/simulationresultlist.hpp"
@@ -434,26 +433,8 @@ SimulationResultDialog::onLinkClick(String_t link)
 void
 SimulationResultDialog::playBattle(util::RequestSender<game::proxy::VcrDatabaseAdaptor> adaptor)
 {
-    class PlayHandler : public afl::base::Closure<void(size_t)> {
-     public:
-        PlayHandler(SimulationResultDialog& parent, util::RequestSender<game::proxy::VcrDatabaseAdaptor> adaptor)
-            : m_parent(parent), m_adaptor(adaptor)
-            { }
-        virtual void call(size_t index)
-            {
-                afl::sys::Log log; // FIXME: for now, ground the logs
-                client::vcr::classic::PlaybackScreen screen(m_parent.m_root, m_parent.m_translator, m_adaptor, index, log);
-                screen.run();
-            }
-     private:
-        SimulationResultDialog& m_parent;
-        util::RequestSender<game::proxy::VcrDatabaseAdaptor> m_adaptor;
-    };
-
-    client::dialogs::ClassicVcrDialog dlg(m_root, m_translator, adaptor, m_gameSender);
-    dlg.sig_play.addNewClosure(new PlayHandler(*this, adaptor));
-
-    game::Reference ref = dlg.run();
+    afl::sys::Log log; // FIXME: for now, ground the logs
+    game::Reference ref = client::dialogs::playCombat(m_root, m_translator, adaptor, m_gameSender, log);
     if (ref.isSet()) {
         m_result.status = SimulationResultStatus::GoToReference;
         m_result.reference = ref;
