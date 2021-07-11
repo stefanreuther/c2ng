@@ -698,7 +698,10 @@ PROJ_AUTO += \
     gamelib:game/*.cpp,game/*.hpp,util/*.cpp,util/*.hpp,interpreter/*.cpp,interpreter/*.hpp
 
 TARGETS += guilib
-FILES_guilib = ui/widgets/keyforwarder.cpp ui/widgets/keyforwarder.hpp \
+FILES_guilib = client/dialogs/vcrplayer.cpp client/dialogs/vcrplayer.hpp \
+    client/dialogs/flakvcrdialog.cpp client/dialogs/flakvcrdialog.hpp \
+    client/widgets/flakvcrinfo.cpp client/widgets/flakvcrinfo.hpp \
+    ui/widgets/keyforwarder.cpp ui/widgets/keyforwarder.hpp \
     gfx/keyeventconsumer.hpp gfx/threed/particlerenderer.hpp \
     gfx/threed/trianglerenderer.cpp gfx/threed/trianglerenderer.hpp \
     gfx/threed/softwarecontext.cpp gfx/threed/softwarecontext.hpp \

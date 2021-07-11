@@ -17,7 +17,6 @@
 #include "client/dialogs/buildstructuresdialog.hpp"
 #include "client/dialogs/buysuppliesdialog.hpp"
 #include "client/dialogs/cargohistorydialog.hpp"
-#include "client/dialogs/classicvcrdialog.hpp"
 #include "client/dialogs/commandlistdialog.hpp"
 #include "client/dialogs/entercoordinates.hpp"
 #include "client/dialogs/fileselectiondialog.hpp"
@@ -53,6 +52,7 @@
 #include "client/dialogs/techupgradedialog.hpp"
 #include "client/dialogs/turnlistdialog.hpp"
 #include "client/dialogs/ufoinfo.hpp"
+#include "client/dialogs/vcrplayer.hpp"
 #include "client/dialogs/visualscandialog.hpp"
 #include "client/help.hpp"
 #include "client/proxy/screenhistoryproxy.hpp"
@@ -67,7 +67,6 @@
 #include "client/si/usercall.hpp"
 #include "client/si/userside.hpp"
 #include "client/si/usertask.hpp"
-#include "client/vcr/classic/playbackscreen.hpp"
 #include "client/widgets/helpwidget.hpp"
 #include "client/widgets/playersetselector.hpp"
 #include "game/actions/multitransfersetup.hpp"
@@ -1859,24 +1858,6 @@ client::si::IFCCViewCombat(game::Session& session, ScriptSide& si, RequestLink1 
             { return new Adaptor(session); }
     };
 
-    class PlayHandler : public afl::base::Closure<void(size_t)> {
-     public:
-        PlayHandler(UserSide& iface, Control& ctl)
-            : m_interface(iface),
-              m_control(ctl)
-            { }
-        virtual void call(size_t index)
-            {
-                client::vcr::classic::PlaybackScreen screen(m_control.root(), m_control.translator(),
-                                                            m_interface.gameSender().makeTemporary(new AdaptorFromSession()),
-                                                            index, m_interface.mainLog());
-                screen.run();
-            }
-     private:
-        UserSide& m_interface;
-        Control& m_control;
-    };
-
     class JoiningControl : public Control {
      public:
         JoiningControl(Control& parent, RequestLink2 link)
@@ -1915,17 +1896,14 @@ client::si::IFCCViewCombat(game::Session& session, ScriptSide& si, RequestLink1 
      public:
         virtual void handle(Control& ctl, RequestLink2 link)
             {
-                UserSide& iface = ctl.interface();
-                client::dialogs::ClassicVcrDialog dlg(ctl.root(), ctl.translator(), iface.gameSender().makeTemporary(new AdaptorFromSession()), iface.gameSender());
-                dlg.sig_play.addNewClosure(new PlayHandler(iface, ctl));
-
-                game::Reference ref = dlg.run();
+                client::si::UserSide& us = ctl.interface();
+                game::Reference ref = client::dialogs::playCombat(ctl.root(), ctl.translator(), us.gameSender().makeTemporary(new AdaptorFromSession()), us.gameSender(), us.mainLog());
                 if (ref.isSet()) {
                     // Re-using the existing executeGoToReference function requires use of a Control,
                     // and will produce a potential second process that we need to join with ours.
                     JoiningControl(ctl, link).executeGoToReference("(Battle Simulator)", ref);
                 }
-                iface.continueProcess(link);
+                us.continueProcess(link);
             }
     };
 
