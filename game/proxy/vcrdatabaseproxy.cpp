@@ -72,6 +72,9 @@ game::proxy::VcrDatabaseProxy::Trampoline::requestData(size_t index)
                 d.units.push_back(obj->describe(teamSettings, &root, &shipList, tx));
             }
         }
+        for (size_t i = 0, n = b->getNumGroups(); i < n; ++i) {
+            d.groups.push_back(b->getGroupInfo(i, root.hostConfiguration()));
+        }
 
         d.algorithmName = b->getAlgorithmName(m_adaptor.translator());
         d.resultSummary = b->getResultSummary(me, root.hostConfiguration(), shipList, root.userConfiguration().getNumberFormatter(), tx);

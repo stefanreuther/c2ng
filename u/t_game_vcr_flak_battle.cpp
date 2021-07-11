@@ -196,6 +196,38 @@ TestGameVcrFlakBattle::testIt()
 
     TS_ASSERT(testee.getObject(8, false) == 0); // out of range
 
+    // - getNumGroups
+    TS_ASSERT_EQUALS(testee.getNumGroups(), 4U);
+
+    // - getGroupInfo
+    TS_ASSERT_EQUALS(testee.getGroupInfo(0, config).firstObject, 0U);
+    TS_ASSERT_EQUALS(testee.getGroupInfo(0, config).numObjects, 3U);
+    TS_ASSERT_EQUALS(testee.getGroupInfo(0, config).x, 12000);
+    TS_ASSERT_EQUALS(testee.getGroupInfo(0, config).y, 0);
+    TS_ASSERT_EQUALS(testee.getGroupInfo(0, config).owner, 9);
+    TS_ASSERT_EQUALS(testee.getGroupInfo(0, config).speed, 100);
+
+    TS_ASSERT_EQUALS(testee.getGroupInfo(1, config).firstObject, 3U);
+    TS_ASSERT_EQUALS(testee.getGroupInfo(1, config).numObjects, 1U);
+    TS_ASSERT_EQUALS(testee.getGroupInfo(1, config).x, 16997);
+    TS_ASSERT_EQUALS(testee.getGroupInfo(1, config).y, 297);
+    TS_ASSERT_EQUALS(testee.getGroupInfo(1, config).owner, 9);
+    TS_ASSERT_EQUALS(testee.getGroupInfo(1, config).speed, 0);
+
+    TS_ASSERT_EQUALS(testee.getGroupInfo(2, config).firstObject, 4U);
+    TS_ASSERT_EQUALS(testee.getGroupInfo(2, config).numObjects, 2U);
+    TS_ASSERT_EQUALS(testee.getGroupInfo(2, config).x, 21987);
+    TS_ASSERT_EQUALS(testee.getGroupInfo(2, config).y, 768);
+    TS_ASSERT_EQUALS(testee.getGroupInfo(2, config).owner, 9);
+    TS_ASSERT_EQUALS(testee.getGroupInfo(2, config).speed, 100);
+
+    TS_ASSERT_EQUALS(testee.getGroupInfo(3, config).firstObject, 6U);
+    TS_ASSERT_EQUALS(testee.getGroupInfo(3, config).numObjects, 2U);
+    TS_ASSERT_EQUALS(testee.getGroupInfo(3, config).x, -28000);
+    TS_ASSERT_EQUALS(testee.getGroupInfo(3, config).y, 0);
+    TS_ASSERT_EQUALS(testee.getGroupInfo(3, config).owner, 4);
+    TS_ASSERT_EQUALS(testee.getGroupInfo(3, config).speed, 100);
+
     // - getOutcome
     testee.prepareResult(config, shipList, game::vcr::Battle::NeedQuickOutcome);
     TS_ASSERT_EQUALS(testee.getOutcome(config, shipList, 0), 0);
