@@ -153,6 +153,23 @@ game::vcr::flak::Battle::getObject(size_t slot, bool after) const
     }
 }
 
+size_t
+game::vcr::flak::Battle::getNumGroups() const
+{
+    return m_setup->getNumFleets();
+}
+
+game::vcr::GroupInfo
+game::vcr::flak::Battle::getGroupInfo(size_t groupNr, const game::config::HostConfiguration& /*config*/) const
+{
+    if (groupNr < getNumGroups()) {
+        const Setup::Fleet& f = m_setup->getFleetByIndex(groupNr);
+        return GroupInfo(f.firstShipIndex, f.numShips, f.x, f.y, f.player, f.speed);
+    } else {
+        return GroupInfo();
+    }
+}
+
 int
 game::vcr::flak::Battle::getOutcome(const game::config::HostConfiguration& /*config*/,
                                     const game::spec::ShipList& /*shipList*/,

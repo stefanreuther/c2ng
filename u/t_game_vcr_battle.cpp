@@ -22,6 +22,10 @@ TestGameVcrBattle::testIt()
             { return 0; }
         virtual int getOutcome(const game::config::HostConfiguration& /*config*/, const game::spec::ShipList& /*shipList*/, size_t /*slot*/)
             { return 0; }
+        virtual size_t getNumGroups() const
+            { return 0; }
+        virtual game::vcr::GroupInfo getGroupInfo(size_t /*groupNr*/, const game::config::HostConfiguration& /*config*/) const
+            { return game::vcr::GroupInfo(); }
         virtual Playability getPlayability(const game::config::HostConfiguration& /*config*/, const game::spec::ShipList& /*shipList*/)
             { return IsDamaged; }
         virtual void prepareResult(const game::config::HostConfiguration& /*config*/, const game::spec::ShipList& /*shipList*/, int /*resultLevel*/)
@@ -59,6 +63,10 @@ TestGameVcrBattle::testDescription()
                     return 0;
                 }
             }
+        virtual size_t getNumGroups() const
+            { return 0; }
+        virtual game::vcr::GroupInfo getGroupInfo(size_t /*groupNr*/, const game::config::HostConfiguration& /*config*/) const
+            { return game::vcr::GroupInfo(); }
         virtual int getOutcome(const game::config::HostConfiguration& /*config*/, const game::spec::ShipList& /*shipList*/, size_t /*slot*/)
             { return 0; }
         virtual Playability getPlayability(const game::config::HostConfiguration& /*config*/, const game::spec::ShipList& /*shipList*/)

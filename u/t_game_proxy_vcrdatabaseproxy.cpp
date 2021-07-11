@@ -187,6 +187,19 @@ TestGameProxyVcrDatabaseProxy::testIt()
     TS_ASSERT_EQUALS(u.m_data.units.size(), 2U);
     TS_ASSERT_EQUALS(u.m_data.units[0].text[0], "Liz (Id #14, a Player 2 ANNIHILATION CLASS BATTLESHIP)");
     TS_ASSERT_EQUALS(u.m_data.units[1].text[0], "Bird (Id #434, a Player 3 starship)");
+    TS_ASSERT_EQUALS(u.m_data.groups.size(), 2U);
+    TS_ASSERT_EQUALS(u.m_data.groups[0].firstObject, 0U);
+    TS_ASSERT_EQUALS(u.m_data.groups[0].numObjects, 1U);
+    TS_ASSERT_EQUALS(u.m_data.groups[0].x, -29000);
+    TS_ASSERT_EQUALS(u.m_data.groups[0].y, 0);
+    TS_ASSERT_EQUALS(u.m_data.groups[0].owner, 2);
+    TS_ASSERT_EQUALS(u.m_data.groups[0].speed, 75);
+    TS_ASSERT_EQUALS(u.m_data.groups[1].firstObject, 1U);
+    TS_ASSERT_EQUALS(u.m_data.groups[1].numObjects, 1U);
+    TS_ASSERT_EQUALS(u.m_data.groups[1].x, 29000);
+    TS_ASSERT_EQUALS(u.m_data.groups[1].y, 0);
+    TS_ASSERT_EQUALS(u.m_data.groups[1].owner, 3);
+    TS_ASSERT_EQUALS(u.m_data.groups[1].speed, 75);
 
     TS_ASSERT(u.m_sideInfo.name.empty());
     TS_ASSERT(!u.m_hullInfo.planetInfo.isValid());

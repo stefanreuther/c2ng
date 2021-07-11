@@ -52,6 +52,8 @@ namespace game { namespace vcr { namespace classic {
 
         virtual size_t getNumObjects() const;
         virtual const Object* getObject(size_t slot, bool after) const;
+        virtual size_t getNumGroups() const;
+        virtual GroupInfo getGroupInfo(size_t groupNr, const game::config::HostConfiguration& config) const;
         virtual int getOutcome(const game::config::HostConfiguration& config,
                                const game::spec::ShipList& shipList,
                                size_t slot);

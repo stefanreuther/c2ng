@@ -21,6 +21,21 @@ namespace game { namespace vcr {
         ObjectInfo();
     };
 
+    /** Information about a group (fleet). */
+    struct GroupInfo {
+        size_t firstObject;     ///< Index of first object.
+        size_t numObjects;      ///< Number of objects in group.
+        int32_t x, y;           ///< Starting location. Absolute values in meters, with (0,0) at the center of the battlefield.
+        int owner;              ///< Owner.
+        int speed;              ///< Movement speed, in meters per battle tick / second.
+
+        GroupInfo(size_t firstObject, size_t numObjects, int32_t x, int32_t y, int owner, int speed)
+            : firstObject(firstObject), numObjects(numObjects), x(x), y(y), owner(owner), speed(speed)
+            { }
+        GroupInfo()
+            : firstObject(), numObjects(), x(), y(), owner(), speed()
+            { }
+    };
 
     /** Human-readable information about a battle. */
     struct BattleInfo {
@@ -29,6 +44,7 @@ namespace game { namespace vcr {
         String_t resultSummary;                               ///< Result summary ("We won").
         String_t position;                                    ///< Position. Can be empty.
         std::vector<ObjectInfo> units;                        ///< Information for all units.
+        std::vector<GroupInfo> groups;                        ///< Information for all groups (fleets).
     };
 
 } }

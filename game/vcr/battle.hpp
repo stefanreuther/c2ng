@@ -12,13 +12,17 @@
 #include "game/map/point.hpp"
 #include "game/playerlist.hpp"
 #include "game/spec/shiplist.hpp"
+#include "game/vcr/info.hpp"
 
 namespace game { namespace vcr {
 
     class Object;
     class Score;
 
-    /** Entry in a VCR database. */
+    /** Entry in a VCR database (=a battle).
+
+        A battle consists of a number of participants (objects), grouped into groups (fleets).
+        A Battle object allows retrieving "before" and "after" information for a fight. */
     class Battle : public afl::base::Deletable {
      public:
         static const int NeedQuickOutcome = 1;   ///< Caller needs the result of getOutcome(x).
@@ -41,7 +45,8 @@ namespace game { namespace vcr {
         };
 
 
-        /** Get number of objects. */
+        /** Get number of objects.
+            \return number of objects */
         virtual size_t getNumObjects() const = 0;
 
         /** Get an object participating in the fight.
@@ -50,6 +55,16 @@ namespace game { namespace vcr {
             \param slot Slot, [0,getNumObjects())
             \param after false to return beginning of fight, true to return after. */
         virtual const Object* getObject(size_t slot, bool after) const = 0;
+
+        /** Get number of groups.
+            \return number of groups */
+        virtual size_t getNumGroups() const = 0;
+
+        /** Get information about a group.
+            \param groupNr Group index [0,getNumGroups())
+            \param config Host configuration
+            \return Group information */
+        virtual GroupInfo getGroupInfo(size_t groupNr, const game::config::HostConfiguration& config) const = 0;
 
         /** Get outcome for an object.
             Can be one of:

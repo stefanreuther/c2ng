@@ -79,6 +79,22 @@ TestGameVcrClassicBattle::testSample()
     TS_ASSERT_EQUALS(t.getSeed(), 42);
     TS_ASSERT_EQUALS(t.getCapabilities(), 0);
 
+    TS_ASSERT_EQUALS(t.getNumGroups(), 2U);
+
+    TS_ASSERT_EQUALS(t.getGroupInfo(0, config).firstObject, 0U);
+    TS_ASSERT_EQUALS(t.getGroupInfo(0, config).numObjects, 1U);
+    TS_ASSERT_EQUALS(t.getGroupInfo(0, config).x, -29000);
+    TS_ASSERT_EQUALS(t.getGroupInfo(0, config).y, 0);
+    TS_ASSERT_EQUALS(t.getGroupInfo(0, config).owner, 2);
+    TS_ASSERT_EQUALS(t.getGroupInfo(0, config).speed, 100);
+
+    TS_ASSERT_EQUALS(t.getGroupInfo(1, config).firstObject, 1U);
+    TS_ASSERT_EQUALS(t.getGroupInfo(1, config).numObjects, 1U);
+    TS_ASSERT_EQUALS(t.getGroupInfo(1, config).x, 25000);
+    TS_ASSERT_EQUALS(t.getGroupInfo(1, config).y, 0);
+    TS_ASSERT_EQUALS(t.getGroupInfo(1, config).owner, 3);
+    TS_ASSERT_EQUALS(t.getGroupInfo(1, config).speed, 100);
+
     // Prepare result
     t.prepareResult(config, shipList, game::vcr::Battle::NeedCompleteResult);
     TS_ASSERT_EQUALS(t.getObject(0, true)->getId(), 14);

@@ -61,6 +61,62 @@ game::vcr::classic::Battle::getObject(size_t slot, bool after) const
     }
 }
 
+size_t
+game::vcr::classic::Battle::getNumGroups() const
+{
+    return 2;
+}
+
+game::vcr::GroupInfo
+game::vcr::classic::Battle::getGroupInfo(size_t groupNr, const game::config::HostConfiguration& config) const
+{
+    GroupInfo result;
+    if (groupNr == 0 || groupNr == 1) {
+        const Object& obj = m_before[groupNr];
+        result.firstObject = groupNr;
+        result.numObjects = 1;
+        result.owner = obj.getOwner();
+        result.y = 0;
+
+        /* Algorithm-specific values.
+           We duplicate and clean up some Algorithm information here.
+           For now, Algorithm::getObjectX() is specified with a [0,640] range matching the classic screen positions;
+           we prefer using meters instead. */
+        switch (m_type) {
+         case Unknown:
+         case Host:
+         case NuHost:
+            if (groupNr == 0) {
+                result.x = 3000  - 32000;
+                result.speed = 100;
+            } else if (obj.isPlanet()) {
+                result.x = 61000 - 32000;
+                result.speed = 0;
+            } else {
+                result.x = 57000 - 32000;
+                result.speed = 100;
+            }
+            break;
+         case PHost4:
+         case PHost3:
+         case PHost2:
+         case UnknownPHost:
+            if (groupNr == 0) {
+                result.x = -29000;
+            } else {
+                result.x = +29000;
+            }
+            if (obj.isPlanet()) {
+                result.speed = 0;
+            } else {
+                result.speed = config[game::config::HostConfiguration::ShipMovementSpeed](obj.getOwner());
+            }
+            break;
+        }
+    }
+    return result;
+}
+
 int
 game::vcr::classic::Battle::getOutcome(const game::config::HostConfiguration& config,
                                        const game::spec::ShipList& shipList,
