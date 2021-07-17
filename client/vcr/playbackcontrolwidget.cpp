@@ -4,14 +4,15 @@
 
 #include "client/vcr/playbackcontrolwidget.hpp"
 
-client::vcr::PlaybackControlWidget::PlaybackControlWidget(ui::Root& root)
+client::vcr::PlaybackControlWidget::PlaybackControlWidget(ui::Root& root, bool acceptShiftMove)
     : Widget(),
       m_root(root),
       m_startButton("\xEE\x85\x84""\xE2\x97\x80", util::KeyMod_Alt + util::Key_Left, root),
       m_rewindButton("\xE2\x97\x80""\xE2\x97\x80", util::KeyMod_Ctrl + util::Key_Left, root),
       m_playButton("\xE2\x96\xB6", util::Key_Right, root),
       m_forwardButton("\xE2\x96\xB6""\xE2\x96\xB6", util::KeyMod_Ctrl + util::Key_Right, root),
-      m_endButton("\xE2\x96\xB6""\xEE\x85\x84", util::KeyMod_Alt + util::Key_Right, root)
+      m_endButton("\xE2\x96\xB6""\xEE\x85\x84", util::KeyMod_Alt + util::Key_Right, root),
+      m_acceptShiftMove(acceptShiftMove)
 {
     // ex WVcrPlayWindow::init [part]
     addChild(m_startButton, 0);
@@ -94,11 +95,27 @@ client::vcr::PlaybackControlWidget::handleKey(util::Key_t key, int prefix)
 {
     switch (key) {
      case util::KeyMod_Shift + util::Key_Left:
-        sig_moveBy.raise(-1);
-        return true;
+        if (m_acceptShiftMove) {
+            sig_moveBy.raise(-1);
+            return true;
+        } else {
+            return false;
+        }
 
      case util::KeyMod_Shift + util::Key_Right:
+        if (m_acceptShiftMove) {
+            sig_moveBy.raise(+1);
+            return true;
+        } else {
+            return false;
+        }
+
+     case 'F':
         sig_moveBy.raise(+1);
+        return true;
+
+     case 'B':
+        sig_moveBy.raise(-1);
         return true;
 
      case ' ':

@@ -219,7 +219,7 @@ client::vcr::classic::PlaybackScreen::PlaybackScreen(ui::Root& root, afl::string
       m_spriteWidget(),
       m_leftStatus(root, tx),
       m_rightStatus(root, tx),
-      m_playbackControl(root),
+      m_playbackControl(root, true),
       m_renderer(),
       m_state(Initializing),
       m_targetTime(0),

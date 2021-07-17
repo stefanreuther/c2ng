@@ -13,7 +13,7 @@ namespace client { namespace vcr {
 
     class PlaybackControlWidget : public ui::Widget {
      public:
-        PlaybackControlWidget(ui::Root& root);
+        PlaybackControlWidget(ui::Root& root, bool acceptShiftMove);
         ~PlaybackControlWidget();
 
         void setPlayState(bool playing);
@@ -50,6 +50,7 @@ namespace client { namespace vcr {
         ui::widgets::Button m_playButton;
         ui::widgets::Button m_forwardButton;
         ui::widgets::Button m_endButton;
+        bool m_acceptShiftMove;
 
         void onStart();
         void onRewind();
