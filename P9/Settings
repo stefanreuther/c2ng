@@ -12,7 +12,10 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/proxy/flakvcrplayerproxy.cpp \
+FILES_gamelib = game/vcr/flak/visualisationsettings.cpp \
+    game/vcr/flak/visualisationsettings.hpp \
+    game/vcr/flak/visualisationstate.hpp \
+    game/vcr/flak/visualisationstate.cpp game/proxy/flakvcrplayerproxy.cpp \
     game/proxy/flakvcrplayerproxy.hpp game/vcr/flak/eventrecorder.cpp \
     game/vcr/flak/eventrecorder.hpp game/proxy/outboxproxy.cpp \
     game/proxy/outboxproxy.hpp util/editor/editor.cpp util/editor/editor.hpp \
@@ -1579,7 +1582,9 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_game_proxy_flakvcrplayerproxy.cpp \
+FILES_testsuite = u/t_game_vcr_flak_visualisationsettings.cpp \
+    u/t_game_vcr_flak_visualisationstate.cpp \
+    u/t_game_proxy_flakvcrplayerproxy.cpp \
     u/t_game_vcr_flak_eventrecorder.cpp \
     u/t_gfx_keyeventconsumer.cpp u/t_gfx_threed_vecmath.cpp \
     u/t_gfx_threed.hpp u/t_gfx_complex.cpp u/t_game_proxy_outboxproxy.cpp \

@@ -74,4 +74,33 @@ class TestGameVcrFlakStructures : public CxxTest::TestSuite {
     void testInclude();
 };
 
+class TestGameVcrFlakVisualisationSettings : public CxxTest::TestSuite {
+ public:
+    void testInit();
+    void testMove();
+    void testFollowFleet();
+    void testFollowPlayer();
+    void testFollowError();
+    void testRaise();
+    void testZoom();
+    void testFollowDead();
+    void testFollowDead2();
+};
+
+class TestGameVcrFlakVisualisationState : public CxxTest::TestSuite {
+ public:
+    void testInit();
+    void testBounds();
+    void testShip();
+    void testFleet();
+    void testFighter();
+    void testTorpedo();
+    void testBeam();
+    void testSmokeAge();
+    void testBeamAge();
+    void testShipTurn();
+    void testCopy();
+    void testTime();
+};
+
 #endif
