@@ -1991,7 +1991,7 @@ namespace {
         data.setNumTorpedoes(sh.getNumLaunchers() != 0 ? sh.getAmmo() : 0);
         data.setTorpedoType(sh.getTorpedoType());
         data.setNumBays(sh.getNumBays());
-        data.setNumFighters(sh.getNumLaunchers() == 0 ? 0 : sh.getAmmo());
+        data.setNumFighters(sh.getNumLaunchers() != 0 ? 0 : sh.getAmmo());
         data.setMass(sh.getMass());
         data.setShield(sh.getShield());
 
