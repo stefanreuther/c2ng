@@ -22,6 +22,7 @@
 #include "ui/spacer.hpp"
 #include "ui/widgets/button.hpp"
 #include "ui/widgets/framegroup.hpp"
+#include "ui/widgets/keyforwarder.hpp"
 #include "ui/widgets/quit.hpp"
 #include "ui/widgets/simpletable.hpp"
 #include "ui/window.hpp"
@@ -31,8 +32,6 @@
 using game::proxy::IonStormProxy;
 
 namespace {
-    class IonStormInfoDialog;
-
     const int NUM_LINES = 5;
 
     gfx::Point getPreferredMapSize(ui::Root& root)
@@ -51,17 +50,7 @@ namespace {
         }
     }
 
-    class IonStormInfoKeyHandler : public ui::InvisibleWidget {
-     public:
-        IonStormInfoKeyHandler(IonStormInfoDialog& parent)
-            : InvisibleWidget(), m_parent(parent)
-            { }
-        virtual bool handleKey(util::Key_t key, int prefix);
-     private:
-        IonStormInfoDialog& m_parent;
-    };
-
-    class IonStormInfoDialog : public client::si::Control {
+    class IonStormInfoDialog : public client::si::Control, public gfx::KeyEventConsumer {
      public:
         IonStormInfoDialog(client::si::UserSide& iface, ui::Root& root, afl::string::Translator& tx, client::si::OutputState& out);
 
@@ -101,17 +90,6 @@ namespace {
 }
 
 
-
-/*
- *  IonStormInfoKeyHandler
- */
-
-bool
-IonStormInfoKeyHandler::handleKey(util::Key_t key, int prefix)
-{
-    return m_parent.handleKey(key, prefix);
-}
-
 /*
  *  IonStormInfoDialog
  */
@@ -150,7 +128,7 @@ IonStormInfoDialog::run()
     afl::base::Deleter del;
 
     ui::Window& win = del.addNew(new ui::Window(m_translator("Ion Storm Information"), m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
-    ui::Widget& keys = del.addNew(new IonStormInfoKeyHandler(*this));
+    ui::Widget& keys = del.addNew(new ui::widgets::KeyForwarder(*this));
 
     // Header
     client::tiles::SelectionHeaderTile& header = del.addNew(new client::tiles::SelectionHeaderTile(m_root, keys));

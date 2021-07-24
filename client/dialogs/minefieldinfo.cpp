@@ -23,6 +23,7 @@
 #include "ui/spacer.hpp"
 #include "ui/widgets/button.hpp"
 #include "ui/widgets/framegroup.hpp"
+#include "ui/widgets/keyforwarder.hpp"
 #include "ui/widgets/quit.hpp"
 #include "ui/widgets/simpletable.hpp"
 #include "ui/window.hpp"
@@ -32,8 +33,6 @@
 using game::proxy::MinefieldProxy;
 
 namespace {
-    class MinefieldInfoDialog;
-
     const int NUM_LINES = 7;
 
     gfx::Point getPreferredMapSize(ui::Root& root)
@@ -52,17 +51,7 @@ namespace {
         }
     }
 
-    class MinefieldInfoKeyHandler : public ui::InvisibleWidget {
-     public:
-        MinefieldInfoKeyHandler(MinefieldInfoDialog& parent)
-            : InvisibleWidget(), m_parent(parent)
-            { }
-        virtual bool handleKey(util::Key_t key, int prefix);
-     private:
-        MinefieldInfoDialog& m_parent;
-    };
-
-    class MinefieldInfoDialog : public client::si::Control {
+    class MinefieldInfoDialog : public client::si::Control, public gfx::KeyEventConsumer {
      public:
         MinefieldInfoDialog(client::si::UserSide& iface, ui::Root& root, afl::string::Translator& tx, client::si::OutputState& out);
 
@@ -108,16 +97,6 @@ namespace {
         void setPassageDistance(int newDistance);
         void showSweepInfo();
     };
-}
-
-/*
- *  MinefieldInfoKeyHandler
- */
-
-bool
-MinefieldInfoKeyHandler::handleKey(util::Key_t key, int prefix)
-{
-    return m_parent.handleKey(key, prefix);
 }
 
 /*
@@ -173,7 +152,7 @@ MinefieldInfoDialog::run()
     afl::base::Deleter del;
 
     ui::Window& win = del.addNew(new ui::Window(m_translator("Minefield Information"), m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
-    ui::Widget& keys = del.addNew(new MinefieldInfoKeyHandler(*this));
+    ui::Widget& keys = del.addNew(new ui::widgets::KeyForwarder(*this));
 
     // Header
     client::tiles::SelectionHeaderTile& header = del.addNew(new client::tiles::SelectionHeaderTile(m_root, keys));

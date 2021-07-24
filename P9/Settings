@@ -693,7 +693,8 @@ PROJ_AUTO += \
     gamelib:game/*.cpp,game/*.hpp,util/*.cpp,util/*.hpp,interpreter/*.cpp,interpreter/*.hpp
 
 TARGETS += guilib
-FILES_guilib = gfx/threed/particlerenderer.hpp \
+FILES_guilib = ui/widgets/keyforwarder.cpp ui/widgets/keyforwarder.hpp \
+    gfx/keyeventconsumer.hpp gfx/threed/particlerenderer.hpp \
     gfx/threed/trianglerenderer.cpp gfx/threed/trianglerenderer.hpp \
     gfx/threed/softwarecontext.cpp gfx/threed/softwarecontext.hpp \
     gfx/threed/linerenderer.cpp gfx/threed/linerenderer.hpp \
@@ -1576,8 +1577,8 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_gfx_threed_vecmath.cpp u/t_gfx_threed.hpp \
-    u/t_gfx_complex.cpp u/t_game_proxy_outboxproxy.cpp \
+FILES_testsuite = u/t_gfx_keyeventconsumer.cpp u/t_gfx_threed_vecmath.cpp \
+    u/t_gfx_threed.hpp u/t_gfx_complex.cpp u/t_game_proxy_outboxproxy.cpp \
     u/t_util_editor_editor.cpp u/t_util_editor_command.cpp \
     u/t_util_editor.hpp u/t_game_proxy_vcroverviewproxy.cpp \
     u/t_game_vcr_overview.cpp u/t_ui_icons_vbox.cpp \

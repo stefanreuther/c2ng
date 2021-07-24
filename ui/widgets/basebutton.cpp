@@ -166,11 +166,11 @@ ui::widgets::BaseButton::handleMouse(gfx::Point pt, MouseButtons_t pressedButton
 
 // Dispatch key activation to another widget.
 void
-ui::widgets::BaseButton::dispatchKeyTo(Widget& target)
+ui::widgets::BaseButton::dispatchKeyTo(gfx::KeyEventConsumer& target)
 {
     class Handler : public afl::base::Closure<void(int, util::Key_t)> {
      public:
-        Handler(Widget& target)
+        Handler(gfx::KeyEventConsumer& target)
             : m_target(target)
             { }
         void call(int prefix, util::Key_t key)
@@ -178,7 +178,7 @@ ui::widgets::BaseButton::dispatchKeyTo(Widget& target)
         Handler* clone() const
             { return new Handler(*this); }
      private:
-        Widget& m_target;
+        gfx::KeyEventConsumer& m_target;
     };
     sig_fireKey.addNewClosure(new Handler(target));
 }

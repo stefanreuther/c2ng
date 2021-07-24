@@ -116,6 +116,11 @@ class TestGfxGraphicsException : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestGfxKeyEventConsumer : public CxxTest::TestSuite {
+ public:
+    void testInterface();
+};
+
 class TestGfxNullCanvas : public CxxTest::TestSuite {
  public:
     void testIt();

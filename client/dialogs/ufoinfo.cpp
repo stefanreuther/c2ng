@@ -24,6 +24,7 @@
 #include "ui/widgets/basebutton.hpp"
 #include "ui/widgets/button.hpp"
 #include "ui/widgets/framegroup.hpp"
+#include "ui/widgets/keyforwarder.hpp"
 #include "ui/widgets/quit.hpp"
 #include "ui/widgets/simpletable.hpp"
 #include "ui/window.hpp"
@@ -33,8 +34,6 @@ using afl::string::Format;
 using game::proxy::UfoProxy;
 
 namespace {
-    class UfoInfoDialog;
-
     const int NUM_LINES = 9;
 
     gfx::Point getPreferredMapSize(ui::Root& root)
@@ -54,22 +53,9 @@ namespace {
     }
 
     /*
-     *  UfoInfoKeyHandler - one-trick widget to relay keystrokes into UfoInfoDialog
-     */
-    class UfoInfoKeyHandler : public ui::InvisibleWidget {
-     public:
-        UfoInfoKeyHandler(UfoInfoDialog& parent)
-            : InvisibleWidget(), m_parent(parent)
-            { }
-        virtual bool handleKey(util::Key_t key, int prefix);
-     private:
-        UfoInfoDialog& m_parent;
-    };
-
-    /*
      *  UfoInfoDialog - dialog main class
      */
-    class UfoInfoDialog : public client::si::Control {
+    class UfoInfoDialog : public client::si::Control, public gfx::KeyEventConsumer {
      public:
         UfoInfoDialog(client::si::UserSide& iface, ui::Root& root, afl::string::Translator& tx, client::si::OutputState& out);
 
@@ -112,16 +98,6 @@ namespace {
     };
 }
 
-
-/*
- *  UfoInfoKeyHandler
- */
-
-bool
-UfoInfoKeyHandler::handleKey(util::Key_t key, int prefix)
-{
-    return m_parent.handleKey(key, prefix);
-}
 
 /*
  *  UfoInfoDialog
@@ -170,7 +146,7 @@ UfoInfoDialog::run()
     afl::base::Deleter del;
 
     ui::Window& win = del.addNew(new ui::Window(m_translator("Ufo Information"), m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
-    ui::Widget& keys = del.addNew(new UfoInfoKeyHandler(*this));
+    ui::Widget& keys = del.addNew(new ui::widgets::KeyForwarder(*this));
 
     // Header
     client::tiles::SelectionHeaderTile& header = del.addNew(new client::tiles::SelectionHeaderTile(m_root, keys));

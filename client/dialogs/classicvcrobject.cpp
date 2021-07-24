@@ -18,6 +18,7 @@
 #include "ui/widgets/button.hpp"
 #include "ui/widgets/framegroup.hpp"
 #include "ui/widgets/imagebutton.hpp"
+#include "ui/widgets/keyforwarder.hpp"
 #include "ui/widgets/quit.hpp"
 #include "ui/widgets/statictext.hpp"
 #include "ui/widgets/stringlistbox.hpp"
@@ -29,7 +30,7 @@ using ui::Group;
 using ui::widgets::FrameGroup;
 
 namespace {
-    class ClassicVcrObjectDialog {
+    class ClassicVcrObjectDialog : public gfx::KeyEventConsumer {
      public:
         ClassicVcrObjectDialog(ui::Root& root, util::NumberFormatter fmt, afl::string::Translator& tx, VcrDatabaseProxy& proxy, size_t side, game::proxy::WaitIndicator& ind);
 
@@ -66,17 +67,6 @@ namespace {
 
         afl::base::SignalConnection conn_sideUpdate;
         afl::base::SignalConnection conn_hullUpdate;
-    };
-
-    class ClassicVcrKeyDispatcher : public ui::InvisibleWidget {
-     public:
-        ClassicVcrKeyDispatcher(ClassicVcrObjectDialog& dlg)
-            : m_dialog(dlg)
-            { }
-        virtual bool handleKey(util::Key_t key, int prefix)
-            { return m_dialog.handleKey(key, prefix); }
-     private:
-        ClassicVcrObjectDialog& m_dialog;
     };
 }
 
@@ -134,7 +124,7 @@ ClassicVcrObjectDialog::run(ui::Root& root, util::RequestSender<game::Session> g
     win.add(headGroup);
     win.add(m_info);
 
-    ui::Widget& disp = del.addNew(new ClassicVcrKeyDispatcher(*this));
+    ui::Widget& disp = del.addNew(new ui::widgets::KeyForwarder(*this));
     ui::Widget& help = del.addNew(new client::widgets::HelpWidget(root, tx, gameSender, "pcc2:vcrinfo"));
     Group& buttons = del.addNew(new Group(ui::layout::HBox::instance5));
     Button& btnHelp  = del.addNew(new Button(tx("Help"), 'h', root));

@@ -5,9 +5,12 @@
 
 #include "client/dialogs/selectionmanager.hpp"
 #include "afl/base/deleter.hpp"
+#include "afl/data/stringvalue.hpp"
 #include "afl/string/format.hpp"
 #include "client/dialogs/helpdialog.hpp"
 #include "client/downlink.hpp"
+#include "client/si/control.hpp"
+#include "client/si/userside.hpp"
 #include "game/proxy/selectionproxy.hpp"
 #include "ui/dialogs/messagebox.hpp"
 #include "ui/draw.hpp"
@@ -19,15 +22,13 @@
 #include "ui/widgets/abstractlistbox.hpp"
 #include "ui/widgets/button.hpp"
 #include "ui/widgets/inputline.hpp"
+#include "ui/widgets/keyforwarder.hpp"
 #include "ui/widgets/quit.hpp"
 #include "ui/widgets/standarddialogbuttons.hpp"
 #include "ui/window.hpp"
 #include "util/skincolor.hpp"
 #include "util/string.hpp"
 #include "util/unicodechars.hpp"
-#include "client/si/control.hpp"
-#include "client/si/userside.hpp"
-#include "afl/data/stringvalue.hpp"
 
 using game::proxy::SelectionProxy;
 
@@ -63,19 +64,8 @@ namespace {
         afl::base::Ref<gfx::Font> getFont() const;
     };
 
-    class SelectionManager : public client::si::Control {
+    class SelectionManager : public client::si::Control, public gfx::KeyEventConsumer {
      public:
-        class KeyDispatcher : public ui::InvisibleWidget {
-         public:
-            KeyDispatcher(SelectionManager& parent)
-                : m_parent(parent)
-                { }
-            virtual bool handleKey(util::Key_t key, int prefix)
-                { return m_parent.handleKey(key, prefix); }
-         private:
-            SelectionManager& m_parent;
-        };
-
         SelectionManager(client::si::UserSide& ui,
                          ui::Root& root,
                          SelectionProxy& proxy,
@@ -101,7 +91,7 @@ namespace {
         SelectionProxy& m_proxy;
         util::RequestSender<game::Session> m_gameSender;
         SelectionList m_list;
-        KeyDispatcher m_keyDispatcher;
+        ui::widgets::KeyForwarder m_keyDispatcher;
         ui::EventLoop m_loop;
         client::si::OutputState m_outputState;
         afl::base::SignalConnection conn_selectionChange;

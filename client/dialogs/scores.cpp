@@ -25,6 +25,7 @@
 #include "ui/widgets/button.hpp"
 #include "ui/widgets/chart.hpp"
 #include "ui/widgets/iconbox.hpp"
+#include "ui/widgets/keyforwarder.hpp"
 #include "ui/widgets/menuframe.hpp"
 #include "ui/widgets/quit.hpp"
 #include "ui/widgets/simpletable.hpp"
@@ -297,8 +298,6 @@ namespace {
         return mode == DifferenceToPrevious || mode == DifferenceToSpecific;
     }
 
-    class ScoreDialog;
-
     /*
      *  ScoreIconBox widget: display a ScoreTabs_t as an IconBox
      */
@@ -322,25 +321,10 @@ namespace {
     };
 
     /*
-     *  ScoreKeyHandler widget: one-trick widget to forward keystrokes to ScoreDialog
-     */
-
-    class ScoreKeyHandler : public ui::InvisibleWidget {
-     public:
-        ScoreKeyHandler(ScoreDialog& parent)
-            : InvisibleWidget(), m_parent(parent)
-            { }
-
-        virtual bool handleKey(util::Key_t key, int prefix);
-     private:
-        ScoreDialog& m_parent;
-    };
-
-    /*
      *  ScoreDialog: main entry point
      */
 
-    class ScoreDialog {
+    class ScoreDialog : public gfx::KeyEventConsumer {
      public:
         ScoreDialog(ui::Root& root, util::RequestSender<game::Session> gameSender, afl::string::Translator& tx);
 
@@ -733,7 +717,7 @@ ScoreDialog::run()
     client::widgets::HelpWidget& help = del.addNew(new client::widgets::HelpWidget(m_root, m_translator, m_gameSender, "pcc2:scores"));
     win.add(help);
     win.add(del.addNew(new ui::widgets::Quit(m_root, loop)));
-    win.add(del.addNew(new ScoreKeyHandler(*this)));
+    win.add(del.addNew(new ui::widgets::KeyForwarder(*this)));
 
     btnNextTurn.sig_fire.add(this, &ScoreDialog::nextTurn);
     btnPreviousTurn.sig_fire.add(this, &ScoreDialog::previousTurn);
@@ -1491,18 +1475,6 @@ ScoreDialog::renderTableRow(SimpleTable::Range row, size_t startingIndex, TableM
                  : hasAnyValue
                  ? COLOR_NORMAL
                  : COLOR_FADED);
-}
-
-
-
-/*
- *  ScoreKeyHandler
- */
-
-bool
-ScoreKeyHandler::handleKey(util::Key_t key, int prefix)
-{
-    return m_parent.handleKey(key, prefix);
 }
 
 

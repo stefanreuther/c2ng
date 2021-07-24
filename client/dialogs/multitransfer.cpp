@@ -25,11 +25,15 @@
 #include "client/widgets/helpwidget.hpp"
 #include "game/proxy/cargotransferproxy.hpp"
 #include "game/proxy/configurationproxy.hpp"
+#include "gfx/complex.hpp"
+#include "gfx/keyeventconsumer.hpp"
 #include "ui/dialogs/messagebox.hpp"
 #include "ui/draw.hpp"
 #include "ui/layout/hbox.hpp"
 #include "ui/layout/vbox.hpp"
 #include "ui/widgets/abstractlistbox.hpp"
+#include "ui/widgets/framegroup.hpp"
+#include "ui/widgets/keyforwarder.hpp"
 #include "ui/widgets/menuframe.hpp"
 #include "ui/widgets/quit.hpp"
 #include "ui/widgets/scrollbarcontainer.hpp"
@@ -42,8 +46,6 @@
 #include "util/unicodechars.hpp"
 #include "util/updater.hpp"
 #include "util/vector.hpp"
-#include "ui/widgets/framegroup.hpp"
-#include "gfx/complex.hpp"
 
 using afl::string::Format;
 using game::Element;
@@ -73,8 +75,6 @@ namespace {
     /*
      *  Classes
      */
-
-    class MultiTransferDialog;
 
     /* List box containing all participating units */
     class MultiTransferList : public ui::widgets::AbstractListbox {
@@ -126,21 +126,8 @@ namespace {
             { return m_root.provider().getFont(gfx::FontRequest()); }
     };
 
-    /* Key forwarder */
-    class MultiTransferKeyHandler : public ui::InvisibleWidget {
-     public:
-        MultiTransferKeyHandler(MultiTransferDialog& dlg)
-            : m_dialog(dlg)
-            { }
-
-        bool handleKey(util::Key_t key, int prefix);
-
-     private:
-        MultiTransferDialog& m_dialog;
-    };
-
     /* Dialog main entry point */
-    class MultiTransferDialog {
+    class MultiTransferDialog : public gfx::KeyEventConsumer {
      public:
         MultiTransferDialog(ui::Root& root, afl::string::Translator& tx, NumberFormatter fmt, Element::Type type, util::RequestSender<game::Session> gameSender, game::proxy::WaitIndicator& ind, CargoTransferProxy& proxy);
 
@@ -372,16 +359,6 @@ MultiTransferList::hasRoomForHold(int32_t holdAmount, size_t extension) const
 }
 
 /*
- *  MultiTransferKeyHandler
- */
-
-bool
-MultiTransferKeyHandler::handleKey(util::Key_t key, int prefix)
-{
-    return m_dialog.handleKey(key, prefix);
-}
-
-/*
  *  MultiTransferDialog
  */
 
@@ -446,7 +423,7 @@ MultiTransferDialog::run(String_t title)
 
     ui::Widget& help = del.addNew(new client::widgets::HelpWidget(m_root, m_translator, m_gameSender, "pcc2:multicargo"));
 
-    ui::Widget& keyHandler = del.addNew(new MultiTransferKeyHandler(*this));
+    ui::Widget& keyHandler = del.addNew(new ui::widgets::KeyForwarder(*this));
     win.add(keyHandler);
     win.add(del.addNew(new ui::widgets::Quit(m_root, m_loop)));
     win.add(help);

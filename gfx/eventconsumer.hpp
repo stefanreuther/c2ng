@@ -1,17 +1,17 @@
 /**
   *  \file gfx/eventconsumer.hpp
+  *  \brief Interface gfx::EventConsumer
   */
 #ifndef C2NG_GFX_EVENTCONSUMER_HPP
 #define C2NG_GFX_EVENTCONSUMER_HPP
 
-#include "util/key.hpp"
-#include "gfx/point.hpp"
 #include "afl/bits/smallset.hpp"
-#include "afl/base/deletable.hpp"
+#include "gfx/keyeventconsumer.hpp"
+#include "gfx/point.hpp"
 
 namespace gfx {
 
-    class EventConsumer : public afl::base::Deletable {
+    class EventConsumer : public KeyEventConsumer {
      public:
         enum MouseButton {
             LeftButton,
@@ -24,11 +24,6 @@ namespace gfx {
             MetaKey
         };
         typedef afl::bits::SmallSet<MouseButton> MouseButtons_t;
-
-        /** Handle keypress.
-            \param key Key that was pressed
-            \param prefix Prefix (repeat) count */
-        virtual bool handleKey(util::Key_t key, int prefix) = 0;
 
         /** Handle mouse movement.
             \param pt Mouse location or movement

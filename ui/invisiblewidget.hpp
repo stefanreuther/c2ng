@@ -17,6 +17,8 @@ namespace ui {
         nor mouse events. */
     class InvisibleWidget : public SimpleWidget {
      public:
+        InvisibleWidget();
+
         virtual void draw(gfx::Canvas& can);
         virtual void handleStateChange(State st, bool enable);
         virtual void handlePositionChange(gfx::Rectangle& oldPosition);

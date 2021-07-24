@@ -5,6 +5,9 @@
 
 #include "ui/invisiblewidget.hpp"
 
+ui::InvisibleWidget::InvisibleWidget()
+{ }
+
 void
 ui::InvisibleWidget::draw(gfx::Canvas& /*can*/)
 { }
