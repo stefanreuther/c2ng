@@ -78,7 +78,10 @@ class game::proxy::SimulationRunProxy::Adaptor : public VcrDatabaseAdaptor {
             return *m_trampoline.m_shipList;
         }
     virtual const TeamSettings* getTeamSettings() const
-        { return 0; /* FIXME */ }
+        {
+            Game* g = m_trampoline.m_game.get();
+            return g != 0 ? &g->teamSettings() : 0;
+        }
     virtual game::vcr::Database& battles()
         { return *m_battles; }
     virtual afl::sys::LogListener& log()
