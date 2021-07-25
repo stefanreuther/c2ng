@@ -231,3 +231,79 @@ TestGameProxyVcrDatabaseProxy::testIt()
     TS_ASSERT_EQUALS(env.setup.getShip(0)->getName(), "Bird");
 }
 
+/** Test getTeamSettings(), no team settings in game side. */
+void
+TestGameProxyVcrDatabaseProxy::testGetTeamSettings()
+{
+    // Environment
+    Environment env;
+    game::test::WaitIndicator ind;
+    TestAdaptor ad(env);
+    util::RequestReceiver<game::proxy::VcrDatabaseAdaptor> recv(ind, ad);
+    game::proxy::VcrDatabaseProxy proxy(recv.getSender(), ind, env.translator, std::auto_ptr<game::spec::info::PictureNamer>(new TestPictureNamer()));
+
+    // Room for result
+    game::TeamSettings teams;
+    teams.setViewpointPlayer(10);
+
+    // Retrieve result
+    proxy.getTeamSettings(ind, teams);
+
+    // Check
+    TS_ASSERT_EQUALS(teams.getViewpointPlayer(), 0);
+}
+
+/** Test getTeamSettings(), team settings present in game side. */
+void
+TestGameProxyVcrDatabaseProxy::testGetTeamSettings2()
+{
+    // Environment
+    game::TeamSettings gameTeams;
+    gameTeams.setViewpointPlayer(7);
+    gameTeams.setPlayerTeam(3, 7);
+
+    Environment env;
+    env.pTeamSettings = &gameTeams;
+    game::test::WaitIndicator ind;
+    TestAdaptor ad(env);
+    util::RequestReceiver<game::proxy::VcrDatabaseAdaptor> recv(ind, ad);
+    game::proxy::VcrDatabaseProxy proxy(recv.getSender(), ind, env.translator, std::auto_ptr<game::spec::info::PictureNamer>(new TestPictureNamer()));
+
+    // Room for result
+    game::TeamSettings teams;
+    teams.setViewpointPlayer(10);
+
+    // Retrieve result
+    proxy.getTeamSettings(ind, teams);
+
+    // Check
+    TS_ASSERT_EQUALS(teams.getViewpointPlayer(), 7);
+    TS_ASSERT_EQUALS(teams.getPlayerTeam(3), 7);
+}
+
+/** Test getPlayerNames(). */
+void
+TestGameProxyVcrDatabaseProxy::testGetPlayerNames()
+{
+    // Environment
+    Environment env;
+    game::Player* p3 = env.root.playerList().create(3);
+    game::Player* p9 = env.root.playerList().create(9);
+    p3->setName(game::Player::AdjectiveName, "three");
+    p9->setName(game::Player::LongName, "Nine");
+    game::test::WaitIndicator ind;
+    TestAdaptor ad(env);
+    util::RequestReceiver<game::proxy::VcrDatabaseAdaptor> recv(ind, ad);
+    game::proxy::VcrDatabaseProxy proxy(recv.getSender(), ind, env.translator, std::auto_ptr<game::spec::info::PictureNamer>(new TestPictureNamer()));
+
+    // Retrieve result
+    game::PlayerArray<String_t> adj  = proxy.getPlayerNames(ind, game::Player::AdjectiveName);
+    game::PlayerArray<String_t> full = proxy.getPlayerNames(ind, game::Player::LongName);
+
+    // Check
+    TS_ASSERT_EQUALS(adj.get(3), "three");
+    TS_ASSERT_EQUALS(adj.get(9), "");
+    TS_ASSERT_EQUALS(full.get(3), "");
+    TS_ASSERT_EQUALS(full.get(9), "Nine");
+}
+

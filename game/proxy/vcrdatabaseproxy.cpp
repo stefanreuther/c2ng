@@ -33,6 +33,8 @@ class game::proxy::VcrDatabaseProxy::Trampoline {
     AddResult addToSimulation(size_t index, size_t side, int hullType, bool after);
 
     void packStatus(Status& st);
+    void packPlayerNames(PlayerArray<String_t>& result, Player::Name which);
+    void copyTeamSettings(TeamSettings& result);
 
  private:
     VcrDatabaseAdaptor& m_adaptor;
@@ -177,7 +179,7 @@ game::proxy::VcrDatabaseProxy::Trampoline::addToSimulation(size_t index, size_t 
     // ex WVcrInfoMain::addToSim
     const game::config::HostConfiguration& config = m_adaptor.root().hostConfiguration();
     const game::spec::ShipList& shipList = m_adaptor.shipList();
-    
+
     // Obtain battle
     game::vcr::Battle* b = m_adaptor.battles().getBattle(index);
     if (b == 0) {
@@ -244,6 +246,24 @@ game::proxy::VcrDatabaseProxy::Trampoline::packStatus(Status& st)
     }
 }
 
+inline void
+game::proxy::VcrDatabaseProxy::Trampoline::packPlayerNames(PlayerArray<String_t>& result, Player::Name which)
+{
+    const PlayerList& list = m_adaptor.root().playerList();
+    for (int i = 0; i <= MAX_PLAYERS; ++i) {
+        if (const Player* pl = list.get(i)) {
+            result.set(i, pl->getName(which));
+        }
+    }
+}
+
+inline void
+game::proxy::VcrDatabaseProxy::Trampoline::copyTeamSettings(TeamSettings& result)
+{
+    if (const TeamSettings* teams = m_adaptor.getTeamSettings()) {
+        result.copyFrom(*teams);
+    }
+}
 
 /*
  *  TrampolineFromAdaptor
@@ -294,6 +314,49 @@ game::proxy::VcrDatabaseProxy::getStatus(WaitIndicator& ind, Status& status)
 
     // Save m_numBattles for UI-side rendering
     m_numBattles = status.numBattles;
+}
+
+void
+game::proxy::VcrDatabaseProxy::getTeamSettings(WaitIndicator& ind, TeamSettings& teams)
+{
+    class Task : public util::Request<Trampoline> {
+     public:
+        Task(TeamSettings& result)
+            : m_result(result)
+            { }
+        virtual void handle(Trampoline& tpl)
+            { tpl.copyTeamSettings(m_result); }
+     private:
+        TeamSettings& m_result;
+    };
+
+    // Two-step copy (game > tmp > teams) so if teams has listeners attached,
+    // those are called in the right context.
+    TeamSettings tmp;
+    Task t(tmp);
+    ind.call(m_request, t);
+    teams.copyFrom(tmp);
+}
+
+game::PlayerArray<String_t>
+game::proxy::VcrDatabaseProxy::getPlayerNames(WaitIndicator& ind, Player::Name which)
+{
+    class Task : public util::Request<Trampoline> {
+     public:
+        Task(PlayerArray<String_t>& result, Player::Name which)
+            : m_result(result), m_which(which)
+            { }
+        virtual void handle(Trampoline& tpl)
+            { tpl.packPlayerNames(m_result, m_which); }
+     private:
+        PlayerArray<String_t>& m_result;
+        Player::Name m_which;
+    };
+
+    PlayerArray<String_t> result;
+    Task t(result, which);
+    ind.call(m_request, t);
+    return result;
 }
 
 void

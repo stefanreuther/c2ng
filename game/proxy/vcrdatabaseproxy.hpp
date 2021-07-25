@@ -10,6 +10,7 @@
 #include "afl/base/signal.hpp"
 #include "afl/string/translator.hpp"
 #include "afl/sys/loglistener.hpp"
+#include "game/playerarray.hpp"
 #include "game/proxy/vcrdatabaseadaptor.hpp"
 #include "game/reference.hpp"
 #include "game/root.hpp"
@@ -40,6 +41,7 @@ namespace game { namespace proxy {
 
         Synchronous, bidirectional:
         - query position and count
+        - query TeamSettings, player names (offered here so you don't need a Session sender if you have a VcrDatabaseAdaptor sender)
 
         Asynchronous, bidirectional:
         - request one battle's information and details
@@ -113,6 +115,18 @@ namespace game { namespace proxy {
             \param [in]  ind    WaitIndicator for UI synchronisation
             \param [out] status Status */
         void getStatus(WaitIndicator& ind, Status& status);
+
+        /** Get TeamSettings.
+            If the VcrDatabaseAdaptor knows about a TeamSettings object, returns a copy of that.
+            \param [in]  ind    WaitIndicator for UI synchronisation
+            \param [out] teams  TeamSettings */
+        void getTeamSettings(WaitIndicator& ind, TeamSettings& teams);
+
+        /** Get player names.
+            \param [in]  ind    WaitIndicator for UI synchronisation
+            \param [in]  which  Name to query
+            \return Array of player names */
+        PlayerArray<String_t> getPlayerNames(WaitIndicator& ind, Player::Name which);
 
         /** Set current battle.
             Replies with one or more sig_update calls.

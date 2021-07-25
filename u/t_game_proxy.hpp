@@ -518,6 +518,9 @@ class TestGameProxyVcrDatabaseAdaptor : public CxxTest::TestSuite {
 class TestGameProxyVcrDatabaseProxy : public CxxTest::TestSuite {
  public:
     void testIt();
+    void testGetTeamSettings();
+    void testGetTeamSettings2();
+    void testGetPlayerNames();
 };
 
 class TestGameProxyVcrOverviewProxy : public CxxTest::TestSuite {
