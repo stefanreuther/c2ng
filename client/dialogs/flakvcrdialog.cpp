@@ -6,6 +6,7 @@
 #include "client/dialogs/flakvcrdialog.hpp"
 #include "client/dialogs/combatoverview.hpp"
 #include "client/dialogs/combatscoresummary.hpp"
+#include "client/dialogs/flakvcrobject.hpp"
 #include "client/downlink.hpp"
 #include "client/picturenamer.hpp"
 #include "game/proxy/playerproxy.hpp"
@@ -29,6 +30,7 @@ client::dialogs::FlakVcrDialog::FlakVcrDialog(ui::Root& root, afl::string::Trans
       m_info(root, tx),
       m_loop(root),
       m_result(),
+      m_battleInfo(),
       m_currentIndex(0),
       m_numBattles(0)
 {
@@ -187,6 +189,7 @@ client::dialogs::FlakVcrDialog::postLoad()
 void
 client::dialogs::FlakVcrDialog::onUpdate(size_t /*index*/, const game::vcr::BattleInfo& data)
 {
+    m_battleInfo = data;
     m_info.setData(data);
 }
 
@@ -194,7 +197,12 @@ void
 client::dialogs::FlakVcrDialog::onList()
 {
     // ex FlakVcrSelector::showInfo
-    // FIXME: missing: participant list
+    if (!m_battleInfo.groups.empty()) {
+        m_result = doFlakVcrObjectInfoDialog(m_root, m_translator, m_gameSender, m_proxy, m_battleInfo);
+        if (m_result.isSet()) {
+            m_loop.stop(1);
+        }
+    }
 }
 
 void

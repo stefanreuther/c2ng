@@ -230,10 +230,6 @@ ClassicVcrObjectDialog::handleKey(util::Key_t key, int /*prefix*/)
         addToSimulation(false);
         return true;
 
-         // case SDLK_RETURN:
-         //    onGoTo();
-         //    return true;
-
      default:
         return false;
     }
@@ -258,27 +254,7 @@ ClassicVcrObjectDialog::addToSimulation(bool after)
         return;
     }
 
-    VcrDatabaseProxy::AddResult result = m_proxy.addToSimulation(m_indicator, n, after);
-    String_t message;
-    switch (result) {
-     case VcrDatabaseProxy::Success:
-        break;
-     case VcrDatabaseProxy::Error:
-        message = m_translator("Unit cannot be added to simulation.");
-        break;
-     case VcrDatabaseProxy::NotPlayable:
-        message = m_translator("This fight could not be played. You can use [Shift+Ins] to use this unit's status before the fight for simulation.");
-        break;
-     case VcrDatabaseProxy::NotParseable:
-        message = m_translator("This unit cannot be added to simulation because PCC2 cannot interpret its data correctly.");
-        break;
-     case VcrDatabaseProxy::UnitDied:
-        message = m_translator("This unit did not survive the fight. You can use [Shift+Ins] to use this unit's status before the fight for simulation.");
-        break;
-    }
-    if (!message.empty()) {
-        ui::dialogs::MessageBox(message, m_translator("Add to Simulation"), m_root).doOkDialog(m_translator);
-    }
+    client::dialogs::addToSimulation(m_indicator, m_proxy, n, after, m_root, m_translator);
 }
 
 game::Reference
@@ -290,7 +266,7 @@ ClassicVcrObjectDialog::getReference() const
 
 
 /*
- *  Entry Point
+ *  Entry Points
  */
 
 game::Reference
@@ -303,4 +279,35 @@ client::dialogs::doClassicVcrObjectInfoDialog(ui::Root& root, afl::string::Trans
     ClassicVcrObjectDialog dlg(root, configProxy.getNumberFormatter(link), tx, proxy, side, link);
     bool ok = dlg.run(root, gameSender);
     return ok ? dlg.getReference() : game::Reference();
+}
+
+void
+client::dialogs::addToSimulation(game::proxy::WaitIndicator& ind,
+                                 game::proxy::VcrDatabaseProxy& proxy,
+                                 int hullNr,
+                                 bool after,
+                                 ui::Root& root,
+                                 afl::string::Translator& tx)
+{
+    VcrDatabaseProxy::AddResult result = proxy.addToSimulation(ind, hullNr, after);
+    String_t message;
+    switch (result) {
+     case VcrDatabaseProxy::Success:
+        break;
+     case VcrDatabaseProxy::Error:
+        message = tx("Unit cannot be added to simulation.");
+        break;
+     case VcrDatabaseProxy::NotPlayable:
+        message = tx("This fight could not be played. You can use [Shift+Ins] to use this unit's status before the fight for simulation.");
+        break;
+     case VcrDatabaseProxy::NotParseable:
+        message = tx("This unit cannot be added to simulation because PCC2 cannot interpret its data correctly.");
+        break;
+     case VcrDatabaseProxy::UnitDied:
+        message = tx("This unit did not survive the fight. You can use [Shift+Ins] to use this unit's status before the fight for simulation.");
+        break;
+    }
+    if (!message.empty()) {
+        ui::dialogs::MessageBox(message, tx("Add to Simulation"), root).doOkDialog(tx);
+    }
 }

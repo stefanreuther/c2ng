@@ -49,6 +49,7 @@ namespace client { namespace dialogs {
         client::widgets::FlakVcrInfo m_info;
         ui::EventLoop m_loop;
         game::Reference m_result;
+        game::vcr::BattleInfo m_battleInfo;
 
         size_t m_currentIndex;
         size_t m_numBattles;
