@@ -85,7 +85,9 @@ namespace client { namespace screens {
         virtual client::si::ContextProvider* createContextProvider();
 
         void setId(game::Id_t id);
-        void setPositions(game::map::Point origin, game::map::Point target);
+        void setPositions(game::map::Point origin, game::map::Point target, bool isHyperdriving);
+        void setTarget(game::map::Point target);
+        void setIsHyperdriving(bool isHyperdriving);
         void clearPositions();
         void onScannerMove(game::map::Point target);
         void onDoubleClick(game::map::Point target);

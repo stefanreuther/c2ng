@@ -85,6 +85,21 @@ namespace {
         void onImageChange();
         void requestImage();
     };
+
+
+    bool isHyperdriving(game::Session& session, const game::map::Object* mo)
+    {
+        const game::map::Ship* pShip = dynamic_cast<const game::map::Ship*>(mo);
+        const game::Game* pGame = session.getGame().get();
+        const game::spec::ShipList* pShipList = session.getShipList().get();
+        const game::Root* pRoot = session.getRoot().get();
+
+        return pGame != 0
+            && pShipList != 0
+            && pRoot != 0
+            && pShip != 0
+            && pShip->isHyperdriving(pGame->shipScores(), *pShipList, pRoot->hostConfiguration());
+    }
 }
 
 /*
@@ -275,16 +290,20 @@ class client::screens::ControlScreen::Updater : public game::proxy::ObjectListen
     Updater(util::RequestSender<ControlScreen> reply)
         : m_reply(reply),
           m_lastObject(0),
-          m_lastPosition()
+          m_lastPosition(),
+          m_lastHyp()
         { }
-    virtual void handle(game::Session&, game::map::Object* obj)
+    virtual void handle(game::Session& session, game::map::Object* obj)
         {
             game::map::Object* mo = obj;
 
             Point pt;
             bool hasPosition = mo != 0 && mo->getPosition(pt);
+            bool isHyp = isHyperdriving(session, mo);
 
             if (mo != 0 && (mo != m_lastObject || pt != m_lastPosition)) {
+                // Normal update: new object chosen (or position changed).
+                // Update everything.
                 Point target;
                 game::map::Ship* pShip = dynamic_cast<game::map::Ship*>(mo);
                 if (pShip == 0 || !pShip->getWaypoint().get(target)) {
@@ -293,30 +312,47 @@ class client::screens::ControlScreen::Updater : public game::proxy::ObjectListen
 
                 class Req : public util::Request<ControlScreen> {
                  public:
-                    Req(bool hasPosition, Point pt, Point target, game::Id_t id)
-                        : m_hasPosition(hasPosition), m_point(pt), m_target(target), m_id(id)
+                    Req(bool hasPosition, Point pt, Point target, game::Id_t id, bool isHyperdriving)
+                        : m_hasPosition(hasPosition), m_isHyperdriving(isHyperdriving), m_point(pt), m_target(target), m_id(id)
                         { }
                     virtual void handle(ControlScreen& cs)
                         {
                             cs.setId(m_id);
-                            cs.setPositions(m_point, m_target);
+                            cs.setPositions(m_point, m_target, m_isHyperdriving);
                         }
                  private:
                     bool m_hasPosition;
+                    bool m_isHyperdriving;
                     Point m_point;
                     Point m_target;
                     game::Id_t m_id;
                 };
 
-                m_reply.postNewRequest(new Req(hasPosition, pt, target, mo->getId()));
+                m_reply.postNewRequest(new Req(hasPosition, pt, target, mo->getId(), isHyp));
                 m_lastPosition = pt;
                 m_lastObject = mo;
+                m_lastHyp = isHyp;
+            } else if (isHyp != m_lastHyp) {
+                // Only hyperdrive changed; only update that.
+                class Req : public util::Request<ControlScreen> {
+                 public:
+                    Req(bool isHyperdriving)
+                        : m_isHyperdriving(isHyperdriving)
+                        { }
+                    virtual void handle(ControlScreen& cs)
+                        { cs.setIsHyperdriving(m_isHyperdriving); }
+                 private:
+                    bool m_isHyperdriving;
+                };
+                m_reply.postNewRequest(new Req(isHyp));
+                m_lastHyp = isHyp;
             }
         }
  private:
     util::RequestSender<ControlScreen> m_reply;
     game::map::Object* m_lastObject;
     Point m_lastPosition;
+    bool m_lastHyp;
 };
 
 
@@ -649,7 +685,16 @@ client::screens::ControlScreen::setId(game::Id_t id)
 }
 
 void
-client::screens::ControlScreen::setPositions(game::map::Point origin, game::map::Point target)
+client::screens::ControlScreen::setPositions(game::map::Point origin, game::map::Point target, bool isHyperdriving)
+{
+    m_center = origin;
+    m_mapWidget.setCenter(origin);
+    setIsHyperdriving(isHyperdriving);
+    setTarget(target);
+}
+
+void
+client::screens::ControlScreen::setTarget(game::map::Point target)
 {
     class SetProperties : public util::Request<Proprietor> {
      public:
@@ -662,13 +707,16 @@ client::screens::ControlScreen::setPositions(game::map::Point origin, game::map:
         Point m_point;
     };
 
-    m_center = origin;
-    m_mapWidget.setCenter(origin);
-    m_scanResult.setPositions(origin, target);
-    m_scannerOverlay.setPositions(origin, target);
+    m_scanResult.setPositions(m_center, target);
+    m_scannerOverlay.setPositions(m_center, target);
     m_movementOverlay.setPosition(target);
-    m_movementOverlay.setLockOrigin(origin, false /* FIXME: handle HYP */);
     m_proprietor.postNewRequest(new SetProperties(target));
+}
+
+void
+client::screens::ControlScreen::setIsHyperdriving(bool isHyperdriving)
+{
+    m_movementOverlay.setLockOrigin(m_center, isHyperdriving);
 }
 
 void
@@ -683,8 +731,7 @@ client::screens::ControlScreen::clearPositions()
 void
 client::screens::ControlScreen::onScannerMove(game::map::Point target)
 {
-    // FIXME: this is a little whacky. We should normally only update the targets.
-    setPositions(m_center, target);
+    setTarget(target);
 }
 
 void
