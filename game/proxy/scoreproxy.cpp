@@ -107,6 +107,7 @@ game::proxy::ScoreProxy::Trampoline::getOverviewInformation(Info& out)
     out.numTurns        = g != 0 ?  g->scores().getNumTurns() : 0;
     out.hasTeams        = g != 0 && g->teamSettings().hasAnyTeams();
     out.viewpointPlayer = g != 0 ? g->teamSettings().getViewpointPlayer() : 0;
+    out.viewpointTurn   = g != 0 ? g->getViewpointTurnNumber() : 0;
     out.players         = r != 0 ?  r->playerList().getAllPlayers() : PlayerSet_t();
 }
 

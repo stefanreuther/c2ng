@@ -40,10 +40,11 @@ namespace game { namespace proxy {
             size_t numTurns;
             bool hasTeams;
             int viewpointPlayer;
+            int viewpointTurn;
             PlayerSet_t players;
 
             Info()
-                : numTurns(0), hasTeams(false), viewpointPlayer(0), players()
+                : numTurns(0), hasTeams(false), viewpointPlayer(0), viewpointTurn(0), players()
                 { }
         };
 

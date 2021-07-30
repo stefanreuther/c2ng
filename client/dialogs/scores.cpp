@@ -572,6 +572,12 @@ ScoreDialog::init()
     }
     m_highlightedPlayer = m_overview.viewpointPlayer;
 
+    // Go to viewpoint turn
+    size_t viewpointTurnIndex;
+    if (m_overview.viewpointTurn != 0 && m_turnList.find(m_overview.viewpointTurn, viewpointTurnIndex)) {
+        m_tableTurnIndex = viewpointTurnIndex;
+    }
+
     // Configuration
     m_formatter = game::proxy::ConfigurationProxy(m_gameSender).getNumberFormatter(m_link);
 
