@@ -25,6 +25,14 @@ namespace game { namespace test {
         \param [out] shipList 10 torpedoes will be added here */
     void initPListTorpedoes(game::spec::ShipList& shipList);
 
+    /** Define all PList 3.2 beams (for testing).
+        \param [out] shipList 10 beams will be added here */
+    void initPList32Beams(game::spec::ShipList& shipList);
+
+    /** Define all PList 3.2 torpedoes (for testing).
+        \param [out] shipList 10 torpedoes will be added here */
+    void initPList32Torpedoes(game::spec::ShipList& shipList);
+
     /*
      *  Hulls
      */

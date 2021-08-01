@@ -205,6 +205,36 @@ namespace game { namespace spec { namespace info {
     /** List of cooked filter elements. */
     typedef std::vector<FilterInfo> FilterInfos_t;
 
+    /** Weapon effects for one weapon. */
+    struct WeaponEffect {
+        String_t name;             ///< Name of weapon system.
+        int32_t shieldEffect;      ///< Anti-Shield effect (scaled by WeaponEffects::effectScale).
+        int32_t damageEffect;      ///< Damage effect (scaled by WeaponEffects::effectScale).
+        int32_t crewEffect;        ///< Anti-Crew effect (scaled by WeaponEffects::effectScale).
+
+        WeaponEffect(const String_t& name, int32_t shieldEffect, int32_t damageEffect, int32_t crewEffect)
+            : name(name), shieldEffect(shieldEffect), damageEffect(damageEffect), crewEffect(crewEffect)
+            { }
+    };
+
+    /** Summary of weapon effects. */
+    struct WeaponEffects {
+        int effectScale;           ///< Scale factor for effects.
+        int mass;                  ///< Combat mass.
+        int usedESBRate;           ///< Amount of ESB (percentage) included in mass.
+        int crew;                  ///< Crew. crewEffect needs to kill this many crew.
+        int damageLimit;           ///< Damage limit. damageEffect needs to destroy this many points.
+        int player;                ///< Player.
+
+        std::vector<WeaponEffect> beamEffects;      ///< Effects of beams.
+        std::vector<WeaponEffect> torpedoEffects;   ///< Effects of torpedoes.
+        std::vector<WeaponEffect> fighterEffects;   ///< Effects of fighters.
+
+        WeaponEffects()
+            : effectScale(1), mass(0), usedESBRate(0), crew(0), damageLimit(100), player(0)
+            { }
+    };
+
     /** Get name of FilterAttribute.
         \param att Attribute
         \param tx Translator

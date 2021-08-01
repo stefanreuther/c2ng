@@ -23,6 +23,7 @@
 #include "client/dialogs/friendlycodedialog.hpp"
 #include "client/dialogs/helpdialog.hpp"
 #include "client/dialogs/historyship.hpp"
+#include "client/dialogs/hullspecification.hpp"
 #include "client/dialogs/inboxdialog.hpp"
 #include "client/dialogs/ionstorminfo.hpp"
 #include "client/dialogs/keymapdialog.hpp"
@@ -1488,6 +1489,36 @@ client::si::IFCCSendMessage(game::Session& session, ScriptSide& si, RequestLink1
     };
     game::Game& g = game::actions::mustHaveGame(session);
     si.postNewTask(link, new DialogTask(g.getViewpointPlayer(), g.currentTurn().outbox().getNumMessages() != 0));
+}
+
+// @since PCC2 2.40.11
+void
+client::si::IFCCShipSpec(game::Session& /*session*/, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    args.checkArgumentCount(0);
+
+    // Must be a known ship
+    game::map::Ship* pShip = dynamic_cast<game::map::Ship*>(link.getProcess().getCurrentObject());
+    if (pShip == 0 || !pShip->getHull().isValid()) {
+        throw interpreter::Error::contextError();
+    }
+
+    // Show dialog
+    class DialogTask : public UserTask {
+     public:
+        DialogTask(game::Id_t id)
+            : m_id(id)
+            { }
+        virtual void handle(Control& ctl, RequestLink2 link)
+            {
+                UserSide& iface = ctl.interface();
+                client::dialogs::showHullSpecificationForShip(m_id, ctl.root(), ctl.translator(), iface.gameSender());
+                iface.continueProcess(link);
+            }
+     private:
+        game::Id_t m_id;
+    };
+    si.postNewTask(link, new DialogTask(pShip->getId()));
 }
 
 // @since PCC2 2.40.9
@@ -3538,7 +3569,7 @@ client::si::registerCommands(UserSide& ui)
                 s.world().setNewGlobalValue("CC$SENDMESSAGE",        new ScriptProcedure(s, &si, IFCCSendMessage));
                 // s.world().setNewGlobalValue("CC$SETTINGS",           new ScriptProcedure(s, &si, IFCCSettings));
                 // s.world().setNewGlobalValue("CC$SHIPCOSTCALC",       new ScriptProcedure(s, &si, IFCCShipCostCalc),
-                // s.world().setNewGlobalValue("CC$SHIPSPEC",           new ScriptProcedure(s, &si, IFCCShipSpec));
+                s.world().setNewGlobalValue("CC$SHIPSPEC",           new ScriptProcedure(s, &si, IFCCShipSpec));
                 s.world().setNewGlobalValue("CC$SPECBROWSER",        new ScriptProcedure(s, &si, IFCCSpecBrowser));
                 // s.world().setNewGlobalValue("CC$TOWFLEETMEMBER",     new ScriptProcedure(s, &si, IFCCTowFleetMember));
                 s.world().setNewGlobalValue("CC$TRANSFERMULTI",      new ScriptProcedure(s, &si, IFCCTransferMulti));

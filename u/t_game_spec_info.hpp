@@ -48,6 +48,12 @@ class TestGameSpecInfoInfo : public CxxTest::TestSuite {
     void testGetBeamAttribute();
     void testGetTorpAttribute();
     void testGetFighterAttribute();
+    void testDescribeWeaponEffectsTim();
+    void testDescribeWeaponEffectsPHostAC();
+    void testDescribeWeaponEffectsPHostNonAC();
+    void testDescribeWeaponEffectsPHostMixedFighters();
+    void testDescribeWeaponEffectsPHostExp();
+    void testDescribeWeaponEffectsPHostExpNonAC();
 };
 
 class TestGameSpecInfoNullPictureNamer : public CxxTest::TestSuite {

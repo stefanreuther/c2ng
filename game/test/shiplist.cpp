@@ -39,6 +39,20 @@ namespace {
         {"Multitraf Spiral",  {130,25,15,10},3,10,40,80}
     };
 
+    const Beam PLIST32_BEAMS[] = {
+        // Name                 $$ Tr Du Mo  m TL  Ki Da
+        {"Laser Cannon",      {  2, 0, 1, 1},0, 1,  1, 7},
+        {"Kill-O-Zap",        { 20, 6, 0, 0},0, 2, 15, 0},
+        {"Desintegrator",     { 15, 6, 1, 8},3, 3, 55,20},
+        {"Phaser",            { 25, 2, 0,10},1, 5, 10,35},
+        {"Disruptor",         { 80,20, 0, 0},1, 6, 45, 0},
+        {"Electron Ram",      { 50, 6, 6, 6},2, 6, 25,45},
+        {"Ion Cannon",        { 70, 5,20, 5},2, 7,  5,70},
+        {"Turbolaser Battery",{ 90,10, 5,15},1, 8, 45,60},
+        {"Inpotron Cannon",   {110,10,10,10},3, 9,100,35},
+        {"Multitraf Spiral",  {130,25,15,10},3,10, 40,80},
+    };
+
     const Beam STANDARD_BEAMS[] = {
         // Name              $$ Tr Du Mo  m TL Ki Da
         {"Laser",           { 1, 1, 0, 0},1, 1,10, 3},
@@ -74,6 +88,19 @@ namespace {
         {"Antimatter Bomb",    {55,1,1,1},{105,10, 3,10},2,9,35,75},
         {"Katalysator Bomb",   {65,1,1,1},{130, 5, 1,10},4,10,80,50},
         {"Selphyr-Fataro-Dev.",{80,1,1,1},{150,15, 5,20},7,10,40,99}
+    };
+
+    const Torpedo PLIST32_TORPEDOES[] = {
+        {"Space Rocket",        { 5,1,1,1},{ 20, 2, 2, 4},2, 1, 5,30},
+        {"Paralyso-Matic Bomb", { 3,1,1,1},{ 40, 4, 2, 2},0, 2,25, 0},
+        {"Fusion Bomb",         {20,1,1,1},{ 50, 8, 6, 2},3, 4,25,65},
+        {"Photon Torp",         {12,1,1,1},{110,18, 4, 4},1, 6,60, 0},
+        {"Initial Bomb",        {42,1,1,1},{ 80, 5,20, 5},5, 6,12,80},
+        {"Graviton Bomb",       {36,1,1,1},{ 90, 8, 8, 8},4, 7,40,75},
+        {"Arkon Bomb",          {28,1,1,1},{100,10, 2, 8},3, 8,64,64},
+        {"Antimatter Bomb",     {50,1,1,1},{100, 8,10,25},7, 8,20,95},
+        {"Katalysator Bomb",    {40,1,1,1},{100,12, 5, 5},4, 9,95,50},
+        {"Selphyr-Fataro-Dev.", {60,1,1,1},{150,15, 5,20},7,10,40,99},
     };
 
     const Torpedo STANDARD_TORPEDOES[] = {
@@ -160,6 +187,18 @@ void
 game::test::initPListTorpedoes(game::spec::ShipList& shipList)
 {
     initTorpedoes(shipList, PLIST_TORPEDOES);
+}
+
+void
+game::test::initPList32Beams(game::spec::ShipList& shipList)
+{
+    initBeams(shipList, PLIST32_BEAMS);
+}
+
+void
+game::test::initPList32Torpedoes(game::spec::ShipList& shipList)
+{
+    initTorpedoes(shipList, PLIST32_TORPEDOES);
 }
 
 void

@@ -12,8 +12,8 @@
 #include "game/map/universe.hpp"
 #include "game/test/root.hpp"
 #include "game/test/sessionthread.hpp"
+#include "game/test/waitindicator.hpp"
 #include "game/turn.hpp"
-#include "util/simplerequestdispatcher.hpp"
 
 namespace {
     using afl::base::Ptr;
@@ -101,7 +101,8 @@ TestGameProxyHullSpecificationProxy::testIt()
     addShip(h, SHIP_ID);
 
     // Testee
-    util::SimpleRequestDispatcher disp;
+    game::test::WaitIndicator ind;
+    util::RequestDispatcher& disp = ind;
     game::proxy::HullSpecificationProxy testee(h.gameSender(), disp, std::auto_ptr<game::spec::info::PictureNamer>(new client::PictureNamer()));
 
     UpdateReceiver recv;
@@ -109,9 +110,9 @@ TestGameProxyHullSpecificationProxy::testIt()
 
     // Request specification
     testee.setExistingShipId(SHIP_ID);
-    while (recv.result.name.empty()) {
-        TS_ASSERT(disp.wait(1000));
-    }
+    h.sync();
+    ind.processQueue();
+    TS_ASSERT(!recv.result.name.empty());
 
     // Verify
     TS_ASSERT_EQUALS(recv.result.name, "FIRST CLASS STARSHIP");
@@ -137,5 +138,11 @@ TestGameProxyHullSpecificationProxy::testIt()
     TS_ASSERT_EQUALS(recv.result.pointsForScrapping, 60);
 
     TS_ASSERT_EQUALS(recv.result.players, game::PlayerSet_t() + 1 + 4);
+
+    // Weapon effects
+    game::spec::info::WeaponEffects eff;
+    testee.describeWeaponEffects(ind, eff);
+    TS_ASSERT_EQUALS(eff.mass, 150);
+    TS_ASSERT_EQUALS(eff.fighterEffects.size(), 1U);
 }
 

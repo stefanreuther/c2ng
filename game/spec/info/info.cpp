@@ -1,22 +1,87 @@
 /**
   *  \file game/spec/info/info.cpp
+  *  \brief Specification formatting functions
   */
 
 #include "game/spec/info/info.hpp"
 #include "afl/string/format.hpp"
-#include "game/spec/info/picturenamer.hpp"
-#include "util/string.hpp"
 #include "game/spec/fighter.hpp"
-#include "afl/string/nulltranslator.hpp"
+#include "game/spec/info/picturenamer.hpp"
+#include "util/math.hpp"
+#include "util/string.hpp"
 
 namespace {
     using afl::string::Format;
     using game::config::HostConfiguration;
+    using game::spec::info::WeaponEffect;
     using util::addListItem;
 
     int getTorpDamageScale(const game::Root& root)
     {
         return root.hostVersion().hasDoubleTorpedoPower(root.hostConfiguration()) ? 2 : 1;
+    }
+
+
+    WeaponEffect describeWeaponEffectHost(const String_t& name,
+                                          const game::ShipQuery& query,
+                                          int kill, int expl, int /*level*/, bool /*deathRay*/,
+                                          const HostConfiguration& /*config*/)
+    {
+        // ex showWeaponEffect (part)
+        int mass = query.getCombatMass() + 1;
+        int shieldEff = util::divideAndRound(80*expl,      mass) + 1;
+        int hullEff   = util::divideAndRound(80*shieldEff, mass) + 1;
+        int crewEff   = util::divideAndRound(80*kill,      mass);
+
+        return WeaponEffect(name, shieldEff, hullEff, crewEff);
+    }
+
+    WeaponEffect describeWeaponEffectPHostAC(const String_t& name,
+                                             const game::ShipQuery& query,
+                                             int kill, int expl, int level, bool deathRay,
+                                             const HostConfiguration& config)
+    {
+        // ex showWeaponEffect (part)
+        const bool isDeathRay = deathRay && expl == 0;
+        const int owner = query.getOwner();
+        const int sds = config[HostConfiguration::ShieldDamageScaling](owner) + config.getExperienceBonus(HostConfiguration::EModShieldDamageScaling, level);
+        const int sks = config[HostConfiguration::ShieldKillScaling](owner)   + config.getExperienceBonus(HostConfiguration::EModShieldKillScaling,   level);
+        const int hds = config[HostConfiguration::HullDamageScaling](owner)   + config.getExperienceBonus(HostConfiguration::EModHullDamageScaling,   level);
+        const int cks = config[HostConfiguration::CrewKillScaling](owner)     + config.getExperienceBonus(HostConfiguration::EModCrewKillScaling,     level);
+        int shieldEff = (sds * int32_t(expl) + sks * int32_t(kill));
+        int hullEff = int32_t(expl) * hds;
+        int crewEff = int32_t(kill) * cks;
+        if (isDeathRay) {
+            shieldEff = hullEff = 0;
+        }
+
+        return WeaponEffect(name, shieldEff, hullEff, crewEff);
+    }
+
+    WeaponEffect describeWeaponEffectPHostNonAC(const String_t& name,
+                                                const game::ShipQuery& query,
+                                                int kill, int expl, int level, bool deathRay,
+                                                const HostConfiguration& config)
+    {
+        // ex showWeaponEffect (part)
+        const bool isDeathRay = deathRay && expl == 0;
+        const int mass = query.getCombatMass() + 1;
+        const int owner = query.getOwner();
+        const int sds = config[HostConfiguration::ShieldDamageScaling](owner) + config.getExperienceBonus(HostConfiguration::EModShieldDamageScaling, level);
+        const int sks = config[HostConfiguration::ShieldKillScaling](owner)   + config.getExperienceBonus(HostConfiguration::EModShieldKillScaling,   level);
+        const int hds = config[HostConfiguration::HullDamageScaling](owner)   + config.getExperienceBonus(HostConfiguration::EModHullDamageScaling,   level);
+        const int cks = config[HostConfiguration::CrewKillScaling](owner)     + config.getExperienceBonus(HostConfiguration::EModCrewKillScaling,     level);
+        int shieldEff = util::divideAndRound(sds * int32_t(expl) + sks * int32_t(kill), mass) + 1;
+        int hullEff = util::divideAndRound(shieldEff * hds, mass);
+        int crewEff = util::divideAndRound(kill * cks, mass);
+        if (isDeathRay) {
+            shieldEff = hullEff = 0;
+            if (crewEff == 0) {
+                crewEff = 1;
+            }
+        }
+
+        return WeaponEffect(name, shieldEff, hullEff, crewEff);
     }
 }
 
@@ -229,6 +294,82 @@ game::spec::info::describeFighter(PageContent& content, int player, const ShipLi
         content.attributes.push_back(Attribute(tx("Strikes"),  util::toString(ftr.getNumStrikes  (root.hostVersion(), root.hostConfiguration()), Fighter::Range_t(0, Fighter::MAX_INTERVAL), false, fmt, tx)));
         if (withCost) {
             content.attributes.push_back(Attribute(tx("Fighter Cost"), ftr.cost().format(tx, fmt)));
+        }
+    }
+}
+
+void
+game::spec::info::describeWeaponEffects(WeaponEffects& result, const ShipQuery& query, const ShipList& shipList, const Root& root, afl::string::Translator& tx)
+{
+    // Environment
+    WeaponEffect (*describe)(const String_t& name, const game::ShipQuery& query, int kill, int expl, int level, bool deathRay, const HostConfiguration& config);
+    const HostVersion& host = root.hostVersion();
+    const HostConfiguration& config = root.hostConfiguration();
+
+    // Initialize
+    if (!host.isPHost()) {
+        describe = describeWeaponEffectHost;
+        result.effectScale = 1;
+    } else if (config[HostConfiguration::AllowAlternativeCombat]()) {
+        describe = describeWeaponEffectPHostAC;
+        result.effectScale = query.getCombatMass() + 1;
+    } else {
+        describe = describeWeaponEffectPHostNonAC;
+        result.effectScale = 1;
+    }
+
+    result.mass        = query.getCombatMass();
+    result.usedESBRate = query.getUsedESBRate();
+    result.crew        = query.getCrew();
+    result.damageLimit = config.getPlayerRaceNumber(query.getOwner()) == 2 ? 151 : 100;
+    result.player      = query.getOwner();
+
+    // Determine level
+    int level = MAX_EXPERIENCE_LEVELS;
+    while (level > 0 && !query.getLevelDisplaySet().contains(level)) {
+        --level;
+    }
+
+    // Beams
+    const bool isDeathRay = host.hasDeathRays();
+    for (const Beam* p = shipList.beams().findNext(0); p != 0; p = shipList.beams().findNext(p->getId())) {
+        result.beamEffects.push_back(describe(p->getName(shipList.componentNamer()),
+                                              query,
+                                              p->getKillPower(),
+                                              p->getDamagePower(),
+                                              level,
+                                              isDeathRay,
+                                              config));
+    }
+
+    // Torpedoes
+    const int scale = getTorpDamageScale(root);
+    for (const TorpedoLauncher* p = shipList.launchers().findNext(0); p != 0; p = shipList.launchers().findNext(p->getId())) {
+        result.torpedoEffects.push_back(describe(p->getName(shipList.componentNamer()),
+                                                 query,
+                                                 p->getKillPower() * scale,
+                                                 p->getDamagePower() * scale,
+                                                 level,
+                                                 isDeathRay,
+                                                 config));
+    }
+
+    // Fighters
+    const HostConfiguration::StandardOption_t& fbk = config[HostConfiguration::FighterBeamKill];
+    const HostConfiguration::StandardOption_t& fbx = config[HostConfiguration::FighterBeamExplosive];
+    if (fbk.isAllTheSame() && fbx.isAllTheSame()) {
+        result.fighterEffects.push_back(describe(tx("Fighter"), query, fbk(1), fbx(1), level, false, config));
+    } else {
+        PlayerSet_t did;
+        for (int i = 1; i <= MAX_PLAYERS; ++i) {
+            if (i != query.getOwner() && !did.contains(i)) {
+                const int thisk = fbk(i);
+                const int thisx = fbx(i);
+                result.fighterEffects.push_back(describe(afl::string::Format(tx("%s Fighter"), root.playerList().getPlayerName(i, Player::AdjectiveName)), query, thisk, thisx, level, false, config));
+
+                // Tag all that have the same option combo to limit number of items shown
+                did += (config.getPlayersWhere(HostConfiguration::FighterBeamKill, thisk) & config.getPlayersWhere(HostConfiguration::FighterBeamExplosive, thisx));
+            }
         }
     }
 }

@@ -6,9 +6,10 @@
 #include "game/spec/info/info.hpp"
 
 #include "t_game_spec_info.hpp"
-#include "game/test/root.hpp"
-#include "game/spec/info/nullpicturenamer.hpp"
 #include "afl/string/nulltranslator.hpp"
+#include "game/spec/info/nullpicturenamer.hpp"
+#include "game/test/root.hpp"
+#include "game/test/shiplist.hpp"
 
 namespace gsi = game::spec::info;
 using game::Id_t;
@@ -418,5 +419,384 @@ TestGameSpecInfoInfo::testGetFighterAttribute()
     TS_ASSERT_EQUALS(getFighterAttribute(ftr, gsi::Range_RechargeTime, h.root).orElse(-1), 21);
 
     TS_ASSERT_EQUALS(getFighterAttribute(ftr, gsi::Range_MaxCrew,      h.root).isValid(), false);
+}
+
+/** Test describeWeaponEffects(), Tim-Host version. */
+void
+TestGameSpecInfoInfo::testDescribeWeaponEffectsTim()
+{
+    // Environment
+    game::spec::ShipList shipList;
+    game::test::initStandardBeams(shipList);
+    game::test::initStandardTorpedoes(shipList);
+
+    game::test::Root root(game::HostVersion(game::HostVersion::Host, MKVERSION(3,22,0)));
+    afl::string::NullTranslator tx;
+
+    // Ship query
+    game::ShipQuery q;
+    q.setCombatMass(330, 50);
+    q.setCrew(348);
+    q.setOwner(11);
+
+    // Action
+    game::spec::info::WeaponEffects result;
+    describeWeaponEffects(result, q, shipList, root, tx);
+
+    // Verify
+    TS_ASSERT_EQUALS(result.effectScale, 1);
+    TS_ASSERT_EQUALS(result.mass,        330);
+    TS_ASSERT_EQUALS(result.usedESBRate, 50);
+    TS_ASSERT_EQUALS(result.crew,        348);
+    TS_ASSERT_EQUALS(result.damageLimit, 100);
+    TS_ASSERT_EQUALS(result.player,      11);
+
+    TS_ASSERT_EQUALS(result.beamEffects.size(), 10U);
+    TS_ASSERT_EQUALS(result.beamEffects[0].name, "Laser");
+    TS_ASSERT_EQUALS(result.beamEffects[0].shieldEffect, 2);
+    TS_ASSERT_EQUALS(result.beamEffects[0].damageEffect, 1);
+    TS_ASSERT_EQUALS(result.beamEffects[0].crewEffect, 2);
+    TS_ASSERT_EQUALS(result.beamEffects[9].name, "Heavy Phaser");
+    TS_ASSERT_EQUALS(result.beamEffects[9].shieldEffect, 12);
+    TS_ASSERT_EQUALS(result.beamEffects[9].damageEffect, 4);
+    TS_ASSERT_EQUALS(result.beamEffects[9].crewEffect, 8);
+
+    TS_ASSERT_EQUALS(result.torpedoEffects.size(), 10U);
+    TS_ASSERT_EQUALS(result.torpedoEffects[0].name, "Mark 1 Photon");
+    TS_ASSERT_EQUALS(result.torpedoEffects[0].shieldEffect, 3);
+    TS_ASSERT_EQUALS(result.torpedoEffects[0].damageEffect, 2);
+    TS_ASSERT_EQUALS(result.torpedoEffects[0].crewEffect, 2);
+    TS_ASSERT_EQUALS(result.torpedoEffects[9].name, "Mark 8 Photon");
+    TS_ASSERT_EQUALS(result.torpedoEffects[9].shieldEffect, 28);
+    TS_ASSERT_EQUALS(result.torpedoEffects[9].damageEffect, 8);
+    TS_ASSERT_EQUALS(result.torpedoEffects[9].crewEffect, 17);
+
+    TS_ASSERT_EQUALS(result.fighterEffects.size(), 1U);
+    TS_ASSERT_EQUALS(result.fighterEffects[0].name, "Fighter");
+    TS_ASSERT_EQUALS(result.fighterEffects[0].shieldEffect, 1);
+    TS_ASSERT_EQUALS(result.fighterEffects[0].damageEffect, 1);
+    TS_ASSERT_EQUALS(result.fighterEffects[0].crewEffect, 0);
+}
+
+/** Test describeWeaponEffects(), PHost Alternative Combat version. */
+void
+TestGameSpecInfoInfo::testDescribeWeaponEffectsPHostAC()
+{
+    // Environment
+    // (Pleiades 13, player 7, turn 74, ship 72)
+    game::spec::ShipList shipList;
+    game::test::initPList32Beams(shipList);
+    game::test::initPList32Torpedoes(shipList);
+
+    game::test::Root root(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,0)));
+    afl::string::NullTranslator tx;
+
+    HostConfiguration& config = root.hostConfiguration();
+    config[HostConfiguration::AllowAlternativeCombat].set(1);
+    config[HostConfiguration::CrewKillScaling].set(15);
+    config[HostConfiguration::ShieldKillScaling].set(0);
+    config[HostConfiguration::ShieldDamageScaling].set(40);
+    config[HostConfiguration::HullDamageScaling].set(20);
+    config[HostConfiguration::FighterBeamExplosive].set(9);
+    config[HostConfiguration::FighterBeamKill].set(9);
+    config[HostConfiguration::EModCrewKillScaling].set("-6,-9,-12,-15");
+    config[HostConfiguration::EModHullDamageScaling].set("0");
+    config[HostConfiguration::EModShieldDamageScaling].set("0");
+    config[HostConfiguration::EModShieldKillScaling].set("0");
+
+    // Ship query
+    game::ShipQuery q;
+    q.setCombatMass(207, 23);
+    q.setCrew(257);
+    q.setOwner(7);
+
+    // Action
+    game::spec::info::WeaponEffects result;
+    describeWeaponEffects(result, q, shipList, root, tx);
+
+    // Verify
+    TS_ASSERT_DIFFERS(result.effectScale, 1);
+    TS_ASSERT_EQUALS(result.mass,        207);
+    TS_ASSERT_EQUALS(result.usedESBRate, 23);
+    TS_ASSERT_EQUALS(result.crew,        257);
+    TS_ASSERT_EQUALS(result.damageLimit, 100);
+    TS_ASSERT_EQUALS(result.player,      7);
+    const double scale = 1.0 / result.effectScale;
+
+    TS_ASSERT_EQUALS(result.beamEffects.size(), 10U);
+    TS_ASSERT_EQUALS(result.beamEffects[0].name, "Laser Cannon");
+    TS_ASSERT_DELTA(result.beamEffects[0].shieldEffect * scale, 1.35, 0.01);
+    TS_ASSERT_DELTA(result.beamEffects[0].damageEffect * scale, 0.67, 0.01);
+    TS_ASSERT_DELTA(result.beamEffects[0].crewEffect   * scale, 0.07, 0.01);
+    TS_ASSERT_EQUALS(result.beamEffects[1].name, "Kill-O-Zap");
+    TS_ASSERT_EQUALS(result.beamEffects[1].shieldEffect, 0);
+    TS_ASSERT_EQUALS(result.beamEffects[1].damageEffect, 0);
+    TS_ASSERT_DELTA(result.beamEffects[1].crewEffect   * scale, 1.08, 0.01);
+    TS_ASSERT_EQUALS(result.beamEffects[9].name, "Multitraf Spiral");
+    TS_ASSERT_DELTA(result.beamEffects[9].shieldEffect * scale, 15.38, 0.01);
+    TS_ASSERT_DELTA(result.beamEffects[9].damageEffect * scale,  7.69, 0.01);
+    TS_ASSERT_DELTA(result.beamEffects[9].crewEffect   * scale,  2.88, 0.01);
+
+    TS_ASSERT_EQUALS(result.torpedoEffects.size(), 10U);
+    TS_ASSERT_EQUALS(result.torpedoEffects[0].name, "Space Rocket");
+    TS_ASSERT_DELTA(result.torpedoEffects[0].shieldEffect * scale, 5.77, 0.01);
+    TS_ASSERT_DELTA(result.torpedoEffects[0].damageEffect * scale, 2.88, 0.01);
+    TS_ASSERT_DELTA(result.torpedoEffects[0].crewEffect   * scale, 0.36, 0.01);
+    TS_ASSERT_EQUALS(result.torpedoEffects[1].name, "Paralyso-Matic Bomb");
+    TS_ASSERT_EQUALS(result.torpedoEffects[1].shieldEffect, 0);
+    TS_ASSERT_EQUALS(result.torpedoEffects[1].damageEffect, 0);
+    TS_ASSERT_DELTA(result.torpedoEffects[1].crewEffect   * scale, 1.80, 0.01);
+    TS_ASSERT_EQUALS(result.torpedoEffects[9].name, "Selphyr-Fataro-Dev.");
+    TS_ASSERT_DELTA(result.torpedoEffects[9].shieldEffect * scale, 19.04, 0.01);
+    TS_ASSERT_DELTA(result.torpedoEffects[9].damageEffect * scale,  9.52, 0.01);
+    TS_ASSERT_DELTA(result.torpedoEffects[9].crewEffect   * scale,  2.88, 0.01);
+
+    TS_ASSERT_EQUALS(result.fighterEffects.size(), 1U);
+    TS_ASSERT_EQUALS(result.fighterEffects[0].name, "Fighter");
+    TS_ASSERT_DELTA(result.fighterEffects[0].shieldEffect * scale, 1.73, 0.01);
+    TS_ASSERT_DELTA(result.fighterEffects[0].damageEffect * scale, 0.87, 0.01);
+    TS_ASSERT_DELTA(result.fighterEffects[0].crewEffect   * scale, 0.65, 0.01);
+}
+
+/** Test describeWeaponEffects(), PHost Non-Alternative-Combat version.
+    This is the same as above, but with AC turned off; validated against PCC2. */
+void
+TestGameSpecInfoInfo::testDescribeWeaponEffectsPHostNonAC()
+{
+    // Environment
+    // (Pleiades 13, player 7, turn 74, ship 72)
+    game::spec::ShipList shipList;
+    game::test::initPList32Beams(shipList);
+    game::test::initPList32Torpedoes(shipList);
+
+    game::test::Root root(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,0)));
+    afl::string::NullTranslator tx;
+
+    HostConfiguration& config = root.hostConfiguration();
+    config[HostConfiguration::AllowAlternativeCombat].set(0);   // off!
+    config[HostConfiguration::CrewKillScaling].set(15);
+    config[HostConfiguration::ShieldKillScaling].set(0);
+    config[HostConfiguration::ShieldDamageScaling].set(40);
+    config[HostConfiguration::HullDamageScaling].set(20);
+    config[HostConfiguration::FighterBeamExplosive].set(9);
+    config[HostConfiguration::FighterBeamKill].set(9);
+    config[HostConfiguration::EModCrewKillScaling].set("-6,-9,-12,-15");
+    config[HostConfiguration::EModHullDamageScaling].set("0");
+    config[HostConfiguration::EModShieldDamageScaling].set("0");
+    config[HostConfiguration::EModShieldKillScaling].set("0");
+
+    // Ship query
+    game::ShipQuery q;
+    q.setCombatMass(207, 23);
+    q.setCrew(257);
+    q.setOwner(7);
+
+    // Action
+    game::spec::info::WeaponEffects result;
+    describeWeaponEffects(result, q, shipList, root, tx);
+
+    // Verify
+    TS_ASSERT_EQUALS(result.effectScale, 1);
+    TS_ASSERT_EQUALS(result.mass,        207);
+    TS_ASSERT_EQUALS(result.usedESBRate, 23);
+    TS_ASSERT_EQUALS(result.crew,        257);
+    TS_ASSERT_EQUALS(result.damageLimit, 100);
+    TS_ASSERT_EQUALS(result.player,      7);
+
+    TS_ASSERT_EQUALS(result.beamEffects.size(), 10U);
+    TS_ASSERT_EQUALS(result.beamEffects[0].name, "Laser Cannon");
+    TS_ASSERT_EQUALS(result.beamEffects[0].shieldEffect, 2);
+    TS_ASSERT_EQUALS(result.beamEffects[0].damageEffect, 0);
+    TS_ASSERT_EQUALS(result.beamEffects[0].crewEffect,   0);
+    TS_ASSERT_EQUALS(result.beamEffects[1].name, "Kill-O-Zap");
+    TS_ASSERT_EQUALS(result.beamEffects[1].shieldEffect, 0);
+    TS_ASSERT_EQUALS(result.beamEffects[1].damageEffect, 0);
+    TS_ASSERT_EQUALS(result.beamEffects[1].crewEffect,   1);
+    TS_ASSERT_EQUALS(result.beamEffects[9].name, "Multitraf Spiral");
+    TS_ASSERT_EQUALS(result.beamEffects[9].shieldEffect, 16);
+    TS_ASSERT_EQUALS(result.beamEffects[9].damageEffect,  2);
+    TS_ASSERT_EQUALS(result.beamEffects[9].crewEffect,    3);
+
+    TS_ASSERT_EQUALS(result.torpedoEffects.size(), 10U);
+    TS_ASSERT_EQUALS(result.torpedoEffects[0].name, "Space Rocket");
+    TS_ASSERT_EQUALS(result.torpedoEffects[0].shieldEffect, 13);
+    TS_ASSERT_EQUALS(result.torpedoEffects[0].damageEffect, 1);
+    TS_ASSERT_EQUALS(result.torpedoEffects[0].crewEffect,   1);
+    TS_ASSERT_EQUALS(result.torpedoEffects[1].name, "Paralyso-Matic Bomb");
+    TS_ASSERT_EQUALS(result.torpedoEffects[1].shieldEffect, 0);
+    TS_ASSERT_EQUALS(result.torpedoEffects[1].damageEffect, 0);
+    TS_ASSERT_EQUALS(result.torpedoEffects[1].crewEffect,   4);
+    TS_ASSERT_EQUALS(result.torpedoEffects[9].name, "Selphyr-Fataro-Dev.");
+    TS_ASSERT_EQUALS(result.torpedoEffects[9].shieldEffect, 39);
+    TS_ASSERT_EQUALS(result.torpedoEffects[9].damageEffect,  4);
+    TS_ASSERT_EQUALS(result.torpedoEffects[9].crewEffect,    6);
+
+    TS_ASSERT_EQUALS(result.fighterEffects.size(), 1U);
+    TS_ASSERT_EQUALS(result.fighterEffects[0].name, "Fighter");
+    TS_ASSERT_EQUALS(result.fighterEffects[0].shieldEffect, 3);
+    TS_ASSERT_EQUALS(result.fighterEffects[0].damageEffect, 0);
+    TS_ASSERT_EQUALS(result.fighterEffects[0].crewEffect,   1);
+}
+
+/** Test describeWeaponEffects(), mixed fighter behaviour. */
+void
+TestGameSpecInfoInfo::testDescribeWeaponEffectsPHostMixedFighters()
+{
+    // Environment
+    // (Pleiades 13, player 7, turn 74, ship 72)
+    game::spec::ShipList shipList;
+    game::test::initPList32Beams(shipList);
+    game::test::initPList32Torpedoes(shipList);
+
+    game::test::Root root(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,0)));
+    afl::string::NullTranslator tx;
+
+    HostConfiguration& config = root.hostConfiguration();
+    config[HostConfiguration::AllowAlternativeCombat].set(1);
+    config[HostConfiguration::CrewKillScaling].set(15);
+    config[HostConfiguration::ShieldKillScaling].set(0);
+    config[HostConfiguration::ShieldDamageScaling].set(40);
+    config[HostConfiguration::HullDamageScaling].set(20);
+    config[HostConfiguration::FighterBeamExplosive].set("9,9,9,10,9,9,10,9,10,6,9");
+    config[HostConfiguration::FighterBeamKill].set("9,12,9,10,9,9,13,9,8,6,9");
+
+    // Ship query
+    game::ShipQuery q;
+    q.setCombatMass(207, 23);
+    q.setCrew(257);
+    q.setOwner(7);
+
+    // Action
+    game::spec::info::WeaponEffects result;
+    describeWeaponEffects(result, q, shipList, root, tx);
+
+    // Verify
+    TS_ASSERT_DIFFERS(result.effectScale, 1);
+    TS_ASSERT_EQUALS(result.mass,        207);
+    TS_ASSERT_EQUALS(result.usedESBRate, 23);
+    TS_ASSERT_EQUALS(result.crew,        257);
+    TS_ASSERT_EQUALS(result.damageLimit, 100);
+    TS_ASSERT_EQUALS(result.player,      7);
+    const double scale = 1.0 / result.effectScale;
+
+    // FighterBeamExplosive = 9,  9, 9, 10, 9, 9, 10, 9, 10, 6, 9
+    // FighterBeamKill      = 9, 12, 9, 10, 9, 9, 13, 9,  8, 6, 9
+    // -> Fed (9/9)           x      x      x  x      x         x
+    // -> Liz (9/12)              x
+    // -> Kli (10/10)                   x
+    // -> Tho (10/13) (not listed!)                x
+    // -> Rob (10/8)                                      x
+    // -> Reb (6/6)                                          x
+    TS_ASSERT_EQUALS(result.fighterEffects.size(), 5U);
+    TS_ASSERT_EQUALS(result.fighterEffects[0].name, "Player 1 Fighter");
+    TS_ASSERT_DELTA(result.fighterEffects[0].shieldEffect * scale, 1.73, 0.01);
+    TS_ASSERT_DELTA(result.fighterEffects[0].damageEffect * scale, 0.87, 0.01);
+    TS_ASSERT_DELTA(result.fighterEffects[0].crewEffect   * scale, 0.65, 0.01);
+    TS_ASSERT_EQUALS(result.fighterEffects[1].name, "Player 2 Fighter");
+    TS_ASSERT_DELTA(result.fighterEffects[1].shieldEffect * scale, 1.73, 0.01);
+    TS_ASSERT_DELTA(result.fighterEffects[1].damageEffect * scale, 0.87, 0.01);
+    TS_ASSERT_DELTA(result.fighterEffects[1].crewEffect   * scale, 0.87, 0.01);
+    TS_ASSERT_EQUALS(result.fighterEffects[2].name, "Player 4 Fighter");
+    TS_ASSERT_DELTA(result.fighterEffects[2].shieldEffect * scale, 1.92, 0.01);
+    TS_ASSERT_DELTA(result.fighterEffects[2].damageEffect * scale, 0.96, 0.01);
+    TS_ASSERT_DELTA(result.fighterEffects[2].crewEffect   * scale, 0.72, 0.01);
+    TS_ASSERT_EQUALS(result.fighterEffects[3].name, "Player 9 Fighter");
+    TS_ASSERT_DELTA(result.fighterEffects[3].shieldEffect * scale, 1.92, 0.01);
+    TS_ASSERT_DELTA(result.fighterEffects[3].damageEffect * scale, 0.96, 0.01);
+    TS_ASSERT_DELTA(result.fighterEffects[3].crewEffect   * scale, 0.58, 0.01);
+    TS_ASSERT_EQUALS(result.fighterEffects[4].name, "Player 10 Fighter");
+    TS_ASSERT_DELTA(result.fighterEffects[4].shieldEffect * scale, 1.15, 0.01);
+    TS_ASSERT_DELTA(result.fighterEffects[4].damageEffect * scale, 0.58, 0.01);
+    TS_ASSERT_DELTA(result.fighterEffects[4].crewEffect   * scale, 0.43, 0.01);
+}
+
+/** Test describeWeaponEffects(), experience behaviour. */
+void
+TestGameSpecInfoInfo::testDescribeWeaponEffectsPHostExp()
+{
+    // Environment (similar as testDescribeWeaponEffectsPHostAC)
+    game::spec::ShipList shipList;
+    game::test::initPList32Beams(shipList);
+    game::test::initPList32Torpedoes(shipList);
+
+    game::test::Root root(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,0)));
+    afl::string::NullTranslator tx;
+
+    HostConfiguration& config = root.hostConfiguration();
+    config[HostConfiguration::AllowAlternativeCombat].set(1);
+    config[HostConfiguration::CrewKillScaling].set(15);
+    config[HostConfiguration::ShieldKillScaling].set(0);
+    config[HostConfiguration::ShieldDamageScaling].set(40);
+    config[HostConfiguration::HullDamageScaling].set(20);
+    config[HostConfiguration::FighterBeamExplosive].set(9);
+    config[HostConfiguration::FighterBeamKill].set(9);
+    config[HostConfiguration::EModCrewKillScaling].set("-6,-9,-12,-15");
+    config[HostConfiguration::EModHullDamageScaling].set("0");
+    config[HostConfiguration::EModShieldDamageScaling].set("0");
+    config[HostConfiguration::EModShieldKillScaling].set("0");
+
+    // Ship query
+    game::ShipQuery q;
+    q.setCombatMass(207, 23);
+    q.setCrew(257);
+    q.setOwner(7);
+    q.setLevelDisplaySet(game::ExperienceLevelSet_t(3));
+
+    // Action
+    game::spec::info::WeaponEffects result;
+    describeWeaponEffects(result, q, shipList, root, tx);
+
+    // Verify specimen
+    const double scale = 1.0 / result.effectScale;
+    TS_ASSERT_EQUALS(result.beamEffects.size(), 10U);
+    TS_ASSERT_EQUALS(result.beamEffects[9].name, "Multitraf Spiral");
+    TS_ASSERT_DELTA(result.beamEffects[9].shieldEffect * scale, 15.38, 0.01);
+    TS_ASSERT_DELTA(result.beamEffects[9].damageEffect * scale,  7.69, 0.01);
+    TS_ASSERT_DELTA(result.beamEffects[9].crewEffect   * scale,  0.58, 0.01);  // CrewKillScaling reduced from 15 -> 3 (=factor 5), effect also reduced by factor 5
+}
+
+/** Test describeWeaponEffects(), experience behaviour, non-AC. */
+void
+TestGameSpecInfoInfo::testDescribeWeaponEffectsPHostExpNonAC()
+{
+    // Environment (similar as testDescribeWeaponEffectsPHostNonAC)
+    game::spec::ShipList shipList;
+    game::test::initPList32Beams(shipList);
+    game::test::initPList32Torpedoes(shipList);
+
+    game::test::Root root(game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,0)));
+    afl::string::NullTranslator tx;
+
+    HostConfiguration& config = root.hostConfiguration();
+    config[HostConfiguration::AllowAlternativeCombat].set(0);   // off!
+    config[HostConfiguration::CrewKillScaling].set(15);
+    config[HostConfiguration::ShieldKillScaling].set(0);
+    config[HostConfiguration::ShieldDamageScaling].set(40);
+    config[HostConfiguration::HullDamageScaling].set(20);
+    config[HostConfiguration::FighterBeamExplosive].set(9);
+    config[HostConfiguration::FighterBeamKill].set(9);
+    config[HostConfiguration::EModCrewKillScaling].set("-6,-9,-12,-15");
+    config[HostConfiguration::EModHullDamageScaling].set("0");
+    config[HostConfiguration::EModShieldDamageScaling].set("0");
+    config[HostConfiguration::EModShieldKillScaling].set("0");
+
+    // Ship query
+    game::ShipQuery q;
+    q.setCombatMass(207, 23);
+    q.setCrew(257);
+    q.setOwner(7);
+    q.setLevelDisplaySet(game::ExperienceLevelSet_t(3));
+
+    // Action
+    game::spec::info::WeaponEffects result;
+    describeWeaponEffects(result, q, shipList, root, tx);
+
+    // Verify specimen
+    TS_ASSERT_EQUALS(result.effectScale, 1);
+    TS_ASSERT_EQUALS(result.beamEffects.size(), 10U);
+    TS_ASSERT_EQUALS(result.beamEffects[9].name, "Multitraf Spiral");
+    TS_ASSERT_EQUALS(result.beamEffects[9].shieldEffect, 16);
+    TS_ASSERT_EQUALS(result.beamEffects[9].damageEffect,  2);
+    TS_ASSERT_EQUALS(result.beamEffects[9].crewEffect,    1);
 }
 

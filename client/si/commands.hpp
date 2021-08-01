@@ -41,6 +41,7 @@ namespace client { namespace si {
     void IFCCReset(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     void IFCCSellSupplies(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     void IFCCSendMessage(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
+    void IFCCShipSpec(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     void IFCCSpecBrowser(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     void IFCCTransferMulti(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     void IFCCTransferPlanet(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);

@@ -8,22 +8,27 @@
 #include "afl/base/signal.hpp"
 #include "game/playerset.hpp"
 #include "game/session.hpp"
-#include "game/shipquery.hpp"
 #include "game/spec/cost.hpp"
 #include "game/spec/info/picturenamer.hpp"
+#include "game/spec/info/types.hpp"
 #include "game/types.hpp"
 #include "util/requestreceiver.hpp"
 #include "util/requestsender.hpp"
-#include "game/spec/info/types.hpp"
 
 namespace game { namespace proxy {
+
+    class WaitIndicator;
 
     /** Hull specification access.
 
         Bidirectional, asynchronous:
-        - retrieve information about a ship's hull */
+        - retrieve information about a ship's hull
+
+        Bidirectional, synchronous:
+        - retrieve weapon effects */
     class HullSpecificationProxy {
      public:
+        /** Prepared information about a hull. */
         struct HullSpecification {
             String_t name;
             String_t image;
@@ -44,28 +49,27 @@ namespace game { namespace proxy {
 
             game::spec::Cost cost;
 
-            int pointsToBuild;
-            int pointsForKilling;
-            int pointsForScrapping;
+            int32_t pointsToBuild;
+            int32_t pointsForKilling;
+            int32_t pointsForScrapping;
+            int32_t pointsAvailable;
 
             PlayerSet_t players;
 
             game::spec::info::Abilities_t abilities;
 
-            // Missing: points we have
-
             HullSpecification()
                 : name(), image(), hullId(0), mass(0), numEngines(0), techLevel(0), maxCrew(0),
                   maxCargo(0), maxFuel(0), maxBeams(0), maxLaunchers(0), numBays(0), mineHitDamage(0),
                   fuelBurnPerTurn(0), fuelBurnPerFight(0), cost(), pointsToBuild(), pointsForKilling(),
-                  pointsForScrapping(), players(), abilities()
+                  pointsForScrapping(), pointsAvailable(), players(), abilities()
                 { }
         };
 
         /** Constructor.
             \param gameSender Game sender
             \param reply RequestDispatcher to send replies back
-            \param picNamer PictureNamer (will be transferred to game thread) */
+            \param picNamer PictureNamer (will be transferred to game thread; can be null) */
         HullSpecificationProxy(util::RequestSender<Session> gameSender, util::RequestDispatcher& reply, std::auto_ptr<game::spec::info::PictureNamer> picNamer);
 
         /** Set existing ship Id.
@@ -75,25 +79,24 @@ namespace game { namespace proxy {
 
         // FIXME: setHullId() to show just a hull
 
+        /** Get weapon effects.
+            Returns the weapon effects for the previously-configured ship.
+            \param [in]  ind    WaitIndicator for UI synchronisation
+            \param [out] result Result */
+        void describeWeaponEffects(WaitIndicator& ind, game::spec::info::WeaponEffects& result);
+
         /** Signal: ship data to show.
             \param data Data */
         afl::base::Signal<void(const HullSpecification&)> sig_update;
 
      private:
-        util::RequestSender<Session> m_gameSender;
-        util::RequestReceiver<HullSpecificationProxy> m_reply;
-        afl::base::Ptr<game::spec::info::PictureNamer> m_picNamer;
+        class Trampoline;
+        class TrampolineFromSession;
 
-        static void sendReply(ShipQuery& q,
-                              const game::spec::ShipList& shipList,
-                              const Root& root,
-                              const game::map::Universe* pUniv,
-                              int player,
-                              game::spec::info::PictureNamer& picNamer,
-                              afl::string::Translator& tx,
-                              util::RequestSender<HullSpecificationProxy> reply);
-        static void sendReply(const HullSpecification& result,
-                              util::RequestSender<HullSpecificationProxy> reply);
+        util::RequestReceiver<HullSpecificationProxy> m_reply;
+        util::RequestSender<Trampoline> m_request;
+
+        void sendUpdate(HullSpecification info);
     };
 
 } }

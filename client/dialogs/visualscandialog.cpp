@@ -802,7 +802,6 @@ client::dialogs::VisualScanDialog::SpecPeer::SpecPeer(ui::Root& root, Window& pa
       m_window(parent.m_translator("Ship Specification"), root.provider(), root.colorScheme(), ui::BLUE_DARK_WINDOW, ui::layout::HBox::instance0),
       m_specSheet(root,
                   parent.m_translator,
-                  false /* FIXME: hasPerTurnCosts */,
                   game::proxy::PlayerProxy(parent.m_gameSender).getAllPlayers(link),
                   game::proxy::PlayerProxy(parent.m_gameSender).getPlayerNames(link, game::Player::AdjectiveName),
                   game::proxy::ConfigurationProxy(parent.m_gameSender).getNumberFormatter(link))

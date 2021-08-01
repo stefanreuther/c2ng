@@ -16,9 +16,9 @@ using afl::string::Format;
 namespace {
     const int PAD = 5;
 
-    const size_t NUM_HULLFUNC_LINES = 4;
+    const size_t NUM_HULLFUNC_LINES = 7;
 
-    void initFirstTable(ui::widgets::SimpleTable& tab, int em, afl::string::Translator& tx)
+    void initBaseTable(ui::widgets::SimpleTable& tab, int em, afl::string::Translator& tx)
     {
         // ex WSpecBaseInfo::drawContent (part)
         tab.column(0).setColor(ui::Color_Gray);
@@ -39,7 +39,7 @@ namespace {
         tab.cell(2, 5).setText(tx("kt"));
     }
 
-    void setFirstTable(ui::widgets::SimpleTable& tab, const game::proxy::HullSpecificationProxy::HullSpecification& data, const util::NumberFormatter& fmt)
+    void setBaseTable(ui::widgets::SimpleTable& tab, const game::proxy::HullSpecificationProxy::HullSpecification& data, const util::NumberFormatter& fmt)
     {
         // ex WSpecBaseInfo::drawContent (part)
         tab.cell(1, 0).setText(fmt.formatNumber(data.mass));
@@ -50,48 +50,7 @@ namespace {
         tab.cell(1, 5).setText(fmt.formatNumber(data.maxFuel));
     }
 
-    void initSecondTable(ui::widgets::SimpleTable& tab, afl::string::Translator& tx)
-    {
-        // ex WSpecMainInfo::drawContent (part)
-        tab.column(0).setColor(ui::Color_Gray);
-        tab.column(1).setColor(ui::Color_Green);
-        tab.setColumnPadding(0, PAD);
-        tab.cell(0, 0).setText(tx("Weapons:"));
-        tab.cell(0, 1).setText(tx("Mine Hit:"));
-        tab.cell(0, 2).setText(tx("Hull Id:"));
-        // FIXME -> tab.cell(0, 3).setText(tx("..."));
-    }
-
-    void setSecondTable(ui::widgets::SimpleTable& tab, const game::proxy::HullSpecificationProxy::HullSpecification& data, const util::NumberFormatter& fmt, afl::string::Translator& tx)
-    {
-        // ex WSpecMainInfo::drawContent
-        String_t w;
-        if (data.maxBeams > 0) {
-            w += Format(tx("%d beam%!1{s%}"), data.maxBeams);
-        }
-        if (data.maxLaunchers > 0) {
-            if (!w.empty()) {
-                w += ", ";
-            }
-            w += Format(tx("%d torpedo launcher%!1{s%}"), data.maxLaunchers);
-        }
-        if (data.numBays > 0) {
-            if (!w.empty()) {
-                w += ", ";
-            }
-            w += Format(tx("%d fighter bay%!1{s%}"), data.numBays);
-        }
-        if (w.empty()) {
-            w = tx("none");
-        }
-        tab.cell(1, 0).setText(w);
-        tab.cell(1, 1).setText(Format(tx("%d%% damage"), data.mineHitDamage));
-        tab.cell(1, 2).setText(fmt.formatNumber(data.hullId));
-
-        // FIXME: hullfuncs
-    }
-
-    void initThirdTable(ui::widgets::SimpleTable& tab, int em, afl::string::Translator& tx)
+    void initBuildTable(ui::widgets::SimpleTable& tab, int em, afl::string::Translator& tx)
     {
         // WSpecBuildInfo::drawContent (part)
         tab.column(0).setColor(ui::Color_Gray);
@@ -134,7 +93,7 @@ namespace {
         tab.clearColumnWidth(3);
     }
 
-    void setThirdTable(ui::widgets::SimpleTable& tab, const game::proxy::HullSpecificationProxy::HullSpecification& data, const util::NumberFormatter& fmt)
+    void setBuildTable(ui::widgets::SimpleTable& tab, const game::proxy::HullSpecificationProxy::HullSpecification& data, const util::NumberFormatter& fmt)
     {
         // ex WSpecBuildInfo::drawContent (part)
         tab.cell(1, 1).setText(fmt.formatNumber(data.cost.get(game::spec::Cost::Money)));
@@ -145,17 +104,66 @@ namespace {
         tab.cell(4, 1).setText(fmt.formatNumber(data.pointsToBuild));
         tab.cell(4, 2).setText(fmt.formatNumber(data.pointsForKilling));
         tab.cell(4, 3).setText(fmt.formatNumber(data.pointsForScrapping));
+        tab.cell(4, 4).setText(fmt.formatNumber(data.pointsAvailable));
     }
 
-    void setHullFunctions(ui::rich::DocumentView& docView, const game::proxy::HullSpecificationProxy::HullSpecification& data, afl::string::Translator& tx)
+    void renderAttribute(ui::rich::Document& doc, String_t label, String_t value)
     {
-        // FIXME: implement ability icons
-        ui::rich::Document& doc = docView.getDocument();
-        const game::spec::info::Abilities_t& ab = data.abilities;
+        doc.add(label);
+        doc.add(": ");
+        doc.add(util::rich::Text(util::SkinColor::Green, value));
+        doc.addNewline();
+    }
 
+    void setHullFunctions(ui::rich::DocumentView& docView, const game::proxy::HullSpecificationProxy::HullSpecification& data, const util::NumberFormatter& fmt, afl::string::Translator& tx)
+    {
+        // Extra attributes
+        ui::rich::Document& doc = docView.getDocument();
         doc.clear();
-        size_t numLines = ab.size();
-        size_t limit = (numLines > NUM_HULLFUNC_LINES ? NUM_HULLFUNC_LINES-1 : numLines);
+        size_t numLines = NUM_HULLFUNC_LINES;
+
+        // - Weapons
+        String_t w;
+        if (data.maxBeams > 0) {
+            w += Format(tx("%d beam%!1{s%}"), data.maxBeams);
+        }
+        if (data.maxLaunchers > 0) {
+            if (!w.empty()) {
+                w += ", ";
+            }
+            w += Format(tx("%d torpedo launcher%!1{s%}"), data.maxLaunchers);
+        }
+        if (data.numBays > 0) {
+            if (!w.empty()) {
+                w += ", ";
+            }
+            w += Format(tx("%d fighter bay%!1{s%}"), data.numBays);
+        }
+        if (w.empty()) {
+            w = tx("none");
+        }
+        renderAttribute(doc, tx("Weapons"), w);
+        --numLines;
+
+        // - Mine hit damage
+        renderAttribute(doc, tx("Mine Hit"), Format(tx("%d%% damage"), data.mineHitDamage));
+        --numLines;
+
+        // - Hull Id
+        renderAttribute(doc, tx("Hull Id"), fmt.formatNumber(data.hullId));
+        --numLines;
+
+        // - Fuel usage
+        if (data.fuelBurnPerTurn != 0 || data.fuelBurnPerFight != 0) {
+            renderAttribute(doc, "Fuel burn", Format(tx("%d kt/turn, %d kt/fight"), data.fuelBurnPerTurn, data.fuelBurnPerFight));
+            --numLines;
+        }
+
+        // Hull abilities
+        // FIXME: implement ability icons
+        const game::spec::info::Abilities_t& ab = data.abilities;
+        const size_t numAbilities = ab.size();
+        const size_t limit = (numAbilities > numLines ? numLines-1 : numAbilities);
         for (size_t i = 0; i < limit; ++i) {
             doc.add(ab[i].info);
             doc.addNewline();
@@ -172,7 +180,6 @@ namespace {
 
 client::widgets::HullSpecificationSheet::HullSpecificationSheet(ui::Root& root,
                                                                 afl::string::Translator& tx,
-                                                                bool hasPerTurnCosts,
                                                                 game::PlayerSet_t allPlayers,
                                                                 const game::PlayerArray<String_t>& playerNames,
                                                                 util::NumberFormatter fmt)
@@ -180,8 +187,12 @@ client::widgets::HullSpecificationSheet::HullSpecificationSheet(ui::Root& root,
       m_deleter(),
       m_root(root),
       m_translator(tx),
-      m_hasPerTurnCosts(hasPerTurnCosts),
-      m_formatter(fmt)
+      m_formatter(fmt),
+      m_pTitle(),
+      m_pImage(),
+      m_pBaseTable(),
+      m_pBuildTable(),
+      m_pHullFunctions()
 {
     init();
     initPlayerLists(allPlayers, playerNames);
@@ -196,17 +207,14 @@ client::widgets::HullSpecificationSheet::setContent(const HullSpecification_t& d
     if (m_pImage != 0) {
         m_pImage->setImage(data.image.empty() ? RESOURCE_ID("nvc") : data.image);
     }
-    if (m_pTables[0] != 0) {
-        setFirstTable(*m_pTables[0], data, m_formatter);
+    if (m_pBaseTable != 0) {
+        setBaseTable(*m_pBaseTable, data, m_formatter);
     }
-    if (m_pTables[1] != 0) {
-        setSecondTable(*m_pTables[1], data, m_formatter, m_translator);
-    }
-    if (m_pTables[2] != 0) {
-        setThirdTable(*m_pTables[2], data, m_formatter);
+    if (m_pBuildTable != 0) {
+        setBuildTable(*m_pBuildTable, data, m_formatter);
     }
     if (m_pHullFunctions != 0) {
-        setHullFunctions(*m_pHullFunctions, data, m_translator);
+        setHullFunctions(*m_pHullFunctions, data, m_formatter, m_translator);
     }
     for (int i = 0; i < 3; ++i) {
         if (m_pPlayerLists[i] != 0) {
@@ -229,32 +237,23 @@ client::widgets::HullSpecificationSheet::init()
 
     // Image || First Table
     m_pImage = &m_deleter.addNew(new ui::widgets::ImageButton(String_t(), 0, m_root, gfx::Point(105, 95)));
-    m_pTables[0] = &m_deleter.addNew(new ui::widgets::SimpleTable(m_root, 3, 6));
-    initFirstTable(*m_pTables[0], em, m_translator);
+    m_pBaseTable = &m_deleter.addNew(new ui::widgets::SimpleTable(m_root, 3, 6));
+    initBaseTable(*m_pBaseTable, em, m_translator);
 
     Group& g1 = m_deleter.addNew(new Group(ui::layout::HBox::instance5));
     g1.add(ui::widgets::FrameGroup::wrapWidget(m_deleter, m_root.colorScheme(), ui::LoweredFrame, *m_pImage));
-    g1.add(*m_pTables[0]);
+    g1.add(*m_pBaseTable);
     g1.add(m_deleter.addNew(new ui::Spacer()));
     add(g1);
 
-    // Second Table + hull functions without gap
-    Group& g2 = m_deleter.addNew(new ui::Group(ui::layout::VBox::instance0));
-    m_pTables[1] = &m_deleter.addNew(new ui::widgets::SimpleTable(m_root, 2, 3));
-    g2.add(*m_pTables[1]);
-    initSecondTable(*m_pTables[1], m_translator);
-
-    // Hull functions
+    // Hull functions (+more)
     m_pHullFunctions = &m_deleter.addNew(new ui::rich::DocumentView(cellSize.scaledBy(30, int(NUM_HULLFUNC_LINES)), 0, m_root.provider()));
-    g2.add(*m_pHullFunctions);
-    add(g2);
+    add(*m_pHullFunctions);
 
     // Third Table
-    m_pTables[2] = &m_deleter.addNew(new ui::widgets::SimpleTable(m_root, 5, 5));
-    add(*m_pTables[2]);
-    initThirdTable(*m_pTables[2], em, m_translator);
-
-    // FIXME: make it possible for a table to contain multi-column text
+    m_pBuildTable = &m_deleter.addNew(new ui::widgets::SimpleTable(m_root, 5, 5));
+    add(*m_pBuildTable);
+    initBuildTable(*m_pBuildTable, em, m_translator);
 }
 
 void

@@ -25,7 +25,6 @@ namespace client { namespace widgets {
 
         HullSpecificationSheet(ui::Root& root,
                                afl::string::Translator& tx,
-                               bool hasPerTurnCosts,
                                game::PlayerSet_t allPlayers,
                                const game::PlayerArray<String_t>& playerNames,
                                util::NumberFormatter fmt);
@@ -42,12 +41,12 @@ namespace client { namespace widgets {
         ui::Root& m_root;
         afl::string::Translator& m_translator;
 
-        bool m_hasPerTurnCosts;
         util::NumberFormatter m_formatter;
 
         ui::widgets::StaticText* m_pTitle;
         ui::widgets::ImageButton* m_pImage;
-        ui::widgets::SimpleTable* m_pTables[3];
+        ui::widgets::SimpleTable* m_pBaseTable;
+        ui::widgets::SimpleTable* m_pBuildTable;
         ui::rich::DocumentView* m_pHullFunctions;
         PlayerList* m_pPlayerLists[3];
     };

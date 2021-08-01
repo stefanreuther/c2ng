@@ -6,6 +6,7 @@
 #define C2NG_GAME_SPEC_INFO_INFO_HPP
 
 #include "game/root.hpp"
+#include "game/shipquery.hpp"
 #include "game/spec/beam.hpp"
 #include "game/spec/engine.hpp"
 #include "game/spec/fighter.hpp"
@@ -84,6 +85,14 @@ namespace game { namespace spec { namespace info {
         \param [in]  root             Root (used for configuration, host version)
         \param [in]  tx               Translator */
     void describeFighter(PageContent& content, int player, const ShipList& shipList, bool withCost, const PictureNamer& picNamer, const Root& root, afl::string::Translator& tx);
+
+    /** Describe weapon effects against a ship.
+        \param [out] result           Result produced here
+        \param [in]  query            ShipQuery describing the ship targeted by weapons
+        \param [in]  shipList         Ship list
+        \param [in]  root             Root (used for configuration, host version)
+        \param [in]  tx               Translator */
+    void describeWeaponEffects(WeaponEffects& result, const ShipQuery& query, const ShipList& shipList, const Root& root, afl::string::Translator& tx);
 
 
     /** Get hull attribute.
