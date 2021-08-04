@@ -9,10 +9,7 @@
 #include "afl/base/optional.hpp"
 #include "afl/bits/smallset.hpp"
 #include "afl/string/string.hpp"
-#include "afl/string/translator.hpp"
-#include "game/experiencelevelset.hpp"
-#include "game/root.hpp"
-#include "game/spec/shiplist.hpp"
+#include "game/playerset.hpp"
 #include "game/types.hpp"
 #include "util/range.hpp"
 
@@ -61,12 +58,24 @@ namespace game { namespace spec { namespace info {
     /** List of attributes. */
     typedef std::vector<Attribute> Attributes_t;
 
+    /** Ability flags. */
+    enum AbilityFlag {
+        DamagedAbility,            ///< Ability is currently damaged.
+        ForeignAbility,            ///< Foreign ability (not for current player).
+        ReachableAbility,          ///< Ability is available at higher experience levels.
+        OutgrownAbility            ///< Ability was available at lower experience levels.
+    };
+
+    /** Set of ability flags. */
+    typedef afl::bits::SmallSet<AbilityFlag> AbilityFlags_t;
+
     /** Description of a ship/racial ability. */
     struct Ability {
         String_t info;             ///< Textual description.
         String_t pictureName;      ///< Picture name. \see PictureNamer::getAbilityPicture.
-        Ability(const String_t& info, const String_t& pictureName)
-            : info(info), pictureName(pictureName)
+        AbilityFlags_t flags;      ///< Flags.
+        Ability(const String_t& info, const String_t& pictureName, AbilityFlags_t flags)
+            : info(info), pictureName(pictureName), flags(flags)
             { }
     };
 
@@ -234,41 +243,6 @@ namespace game { namespace spec { namespace info {
             : effectScale(1), mass(0), usedESBRate(0), crew(0), damageLimit(100), player(0)
             { }
     };
-
-    /** Get name of FilterAttribute.
-        \param att Attribute
-        \param tx Translator
-        \return name */
-    String_t toString(FilterAttribute att, afl::string::Translator& tx);
-
-    /** Convert integer range to ExperienceLevelSet_t.
-        \param r Range
-        \return set */
-    ExperienceLevelSet_t convertRangeToSet(IntRange_t r);
-
-    /** Get available experience level range.
-        Used as range for EditRangeLevel.
-        \param root Root
-        \return Level range */
-    IntRange_t getLevelRange(const Root& root);
-
-    /** Get available hull Id range.
-        Used as range for EditValueHull.
-        \param shipList Ship list
-        \return Level range */
-    IntRange_t getHullRange(const ShipList& shipList);
-
-    /** Get available player Id range.
-        Used as range for EditValuePlayer.
-        \param root Root
-        \return Level range */
-    IntRange_t getPlayerRange(const Root& root);
-
-    /** Get default range for a filter attribute.
-        This is for use in attribute queries (EditRange) and does NOT consider configuration.
-        \param att Attribute
-        \return Range */
-    IntRange_t getAttributeRange(FilterAttribute att);
 
 } } }
 

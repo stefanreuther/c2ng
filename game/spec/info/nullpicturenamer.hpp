@@ -17,7 +17,7 @@ namespace game { namespace spec { namespace info {
         virtual String_t getEnginePicture(const Engine& e) const;
         virtual String_t getBeamPicture(const Beam& b) const;
         virtual String_t getLauncherPicture(const TorpedoLauncher& tl) const;
-        virtual String_t getAbilityPicture(const String_t& abilityName) const;
+        virtual String_t getAbilityPicture(const String_t& abilityName, AbilityFlags_t flags) const;
         virtual String_t getPlayerPicture(const Player& pl) const;
         virtual String_t getFighterPicture(int raceNr, int playerNr) const;
         virtual String_t getVcrObjectPicture(bool isPlanet, int pictureNumber) const;

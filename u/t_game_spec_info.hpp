@@ -75,6 +75,10 @@ class TestGameSpecInfoTypes : public CxxTest::TestSuite {
     void testListContent();
     void testFilterElement();
     void testFilterInfo();
+};
+
+class TestGameSpecInfoUtils : public CxxTest::TestSuite {
+ public:
     void testFilterAttributeToString();
     void testConvertRangeToSet();
     void testGetLevelRange();

@@ -30,7 +30,7 @@ game::spec::info::NullPictureNamer::getLauncherPicture(const TorpedoLauncher& /*
 }
 
 String_t
-game::spec::info::NullPictureNamer::getAbilityPicture(const String_t& /*abilityName*/) const
+game::spec::info::NullPictureNamer::getAbilityPicture(const String_t& /*abilityName*/, AbilityFlags_t /*flags*/) const
 {
     return String_t();
 }

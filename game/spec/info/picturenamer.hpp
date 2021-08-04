@@ -10,6 +10,7 @@
 #include "game/spec/beam.hpp"
 #include "game/spec/engine.hpp"
 #include "game/spec/hull.hpp"
+#include "game/spec/info/types.hpp"
 #include "game/spec/torpedolauncher.hpp"
 
 namespace game { namespace spec { namespace info {
@@ -45,8 +46,9 @@ namespace game { namespace spec { namespace info {
 
         /** Get name of picture to represent a ship/racial ability.
             \param abilityName Name of ability (e.g. BasicHullFunction::getPictureName())
+            \param flags Flags (to request picture variant)
             \return picture name */
-        virtual String_t getAbilityPicture(const String_t& abilityName) const = 0;
+        virtual String_t getAbilityPicture(const String_t& abilityName, AbilityFlags_t flags) const = 0;
 
         /** Get name of picture to represent a player.
             \param pl Player

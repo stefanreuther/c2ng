@@ -35,6 +35,7 @@ game::ShipQuery::clear()
     m_usedESBRate      = 0;
     m_crew             = 0;
     m_owner            = 0;
+    m_damage           = 0;
 }
 
 // Initialize for existing ship.
@@ -113,6 +114,8 @@ game::ShipQuery::complete(const game::map::Universe& univ,
                 m_levelDisplaySet = ExperienceLevelSet_t(level);
             }
         }
+
+        m_damage = sh->getDamage().orElse(0);
     }
 
     // Do we have an owner?
@@ -205,7 +208,8 @@ game::ShipQuery::operator==(const ShipQuery& other) const
         && m_combatMass       == other.m_combatMass
         && m_usedESBRate      == other.m_usedESBRate
         && m_crew             == other.m_crew
-        && m_owner            == other.m_owner;
+        && m_owner            == other.m_owner
+        && m_damage           == other.m_damage;
 }
 
 // Compare for inequality.
@@ -382,4 +386,20 @@ game::ShipQuery::setOwner(int id)
 {
     // ex GShipQuery::setOwner
     m_owner = id;
+}
+
+// Get damage.
+int
+game::ShipQuery::getDamage() const
+{
+    // ex GShipQuery::getDamage
+    return m_damage;
+}
+
+// Set damage.
+void
+game::ShipQuery::setDamage(int damage)
+{
+    // ex GShipQuery::setDamage
+    m_damage = damage;
 }

@@ -51,9 +51,10 @@ client::PictureNamer::getLauncherPicture(const game::spec::TorpedoLauncher& tl) 
 }
 
 String_t
-client::PictureNamer::getAbilityPicture(const String_t& abilityName) const
+client::PictureNamer::getAbilityPicture(const String_t& abilityName, game::spec::info::AbilityFlags_t flags) const
 {
     // Ability: 'ability.<name>'
+    (void) flags;   // FIXME
     if (abilityName.empty()) {
         return String_t();
     } else {

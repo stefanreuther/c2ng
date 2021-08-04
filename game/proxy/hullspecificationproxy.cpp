@@ -134,7 +134,7 @@ game::proxy::HullSpecificationProxy::Trampoline::packResponse(HullSpecification&
             hfList.simplify();
             hfList.sortForNewShip(m_query.getPlayerDisplaySet());
 
-            game::spec::info::describeHullFunctions(result.abilities, hfList, shipList, *m_picNamer, root, m_session.translator());
+            game::spec::info::describeHullFunctions(result.abilities, hfList, &m_query, shipList, *m_picNamer, root, m_session.translator());
         }
     }
 }

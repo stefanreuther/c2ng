@@ -25,6 +25,7 @@ TestGameShipQuery::testInit()
     TS_ASSERT_EQUALS(a.getUsedESBRate(), 0);
     TS_ASSERT_EQUALS(a.getCrew(), 0);
     TS_ASSERT_EQUALS(a.getOwner(), 0);
+    TS_ASSERT_EQUALS(a.getDamage(), 0);
 
     // Level filter: defaults to all
     TS_ASSERT_EQUALS(a.getLevelFilterSet().contains(1), true);
@@ -58,6 +59,7 @@ TestGameShipQuery::testInit()
     a.setPlayerDisplaySet(ps2);
     a.setLevelFilterSet(ls1);
     a.setLevelDisplaySet(ls2);
+    a.setDamage(12);
 
     TS_ASSERT_EQUALS(a.getHullType(), 42);
     TS_ASSERT_EQUALS(a.getShipId(), 150);
@@ -70,6 +72,7 @@ TestGameShipQuery::testInit()
     TS_ASSERT_EQUALS(a.getPlayerDisplaySet(), ps2);
     TS_ASSERT_EQUALS(a.getLevelFilterSet(), ls1);
     TS_ASSERT_EQUALS(a.getLevelDisplaySet(), ls2);
+    TS_ASSERT_EQUALS(a.getDamage(), 12);
     TS_ASSERT_EQUALS(a == b, false);
     TS_ASSERT_EQUALS(a != b, true);
 }
@@ -95,6 +98,7 @@ TestGameShipQuery::testInitForExistingShip()
     sd.hullType = HULL_NR;
     sd.engineType = ENGINE_NR;
     sd.owner = PLAYER_NR;
+    sd.damage = 7;
     sh->addCurrentShipData(sd, game::PlayerSet_t(PLAYER_NR));
     sh->internalCheck();
     sh->setPlayability(game::map::Object::Playable);
@@ -130,5 +134,6 @@ TestGameShipQuery::testInitForExistingShip()
     TS_ASSERT_EQUALS(a.getPlayerDisplaySet(), game::PlayerSet_t(PLAYER_NR));
     TS_ASSERT_EQUALS(a.getLevelFilterSet(), game::ShipQuery().getLevelFilterSet());    // unmodified default
     TS_ASSERT_EQUALS(a.getLevelDisplaySet(), game::ExperienceLevelSet_t(0));           // unmodified default
+    TS_ASSERT_EQUALS(a.getDamage(), 7);
 }
 

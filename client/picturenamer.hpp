@@ -17,7 +17,7 @@ namespace client {
         virtual String_t getEnginePicture(const game::spec::Engine& e) const;
         virtual String_t getBeamPicture(const game::spec::Beam& b) const;
         virtual String_t getLauncherPicture(const game::spec::TorpedoLauncher& tl) const;
-        virtual String_t getAbilityPicture(const String_t& abilityName) const;
+        virtual String_t getAbilityPicture(const String_t& abilityName, game::spec::info::AbilityFlags_t flags) const;
         virtual String_t getPlayerPicture(const game::Player& pl) const;
         virtual String_t getFighterPicture(int raceNr, int playerNr) const;
         virtual String_t getVcrObjectPicture(bool isPlanet, int pictureNumber) const;

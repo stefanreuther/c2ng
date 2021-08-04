@@ -4,8 +4,9 @@
   */
 
 #include "game/spec/info/filter.hpp"
-#include "game/spec/info/browser.hpp"
 #include "afl/string/format.hpp"
+#include "game/spec/info/browser.hpp"
+#include "game/spec/info/utils.hpp"
 
 using afl::string::Format;
 using game::spec::info::IntRange_t;

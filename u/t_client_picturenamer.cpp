@@ -73,8 +73,8 @@ void
 TestClientPictureNamer::testAbility()
 {
     client::PictureNamer testee;
-    TS_ASSERT_EQUALS(testee.getAbilityPicture("cloak"), "ability.cloak");
-    TS_ASSERT_EQUALS(testee.getAbilityPicture(""), "");
+    TS_ASSERT_EQUALS(testee.getAbilityPicture("cloak", game::spec::info::AbilityFlags_t()), "ability.cloak");
+    TS_ASSERT_EQUALS(testee.getAbilityPicture("", game::spec::info::AbilityFlags_t()), "");
 }
 
 void

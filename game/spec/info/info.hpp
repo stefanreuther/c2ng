@@ -18,6 +18,14 @@ namespace game { namespace spec { namespace info {
 
     class PictureNamer;
 
+    /** Get flags for a HullFunction instance.
+        \param [in]  func             Function to check
+        \param [in]  basicFunctions   BasicHullFunctionList (for function damage levels)
+        \param [in]  query            ShipQuery describing the ship we're asking the question for
+        \param [in]  config           Host configuration (for damage levels)
+        \return flags */
+    AbilityFlags_t getAbilityFlags(const HullFunction& func, const BasicHullFunctionList& basicFunctions, const ShipQuery& query, const game::config::HostConfiguration& config);
+
     /** Describe a hull.
         Output is intended to be human-readable.
         \param [out] content          Result produced here
@@ -33,11 +41,12 @@ namespace game { namespace spec { namespace info {
     /** Describe a list of hull functions.
         \param [out] out              Result produced here
         \param [in]  hfList           Hull functions to describe
+        \param [in]  pQuery           Ship query (optional, to describe ability flags)
         \param [in]  shipList         Ship list (for hull functions)
         \param [in]  picNamer         Picture namer
         \param [in]  root             Root (used for configuration, host version)
         \param [in]  tx               Translator */
-    void describeHullFunctions(Abilities_t& out, const HullFunctionList& hfList, const ShipList& shipList, const PictureNamer& picNamer, const Root& root, afl::string::Translator& tx);
+    void describeHullFunctions(Abilities_t& out, const HullFunctionList& hfList, const ShipQuery* pQuery, const ShipList& shipList, const PictureNamer& picNamer, const Root& root, afl::string::Translator& tx);
 
     /** Describe an engine.
         Output is intended to be human-readable.

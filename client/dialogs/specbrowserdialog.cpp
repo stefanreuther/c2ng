@@ -1,5 +1,6 @@
 /**
   *  \file client/dialogs/specbrowserdialog.cpp
+  *  \brief Specification Browser Dialog
   */
 
 #include "client/dialogs/specbrowserdialog.hpp"
@@ -12,6 +13,7 @@
 #include "client/widgets/playerlist.hpp"
 #include "game/proxy/playerproxy.hpp"
 #include "game/proxy/specbrowserproxy.hpp"
+#include "game/spec/info/utils.hpp"
 #include "gfx/complex.hpp"
 #include "ui/draw.hpp"
 #include "ui/eventloop.hpp"
@@ -702,7 +704,7 @@ namespace {
                     }
                 }
 
-                client::dialogs::renderHullInformation(doc, m_root, m_pageContent);
+                client::dialogs::renderHullInformation(doc, m_root, m_pageContent, m_translator);
 
                 m_docView.handleDocumentUpdate();
                 m_docView.setTopY(0);
@@ -821,6 +823,11 @@ namespace {
         bool m_handleListSelectionChange;
         int m_lastSelectedId;
     };
+
+    util::rich::Text renderAbility(const game::spec::info::Ability& ab)
+    {
+        return util::rich::Text(ab.flags.contains(game::spec::info::DamagedAbility) ? util::SkinColor::Red : util::SkinColor::Static, ab.info);
+    }
 }
 
 
@@ -836,7 +843,7 @@ client::dialogs::doSpecificationBrowserDialog(ui::Root& root,
 }
 
 void
-client::dialogs::renderHullInformation(ui::rich::Document& doc, ui::Root& root, const game::spec::info::PageContent& content)
+client::dialogs::renderHullInformation(ui::rich::Document& doc, ui::Root& root, const game::spec::info::PageContent& content, afl::string::Translator& tx)
 {
     for (size_t i = 0, n = content.attributes.size(); i < n; ++i) {
         const gsi::Attribute& att = content.attributes[i];
@@ -849,17 +856,41 @@ client::dialogs::renderHullInformation(ui::rich::Document& doc, ui::Root& root, 
     }
 
     // FIXME: make this configurable
-    const bool FLAG = true;
+    const bool useIcons = true;
+    renderAbilityList(doc, root, content.abilities, useIcons, content.abilities.size(), tx);
+}
 
+void
+client::dialogs::renderAbilityList(ui::rich::Document& doc, ui::Root& root, const game::spec::info::Abilities_t& abilities, bool useIcons, size_t maxLines, afl::string::Translator& tx)
+{
     std::auto_ptr<AbilityIconObject> obj(new AbilityIconObject(root, doc.getPageWidth()));
-    for (size_t i = 0, n = content.abilities.size(); i < n; ++i) {
-        const gsi::Ability& a = content.abilities[i];
-        if (FLAG && !a.pictureName.empty()) {
+    size_t usedLines = 0;       // Number of consumed lines
+    size_t excessLines = 0;     // Number of lines that didn't fit
+    size_t lastIndex = 0;       // Index of first line that didn't fit
+    for (size_t i = 0, n = abilities.size(); i < n; ++i) {
+        const gsi::Ability& a = abilities[i];
+        if (useIcons && !a.pictureName.empty()) {
             obj->add(a.pictureName);
         } else {
-            doc.add(a.info);
-            doc.addNewline();
+            if (usedLines >= maxLines-1) {
+                if (excessLines == 0) {
+                    lastIndex = i;
+                }
+                ++excessLines;
+            } else {
+                doc.add(renderAbility(a));
+                doc.addNewline();
+                ++usedLines;
+            }
         }
+    }
+    if (excessLines != 0) {
+        if (excessLines == 1) {
+            doc.add(renderAbility(abilities[lastIndex]));
+        } else {
+            doc.add(afl::string::Format(tx("(+%d more)"), excessLines));
+        }
+        doc.addNewline();
     }
     if (!obj->empty()) {
         doc.addCenterObject(doc.deleter().addNew(obj.release()));

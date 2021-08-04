@@ -85,6 +85,38 @@ namespace {
     }
 }
 
+game::spec::info::AbilityFlags_t
+game::spec::info::getAbilityFlags(const HullFunction& func, const BasicHullFunctionList& basicFunctions, const ShipQuery& query, const game::config::HostConfiguration& config)
+{
+    AbilityFlags_t result;
+
+    // Damage check
+    if (const BasicHullFunction* hf = basicFunctions.getFunctionById(func.getBasicFunctionId())) {
+        int damageLimit;
+        if (hf->getDamageLimit(query.getOwner(), config).get(damageLimit)) {
+            if (query.getDamage() >= damageLimit) {
+                result += DamagedAbility;
+            }
+        }
+    }
+
+    // Player check
+    if (!query.getPlayerDisplaySet().containsAnyOf(func.getPlayers())) {
+        result += ForeignAbility;
+    }
+
+    // Level check
+    if (!query.getLevelDisplaySet().containsAnyOf(func.getLevels())) {
+        if (func.getLevels().toInteger() >= 2*query.getLevelDisplaySet().toInteger()) {
+            result += ReachableAbility;
+        } else {
+            result += OutgrownAbility;
+        }
+    }
+
+    return result;
+}
+
 void
 game::spec::info::describeHull(PageContent& content, Id_t id, const ShipList& shipList, bool withCost, const PictureNamer& picNamer, const Root& root, int viewpointPlayer, afl::string::Translator& tx)
 {
@@ -141,7 +173,7 @@ game::spec::info::describeHull(PageContent& content, Id_t id, const ShipList& sh
                                         true /* includeNewShip */, false /* includeRacialAbilities */);
         hfList.simplify();
         hfList.sortForNewShip(PlayerSet_t(viewpointPlayer));
-        describeHullFunctions(content.abilities, hfList, shipList, picNamer, root, tx);
+        describeHullFunctions(content.abilities, hfList, 0, shipList, picNamer, root, tx);
 
         // Players
         content.players = shipList.hullAssignments().getPlayersForHull(root.hostConfiguration(), id);
@@ -149,15 +181,22 @@ game::spec::info::describeHull(PageContent& content, Id_t id, const ShipList& sh
 }
 
 void
-game::spec::info::describeHullFunctions(Abilities_t& out, const HullFunctionList& hfList, const ShipList& shipList, const PictureNamer& picNamer, const Root& root, afl::string::Translator& tx)
+game::spec::info::describeHullFunctions(Abilities_t& out, const HullFunctionList& hfList, const ShipQuery* pQuery, const ShipList& shipList, const PictureNamer& picNamer, const Root& root, afl::string::Translator& tx)
 {
     // ex drawHullFunctionList (sort-of)
     // FIXME: implement have/damaged/will-have/will-not-have annotations
     for (HullFunctionList::Iterator_t it = hfList.begin(), e = hfList.end(); it != e; ++it) {
+        // Flags
+        AbilityFlags_t flags;
+        if (pQuery != 0) {
+            flags = getAbilityFlags(*it, shipList.basicHullFunctions(), *pQuery, root.hostConfiguration());
+        }
+
+        // Text
         String_t pictureName;
         String_t info;
         if (const BasicHullFunction* hf = shipList.basicHullFunctions().getFunctionById(it->getBasicFunctionId())) {
-            pictureName = picNamer.getAbilityPicture(hf->getPictureName());
+            pictureName = picNamer.getAbilityPicture(hf->getPictureName(), flags);
             info = hf->getDescription();
         } else {
             info = Format(tx("Hull Function #%d"), it->getBasicFunctionId());
@@ -170,6 +209,9 @@ game::spec::info::describeHullFunctions(Abilities_t& out, const HullFunctionList
         if (it->getKind() == HullFunction::AssignedToShip) {
             util::addListItem(annot, "; ", tx("ship"));
         }
+        if (flags.contains(DamagedAbility)) {
+            util::addListItem(annot, "; ", tx("damaged"));
+        }
 
         // Build total
         if (!annot.empty()) {
@@ -178,7 +220,7 @@ game::spec::info::describeHullFunctions(Abilities_t& out, const HullFunctionList
             info += ")";
         }
 
-        out.push_back(Ability(info, pictureName));
+        out.push_back(Ability(info, pictureName, flags));
     }
 }
 

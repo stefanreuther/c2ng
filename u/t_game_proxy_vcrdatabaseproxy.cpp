@@ -72,7 +72,7 @@ namespace {
             { return String_t(); }
         virtual String_t getLauncherPicture(const game::spec::TorpedoLauncher& /*tl*/) const
             { return String_t(); }
-        virtual String_t getAbilityPicture(const String_t& /*abilityName*/) const
+        virtual String_t getAbilityPicture(const String_t& /*abilityName*/, game::spec::info::AbilityFlags_t /*flags*/) const
             { return String_t(); }
         virtual String_t getPlayerPicture(const game::Player& /*pl*/) const
             { return String_t(); }

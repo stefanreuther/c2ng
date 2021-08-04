@@ -12,7 +12,8 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/vcr/flak/visualisationsettings.cpp \
+FILES_gamelib = game/spec/info/utils.cpp game/spec/info/utils.hpp \
+    game/vcr/flak/visualisationsettings.cpp \
     game/vcr/flak/visualisationsettings.hpp \
     game/vcr/flak/visualisationstate.hpp \
     game/vcr/flak/visualisationstate.cpp game/proxy/flakvcrplayerproxy.cpp \
@@ -1594,7 +1595,8 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_game_vcr_flak_visualisationsettings.cpp \
+FILES_testsuite = u/t_game_spec_info_utils.cpp \
+    u/t_game_vcr_flak_visualisationsettings.cpp \
     u/t_game_vcr_flak_visualisationstate.cpp \
     u/t_game_proxy_flakvcrplayerproxy.cpp \
     u/t_game_vcr_flak_eventrecorder.cpp u/t_gfx_keyeventconsumer.cpp \

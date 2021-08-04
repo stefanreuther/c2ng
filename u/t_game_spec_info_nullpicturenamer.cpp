@@ -22,7 +22,7 @@ TestGameSpecInfoNullPictureNamer::testIt()
     TS_ASSERT_EQUALS(testee.getEnginePicture(game::spec::Engine(3)), "");
     TS_ASSERT_EQUALS(testee.getBeamPicture(game::spec::Beam(4)), "");
     TS_ASSERT_EQUALS(testee.getLauncherPicture(game::spec::TorpedoLauncher(5)), "");
-    TS_ASSERT_EQUALS(testee.getAbilityPicture("cloak"), "");
+    TS_ASSERT_EQUALS(testee.getAbilityPicture("cloak", game::spec::info::AbilityFlags_t()), "");
     TS_ASSERT_EQUALS(testee.getPlayerPicture(game::Player(7)), "");
     TS_ASSERT_EQUALS(testee.getVcrObjectPicture(false, 7), "");
 }

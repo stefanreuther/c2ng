@@ -175,6 +175,14 @@ namespace game {
             \param id Owner, 0 if not known */
         void setOwner(int id);
 
+        /** Get damage.
+            \return damage */
+        int getDamage() const;
+
+        /** Set damage.
+            \param damage Damage */
+        void setDamage(int damage);
+
      private:
         int m_hullType;                   ///< Hull Id. Zero if not known. ex hull_id.
         int m_shipId;                     ///< Ship Id. Zero if not known. ex ship_id.
@@ -190,6 +198,7 @@ namespace game {
         int m_crew;                       ///< Crew. Zero if not known. ex crew.
         int m_owner;                      ///< Ship owner. Zero if not known. ex owner.
         int m_usedESBRate;                ///< Used Engine-Shield bonus. Set if m_combatMass includes ESB. ex used_esb.
+        int m_damage;                     ///< Damage. Zero if not known. ex damage.
     };
     
 }

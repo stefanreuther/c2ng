@@ -806,7 +806,7 @@ BuildShipDialog::renderSpecification(TechLevel area, const gsi::PageContent& con
     DocumentView& docView = *m_pSpecificationDisplay[area];
     ui::rich::Document& doc = docView.getDocument();
     doc.clear();
-    client::dialogs::renderHullInformation(doc, m_root, content);
+    client::dialogs::renderHullInformation(doc, m_root, content, m_translator);
     doc.finish();
     docView.handleDocumentUpdate();
 }

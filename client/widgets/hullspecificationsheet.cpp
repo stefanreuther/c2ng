@@ -4,6 +4,7 @@
 
 #include "client/widgets/hullspecificationsheet.hpp"
 #include "afl/string/format.hpp"
+#include "client/dialogs/specbrowserdialog.hpp"
 #include "client/widgets/playerlist.hpp"
 #include "ui/layout/hbox.hpp"
 #include "ui/layout/vbox.hpp"
@@ -115,7 +116,7 @@ namespace {
         doc.addNewline();
     }
 
-    void setHullFunctions(ui::rich::DocumentView& docView, const game::proxy::HullSpecificationProxy::HullSpecification& data, const util::NumberFormatter& fmt, afl::string::Translator& tx)
+    void setHullFunctions(ui::rich::DocumentView& docView, ui::Root& root, const game::proxy::HullSpecificationProxy::HullSpecification& data, const util::NumberFormatter& fmt, afl::string::Translator& tx)
     {
         // Extra attributes
         ui::rich::Document& doc = docView.getDocument();
@@ -160,18 +161,8 @@ namespace {
         }
 
         // Hull abilities
-        // FIXME: implement ability icons
-        const game::spec::info::Abilities_t& ab = data.abilities;
-        const size_t numAbilities = ab.size();
-        const size_t limit = (numAbilities > numLines ? numLines-1 : numAbilities);
-        for (size_t i = 0; i < limit; ++i) {
-            doc.add(ab[i].info);
-            doc.addNewline();
-        }
-        if (limit != numLines) {
-            doc.add(afl::string::Format(tx("(+%d more)"), numLines - limit));
-            doc.addNewline();
-        }
+        const bool useIcons = true;
+        client::dialogs::renderAbilityList(doc, root, data.abilities, useIcons, numLines, tx);
         doc.finish();
         docView.handleDocumentUpdate();
     }
@@ -214,7 +205,7 @@ client::widgets::HullSpecificationSheet::setContent(const HullSpecification_t& d
         setBuildTable(*m_pBuildTable, data, m_formatter);
     }
     if (m_pHullFunctions != 0) {
-        setHullFunctions(*m_pHullFunctions, data, m_formatter, m_translator);
+        setHullFunctions(*m_pHullFunctions, m_root, data, m_formatter, m_translator);
     }
     for (int i = 0; i < 3; ++i) {
         if (m_pPlayerLists[i] != 0) {

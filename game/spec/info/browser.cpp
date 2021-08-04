@@ -23,6 +23,7 @@
 #include "game/spec/info/filter.hpp"
 #include "game/spec/info/info.hpp"
 #include "game/spec/info/picturenamer.hpp"
+#include "game/spec/info/utils.hpp"
 
 namespace {
     using afl::string::Format;
@@ -432,7 +433,7 @@ game::spec::info::Browser::describePlayer(PageContent& content, Id_t id) const
 
         for (RacialAbilityList::Iterator_t it = m_racialAbilities.begin(), e = m_racialAbilities.end(); it != e; ++it) {
             if (it->players.contains(id)) {
-                content.abilities.push_back(Ability(it->name, m_picNamer.getAbilityPicture(it->pictureName)));
+                content.abilities.push_back(Ability(it->name, m_picNamer.getAbilityPicture(it->pictureName, AbilityFlags_t()), AbilityFlags_t()));
             }
         }
     }
@@ -531,7 +532,7 @@ game::spec::info::Browser::describeRacialAbility(PageContent& content, Id_t id) 
 {
     if (const RacialAbilityList::Ability* a = m_racialAbilities.get(size_t(id))) {
         content.title = a->name;
-        content.pictureName = m_picNamer.getAbilityPicture(a->pictureName);
+        content.pictureName = m_picNamer.getAbilityPicture(a->pictureName, AbilityFlags_t());
         if (!a->explanation.empty()) {
             content.attributes.push_back(Attribute(a->explanation, String_t()));
         }
@@ -642,7 +643,7 @@ game::spec::info::Browser::describeShipAbility(PageContent& content, Id_t id) co
         afl::string::Translator& tx = m_translator;
 
         content.title = fcn->getDescription();
-        content.pictureName = m_picNamer.getAbilityPicture(fcn->getPictureName());
+        content.pictureName = m_picNamer.getAbilityPicture(fcn->getPictureName(), AbilityFlags_t());
         content.attributes.push_back(Attribute(fcn->getExplanation(), String_t()));
         content.attributes.push_back(Attribute(tx("Name"), fcn->getName()));
         content.attributes.push_back(Attribute(tx("Id"), Format("%d", fcn->getId())));
