@@ -169,6 +169,7 @@ class TestGameProxyHistoryShipListProxy : public CxxTest::TestSuite {
 class TestGameProxyHullSpecificationProxy : public CxxTest::TestSuite {
  public:
     void testIt();
+    void testSetQuery();
 };
 
 class TestGameProxyInboxAdaptor : public CxxTest::TestSuite {

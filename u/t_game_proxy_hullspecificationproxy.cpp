@@ -158,3 +158,38 @@ TestGameProxyHullSpecificationProxy::testIt()
     TS_ASSERT(ab.size() >= 1U);
 }
 
+/** Test setQuery().
+    A: create a hull. Request its data using setQuery().
+    E: correct specification reported */
+void
+TestGameProxyHullSpecificationProxy::testSetQuery()
+{
+    // Environment
+    CxxTest::setAbortTestOnFail(true);
+
+    game::test::SessionThread h;
+    addShipList(h);
+    addGame(h);
+    addRoot(h);
+
+    // Testee
+    game::test::WaitIndicator ind;
+    util::RequestDispatcher& disp = ind;
+    game::proxy::HullSpecificationProxy testee(h.gameSender(), disp, std::auto_ptr<game::spec::info::PictureNamer>(new client::PictureNamer()));
+
+    UpdateReceiver recv;
+    testee.sig_update.add(&recv, &UpdateReceiver::onUpdate);
+
+    // Request specification
+    game::ShipQuery q;
+    q.setHullType(57);
+    testee.setQuery(q);
+    h.sync();
+    ind.processQueue();
+    TS_ASSERT(!recv.result.name.empty());
+
+    // Verify
+    TS_ASSERT_EQUALS(recv.result.name, "FIRST CLASS STARSHIP");
+    TS_ASSERT_EQUALS(recv.result.hullId, HULL_NR);
+}
+

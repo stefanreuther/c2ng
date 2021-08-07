@@ -226,6 +226,10 @@ TestGameProxyBuildShipProxy::testNormal()
     TS_ASSERT_EQUALS(sum.get(0)->name, "Hull tech upgrade");
     TS_ASSERT_EQUALS(sum.get(1)->name, "ANNIHILATION CLASS BATTLESHIP");
 
+    game::ShipQuery q = testee.getQuery(ind);
+    TS_ASSERT_EQUALS(q.getHullType(), game::test::ANNIHILATION_HULL_ID);
+    TS_ASSERT_EQUALS(q.getOwner(), PLAYER_NR);
+
     // Commit; verify that order is executed
     testee.commit();
 

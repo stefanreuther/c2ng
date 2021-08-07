@@ -33,6 +33,7 @@ class game::proxy::HullSpecificationProxy::Trampoline {
         }
 
     void setExistingShipId(Id_t id);
+    void setQuery(ShipQuery q);
 
     void describeWeaponEffects(game::spec::info::WeaponEffects& result);
     void describeHullFunctionDetails(game::spec::info::AbilityDetails_t& result);
@@ -58,6 +59,21 @@ game::proxy::HullSpecificationProxy::Trampoline::setExistingShipId(Id_t id)
         const Turn* pTurn = pGame->getViewpointTurn().get();
         if (pTurn != 0) {
             m_query.initForExistingShip(pTurn->universe(), id, *pShipList, pRoot->hostConfiguration(), pGame->shipScores());
+            sendResponse(*pShipList, *pRoot, pTurn, *pGame);
+        }
+    }
+}
+
+void
+game::proxy::HullSpecificationProxy::Trampoline::setQuery(ShipQuery q)
+{
+    const Game* pGame         = m_session.getGame().get();
+    const ShipList* pShipList = m_session.getShipList().get();
+    const Root* pRoot         = m_session.getRoot().get();
+    if (pGame != 0 && pShipList != 0 && pRoot != 0) {
+        const Turn* pTurn = pGame->getViewpointTurn().get();
+        if (pTurn != 0) {
+            m_query = q;
             sendResponse(*pShipList, *pRoot, pTurn, *pGame);
         }
     }
@@ -190,6 +206,12 @@ void
 game::proxy::HullSpecificationProxy::setExistingShipId(Id_t id)
 {
     m_request.postRequest(&Trampoline::setExistingShipId, id);
+}
+
+void
+game::proxy::HullSpecificationProxy::setQuery(const ShipQuery& q)
+{
+    m_request.postRequest(&Trampoline::setQuery, q);
 }
 
 void

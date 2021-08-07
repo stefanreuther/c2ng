@@ -8,6 +8,7 @@
 #include "afl/base/signal.hpp"
 #include "game/playerset.hpp"
 #include "game/session.hpp"
+#include "game/shipquery.hpp"
 #include "game/spec/cost.hpp"
 #include "game/spec/info/picturenamer.hpp"
 #include "game/spec/info/types.hpp"
@@ -77,7 +78,10 @@ namespace game { namespace proxy {
             \param id Ship Id */
         void setExistingShipId(Id_t id);
 
-        // FIXME: setHullId() to show just a hull
+        /** Set ship query.
+            Proxy will eventually produce a sig_update callback with corresponding data.
+            \param q ShipQuery object */
+        void setQuery(const ShipQuery& q);
 
         /** Get weapon effects.
             Returns the weapon effects for the previously-configured ship.

@@ -47,8 +47,8 @@ namespace game {
                                  const game::config::HostConfiguration& config,
                                  const UnitScoreDefinitionList& scoreDefs);
 
-        /** Complete query.
-            If partial information has been given, completes the missing part from the given environment.
+        /** Complete query, full version.
+            If partial information has been given, completes the missing part from the given environment, for a ship that may exist in a universe.
             \param univ Universe (provides ship data)
             \param shipList Ship list (provides hull specs)
             \param config Host configuration (provides settings)
@@ -59,6 +59,17 @@ namespace game {
                       const game::config::HostConfiguration& config,
                       const UnitScoreDefinitionList& scoreDefs,
                       int defaultOwner);
+
+        /** Complete query, non-universe version.
+            If partial information has been given, completes the missing part from the given environment, for a new ship that does not exist in a universe.
+            \param shipList Ship list (provides hull specs)
+            \param config Host configuration (provides settings)
+            \param defaultOwner Default owner to use
+            \param level Experience level to use */
+        void complete(const game::spec::ShipList& shipList,
+                      const game::config::HostConfiguration& config,
+                      int defaultOwner,
+                      int16_t level);
 
         /** Enumerate ship functions.
             If this query describes an existing ship, enumerates that ship's functions.

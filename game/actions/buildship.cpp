@@ -139,6 +139,23 @@ game::actions::BuildShip::setBuildOrder(const ShipBuildOrder& o)
     update();
 }
 
+// Get current build order as ShipQuery.
+game::ShipQuery
+game::actions::BuildShip::getQuery() const
+{
+    // ex WShipBuildDialog::handleEvent (part)
+    int owner = 0;
+    planet().getOwner(owner);
+
+    ShipQuery q;
+    q.setHullType(m_order.getHullIndex());
+    q.setPlayerDisplaySet(PlayerSet_t(owner));
+    q.setEngineType(m_order.getEngineType());
+    q.setOwner(owner);
+    q.complete(shipList(), hostConfiguration(), owner, 0);
+    return q;
+}
+
 void
 game::actions::BuildShip::setPart(TechLevel area, int id)
 {

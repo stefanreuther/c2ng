@@ -8,6 +8,7 @@
 #include "afl/string/translator.hpp"
 #include "game/actions/basebuildaction.hpp"
 #include "game/shipbuildorder.hpp"
+#include "game/shipquery.hpp"
 #include "game/spec/component.hpp"
 #include "util/stringlist.hpp"
 
@@ -65,6 +66,10 @@ namespace game { namespace actions {
             The build order uses a hull Id (not truehull index).
             \param o New build order */
         void setBuildOrder(const ShipBuildOrder& o);
+
+        /** Get current build order as ShipQuery.
+            \return query */
+        ShipQuery getQuery() const;
 
         /** Set part type for a tech area.
             Note that validity of the Id is not verified.

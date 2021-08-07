@@ -6,6 +6,7 @@
 #include "client/dialogs/buildship.hpp"
 #include "afl/string/format.hpp"
 #include "client/dialogs/buildparts.hpp"
+#include "client/dialogs/hullspecification.hpp"
 #include "client/dialogs/specbrowserdialog.hpp"   // renderHullInformation
 #include "client/downlink.hpp"
 #include "client/picturenamer.hpp"
@@ -90,6 +91,7 @@ namespace {
         // UI actions
         void onBuild();
         void onDetailedBill();
+        void onHullSpecification();
         void onBuildParts();
         void onCancelBuild();
         void onToggleUseParts();
@@ -285,12 +287,19 @@ BuildShipDialog::buildDialog()
     // Hulls
     Group& hullGroup = del.addNew(new Group(ui::layout::HBox::instance5));
     Group& hullInfoGroup = del.addNew(new Group(ui::layout::HBox::instance0));
+    Group& hullButtonGroup = del.addNew(new Group(ui::layout::VBox::instance5));
     hullGroup.add(wrapComponentList(game::HullTech));
     hullGroup.add(makeStorageColumn(game::HullTech));
     hullInfoGroup.add(*m_pSpecificationDisplay[game::HullTech]);
+    hullInfoGroup.add(hullButtonGroup);
     hullGroup.add(hullInfoGroup);
     cards.add(hullGroup);
     tabs.addPage(util::KeyString(m_translator("Starship Hulls")), hullGroup);
+
+    Button& btnHullSpec = del.addNew(new Button("S", 's', m_root));
+    hullButtonGroup.add(btnHullSpec);
+    hullButtonGroup.add(del.addNew(new ui::Spacer()));
+    btnHullSpec.sig_fire.add(this, &BuildShipDialog::onHullSpecification);
 
     // Engines
     Group& engineGroup = del.addNew(new Group(ui::layout::HBox::instance5));
@@ -478,6 +487,17 @@ BuildShipDialog::onDetailedBill()
     m_root.centerWidget(win);
     m_root.add(win);
     loop.run();
+}
+
+void
+BuildShipDialog::onHullSpecification()
+{
+    // Get status
+    client::Downlink link(m_root, m_translator);
+    game::ShipQuery q = m_buildProxy.getQuery(link);
+
+    // Show it
+    client::dialogs::showHullSpecification(q, m_root, m_translator, m_gameSender);
 }
 
 /* "Build parts" button for current part */

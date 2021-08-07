@@ -1,10 +1,6 @@
 /**
   *  \file game/shipquery.cpp
   *  \brief Class game::ShipQuery
-  *
-  *  FIXME: think about making it possible to call enumerateShipFunctions without a universe.
-  *  PCC 2.0.5's solution is to make the parameter a pointer. This still links in the equivalent
-  *  of the game::map namespace into a program that won't generate a Universe object, ever.
   */
 
 #include "game/shipquery.hpp"
@@ -57,7 +53,7 @@ game::ShipQuery::initForExistingShip(const game::map::Universe& univ,
     complete(univ, shipList, config, scoreDefs, 0);
 }
 
-// Complete query.
+// Complete query, full version.
 void
 game::ShipQuery::complete(const game::map::Universe& univ,
                           const game::spec::ShipList& shipList,
@@ -67,8 +63,6 @@ game::ShipQuery::complete(const game::map::Universe& univ,
 {
     // ex GShipQuery::complete
     // ex shipacc.pas:FillHullFuncSelection
-
-    // FIXME: split this to get a second signature that takes no universe/scoreDefs for use e.g. in sim.
 
     /*
       Item                  Derived from
@@ -118,6 +112,16 @@ game::ShipQuery::complete(const game::map::Universe& univ,
         m_damage = sh->getDamage().orElse(0);
     }
 
+    complete(shipList, config, defaultOwner, level);
+}
+
+// Complete query, non-universe version.
+void
+game::ShipQuery::complete(const game::spec::ShipList& shipList,
+                          const game::config::HostConfiguration& config,
+                          int defaultOwner,
+                          int16_t level)
+{
     // Do we have an owner?
     if (m_owner <= 0) {
         // Try to derive from m_playerDisplaySet. FIXME: needed?

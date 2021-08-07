@@ -28,6 +28,7 @@ class game::proxy::BuildShipProxy::Trampoline {
 
     void packStatus(Status& st);
     void getCostSummary(game::spec::CostSummary& result);
+    void getQuery(ShipQuery& result);
 
     bool findShipCloningHere(Id_t& id, String_t& name);
     void cancelAllCloneOrders();
@@ -163,6 +164,12 @@ game::proxy::BuildShipProxy::Trampoline::getCostSummary(game::spec::CostSummary&
     m_action.getCostSummary(result);
 }
 
+inline void
+game::proxy::BuildShipProxy::Trampoline::getQuery(ShipQuery& result)
+{
+    result = m_action.getQuery();
+}
+
 inline bool
 game::proxy::BuildShipProxy::Trampoline::findShipCloningHere(Id_t& id, String_t& name)
 {
@@ -259,6 +266,26 @@ game::proxy::BuildShipProxy::getCostSummary(WaitIndicator& ind, game::spec::Cost
     };
     Task t(result);
     ind.call(m_sender, t);
+}
+
+game::ShipQuery
+game::proxy::BuildShipProxy::getQuery(WaitIndicator& ind)
+{
+    class Task : public util::Request<Trampoline> {
+     public:
+        Task(ShipQuery& result)
+            : m_result(result)
+            { }
+        virtual void handle(Trampoline& tpl)
+            { tpl.getQuery(m_result); }
+     private:
+        ShipQuery& m_result;
+    };
+
+    ShipQuery result;
+    Task t(result);
+    ind.call(m_sender, t);
+    return result;
 }
 
 bool

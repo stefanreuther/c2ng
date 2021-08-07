@@ -267,3 +267,16 @@ client::dialogs::showHullSpecificationForShip(game::Id_t shipId, ui::Root& root,
     proxy.setExistingShipId(shipId);
     dlg.run(tx("Ship Specification"));
 }
+
+void
+client::dialogs::showHullSpecification(const game::ShipQuery& q, ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::Session> gameSender)
+{
+    HullSpecificationProxy proxy(gameSender, root.engine().dispatcher(), std::auto_ptr<game::spec::info::PictureNamer>(new PictureNamer()));
+    Downlink link(root, tx);
+    Dialog dlg(proxy, root, tx, gameSender,
+               PlayerProxy(gameSender).getAllPlayers(link),
+               PlayerProxy(gameSender).getPlayerNames(link, game::Player::AdjectiveName),
+               ConfigurationProxy(gameSender).getNumberFormatter(link));
+    proxy.setQuery(q);
+    dlg.run(tx("Ship Specification"));
+}

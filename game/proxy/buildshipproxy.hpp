@@ -7,16 +7,17 @@
 
 #include <vector>
 #include "afl/base/signal.hpp"
+#include "afl/data/stringlist.hpp"
 #include "afl/string/string.hpp"
+#include "game/actions/buildship.hpp"
 #include "game/session.hpp"
+#include "game/shipquery.hpp"
 #include "game/spec/cost.hpp"
+#include "game/spec/costsummary.hpp"
 #include "game/types.hpp"
 #include "util/requestdispatcher.hpp"
 #include "util/requestreceiver.hpp"
 #include "util/requestsender.hpp"
-#include "afl/data/stringlist.hpp"
-#include "game/actions/buildship.hpp"
-#include "game/spec/costsummary.hpp"
 
 namespace game { namespace proxy {
 
@@ -57,7 +58,7 @@ namespace game { namespace proxy {
             int partTech;                             ///< Tech level of selected part.
             int availableTech;                        ///< Corresponding tech level of starbase.
 
-                                                      // Order
+            // Order
             ShipBuildOrder order;                     ///< Ship build order in raw form.
             afl::data::StringList_t description;      ///< Description of ship build order in textual form. @see game::ShipBuildOrder::describe()
             int numEngines;                           ///< Number of engines.
@@ -91,6 +92,12 @@ namespace game { namespace proxy {
             \param [in/out] ind    WaitIndicator for UI synchronisation
             \param [out]    result Result, containing cost breakdown in human-readable form  */
         void getCostSummary(WaitIndicator& ind, game::spec::CostSummary& result);
+
+        /** Get order as ShipQuery object.
+            \param [in/out] ind    WaitIndicator for UI synchronisation
+            \return ShipQuery object
+            \see game::actions::BuildShip::getQuery */
+        ShipQuery getQuery(WaitIndicator& ind);
 
         /** Find ship cloning at this planet.
             \param [in/out] ind    WaitIndicator for UI synchronisation

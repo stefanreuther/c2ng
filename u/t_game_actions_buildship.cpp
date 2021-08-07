@@ -187,6 +187,10 @@ TestGameActionsBuildShip::testSuccess()
     TS_ASSERT_EQUALS(a.getBuildOrder().getLauncherType(), 1);
     TS_ASSERT_EQUALS(a.getBuildOrder().getNumLaunchers(), 5);
 
+    // Verify ShipQuery
+    TS_ASSERT_EQUALS(a.getQuery().getHullType(), HULL_TYPE);
+    TS_ASSERT_EQUALS(a.getQuery().getOwner(), OWNER);
+
     // Verify cost:
     //  Hull            10T          15$
     //  Tech upgrade:               100$
@@ -687,7 +691,7 @@ TestGameActionsBuildShip::testBadHull()
     o.setHullIndex(30);          // Invalid index
     o.setEngineType(9);
     h.planet.setBaseBuildOrder(o);
-    
+
     game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root, h.tx);
 
     TS_ASSERT_EQUALS(a.getBuildOrder().getHullIndex(), HULL_TYPE);
@@ -707,7 +711,7 @@ TestGameActionsBuildShip::testBadEngine()
     o.setHullIndex(HULL_SLOT);
     o.setEngineType(19);       // Invalid type
     h.planet.setBaseBuildOrder(o);
-    
+
     game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root, h.tx);
 
     TS_ASSERT_EQUALS(a.getBuildOrder().getEngineType(), 1);
@@ -729,7 +733,7 @@ TestGameActionsBuildShip::testBadBeam()
     o.setNumBeams(1);
     o.setBeamType(20);        // Invalid type
     h.planet.setBaseBuildOrder(o);
-    
+
     game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root, h.tx);
 
     TS_ASSERT_EQUALS(a.getBuildOrder().getBeamType(), 1);
@@ -751,7 +755,7 @@ TestGameActionsBuildShip::testBadLauncher()
     o.setNumLaunchers(1);
     o.setLauncherType(20);        // Invalid type
     h.planet.setBaseBuildOrder(o);
-    
+
     game::actions::BuildShip a(h.planet, container, *h.shipList, *h.root, h.tx);
 
     TS_ASSERT_EQUALS(a.getBuildOrder().getLauncherType(), 1);
