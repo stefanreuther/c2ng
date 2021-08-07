@@ -5,6 +5,7 @@
 
 #include "client/dialogs/classicvcrobject.hpp"
 #include "afl/base/deleter.hpp"
+#include "client/dialogs/hullspecification.hpp"
 #include "client/downlink.hpp"
 #include "client/widgets/helpwidget.hpp"
 #include "client/widgets/vcrobjectinfo.hpp"
@@ -32,14 +33,15 @@ using ui::widgets::FrameGroup;
 namespace {
     class ClassicVcrObjectDialog : public gfx::KeyEventConsumer {
      public:
-        ClassicVcrObjectDialog(ui::Root& root, util::NumberFormatter fmt, afl::string::Translator& tx, VcrDatabaseProxy& proxy, size_t side, game::proxy::WaitIndicator& ind);
+        ClassicVcrObjectDialog(ui::Root& root, util::NumberFormatter fmt, afl::string::Translator& tx, util::RequestSender<game::Session> gameSender, VcrDatabaseProxy& proxy, size_t side, game::proxy::WaitIndicator& ind);
 
-        bool run(ui::Root& root, util::RequestSender<game::Session> gameSender);
+        bool run(ui::Root& root);
         void onSideUpdate(const VcrDatabaseProxy::SideInfo& info);
         void onHullUpdate(const VcrDatabaseProxy::HullInfo& info);
         void onTab();
         void onListScroll();
         void onGoTo();
+        void onHullSpecification();
 
         bool handleKey(util::Key_t key, int prefix);
         void setSide(size_t side);
@@ -54,14 +56,17 @@ namespace {
         ui::widgets::ImageButton m_image;
         client::widgets::VcrObjectInfo m_info;
         Button m_gotoButton;
+        Button m_specButton;
         ui::EventLoop m_loop;
 
         VcrDatabaseProxy& m_proxy;
         game::proxy::WaitIndicator& m_indicator;
         afl::string::Translator& m_translator;
         ui::Root& m_root;
+        util::RequestSender<game::Session> m_gameSender;
 
         game::Reference m_reference;
+        afl::base::Optional<game::ShipQuery> m_shipQuery;
 
         size_t m_side;
 
@@ -70,19 +75,22 @@ namespace {
     };
 }
 
-ClassicVcrObjectDialog::ClassicVcrObjectDialog(ui::Root& root, util::NumberFormatter fmt, afl::string::Translator& tx, VcrDatabaseProxy& proxy, size_t side, game::proxy::WaitIndicator& ind)
+ClassicVcrObjectDialog::ClassicVcrObjectDialog(ui::Root& root, util::NumberFormatter fmt, afl::string::Translator& tx, util::RequestSender<game::Session> gameSender, VcrDatabaseProxy& proxy, size_t side, game::proxy::WaitIndicator& ind)
     : m_nameWidget(String_t(), util::SkinColor::Static, "+", root.provider()),
       m_subtitleWidget(String_t(), util::SkinColor::Static, gfx::FontRequest(), root.provider()),
       m_hullList(root.provider(), root.colorScheme()),
       m_image(String_t(), 0, root, gfx::Point(105, 93)),
       m_info(false, fmt, tx, root.provider()),
       m_gotoButton(tx("Go to"), util::Key_Return, root),
+      m_specButton("S", 's', root),
       m_loop(root),
       m_proxy(proxy),
       m_indicator(ind),
       m_translator(tx),
       m_root(root),
+      m_gameSender(gameSender),
       m_reference(),
+      m_shipQuery(),
       m_side(side),
       conn_sideUpdate(proxy.sig_sideUpdate.add(this, &ClassicVcrObjectDialog::onSideUpdate)),
       conn_hullUpdate(proxy.sig_hullUpdate.add(this, &ClassicVcrObjectDialog::onHullUpdate))
@@ -95,10 +103,11 @@ ClassicVcrObjectDialog::ClassicVcrObjectDialog(ui::Root& root, util::NumberForma
     m_hullList.setPreferredHeight(3);
     m_hullList.sig_change.add(this, &ClassicVcrObjectDialog::onListScroll);
     m_gotoButton.sig_fire.add(this, &ClassicVcrObjectDialog::onGoTo);
+    m_specButton.sig_fire.add(this, &ClassicVcrObjectDialog::onHullSpecification);
 }
 
 bool
-ClassicVcrObjectDialog::run(ui::Root& root, util::RequestSender<game::Session> gameSender)
+ClassicVcrObjectDialog::run(ui::Root& root)
 {
     // ex WVcrInfo::WVcrInfo, WVcrInfo::init
     afl::string::Translator& tx = m_translator;
@@ -122,10 +131,17 @@ ClassicVcrObjectDialog::run(ui::Root& root, util::RequestSender<game::Session> g
     headGroup.add(FrameGroup::wrapWidget(del, root.colorScheme(), ui::LoweredFrame, m_image));
     headGroup.add(del.addNew(new ui::Spacer()));
     win.add(headGroup);
-    win.add(m_info);
+
+    Group& infoGroup = del.addNew(new Group(ui::layout::HBox::instance5));
+    Group& rightGroup = del.addNew(new Group(ui::layout::VBox::instance5));
+    rightGroup.add(del.addNew(new ui::Spacer()));
+    rightGroup.add(m_specButton);
+    infoGroup.add(m_info);
+    infoGroup.add(rightGroup);
+    win.add(infoGroup);
 
     ui::Widget& disp = del.addNew(new ui::widgets::KeyForwarder(*this));
-    ui::Widget& help = del.addNew(new client::widgets::HelpWidget(root, tx, gameSender, "pcc2:vcrinfo"));
+    ui::Widget& help = del.addNew(new client::widgets::HelpWidget(root, tx, m_gameSender, "pcc2:vcrinfo"));
     Group& buttons = del.addNew(new Group(ui::layout::HBox::instance5));
     Button& btnHelp  = del.addNew(new Button(tx("Help"), 'h', root));
     Button& btnAdd   = del.addNew(new Button(tx("Ins - Sim"), util::Key_Insert, root));
@@ -178,6 +194,9 @@ ClassicVcrObjectDialog::onHullUpdate(const VcrDatabaseProxy::HullInfo& info)
     } else {
         m_info.clear();
     }
+
+    m_shipQuery = info.shipQuery;
+    m_specButton.setState(ui::Widget::DisabledState, !m_shipQuery.isValid());
 }
 
 void
@@ -201,6 +220,14 @@ ClassicVcrObjectDialog::onGoTo()
 {
     if (m_reference.isSet()) {
         m_loop.stop(1);
+    }
+}
+
+void
+ClassicVcrObjectDialog::onHullSpecification()
+{
+    if (const game::ShipQuery* q = m_shipQuery.get()) {
+        client::dialogs::showHullSpecification(*q, m_root, m_translator, m_gameSender);
     }
 }
 
@@ -276,8 +303,8 @@ client::dialogs::doClassicVcrObjectInfoDialog(ui::Root& root, afl::string::Trans
     game::proxy::ConfigurationProxy configProxy(gameSender);
     Downlink link(root, tx);
 
-    ClassicVcrObjectDialog dlg(root, configProxy.getNumberFormatter(link), tx, proxy, side, link);
-    bool ok = dlg.run(root, gameSender);
+    ClassicVcrObjectDialog dlg(root, configProxy.getNumberFormatter(link), tx, gameSender, proxy, side, link);
+    bool ok = dlg.run(root);
     return ok ? dlg.getReference() : game::Reference();
 }
 

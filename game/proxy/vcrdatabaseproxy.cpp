@@ -168,6 +168,18 @@ game::proxy::VcrDatabaseProxy::Trampoline::requestHullInfo(size_t index, size_t 
                 describeShip(*info.shipInfo.get(), *obj, shipList, pHull,
                              b->isESBActive(root.hostConfiguration()), root.hostConfiguration(), tx,
                              root.userConfiguration().getNumberFormatter());
+
+                if (pHull != 0) {
+                    ShipQuery q;
+                    q.setHullType(hullType);
+                    q.setOwner(obj->getOwner());
+                    q.setPlayerDisplaySet(PlayerSet_t(obj->getOwner()));
+                    q.setLevelDisplaySet(ExperienceLevelSet_t(obj->getExperienceLevel()));
+                    q.setCombatMass(obj->getMass(), 0);
+                    q.setCrew(obj->getCrew());
+                    q.setDamage(obj->getDamage());
+                    info.shipQuery = q;
+                }
             }
         }
     }

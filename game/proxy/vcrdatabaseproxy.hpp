@@ -24,6 +24,7 @@
 #include "util/requestreceiver.hpp"
 #include "util/requestsender.hpp"
 #include "util/stringlist.hpp"
+#include "game/shipquery.hpp"
 
 namespace game { namespace proxy {
 
@@ -88,6 +89,7 @@ namespace game { namespace proxy {
             String_t imageName;                                     ///< Name of image.
             afl::base::Optional<game::vcr::PlanetInfo> planetInfo;  ///< Planet information, if this is a planet.
             afl::base::Optional<game::vcr::ShipInfo> shipInfo;      ///< Ship information, if this is a ship.
+            afl::base::Optional<ShipQuery> shipQuery;               ///< ShipQuery, if this is a ship.
         };
 
         /** Result for addToSimulation. */

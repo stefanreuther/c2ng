@@ -204,6 +204,7 @@ TestGameProxyVcrDatabaseProxy::testIt()
     TS_ASSERT(u.m_sideInfo.name.empty());
     TS_ASSERT(!u.m_hullInfo.planetInfo.isValid());
     TS_ASSERT(!u.m_hullInfo.shipInfo.isValid());
+    TS_ASSERT(!u.m_hullInfo.shipQuery.isValid());
 
     // setSide(false) -> sets m_sideInfo, but not m_hullInfo
     proxy.setSide(0, false);
@@ -220,20 +221,25 @@ TestGameProxyVcrDatabaseProxy::testIt()
 
     TS_ASSERT(!u.m_hullInfo.planetInfo.isValid());
     TS_ASSERT(!u.m_hullInfo.shipInfo.isValid());
+    TS_ASSERT(!u.m_hullInfo.shipQuery.isValid());
 
     // setHullType -> sets m_hullInfo
     proxy.setHullType(game::test::ANNIHILATION_HULL_ID);
     ind.processQueue();
     TS_ASSERT(!u.m_hullInfo.planetInfo.isValid());
     TS_ASSERT(u.m_hullInfo.shipInfo.isValid());
+    TS_ASSERT(u.m_hullInfo.shipQuery.isValid());
     TS_ASSERT_EQUALS(u.m_hullInfo.shipInfo.get()->engine.second, "6 engines");
     TS_ASSERT_EQUALS(u.m_hullInfo.imageName, "hull-53");
+    TS_ASSERT_EQUALS(u.m_hullInfo.shipQuery.get()->getHullType(), game::test::ANNIHILATION_HULL_ID);
+    TS_ASSERT_EQUALS(u.m_hullInfo.shipQuery.get()->getOwner(), 2);
 
     // setSide(true) -> replaces both m_hullInfo and m_sideInfo
     proxy.setSide(1, true);
     ind.processQueue();
     TS_ASSERT_EQUALS(u.m_sideInfo.name, "Bird");
     TS_ASSERT(u.m_hullInfo.shipInfo.isValid());
+    TS_ASSERT(!u.m_hullInfo.shipQuery.isValid());
     TS_ASSERT_EQUALS(u.m_hullInfo.shipInfo.get()->engine.second, "");
     TS_ASSERT_EQUALS(u.m_hullInfo.imageName, "obj-0-777");
 

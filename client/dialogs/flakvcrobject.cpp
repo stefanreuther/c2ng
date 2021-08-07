@@ -6,6 +6,7 @@
 #include "client/dialogs/flakvcrobject.hpp"
 #include "afl/base/deleter.hpp"
 #include "client/dialogs/classicvcrobject.hpp"
+#include "client/dialogs/hullspecification.hpp"
 #include "client/downlink.hpp"
 #include "client/widgets/combatunitlist.hpp"
 #include "client/widgets/helpwidget.hpp"
@@ -39,7 +40,7 @@ namespace {
 
     class Dialog : private gfx::KeyEventConsumer {
      public:
-        Dialog(ui::Root& root, afl::string::Translator& tx, VcrDatabaseProxy& proxy, util::NumberFormatter fmt);
+        Dialog(ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::Session> gameSender, VcrDatabaseProxy& proxy, util::NumberFormatter fmt);
 
         void init(game::proxy::WaitIndicator& ind, const game::vcr::BattleInfo& info);
         game::Reference run(ui::Widget& help);
@@ -48,6 +49,7 @@ namespace {
         void onSideUpdate(const VcrDatabaseProxy::SideInfo& info);
         void onHullUpdate(const VcrDatabaseProxy::HullInfo& info);
         void onGoTo();
+        void onHullSpecification();
         virtual bool handleKey(util::Key_t key, int prefix);
         void addToSimulation(bool after);
 
@@ -56,6 +58,7 @@ namespace {
         ui::Root& m_root;
         afl::string::Translator& m_translator;
         VcrDatabaseProxy& m_proxy;
+        util::RequestSender<game::Session> m_gameSender;
 
         // UI/Widgets
         CombatUnitList m_unitList;
@@ -64,11 +67,13 @@ namespace {
         ui::widgets::StaticText m_subtitleWidget;
         ui::widgets::ImageButton m_image;
         ui::widgets::Button m_gotoButton;
+        ui::widgets::Button m_specButton;
         ui::EventLoop m_loop;
 
         // Status
         int m_hullNr;
         game::Reference m_reference;
+        afl::base::Optional<game::ShipQuery> m_shipQuery;
 
         // Events
         afl::base::SignalConnection conn_sideUpdate;
@@ -77,25 +82,29 @@ namespace {
 }
 
 
-Dialog::Dialog(ui::Root& root, afl::string::Translator& tx, VcrDatabaseProxy& proxy, util::NumberFormatter fmt)
+Dialog::Dialog(ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::Session> gameSender, VcrDatabaseProxy& proxy, util::NumberFormatter fmt)
     : m_root(root),
       m_translator(tx),
       m_proxy(proxy),
+      m_gameSender(gameSender),
       m_unitList(root),
       m_objectInfo(true, fmt, tx, root.provider()),
       m_nameWidget(String_t(), util::SkinColor::Static, "+", root.provider()),
       m_subtitleWidget(String_t(), util::SkinColor::Static, gfx::FontRequest(), root.provider()),
       m_image(String_t(), 0, root, gfx::Point(105, 93)),
       m_gotoButton(tx("Go to"), util::Key_Return, root),
+      m_specButton("S", 's', root),
       m_loop(root),
       m_hullNr(0),
       m_reference(),
+      m_shipQuery(),
       conn_sideUpdate(proxy.sig_sideUpdate.add(this, &Dialog::onSideUpdate)),
       conn_hullUpdate(proxy.sig_hullUpdate.add(this, &Dialog::onHullUpdate))
 {
     m_nameWidget.setIsFlexible(true);
     m_subtitleWidget.setIsFlexible(true);
     m_gotoButton.sig_fire.add(this, &Dialog::onGoTo);
+    m_specButton.sig_fire.add(this, &Dialog::onHullSpecification);
     m_unitList.sig_change.add(this, &Dialog::onListScroll);
 }
 
@@ -162,6 +171,7 @@ Dialog::run(ui::Widget& help)
     ui::widgets::Button& btnClose = del.addNew(new ui::widgets::Button(m_translator("Close"),     util::Key_Escape, m_root));
     buttonGroup.add(btnHelp);
     buttonGroup.add(del.addNew(new ui::Spacer()));
+    buttonGroup.add(m_specButton);
     buttonGroup.add(btnIns);
     buttonGroup.add(m_gotoButton);
     buttonGroup.add(btnClose);
@@ -231,6 +241,9 @@ Dialog::onHullUpdate(const VcrDatabaseProxy::HullInfo& info)
     } else {
         m_objectInfo.clear();
     }
+
+    m_shipQuery = info.shipQuery;
+    m_specButton.setState(ui::Widget::DisabledState, !m_shipQuery.isValid());
 }
 
 /* "Go to" button */
@@ -239,6 +252,15 @@ Dialog::onGoTo()
 {
     if (m_reference.isSet()) {
         m_loop.stop(1);
+    }
+}
+
+/* "S" button */
+void
+Dialog::onHullSpecification()
+{
+    if (const game::ShipQuery* q = m_shipQuery.get()) {
+        client::dialogs::showHullSpecification(*q, m_root, m_translator, m_gameSender);
     }
 }
 
@@ -286,7 +308,7 @@ client::dialogs::doFlakVcrObjectInfoDialog(ui::Root& root,
 
     client::widgets::HelpWidget help(root, tx, gameSender, "pcc2:vcrinfo");
 
-    Dialog dlg(root, tx, proxy, fmt);
+    Dialog dlg(root, tx, gameSender, proxy, fmt);
     dlg.init(link, info);
     return dlg.run(help);
 }
