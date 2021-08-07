@@ -228,7 +228,9 @@ ui::widgets::TabBar::handleKey(util::Key_t key, int /*prefix*/)
     // Per-page keys
     for (size_t i = 0, n = m_tabs.size(); i < n; ++i) {
         TabInfo* pTab = m_tabs[i];
-        if (pTab->key == key || pTab->key == (key & ~util::KeyMod_Alt)) {
+        // Do not consume the key if it refers to the active page.
+        // This is required for the ship build screen, where the "S"tarship Hull page has a "S"pecification button.
+        if ((pTab->key == key || pTab->key == (key & ~util::KeyMod_Alt)) && i != getCurrentIndex()) {
             setCurrentIndex(i);
             return true;
         }
