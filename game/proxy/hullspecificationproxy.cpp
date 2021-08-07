@@ -35,6 +35,7 @@ class game::proxy::HullSpecificationProxy::Trampoline {
     void setExistingShipId(Id_t id);
 
     void describeWeaponEffects(game::spec::info::WeaponEffects& result);
+    void describeHullFunctionDetails(game::spec::info::AbilityDetails_t& result);
 
     void sendResponse(const ShipList& shipList, const Root& root, const Turn* pTurn, const Game& game);
     void packResponse(HullSpecification& result, const ShipList& shipList, const Root& root, const Turn* pTurn, const Game& game);
@@ -69,6 +70,25 @@ game::proxy::HullSpecificationProxy::Trampoline::describeWeaponEffects(game::spe
     const Root* pRoot         = m_session.getRoot().get();
     if (pShipList != 0 && pRoot != 0) {
         game::spec::info::describeWeaponEffects(result, m_query, *pShipList, *pRoot, m_session.translator());
+    }
+}
+
+void
+game::proxy::HullSpecificationProxy::Trampoline::describeHullFunctionDetails(game::spec::info::AbilityDetails_t& result)
+{
+    const Game* pGame         = m_session.getGame().get();
+    const ShipList* pShipList = m_session.getShipList().get();
+    const Root* pRoot         = m_session.getRoot().get();
+    const Turn* pTurn         = (pGame != 0 ? pGame->getViewpointTurn().get() : 0);
+    if (pGame != 0 && pShipList != 0 && pRoot != 0 && pTurn != 0) {
+        // Obtain list
+        game::spec::HullFunctionList hfList;
+        m_query.enumerateShipFunctions(hfList, pTurn->universe(), *pShipList, pRoot->hostConfiguration(), true);
+        hfList.simplify();
+        hfList.sortForNewShip(m_query.getPlayerDisplaySet());
+
+        // Format it
+        game::spec::info::describeHullFunctionDetails(result, hfList, &m_query, *pShipList, *m_picNamer, *pRoot, m_session.translator());
     }
 }
 
@@ -188,6 +208,28 @@ game::proxy::HullSpecificationProxy::describeWeaponEffects(WaitIndicator& ind, g
 
     // Clear
     result = game::spec::info::WeaponEffects();
+
+    // Retrieve result
+    Task t(result);
+    ind.call(m_request, t);
+}
+
+void
+game::proxy::HullSpecificationProxy::describeHullFunctionDetails(WaitIndicator& ind, game::spec::info::AbilityDetails_t& result)
+{
+    class Task : public util::Request<Trampoline> {
+     public:
+        Task(game::spec::info::AbilityDetails_t& result)
+            : m_result(result)
+            { }
+        virtual void handle(Trampoline& tpl)
+            { tpl.describeHullFunctionDetails(m_result); }
+     private:
+        game::spec::info::AbilityDetails_t& m_result;
+    };
+
+    // Clear
+    result.clear();
 
     // Retrieve result
     Task t(result);

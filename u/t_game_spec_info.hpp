@@ -54,6 +54,7 @@ class TestGameSpecInfoInfo : public CxxTest::TestSuite {
     void testDescribeWeaponEffectsPHostMixedFighters();
     void testDescribeWeaponEffectsPHostExp();
     void testDescribeWeaponEffectsPHostExpNonAC();
+    void testDescribeHullFunction();
 };
 
 class TestGameSpecInfoNullPictureNamer : public CxxTest::TestSuite {

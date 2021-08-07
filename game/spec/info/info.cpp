@@ -224,6 +224,65 @@ game::spec::info::describeHullFunctions(Abilities_t& out, const HullFunctionList
     }
 }
 
+// Describe a list of hull functions, detailed version.
+void
+game::spec::info::describeHullFunctionDetails(AbilityDetails_t& out, const HullFunctionList& hfList, const ShipQuery* pQuery, const ShipList& shipList, const PictureNamer& picNamer, const Root& root, afl::string::Translator& tx)
+{
+    for (HullFunctionList::Iterator_t it = hfList.begin(), e = hfList.end(); it != e; ++it) {
+        // Flags
+        AbilityFlags_t flags;
+        if (pQuery != 0) {
+            flags = getAbilityFlags(*it, shipList.basicHullFunctions(), *pQuery, root.hostConfiguration());
+        }
+
+        // Build result
+        AbilityDetail d;
+
+        // BasicHullFunction part
+        if (const BasicHullFunction* hf = shipList.basicHullFunctions().getFunctionById(it->getBasicFunctionId())) {
+            d.name        = hf->getName();
+            d.description = hf->getDescription();
+            d.explanation = hf->getExplanation();
+            d.pictureName = picNamer.getAbilityPicture(hf->getPictureName(), flags);
+            if (pQuery != 0) {
+                d.damageLimit = hf->getDamageLimit(pQuery->getOwner(), root.hostConfiguration());
+            }
+        } else {
+            d.description = Format(tx("Hull Function #%d"), it->getBasicFunctionId());
+        }
+
+        // HullFunction part
+        d.players     = it->getPlayers();
+        d.playerLimit = formatPlayerSet(d.players, root.playerList(), tx);
+        d.levels      = it->getLevels();
+        d.levelLimit  = formatExperienceLevelSet(d.levels, root.hostVersion(), root.hostConfiguration(), tx);
+
+        int level = 0;
+        while (level <= MAX_EXPERIENCE_LEVELS && !d.levels.contains(level)) {
+            ++level;
+        }
+        if (level > 0 && level <= MAX_EXPERIENCE_LEVELS) {
+            d.minimumExperience = root.hostConfiguration()[HostConfiguration::ExperienceLevels](level);
+        }
+
+        // Flags part
+        bool isUniversal = d.players.contains(root.playerList().getAllPlayers());
+        d.flags = flags;
+        d.kind  = (it->getKind() == HullFunction::AssignedToRace
+                   ? (isUniversal
+                      ? UniversalAbility
+                      : RacialAbility)
+                   : it->getKind() == HullFunction::AssignedToHull
+                   ? (isUniversal
+                      ? GlobalClassAbility
+                      : ClassAbility)
+                   : ShipAbility);
+
+        out.push_back(d);
+    }
+
+}
+
 void
 game::spec::info::describeEngine(PageContent& content, Id_t id, const ShipList& shipList, bool withCost, const PictureNamer& picNamer, const Root& root, int viewpointPlayer, afl::string::Translator& tx)
 {

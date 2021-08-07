@@ -9,6 +9,7 @@
 #include "afl/base/optional.hpp"
 #include "afl/bits/smallset.hpp"
 #include "afl/string/string.hpp"
+#include "game/experiencelevelset.hpp"
 #include "game/playerset.hpp"
 #include "game/types.hpp"
 #include "util/range.hpp"
@@ -81,6 +82,47 @@ namespace game { namespace spec { namespace info {
 
     /** List of abilities. */
     typedef std::vector<Ability> Abilities_t;
+
+    /** Ability kind. */
+    enum AbilityKind {
+        UniversalAbility,       ///< Universal (all ships, all players).
+        RacialAbility,          ///< Racial ability (all ships, some players).
+        GlobalClassAbility,     ///< Global class ability (some ships, all players).
+        ClassAbility,           ///< Class ability (some ships, some players).
+        ShipAbility             ///< Ship ability (this ship).
+    };
+
+    /** Ability details. Extended version of Ability. */
+    struct AbilityDetail {
+        // General
+        // from BasicHullFunction
+        String_t name;             ///< Name (machine use). \see BasicHullFunction::getName.
+        String_t description;      ///< Description. \see BasicHullFunction::getDescription().
+        String_t explanation;      ///< Explanation. \see BasicHullFunction::getExplanation().
+        String_t pictureName;      ///< Picture name. \see PictureNamer::getAbilityPicture, BasicHullFunction::getPictureName().
+        afl::base::Optional<int> damageLimit; ///< Damage limit. \see BasicHullFunction::getDamageLimit.
+
+        // from HullFunction
+        PlayerSet_t players;       ///< Player limit (machine use).
+        String_t playerLimit;      ///< Player limit (human-readable).
+        ExperienceLevelSet_t levels; ///< Level limit (machine use).
+        String_t levelLimit;       ///< Level limit (human-readable).
+        int32_t minimumExperience; ///< Minimum number of experience points.
+
+        // Flags
+        AbilityFlags_t flags;      ///< Flags.
+        AbilityKind kind;          ///< Ability kind.
+
+        AbilityDetail()
+            : name(), description(), explanation(), pictureName(), damageLimit(),
+              players(), playerLimit(), levels(), levelLimit(), minimumExperience(),
+              flags(), kind()
+            { }
+    };
+
+    /** List of ability details. */
+    typedef std::vector<AbilityDetail> AbilityDetails_t;
+
 
     /** Page content.
         Contains the human-readable information for an object. */

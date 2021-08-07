@@ -6,6 +6,7 @@
 #include "client/dialogs/hullspecification.hpp"
 #include "afl/string/format.hpp"
 #include "client/dialogs/helpdialog.hpp"
+#include "client/dialogs/hullfunctionview.hpp"
 #include "client/downlink.hpp"
 #include "client/picturenamer.hpp"
 #include "client/widgets/hullspecificationsheet.hpp"
@@ -244,9 +245,14 @@ Dialog::showWeaponEffects()
 void
 Dialog::showHullFunctionDetails()
 {
-    // FIXME
-}
+    // Retrieve data
+    client::Downlink link(m_root, m_translator);
+    game::spec::info::AbilityDetails_t details;
+    m_proxy.describeHullFunctionDetails(link, details);
 
+    // Show dialog
+    client::dialogs::showHullFunctions(details, m_root, m_gameSender, m_translator);
+}
 
 void
 client::dialogs::showHullSpecificationForShip(game::Id_t shipId, ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::Session> gameSender)

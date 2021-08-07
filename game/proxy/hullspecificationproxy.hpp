@@ -85,6 +85,11 @@ namespace game { namespace proxy {
             \param [out] result Result */
         void describeWeaponEffects(WaitIndicator& ind, game::spec::info::WeaponEffects& result);
 
+        /** Get hull function details.
+            \param [in]  ind    WaitIndicator for UI synchronisation
+            \param [out] result Result */
+        void describeHullFunctionDetails(WaitIndicator& ind, game::spec::info::AbilityDetails_t& result);
+
         /** Signal: ship data to show.
             \param data Data */
         afl::base::Signal<void(const HullSpecification&)> sig_update;

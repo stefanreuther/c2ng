@@ -49,10 +49,18 @@ namespace {
         h.setNumBays(0);
         h.setMaxLaunchers(3);
         h.setMaxBeams(8);
+        h.changeHullFunction(shipList->modifiedHullFunctions().getFunctionIdFromHostId(99),
+                             game::PlayerSet_t::allUpTo(game::MAX_PLAYERS),
+                             game::PlayerSet_t(),
+                             true);
 
         // Buildable by 1+4
         shipList->hullAssignments().add(1, 1, HULL_NR);
         shipList->hullAssignments().add(4, 7, HULL_NR);
+
+        // HullFunction
+        game::spec::BasicHullFunction* b = shipList->basicHullFunctions().addFunction(99, "Func");
+        b->setDescription("Func Desc");
 
         s.session().setShipList(shipList);
     }
@@ -74,7 +82,6 @@ namespace {
         Ship& sh = *h.session().getGame()->currentTurn().universe().ships().create(id);
         sh.setHull(HULL_NR);
     }
-
 
     struct UpdateReceiver {
         HullSpecificationProxy::HullSpecification result;
@@ -144,5 +151,10 @@ TestGameProxyHullSpecificationProxy::testIt()
     testee.describeWeaponEffects(ind, eff);
     TS_ASSERT_EQUALS(eff.mass, 150);
     TS_ASSERT_EQUALS(eff.fighterEffects.size(), 1U);
+
+    // Hull function details
+    game::spec::info::AbilityDetails_t ab;
+    testee.describeHullFunctionDetails(ind, ab);
+    TS_ASSERT(ab.size() >= 1U);
 }
 

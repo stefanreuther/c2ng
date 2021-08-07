@@ -48,6 +48,16 @@ namespace game { namespace spec { namespace info {
         \param [in]  tx               Translator */
     void describeHullFunctions(Abilities_t& out, const HullFunctionList& hfList, const ShipQuery* pQuery, const ShipList& shipList, const PictureNamer& picNamer, const Root& root, afl::string::Translator& tx);
 
+    /** Describe a list of hull functions, detailed version.
+        \param [out] out              Result produced here
+        \param [in]  hfList           Hull functions to describe
+        \param [in]  pQuery           Ship query (optional, to describe ability flags)
+        \param [in]  shipList         Ship list (for hull functions)
+        \param [in]  picNamer         Picture namer
+        \param [in]  root             Root (used for configuration, host version)
+        \param [in]  tx               Translator */
+    void describeHullFunctionDetails(AbilityDetails_t& out, const HullFunctionList& hfList, const ShipQuery* pQuery, const ShipList& shipList, const PictureNamer& picNamer, const Root& root, afl::string::Translator& tx);
+
     /** Describe an engine.
         Output is intended to be human-readable.
         \param [out] content          Result produced here

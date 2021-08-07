@@ -800,3 +800,120 @@ TestGameSpecInfoInfo::testDescribeWeaponEffectsPHostExpNonAC()
     TS_ASSERT_EQUALS(result.beamEffects[9].crewEffect,    1);
 }
 
+void
+TestGameSpecInfoInfo::testDescribeHullFunction()
+{
+    using game::spec::HullFunction;
+    using game::ExperienceLevelSet_t;
+    using game::PlayerSet_t;
+
+    // Environment
+    TestHarness h;
+    game::spec::BasicHullFunctionList& b = h.shipList.basicHullFunctions();
+    game::spec::BasicHullFunction* fCloak = b.addFunction(16, "Cloak");
+    fCloak->setDescription("cloaking device");
+    fCloak->setExplanation("it cloaks");
+    game::spec::BasicHullFunction* fBoarding = b.addFunction(31, "Boarding");
+    fBoarding->setDescription("tow-capture");
+    fBoarding->setExplanation("it boards!");
+    for (int i = 1; i <= 10; ++i) {
+        h.root.playerList().create(i);
+    }
+
+    h.root.hostConfiguration()[game::config::HostConfiguration::NumExperienceLevels].set(5);
+    h.root.hostConfiguration()[game::config::HostConfiguration::DamageLevelForCloakFail].set(10);
+
+    // HullFunctionList
+    game::spec::HullFunctionList hfList;
+    HullFunction a1(16, ExperienceLevelSet_t::allUpTo(game::MAX_EXPERIENCE_LEVELS));
+    a1.setPlayers(PlayerSet_t() + 5);
+    a1.setKind(HullFunction::AssignedToHull);
+    hfList.add(a1);
+    HullFunction a2(31, ExperienceLevelSet_t() + 3);
+    a2.setKind(HullFunction::AssignedToShip);
+    hfList.add(a2);
+
+    // describeHullFunctions()
+    {
+        gsi::Abilities_t out;
+        describeHullFunctions(out, hfList, 0, h.shipList, h.picNamer, h.root, h.tx);
+        TS_ASSERT_EQUALS(out.size(), 2U);
+        TS_ASSERT_EQUALS(out[0].info, "cloaking device (player 5)");
+        TS_ASSERT_EQUALS(out[1].info, "tow-capture (level 3; ship)");
+
+        TS_ASSERT(!out[0].flags.contains(game::spec::info::DamagedAbility));
+        TS_ASSERT(!out[0].flags.contains(game::spec::info::ForeignAbility));
+        TS_ASSERT(!out[0].flags.contains(game::spec::info::ReachableAbility));
+        TS_ASSERT(!out[0].flags.contains(game::spec::info::OutgrownAbility));
+    }
+
+    // describeHullFunctions() with query
+    {
+        game::ShipQuery q;
+        q.setDamage(20);
+        q.setOwner(2);
+
+        gsi::Abilities_t out;
+        describeHullFunctions(out, hfList, &q, h.shipList, h.picNamer, h.root, h.tx);
+        TS_ASSERT_EQUALS(out.size(), 2U);
+        TS_ASSERT_EQUALS(out[0].info, "cloaking device (player 5; damaged)");
+        TS_ASSERT_EQUALS(out[1].info, "tow-capture (level 3; ship)");
+
+        TS_ASSERT(out[0].flags.contains(game::spec::info::DamagedAbility));
+        TS_ASSERT(out[0].flags.contains(game::spec::info::ForeignAbility));
+        TS_ASSERT(!out[0].flags.contains(game::spec::info::ReachableAbility));
+        TS_ASSERT(!out[0].flags.contains(game::spec::info::OutgrownAbility));
+    }
+
+    // describeHullFunctionDetails()
+    {
+        gsi::AbilityDetails_t out;
+        describeHullFunctionDetails(out, hfList, 0, h.shipList, h.picNamer, h.root, h.tx);
+        TS_ASSERT_EQUALS(out.size(), 2U);
+        TS_ASSERT_EQUALS(out[0].name, "Cloak");
+        TS_ASSERT_EQUALS(out[0].description, "cloaking device");
+        TS_ASSERT_EQUALS(out[0].explanation, "it cloaks");
+        // damageLimit not known (but might be someday)
+        TS_ASSERT_EQUALS(out[0].playerLimit, "player 5");
+        TS_ASSERT_EQUALS(out[0].levelLimit, "");
+        TS_ASSERT_EQUALS(out[0].kind, game::spec::info::ClassAbility);
+
+        TS_ASSERT_EQUALS(out[1].name, "Boarding");
+        TS_ASSERT_EQUALS(out[1].description, "tow-capture");
+        TS_ASSERT_EQUALS(out[1].explanation, "it boards!");
+        TS_ASSERT_EQUALS(out[1].damageLimit.isValid(), false);
+        TS_ASSERT_EQUALS(out[1].playerLimit, "");
+        TS_ASSERT_EQUALS(out[1].levelLimit, "level 3");
+        TS_ASSERT_EQUALS(out[1].kind, game::spec::info::ShipAbility);
+    }
+
+    // describeHullFunctionDetails() with query
+    {
+        game::ShipQuery q;
+        q.setDamage(20);
+        q.setOwner(2);
+
+        gsi::AbilityDetails_t out;
+        describeHullFunctionDetails(out, hfList, &q, h.shipList, h.picNamer, h.root, h.tx);
+        TS_ASSERT_EQUALS(out.size(), 2U);
+        TS_ASSERT_EQUALS(out[0].name, "Cloak");
+        TS_ASSERT_EQUALS(out[0].description, "cloaking device");
+        TS_ASSERT_EQUALS(out[0].explanation, "it cloaks");
+        TS_ASSERT_EQUALS(out[0].damageLimit.orElse(-1), 10);
+        TS_ASSERT_EQUALS(out[0].playerLimit, "player 5");
+        TS_ASSERT_EQUALS(out[0].levelLimit, "");
+        TS_ASSERT_EQUALS(out[0].kind, game::spec::info::ClassAbility);
+        TS_ASSERT(out[0].flags.contains(game::spec::info::DamagedAbility));
+        TS_ASSERT_EQUALS(out[0].minimumExperience, 0);
+
+        TS_ASSERT_EQUALS(out[1].name, "Boarding");
+        TS_ASSERT_EQUALS(out[1].description, "tow-capture");
+        TS_ASSERT_EQUALS(out[1].explanation, "it boards!");
+        TS_ASSERT_EQUALS(out[1].damageLimit.isValid(), false);
+        TS_ASSERT_EQUALS(out[1].playerLimit, "");
+        TS_ASSERT_EQUALS(out[1].levelLimit, "level 3");
+        TS_ASSERT_EQUALS(out[1].kind, game::spec::info::ShipAbility);
+        TS_ASSERT_EQUALS(out[1].minimumExperience, 3000);
+    }
+}
+
