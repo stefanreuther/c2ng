@@ -11,17 +11,15 @@
 #include "ui/spacer.hpp"
 
 namespace {
-    class KeyPoster : public afl::base::Runnable {
+    class KeyPoster : public ui::Root::EventTask_t {
      public:
-        KeyPoster(ui::Root& p, util::Key_t key, int prefix)
-            : m_parent(p),
-              m_key(key),
+        KeyPoster(util::Key_t key, int prefix)
+            : m_key(key),
               m_prefix(prefix)
             { }
-        virtual void run()
-            { m_parent.handleKey(m_key, m_prefix); }
+        virtual void call(gfx::EventConsumer& c)
+            { c.handleKey(m_key, m_prefix); }
      private:
-        ui::Root& m_parent;
         util::Key_t m_key;
         int m_prefix;
     };
@@ -178,9 +176,9 @@ ui::Root::handleEvent()
     performDeferredRedraws();
 
     // Process an event
-    std::auto_ptr<afl::base::Runnable> t(m_localTaskQueue.extractFront());
+    std::auto_ptr<EventTask_t> t(m_localTaskQueue.extractFront());
     if (t.get() != 0) {
-        t->run();
+        t->call(*this);
     } else if (m_mouseEventRequested) {
         m_mouseEventRequested = false;
         handleMouse(m_mousePosition, m_mouseButtons);
@@ -193,9 +191,9 @@ void
 ui::Root::handleEventRelative(EventConsumer& consumer)
 {
     performDeferredRedraws();
-    std::auto_ptr<afl::base::Runnable> t(m_localTaskQueue.extractFront());
+    std::auto_ptr<EventTask_t> t(m_localTaskQueue.extractFront());
     if (t.get() != 0) {
-        t->run();
+        t->call(consumer);
     } else {
         m_engine.handleEvent(consumer, true);
     }
@@ -212,13 +210,13 @@ ui::Root::postMouseEvent()
 void
 ui::Root::postKeyEvent(util::Key_t key, int prefix)
 {
-    m_localTaskQueue.pushBackNew(new KeyPoster(*this, key, prefix));
+    m_localTaskQueue.pushBackNew(new KeyPoster(key, prefix));
 }
 
 void
 ui::Root::ungetKeyEvent(util::Key_t key, int prefix)
 {
-    m_localTaskQueue.pushFrontNew(new KeyPoster(*this, key, prefix));
+    m_localTaskQueue.pushFrontNew(new KeyPoster(key, prefix));
 }
 
 void

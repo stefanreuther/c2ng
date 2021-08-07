@@ -6,14 +6,15 @@
 #define C2NG_UI_ROOT_HPP
 
 #include <memory>
+#include "afl/base/closure.hpp"
 #include "afl/base/signal.hpp"
 #include "afl/container/ptrqueue.hpp"
 #include "gfx/engine.hpp"
 #include "gfx/multiclipfilter.hpp"
 #include "gfx/resourceprovider.hpp"
+#include "gfx/windowparameters.hpp"
 #include "ui/colorscheme.hpp"
 #include "ui/widget.hpp"
-#include "gfx/windowparameters.hpp"
 
 namespace ui {
 
@@ -42,6 +43,8 @@ namespace ui {
         There is no internal interlocking. */
     class Root : public Widget {
      public:
+        typedef afl::base::Closure<void(gfx::EventConsumer&)> EventTask_t;
+
         /** Constructor.
             \param engine Graphics engine
             \param provider Resource provider
@@ -179,7 +182,7 @@ namespace ui {
         afl::base::Ptr<gfx::Canvas> m_window;                              ///< Current engine window.
         std::auto_ptr<gfx::MultiClipFilter> m_filter;                      ///< List of dirty areas. Never null.
 
-        afl::container::PtrQueue<afl::base::Runnable> m_localTaskQueue;    ///< Local task queue. Contains local events.
+        afl::container::PtrQueue<EventTask_t> m_localTaskQueue;            ///< Local task queue. Contains local events.
 
         ColorScheme m_colorScheme;                                         ///< Color scheme (palette -> pixel mapping).
         gfx::ResourceProvider& m_provider;                                 ///< Resource provider.
