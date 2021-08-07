@@ -65,6 +65,7 @@ namespace {
         virtual void handleStateChange(client::si::RequestLink2 link, client::si::OutputState::Target target);
         virtual void handleEndDialog(client::si::RequestLink2 link, int code);
         virtual void handlePopupConsole(client::si::RequestLink2 link);
+        virtual void handleScanKeyboardMode(client::si::RequestLink2 link);
         virtual void handleSetViewRequest(client::si::RequestLink2 link, String_t name, bool withKeymap);
         virtual void handleUseKeymapRequest(client::si::RequestLink2 link, String_t name, int prefix);
         virtual void handleOverlayMessageRequest(client::si::RequestLink2 link, String_t text);
@@ -270,6 +271,12 @@ void
 UfoInfoDialog::handlePopupConsole(client::si::RequestLink2 link)
 {
     defaultHandlePopupConsole(link);
+}
+
+void
+UfoInfoDialog::handleScanKeyboardMode(client::si::RequestLink2 link)
+{
+    defaultHandleScanKeyboardMode(link);
 }
 
 void

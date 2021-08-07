@@ -414,6 +414,7 @@ Bind ControlScreen    "s-l"    := "CCUI.ListShips Chart.X, Chart.Y, 'a'"
 Bind ControlScreen    "l"      := "CCUI.ListShips UI.X, UI.Y, 'a'"
 Bind ControlScreen    "a-q"    := "CC$ProcessManager"
 Bind ControlScreen    "a-r"    := "CC$Reset Loc.X, Loc.Y"
+Bind ControlScreen    "y"      := "UI.ScanKeyboardMode"
 
 Bind AutoTaskScreen   "%"      := "CCUI.Task.ToggleComment"
 Bind AutoTaskScreen   "k"      := "CCUI.Task.ToggleComment"

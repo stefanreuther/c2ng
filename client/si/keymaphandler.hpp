@@ -43,7 +43,11 @@ namespace client { namespace si {
 
             /** UI.PopupConsole.
                 Call handlePopupConsole() with the link provided in the result. */
-            PopupConsole
+            PopupConsole,
+
+            /** UI.ScanKeyboardMode.
+                Call handleScanKeyboardMode() with the link provided in the result. */
+            ScanKeyboardMode
         };
 
         /** Result structure. */
@@ -85,6 +89,7 @@ namespace client { namespace si {
         virtual void handleStateChange(RequestLink2 link, OutputState::Target target);
         virtual void handleEndDialog(RequestLink2 link, int code);
         virtual void handlePopupConsole(RequestLink2 link);
+        virtual void handleScanKeyboardMode(RequestLink2 link);
         virtual void handleSetViewRequest(RequestLink2 link, String_t name, bool withKeymap);
         virtual void handleUseKeymapRequest(RequestLink2 link, String_t name, int prefix);
         virtual void handleOverlayMessageRequest(RequestLink2 link, String_t text);

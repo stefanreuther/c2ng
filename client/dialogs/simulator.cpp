@@ -229,6 +229,7 @@ namespace {
         virtual void handleStateChange(RequestLink2 link, OutputState::Target target);
         virtual void handleEndDialog(RequestLink2 link, int code);
         virtual void handlePopupConsole(RequestLink2 link);
+        virtual void handleScanKeyboardMode(RequestLink2 link);
         virtual void handleSetViewRequest(RequestLink2 link, String_t name, bool withKeymap);
         virtual void handleUseKeymapRequest(client::si::RequestLink2 link, String_t name, int prefix);
         virtual void handleOverlayMessageRequest(RequestLink2 link, String_t text);
@@ -449,6 +450,12 @@ void
 SimulatorDialog::handlePopupConsole(RequestLink2 link)
 {
     defaultHandlePopupConsole(link);
+}
+
+void
+SimulatorDialog::handleScanKeyboardMode(RequestLink2 link)
+{
+    defaultHandleScanKeyboardMode(link);
 }
 
 void

@@ -1910,6 +1910,8 @@ client::si::IFCCViewCombat(game::Session& session, ScriptSide& si, RequestLink1 
             { interface().continueProcess(link); }
         virtual void handlePopupConsole(RequestLink2 link)
             { interface().continueProcess(link); }
+        virtual void handleScanKeyboardMode(client::si::RequestLink2 link)
+            { defaultHandleScanKeyboardMode(link); }
         virtual void handleSetViewRequest(RequestLink2 link, String_t name, bool withKeymap)
             { defaultHandleSetViewRequest(link, name, withKeymap); }
         virtual void handleUseKeymapRequest(RequestLink2 link, String_t name, int prefix)
@@ -3332,6 +3334,23 @@ client::si::IFUIPopupConsole(game::Session& /*session*/, ScriptSide& si, Request
     si.postNewTask(link, new PopupConsoleTask());
 }
 
+/* @q UI.ScanKeyboardMode (Global Command)
+   On a control screen, activates movement of the scanner using the keyboard.
+   Fails with an error when called from another context.
+   @since PCC2 2.40.11 */
+void
+client::si::IFUIScanKeyboardMode(game::Session& /*session*/, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    args.checkArgumentCount(0);
+
+    class Task : public UserTask {
+     public:
+        virtual void handle(Control& ctl, RequestLink2 link)
+            { ctl.handleScanKeyboardMode(link); }
+    };
+    si.postNewTask(link, new Task());
+}
+
 /* @q UI.SelectionManager (Global Command)
    Open <a href="pcc2:selectionmgr">selection manager</a>.
    @since PCC2 1.99.10, PCC2 2.40.9 */
@@ -3611,6 +3630,7 @@ client::si::registerCommands(UserSide& ui)
                 s.world().setNewGlobalValue("UI.OVERLAYMESSAGE",     new ScriptProcedure(s, &si, IFUIOverlayMessage));
                 s.world().setNewGlobalValue("UI.PLANETINFO",         new ScriptProcedure(s, &si, IFUIPlanetInfo));
                 s.world().setNewGlobalValue("UI.POPUPCONSOLE",       new ScriptProcedure(s, &si, IFUIPopupConsole));
+                s.world().setNewGlobalValue("UI.SCANKEYBOARDMODE",   new ScriptProcedure(s, &si, IFUIScanKeyboardMode));
                 s.world().setNewGlobalValue("UI.SEARCH",             new ScriptProcedure(s, &si, IFUISearch));
                 s.world().setNewGlobalValue("UI.SELECTIONMANAGER",   new ScriptProcedure(s, &si, IFUISelectionManager));
                 s.world().setNewGlobalValue("UI.SHOWSCORES",         new ScriptProcedure(s, &si, IFUIShowScores));

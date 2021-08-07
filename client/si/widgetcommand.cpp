@@ -110,6 +110,8 @@ client::si::IFWidgetRun(game::Session& session, ScriptSide& ss, const WidgetRefe
                 // FIXME
                 interface().continueProcess(link);
             }
+        virtual void handleScanKeyboardMode(client::si::RequestLink2 link)
+            { defaultHandleScanKeyboardMode(link); }
         virtual void handleSetViewRequest(RequestLink2 link, String_t name, bool withKeymap)
             { defaultHandleSetViewRequest(link, name, withKeymap); }
         virtual void handleUseKeymapRequest(client::si::RequestLink2 link, String_t name, int prefix)

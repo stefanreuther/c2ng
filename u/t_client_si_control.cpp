@@ -31,6 +31,8 @@ namespace {
             { interface().continueProcess(link); }
         virtual void handlePopupConsole(client::si::RequestLink2 link)
             { interface().continueProcess(link); }
+        virtual void handleScanKeyboardMode(client::si::RequestLink2 link)
+            { interface().continueProcessWithFailure(link, "Context error"); }
         virtual void handleSetViewRequest(client::si::RequestLink2 link, String_t /*name*/, bool /*withKeymap*/)
             { interface().continueProcessWithFailure(link, "Context error"); }
         virtual void handleUseKeymapRequest(client::si::RequestLink2 link, String_t /*name*/, int /*prefix*/)

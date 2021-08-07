@@ -288,6 +288,8 @@ namespace {
             }
         virtual void handlePopupConsole(client::si::RequestLink2 link)
             { defaultHandlePopupConsole(link); }
+        virtual void handleScanKeyboardMode(client::si::RequestLink2 link)
+            { defaultHandleScanKeyboardMode(link); }
         virtual void handleEndDialog(client::si::RequestLink2 link, int /*code*/)
             { interface().continueProcess(link); }
         virtual void handleSetViewRequest(client::si::RequestLink2 link, String_t name, bool withKeymap)

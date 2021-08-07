@@ -131,6 +131,12 @@ client::dialogs::OutboxDialog::handlePopupConsole(client::si::RequestLink2 link)
 }
 
 void
+client::dialogs::OutboxDialog::handleScanKeyboardMode(client::si::RequestLink2 link)
+{
+    defaultHandleScanKeyboardMode(link);
+}
+
+void
 client::dialogs::OutboxDialog::handleSetViewRequest(client::si::RequestLink2 link, String_t name, bool withKeymap)
 {
     defaultHandleSetViewRequest(link, name, withKeymap);

@@ -76,6 +76,7 @@ namespace client { namespace si {
     void IFUIOverlayMessage(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     void IFUIPlanetInfo(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     void IFUIPopupConsole(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
+    void IFUIScanKeyboardMode(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     void IFUISelectionManager(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     void IFUISearch(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);
     void IFUIShowScores(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args);

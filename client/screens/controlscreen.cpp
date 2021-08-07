@@ -576,30 +576,6 @@ client::screens::ControlScreen::run(client::si::InputState& in, client::si::Outp
 
     ui::PrefixArgument prefix(root);
 
-    // Movement Mode Activator - temporary
-    class MoveModeActivator : public ui::InvisibleWidget {
-     public:
-        MoveModeActivator(client::map::MovementOverlay& mover,
-                          client::map::Widget& mapWidget)
-            : m_mover(mover), m_mapWidget(mapWidget)
-            { }
-        virtual bool handleKey(util::Key_t key, int /*prefix*/)
-            {
-                if (key == 'y') {
-                    m_mover.doKeyboardMode(m_mapWidget.renderer());
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-     private:
-        client::map::MovementOverlay& m_mover;
-        client::map::Widget& m_mapWidget;
-    };
-    MoveModeActivator mma(m_movementOverlay, m_mapWidget);
-    m_panel.add(mma);
-    // /MoveModeActivator
-
     m_panel.add(keys);
     m_panel.add(prefix);
     m_panel.add(mapGroup);
@@ -668,6 +644,13 @@ void
 client::screens::ControlScreen::handlePopupConsole(client::si::RequestLink2 link)
 {
     defaultHandlePopupConsole(link);
+}
+
+void
+client::screens::ControlScreen::handleScanKeyboardMode(client::si::RequestLink2 link)
+{
+    m_movementOverlay.doKeyboardMode(m_mapWidget.renderer());
+    interface().continueProcess(link);
 }
 
 void

@@ -123,6 +123,12 @@ client::dialogs::InboxDialog::handlePopupConsole(client::si::RequestLink2 link)
 }
 
 void
+client::dialogs::InboxDialog::handleScanKeyboardMode(client::si::RequestLink2 link)
+{
+    defaultHandleScanKeyboardMode(link);
+}
+
+void
 client::dialogs::InboxDialog::handleSetViewRequest(client::si::RequestLink2 link, String_t name, bool withKeymap)
 {
     defaultHandleSetViewRequest(link, name, withKeymap);

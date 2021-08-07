@@ -390,6 +390,13 @@ client::map::Screen::handlePopupConsole(client::si::RequestLink2 link)
 }
 
 void
+client::map::Screen::handleScanKeyboardMode(client::si::RequestLink2 link)
+{
+    // In the starchart, keyboard mode is always active.
+    interface().continueProcess(link);
+}
+
+void
 client::map::Screen::handleSetViewRequest(client::si::RequestLink2 link, String_t name, bool withKeymap)
 {
     setViewName(name);

@@ -49,6 +49,7 @@ namespace client { namespace si {
         virtual void handleStateChange(RequestLink2 link, OutputState::Target target) = 0;
         virtual void handleEndDialog(RequestLink2 link, int code) = 0;
         virtual void handlePopupConsole(RequestLink2 link) = 0;
+        virtual void handleScanKeyboardMode(RequestLink2 link) = 0;
         virtual void handleSetViewRequest(RequestLink2 link, String_t name, bool withKeymap) = 0;
         virtual void handleUseKeymapRequest(RequestLink2 link, String_t name, int prefix) = 0;
         virtual void handleOverlayMessageRequest(RequestLink2 link, String_t text) = 0;
@@ -56,6 +57,7 @@ namespace client { namespace si {
 
      protected:
         void defaultHandlePopupConsole(RequestLink2 link);
+        void defaultHandleScanKeyboardMode(RequestLink2 link);
         void defaultHandleSetViewRequest(RequestLink2 link, String_t name, bool withKeymap);
 
         void defaultHandleUseKeymapRequest(RequestLink2 link, String_t name, int prefix);

@@ -171,6 +171,15 @@ client::si::KeymapHandler::handlePopupConsole(RequestLink2 link)
 }
 
 void
+client::si::KeymapHandler::handleScanKeyboardMode(RequestLink2 link)
+{
+    // This is called if UseKeymap, UI.ScanKeyboardMode are called after another.
+    m_result.action = ScanKeyboardMode;
+    m_result.link = link;
+    m_loop.stop(0);
+}
+
+void
 client::si::KeymapHandler::handleSetViewRequest(RequestLink2 link, String_t name, bool withKeymap)
 {
     defaultHandleSetViewRequest(link, name, withKeymap);

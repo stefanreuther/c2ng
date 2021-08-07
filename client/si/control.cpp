@@ -186,6 +186,13 @@ client::si::Control::defaultHandlePopupConsole(RequestLink2 link)
 }
 
 void
+client::si::Control::defaultHandleScanKeyboardMode(RequestLink2 link)
+{
+    // Default behaviour for UI.ScanKeyboardMode is to reject it
+    interface().continueProcessWithFailure(link, "Context error");
+}
+
+void
 client::si::Control::defaultHandleSetViewRequest(RequestLink2 link, String_t /*name*/, bool /*withKeymap*/)
 {
     // Default behaviour for Chart.SetView is to reject it
@@ -210,6 +217,9 @@ client::si::Control::defaultHandleUseKeymapRequest(RequestLink2 link, String_t n
         break;
      case KeymapHandler::PopupConsole:
         handlePopupConsole(r.link);
+        break;
+     case KeymapHandler::ScanKeyboardMode:
+        handleScanKeyboardMode(r.link);
         break;
     }
 }
