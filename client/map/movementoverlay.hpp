@@ -10,6 +10,7 @@
 #include "game/map/point.hpp"
 #include "game/proxy/lockproxy.hpp"
 #include "game/session.hpp"
+#include "ui/root.hpp"
 #include "util/requestsender.hpp"
 
 namespace client { namespace map {
@@ -37,7 +38,7 @@ namespace client { namespace map {
         };
         typedef afl::bits::SmallSet<Mode> Modes_t;
 
-        MovementOverlay(util::RequestDispatcher& disp, util::RequestSender<game::Session> gameSender, Widget& parent);
+        MovementOverlay(util::RequestDispatcher& disp, util::RequestSender<game::Session> gameSender, Widget& parent, afl::string::Translator& tx);
         ~MovementOverlay();
 
         virtual void drawBefore(gfx::Canvas& can, const Renderer& ren);
@@ -55,6 +56,14 @@ namespace client { namespace map {
 
         void setLockOrigin(game::map::Point pt, bool isHyperdriving);
 
+        /** Perform keyboard movement mode.
+            This gives the containing Widget exclusive focus,
+            and lets the user move the pointer using the keyboard or the mouse.
+            This function returns when the user exits keyboard mode.
+
+            \param ren Renderer */
+        void doKeyboardMode(const Renderer& ren);
+
         afl::base::Signal<void(game::map::Point)> sig_move;
         afl::base::Signal<void(game::map::Point)> sig_doubleClick;
 
@@ -62,8 +71,11 @@ namespace client { namespace map {
         util::RequestSender<game::Session> m_gameSender;
         game::proxy::LockProxy m_lockProxy;
         Widget& m_parent;
+        afl::string::Translator& m_translator;
         Modes_t m_modes;
 
+        bool m_keyboardMode;
+        bool m_keyboardAdviceOnTop;
         bool m_valid;
         game::map::Point m_position;
 

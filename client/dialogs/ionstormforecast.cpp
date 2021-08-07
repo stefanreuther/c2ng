@@ -62,7 +62,7 @@ IonStormForecastDialog::IonStormForecastDialog(ui::Root& root, util::RequestSend
       m_translator(tx),
       m_mapWidget(gameSender, root, gfx::Point(450, 450)),  // FIXME: size
       m_scannerOverlay(root.colorScheme()),
-      m_movementOverlay(root.engine().dispatcher(), gameSender, m_mapWidget),
+      m_movementOverlay(root.engine().dispatcher(), gameSender, m_mapWidget, tx),
       m_forecastOverlay(root.colorScheme()),
       m_scanResult(root, gameSender, tx)
 { }

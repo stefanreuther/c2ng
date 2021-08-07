@@ -8,14 +8,20 @@
 #include "client/map/widget.hpp"
 #include "game/map/renderoptions.hpp"
 #include "game/proxy/drawingproxy.hpp"
+#include "gfx/complex.hpp"
+#include "gfx/context.hpp"
+#include "ui/prefixargument.hpp"
 
 using game::map::RenderOptions;
 
-client::map::MovementOverlay::MovementOverlay(util::RequestDispatcher& disp, util::RequestSender<game::Session> gameSender, Widget& parent)
+client::map::MovementOverlay::MovementOverlay(util::RequestDispatcher& disp, util::RequestSender<game::Session> gameSender, Widget& parent, afl::string::Translator& tx)
     : m_gameSender(gameSender),
       m_lockProxy(gameSender, disp),
       m_parent(parent),
+      m_translator(tx),
       m_modes(),
+      m_keyboardMode(false),
+      m_keyboardAdviceOnTop(true),
       m_valid(false),
       m_position()
 {
@@ -30,8 +36,41 @@ client::map::MovementOverlay::drawBefore(gfx::Canvas& /*can*/, const Renderer& /
 { }
 
 void
-client::map::MovementOverlay::drawAfter(gfx::Canvas& /*can*/, const Renderer& /*ren*/)
-{ }
+client::map::MovementOverlay::drawAfter(gfx::Canvas& can, const Renderer& ren)
+{
+    if (m_keyboardMode) {
+        // Text
+        String_t message = m_translator("Keyboard Mode");
+
+        // Compute dimensions
+        afl::base::Ref<gfx::Font> font(m_parent.root().provider().getFont("+"));
+        int height = font->getTextHeight(message) + 4;
+        int width = font->getTextWidth(message) + 10;
+
+        // Determine position
+        gfx::Rectangle extent(ren.getExtent());
+        gfx::Rectangle area(0, 0, width, height);
+        gfx::Point cursorPos(ren.scale(m_position));
+        if (m_keyboardAdviceOnTop) {
+            if (cursorPos.getY() < extent.getTopY() + extent.getHeight()/3) {
+                m_keyboardAdviceOnTop = false;
+            }
+        } else {
+            if (cursorPos.getY() > extent.getTopY() + 2*extent.getHeight()/3) {
+                m_keyboardAdviceOnTop = true;
+            }
+        }
+        area.moveToEdge(extent, gfx::CenterAlign, m_keyboardAdviceOnTop ? gfx::TopAlign : gfx::BottomAlign, 5);
+
+        // Draw
+        gfx::Context<uint8_t> ctx(can, m_parent.root().colorScheme());
+        drawSolidBar(ctx, area, ui::Color_Shield+2);
+        ctx.useFont(*font);
+        ctx.setTextAlign(gfx::CenterAlign, gfx::MiddleAlign);
+        ctx.setColor(ui::Color_White);
+        outTextF(ctx, area, message);
+    }
+}
 
 bool
 client::map::MovementOverlay::drawCursor(gfx::Canvas& /*can*/, const Renderer& /*ren*/)
@@ -42,7 +81,7 @@ client::map::MovementOverlay::drawCursor(gfx::Canvas& /*can*/, const Renderer& /
 bool
 client::map::MovementOverlay::handleKey(util::Key_t key, int prefix, const Renderer& ren)
 {
-    if (m_valid && m_modes.contains(AcceptMovementKeys)) {
+    if (m_valid && (m_modes.contains(AcceptMovementKeys) || m_keyboardMode)) {
         // ex WScannerChartWidget::handleKey
         switch (key) {
          case util::Key_Left:
@@ -119,7 +158,7 @@ client::map::MovementOverlay::handleKey(util::Key_t key, int prefix, const Rende
             return true;
         }
     }
-    if (m_valid && m_modes.contains(AcceptConfigKeys)) {
+    if (m_valid && (m_modes.contains(AcceptConfigKeys) || m_keyboardMode)) {
         // ex WScannerChartWidget::handleOption
         if ((key & util::KeyMod_Alt) != 0) {
             RenderOptions::Options_t opt = RenderOptions::getOptionFromKey(key & ~util::KeyMod_Alt & ~util::KeyMod_Ctrl);
@@ -196,6 +235,132 @@ void
 client::map::MovementOverlay::setLockOrigin(game::map::Point pt, bool isHyperdriving)
 {
     m_lockProxy.setOrigin(pt, isHyperdriving);
+}
+
+void
+client::map::MovementOverlay::doKeyboardMode(const Renderer& ren)
+{
+    // ex WScannerChartWidget::doKeyboardMode()
+    // Keyboard mode not available when there's no valid position
+    if (!m_valid) {
+        return;
+    }
+
+    // Avoid recursion
+    if (m_keyboardMode) {
+        return;
+    }
+
+    // Regular keyboard mode
+    class KeyboardModeHelper : public gfx::EventConsumer {
+     public:
+        KeyboardModeHelper(MovementOverlay& parent, const Renderer& ren)
+            : m_parent(parent),
+              m_renderer(ren),
+              m_pendingMouseMovement(),
+              m_running(true)
+            {
+                m_parent.m_keyboardMode = true;
+                m_parent.requestRedraw();
+            }
+        ~KeyboardModeHelper()
+            {
+                m_parent.m_keyboardMode = false;
+                m_parent.requestRedraw();
+            }
+        virtual bool handleKey(util::Key_t key, int prefix)
+            {
+                switch (key) {
+                    /* PCC 1's exit commands:
+                         1..9         prefix arg
+                         BS, ESC, y   regular exit
+                         x            exit + 'x'
+                         C-w          exit + C-w
+                         l            exit + 'l'
+                       We add some more. */
+                 case util::Key_Escape:
+                 case util::Key_Backspace:
+                 case 'y':
+                    m_running = false;
+                    return true;
+
+                 case util::Key_Quit:
+                 case util::Key_F1 + util::KeyMod_Ctrl:
+                 case util::Key_F2 + util::KeyMod_Ctrl:
+                 case util::Key_F3 + util::KeyMod_Ctrl:
+                 case util::Key_F4 + util::KeyMod_Ctrl:
+                 case util::Key_F5 + util::KeyMod_Ctrl:
+                 case 'x':
+                 case 'w' + util::KeyMod_Ctrl:
+                 case 'L':
+                 case 'l':
+                    m_running = false;
+                    m_parent.m_parent.root().ungetKeyEvent(key, prefix);
+                    return true;
+
+                 default:
+                    if (key >= '1' && key <= '9') {
+                        ui::PrefixArgument(m_parent.m_parent.root()).showPopup(key - '0');
+                        return true;
+                    } else {
+                        return m_parent.handleKey(key, prefix, m_renderer);
+                    }
+                }
+
+                if (key == util::Key_Escape) {
+                    m_running = false;
+                }
+                return true;
+            }
+        virtual bool handleMouse(gfx::Point pt, MouseButtons_t pressedButtons)
+            {
+                // Perform relative mouse movement
+                m_pendingMouseMovement += pt;
+                int dx = m_renderer.unscale(m_pendingMouseMovement.getX());
+                int dy = m_renderer.unscale(m_pendingMouseMovement.getY());
+                if (dx != 0 || dy != 0) {
+                    m_parent.moveBy(dx, -dy, m_renderer);
+                    m_pendingMouseMovement = gfx::Point();
+                }
+
+                // Find new position, by locking if needed
+                bool dbl   = pressedButtons.contains(gfx::EventConsumer::DoubleClick);
+                bool shift = pressedButtons.contains(gfx::EventConsumer::ShiftKey);
+                bool ctrl  = pressedButtons.contains(gfx::EventConsumer::CtrlKey);
+                pressedButtons -= gfx::EventConsumer::DoubleClick;
+                pressedButtons -= gfx::EventConsumer::ShiftKey;
+                pressedButtons -= gfx::EventConsumer::CtrlKey;
+
+                if (pressedButtons.contains(LeftButton)) {
+                    m_parent.lockItem(m_parent.m_position, true, ctrl, shift, m_renderer);
+                } else if (pressedButtons.contains(RightButton)) {
+                    m_parent.lockItem(m_parent.m_position, false, ctrl, shift, m_renderer);
+                } else {
+                    // nothing
+                }
+
+                // Double-click exits
+                if (dbl) {
+                    m_running = false;
+                }
+                return true;
+            }
+
+        bool isRunning() const
+            { return m_running; }
+
+     private:
+        MovementOverlay& m_parent;
+        const Renderer& m_renderer;
+        gfx::Point m_pendingMouseMovement;
+        bool m_running;
+    };
+
+
+    KeyboardModeHelper helper(*this, ren);
+    while (helper.isRunning()) {
+        m_parent.root().handleEventRelative(helper);
+    }
 }
 
 void

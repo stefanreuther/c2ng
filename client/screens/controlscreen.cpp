@@ -540,7 +540,7 @@ client::screens::ControlScreen::ControlScreen(Session& session, int nr, const De
       m_panel(ui::layout::HBox::instance5, 2),
       m_mapWidget(interface().gameSender(), root(), gfx::Point(300, 300)),
       m_scannerOverlay(root().colorScheme()),
-      m_movementOverlay(root().engine().dispatcher(), interface().gameSender(), m_mapWidget),
+      m_movementOverlay(root().engine().dispatcher(), interface().gameSender(), m_mapWidget, session.translator()),
       m_minefieldOverlay(root(), session.translator()),
       m_scanResult(root(), interface().gameSender(), translator()),
       m_center(),
@@ -575,6 +575,30 @@ client::screens::ControlScreen::run(client::si::InputState& in, client::si::Outp
     mapGroup.add(m_scanResult);
 
     ui::PrefixArgument prefix(root);
+
+    // Movement Mode Activator - temporary
+    class MoveModeActivator : public ui::InvisibleWidget {
+     public:
+        MoveModeActivator(client::map::MovementOverlay& mover,
+                          client::map::Widget& mapWidget)
+            : m_mover(mover), m_mapWidget(mapWidget)
+            { }
+        virtual bool handleKey(util::Key_t key, int /*prefix*/)
+            {
+                if (key == 'y') {
+                    m_mover.doKeyboardMode(m_mapWidget.renderer());
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+     private:
+        client::map::MovementOverlay& m_mover;
+        client::map::Widget& m_mapWidget;
+    };
+    MoveModeActivator mma(m_movementOverlay, m_mapWidget);
+    m_panel.add(mma);
+    // /MoveModeActivator
 
     m_panel.add(keys);
     m_panel.add(prefix);

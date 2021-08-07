@@ -293,7 +293,7 @@ NavChartDialog::NavChartDialog(ui::Root& root,
       m_result(result),
       m_mapWidget(us.gameSender(), root, gfx::Point(450, 450)),  // FIXME: size
       m_scannerOverlay(root.colorScheme()),
-      m_movementOverlay(root.engine().dispatcher(), us.gameSender(), m_mapWidget),
+      m_movementOverlay(root.engine().dispatcher(), us.gameSender(), m_mapWidget, tx),
       m_scanResult(root, us.gameSender(), tx),
       m_navChartOverlay(*this),
       m_chunnelButton(0)
