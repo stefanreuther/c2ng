@@ -31,7 +31,7 @@
 using afl::test::Assert;
 using afl::except::AssertionFailedException;
 
-class interpreter::test::ExpressionVerifier::TestContext : public SingleContext {
+class interpreter::test::ExpressionVerifier::TestContext : public SingleContext, public Context::PropertyAccessor {
  public:
     TestContext(ExpressionVerifier& parent)
         : m_parent(parent)

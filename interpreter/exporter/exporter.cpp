@@ -81,7 +81,7 @@ interpreter::exporter::Exporter::doExport(Context& ctx, util::AnswerProvider& fi
                 std::auto_ptr<afl::data::Value> value;
                 try {
                     Context::PropertyIndex_t adr;
-                    if (Context* foundContext = ctx.lookup(fields.getFieldName(i), adr)) {
+                    if (Context::PropertyAccessor* foundContext = ctx.lookup(fields.getFieldName(i), adr)) {
                         value.reset(foundContext->get(adr));
                     }
                 }

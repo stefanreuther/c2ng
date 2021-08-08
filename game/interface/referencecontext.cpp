@@ -88,12 +88,6 @@ game::interface::ReferenceContext::lookup(const afl::data::NameQuery& name, Prop
     return lookupName(name, REFERENCE_MAP, result) ? this : 0;
 }
 
-void
-game::interface::ReferenceContext::set(PropertyIndex_t /*index*/, const afl::data::Value* /*value*/)
-{
-    throw interpreter::Error::notAssignable();
-}
-
 afl::data::Value*
 game::interface::ReferenceContext::get(PropertyIndex_t index)
 {

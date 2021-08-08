@@ -23,7 +23,7 @@
 #include "interpreter/world.hpp"
 
 namespace {
-    class GlobalContextMock : public interpreter::SingleContext {
+    class GlobalContextMock : public interpreter::SingleContext, public interpreter::Context::PropertyAccessor {
      public:
         explicit GlobalContextMock(interpreter::World& world)
             : m_world(world)

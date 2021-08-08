@@ -275,11 +275,11 @@ namespace {
                 // Fetch plugin's Id and directory to produce a context
                 std::auto_ptr<afl::data::Value> tmp;
                 interpreter::Context::PropertyIndex_t index;
-                if (interpreter::Context* indexContext = plugContext->lookup("ID", index)) {
+                if (interpreter::Context::PropertyAccessor* indexContext = plugContext->lookup("ID", index)) {
                     tmp.reset(indexContext->get(index));
                     result.name = interpreter::toString(tmp.get(), false);
                 }
-                if (interpreter::Context* dirContext = plugContext->lookup("DIRECTORY", index)) {
+                if (interpreter::Context::PropertyAccessor* dirContext = plugContext->lookup("DIRECTORY", index)) {
                     tmp.reset(dirContext->get(index));
                     result.directory = interpreter::toString(tmp.get(), false);
                 }

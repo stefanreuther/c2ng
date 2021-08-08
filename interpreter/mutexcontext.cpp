@@ -36,25 +36,10 @@ interpreter::MutexContext::~MutexContext()
 // Context:
 
 /* Lookup implementation. Mutex has no properties. */
-interpreter::Context*
+interpreter::Context::PropertyAccessor*
 interpreter::MutexContext::lookup(const afl::data::NameQuery& /*name*/, PropertyIndex_t& /*result*/)
 {
     // ex IntMutexContext::lookup
-    return 0;
-}
-
-/* Set implementation. Mutex has no properties. */
-void
-interpreter::MutexContext::set(PropertyIndex_t /*index*/, const afl::data::Value* /*value*/)
-{
-    // ex IntMutexContext::set
-}
-
-/* Get implementation. Mutex has no properties. */
-afl::data::Value*
-interpreter::MutexContext::get(PropertyIndex_t /*index*/)
-{
-    // ex IntMutexContext::get
     return 0;
 }
 

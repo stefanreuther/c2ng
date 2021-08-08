@@ -123,13 +123,6 @@ game::interface::VcrContext::lookup(const afl::data::NameQuery& name, PropertyIn
     return lookupName(name, vcr_mapping, result) ? this : 0;
 }
 
-void
-game::interface::VcrContext::set(PropertyIndex_t /*index*/, const afl::data::Value* /*value*/)
-{
-    // ex IntVcrContext::set
-    throw interpreter::Error::notAssignable();
-}
-
 afl::data::Value*
 game::interface::VcrContext::get(PropertyIndex_t index)
 {

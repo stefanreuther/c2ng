@@ -74,7 +74,7 @@ namespace {
         int m_count;
     };
 
-    class MinGlobalContext : public interpreter::SingleContext {
+    class MinGlobalContext : public interpreter::SingleContext, public interpreter::Context::PropertyAccessor {
      public:
         explicit MinGlobalContext(interpreter::World& world)
             : m_world(world)

@@ -13,7 +13,7 @@ server::play::Packer::addValue(afl::data::Hash& hv, interpreter::Context& ctx, c
 {
     // ex server/objout.cc:writeValue
     interpreter::Context::PropertyIndex_t index;
-    interpreter::Context* pContext = ctx.lookup(scriptName, index);
+    interpreter::Context::PropertyAccessor* pContext = ctx.lookup(scriptName, index);
     if (pContext == 0) {
         // Name not found. Make this a hard error. (In PCC2, only a soft error.)
         throw std::runtime_error(afl::string::Format("Unable to resolve name \"%s\"", scriptName));

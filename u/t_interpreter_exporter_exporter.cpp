@@ -80,7 +80,7 @@ namespace {
         - provides object Ids up to 10
         - provides 4 properties A..D with values 1..4
         - references an ObjectVector and can provide objects from that */
-    class TestContext : public interpreter::Context {
+    class TestContext : public interpreter::Context, public interpreter::Context::ReadOnlyAccessor {
      public:
         TestContext(int id, game::map::ObjectVector<TestObject>& vec)
             : m_id(id),
@@ -88,8 +88,6 @@ namespace {
             { }
         virtual TestContext* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
             { return lookupName(name, TEST_MAP, result) ? this : 0; }
-        virtual void set(PropertyIndex_t /*index*/, const afl::data::Value* /*value*/)
-            { throw interpreter::Error::notAssignable(); }
         virtual afl::data::Value* get(PropertyIndex_t index)
             {
                 int32_t x = static_cast<int32_t>(TEST_MAP[index].index);

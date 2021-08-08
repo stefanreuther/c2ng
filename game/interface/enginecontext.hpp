@@ -10,7 +10,7 @@
 
 namespace game { namespace interface {
 
-    class EngineContext : public interpreter::Context {
+    class EngineContext : public interpreter::Context, public interpreter::Context::PropertyAccessor {
      public:
         EngineContext(int nr, afl::base::Ref<game::spec::ShipList> shipList);
         ~EngineContext();

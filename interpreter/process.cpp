@@ -82,7 +82,7 @@ interpreter::Process::Frame::~Frame()
 
 /** Local variables for an execution frame.
     Provides access to the local variables of an executing stack frame. */
-class interpreter::Process::FrameContext : public interpreter::SingleContext {
+class interpreter::Process::FrameContext : public SingleContext, public Context::PropertyAccessor {
  public:
     FrameContext(Process::Frame& frame)
         : m_frame(frame)
@@ -778,7 +778,7 @@ interpreter::Process::executeInstruction()
          case Opcode::sNamedVariable:
          {
              Context::PropertyIndex_t index;
-             if (Context* ctx = lookup(f.bco->getName(op.arg), index)) {
+             if (Context::PropertyAccessor* ctx = lookup(f.bco->getName(op.arg), index)) {
                  valueStack.pushBackNew(ctx->get(index));
              } else {
                  throw Error::unknownIdentifier(f.bco->getName(op.arg));
@@ -998,7 +998,7 @@ interpreter::Process::executeInstruction()
          case Opcode::sNamedVariable:
          {
              Context::PropertyIndex_t index;
-             if (Context* ctx = lookup(f.bco->getName(op.arg), index)) {
+             if (Context::PropertyAccessor* ctx = lookup(f.bco->getName(op.arg), index)) {
                  ctx->set(index, valueStack.top());
              } else {
                  throw Error::unknownIdentifier(f.bco->getName(op.arg));
@@ -1036,7 +1036,7 @@ interpreter::Process::executeInstruction()
          case Opcode::sNamedVariable:
          {
              Context::PropertyIndex_t index;
-             if (Context* ctx = lookup(f.bco->getName(op.arg), index)) {
+             if (Context::PropertyAccessor* ctx = lookup(f.bco->getName(op.arg), index)) {
                  ctx->set(index, valueStack.top());
                  valueStack.popBack();
              } else {
@@ -1082,7 +1082,7 @@ interpreter::Process::executeInstruction()
             } else if (Context* cv = dynamic_cast<Context*>(valueStack.top())) {
                 /* It's a context */
                 Context::PropertyIndex_t index;
-                if (Context* foundContext = cv->lookup(f.bco->getName(op.arg), index)) {
+                if (Context::PropertyAccessor* foundContext = cv->lookup(f.bco->getName(op.arg), index)) {
                     /* Load permitted */
                     afl::data::Value* v = foundContext->get(index);
                     valueStack.popBack();
@@ -1108,7 +1108,7 @@ interpreter::Process::executeInstruction()
             if (Context* cv = dynamic_cast<Context*>(valueStack.top())) {
                 /* It's a context */
                 Context::PropertyIndex_t index;
-                if (Context* foundContext = cv->lookup(f.bco->getName(op.arg), index)) {
+                if (Context::PropertyAccessor* foundContext = cv->lookup(f.bco->getName(op.arg), index)) {
                     /* Assignment permitted */
                     foundContext->set(index, valueStack.top(1));
                 } else {
@@ -1473,14 +1473,14 @@ interpreter::Process::suspendForUI()
 }
 
 // Look up value.
-interpreter::Context*
+interpreter::Context::PropertyAccessor*
 interpreter::Process::lookup(const afl::data::NameQuery& q, Context::PropertyIndex_t& index)
 {
     // ex IntExecutionContext::lookup
     // ex ccexpr.pas:ResolveName (part)
     for (size_t i = m_contexts.size(); i > 0; --i) {
         Context* c = m_contexts[i-1];
-        if (Context* fc = c->lookup(q, index)) {
+        if (Context::PropertyAccessor* fc = c->lookup(q, index)) {
             return fc;
         }
     }
@@ -1493,7 +1493,7 @@ interpreter::Process::setVariable(String_t name, afl::data::Value* value)
     // ex IntExecutionContext::setVariable
     try {
         Context::PropertyIndex_t index;
-        if (Context* ctx = lookup(name, index)) {
+        if (Context::PropertyAccessor* ctx = lookup(name, index)) {
             ctx->set(index, value);
             return true;
         }
@@ -1508,7 +1508,7 @@ interpreter::Process::getVariable(String_t name)
 {
     // ex IntExecutionContext::getVariable
     Context::PropertyIndex_t index;
-    if (Context* ctx = lookup(name, index)) {
+    if (Context::PropertyAccessor* ctx = lookup(name, index)) {
         return ctx->get(index);
     } else {
         return 0;

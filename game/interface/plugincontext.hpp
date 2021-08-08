@@ -9,14 +9,13 @@
 
 namespace game { namespace interface {
 
-    class PluginContext : public interpreter::Context {
+    class PluginContext : public interpreter::Context, public interpreter::Context::ReadOnlyAccessor {
      public:
         PluginContext(String_t name, Session& session);
         ~PluginContext();
 
         // Context:
         virtual PluginContext* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
-        virtual void set(PropertyIndex_t index, const afl::data::Value* value);
         virtual afl::data::Value* get(PropertyIndex_t index);
         virtual bool next();
         virtual PluginContext* clone() const;

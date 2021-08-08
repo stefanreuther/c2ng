@@ -44,6 +44,7 @@ namespace {
     /* Meta-context for generating field names. Used to implement '-F'. */
     // FIXME: move into library
     class MetaContext : public interpreter::Context,
+                        public interpreter::Context::ReadOnlyAccessor,
                         public interpreter::PropertyAcceptor
     {
      public:
@@ -51,7 +52,6 @@ namespace {
 
         // Context:
         virtual MetaContext* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
-        virtual void set(PropertyIndex_t index, const afl::data::Value* value);
         virtual afl::data::Value* get(PropertyIndex_t index);
         virtual bool next();
         virtual MetaContext* clone() const;
@@ -87,11 +87,6 @@ namespace {
     MetaContext* MetaContext::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
     {
         return lookupName(name, meta_mapping, result) ? this : 0;
-    }
-
-    void MetaContext::set(PropertyIndex_t /*index*/, const afl::data::Value* /*value*/)
-    {
-        throw interpreter::Error::notAssignable();
     }
 
     afl::data::Value* MetaContext::get(PropertyIndex_t index)

@@ -51,6 +51,7 @@ game::interface::TorpedoContext::lookup(const afl::data::NameQuery& name, Proper
     // ex IntTorpedoContext::lookup, IntLauncherContext::lookup
     return lookupName(name, torpedo_map, result) ? this : 0;
 }
+
 void
 game::interface::TorpedoContext::set(PropertyIndex_t index, const afl::data::Value* value)
 {

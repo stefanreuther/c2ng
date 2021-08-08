@@ -12,7 +12,7 @@
 
 namespace game { namespace interface {
 
-    class MinefieldContext : public interpreter::Context {
+    class MinefieldContext : public interpreter::Context, public interpreter::Context::PropertyAccessor {
      public:
         MinefieldContext(int id, afl::base::Ref<Root> root, afl::base::Ref<Game> game);
         ~MinefieldContext();

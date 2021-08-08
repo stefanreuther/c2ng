@@ -98,15 +98,15 @@ TestInterpreterHashValue::testUnit()
 
     // - verify the properties published by this context
     interpreter::Context::PropertyIndex_t keyIndex;
-    interpreter::Context* keyContext = p->lookup("KEY", keyIndex);
+    interpreter::Context::PropertyAccessor* keyContext = p->lookup("KEY", keyIndex);
     TS_ASSERT(keyContext != 0);
 
     interpreter::Context::PropertyIndex_t valueIndex;
-    interpreter::Context* valueContext = p->lookup("VALUE", valueIndex);
+    interpreter::Context::PropertyAccessor* valueContext = p->lookup("VALUE", valueIndex);
     TS_ASSERT(valueContext != 0);
 
     interpreter::Context::PropertyIndex_t otherIndex;
-    interpreter::Context* otherContext = p->lookup("OTHER", otherIndex);
+    interpreter::Context::PropertyAccessor* otherContext = p->lookup("OTHER", otherIndex);
     TS_ASSERT(otherContext == 0);
 
     // - verify read access to the properties
@@ -226,14 +226,14 @@ TestInterpreterHashValue::testMulti()
     do {
         // Get key
         interpreter::Context::PropertyIndex_t keyIndex;
-        interpreter::Context* keyContext = p->lookup("KEY", keyIndex);
+        interpreter::Context::PropertyAccessor* keyContext = p->lookup("KEY", keyIndex);
         TS_ASSERT(keyContext != 0);
         std::auto_ptr<afl::data::Value> keyValue(keyContext->get(keyIndex));
         TS_ASSERT(keyValue.get() != 0);
 
         // Get value
         interpreter::Context::PropertyIndex_t valueIndex;
-        interpreter::Context* valueContext = p->lookup("VALUE", valueIndex);
+        interpreter::Context::PropertyAccessor* valueContext = p->lookup("VALUE", valueIndex);
         TS_ASSERT(valueContext != 0);
         std::auto_ptr<afl::data::Value> valueValue(valueContext->get(valueIndex));
 

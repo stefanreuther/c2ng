@@ -1,11 +1,12 @@
 /**
   *  \file interpreter/context.hpp
+  *  \brief Class interpreter::Context
   */
 #ifndef C2NG_INTERPRETER_CONTEXT_HPP
 #define C2NG_INTERPRETER_CONTEXT_HPP
 
-#include "game/map/object.hpp"
 #include "afl/data/namequery.hpp"
+#include "game/map/object.hpp"
 #include "interpreter/basevalue.hpp"
 
 namespace interpreter {
@@ -13,28 +14,40 @@ namespace interpreter {
     class PropertyAcceptor;
 
     /** Context for name lookup.
-        A context provides a means for looking up and dealing with local names, and possibly iteration through objects.
-
-        FIXME: it makes sense to split lookup() and set()/get() into different classes now */
+        A context provides a means for looking up and dealing with local names, and possibly iteration through objects. */
     class Context : public BaseValue {
      public:
         /** Index for a property. */
         typedef size_t PropertyIndex_t;
 
+        /** Property accessor.
+            Used as return value from lookup().
+            Not intended to control lifetime of objects. */
+        class PropertyAccessor {
+         public:
+            /** Set value by its index.
+                \param index Property index
+                \param value New value. The parameter is owned by the caller; this function must copy it if needed. */
+            virtual void set(PropertyIndex_t index, const afl::data::Value* value) = 0;
+
+            /** Get value by its index.
+                The returned value must be newly allocated, caller assumes responsibility. */
+            virtual afl::data::Value* get(PropertyIndex_t index) = 0;
+        };
+
+        /** Read-only property accessor.
+            Implements set() by refusing the call. */
+        class ReadOnlyAccessor : public PropertyAccessor {
+         public:
+            virtual void set(PropertyIndex_t index, const afl::data::Value* value);
+        };
+
+
         /** Look up a symbol by its name.
             \param name [in] Name query
             \param result [out] On success, property index
-            \return non-null context if found (can be a different one than this one), null on failure. */
-        virtual Context* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result) = 0;
-
-        /** Set value by its index.
-            \param index Property index
-            \param value New value. The parameter is owned by the caller; this function must copy it if needed. */
-        virtual void set(PropertyIndex_t index, const afl::data::Value* value) = 0;
-
-        /** Get value by its index.
-            The returned value must be newly allocated, caller assumes responsibility. */
-        virtual afl::data::Value* get(PropertyIndex_t index) = 0;
+            \return non-null PropertyAccessor if found, null on failure. */
+        virtual PropertyAccessor* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result) = 0;
 
         /** Advance to next object.
             Return true on success, false on failure. */

@@ -18,7 +18,7 @@ namespace interpreter {
 
         This type provides integration with the remainder of the interpreter.
         In this case, this is the implementation of Context methods, making "With sv" or "sv->member" operations work. */
-    class StructureValue : public SingleContext {
+    class StructureValue : public SingleContext, public Context::PropertyAccessor {
      public:
         /** Constructor.
             \param value Structure value */

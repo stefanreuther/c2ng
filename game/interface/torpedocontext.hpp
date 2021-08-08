@@ -12,7 +12,7 @@
 
 namespace game { namespace interface {
 
-    class TorpedoContext : public interpreter::Context {
+    class TorpedoContext : public interpreter::Context, public interpreter::Context::PropertyAccessor {
      public:
         TorpedoContext(bool useLauncher, int nr, afl::base::Ref<game::spec::ShipList> shipList, afl::base::Ref<game::Root> root);
         ~TorpedoContext();

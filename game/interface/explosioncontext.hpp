@@ -11,14 +11,13 @@
 
 namespace game { namespace interface {
 
-    class ExplosionContext : public interpreter::Context {
+    class ExplosionContext : public interpreter::Context, public interpreter::Context::ReadOnlyAccessor {
      public:
         ExplosionContext(Id_t id, Session& session, afl::base::Ref<Turn> turn);
         ~ExplosionContext();
 
         // Context:
         virtual ExplosionContext* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
-        virtual void set(PropertyIndex_t index, const afl::data::Value* value);
         virtual afl::data::Value* get(PropertyIndex_t index);
         virtual bool next();
         virtual ExplosionContext* clone() const;

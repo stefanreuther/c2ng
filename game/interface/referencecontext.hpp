@@ -30,7 +30,7 @@ namespace game { namespace interface {
     };
 
     /** Reference context: publish properties of a game::Reference. */
-    class ReferenceContext : public interpreter::SingleContext {
+    class ReferenceContext : public interpreter::SingleContext, public interpreter::Context::ReadOnlyAccessor {
      public:
         /** Constructor.
             \param ref Reference to publish
@@ -42,7 +42,6 @@ namespace game { namespace interface {
 
         // Context:
         virtual ReferenceContext* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
-        virtual void set(PropertyIndex_t index, const afl::data::Value* value);
         virtual afl::data::Value* get(PropertyIndex_t index);
         virtual ReferenceContext* clone() const;
         virtual game::map::Object* getObject();

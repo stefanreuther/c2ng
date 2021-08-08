@@ -206,13 +206,6 @@ game::interface::InboxContext::lookup(const afl::data::NameQuery& name, Property
     return lookupName(name, MSG_MAPPING, result) ? this : 0;
 }
 
-void
-game::interface::InboxContext::set(PropertyIndex_t /*index*/, const afl::data::Value* /*value*/)
-{
-    // ex IntMessageContext::set
-    throw Error::notAssignable();
-}
-
 afl::data::Value*
 game::interface::InboxContext::get(PropertyIndex_t index)
 {

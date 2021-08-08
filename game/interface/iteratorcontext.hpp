@@ -17,7 +17,7 @@ namespace game {
 
 namespace game { namespace interface {
 
-    class IteratorContext : public interpreter::SingleContext {
+    class IteratorContext : public interpreter::SingleContext, public interpreter::Context::PropertyAccessor {
      public:
         IteratorContext(afl::base::Ref<IteratorProvider> provider);
         ~IteratorContext();

@@ -76,12 +76,8 @@ namespace {
         SingularObjectContext(game::map::Object* pObject)
             : m_pObject(pObject)
             { }
-        virtual interpreter::Context* lookup(const afl::data::NameQuery& /*name*/, PropertyIndex_t& /*result*/)
+        virtual PropertyAccessor* lookup(const afl::data::NameQuery& /*name*/, PropertyIndex_t& /*result*/)
             { return 0; }
-        virtual void set(PropertyIndex_t /*index*/, const afl::data::Value* /*value*/)
-            { TS_FAIL("SingularObjectContext::set unexpected"); }
-        virtual afl::data::Value* get(PropertyIndex_t /*index*/)
-            { TS_FAIL("SingularObjectContext::get unexpected"); return 0; }
         virtual bool next()
             { TS_FAIL("SingularObjectContext::next unexpected"); return false; }
         virtual Context* clone() const
@@ -102,14 +98,14 @@ namespace {
        We don't expect this context to be copied or examined in another way.
        It only provides a single variable.
        (Turns out that optionally allowing cloning is helpful.) */
-    class SingularVariableContext : public interpreter::Context {
+    class SingularVariableContext : public interpreter::Context, public interpreter::Context::PropertyAccessor {
      public:
         SingularVariableContext(String_t name, String_t& value)
             : m_name(name), m_value(value), m_clonable(false)
             { }
         void makeClonable()
             { m_clonable = true; }
-        virtual interpreter::Context* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
+        virtual interpreter::Context::PropertyAccessor* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
             {
                 if (name.match(m_name)) {
                     result = 77;
@@ -151,12 +147,12 @@ namespace {
 
     /* Counting context.
        Exposes a single variable whose value changes with next(). */
-    class CountingContext : public interpreter::Context {
+    class CountingContext : public interpreter::Context, public interpreter::Context::PropertyAccessor {
      public:
         CountingContext(String_t name, int32_t value)
             : m_name(name), m_value(value)
             { }
-        virtual interpreter::Context* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
+        virtual interpreter::Context::PropertyAccessor* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
             {
                 if (name.match(m_name)) {
                     result = 66;

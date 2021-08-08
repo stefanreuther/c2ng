@@ -13,7 +13,7 @@ TestInterpreterContextProvider::testInterface()
 {
     class Tester : public interpreter::ContextProvider {
      public:
-        virtual interpreter::Context* lookup(const afl::data::NameQuery& /*q*/, interpreter::Context::PropertyIndex_t& /*index*/)
+        virtual interpreter::Context::PropertyAccessor* lookup(const afl::data::NameQuery& /*q*/, interpreter::Context::PropertyIndex_t& /*index*/)
             { return 0; }
     };
     Tester t;

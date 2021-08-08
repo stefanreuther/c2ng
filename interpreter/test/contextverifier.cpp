@@ -57,7 +57,7 @@ interpreter::test::ContextVerifier::verifyTypes() const
         // Look up
         const Assert me(m_assert(it->first));
         Context::PropertyIndex_t index;
-        Context*const foundContext = m_context.lookup(it->first, index);
+        Context::PropertyAccessor*const foundContext = m_context.lookup(it->first, index);
         me.check("lookup failure", foundContext != 0);
 
         // Get. If it's non-null, it must be valid.
@@ -120,7 +120,7 @@ interpreter::test::ContextVerifier::verifyInteger(const char* name, int value) c
 
     // Look up
     Context::PropertyIndex_t index;
-    Context* foundContext = m_context.lookup(name, index);
+    Context::PropertyAccessor* foundContext = m_context.lookup(name, index);
     me.check("lookup", foundContext != 0);
 
     // Get it
@@ -139,7 +139,7 @@ interpreter::test::ContextVerifier::verifyBoolean(const char* name, bool value) 
 
     // Look up
     Context::PropertyIndex_t index;
-    Context* foundContext = m_context.lookup(name, index);
+    Context::PropertyAccessor* foundContext = m_context.lookup(name, index);
     me.check("lookup", foundContext != 0);
 
     // Get it
@@ -158,7 +158,7 @@ interpreter::test::ContextVerifier::verifyString(const char* name, const char* v
 
     // Look up
     Context::PropertyIndex_t index;
-    Context* foundContext = m_context.lookup(name, index);
+    Context::PropertyAccessor* foundContext = m_context.lookup(name, index);
     me.check("lookup", foundContext != 0);
 
     // Get it
@@ -182,8 +182,8 @@ afl::data::Value*
 interpreter::test::ContextVerifier::getValue(const char* name) const
 {
     Assert me(m_assert(name));
-    interpreter::Context::PropertyIndex_t index;
-    interpreter::Context* foundContext = m_context.lookup(name, index);
+    Context::PropertyIndex_t index;
+    Context::PropertyAccessor* foundContext = m_context.lookup(name, index);
     me.check("lookup", foundContext != 0);
 
     return foundContext->get(index);

@@ -127,6 +127,8 @@ class TestInterpreterCompilationContext : public CxxTest::TestSuite {
 class TestInterpreterContext : public CxxTest::TestSuite {
  public:
     void testIt();
+    void testPropertyAccessor();
+    void testReadOnlyAccessor();
 };
 
 class TestInterpreterContextProvider : public CxxTest::TestSuite {

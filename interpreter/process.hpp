@@ -410,7 +410,7 @@ namespace interpreter {
             \param name [in] Name query
             \param result [out] On success, property index
             \return non-null context if found, null on failure. */
-        Context* lookup(const afl::data::NameQuery& q, Context::PropertyIndex_t& index);
+        Context::PropertyAccessor* lookup(const afl::data::NameQuery& q, Context::PropertyIndex_t& index);
 
 
         /*

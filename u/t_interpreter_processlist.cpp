@@ -824,11 +824,7 @@ TestInterpreterProcessList::testObject()
         MyObjectContext(MyObject& obj)
             : m_obj(obj)
             { }
-        virtual interpreter::Context* lookup(const afl::data::NameQuery& /*name*/, PropertyIndex_t& /*result*/)
-            { return 0; }
-        virtual void set(PropertyIndex_t /*index*/, const afl::data::Value* /*value*/)
-            { }
-        virtual afl::data::Value* get(PropertyIndex_t /*index*/)
+        virtual PropertyAccessor* lookup(const afl::data::NameQuery& /*name*/, PropertyIndex_t& /*result*/)
             { return 0; }
         virtual bool next()
             { return false; }

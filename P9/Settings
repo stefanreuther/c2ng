@@ -12,8 +12,8 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/spec/info/utils.cpp game/spec/info/utils.hpp \
-    game/vcr/flak/visualisationsettings.cpp \
+FILES_gamelib = interpreter/context.cpp game/spec/info/utils.cpp \
+    game/spec/info/utils.hpp game/vcr/flak/visualisationsettings.cpp \
     game/vcr/flak/visualisationsettings.hpp \
     game/vcr/flak/visualisationstate.hpp \
     game/vcr/flak/visualisationstate.cpp game/proxy/flakvcrplayerproxy.cpp \

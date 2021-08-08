@@ -236,8 +236,8 @@ game::interface::IFDistance(game::Session& session, interpreter::Arguments& args
         } else if (interpreter::Context* cv = dynamic_cast<interpreter::Context*>(theValue)) {
             /* Context. Must have LOC.X and LOC.Y properties. */
             interpreter::Context::PropertyIndex_t x, y;
-            interpreter::Context* xcv = cv->lookup("LOC.X", x);
-            interpreter::Context* ycv = cv->lookup("LOC.Y", y);
+            interpreter::Context::PropertyAccessor* xcv = cv->lookup("LOC.X", x);
+            interpreter::Context::PropertyAccessor* ycv = cv->lookup("LOC.Y", y);
             if (!xcv || !ycv) {
                 throw interpreter::Error("Operand doesn't have a position");
             }

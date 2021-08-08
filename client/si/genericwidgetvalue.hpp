@@ -19,11 +19,11 @@ namespace client { namespace si {
         WidgetPropertyDomain
     };
 
-    class GenericWidgetValue : public WidgetValue {
+    class GenericWidgetValue : public WidgetValue, public interpreter::Context::PropertyAccessor {
      public:
         GenericWidgetValue(afl::base::Memory<const interpreter::NameTable> names, game::Session& session, ScriptSide* ss, const WidgetReference& ref);
 
-        virtual Context* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
+        virtual Context::PropertyAccessor* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
         virtual void set(PropertyIndex_t index, const afl::data::Value* value);
         virtual afl::data::Value* get(PropertyIndex_t index);
         virtual GenericWidgetValue* clone() const;

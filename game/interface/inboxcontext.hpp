@@ -16,7 +16,7 @@ namespace game { namespace interface {
 
     /** Inbox context.
         Implements the result of the "InMsg" function (-> InboxFunction). */
-    class InboxContext : public interpreter::Context {
+    class InboxContext : public interpreter::Context, interpreter::Context::ReadOnlyAccessor {
      public:
         /** Constructor.
             \param index Message index (0-based)
@@ -30,7 +30,6 @@ namespace game { namespace interface {
         ~InboxContext();
 
         virtual InboxContext* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
-        virtual void set(PropertyIndex_t index, const afl::data::Value* value);
         virtual afl::data::Value* get(PropertyIndex_t index);
         virtual bool next();
         virtual InboxContext* clone() const;

@@ -109,10 +109,6 @@ class game::interface::ReferenceListContext::IterableReferenceContext : public i
     /* Forward most functions to m_child */
     virtual ReferenceContext* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
         { return m_child->lookup(name, result); }
-    virtual void set(PropertyIndex_t index, const afl::data::Value* value)
-        { return m_child->set(index, value); }
-    virtual afl::data::Value* get(PropertyIndex_t index)
-        { return m_child->get(index); }
     virtual IterableReferenceContext* clone() const
         { return new IterableReferenceContext(*this); }
     virtual game::map::Object* getObject()
@@ -231,12 +227,6 @@ game::interface::ReferenceListContext*
 game::interface::ReferenceListContext::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
 {
     return lookupName(name, REFLIST_MAP, result) ? this : 0;
-}
-
-void
-game::interface::ReferenceListContext::set(PropertyIndex_t /*index*/, const afl::data::Value* /*value*/)
-{
-    throw interpreter::Error::notAssignable();
 }
 
 afl::data::Value*

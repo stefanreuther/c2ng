@@ -10,7 +10,7 @@
 
 namespace game { namespace interface {
 
-    class MissionContext : public interpreter::Context {
+    class MissionContext : public interpreter::Context, public interpreter::Context::ReadOnlyAccessor {
      public:
         MissionContext(size_t slot,
                        afl::base::Ref<game::spec::ShipList> shipList);
@@ -18,7 +18,6 @@ namespace game { namespace interface {
 
         // Context:
         virtual MissionContext* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
-        virtual void set(PropertyIndex_t index, const afl::data::Value* value);
         virtual afl::data::Value* get(PropertyIndex_t index);
         virtual bool next();
         virtual MissionContext* clone() const;

@@ -37,7 +37,7 @@ namespace game { namespace interface {
         Note: this wraps a Ptr<TaskEditor>.
         For most code, this could be a Ref<> instead, and all code assumes it is never null.
         However, we need it nullable to be able to call releaseAutoTaskEditor() in the destructor. */
-    class TaskEditorContext : public interpreter::SingleContext {
+    class TaskEditorContext : public interpreter::SingleContext, public interpreter::Context::PropertyAccessor {
      public:
         /** Constructor.
             \param edit TaskEditor to publish. Must not be null.

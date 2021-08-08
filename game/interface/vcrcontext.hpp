@@ -12,7 +12,7 @@
 
 namespace game { namespace interface {
 
-    class VcrContext : public interpreter::Context {
+    class VcrContext : public interpreter::Context, public interpreter::Context::ReadOnlyAccessor {
      public:
         VcrContext(size_t battleNumber,
                    Session& session,
@@ -23,7 +23,6 @@ namespace game { namespace interface {
 
         // Context:
         virtual VcrContext* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
-        virtual void set(PropertyIndex_t index, const afl::data::Value* value);
         virtual afl::data::Value* get(PropertyIndex_t index);
         virtual bool next();
         virtual VcrContext* clone() const;

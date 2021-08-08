@@ -14,7 +14,7 @@
 
 namespace {
     /** Context for iterating a hash. */
-    class HashContext : public interpreter::Context {
+    class HashContext : public interpreter::Context, public interpreter::Context::PropertyAccessor {
      public:
         HashContext(afl::data::Hash::Ref_t data)
             : m_data(data),

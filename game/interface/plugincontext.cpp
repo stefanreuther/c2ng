@@ -38,13 +38,6 @@ game::interface::PluginContext::lookup(const afl::data::NameQuery& name, Propert
     return lookupName(name, property_mapping, result) ? this : 0;
 }
 
-void
-game::interface::PluginContext::set(PropertyIndex_t /*index*/, const afl::data::Value* /*value*/)
-{
-    // ex IntPluginContext::set
-    throw interpreter::Error::notAssignable();
-}
-
 afl::data::Value*
 game::interface::PluginContext::get(PropertyIndex_t index)
 {

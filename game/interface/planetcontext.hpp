@@ -13,7 +13,7 @@
 
 namespace game { namespace interface {
 
-    class PlanetContext : public interpreter::Context {
+    class PlanetContext : public interpreter::Context, public interpreter::Context::PropertyAccessor {
      public:
         PlanetContext(int id,
                       Session& session,

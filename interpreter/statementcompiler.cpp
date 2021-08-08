@@ -489,7 +489,7 @@ interpreter::StatementCompiler::compileAmbiguousStatement(BytecodeObject& bco, c
            see StatementCompilationContext::withContextProvider. */
         bool is_proc;
         Context::PropertyIndex_t index;
-        if (Context* con = cp->lookup(name, index)) {
+        if (Context::PropertyAccessor* con = cp->lookup(name, index)) {
             std::auto_ptr<afl::data::Value> v(con->get(index));
             if (CallableValue* cv = dynamic_cast<CallableValue*>(v.get())) {
                 // Callable builtin

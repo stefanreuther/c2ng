@@ -43,12 +43,6 @@ game::interface::FriendlyCodeContext::lookup(const afl::data::NameQuery& name, P
     return lookupName(name, FC_MAPPING, result) ? this : 0;
 }
 
-void
-game::interface::FriendlyCodeContext::set(PropertyIndex_t /*index*/, const afl::data::Value* /*value*/)
-{
-    throw interpreter::Error::notAssignable();
-}
-
 afl::data::Value*
 game::interface::FriendlyCodeContext::get(PropertyIndex_t index)
 {

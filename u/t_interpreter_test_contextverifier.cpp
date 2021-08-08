@@ -30,7 +30,7 @@ namespace {
      *
      *  Secondary objective: return additional properties in enumProperties() (these all cause verifyTypes to fail).
      */
-    class TestContext : public interpreter::Context {
+    class TestContext : public interpreter::Context, public interpreter::Context::PropertyAccessor {
      public:
         TestContext(String_t name, interpreter::TypeHint th, afl::data::Value* value)
             : m_name(name), m_type(th), m_value(value), m_table()
@@ -39,7 +39,7 @@ namespace {
         void setExtraTable(afl::base::Memory<const interpreter::NameTable> tab)
             { m_table = tab; }
 
-        virtual interpreter::Context* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
+        virtual interpreter::Context::PropertyAccessor* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
             {
                 if (name.match(m_name)) {
                     result = 42;

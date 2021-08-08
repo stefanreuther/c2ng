@@ -14,7 +14,7 @@
 
 namespace game { namespace interface {
 
-    class VcrSideContext : public interpreter::Context {
+    class VcrSideContext : public interpreter::Context, public interpreter::Context::ReadOnlyAccessor {
      public:
         VcrSideContext(size_t battleNumber,
                        size_t side,
@@ -26,7 +26,6 @@ namespace game { namespace interface {
 
         // Context:
         virtual VcrSideContext* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
-        virtual void set(PropertyIndex_t index, const afl::data::Value* value);
         virtual afl::data::Value* get(PropertyIndex_t index);
         virtual bool next();
         virtual VcrSideContext* clone() const;

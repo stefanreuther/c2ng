@@ -48,7 +48,7 @@ interpreter::ProcessObserverContext::create(Process& p)
     return new ProcessObserverContext(*new State(p));
 }
 
-interpreter::Context*
+interpreter::Context::PropertyAccessor*
 interpreter::ProcessObserverContext::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
 {
     if (Process* p = m_state->getProcess()) {
@@ -56,18 +56,6 @@ interpreter::ProcessObserverContext::lookup(const afl::data::NameQuery& name, Pr
     } else {
         return 0;
     }
-}
-
-void
-interpreter::ProcessObserverContext::set(PropertyIndex_t /*index*/, const afl::data::Value* /*value*/)
-{
-    // Should not be called
-}
-
-afl::data::Value*
-interpreter::ProcessObserverContext::get(PropertyIndex_t /*index*/)
-{
-    return 0;
 }
 
 interpreter::ProcessObserverContext*

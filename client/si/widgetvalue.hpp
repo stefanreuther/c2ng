@@ -14,9 +14,7 @@ namespace client { namespace si {
         explicit WidgetValue(const WidgetReference& ref);
 
         // Methods to be implemented by child classes:
-        // virtual Context* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result) = 0;
-        // virtual void set(PropertyIndex_t index, const afl::data::Value* value) = 0;
-        // virtual afl::data::Value* get(PropertyIndex_t index) = 0;
+        // virtual Context::PropertyAccessor* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result) = 0;
         // virtual Context* clone() const = 0;
         // virtual void enumProperties(PropertyAcceptor& acceptor) = 0;
 

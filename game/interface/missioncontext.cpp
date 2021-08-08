@@ -50,12 +50,6 @@ game::interface::MissionContext::lookup(const afl::data::NameQuery& name, Proper
     return lookupName(name, MISSION_MAPPING, result) ? this : 0;
 }
 
-void
-game::interface::MissionContext::set(PropertyIndex_t /*index*/, const afl::data::Value* /*value*/)
-{
-    throw interpreter::Error::notAssignable();
-}
-
 afl::data::Value*
 game::interface::MissionContext::get(PropertyIndex_t index)
 {

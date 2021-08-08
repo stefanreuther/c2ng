@@ -13,7 +13,7 @@
 
 namespace game { namespace interface {
 
-    class ShipContext : public interpreter::Context {
+    class ShipContext : public interpreter::Context, public interpreter::Context::PropertyAccessor {
      public:
         ShipContext(int id,
                     Session& session,

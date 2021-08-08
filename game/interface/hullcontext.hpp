@@ -12,7 +12,7 @@
 
 namespace game { namespace interface {
 
-    class HullContext : public interpreter::Context {
+    class HullContext : public interpreter::Context, public interpreter::Context::PropertyAccessor {
      public:
         HullContext(int nr, afl::base::Ref<game::spec::ShipList> shipList, afl::base::Ref<game::Root> root);
         ~HullContext();

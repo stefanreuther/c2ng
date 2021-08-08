@@ -26,11 +26,7 @@ TestInterpreterVmioProcessLoadContext::testLoadMutex()
         TestContext(String_t name, String_t note, interpreter::Process* owner)
             : m_name(name), m_note(note), m_owner(owner)
             { }
-        virtual TestContext* lookup(const afl::data::NameQuery& /*name*/, PropertyIndex_t& /*result*/)
-            { return 0; }
-        virtual void set(PropertyIndex_t /*index*/, const afl::data::Value* /*value*/)
-            { }
-        virtual afl::data::Value* get(PropertyIndex_t /*index*/)
+        virtual PropertyAccessor* lookup(const afl::data::NameQuery& /*name*/, PropertyIndex_t& /*result*/)
             { return 0; }
         virtual TestContext* clone() const
             { return new TestContext(*this); }

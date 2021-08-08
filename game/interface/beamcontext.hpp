@@ -12,7 +12,7 @@
 
 namespace game { namespace interface {
 
-    class BeamContext : public interpreter::Context {
+    class BeamContext : public interpreter::Context, public interpreter::Context::PropertyAccessor {
      public:
         BeamContext(int nr, afl::base::Ref<game::spec::ShipList> shipList, afl::base::Ref<game::Root> root);
         ~BeamContext();

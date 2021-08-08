@@ -11,14 +11,13 @@
 
 namespace game { namespace interface {
 
-    class PlayerContext : public interpreter::Context {
+    class PlayerContext : public interpreter::Context, public interpreter::Context::ReadOnlyAccessor {
      public:
         PlayerContext(int nr, afl::base::Ref<Game> game, afl::base::Ref<Root> root);
         ~PlayerContext();
 
         // Context:
         virtual PlayerContext* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
-        virtual void set(PropertyIndex_t index, const afl::data::Value* value);
         virtual afl::data::Value* get(PropertyIndex_t index);
         virtual bool next();
         virtual PlayerContext* clone() const;

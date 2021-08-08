@@ -43,12 +43,6 @@ game::interface::ExplosionContext::lookup(const afl::data::NameQuery& name, Prop
     return lookupName(name, EXPLOSION_MAP, result) ? this : 0;
 }
 
-void
-game::interface::ExplosionContext::set(PropertyIndex_t /*index*/, const afl::data::Value* /*value*/)
-{
-    throw interpreter::Error::notAssignable();
-}
-
 afl::data::Value*
 game::interface::ExplosionContext::get(PropertyIndex_t index)
 {

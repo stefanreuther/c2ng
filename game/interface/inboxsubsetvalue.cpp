@@ -17,9 +17,7 @@ namespace {
                            afl::base::Ref<const game::Game> game);
         ~InboxSubsetContext();
 
-        virtual interpreter::Context* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
-        virtual void set(PropertyIndex_t index, const afl::data::Value* value);
-        virtual afl::data::Value* get(PropertyIndex_t index);
+        virtual interpreter::Context::PropertyAccessor* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
         virtual bool next();
         virtual InboxSubsetContext* clone() const;
         virtual game::map::Object* getObject();
@@ -46,24 +44,11 @@ InboxSubsetContext::InboxSubsetContext(size_t index, const std::vector<size_t>& 
 InboxSubsetContext::~InboxSubsetContext()
 { }
 
-interpreter::Context*
+interpreter::Context::PropertyAccessor*
 InboxSubsetContext::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
 {
     // Because the child will return a pointer to itself, it cannot be a temporary.
     return child().lookup(name, result);
-}
-
-void
-InboxSubsetContext::set(PropertyIndex_t /*index*/, const afl::data::Value* /*value*/)
-{
-    // Not used (lookup directs it at child)
-}
-
-afl::data::Value*
-InboxSubsetContext::get(PropertyIndex_t /*index*/)
-{
-    // Not used (lookup directs it at child)
-    return 0;
 }
 
 bool

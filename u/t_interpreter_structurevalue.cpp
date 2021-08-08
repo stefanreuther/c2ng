@@ -39,7 +39,7 @@ TestInterpreterStructureValue::testIt()
 
     // Element access
     interpreter::Context::PropertyIndex_t index;
-    interpreter::Context* ctx = testee.lookup("A", index);
+    interpreter::Context::PropertyAccessor* ctx = testee.lookup("A", index);
     TS_ASSERT(ctx != 0);
 
     // Set a value

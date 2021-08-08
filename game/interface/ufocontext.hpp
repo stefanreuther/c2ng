@@ -12,7 +12,7 @@
 
 namespace game { namespace interface {
 
-    class UfoContext : public interpreter::Context {
+    class UfoContext : public interpreter::Context, public interpreter::Context::PropertyAccessor {
      public:
         UfoContext(Id_t slot, afl::base::Ref<Turn> turn, Session& session);
         ~UfoContext();

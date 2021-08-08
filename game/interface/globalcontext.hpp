@@ -10,7 +10,7 @@
 
 namespace game { namespace interface {
 
-    class GlobalContext : public interpreter::SingleContext {
+    class GlobalContext : public interpreter::SingleContext, public interpreter::Context::PropertyAccessor {
      public:
         explicit GlobalContext(Session& session);
         ~GlobalContext();

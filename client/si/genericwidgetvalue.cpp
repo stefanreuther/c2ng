@@ -19,7 +19,7 @@ client::si::GenericWidgetValue::GenericWidgetValue(afl::base::Memory<const inter
       m_pScriptSide(ss)
 { }
 
-interpreter::Context*
+interpreter::Context::PropertyAccessor*
 client::si::GenericWidgetValue::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
 {
     return lookupName(name, m_names, result) ? this : 0;

@@ -11,7 +11,7 @@
 
 namespace game { namespace interface {
 
-    class IonStormContext : public interpreter::Context {
+    class IonStormContext : public interpreter::Context, public interpreter::Context::PropertyAccessor {
      public:
         IonStormContext(int id, Session& session, afl::base::Ref<Game> game);
         ~IonStormContext();

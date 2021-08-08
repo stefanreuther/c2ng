@@ -12,7 +12,7 @@
 
 namespace game { namespace interface {
 
-    class DrawingContext : public interpreter::Context {
+    class DrawingContext : public interpreter::Context, public interpreter::Context::PropertyAccessor {
      public:
         DrawingContext(afl::base::Ref<Turn> turn, game::map::DrawingContainer::Iterator_t it);
         ~DrawingContext();
