@@ -1,22 +1,26 @@
 /**
   *  \file client/widgets/playerlist.hpp
+  *  \brief Class client::widgets::PlayerList
   */
 #ifndef C2NG_CLIENT_WIDGETS_PLAYERLIST_HPP
 #define C2NG_CLIENT_WIDGETS_PLAYERLIST_HPP
 
-#include "ui/simplewidget.hpp"
-#include "game/playerset.hpp"
-#include "game/playerarray.hpp"
-#include "afl/string/string.hpp"
 #include "afl/base/signal.hpp"
+#include "afl/string/string.hpp"
+#include "game/playerarray.hpp"
+#include "game/playerset.hpp"
 #include "ui/root.hpp"
+#include "ui/simplewidget.hpp"
 
 namespace client { namespace widgets {
 
     /** List of Race or Team names.
         Displays (a subrange of) all player names, optionally each in his own color.
         Clicking a name emits a signal.
-        Used for score charts and other tables. */
+        Used for score charts and other tables.
+
+        @change In PCC2 version, initialisation determines whether to show team or player names (ShowTeamNames).
+        In this version, you set the names explicitly. */
     class PlayerList : public ui::SimpleWidget {
      public:
         enum Layout {

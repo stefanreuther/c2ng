@@ -119,6 +119,7 @@ game::proxy::HullSpecificationProxy::Trampoline::sendResponse(const ShipList& sh
 void
 game::proxy::HullSpecificationProxy::Trampoline::packResponse(HullSpecification& result, const ShipList& shipList, const Root& root, const Turn* pTurn, const Game& game)
 {
+    // ex shipspec.pas:ShowShipSpec (sort-of)
     if (const game::spec::Hull* pHull = shipList.hulls().get(m_query.getHullType())) {
         // Environment
         const HostConfiguration& config = root.hostConfiguration();

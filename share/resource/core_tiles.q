@@ -115,7 +115,7 @@ EndSub
 % - call SetContent with a 30x10 rich-text string
 % @since PCC2 2.40.1
 Sub Tile.PlanetOverview
-  % ex WPlanetOverviewTile::drawData
+  % ex WPlanetOverviewTile::drawData, CPlanetWindow.DrawData
   Local t
 
   % Line 1: Climage/Location
@@ -482,7 +482,7 @@ EndSub
 % - call SetContent with a 30x4 rich-text string
 % @since PCC2 2.40.1
 Sub Tile.PlanetNatives
-  % ex WPlanetNativeTile::drawData
+  % ex WPlanetNativeTile::drawData, CPlanetaryNativesTile
   Local t
   If Not Natives Then
     SetContent Translate("There are no natives on this planet.")
@@ -501,7 +501,7 @@ EndSub
 % - call SetButton to configure button "t" if desired
 % @since PCC2 2.40.1
 Sub Tile.PlanetColonists
-  % ex WPlanetColonistTile::drawPlanetColonistTile
+  % ex WPlanetColonistTile::drawPlanetColonistTile, CPlanetaryColonistsTile
   Local t
   t := RAdd(   RAlign(Translate("Population:"), 80), RStyle("green", CCVP.ClansToString(Colonists)), "\n")
   t := RAdd(t, RAlign(Translate("Tax Rate:"),   80), RStyle("green", Format("%d%%", Colonists.Tax)), "\n")
@@ -515,7 +515,7 @@ EndSub
 % - call SetButton to configure buttons "g","b","m","d","s","c" if desired
 % @since PCC2 2.40.1
 Sub Tile.PlanetEconomy
-  % ex WPlanetEconomyTile::drawPlanetEconomyTile
+  % ex WPlanetEconomyTile::drawPlanetEconomyTile, CPlanetaryEconomyTile
   Option LocalSubs(1)
   Local Function Row(key, value, unit)
     Return RAdd(RAlign(key, 120), RAlign(RStyle("green", CCVP.NumberToString(value)), 50, 2), RStyle("green", " " & unit), "\n")
@@ -562,6 +562,7 @@ EndSub
 % - call SetLeftText/SetRightText for buttons "f8","f5"
 % - call SetButton for these buttons if desired
 Sub Tile.PlanetLink
+  % ex CPlanetarySBTile
   SetLeftText 'f5', RStyle("white,big", Translate("Planet overview"))
   If Base="present" Then
     SetLeftText 'f8', RStyle("white,big", Translate("Go to starbase"))

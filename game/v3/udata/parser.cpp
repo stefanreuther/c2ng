@@ -837,6 +837,7 @@ game::v3::udata::Parser::handleRecord(uint16_t recordId, afl::base::ConstBytes_t
 
      case 52:
         // Special functions assigned to ship
+        // ex hullfunc.pas:AddShipFunctions
         // FIXME: this relies on PHost sending the #57's before the #52's.
         // We need to process the #57's first, because otherwise getFunctionIdFromHostId() will not know what we're talking about.
         if (Eater<gt::Int16_t> id = data) {
@@ -876,6 +877,7 @@ game::v3::udata::Parser::handleRecord(uint16_t recordId, afl::base::ConstBytes_t
 
      case 57:
         // Special function definition
+        // ex hullfunc.pas:AddSpecialDef
         if (Eater<gt::Util57Special> report = data) {
             game::spec::HullFunction func(report->basicId, ExperienceLevelSet_t::fromInteger(report->experienceMask));
             func.setHostId(report->functionId);

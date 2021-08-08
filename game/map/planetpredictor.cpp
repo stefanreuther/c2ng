@@ -18,6 +18,7 @@ using util::PI;
 namespace {
     void trimHappiness(Planet& pl)
     {
+        // ex planacc.pas:ComputePlanetTurn.TrimHappiness
         int chappy = pl.getColonistHappiness().orElse(0);
         if (chappy < -300) {
             chappy = -300;
@@ -68,6 +69,7 @@ namespace {
 
     void doDecay(Planet& pl, game::PlanetaryBuilding kind, const game::config::HostConfiguration& config)
     {
+        // ex planacc.pas:ComputePlanetTurn.Decay
         int planetOwner = 0;
         int max;
         int have;
@@ -88,6 +90,7 @@ namespace {
     void doAssimilation(Planet& pl,
                         const game::config::HostConfiguration& config)
     {
+        // ex planacc.pas:ComputePlanetTurn.Assimilate
         int planetOwner = 0;
         if (pl.getOwner(planetOwner) && config.getPlayerRaceNumber(planetOwner) == 6) {
             int nativeRace;
@@ -126,7 +129,7 @@ game::map::PlanetPredictor::computeTurn(const PlanetEffectors& eff,
                                         const game::config::HostConfiguration& config,
                                         const HostVersion& host)
 {
-    // ex computeTurn
+    // ex computeTurn, pdata.pas:ComputePlanetTurn
     /* Our sequence will be:
        - hiss
        - lfm / gather-build        (maybe)

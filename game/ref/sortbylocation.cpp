@@ -14,7 +14,7 @@ game::ref::SortByLocation::SortByLocation(const game::map::Universe& univ, afl::
 int
 game::ref::SortByLocation::compare(const Reference& a, const Reference& b) const
 {
-    // ex sortByLocation
+    // ex sortByLocation, sort.pas:SortByLocation
     game::map::Point pa, pb;
     bool oka = getLocation(a, pa);
     bool okb = getLocation(b, pb);

@@ -52,7 +52,7 @@ namespace {
             { }
         virtual void drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state)
             {
-                // ex WHullFunctionList::drawPart
+                // ex WHullFunctionList::drawPart, CHullCapabilityList.DrawPart
                 // List item context
                 afl::base::Deleter del;
                 gfx::Context<util::SkinColor::Color> ctx(can, getColorScheme());
@@ -244,7 +244,7 @@ Dialog::run(util::RequestSender<game::Session> gameSender)
 void
 Dialog::onScroll()
 {
-    // ex WHullFunctionInfo::setFunction
+    // ex WHullFunctionInfo::setFunction, CHullCapabilityView.DrawInterior
     ui::rich::Document& doc = m_infoWidget.getDocument();
     doc.clear();
     if (const game::spec::info::AbilityDetail* d = m_listWidget.getCurrentFunction()) {
@@ -320,7 +320,7 @@ Dialog::onScroll()
 void
 client::dialogs::showHullFunctions(const game::spec::info::AbilityDetails_t& content, ui::Root& root, util::RequestSender<game::Session> gameSender, afl::string::Translator& tx)
 {
-    // ex showHullFunctions
+    // ex showHullFunctions, shipspec.pas:ShowHullCapabilityList
     if (!content.empty()) {
         Dialog(content, root, tx).run(gameSender);
     }

@@ -704,7 +704,7 @@ EndSub
 % Returns UI.Result=mission or empty
 % @since PCC2 2.40.1
 Sub CCUI.Base.ChooseMission (m)
-  % ex client/act-planet.cc:doBaseChangeMission (part)
+  % ex client/act-planet.cc:doBaseChangeMission (part), pdata.pas:GetStarbaseMission
   Local _ := Translate
   Local a := Listbox(_("Starbase Mission"), m, 300, 7, "pcc2:basescreen")
 

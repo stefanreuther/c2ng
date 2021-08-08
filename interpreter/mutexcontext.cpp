@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/mutexcontext.cpp
+  *  \brief Class interpreter::MutexContext
   */
 
 #include "interpreter/mutexcontext.hpp"
@@ -19,15 +20,13 @@ namespace {
     }
 }
 
-// /** Constructor.
-//     \param mtx Mutex. Must have one reference allocated to this object. */
 interpreter::MutexContext::MutexContext(MutexList::Mutex* mtx)
     : m_mutex(mtx)
 {
     // ex IntMutexContext::IntMutexContext
 }
 
-// /** Destructor. Removes the mutex when this was the last reference. */
+/* Destructor. Removes the mutex when this was the last reference. */
 interpreter::MutexContext::~MutexContext()
 {
     // ex IntMutexContext::~IntMutexContext
@@ -36,7 +35,7 @@ interpreter::MutexContext::~MutexContext()
 
 // Context:
 
-// /** Lookup implementation. Mutex has no properties. */
+/* Lookup implementation. Mutex has no properties. */
 interpreter::Context*
 interpreter::MutexContext::lookup(const afl::data::NameQuery& /*name*/, PropertyIndex_t& /*result*/)
 {
@@ -44,14 +43,14 @@ interpreter::MutexContext::lookup(const afl::data::NameQuery& /*name*/, Property
     return 0;
 }
 
-// /** Set implementation. Mutex has no properties. */
+/* Set implementation. Mutex has no properties. */
 void
 interpreter::MutexContext::set(PropertyIndex_t /*index*/, const afl::data::Value* /*value*/)
 {
     // ex IntMutexContext::set
 }
 
-// /** Get implementation. Mutex has no properties. */
+/* Get implementation. Mutex has no properties. */
 afl::data::Value*
 interpreter::MutexContext::get(PropertyIndex_t /*index*/)
 {
@@ -59,7 +58,7 @@ interpreter::MutexContext::get(PropertyIndex_t /*index*/)
     return 0;
 }
 
-/** Next implementation. Mutex is not iterable. */
+/* Next implementation. Mutex is not iterable. */
 bool
 interpreter::MutexContext::next()
 {
@@ -67,7 +66,7 @@ interpreter::MutexContext::next()
     return false;
 }
 
-// /** Clone implementation. */
+/* Clone implementation. */
 interpreter::MutexContext*
 interpreter::MutexContext::clone() const
 {
@@ -75,7 +74,7 @@ interpreter::MutexContext::clone() const
     return new MutexContext(&m_mutex->addReference());
 }
 
-// /** GetObject implementation. Mutex has no object. */
+/* getObject implementation. Mutex has no object. */
 game::map::Object*
 interpreter::MutexContext::getObject()
 {
@@ -83,7 +82,7 @@ interpreter::MutexContext::getObject()
     return 0;
 }
 
-// /** EnumProperties implementation. Mutex has no properties. */
+/* EnumProperties implementation. Mutex has no properties. */
 void
 interpreter::MutexContext::enumProperties(PropertyAcceptor& /*acceptor*/)
 {
@@ -92,7 +91,7 @@ interpreter::MutexContext::enumProperties(PropertyAcceptor& /*acceptor*/)
 
 // BaseValue:
 
-// /** toString implementation. */
+/* toString implementation. */
 String_t
 interpreter::MutexContext::toString(bool /*readable*/) const
 {
@@ -101,9 +100,7 @@ interpreter::MutexContext::toString(bool /*readable*/) const
     return "#<lock>";
 }
 
-// /** Store implementation.
-//     \param sv [out] Tag node to store to
-//     \param aux [out] Aux data stream */
+/* Store implementation. */
 void
 interpreter::MutexContext::store(TagNode& out, afl::io::DataSink& aux, afl::charset::Charset& /*cs*/, SaveContext& ctx) const
 {

@@ -12,7 +12,7 @@ game::ref::SortByOwner::SortByOwner(const game::map::Universe& univ, const Playe
 int
 game::ref::SortByOwner::compare(const Reference& a, const Reference& b) const
 {
-    // ex sortByOwner
+    // ex sortByOwner, sort.pas:SortByOwner
     return getOwner(a) - getOwner(b);
 }
 

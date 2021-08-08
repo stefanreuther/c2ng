@@ -112,7 +112,7 @@ game::BattleOrderRule::getShipBattleOrder(const String_t& friendlyCode,
                                           bool hasKillMission,
                                           bool hasFuel) const
 {
-    // ex game/objl-sort.cc:sortByBattleOrder (part)
+    // ex game/objl-sort.cc:sortByBattleOrder (part), sort.pas:SortByBattleOrder (sort-of)
     int value = game::spec::FriendlyCodeList::getNumericValue(friendlyCode, m_host);
     if (m_host.isPHost()) {
         if (value == 1000) {

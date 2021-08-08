@@ -46,6 +46,7 @@ namespace {
             { }
         bool operator()(const game::spec::HullFunction& lhs, const game::spec::HullFunction& rhs) const
             {
+                // ex hullfunc.pas:SortForNewShip
                 // Racial abilities are boring and go last
                 bool lrace = lhs.getKind() == game::spec::HullFunction::AssignedToRace;
                 bool rrace = rhs.getKind() == game::spec::HullFunction::AssignedToRace;

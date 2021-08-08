@@ -221,7 +221,7 @@ ReferenceSortOrderDialog::onFirstChange()
 bool
 client::dialogs::doReferenceSortOrderMenu(game::ref::Configuration& order, gfx::Point anchor, ui::Root& root, afl::string::Translator& tx)
 {
-    // ex WVisualScanListWindow::onMenu
+    // ex WVisualScanListWindow::onMenu, sort.pas:ChooseSortOrder
     ui::widgets::StringListbox box(root.provider(), root.colorScheme());
 
     // FIXME: improve this...

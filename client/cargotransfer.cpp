@@ -229,7 +229,7 @@ client::doPlanetCargoTransfer(ui::Root& root,
                               game::Id_t planetId,
                               bool unload)
 {
-    // ex doPlanetTransfer, doPlanetTransferFor
+    // ex doPlanetTransfer, doPlanetTransferFor, pdata.pas:PlanetTransferCargo
     class Initializer : public game::proxy::ReferenceListProxy::Initializer_t {
      public:
         Initializer(game::Id_t planetId)

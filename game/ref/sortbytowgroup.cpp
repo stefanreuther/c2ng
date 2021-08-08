@@ -58,7 +58,7 @@ game::ref::SortByTowGroup::getClass(const Reference& a) const
 int
 game::ref::SortByTowGroup::getTowGroupKey(const Reference& a) const
 {
-    // ex sortByTowGroup
+    // ex sortByTowGroup, sort.pas:SortByTowGroup
     if (a.getType() == Reference::Ship) {
         if (const game::map::Ship* pShip = m_universe.ships().get(a.getId())) {
             // Check whether we are towing someone.

@@ -27,7 +27,7 @@ namespace {
                                           int kill, int expl, int /*level*/, bool /*deathRay*/,
                                           const HostConfiguration& /*config*/)
     {
-        // ex showWeaponEffect (part)
+        // ex showWeaponEffect (part), shipspec.pas:ShowWeaponEffects
         int mass = query.getCombatMass() + 1;
         int shieldEff = util::divideAndRound(80*expl,      mass) + 1;
         int hullEff   = util::divideAndRound(80*shieldEff, mass) + 1;
@@ -41,7 +41,7 @@ namespace {
                                              int kill, int expl, int level, bool deathRay,
                                              const HostConfiguration& config)
     {
-        // ex showWeaponEffect (part)
+        // ex showWeaponEffect (part), shipspec.pas:ShowWeaponEffects
         const bool isDeathRay = deathRay && expl == 0;
         const int owner = query.getOwner();
         const int sds = config[HostConfiguration::ShieldDamageScaling](owner) + config.getExperienceBonus(HostConfiguration::EModShieldDamageScaling, level);
@@ -63,7 +63,7 @@ namespace {
                                                 int kill, int expl, int level, bool deathRay,
                                                 const HostConfiguration& config)
     {
-        // ex showWeaponEffect (part)
+        // ex showWeaponEffect (part), shipspec.pas:ShowWeaponEffects
         const bool isDeathRay = deathRay && expl == 0;
         const int mass = query.getCombatMass() + 1;
         const int owner = query.getOwner();
@@ -183,8 +183,7 @@ game::spec::info::describeHull(PageContent& content, Id_t id, const ShipList& sh
 void
 game::spec::info::describeHullFunctions(Abilities_t& out, const HullFunctionList& hfList, const ShipQuery* pQuery, const ShipList& shipList, const PictureNamer& picNamer, const Root& root, afl::string::Translator& tx)
 {
-    // ex drawHullFunctionList (sort-of)
-    // FIXME: implement have/damaged/will-have/will-not-have annotations
+    // ex drawHullFunctionList (sort-of); shipspec.pas:ShowHullCapabilities
     for (HullFunctionList::Iterator_t it = hfList.begin(), e = hfList.end(); it != e; ++it) {
         // Flags
         AbilityFlags_t flags;

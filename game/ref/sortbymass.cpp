@@ -12,7 +12,7 @@ game::ref::SortByMass::SortByMass(const game::map::Universe& univ, const game::s
 int
 game::ref::SortByMass::compare(const Reference& a, const Reference& b) const
 {
-    // ex sortByMass
+    // ex sortByMass, sort.pas:SortByMass
     return getMass(a) - getMass(b);
 }
 

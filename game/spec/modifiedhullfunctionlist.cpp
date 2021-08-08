@@ -29,7 +29,7 @@ game::spec::ModifiedHullFunctionList::clear()
 game::spec::ModifiedHullFunctionList::Function_t
 game::spec::ModifiedHullFunctionList::getFunctionIdFromHostId(int hostFunctionId) const
 {
-    // ex GHullFunctionData::getIdFromHostId
+    // ex GHullFunctionData::getIdFromHostId, hullfunc.pas:GetFunctionFromHostId
     for (size_t i = 0, n = m_modifiedFunctions.size(); i < n; ++i) {
         if (hostFunctionId == m_modifiedFunctions[i]->getHostId()) {
             return Function_t(i + MODIFIED_FUNCTION_BASE_ID);
@@ -42,7 +42,7 @@ game::spec::ModifiedHullFunctionList::getFunctionIdFromHostId(int hostFunctionId
 game::spec::ModifiedHullFunctionList::Function_t
 game::spec::ModifiedHullFunctionList::getFunctionIdFromDefinition(const HullFunction& def)
 {
-    // ex GHullFunctionData::getIdFromFunction
+    // ex GHullFunctionData::getIdFromFunction, hullfunc.pas:GetFunctionId
     if (def.getLevels() == ExperienceLevelSet_t::allUpTo(MAX_EXPERIENCE_LEVELS)) {
         // This is an unmodified function, hence its internal Id is the same as its basic function Id.
         return Function_t(def.getBasicFunctionId());
@@ -68,7 +68,7 @@ game::spec::ModifiedHullFunctionList::getFunctionIdFromDefinition(const HullFunc
 bool
 game::spec::ModifiedHullFunctionList::getFunctionDefinition(Function_t id, HullFunction& def) const
 {
-    // ex GHullFunctionData::getFunctionDefinition
+    // ex GHullFunctionData::getFunctionDefinition, hullfunc.pas:GetFunctionDef
     if (int32_t(id) >= MODIFIED_FUNCTION_BASE_ID && size_t(id - MODIFIED_FUNCTION_BASE_ID) < m_modifiedFunctions.size()) {
         // It's a modified function
         def = *m_modifiedFunctions[id - MODIFIED_FUNCTION_BASE_ID];

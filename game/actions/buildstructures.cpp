@@ -144,7 +144,7 @@ game::actions::BuildStructures::addLimitCash(PlanetaryBuilding type, int count)
 void
 game::actions::BuildStructures::doStandardAutoBuild()
 {
-    // ex GPlanetBuildStructuresAction::doStandardAutoBuild
+    // ex GPlanetBuildStructuresAction::doStandardAutoBuild, pdata.pas:Autobuild
     Deferer d(*this);
 
     // If planet does not have a factory, but wants some, start by building one first, independant of orders.

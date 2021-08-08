@@ -13,7 +13,7 @@ game::ref::SortByFleet::SortByFleet(const game::map::Universe& univ, afl::string
 int
 game::ref::SortByFleet::compare(const Reference& a, const Reference& b) const
 {
-    // ex sortByFleet
+    // ex sortByFleet, sort.pas:SortByFleet
     return getFleetNumberKey(a) - getFleetNumberKey(b);
 }
 

@@ -1,11 +1,6 @@
 Major Concept Verification
 ==========================
 
-MULTITHREADED SIMULATOR.
-- [DONE] Make a stripped-down copy of ShipList to copy around.
-  . implemented for VCR algorithms, but not yet needed
-- [DONE] Make a simulator-runner with multiple threads.
-
 PLANETSCENTRAL API. The existing API commands mostly map to microservice commands.
 We need coarser granularity.
 - file/lsgame or file/stat should provide enough information to build a Folder.
@@ -16,22 +11,20 @@ We need coarser granularity.
 Minor Concept Verification
 ==========================
 
-UNDO. The dat/dis style is cumbersome and does not map cleanly to Nu or Host data.
-- [DONE] Make a Reverter interface with implementations for v3/Nu/Host.
-
 MAKETURN/SAVE.
-- [DONE]
+- Still missing for Network play
 
 ABILITIES/ADVANTAGES.
 - Map Nu advantages to racial abilities or configuration.
 
 LOCAL/NETWORK WORKSPLIT.
-- [DONE] Set up complete game directories for network v3 games.
+- Set up complete game directories for network v3 games.
 - Cache Nu history results locally.
 
 SERVERS.
-- [DONE] Implement more PlanetsCentral servers within the new infrastructure.
 - Implement integrated router/server.
+- Implement frontend server?
+- Implement API server?
 
 MESSAGES. Can we integrate all messages (in-game messages, PMs, activities, forum, VCR, files) into one interface?
 - Make an interface that provides heading/text/parsed data/VCR.
@@ -39,15 +32,10 @@ MESSAGES. Can we integrate all messages (in-game messages, PMs, activities, foru
 - .rss parser for update notifications?
 
 FILER NG.
-- [DONE] Use SHA-1 addressing (like git) for implicit deduplication.
 - Add transaction support: upload many files at once and commit at the end; fork dataspace for backup.
-- Add support for symlinks so that user:u/user/path/player9.rst can actually be a link to host:games/0001/out/9/player9.rst.
-  . [DONE] alternative: store user and host data in same filer, so we get internal deduplication
-- [DONE] Requires export/import for host runs!
-- fsck/garbage collection
+- fsck/garbage collection.
 
 SDL2/ANDROID.
-- [DONE] Basic port done.
 - Touch events!
 
 
@@ -56,21 +44,19 @@ Features
 
 HOST PREDICTION. We can do history, doing prediction should be possible.
 
-SPECIFICATION BROWSER. A better version of CCShips.
-- [DONE] Browse hulls, engines, beams, torpedoes, abilities.
-- [DONE] Determine abilities such as "2x mining" from config.
-- [DONE] Allow searching for "who can build heaters" or "what are my cloak ships"
-
-MORE HOSTS. Can we do CircusMaximus?
+MORE HOSTS. Are there any left?
 
 OBJECT FILE (*.qc) SUPPORT.
 
 PCC1 FEATURES MISSING IN PCC2.
-- data transmissions (VPA, Informer)
-- data transmission settings
-- [DONE] turn checker
-- [DONE] *.ccb management (ccbmerge)
-- history management
+- data transmissions (VPA, Informer).
+- data transmission settings.
+- history management.
+
+I18N.
+- Create .po files (custom extractor).
+- Read .po files. We can probably do without compiling them now.
+- Remove last users of _() macro.
 
 
 MISC
@@ -79,11 +65,6 @@ MISC
 INTERPRETER REWORKS.
 - Constant folding. Translate '"foo" & chr(33)' into a string.
 - Rework expressions to reference+deleter style instead of current auto_ptr style.
-
-SUPPORT 8-BPP.
-- Need to disable or tweak graphical effects. It's easy to saturate the GUI thread by just scrolling around
-  on the main screen.
-- Do we still need this?
 
 HISTORY.
 - When loading history ships, clear the mission settings. Don't say the last mission of a stolen ship forever.
@@ -94,4 +75,3 @@ CLEANUP
 
 - client::widgets::BusyIndicator -> ui::widgets
 - client::dialogs::DirectorySelectionDialog -> ui::dialogs
-- too much code is using _() for translation

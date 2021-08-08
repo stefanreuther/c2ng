@@ -70,7 +70,7 @@ namespace {
        \param [in]  fmt       Number formatter */
     void renderEffect(ui::rich::Document& doc, const int x, int32_t effect, int32_t limit, int32_t scale, const util::NumberFormatter& fmt)
     {
-        // ex showEffectI, showEffectF
+        // ex showEffectI, showEffectF, shipspec.pas:ShowEffect
         if (effect == 0) {
             // Totally ineffective weapon
             doc.addCentered(x, util::rich::Text("-").withColor(util::SkinColor::Faded));
@@ -121,6 +121,7 @@ namespace {
                              const int em,
                              afl::string::Translator& tx)
     {
+        // ex CWeaponEffectWidget.Draw
         doc.setPageWidth(40 * em);
         doc.add(Format(tx("Effects on %d kt %s ship"), fmt.formatNumber(eff.mass), name));
         if (eff.usedESBRate != 0) {
@@ -257,7 +258,7 @@ Dialog::showHullFunctionDetails()
 void
 client::dialogs::showHullSpecificationForShip(game::Id_t shipId, ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::Session> gameSender)
 {
-    // ex WSpecView::doStandardDialog (sort-of)
+    // ex WSpecView::doStandardDialog (sort-of), shipspec.pas:ShowShipSpecSheet
     HullSpecificationProxy proxy(gameSender, root.engine().dispatcher(), std::auto_ptr<game::spec::info::PictureNamer>(new PictureNamer()));
     Downlink link(root, tx);
     Dialog dlg(proxy, root, tx, gameSender,

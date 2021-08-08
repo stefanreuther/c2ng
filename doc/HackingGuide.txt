@@ -45,6 +45,14 @@ Status
   Wherever practical, functions contain a "// ex Class::fun" comment
   referring to the PCC2/PCC1 implementation of the same functionality.
 
+  Since 2.40.10 (May 2021), c2ng is maintained in a public git
+  repository. You are welcome to submit bug reports, patches, or pull
+  requests.
+
+  History information is now in the git commits. The old ChangeLog
+  file tracking the original PCC2 > c2ng conversion is archived in the
+  doc/ directory but no longer updated.
+
 
 
 Building PCC2ng
@@ -108,10 +116,9 @@ Building on Linux
   tree. The tree is fully relocatable; for example, you can copy it to
   `/opt/c2ng` and it will find its resources from there.
 
-  If SDL 1.2 is found, c2ng is built against that, because the SDL 1.x
-  port is currently more mature. If you have SDL 1.2 and SDL 2
-  installed, and wish to build against SDL 2, use `--without-sdl`.
-  You can only build against one version at a time.
+  If SDL 1.2 is found, c2ng is built against that. If you have SDL 1.2
+  and SDL 2 installed, and wish to build against SDL 2, use
+  `--without-sdl`. You can only build against one version at a time.
 
 
 Building on Windows (mingw)
@@ -407,6 +414,15 @@ Resources
   font loading just is too cumbersome.
 
 
+3-D
+---
+
+  A rather new part of the graphics engine is the "threed" module for
+  3-D graphics. This engine is modeled after the WebGL implementation
+  in PCC2 Web; I intend to eventually have a version using OpenGL for
+  the desktop as well.
+
+
 
 Source Code Structure
 =====================
@@ -455,6 +471,7 @@ Source Code Structure
     gen          |         | procedural generation
     sdl          |         | SDL 1.2 back-end
     sdl2         |         | SDL 2.0 back-end
+    threed       |         | 3-D engine
   ---------------+---------+---------------------------------------
   interpreter    | gamelib | script interpreter
   ---------------+---------+---------------------------------------

@@ -85,7 +85,7 @@ client::widgets::CostDisplay::setMissingAmount(const game::spec::Cost& amount)
 void
 client::widgets::CostDisplay::init(ui::Root& root)
 {
-    // ex WCostDisplay::WCostDisplay
+    // ex WCostDisplay::WCostDisplay, pdata.pas:InitBill
     if (m_types.contains(Cost::Money)) {
         m_types += Cost::Supplies;
     }
@@ -135,7 +135,7 @@ client::widgets::CostDisplay::init(ui::Root& root)
 void
 client::widgets::CostDisplay::render()
 {
-    // ex WCostDisplay::drawContent
+    // ex WCostDisplay::drawContent, pdata.pas:ShowCost, ShowCash
     size_t r = 1;
     bool needSupplies = m_cost.get(Cost::Supplies) != 0;
     for (size_t i = 0; i < countof(TYPES); ++i) {

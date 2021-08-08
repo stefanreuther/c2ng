@@ -84,7 +84,7 @@ namespace {
 void
 HullfuncParser::handleAssignment(const String_t& fileName, int lineNr, const String_t& name, const String_t& value, const String_t& /*line*/)
 {
-    // ex HullfuncParser::assign
+    // ex HullfuncParser::assign, hullfunc.pas:LoadHullfuncPart
     if (util::stringMatch("Initialize", name)) {
         // "Initialize = Clear" or "Initialize = Default"
         if (util::stringMatch("Clear", value)) {
@@ -505,7 +505,7 @@ game::v3::SpecificationLoader::loadHullFunctions(game::spec::ShipList& list, afl
                                                  const game::HostVersion& host,
                                                  const game::config::HostConfiguration& config)
 {
-    // ex game/spec.cc:loadHulls (part)
+    // ex game/spec.cc:loadHulls (part), hullfunc.pas:LoadHullfuncFile
     // Load basic function definitions
     list.basicHullFunctions().clear();
     afl::base::Ptr<afl::io::Stream> ps = dir.openFileNT("hullfunc.usr", FileSystem::OpenRead);

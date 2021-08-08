@@ -167,7 +167,7 @@ game::actions::TaxationAction::describe(Area a, afl::string::Translator& tx, con
 
     switch (a) {
      case Colonists: {
-        // ex WColonistTaxSelector::drawContent (part)
+        // ex WColonistTaxSelector::drawContent (part), CColonistTax.Draw
         int oldHappy = m_planet.getColonistHappiness().orElse(0);
         newHappy = std::min(100, oldHappy + hissEffect) + happyChange;
         if (oldHappy < 30 || newHappy < m_hostVersion.getPostTaxationHappinessLimit()) {
@@ -180,7 +180,7 @@ game::actions::TaxationAction::describe(Area a, afl::string::Translator& tx, con
         break;
      }
      case Natives: {
-        // ex WNativeTaxSelector::drawContent (part)
+        // ex WNativeTaxSelector::drawContent (part), CNativeTax.Draw
         int oldHappy = m_planet.getNativeHappiness().orElse(0);
         newHappy = std::min(100, oldHappy + hissEffect) + happyChange;
 

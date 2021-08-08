@@ -1,3 +1,12 @@
+#
+#  c2ng build rules
+#
+#  To generate a Makefile (or build.ninja file), use Make.pl from the Accidental Build System:
+#      git@github.com:stefanreuther/accidental-build.git
+#  This will read Rules.pl (and the Rules.pl files from subdirectories) to generate a large,
+#  fast Makefile tailored for your situation.
+#
+
 ##
 ##  Configuration section
 ##

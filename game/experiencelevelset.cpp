@@ -13,7 +13,7 @@ game::formatExperienceLevelSet(ExperienceLevelSet_t set,
                                const game::config::HostConfiguration& config,
                                afl::string::Translator& tx)
 {
-    // ex game/exp.cc:formatExpLevelSet
+    // ex game/exp.cc:formatExpLevelSet, hullfunc.pas:FormatLevelMask
     ExperienceLevelSet_t allLevels = host.hasExperienceLevels() ? ExperienceLevelSet_t::allUpTo(config[config.NumExperienceLevels]()) : ExperienceLevelSet_t(0);
     set &= allLevels;
 

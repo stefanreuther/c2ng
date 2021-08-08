@@ -25,7 +25,7 @@ game::ref::SortByDamage::getClass(const Reference& /*a*/) const
 int
 game::ref::SortByDamage::getDamage(const Reference& a) const
 {
-    // ex sortByDamage
+    // ex sortByDamage, sort.pas:SortByDamage
     int result = 0;
     if (a.getType() == Reference::Ship) {
         if (const game::map::Ship* pShip = m_universe.ships().get(a.getId())) {

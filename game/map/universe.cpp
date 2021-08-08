@@ -625,7 +625,7 @@ game::map::Universe::findShipTowing(Id_t sid, Id_t after) const
 game::Id_t
 game::map::Universe::findShipCloningAt(Id_t pid, Id_t after) const
 {
-    // ex GPlanet::findShipCloningHere, GShip::isCloningAt
+    // ex GPlanet::findShipCloningHere, GShip::isCloningAt, planacc.pas:FindShipBeingClonedAt, ShipIsCloningAt
     const Planet* p = planets().get(pid);
     Point pt;
     if (p == 0 || !p->getPosition(pt)) {

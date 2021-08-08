@@ -1,0 +1,11 @@
+Main author:
+        Stefan Reuther <streu@gmx.de>
+
+Contributors to PCC2 and PCC1, upon which this is based, in alphabetical order:
+        Akseli Mäki (VCR optimisations & tricks)
+        Christian Brückner (Original Windows installer)
+        Ingo von Borstel (MacOS X work)
+        Lucas Di Pentima (Spanish translation)
+        Manuel Fernandes Alonso
+        Matteo Boccafoli (Italian translation)
+        Tim Wisseman (...invented the game)

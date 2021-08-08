@@ -203,7 +203,7 @@ game::spec::BasicHullFunctionList::getFunctionById(int id) const
 const game::spec::BasicHullFunction*
 game::spec::BasicHullFunctionList::getFunctionByName(String_t name, bool acceptPartialMatch) const
 {
-    // ex GHullFunctionData::getBasicFunctionByName
+    // ex GHullFunctionData::getBasicFunctionByName, hullfunc.pas:GetBasicFunctionByName
     BasicHullFunction* result = 0;
 
     name = afl::string::strLCase(name);
@@ -272,7 +272,7 @@ game::spec::BasicHullFunctionList::addDefaultAssignment(int hullId, int basicFun
 void
 game::spec::BasicHullFunctionList::performDefaultAssignments(ComponentVector<Hull>& hulls) const
 {
-    // ex GHullFunctionData::performDefaultAssignments
+    // ex GHullFunctionData::performDefaultAssignments, hullfunc.pas:LoadDefaultHullfuncs
     // FIXME: having this function here makes it hard to test due to cyclic dependency Hull<>BasicHullFunctionList
     for (size_t i = 0, n = m_defaultAssignments.size(); i < n; ++i) {
         if (Hull* h = hulls.get(m_defaultAssignments[i].first)) {

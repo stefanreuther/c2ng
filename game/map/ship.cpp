@@ -1260,7 +1260,8 @@ game::map::Ship::isFleetMember() const
 void
 game::map::Ship::addShipSpecialFunction(game::spec::ModifiedHullFunctionList::Function_t function)
 {
-    // ex GShip::addShipFunction
+    // ex GShip::addShipFunction, hullfunc.pas:AddFunctionToShip
+    // FIXME: avoid duplicates
     m_specialFunctions.push_back(function);
     markDirty();
 }
@@ -1271,7 +1272,7 @@ game::map::Ship::hasSpecialFunction(int basicFunction,
                                     const game::spec::ShipList& shipList,
                                     const game::config::HostConfiguration& config) const
 {
-    // ex GShip::canDoSpecial
+    // ex GShip::canDoSpecial, hullfunc.pas:ShipOrHullDoes
     // Do we know the hull?
     int hullNr;
     if (!getHull().get(hullNr)) {
@@ -1326,7 +1327,7 @@ void
 game::map::Ship::enumerateShipFunctions(game::spec::HullFunctionList& list,
                                         const game::spec::ShipList& shipList) const
 {
-    // ex GShip::enumShipSpecificSpecials
+    // ex GShip::enumShipSpecificSpecials, hullfunc.pas:EnumHullfuncsForShip
     const game::spec::ModifiedHullFunctionList& mhf = shipList.modifiedHullFunctions();
     for (size_t i = 0, n = m_specialFunctions.size(); i < n; ++i) {
         game::spec::HullFunction f;

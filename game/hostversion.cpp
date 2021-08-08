@@ -180,6 +180,7 @@ game::HostVersion::hasAutomaticMineIdentity() const
 int
 game::HostVersion::getPostTaxationHappinessLimit() const
 {
+    // ex pdata.pas:TaxLimit
     return m_kind == PHost ? 30 : 31;
 }
 

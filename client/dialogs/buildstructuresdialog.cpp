@@ -245,7 +245,7 @@ namespace {
               m_btnMinus("-", '-', root),
               conn_statusChange(proxy.sig_statusChange.add(this, &StructureWidget::onStatusChange))
             {
-                // ex WPlanetStructureWidget, WPlanetStructureGroup
+                // ex WPlanetStructureWidget, WPlanetStructureGroup, CBuilding.Draw
                 // HBox
                 //   Image
                 //   VBox
@@ -948,7 +948,7 @@ namespace {
 void
 client::dialogs::doBuildStructuresDialog(ui::Root& root, util::RequestSender<game::Session> gameSender, afl::string::Translator& tx, game::Id_t pid, int page)
 {
-    // ex doPlanetBuildScreen
+    // ex doPlanetBuildScreen, pdata.pas:Build
     Downlink link(root, tx);
     BuildStructuresProxy proxy(gameSender, root.engine().dispatcher());
     BuildStructuresProxy::HeaderInfo info;

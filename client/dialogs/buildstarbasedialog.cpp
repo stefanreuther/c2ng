@@ -89,7 +89,7 @@ namespace {
 void
 client::dialogs::doBuildStarbaseDialog(ui::Root& root, util::RequestSender<game::Session> gameSender, afl::string::Translator& tx, game::Id_t pid)
 {
-    // ex client/act-planet.cc:doPlanetBuildBase
+    // ex client/act-planet.cc:doPlanetBuildBase, pdata.pas:BuildBase
 
     // Proxies
     ConfigurationProxy config(gameSender);

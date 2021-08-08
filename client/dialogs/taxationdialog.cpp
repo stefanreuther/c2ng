@@ -462,7 +462,7 @@ TaxationWidget::TaxationWidget(afl::base::Deleter& del, afl::string::Translator&
 void
 TaxationWidget::setContent(const TaxationProxy::AreaStatus& st)
 {
-    // ex WColonistTaxSelector::drawContent, WNativeTaxSelector::drawContent, showChange
+    // ex WColonistTaxSelector::drawContent, WNativeTaxSelector::drawContent, showChange, pdata.pas:ShowChange
     // Title
     m_pTitle->setText(st.title);
 
@@ -510,7 +510,7 @@ TaxationDialog::TaxationDialog(afl::string::Translator& tx, ui::Root& root, Taxa
 bool
 TaxationDialog::run(const TaxationProxy::Status& initialStatus, const PlanetPredictorProxy::Status& initialPrediction)
 {
-    // ex WTaxationDialog::init
+    // ex WTaxationDialog::init, CTaxWindow.Init
     // VBox
     //   VBox
     //     Colonists
@@ -724,7 +724,7 @@ client::dialogs::doTaxationDialog(game::Id_t planetId,
                                   afl::string::Translator& tx,
                                   util::RequestSender<game::Session> gameSender)
 {
-    // ex doTaxation
+    // ex doTaxation, pdata.pas:TaxRates
     // Set up proxy
     TaxationProxy proxy(root.engine().dispatcher(), gameSender, planetId);
     if (const int* p = numBuildings.get()) {

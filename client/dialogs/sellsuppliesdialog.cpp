@@ -112,7 +112,7 @@ namespace {
 void
 client::dialogs::doSellSuppliesDialog(ui::Root& root, util::RequestSender<game::Session> gameSender, game::Id_t planetId, int32_t reservedSupplies, int32_t reservedMoney, afl::string::Translator& tx)
 {
-    // ex WSellSuppliesDialog::doDialog
+    // ex WSellSuppliesDialog::doDialog, pdata.pas:SellSupplies
     ConvertSuppliesProxy proxy(gameSender);
     Downlink link(root, tx);
 

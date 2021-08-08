@@ -1338,7 +1338,7 @@ ScoreDialog::renderMode()
 void
 ScoreDialog::renderTableData()
 {
-    // ex WScoreTable::drawContent
+    // ex WScoreTable::drawContent, CScoreTable.DrawContent
     // Must be on a valid page
     const ScoreTab* tab = getTab(m_currentTab);
     if (tab == 0 || m_tableData.get() == 0) {

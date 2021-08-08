@@ -229,7 +229,7 @@ game::spec::ShipList::getComponent(TechLevel area, Id_t id) const
 void
 game::spec::ShipList::findRacialAbilities(const game::config::HostConfiguration& config)
 {
-    // ex GHull::findRacialAbilities
+    // ex GHull::findRacialAbilities, hullfunc.pas:FindRacialAbilities
     // Sanity check
     Hull* referenceHull = hulls().findNext(0);
     if (!referenceHull) {

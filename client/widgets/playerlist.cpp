@@ -1,5 +1,6 @@
 /**
   *  \file client/widgets/playerlist.cpp
+  *  \brief Class client::widgets::PlayerList
   */
 
 #include "client/widgets/playerlist.hpp"
@@ -7,15 +8,6 @@
 #include "ui/colorscheme.hpp"
 #include "gfx/context.hpp"
 #include "game/playerlist.hpp"
-
-/*
- *  FIXME: initialisation determines team or player names
- *
- *      if (flags & ShowTeamNames)
- *          cellwidths[i] = fonts[FONT_NORMAL]->getTextWidth(getTeamName(i));
- *      else
- *          cellwidths[i] = fonts[FONT_NORMAL]->getTextWidth(player_racenames.getAdjName(i));
- */
 
 client::widgets::PlayerList::PlayerList(ui::Root& root, Layout layout, TextMode textMode, ColorMode colorMode, int preferredWidth, game::PlayerSet_t players)
     : SimpleWidget(),
@@ -77,7 +69,7 @@ client::widgets::PlayerList::setHighlightedPlayers(game::PlayerSet_t highlighedP
 void
 client::widgets::PlayerList::draw(gfx::Canvas& can)
 {
-    // ex WRaceList::drawContent
+    // ex WRaceList::drawContent, CPlayerList.Draw
     getColorScheme().drawBackground(can, getExtent());
 
     gfx::Context<uint8_t> ctx(can, m_root.colorScheme());
@@ -207,13 +199,13 @@ client::widgets::PlayerList::getPlayerColor(int player)
     return COLORS[size_t(player) % countof(COLORS)];
 }
 
-// /** Compute layout of widget.
-//     \param positions [out] Relative positions of player boxes
-//     \param w [in] Assumed widget width in pixels */
+/** Compute layout of widget.
+    \param [out] positions Relative positions of player boxes
+    \param [in]  w         Assumed widget width in pixels */
 void
 client::widgets::PlayerList::calcLayout(game::PlayerArray<gfx::Rectangle>& positions, int w) const
 {
-    // ex WRaceList::calcLayout
+    // ex WRaceList::calcLayout, CPlayerList.Regen
     afl::base::Ref<gfx::Font> font = m_root.provider().getFont(gfx::FontRequest());
 
     int x = 0, y = 0;

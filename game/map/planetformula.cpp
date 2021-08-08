@@ -14,6 +14,7 @@ namespace {
     /** Compute happiness change target for "Safe Tax" method. */
     int computeHappinessTarget(int happy)
     {
+        // ex pdata.pas:OptimumTarget
         if (happy >= 100) {
             return 0;
         } else {
@@ -158,7 +159,7 @@ game::map::getColonistDue(const Planet& pl, const game::config::HostConfiguratio
 game::LongProperty_t
 game::map::getColonistDueLimited(const Planet& pl, const game::config::HostConfiguration& config, const HostVersion& host, int tax, int32_t& rem_inc)
 {
-    // ex game/planetform.h:getColonistDueLimited
+    // ex game/planetform.h:getColonistDueLimited, pdata.pas:LimitColonists, pdata.pas:ColonistDueLimited
     int owner;
     int32_t due;
     if (pl.getOwner(owner) && getColonistDue(pl, config, host, tax).get(due)) {
@@ -182,8 +183,7 @@ game::map::getColonistDueLimited(const Planet& pl, const game::config::HostConfi
 game::IntegerProperty_t
 game::map::getColonistSafeTax(const Planet& pl, const game::config::HostConfiguration& config, const HostVersion& host, int mifa)
 {
-    // ex game/planetform.h:getColonistSafeTax
-
+    // ex game/planetform.h:getColonistSafeTax, pdata.pas:OptimizeTaxes
     int owner, happy, temp;
     int32_t colos;
     if (pl.getOwner(owner)
@@ -470,7 +470,7 @@ game::map::getNativeDueLimited(const Planet& pl, const game::config::HostConfigu
 game::IntegerProperty_t
 game::map::getNativeSafeTax(const Planet& pl, const game::config::HostConfiguration& config, const HostVersion& host, int mifa)
 {
-    // ex game/planetform.h:getNativeSafeTax
+    // ex game/planetform.h:getNativeSafeTax, pdata.pas:OptimizeTaxes
     // Validate inputs
     int owner, race, gov, happy;
     int32_t cpop, npop;

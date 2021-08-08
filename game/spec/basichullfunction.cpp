@@ -77,6 +77,7 @@ game::spec::BasicHullFunction::getId() const
 const String_t&
 game::spec::BasicHullFunction::getName() const
 {
+    // ex hullfunc.pas:GetBasicFunctionName
     return m_name;
 }
 
@@ -84,6 +85,7 @@ game::spec::BasicHullFunction::getName() const
 const String_t&
 game::spec::BasicHullFunction::getDescription() const
 {
+    // ex hullfunc.pas:GetBasicFunctionTitle
     if (m_description.empty()) {
         return m_name;
     } else {

@@ -7,7 +7,7 @@
 int
 game::ref::SortById::compare(const Reference& a, const Reference& b) const
 {
-    // ex game/objl-sort.cc:sortById
+    // ex game/objl-sort.cc:sortById, sort.pas:SortById
     int aid = a.getId();
     int bid = b.getId();
     if (aid < bid) {

@@ -840,7 +840,7 @@ game::map::describePlanetBuildingEffects(afl::io::xml::Nodes_t& nodes,
                                          const Root& root,
                                          afl::string::Translator& tx)
 {
-    // ex WPlanetStructureEffectWidget::drawContent (part)
+    // ex WPlanetStructureEffectWidget::drawContent (part), pdata.pas:ShowHappinessChange, pdata.pas:ShowSensorRate
     util::NumberFormatter fmt(root.userConfiguration().getNumberFormatter());
     TagNode& list = makeList(nodes);
 
@@ -902,7 +902,7 @@ void game::map::describePlanetDefenseEffects(DefenseEffectInfos_t& result,
                                              const UnitScoreDefinitionList& planetScores,
                                              afl::string::Translator& tx)
 {
-    // ex WPlanetDefenseEffectWidget::drawContent
+    // ex WPlanetDefenseEffectWidget::drawContent, CDefenseStrengthTile.DrawData
     // FIXME: as of 20191227, we don't have a UI-independant table representation. When we have one, produce that instead of DefenseEffectInfos_t.
     // FIXME: for now, do not try too hard to deal with partial information
 
@@ -1139,7 +1139,7 @@ game::map::preparePlanetEffectors(const Universe& univ,
                                   const game::spec::ShipList& shipList,
                                   const game::config::HostConfiguration& config)
 {
-    // ex WTaxationDialog::init (part)
+    // ex WTaxationDialog::init (part), pdata.pas:NumHissers
     PlanetEffectors result;
 
     const Planet* pl = univ.planets().get(pid);

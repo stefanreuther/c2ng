@@ -1,5 +1,6 @@
 /**
   *  \file interpreter/mutexcontext.hpp
+  *  \brief Class interpreter::MutexContext
   */
 #ifndef C2NG_INTERPRETER_MUTEXCONTEXT_HPP
 #define C2NG_INTERPRETER_MUTEXCONTEXT_HPP
@@ -9,12 +10,15 @@
 
 namespace interpreter {
 
-    // /** Mutex context. This is the main primitive exposed to the script interface.
-    //     Users will do "With Lock(...)", causing an IntMutexContext be created.
-    //     As long as this context lives, the mutex will be held. Since the interpreter
-    //     may copy around the object, we must use reference-counting. */
+    /** Mutex context.
+        This is the main primitive exposed to the script interface.
+        Users will do "With Lock(...)", causing an IntMutexContext be created.
+        As long as this context lives, the mutex will be held.
+        Since the interpreter may copy around the object, we must use reference-counting. */
     class MutexContext : public Context {
      public:
+        /** Constructor.
+            \param mtx Mutex. Must have one reference allocated to this object. */
         MutexContext(MutexList::Mutex* mtx);
         ~MutexContext();
 

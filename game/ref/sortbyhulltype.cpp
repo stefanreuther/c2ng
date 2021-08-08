@@ -16,7 +16,7 @@ game::ref::SortByHullType::SortByHullType(const game::map::Universe& univ, const
 int
 game::ref::SortByHullType::compare(const Reference& a, const Reference& b) const
 {
-    // ex sortByHull
+    // ex sortByHull, sort.pas:SortByHull
     return getHullType(a) - getHullType(b);
 }
 

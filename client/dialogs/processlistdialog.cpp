@@ -308,7 +308,7 @@ ProcessListWidget::drawFooter(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
 void
 ProcessListWidget::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state)
 {
-    // WProcessList::drawPart
+    // ex WProcessList::drawPart, CTasklist.DrawPart
     // Prepare
     afl::base::Deleter del;
     gfx::Context<util::SkinColor::Color> ctx(can, getColorScheme());
@@ -507,7 +507,7 @@ ProcessListKeyHandler::setCurrentProcessState(ProcessListEditor::State st)
 inline void
 ProcessListKeyHandler::changePriority()
 {
-    // WProcessManagerDialog::changePriority
+    // WProcessManagerDialog::changePriority, CTasklist.RescheduleCurrent
     if (const ProcessListProxy::Info_t* p = m_list.getSelectedProcess()) {
         uint32_t processId = p->processId;
 

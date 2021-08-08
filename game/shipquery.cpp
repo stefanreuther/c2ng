@@ -62,7 +62,7 @@ game::ShipQuery::complete(const game::map::Universe& univ,
                           const int defaultOwner)
 {
     // ex GShipQuery::complete
-    // ex shipacc.pas:FillHullFuncSelection
+    // ex shipacc.pas:FillHullFuncSelection, shipspec.pas:ShowWeaponEffects
 
     /*
       Item                  Derived from
@@ -181,8 +181,7 @@ game::ShipQuery::enumerateShipFunctions(game::spec::HullFunctionList& list,
                                         const game::config::HostConfiguration& config,
                                         const bool includeRacialAbilities) const
 {
-    // ex GShipQuery::enumShipSpecials
-    // ex hullfunc.pas::EnumHullfuncs
+    // ex GShipQuery::enumShipSpecials, hullfunc.pas::EnumHullfuncs
     if (shipList.hulls().get(m_hullType) != 0) {
         if (const game::map::Ship* ship = univ.ships().get(m_shipId)) {
             // We have a ship

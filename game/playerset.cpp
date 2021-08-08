@@ -11,8 +11,7 @@
 String_t
 game::formatPlayerSet(PlayerSet_t set, const PlayerList& list, afl::string::Translator& tx)
 {
-    // game/playerset.cc:formatPlayerSet
-    // hullfunc.pas::FormatRaceMask
+    // ex game/playerset.cc:formatPlayerSet, hullfunc.pas::FormatRaceMask
     const PlayerSet_t allPlayers = list.getAllPlayers();
     set &= allPlayers;
     if (set == allPlayers) {

@@ -12,7 +12,7 @@ game::ref::SortByHullMass::SortByHullMass(const game::map::Universe& univ, const
 int
 game::ref::SortByHullMass::compare(const Reference& a, const Reference& b) const
 {
-    // ex sortByHullMass
+    // ex sortByHullMass, sort.pas:SortByHullMass
     return getHullMass(a) - getHullMass(b);
 }
 

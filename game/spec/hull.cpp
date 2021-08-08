@@ -166,7 +166,7 @@ game::spec::Hull::clearHullFunctions()
 void
 game::spec::Hull::changeHullFunction(ModifiedHullFunctionList::Function_t function, PlayerSet_t add, PlayerSet_t remove, bool assignToHull)
 {
-    // ex GHull::changeSpecialFunction
+    // ex GHull::changeSpecialFunction, hullfunc.pas:AddFunctionToHull
     if (assignToHull) {
         m_hullFunctions.change(function, add, remove);
     } else {

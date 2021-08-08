@@ -47,8 +47,8 @@ Project Goals
 Status
 =======
 
-  This version implements some key parts to prove feasibility. It does
-  not have a fancy GUI and can not be used for playing.
+  This is an incomplete, but mostly usable Planets client. The GUI is
+  still rough at times, but usable.
 
   Browsing and loading local and network games ................. done
     Browse your hard disk as well as network.
@@ -87,11 +87,13 @@ Status
   SDL2 ......................................................... done
     Milestone four can be built using SDL2.
 
+  All the features of PCC1/PCC2 ............................. in work
+
 
 What can you do with it?
 ========================
 
-  c2ng(.exe) is the future player client (pcc-v2).
+  c2ng(.exe) is the player client (pcc-v2).
 
   When you start the program, you will be shown a browser starting
   with "My Computer". Note that the GUI is still incomplete.
@@ -187,14 +189,13 @@ Contributing
   can get sourcecode, build it yourself, and modify if you wish. See
   <doc/HackingGuide.txt> for instructions.
 
-  As of mid-2020, this project is still in the process of source code
-  conversion from older (PCC1, PCC2) versions; I often rework large
-  parts or add incomplete code. The git repository therefore contains
-  only released versions for now. I plan on switching to a git-based
-  development when the port is complete.
+  Since 2.40.10 (May 2021), c2ng is maintained in a public git
+  repository. You are welcome to submit bug reports, patches, or pull
+  requests.
 
-  You can (and should!) still submit bug reports and patches if you
-  wish.
+  Be aware that this project is still in the process of source code
+  conversion from older (PCC1, PCC2) versions; I often rework large
+  parts or add incomplete code.
 
 
 Contact
