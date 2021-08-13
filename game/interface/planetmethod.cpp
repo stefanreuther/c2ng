@@ -420,23 +420,17 @@ namespace {
         // Resolve optional ship Id and build receiver
         std::auto_ptr<game::CargoContainer> pReceiver;
         if (shipId != 0) {
-            // Ship must exist...
-            game::map::Ship* pShip = turn.universe().ships().get(shipId);
-            if (pShip == 0) {
-                throw Exception(Exception::eRange);
-            }
+            // Ship must exist
+            game::map::Ship& ship = game::actions::mustExist(turn.universe().ships().get(shipId), session.translator());
 
-            // ...be played... (this check redundant; also in ShipStorage)
-            game::actions::mustBePlayed(*pShip, session.translator());
-
-            // ...at same place.
-            game::map::Point planetPos, shipPos;
-            if (!pl.getPosition(planetPos) || !pShip->getPosition(shipPos) || planetPos != shipPos) {
-                throw Exception(Exception::ePos);
+            // Verify preconditions
+            Exception ex("");
+            if (!game::actions::BuildAmmo::isValidCombination(pl, ship, ex)) {
+                throw ex;
             }
 
             // ok
-            pReceiver.reset(new game::map::ShipStorage(*pShip, game::actions::mustHaveShipList(session), session.translator()));
+            pReceiver.reset(new game::map::ShipStorage(ship, game::actions::mustHaveShipList(session), session.translator()));
         } else {
             // No ship; use planet
             pReceiver.reset(new game::map::PlanetStorage(pl, root.hostConfiguration(), session.translator()));

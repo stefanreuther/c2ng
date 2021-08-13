@@ -80,6 +80,13 @@ namespace game {
     };
     const size_t NUM_TECH_AREAS = 4;
 
+    /** A tech level status. */
+    enum TechStatus {
+        AvailableTech,                  ///< Tech level is available.
+        BuyableTech,                    ///< Tech level not available but can be bought.
+        LockedTech                      ///< Tech level not available and cannot be bought.
+    };
+
     // FIXME: these are internal representation only so we may not have to differentiate between IntegerProperty_t and NegativeProperty_t.
     typedef afl::base::InlineOptional<int16_t,-1,int> IntegerProperty_t;
     typedef afl::base::InlineOptional<int32_t,-1,int32_t> LongProperty_t;

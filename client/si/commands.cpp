@@ -11,6 +11,7 @@
 #include "afl/string/string.hpp"
 #include "client/cargotransfer.hpp"
 #include "client/dialogs/alliancedialog.hpp"
+#include "client/dialogs/buildammo.hpp"
 #include "client/dialogs/buildqueuedialog.hpp"
 #include "client/dialogs/buildship.hpp"
 #include "client/dialogs/buildstarbasedialog.hpp"
@@ -85,6 +86,7 @@
 #include "game/map/objecttype.hpp"
 #include "game/map/shipinfo.hpp"
 #include "game/map/shippredictor.hpp"
+#include "game/proxy/buildammoproxy.hpp"
 #include "game/proxy/chunnelproxy.hpp"
 #include "game/proxy/inboxadaptor.hpp"
 #include "game/proxy/maplocationproxy.hpp"
@@ -654,6 +656,41 @@ client::si::IFCCAddToSim(game::Session& session, ScriptSide& si, RequestLink1 li
     game::Reference ref = getCurrentShipOrPlanetReference(link.getProcess().getCurrentObject());
     if (ref.isSet()) {
         si.postNewTask(link, new Task(ref, ask));
+    } else {
+        throw interpreter::Error::contextError();
+    }
+}
+
+// @since PCC2 2.40.11
+void
+client::si::IFCCBuildAmmo(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    // ex IFCCBuildAmmo
+    // FIXME: add a version for ships
+    class Task : public UserTask {
+     public:
+        Task(game::Id_t pid)
+            : m_pid(pid)
+            { }
+        virtual void handle(Control& ctl, RequestLink2 link)
+            {
+                UserSide& iface = ctl.interface();
+                game::proxy::BuildAmmoProxy proxy(iface.gameSender(), ctl.root().engine().dispatcher(), m_pid);
+                proxy.setPlanet();
+                client::dialogs::doBuildAmmo(ctl.root(), proxy, iface.gameSender(), m_pid, ctl.translator());
+                iface.continueProcess(link);
+            }
+     private:
+        game::Id_t m_pid;
+    };
+
+    args.checkArgumentCount(0);
+    session.notifyListeners();
+    game::actions::mustHaveGame(session);
+
+    game::map::Planet* pl = dynamic_cast<game::map::Planet*>(link.getProcess().getCurrentObject());
+    if (pl != 0 && pl->isPlayable(game::map::Object::Playable)) {
+        si.postNewTask(link, new Task(pl->getId()));
     } else {
         throw interpreter::Error::contextError();
     }
@@ -3556,7 +3593,7 @@ client::si::registerCommands(UserSide& ui)
 
                 // Procedures
                 s.world().setNewGlobalValue("CC$ADDTOSIM",           new ScriptProcedure(s, &si, IFCCAddToSim));
-                // s.world().setNewGlobalValue("CC$BUILDAMMO",          new ScriptProcedure(s, &si, IFCCBuildAmmo));
+                s.world().setNewGlobalValue("CC$BUILDAMMO",          new ScriptProcedure(s, &si, IFCCBuildAmmo));
                 s.world().setNewGlobalValue("CC$BUILDBASE",          new ScriptProcedure(s, &si, IFCCBuildBase));
                 s.world().setNewGlobalValue("CC$BUILDSHIP",          new ScriptProcedure(s, &si, IFCCBuildShip));
                 s.world().setNewGlobalValue("CC$BUILDSTRUCTURES",    new ScriptProcedure(s, &si, IFCCBuildStructures));

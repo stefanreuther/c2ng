@@ -76,9 +76,10 @@ client::widgets::ComponentList::getNumItems()
 }
 
 bool
-client::widgets::ComponentList::isItemAccessible(size_t /*n*/)
+client::widgets::ComponentList::isItemAccessible(size_t n)
 {
-    return true;
+    return n < m_content.size()
+        && m_content[n].isAccessible;
 }
 
 int
@@ -119,18 +120,22 @@ client::widgets::ComponentList::drawItem(gfx::Canvas& can, gfx::Rectangle area, 
         ctx.useFont(*getFont());
 
         // Content
-        const Part_t& part = m_content[item];
-        switch (part.techStatus) {
-         case game::proxy::BaseStorageProxy::AvailableTech:
-            ctx.setColor(util::SkinColor::Static);
-            break;
-         case game::proxy::BaseStorageProxy::BuyableTech:
-            ctx.setColor(util::SkinColor::Blue);
-            break;
-         case game::proxy::BaseStorageProxy::LockedTech:
+        const Part& part = m_content[item];
+        if (!part.isAccessible) {
             ctx.setColor(util::SkinColor::Faded);
-            break;
-        };
+        } else {
+            switch (part.techStatus) {
+             case game::AvailableTech:
+                ctx.setColor(util::SkinColor::Static);
+                break;
+             case game::BuyableTech:
+                ctx.setColor(util::SkinColor::Blue);
+                break;
+             case game::LockedTech:
+                ctx.setColor(util::SkinColor::Faded);
+                break;
+            }
+        }
 
         const char* tick = part.numParts != 0 ? UTF_BULLET : " ";
         outTextF(ctx, area, tick + part.name);

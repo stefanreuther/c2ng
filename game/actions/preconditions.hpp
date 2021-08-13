@@ -9,6 +9,10 @@
 #include "game/map/planet.hpp"
 #include "game/session.hpp"
 
+namespace game {
+    class Turn;
+}
+
 namespace game { namespace actions {
 
     /** Check for a ship that is played.
@@ -53,6 +57,14 @@ namespace game { namespace actions {
         \return *ship
         \throw game::Exception on precondition violation */
     game::map::Ship& mustExist(game::map::Ship* ship, afl::string::Translator& tx);
+
+    /** Check for existing turn.
+        Throws if the given Turn pointer is null.
+        \param turn Turn
+        \param tx Translator (for error message)
+        \return *turn
+        \throw game::Exception on precondition violation */
+    Turn& mustExist(Turn* turn, afl::string::Translator& tx);
 
     /** Check for ship list.
         Returns the session's ship list; throws if it has none.

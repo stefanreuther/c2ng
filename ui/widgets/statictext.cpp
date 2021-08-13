@@ -38,8 +38,10 @@ ui::widgets::StaticText&
 ui::widgets::StaticText::setText(const String_t& text)
 {
     // ex UIStaticText::setText
-    m_text = text;
-    requestRedraw();
+    if (text != m_text) {
+        m_text = text;
+        requestRedraw();
+    }
     return *this;
 }
 

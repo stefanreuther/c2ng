@@ -492,6 +492,7 @@ Bind PlanetTaskScreen "f8"     := "CCUI.GotoBaseHere"
 Bind PlanetTaskScreen "f9"     := "CCUI.Planet.SetComment"
 Bind PlanetTaskScreen "ret"    := "CCUI$GotoObject 2, Id"
 
+Bind Base             "a"      := "CC$BuildAmmo"
 Bind Base             "b"      := "CC$BuildShip"
 Bind Base             "c"      := "CC$TransferPlanet 0"
 Bind Base             "d"      := "CC$BuildStructures 2"

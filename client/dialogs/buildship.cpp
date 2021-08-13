@@ -8,6 +8,7 @@
 #include "client/dialogs/buildparts.hpp"
 #include "client/dialogs/hullspecification.hpp"
 #include "client/dialogs/specbrowserdialog.hpp"   // renderHullInformation
+#include "client/dialogs/techupgradedialog.hpp"
 #include "client/downlink.hpp"
 #include "client/picturenamer.hpp"
 #include "client/widgets/componentlist.hpp"
@@ -41,6 +42,7 @@
 
 using afl::string::Format;
 using client::widgets::CostSummaryList;
+using client::widgets::ComponentList;
 using game::TechLevel;
 using game::proxy::BaseStorageProxy;
 using game::proxy::BuildShipProxy;
@@ -65,6 +67,16 @@ namespace {
     {
         // ex WHullInfo::getLayoutInfo, WBeamInfo::getLayoutInfo, WTorpInfo::getLayoutInfo, WEngineInfo::getLayoutInfo
         return root.provider().getFont(gfx::FontRequest())->getCellSize().scaledBy(35, 12);
+    }
+
+    ComponentList::Parts_t convertParts(const BaseStorageProxy::Parts_t& in)
+    {
+        ComponentList::Parts_t out;
+        for (size_t i = 0; i < in.size(); ++i) {
+            const BaseStorageProxy::Part& pt = in[i];
+            out.push_back(ComponentList::Part(pt.id, pt.name, pt.numParts, true, pt.techStatus));
+        }
+        return out;
     }
 
     /*
@@ -118,7 +130,7 @@ namespace {
         game::Id_t m_planetId;
 
         // Widgets:
-        client::widgets::ComponentList* m_pComponentList[game::NUM_TECH_AREAS];
+        ComponentList* m_pComponentList[game::NUM_TECH_AREAS];
         ui::widgets::ImageButton* m_pImageButtons[game::NUM_TECH_AREAS];
         DocumentView* m_pSpecificationDisplay[game::NUM_TECH_AREAS];
         StaticText* m_pInStorage[game::NUM_TECH_AREAS];
@@ -227,8 +239,8 @@ BuildShipDialog::init()
         // Make widget
         int numLines = std::max(3, std::min(10, int(parts.size())));
         int widthInEms = (i == game::HullTech ? 15 : 12);
-        m_pComponentList[i] = &m_deleter.addNew(new client::widgets::ComponentList(m_root, numLines, widthInEms));
-        m_pComponentList[i]->setContent(parts);
+        m_pComponentList[i] = &m_deleter.addNew(new ComponentList(m_root, numLines, widthInEms));
+        m_pComponentList[i]->setContent(convertParts(parts));
 
         // More widgets
         m_pImageButtons[i] = &m_deleter.addNew(new ui::widgets::ImageButton(String_t(), 0, m_root, gfx::Point(105, 93)));
@@ -575,7 +587,7 @@ BuildShipDialog::removeLauncher()
 void
 BuildShipDialog::onStorageUpdate(TechLevel area, const BaseStorageProxy::Parts_t& parts)
 {
-    m_pComponentList[area]->setContent(parts);
+    m_pComponentList[area]->setContent(convertParts(parts));
 }
 
 /* Order update. Render everything.
@@ -751,46 +763,14 @@ BuildShipDialog::checkChange()
 bool
 BuildShipDialog::checkTechUpgrade(game::proxy::WaitIndicator& ind, game::TechLevel area, int level)
 {
-    // Try to achieve correct tech level
-    TechUpgradeProxy techProxy(m_gameSender, m_root.engine().dispatcher(), m_planetId);
-    techProxy.upgradeTechLevel(area, level);
-    TechUpgradeProxy::Status techStatus;
-    techProxy.getStatus(ind, techStatus);
-
     static const char*const MESSAGES[] = {
         N_("To build this engine, you need tech %d."),
         N_("To build this hull, you need tech %d."),
         N_("To build this beam, you need tech %d."),
         N_("To build this torpedo launcher, you need tech %d.")
     };
-    String_t message = Format(m_translator(MESSAGES[area]), level);
-    switch (techStatus.status) {
-     case game::actions::TechUpgrade::Success:
-        if (techStatus.cost.get(game::spec::Cost::Money) != 0) {
-            message += " ";
-            message += Format(m_translator("Do you want to upgrade for %d mc?"), techStatus.cost.get(game::spec::Cost::Money));
-            if (!MessageBox(message, m_translator("Build Components"), m_root).doYesNoDialog(m_translator)) {
-                return false;
-            }
-            techProxy.commit();
-        }
-        break;
-
-     case game::actions::TechUpgrade::MissingResources:
-        message += " ";
-        message += Format(m_translator("You do not have the required %d megacredits required to upgrade to the required level."), techStatus.cost.get(game::spec::Cost::Money));
-        MessageBox(message, m_translator("Build Components"), m_root).doOkDialog(m_translator);
-        return false;
-
-     case game::actions::TechUpgrade::DisallowedTech:
-     case game::actions::TechUpgrade::DisabledTech:    // cannot happen
-     case game::actions::TechUpgrade::ForeignHull:     // cannot happen
-        message += " ";
-        message += m_translator("You cannot buy this tech level.");
-        MessageBox(message, m_translator("Build Components"), m_root).doOkDialog(m_translator);
-        return false;
-    }
-    return true;
+    return client::dialogs::checkTechUpgrade(m_root, m_translator, m_gameSender, m_planetId,
+                                             ind, area, level, m_translator(MESSAGES[area]), m_translator("Build Components"));
 }
 
 /* Render "use parts from storage" flag. */

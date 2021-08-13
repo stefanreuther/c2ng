@@ -12,7 +12,8 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = interpreter/context.cpp game/spec/info/utils.cpp \
+FILES_gamelib = game/proxy/buildammoproxy.cpp game/proxy/buildammoproxy.hpp \
+    interpreter/context.cpp game/spec/info/utils.cpp \
     game/spec/info/utils.hpp game/vcr/flak/visualisationsettings.cpp \
     game/vcr/flak/visualisationsettings.hpp \
     game/vcr/flak/visualisationstate.hpp \
@@ -699,8 +700,9 @@ PROJ_AUTO += \
     gamelib:game/*.cpp,game/*.hpp,util/*.cpp,util/*.hpp,interpreter/*.cpp,interpreter/*.hpp
 
 TARGETS += guilib
-FILES_guilib = client/dialogs/hullfunctionview.cpp \
-    client/dialogs/hullfunctionview.hpp client/dialogs/hullspecification.cpp \
+FILES_guilib = client/dialogs/buildammo.cpp client/dialogs/buildammo.hpp \
+    client/dialogs/hullfunctionview.cpp client/dialogs/hullfunctionview.hpp \
+    client/dialogs/hullspecification.cpp \
     client/dialogs/hullspecification.hpp client/dialogs/flakvcrobject.cpp \
     client/dialogs/flakvcrobject.hpp client/vcr/flak/flatrenderer.cpp \
     client/vcr/flak/flatrenderer.hpp client/vcr/flak/threedrenderer.cpp \
@@ -1596,8 +1598,8 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_game_spec_info_utils.cpp \
-    u/t_game_vcr_flak_visualisationsettings.cpp \
+FILES_testsuite = u/t_game_proxy_buildammoproxy.cpp \
+    u/t_game_spec_info_utils.cpp u/t_game_vcr_flak_visualisationsettings.cpp \
     u/t_game_vcr_flak_visualisationstate.cpp \
     u/t_game_proxy_flakvcrplayerproxy.cpp \
     u/t_game_vcr_flak_eventrecorder.cpp u/t_gfx_keyeventconsumer.cpp \

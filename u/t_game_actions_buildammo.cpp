@@ -91,7 +91,7 @@ namespace {
             }
     };
 
-    void prepare(TestHarness& h)
+    void preparePlanet(game::map::Universe& univ, game::map::Planet& pl, int x, int y, int owner)
     {
         // Define base storage. This is the only way to reserve memory for base storage.
         // Planet::setBaseStorage only accesses present slots and never creates new ones.
@@ -109,22 +109,43 @@ namespace {
         afl::string::NullTranslator tx;
 
         // Define planet with base
-        h.planet.setPosition(game::map::Point(X, Y));
-        h.planet.addCurrentPlanetData(game::map::PlanetData(), game::PlayerSet_t(OWNER));
-        h.planet.addCurrentBaseData(bd, game::PlayerSet_t(OWNER));
-        h.planet.setOwner(OWNER);
-        h.planet.setBaseTechLevel(game::HullTech, 1);
-        h.planet.setBaseTechLevel(game::EngineTech, 1);
-        h.planet.setBaseTechLevel(game::BeamTech, 1);
-        h.planet.setBaseTechLevel(game::TorpedoTech, 1);
-        h.planet.setCargo(Element::Money, 600);
-        h.planet.setCargo(Element::Supplies, 100);
-        h.planet.setCargo(Element::Tritanium, 1000);
-        h.planet.setCargo(Element::Duranium, 1000);
-        h.planet.setCargo(Element::Molybdenum, 1000);
-        h.planet.internalCheck(game::map::Configuration(), tx, log);
-        h.planet.combinedCheck2(h.univ, game::PlayerSet_t(OWNER), TURN_NR);
-        h.planet.setPlayability(game::map::Object::Playable);
+        pl.setPosition(game::map::Point(x, y));
+        pl.addCurrentPlanetData(game::map::PlanetData(), game::PlayerSet_t(owner));
+        pl.addCurrentBaseData(bd, game::PlayerSet_t(owner));
+        pl.setOwner(owner);
+        pl.setBaseTechLevel(game::HullTech, 1);
+        pl.setBaseTechLevel(game::EngineTech, 1);
+        pl.setBaseTechLevel(game::BeamTech, 1);
+        pl.setBaseTechLevel(game::TorpedoTech, 1);
+        pl.setCargo(Element::Money, 600);
+        pl.setCargo(Element::Supplies, 100);
+        pl.setCargo(Element::Tritanium, 1000);
+        pl.setCargo(Element::Duranium, 1000);
+        pl.setCargo(Element::Molybdenum, 1000);
+        pl.internalCheck(game::map::Configuration(), tx, log);
+        pl.combinedCheck2(univ, game::PlayerSet_t(owner), TURN_NR);
+        pl.setPlayability(game::map::Object::Playable);
+    }
+
+    void prepareShip(game::map::Ship& sh, int x, int y, int owner)
+    {
+        // Seed the ship to make it visible
+        game::map::ShipData sd;
+        sd.x = x;
+        sd.y = y;
+        sd.owner = owner;
+        sh.addCurrentShipData(sd, game::PlayerSet_t(owner));
+        sh.internalCheck();
+        sh.setPlayability(game::map::Object::Playable);
+
+        sh.setNumLaunchers(3);
+        sh.setTorpedoType(7);
+        sh.setAmmo(77);
+    }
+
+    void prepare(TestHarness& h)
+    {
+        preparePlanet(h.univ, h.planet, X, Y, OWNER);
 
         // Define torpedoes
         for (int i = 1; i <= 10; ++i) {
@@ -496,5 +517,78 @@ TestGameActionsBuildAmmo::testDifferentContainers()
     TS_ASSERT_EQUALS(h.planet.getCargo(Element::fromTorpedoType(1)).orElse(0), 7);   // was 2 before action
     TS_ASSERT_EQUALS(h.planet.getCargo(Element::fromTorpedoType(2)).orElse(0), 2);   // unchanged
     TS_ASSERT_EQUALS(h.planet.getCargo(Element::fromTorpedoType(3)).orElse(0), 7);   // was 2 before action
+}
+
+/** Test isValidCombination(). */
+void
+TestGameActionsBuildAmmo::testIsValidCombination()
+{
+    // Create some planets:
+    game::map::Universe univ;
+
+    // - my planet (base case)
+    game::map::Planet& myPlanet = *univ.planets().create(100);
+    preparePlanet(univ, myPlanet, X, Y, OWNER);
+
+    // - their planet
+    game::map::Planet& theirPlanet = *univ.planets().create(200);
+    preparePlanet(univ, theirPlanet, X, Y, OWNER+1);
+
+    // - far planet
+    game::map::Planet& farPlanet = *univ.planets().create(300);
+    preparePlanet(univ, farPlanet, X+10, Y, OWNER);
+
+    // - unplayed planet
+    game::map::Planet& unPlanet = *univ.planets().create(400);
+    preparePlanet(univ, unPlanet, X, Y, OWNER);
+    unPlanet.setPlayability(game::map::Object::NotPlayable);
+
+    // Create own ship and check against all planets
+    game::map::Ship& myShip = *univ.ships().create(1);
+    prepareShip(myShip, X, Y, OWNER);
+    {
+        game::Exception ex("");
+        TS_ASSERT_EQUALS(game::actions::BuildAmmo::isValidCombination(myPlanet, myShip, ex), true);
+    }
+    {
+        game::Exception ex("");
+        TS_ASSERT_EQUALS(game::actions::BuildAmmo::isValidCombination(theirPlanet, myShip, ex), false);
+        TS_ASSERT_DIFFERS(ex.getScriptError(), "");
+    }
+    {
+        game::Exception ex("");
+        TS_ASSERT_EQUALS(game::actions::BuildAmmo::isValidCombination(farPlanet, myShip, ex), false);
+        TS_ASSERT_DIFFERS(ex.getScriptError(), "");
+    }
+    {
+        game::Exception ex("");
+        TS_ASSERT_EQUALS(game::actions::BuildAmmo::isValidCombination(unPlanet, myShip, ex), false);
+        TS_ASSERT_DIFFERS(ex.getScriptError(), "");
+    }
+
+    // Create unplayed ship and check against all planets
+    game::map::Ship& theirShip = *univ.ships().create(2);
+    prepareShip(theirShip, X, Y, OWNER);
+    theirShip.setPlayability(game::map::Object::NotPlayable);
+    {
+        game::Exception ex("");
+        TS_ASSERT_EQUALS(game::actions::BuildAmmo::isValidCombination(myPlanet, theirShip, ex), false);
+        TS_ASSERT_DIFFERS(ex.getScriptError(), "");
+    }
+    {
+        game::Exception ex("");
+        TS_ASSERT_EQUALS(game::actions::BuildAmmo::isValidCombination(theirPlanet, theirShip, ex), false);
+        TS_ASSERT_DIFFERS(ex.getScriptError(), "");
+    }
+    {
+        game::Exception ex("");
+        TS_ASSERT_EQUALS(game::actions::BuildAmmo::isValidCombination(farPlanet, theirShip, ex), false);
+        TS_ASSERT_DIFFERS(ex.getScriptError(), "");
+    }
+    {
+        game::Exception ex("");
+        TS_ASSERT_EQUALS(game::actions::BuildAmmo::isValidCombination(unPlanet, theirShip, ex), false);
+        TS_ASSERT_DIFFERS(ex.getScriptError(), "");
+    }
 }
 

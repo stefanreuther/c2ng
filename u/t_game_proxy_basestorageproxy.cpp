@@ -119,7 +119,7 @@ TestGameProxyBaseStorageProxy::testGetParts()
         TS_ASSERT_EQUALS(list.size(), 1U);
         TS_ASSERT_EQUALS(list[0].id, game::test::OUTRIDER_HULL_ID);
         TS_ASSERT_EQUALS(list[0].numParts, 2);  /* Slot 3, masked '&2' */
-        TS_ASSERT_EQUALS(list[0].techStatus, game::proxy::BaseStorageProxy::AvailableTech);
+        TS_ASSERT_EQUALS(list[0].techStatus, game::AvailableTech);
         TS_ASSERT_EQUALS(list[0].name, "OUTRIDER CLASS SCOUT");
     }
 
@@ -130,7 +130,7 @@ TestGameProxyBaseStorageProxy::testGetParts()
         TS_ASSERT_EQUALS(list.size(), 1U);
         TS_ASSERT_EQUALS(list[0].id, 9);
         TS_ASSERT_EQUALS(list[0].numParts, 1);   /* Slot 9, masked '&1' */
-        TS_ASSERT_EQUALS(list[0].techStatus, game::proxy::BaseStorageProxy::LockedTech);
+        TS_ASSERT_EQUALS(list[0].techStatus, game::LockedTech);
         TS_ASSERT_EQUALS(list[0].name, "Transwarp Drive");
     }
 
@@ -141,12 +141,12 @@ TestGameProxyBaseStorageProxy::testGetParts()
         TS_ASSERT_EQUALS(list.size(), 10U);
         TS_ASSERT_EQUALS(list[0].id, 1);
         TS_ASSERT_EQUALS(list[0].numParts, 1);   /* Slot 1, masked '&3' */
-        TS_ASSERT_EQUALS(list[0].techStatus, game::proxy::BaseStorageProxy::AvailableTech);
+        TS_ASSERT_EQUALS(list[0].techStatus, game::AvailableTech);
         TS_ASSERT_EQUALS(list[0].name, "Laser Cannon");
 
         TS_ASSERT_EQUALS(list[5].id, 6);
         TS_ASSERT_EQUALS(list[5].numParts, 2);   /* Slot 6, masked '&3' */
-        TS_ASSERT_EQUALS(list[5].techStatus, game::proxy::BaseStorageProxy::BuyableTech);
+        TS_ASSERT_EQUALS(list[5].techStatus, game::BuyableTech);
         TS_ASSERT_EQUALS(list[5].name, "Electron Ram");
     }
 
@@ -157,12 +157,12 @@ TestGameProxyBaseStorageProxy::testGetParts()
         TS_ASSERT_EQUALS(list.size(), 10U);
         TS_ASSERT_EQUALS(list[0].id, 1);
         TS_ASSERT_EQUALS(list[0].numParts, 0);   /* Slot 1, masked '&4' */
-        TS_ASSERT_EQUALS(list[0].techStatus, game::proxy::BaseStorageProxy::AvailableTech);
+        TS_ASSERT_EQUALS(list[0].techStatus, game::AvailableTech);
         TS_ASSERT_EQUALS(list[0].name, "Space Rocket");
 
         TS_ASSERT_EQUALS(list[6].id, 7);
         TS_ASSERT_EQUALS(list[6].numParts, 4);   /* Slot 7, masked '&4' */
-        TS_ASSERT_EQUALS(list[6].techStatus, game::proxy::BaseStorageProxy::LockedTech);
+        TS_ASSERT_EQUALS(list[6].techStatus, game::LockedTech);
         TS_ASSERT_EQUALS(list[6].name, "Arkon Bomb");
     }
 }

@@ -5,18 +5,30 @@
 #ifndef C2NG_CLIENT_WIDGETS_COMPONENTLIST_HPP
 #define C2NG_CLIENT_WIDGETS_COMPONENTLIST_HPP
 
-#include "game/proxy/basestorageproxy.hpp"
+#include <vector>
+#include "game/types.hpp"
 #include "ui/root.hpp"
 #include "ui/widgets/abstractlistbox.hpp"
 
 namespace client { namespace widgets {
 
     /** List of starship components.
-        Displays a list of game::proxy::BaseStorageProxy::Part elements with appropriate coloring. */
+        Displays a list of starship parts with appropriate coloring. */
     class ComponentList : public ui::widgets::AbstractListbox {
      public:
-        typedef game::proxy::BaseStorageProxy::Part Part_t;
-        typedef game::proxy::BaseStorageProxy::Parts_t Parts_t;
+        /** Data for a list item (one part). */
+        struct Part {
+            String_t name;                      ///< Name of part.
+            int id;                             ///< Id (can serve as primary key, e.g. part number).
+            int numParts;                       ///< Number of parts.
+            bool isAccessible;                  ///< true if part is accessible.
+            game::TechStatus techStatus : 8;    ///< Tech status (determines color).
+
+            Part(int id, String_t name, int numParts, bool isAccessible, game::TechStatus techStatus)
+                : name(name), id(id), numParts(numParts), isAccessible(isAccessible), techStatus(techStatus)
+                { }
+        };
+        typedef std::vector<Part> Parts_t;
 
         /** Constructor.
             \param root Root

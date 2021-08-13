@@ -20,6 +20,13 @@ namespace client { namespace widgets {
         If part or total cost exceeds available amounts, that value is shown in red. */
     class ItemCostDisplay : public ui::widgets::SimpleTable {
      public:
+        enum Mode {
+            /// Highlight each column individually.
+            IndividualMode,
+            /// For item cost, check whether we can buy one more. ex include_item_in_cost.
+            TotalMode
+        };
+
         /** Constructor.
             \param root UI root
             \param tx   Translator */
@@ -28,6 +35,10 @@ namespace client { namespace widgets {
         /** Set NumberFormatter.
             \param fmt NumberFormatter */
         void setNumberFormatter(util::NumberFormatter fmt);
+
+        /** Set highlighting mode.
+            \param mode Mode */
+        void setHighlightingMode(Mode mode);
 
         /** Set available amount.
             \param cost Amount */
@@ -51,15 +62,18 @@ namespace client { namespace widgets {
         game::spec::Cost m_available;
         game::spec::Cost m_partCost;
         game::spec::Cost m_totalCost;
+        Mode m_mode;
         int m_haveTech;
         int m_needTech;
 
         void buildTable(ui::Root& root, afl::string::Translator& tx);
 
+        int32_t getAvailableAmount(bool flag, game::spec::Cost::Type type) const;
+
         void renderPartCost();
         void renderTotalCost();
         void renderAvailableAmount();
-        void renderCost(const game::spec::Cost& cost, int column);
+        void renderCost(const game::spec::Cost& cost, int column, bool flag);
         void renderCost(int column, int row, int32_t need, int32_t remain);
         void renderTechLevels();
     };

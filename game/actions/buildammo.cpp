@@ -257,6 +257,13 @@ game::actions::BuildAmmo::costAction() const
     return m_costAction;
 }
 
+// Access underlying receiver.
+const game::CargoContainer&
+game::actions::BuildAmmo::receiver() const
+{
+    return m_receiver;
+}
+
 void
 game::actions::BuildAmmo::update()
 {
@@ -306,6 +313,39 @@ game::actions::BuildAmmo::getItemCost(Element::Type type, game::spec::Cost& cost
     } else {
         return false;
     }
+}
+
+bool
+game::actions::BuildAmmo::isValidCombination(const game::map::Planet& planet, const game::map::Ship& ship, Exception& ex)
+{
+    // Check playability
+    if (!planet.isPlayable(game::map::Object::Playable) || !ship.isPlayable(game::map::Object::Playable)) {
+        ex = Exception(Exception::eNotPlaying);
+        return false;
+    }
+
+    // Planet must have base
+    if (!planet.hasBase()) {
+        ex = Exception(Exception::eNoBase);
+        return false;
+    }
+
+    // Check position
+    game::map::Point planetPos, shipPos;
+    if (!planet.getPosition(planetPos) || !ship.getPosition(shipPos) || planetPos != shipPos) {
+        ex = Exception(Exception::ePos);
+        return false;
+    }
+
+    // Check owner
+    int planetOwner, shipOwner;
+    if (!planet.getOwner(planetOwner) || !ship.getOwner(shipOwner) || planetOwner != shipOwner) {
+        ex = Exception(Exception::eNotOwner);
+        return false;
+    }
+
+    // Success
+    return true;
 }
 
 bool

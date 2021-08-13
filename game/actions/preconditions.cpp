@@ -54,6 +54,15 @@ game::actions::mustExist(game::map::Ship* ship, afl::string::Translator& tx)
     return *ship;
 }
 
+game::Turn&
+game::actions::mustExist(Turn* turn, afl::string::Translator& tx)
+{
+    if (turn == 0) {
+        throw Exception(Exception::eRange, tx("No turn loaded"));
+    }
+    return *turn;
+}
+
 game::spec::ShipList&
 game::actions::mustHaveShipList(game::Session& session)
 {

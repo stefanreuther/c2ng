@@ -14,6 +14,14 @@ class TestGameProxyBaseStorageProxy : public CxxTest::TestSuite {
     void testUpdate();
 };
 
+class TestGameProxyBuildAmmoProxy : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testPlanet();
+    void testShip();
+    void testFarShip();
+};
+
 class TestGameProxyBuildPartsProxy : public CxxTest::TestSuite {
  public:
     void testEmpty();

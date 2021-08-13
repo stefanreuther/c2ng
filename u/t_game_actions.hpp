@@ -43,6 +43,7 @@ class TestGameActionsBuildAmmo : public CxxTest::TestSuite {
     void testSellReverter();
     void testInvalidTypes();
     void testDifferentContainers();
+    void testIsValidCombination();
 };
 
 class TestGameActionsBuildParts : public CxxTest::TestSuite {

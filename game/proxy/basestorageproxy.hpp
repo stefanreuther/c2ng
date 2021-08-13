@@ -28,12 +28,6 @@ namespace game { namespace proxy {
         - receive updates to part list */
     class BaseStorageProxy {
      public:
-        enum TechStatus {
-            AvailableTech,
-            BuyableTech,
-            LockedTech
-        };
-
         /** Information about one part. */
         struct Part {
             int id;                 ///< Id number (for hulls, NOT slot number).

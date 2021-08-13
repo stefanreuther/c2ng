@@ -9,6 +9,7 @@
 #include "game/actions/cargocostaction.hpp"
 #include "game/cargocontainer.hpp"
 #include "game/element.hpp"
+#include "game/exception.hpp"
 #include "game/map/planet.hpp"
 #include "game/root.hpp"
 
@@ -109,6 +110,26 @@ namespace game { namespace actions {
             \return CargoCostAction */
         const CargoCostAction& costAction() const;
 
+        /** Access underlying receiver.
+            \return receiver */
+        const CargoContainer& receiver() const;
+
+        /** Get item cost.
+            \param [in]  type       Type
+            \param [out] cost       Cost
+            \param [out] techLevel  Tech level
+            \return true on success, false if type is invalid */
+        bool getItemCost(Element::Type type, game::spec::Cost& cost, int& techLevel) const;
+
+        /** Check for valid combination.
+            Given a ship and a planet, determines whether the ship is permitted to build ammo at the planet.
+            \param [in]  planet Planet
+            \param [in]  ship   Ship
+            \param [out] ex     Exception
+            \retval true Combination is valid
+            \retval false Combination not valid; exception has been produced in \c ex */
+        static bool isValidCombination(const game::map::Planet& planet, const game::map::Ship& ship, Exception& ex);
+
      private:
         game::map::Planet& m_planet;
         CargoCostAction m_costAction;
@@ -128,8 +149,6 @@ namespace game { namespace actions {
         const game::map::Universe* m_pUniverse;
 
         void update();
-
-        bool getItemCost(Element::Type type, game::spec::Cost& cost, int& techLevel) const;
 
         bool isAccessibleTechLevel(int techLevel) const;
     };

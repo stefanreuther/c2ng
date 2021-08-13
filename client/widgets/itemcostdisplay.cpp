@@ -49,6 +49,15 @@ client::widgets::ItemCostDisplay::setNumberFormatter(util::NumberFormatter fmt)
 }
 
 void
+client::widgets::ItemCostDisplay::setHighlightingMode(Mode mode)
+{
+    m_mode = mode;
+    renderPartCost();
+    renderTotalCost();
+    renderAvailableAmount();
+}
+
+void
 client::widgets::ItemCostDisplay::setAvailableAmount(game::spec::Cost cost)
 {
     m_available = cost;
@@ -115,35 +124,45 @@ client::widgets::ItemCostDisplay::buildTable(ui::Root& root, afl::string::Transl
     setColumnPadding(4, 10);
 }
 
+int32_t
+client::widgets::ItemCostDisplay::getAvailableAmount(bool flag, game::spec::Cost::Type type) const
+{
+    int32_t n = m_available.get(type);
+    if (flag) {
+        n -= m_totalCost.get(type);
+    }
+    return n;
+}
+
 void
 client::widgets::ItemCostDisplay::renderPartCost()
 {
-    renderCost(m_partCost, 1);
+    renderCost(m_partCost, 1, (m_mode == TotalMode));
 }
 
 void
 client::widgets::ItemCostDisplay::renderTotalCost()
 {
-    renderCost(m_totalCost, 2);
+    renderCost(m_totalCost, 2, false);
 }
 
 void
 client::widgets::ItemCostDisplay::renderAvailableAmount()
 {
-    renderCost(m_available, 3);
+    renderCost(m_available, 3, false);
 }
 
 void
-client::widgets::ItemCostDisplay::renderCost(const game::spec::Cost& cost, int column)
+client::widgets::ItemCostDisplay::renderCost(const game::spec::Cost& cost, int column, bool flag)
 {
     // ex WItemCostDisplay::drawContent (part)
-    renderCost(column, 1, cost.get(Cost::Tritanium),  m_available.get(Cost::Tritanium)  - cost.get(Cost::Tritanium));
-    renderCost(column, 2, cost.get(Cost::Duranium),   m_available.get(Cost::Duranium)   - cost.get(Cost::Duranium));
-    renderCost(column, 3, cost.get(Cost::Molybdenum), m_available.get(Cost::Molybdenum) - cost.get(Cost::Molybdenum));
-    renderCost(column, 4, cost.get(Cost::Money),      m_available.get(Cost::Money) + m_available.get(Cost::Supplies) - cost.get(Cost::Money) - cost.get(Cost::Supplies));
+    renderCost(column, 1, cost.get(Cost::Tritanium),  getAvailableAmount(flag, Cost::Tritanium)  - cost.get(Cost::Tritanium));
+    renderCost(column, 2, cost.get(Cost::Duranium),   getAvailableAmount(flag, Cost::Duranium)   - cost.get(Cost::Duranium));
+    renderCost(column, 3, cost.get(Cost::Molybdenum), getAvailableAmount(flag, Cost::Molybdenum) - cost.get(Cost::Molybdenum));
+    renderCost(column, 4, cost.get(Cost::Money),      getAvailableAmount(flag, Cost::Money) + getAvailableAmount(flag, Cost::Supplies) - cost.get(Cost::Money) - cost.get(Cost::Supplies));
 
     if (&cost == &m_available || cost.get(Cost::Supplies) != 0) {
-        renderCost(column, 5, cost.get(Cost::Supplies), m_available.get(Cost::Supplies) - cost.get(Cost::Supplies));
+        renderCost(column, 5, cost.get(Cost::Supplies), getAvailableAmount(flag, Cost::Supplies) - cost.get(Cost::Supplies));
     } else {
         cell(column, 5).setText(String_t());
     }
