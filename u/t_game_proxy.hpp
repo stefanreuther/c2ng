@@ -505,6 +505,7 @@ class TestGameProxyTechUpgradeProxy : public CxxTest::TestSuite {
     void testNormal();
     void testSignal();
     void testUpgrade();
+    void testReserve();
 };
 
 class TestGameProxyUfoProxy : public CxxTest::TestSuite {

@@ -112,6 +112,9 @@ class TestGameActionsCargoCostAction : public CxxTest::TestSuite {
     void testMissingLotsOfMoney();
     void testMultiModification();
     void testUnderlayingChange();
+    void testReservedAmount();
+    void testReservedMoney();
+    void testReservedMuchMoney();
 };
 
 class TestGameActionsCargoTransfer : public CxxTest::TestSuite {

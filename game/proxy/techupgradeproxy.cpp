@@ -41,6 +41,7 @@ class game::proxy::TechUpgradeProxy::Trampoline {
     void setAll(Order order);
     void setTechLevel(TechLevel area, int value);
     void upgradeTechLevel(TechLevel area, int value);
+    void setReservedAmount(game::spec::Cost cost);
     void commit();
 
     void onChange();
@@ -115,6 +116,12 @@ void
 game::proxy::TechUpgradeProxy::Trampoline::upgradeTechLevel(TechLevel area, int value)
 {
     m_action.upgradeTechLevel(area, value);
+}
+
+void
+game::proxy::TechUpgradeProxy::Trampoline::setReservedAmount(game::spec::Cost cost)
+{
+    m_action.setReservedAmount(cost);
 }
 
 void
@@ -204,6 +211,12 @@ void
 game::proxy::TechUpgradeProxy::upgradeTechLevel(TechLevel area, int value)
 {
     m_sender.postRequest(&Trampoline::upgradeTechLevel, area, value);
+}
+
+void
+game::proxy::TechUpgradeProxy::setReservedAmount(game::spec::Cost cost)
+{
+    m_sender.postRequest(&Trampoline::setReservedAmount, cost);
 }
 
 void

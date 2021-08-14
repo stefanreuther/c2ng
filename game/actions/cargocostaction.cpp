@@ -5,6 +5,20 @@
 
 #include "game/actions/cargocostaction.hpp"
 
+namespace {
+    int32_t getCostAmount(const game::spec::Cost& c, game::Element::Type type)
+    {
+        switch (type) {
+         case game::Element::Tritanium:    return c.get(game::spec::Cost::Tritanium);
+         case game::Element::Duranium:     return c.get(game::spec::Cost::Duranium);
+         case game::Element::Molybdenum:   return c.get(game::spec::Cost::Molybdenum);
+         case game::Element::Supplies:     return c.get(game::spec::Cost::Supplies);
+         case game::Element::Money:        return c.get(game::spec::Cost::Money);
+         default:                          return 0;
+        }
+    }
+}
+
 // Constructor.
 game::actions::CargoCostAction::CargoCostAction(CargoContainer& container)
     : sig_change(),
@@ -40,12 +54,23 @@ game::actions::CargoCostAction::getCost() const
     return m_cost;
 }
 
+// Set reserved amount.
+void
+game::actions::CargoCostAction::setReservedAmount(game::spec::Cost cost)
+{
+    if (m_reservedAmount != cost) {
+        m_reservedAmount = cost;
+        update();
+        sig_change.raise();
+    }
+}
+
 // Get remaining amount.
 int32_t
 game::actions::CargoCostAction::getRemainingAmount(Element::Type type) const
 {
     // ex GCargoCostTransaction::getRemainingCargo
-    return m_container.getEffectiveAmount(type);
+    return m_container.getEffectiveAmount(type) - getCostAmount(m_reservedAmount, type);
 }
 
 // Get remaining amount as Cost structure.
@@ -68,7 +93,7 @@ game::actions::CargoCostAction::getMissingAmount(Element::Type type) const
     // ex GCargoCostTransaction::getMissingCargo
     // FIXME: the original version had some logic about when to report missing supplies.
     int32_t amount = m_container.getEffectiveAmount(type);
-    int32_t limit = m_container.getMinAmount(type);
+    int32_t limit = m_container.getMinAmount(type) + getCostAmount(m_reservedAmount, type);
     if (amount < limit) {
         return limit - amount;
     } else {
@@ -94,11 +119,11 @@ game::spec::Cost
 game::actions::CargoCostAction::getAvailableAmountAsCost() const
 {
     game::spec::Cost result;
-    result.set(m_cost.Tritanium,  m_container.getAmount(Element::Tritanium));
-    result.set(m_cost.Duranium,   m_container.getAmount(Element::Duranium));
-    result.set(m_cost.Molybdenum, m_container.getAmount(Element::Molybdenum));
-    result.set(m_cost.Money,      m_container.getAmount(Element::Money));
-    result.set(m_cost.Supplies,   m_container.getAmount(Element::Supplies));
+    result.set(m_cost.Tritanium,  m_container.getAmount(Element::Tritanium)  - m_reservedAmount.get(game::spec::Cost::Tritanium));
+    result.set(m_cost.Duranium,   m_container.getAmount(Element::Duranium)   - m_reservedAmount.get(game::spec::Cost::Duranium));
+    result.set(m_cost.Molybdenum, m_container.getAmount(Element::Molybdenum) - m_reservedAmount.get(game::spec::Cost::Molybdenum));
+    result.set(m_cost.Money,      m_container.getAmount(Element::Money)      - m_reservedAmount.get(game::spec::Cost::Money));
+    result.set(m_cost.Supplies,   m_container.getAmount(Element::Supplies)   - m_reservedAmount.get(game::spec::Cost::Supplies));
     return result;
 }
 
@@ -136,7 +161,7 @@ game::actions::CargoCostAction::update()
     int32_t neededMoney = m_cost.get(m_cost.Money);
     int32_t neededSupplies = m_cost.get(m_cost.Supplies);
     if (m_container.getFlags().contains(CargoContainer::SupplySale)) {
-        int32_t availableMoney = m_container.getAmount(Element::Money) - m_container.getMinAmount(Element::Money);
+        int32_t availableMoney = m_container.getAmount(Element::Money) - m_container.getMinAmount(Element::Money) - m_reservedAmount.get(m_cost.Money);
         if (availableMoney < neededMoney) {
             neededSupplies += (neededMoney - availableMoney);
             neededMoney = availableMoney;

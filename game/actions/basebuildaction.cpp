@@ -430,6 +430,12 @@ game::actions::BaseBuildAction::setUseTechUpgrade(bool b)
 }
 
 void
+game::actions::BaseBuildAction::setReservedAmount(game::spec::Cost cost)
+{
+    m_costAction.setReservedAmount(cost);
+}
+
+void
 game::actions::BaseBuildAction::getCostSummary(game::spec::CostSummary& result)
 {
     BillingExecutor ex(m_planet, result, m_shipList, m_root.hostConfiguration(), m_useTechUpgrades, m_translator);

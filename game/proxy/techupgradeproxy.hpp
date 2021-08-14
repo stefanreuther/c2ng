@@ -87,6 +87,13 @@ namespace game { namespace proxy {
             \see game::actions::TechUpgrade::upgradeTechLevel */
         void upgradeTechLevel(TechLevel area, int value);
 
+        /** Set reserved mineral amount.
+            This amount will not be spent by this action.
+            Use if the action is a nested transaction.
+            \param cost Reserved amount
+            \see BaseBuildAction::setReservedAmount */
+        void setReservedAmount(game::spec::Cost cost);
+
         /** Commit transaction.
             Will perform all configured upgrades and downgrades. */
         void commit();

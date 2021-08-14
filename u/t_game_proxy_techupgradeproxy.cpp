@@ -172,3 +172,57 @@ TestGameProxyTechUpgradeProxy::testUpgrade()
     TS_ASSERT_EQUALS(st.current[game::BeamTech], 3);       // unchanged
 }
 
+void
+TestGameProxyTechUpgradeProxy::testReserve()
+{
+    game::test::SessionThread t;
+    game::test::WaitIndicator ind;
+    prepare(t);
+    game::proxy::TechUpgradeProxy testee(t.gameSender(), ind, PLANET_ID);
+
+    // Get current status -> returns successful
+    game::proxy::TechUpgradeProxy::Status st;
+    testee.getStatus(ind, st);
+    TS_ASSERT_EQUALS(st.status, game::actions::TechUpgrade::Success);
+    TS_ASSERT_EQUALS(st.max[0], MAX_TECH);
+    TS_ASSERT_EQUALS(st.min[0], 3);
+
+    // Tech levels are at 3, and we have 3000$ in total.
+    // Upgrading to tech 6 costs 1200$.
+    testee.setReservedAmount(game::spec::Cost::fromString("$1000"));
+    testee.setTechLevel(game::HullTech, 6);
+    testee.getStatus(ind, st);
+    TS_ASSERT_EQUALS(st.status, game::actions::TechUpgrade::Success);
+    TS_ASSERT_EQUALS(st.current[game::HullTech], 6);
+    TS_ASSERT_EQUALS(st.current[game::EngineTech], 3);
+    TS_ASSERT_EQUALS(st.current[game::BeamTech], 3);
+    TS_ASSERT_EQUALS(st.current[game::TorpedoTech], 3);
+    TS_ASSERT_EQUALS(st.cost.get(game::spec::Cost::Money), 1200);
+    TS_ASSERT_EQUALS(st.remaining.get(game::spec::Cost::Money), 0);
+    TS_ASSERT_EQUALS(st.remaining.get(game::spec::Cost::Supplies), 800);
+
+    // Upgrade another one, this will fail
+    testee.setTechLevel(game::BeamTech, 6);
+    testee.getStatus(ind, st);
+    TS_ASSERT_EQUALS(st.status, game::actions::TechUpgrade::MissingResources);
+    TS_ASSERT_EQUALS(st.current[game::HullTech], 6);
+    TS_ASSERT_EQUALS(st.current[game::EngineTech], 3);
+    TS_ASSERT_EQUALS(st.current[game::BeamTech], 6);
+    TS_ASSERT_EQUALS(st.current[game::TorpedoTech], 3);
+    TS_ASSERT_EQUALS(st.cost.get(game::spec::Cost::Money), 2400);
+    TS_ASSERT_EQUALS(st.remaining.get(game::spec::Cost::Money), 0);
+    TS_ASSERT_EQUALS(st.remaining.get(game::spec::Cost::Supplies), -400);
+
+    // Undo reservation; action ok now
+    testee.setReservedAmount(game::spec::Cost());
+    testee.getStatus(ind, st);
+    TS_ASSERT_EQUALS(st.status, game::actions::TechUpgrade::Success);
+    TS_ASSERT_EQUALS(st.current[game::HullTech], 6);
+    TS_ASSERT_EQUALS(st.current[game::EngineTech], 3);
+    TS_ASSERT_EQUALS(st.current[game::BeamTech], 6);
+    TS_ASSERT_EQUALS(st.current[game::TorpedoTech], 3);
+    TS_ASSERT_EQUALS(st.cost.get(game::spec::Cost::Money), 2400);
+    TS_ASSERT_EQUALS(st.remaining.get(game::spec::Cost::Money), 0);
+    TS_ASSERT_EQUALS(st.remaining.get(game::spec::Cost::Supplies), 600);
+}
+

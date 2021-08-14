@@ -91,6 +91,13 @@ namespace game { namespace actions {
             \param b New status */
         void setUseTechUpgrade(bool b);
 
+        /** Set reserved mineral amount.
+            This amount will not be spent by this action.
+            Use if the action is a nested transaction.
+            \param cost Reserved amount
+            \see CargoCostAction::setReservedAmount */
+        void setReservedAmount(game::spec::Cost cost);
+
         /** Access underlying CargoCostAction.
             \return CargoCostAction */
         const CargoCostAction& costAction() const;

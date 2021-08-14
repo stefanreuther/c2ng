@@ -291,7 +291,8 @@ Dialog::build(int amount)
     if (amount > 0 && p->techStatus != game::AvailableTech) {
         client::Downlink link(m_root, m_translator);
         client::dialogs::checkTechUpgrade(m_root, m_translator, m_gameSender, m_planetId,
-                                          link, game::TorpedoTech, p->techLevel, m_translator("To build this torpedo, you need tech %d."),
+                                          link, game::TorpedoTech, p->techLevel, m_status.cost,
+                                          m_translator("To build this torpedo, you need tech %d."),
                                           m_translator("Build Torpedoes"));
 
         // Traditionally, PCC doesn't build immediately after upgrading tech.

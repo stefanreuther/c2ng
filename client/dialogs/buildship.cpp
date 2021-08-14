@@ -770,7 +770,8 @@ BuildShipDialog::checkTechUpgrade(game::proxy::WaitIndicator& ind, game::TechLev
         N_("To build this torpedo launcher, you need tech %d.")
     };
     return client::dialogs::checkTechUpgrade(m_root, m_translator, m_gameSender, m_planetId,
-                                             ind, area, level, m_translator(MESSAGES[area]), m_translator("Build Components"));
+                                             ind, area, level, game::spec::Cost(),
+                                             m_translator(MESSAGES[area]), m_translator("Build Components"));
 }
 
 /* Render "use parts from storage" flag. */

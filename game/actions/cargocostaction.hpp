@@ -38,6 +38,16 @@ namespace game { namespace actions {
             \return current cost */
         const game::spec::Cost& getCost() const;
 
+        /** Set reserved amount.
+
+            This amount is considered reserved for other actions, and will not be spent by this action.
+            Use this is this action is nested within another action's UI.
+
+            PCC2 used cargo reservations for this purpose, which is a more general, but also more complex solution to this problem.
+
+            \param cost Amount */
+        void setReservedAmount(game::spec::Cost cost);
+
         /** Get remaining amount.
             This is the amount remaining after removing the cost.
             It may be outside the range allowed by the CargoContainer if the transaction is invalid.
@@ -87,6 +97,7 @@ namespace game { namespace actions {
      private:
         CargoContainer& m_container;
         game::spec::Cost m_cost;
+        game::spec::Cost m_reservedAmount;
         afl::base::SignalConnection m_changeConnection;
 
         void onChange();
