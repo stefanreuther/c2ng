@@ -193,7 +193,7 @@ client::widgets::CombatUnitList::handleKey(util::Key_t key, int prefix)
         n = getCurrentItem();
         while (n > 0 && n < m_items.size()) {
             --n;
-            if (!m_items[n].flags.contains(Dead)) {
+            if (!m_items[n].flags.contains(Dead) && !m_items[n].flags.contains(Inaccessible)) {
                 setCurrentItem(n);
                 break;
             }
@@ -203,7 +203,7 @@ client::widgets::CombatUnitList::handleKey(util::Key_t key, int prefix)
      case util::Key_Down + util::KeyMod_Ctrl:
         n = getCurrentItem();
         while (++n < m_items.size()) {
-            if (!m_items[n].flags.contains(Dead)) {
+            if (!m_items[n].flags.contains(Dead) && !m_items[n].flags.contains(Inaccessible)) {
                 setCurrentItem(n);
                 break;
             }
