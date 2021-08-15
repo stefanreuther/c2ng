@@ -6,6 +6,7 @@
 #include "gfx/threed/vecmath.hpp"
 
 #include "t_gfx_threed.hpp"
+#include "util/math.hpp"
 
 using gfx::threed::Vec3f;
 using gfx::threed::Vec4f;
@@ -363,7 +364,7 @@ void
 TestGfxThreedVecMath::testMat4fRotateX()
 {
     Mat4f m = Mat4f::identity();
-    Mat4f& n = m.rotateX(M_PI/2);
+    Mat4f& n = m.rotateX(util::PI/2);
     TS_ASSERT_EQUALS(&m, &n);
     TS_ASSERT_DELTA(m(0),  1, 0.000001);  TS_ASSERT_DELTA(m(1),  0, 0.000001);  TS_ASSERT_DELTA(m(2),  0, 0.000001);  TS_ASSERT_DELTA(m(3),  0, 0.000001);
     TS_ASSERT_DELTA(m(4),  0, 0.000001);  TS_ASSERT_DELTA(m(5),  0, 0.000001);  TS_ASSERT_DELTA(m(6),  1, 0.000001);  TS_ASSERT_DELTA(m(7),  0, 0.000001);
@@ -380,7 +381,7 @@ void
 TestGfxThreedVecMath::testMat4fRotateY()
 {
     Mat4f m = Mat4f::identity();
-    Mat4f& n = m.rotateY(M_PI/2);
+    Mat4f& n = m.rotateY(util::PI/2);
     TS_ASSERT_EQUALS(&m, &n);
     TS_ASSERT_DELTA(m(0),  0, 0.000001);  TS_ASSERT_DELTA(m(1),  0, 0.000001);  TS_ASSERT_DELTA(m(2), -1, 0.000001);  TS_ASSERT_DELTA(m(3),  0, 0.000001);
     TS_ASSERT_DELTA(m(4),  0, 0.000001);  TS_ASSERT_DELTA(m(5),  1, 0.000001);  TS_ASSERT_DELTA(m(6),  0, 0.000001);  TS_ASSERT_DELTA(m(7),  0, 0.000001);
@@ -397,7 +398,7 @@ void
 TestGfxThreedVecMath::testMat4fRotateZ()
 {
     Mat4f m = Mat4f::identity();
-    Mat4f& n = m.rotateZ(M_PI/2);
+    Mat4f& n = m.rotateZ(util::PI/2);
     TS_ASSERT_EQUALS(&m, &n);
     TS_ASSERT_DELTA(m(0),  0, 0.000001);  TS_ASSERT_DELTA(m(1),  1, 0.000001);  TS_ASSERT_DELTA(m(2),  0, 0.000001);  TS_ASSERT_DELTA(m(3),  0, 0.000001);
     TS_ASSERT_DELTA(m(4), -1, 0.000001);  TS_ASSERT_DELTA(m(5),  0, 0.000001);  TS_ASSERT_DELTA(m(6),  0, 0.000001);  TS_ASSERT_DELTA(m(7),  0, 0.000001);
@@ -440,7 +441,7 @@ void
 TestGfxThreedVecMath::testMat4fTransformMoveScaleRotate()
 {
     Mat4f m = Mat4f::identity();
-    m.rotateZ(M_PI/2);                // third operation
+    m.rotateZ(util::PI/2);            // third operation
     m.scale(2);                       // second operation
     m.translate(Vec3f(50,40,30));     // first operation
 
@@ -480,7 +481,7 @@ void
 TestGfxThreedVecMath::testMat4fTransformRotateX()
 {
     Mat4f m = Mat4f::identity();
-    m.rotateX(M_PI/4);
+    m.rotateX(util::PI/4);
 
     Vec3f v = Vec3f(44,1,0).transform(m);
     TS_ASSERT_DELTA(v(0), 44, 0.000001);
@@ -492,7 +493,7 @@ void
 TestGfxThreedVecMath::testMat4fTransformRotateY()
 {
     Mat4f m = Mat4f::identity();
-    m.rotateY(M_PI/4);
+    m.rotateY(util::PI/4);
     Vec3f v = Vec3f(1,44,0).transform(m);
     TS_ASSERT_DELTA(v(0), 0.707106, 0.000001);
     TS_ASSERT_DELTA(v(1), 44, 0.000001);
@@ -503,7 +504,7 @@ void
 TestGfxThreedVecMath::testMat4fTransformRotateZ()
 {
     Mat4f m = Mat4f::identity();
-    m.rotateZ(M_PI/4);
+    m.rotateZ(util::PI/4);
     Vec3f v = Vec3f(1,0,44).transform(m);
     TS_ASSERT_DELTA(v(0), 0.707106, 0.000001);
     TS_ASSERT_DELTA(v(1), 0.707106, 0.000001);
