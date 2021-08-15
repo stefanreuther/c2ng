@@ -869,6 +869,7 @@ namespace {
                 game::browser::Session browserSession(translator(), log());
                 game::Session gameSession(translator(), fs);
                 gameSession.log().addListener(log());
+                gameSession.setSystemInformation(util::getSystemInformation());
 
                 // Set some variables
                 gameSession.world().setNewGlobalValue("C2$RESOURCEDIRECTORY", interpreter::makeStringValue(resourceDirectory->getDirectoryName()));

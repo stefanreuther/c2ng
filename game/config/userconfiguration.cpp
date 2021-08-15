@@ -134,6 +134,8 @@ namespace game { namespace config {
     const IntegerOptionDescriptor UserConfiguration::Sort_Search           = { "Sort.Search",           &IntegerValueParser::instance };
     const IntegerOptionDescriptor UserConfiguration::Sort_Search_Secondary = { "Sort.Search.Secondary", &IntegerValueParser::instance };
 
+    // Simulation
+    const IntegerOptionDescriptor UserConfiguration::Sim_NumThreads        = { "Sim.NumThreads",        &IntegerValueParser::instance };
 } }
 
 
@@ -243,6 +245,9 @@ game::config::UserConfiguration::setDefaultValues()
         opt.setMarkerKind(desc.m_markerKind);
         opt.setNote(String_t());
     }
+
+    // Simulation
+    me[Sim_NumThreads].set(0);
 
     markAllOptionsUnset();
 }

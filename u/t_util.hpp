@@ -303,6 +303,11 @@ class TestUtilStringParser : public CxxTest::TestSuite {
     void testIt();
 };
 
+class TestUtilSystemInformation : public CxxTest::TestSuite {
+ public:
+    void testIt();
+};
+
 class TestUtilUnicodeChars : public CxxTest::TestSuite {
  public:
     void testIt();

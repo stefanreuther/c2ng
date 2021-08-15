@@ -10,6 +10,7 @@
 #include "game/proxy/simulationsetupproxy.hpp"
 #include "game/root.hpp"
 #include "game/session.hpp"
+#include "game/sim/parallelrunner.hpp"
 #include "game/sim/run.hpp"
 #include "game/sim/runner.hpp"
 #include "game/sim/session.hpp"
@@ -125,8 +126,18 @@ game::proxy::SimulationRunProxy::Trampoline::Trampoline(util::RequestSender<Simu
         m_sim->setup().notifyListeners();
 
         // Build runner
-        // FIXME: configure number of threads
-        m_runner.reset(new game::sim::SimpleRunner(m_sim->setup(), m_sim->configuration(), *m_shipList, m_root->hostConfiguration(), m_root->flakConfiguration(), m_rng));
+        const int configThreads = m_root->userConfiguration()[game::config::UserConfiguration::Sim_NumThreads]();
+        const size_t systemThreads = session.getSystemInformation().numProcessors;
+        const size_t numThreads = (configThreads > 0 && configThreads < 512
+                                   ? static_cast<size_t>(configThreads)
+                                   : systemThreads > 0
+                                   ? systemThreads
+                                   : 1);
+        if (numThreads > 1) {
+            m_runner.reset(new game::sim::ParallelRunner(m_sim->setup(), m_sim->configuration(), *m_shipList, m_root->hostConfiguration(), m_root->flakConfiguration(), m_rng, numThreads));
+        } else {
+            m_runner.reset(new game::sim::SimpleRunner(m_sim->setup(), m_sim->configuration(), *m_shipList, m_root->hostConfiguration(), m_root->flakConfiguration(), m_rng));
+        }
         m_runner->sig_update.add(this, &Trampoline::reportUpdate);
     }
 }

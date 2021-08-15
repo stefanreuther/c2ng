@@ -98,6 +98,11 @@ if (get_variable('ENABLE_BUILD')) {
                               pkg => 'SDL2_image',
                               dir => add_variable(SDL2_IMAGE_DIR => '')));
 
+    my $config_h =
+        ("#define HAVE_SDL 1\n"        x $V{WITH_SDL}) .
+        ("#define HAVE_SDL_IMAGE 1\n"  x $V{WITH_SDL_IMAGE}) .
+        ("#define HAVE_SDL2 1\n"       x $V{WITH_SDL2}) .
+        ("#define HAVE_SDL2_IMAGE 1\n" x $V{WITH_SDL2_IMAGE});
 
     # Target
     add_variable(TARGET => 'POSIX');
@@ -109,12 +114,22 @@ if (get_variable('ENABLE_BUILD')) {
         die "Error: the specified target '$V{TARGET}' is not known; provide correct 'TARGET=' option";
     }
 
+    # Optional functions
+    if ($V{TARGET} =~ /POSIX/i) {
+        if (try_link(file_create_temp("#define _GNU_SOURCE\n".
+                                      "#include <sched.h>\n".
+                                      "int main() {\n".
+                                      " cpu_set_t set;\n".
+                                      " sched_getaffinity(0, sizeof(set), &set);\n".
+                                      " return CPU_COUNT(&set);\n".
+                                      "}", '.c'))) {
+            $config_h .= "#define HAVE_SCHED_GETAFFINITY 1\n";
+            log_info("Using sched_getaffinity.");
+        }
+    }
+
     # Generate output
-    file_update(normalize_filename($V{OUT}, 'config.h'),
-                ("#define HAVE_SDL 1\n"        x $V{WITH_SDL}) .
-                ("#define HAVE_SDL_IMAGE 1\n"  x $V{WITH_SDL_IMAGE}) .
-                ("#define HAVE_SDL2 1\n"       x $V{WITH_SDL2}) .
-                ("#define HAVE_SDL2_IMAGE 1\n" x $V{WITH_SDL2_IMAGE}));
+    file_update(normalize_filename($V{OUT}, 'config.h'), $config_h);
 
     # Options for coverage
     if ($V{WITH_COVERAGE}) {

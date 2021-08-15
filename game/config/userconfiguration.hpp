@@ -128,6 +128,9 @@ namespace game { namespace config {
         static const IntegerOptionDescriptor Sort_Cargo_Secondary;
         static const IntegerOptionDescriptor Sort_Search;
         static const IntegerOptionDescriptor Sort_Search_Secondary;
+
+        // Simulation
+        static const IntegerOptionDescriptor Sim_NumThreads;
     };
 
 } }

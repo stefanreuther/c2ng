@@ -26,6 +26,7 @@
 #include "interpreter/taskeditor.hpp"
 #include "interpreter/world.hpp"
 #include "util/plugin/manager.hpp"
+#include "util/systeminformation.hpp"
 
 namespace game {
 
@@ -181,6 +182,14 @@ namespace game {
             \return InterpreterInterface */
         InterpreterInterface& interface();
 
+        /** Access SystemInformation.
+            \return SystemInformation. */
+        const util::SystemInformation& getSystemInformation() const;
+
+        /** Set SystemInformation.
+            \param info New system information */
+        void setSystemInformation(const util::SystemInformation& info);
+
         /** Access random-number generator.
             \return random-number generator */
         util::RandomNumberGenerator& rng();
@@ -221,6 +230,9 @@ namespace game {
         game::interface::UserInterfacePropertyStack m_uiPropertyStack;
         AreaSet_t m_editableAreas;
         interpreter::World m_world;
+
+        /** System information. */
+        util::SystemInformation m_systemInformation;
 
         /** Process list.
             Must be after World, because processes reference World.

@@ -107,6 +107,7 @@ game::Session::Session(afl::string::Translator& tx, afl::io::FileSystem& fs)
       m_uiPropertyStack(),
       m_editableAreas(),
       m_world(m_log, tx, fs),
+      m_systemInformation(),
       m_processList(),
       m_rng(afl::sys::Time::getTickCounter()),
       m_plugins(tx, m_log),
@@ -340,6 +341,20 @@ game::InterpreterInterface&
 game::Session::interface()
 {
     return *this;
+}
+
+// Access SystemInformation.
+const util::SystemInformation&
+game::Session::getSystemInformation() const
+{
+    return m_systemInformation;
+}
+
+// Set SystemInformation.
+void
+game::Session::setSystemInformation(const util::SystemInformation& info)
+{
+    m_systemInformation = info;
 }
 
 util::RandomNumberGenerator&

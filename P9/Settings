@@ -12,7 +12,8 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/proxy/buildammoproxy.cpp game/proxy/buildammoproxy.hpp \
+FILES_gamelib = util/systeminformation.cpp util/systeminformation.hpp \
+    game/proxy/buildammoproxy.cpp game/proxy/buildammoproxy.hpp \
     interpreter/context.cpp game/spec/info/utils.cpp \
     game/spec/info/utils.hpp game/vcr/flak/visualisationsettings.cpp \
     game/vcr/flak/visualisationsettings.hpp \
@@ -1598,8 +1599,9 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_game_proxy_buildammoproxy.cpp \
-    u/t_game_spec_info_utils.cpp u/t_game_vcr_flak_visualisationsettings.cpp \
+FILES_testsuite = u/t_util_systeminformation.cpp \
+    u/t_game_proxy_buildammoproxy.cpp u/t_game_spec_info_utils.cpp \
+    u/t_game_vcr_flak_visualisationsettings.cpp \
     u/t_game_vcr_flak_visualisationstate.cpp \
     u/t_game_proxy_flakvcrplayerproxy.cpp \
     u/t_game_vcr_flak_eventrecorder.cpp u/t_gfx_keyeventconsumer.cpp \
