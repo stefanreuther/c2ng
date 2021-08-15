@@ -1,0 +1,11 @@
+/*!
+     \namespace util::editor
+     \brief Editor
+
+     This namespace contains classes for editing text,
+     to share some common functionality between input widgets.
+
+     Entry Points:
+     - util::editor::Command
+     - util::editor::Editor
+ */

@@ -1,0 +1,11 @@
+/*!
+     \namespace ui::icons
+     \brief Icons
+
+     An Icon is a simple shape with no behaviour on its own.
+     Icons can be used as part of widgets.
+
+     <b>Entry points:</b>
+
+     - ui::icons::Icon
+ */

@@ -1,0 +1,15 @@
+/*!
+     \namespace gfx::threed
+     \brief 3-D Graphics
+
+     This namespace contains a simple 3-D engine.
+
+     This interface is NOT intended to be a full mapping of 3D APIs,
+     and is probably NOT suited to make a first-person shooter or window compositor.
+     However, a similar interface is used in the WebGL FLAK player.
+
+     <b>Entry point:</b>
+
+     - gfx::threed::Context
+     - gfx::threed::SoftwareContext
+  */

@@ -1,0 +1,13 @@
+/*!
+     \namespace client::flak::classic
+     \brief FLAK Playback
+
+     This namespace contains functions to play FLAK.
+
+     FLAK is easier to play back fluently than classic VCR because the engine already handles torpedo flight time.
+     For FLAK playback, we therefore just receive the event stream from FLAK, and display it.
+
+     Entry points:
+     - PlaybackScreen
+     - Renderer
+ */

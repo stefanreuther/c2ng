@@ -7,6 +7,21 @@ PCC2ng NEWS FILE - Technical Version
   manual.
 
 
+2.40.11
+-------
+
+### all programs: source code
+
+  The detailed revision history is now on Github.
+
+  Whereas previous releases often added/rewrote/removed entire files
+  being ported from PCC2, the structure is now resonably stable and
+  allows meaningful commits to be made.
+
+  If you have anything to add, pull requests are welcome.
+
+
+
 2.40.10
 -------
 
