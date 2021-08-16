@@ -99,14 +99,14 @@ game::v3::ResultLoader::ResultLoader(afl::base::Ref<afl::io::Directory> specific
                                      afl::sys::LogListener& log,
                                      const DirectoryScanner& scanner,
                                      afl::io::FileSystem& fs,
-                                     util::ProfileDirectory& profile)
+                                     util::ProfileDirectory* pProfile)
     : m_specificationDirectory(specificationDirectory),
       m_defaultSpecificationDirectory(defaultSpecificationDirectory),
       m_charset(charset),
       m_translator(tx),
       m_log(log),
       m_fileSystem(fs),
-      m_profile(profile)
+      m_pProfile(pProfile)
 {
     for (int i = 1; i <= DirectoryScanner::NUM_PLAYERS; ++i) {
         m_playerFlags.set(i, scanner.getPlayerFlags(i));
@@ -149,8 +149,10 @@ game::v3::ResultLoader::loadCurrentTurn(Turn& turn, Game& game, int player, game
     loadCurrentDatabases(turn, game, player, root, session);
 
     // expression lists
-    game.expressionLists().loadRecentFiles(m_profile, m_log, m_translator);
-    game.expressionLists().loadPredefinedFiles(m_profile, *m_specificationDirectory, m_log, m_translator);
+    if (m_pProfile != 0) {
+        game.expressionLists().loadRecentFiles(*m_pProfile, m_log, m_translator);
+        game.expressionLists().loadPredefinedFiles(*m_pProfile, *m_specificationDirectory, m_log, m_translator);
+    }
 
     // ex GGameResultStorage::load(GGameTurn& trn)
     {
@@ -343,7 +345,9 @@ game::v3::ResultLoader::saveCurrentTurn(const Turn& turn, const Game& game, int 
         game::db::FleetLoader(*m_charset).save(root.gameDirectory(), turn.universe(), player);
     }
 
-    game.expressionLists().saveRecentFiles(m_profile, m_log, m_translator);
+    if (m_pProfile != 0) {
+        game.expressionLists().saveRecentFiles(*m_pProfile, m_log, m_translator);
+    }
 }
 
 void

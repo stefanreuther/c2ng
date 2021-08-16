@@ -293,7 +293,7 @@ interpreter::exporter::ConsoleApplication::appMain()
         // Set up game directories
         afl::io::FileSystem& fs = fileSystem();
         String_t defaultRoot = fs.makePathName(fs.makePathName(environment().getInstallationDirectoryName(), "share"), "specs");
-        game::v3::RootLoader loader(fs.openDirectory(arg_rootdir.orElse(defaultRoot)), profile, translator(), log(), fs);
+        game::v3::RootLoader loader(fs.openDirectory(arg_rootdir.orElse(defaultRoot)), &profile, translator(), log(), fs);
 
         // Check game data
         // FIXME: load correct config!

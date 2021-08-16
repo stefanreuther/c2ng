@@ -135,14 +135,14 @@ game::v3::DirectoryLoader::DirectoryLoader(afl::base::Ref<afl::io::Directory> sp
                 afl::sys::LogListener& log,
                 const DirectoryScanner& scanner,
                 afl::io::FileSystem& fs,
-                util::ProfileDirectory& profile)
+                util::ProfileDirectory* pProfile)
     : m_specificationDirectory(specificationDirectory),
       m_defaultSpecificationDirectory(defaultSpecificationDirectory),
       m_charset(charset),
       m_translator(tx),
       m_log(log),
       m_fileSystem(fs),
-      m_profile(profile),
+      m_pProfile(pProfile),
       m_playerFlags(),
       m_playersWithDosOutbox()
 {
@@ -186,8 +186,10 @@ game::v3::DirectoryLoader::loadCurrentTurn(Turn& turn, Game& game, int player, R
     loadCurrentDatabases(turn, game, player, root, session);
 
     // expression lists
-    game.expressionLists().loadRecentFiles(m_profile, m_log, m_translator);
-    game.expressionLists().loadPredefinedFiles(m_profile, *m_specificationDirectory, m_log, m_translator);
+    if (m_pProfile != 0) {
+        game.expressionLists().loadRecentFiles(*m_pProfile, m_log, m_translator);
+        game.expressionLists().loadPredefinedFiles(*m_pProfile, *m_specificationDirectory, m_log, m_translator);
+    }
 
     // ex game/load.h:loadDirectory
     m_log.write(m_log.Info, LOG_NAME, Format(m_translator.translateString("Loading %s data...").c_str(), root.playerList().getPlayerName(player, Player::AdjectiveName)));
@@ -432,7 +434,9 @@ game::v3::DirectoryLoader::saveCurrentTurn(const Turn& turn, const Game& game, i
     fizz.save(dir);
 
     // Recent
-    game.expressionLists().saveRecentFiles(m_profile, m_log, m_translator);
+    if (m_pProfile != 0) {
+        game.expressionLists().saveRecentFiles(*m_pProfile, m_log, m_translator);
+    }
 }
 
 void

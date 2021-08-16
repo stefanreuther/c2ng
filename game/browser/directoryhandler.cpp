@@ -19,7 +19,7 @@ namespace {
 
 game::browser::DirectoryHandler::DirectoryHandler(Browser& b, afl::base::Ref<afl::io::Directory> defaultSpecificationDirectory, util::ProfileDirectory& profile, afl::io::FileSystem& fs)
     : m_browser(b),
-      m_v3Loader(defaultSpecificationDirectory, profile, b.translator(), b.log(), fs)
+      m_v3Loader(defaultSpecificationDirectory, &profile, b.translator(), b.log(), fs)
 { }
 
 bool

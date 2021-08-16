@@ -16,7 +16,6 @@
 #include "game/vcr/classic/nullvisualizer.hpp"
 #include "game/vcr/classic/algorithm.hpp"
 #include "afl/sys/environment.hpp"
-#include "util/profiledirectory.hpp"
 #include "afl/charset/utf8charset.hpp"
 #include "game/specificationloader.hpp"
 
@@ -74,10 +73,9 @@ main(int, char** argv)
         afl::io::FileSystem& fs = afl::io::FileSystem::getInstance();
         afl::string::NullTranslator tx;
         util::ConsoleLogger logger;
-        util::ProfileDirectory profile(env, fs, tx, logger);
         afl::charset::Utf8Charset cs;
         game::v3::RootLoader loader(fs.openDirectory(fs.makePathName(fs.makePathName(env.getInstallationDirectoryName(), "share"), "specs")),
-                                    profile,
+                                    0,
                                     tx, logger,
                                     fs);
 

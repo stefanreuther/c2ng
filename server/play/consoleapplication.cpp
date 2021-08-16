@@ -6,7 +6,6 @@
 #include "afl/charset/charset.hpp"
 #include "afl/charset/codepage.hpp"
 #include "afl/charset/codepagecharset.hpp"
-#include "afl/io/nullfilesystem.hpp"
 #include "afl/net/line/linesink.hpp"
 #include "afl/string/format.hpp"
 #include "afl/string/parse.hpp"
@@ -24,7 +23,6 @@
 #include "server/play/mainpacker.hpp"
 #include "util/charsetfactory.hpp"
 #include "util/messagecollector.hpp"
-#include "util/profiledirectory.hpp"
 #include "util/string.hpp"
 #include "version.hpp"
 
@@ -122,15 +120,9 @@ server::play::ConsoleApplication::appMain()
     game::Session session(tx, fs);
     session.log().addListener(logCollector);
 
-    // Profile
-    // FIXME: we don't want our sessions to potentially leak into our profile directory, hence the NullFileSystem.
-    // Can we do without requiring a ProfileDirectory at all?
-    afl::io::NullFileSystem nullFS;
-    util::ProfileDirectory nullProfile(environment(), nullFS, tx, logCollector);
-
     // Root loader
     String_t defaultRoot = fs.makePathName(fs.makePathName(environment().getInstallationDirectoryName(), "share"), "specs");
-    game::v3::RootLoader loader(fs.openDirectory(params.arg_rootdir.orElse(defaultRoot)), nullProfile, tx, session.log(), fs);
+    game::v3::RootLoader loader(fs.openDirectory(params.arg_rootdir.orElse(defaultRoot)), 0 /* profile */, tx, session.log(), fs);
 
     // Check game data
     // FIXME: load correct config!

@@ -27,12 +27,12 @@ namespace {
 }
 
 game::v3::RootLoader::RootLoader(afl::base::Ref<afl::io::Directory> defaultSpecificationDirectory,
-                                 util::ProfileDirectory& profile,
+                                 util::ProfileDirectory* pProfile,
                                  afl::string::Translator& tx,
                                  afl::sys::LogListener& log,
                                  afl::io::FileSystem& fs)
     : m_defaultSpecificationDirectory(defaultSpecificationDirectory),
-      m_profile(profile),
+      m_pProfile(pProfile),
       m_translator(tx),
       m_log(log),
       m_fileSystem(fs),
@@ -90,14 +90,16 @@ game::v3::RootLoader::load(afl::base::Ref<afl::io::Directory> gameDirectory,
         loadRaceNames(result->playerList(), *spec, charset);
 
         // Preferences
-        result->userConfiguration().loadUserConfiguration(m_profile, m_log, m_translator);
+        if (m_pProfile != 0) {
+            result->userConfiguration().loadUserConfiguration(*m_pProfile, m_log, m_translator);
+        }
         result->userConfiguration().merge(config);
 
         // Turn loader
         if (m_scanner.getDirectoryFlags().contains(DirectoryScanner::HaveUnpacked)) {
-            result->setTurnLoader(new DirectoryLoader(spec, m_defaultSpecificationDirectory, std::auto_ptr<afl::charset::Charset>(charset.clone()), m_translator, m_log, m_scanner, m_fileSystem, m_profile));
+            result->setTurnLoader(new DirectoryLoader(spec, m_defaultSpecificationDirectory, std::auto_ptr<afl::charset::Charset>(charset.clone()), m_translator, m_log, m_scanner, m_fileSystem, m_pProfile));
         } else if (m_scanner.getDirectoryFlags().contains(DirectoryScanner::HaveResult)) {
-            result->setTurnLoader(new ResultLoader(spec, m_defaultSpecificationDirectory, std::auto_ptr<afl::charset::Charset>(charset.clone()), m_translator, m_log, m_scanner, m_fileSystem, m_profile));
+            result->setTurnLoader(new ResultLoader(spec, m_defaultSpecificationDirectory, std::auto_ptr<afl::charset::Charset>(charset.clone()), m_translator, m_log, m_scanner, m_fileSystem, m_pProfile));
         } else {
             // nothing loadable
         }

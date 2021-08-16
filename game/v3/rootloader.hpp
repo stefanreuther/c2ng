@@ -26,7 +26,7 @@ namespace game { namespace v3 {
     class RootLoader {
      public:
         RootLoader(afl::base::Ref<afl::io::Directory> defaultSpecificationDirectory,
-                   util::ProfileDirectory& profile,
+                   util::ProfileDirectory* pProfile,
                    afl::string::Translator& tx,
                    afl::sys::LogListener& log,
                    afl::io::FileSystem& fs);
@@ -38,7 +38,7 @@ namespace game { namespace v3 {
 
      private:
         afl::base::Ref<afl::io::Directory> m_defaultSpecificationDirectory;
-        util::ProfileDirectory& m_profile;
+        util::ProfileDirectory* m_pProfile;
         afl::string::Translator& m_translator;
         afl::sys::LogListener& m_log;
         afl::io::FileSystem& m_fileSystem;

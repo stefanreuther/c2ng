@@ -15,7 +15,7 @@ game::pcc::GameFolder::GameFolder(BrowserHandler& handler, game::browser::Accoun
       m_hint(hint),
       m_nullFS(),
       m_v3Loader(handler.getDefaultSpecificationDirectory(),
-                 handler.profile(),
+                 &handler.profile(),
                  handler.translator(),
                  handler.log(),
                  m_nullFS)

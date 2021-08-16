@@ -46,7 +46,7 @@ namespace {
               tx(), log(), fs(),
               scanner(*dir, tx, log),
               profile(env, fs, tx, log),
-              testee(dir, dir, std::auto_ptr<afl::charset::Charset>(new afl::charset::Utf8Charset()), tx, log, scanner, fs, profile),
+              testee(dir, dir, std::auto_ptr<afl::charset::Charset>(new afl::charset::Utf8Charset()), tx, log, scanner, fs, &profile),
               root(dir, *new game::test::SpecificationLoader(),
                    game::HostVersion(),
                    std::auto_ptr<game::RegistrationKey>(new game::test::RegistrationKey(game::RegistrationKey::Unregistered, 5)),

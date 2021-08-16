@@ -30,7 +30,8 @@ namespace game { namespace v3 {
             \param tx Translator
             \param log Logger
             \param scanner Directory scanner (for initialisation)
-            \param fs File System instance */
+            \param fs File System instance
+            \param pProfile Profile directory (optional) */
         DirectoryLoader(afl::base::Ref<afl::io::Directory> specificationDirectory,
                         afl::base::Ref<afl::io::Directory> defaultSpecificationDirectory,
                         std::auto_ptr<afl::charset::Charset> charset,
@@ -38,7 +39,7 @@ namespace game { namespace v3 {
                         afl::sys::LogListener& log,
                         const DirectoryScanner& scanner,
                         afl::io::FileSystem& fs,
-                        util::ProfileDirectory& profile);
+                        util::ProfileDirectory* pProfile);
 
         virtual PlayerStatusSet_t getPlayerStatus(int player, String_t& extra, afl::string::Translator& tx) const;
         virtual void loadCurrentTurn(Turn& turn, Game& game, int player, Root& root, Session& session);
@@ -57,7 +58,7 @@ namespace game { namespace v3 {
         afl::string::Translator& m_translator;
         afl::sys::LogListener& m_log;
         afl::io::FileSystem& m_fileSystem;
-        util::ProfileDirectory& m_profile;
+        util::ProfileDirectory* m_pProfile;
 
         /*
          *  State
