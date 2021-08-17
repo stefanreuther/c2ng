@@ -6,17 +6,15 @@
 
 #include <memory>
 #include "afl/base/ptr.hpp"
+#include "afl/charset/charset.hpp"
 #include "afl/io/directory.hpp"
-#include "game/root.hpp"
-#include "game/v3/directoryscanner.hpp"
+#include "afl/io/filesystem.hpp"
 #include "afl/string/translator.hpp"
 #include "afl/sys/loglistener.hpp"
-#include "afl/charset/charset.hpp"
-#include "afl/io/stream.hpp"
-#include "game/playerlist.hpp"
-#include "util/profiledirectory.hpp"
-#include "afl/io/filesystem.hpp"
 #include "game/config/userconfiguration.hpp"
+#include "game/root.hpp"
+#include "game/v3/directoryscanner.hpp"
+#include "util/profiledirectory.hpp"
 
 namespace game { namespace v3 {
 
@@ -46,10 +44,6 @@ namespace game { namespace v3 {
         DirectoryScanner m_scanner;
 
         void loadConfiguration(Root& root, afl::io::Directory& dir, afl::charset::Charset& charset);
-        void loadPConfig(Root& root, afl::base::Ptr<afl::io::Stream> pconfig, afl::base::Ptr<afl::io::Stream> shiplist, game::config::ConfigurationOption::Source source,
-                         afl::charset::Charset& charset);
-        void loadHConfig(Root& root, afl::io::Stream& hconfig, game::config::ConfigurationOption::Source source);
-        void loadRaceMapping(Root& root, afl::io::Stream& file, game::config::ConfigurationOption::Source source);
     };
 
 } }

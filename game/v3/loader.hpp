@@ -173,6 +173,25 @@ namespace game { namespace v3 {
             \param count Number of Ufos to load */
         void loadUfos(game::map::Universe& univ, afl::io::Stream& file, int firstId, int count) const;
 
+        /** Load PConfig.
+            \param root Root
+            \param pconfig  "pconfig.src"
+            \param shiplist "shiplist.txt" (can be null)
+            \param source   Source flag to set */
+        void loadPConfig(Root& root, afl::io::Stream& pconfig, afl::base::Ptr<afl::io::Stream> shiplist, game::config::ConfigurationOption::Source source);
+
+        /** Load HConfig.
+            \param root Root
+            \param hconfig "hconfig.hst"
+            \param source Source flag to set */
+        void loadHConfig(Root& root, afl::io::Stream& hconfig, game::config::ConfigurationOption::Source source);
+
+        /** Load SRace race mapping.
+            \param root Root
+            \param file "friday.dat"
+            \param source Source flag to set */
+        void loadRaceMapping(Root& root, afl::io::Stream& file, game::config::ConfigurationOption::Source source);
+
         /*
          *  Combined Operations
          */
@@ -194,6 +213,16 @@ namespace game { namespace v3 {
             \param file File to read from
             \param player Player */
         void loadResult(Turn& turn, const Root& root, Game& game, afl::io::Stream& file, int player) const;
+
+        /** Load configuration.
+            - pconfig.src
+            - shiplist.txt (config part)
+            - friday.dat
+            - hconfig.hst
+            - add-on configuration (FLAK, ...)
+            \param root Root
+            \param dir Directory to read from */
+        void loadConfiguration(Root& root, afl::io::Directory& dir);
         
      private:
         afl::charset::Charset& m_charset;

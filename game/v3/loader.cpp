@@ -9,6 +9,7 @@
 #include "afl/string/format.hpp"
 #include "game/alliance/hosthandler.hpp"
 #include "game/alliance/phosthandler.hpp"
+#include "game/config/configurationparser.hpp"
 #include "game/game.hpp"
 #include "game/map/basedata.hpp"
 #include "game/map/ionstorm.hpp"
@@ -21,6 +22,7 @@
 #include "game/parser/messageinformation.hpp"
 #include "game/v3/commandextra.hpp"
 #include "game/v3/genfile.hpp"
+#include "game/v3/hconfig.hpp"
 #include "game/v3/inboxfile.hpp"
 #include "game/v3/packer.hpp"
 #include "game/v3/resultfile.hpp"
@@ -32,11 +34,18 @@
 
 using afl::base::Ref;
 using afl::except::FileFormatException;
+using afl::io::FileSystem;
 using afl::io::Stream;
 using afl::string::Format;
+using game::config::ConfigurationOption;
+
+namespace gt = game::v3::structures;
 
 namespace {
     const char LOG_NAME[] = "game.v3.loader";
+
+    const int DEFAULT_PHOST_VERSION = MKVERSION(4,1,0);
+    const int DEFAULT_HOST_VERSION = MKVERSION(3,22,26);
 
     /** Check for dummy name.
         PHost can filter out ship names; we detect such names to avoid overwriting a known name by a dummy.
@@ -52,7 +61,7 @@ namespace {
 
     struct KoreTargetHeader {
         char sig[4];
-        game::v3::structures::UInt32_t num;
+        gt::UInt32_t num;
     };
 
     Stream::FileSize_t getShipXYSize(const game::v3::ResultFile& result)
@@ -77,13 +86,13 @@ game::v3::Loader::Loader(afl::charset::Charset& charset, afl::string::Translator
 void
 game::v3::Loader::prepareUniverse(game::map::Universe& univ) const
 {
-    for (int i = 1; i <= structures::NUM_SHIPS; ++i) {
+    for (int i = 1; i <= gt::NUM_SHIPS; ++i) {
         univ.ships().create(i);
     }
-    for (int i = 1; i <= structures::NUM_PLANETS; ++i) {
+    for (int i = 1; i <= gt::NUM_PLANETS; ++i) {
         univ.planets().create(i);
     }
-    for (int i = 1; i <= structures::NUM_ION_STORMS; ++i) {
+    for (int i = 1; i <= gt::NUM_ION_STORMS; ++i) {
         univ.ionStorms().create(i);
     }
 }
@@ -119,7 +128,7 @@ game::v3::Loader::loadPlanets(game::map::Universe& univ, afl::io::Stream& file, 
     m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loading %d planet%!1{s%}...").c_str(), count));
     Reverter* pReverter = dynamic_cast<Reverter*>(univ.getReverter());
     while (count > 0) {
-        structures::Planet rawPlanet;
+        gt::Planet rawPlanet;
         file.fullRead(afl::base::fromObject(rawPlanet));
 
         const int planetId = rawPlanet.planetId;
@@ -148,10 +157,10 @@ void
 game::v3::Loader::loadPlanetCoordinates(game::map::Universe& univ, afl::io::Stream& file) const
 {
     // ex game/load.h:loadPlanetXY
-    m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loading up to %d planet position%!1{s%}...").c_str(), structures::NUM_PLANETS));
-    structures::Int16_t data[structures::NUM_PLANETS * 3];
+    m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loading up to %d planet position%!1{s%}...").c_str(), gt::NUM_PLANETS));
+    gt::Int16_t data[gt::NUM_PLANETS * 3];
     file.fullRead(afl::base::fromObject(data));
-    for (int planetId = 1; planetId <= structures::NUM_PLANETS; ++planetId) {
+    for (int planetId = 1; planetId <= gt::NUM_PLANETS; ++planetId) {
         // FIXME: PCC2 checked chart config here.
         // pro: coordinate filtering is a v3 thing, and should be done in v3 code
         // con: doing the filtering in game::map::Planet::internalCheck only allows live map-reconfiguration to recover from errors
@@ -169,10 +178,10 @@ void
 game::v3::Loader::loadPlanetNames(game::map::Universe& univ, afl::io::Stream& file) const
 {
     // ex game/load.h:loadPlanetNames
-    m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loading %d planet name%!1{s%}...").c_str(), structures::NUM_PLANETS));
-    structures::String20_t data[structures::NUM_PLANETS];
+    m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loading %d planet name%!1{s%}...").c_str(), gt::NUM_PLANETS));
+    gt::String20_t data[gt::NUM_PLANETS];
     file.fullRead(afl::base::fromObject(data));
-    for (int planetId = 1; planetId <= structures::NUM_PLANETS; ++planetId) {
+    for (int planetId = 1; planetId <= gt::NUM_PLANETS; ++planetId) {
         game::map::Planet* p = univ.planets().get(planetId);
         if (!p) {
             throw afl::except::FileFormatException(file, afl::string::Format(m_translator.translateString("Invalid planet Id #%d").c_str(), planetId));
@@ -186,10 +195,10 @@ void
 game::v3::Loader::loadIonStormNames(game::map::Universe& univ, afl::io::Stream& file) const
 {
     // ex game/load.h:loadStormNames
-    m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loading %d ion storm name%!1{s%}...").c_str(), structures::NUM_ION_STORMS));
-    structures::String20_t data[structures::NUM_ION_STORMS];
+    m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loading %d ion storm name%!1{s%}...").c_str(), gt::NUM_ION_STORMS));
+    gt::String20_t data[gt::NUM_ION_STORMS];
     file.fullRead(afl::base::fromObject(data));
-    for (int stormId = 1; stormId <= structures::NUM_ION_STORMS; ++stormId) {
+    for (int stormId = 1; stormId <= gt::NUM_ION_STORMS; ++stormId) {
         game::map::IonStorm* p = univ.ionStorms().get(stormId);
         if (!p) {
             throw afl::except::FileFormatException(file, afl::string::Format(m_translator.translateString("Invalid ion storm Id #%d").c_str(), stormId));
@@ -206,7 +215,7 @@ game::v3::Loader::loadBases(game::map::Universe& univ, afl::io::Stream& file, in
     m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loading %d starbase%!1{s%}...").c_str(), count));
     Reverter* pReverter = dynamic_cast<Reverter*>(univ.getReverter());
     while (count > 0) {
-        structures::Base rawBase;
+        gt::Base rawBase;
         file.fullRead(afl::base::fromObject(rawBase));
 
         const int baseId = rawBase.baseId;
@@ -237,15 +246,15 @@ game::v3::Loader::loadShipXY(game::map::Universe& univ, afl::io::Stream& file, a
     // ex game/load.cc:loadShipXY, ccmain.pas:LoadShipXY
 
     // Compute size of file
-    static_assert(structures::NUM_SHIPS == 999, "NUM_SHIPS");
-    size_t numShips = (bytes != 0 && bytes >= 999 * sizeof(structures::ShipXY)) ? 999 : 500;
+    static_assert(gt::NUM_SHIPS == 999, "NUM_SHIPS");
+    size_t numShips = (bytes != 0 && bytes >= 999 * sizeof(gt::ShipXY)) ? 999 : 500;
     m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loading up to %d ship position%!1{s%}...").c_str(), numShips));
 
     // Read file in chunks
     const size_t CHUNK_SIZE = 100;
     Id_t id = 0;
     while (numShips > 0) {
-        structures::ShipXY buffer[CHUNK_SIZE];
+        gt::ShipXY buffer[CHUNK_SIZE];
         size_t now = std::min(numShips, CHUNK_SIZE);
         file.fullRead(afl::base::fromObject(buffer).trim(now * sizeof(buffer[0])));
         for (size_t i = 0; i < now; ++i) {
@@ -264,7 +273,7 @@ game::v3::Loader::loadShipXY(game::map::Universe& univ, afl::io::Stream& file, a
                 return;
             }
 
-            if (owner > 0 && owner <= structures::NUM_OWNERS && !reject.contains(owner)) {
+            if (owner > 0 && owner <= gt::NUM_OWNERS && !reject.contains(owner)) {
                 if (game::map::Ship* ship = univ.ships().get(id)) {
                     ship->addShipXYData(game::map::Point(x, y), owner, mass, source);
                 }
@@ -280,7 +289,7 @@ game::v3::Loader::loadShips(game::map::Universe& univ, afl::io::Stream& file, in
     m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loading %d ship%!1{s%}...").c_str(), count));
     Reverter* pReverter = dynamic_cast<Reverter*>(univ.getReverter());
     while (count > 0) {
-        structures::Ship rawShip;
+        gt::Ship rawShip;
         file.fullRead(afl::base::fromObject(rawShip));
 
         const int shipId = rawShip.shipId;
@@ -312,7 +321,7 @@ game::v3::Loader::loadTargets(game::map::Universe& univ, afl::io::Stream& file, 
     // ex game/load.cc:loadTargets, ccmain.pas:LoadTargets, ccmain.pas:LoadTargetFile
     m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loading %d visual contact%!1{s%}...").c_str(), count));
     while (count > 0) {
-        game::v3::structures::ShipTarget target;
+        gt::ShipTarget target;
         file.fullRead(afl::base::fromObject(target));
 
         // Decrypt the target
@@ -375,7 +384,7 @@ game::v3::Loader::loadKoreMinefields(game::map::Universe& univ, afl::io::Stream&
 
     // Read the file
     for (int i = 1; i <= count; ++i) {
-        structures::KoreMine mf;
+        gt::KoreMine mf;
         file.fullRead(afl::base::fromObject(mf));
         if (mf.ownerTypeFlag != 0) {
             // Use get() if radius is 0; we don't want the minefield to start existing in this case
@@ -407,7 +416,7 @@ game::v3::Loader::loadKoreIonStorms(game::map::Universe& univ, afl::io::Stream& 
     // ex game/load.cc:loadKoreIonStorms
     m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loading up to %d ion storm%!1{s%}...").c_str(), count));
     for (int i = 1; i <= count; ++i) {
-        structures::KoreStorm st;
+        gt::KoreStorm st;
         file.fullRead(afl::base::fromObject(st));
         if (st.voltage > 0 && st.radius > 0) {
             game::map::IonStorm* s = univ.ionStorms().get(i);
@@ -432,7 +441,7 @@ game::v3::Loader::loadKoreExplosions(game::map::Universe& univ, afl::io::Stream&
     m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loading up to %d explosion%!1{s%}...").c_str(), count));
 
     for (int i = 1; i <= count; ++i) {
-        structures::KoreExplosion kx;
+        gt::KoreExplosion kx;
         file.fullRead(afl::base::fromObject(kx));
         int x = kx.x;
         int y = kx.y;
@@ -479,7 +488,7 @@ game::v3::Loader::loadFlakBattles(game::Turn& turn, afl::io::Directory& gameDir,
     }
 
     String_t fileName = afl::string::Format("flak%d.dat", playerNr);
-    afl::base::Ptr<afl::io::Stream> s = gameDir.openFileNT(fileName, afl::io::FileSystem::OpenRead);
+    afl::base::Ptr<afl::io::Stream> s = gameDir.openFileNT(fileName, FileSystem::OpenRead);
     if (s.get() == 0) {
         // No FLAK combat
         return;
@@ -508,7 +517,7 @@ game::v3::Loader::loadUfos(game::map::Universe& univ, afl::io::Stream& file, int
     // ex game/load.h:loadUfos, GUfoType::addUfoData, GUfo::addUfoData
     game::map::UfoType& ufos = univ.ufos();
     for (int i = 0; i < count; ++i) {
-        structures::Ufo in;
+        gt::Ufo in;
         file.fullRead(afl::base::fromObject(in));
         if (in.color != 0) {
             // uc.addUfoData(first_id + i, ufo);
@@ -533,25 +542,107 @@ game::v3::Loader::loadUfos(game::map::Universe& univ, afl::io::Stream& file, int
 }
 
 void
+game::v3::Loader::loadPConfig(Root& root, afl::io::Stream& pconfig, afl::base::Ptr<afl::io::Stream> shiplist, game::config::ConfigurationOption::Source source)
+{
+    // ex game/config.cc:loadPConfig
+    // Configure parser
+    game::config::ConfigurationParser parser(m_log, m_translator, root.hostConfiguration(), source);
+    parser.setCharsetNew(m_charset.clone());
+
+    // Load pconfig.src (mandatory)
+    m_log.write(m_log.Info, LOG_NAME, afl::string::Format(m_translator("Reading configuration from %s..."), pconfig.getName()));
+    parser.setSection("phost", true);
+    parser.parseFile(pconfig);
+
+    // Load shiplist.txt (optional)
+    if (shiplist.get() != 0) {
+        m_log.write(m_log.Info, LOG_NAME, afl::string::Format(m_translator("Reading configuration from %s..."), shiplist->getName()));
+        parser.setSection("phost", false);
+        parser.parseFile(*shiplist);
+    }
+
+    // Postprocess
+    root.hostConfiguration().setDependantOptions();
+
+    // Update host version guess
+    HostVersion& host = root.hostVersion();
+    if (host.getKind() == HostVersion::Unknown) {
+        host.set(HostVersion::PHost, DEFAULT_PHOST_VERSION);
+        m_log.write(m_log.Info, LOG_NAME, afl::string::Format(m_translator("Host version not known, assuming %s"), host.toString(m_translator)));
+    }
+}
+
+void
+game::v3::Loader::loadHConfig(Root& root, afl::io::Stream& hconfig, game::config::ConfigurationOption::Source source)
+{
+    // ex game/config.cc:loadHConfig, Config::assignFromHConfigImage
+    // FIXME: do host version guessing in this function
+    if (hconfig.getSize() > 10*sizeof(gt::HConfig)) {
+        // FIXME: log only?
+        throw afl::except::FileFormatException(hconfig, m_translator.translateString("File has invalid size"));
+    }
+
+    // Read hconfig
+    m_log.write(m_log.Info, LOG_NAME, afl::string::Format(m_translator.translateString("Reading configuration from %s...").c_str(), hconfig.getName()));
+
+    gt::HConfig image;
+    size_t size = hconfig.read(afl::base::fromObject(image));
+    unpackHConfig(image, size, root.hostConfiguration(), source);
+
+    // Postprocess
+    root.hostConfiguration().setDependantOptions();
+
+    // Update host version guess
+    HostVersion& host = root.hostVersion();
+    if (host.getKind() == HostVersion::Unknown) {
+        host.set(HostVersion::Host, DEFAULT_HOST_VERSION);
+        m_log.write(m_log.Info, LOG_NAME, afl::string::Format(m_translator.translateString("Host version not known, assuming %s").c_str(), host.toString(m_translator)));
+    }
+}
+
+void
+game::v3::Loader::loadRaceMapping(Root& root, afl::io::Stream& file, game::config::ConfigurationOption::Source source)
+{
+    gt::Int16_t mapping[gt::NUM_PLAYERS];
+    if (file.read(afl::base::fromObject(mapping)) == sizeof(mapping)) {
+        // Load configuration option
+        game::config::HostConfiguration& config = root.hostConfiguration();
+        for (int i = 1; i <= gt::NUM_PLAYERS; ++i) {
+            config[config.PlayerRace].set(i, mapping[i-1]);
+        }
+        config[config.PlayerSpecialMission].copyFrom(config[config.PlayerRace]);
+        config[config.PlayerRace].setSource(source);
+        config[config.PlayerSpecialMission].setSource(source);
+
+        // Update host version guess
+        HostVersion& host = root.hostVersion();
+        if (host.getKind() == HostVersion::Unknown) {
+            host.set(HostVersion::SRace, DEFAULT_HOST_VERSION);
+            m_log.write(m_log.Info, LOG_NAME, afl::string::Format(m_translator.translateString("Host version not known, assuming %s").c_str(), host.toString(m_translator)));
+        }
+    }
+}
+
+void
 game::v3::Loader::loadCommonFiles(afl::io::Directory& gameDir, afl::io::Directory& specDir, game::map::Universe& univ, int player) const
 {
     {
-        afl::base::Ptr<Stream> file = gameDir.openFileNT(Format("xyplan%d.dat", player), afl::io::FileSystem::OpenRead);
+        afl::base::Ptr<Stream> file = gameDir.openFileNT(Format("xyplan%d.dat", player), FileSystem::OpenRead);
         if (file.get() == 0) {
-            file = specDir.openFile("xyplan.dat", afl::io::FileSystem::OpenRead).asPtr();
+            file = specDir.openFile("xyplan.dat", FileSystem::OpenRead).asPtr();
         }
         loadPlanetCoordinates(univ, *file);
     }
 
     // planet.nm
     {
-        Ref<Stream> file = specDir.openFile("planet.nm", afl::io::FileSystem::OpenRead);
+        Ref<Stream> file = specDir.openFile("planet.nm", FileSystem::OpenRead);
         loadPlanetNames(univ, *file);
     }
 
     // storm.nm
     {
-        Ref<Stream> file = specDir.openFile("storm.nm", afl::io::FileSystem::OpenRead);
+        Ref<Stream> file = specDir.openFile("storm.nm", FileSystem::OpenRead);
         loadIonStormNames(univ, *file);
     }
 }
@@ -560,7 +651,7 @@ void
 game::v3::Loader::loadResult(Turn& turn, const Root& root, Game& game, afl::io::Stream& file, int player) const
 {
     // ex game/load-rst.cc:loadResult
-    structures::Int16_t n;
+    gt::Int16_t n;
 
     ResultFile result(file, m_translator);
     PlayerSet_t source(player);
@@ -627,7 +718,7 @@ game::v3::Loader::loadResult(Turn& turn, const Root& root, Game& game, afl::io::
         KoreTargetHeader kth;
         if (file.read(afl::base::fromObject(kth)) == sizeof(kth) && std::memcmp(kth.sig, "1120", 4) == 0) {
             uint32_t n = kth.num;
-            if (n > uint32_t(game::v3::structures::NUM_SHIPS)) {
+            if (n > uint32_t(gt::NUM_SHIPS)) {
                 throw FileFormatException(file, m_translator.translateString("Unbelievable number of visual contacts"));
             }
             loadTargets(turn.universe(), file, n, TargetEncrypted, source, turn.getTurnNumber());
@@ -641,4 +732,40 @@ game::v3::Loader::loadResult(Turn& turn, const Root& root, Game& game, afl::io::
             loadUfos(turn.universe(), file, 101, n - 100);
         }
     }
+}
+
+void
+game::v3::Loader::loadConfiguration(Root& root, afl::io::Directory& dir)
+{
+    game::config::HostConfiguration& config = root.hostConfiguration();
+    config.setDefaultValues();
+
+    // FIXME: PCC1 shows warning if fewer than 70 pconfig keys
+    // FIXME: PCC1 shows warning if both PCONFIG.SRC and FRIDAY.DAT
+
+    // Check pconfig.src
+    afl::base::Ptr<afl::io::Stream> file = dir.openFileNT("pconfig.src", FileSystem::OpenRead);
+    if (file.get() != 0) {
+        // OK, PHost
+        loadPConfig(root, *file, dir.openFileNT("shiplist.txt", FileSystem::OpenRead), ConfigurationOption::Game);
+    } else {
+        // SRace
+        file = root.gameDirectory().openFileNT("friday.dat", FileSystem::OpenRead);
+        if (file.get() != 0) {
+            loadRaceMapping(root, *file, ConfigurationOption::Game);
+        }
+
+        // Regular host config
+        file = dir.openFileNT("hconfig.hst", FileSystem::OpenRead);
+        if (file.get() != 0) {
+            loadHConfig(root, *file, ConfigurationOption::Game);
+        } else {
+            m_log.write(m_log.Warn, LOG_NAME, m_translator.translateString("No host configuration file found, using defaults"));
+        }
+    }
+
+    root.hostVersion().setImpliedHostConfiguration(config);
+
+    // FLAK
+    game::vcr::flak::loadConfiguration(root.flakConfiguration(), dir, m_log, m_translator);
 }
