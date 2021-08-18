@@ -1079,7 +1079,9 @@ DEPEND_guilib = afl
 PROJ_AUTO += guilib:gfx/*.cpp,gfx/*.hpp,ui/*.cpp,ui/*.hpp,client/*.cpp,client/*.hpp
 
 TARGETS += serverlib
-FILES_serverlib = server/play/flakconfigurationpacker.cpp \
+FILES_serverlib = server/play/fs/session.cpp server/play/fs/directory.cpp \
+    server/play/fs/session.hpp server/play/fs/directory.hpp \
+    server/play/flakconfigurationpacker.cpp \
     server/play/flakconfigurationpacker.hpp server/test/terminalverifier.hpp \
     server/test/consolecommandhandlermock.cpp \
     server/test/consolecommandhandlermock.hpp server/host/hostkey.cpp \

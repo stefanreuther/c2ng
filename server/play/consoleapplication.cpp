@@ -7,6 +7,7 @@
 #include "afl/charset/codepage.hpp"
 #include "afl/charset/codepagecharset.hpp"
 #include "afl/net/line/linesink.hpp"
+#include "afl/net/url.hpp"
 #include "afl/string/format.hpp"
 #include "afl/string/parse.hpp"
 #include "afl/sys/standardcommandlineparser.hpp"
@@ -19,8 +20,11 @@
 #include "game/v3/rootloader.hpp"
 #include "server/interface/gameaccess.hpp"
 #include "server/interface/gameaccessserver.hpp"
+#include "server/play/fs/directory.hpp"
+#include "server/play/fs/session.hpp"
 #include "server/play/gameaccess.hpp"
 #include "server/play/mainpacker.hpp"
+#include "server/ports.hpp"
 #include "util/charsetfactory.hpp"
 #include "util/messagecollector.hpp"
 #include "util/string.hpp"
@@ -28,11 +32,25 @@
 
 using afl::string::Format;
 
+struct server::play::ConsoleApplication::Parameters {
+    afl::base::Optional<String_t> arg_gamedir;  // -G
+    afl::base::Optional<String_t> arg_rootdir;  // -R
+    std::auto_ptr<afl::charset::Charset> gameCharset;
+    int playerNumber;
+
+    Parameters()
+        : arg_gamedir(),
+          arg_rootdir(),
+          gameCharset(new afl::charset::CodepageCharset(afl::charset::g_codepageLatin1)),
+          playerNumber(0)
+        { }
+};
+
+
 server::play::ConsoleApplication::ConsoleApplication(afl::sys::Environment& env, afl::io::FileSystem& fs, afl::net::NetworkStack& net)
-    : Application(env, fs)
-{
-    (void) net;                 // FIXME
-}
+    : Application(env, fs),
+      m_network(net)
+{ }
 
 void
 server::play::ConsoleApplication::appMain()
@@ -40,19 +58,6 @@ server::play::ConsoleApplication::appMain()
     afl::string::Translator& tx = translator();
 
     // Parameters
-    struct Parameters {
-        afl::base::Optional<String_t> arg_gamedir;  // -G
-        afl::base::Optional<String_t> arg_rootdir;  // -R
-        std::auto_ptr<afl::charset::Charset> gameCharset;
-        int playerNumber;
-
-        Parameters()
-            : arg_gamedir(),
-              arg_rootdir(),
-              gameCharset(new afl::charset::CodepageCharset(afl::charset::g_codepageLatin1)),
-              playerNumber(0)
-            { }
-    };
     Parameters params;
 
     // Parser
@@ -116,22 +121,11 @@ server::play::ConsoleApplication::appMain()
     util::MessageCollector logCollector;
 
     // Make a session
-    afl::io::FileSystem& fs = fileSystem();
-    game::Session session(tx, fs);
+    game::Session session(tx, fileSystem());
     session.log().addListener(logCollector);
 
-    // Root loader
-    String_t defaultRoot = fs.makePathName(fs.makePathName(environment().getInstallationDirectoryName(), "share"), "specs");
-
-    // The FileSystem instance is used for accessing backups according to path names generated from configuration.
-    // Although, as far as I can tell, these configuration items (Backup.Turn etc.) cannot be accessed in a c2play-server instance,
-    // we block this possible hole by passing a NullFileSystem.
-    game::v3::RootLoader loader(fs.openDirectory(params.arg_rootdir.orElse(defaultRoot)), 0 /* profile */, tx, session.log(), m_nullFileSystem);
-
     // Check game data
-    // FIXME: load correct config!
-    const game::config::UserConfiguration uc;
-    afl::base::Ptr<game::Root> root = loader.load(fs.openDirectory(gameDir), *params.gameCharset, uc, false);
+    afl::base::Ptr<game::Root> root = loadRoot(gameDir, params, session.log());
     if (root.get() == 0 || root->getTurnLoader().get() == 0) {
         errorExit(tx("no game data found"));
     }
@@ -209,10 +203,40 @@ server::play::ConsoleApplication::help()
                             "  %s [-h]\n"
                             "  %$0s [-OPTIONS] PLAYER GAMEDIR [ROOTDIR]\n"
                             "\n"
+                            "GAMEDIR can be a local directory, or c2file://USER@HOST:PORT/DIR.\n\n"
                             "%s"
                             "\n"
                             "Report bugs to <Streu@gmx.de>").c_str(),
                          environment().getInvocationName(),
                          options));
     exit(0);
+}
+
+afl::base::Ptr<game::Root>
+server::play::ConsoleApplication::loadRoot(const String_t& gameDir, const Parameters& params, afl::sys::LogListener& log)
+{
+    afl::io::FileSystem& fs = fileSystem();
+    afl::string::Translator& tx = translator();
+    String_t defaultRoot = fs.makePathName(fs.makePathName(environment().getInstallationDirectoryName(), "share"), "specs");
+    afl::base::Ref<afl::io::Directory> rootDir = fs.openDirectory(params.arg_rootdir.orElse(defaultRoot));
+
+    // Try to parse as URL
+    afl::net::Url url;
+    if (url.parse(gameDir)) {
+        if (url.getScheme() == "c2file") {
+            afl::base::Ref<server::play::fs::Session> session(server::play::fs::Session::create(m_network, url.getName(afl::string::Format("%d", FILE_PORT)), url.getUser()));
+            return session->createRoot(url.getPath(), tx, log, m_nullFileSystem, rootDir, *params.gameCharset);
+        }
+    }
+
+    // Default: local play
+    // The FileSystem instance is used for accessing backups according to path names generated from configuration.
+    // Although, as far as I can tell, these configuration items (Backup.Turn etc.) cannot be accessed in a c2play-server instance,
+    // we block this possible hole by passing a NullFileSystem.
+    game::v3::RootLoader loader(rootDir, 0 /* profile */, tx, log, m_nullFileSystem);
+
+    // Check game data
+    // FIXME: load correct config!
+    const game::config::UserConfiguration uc;
+    return loader.load(fs.openDirectory(gameDir), *params.gameCharset, uc, false);
 }

@@ -1,0 +1,9 @@
+/*!
+     \namespace server::play::fs
+     \brief c2play-server file-server based play
+
+     This namespace contains the code enabling c2play to talk to c2file-server.
+
+     Entry point:
+     - server::play::fs::Session
+ */

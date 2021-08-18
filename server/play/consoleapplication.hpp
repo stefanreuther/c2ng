@@ -5,9 +5,11 @@
 #define C2NG_SERVER_PLAY_CONSOLEAPPLICATION_HPP
 
 #include <map>
-#include "util/application.hpp"
-#include "afl/net/networkstack.hpp"
+#include "afl/base/ptr.hpp"
 #include "afl/io/nullfilesystem.hpp"
+#include "afl/net/networkstack.hpp"
+#include "game/root.hpp"
+#include "util/application.hpp"
 
 namespace server { namespace play {
 
@@ -18,10 +20,15 @@ namespace server { namespace play {
         virtual void appMain();
 
      private:
+        struct Parameters;
+
         void help();
 
+        afl::net::NetworkStack& m_network;
         std::map<String_t, String_t> m_properties;
         afl::io::NullFileSystem m_nullFileSystem;
+
+        afl::base::Ptr<game::Root> loadRoot(const String_t& gameDir, const Parameters& params, afl::sys::LogListener& log);
     };
 
 } }
