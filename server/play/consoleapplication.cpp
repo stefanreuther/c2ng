@@ -122,7 +122,11 @@ server::play::ConsoleApplication::appMain()
 
     // Root loader
     String_t defaultRoot = fs.makePathName(fs.makePathName(environment().getInstallationDirectoryName(), "share"), "specs");
-    game::v3::RootLoader loader(fs.openDirectory(params.arg_rootdir.orElse(defaultRoot)), 0 /* profile */, tx, session.log(), fs);
+
+    // The FileSystem instance is used for accessing backups according to path names generated from configuration.
+    // Although, as far as I can tell, these configuration items (Backup.Turn etc.) cannot be accessed in a c2play-server instance,
+    // we block this possible hole by passing a NullFileSystem.
+    game::v3::RootLoader loader(fs.openDirectory(params.arg_rootdir.orElse(defaultRoot)), 0 /* profile */, tx, session.log(), m_nullFileSystem);
 
     // Check game data
     // FIXME: load correct config!

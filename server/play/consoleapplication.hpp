@@ -7,6 +7,7 @@
 #include <map>
 #include "util/application.hpp"
 #include "afl/net/networkstack.hpp"
+#include "afl/io/nullfilesystem.hpp"
 
 namespace server { namespace play {
 
@@ -20,6 +21,7 @@ namespace server { namespace play {
         void help();
 
         std::map<String_t, String_t> m_properties;
+        afl::io::NullFileSystem m_nullFileSystem;
     };
 
 } }
