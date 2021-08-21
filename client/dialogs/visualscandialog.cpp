@@ -650,6 +650,7 @@ client::dialogs::VisualScanDialog::KeyHandler::handleKey(util::Key_t key, int /*
     switch (key) {
      case util::Key_Return:
      case util::Key_F1:
+        // FIXME: PCC1 optionally also handles F6 here
         if (m_parent.canConfirm()) {
             m_parent.m_loop.stop(1);
         }
@@ -1154,7 +1155,7 @@ client::dialogs::VisualScanDialog::Window::toggleRemoteControl()
 void
 client::dialogs::VisualScanDialog::Window::showCargoList()
 {
-    // ex WVisualScanWindow::showCargoList
+    // ex WVisualScanWindow::showCargoList, CListShipsWindow.SumCargo
     if (m_cargoSummaryBuilder != 0) {
         Downlink link(m_root, m_translator);
         m_cargoSummaryBuilder->m_list = m_list;
@@ -1381,6 +1382,7 @@ client::dialogs::VisualScanDialog::setEarlyExit(bool flag)
 bool
 client::dialogs::VisualScanDialog::loadCurrent(Downlink& link, game::map::Point pos, game::ref::List::Options_t options, game::Id_t excludeShip)
 {
+    // ex listship.pas:NListShips (sort-of)
     // Build initial list
     game::ref::List list;
     ListBuilder b(list, pos, options, excludeShip);
@@ -1423,7 +1425,7 @@ client::dialogs::VisualScanDialog::loadCurrent(Downlink& link, game::map::Point 
 bool
 client::dialogs::VisualScanDialog::loadNext(Downlink& link, game::map::Point pos, game::Id_t fromShip, game::ref::List::Options_t options)
 {
-    // ex doListNextShips (part)
+    // ex doListNextShips (part), listship.pas:NListShipsNextTurnAt
     // Build initial list
     game::ref::List list;
     NextBuilder b(list, pos, fromShip, options);

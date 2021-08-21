@@ -73,12 +73,14 @@ namespace {
 // Construct blank cargospec.
 game::CargoSpec::CargoSpec()
 {
+    // ex CResourceSet.InitZero
     clear();
 }
 
 // Construct from Cost.
 game::CargoSpec::CargoSpec(const spec::Cost& cost)
 {
+    // ex CResourceSet.InitFromPrice
     clear();
     set(Tritanium,  cost.get(cost.Tritanium));
     set(Duranium,   cost.get(cost.Duranium));
@@ -97,6 +99,7 @@ game::CargoSpec::CargoSpec(const String_t& str, bool acceptMax)
 game::CargoSpec&
 game::CargoSpec::operator+=(const CargoSpec& other)
 {
+    // ex CResourceSet.Add (sort-of)
     for (size_t i = 0; i < LIMIT; ++i) {
         m_amounts[i] += other.m_amounts[i];
     }
@@ -312,7 +315,7 @@ game::CargoSpec::clear()
 bool
 game::CargoSpec::isEnoughFor(const CargoSpec& other) const
 {
-    // ex GCargoSpec::isEnoughFor
+    // ex GCargoSpec::isEnoughFor, CResourceSet.IsEnoughFor
     // Subtract, and perform supply sale
     CargoSpec tmp(*this);
     tmp -= other;

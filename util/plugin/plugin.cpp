@@ -238,7 +238,7 @@ util::plugin::Plugin::initFromScriptFile(String_t baseDir, String_t scriptFileNa
 void
 util::plugin::Plugin::initFromConfigFile(String_t baseDir, String_t pluginName, afl::io::Stream& file, afl::string::Translator& tx)
 {
-    // ex resmgr/resmgrcf.cc:loadResourceConfig
+    // ex resmgr/resmgrcf.cc:loadResourceConfig, ccinit.pas:LoadAdditionalResources (sort-of)
     // @change: we accept '#' as comment
     afl::io::TextFile tf(file);
     String_t line;

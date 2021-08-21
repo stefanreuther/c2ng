@@ -476,7 +476,7 @@ game::map::Universe::hasFullData(int playerNr) const
 game::Id_t
 game::map::Universe::findPlanetAt(Point pt) const
 {
-    // ex GUniverse::getPlanetAt
+    // ex GUniverse::getPlanetAt, global.pas:PlanetAt
     return AnyPlanetType(const_cast<Universe&>(*this)).findNextObjectAt(m_config.getCanonicalLocation(pt), 0, false);
 }
 

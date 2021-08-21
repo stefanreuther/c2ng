@@ -361,7 +361,7 @@ game::vcr::classic::HostAlgorithm::setCapabilities(uint16_t cap)
 bool
 game::vcr::classic::HostAlgorithm::playCycle()
 {
-    // ex VcrPlayerTHost::playCycle
+    // ex VcrPlayerTHost::playCycle, ccvcr.pas:PlayOneCycle (sort-of)
     if (!m_result.empty()) {
         return false;
     }
@@ -427,7 +427,7 @@ game::vcr::classic::HostAlgorithm::playCycle()
 void
 game::vcr::classic::HostAlgorithm::playFastForward()
 {
-    // ex VcrPlayerTHost::playFastForward
+    // ex VcrPlayerTHost::playFastForward, ccvcr.pas:FastForward
 
     // not applicable if we already have a result, have played a tick, or are fighting a planet.
     if (!m_result.empty() || m_time != 0 || m_status[RightSide].m_obj.isPlanet()) {
@@ -647,7 +647,7 @@ game::vcr::classic::HostAlgorithm::rdivadd(int32_t a, int32_t b, int32_t plus) c
 void
 game::vcr::classic::HostAlgorithm::hit(Status& st, int damage, int kill)
 {
-    // ex VcrPlayerTHost::hit
+    // ex VcrPlayerTHost::hit, ccvcr.pas:Hit
     int shld = -rdivadd(80*damage, st.m_obj.getMass() + 1, 1 - st.m_obj.getShield());
     if (shld < 0) {
         st.m_obj.setShield(0);
@@ -695,7 +695,7 @@ game::vcr::classic::HostAlgorithm::hit(Status& st, int damage, int kill)
 void
 game::vcr::classic::HostAlgorithm::launchFighter(Status& st)
 {
-    // ex VcrPlayerTHost::launchFighter
+    // ex VcrPlayerTHost::launchFighter, ccvcr.pas:LaunchFtr
     for (int i = 0; i < VCR_MAX_FTRS; ++i) {
         if (st.m_fighterStatus[i] == FighterIdle) {
             st.m_obj.addFighters(-1);
@@ -715,7 +715,7 @@ game::vcr::classic::HostAlgorithm::launchFighter(Status& st)
 void
 game::vcr::classic::HostAlgorithm::launchFighters(Status& st)
 {
-    // ex VcrPlayerTHost::launchFighters
+    // ex VcrPlayerTHost::launchFighters, ccvcr.pas:LaunchFighters
     if (st.m_obj.getNumBays() > 0) {
         int n = getRandom_1_20();
         if (n <= st.m_obj.getNumBays() && st.m_obj.getNumFighters() > 0 && st.m_numFightersOut < VCR_MAX_FTRS) {
@@ -745,7 +745,7 @@ game::vcr::classic::HostAlgorithm::fighterShoot(Status& st, Status& opp, int i)
 void
 game::vcr::classic::HostAlgorithm::killFighter(Status& st, int i)
 {
-    // ex VcrPlayerTHost::killFighter
+    // ex VcrPlayerTHost::killFighter, ccvcr.pas:KillFighter
     visualizer().killFighter(*this, st.m_side, i);
     st.m_fighterStatus[i] = FighterIdle;
     --st.m_numFightersOut;
@@ -758,7 +758,7 @@ game::vcr::classic::HostAlgorithm::killFighter(Status& st, int i)
 void
 game::vcr::classic::HostAlgorithm::fighterStuff()
 {
-    // ex VcrPlayerTHost::fighterStuff()
+    // ex VcrPlayerTHost::fighterStuff(), ccvcr.pas:MoveFighters, FighterShootL, FighterShootR, FighterStuff
 
     // This used to process all movements, then all firings.
     // However, since all these processes are 100% deterministic, order does not matter and I have fused movement and firing, for a little bit of speed.
@@ -843,7 +843,7 @@ game::vcr::classic::HostAlgorithm::fighterStuff()
 inline void
 game::vcr::classic::HostAlgorithm::rechargeBeams(Status& st)
 {
-    // ex VcrPlayerTHost::rechargeBeams
+    // ex VcrPlayerTHost::rechargeBeams, ccvcr.pas:RechargeBeams
     const int mx = st.m_obj.getNumBeams();
     for (int i = 0; i < mx; ++i) {
         register int j = st.m_beamStatus[i];
@@ -861,7 +861,7 @@ game::vcr::classic::HostAlgorithm::rechargeBeams(Status& st)
 inline void
 game::vcr::classic::HostAlgorithm::fireBeam(Status& st, Status& opp, int which)
 {
-    // ex VcrPlayerTHost::fireBeam
+    // ex VcrPlayerTHost::fireBeam, ccvcr.pas:FireBeam
     int charge = st.m_beamStatus[which];
     st.m_beamStatus[which] = 0;
     visualizer().updateBeam(*this, st.m_side, which);
@@ -880,7 +880,7 @@ game::vcr::classic::HostAlgorithm::fireBeam(Status& st, Status& opp, int which)
 void
 game::vcr::classic::HostAlgorithm::fireBeams(Status& st, Status& opp)
 {
-    // ex VcrPlayerTHost::fireBeams
+    // ex VcrPlayerTHost::fireBeams, ccvcr.pas:FireBeams
     for (int i = 0, n = st.m_obj.getNumBeams(); i < n; ++i) {
         int pick = getRandom_1_20();
         if (pick < 7 && st.m_beamStatus[i] > 50) {
@@ -897,7 +897,7 @@ game::vcr::classic::HostAlgorithm::fireBeams(Status& st, Status& opp)
 void
 game::vcr::classic::HostAlgorithm::fireAtFighter(Status& st, Status& opp, int beam)
 {
-    // ex VcrPlayerTHost::fireAtFighter
+    // ex VcrPlayerTHost::fireAtFighter, ccvcr.pas:FireAtFighter
     int min_dist = 600;
     int ftr_id   = -1;
 
@@ -926,7 +926,7 @@ game::vcr::classic::HostAlgorithm::fireAtFighter(Status& st, Status& opp, int be
 void
 game::vcr::classic::HostAlgorithm::fireBeamsAtFighter(Status& st, Status& opp)
 {
-    // ex VcrPlayerTHost::fireBeamsAtFighter
+    // ex VcrPlayerTHost::fireBeamsAtFighter, ccvcr.pas:FireBeamsAtFighter
     if (!opp.m_numFightersOut) {
         // enemy has no fighters, so just advance the seed; saves some 2..3% run time
         m_seed += st.m_obj.getNumBeams();
@@ -951,7 +951,7 @@ game::vcr::classic::HostAlgorithm::fireBeamsAtFighter(Status& st, Status& opp)
 inline void
 game::vcr::classic::HostAlgorithm::fireTorp(Status& st, Status& opp, int launcher)
 {
-    // ex VcrPlayerTHost::fireTorp
+    // ex VcrPlayerTHost::fireTorp, ccvcr.pas:FireTorp
     register int n = getRandom_1_100();
     if (n >= st.m_obj.getTorpMissRate()) {
         hit(opp, st.m_torpDamagePower, st.m_torpKillPower);
@@ -969,7 +969,7 @@ game::vcr::classic::HostAlgorithm::fireTorp(Status& st, Status& opp, int launche
 void
 game::vcr::classic::HostAlgorithm::fireTorpedoes(Status& st, Status& opp)
 {
-    // ex VcrPlayerTHost::fireTorpedoes
+    // ex VcrPlayerTHost::fireTorpedoes, ccvcr.pas:FireTorpedoes
     for (int i = 0, max = st.m_obj.getNumLaunchers(); i < max; ++i) {
         if (st.m_obj.getNumTorpedoes() > 0) {
             int n = getRandom_1_17();
@@ -991,7 +991,7 @@ game::vcr::classic::HostAlgorithm::fireTorpedoes(Status& st, Status& opp)
 void
 game::vcr::classic::HostAlgorithm::preloadWeapons(Status& st)
 {
-    // ex VcrPlayerTHost::preloadWeapons
+    // ex VcrPlayerTHost::preloadWeapons, ccvcr.pas:PreloadWeapons
     if (st.m_obj.getShield() == 100) {
         for (int i = 0; i < VCR_MAX_BEAMS; ++i) {
             st.m_launcherStatus[i] = 30;

@@ -194,7 +194,7 @@ game::v3::Loader::loadPlanetNames(game::map::Universe& univ, afl::io::Stream& fi
 void
 game::v3::Loader::loadIonStormNames(game::map::Universe& univ, afl::io::Stream& file) const
 {
-    // ex game/load.h:loadStormNames
+    // ex game/load.h:loadStormNames, ccload.pas:LoadStormNames
     m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loading %d ion storm name%!1{s%}...").c_str(), gt::NUM_ION_STORMS));
     gt::String20_t data[gt::NUM_ION_STORMS];
     file.fullRead(afl::base::fromObject(data));
@@ -211,7 +211,7 @@ game::v3::Loader::loadIonStormNames(game::map::Universe& univ, afl::io::Stream& 
 void
 game::v3::Loader::loadBases(game::map::Universe& univ, afl::io::Stream& file, int count, LoadMode mode, PlayerSet_t source) const
 {
-    // ex game/load.h:loadBases
+    // ex game/load.h:loadBases, ccload.pas:LoadBases
     m_log.write(m_log.Debug, LOG_NAME, afl::string::Format(m_translator.translateString("Loading %d starbase%!1{s%}...").c_str(), count));
     Reverter* pReverter = dynamic_cast<Reverter*>(univ.getReverter());
     while (count > 0) {
@@ -603,6 +603,7 @@ game::v3::Loader::loadHConfig(Root& root, afl::io::Stream& hconfig, game::config
 void
 game::v3::Loader::loadRaceMapping(Root& root, afl::io::Stream& file, game::config::ConfigurationOption::Source source)
 {
+    // ex ccload.pas:LoadSRaceMappings
     gt::Int16_t mapping[gt::NUM_PLAYERS];
     if (file.read(afl::base::fromObject(mapping)) == sizeof(mapping)) {
         // Load configuration option
@@ -626,6 +627,9 @@ game::v3::Loader::loadRaceMapping(Root& root, afl::io::Stream& file, game::confi
 void
 game::v3::Loader::loadCommonFiles(afl::io::Directory& gameDir, afl::io::Directory& specDir, game::map::Universe& univ, int player) const
 {
+    // xyplan.dat
+    // ex ccload.pas:LoadPlanetXY
+    // FIXME: PCC1 shows a warning if there's a possible conflict between xyplan.dat/xyplanX.dat
     {
         afl::base::Ptr<Stream> file = gameDir.openFileNT(Format("xyplan%d.dat", player), FileSystem::OpenRead);
         if (file.get() == 0) {

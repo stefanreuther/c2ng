@@ -11,7 +11,7 @@ game::map::ShipData::ShipData(int)
 game::IntegerProperty_t
 game::map::getShipMass(const ShipData& data, const game::spec::ShipList& shipList)
 {
-    // ex game/struct-util.cc:getShipMass
+    // ex game/struct-util.cc:getShipMass, global.pas:ShipMassOf
     int hull, ammo, n, t, d, m, col, sup, nl, lt, nb, bt;
     if (data.hullType.get(hull) && data.ammo.get(ammo)
         && data.neutronium.get(n) && data.tritanium.get(t) && data.duranium.get(d) && data.molybdenum.get(m)

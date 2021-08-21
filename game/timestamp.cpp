@@ -150,6 +150,7 @@ game::Timestamp::operator!=(ConstData_t rhs) const
 bool
 game::Timestamp::isEarlierThan(const game::Timestamp& other) const
 {
+    // ex ccload.pas:StampLater
     for (size_t i = 0; i < countof(INDEX_TABLE); ++i) {
         if (m_data[INDEX_TABLE[i]] != other.m_data[INDEX_TABLE[i]]) {
             return m_data[INDEX_TABLE[i]] < other.m_data[INDEX_TABLE[i]];

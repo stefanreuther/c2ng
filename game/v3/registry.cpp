@@ -29,6 +29,7 @@ namespace {
 void
 game::v3::updateGameRegistry(afl::io::Directory& gameDirectory, const Timestamp& time)
 {
+    // ex ccunp.pas:UpdateSnookerFile
     // Registry is only relevant for games that are beneath a Winplan installation, so look one up
     Ptr<afl::io::Directory> dir = gameDirectory.getParentDirectory();
     if (dir.get() == 0) {

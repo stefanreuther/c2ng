@@ -55,6 +55,7 @@ game::spec::CostSummary::find(Id_t id, size_t* pIndex) const
 game::spec::Cost
 game::spec::CostSummary::getTotalCost() const
 {
+    // ex cost.pas:SumBill
     Cost sum;
     for (size_t i = 0, n = m_items.size(); i < n; ++i) {
         sum += m_items[i].cost;

@@ -173,6 +173,7 @@ util::editor::Editor::getRange(size_t firstLine, size_t firstColumn, size_t last
 void
 util::editor::Editor::insertLine(size_t beforeLine, size_t numLines)
 {
+    // ex editor.inc:InsLine
     // Unoptimized and simple, assuming that dimensions are small.
     if (numLines > 0) {
         Notifier n = start();
@@ -192,6 +193,7 @@ util::editor::Editor::insertLine(size_t beforeLine, size_t numLines)
 void
 util::editor::Editor::deleteLine(size_t line, size_t numLines)
 {
+    // ex editor.inc:DeleteLine
     // Unoptimized and simple, assuming that dimensions are small.
     if (numLines > 0) {
         Notifier n = start();
@@ -619,6 +621,7 @@ util::editor::Editor::insertText(Flags_t flags, Notifier& n, const String_t& tex
 void
 util::editor::Editor::wrapLine(Notifier& n, size_t line)
 {
+    // ex editor.inc:JoinLines (sort-of)
     Utf8 u8(0);
     while (line < m_lines.size()) {
         Line& me = *m_lines[line];

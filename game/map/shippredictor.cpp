@@ -200,6 +200,7 @@ namespace {
                       bool tow_corr,
                       const game::spec::ShipList& shipList)
     {
+        // ex global.pas:EngineLoad
         int mass = getShipMass(ship, shipList).orElse(0);
         if (ship.mission.orElse(0) == game::spec::Mission::msn_Tow) {
             int towee_mass = 0;

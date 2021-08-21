@@ -208,7 +208,7 @@ game::vcr::Object::getBuildPointMass(const game::config::HostConfiguration& conf
 bool
 game::vcr::Object::isFreighter() const
 {
-    // ex GVcrObject::isFreighter
+    // ex GVcrObject::isFreighter, ccvcr.pas:IsFreighter
     return getNumBeams() == 0
         && getNumLaunchers() == 0
         && getNumBays() == 0;

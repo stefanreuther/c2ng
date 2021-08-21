@@ -168,7 +168,7 @@ client::dialogs::MessageEditor::getSender() const
 bool
 client::dialogs::MessageEditor::run()
 {
-    // ex WEditMessageWindow::WEditMessageWindow (sort-of)
+    // ex WEditMessageWindow::WEditMessageWindow (sort-of), editor.inc:EditMessage
 
     // Update content
     // Done here so other methods needn't block.
@@ -203,6 +203,12 @@ client::dialogs::MessageEditor::run()
     win.add(del.addNew(new ui::widgets::Quit(m_root, m_loop)));
 
     // Hot-keys
+    // FIXME: missing PCC1 functionality:
+    //   Alt-S   save-as-template (conflict with send!)
+    //   Ctrl-W  save-to-file
+    //   Ctrl-R  load-from-file
+    //   PgUp    first line, then home
+    //   PgDn    last line, then end
     ui::widgets::KeyDispatcher& disp = del.addNew(new ui::widgets::KeyDispatcher());
     disp.add(util::Key_Return + util::KeyMod_Ctrl, this, &MessageEditor::onSend);
     disp.add('s'              + util::KeyMod_Alt, this, &MessageEditor::onSend);

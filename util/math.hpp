@@ -97,7 +97,7 @@ util::squareFloat(double x)
 inline int32_t
 util::divideAndRound(int32_t a, int32_t b)
 {
-    // ex game/formula.h:radiv
+    // ex game/formula.h:radiv, ccvcr.pas:RDiv
     return (a + (b/2)) / b;
 }
 
@@ -110,7 +110,7 @@ util::divideAndRoundUp(int32_t a, int32_t b)
 inline int32_t
 util::divideAndRoundToEven(int32_t a, int b, int plus)
 {
-    // ex game/formula.h:rdivaddl,rdivaddw, lowlevel.pas:RDiv
+    // ex game/formula.h:rdivaddl,rdivaddw, lowlevel.pas:RDiv, ccvcr.pas:RDivAdd, ccvcr.pas:RDivAddW
     int32_t x = a / b + plus;
     int r = a % b;
     if (r*2 + (x&1) > b) {

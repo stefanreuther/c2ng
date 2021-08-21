@@ -88,6 +88,7 @@ game::vcr::classic::isPHost(Type t)
 inline game::vcr::classic::Side
 game::vcr::classic::flipSide(Side s)
 {
+    // ex ccvcr.pas:Opp
     return s == LeftSide ? RightSide : LeftSide;
 }
 

@@ -349,7 +349,7 @@ game::map::Configuration::isSetFromHostConfiguration() const
 bool
 game::map::Configuration::isOnMap(Point pt) const
 {
-    // ex GChartConfiguration::isOnMap, GPoint::isOnMap
+    // ex GChartConfiguration::isOnMap, GPoint::isOnMap, ccload.pas:ClipXY (sort-of)
     switch (m_mode) {
      case Flat:
         // Everything is on the map
@@ -385,7 +385,7 @@ game::map::Configuration::isValidPlanetCoordinate(Point pt) const
 game::map::Point
 game::map::Configuration::getCanonicalLocation(Point pt) const
 {
-    // ex GChartConfiguration::getCanonicalLocation, GPoint::getCanonicalLocation
+    // ex GChartConfiguration::getCanonicalLocation, GPoint::getCanonicalLocation, global.pas:NormalizeCoords
     switch (m_mode) {
      case Flat:
         // No non-canonical locations

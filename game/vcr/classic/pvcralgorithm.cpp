@@ -128,18 +128,21 @@ struct game::vcr::classic::PVCRAlgorithm::RegularFormula {
     /** Compute shield damage, regular combat, integer version. Returns actual value. */
     static inline int32_t computeShieldDamageS(int expl, int kill, const Status& st)
         {
+            // ex ccvcr.pas:P_ShieldDamageS (part)
             int32_t damage = divideAndRound(st.f.ShieldDamageScaling * int32_t(expl) + st.f.ShieldKillScaling * int32_t(kill), st.f.mass_plus1) + 1;
             return std::min(damage, 10000);
         }
     /** Compute hull damage, regular combat, integer version. Returns actual value. */
     static inline int32_t computeHullDamageS(int expl, int kill, const Status& st)
         {
+            // ex ccvcr.pas:P_HullDamageS (part)
             int32_t d = divideAndRound(computeShieldDamageS(expl, kill, st) * st.f.HullDamageScaling, st.f.mass_plus1) + 1;
             return std::min(d, 10000);
         }
     /** Compute killed crew, regular combat, integer version. Returns actual value. */
     static inline int32_t computeCrewKilledS(int kill, bool death, const Status& st)
         {
+            // ex ccvcr.pas:P_CrewKilledS (part)
             int32_t rv = divideAndRound(st.f.CrewKillScaling * int32_t(kill), st.f.mass_plus1);
             if (death && rv == 0) {
                 return 1;
@@ -188,18 +191,21 @@ struct game::vcr::classic::PVCRAlgorithm::AlternativeFormula {
     /** Compute shield damage, alternative combat, integer version. Returns value sacled by mass+1. */
     static inline int32_t computeShieldDamageS(int expl, int kill, const Status& st)
         {
+            // ex ccvcr.pas:P_ShieldDamageS (part)
             int32_t damage = (st.f.ShieldDamageScaling * int32_t(expl) + st.f.ShieldKillScaling * int32_t(kill));
             return std::min(damage, int32_t(st.f.max_scaled));
         }
     /** Compute hull damage, alternative combat, integer version. Returns value scaled by mass+1. */
     static inline int32_t computeHullDamageS(int expl, int /*kill*/, const Status& st)
         {
+            // ex ccvcr.pas:P_HullDamageS (part)
             int32_t d = int32_t(expl) * st.f.HullDamageScaling;
             return std::min(d, int32_t(st.f.max_scaled));
         }
     /** Compute killed crew, alternative combat, integer version. Returns value scaled by mass+1. */
     static inline int32_t computeCrewKilledS(int kill, bool /*death*/, const Status& st)
         {
+            // ex ccvcr.pas:P_CrewKilledS (part)
             return st.f.CrewKillScaling * int32_t(kill);
         }
 #else
@@ -532,7 +538,7 @@ game::vcr::classic::PVCRAlgorithm::setCapabilities(uint16_t cap)
 bool
 game::vcr::classic::PVCRAlgorithm::playCycle()
 {
-    // ex VcrPlayerPHost::playCycle
+    // ex VcrPlayerPHost::playCycle, ccvcr.pas:P_PlayOneCycle
     if (!canStillFight(m_status[LeftSide], m_status[RightSide]) && !canStillFight(m_status[RightSide], m_status[LeftSide]))
         m_done = true;
     else if (!checkCombatActivity())
@@ -812,7 +818,7 @@ game::vcr::classic::PVCRAlgorithm::getStatistic(Side side)
 uint32_t
 game::vcr::classic::PVCRAlgorithm::random64k()
 {
-    // ex VcrPlayerPHost::random64k
+    // ex VcrPlayerPHost::random64k, ccvcr.pas:P_Random64k
     m_seed = (13489*65536 + m_seed * -259U);
     return m_seed;
 }
@@ -854,7 +860,7 @@ game::vcr::classic::PVCRAlgorithm::PreparedRNG::operator=(uint32_t max)
 int
 game::vcr::classic::PVCRAlgorithm::randomRange(uint32_t max)
 {
-    // ex VcrPlayerPHost::randomRange
+    // ex VcrPlayerPHost::randomRange, pvcr.pas:P_RandomRange
     uint32_t divisor = (65535U / max) * 65536;
     uint32_t i;
     do {
@@ -999,7 +1005,7 @@ game::vcr::classic::PVCRAlgorithm::hitT(Status& st, int kill, int expl, bool is_
 bool
 game::vcr::classic::PVCRAlgorithm::hit(Status& st, int kill, int expl, bool is_death_ray)
 {
-    // ex VcrPlayerPHost::hit
+    // ex VcrPlayerPHost::hit, ccvcr.pas:P_Hit
     if (kill <= 0) {
         kill = 1;
     }
@@ -1026,7 +1032,7 @@ game::vcr::classic::PVCRAlgorithm::hit(Status& st, int kill, int expl, bool is_d
 int
 game::vcr::classic::PVCRAlgorithm::computeBayRechargeRate(int num, const Object& obj) const
 {
-    // ex VcrPlayerPHost::computeBayRechargeRate
+    // ex VcrPlayerPHost::computeBayRechargeRate, ccvcr.pas:P_BayRechargeRate
     int i = getExperienceModifiedValue(m_config[m_config.BayRechargeBonus], m_config[m_config.EModBayRechargeBonus], obj, -500, 500) * num
         + getExperienceModifiedValue(m_config[m_config.BayRechargeRate], m_config[m_config.EModBayRechargeRate], obj, 0, 16384);
     return i > 1 ? i : 1;
@@ -1036,7 +1042,7 @@ game::vcr::classic::PVCRAlgorithm::computeBayRechargeRate(int num, const Object&
 inline void
 game::vcr::classic::PVCRAlgorithm::fighterRecharge(Status& st)
 {
-    // ex VcrPlayerPHost::fighterRecharge
+    // ex VcrPlayerPHost::fighterRecharge, ccvcr.pas:P_RechargeBays
     register const int mx = st.r.obj.getNumBays();
     for (int i = 0; i < mx; ++i)
         if (st.r.m_bayStatus[i] < 1000)
@@ -1047,7 +1053,7 @@ game::vcr::classic::PVCRAlgorithm::fighterRecharge(Status& st)
 inline void
 game::vcr::classic::PVCRAlgorithm::fighterLaunch(Status& st)
 {
-    // ex VcrPlayerPHost::fighterLaunch
+    // ex VcrPlayerPHost::fighterLaunch, ccvcr.pas:P_LaunchFighters
     /* can we launch a fighter? */
     if (st.r.obj.getNumFighters() == 0
         || st.r.m_activeFighters >= st.f.MaxFightersLaunched
@@ -1081,7 +1087,7 @@ game::vcr::classic::PVCRAlgorithm::fighterLaunch(Status& st)
 inline void
 game::vcr::classic::PVCRAlgorithm::fighterMove(Status& st)
 {
-    // ex VcrPlayerPHost::fighterMove
+    // ex VcrPlayerPHost::fighterMove, ccvcr.pas:P_MoveFighters
     if (st.r.m_activeFighters == 0)
         return;
 
@@ -1110,7 +1116,7 @@ game::vcr::classic::PVCRAlgorithm::fighterMove(Status& st)
 void
 game::vcr::classic::PVCRAlgorithm::fighterIntercept()
 {
-    // ex VcrPlayerPHost::fighterIntercept
+    // ex VcrPlayerPHost::fighterIntercept, ccvcr.pas:P_FighterAttackFighter
     static const int NEVER = -0x4000;
 
     /* Fighter intercept only happens if both have fighters */
@@ -1203,7 +1209,7 @@ game::vcr::classic::PVCRAlgorithm::fighterIntercept()
 inline bool
 game::vcr::classic::PVCRAlgorithm::fighterAttack(Status& st, Status& opp)
 {
-    // ex VcrPlayerPHost::fighterAttack
+    // ex VcrPlayerPHost::fighterAttack, ccvcr.pas:P_FighterAttack
     /* only if we have fighters */
     if (st.r.m_activeFighters == 0)
         return false;
@@ -1246,7 +1252,7 @@ game::vcr::classic::PVCRAlgorithm::fighterAttack(Status& st, Status& opp)
 int
 game::vcr::classic::PVCRAlgorithm::computeBeamHitOdds(const game::spec::Beam& beam, const Object& obj) const
 {
-    // ex VcrPlayerPHost::computeBeamHitOdds
+    // ex VcrPlayerPHost::computeBeamHitOdds, ccvcr.pas:P_BeamHitOdds
     int i = getExperienceModifiedValue(m_config[m_config.BeamHitBonus], m_config[m_config.EModBeamHitBonus], obj, -4095, 4095)
         * (beam.getKillPower() + beam.getDamagePower()) / 100
         + getExperienceModifiedValue(m_config[m_config.BeamHitOdds], m_config[m_config.EModBeamHitOdds], obj, 0, 100);
@@ -1258,7 +1264,7 @@ game::vcr::classic::PVCRAlgorithm::computeBeamHitOdds(const game::spec::Beam& be
 int
 game::vcr::classic::PVCRAlgorithm::computeBeamRechargeRate(const game::spec::Beam& beam, const Object& obj) const
 {
-    // ex VcrPlayerPHost::computeBeamRechargeRate
+    // ex VcrPlayerPHost::computeBeamRechargeRate, ccvcr.pas:P_BeamRechargeRate
     int i = (((beam.getKillPower() + beam.getDamagePower()) * getExperienceModifiedValue(m_config[m_config.BeamRechargeBonus], m_config[m_config.EModBeamRechargeBonus], obj, -4095, 4095)) / 100
              + getExperienceModifiedValue(m_config[m_config.BeamRechargeRate], m_config[m_config.EModBeamRechargeRate], obj, 0, 16384))
         * obj.getBeamChargeRate();
@@ -1269,7 +1275,7 @@ game::vcr::classic::PVCRAlgorithm::computeBeamRechargeRate(const game::spec::Bea
 inline void
 game::vcr::classic::PVCRAlgorithm::beamRecharge(Status& st)
 {
-    // ex VcrPlayerPHost::beamRecharge
+    // ex VcrPlayerPHost::beamRecharge, ccvcr.pas:P_RechargeBeams
     register const int mx = st.r.obj.getNumBeams();
     for (int i = 0; i < mx; ++i) {
         if (st.r.m_beamStatus[i] < 1000) {
@@ -1333,7 +1339,7 @@ game::vcr::classic::PVCRAlgorithm::beamFindNearestFighter(const Status& st, cons
 inline bool
 game::vcr::classic::PVCRAlgorithm::beamFire(Status& st, Status& opp)
 {
-    // ex VcrPlayerPHost::beamFire
+    // ex VcrPlayerPHost::beamFire, ccvcr.pas:P_FireBeams
     const int beam_mx = st.r.obj.getNumBeams();
     for (int beam = 0; beam < beam_mx; ++beam) {
         /* Can we fire at a fighter? */
@@ -1385,7 +1391,7 @@ game::vcr::classic::PVCRAlgorithm::beamFire(Status& st, Status& opp)
 int
 game::vcr::classic::PVCRAlgorithm::computeTorpHitOdds(const game::spec::TorpedoLauncher& torp, const Object& obj) const
 {
-    // ex VcrPlayerPHost::computeTorpHitOdds
+    // ex VcrPlayerPHost::computeTorpHitOdds, ccvcr.pas:P_TorpHitOdds
     int i = ((getExperienceModifiedValue(m_config[m_config.TorpHitBonus], m_config[m_config.EModTorpHitBonus], obj, -4095, 4095) * (torp.getKillPower() + torp.getDamagePower())) / 100
              + getExperienceModifiedValue(m_config[m_config.TorpHitOdds], m_config[m_config.EModTorpHitOdds], obj, 0, 100));
     return i < 0 ? 0 : i;
@@ -1396,7 +1402,7 @@ game::vcr::classic::PVCRAlgorithm::computeTorpHitOdds(const game::spec::TorpedoL
 int
 game::vcr::classic::PVCRAlgorithm::computeTubeRechargeRate(const game::spec::TorpedoLauncher& torp, const Object& obj) const
 {
-    // ex VcrPlayerPHost::computeTubeRechargeRate
+    // ex VcrPlayerPHost::computeTubeRechargeRate, ccvcr.pas:P_TubeRechargeRate
     int i = (((getExperienceModifiedValue(m_config[m_config.TubeRechargeBonus], m_config[m_config.EModTubeRechargeBonus], obj, -4095, 4095) * (torp.getKillPower() + torp.getDamagePower())) / 100
               + getExperienceModifiedValue(m_config[m_config.TubeRechargeRate], m_config[m_config.EModTubeRechargeRate], obj, 0, 16384)))
         * obj.getTorpChargeRate();
@@ -1407,7 +1413,7 @@ game::vcr::classic::PVCRAlgorithm::computeTubeRechargeRate(const game::spec::Tor
 inline void
 game::vcr::classic::PVCRAlgorithm::torpsRecharge(Status& st)
 {
-    // ex VcrPlayerPHost::torpsRecharge
+    // ex VcrPlayerPHost::torpsRecharge, ccvcr.pas:P_RechargeTorps
     register const int mx = st.r.obj.getNumLaunchers();
     for (int i = 0; i < mx; ++i) {
         if (st.r.m_launcherStatus[i] < 1000) {
@@ -1421,7 +1427,7 @@ game::vcr::classic::PVCRAlgorithm::torpsRecharge(Status& st)
 inline bool
 game::vcr::classic::PVCRAlgorithm::torpsFire(Status& st, Status& opp)
 {
-    // ex VcrPlayerPHost::torpsFire
+    // ex VcrPlayerPHost::torpsFire, ccvcr.pas:P_FireTorps
     if (getDistance() > st.f.TorpFiringRange || st.r.obj.getNumTorpedoes() == 0)
         return false;
 
@@ -1434,7 +1440,7 @@ game::vcr::classic::PVCRAlgorithm::torpsFire(Status& st, Status& opp)
             st.r.m_launcherStatus[launcher] = 0;
             visualizer().updateLauncher(*this, st.f.side, launcher);
             if (rr <= st.f.torp_hit_odds) {
-                /* Scaling factor for torpedo effect. Tim scales with 2 for some reason. */
+                /* Scaling factor for torpedo effect has already been applied in initialisation. */
                 int kill = st.f.torp_kill;
                 int damage = st.f.torp_damage;
 
@@ -1460,7 +1466,7 @@ game::vcr::classic::PVCRAlgorithm::torpsFire(Status& st, Status& opp)
 inline void
 game::vcr::classic::PVCRAlgorithm::moveObjects()
 {
-    // ex VcrPlayerPHost::moveObjects
+    // ex VcrPlayerPHost::moveObjects, ccvcr.pas:P_MoveObjects
     int32_t remain = getDistance() - m_standoffDistance;
     if (remain <= 0)
         return;
@@ -1480,8 +1486,7 @@ game::vcr::classic::PVCRAlgorithm::moveObjects()
 inline bool
 game::vcr::classic::PVCRAlgorithm::canStillFight(const Status& st, const Status& opp) const
 {
-    // ex VcrPlayerPHost::canStillFight
-    // FIXME: null-pointer checks!
+    // ex VcrPlayerPHost::canStillFight, ccvcr.pas:P_CanStillFight
     const bool drcheck = !(m_capabilities & game::v3::structures::DeathRayCapability) || !opp.r.obj.isPlanet();
     return (st.r.obj.getNumBeams() > 0 && (drcheck || st.f.beam_damage))
         || (st.r.obj.getNumFighters() > 0 && st.r.obj.getNumBays() > 0)
@@ -1499,7 +1504,7 @@ game::vcr::classic::PVCRAlgorithm::canStillFight(const Status& st, const Status&
 void
 game::vcr::classic::PVCRAlgorithm::initActivityDetector()
 {
-    // ex VcrPlayerPHost::initActivityDetector
+    // ex VcrPlayerPHost::initActivityDetector, ccvcr.pas:P_CheckInit
     det_valid = false;
     det_timer = DET_MOVEMENT_TIMER;
 }
@@ -1511,7 +1516,7 @@ game::vcr::classic::PVCRAlgorithm::initActivityDetector()
 inline bool
 game::vcr::classic::PVCRAlgorithm::compareDetectorStatus(const DetectorStatus& a, const Status& st)
 {
-    // ex VcrPlayerPHost::compareDetStatus
+    // ex VcrPlayerPHost::compareDetStatus, ccvcr.pas:P_CompareDetStatus
     return a.fighters == st.r.m_activeFighters + st.r.obj.getNumFighters()
         && a.torps    == st.r.obj.getNumTorpedoes()
 #ifdef PVCR_INTEGER
@@ -1532,7 +1537,7 @@ game::vcr::classic::PVCRAlgorithm::compareDetectorStatus(const DetectorStatus& a
 void
 game::vcr::classic::PVCRAlgorithm::setDetectorStatus(DetectorStatus& a, const Status& st)
 {
-    // ex VcrPlayerPHost::fillInDetStatus
+    // ex VcrPlayerPHost::fillInDetStatus, ccvcr.pas:P_CopyDetStatus
     a.fighters = st.r.m_activeFighters + st.r.obj.getNumFighters();
     a.torps    = st.r.obj.getNumTorpedoes();
 #ifdef PVCR_INTEGER
@@ -1566,7 +1571,7 @@ game::vcr::classic::PVCRAlgorithm::setDetectorStatus(DetectorStatus& a, const St
 bool
 game::vcr::classic::PVCRAlgorithm::checkCombatActivity()
 {
-    // ex VcrPlayerPHost::checkCombatActivity
+    // ex VcrPlayerPHost::checkCombatActivity, ccvcr.pas:P_CheckActivity
     /* re-check timer expired? If not, don't check. */
     if (det_timer > m_time)
         return true;
@@ -1590,6 +1595,21 @@ game::vcr::classic::PVCRAlgorithm::checkCombatActivity()
     setDetectorStatus(m_detectorStatus[RightSide], m_status[RightSide]);
     det_valid = true;
 
+    /* Estimate how long it takes to show some progress.
+
+       DET_INACTIVITY_TIMER (=5000) marks a pessimistic estimate of the
+       recharge times of "point action" weapons, torps and beams: these
+       recharge for a while (minimum configurable average for a progressing
+       fight is 2000), and then fire instantly. Fighters may be configured
+       to much larger inter-action times, namely BayLaunchInterval plus
+       time taken to reach enemy (recharge time is part of
+       BayLaunchInterval).
+
+       This computation does NOT consider torps/beams with low hit rates.
+       A beam that recharges in 2000 cycles average and has a hit rate of
+       1% will do damage after 200000 cycles on average. Such a fight
+       *will* progress and eventually finish, but this timer will kill it.
+       (PHost behaves the same.) */
     int32_t interval = DET_INACTIVITY_TIMER;
     for (int i = 0; i < 2; ++i) {
         if (m_detectorStatus[i].fighters != 0) {

@@ -106,7 +106,7 @@ client::ScreenHistory::ScreenHistory(size_t sizeLimit)
 void
 client::ScreenHistory::push(Reference ref)
 {
-    // ex pushHistoryScreenId
+    // ex pushHistoryScreenId, scrhist.pas:RegisterScreen
     // FIXME: deal with this guy -> discardBogusEntries();
 
     // If this is the same as what we already have on top, don't push anything.
@@ -175,7 +175,7 @@ client::ScreenHistory::rotate()
 void
 client::ScreenHistory::clear()
 {
-    // ex clearScreenHistory
+    // ex clearScreenHistory, scrhist.pas:ClearBackup
     m_data.clear();
 }
 

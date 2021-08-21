@@ -13,7 +13,7 @@ using afl::io::FileSystem;
 void
 game::v3::loadRaceNames(PlayerList& list, afl::io::Directory& dir, afl::charset::Charset& charset)
 {
-    // ex GRaceNameList::load
+    // ex GRaceNameList::load, ccload.pas:LoadRaces
     list.clear();
 
     // Load the file

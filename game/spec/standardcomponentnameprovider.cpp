@@ -145,7 +145,7 @@ game::spec::StandardComponentNameProvider::clear()
 void
 game::spec::StandardComponentNameProvider::load(afl::io::Directory& dir, afl::string::Translator& tx, afl::sys::LogListener& log)
 {
-    // ex game/specsn.cc:initShortNames
+    // ex game/specsn.cc:initShortNames, ccload.pas:LoadShortNames
     NameFileParser parser(*this, tx, log);
     afl::base::Ptr<afl::io::Stream> file;
 

@@ -344,7 +344,7 @@ game::v3::SpecificationLoader::SpecificationLoader(afl::base::Ref<afl::io::Direc
 void
 game::v3::SpecificationLoader::loadShipList(game::spec::ShipList& list, game::Root& root)
 {
-    // ex game/spec.cc:loadSpecification
+    // ex game/spec.cc:loadSpecification, ccinit.pas:LoadEquipment (sort-of)
     loadBeams(list, *m_directory);
     loadLaunchers(list, *m_directory);
     loadEngines(list, *m_directory);

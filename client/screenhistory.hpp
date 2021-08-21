@@ -13,12 +13,6 @@ namespace client {
     class ScreenHistory {
      public:
         enum Type {
-            // NullScreen        = -1,
-            // RaceScreen        = 0,
-
-            // HistoryScreen     = 6,
-
-            // FleetScreen       = 10,
             Null,
             Ship,
             Planet,
@@ -27,6 +21,14 @@ namespace client {
             PlanetTask,
             StarbaseTask,
             Starchart
+            /*
+               Missing:
+                 RaceScreen (PCC2)
+                 HistoryScreen (PCC2, PCC1)
+                 FleetScreen (PCC2, PCC1)
+                 Search Result (PCC1)
+                 Message (PCC1)
+             */
         };
 
         class Reference {

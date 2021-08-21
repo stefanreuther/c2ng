@@ -406,7 +406,7 @@ game::map::Ship::combinedCheck1(Universe& univ, PlayerSet_t availablePlayers, in
 String_t
 game::map::Ship::getName(ObjectName which, afl::string::Translator& tx, InterpreterInterface& iface) const
 {
-    // ex GShip::getName
+    // ex GShip::getName, global.pas:ShipNameRaw (PlainName), global.pas:Shipname (LongName)
     // Figure out plain name
     String_t plainName;
     m_currentData.name.get(plainName);
@@ -592,7 +592,7 @@ game::map::Ship::setPosition(Point pos)
 game::IntegerProperty_t
 game::map::Ship::getMass(const game::spec::ShipList& shipList) const
 {
-    // ex GShip::getMass() const
+    // ex GShip::getMass() const, global.pas:ShipMass
     if (m_kind == CurrentShip) {
         return getShipMass(m_currentData, shipList);
     } else {
@@ -610,7 +610,7 @@ game::map::Ship::getHull() const
 void
 game::map::Ship::setHull(IntegerProperty_t h)
 {
-    // ex GShip::setHullId, GShip::ShipInfo::init
+    // ex GShip::setHullId, GShip::ShipInfo::init, global.pas:SetHistoryShipHull
     // Sanitize. Hull=0 is in some databases.
     int checkValue = 0;
     if (h.get(checkValue) && checkValue == 0) {

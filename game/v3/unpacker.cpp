@@ -961,7 +961,7 @@ game::v3::Unpacker::createBlankFiles(afl::io::Directory& dir)
 void
 game::v3::Unpacker::updateIndex(afl::io::Directory& dir)
 {
-    // ex GUnpacker::updateIndex
+    // ex GUnpacker::updateIndex, ccload.pas:MakeInitTmp
     if (m_playerId > 0 && m_playerId <= gt::NUM_PLAYERS) {
         // Initialize
         uint8_t index[2 * gt::NUM_PLAYERS];

@@ -18,7 +18,7 @@ client::dialogs::doScreenHistoryDialog(ui::Root& root,
                                        ScreenHistory& history,
                                        bool excludeCurrent)
 {
-    // ex client/history.cc:doScreenHistoryDialog
+    // ex client/history.cc:doScreenHistoryDialog, scrhist.pas:NBackOneScreen
     // Environment
     Downlink link(root, tx);
     client::proxy::ScreenHistoryProxy proxy(gameSender);

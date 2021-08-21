@@ -108,7 +108,7 @@ client::widgets::CostSummaryList::getFooterHeight() const
 void
 client::widgets::CostSummaryList::drawHeader(gfx::Canvas& can, gfx::Rectangle area)
 {
-    // ex WBillDisplay::drawContent
+    // ex WBillDisplay::drawContent, CBillWidget.Draw (part)
     afl::base::Ref<gfx::Font> font = m_provider.getFont("");
     const int x = area.getLeftX();
     const int y = area.getTopY();
@@ -134,7 +134,7 @@ client::widgets::CostSummaryList::drawHeader(gfx::Canvas& can, gfx::Rectangle ar
 void
 client::widgets::CostSummaryList::drawFooter(gfx::Canvas& can, gfx::Rectangle area)
 {
-    // ex WBillTotalDisplay::drawContent
+    // ex WBillTotalDisplay::drawContent, CBillWidget.Draw (part)
     afl::base::Ref<gfx::Font> font = m_provider.getFont("");
     const int x = area.getLeftX();
     int y = area.getTopY();
@@ -205,7 +205,7 @@ client::widgets::CostSummaryList::drawFooter(gfx::Canvas& can, gfx::Rectangle ar
 void
 client::widgets::CostSummaryList::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state)
 {
-    // ex WBillDisplay::drawPart
+    // ex WBillDisplay::drawPart, CBillWidget.Draw (part)
     afl::base::Ref<gfx::Font> font = m_provider.getFont("");
     const int m = font->getEmWidth();
 

@@ -50,6 +50,7 @@ namespace {
 
     void buildPropertyList(PropertyList& out, const game::map::Object* obj, const interpreter::World& world, afl::string::Translator& tx)
     {
+        // ex console.pas:EnumProperties, CConsoleInput.DoPropertyList
         const afl::data::Segment* pValues = 0;
         const afl::data::NameMap* pNames = 0;
         if (dynamic_cast<const game::map::Ship*>(obj) != 0) {
@@ -376,7 +377,7 @@ namespace {
 
         void doRecall(int direction)
             {
-                // ex WConsoleDialog::doRecall
+                // ex WConsoleDialog::doRecall, console.pas:ScrollInput
 
                 // Find current position.
                 // If at end, initialize.

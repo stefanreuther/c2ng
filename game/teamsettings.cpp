@@ -216,6 +216,7 @@ game::TeamSettings::getViewpointPlayer() const
 game::TeamSettings::Relation
 game::TeamSettings::getPlayerRelation(int player) const
 {
+    // ex global.pas:FriendOrFoe
     if (player == m_viewpointPlayer) {
         return ThisPlayer;
     } else if (m_playerTeams.get(m_viewpointPlayer) != 0 && m_playerTeams.get(player) == m_playerTeams.get(m_viewpointPlayer)) {

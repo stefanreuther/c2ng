@@ -17,7 +17,7 @@ using afl::string::Format;
 namespace {
     bool validate(game::Session& session, ScreenHistory::Reference ref)
     {
-        // ex WScreenId::isValid
+        // ex WScreenId::isValid, scrhist.pas:VerifyScreenHist (sort-of)
         game::Game* pGame = session.getGame().get();
         if (pGame == 0) {
             return false;
@@ -127,6 +127,7 @@ namespace {
 
     bool activate(game::Session& session, ScreenHistory::Reference ref)
     {
+        // ex scrhist.pas:GotoHistoryScreen
         game::Game* pGame = session.getGame().get();
         if (pGame == 0) {
             return false;

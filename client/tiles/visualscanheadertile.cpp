@@ -26,6 +26,7 @@ namespace {
 
     void prepareContent(game::Session& session, Object* obj, client::tiles::VisualScanHeaderTile::Content& result)
     {
+        // ex CListShipsWindow.DrawInterior (part)
         afl::string::Translator& tx = session.translator();
         game::Root* pRoot = session.getRoot().get();
         game::Game* pGame = session.getGame().get();
