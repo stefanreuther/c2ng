@@ -56,7 +56,13 @@ gfx::gen::OrbitConfig::render(util::RandomNumberGenerator& rng) const
 
     // Starfield
     SpaceView sv(*pix);
-    sv.renderStarfield(rng);
+
+    // Since the number of stars may vary depending on the size,
+    // use a copy of the RNG so that following steps keep seeing the same state.
+    {
+        util::RandomNumberGenerator starRNG(rng);
+        sv.renderStarfield(starRNG);
+    }
 
     // Stars
     for (int i = 0; i < m_numStars; ++i) {
