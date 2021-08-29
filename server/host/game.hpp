@@ -438,9 +438,10 @@ namespace server { namespace host {
             but otherwise assumes the user has read access.
             \param verbose true to fill the structure completely; false to produce essential information only
             \param forUser user who is requesting this information (for viewpoint-dependant values)
+            \param otherUser user whose game list we are requesting (for viewpoint-dependant values)
             \param root Service root
             \return description */
-        server::interface::HostGame::Info describe(bool verbose, String_t forUser, Root& root);
+        server::interface::HostGame::Info describe(bool verbose, String_t forUser, String_t otherUser, Root& root);
 
         /** Describe a slot.
             This function creates a user-dependant view (joinability),

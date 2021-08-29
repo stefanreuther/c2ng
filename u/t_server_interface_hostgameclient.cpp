@@ -42,19 +42,25 @@ namespace {
         h->setNew("slots",               new VectorValue(Vector::create(Segment().pushBackString("open").pushBackString("occupied").pushBackString("self"))));
         h->setNew("turns",               new VectorValue(Vector::create(Segment().pushBackInteger(0).pushBackInteger(2).pushBackInteger(1))));
         h->setNew("joinable",            server::makeIntegerValue(0));
+        h->setNew("userPlays",           server::makeIntegerValue(1));
         h->setNew("scores",              new VectorValue(Vector::create(Segment().pushBackInteger(130).pushBackInteger(140).pushBackInteger(135))));
         h->setNew("scoreName",           server::makeStringValue("test"));
         h->setNew("scoreDescription",    server::makeStringValue("Test Score"));
         h->setNew("host",                server::makeStringValue("thost"));
         h->setNew("hostDescription",     server::makeStringValue("Tim Host"));
+        h->setNew("hostKind",            server::makeStringValue("th"));
         h->setNew("shiplist",            server::makeStringValue("plist2"));
         h->setNew("shiplistDescription", server::makeStringValue("PList 2"));
+        h->setNew("shiplistKind",        server::makeStringValue("plist"));
         h->setNew("master",              server::makeStringValue("xmaster"));
         h->setNew("masterDescription",   server::makeStringValue("Master X"));
+        h->setNew("masterKind",          server::makeStringValue("mak"));
         h->setNew("turn",                server::makeIntegerValue(2));
         h->setNew("lastHostTime",        server::makeIntegerValue(15354520));
         h->setNew("nextHostTime",        server::makeIntegerValue(15356789));
         h->setNew("forum",               server::makeIntegerValue(65));
+        h->setNew("userRank",            server::makeIntegerValue(3));
+        h->setNew("otherRank",           server::makeIntegerValue(7));
 
         return new HashValue(h);
     }
@@ -322,6 +328,7 @@ TestServerInterfaceHostGameClient::testStat()
         TS_ASSERT_EQUALS((*i.turnStates.get())[2], 1);
 
         TS_ASSERT(i.joinable.isSame(false));
+        TS_ASSERT(i.userPlays.isSame(true));
 
         TS_ASSERT(i.scores.isValid());
         TS_ASSERT_EQUALS(i.scores.get()->size(), 3U);
@@ -333,15 +340,20 @@ TestServerInterfaceHostGameClient::testStat()
         TS_ASSERT(i.scoreDescription.isSame(String_t("Test Score")));
         TS_ASSERT_EQUALS(i.hostName, "thost");
         TS_ASSERT_EQUALS(i.hostDescription, "Tim Host");
+        TS_ASSERT_EQUALS(i.hostKind, "th");
         TS_ASSERT_EQUALS(i.shipListName, "plist2");
         TS_ASSERT_EQUALS(i.shipListDescription, "PList 2");
+        TS_ASSERT_EQUALS(i.shipListKind, "plist");
         TS_ASSERT(i.masterName.isSame(String_t("xmaster")));
         TS_ASSERT(i.masterDescription.isSame(String_t("Master X")));
+        TS_ASSERT(i.masterKind.isSame(String_t("mak")));
 
         TS_ASSERT_EQUALS(i.turnNumber, 2);
         TS_ASSERT(i.lastHostTime.isSame(15354520));
         TS_ASSERT(i.nextHostTime.isSame(15356789));
         TS_ASSERT(i.forumId.isSame(65));
+        TS_ASSERT(i.userRank.isSame(3));
+        TS_ASSERT(i.otherRank.isSame(7));
     }
 
     // Full answer from GAMELIST

@@ -530,6 +530,11 @@ server::interface::HostGameServer::packInfo(const HostGame::Info& info)
         h->setNew("joinable", makeIntegerValue(*p));
     }
 
+    // userPlays
+    if (const bool* p = info.userPlays.get()) {
+        h->setNew("userPlays", makeIntegerValue(*p));
+    }
+
     // scores
     if (const std::vector<int32_t>* p = info.scores.get()) {
         Vector::Ref_t scores = Vector::create();
@@ -553,11 +558,17 @@ server::interface::HostGameServer::packInfo(const HostGame::Info& info)
     // hostDescription
     h->setNew("hostDescription", makeStringValue(info.hostDescription));
 
+    // hostKind
+    h->setNew("hostKind", makeStringValue(info.hostKind));
+
     // shipListName
     h->setNew("shiplist", makeStringValue(info.shipListName));
 
     // shipListDescription
     h->setNew("shiplistDescription", makeStringValue(info.shipListDescription));
+
+    // shiplistKind
+    h->setNew("shiplistKind", makeStringValue(info.shipListKind));
 
     // masterName
     if (const String_t* p = info.masterName.get()) {
@@ -567,6 +578,11 @@ server::interface::HostGameServer::packInfo(const HostGame::Info& info)
     // masterDescription
     if (const String_t* p = info.masterDescription.get()) {
         h->setNew("masterDescription", makeStringValue(*p));
+    }
+
+    // masterKind
+    if (const String_t* p = info.masterKind.get()) {
+        h->setNew("masterKind", makeStringValue(*p));
     }
 
     // turnNumber
@@ -585,6 +601,16 @@ server::interface::HostGameServer::packInfo(const HostGame::Info& info)
     // forumId
     if (const int32_t* p = info.forumId.get()) {
         h->setNew("forum", makeIntegerValue(*p));
+    }
+
+    // userRank
+    if (const int32_t* p = info.userRank.get()) {
+        h->setNew("userRank", makeIntegerValue(*p));
+    }
+
+    // otherRank
+    if (const int32_t* p = info.otherRank.get()) {
+        h->setNew("otherRank", makeIntegerValue(*p));
     }
 
     return new HashValue(h);

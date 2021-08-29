@@ -51,6 +51,17 @@ namespace {
             return false;
         }
     }
+
+    void setRank(afl::base::Optional<int32_t>& out, int32_t in)
+    {
+        int32_t* p = out.get();
+        if (p == 0                           // Rank not known
+            || *p == 0                       // Old rank is DNF, so new one is better
+            || (in != 0 && in < *p))         // New rank is not DNF and better than previous
+        {
+            out = in;
+        }
+    }
 }
 
 
@@ -779,7 +790,7 @@ server::host::Game::isMultiJoinAllowed()
 
 // Describe this game.
 server::interface::HostGame::Info
-server::host::Game::describe(bool verbose, String_t forUser, Root& root)
+server::host::Game::describe(bool verbose, String_t forUser, String_t otherUser, Root& root)
 {
     // ex Game::describe
     /* @type HostGameInfo
@@ -796,17 +807,23 @@ server::host::Game::describe(bool verbose, String_t forUser, Root& root)
        @key slots:StrList                (**Slot states. For each slot, one of "occupied", "open", "self", or "dead")
        @key turns:IntList                (**Turn states. For each slot, a {@type HostTurnStatus} value)
        @key joinable:Int                 (**1 if user can join this game)
+       @key userPlays:Int                (1 if invoking user plays in this game)
        @key scores:IntList               (**Scores, if game is running or finished)
        @key host:Str                     (Host Id, {game:$GID:settings}->host)
        @key hostDescription:Str          (Description for that host)
+       @key hostKind:Str                 (Kind for that host)
        @key shiplist:Str                 (Shiplist Id, {game:$GID:settings}->shiplist)
        @key shiplistDescription:Str      (Description for that shiplist)
+       @key shiplistKind:Str             (Kind for that shiplist)
        @key master:Str                   (**Master Id, {game:$GID:settings}->master)
        @key masterDescription:Str        (**Description for that master)
+       @key masterKind:Str               (**Kind for that master)
        @key turn:Int                     (turn number)
        @key lastHostTime:Time            (last host time)
        @key nextHostTime:Time            (next host time, if known)
-       @key forum:FID                    (**associated forum, if any) */
+       @key forum:FID                    (**associated forum, if any)
+       @key userRank:Int                 (rank of invoking player if game is finished (0=did not finish))
+       @key otherRank:Int                (rank of player X in GAMELIST ... USER X) */
     HostGame::Info result;
 
     int32_t turnNr = turnNumber().get();
@@ -891,6 +908,11 @@ server::host::Game::describe(bool verbose, String_t forUser, Root& root)
         result.joinable = (!onGameAsPrimary || isMultiJoinAllowed());
     }
 
+    // Play status
+    if (!forUser.empty()) {
+        result.userPlays = userReferenceCounters().intField(forUser).get() > 0;
+    }
+
     // Scores
     if (verbose && (state == HostGame::Running || state == HostGame::Finished)) {
         String_t scoredesc = m_game.hashKey("scores").stringField("score").get();
@@ -915,17 +937,20 @@ server::host::Game::describe(bool verbose, String_t forUser, Root& root)
     String_t host = settings().stringField("host").get();
     result.hostName = host;
     result.hostDescription = root.hostRoot().byName(host).stringField("description").get();
+    result.hostKind = root.hostRoot().byName(host).stringField("kind").get();
 
     // Ship list
     String_t shipList = settings().stringField("shiplist").get();
     result.shipListName = shipList;
     result.shipListDescription = root.shipListRoot().byName(shipList).stringField("description").get();
+    result.shipListKind = root.shipListRoot().byName(shipList).stringField("kind").get();
 
     // Master
     if (verbose) {
         String_t master = settings().stringField("master").get();
         result.masterName = master;
         result.masterDescription = root.masterRoot().byName(master).stringField("description").get();
+        result.masterKind = root.masterRoot().byName(master).stringField("kind").get();
     }
 
     // Turn
@@ -943,6 +968,24 @@ server::host::Game::describe(bool verbose, String_t forUser, Root& root)
     // Forum
     if (verbose) {
         result.forumId = forumId().get();
+    }
+
+    // Ranks
+    if (state == HostGame::Finished && (!forUser.empty() || !otherUser.empty())) {
+        for (int i = 1; i <= NUM_PLAYERS; ++i) {
+            Slot s = getSlot(i);
+            if (s.slotStatus().get() != 0) {
+                const String_t slotUser = s.players()[0];
+                if (!slotUser.empty()) {
+                    if (slotUser == forUser) {
+                        setRank(result.userRank, s.rank().get());
+                    }
+                    if (slotUser == otherUser) {
+                        setRank(result.otherRank, s.rank().get());
+                    }
+                }
+            }
+        }
     }
 
     return result;

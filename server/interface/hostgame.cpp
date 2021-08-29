@@ -17,19 +17,24 @@ server::interface::HostGame::Info::Info()
       slotStates(),
       turnStates(),
       joinable(),
+      userPlays(),
       scores(),
       scoreName(),
       scoreDescription(),
       hostName(),
       hostDescription(),
+      hostKind(),
       shipListName(),
       shipListDescription(),
+      shipListKind(),
       masterName(),
       masterDescription(),
       turnNumber(0),
       lastHostTime(),
       nextHostTime(),
-      forumId()
+      forumId(),
+      userRank(),
+      otherRank()
 { }
 
 server::interface::HostGame::Info::~Info()

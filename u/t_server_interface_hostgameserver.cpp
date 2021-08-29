@@ -220,19 +220,25 @@ namespace {
         i.slotStates          = ss;
         i.turnStates          = ts;
         i.joinable            = true;
+        i.userPlays           = true;
         i.scores              = sc;
         i.scoreName           = "escore";
         i.scoreDescription    = "A Score";
         i.hostName            = "qhost";
         i.hostDescription     = "Quality Host";
+        i.hostKind            = "qq";
         i.shipListName        = "default";
         i.shipListDescription = "Default List";
+        i.shipListKind        = "slk";
         i.masterName          = "qmaster";
         i.masterDescription   = "Quality Master";
+        i.masterKind          = "mk";
         i.turnNumber          = 3;
         i.lastHostTime        = 1961;
         i.nextHostTime        = 1989;
         i.forumId             = 23;
+        i.userRank            = 7;
+        i.otherRank           = 8;
 
         return i;
     }
@@ -298,6 +304,7 @@ TestServerInterfaceHostGameServer::testIt()
         TS_ASSERT_EQUALS(a("turns")[0].toInteger(), 16);
         TS_ASSERT_EQUALS(a("turns")[1].toInteger(), 1);
         TS_ASSERT_EQUALS(a("joinable").toInteger(), 1);
+        TS_ASSERT_EQUALS(a("userPlays").toInteger(), 1);
         TS_ASSERT_EQUALS(a("scores").getArraySize(), 3U);
         TS_ASSERT_EQUALS(a("scores")[0].toInteger(), 12);
         TS_ASSERT_EQUALS(a("scores")[1].toInteger(), 167);
@@ -306,14 +313,19 @@ TestServerInterfaceHostGameServer::testIt()
         TS_ASSERT_EQUALS(a("scoreDescription").toString(), "A Score");
         TS_ASSERT_EQUALS(a("host").toString(), "qhost");
         TS_ASSERT_EQUALS(a("hostDescription").toString(), "Quality Host");
+        TS_ASSERT_EQUALS(a("hostKind").toString(), "qq");
         TS_ASSERT_EQUALS(a("shiplist").toString(), "default");
         TS_ASSERT_EQUALS(a("shiplistDescription").toString(), "Default List");
+        TS_ASSERT_EQUALS(a("shiplistKind").toString(), "slk");
         TS_ASSERT_EQUALS(a("master").toString(), "qmaster");
         TS_ASSERT_EQUALS(a("masterDescription").toString(), "Quality Master");
+        TS_ASSERT_EQUALS(a("masterKind").toString(), "mk");
         TS_ASSERT_EQUALS(a("turn").toInteger(), 3);
         TS_ASSERT_EQUALS(a("lastHostTime").toInteger(), 1961);
         TS_ASSERT_EQUALS(a("nextHostTime").toInteger(), 1989);
         TS_ASSERT_EQUALS(a("forum").toInteger(), 23);
+        TS_ASSERT_EQUALS(a("userRank").toInteger(), 7);
+        TS_ASSERT_EQUALS(a("otherRank").toInteger(), 8);
     }
 
     // - default (=minimal) data
@@ -331,6 +343,8 @@ TestServerInterfaceHostGameServer::testIt()
         TS_ASSERT(a("currentSchedule").getValue() == 0);
         TS_ASSERT(a("turns").getValue() == 0);
         TS_ASSERT(a("forum").getValue() == 0);
+        TS_ASSERT(a("userRank").getValue() == 0);
+        TS_ASSERT(a("otherRank").getValue() == 0);
     }
 
     // getInfos
@@ -687,6 +701,7 @@ TestServerInterfaceHostGameServer::testRoundtrip()
         TS_ASSERT_EQUALS(i.turnStates.get()->at(0), 16);
         TS_ASSERT_EQUALS(i.turnStates.get()->at(1), 1);
         TS_ASSERT(i.joinable.isSame(true));
+        TS_ASSERT(i.userPlays.isSame(true));
         TS_ASSERT(i.scores.isValid());
         TS_ASSERT_EQUALS(i.scores.get()->size(), 3U);
         TS_ASSERT_EQUALS(i.scores.get()->at(0), 12);
@@ -696,14 +711,19 @@ TestServerInterfaceHostGameServer::testRoundtrip()
         TS_ASSERT(i.scoreDescription.isSame(String_t("A Score")));
         TS_ASSERT_EQUALS(i.hostName, "qhost");
         TS_ASSERT_EQUALS(i.hostDescription, "Quality Host");
+        TS_ASSERT_EQUALS(i.hostKind, "qq");
         TS_ASSERT_EQUALS(i.shipListName, "default");
         TS_ASSERT_EQUALS(i.shipListDescription, "Default List");
+        TS_ASSERT_EQUALS(i.shipListKind, "slk");
         TS_ASSERT(i.masterName.isSame(String_t("qmaster")));
         TS_ASSERT(i.masterDescription.isSame(String_t("Quality Master")));
+        TS_ASSERT(i.masterKind.isSame(String_t("mk")));
         TS_ASSERT_EQUALS(i.turnNumber, 3);
         TS_ASSERT(i.lastHostTime.isSame(1961));
         TS_ASSERT(i.nextHostTime.isSame(1989));
         TS_ASSERT(i.forumId.isSame(23));
+        TS_ASSERT(i.userRank.isSame(7));
+        TS_ASSERT(i.otherRank.isSame(8));
     }
 
     // - default (=minimal) data
@@ -720,6 +740,8 @@ TestServerInterfaceHostGameServer::testRoundtrip()
         TS_ASSERT(!i.currentSchedule.isValid());
         TS_ASSERT(!i.turnStates.isValid());
         TS_ASSERT(!i.forumId.isValid());
+        TS_ASSERT(!i.userRank.isValid());
+        TS_ASSERT(!i.otherRank.isValid());
     }
 
     // getInfos

@@ -335,6 +335,11 @@ server::interface::HostGameClient::unpackInfo(const Value_t* value)
         result.joinable = (Access(p).toInteger() != 0);
     }
 
+    // userPlays [optional]
+    if (const Value_t* p = a("userPlays").getValue()) {
+        result.userPlays = (Access(p).toInteger() != 0);
+    }
+
     // scores [optional]
     if (const Value_t* p = a("scores").getValue()) {
         std::vector<int32_t> scores;
@@ -360,11 +365,17 @@ server::interface::HostGameClient::unpackInfo(const Value_t* value)
     // hostDescription
     result.hostDescription = a("hostDescription").toString();
 
+    // hostKind
+    result.hostKind = a("hostKind").toString();
+
     // shipListName / "shiplist"
     result.shipListName = a("shiplist").toString();
 
     // shipListDescription / "shiplistDescription"
     result.shipListDescription = a("shiplistDescription").toString();
+
+    // shipListKind
+    result.shipListKind = a("shiplistKind").toString();
 
     // masterName / "master" [optional]
     if (const Value_t* p = a("master").getValue()) {
@@ -374,6 +385,11 @@ server::interface::HostGameClient::unpackInfo(const Value_t* value)
     // masterDescription [optional]
     if (const Value_t* p = a("masterDescription").getValue()) {
         result.masterDescription = Access(p).toString();
+    }
+
+    // masterKind [optional]
+    if (const Value_t* p = a("masterKind").getValue()) {
+        result.masterKind = Access(p).toString();
     }
 
     // turnNumber / "turn"
@@ -392,6 +408,16 @@ server::interface::HostGameClient::unpackInfo(const Value_t* value)
     // forumId / "forum" [optional]
     if (const Value_t* p = a("forum").getValue()) {
         result.forumId = Access(p).toInteger();
+    }
+
+    // userRank
+    if (const Value_t* p = a("userRank").getValue()) {
+        result.userRank = Access(p).toInteger();
+    }
+
+    // otherRank
+    if (const Value_t* p = a("otherRank").getValue()) {
+        result.otherRank = Access(p).toInteger();
     }
 
     return result;

@@ -63,19 +63,25 @@ namespace server { namespace interface {
             afl::base::Optional<std::vector<SlotState> > slotStates;
             afl::base::Optional<std::vector<int32_t> > turnStates;
             afl::base::Optional<bool> joinable;
+            afl::base::Optional<bool> userPlays;
             afl::base::Optional<std::vector<int32_t> > scores;
             afl::base::Optional<String_t> scoreName;
             afl::base::Optional<String_t> scoreDescription;
             String_t hostName;
             String_t hostDescription;
+            String_t hostKind;
             String_t shipListName;
             String_t shipListDescription;
+            String_t shipListKind;
             afl::base::Optional<String_t> masterName;
             afl::base::Optional<String_t> masterDescription;
+            afl::base::Optional<String_t> masterKind;
             int32_t turnNumber;
             afl::base::Optional<Time_t> lastHostTime;
             afl::base::Optional<Time_t> nextHostTime;
             afl::base::Optional<int32_t> forumId;
+            afl::base::Optional<int32_t> userRank;
+            afl::base::Optional<int32_t> otherRank;
 
             Info();
             ~Info();

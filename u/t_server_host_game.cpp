@@ -148,17 +148,24 @@ TestServerHostGame::testDescribe()
     // Player 11 is open
     t.hashKey("player:11:status").intField("slot").set(1);
 
+    // Reference counters
+    t.hashKey("users").intField("user-a").set(1);
+    t.hashKey("users").intField("user-b").set(1);
+
     t.hashKey("turn:12:scores").stringField("timscore").set(String_t("\1\0\0\0\2\0\0\0\3\0\0\0\4\0\0\0\5\0\0\0\6\0\0\0\7\0\0\0\10\0\0\0\11\0\0\0\12\0\0\0\13\0\0\0", 44));
 
     // Environment
     HashKey(h.db(), "prog:host:prog:P").stringField("description").set("a host");
+    HashKey(h.db(), "prog:host:prog:P").stringField("kind").set("host kind");
     HashKey(h.db(), "prog:master:prog:M").stringField("description").set("a master");
+    HashKey(h.db(), "prog:master:prog:M").stringField("kind").set("master kind");
     HashKey(h.db(), "prog:sl:prog:S").stringField("description").set("a shiplist");
+    HashKey(h.db(), "prog:sl:prog:S").stringField("kind").set("shiplist kind");
 
     // Query
     {
         // Not verbose
-        HostGame::Info i = server::host::Game(h.root(), GAME_ID).describe(false, "user-a", h.root());
+        HostGame::Info i = server::host::Game(h.root(), GAME_ID).describe(false, "user-a", "", h.root());
         TS_ASSERT_EQUALS(i.gameId, GAME_ID);
         TS_ASSERT_EQUALS(i.state, HostGame::Running);
         TS_ASSERT_EQUALS(i.type, HostGame::UnlistedGame);
@@ -167,13 +174,16 @@ TestServerHostGame::testDescribe()
         TS_ASSERT(!i.currentSchedule.isValid());
         TS_ASSERT_EQUALS(i.hostName, "P");
         TS_ASSERT_EQUALS(i.hostDescription, "a host");
+        TS_ASSERT_EQUALS(i.hostKind, "host kind");
         TS_ASSERT_EQUALS(i.shipListName, "S");
         TS_ASSERT_EQUALS(i.shipListDescription, "a shiplist");
+        TS_ASSERT_EQUALS(i.shipListKind, "shiplist kind");
         TS_ASSERT_EQUALS(i.turnNumber, 12);
+        TS_ASSERT(i.userPlays.isSame(true));
     }
     {
         // Verbose
-        HostGame::Info i = server::host::Game(h.root(), GAME_ID).describe(true, "user-a", h.root());
+        HostGame::Info i = server::host::Game(h.root(), GAME_ID).describe(true, "user-a", "", h.root());
         TS_ASSERT_EQUALS(i.gameId, GAME_ID);
         TS_ASSERT_EQUALS(i.state, HostGame::Running);
         TS_ASSERT_EQUALS(i.type, HostGame::UnlistedGame);
@@ -193,6 +203,7 @@ TestServerHostGame::testDescribe()
         TS_ASSERT_EQUALS(i.turnStates.get()->at(2), 2); // player 3
 
         TS_ASSERT(i.joinable.isSame(false));
+        TS_ASSERT(i.userPlays.isSame(true));
 
         TS_ASSERT(i.scores.isValid());
         TS_ASSERT_EQUALS(i.scores.get()->at(2), 3);
@@ -201,11 +212,12 @@ TestServerHostGame::testDescribe()
         TS_ASSERT(i.scoreDescription.isSame(String_t("Classic Score")));
         TS_ASSERT(i.masterName.isSame(String_t("M")));
         TS_ASSERT(i.masterDescription.isSame(String_t("a master")));
+        TS_ASSERT(i.masterKind.isSame(String_t("master kind")));
         TS_ASSERT(i.forumId.isSame(46));
     }
     {
         // Verbose, as user C
-        HostGame::Info i = server::host::Game(h.root(), GAME_ID).describe(true, "user-c", h.root());
+        HostGame::Info i = server::host::Game(h.root(), GAME_ID).describe(true, "user-c", "", h.root());
 
         TS_ASSERT(i.slotStates.isValid());
         TS_ASSERT_EQUALS(i.slotStates.get()->size(), 11U);
@@ -217,6 +229,7 @@ TestServerHostGame::testDescribe()
         TS_ASSERT_EQUALS(i.turnStates.get()->at(2), 1); // player 3 - difference, Yellow is mapped to Green
 
         TS_ASSERT(i.joinable.isSame(true));
+        TS_ASSERT(i.userPlays.isSame(false));
     }
 }
 
@@ -346,6 +359,11 @@ TestServerHostGame::testSetStateFinish()
     TS_ASSERT(n != String_t::npos);
     TS_ASSERT_EQUALS(a.substr(n), ":game-state:150:finished:u7");
     TS_ASSERT_EQUALS(a, StringListKey(h.db(), "global:history")[0]);
+
+    // Verify statistic
+    server::interface::HostGame::Info info = server::host::Game(h.root(), 150).describe(true, "u1", "u2", h.root());
+    TS_ASSERT_EQUALS(info.userRank.orElse(-1), 6);
+    TS_ASSERT_EQUALS(info.otherRank.orElse(-1), 7);
 }
 
 /** Test setState() to finish a game, no clear winner. */

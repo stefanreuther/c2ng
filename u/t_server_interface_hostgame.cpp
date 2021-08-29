@@ -167,19 +167,24 @@ TestServerInterfaceHostGame::testInit()
         TS_ASSERT(!i.slotStates.isValid());
         TS_ASSERT(!i.turnStates.isValid());
         TS_ASSERT(!i.joinable.isValid());
+        TS_ASSERT(!i.userPlays.isValid());
         TS_ASSERT(!i.scores.isValid());
         TS_ASSERT(!i.scoreName.isValid());
         TS_ASSERT(!i.scoreDescription.isValid());
         TS_ASSERT_EQUALS(i.hostName, "");
         TS_ASSERT_EQUALS(i.hostDescription, "");
+        TS_ASSERT_EQUALS(i.hostKind, "");
         TS_ASSERT_EQUALS(i.shipListName, "");
         TS_ASSERT_EQUALS(i.shipListDescription, "");
+        TS_ASSERT_EQUALS(i.shipListKind, "");
         TS_ASSERT(!i.masterName.isValid());
         TS_ASSERT(!i.masterDescription.isValid());
         TS_ASSERT_EQUALS(i.turnNumber, 0);
         TS_ASSERT(!i.lastHostTime.isValid());
         TS_ASSERT(!i.nextHostTime.isValid());
         TS_ASSERT(!i.forumId.isValid());
+        TS_ASSERT(!i.userRank.isValid());
+        TS_ASSERT(!i.otherRank.isValid());
     }
     {
         HostGame::VictoryCondition v;

@@ -154,7 +154,7 @@ server::host::HostGame::getInfo(int32_t gameId)
     Game game(m_root, gameId);
     m_session.checkPermission(game, Game::ReadPermission);
 
-    return game.describe(true, m_session.getUser(), m_root);
+    return game.describe(true, m_session.getUser(), String_t(), m_root);
 }
 
 void
@@ -164,7 +164,7 @@ server::host::HostGame::getInfos(const Filter& filter, bool verbose, std::vector
     afl::data::IntegerList_t list;
     listGames(filter, list);
     for (size_t i = 0, n = list.size(); i < n; ++i) {
-        result.push_back(Game(m_root, list[i], Game::NoExistanceCheck).describe(verbose, m_session.getUser(), m_root));
+        result.push_back(Game(m_root, list[i], Game::NoExistanceCheck).describe(verbose, m_session.getUser(), filter.requiredUser.orElse(String_t()), m_root));
     }
 }
 
