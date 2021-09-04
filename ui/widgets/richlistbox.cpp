@@ -50,7 +50,8 @@ ui::widgets::RichListbox::RichListbox(gfx::ResourceProvider& provider, ui::Color
       m_colorScheme(scheme),
       m_items(),
       m_renderFlags(),
-      m_preferredWidth(400)
+      m_preferredWidth(400),
+      m_preferredHeight(0)
 { }
 
 ui::widgets::RichListbox::~RichListbox()
@@ -87,6 +88,12 @@ void
 ui::widgets::RichListbox::setPreferredWidth(int width)
 {
     m_preferredWidth = width;
+}
+
+void
+ui::widgets::RichListbox::setPreferredHeight(int height)
+{
+    m_preferredHeight = height;
 }
 
 void
@@ -205,7 +212,10 @@ ui::widgets::RichListbox::getLayoutInfo() const
         totalHeight += 4;
     }
 
-    return gfx::Point(m_preferredWidth, totalHeight);
+    int minHeight = (m_preferredHeight > 0 && totalHeight > m_preferredHeight ? m_preferredHeight : totalHeight);
+    return ui::layout::Info(gfx::Point(m_preferredWidth, minHeight),
+                            gfx::Point(m_preferredWidth, totalHeight),
+                            ui::layout::Info::GrowBoth);
 }
 
 bool

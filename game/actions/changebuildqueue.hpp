@@ -22,12 +22,22 @@ namespace game { namespace actions {
         - call commit() to write back */
     class ChangeBuildQueue {
      public:
+        /** Action. */
+        enum Action {
+            BuildShip,                          ///< Building a ship.
+            CloneShip,                          ///< Cloning a ship.
+            PlanShip                            ///< Planning a ship (waiting for resources).
+        };
+
         /** Information about a build order in prepared format. */
         struct Info {
             Id_t planetId;                      ///< Planet Id.
+            Action action;                      ///< Action type.
             String_t planetName;                ///< Planet name.
-            String_t actionName;                ///< Description of build order.
+            String_t actionName;                ///< Human-readable description of build order.
             String_t friendlyCode;              ///< Friendly code.
+            String_t hullName;                  ///< Hull name.
+            int hullNr;                         ///< Hull number.
             int queuePosition;                  ///< Queue position (0 if not known or new order).
             LongProperty_t pointsRequired;      ///< Number of build points required to build this ship.
             LongProperty_t pointsAvailable;     ///< Number of build points available for this ship.
@@ -37,8 +47,9 @@ namespace game { namespace actions {
             bool planned;                       ///< true if this is a planned build.
 
             Info()
-                : planetId(), planetName(), actionName(),
-                  friendlyCode(), queuePosition(), pointsRequired(), pointsAvailable(),
+                : planetId(), action(), planetName(), actionName(),
+                  friendlyCode(), hullName(), hullNr(),
+                  queuePosition(), pointsRequired(), pointsAvailable(),
                   hasPriority(), conflict(), playable(), planned()
                 { }
         };

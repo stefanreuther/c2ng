@@ -236,12 +236,18 @@ game::actions::ChangeBuildQueue::describe(Infos_t& result, afl::string::Translat
         int pointsRequired = 0;
         if (in.plannedHullId != 0) {
             if (const game::spec::Hull* pHull = m_shipList.hulls().get(in.plannedHullId)) {
-                out.actionName = Format(tx("Plan %s"), pHull->getName(m_shipList.componentNamer()));
+                out.hullName = pHull->getName(m_shipList.componentNamer());
+                out.hullNr = pHull->getId();
+                out.actionName = Format(tx("Plan %s"), out.hullName);
+                out.action = PlanShip;
                 pointsRequired = pHull->getPointsToBuild(player, m_host, m_config);
             }
         } else if (in.cloningShipId == 0) {
             if (const game::spec::Hull* pHull = m_shipList.hulls().get(pl.getBaseBuildHull(m_config, m_shipList.hullAssignments()).orElse(0))) {
-                out.actionName = Format(tx("Build %s"), pHull->getName(m_shipList.componentNamer()));
+                out.hullName = pHull->getName(m_shipList.componentNamer());
+                out.hullNr = pHull->getId();
+                out.actionName = Format(tx("Build %s"), out.hullName);
+                out.action = BuildShip;
                 pointsRequired = pHull->getPointsToBuild(player, m_host, m_config);
             }
         } else {
@@ -251,10 +257,13 @@ game::actions::ChangeBuildQueue::describe(Infos_t& result, afl::string::Translat
                 shipName = Format(tx("Ship #%d"), sh.getId());
             }
             out.actionName = Format(tx("Clone %s"), shipName);
+            out.action = CloneShip;
 
             if (const game::spec::Hull* pHull = m_shipList.hulls().get(sh.getHull().orElse(0))) {
                 pointsRequired = pHull->getPointsToBuild(player, m_host, m_config)
                     * m_config[HostConfiguration::PBPCloneCostRate](player) / 100;
+                out.hullName = pHull->getName(m_shipList.componentNamer());
+                out.hullNr = pHull->getId();
             }
         }
 

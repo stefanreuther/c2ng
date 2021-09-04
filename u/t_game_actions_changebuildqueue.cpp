@@ -115,7 +115,7 @@ namespace {
         sd.waypointDX = 0;
         sd.waypointDY = 0;
         sd.engineType = 9;
-        sd.hullType = 1;
+        sd.hullType = 7;
         sh->addCurrentShipData(sd, game::PlayerSet_t(player));
 
         return *sh;
@@ -315,6 +315,15 @@ TestGameActionsChangeBuildQueue::testClone()
     TS_ASSERT_EQUALS(infos[0].actionName, "Build Hull 1");
     TS_ASSERT_EQUALS(infos[1].actionName, "Clone NSEA Protector");
     TS_ASSERT_EQUALS(infos[2].actionName, "Build Hull 1");
+    TS_ASSERT_EQUALS(infos[0].action, game::actions::ChangeBuildQueue::BuildShip);
+    TS_ASSERT_EQUALS(infos[1].action, game::actions::ChangeBuildQueue::CloneShip);
+    TS_ASSERT_EQUALS(infos[2].action, game::actions::ChangeBuildQueue::BuildShip);
+    TS_ASSERT_EQUALS(infos[0].hullName, "Hull 1");
+    TS_ASSERT_EQUALS(infos[1].hullName, "Hull 7");
+    TS_ASSERT_EQUALS(infos[2].hullName, "Hull 1");
+    TS_ASSERT_EQUALS(infos[0].hullNr, 1);
+    TS_ASSERT_EQUALS(infos[1].hullNr, 7);
+    TS_ASSERT_EQUALS(infos[2].hullNr, 1);
 }
 
 /** Test planned build.
@@ -368,5 +377,14 @@ TestGameActionsChangeBuildQueue::testPlannedBuild()
     TS_ASSERT_EQUALS(infos[0].planetId, 6);
     TS_ASSERT_EQUALS(infos[1].planetId, 20);
     TS_ASSERT_EQUALS(infos[2].planetId, 10);
+    TS_ASSERT_EQUALS(infos[0].action, game::actions::ChangeBuildQueue::BuildShip);
+    TS_ASSERT_EQUALS(infos[1].action, game::actions::ChangeBuildQueue::BuildShip);
+    TS_ASSERT_EQUALS(infos[2].action, game::actions::ChangeBuildQueue::PlanShip);
+    TS_ASSERT_EQUALS(infos[0].hullName, "Hull 1");
+    TS_ASSERT_EQUALS(infos[1].hullName, "Hull 1");
+    TS_ASSERT_EQUALS(infos[2].hullName, "Hull 4");
+    TS_ASSERT_EQUALS(infos[0].hullNr, 1);
+    TS_ASSERT_EQUALS(infos[1].hullNr, 1);
+    TS_ASSERT_EQUALS(infos[2].hullNr, 4);
 }
 

@@ -701,9 +701,10 @@ PROJ_AUTO += \
     gamelib:game/*.cpp,game/*.hpp,util/*.cpp,util/*.hpp,interpreter/*.cpp,interpreter/*.hpp
 
 TARGETS += guilib
-FILES_guilib = client/dialogs/buildammo.cpp client/dialogs/buildammo.hpp \
-    client/dialogs/hullfunctionview.cpp client/dialogs/hullfunctionview.hpp \
-    client/dialogs/hullspecification.cpp \
+FILES_guilib = client/dialogs/buildqueuesummary.cpp \
+    client/dialogs/buildqueuesummary.hpp client/dialogs/buildammo.cpp \
+    client/dialogs/buildammo.hpp client/dialogs/hullfunctionview.cpp \
+    client/dialogs/hullfunctionview.hpp client/dialogs/hullspecification.cpp \
     client/dialogs/hullspecification.hpp client/dialogs/flakvcrobject.cpp \
     client/dialogs/flakvcrobject.hpp client/vcr/flak/flatrenderer.cpp \
     client/vcr/flak/flatrenderer.hpp client/vcr/flak/threedrenderer.cpp \

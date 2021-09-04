@@ -32,6 +32,7 @@ namespace ui { namespace widgets {
         void setItemAccessible(size_t n, bool accessible);
 
         void setPreferredWidth(int width);
+        void setPreferredHeight(int height);
 
         void setRenderFlag(RenderFlag flag, bool value);
         bool hasRenderFlag(RenderFlag flag) const;
@@ -67,6 +68,7 @@ namespace ui { namespace widgets {
         afl::container::PtrVector<Item> m_items;
         RenderFlagSet_t m_renderFlags;
         int m_preferredWidth;
+        int m_preferredHeight;
 
         void render(size_t pos, size_t n);
     };

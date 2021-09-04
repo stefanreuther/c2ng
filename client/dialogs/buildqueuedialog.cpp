@@ -5,6 +5,7 @@
 
 #include "client/dialogs/buildqueuedialog.hpp"
 #include "afl/string/format.hpp"
+#include "client/dialogs/buildqueuesummary.hpp"
 #include "client/downlink.hpp"
 #include "game/proxy/buildqueueproxy.hpp"
 #include "gfx/complex.hpp"
@@ -50,6 +51,8 @@ namespace {
         void setContent(const Infos_t& data);
         void scrollToPlanet(game::Id_t planetId);
 
+        const Infos_t& getContent() const;
+
         virtual size_t getNumItems();
         virtual bool isItemAccessible(size_t n);
         virtual int getItemHeight(size_t n);
@@ -85,12 +88,13 @@ namespace {
      public:
         typedef BuildQueueProxy::Infos_t Infos_t;
 
-        BuildQueueDialog(ui::Root& root, afl::string::Translator& tx, BuildQueueProxy& proxy, BuildQueueList::Columns_t cols)
+        BuildQueueDialog(ui::Root& root, afl::string::Translator& tx, BuildQueueProxy& proxy, BuildQueueList::Columns_t cols, util::RequestSender<game::Session> gameSender)
             : m_root(root),
               m_list(root, tx, cols),
               m_loop(root),
               m_translator(tx),
-              m_proxy(proxy)
+              m_proxy(proxy),
+              m_gameSender(gameSender)
             {
                 proxy.sig_update.add(this, &BuildQueueDialog::setContent);
             }
@@ -122,12 +126,15 @@ namespace {
                 g.add(del.addNew(new ui::widgets::StaticText(m_translator("Build later"), util::SkinColor::Static, gfx::FontRequest(), m_root.provider())));
                 g.add(del.addNew(new ui::Spacer()));
 
+                ui::widgets::Button& btnSummary = del.addNew(new ui::widgets::Button(m_translator("Summary..."), 's', m_root));
+                g.add(btnSummary);
+                btnSummary.sig_fire.add(this, &BuildQueueDialog::onSummary);
+
                 win.add(g);
 
                 ui::widgets::StandardDialogButtons& btns = del.addNew(new ui::widgets::StandardDialogButtons(m_root, m_translator));
                 btns.addStop(m_loop);
                 win.add(btns);
-
 
                 win.pack();
                 m_root.centerWidget(win);
@@ -137,12 +144,18 @@ namespace {
                 }
             }
 
+        void onSummary()
+            {
+                client::dialogs::doBuildQueueSummaryDialog(m_list.getContent(), m_root, m_gameSender, m_translator);
+            }
+
      private:
         ui::Root& m_root;
         BuildQueueList m_list;
         ui::EventLoop m_loop;
         afl::string::Translator& m_translator;
         BuildQueueProxy& m_proxy;
+        util::RequestSender<game::Session> m_gameSender;
     };
 
 }
@@ -189,6 +202,12 @@ BuildQueueList::scrollToPlanet(game::Id_t planetId)
             break;
         }
     }
+}
+
+const BuildQueueList::Infos_t&
+BuildQueueList::getContent() const
+{
+    return m_data;
 }
 
 size_t
@@ -431,7 +450,7 @@ client::dialogs::doBuildQueueDialog(game::Id_t baseId,
     }
 
     // Set up dialog
-    BuildQueueDialog dlg(root, tx, proxy, cols);
+    BuildQueueDialog dlg(root, tx, proxy, cols, gameSender);
     dlg.setContent(infos);
     dlg.scrollToPlanet(baseId);
     dlg.run();
