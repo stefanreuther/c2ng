@@ -411,7 +411,7 @@ util::plugin::ConsoleApplication::doHelp(afl::sys::Environment::CommandLine_t& /
 const util::plugin::ConsoleApplication::Command*
 util::plugin::ConsoleApplication::findCommand(const String_t& name)
 {
-    static struct Command commands[] = {
+    static const struct Command commands[] = {
         { "ls",        &ConsoleApplication::doList },
         { "list",      &ConsoleApplication::doList },
         { "add",       &ConsoleApplication::doAdd },
