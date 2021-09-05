@@ -170,6 +170,19 @@ namespace game { namespace map {
                                   const HostVersion& host,
                                   afl::string::Translator& tx) const;
 
+        /** Get names of units at a point in human-readable form.
+            \param pt               Location
+            \param viewpointPlayer  Viewpoint player (determines whose ships are shown by name)
+            \param players          Player list
+            \param tx               Translator
+            \param iface            Interface (for name retrieval)
+            \return human-readable, multi-line string */
+        String_t findLocationUnitNames(Point pt,
+                                       int viewpointPlayer,
+                                       const PlayerList& players,
+                                       afl::string::Translator& tx,
+                                       InterpreterInterface& iface) const;
+
         /** Check whether a ship is being towed.
             \param sid Ship Id
             \param after Start searching after this Id

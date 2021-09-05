@@ -12,19 +12,6 @@
 using game::map::Point;
 using game::config::UserConfiguration;
 
-class game::proxy::LockProxy::Response : public util::Request<LockProxy> {
- public:
-    Response(Point_t target, Flags_t flags, Point_t result)
-        : m_target(target), m_flags(flags), m_result(result)
-        { }
-    virtual void handle(LockProxy& proxy)
-        { proxy.postResult(m_target, m_flags, m_result); }
- private:
-    Point_t m_target;
-    Flags_t m_flags;
-    Point_t m_result;
-};
-
 class game::proxy::LockProxy::Query : public util::Request<Session> {
  public:
     Query(Point_t target, Flags_t flags, const Limit& limit, const Origin& origin, util::RequestSender<LockProxy> reply)
@@ -38,6 +25,20 @@ class game::proxy::LockProxy::Query : public util::Request<Session> {
     Flags_t m_flags;
     Limit m_limit;
     Origin m_origin;
+    util::RequestSender<LockProxy> m_reply;
+};
+
+class game::proxy::LockProxy::UnitNameQuery : public util::Request<Session> {
+ public:
+    UnitNameQuery(Point_t target, const Limit& limit, util::RequestSender<LockProxy> reply)
+        : m_target(target), m_limit(limit), m_reply(reply)
+        { }
+    virtual void handle(Session& session);
+ private:
+    void sendResponse(Point_t pt, String_t name);
+
+    Point_t m_target;
+    Limit m_limit;
     util::RequestSender<LockProxy> m_reply;
 };
 
@@ -89,7 +90,43 @@ game::proxy::LockProxy::Query::handle(Session& session)
 void
 game::proxy::LockProxy::Query::sendResponse(Point_t pt)
 {
-    m_reply.postNewRequest(new Response(m_target, m_flags, pt));
+    m_reply.postRequest(&LockProxy::postResult, m_target, m_flags, pt);
+}
+
+/*
+ *  UnitNameQuery
+ */
+
+void
+game::proxy::LockProxy::UnitNameQuery::handle(Session& session)
+{
+    // ex WScannerChartWidget::doTooltip (part)
+    Root* pRoot = session.getRoot().get();
+    Game* pGame = session.getGame().get();
+    Turn* pTurn = pGame ? pGame->getViewpointTurn().get() : 0;
+    if (pRoot == 0 || pGame == 0 || pTurn == 0) {
+        sendResponse(m_target, String_t());
+        return;
+    }
+    const game::map::Universe& univ = pTurn->universe();
+
+    // Determine mode
+    game::map::Locker locker(m_target, univ.config());
+    if (m_limit.active) {
+        locker.setRangeLimit(m_limit.min, m_limit.max);
+    }
+
+    // Find target
+    locker.addUniverse(univ, game::map::MatchPlanets | game::map::MatchShips, 0);
+
+    sendResponse(locker.getFoundPoint(),
+                 univ.findLocationUnitNames(locker.getFoundPoint(), pGame->getViewpointPlayer(), pRoot->playerList(), session.translator(), session.interface()));
+}
+
+void
+game::proxy::LockProxy::UnitNameQuery::sendResponse(Point_t pt, String_t name)
+{
+    m_reply.postRequest(&LockProxy::postUnitNameResult, m_target, pt, name);
 }
 
 /*
@@ -129,7 +166,7 @@ game::proxy::LockProxy::setOrigin(Point_t pos, bool isHyperdriving)
 }
 
 void
-game::proxy::LockProxy::postQuery(Point_t target, Flags_t flags)
+game::proxy::LockProxy::requestPosition(Point_t target, Flags_t flags)
 {
     m_lastTarget = target;
     m_lastFlags = flags;
@@ -137,9 +174,24 @@ game::proxy::LockProxy::postQuery(Point_t target, Flags_t flags)
 }
 
 void
+game::proxy::LockProxy::requestUnitNames(Point_t target)
+{
+    m_lastUnitNameTarget = target;
+    m_gameSender.postNewRequest(new UnitNameQuery(target, m_limit, m_reply.getSender()));
+}
+
+void
 game::proxy::LockProxy::postResult(Point_t target, Flags_t flags, Point_t result)
 {
     if (m_lastTarget == target && m_lastFlags == flags) {
         sig_result.raise(result);
+    }
+}
+
+void
+game::proxy::LockProxy::postUnitNameResult(Point_t target, Point_t result, String_t name)
+{
+    if (m_lastUnitNameTarget == target) {
+        sig_unitNameResult.raise(result, name);
     }
 }

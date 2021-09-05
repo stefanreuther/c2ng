@@ -187,7 +187,7 @@ client::map::StarchartOverlay::handleKey(util::Key_t key, int prefix, const Rend
             if ((key & util::KeyMod_Ctrl) != 0) {
                 flags += LockProxy::MarkedOnly;
             }
-            m_lockProxy.postQuery(m_location.getPosition(), flags);
+            m_lockProxy.requestPosition(m_location.getPosition(), flags);
         }
         return true;
 

@@ -13,6 +13,7 @@
 #include "game/map/ship.hpp"
 #include "game/spec/mission.hpp"
 #include "util/math.hpp"
+#include "util/string.hpp"
 
 namespace {
     /** Format name of a planet. */
@@ -602,6 +603,62 @@ game::map::Universe::findLocationName(Point pt, int flags,
     return afl::string::Format((flags & NameVerbose) != 0 ? tx("Deep Space %s") : "%s", pt.toString());
 }
 
+String_t
+game::map::Universe::findLocationUnitNames(Point pt,
+                                           int viewpointPlayer,
+                                           const PlayerList& players,
+                                           afl::string::Translator& tx,
+                                           InterpreterInterface& iface) const
+{
+    // ex WScannerChartWidget::doTooltip (part)
+    const Point realPos = m_config.getCanonicalLocation(pt);
+    const char*const SEP = "\n";
+    String_t desc;
+
+    if (const Planet* p = m_planets.get(findPlanetAt(realPos))) {
+        util::addListItem(desc, SEP, p->getName(LongName, tx, iface));
+    }
+
+    // Count ships
+    PlayerArray<int> numShips;
+    Id_t myShipId = 0;
+    String_t myShipName;
+    AnyShipType ty(const_cast<Universe&>(*this));
+    for (Id_t sid = ty.findNextIndex(0); sid != 0; sid = ty.findNextIndex(sid)) {
+        if (const Ship* sh = ty.getObjectByIndex(sid)) {
+            Point shipPos;
+            int shipOwner;
+            if (sh->getPosition(shipPos) && shipPos == realPos && sh->getOwner(shipOwner)) {
+                // Valid ship, count it
+                numShips.set(shipOwner, numShips.get(shipOwner) + 1);
+                if (myShipId == 0 && shipOwner == viewpointPlayer) {
+                    myShipId = sid;
+                    myShipName = sh->getName(LongName, tx, iface);
+                }
+            }
+        }
+    }
+
+    // Own ships?
+    if (myShipId != 0) {
+        int numMyShips = numShips.get(viewpointPlayer);
+        if (numMyShips > 1) {
+            util::addListItem(desc, SEP, afl::string::Format(tx("%s + %d own ship%!1{s%}"), myShipName, numMyShips-1));
+        } else {
+            util::addListItem(desc, SEP, myShipName);
+        }
+    }
+
+    // Foreign ships?
+    for (int pl = 1; pl <= MAX_PLAYERS; ++pl) {
+        if (pl != viewpointPlayer && numShips.get(pl) != 0) {
+            util::addListItem(desc, SEP, afl::string::Format(tx("%d %s ship%!1{s%}"), numShips.get(pl), players.getPlayerName(pl, Player::AdjectiveName)));
+        }
+    }
+
+    return desc;
+}
+
 game::Id_t
 game::map::Universe::findShipTowing(Id_t sid, Id_t after) const
 {
@@ -631,7 +688,7 @@ game::map::Universe::findShipCloningAt(Id_t pid, Id_t after) const
     if (p == 0 || !p->getPosition(pt)) {
         return 0;
     }
-    
+
     PlayedShipType& ships = *m_playedShips;
     for (Id_t i = ships.findNextObjectAt(pt, after, false); i != 0; i = ships.findNextObjectAt(pt, i, false)) {
         String_t shipFC;

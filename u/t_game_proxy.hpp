@@ -208,10 +208,14 @@ class TestGameProxyKeymapProxy : public CxxTest::TestSuite {
 class TestGameProxyLockProxy : public CxxTest::TestSuite {
  public:
     void testEmpty();
+    void testEmptyName();
     void testNormal();
+    void testNormalName();
     void testRepeat();
+    void testRepeatName();
     void testMarked();
     void testRange();
+    void testRangeName();
     void testSetOrigin();
 };
 

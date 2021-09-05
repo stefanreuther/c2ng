@@ -36,6 +36,13 @@ namespace {
             { results.push_back(pt); }
     };
 
+    struct UnitNameResultReceiver {
+        std::vector<std::pair<Point, String_t> > results;
+
+        void onResult(Point pt, String_t name)
+            { results.push_back(std::make_pair(pt, name)); }
+    };
+
     void prepare(SessionThread& h)
     {
         Ptr<Root> r = new game::test::Root(HostVersion(HostVersion::PHost, MKVERSION(4,0,0)));
@@ -67,9 +74,9 @@ namespace {
     }
 }
 
-/** Test empty universe.
+/** Test empty universe, requestPosition().
     A: create empty session.
-    E: call postQuery(). Must produce correct result (same as query). */
+    E: call requestPosition(). Must produce correct result (same as query). */
 void
 TestGameProxyLockProxy::testEmpty()
 {
@@ -82,7 +89,7 @@ TestGameProxyLockProxy::testEmpty()
     // Testee
     ResultReceiver recv;
     t.sig_result.add(&recv, &ResultReceiver::onResult);
-    t.postQuery(Point(1000, 1100), LockProxy::Flags_t());
+    t.requestPosition(Point(1000, 1100), LockProxy::Flags_t());
 
     // Wait for result
     while (recv.results.empty()) {
@@ -92,9 +99,35 @@ TestGameProxyLockProxy::testEmpty()
     TS_ASSERT_EQUALS(recv.results[0], Point(1000, 1100));
 }
 
-/** Test normal operation.
+/** Test empty universe, requestUnitNames().
+    A: create empty session.
+    E: call requestUnitNames(). Must produce correct result (same as query). */
+void
+TestGameProxyLockProxy::testEmptyName()
+{
+    // Environment
+    CxxTest::setAbortTestOnFail(true);
+    SessionThread h;
+    SimpleRequestDispatcher disp;
+    LockProxy t(h.gameSender(), disp);
+
+    // Testee
+    UnitNameResultReceiver recv;
+    t.sig_unitNameResult.add(&recv, &UnitNameResultReceiver::onResult);
+    t.requestUnitNames(Point(1000, 1100));
+
+    // Wait for result
+    while (recv.results.empty()) {
+        TS_ASSERT(disp.wait(1000));
+    }
+    TS_ASSERT_EQUALS(recv.results.size(), 1U);
+    TS_ASSERT_EQUALS(recv.results[0].first, Point(1000, 1100));
+    TS_ASSERT_EQUALS(recv.results[0].second, "");
+}
+
+/** Test normal operation, requestPosition().
     A: create session with some objects.
-    E: call postQuery(). Must produce correct result. */
+    E: call requestPosition(). Must produce correct result. */
 void
 TestGameProxyLockProxy::testNormal()
 {
@@ -108,7 +141,7 @@ TestGameProxyLockProxy::testNormal()
     // Testee
     ResultReceiver recv;
     t.sig_result.add(&recv, &ResultReceiver::onResult);
-    t.postQuery(Point(1200, 1120), LockProxy::Flags_t());
+    t.requestPosition(Point(1200, 1120), LockProxy::Flags_t());
 
     // Wait for result
     while (recv.results.empty()) {
@@ -118,9 +151,36 @@ TestGameProxyLockProxy::testNormal()
     TS_ASSERT_EQUALS(recv.results[0], Point(1000, 1120));
 }
 
-/** Test debouncing.
+/** Test normal operation, requestUnitNames().
     A: create session with some objects.
-    E: call postQuery() multiple times. Must report only last result. */
+    E: call requestUnitNames(). Must produce correct result. */
+void
+TestGameProxyLockProxy::testNormalName()
+{
+    // Environment
+    CxxTest::setAbortTestOnFail(true);
+    SessionThread h;
+    prepare(h);
+    SimpleRequestDispatcher disp;
+    LockProxy t(h.gameSender(), disp);
+
+    // Testee
+    UnitNameResultReceiver recv;
+    t.sig_unitNameResult.add(&recv, &UnitNameResultReceiver::onResult);
+    t.requestUnitNames(Point(1200, 1120));
+
+    // Wait for result
+    while (recv.results.empty()) {
+        TS_ASSERT(disp.wait(1000));
+    }
+    TS_ASSERT_EQUALS(recv.results.size(), 1U);
+    TS_ASSERT_EQUALS(recv.results[0].first, Point(1000, 1120));
+    TS_ASSERT_EQUALS(recv.results[0].second, "1 Player 1 ship");
+}
+
+/** Test debouncing, requestPosition().
+    A: create session with some objects.
+    E: call requestPosition() multiple times. Must report only last result. */
 void
 TestGameProxyLockProxy::testRepeat()
 {
@@ -134,8 +194,8 @@ TestGameProxyLockProxy::testRepeat()
     // Testee
     ResultReceiver recv;
     t.sig_result.add(&recv, &ResultReceiver::onResult);
-    t.postQuery(Point(1200, 1120), LockProxy::Flags_t());
-    t.postQuery(Point(1200, 1150), LockProxy::Flags_t());
+    t.requestPosition(Point(1200, 1120), LockProxy::Flags_t());
+    t.requestPosition(Point(1200, 1150), LockProxy::Flags_t());
 
     // Wait for result
     while (recv.results.empty()) {
@@ -145,10 +205,37 @@ TestGameProxyLockProxy::testRepeat()
     TS_ASSERT_EQUALS(recv.results[0], Point(1000, 1150));
 }
 
+/** Test debouncing, requestUnitNames().
+    A: create session with some objects.
+    E: call requestUnitNames() multiple times. Must report only last result. */
+void
+TestGameProxyLockProxy::testRepeatName()
+{
+    // Environment
+    CxxTest::setAbortTestOnFail(true);
+    SessionThread h;
+    prepare(h);
+    SimpleRequestDispatcher disp;
+    LockProxy t(h.gameSender(), disp);
+
+    // Testee
+    UnitNameResultReceiver recv;
+    t.sig_unitNameResult.add(&recv, &UnitNameResultReceiver::onResult);
+    t.requestUnitNames(Point(1200, 1120));
+    t.requestUnitNames(Point(1200, 1150));
+
+    // Wait for result
+    while (recv.results.empty()) {
+        TS_ASSERT(disp.wait(1000));
+    }
+    TS_ASSERT_EQUALS(recv.results.size(), 1U);
+    TS_ASSERT_EQUALS(recv.results[0].first, Point(1000, 1150));
+    TS_ASSERT_EQUALS(recv.results[0].second, "1 Player 1 ship");
+}
 
 /** Test limitation to marked objects.
     A: create session with some objects; only one is marked.
-    E: call postQuery(). Must produce correct result. */
+    E: call requestPosition(). Must produce correct result. */
 void
 TestGameProxyLockProxy::testMarked()
 {
@@ -162,7 +249,7 @@ TestGameProxyLockProxy::testMarked()
     // Testee
     ResultReceiver recv;
     t.sig_result.add(&recv, &ResultReceiver::onResult);
-    t.postQuery(Point(1200, 1120), LockProxy::Flags_t(LockProxy::MarkedOnly));
+    t.requestPosition(Point(1200, 1120), LockProxy::Flags_t(LockProxy::MarkedOnly));
 
     // Wait for result
     while (recv.results.empty()) {
@@ -172,9 +259,9 @@ TestGameProxyLockProxy::testMarked()
     TS_ASSERT_EQUALS(recv.results[0], Point(1000, 1170));
 }
 
-/** Test limitation to range objects.
+/** Test limitation to range objects, requestPosition().
     A: create session with some objects.
-    E: call setRangeLimit(), then postQuery(). Must produce correct result. */
+    E: call setRangeLimit(), then requestPosition(). Must produce correct result. */
 void
 TestGameProxyLockProxy::testRange()
 {
@@ -189,7 +276,7 @@ TestGameProxyLockProxy::testRange()
     ResultReceiver recv;
     t.sig_result.add(&recv, &ResultReceiver::onResult);
     t.setRangeLimit(Point(1000, 1000), Point(1200, 1140));
-    t.postQuery(Point(1200, 1150), LockProxy::Flags_t());
+    t.requestPosition(Point(1200, 1150), LockProxy::Flags_t());
 
     // Wait for result
     while (recv.results.empty()) {
@@ -199,9 +286,37 @@ TestGameProxyLockProxy::testRange()
     TS_ASSERT_EQUALS(recv.results[0], Point(1000, 1140));
 }
 
+/** Test limitation to range objects, requestUnitNames().
+    A: create session with some objects.
+    E: call setRangeLimit(), then requestUnitNames(). Must produce correct result. */
+void
+TestGameProxyLockProxy::testRangeName()
+{
+    // Environment
+    CxxTest::setAbortTestOnFail(true);
+    SessionThread h;
+    prepare(h);
+    SimpleRequestDispatcher disp;
+    LockProxy t(h.gameSender(), disp);
+
+    // Testee
+    UnitNameResultReceiver recv;
+    t.sig_unitNameResult.add(&recv, &UnitNameResultReceiver::onResult);
+    t.setRangeLimit(Point(1000, 1000), Point(1200, 1140));
+    t.requestUnitNames(Point(1200, 1150));
+
+    // Wait for result
+    while (recv.results.empty()) {
+        TS_ASSERT(disp.wait(1000));
+    }
+    TS_ASSERT_EQUALS(recv.results.size(), 1U);
+    TS_ASSERT_EQUALS(recv.results[0].first, Point(1000, 1140));
+    TS_ASSERT_EQUALS(recv.results[0].second, "1 Player 1 ship");
+}
+
 /** Set setOrigin.
     A: create session with some objects including a planet.
-    E: call setOrigin(); then call postQuery(). Must produce correct result. */
+    E: call setOrigin(); then call requestPosition(). Must produce correct result. */
 void
 TestGameProxyLockProxy::testSetOrigin()
 {
@@ -217,7 +332,7 @@ TestGameProxyLockProxy::testSetOrigin()
     ResultReceiver recv;
     t.sig_result.add(&recv, &ResultReceiver::onResult);
     t.setOrigin(Point(2100, 2000), false);
-    t.postQuery(Point(2010, 2010), LockProxy::Flags_t() + LockProxy::ToggleOptimizeWarp + LockProxy::Left);
+    t.requestPosition(Point(2010, 2010), LockProxy::Flags_t() + LockProxy::ToggleOptimizeWarp + LockProxy::Left);
 
     // Wait for result
     while (recv.results.empty()) {

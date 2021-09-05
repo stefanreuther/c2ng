@@ -10,6 +10,8 @@
 #include "game/proxy/drawingproxy.hpp"
 #include "gfx/complex.hpp"
 #include "gfx/context.hpp"
+#include "ui/icons/skintext.hpp"
+#include "ui/icons/vbox.hpp"
 #include "ui/prefixargument.hpp"
 
 using game::map::RenderOptions;
@@ -20,12 +22,16 @@ client::map::MovementOverlay::MovementOverlay(util::RequestDispatcher& disp, uti
       m_parent(parent),
       m_translator(tx),
       m_modes(),
+      m_toolTip(parent.root()),
       m_keyboardMode(false),
       m_keyboardAdviceOnTop(true),
       m_valid(false),
-      m_position()
+      m_position(),
+      m_hoveredPoint()
 {
     m_lockProxy.sig_result.add(this, &MovementOverlay::onLockResult);
+    m_lockProxy.sig_unitNameResult.add(this, &MovementOverlay::onUnitNameResult);
+    m_toolTip.sig_hover.add(this, &MovementOverlay::onHover);
 }
 
 client::map::MovementOverlay::~MovementOverlay()
@@ -81,6 +87,7 @@ client::map::MovementOverlay::drawCursor(gfx::Canvas& /*can*/, const Renderer& /
 bool
 client::map::MovementOverlay::handleKey(util::Key_t key, int prefix, const Renderer& ren)
 {
+    m_toolTip.handleKey(key, prefix);
     if (m_valid && (m_modes.contains(AcceptMovementKeys) || m_keyboardMode)) {
         // ex WScannerChartWidget::handleKey
         switch (key) {
@@ -175,6 +182,10 @@ client::map::MovementOverlay::handleKey(util::Key_t key, int prefix, const Rende
 bool
 client::map::MovementOverlay::handleMouse(gfx::Point pt, MouseButtons_t pressedButtons, const Renderer& ren)
 {
+    // Drive the tooltip
+    m_toolTip.handleMouse(pt, pressedButtons, ren.getExtent().contains(pt));
+
+    // Click-to-lock
     if (!pressedButtons.empty()) {
         bool dbl   = pressedButtons.contains(gfx::EventConsumer::DoubleClick);
         bool shift = pressedButtons.contains(gfx::EventConsumer::ShiftKey);
@@ -192,7 +203,7 @@ client::map::MovementOverlay::handleMouse(gfx::Point pt, MouseButtons_t pressedB
         } else if (pressedButtons == MouseButtons_t(gfx::EventConsumer::RightButton)) {
             lockItem(ren.unscale(pt), false, ctrl, shift, ren);
         } else {
-            // Middle butten, button plus Alt, ...
+            // Middle button, button plus Alt, ...
             moveTo(ren.unscale(pt), ren);
         }
         return true;
@@ -401,6 +412,7 @@ client::map::MovementOverlay::lockItem(game::map::Point target, bool left, bool 
     // ex WScannerChartWidget::doItemLock (part)
     using game::proxy::LockProxy;
 
+    // Flags
     LockProxy::Flags_t flags;
     if (left) {
         flags += LockProxy::Left;
@@ -413,13 +425,20 @@ client::map::MovementOverlay::lockItem(game::map::Point target, bool left, bool 
     }
 
     // Range limit
+    configureLockProxy(ren);
+
+    // Request
+    m_lockProxy.requestPosition(target, flags);
+}
+
+void
+client::map::MovementOverlay::configureLockProxy(const Renderer& ren)
+{
     gfx::Rectangle area = ren.getExtent();
     game::map::Point topLeft = ren.unscale(area.getTopLeft());
     game::map::Point bottomRight = ren.unscale(area.getBottomRight() - gfx::Point(1, 1));
     m_lockProxy.setRangeLimit(game::map::Point(topLeft.getX(), bottomRight.getY()),
                               game::map::Point(bottomRight.getX(), topLeft.getY()));
-
-    m_lockProxy.postQuery(target, flags);
 }
 
 void
@@ -429,4 +448,44 @@ client::map::MovementOverlay::onLockResult(game::map::Point result)
         // Do NOT go through moveTo, for now. We don't have the required Renderer object at hand.
         sig_move.raise(result);
     }
+}
+
+void
+client::map::MovementOverlay::onUnitNameResult(game::map::Point result, String_t names)
+{
+    // Discard empty result
+    if (names.empty()) {
+        return;
+    }
+
+    // Verify distance
+    // Distance must be small enough (50 means distance of ~7 pixels; has been pulled out
+    // of a hat, and it's the same as used in PCC 1.x)
+    const Renderer& ren = m_parent.renderer();
+    const gfx::Point resolved = ren.scale(result);
+    const int dx = resolved.getX() - m_hoveredPoint.getX();
+    const int dy = resolved.getY() - m_hoveredPoint.getY();
+    if (dx*dx + dy*dy > 50) {
+        return;
+    }
+
+    // Show it
+    afl::base::Deleter del;
+    ui::icons::VBox icon;
+    String_t::size_type pos = 0, n;
+    while ((n = names.find('\n', pos)) != String_t::npos) {
+        icon.add(del.addNew(new ui::icons::SkinText(names.substr(pos, n - pos), m_parent.root())));
+        pos = n+1;
+    }
+    icon.add(del.addNew(new ui::icons::SkinText(names.substr(pos), m_parent.root())));
+    m_toolTip.showPopup(resolved, icon);
+}
+
+void
+client::map::MovementOverlay::onHover(gfx::Point pt)
+{
+    const Renderer& ren = m_parent.renderer();
+    m_hoveredPoint = pt;
+    configureLockProxy(ren);
+    m_lockProxy.requestUnitNames(ren.unscale(pt));
 }

@@ -15,10 +15,11 @@
 namespace game { namespace proxy {
 
     /** Starchart lock proxy.
-        Provides a possibility to lock onto objects on the map (mouse click).
+        Provides a possibility to lock onto objects on the map (mouse click) and retrieve names (mouse hover).
 
         Bidirectional, asynchronous:
-        - lock (postQuery, sig_result)
+        - lock (requestPosition, sig_result)
+        - retrieve names (requestUnitNames, sig_unitNameResult)
 
         \see game::map::Locker */
     class LockProxy {
@@ -56,21 +57,35 @@ namespace game { namespace proxy {
             \param isHyperdriving true if hyperdriving */
         void setOrigin(Point_t pos, bool isHyperdriving);
 
-        /** Post query.
-            Schedules a sig_result callback with the result point.
-            Note that the sig_result callback will be suppressed if postQuery() is called for a different query
+        /** Request position lock.
+            Determines the object closest to the clicked target and schedules a sig_result callback with the result point.
+            Note that the sig_result callback will be suppressed if requestPosition() is called for a different query
             before the previous one has been answered (de-bouncing).
             \param target Clicked position
-            \param flags  Flags */
-        void postQuery(Point_t target, Flags_t flags);
+            \param flags  Flags
+            \see game::map::Locker::addUniverse, game::map::Locker::getFoundPoint */
+        void requestPosition(Point_t target, Flags_t flags);
 
-        /** Signal: result.
-            \param pt Position (unit nearest to \c target in last postQuery call) */
+        /** Request unit names for a location.
+            Determines the point closest to the target and schedules a sig_nameResult callback with the result point and name.
+            Note that the sig_result callback will be suppressed if requestName() is called for a different query
+            before the previous one has been answered (de-bouncing).
+            \param target Clicked position
+            \see game::map::Universe::findLocationUnitNames */
+        void requestUnitNames(Point_t target);
+
+        /** Signal: position result.
+            \param pt Position (unit nearest to \c target in last requestPosition call) */
         afl::base::Signal<void(game::map::Point)> sig_result;
 
+        /** Signal: unit name result.
+            \param pt Position (unit nearest to \c target in last requestUnitNames call)
+            \param name Name result (multi-line string) */
+        afl::base::Signal<void(game::map::Point, String_t)> sig_unitNameResult;
+
      private:
-        class Response;
         class Query;
+        class UnitNameQuery;
 
         struct Limit {
             bool active;
@@ -93,10 +108,12 @@ namespace game { namespace proxy {
         Point_t m_lastTarget;
         Flags_t m_lastFlags;
 
+        Point_t m_lastUnitNameTarget;
+
         void postResult(Point_t target, Flags_t flags, Point_t result);
+        void postUnitNameResult(Point_t target, Point_t result, String_t name);
     };
 
 } }
-
 
 #endif

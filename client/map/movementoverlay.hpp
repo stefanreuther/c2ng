@@ -11,6 +11,7 @@
 #include "game/proxy/lockproxy.hpp"
 #include "game/session.hpp"
 #include "ui/root.hpp"
+#include "ui/tooltip.hpp"
 #include "util/requestsender.hpp"
 
 namespace client { namespace map {
@@ -73,17 +74,23 @@ namespace client { namespace map {
         Widget& m_parent;
         afl::string::Translator& m_translator;
         Modes_t m_modes;
+        ui::Tooltip m_toolTip;
 
         bool m_keyboardMode;
         bool m_keyboardAdviceOnTop;
         bool m_valid;
         game::map::Point m_position;
 
+        gfx::Point m_hoveredPoint;
+
         void moveBy(int dx, int dy, const Renderer& ren);
         void moveTo(game::map::Point pt, const Renderer& ren);
         void lockItem(game::map::Point target, bool left, bool markedOnly, bool optimizeWarp, const Renderer& ren);
+        void configureLockProxy(const Renderer& ren);
 
         void onLockResult(game::map::Point result);
+        void onUnitNameResult(game::map::Point result, String_t names);
+        void onHover(gfx::Point pt);
     };
 
 } }
