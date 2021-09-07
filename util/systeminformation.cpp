@@ -59,6 +59,7 @@ namespace {
 # endif
 # include <windows.h>
 # include "afl/bits/bits.hpp"
+# include "afl/tmp/sizeduint.hpp"
 
 namespace {
     size_t getNumberOfProcessors()
@@ -66,7 +67,9 @@ namespace {
         // Normal
         DWORD_PTR processMask, systemMask;
         if (GetProcessAffinityMask(GetCurrentProcess(), &processMask, &systemMask)) {
-            size_t n = afl::bits::bitPop(processMask);
+            // DWORD_PTR may be a type not covered by uint16/32/64_t, so "normalize" it.
+            afl::tmp::SizedUInt<sizeof(processMask)>::Type mask(processMask);
+            size_t n = afl::bits::bitPop(mask);
             if (n != 0) {
                 return n;
             }
