@@ -28,11 +28,11 @@ game::map::BoundingBox::addUniverse(const Universe& univ)
 
     // Add regular units
     {
-        AnyPlanetType t(const_cast<Universe&>(univ));
+        AnyPlanetType t(const_cast<Universe&>(univ).planets());
         addType(t);
     }
     {
-        AnyShipType t(const_cast<Universe&>(univ));
+        AnyShipType t(const_cast<Universe&>(univ).ships());
         addType(t);
     }
     addType(const_cast<Universe&>(univ).ionStormType());

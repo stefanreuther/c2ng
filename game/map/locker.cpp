@@ -86,9 +86,9 @@ game::map::Locker::addPlanets(const Universe& univ)
 {
     // ex findPlanet
     // ex find.pas:FindPlanet
-    AnyPlanetType ty(const_cast<Universe&>(univ));
+    const AnyPlanetType ty(const_cast<Universe&>(univ).planets());
     for (Id_t pid = ty.findNextIndex(0); pid != 0; pid = ty.findNextIndex(pid)) {
-        if (const Planet* pl = ty.getObjectByIndex(pid)) {
+        if (const Planet* pl = univ.planets().get(pid)) {
             addObject(*pl, Reference::Planet);
         }
     }
@@ -100,9 +100,9 @@ game::map::Locker::addShips(const Universe& univ)
 {
     // ex findShip
     // ex find.pas:FindShip, FindShipOrMarker
-    AnyShipType ty(const_cast<Universe&>(univ));
+    const AnyShipType ty(const_cast<Universe&>(univ).ships());
     for (Id_t sid = ty.findNextIndex(0); sid != 0; sid = ty.findNextIndex(sid)) {
-        if (const Ship* sh = ty.getObjectByIndex(sid)) {
+        if (const Ship* sh = univ.ships().get(sid)) {
             addObject(*sh, Reference::Ship);
         }
     }

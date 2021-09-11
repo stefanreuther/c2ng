@@ -88,7 +88,7 @@ game::ref::List::addObjectsAt(game::map::Universe& univ, game::map::Point pt, Op
 
     // Handle ships
     // @change PCC2 checks for Object::Playable instead of ReadOnly
-    game::map::AnyShipType type(univ);
+    const game::map::AnyShipType type(univ.ships());
     for (Id_t sid = type.findNextIndex(0); sid != 0; sid = type.findNextIndex(sid)) {
         game::map::Ship* pShip = univ.ships().get(sid);
         game::map::Point shipPos;

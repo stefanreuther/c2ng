@@ -546,7 +546,7 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
            Number of enemy (=not own) ships in orbit of this planet. */
         game::map::Point pt;
         if (pl.getPosition(pt)) {
-            return makeIntegerValue(game::map::AnyShipType(game->currentTurn().universe()).countObjectsAt(pt, PlayerSet_t::allUpTo(MAX_PLAYERS) - game->getViewpointPlayer()));
+            return makeIntegerValue(game::map::AnyShipType(game->currentTurn().universe().ships()).countObjectsAt(pt, PlayerSet_t::allUpTo(MAX_PLAYERS) - game->getViewpointPlayer()));
         } else {
             return 0;
         }
@@ -556,7 +556,7 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
            Number of own ships in orbit of this planet. */
         game::map::Point pt;
         if (pl.getPosition(pt)) {
-            return makeIntegerValue(game::map::AnyShipType(game->currentTurn().universe()).countObjectsAt(pt, PlayerSet_t(game->getViewpointPlayer())));
+            return makeIntegerValue(game::map::AnyShipType(game->currentTurn().universe().ships()).countObjectsAt(pt, PlayerSet_t(game->getViewpointPlayer())));
         } else {
             return 0;
         }
@@ -566,7 +566,7 @@ game::interface::getPlanetProperty(const game::map::Planet& pl, PlanetProperty i
            Total number of ships in orbit of this planet. */
         game::map::Point pt;
         if (pl.getPosition(pt)) {
-            return makeIntegerValue(game::map::AnyShipType(game->currentTurn().universe()).countObjectsAt(pt, PlayerSet_t::allUpTo(MAX_PLAYERS)));
+            return makeIntegerValue(game::map::AnyShipType(game->currentTurn().universe().ships()).countObjectsAt(pt, PlayerSet_t::allUpTo(MAX_PLAYERS)));
         } else {
             return 0;
         }

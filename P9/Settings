@@ -1602,7 +1602,7 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = u/t_util_systeminformation.cpp \
+FILES_testsuite = u/t_game_map_universe.cpp u/t_util_systeminformation.cpp \
     u/t_game_proxy_buildammoproxy.cpp u/t_game_spec_info_utils.cpp \
     u/t_game_vcr_flak_visualisationsettings.cpp \
     u/t_game_vcr_flak_visualisationstate.cpp \

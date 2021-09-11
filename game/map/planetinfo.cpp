@@ -1103,7 +1103,7 @@ game::map::prepareUnloadInfo(const Universe& univ,
         && pl->getPosition(planetPosition)
         && pl->getOwner(planetOwner))
     {
-        PlayedShipType ty(const_cast<Universe&>(univ));
+        PlayedShipType& ty = const_cast<PlayedShipType&>(univ.playedShips());
         for (Id_t sid = ty.findNextObjectAt(planetPosition, 0, false); sid != 0; sid = ty.findNextObjectAt(planetPosition, sid, false)) {
             const Ship* sh = ty.getObjectByIndex(sid);
             int shipOwner;
@@ -1149,7 +1149,7 @@ game::map::preparePlanetEffectors(const Universe& univ,
         && pl->getPosition(planetPosition)
         && pl->getOwner(planetOwner))
     {
-        PlayedShipType ty(const_cast<Universe&>(univ));
+        PlayedShipType& ty = const_cast<PlayedShipType&>(univ.playedShips());
         for (Id_t sid = ty.findNextObjectAt(planetPosition, 0, false); sid != 0; sid = ty.findNextObjectAt(planetPosition, sid, false)) {
             const Ship* sh = ty.getObjectByIndex(sid);
             int shipOwner;

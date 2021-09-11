@@ -3,10 +3,9 @@
   */
 
 #include "game/map/ionstormtype.hpp"
-#include "game/map/universe.hpp"
 
-game::map::IonStormType::IonStormType(Universe& univ)
-    : ObjectVectorType<IonStorm>(univ.ionStorms())
+game::map::IonStormType::IonStormType(ObjectVector<IonStorm>& vec)
+    : ObjectVectorType<IonStorm>(vec)
 { }
 
 bool

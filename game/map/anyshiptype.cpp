@@ -1,13 +1,12 @@
 /**
   *  \file game/map/anyshiptype.cpp
+  *  \brief Class game::map::AnyShipType
   */
 
 #include "game/map/anyshiptype.hpp"
-#include "game/map/universe.hpp"
-#include "game/map/ship.hpp"
 
-game::map::AnyShipType::AnyShipType(Universe& univ)
-    : ObjectVectorType<Ship>(univ.ships())
+game::map::AnyShipType::AnyShipType(ObjectVector<Ship>& vec)
+    : ObjectVectorType<Ship>(vec)
 { }
 
 bool

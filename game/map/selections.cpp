@@ -63,11 +63,11 @@ void
 game::map::Selections::copyFrom(Universe& u, size_t layer)
 {
     if (SelectionVector* p = get(Planet, layer)) {
-        AnyPlanetType ty(u);
+        AnyPlanetType ty(u.planets());
         p->copyFrom(ty);
     }
     if (SelectionVector* p = get(Ship, layer)) {
-        HistoryShipType ty(u);
+        HistoryShipType ty(u.ships());
         p->copyFrom(ty);
     }
 }
@@ -77,11 +77,11 @@ void
 game::map::Selections::copyTo(Universe& u, size_t layer) const
 {
     if (const SelectionVector* p = get(Planet, layer)) {
-        AnyPlanetType ty(u);
+        AnyPlanetType ty(u.planets());
         p->copyTo(ty);
     }
     if (const SelectionVector* p = get(Ship, layer)) {
-        HistoryShipType ty(u);
+        HistoryShipType ty(u.ships());
         p->copyTo(ty);
     }
 }
@@ -92,11 +92,11 @@ game::map::Selections::limitToExistingObjects(Universe& u, size_t layer)
 {
     // ex GSelection::limitToExistingObjects
     if (SelectionVector* p = get(Planet, layer)) {
-        AnyPlanetType ty(u);
+        AnyPlanetType ty(u.planets());
         p->limitToExistingObjects(ty);
     }
     if (SelectionVector* p = get(Ship, layer)) {
-        HistoryShipType ty(u);
+        HistoryShipType ty(u.ships());
         p->limitToExistingObjects(ty);
     }
 }

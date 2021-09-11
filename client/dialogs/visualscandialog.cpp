@@ -184,7 +184,7 @@ namespace {
                         if (posOK) {
                             pos = univ.config().getCanonicalLocation(pos);
 
-                            game::map::AnyShipType ty(const_cast<game::map::Universe&>(univ));
+                            const game::map::AnyShipType ty(const_cast<game::map::Universe&>(univ).ships());
                             for (game::Id_t id = ty.findNextIndex(0); id != 0; id = ty.findNextIndex(id)) {
                                 const game::map::Ship* sh = univ.ships().get(id);
                                 game::map::Point shPos;

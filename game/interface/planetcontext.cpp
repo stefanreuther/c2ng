@@ -316,7 +316,7 @@ bool
 game::interface::PlanetContext::next()
 {
     // ex planint.pas:CPlanetContext.Next
-    if (int id = game::map::AnyPlanetType(m_game->currentTurn().universe()).findNextIndex(m_id)) {
+    if (Id_t id = game::map::AnyPlanetType(m_game->currentTurn().universe().planets()).findNextIndex(m_id)) {
         m_id = id;
         return true;
     }

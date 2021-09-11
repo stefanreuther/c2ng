@@ -4,6 +4,7 @@
 #ifndef C2NG_GAME_MAP_FLEETTYPE_HPP
 #define C2NG_GAME_MAP_FLEETTYPE_HPP
 
+#include "game/map/objectvector.hpp"
 #include "game/map/objectvectortype.hpp"
 #include "game/map/ship.hpp"
 
@@ -15,7 +16,7 @@ namespace game { namespace map {
         Contains all ships. */
     class FleetType : public ObjectVectorType<Ship> {
      public:
-        FleetType(Universe& univ);
+        FleetType(ObjectVector<Ship>& vec);
 
         virtual bool isValid(const Ship& p) const;
 

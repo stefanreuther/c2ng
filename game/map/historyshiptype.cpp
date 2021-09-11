@@ -1,13 +1,12 @@
 /**
   *  \file game/map/historyshiptype.cpp
+  *  \brief Class game::map::HistoryShipType
   */
 
 #include "game/map/historyshiptype.hpp"
-#include "game/map/universe.hpp"
-#include "game/map/ship.hpp"
 
-game::map::HistoryShipType::HistoryShipType(Universe& univ)
-    : ObjectVectorType<Ship>(univ.ships())
+game::map::HistoryShipType::HistoryShipType(ObjectVector<Ship>& vec)
+    : ObjectVectorType<Ship>(vec)
 { }
 
 bool

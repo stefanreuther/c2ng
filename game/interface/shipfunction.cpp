@@ -73,7 +73,7 @@ game::interface::ShipFunction::makeFirstContext()
     Root* root = m_session.getRoot().get();
     game::spec::ShipList* shipList = m_session.getShipList().get();
     if (game != 0 && root != 0 && shipList != 0) {
-        int id = game::map::AnyShipType(game->currentTurn().universe()).findNextIndex(0);
+        Id_t id = game::map::AnyShipType(game->currentTurn().universe().ships()).findNextIndex(0);
         if (id != 0) {
             return new ShipContext(id, m_session, *root, *game, *shipList);
         } else {

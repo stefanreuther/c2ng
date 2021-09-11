@@ -72,7 +72,7 @@ game::interface::PlanetFunction::makeFirstContext()
     Game* game = m_session.getGame().get();
     Root* root = m_session.getRoot().get();
     if (game != 0 && root != 0) {
-        int id = game::map::AnyPlanetType(game->currentTurn().universe()).findNextIndex(0);
+        Id_t id = game::map::AnyPlanetType(game->currentTurn().universe().planets()).findNextIndex(0);
         if (id != 0) {
             return new PlanetContext(id, m_session, *root, *game);
         } else {

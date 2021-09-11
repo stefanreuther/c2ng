@@ -481,6 +481,13 @@ class TestGameMapUfoType : public CxxTest::TestSuite {
     void testIteration();
 };
 
+class TestGameMapUniverse : public CxxTest::TestSuite {
+ public:
+    void testBasics();
+    void testGetObject();
+    void testFind();
+};
+
 class TestGameMapViewport : public CxxTest::TestSuite {
  public:
     void testRectangle();

@@ -354,7 +354,7 @@ bool
 game::interface::ShipContext::next()
 {
     // ex shipint.pas:CShipContext.Next
-    if (int id = game::map::AnyShipType(m_game->currentTurn().universe()).findNextIndex(m_id)) {
+    if (Id_t id = game::map::AnyShipType(m_game->currentTurn().universe().ships()).findNextIndex(m_id)) {
         m_id = id;
         return true;
     }

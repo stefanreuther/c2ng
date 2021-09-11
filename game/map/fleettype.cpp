@@ -5,8 +5,8 @@
 #include "game/map/fleettype.hpp"
 #include "game/map/universe.hpp"
 
-game::map::FleetType::FleetType(Universe& univ)
-    : ObjectVectorType<Ship>(univ.ships())
+game::map::FleetType::FleetType(ObjectVector<Ship>& vec)
+    : ObjectVectorType<Ship>(vec)
 { }
 
 bool

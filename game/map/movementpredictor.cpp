@@ -73,9 +73,9 @@ void
 game::map::MovementPredictor::init(const Universe& univ)
 {
     // ex GMovementPredictor::init
-    AnyShipType ty(const_cast<Universe&>(univ));
+    const AnyShipType ty(const_cast<Universe&>(univ).ships());
     for (Id_t i = ty.findNextIndex(0); i != 0; i = ty.findNextIndex(i)) {
-        if (const Ship* pShip = ty.getObjectByIndex(i)) {
+        if (const Ship* pShip = univ.ships().get(i)) {
             if (Info* pInfo = m_info.create(i)) {
                 pInfo->status = Normal;
                 if (pShip->isPlayable(Ship::ReadOnly)) {
@@ -101,9 +101,9 @@ game::map::MovementPredictor::resolveTows(const Universe& univ)
 {
     // Assume any tow succeeds.
     // Anyway, be careful not to make tow groups with more than two ships.
-    AnyShipType ty(const_cast<Universe&>(univ));
+    const AnyShipType ty(const_cast<Universe&>(univ).ships());
     for (Id_t i = ty.findNextIndex(0); i != 0; i = ty.findNextIndex(i)) {
-        const Ship* pShip = ty.getObjectByIndex(i);
+        const Ship* pShip = univ.ships().get(i);
         Info* pInfo = m_info.get(i);
         if (pShip != 0 && pInfo != 0 && pShip->getMission().orElse(0) == Mission::msn_Tow) {
             int towId = pShip->getMissionParameter(TowParameter).orElse(0);
@@ -137,9 +137,9 @@ game::map::MovementPredictor::moveShips(const Universe& univ,
     // - ours, Normal, intercepting, towee not Moved: wait for next iteration.
     //   For a normal, non-cyclic intercept, the next iteration will ultimately move it.
     //   For a cyclic intercept, we need special handling; see below.
-    AnyShipType ty(const_cast<Universe&>(univ));
+    const AnyShipType ty(const_cast<Universe&>(univ).ships());
     for (Id_t sid = ty.findNextIndex(0); sid != 0; sid = ty.findNextIndex(sid)) {
-        const Ship* pShip = ty.getObjectByIndex(sid);
+        const Ship* pShip = univ.ships().get(sid);
         Info* pInfo = m_info.get(sid);
         if (pShip != 0 && pInfo != 0) {
             const Status ost = pInfo->status;

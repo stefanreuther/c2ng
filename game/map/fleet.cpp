@@ -21,7 +21,7 @@ namespace {
     {
         const game::Id_t fid = ship.getFleetNumber();
         if (fid != 0) {
-            game::map::AnyShipType ships(univ);
+            game::map::AnyShipType ships(univ.ships());
             for (game::Id_t i = ships.getNextIndex(0); i != 0; i = ships.getNextIndex(i)) {
                 if (const game::map::Ship* other = ships.getObjectByIndex(i)) {
                     if (i != ship.getId() && other->getFleetNumber() == fid) {
@@ -52,7 +52,7 @@ void
 game::map::Fleet::markDirty()
 {
     // ex game/fleet.h:markFleetDirty
-    AnyShipType ships(m_universe);
+    AnyShipType ships(m_universe.ships());
     const int fleetNumber = m_ship.getId();
     for (Id_t i = ships.getNextIndex(0); i != 0; i = ships.getNextIndex(i)) {
         if (Ship* sh = ships.getObjectByIndex(i)) {
@@ -71,7 +71,7 @@ game::map::Fleet::synchronize(const game::config::HostConfiguration& config,
                               const game::spec::ShipList& shipList)
 {
     // ex game/fleet.h:synchronizeFleet
-    AnyShipType ships(m_universe);
+    AnyShipType ships(m_universe.ships());
     const int fleetNumber = m_ship.getId();
     for (Id_t i = ships.getNextIndex(0); i != 0; i = ships.getNextIndex(i)) {
         if (Ship* sh = ships.getObjectByIndex(i)) {
@@ -100,7 +100,7 @@ game::map::Fleet::hasSpecialFunction(int basicFunction,
         return m_ship.hasSpecialFunction(basicFunction, scoreDefinitions, shipList, config);
     } else {
         // Fleet: check all members
-        AnyShipType ships(m_universe);
+        AnyShipType ships(m_universe.ships());
         const int fleetNumber = m_ship.getId();
         for (Id_t i = ships.getNextIndex(0); i != 0; i = ships.getNextIndex(i)) {
             if (Ship* sh = ships.getObjectByIndex(i)) {

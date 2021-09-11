@@ -37,7 +37,7 @@ namespace game { namespace interface {
         static PlanetContext* create(int id, Session& session);
 
      private:
-        int m_id;
+        Id_t m_id;
         Session& m_session;
         afl::base::Ref<Root> m_root;
         afl::base::Ref<Game> m_game;

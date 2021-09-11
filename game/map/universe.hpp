@@ -1,26 +1,27 @@
 /**
   *  \file game/map/universe.hpp
+  *  \brief Class game::map::Universe
   */
 #ifndef C2NG_GAME_MAP_UNIVERSE_HPP
 #define C2NG_GAME_MAP_UNIVERSE_HPP
 
 #include <memory>
-#include "game/map/objectvector.hpp"
 #include "afl/base/signal.hpp"
-#include "game/map/configuration.hpp"
-#include "game/interpreterinterface.hpp"
-#include "game/map/object.hpp"
 #include "afl/sys/loglistener.hpp"
-#include "game/map/objectvectortype.hpp"
-#include "game/map/playedshiptype.hpp"
-#include "game/map/playedplanettype.hpp"
-#include "game/map/playedbasetype.hpp"
+#include "game/interpreterinterface.hpp"
+#include "game/map/configuration.hpp"
+#include "game/map/drawingcontainer.hpp"
+#include "game/map/explosiontype.hpp"
+#include "game/map/fleettype.hpp"
 #include "game/map/ionstormtype.hpp"
 #include "game/map/minefieldtype.hpp"
+#include "game/map/object.hpp"
+#include "game/map/objectvector.hpp"
+#include "game/map/objectvectortype.hpp"
+#include "game/map/playedbasetype.hpp"
+#include "game/map/playedplanettype.hpp"
+#include "game/map/playedshiptype.hpp"
 #include "game/map/ufotype.hpp"
-#include "game/map/drawingcontainer.hpp"
-#include "game/map/fleettype.hpp"
-#include "game/map/explosiontype.hpp"
 #include "game/reference.hpp"
 
 namespace game { namespace map {
@@ -30,52 +31,112 @@ namespace game { namespace map {
     class IonStorm;
     class Reverter;
 
+    /** Universe.
+        Serves as container for all sorts of map objects; owns those objects.
+        It contains:
+        - map configuration;
+        - object containers (ObjectVector or special classes);
+        - ObjectType descendants for everything that has an ObjectCursor;
+        - a set of players that have reliable data (hasFullData),
+          used to implement "if I don't see it, it's gone" logic;
+        - an optional Reverter to undo one-way operations;
+        - listener logic. */
     class Universe {
      public:
+        /*
+         *  Flags for findLocationName()
+         */
         static const int NameOrbit   = 1;  // locs_Orbit   = 1,           ///< Show "Orbit of" for planet names.
         static const int NameVerbose = 2;  // locs_Verbose = 2,           ///< Be more verbose.
         static const int NameShips   = 4;  // locs_Ships   = 4,           ///< Show a ship name if applicable.
         static const int NameGravity = 8;  // locs_WW      = 8,           ///< Show planet name if point is in warp well.
         static const int NameNoSpace = 16; // locs_NoSpace = 16           ///< Show nothing at all when in deep space.
 
+        /** Constructor.
+            Make an empty universe. */
         Universe();
+
+        /** Destructor. */
         ~Universe();
 
+        /** Access ships.
+            \return ship vector */
         ObjectVector<Ship>& ships();
         const ObjectVector<Ship>& ships() const;
 
+        /** Access played ships.
+            \return PlayedShipType */
         PlayedShipType& playedShips();
         const PlayedShipType& playedShips() const;
 
+        /** Access planets.
+            \return planet vector */
         ObjectVector<Planet>& planets();
         const ObjectVector<Planet>& planets() const;
 
+        /** Access played planets.
+            \return PlayedPlanetType */
         PlayedPlanetType& playedPlanets();
-        PlayedBaseType& playedBases();
-        FleetType& fleets();
+        const PlayedPlanetType& playedPlanets() const;
 
+        /** Access played bases.
+            \return PlayedBaseType */
+        PlayedBaseType& playedBases();
+        const PlayedBaseType& playedBases() const;
+
+        /** Access fleets.
+            \return fleets */
+        FleetType& fleets();
+        const FleetType& fleets() const;
+
+        /** Access ion storms.
+            \return ion storm vector */
         ObjectVector<IonStorm>& ionStorms();
         const ObjectVector<IonStorm>& ionStorms() const;
-        IonStormType& ionStormType();
 
+        /** Access ion storms.
+            \return IonStormType */
+        IonStormType& ionStormType();
+        const IonStormType& ionStormType() const;
+
+        /** Access minefields.
+            \return MinefieldType */
         MinefieldType& minefields();
         const MinefieldType& minefields() const;
 
+        /** Access Ufos.
+            \return UfoType */
         UfoType& ufos();
         const UfoType& ufos() const;
 
+        /** Access explosions.
+            \return ExplosionType */
         ExplosionType& explosions();
         const ExplosionType& explosions() const;
 
+        /** Access drawings.
+            \return DrawingContainer */
         DrawingContainer& drawings();
         const DrawingContainer& drawings() const;
 
+        /** Access map configuration.
+            \return configuration */
         Configuration& config();
         const Configuration& config() const;
 
+        /** Set reverter.
+            The Universe will own the Reverter instance.
+            Setting a Reverter will replace the previous one.
+            \param p Newly-allocated reverter; can be null */
         void setNewReverter(Reverter* p);
+
+        /** Access reverter.
+            \return Reverter; can be null */
         Reverter* getReverter() const;
 
+        /** Resolve Reference into an Object.
+            \param ref Reference
+            \return Object, if reference refers to a valid object; otherwise, null */
         const Object* getObject(Reference ref) const;
         Object* getObject(Reference ref);
 
@@ -95,7 +156,7 @@ namespace game { namespace map {
             - objects' internalCheck methods
             - objects' combinedCheck methods
             - set objects' playability
-            - signal sig_setChange on all containes so cursors can adapt
+            - signal sig_setChange on all containers so cursors can adapt
 
             \param playingSet       Set of players we're playing.
                                     Those players will be set to the given \c playability;
@@ -220,28 +281,206 @@ namespace game { namespace map {
         afl::base::Signal<void()> sig_universeChange;
 
      private:
+        // Map configuration
         Configuration m_config;
+
+        // Object containers
         ObjectVector<Ship> m_ships;
         ObjectVector<Planet> m_planets;
         ObjectVector<IonStorm> m_ionStorms;
-        std::auto_ptr<MinefieldType> m_minefields;
-        std::auto_ptr<UfoType> m_ufos;
-        std::auto_ptr<ExplosionType> m_explosions;
+        MinefieldType m_minefields;
+        UfoType m_ufos;
+        ExplosionType m_explosions;
         DrawingContainer m_drawings;
 
+        // Change tracking
         bool m_universeChanged;
 
-        std::auto_ptr<PlayedShipType> m_playedShips;
-        std::auto_ptr<PlayedPlanetType> m_playedPlanets;
-        std::auto_ptr<PlayedBaseType> m_playedBases;
-        std::auto_ptr<FleetType> m_fleets;
-        std::auto_ptr<IonStormType> m_ionStormType;
+        // Types (required for everything that has a cursor)
+        PlayedShipType m_playedShips;
+        PlayedPlanetType m_playedPlanets;
+        PlayedBaseType m_playedBases;
+        FleetType m_fleets;
+        IonStormType m_ionStormType;
 
+        // Reverter
         std::auto_ptr<Reverter> m_reverter;
 
+        // Set of players that have reliable data
         PlayerSet_t m_availablePlayers;     // ex data_set
     };
 
 } }
+
+inline game::map::ObjectVector<game::map::Ship>&
+game::map::Universe::ships()
+{
+    // ex GUniverse::getShip, GUniverse::isValidShipId (sort-of)
+    return m_ships;
+}
+
+inline const game::map::ObjectVector<game::map::Ship>&
+game::map::Universe::ships() const
+{
+    return m_ships;
+}
+
+inline game::map::PlayedShipType&
+game::map::Universe::playedShips()
+{
+    return m_playedShips;
+}
+
+inline const game::map::PlayedShipType&
+game::map::Universe::playedShips() const
+{
+    return m_playedShips;
+}
+
+inline game::map::ObjectVector<game::map::Planet>&
+game::map::Universe::planets()
+{
+    // ex GUniverse::getPlanet, GUniverse::isValidPlanetId (sort-of)
+    return m_planets;
+}
+
+inline const game::map::ObjectVector<game::map::Planet>&
+game::map::Universe::planets() const
+{
+    return m_planets;
+}
+
+inline game::map::PlayedPlanetType&
+game::map::Universe::playedPlanets()
+{
+    return m_playedPlanets;
+}
+
+inline const game::map::PlayedPlanetType&
+game::map::Universe::playedPlanets() const
+{
+    return m_playedPlanets;
+}
+
+inline game::map::PlayedBaseType&
+game::map::Universe::playedBases()
+{
+    return m_playedBases;
+}
+
+const inline game::map::PlayedBaseType&
+game::map::Universe::playedBases() const
+{
+    return m_playedBases;
+}
+
+inline game::map::FleetType&
+game::map::Universe::fleets()
+{
+    return m_fleets;
+}
+
+inline const game::map::FleetType&
+game::map::Universe::fleets() const
+{
+    return m_fleets;
+}
+
+inline game::map::ObjectVector<game::map::IonStorm>&
+game::map::Universe::ionStorms()
+{
+    // ex GUniverse::isValidIonStormId, GUniverse::getIonStorm (sort-of)
+    return m_ionStorms;
+}
+
+inline const game::map::ObjectVector<game::map::IonStorm>&
+game::map::Universe::ionStorms() const
+{
+    return m_ionStorms;
+}
+
+inline game::map::IonStormType&
+game::map::Universe::ionStormType()
+{
+    return m_ionStormType;
+}
+
+inline const game::map::IonStormType&
+game::map::Universe::ionStormType() const
+{
+    return m_ionStormType;
+}
+
+inline game::map::MinefieldType&
+game::map::Universe::minefields()
+{
+    return m_minefields;
+}
+
+inline const game::map::MinefieldType&
+game::map::Universe::minefields() const
+{
+    return m_minefields;
+}
+
+inline game::map::UfoType&
+game::map::Universe::ufos()
+{
+    return m_ufos;
+}
+
+inline const game::map::UfoType&
+game::map::Universe::ufos() const
+{
+    return m_ufos;
+}
+
+inline game::map::ExplosionType&
+game::map::Universe::explosions()
+{
+    return m_explosions;
+}
+
+inline const game::map::ExplosionType&
+game::map::Universe::explosions() const
+{
+    return m_explosions;
+}
+
+inline game::map::DrawingContainer&
+game::map::Universe::drawings()
+{
+    return m_drawings;
+}
+
+inline const game::map::DrawingContainer&
+game::map::Universe::drawings() const
+{
+    return m_drawings;
+}
+
+inline game::map::Configuration&
+game::map::Universe::config()
+{
+    return m_config;
+}
+
+inline const game::map::Configuration&
+game::map::Universe::config() const
+{
+    return m_config;
+}
+
+inline game::map::Reverter*
+game::map::Universe::getReverter() const
+{
+    return m_reverter.get();
+}
+
+inline void
+game::map::Universe::markChanged()
+{
+    m_universeChanged = true;
+}
 
 #endif
