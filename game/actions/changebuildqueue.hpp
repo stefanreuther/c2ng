@@ -45,12 +45,13 @@ namespace game { namespace actions {
             bool conflict;                      ///< true if this priority order conflicts with others (same FC).
             bool playable;                      ///< true if this slot can be modified.
             bool planned;                       ///< true if this is a planned build.
+            bool isChange;                      ///< true if this item is a change to the game.
 
             Info()
                 : planetId(), action(), planetName(), actionName(),
                   friendlyCode(), hullName(), hullNr(),
                   queuePosition(), pointsRequired(), pointsAvailable(),
-                  hasPriority(), conflict(), playable(), planned()
+                  hasPriority(), conflict(), playable(), planned(), isChange()
                 { }
         };
 

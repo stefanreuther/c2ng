@@ -231,6 +231,7 @@ game::actions::ChangeBuildQueue::describe(Infos_t& result, afl::string::Translat
         out.hasPriority = checkPriorityCode(in.friendlyCode, m_host);
         out.playable = in.playable;
         out.planned = (in.plannedHullId != 0);
+        out.isChange = (in.friendlyCode != pl.getFriendlyCode().orElse(String_t()));
 
         // Ship being built
         int pointsRequired = 0;

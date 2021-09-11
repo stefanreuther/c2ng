@@ -166,6 +166,11 @@ TestGameActionsChangeBuildQueue::testBasic()
     TS_ASSERT_EQUALS(infos[4].conflict, false);
     TS_ASSERT_EQUALS(infos[5].conflict, false);
 
+    // - change status
+    for (size_t i = 0; i < 6; ++i) {
+        TS_ASSERT_EQUALS(infos[i].isChange, false);
+    }
+
     // - build points
     TS_ASSERT_EQUALS(infos[0].pointsRequired.isValid(), false);   // not set because not PBP queue
     TS_ASSERT_EQUALS(infos[0].pointsAvailable.isValid(), false);  // not set because not known
@@ -202,6 +207,14 @@ TestGameActionsChangeBuildQueue::testIncrease()
     TS_ASSERT_EQUALS(infos[4].planetId, 4);  // PB4 (moved up)
     TS_ASSERT_EQUALS(infos[5].planetId, 1);  // xyz
 
+    // - change status
+    TS_ASSERT_EQUALS(infos[0].isChange, false);
+    TS_ASSERT_EQUALS(infos[1].isChange, true);
+    TS_ASSERT_EQUALS(infos[2].isChange, true);
+    TS_ASSERT_EQUALS(infos[3].isChange, false);
+    TS_ASSERT_EQUALS(infos[4].isChange, true);
+    TS_ASSERT_EQUALS(infos[5].isChange, false);
+
     // Commit and verify
     testee.commit();
     TS_ASSERT_EQUALS(env.univ.planets().get(5)->getFriendlyCode().orElse(""), "PB2");
@@ -237,6 +250,14 @@ TestGameActionsChangeBuildQueue::testDecrease()
     TS_ASSERT_EQUALS(infos[3].planetId, 5);  // PB4 (moved down)
     TS_ASSERT_EQUALS(infos[4].planetId, 1);  // xyz
     TS_ASSERT_EQUALS(infos[5].planetId, 4);  // xyz
+
+    // - change status
+    TS_ASSERT_EQUALS(infos[0].isChange, false);
+    TS_ASSERT_EQUALS(infos[1].isChange, false);
+    TS_ASSERT_EQUALS(infos[2].isChange, false);
+    TS_ASSERT_EQUALS(infos[3].isChange, true);
+    TS_ASSERT_EQUALS(infos[4].isChange, false);
+    TS_ASSERT_EQUALS(infos[5].isChange, false);
 
     // Commit and verify
     testee.commit();

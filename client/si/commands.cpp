@@ -1300,8 +1300,8 @@ client::si::IFCCManageBuildQueue(game::Session& session, ScriptSide& si, Request
         virtual void handle(Control& ctl, RequestLink2 link)
             {
                 UserSide& iface = ctl.interface();
-                client::dialogs::doBuildQueueDialog(m_planetId, ctl.root(), iface.gameSender(), ctl.translator());
-                iface.continueProcess(link);
+                ScreenHistory::Reference ref = client::dialogs::doBuildQueueDialog(m_planetId, ctl.root(), iface.gameSender(), ctl.translator());
+                activateReference(ref, iface, ctl, link);
             }
      private:
         game::Id_t m_planetId;

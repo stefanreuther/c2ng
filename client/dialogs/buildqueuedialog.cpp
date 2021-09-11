@@ -7,6 +7,7 @@
 #include "afl/string/format.hpp"
 #include "client/dialogs/buildqueuesummary.hpp"
 #include "client/downlink.hpp"
+#include "client/widgets/helpwidget.hpp"
 #include "game/proxy/buildqueueproxy.hpp"
 #include "gfx/complex.hpp"
 #include "ui/dialogs/messagebox.hpp"
@@ -15,13 +16,17 @@
 #include "ui/layout/vbox.hpp"
 #include "ui/spacer.hpp"
 #include "ui/widgets/abstractlistbox.hpp"
+#include "ui/widgets/button.hpp"
 #include "ui/widgets/framegroup.hpp"
+#include "ui/widgets/quit.hpp"
 #include "ui/widgets/standarddialogbuttons.hpp"
 #include "ui/widgets/statictext.hpp"
 #include "util/unicodechars.hpp"
 
 namespace {
+    using client::ScreenHistory;
     using game::proxy::BuildQueueProxy;
+    using ui::widgets::Button;
 
     /*
      *  BuildQueueList - a list box displaying the build queue
@@ -52,6 +57,8 @@ namespace {
         void scrollToPlanet(game::Id_t planetId);
 
         const Infos_t& getContent() const;
+        bool hasChanges() const;
+        game::Id_t getCurrentPlanetId() const;
 
         virtual size_t getNumItems();
         virtual bool isItemAccessible(size_t n);
@@ -94,7 +101,8 @@ namespace {
               m_loop(root),
               m_translator(tx),
               m_proxy(proxy),
-              m_gameSender(gameSender)
+              m_gameSender(gameSender),
+              m_reference()
             {
                 proxy.sig_update.add(this, &BuildQueueDialog::setContent);
             }
@@ -115,31 +123,39 @@ namespace {
                 win.add(keys);
 
                 ui::Group& g = del.addNew(new ui::Group(ui::layout::HBox::instance5));
-                ui::widgets::Button& btnFaster = del.addNew(new ui::widgets::Button("+", '+', m_root));
+                Button& btnFaster = del.addNew(new Button("+", '+', m_root));
                 btnFaster.dispatchKeyTo(keys);
                 g.add(btnFaster);
                 g.add(del.addNew(new ui::widgets::StaticText(m_translator("Build earlier"), util::SkinColor::Static, gfx::FontRequest(), m_root.provider())));
 
-                ui::widgets::Button& btnSlower = del.addNew(new ui::widgets::Button("-", '-', m_root));
+                Button& btnSlower = del.addNew(new Button("-", '-', m_root));
                 btnSlower.dispatchKeyTo(keys);
                 g.add(btnSlower);
                 g.add(del.addNew(new ui::widgets::StaticText(m_translator("Build later"), util::SkinColor::Static, gfx::FontRequest(), m_root.provider())));
                 g.add(del.addNew(new ui::Spacer()));
 
-                ui::widgets::Button& btnSummary = del.addNew(new ui::widgets::Button(m_translator("Summary..."), 's', m_root));
+                Button& btnGoto = del.addNew(new Button(m_translator("Go to"), 'g', m_root));
+                g.add(btnGoto);
+                btnGoto.sig_fire.add(this, &BuildQueueDialog::onGoto);
+
+                Button& btnSummary = del.addNew(new Button(m_translator("Summary..."), 's', m_root));
                 g.add(btnSummary);
                 btnSummary.sig_fire.add(this, &BuildQueueDialog::onSummary);
 
                 win.add(g);
 
+                ui::Widget& help = del.addNew(new client::widgets::HelpWidget(m_root, m_translator, m_gameSender, "pcc2:queuemanager"));
                 ui::widgets::StandardDialogButtons& btns = del.addNew(new ui::widgets::StandardDialogButtons(m_root, m_translator));
+                btns.addHelp(help);
                 btns.addStop(m_loop);
                 win.add(btns);
+                win.add(help);
+                win.add(del.addNew(new ui::widgets::Quit(m_root, m_loop)));
 
                 win.pack();
                 m_root.centerWidget(win);
                 m_root.add(win);
-                if (m_loop.run()) {
+                if (m_loop.run() != 0) {
                     m_proxy.commit();
                 }
             }
@@ -149,6 +165,37 @@ namespace {
                 client::dialogs::doBuildQueueSummaryDialog(m_list.getContent(), m_root, m_gameSender, m_translator);
             }
 
+        ScreenHistory::Reference getReference() const
+            { return m_reference; }
+
+        void onGoto()
+            {
+                // Fail-safe
+                game::Id_t id = m_list.getCurrentPlanetId();
+                if (id == 0) {
+                    return;
+                }
+
+                // Ask for confirmation
+                enum { Yes, No, Cancel };
+                int mode;
+                if (m_list.hasChanges()) {
+                    mode = ui::dialogs::MessageBox(m_translator("Apply changes?"), m_translator("Manage Build Queue"), m_root)
+                        .addButton(Yes,    util::KeyString(m_translator("Yes")))
+                        .addButton(No,     util::KeyString(m_translator("No")))
+                        .addButton(Cancel, m_translator("Cancel"), util::Key_Escape)
+                        .run();
+                } else {
+                    mode = Yes;
+                }
+
+                // Do it
+                if (mode != Cancel) {
+                    m_reference = ScreenHistory::Reference(ScreenHistory::Starbase, id, 0);
+                    m_loop.stop(mode == Yes);
+                }
+            }
+
      private:
         ui::Root& m_root;
         BuildQueueList m_list;
@@ -156,6 +203,7 @@ namespace {
         afl::string::Translator& m_translator;
         BuildQueueProxy& m_proxy;
         util::RequestSender<game::Session> m_gameSender;
+        ScreenHistory::Reference m_reference;
     };
 
 }
@@ -176,11 +224,7 @@ void
 BuildQueueList::setContent(const Infos_t& data)
 {
     // Remember current Id
-    game::Id_t currentId = 0;
-    size_t currentItem = getCurrentItem();
-    if (currentItem < m_data.size()) {
-        currentId = m_data[currentItem].planetId;
-    }
+    game::Id_t currentId = getCurrentPlanetId();
 
     // Update
     m_data = data;
@@ -208,6 +252,28 @@ const BuildQueueList::Infos_t&
 BuildQueueList::getContent() const
 {
     return m_data;
+}
+
+bool
+BuildQueueList::hasChanges() const
+{
+    for (size_t i = 0, n = m_data.size(); i < n; ++i) {
+        if (m_data[i].isChange) {
+            return true;
+        }
+    }
+    return false;
+}
+
+game::Id_t
+BuildQueueList::getCurrentPlanetId() const
+{
+    game::Id_t currentId = 0;
+    size_t currentItem = getCurrentItem();
+    if (currentItem < m_data.size()) {
+        currentId = m_data[currentItem].planetId;
+    }
+    return currentId;
 }
 
 size_t
@@ -420,7 +486,7 @@ BuildQueueKeyHandler::handleKey(util::Key_t key, int prefix)
  *  Main entry point
  */
 
-void
+client::ScreenHistory::Reference
 client::dialogs::doBuildQueueDialog(game::Id_t baseId,
                                     ui::Root& root,
                                     util::RequestSender<game::Session> gameSender,
@@ -435,7 +501,7 @@ client::dialogs::doBuildQueueDialog(game::Id_t baseId,
         ui::dialogs::MessageBox(tx("You have no active ship build orders."),
                                 tx("Manage Build Queue"),
                                 root).doOkDialog(tx);
-        return;
+        return ScreenHistory::Reference();
     }
 
     // Column configuration
@@ -454,4 +520,6 @@ client::dialogs::doBuildQueueDialog(game::Id_t baseId,
     dlg.setContent(infos);
     dlg.scrollToPlanet(baseId);
     dlg.run();
+
+    return dlg.getReference();
 }
