@@ -86,7 +86,7 @@ namespace {
             : m_id(id),
               m_vector(vec)
             { }
-        virtual TestContext* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
+        virtual Context::PropertyAccessor* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
             { return lookupName(name, TEST_MAP, result) ? this : 0; }
         virtual afl::data::Value* get(PropertyIndex_t index)
             {

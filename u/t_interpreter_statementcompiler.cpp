@@ -83,7 +83,7 @@ namespace {
             { }
 
         // Context:
-        virtual MinGlobalContext* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
+        virtual interpreter::Context::PropertyAccessor* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
             {
                 NameMap::Index_t i = m_world.globalPropertyNames().getIndexByName(name);
                 if (i != NameMap::nil) {

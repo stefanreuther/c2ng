@@ -62,7 +62,7 @@ game::interface::IonStormContext::~IonStormContext()
 { }
 
 // Context:
-game::interface::IonStormContext*
+interpreter::Context::PropertyAccessor*
 game::interface::IonStormContext::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
 {
     // ex IntIonContext::lookup

@@ -91,7 +91,7 @@ class interpreter::Process::FrameContext : public SingleContext, public Context:
         { }
 
     // Context:
-    virtual FrameContext* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
+    virtual Context::PropertyAccessor* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
         {
             NameMap_t::Index_t i = m_frame.localNames.getIndexByName(name);
             if (i != NameMap_t::nil) {

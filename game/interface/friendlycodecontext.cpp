@@ -37,7 +37,7 @@ game::interface::FriendlyCodeContext::~FriendlyCodeContext()
 { }
 
 // Context:
-game::interface::FriendlyCodeContext*
+interpreter::Context::PropertyAccessor*
 game::interface::FriendlyCodeContext::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
 {
     return lookupName(name, FC_MAPPING, result) ? this : 0;

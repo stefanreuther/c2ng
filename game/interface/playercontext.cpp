@@ -41,7 +41,7 @@ game::interface::PlayerContext::~PlayerContext()
 { }
 
 // Context:
-game::interface::PlayerContext*
+interpreter::Context::PropertyAccessor*
 game::interface::PlayerContext::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
 {
     // ex IntPlayerContext::lookup

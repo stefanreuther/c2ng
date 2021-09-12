@@ -350,7 +350,7 @@ game::interface::TaskEditorContext::~TaskEditorContext()
 }
 
 // Context:
-game::interface::TaskEditorContext*
+interpreter::Context::PropertyAccessor*
 game::interface::TaskEditorContext::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
 {
     return lookupName(name, TASKEDITOR_MAP, result) ? this : 0;

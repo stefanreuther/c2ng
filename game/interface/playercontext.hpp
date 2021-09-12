@@ -17,7 +17,7 @@ namespace game { namespace interface {
         ~PlayerContext();
 
         // Context:
-        virtual PlayerContext* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
+        virtual Context::PropertyAccessor* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
         virtual afl::data::Value* get(PropertyIndex_t index);
         virtual bool next();
         virtual PlayerContext* clone() const;

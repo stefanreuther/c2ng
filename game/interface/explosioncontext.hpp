@@ -17,7 +17,7 @@ namespace game { namespace interface {
         ~ExplosionContext();
 
         // Context:
-        virtual ExplosionContext* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
+        virtual Context::PropertyAccessor* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
         virtual afl::data::Value* get(PropertyIndex_t index);
         virtual bool next();
         virtual ExplosionContext* clone() const;

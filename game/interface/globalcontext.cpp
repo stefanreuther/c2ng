@@ -139,7 +139,7 @@ game::interface::GlobalContext::~GlobalContext()
 { }
 
 // Context:
-game::interface::GlobalContext*
+interpreter::Context::PropertyAccessor*
 game::interface::GlobalContext::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
 {
     // ex IntGlobalContext::lookup, CGlobalContext.ResolveValue (sort-of)

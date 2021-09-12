@@ -116,7 +116,7 @@ game::interface::VcrContext::~VcrContext()
 { }
 
 // Context:
-game::interface::VcrContext*
+interpreter::Context::PropertyAccessor*
 game::interface::VcrContext::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
 {
     // ex IntVcrContext::lookup

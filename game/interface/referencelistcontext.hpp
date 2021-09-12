@@ -28,7 +28,7 @@ namespace game { namespace interface {
         ~ReferenceListContext();
 
         // Context:
-        virtual ReferenceListContext* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
+        virtual Context::PropertyAccessor* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
         virtual afl::data::Value* get(PropertyIndex_t index);
         virtual ReferenceListContext* clone() const;
         virtual game::map::Object* getObject();

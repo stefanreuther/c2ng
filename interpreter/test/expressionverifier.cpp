@@ -36,7 +36,7 @@ class interpreter::test::ExpressionVerifier::TestContext : public SingleContext,
     TestContext(ExpressionVerifier& parent)
         : m_parent(parent)
         { }
-    virtual TestContext* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
+    virtual Context::PropertyAccessor* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
         {
             // ex GlobalTestVars::lookup(const IntNameQuery& name)
             if (name.match("A")) {

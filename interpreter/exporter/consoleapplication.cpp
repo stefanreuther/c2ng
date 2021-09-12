@@ -51,7 +51,7 @@ namespace {
         MetaContext();
 
         // Context:
-        virtual MetaContext* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
+        virtual Context::PropertyAccessor* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
         virtual afl::data::Value* get(PropertyIndex_t index);
         virtual bool next();
         virtual MetaContext* clone() const;
@@ -84,7 +84,7 @@ namespace {
           m_position(0)
     { }
 
-    MetaContext* MetaContext::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
+    interpreter::Context::PropertyAccessor* MetaContext::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
     {
         return lookupName(name, meta_mapping, result) ? this : 0;
     }

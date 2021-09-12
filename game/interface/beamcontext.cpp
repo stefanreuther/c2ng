@@ -46,7 +46,7 @@ game::interface::BeamContext::~BeamContext()
 { }
 
 // Context:
-game::interface::BeamContext*
+interpreter::Context::PropertyAccessor*
 game::interface::BeamContext::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
 {
     // ex IntBeamContext::lookup

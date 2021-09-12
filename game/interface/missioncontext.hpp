@@ -17,7 +17,7 @@ namespace game { namespace interface {
         ~MissionContext();
 
         // Context:
-        virtual MissionContext* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
+        virtual Context::PropertyAccessor* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
         virtual afl::data::Value* get(PropertyIndex_t index);
         virtual bool next();
         virtual MissionContext* clone() const;

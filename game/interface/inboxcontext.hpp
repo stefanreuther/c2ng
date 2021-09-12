@@ -29,7 +29,7 @@ namespace game { namespace interface {
                      afl::base::Ref<const Game> game);
         ~InboxContext();
 
-        virtual InboxContext* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
+        virtual Context::PropertyAccessor* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
         virtual afl::data::Value* get(PropertyIndex_t index);
         virtual bool next();
         virtual InboxContext* clone() const;

@@ -46,7 +46,10 @@ namespace interpreter {
         /** Look up a symbol by its name.
             \param name [in] Name query
             \param result [out] On success, property index
-            \return non-null PropertyAccessor if found, null on failure. */
+            \return non-null PropertyAccessor if found, null on failure.
+
+            BEWARE/LEGACY: do not implement this function using co-variant return types.
+            This will cause g++-3.4 to miscompile this code (it fails to adjust null pointers). */
         virtual PropertyAccessor* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result) = 0;
 
         /** Advance to next object.

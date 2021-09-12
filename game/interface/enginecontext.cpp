@@ -42,7 +42,7 @@ game::interface::EngineContext::~EngineContext()
 { }
 
 // Context:
-game::interface::EngineContext*
+interpreter::Context::PropertyAccessor*
 game::interface::EngineContext::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
 {
     // ex IntEngineContext::lookup

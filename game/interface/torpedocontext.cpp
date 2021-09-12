@@ -45,7 +45,7 @@ game::interface::TorpedoContext::~TorpedoContext()
 { }
 
 // Context:
-game::interface::TorpedoContext*
+interpreter::Context::PropertyAccessor*
 game::interface::TorpedoContext::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
 {
     // ex IntTorpedoContext::lookup, IntLauncherContext::lookup

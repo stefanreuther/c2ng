@@ -65,7 +65,7 @@ game::interface::DrawingContext::~DrawingContext()
 { }
 
 // Context:
-game::interface::DrawingContext*
+interpreter::Context::PropertyAccessor*
 game::interface::DrawingContext::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
 {
     // ex IntDrawingContext::lookup

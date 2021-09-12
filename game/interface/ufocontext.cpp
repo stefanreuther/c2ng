@@ -82,7 +82,7 @@ game::interface::UfoContext::~UfoContext()
 { }
 
 // Context:
-game::interface::UfoContext*
+interpreter::Context::PropertyAccessor*
 game::interface::UfoContext::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
 {
     // ex IntUfoContext::lookup

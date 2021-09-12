@@ -73,7 +73,7 @@ game::interface::MinefieldContext::~MinefieldContext()
 { }
 
 // Context:
-game::interface::MinefieldContext*
+interpreter::Context::PropertyAccessor*
 game::interface::MinefieldContext::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
 {
     // ex IntMinefieldContext::lookup

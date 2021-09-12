@@ -290,7 +290,7 @@ game::interface::IteratorContext::~IteratorContext()
 { }
 
 // Context:
-game::interface::IteratorContext*
+interpreter::Context::PropertyAccessor*
 game::interface::IteratorContext::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
 {
     // ex IntIteratorContext::lookup

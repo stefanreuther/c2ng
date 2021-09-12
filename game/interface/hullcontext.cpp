@@ -58,7 +58,7 @@ game::interface::HullContext::~HullContext()
 { }
 
 // Context:
-game::interface::HullContext*
+interpreter::Context::PropertyAccessor*
 game::interface::HullContext::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
 {
     // ex IntHullContext::lookup

@@ -229,7 +229,7 @@ game::interface::PlanetContext::~PlanetContext()
 { }
 
 // Context:
-game::interface::PlanetContext*
+interpreter::Context::PropertyAccessor*
 game::interface::PlanetContext::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
 {
     // ex planint.pas:CPlanetContext.ResolveValue

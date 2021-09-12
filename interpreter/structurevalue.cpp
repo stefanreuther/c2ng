@@ -53,7 +53,7 @@ interpreter::StructureValue::clone() const
 }
 
 // Context:
-interpreter::StructureValue*
+interpreter::Context::PropertyAccessor*
 interpreter::StructureValue::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
 {
     // ex IntStructureValue::lookup

@@ -37,7 +37,7 @@ game::interface::ExplosionContext::~ExplosionContext()
 { }
 
 // Context:
-game::interface::ExplosionContext*
+interpreter::Context::PropertyAccessor*
 game::interface::ExplosionContext::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
 {
     return lookupName(name, EXPLOSION_MAP, result) ? this : 0;

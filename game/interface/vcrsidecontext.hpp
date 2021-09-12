@@ -25,7 +25,7 @@ namespace game { namespace interface {
         ~VcrSideContext();
 
         // Context:
-        virtual VcrSideContext* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
+        virtual Context::PropertyAccessor* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result);
         virtual afl::data::Value* get(PropertyIndex_t index);
         virtual bool next();
         virtual VcrSideContext* clone() const;

@@ -82,7 +82,7 @@ game::interface::ReferenceContext::~ReferenceContext()
 { }
 
 // Context:
-game::interface::ReferenceContext*
+interpreter::Context::PropertyAccessor*
 game::interface::ReferenceContext::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
 {
     return lookupName(name, REFERENCE_MAP, result) ? this : 0;

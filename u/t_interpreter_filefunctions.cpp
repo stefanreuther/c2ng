@@ -32,7 +32,7 @@ namespace {
             { }
 
         // Context:
-        virtual GlobalContextMock* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
+        virtual Context::PropertyAccessor* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
             {
                 afl::data::NameMap::Index_t ix = m_world.globalPropertyNames().getIndexByName(name);
                 if (ix != afl::data::NameMap::nil) {

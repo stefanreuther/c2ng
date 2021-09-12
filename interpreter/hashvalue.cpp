@@ -24,7 +24,7 @@ namespace {
             { }
 
         // Context:
-        virtual HashContext* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
+        virtual Context::PropertyAccessor* lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
             {
                 // ex IntHashContext::lookup
                 if (name.match("KEY")) {

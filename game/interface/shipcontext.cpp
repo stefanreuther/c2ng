@@ -238,7 +238,7 @@ game::interface::ShipContext::~ShipContext()
 { }
 
 // Context:
-game::interface::ShipContext*
+interpreter::Context::PropertyAccessor*
 game::interface::ShipContext::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
 {
     // ex IntShipContext::lookup

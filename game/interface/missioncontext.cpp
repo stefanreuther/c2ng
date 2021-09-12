@@ -44,7 +44,7 @@ game::interface::MissionContext::~MissionContext()
 { }
 
 // Context:
-game::interface::MissionContext*
+interpreter::Context::PropertyAccessor*
 game::interface::MissionContext::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
 {
     return lookupName(name, MISSION_MAPPING, result) ? this : 0;

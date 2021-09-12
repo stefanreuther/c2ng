@@ -199,7 +199,7 @@ game::interface::InboxContext::InboxContext(size_t index,
 game::interface::InboxContext::~InboxContext()
 { }
 
-game::interface::InboxContext*
+interpreter::Context::PropertyAccessor*
 game::interface::InboxContext::lookup(const afl::data::NameQuery& name, PropertyIndex_t& result)
 {
     // ex IntMessageContext::lookup
