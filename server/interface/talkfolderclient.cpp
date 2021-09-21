@@ -83,12 +83,17 @@ server::interface::TalkFolderClient::configure(int32_t ufid, afl::base::Memory<c
 }
 
 afl::data::Value*
-server::interface::TalkFolderClient::getPMs(int32_t ufid, const ListParameters& params)
+server::interface::TalkFolderClient::getPMs(int32_t ufid, const ListParameters& params, const FilterParameters& filter)
 {
     Segment cmd;
     cmd.pushBackString("FOLDERLSPM");
     cmd.pushBackInteger(ufid);
     TalkForumClient::packListParameters(cmd, params);
+    if (filter.hasFlags()) {
+        cmd.pushBackString("FLAGS");
+        cmd.pushBackInteger(filter.flagMask);
+        cmd.pushBackInteger(filter.flagCheck);
+    }
     return m_commandHandler.call(cmd);
 }
 

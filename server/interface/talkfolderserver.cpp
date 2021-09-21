@@ -153,6 +153,10 @@ server::interface::TalkFolderServer::handleCommand(const String_t& upcasedComman
            - subject
            - time
 
+           In addition to the standard list parameters, you can use the clause:
+           - <tt>FLAGS mask check</tt>: only count messages whose %flags & %mask == %check.
+             For example, <tt>FLAGS 1 0</tt> returns unread messages.
+
            Permissions: user context required, accesses user's folders
 
            @rettype Any
@@ -161,9 +165,10 @@ server::interface::TalkFolderServer::handleCommand(const String_t& upcasedComman
         int32_t ufid = toInteger(args.getNext());
 
         TalkFolder::ListParameters p;
-        TalkForumServer::parseListParameters(p, args);
+        TalkFolder::FilterParameters f;
+        parseListParameters(p, f, args);
 
-        result.reset(m_implementation.getPMs(ufid, p));
+        result.reset(m_implementation.getPMs(ufid, p, f));
         return true;
     } else {
         return false;
@@ -187,4 +192,33 @@ server::interface::TalkFolderServer::packInfo(const TalkFolder::Info& info)
     h->setNew("unread",      makeIntegerValue(info.hasUnreadMessages));
     h->setNew("fixed",       makeIntegerValue(info.isFixedFolder));
     return new HashValue(h);
+}
+
+void
+server::interface::TalkFolderServer::parseListParameters(TalkFolder::ListParameters& p, TalkFolder::FilterParameters& f, interpreter::Arguments& args)
+{
+    while (args.getNumArgs() > 0) {
+        String_t key = afl::string::strUCase(toString(args.getNext()));
+        if (key == "LIMIT") {
+            args.checkArgumentCountAtLeast(2);
+            p.start = toInteger(args.getNext());
+            p.count = toInteger(args.getNext());
+            p.mode = TalkForum::ListParameters::WantRange;
+        } else if (key == "SIZE") {
+            p.mode = TalkForum::ListParameters::WantSize;
+        } else if (key == "CONTAINS") {
+            args.checkArgumentCountAtLeast(1);
+            p.item = toInteger(args.getNext());
+            p.mode = TalkForum::ListParameters::WantMemberCheck;
+        } else if (key == "SORT") {
+            args.checkArgumentCountAtLeast(1);
+            p.sortKey = afl::string::strUCase(toString(args.getNext()));
+        } else if (key == "FLAGS") {
+            args.checkArgumentCountAtLeast(2);
+            f.flagMask = toInteger(args.getNext());
+            f.flagCheck = toInteger(args.getNext());
+        } else {
+            throw std::runtime_error(INVALID_OPTION);
+        }
+    }
 }

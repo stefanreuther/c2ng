@@ -37,6 +37,11 @@ namespace server { namespace talk {
             \param pmId Identifier */
         UserPM(Root& root, int32_t pmId);
 
+        /** Wildcard constructor.
+            \param root Service root
+            \param wild Marker */
+        UserPM(Root& root, Wildcard wild);
+
         /*
          *  Database Fields
          */

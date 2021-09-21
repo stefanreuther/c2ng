@@ -99,6 +99,7 @@ class TestServerTalkTalkFolder : public CxxTest::TestSuite {
  public:
     void testIt();
     void testRoot();
+    void testMessageFlags();
 };
 
 class TestServerTalkTalkForum : public CxxTest::TestSuite {

@@ -14,6 +14,12 @@ server::talk::UserPM::UserPM(Root& root, int32_t pmId)
       m_pmId(pmId)
 { }
 
+// Wildcard constructor.
+server::talk::UserPM::UserPM(Root& root, Wildcard /*wild*/)
+    : m_pmTree(root.pmRoot().subtree("*")),
+      m_pmId(0)
+{ }
+
 // Access message header.
 afl::net::redis::HashKey
 server::talk::UserPM::header()

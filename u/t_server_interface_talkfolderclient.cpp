@@ -135,7 +135,7 @@ TestServerInterfaceTalkFolderClient::testIt()
     {
         mock.expectCall("FOLDERLSPM, 109");
         mock.provideNewResult(server::makeIntegerValue(9));
-        std::auto_ptr<afl::data::Value> p(testee.getPMs(109, server::interface::TalkFolder::ListParameters()));
+        std::auto_ptr<afl::data::Value> p(testee.getPMs(109, server::interface::TalkFolder::ListParameters(), server::interface::TalkFolder::FilterParameters()));
         TS_ASSERT_EQUALS(server::toInteger(p.get()), 9);
     }
     {
@@ -146,7 +146,21 @@ TestServerInterfaceTalkFolderClient::testIt()
         ps.count = 3;
         ps.sortKey = "subject";
         mock.provideNewResult(server::makeIntegerValue(9));
-        std::auto_ptr<afl::data::Value> p(testee.getPMs(109, ps));
+        std::auto_ptr<afl::data::Value> p(testee.getPMs(109, ps, server::interface::TalkFolder::FilterParameters()));
         TS_ASSERT_EQUALS(server::toInteger(p.get()), 9);
+    }
+    {
+        mock.expectCall("FOLDERLSPM, 109, CONTAINS, 9, FLAGS, 7, 4");
+        server::interface::TalkFolder::ListParameters ps;
+        ps.mode = ps.WantMemberCheck;
+        ps.item = 9;
+
+        server::interface::TalkFolder::FilterParameters fs;
+        fs.flagMask = 7;
+        fs.flagCheck = 4;
+
+        mock.provideNewResult(server::makeIntegerValue(1));
+        std::auto_ptr<afl::data::Value> p(testee.getPMs(109, ps, fs));
+        TS_ASSERT_EQUALS(server::toInteger(p.get()), 1);
     }
 }

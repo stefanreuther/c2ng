@@ -25,7 +25,7 @@ TestServerInterfaceTalkFolder::testIt()
             { return false; }
         virtual void configure(int32_t /*ufid*/, afl::base::Memory<const String_t> /*args*/)
             { }
-        virtual afl::data::Value* getPMs(int32_t /*ufid*/, const ListParameters& /*params*/)
+        virtual afl::data::Value* getPMs(int32_t /*ufid*/, const ListParameters& /*params*/, const FilterParameters& /*filter*/)
             { return 0; }
     };
     Tester t;

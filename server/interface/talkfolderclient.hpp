@@ -20,7 +20,7 @@ namespace server { namespace interface {
         virtual int32_t create(String_t name, afl::base::Memory<const String_t> args);
         virtual bool remove(int32_t ufid);
         virtual void configure(int32_t ufid, afl::base::Memory<const String_t> args);
-        virtual afl::data::Value* getPMs(int32_t ufid, const ListParameters& params);
+        virtual afl::data::Value* getPMs(int32_t ufid, const ListParameters& params, const FilterParameters& filter);
 
         static Info unpackInfo(const afl::data::Value* p);
 

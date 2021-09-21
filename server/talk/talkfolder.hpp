@@ -6,11 +6,14 @@
 #define C2NG_SERVER_TALK_TALKFOLDER_HPP
 
 #include "server/interface/talkfolder.hpp"
+#include "afl/net/redis/integersetkey.hpp"
+#include "afl/data/access.hpp"
 
 namespace server { namespace talk {
 
     class Session;
     class Root;
+    class Sorter;
 
     /** Implementation of FOLDER commands. */
     class TalkFolder : public server::interface::TalkFolder {
@@ -27,9 +30,13 @@ namespace server { namespace talk {
         virtual int32_t create(String_t name, afl::base::Memory<const String_t> args);
         virtual bool remove(int32_t ufid);
         virtual void configure(int32_t ufid, afl::base::Memory<const String_t> args);
-        virtual afl::data::Value* getPMs(int32_t ufid, const ListParameters& params);
+        virtual afl::data::Value* getPMs(int32_t ufid, const ListParameters& params, const FilterParameters& filter);
+
+        afl::data::Value* executeListOperation(const ListParameters& params, const FilterParameters& filter, afl::net::redis::IntegerSetKey key, const Sorter& sorter);
 
      private:
+        bool matchFilter(afl::data::Access a, int32_t pmId, const FilterParameters& filter, size_t& index);
+
         Session& m_session;
         Root& m_root;
     };

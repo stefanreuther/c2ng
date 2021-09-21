@@ -6,6 +6,8 @@
 #include <memory>
 #include <stdexcept>
 #include "server/talk/talkfolder.hpp"
+#include "afl/data/vector.hpp"
+#include "afl/data/vectorvalue.hpp"
 #include "afl/net/redis/integersetoperation.hpp"
 #include "afl/net/redis/stringfield.hpp"
 #include "server/errors.hpp"
@@ -16,6 +18,11 @@
 #include "server/talk/user.hpp"
 #include "server/talk/userfolder.hpp"
 #include "server/talk/userpm.hpp"
+
+// Somehow, the ancient Win32 gcc fails to provide this...
+#ifndef INT32_MAX
+# define INT32_MAX 0x7FFFFFFF
+#endif
 
 namespace {
     void configureFolder(server::talk::UserFolder& folder, afl::base::Memory<const String_t> args)
@@ -136,7 +143,7 @@ server::talk::TalkFolder::configure(int32_t ufid, afl::base::Memory<const String
 }
 
 afl::data::Value*
-server::talk::TalkFolder::getPMs(int32_t ufid, const ListParameters& params)
+server::talk::TalkFolder::getPMs(int32_t ufid, const ListParameters& params, const FilterParameters& filter)
 {
     // ex doFolderListPMs
     m_session.checkUser();
@@ -145,5 +152,99 @@ server::talk::TalkFolder::getPMs(int32_t ufid, const ListParameters& params)
     UserFolder folder(u, ufid);
     folder.checkExistance(m_root);
 
-    return TalkForum::executeListOperation(params, folder.messages(), UserPM::PMSorter(m_root));
+    return executeListOperation(params, filter, folder.messages(), UserPM::PMSorter(m_root));
+}
+
+afl::data::Value*
+server::talk::TalkFolder::executeListOperation(const ListParameters& params, const FilterParameters& filter, afl::net::redis::IntegerSetKey key, const Sorter& sorter)
+{
+    if (params.mode == ListParameters::WantMemberCheck) {
+        // Member check: check individual value
+        bool ok = key.contains(params.item);
+        if (ok && filter.hasFlags()) {
+            ok = (UserPM(m_root, params.item).flags(m_session.getUser()).get() & filter.flagMask) == filter.flagCheck;
+        }
+        return makeIntegerValue(ok);
+    } else {
+        // List operation
+        bool hasFilter = false;
+        afl::net::redis::SortOperation op(key.sort());
+        op.get();
+        if (filter.hasFlags()) {
+            hasFilter = true;
+            op.get(UserPM(m_root, Wildcard()).flags(m_session.getUser()));
+        }
+        if (const String_t* sortKey = params.sortKey.get()) {
+            sorter.applySortKey(op, *sortKey);
+        }
+
+        if (!hasFilter) {
+            // No filter: work entirely server-side
+            switch (params.mode) {
+             case ListParameters::WantRange:
+                op.limit(params.start, params.count);
+                return op.getResult();
+             case ListParameters::WantAll:
+                return op.getResult();
+             case ListParameters::WantSize:
+                return makeIntegerValue(key.size());
+             case ListParameters::WantMemberCheck:
+                // Handled above
+                break;
+            }
+            return 0;
+        } else {
+            // Local filter operation
+            std::auto_ptr<afl::data::Value> p(op.getResult());
+            afl::data::Access a(p.get());
+            size_t index = 0, limit = a.getArraySize();
+            switch (params.mode) {
+             case ListParameters::WantRange:
+             case ListParameters::WantAll: {
+                int32_t toSkip = (params.mode == ListParameters::WantAll ? 0         : params.start);
+                int32_t toCopy = (params.mode == ListParameters::WantAll ? INT32_MAX : params.count);
+                afl::data::Vector::Ref_t vv(afl::data::Vector::create());
+                while (index < limit && toCopy > 0) {
+                    int32_t pmId = a[index++].toInteger();
+                    if (matchFilter(a, pmId, filter, index)) {
+                        if (toSkip > 0) {
+                            --toSkip;
+                        } else {
+                            vv->pushBackInteger(pmId);
+                            --toCopy;
+                        }
+                    }
+                }
+                return new afl::data::VectorValue(vv);
+             }
+             case ListParameters::WantSize: {
+                int32_t n = 0;
+                while (index < limit) {
+                    int32_t pmId = a[index++].toInteger();
+                    if (matchFilter(a, pmId, filter, index)) {
+                        ++n;
+                    }
+                }
+                return makeIntegerValue(n);
+             }
+             case ListParameters::WantMemberCheck:
+                // Handled above
+                break;
+            }
+            return 0;
+        }
+    }
+}
+
+bool
+server::talk::TalkFolder::matchFilter(afl::data::Access a, int32_t pmId, const FilterParameters& filter, size_t& index)
+{
+    UserPM pm(m_root, pmId);
+    if (filter.hasFlags()) {
+        int32_t flagValue = a[index++].toInteger();
+        if ((flagValue & filter.flagMask) != filter.flagCheck) {
+            return false;
+        }
+    }
+    return true;
 }

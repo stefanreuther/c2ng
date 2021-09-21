@@ -73,14 +73,14 @@ namespace {
                 cmd += ")";
                 checkCall(cmd);
             }
-        virtual afl::data::Value* getPMs(int32_t ufid, const ListParameters& params)
+        virtual afl::data::Value* getPMs(int32_t ufid, const ListParameters& params, const FilterParameters& filter)
             {
-                checkCall(Format("getPMs(%d,%s)", ufid, formatListParameters(params)));
+                checkCall(Format("getPMs(%d,%s)", ufid, formatListParameters(params, filter)));
                 return consumeReturnValue<afl::data::Value*>();
             }
 
         // FIXME: copied..
-        static String_t formatListParameters(const ListParameters& params)
+        static String_t formatListParameters(const ListParameters& params, const FilterParameters& filter)
             {
                 String_t result;
                 switch (params.mode) {
@@ -100,8 +100,12 @@ namespace {
                 if (const String_t* p = params.sortKey.get()) {
                     result += Format(",sort(%s)", *p);
                 }
+                if (filter.hasFlags()) {
+                    result += Format(",flags(%d,%d)", filter.flagMask, filter.flagCheck);
+                }
                 return result;
             }
+
     };
 }
 
@@ -209,6 +213,12 @@ TestServerInterfaceTalkFolderServer::testIt()
         TS_ASSERT_EQUALS(server::toInteger(p.get()), 987);
     }
 
+    {
+        mock.expectCall("getPMs(104,all,flags(15,8))");
+        mock.provideReturnValue<afl::data::Value*>(0);
+        testee.callVoid(Segment().pushBackString("FOLDERLSPM").pushBackInteger(104).pushBackString("FLAGS").pushBackInteger(15).pushBackInteger(8));
+    }
+
     // Variants
     mock.expectCall("getFolders()");
     testee.callVoid(Segment().pushBackString("folderls"));
@@ -236,6 +246,8 @@ TestServerInterfaceTalkFolderServer::testErrors()
     TS_ASSERT_THROWS(testee.callVoid(Segment().pushBackString("hu")), std::exception);
     TS_ASSERT_THROWS(testee.callVoid(Segment().pushBackString("FOLDERRM")), std::exception);
     TS_ASSERT_THROWS(testee.callVoid(Segment().pushBackString("FOLDERLS").pushBackInteger(3)), std::exception);
+    TS_ASSERT_THROWS(testee.callVoid(Segment().pushBackString("FOLDERLSPM").pushBackInteger(3).pushBackString("WHAT")), std::exception);
+    TS_ASSERT_THROWS(testee.callVoid(Segment().pushBackString("FOLDERLSPM").pushBackInteger(3).pushBackString("FLAGS").pushBackInteger(9)), std::exception);
 
     interpreter::Arguments args(empty, 0, 0);
     std::auto_ptr<afl::data::Value> p;
@@ -343,7 +355,7 @@ TestServerInterfaceTalkFolderServer::testRoundtrip()
     {
         mock.expectCall("getPMs(104,all)");
         mock.provideReturnValue<afl::data::Value*>(0);
-        std::auto_ptr<afl::data::Value> p(level4.getPMs(104, TalkFolder::ListParameters()));
+        std::auto_ptr<afl::data::Value> p(level4.getPMs(104, TalkFolder::ListParameters(), TalkFolder::FilterParameters()));
         TS_ASSERT(p.get() == 0);
     }
 
@@ -353,7 +365,7 @@ TestServerInterfaceTalkFolderServer::testRoundtrip()
         TalkFolder::ListParameters ps;
         ps.mode = ps.WantMemberCheck;
         ps.item = 3;
-        std::auto_ptr<afl::data::Value> p(level4.getPMs(104, ps));
+        std::auto_ptr<afl::data::Value> p(level4.getPMs(104, ps, TalkFolder::FilterParameters()));
         TS_ASSERT(p.get() == 0);
     }
 
@@ -365,8 +377,23 @@ TestServerInterfaceTalkFolderServer::testRoundtrip()
         ps.start = 40;
         ps.count = 10;
         ps.sortKey = "NAME";
-        std::auto_ptr<afl::data::Value> p(level4.getPMs(104, ps));
+        std::auto_ptr<afl::data::Value> p(level4.getPMs(104, ps, TalkFolder::FilterParameters()));
         TS_ASSERT_EQUALS(server::toInteger(p.get()), 987);
+    }
+
+    {
+        mock.expectCall("getPMs(104,member(3),flags(7,2))");
+        mock.provideReturnValue<afl::data::Value*>(0);
+        TalkFolder::ListParameters ps;
+        ps.mode = ps.WantMemberCheck;
+        ps.item = 3;
+
+        TalkFolder::FilterParameters fs;
+        fs.flagMask = 7;
+        fs.flagCheck = 2;
+
+        std::auto_ptr<afl::data::Value> p(level4.getPMs(104, ps, fs));
+        TS_ASSERT(p.get() == 0);
     }
 
     mock.checkFinish();

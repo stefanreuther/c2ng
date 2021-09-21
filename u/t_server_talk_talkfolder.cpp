@@ -15,6 +15,19 @@
 #include "server/talk/user.hpp"
 #include "server/talk/userfolder.hpp"
 #include "server/talk/userpm.hpp"
+#include "server/talk/talkpm.hpp"
+
+namespace {
+    void makeSystemFolders(server::talk::Root& root)
+    {
+        root.defaultFolderRoot().subtree("1").hashKey("header").stringField("name").set("Inbox");
+        root.defaultFolderRoot().subtree("1").hashKey("header").stringField("description").set("Incoming messages");
+        root.defaultFolderRoot().subtree("2").hashKey("header").stringField("name").set("Outbox");
+        root.defaultFolderRoot().subtree("2").hashKey("header").stringField("description").set("Sent messages");
+        root.defaultFolderRoot().intSetKey("all").add(1);
+        root.defaultFolderRoot().intSetKey("all").add(2);
+    }
+}
 
 /** Test folder commands. */
 void
@@ -30,12 +43,7 @@ TestServerTalkTalkFolder::testIt()
     session.setUser("a");
 
     // Make two system folders
-    root.defaultFolderRoot().subtree("1").hashKey("header").stringField("name").set("Inbox");
-    root.defaultFolderRoot().subtree("1").hashKey("header").stringField("description").set("Incoming messages");
-    root.defaultFolderRoot().subtree("2").hashKey("header").stringField("name").set("Outbox");
-    root.defaultFolderRoot().subtree("2").hashKey("header").stringField("description").set("Sent messages");
-    root.defaultFolderRoot().intSetKey("all").add(1);
-    root.defaultFolderRoot().intSetKey("all").add(2);
+    makeSystemFolders(root);
 
     // Testee
     TalkFolder testee(session, root);
@@ -105,12 +113,12 @@ TestServerTalkTalkFolder::testIt()
 
     // Get PMs
     {
-        std::auto_ptr<afl::data::Value> p(testee.getPMs(2, TalkFolder::ListParameters()));
+        std::auto_ptr<afl::data::Value> p(testee.getPMs(2, TalkFolder::ListParameters(), TalkFolder::FilterParameters()));
         TS_ASSERT_EQUALS(afl::data::Access(p).getArraySize(), 1U);
         TS_ASSERT_EQUALS(afl::data::Access(p)[0].toInteger(), 42);
     }
     {
-        TS_ASSERT_THROWS(testee.getPMs(200, TalkFolder::ListParameters()), std::exception);
+        TS_ASSERT_THROWS(testee.getPMs(200, TalkFolder::ListParameters(), TalkFolder::FilterParameters()), std::exception);
     }
 
     // Remove
@@ -165,7 +173,201 @@ TestServerTalkTalkFolder::testRoot()
         TS_ASSERT_THROWS(testee.create("foo", afl::base::Nothing), std::exception);
         TS_ASSERT_THROWS(testee.remove(100), std::exception);
         TS_ASSERT_THROWS(testee.configure(1, afl::base::Nothing), std::exception);
-        TS_ASSERT_THROWS(testee.getPMs(1, TalkFolder::ListParameters()), std::exception);
+        TS_ASSERT_THROWS(testee.getPMs(1, TalkFolder::ListParameters(), TalkFolder::FilterParameters()), std::exception);
+    }
+}
+
+/** Test message flags. */
+void
+TestServerTalkTalkFolder::testMessageFlags()
+{
+    using server::talk::TalkFolder;
+    using server::talk::TalkPM;
+    using server::talk::Session;
+    using afl::data::Access;
+    using afl::data::Value;
+
+    // Infrastructure
+    afl::net::redis::InternalDatabase db;
+    afl::net::NullCommandHandler mq;
+    server::talk::Root root(db, mq, server::talk::Configuration());
+    makeSystemFolders(root);
+
+    // Sessions
+    Session aSession;
+    Session bSession;
+    aSession.setUser("a");
+    bSession.setUser("b");
+
+    // Send messages from A to B
+    int32_t m1 = TalkPM(aSession, root).create("u:b", "subj", "text:text1", afl::base::Nothing);
+    int32_t m2 = TalkPM(aSession, root).create("u:b", "other", "text:text2", afl::base::Nothing);
+    int32_t m3 = TalkPM(aSession, root).create("u:b", "re: subj", "text:text3", m1);
+    int32_t m4 = TalkPM(aSession, root).create("u:b", "re: re: subj", "text:text3", m3);
+
+    // Mark 1 read
+    {
+        int32_t m1s[] = {m1};
+        TalkPM(bSession, root).changeFlags(1, 0, 1, m1s);
+    }
+
+    // FOLDERLSPM 1
+    TalkFolder impl(bSession, root);
+    {
+        TalkFolder::ListParameters p;
+        TalkFolder::FilterParameters f;
+        std::auto_ptr<Value> res(impl.getPMs(1, p, f));
+        Access a(res.get());
+        TS_ASSERT_EQUALS(a.getArraySize(), 4U);
+        TS_ASSERT_EQUALS(a[0].toInteger(), m1);
+        TS_ASSERT_EQUALS(a[1].toInteger(), m2);
+        TS_ASSERT_EQUALS(a[2].toInteger(), m3);
+        TS_ASSERT_EQUALS(a[3].toInteger(), m4);
+    }
+
+    // FOLDERLSPM 1 SIZE
+    {
+        TalkFolder::ListParameters p;
+        p.mode = TalkFolder::ListParameters::WantSize;
+        TalkFolder::FilterParameters f;
+        std::auto_ptr<Value> res(impl.getPMs(1, p, f));
+        Access a(res.get());
+        TS_ASSERT_EQUALS(a.toInteger(), 4);
+    }
+
+    // FOLDERLSPM 1 CONTAINS 3
+    {
+        TalkFolder::ListParameters p;
+        p.mode = TalkFolder::ListParameters::WantMemberCheck;
+        p.item = m3;
+        TalkFolder::FilterParameters f;
+        std::auto_ptr<Value> res(impl.getPMs(1, p, f));
+        Access a(res.get());
+        TS_ASSERT_EQUALS(a.toInteger(), 1);
+    }
+
+    // FOLDERLSPM 1 LIMIT 1 2
+    {
+        TalkFolder::ListParameters p;
+        p.mode = TalkFolder::ListParameters::WantRange;
+        p.start = 1;
+        p.count = 2;
+        TalkFolder::FilterParameters f;
+        std::auto_ptr<Value> res(impl.getPMs(1, p, f));
+        Access a(res.get());
+        TS_ASSERT_EQUALS(a.getArraySize(), 2U);
+        TS_ASSERT_EQUALS(a[0].toInteger(), m2);
+        TS_ASSERT_EQUALS(a[1].toInteger(), m3);
+    }
+
+    // FOLDERLSPM 1 FLAGS 1 0
+    {
+        TalkFolder::ListParameters p;
+        TalkFolder::FilterParameters f;
+        f.flagMask = 1;
+        f.flagCheck = 0;
+        std::auto_ptr<Value> res(impl.getPMs(1, p, f));
+        Access a(res.get());
+        TS_ASSERT_EQUALS(a.getArraySize(), 3U);
+        TS_ASSERT_EQUALS(a[0].toInteger(), m2);
+        TS_ASSERT_EQUALS(a[1].toInteger(), m3);
+        TS_ASSERT_EQUALS(a[2].toInteger(), m4);
+    }
+
+    // FOLDERLSPM 1 FLAGS 1 0 CONTAINS 3
+    {
+        TalkFolder::ListParameters p;
+        p.mode = TalkFolder::ListParameters::WantMemberCheck;
+        p.item = m3;
+        TalkFolder::FilterParameters f;
+        f.flagMask = 1;
+        f.flagCheck = 0;
+        std::auto_ptr<Value> res(impl.getPMs(1, p, f));
+        Access a(res.get());
+        TS_ASSERT_EQUALS(a.toInteger(), 1);
+    }
+
+    // FOLDERLSPM 1 FLAGS 1 1 CONTAINS 3
+    {
+        TalkFolder::ListParameters p;
+        p.mode = TalkFolder::ListParameters::WantMemberCheck;
+        p.item = m3;
+        TalkFolder::FilterParameters f;
+        f.flagMask = 1;
+        f.flagCheck = 1;
+        std::auto_ptr<Value> res(impl.getPMs(1, p, f));
+        Access a(res.get());
+        TS_ASSERT_EQUALS(a.toInteger(), 0);
+    }
+
+    // FOLDERLSPM 1 FLAGS 1 0 CONTAINS 999
+    {
+        TalkFolder::ListParameters p;
+        p.mode = TalkFolder::ListParameters::WantMemberCheck;
+        p.item = 999;
+        TalkFolder::FilterParameters f;
+        f.flagMask = 1;
+        f.flagCheck = 0;
+        std::auto_ptr<Value> res(impl.getPMs(1, p, f));
+        Access a(res.get());
+        TS_ASSERT_EQUALS(a.toInteger(), 0);
+    }
+
+    // FOLDERLSPM 1 FLAGS 1 0 SIZE
+    {
+        TalkFolder::ListParameters p;
+        p.mode = TalkFolder::ListParameters::WantSize;
+        TalkFolder::FilterParameters f;
+        f.flagMask = 1;
+        f.flagCheck = 0;
+        std::auto_ptr<Value> res(impl.getPMs(1, p, f));
+        Access a(res.get());
+        TS_ASSERT_EQUALS(a.toInteger(), 3);
+    }
+
+    // FOLDERLSPM 1 LIMIT 1 2 FLAGS 128 0
+    {
+        TalkFolder::ListParameters p;
+        p.mode = TalkFolder::ListParameters::WantRange;
+        p.start = 1;
+        p.count = 2;
+        TalkFolder::FilterParameters f;
+        f.flagMask = 128;
+        f.flagCheck = 0;
+        std::auto_ptr<Value> res(impl.getPMs(1, p, f));
+        Access a(res.get());
+        TS_ASSERT_EQUALS(a.getArraySize(), 2U);
+        TS_ASSERT_EQUALS(a[0].toInteger(), m2);
+        TS_ASSERT_EQUALS(a[1].toInteger(), m3);
+    }
+
+    // FOLDERLSPM 1 FLAGS 1 0 SORT subject
+    {
+        TalkFolder::ListParameters p;
+        p.sortKey = String_t("SUBJECT");
+        TalkFolder::FilterParameters f;
+        f.flagMask = 1;
+        f.flagCheck = 0;
+        std::auto_ptr<Value> res(impl.getPMs(1, p, f));
+        Access a(res.get());
+        TS_ASSERT_EQUALS(a.getArraySize(), 3U);
+        TS_ASSERT_EQUALS(a[0].toInteger(), m2);  // other
+        TS_ASSERT_EQUALS(a[1].toInteger(), m4);  // re: re: subj
+        TS_ASSERT_EQUALS(a[2].toInteger(), m3);  // re: subj
+    }
+
+    // FOLDERLSPM 1 SORT subject
+    {
+        TalkFolder::ListParameters p;
+        p.sortKey = String_t("SUBJECT");
+        TalkFolder::FilterParameters f;
+        std::auto_ptr<Value> res(impl.getPMs(1, p, f));
+        Access a(res.get());
+        TS_ASSERT_EQUALS(a.getArraySize(), 4U);
+        TS_ASSERT_EQUALS(a[0].toInteger(), m2);  // other
+        TS_ASSERT_EQUALS(a[1].toInteger(), m4);  // re: re: subj
+        TS_ASSERT_EQUALS(a[2].toInteger(), m3);  // re: subj
+        TS_ASSERT_EQUALS(a[3].toInteger(), m1);  // subj
     }
 }
 

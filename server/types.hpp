@@ -18,6 +18,9 @@ namespace server {
         We normally store minutes-since-epoch. */
     typedef int32_t Time_t;
 
+    /** Placeholder for wildcard Id. */
+    struct Wildcard { };
+
 
     /** Interpret value as integer.
         \param v Value

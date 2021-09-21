@@ -17,6 +17,7 @@ namespace server { namespace interface {
         virtual bool handleCommand(const String_t& upcasedCommand, interpreter::Arguments& args, std::auto_ptr<Value_t>& result);
 
         static Value_t* packInfo(const TalkFolder::Info& info);
+        static void parseListParameters(TalkFolder::ListParameters& p, TalkFolder::FilterParameters& f, interpreter::Arguments& args);
 
      private:
         TalkFolder& m_implementation;

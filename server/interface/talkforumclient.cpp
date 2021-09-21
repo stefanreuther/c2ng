@@ -55,7 +55,7 @@ server::interface::TalkForum::Info
 server::interface::TalkForumClient::getInfo(int32_t fid)
 {
     std::auto_ptr<afl::data::Value> p(m_commandHandler.call(Segment().pushBackString("FORUMSTAT").pushBackInteger(fid)));
-    return unpackInfo(p.get());    
+    return unpackInfo(p.get());
 }
 
 // FORUMMSTAT forum:FID... (Talk Command)
