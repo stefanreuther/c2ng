@@ -67,6 +67,7 @@ class TestGameVcrFlakSetup : public CxxTest::TestSuite {
  public:
     void testInit();
     void testIO();
+    void testCopy();
 };
 
 class TestGameVcrFlakStructures : public CxxTest::TestSuite {

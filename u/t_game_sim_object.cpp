@@ -131,6 +131,10 @@ TestGameSimObject::testSetRandom()
     t.setFriendlyCode("xyz");
     t.setRandomFriendlyCodeFlags();
     TS_ASSERT_EQUALS(t.getFlags(), 0);
+
+    t.setFriendlyCode("a#");             // string shorter than usual
+    t.setRandomFriendlyCodeFlags();
+    TS_ASSERT_EQUALS(t.getFlags(), game::sim::Object::fl_RandomFC + game::sim::Object::fl_RandomFC2);
 }
 
 /** Test setRandomFriendlyCode(). */

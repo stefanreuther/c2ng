@@ -106,3 +106,28 @@ TestGameVcrFlakSetup::testIO()
     TS_ASSERT_EQUALS(out.size(), sizeof(FILE_CONTENT));
     TS_ASSERT_SAME_DATA(out.at(OFFSET), FILE_CONTENT+OFFSET, sizeof(FILE_CONTENT)-OFFSET);
 }
+
+/** Test copying. */
+void
+TestGameVcrFlakSetup::testCopy()
+{
+    // Environment
+    afl::string::NullTranslator tx;
+
+    // Initialize by loading
+    game::vcr::flak::Setup testee;
+    afl::charset::Utf8Charset cs;
+    testee.load("testIO", FILE_CONTENT, cs, tx);
+
+    // Make a copy
+    game::vcr::flak::Setup t2(testee);
+
+    // Verify the copy
+    game::map::Point pt;
+    TS_ASSERT_EQUALS(t2.getAmbientFlags(), 0);
+    TS_ASSERT_EQUALS(t2.getPosition(pt), true);
+    TS_ASSERT_EQUALS(pt.getX(), 2595);
+    TS_ASSERT_EQUALS(pt.getY(), 2526);
+    TS_ASSERT_EQUALS(t2.getTotalTime(), 352);
+}
+

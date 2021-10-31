@@ -101,6 +101,30 @@ class TestGameV3ControlFile : public CxxTest::TestSuite {
     void testRange();
 };
 
+class TestGameV3DirectoryScanner : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testResult();
+    void testMultiResult();
+    void testNewResult();
+    void testBrokenResult();
+    void testTruncatedResult();
+    void testGen();
+    void testMultiGen();
+    void testConflictGen();
+    void testBadGen();
+    void testGenAndNewResult();
+    void testGenAndSameResult();
+    void testGenAndOldResult();
+    void testGenOnlyResult();
+    void testResultAndTurn();
+    void testResultAndMismatchingTurn();
+    void testResultAndWrongOwnerTurn();
+    void testResultAndBadTurn();
+    void testHostVersion();
+    void testHostVersionResult();
+};
+
 class TestGameV3FizzFile : public CxxTest::TestSuite {
  public:
     void testMissing();
@@ -120,6 +144,15 @@ class TestGameV3HConfig : public CxxTest::TestSuite {
  public:
     void testPack();
     void testRoundtrip();
+};
+
+class TestGameV3InboxFile : public CxxTest::TestSuite {
+ public:
+    void testDecodeMessage();
+    void testInboxFile();
+    void testInboxFileErrors();
+    void testInboxFileTweakCC();
+    void testInboxFileTweakUniversal();
 };
 
 class TestGameV3Loader : public CxxTest::TestSuite {
@@ -191,6 +224,20 @@ class TestGameV3Reverter : public CxxTest::TestSuite {
     void testLocationHalf();
 };
 
+class TestGameV3SpecificationLoader : public CxxTest::TestSuite {
+ public:
+    void testStandard();
+    void testTruehullVerification();
+    void testLoadHullfunc();
+    void testMissing();
+    void testHullfuncAssignment();
+    void testHullfuncAssignmentShip();
+    void testHullfuncAssignmentPlayerRace();
+    void testHullfuncAssignmentLevel();
+    void testLoadFCodes();
+    void testLoadMissions();
+};
+
 class TestGameV3StringVerifier : public CxxTest::TestSuite {
  public:
     void testMain();
@@ -204,6 +251,28 @@ class TestGameV3Structures : public CxxTest::TestSuite {
     void testHeader();
 };
 
+class TestGameV3TurnFile : public CxxTest::TestSuite {
+ public:
+    void testInit();
+    void testParse30();
+    void testParse30Attachment();
+    void testParse30AttachmentHeader();
+    void testParse35();
+    void testParse35Header();
+    void testParseDamaged();
+    void testDeleteCommand();
+    void testSendTHostAllies();
+    void testSendMessageData();
+    void testMakeShipCommands();
+    void testMakePlanetCommands();
+    void testMakeBaseCommands();
+    void testModify();
+    void testSort();
+    void testSetRegistrationKey();
+    void testAddFile();
+    void testStatics();
+};
+
 class TestGameV3UndoInformation : public CxxTest::TestSuite {
  public:
     void testEmpty();
@@ -213,6 +282,12 @@ class TestGameV3UndoInformation : public CxxTest::TestSuite {
     void testTorpedoUpgrade();
     void testTorpedoShip();
     void testSupplyShip();
+};
+
+class TestGameV3Utils : public CxxTest::TestSuite {
+ public:
+    void testLoadRaceNames();
+    void testEncryptTarget();
 };
 
 #endif

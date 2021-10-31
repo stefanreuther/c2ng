@@ -11,7 +11,9 @@
 void
 TestGameMapObject::testIt()
 {
-    class Tester : public game::map::Object {
+    using game::map::Object;
+
+    class Tester : public Object {
      public:
         virtual String_t getName(game::ObjectName /*which*/, afl::string::Translator& /*tx*/, game::InterpreterInterface& /*iface*/) const
             { return String_t(); }
@@ -23,4 +25,16 @@ TestGameMapObject::testIt()
             { return false; }
     };
     Tester t;
+
+    TS_ASSERT(!t.isDirty());
+    TS_ASSERT(!t.isMarked());
+    TS_ASSERT(!t.isPlayable(Object::Playable));
+
+    t.setIsMarked(true);
+    t.setPlayability(Object::Playable);
+
+    TS_ASSERT(t.isDirty());
+    TS_ASSERT(t.isMarked());
+    TS_ASSERT(t.isPlayable(Object::Playable));
+    TS_ASSERT(t.isPlayable(Object::ReadOnly));
 }

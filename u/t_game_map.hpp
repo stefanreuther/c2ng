@@ -266,6 +266,17 @@ class TestGameMapObjectObserver : public CxxTest::TestSuite {
     void testNormal();
 };
 
+class TestGameMapObjectType : public CxxTest::TestSuite {
+ public:
+    void testEmpty();
+    void testUnit();
+    void testSparseEmpty();
+    void testSparseUnit();
+    void testNormal();
+    void testPartial();
+    void testFindNearest();
+};
+
 class TestGameMapPlanet : public CxxTest::TestSuite {
  public:
     void testAutobuildSettings();
