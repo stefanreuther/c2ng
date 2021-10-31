@@ -73,7 +73,9 @@ game::vcr::flak::Setup::Setup()
 game::vcr::flak::Setup::Setup(const Setup& b)
     : m_attackList(b.m_attackList),
       m_totalTime(b.m_totalTime),
-      m_seed(b.m_seed)
+      m_seed(b.m_seed),
+      m_position(b.m_position),
+      m_ambientFlags(b.m_ambientFlags)
 {
     // ex FlakBattle::FlakBattle
     // Copy fleets

@@ -472,7 +472,7 @@ struct game::vcr::flak::Algorithm::Player {
 };
 
 game::vcr::flak::Algorithm::Player::Player(int number)
-    : number(static_cast<int16_t>(number)), num_live_ships(0), sum_strength(0), stuff(), have_any_fighters(false)
+    : number(static_cast<int16_t>(number)), num_live_ships(0), sum_strength(0), stuff(), have_any_fighters(false), FighterKillOdds(0)
 {
     // ex FlakPlayer::FlakPlayer
 }

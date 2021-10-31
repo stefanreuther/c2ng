@@ -290,6 +290,7 @@ TestGameSimRunner::testInterrupt()
     // SimpleRunner
     util::RandomNumberGenerator simpleRNG(77);
     game::sim::SimpleRunner simpleRunner(setup, opts, shipList, config, flakConfiguration, simpleRNG);
+    simpleRunner.init();
     checkInterrupt("SimpleRunner", simpleRunner);
 
     // ParallelRunner
