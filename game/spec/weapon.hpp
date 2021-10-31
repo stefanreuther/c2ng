@@ -37,7 +37,7 @@ namespace game { namespace spec {
         void setDamagePower(int damagePower);
 
         /** Check for death ray.
-            \param config Host Version
+            \param host Host Version
             \return true if this is a death ray */
         bool isDeathRay(const HostVersion& host) const;
 

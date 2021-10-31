@@ -62,7 +62,7 @@ namespace game { namespace parser {
 
         /** Add integer value.
             \param ii Integer value index
-            \param s String value */
+            \param i Integer value */
         void addValue(MessageIntegerIndex ii, int32_t i);
 
         /** Add configuration value.
@@ -91,7 +91,7 @@ namespace game { namespace parser {
         bool getValue(MessageStringIndex si, String_t& out) const;
 
         /** Get integer value.
-            \param si  [in] Integer value index
+            \param ii [in] Integer value index
             \param out [out] Result
             \retval true Value was found, \c out updated
             \retval false Value not found, \c out unchanged */

@@ -21,7 +21,7 @@ namespace game { namespace sim {
 
         Limitation: Statistic::getMinFightersAboard() will not be initialized for planets that do not fight.
         
-        \param [in/out]  state     Simulation state. Will be updated to contain the simulation results.
+        \param [in/out]  setup     Simulation state. Will be updated to contain the simulation results.
         \param [out]     stats     Receives out-of-band statistics not covered by state.
         \param [in/out]  result    Result descriptor. Caller must initialize; will be updated with new battle weights.
         \param [in]      opts      Simulator options
@@ -29,7 +29,7 @@ namespace game { namespace sim {
         \param [in]      config    Host configuration
         \param [in]      flakConfig FLAK configuration
         \param [in/out]  rng       Random number generator; used only of \c opts does not configure a deterministic simulation */
-    void runSimulation(Setup& state,
+    void runSimulation(Setup& setup,
                        std::vector<game::vcr::Statistic>& stats,
                        Result& result,
                        const Configuration& opts,
@@ -42,7 +42,7 @@ namespace game { namespace sim {
         Call once before calling runSimulation() possibly multiple times.
         This will process random friendly codes for hasRandomizeFCodesOnEveryFight()=off. 
         
-        \param [in/out]  state     Simulation state. Will be updated to contain the simulation results.
+        \param [in/out]  setup     Simulation state. Will be updated to contain the simulation results.
         \param [in]      opts      Simulator options
         \param [in/out]  rng       Random number generator; used only of \c opts does not configure a deterministic simulation */
     void prepareSimulation(Setup& setup, const Configuration& opts, util::RandomNumberGenerator& rng);

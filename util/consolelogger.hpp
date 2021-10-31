@@ -18,7 +18,6 @@ namespace util {
         This logger is used by default in all programs.
 
         By default, this class expects to be connected with the afl::io::TextWriter's provided by the afl::sys::Environment.
-        Preprocessor macros allow to hardwire it to stdout/stderr for debugging.
 
         To connect the logger, call attachWriter() after constructing it.
         - call log.attachWriter(_, env.attachTextWriter(_)) if you are a console program and it is an error if the given channel does not exist.

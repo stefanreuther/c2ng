@@ -82,7 +82,7 @@ TestGameVcrFlakGameEnvironment::testSpec()
     // Configuration (dummy)
     HostConfiguration config;
 
-    // Specification (dummy)
+    // Specification
     game::spec::BeamVector_t beams;
     game::spec::Beam* b3 = beams.create(3);
     b3->setKillPower(333);

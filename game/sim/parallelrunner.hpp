@@ -23,9 +23,7 @@ namespace game { namespace sim {
         The sig_update may therefore not modify any of those.
         The sig_update callback may come from any thread.
 
-        Worker threads are passive when run() is not active,
-
-    */
+        Worker threads are passive when run() is not active. */
     class ParallelRunner : public Runner,
                            private afl::base::Stoppable
     {

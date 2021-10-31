@@ -95,7 +95,7 @@ game::PlayerList::getCharacterFromPlayer(int id)
     }
 }
 
-// Get set of all players.
+// Expand names in string template.
 String_t
 game::PlayerList::expandNames(const String_t tpl, bool useOriginalNames) const
 {

@@ -33,7 +33,7 @@ namespace game { namespace sim {
         ~Object();
 
         /** Assignment operator.
-            \param rhs Other object
+            \param other Other object
             \return this */
         Object& operator=(const Object& other);
 

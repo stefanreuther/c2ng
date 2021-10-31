@@ -77,7 +77,7 @@ namespace game { namespace spec {
         int getMaxCargo() const;
 
         /** Set cargo capacity.
-            \param maxCrew cargo capacity */
+            \param maxCargo cargo capacity */
         void setMaxCargo(int maxCargo);
 
         /** Get number of fighter bays.

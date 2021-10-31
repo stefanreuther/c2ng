@@ -6,5 +6,5 @@
 
      <b>Entry points:</b>
 
-     - game::sim::State
+     - game::sim::Setup
  */

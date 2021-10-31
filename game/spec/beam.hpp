@@ -16,7 +16,7 @@ namespace game { namespace spec {
     class Beam : public Weapon {
      public:
         /** Constructor.
-            \param beam Id */
+            \param id beam Id */
         explicit Beam(int id);
 
         /** Get average recharge time.

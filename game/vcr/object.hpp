@@ -200,7 +200,7 @@ namespace game { namespace vcr {
         void setNumLaunchers(int numLaunchers);
 
         /** Set number of fighter bays.
-            \param numBeams number of fighter bays */
+            \param numBays number of fighter bays */
         void setNumBays(int numBays);
 
         /** Set number of fighters.
@@ -208,7 +208,7 @@ namespace game { namespace vcr {
         void setNumFighters(int numFighters);
 
         /** Set experience level.
-            \return level experience level */
+            \param level experience level */
         void setExperienceLevel(int level);
 
         /** Set beam kill rate.
@@ -646,9 +646,9 @@ game::vcr::Object::setBeamChargeRate(int beamChargeRate)
 }
 
 inline void
-game::vcr::Object::setTorpMissRate(int torpChargeRate)
+game::vcr::Object::setTorpMissRate(int torpMissRate)
 {
-    m_data.torpMissRate = torpChargeRate;
+    m_data.torpMissRate = torpMissRate;
 }
 
 inline void

@@ -29,7 +29,7 @@ namespace game {
         /** Evaluate a boolean expression.
             \param scope Object type
             \param id Object Id
-            \param exp Expression to evaluate
+            \param expr Expression to evaluate
             \return Result
 
             FIXME: this method is deprecated because it requires Process::runTemporary. */

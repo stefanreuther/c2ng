@@ -1,13 +1,14 @@
 /**
   *  \file util/application.cpp
+  *  \brief Class util::Application
   */
 
 #include <cstdlib>
 #include <stdexcept>
 #include "util/application.hpp"
+#include "afl/except/fileproblemexception.hpp"
 #include "afl/io/nulltextwriter.hpp"
 #include "afl/string/format.hpp"
-#include "afl/except/fileproblemexception.hpp"
 
 namespace {
     afl::base::Ref<afl::io::TextWriter> getWriter(afl::sys::Environment& env, afl::sys::Environment::Channel ch)

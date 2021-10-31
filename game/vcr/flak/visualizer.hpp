@@ -120,7 +120,7 @@ namespace game { namespace vcr { namespace flak {
 
         /** Move fleet (JS: gmove).
             \param fleetNr   Fleet number
-            \param xmy       Position */
+            \param x,y       Position */
         virtual void moveFleet(Fleet_t fleetNr, int32_t x, int32_t y) = 0;
 
 
@@ -182,7 +182,7 @@ namespace game { namespace vcr { namespace flak {
 
         /** Torpedo hits target (JS: thit).
             \param id     Object Id (must be used, will become unused)
-            \param ship   Ship being hit (can differ from original target) */
+            \param shipNr Ship being hit (can differ from original target) */
         virtual void hitTorpedo(Object_t id, Ship_t shipNr) = 0;
 
         /** Torpedo misses (JS: tmiss).

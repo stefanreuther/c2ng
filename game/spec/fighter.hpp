@@ -30,7 +30,7 @@ namespace game { namespace spec {
         static const int32_t MAX_INTERVAL = 10000;
 
         /** Constructor.
-            \param fighter Id (=player number)
+            \param id fighter Id (=player number)
             \param config Host configuration
             \param players Player list
             \param tx Translator */

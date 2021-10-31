@@ -113,7 +113,7 @@ game::spec::MissionList::addMission(const Mission& msn)
         } else {
             for (int i = 0; i < 26; ++i) {
                 if (!(m_usedLetters & (1 << i))) {
-                    c = char('a' + i);  // FIXME: assumes ASCII
+                    c = char('a' + i);
                     break;
                 }
             }

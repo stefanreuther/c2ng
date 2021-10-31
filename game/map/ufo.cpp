@@ -305,7 +305,6 @@ game::map::Ufo::getLastTurn() const
 void
 game::map::Ufo::setLastTurn(int n)
 {
-    // FIXME: needed?
     if (m_turnLastSeen != n) {
         m_turnLastSeen = n;
         markDirty();

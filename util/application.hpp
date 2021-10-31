@@ -1,15 +1,16 @@
 /**
   *  \file util/application.hpp
+  *  \brief Class util::Application
   */
 #ifndef C2NG_UTIL_APPLICATION_HPP
 #define C2NG_UTIL_APPLICATION_HPP
 
 #include "afl/base/deletable.hpp"
-#include "afl/sys/environment.hpp"
 #include "afl/io/filesystem.hpp"
-#include "afl/string/nulltranslator.hpp"
-#include "consolelogger.hpp"
 #include "afl/io/textwriter.hpp"
+#include "afl/string/nulltranslator.hpp"
+#include "afl/sys/environment.hpp"
+#include "consolelogger.hpp"
 
 namespace util {
 
@@ -55,12 +56,34 @@ namespace util {
             \param str Message */
         void errorExit(String_t str);
 
+        /** Access environment instance.
+            \return instance */
         afl::sys::Environment& environment();
+
+        /** Access file system instance.
+            \return instance */
         afl::io::FileSystem& fileSystem();
+
+        /** Access translator instance.
+            \return instance */
         afl::string::Translator& translator();
+
+        /** Access general logger instance.
+            Use for logging/pass to components that need a loggeer.
+            \return instance */
         afl::sys::LogListener& log();
+
+        /** Access ConsoleLogger instance.
+            Returns the same object as log(), but as type ConsoleLogger so it can be configured.
+            \return instance */
         ConsoleLogger& consoleLogger();
+
+        /** Return standard error stream.
+            \return instance */
         afl::io::TextWriter& errorOutput();
+
+        /** Return standard output stream.
+            \return instance */
         afl::io::TextWriter& standardOutput();
 
      protected:

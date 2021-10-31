@@ -35,7 +35,8 @@ namespace game { namespace vcr { namespace classic {
             \param phost3Flag false: PHost 2.x combat; true: PHost 3.x/4.x combat.
             \param vis Visualizer to use
             \param config Host configuration (required for PlayerRace)
-            \param list Ship list */
+            \param beams Beams
+            \param launchers Torpedo launcher */
         PVCRAlgorithm(bool phost3Flag,
                       Visualizer& vis,
                       const game::config::HostConfiguration& config,

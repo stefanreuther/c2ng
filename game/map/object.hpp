@@ -34,7 +34,7 @@ namespace game { namespace map {
 
         Finally, objects have a "dirty" flag used to track changes,
         and a sig_change signal to allow others to hook into these changes.
-        Actual change notification is done by GUniverse. */
+        Actual change notification is done by Universe. */
     class Object : public afl::base::Deletable {
      public:
         /** Playability level. */
@@ -61,7 +61,8 @@ namespace game { namespace map {
         virtual String_t getName(ObjectName which, afl::string::Translator& tx, InterpreterInterface& iface) const = 0;
 
         /** Get Id number of this object.
-            The Id is always known. */
+            The Id is always known.
+            \return Id */
         virtual Id_t getId() const = 0;
 
         /** Get owner of this object.
@@ -69,7 +70,9 @@ namespace game { namespace map {
             \return true if owner is known */
         virtual bool getOwner(int& result) const = 0;
 
-        /** Get position in game universe. */
+        /** Get position in game universe.
+            \param result [out] result
+            \return true if position is known */
         virtual bool getPosition(Point& result) const = 0;
 
 
@@ -78,19 +81,50 @@ namespace game { namespace map {
          */
 
         // Playability:
-        /** Check playability level. */
+
+        /** Check playability level.
+            \param p Level to check for
+            \return true if actual level is p or better */
         bool isPlayable(Playability p) const;
+
+        /** Set playability.
+            \param p New playability */
         void setPlayability(Playability p);
+
+        /** Get playability.
+            \return playability */
         Playability getPlayability() const;
 
         // Dirtiness:
+
+        /** Mark object clean. */
         void markClean();
+
+        /** Mark object dirty. */
         void markDirty();
+
+        /** Check whether object is dirty.
+            \return true if dirty */
         bool isDirty() const;
+
+        /** Notify all listeners. If this object is dirty, raise sig_change
+            and reset dirtiness state.
+
+            You should not use this directly. Use Universe::notifyListeners()
+            instead, which offers more flexibility for users to hook into
+            universe change. In particular, widgets that hook into
+            Universe::sig_preUpdate (those that observe lots of objects)
+            will not be notified by a lone notifyListeners(). */
         void notifyListeners();
 
         // Selection:
+
+        /** Check whether object is marked.
+            \return true if object is marked */
         bool isMarked() const;
+
+        /** Set selection status.
+            \param n true to mark object */
         void setIsMarked(bool n);
 
         /** Signal for object changes.

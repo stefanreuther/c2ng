@@ -22,7 +22,8 @@ namespace game { namespace vcr { namespace classic {
             \param nuFlag false: HOST combat; true: NuHost combat.
             \param vis Visualizer to use
             \param config Host configuration (required for PlayerRace)
-            \param list Ship list */
+            \param beams Beams
+            \param launchers Torpedo launcher */
         HostAlgorithm(bool nuFlag,
                       Visualizer& vis,
                       const game::config::HostConfiguration& config,

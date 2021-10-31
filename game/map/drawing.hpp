@@ -84,7 +84,7 @@ namespace game { namespace map {
         void setExpire(int expire);
 
         /** Get type.
-            \param type Type */
+            \return Type */
         Type getType() const
             { return m_type; }
 

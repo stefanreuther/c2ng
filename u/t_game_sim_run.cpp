@@ -1810,7 +1810,7 @@ TestGameSimRun::testFLAK()
     game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
 
     // Verify result
-    // FIXME? Other alogs verify that rng has not been touched because we use seed control, but FLAK does touch it.
+    // FIXME? Other algos verify that rng has not been touched because we use seed control, but FLAK does touch it.
 
     // - a battle has been created
     TS_ASSERT(h.result.battles.get() != 0);

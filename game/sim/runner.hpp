@@ -128,7 +128,7 @@ namespace game { namespace sim {
 
         /** Run a job.
             Call from your run(), see there.
-            \return p Job created by makeJob(). */
+            \param p Job created by makeJob(). */
         static void runJob(Job* p);
 
      private:

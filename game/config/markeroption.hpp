@@ -41,7 +41,7 @@ namespace game { namespace config {
         uint8_t getMarkerKind() const;
 
         /** Set marker kind (shape).
-            \param k Kind [0,game::map::Drawing::NUM_USER_MARKERS)
+            \param markerKind Kind [0,game::map::Drawing::NUM_USER_MARKERS)
             \see game::map::Drawing::setMarkerKind */
         void setMarkerKind(uint8_t markerKind);
 

@@ -62,7 +62,7 @@ namespace game { namespace config {
         String_t formatPopulation(afl::base::InlineOptional<StorageType,NullValue,UserType> value) const;
 
         /** Get canned marker configuration.
-            \param int Slot number, starting at 0
+            \param slot Slot number, starting at 0
             \return Configuration option; null if slot number out of range */
         MarkerOption* getCannedMarker(int slot);
 

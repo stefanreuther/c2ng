@@ -34,7 +34,7 @@ namespace game { namespace map {
      public:
         /** Constructor.
             \param id Explosion Id (NOT ship Id), can be 0.
-            \parmm pos Explosion position */
+            \param pos Explosion position */
         Explosion(Id_t id, Point pos);
 
         /** Copy constructor.

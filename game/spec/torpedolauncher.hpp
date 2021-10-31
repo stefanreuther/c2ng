@@ -20,7 +20,7 @@ namespace game { namespace spec {
     class TorpedoLauncher : public Weapon {
      public:
         /** Constructor.
-            \param torpedo Id */
+            \param id torpedo Id */
         explicit TorpedoLauncher(int id);
 
         /** Get torpedo cost.

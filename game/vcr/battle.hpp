@@ -84,8 +84,9 @@ namespace game { namespace vcr {
         /** Prepare the result.
             Compute this fight's result.
             If the result is already computed, just return.
-            \param resultLevel Requested result level (NeedQuickOutcome, NeedCompleteResult, or combination thereof).
-            \param pm Progress monitor */
+            \param config Host configuration
+            \param shipList Ship list
+            \param resultLevel Requested result level (NeedQuickOutcome, NeedCompleteResult, or combination thereof). */
         virtual void prepareResult(const game::config::HostConfiguration& config,
                                    const game::spec::ShipList& shipList,
                                    int resultLevel) = 0;
@@ -124,7 +125,7 @@ namespace game { namespace vcr {
             Requires the result to be prepared at NeedCompleteResult level (will honor damage taken in computation).
             Accumulates the resulting scores in the given Score object.
             \param [in/out] score    Scores are added here
-            \param [in]     side     Compute scores for this side
+            \param [in]     slot     Compute scores for this side
             \param [in]     config   Configuration to use
             \param [in]     shipList Ship list to use
             \return true on success; false if scores cannot be computed, slot is invalid, or result is not prepared */

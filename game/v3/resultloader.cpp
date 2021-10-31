@@ -544,7 +544,6 @@ game::v3::ResultLoader::loadTurnfile(Turn& trn, Root& root, afl::io::Stream& fil
         virtual void addMessage(int to, String_t text)
             {
                 if (to > 0 && to <= structures::NUM_OWNERS) {
-                    // FIXME: this remapping should look nicer
                     if (to == structures::NUM_OWNERS) {
                         to = 0;
                     }

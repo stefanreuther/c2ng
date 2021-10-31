@@ -330,7 +330,7 @@ TestGameBattleOrderRule::testGamePlanet()
     }
 }
 
-/** Test add(game::sim::Ship&). */
+/** Test get(game::sim::Ship&). */
 void
 TestGameBattleOrderRule::testSimShip()
 {
@@ -360,10 +360,9 @@ TestGameBattleOrderRule::testSimShip()
         TS_ASSERT_EQUALS(tRule.get(sh), 1000);
         TS_ASSERT_EQUALS(pRule.get(sh), 1000);
     }
-
 }
 
-/** Test add(game::sim::Planet&). */
+/** Test get(game::sim::Planet&). */
 void
 TestGameBattleOrderRule::testSimPlanet()
 {

@@ -35,7 +35,7 @@ namespace game { namespace sim {
         int getBaseDefense() const;
 
         /** Set number of starbase defense posts.
-            \param defense number */
+            \param baseDefense defense number */
         void setBaseDefense(int baseDefense);
 
         /** Get starbase beam tech level.

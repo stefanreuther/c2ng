@@ -191,7 +191,7 @@ namespace game { namespace map {
         Point getSimplePointAlias(Point pt, int image) const;
 
         /** Get minimum distance between two points, considering map configuration.
-            \param pt a,b points
+            \param a,b points
             \return squared distance */
         int32_t getSquaredDistance(Point a, Point b) const;
 

@@ -52,7 +52,7 @@ namespace game { namespace spec {
             Locates the first item with the given Id.
             \param [in]  id     Id to find
             \param [out] pIndex If given as non-null, the index is returned here
-            \param item Item if any, valid until next modifying call; null if none found */
+            \return item Item if any, valid until next modifying call; null if none found */
         const Item* find(Id_t id, size_t* pIndex) const;
 
         /** Get total cost.

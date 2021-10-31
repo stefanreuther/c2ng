@@ -188,7 +188,7 @@ struct game::vcr::classic::PVCRAlgorithm::RegularFormula {
 /** Damage formulas for Alternative Combat. */
 struct game::vcr::classic::PVCRAlgorithm::AlternativeFormula {
 #ifdef PVCR_INTEGER
-    /** Compute shield damage, alternative combat, integer version. Returns value sacled by mass+1. */
+    /** Compute shield damage, alternative combat, integer version. Returns value scaled by mass+1. */
     static inline int32_t computeShieldDamageS(int expl, int kill, const Status& st)
         {
             // ex ccvcr.pas:P_ShieldDamageS (part)

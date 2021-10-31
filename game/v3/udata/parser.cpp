@@ -583,7 +583,9 @@ game::v3::udata::Parser::handleRecord(uint16_t recordId, afl::base::ConstBytes_t
         }
         break;
 
-        // TODO: 27 (old FTP)
+     case 27:
+        // pconfig.src - handled in AttachmentUnpacker
+        break;
 
      case 28:
         // Ground attack
@@ -677,7 +679,9 @@ game::v3::udata::Parser::handleRecord(uint16_t recordId, afl::base::ConstBytes_t
         }
         break;
 
-        // FIXME: Util34FTP
+     case 34:
+        // File transfer - handled in AttachmentUnpacker
+        break;
 
      case 35:
         // Cloak failure. Can we do anything?

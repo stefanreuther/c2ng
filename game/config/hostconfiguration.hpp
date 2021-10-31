@@ -411,7 +411,7 @@ namespace game { namespace config {
         int getExperienceLevelFromPoints(int32_t points) const;
 
         /** Get experience bonus.
-            \param param descriptor of option to test
+            \param option descriptor of option to test
             \param level experience level (normally [0,MAX_EXPERIENCE_LEVELS], but out-of-range values are handled)
             \return Value */
         int32_t getExperienceBonus(const ExperienceOptionDescriptor_t& option, int level) const;

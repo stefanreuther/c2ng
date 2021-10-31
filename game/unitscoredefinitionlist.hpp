@@ -72,7 +72,7 @@ namespace game {
         Index_t getNumScores() const;
 
         /** Look up score by identifier.
-            \param id [in] score_type field of the definition to look up
+            \param id [in] id field of the definition to look up
             \param index [out] Index
             \return true if found, false if not found */
         bool lookup(int16_t id, Index_t& index) const;
