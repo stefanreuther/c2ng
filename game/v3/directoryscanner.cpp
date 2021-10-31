@@ -11,74 +11,63 @@
 #include "afl/string/format.hpp"
 #include "afl/string/translator.hpp"
 #include "game/hostversion.hpp"
+#include "game/parser/datainterface.hpp"
+#include "game/parser/messageinformation.hpp"
+#include "game/parser/messagevalue.hpp"
 #include "game/timestamp.hpp"
+#include "game/v3/inboxfile.hpp"
 #include "game/v3/resultfile.hpp"
 #include "game/v3/structures.hpp"
 #include "game/v3/turnfile.hpp"
-#include "game/v3/inboxfile.hpp"
-#include "game/parser/messagevalue.hpp"
-#include "game/parser/datainterface.hpp"
-#include "game/parser/messageinformation.hpp"
+#include "util/stringparser.hpp"
 
 namespace gt = game::v3::structures;
 
 namespace {
     const char LOG_NAME[] = "game.v3.scan";
 
-    bool parseNumber(const String_t& text, String_t::size_type& pos, int& val)
-    {
-        val = 0;
-        bool ok = false;
-        while (pos < text.size() && text[pos] >= '0' && text[pos] <= '9') {
-            val = 10*val + (text[pos] - '0');
-            ok = true;
-            ++pos;
-        }
-        return ok;
-    }
-
     int32_t parseHostVersion(const String_t& text, bool host)
     {
         // ex game/storage/overview.cc:parseHostVersion, readmsg.pas::ParseHostVersion
         // FIXME: use util::StringParser?
-        String_t::size_type pos = 0;
-        while (pos < text.size() && (text[pos] == ' ' || text[pos] == 'v')) {
-            ++pos;
-        }
+        util::StringParser p(text);
+        while (p.parseCharacter(' ') || p.parseCharacter('v'))
+            ;
 
         // Major number
         int val;
-        if (!parseNumber(text, pos, val)) {
+        if (!p.parseInt(val) || val < 0) {
             return 0;
         }
-        int32_t result = int32_t(100000) * val;
+        int major = val;
+        int minor = 0;
+        int patch = 0;
 
         // Minor number
-        if (pos < text.size() && text[pos] == '.') {
-            ++pos;
-            if (!parseNumber(text, pos, val)) {
+        if (p.parseCharacter('.')) {
+            if (!p.parseInt(val) || val < 0) {
                 return 0;
             }
             // THost: 3.0, 3.1, 3.14, 3.2, 3.21
             // PHost: 2.7, 2.8, 2.9, 2.10, ...
-            if (host && val < 10) {
-                val *= 10;
+            minor = val;
+            if (host && minor < 10) {
+                minor *= 10;
             }
-            result += 1000L * val;
         }
 
         // Patchlevel
-        if (pos < text.size()) {
-            if (text[pos] == '.') {
-                ++pos;
-                if (parseNumber(text, pos, val)) {
-                    result += val;
-                }
-            } else if (text[pos] >= 'a' && text[pos] <= 'z') {
-                result += (text[pos] - 'a' + 1);
+        if (p.parseCharacter('.')) {
+            if (p.parseInt(val) && val >= 0) {
+                patch = val;
+            }
+        } else {
+            char ch;
+            if (p.getCurrentCharacter(ch) && ch >= 'a' && ch <= 'z') {
+                patch = (ch - 'a' + 1);
             }
         }
-        return result;
+        return MKVERSION(major, minor, patch);
     }
 }
 
