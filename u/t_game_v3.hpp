@@ -189,6 +189,7 @@ class TestGameV3RegistrationKey : public CxxTest::TestSuite {
     void testInit();
     void testFileRoundtrip();
     void testBufferRoundtrip();
+    void testSetLine();
 };
 
 class TestGameV3ResultFile : public CxxTest::TestSuite {

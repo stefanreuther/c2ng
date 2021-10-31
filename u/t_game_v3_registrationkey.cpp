@@ -15,6 +15,8 @@
 #include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
 
+using game::v3::RegistrationKey;
+
 namespace {
     std::auto_ptr<afl::charset::Charset> makeCharset()
     {
@@ -26,14 +28,14 @@ namespace {
 void
 TestGameV3RegistrationKey::testInit()
 {
-    game::v3::RegistrationKey testee(makeCharset());
-    TS_ASSERT_EQUALS(testee.getStatus(), game::RegistrationKey::Unknown);
+    RegistrationKey testee(makeCharset());
+    TS_ASSERT_EQUALS(testee.getStatus(), RegistrationKey::Unknown);
     TS_ASSERT_EQUALS(testee.getMaxTechLevel(game::HullTech), 6);
     TS_ASSERT_EQUALS(testee.getKeyId(), "292f010cc69d850b82a83950fb6ba06959334007");
-    TS_ASSERT_DIFFERS(testee.getLine(game::RegistrationKey::Line1), "");
-    TS_ASSERT_DIFFERS(testee.getLine(game::RegistrationKey::Line2), "");
-    TS_ASSERT_DIFFERS(testee.getLine(game::RegistrationKey::Line3), "");
-    TS_ASSERT_DIFFERS(testee.getLine(game::RegistrationKey::Line4), "");
+    TS_ASSERT_DIFFERS(testee.getLine(RegistrationKey::Line1), "");
+    TS_ASSERT_DIFFERS(testee.getLine(RegistrationKey::Line2), "");
+    TS_ASSERT_DIFFERS(testee.getLine(RegistrationKey::Line3), "");
+    TS_ASSERT_DIFFERS(testee.getLine(RegistrationKey::Line4), "");
 }
 
 void
@@ -75,7 +77,7 @@ TestGameV3RegistrationKey::testFileRoundtrip()
     dir->addStream("fizz.bin", *new afl::io::ConstMemoryStream(FILE_CONTENT));
 
     // Test
-    game::v3::RegistrationKey testee(makeCharset());
+    RegistrationKey testee(makeCharset());
     afl::sys::Log log;
     afl::string::NullTranslator tx;
     testee.initFromDirectory(*dir, log, tx);
@@ -111,16 +113,31 @@ TestGameV3RegistrationKey::testBufferRoundtrip()
         0x20, 0x22, 0x00, 0x00, 0xc0, 0x23, 0x00, 0x00, 0x60, 0x25, 0x00, 0x00,
         0x00, 0x27, 0x00, 0x00, 0xa0, 0x28, 0x00, 0x00, 0xfb, 0xd5, 0x07, 0x00
     };
-    static_assert(sizeof(BUFFER_CONTENT) == game::v3::RegistrationKey::KEY_SIZE_BYTES, "KEY_SIZE_BYTES");
+    static_assert(sizeof(BUFFER_CONTENT) == RegistrationKey::KEY_SIZE_BYTES, "KEY_SIZE_BYTES");
 
     // Test
-    game::v3::RegistrationKey testee(makeCharset());
+    RegistrationKey testee(makeCharset());
     testee.unpackFromBytes(BUFFER_CONTENT);
 
-    uint8_t out[game::v3::RegistrationKey::KEY_SIZE_BYTES];
+    uint8_t out[RegistrationKey::KEY_SIZE_BYTES];
     testee.packIntoBytes(out);
 
     // Verify
     TS_ASSERT_SAME_DATA(out, BUFFER_CONTENT, sizeof(BUFFER_CONTENT));
+}
+
+void
+TestGameV3RegistrationKey::testSetLine()
+{
+    RegistrationKey testee(makeCharset());
+    TS_ASSERT_EQUALS(testee.getStatus(), RegistrationKey::Unknown);
+
+    TS_ASSERT(!testee.setLine(RegistrationKey::Line1, "n1"));
+    TS_ASSERT(!testee.setLine(RegistrationKey::Line2, "n2"));
+    TS_ASSERT( testee.setLine(RegistrationKey::Line3, "n3"));
+    TS_ASSERT( testee.setLine(RegistrationKey::Line4, "n4"));
+
+    TS_ASSERT_EQUALS(testee.getLine(RegistrationKey::Line3), "n3");
+    TS_ASSERT_EQUALS(testee.getLine(RegistrationKey::Line4), "n4");
 }
 

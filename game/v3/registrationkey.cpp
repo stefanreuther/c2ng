@@ -113,7 +113,7 @@ game::v3::RegistrationKey::setLine(Line which, String_t value)
         m_winplanString2 = value;
         return true;
     }
-    return true;
+    return false;
 }
 
 int
