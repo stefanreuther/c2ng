@@ -333,8 +333,8 @@ game::vcr::classic::PVCRAlgorithm::initBattle(const Object& left, const Object& 
             if (const game::spec::Beam* b = m_beams.get(st.r.obj.getBeamType())) {
                 st.f.beam_hit_odds = computeBeamHitOdds     (*b, st.r.obj);
                 st.f.beam_recharge = computeBeamRechargeRate(*b, st.r.obj);
-                st.f.beam_kill = b ? b->getKillPower() : 0;
-                st.f.beam_damage = b ? b->getDamagePower() : 0;
+                st.f.beam_kill = b->getKillPower();
+                st.f.beam_damage = b->getDamagePower();
             } else {
                 st.f.beam_hit_odds = 0;
                 st.f.beam_recharge = 1;
@@ -1044,9 +1044,11 @@ game::vcr::classic::PVCRAlgorithm::fighterRecharge(Status& st)
 {
     // ex VcrPlayerPHost::fighterRecharge, ccvcr.pas:P_RechargeBays
     register const int mx = st.r.obj.getNumBays();
-    for (int i = 0; i < mx; ++i)
-        if (st.r.m_bayStatus[i] < 1000)
+    for (int i = 0; i < mx; ++i) {
+        if (st.r.m_bayStatus[i] < 1000) {
             st.r.m_bayStatus[i] += randomRange(st.f.bay_recharge);
+        }
+    }
 }
 
 /** Launch Fighters. */

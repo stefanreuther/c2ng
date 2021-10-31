@@ -50,8 +50,6 @@ namespace {
             }
         virtual String_t expandRaceNames(String_t name) const
             { return name; }
-     private:
-        int m_player;
     };
 }
 

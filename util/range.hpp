@@ -136,7 +136,7 @@ namespace util {
         if (range.empty()) {
             return verbal ? tx("none") : "-";
         } else if (range.isUnit()) {
-            return afl::string::Format("%d", fmt.formatNumber(range.min()));
+            return fmt.formatNumber(range.min());
         } else {
             bool toMin = range.min() <= maxRange.min();
             bool toMax = range.max() >= maxRange.max();
@@ -252,7 +252,7 @@ util::Range<T>&
 util::Range<T>::intersect(const Range& other)
 {
     if (other.empty()) {
-        *this = other;
+        clear();
     } else {
         m_min = std::max(m_min, other.min());
         m_max = std::min(m_max, other.max());

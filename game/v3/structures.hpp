@@ -491,6 +491,7 @@ namespace game { namespace v3 { namespace structures {
     struct TurnPlayerSecret {
         UInt32_t    data[NUM_PLAYERS];                          ///< "Player secret" (templock/playerlog).
     };
+    static_assert(sizeof(TurnPlayerSecret) == 44, "sizeof TurnPlayerSecret");
 
     /** Turn file trailer, DOS version. */
     struct TurnDosTrailer {
@@ -827,6 +828,7 @@ namespace game { namespace v3 { namespace structures {
         Int16_t     baseId;                                     ///< Base Id.
         Int16_t     owner;                                      ///< Owner.
     };
+    static_assert(sizeof(Util11AlliedBase) == 4, "sizeof Util11AlliedBase");
 
     /** Record type 12: Allied planet. */
     struct Util12AlliedPlanet {
@@ -840,6 +842,7 @@ namespace game { namespace v3 { namespace structures {
         Int32_t     numColonists;                               ///< Colonist population (people, not clans!).
         Int32_t     supplies, money;                            ///< Funds.
     };
+    static_assert(sizeof(Util12AlliedPlanet) == 42, "sizeof Util12AlliedPlanet");
 
     /** Record type 13, minimal version (PHost 1.1).
         This is the minimum set of information we expect. */
@@ -1151,6 +1154,7 @@ namespace game { namespace v3 { namespace structures {
         Int16_t     id;                                         ///< Unit Id.
         Int16_t     value;                                      ///< Score value.
     };
+    static_assert(sizeof(Util49UnitScoreEntry) == 4, "sizeof Util49UnitScoreEntry");
 
     // 50 = 49
 

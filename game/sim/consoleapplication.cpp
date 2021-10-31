@@ -449,7 +449,6 @@ game::sim::ConsoleApplication::verifySetup(const Setup& setup, const Session& se
     afl::io::TextWriter& out = standardOutput();
 
     if (!setup.isMatchingShipList(*session.shipList)) {
-        afl::string::Translator& tx = translator();
         errorExit(tx("simulation does not match ship list"));
     } else {
         if (m_verbose) {

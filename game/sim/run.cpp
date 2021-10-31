@@ -686,7 +686,7 @@ namespace {
         const int limit = getFCodeAmmoLimit(sh.getFriendlyCode());
         if (sh.getNumBays() != 0) {
             // Cloaked Fighter Bays Peer
-            Ship* peer = const_cast<Ship*>(mods.cloakedBaysHelper.get(obj.getOwner()));
+            Ship*const peer = const_cast<Ship*>(mods.cloakedBaysHelper.get(obj.getOwner()));
 
             // Previous ammo
             int previous_ammo = sh.getAmmo();
@@ -698,7 +698,7 @@ namespace {
             const int unused_ammo = getUnusedAmmo(previous_ammo, limit);
 
             int fighter_loss = sh.getAmmo() - (obj.getNumFighters() + unused_ammo);
-            if (Ship* peer = const_cast<Ship*>(mods.cloakedBaysHelper.get(obj.getOwner()))) {
+            if (peer != 0) {
                 // We have a peer that also contributes fighters, so it also suffices loss.
                 // Above, fighter_loss has been computed as the loss of (ship, before) to (ship+peer, after),
                 // so we need to add (peer, before) first.

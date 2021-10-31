@@ -52,7 +52,7 @@ TestGameConfigGenericIntegerArrayOption::testIt()
     TS_ASSERT(!t.isAllTheSame());
 
     t.set(3, 7);
-    TS_ASSERT_EQUALS(t(0), 7)
+    TS_ASSERT_EQUALS(t(0), 7);
     TS_ASSERT_EQUALS(t(1), 1);
     TS_ASSERT_EQUALS(t(2), 9);
     TS_ASSERT_EQUALS(t(3), 7);

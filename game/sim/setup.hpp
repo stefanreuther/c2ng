@@ -240,7 +240,7 @@ namespace game { namespace sim {
         /** Modify flags globally for all units.
             \param clear   Flags to clear
             \param toggle  Flags to toggle */
-        void setFlags(int32_t clear, int toggle);
+        void setFlags(int32_t clear, int32_t toggle);
 
         /** Check whether this setup matches a ship list.
             \param shipList ship list

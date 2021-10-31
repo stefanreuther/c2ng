@@ -49,7 +49,7 @@ namespace game { namespace vcr { namespace flak { namespace structures {
         Int16_t    flags;                      ///< Additional flags.
         Int16_t    endingStatus;               ///< Ending status.
     };
-    static_assert(sizeof(Ship) >= 62, "sizeof Ship");
+    static_assert(sizeof(Ship) == 62, "sizeof Ship");
 
     /** FLAK Fleet Data. */
     struct Fleet {

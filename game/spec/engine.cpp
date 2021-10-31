@@ -37,7 +37,7 @@ game::spec::Engine::getMaxEfficientWarp() const
     if (m_maxEfficientWarp != 0) {
         return m_maxEfficientWarp;
     } else {
-        int warp = 9;
+        int warp = MAX_WARP;
         while (warp > 1 && m_fuelFactors[warp-1] > 120L * warp*warp) {
             --warp;
         }

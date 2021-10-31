@@ -35,21 +35,21 @@ TestGameConfigCollapsibleIntegerArrayOption::testIt()
 
     testee.set(1, 3);
     TS_ASSERT_EQUALS(testee.toString(), "3");
-    TS_ASSERT_EQUALS(testee(1), 3)
+    TS_ASSERT_EQUALS(testee(1), 3);
     TS_ASSERT_EQUALS(testee(2), 3);
     TS_ASSERT_EQUALS(testee(3), 3);
     TS_ASSERT_EQUALS(testee(4), 3);
 
     testee.set(9);
     TS_ASSERT_EQUALS(testee.toString(), "9");
-    TS_ASSERT_EQUALS(testee(1), 9)
+    TS_ASSERT_EQUALS(testee(1), 9);
     TS_ASSERT_EQUALS(testee(2), 9);
     TS_ASSERT_EQUALS(testee(3), 9);
     TS_ASSERT_EQUALS(testee(4), 9);
 
     testee.set("4");
     TS_ASSERT_EQUALS(testee.toString(), "4");
-    TS_ASSERT_EQUALS(testee(1), 4)
+    TS_ASSERT_EQUALS(testee(1), 4);
     TS_ASSERT_EQUALS(testee(2), 4);
     TS_ASSERT_EQUALS(testee(3), 4);
     TS_ASSERT_EQUALS(testee(4), 4);

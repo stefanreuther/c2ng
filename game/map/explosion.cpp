@@ -32,11 +32,11 @@ String_t
 game::map::Explosion::getName(ObjectName /*which*/, afl::string::Translator& tx, InterpreterInterface& /*iface*/) const
 {
     if (!m_shipName.empty()) {
-        return afl::string::Format(tx.translateString("Explosion of %s%!d%!0{ (#%1$d)%}").c_str(), m_shipName, m_shipId);
+        return afl::string::Format(tx("Explosion of %s%!d%!0{ (#%1$d)%}"), m_shipName, m_shipId);
     } else if (m_shipId != 0) {
-        return afl::string::Format(tx.translateString("Explosion of ship #%d").c_str(), m_shipId);
+        return afl::string::Format(tx("Explosion of ship #%d"), m_shipId);
     } else {
-        return "Explosion";
+        return tx("Explosion");
     }
 }
 

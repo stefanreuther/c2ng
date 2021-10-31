@@ -78,7 +78,7 @@ game::vcr::flak::Setup::Setup(const Setup& b)
     // ex FlakBattle::FlakBattle
     // Copy fleets
     for (FleetIndex_t i = 0; i < b.getNumFleets(); ++i) {
-        m_fleets.pushBackNew(new Fleet(b.getFleetByIndex(static_cast<int>(i))));
+        m_fleets.pushBackNew(new Fleet(b.getFleetByIndex(i)));
     }
 
     // Copy ships

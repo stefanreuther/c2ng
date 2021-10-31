@@ -212,20 +212,6 @@ game::sim::Setup::getObject(Slot_t slot) const
     return const_cast<Setup*>(this)->getObject(slot);
 }
 
-// Find slot, given an object.
-bool
-game::sim::Setup::findIndex(const Object* obj, Slot_t& result) const
-{
-    if (obj != 0 && obj == m_planet.get()) {
-        result = m_ships.size();
-        return true;
-    } else if (const Ship* ship = dynamic_cast<const Ship*>(obj)) {
-        return findIndex(ship, result);
-    } else {
-        return false;
-    }
-}
-
 // Get object, given a slot number.
 game::sim::Object*
 game::sim::Setup::getObject(Slot_t slot)
@@ -237,6 +223,20 @@ game::sim::Setup::getObject(Slot_t slot)
         return m_planet.get();
     } else {
         return 0;
+    }
+}
+
+// Find slot, given an object.
+bool
+game::sim::Setup::findIndex(const Object* obj, Slot_t& result) const
+{
+    if (obj != 0 && obj == m_planet.get()) {
+        result = m_ships.size();
+        return true;
+    } else if (const Ship* ship = dynamic_cast<const Ship*>(obj)) {
+        return findIndex(ship, result);
+    } else {
+        return false;
     }
 }
 
@@ -491,7 +491,7 @@ game::sim::Setup::setSequentialFriendlyCode(Slot_t slot)
 }
 
 void
-game::sim::Setup::setFlags(int32_t clear, int toggle)
+game::sim::Setup::setFlags(int32_t clear, int32_t toggle)
 {
     for (size_t i = 0, n = getNumObjects(); i < n; ++i) {
         if (Object* p = getObject(i)) {

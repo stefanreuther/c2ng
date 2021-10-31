@@ -342,7 +342,7 @@ TestGameVcrObject::testGuessEngine()
         obj.setMass(230);
         obj.setIsPlanet(false);
         obj.setOwner(3);
-        TS_ASSERT_EQUALS(obj.getGuessedEngine(engines, 0, false, config), 0);
+        TS_ASSERT_EQUALS(obj.getGuessedEngine(engines, &hull, false, config), 0);
     }
 
     // Failure case: no 360k bonus because no fighters

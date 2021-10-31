@@ -108,7 +108,6 @@ namespace game {
      private:
         afl::container::PtrVector<Player> m_players;
 
-        void init();
         Player* findNextPlayer(int nr) const;
     };
 

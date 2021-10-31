@@ -690,9 +690,6 @@ TestGameMapConfiguration::testSaveToConfigUser()
     testee.setConfiguration(testee.Flat, Point(2000, 2000), Point(2000, 2000));
     testee.saveToConfiguration(pref);
 
-    afl::base::Ref<UserConfiguration::Enumerator_t> e(pref.getOptions());
-    UserConfiguration::OptionInfo_t info;
-
     ConfigurationOption* opt = pref.getOptionByName("Chart.Geo.Mode");
     TS_ASSERT(opt);
     TS_ASSERT_EQUALS(opt->getSource(), ConfigurationOption::Game);
