@@ -1070,15 +1070,15 @@ client::si::IFCCChangeWaypoint(game::Session& session, ScriptSide& si, RequestLi
             in.shipId = sh->getId();
             in.hyperjumping = sh->isHyperdriving(g.shipScores(), shipList, root.hostConfiguration());
             in.speed = util::squareInteger(sh->getWarpFactor().orElse(0));
-            if (sh->hasSpecialFunction(game::spec::HullFunction::Gravitonic, g.shipScores(), shipList, root.hostConfiguration())) {
+            if (sh->hasSpecialFunction(game::spec::BasicHullFunction::Gravitonic, g.shipScores(), shipList, root.hostConfiguration())) {
                 in.speed *= 2;
             }
 
             in.acceptLocation = true;
             in.acceptShip = false;
-            in.acceptChunnel = sh->hasSpecialFunction(game::spec::HullFunction::FirecloudChunnel, g.shipScores(), shipList, root.hostConfiguration())
-                || sh->hasSpecialFunction(game::spec::HullFunction::ChunnelSelf, g.shipScores(), shipList, root.hostConfiguration())
-                || sh->hasSpecialFunction(game::spec::HullFunction::ChunnelOthers, g.shipScores(), shipList, root.hostConfiguration());
+            in.acceptChunnel = sh->hasSpecialFunction(game::spec::BasicHullFunction::FirecloudChunnel, g.shipScores(), shipList, root.hostConfiguration())
+                || sh->hasSpecialFunction(game::spec::BasicHullFunction::ChunnelSelf, g.shipScores(), shipList, root.hostConfiguration())
+                || sh->hasSpecialFunction(game::spec::BasicHullFunction::ChunnelOthers, g.shipScores(), shipList, root.hostConfiguration());
 
             game::map::ChunnelMission chm;
             game::map::Universe& univ = g.currentTurn().universe(); // FIXME: is this the same where the ship is from?

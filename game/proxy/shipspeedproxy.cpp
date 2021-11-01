@@ -73,7 +73,7 @@ class game::proxy::ShipSpeedProxy::Trampoline {
 
                     // Hyperdrive capable?
                     Fleet f(m_pTurn->universe(), *m_pShip);
-                    if (f.hasSpecialFunction(game::spec::HullFunction::Hyperdrive, pGame->shipScores(), *pShipList, pRoot->hostConfiguration())) {
+                    if (f.hasSpecialFunction(game::spec::BasicHullFunction::Hyperdrive, pGame->shipScores(), *pShipList, pRoot->hostConfiguration())) {
                         // OK, fleet can hyperjump. Limit is 10.
                         m_status.maxSpeed = HYPER_WARP;
                         if (m_pShip->isHyperdriving(pGame->shipScores(), *pShipList, pRoot->hostConfiguration())) {

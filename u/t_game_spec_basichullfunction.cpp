@@ -79,7 +79,7 @@ TestGameSpecBasicHullFunction::testExplain()
 void
 TestGameSpecBasicHullFunction::testGetDamageLimit()
 {
-    using game::spec::HullFunction;
+    using game::spec::BasicHullFunction;
     using game::config::HostConfiguration;
 
     HostConfiguration defaultConfig;
@@ -92,49 +92,49 @@ TestGameSpecBasicHullFunction::testGetDamageLimit()
 
     // Cloak (default config: 1)
     {
-        game::spec::BasicHullFunction testee(HullFunction::Cloak, "Fun");
+        BasicHullFunction testee(BasicHullFunction::Cloak, "Fun");
         TS_ASSERT_EQUALS(testee.getDamageLimit(1, defaultConfig).orElse(-1), 1);
         TS_ASSERT_EQUALS(testee.getDamageLimit(1, otherConfig).orElse(-1), 27);
     }
 
     // Anti-cloak (default config: 20)
     {
-        game::spec::BasicHullFunction testee(HullFunction::LokiAnticloak, "Fun");
+        BasicHullFunction testee(BasicHullFunction::LokiAnticloak, "Fun");
         TS_ASSERT_EQUALS(testee.getDamageLimit(1, defaultConfig).orElse(-1), 20);
         TS_ASSERT_EQUALS(testee.getDamageLimit(1, otherConfig).orElse(-1), 12);
     }
 
     // Hyperdrive (default config: 100)
     {
-        game::spec::BasicHullFunction testee(HullFunction::Hyperdrive, "Fun");
+        BasicHullFunction testee(BasicHullFunction::Hyperdrive, "Fun");
         TS_ASSERT_EQUALS(testee.getDamageLimit(1, defaultConfig).orElse(-1), 100);
         TS_ASSERT_EQUALS(testee.getDamageLimit(1, otherConfig).orElse(-1), 64);
     }
 
     // Heat (default config: 100)
     {
-        game::spec::BasicHullFunction testee(HullFunction::HeatsTo50, "Fun");
+        BasicHullFunction testee(BasicHullFunction::HeatsTo50, "Fun");
         TS_ASSERT_EQUALS(testee.getDamageLimit(1, defaultConfig).orElse(-1), 100);
         TS_ASSERT_EQUALS(testee.getDamageLimit(1, otherConfig).orElse(-1), 8);
     }
 
     // Chunnel (default config: 100)
     {
-        game::spec::BasicHullFunction testee(HullFunction::ChunnelSelf, "Fun");
+        BasicHullFunction testee(BasicHullFunction::ChunnelSelf, "Fun");
         TS_ASSERT_EQUALS(testee.getDamageLimit(1, defaultConfig).orElse(-1), 100);
         TS_ASSERT_EQUALS(testee.getDamageLimit(1, otherConfig).orElse(-1), 3);
     }
 
     // Imperial Assault (always 1)
     {
-        game::spec::BasicHullFunction testee(HullFunction::ImperialAssault, "Fun");
+        BasicHullFunction testee(BasicHullFunction::ImperialAssault, "Fun");
         TS_ASSERT_EQUALS(testee.getDamageLimit(1, defaultConfig).orElse(-1), 1);
         TS_ASSERT_EQUALS(testee.getDamageLimit(1, otherConfig).orElse(-1), 1);
     }
 
     // Boarding (always unfailable)
     {
-        game::spec::BasicHullFunction testee(HullFunction::Boarding, "Fun");
+        BasicHullFunction testee(BasicHullFunction::Boarding, "Fun");
         TS_ASSERT(!testee.getDamageLimit(1, defaultConfig).isValid());
         TS_ASSERT(!testee.getDamageLimit(1, otherConfig).isValid());
     }

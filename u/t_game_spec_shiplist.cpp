@@ -8,6 +8,7 @@
 #include "t_game_spec.hpp"
 
 using game::spec::ModifiedHullFunctionList;
+using game::spec::BasicHullFunction;
 using game::spec::HullFunction;
 
 /** Basic accessor test. */
@@ -79,7 +80,7 @@ TestGameSpecShipList::testRacialAbilities()
 
     // PlanetImmunity must now be registered as racial abilities for 4+10
     const game::spec::HullFunctionAssignmentList::Entry* p =
-        testee.racialAbilities().findEntry(ModifiedHullFunctionList::Function_t(HullFunction::PlanetImmunity));
+        testee.racialAbilities().findEntry(ModifiedHullFunctionList::Function_t(BasicHullFunction::PlanetImmunity));
 
     TS_ASSERT(p != 0);
     TS_ASSERT_EQUALS(p->m_addedPlayers, game::PlayerSet_t() + 4 + 10);
@@ -95,7 +96,7 @@ TestGameSpecShipList::testRacialAbilitiesSSD()
 
     // Create some hulls, one of which has PlanetImmunity
     testee.hulls().create(1);
-    testee.hulls().create(2)->changeHullFunction(ModifiedHullFunctionList::Function_t(HullFunction::PlanetImmunity), game::PlayerSet_t::allUpTo(game::MAX_PLAYERS), game::PlayerSet_t(), true);
+    testee.hulls().create(2)->changeHullFunction(ModifiedHullFunctionList::Function_t(BasicHullFunction::PlanetImmunity), game::PlayerSet_t::allUpTo(game::MAX_PLAYERS), game::PlayerSet_t(), true);
     testee.hulls().create(3);
 
     // Create host configuration
@@ -109,7 +110,7 @@ TestGameSpecShipList::testRacialAbilitiesSSD()
 
     // PlanetImmunity must now be registered as racial abilities for 4+10
     const game::spec::HullFunctionAssignmentList::Entry* p =
-        testee.racialAbilities().findEntry(ModifiedHullFunctionList::Function_t(HullFunction::PlanetImmunity));
+        testee.racialAbilities().findEntry(ModifiedHullFunctionList::Function_t(BasicHullFunction::PlanetImmunity));
 
     TS_ASSERT(p != 0);
     TS_ASSERT_EQUALS(p->m_addedPlayers, game::PlayerSet_t() + 4 + 10);
@@ -139,7 +140,7 @@ TestGameSpecShipList::testRacialAbilitiesSparse()
 
     // PlanetImmunity must now be registered as racial abilities for 4+10
     const game::spec::HullFunctionAssignmentList::Entry* p =
-        testee.racialAbilities().findEntry(ModifiedHullFunctionList::Function_t(HullFunction::PlanetImmunity));
+        testee.racialAbilities().findEntry(ModifiedHullFunctionList::Function_t(BasicHullFunction::PlanetImmunity));
 
     TS_ASSERT(p != 0);
     TS_ASSERT_EQUALS(p->m_addedPlayers, game::PlayerSet_t() + 4 + 10);
@@ -155,7 +156,7 @@ TestGameSpecShipList::testRacialAbilitiesOne()
     game::spec::ShipList testee;
 
     // Create one hull that can cloak
-    testee.hulls().create(1)->changeHullFunction(ModifiedHullFunctionList::Function_t(HullFunction::Cloak), game::PlayerSet_t(9), game::PlayerSet_t(), true);
+    testee.hulls().create(1)->changeHullFunction(ModifiedHullFunctionList::Function_t(BasicHullFunction::Cloak), game::PlayerSet_t(9), game::PlayerSet_t(), true);
 
     // Create host configuration
     game::config::HostConfiguration config;
@@ -168,14 +169,14 @@ TestGameSpecShipList::testRacialAbilitiesOne()
 
     // PlanetImmunity must now be registered as racial abilities for 4+10
     const game::spec::HullFunctionAssignmentList::Entry* p =
-        testee.racialAbilities().findEntry(ModifiedHullFunctionList::Function_t(HullFunction::PlanetImmunity));
+        testee.racialAbilities().findEntry(ModifiedHullFunctionList::Function_t(BasicHullFunction::PlanetImmunity));
 
     TS_ASSERT(p != 0);
     TS_ASSERT_EQUALS(p->m_addedPlayers, game::PlayerSet_t() + 4 + 10);
     TS_ASSERT_EQUALS(p->m_removedPlayers, game::PlayerSet_t());
 
     // Likewise, Cloak must be a racial ability
-    p = testee.racialAbilities().findEntry(ModifiedHullFunctionList::Function_t(HullFunction::Cloak));
+    p = testee.racialAbilities().findEntry(ModifiedHullFunctionList::Function_t(BasicHullFunction::Cloak));
     TS_ASSERT(p != 0);
     TS_ASSERT_EQUALS(p->m_addedPlayers, game::PlayerSet_t(9));
     TS_ASSERT_EQUALS(p->m_removedPlayers, game::PlayerSet_t());
@@ -200,7 +201,7 @@ TestGameSpecShipList::testRacialAbilitiesEmpty()
 
     // No racial abilities
     const game::spec::HullFunctionAssignmentList::Entry* p =
-        testee.racialAbilities().findEntry(ModifiedHullFunctionList::Function_t(HullFunction::PlanetImmunity));
+        testee.racialAbilities().findEntry(ModifiedHullFunctionList::Function_t(BasicHullFunction::PlanetImmunity));
 
     TS_ASSERT(p != 0);
     TS_ASSERT(p->m_addedPlayers.empty());
@@ -215,7 +216,7 @@ TestGameSpecShipList::testRacialAbilitiesFail()
     game::spec::ShipList testee;
 
     // Create one hull that can cloak WHEN ASSIGNED TO THE SHIP
-    testee.hulls().create(1)->changeHullFunction(ModifiedHullFunctionList::Function_t(HullFunction::Cloak), game::PlayerSet_t(9), game::PlayerSet_t(), false);
+    testee.hulls().create(1)->changeHullFunction(ModifiedHullFunctionList::Function_t(BasicHullFunction::Cloak), game::PlayerSet_t(9), game::PlayerSet_t(), false);
 
     // Do it
     game::config::HostConfiguration hostConfig;
@@ -223,7 +224,7 @@ TestGameSpecShipList::testRacialAbilitiesFail()
 
     // Must not find Cloak.
     const game::spec::HullFunctionAssignmentList::Entry* p =
-        testee.racialAbilities().findEntry(ModifiedHullFunctionList::Function_t(HullFunction::Cloak));
+        testee.racialAbilities().findEntry(ModifiedHullFunctionList::Function_t(BasicHullFunction::Cloak));
     TS_ASSERT(p == 0);
 }
 
@@ -238,15 +239,15 @@ TestGameSpecShipList::testGetHullFunctions()
     const game::ExperienceLevelSet_t allLevels = game::ExperienceLevelSet_t::allUpTo(game::MAX_EXPERIENCE_LEVELS);
 
     // Create a modified hull function.
-    int modCloak = testee.modifiedHullFunctions().getFunctionIdFromDefinition(HullFunction(HullFunction::Cloak, game::ExperienceLevelSet_t(3)));
+    int modCloak = testee.modifiedHullFunctions().getFunctionIdFromDefinition(game::spec::HullFunction(BasicHullFunction::Cloak, game::ExperienceLevelSet_t(3)));
 
     // Create some hulls.
-    testee.hulls().create(1)->changeHullFunction(ModifiedHullFunctionList::Function_t(HullFunction::Cloak), allPlayers, noPlayers, true);
+    testee.hulls().create(1)->changeHullFunction(ModifiedHullFunctionList::Function_t(BasicHullFunction::Cloak), allPlayers, noPlayers, true);
     testee.hulls().create(2)->changeHullFunction(modCloak,                                                  allPlayers, noPlayers, true);
-    testee.hulls().create(3)->changeHullFunction(ModifiedHullFunctionList::Function_t(HullFunction::Cloak), allPlayers, noPlayers, false);
+    testee.hulls().create(3)->changeHullFunction(ModifiedHullFunctionList::Function_t(BasicHullFunction::Cloak), allPlayers, noPlayers, false);
 
     // Create a racial ability. Do NOT call findRacialAbilities().
-    testee.racialAbilities().change(ModifiedHullFunctionList::Function_t(HullFunction::Bioscan), game::PlayerSet_t(2), noPlayers);
+    testee.racialAbilities().change(ModifiedHullFunctionList::Function_t(BasicHullFunction::Bioscan), game::PlayerSet_t(2), noPlayers);
 
     // Create a configuration
     game::config::HostConfiguration config;
@@ -259,34 +260,34 @@ TestGameSpecShipList::testGetHullFunctions()
 
     // Check getPlayersThatCan().
     // - Cloak: available to 1 (general ability) and 2 (because the modified level is a subset of allLevels)
-    TS_ASSERT_EQUALS(testee.getPlayersThatCan(HullFunction::Cloak, 1, config, allLevels), allPlayers);
-    TS_ASSERT_EQUALS(testee.getPlayersThatCan(HullFunction::Cloak, 2, config, allLevels), allPlayers);
-    TS_ASSERT_EQUALS(testee.getPlayersThatCan(HullFunction::Cloak, 3, config, allLevels), noPlayers);
-    TS_ASSERT_EQUALS(testee.getPlayersThatCan(HullFunction::Cloak, 4, config, allLevels), noPlayers);
+    TS_ASSERT_EQUALS(testee.getPlayersThatCan(BasicHullFunction::Cloak, 1, config, allLevels), allPlayers);
+    TS_ASSERT_EQUALS(testee.getPlayersThatCan(BasicHullFunction::Cloak, 2, config, allLevels), allPlayers);
+    TS_ASSERT_EQUALS(testee.getPlayersThatCan(BasicHullFunction::Cloak, 3, config, allLevels), noPlayers);
+    TS_ASSERT_EQUALS(testee.getPlayersThatCan(BasicHullFunction::Cloak, 4, config, allLevels), noPlayers);
 
     // - Cloak, level 1: only available to 1 (general ability), not to 2 (mismatching level)
-    TS_ASSERT_EQUALS(testee.getPlayersThatCan(HullFunction::Cloak, 1, config, game::ExperienceLevelSet_t(2)), allPlayers);
-    TS_ASSERT_EQUALS(testee.getPlayersThatCan(HullFunction::Cloak, 2, config, game::ExperienceLevelSet_t(2)), noPlayers);
-    TS_ASSERT_EQUALS(testee.getPlayersThatCan(HullFunction::Cloak, 3, config, game::ExperienceLevelSet_t(2)), noPlayers);
-    TS_ASSERT_EQUALS(testee.getPlayersThatCan(HullFunction::Cloak, 4, config, game::ExperienceLevelSet_t(2)), noPlayers);
+    TS_ASSERT_EQUALS(testee.getPlayersThatCan(BasicHullFunction::Cloak, 1, config, game::ExperienceLevelSet_t(2)), allPlayers);
+    TS_ASSERT_EQUALS(testee.getPlayersThatCan(BasicHullFunction::Cloak, 2, config, game::ExperienceLevelSet_t(2)), noPlayers);
+    TS_ASSERT_EQUALS(testee.getPlayersThatCan(BasicHullFunction::Cloak, 3, config, game::ExperienceLevelSet_t(2)), noPlayers);
+    TS_ASSERT_EQUALS(testee.getPlayersThatCan(BasicHullFunction::Cloak, 4, config, game::ExperienceLevelSet_t(2)), noPlayers);
 
     // - Cloak, level 1: available to 1 (general ability), and 2 (matching level)
-    TS_ASSERT_EQUALS(testee.getPlayersThatCan(HullFunction::Cloak, 1, config, game::ExperienceLevelSet_t(3)), allPlayers);
-    TS_ASSERT_EQUALS(testee.getPlayersThatCan(HullFunction::Cloak, 2, config, game::ExperienceLevelSet_t(3)), allPlayers);
-    TS_ASSERT_EQUALS(testee.getPlayersThatCan(HullFunction::Cloak, 3, config, game::ExperienceLevelSet_t(3)), noPlayers);
-    TS_ASSERT_EQUALS(testee.getPlayersThatCan(HullFunction::Cloak, 4, config, game::ExperienceLevelSet_t(3)), noPlayers);
+    TS_ASSERT_EQUALS(testee.getPlayersThatCan(BasicHullFunction::Cloak, 1, config, game::ExperienceLevelSet_t(3)), allPlayers);
+    TS_ASSERT_EQUALS(testee.getPlayersThatCan(BasicHullFunction::Cloak, 2, config, game::ExperienceLevelSet_t(3)), allPlayers);
+    TS_ASSERT_EQUALS(testee.getPlayersThatCan(BasicHullFunction::Cloak, 3, config, game::ExperienceLevelSet_t(3)), noPlayers);
+    TS_ASSERT_EQUALS(testee.getPlayersThatCan(BasicHullFunction::Cloak, 4, config, game::ExperienceLevelSet_t(3)), noPlayers);
 
     // - Bioscan: available to all existing hulls for player 2 (racial ability)
-    TS_ASSERT_EQUALS(testee.getPlayersThatCan(HullFunction::Bioscan, 1, config, allLevels), game::PlayerSet_t(2));
-    TS_ASSERT_EQUALS(testee.getPlayersThatCan(HullFunction::Bioscan, 2, config, allLevels), game::PlayerSet_t(2));
-    TS_ASSERT_EQUALS(testee.getPlayersThatCan(HullFunction::Bioscan, 3, config, allLevels), game::PlayerSet_t(2));
-    TS_ASSERT_EQUALS(testee.getPlayersThatCan(HullFunction::Bioscan, 4, config, allLevels), noPlayers);
+    TS_ASSERT_EQUALS(testee.getPlayersThatCan(BasicHullFunction::Bioscan, 1, config, allLevels), game::PlayerSet_t(2));
+    TS_ASSERT_EQUALS(testee.getPlayersThatCan(BasicHullFunction::Bioscan, 2, config, allLevels), game::PlayerSet_t(2));
+    TS_ASSERT_EQUALS(testee.getPlayersThatCan(BasicHullFunction::Bioscan, 3, config, allLevels), game::PlayerSet_t(2));
+    TS_ASSERT_EQUALS(testee.getPlayersThatCan(BasicHullFunction::Bioscan, 4, config, allLevels), noPlayers);
 
     // - PlanetImmunity: available to all existing hulls for player 4+10 (implied)
-    TS_ASSERT_EQUALS(testee.getPlayersThatCan(HullFunction::PlanetImmunity, 1, config, allLevels), game::PlayerSet_t() + 4 + 10);
-    TS_ASSERT_EQUALS(testee.getPlayersThatCan(HullFunction::PlanetImmunity, 2, config, allLevels), game::PlayerSet_t() + 4 + 10);
-    TS_ASSERT_EQUALS(testee.getPlayersThatCan(HullFunction::PlanetImmunity, 3, config, allLevels), game::PlayerSet_t() + 4 + 10);
-    TS_ASSERT_EQUALS(testee.getPlayersThatCan(HullFunction::PlanetImmunity, 4, config, allLevels), noPlayers);
+    TS_ASSERT_EQUALS(testee.getPlayersThatCan(BasicHullFunction::PlanetImmunity, 1, config, allLevels), game::PlayerSet_t() + 4 + 10);
+    TS_ASSERT_EQUALS(testee.getPlayersThatCan(BasicHullFunction::PlanetImmunity, 2, config, allLevels), game::PlayerSet_t() + 4 + 10);
+    TS_ASSERT_EQUALS(testee.getPlayersThatCan(BasicHullFunction::PlanetImmunity, 3, config, allLevels), game::PlayerSet_t() + 4 + 10);
+    TS_ASSERT_EQUALS(testee.getPlayersThatCan(BasicHullFunction::PlanetImmunity, 4, config, allLevels), noPlayers);
 
     // Check enumerateHullFunctions
     // - Hull 1
@@ -297,15 +298,15 @@ TestGameSpecShipList::testGetHullFunctions()
 
         // Result should be: Cloak [H], PlanetImmunity [H], Bioscan [R]
         TS_ASSERT_EQUALS(list.size(), 3U);
-        TS_ASSERT_EQUALS(list[0].getBasicFunctionId(), HullFunction::Cloak);
+        TS_ASSERT_EQUALS(list[0].getBasicFunctionId(), BasicHullFunction::Cloak);
         TS_ASSERT_EQUALS(list[0].getPlayers(), allPlayers);
         TS_ASSERT_EQUALS(list[0].getKind(), HullFunction::AssignedToHull);
 
-        TS_ASSERT_EQUALS(list[1].getBasicFunctionId(), HullFunction::PlanetImmunity);
+        TS_ASSERT_EQUALS(list[1].getBasicFunctionId(), BasicHullFunction::PlanetImmunity);
         TS_ASSERT_EQUALS(list[1].getPlayers(), game::PlayerSet_t() + 4 + 10);
         TS_ASSERT_EQUALS(list[1].getKind(), HullFunction::AssignedToHull);
 
-        TS_ASSERT_EQUALS(list[2].getBasicFunctionId(), HullFunction::Bioscan);
+        TS_ASSERT_EQUALS(list[2].getBasicFunctionId(), BasicHullFunction::Bioscan);
         TS_ASSERT_EQUALS(list[2].getPlayers(), game::PlayerSet_t(2));
         TS_ASSERT_EQUALS(list[2].getKind(), HullFunction::AssignedToRace);
     }
@@ -317,17 +318,17 @@ TestGameSpecShipList::testGetHullFunctions()
 
         // Result should be: PlanetImmunity [H], Cloak [H], Bioscan [R]
         TS_ASSERT_EQUALS(list.size(), 3U);
-        TS_ASSERT_EQUALS(list[0].getBasicFunctionId(), HullFunction::PlanetImmunity);
+        TS_ASSERT_EQUALS(list[0].getBasicFunctionId(), BasicHullFunction::PlanetImmunity);
         TS_ASSERT_EQUALS(list[0].getPlayers(), game::PlayerSet_t() + 4 + 10);
         TS_ASSERT_EQUALS(list[0].getKind(), HullFunction::AssignedToHull);
         TS_ASSERT_EQUALS(list[0].getLevels(), allLevels);
 
-        TS_ASSERT_EQUALS(list[1].getBasicFunctionId(), HullFunction::Cloak);
+        TS_ASSERT_EQUALS(list[1].getBasicFunctionId(), BasicHullFunction::Cloak);
         TS_ASSERT_EQUALS(list[1].getPlayers(), allPlayers);
         TS_ASSERT_EQUALS(list[1].getKind(), HullFunction::AssignedToHull);
         TS_ASSERT_EQUALS(list[1].getLevels(), game::ExperienceLevelSet_t(3));
 
-        TS_ASSERT_EQUALS(list[2].getBasicFunctionId(), HullFunction::Bioscan);
+        TS_ASSERT_EQUALS(list[2].getBasicFunctionId(), BasicHullFunction::Bioscan);
         TS_ASSERT_EQUALS(list[2].getPlayers(), game::PlayerSet_t(2));
         TS_ASSERT_EQUALS(list[2].getKind(), HullFunction::AssignedToRace);
     }
@@ -339,17 +340,17 @@ TestGameSpecShipList::testGetHullFunctions()
 
         // Result should be: PlanetImmunity [H], Cloak [S], Bioscan [R]
         TS_ASSERT_EQUALS(list.size(), 3U);
-        TS_ASSERT_EQUALS(list[0].getBasicFunctionId(), HullFunction::Cloak);
+        TS_ASSERT_EQUALS(list[0].getBasicFunctionId(), BasicHullFunction::Cloak);
         TS_ASSERT_EQUALS(list[0].getPlayers(), allPlayers);
         TS_ASSERT_EQUALS(list[0].getKind(), HullFunction::AssignedToShip);
         TS_ASSERT_EQUALS(list[0].getLevels(), allLevels);
 
-        TS_ASSERT_EQUALS(list[1].getBasicFunctionId(), HullFunction::PlanetImmunity);
+        TS_ASSERT_EQUALS(list[1].getBasicFunctionId(), BasicHullFunction::PlanetImmunity);
         TS_ASSERT_EQUALS(list[1].getPlayers(), game::PlayerSet_t() + 4 + 10);
         TS_ASSERT_EQUALS(list[1].getKind(), HullFunction::AssignedToHull);
         TS_ASSERT_EQUALS(list[1].getLevels(), allLevels);
 
-        TS_ASSERT_EQUALS(list[2].getBasicFunctionId(), HullFunction::Bioscan);
+        TS_ASSERT_EQUALS(list[2].getBasicFunctionId(), BasicHullFunction::Bioscan);
         TS_ASSERT_EQUALS(list[2].getPlayers(), game::PlayerSet_t(2));
         TS_ASSERT_EQUALS(list[2].getKind(), HullFunction::AssignedToRace);
     }
@@ -370,7 +371,7 @@ TestGameSpecShipList::testGetHullFunctions()
 
         // Only Bioscan, everything else filtered
         TS_ASSERT_EQUALS(list.size(), 1U);
-        TS_ASSERT_EQUALS(list[0].getBasicFunctionId(), HullFunction::Bioscan);
+        TS_ASSERT_EQUALS(list[0].getBasicFunctionId(), BasicHullFunction::Bioscan);
         TS_ASSERT_EQUALS(list[0].getPlayers(), game::PlayerSet_t(2));
         TS_ASSERT_EQUALS(list[0].getKind(), HullFunction::AssignedToRace);
     }

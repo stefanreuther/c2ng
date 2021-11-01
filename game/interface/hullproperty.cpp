@@ -18,16 +18,16 @@ namespace {
         int basicFunction : 8;
     };
     const FunctionMap functions[] = {
-        {'C', game::spec::HullFunction::Cloak},
-        {'C', game::spec::HullFunction::AdvancedCloak},
-        {'C', game::spec::HullFunction::HardenedCloak},
-        {'H', game::spec::HullFunction::Hyperdrive},
-        {'G', game::spec::HullFunction::Gravitonic},
-        {'B', game::spec::HullFunction::Bioscan},
-        {'B', game::spec::HullFunction::FullBioscan},
-        {'A', game::spec::HullFunction::MerlinAlchemy},
-        {'A', game::spec::HullFunction::AriesRefinery},
-        {'A', game::spec::HullFunction::NeutronicRefinery},
+        {'C', game::spec::BasicHullFunction::Cloak},
+        {'C', game::spec::BasicHullFunction::AdvancedCloak},
+        {'C', game::spec::BasicHullFunction::HardenedCloak},
+        {'H', game::spec::BasicHullFunction::Hyperdrive},
+        {'G', game::spec::BasicHullFunction::Gravitonic},
+        {'B', game::spec::BasicHullFunction::Bioscan},
+        {'B', game::spec::BasicHullFunction::FullBioscan},
+        {'A', game::spec::BasicHullFunction::MerlinAlchemy},
+        {'A', game::spec::BasicHullFunction::AriesRefinery},
+        {'A', game::spec::BasicHullFunction::NeutronicRefinery},
         {'\0', 0} // dummy element to simplify loop
     };
 

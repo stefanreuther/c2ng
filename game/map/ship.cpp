@@ -755,7 +755,7 @@ game::map::Ship::isHyperdriving(const UnitScoreDefinitionList& scoreDefinitions,
     int warp;
     String_t fc;
     return getShipKind() == CurrentShip
-        && hasSpecialFunction(game::spec::HullFunction::Hyperdrive, scoreDefinitions, shipList, config)
+        && hasSpecialFunction(game::spec::BasicHullFunction::Hyperdrive, scoreDefinitions, shipList, config)
         && getWarpFactor().get(warp)
         && warp > 0
         && getFriendlyCode().get(fc)

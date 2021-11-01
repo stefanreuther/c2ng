@@ -13,13 +13,13 @@
 #include "game/sim/configuration.hpp"
 #include "game/sim/planet.hpp"
 #include "game/sim/ship.hpp"
+#include "game/spec/basichullfunction.hpp"
 #include "game/spec/hull.hpp"
-#include "game/spec/hullfunction.hpp"
 #include "game/spec/mission.hpp"
 #include "game/vcr/objectinfo.hpp"
 
 using game::Element;
-using game::spec::HullFunction;
+using game::spec::BasicHullFunction;
 using game::spec::Mission;
 
 const char*const NULL_FCODE = "?""?""?";
@@ -151,7 +151,7 @@ game::sim::Transfer::copyShipFromGame(Ship& out, const game::map::Ship& in) cons
     }
 
     // Intercept
-    const bool cloakable = in.hasSpecialFunction(HullFunction::Cloak, m_shipScores, m_shipList, m_config);
+    const bool cloakable = in.hasSpecialFunction(BasicHullFunction::Cloak, m_shipScores, m_shipList, m_config);
     if (mission == Mission::msn_Intercept && cloakable) {
         out.setInterceptId(in.getMissionParameter(InterceptParameter).orElse(0));
     } else {
@@ -163,9 +163,9 @@ game::sim::Transfer::copyShipFromGame(Ship& out, const game::map::Ship& in) cons
     if (fuel > 0 && cloakable && m_shipList.missions().isMissionCloaking(mission, out.getOwner(), m_config, m_hostVersion)) {
         flags |= Ship::fl_Cloaked;
     }
-    setHullFunction(flags, out, in, FullWeaponryAbility,   HullFunction::FullWeaponry);
-    setHullFunction(flags, out, in, PlanetImmunityAbility, HullFunction::PlanetImmunity);
-    setHullFunction(flags, out, in, CommanderAbility,      HullFunction::Commander);
+    setHullFunction(flags, out, in, FullWeaponryAbility,   BasicHullFunction::FullWeaponry);
+    setHullFunction(flags, out, in, PlanetImmunityAbility, BasicHullFunction::PlanetImmunity);
+    setHullFunction(flags, out, in, CommanderAbility,      BasicHullFunction::Commander);
     out.setFlags(flags);
     return true;
 }
@@ -193,7 +193,7 @@ game::sim::Transfer::copyShipToGame(game::map::Ship& out, const Ship& in, game::
         } else {
             const int oldMission = out.getMission().orElse(0);
             const bool isCloaking = m_shipList.missions().isMissionCloaking(oldMission, realOwner, m_config, m_hostVersion);
-            if (out.hasSpecialFunction(HullFunction::Cloak, m_shipScores, m_shipList, m_config) && (in.getFlags() & Ship::fl_Cloaked) != 0) {
+            if (out.hasSpecialFunction(BasicHullFunction::Cloak, m_shipScores, m_shipList, m_config) && (in.getFlags() & Ship::fl_Cloaked) != 0) {
                 // Ship can cloak -> set a cloak mission unless it already has one
                 if (!isCloaking) {
                     mem.setMission(Mission::msn_Cloak, 0, 0, m_config, m_shipList);

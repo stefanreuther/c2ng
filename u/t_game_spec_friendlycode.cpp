@@ -236,7 +236,7 @@ TestGameSpecFriendlyCode::testWorksOnShip()
         sh.setPlayability(sh.ReadOnly);
         sh.setNumBeams(1);
         sh.setBeamType(10);
-        sh.addShipSpecialFunction(game::spec::HullFunction::NeutronicRefinery);
+        sh.addShipSpecialFunction(game::spec::BasicHullFunction::NeutronicRefinery);
         TS_ASSERT(shipFC.worksOn(sh, scoreDefinitions, shipList, config));
         TS_ASSERT(!fedFC.worksOn(sh, scoreDefinitions, shipList, config));
         TS_ASSERT(capFC.worksOn(sh, scoreDefinitions, shipList, config));

@@ -1121,7 +1121,7 @@ game::map::prepareUnloadInfo(const Universe& univ,
                 } else {
                     // Hostile unload
                     result.hostileUnload += clansInTransporter;
-                    if (clansInTransporter >= 10 && sh->hasSpecialFunction(game::spec::HullFunction::ImperialAssault, scoreDefinitions, shipList, config)) {
+                    if (clansInTransporter >= 10 && sh->hasSpecialFunction(game::spec::BasicHullFunction::ImperialAssault, scoreDefinitions, shipList, config)) {
                         result.hostileUnloadIsAssault = true;
                     }
                 }
@@ -1168,13 +1168,13 @@ game::map::preparePlanetEffectors(const Universe& univ,
                 }
                 if (sh->getWaypointDX().orElse(0) == 0 && sh->getWaypointDY().orElse(0) == 0) {
                     // Terraforming is after movement, so only process it if ships have no waypoint.
-                    if (sh->hasSpecialFunction(game::spec::HullFunction::HeatsTo50, shipScores, shipList, config)) {
+                    if (sh->hasSpecialFunction(game::spec::BasicHullFunction::HeatsTo50, shipScores, shipList, config)) {
                         result.add(PlanetEffectors::HeatsTo50, 1);
                     }
-                    if (sh->hasSpecialFunction(game::spec::HullFunction::CoolsTo50, shipScores, shipList, config)) {
+                    if (sh->hasSpecialFunction(game::spec::BasicHullFunction::CoolsTo50, shipScores, shipList, config)) {
                         result.add(PlanetEffectors::CoolsTo50, 1);
                     }
-                    if (sh->hasSpecialFunction(game::spec::HullFunction::HeatsTo100, shipScores, shipList, config)) {
+                    if (sh->hasSpecialFunction(game::spec::BasicHullFunction::HeatsTo100, shipScores, shipList, config)) {
                         result.add(PlanetEffectors::HeatsTo100, 1);
                     }
                 }

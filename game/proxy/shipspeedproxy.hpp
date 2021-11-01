@@ -29,7 +29,7 @@ namespace game { namespace proxy {
                 If this is 0, the constructor parameters were invalid (e.g. ship does not exist) and this proxy cannot be used. */
             int maxSpeed;
 
-            /** Marker for hyperspeed (game::spec::HullFunction::Hyperdrive).
+            /** Marker for hyperspeed (game::spec::BasicHullFunction::Hyperdrive).
                 If currentSpeed=hyperSpeedMarker, this ship is hyperjumping.
                 Otherwise, currentSpeed is a warp factor. */
             int hyperSpeedMarker;

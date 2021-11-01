@@ -6,7 +6,7 @@
 #include "game/sim/ship.hpp"
 #include "afl/string/format.hpp"
 #include "game/sim/configuration.hpp"
-#include "game/spec/hullfunction.hpp"
+#include "game/spec/basichullfunction.hpp"
 
 using game::spec::Hull;
 
@@ -464,19 +464,19 @@ bool
 game::sim::Ship::hasImpliedAbility(Ability which, const Configuration& opts, const game::spec::ShipList& shipList, const game::config::HostConfiguration& config) const
 {
     // ex GSimShip::hasImpliedFunction, ccsim.pas:SimHullDoes
-    using game::spec::HullFunction;
+    using game::spec::BasicHullFunction;
     switch (which) {
      case PlanetImmunityAbility:
         // FIXME: do we need the "|| getPlayerRaceNumber()" part? Should normally be done by the hullfunc engine.
-        return hasImpliedFunction(HullFunction::PlanetImmunity, shipList, config)
+        return hasImpliedFunction(BasicHullFunction::PlanetImmunity, shipList, config)
             || (config.getPlayerRaceNumber(getOwner()) == 4 && !config[config.PlanetsAttackKlingons]())
             || (config.getPlayerRaceNumber(getOwner()) == 10 && !config[config.PlanetsAttackRebels]());
 
      case FullWeaponryAbility:
-        return hasImpliedFunction(HullFunction::FullWeaponry, shipList, config);
+        return hasImpliedFunction(BasicHullFunction::FullWeaponry, shipList, config);
 
      case CommanderAbility:
-        return hasImpliedFunction(HullFunction::Commander, shipList, config);
+        return hasImpliedFunction(BasicHullFunction::Commander, shipList, config);
 
      case TripleBeamKillAbility:
         return config.getPlayerRaceNumber(getOwner()) == 5;

@@ -8,6 +8,7 @@
 #include "t_game_spec.hpp"
 #include "game/config/hostconfiguration.hpp"
 #include "game/spec/hull.hpp"
+#include "game/spec/basichullfunction.hpp"
 
 /** Test basic data operations. */
 void
@@ -63,6 +64,7 @@ TestGameSpecHullFunction::testCompare()
 void
 TestGameSpecHullFunction::testGetDefault()
 {
+    using game::spec::BasicHullFunction;
     using game::spec::HullFunction;
     using game::PlayerSet_t;
     using game::MAX_PLAYERS;
@@ -74,7 +76,7 @@ TestGameSpecHullFunction::testGetDefault()
         game::spec::Hull hull(3);
         hull.setNumEngines(1);
         config[config.AllowOneEngineTowing].set(false);
-        TS_ASSERT(HullFunction::getDefaultAssignment(HullFunction::Tow, config, hull).empty());
+        TS_ASSERT(HullFunction::getDefaultAssignment(BasicHullFunction::Tow, config, hull).empty());
     }
     // - one engine, one-engine-towing enabled
     {
@@ -82,7 +84,7 @@ TestGameSpecHullFunction::testGetDefault()
         game::spec::Hull hull(3);
         hull.setNumEngines(1);
         config[config.AllowOneEngineTowing].set(true);
-        TS_ASSERT_EQUALS(HullFunction::getDefaultAssignment(HullFunction::Tow, config, hull), PlayerSet_t::allUpTo(MAX_PLAYERS));
+        TS_ASSERT_EQUALS(HullFunction::getDefaultAssignment(BasicHullFunction::Tow, config, hull), PlayerSet_t::allUpTo(MAX_PLAYERS));
     }
     // - two engines
     {
@@ -90,7 +92,7 @@ TestGameSpecHullFunction::testGetDefault()
         game::spec::Hull hull(3);
         hull.setNumEngines(2);
         config[config.AllowOneEngineTowing].set(false);
-        TS_ASSERT_EQUALS(HullFunction::getDefaultAssignment(HullFunction::Tow, config, hull), PlayerSet_t::allUpTo(MAX_PLAYERS));
+        TS_ASSERT_EQUALS(HullFunction::getDefaultAssignment(BasicHullFunction::Tow, config, hull), PlayerSet_t::allUpTo(MAX_PLAYERS));
     }
 
     // Boarding
@@ -101,7 +103,7 @@ TestGameSpecHullFunction::testGetDefault()
         config.setDefaultValues();
         config[config.AllowPrivateerTowCapture].set(false);
         config[config.AllowCrystalTowCapture].set(false);
-        TS_ASSERT(HullFunction::getDefaultAssignment(HullFunction::Tow, config, hull).empty());
+        TS_ASSERT(HullFunction::getDefaultAssignment(BasicHullFunction::Tow, config, hull).empty());
     }
     // - privateer enabled
     {
@@ -110,7 +112,7 @@ TestGameSpecHullFunction::testGetDefault()
         config.setDefaultValues();
         config[config.AllowPrivateerTowCapture].set(true);
         config[config.AllowCrystalTowCapture].set(false);
-        TS_ASSERT_EQUALS(HullFunction::getDefaultAssignment(HullFunction::Boarding, config, hull), PlayerSet_t(5));
+        TS_ASSERT_EQUALS(HullFunction::getDefaultAssignment(BasicHullFunction::Boarding, config, hull), PlayerSet_t(5));
     }
     // - all enabled
     {
@@ -119,7 +121,7 @@ TestGameSpecHullFunction::testGetDefault()
         config.setDefaultValues();
         config[config.AllowPrivateerTowCapture].set(true);
         config[config.AllowCrystalTowCapture].set(true);
-        TS_ASSERT_EQUALS(HullFunction::getDefaultAssignment(HullFunction::Boarding, config, hull), PlayerSet_t() + 5 + 7);
+        TS_ASSERT_EQUALS(HullFunction::getDefaultAssignment(BasicHullFunction::Boarding, config, hull), PlayerSet_t() + 5 + 7);
     }
     // - nonstandard PlayerRace
     {
@@ -129,7 +131,7 @@ TestGameSpecHullFunction::testGetDefault()
         config[config.AllowPrivateerTowCapture].set(true);
         config[config.AllowCrystalTowCapture].set(true);
         config[config.PlayerRace].set("5,2,7,4,1,2,3,5,7,5,1"); // must end in not-5-or-7 because that's the value that is used to pad the option to MAX_PLAYERS
-        TS_ASSERT_EQUALS(HullFunction::getDefaultAssignment(HullFunction::Boarding, config, hull), PlayerSet_t() + 1 + 3 + 8 + 9 + 10);
+        TS_ASSERT_EQUALS(HullFunction::getDefaultAssignment(BasicHullFunction::Boarding, config, hull), PlayerSet_t() + 1 + 3 + 8 + 9 + 10);
     }
 
     // AntiCloakImmunity
@@ -138,7 +140,7 @@ TestGameSpecHullFunction::testGetDefault()
         game::spec::Hull hull(9);
         config.setDefaultValues();
         config[config.AntiCloakImmunity].set("yes,no,yes,no,yes,no");
-        TS_ASSERT_EQUALS(HullFunction::getDefaultAssignment(HullFunction::AntiCloakImmunity, config, hull), PlayerSet_t() + 1 + 3 + 5);
+        TS_ASSERT_EQUALS(HullFunction::getDefaultAssignment(BasicHullFunction::AntiCloakImmunity, config, hull), PlayerSet_t() + 1 + 3 + 5);
     }
 
     // PlanetImmunity
@@ -149,7 +151,7 @@ TestGameSpecHullFunction::testGetDefault()
         config.setDefaultValues();
         config[config.PlanetsAttackKlingons].set(false);
         config[config.PlanetsAttackRebels].set(false);
-        TS_ASSERT_EQUALS(HullFunction::getDefaultAssignment(HullFunction::PlanetImmunity, config, hull), PlayerSet_t() + 4 + 10);
+        TS_ASSERT_EQUALS(HullFunction::getDefaultAssignment(BasicHullFunction::PlanetImmunity, config, hull), PlayerSet_t() + 4 + 10);
     }
     // - rebels can be attacked
     {
@@ -158,7 +160,7 @@ TestGameSpecHullFunction::testGetDefault()
         config.setDefaultValues();
         config[config.PlanetsAttackKlingons].set(false);
         config[config.PlanetsAttackRebels].set(true);
-        TS_ASSERT_EQUALS(HullFunction::getDefaultAssignment(HullFunction::PlanetImmunity, config, hull), PlayerSet_t() + 4);
+        TS_ASSERT_EQUALS(HullFunction::getDefaultAssignment(BasicHullFunction::PlanetImmunity, config, hull), PlayerSet_t() + 4);
     }
     // - nonstandard PlayerRace
     {
@@ -168,7 +170,7 @@ TestGameSpecHullFunction::testGetDefault()
         config[config.PlanetsAttackKlingons].set(false);
         config[config.PlanetsAttackRebels].set(false);
         config[config.PlayerRace].set("1,4,10,2,3,5,6,10,4,9");
-        TS_ASSERT_EQUALS(HullFunction::getDefaultAssignment(HullFunction::PlanetImmunity, config, hull), PlayerSet_t() + 2 + 3 + 8 + 9);
+        TS_ASSERT_EQUALS(HullFunction::getDefaultAssignment(BasicHullFunction::PlanetImmunity, config, hull), PlayerSet_t() + 2 + 3 + 8 + 9);
     }
 
     // FullWeaponry
@@ -178,7 +180,7 @@ TestGameSpecHullFunction::testGetDefault()
         game::spec::Hull hull(77);
         config.setDefaultValues();
         config[config.AllowFedCombatBonus].set(false);
-        TS_ASSERT_EQUALS(HullFunction::getDefaultAssignment(HullFunction::FullWeaponry, config, hull), PlayerSet_t());
+        TS_ASSERT_EQUALS(HullFunction::getDefaultAssignment(BasicHullFunction::FullWeaponry, config, hull), PlayerSet_t());
     }
     // - enabled
     {
@@ -186,7 +188,7 @@ TestGameSpecHullFunction::testGetDefault()
         game::spec::Hull hull(77);
         config.setDefaultValues();
         config[config.AllowFedCombatBonus].set(true);
-        TS_ASSERT_EQUALS(HullFunction::getDefaultAssignment(HullFunction::FullWeaponry, config, hull), PlayerSet_t(1));
+        TS_ASSERT_EQUALS(HullFunction::getDefaultAssignment(BasicHullFunction::FullWeaponry, config, hull), PlayerSet_t(1));
     }
     // - nonstandard PlayerRace
     {
@@ -195,7 +197,7 @@ TestGameSpecHullFunction::testGetDefault()
         config.setDefaultValues();
         config[config.AllowFedCombatBonus].set(true);
         config[config.PlayerRace].set("2,1,3,1,5,1,7,8,9,10");
-        TS_ASSERT_EQUALS(HullFunction::getDefaultAssignment(HullFunction::FullWeaponry, config, hull), PlayerSet_t() + 2 + 4 + 6);
+        TS_ASSERT_EQUALS(HullFunction::getDefaultAssignment(BasicHullFunction::FullWeaponry, config, hull), PlayerSet_t() + 2 + 4 + 6);
     }
 
     // Other
@@ -203,6 +205,6 @@ TestGameSpecHullFunction::testGetDefault()
         game::config::HostConfiguration config;
         game::spec::Hull hull(42);
         config.setDefaultValues();
-        TS_ASSERT_EQUALS(HullFunction::getDefaultAssignment(HullFunction::Bioscan, config, hull), PlayerSet_t());
+        TS_ASSERT_EQUALS(HullFunction::getDefaultAssignment(BasicHullFunction::Bioscan, config, hull), PlayerSet_t());
     }
 }

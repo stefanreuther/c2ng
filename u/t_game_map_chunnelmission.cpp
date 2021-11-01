@@ -15,7 +15,7 @@
 #include "game/test/specificationloader.hpp"
 #include "game/test/stringverifier.hpp"
 
-using game::spec::HullFunction;
+using game::spec::BasicHullFunction;
 
 namespace {
     void checkRange(game::HostVersion host, int dx, int dy, int fuel, bool expectSetup, bool expectMission)
@@ -30,7 +30,7 @@ namespace {
         game::map::Point initPos(500, 500);
         game::map::Ship& init = t.addShip(32, 6, game::map::Object::Playable);
         init.setFriendlyCode(String_t("foo"));
-        init.addShipSpecialFunction(t.shipList().modifiedHullFunctions().getFunctionIdFromHostId(HullFunction::FirecloudChunnel));
+        init.addShipSpecialFunction(t.shipList().modifiedHullFunctions().getFunctionIdFromHostId(BasicHullFunction::FirecloudChunnel));
         init.setCargo(game::Element::Neutronium, fuel);
         init.setPosition(initPos);
         init.setWaypoint(initPos);
@@ -39,7 +39,7 @@ namespace {
         game::map::Point matePos(500 + dx, 500 + dy);
         game::map::Ship& mate = t.addShip(77, 6, game::map::Object::Playable);
         mate.setFriendlyCode(String_t("bar"));
-        mate.addShipSpecialFunction(t.shipList().modifiedHullFunctions().getFunctionIdFromHostId(HullFunction::FirecloudChunnel));
+        mate.addShipSpecialFunction(t.shipList().modifiedHullFunctions().getFunctionIdFromHostId(BasicHullFunction::FirecloudChunnel));
         mate.setCargo(game::Element::Neutronium, 100);
         mate.setPosition(matePos);
         mate.setWaypoint(matePos);
@@ -173,25 +173,25 @@ TestGameMapChunnelMission::testAbilities()
     using game::map::ChunnelMission;
     const int chk_All = ChunnelMission::chk_Self + ChunnelMission::chk_Others;
 
-    checkAbilities(HullFunction::FirecloudChunnel, 0, HullFunction::FirecloudChunnel, true,  chk_All);
-    checkAbilities(HullFunction::FirecloudChunnel, 0, HullFunction::ChunnelTarget,    true,  chk_All);
-    checkAbilities(HullFunction::FirecloudChunnel, 0, HullFunction::ChunnelSelf,      false, 0);
-    checkAbilities(HullFunction::FirecloudChunnel, 0, HullFunction::ChunnelOthers,    false, 0);
+    checkAbilities(BasicHullFunction::FirecloudChunnel, 0, BasicHullFunction::FirecloudChunnel, true,  chk_All);
+    checkAbilities(BasicHullFunction::FirecloudChunnel, 0, BasicHullFunction::ChunnelTarget,    true,  chk_All);
+    checkAbilities(BasicHullFunction::FirecloudChunnel, 0, BasicHullFunction::ChunnelSelf,      false, 0);
+    checkAbilities(BasicHullFunction::FirecloudChunnel, 0, BasicHullFunction::ChunnelOthers,    false, 0);
 
-    checkAbilities(HullFunction::ChunnelSelf, 0, HullFunction::FirecloudChunnel, true,  ChunnelMission::chk_Self);
-    checkAbilities(HullFunction::ChunnelSelf, 0, HullFunction::ChunnelTarget,    true,  ChunnelMission::chk_Self);
-    checkAbilities(HullFunction::ChunnelSelf, 0, HullFunction::ChunnelSelf,      false, 0);
-    checkAbilities(HullFunction::ChunnelSelf, 0, HullFunction::ChunnelOthers,    false, 0);
+    checkAbilities(BasicHullFunction::ChunnelSelf, 0, BasicHullFunction::FirecloudChunnel, true,  ChunnelMission::chk_Self);
+    checkAbilities(BasicHullFunction::ChunnelSelf, 0, BasicHullFunction::ChunnelTarget,    true,  ChunnelMission::chk_Self);
+    checkAbilities(BasicHullFunction::ChunnelSelf, 0, BasicHullFunction::ChunnelSelf,      false, 0);
+    checkAbilities(BasicHullFunction::ChunnelSelf, 0, BasicHullFunction::ChunnelOthers,    false, 0);
 
-    checkAbilities(HullFunction::ChunnelOthers, 0, HullFunction::FirecloudChunnel, true,  ChunnelMission::chk_Others);
-    checkAbilities(HullFunction::ChunnelOthers, 0, HullFunction::ChunnelTarget,    true,  ChunnelMission::chk_Others);
-    checkAbilities(HullFunction::ChunnelOthers, 0, HullFunction::ChunnelSelf,      false, 0);
-    checkAbilities(HullFunction::ChunnelOthers, 0, HullFunction::ChunnelOthers,    false, 0);
+    checkAbilities(BasicHullFunction::ChunnelOthers, 0, BasicHullFunction::FirecloudChunnel, true,  ChunnelMission::chk_Others);
+    checkAbilities(BasicHullFunction::ChunnelOthers, 0, BasicHullFunction::ChunnelTarget,    true,  ChunnelMission::chk_Others);
+    checkAbilities(BasicHullFunction::ChunnelOthers, 0, BasicHullFunction::ChunnelSelf,      false, 0);
+    checkAbilities(BasicHullFunction::ChunnelOthers, 0, BasicHullFunction::ChunnelOthers,    false, 0);
 
-    checkAbilities(HullFunction::ChunnelTarget, 0, HullFunction::FirecloudChunnel, false, 0);
-    checkAbilities(HullFunction::ChunnelTarget, 0, HullFunction::ChunnelTarget,    false, 0);
-    checkAbilities(HullFunction::ChunnelTarget, 0, HullFunction::ChunnelSelf,      false, 0);
-    checkAbilities(HullFunction::ChunnelTarget, 0, HullFunction::ChunnelOthers,    false, 0);
+    checkAbilities(BasicHullFunction::ChunnelTarget, 0, BasicHullFunction::FirecloudChunnel, false, 0);
+    checkAbilities(BasicHullFunction::ChunnelTarget, 0, BasicHullFunction::ChunnelTarget,    false, 0);
+    checkAbilities(BasicHullFunction::ChunnelTarget, 0, BasicHullFunction::ChunnelSelf,      false, 0);
+    checkAbilities(BasicHullFunction::ChunnelTarget, 0, BasicHullFunction::ChunnelOthers,    false, 0);
 }
 
 /** Test consistent handling of combination abilities. */
@@ -202,6 +202,6 @@ TestGameMapChunnelMission::testCombinationAbilities()
     const int chk_All = ChunnelMission::chk_Self + ChunnelMission::chk_Others;
 
     // Chunneling a ship that has ChunnelSelf + ChunnelOthers will produce chk_All
-    checkAbilities(HullFunction::ChunnelSelf, HullFunction::ChunnelOthers, HullFunction::ChunnelTarget, true,  chk_All);
+    checkAbilities(BasicHullFunction::ChunnelSelf, BasicHullFunction::ChunnelOthers, BasicHullFunction::ChunnelTarget, true,  chk_All);
 }
 

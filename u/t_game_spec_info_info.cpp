@@ -803,6 +803,7 @@ TestGameSpecInfoInfo::testDescribeWeaponEffectsPHostExpNonAC()
 void
 TestGameSpecInfoInfo::testDescribeHullFunction()
 {
+    using game::spec::BasicHullFunction;
     using game::spec::HullFunction;
     using game::ExperienceLevelSet_t;
     using game::PlayerSet_t;
@@ -810,10 +811,10 @@ TestGameSpecInfoInfo::testDescribeHullFunction()
     // Environment
     TestHarness h;
     game::spec::BasicHullFunctionList& b = h.shipList.basicHullFunctions();
-    game::spec::BasicHullFunction* fCloak = b.addFunction(16, "Cloak");
+    BasicHullFunction* fCloak = b.addFunction(16, "Cloak");
     fCloak->setDescription("cloaking device");
     fCloak->setExplanation("it cloaks");
-    game::spec::BasicHullFunction* fBoarding = b.addFunction(31, "Boarding");
+    BasicHullFunction* fBoarding = b.addFunction(31, "Boarding");
     fBoarding->setDescription("tow-capture");
     fBoarding->setExplanation("it boards!");
     for (int i = 1; i <= 10; ++i) {

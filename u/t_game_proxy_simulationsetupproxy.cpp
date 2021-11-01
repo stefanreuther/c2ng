@@ -112,7 +112,7 @@ namespace {
     {
         game::spec::ShipList& list = *thread.session().getShipList();
         list.hulls().get(hullId)->changeHullFunction(
-            list.modifiedHullFunctions().getFunctionIdFromHostId(game::spec::HullFunction::Cloak),
+            list.modifiedHullFunctions().getFunctionIdFromHostId(game::spec::BasicHullFunction::Cloak),
             game::PlayerSet_t::allUpTo(20),
             game::PlayerSet_t(),
             true);

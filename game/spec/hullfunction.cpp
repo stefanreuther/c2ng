@@ -4,6 +4,7 @@
   */
 
 #include "game/spec/hullfunction.hpp"
+#include "game/spec/basichullfunction.hpp"
 #include "game/spec/hull.hpp"
 
 // Constructor.
@@ -109,14 +110,14 @@ game::spec::HullFunction::getDefaultAssignment(int basicFunctionId, const game::
 {
     // Note: all hull functions that can have a nonempty result here must be listed in HullFunctionAssignmentList::clear().
     // ex GHullFunctionData::getDefaultAssignment
-    if (basicFunctionId == Tow) {
+    if (basicFunctionId == BasicHullFunction::Tow) {
         // if AllowOneEngineTowing enabled or ship has more than one engine, everyone can tow with it
         if (config[config.AllowOneEngineTowing]() || hull.getNumEngines() > 1) {
             return PlayerSet_t::allUpTo(MAX_PLAYERS);
         } else {
             return PlayerSet_t();
         }
-    } else if (basicFunctionId == Boarding) {
+    } else if (basicFunctionId == BasicHullFunction::Boarding) {
         // Tholians and Privateers, if enabled
         PlayerSet_t result;
         if (config[config.AllowPrivateerTowCapture]()) {
@@ -126,10 +127,10 @@ game::spec::HullFunction::getDefaultAssignment(int basicFunctionId, const game::
             result += config.getPlayersOfRace(7);
         }
         return result;
-    } else if (basicFunctionId == AntiCloakImmunity) {
+    } else if (basicFunctionId == BasicHullFunction::AntiCloakImmunity) {
         // as configured
         return config.getPlayersWhereEnabled(config.AntiCloakImmunity);
-    } else if (basicFunctionId == PlanetImmunity) {
+    } else if (basicFunctionId == BasicHullFunction::PlanetImmunity) {
         // Rebels and Klingons, if enabled
         // FIXME:        /* This also applies to the SSD, but that's handled differently */
         PlayerSet_t result;
@@ -140,7 +141,7 @@ game::spec::HullFunction::getDefaultAssignment(int basicFunctionId, const game::
             result += config.getPlayersOfRace(10);
         }
         return result;
-    } else if (basicFunctionId == FullWeaponry) {
+    } else if (basicFunctionId == BasicHullFunction::FullWeaponry) {
         // Feds, if enabled
         if (config[config.AllowFedCombatBonus]()) {
             return config.getPlayersOfRace(1);

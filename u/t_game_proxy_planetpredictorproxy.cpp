@@ -256,7 +256,7 @@ TestGameProxyPlanetPredictorProxy::testEffectors()
         d.owner = 1;
         d.hullType = HULL_ID;
         ship->addCurrentShipData(d, game::PlayerSet_t(1));
-        ship->addShipSpecialFunction(h.session().getShipList()->modifiedHullFunctions().getFunctionIdFromHostId(game::spec::HullFunction::HeatsTo100));
+        ship->addShipSpecialFunction(h.session().getShipList()->modifiedHullFunctions().getFunctionIdFromHostId(game::spec::BasicHullFunction::HeatsTo100));
         ship->internalCheck();
         ship->setPlayability(game::map::Object::Playable);
     }

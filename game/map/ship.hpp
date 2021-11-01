@@ -494,7 +494,7 @@ namespace game { namespace map {
 
         /** Check whether ship can do hull function.
             Checks functions assigned to the ship as well as automatic hull functions and racial abilities.
-            \param basicFunction     Function to check, e.g. game::spec::HullFunction::Cloak
+            \param basicFunction     Function to check, e.g. game::spec::BasicHullFunction::Cloak
             \param scoreDefinitions  Ship score definitions (to resolve experience limits)
             \param shipList          Ship list (to resolve hull/race specific functions, experience limits)
             \param config            Host configuration

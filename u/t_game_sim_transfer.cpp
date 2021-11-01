@@ -70,7 +70,7 @@ TestGameSimTransfer::testCopyFromShip()
     in.setEngineType(9);
     in.setPrimaryEnemy(7);
     in.setMission(1, 0, 0);
-    in.addShipSpecialFunction(t.shipList().modifiedHullFunctions().getFunctionIdFromHostId(game::spec::HullFunction::Commander));
+    in.addShipSpecialFunction(t.shipList().modifiedHullFunctions().getFunctionIdFromHostId(game::spec::BasicHullFunction::Commander));
 
     // Transfer
     Transfer tr(shipScores, planetScores, t.shipList(), t.config(), h, tx);

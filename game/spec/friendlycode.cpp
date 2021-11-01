@@ -11,11 +11,9 @@
 #include "game/map/planet.hpp"
 #include "game/map/ship.hpp"
 #include "game/registrationkey.hpp"
-#include "game/spec/hullfunction.hpp"
+#include "game/spec/basichullfunction.hpp"
 #include "util/string.hpp"
 #include "util/translation.hpp"
-
-using game::spec::HullFunction;
 
 // Default constructor.
 game::spec::FriendlyCode::FriendlyCode()
@@ -119,9 +117,9 @@ game::spec::FriendlyCode::worksOn(const game::map::Ship& s,
         return false;
     }
     if (m_flags.contains(AlchemyShipCode)
-        && !s.hasSpecialFunction(HullFunction::MerlinAlchemy,     scoreDefinitions, shipList, config)
-        && !s.hasSpecialFunction(HullFunction::NeutronicRefinery, scoreDefinitions, shipList, config)
-        && !s.hasSpecialFunction(HullFunction::AriesRefinery,     scoreDefinitions, shipList, config))
+        && !s.hasSpecialFunction(BasicHullFunction::MerlinAlchemy,     scoreDefinitions, shipList, config)
+        && !s.hasSpecialFunction(BasicHullFunction::NeutronicRefinery, scoreDefinitions, shipList, config)
+        && !s.hasSpecialFunction(BasicHullFunction::AriesRefinery,     scoreDefinitions, shipList, config))
     {
         return false;
     }

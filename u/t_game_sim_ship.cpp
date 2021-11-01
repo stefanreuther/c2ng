@@ -271,7 +271,7 @@ TestGameSimShip::testAbilities()
     game::spec::ShipList list;
     {
         game::spec::Hull* h = list.hulls().create(1);
-        h->changeHullFunction(game::spec::ModifiedHullFunctionList::Function_t(game::spec::HullFunction::Commander),
+        h->changeHullFunction(game::spec::ModifiedHullFunctionList::Function_t(game::spec::BasicHullFunction::Commander),
                               game::PlayerSet_t(9),
                               game::PlayerSet_t(),
                               true);

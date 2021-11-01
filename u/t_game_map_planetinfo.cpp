@@ -814,9 +814,9 @@ TestGameMapPlanetInfo::testPreparePlanetEffectors()
     game::UnitScoreDefinitionList shipScores;
 
     // Hull function Ids
-    const int HEATSTO50 = t.shipList().modifiedHullFunctions().getFunctionIdFromHostId(game::spec::HullFunction::HeatsTo50);
-    const int HEATSTO100 = t.shipList().modifiedHullFunctions().getFunctionIdFromHostId(game::spec::HullFunction::HeatsTo100);
-    const int COOLSTO50 = t.shipList().modifiedHullFunctions().getFunctionIdFromHostId(game::spec::HullFunction::CoolsTo50);
+    const int HEATSTO50 = t.shipList().modifiedHullFunctions().getFunctionIdFromHostId(game::spec::BasicHullFunction::HeatsTo50);
+    const int HEATSTO100 = t.shipList().modifiedHullFunctions().getFunctionIdFromHostId(game::spec::BasicHullFunction::HeatsTo100);
+    const int COOLSTO50 = t.shipList().modifiedHullFunctions().getFunctionIdFromHostId(game::spec::BasicHullFunction::CoolsTo50);
 
     // Ships
     game::Id_t shipId = 1;

@@ -10,11 +10,11 @@
 #include "game/map/ship.hpp"
 #include "game/map/universe.hpp"
 #include "game/registrationkey.hpp"
+#include "game/spec/basichullfunction.hpp"
 #include "game/spec/hull.hpp"
-#include "game/spec/hullfunction.hpp"
 #include "util/math.hpp"
 
-using game::spec::HullFunction;
+using game::spec::BasicHullFunction;
 using game::spec::Cost;
 using game::config::HostConfiguration;
 
@@ -701,15 +701,15 @@ game::map::ShipPredictor::computeTurn()
     // Alchemy
     // FIXME: HOST does not accept NAL for Aries.
     if (shipFCode != "NAL") {
-        if (real_ship->hasSpecialFunction(HullFunction::MerlinAlchemy, m_scoreDefinitions, m_shipList, m_hostConfiguration)) {
+        if (real_ship->hasSpecialFunction(BasicHullFunction::MerlinAlchemy, m_scoreDefinitions, m_shipList, m_hostConfiguration)) {
             if (m_hostVersion.hasAlchemyCombinations()
                 && m_hostConfiguration[HostConfiguration::AllowAdvancedRefinery]() != 0
-                && real_ship->hasSpecialFunction(HullFunction::AriesRefinery, m_scoreDefinitions, m_shipList, m_hostConfiguration))
+                && real_ship->hasSpecialFunction(BasicHullFunction::AriesRefinery, m_scoreDefinitions, m_shipList, m_hostConfiguration))
             {
                 // Alchemy + AdvancedRefinery -> 3:1 direct refinery
                 doDirectRefinery(m_ship, 3, *pHull, m_usedProperties);
             } else if (m_hostVersion.hasAlchemyCombinations()
-                       && real_ship->hasSpecialFunction(HullFunction::NeutronicRefinery, m_scoreDefinitions, m_shipList, m_hostConfiguration))
+                       && real_ship->hasSpecialFunction(BasicHullFunction::NeutronicRefinery, m_scoreDefinitions, m_shipList, m_hostConfiguration))
             {
                 // Alchemy + Refinery -> 4:1 direct refinery
                 doDirectRefinery(m_ship, 4, *pHull, m_usedProperties);
@@ -717,10 +717,10 @@ game::map::ShipPredictor::computeTurn()
                 // Regular Alchemy
                 doAlchemy(shipFCode, m_ship, m_hostVersion, m_key, m_usedProperties);
             }
-        } else if (real_ship->hasSpecialFunction(HullFunction::AriesRefinery, m_scoreDefinitions, m_shipList, m_hostConfiguration)
+        } else if (real_ship->hasSpecialFunction(BasicHullFunction::AriesRefinery, m_scoreDefinitions, m_shipList, m_hostConfiguration)
                    && m_hostConfiguration[HostConfiguration::AllowAdvancedRefinery]() != 0
                    && (m_hostVersion.hasAlchemyCombinations()
-                       || !real_ship->hasSpecialFunction(HullFunction::NeutronicRefinery, m_scoreDefinitions, m_shipList, m_hostConfiguration)))
+                       || !real_ship->hasSpecialFunction(BasicHullFunction::NeutronicRefinery, m_scoreDefinitions, m_shipList, m_hostConfiguration)))
         {
             // Aries converts 1 Min -> 1 Neu
             // If host does not have hasAlchemyCombinations(), the lesser Refinery ability takes precedence!
@@ -742,7 +742,7 @@ game::map::ShipPredictor::computeTurn()
                 }
                 m_usedProperties |= UsedAlchemy;
             }
-        } else if (real_ship->hasSpecialFunction(HullFunction::NeutronicRefinery, m_scoreDefinitions, m_shipList, m_hostConfiguration)) {
+        } else if (real_ship->hasSpecialFunction(BasicHullFunction::NeutronicRefinery, m_scoreDefinitions, m_shipList, m_hostConfiguration)) {
             // Neutronic refinery converts 1 Sup + 1 Min -> 1 Neu
             int which = getAlchemyFCodeValue(shipFCode, m_hostVersion, m_key, m_hostVersion.hasRefineryFCodes());
             int supplies = m_ship.supplies.orElse(0);
@@ -767,10 +767,10 @@ game::map::ShipPredictor::computeTurn()
             // Not an alchemy ship
         }
     } else {
-        if (real_ship->hasSpecialFunction(HullFunction::MerlinAlchemy, m_scoreDefinitions, m_shipList, m_hostConfiguration)
-            || real_ship->hasSpecialFunction(HullFunction::NeutronicRefinery, m_scoreDefinitions, m_shipList, m_hostConfiguration)
+        if (real_ship->hasSpecialFunction(BasicHullFunction::MerlinAlchemy, m_scoreDefinitions, m_shipList, m_hostConfiguration)
+            || real_ship->hasSpecialFunction(BasicHullFunction::NeutronicRefinery, m_scoreDefinitions, m_shipList, m_hostConfiguration)
             || (m_hostConfiguration[HostConfiguration::AllowAdvancedRefinery]()
-                && real_ship->hasSpecialFunction(HullFunction::AriesRefinery, m_scoreDefinitions, m_shipList, m_hostConfiguration)))
+                && real_ship->hasSpecialFunction(BasicHullFunction::AriesRefinery, m_scoreDefinitions, m_shipList, m_hostConfiguration)))
         {
             m_usedProperties |= UsedFCode;
         }
@@ -805,15 +805,15 @@ game::map::ShipPredictor::computeTurn()
     }
 
     // Cloak Fuel Burn
-    bool canCloak = real_ship->hasSpecialFunction(HullFunction::Cloak, m_scoreDefinitions, m_shipList, m_hostConfiguration);
-    bool canAdvancedCloak = real_ship->hasSpecialFunction(HullFunction::AdvancedCloak, m_scoreDefinitions, m_shipList, m_hostConfiguration);
+    bool canCloak = real_ship->hasSpecialFunction(BasicHullFunction::Cloak, m_scoreDefinitions, m_shipList, m_hostConfiguration);
+    bool canAdvancedCloak = real_ship->hasSpecialFunction(BasicHullFunction::AdvancedCloak, m_scoreDefinitions, m_shipList, m_hostConfiguration);
     if ((canCloak || canAdvancedCloak) && m_shipList.missions().isMissionCloaking(m_ship.mission.orElse(0), m_ship.owner.orElse(0), m_hostConfiguration, m_hostVersion)) {
         // ex shipacc.pas:CloakFuel (sort-of)
         int neededFuel = canAdvancedCloak ? 0 : getCloakFuel(0, real_ship->getRealOwner().orElse(0), m_hostConfiguration, *pHull);
         int haveFuel = m_ship.neutronium.orElse(0);
         if (haveFuel <= neededFuel
             || (m_ship.damage.orElse(0) >= m_hostConfiguration[HostConfiguration::DamageLevelForCloakFail]()
-                && !real_ship->hasSpecialFunction(HullFunction::HardenedCloak, m_scoreDefinitions, m_shipList, m_hostConfiguration)))
+                && !real_ship->hasSpecialFunction(BasicHullFunction::HardenedCloak, m_scoreDefinitions, m_shipList, m_hostConfiguration)))
         {
             // We cancel only cloak missions here. Other missions are NOT canceled, see below.
             m_ship.mission = 0;
@@ -832,7 +832,7 @@ game::map::ShipPredictor::computeTurn()
 
     /* damage speed limit */
     shipDamage = m_ship.damage.orElse(0);
-    if (shipDamage > 0 && !real_ship->hasSpecialFunction(HullFunction::HardenedEngines, m_scoreDefinitions, m_shipList, m_hostConfiguration)) {
+    if (shipDamage > 0 && !real_ship->hasSpecialFunction(BasicHullFunction::HardenedEngines, m_scoreDefinitions, m_shipList, m_hostConfiguration)) {
         int limit = (m_hostConfiguration.getPlayerRaceNumber(m_ship.owner.orElse(0)) == 2
                      ? (m_hostVersion.getKind() == HostVersion::PHost
                         ? 15 - shipDamage/10
@@ -853,7 +853,7 @@ game::map::ShipPredictor::computeTurn()
     /* Actual movement here */
     int32_t dist2 = (int32_t(m_ship.waypointDX.orElse(0) * m_ship.waypointDX.orElse(0))
                      + int32_t(m_ship.waypointDY.orElse(0) * m_ship.waypointDY.orElse(0)));
-    if (real_ship->hasSpecialFunction(HullFunction::Hyperdrive, m_scoreDefinitions, m_shipList, m_hostConfiguration)
+    if (real_ship->hasSpecialFunction(BasicHullFunction::Hyperdrive, m_scoreDefinitions, m_shipList, m_hostConfiguration)
         && shipFCode == "HYP"
         && m_ship.warpFactor.orElse(0) > 0
         && dist2 >= 20*20)   // FIXME: minimum distance not in PHost?
@@ -899,7 +899,7 @@ game::map::ShipPredictor::computeTurn()
         // First, compute new position in mx,my
         double dist = std::sqrt(double(dist2));
         int way = m_ship.warpFactor.orElse(0) * m_ship.warpFactor.orElse(0);
-        if (real_ship->hasSpecialFunction(HullFunction::Gravitonic, m_scoreDefinitions, m_shipList, m_hostConfiguration)) {
+        if (real_ship->hasSpecialFunction(BasicHullFunction::Gravitonic, m_scoreDefinitions, m_shipList, m_hostConfiguration)) {
             way *= 2;
         }
 
@@ -965,7 +965,7 @@ game::map::ShipPredictor::computeTurn()
         int fuel = computeFuelUsage(m_universe, m_ship,
                                     m_pTowee ? m_pTowee->m_shipId : 0,
                                     m_pTowee ? &m_pTowee->m_ship : 0,
-                                    real_ship->hasSpecialFunction(HullFunction::Gravitonic, m_scoreDefinitions, m_shipList, m_hostConfiguration),
+                                    real_ship->hasSpecialFunction(BasicHullFunction::Gravitonic, m_scoreDefinitions, m_shipList, m_hostConfiguration),
                                     dist,
                                     m_shipList, m_hostConfiguration, m_hostVersion);
         m_ship.neutronium = m_ship.neutronium.orElse(0) - fuel;

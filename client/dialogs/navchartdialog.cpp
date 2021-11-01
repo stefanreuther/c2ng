@@ -19,7 +19,6 @@
 #include "game/map/universe.hpp"
 #include "game/proxy/chunnelproxy.hpp"
 #include "game/root.hpp"
-#include "game/spec/hullfunction.hpp"
 #include "game/turn.hpp"
 #include "gfx/complex.hpp"
 #include "ui/dialogs/messagebox.hpp"

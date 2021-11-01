@@ -4,7 +4,6 @@
   */
 
 #include "game/spec/basichullfunction.hpp"
-#include "game/spec/hullfunction.hpp"
 
 // Constructor.
 game::spec::BasicHullFunction::BasicHullFunction(int id, String_t name)
@@ -121,29 +120,29 @@ game::spec::BasicHullFunction::getDamageLimit(int /*forOwner*/, const game::conf
     // ex GBasicHullFunction::getDamageLimit
     using game::config::HostConfiguration;
     switch (m_id) {
-     case HullFunction::Cloak:
-     case HullFunction::AdvancedCloak:
+     case Cloak:
+     case AdvancedCloak:
         return config[HostConfiguration::DamageLevelForCloakFail]();
 
-     case HullFunction::LokiAnticloak:
-     case HullFunction::AdvancedAntiCloak:
+     case LokiAnticloak:
+     case AdvancedAntiCloak:
         return config[HostConfiguration::DamageLevelForAntiCloakFail]();
 
-     case HullFunction::HeatsTo50:
-     case HullFunction::CoolsTo50:
-     case HullFunction::HeatsTo100:
+     case HeatsTo50:
+     case CoolsTo50:
+     case HeatsTo100:
         return config[HostConfiguration::DamageLevelForTerraformFail]();
 
-     case HullFunction::Hyperdrive:
+     case Hyperdrive:
         return config[HostConfiguration::DamageLevelForHyperjumpFail]();
 
-     case HullFunction::ImperialAssault:
+     case ImperialAssault:
         return 1;
 
-     case HullFunction::FirecloudChunnel:
-     case HullFunction::ChunnelSelf:
-     case HullFunction::ChunnelOthers:
-     case HullFunction::ChunnelTarget:
+     case FirecloudChunnel:
+     case ChunnelSelf:
+     case ChunnelOthers:
+     case ChunnelTarget:
         return config[HostConfiguration::DamageLevelForChunnelFail]();
 
      default:

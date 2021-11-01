@@ -22,7 +22,7 @@
 #include "game/sim/planet.hpp"
 #include "game/sim/sessionextra.hpp"
 #include "game/sim/ship.hpp"
-#include "game/spec/hullfunction.hpp"
+#include "game/spec/basichullfunction.hpp"
 #include "util/math.hpp"
 #include "game/sim/sort.hpp"
 
@@ -34,7 +34,7 @@ using game::sim::Configuration;
 using game::sim::Planet;
 using game::sim::Setup;
 using game::sim::Ship;
-using game::spec::HullFunction;
+using game::spec::BasicHullFunction;
 using game::spec::ShipList;
 typedef game::proxy::SimulationSetupProxy::Element_t Element_t;
 
@@ -835,9 +835,9 @@ game::proxy::SimulationSetupProxy::Trampoline::setHullType(Slot_t slot, int hull
 
                 // Uncloak if it cannot cloak
                 if (!sh->isCustomShip()
-                    && !sh->hasImpliedFunction(HullFunction::Cloak, *m_shipList, m_root->hostConfiguration())
-                    && !sh->hasImpliedFunction(HullFunction::AdvancedCloak, *m_shipList, m_root->hostConfiguration())
-                    && !sh->hasImpliedFunction(HullFunction::HardenedCloak, *m_shipList, m_root->hostConfiguration()))
+                    && !sh->hasImpliedFunction(BasicHullFunction::Cloak, *m_shipList, m_root->hostConfiguration())
+                    && !sh->hasImpliedFunction(BasicHullFunction::AdvancedCloak, *m_shipList, m_root->hostConfiguration())
+                    && !sh->hasImpliedFunction(BasicHullFunction::HardenedCloak, *m_shipList, m_root->hostConfiguration()))
                 {
                     sh->setFlags(sh->getFlags() & ~Ship::fl_Cloaked);
                 }

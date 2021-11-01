@@ -127,7 +127,7 @@ TestGameProxyShipSpeedProxy::testHyper()
         sh->setWarpFactor(3);
         sh->setHull(HULL_NR);
         sh->setFleetNumber(SHIP_NR);
-        sh->addShipSpecialFunction(game::spec::HullFunction::Hyperdrive);
+        sh->addShipSpecialFunction(game::spec::BasicHullFunction::Hyperdrive);
         sh->setFriendlyCode(String_t("abc"));
     }
     h.session().setGame(g);

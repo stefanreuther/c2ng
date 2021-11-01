@@ -49,7 +49,7 @@ namespace {
         pFirecloud->setMass(1);
         pFirecloud->setMaxCargo(100);
         pFirecloud->setMaxFuel(100);
-        pFirecloud->changeHullFunction(shipList->modifiedHullFunctions().getFunctionIdFromHostId(game::spec::HullFunction::FirecloudChunnel),
+        pFirecloud->changeHullFunction(shipList->modifiedHullFunctions().getFunctionIdFromHostId(game::spec::BasicHullFunction::FirecloudChunnel),
                                        game::PlayerSet_t::allUpTo(game::MAX_PLAYERS),
                                        game::PlayerSet_t(),
                                        true);
@@ -126,7 +126,7 @@ TestGameProxyChunnelProxy::testCandidates()
     addShip(h,  12,  1200, 1000, FIRECLOUD_ID);   // -"-
     addShip(h,  13,  1300, 1000, FIRECLOUD_ID);   // -"-
 
-    TS_ASSERT(init.hasSpecialFunction(game::spec::HullFunction::FirecloudChunnel,
+    TS_ASSERT(init.hasSpecialFunction(game::spec::BasicHullFunction::FirecloudChunnel,
                                       h.session().getGame()->shipScores(),
                                       *h.session().getShipList(),
                                       h.session().getRoot()->hostConfiguration()));

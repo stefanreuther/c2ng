@@ -21,7 +21,7 @@ using gfx::Point;
 using gfx::Rectangle;
 using ui::widgets::FrameGroup;
 using util::SkinColor;
-using game::spec::HullFunction;
+using game::spec::BasicHullFunction;
 using game::map::ChunnelMission;
 
 namespace {
@@ -42,9 +42,9 @@ namespace {
         // FIXME: similar function in ShipPredictor.
         // FIXME: use Hull::getCloakFuelUsage, make separate function
         if (shipList.missions().isMissionCloaking(ship.getMission().orElse(0), ship.getRealOwner().orElse(0), config, host)
-            && (ship.hasSpecialFunction(HullFunction::Cloak, scoreDefinitions, shipList, config)
-                || ship.hasSpecialFunction(HullFunction::HardenedCloak, scoreDefinitions, shipList, config))
-            && !ship.hasSpecialFunction(HullFunction::AdvancedCloak, scoreDefinitions, shipList, config))
+            && (ship.hasSpecialFunction(BasicHullFunction::Cloak, scoreDefinitions, shipList, config)
+                || ship.hasSpecialFunction(BasicHullFunction::HardenedCloak, scoreDefinitions, shipList, config))
+            && !ship.hasSpecialFunction(BasicHullFunction::AdvancedCloak, scoreDefinitions, shipList, config))
         {
             if (game::spec::Hull* h = shipList.hulls().get(ship.getHull().orElse(0))) {
                 // Regular cloaking that burns fuel

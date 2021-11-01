@@ -718,7 +718,7 @@ game::map::Renderer::renderShipVector(const State& st, const Ship& sh, int shipO
             // This is a simplification against PCC1/PCC2 by using the computed heading.
             // It comes with a certain imprecision: a 81 ly circle has a circumference of 509, but we reach only 360 points = 70%.
             int dist = util::squareInteger(speed);
-            if (sh.hasSpecialFunction(game::spec::HullFunction::Gravitonic, m_viewport.shipScores(), m_viewport.shipList(), m_viewport.hostConfiguration())) {
+            if (sh.hasSpecialFunction(game::spec::BasicHullFunction::Gravitonic, m_viewport.shipScores(), m_viewport.shipList(), m_viewport.hostConfiguration())) {
                 dist *= 2;
             }
 

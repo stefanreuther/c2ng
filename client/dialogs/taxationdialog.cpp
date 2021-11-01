@@ -169,9 +169,9 @@ namespace {
                 {
                     afl::string::Translator& tx = session.translator();
                     m_labels.label[0] = tx("Ships hissing");
-                    m_labels.label[1] = addHullName(tx("Ships cooling to 50\xC2\xB0\x46"), game::spec::HullFunction::CoolsTo50, session);
-                    m_labels.label[2] = addHullName(tx("Ships heating to 50\xC2\xB0\x46"), game::spec::HullFunction::HeatsTo50, session);
-                    m_labels.label[3] = addHullName(tx("Ships heating to 100\xC2\xB0\x46"), game::spec::HullFunction::HeatsTo100, session);
+                    m_labels.label[1] = addHullName(tx("Ships cooling to 50\xC2\xB0\x46"), game::spec::BasicHullFunction::CoolsTo50, session);
+                    m_labels.label[2] = addHullName(tx("Ships heating to 50\xC2\xB0\x46"), game::spec::BasicHullFunction::HeatsTo50, session);
+                    m_labels.label[3] = addHullName(tx("Ships heating to 100\xC2\xB0\x46"), game::spec::BasicHullFunction::HeatsTo100, session);
                 }
          private:
             EffectorLabels& m_labels;

@@ -30,11 +30,11 @@ game::spec::HullFunctionAssignmentList::clear()
     // We add an entry effectively saying "no change", to make getAll() query getDefaultAssignment().
     // The alternative would be to special-case it.
     // Note that this uses the fact that a HullFunction constant can be used as a Function_t.
-    m_entries.push_back(Entry(ModifiedHullFunctionList::Function_t(HullFunction::Tow),               PlayerSet_t(), PlayerSet_t()));
-    m_entries.push_back(Entry(ModifiedHullFunctionList::Function_t(HullFunction::Boarding),          PlayerSet_t(), PlayerSet_t()));
-    m_entries.push_back(Entry(ModifiedHullFunctionList::Function_t(HullFunction::AntiCloakImmunity), PlayerSet_t(), PlayerSet_t()));
-    m_entries.push_back(Entry(ModifiedHullFunctionList::Function_t(HullFunction::PlanetImmunity),    PlayerSet_t(), PlayerSet_t()));
-    m_entries.push_back(Entry(ModifiedHullFunctionList::Function_t(HullFunction::FullWeaponry),      PlayerSet_t(), PlayerSet_t()));
+    m_entries.push_back(Entry(ModifiedHullFunctionList::Function_t(BasicHullFunction::Tow),               PlayerSet_t(), PlayerSet_t()));
+    m_entries.push_back(Entry(ModifiedHullFunctionList::Function_t(BasicHullFunction::Boarding),          PlayerSet_t(), PlayerSet_t()));
+    m_entries.push_back(Entry(ModifiedHullFunctionList::Function_t(BasicHullFunction::AntiCloakImmunity), PlayerSet_t(), PlayerSet_t()));
+    m_entries.push_back(Entry(ModifiedHullFunctionList::Function_t(BasicHullFunction::PlanetImmunity),    PlayerSet_t(), PlayerSet_t()));
+    m_entries.push_back(Entry(ModifiedHullFunctionList::Function_t(BasicHullFunction::FullWeaponry),      PlayerSet_t(), PlayerSet_t()));
 }
 
 // Get number of entries.

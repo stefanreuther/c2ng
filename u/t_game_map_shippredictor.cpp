@@ -218,7 +218,7 @@ namespace {
         s.setCargo(Element::Supplies, suppliesBefore);
         s.setFriendlyCode(String_t(friendlyCode));
 
-        t.shipList.hulls().get(61)->changeHullFunction(t.shipList.modifiedHullFunctions().getFunctionIdFromHostId(game::spec::HullFunction::MerlinAlchemy),
+        t.shipList.hulls().get(61)->changeHullFunction(t.shipList.modifiedHullFunctions().getFunctionIdFromHostId(game::spec::BasicHullFunction::MerlinAlchemy),
                                                        game::PlayerSet_t::fromInteger(-1), game::PlayerSet_t(), true);
 
         finish(t);
@@ -254,7 +254,7 @@ namespace {
         s.setCargo(Element::Supplies, suppliesBefore);
         s.setFriendlyCode(String_t(friendlyCode));
 
-        t.shipList.hulls().get(61)->changeHullFunction(t.shipList.modifiedHullFunctions().getFunctionIdFromHostId(game::spec::HullFunction::NeutronicRefinery),
+        t.shipList.hulls().get(61)->changeHullFunction(t.shipList.modifiedHullFunctions().getFunctionIdFromHostId(game::spec::BasicHullFunction::NeutronicRefinery),
                                                        game::PlayerSet_t::fromInteger(-1), game::PlayerSet_t(), true);
 
         finish(t);
@@ -291,7 +291,7 @@ namespace {
         s.setCargo(Element::Supplies, suppliesBefore);
         s.setFriendlyCode(String_t(friendlyCode));
 
-        t.shipList.hulls().get(61)->changeHullFunction(t.shipList.modifiedHullFunctions().getFunctionIdFromHostId(game::spec::HullFunction::AriesRefinery),
+        t.shipList.hulls().get(61)->changeHullFunction(t.shipList.modifiedHullFunctions().getFunctionIdFromHostId(game::spec::BasicHullFunction::AriesRefinery),
                                                        game::PlayerSet_t::fromInteger(-1), game::PlayerSet_t(), true);
 
         finish(t);

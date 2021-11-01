@@ -10,35 +10,35 @@
 #include "game/map/fleetmember.hpp"
 #include "game/map/ship.hpp"
 #include "game/map/universe.hpp"
-#include "game/spec/hullfunction.hpp"
+#include "game/spec/basichullfunction.hpp"
 #include "game/spec/mission.hpp"
 #include "util/math.hpp"
 #include "util/translation.hpp"
 
-using game::spec::HullFunction;
+using game::spec::BasicHullFunction;
 using game::config::HostConfiguration;
 using game::map::ChunnelMission;
 
 namespace {
     bool canReceiveChunnel(const game::map::Ship& ship, const game::UnitScoreDefinitionList& shipScores, const game::spec::ShipList& shipList, const game::Root& root)
     {
-        return ship.hasSpecialFunction(HullFunction::FirecloudChunnel, shipScores, shipList, root.hostConfiguration())
-            || ship.hasSpecialFunction(HullFunction::ChunnelTarget, shipScores, shipList, root.hostConfiguration());
+        return ship.hasSpecialFunction(BasicHullFunction::FirecloudChunnel, shipScores, shipList, root.hostConfiguration())
+            || ship.hasSpecialFunction(BasicHullFunction::ChunnelTarget, shipScores, shipList, root.hostConfiguration());
     }
 
     int getInitiatorCapabilities(const game::map::Ship& ship, const game::UnitScoreDefinitionList& shipScores, const game::spec::ShipList& shipList, const game::Root& root)
     {
         int result;
-        if (ship.hasSpecialFunction(HullFunction::FirecloudChunnel, shipScores, shipList, root.hostConfiguration())) {
+        if (ship.hasSpecialFunction(BasicHullFunction::FirecloudChunnel, shipScores, shipList, root.hostConfiguration())) {
             // Ship can do everything
             result = ChunnelMission::chk_Self | ChunnelMission::chk_Others;
         } else {
             // Check both of the lesser abilities, ship may have both
             result = 0;
-            if (ship.hasSpecialFunction(HullFunction::ChunnelSelf, shipScores, shipList, root.hostConfiguration())) {
+            if (ship.hasSpecialFunction(BasicHullFunction::ChunnelSelf, shipScores, shipList, root.hostConfiguration())) {
                 result |= ChunnelMission::chk_Self;
             }
-            if (ship.hasSpecialFunction(HullFunction::ChunnelOthers, shipScores, shipList, root.hostConfiguration())) {
+            if (ship.hasSpecialFunction(BasicHullFunction::ChunnelOthers, shipScores, shipList, root.hostConfiguration())) {
                 result |= ChunnelMission::chk_Others;
             }
         }

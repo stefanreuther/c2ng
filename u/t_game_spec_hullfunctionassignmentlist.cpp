@@ -70,7 +70,7 @@ TestGameSpecHullFunctionAssignmentList::testIt()
             switch (result[i].getBasicFunctionId()) {
              case 42: found42 = true; break;
              case 77: found77 = true; break;
-             case game::spec::HullFunction::FullWeaponry: foundFullWeaponry = true; break;
+             case game::spec::BasicHullFunction::FullWeaponry: foundFullWeaponry = true; break;
             }
         }
 
@@ -112,7 +112,7 @@ TestGameSpecHullFunctionAssignmentList::testGetPlayerImplied()
     game::spec::HullFunctionAssignmentList testee;
 
     // Add a function: Tow implies This
-    game::spec::BasicHullFunction* towFunction = basicList.addFunction(game::spec::HullFunction::Tow, "Tow");
+    game::spec::BasicHullFunction* towFunction = basicList.addFunction(game::spec::BasicHullFunction::Tow, "Tow");
     towFunction->setImpliedFunctionId(44);
     basicList.addFunction(44, "This");
 
@@ -126,7 +126,7 @@ TestGameSpecHullFunctionAssignmentList::testGetPlayerImplied()
     TS_ASSERT_EQUALS(testee.getPlayersThatCan(44, modList, basicList, config, hull, allLevels, true), game::PlayerSet_t::allUpTo(game::MAX_PLAYERS));
 
     // Remove Tow for feds
-    testee.change(game::spec::HullFunction::Tow, game::PlayerSet_t(), game::PlayerSet_t(1));
+    testee.change(game::spec::BasicHullFunction::Tow, game::PlayerSet_t(), game::PlayerSet_t(1));
     TS_ASSERT_EQUALS(testee.getPlayersThatCan(44, modList, basicList, config, hull, allLevels, true), game::PlayerSet_t::allUpTo(game::MAX_PLAYERS) - 1);
 
     // Change hull so that implied-tow no longer applies
@@ -147,7 +147,7 @@ TestGameSpecHullFunctionAssignmentList::testMerged()
     game::spec::Hull hull(3);
 
     // Configure
-    const int fn = game::spec::HullFunction::PlanetImmunity;
+    const int fn = game::spec::BasicHullFunction::PlanetImmunity;
     config[config.PlanetsAttackKlingons].set(false);
     config[config.PlanetsAttackRebels].set(false);
     testee.change(ModifiedHullFunctionList::Function_t(fn), game::PlayerSet_t(3), game::PlayerSet_t());
@@ -178,18 +178,18 @@ TestGameSpecHullFunctionAssignmentList::testDefaulted()
     config[config.AntiCloakImmunity].set("true,true,true,false");
 
     // Verify
-    using game::spec::HullFunction;
-    TS_ASSERT_EQUALS(testee.getPlayersThatCan(HullFunction::Tow,               modList, basicList, config, hull, allLevels, true), game::PlayerSet_t::allUpTo(game::MAX_PLAYERS));
-    TS_ASSERT_EQUALS(testee.getPlayersThatCan(HullFunction::Boarding,          modList, basicList, config, hull, allLevels, true), game::PlayerSet_t() + 5 + 7);
-    TS_ASSERT_EQUALS(testee.getPlayersThatCan(HullFunction::AntiCloakImmunity, modList, basicList, config, hull, allLevels, true), game::PlayerSet_t() + 1 + 2 + 3);
-    TS_ASSERT_EQUALS(testee.getPlayersThatCan(HullFunction::PlanetImmunity,    modList, basicList, config, hull, allLevels, true), game::PlayerSet_t() + 4 + 10);
-    TS_ASSERT_EQUALS(testee.getPlayersThatCan(HullFunction::FullWeaponry,      modList, basicList, config, hull, allLevels, true), game::PlayerSet_t() + 1);
+    using game::spec::BasicHullFunction;
+    TS_ASSERT_EQUALS(testee.getPlayersThatCan(BasicHullFunction::Tow,               modList, basicList, config, hull, allLevels, true), game::PlayerSet_t::allUpTo(game::MAX_PLAYERS));
+    TS_ASSERT_EQUALS(testee.getPlayersThatCan(BasicHullFunction::Boarding,          modList, basicList, config, hull, allLevels, true), game::PlayerSet_t() + 5 + 7);
+    TS_ASSERT_EQUALS(testee.getPlayersThatCan(BasicHullFunction::AntiCloakImmunity, modList, basicList, config, hull, allLevels, true), game::PlayerSet_t() + 1 + 2 + 3);
+    TS_ASSERT_EQUALS(testee.getPlayersThatCan(BasicHullFunction::PlanetImmunity,    modList, basicList, config, hull, allLevels, true), game::PlayerSet_t() + 4 + 10);
+    TS_ASSERT_EQUALS(testee.getPlayersThatCan(BasicHullFunction::FullWeaponry,      modList, basicList, config, hull, allLevels, true), game::PlayerSet_t() + 1);
 
-    TS_ASSERT_EQUALS(testee.getPlayersThatCan(HullFunction::Tow,               modList, basicList, config, hull, allLevels, false), game::PlayerSet_t());
-    TS_ASSERT_EQUALS(testee.getPlayersThatCan(HullFunction::Boarding,          modList, basicList, config, hull, allLevels, false), game::PlayerSet_t());
-    TS_ASSERT_EQUALS(testee.getPlayersThatCan(HullFunction::AntiCloakImmunity, modList, basicList, config, hull, allLevels, false), game::PlayerSet_t());
-    TS_ASSERT_EQUALS(testee.getPlayersThatCan(HullFunction::PlanetImmunity,    modList, basicList, config, hull, allLevels, false), game::PlayerSet_t());
-    TS_ASSERT_EQUALS(testee.getPlayersThatCan(HullFunction::FullWeaponry,      modList, basicList, config, hull, allLevels, false), game::PlayerSet_t());
+    TS_ASSERT_EQUALS(testee.getPlayersThatCan(BasicHullFunction::Tow,               modList, basicList, config, hull, allLevels, false), game::PlayerSet_t());
+    TS_ASSERT_EQUALS(testee.getPlayersThatCan(BasicHullFunction::Boarding,          modList, basicList, config, hull, allLevels, false), game::PlayerSet_t());
+    TS_ASSERT_EQUALS(testee.getPlayersThatCan(BasicHullFunction::AntiCloakImmunity, modList, basicList, config, hull, allLevels, false), game::PlayerSet_t());
+    TS_ASSERT_EQUALS(testee.getPlayersThatCan(BasicHullFunction::PlanetImmunity,    modList, basicList, config, hull, allLevels, false), game::PlayerSet_t());
+    TS_ASSERT_EQUALS(testee.getPlayersThatCan(BasicHullFunction::FullWeaponry,      modList, basicList, config, hull, allLevels, false), game::PlayerSet_t());
 }
 
 /** Test remove(). */
@@ -228,17 +228,17 @@ TestGameSpecHullFunctionAssignmentList::testRemove()
 void
 TestGameSpecHullFunctionAssignmentList::testSequence()
 {
-    using game::spec::HullFunction;
+    using game::spec::BasicHullFunction;
 
     game::spec::HullFunctionAssignmentList testee;
 
     // Modify something from the variable-default set
     // - in one action
-    testee.change(ModifiedHullFunctionList::Function_t(HullFunction::PlanetImmunity), game::PlayerSet_t(1) + 2, game::PlayerSet_t(2) + 3);
+    testee.change(ModifiedHullFunctionList::Function_t(BasicHullFunction::PlanetImmunity), game::PlayerSet_t(1) + 2, game::PlayerSet_t(2) + 3);
 
     // - in two actions
-    testee.change(ModifiedHullFunctionList::Function_t(HullFunction::Tow),            game::PlayerSet_t(1) + 2, game::PlayerSet_t());
-    testee.change(ModifiedHullFunctionList::Function_t(HullFunction::Tow),            game::PlayerSet_t(),      game::PlayerSet_t(2) + 3);
+    testee.change(ModifiedHullFunctionList::Function_t(BasicHullFunction::Tow),            game::PlayerSet_t(1) + 2, game::PlayerSet_t());
+    testee.change(ModifiedHullFunctionList::Function_t(BasicHullFunction::Tow),            game::PlayerSet_t(),      game::PlayerSet_t(2) + 3);
 
     // Modify something outside the variable-default set
     // - in one action
@@ -249,12 +249,12 @@ TestGameSpecHullFunctionAssignmentList::testSequence()
     testee.change(ModifiedHullFunctionList::Function_t(101),                          game::PlayerSet_t(),      game::PlayerSet_t(2) + 3);
 
     // Verify. All four must be "+1", "-23".
-    const game::spec::HullFunctionAssignmentList::Entry* p = testee.findEntry(ModifiedHullFunctionList::Function_t(HullFunction::PlanetImmunity));
+    const game::spec::HullFunctionAssignmentList::Entry* p = testee.findEntry(ModifiedHullFunctionList::Function_t(BasicHullFunction::PlanetImmunity));
     TS_ASSERT(p != 0);
     TS_ASSERT_EQUALS(p->m_addedPlayers, game::PlayerSet_t(1));
     TS_ASSERT_EQUALS(p->m_removedPlayers, game::PlayerSet_t(2) + 3);
 
-    p = testee.findEntry(ModifiedHullFunctionList::Function_t(HullFunction::Tow));
+    p = testee.findEntry(ModifiedHullFunctionList::Function_t(BasicHullFunction::Tow));
     TS_ASSERT(p != 0);
     TS_ASSERT_EQUALS(p->m_addedPlayers, game::PlayerSet_t(1));
     TS_ASSERT_EQUALS(p->m_removedPlayers, game::PlayerSet_t(2) + 3);
