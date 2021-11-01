@@ -38,6 +38,11 @@ TestGameSimPlanet::testIt()
     TS_ASSERT_EQUALS(t.getBaseDefense(), 50);
     TS_ASSERT(t.isDirty());
 
+    t.markClean();                             // repeated -> no change signal
+    t.setBaseDefense(50);
+    TS_ASSERT_EQUALS(t.getBaseDefense(), 50);
+    TS_ASSERT(!t.isDirty());
+
     t.markClean();
     t.setBaseBeamTech(9);
     TS_ASSERT_EQUALS(t.getBaseBeamTech(), 9);

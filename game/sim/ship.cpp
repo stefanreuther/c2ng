@@ -18,7 +18,6 @@ const int game::sim::Ship::agg_Kill;
 const int game::sim::Ship::agg_Passive;
 const int game::sim::Ship::agg_NoFuel;
 
-
 // Default constructor.
 game::sim::Ship::Ship()
     : Object(),
@@ -42,6 +41,25 @@ game::sim::Ship::Ship()
 game::sim::Ship::~Ship()
 { }
 
+game::sim::Ship&
+game::sim::Ship::operator=(const Ship& other)
+{
+    Object::operator=(other);
+    setCrew(other.m_crew);
+    setHullTypeOnly(other.m_hullType);
+    setMass(other.m_mass);
+    setBeamType(other.m_beamType);
+    setNumBeams(other.m_numBeams);
+    setTorpedoType(other.m_torpedoType);
+    setNumLaunchers(other.m_numLaunchers);
+    setNumBays(other.m_numBays);
+    setAmmo(other.m_ammo);
+    setEngineType(other.m_engineType);
+    setAggressiveness(other.m_aggressiveness);
+    setInterceptId(other.m_interceptId);
+    return *this;
+}
+
 // Get crew.
 int
 game::sim::Ship::getCrew() const
@@ -55,8 +73,10 @@ void
 game::sim::Ship::setCrew(int crew)
 {
     // ex GSimShip::setCrew
-    m_crew = crew;
-    markDirty();
+    if (m_crew != crew) {
+        m_crew = crew;
+        markDirty();
+    }
 }
 
 // Get hull type.
@@ -115,8 +135,10 @@ game::sim::Ship::setHullType(int hullType, const game::spec::ShipList& shipList)
 void
 game::sim::Ship::setHullTypeOnly(int hullType)
 {
-    m_hullType = hullType;
-    markDirty();
+    if (m_hullType != hullType) {
+        m_hullType = hullType;
+        markDirty();
+    }
 }
 
 // Get mass.
@@ -132,8 +154,10 @@ void
 game::sim::Ship::setMass(int mass)
 {
     // ex GSimShip::setMass
-    m_mass = mass;
-    markDirty();
+    if (m_mass != mass) {
+        m_mass = mass;
+        markDirty();
+    }
 }
 
 // Get beam type.
@@ -149,8 +173,10 @@ void
 game::sim::Ship::setBeamType(int beamType)
 {
     // ex GSimShip::setBeamType
-    m_beamType = beamType;
-    markDirty();
+    if (m_beamType != beamType) {
+        m_beamType = beamType;
+        markDirty();
+    }
 }
 
 // Get number of beams.
@@ -166,8 +192,10 @@ void
 game::sim::Ship::setNumBeams(int numBeams)
 {
     // ex GSimShip::setBeamCount
-    m_numBeams = numBeams;
-    markDirty();
+    if (m_numBeams != numBeams) {
+        m_numBeams = numBeams;
+        markDirty();
+    }
 }
 
 // Get torpedo type.
@@ -183,8 +211,10 @@ void
 game::sim::Ship::setTorpedoType(int torpedoType)
 {
     // ex GSimShip::setTorpType
-    m_torpedoType = torpedoType;
-    markDirty();
+    if (m_torpedoType != torpedoType) {
+        m_torpedoType = torpedoType;
+        markDirty();
+    }
 }
 
 // Get number of torpedo launchers.
@@ -200,8 +230,10 @@ void
 game::sim::Ship::setNumLaunchers(int numLaunchers)
 {
     // ex GSimShip::setTorpLauncherCount
-    m_numLaunchers = numLaunchers;
-    markDirty();
+    if (m_numLaunchers != numLaunchers) {
+        m_numLaunchers = numLaunchers;
+        markDirty();
+    }
 }
 
 // Get number of fighter bays.
@@ -217,8 +249,10 @@ void
 game::sim::Ship::setNumBays(int numBays)
 {
     // ex GSimShip::setBayCount
-    m_numBays = numBays;
-    markDirty();
+    if (m_numBays != numBays) {
+        m_numBays = numBays;
+        markDirty();
+    }
 }
 
 // Get number of torpedoes/fighters.
@@ -234,8 +268,10 @@ void
 game::sim::Ship::setAmmo(int ammo)
 {
     // ex GSimShip::setAmmo
-    m_ammo = ammo;
-    markDirty();
+    if (m_ammo != ammo) {
+        m_ammo = ammo;
+        markDirty();
+    }
 }
 
 // Get engine type.
@@ -251,8 +287,10 @@ void
 game::sim::Ship::setEngineType(int engineType)
 {
     // ex GSimShip::setEngineType
-    m_engineType = engineType;
-    markDirty();
+    if (m_engineType != engineType) {
+        m_engineType = engineType;
+        markDirty();
+    }
 }
 
 // Get aggressiveness.
@@ -268,8 +306,10 @@ void
 game::sim::Ship::setAggressiveness(int aggressiveness)
 {
     // ex GSimShip::setAggressiveness
-    m_aggressiveness = aggressiveness;
-    markDirty();
+    if (m_aggressiveness != aggressiveness) {
+        m_aggressiveness = aggressiveness;
+        markDirty();
+    }
 }
 
 // Get Id for intercept-attack.
@@ -285,8 +325,10 @@ void
 game::sim::Ship::setInterceptId(int id)
 {
     // ex GSimShip::setInterceptId
-    m_interceptId = id;
-    markDirty();
+    if (m_interceptId != id) {
+        m_interceptId = id;
+        markDirty();
+    }
 }
 
 // Check for default name.

@@ -31,6 +31,10 @@ namespace game { namespace sim {
         /** Destructor. */
         ~Ship();
 
+        /** Assign from other ship.
+            \param other Other ship */
+        Ship& operator=(const Ship& other);
+
         /** Get crew.
             \return crew */
         int getCrew() const;

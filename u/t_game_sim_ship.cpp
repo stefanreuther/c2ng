@@ -67,6 +67,11 @@ TestGameSimShip::testIt()
     TS_ASSERT_EQUALS(t.getNumBeams(), 9);
     TS_ASSERT(t.isDirty());
 
+    t.markClean();                             // repeated -> no change signal
+    t.setNumBeams(9);
+    TS_ASSERT_EQUALS(t.getNumBeams(), 9);
+    TS_ASSERT(!t.isDirty());
+
     t.markClean();
     t.setTorpedoType(4);
     TS_ASSERT_EQUALS(t.getTorpedoType(), 4);

@@ -22,6 +22,10 @@ namespace game { namespace sim {
         /** Destructor. */
         ~Planet();
 
+        /** Assign from other planet.
+            \param other Other planet */
+        Planet& operator=(const Planet& other);
+
         /** Get number of planetary defense posts.
             \return number */
         int getDefense() const;

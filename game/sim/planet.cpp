@@ -24,6 +24,22 @@ game::sim::Planet::Planet()
 game::sim::Planet::~Planet()
 { }
 
+// Assign from other planet.
+game::sim::Planet&
+game::sim::Planet::operator=(const Planet& other)
+{
+    Object::operator=(other);
+    setDefense(other.m_defense);
+    setBaseDefense(other.m_baseDefense);
+    setBaseBeamTech(other.m_beamTech);
+    setBaseTorpedoTech(other.m_torpedoTech);
+    setNumBaseFighters(other.m_baseFighters);
+    for (int i = 1; i <= NUM_TORPEDO_TYPES; ++i) {
+        setNumBaseTorpedoes(i, other.getNumBaseTorpedoes(i));
+    }
+    return *this;
+}
+
 // Get number of planetary defense posts.
 int
 game::sim::Planet::getDefense() const
@@ -37,8 +53,10 @@ void
 game::sim::Planet::setDefense(int defense)
 {
     // ex GSimPlanet::setDefense
-    m_defense = defense;
-    markDirty();
+    if (m_defense != defense) {
+        m_defense = defense;
+        markDirty();
+    }
 }
 
 // Get number of starbase defense posts.
@@ -54,8 +72,10 @@ void
 game::sim::Planet::setBaseDefense(int baseDefense)
 {
     // ex GSimPlanet::setBaseDefense
-    m_baseDefense = baseDefense;
-    markDirty();
+    if (m_baseDefense != baseDefense) {
+        m_baseDefense = baseDefense;
+        markDirty();
+    }
 }
 
 // Get starbase beam tech level.
@@ -71,8 +91,10 @@ void
 game::sim::Planet::setBaseBeamTech(int beamTech)
 {
     // ex GSimPlanet::setBaseBeamTech
-    m_beamTech = beamTech;
-    markDirty();
+    if (m_beamTech != beamTech) {
+        m_beamTech = beamTech;
+        markDirty();
+    }
 }
 
 // Get starbase torpedo tech level.
@@ -88,8 +110,10 @@ void
 game::sim::Planet::setBaseTorpedoTech(int torpTech)
 {
     // ex GSimPlanet::setBaseTorpTech
-    m_torpedoTech = torpTech;
-    markDirty();
+    if (m_torpedoTech != torpTech) {
+        m_torpedoTech = torpTech;
+        markDirty();
+    }
 }
 
 // Get number of starbase fighters.
@@ -105,8 +129,10 @@ void
 game::sim::Planet::setNumBaseFighters(int baseFighters)
 {
     // ex GSimPlanet::setBaseFighters
-    m_baseFighters = baseFighters;
-    markDirty();
+    if (m_baseFighters != baseFighters) {
+        m_baseFighters = baseFighters;
+        markDirty();
+    }
 }
 
 // Get number of starbase torpedoes of a given type.
@@ -126,7 +152,7 @@ void
 game::sim::Planet::setNumBaseTorpedoes(int type, int amount)
 {
     // ex GSimPlanet::setBaseTorps
-    if (type > 0 && type <= NUM_TORPEDO_TYPES) {
+    if (type > 0 && type <= NUM_TORPEDO_TYPES && m_baseTorpedoes[type-1] != amount) {
         m_baseTorpedoes[type-1] = amount;
         markDirty();
     }
