@@ -163,7 +163,8 @@ BasicHullFunctionReader::handleError(const String_t& fileName, int lineNr, Strin
 
 // Constructor.
 game::spec::BasicHullFunctionList::BasicHullFunctionList()
-    : m_functions()
+    : m_functions(),
+      m_defaultAssignments()
 { }
 
 // Destructor.
@@ -176,6 +177,7 @@ game::spec::BasicHullFunctionList::clear()
 {
     // ex GHullFunctionData::clear (part)
     m_functions.clear();
+    m_defaultAssignments.clear();
 }
 
 // Load from file.
