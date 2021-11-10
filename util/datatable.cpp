@@ -237,6 +237,7 @@ util::DataTable::appendCopy(const DataTable& other)
     for (size_t i = 0, n = other.m_rows.size(); i < n; ++i) {
         Row& c = addRow(other.m_rows[i]->m_id);
         c.m_values = other.m_rows[i]->m_values;
+        c.m_name = other.m_rows[i]->m_name;
     }
 }
 

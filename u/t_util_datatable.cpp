@@ -183,6 +183,9 @@ TestUtilDataTable::testAppend()
     t1.addRow(10).set(0, 10);
     t2.addRow(20).set(0, 20);
     t3.addRow(30).set(0, 30);
+    t1.getRow(0)->setName("one");
+    t2.getRow(0)->setName("two");
+    t3.getRow(0)->setName("three");
 
     t1.appendCopy(t2);
     t1.appendMove(t3);
@@ -197,6 +200,9 @@ TestUtilDataTable::testAppend()
     TS_ASSERT_EQUALS(t1.getRow(0)->getIndex(), 0U);
     TS_ASSERT_EQUALS(t1.getRow(1)->getIndex(), 1U);
     TS_ASSERT_EQUALS(t1.getRow(2)->getIndex(), 2U);
+    TS_ASSERT_EQUALS(t1.getRow(0)->getName(), "one");
+    TS_ASSERT_EQUALS(t1.getRow(1)->getName(), "two");
+    TS_ASSERT_EQUALS(t1.getRow(2)->getName(), "three");
 }
 
 /** Test add(). */
